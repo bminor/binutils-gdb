@@ -78,8 +78,8 @@ extern struct gdbarch *target_gdbarch (void);
 /* Callback type for the 'iterate_over_objfiles_in_search_order'
    gdbarch  method.  */
 
-typedef int (iterate_over_objfiles_in_search_order_cb_ftype)
-  (struct objfile *objfile, void *cb_data);
+using iterate_over_objfiles_in_search_order_cb_ftype
+  = gdb::function_view<bool(objfile *)>;
 
 /* Callback type for regset section iterators.  The callback usually
    invokes the REGSET's supply or collect method, to which it must

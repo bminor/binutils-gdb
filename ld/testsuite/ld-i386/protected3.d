@@ -10,5 +10,5 @@ Disassembly of section .text:
 0+[a-f0-9]+ <bar>:
 [ 	]*[a-f0-9]+:	8b 81 [a-f0-9][a-f0-9] [a-f0-9][a-f0-9] ff ff    	mov    -0x[a-f0-9]+\(%ecx\),%eax
 [ 	]*[a-f0-9]+:	8b 00                	mov    \(%eax\),%eax
-[ 	]*[a-f0-9]+:	c3                   	ret    
+[ 	]*[a-f0-9]+:	c3                   	ret
 #pass

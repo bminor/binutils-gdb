@@ -42,6 +42,7 @@ public:
     sigaddset (&mask, SIGCHLD);
     sigaddset (&mask, SIGALRM);
     sigaddset (&mask, SIGWINCH);
+    sigaddset (&mask, SIGTERM);
     gdb_sigmask (SIG_BLOCK, &mask, &m_old_mask);
 #endif
   }

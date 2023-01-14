@@ -168,6 +168,10 @@ phex (ULONGEST l, int sizeof_l)
       str = get_print_cell ();
       xsnprintf (str, PRINT_CELL_SIZE, "%04x", (unsigned short) (l & 0xffff));
       break;
+    case 1:
+      str = get_print_cell ();
+      xsnprintf (str, PRINT_CELL_SIZE, "%02x", (unsigned short) (l & 0xff));
+      break;
     default:
       str = phex (l, sizeof (l));
       break;
@@ -205,6 +209,10 @@ phex_nz (ULONGEST l, int sizeof_l)
     case 2:
       str = get_print_cell ();
       xsnprintf (str, PRINT_CELL_SIZE, "%x", (unsigned short) (l & 0xffff));
+      break;
+    case 1:
+      str = get_print_cell ();
+      xsnprintf (str, PRINT_CELL_SIZE, "%x", (unsigned short) (l & 0xff));
       break;
     default:
       str = phex_nz (l, sizeof (l));
@@ -270,7 +278,11 @@ int_string (LONGEST val, int radix, int is_signed, int width,
     case 10:
       {
 	if (is_signed && val < 0)
-	  return decimal2str ("-", -val, width);
+	  /* Cast to unsigned before negating, to prevent runtime error:
+	     negation of -9223372036854775808 cannot be represented in type
+	     'long int'; cast to an unsigned type to negate this value to
+	     itself.  */
+	  return decimal2str ("-", -(ULONGEST)val, width);
 	else
 	  return decimal2str ("", val, width);
       }

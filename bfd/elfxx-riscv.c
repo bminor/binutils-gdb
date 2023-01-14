@@ -46,7 +46,7 @@ static reloc_howto_type howto_table[] =
   /* No relocation.  */
   HOWTO (R_RISCV_NONE,			/* type */
 	 0,				/* rightshift */
-	 3,				/* size */
+	 0,				/* size */
 	 0,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -61,7 +61,7 @@ static reloc_howto_type howto_table[] =
   /* 32 bit relocation.  */
   HOWTO (R_RISCV_32,			/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -76,7 +76,7 @@ static reloc_howto_type howto_table[] =
   /* 64 bit relocation.  */
   HOWTO (R_RISCV_64,			/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 8,				/* size */
 	 64,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -91,7 +91,7 @@ static reloc_howto_type howto_table[] =
   /* Relocation against a local symbol in a shared object.  */
   HOWTO (R_RISCV_RELATIVE,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -119,7 +119,7 @@ static reloc_howto_type howto_table[] =
 
   HOWTO (R_RISCV_JUMP_SLOT,		/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 8,				/* size */
 	 64,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -134,7 +134,7 @@ static reloc_howto_type howto_table[] =
   /* Dynamic TLS relocations.  */
   HOWTO (R_RISCV_TLS_DTPMOD32,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -148,7 +148,7 @@ static reloc_howto_type howto_table[] =
 
   HOWTO (R_RISCV_TLS_DTPMOD64,		/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 8,				/* size */
 	 64,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -162,7 +162,7 @@ static reloc_howto_type howto_table[] =
 
   HOWTO (R_RISCV_TLS_DTPREL32,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -176,7 +176,7 @@ static reloc_howto_type howto_table[] =
 
   HOWTO (R_RISCV_TLS_DTPREL64,		/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 8,				/* size */
 	 64,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -190,7 +190,7 @@ static reloc_howto_type howto_table[] =
 
   HOWTO (R_RISCV_TLS_TPREL32,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -204,7 +204,7 @@ static reloc_howto_type howto_table[] =
 
   HOWTO (R_RISCV_TLS_TPREL64,		/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 8,				/* size */
 	 64,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -225,7 +225,7 @@ static reloc_howto_type howto_table[] =
   /* 12-bit PC-relative branch offset.  */
   HOWTO (R_RISCV_BRANCH,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 true,				/* pc_relative */
 	 0,				/* bitpos */
@@ -240,7 +240,7 @@ static reloc_howto_type howto_table[] =
   /* 20-bit PC-relative jump offset.  */
   HOWTO (R_RISCV_JAL,			/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 true,				/* pc_relative */
 	 0,				/* bitpos */
@@ -255,7 +255,7 @@ static reloc_howto_type howto_table[] =
   /* 32-bit PC-relative function call (AUIPC/JALR).  */
   HOWTO (R_RISCV_CALL,			/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 8,				/* size */
 	 64,				/* bitsize */
 	 true,				/* pc_relative */
 	 0,				/* bitpos */
@@ -271,7 +271,7 @@ static reloc_howto_type howto_table[] =
   /* Like R_RISCV_CALL, but not locally binding.  */
   HOWTO (R_RISCV_CALL_PLT,		/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 8,				/* size */
 	 64,				/* bitsize */
 	 true,				/* pc_relative */
 	 0,				/* bitpos */
@@ -287,7 +287,7 @@ static reloc_howto_type howto_table[] =
   /* High 20 bits of 32-bit PC-relative GOT access.  */
   HOWTO (R_RISCV_GOT_HI20,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 true,				/* pc_relative */
 	 0,				/* bitpos */
@@ -302,7 +302,7 @@ static reloc_howto_type howto_table[] =
   /* High 20 bits of 32-bit PC-relative TLS IE GOT access.  */
   HOWTO (R_RISCV_TLS_GOT_HI20,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 true,				/* pc_relative */
 	 0,				/* bitpos */
@@ -317,7 +317,7 @@ static reloc_howto_type howto_table[] =
   /* High 20 bits of 32-bit PC-relative TLS GD GOT reference.  */
   HOWTO (R_RISCV_TLS_GD_HI20,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 true,				/* pc_relative */
 	 0,				/* bitpos */
@@ -332,7 +332,7 @@ static reloc_howto_type howto_table[] =
   /* High 20 bits of 32-bit PC-relative reference.  */
   HOWTO (R_RISCV_PCREL_HI20,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 true,				/* pc_relative */
 	 0,				/* bitpos */
@@ -347,7 +347,7 @@ static reloc_howto_type howto_table[] =
   /* Low 12 bits of a 32-bit PC-relative load or add.  */
   HOWTO (R_RISCV_PCREL_LO12_I,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -362,7 +362,7 @@ static reloc_howto_type howto_table[] =
   /* Low 12 bits of a 32-bit PC-relative store.  */
   HOWTO (R_RISCV_PCREL_LO12_S,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -377,7 +377,7 @@ static reloc_howto_type howto_table[] =
   /* High 20 bits of 32-bit absolute address.  */
   HOWTO (R_RISCV_HI20,			/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -392,7 +392,7 @@ static reloc_howto_type howto_table[] =
   /* High 12 bits of 32-bit load or add.  */
   HOWTO (R_RISCV_LO12_I,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -407,7 +407,7 @@ static reloc_howto_type howto_table[] =
   /* High 12 bits of 32-bit store.  */
   HOWTO (R_RISCV_LO12_S,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -422,7 +422,7 @@ static reloc_howto_type howto_table[] =
   /* High 20 bits of TLS LE thread pointer offset.  */
   HOWTO (R_RISCV_TPREL_HI20,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -437,7 +437,7 @@ static reloc_howto_type howto_table[] =
   /* Low 12 bits of TLS LE thread pointer offset for loads and adds.  */
   HOWTO (R_RISCV_TPREL_LO12_I,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -452,7 +452,7 @@ static reloc_howto_type howto_table[] =
   /* Low 12 bits of TLS LE thread pointer offset for stores.  */
   HOWTO (R_RISCV_TPREL_LO12_S,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -467,7 +467,7 @@ static reloc_howto_type howto_table[] =
   /* TLS LE thread pointer usage.  May be relaxed.  */
   HOWTO (R_RISCV_TPREL_ADD,		/* type */
 	 0,				/* rightshift */
-	 3,				/* size */
+	 0,				/* size */
 	 0,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -482,7 +482,7 @@ static reloc_howto_type howto_table[] =
   /* 8-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_ADD8,			/* type */
 	 0,				/* rightshift */
-	 0,				/* size */
+	 1,				/* size */
 	 8,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -497,7 +497,7 @@ static reloc_howto_type howto_table[] =
   /* 16-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_ADD16,			/* type */
 	 0,				/* rightshift */
-	 1,				/* size */
+	 2,				/* size */
 	 16,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -512,7 +512,7 @@ static reloc_howto_type howto_table[] =
   /* 32-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_ADD32,			/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -527,7 +527,7 @@ static reloc_howto_type howto_table[] =
   /* 64-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_ADD64,			/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 8,				/* size */
 	 64,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -542,7 +542,7 @@ static reloc_howto_type howto_table[] =
   /* 8-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_SUB8,			/* type */
 	 0,				/* rightshift */
-	 0,				/* size */
+	 1,				/* size */
 	 8,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -557,7 +557,7 @@ static reloc_howto_type howto_table[] =
   /* 16-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_SUB16,			/* type */
 	 0,				/* rightshift */
-	 1,				/* size */
+	 2,				/* size */
 	 16,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -572,7 +572,7 @@ static reloc_howto_type howto_table[] =
   /* 32-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_SUB32,			/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -587,7 +587,7 @@ static reloc_howto_type howto_table[] =
   /* 64-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_SUB64,			/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 8,				/* size */
 	 64,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -602,7 +602,7 @@ static reloc_howto_type howto_table[] =
   /* GNU extension to record C++ vtable hierarchy */
   HOWTO (R_RISCV_GNU_VTINHERIT,		/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 8,				/* size */
 	 0,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -617,7 +617,7 @@ static reloc_howto_type howto_table[] =
   /* GNU extension to record C++ vtable member usage */
   HOWTO (R_RISCV_GNU_VTENTRY,		/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 8,				/* size */
 	 0,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -634,7 +634,7 @@ static reloc_howto_type howto_table[] =
      addend rounded up to the next power of two.  */
   HOWTO (R_RISCV_ALIGN,			/* type */
 	 0,				/* rightshift */
-	 3,				/* size */
+	 0,				/* size */
 	 0,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -649,7 +649,7 @@ static reloc_howto_type howto_table[] =
   /* 8-bit PC-relative branch offset.  */
   HOWTO (R_RISCV_RVC_BRANCH,		/* type */
 	 0,				/* rightshift */
-	 1,				/* size */
+	 2,				/* size */
 	 16,				/* bitsize */
 	 true,				/* pc_relative */
 	 0,				/* bitpos */
@@ -664,7 +664,7 @@ static reloc_howto_type howto_table[] =
   /* 11-bit PC-relative jump offset.  */
   HOWTO (R_RISCV_RVC_JUMP,		/* type */
 	 0,				/* rightshift */
-	 1,				/* size */
+	 2,				/* size */
 	 16,				/* bitsize */
 	 true,				/* pc_relative */
 	 0,				/* bitpos */
@@ -679,7 +679,7 @@ static reloc_howto_type howto_table[] =
   /* High 6 bits of 18-bit absolute address.  */
   HOWTO (R_RISCV_RVC_LUI,		/* type */
 	 0,				/* rightshift */
-	 1,				/* size */
+	 2,				/* size */
 	 16,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -694,7 +694,7 @@ static reloc_howto_type howto_table[] =
   /* GP-relative load.  */
   HOWTO (R_RISCV_GPREL_I,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -709,7 +709,7 @@ static reloc_howto_type howto_table[] =
   /* GP-relative store.  */
   HOWTO (R_RISCV_GPREL_S,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -724,7 +724,7 @@ static reloc_howto_type howto_table[] =
   /* TP-relative TLS LE load.  */
   HOWTO (R_RISCV_TPREL_I,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -739,7 +739,7 @@ static reloc_howto_type howto_table[] =
   /* TP-relative TLS LE store.  */
   HOWTO (R_RISCV_TPREL_S,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -754,7 +754,7 @@ static reloc_howto_type howto_table[] =
   /* The paired relocation may be relaxed.  */
   HOWTO (R_RISCV_RELAX,			/* type */
 	 0,				/* rightshift */
-	 3,				/* size */
+	 0,				/* size */
 	 0,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -769,7 +769,7 @@ static reloc_howto_type howto_table[] =
   /* 6-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_SUB6,			/* type */
 	 0,				/* rightshift */
-	 0,				/* size */
+	 1,				/* size */
 	 8,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -784,7 +784,7 @@ static reloc_howto_type howto_table[] =
   /* 6-bit in-place setting, for local label subtraction.  */
   HOWTO (R_RISCV_SET6,			/* type */
 	 0,				/* rightshift */
-	 0,				/* size */
+	 1,				/* size */
 	 8,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -799,7 +799,7 @@ static reloc_howto_type howto_table[] =
   /* 8-bit in-place setting, for local label subtraction.  */
   HOWTO (R_RISCV_SET8,			/* type */
 	 0,				/* rightshift */
-	 0,				/* size */
+	 1,				/* size */
 	 8,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -814,7 +814,7 @@ static reloc_howto_type howto_table[] =
   /* 16-bit in-place setting, for local label subtraction.  */
   HOWTO (R_RISCV_SET16,			/* type */
 	 0,				/* rightshift */
-	 1,				/* size */
+	 2,				/* size */
 	 16,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -829,7 +829,7 @@ static reloc_howto_type howto_table[] =
   /* 32-bit in-place setting, for local label subtraction.  */
   HOWTO (R_RISCV_SET32,			/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -844,7 +844,7 @@ static reloc_howto_type howto_table[] =
   /* 32-bit PC relative.  */
   HOWTO (R_RISCV_32_PCREL,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 true,				/* pc_relative */
 	 0,				/* bitpos */
@@ -859,7 +859,7 @@ static reloc_howto_type howto_table[] =
   /* Relocation against a local ifunc symbol in a shared object.  */
   HOWTO (R_RISCV_IRELATIVE,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -1100,8 +1100,13 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zvl64b", "zvl32b",		check_implicit_always},
   {"d", "f",		check_implicit_always},
   {"f", "zicsr",	check_implicit_always},
+  {"zfh", "f",		check_implicit_always},
+  {"zfh", "zicsr",	check_implicit_always},
   {"zqinx", "zdinx",	check_implicit_always},
   {"zdinx", "zfinx",	check_implicit_always},
+  {"zfinx", "zicsr",	check_implicit_always},
+  {"zhinx", "zfinx",	check_implicit_always},
+  {"zhinx", "zicsr",	check_implicit_always},
   {"zk", "zkn",		check_implicit_always},
   {"zk", "zkr",		check_implicit_always},
   {"zk", "zkt",		check_implicit_always},
@@ -1163,30 +1168,29 @@ static struct riscv_supported_ext riscv_supported_std_ext[] =
   {"q",		ISA_SPEC_CLASS_20191213,	2, 2, 0 },
   {"q",		ISA_SPEC_CLASS_20190608,	2, 2, 0 },
   {"q",		ISA_SPEC_CLASS_2P2,		2, 0, 0 },
-  {"l",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
   {"c",		ISA_SPEC_CLASS_20191213,	2, 0, 0 },
   {"c",		ISA_SPEC_CLASS_20190608,	2, 0, 0 },
   {"c",		ISA_SPEC_CLASS_2P2,		2, 0, 0 },
-  {"b",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
-  {"k",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
-  {"j",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
-  {"t",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
-  {"p",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
   {"v",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
-  {"n",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
+  {"h",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {NULL, 0, 0, 0, 0}
 };
 
 static struct riscv_supported_ext riscv_supported_std_z_ext[] =
 {
+  {"zicbom",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zicbop",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zicboz",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zicsr",		ISA_SPEC_CLASS_20191213,	2, 0,  0 },
   {"zicsr",		ISA_SPEC_CLASS_20190608,	2, 0,  0 },
   {"zifencei",		ISA_SPEC_CLASS_20191213,	2, 0,  0 },
   {"zifencei",		ISA_SPEC_CLASS_20190608,	2, 0,  0 },
-  {"zihintpause",	ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zihintpause",	ISA_SPEC_CLASS_DRAFT,		2, 0,  0 },
+  {"zfh",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zfinx",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zdinx",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zqinx",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zhinx",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zbb",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zba",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zbc",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
@@ -1227,12 +1231,10 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
 
 static struct riscv_supported_ext riscv_supported_std_s_ext[] =
 {
+  {"smstateen",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"sscofpmf",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"sstc",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"svinval",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
-  {NULL, 0, 0, 0, 0}
-};
-
-static struct riscv_supported_ext riscv_supported_std_h_ext[] =
-{
   {NULL, 0, 0, 0, 0}
 };
 
@@ -1246,7 +1248,6 @@ const struct riscv_supported_ext *riscv_all_supported_ext[] =
   riscv_supported_std_ext,
   riscv_supported_std_z_ext,
   riscv_supported_std_s_ext,
-  riscv_supported_std_h_ext,
   riscv_supported_std_zxm_ext,
   NULL
 };
@@ -1256,7 +1257,6 @@ enum riscv_prefix_ext_class
 {
   RV_ISA_CLASS_Z = 1,
   RV_ISA_CLASS_S,
-  RV_ISA_CLASS_H,
   RV_ISA_CLASS_ZXM,
   RV_ISA_CLASS_X,
   RV_ISA_CLASS_UNKNOWN
@@ -1279,7 +1279,6 @@ static const struct riscv_parse_prefix_config parse_config[] =
   {RV_ISA_CLASS_ZXM, "zxm"},
   {RV_ISA_CLASS_Z, "z"},
   {RV_ISA_CLASS_S, "s"},
-  {RV_ISA_CLASS_H, "h"},
   {RV_ISA_CLASS_X, "x"},
   {RV_ISA_CLASS_UNKNOWN, NULL}
 };
@@ -1329,8 +1328,6 @@ riscv_recognized_prefixed_ext (const char *ext)
     return riscv_known_prefixed_ext (ext, riscv_supported_std_zxm_ext);
   case RV_ISA_CLASS_S:
     return riscv_known_prefixed_ext (ext, riscv_supported_std_s_ext);
-  case RV_ISA_CLASS_H:
-    return riscv_known_prefixed_ext (ext, riscv_supported_std_h_ext);
   case RV_ISA_CLASS_X:
     /* Only the single x is unrecognized.  */
     if (strcmp (ext, "x") != 0)
@@ -1340,6 +1337,9 @@ riscv_recognized_prefixed_ext (const char *ext)
   }
   return false;
 }
+
+/* Canonical order for single letter extensions.  */
+static const char riscv_ext_canonical_order[] = "eigmafdqlcbkjtpvnh";
 
 /* Array is used to compare the orders of standard extensions quickly.  */
 static int riscv_ext_order[26] = {0};
@@ -1356,16 +1356,8 @@ riscv_init_ext_order (void)
   /* The orders of all standard extensions are positive.  */
   int order = 1;
 
-  int i = 0;
-  while (riscv_supported_std_ext[i].name != NULL)
-    {
-      const char *ext = riscv_supported_std_ext[i].name;
-      riscv_ext_order[(*ext - 'a')] = order++;
-      i++;
-      while (riscv_supported_std_ext[i].name
-	     && strcmp (ext, riscv_supported_std_ext[i].name) == 0)
-	i++;
-    }
+  for (const char *ext = &riscv_ext_canonical_order[0]; *ext; ++ext)
+    riscv_ext_order[(*ext - 'a')] = order++;
 
   /* Some of the prefixed keyword are not single letter, so we set
      their prefixed orders in the riscv_compare_subsets directly,
@@ -1512,7 +1504,6 @@ riscv_get_default_ext_version (enum riscv_spec_class *default_isa_spec,
     case RV_ISA_CLASS_ZXM: table = riscv_supported_std_zxm_ext; break;
     case RV_ISA_CLASS_Z: table = riscv_supported_std_z_ext; break;
     case RV_ISA_CLASS_S: table = riscv_supported_std_s_ext; break;
-    case RV_ISA_CLASS_H: table = riscv_supported_std_h_ext; break;
     case RV_ISA_CLASS_X:
       break;
     default:
@@ -1741,7 +1732,6 @@ riscv_parse_prefixed_ext (riscv_parse_subset_t *rps,
 {
   int major_version;
   int minor_version;
-  const char *last_name;
   enum riscv_prefix_ext_class class;
 
   while (*p)
@@ -1818,28 +1808,6 @@ riscv_parse_prefixed_ext (riscv_parse_subset_t *rps,
 	  return NULL;
 	}
 
-      /* Check that the extension isn't duplicate.  */
-      last_name = rps->subset_list->tail->name;
-      if (!strcasecmp (last_name, subset))
-	{
-	  rps->error_handler
-	    (_("%s: duplicate prefixed ISA extension `%s'"),
-	     arch, subset);
-	  free (subset);
-	  return NULL;
-	}
-
-      /* Check that the extension is in expected order.  */
-      if (riscv_compare_subsets (last_name, subset) > 0)
-	{
-	  rps->error_handler
-	    (_("%s: prefixed ISA extension `%s' is not in expected "
-	       "order.  It must come before `%s'"),
-	     arch, subset, last_name);
-	  free (subset);
-	  return NULL;
-	}
-
       riscv_parse_add_subset (rps, subset,
 			      major_version,
 			      minor_version, false);
@@ -1892,10 +1860,11 @@ riscv_parse_check_conflicts (riscv_parse_subset_t *rps)
       no_conflict = false;
     }
   if (riscv_lookup_subset (rps->subset_list, "q", &subset)
+      && (subset->major_version < 2 || (subset->major_version == 2
+					&& subset->minor_version < 2))
       && xlen < 64)
     {
-      rps->error_handler
-        (_("rv%d does not support the `q' extension"), xlen);
+      rps->error_handler (_("rv%d does not support the `q' extension"), xlen);
       no_conflict = false;
     }
   if (riscv_lookup_subset (rps->subset_list, "e", &subset)
@@ -2031,14 +2000,11 @@ riscv_parse_subset (riscv_parse_subset_t *rps,
   if (p == NULL)
     return false;
 
-  /* Parse the different classes of extensions in the specified order.  */
-  while (*p != '\0')
-    {
-      p = riscv_parse_prefixed_ext (rps, arch, p);
+  /* Parse prefixed extensions.  */
+  p = riscv_parse_prefixed_ext (rps, arch, p);
 
-      if (p == NULL)
-        return false;
-    }
+  if (p == NULL)
+    return false;
 
   /* Finally add implicit extensions according to the current
      extensions.  */
@@ -2331,6 +2297,12 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
     {
     case INSN_CLASS_I:
       return riscv_subset_supports (rps, "i");
+    case INSN_CLASS_ZICBOM:
+      return riscv_subset_supports (rps, "zicbom");
+    case INSN_CLASS_ZICBOP:
+      return riscv_subset_supports (rps, "zicbop");
+    case INSN_CLASS_ZICBOZ:
+      return riscv_subset_supports (rps, "zicboz");
     case INSN_CLASS_ZICSR:
       return riscv_subset_supports (rps, "zicsr");
     case INSN_CLASS_ZIFENCEI:
@@ -2364,6 +2336,19 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
     case INSN_CLASS_Q_OR_ZQINX:
       return (riscv_subset_supports (rps, "q")
 	      || riscv_subset_supports (rps, "zqinx"));
+    case INSN_CLASS_ZFH:
+      return riscv_subset_supports (rps, "zfh");
+    case INSN_CLASS_ZFH_OR_ZHINX:
+      return riscv_subset_supports (rps, "zfh")
+        || riscv_subset_supports (rps, "zhinx");
+    case INSN_CLASS_D_AND_ZFH_INX:
+      return (riscv_subset_supports (rps, "d")
+	      && riscv_subset_supports (rps, "zfh"))
+           || riscv_subset_supports (rps, "zhinx");
+    case INSN_CLASS_Q_AND_ZFH_INX:
+      return (riscv_subset_supports (rps, "q")
+	      && riscv_subset_supports (rps, "zfh"))
+           || riscv_subset_supports (rps, "zhinx");
     case INSN_CLASS_ZBA:
       return riscv_subset_supports (rps, "zba");
     case INSN_CLASS_ZBB:
@@ -2408,9 +2393,116 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
 	      || riscv_subset_supports (rps, "zve32f"));
     case INSN_CLASS_SVINVAL:
       return riscv_subset_supports (rps, "svinval");
+    case INSN_CLASS_H:
+      return riscv_subset_supports (rps, "h");
     default:
       rps->error_handler
         (_("internal: unreachable INSN_CLASS_*"));
       return false;
+    }
+}
+
+/* Each instuction is belonged to an instruction class INSN_CLASS_*.
+   Call riscv_subset_supports_ext to determine the missing extension.  */
+
+const char *
+riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
+				 enum riscv_insn_class insn_class)
+{
+  switch (insn_class)
+    {
+    case INSN_CLASS_I:
+      return "i";
+    case INSN_CLASS_ZICSR:
+      return "zicsr";
+    case INSN_CLASS_ZIFENCEI:
+      return "zifencei";
+    case INSN_CLASS_ZIHINTPAUSE:
+      return "zihintpause";
+    case INSN_CLASS_M:
+      return "m";
+    case INSN_CLASS_A:
+      return "a";
+    case INSN_CLASS_F:
+      return "f";
+    case INSN_CLASS_D:
+      return "d";
+    case INSN_CLASS_Q:
+      return "q";
+    case INSN_CLASS_C:
+      return "c";
+    case INSN_CLASS_F_AND_C:
+      if (!riscv_subset_supports (rps, "f")
+	  && !riscv_subset_supports (rps, "c"))
+	return _("f' and `c");
+      else if (!riscv_subset_supports (rps, "f"))
+	return "f";
+      else
+	return "c";
+    case INSN_CLASS_D_AND_C:
+      if (!riscv_subset_supports (rps, "d")
+	  && !riscv_subset_supports (rps, "c"))
+	return _("d' and `c");
+      else if (!riscv_subset_supports (rps, "d"))
+	return "d";
+      else
+	return "c";
+    case INSN_CLASS_F_OR_ZFINX:
+      /* i18n: Formatted like "extension `f' or `zfinx' required".  */
+      return _("f' or `zfinx");
+    case INSN_CLASS_D_OR_ZDINX:
+      return _("d' or `zdinx");
+    case INSN_CLASS_Q_OR_ZQINX:
+      return _("q' or `zqinx");
+    case INSN_CLASS_ZBA:
+      return "zba";
+    case INSN_CLASS_ZBB:
+      return "zbb";
+    case INSN_CLASS_ZBC:
+      return "zbc";
+    case INSN_CLASS_ZBS:
+      return "zbs";
+    case INSN_CLASS_ZBKB:
+      return "zbkb";
+    case INSN_CLASS_ZBKC:
+      return "zbkc";
+    case INSN_CLASS_ZBKX:
+      return "zbkx";
+    case INSN_CLASS_ZBB_OR_ZBKB:
+      return _("zbb' or `zbkb");
+    case INSN_CLASS_ZBC_OR_ZBKC:
+      return _("zbc' or `zbkc");
+    case INSN_CLASS_ZKND:
+      return "zknd";
+    case INSN_CLASS_ZKNE:
+      return "zkne";
+    case INSN_CLASS_ZKNH:
+      return "zknh";
+    case INSN_CLASS_ZKND_OR_ZKNE:
+      return _("zknd' or `zkne");
+    case INSN_CLASS_ZKSED:
+      return "zksed";
+    case INSN_CLASS_ZKSH:
+      return "zksh";
+    case INSN_CLASS_V:
+      return _("v' or `zve64x' or `zve32x");
+    case INSN_CLASS_ZVEF:
+      return _("v' or `zve64d' or `zve64f' or `zve32f");
+    case INSN_CLASS_SVINVAL:
+      return "svinval";
+    case INSN_CLASS_ZFH:
+      return "zfh";
+    case INSN_CLASS_ZFH_OR_ZHINX:
+      return _("zfh' or 'zhinx");
+    case INSN_CLASS_D_AND_ZFH_INX:
+      return _("('d' and 'zfh') or 'zhinx");
+    case INSN_CLASS_Q_AND_ZFH_INX:
+      return _("('q' and 'zfh') or 'zhinx");
+    case INSN_CLASS_H:
+      return _("h");
+    default:
+      rps->error_handler
+        (_("internal: unreachable INSN_CLASS_*"));
+      return NULL;
     }
 }

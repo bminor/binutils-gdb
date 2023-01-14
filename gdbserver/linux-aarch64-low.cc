@@ -191,9 +191,9 @@ struct arch_process_info
 static int
 is_64bit_tdesc (void)
 {
-  struct regcache *regcache = get_thread_regcache (current_thread, 0);
-
-  return register_size (regcache->tdesc, 0) == 8;
+  /* We may not have a current thread at this point, so go straight to
+     the process's target description.  */
+  return register_size (current_process ()->tdesc, 0) == 8;
 }
 
 static void
@@ -285,6 +285,26 @@ aarch64_store_mteregset (struct regcache *regcache, const void *buf)
 
   /* Tag Control register */
   supply_register (regcache, mte_base, mte_regset);
+}
+
+/* Fill BUF with TLS register from the regcache.  */
+
+static void
+aarch64_fill_tlsregset (struct regcache *regcache, void *buf)
+{
+  int tls_regnum  = find_regno (regcache->tdesc, "tpidr");
+
+  collect_register (regcache, tls_regnum, buf);
+}
+
+/* Store TLS register to regcache.  */
+
+static void
+aarch64_store_tlsregset (struct regcache *regcache, const void *buf)
+{
+  int tls_regnum  = find_regno (regcache->tdesc, "tpidr");
+
+  supply_register (regcache, tls_regnum, buf);
 }
 
 bool
@@ -413,9 +433,10 @@ aarch64_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
 
   if (targ_type != hw_execute)
     {
-      if (aarch64_linux_region_ok_for_watchpoint (addr, len))
+      if (aarch64_region_ok_for_watchpoint (addr, len))
 	ret = aarch64_handle_watchpoint (targ_type, addr, len,
-					 1 /* is_insert */, state);
+					 1 /* is_insert */,
+					 current_lwp_ptid (), state);
       else
 	ret = -1;
     }
@@ -429,7 +450,8 @@ aarch64_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
 	  len = 2;
 	}
       ret = aarch64_handle_breakpoint (targ_type, addr, len,
-				       1 /* is_insert */, state);
+				       1 /* is_insert */, current_lwp_ptid (),
+				       state);
     }
 
   if (show_debug_regs)
@@ -464,7 +486,7 @@ aarch64_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
   if (targ_type != hw_execute)
     ret =
       aarch64_handle_watchpoint (targ_type, addr, len, 0 /* is_insert */,
-				 state);
+				 current_lwp_ptid (), state);
   else
     {
       if (len == 3)
@@ -475,7 +497,8 @@ aarch64_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
 	  len = 2;
 	}
       ret = aarch64_handle_breakpoint (targ_type, addr, len,
-				       0 /* is_insert */,  state);
+				       0 /* is_insert */,  current_lwp_ptid (),
+				       state);
     }
 
   if (show_debug_regs)
@@ -716,6 +739,10 @@ static struct regset_info aarch64_regsets[] =
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_TAGGED_ADDR_CTRL,
     0, OPTIONAL_REGS,
     aarch64_fill_mteregset, aarch64_store_mteregset },
+  /* TLS register.  */
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_TLS,
+    0, OPTIONAL_REGS,
+    aarch64_fill_tlsregset, aarch64_store_tlsregset },
   NULL_REGSET
 };
 
@@ -752,11 +779,11 @@ aarch64_adjust_register_sets (const struct aarch64_features &features)
 	  break;
 	case NT_FPREGSET:
 	  /* This is unavailable when SVE is present.  */
-	  if (!features.sve)
+	  if (features.vq == 0)
 	    regset->size = sizeof (struct user_fpsimd_state);
 	  break;
 	case NT_ARM_SVE:
-	  if (features.sve)
+	  if (features.vq > 0)
 	    regset->size = SVE_PT_SIZE (AARCH64_MAX_SVE_VQ, SVE_PT_REGS_SVE);
 	  break;
 	case NT_ARM_PAC_MASK:
@@ -766,6 +793,10 @@ aarch64_adjust_register_sets (const struct aarch64_features &features)
 	case NT_ARM_TAGGED_ADDR_CTRL:
 	  if (features.mte)
 	    regset->size = AARCH64_LINUX_SIZEOF_MTE;
+	  break;
+	case NT_ARM_TLS:
+	  if (features.tls)
+	    regset->size = AARCH64_TLS_REGS_SIZE;
 	  break;
 	default:
 	  gdb_assert_not_reached ("Unknown register set found.");
@@ -793,15 +824,14 @@ aarch64_target::low_arch_setup ()
     {
       struct aarch64_features features;
 
-      uint64_t vq = aarch64_sve_get_vq (tid);
-      features.sve = (vq > 0);
+      features.vq = aarch64_sve_get_vq (tid);
       /* A-profile PAC is 64-bit only.  */
       features.pauth = linux_get_hwcap (8) & AARCH64_HWCAP_PACA;
       /* A-profile MTE is 64-bit only.  */
       features.mte = linux_get_hwcap2 (8) & HWCAP2_MTE;
+      features.tls = true;
 
-      current_process ()->tdesc
-	= aarch64_linux_read_description (vq, features.pauth, features.mte);
+      current_process ()->tdesc = aarch64_linux_read_description (features);
 
       /* Adjust the register sets we should use for this particular set of
 	 features.  */

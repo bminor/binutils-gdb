@@ -8,6 +8,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   ${LDEMUL_SYSLIB-syslib_default},
   ${LDEMUL_HLL-hll_default},
   ${LDEMUL_AFTER_PARSE-after_parse_default},
+  ${LDEMUL_BEFORE_PLUGIN_ALL_SYMBOLS_READ-NULL},
   ${LDEMUL_AFTER_OPEN-after_open_default},
   ${LDEMUL_AFTER_CHECK_RELOCS-after_check_relocs_default},
   ${LDEMUL_BEFORE_PLACE_ORPHANS-before_place_orphans_default},

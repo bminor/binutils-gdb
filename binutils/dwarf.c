@@ -109,6 +109,9 @@ int do_debug_cu_index;
 int do_wide;
 int do_debug_links;
 int do_follow_links = DEFAULT_FOR_FOLLOW_LINKS;
+#ifdef HAVE_LIBDEBUGINFOD
+int use_debuginfod = 1;
+#endif
 bool do_checks;
 
 int dwarf_cutoff_level = -1;
@@ -240,7 +243,7 @@ static const char *
 dwarf_vmatoa_1 (const char *fmtch, dwarf_vma value, unsigned num_bytes)
 {
   /* As dwarf_vmatoa is used more then once in a printf call
-     for output, we are cycling through an fixed array of pointers
+     for output, we are cycling through a fixed array of pointers
      for return address.  */
   static int buf_pos = 0;
   static struct dwarf_vmatoa_buf
@@ -687,8 +690,11 @@ fetch_indirect_line_string (dwarf_vma offset)
 }
 
 static const char *
-fetch_indexed_string (dwarf_vma idx, struct cu_tu_set *this_set,
-		      dwarf_vma offset_size, bool dwo)
+fetch_indexed_string (dwarf_vma           idx,
+		      struct cu_tu_set *  this_set,
+		      dwarf_vma           offset_size,
+		      bool                dwo,
+		      dwarf_vma           str_offsets_base)
 {
   enum dwarf_section_display_enum str_sec_idx = dwo ? str_dwo : str;
   enum dwarf_section_display_enum idx_sec_idx = dwo ? str_index_dwo : str_index;
@@ -697,9 +703,6 @@ fetch_indexed_string (dwarf_vma idx, struct cu_tu_set *this_set,
   dwarf_vma index_offset;
   dwarf_vma str_offset;
   const char * ret;
-  unsigned char *curr = index_section->start;
-  unsigned char *end = curr + index_section->size;
-  dwarf_vma length;
 
   if (index_section->start == NULL)
     return (dwo ? _("<no .debug_str_offsets.dwo section>")
@@ -709,111 +712,119 @@ fetch_indexed_string (dwarf_vma idx, struct cu_tu_set *this_set,
     return (dwo ? _("<no .debug_str.dwo section>")
 		: _("<no .debug_str section>"));
 
-  /* FIXME: We should cache the length...  */
-  SAFE_BYTE_GET_AND_INC (length, curr, 4, end);
-  if (length == 0xffffffff)
-    {
-      if (offset_size != 8)
-	warn (_("Expected offset size of 8 but given %s"), dwarf_vmatoa ("x", offset_size));
-      SAFE_BYTE_GET_AND_INC (length, curr, 8, end);
-    }
-  else if (offset_size != 4)
-    {
-      warn (_("Expected offset size of 4 but given %s"), dwarf_vmatoa ("x", offset_size));
-    }
-
-  if (length == 0)
-    {
-      /* This is probably an old style .debug_str_offset section which
-	 just contains offsets and no header (and the first offset is 0).  */
-      curr = index_section->start;
-      length = index_section->size;
-    }
-  else
-    {
-      /* Skip the version and padding bytes.
-	 We assume that they are correct.  */
-      if (end - curr >= 4)
-	curr += 4;
-      else
-	curr = end;
-      if (length >= 4)
-	length -= 4;
-      else
-	length = 0;
-
-      if (this_set != NULL
-	  && this_set->section_sizes[DW_SECT_STR_OFFSETS] < length)
-	length = this_set->section_sizes[DW_SECT_STR_OFFSETS];
-
-      if (length > (dwarf_vma) (end - curr))
-	{
-	  warn (_("index table size too large for section %s vs %s\n"),
-		dwarf_vmatoa ("x", length),
-		dwarf_vmatoa ("x", index_section->size));
-	  length = end - curr;
-	}
-
-      if (length < offset_size)
-	{
-	  warn (_("index table size %s is too small\n"),
-		dwarf_vmatoa ("x", length));
-	  return _("<table too small>");
-	}
-    }
-
   index_offset = idx * offset_size;
 
   if (this_set != NULL)
     index_offset += this_set->section_offsets [DW_SECT_STR_OFFSETS];
 
-  if (index_offset >= length
-      || length - index_offset < offset_size)
+  index_offset += str_offsets_base;
+
+  if (index_offset + offset_size > index_section->size)
     {
-      warn (_("DW_FORM_GNU_str_index offset too big: 0x%s vs 0x%s\n"),
+      warn (_("string index of %s converts to an offset of 0x%s which is too big for section %s"),
+	    dwarf_vmatoa ("d", idx),
 	    dwarf_vmatoa ("x", index_offset),
-	    dwarf_vmatoa ("x", length));
-      return _("<index offset is too big>");
+	    str_section->name);
+
+      return _("<string index too big>");
     }
 
-  str_offset = byte_get (curr + index_offset, offset_size);
+  /* FIXME: If we are being paranoid then we should also check to see if
+     IDX references an entry beyond the end of the string table pointed to
+     by STR_OFFSETS_BASE.  (Since there can be more than one string table
+     in a DWARF string section).  */
+
+  str_offset = byte_get (index_section->start + index_offset, offset_size);
+
   str_offset -= str_section->address;
   if (str_offset >= str_section->size)
     {
-      warn (_("DW_FORM_GNU_str_index indirect offset too big: 0x%s\n"),
+      warn (_("indirect offset too big: 0x%s\n"),
 	    dwarf_vmatoa ("x", str_offset));
       return _("<indirect index offset is too big>");
     }
 
   ret = (const char *) str_section->start + str_offset;
+
   /* Unfortunately we cannot rely upon str_section ending with a NUL byte.
      Since our caller is expecting to receive a well formed C string we test
      for the lack of a terminating byte here.  */
   if (strnlen (ret, str_section->size - str_offset)
       == str_section->size - str_offset)
-    ret = (const char *) _("<no NUL byte at end of section>");
+    return _("<no NUL byte at end of section>");
 
   return ret;
 }
 
-static const char *
-fetch_indexed_value (dwarf_vma offset, dwarf_vma bytes)
+static dwarf_vma
+fetch_indexed_addr (dwarf_vma offset, uint32_t num_bytes)
 {
   struct dwarf_section *section = &debug_displays [debug_addr].section;
 
   if (section->start == NULL)
-    return (_("<no .debug_addr section>"));
+    {
+      warn (_("Cannot fetch indexed address: the .debug_addr section is missing\n"));
+      return 0;
+    }
 
-  if (offset + bytes > section->size)
+  if (offset + num_bytes > section->size)
     {
       warn (_("Offset into section %s too big: 0x%s\n"),
 	    section->name, dwarf_vmatoa ("x", offset));
-      return "<offset too big>";
+      return 0;
     }
 
-  return dwarf_vmatoa ("x", byte_get (section->start + offset, bytes));
+  return byte_get (section->start + offset, num_bytes);
 }
 
+/* Fetch a value from a debug section that has been indexed by
+   something in another section (eg DW_FORM_loclistx or DW_FORM_rnglistx).
+   Returns 0 if the value could not be found.  */
+
+static dwarf_vma
+fetch_indexed_value (dwarf_vma idx,
+		     enum dwarf_section_display_enum sec_enum,
+		     dwarf_vma base_address)
+{
+  struct dwarf_section *section = &debug_displays [sec_enum].section;
+
+  if (section->start == NULL)
+    {
+      warn (_("Unable to locate %s section\n"), section->uncompressed_name);
+      return 0;
+    }
+
+  uint32_t pointer_size, bias;
+
+  if (byte_get (section->start, 4) == 0xffffffff)
+    {
+      pointer_size = 8;
+      bias = 20;
+    }
+  else
+    {
+      pointer_size = 4;
+      bias = 12;
+    }
+ 
+  dwarf_vma offset = idx * pointer_size;
+
+  /* Offsets are biased by the size of the section header
+     or base address.  */
+  if (base_address)
+    offset += base_address;
+  else
+    offset += bias;
+
+  if (offset + pointer_size > section->size)
+    {
+      warn (_("Offset into section %s too big: 0x%s\n"),
+	    section->name, dwarf_vmatoa ("x", offset));
+      return 0;
+    }
+
+  return byte_get (section->start + offset, pointer_size);
+}
 
 /* FIXME:  There are better and more efficient ways to handle
    these structures.  For now though, I just want something that
@@ -1672,6 +1683,10 @@ decode_location_expression (unsigned char * data,
 	  printf ("DW_OP_GNU_parameter_ref: <0x%s>",
 		  dwarf_vmatoa ("x", cu_offset + uvalue));
 	  break;
+	case DW_OP_addrx:
+	  READ_ULEB (uvalue, data, end);
+	  printf ("DW_OP_addrx <0x%s>", dwarf_vmatoa ("x", uvalue));
+	  break;
 	case DW_OP_GNU_addr_index:
 	  READ_ULEB (uvalue, data, end);
 	  printf ("DW_OP_GNU_addr_index <0x%s>", dwarf_vmatoa ("x", uvalue));
@@ -1999,6 +2014,8 @@ skip_attr_bytes (unsigned long form,
     case DW_FORM_strx:
     case DW_FORM_GNU_addr_index:
     case DW_FORM_addrx:
+    case DW_FORM_loclistx:
+    case DW_FORM_rnglistx:
       READ_ULEB (uvalue, data, end);
       break;
 
@@ -2410,9 +2427,6 @@ read_and_display_attr_value (unsigned long           attribute,
 
   switch (form)
     {
-    default:
-      break;
-
     case DW_FORM_ref_addr:
       if (dwarf_version == 2)
 	SAFE_BYTE_GET_AND_INC (uvalue, data, pointer_size, end);
@@ -2496,6 +2510,8 @@ read_and_display_attr_value (unsigned long           attribute,
     case DW_FORM_udata:
     case DW_FORM_GNU_addr_index:
     case DW_FORM_addrx:
+    case DW_FORM_loclistx:
+    case DW_FORM_rnglistx:
       READ_ULEB (uvalue, data, end);
       break;
 
@@ -2514,6 +2530,9 @@ read_and_display_attr_value (unsigned long           attribute,
 
     case DW_FORM_implicit_const:
       uvalue = implicit_const;
+      break;
+
+    default:
       break;
     }
 
@@ -2557,9 +2576,13 @@ read_and_display_attr_value (unsigned long           attribute,
     case DW_FORM_data1:
     case DW_FORM_data2:
     case DW_FORM_sdata:
-    case DW_FORM_udata:
       if (!do_loc)
 	printf ("%c%s", delimiter, dwarf_vmatoa ("d", uvalue));
+      break;
+
+    case DW_FORM_udata:
+      if (!do_loc)
+	printf ("%c%s", delimiter, dwarf_vmatoa ("u", uvalue));
       break;
 
     case DW_FORM_implicit_const:
@@ -2608,10 +2631,15 @@ read_and_display_attr_value (unsigned long           attribute,
 
       uvalue = check_uvalue (block_start, uvalue, end);
 
-      if (do_loc)
-	data = block_start + uvalue;
-      else
-	data = display_block (block_start, uvalue, end, delimiter);
+      data = block_start + uvalue;
+      if (!do_loc)
+	{
+	  unsigned char op;
+
+	  SAFE_BYTE_GET (op, block_start, sizeof (op), end);
+	  if (op != DW_OP_addrx)
+	    data = display_block (block_start, uvalue, end, delimiter);
+	}
       break;
 
     case DW_FORM_block1:
@@ -2664,18 +2692,19 @@ read_and_display_attr_value (unsigned long           attribute,
     case DW_FORM_strx4:
       if (!do_loc)
 	{
-	  const char *suffix = strrchr (section->name, '.');
+	  const char *suffix = section ? strrchr (section->name, '.') : NULL;
 	  bool dwo = suffix && strcmp (suffix, ".dwo") == 0;
+	  const char *strng;
 
+	  strng = fetch_indexed_string (uvalue, this_set, offset_size, dwo,
+					debug_info_p ? debug_info_p->str_offsets_base : 0);
 	  if (do_wide)
 	    /* We have already displayed the form name.  */
 	    printf (_("%c(offset: 0x%s): %s"), delimiter,
-		    dwarf_vmatoa ("x", uvalue),
-		    fetch_indexed_string (uvalue, this_set, offset_size, dwo));
+		    dwarf_vmatoa ("x", uvalue), strng);
 	  else
 	    printf (_("%c(indexed string: 0x%s): %s"), delimiter,
-		    dwarf_vmatoa ("x", uvalue),
-		    fetch_indexed_string (uvalue, this_set, offset_size, dwo));
+		    dwarf_vmatoa ("x", uvalue), strng);
 	}
       break;
 
@@ -2710,29 +2739,56 @@ read_and_display_attr_value (unsigned long           attribute,
     case DW_FORM_addrx2:
     case DW_FORM_addrx3:
     case DW_FORM_addrx4:
+    case DW_FORM_loclistx:
+    case DW_FORM_rnglistx:
       if (!do_loc)
 	{
-	  dwarf_vma base;
-	  dwarf_vma offset;
+	  dwarf_vma base, index;
 
-	  if (debug_info_p == NULL)
-	    base = 0;
-	  else if (debug_info_p->addr_base == DEBUG_INFO_UNAVAILABLE)
-	    base = 0;
+	  if (form == DW_FORM_loclistx)
+	    {
+	      if (debug_info_p == NULL)
+		{
+		  index = fetch_indexed_value (uvalue, loclists, 0);
+		}
+	      else
+		{
+		  /* We want to compute:
+		       index = fetch_indexed_value (uvalue, loclists, debug_info_p->loclists_base);
+		       index += debug_info_p->loclists_base;
+		      Fortunately we already have that sum cached in the
+		      loc_offsets array.  */
+		  index = debug_info_p->loc_offsets [uvalue];
+		}
+	    }
+	  else if (form == DW_FORM_rnglistx)
+	    {
+	      if (debug_info_p == NULL)
+		base = 0;
+	      else
+		base = debug_info_p->rnglists_base;
+	      /* We do not have a cached value this time, so we perform the
+		 computation manually.  */
+	      index = fetch_indexed_value (uvalue, rnglists, base);
+	      index += base;
+	    }
 	  else
-	    base = debug_info_p->addr_base;
+	    {
+	      if (debug_info_p == NULL)
+		base = 0;
+	      else if (debug_info_p->addr_base == DEBUG_INFO_UNAVAILABLE)
+		base = 0;
+	      else
+		base = debug_info_p->addr_base;
 
-	  offset = base + uvalue * pointer_size;
+	      base += uvalue * pointer_size;
+	      index = fetch_indexed_addr (base, pointer_size);
+	    }
 
-	  if (do_wide)
-	    /* We have already displayed the form name.  */
-	    printf (_("%c(index: 0x%s): %s"), delimiter,
-		    dwarf_vmatoa ("x", uvalue),
-		    fetch_indexed_value (offset, pointer_size));
-	  else
-	    printf (_("%c(addr_index: 0x%s): %s"), delimiter,
-		    dwarf_vmatoa ("x", uvalue),
-		    fetch_indexed_value (offset, pointer_size));
+	  /* We have already displayed the form name.  */
+	  printf (_("%c(index: 0x%s): %s"), delimiter,
+		  dwarf_vmatoa ("x", uvalue),
+		  dwarf_vmatoa ("x", index));
 	}
       break;
 
@@ -2748,12 +2804,37 @@ read_and_display_attr_value (unsigned long           attribute,
       break;
     }
 
-  if ((do_loc || do_debug_loc || do_debug_ranges)
+  if ((do_loc || do_debug_loc || do_debug_ranges || do_debug_info)
       && num_debug_info_entries == 0
       && debug_info_p != NULL)
     {
       switch (attribute)
 	{
+	case DW_AT_loclists_base:
+	  if (debug_info_p->loclists_base)
+	    warn (_("CU @ 0x%s has multiple loclists_base values (0x%s and 0x%s)"),
+		  dwarf_vmatoa ("x", debug_info_p->cu_offset),
+		  dwarf_vmatoa ("x", debug_info_p->loclists_base),
+		  dwarf_vmatoa ("x", uvalue));
+	  debug_info_p->loclists_base = uvalue;
+	  break;
+	case DW_AT_rnglists_base:
+	  if (debug_info_p->rnglists_base)
+	    warn (_("CU @ 0x%s has multiple rnglists_base values (0x%s and 0x%s)"),
+	          dwarf_vmatoa ("x", debug_info_p->cu_offset),
+	          dwarf_vmatoa ("x", debug_info_p->rnglists_base),
+	          dwarf_vmatoa ("x", uvalue));
+	  debug_info_p->rnglists_base = uvalue;
+	  break;
+	case DW_AT_str_offsets_base:
+	  if (debug_info_p->str_offsets_base)
+	    warn (_("CU @ 0x%s has multiple str_offsets_base values (0x%s and 0x%s)"),
+		  dwarf_vmatoa ("x", debug_info_p->cu_offset),
+		  dwarf_vmatoa ("x", debug_info_p->str_offsets_base),
+		  dwarf_vmatoa ("x", uvalue));
+	  debug_info_p->str_offsets_base = uvalue;
+	  break;
+
 	case DW_AT_frame_base:
 	  have_frame_base = 1;
 	  /* Fall through.  */
@@ -2776,7 +2857,8 @@ read_and_display_attr_value (unsigned long           attribute,
 	case DW_AT_GNU_call_site_target_clobbered:
 	  if ((dwarf_version < 4
 	       && (form == DW_FORM_data4 || form == DW_FORM_data8))
-	      || form == DW_FORM_sec_offset)
+	      || form == DW_FORM_sec_offset
+	      || form == DW_FORM_loclistx)
 	    {
 	      /* Process location list.  */
 	      unsigned int lmax = debug_info_p->max_loc_offsets;
@@ -2796,11 +2878,16 @@ read_and_display_attr_value (unsigned long           attribute,
 			       lmax, sizeof (*debug_info_p->have_frame_base));
 		  debug_info_p->max_loc_offsets = lmax;
 		}
-	      if (this_set != NULL)
+	      if (form == DW_FORM_loclistx)
+		uvalue = fetch_indexed_value (num, loclists, debug_info_p->loclists_base);
+	      else if (this_set != NULL)
 		uvalue += this_set->section_offsets [DW_SECT_LOC];
+
 	      debug_info_p->have_frame_base [num] = have_frame_base;
 	      if (attribute != DW_AT_GNU_locviews)
 		{
+		  uvalue += debug_info_p->loclists_base;
+
 		  /* Corrupt DWARF info can produce more offsets than views.
 		     See PR 23062 for an example.  */
 		  if (debug_info_p->num_loc_offsets
@@ -2844,7 +2931,8 @@ read_and_display_attr_value (unsigned long           attribute,
 	case DW_AT_ranges:
 	  if ((dwarf_version < 4
 	       && (form == DW_FORM_data4 || form == DW_FORM_data8))
-	      || form == DW_FORM_sec_offset)
+	      || form == DW_FORM_sec_offset
+	      || form == DW_FORM_rnglistx)
 	    {
 	      /* Process range list.  */
 	      unsigned int lmax = debug_info_p->max_range_lists;
@@ -2858,6 +2946,10 @@ read_and_display_attr_value (unsigned long           attribute,
 			       lmax, sizeof (*debug_info_p->range_lists));
 		  debug_info_p->max_range_lists = lmax;
 		}
+
+	      if (form == DW_FORM_rnglistx)
+		uvalue = fetch_indexed_value (uvalue, rnglists, 0);
+
 	      debug_info_p->range_lists [num] = uvalue;
 	      debug_info_p->num_range_lists++;
 	    }
@@ -2880,7 +2972,9 @@ read_and_display_attr_value (unsigned long           attribute,
 	      case DW_FORM_strx2:
 	      case DW_FORM_strx3:
 	      case DW_FORM_strx4:
-		add_dwo_name (fetch_indexed_string (uvalue, this_set, offset_size, false), cu_offset);
+		add_dwo_name (fetch_indexed_string (uvalue, this_set, offset_size, false,
+		                                    debug_info_p->str_offsets_base),
+			      cu_offset);
 		break;
 	      case DW_FORM_string:
 		add_dwo_name ((const char *) orig_data, cu_offset);
@@ -2912,7 +3006,9 @@ read_and_display_attr_value (unsigned long           attribute,
 	      case DW_FORM_strx2:
 	      case DW_FORM_strx3:
 	      case DW_FORM_strx4:
-		add_dwo_dir (fetch_indexed_string (uvalue, this_set, offset_size, false), cu_offset);
+		add_dwo_dir (fetch_indexed_string (uvalue, this_set, offset_size, false,
+		                                   debug_info_p->str_offsets_base),
+			     cu_offset);
 		break;
 	      case DW_FORM_string:
 		add_dwo_dir ((const char *) orig_data, cu_offset);
@@ -3231,6 +3327,9 @@ read_and_display_attr_value (unsigned long           attribute,
       have_frame_base = 1;
       /* Fall through.  */
     case DW_AT_location:
+    case DW_AT_loclists_base:
+    case DW_AT_rnglists_base:
+    case DW_AT_str_offsets_base:
     case DW_AT_string_length:
     case DW_AT_return_addr:
     case DW_AT_data_member_location:
@@ -3248,8 +3347,13 @@ read_and_display_attr_value (unsigned long           attribute,
     case DW_AT_GNU_call_site_target_clobbered:
       if ((dwarf_version < 4
 	   && (form == DW_FORM_data4 || form == DW_FORM_data8))
-	  || form == DW_FORM_sec_offset)
-	printf (_(" (location list)"));
+	  || form == DW_FORM_sec_offset
+	  || form == DW_FORM_loclistx)
+	{
+	  if (attribute != DW_AT_rnglists_base
+	      && attribute != DW_AT_str_offsets_base)
+	    printf (_(" (location list)"));
+	}
       /* Fall through.  */
     case DW_AT_allocated:
     case DW_AT_associated:
@@ -3480,7 +3584,7 @@ process_debug_info (struct dwarf_section * section,
       return false;
     }
 
-  if ((do_loc || do_debug_loc || do_debug_ranges)
+  if ((do_loc || do_debug_loc || do_debug_ranges || do_debug_info)
       && num_debug_info_entries == 0
       && ! do_types)
     {
@@ -3517,6 +3621,9 @@ process_debug_info (struct dwarf_section * section,
     }
 
   load_debug_section_with_follow (abbrev_sec, file);
+  load_debug_section_with_follow (loclists, file);
+  load_debug_section_with_follow (rnglists, file);
+  
   if (debug_displays [abbrev_sec].section.start == NULL)
     {
       warn (_("Unable to locate %s section!\n"),
@@ -3712,7 +3819,7 @@ process_debug_info (struct dwarf_section * section,
 	  continue;
 	}
 
-      if ((do_loc || do_debug_loc || do_debug_ranges)
+      if ((do_loc || do_debug_loc || do_debug_ranges || do_debug_info)
 	  && num_debug_info_entries == 0
 	  && alloc_num_debug_info_entries > unit
 	  && ! do_types)
@@ -3725,13 +3832,17 @@ process_debug_info (struct dwarf_section * section,
 	  debug_information [unit].base_address = 0;
 	  debug_information [unit].addr_base = DEBUG_INFO_UNAVAILABLE;
 	  debug_information [unit].ranges_base = DEBUG_INFO_UNAVAILABLE;
+	  debug_information [unit].rnglists_base = 0;
 	  debug_information [unit].loc_offsets = NULL;
 	  debug_information [unit].have_frame_base = NULL;
 	  debug_information [unit].max_loc_offsets = 0;
 	  debug_information [unit].num_loc_offsets = 0;
+	  debug_information [unit].loclists_base = 0;
 	  debug_information [unit].range_lists = NULL;
 	  debug_information [unit].max_range_lists= 0;
 	  debug_information [unit].num_range_lists = 0;
+	  debug_information [unit].rnglists_base = 0;
+	  debug_information [unit].str_offsets_base = 0;
 	}
 
       if (!do_loc && dwarf_start_die == 0)
@@ -4002,7 +4113,7 @@ process_debug_info (struct dwarf_section * section,
 
   /* Set num_debug_info_entries here so that it can be used to check if
      we need to process .debug_loc and .debug_ranges sections.  */
-  if ((do_loc || do_debug_loc || do_debug_ranges)
+  if ((do_loc || do_debug_loc || do_debug_ranges || do_debug_info)
       && num_debug_info_entries == 0
       && ! do_types)
     {
@@ -6150,7 +6261,7 @@ display_debug_macro (struct dwarf_section *section,
 	      READ_ULEB (lineno, curr, end);
 	      READ_ULEB (offset, curr, end);
 	      string = (const unsigned char *)
-		fetch_indexed_string (offset, NULL, offset_size, false);
+		fetch_indexed_string (offset, NULL, offset_size, false, 0);
 	      if (op == DW_MACRO_define_strx)
 		printf (" DW_MACRO_define_strx ");
 	      else
@@ -6193,8 +6304,9 @@ display_debug_macro (struct dwarf_section *section,
 		      SAFE_BYTE_GET_AND_INC (val, desc, 1, end);
 		      curr
 			= read_and_display_attr_value (0, val, 0,
-						       start, curr, end, 0, 0, offset_size,
-						       version, NULL, 0, NULL,
+						       start, curr, end, 0, 0,
+						       offset_size, version,
+						       NULL, 0, section,
 						       NULL, ' ', -1);
 		      if (n != nargs - 1)
 			printf (",");
@@ -6465,20 +6577,21 @@ display_loc_list (struct dwarf_section *section,
 /* Display a location list from a normal (ie, non-dwo) .debug_loclists section.  */
 
 static void
-display_loclists_list (struct dwarf_section *section,
-		       unsigned char **start_ptr,
-		       unsigned int debug_info_entry,
-		       dwarf_vma offset,
-		       dwarf_vma base_address,
-		       unsigned char **vstart_ptr,
-		       int has_frame_base)
+display_loclists_list (struct dwarf_section *  section,
+		       unsigned char **        start_ptr,
+		       unsigned int            debug_info_entry,
+		       dwarf_vma               offset,
+		       dwarf_vma               base_address,
+		       unsigned char **        vstart_ptr,
+		       int                     has_frame_base)
 {
-  unsigned char *start = *start_ptr, *vstart = *vstart_ptr;
-  unsigned char *section_end = section->start + section->size;
-  dwarf_vma    cu_offset;
-  unsigned int pointer_size;
-  unsigned int offset_size;
-  int dwarf_version;
+  unsigned char *  start = *start_ptr;
+  unsigned char *  vstart = *vstart_ptr;
+  unsigned char *  section_end = section->start + section->size;
+  dwarf_vma        cu_offset;
+  unsigned int     pointer_size;
+  unsigned int     offset_size;
+  unsigned int     dwarf_version;
 
   /* Initialize it due to a false compiler warning.  */
   dwarf_vma begin = -1, vbegin = -1;
@@ -6544,27 +6657,59 @@ display_loclists_list (struct dwarf_section *section,
 	case DW_LLE_end_of_list:
 	  printf (_("<End of list>\n"));
 	  break;
+
+	case DW_LLE_base_addressx:
+	  READ_ULEB (base_address, start, section_end);
+	  print_dwarf_vma (base_address, pointer_size);
+	  printf (_("(index into .debug_addr) "));
+	  base_address = fetch_indexed_addr (base_address, pointer_size);
+	  print_dwarf_vma (base_address, pointer_size);
+	  printf (_("(base address)\n"));
+	  break;
+
+	case DW_LLE_startx_endx:
+	  READ_ULEB (begin, start, section_end);
+	  begin = fetch_indexed_addr (begin, pointer_size);
+	  READ_ULEB (end, start, section_end);
+	  end = fetch_indexed_addr (end, pointer_size);
+	  break;
+
+	case DW_LLE_startx_length:
+	  READ_ULEB (begin, start, section_end);
+	  begin = fetch_indexed_addr (begin, pointer_size);
+	  READ_ULEB (end, start, section_end);
+	  end += begin;
+	  break;
+
+	case DW_LLE_default_location:
+	  begin = end = 0;
+	  break;
+	  
 	case DW_LLE_offset_pair:
 	  READ_ULEB (begin, start, section_end);
 	  begin += base_address;
 	  READ_ULEB (end, start, section_end);
 	  end += base_address;
 	  break;
-	case DW_LLE_start_end:
-	  SAFE_BYTE_GET_AND_INC (begin, start, pointer_size, section_end);
-	  SAFE_BYTE_GET_AND_INC (end, start, pointer_size, section_end);
-	  break;
-	case DW_LLE_start_length:
-	  SAFE_BYTE_GET_AND_INC (begin, start, pointer_size, section_end);
-	  READ_ULEB (end, start, section_end);
-	  end += begin;
-	  break;
+
 	case DW_LLE_base_address:
 	  SAFE_BYTE_GET_AND_INC (base_address, start, pointer_size,
 				 section_end);
 	  print_dwarf_vma (base_address, pointer_size);
 	  printf (_("(base address)\n"));
 	  break;
+
+	case DW_LLE_start_end:
+	  SAFE_BYTE_GET_AND_INC (begin, start, pointer_size, section_end);
+	  SAFE_BYTE_GET_AND_INC (end, start, pointer_size, section_end);
+	  break;
+
+	case DW_LLE_start_length:
+	  SAFE_BYTE_GET_AND_INC (begin, start, pointer_size, section_end);
+	  READ_ULEB (end, start, section_end);
+	  end += begin;
+	  break;
+
 #ifdef DW_LLE_view_pair
 	case DW_LLE_view_pair:
 	  if (vstart)
@@ -6578,15 +6723,17 @@ display_loclists_list (struct dwarf_section *section,
 	  printf (_("views for:\n"));
 	  continue;
 #endif
+
 	default:
 	  error (_("Invalid location list entry type %d\n"), llet);
 	  return;
 	}
+
       if (llet == DW_LLE_end_of_list)
 	break;
-      if (llet != DW_LLE_offset_pair
-	  && llet != DW_LLE_start_end
-	  && llet != DW_LLE_start_length)
+
+      if (llet == DW_LLE_base_address
+	  || llet == DW_LLE_base_addressx)
 	continue;
 
       if (start == section_end)
@@ -6828,6 +6975,218 @@ loc_offsets_compar (const void *ap, const void *bp)
 }
 
 static int
+display_offset_entry_loclists (struct dwarf_section *section)
+{
+  unsigned char *  start = section->start;
+  unsigned char * const end = start + section->size;
+
+  introduce (section, false);  
+
+  do
+    {
+      dwarf_vma        length;
+      unsigned short   version;
+      unsigned char    address_size;
+      unsigned char    segment_selector_size;
+      uint32_t         offset_entry_count;
+      uint32_t         i;
+      bool             is_64bit;
+
+      printf (_("Table at Offset 0x%lx\n"), (long)(start - section->start));
+
+      SAFE_BYTE_GET_AND_INC (length, start, 4, end);
+      if (length == 0xffffffff)
+	{
+	  is_64bit = true;
+	  SAFE_BYTE_GET_AND_INC (length, start, 8, end);
+	}
+      else
+	is_64bit = false;
+
+      SAFE_BYTE_GET_AND_INC (version, start, 2, end);
+      SAFE_BYTE_GET_AND_INC (address_size, start, 1, end);
+      SAFE_BYTE_GET_AND_INC (segment_selector_size, start, 1, end);
+      SAFE_BYTE_GET_AND_INC (offset_entry_count, start, 4, end);
+
+      printf (_("  Length:          0x%s\n"), dwarf_vmatoa ("x", length));
+      printf (_("  DWARF version:   %u\n"), version);
+      printf (_("  Address size:    %u\n"), address_size);
+      printf (_("  Segment size:    %u\n"), segment_selector_size);
+      printf (_("  Offset entries:  %u\n"), offset_entry_count);
+
+      if (version < 5)
+	{
+	  warn (_("The %s section contains a corrupt or "
+		  "unsupported version number: %d.\n"),
+		section->name, version);
+	  return 0;
+	}
+
+      if (segment_selector_size != 0)
+	{
+	  warn (_("The %s section contains an "
+		  "unsupported segment selector size: %d.\n"),
+		section->name, segment_selector_size);
+	  return 0;
+	}
+      
+      if (offset_entry_count == 0)
+	{
+	  warn (_("The %s section contains a table without offset\n"),
+		section->name);
+	  return 0;
+	}
+  
+      printf (_("\n   Offset Entries starting at 0x%lx:\n"),
+	      (long)(start - section->start));
+
+      if (is_64bit)
+	{
+	  for (i = 0; i < offset_entry_count; i++)
+	    {
+	      dwarf_vma entry;
+
+	      SAFE_BYTE_GET_AND_INC (entry, start, 8, end);
+	      printf (_("    [%6u] 0x%s\n"), i, dwarf_vmatoa ("x", entry));
+	    }
+	}
+      else
+	{
+	  for (i = 0; i < offset_entry_count; i++)
+	    {
+	      uint32_t entry;
+
+	      SAFE_BYTE_GET_AND_INC (entry, start, 4, end);
+	      printf (_("    [%6u] 0x%x\n"), i, entry);
+	    }
+	}
+
+      putchar ('\n');
+
+      uint32_t j;
+
+      for (j = 1, i = 0; i < offset_entry_count;)
+	{
+	  unsigned char  lle;
+	  dwarf_vma      base_address = 0;
+	  dwarf_vma      begin;
+	  dwarf_vma      finish;
+	  dwarf_vma      off = start - section->start;
+
+	  if (j != i)
+	    {
+	      printf (_("   Offset Entry %u\n"), i);
+	      j = i;
+	    }
+
+	  printf ("    ");
+	  print_dwarf_vma (off, 4);
+
+	  SAFE_BYTE_GET_AND_INC (lle, start, 1, end);
+
+	  switch (lle)
+	    {
+	    case DW_LLE_end_of_list:
+	      printf (_("<End of list>\n\n"));
+	      i ++;
+	      continue;
+
+	    case DW_LLE_base_addressx:
+	      READ_ULEB (base_address, start, end);
+	      print_dwarf_vma (base_address, address_size);
+	      printf (_("(index into .debug_addr) "));
+	      base_address = fetch_indexed_addr (base_address, address_size);
+	      print_dwarf_vma (base_address, address_size);
+	      printf (_("(base address)\n"));
+	      continue;
+
+	    case DW_LLE_startx_endx:
+	      READ_ULEB (begin, start, end);
+	      begin = fetch_indexed_addr (begin, address_size);
+	      READ_ULEB (finish, start, end);
+	      finish = fetch_indexed_addr (finish, address_size);
+	      break;
+
+	    case DW_LLE_startx_length:
+	      READ_ULEB (begin, start, end);
+	      begin = fetch_indexed_addr (begin, address_size);
+	      READ_ULEB (finish, start, end);
+	      finish += begin;
+	      break;
+
+	    case DW_LLE_offset_pair:
+	      READ_ULEB (begin, start, end);
+	      begin += base_address;
+	      READ_ULEB (finish, start, end);
+	      finish += base_address;
+	      break;
+
+	    case DW_LLE_default_location:
+	      begin = finish = 0;
+	      break;
+
+	    case DW_LLE_base_address:
+	      SAFE_BYTE_GET_AND_INC (base_address, start, address_size, end);
+	      print_dwarf_vma (base_address, address_size);
+	      printf (_("(base address)\n"));
+	      continue;
+
+	    case DW_LLE_start_end:
+	      SAFE_BYTE_GET_AND_INC (begin,  start, address_size, end);
+	      SAFE_BYTE_GET_AND_INC (finish, start, address_size, end);
+	      break;
+
+	    case DW_LLE_start_length:
+	      SAFE_BYTE_GET_AND_INC (begin, start, address_size, end);
+	      READ_ULEB (finish, start, end);
+	      finish += begin;
+	      break;
+
+	    default:
+	      error (_("Invalid location list entry type %d\n"), lle);
+	      return 0;
+	    }
+
+	  if (start == end)
+	    {
+	      warn (_("Location list starting at offset 0x%lx is not terminated.\n"),
+		    (unsigned long) off);
+	      break;
+	    }
+
+	  print_dwarf_vma (begin, address_size);
+	  print_dwarf_vma (finish, address_size);
+
+	  if (begin == finish)
+	    fputs (_(" (start == end)"), stdout);
+	  else if (begin > finish)
+	    fputs (_(" (start > end)"), stdout);
+
+	  /* Read the counted location descriptions.  */
+	  READ_ULEB (length, start, end);
+
+	  if (length > (size_t) (end - start))
+	    {
+	      warn (_("Location list starting at offset 0x%lx is not terminated.\n"),
+		    (unsigned long) off);
+	      break;
+	    }
+
+	  putchar (' ');
+	  (void) decode_location_expression (start, address_size, address_size,
+					     version, length, 0, section);
+	  start += length;
+	  putchar ('\n');
+	}
+
+      putchar ('\n');
+    }
+  while (start < end);
+
+  return 1;
+}
+
+static int
 display_debug_loc (struct dwarf_section *section, void *file)
 {
   unsigned char *start = section->start, *vstart = NULL;
@@ -6893,13 +7252,9 @@ display_debug_loc (struct dwarf_section *section, void *file)
 	}
 
       SAFE_BYTE_GET_AND_INC (offset_entry_count, hdrptr, 4, end);
+
       if (offset_entry_count != 0)
-	{
-	  warn (_("The %s section contains "
-		  "unsupported offset entry count: %d.\n"),
-		section->name, offset_entry_count);
-	  return 0;
-	}
+	return display_offset_entry_loclists (section);
 
       expected_start = hdrptr - section_begin;
     }
@@ -6959,9 +7314,10 @@ display_debug_loc (struct dwarf_section *section, void *file)
   if (debug_information [first].num_loc_offsets > 0
       && debug_information [first].loc_offsets [0] != expected_start
       && debug_information [first].loc_views [0] != expected_start)
-    warn (_("Location lists in %s section start at 0x%s\n"),
+    warn (_("Location lists in %s section start at 0x%s rather than 0x%s\n"),
 	  section->name,
-	  dwarf_vmatoa ("x", debug_information [first].loc_offsets [0]));
+	  dwarf_vmatoa ("x", debug_information [first].loc_offsets [0]),
+	  dwarf_vmatoa ("x", expected_start));
 
   if (!locs_sorted)
     array = (unsigned int *) xcmalloc (num_loc_list, sizeof (unsigned int));
@@ -7520,7 +7876,7 @@ display_debug_str_offsets (struct dwarf_section *section,
 	  SAFE_BYTE_GET_AND_INC (offset, curr, entry_length, entries_end);
 	  if (dwo)
 	    string = (const unsigned char *)
-	      fetch_indexed_string (idx, NULL, entry_length, dwo);
+	      fetch_indexed_string (idx, NULL, entry_length, dwo, 0);
 	  else
 	    string = fetch_indirect_string (offset);
 
@@ -7606,14 +7962,21 @@ display_debug_ranges_list (unsigned char *  start,
     }
 }
 
-static void
+static unsigned char *
 display_debug_rnglists_list (unsigned char * start,
 			     unsigned char * finish,
 			     unsigned int    pointer_size,
 			     dwarf_vma       offset,
-			     dwarf_vma       base_address)
+			     dwarf_vma       base_address,
+			     unsigned int    offset_size)
 {
   unsigned char *next = start;
+  unsigned int debug_addr_section_hdr_len;
+
+  if (offset_size == 4)
+    debug_addr_section_hdr_len = 8;
+  else
+    debug_addr_section_hdr_len = 16;
 
   while (1)
     {
@@ -7639,32 +8002,57 @@ display_debug_rnglists_list (unsigned char * start,
 	case DW_RLE_end_of_list:
 	  printf (_("<End of list>\n"));
 	  break;
-	case DW_RLE_base_address:
-	  SAFE_BYTE_GET_AND_INC (base_address, start, pointer_size, finish);
+	case DW_RLE_base_addressx:
+	  READ_ULEB (base_address, start, finish);
+	  print_dwarf_vma (base_address, pointer_size);
+	  printf (_("(base address index) "));
+	  base_address = fetch_indexed_addr ((base_address * pointer_size)
+			                     + debug_addr_section_hdr_len, pointer_size);
 	  print_dwarf_vma (base_address, pointer_size);
 	  printf (_("(base address)\n"));
 	  break;
-	case DW_RLE_start_length:
-	  SAFE_BYTE_GET_AND_INC (begin, start, pointer_size, finish);
+	case DW_RLE_startx_endx:
+	  READ_ULEB (begin, start, finish);
+	  READ_ULEB (end, start, finish);
+	  begin = fetch_indexed_addr ((begin * pointer_size)
+			              + debug_addr_section_hdr_len, pointer_size);
+	  end   = fetch_indexed_addr ((begin * pointer_size)
+			              + debug_addr_section_hdr_len, pointer_size);
+	  break;
+	case DW_RLE_startx_length:
+	  READ_ULEB (begin, start, finish);
 	  READ_ULEB (length, start, finish);
+	  begin = fetch_indexed_addr ((begin * pointer_size)
+			              + debug_addr_section_hdr_len, pointer_size);
 	  end = begin + length;
 	  break;
 	case DW_RLE_offset_pair:
 	  READ_ULEB (begin, start, finish);
 	  READ_ULEB (end, start, finish);
 	  break;
+	case DW_RLE_base_address:
+	  SAFE_BYTE_GET_AND_INC (base_address, start, pointer_size, finish);
+	  print_dwarf_vma (base_address, pointer_size);
+	  printf (_("(base address)\n"));
+	  break;
 	case DW_RLE_start_end:
 	  SAFE_BYTE_GET_AND_INC (begin, start, pointer_size, finish);
 	  SAFE_BYTE_GET_AND_INC (end, start, pointer_size, finish);
+	  break;
+	case DW_RLE_start_length:
+	  SAFE_BYTE_GET_AND_INC (begin, start, pointer_size, finish);
+	  READ_ULEB (length, start, finish);
+	  end = begin + length;
 	  break;
 	default:
 	  error (_("Invalid range list entry type %d\n"), rlet);
 	  rlet = DW_RLE_end_of_list;
 	  break;
 	}
+
       if (rlet == DW_RLE_end_of_list)
 	break;
-      if (rlet == DW_RLE_base_address)
+      if (rlet == DW_RLE_base_address || rlet == DW_RLE_base_addressx)
 	continue;
 
       /* Only a DW_RLE_offset_pair needs the base address added.  */
@@ -7684,6 +8072,138 @@ display_debug_rnglists_list (unsigned char * start,
 
       putchar ('\n');
     }
+
+  return start;
+}
+
+static int
+display_debug_rnglists (struct dwarf_section *section)
+{
+  unsigned char *       start = section->start;
+  unsigned char *       finish = start + section->size;
+
+  while (start < finish)
+    {
+      unsigned char * table_start;
+      dwarf_vma       offset = start - section->start;
+      unsigned char * end;
+      dwarf_vma       initial_length;
+      unsigned char   segment_selector_size;
+      unsigned int    offset_entry_count;
+      unsigned int    i;
+      unsigned short  version;
+      unsigned char   address_size = 0;
+      unsigned char   offset_size;
+
+      /* Get and check the length of the block.  */
+      SAFE_BYTE_GET_AND_INC (initial_length, start, 4, finish);
+
+      if (initial_length == 0xffffffff)
+	{
+	  /* This section is 64-bit DWARF 3.  */
+	  SAFE_BYTE_GET_AND_INC (initial_length, start, 8, finish);
+	  offset_size = 8;
+	}
+      else
+	offset_size = 4;
+
+      if (initial_length > (size_t) (finish - start))
+	{
+	  /* If the length field has a relocation against it, then we should
+	     not complain if it is inaccurate (and probably negative).
+	     It is copied from .debug_line handling code.  */
+	  if (reloc_at (section, (start - section->start) - offset_size))
+	    initial_length = finish - start;
+	  else
+	    {
+	      warn (_("The length field (0x%lx) in the debug_rnglists header is wrong - the section is too small\n"),
+		    (long) initial_length);
+	      return 0;
+	    }
+	}
+
+      end = start + initial_length;
+
+      /* Get the other fields in the header.  */
+      SAFE_BYTE_GET_AND_INC (version, start, 2, finish);
+      SAFE_BYTE_GET_AND_INC (address_size, start, 1, finish);
+      SAFE_BYTE_GET_AND_INC (segment_selector_size, start, 1, finish);
+      SAFE_BYTE_GET_AND_INC (offset_entry_count, start, 4, finish);
+
+      printf (_(" Table at Offset: 0x%s:\n"), dwarf_vmatoa ("x", offset));
+      printf (_("  Length:          0x%s\n"), dwarf_vmatoa ("x", initial_length));
+      printf (_("  DWARF version:   %u\n"), version);
+      printf (_("  Address size:    %u\n"), address_size);
+      printf (_("  Segment size:    %u\n"), segment_selector_size);
+      printf (_("  Offset entries:  %u\n"), offset_entry_count);
+
+      /* Check the fields.  */
+      if (segment_selector_size != 0)
+	{
+	  warn (_("The %s section contains "
+		  "unsupported segment selector size: %d.\n"),
+		section->name, segment_selector_size);
+	  return 0;
+	}
+
+      if (version < 5)
+	{
+	  warn (_("Only DWARF version 5+ debug_rnglists info "
+		  "is currently supported.\n"));
+	  return 0;
+	}
+
+      table_start = start;
+
+      if (offset_entry_count != 0)
+	{
+	  printf (_("\n   Offsets starting at 0x%lx:\n"), (long)(start - section->start));
+	  if (offset_size == 8)
+	    {
+	      for (i = 0; i < offset_entry_count; i++)
+		{
+		  dwarf_vma entry;
+
+		  SAFE_BYTE_GET_AND_INC (entry, start, 8, finish);
+		  printf (_("    [%6u] 0x%s\n"), i, dwarf_vmatoa ("x", entry));
+		}
+	    }
+	  else
+	    {
+	      for (i = 0; i < offset_entry_count; i++)
+		{
+		  uint32_t entry;
+
+		  SAFE_BYTE_GET_AND_INC (entry, start, 4, finish);
+		  printf (_("    [%6u] 0x%x\n"), i, entry);
+		}
+	    }
+	}
+      else
+	offset_entry_count = 1;
+
+      for (i = 0; i < offset_entry_count; i++)
+	{
+	  dwarf_vma indx = start - table_start;
+
+	  offset = start - section->start;
+	  printf (_("\n  Offset: %lx, Index: 0x%s\n"),
+		  (long) offset, dwarf_vmatoa ("x", indx));
+	  printf (_("    Offset   Begin    End\n"));
+	  start = display_debug_rnglists_list
+	    (start, end, address_size, offset, 0, offset_size);
+	  if (start >= end)
+	    break;	  
+	}
+
+      start = end;
+
+      if (start < finish)
+	putchar ('\n');
+    }
+
+  putchar ('\n');
+  return 1;
 }
 
 static int
@@ -7709,72 +8229,10 @@ display_debug_ranges (struct dwarf_section *section,
       return 0;
     }
 
+  introduce (section, false);
+
   if (is_rnglists)
-    {
-      dwarf_vma initial_length;
-      unsigned char segment_selector_size;
-      unsigned int offset_size, offset_entry_count;
-      unsigned short version;
-
-      /* Get and check the length of the block.  */
-      SAFE_BYTE_GET_AND_INC (initial_length, start, 4, finish);
-
-      if (initial_length == 0xffffffff)
-	{
-	  /* This section is 64-bit DWARF 3.  */
-	  SAFE_BYTE_GET_AND_INC (initial_length, start, 8, finish);
-	  offset_size = 8;
-	}
-      else
-	offset_size = 4;
-
-      if (initial_length > (size_t) (finish - start))
-	{
-	  /* If the length field has a relocation against it, then we should
-	     not complain if it is inaccurate (and probably negative).
-	     It is copied from .debug_line handling code.  */
-	  if (reloc_at (section, (start - section->start) - offset_size))
-	    {
-	      initial_length = finish - start;
-	    }
-	  else
-	    {
-	      warn (_("The length field (0x%lx) in the debug_rnglists header is wrong - the section is too small\n"),
-		    (long) initial_length);
-	      return 0;
-	    }
-	}
-
-      /* Get and check the version number.  */
-      SAFE_BYTE_GET_AND_INC (version, start, 2, finish);
-
-      if (version != 5)
-	{
-	  warn (_("Only DWARF version 5 debug_rnglists info "
-		  "is currently supported.\n"));
-	  return 0;
-	}
-
-      SAFE_BYTE_GET_AND_INC (address_size, start, 1, finish);
-
-      SAFE_BYTE_GET_AND_INC (segment_selector_size, start, 1, finish);
-      if (segment_selector_size != 0)
-	{
-	  warn (_("The %s section contains "
-		  "unsupported segment selector size: %d.\n"),
-		section->name, segment_selector_size);
-	  return 0;
-	}
-
-      SAFE_BYTE_GET_AND_INC (offset_entry_count, start, 4, finish);
-      if (offset_entry_count != 0)
-	{
-	  warn (_("The %s section contains "
-		  "unsupported offset entry count: %u.\n"),
-		section->name, offset_entry_count);
-	  return 0;
-	}
-    }
+    return display_debug_rnglists (section);
 
   if (load_debug_info (file) == 0)
     {
@@ -7785,15 +8243,7 @@ display_debug_ranges (struct dwarf_section *section,
 
   num_range_list = 0;
   for (i = 0; i < num_debug_info_entries; i++)
-    {
-      if (debug_information [i].dwarf_version < 5 && is_rnglists)
-	/* Skip .debug_rnglists reference.  */
-	continue;
-      if (debug_information [i].dwarf_version >= 5 && !is_rnglists)
-	/* Skip .debug_range reference.  */
-	continue;
-      num_range_list += debug_information [i].num_range_lists;
-    }
+    num_range_list += debug_information [i].num_range_lists;
 
   if (num_range_list == 0)
     {
@@ -7812,13 +8262,6 @@ display_debug_ranges (struct dwarf_section *section,
       debug_info *debug_info_p = &debug_information[i];
       unsigned int j;
 
-      if (debug_information [i].dwarf_version < 5 && is_rnglists)
-	/* Skip .debug_rnglists reference.  */
-	continue;
-      if (debug_information [i].dwarf_version >= 5 && !is_rnglists)
-	/* Skip .debug_range reference.  */
-	continue;
-
       for (j = 0; j < debug_info_p->num_range_lists; j++)
 	{
 	  range_entry_fill->ranges_offset = debug_info_p->range_lists[j];
@@ -7834,8 +8277,7 @@ display_debug_ranges (struct dwarf_section *section,
     warn (_("Range lists in %s section start at 0x%lx\n"),
 	  section->name, (unsigned long) range_entries[0].ranges_offset);
 
-  introduce (section, false);
-
+  putchar ('\n');
   printf (_("    Offset   Begin    End\n"));
 
   for (i = 0; i < num_range_list; i++)
@@ -7865,7 +8307,8 @@ display_debug_ranges (struct dwarf_section *section,
 		(unsigned long) offset, i);
 	  continue;
 	}
-      next = section_begin + offset;
+
+      next = section_begin + offset + debug_info_p->rnglists_base;
 
       /* If multiple DWARF entities reference the same range then we will
          have multiple entries in the `range_entries' list for the same
@@ -7895,7 +8338,7 @@ display_debug_ranges (struct dwarf_section *section,
       start = next;
       last_start = next;
 
-      (is_rnglists ? display_debug_rnglists_list : display_debug_ranges_list)
+      display_debug_ranges_list
 	(start, finish, pointer_size, offset, base_address);
     }
   putchar ('\n');
@@ -8923,18 +9366,17 @@ display_debug_frames (struct dwarf_section *section,
 
 	      /* Warning: if you add any more cases to this switch, be
 		 sure to add them to the corresponding switch below.  */
+	      reg = -1u;
 	      switch (op)
 		{
 		case DW_CFA_advance_loc:
 		  break;
 		case DW_CFA_offset:
 		  SKIP_ULEB (start, block_end);
-		  if (frame_need_space (fc, opa) >= 0)
-		    fc->col_type[opa] = DW_CFA_undefined;
+		  reg = opa;
 		  break;
 		case DW_CFA_restore:
-		  if (frame_need_space (fc, opa) >= 0)
-		    fc->col_type[opa] = DW_CFA_undefined;
+		  reg = opa;
 		  break;
 		case DW_CFA_set_loc:
 		  if ((size_t) (block_end - start) < encoded_ptr_size)
@@ -8964,29 +9406,19 @@ display_debug_frames (struct dwarf_section *section,
 		case DW_CFA_val_offset:
 		  READ_ULEB (reg, start, block_end);
 		  SKIP_ULEB (start, block_end);
-		  if (frame_need_space (fc, reg) >= 0)
-		    fc->col_type[reg] = DW_CFA_undefined;
 		  break;
 		case DW_CFA_restore_extended:
 		  READ_ULEB (reg, start, block_end);
-		  if (frame_need_space (fc, reg) >= 0)
-		    fc->col_type[reg] = DW_CFA_undefined;
 		  break;
 		case DW_CFA_undefined:
 		  READ_ULEB (reg, start, block_end);
-		  if (frame_need_space (fc, reg) >= 0)
-		    fc->col_type[reg] = DW_CFA_undefined;
 		  break;
 		case DW_CFA_same_value:
 		  READ_ULEB (reg, start, block_end);
-		  if (frame_need_space (fc, reg) >= 0)
-		    fc->col_type[reg] = DW_CFA_undefined;
 		  break;
 		case DW_CFA_register:
 		  READ_ULEB (reg, start, block_end);
 		  SKIP_ULEB (start, block_end);
-		  if (frame_need_space (fc, reg) >= 0)
-		    fc->col_type[reg] = DW_CFA_undefined;
 		  break;
 		case DW_CFA_def_cfa:
 		  SKIP_ULEB (start, block_end);
@@ -9013,15 +9445,11 @@ display_debug_frames (struct dwarf_section *section,
 		    start = block_end;
 		  else
 		    start += temp;
-		  if (frame_need_space (fc, reg) >= 0)
-		    fc->col_type[reg] = DW_CFA_undefined;
 		  break;
 		case DW_CFA_offset_extended_sf:
 		case DW_CFA_val_offset_sf:
 		  READ_ULEB (reg, start, block_end);
 		  SKIP_SLEB (start, block_end);
-		  if (frame_need_space (fc, reg) >= 0)
-		    fc->col_type[reg] = DW_CFA_undefined;
 		  break;
 		case DW_CFA_def_cfa_sf:
 		  SKIP_ULEB (start, block_end);
@@ -9042,11 +9470,20 @@ display_debug_frames (struct dwarf_section *section,
 		case DW_CFA_GNU_negative_offset_extended:
 		  READ_ULEB (reg, start, block_end);
 		  SKIP_ULEB (start, block_end);
-		  if (frame_need_space (fc, reg) >= 0)
-		    fc->col_type[reg] = DW_CFA_undefined;
 		  break;
 		default:
 		  break;
+		}
+	      if (reg != -1u && frame_need_space (fc, reg) >= 0)
+		{
+		  /* Don't leave any reg as DW_CFA_unreferenced so
+		     that frame_display_row prints name of regs in
+		     header, and all referenced regs in each line.  */
+		  if (reg >= cie->ncols
+		      || cie->col_type[reg] == DW_CFA_unreferenced)
+		    fc->col_type[reg] = DW_CFA_undefined;
+		  else
+		    fc->col_type[reg] = cie->col_type[reg];
 		}
 	    }
 	  start = tmp;
@@ -9097,7 +9534,7 @@ display_debug_frames (struct dwarf_section *section,
 
 	    case DW_CFA_offset:
 	      READ_ULEB (roffs, start, block_end);
-	      if (opa >= (unsigned int) fc->ncols)
+	      if (opa >= fc->ncols)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
 		printf ("  DW_CFA_offset: %s%s at cfa%+ld\n",
@@ -9111,7 +9548,7 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_restore:
-	      if (opa >= (unsigned int) fc->ncols)
+	      if (opa >= fc->ncols)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
 		printf ("  DW_CFA_restore: %s%s\n",
@@ -9119,9 +9556,8 @@ display_debug_frames (struct dwarf_section *section,
 	      if (*reg_prefix != '\0')
 		break;
 
-	      if (opa >= (unsigned int) cie->ncols
-		  || (do_debug_frames_interp
-		      && cie->col_type[opa] == DW_CFA_unreferenced))
+	      if (opa >= cie->ncols
+		  || cie->col_type[opa] == DW_CFA_unreferenced)
 		{
 		  fc->col_type[opa] = DW_CFA_undefined;
 		  fc->col_offset[opa] = 0;
@@ -9186,7 +9622,7 @@ display_debug_frames (struct dwarf_section *section,
 	    case DW_CFA_offset_extended:
 	      READ_ULEB (reg, start, block_end);
 	      READ_ULEB (roffs, start, block_end);
-	      if (reg >= (unsigned int) fc->ncols)
+	      if (reg >= fc->ncols)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
 		printf ("  DW_CFA_offset_extended: %s%s at cfa%+ld\n",
@@ -9202,7 +9638,7 @@ display_debug_frames (struct dwarf_section *section,
 	    case DW_CFA_val_offset:
 	      READ_ULEB (reg, start, block_end);
 	      READ_ULEB (roffs, start, block_end);
-	      if (reg >= (unsigned int) fc->ncols)
+	      if (reg >= fc->ncols)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
 		printf ("  DW_CFA_val_offset: %s%s is cfa%+ld\n",
@@ -9217,7 +9653,7 @@ display_debug_frames (struct dwarf_section *section,
 
 	    case DW_CFA_restore_extended:
 	      READ_ULEB (reg, start, block_end);
-	      if (reg >= (unsigned int) fc->ncols)
+	      if (reg >= fc->ncols)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
 		printf ("  DW_CFA_restore_extended: %s%s\n",
@@ -9225,7 +9661,8 @@ display_debug_frames (struct dwarf_section *section,
 	      if (*reg_prefix != '\0')
 		break;
 
-	      if (reg >= (unsigned int) cie->ncols)
+	      if (reg >= cie->ncols
+		  || cie->col_type[reg] == DW_CFA_unreferenced)
 		{
 		  fc->col_type[reg] = DW_CFA_undefined;
 		  fc->col_offset[reg] = 0;
@@ -9239,7 +9676,7 @@ display_debug_frames (struct dwarf_section *section,
 
 	    case DW_CFA_undefined:
 	      READ_ULEB (reg, start, block_end);
-	      if (reg >= (unsigned int) fc->ncols)
+	      if (reg >= fc->ncols)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
 		printf ("  DW_CFA_undefined: %s%s\n",
@@ -9253,7 +9690,7 @@ display_debug_frames (struct dwarf_section *section,
 
 	    case DW_CFA_same_value:
 	      READ_ULEB (reg, start, block_end);
-	      if (reg >= (unsigned int) fc->ncols)
+	      if (reg >= fc->ncols)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
 		printf ("  DW_CFA_same_value: %s%s\n",
@@ -9268,7 +9705,7 @@ display_debug_frames (struct dwarf_section *section,
 	    case DW_CFA_register:
 	      READ_ULEB (reg, start, block_end);
 	      READ_ULEB (roffs, start, block_end);
-	      if (reg >= (unsigned int) fc->ncols)
+	      if (reg >= fc->ncols)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
 		{
@@ -9378,7 +9815,7 @@ display_debug_frames (struct dwarf_section *section,
 	    case DW_CFA_expression:
 	      READ_ULEB (reg, start, block_end);
 	      READ_ULEB (ul, start, block_end);
-	      if (reg >= (unsigned int) fc->ncols)
+	      if (reg >= fc->ncols)
 		reg_prefix = bad_reg;
 	      /* PR 17512: file: 069-133014-0.006.  */
 	      /* PR 17512: file: 98c02eb4.  */
@@ -9403,7 +9840,7 @@ display_debug_frames (struct dwarf_section *section,
 	    case DW_CFA_val_expression:
 	      READ_ULEB (reg, start, block_end);
 	      READ_ULEB (ul, start, block_end);
-	      if (reg >= (unsigned int) fc->ncols)
+	      if (reg >= fc->ncols)
 		reg_prefix = bad_reg;
 	      if (ul > (size_t) (block_end - start))
 		{
@@ -9426,7 +9863,7 @@ display_debug_frames (struct dwarf_section *section,
 	    case DW_CFA_offset_extended_sf:
 	      READ_ULEB (reg, start, block_end);
 	      READ_SLEB (l, start, block_end);
-	      if (frame_need_space (fc, reg) < 0)
+	      if (reg >= fc->ncols)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
 		printf ("  DW_CFA_offset_extended_sf: %s%s at cfa%+ld\n",
@@ -9442,7 +9879,7 @@ display_debug_frames (struct dwarf_section *section,
 	    case DW_CFA_val_offset_sf:
 	      READ_ULEB (reg, start, block_end);
 	      READ_SLEB (l, start, block_end);
-	      if (frame_need_space (fc, reg) < 0)
+	      if (reg >= fc->ncols)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
 		printf ("  DW_CFA_val_offset_sf: %s%s is cfa%+ld\n",
@@ -9502,7 +9939,7 @@ display_debug_frames (struct dwarf_section *section,
 	      READ_ULEB (reg, start, block_end);
 	      READ_SLEB (l, start, block_end);
 	      l = - l;
-	      if (frame_need_space (fc, reg) < 0)
+	      if (reg >= fc->ncols)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
 		printf ("  DW_CFA_GNU_negative_offset_extended: %s%s at cfa%+ld\n",
@@ -9777,32 +10214,40 @@ display_debug_names (struct dwarf_section *section, void *file)
 			bucket_count),
 	      buckets_filled, (unsigned long) bucket_count);
 
-      uint32_t hash_prev = 0;
-      size_t hash_clash_count = 0;
-      size_t longest_clash = 0;
-      size_t this_length = 0;
-      size_t hashi;
-      for (hashi = 0; hashi < name_count; hashi++)
+      if (bucket_count != 0)
 	{
-	  const uint32_t hash_this = hash_table_hashes[hashi];
-
-	  if (hashi > 0)
+	  uint32_t hash_prev = 0;
+	  size_t hash_clash_count = 0;
+	  size_t longest_clash = 0;
+	  size_t this_length = 0;
+	  size_t hashi;
+	  for (hashi = 0; hashi < name_count; hashi++)
 	    {
-	      if (hash_prev % bucket_count == hash_this % bucket_count)
+	      const uint32_t hash_this = hash_table_hashes[hashi];
+
+	      if (hashi > 0)
 		{
-		  ++hash_clash_count;
-		  ++this_length;
-		  longest_clash = MAX (longest_clash, this_length);
+		  if (hash_prev % bucket_count == hash_this % bucket_count)
+		    {
+		      ++hash_clash_count;
+		      ++this_length;
+		      longest_clash = MAX (longest_clash, this_length);
+		    }
+		  else
+		    this_length = 0;
 		}
-	      else
-		this_length = 0;
+	      hash_prev = hash_this;
 	    }
-	  hash_prev = hash_this;
+	  printf (_("Out of %lu items there are %zu bucket clashes"
+		    " (longest of %zu entries).\n"),
+		  (unsigned long) name_count, hash_clash_count, longest_clash);
+	  
+	  if (name_count != buckets_filled + hash_clash_count)
+	    warn (_("The name_count (%lu) is not the same as the used bucket_count (%lu) + the hash clash count (%lu)"),
+		  (unsigned long) name_count,
+		  (unsigned long) buckets_filled,
+		  (unsigned long) hash_clash_count);
 	}
-      printf (_("Out of %lu items there are %zu bucket clashes"
-		" (longest of %zu entries).\n"),
-	      (unsigned long) name_count, hash_clash_count, longest_clash);
-      assert (name_count == buckets_filled + hash_clash_count);
 
       struct abbrev_lookup_entry
       {
@@ -9935,7 +10380,7 @@ display_debug_names (struct dwarf_section *section, void *file)
 							  unit_start, entryptr, unit_end,
 							  0, 0, offset_size,
 							  dwarf_version, NULL,
-							  (tagno < 0), NULL,
+							  (tagno < 0), section,
 							  NULL, '=', -1);
 		}
 	      ++tagno;
@@ -10034,7 +10479,7 @@ display_gdb_index (struct dwarf_section *section,
   uint32_t cu_list_offset, tu_list_offset;
   uint32_t address_table_offset, symbol_table_offset, constant_pool_offset;
   unsigned int cu_list_elements, tu_list_elements;
-  unsigned int address_table_size, symbol_table_slots;
+  unsigned int address_table_elements, symbol_table_slots;
   unsigned char *cu_list, *tu_list;
   unsigned char *address_table, *symbol_table, *constant_pool;
   unsigned int i;
@@ -10082,48 +10527,19 @@ display_gdb_index (struct dwarf_section *section,
       || tu_list_offset > section->size
       || address_table_offset > section->size
       || symbol_table_offset > section->size
-      || constant_pool_offset > section->size)
+      || constant_pool_offset > section->size
+      || tu_list_offset < cu_list_offset
+      || address_table_offset < tu_list_offset
+      || symbol_table_offset < address_table_offset
+      || constant_pool_offset < symbol_table_offset)
     {
       warn (_("Corrupt header in the %s section.\n"), section->name);
       return 0;
     }
 
-  /* PR 17531: file: 418d0a8a.  */
-  if (tu_list_offset < cu_list_offset)
-    {
-      warn (_("TU offset (%x) is less than CU offset (%x)\n"),
-	    tu_list_offset, cu_list_offset);
-      return 0;
-    }
-
-  cu_list_elements = (tu_list_offset - cu_list_offset) / 8;
-
-  if (address_table_offset < tu_list_offset)
-    {
-      warn (_("Address table offset (%x) is less than TU offset (%x)\n"),
-	    address_table_offset, tu_list_offset);
-      return 0;
-    }
-
-  tu_list_elements = (address_table_offset - tu_list_offset) / 8;
-
-  /* PR 17531: file: 18a47d3d.  */
-  if (symbol_table_offset < address_table_offset)
-    {
-      warn (_("Symbol table offset (%x) is less then Address table offset (%x)\n"),
-	    symbol_table_offset, address_table_offset);
-      return 0;
-    }
-
-  address_table_size = symbol_table_offset - address_table_offset;
-
-  if (constant_pool_offset < symbol_table_offset)
-    {
-      warn (_("Constant pool offset (%x) is less than symbol table offset (%x)\n"),
-	    constant_pool_offset, symbol_table_offset);
-      return 0;
-    }
-
+  cu_list_elements = (tu_list_offset - cu_list_offset) / 16;
+  tu_list_elements = (address_table_offset - tu_list_offset) / 24;
+  address_table_elements = (symbol_table_offset - address_table_offset) / 20;
   symbol_table_slots = (constant_pool_offset - symbol_table_offset) / 8;
 
   cu_list = start + cu_list_offset;
@@ -10132,31 +10548,25 @@ display_gdb_index (struct dwarf_section *section,
   symbol_table = start + symbol_table_offset;
   constant_pool = start + constant_pool_offset;
 
-  if (address_table_offset + address_table_size > section->size)
-    {
-      warn (_("Address table extends beyond end of section.\n"));
-      return 0;
-    }
-
   printf (_("\nCU table:\n"));
-  for (i = 0; i < cu_list_elements; i += 2)
+  for (i = 0; i < cu_list_elements; i++)
     {
-      uint64_t cu_offset = byte_get_little_endian (cu_list + i * 8, 8);
-      uint64_t cu_length = byte_get_little_endian (cu_list + i * 8 + 8, 8);
+      uint64_t cu_offset = byte_get_little_endian (cu_list + i * 16, 8);
+      uint64_t cu_length = byte_get_little_endian (cu_list + i * 16 + 8, 8);
 
-      printf (_("[%3u] 0x%lx - 0x%lx\n"), i / 2,
+      printf (_("[%3u] 0x%lx - 0x%lx\n"), i,
 	      (unsigned long) cu_offset,
 	      (unsigned long) (cu_offset + cu_length - 1));
     }
 
   printf (_("\nTU table:\n"));
-  for (i = 0; i < tu_list_elements; i += 3)
+  for (i = 0; i < tu_list_elements; i++)
     {
-      uint64_t tu_offset = byte_get_little_endian (tu_list + i * 8, 8);
-      uint64_t type_offset = byte_get_little_endian (tu_list + i * 8 + 8, 8);
-      uint64_t signature = byte_get_little_endian (tu_list + i * 8 + 16, 8);
+      uint64_t tu_offset = byte_get_little_endian (tu_list + i * 24, 8);
+      uint64_t type_offset = byte_get_little_endian (tu_list + i * 24 + 8, 8);
+      uint64_t signature = byte_get_little_endian (tu_list + i * 24 + 16, 8);
 
-      printf (_("[%3u] 0x%lx 0x%lx "), i / 3,
+      printf (_("[%3u] 0x%lx 0x%lx "), i,
 	      (unsigned long) tu_offset,
 	      (unsigned long) type_offset);
       print_dwarf_vma (signature, 8);
@@ -10164,12 +10574,11 @@ display_gdb_index (struct dwarf_section *section,
     }
 
   printf (_("\nAddress table:\n"));
-  for (i = 0; i < address_table_size && i <= address_table_size - (2 * 8 + 4);
-       i += 2 * 8 + 4)
+  for (i = 0; i < address_table_elements; i++)
     {
-      uint64_t low = byte_get_little_endian (address_table + i, 8);
-      uint64_t high = byte_get_little_endian (address_table + i + 8, 8);
-      uint32_t cu_index = byte_get_little_endian (address_table + i + 16, 4);
+      uint64_t low = byte_get_little_endian (address_table + i * 20, 8);
+      uint64_t high = byte_get_little_endian (address_table + i * 20 + 8, 8);
+      uint32_t cu_index = byte_get_little_endian (address_table + i + 20 + 16, 4);
 
       print_dwarf_vma (low, 8);
       print_dwarf_vma (high, 8);
@@ -11038,7 +11447,7 @@ debuginfod_fetch_separate_debug_info (struct dwarf_section * section,
 
   return false;
 }
-#endif
+#endif /* HAVE_LIBDEBUGINFOD  */
 
 static void *
 load_separate_debug_info (const char *            main_filename,
@@ -11157,9 +11566,10 @@ load_separate_debug_info (const char *            main_filename,
   {
     char * tmp_filename;
 
-    if (debuginfod_fetch_separate_debug_info (xlink,
-                                              & tmp_filename,
-                                              file))
+    if (use_debuginfod
+	&& debuginfod_fetch_separate_debug_info (xlink,
+						 & tmp_filename,
+						 file))
       {
         /* File successfully downloaded from server, replace
            debug_filename with the file's path.  */
@@ -11207,13 +11617,15 @@ load_separate_debug_info (const char *            main_filename,
       warn (_("tried: %s\n"), debug_filename);
 
 #if HAVE_LIBDEBUGINFOD
-      {
-	char *urls = getenv (DEBUGINFOD_URLS_ENV_VAR);
-	if (urls == NULL)
-	  urls = "";
+      if (use_debuginfod)
+	{
+	  char *urls = getenv (DEBUGINFOD_URLS_ENV_VAR);
 
-	warn (_("tried: DEBUGINFOD_URLS=%s\n"), urls);
-      }
+	  if (urls == NULL)
+	    urls = "";
+
+	  warn (_("tried: DEBUGINFOD_URLS=%s\n"), urls);
+	}
 #endif
     }
 
@@ -11537,6 +11949,11 @@ load_separate_debug_files (void * file, const char * filename)
       && load_debug_section (abbrev, file)
       && load_debug_section (info, file))
     {
+      /* Load the .debug_addr section, if it exists.  */
+      load_debug_section (debug_addr, file);
+      /* Load the .debug_str_offsets section, if it exists.  */
+      load_debug_section (str_index, file);
+
       free_dwo_info ();
 
       if (process_debug_info (& debug_displays[info].section, file, abbrev,
@@ -11687,72 +12104,77 @@ free_debug_memory (void)
   free_dwo_info ();
 }
 
-void
+typedef struct
+{
+  const char letter;
+  const char *option;
+  int *variable;
+  int val;
+} debug_dump_long_opts;
+
+static const debug_dump_long_opts debug_option_table[] =
+{
+  { 'A', "addr", &do_debug_addr, 1 },
+  { 'a', "abbrev", &do_debug_abbrevs, 1 },
+  { 'c', "cu_index", &do_debug_cu_index, 1 },
+#ifdef HAVE_LIBDEBUGINFOD
+  { 'D', "use-debuginfod", &use_debuginfod, 1 },
+  { 'E', "do-not-use-debuginfod", &use_debuginfod, 0 },
+#endif
+  { 'F', "frames-interp", &do_debug_frames_interp, 1 },
+  { 'f', "frames", &do_debug_frames, 1 },
+  { 'g', "gdb_index", &do_gdb_index, 1 },
+  { 'i', "info", &do_debug_info, 1 },
+  { 'K', "follow-links", &do_follow_links, 1 },
+  { 'k', "links", &do_debug_links, 1 },
+  { 'L', "decodedline", &do_debug_lines, FLAG_DEBUG_LINES_DECODED },
+  { 'l', "rawline", &do_debug_lines, FLAG_DEBUG_LINES_RAW },
+  /* For compatibility with earlier versions of readelf.  */
+  { 'l', "line", &do_debug_lines, FLAG_DEBUG_LINES_RAW },
+  { 'm', "macro", &do_debug_macinfo, 1 },
+  { 'N', "no-follow-links", &do_follow_links, 0 },
+  { 'O', "str-offsets", &do_debug_str_offsets, 1 },
+  { 'o', "loc", &do_debug_loc, 1 },
+  { 'p', "pubnames", &do_debug_pubnames, 1 },
+  { 'R', "Ranges", &do_debug_ranges, 1 },
+  { 'r', "aranges", &do_debug_aranges, 1 },
+  /* For compatibility with earlier versions of readelf.  */
+  { 'r', "ranges", &do_debug_aranges, 1 },
+  { 's', "str", &do_debug_str, 1 },
+  { 'T', "trace_aranges", &do_trace_aranges, 1 },
+  { 't', "pubtypes", &do_debug_pubtypes, 1 },
+  { 'U', "trace_info", &do_trace_info, 1 },
+  { 'u', "trace_abbrev", &do_trace_abbrevs, 1 },
+  { 0, NULL, NULL, 0 }
+};
+
+/* Enable display of specific DWARF sections as determined by the comma
+   separated strings in NAMES.  Returns non-zero if any displaying was
+   enabled.  */
+
+int
 dwarf_select_sections_by_names (const char *names)
 {
-  typedef struct
-  {
-    const char * option;
-    int *        variable;
-    int          val;
-  }
-  debug_dump_long_opts;
-
-  static const debug_dump_long_opts opts_table [] =
-    {
-      /* Please keep this table alpha- sorted.  */
-      { "Ranges", & do_debug_ranges, 1 },
-      { "abbrev", & do_debug_abbrevs, 1 },
-      { "addr", & do_debug_addr, 1 },
-      { "aranges", & do_debug_aranges, 1 },
-      { "cu_index", & do_debug_cu_index, 1 },
-      { "decodedline", & do_debug_lines, FLAG_DEBUG_LINES_DECODED },
-      { "follow-links", & do_follow_links, 1 },
-      { "frames", & do_debug_frames, 1 },
-      { "frames-interp", & do_debug_frames_interp, 1 },
-      /* The special .gdb_index section.  */
-      { "gdb_index", & do_gdb_index, 1 },
-      { "info", & do_debug_info, 1 },
-      { "line", & do_debug_lines, FLAG_DEBUG_LINES_RAW }, /* For backwards compatibility.  */
-      { "links", & do_debug_links, 1 },
-      { "loc",  & do_debug_loc, 1 },
-      { "macro", & do_debug_macinfo, 1 },
-      { "no-follow-links", & do_follow_links, 0 },
-      { "pubnames", & do_debug_pubnames, 1 },
-      { "pubtypes", & do_debug_pubtypes, 1 },
-      /* This entry is for compatibility
-	 with earlier versions of readelf.  */
-      { "ranges", & do_debug_aranges, 1 },
-      { "rawline", & do_debug_lines, FLAG_DEBUG_LINES_RAW },
-      { "str", & do_debug_str, 1 },
-      { "str-offsets", & do_debug_str_offsets, 1 },
-      /* These trace_* sections are used by Itanium VMS.  */
-      { "trace_abbrev", & do_trace_abbrevs, 1 },
-      { "trace_aranges", & do_trace_aranges, 1 },
-      { "trace_info", & do_trace_info, 1 },
-      { NULL, NULL, 0 }
-    };
-
   const char *p;
+  int result = 0;
 
   p = names;
   while (*p)
     {
-      const debug_dump_long_opts * entry;
+      const debug_dump_long_opts *entry;
 
-      for (entry = opts_table; entry->option; entry++)
+      for (entry = debug_option_table; entry->option; entry++)
 	{
 	  size_t len = strlen (entry->option);
 
 	  if (strncmp (p, entry->option, len) == 0
 	      && (p[len] == ',' || p[len] == '\0'))
 	    {
-	      * entry->variable = entry->val;
-
-	      /* The --debug-dump=frames-interp option also
-		 enables the --debug-dump=frames option.  */
-	      if (do_debug_frames_interp)
-		do_debug_frames = 1;
+	      if (entry->val == 0)
+		* entry->variable = 0;
+	      else
+		* entry->variable = entry->val;
+	      result |= entry->val;
 
 	      p += len;
 	      break;
@@ -11770,44 +12192,52 @@ dwarf_select_sections_by_names (const char *names)
       if (*p == ',')
 	p++;
     }
+
+  /* The --debug-dump=frames-interp option also enables the
+     --debug-dump=frames option.  */
+  if (do_debug_frames_interp)
+    do_debug_frames = 1;
+
+  return result;
 }
 
-void
+/* Enable display of specific DWARF sections as determined by the characters
+   in LETTERS.  Returns non-zero if any displaying was enabled.  */
+
+int
 dwarf_select_sections_by_letters (const char *letters)
 {
-  unsigned int lindex = 0;
+  int result = 0;
 
-  while (letters[lindex])
-    switch (letters[lindex++])
-      {
-      case 'A':	do_debug_addr = 1; break;
-      case 'a':	do_debug_abbrevs = 1; break;
-      case 'c':	do_debug_cu_index = 1; break;
-      case 'F':	do_debug_frames_interp = 1; /* Fall through.  */
-      case 'f':	do_debug_frames = 1; break;
-      case 'g':	do_gdb_index = 1; break;
-      case 'i':	do_debug_info = 1; break;
-      case 'K': do_follow_links = 1; break;
-      case 'N': do_follow_links = 0; break;
-      case 'k':	do_debug_links = 1; break;
-      case 'l':	do_debug_lines |= FLAG_DEBUG_LINES_RAW;	break;
-      case 'L':	do_debug_lines |= FLAG_DEBUG_LINES_DECODED; break;
-      case 'm': do_debug_macinfo = 1; break;
-      case 'O':	do_debug_str_offsets = 1; break;
-      case 'o':	do_debug_loc = 1; break;
-      case 'p':	do_debug_pubnames = 1; break;
-      case 'R':	do_debug_ranges = 1; break;
-      case 'r':	do_debug_aranges = 1; break;
-      case 's':	do_debug_str = 1; break;
-      case 'T': do_trace_aranges = 1; break;
-      case 't': do_debug_pubtypes = 1; break;
-      case 'U': do_trace_info = 1; break;
-      case 'u': do_trace_abbrevs = 1; break;
+  while (* letters)
+    {
+      const debug_dump_long_opts *entry;
 
-      default:
-	warn (_("Unrecognized debug option '%s'\n"), letters);
-	break;
-      }
+      for (entry = debug_option_table; entry->letter; entry++)
+	{
+	  if (entry->letter == * letters)
+	    {
+	      if (entry->val == 0)
+		* entry->variable = 0;
+	      else
+		* entry->variable |= entry->val;
+	      result |= entry->val;
+	      break;
+	    }
+	}
+
+      if (entry->letter == 0)
+	warn (_("Unrecognized debug letter option '%c'\n"), * letters);
+
+      letters ++;
+    }
+
+  /* The --debug-dump=frames-interp option also enables the
+     --debug-dump=frames option.  */
+  if (do_debug_frames_interp)
+    do_debug_frames = 1;
+
+  return result;
 }
 
 void

@@ -17,7 +17,6 @@ load_lib compile-support.exp
 
 standard_testfile .c compile-shlib.c compile-constvar.S compile-nodebug.c
 
-get_compiler_info
 set options {}
 if { [test_compiler_info gcc*] || [test_compiler_info clang*] } {
     lappend options additional_flags=-g3

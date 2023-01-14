@@ -565,58 +565,32 @@ proc test_catch_syscall_with_wrong_args_noxml {} {
     }
 }
 
-proc test_catch_syscall_multi_arch {} {
-    global decimal binfile
+proc test_catch_syscall_multi_arch_1 {
+  arch1 arch2 syscall1_name syscall2_name syscall_number
+} {
+    global decimal
 
-    if { [istarget "i*86-*-*"] || [istarget "x86_64-*-*"] } {
-	set arch1 "i386"
-	set arch2 "i386:x86-64"
-	set syscall1_name "exit"
-	set syscall2_name "write"
-	set syscall_number 1
-    } elseif { [istarget "powerpc-*-linux*"] \
-		   || [istarget "powerpc64*-linux*"] } {
-	set arch1 "powerpc:common"
-	set arch2 "powerpc:common64"
-	set syscall1_name "openat"
-	set syscall2_name "unlinkat"
-	set syscall_number 286
-    } elseif { [istarget "sparc-*-linux*"] \
-		   || [istarget "sparc64-*-linux*"] } {
-	set arch1 "sparc"
-	set arch2 "sparc:v9"
-	set syscall1_name "setresuid32"
-	set syscall2_name "setresuid"
-	set syscall_number 108
-    } elseif { [istarget "mips*-linux*"] } {
-	# MIPS does not use the same numbers for syscalls on 32 and 64
-	# bits.
-	verbose "Not testing MIPS for multi-arch syscall support"
-	return
-    } elseif { [istarget "arm*-linux*"] } {
-	# catch syscall supports only 32-bit ARM for now.
-	verbose "Not testing ARM for multi-arch syscall support"
-	return
-    } elseif { [istarget "aarch64*-linux*"] } {
-	set arch1 "aarch64"
-	set arch2 "arm"
-	set syscall1_name "reboot"
-	set syscall2_name "_newselect"
-	set syscall_number 142
-    } elseif { [istarget "s390*-linux*"] } {
-	set arch1 "s390:31-bit"
-	set arch2 "s390:64-bit"
-	set syscall1_name "_newselect"
-	set syscall2_name "select"
-	set syscall_number 142
-    }
-
-    with_test_prefix "multiple targets" {
+    with_test_prefix "multiple targets: $arch1 vs $arch2" {
 	# We are not interested in loading any binary here, and in
 	# some systems (PowerPC, for example), if we load a binary
 	# there is no way to set other architecture.
 	gdb_exit
 	gdb_start
+
+	set supported 1
+	foreach arch [list $arch1 $arch2] {
+	    gdb_test_multiple "set architecture $arch" "" {
+		-re -wrap "Undefined item: \"$arch\"\\." {
+		    set supported 0
+		    unsupported $gdb_test_name
+		}
+		-re -wrap "The target architecture is set to \"$arch\"\\." {
+		}
+	    }
+	}
+	if { $supported == 0 } {
+	    return
+	}
 
 	gdb_test "set architecture $arch1" \
 	    "The target architecture is set to \"$arch1\"\\."
@@ -631,9 +605,53 @@ proc test_catch_syscall_multi_arch {} {
 	gdb_test "catch syscall $syscall_number" \
 	    "Catchpoint $decimal \\(syscall .${syscall2_name}. \\\[${syscall_number}\\\]\\)" \
 	    "insert catch syscall on syscall $syscall_number -- $syscall2_name on $arch2"
-
-	clean_restart $binfile
     }
+}
+
+proc test_catch_syscall_multi_arch {} {
+    global binfile
+
+    set arch1 "i386"
+    set arch2 "i386:x86-64"
+    set syscall1_name "exit"
+    set syscall2_name "write"
+    set syscall_number 1
+    test_catch_syscall_multi_arch_1 $arch1 $arch2 $syscall1_name \
+	$syscall2_name $syscall_number
+
+    set arch1 "powerpc:common"
+    set arch2 "powerpc:common64"
+    set syscall1_name "fstatat64"
+    set syscall2_name "newfstatat"
+    set syscall_number 291
+    test_catch_syscall_multi_arch_1 $arch1 $arch2 $syscall1_name \
+	$syscall2_name $syscall_number
+
+    set arch1 "sparc"
+    set arch2 "sparc:v9"
+    set syscall1_name "setresuid32"
+    set syscall2_name "setresuid"
+    set syscall_number 108
+    test_catch_syscall_multi_arch_1 $arch1 $arch2 $syscall1_name \
+	$syscall2_name $syscall_number
+
+    set arch1 "aarch64"
+    set arch2 "arm"
+    set syscall1_name "reboot"
+    set syscall2_name "_newselect"
+    set syscall_number 142
+    test_catch_syscall_multi_arch_1 $arch1 $arch2 $syscall1_name \
+	$syscall2_name $syscall_number
+
+    set arch1 "s390:31-bit"
+    set arch2 "s390:64-bit"
+    set syscall1_name "_newselect"
+    set syscall2_name "select"
+    set syscall_number 142
+    test_catch_syscall_multi_arch_1 $arch1 $arch2 $syscall1_name \
+	$syscall2_name $syscall_number
+
+    clean_restart $binfile
 }
 
 proc do_syscall_tests_without_xml {} {
@@ -669,35 +687,94 @@ proc fill_all_syscalls_numbers {} {
     set unknown_syscall_number [get_integer_valueof "unknown_syscall" -1]
 }
 
-# Set up the vector all_syscalls.
+# Set up the vector all_syscalls.  Returns 1 upon success, 0 upon failure.
 
 proc setup_all_syscalls {} {
     global all_syscalls
     global gdb_prompt
+    global decimal
 
     # They are ordered according to the file, so do not change this.
     lappend all_syscalls "close"
     lappend all_syscalls "chroot"
 
+    if { ![runto_main] } {
+	return 0
+    }
+
     # SYS_pipe doesn't exist on aarch64 kernel.
     set test "check SYS_pipe"
+    set have_SYS_pipe 0
+    set SYS_pipe -1
     gdb_test_multiple "p pipe_syscall" $test {
-	-re " = .*$gdb_prompt $" {
+	-re -wrap " = ($decimal)" {
 	    pass $test
-	    lappend all_syscalls "pipe"
+	    set have_SYS_pipe 1
+	    set SYS_pipe $expect_out(1,string)
 	}
-	-re "No symbol .*$gdb_prompt $" {
+	-re -wrap "No symbol .*" {
 	    pass $test
-	    # SYS_pipe isn't defined, use SYS_pipe2 instead.
-	    lappend all_syscalls "pipe2"
+	}
+    }
+
+    set test "check SYS_pipe2"
+    set have_SYS_pipe2 0
+    set SYS_pipe2 -1
+    gdb_test_multiple "p pipe2_syscall" $test {
+	-re -wrap " = ($decimal)" {
+	    pass $test
+	    set have_SYS_pipe2 1
+	    set SYS_pipe2 $expect_out(1,string)
+	}
+	-re -wrap "No symbol .*" {
+	    pass $test
+	}
+    }
+
+    if { $have_SYS_pipe == 0 && $have_SYS_pipe2 == 0 } {
+	return 0
+    }
+
+    with_test_prefix "determine pipe syscall" {
+	set line [gdb_get_line_number "pipe (fd)"]
+	gdb_test "break $line"
+	gdb_continue_to_breakpoint "before pipe call"
+	if { $have_SYS_pipe } {
+	    gdb_test "catch syscall $SYS_pipe"
+	}
+	if { $have_SYS_pipe2 } {
+	    gdb_test "catch syscall $SYS_pipe2"
+	}
+	set ok 0
+	gdb_test_multiple "continue" "" {
+	    -re -wrap "Catchpoint $decimal \\(call to syscall (pipe|$SYS_pipe)\\).*" {
+		lappend all_syscalls pipe
+		pass $gdb_test_name
+		set ok 1
+	    }
+	    -re -wrap "Catchpoint $decimal \\(call to syscall (pipe2|$SYS_pipe)\\).*" {
+		lappend all_syscalls pipe2
+		pass $gdb_test_name
+		set ok 1
+	    }
+	    -re -wrap "" {
+		fail $gdb_test_name
+	    }
+	}
+	if { ! $ok } {
+	    return 0
 	}
     }
 
     lappend all_syscalls "write"
     lappend all_syscalls "read"
+
+    return 1
 }
 
-setup_all_syscalls
+if { ![setup_all_syscalls] } {
+    return -1
+}
 
 # Fill all the syscalls numbers before starting anything.
 fill_all_syscalls_numbers

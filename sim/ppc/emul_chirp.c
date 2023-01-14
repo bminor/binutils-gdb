@@ -1492,7 +1492,7 @@ typedef struct _chirp_note_head {
 static void
 map_over_chirp_note(bfd *image,
 		    asection *sect,
-		    PTR obj)
+		    void *obj)
 {
   chirp_note *note = (chirp_note*)obj;
   if (strcmp(sect->name, ".note") == 0) {

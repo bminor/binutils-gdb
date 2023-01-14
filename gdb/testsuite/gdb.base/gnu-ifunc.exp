@@ -31,10 +31,6 @@ set libsrc ${libfile}.c
 set final_file "${testfile}-final"
 set final_src ${final_file}.c
 
-if [get_compiler_info] {
-    return -1
-}
-
 # Return the binary suffix appended to program and library names to
 # make each testcase variant unique.
 proc make_binsuffix {resolver_attr resolver_debug final_debug} {

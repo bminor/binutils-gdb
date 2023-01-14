@@ -316,7 +316,7 @@ static device_callbacks const hw_data_callbacks = {
 static void
 update_for_binary_section(bfd *abfd,
 			  asection *the_section,
-			  PTR obj)
+			  void *obj)
 {
   unsigned_word section_vma;
   unsigned_word section_size;
@@ -431,7 +431,7 @@ hw_binary_init_data_callback(device *me)
   /* and the data sections */
   bfd_map_over_sections(image,
 			update_for_binary_section,
-			(PTR)me);
+			me);
 
   bfd_close(image);
 }
@@ -576,7 +576,7 @@ create_ppc_elf_stack_frame(device *me,
   const unsigned sizeof_argv = sizeof_arguments(argv);
   const unsigned_word start_argv = start_envp - sizeof_argv;
 
-  /* link register save address - alligned to a 16byte boundary */
+  /* link register save address - aligned to a 16byte boundary */
   const unsigned_word top_of_stack = ((start_argv
 				       - 2 * sizeof(unsigned_word))
 				      & ~0xf);

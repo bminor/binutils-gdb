@@ -281,8 +281,8 @@ static void
 show_stapexpressiondebug (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("SystemTap Probe expression debugging is %s.\n"),
-		    value);
+  gdb_printf (file, _("SystemTap Probe expression debugging is %s.\n"),
+	      value);
 }
 
 /* Returns the operator precedence level of OP, or STAP_OPERAND_PREC_NONE
@@ -821,6 +821,21 @@ stap_parse_register_operand (struct stap_parse_info *p)
     }
 
   operation_up reg = make_operation<register_operation> (std::move (regname));
+
+  /* If the argument has been placed into a vector register then (for most
+     architectures), the type of this register will be a union of arrays.
+     As a result, attempting to cast from the register type to the scalar
+     argument type will not be possible (GDB will throw an error during
+     expression evaluation).
+
+     The solution is to extract the scalar type from the value contents of
+     the entire register value.  */
+  if (!is_scalar_type (gdbarch_register_type (gdbarch, regnum)))
+    {
+      gdb_assert (is_scalar_type (p->arg_type));
+      reg = make_operation<unop_extract_operation> (std::move (reg),
+						    p->arg_type);
+    }
 
   if (indirect_p)
     {

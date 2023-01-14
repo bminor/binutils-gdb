@@ -10,9 +10,9 @@
 Disassembly of section .text:
 
 0+ <_start>:
- +[a-f0-9]+:	0f ae e8             	lfence 
+ +[a-f0-9]+:	0f ae e8             	lfence
  +[a-f0-9]+:	ff d2                	call   \*%rdx
- +[a-f0-9]+:	0f ae e8             	lfence 
+ +[a-f0-9]+:	0f ae e8             	lfence
  +[a-f0-9]+:	ff e2                	jmp    \*%rdx
  +[a-f0-9]+:	ff 12                	call   \*\(%rdx\)
  +[a-f0-9]+:	ff 22                	jmp    \*\(%rdx\)

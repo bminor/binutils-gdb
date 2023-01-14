@@ -28,37 +28,37 @@
 
 static reloc_howto_type elf_howto_table[]=
 {
-  HOWTO(R_386_NONE, 0, 3, 0, false, 0, complain_overflow_dont,
+  HOWTO(R_386_NONE, 0, 0, 0, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_NONE",
 	true, 0x00000000, 0x00000000, false),
-  HOWTO(R_386_32, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_32, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_32",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_PC32, 0, 2, 32, true, 0, complain_overflow_dont,
+  HOWTO(R_386_PC32, 0, 4, 32, true, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_PC32",
 	true, 0xffffffff, 0xffffffff, true),
-  HOWTO(R_386_GOT32, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_GOT32, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_GOT32",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_PLT32, 0, 2, 32, true, 0, complain_overflow_dont,
+  HOWTO(R_386_PLT32, 0, 4, 32, true, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_PLT32",
 	true, 0xffffffff, 0xffffffff, true),
-  HOWTO(R_386_COPY, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_COPY, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_COPY",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_GLOB_DAT, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_GLOB_DAT, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_GLOB_DAT",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_JUMP_SLOT, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_JUMP_SLOT, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_JUMP_SLOT",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_RELATIVE, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_RELATIVE, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_RELATIVE",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_GOTOFF, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_GOTOFF, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_GOTOFF",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_GOTPC, 0, 2, 32, true, 0, complain_overflow_dont,
+  HOWTO(R_386_GOTPC, 0, 4, 32, true, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_GOTPC",
 	true, 0xffffffff, 0xffffffff, true),
 
@@ -70,74 +70,74 @@ static reloc_howto_type elf_howto_table[]=
 #define R_386_ext_offset (R_386_TLS_TPOFF - R_386_standard)
 
   /* These relocs are a GNU extension.  */
-  HOWTO(R_386_TLS_TPOFF, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_TLS_TPOFF, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_TLS_TPOFF",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_TLS_IE, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_TLS_IE, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_TLS_IE",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_TLS_GOTIE, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_TLS_GOTIE, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_TLS_GOTIE",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_TLS_LE, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_TLS_LE, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_TLS_LE",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_TLS_GD, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_TLS_GD, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_TLS_GD",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_TLS_LDM, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_TLS_LDM, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_TLS_LDM",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_16, 0, 1, 16, false, 0, complain_overflow_bitfield,
+  HOWTO(R_386_16, 0, 2, 16, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_386_16",
 	true, 0xffff, 0xffff, false),
-  HOWTO(R_386_PC16, 0, 1, 16, true, 0, complain_overflow_bitfield,
+  HOWTO(R_386_PC16, 0, 2, 16, true, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_386_PC16",
 	true, 0xffff, 0xffff, true),
-  HOWTO(R_386_8, 0, 0, 8, false, 0, complain_overflow_bitfield,
+  HOWTO(R_386_8, 0, 1, 8, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_386_8",
 	true, 0xff, 0xff, false),
-  HOWTO(R_386_PC8, 0, 0, 8, true, 0, complain_overflow_signed,
+  HOWTO(R_386_PC8, 0, 1, 8, true, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_386_PC8",
 	true, 0xff, 0xff, true),
 
 #define R_386_ext (R_386_PC8 + 1 - R_386_ext_offset)
 #define R_386_tls_offset (R_386_TLS_LDO_32 - R_386_ext)
   /* These are common with Solaris TLS implementation.  */
-  HOWTO(R_386_TLS_LDO_32, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_TLS_LDO_32, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_TLS_LDO_32",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_TLS_IE_32, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_TLS_IE_32, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_TLS_IE_32",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_TLS_LE_32, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_TLS_LE_32, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_TLS_LE_32",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_TLS_DTPMOD32, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_TLS_DTPMOD32, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_TLS_DTPMOD32",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_TLS_DTPOFF32, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_TLS_DTPOFF32, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_TLS_DTPOFF32",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_TLS_TPOFF32, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_TLS_TPOFF32, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_TLS_TPOFF32",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_SIZE32, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_SIZE32, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_SIZE32",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_TLS_GOTDESC, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_TLS_GOTDESC, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_TLS_GOTDESC",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_TLS_DESC_CALL, 0, 3, 0, false, 0, complain_overflow_dont,
+  HOWTO(R_386_TLS_DESC_CALL, 0, 0, 0, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_TLS_DESC_CALL",
 	false, 0, 0, false),
-  HOWTO(R_386_TLS_DESC, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_TLS_DESC, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_TLS_DESC",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_IRELATIVE, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_IRELATIVE, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_IRELATIVE",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_GOT32X, 0, 2, 32, false, 0, complain_overflow_dont,
+  HOWTO(R_386_GOT32X, 0, 4, 32, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_GOT32X",
 	true, 0xffffffff, 0xffffffff, false),
 
@@ -148,7 +148,7 @@ static reloc_howto_type elf_howto_table[]=
 /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_386_GNU_VTINHERIT,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -163,7 +163,7 @@ static reloc_howto_type elf_howto_table[]=
 /* GNU extension to record C++ vtable member usage.  */
   HOWTO (R_386_GNU_VTENTRY,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1772,11 +1772,20 @@ elf_i386_scan_relocs (bfd *abfd,
 		}
 	      else
 		{
-		  h->pointer_equality_needed = 1;
-		  /* R_386_32 can be resolved at run-time.  */
+		  /* R_386_32 can be resolved at run-time.  Function
+		     pointer reference doesn't need PLT for pointer
+		     equality.  */
 		  if (r_type == R_386_32
 		      && (sec->flags & SEC_READONLY) == 0)
 		    func_pointer_ref = true;
+
+		  /* IFUNC symbol needs pointer equality in PDE so that
+		     function pointer reference will be resolved to its
+		     PLT entry directly.  */
+		  if (!func_pointer_ref
+		      || (bfd_link_pde (info)
+			  && h->type == STT_GNU_IFUNC))
+		    h->pointer_equality_needed = 1;
 		}
 
 	      if (!func_pointer_ref)
@@ -1798,6 +1807,23 @@ elf_i386_scan_relocs (bfd *abfd,
 		  if (!h->def_regular
 		      || (sec->flags & (SEC_CODE | SEC_READONLY)) != 0)
 		    h->plt.refcount = 1;
+
+		  if (h->pointer_equality_needed
+		      && h->type == STT_FUNC
+		      && eh->def_protected
+		      && elf_has_indirect_extern_access (h->root.u.def.section->owner))
+		    {
+		      /* Disallow non-canonical reference to canonical
+			 protected function.  */
+		      _bfd_error_handler
+			/* xgettext:c-format */
+			(_("%pB: non-canonical reference to canonical "
+			   "protected function `%s' in %pB"),
+			 abfd, h->root.root.string,
+			 h->root.u.def.section->owner);
+		      bfd_set_error (bfd_error_bad_value);
+		      goto error_return;
+		    }
 		}
 	    }
 
@@ -2084,9 +2110,9 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      bfd_vma addend;
 	      bfd_byte *where = contents + rel->r_offset;
 
-	      switch (howto->size)
+	      switch (bfd_get_reloc_size (howto))
 		{
-		case 0:
+		case 1:
 		  addend = bfd_get_8 (input_bfd, where);
 		  if (howto->pc_relative)
 		    {
@@ -2094,7 +2120,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		      addend += 1;
 		    }
 		  break;
-		case 1:
+		case 2:
 		  addend = bfd_get_16 (input_bfd, where);
 		  if (howto->pc_relative)
 		    {
@@ -2102,7 +2128,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		      addend += 2;
 		    }
 		  break;
-		case 2:
+		case 4:
 		  addend = bfd_get_32 (input_bfd, where);
 		  if (howto->pc_relative)
 		    {
@@ -2125,20 +2151,20 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  addend += msec->output_section->vma + msec->output_offset;
 		}
 
-	      switch (howto->size)
+	      switch (bfd_get_reloc_size (howto))
 		{
-		case 0:
+		case 1:
 		  /* FIXME: overflow checks.  */
 		  if (howto->pc_relative)
 		    addend -= 1;
 		  bfd_put_8 (input_bfd, addend, where);
 		  break;
-		case 1:
+		case 2:
 		  if (howto->pc_relative)
 		    addend -= 2;
 		  bfd_put_16 (input_bfd, addend, where);
 		  break;
-		case 2:
+		case 4:
 		  if (howto->pc_relative)
 		    addend -= 4;
 		  bfd_put_32 (input_bfd, addend, where);

@@ -246,6 +246,8 @@ char invalid_RRR[] = "aaaaaaaaaaaaaaaaaaaa"
 
 /* -- */
 
+float f_var = 65.0f;
+
 int main ()
 {
   void *p = malloc (1);

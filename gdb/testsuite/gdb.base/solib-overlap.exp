@@ -35,10 +35,6 @@ if {![can_spawn_for_attach]} {
     return 0
 }
 
-if [get_compiler_info] {
-    return -1
-}
-
 # Library file.
 set libname "solib-overlap-lib"
 set srcfile_lib ${srcdir}/${subdir}/${libname}.c

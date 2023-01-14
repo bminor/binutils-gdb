@@ -17,7 +17,7 @@
 # Rust compiler.  This serves as a smoke test.
 
 load_lib "rust-support.exp"
-if {[skip_rust_tests]} { continue }
+if {[skip_rust_tests]} { return }
 
 gdb_start
 
@@ -25,7 +25,7 @@ gdb_test_no_output "set var \$something = 27"
 
 if {![set_lang_rust]} {
     warning "Rust expression tests suppressed."
-    continue
+    return
 }
 
 gdb_test "print 9__97" " = 997"
@@ -145,3 +145,5 @@ gdb_test "print 0x0 as fn(i64) -> ()" " = \\\(\\*mut fn \\\(i64\\\) -> \\\(\\\)\
 gdb_test "print r#" "No symbol 'r' in current context"
 
 gdb_test "printf \"%d %d\\n\", 23+1, 23-1" "24 22"
+
+gdb_test "print 5," "Syntax error near ','"

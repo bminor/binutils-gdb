@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if { [skip_cplus_tests] || [skip_hw_watchpoint_tests]} { continue }
+if { [skip_cplus_tests] || [skip_hw_watchpoint_tests]} { return }
 
 standard_testfile .cc
 
@@ -23,7 +23,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 
 if ![runto_main] then {
     perror "couldn't run to main"
-    continue
+    return
 }
 
 gdb_test "watch watchme\[3\]" "atchpoint .*: watchme.*" "set watchpoint"

@@ -33,7 +33,7 @@ static reloc_howto_type elf_d10v_howto_table[] =
   /* This reloc does nothing.  */
   HOWTO (R_D10V_NONE,		/* Type.  */
 	 0,			/* Rightshift.  */
-	 3,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 0,			/* Size.  */
 	 0,			/* Bitsize.  */
 	 false,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -48,7 +48,7 @@ static reloc_howto_type elf_d10v_howto_table[] =
   /* An PC Relative 10-bit relocation, shifted by 2, right container.  */
   HOWTO (R_D10V_10_PCREL_R,	/* Type.  */
 	 2,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 8,			/* Bitsize.  */
 	 true,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -63,7 +63,7 @@ static reloc_howto_type elf_d10v_howto_table[] =
   /* An PC Relative 10-bit relocation, shifted by 2, left container.  */
   HOWTO (R_D10V_10_PCREL_L,	/* Type.  */
 	 2,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 8,			/* Bitsize.  */
 	 true,			/* PC_relative.  */
 	 15,			/* Bitpos.  */
@@ -78,7 +78,7 @@ static reloc_howto_type elf_d10v_howto_table[] =
   /* A 16 bit absolute relocation.  */
   HOWTO (R_D10V_16,		/* Type.  */
 	 0,			/* Rightshift.  */
-	 1,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* Size.  */
 	 16,			/* Bitsize.  */
 	 false,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -93,7 +93,7 @@ static reloc_howto_type elf_d10v_howto_table[] =
   /* An 18 bit absolute relocation, right shifted 2.  */
   HOWTO (R_D10V_18,		/* Type.  */
 	 2,			/* Rightshift.  */
-	 1,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* Size.  */
 	 16,			/* Bitsize.  */
 	 false,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -108,7 +108,7 @@ static reloc_howto_type elf_d10v_howto_table[] =
   /* A relative 18 bit relocation, right shifted by 2.  */
   HOWTO (R_D10V_18_PCREL,	/* Type.  */
 	 2,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 16,			/* Bitsize.  */
 	 true,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -123,7 +123,7 @@ static reloc_howto_type elf_d10v_howto_table[] =
   /* A 32 bit absolute relocation.  */
   HOWTO (R_D10V_32,		/* Type.  */
 	 0,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 32,			/* Bitsize.  */
 	 false,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -138,7 +138,7 @@ static reloc_howto_type elf_d10v_howto_table[] =
   /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_D10V_GNU_VTINHERIT,	/* Type.  */
 	 0,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 0,			/* Bitsize.  */
 	 false,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -153,7 +153,7 @@ static reloc_howto_type elf_d10v_howto_table[] =
   /* GNU extension to record C++ vtable member usage.  */
   HOWTO (R_D10V_GNU_VTENTRY,	/* Type.  */
 	 0,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 0,			/* Bitsize.  */
 	 false,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -324,15 +324,15 @@ extract_rel_addend (bfd *abfd,
 {
   bfd_vma insn, val;
 
-  switch (howto->size)
+  switch (bfd_get_reloc_size (howto))
     {
-    case 0:
+    case 1:
       insn = bfd_get_8 (abfd, where);
       break;
-    case 1:
+    case 2:
       insn = bfd_get_16 (abfd, where);
       break;
-    case 2:
+    case 4:
       insn = bfd_get_32 (abfd, where);
       break;
     default:
@@ -362,19 +362,19 @@ insert_rel_addend (bfd *abfd,
 
   addend = (addend >> howto->rightshift << howto->bitpos) & howto->dst_mask;
   insn = ~howto->dst_mask;
-  switch (howto->size)
+  switch (bfd_get_reloc_size (howto))
     {
-    case 0:
+    case 1:
       insn &= bfd_get_8 (abfd, where);
       insn |= addend;
       bfd_put_8 (abfd, insn, where);
       break;
-    case 1:
+    case 2:
       insn &= bfd_get_16 (abfd, where);
       insn |= addend;
       bfd_put_16 (abfd, insn, where);
       break;
-    case 2:
+    case 4:
       insn &= bfd_get_32 (abfd, where);
       insn |= addend;
       bfd_put_32 (abfd, insn, where);

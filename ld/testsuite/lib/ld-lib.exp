@@ -1628,24 +1628,36 @@ proc compile_one_cc { src output additional_flags } {
     return [run_host_cmd_yesno "$CC_FOR_TARGET" "$flags $CFLAGS_FOR_TARGET $additional_flags $src -o $output"]
 }
 
-# Returns true if the target compiler supports -gctf
+# Returns true if the target compiler supports -gctf.
 proc check_ctf_available { } {
     global ctf_available_saved
 
     if {![info exists ctf_available_saved]} {
-	if { ![check_compiler_available] } {
-	    set ctf_available_saved 0
-	} else {
+	set ctf_available_saved 0
+
+	# Don't check for compiler availability, because that FNs if the
+	# compiler is available but emits warnings.  An unavailable
+	# compiler will fail this test anyway.
+
+	if ([check_compiler_available]) {
 	    set basename "tmpdir/ctf_available[pid]"
 	    set src ${basename}.c
-	    set output ${basename}.o
+	    set output ${basename}.s
 	    set f [open $src "w"]
 	    puts $f "int main() { return 0; }"
 	    close $f
-	    set ctf_available_saved [compile_one_cc $src $output "-gctf -c"]
+	    compile_one_cc $src $output "-gctf -S -c"
 	    remote_file host delete $src
+	    if {! [remote_file host exists $output] } {
+		file delete $src
+		return 0
+	    }
+	    set status [remote_exec host fgrep ".ctf $output"]
 	    remote_file host delete $output
 	    file delete $src
+	    if { [lindex $status 0] == 0 } {
+		set ctf_available_saved 1
+	    }
 	}
     }
     return $ctf_available_saved

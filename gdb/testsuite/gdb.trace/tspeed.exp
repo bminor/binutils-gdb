@@ -74,11 +74,13 @@ proc prepare_for_trace_test {} {
 
     set testline [gdb_get_line_number "set pre-run breakpoint here"]
 
-    gdb_test "break $testline" ".*" ""
+    gdb_test "break $testline" ".*" \
+	"break at pre-run"
 
     set testline [gdb_get_line_number "set post-run breakpoint here"]
 
-    gdb_test "break $testline" ".*" ""
+    gdb_test "break $testline" ".*" \
+	"break at post-run"
 }
 
 proc run_trace_experiment {} {
@@ -98,7 +100,7 @@ proc run_trace_experiment {} {
     gdb_test "tstop" "" ""
 }
 
-proc gdb_slow_trace_speed_test { } {
+proc_with_prefix gdb_slow_trace_speed_test { } {
 
     gdb_delete_tracepoints
 
@@ -114,7 +116,7 @@ proc gdb_slow_trace_speed_test { } {
     run_trace_experiment
 }
 
-proc gdb_fast_trace_speed_test { } {
+proc_with_prefix gdb_fast_trace_speed_test { } {
     global gdb_prompt
 
     gdb_delete_tracepoints

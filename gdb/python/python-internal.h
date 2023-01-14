@@ -87,22 +87,7 @@
 #include <frameobject.h>
 #include "py-ref.h"
 
-#if PY_MAJOR_VERSION >= 3
-#define IS_PY3K 1
-#endif
-
-#ifdef IS_PY3K
 #define Py_TPFLAGS_CHECKTYPES 0
-
-#define PyInt_Check PyLong_Check
-#define PyInt_AsLong PyLong_AsLong
-#define PyInt_AsSsize_t PyLong_AsSsize_t
-
-#define PyString_FromString PyUnicode_FromString
-#define PyString_Decode PyUnicode_Decode
-#define PyString_FromFormat PyUnicode_FromFormat
-#define PyString_Check PyUnicode_Check
-#endif
 
 /* If Python.h does not define WITH_THREAD, then the various
    GIL-related functions will not be defined.  However,
@@ -146,19 +131,6 @@ typedef long Py_hash_t;
 #if PY_VERSION_HEX < 0x03040000
 #define PyMem_RawMalloc PyMem_Malloc
 #endif
-
-/* Python 2.6 did not wrap Py_DECREF in 'do {...} while (0)', leading
-   to 'suggest explicit braces to avoid ambiguous ‘else’' gcc errors.
-   Wrap it ourselves, so that callers don't need to care.  */
-
-static inline void
-gdb_Py_DECREF (void *op) /* ARI: editCase function */
-{
-  Py_DECREF (op);
-}
-
-#undef Py_DECREF
-#define Py_DECREF(op) gdb_Py_DECREF (op)
 
 /* PyObject_CallMethod's 'method' and 'format' parameters were missing
    the 'const' qualifier before Python 3.4.  Hence, we wrap the
@@ -209,11 +181,7 @@ gdb_PySys_GetObject (const char *name)
    before Python 3.6.  Hence, we wrap it in a function to avoid errors
    when compiled with -Werror.  */
 
-#ifdef IS_PY3K
 # define GDB_PYSYS_SETPATH_CHAR wchar_t
-#else
-# define GDB_PYSYS_SETPATH_CHAR char
-#endif
 
 static inline void
 gdb_PySys_SetPath (const GDB_PYSYS_SETPATH_CHAR *path)
@@ -497,6 +465,13 @@ struct symtab_and_line *sal_object_to_symtab_and_line (PyObject *obj);
 struct frame_info *frame_object_to_frame_info (PyObject *frame_obj);
 struct gdbarch *arch_object_to_gdbarch (PyObject *obj);
 
+/* Convert Python object OBJ to a program_space pointer.  OBJ must be a
+   gdb.Progspace reference.  Return nullptr if the gdb.Progspace is not
+   valid (see gdb.Progspace.is_valid), otherwise return the program_space
+   pointer.  */
+
+extern struct program_space *progspace_object_to_program_space (PyObject *obj);
+
 void gdbpy_initialize_gdb_readline (void);
 int gdbpy_initialize_auto_load (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
@@ -562,6 +537,11 @@ int gdbpy_initialize_membuf ()
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_connection ()
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_micommands (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+void gdbpy_finalize_micommands ();
+int gdbpy_initialize_disasm ()
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 
 /* A wrapper for PyErr_Fetch that handles reference counting for the
    caller.  */
@@ -571,14 +551,12 @@ public:
 
   gdbpy_err_fetch ()
   {
-    PyErr_Fetch (&m_error_type, &m_error_value, &m_error_traceback);
-  }
+    PyObject *error_type, *error_value, *error_traceback;
 
-  ~gdbpy_err_fetch ()
-  {
-    Py_XDECREF (m_error_type);
-    Py_XDECREF (m_error_value);
-    Py_XDECREF (m_error_traceback);
+    PyErr_Fetch (&error_type, &error_value, &error_traceback);
+    m_error_type.reset (error_type);
+    m_error_value.reset (error_value);
+    m_error_traceback.reset (error_traceback);
   }
 
   /* Call PyErr_Restore using the values stashed in this object.
@@ -587,10 +565,9 @@ public:
 
   void restore ()
   {
-    PyErr_Restore (m_error_type, m_error_value, m_error_traceback);
-    m_error_type = nullptr;
-    m_error_value = nullptr;
-    m_error_traceback = nullptr;
+    PyErr_Restore (m_error_type.release (),
+		   m_error_value.release (),
+		   m_error_traceback.release ());
   }
 
   /* Return the string representation of the exception represented by
@@ -609,12 +586,19 @@ public:
 
   bool type_matches (PyObject *type) const
   {
-    return PyErr_GivenExceptionMatches (m_error_type, type);
+    return PyErr_GivenExceptionMatches (m_error_type.get (), type);
+  }
+
+  /* Return a new reference to the exception value object.  */
+
+  gdbpy_ref<> value ()
+  {
+    return m_error_value;
   }
 
 private:
 
-  PyObject *m_error_type, *m_error_value, *m_error_traceback;
+  gdbpy_ref<> m_error_type, m_error_value, m_error_traceback;
 };
 
 /* Called before entering the Python interpreter to install the
@@ -730,6 +714,17 @@ void gdbpy_print_stack (void);
 void gdbpy_print_stack_or_quit ();
 void gdbpy_handle_exception () ATTRIBUTE_NORETURN;
 
+/* A wrapper around calling 'error'.  Prefixes the error message with an
+   'Error occurred in Python' string.  Use this in C++ code if we spot
+   something wrong with an object returned from Python code.  The prefix
+   string gives the user a hint that the mistake is within Python code,
+   rather than some other part of GDB.
+
+   This always calls error, and never returns.  */
+
+void gdbpy_error (const char *fmt, ...)
+  ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
+
 gdbpy_ref<> python_string_to_unicode (PyObject *obj);
 gdb::unique_xmalloc_ptr<char> unicode_to_target_string (PyObject *unicode_str);
 gdb::unique_xmalloc_ptr<char> python_string_to_target_string (PyObject *obj);
@@ -823,5 +818,49 @@ typedef std::unique_ptr<Py_buffer, Py_buffer_deleter> Py_buffer_up;
 
 extern bool gdbpy_parse_register_id (struct gdbarch *gdbarch,
 				     PyObject *pyo_reg_id, int *reg_num);
+
+/* Return true if OBJ is a gdb.Architecture object, otherwise, return
+   false.  */
+
+extern bool gdbpy_is_architecture (PyObject *obj);
+
+/* Return true if OBJ is a gdb.Progspace object, otherwise, return false.  */
+
+extern bool gdbpy_is_progspace (PyObject *obj);
+
+/* Take DOC, the documentation string for a GDB command defined in Python,
+   and return an (possibly) modified version of that same string.
+
+   When a command is defined in Python, the documentation string will
+   usually be indented based on the indentation of the surrounding Python
+   code.  However, the documentation string is a literal string, all the
+   white-space added for indentation is included within the documentation
+   string.
+
+   This indentation is then included in the help text that GDB displays,
+   which looks odd out of the context of the original Python source code.
+
+   This function analyses DOC and tries to figure out what white-space
+   within DOC was added as part of the indentation, and then removes that
+   white-space from the copy that is returned.
+
+   If the analysis of DOC fails then DOC will be returned unmodified.  */
+
+extern gdb::unique_xmalloc_ptr<char> gdbpy_fix_doc_string_indentation
+  (gdb::unique_xmalloc_ptr<char> doc);
+
+/* Implement the 'print_insn' hook for Python.  Disassemble an instruction
+   whose address is ADDRESS for architecture GDBARCH.  The bytes of the
+   instruction should be read with INFO->read_memory_func as the
+   instruction being disassembled might actually be in a buffer.
+
+   Used INFO->fprintf_func to print the results of the disassembly, and
+   return the length of the instruction in octets.
+
+   If no instruction can be disassembled then return an empty value.  */
+
+extern gdb::optional<int> gdbpy_print_insn (struct gdbarch *gdbarch,
+					    CORE_ADDR address,
+					    disassemble_info *info);
 
 #endif /* PYTHON_PYTHON_INTERNAL_H */

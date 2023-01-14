@@ -31,12 +31,6 @@
 
 /* See tui-command.h.  */
 
-int
-tui_cmd_window::max_height () const
-{
-  return tui_term_height () - 4;
-}
-
 void
 tui_cmd_window::resize (int height_, int width_, int origin_x, int origin_y)
 {

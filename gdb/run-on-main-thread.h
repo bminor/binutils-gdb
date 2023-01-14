@@ -25,4 +25,8 @@
 
 extern void run_on_main_thread (std::function<void ()> &&);
 
+/* Return true on the main thread.  */
+
+extern bool is_main_thread ();
+
 #endif /* GDB_RUN_ON_MAIN_THREAD_H */

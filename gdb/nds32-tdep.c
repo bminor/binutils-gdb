@@ -314,16 +314,16 @@ nds32_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int num)
 }
 
 /* NDS32 register groups.  */
-static struct reggroup *nds32_cr_reggroup;
-static struct reggroup *nds32_ir_reggroup;
-static struct reggroup *nds32_mr_reggroup;
-static struct reggroup *nds32_dr_reggroup;
-static struct reggroup *nds32_pfr_reggroup;
-static struct reggroup *nds32_hspr_reggroup;
-static struct reggroup *nds32_dmar_reggroup;
-static struct reggroup *nds32_racr_reggroup;
-static struct reggroup *nds32_idr_reggroup;
-static struct reggroup *nds32_secur_reggroup;
+static const reggroup *nds32_cr_reggroup;
+static const reggroup *nds32_ir_reggroup;
+static const reggroup *nds32_mr_reggroup;
+static const reggroup *nds32_dr_reggroup;
+static const reggroup *nds32_pfr_reggroup;
+static const reggroup *nds32_hspr_reggroup;
+static const reggroup *nds32_dmar_reggroup;
+static const reggroup *nds32_racr_reggroup;
+static const reggroup *nds32_idr_reggroup;
+static const reggroup *nds32_secur_reggroup;
 
 static void
 nds32_init_reggroups (void)
@@ -343,14 +343,6 @@ nds32_init_reggroups (void)
 static void
 nds32_add_reggroups (struct gdbarch *gdbarch)
 {
-  /* Add pre-defined register groups.  */
-  reggroup_add (gdbarch, general_reggroup);
-  reggroup_add (gdbarch, float_reggroup);
-  reggroup_add (gdbarch, system_reggroup);
-  reggroup_add (gdbarch, all_reggroup);
-  reggroup_add (gdbarch, save_reggroup);
-  reggroup_add (gdbarch, restore_reggroup);
-
   /* Add NDS32 register groups.  */
   reggroup_add (gdbarch, nds32_cr_reggroup);
   reggroup_add (gdbarch, nds32_ir_reggroup);
@@ -368,7 +360,7 @@ nds32_add_reggroups (struct gdbarch *gdbarch)
 
 static int
 nds32_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-			   struct reggroup *reggroup)
+			   const struct reggroup *reggroup)
 {
   const char *reg_name;
   const char *group_name;
@@ -398,7 +390,7 @@ nds32_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   /* The NDS32 reggroup contains registers whose name is prefixed
      by reggroup name.  */
   reg_name = gdbarch_register_name (gdbarch, regnum);
-  group_name = reggroup_name (reggroup);
+  group_name = reggroup->name ();
   return !strncmp (reg_name, group_name, strlen (group_name));
 }
 

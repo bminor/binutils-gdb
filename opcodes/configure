@@ -5357,25 +5357,31 @@ else
      lt_nm_to_check="$lt_nm_to_check nm"
    fi
  fi
- for lt_tmp_nm in $lt_nm_to_check; do
+ for lt_tmp_nm in "$lt_nm_to_check"; do
    lt_save_ifs="$IFS"; IFS=$PATH_SEPARATOR
    for ac_dir in $PATH /usr/ccs/bin/elf /usr/ccs/bin /usr/ucb /bin; do
      IFS="$lt_save_ifs"
      test -z "$ac_dir" && ac_dir=.
-     case "$lt_tmp_nm" in
+     # Strip out any user-provided options from the nm to test twice,
+     # the first time to test to see if nm (rather than its options) has
+     # an explicit path, the second time to yield a file which can be
+     # nm'ed itself.
+     tmp_nm_path="`$ECHO "$lt_tmp_nm" | sed 's, -.*$,,'`"
+     case "$tmp_nm_path" in
      */*|*\\*) tmp_nm="$lt_tmp_nm";;
      *) tmp_nm="$ac_dir/$lt_tmp_nm";;
      esac
-     if test -f "$tmp_nm" || test -f "$tmp_nm$ac_exeext" ; then
+     tmp_nm_to_nm="`$ECHO "$tmp_nm" | sed 's, -.*$,,'`"
+     if test -f "$tmp_nm_to_nm" || test -f "$tmp_nm_to_nm$ac_exeext" ; then
        # Check to see if the nm accepts a BSD-compat flag.
        # Adding the `sed 1q' prevents false positives on HP-UX, which says:
        #   nm: unknown option "B" ignored
-       case `"$tmp_nm" -B "$tmp_nm" 2>&1 | grep -v '^ *$' | sed '1q'` in
+       case `"$tmp_nm" -B "$tmp_nm_to_nm" 2>&1 | grep -v '^ *$' | sed '1q'` in
        *$tmp_nm*) lt_cv_path_NM="$tmp_nm -B"
 	 break
 	 ;;
        *)
-	 case `"$tmp_nm" -p "$tmp_nm" 2>&1 | grep -v '^ *$' | sed '1q'` in
+	 case `"$tmp_nm" -p "$tmp_nm_to_nm" 2>&1 | grep -v '^ *$' | sed '1q'` in
 	 *$tmp_nm*)
 	   lt_cv_path_NM="$tmp_nm -p"
 	   break
@@ -11035,7 +11041,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11038 "configure"
+#line 11044 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11141,7 +11147,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11144 "configure"
+#line 11150 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12491,6 +12497,7 @@ if test x${all_targets} = xfalse ; then
 	case "$arch" in
 	bfd_aarch64_arch)	ta="$ta aarch64-asm.lo aarch64-dis.lo aarch64-opc.lo aarch64-asm-2.lo aarch64-dis-2.lo aarch64-opc-2.lo" ;;
 	bfd_alpha_arch)		ta="$ta alpha-dis.lo alpha-opc.lo" ;;
+	bfd_amdgcn_arch)	;;
 	bfd_arc_arch)		ta="$ta arc-dis.lo arc-opc.lo arc-ext.lo" ;;
 	bfd_arm_arch)		ta="$ta arm-dis.lo" ;;
 	bfd_avr_arch)		ta="$ta avr-dis.lo" ;;
@@ -12508,7 +12515,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_moxie_arch)		ta="$ta moxie-dis.lo moxie-opc.lo" ;;
 	bfd_h8300_arch)		ta="$ta h8300-dis.lo" ;;
 	bfd_hppa_arch)		ta="$ta hppa-dis.lo" ;;
-	bfd_i386_arch|bfd_iamcu_arch|bfd_l1om_arch|bfd_k1om_arch)
+	bfd_i386_arch|bfd_iamcu_arch)
 				ta="$ta i386-dis.lo i386-opc.lo" ;;
 	bfd_ia64_arch)		ta="$ta ia64-dis.lo ia64-opc.lo" ;;
 	bfd_ip2k_arch)		ta="$ta ip2k-asm.lo ip2k-desc.lo ip2k-dis.lo ip2k-ibld.lo ip2k-opc.lo" using_cgen=yes ;;
@@ -12567,7 +12574,6 @@ if test x${all_targets} = xfalse ; then
 	bfd_vax_arch)		ta="$ta vax-dis.lo" ;;
 	bfd_visium_arch)	ta="$ta visium-dis.lo visium-opc.lo" ;;
         bfd_wasm32_arch)        ta="$ta wasm32-dis.lo" ;;
-	bfd_xc16x_arch)		ta="$ta xc16x-asm.lo xc16x-desc.lo xc16x-dis.lo xc16x-ibld.lo xc16x-opc.lo" using_cgen=yes ;;
 	bfd_xgate_arch)		ta="$ta xgate-dis.lo xgate-opc.lo" ;;
 	bfd_xstormy16_arch)	ta="$ta xstormy16-asm.lo xstormy16-desc.lo xstormy16-dis.lo xstormy16-ibld.lo xstormy16-opc.lo" using_cgen=yes ;;
 	bfd_xtensa_arch)	ta="$ta xtensa-dis.lo" ;;

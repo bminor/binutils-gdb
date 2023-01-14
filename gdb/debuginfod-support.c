@@ -17,6 +17,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "diagnostics.h"
 #include <errno.h>
 #include "gdbsupport/scoped_fd.h"
 #include "debuginfod-support.h"
@@ -69,6 +70,15 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
   return scoped_fd (-ENOSYS);
 }
 
+scoped_fd
+debuginfod_exec_query (const unsigned char *build_id,
+		       int build_id_len,
+		       const char *filename,
+		       gdb::unique_xmalloc_ptr<char> *destname)
+{
+  return scoped_fd (-ENOSYS);
+}
+
 #define NO_IMPL _("Support for debuginfod is not compiled into GDB.")
 
 #else
@@ -77,12 +87,12 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
 struct user_data
 {
   user_data (const char *desc, const char *fname)
-    : desc (desc), fname (fname)
+    : desc (desc), fname (fname), has_printed (false)
   { }
 
   const char * const desc;
   const char * const fname;
-  gdb::optional<ui_out::progress_meter> meter;
+  bool has_printed;
 };
 
 /* Deleter for a debuginfod_client.  */
@@ -106,30 +116,38 @@ progressfn (debuginfod_client *c, long cur, long total)
 
   if (check_quit_flag ())
     {
-      printf_filtered ("Cancelling download of %s %ps...\n",
-		       data->desc,
-		       styled_string (file_name_style.style (), data->fname));
+      gdb_printf ("Cancelling download of %s %ps...\n",
+		  data->desc,
+		  styled_string (file_name_style.style (), data->fname));
       return 1;
     }
 
-  if (total == 0)
-    return 0;
-
-  if (!data->meter.has_value ())
+  if (!data->has_printed)
     {
-      float size_in_mb = 1.0f * total / (1024 * 1024);
-      string_file styled_filename (current_uiout->can_emit_style_escape ());
-      fprintf_styled (&styled_filename,
-		      file_name_style.style (),
-		      "%s",
-		      data->fname);
-      std::string message
-	= string_printf ("Downloading %.2f MB %s %s", size_in_mb, data->desc,
-			 styled_filename.c_str());
-      data->meter.emplace (current_uiout, message, 1);
-    }
+      /* Include the transfer size, if available.  */
+      if (total > 0)
+	{
+	  float size = 1.0f * total / 1024;
+	  const char *unit = "KB";
 
-  current_uiout->progress ((double)cur / (double)total);
+	  /* If size is greater than 0.01 MB, set unit to MB.  */
+	  if (size > 10.24)
+	    {
+	      size /= 1024;
+	      unit = "MB";
+	    }
+
+	  gdb_printf ("Downloading %.2f %s %s %ps...\n",
+		      size, unit, data->desc,
+		      styled_string (file_name_style.style (),
+				     data->fname));
+	}
+      else
+	gdb_printf ("Downloading %s %ps...\n", data->desc,
+		    styled_string (file_name_style.style (), data->fname));
+
+      data->has_printed = true;
+    }
 
   return 0;
 }
@@ -156,30 +174,56 @@ get_debuginfod_client ()
 static bool
 debuginfod_is_enabled ()
 {
-  const char *urls = getenv (DEBUGINFOD_URLS_ENV_VAR);
+  const char *urls = skip_spaces (getenv (DEBUGINFOD_URLS_ENV_VAR));
 
-  if (urls == nullptr || urls[0] == '\0'
-      || debuginfod_enabled == debuginfod_off)
+  if (debuginfod_enabled == debuginfod_off
+      || urls == nullptr
+      || *urls == '\0')
     return false;
 
   if (debuginfod_enabled == debuginfod_ask)
     {
-      int resp = nquery (_("\nThis GDB supports auto-downloading debuginfo " \
-			   "from the following URLs:\n%s\nEnable debuginfod " \
-			   "for this session? "),
-			 urls);
+      gdb_printf (_("\nThis GDB supports auto-downloading debuginfo " \
+		    "from the following URLs:\n"));
+
+      gdb::string_view url_view (urls);
+      while (true)
+	{
+	  size_t off = url_view.find_first_not_of (' ');
+	  if (off == gdb::string_view::npos)
+	    break;
+	  url_view = url_view.substr (off);
+	  /* g++ 11.2.1 on s390x, g++ 11.3.1 on ppc64le and g++ 11 on
+	     hppa seem convinced url_view might be of SIZE_MAX length.
+	     And so complains because the length of an array can only
+	     be PTRDIFF_MAX.  */
+	  DIAGNOSTIC_PUSH
+	  DIAGNOSTIC_IGNORE_STRINGOP_OVERREAD
+	  off = url_view.find_first_of (' ');
+	  DIAGNOSTIC_POP
+	  gdb_printf
+	    (_("  <%ps>\n"),
+	     styled_string (file_name_style.style (),
+			    gdb::to_string (url_view.substr (0,
+							     off)).c_str ()));
+	  if (off == gdb::string_view::npos)
+	    break;
+	  url_view = url_view.substr (off);
+	}
+
+      int resp = nquery (_("Enable debuginfod for this session? "));
       if (!resp)
 	{
-	  printf_filtered (_("Debuginfod has been disabled.\nTo make this " \
-			     "setting permanent, add \'set debuginfod " \
-			     "enabled off\' to .gdbinit.\n"));
+	  gdb_printf (_("Debuginfod has been disabled.\nTo make this " \
+			"setting permanent, add \'set debuginfod " \
+			"enabled off\' to .gdbinit.\n"));
 	  debuginfod_enabled = debuginfod_off;
 	  return false;
 	}
 
-      printf_filtered (_("Debuginfod has been enabled.\nTo make this " \
-			 "setting permanent, add \'set debuginfod enabled " \
-			 "on\' to .gdbinit.\n"));
+      gdb_printf (_("Debuginfod has been enabled.\nTo make this " \
+		    "setting permanent, add \'set debuginfod enabled " \
+		    "on\' to .gdbinit.\n"));
       debuginfod_enabled = debuginfod_on;
     }
 
@@ -202,6 +246,7 @@ debuginfod_source_query (const unsigned char *build_id,
   if (c == nullptr)
     return scoped_fd (-ENOMEM);
 
+  char *dname = nullptr;
   user_data data ("source file", srcpath);
 
   debuginfod_set_user_data (c, &data);
@@ -216,16 +261,16 @@ debuginfod_source_query (const unsigned char *build_id,
 					build_id,
 					build_id_len,
 					srcpath,
-					nullptr));
+					&dname));
   debuginfod_set_user_data (c, nullptr);
 
-  if (debuginfod_verbose > 0 && fd.get () < 0 && fd.get () != -ENOENT)
-    printf_filtered (_("Download failed: %s.  Continuing without source file %ps.\n"),
-		     safe_strerror (-fd.get ()),
-		     styled_string (file_name_style.style (),  srcpath));
+  if (fd.get () < 0 && fd.get () != -ENOENT)
+    gdb_printf (_("Download failed: %s.  Continuing without source file %ps.\n"),
+		safe_strerror (-fd.get ()),
+		styled_string (file_name_style.style (),  srcpath));
 
   if (fd.get () >= 0)
-    *destname = make_unique_xstrdup (srcpath);
+    destname->reset (dname);
 
   return fd;
 }
@@ -261,10 +306,52 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
 					   &dname));
   debuginfod_set_user_data (c, nullptr);
 
-  if (debuginfod_verbose > 0 && fd.get () < 0 && fd.get () != -ENOENT)
-    printf_filtered (_("Download failed: %s.  Continuing without debug info for %ps.\n"),
-		     safe_strerror (-fd.get ()),
-		     styled_string (file_name_style.style (),  filename));
+  if (fd.get () < 0 && fd.get () != -ENOENT)
+    gdb_printf (_("Download failed: %s.  Continuing without debug info for %ps.\n"),
+		safe_strerror (-fd.get ()),
+		styled_string (file_name_style.style (),  filename));
+
+  if (fd.get () >= 0)
+    destname->reset (dname);
+
+  return fd;
+}
+
+/* See debuginfod-support.h  */
+
+scoped_fd
+debuginfod_exec_query (const unsigned char *build_id,
+		       int build_id_len,
+		       const char *filename,
+		       gdb::unique_xmalloc_ptr<char> *destname)
+{
+  if (!debuginfod_is_enabled ())
+    return scoped_fd (-ENOSYS);
+
+  debuginfod_client *c = get_debuginfod_client ();
+
+  if (c == nullptr)
+    return scoped_fd (-ENOMEM);
+
+  char *dname = nullptr;
+  user_data data ("executable for", filename);
+
+  debuginfod_set_user_data (c, &data);
+  gdb::optional<target_terminal::scoped_restore_terminal_state> term_state;
+  if (target_supports_terminal_ours ())
+    {
+      term_state.emplace ();
+      target_terminal::ours ();
+    }
+
+  scoped_fd fd (debuginfod_find_executable (c, build_id, build_id_len, &dname));
+  debuginfod_set_user_data (c, nullptr);
+
+  if (fd.get () < 0 && fd.get () != -ENOENT)
+    gdb_printf (_("Download failed: %s. " \
+		  "Continuing without executable for %ps.\n"),
+		safe_strerror (-fd.get ()),
+		styled_string (file_name_style.style (),  filename));
 
   if (fd.get () >= 0)
     destname->reset (dname);
@@ -299,9 +386,9 @@ static void
 show_debuginfod_enabled (ui_file *file, int from_tty, cmd_list_element *cmd,
 			 const char *value)
 {
-  fprintf_filtered (file,
-		    _("Debuginfod functionality is currently set to "
-		      "\"%s\".\n"), debuginfod_enabled);
+  gdb_printf (file,
+	      _("Debuginfod functionality is currently set to "
+		"\"%s\".\n"), debuginfod_enabled);
 }
 
 /* Set callback for "set debuginfod urls".  */
@@ -342,10 +429,10 @@ show_debuginfod_urls (ui_file *file, int from_tty, cmd_list_element *cmd,
 		      const char *value)
 {
   if (value[0] == '\0')
-    fprintf_filtered (file, _("Debuginfod URLs have not been set.\n"));
+    gdb_printf (file, _("Debuginfod URLs have not been set.\n"));
   else
-    fprintf_filtered (file, _("Debuginfod URLs are currently set to:\n%s\n"),
-		      value);
+    gdb_printf (file, _("Debuginfod URLs are currently set to:\n%s\n"),
+		value);
 }
 
 /* Show callback for "set debuginfod verbose".  */
@@ -354,8 +441,8 @@ static void
 show_debuginfod_verbose_command (ui_file *file, int from_tty,
 				 cmd_list_element *cmd, const char *value)
 {
-  fprintf_filtered (file, _("Debuginfod verbose output is set to %s.\n"),
-		    value);
+  gdb_printf (file, _("Debuginfod verbose output is set to %s.\n"),
+	      value);
 }
 
 /* Register debuginfod commands.  */

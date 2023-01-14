@@ -39,6 +39,7 @@ fi
 
 case "${gdbserver_host}" in
   aarch64*-*-linux*)	srv_tgtobj="linux-aarch64-low.o"
+			srv_tgtobj="$srv_tgtobj nat/aarch64-hw-point.o"
 			srv_tgtobj="$srv_tgtobj nat/aarch64-linux-hw-point.o"
 			srv_tgtobj="$srv_tgtobj linux-aarch32-low.o"
 			srv_tgtobj="$srv_tgtobj linux-aarch32-tdesc.o"
@@ -124,6 +125,12 @@ case "${gdbserver_host}" in
   ia64-*-linux*)	srv_regobj=reg-ia64.o
 			srv_tgtobj="$srv_linux_obj linux-ia64-low.o"
 			srv_linux_usrregs=yes
+			;;
+  loongarch*-*-linux*)	srv_tgtobj="arch/loongarch.o linux-loongarch-low.o"
+			srv_tgtobj="${srv_tgtobj} ${srv_linux_obj}"
+			srv_linux_regsets=yes
+			srv_linux_usrregs=yes
+			srv_linux_thread_db=yes
 			;;
   m68*-*-linux*)	if test "$gdb_cv_m68k_is_coldfire" = yes; then
                           srv_regobj=reg-cf.o

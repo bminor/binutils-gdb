@@ -1358,8 +1358,20 @@ is_strip_section_1 (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 	{
 	  /* By default we don't want to strip .reloc section.
 	     This section has for pe-coff special meaning.   See
-	     pe-dll.c file in ld, and peXXigen.c in bfd for details.  */
-	  if (strcmp (bfd_section_name (sec), ".reloc") != 0)
+	     pe-dll.c file in ld, and peXXigen.c in bfd for details.
+	     Similarly we do not want to strip debuglink sections.  */
+	  const char * kept_sections[] =
+	    {
+	      ".reloc",
+	      ".gnu_debuglink",
+	      ".gnu_debugaltlink"
+	    };
+	  int i;
+
+	  for (i = ARRAY_SIZE (kept_sections);i--;)
+	    if (strcmp (bfd_section_name (sec), kept_sections[i]) == 0)
+	      break;
+	  if (i == -1)
 	    return true;
 	}
 
@@ -1681,11 +1693,11 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 
       if (keep)
 	{
-	  if (((flags & BSF_GLOBAL) != 0
+	  if (((flags & (BSF_GLOBAL | BSF_GNU_UNIQUE))
 	       || undefined)
 	      && (weaken || is_specified_symbol (name, weaken_specific_htab)))
 	    {
-	      sym->flags &= ~ BSF_GLOBAL;
+	      sym->flags &= ~ (BSF_GLOBAL | BSF_GNU_UNIQUE);
 	      sym->flags |= BSF_WEAK;
 	    }
 
@@ -2735,7 +2747,14 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
       /* Copy PE parameters before changing them.  */
       if (bfd_get_flavour (ibfd) == bfd_target_coff_flavour
 	  && bfd_pei_p (ibfd))
-	pe->pe_opthdr = pe_data (ibfd)->pe_opthdr;
+	{
+	  pe->pe_opthdr = pe_data (ibfd)->pe_opthdr;
+
+ 	  if (preserve_dates)
+	    pe->timestamp = pe_data (ibfd)->coff.timestamp;
+	  else
+	    pe->timestamp = -1;
+	}
 
       if (pe_file_alignment != (bfd_vma) -1)
 	pe->pe_opthdr.FileAlignment = pe_file_alignment;
@@ -2781,11 +2800,6 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 
 		     file_alignment, section_alignment);
 	}
-
-      if (preserve_dates
-	  && bfd_get_flavour (ibfd) == bfd_target_coff_flavour
-	  && bfd_pei_p (ibfd))
-	pe->timestamp = pe_data (ibfd)->coff.timestamp;
     }
 
   free (isympp);
@@ -3911,15 +3925,9 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
       bfd_nonfatal_message (input_filename, NULL, NULL, NULL);
 
       if (obj_error == bfd_error_file_ambiguously_recognized)
-	{
-	  list_matching_formats (obj_matching);
-	  free (obj_matching);
-	}
+	list_matching_formats (obj_matching);
       if (core_error == bfd_error_file_ambiguously_recognized)
-	{
-	  list_matching_formats (core_matching);
-	  free (core_matching);
-	}
+	list_matching_formats (core_matching);
 
       status = 1;
     }

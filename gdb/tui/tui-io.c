@@ -44,6 +44,7 @@
 #include "completer.h"
 #include "gdb_curses.h"
 #include <map>
+#include "pager.h"
 
 /* This redefines CTRL if it is not already defined, so it must come
    after terminal state releated include files like <term.h> and
@@ -108,11 +109,13 @@ key_is_start_sequence (int ch)
 /* TUI output files.  */
 static struct ui_file *tui_stdout;
 static struct ui_file *tui_stderr;
+static struct ui_file *tui_stdlog;
 struct ui_out *tui_out;
 
 /* GDB output files in non-curses mode.  */
 static struct ui_file *tui_old_stdout;
 static struct ui_file *tui_old_stderr;
+static struct ui_file *tui_old_stdlog;
 cli_ui_out *tui_old_uiout;
 
 /* Readline previous hooks.  */
@@ -828,13 +831,14 @@ tui_setup_io (int mode)
       /* Keep track of previous gdb output.  */
       tui_old_stdout = gdb_stdout;
       tui_old_stderr = gdb_stderr;
+      tui_old_stdlog = gdb_stdlog;
       tui_old_uiout = dynamic_cast<cli_ui_out *> (current_uiout);
       gdb_assert (tui_old_uiout != nullptr);
 
       /* Reconfigure gdb output.  */
       gdb_stdout = tui_stdout;
       gdb_stderr = tui_stderr;
-      gdb_stdlog = gdb_stdout;	/* for moment */
+      gdb_stdlog = tui_stdlog;
       gdb_stdtarg = gdb_stderr;	/* for moment */
       gdb_stdtargerr = gdb_stderr;	/* for moment */
       current_uiout = tui_out;
@@ -847,7 +851,7 @@ tui_setup_io (int mode)
       /* Restore gdb output.  */
       gdb_stdout = tui_old_stdout;
       gdb_stderr = tui_old_stderr;
-      gdb_stdlog = gdb_stdout;	/* for moment */
+      gdb_stdlog = tui_old_stdlog;
       gdb_stdtarg = gdb_stderr;	/* for moment */
       gdb_stdtargerr = gdb_stderr;	/* for moment */
       current_uiout = tui_old_uiout;
@@ -900,8 +904,9 @@ tui_initialize_io (void)
 #endif
 
   /* Create tui output streams.  */
-  tui_stdout = new tui_file (stdout);
+  tui_stdout = new pager_file (new tui_file (stdout));
   tui_stderr = new tui_file (stderr);
+  tui_stdlog = new timestamped_file (tui_stderr);
   tui_out = tui_out_new (tui_stdout);
 
   /* Create the default UI.  */
@@ -1034,7 +1039,7 @@ tui_inject_newline_into_command_window ()
 {
   gdb_assert (tui_active);
 
-  WINDOW *w= TUI_CMD_WIN->handle.get ();
+  WINDOW *w = TUI_CMD_WIN->handle.get ();
 
   /* When hitting return with an empty input, gdb executes the last
      command.  If we emit a newline, this fills up the command window

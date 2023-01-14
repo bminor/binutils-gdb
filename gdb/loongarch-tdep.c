@@ -22,10 +22,170 @@
 #include "dwarf2/frame.h"
 #include "elf-bfd.h"
 #include "frame-unwind.h"
+#include "gdbcore.h"
 #include "loongarch-tdep.h"
+#include "target.h"
 #include "target-descriptions.h"
 #include "trad-frame.h"
 #include "user-regs.h"
+
+/* Fetch the instruction at PC.  */
+
+static insn_t
+loongarch_fetch_instruction (CORE_ADDR pc)
+{
+  size_t insn_len = loongarch_insn_length (0);
+  gdb_byte buf[insn_len];
+  int err;
+
+  err = target_read_memory (pc, buf, insn_len);
+  if (err)
+    memory_error (TARGET_XFER_E_IO, pc);
+
+  return extract_unsigned_integer (buf, insn_len, BFD_ENDIAN_LITTLE);
+}
+
+/* Return TRUE if INSN is a unconditional branch instruction, otherwise return FALSE.  */
+
+static bool
+loongarch_insn_is_uncond_branch (insn_t insn)
+{
+  if ((insn & 0xfc000000) == 0x4c000000		/* jirl  */
+      || (insn & 0xfc000000) == 0x50000000	/* b     */
+      || (insn & 0xfc000000) == 0x54000000)	/* bl    */
+    return true;
+  return false;
+}
+
+/* Return TRUE if INSN is a conditional branch instruction, otherwise return FALSE.  */
+
+static bool
+loongarch_insn_is_cond_branch (insn_t insn)
+{
+  if ((insn & 0xfc000000) == 0x58000000		/* beq   */
+      || (insn & 0xfc000000) == 0x5c000000	/* bne   */
+      || (insn & 0xfc000000) == 0x60000000	/* blt   */
+      || (insn & 0xfc000000) == 0x64000000	/* bge	 */
+      || (insn & 0xfc000000) == 0x68000000	/* bltu  */
+      || (insn & 0xfc000000) == 0x6c000000	/* bgeu  */
+      || (insn & 0xfc000000) == 0x40000000	/* beqz  */
+      || (insn & 0xfc000000) == 0x44000000)	/* bnez  */
+    return true;
+  return false;
+}
+
+/* Return TRUE if INSN is a branch instruction, otherwise return FALSE.  */
+
+static bool
+loongarch_insn_is_branch (insn_t insn)
+{
+  bool is_uncond = loongarch_insn_is_uncond_branch (insn);
+  bool is_cond = loongarch_insn_is_cond_branch (insn);
+
+  return (is_uncond || is_cond);
+}
+
+/* Return TRUE if INSN is a Load Linked instruction, otherwise return FALSE.  */
+
+static bool
+loongarch_insn_is_ll (insn_t insn)
+{
+  if ((insn & 0xff000000) == 0x20000000		/* ll.w  */
+      || (insn & 0xff000000) == 0x22000000)	/* ll.d  */
+    return true;
+  return false;
+}
+
+/* Return TRUE if INSN is a Store Conditional instruction, otherwise return FALSE.  */
+
+static bool
+loongarch_insn_is_sc (insn_t insn)
+{
+  if ((insn & 0xff000000) == 0x21000000		/* sc.w  */
+      || (insn & 0xff000000) == 0x23000000)	/* sc.d  */
+    return true;
+  return false;
+}
+
+/* Analyze the function prologue from START_PC to LIMIT_PC.
+   Return the address of the first instruction past the prologue.  */
+
+static CORE_ADDR
+loongarch_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
+			 CORE_ADDR limit_pc, struct frame_info *this_frame,
+			 struct trad_frame_cache *this_cache)
+{
+  CORE_ADDR cur_pc = start_pc, prologue_end = 0;
+  int32_t sp = LOONGARCH_SP_REGNUM;
+  int32_t fp = LOONGARCH_FP_REGNUM;
+  int32_t reg_value[32] = {0};
+  int32_t reg_used[32] = {1, 0};
+
+  while (cur_pc < limit_pc)
+    {
+      insn_t insn = loongarch_fetch_instruction (cur_pc);
+      size_t insn_len = loongarch_insn_length (insn);
+      int32_t rd = loongarch_decode_imm ("0:5", insn, 0);
+      int32_t rj = loongarch_decode_imm ("5:5", insn, 0);
+      int32_t rk = loongarch_decode_imm ("10:5", insn, 0);
+      int32_t si12 = loongarch_decode_imm ("10:12", insn, 1);
+      int32_t si20 = loongarch_decode_imm ("5:20", insn, 1);
+
+      if ((insn & 0xffc00000) == 0x02c00000	/* addi.d sp,sp,si12  */
+	  && rd == sp && rj == sp && si12 < 0)
+	{
+	  prologue_end = cur_pc + insn_len;
+	}
+      else if ((insn & 0xffc00000) == 0x02c00000 /* addi.d fp,sp,si12  */
+	       && rd == fp && rj == sp && si12 > 0)
+	{
+	  prologue_end = cur_pc + insn_len;
+	}
+      else if ((insn & 0xffc00000) == 0x29c00000 /* st.d rd,sp,si12  */
+	       && rj == sp)
+	{
+	  prologue_end = cur_pc + insn_len;
+	}
+      else if ((insn & 0xff000000) == 0x27000000 /* stptr.d rd,sp,si14  */
+	       && rj == sp)
+	{
+	  prologue_end = cur_pc + insn_len;
+	}
+      else if ((insn & 0xfe000000) == 0x14000000) /* lu12i.w rd,si20  */
+	{
+	  reg_value[rd] = si20 << 12;
+	  reg_used[rd] = 1;
+	}
+      else if ((insn & 0xffc00000) == 0x03800000) /* ori rd,rj,si12  */
+	{
+	  if (reg_used[rj])
+	  {
+	    reg_value[rd] = reg_value[rj] | (si12 & 0xfff);
+	    reg_used[rd] = 1;
+	  }
+	}
+      else if ((insn & 0xffff8000) == 0x00108000 /* add.d sp,sp,rk  */
+	       && rd == sp && rj == sp)
+	{
+	  if (reg_used[rk] == 1 && reg_value[rk] < 0)
+	    {
+	      prologue_end = cur_pc + insn_len;
+	      break;
+	    }
+	}
+      else if (loongarch_insn_is_branch (insn))
+	{
+	  break;
+	}
+
+      cur_pc += insn_len;
+    }
+
+  if (prologue_end == 0)
+    prologue_end = cur_pc;
+
+  return prologue_end;
+}
 
 /* Implement the loongarch_skip_prologue gdbarch method.  */
 
@@ -45,11 +205,188 @@ loongarch_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	return std::max (pc, post_prologue_pc);
     }
 
-  return 0;
+  /* Can't determine prologue from the symbol table, need to examine
+     instructions.  */
+
+  /* Find an upper limit on the function prologue using the debug
+     information.  If the debug information could not be used to provide
+     that bound, then use an arbitrary large number as the upper bound.  */
+  CORE_ADDR limit_pc = skip_prologue_using_sal (gdbarch, pc);
+  if (limit_pc == 0)
+    limit_pc = pc + 100;	/* Arbitrary large number.  */
+
+  return loongarch_scan_prologue (gdbarch, pc, limit_pc, nullptr, nullptr);
 }
 
-/* Adjust the address downward (direction of stack growth) so that it
-   is correctly aligned for a new stack frame.  */
+/* Decode the current instruction and determine the address of the
+   next instruction.  */
+
+static CORE_ADDR
+loongarch_next_pc (struct regcache *regcache, CORE_ADDR cur_pc)
+{
+  struct gdbarch *gdbarch = regcache->arch ();
+  loongarch_gdbarch_tdep *tdep = (loongarch_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  insn_t insn = loongarch_fetch_instruction (cur_pc);
+  size_t insn_len = loongarch_insn_length (insn);
+  CORE_ADDR next_pc = cur_pc + insn_len;
+
+  if ((insn & 0xfc000000) == 0x4c000000)		/* jirl rd, rj, offs16  */
+    {
+      LONGEST rj = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("5:5", insn, 0));
+      next_pc = rj + loongarch_decode_imm ("10:16<<2", insn, 1);
+    }
+  else if ((insn & 0xfc000000) == 0x50000000		/* b    offs26  */
+	   || (insn & 0xfc000000) == 0x54000000)	/* bl	offs26  */
+    {
+      next_pc = cur_pc + loongarch_decode_imm ("0:10|10:16<<2", insn, 1);
+    }
+  else if ((insn & 0xfc000000) == 0x58000000)		/* beq	rj, rd, offs16  */
+    {
+      LONGEST rj = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("5:5", insn, 0));
+      LONGEST rd = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("0:5", insn, 0));
+      if (rj == rd)
+	next_pc = cur_pc + loongarch_decode_imm ("10:16<<2", insn, 1);
+    }
+  else if ((insn & 0xfc000000) == 0x5c000000)		/* bne	rj, rd, offs16  */
+    {
+      LONGEST rj = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("5:5", insn, 0));
+      LONGEST rd = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("0:5", insn, 0));
+      if (rj != rd)
+	next_pc = cur_pc + loongarch_decode_imm ("10:16<<2", insn, 1);
+    }
+  else if ((insn & 0xfc000000) == 0x60000000)		/* blt	rj, rd, offs16  */
+    {
+      LONGEST rj = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("5:5", insn, 0));
+      LONGEST rd = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("0:5", insn, 0));
+      if (rj < rd)
+	next_pc = cur_pc + loongarch_decode_imm ("10:16<<2", insn, 1);
+    }
+  else if ((insn & 0xfc000000) == 0x64000000)		/* bge	rj, rd, offs16  */
+    {
+      LONGEST rj = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("5:5", insn, 0));
+      LONGEST rd = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("0:5", insn, 0));
+      if (rj >= rd)
+	next_pc = cur_pc + loongarch_decode_imm ("10:16<<2", insn, 1);
+    }
+  else if ((insn & 0xfc000000) == 0x68000000)		/* bltu	rj, rd, offs16  */
+    {
+      ULONGEST rj = regcache_raw_get_unsigned (regcache,
+		      loongarch_decode_imm ("5:5", insn, 0));
+      ULONGEST rd = regcache_raw_get_unsigned (regcache,
+		      loongarch_decode_imm ("0:5", insn, 0));
+      if (rj < rd)
+	next_pc = cur_pc + loongarch_decode_imm ("10:16<<2", insn, 1);
+    }
+  else if ((insn & 0xfc000000) == 0x6c000000)		/* bgeu	rj, rd, offs16  */
+    {
+      ULONGEST rj = regcache_raw_get_unsigned (regcache,
+		      loongarch_decode_imm ("5:5", insn, 0));
+      ULONGEST rd = regcache_raw_get_unsigned (regcache,
+		      loongarch_decode_imm ("0:5", insn, 0));
+      if (rj >= rd)
+	next_pc = cur_pc + loongarch_decode_imm ("10:16<<2", insn, 1);
+    }
+  else if ((insn & 0xfc000000) == 0x40000000)		/* beqz	rj, offs21  */
+    {
+      LONGEST rj = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("5:5", insn, 0));
+      if (rj == 0)
+	next_pc = cur_pc + loongarch_decode_imm ("0:5|10:16<<2", insn, 1);
+    }
+  else if ((insn & 0xfc000000) == 0x44000000)		/* bnez	rj, offs21  */
+    {
+      LONGEST rj = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("5:5", insn, 0));
+      if (rj != 0)
+	next_pc = cur_pc + loongarch_decode_imm ("0:5|10:16<<2", insn, 1);
+    }
+  else if ((insn & 0xffff8000) == 0x002b0000)		/* syscall  */
+    {
+      if (tdep->syscall_next_pc != nullptr)
+	next_pc = tdep->syscall_next_pc (get_current_frame ());
+    }
+
+  return next_pc;
+}
+
+/* We can't put a breakpoint in the middle of a ll/sc atomic sequence,
+   so look for the end of the sequence and put the breakpoint there.  */
+
+static std::vector<CORE_ADDR>
+loongarch_deal_with_atomic_sequence (struct regcache *regcache, CORE_ADDR cur_pc)
+{
+  CORE_ADDR next_pc;
+  std::vector<CORE_ADDR> next_pcs;
+  insn_t insn = loongarch_fetch_instruction (cur_pc);
+  size_t insn_len = loongarch_insn_length (insn);
+  const int atomic_sequence_length = 16;
+  bool found_atomic_sequence_endpoint = false;
+
+  /* Look for a Load Linked instruction which begins the atomic sequence.  */
+  if (!loongarch_insn_is_ll (insn))
+    return {};
+
+  /* Assume that no atomic sequence is longer than "atomic_sequence_length" instructions.  */
+  for (int insn_count = 0; insn_count < atomic_sequence_length; ++insn_count)
+    {
+      cur_pc += insn_len;
+      insn = loongarch_fetch_instruction (cur_pc);
+
+      /* Look for a unconditional branch instruction, fallback to the standard code.  */
+      if (loongarch_insn_is_uncond_branch (insn))
+	{
+	  return {};
+	}
+      /* Look for a conditional branch instruction, put a breakpoint in its destination address.  */
+      else if (loongarch_insn_is_cond_branch (insn))
+	{
+	  next_pc = loongarch_next_pc (regcache, cur_pc);
+	  next_pcs.push_back (next_pc);
+	}
+      /* Look for a Store Conditional instruction which closes the atomic sequence.  */
+      else if (loongarch_insn_is_sc (insn))
+	{
+	  found_atomic_sequence_endpoint = true;
+	  next_pc = cur_pc + insn_len;
+	  next_pcs.push_back (next_pc);
+	  break;
+	}
+    }
+
+  /* We didn't find a closing Store Conditional instruction, fallback to the standard code.  */
+  if (!found_atomic_sequence_endpoint)
+    return {};
+
+  return next_pcs;
+}
+
+/* Implement the software_single_step gdbarch method  */
+
+static std::vector<CORE_ADDR>
+loongarch_software_single_step (struct regcache *regcache)
+{
+  CORE_ADDR cur_pc = regcache_read_pc (regcache);
+  std::vector<CORE_ADDR> next_pcs
+    = loongarch_deal_with_atomic_sequence (regcache, cur_pc);
+
+  if (!next_pcs.empty ())
+    return next_pcs;
+
+  CORE_ADDR next_pc = loongarch_next_pc (regcache, cur_pc);
+
+  return {next_pc};
+}
+
+/* Implement the frame_align gdbarch method.  */
 
 static CORE_ADDR
 loongarch_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
@@ -57,12 +394,11 @@ loongarch_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
   return align_down (addr, 16);
 }
 
-/* Generate, or return the cached frame cache for LoongArch frame unwinder.  */
+/* Generate, or return the cached frame cache for frame unwinder.  */
 
 static struct trad_frame_cache *
 loongarch_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
-  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct trad_frame_cache *cache;
   CORE_ADDR pc;
 
@@ -72,8 +408,7 @@ loongarch_frame_cache (struct frame_info *this_frame, void **this_cache)
   cache = trad_frame_cache_zalloc (this_frame);
   *this_cache = cache;
 
-  loongarch_gdbarch_tdep *tdep = (loongarch_gdbarch_tdep *) gdbarch_tdep (gdbarch);
-  trad_frame_set_reg_realreg (cache, gdbarch_pc_regnum (gdbarch), tdep->regs.ra);
+  trad_frame_set_reg_realreg (cache, LOONGARCH_PC_REGNUM, LOONGARCH_RA_REGNUM);
 
   pc = get_frame_address_in_block (this_frame);
   trad_frame_set_id (cache, frame_id_build_unavailable_stack (pc));
@@ -81,7 +416,7 @@ loongarch_frame_cache (struct frame_info *this_frame, void **this_cache)
   return cache;
 }
 
-/* Implement the this_id callback for LoongArch frame unwinder.  */
+/* Implement the this_id callback for frame unwinder.  */
 
 static void
 loongarch_frame_this_id (struct frame_info *this_frame, void **prologue_cache,
@@ -93,7 +428,7 @@ loongarch_frame_this_id (struct frame_info *this_frame, void **prologue_cache,
   trad_frame_get_id (info, this_id);
 }
 
-/* Implement the prev_register callback for LoongArch frame unwinder.  */
+/* Implement the prev_register callback for frame unwinder.  */
 
 static struct value *
 loongarch_frame_prev_register (struct frame_info *this_frame,
@@ -117,16 +452,41 @@ static const struct frame_unwind loongarch_frame_unwind = {
   /*.prev_arch	   =*/nullptr,
 };
 
-/* Implement the "dwarf2_reg_to_regnum" gdbarch method.  */
+/* Implement the return_value gdbarch method.  */
+
+static enum return_value_convention
+loongarch_return_value (struct gdbarch *gdbarch, struct value *function,
+			struct type *type, struct regcache *regcache,
+			gdb_byte *readbuf, const gdb_byte *writebuf)
+{
+  int len = TYPE_LENGTH (type);
+  int regnum = -1;
+
+  /* See if our value is returned through a register.  If it is, then
+     store the associated register number in REGNUM.  */
+  switch (type->code ())
+    {
+      case TYPE_CODE_INT:
+	regnum = LOONGARCH_A0_REGNUM;
+	break;
+    }
+
+  /* Extract the return value from the register where it was stored.  */
+  if (readbuf != nullptr)
+    regcache->raw_read_part (regnum, 0, len, readbuf);
+  if (writebuf != nullptr)
+    regcache->raw_write_part (regnum, 0, len, writebuf);
+
+  return RETURN_VALUE_REGISTER_CONVENTION;
+}
+
+/* Implement the dwarf2_reg_to_regnum gdbarch method.  */
 
 static int
-loongarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int num)
+loongarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int regnum)
 {
-  loongarch_gdbarch_tdep *tdep = (loongarch_gdbarch_tdep *) gdbarch_tdep (gdbarch);
-  auto regs = tdep->regs;
-
-  if (0 <= num && num < 32)
-    return regs.r + num;
+  if (regnum >= 0 && regnum < 32)
+    return regnum;
   else
     return -1;
 }
@@ -209,7 +569,6 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   size_t regnum = 0;
   tdesc_arch_data_up tdesc_data = tdesc_data_alloc ();
   loongarch_gdbarch_tdep *tdep = new loongarch_gdbarch_tdep;
-  tdep->regs.r = regnum;
 
   /* Validate the description provides the mandatory base registers
      and allocate their numbers.  */
@@ -217,10 +576,8 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   for (int i = 0; i < 32; i++)
     valid_p &= tdesc_numbered_register (feature_cpu, tdesc_data.get (), regnum++,
 					loongarch_r_normal_name[i] + 1);
-  valid_p &= tdesc_numbered_register (feature_cpu, tdesc_data.get (),
-				      tdep->regs.pc = regnum++, "pc");
-  valid_p &= tdesc_numbered_register (feature_cpu, tdesc_data.get (),
-				      tdep->regs.badv = regnum++, "badv");
+  valid_p &= tdesc_numbered_register (feature_cpu, tdesc_data.get (), regnum++, "pc");
+  valid_p &= tdesc_numbered_register (feature_cpu, tdesc_data.get (), regnum++, "badv");
   if (!valid_p)
     return nullptr;
 
@@ -268,6 +625,10 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_int_bit (gdbarch, 32);
   set_gdbarch_long_bit (gdbarch, info.bfd_arch_info->bits_per_address);
   set_gdbarch_long_long_bit (gdbarch, 64);
+  set_gdbarch_float_bit (gdbarch, 32);
+  set_gdbarch_double_bit (gdbarch, 64);
+  set_gdbarch_long_double_bit (gdbarch, 128);
+  set_gdbarch_long_double_format (gdbarch, floatformats_ieee_quad);
   set_gdbarch_ptr_bit (gdbarch, info.bfd_arch_info->bits_per_address);
   set_gdbarch_char_signed (gdbarch, 0);
 
@@ -275,14 +636,15 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   info.tdesc_data = tdesc_data.get ();
 
   /* Information about registers.  */
-  tdep->regs.ra = tdep->regs.r + 1;
-  tdep->regs.sp = tdep->regs.r + 3;
   set_gdbarch_num_regs (gdbarch, regnum);
-  set_gdbarch_sp_regnum (gdbarch, tdep->regs.sp);
-  set_gdbarch_pc_regnum (gdbarch, tdep->regs.pc);
+  set_gdbarch_sp_regnum (gdbarch, LOONGARCH_SP_REGNUM);
+  set_gdbarch_pc_regnum (gdbarch, LOONGARCH_PC_REGNUM);
 
   /* Finalise the target description registers.  */
   tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
+
+  /* Return value info  */
+  set_gdbarch_return_value (gdbarch, loongarch_return_value);
 
   /* Advance PC across function entry code.  */
   set_gdbarch_skip_prologue (gdbarch, loongarch_skip_prologue);
@@ -294,6 +656,7 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_align (gdbarch, loongarch_frame_align);
 
   /* Breakpoint manipulation.  */
+  set_gdbarch_software_single_step (gdbarch, loongarch_software_single_step);
   set_gdbarch_breakpoint_kind_from_pc (gdbarch, loongarch_breakpoint::kind_from_pc);
   set_gdbarch_sw_breakpoint_from_kind (gdbarch, loongarch_breakpoint::bp_from_kind);
 

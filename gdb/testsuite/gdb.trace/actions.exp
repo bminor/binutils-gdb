@@ -246,7 +246,7 @@ gdb_load $binfile
 # created above.
 gdb_breakpoint "main"
 gdb_run_cmd
-if {[gdb_test "" "Breakpoint .*"] != 0} {
+if {[gdb_test "" "Breakpoint .*" "run to main"] != 0} {
     return -1
 }
 

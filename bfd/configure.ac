@@ -209,13 +209,6 @@ AM_PO_SUBDIRS
 AC_SUBST(HDEFINES)
 AC_PROG_INSTALL
 
-BFD_HOST_64BIT_LONG=0
-BFD_HOST_64BIT_LONG_LONG=0
-BFD_HOST_64_BIT_DEFINED=0
-BFD_HOST_64_BIT=
-BFD_HOST_U_64_BIT=
-BFD_HOSTPTR_T="unsigned long"
-
 AC_CHECK_SIZEOF(long long)
 AC_CHECK_SIZEOF(void *)
 AC_CHECK_SIZEOF(long)
@@ -225,31 +218,12 @@ if test "x${ac_cv_sizeof_void_p}" = "x8"; then
   host64=true
 fi
 
+BFD_HOST_64BIT_LONG=0
 if test "x${ac_cv_sizeof_long}" = "x8"; then
   BFD_HOST_64BIT_LONG=1
-  test -n "${HOST_64BIT_TYPE}" || HOST_64BIT_TYPE="long"
-  test -n "${HOST_U_64BIT_TYPE}" || HOST_U_64BIT_TYPE="unsigned long"
-elif test "x${ac_cv_sizeof_long_long}" = "x8"; then
-  BFD_HOST_64BIT_LONG_LONG=1
-  test -n "${HOST_64BIT_TYPE}" || HOST_64BIT_TYPE="long long"
-  test -n "${HOST_U_64BIT_TYPE}" || HOST_U_64BIT_TYPE="unsigned long long"
-  if test "x${ac_cv_sizeof_void_p}" = "x8"; then
-    BFD_HOSTPTR_T="unsigned long long"
-  fi
-fi
-
-if test -n "${HOST_64BIT_TYPE}" -a -n "${HOST_U_64BIT_TYPE}"; then
-  BFD_HOST_64_BIT_DEFINED=1
-  BFD_HOST_64_BIT="${HOST_64BIT_TYPE}"
-  BFD_HOST_U_64_BIT="${HOST_U_64BIT_TYPE}"
 fi
 
 AC_SUBST(BFD_HOST_64BIT_LONG)
-AC_SUBST(BFD_HOST_64BIT_LONG_LONG)
-AC_SUBST(BFD_HOST_64_BIT_DEFINED)
-AC_SUBST(BFD_HOST_64_BIT)
-AC_SUBST(BFD_HOST_U_64_BIT)
-AC_SUBST(BFD_HOSTPTR_T)
 
 BFD_CC_FOR_BUILD
 
@@ -443,6 +417,7 @@ do
     alpha_vms_vec)		 tb="$tb vms-alpha.lo vms-misc.lo vms-lib.lo"; target_size=64 ;;
     alpha_vms_lib_txt_vec)	 tb="$tb vms-lib.lo vms-misc.lo" ;;
     am33_elf32_linux_vec)	 tb="$tb elf32-am33lin.lo elf32.lo $elf" ;;
+    amdgcn_elf64_le_vec)	 tb="$tb elf64-amdgcn.lo elf64.lo $elf"; target_size=64 ;;
     aout0_be_vec)		 tb="$tb aout0.lo aout32.lo" ;;
     aout64_vec)			 tb="$tb demo64.lo aout64.lo"; target_size=64 ;;
     aout_vec)			 tb="$tb host-aout.lo aout32.lo" ;;
@@ -522,10 +497,6 @@ do
     ia64_pei_vec)		 tb="$tb pei-ia64.lo pepigen.lo $coff"; target_size=64 ;;
     ip2k_elf32_vec)		 tb="$tb elf32-ip2k.lo elf32.lo $elf" ;;
     iq2000_elf32_vec)		 tb="$tb elf32-iq2000.lo elf32.lo $elf" ;;
-    k1om_elf64_vec)		 tb="$tb elf64-x86-64.lo elfxx-x86.lo elf-ifunc.lo elf64.lo $elf"; target_size=64 ;;
-    k1om_elf64_fbsd_vec)	 tb="$tb elf64-x86-64.lo elfxx-x86.lo elf-ifunc.lo elf64.lo $elf"; target_size=64 ;;
-    l1om_elf64_vec)		 tb="$tb elf64-x86-64.lo elfxx-x86.lo elf-ifunc.lo elf64.lo $elf"; target_size=64 ;;
-    l1om_elf64_fbsd_vec)	 tb="$tb elf64-x86-64.lo elfxx-x86.lo elf-ifunc.lo elf64.lo $elf"; target_size=64 ;;
     lm32_elf32_vec)		 tb="$tb elf32-lm32.lo elf32.lo $elf" ;;
     lm32_elf32_fdpic_vec)	 tb="$tb elf32-lm32.lo elf32.lo $elf" ;;
     loongarch_elf32_vec)	 tb="$tb elf32-loongarch.lo elfxx-loongarch.lo elf32.lo elf-ifunc.lo $elf" ;;
@@ -694,7 +665,6 @@ do
     x86_64_pe_vec)		 tb="$tb pe-x86_64.lo pex64igen.lo $coff"; target_size=64 ;;
     x86_64_pe_big_vec)		 tb="$tb pe-x86_64.lo pex64igen.lo $coff"; target_size=64 ;;
     x86_64_pei_vec)		 tb="$tb pei-x86_64.lo pex64igen.lo $coff"; target_size=64 ;;
-    xc16x_elf32_vec)		 tb="$tb elf32-xc16x.lo elf32.lo $elf" ;;
     xgate_elf32_vec)		 tb="$tb elf32-xgate.lo elf32.lo $elf" ;;
     xstormy16_elf32_vec)	 tb="$tb elf32-xstormy16.lo elf32.lo $elf" ;;
     xtensa_elf32_be_vec)	 tb="$tb xtensa-isa.lo xtensa-modules.lo elf32-xtensa.lo elf32.lo $elf" ;;
@@ -785,10 +755,6 @@ case ${host64}-${target64}-${want64} in
     wordsize=64
     bfd64_libs='$(BFD64_LIBS)'
     all_backends='$(BFD64_BACKENDS) $(BFD32_BACKENDS)'
-    if test $BFD_HOST_64_BIT_DEFINED = 0; then
-      AC_MSG_WARN([You have requested a 64 bit BFD configuration, but])
-      AC_MSG_WARN([your compiler may not have a 64 bit integral type])
-    fi
     if test -n "$GCC" ; then
        bad_64bit_gcc=no;
        AC_MSG_CHECKING([for gcc version with buggy 64-bit support])
@@ -1090,8 +1056,8 @@ bfd_file_ptr="long"
 bfd_ufile_ptr="unsigned long"
 if test x"$ac_cv_func_ftello64" = xyes -a x"$ac_cv_func_fseeko64" = xyes \
 	-o x"${ac_cv_sizeof_off_t}" = x8; then
-    bfd_file_ptr=BFD_HOST_64_BIT
-    bfd_ufile_ptr=BFD_HOST_U_64_BIT
+    bfd_file_ptr=int64_t
+    bfd_ufile_ptr=uint64_t
 fi
 AC_MSG_RESULT($bfd_file_ptr)
 AC_SUBST(bfd_file_ptr)

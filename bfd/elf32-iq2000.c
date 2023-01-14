@@ -35,7 +35,7 @@ static reloc_howto_type iq2000_elf_howto_table [] =
 
   HOWTO (R_IQ2000_NONE,		     /* type */
 	 0,			     /* rightshift */
-	 3,			     /* size (0 = byte, 1 = short, 2 = long) */
+	 0,			     /* size */
 	 0,			     /* bitsize */
 	 false,			     /* pc_relative */
 	 0,			     /* bitpos */
@@ -50,7 +50,7 @@ static reloc_howto_type iq2000_elf_howto_table [] =
   /* A 16 bit absolute relocation.  */
   HOWTO (R_IQ2000_16,		     /* type */
 	 0,			     /* rightshift */
-	 1,			     /* size (0 = byte, 1 = short, 2 = long) */
+	 2,			     /* size */
 	 16,			     /* bitsize */
 	 false,			     /* pc_relative */
 	 0,			     /* bitpos */
@@ -65,7 +65,7 @@ static reloc_howto_type iq2000_elf_howto_table [] =
   /* A 32 bit absolute relocation.  */
   HOWTO (R_IQ2000_32,		     /* type */
 	 0,			     /* rightshift */
-	 2,			     /* size (0 = byte, 1 = short, 2 = long) */
+	 4,			     /* size */
 	 31,			     /* bitsize */
 	 false,			     /* pc_relative */
 	 0,			     /* bitpos */
@@ -80,7 +80,7 @@ static reloc_howto_type iq2000_elf_howto_table [] =
   /* 26 bit branch address.  */
   HOWTO (R_IQ2000_26,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 26,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -98,7 +98,7 @@ static reloc_howto_type iq2000_elf_howto_table [] =
   /* 16 bit PC relative reference.  */
   HOWTO (R_IQ2000_PC16,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -113,7 +113,7 @@ static reloc_howto_type iq2000_elf_howto_table [] =
   /* high 16 bits of symbol value.  */
   HOWTO (R_IQ2000_HI16,		/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 15,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -128,7 +128,7 @@ static reloc_howto_type iq2000_elf_howto_table [] =
   /* Low 16 bits of symbol value.  */
   HOWTO (R_IQ2000_LO16,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -143,7 +143,7 @@ static reloc_howto_type iq2000_elf_howto_table [] =
   /* 16-bit jump offset.  */
   HOWTO (R_IQ2000_OFFSET_16,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -158,7 +158,7 @@ static reloc_howto_type iq2000_elf_howto_table [] =
   /* 21-bit jump offset.  */
   HOWTO (R_IQ2000_OFFSET_21,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 21,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -173,7 +173,7 @@ static reloc_howto_type iq2000_elf_howto_table [] =
   /* unsigned high 16 bits of value.  */
   HOWTO (R_IQ2000_OFFSET_21,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -188,7 +188,7 @@ static reloc_howto_type iq2000_elf_howto_table [] =
   /* A 32 bit absolute debug relocation.  */
   HOWTO (R_IQ2000_32_DEBUG,	     /* type */
 	 0,			     /* rightshift */
-	 2,			     /* size (0 = byte, 1 = short, 2 = long) */
+	 4,			     /* size */
 	 32,			     /* bitsize */
 	 false,			     /* pc_relative */
 	 0,			     /* bitpos */
@@ -206,7 +206,7 @@ static reloc_howto_type iq2000_elf_howto_table [] =
 static reloc_howto_type iq2000_elf_vtinherit_howto =
   HOWTO (R_IQ2000_GNU_VTINHERIT,    /* type */
 	 0,			   /* rightshift */
-	 2,			   /* size (0 = byte, 1 = short, 2 = long) */
+	 4,			   /* size */
 	 0,			   /* bitsize */
 	 false,			   /* pc_relative */
 	 0,			   /* bitpos */
@@ -222,7 +222,7 @@ static reloc_howto_type iq2000_elf_vtinherit_howto =
 static reloc_howto_type iq2000_elf_vtentry_howto =
   HOWTO (R_IQ2000_GNU_VTENTRY,	   /* type */
 	 0,			   /* rightshift */
-	 2,			   /* size (0 = byte, 1 = short, 2 = long) */
+	 4,			   /* size */
 	 0,			   /* bitsize */
 	 false,			   /* pc_relative */
 	 0,			   /* bitpos */

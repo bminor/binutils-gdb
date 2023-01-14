@@ -489,7 +489,7 @@ pe_ILF_make_a_symbol_reloc (pe_ILF_vars *		vars,
 
   internal->r_vaddr  = address;
   internal->r_symndx = sym_index;
-  internal->r_type   = entry->howto->type;
+  internal->r_type   = entry->howto ? entry->howto->type : 0;
 
   vars->relcount ++;
 
@@ -588,7 +588,7 @@ pe_ILF_make_a_symbol (pe_ILF_vars *  vars,
   /* Initialise the internal symbol structure.  */
   ent->u.syment.n_sclass	  = sclass;
   ent->u.syment.n_scnum		  = section->target_index;
-  ent->u.syment._n._n_n._n_offset = (bfd_hostptr_t) sym;
+  ent->u.syment._n._n_n._n_offset = (uintptr_t) sym;
   ent->is_sym = true;
 
   sym->symbol.the_bfd = vars->abfd;

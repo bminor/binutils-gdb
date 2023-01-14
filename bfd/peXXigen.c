@@ -736,13 +736,23 @@ _bfd_XXi_swap_aouthdr_out (bfd * abfd, void * in, void * out)
 
   H_PUT_16 (abfd, aouthdr_in->magic, aouthdr_out->standard.magic);
 
+  if (extra->MajorLinkerVersion || extra->MinorLinkerVersion)
+    {
+      H_PUT_8 (abfd, extra->MajorLinkerVersion,
+	       aouthdr_out->standard.vstamp);
+      H_PUT_8 (abfd, extra->MinorLinkerVersion,
+	       aouthdr_out->standard.vstamp + 1);
+    }
+  else
+    {
 /* e.g. 219510000 is linker version 2.19  */
 #define LINKER_VERSION ((short) (BFD_VERSION / 1000000))
 
-  /* This piece of magic sets the "linker version" field to
-     LINKER_VERSION.  */
-  H_PUT_16 (abfd, (LINKER_VERSION / 100 + (LINKER_VERSION % 100) * 256),
-	    aouthdr_out->standard.vstamp);
+      /* This piece of magic sets the "linker version" field to
+	 LINKER_VERSION.  */
+      H_PUT_16 (abfd, (LINKER_VERSION / 100 + (LINKER_VERSION % 100) * 256),
+		aouthdr_out->standard.vstamp);
+    }
 
   PUT_AOUTHDR_TSIZE (abfd, aouthdr_in->tsize, aouthdr_out->standard.tsize);
   PUT_AOUTHDR_DSIZE (abfd, aouthdr_in->dsize, aouthdr_out->standard.dsize);
@@ -2937,6 +2947,7 @@ bool
 _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
 {
   pe_data_type *ipe, *ope;
+  bfd_size_type size;
 
   /* One day we may try to grok other private data.  */
   if (ibfd->xvec->flavour != bfd_target_coff_flavour
@@ -2971,7 +2982,8 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
   memcpy (ope->dos_message, ipe->dos_message, sizeof (ope->dos_message));
 
   /* The file offsets contained in the debug directory need rewriting.  */
-  if (ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size != 0)
+  size = ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size;
+  if (size != 0)
     {
       bfd_vma addr = ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].VirtualAddress
 	+ ope->pe_opthdr.ImageBase;
@@ -2980,62 +2992,74 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
 	 representing s_size, not virt_size).  Therefore don't look for the
 	 section containing the first byte, but for that covering the last
 	 one.  */
-      bfd_vma last = addr + ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size - 1;
+      bfd_vma last = addr + size - 1;
       asection *section = find_section_by_vma (obfd, last);
-      bfd_byte *data;
 
-      /* PR 17512: file: 0f15796a.  */
-      if (section && addr < section->vma)
+      if (section != NULL)
 	{
-	  /* xgettext:c-format */
-	  _bfd_error_handler
-	    (_("%pB: Data Directory (%lx bytes at %" PRIx64 ") "
-	       "extends across section boundary at %" PRIx64),
-	     obfd, ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size,
-	     (uint64_t) addr, (uint64_t) section->vma);
-	  return false;
-	}
+	  bfd_byte *data;
+	  bfd_vma dataoff = addr - section->vma;
 
-      if (section && bfd_malloc_and_get_section (obfd, section, &data))
-	{
-	  unsigned int i;
-	  struct external_IMAGE_DEBUG_DIRECTORY *dd =
-	    (struct external_IMAGE_DEBUG_DIRECTORY *)(data + (addr - section->vma));
-
-	  for (i = 0; i < ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size
-		 / sizeof (struct external_IMAGE_DEBUG_DIRECTORY); i++)
+	  /* PR 17512: file: 0f15796a.  */
+	  if (addr < section->vma
+	      || section->size < dataoff
+	      || section->size - dataoff < size)
 	    {
-	      asection *ddsection;
-	      struct external_IMAGE_DEBUG_DIRECTORY *edd = &(dd[i]);
-	      struct internal_IMAGE_DEBUG_DIRECTORY idd;
-
-	      _bfd_XXi_swap_debugdir_in (obfd, edd, &idd);
-
-	      if (idd.AddressOfRawData == 0)
-		continue; /* RVA 0 means only offset is valid, not handled yet.  */
-
-	      ddsection = find_section_by_vma (obfd, idd.AddressOfRawData + ope->pe_opthdr.ImageBase);
-	      if (!ddsection)
-		continue; /* Not in a section! */
-
-	      idd.PointerToRawData = ddsection->filepos + (idd.AddressOfRawData
-							   + ope->pe_opthdr.ImageBase) - ddsection->vma;
-
-	      _bfd_XXi_swap_debugdir_out (obfd, &idd, edd);
-	    }
-
-	  if (!bfd_set_section_contents (obfd, section, data, 0, section->size))
-	    {
-	      _bfd_error_handler (_("failed to update file offsets in debug directory"));
-	      free (data);
+	      /* xgettext:c-format */
+	      _bfd_error_handler
+		(_("%pB: Data Directory (%lx bytes at %" PRIx64 ") "
+		   "extends across section boundary at %" PRIx64),
+		 obfd, ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size,
+		 (uint64_t) addr, (uint64_t) section->vma);
 	      return false;
 	    }
-	  free (data);
-	}
-      else if (section)
-	{
-	  _bfd_error_handler (_("%pB: failed to read debug data section"), obfd);
-	  return false;
+
+	  if (bfd_malloc_and_get_section (obfd, section, &data))
+	    {
+	      unsigned int i;
+	      struct external_IMAGE_DEBUG_DIRECTORY *dd =
+		(struct external_IMAGE_DEBUG_DIRECTORY *)(data + dataoff);
+
+	      for (i = 0; i < ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size
+		     / sizeof (struct external_IMAGE_DEBUG_DIRECTORY); i++)
+		{
+		  asection *ddsection;
+		  struct external_IMAGE_DEBUG_DIRECTORY *edd = &(dd[i]);
+		  struct internal_IMAGE_DEBUG_DIRECTORY idd;
+		  bfd_vma idd_vma;
+
+		  _bfd_XXi_swap_debugdir_in (obfd, edd, &idd);
+
+		  /* RVA 0 means only offset is valid, not handled yet.  */
+		  if (idd.AddressOfRawData == 0)
+		    continue;
+
+		  idd_vma = idd.AddressOfRawData + ope->pe_opthdr.ImageBase;
+		  ddsection = find_section_by_vma (obfd, idd_vma);
+		  if (!ddsection)
+		    continue; /* Not in a section! */
+
+		  idd.PointerToRawData
+		    = ddsection->filepos + idd_vma - ddsection->vma;
+		  _bfd_XXi_swap_debugdir_out (obfd, &idd, edd);
+		}
+
+	      if (!bfd_set_section_contents (obfd, section, data, 0,
+					     section->size))
+		{
+		  _bfd_error_handler (_("failed to update file offsets"
+					" in debug directory"));
+		  free (data);
+		  return false;
+		}
+	      free (data);
+	    }
+	  else
+	    {
+	      _bfd_error_handler (_("%pB: failed to read "
+				    "debug data section"), obfd);
+	      return false;
+	    }
 	}
     }
 

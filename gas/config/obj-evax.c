@@ -87,7 +87,7 @@ evax_symbol_new_hook (symbolS *sym)
   udata->enbsym = NULL;
   udata->origname = xstrdup (S_GET_NAME (sym));
   udata->lkindex = 0;
-  symbol_get_bfdsym(sym)->udata.p = (PTR) udata;
+  symbol_get_bfdsym(sym)->udata.p = udata;
 }
 
 void

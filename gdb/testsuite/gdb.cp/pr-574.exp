@@ -20,17 +20,13 @@
 
 # This file is part of the gdb testsuite
 
-if { [skip_cplus_tests] } { continue }
+if { [skip_cplus_tests] } { return }
 
 #
 # test running programs
 #
 
 standard_testfile .cc
-
-if [get_compiler_info "c++"] {
-    return -1
-}
 
 set flags [list debug c++]
 if { [test_compiler_info gcc-*] && [gcc_major_version] >= 10 } {
@@ -44,7 +40,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile $flags]} {
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 # First, run to after we've constructed the object:

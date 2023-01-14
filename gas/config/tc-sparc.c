@@ -75,10 +75,10 @@ static enum { MM_TSO, MM_PSO, MM_RMO } sparc_memory_model = MM_RMO;
 #ifndef TE_SOLARIS
 /* Bitmask of instruction types seen so far, used to populate the
    GNU attributes section with hwcap information.  */
-static bfd_uint64_t hwcap_seen;
+static uint64_t hwcap_seen;
 #endif
 
-static bfd_uint64_t hwcap_allowed;
+static uint64_t hwcap_allowed;
 
 static int architecture_requested;
 static int warn_on_bump;
@@ -498,15 +498,15 @@ md_parse_option (int c, const char *arg)
 	    || opcode_arch > max_architecture)
 	  max_architecture = opcode_arch;
 
-        /* The allowed hardware capabilities are the implied by the
-           opcodes arch plus any extra capabilities defined in the GAS
-           arch.  */
-        hwcap_allowed
-          = (hwcap_allowed
-             | (((bfd_uint64_t) sparc_opcode_archs[opcode_arch].hwcaps2) << 32)
-             | (((bfd_uint64_t) sa->hwcap2_allowed) << 32)
-             | sparc_opcode_archs[opcode_arch].hwcaps
-             | sa->hwcap_allowed);
+	/* The allowed hardware capabilities are the implied by the
+	   opcodes arch plus any extra capabilities defined in the GAS
+	   arch.  */
+	hwcap_allowed
+	  = (hwcap_allowed
+	     | ((uint64_t) sparc_opcode_archs[opcode_arch].hwcaps2 << 32)
+	     | ((uint64_t) sa->hwcap2_allowed << 32)
+	     | sparc_opcode_archs[opcode_arch].hwcaps
+	     | sa->hwcap_allowed);
 	architecture_requested = 1;
       }
       break;
@@ -1607,7 +1607,7 @@ md_assemble (char *str)
 }
 
 static const char *
-get_hwcap_name (bfd_uint64_t mask)
+get_hwcap_name (uint64_t mask)
 {
   if (mask & HWCAP_MUL32)
     return "mul32";
@@ -3171,8 +3171,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
               msg_str = sasi->name;
             }
 
-          bfd_uint64_t hwcaps
-	    = (((bfd_uint64_t) insn->hwcaps2) << 32) | insn->hwcaps;
+	  uint64_t hwcaps = ((uint64_t) insn->hwcaps2 << 32) | insn->hwcaps;
 
 #ifndef TE_SOLARIS
 	  if (hwcaps)
@@ -3211,10 +3210,10 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		}
 	      current_architecture = needed_architecture;
 	      hwcap_allowed
-                = (hwcap_allowed
-                   | hwcaps
-                   | (((bfd_uint64_t) sparc_opcode_archs[current_architecture].hwcaps2) << 32)
-                   | sparc_opcode_archs[current_architecture].hwcaps);
+		= (hwcap_allowed
+		   | hwcaps
+		   | ((uint64_t) sparc_opcode_archs[current_architecture].hwcaps2 << 32)
+		   | sparc_opcode_archs[current_architecture].hwcaps);
 	    }
 	  /* Conflict.  */
 	  /* ??? This seems to be a bit fragile.  What if the next entry in

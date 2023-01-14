@@ -282,6 +282,13 @@ struct language_defn
 
   virtual const char *natural_name () const = 0;
 
+  /* Digit separator of the language.  */
+
+  virtual const char *get_digit_separator () const
+  {
+    return " ";
+  }
+
   /* Return a vector of file extensions for this language.  The extension
      must include the ".", like ".c".  If this language doesn't need to
      provide any filename extensions, this may be an empty vector (which is
@@ -749,20 +756,6 @@ extern void language_info ();
 
 extern enum language set_language (enum language);
 
-
-/* This page contains functions that return things that are
-   specific to languages.  Each of these functions is based on
-   the current setting of working_lang, which the user sets
-   with the "set language" command.  */
-
-#define LA_PRINT_TYPE(type,varstring,stream,show,level,flags)		\
-  (current_language->print_type(type,varstring,stream,show,level,flags))
-
-#define LA_PRINT_CHAR(ch, type, stream) \
-  (current_language->printchar (ch, type, stream))
-#define LA_PRINT_STRING(stream, elttype, string, length, encoding, force_ellipses, options) \
-  (current_language->printstr (stream, elttype, string, length, \
-			       encoding, force_ellipses,options))
 
 /* Test a character to decide whether it can be printed in literal form
    or needs to be printed in another representation.  For example,

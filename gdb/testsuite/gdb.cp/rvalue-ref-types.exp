@@ -16,7 +16,7 @@
 # Tests for reference types with short type variables in GDB, based on
 # gdb.cp/ref-types.exp.
 
-if { [skip_cplus_tests] } { continue }
+if { [skip_cplus_tests] } { return }
 
 standard_testfile .cc
 
@@ -63,7 +63,7 @@ gdb_test "print rrat\[3\]" ".$decimal = 3" "print value of rrat\[3\]"
 
 if {![runto 'f']} then {
     perror "couldn't run to f"
-    continue
+    return
 }
 
 gdb_test "up" ".main2.*" "up from f"

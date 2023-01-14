@@ -72,7 +72,7 @@ proc check_thread_local {number} {
 	    "= $expected_value" \
 	    "${number} thread local storage"
 
-    if {![skip_python_tests]} {
+    if {!$::has_python_support} {
 	gdb_test_no_output \
 	    "python sym = gdb.lookup_symbol('a_thread_local')\[0\]" \
 	    "${number} look up a_thread_local symbol"
@@ -154,6 +154,9 @@ proc check_thread_stack {number spin_threads spin_threads_level} {
 }
 
 clean_restart ${binfile}
+
+# Set this to avoid calling skip_python_tests repeatedly.
+set has_python_support [skip_python_tests]
 
 gdb_test_multiple "print a_thread_local" "" {
     -re -wrap "Cannot find thread-local variables on this target" {

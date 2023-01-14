@@ -143,7 +143,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
   /* Dummy relocation.  Does nothing.  */
   HOWTO (R_MN10300_NONE,
 	 0,
-	 3,
+	 0,
 	 0,
 	 false,
 	 0,
@@ -157,7 +157,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
   /* Standard 32 bit reloc.  */
   HOWTO (R_MN10300_32,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 0,
@@ -171,7 +171,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
   /* Standard 16 bit reloc.  */
   HOWTO (R_MN10300_16,
 	 0,
-	 1,
+	 2,
 	 16,
 	 false,
 	 0,
@@ -185,7 +185,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
   /* Standard 8 bit reloc.  */
   HOWTO (R_MN10300_8,
 	 0,
-	 0,
+	 1,
 	 8,
 	 false,
 	 0,
@@ -199,7 +199,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
   /* Standard 32bit pc-relative reloc.  */
   HOWTO (R_MN10300_PCREL32,
 	 0,
-	 2,
+	 4,
 	 32,
 	 true,
 	 0,
@@ -213,7 +213,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
   /* Standard 16bit pc-relative reloc.  */
   HOWTO (R_MN10300_PCREL16,
 	 0,
-	 1,
+	 2,
 	 16,
 	 true,
 	 0,
@@ -227,7 +227,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
   /* Standard 8 pc-relative reloc.  */
   HOWTO (R_MN10300_PCREL8,
 	 0,
-	 0,
+	 1,
 	 8,
 	 true,
 	 0,
@@ -242,7 +242,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
   /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_MN10300_GNU_VTINHERIT, /* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -257,7 +257,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
   /* GNU extension to record C++ vtable member usage */
   HOWTO (R_MN10300_GNU_VTENTRY,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -272,7 +272,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
   /* Standard 24 bit reloc.  */
   HOWTO (R_MN10300_24,
 	 0,
-	 2,
+	 4,
 	 24,
 	 false,
 	 0,
@@ -285,7 +285,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 	 false),
   HOWTO (R_MN10300_GOTPC32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -299,7 +299,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_GOTPC16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -313,7 +313,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_GOTOFF32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -327,7 +327,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_GOTOFF24,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -341,7 +341,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_GOTOFF16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -355,7 +355,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_PLT32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -369,7 +369,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_PLT16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -383,7 +383,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_GOT32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -397,7 +397,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_GOT24,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -411,7 +411,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_GOT16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -425,7 +425,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_COPY,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -439,7 +439,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_GLOB_DAT,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -453,7 +453,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_JMP_SLOT,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -467,7 +467,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_RELATIVE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -481,7 +481,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_TLS_GD,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -495,7 +495,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_TLS_LD,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -509,7 +509,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_TLS_LDO,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -523,7 +523,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_TLS_GOTIE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -537,7 +537,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_TLS_IE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -551,7 +551,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_TLS_LE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -565,7 +565,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_TLS_DTPMOD,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -579,7 +579,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_TLS_DTPOFF,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -593,7 +593,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_TLS_TPOFF,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -607,7 +607,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_SYM_DIFF,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -621,7 +621,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 
   HOWTO (R_MN10300_ALIGN,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

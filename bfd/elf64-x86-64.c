@@ -43,130 +43,130 @@
    special_function, name, partial_inplace, src_mask, dst_mask, pcrel_offset.  */
 static reloc_howto_type x86_64_elf_howto_table[] =
 {
-  HOWTO(R_X86_64_NONE, 0, 3, 0, false, 0, complain_overflow_dont,
+  HOWTO(R_X86_64_NONE, 0, 0, 0, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_X86_64_NONE",	false, 0, 0x00000000,
 	false),
-  HOWTO(R_X86_64_64, 0, 4, 64, false, 0, complain_overflow_dont,
+  HOWTO(R_X86_64_64, 0, 8, 64, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_X86_64_64", false, 0, MINUS_ONE,
 	false),
-  HOWTO(R_X86_64_PC32, 0, 2, 32, true, 0, complain_overflow_signed,
+  HOWTO(R_X86_64_PC32, 0, 4, 32, true, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_PC32", false, 0, 0xffffffff,
 	true),
-  HOWTO(R_X86_64_GOT32, 0, 2, 32, false, 0, complain_overflow_signed,
+  HOWTO(R_X86_64_GOT32, 0, 4, 32, false, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_GOT32", false, 0, 0xffffffff,
 	false),
-  HOWTO(R_X86_64_PLT32, 0, 2, 32, true, 0, complain_overflow_signed,
+  HOWTO(R_X86_64_PLT32, 0, 4, 32, true, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_PLT32", false, 0, 0xffffffff,
 	true),
-  HOWTO(R_X86_64_COPY, 0, 2, 32, false, 0, complain_overflow_bitfield,
+  HOWTO(R_X86_64_COPY, 0, 4, 32, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_X86_64_COPY", false, 0, 0xffffffff,
 	false),
-  HOWTO(R_X86_64_GLOB_DAT, 0, 4, 64, false, 0, complain_overflow_dont,
+  HOWTO(R_X86_64_GLOB_DAT, 0, 8, 64, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_X86_64_GLOB_DAT", false, 0, MINUS_ONE,
 	false),
-  HOWTO(R_X86_64_JUMP_SLOT, 0, 4, 64, false, 0, complain_overflow_dont,
+  HOWTO(R_X86_64_JUMP_SLOT, 0, 8, 64, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_X86_64_JUMP_SLOT", false, 0, MINUS_ONE,
 	false),
-  HOWTO(R_X86_64_RELATIVE, 0, 4, 64, false, 0, complain_overflow_dont,
+  HOWTO(R_X86_64_RELATIVE, 0, 8, 64, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_X86_64_RELATIVE", false, 0, MINUS_ONE,
 	false),
-  HOWTO(R_X86_64_GOTPCREL, 0, 2, 32, true, 0, complain_overflow_signed,
+  HOWTO(R_X86_64_GOTPCREL, 0, 4, 32, true, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_GOTPCREL", false, 0, 0xffffffff,
 	true),
-  HOWTO(R_X86_64_32, 0, 2, 32, false, 0, complain_overflow_unsigned,
+  HOWTO(R_X86_64_32, 0, 4, 32, false, 0, complain_overflow_unsigned,
 	bfd_elf_generic_reloc, "R_X86_64_32", false, 0, 0xffffffff,
 	false),
-  HOWTO(R_X86_64_32S, 0, 2, 32, false, 0, complain_overflow_signed,
+  HOWTO(R_X86_64_32S, 0, 4, 32, false, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_32S", false, 0, 0xffffffff,
 	false),
-  HOWTO(R_X86_64_16, 0, 1, 16, false, 0, complain_overflow_bitfield,
+  HOWTO(R_X86_64_16, 0, 2, 16, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_X86_64_16", false, 0, 0xffff, false),
-  HOWTO(R_X86_64_PC16, 0, 1, 16, true, 0, complain_overflow_bitfield,
+  HOWTO(R_X86_64_PC16, 0, 2, 16, true, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_X86_64_PC16", false, 0, 0xffff, true),
-  HOWTO(R_X86_64_8, 0, 0, 8, false, 0, complain_overflow_bitfield,
+  HOWTO(R_X86_64_8, 0, 1, 8, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_X86_64_8", false, 0, 0xff, false),
-  HOWTO(R_X86_64_PC8, 0, 0, 8, true, 0, complain_overflow_signed,
+  HOWTO(R_X86_64_PC8, 0, 1, 8, true, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_PC8", false, 0, 0xff, true),
-  HOWTO(R_X86_64_DTPMOD64, 0, 4, 64, false, 0, complain_overflow_dont,
+  HOWTO(R_X86_64_DTPMOD64, 0, 8, 64, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_X86_64_DTPMOD64", false, 0, MINUS_ONE,
 	false),
-  HOWTO(R_X86_64_DTPOFF64, 0, 4, 64, false, 0, complain_overflow_dont,
+  HOWTO(R_X86_64_DTPOFF64, 0, 8, 64, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_X86_64_DTPOFF64", false, 0, MINUS_ONE,
 	false),
-  HOWTO(R_X86_64_TPOFF64, 0, 4, 64, false, 0, complain_overflow_dont,
+  HOWTO(R_X86_64_TPOFF64, 0, 8, 64, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_X86_64_TPOFF64", false, 0, MINUS_ONE,
 	false),
-  HOWTO(R_X86_64_TLSGD, 0, 2, 32, true, 0, complain_overflow_signed,
+  HOWTO(R_X86_64_TLSGD, 0, 4, 32, true, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_TLSGD", false, 0, 0xffffffff,
 	true),
-  HOWTO(R_X86_64_TLSLD, 0, 2, 32, true, 0, complain_overflow_signed,
+  HOWTO(R_X86_64_TLSLD, 0, 4, 32, true, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_TLSLD", false, 0, 0xffffffff,
 	true),
-  HOWTO(R_X86_64_DTPOFF32, 0, 2, 32, false, 0, complain_overflow_signed,
+  HOWTO(R_X86_64_DTPOFF32, 0, 4, 32, false, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_DTPOFF32", false, 0, 0xffffffff,
 	false),
-  HOWTO(R_X86_64_GOTTPOFF, 0, 2, 32, true, 0, complain_overflow_signed,
+  HOWTO(R_X86_64_GOTTPOFF, 0, 4, 32, true, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_GOTTPOFF", false, 0, 	0xffffffff,
 	true),
-  HOWTO(R_X86_64_TPOFF32, 0, 2, 32, false, 0, complain_overflow_signed,
+  HOWTO(R_X86_64_TPOFF32, 0, 4, 32, false, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_TPOFF32", false, 0, 0xffffffff,
 	false),
-  HOWTO(R_X86_64_PC64, 0, 4, 64, true, 0, complain_overflow_dont,
+  HOWTO(R_X86_64_PC64, 0, 8, 64, true, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_X86_64_PC64", false, 0, MINUS_ONE,
 	true),
-  HOWTO(R_X86_64_GOTOFF64, 0, 4, 64, false, 0, complain_overflow_dont,
+  HOWTO(R_X86_64_GOTOFF64, 0, 8, 64, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_X86_64_GOTOFF64", false, 0, MINUS_ONE,
 	false),
-  HOWTO(R_X86_64_GOTPC32, 0, 2, 32, true, 0, complain_overflow_signed,
+  HOWTO(R_X86_64_GOTPC32, 0, 4, 32, true, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_GOTPC32", false, 0, 0xffffffff,
 	true),
-  HOWTO(R_X86_64_GOT64, 0, 4, 64, false, 0, complain_overflow_signed,
+  HOWTO(R_X86_64_GOT64, 0, 8, 64, false, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_GOT64", false, 0, MINUS_ONE,
 	false),
-  HOWTO(R_X86_64_GOTPCREL64, 0, 4, 64, true, 0, complain_overflow_signed,
+  HOWTO(R_X86_64_GOTPCREL64, 0, 8, 64, true, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_GOTPCREL64", false, 0, MINUS_ONE,
 	true),
-  HOWTO(R_X86_64_GOTPC64, 0, 4, 64, true, 0, complain_overflow_signed,
+  HOWTO(R_X86_64_GOTPC64, 0, 8, 64, true, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_GOTPC64", false, 0, MINUS_ONE,
 	true),
-  HOWTO(R_X86_64_GOTPLT64, 0, 4, 64, false, 0, complain_overflow_signed,
+  HOWTO(R_X86_64_GOTPLT64, 0, 8, 64, false, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_GOTPLT64", false, 0, MINUS_ONE,
 	false),
-  HOWTO(R_X86_64_PLTOFF64, 0, 4, 64, false, 0, complain_overflow_signed,
+  HOWTO(R_X86_64_PLTOFF64, 0, 8, 64, false, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_PLTOFF64", false, 0, MINUS_ONE,
 	false),
-  HOWTO(R_X86_64_SIZE32, 0, 2, 32, false, 0, complain_overflow_unsigned,
+  HOWTO(R_X86_64_SIZE32, 0, 4, 32, false, 0, complain_overflow_unsigned,
 	bfd_elf_generic_reloc, "R_X86_64_SIZE32", false, 0, 0xffffffff,
 	false),
-  HOWTO(R_X86_64_SIZE64, 0, 4, 64, false, 0, complain_overflow_dont,
+  HOWTO(R_X86_64_SIZE64, 0, 8, 64, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_X86_64_SIZE64", false, 0, MINUS_ONE,
 	false),
-  HOWTO(R_X86_64_GOTPC32_TLSDESC, 0, 2, 32, true, 0,
+  HOWTO(R_X86_64_GOTPC32_TLSDESC, 0, 4, 32, true, 0,
 	complain_overflow_bitfield, bfd_elf_generic_reloc,
 	"R_X86_64_GOTPC32_TLSDESC", false, 0, 0xffffffff, true),
-  HOWTO(R_X86_64_TLSDESC_CALL, 0, 3, 0, false, 0,
+  HOWTO(R_X86_64_TLSDESC_CALL, 0, 0, 0, false, 0,
 	complain_overflow_dont, bfd_elf_generic_reloc,
 	"R_X86_64_TLSDESC_CALL",
 	false, 0, 0, false),
-  HOWTO(R_X86_64_TLSDESC, 0, 4, 64, false, 0,
+  HOWTO(R_X86_64_TLSDESC, 0, 8, 64, false, 0,
 	complain_overflow_dont, bfd_elf_generic_reloc,
 	"R_X86_64_TLSDESC", false, 0, MINUS_ONE, false),
-  HOWTO(R_X86_64_IRELATIVE, 0, 4, 64, false, 0, complain_overflow_dont,
+  HOWTO(R_X86_64_IRELATIVE, 0, 8, 64, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_X86_64_IRELATIVE", false, 0, MINUS_ONE,
 	false),
-  HOWTO(R_X86_64_RELATIVE64, 0, 4, 64, false, 0, complain_overflow_dont,
+  HOWTO(R_X86_64_RELATIVE64, 0, 8, 64, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_X86_64_RELATIVE64", false, 0, MINUS_ONE,
 	false),
-  HOWTO(R_X86_64_PC32_BND, 0, 2, 32, true, 0, complain_overflow_signed,
+  HOWTO(R_X86_64_PC32_BND, 0, 4, 32, true, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_PC32_BND", false, 0, 0xffffffff,
 	true),
-  HOWTO(R_X86_64_PLT32_BND, 0, 2, 32, true, 0, complain_overflow_signed,
+  HOWTO(R_X86_64_PLT32_BND, 0, 4, 32, true, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_PLT32_BND", false, 0, 0xffffffff,
 	true),
-  HOWTO(R_X86_64_GOTPCRELX, 0, 2, 32, true, 0, complain_overflow_signed,
+  HOWTO(R_X86_64_GOTPCRELX, 0, 4, 32, true, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_GOTPCRELX", false, 0, 0xffffffff,
 	true),
-  HOWTO(R_X86_64_REX_GOTPCRELX, 0, 2, 32, true, 0, complain_overflow_signed,
+  HOWTO(R_X86_64_REX_GOTPCRELX, 0, 4, 32, true, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_REX_GOTPCRELX", false, 0, 0xffffffff,
 	true),
 
@@ -178,16 +178,16 @@ static reloc_howto_type x86_64_elf_howto_table[] =
 #define R_X86_64_vt_offset (R_X86_64_GNU_VTINHERIT - R_X86_64_standard)
 
 /* GNU extension to record C++ vtable hierarchy.  */
-  HOWTO (R_X86_64_GNU_VTINHERIT, 0, 4, 0, false, 0, complain_overflow_dont,
+  HOWTO (R_X86_64_GNU_VTINHERIT, 0, 8, 0, false, 0, complain_overflow_dont,
 	 NULL, "R_X86_64_GNU_VTINHERIT", false, 0, 0, false),
 
 /* GNU extension to record C++ vtable member usage.  */
-  HOWTO (R_X86_64_GNU_VTENTRY, 0, 4, 0, false, 0, complain_overflow_dont,
+  HOWTO (R_X86_64_GNU_VTENTRY, 0, 8, 0, false, 0, complain_overflow_dont,
 	 _bfd_elf_rel_vtable_reloc_fn, "R_X86_64_GNU_VTENTRY", false, 0, 0,
 	 false),
 
 /* Use complain_overflow_bitfield on R_X86_64_32 for x32.  */
-  HOWTO(R_X86_64_32, 0, 2, 32, false, 0, complain_overflow_bitfield,
+  HOWTO(R_X86_64_32, 0, 4, 32, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_X86_64_32", false, 0, 0xffffffff,
 	false)
 };
@@ -2211,16 +2211,24 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 	      else if (r_type != R_X86_64_PC32_BND
 		       && r_type != R_X86_64_PC64)
 		{
-		  h->pointer_equality_needed = 1;
 		  /* At run-time, R_X86_64_64 can be resolved for both
 		     x86-64 and x32. But R_X86_64_32 and R_X86_64_32S
-		     can only be resolved for x32.  */
+		     can only be resolved for x32.  Function pointer
+		     reference doesn't need PLT for pointer equality.  */
 		  if ((sec->flags & SEC_READONLY) == 0
 		      && (r_type == R_X86_64_64
 			  || (!ABI_64_P (abfd)
 			      && (r_type == R_X86_64_32
 				  || r_type == R_X86_64_32S))))
 		    func_pointer_ref = true;
+
+		  /* IFUNC symbol needs pointer equality in PDE so that
+		     function pointer reference will be resolved to its
+		     PLT entry directly.  */
+		  if (!func_pointer_ref
+		      || (bfd_link_pde (info)
+			  && h->type == STT_GNU_IFUNC))
+		    h->pointer_equality_needed = 1;
 		}
 
 	      if (!func_pointer_ref)
@@ -2242,6 +2250,23 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 		  if (!h->def_regular
 		      || (sec->flags & (SEC_CODE | SEC_READONLY)) != 0)
 		    h->plt.refcount = 1;
+
+		  if (h->pointer_equality_needed
+		      && h->type == STT_FUNC
+		      && eh->def_protected
+		      && elf_has_indirect_extern_access (h->root.u.def.section->owner))
+		    {
+		      /* Disallow non-canonical reference to canonical
+			 protected function.  */
+		      _bfd_error_handler
+			/* xgettext:c-format */
+			(_("%pB: non-canonical reference to canonical "
+			   "protected function `%s' in %pB"),
+			 abfd, h->root.root.string,
+			 h->root.u.def.section->owner);
+		      bfd_set_error (bfd_error_bad_value);
+		      goto error_return;
+		    }
 		}
 	    }
 
@@ -5395,99 +5420,6 @@ elf64_x86_64_copy_solaris_special_section_fields (const bfd *ibfd ATTRIBUTE_UNUS
 #undef  elf_backend_strtab_flags
 #undef  elf_backend_copy_special_section_fields
 
-/* Intel L1OM support.  */
-
-static bool
-elf64_l1om_elf_object_p (bfd *abfd)
-{
-  /* Set the right machine number for an L1OM elf64 file.  */
-  bfd_default_set_arch_mach (abfd, bfd_arch_l1om, bfd_mach_l1om);
-  return true;
-}
-
-#undef  TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM		    l1om_elf64_vec
-#undef  TARGET_LITTLE_NAME
-#define TARGET_LITTLE_NAME		    "elf64-l1om"
-#undef ELF_ARCH
-#define ELF_ARCH			    bfd_arch_l1om
-
-#undef	ELF_MACHINE_CODE
-#define ELF_MACHINE_CODE		    EM_L1OM
-
-#undef	ELF_OSABI
-
-#undef  elf64_bed
-#define elf64_bed elf64_l1om_bed
-
-#undef elf_backend_object_p
-#define elf_backend_object_p		    elf64_l1om_elf_object_p
-
-/* Restore defaults.  */
-#undef ELF_TARGET_OS
-
-#include "elf64-target.h"
-
-/* FreeBSD L1OM support.  */
-
-#undef  TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM		    l1om_elf64_fbsd_vec
-#undef  TARGET_LITTLE_NAME
-#define TARGET_LITTLE_NAME		    "elf64-l1om-freebsd"
-
-#undef	ELF_OSABI
-#define	ELF_OSABI			    ELFOSABI_FREEBSD
-
-#undef  elf64_bed
-#define elf64_bed elf64_l1om_fbsd_bed
-
-#include "elf64-target.h"
-
-/* Intel K1OM support.  */
-
-static bool
-elf64_k1om_elf_object_p (bfd *abfd)
-{
-  /* Set the right machine number for an K1OM elf64 file.  */
-  bfd_default_set_arch_mach (abfd, bfd_arch_k1om, bfd_mach_k1om);
-  return true;
-}
-
-#undef  TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM		    k1om_elf64_vec
-#undef  TARGET_LITTLE_NAME
-#define TARGET_LITTLE_NAME		    "elf64-k1om"
-#undef ELF_ARCH
-#define ELF_ARCH			    bfd_arch_k1om
-
-#undef	ELF_MACHINE_CODE
-#define ELF_MACHINE_CODE		    EM_K1OM
-
-#undef	ELF_OSABI
-
-#undef  elf64_bed
-#define elf64_bed elf64_k1om_bed
-
-#undef elf_backend_object_p
-#define elf_backend_object_p		    elf64_k1om_elf_object_p
-
-#include "elf64-target.h"
-
-/* FreeBSD K1OM support.  */
-
-#undef  TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM		    k1om_elf64_fbsd_vec
-#undef  TARGET_LITTLE_NAME
-#define TARGET_LITTLE_NAME		    "elf64-k1om-freebsd"
-
-#undef	ELF_OSABI
-#define	ELF_OSABI			    ELFOSABI_FREEBSD
-
-#undef  elf64_bed
-#define elf64_bed elf64_k1om_fbsd_bed
-
-#include "elf64-target.h"
-
 /* 32bit x86-64 support.  */
 
 #undef  TARGET_LITTLE_SYM
@@ -5503,6 +5435,7 @@ elf64_k1om_elf_object_p (bfd *abfd)
 #undef	ELF_MACHINE_CODE
 #define ELF_MACHINE_CODE		    EM_X86_64
 
+#undef	ELF_TARGET_OS
 #undef	ELF_OSABI
 
 #define bfd_elf32_bfd_reloc_type_lookup	\

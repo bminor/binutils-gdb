@@ -226,9 +226,9 @@ DESCRIPTION
 .  {* Entries for byte swapping for data. These are different from the
 .     other entry points, since they don't take a BFD as the first argument.
 .     Certain other handlers could do the same.  *}
-.  bfd_uint64_t	  (*bfd_getx64) (const void *);
-.  bfd_int64_t	  (*bfd_getx_signed_64) (const void *);
-.  void		  (*bfd_putx64) (bfd_uint64_t, void *);
+.  uint64_t	  (*bfd_getx64) (const void *);
+.  int64_t	  (*bfd_getx_signed_64) (const void *);
+.  void		  (*bfd_putx64) (uint64_t, void *);
 .  bfd_vma	  (*bfd_getx32) (const void *);
 .  bfd_signed_vma (*bfd_getx_signed_32) (const void *);
 .  void		  (*bfd_putx32) (bfd_vma, void *);
@@ -237,9 +237,9 @@ DESCRIPTION
 .  void		  (*bfd_putx16) (bfd_vma, void *);
 .
 .  {* Byte swapping for the headers.  *}
-.  bfd_uint64_t	  (*bfd_h_getx64) (const void *);
-.  bfd_int64_t	  (*bfd_h_getx_signed_64) (const void *);
-.  void		  (*bfd_h_putx64) (bfd_uint64_t, void *);
+.  uint64_t	  (*bfd_h_getx64) (const void *);
+.  int64_t	  (*bfd_h_getx_signed_64) (const void *);
+.  void		  (*bfd_h_putx64) (uint64_t, void *);
 .  bfd_vma	  (*bfd_h_getx32) (const void *);
 .  bfd_signed_vma (*bfd_h_getx_signed_32) (const void *);
 .  void		  (*bfd_h_putx32) (bfd_vma, void *);
@@ -686,6 +686,7 @@ extern const bfd_target alpha_elf64_fbsd_vec;
 extern const bfd_target alpha_vms_vec;
 extern const bfd_target alpha_vms_lib_txt_vec;
 extern const bfd_target am33_elf32_linux_vec;
+extern const bfd_target amdgcn_elf64_le_vec;
 extern const bfd_target aout_vec;
 extern const bfd_target arc_elf32_be_vec;
 extern const bfd_target arc_elf32_le_vec;
@@ -763,10 +764,6 @@ extern const bfd_target ia64_elf64_vms_vec;
 extern const bfd_target ia64_pei_vec;
 extern const bfd_target ip2k_elf32_vec;
 extern const bfd_target iq2000_elf32_vec;
-extern const bfd_target k1om_elf64_vec;
-extern const bfd_target k1om_elf64_fbsd_vec;
-extern const bfd_target l1om_elf64_vec;
-extern const bfd_target l1om_elf64_fbsd_vec;
 extern const bfd_target lm32_elf32_vec;
 extern const bfd_target lm32_elf32_fdpic_vec;
 extern const bfd_target loongarch_elf64_vec;
@@ -936,7 +933,6 @@ extern const bfd_target x86_64_mach_o_vec;
 extern const bfd_target x86_64_pe_vec;
 extern const bfd_target x86_64_pe_big_vec;
 extern const bfd_target x86_64_pei_vec;
-extern const bfd_target xc16x_elf32_vec;
 extern const bfd_target xgate_elf32_vec;
 extern const bfd_target xstormy16_elf32_vec;
 extern const bfd_target xtensa_elf32_be_vec;
@@ -995,6 +991,10 @@ static const bfd_target * const _bfd_target_vector[] =
 	&aarch64_elf64_le_cloudabi_vec,
 	&aarch64_mach_o_vec,
 	&aarch64_pei_vec,
+#endif
+
+#ifdef BFD64
+	&amdgcn_elf64_le_vec,
 #endif
 
 #ifdef BFD64
@@ -1121,13 +1121,6 @@ static const bfd_target * const _bfd_target_vector[] =
 
 	&ip2k_elf32_vec,
 	&iq2000_elf32_vec,
-
-#ifdef BFD64
-	&k1om_elf64_vec,
-	&k1om_elf64_fbsd_vec,
-	&l1om_elf64_vec,
-	&l1om_elf64_fbsd_vec,
-#endif
 
 	&lm32_elf32_vec,
 
@@ -1349,8 +1342,6 @@ static const bfd_target * const _bfd_target_vector[] =
 	&x86_64_pe_big_vec,
 	&x86_64_pei_vec,
 #endif
-
-	&xc16x_elf32_vec,
 
 	&xgate_elf32_vec,
 

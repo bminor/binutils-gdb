@@ -64,7 +64,7 @@ Disassembly of section .text:
  *[a-f0-9]+:	48 ff 00             	incq   \(%rax\)
  *[a-f0-9]+:	48 6d                	rex\.W insl \(%dx\),%es:\(%rdi\)
  *[a-f0-9]+:	48 6d                	rex\.W insl \(%dx\),%es:\(%rdi\)
- *[a-f0-9]+:	48 cf                	iretq *
+ *[a-f0-9]+:	48 cf                	iretq
  *[a-f0-9]+:	48 ff 20             	rex\.W jmp \*\(%rax\)
  *[a-f0-9]+:	48 ff 18             	rex\.W lcall \*\(%rax\)
  *[a-f0-9]+:	48 0f 01 10          	rex\.W lgdt \(%rax\)
@@ -74,7 +74,7 @@ Disassembly of section .text:
  *[a-f0-9]+:	48 0f 01 30          	rex\.W lmsw \(%rax\)
  *[a-f0-9]+:	48 ad                	lods   %ds:\(%rsi\),%rax
  *[a-f0-9]+:	48 ad                	lods   %ds:\(%rsi\),%rax
- *[a-f0-9]+:	48 cb                	lretq *
+ *[a-f0-9]+:	48 cb                	lretq
  *[a-f0-9]+:	48 ca 04 00          	lretq  \$0x4
  *[a-f0-9]+:	48 0f 00 18          	rex\.W ltr \(%rax\)
  *[a-f0-9]+:	48 c7 00 12 00 00 00 	movq   \$0x12,\(%rax\)
@@ -149,8 +149,8 @@ Disassembly of section .text:
  *[a-f0-9]+:	48 81 28 89 00 00 00 	subq   \$0x89,\(%rax\)
  *[a-f0-9]+:	48 81 28 34 12 00 00 	subq   \$0x1234,\(%rax\)
  *[a-f0-9]+:	48 81 28 78 56 34 12 	subq   \$0x12345678,\(%rax\)
- *[a-f0-9]+:	48 0f 35             	sysexitq *
- *[a-f0-9]+:	48 0f 07             	sysretq *
+ *[a-f0-9]+:	48 0f 35             	sysexitq
+ *[a-f0-9]+:	48 0f 07             	sysretq
  *[a-f0-9]+:	48 f7 00 89 00 00 00 	testq  \$0x89,\(%rax\)
  *[a-f0-9]+:	48 f7 00 34 12 00 00 	testq  \$0x1234,\(%rax\)
  *[a-f0-9]+:	48 f7 00 78 56 34 12 	testq  \$0x12345678,\(%rax\)

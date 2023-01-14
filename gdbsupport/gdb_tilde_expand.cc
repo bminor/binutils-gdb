@@ -102,12 +102,3 @@ gdb_tilde_expand (const char *dir)
   gdb_assert (glob.pathc () == 1);
   return std::string (glob.pathv ()[0]) + remainder;
 }
-
-/* See gdbsupport/gdb_tilde_expand.h.  */
-
-gdb::unique_xmalloc_ptr<char>
-gdb_tilde_expand_up (const char *dir)
-{
-  const std::string expanded = gdb_tilde_expand (dir);
-  return make_unique_xstrdup (expanded.c_str ());
-}

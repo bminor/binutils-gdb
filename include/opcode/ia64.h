@@ -29,7 +29,7 @@
 extern "C" {
 #endif
 
-typedef BFD_HOST_U_64_BIT ia64_insn;
+typedef uint64_t ia64_insn;
 
 enum ia64_insn_type
   {

@@ -26,20 +26,46 @@
    used to select register sets.  */
 struct aarch64_features
 {
-  bool sve = false;
+  /* A non zero VQ value indicates both the presence of SVE and the
+     Vector Quotient - the number of 128bit chunks in an SVE Z
+     register.  */
+  uint64_t vq = 0;
+
   bool pauth = false;
   bool mte = false;
+  bool tls = false;
 };
 
-/* Create the aarch64 target description.  A non zero VQ value indicates both
-   the presence of SVE and the Vector Quotient - the number of 128bit chunks in
-   an SVE Z register.  HAS_PAUTH_P indicates the presence of the PAUTH
-   feature.
+inline bool operator==(const aarch64_features &lhs, const aarch64_features &rhs)
+{
+  return lhs.vq == rhs.vq
+    && lhs.pauth == rhs.pauth
+    && lhs.mte == rhs.mte
+    && lhs.tls == rhs.tls;
+}
 
-   MTE_P indicates the presence of the Memory Tagging Extension feature.  */
+namespace std
+{
+  template<>
+  struct hash<aarch64_features>
+  {
+    std::size_t operator()(const aarch64_features &features) const noexcept
+    {
+      std::size_t h;
 
-target_desc *aarch64_create_target_description (uint64_t vq, bool has_pauth_p,
-						bool mte_p);
+      h = features.vq;
+      h = h << 1 | features.pauth;
+      h = h << 1 | features.mte;
+      h = h << 1 | features.tls;
+      return h;
+    }
+  };
+}
+
+/* Create the aarch64 target description.  */
+
+target_desc *
+  aarch64_create_target_description (const aarch64_features &features);
 
 /* Register numbers of various important registers.
    Note that on SVE, the Z registers reuse the V register numbers and the V
@@ -91,6 +117,7 @@ enum aarch64_regnum
 #define AARCH64_NUM_REGS AARCH64_FPCR_REGNUM + 1
 #define AARCH64_SVE_NUM_REGS AARCH64_SVE_VG_REGNUM + 1
 
+#define	AARCH64_TLS_REGS_SIZE (8)
 
 /* There are a number of ways of expressing the current SVE vector size:
 

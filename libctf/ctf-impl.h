@@ -449,6 +449,10 @@ struct ctf_dict
   ctf_dynhash_t *ctf_link_inputs; /* Inputs to this link.  */
   ctf_dynhash_t *ctf_link_outputs; /* Additional outputs from this link.  */
 
+  /* If a link input CU, points at the corresponding per-CU output (if any);
+     if an output, points at the input (if any).  */
+  ctf_dict_t *ctf_link_in_out;
+
   /* Map input types to output types for ctf_add_type.  Key is a
      ctf_link_type_key_t: value is a type ID.  */
   ctf_dynhash_t *ctf_link_type_mapping;
@@ -738,6 +742,8 @@ extern void ctf_arc_close_internal (struct ctf_archive *);
 extern const ctf_preamble_t *ctf_arc_bufpreamble (const ctf_sect_t *);
 extern void *ctf_set_open_errno (int *, int);
 extern unsigned long ctf_set_errno (ctf_dict_t *, int);
+extern void ctf_flip_header (ctf_header_t *);
+extern int ctf_flip (ctf_dict_t *, ctf_header_t *, unsigned char *, int);
 
 extern ctf_dict_t *ctf_simple_open_internal (const char *, size_t, const char *,
 					     size_t, size_t,

@@ -740,533 +740,533 @@ _start:
 
 .intel_syntax noprefix
 	vaddph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vaddph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vaddph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vaddph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vaddph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vaddph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vaddph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vaddph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vaddph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vaddph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vaddph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vaddsh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vaddsh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vaddsh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vaddsh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vaddsh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vaddsh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vaddsh	xmm6, xmm5, WORD PTR [ecx]	 #AVX512-FP16
 	vaddsh	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vaddsh	xmm6{k7}{z}, xmm5, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vcmpph	k5, zmm5, zmm4, 123	 #AVX512-FP16
-	vcmpph	k5, zmm5, zmm4, {sae}, 123	 #AVX512-FP16 HAS_SAE
-	vcmpph	k5{k7}, zmm5, zmm4, {sae}, 123	 #AVX512-FP16 MASK_ENABLING HAS_SAE
+	vcmpph	k5, zmm5, zmm4{sae}, 123	 #AVX512-FP16 HAS_SAE
+	vcmpph	k5{k7}, zmm5, zmm4{sae}, 123	 #AVX512-FP16 MASK_ENABLING HAS_SAE
 	vcmpph	k5{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000], 123	 #AVX512-FP16 MASK_ENABLING
-	vcmpph	k5, zmm5, WORD PTR [ecx]{1to32}, 123	 #AVX512-FP16 BROADCAST_EN
+	vcmpph	k5, zmm5, WORD BCST [ecx], 123	 #AVX512-FP16 BROADCAST_EN
 	vcmpph	k5, zmm5, ZMMWORD PTR [ecx+8128], 123	 #AVX512-FP16 Disp8(7f)
-	vcmpph	k5{k7}, zmm5, WORD PTR [edx-256]{1to32}, 123	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING
+	vcmpph	k5{k7}, zmm5, WORD BCST [edx-256], 123	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING
 	vcmpsh	k5, xmm5, xmm4, 123	 #AVX512-FP16
-	vcmpsh	k5, xmm5, xmm4, {sae}, 123	 #AVX512-FP16 HAS_SAE
-	vcmpsh	k5{k7}, xmm5, xmm4, {sae}, 123	 #AVX512-FP16 MASK_ENABLING HAS_SAE
+	vcmpsh	k5, xmm5, xmm4{sae}, 123	 #AVX512-FP16 HAS_SAE
+	vcmpsh	k5{k7}, xmm5, xmm4{sae}, 123	 #AVX512-FP16 MASK_ENABLING HAS_SAE
 	vcmpsh	k5{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000], 123	 #AVX512-FP16 MASK_ENABLING
 	vcmpsh	k5, xmm5, WORD PTR [ecx], 123	 #AVX512-FP16
 	vcmpsh	k5, xmm5, WORD PTR [ecx+254], 123	 #AVX512-FP16 Disp8(7f)
 	vcmpsh	k5{k7}, xmm5, WORD PTR [edx-256], 123	 #AVX512-FP16 Disp8(80) MASK_ENABLING
 	vcomish	xmm6, xmm5	 #AVX512-FP16
-	vcomish	xmm6, xmm5, {sae}	 #AVX512-FP16 HAS_SAE
+	vcomish	xmm6, xmm5{sae}	 #AVX512-FP16 HAS_SAE
 	vcomish	xmm6, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16
 	vcomish	xmm6, WORD PTR [ecx]	 #AVX512-FP16
 	vcomish	xmm6, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vcomish	xmm6, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80)
 	vcvtdq2ph	ymm6, zmm5	 #AVX512-FP16
-	vcvtdq2ph	ymm6, zmm5, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vcvtdq2ph	ymm6{k7}{z}, zmm5, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vcvtdq2ph	ymm6, zmm5{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtdq2ph	ymm6{k7}{z}, zmm5{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vcvtdq2ph	ymm6{k7}, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vcvtdq2ph	ymm6, DWORD PTR [ecx]{1to16}	 #AVX512-FP16 BROADCAST_EN
+	vcvtdq2ph	ymm6, DWORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vcvtdq2ph	ymm6, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vcvtdq2ph	ymm6{k7}{z}, DWORD PTR [edx-512]{1to16}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vcvtdq2ph	ymm6{k7}{z}, DWORD BCST [edx-512]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vcvtpd2ph	xmm6, zmm5	 #AVX512-FP16
-	vcvtpd2ph	xmm6, zmm5, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vcvtpd2ph	xmm6{k7}{z}, zmm5, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vcvtpd2ph	xmm6, zmm5{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtpd2ph	xmm6{k7}{z}, zmm5{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vcvtpd2ph	xmm6{k7}, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vcvtpd2ph	xmm6, QWORD PTR [ecx]{1to8}	 #AVX512-FP16 BROADCAST_EN
+	vcvtpd2ph	xmm6, QWORD BCST [ecx]{1to8}	 #AVX512-FP16 BROADCAST_EN
 	vcvtpd2ph	xmm6, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vcvtpd2ph	xmm6{k7}{z}, QWORD PTR [edx-1024]{1to8}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vcvtpd2ph	xmm6{k7}{z}, QWORD BCST [edx-1024]{1to8}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vcvtph2dq	zmm6, ymm5	 #AVX512-FP16
-	vcvtph2dq	zmm6, ymm5, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vcvtph2dq	zmm6{k7}{z}, ymm5, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vcvtph2dq	zmm6, ymm5{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtph2dq	zmm6{k7}{z}, ymm5{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vcvtph2dq	zmm6{k7}, YMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vcvtph2dq	zmm6, WORD PTR [ecx]{1to16}	 #AVX512-FP16 BROADCAST_EN
+	vcvtph2dq	zmm6, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vcvtph2dq	zmm6, YMMWORD PTR [ecx+4064]	 #AVX512-FP16 Disp8(7f)
-	vcvtph2dq	zmm6{k7}{z}, WORD PTR [edx-256]{1to16}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vcvtph2dq	zmm6{k7}{z}, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vcvtph2pd	zmm6, xmm5	 #AVX512-FP16
-	vcvtph2pd	zmm6, xmm5, {sae}	 #AVX512-FP16 HAS_SAE
-	vcvtph2pd	zmm6{k7}{z}, xmm5, {sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
+	vcvtph2pd	zmm6, xmm5{sae}	 #AVX512-FP16 HAS_SAE
+	vcvtph2pd	zmm6{k7}{z}, xmm5{sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
 	vcvtph2pd	zmm6{k7}, XMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vcvtph2pd	zmm6, WORD PTR [ecx]{1to8}	 #AVX512-FP16 BROADCAST_EN
+	vcvtph2pd	zmm6, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vcvtph2pd	zmm6, XMMWORD PTR [ecx+2032]	 #AVX512-FP16 Disp8(7f)
-	vcvtph2pd	zmm6{k7}{z}, WORD PTR [edx-256]{1to8}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vcvtph2pd	zmm6{k7}{z}, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vcvtph2psx	zmm6, ymm5	 #AVX512-FP16
-	vcvtph2psx	zmm6, ymm5, {sae}	 #AVX512-FP16 HAS_SAE
-	vcvtph2psx	zmm6{k7}{z}, ymm5, {sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
+	vcvtph2psx	zmm6, ymm5{sae}	 #AVX512-FP16 HAS_SAE
+	vcvtph2psx	zmm6{k7}{z}, ymm5{sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
 	vcvtph2psx	zmm6{k7}, YMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vcvtph2psx	zmm6, WORD PTR [ecx]{1to16}	 #AVX512-FP16 BROADCAST_EN
+	vcvtph2psx	zmm6, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vcvtph2psx	zmm6, YMMWORD PTR [ecx+4064]	 #AVX512-FP16 Disp8(7f)
-	vcvtph2psx	zmm6{k7}{z}, WORD PTR [edx-256]{1to16}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vcvtph2psx	zmm6{k7}{z}, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vcvtph2qq	zmm6, xmm5	 #AVX512-FP16
-	vcvtph2qq	zmm6, xmm5, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vcvtph2qq	zmm6{k7}{z}, xmm5, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vcvtph2qq	zmm6, xmm5{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtph2qq	zmm6{k7}{z}, xmm5{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vcvtph2qq	zmm6{k7}, XMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vcvtph2qq	zmm6, WORD PTR [ecx]{1to8}	 #AVX512-FP16 BROADCAST_EN
+	vcvtph2qq	zmm6, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vcvtph2qq	zmm6, XMMWORD PTR [ecx+2032]	 #AVX512-FP16 Disp8(7f)
-	vcvtph2qq	zmm6{k7}{z}, WORD PTR [edx-256]{1to8}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vcvtph2qq	zmm6{k7}{z}, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vcvtph2udq	zmm6, ymm5	 #AVX512-FP16
-	vcvtph2udq	zmm6, ymm5, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vcvtph2udq	zmm6{k7}{z}, ymm5, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vcvtph2udq	zmm6, ymm5{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtph2udq	zmm6{k7}{z}, ymm5{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vcvtph2udq	zmm6{k7}, YMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vcvtph2udq	zmm6, WORD PTR [ecx]{1to16}	 #AVX512-FP16 BROADCAST_EN
+	vcvtph2udq	zmm6, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vcvtph2udq	zmm6, YMMWORD PTR [ecx+4064]	 #AVX512-FP16 Disp8(7f)
-	vcvtph2udq	zmm6{k7}{z}, WORD PTR [edx-256]{1to16}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vcvtph2udq	zmm6{k7}{z}, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vcvtph2uqq	zmm6, xmm5	 #AVX512-FP16
-	vcvtph2uqq	zmm6, xmm5, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vcvtph2uqq	zmm6{k7}{z}, xmm5, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vcvtph2uqq	zmm6, xmm5{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtph2uqq	zmm6{k7}{z}, xmm5{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vcvtph2uqq	zmm6{k7}, XMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vcvtph2uqq	zmm6, WORD PTR [ecx]{1to8}	 #AVX512-FP16 BROADCAST_EN
+	vcvtph2uqq	zmm6, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vcvtph2uqq	zmm6, XMMWORD PTR [ecx+2032]	 #AVX512-FP16 Disp8(7f)
-	vcvtph2uqq	zmm6{k7}{z}, WORD PTR [edx-256]{1to8}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vcvtph2uqq	zmm6{k7}{z}, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vcvtph2uw	zmm6, zmm5	 #AVX512-FP16
-	vcvtph2uw	zmm6, zmm5, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vcvtph2uw	zmm6{k7}{z}, zmm5, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vcvtph2uw	zmm6, zmm5{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtph2uw	zmm6{k7}{z}, zmm5{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vcvtph2uw	zmm6{k7}, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vcvtph2uw	zmm6, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vcvtph2uw	zmm6, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vcvtph2uw	zmm6, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vcvtph2uw	zmm6{k7}{z}, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vcvtph2uw	zmm6{k7}{z}, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vcvtph2w	zmm6, zmm5	 #AVX512-FP16
-	vcvtph2w	zmm6, zmm5, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vcvtph2w	zmm6{k7}{z}, zmm5, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vcvtph2w	zmm6, zmm5{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtph2w	zmm6{k7}{z}, zmm5{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vcvtph2w	zmm6{k7}, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vcvtph2w	zmm6, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vcvtph2w	zmm6, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vcvtph2w	zmm6, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vcvtph2w	zmm6{k7}{z}, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vcvtph2w	zmm6{k7}{z}, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vcvtps2phx	ymm6, zmm5	 #AVX512-FP16
-	vcvtps2phx	ymm6, zmm5, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vcvtps2phx	ymm6{k7}{z}, zmm5, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vcvtps2phx	ymm6, zmm5{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtps2phx	ymm6{k7}{z}, zmm5{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vcvtps2phx	ymm6{k7}, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vcvtps2phx	ymm6, DWORD PTR [ecx]{1to16}	 #AVX512-FP16 BROADCAST_EN
+	vcvtps2phx	ymm6, DWORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vcvtps2phx	ymm6, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vcvtps2phx	ymm6{k7}{z}, DWORD PTR [edx-512]{1to16}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vcvtps2phx	ymm6{k7}{z}, DWORD BCST [edx-512]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vcvtqq2ph	xmm6, zmm5	 #AVX512-FP16
-	vcvtqq2ph	xmm6, zmm5, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vcvtqq2ph	xmm6{k7}{z}, zmm5, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vcvtqq2ph	xmm6, zmm5{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtqq2ph	xmm6{k7}{z}, zmm5{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vcvtqq2ph	xmm6{k7}, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vcvtqq2ph	xmm6, QWORD PTR [ecx]{1to8}	 #AVX512-FP16 BROADCAST_EN
+	vcvtqq2ph	xmm6, QWORD BCST [ecx]{1to8}	 #AVX512-FP16 BROADCAST_EN
 	vcvtqq2ph	xmm6, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vcvtqq2ph	xmm6{k7}{z}, QWORD PTR [edx-1024]{1to8}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vcvtqq2ph	xmm6{k7}{z}, QWORD BCST [edx-1024]{1to8}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vcvtsd2sh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vcvtsd2sh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vcvtsd2sh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vcvtsd2sh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtsd2sh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vcvtsd2sh	xmm6{k7}, xmm5, QWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vcvtsd2sh	xmm6, xmm5, QWORD PTR [ecx]	 #AVX512-FP16
 	vcvtsd2sh	xmm6, xmm5, QWORD PTR [ecx+1016]	 #AVX512-FP16 Disp8(7f)
 	vcvtsd2sh	xmm6{k7}{z}, xmm5, QWORD PTR [edx-1024]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vcvtsh2sd	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vcvtsh2sd	xmm6, xmm5, xmm4, {sae}	 #AVX512-FP16 HAS_SAE
-	vcvtsh2sd	xmm6{k7}{z}, xmm5, xmm4, {sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
+	vcvtsh2sd	xmm6, xmm5, xmm4{sae}	 #AVX512-FP16 HAS_SAE
+	vcvtsh2sd	xmm6{k7}{z}, xmm5, xmm4{sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
 	vcvtsh2sd	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vcvtsh2sd	xmm6, xmm5, WORD PTR [ecx]	 #AVX512-FP16
 	vcvtsh2sd	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vcvtsh2sd	xmm6{k7}{z}, xmm5, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vcvtsh2si	edx, xmm6	 #AVX512-FP16
-	vcvtsh2si	edx, xmm6, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtsh2si	edx, xmm6{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
 	vcvtsh2si	edx, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16
 	vcvtsh2si	edx, WORD PTR [ecx]	 #AVX512-FP16
 	vcvtsh2si	edx, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vcvtsh2si	edx, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80)
 	vcvtsh2ss	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vcvtsh2ss	xmm6, xmm5, xmm4, {sae}	 #AVX512-FP16 HAS_SAE
-	vcvtsh2ss	xmm6{k7}{z}, xmm5, xmm4, {sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
+	vcvtsh2ss	xmm6, xmm5, xmm4{sae}	 #AVX512-FP16 HAS_SAE
+	vcvtsh2ss	xmm6{k7}{z}, xmm5, xmm4{sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
 	vcvtsh2ss	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vcvtsh2ss	xmm6, xmm5, WORD PTR [ecx]	 #AVX512-FP16
 	vcvtsh2ss	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vcvtsh2ss	xmm6{k7}{z}, xmm5, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vcvtsh2usi	edx, xmm6	 #AVX512-FP16
-	vcvtsh2usi	edx, xmm6, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtsh2usi	edx, xmm6{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
 	vcvtsh2usi	edx, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16
 	vcvtsh2usi	edx, WORD PTR [ecx]	 #AVX512-FP16
 	vcvtsh2usi	edx, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vcvtsh2usi	edx, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80)
 	vcvtsi2sh	xmm6, xmm5, edx	 #AVX512-FP16
-	vcvtsi2sh	xmm6, xmm5, {rn-sae}, edx	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtsi2sh	xmm6, xmm5, edx{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
 	vcvtsi2sh	xmm6, xmm5, DWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16
 	vcvtsi2sh	xmm6, xmm5, DWORD PTR [ecx]	 #AVX512-FP16
 	vcvtsi2sh	xmm6, xmm5, DWORD PTR [ecx+508]	 #AVX512-FP16 Disp8(7f)
 	vcvtsi2sh	xmm6, xmm5, DWORD PTR [edx-512]	 #AVX512-FP16 Disp8(80)
 	vcvtss2sh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vcvtss2sh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vcvtss2sh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vcvtss2sh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtss2sh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vcvtss2sh	xmm6{k7}, xmm5, DWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vcvtss2sh	xmm6, xmm5, DWORD PTR [ecx]	 #AVX512-FP16
 	vcvtss2sh	xmm6, xmm5, DWORD PTR [ecx+508]	 #AVX512-FP16 Disp8(7f)
 	vcvtss2sh	xmm6{k7}{z}, xmm5, DWORD PTR [edx-512]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vcvttph2dq	zmm6, ymm5	 #AVX512-FP16
-	vcvttph2dq	zmm6, ymm5, {sae}	 #AVX512-FP16 HAS_SAE
-	vcvttph2dq	zmm6{k7}{z}, ymm5, {sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
+	vcvttph2dq	zmm6, ymm5{sae}	 #AVX512-FP16 HAS_SAE
+	vcvttph2dq	zmm6{k7}{z}, ymm5{sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
 	vcvttph2dq	zmm6{k7}, YMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vcvttph2dq	zmm6, WORD PTR [ecx]{1to16}	 #AVX512-FP16 BROADCAST_EN
+	vcvttph2dq	zmm6, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vcvttph2dq	zmm6, YMMWORD PTR [ecx+4064]	 #AVX512-FP16 Disp8(7f)
-	vcvttph2dq	zmm6{k7}{z}, WORD PTR [edx-256]{1to16}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vcvttph2dq	zmm6{k7}{z}, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vcvttph2qq	zmm6, xmm5	 #AVX512-FP16
-	vcvttph2qq	zmm6, xmm5, {sae}	 #AVX512-FP16 HAS_SAE
-	vcvttph2qq	zmm6{k7}{z}, xmm5, {sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
+	vcvttph2qq	zmm6, xmm5{sae}	 #AVX512-FP16 HAS_SAE
+	vcvttph2qq	zmm6{k7}{z}, xmm5{sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
 	vcvttph2qq	zmm6{k7}, XMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vcvttph2qq	zmm6, WORD PTR [ecx]{1to8}	 #AVX512-FP16 BROADCAST_EN
+	vcvttph2qq	zmm6, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vcvttph2qq	zmm6, XMMWORD PTR [ecx+2032]	 #AVX512-FP16 Disp8(7f)
-	vcvttph2qq	zmm6{k7}{z}, WORD PTR [edx-256]{1to8}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vcvttph2qq	zmm6{k7}{z}, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vcvttph2udq	zmm6, ymm5	 #AVX512-FP16
-	vcvttph2udq	zmm6, ymm5, {sae}	 #AVX512-FP16 HAS_SAE
-	vcvttph2udq	zmm6{k7}{z}, ymm5, {sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
+	vcvttph2udq	zmm6, ymm5{sae}	 #AVX512-FP16 HAS_SAE
+	vcvttph2udq	zmm6{k7}{z}, ymm5{sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
 	vcvttph2udq	zmm6{k7}, YMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vcvttph2udq	zmm6, WORD PTR [ecx]{1to16}	 #AVX512-FP16 BROADCAST_EN
+	vcvttph2udq	zmm6, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vcvttph2udq	zmm6, YMMWORD PTR [ecx+4064]	 #AVX512-FP16 Disp8(7f)
-	vcvttph2udq	zmm6{k7}{z}, WORD PTR [edx-256]{1to16}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vcvttph2udq	zmm6{k7}{z}, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vcvttph2uqq	zmm6, xmm5	 #AVX512-FP16
-	vcvttph2uqq	zmm6, xmm5, {sae}	 #AVX512-FP16 HAS_SAE
-	vcvttph2uqq	zmm6{k7}{z}, xmm5, {sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
+	vcvttph2uqq	zmm6, xmm5{sae}	 #AVX512-FP16 HAS_SAE
+	vcvttph2uqq	zmm6{k7}{z}, xmm5{sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
 	vcvttph2uqq	zmm6{k7}, XMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vcvttph2uqq	zmm6, WORD PTR [ecx]{1to8}	 #AVX512-FP16 BROADCAST_EN
+	vcvttph2uqq	zmm6, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vcvttph2uqq	zmm6, XMMWORD PTR [ecx+2032]	 #AVX512-FP16 Disp8(7f)
-	vcvttph2uqq	zmm6{k7}{z}, WORD PTR [edx-256]{1to8}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vcvttph2uqq	zmm6{k7}{z}, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vcvttph2uw	zmm6, zmm5	 #AVX512-FP16
-	vcvttph2uw	zmm6, zmm5, {sae}	 #AVX512-FP16 HAS_SAE
-	vcvttph2uw	zmm6{k7}{z}, zmm5, {sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
+	vcvttph2uw	zmm6, zmm5{sae}	 #AVX512-FP16 HAS_SAE
+	vcvttph2uw	zmm6{k7}{z}, zmm5{sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
 	vcvttph2uw	zmm6{k7}, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vcvttph2uw	zmm6, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vcvttph2uw	zmm6, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vcvttph2uw	zmm6, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vcvttph2uw	zmm6{k7}{z}, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vcvttph2uw	zmm6{k7}{z}, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vcvttph2w	zmm6, zmm5	 #AVX512-FP16
-	vcvttph2w	zmm6, zmm5, {sae}	 #AVX512-FP16 HAS_SAE
-	vcvttph2w	zmm6{k7}{z}, zmm5, {sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
+	vcvttph2w	zmm6, zmm5{sae}	 #AVX512-FP16 HAS_SAE
+	vcvttph2w	zmm6{k7}{z}, zmm5{sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
 	vcvttph2w	zmm6{k7}, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vcvttph2w	zmm6, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vcvttph2w	zmm6, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vcvttph2w	zmm6, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vcvttph2w	zmm6{k7}{z}, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vcvttph2w	zmm6{k7}{z}, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vcvttsh2si	edx, xmm6	 #AVX512-FP16
-	vcvttsh2si	edx, xmm6, {sae}	 #AVX512-FP16 HAS_SAE
+	vcvttsh2si	edx, xmm6{sae}	 #AVX512-FP16 HAS_SAE
 	vcvttsh2si	edx, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16
 	vcvttsh2si	edx, WORD PTR [ecx]	 #AVX512-FP16
 	vcvttsh2si	edx, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vcvttsh2si	edx, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80)
 	vcvttsh2usi	edx, xmm6	 #AVX512-FP16
-	vcvttsh2usi	edx, xmm6, {sae}	 #AVX512-FP16 HAS_SAE
+	vcvttsh2usi	edx, xmm6{sae}	 #AVX512-FP16 HAS_SAE
 	vcvttsh2usi	edx, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16
 	vcvttsh2usi	edx, WORD PTR [ecx]	 #AVX512-FP16
 	vcvttsh2usi	edx, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vcvttsh2usi	edx, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80)
 	vcvtudq2ph	ymm6, zmm5	 #AVX512-FP16
-	vcvtudq2ph	ymm6, zmm5, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vcvtudq2ph	ymm6{k7}{z}, zmm5, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vcvtudq2ph	ymm6, zmm5{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtudq2ph	ymm6{k7}{z}, zmm5{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vcvtudq2ph	ymm6{k7}, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vcvtudq2ph	ymm6, DWORD PTR [ecx]{1to16}	 #AVX512-FP16 BROADCAST_EN
+	vcvtudq2ph	ymm6, DWORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vcvtudq2ph	ymm6, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vcvtudq2ph	ymm6{k7}{z}, DWORD PTR [edx-512]{1to16}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vcvtudq2ph	ymm6{k7}{z}, DWORD BCST [edx-512]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vcvtuqq2ph	xmm6, zmm5	 #AVX512-FP16
-	vcvtuqq2ph	xmm6, zmm5, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vcvtuqq2ph	xmm6{k7}{z}, zmm5, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vcvtuqq2ph	xmm6, zmm5{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtuqq2ph	xmm6{k7}{z}, zmm5{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vcvtuqq2ph	xmm6{k7}, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vcvtuqq2ph	xmm6, QWORD PTR [ecx]{1to8}	 #AVX512-FP16 BROADCAST_EN
+	vcvtuqq2ph	xmm6, QWORD BCST [ecx]{1to8}	 #AVX512-FP16 BROADCAST_EN
 	vcvtuqq2ph	xmm6, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vcvtuqq2ph	xmm6{k7}{z}, QWORD PTR [edx-1024]{1to8}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vcvtuqq2ph	xmm6{k7}{z}, QWORD BCST [edx-1024]{1to8}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vcvtusi2sh	xmm6, xmm5, edx	 #AVX512-FP16
-	vcvtusi2sh	xmm6, xmm5, {rn-sae}, edx	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtusi2sh	xmm6, xmm5, edx{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
 	vcvtusi2sh	xmm6, xmm5, DWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16
 	vcvtusi2sh	xmm6, xmm5, DWORD PTR [ecx]	 #AVX512-FP16
 	vcvtusi2sh	xmm6, xmm5, DWORD PTR [ecx+508]	 #AVX512-FP16 Disp8(7f)
 	vcvtusi2sh	xmm6, xmm5, DWORD PTR [edx-512]	 #AVX512-FP16 Disp8(80)
 	vcvtuw2ph	zmm6, zmm5	 #AVX512-FP16
-	vcvtuw2ph	zmm6, zmm5, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vcvtuw2ph	zmm6{k7}{z}, zmm5, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vcvtuw2ph	zmm6, zmm5{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtuw2ph	zmm6{k7}{z}, zmm5{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vcvtuw2ph	zmm6{k7}, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vcvtuw2ph	zmm6, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vcvtuw2ph	zmm6, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vcvtuw2ph	zmm6, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vcvtuw2ph	zmm6{k7}{z}, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vcvtuw2ph	zmm6{k7}{z}, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vcvtw2ph	zmm6, zmm5	 #AVX512-FP16
-	vcvtw2ph	zmm6, zmm5, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vcvtw2ph	zmm6{k7}{z}, zmm5, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vcvtw2ph	zmm6, zmm5{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtw2ph	zmm6{k7}{z}, zmm5{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vcvtw2ph	zmm6{k7}, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vcvtw2ph	zmm6, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vcvtw2ph	zmm6, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vcvtw2ph	zmm6, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vcvtw2ph	zmm6{k7}{z}, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vcvtw2ph	zmm6{k7}{z}, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vdivph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vdivph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vdivph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vdivph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vdivph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vdivph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vdivph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vdivph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vdivph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vdivph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vdivph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vdivsh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vdivsh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vdivsh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vdivsh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vdivsh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vdivsh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vdivsh	xmm6, xmm5, WORD PTR [ecx]	 #AVX512-FP16
 	vdivsh	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vdivsh	xmm6{k7}{z}, xmm5, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vfcmaddcph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vfcmaddcph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfcmaddcph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfcmaddcph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfcmaddcph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfcmaddcph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vfcmaddcph	zmm6, zmm5, DWORD PTR [ecx]{1to16}	 #AVX512-FP16 BROADCAST_EN
+	vfcmaddcph	zmm6, zmm5, DWORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vfcmaddcph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vfcmaddcph	zmm6{k7}{z}, zmm5, DWORD PTR [edx-512]{1to16}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vfcmaddcph	zmm6{k7}{z}, zmm5, DWORD BCST [edx-512]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vfcmaddcsh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vfcmaddcsh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfcmaddcsh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfcmaddcsh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfcmaddcsh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfcmaddcsh	xmm6{k7}, xmm5, DWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vfcmaddcsh	xmm6, xmm5, DWORD PTR [ecx]	 #AVX512-FP16
 	vfcmaddcsh	xmm6, xmm5, DWORD PTR [ecx+508]	 #AVX512-FP16 Disp8(7f)
 	vfcmaddcsh	xmm6{k7}{z}, xmm5, DWORD PTR [edx-512]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vfcmulcph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vfcmulcph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfcmulcph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfcmulcph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfcmulcph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfcmulcph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vfcmulcph	zmm6, zmm5, DWORD PTR [ecx]{1to16}	 #AVX512-FP16 BROADCAST_EN
+	vfcmulcph	zmm6, zmm5, DWORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vfcmulcph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vfcmulcph	zmm6{k7}{z}, zmm5, DWORD PTR [edx-512]{1to16}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vfcmulcph	zmm6{k7}{z}, zmm5, DWORD BCST [edx-512]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vfcmulcsh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vfcmulcsh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfcmulcsh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfcmulcsh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfcmulcsh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfcmulcsh	xmm6{k7}, xmm5, DWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vfcmulcsh	xmm6, xmm5, DWORD PTR [ecx]	 #AVX512-FP16
 	vfcmulcsh	xmm6, xmm5, DWORD PTR [ecx+508]	 #AVX512-FP16 Disp8(7f)
 	vfcmulcsh	xmm6{k7}{z}, xmm5, DWORD PTR [edx-512]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vfmadd132ph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vfmadd132ph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfmadd132ph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfmadd132ph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfmadd132ph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfmadd132ph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vfmadd132ph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vfmadd132ph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vfmadd132ph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vfmadd132ph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vfmadd132ph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vfmadd132sh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vfmadd132sh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfmadd132sh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfmadd132sh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfmadd132sh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfmadd132sh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vfmadd132sh	xmm6, xmm5, WORD PTR [ecx]	 #AVX512-FP16
 	vfmadd132sh	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vfmadd132sh	xmm6{k7}{z}, xmm5, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vfmadd213ph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vfmadd213ph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfmadd213ph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfmadd213ph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfmadd213ph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfmadd213ph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vfmadd213ph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vfmadd213ph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vfmadd213ph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vfmadd213ph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vfmadd213ph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vfmadd213sh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vfmadd213sh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfmadd213sh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfmadd213sh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfmadd213sh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfmadd213sh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vfmadd213sh	xmm6, xmm5, WORD PTR [ecx]	 #AVX512-FP16
 	vfmadd213sh	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vfmadd213sh	xmm6{k7}{z}, xmm5, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vfmadd231ph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vfmadd231ph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfmadd231ph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfmadd231ph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfmadd231ph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfmadd231ph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vfmadd231ph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vfmadd231ph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vfmadd231ph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vfmadd231ph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vfmadd231ph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vfmadd231sh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vfmadd231sh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfmadd231sh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfmadd231sh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfmadd231sh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfmadd231sh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vfmadd231sh	xmm6, xmm5, WORD PTR [ecx]	 #AVX512-FP16
 	vfmadd231sh	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vfmadd231sh	xmm6{k7}{z}, xmm5, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vfmaddcph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vfmaddcph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfmaddcph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfmaddcph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfmaddcph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfmaddcph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vfmaddcph	zmm6, zmm5, DWORD PTR [ecx]{1to16}	 #AVX512-FP16 BROADCAST_EN
+	vfmaddcph	zmm6, zmm5, DWORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vfmaddcph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vfmaddcph	zmm6{k7}{z}, zmm5, DWORD PTR [edx-512]{1to16}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vfmaddcph	zmm6{k7}{z}, zmm5, DWORD BCST [edx-512]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vfmaddcsh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vfmaddcsh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfmaddcsh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfmaddcsh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfmaddcsh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfmaddcsh	xmm6{k7}, xmm5, DWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vfmaddcsh	xmm6, xmm5, DWORD PTR [ecx]	 #AVX512-FP16
 	vfmaddcsh	xmm6, xmm5, DWORD PTR [ecx+508]	 #AVX512-FP16 Disp8(7f)
 	vfmaddcsh	xmm6{k7}{z}, xmm5, DWORD PTR [edx-512]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vfmaddsub132ph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vfmaddsub132ph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfmaddsub132ph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfmaddsub132ph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfmaddsub132ph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfmaddsub132ph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vfmaddsub132ph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vfmaddsub132ph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vfmaddsub132ph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vfmaddsub132ph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vfmaddsub132ph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vfmaddsub213ph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vfmaddsub213ph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfmaddsub213ph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfmaddsub213ph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfmaddsub213ph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfmaddsub213ph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vfmaddsub213ph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vfmaddsub213ph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vfmaddsub213ph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vfmaddsub213ph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vfmaddsub213ph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vfmaddsub231ph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vfmaddsub231ph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfmaddsub231ph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfmaddsub231ph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfmaddsub231ph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfmaddsub231ph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vfmaddsub231ph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vfmaddsub231ph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vfmaddsub231ph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vfmaddsub231ph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vfmaddsub231ph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vfmsub132ph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vfmsub132ph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfmsub132ph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfmsub132ph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfmsub132ph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfmsub132ph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vfmsub132ph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vfmsub132ph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vfmsub132ph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vfmsub132ph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vfmsub132ph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vfmsub132sh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vfmsub132sh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfmsub132sh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfmsub132sh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfmsub132sh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfmsub132sh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vfmsub132sh	xmm6, xmm5, WORD PTR [ecx]	 #AVX512-FP16
 	vfmsub132sh	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vfmsub132sh	xmm6{k7}{z}, xmm5, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vfmsub213ph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vfmsub213ph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfmsub213ph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfmsub213ph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfmsub213ph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfmsub213ph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vfmsub213ph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vfmsub213ph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vfmsub213ph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vfmsub213ph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vfmsub213ph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vfmsub213sh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vfmsub213sh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfmsub213sh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfmsub213sh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfmsub213sh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfmsub213sh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vfmsub213sh	xmm6, xmm5, WORD PTR [ecx]	 #AVX512-FP16
 	vfmsub213sh	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vfmsub213sh	xmm6{k7}{z}, xmm5, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vfmsub231ph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vfmsub231ph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfmsub231ph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfmsub231ph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfmsub231ph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfmsub231ph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vfmsub231ph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vfmsub231ph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vfmsub231ph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vfmsub231ph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vfmsub231ph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vfmsub231sh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vfmsub231sh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfmsub231sh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfmsub231sh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfmsub231sh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfmsub231sh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vfmsub231sh	xmm6, xmm5, WORD PTR [ecx]	 #AVX512-FP16
 	vfmsub231sh	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vfmsub231sh	xmm6{k7}{z}, xmm5, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vfmsubadd132ph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vfmsubadd132ph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfmsubadd132ph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfmsubadd132ph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfmsubadd132ph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfmsubadd132ph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vfmsubadd132ph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vfmsubadd132ph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vfmsubadd132ph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vfmsubadd132ph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vfmsubadd132ph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vfmsubadd213ph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vfmsubadd213ph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfmsubadd213ph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfmsubadd213ph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfmsubadd213ph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfmsubadd213ph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vfmsubadd213ph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vfmsubadd213ph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vfmsubadd213ph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vfmsubadd213ph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vfmsubadd213ph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vfmsubadd231ph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vfmsubadd231ph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfmsubadd231ph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfmsubadd231ph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfmsubadd231ph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfmsubadd231ph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vfmsubadd231ph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vfmsubadd231ph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vfmsubadd231ph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vfmsubadd231ph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vfmsubadd231ph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vfmulcph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vfmulcph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfmulcph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfmulcph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfmulcph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfmulcph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vfmulcph	zmm6, zmm5, DWORD PTR [ecx]{1to16}	 #AVX512-FP16 BROADCAST_EN
+	vfmulcph	zmm6, zmm5, DWORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vfmulcph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vfmulcph	zmm6{k7}{z}, zmm5, DWORD PTR [edx-512]{1to16}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vfmulcph	zmm6{k7}{z}, zmm5, DWORD BCST [edx-512]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vfmulcsh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vfmulcsh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfmulcsh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfmulcsh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfmulcsh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfmulcsh	xmm6{k7}, xmm5, DWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vfmulcsh	xmm6, xmm5, DWORD PTR [ecx]	 #AVX512-FP16
 	vfmulcsh	xmm6, xmm5, DWORD PTR [ecx+508]	 #AVX512-FP16 Disp8(7f)
 	vfmulcsh	xmm6{k7}{z}, xmm5, DWORD PTR [edx-512]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vfnmadd132ph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vfnmadd132ph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfnmadd132ph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfnmadd132ph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfnmadd132ph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfnmadd132ph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vfnmadd132ph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vfnmadd132ph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vfnmadd132ph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vfnmadd132ph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vfnmadd132ph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vfnmadd132sh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vfnmadd132sh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfnmadd132sh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfnmadd132sh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfnmadd132sh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfnmadd132sh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vfnmadd132sh	xmm6, xmm5, WORD PTR [ecx]	 #AVX512-FP16
 	vfnmadd132sh	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vfnmadd132sh	xmm6{k7}{z}, xmm5, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vfnmadd213ph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vfnmadd213ph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfnmadd213ph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfnmadd213ph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfnmadd213ph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfnmadd213ph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vfnmadd213ph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vfnmadd213ph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vfnmadd213ph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vfnmadd213ph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vfnmadd213ph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vfnmadd213sh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vfnmadd213sh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfnmadd213sh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfnmadd213sh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfnmadd213sh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfnmadd213sh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vfnmadd213sh	xmm6, xmm5, WORD PTR [ecx]	 #AVX512-FP16
 	vfnmadd213sh	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vfnmadd213sh	xmm6{k7}{z}, xmm5, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vfnmadd231ph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vfnmadd231ph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfnmadd231ph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfnmadd231ph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfnmadd231ph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfnmadd231ph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vfnmadd231ph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vfnmadd231ph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vfnmadd231ph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vfnmadd231ph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vfnmadd231ph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vfnmadd231sh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vfnmadd231sh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfnmadd231sh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfnmadd231sh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfnmadd231sh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfnmadd231sh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vfnmadd231sh	xmm6, xmm5, WORD PTR [ecx]	 #AVX512-FP16
 	vfnmadd231sh	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vfnmadd231sh	xmm6{k7}{z}, xmm5, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vfnmsub132ph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vfnmsub132ph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfnmsub132ph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfnmsub132ph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfnmsub132ph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfnmsub132ph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vfnmsub132ph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vfnmsub132ph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vfnmsub132ph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vfnmsub132ph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vfnmsub132ph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vfnmsub132sh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vfnmsub132sh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfnmsub132sh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfnmsub132sh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfnmsub132sh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfnmsub132sh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vfnmsub132sh	xmm6, xmm5, WORD PTR [ecx]	 #AVX512-FP16
 	vfnmsub132sh	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vfnmsub132sh	xmm6{k7}{z}, xmm5, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vfnmsub213ph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vfnmsub213ph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfnmsub213ph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfnmsub213ph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfnmsub213ph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfnmsub213ph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vfnmsub213ph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vfnmsub213ph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vfnmsub213ph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vfnmsub213ph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vfnmsub213ph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vfnmsub213sh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vfnmsub213sh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfnmsub213sh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfnmsub213sh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfnmsub213sh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfnmsub213sh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vfnmsub213sh	xmm6, xmm5, WORD PTR [ecx]	 #AVX512-FP16
 	vfnmsub213sh	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vfnmsub213sh	xmm6{k7}{z}, xmm5, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vfnmsub231ph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vfnmsub231ph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfnmsub231ph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfnmsub231ph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfnmsub231ph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfnmsub231ph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vfnmsub231ph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vfnmsub231ph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vfnmsub231ph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vfnmsub231ph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vfnmsub231ph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vfnmsub231sh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vfnmsub231sh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vfnmsub231sh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vfnmsub231sh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vfnmsub231sh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vfnmsub231sh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vfnmsub231sh	xmm6, xmm5, WORD PTR [ecx]	 #AVX512-FP16
 	vfnmsub231sh	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
@@ -1274,9 +1274,9 @@ _start:
 	vfpclassph	k5, zmm6, 123	 #AVX512-FP16
 	vfpclassph	k5{k7}, zmm6, 123	 #AVX512-FP16 MASK_ENABLING
 	vfpclassph	k5{k7}, ZMMWORD PTR [esp+esi*8+0x10000000], 123	 #AVX512-FP16 MASK_ENABLING
-	vfpclassph	k5, WORD PTR [ecx]{1to32}, 123	 #AVX512-FP16 BROADCAST_EN
+	vfpclassph	k5, WORD BCST [ecx]{1to32}, 123	 #AVX512-FP16 BROADCAST_EN
 	vfpclassph	k5, ZMMWORD PTR [ecx+8128], 123	 #AVX512-FP16 Disp8(7f)
-	vfpclassph	k5{k7}, WORD PTR [edx-256]{1to32}, 123	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING
+	vfpclassph	k5{k7}, WORD BCST [edx-256]{1to32}, 123	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING
 	vfpclasssh	k5, xmm6, 123	 #AVX512-FP16
 	vfpclasssh	k5{k7}, xmm6, 123	 #AVX512-FP16 MASK_ENABLING
 	vfpclasssh	k5{k7}, WORD PTR [esp+esi*8+0x10000000], 123	 #AVX512-FP16 MASK_ENABLING
@@ -1284,57 +1284,57 @@ _start:
 	vfpclasssh	k5, WORD PTR [ecx+254], 123	 #AVX512-FP16 Disp8(7f)
 	vfpclasssh	k5{k7}, WORD PTR [edx-256], 123	 #AVX512-FP16 Disp8(80) MASK_ENABLING
 	vgetexpph	zmm6, zmm5	 #AVX512-FP16
-	vgetexpph	zmm6, zmm5, {sae}	 #AVX512-FP16 HAS_SAE
-	vgetexpph	zmm6{k7}{z}, zmm5, {sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
+	vgetexpph	zmm6, zmm5{sae}	 #AVX512-FP16 HAS_SAE
+	vgetexpph	zmm6{k7}{z}, zmm5{sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
 	vgetexpph	zmm6{k7}, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vgetexpph	zmm6, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vgetexpph	zmm6, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vgetexpph	zmm6, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vgetexpph	zmm6{k7}{z}, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vgetexpph	zmm6{k7}{z}, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vgetexpsh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vgetexpsh	xmm6, xmm5, xmm4, {sae}	 #AVX512-FP16 HAS_SAE
-	vgetexpsh	xmm6{k7}{z}, xmm5, xmm4, {sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
+	vgetexpsh	xmm6, xmm5, xmm4{sae}	 #AVX512-FP16 HAS_SAE
+	vgetexpsh	xmm6{k7}{z}, xmm5, xmm4{sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
 	vgetexpsh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vgetexpsh	xmm6, xmm5, WORD PTR [ecx]	 #AVX512-FP16
 	vgetexpsh	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vgetexpsh	xmm6{k7}{z}, xmm5, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vgetmantph	zmm6, zmm5, 123	 #AVX512-FP16
-	vgetmantph	zmm6, zmm5, {sae}, 123	 #AVX512-FP16 HAS_SAE
-	vgetmantph	zmm6{k7}{z}, zmm5, {sae}, 123	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
+	vgetmantph	zmm6, zmm5{sae}, 123	 #AVX512-FP16 HAS_SAE
+	vgetmantph	zmm6{k7}{z}, zmm5{sae}, 123	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
 	vgetmantph	zmm6{k7}, ZMMWORD PTR [esp+esi*8+0x10000000], 123	 #AVX512-FP16 MASK_ENABLING
-	vgetmantph	zmm6, WORD PTR [ecx]{1to32}, 123	 #AVX512-FP16 BROADCAST_EN
+	vgetmantph	zmm6, WORD BCST [ecx], 123	 #AVX512-FP16 BROADCAST_EN
 	vgetmantph	zmm6, ZMMWORD PTR [ecx+8128], 123	 #AVX512-FP16 Disp8(7f)
-	vgetmantph	zmm6{k7}{z}, WORD PTR [edx-256]{1to32}, 123	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vgetmantph	zmm6{k7}{z}, WORD BCST [edx-256], 123	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vgetmantsh	xmm6, xmm5, xmm4, 123	 #AVX512-FP16
-	vgetmantsh	xmm6, xmm5, xmm4, {sae}, 123	 #AVX512-FP16 HAS_SAE
-	vgetmantsh	xmm6{k7}{z}, xmm5, xmm4, {sae}, 123	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
+	vgetmantsh	xmm6, xmm5, xmm4{sae}, 123	 #AVX512-FP16 HAS_SAE
+	vgetmantsh	xmm6{k7}{z}, xmm5, xmm4{sae}, 123	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
 	vgetmantsh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000], 123	 #AVX512-FP16 MASK_ENABLING
 	vgetmantsh	xmm6, xmm5, WORD PTR [ecx], 123	 #AVX512-FP16
 	vgetmantsh	xmm6, xmm5, WORD PTR [ecx+254], 123	 #AVX512-FP16 Disp8(7f)
 	vgetmantsh	xmm6{k7}{z}, xmm5, WORD PTR [edx-256], 123	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vmaxph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vmaxph	zmm6, zmm5, zmm4, {sae}	 #AVX512-FP16 HAS_SAE
-	vmaxph	zmm6{k7}{z}, zmm5, zmm4, {sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
+	vmaxph	zmm6, zmm5, zmm4{sae}	 #AVX512-FP16 HAS_SAE
+	vmaxph	zmm6{k7}{z}, zmm5, zmm4{sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
 	vmaxph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vmaxph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vmaxph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vmaxph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vmaxph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vmaxph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vmaxsh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vmaxsh	xmm6, xmm5, xmm4, {sae}	 #AVX512-FP16 HAS_SAE
-	vmaxsh	xmm6{k7}{z}, xmm5, xmm4, {sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
+	vmaxsh	xmm6, xmm5, xmm4{sae}	 #AVX512-FP16 HAS_SAE
+	vmaxsh	xmm6{k7}{z}, xmm5, xmm4{sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
 	vmaxsh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vmaxsh	xmm6, xmm5, WORD PTR [ecx]	 #AVX512-FP16
 	vmaxsh	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vmaxsh	xmm6{k7}{z}, xmm5, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vminph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vminph	zmm6, zmm5, zmm4, {sae}	 #AVX512-FP16 HAS_SAE
-	vminph	zmm6{k7}{z}, zmm5, zmm4, {sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
+	vminph	zmm6, zmm5, zmm4{sae}	 #AVX512-FP16 HAS_SAE
+	vminph	zmm6{k7}{z}, zmm5, zmm4{sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
 	vminph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vminph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vminph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vminph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vminph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vminph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vminsh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vminsh	xmm6, xmm5, xmm4, {sae}	 #AVX512-FP16 HAS_SAE
-	vminsh	xmm6{k7}{z}, xmm5, xmm4, {sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
+	vminsh	xmm6, xmm5, xmm4{sae}	 #AVX512-FP16 HAS_SAE
+	vminsh	xmm6{k7}{z}, xmm5, xmm4{sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
 	vminsh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vminsh	xmm6, xmm5, WORD PTR [ecx]	 #AVX512-FP16
 	vminsh	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
@@ -1360,15 +1360,15 @@ _start:
 	vmovw	WORD PTR [ecx+254], xmm6	 #AVX512-FP16 Disp8(7f)
 	vmovw	WORD PTR [edx-256], xmm6	 #AVX512-FP16 Disp8(80)
 	vmulph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vmulph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vmulph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vmulph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vmulph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vmulph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vmulph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vmulph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vmulph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vmulph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vmulph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vmulsh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vmulsh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vmulsh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vmulsh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vmulsh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vmulsh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vmulsh	xmm6, xmm5, WORD PTR [ecx]	 #AVX512-FP16
 	vmulsh	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
@@ -1376,9 +1376,9 @@ _start:
 	vrcpph	zmm6, zmm5	 #AVX512-FP16
 	vrcpph	zmm6{k7}{z}, zmm5	 #AVX512-FP16 MASK_ENABLING ZEROCTL
 	vrcpph	zmm6{k7}, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vrcpph	zmm6, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vrcpph	zmm6, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vrcpph	zmm6, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vrcpph	zmm6{k7}{z}, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vrcpph	zmm6{k7}{z}, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vrcpsh	xmm6, xmm5, xmm4	 #AVX512-FP16
 	vrcpsh	xmm6{k7}{z}, xmm5, xmm4	 #AVX512-FP16 MASK_ENABLING ZEROCTL
 	vrcpsh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
@@ -1386,29 +1386,29 @@ _start:
 	vrcpsh	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vrcpsh	xmm6{k7}{z}, xmm5, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vreduceph	zmm6, zmm5, 123	 #AVX512-FP16
-	vreduceph	zmm6, zmm5, {sae}, 123	 #AVX512-FP16 HAS_SAE
-	vreduceph	zmm6{k7}{z}, zmm5, {sae}, 123	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
+	vreduceph	zmm6, zmm5{sae}, 123	 #AVX512-FP16 HAS_SAE
+	vreduceph	zmm6{k7}{z}, zmm5{sae}, 123	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
 	vreduceph	zmm6{k7}, ZMMWORD PTR [esp+esi*8+0x10000000], 123	 #AVX512-FP16 MASK_ENABLING
-	vreduceph	zmm6, WORD PTR [ecx]{1to32}, 123	 #AVX512-FP16 BROADCAST_EN
+	vreduceph	zmm6, WORD BCST [ecx], 123	 #AVX512-FP16 BROADCAST_EN
 	vreduceph	zmm6, ZMMWORD PTR [ecx+8128], 123	 #AVX512-FP16 Disp8(7f)
-	vreduceph	zmm6{k7}{z}, WORD PTR [edx-256]{1to32}, 123	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vreduceph	zmm6{k7}{z}, WORD BCST [edx-256], 123	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vreducesh	xmm6, xmm5, xmm4, 123	 #AVX512-FP16
-	vreducesh	xmm6, xmm5, xmm4, {sae}, 123	 #AVX512-FP16 HAS_SAE
-	vreducesh	xmm6{k7}{z}, xmm5, xmm4, {sae}, 123	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
+	vreducesh	xmm6, xmm5, xmm4{sae}, 123	 #AVX512-FP16 HAS_SAE
+	vreducesh	xmm6{k7}{z}, xmm5, xmm4{sae}, 123	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
 	vreducesh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000], 123	 #AVX512-FP16 MASK_ENABLING
 	vreducesh	xmm6, xmm5, WORD PTR [ecx], 123	 #AVX512-FP16
 	vreducesh	xmm6, xmm5, WORD PTR [ecx+254], 123	 #AVX512-FP16 Disp8(7f)
 	vreducesh	xmm6{k7}{z}, xmm5, WORD PTR [edx-256], 123	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vrndscaleph	zmm6, zmm5, 123	 #AVX512-FP16
-	vrndscaleph	zmm6, zmm5, {sae}, 123	 #AVX512-FP16 HAS_SAE
-	vrndscaleph	zmm6{k7}{z}, zmm5, {sae}, 123	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
+	vrndscaleph	zmm6, zmm5{sae}, 123	 #AVX512-FP16 HAS_SAE
+	vrndscaleph	zmm6{k7}{z}, zmm5{sae}, 123	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
 	vrndscaleph	zmm6{k7}, ZMMWORD PTR [esp+esi*8+0x10000000], 123	 #AVX512-FP16 MASK_ENABLING
-	vrndscaleph	zmm6, WORD PTR [ecx]{1to32}, 123	 #AVX512-FP16 BROADCAST_EN
+	vrndscaleph	zmm6, WORD BCST [ecx], 123	 #AVX512-FP16 BROADCAST_EN
 	vrndscaleph	zmm6, ZMMWORD PTR [ecx+8128], 123	 #AVX512-FP16 Disp8(7f)
-	vrndscaleph	zmm6{k7}{z}, WORD PTR [edx-256]{1to32}, 123	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vrndscaleph	zmm6{k7}{z}, WORD BCST [edx-256], 123	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vrndscalesh	xmm6, xmm5, xmm4, 123	 #AVX512-FP16
-	vrndscalesh	xmm6, xmm5, xmm4, {sae}, 123	 #AVX512-FP16 HAS_SAE
-	vrndscalesh	xmm6{k7}{z}, xmm5, xmm4, {sae}, 123	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
+	vrndscalesh	xmm6, xmm5, xmm4{sae}, 123	 #AVX512-FP16 HAS_SAE
+	vrndscalesh	xmm6{k7}{z}, xmm5, xmm4{sae}, 123	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE
 	vrndscalesh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000], 123	 #AVX512-FP16 MASK_ENABLING
 	vrndscalesh	xmm6, xmm5, WORD PTR [ecx], 123	 #AVX512-FP16
 	vrndscalesh	xmm6, xmm5, WORD PTR [ecx+254], 123	 #AVX512-FP16 Disp8(7f)
@@ -1416,9 +1416,9 @@ _start:
 	vrsqrtph	zmm6, zmm5	 #AVX512-FP16
 	vrsqrtph	zmm6{k7}{z}, zmm5	 #AVX512-FP16 MASK_ENABLING ZEROCTL
 	vrsqrtph	zmm6{k7}, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vrsqrtph	zmm6, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vrsqrtph	zmm6, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vrsqrtph	zmm6, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vrsqrtph	zmm6{k7}{z}, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vrsqrtph	zmm6{k7}{z}, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vrsqrtsh	xmm6, xmm5, xmm4	 #AVX512-FP16
 	vrsqrtsh	xmm6{k7}{z}, xmm5, xmm4	 #AVX512-FP16 MASK_ENABLING ZEROCTL
 	vrsqrtsh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
@@ -1426,49 +1426,49 @@ _start:
 	vrsqrtsh	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vrsqrtsh	xmm6{k7}{z}, xmm5, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vscalefph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vscalefph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vscalefph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vscalefph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vscalefph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vscalefph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vscalefph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vscalefph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vscalefph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vscalefph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vscalefph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vscalefsh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vscalefsh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vscalefsh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vscalefsh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vscalefsh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vscalefsh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vscalefsh	xmm6, xmm5, WORD PTR [ecx]	 #AVX512-FP16
 	vscalefsh	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vscalefsh	xmm6{k7}{z}, xmm5, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vsqrtph	zmm6, zmm5	 #AVX512-FP16
-	vsqrtph	zmm6, zmm5, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vsqrtph	zmm6{k7}{z}, zmm5, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vsqrtph	zmm6, zmm5{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vsqrtph	zmm6{k7}{z}, zmm5{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vsqrtph	zmm6{k7}, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vsqrtph	zmm6, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vsqrtph	zmm6, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vsqrtph	zmm6, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vsqrtph	zmm6{k7}{z}, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vsqrtph	zmm6{k7}{z}, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vsqrtsh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vsqrtsh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vsqrtsh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vsqrtsh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vsqrtsh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vsqrtsh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vsqrtsh	xmm6, xmm5, WORD PTR [ecx]	 #AVX512-FP16
 	vsqrtsh	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vsqrtsh	xmm6{k7}{z}, xmm5, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vsubph	zmm6, zmm5, zmm4	 #AVX512-FP16
-	vsubph	zmm6, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vsubph	zmm6{k7}{z}, zmm5, zmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vsubph	zmm6, zmm5, zmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vsubph	zmm6{k7}{z}, zmm5, zmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vsubph	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
-	vsubph	zmm6, zmm5, WORD PTR [ecx]{1to32}	 #AVX512-FP16 BROADCAST_EN
+	vsubph	zmm6, zmm5, WORD BCST [ecx]	 #AVX512-FP16 BROADCAST_EN
 	vsubph	zmm6, zmm5, ZMMWORD PTR [ecx+8128]	 #AVX512-FP16 Disp8(7f)
-	vsubph	zmm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
+	vsubph	zmm6{k7}{z}, zmm5, WORD BCST [edx-256]	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vsubsh	xmm6, xmm5, xmm4	 #AVX512-FP16
-	vsubsh	xmm6, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
-	vsubsh	xmm6{k7}{z}, xmm5, xmm4, {rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
+	vsubsh	xmm6, xmm5, xmm4{rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vsubsh	xmm6{k7}{z}, xmm5, xmm4{rn-sae}	 #AVX512-FP16 MASK_ENABLING ZEROCTL HAS_SAE RC_CTRL
 	vsubsh	xmm6{k7}, xmm5, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16 MASK_ENABLING
 	vsubsh	xmm6, xmm5, WORD PTR [ecx]	 #AVX512-FP16
 	vsubsh	xmm6, xmm5, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)
 	vsubsh	xmm6{k7}{z}, xmm5, WORD PTR [edx-256]	 #AVX512-FP16 Disp8(80) MASK_ENABLING ZEROCTL
 	vucomish	xmm6, xmm5	 #AVX512-FP16
-	vucomish	xmm6, xmm5, {sae}	 #AVX512-FP16 HAS_SAE
+	vucomish	xmm6, xmm5{sae}	 #AVX512-FP16 HAS_SAE
 	vucomish	xmm6, WORD PTR [esp+esi*8+0x10000000]	 #AVX512-FP16
 	vucomish	xmm6, WORD PTR [ecx]	 #AVX512-FP16
 	vucomish	xmm6, WORD PTR [ecx+254]	 #AVX512-FP16 Disp8(7f)

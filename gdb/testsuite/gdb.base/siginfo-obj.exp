@@ -23,7 +23,7 @@
 
 if [target_info exists gdb,nosignals] {
     verbose "Skipping siginfo-obj.exp because of nosignals."
-    continue
+    return
 }
 
 if { ![supports_get_siginfo_type] } {

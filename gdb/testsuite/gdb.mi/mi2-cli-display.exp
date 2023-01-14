@@ -19,7 +19,7 @@ load_lib mi-support.exp
 set MIFLAGS "-i=mi2"
 
 if {[mi_gdb_start]} {
-    continue
+    return
 }
 
 standard_testfile

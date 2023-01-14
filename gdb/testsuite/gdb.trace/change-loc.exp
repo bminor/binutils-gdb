@@ -34,10 +34,6 @@ set lib_sl2 [standard_output_file $libfile2.sl]
 
 set lib_opts debug
 
-if [get_compiler_info] {
-    return -1
-}
-
 # Some targets have leading underscores on assembly symbols.
 set additional_flags [list debug shlib=$lib_sl1 shlib_load [gdb_target_symbol_prefix_flags]]
 

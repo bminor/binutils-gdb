@@ -26,10 +26,6 @@ set lib1     [standard_output_file symtab-search-order-1.sl]
 set lib_opts "debug"
 set exec_opts [list debug shlib=$lib1]
 
-if [get_compiler_info] {
-    return -1
-}
-
 if { [gdb_compile_shlib $lib1src $lib1 $lib_opts] != ""
      || [gdb_compile [list $srcfile $srcfile2] $binfile executable \
 	     $exec_opts] != ""} {

@@ -158,7 +158,55 @@ public:
   bool stopped_by_sw_breakpoint () override;
 
   bool supports_stopped_by_sw_breakpoint () override;
+
+  const char *thread_name (ptid_t thread) override;
+
+  bool supports_pid_to_exec_file () override
+  { return true; }
+
+  const char *pid_to_exec_file (int pid) override;
+
+  bool supports_disable_randomization () override
+  {
+    return windows_nat::disable_randomization_available ();
+  }
 };
+
+struct gdbserver_windows_process : public windows_nat::windows_process_info
+{
+  windows_nat::windows_thread_info *thread_rec
+       (ptid_t ptid,
+	windows_nat::thread_disposition_type disposition) override;
+  int handle_output_debug_string (struct target_waitstatus *ourstatus) override;
+  void handle_load_dll (const char *dll_name, LPVOID base) override;
+  void handle_unload_dll () override;
+  bool handle_access_violation (const EXCEPTION_RECORD *rec) override;
+
+  int attaching = 0;
+
+  /* A status that hasn't been reported to the core yet, and so
+     win32_wait should return it next, instead of fetching the next
+     debug event off the win32 API.  */
+  struct target_waitstatus cached_status;
+
+  /* Non zero if an interrupt request is to be satisfied by suspending
+     all threads.  */
+  int soft_interrupt_requested = 0;
+
+  /* Non zero if the inferior is stopped in a simulated breakpoint done
+     by suspending all the threads.  */
+  int faked_breakpoint = 0;
+
+  /* True if current_process_handle needs to be closed.  */
+  bool open_process_used = false;
+
+  /* Zero during the child initialization phase, and nonzero
+     otherwise.  */
+  int child_initialization_done = 0;
+};
+
+/* The sole Windows process.  */
+extern gdbserver_windows_process windows_process;
 
 /* Retrieve the context for this thread, if not already retrieved.  */
 extern void win32_require_context (windows_nat::windows_thread_info *th);

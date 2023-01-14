@@ -221,16 +221,16 @@ m32r_elf_generic_reloc (bfd *input_bfd,
   (((x & reloc_entry->howto->src_mask) +  relocation) &	\
   reloc_entry->howto->dst_mask))
 
-  switch (reloc_entry->howto->size)
+  switch (bfd_get_reloc_size (reloc_entry->howto))
     {
-    case 1:
+    case 2:
       {
 	short x = bfd_get_16 (input_bfd, inplace_address);
 	DOIT (x);
 	bfd_put_16 (input_bfd, (bfd_vma) x, inplace_address);
       }
       break;
-    case 2:
+    case 4:
       {
 	unsigned long x = bfd_get_32 (input_bfd, inplace_address);
 	DOIT (x);
@@ -474,7 +474,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* This reloc does nothing.  */
   HOWTO (R_M32R_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -489,7 +489,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* A 16 bit absolute relocation.  */
   HOWTO (R_M32R_16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -504,7 +504,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* A 32 bit absolute relocation.  */
   HOWTO (R_M32R_32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -519,7 +519,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* A 24 bit address.  */
   HOWTO (R_M32R_24,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -541,7 +541,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
      again.  */
   HOWTO (R_M32R_10_PCREL,	/* type */
 	 2,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 10,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -556,7 +556,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* A relative 18 bit relocation, right shifted by 2.  */
   HOWTO (R_M32R_18_PCREL,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -575,7 +575,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
      again.  */
   HOWTO (R_M32R_26_PCREL,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 26,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -590,7 +590,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* High 16 bits of address when lower 16 is or'd in.  */
   HOWTO (R_M32R_HI16_ULO,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -605,7 +605,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* High 16 bits of address when lower 16 is added in.  */
   HOWTO (R_M32R_HI16_SLO,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -620,7 +620,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* Lower 16 bits of address.  */
   HOWTO (R_M32R_LO16,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -635,7 +635,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* Small data area 16 bits offset.  */
   HOWTO (R_M32R_SDA16,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -650,7 +650,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_M32R_GNU_VTINHERIT, /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -665,7 +665,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* GNU extension to record C++ vtable member usage.  */
   HOWTO (R_M32R_GNU_VTENTRY,	 /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -701,7 +701,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* A 16 bit absolute relocation.  */
   HOWTO (R_M32R_16_RELA,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -716,7 +716,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* A 32 bit absolute relocation.  */
   HOWTO (R_M32R_32_RELA,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -731,7 +731,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* A 24 bit address.  */
   HOWTO (R_M32R_24_RELA,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -745,7 +745,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
 
   HOWTO (R_M32R_10_PCREL_RELA,	/* type */
 	 2,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 10,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -760,7 +760,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* A relative 18 bit relocation, right shifted by 2.  */
   HOWTO (R_M32R_18_PCREL_RELA,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -775,7 +775,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* A relative 26 bit relocation, right shifted by 2.  */
   HOWTO (R_M32R_26_PCREL_RELA,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 26,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -790,7 +790,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* High 16 bits of address when lower 16 is or'd in.  */
   HOWTO (R_M32R_HI16_ULO_RELA,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -805,7 +805,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* High 16 bits of address when lower 16 is added in.  */
   HOWTO (R_M32R_HI16_SLO_RELA,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -820,7 +820,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* Lower 16 bits of address.  */
   HOWTO (R_M32R_LO16_RELA,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -835,7 +835,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* Small data area 16 bits offset.  */
   HOWTO (R_M32R_SDA16_RELA,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -850,7 +850,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_M32R_RELA_GNU_VTINHERIT, /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -865,7 +865,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* GNU extension to record C++ vtable member usage.  */
   HOWTO (R_M32R_RELA_GNU_VTENTRY,     /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -880,7 +880,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* A 32 bit PC relative relocation.  */
   HOWTO (R_M32R_REL32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -899,7 +899,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
      the symbol.  */
   HOWTO (R_M32R_GOT24,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -915,7 +915,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
      entry for the symbol.  */
   HOWTO (R_M32R_26_PLTREL,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -934,7 +934,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
      run has to have the data at some particular address.  */
   HOWTO (R_M32R_COPY,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -950,7 +950,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
      entries.  */
   HOWTO (R_M32R_GLOB_DAT,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -965,7 +965,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
   /* Marks a procedure linkage table entry for a symbol.  */
   HOWTO (R_M32R_JMP_SLOT,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -982,7 +982,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
      addend.  */
   HOWTO (R_M32R_RELATIVE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -996,7 +996,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
 
   HOWTO (R_M32R_GOTOFF,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1012,7 +1012,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
      table register. */
   HOWTO (R_M32R_GOTPC24,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1028,7 +1028,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
      the symbol.  */
   HOWTO (R_M32R_GOT16_HI_ULO,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1044,7 +1044,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
      the symbol.  */
   HOWTO (R_M32R_GOT16_HI_SLO,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1060,7 +1060,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
      the symbol.  */
   HOWTO (R_M32R_GOT16_LO,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1077,7 +1077,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
      the symbol.  */
   HOWTO (R_M32R_GOTPC_HI_ULO,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1094,7 +1094,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
      the symbol.  */
   HOWTO (R_M32R_GOTPC_HI_SLO,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1111,7 +1111,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
      the symbol.  */
   HOWTO (R_M32R_GOTPC_LO,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1125,7 +1125,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
 
   HOWTO (R_M32R_GOTOFF_HI_ULO,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1139,7 +1139,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
 
   HOWTO (R_M32R_GOTOFF_HI_SLO,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1153,7 +1153,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
 
   HOWTO (R_M32R_GOTOFF_LO,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

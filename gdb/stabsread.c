@@ -61,9 +61,9 @@ int *this_object_header_files;
 int n_this_object_header_files;
 int n_allocated_this_object_header_files;
 
-struct nextfield
+struct stabs_nextfield
 {
-  struct nextfield *next;
+  struct stabs_nextfield *next;
 
   /* This is the raw visibility from the stab.  It is not checked
      for being one of the visibilities we recognize, so code which
@@ -87,7 +87,7 @@ struct next_fnfieldlist
 
 struct stab_field_info
   {
-    struct nextfield *list = nullptr;
+    struct stabs_nextfield *list = nullptr;
     struct next_fnfieldlist *fnlist = nullptr;
 
     auto_obstack obstack;
@@ -623,7 +623,7 @@ symbol_reference_defined (const char **string)
 static int
 stab_reg_to_regnum (struct symbol *sym, struct gdbarch *gdbarch)
 {
-  int regno = gdbarch_stab_reg_to_regnum (gdbarch, SYMBOL_VALUE (sym));
+  int regno = gdbarch_stab_reg_to_regnum (gdbarch, sym->value_longest ());
 
   if (regno < 0 || regno >= gdbarch_num_cooked_regs (gdbarch))
     {
@@ -805,7 +805,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	    target_float_from_string (dbl_valu, dbl_type, std::string (p));
 
 	    sym->set_type (dbl_type);
-	    SYMBOL_VALUE_BYTES (sym) = dbl_valu;
+	    sym->set_value_bytes (dbl_valu);
 	    sym->set_aclass_index (LOC_CONST_BYTES);
 	  }
 	  break;
@@ -819,7 +819,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	       unsigned as well as signed constants.  */
 
 	    sym->set_type (objfile_type (objfile)->builtin_long);
-	    SYMBOL_VALUE (sym) = atoi (p);
+	    sym->set_value_longest (atoi (p));
 	    sym->set_aclass_index (LOC_CONST);
 	  }
 	  break;
@@ -827,7 +827,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	case 'c':
 	  {
 	    sym->set_type (objfile_type (objfile)->builtin_char);
-	    SYMBOL_VALUE (sym) = atoi (p);
+	    sym->set_value_longest (atoi (p));
 	    sym->set_aclass_index (LOC_CONST);
 	  }
 	  break;
@@ -888,7 +888,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	    memcpy (string_value, string_local, ind + 1);
 	    p++;
 
-	    SYMBOL_VALUE_BYTES (sym) = string_value;
+	    sym->set_value_bytes (string_value);
 	    sym->set_aclass_index (LOC_CONST_BYTES);
 	  }
 	  break;
@@ -915,7 +915,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	       correct.  Ideally, we should be using whatever we have
 	       available for parsing unsigned and long long values,
 	       however.  */
-	    SYMBOL_VALUE (sym) = atoi (p);
+	    sym->set_value_longest (atoi (p));
 	  }
 	  break;
 	default:
@@ -933,7 +933,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       sym->set_type (read_type (&p, objfile));
       sym->set_aclass_index (LOC_LABEL);
       sym->set_domain (VAR_DOMAIN);
-      SET_SYMBOL_VALUE_ADDRESS (sym, valu);
+      sym->set_value_address (valu);
       add_symbol_to_list (sym, get_local_symbols ());
       break;
 
@@ -1032,7 +1032,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       if (sym->linkage_name () && sym->linkage_name ()[0] != '#')
 	{
 	  i = hashname (sym->linkage_name ());
-	  SYMBOL_VALUE_CHAIN (sym) = global_sym_chain[i];
+	  sym->set_value_chain (global_sym_chain[i]);
 	  global_sym_chain[i] = sym;
 	}
       add_symbol_to_list (sym, get_global_symbols ());
@@ -1045,7 +1045,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
     case 'l':
       sym->set_type (read_type (&p, objfile));
       sym->set_aclass_index (LOC_LOCAL);
-      SYMBOL_VALUE (sym) = valu;
+      sym->set_value_longest (valu);
       sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_local_symbols ());
       break;
@@ -1065,7 +1065,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	sym->set_type (read_type (&p, objfile));
 
       sym->set_aclass_index (LOC_ARG);
-      SYMBOL_VALUE (sym) = valu;
+      sym->set_value_longest (valu);
       sym->set_domain (VAR_DOMAIN);
       sym->set_is_argument (1);
       add_symbol_to_list (sym, get_local_symbols ());
@@ -1115,7 +1115,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       sym->set_type (read_type (&p, objfile));
       sym->set_aclass_index (stab_register_index);
       sym->set_is_argument (1);
-      SYMBOL_VALUE (sym) = valu;
+      sym->set_value_longest (valu);
       sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_local_symbols ());
       break;
@@ -1124,7 +1124,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       /* Register variable (either global or local).  */
       sym->set_type (read_type (&p, objfile));
       sym->set_aclass_index (stab_register_index);
-      SYMBOL_VALUE (sym) = valu;
+      sym->set_value_longest (valu);
       sym->set_domain (VAR_DOMAIN);
       if (within_function)
 	{
@@ -1164,7 +1164,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 		  /* Use the type from the LOC_REGISTER; that is the type
 		     that is actually in that register.  */
 		  prev_sym->set_type (sym->type ());
-		  SYMBOL_VALUE (prev_sym) = SYMBOL_VALUE (sym);
+		  prev_sym->set_value_longest (sym->value_longest ());
 		  sym = prev_sym;
 		  break;
 		}
@@ -1179,7 +1179,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       /* Static symbol at top level of file.  */
       sym->set_type (read_type (&p, objfile));
       sym->set_aclass_index (LOC_STATIC);
-      SET_SYMBOL_VALUE_ADDRESS (sym, valu);
+      sym->set_value_address (valu);
       sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_file_symbols ());
       break;
@@ -1210,7 +1210,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	return NULL;
 
       sym->set_aclass_index (LOC_TYPEDEF);
-      SYMBOL_VALUE (sym) = valu;
+      sym->set_value_longest (valu);
       sym->set_domain (VAR_DOMAIN);
       /* C++ vagaries: we may have a type which is derived from
 	 a base type which did not have its name defined when the
@@ -1287,7 +1287,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
 	  *struct_sym = *sym;
 	  struct_sym->set_aclass_index (LOC_TYPEDEF);
-	  SYMBOL_VALUE (struct_sym) = valu;
+	  struct_sym->set_value_longest (valu);
 	  struct_sym->set_domain (STRUCT_DOMAIN);
 	  if (sym->type ()->name () == 0)
 	    sym->type ()->set_name
@@ -1314,7 +1314,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	return NULL;
 
       sym->set_aclass_index (LOC_TYPEDEF);
-      SYMBOL_VALUE (sym) = valu;
+      sym->set_value_longest (valu);
       sym->set_domain (STRUCT_DOMAIN);
       if (sym->type ()->name () == 0)
 	sym->type ()->set_name
@@ -1329,7 +1329,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
 	  *typedef_sym = *sym;
 	  typedef_sym->set_aclass_index (LOC_TYPEDEF);
-	  SYMBOL_VALUE (typedef_sym) = valu;
+	  typedef_sym->set_value_longest (valu);
 	  typedef_sym->set_domain (VAR_DOMAIN);
 	  if (sym->type ()->name () == 0)
 	    sym->type ()->set_name
@@ -1343,7 +1343,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       /* Static symbol of local scope.  */
       sym->set_type (read_type (&p, objfile));
       sym->set_aclass_index (LOC_STATIC);
-      SET_SYMBOL_VALUE_ADDRESS (sym, valu);
+      sym->set_value_address (valu);
       sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_local_symbols ());
       break;
@@ -1353,7 +1353,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       sym->set_type (read_type (&p, objfile));
       sym->set_aclass_index (LOC_REF_ARG);
       sym->set_is_argument (1);
-      SYMBOL_VALUE (sym) = valu;
+      sym->set_value_longest (valu);
       sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_local_symbols ());
       break;
@@ -1363,7 +1363,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       sym->set_type (read_type (&p, objfile));
       sym->set_aclass_index (stab_regparm_index);
       sym->set_is_argument (1);
-      SYMBOL_VALUE (sym) = valu;
+      sym->set_value_longest (valu);
       sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_local_symbols ());
       break;
@@ -1375,7 +1375,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	 "x:3" (local symbol) instead.  */
       sym->set_type (read_type (&p, objfile));
       sym->set_aclass_index (LOC_LOCAL);
-      SYMBOL_VALUE (sym) = valu;
+      sym->set_value_longest (valu);
       sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_local_symbols ());
       break;
@@ -1383,7 +1383,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
     default:
       sym->set_type (error_type (&p, objfile));
       sym->set_aclass_index (LOC_CONST);
-      SYMBOL_VALUE (sym) = 0;
+      sym->set_value_longest (0);
       sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_file_symbols ());
       break;
@@ -2922,7 +2922,7 @@ read_struct_fields (struct stab_field_info *fip, const char **pp,
 		    struct type *type, struct objfile *objfile)
 {
   const char *p;
-  struct nextfield *newobj;
+  struct stabs_nextfield *newobj;
 
   /* We better set p right now, in case there are no fields at all...    */
 
@@ -2938,7 +2938,7 @@ read_struct_fields (struct stab_field_info *fip, const char **pp,
     {
       STABS_CONTINUE (pp, objfile);
       /* Get space to record the next field's data.  */
-      newobj = OBSTACK_ZALLOC (&fip->obstack, struct nextfield);
+      newobj = OBSTACK_ZALLOC (&fip->obstack, struct stabs_nextfield);
 
       newobj->next = fip->list;
       fip->list = newobj;
@@ -3019,7 +3019,7 @@ read_baseclasses (struct stab_field_info *fip, const char **pp,
 		  struct type *type, struct objfile *objfile)
 {
   int i;
-  struct nextfield *newobj;
+  struct stabs_nextfield *newobj;
 
   if (**pp != '!')
     {
@@ -3059,7 +3059,7 @@ read_baseclasses (struct stab_field_info *fip, const char **pp,
 
   for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
     {
-      newobj = OBSTACK_ZALLOC (&fip->obstack, struct nextfield);
+      newobj = OBSTACK_ZALLOC (&fip->obstack, struct stabs_nextfield);
 
       newobj->next = fip->list;
       fip->list = newobj;
@@ -3245,7 +3245,7 @@ attach_fields_to_type (struct stab_field_info *fip, struct type *type,
 {
   int nfields = 0;
   int non_public_fields = 0;
-  struct nextfield *scan;
+  struct stabs_nextfield *scan;
 
   /* Count up the number of fields that we have, as well as taking note of
      whether or not there are any non-public fields, which requires us to
@@ -3594,7 +3594,7 @@ read_enum_type (const char **pp, struct type *type,
 			 &objfile->objfile_obstack);
       sym->set_aclass_index (LOC_CONST);
       sym->set_domain (VAR_DOMAIN);
-      SYMBOL_VALUE (sym) = n;
+      sym->set_value_longest (n);
       if (n < 0)
 	unsigned_enum = 0;
       add_symbol_to_list (sym, symlist);
@@ -3637,7 +3637,7 @@ read_enum_type (const char **pp, struct type *type,
 
 	  xsym->set_type (type);
 	  type->field (n).set_name (xsym->linkage_name ());
-	  type->field (n).set_loc_enumval (SYMBOL_VALUE (xsym));
+	  type->field (n).set_loc_enumval (xsym->value_longest ());
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
 	}
       if (syms == osyms)
@@ -4287,7 +4287,7 @@ common_block_end (struct objfile *objfile)
      Does it matter?  */
 
   i = hashname (sym->linkage_name ());
-  SYMBOL_VALUE_CHAIN (sym) = global_sym_chain[i];
+  sym->set_value_chain (global_sym_chain[i]);
   global_sym_chain[i] = sym;
   common_block_name = NULL;
 }
@@ -4306,9 +4306,8 @@ fix_common_block (struct symbol *sym, CORE_ADDR valu)
       int j;
 
       for (j = next->nsyms - 1; j >= 0; j--)
-	SET_SYMBOL_VALUE_ADDRESS (next->symbol[j],
-				  SYMBOL_VALUE_ADDRESS (next->symbol[j])
-				  + valu);
+	next->symbol[j]->set_value_address
+	  (next->symbol[j]->value_address () + valu);
     }
 }
 
@@ -4539,7 +4538,7 @@ scan_file_globals (struct objfile *objfile)
 	  QUIT;
 
 	  /* Skip static symbols.  */
-	  switch (MSYMBOL_TYPE (msymbol))
+	  switch (msymbol->type ())
 	    {
 	    case mst_file_text:
 	    case mst_file_data:
@@ -4564,11 +4563,11 @@ scan_file_globals (struct objfile *objfile)
 		     assign the value we have to it.  */
 		  if (prev)
 		    {
-		      SYMBOL_VALUE_CHAIN (prev) = SYMBOL_VALUE_CHAIN (sym);
+		      prev->set_value_chain (sym->value_chain ());
 		    }
 		  else
 		    {
-		      global_sym_chain[hash] = SYMBOL_VALUE_CHAIN (sym);
+		      global_sym_chain[hash] = sym->value_chain ();
 		    }
 
 		  /* Check to see whether we need to fix up a common block.  */
@@ -4577,23 +4576,17 @@ scan_file_globals (struct objfile *objfile)
 		  if (sym)
 		    {
 		      if (sym->aclass () == LOC_BLOCK)
-			{
-			  fix_common_block (sym,
-					    MSYMBOL_VALUE_ADDRESS (resolve_objfile,
-								   msymbol));
-			}
+			fix_common_block
+			  (sym, msymbol->value_address (resolve_objfile));
 		      else
-			{
-			  SET_SYMBOL_VALUE_ADDRESS
-			    (sym, MSYMBOL_VALUE_ADDRESS (resolve_objfile,
-							 msymbol));
-			}
+			sym->set_value_address
+			  (msymbol->value_address (resolve_objfile));
 		      sym->set_section_index (msymbol->section_index ());
 		    }
 
 		  if (prev)
 		    {
-		      sym = SYMBOL_VALUE_CHAIN (prev);
+		      sym = prev->value_chain ();
 		    }
 		  else
 		    {
@@ -4603,7 +4596,7 @@ scan_file_globals (struct objfile *objfile)
 	      else
 		{
 		  prev = sym;
-		  sym = SYMBOL_VALUE_CHAIN (sym);
+		  sym = sym->value_chain ();
 		}
 	    }
 	}
@@ -4620,11 +4613,11 @@ scan_file_globals (struct objfile *objfile)
       while (sym)
 	{
 	  prev = sym;
-	  sym = SYMBOL_VALUE_CHAIN (sym);
+	  sym = sym->value_chain ();
 
 	  /* Change the symbol address from the misleading chain value
 	     to address zero.  */
-	  SET_SYMBOL_VALUE_ADDRESS (prev, 0);
+	  prev->set_value_address (0);
 
 	  /* Complain about unresolved common block symbols.  */
 	  if (prev->aclass () == LOC_STATIC)
@@ -4659,7 +4652,7 @@ stabsread_new_init (void)
 }
 
 /* Initialize anything that needs initializing at the same time as
-   start_symtab() is called.  */
+   start_compunit_symtab() is called.  */
 
 void
 start_stabs (void)
@@ -4675,7 +4668,7 @@ start_stabs (void)
   common_block_name = NULL;
 }
 
-/* Call after end_symtab().  */
+/* Call after end_compunit_symtab().  */
 
 void
 end_stabs (void)

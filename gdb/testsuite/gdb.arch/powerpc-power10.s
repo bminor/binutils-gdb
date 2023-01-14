@@ -18,6 +18,7 @@
 	.text
 	.globl func
 func:
+/* 32-bit long instructions */
 	.long 0x7c200176	/* brd r0,r1 */
 	.long 0x7c2001b6	/* brh r0,r1 */
 	.long 0x7c200136	/* brw r0,r1 */
@@ -69,323 +70,6 @@ func:
 	.long 0x10140e42	/* mtvsrqm v0,r1 */
 	.long 0x10120e42	/* mtvsrwm v0,r1 */
 	.long 0x60000000	/* nop */
-	.quad 0x3801000006000000	/* paddi r0,r1,0 */
-	.quad 0x3801000c06000000	/* paddi r0,r1,12 */
-	.quad 0x3801003006000000	/* paddi r0,r1,48 */
-	.quad 0x3801006206000000	/* paddi r0,r1,98 */
-	.quad 0x7c2011787c201138	/* pdepd r0,r1,r2 */
-	.quad 0x8801000006000000	/* plbz r0,0(r1) */
-	.quad 0x8801001006000000	/* plbz r0,16(r1) */
-	.quad 0x8801002006000000	/* plbz r0,32(r1) */
-	.quad 0x8801004006000000	/* plbz r0,64(r1) */
-	.quad 0x8801000806000000	/* plbz r0,8(r1) */
-	.quad 0xe401000004000000	/* pld r0,0(r1) */
-	.quad 0xe401001004000000	/* pld r0,16(r1) */
-	.quad 0xe401002004000000	/* pld r0,32(r1) */
-	.quad 0xe401004004000000	/* pld r0,64(r1) */
-	.quad 0xe401000804000000	/* pld r0,8(r1) */
-	.quad 0xcb80000006000000	/* plfd f28,0(0) */
-	.quad 0xcb80001006000000	/* plfd f28,16(0) */
-	.quad 0xcb80002006000000	/* plfd f28,32(0) */
-	.quad 0xcb80000406000000	/* plfd f28,4(0) */
-	.quad 0xcb80004006000000	/* plfd f28,64(0) */
-	.quad 0xcb80000806000000	/* plfd f28,8(0) */
-	.quad 0xc380000006000000	/* plfs f28,0(0) */
-	.quad 0xc380001006000000	/* plfs f28,16(0) */
-	.quad 0xc380002006000000	/* plfs f28,32(0) */
-	.quad 0xc380000406000000	/* plfs f28,4(0) */
-	.quad 0xc380004006000000	/* plfs f28,64(0) */
-	.quad 0xc380000806000000	/* plfs f28,8(0) */
-	.quad 0xa801000006000000	/* plha r0,0(r1) */
-	.quad 0xa801001006000000	/* plha r0,16(r1) */
-	.quad 0xa801002006000000	/* plha r0,32(r1) */
-	.quad 0xa801004006000000	/* plha r0,64(r1) */
-	.quad 0xa801000806000000	/* plha r0,8(r1) */
-	.quad 0xa001000006000000	/* plhz r0,0(r1) */
-	.quad 0xa001001006000000	/* plhz r0,16(r1) */
-	.quad 0xa001002006000000	/* plhz r0,32(r1) */
-	.quad 0xa001004006000000	/* plhz r0,64(r1) */
-	.quad 0xa001000806000000	/* plhz r0,8(r1) */
-	.quad 0xe340000004000000	/* plq r26,0(0) */
-	.quad 0xe340001004000000	/* plq r26,16(0) */
-	.quad 0xe340002004000000	/* plq r26,32(0) */
-	.quad 0xe340003004000000	/* plq r26,48(0) */
-	.quad 0xe340004004000000	/* plq r26,64(0) */
-	.quad 0xe340000804000000	/* plq r26,8(0) */
-	.quad 0xa401000004000000	/* plwa r0,0(r1) */
-	.quad 0xa401001004000000	/* plwa r0,16(r1) */
-	.quad 0xa401002004000000	/* plwa r0,32(r1) */
-	.quad 0xa401004004000000	/* plwa r0,64(r1) */
-	.quad 0xa401000804000000	/* plwa r0,8(r1) */
-	.quad 0x8001000006000000	/* plwz r0,0(r1) */
-	.quad 0x8001001006000000	/* plwz r0,16(r1) */
-	.quad 0x8001002006000000	/* plwz r0,32(r1) */
-	.quad 0x8001004006000000	/* plwz r0,64(r1) */
-	.quad 0x8001000806000000	/* plwz r0,8(r1) */
-	.quad 0xa801000004000000	/* plxsd v0,0(r1) */
-	.quad 0xa801001004000000	/* plxsd v0,16(r1) */
-	.quad 0xa801002004000000	/* plxsd v0,32(r1) */
-	.quad 0xa801000404000000	/* plxsd v0,4(r1) */
-	.quad 0xa801004004000000	/* plxsd v0,64(r1) */
-	.quad 0xa801000804000000	/* plxsd v0,8(r1) */
-	.quad 0xac01000004000000	/* plxssp v0,0(r1) */
-	.quad 0xac01001004000000	/* plxssp v0,16(r1) */
-	.quad 0xac01002004000000	/* plxssp v0,32(r1) */
-	.quad 0xac01000404000000	/* plxssp v0,4(r1) */
-	.quad 0xac01004004000000	/* plxssp v0,64(r1) */
-	.quad 0xac01000804000000	/* plxssp v0,8(r1) */
-	.quad 0xea80000004000000	/* plxvp vs20,0(0) */
-	.quad 0xea80001004000000	/* plxvp vs20,16(0) */
-	.quad 0xea80001804000000	/* plxvp vs20,24(0) */
-	.quad 0xea80002004000000	/* plxvp vs20,32(0) */
-	.quad 0xea80000804000000	/* plxvp vs20,8(0) */
-	.quad 0xc801000004000000	/* plxv vs0,0(r1) */
-	.quad 0xc801001004000000	/* plxv vs0,16(r1) */
-	.quad 0xc801000404000000	/* plxv vs0,4(r1) */
-	.quad 0xc801000804000000	/* plxv vs0,8(r1) */
-	.quad 0xee00099807900000	/* pmxvbf16ger2 a4,vs0,vs1,0,0,0 */
-	.quad 0xee00099807904000	/* pmxvbf16ger2 a4,vs0,vs1,0,0,1 */
-	.quad 0xee0009980790000d	/* pmxvbf16ger2 a4,vs0,vs1,0,13,0 */
-	.quad 0xee0009980790400d	/* pmxvbf16ger2 a4,vs0,vs1,0,13,1 */
-	.quad 0xee000998079000b0	/* pmxvbf16ger2 a4,vs0,vs1,11,0,0 */
-	.quad 0xee000998079040b0	/* pmxvbf16ger2 a4,vs0,vs1,11,0,1 */
-	.quad 0xee000998079000bd	/* pmxvbf16ger2 a4,vs0,vs1,11,13,0 */
-	.quad 0xee000998079040bd	/* pmxvbf16ger2 a4,vs0,vs1,11,13,1 */
-	.quad 0xee000f9007900000	/* pmxvbf16ger2nn a4,vs0,vs1,0,0,0 */
-	.quad 0xee000f9007904000	/* pmxvbf16ger2nn a4,vs0,vs1,0,0,1 */
-	.quad 0xee000f900790000d	/* pmxvbf16ger2nn a4,vs0,vs1,0,13,0 */
-	.quad 0xee000f900790400d	/* pmxvbf16ger2nn a4,vs0,vs1,0,13,1 */
-	.quad 0xee000f90079000b0	/* pmxvbf16ger2nn a4,vs0,vs1,11,0,0 */
-	.quad 0xee000f90079040b0	/* pmxvbf16ger2nn a4,vs0,vs1,11,0,1 */
-	.quad 0xee000f90079000bd	/* pmxvbf16ger2nn a4,vs0,vs1,11,13,0 */
-	.quad 0xee000f90079040bd	/* pmxvbf16ger2nn a4,vs0,vs1,11,13,1 */
-	.quad 0xee000b9007900000	/* pmxvbf16ger2np a4,vs0,vs1,0,0,0 */
-	.quad 0xee000b9007904000	/* pmxvbf16ger2np a4,vs0,vs1,0,0,1 */
-	.quad 0xee000b900790000d	/* pmxvbf16ger2np a4,vs0,vs1,0,13,0 */
-	.quad 0xee000b900790400d	/* pmxvbf16ger2np a4,vs0,vs1,0,13,1 */
-	.quad 0xee000b90079000b0	/* pmxvbf16ger2np a4,vs0,vs1,11,0,0 */
-	.quad 0xee000b90079040b0	/* pmxvbf16ger2np a4,vs0,vs1,11,0,1 */
-	.quad 0xee000b90079000bd	/* pmxvbf16ger2np a4,vs0,vs1,11,13,0 */
-	.quad 0xee000b90079040bd	/* pmxvbf16ger2np a4,vs0,vs1,11,13,1 */
-	.quad 0xee000d9007900000	/* pmxvbf16ger2pn a4,vs0,vs1,0,0,0 */
-	.quad 0xee000d9007904000	/* pmxvbf16ger2pn a4,vs0,vs1,0,0,1 */
-	.quad 0xee000d900790000d	/* pmxvbf16ger2pn a4,vs0,vs1,0,13,0 */
-	.quad 0xee000d900790400d	/* pmxvbf16ger2pn a4,vs0,vs1,0,13,1 */
-	.quad 0xee000d90079000b0	/* pmxvbf16ger2pn a4,vs0,vs1,11,0,0 */
-	.quad 0xee000d90079040b0	/* pmxvbf16ger2pn a4,vs0,vs1,11,0,1 */
-	.quad 0xee000d90079000bd	/* pmxvbf16ger2pn a4,vs0,vs1,11,13,0 */
-	.quad 0xee000d90079040bd	/* pmxvbf16ger2pn a4,vs0,vs1,11,13,1 */
-	.quad 0xee00099007900000	/* pmxvbf16ger2pp a4,vs0,vs1,0,0,0 */
-	.quad 0xee00099007904000	/* pmxvbf16ger2pp a4,vs0,vs1,0,0,1 */
-	.quad 0xee0009900790000d	/* pmxvbf16ger2pp a4,vs0,vs1,0,13,0 */
-	.quad 0xee0009900790400d	/* pmxvbf16ger2pp a4,vs0,vs1,0,13,1 */
-	.quad 0xee000990079000b0	/* pmxvbf16ger2pp a4,vs0,vs1,11,0,0 */
-	.quad 0xee000990079040b0	/* pmxvbf16ger2pp a4,vs0,vs1,11,0,1 */
-	.quad 0xee000990079000bd	/* pmxvbf16ger2pp a4,vs0,vs1,11,13,0 */
-	.quad 0xee000990079040bd	/* pmxvbf16ger2pp a4,vs0,vs1,11,13,1 */
-	.quad 0xee00089807900000	/* pmxvf16ger2 a4,vs0,vs1,0,0,0 */
-	.quad 0xee00089807904000	/* pmxvf16ger2 a4,vs0,vs1,0,0,1 */
-	.quad 0xee0008980790000d	/* pmxvf16ger2 a4,vs0,vs1,0,13,0 */
-	.quad 0xee0008980790400d	/* pmxvf16ger2 a4,vs0,vs1,0,13,1 */
-	.quad 0xee000898079000b0	/* pmxvf16ger2 a4,vs0,vs1,11,0,0 */
-	.quad 0xee000898079040b0	/* pmxvf16ger2 a4,vs0,vs1,11,0,1 */
-	.quad 0xee000898079000bd	/* pmxvf16ger2 a4,vs0,vs1,11,13,0 */
-	.quad 0xee000898079040bd	/* pmxvf16ger2 a4,vs0,vs1,11,13,1 */
-	.quad 0xee000e9007900000	/* pmxvf16ger2nn a4,vs0,vs1,0,0,0 */
-	.quad 0xee000e9007904000	/* pmxvf16ger2nn a4,vs0,vs1,0,0,1 */
-	.quad 0xee000e900790000d	/* pmxvf16ger2nn a4,vs0,vs1,0,13,0 */
-	.quad 0xee000e900790400d	/* pmxvf16ger2nn a4,vs0,vs1,0,13,1 */
-	.quad 0xee000e90079000b0	/* pmxvf16ger2nn a4,vs0,vs1,11,0,0 */
-	.quad 0xee000e90079040b0	/* pmxvf16ger2nn a4,vs0,vs1,11,0,1 */
-	.quad 0xee000e90079000bd	/* pmxvf16ger2nn a4,vs0,vs1,11,13,0 */
-	.quad 0xee000e90079040bd	/* pmxvf16ger2nn a4,vs0,vs1,11,13,1 */
-	.quad 0xee000a9007900000	/* pmxvf16ger2np a4,vs0,vs1,0,0,0 */
-	.quad 0xee000a9007904000	/* pmxvf16ger2np a4,vs0,vs1,0,0,1 */
-	.quad 0xee000a900790000d	/* pmxvf16ger2np a4,vs0,vs1,0,13,0 */
-	.quad 0xee000a900790400d	/* pmxvf16ger2np a4,vs0,vs1,0,13,1 */
-	.quad 0xee000a90079000b0	/* pmxvf16ger2np a4,vs0,vs1,11,0,0 */
-	.quad 0xee000a90079040b0	/* pmxvf16ger2np a4,vs0,vs1,11,0,1 */
-	.quad 0xee000a90079000bd	/* pmxvf16ger2np a4,vs0,vs1,11,13,0 */
-	.quad 0xee000a90079040bd	/* pmxvf16ger2np a4,vs0,vs1,11,13,1 */
-	.quad 0xee000c9007900000	/* pmxvf16ger2pn a4,vs0,vs1,0,0,0 */
-	.quad 0xee000c9007904000	/* pmxvf16ger2pn a4,vs0,vs1,0,0,1 */
-	.quad 0xee000c900790000d	/* pmxvf16ger2pn a4,vs0,vs1,0,13,0 */
-	.quad 0xee000c900790400d	/* pmxvf16ger2pn a4,vs0,vs1,0,13,1 */
-	.quad 0xee000c90079000b0	/* pmxvf16ger2pn a4,vs0,vs1,11,0,0 */
-	.quad 0xee000c90079040b0	/* pmxvf16ger2pn a4,vs0,vs1,11,0,1 */
-	.quad 0xee000c90079000bd	/* pmxvf16ger2pn a4,vs0,vs1,11,13,0 */
-	.quad 0xee000c90079040bd	/* pmxvf16ger2pn a4,vs0,vs1,11,13,1 */
-	.quad 0xee00089007900000	/* pmxvf16ger2pp a4,vs0,vs1,0,0,0 */
-	.quad 0xee00089007904000	/* pmxvf16ger2pp a4,vs0,vs1,0,0,1 */
-	.quad 0xee0008900790000d	/* pmxvf16ger2pp a4,vs0,vs1,0,13,0 */
-	.quad 0xee0008900790400d	/* pmxvf16ger2pp a4,vs0,vs1,0,13,1 */
-	.quad 0xee000890079000b0	/* pmxvf16ger2pp a4,vs0,vs1,11,0,0 */
-	.quad 0xee000890079040b0	/* pmxvf16ger2pp a4,vs0,vs1,11,0,1 */
-	.quad 0xee000890079000bd	/* pmxvf16ger2pp a4,vs0,vs1,11,13,0 */
-	.quad 0xee000890079040bd	/* pmxvf16ger2pp a4,vs0,vs1,11,13,1 */
-	.quad 0xee0008d807900000	/* pmxvf32ger a4,vs0,vs1,0,0 */
-	.quad 0xee0008d80790000d	/* pmxvf32ger a4,vs0,vs1,0,13 */
-	.quad 0xee0008d8079000b0	/* pmxvf32ger a4,vs0,vs1,11,0 */
-	.quad 0xee0008d8079000bd	/* pmxvf32ger a4,vs0,vs1,11,13 */
-	.quad 0xee000ed007900000	/* pmxvf32gernn a4,vs0,vs1,0,0 */
-	.quad 0xee000ed00790000d	/* pmxvf32gernn a4,vs0,vs1,0,13 */
-	.quad 0xee000ed0079000b0	/* pmxvf32gernn a4,vs0,vs1,11,0 */
-	.quad 0xee000ed0079000bd	/* pmxvf32gernn a4,vs0,vs1,11,13 */
-	.quad 0xee000ad007900000	/* pmxvf32gernp a4,vs0,vs1,0,0 */
-	.quad 0xee000ad00790000d	/* pmxvf32gernp a4,vs0,vs1,0,13 */
-	.quad 0xee000ad0079000b0	/* pmxvf32gernp a4,vs0,vs1,11,0 */
-	.quad 0xee000ad0079000bd	/* pmxvf32gernp a4,vs0,vs1,11,13 */
-	.quad 0xee000cd007900000	/* pmxvf32gerpn a4,vs0,vs1,0,0 */
-	.quad 0xee000cd00790000d	/* pmxvf32gerpn a4,vs0,vs1,0,13 */
-	.quad 0xee000cd0079000b0	/* pmxvf32gerpn a4,vs0,vs1,11,0 */
-	.quad 0xee000cd0079000bd	/* pmxvf32gerpn a4,vs0,vs1,11,13 */
-	.quad 0xee0008d007900000	/* pmxvf32gerpp a4,vs0,vs1,0,0 */
-	.quad 0xee0008d00790000d	/* pmxvf32gerpp a4,vs0,vs1,0,13 */
-	.quad 0xee0008d0079000b0	/* pmxvf32gerpp a4,vs0,vs1,11,0 */
-	.quad 0xee0008d0079000bd	/* pmxvf32gerpp a4,vs0,vs1,11,13 */
-	.quad 0xee1601d807900000	/* pmxvf64ger a4,vs22,vs0,0,0 */
-	.quad 0xee1601d807900004	/* pmxvf64ger a4,vs22,vs0,0,1 */
-	.quad 0xee1601d8079000b0	/* pmxvf64ger a4,vs22,vs0,11,0 */
-	.quad 0xee1601d8079000b4	/* pmxvf64ger a4,vs22,vs0,11,1 */
-	.quad 0xee1607d007900000	/* pmxvf64gernn a4,vs22,vs0,0,0 */
-	.quad 0xee1607d007900004	/* pmxvf64gernn a4,vs22,vs0,0,1 */
-	.quad 0xee1607d0079000b0	/* pmxvf64gernn a4,vs22,vs0,11,0 */
-	.quad 0xee1607d0079000b4	/* pmxvf64gernn a4,vs22,vs0,11,1 */
-	.quad 0xee1603d007900000	/* pmxvf64gernp a4,vs22,vs0,0,0 */
-	.quad 0xee1603d007900004	/* pmxvf64gernp a4,vs22,vs0,0,1 */
-	.quad 0xee1603d0079000b0	/* pmxvf64gernp a4,vs22,vs0,11,0 */
-	.quad 0xee1603d0079000b4	/* pmxvf64gernp a4,vs22,vs0,11,1 */
-	.quad 0xee1605d007900000	/* pmxvf64gerpn a4,vs22,vs0,0,0 */
-	.quad 0xee1605d007900004	/* pmxvf64gerpn a4,vs22,vs0,0,1 */
-	.quad 0xee1605d0079000b0	/* pmxvf64gerpn a4,vs22,vs0,11,0 */
-	.quad 0xee1605d0079000b4	/* pmxvf64gerpn a4,vs22,vs0,11,1 */
-	.quad 0xee1601d007900000	/* pmxvf64gerpp a4,vs22,vs0,0,0 */
-	.quad 0xee1601d007900004	/* pmxvf64gerpp a4,vs22,vs0,0,1 */
-	.quad 0xee1601d0079000b0	/* pmxvf64gerpp a4,vs22,vs0,11,0 */
-	.quad 0xee1601d0079000b4	/* pmxvf64gerpp a4,vs22,vs0,11,1 */
-	.quad 0xee000a5807900000	/* pmxvi16ger2 a4,vs0,vs1,0,0,0 */
-	.quad 0xee000a5807904000	/* pmxvi16ger2 a4,vs0,vs1,0,0,1 */
-	.quad 0xee000a580790000d	/* pmxvi16ger2 a4,vs0,vs1,0,13,0 */
-	.quad 0xee000a580790400d	/* pmxvi16ger2 a4,vs0,vs1,0,13,1 */
-	.quad 0xee000a58079000b0	/* pmxvi16ger2 a4,vs0,vs1,11,0,0 */
-	.quad 0xee000a58079040b0	/* pmxvi16ger2 a4,vs0,vs1,11,0,1 */
-	.quad 0xee000a58079000bd	/* pmxvi16ger2 a4,vs0,vs1,11,13,0 */
-	.quad 0xee000a58079040bd	/* pmxvi16ger2 a4,vs0,vs1,11,13,1 */
-	.quad 0xee000b5807900000	/* pmxvi16ger2pp a4,vs0,vs1,0,0,0 */
-	.quad 0xee000b5807904000	/* pmxvi16ger2pp a4,vs0,vs1,0,0,1 */
-	.quad 0xee000b580790000d	/* pmxvi16ger2pp a4,vs0,vs1,0,13,0 */
-	.quad 0xee000b580790400d	/* pmxvi16ger2pp a4,vs0,vs1,0,13,1 */
-	.quad 0xee000b58079000b0	/* pmxvi16ger2pp a4,vs0,vs1,11,0,0 */
-	.quad 0xee000b58079040b0	/* pmxvi16ger2pp a4,vs0,vs1,11,0,1 */
-	.quad 0xee000b58079000bd	/* pmxvi16ger2pp a4,vs0,vs1,11,13,0 */
-	.quad 0xee000b58079040bd	/* pmxvi16ger2pp a4,vs0,vs1,11,13,1 */
-	.quad 0xee00095807900000	/* pmxvi16ger2s a4,vs0,vs1,0,0,0 */
-	.quad 0xee00095807904000	/* pmxvi16ger2s a4,vs0,vs1,0,0,1 */
-	.quad 0xee0009580790000d	/* pmxvi16ger2s a4,vs0,vs1,0,13,0 */
-	.quad 0xee0009580790400d	/* pmxvi16ger2s a4,vs0,vs1,0,13,1 */
-	.quad 0xee000958079000b0	/* pmxvi16ger2s a4,vs0,vs1,11,0,0 */
-	.quad 0xee000958079040b0	/* pmxvi16ger2s a4,vs0,vs1,11,0,1 */
-	.quad 0xee000958079000bd	/* pmxvi16ger2s a4,vs0,vs1,11,13,0 */
-	.quad 0xee000958079040bd	/* pmxvi16ger2s a4,vs0,vs1,11,13,1 */
-	.quad 0xee00095007900000	/* pmxvi16ger2spp a4,vs0,vs1,0,0,0 */
-	.quad 0xee00095007904000	/* pmxvi16ger2spp a4,vs0,vs1,0,0,1 */
-	.quad 0xee0009500790000d	/* pmxvi16ger2spp a4,vs0,vs1,0,13,0 */
-	.quad 0xee0009500790400d	/* pmxvi16ger2spp a4,vs0,vs1,0,13,1 */
-	.quad 0xee000950079000b0	/* pmxvi16ger2spp a4,vs0,vs1,11,0,0 */
-	.quad 0xee000950079040b0	/* pmxvi16ger2spp a4,vs0,vs1,11,0,1 */
-	.quad 0xee000950079000bd	/* pmxvi16ger2spp a4,vs0,vs1,11,13,0 */
-	.quad 0xee000950079040bd	/* pmxvi16ger2spp a4,vs0,vs1,11,13,1 */
-	.quad 0xee00091807900000	/* pmxvi4ger8 a4,vs0,vs1,0,0,0 */
-	.quad 0xee00091807902d00	/* pmxvi4ger8 a4,vs0,vs1,0,0,45 */
-	.quad 0xee00091807900001	/* pmxvi4ger8 a4,vs0,vs1,0,1,0 */
-	.quad 0xee00091807902d01	/* pmxvi4ger8 a4,vs0,vs1,0,1,45 */
-	.quad 0xee000918079000b0	/* pmxvi4ger8 a4,vs0,vs1,11,0,0 */
-	.quad 0xee00091807902db0	/* pmxvi4ger8 a4,vs0,vs1,11,0,45 */
-	.quad 0xee000918079000b1	/* pmxvi4ger8 a4,vs0,vs1,11,1,0 */
-	.quad 0xee00091807902db1	/* pmxvi4ger8 a4,vs0,vs1,11,1,45 */
-	.quad 0xee00091007900000	/* pmxvi4ger8pp a4,vs0,vs1,0,0,0 */
-	.quad 0xee00091007902d00	/* pmxvi4ger8pp a4,vs0,vs1,0,0,45 */
-	.quad 0xee00091007900001	/* pmxvi4ger8pp a4,vs0,vs1,0,1,0 */
-	.quad 0xee00091007902d01	/* pmxvi4ger8pp a4,vs0,vs1,0,1,45 */
-	.quad 0xee000910079000b0	/* pmxvi4ger8pp a4,vs0,vs1,11,0,0 */
-	.quad 0xee00091007902db0	/* pmxvi4ger8pp a4,vs0,vs1,11,0,45 */
-	.quad 0xee000910079000b1	/* pmxvi4ger8pp a4,vs0,vs1,11,1,0 */
-	.quad 0xee00091007902db1	/* pmxvi4ger8pp a4,vs0,vs1,11,1,45 */
-	.quad 0xee00081807900000	/* pmxvi8ger4 a4,vs0,vs1,0,0,0 */
-	.quad 0xee00081807905000	/* pmxvi8ger4 a4,vs0,vs1,0,0,5 */
-	.quad 0xee0008180790000d	/* pmxvi8ger4 a4,vs0,vs1,0,13,0 */
-	.quad 0xee0008180790500d	/* pmxvi8ger4 a4,vs0,vs1,0,13,5 */
-	.quad 0xee000818079000b0	/* pmxvi8ger4 a4,vs0,vs1,11,0,0 */
-	.quad 0xee000818079050b0	/* pmxvi8ger4 a4,vs0,vs1,11,0,5 */
-	.quad 0xee000818079000bd	/* pmxvi8ger4 a4,vs0,vs1,11,13,0 */
-	.quad 0xee000818079050bd	/* pmxvi8ger4 a4,vs0,vs1,11,13,5 */
-	.quad 0xee00081007900000	/* pmxvi8ger4pp a4,vs0,vs1,0,0,0 */
-	.quad 0xee00081007905000	/* pmxvi8ger4pp a4,vs0,vs1,0,0,5 */
-	.quad 0xee0008100790000d	/* pmxvi8ger4pp a4,vs0,vs1,0,13,0 */
-	.quad 0xee0008100790500d	/* pmxvi8ger4pp a4,vs0,vs1,0,13,5 */
-	.quad 0xee000810079000b0	/* pmxvi8ger4pp a4,vs0,vs1,11,0,0 */
-	.quad 0xee000810079050b0	/* pmxvi8ger4pp a4,vs0,vs1,11,0,5 */
-	.quad 0xee000810079000bd	/* pmxvi8ger4pp a4,vs0,vs1,11,13,0 */
-	.quad 0xee000810079050bd	/* pmxvi8ger4pp a4,vs0,vs1,11,13,5 */
-	.quad 0xee000b1807900000	/* pmxvi8ger4spp a4,vs0,vs1,0,0,0 */
-	.quad 0xee000b1807905000	/* pmxvi8ger4spp a4,vs0,vs1,0,0,5 */
-	.quad 0xee000b180790000d	/* pmxvi8ger4spp a4,vs0,vs1,0,13,0 */
-	.quad 0xee000b180790500d	/* pmxvi8ger4spp a4,vs0,vs1,0,13,5 */
-	.quad 0xee000b18079000b0	/* pmxvi8ger4spp a4,vs0,vs1,11,0,0 */
-	.quad 0xee000b18079050b0	/* pmxvi8ger4spp a4,vs0,vs1,11,0,5 */
-	.quad 0xee000b18079000bd	/* pmxvi8ger4spp a4,vs0,vs1,11,13,0 */
-	.quad 0xee000b18079050bd	/* pmxvi8ger4spp a4,vs0,vs1,11,13,5 */
-	.quad 0x9801000006000000	/* pstb r0,0(r1) */
-	.quad 0x9801001006000000	/* pstb r0,16(r1) */
-	.quad 0x9801002006000000	/* pstb r0,32(r1) */
-	.quad 0x9801000806000000	/* pstb r0,8(r1) */
-	.quad 0xf401000004000000	/* pstd r0,0(r1) */
-	.quad 0xf401001004000000	/* pstd r0,16(r1) */
-	.quad 0xf401002004000000	/* pstd r0,32(r1) */
-	.quad 0xf401000804000000	/* pstd r0,8(r1) */
-	.quad 0xdb40000006000000	/* pstfd f26,0(0) */
-	.quad 0xdb40001006000000	/* pstfd f26,16(0) */
-	.quad 0xdb40002006000000	/* pstfd f26,32(0) */
-	.quad 0xdb40000406000000	/* pstfd f26,4(0) */
-	.quad 0xdb40000806000000	/* pstfd f26,8(0) */
-	.quad 0xd340000006000000	/* pstfs f26,0(0) */
-	.quad 0xd340001006000000	/* pstfs f26,16(0) */
-	.quad 0xd340002006000000	/* pstfs f26,32(0) */
-	.quad 0xd340000406000000	/* pstfs f26,4(0) */
-	.quad 0xd340000806000000	/* pstfs f26,8(0) */
-	.quad 0xb001000006000000	/* psth r0,0(r1) */
-	.quad 0xb001001006000000	/* psth r0,16(r1) */
-	.quad 0xb001002006000000	/* psth r0,32(r1) */
-	.quad 0xb001000806000000	/* psth r0,8(r1) */
-	.quad 0xf300000004000000	/* pstq r24,0(0) */
-	.quad 0xf300001004000000	/* pstq r24,16(0) */
-	.quad 0xf300002004000000	/* pstq r24,32(0) */
-	.quad 0xf300004004000000	/* pstq r24,64(0) */
-	.quad 0xf300000804000000	/* pstq r24,8(0) */
-	.quad 0x9001000006000000	/* pstw r0,0(r1) */
-	.quad 0x9001001006000000	/* pstw r0,16(r1) */
-	.quad 0x9001002006000000	/* pstw r0,32(r1) */
-	.quad 0x9001000806000000	/* pstw r0,8(r1) */
-	.quad 0xbac0000004000000	/* pstxsd v22,0(0) */
-	.quad 0xbac0001004000000	/* pstxsd v22,16(0) */
-	.quad 0xbac0002004000000	/* pstxsd v22,32(0) */
-	.quad 0xbac0000404000000	/* pstxsd v22,4(0) */
-	.quad 0xbac0004004000000	/* pstxsd v22,64(0) */
-	.quad 0xbac0000804000000	/* pstxsd v22,8(0) */
-	.quad 0xbec0000004000000	/* pstxssp v22,0(0) */
-	.quad 0xbec0001004000000	/* pstxssp v22,16(0) */
-	.quad 0xbec0002004000000	/* pstxssp v22,32(0) */
-	.quad 0xbec0000404000000	/* pstxssp v22,4(0) */
-	.quad 0xbec0004004000000	/* pstxssp v22,64(0) */
-	.quad 0xbec0000804000000	/* pstxssp v22,8(0) */
-	.quad 0xfa80000004000000	/* pstxvp vs20,0(0) */
-	.quad 0xfa80001004000000	/* pstxvp vs20,16(0) */
-	.quad 0xfa80002004000000	/* pstxvp vs20,32(0) */
-	.quad 0xfa80003004000000	/* pstxvp vs20,48(0) */
-	.quad 0xd801000004000000	/* pstxv vs0,0(r1) */
-	.quad 0xd801001004000000	/* pstxv vs0,16(r1) */
-	.quad 0xd801000404000000	/* pstxv vs0,4(r1) */
-	.quad 0xd801000804000000	/* pstxv vs0,8(r1) */
 	.long 0x7f470300	/* setbc r26,4*cr1+so */
 	.long 0x7f480300	/* setbc r26,4*cr2+lt */
 	.long 0x7f5f0300	/* setbc r26,4*cr7+so */
@@ -567,12 +251,6 @@ func:
 	.long 0xee000810	/* xvi8ger4pp a4,vs0,vs1 */
 	.long 0xee000b18	/* xvi8ger4spp a4,vs0,vs1 */
 	.long 0xf182076c	/* xvtlsbb cr3,vs0 */
-	.quad 0x840110c005000000	/* xxblendvb vs0,vs1,vs2,vs3 */
-	.quad 0x840110f005000000	/* xxblendvd vs0,vs1,vs2,vs3 */
-	.quad 0x840110d005000000	/* xxblendvh vs0,vs1,vs2,vs3 */
-	.quad 0x840110e005000000	/* xxblendvw vs0,vs1,vs2,vs3 */
-	.quad 0x880110d005000000	/* xxeval vs0,vs1,vs2,vs3,0 */
-	.quad 0x880110d005000003	/* xxeval vs0,vs1,vs2,vs3,3 */
 	.long 0xf0000f28	/* xxgenpcvbm vs0,v1,0 */
 	.long 0xf0010f28	/* xxgenpcvbm vs0,v1,1 */
 	.long 0xf0020f28	/* xxgenpcvbm vs0,v1,2 */
@@ -592,48 +270,748 @@ func:
 	.long 0x7e000162	/* xxmfacc a4 */
 	.long 0x7e010162	/* xxmtacc a4 */
 	.long 0x7e030162	/* xxsetaccz a4 */
-	.quad 0x880110c005000000	/* xxpermx vs0,vs1,vs2,vs3,0 */
-	.quad 0x880110c005000003	/* xxpermx vs0,vs1,vs2,vs3,3 */
-	.quad 0x8000007f05000000	/* xxsplti32dx vs0,0,127 */
-	.quad 0x8000000f05000000	/* xxsplti32dx vs0,0,15 */
-	.quad 0x8000a5a50500a5a5	/* xxsplti32dx vs0,0,2779096485 */
-	.quad 0x8000000305000000	/* xxsplti32dx vs0,0,3 */
-	.quad 0x8000001f05000000	/* xxsplti32dx vs0,0,31 */
-	.quad 0x8000800005000000	/* xxsplti32dx vs0,0,32768 */
-	.quad 0x8000ffff0500ffff	/* xxsplti32dx vs0,0,4294967295 */
-	.quad 0x8000003f05000000	/* xxsplti32dx vs0,0,63 */
-	.quad 0x800003e705000001	/* xxsplti32dx vs0,0,66535 */
-	.quad 0x8000000705000000	/* xxsplti32dx vs0,0,7 */
-	.quad 0x8002007f05000000	/* xxsplti32dx vs0,1,127 */
-	.quad 0x8002000f05000000	/* xxsplti32dx vs0,1,15 */
-	.quad 0x8002a5a50500a5a5	/* xxsplti32dx vs0,1,2779096485 */
-	.quad 0x8002000305000000	/* xxsplti32dx vs0,1,3 */
-	.quad 0x8002001f05000000	/* xxsplti32dx vs0,1,31 */
-	.quad 0x8002800005000000	/* xxsplti32dx vs0,1,32768 */
-	.quad 0x8002ffff0500ffff	/* xxsplti32dx vs0,1,4294967295 */
-	.quad 0x8002003f05000000	/* xxsplti32dx vs0,1,63 */
-	.quad 0x800203e705000001	/* xxsplti32dx vs0,1,66535 */
-	.quad 0x8002000705000000	/* xxsplti32dx vs0,1,7 */
-	.quad 0x8004000005000000	/* xxspltidp vs0,0 */
-	.quad 0x8004000005000080	/* xxspltidp vs0,8388608 */
-	.quad 0x8004000105000080	/* xxspltidp vs0,8388609 */
-	.quad 0x8004234505000083	/* xxspltidp vs0,8594245 */
-	.quad 0x8004ffff050000ff	/* xxspltidp vs0,16777215 */
-	.quad 0x8004000005003200	/* xxspltidp vs0,838860800 */
-	.quad 0x8004000005007f80	/* xxspltidp vs0,2139095040 */
-	.quad 0x8004000105007f80	/* xxspltidp vs0,2139095041 */
-	.quad 0x8004234505007f83	/* xxspltidp vs0,2139300677 */
-	.quad 0x8004ffff05007fff	/* xxspltidp vs0,2147483647 */
-	.quad 0x8004000005008000	/* xxspltidp vs0,2147483648 */
-	.quad 0x8004000005008080	/* xxspltidp vs0,2155872256 */
-	.quad 0x8004000105008080	/* xxspltidp vs0,2155872257 */
-	.quad 0x8004234505008083	/* xxspltidp vs0,2156077893 */
-	.quad 0x8004ffff050080ff	/* xxspltidp vs0,2164260863 */
-	.quad 0x800400000500ff80	/* xxspltidp vs0,4286578688 */
-	.quad 0x800400010500ff80	/* xxspltidp vs0,4286578689 */
-	.quad 0x800423450500ff83	/* xxspltidp vs0,4286784325 */
-	.quad 0x8004ffff0500ffff	/* xxspltidp vs0,4294967295 */
-	.quad 0x8006000005000000	/* xxspltiw vs0,0 */
-	.quad 0x8006000105000000	/* xxspltiw vs0,0 */
-	.quad 0x8006000305000000	/* xxspltiw vs0,3 */
-	.quad 0x8006000805000000	/* xxspltiw vs0,8 */
+
+/* Prefixed instructions are 64-bits long.  Use multiple .long statements to
+   represent the 64-bit instructions so the instructions are properly
+   represented in the machines native byte order when words are fetched 32-bits
+   at a time.  The first .long is for the 32-bit prefix word and the second
+   .long is for the 32-bit suffix word thus making the word order independent
+   of the machine Endianes.  The use of the .quad statement on Big Endian
+   results in the disassembler fetching the 32-bit suffix before the 32-bit
+   prefix word.  */
+	.long 0x06000000	/* paddi r0,r1,0 */
+	.long 0x38010000
+	.long 0x06000000	/* paddi r0,r1,12 */
+	.long 0x3801000c
+	.long 0x06000000	/* paddi r0,r1,48 */
+	.long 0x38010030
+	.long 0x06000000	/* paddi r0,r1,98 */
+	.long 0x38010062
+	.long 0x7c201138	/* pdepd r0,r1,r2 */
+	.long 0x7c201178
+	.long 0x06000000	/* plbz r0,0(r1) */
+	.long 0x88010000
+	.long 0x06000000	/* plbz r0,16(r1) */
+	.long 0x88010010
+	.long 0x06000000	/* plbz r0,32(r1) */
+	.long 0x88010020
+	.long 0x06000000	/* plbz r0,64(r1) */
+	.long 0x88010040
+	.long 0x06000000	/* plbz r0,8(r1) */
+	.long 0x88010008
+	.long 0x04000000	/* pld r0,0(r1) */
+	.long 0xe4010000
+	.long 0x04000000	/* pld r0,16(r1) */
+	.long 0xe4010010
+	.long 0x04000000	/* pld r0,32(r1) */
+	.long 0xe4010020
+	.long 0x04000000	/* pld r0,64(r1) */
+	.long 0xe4010040
+	.long 0x04000000	/* pld r0,8(r1) */
+	.long 0xe4010008
+	.long 0x06000000	/* plfd f28,0(0) */
+	.long 0xcb800000
+	.long 0x06000000	/* plfd f28,16(0) */
+	.long 0xcb800010
+	.long 0x06000000	/* plfd f28,32(0) */
+	.long 0xcb800020
+	.long 0x06000000	/* plfd f28,4(0) */
+	.long 0xcb800004
+	.long 0x06000000	/* plfd f28,64(0) */
+	.long 0xcb800040
+	.long 0x06000000	/* plfd f28,8(0) */
+	.long 0xcb800008
+	.long 0x06000000	/* plfs f28,0(0) */
+	.long 0xc3800000
+	.long 0x06000000	/* plfs f28,16(0) */
+	.long 0xc3800010
+	.long 0x06000000	/* plfs f28,32(0) */
+	.long 0xc3800020
+	.long 0x06000000	/* plfs f28,4(0) */
+	.long 0xc3800004
+	.long 0x06000000	/* plfs f28,64(0) */
+	.long 0xc3800040
+	.long 0x06000000	/* plfs f28,8(0) */
+	.long 0xc3800008
+	.long 0x06000000	/* plha r0,0(r1) */
+	.long 0xa8010000
+	.long 0x06000000	/* plha r0,16(r1) */
+	.long 0xa8010010
+	.long 0x06000000	/* plha r0,32(r1) */
+	.long 0xa8010020
+	.long 0x06000000	/* plha r0,64(r1) */
+	.long 0xa8010040
+	.long 0x06000000	/* plha r0,8(r1) */
+	.long 0xa8010008
+	.long 0x06000000	/* plhz r0,0(r1) */
+	.long 0xa0010000
+	.long 0x06000000	/* plhz r0,16(r1) */
+	.long 0xa0010010
+	.long 0x06000000	/* plhz r0,32(r1) */
+	.long 0xa0010020
+	.long 0x06000000	/* plhz r0,64(r1) */
+	.long 0xa0010040
+	.long 0x06000000	/* plhz r0,8(r1) */
+	.long 0xa0010008
+	.long 0x04000000	/* plq r26,0(0) */
+	.long 0xe3400000
+	.long 0x04000000	/* plq r26,16(0) */
+	.long 0xe3400010
+	.long 0x04000000	/* plq r26,32(0) */
+	.long 0xe3400020
+	.long 0x04000000	/* plq r26,48(0) */
+	.long 0xe3400030
+	.long 0x04000000	/* plq r26,64(0) */
+	.long 0xe3400040
+	.long 0x04000000	/* plq r26,8(0) */
+	.long 0xe3400008
+	.long 0x04000000	/* plwa r0,0(r1) */
+	.long 0xa4010000
+	.long 0x04000000	/* plwa r0,16(r1) */
+	.long 0xa4010010
+	.long 0x04000000	/* plwa r0,32(r1) */
+	.long 0xa4010020
+	.long 0x04000000	/* plwa r0,64(r1) */
+	.long 0xa4010040
+	.long 0x04000000	/* plwa r0,8(r1) */
+	.long 0xa4010008
+	.long 0x06000000	/* plwz r0,0(r1) */
+	.long 0x80010000
+	.long 0x06000000	/* plwz r0,16(r1) */
+	.long 0x80010010
+	.long 0x06000000	/* plwz r0,32(r1) */
+	.long 0x80010020
+	.long 0x06000000	/* plwz r0,64(r1) */
+	.long 0x80010040
+	.long 0x06000000	/* plwz r0,8(r1) */
+	.long 0x80010008
+	.long 0x04000000	/* plxsd v0,0(r1) */
+	.long 0xa8010000
+	.long 0x04000000	/* plxsd v0,16(r1) */
+	.long 0xa8010010
+	.long 0x04000000	/* plxsd v0,32(r1) */
+	.long 0xa8010020
+	.long 0x04000000	/* plxsd v0,4(r1) */
+	.long 0xa8010004
+	.long 0x04000000	/* plxsd v0,64(r1) */
+	.long 0xa8010040
+	.long 0x04000000	/* plxsd v0,8(r1) */
+	.long 0xa8010008
+	.long 0x04000000	/* plxssp v0,0(r1) */
+	.long 0xac010000
+	.long 0x04000000	/* plxssp v0,16(r1) */
+	.long 0xac010010
+	.long 0x04000000	/* plxssp v0,32(r1) */
+	.long 0xac010020
+	.long 0x04000000	/* plxssp v0,4(r1) */
+	.long 0xac010004
+	.long 0x04000000	/* plxssp v0,64(r1) */
+	.long 0xac010040
+	.long 0x04000000	/* plxssp v0,8(r1) */
+	.long 0xac010008
+	.long 0x04000000	/* plxvp vs20,0(0) */
+	.long 0xea800000
+	.long 0x04000000	/* plxvp vs20,16(0) */
+	.long 0xea800010
+	.long 0x04000000	/* plxvp vs20,24(0) */
+	.long 0xea800018
+	.long 0x04000000	/* plxvp vs20,32(0) */
+	.long 0xea800020
+	.long 0x04000000	/* plxvp vs20,8(0) */
+	.long 0xea800008
+	.long 0x04000000	/* plxv vs0,0(r1) */
+	.long 0xc8010000
+	.long 0x04000000	/* plxv vs0,16(r1) */
+	.long 0xc8010010
+	.long 0x04000000	/* plxv vs0,4(r1) */
+	.long 0xc8010004
+	.long 0x04000000	/* plxv vs0,8(r1) */
+	.long 0xc8010008
+	.long 0x07900000	/* pmxvbf16ger2 a4,vs0,vs1,0,0,0 */
+	.long 0xee000998
+	.long 0x07904000	/* pmxvbf16ger2 a4,vs0,vs1,0,0,1 */
+	.long 0xee000998
+	.long 0x0790000d	/* pmxvbf16ger2 a4,vs0,vs1,0,13,0 */
+	.long 0xee000998
+	.long 0x0790400d	/* pmxvbf16ger2 a4,vs0,vs1,0,13,1 */
+	.long 0xee000998
+	.long 0x079000b0	/* pmxvbf16ger2 a4,vs0,vs1,11,0,0 */
+	.long 0xee000998
+	.long 0x079040b0	/* pmxvbf16ger2 a4,vs0,vs1,11,0,1 */
+	.long 0xee000998
+	.long 0x079000bd	/* pmxvbf16ger2 a4,vs0,vs1,11,13,0 */
+	.long 0xee000998
+	.long 0x079040bd	/* pmxvbf16ger2 a4,vs0,vs1,11,13,1 */
+	.long 0xee000998
+	.long 0x07900000	/* pmxvbf16ger2nn a4,vs0,vs1,0,0,0 */
+	.long 0xee000f90
+	.long 0x07904000	/* pmxvbf16ger2nn a4,vs0,vs1,0,0,1 */
+	.long 0xee000f90
+	.long 0x0790000d	/* pmxvbf16ger2nn a4,vs0,vs1,0,13,0 */
+	.long 0xee000f90
+	.long 0x0790400d	/* pmxvbf16ger2nn a4,vs0,vs1,0,13,1 */
+	.long 0xee000f90
+	.long 0x079000b0	/* pmxvbf16ger2nn a4,vs0,vs1,11,0,0 */
+	.long 0xee000f90
+	.long 0x079040b0	/* pmxvbf16ger2nn a4,vs0,vs1,11,0,1 */
+	.long 0xee000f90
+	.long 0x079000bd	/* pmxvbf16ger2nn a4,vs0,vs1,11,13,0 */
+	.long 0xee000f90
+	.long 0x079040bd	/* pmxvbf16ger2nn a4,vs0,vs1,11,13,1 */
+	.long 0xee000f90
+	.long 0x07900000	/* pmxvbf16ger2np a4,vs0,vs1,0,0,0 */
+	.long 0xee000b90
+	.long 0x07904000	/* pmxvbf16ger2np a4,vs0,vs1,0,0,1 */
+	.long 0xee000b90
+	.long 0x0790000d	/* pmxvbf16ger2np a4,vs0,vs1,0,13,0 */
+	.long 0xee000b90
+	.long 0x0790400d	/* pmxvbf16ger2np a4,vs0,vs1,0,13,1 */
+	.long 0xee000b90
+	.long 0x079000b0	/* pmxvbf16ger2np a4,vs0,vs1,11,0,0 */
+	.long 0xee000b90
+	.long 0x079040b0	/* pmxvbf16ger2np a4,vs0,vs1,11,0,1 */
+	.long 0xee000b90
+	.long 0x079000bd	/* pmxvbf16ger2np a4,vs0,vs1,11,13,0 */
+	.long 0xee000b90
+	.long 0x079040bd	/* pmxvbf16ger2np a4,vs0,vs1,11,13,1 */
+	.long 0xee000b90
+	.long 0x07900000	/* pmxvbf16ger2pn a4,vs0,vs1,0,0,0 */
+	.long 0xee000d90
+	.long 0x07904000	/* pmxvbf16ger2pn a4,vs0,vs1,0,0,1 */
+	.long 0xee000d90
+	.long 0x0790000d	/* pmxvbf16ger2pn a4,vs0,vs1,0,13,0 */
+	.long 0xee000d90
+	.long 0x0790400d	/* pmxvbf16ger2pn a4,vs0,vs1,0,13,1 */
+	.long 0xee000d90
+	.long 0x079000b0	/* pmxvbf16ger2pn a4,vs0,vs1,11,0,0 */
+	.long 0xee000d90
+	.long 0x079040b0	/* pmxvbf16ger2pn a4,vs0,vs1,11,0,1 */
+	.long 0xee000d90
+	.long 0x079000bd	/* pmxvbf16ger2pn a4,vs0,vs1,11,13,0 */
+	.long 0xee000d90
+	.long 0x079040bd	/* pmxvbf16ger2pn a4,vs0,vs1,11,13,1 */
+	.long 0xee000d90
+	.long 0x07900000	/* pmxvbf16ger2pp a4,vs0,vs1,0,0,0 */
+	.long 0xee000990
+	.long 0x07904000	/* pmxvbf16ger2pp a4,vs0,vs1,0,0,1 */
+	.long 0xee000990
+	.long 0x0790000d	/* pmxvbf16ger2pp a4,vs0,vs1,0,13,0 */
+	.long 0xee000990
+	.long 0x0790400d	/* pmxvbf16ger2pp a4,vs0,vs1,0,13,1 */
+	.long 0xee000990
+	.long 0x079000b0	/* pmxvbf16ger2pp a4,vs0,vs1,11,0,0 */
+	.long 0xee000990
+	.long 0x079040b0	/* pmxvbf16ger2pp a4,vs0,vs1,11,0,1 */
+	.long 0xee000990
+	.long 0x079000bd	/* pmxvbf16ger2pp a4,vs0,vs1,11,13,0 */
+	.long 0xee000990
+	.long 0x079040bd	/* pmxvbf16ger2pp a4,vs0,vs1,11,13,1 */
+	.long 0xee000990
+	.long 0x07900000	/* pmxvf16ger2 a4,vs0,vs1,0,0,0 */
+	.long 0xee000898
+	.long 0x07904000	/* pmxvf16ger2 a4,vs0,vs1,0,0,1 */
+	.long 0xee000898
+	.long 0x0790000d	/* pmxvf16ger2 a4,vs0,vs1,0,13,0 */
+	.long 0xee000898
+	.long 0x0790400d	/* pmxvf16ger2 a4,vs0,vs1,0,13,1 */
+	.long 0xee000898
+	.long 0x079000b0	/* pmxvf16ger2 a4,vs0,vs1,11,0,0 */
+	.long 0xee000898
+	.long 0x079040b0	/* pmxvf16ger2 a4,vs0,vs1,11,0,1 */
+	.long 0xee000898
+	.long 0x079000bd	/* pmxvf16ger2 a4,vs0,vs1,11,13,0 */
+	.long 0xee000898
+	.long 0x079040bd	/* pmxvf16ger2 a4,vs0,vs1,11,13,1 */
+	.long 0xee000898
+	.long 0x07900000	/* pmxvf16ger2nn a4,vs0,vs1,0,0,0 */
+	.long 0xee000e90
+	.long 0x07904000	/* pmxvf16ger2nn a4,vs0,vs1,0,0,1 */
+	.long 0xee000e90
+	.long 0x0790000d	/* pmxvf16ger2nn a4,vs0,vs1,0,13,0 */
+	.long 0xee000e90
+	.long 0x0790400d	/* pmxvf16ger2nn a4,vs0,vs1,0,13,1 */
+	.long 0xee000e90
+	.long 0x079000b0	/* pmxvf16ger2nn a4,vs0,vs1,11,0,0 */
+	.long 0xee000e90
+	.long 0x079040b0	/* pmxvf16ger2nn a4,vs0,vs1,11,0,1 */
+	.long 0xee000e90
+	.long 0x079000bd	/* pmxvf16ger2nn a4,vs0,vs1,11,13,0 */
+	.long 0xee000e90
+	.long 0x079040bd	/* pmxvf16ger2nn a4,vs0,vs1,11,13,1 */
+	.long 0xee000e90
+	.long 0x07900000	/* pmxvf16ger2np a4,vs0,vs1,0,0,0 */
+	.long 0xee000a90
+	.long 0x07904000	/* pmxvf16ger2np a4,vs0,vs1,0,0,1 */
+	.long 0xee000a90
+	.long 0x0790000d	/* pmxvf16ger2np a4,vs0,vs1,0,13,0 */
+	.long 0xee000a90
+	.long 0x0790400d	/* pmxvf16ger2np a4,vs0,vs1,0,13,1 */
+	.long 0xee000a90
+	.long 0x079000b0	/* pmxvf16ger2np a4,vs0,vs1,11,0,0 */
+	.long 0xee000a90
+	.long 0x079040b0	/* pmxvf16ger2np a4,vs0,vs1,11,0,1 */
+	.long 0xee000a90
+	.long 0x079000bd	/* pmxvf16ger2np a4,vs0,vs1,11,13,0 */
+	.long 0xee000a90
+	.long 0x079040bd	/* pmxvf16ger2np a4,vs0,vs1,11,13,1 */
+	.long 0xee000a90
+	.long 0x07900000	/* pmxvf16ger2pn a4,vs0,vs1,0,0,0 */
+	.long 0xee000c90
+	.long 0x07904000	/* pmxvf16ger2pn a4,vs0,vs1,0,0,1 */
+	.long 0xee000c90
+	.long 0x0790000d	/* pmxvf16ger2pn a4,vs0,vs1,0,13,0 */
+	.long 0xee000c90
+	.long 0x0790400d	/* pmxvf16ger2pn a4,vs0,vs1,0,13,1 */
+	.long 0xee000c90
+	.long 0x079000b0	/* pmxvf16ger2pn a4,vs0,vs1,11,0,0 */
+	.long 0xee000c90
+	.long 0x079040b0	/* pmxvf16ger2pn a4,vs0,vs1,11,0,1 */
+	.long 0xee000c90
+	.long 0x079000bd	/* pmxvf16ger2pn a4,vs0,vs1,11,13,0 */
+	.long 0xee000c90
+	.long 0x079040bd	/* pmxvf16ger2pn a4,vs0,vs1,11,13,1 */
+	.long 0xee000c90
+	.long 0x07900000	/* pmxvf16ger2pp a4,vs0,vs1,0,0,0 */
+	.long 0xee000890
+	.long 0x07904000	/* pmxvf16ger2pp a4,vs0,vs1,0,0,1 */
+	.long 0xee000890
+	.long 0x0790000d	/* pmxvf16ger2pp a4,vs0,vs1,0,13,0 */
+	.long 0xee000890
+	.long 0x0790400d	/* pmxvf16ger2pp a4,vs0,vs1,0,13,1 */
+	.long 0xee000890
+	.long 0x079000b0	/* pmxvf16ger2pp a4,vs0,vs1,11,0,0 */
+	.long 0xee000890
+	.long 0x079040b0	/* pmxvf16ger2pp a4,vs0,vs1,11,0,1 */
+	.long 0xee000890
+	.long 0x079000bd	/* pmxvf16ger2pp a4,vs0,vs1,11,13,0 */
+	.long 0xee000890
+	.long 0x079040bd	/* pmxvf16ger2pp a4,vs0,vs1,11,13,1 */
+	.long 0xee000890
+	.long 0x07900000	/* pmxvf32ger a4,vs0,vs1,0,0 */
+	.long 0xee0008d8
+	.long 0x0790000d	/* pmxvf32ger a4,vs0,vs1,0,13 */
+	.long 0xee0008d8
+	.long 0x079000b0	/* pmxvf32ger a4,vs0,vs1,11,0 */
+	.long 0xee0008d8
+	.long 0x079000bd	/* pmxvf32ger a4,vs0,vs1,11,13 */
+	.long 0xee0008d8
+	.long 0x07900000	/* pmxvf32gernn a4,vs0,vs1,0,0 */
+	.long 0xee000ed0
+	.long 0x0790000d	/* pmxvf32gernn a4,vs0,vs1,0,13 */
+	.long 0xee000ed0
+	.long 0x079000b0	/* pmxvf32gernn a4,vs0,vs1,11,0 */
+	.long 0xee000ed0
+	.long 0x079000bd	/* pmxvf32gernn a4,vs0,vs1,11,13 */
+	.long 0xee000ed0
+	.long 0x07900000	/* pmxvf32gernp a4,vs0,vs1,0,0 */
+	.long 0xee000ad0
+	.long 0x0790000d	/* pmxvf32gernp a4,vs0,vs1,0,13 */
+	.long 0xee000ad0
+	.long 0x079000b0	/* pmxvf32gernp a4,vs0,vs1,11,0 */
+	.long 0xee000ad0
+	.long 0x079000bd	/* pmxvf32gernp a4,vs0,vs1,11,13 */
+	.long 0xee000ad0
+	.long 0x07900000	/* pmxvf32gerpn a4,vs0,vs1,0,0 */
+	.long 0xee000cd0
+	.long 0x0790000d	/* pmxvf32gerpn a4,vs0,vs1,0,13 */
+	.long 0xee000cd0
+	.long 0x079000b0	/* pmxvf32gerpn a4,vs0,vs1,11,0 */
+	.long 0xee000cd0
+	.long 0x079000bd	/* pmxvf32gerpn a4,vs0,vs1,11,13 */
+	.long 0xee000cd0
+	.long 0x07900000	/* pmxvf32gerpp a4,vs0,vs1,0,0 */
+	.long 0xee0008d0
+	.long 0x0790000d	/* pmxvf32gerpp a4,vs0,vs1,0,13 */
+	.long 0xee0008d0
+	.long 0x079000b0	/* pmxvf32gerpp a4,vs0,vs1,11,0 */
+	.long 0xee0008d0
+	.long 0x079000bd	/* pmxvf32gerpp a4,vs0,vs1,11,13 */
+	.long 0xee0008d0
+	.long 0x07900000	/* pmxvf64ger a4,vs22,vs0,0,0 */
+	.long 0xee1601d8
+	.long 0x07900004	/* pmxvf64ger a4,vs22,vs0,0,1 */
+	.long 0xee1601d8
+	.long 0x079000b0	/* pmxvf64ger a4,vs22,vs0,11,0 */
+	.long 0xee1601d8
+	.long 0x079000b4	/* pmxvf64ger a4,vs22,vs0,11,1 */
+	.long 0xee1601d8
+	.long 0x07900000	/* pmxvf64gernn a4,vs22,vs0,0,0 */
+	.long 0xee1607d0
+	.long 0x07900004	/* pmxvf64gernn a4,vs22,vs0,0,1 */
+	.long 0xee1607d0
+	.long 0x079000b0	/* pmxvf64gernn a4,vs22,vs0,11,0 */
+	.long 0xee1607d0
+	.long 0x079000b4	/* pmxvf64gernn a4,vs22,vs0,11,1 */
+	.long 0xee1607d0
+	.long 0x07900000	/* pmxvf64gernp a4,vs22,vs0,0,0 */
+	.long 0xee1603d0
+	.long 0x07900004	/* pmxvf64gernp a4,vs22,vs0,0,1 */
+	.long 0xee1603d0
+	.long 0x079000b0	/* pmxvf64gernp a4,vs22,vs0,11,0 */
+	.long 0xee1603d0
+	.long 0x079000b4	/* pmxvf64gernp a4,vs22,vs0,11,1 */
+	.long 0xee1603d0
+	.long 0x07900000	/* pmxvf64gerpn a4,vs22,vs0,0,0 */
+	.long 0xee1605d0
+	.long 0x07900004	/* pmxvf64gerpn a4,vs22,vs0,0,1 */
+	.long 0xee1605d0
+	.long 0x079000b0	/* pmxvf64gerpn a4,vs22,vs0,11,0 */
+	.long 0xee1605d0
+	.long 0x079000b4	/* pmxvf64gerpn a4,vs22,vs0,11,1 */
+	.long 0xee1605d0
+	.long 0x07900000	/* pmxvf64gerpp a4,vs22,vs0,0,0 */
+	.long 0xee1601d0
+	.long 0x07900004	/* pmxvf64gerpp a4,vs22,vs0,0,1 */
+	.long 0xee1601d0
+	.long 0x079000b0	/* pmxvf64gerpp a4,vs22,vs0,11,0 */
+	.long 0xee1601d0
+	.long 0x079000b4	/* pmxvf64gerpp a4,vs22,vs0,11,1 */
+	.long 0xee1601d0
+	.long 0x07900000	/* pmxvi16ger2 a4,vs0,vs1,0,0,0 */
+	.long 0xee000a58
+	.long 0x07904000	/* pmxvi16ger2 a4,vs0,vs1,0,0,1 */
+	.long 0xee000a58
+	.long 0x0790000d	/* pmxvi16ger2 a4,vs0,vs1,0,13,0 */
+	.long 0xee000a58
+	.long 0x0790400d	/* pmxvi16ger2 a4,vs0,vs1,0,13,1 */
+	.long 0xee000a58
+	.long 0x079000b0	/* pmxvi16ger2 a4,vs0,vs1,11,0,0 */
+	.long 0xee000a58
+	.long 0x079040b0	/* pmxvi16ger2 a4,vs0,vs1,11,0,1 */
+	.long 0xee000a58
+	.long 0x079000bd	/* pmxvi16ger2 a4,vs0,vs1,11,13,0 */
+	.long 0xee000a58
+	.long 0x079040bd	/* pmxvi16ger2 a4,vs0,vs1,11,13,1 */
+	.long 0xee000a58
+	.long 0x07900000	/* pmxvi16ger2pp a4,vs0,vs1,0,0,0 */
+	.long 0xee000b58
+	.long 0x07904000	/* pmxvi16ger2pp a4,vs0,vs1,0,0,1 */
+	.long 0xee000b58
+	.long 0x0790000d	/* pmxvi16ger2pp a4,vs0,vs1,0,13,0 */
+	.long 0xee000b58
+	.long 0x0790400d	/* pmxvi16ger2pp a4,vs0,vs1,0,13,1 */
+	.long 0xee000b58
+	.long 0x079000b0	/* pmxvi16ger2pp a4,vs0,vs1,11,0,0 */
+	.long 0xee000b58
+	.long 0x079040b0	/* pmxvi16ger2pp a4,vs0,vs1,11,0,1 */
+	.long 0xee000b58
+	.long 0x079000bd	/* pmxvi16ger2pp a4,vs0,vs1,11,13,0 */
+	.long 0xee000b58
+	.long 0x079040bd	/* pmxvi16ger2pp a4,vs0,vs1,11,13,1 */
+	.long 0xee000b58
+	.long 0x07900000	/* pmxvi16ger2s a4,vs0,vs1,0,0,0 */
+	.long 0xee000958
+	.long 0x07904000	/* pmxvi16ger2s a4,vs0,vs1,0,0,1 */
+	.long 0xee000958
+	.long 0x0790000d	/* pmxvi16ger2s a4,vs0,vs1,0,13,0 */
+	.long 0xee000958
+	.long 0x0790400d	/* pmxvi16ger2s a4,vs0,vs1,0,13,1 */
+	.long 0xee000958
+	.long 0x079000b0	/* pmxvi16ger2s a4,vs0,vs1,11,0,0 */
+	.long 0xee000958
+	.long 0x079040b0	/* pmxvi16ger2s a4,vs0,vs1,11,0,1 */
+	.long 0xee000958
+	.long 0x079000bd	/* pmxvi16ger2s a4,vs0,vs1,11,13,0 */
+	.long 0xee000958
+	.long 0x079040bd	/* pmxvi16ger2s a4,vs0,vs1,11,13,1 */
+	.long 0xee000958
+	.long 0x07900000	/* pmxvi16ger2spp a4,vs0,vs1,0,0,0 */
+	.long 0xee000950
+	.long 0x07904000	/* pmxvi16ger2spp a4,vs0,vs1,0,0,1 */
+	.long 0xee000950
+	.long 0x0790000d	/* pmxvi16ger2spp a4,vs0,vs1,0,13,0 */
+	.long 0xee000950
+	.long 0x0790400d	/* pmxvi16ger2spp a4,vs0,vs1,0,13,1 */
+	.long 0xee000950
+	.long 0x079000b0	/* pmxvi16ger2spp a4,vs0,vs1,11,0,0 */
+	.long 0xee000950
+	.long 0x079040b0	/* pmxvi16ger2spp a4,vs0,vs1,11,0,1 */
+	.long 0xee000950
+	.long 0x079000bd	/* pmxvi16ger2spp a4,vs0,vs1,11,13,0 */
+	.long 0xee000950
+	.long 0x079040bd	/* pmxvi16ger2spp a4,vs0,vs1,11,13,1 */
+	.long 0xee000950
+	.long 0x07900000	/* pmxvi4ger8 a4,vs0,vs1,0,0,0 */
+	.long 0xee000918
+	.long 0x07902d00	/* pmxvi4ger8 a4,vs0,vs1,0,0,45 */
+	.long 0xee000918
+	.long 0x07900001	/* pmxvi4ger8 a4,vs0,vs1,0,1,0 */
+	.long 0xee000918
+	.long 0x07902d01	/* pmxvi4ger8 a4,vs0,vs1,0,1,45 */
+	.long 0xee000918
+	.long 0x079000b0	/* pmxvi4ger8 a4,vs0,vs1,11,0,0 */
+	.long 0xee000918
+	.long 0x07902db0	/* pmxvi4ger8 a4,vs0,vs1,11,0,45 */
+	.long 0xee000918
+	.long 0x079000b1	/* pmxvi4ger8 a4,vs0,vs1,11,1,0 */
+	.long 0xee000918
+	.long 0x07902db1	/* pmxvi4ger8 a4,vs0,vs1,11,1,45 */
+	.long 0xee000918
+	.long 0x07900000	/* pmxvi4ger8pp a4,vs0,vs1,0,0,0 */
+	.long 0xee000910
+	.long 0x07902d00	/* pmxvi4ger8pp a4,vs0,vs1,0,0,45 */
+	.long 0xee000910
+	.long 0x07900001	/* pmxvi4ger8pp a4,vs0,vs1,0,1,0 */
+	.long 0xee000910
+	.long 0x07902d01	/* pmxvi4ger8pp a4,vs0,vs1,0,1,45 */
+	.long 0xee000910
+	.long 0x079000b0	/* pmxvi4ger8pp a4,vs0,vs1,11,0,0 */
+	.long 0xee000910
+	.long 0x07902db0	/* pmxvi4ger8pp a4,vs0,vs1,11,0,45 */
+	.long 0xee000910
+	.long 0x079000b1	/* pmxvi4ger8pp a4,vs0,vs1,11,1,0 */
+	.long 0xee000910
+	.long 0x07902db1	/* pmxvi4ger8pp a4,vs0,vs1,11,1,45 */
+	.long 0xee000910
+	.long 0x07900000	/* pmxvi8ger4 a4,vs0,vs1,0,0,0 */
+	.long 0xee000818
+	.long 0x07905000	/* pmxvi8ger4 a4,vs0,vs1,0,0,5 */
+	.long 0xee000818
+	.long 0x0790000d	/* pmxvi8ger4 a4,vs0,vs1,0,13,0 */
+	.long 0xee000818
+	.long 0x0790500d	/* pmxvi8ger4 a4,vs0,vs1,0,13,5 */
+	.long 0xee000818
+	.long 0x079000b0	/* pmxvi8ger4 a4,vs0,vs1,11,0,0 */
+	.long 0xee000818
+	.long 0x079050b0	/* pmxvi8ger4 a4,vs0,vs1,11,0,5 */
+	.long 0xee000818
+	.long 0x079000bd	/* pmxvi8ger4 a4,vs0,vs1,11,13,0 */
+	.long 0xee000818
+	.long 0x079050bd	/* pmxvi8ger4 a4,vs0,vs1,11,13,5 */
+	.long 0xee000818
+	.long 0x07900000	/* pmxvi8ger4pp a4,vs0,vs1,0,0,0 */
+	.long 0xee000810
+	.long 0x07905000	/* pmxvi8ger4pp a4,vs0,vs1,0,0,5 */
+	.long 0xee000810
+	.long 0x0790000d	/* pmxvi8ger4pp a4,vs0,vs1,0,13,0 */
+	.long 0xee000810
+	.long 0x0790500d	/* pmxvi8ger4pp a4,vs0,vs1,0,13,5 */
+	.long 0xee000810
+	.long 0x079000b0	/* pmxvi8ger4pp a4,vs0,vs1,11,0,0 */
+	.long 0xee000810
+	.long 0x079050b0	/* pmxvi8ger4pp a4,vs0,vs1,11,0,5 */
+	.long 0xee000810
+	.long 0x079000bd	/* pmxvi8ger4pp a4,vs0,vs1,11,13,0 */
+	.long 0xee000810
+	.long 0x079050bd	/* pmxvi8ger4pp a4,vs0,vs1,11,13,5 */
+	.long 0xee000810
+	.long 0x07900000	/* pmxvi8ger4spp a4,vs0,vs1,0,0,0 */
+	.long 0xee000b18
+	.long 0x07905000	/* pmxvi8ger4spp a4,vs0,vs1,0,0,5 */
+	.long 0xee000b18
+	.long 0x0790000d	/* pmxvi8ger4spp a4,vs0,vs1,0,13,0 */
+	.long 0xee000b18
+	.long 0x0790500d	/* pmxvi8ger4spp a4,vs0,vs1,0,13,5 */
+	.long 0xee000b18
+	.long 0x079000b0	/* pmxvi8ger4spp a4,vs0,vs1,11,0,0 */
+	.long 0xee000b18
+	.long 0x079050b0	/* pmxvi8ger4spp a4,vs0,vs1,11,0,5 */
+	.long 0xee000b18
+	.long 0x079000bd	/* pmxvi8ger4spp a4,vs0,vs1,11,13,0 */
+	.long 0xee000b18
+	.long 0x079050bd	/* pmxvi8ger4spp a4,vs0,vs1,11,13,5 */
+	.long 0xee000b18
+	.long 0x06000000	/* pstb r0,0(r1) */
+	.long 0x98010000
+	.long 0x06000000	/* pstb r0,16(r1) */
+	.long 0x98010010
+	.long 0x06000000	/* pstb r0,32(r1) */
+	.long 0x98010020
+	.long 0x06000000	/* pstb r0,8(r1) */
+	.long 0x98010008
+	.long 0x04000000	/* pstd r0,0(r1) */
+	.long 0xf4010000
+	.long 0x04000000	/* pstd r0,16(r1) */
+	.long 0xf4010010
+	.long 0x04000000	/* pstd r0,32(r1) */
+	.long 0xf4010020
+	.long 0x04000000	/* pstd r0,8(r1) */
+	.long 0xf4010008
+	.long 0x06000000	/* pstfd f26,0(0) */
+	.long 0xdb400000
+	.long 0x06000000	/* pstfd f26,16(0) */
+	.long 0xdb400010
+	.long 0x06000000	/* pstfd f26,32(0) */
+	.long 0xdb400020
+	.long 0x06000000	/* pstfd f26,4(0) */
+	.long 0xdb400004
+	.long 0x06000000	/* pstfd f26,8(0) */
+	.long 0xdb400008
+	.long 0x06000000	/* pstfs f26,0(0) */
+	.long 0xd3400000
+	.long 0x06000000	/* pstfs f26,16(0) */
+	.long 0xd3400010
+	.long 0x06000000	/* pstfs f26,32(0) */
+	.long 0xd3400020
+	.long 0x06000000	/* pstfs f26,4(0) */
+	.long 0xd3400004
+	.long 0x06000000	/* pstfs f26,8(0) */
+	.long 0xd3400008
+	.long 0x06000000	/* psth r0,0(r1) */
+	.long 0xb0010000
+	.long 0x06000000	/* psth r0,16(r1) */
+	.long 0xb0010010
+	.long 0x06000000	/* psth r0,32(r1) */
+	.long 0xb0010020
+	.long 0x06000000	/* psth r0,8(r1) */
+	.long 0xb0010008
+	.long 0x04000000	/* pstq r24,0(0) */
+	.long 0xf3000000
+	.long 0x04000000	/* pstq r24,16(0) */
+	.long 0xf3000010
+	.long 0x04000000	/* pstq r24,32(0) */
+	.long 0xf3000020
+	.long 0x04000000	/* pstq r24,64(0) */
+	.long 0xf3000040
+	.long 0x04000000	/* pstq r24,8(0) */
+	.long 0xf3000008
+	.long 0x06000000	/* pstw r0,0(r1) */
+	.long 0x90010000
+	.long 0x06000000	/* pstw r0,16(r1) */
+	.long 0x90010010
+	.long 0x06000000	/* pstw r0,32(r1) */
+	.long 0x90010020
+	.long 0x06000000	/* pstw r0,8(r1) */
+	.long 0x90010008
+	.long 0x04000000	/* pstxsd v22,0(0) */
+	.long 0xbac00000
+	.long 0x04000000	/* pstxsd v22,16(0) */
+	.long 0xbac00010
+	.long 0x04000000	/* pstxsd v22,32(0) */
+	.long 0xbac00020
+	.long 0x04000000	/* pstxsd v22,4(0) */
+	.long 0xbac00004
+	.long 0x04000000	/* pstxsd v22,64(0) */
+	.long 0xbac00040
+	.long 0x04000000	/* pstxsd v22,8(0) */
+	.long 0xbac00008
+	.long 0x04000000	/* pstxssp v22,0(0) */
+	.long 0xbec00000
+	.long 0x04000000	/* pstxssp v22,16(0) */
+	.long 0xbec00010
+	.long 0x04000000	/* pstxssp v22,32(0) */
+	.long 0xbec00020
+	.long 0x04000000	/* pstxssp v22,4(0) */
+	.long 0xbec00004
+	.long 0x04000000	/* pstxssp v22,64(0) */
+	.long 0xbec00040
+	.long 0x04000000	/* pstxssp v22,8(0) */
+	.long 0xbec00008
+	.long 0x04000000	/* pstxvp vs20,0(0) */
+	.long 0xfa800000
+	.long 0x04000000	/* pstxvp vs20,16(0) */
+	.long 0xfa800010
+	.long 0x04000000	/* pstxvp vs20,32(0) */
+	.long 0xfa800020
+	.long 0x04000000	/* pstxvp vs20,48(0) */
+	.long 0xfa800030
+	.long 0x04000000	/* pstxv vs0,0(r1) */
+	.long 0xd8010000
+	.long 0x04000000	/* pstxv vs0,16(r1) */
+	.long 0xd8010010
+	.long 0x04000000	/* pstxv vs0,4(r1) */
+	.long 0xd8010004
+	.long 0x04000000	/* pstxv vs0,8(r1) */
+	.long 0xd8010008
+	.long 0x05000000	/* xxblendvb vs0,vs1,vs2,vs3 */
+	.long 0x840110c0
+	.long 0x05000000	/* xxblendvd vs0,vs1,vs2,vs3 */
+	.long 0x840110f0
+	.long 0x05000000	/* xxblendvh vs0,vs1,vs2,vs3 */
+	.long 0x840110d0
+	.long 0x05000000	/* xxblendvw vs0,vs1,vs2,vs3 */
+	.long 0x840110e0
+	.long 0x05000000	/* xxeval vs0,vs1,vs2,vs3,0 */
+	.long 0x880110d0
+	.long 0x05000003	/* xxeval vs0,vs1,vs2,vs3,3 */
+	.long 0x880110d0
+	.long 0x05000000	/* xxpermx vs0,vs1,vs2,vs3,0 */
+	.long 0x880110c0
+	.long 0x05000003	/* xxpermx vs0,vs1,vs2,vs3,3 */
+	.long 0x880110c0
+	.long 0x05000000	/* xxsplti32dx vs0,0,127 */
+	.long 0x8000007f
+	.long 0x05000000	/* xxsplti32dx vs0,0,15 */
+	.long 0x8000000f
+	.long 0x0500a5a5	/* xxsplti32dx vs0,0,2779096485 */
+	.long 0x8000a5a5
+	.long 0x05000000	/* xxsplti32dx vs0,0,3 */
+	.long 0x80000003
+	.long 0x05000000	/* xxsplti32dx vs0,0,31 */
+	.long 0x8000001f
+	.long 0x05000000	/* xxsplti32dx vs0,0,32768 */
+	.long 0x80008000
+	.long 0x0500ffff	/* xxsplti32dx vs0,0,4294967295 */
+	.long 0x8000ffff
+	.long 0x05000000	/* xxsplti32dx vs0,0,63 */
+	.long 0x8000003f
+	.long 0x05000001	/* xxsplti32dx vs0,0,66535 */
+	.long 0x800003e7
+	.long 0x05000000	/* xxsplti32dx vs0,0,7 */
+	.long 0x80000007
+	.long 0x05000000	/* xxsplti32dx vs0,1,127 */
+	.long 0x8002007f
+	.long 0x05000000	/* xxsplti32dx vs0,1,15 */
+	.long 0x8002000f
+	.long 0x0500a5a5	/* xxsplti32dx vs0,1,2779096485 */
+	.long 0x8002a5a5
+	.long 0x05000000	/* xxsplti32dx vs0,1,3 */
+	.long 0x80020003
+	.long 0x05000000	/* xxsplti32dx vs0,1,31 */
+	.long 0x8002001f
+	.long 0x05000000	/* xxsplti32dx vs0,1,32768 */
+	.long 0x80028000
+	.long 0x0500ffff	/* xxsplti32dx vs0,1,4294967295 */
+	.long 0x8002ffff
+	.long 0x05000000	/* xxsplti32dx vs0,1,63 */
+	.long 0x8002003f
+	.long 0x05000001	/* xxsplti32dx vs0,1,66535 */
+	.long 0x800203e7
+	.long 0x05000000	/* xxsplti32dx vs0,1,7 */
+	.long 0x80020007
+	.long 0x05000000	/* xxspltidp vs0,0 */
+	.long 0x80040000
+	.long 0x05000080	/* xxspltidp vs0,8388608 */
+	.long 0x80040000
+	.long 0x05000080	/* xxspltidp vs0,8388609 */
+	.long 0x80040001
+	.long 0x05000083	/* xxspltidp vs0,8594245 */
+	.long 0x80042345
+	.long 0x050000ff	/* xxspltidp vs0,16777215 */
+	.long 0x8004ffff
+	.long 0x05003200	/* xxspltidp vs0,838860800 */
+	.long 0x80040000
+	.long 0x05007f80	/* xxspltidp vs0,2139095040 */
+	.long 0x80040000
+	.long 0x05007f80	/* xxspltidp vs0,2139095041 */
+	.long 0x80040001
+	.long 0x05007f83	/* xxspltidp vs0,2139300677 */
+	.long 0x80042345
+	.long 0x05007fff	/* xxspltidp vs0,2147483647 */
+	.long 0x8004ffff
+	.long 0x05008000	/* xxspltidp vs0,2147483648 */
+	.long 0x80040000
+	.long 0x05008080	/* xxspltidp vs0,2155872256 */
+	.long 0x80040000
+	.long 0x05008080	/* xxspltidp vs0,2155872257 */
+	.long 0x80040001
+	.long 0x05008083	/* xxspltidp vs0,2156077893 */
+	.long 0x80042345
+	.long 0x050080ff	/* xxspltidp vs0,2164260863 */
+	.long 0x8004ffff
+	.long 0x0500ff80	/* xxspltidp vs0,4286578688 */
+	.long 0x80040000
+	.long 0x0500ff80	/* xxspltidp vs0,4286578689 */
+	.long 0x80040001
+	.long 0x0500ff83	/* xxspltidp vs0,4286784325 */
+	.long 0x80042345
+	.long 0x0500ffff	/* xxspltidp vs0,4294967295 */
+	.long 0x8004ffff
+	.long 0x05000000	/* xxspltiw vs0,0 */
+	.long 0x80060000
+	.long 0x05000000	/* xxspltiw vs0,0 */
+	.long 0x80060001
+	.long 0x05000000	/* xxspltiw vs0,3 */
+	.long 0x80060003
+	.long 0x05000000	/* xxspltiw vs0,8 */
+	.long 0x80060008

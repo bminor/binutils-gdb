@@ -59,23 +59,448 @@
 #include <vector>
 
 /* Control debugging information emitted in this file.  */
+
 static bool csky_debug = false;
 
-static struct reggroup *cr_reggroup;
-static struct reggroup *fr_reggroup;
-static struct reggroup *vr_reggroup;
-static struct reggroup *mmu_reggroup;
-static struct reggroup *prof_reggroup;
+static const reggroup *cr_reggroup;
+static const reggroup *fr_reggroup;
+static const reggroup *vr_reggroup;
+static const reggroup *mmu_reggroup;
+static const reggroup *prof_reggroup;
+
+static const char *csky_supported_tdesc_feature_names[] = {
+  (const char *)"org.gnu.csky.abiv2.gpr",
+  (const char *)"org.gnu.csky.abiv2.fpu",
+  (const char *)"org.gnu.csky.abiv2.cr",
+  (const char *)"org.gnu.csky.abiv2.fvcr",
+  (const char *)"org.gnu.csky.abiv2.mmu",
+  (const char *)"org.gnu.csky.abiv2.tee",
+  (const char *)"org.gnu.csky.abiv2.fpu2",
+  (const char *)"org.gnu.csky.abiv2.bank0",
+  (const char *)"org.gnu.csky.abiv2.bank1",
+  (const char *)"org.gnu.csky.abiv2.bank2",
+  (const char *)"org.gnu.csky.abiv2.bank3",
+  (const char *)"org.gnu.csky.abiv2.bank4",
+  (const char *)"org.gnu.csky.abiv2.bank5",
+  (const char *)"org.gnu.csky.abiv2.bank6",
+  (const char *)"org.gnu.csky.abiv2.bank7",
+  (const char *)"org.gnu.csky.abiv2.bank8",
+  (const char *)"org.gnu.csky.abiv2.bank9",
+  (const char *)"org.gnu.csky.abiv2.bank10",
+  (const char *)"org.gnu.csky.abiv2.bank11",
+  (const char *)"org.gnu.csky.abiv2.bank12",
+  (const char *)"org.gnu.csky.abiv2.bank13",
+  (const char *)"org.gnu.csky.abiv2.bank14",
+  (const char *)"org.gnu.csky.abiv2.bank15",
+  (const char *)"org.gnu.csky.abiv2.bank16",
+  (const char *)"org.gnu.csky.abiv2.bank17",
+  (const char *)"org.gnu.csky.abiv2.bank18",
+  (const char *)"org.gnu.csky.abiv2.bank19",
+  (const char *)"org.gnu.csky.abiv2.bank20",
+  (const char *)"org.gnu.csky.abiv2.bank21",
+  (const char *)"org.gnu.csky.abiv2.bank22",
+  (const char *)"org.gnu.csky.abiv2.bank23",
+  (const char *)"org.gnu.csky.abiv2.bank24",
+  (const char *)"org.gnu.csky.abiv2.bank25",
+  (const char *)"org.gnu.csky.abiv2.bank26",
+  (const char *)"org.gnu.csky.abiv2.bank27",
+  (const char *)"org.gnu.csky.abiv2.bank28",
+  (const char *)"org.gnu.csky.abiv2.bank29",
+  (const char *)"org.gnu.csky.abiv2.bank30",
+  (const char *)"org.gnu.csky.abiv2.bank31"
+};
+
+struct csky_supported_tdesc_register
+{
+  char name[16];
+  int num;
+};
+
+static const struct csky_supported_tdesc_register csky_supported_gpr_regs[] = {
+  {"r0", 0},
+  {"r1", 1},
+  {"r2", 2},
+  {"r3", 3},
+  {"r4", 4},
+  {"r5", 5},
+  {"r6", 6},
+  {"r7", 7},
+  {"r8", 8},
+  {"r9", 9},
+  {"r10", 10},
+  {"r11", 11},
+  {"r12", 12},
+  {"r13", 13},
+  {"r14", 14},
+  {"r15", 15},
+  {"r16", 16},
+  {"r17", 17},
+  {"r18", 18},
+  {"r19", 19},
+  {"r20", 20},
+  {"r21", 21},
+  {"r22", 22},
+  {"r23", 23},
+  {"r24", 24},
+  {"r25", 25},
+  {"r26", 26},
+  {"r27", 27},
+  {"r28", 28},
+  {"r28", 28},
+  {"r29", 29},
+  {"r30", 30},
+  {"r31", 31},
+  {"hi", CSKY_HI_REGNUM},
+  {"lo", CSKY_LO_REGNUM},
+  {"pc", CSKY_PC_REGNUM}
+};
+
+static const struct csky_supported_tdesc_register csky_supported_fpu_regs[] = {
+  /* fr0~fr15.  */
+  {"fr0",  CSKY_FR0_REGNUM + 0},
+  {"fr1",  CSKY_FR0_REGNUM + 1},
+  {"fr2",  CSKY_FR0_REGNUM + 2},
+  {"fr3",  CSKY_FR0_REGNUM + 3},
+  {"fr4",  CSKY_FR0_REGNUM + 4},
+  {"fr5",  CSKY_FR0_REGNUM + 5},
+  {"fr6",  CSKY_FR0_REGNUM + 6},
+  {"fr7",  CSKY_FR0_REGNUM + 7},
+  {"fr8",  CSKY_FR0_REGNUM + 8},
+  {"fr9",  CSKY_FR0_REGNUM + 9},
+  {"fr10", CSKY_FR0_REGNUM + 10},
+  {"fr11", CSKY_FR0_REGNUM + 11},
+  {"fr12", CSKY_FR0_REGNUM + 12},
+  {"fr13", CSKY_FR0_REGNUM + 13},
+  {"fr14", CSKY_FR0_REGNUM + 14},
+  {"fr15", CSKY_FR0_REGNUM + 15},
+  /* fr16~fr31.  */
+  {"fr16", CSKY_FR16_REGNUM + 0},
+  {"fr17", CSKY_FR16_REGNUM + 1},
+  {"fr18", CSKY_FR16_REGNUM + 2},
+  {"fr19", CSKY_FR16_REGNUM + 3},
+  {"fr20", CSKY_FR16_REGNUM + 4},
+  {"fr21", CSKY_FR16_REGNUM + 5},
+  {"fr22", CSKY_FR16_REGNUM + 6},
+  {"fr23", CSKY_FR16_REGNUM + 7},
+  {"fr24", CSKY_FR16_REGNUM + 8},
+  {"fr25", CSKY_FR16_REGNUM + 9},
+  {"fr26", CSKY_FR16_REGNUM + 10},
+  {"fr27", CSKY_FR16_REGNUM + 11},
+  {"fr28", CSKY_FR16_REGNUM + 12},
+  {"fr29", CSKY_FR16_REGNUM + 13},
+  {"fr30", CSKY_FR16_REGNUM + 14},
+  {"fr31", CSKY_FR16_REGNUM + 15},
+  /* vr0~vr15.  */
+  {"vr0",  CSKY_VR0_REGNUM + 0},
+  {"vr1",  CSKY_VR0_REGNUM + 1},
+  {"vr2",  CSKY_VR0_REGNUM + 2},
+  {"vr3",  CSKY_VR0_REGNUM + 3},
+  {"vr4",  CSKY_VR0_REGNUM + 4},
+  {"vr5",  CSKY_VR0_REGNUM + 5},
+  {"vr6",  CSKY_VR0_REGNUM + 6},
+  {"vr7",  CSKY_VR0_REGNUM + 7},
+  {"vr8",  CSKY_VR0_REGNUM + 8},
+  {"vr9",  CSKY_VR0_REGNUM + 9},
+  {"vr10", CSKY_VR0_REGNUM + 10},
+  {"vr11", CSKY_VR0_REGNUM + 11},
+  {"vr12", CSKY_VR0_REGNUM + 12},
+  {"vr13", CSKY_VR0_REGNUM + 13},
+  {"vr14", CSKY_VR0_REGNUM + 14},
+  {"vr15", CSKY_VR0_REGNUM + 15},
+  /* fpu control registers.  */
+  {"fcr",  CSKY_FCR_REGNUM + 0},
+  {"fid",  CSKY_FCR_REGNUM + 1},
+  {"fesr", CSKY_FCR_REGNUM + 2},
+};
+
+static const struct csky_supported_tdesc_register csky_supported_ar_regs[] = {
+  {"ar0",  CSKY_AR0_REGNUM + 0},
+  {"ar1",  CSKY_AR0_REGNUM + 1},
+  {"ar2",  CSKY_AR0_REGNUM + 2},
+  {"ar3",  CSKY_AR0_REGNUM + 3},
+  {"ar4",  CSKY_AR0_REGNUM + 4},
+  {"ar5",  CSKY_AR0_REGNUM + 5},
+  {"ar6",  CSKY_AR0_REGNUM + 6},
+  {"ar7",  CSKY_AR0_REGNUM + 7},
+  {"ar8",  CSKY_AR0_REGNUM + 8},
+  {"ar9",  CSKY_AR0_REGNUM + 9},
+  {"ar10", CSKY_AR0_REGNUM + 10},
+  {"ar11", CSKY_AR0_REGNUM + 11},
+  {"ar12", CSKY_AR0_REGNUM + 12},
+  {"ar13", CSKY_AR0_REGNUM + 13},
+  {"ar14", CSKY_AR0_REGNUM + 14},
+  {"ar15", CSKY_AR0_REGNUM + 15},
+};
+
+static const struct csky_supported_tdesc_register csky_supported_bank0_regs[] = {
+  {"cr0",  CSKY_CR0_REGNUM + 0},
+  {"cr1",  CSKY_CR0_REGNUM + 1},
+  {"cr2",  CSKY_CR0_REGNUM + 2},
+  {"cr3",  CSKY_CR0_REGNUM + 3},
+  {"cr4",  CSKY_CR0_REGNUM + 4},
+  {"cr5",  CSKY_CR0_REGNUM + 5},
+  {"cr6",  CSKY_CR0_REGNUM + 6},
+  {"cr7",  CSKY_CR0_REGNUM + 7},
+  {"cr8",  CSKY_CR0_REGNUM + 8},
+  {"cr9",  CSKY_CR0_REGNUM + 9},
+  {"cr10", CSKY_CR0_REGNUM + 10},
+  {"cr11", CSKY_CR0_REGNUM + 11},
+  {"cr12", CSKY_CR0_REGNUM + 12},
+  {"cr13", CSKY_CR0_REGNUM + 13},
+  {"cr14", CSKY_CR0_REGNUM + 14},
+  {"cr15", CSKY_CR0_REGNUM + 15},
+  {"cr16", CSKY_CR0_REGNUM + 16},
+  {"cr17", CSKY_CR0_REGNUM + 17},
+  {"cr18", CSKY_CR0_REGNUM + 18},
+  {"cr19", CSKY_CR0_REGNUM + 19},
+  {"cr20", CSKY_CR0_REGNUM + 20},
+  {"cr21", CSKY_CR0_REGNUM + 21},
+  {"cr22", CSKY_CR0_REGNUM + 22},
+  {"cr23", CSKY_CR0_REGNUM + 23},
+  {"cr24", CSKY_CR0_REGNUM + 24},
+  {"cr25", CSKY_CR0_REGNUM + 25},
+  {"cr26", CSKY_CR0_REGNUM + 26},
+  {"cr27", CSKY_CR0_REGNUM + 27},
+  {"cr28", CSKY_CR0_REGNUM + 28},
+  {"cr29", CSKY_CR0_REGNUM + 29},
+  {"cr30", CSKY_CR0_REGNUM + 30},
+  {"cr31", CSKY_CR0_REGNUM + 31}
+};
+
+static const struct csky_supported_tdesc_register csky_supported_mmu_regs[] = {
+  {"mcr0",  128},
+  {"mcr2",  129},
+  {"mcr3",  130},
+  {"mcr4",  131},
+  {"mcr6",  132},
+  {"mcr8",  133},
+  {"mcr29", 134},
+  {"mcr30", 135},
+  {"mcr31", 136}
+};
+
+static const struct csky_supported_tdesc_register csky_supported_bank15_regs[] = {
+  {"cp15cp1",   253},
+  {"cp15cp5",   254},
+  {"cp15cp7",   255},
+  {"cp15cp9",   256},
+  {"cp15cp10",  257},
+  {"cp15cp11",  258},
+  {"cp15cp12",  259},
+  {"cp15cp13",  260},
+  {"cp15cp14",  261},
+  {"cp15cp15",  262},
+  {"cp15cp16",  263},
+  {"cp15cp17",  264},
+  {"cp15cp18",  265},
+  {"cp15cp19",  266},
+  {"cp15cp20",  267},
+  {"cp15cp21",  268},
+  {"cp15cp22",  269},
+  {"cp15cp23",  270},
+  {"cp15cp24",  271},
+  {"cp15cp25",  272},
+  {"cp15cp26",  273},
+  {"cp15cp27",  274},
+  {"cp15cp28",  275},
+};
+
+static const struct csky_supported_tdesc_register csky_supported_alias_regs[] = {
+  /* Alias register names for Bank0.  */
+  {"psr",   CSKY_CR0_REGNUM + 0},
+  {"vbr",   CSKY_CR0_REGNUM + 1},
+  {"epsr",  CSKY_CR0_REGNUM + 2},
+  {"fpsr",  CSKY_CR0_REGNUM + 3},
+  {"epc",   CSKY_CR0_REGNUM + 4},
+  {"fpc",   CSKY_CR0_REGNUM + 5},
+  {"ss0",   CSKY_CR0_REGNUM + 6},
+  {"ss1",   CSKY_CR0_REGNUM + 7},
+  {"ss2",   CSKY_CR0_REGNUM + 8},
+  {"ss3",   CSKY_CR0_REGNUM + 9},
+  {"ss4",   CSKY_CR0_REGNUM + 10},
+  {"gcr",   CSKY_CR0_REGNUM + 11},
+  {"gsr",   CSKY_CR0_REGNUM + 12},
+  {"cpuid", CSKY_CR0_REGNUM + 13},
+  {"ccr",   CSKY_CR0_REGNUM + 18},
+  {"capr",  CSKY_CR0_REGNUM + 19},
+  {"pacr",  CSKY_CR0_REGNUM + 20},
+  {"prsr",  CSKY_CR0_REGNUM + 21},
+  {"chr",   CSKY_CR0_REGNUM + 31},
+  /* Alias register names for MMU.  */
+  {"mir",   128},
+  {"mel0",  129},
+  {"mel1",  130},
+  {"meh",   131},
+  {"mpr",   132},
+  {"mcir",  133},
+  {"mpgd",  134},
+  {"msa0",  135},
+  {"msa1",  136},
+  /* Alias register names for Bank1.  */
+  {"ebr",     190},
+  {"errlc",   195},
+  {"erraddr", 196},
+  {"errsts",  197},
+  {"errinj",  198},
+  {"usp",     203},
+  {"int_sp",  204},
+  {"itcmcr",  211},
+  {"dtcmcr",  212},
+  {"cindex",  215},
+  {"cdata0",  216},
+  {"cdata1",  217},
+  {"cdata2",  218},
+  {"cins",    220},
+  /* Alias register names for Bank3.  */
+  {"sepsr",   221},
+  {"t_wssr",  221},
+  {"sevbr",   222},
+  {"t_wrcr",  222},
+  {"seepsr",  223},
+  {"seepc",   225},
+  {"nsssp",   227},
+  {"t_usp",   228},
+  {"dcr",     229},
+  {"t_pcr",   230},
+};
+
+/* Functions declaration.  */
+
+static const char *
+csky_pseudo_register_name (struct gdbarch *gdbarch, int regno);
+
+/* Get csky supported registers's count for tdesc xml.  */
+
+static int
+csky_get_supported_tdesc_registers_count()
+{
+  int count = 0;
+  count += ARRAY_SIZE (csky_supported_gpr_regs);
+  count += ARRAY_SIZE (csky_supported_fpu_regs);
+  count += ARRAY_SIZE (csky_supported_ar_regs);
+  count += ARRAY_SIZE (csky_supported_bank0_regs);
+  count += ARRAY_SIZE (csky_supported_mmu_regs);
+  count += ARRAY_SIZE (csky_supported_bank15_regs);
+  count += ARRAY_SIZE (csky_supported_alias_regs);
+  /* Bank1~Bank14, Bank16~Bank31. */
+  count += 32 * (14 + 16);
+  return count;
+}
+
+/* Return a supported register according to index.  */
+
+static const struct csky_supported_tdesc_register *
+csky_get_supported_register_by_index (int index)
+{
+  static struct csky_supported_tdesc_register tdesc_reg;
+  int count = 0;
+  int multi, remain;
+  int count_gpr = ARRAY_SIZE (csky_supported_gpr_regs);
+  int count_fpu = ARRAY_SIZE (csky_supported_fpu_regs);
+  int count_ar = ARRAY_SIZE (csky_supported_ar_regs);
+  int count_bank0 = ARRAY_SIZE (csky_supported_bank0_regs);
+  int count_mmu = ARRAY_SIZE (csky_supported_mmu_regs);
+  int count_bank15 = ARRAY_SIZE (csky_supported_bank15_regs);
+  int count_alias = ARRAY_SIZE (csky_supported_alias_regs);
+
+  count = count_gpr;
+  if (index < count)
+    return &csky_supported_gpr_regs[index];
+  if (index < (count + count_fpu))
+    return &csky_supported_fpu_regs[index - count];
+  count += count_fpu;
+  if (index < (count + count_ar))
+    return &csky_supported_ar_regs[index - count];
+  count += count_ar;
+  if (index < (count + count_bank0))
+    return &csky_supported_bank0_regs[index - count];
+  count += count_bank0;
+  if (index < (count + count_mmu))
+    return &csky_supported_mmu_regs[index - count];
+  count += count_mmu;
+  if (index < (count + count_bank15))
+    return &csky_supported_bank15_regs[index - count];
+  count += count_bank15;
+  if (index < (count + count_alias))
+    return &csky_supported_alias_regs[index - count];
+  count += count_alias;
+  index -= count;
+  multi = index / 32;
+  remain = index % 32;
+  switch (multi)
+    {
+      case 0: /* Bank1.  */
+        {
+          sprintf (tdesc_reg.name, "cp1cr%d", remain);
+          tdesc_reg.num = 189 + remain;
+        }
+        break;
+      case 1: /* Bank2.  */
+        {
+          sprintf (tdesc_reg.name, "cp2cr%d", remain);
+          tdesc_reg.num = 276 + remain;
+        }
+        break;
+      case 2: /* Bank3.  */
+        {
+          sprintf (tdesc_reg.name, "cp3cr%d", remain);
+          tdesc_reg.num = 221 + remain;
+        }
+        break;
+      case 3:  /* Bank4.  */
+      case 4:  /* Bank5.  */
+      case 5:  /* Bank6.  */
+      case 6:  /* Bank7.  */
+      case 7:  /* Bank8.  */
+      case 8:  /* Bank9.  */
+      case 9:  /* Bank10.  */
+      case 10: /* Bank11.  */
+      case 11: /* Bank12.  */
+      case 12: /* Bank13.  */
+      case 13: /* Bank14.  */
+        {
+          /* Regitsers in Bank4~14 have continuous regno with start 308.  */
+          sprintf (tdesc_reg.name, "cp%dcr%d", (multi + 1), remain);
+          tdesc_reg.num = 308 + ((multi - 3) * 32) + remain;
+        }
+        break;
+      case 14: /* Bank16.  */
+      case 15: /* Bank17.  */
+      case 16: /* Bank18.  */
+      case 17: /* Bank19.  */
+      case 18: /* Bank20.  */
+      case 19: /* Bank21.  */
+      case 20: /* Bank22.  */
+      case 21: /* Bank23.  */
+      case 22: /* Bank24.  */
+      case 23: /* Bank25.  */
+      case 24: /* Bank26.  */
+      case 25: /* Bank27.  */
+      case 26: /* Bank28.  */
+      case 27: /* Bank29.  */
+      case 28: /* Bank30.  */
+      case 29: /* Bank31.  */
+        {
+          /* Regitsers in Bank16~31 have continuous regno with start 660.  */
+          sprintf (tdesc_reg.name, "cp%dcr%d", (multi + 2), remain);
+          tdesc_reg.num = 660 + ((multi - 14) * 32) + remain;
+        }
+        break;
+      default:
+        return NULL;
+    }
+  return &tdesc_reg;
+}
 
 /* Convenience function to print debug messages in prologue analysis.  */
 
 static void
 print_savedreg_msg (int regno, int offsets[], bool print_continuing)
 {
-  fprintf_unfiltered (gdb_stdlog, "csky: r%d saved at offset 0x%x\n",
-		      regno, offsets[regno]);
+  gdb_printf (gdb_stdlog, "csky: r%d saved at offset 0x%x\n",
+	      regno, offsets[regno]);
   if (print_continuing)
-    fprintf_unfiltered (gdb_stdlog, "csky: continuing\n");
+    gdb_printf (gdb_stdlog, "csky: continuing\n");
 }
 
 /*  Check whether the instruction at ADDR is 16-bit or not.  */
@@ -235,6 +660,15 @@ static const char * const csky_register_names[] =
 static const char *
 csky_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
+  int num_regs = gdbarch_num_regs (gdbarch);
+  int num_pseudo_regs =  gdbarch_num_pseudo_regs (gdbarch);
+
+  if ((reg_nr >= num_regs) && (reg_nr < (num_regs + num_pseudo_regs)))
+    return csky_pseudo_register_name (gdbarch, reg_nr);
+
+  if (tdesc_has_registers (gdbarch_target_desc (gdbarch)))
+    return tdesc_register_name (gdbarch, reg_nr);
+
   if (reg_nr < 0)
     return NULL;
 
@@ -275,6 +709,14 @@ csky_vector_type (struct gdbarch *gdbarch)
 static struct type *
 csky_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
+  /* If type has been described in tdesc-xml, use it.  */
+  if (tdesc_has_registers (gdbarch_target_desc (gdbarch)))
+    {
+      struct type *tdesc_t = tdesc_register_type (gdbarch, reg_nr);
+      if (tdesc_t)
+        return tdesc_t;
+    }
+
   /* PC, EPC, FPC is a text pointer.  */
   if ((reg_nr == CSKY_PC_REGNUM)  || (reg_nr == CSKY_EPC_REGNUM)
       || (reg_nr == CSKY_FPC_REGNUM))
@@ -307,9 +749,9 @@ csky_register_type (struct gdbarch *gdbarch, int reg_nr)
 /* Data structure to marshall items in a dummy stack frame when
    calling a function in the inferior.  */
 
-struct stack_item
+struct csky_stack_item
 {
-  stack_item (int len_, const gdb_byte *data_)
+  csky_stack_item (int len_, const gdb_byte *data_)
   : len (len_), data (data_)
   {}
 
@@ -330,7 +772,7 @@ csky_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int argreg = CSKY_ABI_A0_REGNUM;
   int last_arg_regnum = CSKY_ABI_LAST_ARG_REGNUM;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  std::vector<stack_item> stack_items;
+  std::vector<csky_stack_item> stack_items;
 
   /* Set the return address.  For CSKY, the return breakpoint is
      always at BP_ADDR.  */
@@ -342,10 +784,10 @@ csky_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       if (csky_debug)
 	{
-	  fprintf_unfiltered (gdb_stdlog,
-			      "csky: struct return in %s = %s\n",
-			      gdbarch_register_name (gdbarch, argreg),
-			      paddress (gdbarch, struct_addr));
+	  gdb_printf (gdb_stdlog,
+		      "csky: struct return in %s = %s\n",
+		      gdbarch_register_name (gdbarch, argreg),
+		      paddress (gdbarch, struct_addr));
 	}
       regcache_cooked_write_unsigned (regcache, argreg, struct_addr);
       argreg++;
@@ -406,7 +848,7 @@ csky_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     }
 
   /* Transfer the dummy stack frame to the target.  */
-  std::vector<stack_item>::reverse_iterator iter;
+  std::vector<csky_stack_item>::reverse_iterator iter;
   for (iter = stack_items.rbegin (); iter != stack_items.rend (); ++iter)
     {
       sp -= iter->len;
@@ -533,10 +975,10 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
      saved (and where).  */
   if (csky_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "csky: Scanning prologue: start_pc = 0x%x,"
-			  "limit_pc = 0x%x\n", (unsigned int) start_pc,
-			  (unsigned int) limit_pc);
+      gdb_printf (gdb_stdlog,
+		  "csky: Scanning prologue: start_pc = 0x%x,"
+		  "limit_pc = 0x%x\n", (unsigned int) start_pc,
+		  (unsigned int) limit_pc);
     }
 
   /* Default to 16 bit instruction.  */
@@ -557,9 +999,9 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 	      int offset = CSKY_32_SUBI_IMM (insn);
 	      if (csky_debug)
 		{
-		  fprintf_unfiltered (gdb_stdlog,
-				      "csky: got subi sp,%d; continuing\n",
-				      offset);
+		  gdb_printf (gdb_stdlog,
+			      "csky: got subi sp,%d; continuing\n",
+			      offset);
 		}
 	      stacksize += offset;
 	      continue;
@@ -583,10 +1025,10 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 	      reg_count = CSKY_32_STM_SIZE (insn);
 	      if (csky_debug)
 		{
-		  fprintf_unfiltered (gdb_stdlog,
-				      "csky: got stm r%d-r%d,(sp)\n",
-				      start_register,
-				      start_register + reg_count);
+		  gdb_printf (gdb_stdlog,
+			      "csky: got stm r%d-r%d,(sp)\n",
+			      start_register,
+			      start_register + reg_count);
 		}
 
 	      for (rn = start_register, offset = 0;
@@ -596,15 +1038,15 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		  register_offsets[rn] = stacksize - offset;
 		  if (csky_debug)
 		    {
-		      fprintf_unfiltered (gdb_stdlog,
-					  "csky: r%d saved at 0x%x"
-					  " (offset %d)\n",
-					  rn, register_offsets[rn],
-					  offset);
+		      gdb_printf (gdb_stdlog,
+				  "csky: r%d saved at 0x%x"
+				  " (offset %d)\n",
+				  rn, register_offsets[rn],
+				  offset);
 		    }
 		}
 	      if (csky_debug)
-		fprintf_unfiltered (gdb_stdlog, "csky: continuing\n");
+		gdb_printf (gdb_stdlog, "csky: continuing\n");
 	      continue;
 	    }
 	  /* stw ry,(sp,disp).  */
@@ -814,19 +1256,19 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		  stacksize += num * 4;
 		  if (csky_debug)
 		    {
-		      fprintf_unfiltered (gdb_stdlog,
-					  "csky: push regs_array: r16-r%d\n",
-					  16 + num - 1);
+		      gdb_printf (gdb_stdlog,
+				  "csky: push regs_array: r16-r%d\n",
+				  16 + num - 1);
 		    }
 		  for (rn = 16; rn <= 16 + num - 1; rn++)
 		    {
 		       register_offsets[rn] = stacksize - tmp;
 		       if (csky_debug)
 			 {
-			   fprintf_unfiltered (gdb_stdlog,
-					       "csky: r%d saved at 0x%x"
-					       " (offset %d)\n", rn,
-					       register_offsets[rn], tmp);
+			   gdb_printf (gdb_stdlog,
+				       "csky: r%d saved at 0x%x"
+				       " (offset %d)\n", rn,
+				       register_offsets[rn], tmp);
 			 }
 		       tmp += 4;
 		    }
@@ -845,19 +1287,19 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		  stacksize += num * 4;
 		  if (csky_debug)
 		    {
-		      fprintf_unfiltered (gdb_stdlog,
-					  "csky: push regs_array: r4-r%d\n",
-					  4 + num - 1);
+		      gdb_printf (gdb_stdlog,
+				  "csky: push regs_array: r4-r%d\n",
+				  4 + num - 1);
 		    }
 		  for (rn = 4; rn <= 4 + num - 1; rn++)
 		    {
 		       register_offsets[rn] = stacksize - tmp;
 		       if (csky_debug)
 			 {
-			   fprintf_unfiltered (gdb_stdlog,
-					       "csky: r%d saved at 0x%x"
-					       " (offset %d)\n", rn,
-					       register_offsets[rn], tmp);
+			   gdb_printf (gdb_stdlog,
+				       "csky: r%d saved at 0x%x"
+				       " (offset %d)\n", rn,
+				       register_offsets[rn], tmp);
 			 }
 			tmp += 4;
 		    }
@@ -865,7 +1307,7 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 
 	      framesize = stacksize;
 	      if (csky_debug)
-		fprintf_unfiltered (gdb_stdlog, "csky: continuing\n");
+		gdb_printf (gdb_stdlog, "csky: continuing\n");
 	      continue;
 	    }
 	  else if (CSKY_32_IS_LRW4 (insn) || CSKY_32_IS_MOVI4 (insn)
@@ -877,8 +1319,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 
 	      if (csky_debug)
 		{
-		  fprintf_unfiltered (gdb_stdlog,
-				      "csky: looking at large frame\n");
+		  gdb_printf (gdb_stdlog,
+			      "csky: looking at large frame\n");
 		}
 	      if (CSKY_32_IS_LRW4 (insn))
 		{
@@ -900,12 +1342,12 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 
 	      if (csky_debug)
 		{
-		  fprintf_unfiltered (gdb_stdlog,
-				      "csky: base stacksize=0x%x\n", adjust);
+		  gdb_printf (gdb_stdlog,
+			      "csky: base stacksize=0x%x\n", adjust);
 
 		  /* May have zero or more insns which modify r4.  */
-		  fprintf_unfiltered (gdb_stdlog,
-				      "csky: looking for r4 adjusters...\n");
+		  gdb_printf (gdb_stdlog,
+			      "csky: looking for r4 adjusters...\n");
 		}
 
 	      offset = 4;
@@ -918,8 +1360,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust += imm;
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: addi r4,%d\n", imm);
+			  gdb_printf (gdb_stdlog,
+				      "csky: addi r4,%d\n", imm);
 			}
 		    }
 		  else if (CSKY_32_IS_SUBI4 (insn2))
@@ -928,8 +1370,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust -= imm;
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: subi r4,%d\n", imm);
+			  gdb_printf (gdb_stdlog,
+				      "csky: subi r4,%d\n", imm);
 			}
 		    }
 		  else if (CSKY_32_IS_NOR4 (insn2))
@@ -937,8 +1379,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust = ~adjust;
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: nor r4,r4,r4\n");
+			  gdb_printf (gdb_stdlog,
+				      "csky: nor r4,r4,r4\n");
 			}
 		    }
 		  else if (CSKY_32_IS_ROTLI4 (insn2))
@@ -949,8 +1391,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust |= temp;
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: rotli r4,r4,%d\n", imm);
+			  gdb_printf (gdb_stdlog,
+				      "csky: rotli r4,r4,%d\n", imm);
 			}
 		    }
 		  else if (CSKY_32_IS_LISI4 (insn2))
@@ -959,8 +1401,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust <<= imm;
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: lsli r4,r4,%d\n", imm);
+			  gdb_printf (gdb_stdlog,
+				      "csky: lsli r4,r4,%d\n", imm);
 			}
 		    }
 		  else if (CSKY_32_IS_BSETI4 (insn2))
@@ -969,8 +1411,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust |= (1 << imm);
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: bseti r4,r4 %d\n", imm);
+			  gdb_printf (gdb_stdlog,
+				      "csky: bseti r4,r4 %d\n", imm);
 			}
 		    }
 		  else if (CSKY_32_IS_BCLRI4 (insn2))
@@ -979,8 +1421,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust &= ~(1 << imm);
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: bclri r4,r4 %d\n", imm);
+			  gdb_printf (gdb_stdlog,
+				      "csky: bclri r4,r4 %d\n", imm);
 			}
 		    }
 		  else if (CSKY_32_IS_IXH4 (insn2))
@@ -988,8 +1430,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust *= 3;
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: ixh r4,r4,r4\n");
+			  gdb_printf (gdb_stdlog,
+				      "csky: ixh r4,r4,r4\n");
 			}
 		    }
 		  else if (CSKY_32_IS_IXW4 (insn2))
@@ -997,8 +1439,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust *= 5;
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: ixw r4,r4,r4\n");
+			  gdb_printf (gdb_stdlog,
+				      "csky: ixw r4,r4,r4\n");
 			}
 		    }
 		  else if (CSKY_16_IS_ADDI4 (insn2))
@@ -1007,8 +1449,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust += imm;
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: addi r4,%d\n", imm);
+			  gdb_printf (gdb_stdlog,
+				      "csky: addi r4,%d\n", imm);
 			}
 		    }
 		  else if (CSKY_16_IS_SUBI4 (insn2))
@@ -1017,8 +1459,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust -= imm;
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: subi r4,%d\n", imm);
+			  gdb_printf (gdb_stdlog,
+				      "csky: subi r4,%d\n", imm);
 			}
 		    }
 		  else if (CSKY_16_IS_NOR4 (insn2))
@@ -1026,8 +1468,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust = ~adjust;
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: nor r4,r4\n");
+			  gdb_printf (gdb_stdlog,
+				      "csky: nor r4,r4\n");
 			}
 		    }
 		  else if (CSKY_16_IS_BSETI4 (insn2))
@@ -1036,8 +1478,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust |= (1 << imm);
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: bseti r4, %d\n", imm);
+			  gdb_printf (gdb_stdlog,
+				      "csky: bseti r4, %d\n", imm);
 			}
 		    }
 		  else if (CSKY_16_IS_BCLRI4 (insn2))
@@ -1046,8 +1488,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust &= ~(1 << imm);
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: bclri r4, %d\n", imm);
+			  gdb_printf (gdb_stdlog,
+				      "csky: bclri r4, %d\n", imm);
 			}
 		    }
 		  else if (CSKY_16_IS_LSLI4 (insn2))
@@ -1056,8 +1498,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust <<= imm;
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: lsli r4,r4, %d\n", imm);
+			  gdb_printf (gdb_stdlog,
+				      "csky: lsli r4,r4, %d\n", imm);
 			}
 		    }
 
@@ -1067,8 +1509,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 
 	      if (csky_debug)
 		{
-		  fprintf_unfiltered (gdb_stdlog, "csky: done looking for"
-				      " r4 adjusters\n");
+		  gdb_printf (gdb_stdlog, "csky: done looking for"
+			      " r4 adjusters\n");
 		}
 
 	      /* If the next insn adjusts the stack pointer, we keep
@@ -1080,14 +1522,14 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		  stacksize += adjust;
 		  if (csky_debug)
 		    {
-		      fprintf_unfiltered (gdb_stdlog,
-					  "csky: found stack adjustment of"
-					  " 0x%x bytes.\n", adjust);
-		      fprintf_unfiltered (gdb_stdlog,
-					  "csky: skipping to new address %s\n",
-					  core_addr_to_string_nz (addr));
-		      fprintf_unfiltered (gdb_stdlog,
-					  "csky: continuing\n");
+		      gdb_printf (gdb_stdlog,
+				  "csky: found stack adjustment of"
+				  " 0x%x bytes.\n", adjust);
+		      gdb_printf (gdb_stdlog,
+				  "csky: skipping to new address %s\n",
+				  core_addr_to_string_nz (addr));
+		      gdb_printf (gdb_stdlog,
+				  "csky: continuing\n");
 		    }
 		  continue;
 		}
@@ -1096,9 +1538,9 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		 anything.  */
 	      if (csky_debug)
 		{
-		  fprintf_unfiltered (gdb_stdlog,
-				      "csky: no subu sp,sp,r4; NOT altering"
-				      " stacksize.\n");
+		  gdb_printf (gdb_stdlog,
+			      "csky: no subu sp,sp,r4; NOT altering"
+			      " stacksize.\n");
 		}
 	      break;
 	    }
@@ -1113,9 +1555,9 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 	      int offset = CSKY_16_SUBI_IMM (insn);
 	      if (csky_debug)
 		{
-		  fprintf_unfiltered (gdb_stdlog,
-				      "csky: got subi r0,%d; continuing\n",
-				      offset);
+		  gdb_printf (gdb_stdlog,
+			      "csky: got subi r0,%d; continuing\n",
+			      offset);
 		}
 	      stacksize += offset;
 	      continue;
@@ -1160,19 +1602,19 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		  offset += num * 4;
 		  if (csky_debug)
 		    {
-		      fprintf_unfiltered (gdb_stdlog,
-					  "csky: push regs_array: r4-r%d\n",
-					  4 + num - 1);
+		      gdb_printf (gdb_stdlog,
+				  "csky: push regs_array: r4-r%d\n",
+				  4 + num - 1);
 		    }
 		  for (rn = 4; rn <= 4 + num - 1; rn++)
 		    {
 		       register_offsets[rn] = stacksize - tmp;
 		       if (csky_debug)
 			 {
-			   fprintf_unfiltered (gdb_stdlog,
-					       "csky: r%d saved at 0x%x"
-					       " (offset %d)\n", rn,
-					       register_offsets[rn], offset);
+			   gdb_printf (gdb_stdlog,
+				       "csky: r%d saved at 0x%x"
+				       " (offset %d)\n", rn,
+				       register_offsets[rn], offset);
 			 }
 		       tmp += 4;
 		    }
@@ -1180,7 +1622,7 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 
 	      framesize = stacksize;
 	      if (csky_debug)
-		fprintf_unfiltered (gdb_stdlog, "csky: continuing\n");
+		gdb_printf (gdb_stdlog, "csky: continuing\n");
 	      continue;
 	    }
 	  else if (CSKY_16_IS_LRW4 (insn) || CSKY_16_IS_MOVI4 (insn))
@@ -1190,8 +1632,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 
 	      if (csky_debug)
 		{
-		  fprintf_unfiltered (gdb_stdlog,
-				      "csky: looking at large frame\n");
+		  gdb_printf (gdb_stdlog,
+			      "csky: looking at large frame\n");
 		}
 	      if (CSKY_16_IS_LRW4 (insn))
 		{
@@ -1209,15 +1651,15 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 
 	      if (csky_debug)
 		{
-		  fprintf_unfiltered (gdb_stdlog,
-				      "csky: base stacksize=0x%x\n", adjust);
+		  gdb_printf (gdb_stdlog,
+			      "csky: base stacksize=0x%x\n", adjust);
 		}
 
 	      /* May have zero or more instructions which modify r4.  */
 	      if (csky_debug)
 		{
-		  fprintf_unfiltered (gdb_stdlog,
-				      "csky: looking for r4 adjusters...\n");
+		  gdb_printf (gdb_stdlog,
+			      "csky: looking for r4 adjusters...\n");
 		}
 	      int offset = 2;
 	      insn_len = csky_get_insn (gdbarch, addr + offset, &insn2);
@@ -1229,8 +1671,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust += imm;
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: addi r4,%d\n", imm);
+			  gdb_printf (gdb_stdlog,
+				      "csky: addi r4,%d\n", imm);
 			}
 		    }
 		  else if (CSKY_32_IS_SUBI4 (insn2))
@@ -1239,8 +1681,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust -= imm;
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: subi r4,%d\n", imm);
+			  gdb_printf (gdb_stdlog,
+				      "csky: subi r4,%d\n", imm);
 			}
 		    }
 		  else if (CSKY_32_IS_NOR4 (insn2))
@@ -1248,8 +1690,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust = ~adjust;
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: nor r4,r4,r4\n");
+			  gdb_printf (gdb_stdlog,
+				      "csky: nor r4,r4,r4\n");
 			}
 		    }
 		  else if (CSKY_32_IS_ROTLI4 (insn2))
@@ -1260,8 +1702,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust |= temp;
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: rotli r4,r4,%d\n", imm);
+			  gdb_printf (gdb_stdlog,
+				      "csky: rotli r4,r4,%d\n", imm);
 			}
 		    }
 		  else if (CSKY_32_IS_LISI4 (insn2))
@@ -1270,8 +1712,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust <<= imm;
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: lsli r4,r4,%d\n", imm);
+			  gdb_printf (gdb_stdlog,
+				      "csky: lsli r4,r4,%d\n", imm);
 			}
 		    }
 		  else if (CSKY_32_IS_BSETI4 (insn2))
@@ -1280,8 +1722,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust |= (1 << imm);
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: bseti r4,r4 %d\n", imm);
+			  gdb_printf (gdb_stdlog,
+				      "csky: bseti r4,r4 %d\n", imm);
 			}
 		    }
 		  else if (CSKY_32_IS_BCLRI4 (insn2))
@@ -1290,8 +1732,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust &= ~(1 << imm);
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: bclri r4,r4 %d\n", imm);
+			  gdb_printf (gdb_stdlog,
+				      "csky: bclri r4,r4 %d\n", imm);
 			}
 		    }
 		  else if (CSKY_32_IS_IXH4 (insn2))
@@ -1299,8 +1741,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust *= 3;
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: ixh r4,r4,r4\n");
+			  gdb_printf (gdb_stdlog,
+				      "csky: ixh r4,r4,r4\n");
 			}
 		    }
 		  else if (CSKY_32_IS_IXW4 (insn2))
@@ -1308,8 +1750,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust *= 5;
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: ixw r4,r4,r4\n");
+			  gdb_printf (gdb_stdlog,
+				      "csky: ixw r4,r4,r4\n");
 			}
 		    }
 		  else if (CSKY_16_IS_ADDI4 (insn2))
@@ -1318,8 +1760,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust += imm;
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: addi r4,%d\n", imm);
+			  gdb_printf (gdb_stdlog,
+				      "csky: addi r4,%d\n", imm);
 			}
 		    }
 		  else if (CSKY_16_IS_SUBI4 (insn2))
@@ -1328,8 +1770,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust -= imm;
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: subi r4,%d\n", imm);
+			  gdb_printf (gdb_stdlog,
+				      "csky: subi r4,%d\n", imm);
 			}
 		    }
 		  else if (CSKY_16_IS_NOR4 (insn2))
@@ -1337,8 +1779,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust = ~adjust;
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: nor r4,r4\n");
+			  gdb_printf (gdb_stdlog,
+				      "csky: nor r4,r4\n");
 			}
 		    }
 		  else if (CSKY_16_IS_BSETI4 (insn2))
@@ -1347,8 +1789,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust |= (1 << imm);
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: bseti r4, %d\n", imm);
+			  gdb_printf (gdb_stdlog,
+				      "csky: bseti r4, %d\n", imm);
 			}
 		    }
 		  else if (CSKY_16_IS_BCLRI4 (insn2))
@@ -1357,8 +1799,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust &= ~(1 << imm);
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: bclri r4, %d\n", imm);
+			  gdb_printf (gdb_stdlog,
+				      "csky: bclri r4, %d\n", imm);
 			}
 		    }
 		  else if (CSKY_16_IS_LSLI4 (insn2))
@@ -1367,8 +1809,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		      adjust <<= imm;
 		      if (csky_debug)
 			{
-			  fprintf_unfiltered (gdb_stdlog,
-					      "csky: lsli r4,r4, %d\n", imm);
+			  gdb_printf (gdb_stdlog,
+				      "csky: lsli r4,r4, %d\n", imm);
 			}
 		    }
 
@@ -1378,8 +1820,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 
 	      if (csky_debug)
 		{
-		  fprintf_unfiltered (gdb_stdlog, "csky: "
-				      "done looking for r4 adjusters\n");
+		  gdb_printf (gdb_stdlog, "csky: "
+			      "done looking for r4 adjusters\n");
 		}
 
 	      /* If the next instruction adjusts the stack pointer, we keep
@@ -1391,13 +1833,13 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		  stacksize += adjust;
 		  if (csky_debug)
 		    {
-		      fprintf_unfiltered (gdb_stdlog, "csky: "
-					  "found stack adjustment of 0x%x"
-					  " bytes.\n", adjust);
-		      fprintf_unfiltered (gdb_stdlog, "csky: "
-					  "skipping to new address %s\n",
-					  core_addr_to_string_nz (addr));
-		      fprintf_unfiltered (gdb_stdlog, "csky: continuing\n");
+		      gdb_printf (gdb_stdlog, "csky: "
+				  "found stack adjustment of 0x%x"
+				  " bytes.\n", adjust);
+		      gdb_printf (gdb_stdlog, "csky: "
+				  "skipping to new address %s\n",
+				  core_addr_to_string_nz (addr));
+		      gdb_printf (gdb_stdlog, "csky: continuing\n");
 		    }
 		  continue;
 		}
@@ -1406,8 +1848,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		 anything.  */
 	      if (csky_debug)
 		{
-		  fprintf_unfiltered (gdb_stdlog, "csky: no subu sp,r4; "
-				      "NOT altering stacksize.\n");
+		  gdb_printf (gdb_stdlog, "csky: no subu sp,r4; "
+			      "NOT altering stacksize.\n");
 		}
 	      break;
 	    }
@@ -1416,8 +1858,8 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
       /* This is not a prologue instruction, so stop here.  */
       if (csky_debug)
 	{
-	  fprintf_unfiltered (gdb_stdlog, "csky: insn is not a prologue"
-			      " insn -- ending scan\n");
+	  gdb_printf (gdb_stdlog, "csky: insn is not a prologue"
+		      " insn -- ending scan\n");
 	}
       break;
     }
@@ -1455,12 +1897,12 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		{
 		  CORE_ADDR rn_value = read_memory_unsigned_integer (
 		    this_cache->saved_regs[rn].addr (), 4, byte_order);
-		  fprintf_unfiltered (gdb_stdlog, "Saved register %s "
-				      "stored at 0x%08lx, value=0x%08lx\n",
-				      csky_register_names[rn],
-				      (unsigned long)
-					this_cache->saved_regs[rn].addr (),
-				      (unsigned long) rn_value);
+		  gdb_printf (gdb_stdlog, "Saved register %s "
+			      "stored at 0x%08lx, value=0x%08lx\n",
+			      csky_register_names[rn],
+			      (unsigned long)
+			      this_cache->saved_regs[rn].addr (),
+			      (unsigned long) rn_value);
 		}
 	    }
 	}
@@ -1526,7 +1968,6 @@ static CORE_ADDR
 csky_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR func_addr, func_end;
-  struct symtab_and_line sal;
   const int default_search_limit = 128;
 
   /* See if we can find the end of the prologue using the symbol table.  */
@@ -1840,13 +2281,13 @@ csky_frame_unwind_cache (struct frame_info *this_frame)
   /* Get the (function) symbol matching prologue_start.  */
   bl = block_for_pc (prologue_start);
   if (bl != NULL)
-    func_size = bl->endaddr - bl->startaddr;
+    func_size = bl->end () - bl->start ();
   else
     {
       struct bound_minimal_symbol msymbol
 	= lookup_minimal_symbol_by_pc (prologue_start);
       if (msymbol.minsym != NULL)
-	func_size = MSYMBOL_SIZE (msymbol.minsym);
+	func_size = msymbol.minsym->size ();
     }
 
   /* If FUNC_SIZE is 0 we may have a special-case use of lr
@@ -2051,8 +2492,6 @@ csky_init_reggroup ()
 static void
 csky_add_reggroups (struct gdbarch *gdbarch)
 {
-  reggroup_add (gdbarch, all_reggroup);
-  reggroup_add (gdbarch, general_reggroup);
   reggroup_add (gdbarch, cr_reggroup);
   reggroup_add (gdbarch, fr_reggroup);
   reggroup_add (gdbarch, vr_reggroup);
@@ -2064,7 +2503,7 @@ csky_add_reggroups (struct gdbarch *gdbarch)
 
 static int
 csky_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-			  struct reggroup *reggroup)
+			  const struct reggroup *reggroup)
 {
   int raw_p;
 
@@ -2090,8 +2529,8 @@ csky_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
     return 2;
 
   if ((((regnum >= CSKY_VR0_REGNUM) && (regnum <= CSKY_VR0_REGNUM + 15))
-       || ((regnum >= CSKY_VCR0_REGNUM)
-	   && (regnum <= CSKY_VCR0_REGNUM + 2)))
+       || ((regnum >= CSKY_FCR_REGNUM)
+	   && (regnum <= CSKY_FCR_REGNUM + 2)))
       && (reggroup == vr_reggroup))
     return 3;
 
@@ -2105,7 +2544,7 @@ csky_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
     return 5;
 
   if ((((regnum >= CSKY_FR0_REGNUM) && (regnum <= CSKY_FR0_REGNUM + 15))
-       || ((regnum >= CSKY_VCR0_REGNUM) && (regnum <= CSKY_VCR0_REGNUM + 2)))
+       || ((regnum >= CSKY_FCR_REGNUM) && (regnum <= CSKY_FCR_REGNUM + 2)))
       && (reggroup == fr_reggroup))
     return 6;
 
@@ -2146,6 +2585,218 @@ csky_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
   return;
 }
 
+/* Check whether xml has discribled the essential regs.  */
+
+static int
+csky_essential_reg_check (const struct csky_supported_tdesc_register *reg)
+{
+  if ((strcmp (reg->name , "pc") == 0)
+      && (reg->num == CSKY_PC_REGNUM))
+    return CSKY_TDESC_REGS_PC_NUMBERED;
+  else if ((strcmp (reg->name , "r14") == 0)
+      && (reg->num == CSKY_SP_REGNUM))
+    return CSKY_TDESC_REGS_SP_NUMBERED;
+  else if ((strcmp (reg->name , "r15") == 0)
+      && (reg->num == CSKY_LR_REGNUM))
+    return CSKY_TDESC_REGS_LR_NUMBERED;
+  else
+    return 0;
+}
+
+/* Check whether xml has discribled the fr0~fr15 regs.  */
+
+static int
+csky_fr0_fr15_reg_check (const struct csky_supported_tdesc_register *reg) {
+  int i = 0;
+  for (i = 0; i < 16; i++)
+    {
+      if ((strcmp (reg->name, csky_supported_fpu_regs[i].name) == 0)
+          && (csky_supported_fpu_regs[i].num == reg->num))
+        return (1 << i);
+    }
+
+  return 0;
+};
+
+/* Check whether xml has discribled the fr16~fr31 regs.  */
+
+static int
+csky_fr16_fr31_reg_check (const struct csky_supported_tdesc_register *reg) {
+  int i = 0;
+  for (i = 0; i < 16; i++)
+    {
+      if ((strcmp (reg->name, csky_supported_fpu_regs[i + 16].name) == 0)
+          && (csky_supported_fpu_regs[i + 16].num == reg->num))
+        return (1 << i);
+    }
+
+  return 0;
+};
+
+/* Check whether xml has discribled the vr0~vr15 regs.  */
+
+static int
+csky_vr0_vr15_reg_check (const struct csky_supported_tdesc_register *reg) {
+  int i = 0;
+  for (i = 0; i < 16; i++)
+    {
+      if ((strcmp (reg->name, csky_supported_fpu_regs[i + 32].name) == 0)
+          && (csky_supported_fpu_regs[i + 32].num == reg->num))
+        return (1 << i);
+    }
+
+  return 0;
+};
+
+/* Return pseudo reg's name.  */
+
+static const char *
+csky_pseudo_register_name (struct gdbarch *gdbarch, int regno)
+{
+  int num_regs = gdbarch_num_regs (gdbarch);
+  csky_gdbarch_tdep *tdep
+        = (csky_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
+  regno -= num_regs;
+
+  if (tdep->fv_pseudo_registers_count)
+    {
+      static const char *const fv_pseudo_names[] = {
+        "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7",
+        "s8", "s9", "s10", "s11", "s12", "s13", "s14", "s15",
+        "s16", "s17", "s18", "s19", "s20", "s21", "s22", "s23",
+        "s24", "s25", "s26", "s27", "s28", "s29", "s30", "s31",
+        "s32", "s33", "s34", "s35", "s36", "s37", "s38", "s39",
+        "s40", "s41", "s42", "s43", "s44", "s45", "s46", "s47",
+        "s48", "s49", "s50", "s51", "s52", "s53", "s54", "s55",
+        "s56", "s57", "s58", "s59", "s60", "s61", "s62", "s63",
+        "s64", "s65", "s66", "s67", "s68", "s69", "s70", "s71",
+        "s72", "s73", "s74", "s75", "s76", "s77", "s78", "s79",
+        "s80", "s81", "s82", "s83", "s84", "s85", "s86", "s87",
+        "s88", "s89", "s90", "s91", "s92", "s93", "s94", "s95",
+        "s96", "s97", "s98", "s99", "s100", "s101", "s102", "s103",
+        "s104", "s105", "s106", "s107", "s108", "s109", "s110", "s111",
+        "s112", "s113", "s114", "s115", "s116", "s117", "s118", "s119",
+        "s120", "s121", "s122", "s123", "s124", "s125", "s126", "s127",
+      };
+
+      if (regno < tdep->fv_pseudo_registers_count)
+        {
+          if ((regno < 64) && ((regno % 4) >= 2) && !tdep->has_vr0)
+            return NULL;
+          else if ((regno >= 64) && ((regno % 4) >= 2))
+            return NULL;
+          else
+            return fv_pseudo_names[regno];
+        }
+    }
+
+  return NULL;
+}
+
+/* Read for csky pseudo regs.  */
+
+static enum register_status
+csky_pseudo_register_read (struct gdbarch *gdbarch,
+                           struct readable_regcache *regcache,
+                           int regnum, gdb_byte *buf)
+{
+  int num_regs = gdbarch_num_regs (gdbarch);
+  csky_gdbarch_tdep *tdep
+        = (csky_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
+  regnum -= num_regs;
+
+  if (regnum < tdep->fv_pseudo_registers_count)
+    {
+      enum register_status status;
+      int gdb_regnum = 0;
+      int offset = 0;
+      gdb_byte reg_buf[16];
+
+      /* Ensure getting s0~s63 from vrx if tdep->has_vr0 is ture.  */
+      if (tdep->has_vr0)
+        {
+          if (regnum < 64)
+            {
+              gdb_regnum = CSKY_VR0_REGNUM + (regnum / 4);
+              offset = (regnum % 4) * 4;
+            }
+          else
+            {
+              gdb_regnum = CSKY_FR16_REGNUM + ((regnum - 64) / 4);
+              if ((regnum % 4) >= 2)
+                 return REG_UNAVAILABLE;
+              offset = (regnum % 2) * 4;
+            }
+        }
+      else
+        {
+           gdb_regnum = CSKY_FR0_REGNUM + (regnum / 4);
+           if ((regnum % 4) >= 2)
+              return REG_UNAVAILABLE;
+           offset = (regnum % 2) * 4;
+        }
+
+      status = regcache->raw_read (gdb_regnum, reg_buf);
+      if (status == REG_VALID)
+        memcpy (buf, reg_buf + offset, 4);
+      return status;
+    }
+
+  return REG_UNKNOWN;
+}
+
+/* Write for csky pseudo regs.  */
+
+static void
+csky_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
+                            int regnum, const gdb_byte *buf)
+{
+  int num_regs = gdbarch_num_regs (gdbarch);
+  csky_gdbarch_tdep *tdep
+        = (csky_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
+  regnum -= num_regs;
+
+  if (regnum < tdep->fv_pseudo_registers_count)
+    {
+      gdb_byte reg_buf[16];
+      int gdb_regnum = 0;
+      int offset = 0;
+
+      if (tdep->has_vr0)
+        {
+          if (regnum < 64)
+            {
+              gdb_regnum = CSKY_VR0_REGNUM + (regnum / 4);
+              offset = (regnum % 4) * 4;
+            }
+          else
+            {
+              gdb_regnum = CSKY_FR16_REGNUM + ((regnum - 64) / 4);
+              if ((regnum % 4) >= 2)
+                return;
+              offset = (regnum % 2) * 4;
+            }
+        }
+      else
+        {
+           gdb_regnum = CSKY_FR0_REGNUM + (regnum / 4);
+           if ((regnum % 4) >= 2)
+             return;
+           offset = (regnum % 2) * 4;
+        }
+
+      regcache->raw_read (gdb_regnum, reg_buf);
+      memcpy (reg_buf + offset, buf, 4);
+      regcache->raw_write (gdb_regnum, reg_buf);
+      return;
+    }
+
+  return;
+}
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
@@ -2157,16 +2808,132 @@ static struct gdbarch *
 csky_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
+  /* Analyze info.abfd.  */
+  unsigned int fpu_abi = 0;
+  unsigned int vdsp_version = 0;
+  unsigned int fpu_hardfp = 0;
+  /* Analyze info.target_desc */
+  int num_regs = 0;
+  int has_fr0 = 0;
+  int has_fr16 = 0;
+  int has_vr0 = 0;
+  tdesc_arch_data_up tdesc_data;
+
+  if (tdesc_has_registers (info.target_desc))
+    {
+      int valid_p = 0;
+      int numbered = 0;
+      int index = 0;
+      int i = 0;
+      int feature_names_count = ARRAY_SIZE (csky_supported_tdesc_feature_names);
+      int support_tdesc_regs_count
+            = csky_get_supported_tdesc_registers_count();
+      const struct csky_supported_tdesc_register *tdesc_reg;
+      const struct tdesc_feature *feature;
+
+      tdesc_data = tdesc_data_alloc ();
+      for (index = 0; index < feature_names_count; index ++)
+        {
+          feature = tdesc_find_feature (info.target_desc,
+                      csky_supported_tdesc_feature_names[index]);
+          if (feature != NULL)
+            {
+              for (i = 0; i < support_tdesc_regs_count; i++)
+                {
+                  tdesc_reg = csky_get_supported_register_by_index (i);
+                  if (!tdesc_reg)
+                    break;
+                  numbered = tdesc_numbered_register (feature, tdesc_data.get(),
+                                                      tdesc_reg->num,
+                                                      tdesc_reg->name);
+                  if (numbered) {
+                    valid_p |= csky_essential_reg_check (tdesc_reg);
+                    has_fr0 |= csky_fr0_fr15_reg_check (tdesc_reg);
+                    has_fr16 |= csky_fr16_fr31_reg_check (tdesc_reg);
+                    has_vr0 |= csky_vr0_vr15_reg_check (tdesc_reg);
+                    if (num_regs < tdesc_reg->num)
+                      num_regs = tdesc_reg->num;
+                  }
+                }
+            }
+        }
+      if (valid_p != CSKY_TDESC_REGS_ESSENTIAL_VALUE)
+        return NULL;
+    }
+
+  /* When the type of bfd file is srec(or any files are not elf),
+     the E_FLAGS will be not credible.  */
+  if (info.abfd != NULL && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
+    {
+      /* Get FPU, VDSP build options.  */
+      fpu_abi = bfd_elf_get_obj_attr_int (info.abfd,
+                                          OBJ_ATTR_PROC,
+                                          Tag_CSKY_FPU_ABI);
+      vdsp_version = bfd_elf_get_obj_attr_int (info.abfd,
+                                               OBJ_ATTR_PROC,
+                                               Tag_CSKY_VDSP_VERSION);
+      fpu_hardfp = bfd_elf_get_obj_attr_int (info.abfd,
+                                             OBJ_ATTR_PROC,
+                                             Tag_CSKY_FPU_HARDFP);
+    }
 
   /* Find a candidate among the list of pre-declared architectures.  */
-  arches = gdbarch_list_lookup_by_info (arches, &info);
-  if (arches != NULL)
-    return arches->gdbarch;
+  for (arches = gdbarch_list_lookup_by_info (arches, &info);
+       arches != NULL;
+       arches = gdbarch_list_lookup_by_info (arches->next, &info))
+    {
+      csky_gdbarch_tdep *tdep
+        = (csky_gdbarch_tdep *) gdbarch_tdep (arches->gdbarch);
+      if (fpu_abi != tdep->fpu_abi)
+        continue;
+      if (vdsp_version != tdep->vdsp_version)
+        continue;
+      if (fpu_hardfp != tdep->fpu_hardfp)
+        continue;
+
+      /* Found a match.  */
+      return arches->gdbarch;
+    }
 
   /* None found, create a new architecture from the information
      provided.  */
   csky_gdbarch_tdep *tdep = new csky_gdbarch_tdep;
   gdbarch = gdbarch_alloc (&info, tdep);
+  tdep->fpu_abi = fpu_abi;
+  tdep->vdsp_version = vdsp_version;
+  tdep->fpu_hardfp = fpu_hardfp;
+
+  if (tdesc_data != NULL)
+    {
+      if ((has_vr0 == CSKY_FULL16_ONEHOT_VALUE)
+          && (has_fr16 == CSKY_FULL16_ONEHOT_VALUE))
+        {
+          tdep->has_vr0 = 1;
+          tdep->fv_pseudo_registers_count = 128;
+        }
+      else if ((has_vr0 == CSKY_FULL16_ONEHOT_VALUE)
+               && (has_fr16 != CSKY_FULL16_ONEHOT_VALUE))
+        {
+          tdep->has_vr0 = 1;
+          tdep->fv_pseudo_registers_count = 64;
+        }
+      else if ((has_fr0 == CSKY_FULL16_ONEHOT_VALUE)
+               && (has_vr0 != CSKY_FULL16_ONEHOT_VALUE))
+        {
+          tdep->has_vr0 = 0;
+          tdep->fv_pseudo_registers_count = 64;
+        }
+      else
+        {
+          tdep->has_vr0 = 0;
+          tdep->fv_pseudo_registers_count = 0;
+        }
+    }
+  else
+    {
+      tdep->has_vr0 = 1;
+      tdep->fv_pseudo_registers_count = 64;
+    }
 
   /* Target data types.  */
   set_gdbarch_ptr_bit (gdbarch, 32);
@@ -2228,6 +2995,25 @@ csky_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Support simple overlay manager.  */
   set_gdbarch_overlay_update (gdbarch, simple_overlay_update);
   set_gdbarch_char_signed (gdbarch, 0);
+
+  if (tdesc_data != nullptr)
+    {
+      set_gdbarch_num_regs (gdbarch, (num_regs + 1));
+      tdesc_use_registers (gdbarch, info.target_desc, std::move (tdesc_data));
+      set_gdbarch_register_type (gdbarch, csky_register_type);
+    }
+
+  if (tdep->fv_pseudo_registers_count)
+    {
+      set_gdbarch_num_pseudo_regs (gdbarch,
+                                   tdep->fv_pseudo_registers_count);
+      set_gdbarch_pseudo_register_read (gdbarch,
+                                        csky_pseudo_register_read);
+      set_gdbarch_pseudo_register_write (gdbarch,
+                                         csky_pseudo_register_write);
+      set_tdesc_pseudo_register_name (gdbarch, csky_pseudo_register_name);
+    }
+
   return gdbarch;
 }
 

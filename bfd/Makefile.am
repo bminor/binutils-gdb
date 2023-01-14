@@ -97,6 +97,7 @@ BFD64_LIBS_CFILES = archive64.c
 ALL_MACHINES = \
 	cpu-aarch64.lo \
 	cpu-alpha.lo \
+	cpu-amdgcn.lo \
 	cpu-arc.lo \
 	cpu-arm.lo \
 	cpu-avr.lo \
@@ -117,8 +118,6 @@ ALL_MACHINES = \
 	cpu-hppa.lo \
 	cpu-i386.lo \
 	cpu-iamcu.lo \
-	cpu-l1om.lo \
-	cpu-k1om.lo \
 	cpu-ia64.lo \
 	cpu-ip2k.lo \
 	cpu-iq2000.lo \
@@ -172,7 +171,6 @@ ALL_MACHINES = \
 	cpu-vax.lo \
 	cpu-visium.lo \
 	cpu-wasm32.lo \
-	cpu-xc16x.lo \
 	cpu-xgate.lo \
 	cpu-xstormy16.lo \
 	cpu-xtensa.lo \
@@ -182,6 +180,7 @@ ALL_MACHINES = \
 ALL_MACHINES_CFILES = \
 	cpu-aarch64.c \
 	cpu-alpha.c \
+	cpu-amdgcn.c \
 	cpu-arc.c \
 	cpu-arm.c \
 	cpu-avr.c \
@@ -202,8 +201,6 @@ ALL_MACHINES_CFILES = \
 	cpu-hppa.c \
 	cpu-i386.c \
 	cpu-iamcu.c \
-	cpu-l1om.c \
-	cpu-k1om.c \
 	cpu-ia64.c \
 	cpu-ip2k.c \
 	cpu-iq2000.c \
@@ -257,7 +254,6 @@ ALL_MACHINES_CFILES = \
 	cpu-vax.c \
 	cpu-visium.c \
 	cpu-wasm32.c \
-	cpu-xc16x.c \
 	cpu-xgate.c \
 	cpu-xstormy16.c \
 	cpu-xtensa.c \
@@ -354,7 +350,6 @@ BFD32_BACKENDS = \
 	elf32-vax.lo \
 	elf32-visium.lo \
 	elf32-wasm32.lo \
-	elf32-xc16x.lo \
 	elf32-xgate.lo \
 	elf32-xstormy16.lo \
 	elf32-xtensa.lo \
@@ -487,7 +482,6 @@ BFD32_BACKENDS_CFILES = \
 	elf32-vax.c \
 	elf32-visium.c \
 	elf32-wasm32.c \
-	elf32-xc16x.c \
 	elf32-xgate.c \
 	elf32-xstormy16.c \
 	elf32-xtensa.c \
@@ -550,6 +544,7 @@ BFD64_BACKENDS = \
 	elf32-score.lo \
 	elf32-score7.lo \
 	elf64-alpha.lo \
+	elf64-amdgcn.lo \
 	elf64-gen.lo \
 	elf64-hppa.lo \
 	elf64-ia64.lo \
@@ -596,6 +591,7 @@ BFD64_BACKENDS_CFILES = \
 	elf32-score.c \
 	elf32-score7.c \
 	elf64-alpha.c \
+	elf64-amdgcn.c \
 	elf64-gen.c \
 	elf64-hppa.c \
 	elf64-ia64-vms.c \
@@ -801,7 +797,7 @@ libbfd.a: stamp-lib ; @true
 # vector names.  It is built from config.bfd.  It is not compiled by
 # itself, but is included by targets.c.
 targmatch.h: config.bfd targmatch.sed
-	$(AM_V_at)rm -f targmatch.h
+	$(AM_V_at)rm -f targmatch.new
 	$(AM_V_GEN)$(SED) -f $(srcdir)/targmatch.sed < $(srcdir)/config.bfd > targmatch.new
 	$(AM_V_at)mv -f targmatch.new targmatch.h
 

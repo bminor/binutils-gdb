@@ -52,7 +52,7 @@ macro_start_file (buildsym_compunit *builder,
 		  const struct line_header *lh)
 {
   /* File name relative to the compilation directory of this source file.  */
-  gdb::unique_xmalloc_ptr<char> file_name = lh->file_file_name (file);
+  std::string file_name = lh->file_file_name (file);
 
   if (! current_file)
     {
@@ -62,11 +62,11 @@ macro_start_file (buildsym_compunit *builder,
 
       /* If we have no current file, then this must be the start_file
 	 directive for the compilation unit's main source file.  */
-      current_file = macro_set_main (macro_table, file_name.get ());
+      current_file = macro_set_main (macro_table, file_name.c_str ());
       macro_define_special (macro_table);
     }
   else
-    current_file = macro_include (current_file, line, file_name.get ());
+    current_file = macro_include (current_file, line, file_name.c_str ());
 
   return current_file;
 }

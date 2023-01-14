@@ -173,6 +173,18 @@ set ppcelftests {
      {{objdump -dr relaxrl.d}}
      "rrelax"}
     {"build empty shared library" "-shared" "" "" "empty.s" {} "empty.so"}
+    {"abs32-static" "-melf32ppc -static --defsym a=1 --defsym 'HIDDEN(b=2)' --defsym c=0x12345678" ""
+	"-a32" {abs32-reloc.s}
+	{{objdump {-dr} abs32-static.d}
+	 {readelf {-rW} abs32-static.r}} "abs32-static"}
+    {"abs32-pie" "-melf32ppc -pie --hash-style=sysv --defsym a=1 --defsym 'HIDDEN(b=2)' --defsym c=0x12345678" ""
+	"-a32" {abs32-reloc.s}
+	{{objdump {-dr} abs32-pie.d}
+	 {readelf {-rW} abs32-pie.r}} "abs32-pie"}
+    {"abs32-shared" "-melf32ppc -shared --hash-style=sysv --defsym a=1 --defsym 'HIDDEN(b=2)' --defsym c=0x12345678" ""
+	"-a32" {abs32-reloc.s}
+	{{objdump {-dr} abs32-shared.d}
+	 {readelf {-rW} abs32-shared.r}} "abs32-shared"}
 }
 
 set ppc64elftests {

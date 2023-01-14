@@ -67,8 +67,8 @@ foreach wpsize $sizes {
 			fail $test
 		    }
 		}
-		gdb_test_no_output "set variable size = $rdsize" ""
-		gdb_test_no_output "set variable offset = $rdoffset" ""
+		gdb_test_no_output -nopass "set variable size = $rdsize"
+		gdb_test_no_output -nopass "set variable offset = $rdoffset"
 		set test "continue"
 		set got_hit 0
 		gdb_test_multiple $test $test {
@@ -80,7 +80,7 @@ foreach wpsize $sizes {
 		    -re " start_again .*\r\n$gdb_prompt $" {
 		    }
 		}
-		gdb_test_no_output "delete $wpnum" ""
+		gdb_test_no_output -nopass "delete $wpnum"
 		set test "wp(size=$wpsize offset=$wpoffset) rd(size=$rdsize offset=$rdoffset) expect=$expect_hit"
 		if {$expect_hit == $got_hit} {
 		    pass $test
@@ -119,8 +119,8 @@ foreach wpcount {4 7} {
 	    }
 	}
     }
-    gdb_test_no_output "set variable size = 1" ""
-    gdb_test_no_output "set variable offset = 1" ""
+    gdb_test_no_output -nopass "set variable size = 1"
+    gdb_test_no_output -nopass "set variable offset = 1"
     set test "continue"
     set got_hit 0
     gdb_test_multiple $test $test {

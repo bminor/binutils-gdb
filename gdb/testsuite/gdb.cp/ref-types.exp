@@ -20,7 +20,7 @@
 # test running programs
 #
 
-if { [skip_cplus_tests] } { continue }
+if { [skip_cplus_tests] } { return }
 
 standard_testfile .cc
 
@@ -33,12 +33,12 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 #
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 if ![runto 'marker1'] then {
     perror "couldn't run to marker1"
-    continue
+    return
 }
 
 gdb_test "up" ".*main.*" "up from marker1 1"
@@ -59,12 +59,12 @@ proc gdb_start_again {} {
     #
     if ![runto_main] then {
 	perror "couldn't run to breakpoint"
-	continue
+	return
     }
 
     if ![runto 'marker1'] then {
 	perror "couldn't run to marker1"
-	continue
+	return
     }
 
     gdb_test "up" ".*main.*" "up from marker1 2"
@@ -130,7 +130,7 @@ gdb_test "print ras\[3\]" ".\[0-9\]* = 3" "print value of ras\[3\]"
 
 if ![runto 'f'] then {
     perror "couldn't run to f"
-    continue
+    return
 }
 
 gdb_test "up" ".main2.*" "up from f"

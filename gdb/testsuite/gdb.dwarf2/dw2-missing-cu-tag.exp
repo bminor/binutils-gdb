@@ -54,8 +54,7 @@ clean_restart
 set pattern1 \
     [multi_line \
 	 "Reading symbols from \[^\r\n\]+" \
-	 "Dwarf Error: unexpected tag 'DW_TAG_subprogram' at offset $hex \\\[\[^\r\n\]+\\\]" \
-	 "\\(No debugging symbols \[^\r\n\]+\\)"]
+	 "Dwarf Error: unexpected tag 'DW_TAG_subprogram' at offset $hex \\\[\[^\r\n\]+\\\]"]
 
 # This pattern is hit when GDB does use -readnow (e.g. running with
 # --target_board=readnow).

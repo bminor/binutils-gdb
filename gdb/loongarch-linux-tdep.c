@@ -25,86 +25,76 @@
 #include "loongarch-tdep.h"
 #include "solib-svr4.h"
 #include "target-descriptions.h"
+#include "trad-frame.h"
+#include "tramp-frame.h"
 
 /* Unpack an elf_gregset_t into GDB's register cache.  */
 
 static void
-loongarch_supply_gregset (const struct regset *r,
-			  struct regcache *regcache, int regno,
+loongarch_supply_gregset (const struct regset *regset,
+			  struct regcache *regcache, int regnum,
 			  const void *gprs, size_t len)
 {
-  loongarch_gdbarch_tdep *tdep
-    = (loongarch_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
-  auto regs = tdep->regs;
-
-  int regsize = register_size (regcache->arch (), regs.r);
+  int regsize = register_size (regcache->arch (), 0);
   const gdb_byte *buf = nullptr;
 
-  if (regno == -1)
+  if (regnum == -1)
     {
-      /* Set $r0 = 0.  */
-      regcache->raw_supply_zeroed (regs.r);
+      regcache->raw_supply_zeroed (0);
 
       for (int i = 1; i < 32; i++)
 	{
 	  buf = (const gdb_byte*) gprs + regsize * i;
-	  regcache->raw_supply (regs.r + i, (const void *) buf);
+	  regcache->raw_supply (i, (const void *) buf);
 	}
 
-      /* Size base (pc) = regsize * regs.pc.  */
-      buf = (const gdb_byte*) gprs + regsize * regs.pc;
-      regcache->raw_supply (regs.pc, (const void *) buf);
+      buf = (const gdb_byte*) gprs + regsize * LOONGARCH_PC_REGNUM;
+      regcache->raw_supply (LOONGARCH_PC_REGNUM, (const void *) buf);
 
-      /* Size base (badv) = regsize * regs.badv.  */
-      buf = (const gdb_byte*) gprs + regsize * regs.badv;
-      regcache->raw_supply (regs.badv, (const void *) buf);
+      buf = (const gdb_byte*) gprs + regsize * LOONGARCH_BADV_REGNUM;
+      regcache->raw_supply (LOONGARCH_BADV_REGNUM, (const void *) buf);
     }
-  else if (regs.r == regno)
-    regcache->raw_supply_zeroed (regno);
-  else if ((regs.r < regno && regno < regs.r + 32)
-	   || regs.pc == regno || regs.badv == regno)
+  else if (regnum == 0)
+    regcache->raw_supply_zeroed (0);
+  else if ((regnum > 0 && regnum < 32)
+	   || regnum == LOONGARCH_PC_REGNUM
+	   || regnum == LOONGARCH_BADV_REGNUM)
     {
-      /* Offset offset (regno) = regsize * (regno - regs.r).  */
-      buf = (const gdb_byte*) gprs + regsize * (regno - regs.r);
-      regcache->raw_supply (regno, (const void *) buf);
+      buf = (const gdb_byte*) gprs + regsize * regnum;
+      regcache->raw_supply (regnum, (const void *) buf);
     }
 }
 
 /* Pack the GDB's register cache value into an elf_gregset_t.  */
 
 static void
-loongarch_fill_gregset (const struct regset *r,
-			const struct regcache *regcache, int regno,
+loongarch_fill_gregset (const struct regset *regset,
+			const struct regcache *regcache, int regnum,
 			void *gprs, size_t len)
 {
-  loongarch_gdbarch_tdep *tdep
-    = (loongarch_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
-  auto regs = tdep->regs;
-  int regsize = register_size (regcache->arch (), regs.r);
+  int regsize = register_size (regcache->arch (), 0);
   gdb_byte *buf = nullptr;
 
-  if (regno == -1)
+  if (regnum == -1)
     {
       for (int i = 0; i < 32; i++)
 	{
 	  buf = (gdb_byte *) gprs + regsize * i;
-	  regcache->raw_collect (regs.r + i, (void *) buf);
+	  regcache->raw_collect (i, (void *) buf);
 	}
 
-      /* Size base (pc) = regsize * regs.pc.  */
-      buf = (gdb_byte *) gprs + regsize * regs.pc;
-      regcache->raw_collect (regs.pc, (void *) buf);
+      buf = (gdb_byte *) gprs + regsize * LOONGARCH_PC_REGNUM;
+      regcache->raw_collect (LOONGARCH_PC_REGNUM, (void *) buf);
 
-      /* Size base (badv) = regsize * regs.badv.  */
-      buf = (gdb_byte *) gprs + regsize * regs.badv;
-      regcache->raw_collect (regs.badv, (void *) buf);
+      buf = (gdb_byte *) gprs + regsize * LOONGARCH_BADV_REGNUM;
+      regcache->raw_collect (LOONGARCH_BADV_REGNUM, (void *) buf);
     }
-  else if ((regs.r <= regno && regno < regs.r + 32)
-	   || regs.pc == regno || regs.badv == regno)
+  else if ((regnum >= 0 && regnum < 32)
+	   || regnum == LOONGARCH_PC_REGNUM
+	   || regnum == LOONGARCH_BADV_REGNUM)
     {
-      /* Offset offset (regno) = regsize * (regno - regs.r).  */
-      buf = (gdb_byte *) gprs + regsize * (regno - regs.r);
-      regcache->raw_collect (regno, (void *) buf);
+      buf = (gdb_byte *) gprs + regsize * regnum;
+      regcache->raw_collect (regnum, (void *) buf);
     }
 }
 
@@ -117,11 +107,89 @@ const struct regset loongarch_gregset =
   loongarch_fill_gregset,
 };
 
+/* Implement the "init" method of struct tramp_frame.  */
+
+#define LOONGARCH_RT_SIGFRAME_UCONTEXT_OFFSET	128
+#define LOONGARCH_UCONTEXT_SIGCONTEXT_OFFSET	176
+
+static void
+loongarch_linux_rt_sigframe_init (const struct tramp_frame *self,
+				  struct frame_info *this_frame,
+				  struct trad_frame_cache *this_cache,
+				  CORE_ADDR func)
+{
+  CORE_ADDR frame_sp = get_frame_sp (this_frame);
+  CORE_ADDR sigcontext_base = (frame_sp + LOONGARCH_RT_SIGFRAME_UCONTEXT_OFFSET
+			       + LOONGARCH_UCONTEXT_SIGCONTEXT_OFFSET);
+
+  trad_frame_set_reg_addr (this_cache, LOONGARCH_PC_REGNUM, sigcontext_base);
+  for (int i = 0; i < 32; i++)
+    trad_frame_set_reg_addr (this_cache, i, sigcontext_base + 8 + i * 8);
+
+  trad_frame_set_id (this_cache, frame_id_build (frame_sp, func));
+}
+
+/* li.w    a7, __NR_rt_sigreturn  */
+#define LOONGARCH_INST_LIW_A7_RT_SIGRETURN	0x03822c0b
+/* syscall 0  */
+#define LOONGARCH_INST_SYSCALL			0x002b0000
+
+static const struct tramp_frame loongarch_linux_rt_sigframe =
+{
+  SIGTRAMP_FRAME,
+  4,
+  {
+    { LOONGARCH_INST_LIW_A7_RT_SIGRETURN, ULONGEST_MAX },
+    { LOONGARCH_INST_SYSCALL, ULONGEST_MAX },
+    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
+  },
+  loongarch_linux_rt_sigframe_init,
+  NULL
+};
+
+/* Implement the "iterate_over_regset_sections" gdbarch method.  */
+
+static void
+loongarch_iterate_over_regset_sections (struct gdbarch *gdbarch,
+					iterate_over_regset_sections_cb *cb,
+					void *cb_data,
+					const struct regcache *regcache)
+{
+  int regsize = register_size (gdbarch, 0);
+
+  cb (".reg", LOONGARCH_LINUX_NUM_GREGSET * regsize,
+      LOONGARCH_LINUX_NUM_GREGSET * regsize, &loongarch_gregset, NULL, cb_data);
+}
+
+/* The following value is derived from __NR_rt_sigreturn in
+   <include/uapi/asm-generic/unistd.h> from the Linux source tree.  */
+
+#define LOONGARCH_NR_rt_sigreturn	139
+
+/* When FRAME is at a syscall instruction, return the PC of the next
+   instruction to be executed.  */
+
+static CORE_ADDR
+loongarch_linux_syscall_next_pc (struct frame_info *frame)
+{
+  const CORE_ADDR pc = get_frame_pc (frame);
+  ULONGEST a7 = get_frame_register_unsigned (frame, LOONGARCH_A7_REGNUM);
+
+  /* If we are about to make a sigreturn syscall, use the unwinder to
+     decode the signal frame.  */
+  if (a7 == LOONGARCH_NR_rt_sigreturn)
+    return frame_unwind_caller_pc (frame);
+
+  return pc + 4;
+}
+
 /* Initialize LoongArch Linux ABI info.  */
 
 static void
 loongarch_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  loongarch_gdbarch_tdep *tdep = (loongarch_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
   linux_init_abi (info, gdbarch, 0);
 
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
@@ -134,8 +202,17 @@ loongarch_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* GNU/Linux uses the dynamic linker included in the GNU C Library.  */
   set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
+
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch, svr4_fetch_objfile_link_map);
+
+  /* Prepend tramp frame unwinder for signal.  */
+  tramp_frame_prepend_unwinder (gdbarch, &loongarch_linux_rt_sigframe);
+
+  /* Core file support.  */
+  set_gdbarch_iterate_over_regset_sections (gdbarch, loongarch_iterate_over_regset_sections);
+
+  tdep->syscall_next_pc = loongarch_linux_syscall_next_pc;
 }
 
 /* Initialize LoongArch Linux target support.  */

@@ -32,11 +32,11 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 }
 
 if [mi_gdb_start] {
-    continue
+    return
 }
 
 if ![can_spawn_for_attach] {
-    continue
+    return
 }
 
 set string_re {(?:[^\\"]|\\.)*}

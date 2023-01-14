@@ -113,7 +113,6 @@ static struct pyty_code pyty_codes[] =
   ENTRY (TYPE_CODE_NAMESPACE),
   ENTRY (TYPE_CODE_DECFLOAT),
   ENTRY (TYPE_CODE_INTERNAL_FUNCTION),
-  { TYPE_CODE_UNDEF, NULL }
 };
 
 
@@ -210,7 +209,7 @@ convert_field (struct type *type, int field)
 
       if (field_name[0] != '\0')
 	{
-	  arg.reset (PyString_FromString (type->field (field).name ()));
+	  arg.reset (PyUnicode_FromString (type->field (field).name ()));
 	  if (arg == NULL)
 	    return NULL;
 	}
@@ -221,14 +220,12 @@ convert_field (struct type *type, int field)
   if (PyObject_SetAttrString (result.get (), "name", arg.get ()) < 0)
     return NULL;
 
-  arg = gdbpy_ref<>::new_reference (TYPE_FIELD_ARTIFICIAL (type, field)
-				    ? Py_True : Py_False);
+  arg.reset (PyBool_FromLong (TYPE_FIELD_ARTIFICIAL (type, field)));
   if (PyObject_SetAttrString (result.get (), "artificial", arg.get ()) < 0)
     return NULL;
 
   if (type->code () == TYPE_CODE_STRUCT)
-    arg = gdbpy_ref<>::new_reference (field < TYPE_N_BASECLASSES (type)
-				      ? Py_True : Py_False);
+    arg.reset (PyBool_FromLong (field < TYPE_N_BASECLASSES (type)));
   else
     arg = gdbpy_ref<>::new_reference (Py_False);
   if (PyObject_SetAttrString (result.get (), "is_base_class", arg.get ()) < 0)
@@ -262,7 +259,7 @@ field_name (struct type *type, int field)
   gdbpy_ref<> result;
 
   if (type->field (field).name ())
-    result.reset (PyString_FromString (type->field (field).name ()));
+    result.reset (PyUnicode_FromString (type->field (field).name ()));
   else
     result = gdbpy_ref<>::new_reference (Py_None);
 
@@ -400,9 +397,9 @@ typy_get_name (PyObject *self, void *closure)
     {
       std::string name = ada_decode (type->name (), false);
       if (!name.empty ())
-	return PyString_FromString (name.c_str ());
+	return PyUnicode_FromString (name.c_str ());
     }
-  return PyString_FromString (type->name ());
+  return PyUnicode_FromString (type->name ());
 }
 
 /* Return the type's tag, or None.  */
@@ -419,7 +416,7 @@ typy_get_tag (PyObject *self, void *closure)
 
   if (tagname == nullptr)
     Py_RETURN_NONE;
-  return PyString_FromString (tagname);
+  return PyUnicode_FromString (tagname);
 }
 
 /* Return the type's objfile, or None.  */
@@ -432,6 +429,40 @@ typy_get_objfile (PyObject *self, void *closure)
   if (objfile == nullptr)
     Py_RETURN_NONE;
   return objfile_to_objfile_object (objfile).release ();
+}
+
+/* Return true if this is a scalar type, otherwise, returns false.  */
+
+static PyObject *
+typy_is_scalar (PyObject *self, void *closure)
+{
+  struct type *type = ((type_object *) self)->type;
+
+  if (is_scalar_type (type))
+    Py_RETURN_TRUE;
+  else
+    Py_RETURN_FALSE;
+}
+
+/* Return true if this type is signed.  Raises a ValueError if this type
+   is not a scalar type.  */
+
+static PyObject *
+typy_is_signed (PyObject *self, void *closure)
+{
+  struct type *type = ((type_object *) self)->type;
+
+  if (!is_scalar_type (type))
+    {
+      PyErr_SetString (PyExc_ValueError,
+		       _("Type must be a scalar type"));
+      return nullptr;
+    }
+
+  if (type->is_unsigned ())
+    Py_RETURN_FALSE;
+  else
+    Py_RETURN_TRUE;
 }
 
 /* Return the type, stripped of typedefs. */
@@ -506,7 +537,7 @@ typy_array_1 (PyObject *self, PyObject *args, int is_vector)
 
   if (n2_obj)
     {
-      if (!PyInt_Check (n2_obj))
+      if (!PyLong_Check (n2_obj))
 	{
 	  PyErr_SetString (PyExc_RuntimeError,
 			   _("Array bound must be an integer"));
@@ -1025,8 +1056,9 @@ typy_str (PyObject *self)
 
   try
     {
-      LA_PRINT_TYPE (type_object_to_type (self), "", &thetype, -1, 0,
-		     &type_print_raw_options);
+      current_language->print_type (type_object_to_type (self), "",
+				    &thetype, -1, 0,
+				    &type_print_raw_options);
     }
   catch (const gdb_exception &except)
     {
@@ -1444,8 +1476,6 @@ _initialize_py_type ()
 int
 gdbpy_initialize_types (void)
 {
-  int i;
-
   if (PyType_Ready (&type_object_type) < 0)
     return -1;
   if (PyType_Ready (&field_object_type) < 0)
@@ -1453,10 +1483,9 @@ gdbpy_initialize_types (void)
   if (PyType_Ready (&type_iterator_object_type) < 0)
     return -1;
 
-  for (i = 0; pyty_codes[i].name; ++i)
+  for (const auto &item : pyty_codes)
     {
-      if (PyModule_AddIntConstant (gdb_module, pyty_codes[i].name,
-				   pyty_codes[i].code) < 0)
+      if (PyModule_AddIntConstant (gdb_module, item.name, item.code) < 0)
 	return -1;
     }
 
@@ -1490,6 +1519,10 @@ static gdb_PyGetSetDef type_object_getset[] =
     "The tag name for this type, or None.", NULL },
   { "objfile", typy_get_objfile, NULL,
     "The objfile this type was defined in, or None.", NULL },
+  { "is_scalar", typy_is_scalar, nullptr,
+    "Is this a scalar type?", nullptr },
+  { "is_signed", typy_is_signed, nullptr,
+    "Is this an signed type?", nullptr },
   { NULL }
 };
 
@@ -1575,9 +1608,6 @@ static PyNumberMethods type_object_as_number = {
   NULL,			      /* nb_add */
   NULL,			      /* nb_subtract */
   NULL,			      /* nb_multiply */
-#ifndef IS_PY3K
-  NULL,			      /* nb_divide */
-#endif
   NULL,			      /* nb_remainder */
   NULL,			      /* nb_divmod */
   NULL,			      /* nb_power */
@@ -1591,19 +1621,9 @@ static PyNumberMethods type_object_as_number = {
   NULL,			      /* nb_and */
   NULL,			      /* nb_xor */
   NULL,			      /* nb_or */
-#ifdef IS_PY3K
   NULL,			      /* nb_int */
   NULL,			      /* reserved */
-#else
-  NULL,			      /* nb_coerce */
-  NULL,			      /* nb_int */
-  NULL,			      /* nb_long */
-#endif
   NULL,			      /* nb_float */
-#ifndef IS_PY3K
-  NULL,			      /* nb_oct */
-  NULL			      /* nb_hex */
-#endif
 };
 
 static PyMappingMethods typy_mapping = {

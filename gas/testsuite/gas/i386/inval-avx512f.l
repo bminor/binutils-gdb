@@ -218,6 +218,32 @@
 .*:313: Error: .*unsupported broadcast for `vcvtneps2bf16'
 .*:316: Error: .*unsupported broadcast for `vcvtneps2bf16'
 .*:319: Error: .*unsupported broadcast for `vcvtneps2bf16'
+.*:321: Error: .*vaddps.*
+.*:322: Error: .*vcmpss.*
+.*:324: Error: .*vaddss.*
+.*:325: Error: .*vcmpps.*
+.*:328: Error: .*vaddps.*
+.*:330: Error: .*vaddps.*
+.*:331: Error: .*
+.*:333: Error: .*vaddpd.*
+.*:334: Error: .*vaddpd.*
+.*:336: Error: .*
+.*:340: Error: .*vaddps.*
+.*:341: Error: .*vaddps.*
+.*:342: Error: .*vaddps.*
+.*:344: Error: .*vcmpps.*
+.*:346: Error: .*vcmpps.*
+.*:347: Error: .*vcmpps.*
+.*:348: Error: .*vcmpps.*
+.*:350: Error: .*vcvtsi2ss.*
+.*:352: Error: .*vcvtsi2ss.*
+.*:353: Error: .*vcvtsi2ss.*
+.*:356: Error: .*vaddps.*
+.*:357: Error: .*vaddps.*
+.*:360: Error: .*vcmpps.*
+.*:361: Error: .*vcmpps.*
+.*:365: Error: .*vcvtsi2ss.*
+.*:366: Error: .*vcvtsi2ss.*
 GAS LISTING .*
 
 
@@ -569,6 +595,63 @@ GAS LISTING .*
 [ 	]*318 \?\?\?\? 62F27E38[ 	]+vcvtneps2bf16 \(%eax\)\{1to8\}, %xmm1
 [ 	]*318[ 	]+7208
 [ 	]*319[ 	]+vcvtneps2bf16 \(%eax\)\{1to16\}, %xmm1
-[ 	]*320[ 	]+\?\?\?\? 8DB42600 		\.p2align 4
-[ 	]*320[ 	]+0000008D 
-[ 	]*320[ 	]+7600
+[ 	]*320[ 	]*
+[ 	]*321[ 	]+vaddps \$0xcc, %zmm0, %zmm0, %zmm0
+[ 	]*322[ 	]+vcmpss \$0, \$0xcc, %xmm0, %xmm0, %k0
+[ 	]*323[ 	]*
+GAS LISTING .*
+#...
+[ 	]*324[ 	]+vaddss \{sae\}, %xmm0, %xmm0, %xmm0
+[ 	]*325[ 	]+vcmpps \$0, \{rn-sae\}, %zmm0, %zmm0, %k0
+[ 	]*326[ 	]*
+[ 	]*327[ 	]+\.intel_syntax noprefix
+[ 	]*328[ 	]+vaddps zmm2, zmm1, WORD BCST \[eax\]
+[ 	]*329 \?\?\?\? 62F17458[ 	]+vaddps zmm2, zmm1, DWORD BCST \[eax\]
+[ 	]*329[ 	]+5810
+[ 	]*330[ 	]+vaddps zmm2, zmm1, QWORD BCST \[eax\]
+[ 	]*331[ 	].*vaddps zmm2, zmm1, ZMMWORD BCST \[eax\]
+#...
+[ 	]*333[ 	]+vaddpd zmm2, zmm1, WORD BCST \[eax\]
+[ 	]*334[ 	]+vaddpd zmm2, zmm1, DWORD BCST \[eax\]
+[ 	]*335 \?\?\?\? 62F1F558[ 	]+vaddpd zmm2, zmm1, QWORD BCST \[eax\]
+[ 	]*335[ 	]+5810
+[ 	]*336[ 	].*vaddpd zmm2, zmm1, ZMMWORD BCST \[eax\]
+#...
+[ 	]*339[ 	].*vaddps \{rn-sae\}, %zmm0, %zmm0, %zmm0
+[ 	]*339[ 	]+58C0
+[ 	]*340[ 	]+vaddps %zmm0, \{rn-sae\}, %zmm0, %zmm0
+[ 	]*341[ 	]+vaddps %zmm0, %zmm0, \{rn-sae\}, %zmm0
+[ 	]*342[ 	]+vaddps %zmm0, %zmm0, %zmm0, \{rn-sae\}
+[ 	]*343[ 	]*
+[ 	]*344[ 	]+vcmpps \{sae\}, \$0, %zmm0, %zmm0, %k0
+[ 	]*345[ 	].*vcmpps \$0, \{sae\}, %zmm0, %zmm0, %k0
+[ 	]*345[ 	]+C2C000
+[ 	]*346[ 	]+vcmpps \$0, %zmm0, \{sae\}, %zmm0, %k0
+[ 	]*347[ 	]+vcmpps \$0, %zmm0, %zmm0, \{sae\}, %k0
+[ 	]*348[ 	]+vcmpps \$0, %zmm0, %zmm0, %k0, \{sae\}
+[ 	]*349[ 	]*
+[ 	]*350[ 	]+vcvtsi2ss \{rn-sae\}, %eax, %xmm0, %xmm0
+[ 	]*351[ 	].*vcvtsi2ss %eax, \{rn-sae\}, %xmm0, %xmm0
+[ 	]*351[ 	]+2AC0
+[ 	]*352[ 	]+vcvtsi2ss %eax, %xmm0, \{rn-sae\}, %xmm0
+[ 	]*353[ 	]+vcvtsi2ss %eax, %xmm0, %xmm0, \{rn-sae\}
+#...
+[ 	]*356[ 	]+vaddps zmm0\{rn-sae\}, zmm0, zmm0
+[ 	]*357[ 	]+vaddps zmm0, zmm0\{rn-sae\}, zmm0
+[ 	]*358[ 	].*vaddps zmm0, zmm0, zmm0\{rn-sae\}
+[ 	]*358[ 	]+58C0
+[ 	]*359[ 	]*
+[ 	]*360[ 	]+vcmpps k0\{sae\}, zmm0, zmm0, 0
+[ 	]*361[ 	]+vcmpps k0, zmm0\{sae\}, zmm0, 0
+[ 	]*362[ 	].*vcmpps k0, zmm0, zmm0\{sae\}, 0
+[ 	]*362[ 	]+C2C000
+[ 	]*363[ 	].*vcmpps k0, zmm0, zmm0, 0\{sae\}
+[ 	]*363[ 	]+C2C000
+[ 	]*364[ 	]*
+[ 	]*365[ 	]+vcvtsi2ss xmm0\{rn-sae\}, xmm0, eax
+[ 	]*366[ 	]+vcvtsi2ss xmm0, xmm0\{rn-sae\}, eax
+GAS LISTING .*
+#...
+[ 	]*367[ 	].*vcvtsi2ss xmm0, xmm0, eax\{rn-sae\}
+[ 	]*367[ 	]+2AC0
+#pass

@@ -54,10 +54,10 @@ go_language::print_type (struct type *type, const char *varstring,
   if (type->code () == TYPE_CODE_ARRAY
       && TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_CHAR)
     {
-      fputs_filtered ("string", stream);
+      gdb_puts ("string", stream);
       return;
     }
 
   /* Punt the rest to C for now.  */
-  c_print_type (type, varstring, stream, show, level, flags);
+  c_print_type (type, varstring, stream, show, level, la_language, flags);
 }

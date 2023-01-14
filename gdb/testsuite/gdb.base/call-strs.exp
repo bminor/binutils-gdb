@@ -29,7 +29,7 @@ standard_testfile
 # test.
 if [target_info exists gdb,cannot_call_functions] {
     unsupported "this target can not call functions"
-    continue
+    return
 }
 
 
@@ -44,7 +44,7 @@ gdb_test_no_output "set width 0"
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 set prev_timeout $timeout

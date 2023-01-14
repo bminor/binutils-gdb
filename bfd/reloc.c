@@ -288,10 +288,8 @@ CODE_FRAGMENT
 .     an external reloc number is stored in this field.  *}
 .  unsigned int type;
 .
-.  {* The encoded size of the item to be relocated.  This is *not* a
-.     power-of-two measure.  Use bfd_get_reloc_size to find the size
-.     of the item in bytes.  *}
-.  unsigned int size:3;
+.  {* The size of the item to be relocated in bytes.  *}
+.  unsigned int size:4;
 .
 .  {* The number of bits in the field to be relocated.  This is used
 .     when doing overflow checking.  *}
@@ -375,46 +373,26 @@ DESCRIPTION
 	The HOWTO macro fills in a reloc_howto_type (a typedef for
 	const struct reloc_howto_struct).
 
+.#define HOWTO_RSIZE(sz) ((sz) < 0 ? -(sz) : (sz))
 .#define HOWTO(type, right, size, bits, pcrel, left, ovf, func, name,	\
 .              inplace, src_mask, dst_mask, pcrel_off)			\
-.  { (unsigned) type, size < 0 ? -size : size, bits, right, left, ovf,	\
+.  { (unsigned) type, HOWTO_RSIZE (size), bits, right, left, ovf,	\
 .    size < 0, pcrel, inplace, pcrel_off, src_mask, dst_mask, func, name }
 
 DESCRIPTION
 	This is used to fill in an empty howto entry in an array.
 
 .#define EMPTY_HOWTO(C) \
-.  HOWTO ((C), 0, 0, 0, false, 0, complain_overflow_dont, NULL, \
+.  HOWTO ((C), 0, 1, 0, false, 0, complain_overflow_dont, NULL, \
 .	  NULL, false, 0, 0, false)
 .
+.static inline unsigned int
+.bfd_get_reloc_size (reloc_howto_type *howto)
+.{
+.  return howto->size;
+.}
+.
 */
-
-/*
-FUNCTION
-	bfd_get_reloc_size
-
-SYNOPSIS
-	unsigned int bfd_get_reloc_size (reloc_howto_type *);
-
-DESCRIPTION
-	For a reloc_howto_type that operates on a fixed number of bytes,
-	this returns the number of bytes operated on.
- */
-
-unsigned int
-bfd_get_reloc_size (reloc_howto_type *howto)
-{
-  switch (howto->size)
-    {
-    case 0: return 1;
-    case 1: return 2;
-    case 2: return 4;
-    case 3: return 0;
-    case 4: return 8;
-    case 5: return 3;
-    default: abort ();
-    }
-}
 
 /*
 TYPEDEF
@@ -556,27 +534,27 @@ bfd_reloc_offset_in_range (reloc_howto_type *howto,
 static bfd_vma
 read_reloc (bfd *abfd, bfd_byte *data, reloc_howto_type *howto)
 {
-  switch (howto->size)
+  switch (bfd_get_reloc_size (howto))
     {
     case 0:
-      return bfd_get_8 (abfd, data);
-
-    case 1:
-      return bfd_get_16 (abfd, data);
-
-    case 2:
-      return bfd_get_32 (abfd, data);
-
-    case 3:
       break;
 
-#ifdef BFD64
+    case 1:
+      return bfd_get_8 (abfd, data);
+
+    case 2:
+      return bfd_get_16 (abfd, data);
+
+    case 3:
+      return bfd_get_24 (abfd, data);
+
     case 4:
+      return bfd_get_32 (abfd, data);
+
+#ifdef BFD64
+    case 8:
       return bfd_get_64 (abfd, data);
 #endif
-
-    case 5:
-      return bfd_get_24 (abfd, data);
 
     default:
       abort ();
@@ -590,32 +568,32 @@ read_reloc (bfd *abfd, bfd_byte *data, reloc_howto_type *howto)
 static void
 write_reloc (bfd *abfd, bfd_vma val, bfd_byte *data, reloc_howto_type *howto)
 {
-  switch (howto->size)
+  switch (bfd_get_reloc_size (howto))
     {
     case 0:
-      bfd_put_8 (abfd, val, data);
       break;
 
     case 1:
-      bfd_put_16 (abfd, val, data);
+      bfd_put_8 (abfd, val, data);
       break;
 
     case 2:
-      bfd_put_32 (abfd, val, data);
+      bfd_put_16 (abfd, val, data);
       break;
 
     case 3:
+      bfd_put_24 (abfd, val, data);
+      break;
+
+    case 4:
+      bfd_put_32 (abfd, val, data);
       break;
 
 #ifdef BFD64
-    case 4:
+    case 8:
       bfd_put_64 (abfd, val, data);
       break;
 #endif
-
-    case 5:
-      bfd_put_24 (abfd, val, data);
-      break;
 
     default:
       abort ();
@@ -1621,6 +1599,8 @@ the section containing the relocation.  It depends on the specific target.
 
 ENUM
   BFD_RELOC_32_SECREL
+ENUMX
+  BFD_RELOC_16_SECIDX
 ENUMDOC
   Section relative relocations.  Some targets need this for DWARF2.
 
@@ -2313,7 +2293,7 @@ ENUMX
 ENUMX
   BFD_RELOC_MICROMIPS_SCN_DISP
 ENUMX
-  BFD_RELOC_MIPS_REL16
+  BFD_RELOC_MIPS_16
 ENUMX
   BFD_RELOC_MIPS_RELGOT
 ENUMX
@@ -6310,17 +6290,6 @@ ENUMDOC
 COMMENT
 
 ENUM
-  BFD_RELOC_XC16X_PAG
-ENUMX
-  BFD_RELOC_XC16X_POF
-ENUMX
-  BFD_RELOC_XC16X_SEG
-ENUMX
-  BFD_RELOC_XC16X_SOF
-ENUMDOC
-  Infineon Relocations.
-
-ENUM
   BFD_RELOC_VAX_GLOB_DAT
 ENUMX
   BFD_RELOC_VAX_JMP_SLOT
@@ -8300,7 +8269,7 @@ bfd_reloc_name_lookup (bfd *abfd, const char *reloc_name)
 }
 
 static reloc_howto_type bfd_howto_32 =
-HOWTO (0, 00, 2, 32, false, 0, complain_overflow_dont, 0, "VRT32", false, 0xffffffff, 0xffffffff, true);
+HOWTO (0, 00, 4, 32, false, 0, complain_overflow_dont, 0, "VRT32", false, 0xffffffff, 0xffffffff, true);
 
 /*
 INTERNAL_FUNCTION

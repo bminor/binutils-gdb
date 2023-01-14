@@ -38,7 +38,8 @@ gdb_test_no_output "set stop-on-solib-events 1"
 
 # Start the inferior and run to the first stop
 gdb_run_cmd
-gdb_test "" ".*Stopped due to shared library event.*"
+gdb_test "" ".*Stopped due to shared library event.*" \
+    "run to shared library event"
 
 # Check if we're using probes.
 set using_probes 0

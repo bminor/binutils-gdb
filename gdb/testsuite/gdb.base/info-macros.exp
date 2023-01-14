@@ -21,19 +21,7 @@ if [using_fission] {
     return -1
 }
 
-set options {debug}
-
-get_compiler_info
-if { [test_compiler_info gcc*] } {
-    lappend options "additional_flags=-g3"
-} elseif { [test_compiler_info clang*] } {
-    lappend options "additional_flags=-fdebug-macro"
-} else {
-    untested "no compiler info"
-    return -1
-}
-
-if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} $options] } {
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug macros}] } {
     return -1
 }
 
@@ -125,7 +113,7 @@ gdb_test_lines $test $testname $r1.*$r2 \
     -re-not "#define THREE" \
     -re-not "#define FOUR"
 
-gdb_test "next" ".*" ""
+gdb_test "next" "" "next, 1"
 
 set r1 "#define FOO \" \""
 set r2 "#define ONE"
@@ -135,9 +123,9 @@ gdb_test_lines $test $testname $r1.*$r2.*$r3 \
     -re-not "#define THREE" \
     -re-not "#define FOUR"
 
-gdb_test "next" ".*" ""
+gdb_test "next" "" "next, 2"
 
-# in alpabetical order...
+# in alphabetical order...
 set r1 "#define FOO \"world\""
 set r2 "#define ONE"
 set r3 "#define THREE"
@@ -150,7 +138,7 @@ gdb_test_lines $test $testname $r1.*$r2.*$r3.*$r4 \
 set test "info macros *\$pc"
 gdb_test_lines $test "" $r1.*$r2.*$r3.*$r4 \
     -re-not "#define FOUR"
-gdb_test "next" ".*" ""
+gdb_test "next" "" "next, 3"
 
 set r1 "#define FOO \" \""
 set r2 "#define ONE"
@@ -160,8 +148,8 @@ set testname "$test 5"
 gdb_test_lines $test $testname $r1.*$r2.*$r3 \
     -re-not "#define THREE" \
     -re-not "#define FOUR"
-gdb_test "next" ".*" ""
-gdb_test "next" ".*" ""
+gdb_test "next" "" "next, 4"
+gdb_test "next" "" "next, 5"
 
 set r1 "#define DEF_MACROS"
 set testname "$test 6"
@@ -172,7 +160,7 @@ gdb_test_lines $test $testname $r1 \
     -re-not "#define THREE" \
     -re-not "#define FOUR"
 
-gdb_test "next" ".*" ""
+gdb_test "next" "" "next, 6"
 set r1 "#define DEF_MACROS"
 set r2 "#define FOO\\(a\\) foo = a"
 set r3 "#define FOUR"

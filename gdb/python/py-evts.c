@@ -20,7 +20,6 @@
 #include "defs.h"
 #include "py-events.h"
 
-#ifdef IS_PY3K
 static struct PyModuleDef EventModuleDef =
 {
   PyModuleDef_HEAD_INIT,
@@ -33,7 +32,6 @@ static struct PyModuleDef EventModuleDef =
   NULL,
   NULL
 };
-#endif
 
 /* Initialize python events.  */
 
@@ -53,11 +51,7 @@ add_new_registry (eventregistry_object **registryp, const char *name)
 int
 gdbpy_initialize_py_events (void)
 {
-#ifdef IS_PY3K
   gdb_py_events.module = PyModule_Create (&EventModuleDef);
-#else
-  gdb_py_events.module = Py_InitModule ("events", NULL);
-#endif
 
   if (!gdb_py_events.module)
     return -1;

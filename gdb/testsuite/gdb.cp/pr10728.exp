@@ -17,7 +17,7 @@
 
 set nl		"\[\r\n\]+"
 
-if { [skip_cplus_tests] } { continue }
+if { [skip_cplus_tests] } { return }
 
 load_lib "cp-support.exp"
 
@@ -44,7 +44,7 @@ clean_restart $binfile
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 # set a breakpoint at the return stmt

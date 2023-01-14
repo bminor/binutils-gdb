@@ -494,14 +494,14 @@ stabs_generate_asm_file (void)
   file = as_where (&lineno);
   if (use_gnu_debug_info_extensions)
     {
-      const char *dir;
+      char *dir;
       char *dir2;
 
       dir = remap_debug_filename (getpwd ());
       dir2 = concat (dir, "/", NULL);
       generate_asm_file (N_SO, dir2);
       free (dir2);
-      xfree ((char *) dir);
+      free (dir);
     }
   generate_asm_file (N_SO, file);
 }

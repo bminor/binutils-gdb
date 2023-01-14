@@ -3212,7 +3212,7 @@ print_fixup (fixS *fixp)
 {
   indent_level = 1;
   fprintf (stderr, "fix ");
-  fprintf_vma (stderr, (bfd_vma)((bfd_hostptr_t) fixp));
+  fprintf_vma (stderr, (bfd_vma) (uintptr_t) fixp);
   fprintf (stderr, " %s:%d",fixp->fx_file, fixp->fx_line);
   if (fixp->fx_pcrel)
     fprintf (stderr, " pcrel");
@@ -3223,7 +3223,7 @@ print_fixup (fixS *fixp)
   if (fixp->fx_done)
     fprintf (stderr, " done");
   fprintf (stderr, "\n    size=%d frag=", fixp->fx_size);
-  fprintf_vma (stderr, (bfd_vma) ((bfd_hostptr_t) fixp->fx_frag));
+  fprintf_vma (stderr, (bfd_vma) (uintptr_t) fixp->fx_frag);
   fprintf (stderr, " where=%ld offset=%lx addnumber=%lx",
 	   (long) fixp->fx_where,
 	   (unsigned long) fixp->fx_offset,

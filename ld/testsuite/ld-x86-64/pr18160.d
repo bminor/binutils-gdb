@@ -11,4 +11,4 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	e9 00 00 00 00       	jmp    5 <foo>
 
 0+5 <foo>:
-[ 	]*[a-f0-9]+:	c3                   	ret    
+[ 	]*[a-f0-9]+:	c3                   	ret

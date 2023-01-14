@@ -340,7 +340,37 @@ if [is_elf_format] {
 	}
     }
 
-    
+    set testname "nm --no-weak"
+    if {![binutils_assemble $srcdir/$subdir/no-weak.s tmpdir/no-weak.o]} then {
+	fail "$testname (assembly)"
+    } else {
+	if [is_remote host] {
+	    set tmpfile [remote_download host tmpdir/no-weak.o]
+	} else {
+	    set tmpfile tmpdir/no-weak.o
+	}
+
+	set got [binutils_run $NM "$NMFLAGS --no-weak $tmpfile"]
+
+	if [regexp "weak_with_default_value" $got] then {
+	    fail "$testname (weak symbol with default value)"
+	} else {
+	    pass "$testname (weak symbol with default value)"
+	}
+
+	if [regexp "weak_without_default_value" $got] then {
+	    fail "$testname (weak symbol without default value)"
+	} else {
+	    pass "$testname (weak symbol without default value)"
+	}
+
+	# FIXME: We should re run this test without the --no-weak option
+	# and verify that the expected symbol names *are* shown...
+
+	if { $verbose < 1 } {
+	    remote_file host delete "tmpdir/no0weak.o"
+	}
+    }    
 }
 
 # There are certainly other tests that could be run.

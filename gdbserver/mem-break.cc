@@ -1000,12 +1000,18 @@ z_type_supported (char z_type)
    failure returns NULL and sets *ERR to either -1 for error, or 1 if
    Z_TYPE breakpoints are not supported on this target.  */
 
-static struct gdb_breakpoint *
-set_gdb_breakpoint_1 (char z_type, CORE_ADDR addr, int kind, int *err)
+struct gdb_breakpoint *
+set_gdb_breakpoint (char z_type, CORE_ADDR addr, int kind, int *err)
 {
   struct gdb_breakpoint *bp;
   enum bkpt_type type;
   enum raw_bkpt_type raw_type;
+
+  if (!z_type_supported (z_type))
+    {
+      *err = 1;
+      return nullptr;
+    }
 
   /* If we see GDB inserting a second code breakpoint at the same
      address, then either: GDB is updating the breakpoint's conditions
@@ -1074,108 +1080,29 @@ set_gdb_breakpoint_1 (char z_type, CORE_ADDR addr, int kind, int *err)
 						   kind, NULL, err);
 }
 
-static int
-check_gdb_bp_preconditions (char z_type, int *err)
-{
-  /* As software/memory breakpoints work by poking at memory, we need
-     to prepare to access memory.  If that operation fails, we need to
-     return error.  Seeing an error, if this is the first breakpoint
-     of that type that GDB tries to insert, GDB would then assume the
-     breakpoint type is supported, but it may actually not be.  So we
-     need to check whether the type is supported at all before
-     preparing to access memory.  */
-  if (!z_type_supported (z_type))
-    {
-      *err = 1;
-      return 0;
-    }
-
-  return 1;
-}
-
-/* See mem-break.h.  This is a wrapper for set_gdb_breakpoint_1 that
-   knows to prepare to access memory for Z0 breakpoints.  */
-
-struct gdb_breakpoint *
-set_gdb_breakpoint (char z_type, CORE_ADDR addr, int kind, int *err)
-{
-  struct gdb_breakpoint *bp;
-
-  if (!check_gdb_bp_preconditions (z_type, err))
-    return NULL;
-
-  /* If inserting a software/memory breakpoint, need to prepare to
-     access memory.  */
-  if (z_type == Z_PACKET_SW_BP)
-    {
-      if (prepare_to_access_memory () != 0)
-	{
-	  *err = -1;
-	  return NULL;
-	}
-    }
-
-  bp = set_gdb_breakpoint_1 (z_type, addr, kind, err);
-
-  if (z_type == Z_PACKET_SW_BP)
-    done_accessing_memory ();
-
-  return bp;
-}
-
 /* Delete a GDB breakpoint of type Z_TYPE and kind KIND previously
    inserted at ADDR with set_gdb_breakpoint_at.  Returns 0 on success,
    -1 on error, and 1 if Z_TYPE breakpoints are not supported on this
    target.  */
 
-static int
-delete_gdb_breakpoint_1 (char z_type, CORE_ADDR addr, int kind)
+int
+delete_gdb_breakpoint (char z_type, CORE_ADDR addr, int kind)
 {
-  struct gdb_breakpoint *bp;
-  int err;
+  if (!z_type_supported (z_type))
+    return 1;
 
-  bp = find_gdb_breakpoint (z_type, addr, kind);
+  gdb_breakpoint *bp = find_gdb_breakpoint (z_type, addr, kind);
   if (bp == NULL)
     return -1;
 
   /* Before deleting the breakpoint, make sure to free its condition
      and command lists.  */
   clear_breakpoint_conditions_and_commands (bp);
-  err = delete_breakpoint ((struct breakpoint *) bp);
+  int err = delete_breakpoint ((struct breakpoint *) bp);
   if (err != 0)
     return -1;
 
   return 0;
-}
-
-/* See mem-break.h.  This is a wrapper for delete_gdb_breakpoint that
-   knows to prepare to access memory for Z0 breakpoints.  */
-
-int
-delete_gdb_breakpoint (char z_type, CORE_ADDR addr, int kind)
-{
-  int ret;
-
-  if (!check_gdb_bp_preconditions (z_type, &ret))
-    return ret;
-
-  /* If inserting a software/memory breakpoint, need to prepare to
-     access memory.  */
-  if (z_type == Z_PACKET_SW_BP)
-    {
-      int err;
-
-      err = prepare_to_access_memory ();
-      if (err != 0)
-	return -1;
-    }
-
-  ret = delete_gdb_breakpoint_1 (z_type, addr, kind);
-
-  if (z_type == Z_PACKET_SW_BP)
-    done_accessing_memory ();
-
-  return ret;
 }
 
 /* Clear all conditions associated with a breakpoint.  */

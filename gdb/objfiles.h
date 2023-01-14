@@ -409,7 +409,7 @@ public:
      remove it from the program space's list.  In some cases, you may
      need to hold a reference to an objfile that is independent of its
      existence on the program space's list; for this case, the
-     destructor must be public so that shared_ptr can reference
+     destructor must be public so that unique_ptr can reference
      it.  */
   ~objfile ();
 
@@ -611,6 +611,19 @@ public:
     int idx = gdb_bfd_section_index (this->obfd, section);
     this->section_offsets[idx] = offset;
   }
+
+private:
+
+  /* Ensure that partial symbols have been read and return the "quick" (aka
+     partial) symbol functions for this symbol reader.  */
+  const std::forward_list<quick_symbol_functions_up> &
+  qf_require_partial_symbols ()
+  {
+    this->require_partial_symbols (true);
+    return qf;
+  }
+
+public:
 
   /* The object file's original name as specified by the user,
      made absolute, and tilde-expanded.  However, it is not canonicalized
@@ -903,9 +916,8 @@ extern scoped_restore_tmpl<int> inhibit_section_map_updates
     (struct program_space *pspace);
 
 extern void default_iterate_over_objfiles_in_search_order
-  (struct gdbarch *gdbarch,
-   iterate_over_objfiles_in_search_order_cb_ftype *cb,
-   void *cb_data, struct objfile *current_objfile);
+  (gdbarch *gdbarch, iterate_over_objfiles_in_search_order_cb_ftype cb,
+   objfile *current_objfile);
 
 /* Reset the per-BFD storage area on OBJ.  */
 

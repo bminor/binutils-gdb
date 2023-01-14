@@ -15,7 +15,7 @@
 
 # This test only works for native processes on GNU/Linux.
 if {[target_info gdb_protocol] != "" || ![istarget *-linux*]} {
-    continue
+    return
 }
 
 # Test relies on checking gdb debug output. Do not run if gdb debug is

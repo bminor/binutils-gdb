@@ -17,7 +17,7 @@
 
 load_lib rust-support.exp
 if {[skip_rust_tests]} {
-    continue
+    return
 }
 
 standard_testfile .rs
@@ -314,7 +314,8 @@ proc test_one_slice {svar length base range} {
     with_test_prefix $range {
 	global hex
 
-	set result " = &\\\[.*\\\] \\{data_ptr: $hex, length: $length\\}"
+	# Just accept any array here.
+	set result " = &\\\[.*\\\] \\\[.*\\\]"
 
 	gdb_test "print $svar" $result
 	gdb_test "print &${base}\[${range}\]" $result
@@ -388,7 +389,7 @@ gdb_test "print empty_enum_value.something" ""
 
 load_lib gdb-python.exp
 if {[skip_python_tests]} {
-    continue
+    return
 }
 
 gdb_test "python print(gdb.lookup_type('simple::HiBob'))" "simple::HiBob"

@@ -157,7 +157,7 @@ struct bcache
   /* Print statistics on this bcache's memory usage and efficacity at
      eliminating duplication.  TYPE should be a string describing the
      kind of data this bcache holds.  Statistics are printed using
-     `printf_filtered' and its ilk.  */
+     `gdb_printf' and its ilk.  */
   void print_statistics (const char *type);
   int memory_used ();
 

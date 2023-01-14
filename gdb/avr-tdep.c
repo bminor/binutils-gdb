@@ -664,12 +664,12 @@ avr_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc_beg, CORE_ADDR pc_end,
 
       /* Resolve offset (in words) from __prologue_saves__ symbol.
 	 Which is a pushes count in `-mcall-prologues' mode */
-      num_pushes = AVR_MAX_PUSHES - (i - BMSYMBOL_VALUE_ADDRESS (msymbol)) / 2;
+      num_pushes = AVR_MAX_PUSHES - (i - msymbol.value_address ()) / 2;
 
       if (num_pushes > AVR_MAX_PUSHES)
 	{
-	  fprintf_unfiltered (gdb_stderr, _("Num pushes too large: %d\n"),
-			      num_pushes);
+	  gdb_printf (gdb_stderr, _("Num pushes too large: %d\n"),
+		      num_pushes);
 	  num_pushes = 0;
 	}
 
@@ -1199,18 +1199,19 @@ avr_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 /* When arguments must be pushed onto the stack, they go on in reverse
    order.  The below implements a FILO (stack) to do this.  */
 
-struct stack_item
+struct avr_stack_item
 {
   int len;
-  struct stack_item *prev;
+  struct avr_stack_item *prev;
   gdb_byte *data;
 };
 
-static struct stack_item *
-push_stack_item (struct stack_item *prev, const bfd_byte *contents, int len)
+static struct avr_stack_item *
+push_stack_item (struct avr_stack_item *prev, const bfd_byte *contents,
+		 int len)
 {
-  struct stack_item *si;
-  si = XNEW (struct stack_item);
+  struct avr_stack_item *si;
+  si = XNEW (struct avr_stack_item);
   si->data = (gdb_byte *) xmalloc (len);
   si->len = len;
   si->prev = prev;
@@ -1218,11 +1219,10 @@ push_stack_item (struct stack_item *prev, const bfd_byte *contents, int len)
   return si;
 }
 
-static struct stack_item *pop_stack_item (struct stack_item *si);
-static struct stack_item *
-pop_stack_item (struct stack_item *si)
+static struct avr_stack_item *
+pop_stack_item (struct avr_stack_item *si)
 {
-  struct stack_item *dead = si;
+  struct avr_stack_item *dead = si;
   si = si->prev;
   xfree (dead->data);
   xfree (dead);
@@ -1281,7 +1281,7 @@ avr_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int call_length = tdep->call_length;
   CORE_ADDR return_pc = avr_convert_iaddr_to_raw (bp_addr);
   int regnum = AVR_ARGN_REGNUM;
-  struct stack_item *si = NULL;
+  struct avr_stack_item *si = NULL;
 
   if (return_method == return_method_struct)
     {
@@ -1574,9 +1574,9 @@ avr_io_reg_read_command (const char *args, int from_tty)
 
   if (!buf)
     {
-      fprintf_unfiltered (gdb_stderr,
-			  _("ERR: info io_registers NOT supported "
-			    "by current target\n"));
+      gdb_printf (gdb_stderr,
+		  _("ERR: info io_registers NOT supported "
+		    "by current target\n"));
       return;
     }
 
@@ -1584,12 +1584,12 @@ avr_io_reg_read_command (const char *args, int from_tty)
 
   if (sscanf (bufstr, "%x", &nreg) != 1)
     {
-      fprintf_unfiltered (gdb_stderr,
-			  _("Error fetching number of io registers\n"));
+      gdb_printf (gdb_stderr,
+		  _("Error fetching number of io registers\n"));
       return;
     }
 
-  printf_filtered (_("Target has %u io registers:\n\n"), nreg);
+  gdb_printf (_("Target has %u io registers:\n\n"), nreg);
 
   /* only fetch up to 8 registers at a time to keep the buffer small */
   int step = 8;
@@ -1607,9 +1607,9 @@ avr_io_reg_read_command (const char *args, int from_tty)
 
       if (!buf)
 	{
-	  fprintf_unfiltered (gdb_stderr,
-			      _("ERR: error reading avr.io_reg:%x,%x\n"),
-			      i, j);
+	  gdb_printf (gdb_stderr,
+		      _("ERR: error reading avr.io_reg:%x,%x\n"),
+		      i, j);
 	  return;
 	}
 
@@ -1618,7 +1618,7 @@ avr_io_reg_read_command (const char *args, int from_tty)
 	{
 	  if (sscanf (p, "%[^,],%x;", query, &val) == 2)
 	    {
-	      printf_filtered ("[%02x] %-15s : %02x\n", k, query, val);
+	      gdb_printf ("[%02x] %-15s : %02x\n", k, query, val);
 	      while ((*p != ';') && (*p != '\0'))
 		p++;
 	      p++;		/* skip over ';' */

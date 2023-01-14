@@ -230,14 +230,14 @@ static bfd_vma
 score3_bfd_getl48 (const void *p)
 {
   const bfd_byte *addr = p;
-  bfd_uint64_t v;
+  uint64_t v;
 
-  v = (bfd_uint64_t) addr[4];
-  v |= (bfd_uint64_t) addr[5] << 8;
-  v |= (bfd_uint64_t) addr[2] << 16;
-  v |= (bfd_uint64_t) addr[3] << 24;
-  v |= (bfd_uint64_t) addr[0] << 32;
-  v |= (bfd_uint64_t) addr[1] << 40;
+  v = (uint64_t) addr[4];
+  v |= (uint64_t) addr[5] << 8;
+  v |= (uint64_t) addr[2] << 16;
+  v |= (uint64_t) addr[3] << 24;
+  v |= (uint64_t) addr[0] << 32;
+  v |= (uint64_t) addr[1] << 40;
   return v;
 }
 
@@ -639,7 +639,7 @@ static reloc_howto_type elf32_score_howto_table[] =
   /* No relocation.  */
   HOWTO (R_SCORE_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -654,7 +654,7 @@ static reloc_howto_type elf32_score_howto_table[] =
   /* R_SCORE_HI16 */
   HOWTO (R_SCORE_HI16,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 1,			/* bitpos */
@@ -669,7 +669,7 @@ static reloc_howto_type elf32_score_howto_table[] =
   /* R_SCORE_LO16 */
   HOWTO (R_SCORE_LO16,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 1,			/* bitpos */
@@ -684,7 +684,7 @@ static reloc_howto_type elf32_score_howto_table[] =
   /*  R_SCORE_BCMP */
   HOWTO (R_SCORE_BCMP,		/* type */
 	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 1,			/* bitpos */
@@ -699,7 +699,7 @@ static reloc_howto_type elf32_score_howto_table[] =
   /*R_SCORE_24 */
   HOWTO (R_SCORE_24,		/* type */
 	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 false,			/* pc_relative */
 	 1,			/* bitpos */
@@ -714,7 +714,7 @@ static reloc_howto_type elf32_score_howto_table[] =
   /*R_SCORE_PC19 */
   HOWTO (R_SCORE_PC19,		/* type */
 	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 19,			/* bitsize */
 	 true,			/* pc_relative */
 	 1,			/* bitpos */
@@ -729,7 +729,7 @@ static reloc_howto_type elf32_score_howto_table[] =
   /*R_SCORE16_11 */
   HOWTO (R_SCORE16_11,		/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 11,			/* bitsize */
 	 false,			/* pc_relative */
 	 1,			/* bitpos */
@@ -744,7 +744,7 @@ static reloc_howto_type elf32_score_howto_table[] =
   /* R_SCORE16_PC8 */
   HOWTO (R_SCORE16_PC8,		/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 9,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -759,7 +759,7 @@ static reloc_howto_type elf32_score_howto_table[] =
   /* 32 bit absolute */
   HOWTO (R_SCORE_ABS32,		/* type	 8 */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -774,7 +774,7 @@ static reloc_howto_type elf32_score_howto_table[] =
   /* 16 bit absolute */
   HOWTO (R_SCORE_ABS16,		/* type 11 */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -789,7 +789,7 @@ static reloc_howto_type elf32_score_howto_table[] =
   /* R_SCORE_DUMMY2 */
   HOWTO (R_SCORE_DUMMY2,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -804,7 +804,7 @@ static reloc_howto_type elf32_score_howto_table[] =
   /* R_SCORE_GP15 */
   HOWTO (R_SCORE_GP15,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -819,7 +819,7 @@ static reloc_howto_type elf32_score_howto_table[] =
   /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_SCORE_GNU_VTINHERIT, /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -834,7 +834,7 @@ static reloc_howto_type elf32_score_howto_table[] =
   /* GNU extension to record C++ vtable member usage */
   HOWTO (R_SCORE_GNU_VTENTRY,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -849,7 +849,7 @@ static reloc_howto_type elf32_score_howto_table[] =
   /* Reference to global offset table.  */
   HOWTO (R_SCORE_GOT15,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -864,7 +864,7 @@ static reloc_howto_type elf32_score_howto_table[] =
   /* Low 16 bits of displacement in global offset table.  */
   HOWTO (R_SCORE_GOT_LO16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 1,			/* bitpos */
@@ -879,7 +879,7 @@ static reloc_howto_type elf32_score_howto_table[] =
   /* 15 bit call through global offset table.  */
   HOWTO (R_SCORE_CALL15,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -894,7 +894,7 @@ static reloc_howto_type elf32_score_howto_table[] =
   /* 32 bit GP relative reference.  */
   HOWTO (R_SCORE_GPREL32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -909,7 +909,7 @@ static reloc_howto_type elf32_score_howto_table[] =
   /* 32 bit symbol relative relocation.  */
   HOWTO (R_SCORE_REL32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -924,7 +924,7 @@ static reloc_howto_type elf32_score_howto_table[] =
   /* R_SCORE_DUMMY_HI16 */
   HOWTO (R_SCORE_DUMMY_HI16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 1,			/* bitpos */
@@ -939,7 +939,7 @@ static reloc_howto_type elf32_score_howto_table[] =
   /* R_SCORE_IMM30 */
   HOWTO (R_SCORE_IMM30,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 30,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -954,7 +954,7 @@ static reloc_howto_type elf32_score_howto_table[] =
   /* R_SCORE_IMM32 */
   HOWTO (R_SCORE_IMM32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 5,			/* bitpos */

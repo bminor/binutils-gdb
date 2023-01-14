@@ -29,7 +29,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint main"
-    continue
+    return
 }
 
 gdb_test "print x" "\\$\[0-9\].* = 11"

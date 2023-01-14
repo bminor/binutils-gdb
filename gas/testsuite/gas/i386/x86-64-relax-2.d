@@ -19,17 +19,17 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	e9 00 00 00 00       	jmp    22 <hidden_def>	1e: R_X86_64_PLT32	hidden_undef-0x4
 
 0+22 <hidden_def>:
-[ 	]*[a-f0-9]+:	c3                   	ret *
+[ 	]*[a-f0-9]+:	c3                   	ret
 
 0+23 <weak_hidden_def>:
-[ 	]*[a-f0-9]+:	c3                   	ret *
+[ 	]*[a-f0-9]+:	c3                   	ret
 
 0+24 <global_def>:
-[ 	]*[a-f0-9]+:	c3                   	ret *
+[ 	]*[a-f0-9]+:	c3                   	ret
 
 0+25 <weak_def>:
-[ 	]*[a-f0-9]+:	c3                   	ret *
+[ 	]*[a-f0-9]+:	c3                   	ret
 
 0+26 <local>:
-[ 	]*[a-f0-9]+:	c3                   	ret *
+[ 	]*[a-f0-9]+:	c3                   	ret
 #pass

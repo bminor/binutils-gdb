@@ -742,6 +742,34 @@ template<class C> int FunctionArg<C>::method(Empty<void (FunctionArg<C>)> &arg)
 Empty<void(FunctionArg<int>)> empty;
 FunctionArg<int> arg;
 
+template <typename T1>
+struct Foozle
+{
+  int x;
+  T1 t;
+  template <typename T2>
+  T2 fogey (T2 plop);
+};
+
+template <typename T1>
+template <typename T2>
+T2 Foozle<T1>::fogey (T2 plop)
+{
+  return plop;
+}
+
+template <typename T>
+int operator< (T &lhs, T &rhs)
+{
+  return 0;
+}
+
+template <typename T>
+int operator<< (T &obj, T &val)
+{
+  return 1;
+};
+
 int main()
 {
     int i;
@@ -814,6 +842,25 @@ int main()
   t5i.value();
 
   arg.method(empty);
+
+  Empty<int> e;
+  Foozle<int> fzi;
+  x = fzi.fogey (0);
+  c = fzi.fogey<char> ('a');
+  e = fzi.fogey<Empty<int>> (e);
+  Foozle<char> fzc;
+  c = fzc.fogey ('b');
+  x = fzc.fogey<int> (0);
+  e = fzc.fogey<Empty<int>> (e);
+  Foozle<Empty<int>> fze;
+  e = fze.fogey (e);
+  c = fze.fogey<char> ('c');
+  x = fze.fogey<int> (0);
+
+  z = e < e;
+  z += e << e;
+  z += fzi < fzi;
+  z += fzi << fzi;
 
   return 0;	/* Final breakpoint.  */
 }

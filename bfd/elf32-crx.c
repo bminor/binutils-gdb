@@ -82,7 +82,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 {
   HOWTO (R_CRX_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -96,7 +96,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 
   HOWTO (R_CRX_REL4,		/* type */
 	 1,			/* rightshift */
-	 0,			/* size */
+	 1,			/* size */
 	 4,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -110,7 +110,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 
   HOWTO (R_CRX_REL8,		/* type */
 	 1,			/* rightshift */
-	 0,			/* size */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -124,7 +124,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 
   HOWTO (R_CRX_REL8_CMP,	/* type */
 	 1,			/* rightshift */
-	 0,			/* size */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -138,7 +138,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 
   HOWTO (R_CRX_REL16,		/* type */
 	 1,			/* rightshift */
-	 1,			/* size */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -152,7 +152,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 
   HOWTO (R_CRX_REL24,		/* type */
 	 1,			/* rightshift */
-	 2,			/* size */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -166,7 +166,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 
   HOWTO (R_CRX_REL32,		/* type */
 	 1,			/* rightshift */
-	 2,			/* size */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -180,7 +180,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 
   HOWTO (R_CRX_REGREL12,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 2,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -194,7 +194,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 
   HOWTO (R_CRX_REGREL22,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size */
+	 4,			/* size */
 	 22,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -208,7 +208,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 
   HOWTO (R_CRX_REGREL28,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size */
+	 4,			/* size */
 	 28,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -222,7 +222,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 
   HOWTO (R_CRX_REGREL32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -236,7 +236,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 
   HOWTO (R_CRX_ABS16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -250,7 +250,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 
   HOWTO (R_CRX_ABS32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -264,7 +264,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 
   HOWTO (R_CRX_NUM8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -278,7 +278,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 
   HOWTO (R_CRX_NUM16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -292,7 +292,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 
   HOWTO (R_CRX_NUM32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -306,7 +306,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 
   HOWTO (R_CRX_IMM16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -320,7 +320,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 
   HOWTO (R_CRX_IMM32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -337,7 +337,7 @@ static reloc_howto_type crx_elf_howto_table[] =
      between the reloc address and L2.  */
   HOWTO (R_CRX_SWITCH8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -354,7 +354,7 @@ static reloc_howto_type crx_elf_howto_table[] =
      between the reloc address and L2.  */
   HOWTO (R_CRX_SWITCH16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -371,7 +371,7 @@ static reloc_howto_type crx_elf_howto_table[] =
      between the reloc address and L2.  */
   HOWTO (R_CRX_SWITCH32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -530,9 +530,9 @@ crx_elf_final_link_relocate (reloc_howto_type *howto, bfd *input_bfd,
   /* Apply dst_mask to select only relocatable part of the insn.  */
   Rvalue &= howto->dst_mask;
 
-  switch (howto->size)
+  switch (bfd_get_reloc_size (howto))
     {
-     case 0:
+     case 1:
        if (r_type == R_CRX_REL4)
 	 {
 	   Rvalue <<= 4;
@@ -542,14 +542,14 @@ crx_elf_final_link_relocate (reloc_howto_type *howto, bfd *input_bfd,
        bfd_put_8 (input_bfd, (unsigned char) Rvalue, hit_data);
        break;
 
-     case 1:
+     case 2:
        if (r_type == R_CRX_REGREL12)
 	 Rvalue |= (bfd_get_16 (input_bfd, hit_data) & 0xf000);
 
        bfd_put_16 (input_bfd, Rvalue, hit_data);
        break;
 
-     case 2:
+     case 4:
        if (r_type == R_CRX_REL24
 	   || r_type == R_CRX_REGREL22
 	   || r_type == R_CRX_REGREL28)

@@ -473,8 +473,8 @@ void   do_scrub_begin (int);
 void   input_scrub_begin (void);
 void   input_scrub_close (void);
 void   input_scrub_end (void);
-int    new_logical_line (const char *, int);
-int    new_logical_line_flags (const char *, int, int);
+void   new_logical_line (const char *, int);
+void   new_logical_line_flags (const char *, int, int);
 void   subsegs_begin (void);
 void   subseg_change (segT, int);
 segT   subseg_new (const char *, subsegT);
@@ -487,7 +487,7 @@ void   register_dependency (const char *);
 void   print_dependencies (void);
 segT   subseg_get (const char *, int);
 
-const char *remap_debug_filename (const char *);
+char *remap_debug_filename (const char *);
 void add_debug_prefix_map (const char *);
 
 static inline char *

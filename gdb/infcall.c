@@ -62,9 +62,9 @@ show_may_call_functions_p (struct ui_file *file, int from_tty,
 			   struct cmd_list_element *c,
 			   const char *value)
 {
-  fprintf_filtered (file,
-		    _("Permission to call functions in the program is %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("Permission to call functions in the program is %s.\n"),
+	      value);
 }
 
 /* How you should pass arguments to a function depends on whether it
@@ -92,10 +92,10 @@ static void
 show_coerce_float_to_double_p (struct ui_file *file, int from_tty,
 			       struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file,
-		    _("Coercion of floats to doubles "
-		      "when calling functions is %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("Coercion of floats to doubles "
+		"when calling functions is %s.\n"),
+	      value);
 }
 
 /* This boolean tells what gdb should do if a signal is received while
@@ -110,10 +110,10 @@ static void
 show_unwind_on_signal_p (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file,
-		    _("Unwinding of stack if a signal is "
-		      "received while in a call dummy is %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("Unwinding of stack if a signal is "
+		"received while in a call dummy is %s.\n"),
+	      value);
 }
 
 /* This boolean tells what gdb should do if a std::terminate call is
@@ -136,10 +136,10 @@ show_unwind_on_terminating_exception_p (struct ui_file *file, int from_tty,
 					const char *value)
 
 {
-  fprintf_filtered (file,
-		    _("Unwind stack if a C++ exception is "
-		      "unhandled while in a call dummy is %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("Unwind stack if a C++ exception is "
+		"unhandled while in a call dummy is %s.\n"),
+	      value);
 }
 
 /* Perform the standard coercions that are specified
@@ -578,21 +578,13 @@ run_inferior_call (std::unique_ptr<call_thread_fsm> sm,
 		   struct thread_info *call_thread, CORE_ADDR real_pc)
 {
   struct gdb_exception caught_error;
-  int saved_in_infcall = call_thread->control.in_infcall;
   ptid_t call_thread_ptid = call_thread->ptid;
-  enum prompt_state saved_prompt_state = current_ui->prompt_state;
   int was_running = call_thread->state == THREAD_RUNNING;
-  int saved_ui_async = current_ui->async;
-
-  /* Infcalls run synchronously, in the foreground.  */
-  current_ui->prompt_state = PROMPT_BLOCKED;
-  /* So that we don't print the prompt prematurely in
-     fetch_inferior_event.  */
-  current_ui->async = 0;
 
   delete_file_handler (current_ui->input_fd);
 
-  call_thread->control.in_infcall = 1;
+  scoped_restore restore_in_infcall
+    = make_scoped_restore (&call_thread->control.in_infcall, 1);
 
   clear_proceed_status (0);
 
@@ -607,6 +599,15 @@ run_inferior_call (std::unique_ptr<call_thread_fsm> sm,
 
   try
     {
+      /* Infcalls run synchronously, in the foreground.  */
+      scoped_restore restore_prompt_state
+	= make_scoped_restore (&current_ui->prompt_state, PROMPT_BLOCKED);
+
+      /* So that we don't print the prompt prematurely in
+	 fetch_inferior_event.  */
+      scoped_restore restore_ui_async
+	= make_scoped_restore (&current_ui->async, 0);
+
       proceed (real_pc, GDB_SIGNAL_0);
 
       /* Inferior function calls are always synchronous, even if the
@@ -622,12 +623,10 @@ run_inferior_call (std::unique_ptr<call_thread_fsm> sm,
      so.  normal_stop calls async_enable_stdin, so reset the prompt
      state again here.  In other cases, stdin will be re-enabled by
      inferior_event_handler, when an exception is thrown.  */
-  current_ui->prompt_state = saved_prompt_state;
   if (current_ui->prompt_state == PROMPT_BLOCKED)
     delete_file_handler (current_ui->input_fd);
   else
     ui_register_input_event_handler (current_ui);
-  current_ui->async = saved_ui_async;
 
   /* If the infcall does NOT succeed, normal_stop will have already
      finished the thread states.  However, on success, normal_stop
@@ -662,8 +661,6 @@ run_inferior_call (std::unique_ptr<call_thread_fsm> sm,
       if (call_thread->state != THREAD_EXITED)
 	breakpoint_auto_delete (call_thread->control.stop_bpstat);
     }
-
-  call_thread->control.in_infcall = saved_in_infcall;
 
   return caught_error;
 }
@@ -811,6 +808,11 @@ call_function_by_hand_dummy (struct value *function,
   type *ftype;
   type *values_type;
   CORE_ADDR funaddr = find_function_addr (function, &values_type, &ftype);
+
+  if (is_nocall_function (ftype))
+    error (_("Cannot call the function '%s' which does not follow the "
+	     "target calling convention."),
+	   get_function_name (funaddr, name_buf, sizeof (name_buf)));
 
   if (values_type == NULL)
     values_type = default_return_type;

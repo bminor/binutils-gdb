@@ -30,11 +30,6 @@
 
 standard_testfile
 
-# What compiler are we using?
-if [get_compiler_info] {
-    return -1
-}
-
 # We intentionally compile the source file in twice.
 if {[prepare_for_testing_full "failed to prepare" \
 	 [list $testfile debug $srcfile {debug additional_flags=-DFIRST} \

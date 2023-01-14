@@ -37,7 +37,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
   /* This reloc does nothing.  */
   HOWTO (R_FR30_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -52,7 +52,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
   /* An 8 bit absolute relocation.  */
   HOWTO (R_FR30_8,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 4,			/* bitpos */
@@ -67,7 +67,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
   /* A 20 bit absolute relocation.  */
   HOWTO (R_FR30_20,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 20,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -82,7 +82,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
   /* A 32 bit absolute relocation.  */
   HOWTO (R_FR30_32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -97,7 +97,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
   /* A 32 bit into 48 bits absolute relocation.  */
   HOWTO (R_FR30_48,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -112,7 +112,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
   /* A 6 bit absolute relocation.  */
   HOWTO (R_FR30_6_IN_4,		/* type */
 	 2,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 6,			/* bitsize */
 	 false,			/* pc_relative */
 	 4,			/* bitpos */
@@ -127,7 +127,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
   /* An 8 bit absolute relocation.  */
   HOWTO (R_FR30_8_IN_8,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 4,			/* bitpos */
@@ -142,7 +142,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
   /* A 9 bit absolute relocation.  */
   HOWTO (R_FR30_9_IN_8,		/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 9,			/* bitsize */
 	 false,			/* pc_relative */
 	 4,			/* bitpos */
@@ -157,7 +157,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
   /* A 10 bit absolute relocation.  */
   HOWTO (R_FR30_10_IN_8,	/* type */
 	 2,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 10,			/* bitsize */
 	 false,			/* pc_relative */
 	 4,			/* bitpos */
@@ -172,7 +172,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
   /* A PC relative 9 bit relocation, right shifted by 1.  */
   HOWTO (R_FR30_9_PCREL,	/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 9,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -187,7 +187,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
   /* A PC relative 12 bit relocation, right shifted by 1.  */
   HOWTO (R_FR30_12_PCREL,	/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 12,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -201,7 +201,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
   /* GNU extension to record C++ vtable hierarchy */
   HOWTO (R_FR30_GNU_VTINHERIT, /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -216,7 +216,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
   /* GNU extension to record C++ vtable member usage */
   HOWTO (R_FR30_GNU_VTENTRY,	 /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

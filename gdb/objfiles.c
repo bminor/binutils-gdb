@@ -331,7 +331,7 @@ objfile::objfile (bfd *abfd, const char *name, objfile_flags flags_)
 
   objfile_alloc_data (this);
 
-  gdb::unique_xmalloc_ptr<char> name_holder;
+  std::string name_holder;
   if (name == NULL)
     {
       gdb_assert (abfd == NULL);
@@ -344,7 +344,7 @@ objfile::objfile (bfd *abfd, const char *name, objfile_flags flags_)
   else
     {
       name_holder = gdb_abspath (name);
-      expanded_name = name_holder.get ();
+      expanded_name = name_holder.c_str ();
     }
   original_name = obstack_strdup (&objfile_obstack, expanded_name);
 
@@ -468,9 +468,7 @@ objfile::make (bfd *bfd_, const char *name_, objfile_flags flags_,
   if (parent != nullptr)
     add_separate_debug_objfile (result, parent);
 
-  /* Using std::make_shared might be a bit nicer here, but that would
-     require making the constructor public.  */
-  current_program_space->add_objfile (std::shared_ptr<objfile> (result),
+  current_program_space->add_objfile (std::unique_ptr<objfile> (result),
 				      parent);
 
   /* Rebuild section map next time we need it.  */
@@ -591,7 +589,7 @@ objfile::~objfile ()
   {
     struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
-    if (cursal.symtab && cursal.symtab->objfile () == this)
+    if (cursal.symtab && cursal.symtab->compunit ()->objfile () == this)
       clear_current_source_symtab_and_line ();
   }
 
@@ -619,11 +617,8 @@ relocate_one_symbol (struct symbol *sym, struct objfile *objfile,
   if ((sym->aclass () == LOC_LABEL
        || sym->aclass () == LOC_STATIC)
       && sym->section_index () >= 0)
-    {
-      SET_SYMBOL_VALUE_ADDRESS (sym,
-				SYMBOL_VALUE_ADDRESS (sym)
-				+ delta[sym->section_index ()]);
-    }
+    sym->set_value_address (sym->value_address ()
+			    + delta[sym->section_index ()]);
 }
 
 /* Relocate OBJFILE to NEW_OFFSETS.  There should be OBJFILE->NUM_SECTIONS
@@ -667,32 +662,29 @@ objfile_relocate1 (struct objfile *objfile,
 
     for (compunit_symtab *cust : objfile->compunits ())
       {
-	const struct blockvector *bv = cust->blockvector ();
+	struct blockvector *bv = cust->blockvector ();
 	int block_line_section = cust->block_line_section ();
 
-	if (BLOCKVECTOR_MAP (bv))
-	  addrmap_relocate (BLOCKVECTOR_MAP (bv), delta[block_line_section]);
+	if (bv->map () != nullptr)
+	  bv->map ()->relocate (delta[block_line_section]);
 
-	for (int i = 0; i < BLOCKVECTOR_NBLOCKS (bv); ++i)
+	for (block *b : bv->blocks ())
 	  {
-	    struct block *b;
 	    struct symbol *sym;
 	    struct mdict_iterator miter;
 
-	    b = BLOCKVECTOR_BLOCK (bv, i);
-	    BLOCK_START (b) += delta[block_line_section];
-	    BLOCK_END (b) += delta[block_line_section];
+	    b->set_start (b->start () + delta[block_line_section]);
+	    b->set_end (b->end () + delta[block_line_section]);
 
-	    if (BLOCK_RANGES (b) != nullptr)
-	      for (int j = 0; j < BLOCK_NRANGES (b); j++)
-		{
-		  BLOCK_RANGE_START (b, j) += delta[block_line_section];
-		  BLOCK_RANGE_END (b, j) += delta[block_line_section];
-		}
+	    for (blockrange &r : b->ranges ())
+	      {
+		r.set_start (r.start () + delta[block_line_section]);
+		r.set_end (r.end () + delta[block_line_section]);
+	      }
 
 	    /* We only want to iterate over the local symbols, not any
 	       symbols in included symtabs.  */
-	    ALL_DICT_SYMBOLS (BLOCK_MULTIDICT (b), miter, sym)
+	    ALL_DICT_SYMBOLS (b->multidict (), miter, sym)
 	      {
 		relocate_one_symbol (sym, objfile, delta);
 	      }
@@ -994,7 +986,7 @@ preferred_obj_section (struct obj_section *a, struct obj_section *b)
 }
 
 /* Return 1 if SECTION should be inserted into the section map.
-   We want to insert only non-overlay and non-TLS section.  */
+   We want to insert only non-overlay non-TLS non-empty sections.  */
 
 static int
 insert_section_p (const struct bfd *abfd,
@@ -1011,6 +1003,12 @@ insert_section_p (const struct bfd *abfd,
   if ((bfd_section_flags (section) & SEC_THREAD_LOCAL) != 0)
     /* This is a TLS section.  */
     return 0;
+  if (bfd_section_size (section) == 0)
+    {
+      /* This is an empty section.  It has no PCs for find_pc_section (), so
+	 there is no reason to insert it into the section map.  */
+      return 0;
+    }
 
   return 1;
 }
@@ -1321,18 +1319,12 @@ shared_objfile_contains_address_p (struct program_space *pspace,
 
 void
 default_iterate_over_objfiles_in_search_order
-  (struct gdbarch *gdbarch,
-   iterate_over_objfiles_in_search_order_cb_ftype *cb,
-   void *cb_data, struct objfile *current_objfile)
+  (gdbarch *gdbarch, iterate_over_objfiles_in_search_order_cb_ftype cb,
+   objfile *current_objfile)
 {
-  int stop = 0;
-
   for (objfile *objfile : current_program_space->objfiles ())
-    {
-       stop = cb (objfile, cb_data);
-       if (stop)
-	 return;
-    }
+    if (cb (objfile))
+	return;
 }
 
 /* See objfiles.h.  */

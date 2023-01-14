@@ -17,13 +17,9 @@
 # This file was written by Sue Kimura (sue_kimura@hp.com)
 # Rewritten by Michael Chastain (mec.gnu@mindspring.com)
 
-if { [skip_stl_tests] } { continue }
+if { [skip_stl_tests] } { return }
 
 standard_testfile .cc
-
-if [get_compiler_info] {
-    return -1
-}
 
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
     return -1
@@ -31,7 +27,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 # Set breakpoint on template function

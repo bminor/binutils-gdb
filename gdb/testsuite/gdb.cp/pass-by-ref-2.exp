@@ -27,7 +27,7 @@
 
 if {[skip_cplus_tests]} {
     untested "c++ test skipped"
-    continue
+    return
 }
 
 standard_testfile .cc

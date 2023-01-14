@@ -496,14 +496,14 @@ print_command_trace (const char *fmt, ...)
     return;
 
   for (i=0; i < command_nest_depth; i++)
-    printf_filtered ("+");
+    gdb_printf ("+");
 
   va_list args;
 
   va_start (args, fmt);
-  vprintf_filtered (fmt, args);
+  gdb_vprintf (fmt, args);
   va_end (args);
-  puts_filtered ("\n");
+  gdb_puts ("\n");
 }
 
 /* Helper for execute_control_command.  */
@@ -1647,15 +1647,15 @@ show_user_1 (struct cmd_list_element *c, const char *prefix, const char *name,
     {
       struct command_line *cmdlines = c->user_commands.get ();
 
-      fprintf_filtered (stream, "User %scommand \"",
-			c->is_prefix () ? "prefix" : "");
+      gdb_printf (stream, "User %scommand \"",
+		  c->is_prefix () ? "prefix" : "");
       fprintf_styled (stream, title_style.style (), "%s%s",
 		      prefix, name);
-      fprintf_filtered (stream, "\":\n");
+      gdb_printf (stream, "\":\n");
       if (cmdlines)
 	{
 	  print_command_lines (current_uiout, cmdlines, 1);
-	  fputs_filtered ("\n", stream);
+	  gdb_puts ("\n", stream);
 	}
     }
 

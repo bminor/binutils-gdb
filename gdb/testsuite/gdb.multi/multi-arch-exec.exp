@@ -62,8 +62,8 @@ proc append_arch2_options {options_var} {
     upvar 1 $options_var options
 
     if { [istarget "aarch64*-*-*"] } {
-	if {[info exists ARM_CC_FOR_TARGET]} {
-	    lappend options "compiler=${ARM_CC_FOR_TARGET}"
+	if {[arm_cc_for_target] != ""} {
+	    lappend options "compiler=[arm_cc_for_target]"
 	    return 1
 	} else {
 	    unsupported "ARM compiler is not known"

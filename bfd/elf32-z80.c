@@ -50,7 +50,7 @@ bfd_howto_type elf_z80_howto_table[] =
   BFD_HOWTO (BFD_RELOC_NONE,
 	 R_Z80_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -66,7 +66,7 @@ bfd_howto_type elf_z80_howto_table[] =
   BFD_HOWTO (BFD_RELOC_8,
 	 R_Z80_8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -82,7 +82,7 @@ bfd_howto_type elf_z80_howto_table[] =
   BFD_HOWTO (BFD_RELOC_Z80_DISP8,
 	 R_Z80_8_DIS,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -98,7 +98,7 @@ bfd_howto_type elf_z80_howto_table[] =
   BFD_HOWTO (BFD_RELOC_8_PCREL,
 	 R_Z80_8_PCREL,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -114,7 +114,7 @@ bfd_howto_type elf_z80_howto_table[] =
   BFD_HOWTO (BFD_RELOC_16,
 	 R_Z80_16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -130,7 +130,7 @@ bfd_howto_type elf_z80_howto_table[] =
   BFD_HOWTO (BFD_RELOC_24,
 	 R_Z80_24,		/* type */
 	 0,			/* rightshift */
-	 5,			/* size (0 = byte, 1 = short, 2 = long) */
+	 3,			/* size */
 	 24,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -145,7 +145,7 @@ bfd_howto_type elf_z80_howto_table[] =
   BFD_HOWTO (BFD_RELOC_32,
 	 R_Z80_32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -161,7 +161,7 @@ bfd_howto_type elf_z80_howto_table[] =
   BFD_HOWTO (BFD_RELOC_Z80_BYTE0,
 	 R_Z80_BYTE0,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -177,7 +177,7 @@ bfd_howto_type elf_z80_howto_table[] =
   BFD_HOWTO (BFD_RELOC_Z80_BYTE1,
 	 R_Z80_BYTE1,		/* type */
 	 8,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -193,7 +193,7 @@ bfd_howto_type elf_z80_howto_table[] =
   BFD_HOWTO (BFD_RELOC_Z80_BYTE2,
 	 R_Z80_BYTE2,		/* type */
 	 16,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -209,7 +209,7 @@ bfd_howto_type elf_z80_howto_table[] =
   BFD_HOWTO (BFD_RELOC_Z80_BYTE3,
 	 R_Z80_BYTE3,		/* type */
 	 24,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -225,7 +225,7 @@ bfd_howto_type elf_z80_howto_table[] =
   BFD_HOWTO (BFD_RELOC_Z80_WORD0,
 	 R_Z80_WORD0,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -241,7 +241,7 @@ bfd_howto_type elf_z80_howto_table[] =
   BFD_HOWTO (BFD_RELOC_Z80_WORD1,
 	 R_Z80_WORD1,		/* type */
 	 16,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -257,7 +257,7 @@ bfd_howto_type elf_z80_howto_table[] =
   BFD_HOWTO (BFD_RELOC_Z80_16_BE,
 	 R_Z80_16_BE,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

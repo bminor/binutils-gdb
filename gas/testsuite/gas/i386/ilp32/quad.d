@@ -5,7 +5,7 @@
 .*: +file format .*
 
 RELOCATION RECORDS FOR \[.data\]:
-OFFSET +TYPE +VALUE 
+OFFSET +TYPE +VALUE
 0+ R_X86_64_64 +foo
 0+10 R_X86_64_64 +bar
 0+20 R_X86_64_64 +foo

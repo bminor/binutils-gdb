@@ -55,7 +55,7 @@ Disassembly of section \.text:
 .*:	(14 5a 60 7d|7d 60 5a 14) 	add     r11,r0,r11
 .*:	(d4 ff 0c 38|38 0c ff d4) 	addi    r0,r12,-44
 .*:	(00 00 8b e9|e9 8b 00 00) 	ld      r12,0\(r11\)
-.*:	(82 f0 00 78|78 00 f0 82) 	rldicl  r0,r0,62,2
+.*:	(82 f0 00 78|78 00 f0 82) 	srdi    r0,r0,2
 .*:	(a6 03 89 7d|7d 89 03 a6) 	mtctr   r12
 .*:	(08 00 6b e9|e9 6b 00 08) 	ld      r11,8\(r11\)
 .*:	(20 04 80 4e|4e 80 04 20) 	bctr

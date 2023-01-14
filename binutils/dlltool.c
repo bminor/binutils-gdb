@@ -1268,7 +1268,7 @@ run (const char *what, char *args)
   int pid, wait_status;
   int i;
   const char **argv;
-  char *errmsg_fmt, *errmsg_arg;
+  char *errmsg_fmt = NULL, *errmsg_arg = NULL;
   char *temp_base = choose_temp_base ();
 
   inform (_("run: %s %s"), what, args);
@@ -3992,10 +3992,11 @@ main (int ac, char **av)
   if (tmp_prefix == NULL)
     {
       /* If possible use a deterministic prefix.  */
-      if (dll_name)
+      if (imp_name || delayimp_name)
         {
-          tmp_prefix = xmalloc (strlen (dll_name) + 2);
-          sprintf (tmp_prefix, "%s_", dll_name);
+          const char *input = imp_name ? imp_name : delayimp_name;
+          tmp_prefix = xmalloc (strlen (input) + 2);
+          sprintf (tmp_prefix, "%s_", input);
           for (i = 0; tmp_prefix[i]; i++)
             if (!ISALNUM (tmp_prefix[i]))
               tmp_prefix[i] = '_';

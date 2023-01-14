@@ -128,8 +128,7 @@ cmdpy_function (const char *args, int from_tty, cmd_list_element *command)
       error (_("Could not convert arguments to Python string."));
     }
 
-  gdbpy_ref<> ttyobj
-    = gdbpy_ref<>::new_reference (from_tty ? Py_True : Py_False);
+  gdbpy_ref<> ttyobj (PyBool_FromLong (from_tty));
   gdbpy_ref<> result (PyObject_CallMethodObjArgs ((PyObject *) obj, invoke_cst,
 						  argobj.get (), ttyobj.get (),
 						  NULL));
@@ -233,7 +232,7 @@ cmdpy_completer_handle_brkchars (struct cmd_list_element *command,
   if (resultobj == NULL)
     return;
 
-  if (PyInt_Check (resultobj.get ()))
+  if (PyLong_Check (resultobj.get ()))
     {
       /* User code may also return one of the completion constants,
 	 thus requesting that sort of completion.  We are only
@@ -277,7 +276,7 @@ cmdpy_completer (struct cmd_list_element *command,
   if (resultobj == NULL)
     return;
 
-  if (PyInt_Check (resultobj.get ()))
+  if (PyLong_Check (resultobj.get ()))
     {
       /* User code may also return one of the completion constants,
 	 thus requesting that sort of completion.  */
@@ -430,7 +429,6 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
   const char *name;
   int cmdtype;
   int completetype = -1;
-  char *docstring = NULL;
   struct cmd_list_element **cmd_list;
   static const char *keywords[] = { "name", "command_class", "completer_class",
 				    "prefix", NULL };
@@ -484,19 +482,21 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
       is_prefix = cmp > 0;
     }
 
+  gdb::unique_xmalloc_ptr<char> docstring = nullptr;
   if (PyObject_HasAttr (self, gdbpy_doc_cst))
     {
       gdbpy_ref<> ds_obj (PyObject_GetAttr (self, gdbpy_doc_cst));
 
       if (ds_obj != NULL && gdbpy_is_string (ds_obj.get ()))
 	{
-	  docstring = python_string_to_host_string (ds_obj.get ()).release ();
-	  if (docstring == NULL)
+	  docstring = python_string_to_host_string (ds_obj.get ());
+	  if (docstring == nullptr)
 	    return -1;
+	  docstring = gdbpy_fix_doc_string_indentation (std::move (docstring));
 	}
     }
-  if (! docstring)
-    docstring = xstrdup (_("This command is not documented."));
+  if (docstring == nullptr)
+    docstring = make_unique_xstrdup (_("This command is not documented."));
 
   gdbpy_ref<> self_ref = gdbpy_ref<>::new_reference (self);
 
@@ -513,12 +513,12 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 	  allow_unknown = PyObject_HasAttr (self, invoke_cst);
 	  cmd = add_prefix_cmd (cmd_name.get (),
 				(enum command_class) cmdtype,
-				NULL, docstring, &obj->sub_list,
+				NULL, docstring.release (), &obj->sub_list,
 				allow_unknown, cmd_list);
 	}
       else
 	cmd = add_cmd (cmd_name.get (), (enum command_class) cmdtype,
-		       docstring, cmd_list);
+		       docstring.release (), cmd_list);
 
       /* If successful, the above takes ownership of the name, since we set
          name_allocated, so release it.  */
@@ -540,7 +540,6 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
     }
   catch (const gdb_exception &except)
     {
-      xfree (docstring);
       gdbpy_convert_exception (except);
       return -1;
     }
@@ -592,10 +591,10 @@ gdbpy_initialize_commands (void)
 			      (PyObject *) &cmdpy_object_type) < 0)
     return -1;
 
-  invoke_cst = PyString_FromString ("invoke");
+  invoke_cst = PyUnicode_FromString ("invoke");
   if (invoke_cst == NULL)
     return -1;
-  complete_cst = PyString_FromString ("complete");
+  complete_cst = PyUnicode_FromString ("complete");
   if (complete_cst == NULL)
     return -1;
 
@@ -684,7 +683,7 @@ gdbpy_string_to_argv (PyObject *self, PyObject *args)
 
       for (char *arg : c_argv)
 	{
-	  gdbpy_ref<> argp (PyString_FromString (arg));
+	  gdbpy_ref<> argp (PyUnicode_FromString (arg));
 
 	  if (argp == NULL
 	      || PyList_Append (py_argv.get (), argp.get ()) < 0)

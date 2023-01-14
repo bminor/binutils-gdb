@@ -895,7 +895,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* This reloc does nothing.  */
   HOWTO (R_V850_NONE,			/* Type.  */
 	 0,				/* Rightshift.  */
-	 3,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 0,				/* Size.  */
 	 0,				/* Bitsize.  */
 	 false,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -910,7 +910,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* A PC relative 9 bit branch.  */
   HOWTO (R_V850_9_PCREL,		/* Type.  */
 	 0,				/* Rightshift.  */
-	 1,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,				/* Size.  */
 	 9,				/* Bitsize.  */
 	 true,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -925,7 +925,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* A PC relative 22 bit branch.  */
   HOWTO (R_V850_22_PCREL,		/* Type.  */
 	 0,				/* Rightshift.  */
-	 2,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,				/* Size.  */
 	 22,				/* Bitsize.  */
 	 true,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -940,7 +940,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* High 16 bits of symbol value.  */
   HOWTO (R_V850_HI16_S,			/* Type.  */
 	 0,				/* Rightshift.  */
-	 1,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,				/* Size.  */
 	 16,				/* Bitsize.  */
 	 false,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -955,7 +955,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* High 16 bits of symbol value.  */
   HOWTO (R_V850_HI16,			/* Type.  */
 	 0,				/* Rightshift.  */
-	 1,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,				/* Size.  */
 	 16,				/* Bitsize.  */
 	 false,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -970,7 +970,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* Low 16 bits of symbol value.  */
   HOWTO (R_V850_LO16,			/* Type.  */
 	 0,				/* Rightshift.  */
-	 1,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,				/* Size.  */
 	 16,				/* Bitsize.  */
 	 false,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -985,7 +985,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* Simple 32bit reloc.  */
   HOWTO (R_V850_ABS32,			/* Type.  */
 	 0,				/* Rightshift.  */
-	 2,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,				/* Size.  */
 	 32,				/* Bitsize.  */
 	 false,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -1000,7 +1000,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* Simple 16bit reloc.  */
   HOWTO (R_V850_16,			/* Type.  */
 	 0,				/* Rightshift.  */
-	 1,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,				/* Size.  */
 	 16,				/* Bitsize.  */
 	 false,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -1015,7 +1015,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* Simple 8bit reloc.  */
   HOWTO (R_V850_8,			/* Type.  */
 	 0,				/* Rightshift.  */
-	 0,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 1,				/* Size.  */
 	 8,				/* Bitsize.  */
 	 false,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -1030,7 +1030,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* 16 bit offset from the short data area pointer.  */
   HOWTO (R_V850_SDA_16_16_OFFSET,	/* Type.  */
 	 0,				/* Rightshift.  */
-	 1,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,				/* Size.  */
 	 16,				/* Bitsize.  */
 	 false,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -1045,7 +1045,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* 15 bit offset from the short data area pointer.  */
   HOWTO (R_V850_SDA_15_16_OFFSET,	/* Type.  */
 	 1,				/* Rightshift.  */
-	 1,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,				/* Size.  */
 	 16,				/* Bitsize.  */
 	 false,				/* PC_relative.  */
 	 1,				/* Bitpos.  */
@@ -1060,7 +1060,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* 16 bit offset from the zero data area pointer.  */
   HOWTO (R_V850_ZDA_16_16_OFFSET,	/* Type.  */
 	 0,				/* Rightshift.  */
-	 1,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,				/* Size.  */
 	 16,				/* Bitsize.  */
 	 false,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -1075,7 +1075,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* 15 bit offset from the zero data area pointer.  */
   HOWTO (R_V850_ZDA_15_16_OFFSET,	/* Type.  */
 	 1,				/* Rightshift.  */
-	 1,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,				/* Size.  */
 	 16,				/* Bitsize.  */
 	 false,				/* PC_relative.  */
 	 1,				/* Bitpos.  */
@@ -1090,7 +1090,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* 6 bit offset from the tiny data area pointer.  */
   HOWTO (R_V850_TDA_6_8_OFFSET,		/* Type.  */
 	 2,				/* Rightshift.  */
-	 1,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,				/* Size.  */
 	 8,				/* Bitsize.  */
 	 false,				/* PC_relative.  */
 	 1,				/* Bitpos.  */
@@ -1105,7 +1105,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* 8 bit offset from the tiny data area pointer.  */
   HOWTO (R_V850_TDA_7_8_OFFSET,		/* Type.  */
 	 1,				/* Rightshift.  */
-	 1,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,				/* Size.  */
 	 8,				/* Bitsize.  */
 	 false,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -1120,7 +1120,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* 7 bit offset from the tiny data area pointer.  */
   HOWTO (R_V850_TDA_7_7_OFFSET,		/* Type.  */
 	 0,				/* Rightshift.  */
-	 1,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,				/* Size.  */
 	 7,				/* Bitsize.  */
 	 false,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -1135,7 +1135,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* 16 bit offset from the tiny data area pointer!  */
   HOWTO (R_V850_TDA_16_16_OFFSET,	/* Type.  */
 	 0,				/* Rightshift.  */
-	 1,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,				/* Size.  */
 	 16,				/* Bitsize.  */
 	 false,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -1150,7 +1150,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* 5 bit offset from the tiny data area pointer.  */
   HOWTO (R_V850_TDA_4_5_OFFSET,		/* Type.  */
 	 1,				/* Rightshift.  */
-	 1,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,				/* Size.  */
 	 5,				/* Bitsize.  */
 	 false,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -1165,7 +1165,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* 4 bit offset from the tiny data area pointer.  */
   HOWTO (R_V850_TDA_4_4_OFFSET,		/* Type.  */
 	 0,				/* Rightshift.  */
-	 1,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,				/* Size.  */
 	 4,				/* Bitsize.  */
 	 false,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -1180,7 +1180,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* 16 bit offset from the short data area pointer.  */
   HOWTO (R_V850_SDA_16_16_SPLIT_OFFSET,	/* Type.  */
 	 0,				/* Rightshift.  */
-	 2,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,				/* Size.  */
 	 16,				/* Bitsize.  */
 	 false,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -1195,7 +1195,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* 16 bit offset from the zero data area pointer.  */
   HOWTO (R_V850_ZDA_16_16_SPLIT_OFFSET,	/* Type.  */
 	 0,				/* Rightshift.  */
-	 2,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,				/* Size.  */
 	 16,				/* Bitsize.  */
 	 false,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -1210,7 +1210,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* 6 bit offset from the call table base pointer.  */
   HOWTO (R_V850_CALLT_6_7_OFFSET,	/* Type.  */
 	 0,				/* Rightshift.  */
-	 1,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,				/* Size.  */
 	 7,				/* Bitsize.  */
 	 false,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -1225,7 +1225,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* 16 bit offset from the call table base pointer.  */
   HOWTO (R_V850_CALLT_16_16_OFFSET,	/* Type.  */
 	 0,				/* Rightshift.  */
-	 1,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,				/* Size.  */
 	 16,				/* Bitsize.  */
 	 false,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -1241,7 +1241,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* GNU extension to record C++ vtable hierarchy */
   HOWTO (R_V850_GNU_VTINHERIT, /* Type.  */
 	 0,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 0,			/* Bitsize.  */
 	 false,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -1256,7 +1256,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* GNU extension to record C++ vtable member usage.  */
   HOWTO (R_V850_GNU_VTENTRY,	 /* Type.  */
 	 0,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 0,			/* Bitsize.  */
 	 false,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -1272,7 +1272,7 @@ static reloc_howto_type v850_elf_howto_table[] =
      pseudo-op when it finds a function call which can be relaxed.  */
   HOWTO (R_V850_LONGCALL,     /* Type.  */
 	 0,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 32,			/* Bitsize.  */
 	 true,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -1288,7 +1288,7 @@ static reloc_howto_type v850_elf_howto_table[] =
      .longjump pseudo-op when it finds a branch which can be relaxed.  */
   HOWTO (R_V850_LONGJUMP,     /* Type.  */
 	 0,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 32,			/* Bitsize.  */
 	 true,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -1302,7 +1302,7 @@ static reloc_howto_type v850_elf_howto_table[] =
 
   HOWTO (R_V850_ALIGN,	      /* Type.  */
 	 0,			/* Rightshift.  */
-	 1,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* Size.  */
 	 0,			/* Bitsize.  */
 	 false,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -1317,7 +1317,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* Simple pc-relative 32bit reloc.  */
   HOWTO (R_V850_REL32,			/* Type.  */
 	 0,				/* Rightshift.  */
-	 2,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,				/* Size.  */
 	 32,				/* Bitsize.  */
 	 true,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -1332,7 +1332,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* An ld.bu version of R_V850_LO16.  */
   HOWTO (R_V850_LO16_SPLIT_OFFSET,	/* Type.  */
 	 0,				/* Rightshift.  */
-	 2,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,				/* Size.  */
 	 16,				/* Bitsize.  */
 	 false,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -1347,7 +1347,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* A unsigned PC relative 16 bit loop.  */
   HOWTO (R_V850_16_PCREL,		/* Type.  */
 	 0,				/* Rightshift.  */
-	 1,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,				/* Size.  */
 	 16,				/* Bitsize.  */
 	 true,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -1362,7 +1362,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* A PC relative 17 bit branch.  */
   HOWTO (R_V850_17_PCREL,		/* Type.  */
 	 0,				/* Rightshift.  */
-	 2,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,				/* Size.  */
 	 17,				/* Bitsize.  */
 	 true,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -1377,7 +1377,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* A 23bit offset ld/st.  */
   HOWTO (R_V850_23,			/* type.  */
 	 0,				/* rightshift.  */
-	 2,				/* size (0 = byte, 1 = short, 2 = long).  */
+	 4,				/* size.  */
 	 23,				/* bitsize.  */
 	 false,				/* pc_relative.  */
 	 0,				/* bitpos.  */
@@ -1392,7 +1392,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* A PC relative 32 bit branch.  */
   HOWTO (R_V850_32_PCREL,		/* type.  */
 	 1,				/* rightshift.  */
-	 2,				/* size (0 = byte, 1 = short, 2 = long).  */
+	 4,				/* size.  */
 	 32,				/* bitsize.  */
 	 true,				/* pc_relative.  */
 	 1,				/* bitpos.  */
@@ -1407,7 +1407,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* A absolute 32 bit branch.  */
   HOWTO (R_V850_32_ABS,			/* type.  */
 	 1,				/* rightshift.  */
-	 2,				/* size (0 = byte, 1 = short, 2 = long).  */
+	 4,				/* size.  */
 	 32,				/* bitsize.  */
 	 true,				/* pc_relative.  */
 	 1,				/* bitpos.  */
@@ -1422,7 +1422,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* High 16 bits of symbol value.  */
   HOWTO (R_V850_HI16,			/* Type.  */
 	 0,				/* Rightshift.  */
-	 1,				/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,				/* Size.  */
 	 16,				/* Bitsize.  */
 	 false,				/* PC_relative.  */
 	 0,				/* Bitpos.  */
@@ -1437,7 +1437,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* Low 16 bits of symbol value.  */
   HOWTO (R_V850_16_S1,			/* type.  */
 	 1,				/* rightshift.  */
-	 1,				/* size (0 = byte, 1 = short, 2 = long).  */
+	 2,				/* size.  */
 	 16,				/* bitsize.  */
 	 false,				/* pc_relative.  */
 	 1,				/* bitpos.  */
@@ -1452,7 +1452,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* Low 16 bits of symbol value.  */
   HOWTO (R_V850_LO16_S1,		/* type.  */
 	 1,				/* rightshift.  */
-	 1,				/* size (0 = byte, 1 = short, 2 = long).  */
+	 2,				/* size.  */
 	 16,				/* bitsize.  */
 	 false,				/* pc_relative.  */
 	 1,				/* bitpos.  */
@@ -1467,7 +1467,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* 16 bit offset from the call table base pointer.  */
   HOWTO (R_V850_CALLT_15_16_OFFSET,	/* type.  */
 	 1,				/* rightshift.  */
-	 1,				/* size (0 = byte, 1 = short, 2 = long).  */
+	 2,				/* size.  */
 	 16,				/* bitsize.  */
 	 false,				/* pc_relative.  */
 	 1,				/* bitpos.  */
@@ -1483,7 +1483,7 @@ static reloc_howto_type v850_elf_howto_table[] =
      the symbol.  */
   HOWTO (R_V850_32_GOTPCREL,		/* type.  */
 	 0,				/* rightshift.  */
-	 2,				/* size (0 = byte, 1 = short, 2 = long).  */
+	 4,				/* size.  */
 	 32,				/* bitsize.  */
 	 true,				/* pc_relative.  */
 	 0,				/* bitpos.  */
@@ -1499,7 +1499,7 @@ static reloc_howto_type v850_elf_howto_table[] =
      the symbol.  */
   HOWTO (R_V850_16_GOT,			/* type.  */
 	 0,				/* rightshift.  */
-	 2,				/* size (0 = byte, 1 = short, 2 = long).  */
+	 4,				/* size.  */
 	 16,				/* bitsize.  */
 	 false,				/* pc_relative.  */
 	 0,				/* bitpos.  */
@@ -1513,7 +1513,7 @@ static reloc_howto_type v850_elf_howto_table[] =
 
   HOWTO (R_V850_32_GOT,			/* type.  */
 	 0,				/* rightshift.  */
-	 2,				/* size (0 = byte, 1 = short, 2 = long).  */
+	 4,				/* size.  */
 	 32,				/* bitsize.  */
 	 false,				/* pc_relative.  */
 	 0,				/* bitpos.  */
@@ -1529,7 +1529,7 @@ static reloc_howto_type v850_elf_howto_table[] =
      entry for the symbol.  */
   HOWTO (R_V850_22_PLT,			/* type.  */
 	 1,				/* rightshift.  */
-	 2,				/* size (0 = byte, 1 = short, 2 = long).  */
+	 4,				/* size.  */
 	 22,				/* bitsize.  */
 	 true,				/* pc_relative.  */
 	 7,				/* bitpos.  */
@@ -1543,7 +1543,7 @@ static reloc_howto_type v850_elf_howto_table[] =
 
   HOWTO (R_V850_32_PLT,			/* type.  */
 	 1,				/* rightshift.  */
-	 2,				/* size (0 = byte, 1 = short, 2 = long).  */
+	 4,				/* size.  */
 	 32,				/* bitsize.  */
 	 true,				/* pc_relative.  */
 	 1,				/* bitpos.  */
@@ -1562,7 +1562,7 @@ static reloc_howto_type v850_elf_howto_table[] =
      run has to have the data at some particular address.  */
   HOWTO (R_V850_COPY,			/* type.  */
 	 0,				/* rightshift.  */
-	 2,				/* size (0 = byte, 1 = short, 2 = long).  */
+	 4,				/* size.  */
 	 32,				/* bitsize.  */
 	 false,				/* pc_relative.  */
 	 0,				/* bitpos.  */
@@ -1578,7 +1578,7 @@ static reloc_howto_type v850_elf_howto_table[] =
      entries.  */
   HOWTO (R_V850_GLOB_DAT,		/* type.  */
 	 0,				/* rightshift.  */
-	 2,				/* size (0 = byte, 1 = short, 2 = long) */
+	 4,				/* size */
 	 32,				/* bitsize.  */
 	 false,				/* pc_relative.  */
 	 0,				/* bitpos.  */
@@ -1593,7 +1593,7 @@ static reloc_howto_type v850_elf_howto_table[] =
   /* Marks a procedure linkage table entry for a symbol.  */
   HOWTO (R_V850_JMP_SLOT,		/* type.  */
 	 0,				/* rightshift.  */
-	 2,				/* size (0 = byte, 1 = short, 2 = long) */
+	 4,				/* size */
 	 32,				/* bitsize.  */
 	 false,				/* pc_relative.  */
 	 0,				/* bitpos.  */
@@ -1610,7 +1610,7 @@ static reloc_howto_type v850_elf_howto_table[] =
      addend.  */
   HOWTO (R_V850_RELATIVE,		/* type.  */
 	 0,				/* rightshift.  */
-	 2,				/* size (0 = byte, 1 = short, 2 = long) */
+	 4,				/* size */
 	 32,				/* bitsize.  */
 	 false,				/* pc_relative.  */
 	 0,				/* bitpos.  */
@@ -1624,7 +1624,7 @@ static reloc_howto_type v850_elf_howto_table[] =
 
   HOWTO (R_V850_16_GOTOFF,		/* type.  */
 	 0,				/* rightshift.  */
-	 2,				/* size (0 = byte, 1 = short, 2 = long) */
+	 4,				/* size */
 	 16,				/* bitsize.  */
 	 false,				/* pc_relative.  */
 	 0,				/* bitpos.  */
@@ -1638,7 +1638,7 @@ static reloc_howto_type v850_elf_howto_table[] =
 
   HOWTO (R_V850_32_GOTOFF,		/* type.  */
 	 0,				/* rightshift.  */
-	 2,				/* size (0 = byte, 1 = short, 2 = long) */
+	 4,				/* size */
 	 32,				/* bitsize.  */
 	 false,				/* pc_relative.  */
 	 0,				/* bitpos.  */
@@ -1652,7 +1652,7 @@ static reloc_howto_type v850_elf_howto_table[] =
 
   HOWTO (R_V850_CODE,			/* type.  */
 	 0,				/* rightshift.  */
-	 1,				/* size (0 = byte, 1 = short, 2 = long) */
+	 2,				/* size */
 	 0,				/* bitsize.  */
 	 false,				/* pc_relative.  */
 	 0,				/* bitpos.  */
@@ -1666,7 +1666,7 @@ static reloc_howto_type v850_elf_howto_table[] =
 
   HOWTO (R_V850_DATA,			/* type.  */
 	 0,				/* rightshift.  */
-	 1,				/* size (0 = byte, 1 = short, 2 = long) */
+	 2,				/* size */
 	 0,				/* bitsize.  */
 	 false,				/* pc_relative.  */
 	 0,				/* bitpos.  */
@@ -1762,91 +1762,91 @@ static const struct v850_elf_reloc_map v850_elf_reloc_map[] =
 static reloc_howto_type v800_elf_howto_table[] =
 {
   V800_RELOC (R_V810_NONE,      0,  0, 0, dont,     false, generic),	/* Type = 0x30 */
-  V800_RELOC (R_V810_BYTE,      0,  8, 0, dont,     false, generic),
-  V800_RELOC (R_V810_HWORD,     1, 16, 0, dont,     false, generic),
-  V800_RELOC (R_V810_WORD,      2, 32, 0, dont,     false, generic),
-  V800_RELOC (R_V810_WLO,       1, 16, 0, dont,     false, generic),
-  V800_RELOC (R_V810_WHI,       1, 16, 0, dont,     false, generic),
-  V800_RELOC (R_V810_WHI1,      1, 16, 0, dont,     false, generic),
-  V800_RELOC (R_V810_GPBYTE,    0,  8, 0, dont,     false, v850),
-  V800_RELOC (R_V810_GPHWORD,   1, 16, 0, dont,     false, v850),
-  V800_RELOC (R_V810_GPWORD,    2, 32, 0, dont,     false, v850),
-  V800_RELOC (R_V810_GPWLO,     1, 16, 0, dont,     false, v850),
-  V800_RELOC (R_V810_GPWHI,     1, 16, 0, dont,     false, v850),
-  V800_RELOC (R_V810_GPWHI1,    1, 16, 0, dont,     false, v850),
-  V800_RELOC (R_V850_HWLO,      1, 16, 0, dont,     false, generic),
+  V800_RELOC (R_V810_BYTE,      1,  8, 0, dont,     false, generic),
+  V800_RELOC (R_V810_HWORD,     2, 16, 0, dont,     false, generic),
+  V800_RELOC (R_V810_WORD,      4, 32, 0, dont,     false, generic),
+  V800_RELOC (R_V810_WLO,       2, 16, 0, dont,     false, generic),
+  V800_RELOC (R_V810_WHI,       2, 16, 0, dont,     false, generic),
+  V800_RELOC (R_V810_WHI1,      2, 16, 0, dont,     false, generic),
+  V800_RELOC (R_V810_GPBYTE,    1,  8, 0, dont,     false, v850),
+  V800_RELOC (R_V810_GPHWORD,   2, 16, 0, dont,     false, v850),
+  V800_RELOC (R_V810_GPWORD,    4, 32, 0, dont,     false, v850),
+  V800_RELOC (R_V810_GPWLO,     2, 16, 0, dont,     false, v850),
+  V800_RELOC (R_V810_GPWHI,     2, 16, 0, dont,     false, v850),
+  V800_RELOC (R_V810_GPWHI1,    2, 16, 0, dont,     false, v850),
+  V800_RELOC (R_V850_HWLO,      2, 16, 0, dont,     false, generic),
   V800_EMPTY (R_V810_reserved1),
-  V800_RELOC (R_V850_EP7BIT,    0,  7, 0, unsigned, false, v850),
-  V800_RELOC (R_V850_EPHBYTE,   0,  8, 1, unsigned, false, v850),
-  V800_RELOC (R_V850_EPWBYTE,   0,  8, 2, unsigned, false, v850),
-  V800_RELOC (R_V850_REGHWLO,   1, 16, 0, dont,     false, v850),
+  V800_RELOC (R_V850_EP7BIT,    1,  7, 0, unsigned, false, v850),
+  V800_RELOC (R_V850_EPHBYTE,   1,  8, 1, unsigned, false, v850),
+  V800_RELOC (R_V850_EPWBYTE,   1,  8, 2, unsigned, false, v850),
+  V800_RELOC (R_V850_REGHWLO,   2, 16, 0, dont,     false, v850),
   V800_EMPTY (R_V810_reserved2),
-  V800_RELOC (R_V850_GPHWLO,    1, 16, 0, dont,     false, v850),
+  V800_RELOC (R_V850_GPHWLO,    2, 16, 0, dont,     false, v850),
   V800_EMPTY (R_V810_reserved3),
-  V800_RELOC (R_V850_PCR22,     2, 22, 0, signed,   true,  generic),
-  V800_RELOC (R_V850_BLO,       2, 24, 0, dont,     false, v850),
-  V800_RELOC (R_V850_EP4BIT,    0,  4, 0, unsigned, false, v850),
-  V800_RELOC (R_V850_EP5BIT,    0,  5, 0, unsigned, false, v850),
-  V800_RELOC (R_V850_REGBLO,    2, 24, 0, dont,     false, v850),
-  V800_RELOC (R_V850_GPBLO,     2, 24, 0, dont,     false, v850),
-  V800_RELOC (R_V810_WLO_1,     1, 16, 0, dont,     false, v850),
-  V800_RELOC (R_V810_GPWLO_1,   1, 16, 0, signed,   false, v850),
-  V800_RELOC (R_V850_BLO_1,     2, 16, 0, signed,   false, v850),
-  V800_RELOC (R_V850_HWLO_1,    1, 16, 0, signed,   false, v850),
+  V800_RELOC (R_V850_PCR22,     4, 22, 0, signed,   true,  generic),
+  V800_RELOC (R_V850_BLO,       4, 24, 0, dont,     false, v850),
+  V800_RELOC (R_V850_EP4BIT,    1,  4, 0, unsigned, false, v850),
+  V800_RELOC (R_V850_EP5BIT,    1,  5, 0, unsigned, false, v850),
+  V800_RELOC (R_V850_REGBLO,    4, 24, 0, dont,     false, v850),
+  V800_RELOC (R_V850_GPBLO,     4, 24, 0, dont,     false, v850),
+  V800_RELOC (R_V810_WLO_1,     2, 16, 0, dont,     false, v850),
+  V800_RELOC (R_V810_GPWLO_1,   2, 16, 0, signed,   false, v850),
+  V800_RELOC (R_V850_BLO_1,     4, 16, 0, signed,   false, v850),
+  V800_RELOC (R_V850_HWLO_1,    2, 16, 0, signed,   false, v850),
   V800_EMPTY  (R_V810_reserved4),
-  V800_RELOC (R_V850_GPBLO_1,   2, 16, 1, signed,   false, v850),
-  V800_RELOC (R_V850_GPHWLO_1,  1, 16, 1, signed,   false, v850),
+  V800_RELOC (R_V850_GPBLO_1,   4, 16, 1, signed,   false, v850),
+  V800_RELOC (R_V850_GPHWLO_1,  2, 16, 1, signed,   false, v850),
   V800_EMPTY (R_V810_reserved5),
-  V800_RELOC (R_V850_EPBLO,     2, 16, 1, signed,   false, v850),
-  V800_RELOC (R_V850_EPHWLO,    1, 16, 1, signed,   false, v850),
+  V800_RELOC (R_V850_EPBLO,     4, 16, 1, signed,   false, v850),
+  V800_RELOC (R_V850_EPHWLO,    2, 16, 1, signed,   false, v850),
   V800_EMPTY (R_V810_reserved6),
-  V800_RELOC (R_V850_EPWLO_N,   1, 16, 1, signed,   false, v850),
-  V800_RELOC (R_V850_PC32,      2, 32, 1, signed,   true,  v850),
-  V800_RELOC (R_V850_W23BIT,    2, 23, 1, signed,   false, v850),
-  V800_RELOC (R_V850_GPW23BIT,  2, 23, 1, signed,   false, v850),
-  V800_RELOC (R_V850_EPW23BIT,  2, 23, 1, signed,   false, v850),
-  V800_RELOC (R_V850_B23BIT,    2, 23, 1, signed,   false, v850),
-  V800_RELOC (R_V850_GPB23BIT,  2, 23, 1, signed,   false, v850),
-  V800_RELOC (R_V850_EPB23BIT,  2, 23, 1, signed,   false, v850),
-  V800_RELOC (R_V850_PC16U,     1, 16, 1, unsigned, true,  generic),
-  V800_RELOC (R_V850_PC17,      2, 17, 1, signed,   true,  generic),
-  V800_RELOC (R_V850_DW8,       2,  8, 2, signed,   false, v850),
-  V800_RELOC (R_V850_GPDW8,     2,  8, 2, signed,   false, v850),
-  V800_RELOC (R_V850_EPDW8,     2,  8, 2, signed,   false, v850),
-  V800_RELOC (R_V850_PC9,       1,  9, 3, signed,   true,  v850),
-  V800_RELOC (R_V810_REGBYTE,   0,  8, 0, dont,     false, v850),
-  V800_RELOC (R_V810_REGHWORD,  1, 16, 0, dont,     false, v850),
-  V800_RELOC (R_V810_REGWORD,   2, 32, 0, dont,     false, v850),
-  V800_RELOC (R_V810_REGWLO,    1, 16, 0, dont,     false, v850),
-  V800_RELOC (R_V810_REGWHI,    1, 16, 0, dont,     false, v850),
-  V800_RELOC (R_V810_REGWHI1,   1, 16, 0, dont,     false, v850),
-  V800_RELOC (R_V850_REGW23BIT, 2, 23, 1, signed,   false, v850),
-  V800_RELOC (R_V850_REGB23BIT, 2, 23, 1, signed,   false, v850),
-  V800_RELOC (R_V850_REGDW8,    2,  8, 2, signed,   false, v850),
-  V800_RELOC (R_V810_EPBYTE,    0,  8, 0, dont,     false, v850),
-  V800_RELOC (R_V810_EPHWORD,   1, 16, 0, dont,     false, v850),
-  V800_RELOC (R_V810_EPWORD,    2, 32, 0, dont,     false, v850),
-  V800_RELOC (R_V850_WLO23,     2, 32, 1, dont,     false, v850),
-  V800_RELOC (R_V850_WORD_E,    2, 32, 1, dont,     false, v850),
-  V800_RELOC (R_V850_REGWORD_E, 2, 32, 1, dont,     false, v850),
-  V800_RELOC (R_V850_WORD,      2, 32, 0, dont,     false, v850),
-  V800_RELOC (R_V850_GPWORD,    2, 32, 0, dont,     false, v850),
-  V800_RELOC (R_V850_REGWORD,   2, 32, 0, dont,     false, v850),
-  V800_RELOC (R_V850_EPWORD,    2, 32, 0, dont,     false, v850),
-  V800_RELOC (R_V810_TPBYTE,    0,  8, 0, dont,     false, v850),
-  V800_RELOC (R_V810_TPHWORD,   1, 16, 0, dont,     false, v850),
-  V800_RELOC (R_V810_TPWORD,    2, 32, 0, dont,     false, v850),
-  V800_RELOC (R_V810_TPWLO,     1, 16, 0, dont,     false, v850),
-  V800_RELOC (R_V810_TPWHI,     1, 16, 0, dont,     false, v850),
-  V800_RELOC (R_V810_TPWHI1,    1, 16, 0, dont,     false, v850),
-  V800_RELOC (R_V850_TPHWLO,    1, 16, 1, dont,     false, v850),
-  V800_RELOC (R_V850_TPBLO,     2, 24, 0, dont,     false, v850),
-  V800_RELOC (R_V810_TPWLO_1,   1, 16, 0, signed,   false, v850),
-  V800_RELOC (R_V850_TPBLO_1,   2, 16, 0, signed,   false, v850),
-  V800_RELOC (R_V850_TPHWLO_1,  1, 16, 0, signed,   false, v850),
-  V800_RELOC (R_V850_TP23BIT,   2, 23, 0, signed,   false, v850),
-  V800_RELOC (R_V850_TPW23BIT,  2, 23, 0, signed,   false, v850),
-  V800_RELOC (R_V850_TPDW8,     2,  8, 0, signed,   false, v850)
+  V800_RELOC (R_V850_EPWLO_N,   2, 16, 1, signed,   false, v850),
+  V800_RELOC (R_V850_PC32,      4, 32, 1, signed,   true,  v850),
+  V800_RELOC (R_V850_W23BIT,    4, 23, 1, signed,   false, v850),
+  V800_RELOC (R_V850_GPW23BIT,  4, 23, 1, signed,   false, v850),
+  V800_RELOC (R_V850_EPW23BIT,  4, 23, 1, signed,   false, v850),
+  V800_RELOC (R_V850_B23BIT,    4, 23, 1, signed,   false, v850),
+  V800_RELOC (R_V850_GPB23BIT,  4, 23, 1, signed,   false, v850),
+  V800_RELOC (R_V850_EPB23BIT,  4, 23, 1, signed,   false, v850),
+  V800_RELOC (R_V850_PC16U,     2, 16, 1, unsigned, true,  generic),
+  V800_RELOC (R_V850_PC17,      4, 17, 1, signed,   true,  generic),
+  V800_RELOC (R_V850_DW8,       4,  8, 2, signed,   false, v850),
+  V800_RELOC (R_V850_GPDW8,     4,  8, 2, signed,   false, v850),
+  V800_RELOC (R_V850_EPDW8,     4,  8, 2, signed,   false, v850),
+  V800_RELOC (R_V850_PC9,       2,  9, 3, signed,   true,  v850),
+  V800_RELOC (R_V810_REGBYTE,   1,  8, 0, dont,     false, v850),
+  V800_RELOC (R_V810_REGHWORD,  2, 16, 0, dont,     false, v850),
+  V800_RELOC (R_V810_REGWORD,   4, 32, 0, dont,     false, v850),
+  V800_RELOC (R_V810_REGWLO,    2, 16, 0, dont,     false, v850),
+  V800_RELOC (R_V810_REGWHI,    2, 16, 0, dont,     false, v850),
+  V800_RELOC (R_V810_REGWHI1,   2, 16, 0, dont,     false, v850),
+  V800_RELOC (R_V850_REGW23BIT, 4, 23, 1, signed,   false, v850),
+  V800_RELOC (R_V850_REGB23BIT, 4, 23, 1, signed,   false, v850),
+  V800_RELOC (R_V850_REGDW8,    4,  8, 2, signed,   false, v850),
+  V800_RELOC (R_V810_EPBYTE,    1,  8, 0, dont,     false, v850),
+  V800_RELOC (R_V810_EPHWORD,   2, 16, 0, dont,     false, v850),
+  V800_RELOC (R_V810_EPWORD,    4, 32, 0, dont,     false, v850),
+  V800_RELOC (R_V850_WLO23,     4, 32, 1, dont,     false, v850),
+  V800_RELOC (R_V850_WORD_E,    4, 32, 1, dont,     false, v850),
+  V800_RELOC (R_V850_REGWORD_E, 4, 32, 1, dont,     false, v850),
+  V800_RELOC (R_V850_WORD,      4, 32, 0, dont,     false, v850),
+  V800_RELOC (R_V850_GPWORD,    4, 32, 0, dont,     false, v850),
+  V800_RELOC (R_V850_REGWORD,   4, 32, 0, dont,     false, v850),
+  V800_RELOC (R_V850_EPWORD,    4, 32, 0, dont,     false, v850),
+  V800_RELOC (R_V810_TPBYTE,    1,  8, 0, dont,     false, v850),
+  V800_RELOC (R_V810_TPHWORD,   2, 16, 0, dont,     false, v850),
+  V800_RELOC (R_V810_TPWORD,    4, 32, 0, dont,     false, v850),
+  V800_RELOC (R_V810_TPWLO,     2, 16, 0, dont,     false, v850),
+  V800_RELOC (R_V810_TPWHI,     2, 16, 0, dont,     false, v850),
+  V800_RELOC (R_V810_TPWHI1,    2, 16, 0, dont,     false, v850),
+  V800_RELOC (R_V850_TPHWLO,    2, 16, 1, dont,     false, v850),
+  V800_RELOC (R_V850_TPBLO,     4, 24, 0, dont,     false, v850),
+  V800_RELOC (R_V810_TPWLO_1,   2, 16, 0, signed,   false, v850),
+  V800_RELOC (R_V850_TPBLO_1,   4, 16, 0, signed,   false, v850),
+  V800_RELOC (R_V850_TPHWLO_1,  2, 16, 0, signed,   false, v850),
+  V800_RELOC (R_V850_TP23BIT,   4, 23, 0, signed,   false, v850),
+  V800_RELOC (R_V850_TPW23BIT,  4, 23, 0, signed,   false, v850),
+  V800_RELOC (R_V850_TPDW8,     4,  8, 0, signed,   false, v850)
 };
 
 /* Map a bfd relocation into the appropriate howto structure.  */
@@ -2414,7 +2414,7 @@ v850_elf_create_sections (struct bfd_link_info * info)
 }
 
 bool
-v850_elf_set_note (bfd * abfd, enum v850_notes note, unsigned int val)
+v850_elf_set_note (bfd * abfd, unsigned int note, unsigned int val)
 {
   asection * notes = bfd_get_section_by_name (abfd, V850_NOTE_SECNAME);
 

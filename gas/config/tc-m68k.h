@@ -18,6 +18,9 @@
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
+#ifndef TC_M68K_H
+#define TC_M68K_H
+
 #define TC_M68K 1
 
 struct fix;
@@ -139,3 +142,17 @@ struct broken_word;
   tc_m68k_check_adjusted_broken_word ((offsetT) (new_offset), (brokw))
 extern void tc_m68k_check_adjusted_broken_word (offsetT,
 						struct broken_word *);
+
+/* We want to warn if any text labels are misaligned.  In order to get
+   the right line number, we need to record the line number for each
+   label.  */
+struct m68k_tc_sy
+{
+  const char *file;
+  unsigned int line;
+  int text;
+};
+
+#define TC_SYMFIELD_TYPE struct m68k_tc_sy
+
+#endif /* TC_M68K_H */

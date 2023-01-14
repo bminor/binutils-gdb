@@ -32,10 +32,6 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      return -1
     }
 
-if [get_compiler_info] {
-    return -1
-}
-
 clean_restart ${binfile}
 
 
@@ -45,8 +41,12 @@ clean_restart ${binfile}
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
+
+# These are used as expected result values.
+set false 0
+set true 1
 
 gdb_test "next " "more_code.*;" "continuing after dummy()"
 
@@ -209,7 +209,7 @@ gdb_test "print **ptr_to_ptr_to_float" " = 100" \
 
 gdb_test "break marker1" ".*" ""
 gdb_test "cont" "Break.* marker1 \\(\\) at .*:$decimal.*" \
-    continue to marker1"
+    "continue to marker1"
 gdb_test "up" "more_code.*" "up from marker1"
 
 gdb_test "print *pUC" " = 21 \'.025\'.*" "print value of *pUC"

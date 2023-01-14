@@ -21,7 +21,7 @@
 
 if [target_info exists gdb,nosignals] {
     verbose "Skipping because of nosignals."
-    continue
+    return
 }
 
 # This test requires sending ^C to interrupt the running target.

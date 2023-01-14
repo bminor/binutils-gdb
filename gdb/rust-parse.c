@@ -33,12 +33,6 @@
 
 using namespace expr;
 
-#if WORDS_BIGENDIAN
-#define UTF32 "UTF-32BE"
-#else
-#define UTF32 "UTF-32LE"
-#endif
-
 /* A regular expression for matching Rust numbers.  This is split up
    since it is very long and this gives us a way to comment the
    sections.  */
@@ -277,7 +271,10 @@ struct rust_parser
   operation_up parse_entry_point ()
   {
     lex ();
-    return parse_expr ();
+    operation_up result = parse_expr ();
+    if (current_token != 0)
+      error (_("Syntax error near '%s'"), pstate->prev_lexptr);
+    return result;
   }
 
   operation_up parse_tuple ();
@@ -601,7 +598,8 @@ lex_multibyte_char (const char *text, int *len)
     return 0;
 
   auto_obstack result;
-  convert_between_encodings (host_charset (), UTF32, (const gdb_byte *) text,
+  convert_between_encodings (host_charset (), HOST_UTF32,
+			     (const gdb_byte *) text,
 			     quote, 1, &result, translit_none);
 
   int size = obstack_object_size (&result);
@@ -732,7 +730,8 @@ rust_parser::lex_string ()
 	  if (is_byte)
 	    obstack_1grow (&obstack, value);
 	  else
-	    convert_between_encodings (UTF32, "UTF-8", (gdb_byte *) &value,
+	    convert_between_encodings (HOST_UTF32, "UTF-8",
+				       (gdb_byte *) &value,
 				       sizeof (value), sizeof (value),
 				       &obstack, translit_none);
 	}
@@ -1025,7 +1024,10 @@ rust_parser::lex_number ()
 	    }
 	}
 
-      value = strtoulst (number.c_str () + offset, NULL, radix);
+      const char *trailer;
+      value = strtoulst (number.c_str () + offset, &trailer, radix);
+      if (*trailer != '\0')
+	error (_("Integer literal is too large"));
       if (implicit_i32 && value >= ((uint64_t) 1) << 31)
 	type = get_type ("i64");
 
@@ -2024,6 +2026,7 @@ rust_parser::parse_atom (bool required)
 
     case STRING:
       result = parse_string ();
+      lex ();
       break;
 
     case BYTESTRING:

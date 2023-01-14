@@ -175,7 +175,7 @@ const CGEN_HW_ENTRY bpf_cgen_hw_table[] =
   { "h-uint", HW_H_UINT, CGEN_ASM_NONE, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xf0" } } } } },
   { "h-addr", HW_H_ADDR, CGEN_ASM_NONE, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xf0" } } } } },
   { "h-iaddr", HW_H_IADDR, CGEN_ASM_NONE, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xf0" } } } } },
-  { "h-gpr", HW_H_GPR, CGEN_ASM_KEYWORD, (PTR) & bpf_cgen_opval_h_gpr, { 0, { { { (1<<MACH_BPF)|(1<<MACH_XBPF), 0 } }, { { 1, "\xf0" } } } } },
+  { "h-gpr", HW_H_GPR, CGEN_ASM_KEYWORD, & bpf_cgen_opval_h_gpr, { 0, { { { (1<<MACH_BPF)|(1<<MACH_XBPF), 0 } }, { { 1, "\xf0" } } } } },
   { "h-pc", HW_H_PC, CGEN_ASM_NONE, 0, { 0|A(PROFILE)|A(PC), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xf0" } } } } },
   { "h-sint64", HW_H_SINT64, CGEN_ASM_NONE, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xf0" } } } } },
   { 0, 0, CGEN_ASM_NONE, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } } }
@@ -224,10 +224,10 @@ const CGEN_MAYBE_MULTI_IFLD BPF_F_IMM64_MULTI_IFIELD [];
 
 const CGEN_MAYBE_MULTI_IFLD BPF_F_IMM64_MULTI_IFIELD [] =
 {
-    { 0, { (const PTR) &bpf_cgen_ifld_table[BPF_F_IMM64_A] } },
-    { 0, { (const PTR) &bpf_cgen_ifld_table[BPF_F_IMM64_B] } },
-    { 0, { (const PTR) &bpf_cgen_ifld_table[BPF_F_IMM64_C] } },
-    { 0, { (const PTR) 0 } }
+    { 0, { &bpf_cgen_ifld_table[BPF_F_IMM64_A] } },
+    { 0, { &bpf_cgen_ifld_table[BPF_F_IMM64_B] } },
+    { 0, { &bpf_cgen_ifld_table[BPF_F_IMM64_C] } },
+    { 0, { 0 } }
 };
 
 /* The operand table.  */
@@ -239,51 +239,51 @@ const CGEN_OPERAND bpf_cgen_operand_table[] =
 {
 /* pc: program counter */
   { "pc", BPF_OPERAND_PC, HW_H_PC, 0, 0,
-    { 0, { (const PTR) &bpf_cgen_ifld_table[BPF_F_NIL] } },
+    { 0, { &bpf_cgen_ifld_table[BPF_F_NIL] } },
     { 0|A(SEM_ONLY), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xf0" } } } }  },
 /* dstle: destination register */
   { "dstle", BPF_OPERAND_DSTLE, HW_H_GPR, 3, 4,
-    { 0, { (const PTR) &bpf_cgen_ifld_table[BPF_F_DSTLE] } },
+    { 0, { &bpf_cgen_ifld_table[BPF_F_DSTLE] } },
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }  },
 /* srcle: source register */
   { "srcle", BPF_OPERAND_SRCLE, HW_H_GPR, 7, 4,
-    { 0, { (const PTR) &bpf_cgen_ifld_table[BPF_F_SRCLE] } },
+    { 0, { &bpf_cgen_ifld_table[BPF_F_SRCLE] } },
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }  },
 /* dstbe: destination register */
   { "dstbe", BPF_OPERAND_DSTBE, HW_H_GPR, 7, 4,
-    { 0, { (const PTR) &bpf_cgen_ifld_table[BPF_F_DSTBE] } },
+    { 0, { &bpf_cgen_ifld_table[BPF_F_DSTBE] } },
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x50" } } } }  },
 /* srcbe: source register */
   { "srcbe", BPF_OPERAND_SRCBE, HW_H_GPR, 3, 4,
-    { 0, { (const PTR) &bpf_cgen_ifld_table[BPF_F_SRCBE] } },
+    { 0, { &bpf_cgen_ifld_table[BPF_F_SRCBE] } },
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x50" } } } }  },
 /* disp16: 16-bit PC-relative address */
   { "disp16", BPF_OPERAND_DISP16, HW_H_SINT, 15, 16,
-    { 0, { (const PTR) &bpf_cgen_ifld_table[BPF_F_OFFSET16] } },
+    { 0, { &bpf_cgen_ifld_table[BPF_F_OFFSET16] } },
     { 0|A(PCREL_ADDR), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xf0" } } } }  },
 /* disp32: 32-bit PC-relative address */
   { "disp32", BPF_OPERAND_DISP32, HW_H_SINT, 31, 32,
-    { 0, { (const PTR) &bpf_cgen_ifld_table[BPF_F_IMM32] } },
+    { 0, { &bpf_cgen_ifld_table[BPF_F_IMM32] } },
     { 0|A(PCREL_ADDR), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xf0" } } } }  },
 /* imm32: 32-bit immediate */
   { "imm32", BPF_OPERAND_IMM32, HW_H_SINT, 31, 32,
-    { 0, { (const PTR) &bpf_cgen_ifld_table[BPF_F_IMM32] } },
+    { 0, { &bpf_cgen_ifld_table[BPF_F_IMM32] } },
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xf0" } } } }  },
 /* offset16: 16-bit offset */
   { "offset16", BPF_OPERAND_OFFSET16, HW_H_SINT, 15, 16,
-    { 0, { (const PTR) &bpf_cgen_ifld_table[BPF_F_OFFSET16] } },
+    { 0, { &bpf_cgen_ifld_table[BPF_F_OFFSET16] } },
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xf0" } } } }  },
 /* imm64: 64-bit immediate */
   { "imm64", BPF_OPERAND_IMM64, HW_H_SINT64, 31, 96,
-    { 3, { (const PTR) &BPF_F_IMM64_MULTI_IFIELD[0] } },
+    { 3, { &BPF_F_IMM64_MULTI_IFIELD[0] } },
     { 0|A(VIRTUAL), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xf0" } } } }  },
 /* endsize: endianness size immediate: 16, 32 or 64 */
   { "endsize", BPF_OPERAND_ENDSIZE, HW_H_UINT, 31, 32,
-    { 0, { (const PTR) &bpf_cgen_ifld_table[BPF_F_IMM32] } },
+    { 0, { &bpf_cgen_ifld_table[BPF_F_IMM32] } },
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xf0" } } } }  },
 /* sentinel */
   { 0, 0, 0, 0, 0,
-    { 0, { (const PTR) 0 } },
+    { 0, { 0 } },
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } } }
 };
 

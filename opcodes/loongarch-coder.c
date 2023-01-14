@@ -106,11 +106,13 @@ loongarch_decode_imm (const char *bit_field, insn_t insn, int si)
   else if (*bit_field_1 == '+')
     ret += atoi (bit_field_1 + 1);
 
+  /* Extend signed bit.  */
   if (si)
     {
-      ret <<= sizeof (ret) * 8 - len;
-      ret >>= sizeof (ret) * 8 - len;
+      uint32_t sign = 1u << (len - 1);
+      ret = (ret ^ sign) - sign;
     }
+
   return ret;
 }
 
@@ -133,7 +135,8 @@ loongarch_encode_imm (const char *bit_field, int32_t imm)
   else if (*t == '+')
     uimm -= atoi (t + 1);
 
-  uimm <<= sizeof (uimm) * 8 - width;
+  uimm = width ? (uimm << (sizeof (uimm) * 8 - width)) : 0;
+
   while (1)
     {
       b_start = strtol (bit_field_1, &bit_field_1, 10);
@@ -141,10 +144,10 @@ loongarch_encode_imm (const char *bit_field, int32_t imm)
 	break;
       width = strtol (bit_field_1 + 1, &bit_field_1, 10);
       i = uimm;
-      i >>= sizeof (i) * 8 - width;
-      i <<= b_start;
+      i = width ? (i >> (sizeof (i) * 8 - width)) : 0;
+      i = (b_start == 32) ? 0 : (i << b_start);
       ret |= i;
-      uimm <<= width;
+      uimm = (width == 32) ? 0 : (uimm << width);
 
       if (*bit_field_1 != '|')
 	break;
@@ -375,13 +378,18 @@ char *
 loongarch_expand_macro_with_format_map (
   const char *format, const char *macro, const char *const arg_strs[],
   const char *(*map) (char esc1, char esc2, const char *arg),
-  char *(*helper) (const char *const arg_strs[], void *context), void *context)
+  char *(*helper) (const char *const arg_strs[], void *context), void *context,
+  size_t len_str)
 {
   char esc1s[MAX_ARG_NUM_PLUS_2 - 1], esc2s[MAX_ARG_NUM_PLUS_2 - 1];
   const char *bit_fields[MAX_ARG_NUM_PLUS_2 - 1];
   const char *src;
   char *dest;
-  char buffer[8192];
+
+  /* The expanded macro character length does not exceed 1000, and number of
+     label is 6 at most in the expanded macro. The len_str is the length of
+     str.  */
+  char *buffer =(char *) malloc(1024 +  6 * len_str);
 
   if (format)
     loongarch_parse_format (format, esc1s, esc2s, bit_fields);
@@ -419,17 +427,17 @@ loongarch_expand_macro_with_format_map (
       *dest++ = *src++;
 
   *dest = '\0';
-  return strdup (buffer);
+  return buffer;
 }
 
 char *
 loongarch_expand_macro (const char *macro, const char *const arg_strs[],
 			char *(*helper) (const char *const arg_strs[],
 					 void *context),
-			void *context)
+			void *context, size_t len_str)
 {
   return loongarch_expand_macro_with_format_map (NULL, macro, arg_strs, I,
-						 helper, context);
+						 helper, context, len_str);
 }
 
 size_t

@@ -1982,6 +1982,7 @@ static void
 s_aarch64_inst (int ignored ATTRIBUTE_UNUSED)
 {
   expressionS exp;
+  unsigned n = 0;
 
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
@@ -2020,9 +2021,12 @@ s_aarch64_inst (int ignored ATTRIBUTE_UNUSED)
 	  unsigned int val = exp.X_add_number;
 	  exp.X_add_number = SWAP_32 (val);
 	}
-      emit_expr (&exp, 4);
+      emit_expr (&exp, INSN_SIZE);
+      ++n;
     }
   while (*input_line_pointer++ == ',');
+
+  dwarf2_emit_insn (n * INSN_SIZE);
 
   /* Put terminator back into stream.  */
   input_line_pointer--;
@@ -3076,7 +3080,7 @@ aarch64_force_reloc (unsigned int type)
     case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_LO12_NC:
       /* Pseudo relocs that need to be fixed up according to
 	 ilp32_p.  */
-      return 0;
+      return 1;
 
     case BFD_RELOC_AARCH64_ADD_LO12:
     case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
@@ -3093,6 +3097,7 @@ aarch64_force_reloc (unsigned int type)
     case BFD_RELOC_AARCH64_LDST32_LO12:
     case BFD_RELOC_AARCH64_LDST64_LO12:
     case BFD_RELOC_AARCH64_LDST8_LO12:
+    case BFD_RELOC_AARCH64_LDST_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21:
@@ -3126,6 +3131,8 @@ aarch64_force_reloc (unsigned int type)
     case BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1:
@@ -3139,6 +3146,8 @@ aarch64_force_reloc (unsigned int type)
     case BFD_RELOC_AARCH64_TLSLE_LDST64_TPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLE_LDST_TPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLE_LDST_TPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
@@ -3648,7 +3657,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 
 	  /* #:<reloc_op>:  */
 	  if (! aarch64_get_expression (exp, &p, GE_NO_PREFIX, REJECT_ABSENT,
-					aarch64_force_reloc (entry->add_type) == 1))
+					aarch64_force_reloc (ty) == 1))
 	    {
 	      set_syntax_error (_("invalid relocation expression"));
 	      return false;
@@ -3772,7 +3781,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	         the name in the assembler source.  Next, we parse the
 	         expression.  */
 	      if (! aarch64_get_expression (exp, &p, GE_NO_PREFIX, REJECT_ABSENT,
-					    aarch64_force_reloc (entry->add_type) == 1))
+					    aarch64_force_reloc (entry->ldst_type) == 1))
 		{
 		  set_syntax_error (_("invalid relocation expression"));
 		  return false;
@@ -5349,6 +5358,7 @@ print_operands (char *buf, const aarch64_opcode *opcode,
   for (i = 0; i < AARCH64_MAX_OPND_NUM; ++i)
     {
       char str[128];
+      char cmt[128];
 
       /* We regard the opcode operand info more, however we also look into
 	 the inst->operands to support the disassembling of the optional
@@ -5361,7 +5371,7 @@ print_operands (char *buf, const aarch64_opcode *opcode,
 
       /* Generate the operand string in STR.  */
       aarch64_print_operand (str, sizeof (str), 0, opcode, opnds, i, NULL, NULL,
-			     NULL, cpu_variant);
+			     NULL, cmt, sizeof (cmt), cpu_variant);
 
       /* Delimiter.  */
       if (str[0] != '\0')
@@ -5369,6 +5379,15 @@ print_operands (char *buf, const aarch64_opcode *opcode,
 
       /* Append the operand string.  */
       strcat (buf, str);
+
+      /* Append a comment.  This works because only the last operand ever
+	 adds a comment.  If that ever changes then we'll need to be
+	 smarter here.  */
+      if (cmt[0] != '\0')
+	{
+	  strcat (buf, "\t// ");
+	  strcat (buf, cmt);
+	}
     }
 }
 
@@ -10465,17 +10484,17 @@ aarch64_elf_copy_symbol_attributes (symbolS *dest, symbolS *src)
 {
   struct elf_obj_sy *srcelf = symbol_get_obj (src);
   struct elf_obj_sy *destelf = symbol_get_obj (dest);
-  if (srcelf->size)
+  /* If size is unset, copy size from src.  Because we don't track whether
+     .size has been used, we can't differentiate .size dest, 0 from the case
+     where dest's size is unset.  */
+  if (!destelf->size && S_GET_SIZE (dest) == 0)
     {
-      if (destelf->size == NULL)
-	destelf->size = XNEW (expressionS);
-      *destelf->size = *srcelf->size;
+      if (srcelf->size)
+	{
+	  destelf->size = XNEW (expressionS);
+	  *destelf->size = *srcelf->size;
+	}
+      S_SET_SIZE (dest, S_GET_SIZE (src));
     }
-  else
-    {
-      free (destelf->size);
-      destelf->size = NULL;
-    }
-  S_SET_SIZE (dest, S_GET_SIZE (src));
 }
 #endif

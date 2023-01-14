@@ -77,23 +77,12 @@ extern "C" {
 #define BFD_DEFAULT_TARGET_SIZE @bfd_default_target_size@
 
 #define BFD_HOST_64BIT_LONG @BFD_HOST_64BIT_LONG@
-#define BFD_HOST_64BIT_LONG_LONG @BFD_HOST_64BIT_LONG_LONG@
-#if @BFD_HOST_64_BIT_DEFINED@
-#define BFD_HOST_64_BIT @BFD_HOST_64_BIT@
-#define BFD_HOST_U_64_BIT @BFD_HOST_U_64_BIT@
-typedef BFD_HOST_64_BIT bfd_int64_t;
-typedef BFD_HOST_U_64_BIT bfd_uint64_t;
-#endif
 
 #include <inttypes.h>
 
 #if BFD_ARCH_SIZE >= 64
 #define BFD64
 #endif
-
-/* Declaring a type wide enough to hold a host long and a host pointer.  */
-#define BFD_HOSTPTR_T @BFD_HOSTPTR_T@
-typedef BFD_HOSTPTR_T bfd_hostptr_t;
 
 /* Forward declaration.  */
 typedef struct bfd bfd;
@@ -119,14 +108,10 @@ typedef struct bfd bfd;
 
 #ifdef BFD64
 
-#ifndef BFD_HOST_64_BIT
- #error No 64 bit integer type available
-#endif /* ! defined (BFD_HOST_64_BIT) */
-
-typedef BFD_HOST_U_64_BIT bfd_vma;
-typedef BFD_HOST_64_BIT bfd_signed_vma;
-typedef BFD_HOST_U_64_BIT bfd_size_type;
-typedef BFD_HOST_U_64_BIT symvalue;
+typedef uint64_t bfd_vma;
+typedef int64_t bfd_signed_vma;
+typedef uint64_t bfd_size_type;
+typedef uint64_t symvalue;
 
 #if BFD_HOST_64BIT_LONG
 #define BFD_VMA_FMT "l"
@@ -167,19 +152,10 @@ typedef unsigned long bfd_size_type;
 #define HALF_BFD_SIZE_TYPE \
   (((bfd_size_type) 1) << (8 * sizeof (bfd_size_type) / 2))
 
-#ifndef BFD_HOST_64_BIT
-/* Fall back on a 32 bit type.  The idea is to make these types always
-   available for function return types, but in the case that
-   BFD_HOST_64_BIT is undefined such a function should abort or
-   otherwise signal an error.  */
-typedef bfd_signed_vma bfd_int64_t;
-typedef bfd_vma bfd_uint64_t;
-#endif
-
 /* An offset into a file.  BFD always uses the largest possible offset
    based on the build time availability of fseek, fseeko, or fseeko64.  */
 typedef @bfd_file_ptr@ file_ptr;
-typedef unsigned @bfd_file_ptr@ ufile_ptr;
+typedef @bfd_ufile_ptr@ ufile_ptr;
 
 extern void bfd_sprintf_vma (bfd *, char *, bfd_vma);
 extern void bfd_fprintf_vma (bfd *, void *, bfd_vma);
@@ -454,10 +430,10 @@ extern bool bfd_record_phdr
 
 /* Byte swapping routines.  */
 
-bfd_uint64_t bfd_getb64 (const void *);
-bfd_uint64_t bfd_getl64 (const void *);
-bfd_int64_t bfd_getb_signed_64 (const void *);
-bfd_int64_t bfd_getl_signed_64 (const void *);
+uint64_t bfd_getb64 (const void *);
+uint64_t bfd_getl64 (const void *);
+int64_t bfd_getb_signed_64 (const void *);
+int64_t bfd_getl_signed_64 (const void *);
 bfd_vma bfd_getb32 (const void *);
 bfd_vma bfd_getl32 (const void *);
 bfd_signed_vma bfd_getb_signed_32 (const void *);
@@ -466,8 +442,8 @@ bfd_vma bfd_getb16 (const void *);
 bfd_vma bfd_getl16 (const void *);
 bfd_signed_vma bfd_getb_signed_16 (const void *);
 bfd_signed_vma bfd_getl_signed_16 (const void *);
-void bfd_putb64 (bfd_uint64_t, void *);
-void bfd_putl64 (bfd_uint64_t, void *);
+void bfd_putb64 (uint64_t, void *);
+void bfd_putl64 (uint64_t, void *);
 void bfd_putb32 (bfd_vma, void *);
 void bfd_putl32 (bfd_vma, void *);
 void bfd_putb24 (bfd_vma, void *);
@@ -477,8 +453,8 @@ void bfd_putl16 (bfd_vma, void *);
 
 /* Byte swapping routines which take size and endiannes as arguments.  */
 
-bfd_uint64_t bfd_get_bits (const void *, int, bool);
-void bfd_put_bits (bfd_uint64_t, void *, int, bool);
+uint64_t bfd_get_bits (const void *, int, bool);
+void bfd_put_bits (uint64_t, void *, int, bool);
 
 
 /* mmap hacks */
@@ -766,6 +742,12 @@ typedef struct bfd_section
      the same as that passed to bfd_make_section.  */
   const char *name;
 
+  /* The next section in the list belonging to the BFD, or NULL.  */
+  struct bfd_section *next;
+
+  /* The previous section in the list belonging to the BFD, or NULL.  */
+  struct bfd_section *prev;
+
   /* A unique sequence number.  */
   unsigned int id;
 
@@ -775,12 +757,6 @@ typedef struct bfd_section
 
   /* Which section in the bfd; 0..n-1 as sections are created in a bfd.  */
   unsigned int index;
-
-  /* The next section in the list belonging to the BFD, or NULL.  */
-  struct bfd_section *next;
-
-  /* The previous section in the list belonging to the BFD, or NULL.  */
-  struct bfd_section *prev;
 
   /* The field flags contains attributes of the section. Some
      flags are read in from the object file, and some are
@@ -1070,13 +1046,6 @@ typedef struct bfd_section
   /* The compressed size of the section in octets.  */
   bfd_size_type compressed_size;
 
-  /* Relaxation table. */
-  struct relax_table *relax;
-
-  /* Count of used relaxation table entries. */
-  int relax_count;
-
-
   /* If this section is going to be output, then this value is the
      offset in *bytes* into the output section of the first byte in the
      input section (byte ==> smallest addressable unit on the
@@ -1089,10 +1058,6 @@ typedef struct bfd_section
   /* The output section through which to map on output.  */
   struct bfd_section *output_section;
 
-  /* The alignment requirement of the section, as an exponent of 2 -
-     e.g., 3 aligns to 2^3 (or 8).  */
-  unsigned int alignment_power;
-
   /* If an input section, a pointer to a vector of relocation
      records for the data in this section.  */
   struct reloc_cache_entry *relocation;
@@ -1103,6 +1068,10 @@ typedef struct bfd_section
 
   /* The number of relocation records in one of the above.  */
   unsigned reloc_count;
+
+  /* The alignment requirement of the section, as an exponent of 2 -
+     e.g., 3 aligns to 2^3 (or 8).  */
+  unsigned int alignment_power;
 
   /* Information below is back end specific - and not always used
      or updated.  */
@@ -1166,22 +1135,16 @@ typedef struct bfd_section
     struct bfd_section *s;
     const char *linked_to_symbol_name;
   } map_head, map_tail;
- /* Points to the output section this section is already assigned to, if any.
-    This is used when support for non-contiguous memory regions is enabled.  */
- struct bfd_section *already_assigned;
+
+  /* Points to the output section this section is already assigned to,
+     if any.  This is used when support for non-contiguous memory
+     regions is enabled.  */
+  struct bfd_section *already_assigned;
+
+  /* Explicitly specified section type, if non-zero.  */
+  unsigned int type;
 
 } asection;
-
-/* Relax table contains information about instructions which can
-   be removed by relaxation -- replacing a long address with a
-   short address.  */
-struct relax_table {
-  /* Address where bytes may be deleted. */
-  bfd_vma addr;
-
-  /* Number of bytes to be deleted.  */
-  int size;
-};
 
 static inline const char *
 bfd_section_name (const asection *sec)
@@ -1319,8 +1282,8 @@ discarded_section (const asection *sec)
 }
 
 #define BFD_FAKE_SECTION(SEC, SYM, NAME, IDX, FLAGS)                   \
-  /* name, id,  section_id, index, next, prev, flags, user_set_vma, */ \
-  {  NAME, IDX, 0,          0,     NULL, NULL, FLAGS, 0,               \
+  /* name, next, prev, id,  section_id, index, flags, user_set_vma, */ \
+  {  NAME, NULL, NULL, IDX, 0,          0,     FLAGS, 0,               \
                                                                        \
   /* linker_mark, linker_has_input, gc_mark, decompress_status,     */ \
      0,           0,                1,       0,                        \
@@ -1331,14 +1294,14 @@ discarded_section (const asection *sec)
   /* sec_flg0, sec_flg1, sec_flg2, sec_flg3, sec_flg4, sec_flg5,    */ \
      0,        0,        0,        0,        0,        0,              \
                                                                        \
-  /* vma, lma, size, rawsize, compressed_size, relax, relax_count,  */ \
-     0,   0,   0,    0,       0,               0,     0,               \
+  /* vma, lma, size, rawsize, compressed_size,                      */ \
+     0,   0,   0,    0,       0,                                       \
                                                                        \
-  /* output_offset, output_section, alignment_power,                */ \
-     0,             &SEC,           0,                                 \
+  /* output_offset, output_section, relocation, orelocation,        */ \
+     0,             &SEC,           NULL,       NULL,                  \
                                                                        \
-  /* relocation, orelocation, reloc_count, filepos, rel_filepos,    */ \
-     NULL,       NULL,        0,           0,       0,                 \
+  /* reloc_count, alignment_power, filepos, rel_filepos,            */ \
+     0,           0,               0,       0,                         \
                                                                        \
   /* line_filepos, userdata, contents, lineno, lineno_count,        */ \
      0,            NULL,     NULL,     NULL,   0,                      \
@@ -1352,8 +1315,8 @@ discarded_section (const asection *sec)
   /* symbol,                    symbol_ptr_ptr,                     */ \
      (struct bfd_symbol *) SYM, &SEC.symbol,                           \
                                                                        \
-  /* map_head, map_tail, already_assigned                           */ \
-     { NULL }, { NULL }, NULL                                          \
+  /* map_head, map_tail, already_assigned, type                     */ \
+     { NULL }, { NULL }, NULL,             0                           \
                                                                        \
     }
 
@@ -1579,12 +1542,6 @@ enum bfd_architecture
 #define bfd_mach_i386_i386_intel_syntax (bfd_mach_i386_i386 | bfd_mach_i386_intel_syntax)
 #define bfd_mach_x86_64_intel_syntax   (bfd_mach_x86_64 | bfd_mach_i386_intel_syntax)
 #define bfd_mach_x64_32_intel_syntax   (bfd_mach_x64_32 | bfd_mach_i386_intel_syntax)
-  bfd_arch_l1om,      /* Intel L1OM.  */
-#define bfd_mach_l1om                  (1 << 5)
-#define bfd_mach_l1om_intel_syntax     (bfd_mach_l1om | bfd_mach_i386_intel_syntax)
-  bfd_arch_k1om,      /* Intel K1OM.  */
-#define bfd_mach_k1om                  (1 << 6)
-#define bfd_mach_k1om_intel_syntax     (bfd_mach_k1om | bfd_mach_i386_intel_syntax)
   bfd_arch_iamcu,     /* Intel MCU.  */
 #define bfd_mach_iamcu                 (1 << 8)
 #define bfd_mach_i386_iamcu            (bfd_mach_i386_i386 | bfd_mach_iamcu)
@@ -1867,10 +1824,6 @@ enum bfd_architecture
 #define bfd_mach_msp46         46
 #define bfd_mach_msp47         47
 #define bfd_mach_msp54         54
-  bfd_arch_xc16x,     /* Infineon's XC16X Series.  */
-#define bfd_mach_xc16x         1
-#define bfd_mach_xc16xl        2
-#define bfd_mach_xc16xs        3
   bfd_arch_xgate,     /* Freescale XGATE.  */
 #define bfd_mach_xgate         1
   bfd_arch_xtensa,    /* Tensilica's Xtensa cores.  */
@@ -1933,6 +1886,19 @@ enum bfd_architecture
   bfd_arch_loongarch,       /* LoongArch */
 #define bfd_mach_loongarch32   1
 #define bfd_mach_loongarch64   2
+  bfd_arch_amdgcn,     /* AMDGCN */
+#define bfd_mach_amdgcn_unknown 0x000
+#define bfd_mach_amdgcn_gfx900  0x02c
+#define bfd_mach_amdgcn_gfx904  0x02e
+#define bfd_mach_amdgcn_gfx906  0x02f
+#define bfd_mach_amdgcn_gfx908  0x030
+#define bfd_mach_amdgcn_gfx90a  0x03f
+#define bfd_mach_amdgcn_gfx1010 0x033
+#define bfd_mach_amdgcn_gfx1011 0x034
+#define bfd_mach_amdgcn_gfx1012 0x035
+#define bfd_mach_amdgcn_gfx1030 0x036
+#define bfd_mach_amdgcn_gfx1031 0x037
+#define bfd_mach_amdgcn_gfx1032 0x038
   bfd_arch_last
   };
 
@@ -2088,10 +2054,8 @@ struct reloc_howto_struct
      an external reloc number is stored in this field.  */
   unsigned int type;
 
-  /* The encoded size of the item to be relocated.  This is *not* a
-     power-of-two measure.  Use bfd_get_reloc_size to find the size
-     of the item in bytes.  */
-  unsigned int size:3;
+  /* The size of the item to be relocated in bytes.  */
+  unsigned int size:4;
 
   /* The number of bits in the field to be relocated.  This is used
      when doing overflow checking.  */
@@ -2165,15 +2129,20 @@ struct reloc_howto_struct
   const char *name;
 };
 
+#define HOWTO_RSIZE(sz) ((sz) < 0 ? -(sz) : (sz))
 #define HOWTO(type, right, size, bits, pcrel, left, ovf, func, name,   \
               inplace, src_mask, dst_mask, pcrel_off)                  \
-  { (unsigned) type, size < 0 ? -size : size, bits, right, left, ovf,  \
+  { (unsigned) type, HOWTO_RSIZE (size), bits, right, left, ovf,       \
     size < 0, pcrel, inplace, pcrel_off, src_mask, dst_mask, func, name }
 #define EMPTY_HOWTO(C) \
-  HOWTO ((C), 0, 0, 0, false, 0, complain_overflow_dont, NULL, \
+  HOWTO ((C), 0, 1, 0, false, 0, complain_overflow_dont, NULL, \
          NULL, false, 0, 0, false)
 
-unsigned int bfd_get_reloc_size (reloc_howto_type *);
+static inline unsigned int
+bfd_get_reloc_size (reloc_howto_type *howto)
+{
+  return howto->size;
+}
 
 typedef struct relent_chain
 {
@@ -2235,6 +2204,7 @@ the section containing the relocation.  It depends on the specific target.  */
 
 /* Section relative relocations.  Some targets need this for DWARF2.  */
   BFD_RELOC_32_SECREL,
+  BFD_RELOC_16_SECIDX,
 
 /* For ELF.  */
   BFD_RELOC_32_GOT_PCREL,
@@ -2637,7 +2607,7 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_MICROMIPS_HIGHER,
   BFD_RELOC_MIPS_SCN_DISP,
   BFD_RELOC_MICROMIPS_SCN_DISP,
-  BFD_RELOC_MIPS_REL16,
+  BFD_RELOC_MIPS_16,
   BFD_RELOC_MIPS_RELGOT,
   BFD_RELOC_MIPS_JALR,
   BFD_RELOC_MICROMIPS_JALR,
@@ -5054,12 +5024,6 @@ then it may be truncated to 8 bits.  */
   BFD_RELOC_RELC,
 
 
-/* Infineon Relocations.  */
-  BFD_RELOC_XC16X_PAG,
-  BFD_RELOC_XC16X_POF,
-  BFD_RELOC_XC16X_SEG,
-  BFD_RELOC_XC16X_SOF,
-
 /* Relocations used by VAX ELF.  */
   BFD_RELOC_VAX_GLOB_DAT,
   BFD_RELOC_VAX_JMP_SLOT,
@@ -7273,7 +7237,7 @@ bool bfd_alt_mach_code (bfd *abfd, int alternative);
 
 bfd_vma bfd_emul_get_maxpagesize (const char *);
 
-bfd_vma bfd_emul_get_commonpagesize (const char *, bool);
+bfd_vma bfd_emul_get_commonpagesize (const char *);
 
 char *bfd_demangle (bfd *, const char *, int);
 
@@ -7421,9 +7385,9 @@ typedef struct bfd_target
   /* Entries for byte swapping for data. These are different from the
      other entry points, since they don't take a BFD as the first argument.
      Certain other handlers could do the same.  */
-  bfd_uint64_t   (*bfd_getx64) (const void *);
-  bfd_int64_t    (*bfd_getx_signed_64) (const void *);
-  void           (*bfd_putx64) (bfd_uint64_t, void *);
+  uint64_t       (*bfd_getx64) (const void *);
+  int64_t        (*bfd_getx_signed_64) (const void *);
+  void           (*bfd_putx64) (uint64_t, void *);
   bfd_vma        (*bfd_getx32) (const void *);
   bfd_signed_vma (*bfd_getx_signed_32) (const void *);
   void           (*bfd_putx32) (bfd_vma, void *);
@@ -7432,9 +7396,9 @@ typedef struct bfd_target
   void           (*bfd_putx16) (bfd_vma, void *);
 
   /* Byte swapping for the headers.  */
-  bfd_uint64_t   (*bfd_h_getx64) (const void *);
-  bfd_int64_t    (*bfd_h_getx_signed_64) (const void *);
-  void           (*bfd_h_putx64) (bfd_uint64_t, void *);
+  uint64_t       (*bfd_h_getx64) (const void *);
+  int64_t        (*bfd_h_getx_signed_64) (const void *);
+  void           (*bfd_h_putx64) (uint64_t, void *);
   bfd_vma        (*bfd_h_getx32) (const void *);
   bfd_signed_vma (*bfd_h_getx_signed_32) (const void *);
   void           (*bfd_h_putx32) (bfd_vma, void *);

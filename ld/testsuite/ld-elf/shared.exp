@@ -914,7 +914,7 @@ run_cc_link_tests [list \
 if { ![istarget alpha-*-*] } {
     append build_tests {
 	{"Build pr19073a.o"
-	 "-r -nostdlib" ""
+	 "-r -nostdlib -z noexecstack" ""
 	 {pr19073.s} {} "pr19073a.o"}
 	{"Build libpr19073.so"
 	 "-shared -Wl,--version-script=pr19073.map tmpdir/pr19073a.o" "-fPIC"

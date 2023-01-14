@@ -54,7 +54,7 @@ static bool elf32_vax_print_private_bfd_data (bfd *, void *);
 static reloc_howto_type howto_table[] = {
   HOWTO (R_VAX_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -68,7 +68,7 @@ static reloc_howto_type howto_table[] = {
 
   HOWTO (R_VAX_32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -82,7 +82,7 @@ static reloc_howto_type howto_table[] = {
 
   HOWTO (R_VAX_16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -96,7 +96,7 @@ static reloc_howto_type howto_table[] = {
 
   HOWTO (R_VAX_8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -110,7 +110,7 @@ static reloc_howto_type howto_table[] = {
 
   HOWTO (R_VAX_PC32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -124,7 +124,7 @@ static reloc_howto_type howto_table[] = {
 
   HOWTO (R_VAX_PC16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -138,7 +138,7 @@ static reloc_howto_type howto_table[] = {
 
   HOWTO (R_VAX_PC8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -152,7 +152,7 @@ static reloc_howto_type howto_table[] = {
 
   HOWTO (R_VAX_GOT32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -172,7 +172,7 @@ static reloc_howto_type howto_table[] = {
 
   HOWTO (R_VAX_PLT32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -192,7 +192,7 @@ static reloc_howto_type howto_table[] = {
 
   HOWTO (R_VAX_COPY,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -206,7 +206,7 @@ static reloc_howto_type howto_table[] = {
 
   HOWTO (R_VAX_GLOB_DAT,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -220,7 +220,7 @@ static reloc_howto_type howto_table[] = {
 
   HOWTO (R_VAX_JMP_SLOT,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -234,7 +234,7 @@ static reloc_howto_type howto_table[] = {
 
   HOWTO (R_VAX_RELATIVE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -249,7 +249,7 @@ static reloc_howto_type howto_table[] = {
   /* GNU extension to record C++ vtable hierarchy */
   HOWTO (R_VAX_GNU_VTINHERIT,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -264,7 +264,7 @@ static reloc_howto_type howto_table[] = {
   /* GNU extension to record C++ vtable member usage */
   HOWTO (R_VAX_GNU_VTENTRY,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

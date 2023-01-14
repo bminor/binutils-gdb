@@ -181,7 +181,7 @@ proc run_lookup_test { name } {
     }
 
     # Compile and link the lookup program.
-    set comp_output [compile_link_one_host_cc $opts(lookup) "tmpdir/lookup" "libctf.la"]
+    set comp_output [prune_warnings [compile_link_one_host_cc $opts(lookup) "tmpdir/lookup" "libctf.la"]]
 
     if { $comp_output != ""} {
 	send_log "compilation of lookup program $opts(lookup) failed with <$comp_output>"
@@ -217,7 +217,7 @@ proc run_lookup_test { name } {
 	    }
 	}
 
-	set comp_output [run_host_cmd "$CC_FOR_TARGET" "$CFLAGS_FOR_TARGET $lookup_flags [concat $src] -o $lookup_output"]
+	set comp_output [prune_warnings [run_host_cmd "$CC_FOR_TARGET" "$CFLAGS_FOR_TARGET $lookup_flags [concat $src] -o $lookup_output"]]
 
 	if { $comp_output != ""} {
 	    send_log "compilation of CTF program [concat $src] failed with <$comp_output>"

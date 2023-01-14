@@ -203,6 +203,37 @@ AC_ARG_ENABLE(separate-code,
   no) ac_default_ld_z_separate_code=0 ;;
 esac])
 
+
+# By default warn when an executable stack is created due to object files
+# requesting such, not when the user specifies -z execstack.
+ac_default_ld_warn_execstack=2
+AC_ARG_ENABLE(warn-execstack,
+	      AS_HELP_STRING([--enable-warn-execstack],
+	      [enable warnings when creating an executable stack]),
+[case "${enableval}" in
+  yes) ac_default_ld_warn_execstack=1 ;;
+  no)  ac_default_ld_warn_execstack=0 ;;
+esac])
+
+ac_default_ld_warn_rwx_segments=unset
+AC_ARG_ENABLE(warn-rwx-segments,
+	      AS_HELP_STRING([--enable-warn-rwx-segments],
+	      [enable warnings when creating segements with RWX permissions]),
+[case "${enableval}" in
+  yes) ac_default_ld_warn_rwx_segments=1 ;;
+  no)  ac_default_ld_warn_rwx_segments=0 ;;
+esac])
+
+ac_default_ld_default_execstack=unset
+AC_ARG_ENABLE(default-execstack,
+	      AS_HELP_STRING([--enable-default-execstack],
+	      [create an executable stack if an input file is missing a .note.GNU-stack section]),
+[case "${enableval}" in
+  yes) ac_default_ld_default_execstack=1 ;;
+  no)  ac_default_ld_default_execstack=0 ;;
+esac])
+
+
 # Decide if --error-handling-script should be supported.
 ac_support_error_handling_script=unset
 AC_ARG_ENABLE(error-handling-script,
@@ -257,6 +288,32 @@ if test "${enable_libctf}" = yes; then
 fi
 AM_CONDITIONAL(ENABLE_LIBCTF, test "${enable_libctf}" = yes)
 AC_SUBST(enable_libctf)
+
+# Used to validate --package-metadata= input. Disabled by default.
+AC_ARG_ENABLE([jansson],
+  [AS_HELP_STRING([--enable-jansson],
+    [enable jansson [default=no]])],
+  [enable_jansson=$enableval],
+  [enable_jansson="no"])
+
+if test "x$enable_jansson" != "xno"; then
+  PKG_PROG_PKG_CONFIG
+  AS_IF([test -n "$PKG_CONFIG"],
+    [
+      PKG_CHECK_MODULES(JANSSON, [jansson],
+	[
+	  AC_DEFINE(HAVE_JANSSON, 1, [The jansson library is to be used])
+	  AC_SUBST([JANSSON_CFLAGS])
+	  AC_SUBST([JANSSON_LIBS])
+	],
+	[
+	  AC_MSG_ERROR([Cannot find jansson library])
+	])
+    ],
+    [
+      AC_MSG_ERROR([Cannot find pkg-config])
+    ])
+fi
 
 AM_BINUTILS_WARNINGS
 
@@ -500,6 +557,26 @@ fi
 AC_DEFINE_UNQUOTED(DEFAULT_LD_Z_SEPARATE_CODE,
   $ac_default_ld_z_separate_code,
   [Define to 1 if you want to enable -z separate-code in ELF linker by default.])
+
+
+AC_DEFINE_UNQUOTED(DEFAULT_LD_WARN_EXECSTACK,
+  $ac_default_ld_warn_execstack,
+  [Define to 1 if you want to enable --warn-execstack in ELF linker by default.])
+
+if test "${ac_default_ld_warn_rwx_segments}" = unset; then
+  ac_default_ld_warn_rwx_segments=1
+fi
+AC_DEFINE_UNQUOTED(DEFAULT_LD_WARN_RWX_SEGMENTS,
+  $ac_default_ld_warn_rwx_segments,
+  [Define to 0 if you want to disable --warn-rwx-segments in ELF linker by default.])
+
+if test "${ac_default_ld_default_execstack}" = unset; then
+  ac_default_ld_default_execstack=1
+fi
+AC_DEFINE_UNQUOTED(DEFAULT_LD_EXECSTACK,
+  $ac_default_ld_default_execstack,
+  [Define to 0 if you want to disable the generation of an executable stack when a .note-GNU-stack section is missing.])
+
 
 if test "${ac_support_error_handling_script}" = unset; then
   ac_support_error_handling_script=1

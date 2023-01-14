@@ -19,13 +19,13 @@
 
 if [target_info exists gdb,nosignals] {
     verbose "Skipping $subdir/$gdb_test_file_name.exp because of nosignals."
-    continue
+    return
 }
 
 # The testfile relies on "run" from the command line, so only works
 # with "target native".
 if { [target_info gdb_protocol] != "" } {
-    continue
+    return
 }
 
 gdb_exit

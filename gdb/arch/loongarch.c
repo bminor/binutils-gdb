@@ -25,7 +25,13 @@
 #include "../features/loongarch/base32.c"
 #include "../features/loongarch/base64.c"
 
-static target_desc_up
+#ifndef GDBSERVER
+#define STATIC_IN_GDB static
+#else
+#define STATIC_IN_GDB
+#endif
+
+STATIC_IN_GDB target_desc_up
 loongarch_create_target_description (const struct loongarch_gdbarch_features features)
 {
   /* Now we should create a new target description.  */
@@ -50,6 +56,8 @@ loongarch_create_target_description (const struct loongarch_gdbarch_features fea
 
   return tdesc;
 }
+
+#ifndef GDBSERVER
 
 /* Wrapper used by std::unordered_map to generate hash for feature set.  */
 struct loongarch_gdbarch_features_hasher
@@ -86,3 +94,5 @@ loongarch_lookup_target_description (const struct loongarch_gdbarch_features fea
   loongarch_tdesc_cache.emplace (features, std::move (tdesc));
   return ptr;
 }
+
+#endif /* !GDBSERVER */

@@ -894,14 +894,16 @@ main (int argc, char **argv)
 	     being operated on.  We shouldn't use 1st slot, but we want
 	     to avoid having to search all the way to the end of an
 	     archive with a large number of members at link time.  */
-	  new_files = xmalloc ((file_count + 2) * sizeof (char *));
-	  new_files[0] = files[0];
-	  new_files[1] = LIBDEPS;
-	  for (i = 1; i < file_count; i++)
-	    new_files[i+1] = files[i];
-	  file_count = ++i;
+	  new_files = xmalloc ((file_count + 2) * sizeof (*new_files));
+	  if (file_count)
+	    {
+	      new_files[0] = files[0];
+	      memcpy (new_files + 1, files, file_count * sizeof (*files));
+	    }
+	  new_files[file_count != 0] = LIBDEPS;
+	  file_count++;
+	  new_files[file_count] = NULL;
 	  files = new_files;
-	  files[i] = NULL;
 	}
 
       switch (operation)
@@ -1035,10 +1037,7 @@ open_inarch (const char *archive_filename, const char *file)
     {
       bfd_nonfatal (archive_filename);
       if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
-	{
-	  list_matching_formats (matching);
-	  free (matching);
-	}
+	list_matching_formats (matching);
       xexit (1);
     }
 
@@ -1613,10 +1612,7 @@ ranlib_touch (const char *archname)
     {
       bfd_nonfatal (archname);
       if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
-	{
-	  list_matching_formats (matching);
-	  free (matching);
-	}
+	list_matching_formats (matching);
       xexit (1);
     }
 

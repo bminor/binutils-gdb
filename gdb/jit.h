@@ -28,12 +28,12 @@ struct minimal_symbol;
    these actions.  These values are used by the inferior, so the
    values of these enums cannot be changed.  */
 
-typedef enum
+enum jit_actions_t
 {
   JIT_NOACTION = 0,
   JIT_REGISTER,
   JIT_UNREGISTER
-} jit_actions_t;
+};
 
 /* This struct describes a single symbol file in a linked list of
    symbol files describing generated code.  As the inferior generates

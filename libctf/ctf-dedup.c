@@ -1502,12 +1502,17 @@ ctf_dedup_detect_name_ambiguity (ctf_dict_t *fp, ctf_dict_t **inputs)
 	     the most-popular type on insertion, and we want conflicting structs
 	     et al to have all forwards left intact, so the user is notified
 	     that this type is conflicting.  TODO: improve this in future by
-	     setting such forwards non-root-visible.)  */
+	     setting such forwards non-root-visible.)
+
+	     If multiple distinct types are "most common", pick the one that
+	     appears first on the link line, and within that, the one with the
+	     lowest type ID.  (See sort_output_mapping.)  */
 
 	  const void *key;
 	  const void *count;
 	  const char *hval;
 	  long max_hcount = -1;
+	  void *max_gid = NULL;
 	  const char *max_hval = NULL;
 
 	  if (ctf_dynhash_elements (name_counts) <= 1)
@@ -1517,10 +1522,24 @@ ctf_dedup_detect_name_ambiguity (ctf_dict_t *fp, ctf_dict_t **inputs)
 	  while ((err = ctf_dynhash_cnext (name_counts, &j, &key, &count)) == 0)
 	    {
 	      hval = (const char *) key;
+
 	      if ((long int) (uintptr_t) count > max_hcount)
 		{
 		  max_hcount = (long int) (uintptr_t) count;
 		  max_hval = hval;
+		  max_gid = ctf_dynhash_lookup (d->cd_output_first_gid, hval);
+		}
+	      else if ((long int) (uintptr_t) count == max_hcount)
+		{
+		  void *gid = ctf_dynhash_lookup (d->cd_output_first_gid, hval);
+
+		  if (CTF_DEDUP_GID_TO_INPUT(gid) < CTF_DEDUP_GID_TO_INPUT(max_gid)
+		      || (CTF_DEDUP_GID_TO_INPUT(gid) == CTF_DEDUP_GID_TO_INPUT(max_gid)
+			  && CTF_DEDUP_GID_TO_TYPE(gid) < CTF_DEDUP_GID_TO_TYPE(max_gid)))
+		    {
+		      max_hval = hval;
+		      max_gid = ctf_dynhash_lookup (d->cd_output_first_gid, hval);
+		    }
 		}
 	    }
 	  if (err != ECTF_NEXT_END)
@@ -2652,6 +2671,8 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	  ctf_parent_name_set (target, _CTF_SECTION);
 
 	  input->ctf_dedup.cd_output = target;
+	  input->ctf_link_in_out = target;
+	  target->ctf_link_in_out = input;
 	}
       output_num = input_num;
     }

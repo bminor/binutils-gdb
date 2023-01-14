@@ -28,7 +28,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug f90}]} {
 
 if ![runto sub_] then {
     perror "couldn't run to breakpoint sub_"
-    continue
+    return
 }
 
 gdb_breakpoint [gdb_get_line_number "return"]

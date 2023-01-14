@@ -29,7 +29,7 @@
 
 /* Return type of print_string_repr.  */
 
-enum string_repr_result
+enum gdbpy_string_repr_result
   {
     /* The string method returned None.  */
     string_repr_none,
@@ -273,7 +273,7 @@ print_stack_unless_memory_error (struct ui_file *stream)
 /* Helper for gdbpy_apply_val_pretty_printer which calls to_string and
    formats the result.  */
 
-static enum string_repr_result
+static enum gdbpy_string_repr_result
 print_string_repr (PyObject *printer, const char *hint,
 		   struct ui_file *stream, int recurse,
 		   const struct value_print_options *options,
@@ -281,7 +281,7 @@ print_string_repr (PyObject *printer, const char *hint,
 		   struct gdbarch *gdbarch)
 {
   struct value *replacement = NULL;
-  enum string_repr_result result = string_repr_ok;
+  enum gdbpy_string_repr_result result = string_repr_ok;
 
   gdbpy_ref<> py_str = pretty_print_one_value (printer, &replacement);
   if (py_str != NULL)
@@ -321,7 +321,7 @@ print_string_repr (PyObject *printer, const char *hint,
 		language->printstr (stream, type, (gdb_byte *) output,
 				    length, NULL, 0, options);
 	      else
-		fputs_filtered (output, stream);
+		gdb_puts (output, stream);
 	    }
 	  else
 	    {
@@ -425,8 +425,8 @@ print_children (PyObject *printer, const char *hint,
 	  /* The user won't necessarily get a stack trace here, so provide
 	     more context.  */
 	  if (gdbpy_print_python_errors_p ())
-	    fprintf_unfiltered (gdb_stderr,
-				_("Bad result from children iterator.\n"));
+	    gdb_printf (gdb_stderr,
+			_("Bad result from children iterator.\n"));
 	  gdbpy_print_stack ();
 	  continue;
 	}
@@ -439,10 +439,10 @@ print_children (PyObject *printer, const char *hint,
       if (i == 0)
 	{
 	  if (!is_py_none)
-	    fputs_filtered (" = ", stream);
+	    gdb_puts (" = ", stream);
 	}
       else if (! is_map || i % 2 == 0)
-	fputs_filtered (pretty ? "," : ", ", stream);
+	gdb_puts (pretty ? "," : ", ", stream);
 
       /* Skip printing children if max_depth has been reached.  This check
 	 is performed after print_string_repr and the "=" separator so that
@@ -452,7 +452,7 @@ print_children (PyObject *printer, const char *hint,
 	return;
       else if (i == 0)
 	/* Print initial "{" to bookend children.  */
-	fputs_filtered ("{", stream);
+	gdb_puts ("{", stream);
 
       /* In summary mode, we just want to print "= {...}" if there is
 	 a value.  */
@@ -470,26 +470,26 @@ print_children (PyObject *printer, const char *hint,
 	{
 	  if (pretty)
 	    {
-	      fputs_filtered ("\n", stream);
-	      print_spaces_filtered (2 + 2 * recurse, stream);
+	      gdb_puts ("\n", stream);
+	      print_spaces (2 + 2 * recurse, stream);
 	    }
 	  else
 	    stream->wrap_here (2 + 2 *recurse);
 	}
 
       if (is_map && i % 2 == 0)
-	fputs_filtered ("[", stream);
+	gdb_puts ("[", stream);
       else if (is_array)
 	{
 	  /* We print the index, not whatever the child method
 	     returned as the name.  */
 	  if (options->print_array_indexes)
-	    fprintf_filtered (stream, "[%d] = ", i);
+	    gdb_printf (stream, "[%d] = ", i);
 	}
       else if (! is_map)
 	{
-	  fputs_filtered (name, stream);
-	  fputs_filtered (" = ", stream);
+	  gdb_puts (name, stream);
+	  gdb_puts (" = ", stream);
 	}
 
       if (gdbpy_is_lazy_string (py_v))
@@ -514,7 +514,7 @@ print_children (PyObject *printer, const char *hint,
 	  if (!output)
 	    gdbpy_print_stack ();
 	  else
-	    fputs_filtered (output.get (), stream);
+	    gdb_puts (output.get (), stream);
 	}
       else
 	{
@@ -540,7 +540,7 @@ print_children (PyObject *printer, const char *hint,
 	}
 
       if (is_map && i % 2 == 0)
-	fputs_filtered ("] = ", stream);
+	gdb_puts ("] = ", stream);
     }
 
   if (i)
@@ -549,17 +549,17 @@ print_children (PyObject *printer, const char *hint,
 	{
 	  if (pretty)
 	    {
-	      fputs_filtered ("\n", stream);
-	      print_spaces_filtered (2 + 2 * recurse, stream);
+	      gdb_puts ("\n", stream);
+	      print_spaces (2 + 2 * recurse, stream);
 	    }
-	  fputs_filtered ("...", stream);
+	  gdb_puts ("...", stream);
 	}
       if (pretty)
 	{
-	  fputs_filtered ("\n", stream);
-	  print_spaces_filtered (2 * recurse, stream);
+	  gdb_puts ("\n", stream);
+	  print_spaces (2 * recurse, stream);
 	}
-      fputs_filtered ("}", stream);
+      gdb_puts ("}", stream);
     }
 }
 
@@ -572,7 +572,7 @@ gdbpy_apply_val_pretty_printer (const struct extension_language_defn *extlang,
 {
   struct type *type = value_type (value);
   struct gdbarch *gdbarch = type->arch ();
-  enum string_repr_result print_result;
+  enum gdbpy_string_repr_result print_result;
 
   if (value_lazy (value))
     value_fetch_lazy (value);

@@ -42,10 +42,6 @@ set lib_dlopen2 [shlib_target_file ${libname2}]
 set lib_syms [shlib_symbol_file ${libname}]
 set lib_syms2 [shlib_symbol_file ${libname2}]
 
-if [get_compiler_info] {
-    return -1
-}
-
 set lib_opts debug
 set exec_opts [list debug shlib_load additional_flags=-DSHLIB_NAME=\"${lib_dlopen}\" additional_flags=-DSHLIB_NAME2=\"${lib_dlopen2}\"]
 

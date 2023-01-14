@@ -640,6 +640,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
       "unions",			/* See set print union on|off.  */
       "address",		/* See set print address on|off.  */
       "styling",		/* Should we apply styling.  */
+      "nibbles",		/* See set print nibbles on|off.  */
       /* C++ options.  */
       "deref_refs",		/* No corresponding setting.  */
       "actual_objects",		/* See set print object on|off.  */
@@ -685,13 +686,14 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
   PyObject *unions_obj = NULL;
   PyObject *address_obj = NULL;
   PyObject *styling_obj = Py_False;
+  PyObject *nibbles_obj = NULL;
   PyObject *deref_refs_obj = NULL;
   PyObject *actual_objects_obj = NULL;
   PyObject *static_members_obj = NULL;
   char *format = NULL;
   if (!gdb_PyArg_ParseTupleAndKeywords (args,
 					kw,
-					"|O!O!O!O!O!O!O!O!O!O!O!IIIs",
+					"|O!O!O!O!O!O!O!O!O!O!O!O!IIIs",
 					keywords,
 					&PyBool_Type, &raw_obj,
 					&PyBool_Type, &pretty_arrays_obj,
@@ -701,6 +703,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
 					&PyBool_Type, &unions_obj,
 					&PyBool_Type, &address_obj,
 					&PyBool_Type, &styling_obj,
+					&PyBool_Type, &nibbles_obj,
 					&PyBool_Type, &deref_refs_obj,
 					&PyBool_Type, &actual_objects_obj,
 					&PyBool_Type, &static_members_obj,
@@ -724,6 +727,8 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
   if (!copy_py_bool_obj (&opts.unionprint, unions_obj))
     return NULL;
   if (!copy_py_bool_obj (&opts.addressprint, address_obj))
+    return NULL;
+  if (!copy_py_bool_obj (&opts.nibblesprint, nibbles_obj))
     return NULL;
   if (!copy_py_bool_obj (&opts.deref_ref, deref_refs_obj))
     return NULL;
@@ -1695,41 +1700,6 @@ valpy_richcompare (PyObject *self, PyObject *other, int op)
   Py_RETURN_FALSE;
 }
 
-#ifndef IS_PY3K
-/* Implements conversion to int.  */
-static PyObject *
-valpy_int (PyObject *self)
-{
-  struct value *value = ((value_object *) self)->value;
-  struct type *type = value_type (value);
-  LONGEST l = 0;
-
-  try
-    {
-      if (is_floating_value (value))
-	{
-	  type = builtin_type_pylong;
-	  value = value_cast (type, value);
-	}
-
-      if (!is_integral_type (type)
-	  && type->code () != TYPE_CODE_PTR)
-	error (_("Cannot convert value to int."));
-
-      l = value_as_long (value);
-    }
-  catch (const gdb_exception &except)
-    {
-      GDB_PY_HANDLE_EXCEPTION (except);
-    }
-
-  if (type->is_unsigned ())
-    return gdb_py_object_from_ulongest (l).release ();
-  else
-    return gdb_py_object_from_longest (l).release ();
-}
-#endif
-
 /* Implements conversion to long.  */
 static PyObject *
 valpy_long (PyObject *self)
@@ -1875,13 +1845,6 @@ convert_value_from_python (PyObject *obj)
 	  if (cmp >= 0)
 	    value = value_from_longest (builtin_type_pybool, cmp);
 	}
-      /* Make a long logic check first.  In Python 3.x, internally,
-	 all integers are represented as longs.  In Python 2.x, there
-	 is still a differentiation internally between a PyInt and a
-	 PyLong.  Explicitly do this long check conversion first. In
-	 GDB, for Python 3.x, we #ifdef PyInt = PyLong.  This check has
-	 to be done first to ensure we do not lose information in the
-	 conversion process.  */
       else if (PyLong_Check (obj))
 	{
 	  LONGEST l = PyLong_AsLongLong (obj);
@@ -1914,15 +1877,6 @@ convert_value_from_python (PyObject *obj)
 	  else
 	    value = value_from_longest (builtin_type_pylong, l);
 	}
-#if PY_MAJOR_VERSION == 2
-      else if (PyInt_Check (obj))
-	{
-	  long l = PyInt_AsLong (obj);
-
-	  if (! PyErr_Occurred ())
-	    value = value_from_longest (builtin_type_pyint, l);
-	}
-#endif
       else if (PyFloat_Check (obj))
 	{
 	  double d = PyFloat_AsDouble (obj);
@@ -1948,14 +1902,8 @@ convert_value_from_python (PyObject *obj)
 	  value = value_copy (((value_object *) result)->value);
 	}
       else
-#ifdef IS_PY3K
 	PyErr_Format (PyExc_TypeError,
 		      _("Could not convert Python object: %S."), obj);
-#else
-	PyErr_Format (PyExc_TypeError,
-		      _("Could not convert Python object: %s."),
-		      PyString_AsString (PyObject_Str (obj)));
-#endif
     }
   catch (const gdb_exception &except)
     {
@@ -2176,9 +2124,6 @@ static PyNumberMethods value_object_as_number = {
   valpy_add,
   valpy_subtract,
   valpy_multiply,
-#ifndef IS_PY3K
-  valpy_divide,
-#endif
   valpy_remainder,
   NULL,			      /* nb_divmod */
   valpy_power,		      /* nb_power */
@@ -2192,25 +2137,12 @@ static PyNumberMethods value_object_as_number = {
   valpy_and,		      /* nb_and */
   valpy_xor,		      /* nb_xor */
   valpy_or,		      /* nb_or */
-#ifdef IS_PY3K
   valpy_long,		      /* nb_int */
   NULL,			      /* reserved */
-#else
-  NULL,			      /* nb_coerce */
-  valpy_int,		      /* nb_int */
-  valpy_long,		      /* nb_long */
-#endif
   valpy_float,		      /* nb_float */
-#ifndef IS_PY3K
-  NULL,			      /* nb_oct */
-  NULL,                       /* nb_hex */
-#endif
   NULL,                       /* nb_inplace_add */
   NULL,                       /* nb_inplace_subtract */
   NULL,                       /* nb_inplace_multiply */
-#ifndef IS_PY3K
-  NULL,                       /* nb_inplace_divide */
-#endif
   NULL,                       /* nb_inplace_remainder */
   NULL,                       /* nb_inplace_power */
   NULL,                       /* nb_inplace_lshift */

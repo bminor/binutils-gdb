@@ -1,3 +1,18 @@
+2022-06-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 23765
+	* fileread.cc (File_read::do_read): Check start parameter before
+	computing number of bytes to read.
+
+2022-05-18  Nick Clifton  <nickc@redhat.com>
+
+	* int_encoding.cc (get_length_as_unsigned_LEB_128): Remove
+	current_length variable.
+
+2022-02-17  Nick Clifton  <nickc@redhat.com>
+
+	* po/sr.po: Updated Serbian translation.
+
 2022-02-02  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.

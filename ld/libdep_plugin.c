@@ -99,6 +99,7 @@ get_libdeps (int fd)
   arhdr ah;
   int len;
   unsigned long mlen;
+  size_t amt;
   linerec *lr;
   enum ld_plugin_status rc = LDPS_NO_SYMS;
 
@@ -114,7 +115,10 @@ get_libdeps (int fd)
 	  lseek (fd, mlen, SEEK_CUR);
 	  continue;
 	}
-      lr = malloc (sizeof (linerec) + mlen);
+      amt = mlen + sizeof (linerec);
+      if (amt <= mlen)
+	return LDPS_ERR;
+      lr = malloc (amt);
       if (!lr)
 	return LDPS_ERR;
       lr->next = NULL;

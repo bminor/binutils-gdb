@@ -49,7 +49,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
   /* This reloc does nothing.  */
   HOWTO (R_OR1K_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -63,7 +63,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_32,
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -77,7 +77,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_16,
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -91,7 +91,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_8,
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -105,7 +105,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_LO_16_IN_INSN, /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -119,7 +119,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_HI_16_IN_INSN, /* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -134,7 +134,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
   /* A PC relative 26 bit relocation, right shifted by 2.  */
   HOWTO (R_OR1K_INSN_REL_26, /* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 26,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -149,7 +149,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
   /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_OR1K_GNU_VTINHERIT, /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -164,7 +164,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
   /* GNU extension to record C++ vtable member usage.  */
   HOWTO (R_OR1K_GNU_VTENTRY, /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -178,7 +178,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_32_PCREL,
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -192,7 +192,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_16_PCREL,
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -206,7 +206,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_8_PCREL,
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -220,7 +220,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
    HOWTO (R_OR1K_GOTPC_HI16,	/* Type.  */
 	 16,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 16,			/* Bitsize.  */
 	 true,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -234,7 +234,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
    HOWTO (R_OR1K_GOTPC_LO16,	/* Type.  */
 	 0,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 16,			/* Bitsize.  */
 	 true,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -248,7 +248,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_GOT16,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -263,7 +263,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
   /* A 26 bit PLT relocation.  Shifted by 2.  */
   HOWTO (R_OR1K_PLT26,		/* Type.  */
 	 2,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 26,			/* Bitsize.  */
 	 true,			/* pc_relative.  */
 	 0,			/* Bitpos.  */
@@ -277,7 +277,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_GOTOFF_HI16,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -291,7 +291,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_GOTOFF_LO16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -305,7 +305,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_COPY,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -319,7 +319,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_GLOB_DAT,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -333,7 +333,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_JMP_SLOT,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -347,7 +347,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_RELATIVE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -361,7 +361,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_TLS_GD_HI16,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -375,7 +375,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_TLS_GD_LO16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -389,7 +389,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_TLS_LDM_HI16,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -403,7 +403,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_TLS_LDM_LO16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -417,7 +417,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_TLS_LDO_HI16,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -431,7 +431,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_TLS_LDO_LO16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -445,7 +445,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_TLS_IE_HI16,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -459,7 +459,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_TLS_IE_LO16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -473,7 +473,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_TLS_LE_HI16,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -487,7 +487,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_TLS_LE_LO16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -501,7 +501,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_TLS_TPOFF,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -515,7 +515,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_TLS_DTPOFF,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -529,7 +529,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_TLS_DTPMOD,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -543,7 +543,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_AHI16,		/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -557,7 +557,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_GOTOFF_AHI16,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -571,7 +571,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_TLS_IE_AHI16,   /* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -585,7 +585,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_TLS_LE_AHI16,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -599,7 +599,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_SLO16,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -613,7 +613,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_GOTOFF_SLO16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -627,7 +627,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_TLS_LE_SLO16,   /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -646,7 +646,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
      pc-relative relocations to local symbols.  */
   HOWTO (R_OR1K_PCREL_PG21,    /* type */
 	 13,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 21,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -660,7 +660,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_GOT_PG21,       /* type */
 	 13,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 21,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -674,7 +674,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_TLS_GD_PG21,    /* type */
 	 13,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 21,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -688,7 +688,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_TLS_LDM_PG21,   /* type */
 	 13,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 21,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -702,7 +702,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_TLS_IE_PG21,    /* type */
 	 13,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 21,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -716,7 +716,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_LO13,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -730,7 +730,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_GOT_LO13,       /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -744,7 +744,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_TLS_GD_LO13,    /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -758,7 +758,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_TLS_LDM_LO13,   /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -772,7 +772,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_TLS_IE_LO13,    /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -786,7 +786,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_SLO13,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -801,7 +801,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
   /* A 26 bit PLT relocation, using ADRP.  Shifted by 2.  */
   HOWTO (R_OR1K_PLTA26,		/* Type.  */
 	 2,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 26,			/* Bitsize.  */
 	 true,			/* pc_relative.  */
 	 0,			/* Bitpos.  */
@@ -815,7 +815,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 
   HOWTO (R_OR1K_GOT_AHI16,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -833,7 +833,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 static reloc_howto_type or1k_elf_got16_no_overflow_howto =
   HOWTO (R_OR1K_GOT16,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

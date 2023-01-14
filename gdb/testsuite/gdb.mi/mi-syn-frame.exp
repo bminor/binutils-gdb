@@ -18,7 +18,7 @@
 
 if [target_info exists gdb,nosignals] {
     verbose "Skipping mi-syn-frame.exp because of nosignals."
-    continue
+    return
 }
 
 load_lib mi-support.exp

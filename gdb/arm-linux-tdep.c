@@ -741,9 +741,9 @@ arm_linux_core_read_description (struct gdbarch *gdbarch,
       if (arm_hwcap & HWCAP_NEON)
 	return aarch32_read_description ();
       else if ((arm_hwcap & (HWCAP_VFPv3 | HWCAP_VFPv3D16)) == HWCAP_VFPv3)
-	return arm_read_description (ARM_FP_TYPE_VFPV3);
+	return arm_read_description (ARM_FP_TYPE_VFPV3, false);
 
-      return arm_read_description (ARM_FP_TYPE_VFPV2);
+      return arm_read_description (ARM_FP_TYPE_VFPV2, false);
     }
 
   return nullptr;
@@ -1650,10 +1650,10 @@ arm_linux_syscall_record (struct regcache *regcache, unsigned long svc_number)
 
   if (syscall_gdb == gdb_sys_no_syscall)
     {
-      fprintf_unfiltered (gdb_stderr,
-			  _("Process record and replay target doesn't "
-			    "support syscall number %s\n"),
-			  plongest (svc_number));
+      gdb_printf (gdb_stderr,
+		  _("Process record and replay target doesn't "
+		    "support syscall number %s\n"),
+		  plongest (svc_number));
       return -1;
     }
 

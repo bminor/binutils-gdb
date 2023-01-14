@@ -9,7 +9,7 @@
 # sed.  mn10300 and riscv put different numbers of local symbols in
 # linkonce section and comdat sections.  xtensa has more than one member
 # in comdat groups.
-#xfail: am33_2.0-*-* hppa*-*-hpux* mn10300-*-* riscv*-*-* xtensa*-*-*
+#xfail: am33_2.0-*-* hppa*-*-hpux* mn10300-*-* riscv*-*-* xtensa*-*-* loongarch*-*-*
 
 #...
 CU: .*/pr26936c.s:

@@ -17,7 +17,7 @@
 # Derived from gdb.linespec/ls-errs.exp.
 
 if {[skip_cplus_tests]} {
-    continue
+    return
 }
 
 standard_testfile .cc

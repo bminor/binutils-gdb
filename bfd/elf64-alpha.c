@@ -488,7 +488,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 {
   HOWTO (R_ALPHA_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -503,7 +503,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* A 32 bit reference to a symbol.  */
   HOWTO (R_ALPHA_REFLONG,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -518,7 +518,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* A 64 bit reference to a symbol.  */
   HOWTO (R_ALPHA_REFQUAD,	/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -535,7 +535,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
      added in.  */
   HOWTO (R_ALPHA_GPREL32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -550,7 +550,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* Used for an instruction that refers to memory off the GP register.  */
   HOWTO (R_ALPHA_LITERAL,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -571,7 +571,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
      This does not actually do any relocation.  */
   HOWTO (R_ALPHA_LITUSE,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -601,7 +601,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
      in the GPDISP_HI16 reloc.  */
   HOWTO (R_ALPHA_GPDISP,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -616,7 +616,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* A 21 bit branch.  */
   HOWTO (R_ALPHA_BRADDR,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 21,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -631,7 +631,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* A hint for a jump to a register.  */
   HOWTO (R_ALPHA_HINT,		/* type */
 	 2,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 14,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -646,7 +646,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* 16 bit PC relative offset.  */
   HOWTO (R_ALPHA_SREL16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -661,7 +661,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* 32 bit PC relative offset.  */
   HOWTO (R_ALPHA_SREL32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -676,7 +676,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* A 64 bit PC relative offset.  */
   HOWTO (R_ALPHA_SREL64,	/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -698,7 +698,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* The high 16 bits of the displacement from GP to the target.  */
   HOWTO (R_ALPHA_GPRELHIGH,
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -713,7 +713,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* The low 16 bits of the displacement from GP to the target.  */
   HOWTO (R_ALPHA_GPRELLOW,
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -728,7 +728,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* A 16-bit displacement from the GP to the target.  */
   HOWTO (R_ALPHA_GPREL16,
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -814,7 +814,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* A 21 bit branch that adjusts for gp loads.  */
   HOWTO (R_ALPHA_BRSGP,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 21,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -829,7 +829,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* Creates a tls_index for the symbol in the got.  */
   HOWTO (R_ALPHA_TLSGD,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -844,7 +844,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* Creates a tls_index for the (current) module in the got.  */
   HOWTO (R_ALPHA_TLSLDM,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -859,7 +859,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* A dynamic relocation for a DTP module entry.  */
   HOWTO (R_ALPHA_DTPMOD64,	/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -875,7 +875,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
      from DTP to the target.  */
   HOWTO (R_ALPHA_GOTDTPREL,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -890,7 +890,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* A dynamic relocation for a displacement from DTP to the target.  */
   HOWTO (R_ALPHA_DTPREL64,	/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -905,7 +905,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* The high 16 bits of the displacement from DTP to the target.  */
   HOWTO (R_ALPHA_DTPRELHI,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -920,7 +920,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* The low 16 bits of the displacement from DTP to the target.  */
   HOWTO (R_ALPHA_DTPRELLO,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -935,7 +935,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* A 16-bit displacement from DTP to the target.  */
   HOWTO (R_ALPHA_DTPREL16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -951,7 +951,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
      from TP to the target.  */
   HOWTO (R_ALPHA_GOTTPREL,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -966,7 +966,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* A dynamic relocation for a displacement from TP to the target.  */
   HOWTO (R_ALPHA_TPREL64,	/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -981,7 +981,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* The high 16 bits of the displacement from TP to the target.  */
   HOWTO (R_ALPHA_TPRELHI,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -996,7 +996,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* The low 16 bits of the displacement from TP to the target.  */
   HOWTO (R_ALPHA_TPRELLO,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1011,7 +1011,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* A 16-bit displacement from TP to the target.  */
   HOWTO (R_ALPHA_TPREL16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

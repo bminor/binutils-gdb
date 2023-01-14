@@ -63,8 +63,8 @@ struct attribute
   {
     char *str;
     struct dwarf_block *blk;
-    bfd_uint64_t val;
-    bfd_int64_t sval;
+    uint64_t val;
+    int64_t sval;
   }
   u;
 };
@@ -81,6 +81,76 @@ struct adjusted_section
   asection *section;
   bfd_vma adj_vma;
 };
+
+/* A trie to map quickly from address range to compilation unit.
+
+   This is a fairly standard radix-256 trie, used to quickly locate which
+   compilation unit any given address belongs to.  Given that each compilation
+   unit may register hundreds of very small and unaligned ranges (which may
+   potentially overlap, due to inlining and other concerns), and a large
+   program may end up containing hundreds of thousands of such ranges, we cannot
+   scan through them linearly without undue slowdown.
+
+   We use a hybrid trie to avoid memory explosion: There are two types of trie
+   nodes, leaves and interior nodes.  (Almost all nodes are leaves, so they
+   take up the bulk of the memory usage.) Leaves contain a simple array of
+   ranges (high/low address) and which compilation unit contains those ranges,
+   and when we get to a leaf, we scan through it linearly.  Interior nodes
+   contain pointers to 256 other nodes, keyed by the next byte of the address.
+   So for a 64-bit address like 0x1234567abcd, we would start at the root and go
+   down child[0x00]->child[0x00]->child[0x01]->child[0x23]->child[0x45] etc.,
+   until we hit a leaf.  (Nodes are, in general, leaves until they exceed the
+   default allocation of 16 elements, at which point they are converted to
+   interior node if possible.) This gives us near-constant lookup times;
+   the only thing that can be costly is if there are lots of overlapping ranges
+   within a single 256-byte segment of the binary, in which case we have to
+   scan through them all to find the best match.
+
+   For a binary with few ranges, we will in practice only have a single leaf
+   node at the root, containing a simple array.  Thus, the scheme is efficient
+   for both small and large binaries.
+ */
+
+/* Experiments have shown 16 to be a memory-efficient default leaf size.
+   The only case where a leaf will hold more memory than this, is at the
+   bottomost level (covering 256 bytes in the binary), where we'll expand
+   the leaf to be able to hold more ranges if needed.
+ */
+#define TRIE_LEAF_SIZE 16
+
+/* All trie_node pointers will really be trie_leaf or trie_interior,
+   but they have this common head.  */
+struct trie_node
+{
+  /* If zero, we are an interior node.
+     Otherwise, how many ranges we have room for in this leaf.  */
+  unsigned int num_room_in_leaf;
+};
+
+struct trie_leaf
+{
+  struct trie_node head;
+  unsigned int num_stored_in_leaf;
+  struct {
+    struct comp_unit *unit;
+    bfd_vma low_pc, high_pc;
+  } ranges[TRIE_LEAF_SIZE];
+};
+
+struct trie_interior
+{
+  struct trie_node head;
+  struct trie_node *children[256];
+};
+
+static struct trie_node *alloc_trie_leaf (bfd *abfd)
+{
+  struct trie_leaf *leaf = bfd_zalloc (abfd, sizeof (struct trie_leaf));
+  if (leaf == NULL)
+    return NULL;
+  leaf->head.num_room_in_leaf = TRIE_LEAF_SIZE;
+  return &leaf->head;
+}
 
 struct dwarf2_debug_file
 {
@@ -118,6 +188,18 @@ struct dwarf2_debug_file
   /* Length of the loaded .debug_str section.  */
   bfd_size_type dwarf_str_size;
 
+  /* Pointer to the .debug_str_offsets section loaded into memory.  */
+  bfd_byte *dwarf_str_offsets_buffer;
+
+  /* Length of the loaded .debug_str_offsets section.  */
+  bfd_size_type dwarf_str_offsets_size;
+
+  /* Pointer to the .debug_addr section loaded into memory.  */
+  bfd_byte *dwarf_addr_buffer;
+
+  /* Length of the loaded .debug_addr section.  */
+  bfd_size_type dwarf_addr_size;
+
   /* Pointer to the .debug_line_str section loaded into memory.  */
   bfd_byte *dwarf_line_str_buffer;
 
@@ -139,6 +221,9 @@ struct dwarf2_debug_file
   /* A list of all previously read comp_units.  */
   struct comp_unit *all_comp_units;
 
+  /* A list of all previously read comp_units with no ranges (yet).  */
+  struct comp_unit *all_comp_units_without_ranges;
+
   /* Last comp unit in list above.  */
   struct comp_unit *last_comp_unit;
 
@@ -147,6 +232,9 @@ struct dwarf2_debug_file
 
   /* Hash table to map offsets to decoded abbrevs.  */
   htab_t abbrev_offsets;
+
+  /* Root of a trie to map addresses to compilation units.  */
+  struct trie_node *trie_root;
 };
 
 struct dwarf2_debug
@@ -219,6 +307,11 @@ struct comp_unit
 {
   /* Chain the previously read compilation units.  */
   struct comp_unit *next_unit;
+
+  /* Chain the previously read compilation units that have no ranges yet.
+     We scan these separately when we have a trie over the ranges.
+     Unused if arange.high != 0. */
+  struct comp_unit *next_unit_without_ranges;
 
   /* Likewise, chain the compilation unit read after this one.
      The comp units are stored in reversed reading order.  */
@@ -296,6 +389,16 @@ struct comp_unit
 
   /* TRUE if symbols are cached in hash table for faster lookup by name.  */
   bool cached;
+
+  /* Used when iterating over trie leaves to know which units we have
+     already seen in this iteration.  */
+  bool mark;
+
+ /* Base address of debug_addr section.  */
+  size_t dwarf_addr_offset;
+
+  /* Base address of string offset table.  */
+  size_t dwarf_str_offset;
 };
 
 /* This data structure holds the information of an abbrev.  */
@@ -338,6 +441,8 @@ const struct dwarf_debug_section dwarf_debug_sections[] =
   { ".debug_static_vars",	".zdebug_static_vars" },
   { ".debug_str",		".zdebug_str", },
   { ".debug_str",		".zdebug_str", },
+  { ".debug_str_offsets",	".zdebug_str_offsets", },
+  { ".debug_addr",		".zdebug_addr", },
   { ".debug_line_str",		".zdebug_line_str", },
   { ".debug_types",		".zdebug_types" },
   /* GNU DWARF 1 extensions */
@@ -372,6 +477,8 @@ enum dwarf_debug_section_enum
   debug_static_vars,
   debug_str,
   debug_str_alt,
+  debug_str_offsets,
+  debug_addr,
   debug_line_str,
   debug_types,
   debug_sfnames,
@@ -524,12 +631,12 @@ lookup_info_hash_table (struct info_hash_table *hash_table, const char *key)
    the located section does not contain at least OFFSET bytes.  */
 
 static bool
-read_section (bfd *	      abfd,
+read_section (bfd *abfd,
 	      const struct dwarf_debug_section *sec,
-	      asymbol **      syms,
-	      bfd_uint64_t    offset,
-	      bfd_byte **     section_buffer,
-	      bfd_size_type * section_size)
+	      asymbol **syms,
+	      uint64_t offset,
+	      bfd_byte **section_buffer,
+	      bfd_size_type *section_size)
 {
   const char *section_name = sec->uncompressed_name;
   bfd_byte *contents = *section_buffer;
@@ -740,7 +847,7 @@ read_indirect_string (struct comp_unit *unit,
 		      bfd_byte **ptr,
 		      bfd_byte *buf_end)
 {
-  bfd_uint64_t offset;
+  uint64_t offset;
   struct dwarf2_debug *stash = unit->stash;
   struct dwarf2_debug_file *file = unit->file;
   char *str;
@@ -774,7 +881,7 @@ read_indirect_line_string (struct comp_unit *unit,
 			   bfd_byte **ptr,
 			   bfd_byte *buf_end)
 {
-  bfd_uint64_t offset;
+  uint64_t offset;
   struct dwarf2_debug *stash = unit->stash;
   struct dwarf2_debug_file *file = unit->file;
   char *str;
@@ -811,7 +918,7 @@ read_alt_indirect_string (struct comp_unit *unit,
 			  bfd_byte **ptr,
 			  bfd_byte *buf_end)
 {
-  bfd_uint64_t offset;
+  uint64_t offset;
   struct dwarf2_debug *stash = unit->stash;
   char *str;
 
@@ -867,8 +974,7 @@ read_alt_indirect_string (struct comp_unit *unit,
    or NULL upon failure.  */
 
 static bfd_byte *
-read_alt_indirect_ref (struct comp_unit * unit,
-		       bfd_uint64_t       offset)
+read_alt_indirect_ref (struct comp_unit *unit, uint64_t offset)
 {
   struct dwarf2_debug *stash = unit->stash;
 
@@ -904,7 +1010,7 @@ read_alt_indirect_ref (struct comp_unit * unit,
   return stash->alt.dwarf_info_buffer + offset;
 }
 
-static bfd_uint64_t
+static uint64_t
 read_address (struct comp_unit *unit, bfd_byte **ptr, bfd_byte *buf_end)
 {
   bfd_byte *buf = *ptr;
@@ -1023,7 +1129,7 @@ del_abbrev (void *p)
    in a hash table.  */
 
 static struct abbrev_info**
-read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash,
+read_abbrevs (bfd *abfd, uint64_t offset, struct dwarf2_debug *stash,
 	      struct dwarf2_debug_file *file)
 {
   struct abbrev_info **abbrevs;
@@ -1221,12 +1327,113 @@ is_int_form (const struct attribute *attr)
     }
 }
 
-static const char *
-read_indexed_string (bfd_uint64_t idx ATTRIBUTE_UNUSED,
-		     struct comp_unit * unit ATTRIBUTE_UNUSED)
+/* Returns true if the form is strx[1-4].  */
+
+static inline bool
+is_strx_form (enum dwarf_form form)
 {
-  /* FIXME: Add support for indexed strings.  */
-  return "<indexed strings not yet supported>";
+  return (form == DW_FORM_strx
+	  || form == DW_FORM_strx1
+	  || form == DW_FORM_strx2
+	  || form == DW_FORM_strx3
+	  || form == DW_FORM_strx4);
+}
+
+/* Return true if the form is addrx[1-4].  */
+
+static inline bool
+is_addrx_form (enum dwarf_form form)
+{
+  return (form == DW_FORM_addrx
+	  || form == DW_FORM_addrx1
+	  || form == DW_FORM_addrx2
+	  || form == DW_FORM_addrx3
+	  || form == DW_FORM_addrx4);
+}
+
+/* Returns the address in .debug_addr section using DW_AT_addr_base.
+   Used to implement DW_FORM_addrx*.  */
+static uint64_t
+read_indexed_address (uint64_t idx, struct comp_unit *unit)
+{
+  struct dwarf2_debug *stash = unit->stash;
+  struct dwarf2_debug_file *file = unit->file;
+  bfd_byte *info_ptr;
+  size_t offset;
+
+  if (stash == NULL)
+    return 0;
+
+  if (!read_section (unit->abfd, &stash->debug_sections[debug_addr],
+		     file->syms, 0,
+		     &file->dwarf_addr_buffer, &file->dwarf_addr_size))
+    return 0;
+
+  if (_bfd_mul_overflow (idx, unit->offset_size, &offset))
+    return 0;
+
+  offset += unit->dwarf_addr_offset;
+  if (offset < unit->dwarf_addr_offset
+      || offset > file->dwarf_addr_size
+      || file->dwarf_addr_size - offset < unit->offset_size)
+    return 0;
+
+  info_ptr = file->dwarf_addr_buffer + offset;
+
+  if (unit->offset_size == 4)
+    return bfd_get_32 (unit->abfd, info_ptr);
+  else if (unit->offset_size == 8)
+    return bfd_get_64 (unit->abfd, info_ptr);
+  else
+    return 0;
+}
+
+/* Returns the string using DW_AT_str_offsets_base.
+   Used to implement DW_FORM_strx*.  */
+static const char *
+read_indexed_string (uint64_t idx, struct comp_unit *unit)
+{
+  struct dwarf2_debug *stash = unit->stash;
+  struct dwarf2_debug_file *file = unit->file;
+  bfd_byte *info_ptr;
+  uint64_t str_offset;
+  size_t offset;
+
+  if (stash == NULL)
+    return NULL;
+
+  if (!read_section (unit->abfd, &stash->debug_sections[debug_str],
+		     file->syms, 0,
+		     &file->dwarf_str_buffer, &file->dwarf_str_size))
+    return NULL;
+
+  if (!read_section (unit->abfd, &stash->debug_sections[debug_str_offsets],
+		     file->syms, 0,
+		     &file->dwarf_str_offsets_buffer,
+		     &file->dwarf_str_offsets_size))
+    return NULL;
+
+  if (_bfd_mul_overflow (idx, unit->offset_size, &offset))
+    return NULL;
+
+  offset += unit->dwarf_str_offset;
+  if (offset < unit->dwarf_str_offset
+      || offset > file->dwarf_str_offsets_size
+      || file->dwarf_str_offsets_size - offset < unit->offset_size)
+    return NULL;
+
+  info_ptr = file->dwarf_str_offsets_buffer + offset;
+
+  if (unit->offset_size == 4)
+    str_offset = bfd_get_32 (unit->abfd, info_ptr);
+  else if (unit->offset_size == 8)
+    str_offset = bfd_get_64 (unit->abfd, info_ptr);
+  else
+    return NULL;
+
+  if (str_offset >= file->dwarf_str_size)
+    return NULL;
+  return (const char *) file->dwarf_str_buffer + str_offset;
 }
 
 /* Read and fill in the value of attribute ATTR as described by FORM.
@@ -1295,21 +1502,37 @@ read_attribute_value (struct attribute *  attr,
     case DW_FORM_ref1:
     case DW_FORM_flag:
     case DW_FORM_data1:
-    case DW_FORM_addrx1:
       attr->u.val = read_1_byte (abfd, &info_ptr, info_ptr_end);
       break;
+    case DW_FORM_addrx1:
+      attr->u.val = read_1_byte (abfd, &info_ptr, info_ptr_end);
+      /* dwarf_addr_offset value 0 indicates the attribute DW_AT_addr_base
+	 is not yet read.  */
+      if (unit->dwarf_addr_offset != 0)
+	attr->u.val = read_indexed_address (attr->u.val, unit);
+      break;
     case DW_FORM_data2:
-    case DW_FORM_addrx2:
     case DW_FORM_ref2:
       attr->u.val = read_2_bytes (abfd, &info_ptr, info_ptr_end);
       break;
+    case DW_FORM_addrx2:
+      attr->u.val = read_2_bytes (abfd, &info_ptr, info_ptr_end);
+      if (unit->dwarf_addr_offset != 0)
+	attr->u.val = read_indexed_address (attr->u.val, unit);
+      break;
     case DW_FORM_addrx3:
       attr->u.val = read_3_bytes (abfd, &info_ptr, info_ptr_end);
+      if (unit->dwarf_addr_offset != 0)
+	attr->u.val = read_indexed_address(attr->u.val, unit);
       break;
     case DW_FORM_ref4:
     case DW_FORM_data4:
+      attr->u.val = read_4_bytes (abfd, &info_ptr, info_ptr_end);
+      break;
     case DW_FORM_addrx4:
       attr->u.val = read_4_bytes (abfd, &info_ptr, info_ptr_end);
+      if (unit->dwarf_addr_offset != 0)
+	attr->u.val = read_indexed_address (attr->u.val, unit);
       break;
     case DW_FORM_data8:
     case DW_FORM_ref8:
@@ -1330,24 +1553,41 @@ read_attribute_value (struct attribute *  attr,
       break;
     case DW_FORM_strx1:
       attr->u.val = read_1_byte (abfd, &info_ptr, info_ptr_end);
-      attr->u.str = (char *) read_indexed_string (attr->u.val, unit);
+      /* dwarf_str_offset value 0 indicates the attribute DW_AT_str_offsets_base
+	 is not yet read.  */
+      if (unit->dwarf_str_offset != 0)
+	attr->u.str = (char *) read_indexed_string (attr->u.val, unit);
+      else
+	attr->u.str = NULL;
       break;
     case DW_FORM_strx2:
       attr->u.val = read_2_bytes (abfd, &info_ptr, info_ptr_end);
-      attr->u.str = (char *) read_indexed_string (attr->u.val, unit);
+      if (unit->dwarf_str_offset != 0)
+	attr->u.str = (char *) read_indexed_string (attr->u.val, unit);
+      else
+	attr->u.str = NULL;
       break;
     case DW_FORM_strx3:
       attr->u.val = read_3_bytes (abfd, &info_ptr, info_ptr_end);
-      attr->u.str = (char *) read_indexed_string (attr->u.val, unit);
+      if (unit->dwarf_str_offset != 0)
+	attr->u.str = (char *) read_indexed_string (attr->u.val, unit);
+      else
+	attr->u.str = NULL;
       break;
     case DW_FORM_strx4:
       attr->u.val = read_4_bytes (abfd, &info_ptr, info_ptr_end);
-      attr->u.str = (char *) read_indexed_string (attr->u.val, unit);
+      if (unit->dwarf_str_offset != 0)
+	attr->u.str = (char *) read_indexed_string (attr->u.val, unit);
+      else
+	attr->u.str = NULL;
       break;
     case DW_FORM_strx:
       attr->u.val = _bfd_safe_read_leb128 (abfd, &info_ptr,
 					   false, info_ptr_end);
-      attr->u.str = (char *) read_indexed_string (attr->u.val, unit);
+      if (unit->dwarf_str_offset != 0)
+	attr->u.str = (char *) read_indexed_string (attr->u.val, unit);
+      else
+	attr->u.str = NULL;
       break;
     case DW_FORM_exprloc:
     case DW_FORM_block:
@@ -1369,9 +1609,14 @@ read_attribute_value (struct attribute *  attr,
       break;
     case DW_FORM_ref_udata:
     case DW_FORM_udata:
+      attr->u.val = _bfd_safe_read_leb128 (abfd, &info_ptr,
+					   false, info_ptr_end);
+      break;
     case DW_FORM_addrx:
       attr->u.val = _bfd_safe_read_leb128 (abfd, &info_ptr,
 					   false, info_ptr_end);
+      if (unit->dwarf_addr_offset != 0)
+	attr->u.val = read_indexed_address (attr->u.val, unit);
       break;
     case DW_FORM_indirect:
       form = _bfd_safe_read_leb128 (abfd, &info_ptr,
@@ -1441,6 +1686,7 @@ non_mangled (int lang)
     case DW_LANG_PLI:
     case DW_LANG_UPC:
     case DW_LANG_C11:
+    case DW_LANG_Mips_Assembler:
       return true;
     }
 }
@@ -1500,39 +1746,39 @@ struct line_info_table
 struct funcinfo
 {
   /* Pointer to previous function in list of all functions.  */
-  struct funcinfo *	prev_func;
+  struct funcinfo *prev_func;
   /* Pointer to function one scope higher.  */
-  struct funcinfo *	caller_func;
+  struct funcinfo *caller_func;
   /* Source location file name where caller_func inlines this func.  */
-  char *		caller_file;
+  char *caller_file;
   /* Source location file name.  */
-  char *		file;
+  char *file;
   /* Source location line number where caller_func inlines this func.  */
-  int			caller_line;
+  int caller_line;
   /* Source location line number.  */
-  int			line;
-  int			tag;
-  bool			is_linkage;
-  const char *		name;
-  struct arange		arange;
+  int line;
+  int tag;
+  bool is_linkage;
+  const char *name;
+  struct arange arange;
   /* Where the symbol is defined.  */
-  asection *		sec;
+  asection *sec;
   /* The offset of the funcinfo from the start of the unit.  */
-  bfd_uint64_t          unit_offset;
+  uint64_t unit_offset;
 };
 
 struct lookup_funcinfo
 {
   /* Function information corresponding to this lookup table entry.  */
-  struct funcinfo *	funcinfo;
+  struct funcinfo *funcinfo;
 
   /* The lowest address for this specific function.  */
-  bfd_vma		low_addr;
+  bfd_vma low_addr;
 
   /* The highest address of this function before the lookup table is sorted.
      The highest address of all prior functions after the lookup table is
      sorted, which is used for binary search.  */
-  bfd_vma		high_addr;
+  bfd_vma high_addr;
   /* Index of this function, used to ensure qsort is stable.  */
   unsigned int idx;
 };
@@ -1542,7 +1788,7 @@ struct varinfo
   /* Pointer to previous variable in list of all variables.  */
   struct varinfo *prev_var;
   /* The offset of the varinfo from the start of the unit.  */
-  bfd_uint64_t unit_offset;
+  uint64_t unit_offset;
   /* Source location file name.  */
   char *file;
   /* Source location line number.  */
@@ -1766,15 +2012,210 @@ concat_filename (struct line_info_table *table, unsigned int file)
   return strdup (filename);
 }
 
+/* Number of bits in a bfd_vma.  */
+#define VMA_BITS (8 * sizeof (bfd_vma))
+
+/* Check whether [low1, high1) can be combined with [low2, high2),
+   i.e., they touch or overlap.  */
+static bool ranges_overlap (bfd_vma low1,
+			    bfd_vma high1,
+			    bfd_vma low2,
+			    bfd_vma high2)
+{
+  if (low1 == low2 || high1 == high2)
+    return true;
+
+  /* Sort so that low1 is below low2. */
+  if (low1 > low2)
+    {
+      bfd_vma tmp;
+
+      tmp = low1;
+      low1 = low2;
+      low2 = tmp;
+
+      tmp = high1;
+      high1 = high2;
+      high2 = tmp;
+    }
+
+  /* We touch iff low2 == high1.
+     We overlap iff low2 is within [low1, high1). */
+  return low2 <= high1;
+}
+
+/* Insert an address range in the trie mapping addresses to compilation units.
+   Will return the new trie node (usually the same as is being sent in, but
+   in case of a leaf-to-interior conversion, or expansion of a leaf, it may be
+   different), or NULL on failure.
+ */
+static struct trie_node *insert_arange_in_trie(bfd *abfd,
+					       struct trie_node *trie,
+					       bfd_vma trie_pc,
+					       unsigned int trie_pc_bits,
+					       struct comp_unit *unit,
+					       bfd_vma low_pc,
+					       bfd_vma high_pc)
+{
+  bfd_vma clamped_low_pc, clamped_high_pc;
+  int ch, from_ch, to_ch;
+  bool is_full_leaf = false;
+
+  /* See if we can extend any of the existing ranges.  This merging
+     isn't perfect (if merging opens up the possibility of merging two existing
+     ranges, we won't find them), but it takes the majority of the cases.  */
+  if (trie->num_room_in_leaf > 0)
+    {
+      struct trie_leaf *leaf = (struct trie_leaf *) trie;
+      unsigned int i;
+
+      for (i = 0; i < leaf->num_stored_in_leaf; ++i)
+	{
+	  if (leaf->ranges[i].unit == unit
+	      && ranges_overlap (low_pc, high_pc,
+				 leaf->ranges[i].low_pc,
+				 leaf->ranges[i].high_pc))
+	    {
+	      if (low_pc < leaf->ranges[i].low_pc)
+		leaf->ranges[i].low_pc = low_pc;
+	      if (high_pc > leaf->ranges[i].high_pc)
+		leaf->ranges[i].high_pc = high_pc;
+	      return trie;
+	    }
+	}
+
+      is_full_leaf = leaf->num_stored_in_leaf == trie->num_room_in_leaf;
+    }
+
+  /* If we're a leaf with no more room and we're _not_ at the bottom,
+     convert to an interior node.  */
+  if (is_full_leaf && trie_pc_bits < VMA_BITS)
+    {
+      const struct trie_leaf *leaf = (struct trie_leaf *) trie;
+      unsigned int i;
+
+      trie = bfd_zalloc (abfd, sizeof (struct trie_interior));
+      if (!trie)
+	return NULL;
+      is_full_leaf = false;
+
+      /* TODO: If we wanted to save a little more memory at the cost of
+	 complexity, we could have reused the old leaf node as one of the
+	 children of the new interior node, instead of throwing it away.  */
+      for (i = 0; i < leaf->num_stored_in_leaf; ++i)
+        {
+	  if (!insert_arange_in_trie (abfd, trie, trie_pc, trie_pc_bits,
+				      leaf->ranges[i].unit, leaf->ranges[i].low_pc,
+				      leaf->ranges[i].high_pc))
+	    return NULL;
+	}
+    }
+
+  /* If we're a leaf with no more room and we _are_ at the bottom,
+     we have no choice but to just make it larger. */
+  if (is_full_leaf)
+    {
+      const struct trie_leaf *leaf = (struct trie_leaf *) trie;
+      unsigned int new_room_in_leaf = trie->num_room_in_leaf * 2;
+      struct trie_leaf *new_leaf;
+      size_t amt = (sizeof (struct trie_leaf)
+		    + ((new_room_in_leaf - TRIE_LEAF_SIZE)
+		       * sizeof (leaf->ranges[0])));
+      new_leaf = bfd_zalloc (abfd, amt);
+      new_leaf->head.num_room_in_leaf = new_room_in_leaf;
+      new_leaf->num_stored_in_leaf = leaf->num_stored_in_leaf;
+
+      memcpy (new_leaf->ranges,
+	      leaf->ranges,
+	      leaf->num_stored_in_leaf * sizeof (leaf->ranges[0]));
+      trie = &new_leaf->head;
+      is_full_leaf = false;
+
+      /* Now the insert below will go through.  */
+    }
+
+  /* If we're a leaf (now with room), we can just insert at the end.  */
+  if (trie->num_room_in_leaf > 0)
+    {
+      struct trie_leaf *leaf = (struct trie_leaf *) trie;
+
+      unsigned int i = leaf->num_stored_in_leaf++;
+      leaf->ranges[i].unit = unit;
+      leaf->ranges[i].low_pc = low_pc;
+      leaf->ranges[i].high_pc = high_pc;
+      return trie;
+    }
+
+  /* Now we are definitely an interior node, so recurse into all
+     the relevant buckets.  */
+
+  /* Clamp the range to the current trie bucket.  */
+  clamped_low_pc = low_pc;
+  clamped_high_pc = high_pc;
+  if (trie_pc_bits > 0)
+    {
+      bfd_vma bucket_high_pc =
+	trie_pc + ((bfd_vma) -1 >> trie_pc_bits);  /* Inclusive.  */
+      if (clamped_low_pc < trie_pc)
+	clamped_low_pc = trie_pc;
+      if (clamped_high_pc > bucket_high_pc)
+	clamped_high_pc = bucket_high_pc;
+    }
+
+  /* Insert the ranges in all buckets that it spans.  */
+  from_ch = (clamped_low_pc >> (VMA_BITS - trie_pc_bits - 8)) & 0xff;
+  to_ch = ((clamped_high_pc - 1) >> (VMA_BITS - trie_pc_bits - 8)) & 0xff;
+  for (ch = from_ch; ch <= to_ch; ++ch)
+    {
+      struct trie_interior *interior = (struct trie_interior *) trie;
+      struct trie_node *child = interior->children[ch];
+
+      if (child == NULL)
+        {
+	  child = alloc_trie_leaf (abfd);
+	  if (!child)
+	    return NULL;
+	}
+      bfd_vma bucket = (bfd_vma) ch << (VMA_BITS - trie_pc_bits - 8);
+      child = insert_arange_in_trie (abfd,
+				     child,
+				     trie_pc + bucket,
+				     trie_pc_bits + 8,
+				     unit,
+				     low_pc,
+				     high_pc);
+      if (!child)
+	return NULL;
+
+      interior->children[ch] = child;
+    }
+
+    return trie;
+}
+
+
 static bool
-arange_add (const struct comp_unit *unit, struct arange *first_arange,
-	    bfd_vma low_pc, bfd_vma high_pc)
+arange_add (struct comp_unit *unit, struct arange *first_arange,
+	    struct trie_node **trie_root, bfd_vma low_pc, bfd_vma high_pc)
 {
   struct arange *arange;
 
   /* Ignore empty ranges.  */
   if (low_pc == high_pc)
     return true;
+
+  if (trie_root != NULL)
+    {
+      *trie_root = insert_arange_in_trie (unit->file->bfd_ptr,
+					  *trie_root,
+					  0,
+					  0,
+					  unit,
+					  low_pc,
+					  high_pc);
+      if (*trie_root == NULL)
+	return false;
+    }
 
   /* If the first arange is empty, use it.  */
   if (first_arange->high == 0)
@@ -2116,6 +2557,11 @@ read_formatted_entries (struct comp_unit *unit, bfd_byte **bufp,
 	    {
 	    case DW_FORM_string:
 	    case DW_FORM_line_strp:
+	    case DW_FORM_strx:
+	    case DW_FORM_strx1:
+	    case DW_FORM_strx2:
+	    case DW_FORM_strx3:
+	    case DW_FORM_strx4:
 	      *stringp = attr.u.str;
 	      break;
 
@@ -2410,7 +2856,8 @@ decode_line_info (struct comp_unit *unit)
 		    low_pc = address;
 		  if (address > high_pc)
 		    high_pc = address;
-		  if (!arange_add (unit, &unit->arange, low_pc, high_pc))
+		  if (!arange_add (unit, &unit->arange, &unit->file->trie_root,
+				   low_pc, high_pc))
 		    goto line_fail;
 		  break;
 		case DW_LNE_set_address:
@@ -2430,9 +2877,8 @@ decode_line_info (struct comp_unit *unit)
 		    goto line_fail;
 		  break;
 		case DW_LNE_set_discriminator:
-		  discriminator =
-		    _bfd_safe_read_leb128 (abfd, &line_ptr,
-					   false, line_end);
+		  discriminator = _bfd_safe_read_leb128 (abfd, &line_ptr,
+							 false, line_end);
 		  break;
 		case DW_LNE_HP_source_file_correlation:
 		  line_ptr += exop_len - 1;
@@ -2543,13 +2989,12 @@ decode_line_info (struct comp_unit *unit)
   return NULL;
 }
 
-/* If ADDR is within TABLE set the output parameters and return the
-   range of addresses covered by the entry used to fill them out.
-   Otherwise set * FILENAME_PTR to NULL and return 0.
+/* If ADDR is within TABLE set the output parameters and return TRUE,
+   otherwise set *FILENAME_PTR to NULL and return FALSE.
    The parameters FILENAME_PTR, LINENUMBER_PTR and DISCRIMINATOR_PTR
    are pointers to the objects to be filled in.  */
 
-static bfd_vma
+static bool
 lookup_address_in_line_info_table (struct line_info_table *table,
 				   bfd_vma addr,
 				   const char **filename_ptr,
@@ -2608,12 +3053,12 @@ lookup_address_in_line_info_table (struct line_info_table *table,
       *linenumber_ptr = info->line;
       if (discriminator_ptr)
 	*discriminator_ptr = info->discriminator;
-      return seq->last_line->address - seq->low_pc;
+      return true;
     }
 
  fail:
   *filename_ptr = NULL;
-  return 0;
+  return false;
 }
 
 /* Read in the .debug_ranges section for future reference.  */
@@ -2920,7 +3365,7 @@ find_abstract_instance (struct comp_unit *unit,
   bfd_byte *info_ptr_end;
   unsigned int abbrev_number, i;
   struct abbrev_info *abbrev;
-  bfd_uint64_t die_ref = attr_ptr->u.val;
+  uint64_t die_ref = attr_ptr->u.val;
   struct attribute attr;
   const char *name = NULL;
 
@@ -3134,7 +3579,7 @@ find_abstract_instance (struct comp_unit *unit,
 
 static bool
 read_ranges (struct comp_unit *unit, struct arange *arange,
-	     bfd_uint64_t offset)
+	     struct trie_node **trie_root, uint64_t offset)
 {
   bfd_byte *ranges_ptr;
   bfd_byte *ranges_end;
@@ -3169,7 +3614,7 @@ read_ranges (struct comp_unit *unit, struct arange *arange,
 	base_address = high_pc;
       else
 	{
-	  if (!arange_add (unit, arange,
+	  if (!arange_add (unit, arange, trie_root,
 			   base_address + low_pc, base_address + high_pc))
 	    return false;
 	}
@@ -3179,7 +3624,7 @@ read_ranges (struct comp_unit *unit, struct arange *arange,
 
 static bool
 read_rnglists (struct comp_unit *unit, struct arange *arange,
-	       bfd_uint64_t offset)
+	       struct trie_node **trie_root, uint64_t offset)
 {
   bfd_byte *rngs_ptr;
   bfd_byte *rngs_end;
@@ -3253,23 +3698,23 @@ read_rnglists (struct comp_unit *unit, struct arange *arange,
 	  return false;
 	}
 
-      if (!arange_add (unit, arange, low_pc, high_pc))
+      if (!arange_add (unit, arange, trie_root, low_pc, high_pc))
 	return false;
     }
 }
 
 static bool
 read_rangelist (struct comp_unit *unit, struct arange *arange,
-		bfd_uint64_t offset)
+		struct trie_node **trie_root, uint64_t offset)
 {
   if (unit->version <= 4)
-    return read_ranges (unit, arange, offset);
+    return read_ranges (unit, arange, trie_root, offset);
   else
-    return read_rnglists (unit, arange, offset);
+    return read_rnglists (unit, arange, trie_root, offset);
 }
 
 static struct funcinfo *
-lookup_func_by_offset (bfd_uint64_t offset, struct funcinfo * table)
+lookup_func_by_offset (uint64_t offset, struct funcinfo * table)
 {
   for (; table != NULL; table = table->prev_func)
     if (table->unit_offset == offset)
@@ -3278,7 +3723,7 @@ lookup_func_by_offset (bfd_uint64_t offset, struct funcinfo * table)
 }
 
 static struct varinfo *
-lookup_var_by_offset (bfd_uint64_t offset, struct varinfo * table)
+lookup_var_by_offset (uint64_t offset, struct varinfo * table)
 {
   while (table)
     {
@@ -3292,6 +3737,36 @@ lookup_var_by_offset (bfd_uint64_t offset, struct varinfo * table)
 
 
 /* DWARF2 Compilation unit functions.  */
+
+static struct funcinfo *
+reverse_funcinfo_list (struct funcinfo *head)
+{
+  struct funcinfo *rhead;
+  struct funcinfo *temp;
+
+  for (rhead = NULL; head; head = temp)
+    {
+      temp = head->prev_func;
+      head->prev_func = rhead;
+      rhead = head;
+    }
+  return rhead;
+}
+
+static struct varinfo *
+reverse_varinfo_list (struct varinfo *head)
+{
+  struct varinfo *rhead;
+  struct varinfo *temp;
+
+  for (rhead = NULL; head; head = temp)
+    {
+      temp = head->prev_var;
+      head->prev_var = rhead;
+      rhead = head;
+    }
+  return rhead;
+}
 
 /* Scan over each die in a comp. unit looking for functions to add
    to the function table and variables to the variable table.  */
@@ -3308,7 +3783,9 @@ scan_unit_for_symbols (struct comp_unit *unit)
     struct funcinfo *func;
   } *nested_funcs;
   int nested_funcs_size;
-
+  struct funcinfo *last_func;
+  struct varinfo *last_var;
+  
   /* Maintain a stack of in-scope functions and inlined functions, which we
      can use to set the caller_func field.  */
   nested_funcs_size = 32;
@@ -3328,7 +3805,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
       struct abbrev_info *abbrev;
       struct funcinfo *func;
       struct varinfo *var;
-      bfd_uint64_t current_offset;
+      uint64_t current_offset;
 
       /* PR 17512: file: 9f405d9d.  */
       if (info_ptr >= info_ptr_end)
@@ -3442,10 +3919,16 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	}
     }
 
+  unit->function_table = reverse_funcinfo_list (unit->function_table);
+  unit->variable_table = reverse_varinfo_list (unit->variable_table);
+
   /* This is the second pass over the abbrevs.  */      
   info_ptr = unit->first_child_die_ptr;
   nesting_level = 0;
   
+  last_func = NULL;
+  last_var = NULL;
+
   while (nesting_level >= 0)
     {
       unsigned int abbrev_number, i;
@@ -3456,7 +3939,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
       bfd_vma low_pc = 0;
       bfd_vma high_pc = 0;
       bool high_pc_relative = false;
-      bfd_uint64_t current_offset;
+      uint64_t current_offset;
 
       /* PR 17512: file: 9f405d9d.  */
       if (info_ptr >= info_ptr_end)
@@ -3481,16 +3964,32 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	  || abbrev->tag == DW_TAG_entry_point
 	  || abbrev->tag == DW_TAG_inlined_subroutine)
 	{
-	  func = lookup_func_by_offset (current_offset, unit->function_table);
+	  if (last_func
+	      && last_func->prev_func
+	      && last_func->prev_func->unit_offset == current_offset)
+	    func = last_func->prev_func;
+	  else
+	    func = lookup_func_by_offset (current_offset, unit->function_table);
+
 	  if (func == NULL)
 	    goto fail;
+
+	  last_func = func;
 	}
       else if (abbrev->tag == DW_TAG_variable
 	       || abbrev->tag == DW_TAG_member)
 	{
-	  var = lookup_var_by_offset (current_offset, unit->variable_table);
+	  if (last_var
+	      && last_var->prev_var
+	      && last_var->prev_var->unit_offset == current_offset)
+	    var = last_var->prev_var;
+	  else
+	    var = lookup_var_by_offset (current_offset, unit->variable_table);
+
 	  if (var == NULL)
 	    goto fail;
+
+	  last_var = var;
 	}
 
       for (i = 0; i < abbrev->num_attrs; ++i)
@@ -3563,7 +4062,8 @@ scan_unit_for_symbols (struct comp_unit *unit)
 
 		case DW_AT_ranges:
 		  if (is_int_form (&attr)
-		      && !read_rangelist (unit, &func->arange, attr.u.val))
+		      && !read_rangelist (unit, &func->arange,
+					  &unit->file->trie_root, attr.u.val))
 		    goto fail;
 		  break;
 
@@ -3679,10 +4179,14 @@ scan_unit_for_symbols (struct comp_unit *unit)
 
       if (func && high_pc != 0)
 	{
-	  if (!arange_add (unit, &func->arange, low_pc, high_pc))
+	  if (!arange_add (unit, &func->arange, &unit->file->trie_root,
+			   low_pc, high_pc))
 	    goto fail;
 	}
     }
+
+  unit->function_table = reverse_funcinfo_list (unit->function_table);
+  unit->variable_table = reverse_varinfo_list (unit->variable_table);
 
   free (nested_funcs);
   return true;
@@ -3690,6 +4194,80 @@ scan_unit_for_symbols (struct comp_unit *unit)
  fail:
   free (nested_funcs);
   return false;
+}
+
+/* Read the attributes of the form strx and addrx.  */
+
+static void
+reread_attribute (struct comp_unit *unit,
+		  struct attribute *attr,
+		  bfd_vma *low_pc,
+		  bfd_vma *high_pc,
+		  bool *high_pc_relative,
+		  bool compunit)
+{
+  if (is_strx_form (attr->form))
+    attr->u.str = (char *) read_indexed_string (attr->u.val, unit);
+  if (is_addrx_form (attr->form))
+    attr->u.val = read_indexed_address (attr->u.val, unit);
+
+  switch (attr->name)
+    {
+    case DW_AT_stmt_list:
+      unit->stmtlist = 1;
+      unit->line_offset = attr->u.val;
+      break;
+
+    case DW_AT_name:
+      if (is_str_form (attr))
+	unit->name = attr->u.str;
+      break;
+
+    case DW_AT_low_pc:
+      *low_pc = attr->u.val;
+      if (compunit)
+	unit->base_address = *low_pc;
+      break;
+
+    case DW_AT_high_pc:
+      *high_pc = attr->u.val;
+      *high_pc_relative = attr->form != DW_FORM_addr;
+      break;
+
+    case DW_AT_ranges:
+      if (!read_rangelist (unit, &unit->arange,
+			   &unit->file->trie_root, attr->u.val))
+	return;
+      break;
+
+    case DW_AT_comp_dir:
+      {
+	char *comp_dir = attr->u.str;
+
+	if (!is_str_form (attr))
+	  {
+	    _bfd_error_handler
+	      (_("DWARF error: DW_AT_comp_dir attribute encountered "
+		 "with a non-string form"));
+	    comp_dir = NULL;
+	  }
+
+	if (comp_dir)
+	  {
+	    char *cp = strchr (comp_dir, ':');
+
+	    if (cp && cp != comp_dir && cp[-1] == '.' && cp[1] == '/')
+	      comp_dir = cp + 1;
+	  }
+	unit->comp_dir = comp_dir;
+	break;
+      }
+
+    case DW_AT_language:
+      unit->lang = attr->u.val;
+    default:
+      break;
+    }
 }
 
 /* Parse a DWARF2 compilation unit starting at INFO_PTR.  UNIT_LENGTH
@@ -3711,7 +4289,7 @@ parse_comp_unit (struct dwarf2_debug *stash,
 {
   struct comp_unit* unit;
   unsigned int version;
-  bfd_uint64_t abbrev_offset = 0;
+  uint64_t abbrev_offset = 0;
   /* Initialize it just to avoid a GCC false warning.  */
   unsigned int addr_size = -1;
   struct abbrev_info** abbrevs;
@@ -3725,6 +4303,10 @@ parse_comp_unit (struct dwarf2_debug *stash,
   bfd *abfd = file->bfd_ptr;
   bool high_pc_relative = false;
   enum dwarf_unit_type unit_type;
+  struct attribute *str_addrp = NULL;
+  size_t str_count = 0;
+  size_t str_alloc = 0;
+  bool compunit_flag = false;
 
   version = read_2_bytes (abfd, &info_ptr, end_ptr);
   if (version < 2 || version > 5)
@@ -3829,11 +4411,33 @@ parse_comp_unit (struct dwarf2_debug *stash,
   unit->file = file;
   unit->info_ptr_unit = info_ptr_unit;
 
+  if (abbrev->tag == DW_TAG_compile_unit)
+    compunit_flag = true;
+
   for (i = 0; i < abbrev->num_attrs; ++i)
     {
       info_ptr = read_attribute (&attr, &abbrev->attrs[i], unit, info_ptr, end_ptr);
       if (info_ptr == NULL)
-	return NULL;
+	goto err_exit;
+
+      /* Identify attributes of the form strx* and addrx* which come before
+	 DW_AT_str_offsets_base and DW_AT_addr_base respectively in the CU.
+	 Store the attributes in an array and process them later.  */
+      if ((unit->dwarf_str_offset == 0 && is_strx_form (attr.form))
+	  || (unit->dwarf_addr_offset == 0 && is_addrx_form (attr.form)))
+	{
+	  if (str_count <= str_alloc)
+	    {
+	      str_alloc = 2 * str_alloc + 200;
+	      str_addrp = bfd_realloc (str_addrp,
+				       str_alloc * sizeof (*str_addrp));
+	      if (str_addrp == NULL)
+		goto err_exit;
+	    }
+	  str_addrp[str_count] = attr;
+	  str_count++;
+	  continue;
+	}
 
       /* Store the data if it is of an attribute we want to keep in a
 	 partial symbol table.  */
@@ -3859,7 +4463,7 @@ parse_comp_unit (struct dwarf2_debug *stash,
 	      /* If the compilation unit DIE has a DW_AT_low_pc attribute,
 		 this is the base address to use when reading location
 		 lists or range lists.  */
-	      if (abbrev->tag == DW_TAG_compile_unit)
+	      if (compunit_flag)
 		unit->base_address = low_pc;
 	    }
 	  break;
@@ -3874,8 +4478,9 @@ parse_comp_unit (struct dwarf2_debug *stash,
 
 	case DW_AT_ranges:
 	  if (is_int_form (&attr)
-	      && !read_rangelist (unit, &unit->arange, attr.u.val))
-	    return NULL;
+	      && !read_rangelist (unit, &unit->arange,
+				  &unit->file->trie_root, attr.u.val))
+	    goto err_exit;
 	  break;
 
 	case DW_AT_comp_dir:
@@ -3908,20 +4513,41 @@ parse_comp_unit (struct dwarf2_debug *stash,
 	    unit->lang = attr.u.val;
 	  break;
 
+	case DW_AT_addr_base:
+	  unit->dwarf_addr_offset = attr.u.val;
+	  break;
+
+	case DW_AT_str_offsets_base:
+	  unit->dwarf_str_offset = attr.u.val;
+	  break;
+
 	default:
 	  break;
 	}
     }
+
+  for (i = 0; i < str_count; ++i)
+    reread_attribute (unit, &str_addrp[i], &low_pc, &high_pc,
+		      &high_pc_relative, compunit_flag);
+
   if (high_pc_relative)
     high_pc += low_pc;
   if (high_pc != 0)
     {
-      if (!arange_add (unit, &unit->arange, low_pc, high_pc))
-	return NULL;
+      if (!arange_add (unit, &unit->arange, &unit->file->trie_root,
+		       low_pc, high_pc))
+	goto err_exit;
     }
 
   unit->first_child_die_ptr = info_ptr;
+
+  free (str_addrp);
   return unit;
+
+ err_exit:
+  unit->error = 1;
+  free (str_addrp);
+  return NULL;
 }
 
 /* Return TRUE if UNIT may contain the address given by ADDR.  When
@@ -3951,14 +4577,11 @@ comp_unit_contains_address (struct comp_unit *unit, bfd_vma addr)
 }
 
 /* If UNIT contains ADDR, set the output parameters to the values for
-   the line containing ADDR.  The output parameters, FILENAME_PTR,
-   FUNCTION_PTR, and LINENUMBER_PTR, are pointers to the objects
-   to be filled in.
+   the line containing ADDR and return TRUE.  Otherwise return FALSE.
+   The output parameters, FILENAME_PTR, FUNCTION_PTR, and
+   LINENUMBER_PTR, are pointers to the objects to be filled in.  */
 
-   Returns the range of addresses covered by the entry that was used
-   to fill in *LINENUMBER_PTR or 0 if it was not filled in.  */
-
-static bfd_vma
+static bool
 comp_unit_find_nearest_line (struct comp_unit *unit,
 			     bfd_vma addr,
 			     const char **filename_ptr,
@@ -3966,7 +4589,7 @@ comp_unit_find_nearest_line (struct comp_unit *unit,
 			     unsigned int *linenumber_ptr,
 			     unsigned int *discriminator_ptr)
 {
-  bool func_p;
+  bool line_p, func_p;
 
   if (!comp_unit_maybe_decode_line_info (unit))
     return false;
@@ -3976,10 +4599,11 @@ comp_unit_find_nearest_line (struct comp_unit *unit,
   if (func_p && (*function_ptr)->tag == DW_TAG_inlined_subroutine)
     unit->stash->inliner_chain = *function_ptr;
 
-  return lookup_address_in_line_info_table (unit->line_table, addr,
-					    filename_ptr,
-					    linenumber_ptr,
-					    discriminator_ptr);
+  line_p = lookup_address_in_line_info_table (unit->line_table, addr,
+					      filename_ptr,
+					      linenumber_ptr,
+					      discriminator_ptr);
+  return line_p || func_p;
 }
 
 /* Check to see if line info is already decoded in a comp_unit.
@@ -4045,36 +4669,6 @@ comp_unit_find_line (struct comp_unit *unit,
   return lookup_symbol_in_variable_table (unit, sym, addr,
 					  filename_ptr,
 					  linenumber_ptr);
-}
-
-static struct funcinfo *
-reverse_funcinfo_list (struct funcinfo *head)
-{
-  struct funcinfo *rhead;
-  struct funcinfo *temp;
-
-  for (rhead = NULL; head; head = temp)
-    {
-      temp = head->prev_func;
-      head->prev_func = rhead;
-      rhead = head;
-    }
-  return rhead;
-}
-
-static struct varinfo *
-reverse_varinfo_list (struct varinfo *head)
-{
-  struct varinfo *rhead;
-  struct varinfo *temp;
-
-  for (rhead = NULL; head; head = temp)
-    {
-      temp = head->prev_var;
-      head->prev_var = rhead;
-      rhead = head;
-    }
-  return rhead;
 }
 
 /* Extract all interesting funcinfos and varinfos of a compilation
@@ -4747,6 +5341,14 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
   if (!stash->alt.abbrev_offsets)
     return false;
 
+  stash->f.trie_root = alloc_trie_leaf (abfd);
+  if (!stash->f.trie_root)
+    return false;
+
+  stash->alt.trie_root = alloc_trie_leaf (abfd);
+  if (!stash->alt.trie_root)
+    return false;
+
   *pinfo = stash;
 
   if (debug_bfd == NULL)
@@ -4918,6 +5520,12 @@ stash_comp_unit (struct dwarf2_debug *stash, struct dwarf2_debug_file *file)
 	  each->next_unit = file->all_comp_units;
 	  file->all_comp_units = each;
 
+	  if (each->arange.high == 0)
+	    {
+	      each->next_unit_without_ranges = file->all_comp_units_without_ranges;
+	      file->all_comp_units_without_ranges = each->next_unit_without_ranges;
+	    }
+
 	  file->info_ptr += length;
 	  return each;
 	}
@@ -4991,14 +5599,14 @@ _bfd_dwarf2_find_symbol_bias (asymbol ** symbols, void ** pinfo)
 	  {
 	    asymbol search, *sym;
 
-	    /* FIXME: Do we need to scan the aranges looking for the lowest pc value ?  */
+	    /* FIXME: Do we need to scan the aranges looking for the
+	       lowest pc value?  */
 
 	    search.name = func->name;
 	    sym = htab_find (sym_hash, &search);
 	    if (sym != NULL)
 	      {
-		result = ((bfd_signed_vma) func->arange.low) -
-		  ((bfd_signed_vma) (sym->value + sym->section->vma));
+		result = func->arange.low - (sym->value + sym->section->vma);
 		goto done;
 	      }
 	  }
@@ -5160,54 +5768,65 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
     }
   else
     {
-      bfd_vma min_range = (bfd_vma) -1;
-      const char * local_filename = NULL;
-      struct funcinfo *local_function = NULL;
-      unsigned int local_linenumber = 0;
-      unsigned int local_discriminator = 0;
+      struct trie_node *trie = stash->f.trie_root;
+      unsigned int bits = VMA_BITS - 8;
+      struct comp_unit **prev_each;
 
-      for (each = stash->f.all_comp_units; each; each = each->next_unit)
+      /* Traverse interior nodes until we get to a leaf.  */
+      while (trie && trie->num_room_in_leaf == 0)
 	{
-	  bfd_vma range = (bfd_vma) -1;
-
-	  found = ((each->arange.high == 0
-		    || comp_unit_contains_address (each, addr))
-		   && (range = (comp_unit_find_nearest_line
-				(each, addr, &local_filename,
-				 &local_function, &local_linenumber,
-				 &local_discriminator))) != 0);
-	  if (found)
-	    {
-	      /* PRs 15935 15994: Bogus debug information may have provided us
-		 with an erroneous match.  We attempt to counter this by
-		 selecting the match that has the smallest address range
-		 associated with it.  (We are assuming that corrupt debug info
-		 will tend to result in extra large address ranges rather than
-		 extra small ranges).
-
-		 This does mean that we scan through all of the CUs associated
-		 with the bfd each time this function is called.  But this does
-		 have the benefit of producing consistent results every time the
-		 function is called.  */
-	      if (range <= min_range)
-		{
-		  if (filename_ptr && local_filename)
-		    * filename_ptr = local_filename;
-		  if (local_function)
-		    function = local_function;
-		  if (discriminator_ptr && local_discriminator)
-		    * discriminator_ptr = local_discriminator;
-		  if (local_linenumber)
-		    * linenumber_ptr = local_linenumber;
-		  min_range = range;
-		}
-	    }
+	  int ch = (addr >> bits) & 0xff;
+	  trie = ((struct trie_interior *) trie)->children[ch];
+	  bits -= 8;
 	}
 
-      if (* linenumber_ptr)
+      if (trie)
 	{
-	  found = true;
-	  goto done;
+	  const struct trie_leaf *leaf = (struct trie_leaf *) trie;
+	  unsigned int i;
+
+	  for (i = 0; i < leaf->num_stored_in_leaf; ++i)
+	    leaf->ranges[i].unit->mark = false;
+
+	  for (i = 0; i < leaf->num_stored_in_leaf; ++i)
+	    {
+	      struct comp_unit *unit = leaf->ranges[i].unit;
+	      if (unit->mark
+		  || addr < leaf->ranges[i].low_pc
+		  || addr >= leaf->ranges[i].high_pc)
+	        continue;
+	      unit->mark = true;
+
+	      found = comp_unit_find_nearest_line (unit, addr,
+						   filename_ptr,
+						   &function,
+						   linenumber_ptr,
+						   discriminator_ptr);
+	      if (found)
+		goto done;
+	   }
+	}
+
+      /* Also scan through all compilation units without any ranges,
+         taking them out of the list if they have acquired any since
+	 last time.  */
+      prev_each = &stash->f.all_comp_units_without_ranges;
+      for (each = *prev_each; each; each = each->next_unit_without_ranges)
+        {
+	  if (each->arange.high != 0)
+	    {
+	      *prev_each = each->next_unit_without_ranges;
+	      continue;
+	    }
+
+	  found = comp_unit_find_nearest_line (each, addr,
+					       filename_ptr,
+					       &function,
+					       linenumber_ptr,
+					       discriminator_ptr);
+	  if (found)
+	    goto done;
+	  prev_each = &each->next_unit_without_ranges;
 	}
     }
 
@@ -5232,7 +5851,7 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 						 filename_ptr,
 						 &function,
 						 linenumber_ptr,
-						 discriminator_ptr) != 0);
+						 discriminator_ptr));
 
       if (found)
 	break;
@@ -5240,7 +5859,11 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 
  done:
   if (functionname_ptr && function && function->is_linkage)
-    *functionname_ptr = function->name;
+    {
+      *functionname_ptr = function->name;
+      if (!found)
+        found = 2;
+    }
   else if (functionname_ptr
 	   && (!*functionname_ptr
 	       || (function && !function->is_linkage)))
@@ -5264,8 +5887,9 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 	  sec_vma = section->vma;
 	  if (section->output_section != NULL)
 	    sec_vma = section->output_section->vma + section->output_offset;
-	  if (fun != NULL
-	      && fun->value + sec_vma == function->arange.low)
+	  if (fun == NULL)
+	    *functionname_ptr = function->name;
+	  else if (fun->value + sec_vma == function->arange.low)
 	    function->name = *functionname_ptr;
 	  /* Even if we didn't find a linkage name, say that we have
 	     to stop a repeated search of symbols.  */

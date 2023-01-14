@@ -375,18 +375,18 @@ show_endian (struct ui_file *file, int from_tty, struct cmd_list_element *c,
 {
   if (target_byte_order_user == BFD_ENDIAN_UNKNOWN)
     if (gdbarch_byte_order (get_current_arch ()) == BFD_ENDIAN_BIG)
-      fprintf_filtered (file, _("The target endianness is set automatically "
-				"(currently big endian).\n"));
+      gdb_printf (file, _("The target endianness is set automatically "
+			  "(currently big endian).\n"));
     else
-      fprintf_filtered (file, _("The target endianness is set automatically "
-				"(currently little endian).\n"));
+      gdb_printf (file, _("The target endianness is set automatically "
+			  "(currently little endian).\n"));
   else
     if (target_byte_order_user == BFD_ENDIAN_BIG)
-      fprintf_filtered (file,
-			_("The target is set to big endian.\n"));
+      gdb_printf (file,
+		  _("The target is set to big endian.\n"));
     else
-      fprintf_filtered (file,
-			_("The target is set to little endian.\n"));
+      gdb_printf (file,
+		  _("The target is set to little endian.\n"));
 }
 
 static void
@@ -405,8 +405,8 @@ set_endian (const char *ignore_args, int from_tty, struct cmd_list_element *c)
     {
       info.byte_order = BFD_ENDIAN_LITTLE;
       if (! gdbarch_update_p (info))
-	fprintf_unfiltered (gdb_stderr,
-			    _("Little endian target not supported by GDB\n"));
+	gdb_printf (gdb_stderr,
+		    _("Little endian target not supported by GDB\n"));
       else
 	target_byte_order_user = BFD_ENDIAN_LITTLE;
     }
@@ -414,8 +414,8 @@ set_endian (const char *ignore_args, int from_tty, struct cmd_list_element *c)
     {
       info.byte_order = BFD_ENDIAN_BIG;
       if (! gdbarch_update_p (info))
-	fprintf_unfiltered (gdb_stderr,
-			    _("Big endian target not supported by GDB\n"));
+	gdb_printf (gdb_stderr,
+		    _("Big endian target not supported by GDB\n"));
       else
 	target_byte_order_user = BFD_ENDIAN_BIG;
     }
@@ -535,12 +535,12 @@ show_architecture (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
   if (target_architecture_user == NULL)
-    fprintf_filtered (file, _("The target architecture is set to "
-			      "\"auto\" (currently \"%s\").\n"),
-		      gdbarch_bfd_arch_info (get_current_arch ())->printable_name);
+    gdb_printf (file, _("The target architecture is set to "
+			"\"auto\" (currently \"%s\").\n"),
+		gdbarch_bfd_arch_info (get_current_arch ())->printable_name);
   else
-    fprintf_filtered (file, _("The target architecture is set to \"%s\".\n"),
-		      set_architecture_string);
+    gdb_printf (file, _("The target architecture is set to \"%s\".\n"),
+		set_architecture_string);
 }
 
 
@@ -569,9 +569,9 @@ set_architecture (const char *ignore_args,
       if (gdbarch_update_p (info))
 	target_architecture_user = info.bfd_arch_info;
       else
-	fprintf_unfiltered (gdb_stderr,
-			    _("Architecture `%s' not recognized.\n"),
-			    set_architecture_string);
+	gdb_printf (gdb_stderr,
+		    _("Architecture `%s' not recognized.\n"),
+		    set_architecture_string);
     }
   show_architecture (gdb_stdout, from_tty, NULL, NULL);
 }
@@ -599,8 +599,8 @@ gdbarch_update_p (struct gdbarch_info info)
   if (new_gdbarch == NULL)
     {
       if (gdbarch_debug)
-	fprintf_unfiltered (gdb_stdlog, "gdbarch_update_p: "
-			    "Architecture not found\n");
+	gdb_printf (gdb_stdlog, "gdbarch_update_p: "
+		    "Architecture not found\n");
       return 0;
     }
 
@@ -609,19 +609,19 @@ gdbarch_update_p (struct gdbarch_info info)
   if (new_gdbarch == target_gdbarch ())
     {
       if (gdbarch_debug)
-	fprintf_unfiltered (gdb_stdlog, "gdbarch_update_p: "
-			    "Architecture %s (%s) unchanged\n",
-			    host_address_to_string (new_gdbarch),
-			    gdbarch_bfd_arch_info (new_gdbarch)->printable_name);
+	gdb_printf (gdb_stdlog, "gdbarch_update_p: "
+		    "Architecture %s (%s) unchanged\n",
+		    host_address_to_string (new_gdbarch),
+		    gdbarch_bfd_arch_info (new_gdbarch)->printable_name);
       return 1;
     }
 
   /* It's a new architecture, swap it in.  */
   if (gdbarch_debug)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_update_p: "
-			"New architecture %s (%s) selected\n",
-			host_address_to_string (new_gdbarch),
-			gdbarch_bfd_arch_info (new_gdbarch)->printable_name);
+    gdb_printf (gdb_stdlog, "gdbarch_update_p: "
+		"New architecture %s (%s) selected\n",
+		host_address_to_string (new_gdbarch),
+		gdbarch_bfd_arch_info (new_gdbarch)->printable_name);
   set_target_gdbarch (new_gdbarch);
 
   return 1;
@@ -1106,7 +1106,7 @@ static void
 show_gdbarch_debug (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Architecture debugging is %s.\n"), value);
+  gdb_printf (file, _("Architecture debugging is %s.\n"), value);
 }
 
 static const char *
@@ -1202,7 +1202,7 @@ struct gdbarch_tdep *
 gdbarch_tdep (struct gdbarch *gdbarch)
 {
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_tdep called\n");
+    gdb_printf (gdb_stdlog, "gdbarch_tdep called\n");
   return gdbarch->tdep;
 }
 
@@ -1385,9 +1385,9 @@ gdbarch_register (enum bfd_architecture bfd_architecture,
     }
   /* log it */
   if (gdbarch_debug)
-    fprintf_unfiltered (gdb_stdlog, "register_gdbarch_init (%s, %s)\n",
-			bfd_arch_info->printable_name,
-			host_address_to_string (init));
+    gdb_printf (gdb_stdlog, "register_gdbarch_init (%s, %s)\n",
+		bfd_arch_info->printable_name,
+		host_address_to_string (init));
   /* Append it */
   (*curr) = XNEW (struct gdbarch_registration);
   (*curr)->bfd_architecture = bfd_architecture;
@@ -1446,23 +1446,23 @@ gdbarch_find_by_info (struct gdbarch_info info)
 
   if (gdbarch_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_find_by_info: info.bfd_arch_info %s\n",
-			  (info.bfd_arch_info != NULL
-			   ? info.bfd_arch_info->printable_name
-			   : "(null)"));
-      fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_find_by_info: info.byte_order %d (%s)\n",
-			  info.byte_order,
-			  (info.byte_order == BFD_ENDIAN_BIG ? "big"
-			   : info.byte_order == BFD_ENDIAN_LITTLE ? "little"
-			   : "default"));
-      fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_find_by_info: info.osabi %d (%s)\n",
-			  info.osabi, gdbarch_osabi_name (info.osabi));
-      fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_find_by_info: info.abfd %s\n",
-			  host_address_to_string (info.abfd));
+      gdb_printf (gdb_stdlog,
+		  "gdbarch_find_by_info: info.bfd_arch_info %s\n",
+		  (info.bfd_arch_info != NULL
+		   ? info.bfd_arch_info->printable_name
+		   : "(null)"));
+      gdb_printf (gdb_stdlog,
+		  "gdbarch_find_by_info: info.byte_order %d (%s)\n",
+		  info.byte_order,
+		  (info.byte_order == BFD_ENDIAN_BIG ? "big"
+		   : info.byte_order == BFD_ENDIAN_LITTLE ? "little"
+		   : "default"));
+      gdb_printf (gdb_stdlog,
+		  "gdbarch_find_by_info: info.osabi %d (%s)\n",
+		  info.osabi, gdbarch_osabi_name (info.osabi));
+      gdb_printf (gdb_stdlog,
+		  "gdbarch_find_by_info: info.abfd %s\n",
+		  host_address_to_string (info.abfd));
     }
 
   /* Find the tdep code that knows about this architecture.  */
@@ -1474,8 +1474,8 @@ gdbarch_find_by_info (struct gdbarch_info info)
   if (rego == NULL)
     {
       if (gdbarch_debug)
-	fprintf_unfiltered (gdb_stdlog, "gdbarch_find_by_info: "
-			    "No matching architecture\n");
+	gdb_printf (gdb_stdlog, "gdbarch_find_by_info: "
+		    "No matching architecture\n");
       return 0;
     }
 
@@ -1487,8 +1487,8 @@ gdbarch_find_by_info (struct gdbarch_info info)
   if (new_gdbarch == NULL)
     {
       if (gdbarch_debug)
-	fprintf_unfiltered (gdb_stdlog, "gdbarch_find_by_info: "
-			    "Target rejected architecture\n");
+	gdb_printf (gdb_stdlog, "gdbarch_find_by_info: "
+		    "Target rejected architecture\n");
       return NULL;
     }
 
@@ -1500,10 +1500,10 @@ gdbarch_find_by_info (struct gdbarch_info info)
       struct gdbarch_list **list;
       struct gdbarch_list *self;
       if (gdbarch_debug)
-	fprintf_unfiltered (gdb_stdlog, "gdbarch_find_by_info: "
-			    "Previous architecture %s (%s) selected\n",
-			    host_address_to_string (new_gdbarch),
-			    new_gdbarch->bfd_arch_info->printable_name);
+	gdb_printf (gdb_stdlog, "gdbarch_find_by_info: "
+		    "Previous architecture %s (%s) selected\n",
+		    host_address_to_string (new_gdbarch),
+		    new_gdbarch->bfd_arch_info->printable_name);
       /* Find the existing arch in the list.  */
       for (list = &rego->arches;
 	   (*list) != NULL && (*list)->gdbarch != new_gdbarch;
@@ -1522,10 +1522,10 @@ gdbarch_find_by_info (struct gdbarch_info info)
 
   /* It's a new architecture.  */
   if (gdbarch_debug)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_find_by_info: "
-			"New architecture %s (%s) selected\n",
-			host_address_to_string (new_gdbarch),
-			new_gdbarch->bfd_arch_info->printable_name);
+    gdb_printf (gdb_stdlog, "gdbarch_find_by_info: "
+		"New architecture %s (%s) selected\n",
+		host_address_to_string (new_gdbarch),
+		new_gdbarch->bfd_arch_info->printable_name);
 
   /* Insert the new architecture into the front of the architecture
      list (keep the list sorted Most Recently Used).  */

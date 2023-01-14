@@ -513,6 +513,47 @@ if { ![is_elf_format] } then {
     }
 }
 
+# Test objdump -Wi on a file containing dwarf-5 encodings information.
+
+if { ![is_elf_format] } then {
+    unsupported "objdump DW_OP_* test"
+} elseif { ![binutils_assemble $srcdir/$subdir/dw5-op.S tmpdir/dw5-op.${obj}] } then {
+    fail "objdump DW_OP_* test"
+} else {
+    if [is_remote host] {
+       set op_testfile [remote_download host tmpdir/dw5-op.${obj}]
+    } else {
+       set op_testfile tmpdir/dw5-op.${obj}
+    }
+
+    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -Wi $op_testfile" "" "/dev/null" "objdump.out"]
+
+    if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
+       fail "objdump -Wi (reason: unexpected output)"
+       send_log $got
+       send_log "\n"
+    }
+
+    set got [remote_exec host "tail -n +4 objdump.out" "" "/dev/null" "objdump.out"]
+    set output [remote_upload host objdump.out]
+
+    if ![file size $output] then {
+       # If the output file is empty, then this target does not
+       # generate dwarf2 output.  This is not a failure.
+       verbose "No output from 'objdump -Wi'"
+       untested "objdump -Wi"
+       return
+    }
+
+    if { [regexp_diff objdump.out $srcdir/$subdir/dw5-op.W] } then {
+       fail "objdump -Wi for DW_OP_*"
+    } else {
+       pass "objdump -Wi for DW_OP_*"
+    }
+
+    file_on_host delete $output
+}
+
 proc test_build_id_debuglink {} {
     global srcdir
     global subdir
@@ -817,7 +858,7 @@ proc test_objdump_S { } {
     global OBJDUMP
     global OBJDUMPFLAGS
     global exe
-    
+
     set test "objdump -S"
 
     if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog${exe} executable debug] != "" } {

@@ -4,7 +4,7 @@
 .*: .*
 
 RELOCATION RECORDS FOR .*
-OFFSET +TYPE +VALUE 
+OFFSET +TYPE +VALUE
 0+ .*(\.data|label_i)(|\+0xf+e|\+0xf+c|\+0xf+8|-0x0*2|-0x0*4|-0x0*8)
 
 Contents of section .*

@@ -187,9 +187,9 @@ bpscm_print_breakpoint_smob (SCM self, SCM port, scm_print_state *pstate)
       gdbscm_printf (port, " hit:%d", b->hit_count);
       gdbscm_printf (port, " ignore:%d", b->ignore_count);
 
-      if (b->location != nullptr)
+      if (b->locspec != nullptr)
 	{
-	  const char *str = event_location_to_string (b->location.get ());
+	  const char *str = b->locspec->to_string ();
 	  if (str != nullptr)
 	    gdbscm_printf (port, " @%s", str);
 	}
@@ -353,8 +353,8 @@ gdbscm_make_breakpoint (SCM location_scm, SCM rest)
   char *location;
   int type_arg_pos = -1, access_type_arg_pos = -1,
       internal_arg_pos = -1, temporary_arg_pos = -1;
-  enum bptype type = bp_breakpoint;
-  enum target_hw_bp_type access_type = hw_write;
+  int type = bp_breakpoint;
+  int access_type = hw_write;
   int internal = 0;
   int temporary = 0;
   SCM result;
@@ -403,7 +403,7 @@ gdbscm_make_breakpoint (SCM location_scm, SCM rest)
     case bp_access_watchpoint:
     case bp_catchpoint:
       {
-	const char *type_name = bpscm_type_to_string (type);
+	const char *type_name = bpscm_type_to_string ((enum bptype) type);
 	gdbscm_misc_error (FUNC_NAME, type_arg_pos,
 			   gdbscm_scm_from_c_string (type_name),
 			   _("unsupported breakpoint type"));
@@ -417,8 +417,8 @@ gdbscm_make_breakpoint (SCM location_scm, SCM rest)
 
   bp_smob->is_scheme_bkpt = 1;
   bp_smob->spec.location = location;
-  bp_smob->spec.type = type;
-  bp_smob->spec.access_type = access_type;
+  bp_smob->spec.type = (enum bptype) type;
+  bp_smob->spec.access_type = (enum target_hw_bp_type) access_type;
   bp_smob->spec.is_internal = internal;
   bp_smob->spec.is_temporary = temporary;
 
@@ -448,10 +448,10 @@ gdbscm_register_breakpoint_x (SCM self)
   pending_breakpoint_scm = self;
   location = bp_smob->spec.location;
   copy = skip_spaces (location);
-  event_location_up eloc
-    = string_to_event_location_basic (&copy,
-				      current_language,
-				      symbol_name_match_type::WILD);
+  location_spec_up locspec
+    = string_to_location_spec_basic (&copy,
+				     current_language,
+				     symbol_name_match_type::WILD);
 
   try
     {
@@ -463,9 +463,9 @@ gdbscm_register_breakpoint_x (SCM self)
 	case bp_breakpoint:
 	  {
 	    const breakpoint_ops *ops =
-	      breakpoint_ops_for_event_location (eloc.get (), false);
+	      breakpoint_ops_for_location_spec (locspec.get (), false);
 	    create_breakpoint (get_current_arch (),
-			       eloc.get (), NULL, -1, NULL, false,
+			       locspec.get (), NULL, -1, NULL, false,
 			       0,
 			       temporary, bp_breakpoint,
 			       0,
@@ -855,13 +855,12 @@ gdbscm_breakpoint_location (SCM self)
 {
   breakpoint_smob *bp_smob
     = bpscm_get_valid_breakpoint_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
-  const char *str;
 
   if (bp_smob->bp->type != bp_breakpoint)
     return SCM_BOOL_F;
 
-  str = event_location_to_string (bp_smob->bp->location.get ());
-  if (! str)
+  const char *str = bp_smob->bp->locspec->to_string ();
+  if (str == nullptr)
     str = "";
 
   return gdbscm_scm_from_c_string (str);

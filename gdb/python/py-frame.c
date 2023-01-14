@@ -80,7 +80,7 @@ static PyObject *
 frapy_str (PyObject *self)
 {
   const frame_id &fid = ((frame_object *) self)->frame_id;
-  return PyString_FromString (fid.to_string ().c_str ());
+  return PyUnicode_FromString (fid.to_string ().c_str ());
 }
 
 /* Implementation of gdb.Frame.is_valid (self) -> Boolean.
@@ -292,11 +292,11 @@ frapy_block (PyObject *self, PyObject *args)
     }
 
   for (fn_block = block;
-       fn_block != NULL && BLOCK_FUNCTION (fn_block) == NULL;
-       fn_block = BLOCK_SUPERBLOCK (fn_block))
+       fn_block != NULL && fn_block->function () == NULL;
+       fn_block = fn_block->superblock ())
     ;
 
-  if (block == NULL || fn_block == NULL || BLOCK_FUNCTION (fn_block) == NULL)
+  if (block == NULL || fn_block == NULL || fn_block->function () == NULL)
     {
       PyErr_SetString (PyExc_RuntimeError,
 		       _("Cannot locate block for frame."));
@@ -306,7 +306,7 @@ frapy_block (PyObject *self, PyObject *args)
   if (block)
     {
       return block_to_block_object
-	(block, symbol_objfile (BLOCK_FUNCTION (fn_block)));
+	(block, fn_block->function ()->objfile ());
     }
 
   Py_RETURN_NONE;
@@ -598,6 +598,29 @@ frapy_level (PyObject *self, PyObject *args)
   Py_RETURN_NONE;
 }
 
+/* The language for this frame.  */
+
+static PyObject *
+frapy_language (PyObject *self, PyObject *args)
+{
+  try
+    {
+      struct frame_info *fi;
+      FRAPY_REQUIRE_VALID (self, fi);
+
+      enum language lang = get_frame_language (fi);
+      const language_defn *lang_def = language_def (lang);
+
+      return host_string_to_python_string (lang_def->name ()).release ();
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+
+  Py_RETURN_NONE;
+}
+
 /* Implementation of gdb.newest_frame () -> gdb.Frame.
    Returns the newest frame object.  */
 
@@ -771,6 +794,8 @@ Return the value of the variable in this frame." },
     "Select this frame as the user's current frame." },
   { "level", frapy_level, METH_NOARGS,
     "The stack level of this frame." },
+  { "language", frapy_language, METH_NOARGS,
+    "The language of this frame." },
   {NULL}  /* Sentinel */
 };
 

@@ -65,7 +65,7 @@
 #
 # A gdbarch is zero-initialized.  Then, if a field has a pre-default,
 # the field is set to that value.  After initialization is complete
-# (that is, after the tdep code has a change to change the settings),
+# (that is, after the tdep code has a chance to change the settings),
 # the post-initialization step is done.
 #
 # There is a generic algorithm to generate a "validation function" for
@@ -574,7 +574,6 @@ use "register_type".
     type="struct type *",
     name="register_type",
     params=[("int", "reg_nr")],
-    predicate=True,
     invalid=True,
 )
 
@@ -741,7 +740,7 @@ FRAME corresponds to the longjmp frame.
 Value(
     type="int",
     name="believe_pcc_promotion",
-    invalid=True,
+    invalid=False,
 )
 
 Method(
@@ -763,7 +762,7 @@ Function(
         ("int *", "optimizedp"),
         ("int *", "unavailablep"),
     ],
-    invalid=True,
+    invalid=False,
 )
 
 Function(
@@ -775,7 +774,7 @@ Function(
         ("struct type *", "type"),
         ("const gdb_byte *", "buf"),
     ],
-    invalid=True,
+    invalid=False,
 )
 
 Method(
@@ -1087,7 +1086,7 @@ Method(
 Value(
     type="int",
     name="frame_red_zone_size",
-    invalid=True,
+    invalid=False,
 )
 
 Method(
@@ -1461,7 +1460,7 @@ Is a register in a group
 """,
     type="int",
     name="register_reggroup_p",
-    params=[("int", "regnum"), ("struct reggroup *", "reggroup")],
+    params=[("int", "regnum"), ("const struct reggroup *", "reggroup")],
     predefault="default_register_reggroup_p",
     invalid=False,
 )
@@ -1768,7 +1767,7 @@ contents of all displaced step buffers in the child's address space.
     type="void",
     name="displaced_step_restore_all_in_ptid",
     params=[("inferior *", "parent_inf"), ("ptid_t", "child_ptid")],
-    invalid=True,
+    invalid=False,
 )
 
 Method(
@@ -2299,7 +2298,7 @@ compared to the names of the files GDB should load for debug info.
 """,
     type="const char *",
     name="solib_symbols_extension",
-    invalid=True,
+    invalid=False,
     printer="pstring (gdbarch->solib_symbols_extension)",
 )
 
@@ -2363,13 +2362,8 @@ Method(
 Iterate over all objfiles in the order that makes the most sense
 for the architecture to make global symbol searches.
 
-CB is a callback function where OBJFILE is the objfile to be searched,
-and CB_DATA a pointer to user-defined data (the same data that is passed
-when calling this gdbarch method).  The iteration stops if this function
-returns nonzero.
-
-CB_DATA is a pointer to some user-defined data to be passed to
-the callback.
+CB is a callback function passed an objfile to be searched.  The iteration stops
+if this function returns nonzero.
 
 If not NULL, CURRENT_OBJFILE corresponds to the objfile being
 inspected when the symbol search was requested.
@@ -2377,8 +2371,7 @@ inspected when the symbol search was requested.
     type="void",
     name="iterate_over_objfiles_in_search_order",
     params=[
-        ("iterate_over_objfiles_in_search_order_cb_ftype *", "cb"),
-        ("void *", "cb_data"),
+        ("iterate_over_objfiles_in_search_order_cb_ftype", "cb"),
         ("struct objfile *", "current_objfile"),
     ],
     predefault="default_iterate_over_objfiles_in_search_order",

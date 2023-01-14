@@ -485,41 +485,12 @@ pop_type (struct pr_handle *info)
 static void
 print_vma (bfd_vma vma, char *buf, bool unsignedp, bool hexp)
 {
-  if (sizeof (vma) <= sizeof (unsigned long))
-    {
-      if (hexp)
-	sprintf (buf, "0x%lx", (unsigned long) vma);
-      else if (unsignedp)
-	sprintf (buf, "%lu", (unsigned long) vma);
-      else
-	sprintf (buf, "%ld", (long) vma);
-    }
-#if BFD_HOST_64BIT_LONG_LONG
-  else if (sizeof (vma) <= sizeof (unsigned long long))
-    {
-#ifndef __MSVCRT__
-      if (hexp)
-	sprintf (buf, "0x%llx", (unsigned long long) vma);
-      else if (unsignedp)
-	sprintf (buf, "%llu", (unsigned long long) vma);
-      else
-	sprintf (buf, "%lld", (long long) vma);
-#else
-      if (hexp)
-	sprintf (buf, "0x%I64x", (unsigned long long) vma);
-      else if (unsignedp)
-	sprintf (buf, "%I64u", (unsigned long long) vma);
-      else
-	sprintf (buf, "%I64d", (long long) vma);
-#endif
-    }
-#endif
+  if (hexp)
+    sprintf (buf, "%#" PRIx64, (uint64_t) vma);
+  else if (unsignedp)
+    sprintf (buf, "%" PRIu64, (uint64_t) vma);
   else
-    {
-      buf[0] = '0';
-      buf[1] = 'x';
-      sprintf_vma (buf + 2, vma);
-    }
+    sprintf (buf, "%" PRId64, (int64_t) vma);
 }
 
 /* Start a new compilation unit.  */
@@ -771,12 +742,9 @@ pr_function_type (void *p, int argcount, bool varargs)
 
   strcat (s, ")");
 
-  if (! substitute_type (info, s))
-    return false;
-
+  bool ret = substitute_type (info, s);
   free (s);
-
-  return true;
+  return ret;
 }
 
 /* Turn the top type on the stack into a reference to that type.  */

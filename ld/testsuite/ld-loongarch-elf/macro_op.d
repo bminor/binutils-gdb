@@ -1,12 +1,13 @@
 #as:
 #objdump: -dr
+#skip: loongarch32-*-*
 
 .*:[ 	]+file format .*
 
 
 Disassembly of section .text:
 
-0000000000000000 <.text>:
+0+0 <.text>:
 [ 	]+0:[ 	]+00150004 [ 	]+move[ 	]+[ 	]+\$a0, \$zero
 [ 	]+4:[ 	]+02bffc04 [ 	]+addi.w[ 	]+[ 	]+\$a0, \$zero, -1\(0xfff\)
 [ 	]+8:[ 	]+00150004 [ 	]+move[ 	]+[ 	]+\$a0, \$zero

@@ -7542,34 +7542,43 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
 					&intopt);
 	  if (intopt.size < sizeof (Elf_External_Options))
 	    {
+	    bad_opt:
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB: warning: bad `%s' option size %u smaller than"
-		   " its header"),
-		abfd, MIPS_ELF_OPTIONS_SECTION_NAME (abfd), intopt.size);
+		(_("%pB: warning: truncated `%s' option"),
+		 abfd, MIPS_ELF_OPTIONS_SECTION_NAME (abfd));
 	      break;
 	    }
-	  if (ABI_64_P (abfd) && intopt.kind == ODK_REGINFO)
+	  if (intopt.kind == ODK_REGINFO)
 	    {
-	      Elf64_Internal_RegInfo intreg;
-
-	      bfd_mips_elf64_swap_reginfo_in
-		(abfd,
-		 ((Elf64_External_RegInfo *)
-		  (l + sizeof (Elf_External_Options))),
-		 &intreg);
-	      elf_gp (abfd) = intreg.ri_gp_value;
-	    }
-	  else if (intopt.kind == ODK_REGINFO)
-	    {
-	      Elf32_RegInfo intreg;
-
-	      bfd_mips_elf32_swap_reginfo_in
-		(abfd,
-		 ((Elf32_External_RegInfo *)
-		  (l + sizeof (Elf_External_Options))),
-		 &intreg);
-	      elf_gp (abfd) = intreg.ri_gp_value;
+	      if (ABI_64_P (abfd))
+		{
+		  Elf64_Internal_RegInfo intreg;
+		  size_t needed = (sizeof (Elf_External_Options)
+				   + sizeof (Elf64_External_RegInfo));
+		  if (intopt.size < needed || (size_t) (lend - l) < needed)
+		    goto bad_opt;
+		  bfd_mips_elf64_swap_reginfo_in
+		    (abfd,
+		     ((Elf64_External_RegInfo *)
+		      (l + sizeof (Elf_External_Options))),
+		     &intreg);
+		  elf_gp (abfd) = intreg.ri_gp_value;
+		}
+	      else
+		{
+		  Elf32_RegInfo intreg;
+		  size_t needed = (sizeof (Elf_External_Options)
+				   + sizeof (Elf32_External_RegInfo));
+		  if (intopt.size < needed || (size_t) (lend - l) < needed)
+		    goto bad_opt;
+		  bfd_mips_elf32_swap_reginfo_in
+		    (abfd,
+		     ((Elf32_External_RegInfo *)
+		      (l + sizeof (Elf_External_Options))),
+		     &intreg);
+		  elf_gp (abfd) = intreg.ri_gp_value;
+		}
 	    }
 	  l += intopt.size;
 	}

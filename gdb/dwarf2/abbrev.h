@@ -44,9 +44,12 @@ struct abbrev_info
   /* Number identifying abbrev.  */
   unsigned int number;
   /* DWARF tag.  */
-  enum dwarf_tag tag;
+  ENUM_BITFIELD (dwarf_tag) tag : 16;
   /* True if the DIE has children.  */
-  unsigned short has_children;
+  bool has_children;
+  bool interesting;
+  unsigned short size_if_constant;
+  unsigned short sibling_offset;
   /* Number of attributes.  */
   unsigned short num_attrs;
   /* An array of attribute descriptions, allocated using the struct
@@ -85,9 +88,11 @@ struct abbrev_table
      This is used as a sanity check when the table is used.  */
   const sect_offset sect_off;
 
+  struct dwarf2_section_info *section;
+
 private:
 
-  explicit abbrev_table (sect_offset off);
+  abbrev_table (sect_offset off, struct dwarf2_section_info *sect);
 
   DISABLE_COPY_AND_ASSIGN (abbrev_table);
 

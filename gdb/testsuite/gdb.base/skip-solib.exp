@@ -22,7 +22,7 @@
 # This only works on GNU/Linux.
 if { ![isnative] || [is_remote host] || ![istarget *-linux*]
      || [skip_shlib_tests]} {
-    continue
+    return
 }
 
 set test "skip-solib"

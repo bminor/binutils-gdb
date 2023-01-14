@@ -2690,9 +2690,11 @@ coff_write_relocs (bfd * abfd, int first_undef)
 
 #ifdef SELECT_RELOC
 	  /* Work out reloc type from what is required.  */
-	  SELECT_RELOC (n, q->howto);
+	  if (q->howto)
+	    SELECT_RELOC (n, q->howto);
 #else
-	  n.r_type = q->howto->type;
+	  if (q->howto)
+	    n.r_type = q->howto->type;
 #endif
 	  coff_swap_reloc_out (abfd, &n, &dst);
 
@@ -2962,7 +2964,7 @@ coff_compute_section_file_positions (bfd * abfd)
 #endif
 
 #ifdef COFF_IMAGE_WITH_PE
-  int page_size;
+  unsigned int page_size;
 
   if (coff_data (abfd)->link_info
       || (pe_data (abfd) && pe_data (abfd)->pe_opthdr.FileAlignment))
@@ -2973,22 +2975,12 @@ coff_compute_section_file_positions (bfd * abfd)
 	 This repairs 'ld -r' for arm-wince-pe target.  */
       if (page_size == 0)
 	page_size = 1;
-
-      /* PR 17512: file: 0ac816d3.  */
-      if (page_size < 0)
-	{
-	  bfd_set_error (bfd_error_file_too_big);
-	  _bfd_error_handler
-	    /* xgettext:c-format */
-	    (_("%pB: page size is too large (0x%x)"), abfd, page_size);
-	  return false;
-	}
     }
   else
     page_size = PE_DEF_FILE_ALIGNMENT;
 #else
 #ifdef COFF_PAGE_SIZE
-  int page_size = COFF_PAGE_SIZE;
+  unsigned int page_size = COFF_PAGE_SIZE;
 #endif
 #endif
 
@@ -3070,9 +3062,10 @@ coff_compute_section_file_positions (bfd * abfd)
     bfd_size_type amt;
 
 #ifdef COFF_PAGE_SIZE
-    /* Clear D_PAGED if section alignment is smaller than
-       COFF_PAGE_SIZE.  */
-   if (pe_data (abfd)->pe_opthdr.SectionAlignment < COFF_PAGE_SIZE)
+    /* Clear D_PAGED if section / file alignment aren't suitable for
+       paging at COFF_PAGE_SIZE granularity.  */
+   if (pe_data (abfd)->pe_opthdr.SectionAlignment < COFF_PAGE_SIZE
+       || page_size < COFF_PAGE_SIZE)
      abfd->flags &= ~D_PAGED;
 #endif
 
@@ -3193,7 +3186,11 @@ coff_compute_section_file_positions (bfd * abfd)
 	     padding the previous section up if necessary.  */
 	  old_sofar = sofar;
 
+#ifdef COFF_IMAGE_WITH_PE
+	  sofar = BFD_ALIGN (sofar, page_size);
+#else
 	  sofar = BFD_ALIGN (sofar, 1 << current->alignment_power);
+#endif
 
 #ifdef RS6000COFF_C
 	  /* Make sure the file offset and the vma of .text/.data are at the
@@ -3269,7 +3266,11 @@ coff_compute_section_file_positions (bfd * abfd)
       else
 	{
 	  old_sofar = sofar;
+#ifdef COFF_IMAGE_WITH_PE
+	  sofar = BFD_ALIGN (sofar, page_size);
+#else
 	  sofar = BFD_ALIGN (sofar, 1 << current->alignment_power);
+#endif
 	  align_adjust = sofar != old_sofar;
 	  current->size += sofar - old_sofar;
 	}
@@ -3843,7 +3844,7 @@ coff_write_object_contents (bfd * abfd)
       bfd_byte *b = bfd_zmalloc (fill_size);
       if (b)
 	{
-	  bfd_bwrite ((PTR)b, fill_size, abfd);
+	  bfd_bwrite (b, fill_size, abfd);
 	  free (b);
 	}
     }
@@ -4621,7 +4622,7 @@ coff_slurp_symbol_table (bfd * abfd)
 	  BFD_ASSERT (src->is_sym);
 	  dst->symbol.name = (char *) (src->u.syment._n._n_n._n_offset);
 	  /* We use the native name field to point to the cached field.  */
-	  src->u.syment._n._n_n._n_zeroes = (bfd_hostptr_t) dst;
+	  src->u.syment._n._n_n._n_zeroes = (uintptr_t) dst;
 	  dst->symbol.section = coff_section_from_bfd_index (abfd,
 						     src->u.syment.n_scnum);
 	  dst->symbol.flags = 0;
@@ -4756,6 +4757,9 @@ coff_slurp_symbol_table (bfd * abfd)
 		dst->symbol.value = src->u.syment.n_value;
 	      break;
 
+	    case C_FILE:	/* File name.  */
+	      dst->symbol.flags = BSF_FILE;
+	      /* Fall through.  */
 	    case C_MOS:		/* Member of structure.  */
 	    case C_EOS:		/* End of structure.  */
 	    case C_REGPARM:	/* Register parameter.  */
@@ -4769,11 +4773,6 @@ coff_slurp_symbol_table (bfd * abfd)
 	    case C_MOE:		/* Member of enumeration.  */
 	    case C_MOU:		/* Member of union.  */
 	    case C_UNTAG:	/* Union tag.  */
-	      dst->symbol.flags = BSF_DEBUGGING;
-	      dst->symbol.value = (src->u.syment.n_value);
-	      break;
-
-	    case C_FILE:	/* File name.  */
 	    case C_STRTAG:	/* Structure tag.  */
 #ifdef RS6000COFF_C
 	    case C_GSYM:
@@ -4791,7 +4790,7 @@ coff_slurp_symbol_table (bfd * abfd)
 	    case C_FUN:
 	    case C_ESTAT:
 #endif
-	      dst->symbol.flags = BSF_DEBUGGING;
+	      dst->symbol.flags |= BSF_DEBUGGING;
 	      dst->symbol.value = (src->u.syment.n_value);
 	      break;
 
@@ -4832,7 +4831,7 @@ coff_slurp_symbol_table (bfd * abfd)
 		 to the symbol instead of the index.  FIXME: This
 		 should use a union.  */
 	      src->u.syment.n_value
-		= (bfd_hostptr_t) (native_symbols + src->u.syment.n_value);
+		= (uintptr_t) (native_symbols + src->u.syment.n_value);
 	      dst->symbol.value = src->u.syment.n_value;
 	      src->fix_value = 1;
 	      break;

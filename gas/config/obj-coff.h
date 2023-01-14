@@ -129,10 +129,8 @@
 
 #define OUTPUT_FLAVOR bfd_target_coff_flavour
 
-/* Alter the field names, for now, until we've fixed up the other
-   references to use the new name.  */
+/* COFF symbol flags.  See SF_* macros.  */
 #define OBJ_SYMFIELD_TYPE	unsigned long
-#define sy_obj			sy_obj_flags
 
 /* We can't use the predefined section symbols in bfd/section.c, as
    COFF symbols have extra fields.  See bfd/libcoff.h:coff_symbol_type.  */
@@ -187,9 +185,8 @@
 #define SA_SET_SECT_NRELOC(s,v)	(SYM_AUXENT (s)->x_sect.x_nreloc = (v))
 #endif
 
-/* Internal use only definitions. SF_ stands for symbol flags.
-
-   These values can be assigned to sy_symbol.ost_flags field of a symbolS.  */
+/* Internal use only definitions.  SF_ stands for symbol flags.  These
+   values can be assigned to OBJ_SYMFIELD_TYPE obj field of a symbolS.  */
 
 #define SF_NORMAL_MASK	0x0000ffff	/* bits 12-15 are general purpose.  */
 
@@ -249,7 +246,7 @@ extern int coff_n_line_nos;
 extern symbolS *coff_last_function;
 
 #define obj_emit_lineno(WHERE, LINE, FILE_START)	abort ()
-#define obj_app_file(name, app)      c_dot_file_symbol (name, app)
+#define obj_app_file(name)           c_dot_file_symbol (name)
 #define obj_frob_symbol(S,P) 	     coff_frob_symbol (S, & P)
 #define obj_frob_section(S)	     coff_frob_section (S)
 #define obj_frob_file_after_relocs() coff_frob_file_after_relocs ()
@@ -315,14 +312,12 @@ extern const pseudo_typeS coff_pseudo_table[];
   SA_SET_SCN_NRELOC (section_symbol (sec), n)
 #endif
 
-#define obj_app_file(name, app) c_dot_file_symbol (name, app)
-
 extern int  S_SET_DATA_TYPE              (symbolS *, int);
 extern int  S_SET_STORAGE_CLASS          (symbolS *, int);
 extern int  S_GET_STORAGE_CLASS          (symbolS *);
 extern void SA_SET_SYM_ENDNDX            (symbolS *, symbolS *);
 extern void coff_add_linesym             (symbolS *);
-extern void c_dot_file_symbol            (const char *, int);
+extern void c_dot_file_symbol            (const char *);
 extern void coff_frob_symbol             (symbolS *, int *);
 extern void coff_adjust_symtab           (void);
 extern void coff_frob_section            (segT);
@@ -338,7 +333,6 @@ extern void pecoff_obj_clear_weak_hook   (symbolS *);
 extern void obj_coff_section             (int);
 extern segT obj_coff_add_segment         (const char *);
 extern void obj_coff_section             (int);
-extern void c_dot_file_symbol            (const char *, int);
 extern segT s_get_segment                (symbolS *);
 #ifndef tc_coff_symbol_emit_hook
 extern void tc_coff_symbol_emit_hook     (symbolS *);

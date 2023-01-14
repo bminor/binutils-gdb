@@ -204,12 +204,12 @@ connpy_repr (PyObject *obj)
   process_stratum_target *target = self->target;
 
   if (target == nullptr)
-    return PyString_FromFormat ("<%s (invalid)>", Py_TYPE (obj)->tp_name);
+    return PyUnicode_FromFormat ("<%s (invalid)>", Py_TYPE (obj)->tp_name);
 
-  return PyString_FromFormat ("<%s num=%d, what=\"%s\">",
-			      Py_TYPE (obj)->tp_name,
-			      target->connection_number,
-			      make_target_connection_string (target).c_str ());
+  return PyUnicode_FromFormat ("<%s num=%d, what=\"%s\">",
+			       Py_TYPE (obj)->tp_name,
+			       target->connection_number,
+			       make_target_connection_string (target).c_str ());
 }
 
 /* Implementation of gdb.TargetConnection.is_valid() -> Boolean.  Returns

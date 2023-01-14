@@ -2656,31 +2656,16 @@ bfd_mach_o_write_contents (bfd *abfd)
 	{
 	  bfd_mach_o_dyld_info_command *di = &cmd->command.dyld_info;
 
-	  if (di->rebase_size != 0)
-	    {
-	      di->rebase_off = mdata->filelen;
-	      mdata->filelen += di->rebase_size;
-	    }
-	  if (di->bind_size != 0)
-	    {
-	      di->bind_off = mdata->filelen;
-	      mdata->filelen += di->bind_size;
-	    }
-	  if (di->weak_bind_size != 0)
-	    {
-	      di->weak_bind_off = mdata->filelen;
-	      mdata->filelen += di->weak_bind_size;
-	    }
-	  if (di->lazy_bind_size != 0)
-	    {
-	      di->lazy_bind_off = mdata->filelen;
-	      mdata->filelen += di->lazy_bind_size;
-	    }
-	  if (di->export_size != 0)
-	    {
-	      di->export_off = mdata->filelen;
-	      mdata->filelen += di->export_size;
-	    }
+	  di->rebase_off = di->rebase_size != 0 ? mdata->filelen : 0;
+	  mdata->filelen += di->rebase_size;
+	  di->bind_off = di->bind_size != 0 ? mdata->filelen : 0;
+	  mdata->filelen += di->bind_size;
+	  di->weak_bind_off = di->weak_bind_size != 0 ? mdata->filelen : 0;
+	  mdata->filelen += di->weak_bind_size;
+	  di->lazy_bind_off = di->lazy_bind_size != 0 ? mdata->filelen : 0;
+	  mdata->filelen += di->lazy_bind_size;
+	  di->export_off = di->export_size != 0 ? mdata->filelen : 0;
+	  mdata->filelen += di->export_size;
 	}
 	break;
       case BFD_MACH_O_LC_LOAD_DYLIB:
@@ -4773,7 +4758,7 @@ bfd_mach_o_read_source_version (bfd *abfd, bfd_mach_o_load_command *command)
 {
   bfd_mach_o_source_version_command *cmd = &command->command.source_version;
   struct mach_o_source_version_command_external raw;
-  bfd_uint64_t ver;
+  uint64_t ver;
 
   if (command->len < sizeof (raw) + 8)
     return false;

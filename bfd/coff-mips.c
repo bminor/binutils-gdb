@@ -84,7 +84,7 @@ static reloc_howto_type mips_howto_table[] =
      bfd_perform_relocation to do nothing.  */
   HOWTO (MIPS_R_IGNORE,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -99,7 +99,7 @@ static reloc_howto_type mips_howto_table[] =
   /* A 16 bit reference to a symbol, normally from a data section.  */
   HOWTO (MIPS_R_REFHALF,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -114,7 +114,7 @@ static reloc_howto_type mips_howto_table[] =
   /* A 32 bit reference to a symbol, normally from a data section.  */
   HOWTO (MIPS_R_REFWORD,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -129,7 +129,7 @@ static reloc_howto_type mips_howto_table[] =
   /* A 26 bit absolute jump address.  */
   HOWTO (MIPS_R_JMPADDR,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 26,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -148,7 +148,7 @@ static reloc_howto_type mips_howto_table[] =
      mips_refhi_reloc.  */
   HOWTO (MIPS_R_REFHI,		/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -163,7 +163,7 @@ static reloc_howto_type mips_howto_table[] =
   /* The low 16 bits of a symbol value.  */
   HOWTO (MIPS_R_REFLO,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -179,7 +179,7 @@ static reloc_howto_type mips_howto_table[] =
      function mips_gprel_reloc.  */
   HOWTO (MIPS_R_GPREL,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -195,7 +195,7 @@ static reloc_howto_type mips_howto_table[] =
      Handled by the function mips_gprel_reloc.  */
   HOWTO (MIPS_R_LITERAL,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -217,7 +217,7 @@ static reloc_howto_type mips_howto_table[] =
      be removed.  (It used to be used for embedded-PIC support.)  */
   HOWTO (MIPS_R_PCREL16,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -593,10 +593,9 @@ mips_gprel_reloc (bfd *abfd ATTRIBUTE_UNUSED,
     {
       relocatable = false;
       output_bfd = symbol->section->output_section->owner;
+      if (output_bfd == NULL)
+	return bfd_reloc_undefined;
     }
-
-  if (bfd_is_und_section (symbol->section) && ! relocatable)
-    return bfd_reloc_undefined;
 
   /* We have to figure out the gp value, so that we can adjust the
      symbol value correctly.  We look up the symbol _gp in the output

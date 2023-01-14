@@ -21,12 +21,6 @@ import re
 import sys
 
 
-if sys.version_info[0] > 2:
-    # Python 3 removed basestring and long
-    basestring = str
-    long = int
-
-
 class XMethod(object):
     """Base class (or a template) for an xmethod description.
 
@@ -223,7 +217,7 @@ def _validate_xmethod_matcher(matcher):
         return TypeError("Xmethod matcher is missing attribute: name")
     if not hasattr(matcher, "enabled"):
         return TypeError("Xmethod matcher is missing attribute: enabled")
-    if not isinstance(matcher.name, basestring):
+    if not isinstance(matcher.name, str):
         return TypeError("Attribute 'name' of xmethod matcher is not a " "string")
     if matcher.name.find(";") >= 0:
         return ValueError("Xmethod matcher name cannot contain ';' in it")

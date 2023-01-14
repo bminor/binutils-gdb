@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 # Copyright (C) 2011-2022 Free Software Foundation, Inc.
 #
@@ -102,24 +102,24 @@ def CheckSets(list0, list1, name0, name1):
 
     difference0 = set(list0) - set(list1)
     if len(difference0) != 0:
-        print "Elements in " + name0 + " but not " + name1 + ": (",
-        print len(difference0),
-        print ")"
+        print("Elements in " + name0 + " but not " + name1 + ": (", end=" ")
+        print(len(difference0), end=" ")
+        print(")")
         for element in difference0:
-            print "  " + element
+            print("  " + element)
 
     difference1 = set(list1) - set(list0)
     if len(difference1) != 0:
-        print "Elements in " + name1 + " but not " + name0 + ": (",
-        print len(difference1),
-        print ")"
+        print("Elements in " + name1 + " but not " + name0 + ": (", end=" ")
+        print(len(difference1), end=" ")
+        print(")")
         for element in difference1:
-            print "  " + element
+            print("  " + element)
 
     if len(difference0) != 0 or len(difference1) != 0:
         return True
 
-    print name0 + " and " + name1 + " are identical."
+    print(name0 + " and " + name1 + " are identical.")
     return False
 
 
@@ -152,7 +152,7 @@ def find_executables():
 def main(argv):
     """The main subprogram."""
     if len(argv) != 2:
-        print "Usage: test_pubnames_and_indexes.py <filename>"
+        print("Usage: test_pubnames_and_indexes.py <filename>")
         sys.exit(2)
 
     find_executables()
@@ -200,15 +200,15 @@ def main(argv):
 
     # Find the differences between the various indices.
     if len(gold_index) == 0:
-        print "Gold index is empty"
+        print("Gold index is empty")
         failed |= True
 
     if len(gdb_index) == 0:
-        print "Gdb index is empty"
+        print("Gdb index is empty")
         failed |= True
 
     if len(pubs_list) == 0:
-        print "Pubs list is empty"
+        print("Pubs list is empty")
         failed |= True
 
     failed |= CheckSets(gdb_index, gold_index, "gdb index", "gold index")
@@ -216,7 +216,7 @@ def main(argv):
     failed |= CheckSets(pubs_list, gdb_index, "pubs list", "gdb index")
 
     if failed:
-        print "Test failed"
+        print("Test failed")
         sys.exit(1)
 
 

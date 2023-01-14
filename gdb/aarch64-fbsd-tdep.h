@@ -32,6 +32,9 @@
    alignment.  */
 #define AARCH64_FBSD_SIZEOF_FPREGSET (33 * V_REGISTER_SIZE)
 
+/* The TLS regset consists of a single register.  */
+#define	AARCH64_FBSD_SIZEOF_TLSREGSET (X_REGISTER_SIZE)
+
 extern const struct regset aarch64_fbsd_gregset;
 extern const struct regset aarch64_fbsd_fpregset;
 

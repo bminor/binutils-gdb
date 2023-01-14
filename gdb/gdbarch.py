@@ -20,6 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import textwrap
+import gdbcopyright
 
 # All the components created in gdbarch-components.py.
 components = []
@@ -161,30 +162,9 @@ class Method(Function):
 with open("gdbarch-components.py") as fd:
     exec(fd.read())
 
-copyright = """/* *INDENT-OFF* */ /* THIS FILE IS GENERATED -*- buffer-read-only: t -*- */
-/* vi:set ro: */
-
-/* Dynamic architecture support for GDB, the GNU debugger.
-
-   Copyright (C) 1998-2022 Free Software Foundation, Inc.
-
-   This file is part of GDB.
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
-
-/* This file was created with the aid of ``gdbarch.py''.  */
-"""
+copyright = gdbcopyright.copyright(
+    "gdbarch.py", "Dynamic architecture support for GDB, the GNU debugger."
+)
 
 
 def info(c):
@@ -381,6 +361,16 @@ with open("gdbarch.c", "w") as f:
         elif c.predefault is not None:
             print(f"  if (gdbarch->{c.name} == {c.predefault})", file=f)
             print(f"""    log.puts ("\\n\\t{c.name}");""", file=f)
+        elif c.invalid is True:
+            print(f"  if (gdbarch->{c.name} == 0)", file=f)
+            print(f"""    log.puts ("\\n\\t{c.name}");""", file=f)
+        else:
+            # We should not allow ourselves to simply do nothing here
+            # because no other case applies.  If we end up here then
+            # either the input data needs adjusting so one of the
+            # above cases matches, or we need additional cases adding
+            # here.
+            raise Exception("unhandled case when generating gdbarch validation")
     print("  if (!log.empty ())", file=f)
     print("    internal_error (__FILE__, __LINE__,", file=f)
     print("""		    _("verify_gdbarch: the following are invalid ...%s"),""", file=f)
@@ -401,19 +391,19 @@ with open("gdbarch.c", "w") as f:
     print("#if defined (GDB_NM_FILE)", file=f)
     print("  gdb_nm_file = GDB_NM_FILE;", file=f)
     print("#endif", file=f)
-    print("  fprintf_filtered (file,", file=f)
+    print("  gdb_printf (file,", file=f)
     print("""		      "gdbarch_dump: GDB_NM_FILE = %s\\n",""", file=f)
     print("		      gdb_nm_file);", file=f)
     for c in components:
         if c.predicate:
-            print("  fprintf_filtered (file,", file=f)
+            print("  gdb_printf (file,", file=f)
             print(
                 f"""                      "gdbarch_dump: gdbarch_{c.name}_p() = %d\\n",""",
                 file=f,
             )
             print(f"                      gdbarch_{c.name}_p (gdbarch));", file=f)
         if isinstance(c, Function):
-            print("  fprintf_filtered (file,", file=f)
+            print("  gdb_printf (file,", file=f)
             print(
                 f"""                      "gdbarch_dump: {c.name} = <%s>\\n",""", file=f
             )
@@ -428,7 +418,7 @@ with open("gdbarch.c", "w") as f:
                 printer = f"core_addr_to_string_nz (gdbarch->{c.name})"
             else:
                 printer = f"plongest (gdbarch->{c.name})"
-            print("  fprintf_filtered (file,", file=f)
+            print("  gdb_printf (file,", file=f)
             print(
                 f"""                      "gdbarch_dump: {c.name} = %s\\n",""", file=f
             )
@@ -464,7 +454,7 @@ with open("gdbarch.c", "w") as f:
                 )
             print("  if (gdbarch_debug >= 2)", file=f)
             print(
-                f"""    fprintf_unfiltered (gdb_stdlog, "gdbarch_{c.name} called\\n");""",
+                f"""    gdb_printf (gdb_stdlog, "gdbarch_{c.name} called\\n");""",
                 file=f,
             )
             print("  ", file=f, end="")
@@ -498,7 +488,7 @@ with open("gdbarch.c", "w") as f:
                 print(f"  gdb_assert (gdbarch->{c.name} != {c.predefault});", file=f)
             print("  if (gdbarch_debug >= 2)", file=f)
             print(
-                f"""    fprintf_unfiltered (gdb_stdlog, "gdbarch_{c.name} called\\n");""",
+                f"""    gdb_printf (gdb_stdlog, "gdbarch_{c.name} called\\n");""",
                 file=f,
             )
             print(f"  return gdbarch->{c.name};", file=f)
@@ -519,7 +509,7 @@ with open("gdbarch.c", "w") as f:
             print("  gdb_assert (gdbarch != NULL);", file=f)
             print("  if (gdbarch_debug >= 2)", file=f)
             print(
-                f"""    fprintf_unfiltered (gdb_stdlog, "gdbarch_{c.name} called\\n");""",
+                f"""    gdb_printf (gdb_stdlog, "gdbarch_{c.name} called\\n");""",
                 file=f,
             )
             print(f"  return gdbarch->{c.name};", file=f)

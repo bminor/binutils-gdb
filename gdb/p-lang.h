@@ -116,7 +116,7 @@ public:
 
     print_one_char (ch, stream, &in_quotes);
     if (in_quotes)
-      fputs_filtered ("'", stream);
+      gdb_puts ("'", stream);
   }
 
   /* See language.h.  */

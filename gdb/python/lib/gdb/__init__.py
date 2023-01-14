@@ -22,7 +22,7 @@ from contextlib import contextmanager
 # Python 3 moved "reload"
 if sys.version_info >= (3, 4):
     from importlib import reload
-elif sys.version_info[0] > 2:
+else:
     from imp import reload
 
 from _gdb import *
@@ -248,23 +248,3 @@ def with_parameter(name, value):
         yield None
     finally:
         set_parameter(name, old_value)
-
-
-try:
-    from pygments import formatters, lexers, highlight
-
-    def colorize(filename, contents):
-        # Don't want any errors.
-        try:
-            lexer = lexers.get_lexer_for_filename(filename, stripnl=False)
-            formatter = formatters.TerminalFormatter()
-            return highlight(contents, lexer, formatter).encode(
-                host_charset(), "backslashreplace"
-            )
-        except:
-            return None
-
-except:
-
-    def colorize(filename, contents):
-        return None

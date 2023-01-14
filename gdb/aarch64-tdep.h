@@ -34,9 +34,8 @@ struct regset;
 /* AArch64 Dwarf register numbering.  */
 #define AARCH64_DWARF_X0   0
 #define AARCH64_DWARF_SP  31
-#define AARCH64_DWARF_PAUTH_RA_STATE  34
-#define AARCH64_DWARF_PAUTH_DMASK  35
-#define AARCH64_DWARF_PAUTH_CMASK  36
+#define AARCH64_DWARF_PC  32
+#define AARCH64_DWARF_RA_SIGN_STATE  34
 #define AARCH64_DWARF_V0  64
 #define AARCH64_DWARF_SVE_VG   46
 #define AARCH64_DWARF_SVE_FFR  47
@@ -95,7 +94,7 @@ struct aarch64_gdbarch_tdep : gdbarch_tdep
   }
 
   int pauth_reg_base = 0;
-  int pauth_ra_state_regnum = 0;
+  int ra_sign_state_regnum = 0;
 
   /* Returns true if the target supports pauth.  */
   bool has_pauth () const
@@ -111,10 +110,17 @@ struct aarch64_gdbarch_tdep : gdbarch_tdep
   {
     return mte_reg_base != -1;
   }
+
+  /* TLS register.  This is -1 if the TLS register is not available.  */
+  int tls_regnum = 0;
+
+  bool has_tls() const
+  {
+    return tls_regnum != -1;
+  }
 };
 
-const target_desc *aarch64_read_description (uint64_t vq, bool pauth_p,
-					     bool mte_p);
+const target_desc *aarch64_read_description (const aarch64_features &features);
 
 extern int aarch64_process_record (struct gdbarch *gdbarch,
 			       struct regcache *regcache, CORE_ADDR addr);

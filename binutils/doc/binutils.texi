@@ -817,10 +817,10 @@ nm [@option{-A}|@option{-o}|@option{--print-file-name}]
    [@option{-s}|@option{--print-armap}]
    [@option{-t} @var{radix}|@option{--radix=}@var{radix}]
    [@option{-u}|@option{--undefined-only}]
-   [@option{-U} @var{method}] [@option{--unicode=}@var{method}]
+   [@option{-U}|@option{--defined-only}]
    [@option{-V}|@option{--version}]
+   [@option{-W}|@option{--no-weak}]
    [@option{-X 32_64}]
-   [@option{--defined-only}]
    [@option{--no-demangle}]
    [@option{--no-recurse-limit}|@option{--recurse-limit}]]
    [@option{--plugin} @var{name}]
@@ -828,6 +828,7 @@ nm [@option{-A}|@option{-o}|@option{--print-file-name}]
    [@option{--special-syms}]
    [@option{--synthetic}]
    [@option{--target=}@var{bfdname}]
+   [@option{--unicode=}@var{method}]
    [@option{--with-symbol-versions}]
    [@option{--without-symbol-versions}]
    [@var{objfile}@dots{}]
@@ -1137,21 +1138,14 @@ Use @var{radix} as the radix for printing the symbol values.  It must be
 @cindex external symbols
 @cindex undefined symbols
 Display only undefined symbols (those external to each object file).
+By default both defined and undefined symbols are displayed.
 
-@item -U @var{[d|i|l|e|x|h]}
-@itemx --unicode=@var{[default|invalid|locale|escape|hex|highlight]}
-Controls the display of UTF-8 encoded multibyte characters in strings.
-The default (@option{--unicode=default}) is to give them no special
-treatment.  The @option{--unicode=locale} option displays the sequence
-in the current locale, which may or may not support them.  The options
-@option{--unicode=hex} and @option{--unicode=invalid} display them as
-hex byte sequences enclosed by either angle brackets or curly braces.
-
-The @option{--unicode=escape} option displays them as escape sequences
-(@var{\uxxxx}) and the @option{--unicode=highlight} option displays
-them as escape sequences highlighted in red (if supported by the
-output device).  The colouring is intended to draw attention to the
-presence of unicode sequences where they might not be expected.
+@item -U
+@itemx --defined-only
+@cindex external symbols
+@cindex undefined symbols
+Display only defined symbols for each object file.
+By default both defined and undefined symbols are displayed.
 
 @item -V
 @itemx --version
@@ -1162,11 +1156,6 @@ This option is ignored for compatibility with the AIX version of
 @command{nm}.  It takes one parameter which must be the string
 @option{32_64}.  The default mode of AIX @command{nm} corresponds
 to @option{-X 32}, which is not supported by @sc{gnu} @command{nm}.
-
-@item --defined-only
-@cindex external symbols
-@cindex undefined symbols
-Display only defined symbols for each object file.
 
 @item --plugin @var{name}
 @cindex plugins
@@ -1196,6 +1185,9 @@ with the next higher value.  If the @code{bsd} output format is used
 the size of the symbol is printed, rather than the value, and
 @samp{-S} must be used in order both size and value to be printed.
 
+Note - this option does not work if @option{--undefined-only} has been
+enabled as undefined symbols have no size.
+
 @item --special-syms
 Display symbols which have a target-specific special meaning.  These
 symbols are usually used by the target for some special processing and
@@ -1207,6 +1199,24 @@ used to mark transitions between ARM code, THUMB code and data.
 Include synthetic symbols in the output.  These are special symbols
 created by the linker for various purposes.  They are not shown by
 default since they are not part of the binary's original source code.
+
+@item --unicode=@var{[default|invalid|locale|escape|hex|highlight]}
+Controls the display of UTF-8 encoded multibyte characters in strings.
+The default (@option{--unicode=default}) is to give them no special
+treatment.  The @option{--unicode=locale} option displays the sequence
+in the current locale, which may or may not support them.  The options
+@option{--unicode=hex} and @option{--unicode=invalid} display them as
+hex byte sequences enclosed by either angle brackets or curly braces.
+
+The @option{--unicode=escape} option displays them as escape sequences
+(@var{\uxxxx}) and the @option{--unicode=highlight} option displays
+them as escape sequences highlighted in red (if supported by the
+output device).  The colouring is intended to draw attention to the
+presence of unicode sequences where they might not be expected.
+
+@item -W
+@itemx --no-weak
+Do not display weak symbols.
 
 @item --with-symbol-versions
 @item --without-symbol-versions
@@ -2246,6 +2256,8 @@ objdump [@option{-a}|@option{--archive-headers}]
          @option{--dwarf}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links]]
         [@option{-WK}|@option{--dwarf=follow-links}]
         [@option{-WN}|@option{--dwarf=no-follow-links}]
+        [@option{-wD}|@option{--dwarf=use-debuginfod}]
+        [@option{-wE}|@option{--dwarf=do-not-use-debuginfod}]
         [@option{-L}|@option{--process-links}]
         [@option{--ctf=}@var{section}]
         [@option{-G}|@option{--stabs}]
@@ -2268,6 +2280,7 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{--prefix-strip=}@var{level}]
         [@option{--insn-width=}@var{width}]
         [@option{--visualize-jumps[=color|=extended-color|=off]}
+        [@option{--disassembler-color=[color|extended-color|off]}
         [@option{-U} @var{method}] [@option{--unicode=}@var{method}]
         [@option{-V}|@option{--version}]
         [@option{-H}|@option{--help}]
@@ -2804,6 +2817,16 @@ colors, but these might not work on all terminals.
 If it is necessary to disable the @option{visualize-jumps} option
 after it has previously been enabled then use
 @option{visualize-jumps=off}.
+
+@item --disassembler-color=[color|extended-color|off]
+Apply syntax highlighting to the disassembler output.  The
+@option{color} argument adds color using simple terminal colors.
+Alternatively the @option{extended-color} argument will use 8bit
+colors, but these might not work on all terminals.
+
+If it is necessary to disable the @option{--disassembler-color} option
+after it has previously been enabled then use
+@option{--disassembler-color=off}.
 
 @item -W[lLiaprmfFsoORtUuTgAckK]
 @itemx --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]
@@ -4883,6 +4906,8 @@ readelf [@option{-a}|@option{--all}]
          @option{--debug-dump}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links]]
         [@option{-wK}|@option{--debug-dump=follow-links}]
         [@option{-wN}|@option{--debug-dump=no-follow-links}]
+        [@option{-wD}|@option{--debug-dump=use-debuginfod}]
+        [@option{-wE}|@option{--debug-dump=do-not-use-debuginfod}]
         [@option{-P}|@option{--process-links}]
         [@option{--dwarf-depth=@var{n}}]
         [@option{--dwarf-start=@var{n}}]
@@ -5508,7 +5533,8 @@ deduced from the input file
 @cindex separate debug files
 
 debuginfod is a web service that indexes ELF/DWARF debugging resources
-by build-id and serves them over HTTP.
+by build-id and serves them over HTTP.  For more information see:
+@emph{https://sourceware.org/elfutils/Debuginfod.html}
 
 Binutils can be built with the debuginfod client library
 @code{libdebuginfod} using the @option{--with-debuginfod} configure option.
@@ -5519,6 +5545,10 @@ separate debug files when the files are otherwise not found.
 
 debuginfod is packaged with elfutils, starting with version 0.178.
 You can get the latest version from `https://sourceware.org/elfutils/'.
+
+The DWARF info dumping tools (@command{readelf} and @command{objdump})
+have options to control when they should access the debuginfod
+servers.  By default this access is enabled.
 
 @node Reporting Bugs
 @chapter Reporting Bugs

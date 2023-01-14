@@ -57,19 +57,9 @@ mi_send_resuming_command "exec-continue --thread-group i1" \
 set use_second_inferior [expr {![use_gdb_stub]}]
 
 if { $use_second_inferior } {
-    # The inferior created by the -add-inferior MI command does not inherit the
-    # target connection of the first inferior.  If debugging through an
-    # extended-remote connection, that means we can't run that second inferior
-    # on the remote connection.  Use the add-inferior CLI command as a stop-gap.
-    if { [mi_is_target_remote] } {
-	mi_gdb_test "add-inferior" \
-	    "\\^done" \
-	    "add inferior 2"
-    } else {
-	mi_gdb_test "-add-inferior" \
-	    "\\^done,inferior=\"i2\"" \
-	    "add inferior 2"
-    }
+    mi_gdb_test "-add-inferior" \
+	"\\^done,inferior=\"i2\",connection=\\{\[^\}\]+\\}" \
+	"add inferior 2"
     mi_gdb_test "-file-exec-and-symbols --thread-group i2 $::binfile" \
 	"\\^done" \
 	"set executable of inferior 2"

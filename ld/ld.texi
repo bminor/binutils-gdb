@@ -2076,7 +2076,7 @@ If this option is provided then the linker will invoke
 @var{scriptname} whenever an error is encountered.  Currently however
 only two kinds of error are supported: missing symbols and missing
 libraries.  Two arguments will be passed to script: the keyword
-``undefined-symbol'' or `missing-lib'' and the @var{name} of the 
+``undefined-symbol'' or `missing-lib'' and the @var{name} of the
 undefined symbol or missing library.  The intention is that the script
 will provide suggestions to the user as to where the symbol or library
 might be found.  After the script has finished then the normal linker
@@ -2230,7 +2230,7 @@ On platforms where the feature is supported, the option
 
 On platforms where the feature is not supported, both @option{--relax}
 and @option{--no-relax} are accepted, but ignored.
- 
+
 @cindex retaining specified symbols
 @cindex stripping all but some symbols
 @cindex symbols, retaining selectively
@@ -2653,6 +2653,33 @@ Warn if any global constructors are used.  This is only useful for a few
 object file formats.  For formats like COFF or ELF, the linker can not
 detect the use of global constructors.
 
+@kindex --warn-execstack
+@cindex warnings, on executable stack
+@cindex executable stack, warnings on
+@item --warn-execstack
+@itemx --no-warn-execstack
+On ELF platforms this option controls how the linker generates warning
+messages when it creates an output file with an executable stack.  By
+default the linker will not warn if the @command{-z execstack} command
+line option has been used, but this behaviour can be overridden by the
+@option{--warn-execstack} option.
+
+On the other hand the linker will normally warn if the stack is made
+executable because one or more of the input files need an execuable
+stack and neither of the @command{-z execstack} or @command{-z
+noexecstack} command line options have been specified.  This warning
+can be disabled via the @command{--no-warn-execstack} option.
+
+Note: ELF format input files specify that they need an executable
+stack by having a @var{.note.GNU-stack} section with the executable
+bit set in its section flags.  They can specify that they do not need
+an executable stack by having that section, but without the executable
+flag bit set.  If an input file does not have a @var{.note.GNU-stack}
+section present then the default behaviour is target specific.  For
+some targets, then absence of such a section implies that an
+executable stack @emph{is} required.  This is often a problem for hand
+crafted assembler files.
+
 @kindex --warn-multiple-gp
 @item --warn-multiple-gp
 Warn if multiple global pointer values are required in the output file.
@@ -2673,6 +2700,22 @@ option causes a warning to be issued whenever this case occurs.
 @item --warn-once
 Only warn once for each undefined symbol, rather than once per module
 which refers to it.
+
+@kindex --warn-rwx-segments
+@cindex warnings, on writeable and exectuable segments
+@cindex executable segments, warnings on
+@item --warn-rwx-segments
+@itemx --no-warn-rwx-segments
+Warn if the linker creates a loadable, non-zero sized segment that has
+all three of the read, write and execute permission flags set.  Such a
+segment represents a potential security vulnerability.  In addition
+warnings will be generated if a thread local storage segment is
+created with the execute permission flag set, regardless of whether or
+not it has the read and/or write flags set.
+
+These warnings are enabled by default.  They can be disabled via the
+@option{--no-warn-rwx-segments} option and re-enabled via the
+@option{--warn-rwx-segments} option.
 
 @kindex --warn-section-align
 @cindex warnings, on section alignment
@@ -2892,6 +2935,18 @@ string identifying the original linked file does not change.
 
 Passing @code{none} for @var{style} disables the setting from any
 @code{--build-id} options earlier on the command line.
+
+@kindex --package-metadata=@var{JSON}
+@item --package-metadata=@var{JSON}
+Request the creation of a @code{.note.package} ELF note section.  The
+contents of the note are in JSON format, as per the package metadata
+specification.  For more information see:
+https://systemd.io/ELF_PACKAGE_METADATA/
+If the JSON argument is missing/empty then this will disable the
+creation of the metadata note, if one had been enabled by an earlier
+occurrence of the --package-metdata option.
+If the linker has been built with libjansson, then the JSON string
+will be validated.
 @end table
 
 @c man end
@@ -3923,7 +3978,7 @@ check a list of possible entry symbols, matching the first one found.
 @item
 the address of the first byte of the code section, if present and an
 executable is being created - the code section is usually
-@samp{.text}, but can be something else; 
+@samp{.text}, but can be something else;
 @item
 The address @code{0}.
 @end itemize
@@ -5483,13 +5538,23 @@ loaded into memory when the program is run.
 @item READONLY
 The section should be marked as read-only.
 @item DSECT
-@itemx COPY
-@itemx INFO
-@itemx OVERLAY
+@item COPY
+@item INFO
+@item OVERLAY
 These type names are supported for backward compatibility, and are
 rarely used.  They all have the same effect: the section should be
 marked as not allocatable, so that no memory is allocated for the
 section when the program is run.
+@item TYPE = @var{type}
+Set the section type to the integer @var{type}. When generating an ELF
+output file, type names @code{SHT_PROGBITS}, @code{SHT_STRTAB},
+@code{SHT_NOTE}, @code{SHT_NOBITS}, @code{SHT_INIT_ARRAY},
+@code{SHT_FINI_ARRAY}, and @code{SHT_PREINIT_ARRAY} are also allowed
+for @var{type}.  It is the user's responsibility to ensure that any
+special requirements of the section type are met.
+@item READONLY ( TYPE = @var{type} )
+This form of the syntax combines the @var{READONLY} type with the
+type specified by @var{type}.
 @end table
 
 @kindex NOLOAD

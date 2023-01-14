@@ -21,10 +21,6 @@ set testfile weird
 set srcfile [standard_output_file weird.s]
 set binfile [standard_output_file weirdx.o]
 
-if { [ get_compiler_info ] } {
-    return -1
-}
-
 proc do_tests {} {
 	global binfile
 	global gdb_prompt

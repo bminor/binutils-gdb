@@ -27,7 +27,7 @@ if [support_complex_tests] {
 # test.
 if [target_info exists gdb,cannot_call_functions] {
     unsupported "this target can not call functions"
-    continue
+    return
 }
 
 set skip_float_test [gdb_skip_float_test]

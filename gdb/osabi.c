@@ -332,9 +332,10 @@ can_run_code_for (const struct bfd_arch_info *a, const struct bfd_arch_info *b)
   return (a == b || a->compatible (a, b) == a);
 }
 
+/* Return OS ABI handler for INFO.  */
 
-void
-gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
+static struct gdb_osabi_handler *
+gdbarch_osabi_handler (struct gdbarch_info info)
 {
   struct gdb_osabi_handler *handler;
 
@@ -367,10 +368,32 @@ gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 	 ISA").  BFD doesn't normally consider 32-bit and 64-bit
 	 "compatible" so it doesn't succeed.  */
       if (can_run_code_for (info.bfd_arch_info, handler->arch_info))
-	{
-	  (*handler->init_osabi) (info, gdbarch);
-	  return;
-	}
+	return handler;
+    }
+
+  return nullptr;
+}
+
+/* See osabi.h.  */
+
+bool
+has_gdb_osabi_handler (struct gdbarch_info info)
+{
+  return gdbarch_osabi_handler (info) != nullptr;
+}
+
+void
+gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  struct gdb_osabi_handler *handler;
+
+  gdb_assert (info.osabi != GDB_OSABI_UNKNOWN);
+  handler = gdbarch_osabi_handler (info);
+
+  if (handler != nullptr)
+    {
+      (*handler->init_osabi) (info, gdbarch);
+      return;
     }
 
   if (info.osabi == GDB_OSABI_NONE)
@@ -638,17 +661,17 @@ show_osabi (struct ui_file *file, int from_tty, struct cmd_list_element *c,
 	    const char *value)
 {
   if (user_osabi_state == osabi_auto)
-    fprintf_filtered (file,
-		      _("The current OS ABI is \"auto\" "
-			"(currently \"%s\").\n"),
-		      gdbarch_osabi_name (gdbarch_osabi (get_current_arch ())));
+    gdb_printf (file,
+		_("The current OS ABI is \"auto\" "
+		  "(currently \"%s\").\n"),
+		gdbarch_osabi_name (gdbarch_osabi (get_current_arch ())));
   else
-    fprintf_filtered (file, _("The current OS ABI is \"%s\".\n"),
-		      gdbarch_osabi_name (user_selected_osabi));
+    gdb_printf (file, _("The current OS ABI is \"%s\".\n"),
+		gdbarch_osabi_name (user_selected_osabi));
 
   if (GDB_OSABI_DEFAULT != GDB_OSABI_UNKNOWN)
-    fprintf_filtered (file, _("The default OS ABI is \"%s\".\n"),
-		      gdbarch_osabi_name (GDB_OSABI_DEFAULT));
+    gdb_printf (file, _("The default OS ABI is \"%s\".\n"),
+		gdbarch_osabi_name (GDB_OSABI_DEFAULT));
 }
 
 void _initialize_gdb_osabi ();

@@ -29,3 +29,13 @@ loongarch_reloc_type_lookup (bfd *abfd, bfd_reloc_code_real_type code);
 
 extern reloc_howto_type *
 loongarch_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED, const char *r_name);
+
+bool loongarch_adjust_reloc_bitsfield (reloc_howto_type *howto, bfd_vma *fix_val);
+
+/* TRUE if this is a PLT reference to a local IFUNC.  */
+#define PLT_LOCAL_IFUNC_P(INFO, H) \
+  ((H)->dynindx == -1 \
+   || ((bfd_link_executable (INFO) \
+	|| ELF_ST_VISIBILITY ((H)->other) != STV_DEFAULT) \
+	&& (H)->def_regular \
+	&& (H)->type == STT_GNU_IFUNC))

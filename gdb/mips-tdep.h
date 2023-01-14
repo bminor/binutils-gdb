@@ -50,8 +50,17 @@ enum mips_isa
   };
 
 /* Corresponding MSYMBOL_TARGET_FLAG aliases.  */
-#define MSYMBOL_TARGET_FLAG_MIPS16 MSYMBOL_TARGET_FLAG_1
-#define MSYMBOL_TARGET_FLAG_MICROMIPS MSYMBOL_TARGET_FLAG_2
+#define MSYMBOL_TARGET_FLAG_MIPS16(sym) \
+	(sym)->target_flag_1 ()
+
+#define SET_MSYMBOL_TARGET_FLAG_MIPS16(sym) \
+	(sym)->set_target_flag_1 (true)
+
+#define MSYMBOL_TARGET_FLAG_MICROMIPS(sym) \
+	(sym)->target_flag_2 ()
+
+#define SET_MSYMBOL_TARGET_FLAG_MICROMIPS(sym) \
+	(sym)->set_target_flag_2 (true)
 
 /* Return the MIPS ISA's register size.  Just a short cut to the BFD
    architecture's word size.  */

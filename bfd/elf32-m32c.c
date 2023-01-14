@@ -50,7 +50,7 @@ static reloc_howto_type m32c_elf_howto_table [] =
   /* This reloc does nothing.  */
   HOWTO (R_M32C_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -67,7 +67,7 @@ static reloc_howto_type m32c_elf_howto_table [] =
      about overflow.  */
   HOWTO (R_M32C_16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -81,7 +81,7 @@ static reloc_howto_type m32c_elf_howto_table [] =
 
   HOWTO (R_M32C_24,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -95,7 +95,7 @@ static reloc_howto_type m32c_elf_howto_table [] =
 
   HOWTO (R_M32C_32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -109,7 +109,7 @@ static reloc_howto_type m32c_elf_howto_table [] =
 
   HOWTO (R_M32C_8_PCREL,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -123,7 +123,7 @@ static reloc_howto_type m32c_elf_howto_table [] =
 
   HOWTO (R_M32C_16_PCREL,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -137,7 +137,7 @@ static reloc_howto_type m32c_elf_howto_table [] =
 
   HOWTO (R_M32C_8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -151,7 +151,7 @@ static reloc_howto_type m32c_elf_howto_table [] =
 
   HOWTO (R_M32C_LO16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -165,7 +165,7 @@ static reloc_howto_type m32c_elf_howto_table [] =
 
   HOWTO (R_M32C_HI8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -179,7 +179,7 @@ static reloc_howto_type m32c_elf_howto_table [] =
 
   HOWTO (R_M32C_HI16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -193,7 +193,7 @@ static reloc_howto_type m32c_elf_howto_table [] =
 
   HOWTO (R_M32C_RL_JUMP,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -207,7 +207,7 @@ static reloc_howto_type m32c_elf_howto_table [] =
 
   HOWTO (R_M32C_RL_1ADDR,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -221,7 +221,7 @@ static reloc_howto_type m32c_elf_howto_table [] =
 
   HOWTO (R_M32C_RL_2ADDR,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

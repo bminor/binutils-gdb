@@ -33,10 +33,10 @@
 #include "symtab.h"
 #include "sym_ids.h"
 
-static int cmp_bb (const PTR, const PTR);
-static int cmp_ncalls (const PTR, const PTR);
+static int cmp_bb (const void *, const void *);
+static int cmp_ncalls (const void *, const void *);
 static void fskip_string (FILE *);
-static void annotate_with_count (char *, unsigned int, int, PTR);
+static void annotate_with_count (char *, unsigned int, int, void *);
 
 /* Default option values:  */
 bool bb_annotate_all_lines = false;
@@ -53,7 +53,7 @@ static long num_lines_executed;
    number, and address (in that order).  */
 
 static int
-cmp_bb (const PTR lp, const PTR rp)
+cmp_bb (const void *lp, const void *rp)
 {
   int r;
   const Sym *left = *(const Sym **) lp;
@@ -82,7 +82,7 @@ cmp_bb (const PTR lp, const PTR rp)
 /* Helper for sorting.  Order basic blocks in decreasing number of
    calls, ties are broken in increasing order of line numbers.  */
 static int
-cmp_ncalls (const PTR lp, const PTR rp)
+cmp_ncalls (const void *lp, const void *rp)
 {
   const Sym *left = *(const Sym **) lp;
   const Sym *right = *(const Sym **) rp;
@@ -317,7 +317,7 @@ print_exec_counts (void)
    that starts the basic-block.  */
 
 static void
-annotate_with_count (char *buf, unsigned int width, int line_num, PTR arg)
+annotate_with_count (char *buf, unsigned int width, int line_num, void *arg)
 {
   Source_File *sf = (Source_File *) arg;
   Sym *b;

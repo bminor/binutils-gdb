@@ -522,7 +522,7 @@ _bfd_vms_slurp_eisd (bfd *abfd, unsigned int offset)
       struct vms_eisd *eisd;
       unsigned int rec_size;
       unsigned int size;
-      bfd_uint64_t vaddr;
+      uint64_t vaddr;
       unsigned int flags;
       unsigned int vbn;
       char *name = NULL;
@@ -4352,9 +4352,13 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 
   /* Initialize tables with zero element.  */
   curr_srec = (struct srecinfo *) bfd_zalloc (abfd, sizeof (struct srecinfo));
+  if (!curr_srec)
+    return false;
   module->srec_table = curr_srec;
 
   curr_line = (struct lineinfo *) bfd_zalloc (abfd, sizeof (struct lineinfo));
+  if (!curr_line)
+    return false;
   module->line_table = curr_line;
 
   while (length == -1 || ptr < maxptr)
@@ -4389,6 +4393,8 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 	case DST__K_RTNBEG:
 	  funcinfo = (struct funcinfo *)
 	    bfd_zalloc (abfd, sizeof (struct funcinfo));
+	  if (!funcinfo)
+	    return false;
 	  funcinfo->name
 	    = _bfd_vms_save_counted_string (abfd, ptr + DST_S_B_RTNBEG_NAME,
 					    maxptr - (ptr + DST_S_B_RTNBEG_NAME));
@@ -4401,6 +4407,8 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 	  break;
 
 	case DST__K_RTNEND:
+	  if (!module->func_table)
+	    return false;
 	  module->func_table->high = module->func_table->low
 	    + bfd_getl32 (ptr + DST_S_L_RTNEND_SIZE) - 1;
 
@@ -5507,7 +5515,7 @@ static reloc_howto_type alpha_howto_table[] =
 {
   HOWTO (ALPHA_R_IGNORE,	/* Type.  */
 	 0,			/* Rightshift.  */
-	 0,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 1,			/* Size.  */
 	 8,			/* Bitsize.  */
 	 true,			/* PC relative.  */
 	 0,			/* Bitpos.  */
@@ -5522,7 +5530,7 @@ static reloc_howto_type alpha_howto_table[] =
   /* A 64 bit reference to a symbol.  */
   HOWTO (ALPHA_R_REFQUAD,	/* Type.  */
 	 0,			/* Rightshift.  */
-	 4,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 8,			/* Size.  */
 	 64,			/* Bitsize.  */
 	 false,			/* PC relative.  */
 	 0,			/* Bitpos.  */
@@ -5539,7 +5547,7 @@ static reloc_howto_type alpha_howto_table[] =
      relative offset in the instruction.  */
   HOWTO (ALPHA_R_BRADDR,	/* Type.  */
 	 2,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 21,			/* Bitsize.  */
 	 true,			/* PC relative.  */
 	 0,			/* Bitpos.  */
@@ -5554,7 +5562,7 @@ static reloc_howto_type alpha_howto_table[] =
   /* A hint for a jump to a register.  */
   HOWTO (ALPHA_R_HINT,		/* Type.  */
 	 2,			/* Rightshift.  */
-	 1,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* Size.  */
 	 14,			/* Bitsize.  */
 	 true,			/* PC relative.  */
 	 0,			/* Bitpos.  */
@@ -5569,7 +5577,7 @@ static reloc_howto_type alpha_howto_table[] =
   /* 16 bit PC relative offset.  */
   HOWTO (ALPHA_R_SREL16,	/* Type.  */
 	 0,			/* Rightshift.  */
-	 1,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* Size.  */
 	 16,			/* Bitsize.  */
 	 true,			/* PC relative.  */
 	 0,			/* Bitpos.  */
@@ -5584,7 +5592,7 @@ static reloc_howto_type alpha_howto_table[] =
   /* 32 bit PC relative offset.  */
   HOWTO (ALPHA_R_SREL32,	/* Type.  */
 	 0,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 32,			/* Bitsize.  */
 	 true,			/* PC relative.  */
 	 0,			/* Bitpos.  */
@@ -5599,7 +5607,7 @@ static reloc_howto_type alpha_howto_table[] =
   /* A 64 bit PC relative offset.  */
   HOWTO (ALPHA_R_SREL64,	/* Type.  */
 	 0,			/* Rightshift.  */
-	 4,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 8,			/* Size.  */
 	 64,			/* Bitsize.  */
 	 true,			/* PC relative.  */
 	 0,			/* Bitpos.  */
@@ -5614,7 +5622,7 @@ static reloc_howto_type alpha_howto_table[] =
   /* Push a value on the reloc evaluation stack.  */
   HOWTO (ALPHA_R_OP_PUSH,	/* Type.  */
 	 0,			/* Rightshift.  */
-	 0,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 0,			/* Size.  */
 	 0,			/* Bitsize.  */
 	 false,			/* PC relative.  */
 	 0,			/* Bitpos.  */
@@ -5630,7 +5638,7 @@ static reloc_howto_type alpha_howto_table[] =
      a bitfield of size r_size starting at bit position r_offset.  */
   HOWTO (ALPHA_R_OP_STORE,	/* Type.  */
 	 0,			/* Rightshift.  */
-	 4,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 8,			/* Size.  */
 	 64,			/* Bitsize.  */
 	 false,			/* PC relative.  */
 	 0,			/* Bitpos.  */
@@ -5646,7 +5654,7 @@ static reloc_howto_type alpha_howto_table[] =
      relocation stack.  */
   HOWTO (ALPHA_R_OP_PSUB,	/* Type.  */
 	 0,			/* Rightshift.  */
-	 0,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 0,			/* Size.  */
 	 0,			/* Bitsize.  */
 	 false,			/* PC relative.  */
 	 0,			/* Bitpos.  */
@@ -5662,7 +5670,7 @@ static reloc_howto_type alpha_howto_table[] =
      given value.  */
   HOWTO (ALPHA_R_OP_PRSHIFT,	/* Type.  */
 	 0,			/* Rightshift.  */
-	 0,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 0,			/* Size.  */
 	 0,			/* Bitsize.  */
 	 false,			/* PC relative.  */
 	 0,			/* Bitpos.  */
@@ -5677,7 +5685,7 @@ static reloc_howto_type alpha_howto_table[] =
   /* Hack. Linkage is done by linker.  */
   HOWTO (ALPHA_R_LINKAGE,	/* Type.  */
 	 0,			/* Rightshift.  */
-	 0,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 0,			/* Size.  */
 	 0,			/* Bitsize.  */
 	 false,			/* PC relative.  */
 	 0,			/* Bitpos.  */
@@ -5692,7 +5700,7 @@ static reloc_howto_type alpha_howto_table[] =
   /* A 32 bit reference to a symbol.  */
   HOWTO (ALPHA_R_REFLONG,	/* Type.  */
 	 0,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 32,			/* Bitsize.  */
 	 false,			/* PC relative.  */
 	 0,			/* Bitpos.  */
@@ -5707,7 +5715,7 @@ static reloc_howto_type alpha_howto_table[] =
   /* A 64 bit reference to a procedure, written as 32 bit value.  */
   HOWTO (ALPHA_R_CODEADDR,	/* Type.  */
 	 0,			/* Rightshift.  */
-	 4,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 8,			/* Size.  */
 	 64,			/* Bitsize.  */
 	 false,			/* PC relative.  */
 	 0,			/* Bitpos.  */
@@ -5721,7 +5729,7 @@ static reloc_howto_type alpha_howto_table[] =
 
   HOWTO (ALPHA_R_NOP,		/* Type.  */
 	 0,			/* Rightshift.  */
-	 3,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 0,			/* Size.  */
 	 0,			/* Bitsize.  */
 	 /* The following value must match that of ALPHA_R_BSR/ALPHA_R_BOH
 	    because the calculations for the 3 relocations are the same.
@@ -5738,7 +5746,7 @@ static reloc_howto_type alpha_howto_table[] =
 
   HOWTO (ALPHA_R_BSR,		/* Type.  */
 	 0,			/* Rightshift.  */
-	 3,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 0,			/* Size.  */
 	 0,			/* Bitsize.  */
 	 true,			/* PC relative.  */
 	 0,			/* Bitpos.  */
@@ -5752,7 +5760,7 @@ static reloc_howto_type alpha_howto_table[] =
 
   HOWTO (ALPHA_R_LDA,		/* Type.  */
 	 0,			/* Rightshift.  */
-	 3,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 0,			/* Size.  */
 	 0,			/* Bitsize.  */
 	 false,			/* PC relative.  */
 	 0,			/* Bitpos.  */
@@ -5766,7 +5774,7 @@ static reloc_howto_type alpha_howto_table[] =
 
   HOWTO (ALPHA_R_BOH,		/* Type.  */
 	 0,			/* Rightshift.  */
-	 3,			/* Size (0 = byte, 1 = short, 2 = long, 3 = nil).  */
+	 0,			/* Size.  */
 	 0,			/* Bitsize.  */
 	 true,			/* PC relative.  */
 	 0,			/* Bitpos.  */
@@ -5939,9 +5947,9 @@ evax_bfd_print_emh (FILE *file, unsigned char *rec, unsigned int rec_len)
     case EMH__C_MHD:
       {
 	struct vms_emh_mhd *mhd = (struct vms_emh_mhd *) rec;
-	const char * name;
-	const char * nextname;
-	const char * maxname;
+	unsigned char *name;
+	unsigned char *nextname;
+	unsigned char *maxname;
 
 	/* PR 21840: Check for invalid lengths.  */
 	if (rec_len < sizeof (* mhd))
@@ -5953,8 +5961,8 @@ evax_bfd_print_emh (FILE *file, unsigned char *rec, unsigned int rec_len)
 	fprintf (file, _("   structure level: %u\n"), mhd->strlvl);
 	fprintf (file, _("   max record size: %u\n"),
 		 (unsigned) bfd_getl32 (mhd->recsiz));
-	name = (char *)(mhd + 1);
-	maxname = (char *) rec + rec_len;
+	name = (unsigned char *) (mhd + 1);
+	maxname = (unsigned char *) rec + rec_len;
 	if (name > maxname - 2)
 	  {
 	    fprintf (file, _("   Error: The module name is missing\n"));
@@ -7390,12 +7398,14 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 	  fprintf (file, _("standard data: %s\n"),
 		   evax_bfd_get_dsc_name (type));
 	  evax_bfd_print_valspec (buf, len, 4, file);
-	  fprintf (file, _("    name: %.*s\n"), buf[5], buf + 6);
+	  if (len > 6)
+	    fprintf (file, _("    name: %.*s\n"),
+		     buf[5] > len - 6 ? len - 6 : buf[5], buf + 6);
 	  break;
 	case DST__K_MODBEG:
 	  {
 	    struct vms_dst_modbeg *dst = (void *)buf;
-	    const char *name = (const char *)buf + sizeof (*dst);
+	    unsigned char *name = buf + sizeof (*dst);
 
 	    fprintf (file, _("modbeg\n"));
 	    if (len < sizeof (*dst))
@@ -7419,7 +7429,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 		    name += name[0] + 1;
 		    nlen = len - 1;
 		    fprintf (file, _("   compiler   : %.*s\n"),
-			     name[0] > nlen ? nlen: name[0], name + 1);
+			     name[0] > nlen ? nlen : name[0], name + 1);
 		  }
 	      }
 	  }
@@ -7430,7 +7440,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 	case DST__K_RTNBEG:
 	  {
 	    struct vms_dst_rtnbeg *dst = (void *)buf;
-	    const char *name = (const char *)buf + sizeof (*dst);
+	    unsigned char *name = buf + sizeof (*dst);
 
 	    fputs (_("rtnbeg\n"), file);
 	    if (len >= sizeof (*dst))
@@ -7483,7 +7493,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 	case DST__K_BLKBEG:
 	  {
 	    struct vms_dst_blkbeg *dst = (void *)buf;
-	    const char *name = (const char *)buf + sizeof (*dst);
+	    unsigned char *name = buf + sizeof (*dst);
 
 	    if (len > sizeof (*dst))
 	      {
@@ -7534,7 +7544,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 	case DST__K_RECBEG:
 	  {
 	    struct vms_dst_recbeg *recbeg = (void *)buf;
-	    const char *name = (const char *)buf + sizeof (*recbeg);
+	    unsigned char *name = buf + sizeof (*recbeg);
 
 	    if (len > sizeof (*recbeg))
 	      {
@@ -7748,7 +7758,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 		  case DST__K_SRC_DECLFILE:
 		    {
 		      struct vms_dst_src_decl_src *src = (void *) buf;
-		      const char *name;
+		      unsigned char *name;
 		      int nlen;
 
 		      if (len < sizeof (*src))
@@ -7770,7 +7780,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 		      if (src->length > len || src->length <= sizeof (*src))
 			break;
 		      nlen = src->length - sizeof (*src) - 1;
-		      name = (const char *) buf + sizeof (*src);
+		      name = buf + sizeof (*src);
 		      fprintf (file, _("   filename   : %.*s\n"),
 			       name[0] > nlen ? nlen : name[0], name + 1);
 		      if (name[0] >= nlen)

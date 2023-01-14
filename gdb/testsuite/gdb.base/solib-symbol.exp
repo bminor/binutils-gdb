@@ -30,10 +30,6 @@ set srcfile ${srcdir}/${subdir}/${testfile}.c
 set binfile [standard_output_file ${testfile}]
 set bin_flags [list debug shlib=${binfile_lib}]
 
-if [get_compiler_info] {
-    return -1
-}
-
 if { [gdb_compile_shlib ${srcfile_lib} ${binfile_lib} $lib_flags] != ""
      || [gdb_compile ${srcfile} ${binfile} executable $bin_flags] != "" } {
   untested "failed to compile"

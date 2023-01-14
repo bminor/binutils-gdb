@@ -3229,6 +3229,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 		       const aarch64_opcode *opcode,
 		       const aarch64_opnd_info *opnds, int idx, int *pcrel_p,
 		       bfd_vma *address, char** notes,
+		       char *comment, size_t comment_size,
 		       aarch64_feature_set features)
 {
   unsigned int i, num_conds;
@@ -3236,6 +3237,14 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
   const aarch64_opnd_info *opnd = opnds + idx;
   enum aarch64_modifier_kind kind;
   uint64_t addr, enum_value;
+
+  if (comment != NULL)
+    {
+      assert (comment_size > 0);
+      comment[0] = '\0';
+    }
+  else
+    assert (comment_size == 0);
 
   buf[0] = '\0';
   if (pcrel_p)
@@ -3572,12 +3581,13 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	case 4:	/* e.g. MOV Wd, #<imm32>.  */
 	    {
 	      int imm32 = opnd->imm.value;
-	      snprintf (buf, size, "#0x%-20x\t// #%d", imm32, imm32);
+	      snprintf (buf, size, "#0x%-20x", imm32);
+	      snprintf (comment, comment_size, "#%d", imm32);
 	    }
 	  break;
 	case 8:	/* e.g. MOV Xd, #<imm64>.  */
-	  snprintf (buf, size, "#0x%-20" PRIx64 "\t// #%" PRIi64,
-		    opnd->imm.value, opnd->imm.value);
+	  snprintf (buf, size, "#0x%-20" PRIx64, opnd->imm.value);
+	  snprintf (comment, comment_size, "#%" PRIi64, opnd->imm.value);
 	  break;
 	default:
 	  snprintf (buf, size, "<invalid>");
@@ -3675,12 +3685,12 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       num_conds = ARRAY_SIZE (opnd->cond->names);
       for (i = 1; i < num_conds && opnd->cond->names[i]; ++i)
 	{
-	  size_t len = strlen (buf);
+	  size_t len = comment != NULL ? strlen (comment) : 0;
 	  if (i == 1)
-	    snprintf (buf + len, size - len, "  // %s = %s",
+	    snprintf (comment + len, comment_size - len, "%s = %s",
 		      opnd->cond->names[0], opnd->cond->names[i]);
 	  else
-	    snprintf (buf + len, size - len, ", %s",
+	    snprintf (comment + len, comment_size - len, ", %s",
 		      opnd->cond->names[i]);
 	}
       break;
@@ -3974,7 +3984,6 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
   SYSREG ((n), (e), (f) | F_ARCHEXT, \
 	  AARCH64_FEATURE_##fe1 | AARCH64_FEATURE_##fe2)
 
-#define SR_RNG(n,e,f)	 SR_FEAT2(n,e,f,RNG,V8_5)
 #define SR_V8_1_A(n,e,f) SR_FEAT2(n,e,f,V8_A,V8_1)
 #define SR_V8_4_A(n,e,f) SR_FEAT2(n,e,f,V8_A,V8_4)
 
@@ -3994,6 +4003,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 #define SR_LOR(n,e,f)	  SR_FEAT (n,e,f,LOR)
 #define SR_PAN(n,e,f)	  SR_FEAT (n,e,f,PAN)
 #define SR_RAS(n,e,f)	  SR_FEAT (n,e,f,RAS)
+#define SR_RNG(n,e,f)	  SR_FEAT (n,e,f,RNG)
 #define SR_SME(n,e,f)	  SR_FEAT (n,e,f,SME)
 #define SR_SSBS(n,e,f)	  SR_FEAT (n,e,f,SSBS)
 #define SR_SVE(n,e,f)	  SR_FEAT (n,e,f,SVE)

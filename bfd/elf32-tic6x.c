@@ -138,7 +138,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 {
   HOWTO (R_C6000_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -151,7 +151,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_ABS32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -164,7 +164,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_ABS16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -177,7 +177,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_ABS8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -190,7 +190,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_PCR_S21,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 21,			/* bitsize */
 	 true,			/* pc_relative */
 	 7,			/* bitpos */
@@ -203,7 +203,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 true),			/* pcrel_offset */
   HOWTO (R_C6000_PCR_S12,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 true,			/* pc_relative */
 	 16,			/* bitpos */
@@ -216,7 +216,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 true),			/* pcrel_offset */
   HOWTO (R_C6000_PCR_S10,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 10,			/* bitsize */
 	 true,			/* pc_relative */
 	 13,			/* bitpos */
@@ -229,7 +229,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 true),			/* pcrel_offset */
   HOWTO (R_C6000_PCR_S7,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 7,			/* bitsize */
 	 true,			/* pc_relative */
 	 16,			/* bitpos */
@@ -242,7 +242,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 true),			/* pcrel_offset */
   HOWTO (R_C6000_ABS_S16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -255,7 +255,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_ABS_L16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -268,7 +268,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_ABS_H16,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -281,7 +281,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_SBR_U15_B,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 15,			/* bitsize */
 	 false,			/* pc_relative */
 	 8,			/* bitpos */
@@ -294,7 +294,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_SBR_U15_H,	/* type */
 	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 15,			/* bitsize */
 	 false,			/* pc_relative */
 	 8,			/* bitpos */
@@ -307,7 +307,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_SBR_U15_W,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 15,			/* bitsize */
 	 false,			/* pc_relative */
 	 8,			/* bitpos */
@@ -320,7 +320,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_SBR_S16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -333,7 +333,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_SBR_L16_B,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -346,7 +346,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_SBR_L16_H,	/* type */
 	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -359,7 +359,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_SBR_L16_W,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -372,7 +372,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_SBR_H16_B,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -385,7 +385,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_SBR_H16_H,	/* type */
 	 17,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -398,7 +398,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_SBR_H16_W,	/* type */
 	 18,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -411,7 +411,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_SBR_GOT_U15_W,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 15,			/* bitsize */
 	 false,			/* pc_relative */
 	 8,			/* bitpos */
@@ -424,7 +424,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_SBR_GOT_L16_W,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -437,7 +437,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_SBR_GOT_H16_W,	/* type */
 	 18,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -450,7 +450,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_DSBT_INDEX,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 15,			/* bitsize */
 	 false,			/* pc_relative */
 	 8,			/* bitpos */
@@ -463,7 +463,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_PREL31,	/* type */
 	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 31,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -476,7 +476,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 true),			/* pcrel_offset */
   HOWTO (R_C6000_COPY,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -489,7 +489,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_JUMP_SLOT,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -502,7 +502,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_EHTYPE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -515,7 +515,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_PCR_H16,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 7,			/* bitpos */
@@ -528,7 +528,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 true),			/* pcrel_offset */
   HOWTO (R_C6000_PCR_L16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 7,			/* bitpos */
@@ -763,7 +763,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
   EMPTY_HOWTO (252),
   HOWTO (R_C6000_ALIGN,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -776,7 +776,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_FPHEAD,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -789,7 +789,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_NOCMP,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -806,7 +806,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 {
   HOWTO (R_C6000_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -819,7 +819,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_ABS32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -832,7 +832,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_ABS16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -845,7 +845,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_ABS8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -858,7 +858,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_PCR_S21,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 21,			/* bitsize */
 	 true,			/* pc_relative */
 	 7,			/* bitpos */
@@ -871,7 +871,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 true),			/* pcrel_offset */
   HOWTO (R_C6000_PCR_S12,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 true,			/* pc_relative */
 	 16,			/* bitpos */
@@ -884,7 +884,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 true),			/* pcrel_offset */
   HOWTO (R_C6000_PCR_S10,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 10,			/* bitsize */
 	 true,			/* pc_relative */
 	 13,			/* bitpos */
@@ -897,7 +897,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 true),			/* pcrel_offset */
   HOWTO (R_C6000_PCR_S7,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 7,			/* bitsize */
 	 true,			/* pc_relative */
 	 16,			/* bitpos */
@@ -910,7 +910,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 true),			/* pcrel_offset */
   HOWTO (R_C6000_ABS_S16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -923,7 +923,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_ABS_L16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -937,7 +937,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
   EMPTY_HOWTO (R_C6000_ABS_H16),
   HOWTO (R_C6000_SBR_U15_B,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 15,			/* bitsize */
 	 false,			/* pc_relative */
 	 8,			/* bitpos */
@@ -950,7 +950,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_SBR_U15_H,	/* type */
 	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 15,			/* bitsize */
 	 false,			/* pc_relative */
 	 8,			/* bitpos */
@@ -963,7 +963,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_SBR_U15_W,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 15,			/* bitsize */
 	 false,			/* pc_relative */
 	 8,			/* bitpos */
@@ -976,7 +976,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_SBR_S16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -989,7 +989,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_SBR_L16_B,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -1002,7 +1002,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_SBR_L16_H,	/* type */
 	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -1015,7 +1015,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_SBR_L16_W,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -1031,7 +1031,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
   EMPTY_HOWTO (R_C6000_SBR_H16_W),
   HOWTO (R_C6000_SBR_GOT_U15_W,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 15,			/* bitsize */
 	 false,			/* pc_relative */
 	 8,			/* bitpos */
@@ -1044,7 +1044,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_SBR_GOT_L16_W,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -1058,7 +1058,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
   EMPTY_HOWTO (R_C6000_SBR_GOT_H16_W),
   HOWTO (R_C6000_DSBT_INDEX,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 15,			/* bitsize */
 	 false,			/* pc_relative */
 	 8,			/* bitpos */
@@ -1071,7 +1071,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_PREL31,	/* type */
 	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 31,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1084,7 +1084,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 true),			/* pcrel_offset */
   HOWTO (R_C6000_COPY,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1097,7 +1097,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_JUMP_SLOT,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1110,7 +1110,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_EHTYPE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1347,7 +1347,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
   EMPTY_HOWTO (252),
   HOWTO (R_C6000_ALIGN,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1360,7 +1360,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_FPHEAD,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1373,7 +1373,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_C6000_NOCMP,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

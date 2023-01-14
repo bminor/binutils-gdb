@@ -11,5 +11,5 @@ Disassembly of section .text:
  +[a-f0-9]+:	e8 00 00 00 00       	call   [0-9a-f]+ <foo>
 
 [0-9a-f]+ <foo>:
- +[a-f0-9]+:	c3                   	ret *
+ +[a-f0-9]+:	c3                   	ret
 #pass

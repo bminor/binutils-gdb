@@ -28,7 +28,7 @@ if {[prepare_for_testing $testfile.exp $testfile $srcfile {f90 debug}]} {
 
 if {![fortran_runto_main]} {
     perror "Could not run to main."
-    continue
+    return
 }
 
 gdb_test "until 21" {21.*print.*}

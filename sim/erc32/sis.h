@@ -18,6 +18,7 @@
 #include "sim/sim.h"
 #include <sim-config.h>
 #include <stdint.h>
+#include "dis-asm.h"
 
 #if HOST_BYTE_ORDER == BIG_ENDIAN
 #define HOST_BIG_ENDIAN
@@ -203,6 +204,8 @@ extern void	init_regs (struct pstate *sregs);
 /* interf.c */
 extern int	run_sim (struct pstate *sregs,
 			 uint64_t icount, int dis);
+extern int      fprintf_styled (void *stream, enum disassembler_style style,
+				const char *fmt, ...) ATTRIBUTE_PRINTF (3, 4);
 
 /* float.c */
 extern int	get_accex (void);

@@ -59,9 +59,6 @@ struct file_entry
 
   unsigned int length {};
 
-  /* True if referenced by the Line Number Program.  */
-  bool included_p {};
-
   /* The associated symbol table, if any.  */
   struct symtab *symtab {};
 };
@@ -139,9 +136,7 @@ struct line_header
   /* OFFSET is for struct dwz_file associated with dwarf2_per_objfile.  */
   unsigned offset_in_dwz : 1; /* Can't initialize bitfields in-class.  */
 
-  unsigned int total_length {};
   unsigned short version {};
-  unsigned int header_length {};
   unsigned char minimum_instruction_length {};
   unsigned char maximum_ops_per_instruction {};
   unsigned char default_is_stmt {};
@@ -163,10 +158,8 @@ struct line_header
   const gdb_byte *statement_program_start {}, *statement_program_end {};
 
   /* Return file name relative to the compilation directory of file
-     number I in this object's file name table.  The result is
-     allocated using xmalloc; the caller is responsible for freeing
-     it.  */
-  gdb::unique_xmalloc_ptr<char> file_file_name (int file) const;
+     number FILE in this object's file name table.  */
+  std::string file_file_name (int file) const;
 
  private:
   /* The include_directories table.  Note these are observing

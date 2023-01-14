@@ -195,14 +195,11 @@ _bfd_elf_parse_gnu_properties (bfd *abfd, Elf_Internal_Note *note)
 		  prop = _bfd_elf_get_property (abfd, type, datasz);
 		  prop->u.number |= bfd_h_get_32 (abfd, ptr);
 		  prop->pr_kind = property_number;
-		  if ((abfd->flags & DYNAMIC) == 0
-		      && type == GNU_PROPERTY_1_NEEDED
+		  if (type == GNU_PROPERTY_1_NEEDED
 		      && ((prop->u.number
 			   & GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS)
 			  != 0))
 		    {
-		      /* NB: Skip the shared library since it may not be
-			 the same at run-time.  */
 		      elf_has_indirect_extern_access (abfd) = true;
 		      /* GNU_PROPERTY_NO_COPY_ON_PROTECTED is implied.  */
 		      elf_has_no_copy_on_protected (abfd) = true;

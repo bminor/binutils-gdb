@@ -1427,9 +1427,9 @@ ppc_linux_syscall_record (struct regcache *regcache)
 
   if (syscall_gdb < 0)
     {
-      fprintf_unfiltered (gdb_stderr,
-			  _("Process record and replay target doesn't "
-			    "support syscall number %d\n"), (int) scnum);
+      gdb_printf (gdb_stderr,
+		  _("Process record and replay target doesn't "
+		    "support syscall number %d\n"), (int) scnum);
       return 0;
     }
 
@@ -1639,7 +1639,7 @@ ppc_elfv2_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
     default:
       break;
     case 8:
-      MSYMBOL_TARGET_FLAG_1 (msym) = 1;
+      msym->set_target_flag_1 (true);
       break;
     }
 }
@@ -1659,12 +1659,12 @@ ppc_elfv2_skip_entrypoint (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   /* See ppc_elfv2_elf_make_msymbol_special for how local entry point
      offset values are encoded.  */
-  if (MSYMBOL_TARGET_FLAG_1 (fun.minsym))
+  if (fun.minsym->target_flag_1 ())
     local_entry_offset = 8;
 
-  if (BMSYMBOL_VALUE_ADDRESS (fun) <= pc
-      && pc < BMSYMBOL_VALUE_ADDRESS (fun) + local_entry_offset)
-    return BMSYMBOL_VALUE_ADDRESS (fun) + local_entry_offset;
+  if (fun.value_address () <= pc
+      && pc < fun.value_address () + local_entry_offset)
+    return fun.value_address () + local_entry_offset;
 
   return pc;
 }
@@ -1738,6 +1738,11 @@ static void
 ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
 			    int wordsize)
 {
+  /* The values for TCGETS, TCSETS, TCSETSW, TCSETSF are based on the
+     size of struct termios in the kernel source.
+     include/uapi/asm-generic/termbits.h  */
+#define SIZE_OF_STRUCT_TERMIOS  0x2c
+
   /* Simply return if it had been initialized.  */
   if (record_tdep->size_pointer != 0)
     return;
@@ -1899,14 +1904,15 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
   /* These values are the second argument of system call "sys_ioctl".
      They are obtained from Linux Kernel source.
      See arch/powerpc/include/uapi/asm/ioctls.h.  */
-  record_tdep->ioctl_TCGETS = 0x403c7413;
-  record_tdep->ioctl_TCSETS = 0x803c7414;
-  record_tdep->ioctl_TCSETSW = 0x803c7415;
-  record_tdep->ioctl_TCSETSF = 0x803c7416;
   record_tdep->ioctl_TCGETA = 0x40147417;
   record_tdep->ioctl_TCSETA = 0x80147418;
   record_tdep->ioctl_TCSETAW = 0x80147419;
   record_tdep->ioctl_TCSETAF = 0x8014741c;
+  record_tdep->ioctl_TCGETS = 0x40007413 | (SIZE_OF_STRUCT_TERMIOS << 16);
+  record_tdep->ioctl_TCSETS = 0x80007414 | (SIZE_OF_STRUCT_TERMIOS << 16);
+  record_tdep->ioctl_TCSETSW = 0x80007415 | (SIZE_OF_STRUCT_TERMIOS << 16);
+  record_tdep->ioctl_TCSETSF = 0x80007416 | (SIZE_OF_STRUCT_TERMIOS << 16);
+
   record_tdep->ioctl_TCSBRK = 0x2000741d;
   record_tdep->ioctl_TCXONC = 0x2000741e;
   record_tdep->ioctl_TCFLSH = 0x2000741f;
@@ -1974,7 +1980,7 @@ ppc_floatformat_for_type (struct gdbarch *gdbarch,
 	  || strcmp (name, "_Float64x") == 0
 	  || strcmp (name, "complex _Float128") == 0
 	  || strcmp (name, "complex _Float64x") == 0)
-	return floatformats_ia64_quad;
+	return floatformats_ieee_quad;
 
       if (strcmp (name, "__ibm128") == 0)
 	return floatformats_ibm_long_double;
@@ -2053,7 +2059,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
      to distinguish between the IBM long double and IEEE quad cases.  */
   set_gdbarch_long_double_bit (gdbarch, 16 * TARGET_CHAR_BIT);
   if (tdep->long_double_abi == POWERPC_LONG_DOUBLE_IEEE128)
-    set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
+    set_gdbarch_long_double_format (gdbarch, floatformats_ieee_quad);
   else
     set_gdbarch_long_double_format (gdbarch, floatformats_ibm_long_double);
 

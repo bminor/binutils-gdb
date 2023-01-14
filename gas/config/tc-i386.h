@@ -80,14 +80,6 @@ extern unsigned long i386_mach (void);
 #define ELF_TARGET_FORMAT32	"elf32-x86-64"
 #endif
 
-#ifndef ELF_TARGET_L1OM_FORMAT
-#define ELF_TARGET_L1OM_FORMAT	"elf64-l1om"
-#endif
-
-#ifndef ELF_TARGET_K1OM_FORMAT
-#define ELF_TARGET_K1OM_FORMAT	"elf64-k1om"
-#endif
-
 #ifndef ELF_TARGET_IAMCU_FORMAT
 #define ELF_TARGET_IAMCU_FORMAT	"elf32-iamcu"
 #endif
@@ -215,7 +207,8 @@ if ((n)									\
     goto around;							\
   }
 
-#define MAX_MEM_FOR_RS_ALIGN_CODE  (alignment ? ((1 << alignment) - 1) : 1)
+#define MAX_MEM_FOR_RS_ALIGN_CODE \
+  (alignment ? ((size_t) 1 << alignment) - 1 : (size_t) 1)
 
 extern void i386_cons_align (int);
 #define md_cons_align(nbytes) i386_cons_align (nbytes)
@@ -244,8 +237,6 @@ enum processor_type
   PROCESSOR_CORE,
   PROCESSOR_CORE2,
   PROCESSOR_COREI7,
-  PROCESSOR_L1OM,
-  PROCESSOR_K1OM,
   PROCESSOR_IAMCU,
   PROCESSOR_K6,
   PROCESSOR_ATHLON,

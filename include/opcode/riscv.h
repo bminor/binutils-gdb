@@ -370,6 +370,10 @@ enum riscv_insn_class
   INSN_CLASS_F_OR_ZFINX,
   INSN_CLASS_D_OR_ZDINX,
   INSN_CLASS_Q_OR_ZQINX,
+  INSN_CLASS_ZFH,
+  INSN_CLASS_ZFH_OR_ZHINX,
+  INSN_CLASS_D_AND_ZFH_INX,
+  INSN_CLASS_Q_AND_ZFH_INX,
   INSN_CLASS_ZBA,
   INSN_CLASS_ZBB,
   INSN_CLASS_ZBC,
@@ -388,6 +392,10 @@ enum riscv_insn_class
   INSN_CLASS_V,
   INSN_CLASS_ZVEF,
   INSN_CLASS_SVINVAL,
+  INSN_CLASS_ZICBOM,
+  INSN_CLASS_ZICBOP,
+  INSN_CLASS_ZICBOZ,
+  INSN_CLASS_H,
 };
 
 /* This structure holds information for a particular instruction.  */
@@ -495,6 +503,8 @@ enum
   M_SEXTH,
   M_VMSGE,
   M_VMSGEU,
+  M_FLH,
+  M_FSH,
   M_NUM_MACROS
 };
 

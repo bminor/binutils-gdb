@@ -134,6 +134,7 @@ avr_elf_create_output_section_statements (void)
       einfo (_("%X%P: can not create stub BFD: %E\n"));
       return;
     }
+  stub_file->the_bfd->flags |= BFD_LINKER_CREATED;
 
   /* Now we add the stub section.  */
 

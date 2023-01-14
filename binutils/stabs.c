@@ -2367,7 +2367,10 @@ parse_stab_struct_fields (void *dhandle,
 
       if (! parse_stab_one_struct_field (dhandle, info, pp, p, fields + c,
 					 staticsp, p_end))
-	return false;
+	{
+	  free (fields);
+	  return false;
+	}
 
       ++c;
     }
@@ -5467,7 +5470,10 @@ stab_demangle_v3_arg (void *dhandle, struct stab_handle *info,
 					  dc->u.s_binary.right,
 					  &varargs);
 	if (pargs == NULL)
-	  return NULL;
+	  {
+	    free (dt);
+	    return NULL;
+	  }
 
 	return debug_make_function_type (dhandle, dt, pargs, varargs);
       }

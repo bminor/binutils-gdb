@@ -33,7 +33,8 @@ gdb_test "break foo.adb:$bp_location" \
     "Breakpoint $decimal.*" \
 
 gdb_run_cmd
-gdb_test "" "Breakpoint $decimal, foo \\(\\).*"
+gdb_test "" "Breakpoint $decimal, foo \\(\\).*" \
+    "run to foo"
 gdb_test "continue" \
          "Continuing\\..*Breakpoint $decimal, foo \\(\\).*"
 

@@ -187,6 +187,15 @@ OP (OP_STRING)
    and they must all match.  */
 OP (OP_ARRAY)
 
+/* UNOP_EXTRACT takes a value and a type, like a cast, but, instead of
+   casting the value to the given type, a new value (of the given
+   type) is extracted from the contents of the old value, starting
+   from the least significant byte.
+
+   It is invalid for the given type to be larger than the type of the
+   given value.  */
+OP (UNOP_EXTRACT)
+
 /* UNOP_CAST is followed by a type pointer in the next exp_element.
    With another UNOP_CAST at the end, this makes three exp_elements.
    It casts the value of the following subexpression.  */
@@ -375,19 +384,21 @@ OP (OP_F77_UNDETERMINED_ARGLIST)
 
 /* Single operand builtins.  */
 OP (UNOP_FORTRAN_KIND)
-OP (UNOP_FORTRAN_FLOOR)
-OP (UNOP_FORTRAN_CEILING)
 OP (UNOP_FORTRAN_ALLOCATED)
 OP (UNOP_FORTRAN_RANK)
 OP (UNOP_FORTRAN_SHAPE)
 OP (UNOP_FORTRAN_LOC)
 
 /* Two operand builtins.  */
-OP (BINOP_FORTRAN_CMPLX)
 OP (BINOP_FORTRAN_MODULO)
 
 /* Builtins that take one or two operands.  */
+OP (FORTRAN_CEILING)
+OP (FORTRAN_FLOOR)
+OP (FORTRAN_ASSOCIATED)
+
+/* Builtins that take one, two or three operands.  */
 OP (FORTRAN_LBOUND)
 OP (FORTRAN_UBOUND)
-OP (FORTRAN_ASSOCIATED)
+OP (FORTRAN_CMPLX)
 OP (FORTRAN_ARRAY_SIZE)

@@ -392,6 +392,20 @@ case "${ENABLE_LD}" in
     ;;
 esac
 
+AC_ARG_ENABLE(gprofng,
+[AS_HELP_STRING([[--enable-gprofng[=ARG]]],
+		[build gprofng @<:@ARG={yes,no}@:>@])],
+enable_gprofng=$enableval,
+enable_gprofng=yes)
+if test "$enable_gprofng" = "yes"; then
+  case "${target}" in
+    x86_64-*-linux* | i?86-*-linux* | aarch64-*-linux*)
+    configdirs="$configdirs gprofng"
+    ;;
+  esac
+fi
+
+
 # PR gas/19109
 # Decide the default method for compressing debug sections.
 # Provide a configure time option to override our default.
@@ -2328,13 +2342,18 @@ fi
 
 # Sometimes we have special requirements for the host libiberty.
 extra_host_libiberty_configure_flags=
-extra_host_zlib_configure_flags=
 case " $configdirs " in
-  *" lto-plugin "* | *" libcc1 "*)
+  *" lto-plugin "* | *" libcc1 "* | *" gdbserver "*)
     # When these are to be built as shared libraries, the same applies to
     # libiberty.
     extra_host_libiberty_configure_flags=--enable-shared
     ;;
+esac
+AC_SUBST(extra_host_libiberty_configure_flags)
+
+# Sometimes we have special requirements for the host zlib.
+extra_host_zlib_configure_flags=
+case " $configdirs " in
   *" bfd "*)
     # When bfd is to be built as a shared library, the same applies to
     # zlib.
@@ -2343,7 +2362,6 @@ case " $configdirs " in
     fi
     ;;
 esac
-AC_SUBST(extra_host_libiberty_configure_flags)
 AC_SUBST(extra_host_zlib_configure_flags)
 
 # Produce a warning message for the subdirs we can't configure.
@@ -3451,6 +3469,7 @@ AC_SUBST(CC)
 AC_SUBST(CXX)
 AC_SUBST(CFLAGS)
 AC_SUBST(CXXFLAGS)
+AC_SUBST(PKG_CONFIG_PATH)
 
 GCC_PLUGIN_OPTION(PLUGIN_OPTION)
 AR_PLUGIN_OPTION=

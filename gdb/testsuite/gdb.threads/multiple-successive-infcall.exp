@@ -18,10 +18,6 @@
 
 standard_testfile
 
-if [get_compiler_info] {
-  return -1
-}
-
 if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
   executable {debug additional_flags=-std=gnu99}] != "" } {
   return -1

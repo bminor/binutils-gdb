@@ -181,13 +181,19 @@ typedef struct
   /* This is an array of offsets to the location view table.  */
   dwarf_vma *    loc_views;
   int *          have_frame_base;
+
+  /* Information for associating location lists with CUs.  */
   unsigned int   num_loc_offsets;
   unsigned int   max_loc_offsets;
   unsigned int   num_loc_views;
+  dwarf_vma      loclists_base;
+
   /* List of .debug_ranges offsets seen in this .debug_info.  */
   dwarf_vma *    range_lists;
   unsigned int   num_range_lists;
   unsigned int   max_range_lists;
+  dwarf_vma      rnglists_base;
+  dwarf_vma      str_offsets_base;
 }
 debug_info;
 
@@ -224,6 +230,9 @@ extern int do_debug_cu_index;
 extern int do_wide;
 extern int do_debug_links;
 extern int do_follow_links;
+#ifdef HAVE_LIBDEBUGINFOD
+extern int use_debuginfod;
+#endif
 extern bool do_checks;
 
 extern int dwarf_cutoff_level;
@@ -243,8 +252,8 @@ extern void *open_debug_file (const char *);
 
 extern void free_debug_memory (void);
 
-extern void dwarf_select_sections_by_names (const char *);
-extern void dwarf_select_sections_by_letters (const char *);
+extern int dwarf_select_sections_by_names (const char *);
+extern int dwarf_select_sections_by_letters (const char *);
 extern void dwarf_select_sections_all (void);
 
 extern unsigned int * find_cu_tu_set (void *, unsigned int);

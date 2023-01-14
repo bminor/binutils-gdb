@@ -22,7 +22,6 @@ if {[prepare_for_testing "failed to prepare" $testfile \
 
 runto_main
 
-get_compiler_info
 get_debug_format
 if { [skip_inline_var_tests] } {
     untested inline-bt.exp

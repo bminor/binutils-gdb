@@ -6,3 +6,6 @@ a_val:	.long 0
         .global main
 main:
         .long 0
+
+	.section	.note.GNU-stack,""
+

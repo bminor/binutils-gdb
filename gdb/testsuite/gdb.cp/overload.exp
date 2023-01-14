@@ -259,6 +259,9 @@ gdb_test "print bar(b)" "= 22"
 gdb_test "print bar(c)" "= 22"
 gdb_test "print bar(d)" "= 22"
 
+# PR c++/28901 - gdb thought this was ambiguous.
+gdb_test "print bar2(e, b)" " = 33"
+
 # ---
 
 # List overloaded functions.

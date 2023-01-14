@@ -29,10 +29,6 @@
 
 standard_testfile all-types.c
 
-if [get_compiler_info] {
-    return -1
-}
-
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
     return -1
 }
@@ -43,8 +39,12 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
+
+# These are used as expected result values.
+set false 0
+set true 1
 
 gdb_test "next" "return 0;" "continuing after dummy()"
 

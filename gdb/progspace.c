@@ -27,6 +27,7 @@
 #include "gdbthread.h"
 #include "inferior.h"
 #include <algorithm>
+#include "cli/cli-style.h"
 
 /* The last program space number assigned.  */
 static int last_program_space_num = 0;
@@ -173,7 +174,7 @@ program_space::free_all_objfiles ()
 /* See progspace.h.  */
 
 void
-program_space::add_objfile (std::shared_ptr<objfile> &&objfile,
+program_space::add_objfile (std::unique_ptr<objfile> &&objfile,
 			    struct objfile *before)
 {
   if (before == nullptr)
@@ -181,7 +182,7 @@ program_space::add_objfile (std::shared_ptr<objfile> &&objfile,
   else
     {
       auto iter = std::find_if (objfiles_list.begin (), objfiles_list.end (),
-				[=] (const std::shared_ptr<::objfile> &objf)
+				[=] (const std::unique_ptr<::objfile> &objf)
 				{
 				  return objf.get () == before;
 				});
@@ -202,7 +203,7 @@ program_space::remove_objfile (struct objfile *objfile)
   reinit_frame_cache ();
 
   auto iter = std::find_if (objfiles_list.begin (), objfiles_list.end (),
-			    [=] (const std::shared_ptr<::objfile> &objf)
+			    [=] (const std::unique_ptr<::objfile> &objf)
 			    {
 			      return objf.get () == objfile;
 			    });
@@ -321,7 +322,8 @@ print_program_space (struct ui_out *uiout, int requested)
       uiout->field_signed ("id", pspace->num);
 
       if (pspace->exec_filename != nullptr)
-	uiout->field_string ("exec", pspace->exec_filename.get ());
+	uiout->field_string ("exec", pspace->exec_filename.get (),
+			     file_name_style.style ());
       else
 	uiout->field_skip ("exec");
 
@@ -344,14 +346,14 @@ print_program_space (struct ui_out *uiout, int requested)
 	    if (!printed_header)
 	      {
 		printed_header = 1;
-		printf_filtered ("\n\tBound inferiors: ID %d (%s)",
-				 inf->num,
-				 target_pid_to_str (ptid_t (inf->pid)).c_str ());
+		gdb_printf ("\n\tBound inferiors: ID %d (%s)",
+			    inf->num,
+			    target_pid_to_str (ptid_t (inf->pid)).c_str ());
 	      }
 	    else
-	      printf_filtered (", ID %d (%s)",
-			       inf->num,
-			       target_pid_to_str (ptid_t (inf->pid)).c_str ());
+	      gdb_printf (", ID %d (%s)",
+			  inf->num,
+			  target_pid_to_str (ptid_t (inf->pid)).c_str ());
 	  }
 
       uiout->text ("\n");

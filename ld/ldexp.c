@@ -340,8 +340,10 @@ update_definedness (const char *name, struct bfd_link_hash_entry *h)
 }
 
 static void
-fold_segment_end (seg_align_type *seg)
+fold_segment_end (void)
 {
+  seg_align_type *seg = &expld.dataseg;
+
   if (expld.phase == lang_first_phase_enum
       || expld.section != bfd_abs_section_ptr)
     {
@@ -410,7 +412,7 @@ fold_unary (etree_type *tree)
 	  break;
 
 	case DATA_SEGMENT_END:
-	  fold_segment_end (&expld.dataseg);
+	  fold_segment_end ();
 	  break;
 
 	default:
@@ -447,8 +449,10 @@ arith_result_section (const etree_value_type *lhs)
 }
 
 static void
-fold_segment_align (seg_align_type *seg, etree_value_type *lhs)
+fold_segment_align (etree_value_type *lhs)
 {
+  seg_align_type *seg = &expld.dataseg;
+
   seg->relro = exp_seg_relro_start;
   if (expld.phase == lang_first_phase_enum
       || expld.section != bfd_abs_section_ptr)
@@ -469,7 +473,8 @@ fold_segment_align (seg_align_type *seg, etree_value_type *lhs)
 	}
       else
 	{
-	  expld.result.value += expld.dot & (maxpage - 1);
+	  if (!link_info.relro)
+	    expld.result.value += expld.dot & (maxpage - 1);
 	  if (seg->phase == exp_seg_done)
 	    {
 	      /* OK.  */
@@ -478,8 +483,9 @@ fold_segment_align (seg_align_type *seg, etree_value_type *lhs)
 	    {
 	      seg->phase = exp_seg_align_seen;
 	      seg->base = expld.result.value;
-	      seg->pagesize = commonpage;
+	      seg->commonpagesize = commonpage;
 	      seg->maxpagesize = maxpage;
+	      seg->relropagesize = maxpage;
 	      seg->relro_end = 0;
 	    }
 	  else
@@ -489,8 +495,10 @@ fold_segment_align (seg_align_type *seg, etree_value_type *lhs)
 }
 
 static void
-fold_segment_relro_end (seg_align_type *seg, etree_value_type *lhs)
+fold_segment_relro_end (etree_value_type *lhs)
 {
+  seg_align_type *seg = &expld.dataseg;
+
   /* Operands swapped!  XXX_SEGMENT_RELRO_END(offset,exp) has offset
      in expld.result and exp in lhs.  */
   seg->relro = exp_seg_relro_end;
@@ -508,10 +516,10 @@ fold_segment_relro_end (seg_align_type *seg, etree_value_type *lhs)
 	seg->relro_end = lhs->value + expld.result.value;
 
       if (seg->phase == exp_seg_relro_adjust
-	  && (seg->relro_end & (seg->pagesize - 1)))
+	  && (seg->relro_end & (seg->relropagesize - 1)))
 	{
-	  seg->relro_end += seg->pagesize - 1;
-	  seg->relro_end &= ~(seg->pagesize - 1);
+	  seg->relro_end += seg->relropagesize - 1;
+	  seg->relro_end &= ~(seg->relropagesize - 1);
 	  expld.result.value = seg->relro_end - expld.result.value;
 	}
       else
@@ -657,11 +665,11 @@ fold_binary (etree_type *tree)
 	  break;
 
 	case DATA_SEGMENT_ALIGN:
-	  fold_segment_align (&expld.dataseg, &lhs);
+	  fold_segment_align (&lhs);
 	  break;
 
 	case DATA_SEGMENT_RELRO_END:
-	  fold_segment_relro_end (&expld.dataseg, &lhs);
+	  fold_segment_relro_end (&lhs);
 	  break;
 
 	default:
@@ -856,9 +864,17 @@ fold_name (etree_type *tree)
 	      bfd_vma val;
 
 	      if (tree->type.node_code == SIZEOF)
-		val = (os->bfd_section->size
-		       / bfd_octets_per_byte (link_info.output_bfd,
-					      os->bfd_section));
+		{
+		  if (os->processed_vma)
+		    val = os->bfd_section->size;
+		  else
+		    /* If we've just called lang_reset_memory_regions,
+		       size will be zero and a previous estimate of
+		       size will be in rawsize.  */
+		    val = os->bfd_section->rawsize;
+		  val /= bfd_octets_per_byte (link_info.output_bfd,
+					      os->bfd_section);
+		}
 	      else
 		val = (bfd_vma)1 << os->bfd_section->alignment_power;
 

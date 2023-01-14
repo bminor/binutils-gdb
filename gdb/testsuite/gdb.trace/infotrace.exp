@@ -107,7 +107,7 @@ gdb_breakpoint "main"
 gdb_trace_setactions "collect on tracepoint 1" "1" \
 	"collect gdb_struct1_test" "^$"
 gdb_run_cmd
-if {[gdb_test "" "Breakpoint ${decimal}, main.*"] != 0} {
+if {[gdb_test "" "Breakpoint ${decimal}, main.*" "run to main"] != 0} {
     return -1
 }
 

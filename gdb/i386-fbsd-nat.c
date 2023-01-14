@@ -27,30 +27,22 @@
 #include <sys/sysctl.h>
 #include <sys/user.h>
 
-#include "fbsd-nat.h"
 #include "i386-tdep.h"
 #include "i386-fbsd-tdep.h"
 #include "i387-tdep.h"
 #include "x86-nat.h"
 #include "gdbsupport/x86-xstate.h"
-#include "x86-bsd-nat.h"
+#include "x86-fbsd-nat.h"
 
-class i386_fbsd_nat_target final
-  : public x86bsd_nat_target<fbsd_nat_target>
+class i386_fbsd_nat_target final : public x86_fbsd_nat_target
 {
 public:
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
 
-#if defined(PT_GETXMMREGS) || defined(PT_GETXSTATE_INFO)
   const struct target_desc *read_description () override;
-#endif
 
   void resume (ptid_t, int, enum gdb_signal) override;
-
-#if defined(HAVE_PT_GETDBREGS) && defined(USE_SIGTRAP_SIGINFO)
-  bool supports_stopped_by_hw_breakpoint () override;
-#endif
 };
 
 static i386_fbsd_nat_target the_i386_fbsd_nat_target;
@@ -59,9 +51,7 @@ static i386_fbsd_nat_target the_i386_fbsd_nat_target;
 static size_t xsave_len;
 #endif
 
-#ifdef HAVE_PT_GETXMMREGS
 static int have_ptrace_xmmregs;
-#endif
 
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers.  */
@@ -70,9 +60,6 @@ void
 i386_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-#if defined(PT_GETFSBASE) || defined(PT_GETGSBASE)
-  const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-#endif
   pid_t pid = get_ptrace_pid (regcache->ptid ());
 
   if (fetch_register_set<struct reg> (regcache, regnum, PT_GETREGS,
@@ -126,7 +113,6 @@ i386_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
       return;
     }
 #endif
-#ifdef HAVE_PT_GETXMMREGS
   if (have_ptrace_xmmregs != 0)
     {
       char xmmregs[I387_SIZEOF_FXSAVE];
@@ -137,7 +123,6 @@ i386_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
       i387_supply_fxsave (regcache, regnum, xmmregs);
       return;
     }
-#endif
 
   struct fpreg fpregs;
 
@@ -154,9 +139,6 @@ void
 i386_fbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-#if defined(PT_GETFSBASE) || defined(PT_GETGSBASE)
-  const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-#endif
   pid_t pid = get_ptrace_pid (regcache->ptid ());
 
   if (store_register_set<struct reg> (regcache, regnum, PT_GETREGS, PT_SETREGS,
@@ -214,7 +196,6 @@ i386_fbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
       return;
     }
 #endif
-#ifdef HAVE_PT_GETXMMREGS
   if (have_ptrace_xmmregs != 0)
     {
       char xmmregs[I387_SIZEOF_FXSAVE];
@@ -228,7 +209,6 @@ i386_fbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
 	perror_with_name (_("Couldn't write XMM registers"));
       return;
     }
-#endif
 
   struct fpreg fpregs;
 
@@ -324,7 +304,6 @@ i386fbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 }
 
 
-#if defined(PT_GETXMMREGS) || defined(PT_GETXSTATE_INFO)
 /* Implement the read_description method.  */
 
 const struct target_desc *
@@ -334,9 +313,7 @@ i386_fbsd_nat_target::read_description ()
   static int xsave_probed;
   static uint64_t xcr0;
 #endif
-#ifdef PT_GETXMMREGS
   static int xmm_probed;
-#endif
 
 #ifdef PT_GETXSTATE_INFO
   if (!xsave_probed)
@@ -356,7 +333,6 @@ i386_fbsd_nat_target::read_description ()
     return i386_target_description (xcr0, true);
 #endif
 
-#ifdef PT_GETXMMREGS
   if (!xmm_probed)
     {
       char xmmregs[I387_SIZEOF_FXSAVE];
@@ -369,21 +345,9 @@ i386_fbsd_nat_target::read_description ()
 
   if (have_ptrace_xmmregs)
     return i386_target_description (X86_XSTATE_SSE_MASK, true);
-#endif
 
   return i386_target_description (X86_XSTATE_X87_MASK, true);
 }
-#endif
-
-#if defined(HAVE_PT_GETDBREGS) && defined(USE_SIGTRAP_SIGINFO)
-/* Implement the supports_stopped_by_hw_breakpoints method.  */
-
-bool
-i386_fbsd_nat_target::supports_stopped_by_hw_breakpoint ()
-{
-  return true;
-}
-#endif
 
 void _initialize_i386fbsd_nat ();
 void

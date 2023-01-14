@@ -1088,10 +1088,10 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen)
 	      /* PUT didn't jump out.  We could just break, but we
 		 know what will happen, so optimize a bit.  */
 	      ch = GET ();
-	      old_state = 3;
+	      old_state = 9;
 	    }
-	  else if (state == 9)
-	    old_state = 3;
+	  else if (state == 3)
+	    old_state = 9;
 	  else
 	    old_state = state;
 	  state = 5;

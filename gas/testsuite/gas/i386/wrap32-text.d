@@ -39,5 +39,5 @@ Disassembly of section .text:
 [ 	]*[0-9a-f]+:[ 	]+81 02 00 ff ff ff    	addl   \$0xffffff00,\(%edx\)[ 	]+[0-9a-f]+: (R_386_|dir)?32[ 	]+sym
 [ 	]*[0-9a-f]+:[ 	]+81 00 f4 00 00 00    	addl   \$0xf4,\(%eax\)[ 	]+[0-9a-f]+: (R_386_|dir)?32[ 	]+sym
 [ 	]*[0-9a-f]+:[ 	]+81 02 f4 00 00 00    	addl   \$0xf4,\(%edx\)[ 	]+[0-9a-f]+: (R_386_|dir)?32[ 	]+sym
-[ 	]*[0-9a-f]+:[ 	]+c3                   	ret *
+[ 	]*[0-9a-f]+:[ 	]+c3                   	ret
 #pass

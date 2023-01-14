@@ -24,6 +24,7 @@
 #include "opcode/arc.h"
 #include "osabi.h"
 #include "solib-svr4.h"
+#include "disasm.h"
 
 /* ARC header files.  */
 #include "opcodes/arc-dis.h"
@@ -355,7 +356,7 @@ arc_linux_sw_breakpoint_from_kind (struct gdbarch *gdbarch,
    */
 
 static std::vector<CORE_ADDR>
-handle_atomic_sequence (arc_instruction insn, disassemble_info &di)
+handle_atomic_sequence (arc_instruction insn, disassemble_info *di)
 {
   const int atomic_seq_len = 24;    /* Instruction sequence length.  */
   std::vector<CORE_ADDR> next_pcs;
@@ -373,7 +374,7 @@ handle_atomic_sequence (arc_instruction insn, disassemble_info &di)
   for (int insn_count = 0; insn_count < atomic_seq_len; ++insn_count)
     {
       arc_insn_decode (arc_insn_get_linear_next_pc (insn),
-		       &di, arc_delayed_print_insn, &insn);
+		       di, arc_delayed_print_insn, &insn);
 
       if (insn.insn_class == BRCC)
         {
@@ -411,15 +412,15 @@ arc_linux_software_single_step (struct regcache *regcache)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   arc_gdbarch_tdep *tdep = (arc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
-  struct disassemble_info di = arc_disassemble_info (gdbarch);
+  struct gdb_non_printing_memory_disassembler dis (gdbarch);
 
   /* Read current instruction.  */
   struct arc_instruction curr_insn;
-  arc_insn_decode (regcache_read_pc (regcache), &di, arc_delayed_print_insn,
-		   &curr_insn);
+  arc_insn_decode (regcache_read_pc (regcache), dis.disasm_info (),
+		   arc_delayed_print_insn, &curr_insn);
 
   if (curr_insn.insn_class == LLOCK)
-    return handle_atomic_sequence (curr_insn, di);
+    return handle_atomic_sequence (curr_insn, dis.disasm_info ());
 
   CORE_ADDR next_pc = arc_insn_get_linear_next_pc (curr_insn);
   std::vector<CORE_ADDR> next_pcs;
@@ -430,7 +431,8 @@ arc_linux_software_single_step (struct regcache *regcache)
   if (curr_insn.has_delay_slot)
     {
       struct arc_instruction next_insn;
-      arc_insn_decode (next_pc, &di, arc_delayed_print_insn, &next_insn);
+      arc_insn_decode (next_pc, dis.disasm_info (), arc_delayed_print_insn,
+		       &next_insn);
       next_pcs.push_back (arc_insn_get_linear_next_pc (next_insn));
     }
   else
@@ -508,7 +510,7 @@ arc_linux_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
     {
       if (resolver.minsym != nullptr)
 	{
-	  CORE_ADDR res_addr = BMSYMBOL_VALUE_ADDRESS (resolver);
+	  CORE_ADDR res_addr = resolver.value_address ();
 	  arc_linux_debug_printf ("pc = %s, resolver at %s",
 				  print_core_address (gdbarch, pc),
 				  print_core_address (gdbarch, res_addr));
@@ -518,7 +520,7 @@ arc_linux_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 				print_core_address (gdbarch, pc));
     }
 
-  if (resolver.minsym != nullptr && BMSYMBOL_VALUE_ADDRESS (resolver) == pc)
+  if (resolver.minsym != nullptr && resolver.value_address () == pc)
     {
       /* Find the return address.  */
       return frame_unwind_caller_pc (get_current_frame ());

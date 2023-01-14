@@ -25,6 +25,7 @@ Disassembly of section .text:
  +[a-f0-9]+:	c5 f8 28 90 80 00 00 00 	vmovaps 0x80\(%eax\),%xmm2
  +[a-f0-9]+:	c5 f8 28 90 80 00 00 00 	vmovaps 0x80\(%eax\),%xmm2
  +[a-f0-9]+:	62 f1 7c 08 28 50 08 	vmovaps 0x80\(%eax\),%xmm2
+ +[a-f0-9]+:	67 62 f1 7c 08 28 97 80 00 	vmovaps 0x80\(%bx\),%xmm2
  +[a-f0-9]+:	62 f1 7c 08 28 90 80 00 00 00 	vmovaps 0x80\(%eax\),%xmm2
  +[a-f0-9]+:	89 c8                	mov    %ecx,%eax
  +[a-f0-9]+:	8b c1                	mov    %ecx,%eax
@@ -324,6 +325,7 @@ Disassembly of section .text:
  +[a-f0-9]+:	c5 f8 28 90 80 00 00 00 	vmovaps 0x80\(%eax\),%xmm2
  +[a-f0-9]+:	c5 f8 28 90 80 00 00 00 	vmovaps 0x80\(%eax\),%xmm2
  +[a-f0-9]+:	62 f1 7c 08 28 50 08 	vmovaps 0x80\(%eax\),%xmm2
+ +[a-f0-9]+:	67 62 f1 7c 08 28 97 80 00 	vmovaps 0x80\(%bx\),%xmm2
  +[a-f0-9]+:	62 f1 7c 08 28 90 80 00 00 00 	vmovaps 0x80\(%eax\),%xmm2
  +[a-f0-9]+:	89 c8                	mov    %ecx,%eax
  +[a-f0-9]+:	8b c1                	mov    %ecx,%eax
@@ -354,4 +356,6 @@ Disassembly of section .text:
  +[a-f0-9]+:	67 8a 46 00          	mov    0x0\(%bp\),%al
  +[a-f0-9]+:	67 8a 46 00          	mov    0x0\(%bp\),%al
  +[a-f0-9]+:	67 8a 86 00 00       	mov    0x0\(%bp\),%al
+ +[a-f0-9]+:	e9 fb ff ff ff       	jmp    [0-9a-f]* <.*>
+ +[a-f0-9]+:	e9 fd ff ff ff       	jmp    [0-9a-f]* <.*>
 #pass

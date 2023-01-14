@@ -4,7 +4,7 @@
 # Check that the IRELATIVE addend is magic+0, not magic+8
 
 #...
-.* R_PPC64_IRELATIVE +10000180
+.* R_PPC64_IRELATIVE +100001a0
 #...
-.*: 0+10000180 +20 IFUNC +LOCAL +DEFAULT .* magic
+.*: 0+100001a0 +20 IFUNC +LOCAL +DEFAULT .* magic
 #pass

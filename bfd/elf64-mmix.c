@@ -192,7 +192,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
   /* This reloc does nothing.  */
   HOWTO (R_MMIX_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -207,7 +207,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
   /* An 8 bit absolute relocation.  */
   HOWTO (R_MMIX_8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -222,7 +222,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
   /* An 16 bit absolute relocation.  */
   HOWTO (R_MMIX_16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -237,7 +237,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
   /* An 24 bit absolute relocation.  */
   HOWTO (R_MMIX_24,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -252,7 +252,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
   /* A 32 bit absolute relocation.  */
   HOWTO (R_MMIX_32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -267,7 +267,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
   /* 64 bit relocation.  */
   HOWTO (R_MMIX_64,		/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -282,7 +282,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
   /* An 8 bit PC-relative relocation.  */
   HOWTO (R_MMIX_PC_8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -297,7 +297,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
   /* An 16 bit PC-relative relocation.  */
   HOWTO (R_MMIX_PC_16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -312,7 +312,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
   /* An 24 bit PC-relative relocation.  */
   HOWTO (R_MMIX_PC_24,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -327,7 +327,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
   /* A 32 bit absolute PC-relative relocation.  */
   HOWTO (R_MMIX_PC_32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -342,7 +342,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
   /* 64 bit PC-relative relocation.  */
   HOWTO (R_MMIX_PC_64,		/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -357,7 +357,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
   /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_MMIX_GNU_VTINHERIT, /* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -372,7 +372,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
   /* GNU extension to record C++ vtable member usage.  */
   HOWTO (R_MMIX_GNU_VTENTRY,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -390,7 +390,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
      significant bits are set.  The howto members reflect a simple GETA.  */
   HOWTO (R_MMIX_GETA,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 19,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -404,7 +404,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 
   HOWTO (R_MMIX_GETA_1,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 19,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -418,7 +418,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 
   HOWTO (R_MMIX_GETA_2,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 19,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -432,7 +432,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 
   HOWTO (R_MMIX_GETA_3,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 19,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -450,7 +450,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
      reflect a simple branch.  */
   HOWTO (R_MMIX_CBRANCH,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 19,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -464,7 +464,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 
   HOWTO (R_MMIX_CBRANCH_J,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 19,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -478,7 +478,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 
   HOWTO (R_MMIX_CBRANCH_1,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 19,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -492,7 +492,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 
   HOWTO (R_MMIX_CBRANCH_2,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 19,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -506,7 +506,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 
   HOWTO (R_MMIX_CBRANCH_3,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 19,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -526,7 +526,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
      PUSHJ.  */
   HOWTO (R_MMIX_PUSHJ,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 19,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -540,7 +540,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 
   HOWTO (R_MMIX_PUSHJ_1,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 19,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -554,7 +554,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 
   HOWTO (R_MMIX_PUSHJ_2,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 19,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -568,7 +568,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 
   HOWTO (R_MMIX_PUSHJ_3,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 19,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -586,7 +586,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
      memory segments.  The howto members reflect a trivial JMP.  */
   HOWTO (R_MMIX_JMP,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 27,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -600,7 +600,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 
   HOWTO (R_MMIX_JMP_1,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 27,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -614,7 +614,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 
   HOWTO (R_MMIX_JMP_2,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 27,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -628,7 +628,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 
   HOWTO (R_MMIX_JMP_3,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 27,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -645,7 +645,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
      GETA/PUSHJ/branches.  */
   HOWTO (R_MMIX_ADDR19,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 19,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -660,7 +660,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
   /* For JMP.  */
   HOWTO (R_MMIX_ADDR27,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 27,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -676,7 +676,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
      instruction (offset -3) needs adjusting.  */
   HOWTO (R_MMIX_REG_OR_BYTE,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -691,7 +691,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
   /* A general register.  */
   HOWTO (R_MMIX_REG,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -708,7 +708,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
      the bitmasks correspond to what we store in the image.  */
   HOWTO (R_MMIX_BASE_PLUS_OFFSET,	/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -727,7 +727,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
      section to discard *after* relocation.  */
   HOWTO (R_MMIX_LOCAL,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -741,7 +741,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 
   HOWTO (R_MMIX_PUSHJ_STUBBABLE, /* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 19,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */

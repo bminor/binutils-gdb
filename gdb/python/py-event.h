@@ -45,13 +45,13 @@ extern int emit_exited_event (const LONGEST *exit_code, struct inferior *inf);
 /* For inferior function call events, discriminate whether event is
    before or after the call. */
 
-typedef enum
+enum inferior_call_kind
 {
   /* Before the call */
   INFERIOR_CALL_PRE,
   /* after the call */
   INFERIOR_CALL_POST,
-} inferior_call_kind;
+};
 
 extern int emit_inferior_call_event (inferior_call_kind kind,
 				     ptid_t thread, CORE_ADDR addr);

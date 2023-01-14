@@ -18,7 +18,7 @@
 # Test expressions which assume an implicit "this" with a qualified
 # name.
 
-if {[skip_cplus_tests]} { continue }
+if {[skip_cplus_tests]} { return }
 
 standard_testfile .cc
 
@@ -51,7 +51,7 @@ with_test_prefix "before run" {
 # Run to D::f.
 if {![runto_main]} {
     perror "couldn't run to main"
-    continue
+    return
 }
 
 gdb_breakpoint "D::f"

@@ -25,6 +25,9 @@ if [target_info exists no_long_long] {
     set exec_opts [list debug]
 }
 
+# Some tests require GCC.
+set gcc_compiled [is_c_compiler_gcc]
+
 standard_testfile .c
 
 # Define a procedure to set up an xfail for all targets that put out a

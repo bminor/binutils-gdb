@@ -418,7 +418,7 @@ private:
       char *execd_pathname;
       /* Syscall number */
       int syscall_number;
-    } m_value;
+    } m_value {};
 };
 
 /* Extended reasons that can explain why a target/thread stopped for a

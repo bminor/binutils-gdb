@@ -160,9 +160,6 @@ eelf32tilegx_be.c
 eelf32tilepro.c
 eelf32vax.c
 eelf32visium.c
-eelf32xc16x.c
-eelf32xc16xl.c
-eelf32xc16xs.c
 eelf32xstormy16.c
 eelf32xtensa.c
 eelf32z80.c
@@ -207,10 +204,6 @@ eelf_i386_ldso.c
 eelf_i386_sol2.c
 eelf_i386_vxworks.c
 eelf_iamcu.c
-eelf_k1om.c
-eelf_k1om_fbsd.c
-eelf_l1om.c
-eelf_l1om_fbsd.c
 eelf_mipsel_haiku.c
 eelf_s390.c
 eelf_x86_64.c

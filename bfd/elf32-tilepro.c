@@ -34,7 +34,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
   /* This reloc does nothing.  */
   HOWTO (R_TILEPRO_NONE,	/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -49,7 +49,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
   /* A 32 bit absolute relocation.  */
   HOWTO (R_TILEPRO_32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -64,7 +64,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
   /* A 16 bit absolute relocation.  */
   HOWTO (R_TILEPRO_16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -79,7 +79,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
   /* An 8 bit absolute relocation.  */
   HOWTO (R_TILEPRO_8,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -94,7 +94,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
   /* A 32 bit pc-relative relocation.  */
   HOWTO (R_TILEPRO_32_PCREL,/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -109,7 +109,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
   /* A 16 bit pc-relative relocation.  */
   HOWTO (R_TILEPRO_16_PCREL,/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -124,7 +124,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
   /* An 8 bit pc-relative relocation.  */
   HOWTO (R_TILEPRO_8_PCREL,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -139,7 +139,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
   /* A 16 bit relocation without overflow.  */
   HOWTO (R_TILEPRO_LO16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -154,7 +154,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
   /* The high order 16 bits of an address.  */
   HOWTO (R_TILEPRO_HI16,	/* type */
 	 16,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -170,7 +170,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
      the low 16 bits, treated as a signed number, is negative.  */
   HOWTO (R_TILEPRO_HA16,	/* type */
 	 16,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -182,9 +182,9 @@ static reloc_howto_type tilepro_elf_howto_table [] =
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  HOWTO (R_TILEPRO_COPY,		/* type */
+  HOWTO (R_TILEPRO_COPY,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -198,7 +198,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
 
   HOWTO (R_TILEPRO_GLOB_DAT,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -212,7 +212,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
 
   HOWTO (R_TILEPRO_JMP_SLOT,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -226,7 +226,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
 
   HOWTO (R_TILEPRO_RELATIVE,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -240,7 +240,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
 
   HOWTO (R_TILEPRO_BROFF_X1, /* type */
 	 TILEPRO_LOG2_BUNDLE_ALIGNMENT_IN_BYTES, /* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 17,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -254,7 +254,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
 
   HOWTO (R_TILEPRO_JOFFLONG_X1, /* type */
 	 TILEPRO_LOG2_BUNDLE_ALIGNMENT_IN_BYTES, /* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 29,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -268,7 +268,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
 
   HOWTO (R_TILEPRO_JOFFLONG_X1_PLT, /* type */
 	 TILEPRO_LOG2_BUNDLE_ALIGNMENT_IN_BYTES, /* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 29,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -290,17 +290,17 @@ static reloc_howto_type tilepro_elf_howto_table [] =
 	 complain_overflow_unsigned, bfd_elf_generic_reloc, \
 	 #name, false, 0, -1, false)
 
-  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM8_X0,  0,  8),
-  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM8_Y0,  0,  8),
-  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM8_X1,  0,  8),
-  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM8_Y1,  0,  8),
-  TILEPRO_UIMM_HOWTO(R_TILEPRO_MT_IMM15_X1, 1,  15),
-  TILEPRO_UIMM_HOWTO(R_TILEPRO_MF_IMM15_X1, 1,  15),
-  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM16_X0, 1, 16),
-  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM16_X1, 1, 16),
+  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM8_X0,  1,  8),
+  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM8_Y0,  1,  8),
+  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM8_X1,  1,  8),
+  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM8_Y1,  1,  8),
+  TILEPRO_UIMM_HOWTO(R_TILEPRO_MT_IMM15_X1, 2,  15),
+  TILEPRO_UIMM_HOWTO(R_TILEPRO_MF_IMM15_X1, 2,  15),
+  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM16_X0, 2, 16),
+  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM16_X1, 2, 16),
 
 #define TILEPRO_IMM16_HOWTO(name, rshift) \
-  HOWTO (name, rshift, 1, 16, false, 0, \
+  HOWTO (name, rshift, 2, 16, false, 0, \
 	 complain_overflow_dont, bfd_elf_generic_reloc, \
 	 #name, false, 0, 0xffff, false)
 
@@ -315,7 +315,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
 
   HOWTO (R_TILEPRO_IMM16_X0_PCREL,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -329,7 +329,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
 
   HOWTO (R_TILEPRO_IMM16_X1_PCREL,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -342,7 +342,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
 	 true),			/* pcrel_offset */
 
 #define TILEPRO_IMM16_HOWTO_PCREL(name, rshift) \
-  HOWTO (name, rshift, 1, 16, true, 0, \
+  HOWTO (name, rshift, 2, 16, true, 0, \
 	 complain_overflow_dont, bfd_elf_generic_reloc, \
 	 #name, false, 0, 0xffff, true)
 
@@ -354,8 +354,8 @@ static reloc_howto_type tilepro_elf_howto_table [] =
   TILEPRO_IMM16_HOWTO_PCREL (R_TILEPRO_IMM16_X1_HA_PCREL, 16),
 
   /* Byte offset into GOT for a particular symbol. */
-  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM16_X0_GOT, 1, 16),
-  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM16_X1_GOT, 1, 16),
+  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM16_X0_GOT, 2, 16),
+  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM16_X1_GOT, 2, 16),
   TILEPRO_IMM16_HOWTO (R_TILEPRO_IMM16_X0_GOT_LO,  0),
   TILEPRO_IMM16_HOWTO (R_TILEPRO_IMM16_X1_GOT_LO,  0),
   TILEPRO_IMM16_HOWTO (R_TILEPRO_IMM16_X0_GOT_HI, 16),
@@ -363,17 +363,17 @@ static reloc_howto_type tilepro_elf_howto_table [] =
   TILEPRO_IMM16_HOWTO (R_TILEPRO_IMM16_X0_GOT_HA, 16),
   TILEPRO_IMM16_HOWTO (R_TILEPRO_IMM16_X1_GOT_HA, 16),
 
-  TILEPRO_UIMM_HOWTO(R_TILEPRO_MMSTART_X0, 0, 5),
-  TILEPRO_UIMM_HOWTO(R_TILEPRO_MMEND_X0,   0, 5),
-  TILEPRO_UIMM_HOWTO(R_TILEPRO_MMSTART_X1, 0, 5),
-  TILEPRO_UIMM_HOWTO(R_TILEPRO_MMEND_X1,   0, 5),
+  TILEPRO_UIMM_HOWTO(R_TILEPRO_MMSTART_X0, 1, 5),
+  TILEPRO_UIMM_HOWTO(R_TILEPRO_MMEND_X0,   1, 5),
+  TILEPRO_UIMM_HOWTO(R_TILEPRO_MMSTART_X1, 1, 5),
+  TILEPRO_UIMM_HOWTO(R_TILEPRO_MMEND_X1,   1, 5),
 
-  TILEPRO_UIMM_HOWTO(R_TILEPRO_SHAMT_X0, 0, 5),
-  TILEPRO_UIMM_HOWTO(R_TILEPRO_SHAMT_X1, 0, 5),
-  TILEPRO_UIMM_HOWTO(R_TILEPRO_SHAMT_Y0, 0, 5),
-  TILEPRO_UIMM_HOWTO(R_TILEPRO_SHAMT_Y1, 0, 5),
+  TILEPRO_UIMM_HOWTO(R_TILEPRO_SHAMT_X0, 1, 5),
+  TILEPRO_UIMM_HOWTO(R_TILEPRO_SHAMT_X1, 1, 5),
+  TILEPRO_UIMM_HOWTO(R_TILEPRO_SHAMT_Y0, 1, 5),
+  TILEPRO_UIMM_HOWTO(R_TILEPRO_SHAMT_Y1, 1, 5),
 
-  TILEPRO_IMM_HOWTO(R_TILEPRO_DEST_IMM8_X1, 0, 8),
+  TILEPRO_IMM_HOWTO(R_TILEPRO_DEST_IMM8_X1, 1, 8),
 
   /* These relocs are currently not defined.  */
   EMPTY_HOWTO (56),
@@ -383,7 +383,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
 
   HOWTO (R_TILEPRO_TLS_GD_CALL, /* type */
 	 TILEPRO_LOG2_BUNDLE_ALIGNMENT_IN_BYTES, /* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 29,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -395,17 +395,17 @@ static reloc_howto_type tilepro_elf_howto_table [] =
 	 -1,			/* dst_mask */
 	 true),			/* pcrel_offset */
 
-  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM8_X0_TLS_GD_ADD,  0,  8),
-  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM8_X1_TLS_GD_ADD,  0,  8),
-  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM8_Y0_TLS_GD_ADD,  0,  8),
-  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM8_Y1_TLS_GD_ADD,  0,  8),
-  TILEPRO_IMM_HOWTO(R_TILEPRO_TLS_IE_LOAD,  0,  8),
+  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM8_X0_TLS_GD_ADD,  1,  8),
+  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM8_X1_TLS_GD_ADD,  1,  8),
+  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM8_Y0_TLS_GD_ADD,  1,  8),
+  TILEPRO_IMM_HOWTO(R_TILEPRO_IMM8_Y1_TLS_GD_ADD,  1,  8),
+  TILEPRO_IMM_HOWTO(R_TILEPRO_TLS_IE_LOAD,  1,  8),
 
   /* Offsets into the GOT of TLS Descriptors. */
 
   HOWTO (R_TILEPRO_IMM16_X0_TLS_GD,/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -419,7 +419,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
 
   HOWTO (R_TILEPRO_IMM16_X1_TLS_GD,/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -442,7 +442,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
 
   HOWTO (R_TILEPRO_IMM16_X0_TLS_IE,/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -456,7 +456,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
 
   HOWTO (R_TILEPRO_IMM16_X1_TLS_IE,/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -479,7 +479,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
   HOWTO(R_TILEPRO_TLS_DTPMOD32, 0, 0, 0, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_TILEPRO_TLS_DTPMOD32",
 	false, 0, 0, true),
-  HOWTO(R_TILEPRO_TLS_DTPOFF32, 0, 2, 32, false, 0, complain_overflow_bitfield,
+  HOWTO(R_TILEPRO_TLS_DTPOFF32, 0, 4, 32, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_TILEPRO_TLS_DTPOFF32",
 	false, 0, 0xFFFFFFFF, true),
   HOWTO(R_TILEPRO_TLS_TPOFF32, 0, 0, 0, false, 0, complain_overflow_dont,
@@ -488,7 +488,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
 
   HOWTO (R_TILEPRO_IMM16_X0_TLS_LE,/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -502,7 +502,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
 
   HOWTO (R_TILEPRO_IMM16_X1_TLS_LE,/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -527,7 +527,7 @@ static reloc_howto_type tilepro_elf_howto_table2 [] =
   /* GNU extension to record C++ vtable hierarchy */
   HOWTO (R_TILEPRO_GNU_VTINHERIT, /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -542,7 +542,7 @@ static reloc_howto_type tilepro_elf_howto_table2 [] =
   /* GNU extension to record C++ vtable member usage */
   HOWTO (R_TILEPRO_GNU_VTENTRY,	    /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

@@ -39,6 +39,9 @@
 #include <glob.h>
 #endif
 #include "ldelf.h"
+#ifdef HAVE_JANSSON
+#include <jansson.h>
+#endif
 
 struct dt_needed
 {
@@ -48,6 +51,9 @@ struct dt_needed
 
 /* Style of .note.gnu.build-id section.  */
 const char *ldelf_emit_note_gnu_build_id;
+
+/* Content of .note.package section.  */
+const char *ldelf_emit_note_fdo_package_metadata;
 
 /* These variables are required to pass information back and forth
    between after_open and check_needed and stat_needed and vercheck.  */
@@ -1005,172 +1011,14 @@ ldelf_check_needed (lang_input_statement_type *s)
     }
 }
 
-/* This is called after all the input files have been opened.  */
-
-void
-ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
-		  int elfsize, const char *prefix)
+static void
+ldelf_handle_dt_needed (struct elf_link_hash_table *htab,
+			int use_libpath, int native, int is_linux,
+			int is_freebsd, int elfsize, const char *prefix)
 {
   struct bfd_link_needed_list *needed, *l;
-  struct elf_link_hash_table *htab;
-  asection *s;
   bfd *abfd;
   bfd **save_input_bfd_tail;
-
-  after_open_default ();
-
-  htab = elf_hash_table (&link_info);
-  if (!is_elf_hash_table (&htab->root))
-    return;
-
-  if (command_line.out_implib_filename)
-    {
-      unlink_if_ordinary (command_line.out_implib_filename);
-      link_info.out_implib_bfd
-	= bfd_openw (command_line.out_implib_filename,
-		     bfd_get_target (link_info.output_bfd));
-
-      if (link_info.out_implib_bfd == NULL)
-	{
-	  einfo (_("%F%P: %s: can't open for writing: %E\n"),
-		 command_line.out_implib_filename);
-	}
-    }
-
-  if (ldelf_emit_note_gnu_build_id != NULL)
-    {
-      /* Find an ELF input.  */
-      for (abfd = link_info.input_bfds;
-	   abfd != (bfd *) NULL; abfd = abfd->link.next)
-	if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
-	    && bfd_count_sections (abfd) != 0
-	    && !bfd_input_just_syms (abfd))
-	  break;
-
-      /* PR 10555: If there are no ELF input files do not try to
-	 create a .note.gnu-build-id section.  */
-      if (abfd == NULL
-	  || !ldelf_setup_build_id (abfd))
-	{
-	  free ((char *) ldelf_emit_note_gnu_build_id);
-	  ldelf_emit_note_gnu_build_id = NULL;
-	}
-    }
-
-  get_elf_backend_data (link_info.output_bfd)->setup_gnu_properties (&link_info);
-
-  /* Do not allow executable files to be used as inputs to the link.  */
-  for (abfd = link_info.input_bfds; abfd; abfd = abfd->link.next)
-    {
-      /* Discard input .note.gnu.build-id sections.  */
-      s = bfd_get_section_by_name (abfd, ".note.gnu.build-id");
-      while (s != NULL)
-	{
-	  if (s != elf_tdata (link_info.output_bfd)->o->build_id.sec)
-	    s->flags |= SEC_EXCLUDE;
-	  s = bfd_get_next_section_by_name (NULL, s);
-	}
-
-      if (abfd->xvec->flavour == bfd_target_elf_flavour
-	  && !bfd_input_just_syms (abfd)
-	  && elf_tdata (abfd) != NULL
-	  /* FIXME: Maybe check for other non-supportable types as well ?  */
-	  && (elf_tdata (abfd)->elf_header->e_type == ET_EXEC
-	      || (elf_tdata (abfd)->elf_header->e_type == ET_DYN
-		  && elf_tdata (abfd)->is_pie)))
-	einfo (_("%F%P: cannot use executable file '%pB' as input to a link\n"),
-	       abfd);
-    }
-
-  if (bfd_link_relocatable (&link_info))
-    {
-      if (link_info.execstack == !link_info.noexecstack)
-	{
-	  /* PR ld/16744: If "-z [no]execstack" has been specified on the
-	     command line and we are perfoming a relocatable link then no
-	     PT_GNU_STACK segment will be created and so the
-	     linkinfo.[no]execstack values set in _handle_option() will have no
-	     effect.  Instead we create a .note.GNU-stack section in much the
-	     same way as the assembler does with its --[no]execstack option.  */
-	  flagword flags = SEC_READONLY | (link_info.execstack ? SEC_CODE : 0);
-	  (void) bfd_make_section_with_flags (link_info.input_bfds,
-					      ".note.GNU-stack", flags);
-	}
-      return;
-    }
-
-  if (!link_info.traditional_format)
-    {
-      bfd *elfbfd = NULL;
-      bool warn_eh_frame = false;
-      int seen_type = 0;
-
-      for (abfd = link_info.input_bfds; abfd; abfd = abfd->link.next)
-	{
-	  int type = 0;
-
-	  if (bfd_input_just_syms (abfd))
-	    continue;
-
-	  for (s = abfd->sections; s && type < COMPACT_EH_HDR; s = s->next)
-	    {
-	      const char *name = bfd_section_name (s);
-
-	      if (bfd_is_abs_section (s->output_section))
-		continue;
-	      if (startswith (name, ".eh_frame_entry"))
-		type = COMPACT_EH_HDR;
-	      else if (strcmp (name, ".eh_frame") == 0 && s->size > 8)
-		type = DWARF2_EH_HDR;
-	    }
-
-	  if (type != 0)
-	    {
-	      if (seen_type == 0)
-		{
-		  seen_type = type;
-		}
-	      else if (seen_type != type)
-		{
-		  einfo (_("%F%P: compact frame descriptions incompatible with"
-			   " DWARF2 .eh_frame from %pB\n"),
-			 type == DWARF2_EH_HDR ? abfd : elfbfd);
-		  break;
-		}
-
-	      if (!elfbfd
-		  && (type == COMPACT_EH_HDR
-		      || link_info.eh_frame_hdr_type != 0))
-		{
-		  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
-		    elfbfd = abfd;
-
-		  warn_eh_frame = true;
-		}
-	    }
-
-	  if (seen_type == COMPACT_EH_HDR)
-	    link_info.eh_frame_hdr_type = COMPACT_EH_HDR;
-	}
-      if (elfbfd)
-	{
-	  const struct elf_backend_data *bed;
-
-	  bed = get_elf_backend_data (elfbfd);
-	  s = bfd_make_section_with_flags (elfbfd, ".eh_frame_hdr",
-					   bed->dynamic_sec_flags
-					   | SEC_READONLY);
-	  if (s != NULL
-	      && bfd_set_section_alignment (s, 2))
-	    {
-	      htab->eh_info.hdr_sec = s;
-	      warn_eh_frame = false;
-	    }
-	}
-      if (warn_eh_frame)
-	einfo (_("%P: warning: cannot create .eh_frame_hdr section,"
-		 " --eh-frame-hdr ignored\n"));
-    }
 
   /* Get the list of files which appear in DT_NEEDED entries in
      dynamic objects included in the link (often there will be none).
@@ -1195,10 +1043,12 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
 	  && (bfd_elf_get_dyn_lib_class (l->by) & DYN_AS_NEEDED) != 0)
 	continue;
 
-      /* Skip the lib if --no-copy-dt-needed-entries and
-	 --allow-shlib-undefined is in effect.  */
+      /* Skip the lib if --no-copy-dt-needed-entries and when we are
+	 handling DT_NEEDED entries or --allow-shlib-undefined is in
+	 effect.  */
       if (l->by != NULL
-	  && link_info.unresolved_syms_in_shared_libs == RM_IGNORE
+	  && (htab->handling_dt_needed
+	      || link_info.unresolved_syms_in_shared_libs == RM_IGNORE)
 	  && (bfd_elf_get_dyn_lib_class (l->by) & DYN_NO_ADD_NEEDED) != 0)
 	continue;
 
@@ -1338,23 +1188,224 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
 	     l->name, l->by);
     }
 
-  for (abfd = link_info.input_bfds; abfd; abfd = abfd->link.next)
-    if (bfd_get_format (abfd) == bfd_object
-	&& ((abfd->flags) & DYNAMIC) != 0
-	&& bfd_get_flavour (abfd) == bfd_target_elf_flavour
-	&& (elf_dyn_lib_class (abfd) & (DYN_AS_NEEDED | DYN_NO_NEEDED)) == 0
-	&& elf_dt_name (abfd) != NULL)
-      {
-	if (bfd_elf_add_dt_needed_tag (abfd, &link_info) < 0)
-	  einfo (_("%F%P: failed to add DT_NEEDED dynamic tag\n"));
-      }
+  /* Don't add DT_NEEDED when loading shared objects from DT_NEEDED for
+     plugin symbol resolution while handling DT_NEEDED entries.  */
+  if (!htab->handling_dt_needed)
+    for (abfd = link_info.input_bfds; abfd; abfd = abfd->link.next)
+      if (bfd_get_format (abfd) == bfd_object
+	  && ((abfd->flags) & DYNAMIC) != 0
+	  && bfd_get_flavour (abfd) == bfd_target_elf_flavour
+	  && (elf_dyn_lib_class (abfd) & (DYN_AS_NEEDED | DYN_NO_NEEDED)) == 0
+	  && elf_dt_name (abfd) != NULL)
+	{
+	  if (bfd_elf_add_dt_needed_tag (abfd, &link_info) < 0)
+	    einfo (_("%F%P: failed to add DT_NEEDED dynamic tag\n"));
+	}
 
   link_info.input_bfds_tail = save_input_bfd_tail;
   *save_input_bfd_tail = NULL;
+}
+
+/* This is called before calling plugin 'all symbols read' hook.  */
+
+void
+ldelf_before_plugin_all_symbols_read (int use_libpath, int native,
+				      int is_linux, int is_freebsd,
+				      int elfsize, const char *prefix)
+{
+  struct elf_link_hash_table *htab = elf_hash_table (&link_info);
+
+  if (!is_elf_hash_table (&htab->root))
+    return;
+
+  htab->handling_dt_needed = true;
+  ldelf_handle_dt_needed (htab, use_libpath, native, is_linux,
+			  is_freebsd, elfsize, prefix);
+  htab->handling_dt_needed = false;
+}
+
+/* This is called after all the input files have been opened and all
+   symbols have been loaded.  */
+
+void
+ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
+		  int elfsize, const char *prefix)
+{
+  struct elf_link_hash_table *htab;
+  asection *s;
+  bfd *abfd;
+
+  after_open_default ();
+
+  htab = elf_hash_table (&link_info);
+  if (!is_elf_hash_table (&htab->root))
+    return;
+
+  if (command_line.out_implib_filename)
+    {
+      unlink_if_ordinary (command_line.out_implib_filename);
+      link_info.out_implib_bfd
+	= bfd_openw (command_line.out_implib_filename,
+		     bfd_get_target (link_info.output_bfd));
+
+      if (link_info.out_implib_bfd == NULL)
+	{
+	  einfo (_("%F%P: %s: can't open for writing: %E\n"),
+		 command_line.out_implib_filename);
+	}
+    }
+
+  if (ldelf_emit_note_gnu_build_id != NULL
+      || ldelf_emit_note_fdo_package_metadata != NULL)
+    {
+      /* Find an ELF input.  */
+      for (abfd = link_info.input_bfds;
+	   abfd != (bfd *) NULL; abfd = abfd->link.next)
+	if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
+	    && bfd_count_sections (abfd) != 0
+	    && !bfd_input_just_syms (abfd))
+	  break;
+
+      /* PR 10555: If there are no ELF input files do not try to
+	 create a .note.gnu-build-id section.  */
+      if (abfd == NULL
+	  || (ldelf_emit_note_gnu_build_id != NULL
+	      && !ldelf_setup_build_id (abfd)))
+	{
+	  free ((char *) ldelf_emit_note_gnu_build_id);
+	  ldelf_emit_note_gnu_build_id = NULL;
+	}
+
+      if (abfd == NULL
+	  || (ldelf_emit_note_fdo_package_metadata != NULL
+	      && !ldelf_setup_package_metadata (abfd)))
+	{
+	  free ((char *) ldelf_emit_note_fdo_package_metadata);
+	  ldelf_emit_note_fdo_package_metadata = NULL;
+	}
+    }
+
+  get_elf_backend_data (link_info.output_bfd)->setup_gnu_properties (&link_info);
+
+  /* Do not allow executable files to be used as inputs to the link.  */
+  for (abfd = link_info.input_bfds; abfd; abfd = abfd->link.next)
+    {
+      /* Discard input .note.gnu.build-id sections.  */
+      s = bfd_get_section_by_name (abfd, ".note.gnu.build-id");
+      while (s != NULL)
+	{
+	  if (s != elf_tdata (link_info.output_bfd)->o->build_id.sec)
+	    s->flags |= SEC_EXCLUDE;
+	  s = bfd_get_next_section_by_name (NULL, s);
+	}
+
+      if (abfd->xvec->flavour == bfd_target_elf_flavour
+	  && !bfd_input_just_syms (abfd)
+	  && elf_tdata (abfd) != NULL
+	  /* FIXME: Maybe check for other non-supportable types as well ?  */
+	  && (elf_tdata (abfd)->elf_header->e_type == ET_EXEC
+	      || (elf_tdata (abfd)->elf_header->e_type == ET_DYN
+		  && elf_tdata (abfd)->is_pie)))
+	einfo (_("%F%P: cannot use executable file '%pB' as input to a link\n"),
+	       abfd);
+    }
+
+  if (bfd_link_relocatable (&link_info))
+    {
+      if (link_info.execstack == !link_info.noexecstack)
+	{
+	  /* PR ld/16744: If "-z [no]execstack" has been specified on the
+	     command line and we are perfoming a relocatable link then no
+	     PT_GNU_STACK segment will be created and so the
+	     linkinfo.[no]execstack values set in _handle_option() will have no
+	     effect.  Instead we create a .note.GNU-stack section in much the
+	     same way as the assembler does with its --[no]execstack option.  */
+	  flagword flags = SEC_READONLY | (link_info.execstack ? SEC_CODE : 0);
+	  (void) bfd_make_section_with_flags (link_info.input_bfds,
+					      ".note.GNU-stack", flags);
+	}
+      return;
+    }
+
+  if (!link_info.traditional_format)
+    {
+      bfd *elfbfd = NULL;
+      bool warn_eh_frame = false;
+      int seen_type = 0;
+
+      for (abfd = link_info.input_bfds; abfd; abfd = abfd->link.next)
+	{
+	  int type = 0;
+
+	  if (bfd_input_just_syms (abfd))
+	    continue;
+
+	  for (s = abfd->sections; s && type < COMPACT_EH_HDR; s = s->next)
+	    {
+	      const char *name = bfd_section_name (s);
+
+	      if (bfd_is_abs_section (s->output_section))
+		continue;
+	      if (startswith (name, ".eh_frame_entry"))
+		type = COMPACT_EH_HDR;
+	      else if (strcmp (name, ".eh_frame") == 0 && s->size > 8)
+		type = DWARF2_EH_HDR;
+	    }
+
+	  if (type != 0)
+	    {
+	      if (seen_type == 0)
+		{
+		  seen_type = type;
+		}
+	      else if (seen_type != type)
+		{
+		  einfo (_("%F%P: compact frame descriptions incompatible with"
+			   " DWARF2 .eh_frame from %pB\n"),
+			 type == DWARF2_EH_HDR ? abfd : elfbfd);
+		  break;
+		}
+
+	      if (!elfbfd
+		  && (type == COMPACT_EH_HDR
+		      || link_info.eh_frame_hdr_type != 0))
+		{
+		  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+		    elfbfd = abfd;
+
+		  warn_eh_frame = true;
+		}
+	    }
+
+	  if (seen_type == COMPACT_EH_HDR)
+	    link_info.eh_frame_hdr_type = COMPACT_EH_HDR;
+	}
+      if (elfbfd)
+	{
+	  const struct elf_backend_data *bed;
+
+	  bed = get_elf_backend_data (elfbfd);
+	  s = bfd_make_section_with_flags (elfbfd, ".eh_frame_hdr",
+					   bed->dynamic_sec_flags
+					   | SEC_READONLY);
+	  if (s != NULL
+	      && bfd_set_section_alignment (s, 2))
+	    {
+	      htab->eh_info.hdr_sec = s;
+	      warn_eh_frame = false;
+	    }
+	}
+      if (warn_eh_frame)
+	einfo (_("%P: warning: cannot create .eh_frame_hdr section,"
+		 " --eh-frame-hdr ignored\n"));
+    }
 
   if (link_info.eh_frame_hdr_type == COMPACT_EH_HDR)
     if (!bfd_elf_parse_eh_frame_entries (NULL, &link_info))
       einfo (_("%F%P: failed to parse EH frame entries\n"));
+
+  ldelf_handle_dt_needed (htab, use_libpath, native, is_linux,
+			  is_freebsd, elfsize, prefix);
 }
 
 static bfd_size_type
@@ -1463,6 +1514,121 @@ ldelf_setup_build_id (bfd *ibfd)
 
   einfo (_("%P: warning: cannot create .note.gnu.build-id section,"
 	   " --build-id ignored\n"));
+  return false;
+}
+
+static bool
+write_package_metadata (bfd *abfd)
+{
+  struct elf_obj_tdata *t = elf_tdata (abfd);
+  const char *json;
+  asection *asec;
+  Elf_Internal_Shdr *i_shdr;
+  unsigned char *contents, *json_bits;
+  bfd_size_type size;
+  file_ptr position;
+  Elf_External_Note *e_note;
+
+  json = t->o->package_metadata.json;
+  asec = t->o->package_metadata.sec;
+  if (bfd_is_abs_section (asec->output_section))
+    {
+      einfo (_("%P: warning: .note.package section discarded,"
+	       " --package-metadata ignored\n"));
+      return true;
+    }
+  i_shdr = &elf_section_data (asec->output_section)->this_hdr;
+
+  if (i_shdr->contents == NULL)
+    {
+      if (asec->contents == NULL)
+	asec->contents = (unsigned char *) xmalloc (asec->size);
+      contents = asec->contents;
+    }
+  else
+    contents = i_shdr->contents + asec->output_offset;
+
+  e_note = (Elf_External_Note *) contents;
+  size = offsetof (Elf_External_Note, name[sizeof "FDO"]);
+  size = (size + 3) & -(bfd_size_type) 4;
+  json_bits = contents + size;
+  size = asec->size - size;
+
+  /* Clear the package metadata field.  */
+  memset (json_bits, 0, size);
+
+  bfd_h_put_32 (abfd, sizeof "FDO", &e_note->namesz);
+  bfd_h_put_32 (abfd, size, &e_note->descsz);
+  bfd_h_put_32 (abfd, FDO_PACKAGING_METADATA, &e_note->type);
+  memcpy (e_note->name, "FDO", sizeof "FDO");
+  memcpy (json_bits, json, strlen(json));
+
+  position = i_shdr->sh_offset + asec->output_offset;
+  size = asec->size;
+  return (bfd_seek (abfd, position, SEEK_SET) == 0
+	  && bfd_bwrite (contents, size, abfd) == size);
+}
+
+/* Make .note.package section.
+   https://systemd.io/ELF_PACKAGE_METADATA/  */
+
+bool
+ldelf_setup_package_metadata (bfd *ibfd)
+{
+  asection *s;
+  bfd_size_type size;
+  size_t json_length;
+  flagword flags;
+
+  /* If the option wasn't specified, silently return. */
+  if (!ldelf_emit_note_fdo_package_metadata)
+    return false;
+
+  /* The option was specified, but it's empty, log and return. */
+  json_length = strlen (ldelf_emit_note_fdo_package_metadata);
+  if (json_length == 0)
+    {
+      einfo (_("%P: warning: --package-metadata is empty, ignoring\n"));
+      return false;
+    }
+
+#ifdef HAVE_JANSSON
+  json_error_t json_error;
+  json_t *json = json_loads (ldelf_emit_note_fdo_package_metadata,
+			     0, &json_error);
+  if (!json)
+    {
+      einfo (_("%P: warning: --package-metadata=%s does not contain valid "
+	       "JSON, ignoring: %s\n"),
+	     ldelf_emit_note_fdo_package_metadata, json_error.text);
+      return false;
+    }
+  else
+    json_decref (json);
+#endif
+
+  size = offsetof (Elf_External_Note, name[sizeof "FDO"]);
+  size += json_length + 1;
+  size = (size + 3) & -(bfd_size_type) 4;
+
+  flags = (SEC_ALLOC | SEC_LOAD | SEC_IN_MEMORY
+	   | SEC_LINKER_CREATED | SEC_READONLY | SEC_DATA);
+  s = bfd_make_section_anyway_with_flags (ibfd, ".note.package",
+					  flags);
+  if (s != NULL && bfd_set_section_alignment (s, 2))
+    {
+      struct elf_obj_tdata *t = elf_tdata (link_info.output_bfd);
+      t->o->package_metadata.after_write_object_contents
+	= &write_package_metadata;
+      t->o->package_metadata.json = ldelf_emit_note_fdo_package_metadata;
+      t->o->package_metadata.sec = s;
+      elf_section_type (s) = SHT_NOTE;
+      s->size = size;
+      return true;
+    }
+
+  einfo (_("%P: warning: cannot create .note.package section,"
+	   " --package-metadata ignored\n"));
   return false;
 }
 

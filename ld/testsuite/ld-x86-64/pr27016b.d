@@ -19,5 +19,5 @@ Disassembly of section .text:
  +[a-f0-9]+:	41 89 13             	mov    %edx,\(%r11\)
  +[a-f0-9]+:	b8 00 00 00 00       	mov    \$0x0,%eax
  +[a-f0-9]+:	5d                   	pop    %rbp
- +[a-f0-9]+:	c3                   	ret    
+ +[a-f0-9]+:	c3                   	ret
 #pass

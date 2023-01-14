@@ -80,7 +80,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
   /* No relocation.  */
   HOWTO (R_ARM_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -94,7 +94,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_PC24,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -109,7 +109,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
   /* 32 bit absolute */
   HOWTO (R_ARM_ABS32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -124,7 +124,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
   /* standard 32bit pc-relative reloc */
   HOWTO (R_ARM_REL32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -139,7 +139,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
   /* 8 bit absolute - R_ARM_LDR_PC_G0 in AAELF */
   HOWTO (R_ARM_LDR_PC_G0,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -154,7 +154,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
    /* 16 bit absolute */
   HOWTO (R_ARM_ABS16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -169,7 +169,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
   /* 12 bit absolute */
   HOWTO (R_ARM_ABS12,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -183,7 +183,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_THM_ABS5,	/* type */
 	 6,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 5,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -198,7 +198,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
   /* 8 bit absolute */
   HOWTO (R_ARM_ABS8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -212,7 +212,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_SBREL32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -226,7 +226,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_THM_CALL,	/* type */
 	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -240,7 +240,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_THM_PC8,		/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -254,7 +254,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_BREL_ADJ,	/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -268,7 +268,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_TLS_DESC,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -282,7 +282,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_THM_SWI8,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -297,7 +297,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
   /* BLX instruction for the ARM.  */
   HOWTO (R_ARM_XPC25,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -312,7 +312,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
   /* BLX instruction for the Thumb.  */
   HOWTO (R_ARM_THM_XPC22,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -328,7 +328,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_TLS_DTPMOD32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -342,7 +342,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_TLS_DTPOFF32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -356,7 +356,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_TLS_TPOFF32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -372,7 +372,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_COPY,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -386,7 +386,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_GLOB_DAT,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -400,7 +400,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_JUMP_SLOT,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -414,7 +414,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_RELATIVE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -428,7 +428,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_GOTOFF32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -442,7 +442,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_GOTPC,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -456,7 +456,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_GOT32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -470,7 +470,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_PLT32,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -484,7 +484,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_CALL,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -498,7 +498,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_JUMP24,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -512,7 +512,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_THM_JUMP24,	/* type */
 	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -526,7 +526,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_BASE_ABS,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -540,7 +540,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_ALU_PCREL7_0,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -554,7 +554,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_ALU_PCREL15_8,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 true,			/* pc_relative */
 	 8,			/* bitpos */
@@ -568,7 +568,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_ALU_PCREL23_15,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 true,			/* pc_relative */
 	 16,			/* bitpos */
@@ -582,7 +582,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_LDR_SBREL_11_0,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -596,7 +596,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_ALU_SBREL_19_12,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 12,			/* bitpos */
@@ -610,7 +610,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_ALU_SBREL_27_20,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 20,			/* bitpos */
@@ -624,7 +624,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_TARGET1,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -638,7 +638,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_ROSEGREL32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -652,7 +652,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_V4BX,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -666,7 +666,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_TARGET2,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -680,7 +680,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_PREL31,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 31,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -694,7 +694,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_MOVW_ABS_NC,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -708,7 +708,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_MOVT_ABS,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -722,7 +722,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_MOVW_PREL_NC,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -736,7 +736,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_MOVT_PREL,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -750,7 +750,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_THM_MOVW_ABS_NC,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -764,7 +764,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_THM_MOVT_ABS,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -778,7 +778,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_THM_MOVW_PREL_NC,/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -792,7 +792,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_THM_MOVT_PREL,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -806,7 +806,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_THM_JUMP19,	/* type */
 	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 19,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -820,7 +820,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_THM_JUMP6,	/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 6,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -837,7 +837,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
      versa.  */
   HOWTO (R_ARM_THM_ALU_PREL_11_0,/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 13,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -851,7 +851,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_THM_PC12,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 13,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -865,7 +865,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_ABS32_NOI,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -879,7 +879,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_REL32_NOI,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -895,7 +895,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_ALU_PC_G0_NC,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -909,7 +909,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_ALU_PC_G0,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -923,7 +923,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_ALU_PC_G1_NC,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -937,7 +937,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_ALU_PC_G1,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -951,7 +951,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_ALU_PC_G2,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -965,7 +965,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_LDR_PC_G1,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -979,7 +979,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_LDR_PC_G2,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -993,7 +993,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_LDRS_PC_G0,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1007,7 +1007,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_LDRS_PC_G1,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1021,7 +1021,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_LDRS_PC_G2,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1035,7 +1035,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_LDC_PC_G0,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1049,7 +1049,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_LDC_PC_G1,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1063,7 +1063,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_LDC_PC_G2,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1077,7 +1077,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_ALU_SB_G0_NC,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1091,7 +1091,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_ALU_SB_G0,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1105,7 +1105,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_ALU_SB_G1_NC,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1119,7 +1119,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_ALU_SB_G1,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1133,7 +1133,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_ALU_SB_G2,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1147,7 +1147,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_LDR_SB_G0,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1161,7 +1161,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_LDR_SB_G1,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1175,7 +1175,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_LDR_SB_G2,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1189,7 +1189,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_LDRS_SB_G0,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1203,7 +1203,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_LDRS_SB_G1,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1217,7 +1217,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_LDRS_SB_G2,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1231,7 +1231,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_LDC_SB_G0,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1245,7 +1245,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_LDC_SB_G1,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1259,7 +1259,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_LDC_SB_G2,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1275,7 +1275,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_MOVW_BREL_NC,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1289,7 +1289,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_MOVT_BREL,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1303,7 +1303,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_MOVW_BREL,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1317,7 +1317,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_THM_MOVW_BREL_NC,/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1331,7 +1331,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_THM_MOVT_BREL,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1345,7 +1345,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_THM_MOVW_BREL,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1359,7 +1359,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_TLS_GOTDESC,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1373,7 +1373,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_TLS_CALL,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1387,7 +1387,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_TLS_DESCSEQ,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1401,7 +1401,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_THM_TLS_CALL,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1415,7 +1415,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_PLT32_ABS,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1429,7 +1429,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_GOT_ABS,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1443,7 +1443,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_GOT_PREL,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1457,7 +1457,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_GOT_BREL12,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1471,7 +1471,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_GOTOFF12,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1488,7 +1488,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
   /* GNU extension to record C++ vtable member usage */
   HOWTO (R_ARM_GNU_VTENTRY,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1503,7 +1503,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
   /* GNU extension to record C++ vtable hierarchy */
   HOWTO (R_ARM_GNU_VTINHERIT, /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1517,7 +1517,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_THM_JUMP11,	/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 11,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1531,7 +1531,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_THM_JUMP8,	/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1546,7 +1546,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
   /* TLS relocations */
   HOWTO (R_ARM_TLS_GD32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1560,7 +1560,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_TLS_LDM32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1574,7 +1574,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_TLS_LDO32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1588,7 +1588,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_TLS_IE32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			 /* pc_relative */
 	 0,			/* bitpos */
@@ -1602,7 +1602,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_TLS_LE32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1616,7 +1616,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_TLS_LDO12,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1630,7 +1630,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_TLS_LE12,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1644,7 +1644,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_TLS_IE12GP,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1679,7 +1679,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_THM_TLS_DESCSEQ,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1694,7 +1694,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
   EMPTY_HOWTO (131),
   HOWTO (R_ARM_THM_ALU_ABS_G0_NC,/* type.  */
 	 0,			/* rightshift.  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* size.  */
 	 16,			/* bitsize.  */
 	 false,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -1707,7 +1707,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 	 false),		/* pcrel_offset.  */
   HOWTO (R_ARM_THM_ALU_ABS_G1_NC,/* type.  */
 	 0,			/* rightshift.  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* size.  */
 	 16,			/* bitsize.  */
 	 false,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -1720,7 +1720,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 	 false),		/* pcrel_offset.  */
   HOWTO (R_ARM_THM_ALU_ABS_G2_NC,/* type.  */
 	 0,			/* rightshift.  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* size.  */
 	 16,			/* bitsize.  */
 	 false,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -1733,7 +1733,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 	 false),		/* pcrel_offset.  */
   HOWTO (R_ARM_THM_ALU_ABS_G3_NC,/* type.  */
 	 0,			/* rightshift.  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* size.  */
 	 16,			/* bitsize.  */
 	 false,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -1747,7 +1747,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
   /* Relocations for Armv8.1-M Mainline.  */
   HOWTO (R_ARM_THM_BF16,	/* type.  */
 	 0,			/* rightshift.  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* size.  */
 	 16,			/* bitsize.  */
 	 true,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -1760,7 +1760,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 	 true),			/* pcrel_offset.  */
   HOWTO (R_ARM_THM_BF12,	/* type.  */
 	 0,			/* rightshift.  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* size.  */
 	 12,			/* bitsize.  */
 	 true,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -1773,7 +1773,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 	 true),			/* pcrel_offset.  */
   HOWTO (R_ARM_THM_BF18,	/* type.  */
 	 0,			/* rightshift.  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* size.  */
 	 18,			/* bitsize.  */
 	 true,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -1791,7 +1791,7 @@ static reloc_howto_type elf32_arm_howto_table_2[8] =
 {
   HOWTO (R_ARM_IRELATIVE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1804,7 +1804,7 @@ static reloc_howto_type elf32_arm_howto_table_2[8] =
 	 false),		/* pcrel_offset */
   HOWTO (R_ARM_GOTFUNCDESC,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1817,7 +1817,7 @@ static reloc_howto_type elf32_arm_howto_table_2[8] =
 	 false),		/* pcrel_offset */
   HOWTO (R_ARM_GOTOFFFUNCDESC, /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1830,7 +1830,7 @@ static reloc_howto_type elf32_arm_howto_table_2[8] =
 	 false),		/* pcrel_offset */
   HOWTO (R_ARM_FUNCDESC,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1843,7 +1843,7 @@ static reloc_howto_type elf32_arm_howto_table_2[8] =
 	 false),		/* pcrel_offset */
   HOWTO (R_ARM_FUNCDESC_VALUE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1856,7 +1856,7 @@ static reloc_howto_type elf32_arm_howto_table_2[8] =
 	 false),		/* pcrel_offset */
   HOWTO (R_ARM_TLS_GD32_FDPIC,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1869,7 +1869,7 @@ static reloc_howto_type elf32_arm_howto_table_2[8] =
 	 false),		/* pcrel_offset */
   HOWTO (R_ARM_TLS_LDM32_FDPIC,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1882,7 +1882,7 @@ static reloc_howto_type elf32_arm_howto_table_2[8] =
 	 false),		/* pcrel_offset */
   HOWTO (R_ARM_TLS_IE32_FDPIC,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1900,7 +1900,7 @@ static reloc_howto_type elf32_arm_howto_table_3[4] =
 {
   HOWTO (R_ARM_RREL32,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1914,7 +1914,7 @@ static reloc_howto_type elf32_arm_howto_table_3[4] =
 
   HOWTO (R_ARM_RABS32,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1928,7 +1928,7 @@ static reloc_howto_type elf32_arm_howto_table_3[4] =
 
   HOWTO (R_ARM_RPC24,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1942,7 +1942,7 @@ static reloc_howto_type elf32_arm_howto_table_3[4] =
 
   HOWTO (R_ARM_RBASE,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -2536,11 +2536,23 @@ static const bfd_vma elf32_arm_nacl_plt_entry [] =
   0xea000000,		/* b	.Lplt_tail			*/
 };
 
+/* PR 28924:
+   There was a bug due to too high values of THM_MAX_FWD_BRANCH_OFFSET and
+   THM2_MAX_FWD_BRANCH_OFFSET.  The first macro concerns the case when Thumb-2
+   is not available, and second macro when Thumb-2 is available.  Among other
+   things, they affect the range of branches represented as BLX instructions
+   in Encoding T2 defined in Section A8.8.25 of the ARM Architecture
+   Reference Manual ARMv7-A and ARMv7-R edition issue C.d.  Such branches are
+   specified there to have a maximum forward offset that is a multiple of 4.
+   Previously, the respective values defined here were multiples of 2 but not
+   4 and they are included in comments for reference.  */
 #define ARM_MAX_FWD_BRANCH_OFFSET  ((((1 << 23) - 1) << 2) + 8)
-#define ARM_MAX_BWD_BRANCH_OFFSET  ((-((1 << 23) << 2)) + 8)
-#define THM_MAX_FWD_BRANCH_OFFSET  ((1 << 22) -2 + 4)
+#define ARM_MAX_BWD_BRANCH_OFFSET ((-((1 << 23) << 2)) + 8)
+#define THM_MAX_FWD_BRANCH_OFFSET   ((1 << 22) - 4 + 4)
+/* #def THM_MAX_FWD_BRANCH_OFFSET   ((1 << 22) - 2 + 4) */
 #define THM_MAX_BWD_BRANCH_OFFSET  (-(1 << 22) + 4)
-#define THM2_MAX_FWD_BRANCH_OFFSET (((1 << 24) - 2) + 4)
+#define THM2_MAX_FWD_BRANCH_OFFSET (((1 << 24) - 4) + 4)
+/* #def THM2_MAX_FWD_BRANCH_OFFSET (((1 << 24) - 2) + 4) */
 #define THM2_MAX_BWD_BRANCH_OFFSET (-(1 << 24) + 4)
 #define THM2_MAX_FWD_COND_BRANCH_OFFSET (((1 << 20) -2) + 4)
 #define THM2_MAX_BWD_COND_BRANCH_OFFSET (-(1 << 20) + 4)
@@ -10345,11 +10357,11 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
     {
       bfd_vma sign;
 
-      switch (howto->size)
+      switch (bfd_get_reloc_size (howto))
 	{
-	case 0: addend = bfd_get_8 (input_bfd, hit_data); break;
-	case 1: addend = bfd_get_16 (input_bfd, hit_data); break;
-	case 2: addend = bfd_get_32 (input_bfd, hit_data); break;
+	case 1: addend = bfd_get_8 (input_bfd, hit_data); break;
+	case 2: addend = bfd_get_16 (input_bfd, hit_data); break;
+	case 4: addend = bfd_get_32 (input_bfd, hit_data); break;
 	default: addend = 0; break;
 	}
       /* Note: the addend and signed_addend calculated here are
@@ -13047,7 +13059,7 @@ arm_add_to_rel (bfd *		   abfd,
 	case R_ARM_PLT32:
 	case R_ARM_CALL:
 	case R_ARM_JUMP24:
-	  addend <<= howto->size;
+	  addend *= bfd_get_reloc_size (howto);
 	  addend += increment;
 
 	  /* Should we check for overflow here ?  */
@@ -14522,6 +14534,14 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, struct bfd_link_info *info)
 	  out_attr[Tag_MPextension_use_legacy].type = 0;
 	  out_attr[Tag_MPextension_use_legacy].i = 0;
 	}
+
+      /* PR 28859 and 28848:  Handle the case where the first input file,
+	 eg crti.o, has a Tag_ABI_HardFP_use of 3 but no Tag_FP_arch set.
+	 Using Tag_ABI_HardFP_use in this way is deprecated, so reset the
+	 attribute to zero.
+	 FIXME: Should we handle other non-zero values of Tag_ABI_HardFO_use ? */
+      if (out_attr[Tag_ABI_HardFP_use].i == 3 && out_attr[Tag_FP_arch].i == 0)
+	out_attr[Tag_ABI_HardFP_use].i = 0;
 
       return result;
     }
@@ -20295,7 +20315,7 @@ elf32_arm_backend_symbol_processing (bfd *abfd, asymbol *sym)
 #define elf_backend_dtrel_excludes_plt 1
 
 #define elf_backend_got_header_size	12
-#define elf_backend_extern_protected_data 1
+#define elf_backend_extern_protected_data 0
 
 #undef	elf_backend_obj_attrs_vendor
 #define elf_backend_obj_attrs_vendor		"aeabi"

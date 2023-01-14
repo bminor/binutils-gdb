@@ -104,6 +104,9 @@
 /* Define to 1 if you have a working `mmap' system call. */
 #undef HAVE_MMAP
 
+/* Define to 1 if msgpack is available. */
+#undef HAVE_MSGPACK
+
 /* Define to 1 if you have the `sbrk' function. */
 #undef HAVE_SBRK
 

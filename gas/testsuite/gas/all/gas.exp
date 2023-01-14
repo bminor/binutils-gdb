@@ -461,6 +461,15 @@ if [is_elf_format] {
 
 run_dump_test quoted-sym-names
 
+# Targets where # is not a line comment character don't transform
+# "# <line> <file>" into .linefile (PR gas/29120).
+setup_xfail "tic30-*-*"
+run_list_test cond-2 "-al"
+setup_xfail "tic30-*-*"
+run_list_test linefile ""
+
+run_list_test macro "-alm"
+
 run_list_test pr20312
 
 load_lib gas-dg.exp

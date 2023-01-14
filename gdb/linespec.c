@@ -94,8 +94,8 @@ struct address_entry
 
 struct linespec
 {
-  /* An explicit location describing the SaLs.  */
-  struct explicit_location explicit_loc {};
+  /* An explicit location spec describing the SaLs.  */
+  explicit_location_spec explicit_loc;
 
   /* The list of symtabs to search to which to limit the search.
 
@@ -228,7 +228,7 @@ struct symbol_searcher_collect_info
 
 /* Token types  */
 
-enum ls_token_type
+enum linespec_token_type
 {
   /* A keyword  */
   LSTOKEN_KEYWORD = 0,
@@ -251,7 +251,6 @@ enum ls_token_type
   /* Consumed token  */
   LSTOKEN_CONSUMED
 };
-typedef enum ls_token_type linespec_token_type;
 
 /* List of keywords.  This is NULL-terminated so that it can be used
    as enum completer.  */
@@ -343,8 +342,8 @@ struct linespec_parser
   struct completion_tracker *completion_tracker = nullptr;
 };
 
-/* A convenience macro for accessing the explicit location result of
-   the parser.  */
+/* A convenience macro for accessing the explicit location spec result
+   of the parser.  */
 #define PARSER_EXPLICIT(PPTR) (&PARSER_RESULT ((PPTR))->explicit_loc)
 
 /* Prototypes for local functions.  */
@@ -1188,12 +1187,11 @@ iterate_over_all_matching_symtabs
 		{
 		  const struct block *block;
 		  int i;
+		  const blockvector *bv = symtab->compunit ()->blockvector ();
 
-		  for (i = FIRST_LOCAL_BLOCK;
-		       i < BLOCKVECTOR_NBLOCKS (symtab->blockvector ());
-		       i++)
+		  for (i = FIRST_LOCAL_BLOCK; i < bv->num_blocks (); i++)
 		    {
-		      block = BLOCKVECTOR_BLOCK (symtab->blockvector (), i);
+		      block = bv->block (i);
 		      state->language->iterate_over_symbols
 			(block, lookup_name, name_domain,
 			 [&] (block_symbol *bsym)
@@ -1232,9 +1230,9 @@ iterate_over_file_blocks
 {
   const struct block *block;
 
-  for (block = BLOCKVECTOR_BLOCK (symtab->blockvector (), STATIC_BLOCK);
+  for (block = symtab->compunit ()->blockvector ()->static_block ();
        block != NULL;
-       block = BLOCK_SUPERBLOCK (block))
+       block = block->superblock ())
     current_language->iterate_over_symbols (block, name, domain, callback);
 }
 
@@ -1296,83 +1294,6 @@ find_methods (struct type *t, enum language t_lang, const char *name,
 
   for (ibase = 0; ibase < TYPE_N_BASECLASSES (t); ibase++)
     superclasses->push_back (TYPE_BASECLASS (t, ibase));
-}
-
-/* Find an instance of the character C in the string S that is outside
-   of all parenthesis pairs, single-quoted strings, and double-quoted
-   strings.  Also, ignore the char within a template name, like a ','
-   within foo<int, int>, while considering C++ operator</operator<<.  */
-
-const char *
-find_toplevel_char (const char *s, char c)
-{
-  int quoted = 0;		/* zero if we're not in quotes;
-				   '"' if we're in a double-quoted string;
-				   '\'' if we're in a single-quoted string.  */
-  int depth = 0;		/* Number of unclosed parens we've seen.  */
-  const char *scan;
-
-  for (scan = s; *scan; scan++)
-    {
-      if (quoted)
-	{
-	  if (*scan == quoted)
-	    quoted = 0;
-	  else if (*scan == '\\' && *(scan + 1))
-	    scan++;
-	}
-      else if (*scan == c && ! quoted && depth == 0)
-	return scan;
-      else if (*scan == '"' || *scan == '\'')
-	quoted = *scan;
-      else if (*scan == '(' || *scan == '<')
-	depth++;
-      else if ((*scan == ')' || *scan == '>') && depth > 0)
-	depth--;
-      else if (*scan == 'o' && !quoted && depth == 0)
-	{
-	  /* Handle C++ operator names.  */
-	  if (strncmp (scan, CP_OPERATOR_STR, CP_OPERATOR_LEN) == 0)
-	    {
-	      scan += CP_OPERATOR_LEN;
-	      if (*scan == c)
-		return scan;
-	      while (isspace (*scan))
-		{
-		  ++scan;
-		  if (*scan == c)
-		    return scan;
-		}
-	      if (*scan == '\0')
-		break;
-
-	      switch (*scan)
-		{
-		  /* Skip over one less than the appropriate number of
-		     characters: the for loop will skip over the last
-		     one.  */
-		case '<':
-		  if (scan[1] == '<')
-		    {
-		      scan++;
-		      if (*scan == c)
-			return scan;
-		    }
-		  break;
-		case '>':
-		  if (scan[1] == '>')
-		    {
-		      scan++;
-		      if (*scan == c)
-			return scan;
-		    }
-		  break;
-		}
-	    }
-	}
-    }
-
-  return 0;
 }
 
 /* The string equivalent of find_toplevel_char.  Returns a pointer
@@ -1741,7 +1662,7 @@ struct line_offset
 linespec_parse_line_offset (const char *string)
 {
   const char *start = string;
-  struct line_offset line_offset = {0, LINE_OFFSET_NONE};
+  struct line_offset line_offset;
 
   if (*string == '+')
     {
@@ -1753,6 +1674,8 @@ linespec_parse_line_offset (const char *string)
       line_offset.sign = LINE_OFFSET_MINUS;
       ++string;
     }
+  else
+    line_offset.sign = LINE_OFFSET_NONE;
 
   if (*string != '\0' && !isdigit (*string))
     error (_("malformed line offset: \"%s\""), start);
@@ -2069,18 +1992,14 @@ linespec_parse_basic (linespec_parser *parser)
 static void
 canonicalize_linespec (struct linespec_state *state, const linespec *ls)
 {
-  struct event_location *canon;
-  struct explicit_location *explicit_loc;
-
   /* If canonicalization was not requested, no need to do anything.  */
   if (!state->canonical)
     return;
 
   /* Save everything as an explicit location.  */
-  state->canonical->location
-    = new_explicit_location (&ls->explicit_loc);
-  canon = state->canonical->location.get ();
-  explicit_loc = get_explicit_location (canon);
+  state->canonical->locspec = ls->explicit_loc.clone ();
+  explicit_location_spec *explicit_loc
+    = as_explicit_location_spec (state->canonical->locspec.get ());
 
   if (explicit_loc->label_name != NULL)
     {
@@ -2098,8 +2017,7 @@ canonicalize_linespec (struct linespec_state *state, const linespec *ls)
   /* If this location originally came from a linespec, save a string
      representation of it for display and saving to file.  */
   if (state->is_linespec)
-    set_event_location_string (canon,
-			       explicit_location_to_linespec (explicit_loc));
+    explicit_loc->set_string (explicit_loc->to_linespec ());
 }
 
 /* Given a line offset in LS, construct the relevant SALs.  */
@@ -2265,7 +2183,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec *ls)
       for (const auto &sym : ls->labels.label_symbols)
 	{
 	  struct program_space *pspace
-	    = symbol_symtab (sym.symbol)->pspace ();
+	    = sym.symbol->symtab ()->compunit ()->objfile ()->pspace;
 
 	  if (symbol_to_sal (&sal, state->funfirstline, sym.symbol)
 	      && maybe_add_address (state->addr_set, pspace, sal.pc))
@@ -2287,7 +2205,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec *ls)
 	  for (const auto &sym : ls->function_symbols)
 	    {
 	      program_space *pspace
-		= symbol_symtab (sym.symbol)->pspace ();
+		= sym.symbol->symtab ()->compunit ()->objfile ()->pspace;
 	      set_current_program_space (pspace);
 
 	      /* Don't skip to the first line of the function if we
@@ -2301,15 +2219,15 @@ convert_linespec_to_sals (struct linespec_state *state, linespec *ls)
 		   && sym.symbol->aclass () == LOC_BLOCK)
 		{
 		  const CORE_ADDR addr
-		    = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym.symbol));
+		    = sym.symbol->value_block ()->entry_pc ();
 
 		  for (const auto &elem : ls->minimal_symbols)
 		    {
-		      if (MSYMBOL_TYPE (elem.minsym) == mst_text_gnu_ifunc
-			  || MSYMBOL_TYPE (elem.minsym) == mst_data_gnu_ifunc)
+		      if (elem.minsym->type () == mst_text_gnu_ifunc
+			  || elem.minsym->type () == mst_data_gnu_ifunc)
 			{
-			  CORE_ADDR msym_addr = BMSYMBOL_VALUE_ADDRESS (elem);
-			  if (MSYMBOL_TYPE (elem.minsym) == mst_data_gnu_ifunc)
+			  CORE_ADDR msym_addr = elem.value_address ();
+			  if (elem.minsym->type () == mst_data_gnu_ifunc)
 			    {
 			      struct gdbarch *gdbarch
 				= elem.objfile->arch ();
@@ -2386,17 +2304,18 @@ convert_linespec_to_sals (struct linespec_state *state, linespec *ls)
   return sals;
 }
 
-/* Build RESULT from the explicit location components SOURCE_FILENAME,
-   FUNCTION_NAME, LABEL_NAME and LINE_OFFSET.  */
+/* Build RESULT from the explicit location spec components
+   SOURCE_FILENAME, FUNCTION_NAME, LABEL_NAME and LINE_OFFSET.  */
 
 static void
-convert_explicit_location_to_linespec (struct linespec_state *self,
-				       linespec *result,
-				       const char *source_filename,
-				       const char *function_name,
-				       symbol_name_match_type fname_match_type,
-				       const char *label_name,
-				       struct line_offset line_offset)
+convert_explicit_location_spec_to_linespec
+  (struct linespec_state *self,
+   linespec *result,
+   const char *source_filename,
+   const char *function_name,
+   symbol_name_match_type fname_match_type,
+   const char *label_name,
+   struct line_offset line_offset)
 {
   std::vector<bound_minimal_symbol> minimal_symbols;
 
@@ -2461,16 +2380,17 @@ convert_explicit_location_to_linespec (struct linespec_state *self,
 /* Convert the explicit location EXPLICIT_LOC into SaLs.  */
 
 static std::vector<symtab_and_line>
-convert_explicit_location_to_sals (struct linespec_state *self,
-				   linespec *result,
-				   const struct explicit_location *explicit_loc)
+convert_explicit_location_spec_to_sals
+  (struct linespec_state *self,
+   linespec *result,
+   const explicit_location_spec *explicit_spec)
 {
-  convert_explicit_location_to_linespec (self, result,
-					 explicit_loc->source_filename,
-					 explicit_loc->function_name,
-					 explicit_loc->func_name_match_type,
-					 explicit_loc->label_name,
-					 explicit_loc->line_offset);
+  convert_explicit_location_spec_to_linespec (self, result,
+					      explicit_spec->source_filename,
+					      explicit_spec->function_name,
+					      explicit_spec->func_name_match_type,
+					      explicit_spec->label_name,
+					      explicit_spec->line_offset);
   return convert_linespec_to_sals (self, result);
 }
 
@@ -2773,10 +2693,6 @@ linespec_state_destructor (struct linespec_state *self)
 
 linespec_parser::~linespec_parser ()
 {
-  xfree (PARSER_EXPLICIT (this)->source_filename);
-  xfree (PARSER_EXPLICIT (this)->label_name);
-  xfree (PARSER_EXPLICIT (this)->function_name);
-
   linespec_state_destructor (PARSER_STATE (this));
 }
 
@@ -2930,16 +2846,16 @@ linespec_complete_label (completion_tracker &tracker,
 {
   linespec_parser parser (0, language, NULL, NULL, 0, NULL);
 
-  line_offset unknown_offset = { 0, LINE_OFFSET_UNKNOWN };
+  line_offset unknown_offset;
 
   try
     {
-      convert_explicit_location_to_linespec (PARSER_STATE (&parser),
-					     PARSER_RESULT (&parser),
-					     source_filename,
-					     function_name,
-					     func_name_match_type,
-					     NULL, unknown_offset);
+      convert_explicit_location_spec_to_linespec (PARSER_STATE (&parser),
+						  PARSER_RESULT (&parser),
+						  source_filename,
+						  function_name,
+						  func_name_match_type,
+						  NULL, unknown_offset);
     }
   catch (const gdb_exception_error &ex)
     {
@@ -3140,68 +3056,62 @@ linespec_complete (completion_tracker &tracker, const char *text,
 }
 
 /* A helper function for decode_line_full and decode_line_1 to
-   turn LOCATION into std::vector<symtab_and_line>.  */
+   turn LOCSPEC into std::vector<symtab_and_line>.  */
 
 static std::vector<symtab_and_line>
-event_location_to_sals (linespec_parser *parser,
-			const struct event_location *location)
+location_spec_to_sals (linespec_parser *parser,
+		       const location_spec *locspec)
 {
   std::vector<symtab_and_line> result;
 
-  switch (event_location_type (location))
+  switch (locspec->type ())
     {
-    case LINESPEC_LOCATION:
+    case LINESPEC_LOCATION_SPEC:
       {
+	const linespec_location_spec *ls = as_linespec_location_spec (locspec);
 	PARSER_STATE (parser)->is_linespec = 1;
-	try
-	  {
-	    const linespec_location *ls = get_linespec_location (location);
-	    result = parse_linespec (parser,
-				     ls->spec_string, ls->match_type);
-	  }
-	catch (const gdb_exception_error &except)
-	  {
-	    throw;
-	  }
+	result = parse_linespec (parser, ls->spec_string, ls->match_type);
       }
       break;
 
-    case ADDRESS_LOCATION:
+    case ADDRESS_LOCATION_SPEC:
       {
-	const char *addr_string = get_address_string_location (location);
-	CORE_ADDR addr = get_address_location (location);
+	const address_location_spec *addr_spec
+	  = as_address_location_spec (locspec);
+	const char *addr_string = addr_spec->to_string ();
+	CORE_ADDR addr;
 
 	if (addr_string != NULL)
 	  {
 	    addr = linespec_expression_to_pc (&addr_string);
 	    if (PARSER_STATE (parser)->canonical != NULL)
-	      PARSER_STATE (parser)->canonical->location
-		= copy_event_location (location);
+	      PARSER_STATE (parser)->canonical->locspec	= locspec->clone ();
 	  }
+	else
+	  addr = addr_spec->address;
 
 	result = convert_address_location_to_sals (PARSER_STATE (parser),
 						   addr);
       }
       break;
 
-    case EXPLICIT_LOCATION:
+    case EXPLICIT_LOCATION_SPEC:
       {
-	const struct explicit_location *explicit_loc;
-
-	explicit_loc = get_explicit_location_const (location);
-	result = convert_explicit_location_to_sals (PARSER_STATE (parser),
-						    PARSER_RESULT (parser),
-						    explicit_loc);
+	const explicit_location_spec *explicit_locspec
+	  = as_explicit_location_spec (locspec);
+	result = convert_explicit_location_spec_to_sals (PARSER_STATE (parser),
+							 PARSER_RESULT (parser),
+							 explicit_locspec);
       }
       break;
 
-    case PROBE_LOCATION:
+    case PROBE_LOCATION_SPEC:
       /* Probes are handled by their own decoders.  */
       gdb_assert_not_reached ("attempt to decode probe location");
       break;
 
     default:
-      gdb_assert_not_reached ("unhandled event location type");
+      gdb_assert_not_reached ("unhandled location spec type");
     }
 
   return result;
@@ -3210,7 +3120,7 @@ event_location_to_sals (linespec_parser *parser,
 /* See linespec.h.  */
 
 void
-decode_line_full (struct event_location *location, int flags,
+decode_line_full (struct location_spec *locspec, int flags,
 		  struct program_space *search_pspace,
 		  struct symtab *default_symtab,
 		  int default_line, struct linespec_result *canonical,
@@ -3235,13 +3145,13 @@ decode_line_full (struct event_location *location, int flags,
 
   scoped_restore_current_program_space restore_pspace;
 
-  std::vector<symtab_and_line> result = event_location_to_sals (&parser,
-								location);
+  std::vector<symtab_and_line> result = location_spec_to_sals (&parser,
+							       locspec);
   state = PARSER_STATE (&parser);
 
   if (result.size () == 0)
     throw_error (NOT_SUPPORTED_ERROR, _("Location %s not available"),
-		 event_location_to_string (location));
+		 locspec->to_string ());
 
   gdb_assert (result.size () == 1 || canonical->pre_expanded);
   canonical->pre_expanded = 1;
@@ -3279,7 +3189,7 @@ decode_line_full (struct event_location *location, int flags,
 /* See linespec.h.  */
 
 std::vector<symtab_and_line>
-decode_line_1 (const struct event_location *location, int flags,
+decode_line_1 (const location_spec *locspec, int flags,
 	       struct program_space *search_pspace,
 	       struct symtab *default_symtab,
 	       int default_line)
@@ -3290,7 +3200,7 @@ decode_line_1 (const struct event_location *location, int flags,
 
   scoped_restore_current_program_space restore_pspace;
 
-  return event_location_to_sals (&parser, location);
+  return location_spec_to_sals (&parser, locspec);
 }
 
 /* See linespec.h.  */
@@ -3305,10 +3215,10 @@ decode_line_with_current_source (const char *string, int flags)
      and get a default source symtab+line or it will recursively call us!  */
   symtab_and_line cursal = get_current_source_symtab_and_line ();
 
-  event_location_up location = string_to_event_location (&string,
-							 current_language);
+  location_spec_up locspec = string_to_location_spec (&string,
+						      current_language);
   std::vector<symtab_and_line> sals
-    = decode_line_1 (location.get (), flags, NULL, cursal.symtab, cursal.line);
+    = decode_line_1 (locspec.get (), flags, NULL, cursal.symtab, cursal.line);
 
   if (*string)
     error (_("Junk at end of line specification: %s"), string);
@@ -3324,14 +3234,14 @@ decode_line_with_last_displayed (const char *string, int flags)
   if (string == 0)
     error (_("Empty line specification."));
 
-  event_location_up location = string_to_event_location (&string,
-							 current_language);
+  location_spec_up locspec = string_to_location_spec (&string,
+						      current_language);
   std::vector<symtab_and_line> sals
     = (last_displayed_sal_is_valid ()
-       ? decode_line_1 (location.get (), flags, NULL,
+       ? decode_line_1 (locspec.get (), flags, NULL,
 			get_last_displayed_symtab (),
 			get_last_displayed_line ())
-       : decode_line_1 (location.get (), flags, NULL, NULL, 0));
+       : decode_line_1 (locspec.get (), flags, NULL, NULL, 0));
 
   if (*string)
     error (_("Junk at end of line specification: %s"), string);
@@ -3443,8 +3353,8 @@ decode_objc (struct linespec_state *self, linespec *ls, const char *arg)
 	  else
 	    str = saved_arg;
 
-	  self->canonical->location
-	    = new_linespec_location (&str, symbol_name_match_type::FULL);
+	  self->canonical->locspec
+	    = new_linespec_location_spec (&str, symbol_name_match_type::FULL);
 	}
     }
 
@@ -3539,8 +3449,10 @@ lookup_prefix_sym (struct linespec_state *state,
 	{
 	  /* Program spaces that are executing startup should have
 	     been filtered out earlier.  */
-	  gdb_assert (!elt->pspace ()->executing_startup);
-	  set_current_program_space (elt->pspace ());
+	  program_space *pspace = elt->compunit ()->objfile ()->pspace;
+
+	  gdb_assert (!pspace->executing_startup);
+	  set_current_program_space (pspace);
 	  iterate_over_file_blocks (elt, lookup_name, STRUCT_DOMAIN, collector);
 	  iterate_over_file_blocks (elt, lookup_name, VAR_DOMAIN, collector);
 	}
@@ -3558,8 +3470,8 @@ compare_symbols (const block_symbol &a, const block_symbol &b)
 {
   uintptr_t uia, uib;
 
-  uia = (uintptr_t) symbol_symtab (a.symbol)->pspace ();
-  uib = (uintptr_t) symbol_symtab (b.symbol)->pspace ();
+  uia = (uintptr_t) a.symbol->symtab ()->compunit ()->objfile ()->pspace;
+  uib = (uintptr_t) b.symbol->symtab ()->compunit ()->objfile ()->pspace;
 
   if (uia < uib)
     return true;
@@ -3683,7 +3595,7 @@ find_method (struct linespec_state *self,
 
       /* Program spaces that are executing startup should have
 	 been filtered out earlier.  */
-      pspace = symbol_symtab (sym)->pspace ();
+      pspace = sym->symtab ()->compunit ()->objfile ()->pspace;
       gdb_assert (!pspace->executing_startup);
       set_current_program_space (pspace);
       t = check_typedef (sym->type ());
@@ -3694,7 +3606,8 @@ find_method (struct linespec_state *self,
 	 sure not to miss the last batch.  */
       if (ix == sym_classes->size () - 1
 	  || (pspace
-	      != symbol_symtab (sym_classes->at (ix + 1).symbol)->pspace ()))
+	      != (sym_classes->at (ix + 1).symbol->symtab ()
+		  ->compunit ()->objfile ()->pspace)))
 	{
 	  /* If we did not find a direct implementation anywhere in
 	     this program space, consider superclasses.  */
@@ -4041,14 +3954,14 @@ find_label_symbols (struct linespec_state *self,
       block = get_current_search_block ();
 
       for (;
-	   block && !BLOCK_FUNCTION (block);
-	   block = BLOCK_SUPERBLOCK (block))
+	   block && !block->function ();
+	   block = block->superblock ())
 	;
 
       if (!block)
 	return {};
 
-      fn_sym = BLOCK_FUNCTION (block);
+      fn_sym = block->function ();
 
       find_label_symbols_in_block (block, name, fn_sym, completion_mode,
 				   &result, label_funcs_ret);
@@ -4058,8 +3971,9 @@ find_label_symbols (struct linespec_state *self,
       for (const auto &elt : function_symbols)
 	{
 	  fn_sym = elt.symbol;
-	  set_current_program_space (symbol_symtab (fn_sym)->pspace ());
-	  block = SYMBOL_BLOCK_VALUE (fn_sym);
+	  set_current_program_space
+	    (fn_sym->symtab ()->compunit ()->objfile ()->pspace);
+	  block = fn_sym->value_block ();
 
 	  find_label_symbols_in_block (block, name, fn_sym, completion_mode,
 				       &result, label_funcs_ret);
@@ -4087,13 +4001,14 @@ decode_digits_list_mode (struct linespec_state *self,
       /* The logic above should ensure this.  */
       gdb_assert (elt != NULL);
 
-      set_current_program_space (elt->pspace ());
+      program_space *pspace = elt->compunit ()->objfile ()->pspace;
+      set_current_program_space (pspace);
 
       /* Simplistic search just for the list command.  */
       val.symtab = find_line_symtab (elt, val.line, NULL, NULL);
       if (val.symtab == NULL)
 	val.symtab = elt;
-      val.pspace = elt->pspace ();
+      val.pspace = pspace;
       val.pc = 0;
       val.explicit_line = true;
 
@@ -4121,13 +4036,14 @@ decode_digits_ordinary (struct linespec_state *self,
       /* The logic above should ensure this.  */
       gdb_assert (elt != NULL);
 
-      set_current_program_space (elt->pspace ());
+      program_space *pspace = elt->compunit ()->objfile ()->pspace;
+      set_current_program_space (pspace);
 
       pcs = find_pcs_for_symtab_line (elt, line, best_entry);
       for (CORE_ADDR pc : pcs)
 	{
 	  symtab_and_line sal;
-	  sal.pspace = elt->pspace ();
+	  sal.pspace = pspace;
 	  sal.symtab = elt;
 	  sal.line = line;
 	  sal.explicit_line = true;
@@ -4148,7 +4064,7 @@ linespec_parse_variable (struct linespec_state *self, const char *variable)
 {
   int index = 0;
   const char *p;
-  struct line_offset offset = {0, LINE_OFFSET_NONE};
+  line_offset offset;
 
   p = (variable[1] == '$') ? variable + 2 : variable + 1;
   if (*p == '$')
@@ -4167,6 +4083,7 @@ linespec_parse_variable (struct linespec_state *self, const char *variable)
 	error (_("History values used in line "
 		 "specs must have integer values."));
       offset.offset = value_as_long (val_history);
+      offset.sign = LINE_OFFSET_NONE;
     }
   else
     {
@@ -4178,11 +4095,10 @@ linespec_parse_variable (struct linespec_state *self, const char *variable)
       /* Try it as a convenience variable.  If it is not a convenience
 	 variable, return and allow normal symbol lookup to occur.  */
       ivar = lookup_only_internalvar (variable + 1);
-      if (ivar == NULL)
-	/* No internal variable with that name.  Mark the offset
-	   as unknown to allow the name to be looked up as a symbol.  */
-	offset.sign = LINE_OFFSET_UNKNOWN;
-      else
+	/* If there's no internal variable with that name, let the
+	   offset remain as unknown to allow the name to be looked up
+	   as a symbol.  */
+      if (ivar != nullptr)
 	{
 	  /* We found a valid variable name.  If it is not an integer,
 	     throw an error.  */
@@ -4190,7 +4106,10 @@ linespec_parse_variable (struct linespec_state *self, const char *variable)
 	    error (_("Convenience variables used in line "
 		     "specs must have integer values."));
 	  else
-	    offset.offset = valx;
+	    {
+	      offset.offset = valx;
+	      offset.sign = LINE_OFFSET_NONE;
+	    }
 	}
     }
 
@@ -4217,8 +4136,8 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
     {
       const char *msym_name = msymbol->linkage_name ();
 
-      if (MSYMBOL_TYPE (msymbol) == mst_text_gnu_ifunc
-	  || MSYMBOL_TYPE (msymbol) == mst_data_gnu_ifunc)
+      if (msymbol->type () == mst_text_gnu_ifunc
+	  || msymbol->type () == mst_data_gnu_ifunc)
 	want_start_sal = gnu_ifunc_resolve_name (msym_name, &func_addr);
       else
 	want_start_sal = true;
@@ -4237,7 +4156,7 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
       if (is_function)
 	sal.pc = func_addr;
       else
-	sal.pc = MSYMBOL_VALUE_ADDRESS (objfile, msymbol);
+	sal.pc = msymbol->value_address (objfile);
       sal.pspace = current_program_space;
     }
 
@@ -4273,8 +4192,7 @@ add_minsym (struct minimal_symbol *minsym, struct objfile *objfile,
   if (!list_mode && !msymbol_is_function (objfile, minsym))
     return;
 
-  struct bound_minimal_symbol mo = {minsym, objfile};
-  msyms->push_back (mo);
+  msyms->emplace_back (minsym, objfile);
   return;
 }
 
@@ -4319,14 +4237,16 @@ search_minsyms_for_name (struct collect_info *info,
     }
   else
     {
-      if (search_pspace == NULL || symtab->pspace () == search_pspace)
+      program_space *pspace = symtab->compunit ()->objfile ()->pspace;
+
+      if (search_pspace == NULL || pspace == search_pspace)
 	{
-	  set_current_program_space (symtab->pspace ());
+	  set_current_program_space (pspace);
 	  iterate_over_minimal_symbols
-	    (symtab->objfile (), name,
+	    (symtab->compunit ()->objfile (), name,
 	     [&] (struct minimal_symbol *msym)
 	       {
-		 add_minsym (msym, symtab->objfile (), symtab,
+		 add_minsym (msym, symtab->compunit ()->objfile (), symtab,
 			     info->state->list_mode, &minsyms);
 		 return false;
 	       });
@@ -4354,7 +4274,7 @@ search_minsyms_for_name (struct collect_info *info,
   for (const bound_minimal_symbol &item : minsyms)
     {
       bool skip = false;
-      if (MSYMBOL_TYPE (item.minsym) == mst_solib_trampoline)
+      if (item.minsym->type () == mst_solib_trampoline)
 	{
 	  for (const bound_minimal_symbol &item2 : minsyms)
 	    {
@@ -4363,7 +4283,7 @@ search_minsyms_for_name (struct collect_info *info,
 
 	      /* Trampoline symbols can only jump to exported
 		 symbols.  */
-	      if (msymbol_type_is_static (MSYMBOL_TYPE (item2.minsym)))
+	      if (msymbol_type_is_static (item2.minsym->type ()))
 		continue;
 
 	      if (strcmp (item.minsym->linkage_name (),
@@ -4407,14 +4327,15 @@ add_matching_symbols_to_info (const char *name,
 	    { return info->add_symbol (bsym); });
 	  search_minsyms_for_name (info, lookup_name, pspace, NULL);
 	}
-      else if (pspace == NULL || pspace == elt->pspace ())
+      else if (pspace == NULL || pspace == elt->compunit ()->objfile ()->pspace)
 	{
 	  int prev_len = info->result.symbols->size ();
 
 	  /* Program spaces that are executing startup should have
 	     been filtered out earlier.  */
-	  gdb_assert (!elt->pspace ()->executing_startup);
-	  set_current_program_space (elt->pspace ());
+	  program_space *elt_pspace = elt->compunit ()->objfile ()->pspace;
+	  gdb_assert (!elt_pspace->executing_startup);
+	  set_current_program_space (elt_pspace);
 	  iterate_over_file_blocks (elt, lookup_name, VAR_DOMAIN,
 				    [&] (block_symbol *bsym)
 	    { return info->add_symbol (bsym); });
@@ -4446,14 +4367,14 @@ symbol_to_sal (struct symtab_and_line *result,
     }
   else
     {
-      if (sym->aclass () == LOC_LABEL && SYMBOL_VALUE_ADDRESS (sym) != 0)
+      if (sym->aclass () == LOC_LABEL && sym->value_address () != 0)
 	{
 	  *result = {};
-	  result->symtab = symbol_symtab (sym);
+	  result->symtab = sym->symtab ();
 	  result->symbol = sym;
 	  result->line = sym->line ();
-	  result->pc = SYMBOL_VALUE_ADDRESS (sym);
-	  result->pspace = result->symtab->pspace ();
+	  result->pc = sym->value_address ();
+	  result->pspace = result->symtab->compunit ()->objfile ()->pspace;
 	  result->explicit_pc = 1;
 	  return 1;
 	}
@@ -4465,11 +4386,11 @@ symbol_to_sal (struct symtab_and_line *result,
 	{
 	  /* We know its line number.  */
 	  *result = {};
-	  result->symtab = symbol_symtab (sym);
+	  result->symtab = sym->symtab ();
 	  result->symbol = sym;
 	  result->line = sym->line ();
-	  result->pc = SYMBOL_VALUE_ADDRESS (sym);
-	  result->pspace = result->symtab->pspace ();
+	  result->pc = sym->value_address ();
+	  result->pspace = result->symtab->compunit ()->objfile ()->pspace;
 	  return 1;
 	}
     }

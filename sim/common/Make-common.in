@@ -250,7 +250,7 @@ RUNTESTFLAGS =
 callback_h = $(srcroot)/include/sim/callback.h
 remote_sim_h = $(srcroot)/include/sim/sim.h
 
-all: libsim.a run$(EXEEXT) .gdbinit
+all: libsim.a run$(EXEEXT)
 
 libsim.a: $(LIB_OBJS)
 	$(SILENCE) rm -f libsim.a
@@ -504,7 +504,7 @@ mostlyclean clean: $(SIM_EXTRA_CLEAN)
 
 distclean maintainer-clean realclean: clean $(SIM_EXTRA_DISTCLEAN)
 	rm -f TAGS
-	rm -f Makefile config.cache config.log config.status .gdbinit
+	rm -f Makefile config.cache config.log config.status
 
 .c.o:
 	$(COMPILE) $<
@@ -520,9 +520,6 @@ Makefile: Makefile.in $(srccom)/Make-common.in $(config.status)
 
 @SIM_COMMON_BUILD_FALSE@config.status: configure
 @SIM_COMMON_BUILD_FALSE@	$(ECHO_GEN) $(SHELL) ./config.status --recheck
-
-.gdbinit: # config.status $(srccom)/gdbinit.in
-@SIM_COMMON_BUILD_FALSE@	$(ECHO_GEN) CONFIG_FILES=$@:../common/gdbinit.in CONFIG_HEADERS= $(SHELL) ./config.status
 
 
 # CGEN support

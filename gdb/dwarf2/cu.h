@@ -59,11 +59,11 @@ struct dwarf2_cu
      We don't need the pc/line-number mapping for type units.  */
   void setup_type_unit_groups (struct die_info *die);
 
-  /* Start a symtab for DWARF.  NAME, COMP_DIR, LOW_PC are passed to the
-     buildsym_compunit constructor.  */
-  struct compunit_symtab *start_symtab (const char *name,
-					const char *comp_dir,
-					CORE_ADDR low_pc);
+  /* Start a compunit_symtab for DWARF.  NAME, COMP_DIR, LOW_PC are passed to
+     the buildsym_compunit constructor.  */
+  struct compunit_symtab *start_compunit_symtab (const char *name,
+						 const char *comp_dir,
+						 CORE_ADDR low_pc);
 
   /* Reset the builder.  */
   void reset_builder () { m_builder.reset (); }

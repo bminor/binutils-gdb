@@ -26,10 +26,6 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      return -1
 }
 
-if [get_compiler_info] {
-    return -1
-}
-
 clean_restart ${binfile}
 
 #
@@ -38,8 +34,12 @@ clean_restart ${binfile}
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
+
+# These are used as expected result values.
+set false 0
+set true 1
 
 proc test_expr { args } {
     if { [llength $args] % 2 } {

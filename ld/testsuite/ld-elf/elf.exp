@@ -99,7 +99,6 @@ if [is_elf64 tmpdir/symbol3w.a] {
 	 || [istarget h8300-*-*]
 	 || [istarget ip2k-*-*]
 	 || [istarget m68hc11-*]
-	 || [istarget "xc16x-*"]
 	 || [istarget "z80-*-*"] } {
 	set pr25490_2_exp "pr25490-2-16.rd"
 	set pr25490_3_exp "pr25490-3-16.rd"
@@ -180,9 +179,24 @@ if { [check_gc_sections_available] && ![istarget "v850-*-*"] } {
     }
 }
 
-if { [istarget *-*-*linux*]
-     || [istarget *-*-nacl*]
-     || [istarget *-*-gnu*] } {
+proc target_defaults_to_execstack {} {
+    if {   [istarget "aarch64*-*-*"]
+	|| [istarget "arc*-*-*"]
+	|| [istarget "cris*-*-*"]
+	|| [istarget "ia64*-*-*"]
+	|| [istarget "nios2*-*-*"]
+	|| [istarget "powerpc64*-*-*"]
+	|| [istarget "riscv*-*-*"]
+	|| [istarget "tilegx*-*-*"]
+	|| [istarget "tilepro*-*-*"] } {
+	  return 0
+    }
+    return 1
+}
+
+if {   [istarget *-*-*linux*]
+    || [istarget *-*-nacl*]
+    || [istarget *-*-gnu*] } {
     run_ld_link_tests [list \
 	[list "stack exec" \
 	    "-z execstack" \
@@ -199,7 +213,7 @@ if { [istarget *-*-*linux*]
 	    {{readelf {-Wl} stack-noexec.rd}} \
 	    "stack-noexec.exe"] \
 	[list "stack size" \
-	    "-z stack-size=0x123400" \
+	    "-z stack-size=0x123400 -z noexecstack" \
 	    "" \
 	    "" \
 	    {stack.s} \
@@ -211,8 +225,96 @@ if { [istarget *-*-*linux*]
 	    "" \
 	    {pr23900-1.s} \
 	    [list [list "readelf" {-Wl} $pr23900_1_exp]] \
-	    "pr23900-1.exe"] \
+	     "pr23900-1.exe"] \
+	  ]
+
+    # Test the linker's generation of execstack and executable segment warnings.
+    # Since these are normally pruned from the linker's output we temporarily
+    # disable tha action here.
+    rename prune_warnings_extra old_prune_warnings_extra
+    proc prune_warnings_extra { text } {
+	return $text
+    }
+
+    # The HPPA target disables the warnings by default since it needs an
+    # executable stack to support older kernels and an RWX segment to
+    # support its PLT.  MIPS also turns off exec stack warnings.
+    if { [istarget "hppa*-*-*"] || [istarget mips*-*-*] } {
+        set extra_link_opts "--warn-execstack --warn-rwx-segments"
+    } else {
+        set extra_link_opts ""
+    }
+
+    run_ld_link_tests [list \
+	[list "PR ld/29072 (warn about an executable .note.GNU-stack)" \
+	    "-e 0 $extra_link_opts" \
+	    "" \
+	    "" \
+	    {pr29072-a.s} \
+	    {{ld pr29072.a.warn}} \
+	    "pr29072-a.exe"] \
+	[list "PR 29072 (warn about -z execstack)" \
+	    "-z execstack --warn-execstack" \
+	    "" \
+	    "" \
+	    {stack.s} \
+	     {{ld pr29072.c.warn}} \
+	    "pr29072-c.exe"] \
+	[list "PR ld/29072 (suppress warnings about executable stack)" \
+	    "-e 0 --no-warn-execstack" \
+	    "" \
+	    "" \
+	    {pr29072-a.s} \
+	    {} \
+	    "pr29072-d.exe"] \
+	[list "Ensure that a warning issued when creating a segment with RWX permissions" \
+	    "-e 0 -Tnobits-1.t --warn-rwx-segments" \
+	    "" \
+	    "" \
+	    {nobits-1.s} \
+	     {{ld rwx-segments-1.l}} \
+	    "rwx-segments-1.exe"] \
+	[list "Ensure that a warning issued when creating a TLS segment with execute permission" \
+	    "-e 0 -T rwx-segments-2.t --warn-rwx-segments" \
+	    "" \
+	    "" \
+	    {size-2.s} \
+	     {{ld rwx-segments-2.l}} \
+	    "rwx-segments-2.exe"] \
+	[list "Ensure that the RWX warning can be suppressed" \
+	    "-e 0 -Tnobits-1.t --no-warn-rwx-segments" \
+	    "" \
+	    "" \
+	    {nobits-1.s} \
+	     {} \
+	    "rwx-segments-3.exe"] \
+	  ]
+
+    if { [target_defaults_to_execstack] } {
+	run_ld_link_tests [list \
+	   [list "PR ld/29072 (warn about absent .note.GNU-stack)" \
+	    "-e 0 -z stack-size=0x123400  --warn-execstack" \
+	    "" \
+	    "" \
+	    {pr29072-b.s} \
+	    {{ld pr29072.b.warn}} \
+	    "pr29072-b.exe"] \
 	]
+    } else {
+	run_ld_link_tests [list \
+	   [list "PR ld/29072 (ignore absent .note.GNU-stack)" \
+	    "-e 0 -z stack-size=0x123400" \
+	    "" \
+	    "" \
+	    {pr29072-b.s} \
+	    {} \
+	    "pr29072-b.exe"] \
+	]
+    }
+
+    # Restore the normal pruning behaviour.
+    rename prune_warnings_extra ""
+    rename old_prune_warnings_extra prune_warnings_extra
 }
 
 if [check_gc_sections_available] {
@@ -365,7 +467,7 @@ if { [istarget *-*-linux*]
     run_ld_link_exec_tests [list \
 	[list \
 	    "Run mbind2a" \
-	    "$NOPIE_LDFLAGS -Wl,-z,common-page-size=0x4000" \
+	    "$NOPIE_LDFLAGS -Wl,-z,common-page-size=0x4000 -Wl,-z,noexecstack" \
 	    "" \
 	    { mbind2a.s mbind2b.c } \
 	    "mbind2a" \
@@ -374,7 +476,7 @@ if { [istarget *-*-linux*]
 	] \
 	[list \
 	    "Run mbind2b" \
-	    "-static -Wl,-z,common-page-size=0x4000" \
+	    "-static -Wl,-z,common-page-size=0x4000 -Wl,-z,noexecstack" \
 	    "" \
 	    { mbind2a.s mbind2b.c } \
 	    "mbind2b" \

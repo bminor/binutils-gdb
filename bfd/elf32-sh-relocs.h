@@ -20,7 +20,7 @@
 /* No relocation.  */
   HOWTO (R_SH_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -36,7 +36,7 @@
      src_mask to a non-zero value is similar to the COFF toolchain.  */
   HOWTO (R_SH_DIR32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -51,7 +51,7 @@
   /* 32 bit PC relative relocation.  */
   HOWTO (R_SH_REL32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -66,7 +66,7 @@
   /* 8 bit PC relative branch divided by 2.  */
   HOWTO (R_SH_DIR8WPN,		/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -83,7 +83,7 @@
      eventual value of a symbol.  */
   HOWTO (R_SH_IND12W,		/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 12,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -98,7 +98,7 @@
   /* 8 bit unsigned PC relative divided by 4.  */
   HOWTO (R_SH_DIR8WPL,		/* type */
 	 2,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -113,7 +113,7 @@
   /* 8 bit unsigned PC relative divided by 2.  */
   HOWTO (R_SH_DIR8WPZ,		/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -130,7 +130,7 @@
      implemented.  */
   HOWTO (R_SH_DIR8BP,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -147,7 +147,7 @@
      is not implemented.  */
   HOWTO (R_SH_DIR8W,		/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -164,7 +164,7 @@
      is not implemented.  */
   HOWTO (R_SH_DIR8L,		/* type */
 	 2,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -179,7 +179,7 @@
   /* 8 bit PC relative divided by 2 - but specified in a very odd way.  */
   HOWTO (R_SH_LOOP_START,	/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -194,7 +194,7 @@
   /* 8 bit PC relative divided by 2 - but specified in a very odd way.  */
   HOWTO (R_SH_LOOP_END,		/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -225,7 +225,7 @@
   /* GNU extension to record C++ vtable hierarchy */
   HOWTO (R_SH_GNU_VTINHERIT, /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -240,7 +240,7 @@
   /* GNU extension to record C++ vtable member usage */
   HOWTO (R_SH_GNU_VTENTRY,     /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -257,7 +257,7 @@
      between the reloc address and L2.  */
   HOWTO (R_SH_SWITCH8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -274,7 +274,7 @@
      between the reloc address and L2.  */
   HOWTO (R_SH_SWITCH16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -291,7 +291,7 @@
      between the reloc address and L2.  */
   HOWTO (R_SH_SWITCH32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -309,7 +309,7 @@
      which loads the register used in the function call.  */
   HOWTO (R_SH_USES,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -327,7 +327,7 @@
      object file.  */
   HOWTO (R_SH_COUNT,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -344,7 +344,7 @@
      aligned.  */
   HOWTO (R_SH_ALIGN,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -361,7 +361,7 @@
      contains data, unless this reloc is seen.  */
   HOWTO (R_SH_CODE,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -377,7 +377,7 @@
      instructions when it sees data that is not instructions.  */
   HOWTO (R_SH_DATA,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -394,7 +394,7 @@
      instructions which are the targets of branches.  */
   HOWTO (R_SH_LABEL,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -409,7 +409,7 @@
   /* The next 12 are only supported via linking in SHC-generated objects.  */
   HOWTO (R_SH_DIR16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -423,7 +423,7 @@
 
   HOWTO (R_SH_DIR8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -437,7 +437,7 @@
 
   HOWTO (R_SH_DIR8UL,		/* type */
 	 2,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -451,7 +451,7 @@
 
   HOWTO (R_SH_DIR8UW,		/* type */
 	 1,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -465,7 +465,7 @@
 
   HOWTO (R_SH_DIR8U,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -479,7 +479,7 @@
 
   HOWTO (R_SH_DIR8SW,		/* type */
 	 1,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -493,7 +493,7 @@
 
   HOWTO (R_SH_DIR8S,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -507,7 +507,7 @@
 
   HOWTO (R_SH_DIR4UL,		/* type */
 	 2,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 4,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -521,7 +521,7 @@
 
   HOWTO (R_SH_DIR4UW,		/* type */
 	 1,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 4,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -535,7 +535,7 @@
 
   HOWTO (R_SH_DIR4U,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 4,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -549,7 +549,7 @@
 
   HOWTO (R_SH_PSHA,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 7,			/* bitsize */
 	 false,			/* pc_relative */
 	 4,			/* bitpos */
@@ -563,7 +563,7 @@
 
   HOWTO (R_SH_PSHL,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 7,			/* bitsize */
 	 false,			/* pc_relative */
 	 4,			/* bitpos */
@@ -587,7 +587,7 @@
 
   HOWTO (R_SH_DIR16S,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -692,7 +692,7 @@
 
   HOWTO (R_SH_TLS_GD_32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -706,7 +706,7 @@
 
   HOWTO (R_SH_TLS_LD_32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -720,7 +720,7 @@
 
   HOWTO (R_SH_TLS_LDO_32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -734,7 +734,7 @@
 
   HOWTO (R_SH_TLS_IE_32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -748,7 +748,7 @@
 
   HOWTO (R_SH_TLS_LE_32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -762,7 +762,7 @@
 
   HOWTO (R_SH_TLS_DTPMOD32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -776,7 +776,7 @@
 
   HOWTO (R_SH_TLS_DTPOFF32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -790,7 +790,7 @@
 
   HOWTO (R_SH_TLS_TPOFF32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -813,7 +813,7 @@
 
   HOWTO (R_SH_GOT32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -827,7 +827,7 @@
 
   HOWTO (R_SH_PLT32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -841,7 +841,7 @@
 
   HOWTO (R_SH_COPY,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -855,7 +855,7 @@
 
   HOWTO (R_SH_GLOB_DAT,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -869,7 +869,7 @@
 
   HOWTO (R_SH_JMP_SLOT,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -883,7 +883,7 @@
 
   HOWTO (R_SH_RELATIVE,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -897,7 +897,7 @@
 
   HOWTO (R_SH_GOTOFF,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -911,7 +911,7 @@
 
   HOWTO (R_SH_GOTPC,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -925,7 +925,7 @@
 
   HOWTO (R_SH_GOTPLT32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -974,7 +974,7 @@
   /* FDPIC-relative offset to a GOT entry, for movi20.  */
   HOWTO (R_SH_GOT20,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 20,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -989,7 +989,7 @@
   /* FDPIC-relative offset to a data object, for movi20.  */
   HOWTO (R_SH_GOTOFF20,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 20,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1004,7 +1004,7 @@
   /* FDPIC-relative offset to a GOT entry for a function descriptor.  */
   HOWTO (R_SH_GOTFUNCDESC,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1020,7 +1020,7 @@
      for movi20.  */
   HOWTO (R_SH_GOTFUNCDESC20,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 20,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1035,7 +1035,7 @@
   /* FDPIC-relative offset to a function descriptor.  */
   HOWTO (R_SH_GOTOFFFUNCDESC,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1050,7 +1050,7 @@
   /* FDPIC-relative offset to a function descriptor, for movi20.  */
   HOWTO (R_SH_GOTOFFFUNCDESC20,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 20,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1065,7 +1065,7 @@
   /* Address of an official function descriptor.  */
   HOWTO (R_SH_FUNCDESC,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1080,7 +1080,7 @@
   /* Function descriptor to be filled in by the dynamic linker.  */
   HOWTO (R_SH_FUNCDESC_VALUE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

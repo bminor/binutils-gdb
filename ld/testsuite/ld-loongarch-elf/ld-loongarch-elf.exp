@@ -26,9 +26,16 @@ proc loongarch_choose_lp64_emul {} {
     return "elf64lloongarch"
 }
 
-if [istarget "loongarch*-*-*"] {
+if [istarget "loongarch64-*-*"] {
     run_dump_test "jmp_op"
     run_dump_test "macro_op"
     run_dump_test "syscall"
     run_dump_test "disas-jirl"
+}
+
+if [istarget "loongarch32-*-*"] {
+    run_dump_test "jmp_op"
+    run_dump_test "macro_op_32"
+    run_dump_test "syscall"
+    run_dump_test "disas-jirl-32"
 }

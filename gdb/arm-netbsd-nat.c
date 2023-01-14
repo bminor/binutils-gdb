@@ -346,13 +346,13 @@ arm_netbsd_nat_target::read_description ()
 
   if (sysctlbyname("machdep.fpu_present", &flag, &len, NULL, 0) != 0
       || !flag)
-    return arm_read_description (ARM_FP_TYPE_NONE);
+    return arm_read_description (ARM_FP_TYPE_NONE, false);
 
   len = sizeof(flag);
   if (sysctlbyname("machdep.neon_present", &flag, &len, NULL, 0) == 0 && flag)
     return aarch32_read_description ();
 
-  return arm_read_description (ARM_FP_TYPE_VFPV3);
+  return arm_read_description (ARM_FP_TYPE_VFPV3, false);
 }
 
 void _initialize_arm_netbsd_nat ();

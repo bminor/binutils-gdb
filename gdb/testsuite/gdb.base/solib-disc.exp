@@ -38,10 +38,6 @@ set lib_syms [shlib_symbol_file ${libname}]
 
 remote_exec build "rm -f ${binfile}"
 
-if [get_compiler_info] {
-    return -1
-}
-
 set exec_opts [list debug shlib_load additional_flags=-DSHLIB_NAME=\"${lib_dlopen}\"]
 
 if { [gdb_compile_shlib $libsrc $libobj {debug}] != ""

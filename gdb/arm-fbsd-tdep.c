@@ -27,6 +27,7 @@
 #include "auxv.h"
 #include "fbsd-tdep.h"
 #include "gdbcore.h"
+#include "inferior.h"
 #include "osabi.h"
 #include "solib-svr4.h"
 #include "trad-frame.h"
@@ -163,6 +164,24 @@ arm_fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
   cb (".reg", ARM_FBSD_SIZEOF_GREGSET, ARM_FBSD_SIZEOF_GREGSET,
       &arm_fbsd_gregset, NULL, cb_data);
 
+  if (tdep->tls_regnum > 0)
+    {
+      const struct regcache_map_entry arm_fbsd_tlsregmap[] =
+	{
+	  { 1, tdep->tls_regnum, 4 },
+	  { 0 }
+	};
+
+      const struct regset arm_fbsd_tlsregset =
+	{
+	  arm_fbsd_tlsregmap,
+	  regcache_supply_regset, regcache_collect_regset
+	};
+
+      cb (".reg-aarch-tls", ARM_FBSD_SIZEOF_TLSREGSET, ARM_FBSD_SIZEOF_TLSREGSET,
+	  &arm_fbsd_tlsregset, NULL, cb_data);
+    }
+
   /* While FreeBSD/arm cores do contain a NT_FPREGSET / ".reg2"
      register set, it is not populated with register values by the
      kernel but just contains all zeroes.  */
@@ -175,12 +194,12 @@ arm_fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
    vector.  */
 
 const struct target_desc *
-arm_fbsd_read_description_auxv (struct target_ops *target)
+arm_fbsd_read_description_auxv (struct target_ops *target, bool tls)
 {
   CORE_ADDR arm_hwcap = 0;
 
   if (target_auxv_search (target, AT_FREEBSD_HWCAP, &arm_hwcap) != 1)
-    return nullptr;
+    return arm_read_description (ARM_FP_TYPE_NONE, tls);
 
   if (arm_hwcap & HWCAP_VFP)
     {
@@ -188,12 +207,12 @@ arm_fbsd_read_description_auxv (struct target_ops *target)
 	return aarch32_read_description ();
       else if ((arm_hwcap & (HWCAP_VFPv3 | HWCAP_VFPD32))
 	       == (HWCAP_VFPv3 | HWCAP_VFPD32))
-	return arm_read_description (ARM_FP_TYPE_VFPV3);
+	return arm_read_description (ARM_FP_TYPE_VFPV3, tls);
       else
-	return arm_read_description (ARM_FP_TYPE_VFPV2);
+	return arm_read_description (ARM_FP_TYPE_VFPV2, tls);
     }
 
-  return nullptr;
+  return arm_read_description (ARM_FP_TYPE_NONE, tls);
 }
 
 /* Implement the "core_read_description" gdbarch method.  */
@@ -203,7 +222,33 @@ arm_fbsd_core_read_description (struct gdbarch *gdbarch,
 				struct target_ops *target,
 				bfd *abfd)
 {
-  return arm_fbsd_read_description_auxv (target);
+  asection *tls = bfd_get_section_by_name (abfd, ".reg-aarch-tls");
+
+  return arm_fbsd_read_description_auxv (target, tls != nullptr);
+}
+
+/* Implement the get_thread_local_address gdbarch method.  */
+
+static CORE_ADDR
+arm_fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
+				   CORE_ADDR lm_addr, CORE_ADDR offset)
+{
+  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  struct regcache *regcache;
+
+  regcache = get_thread_arch_regcache (current_inferior ()->process_target (),
+				       ptid, gdbarch);
+
+  target_fetch_registers (regcache, tdep->tls_regnum);
+
+  ULONGEST tpidruro;
+  if (regcache->cooked_read (tdep->tls_regnum, &tpidruro) != REG_VALID)
+    error (_("Unable to fetch %%tpidruro"));
+
+  /* %tpidruro points to the TCB whose first member is the dtv
+      pointer.  */
+  CORE_ADDR dtv_addr = tpidruro;
+  return fbsd_get_thread_local_address (gdbarch, dtv_addr, lm_addr, offset);
 }
 
 /* Implement the 'init_osabi' method of struct gdb_osabi_handler.  */
@@ -230,6 +275,14 @@ arm_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_iterate_over_regset_sections
     (gdbarch, arm_fbsd_iterate_over_regset_sections);
   set_gdbarch_core_read_description (gdbarch, arm_fbsd_core_read_description);
+
+  if (tdep->tls_regnum > 0)
+    {
+      set_gdbarch_fetch_tls_load_module_address (gdbarch,
+						 svr4_fetch_objfile_link_map);
+      set_gdbarch_get_thread_local_address (gdbarch,
+					    arm_fbsd_get_thread_local_address);
+    }
 
   /* Single stepping.  */
   set_gdbarch_software_single_step (gdbarch, arm_software_single_step);

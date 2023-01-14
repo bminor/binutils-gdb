@@ -44,6 +44,9 @@ struct value_print_options
   /* Controls printing of addresses.  */
   bool addressprint;
 
+  /* Controls printing of nibbles.  */
+  bool nibblesprint;
+
   /* Controls looking up an object's derived type using what we find
      in its vtables.  */
   bool objectprint;
@@ -100,9 +103,6 @@ struct value_print_options
 
   /* Maximum print depth when printing nested aggregates.  */
   int max_depth;
-
-  /* Whether "finish" should print the value.  */
-  bool finish_print;
 };
 
 /* Create an option_def_group for the value_print options, with OPTS
@@ -149,7 +149,8 @@ extern void value_print_scalar_formatted
    int size, struct ui_file *stream);
 
 extern void print_binary_chars (struct ui_file *, const gdb_byte *,
-				unsigned int, enum bfd_endian, bool);
+				unsigned int, enum bfd_endian, bool,
+				const struct value_print_options *options);
 
 extern void print_octal_chars (struct ui_file *, const gdb_byte *,
 			       unsigned int, enum bfd_endian);
@@ -164,12 +165,6 @@ extern void print_function_pointer_address (const struct value_print_options *op
 					    struct gdbarch *gdbarch,
 					    CORE_ADDR address,
 					    struct ui_file *stream);
-
-extern int read_string (CORE_ADDR addr, int len, int width,
-			unsigned int fetchlimit,
-			enum bfd_endian byte_order,
-			gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
-			int *bytes_read);
 
 /* Helper function to check the validity of some bits of a value.
 

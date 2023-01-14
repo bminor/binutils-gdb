@@ -491,7 +491,7 @@ d_lookup_symbol_module (const char *scope, const char *name,
       if (sym.symbol != NULL)
 	return sym;
 
-      block = BLOCK_SUPERBLOCK (block);
+      block = block->superblock ();
     }
 
   return {};

@@ -26,10 +26,6 @@
 #include <map>
 #include <string>
 
-/* A command held in the MI_CMD_TABLE.  */
-
-using mi_command_up = std::unique_ptr<struct mi_command>;
-
 /* MI command table (built at run time). */
 
 static std::map<std::string, mi_command_up> mi_cmd_table;
@@ -49,11 +45,9 @@ struct mi_command_mi : public mi_command
     gdb_assert (func != nullptr);
   }
 
-protected:
-
   /* Called when this MI command has been invoked, calls m_argv_function
      with arguments contained within PARSE.  */
-  void do_invoke (struct mi_parse *parse) const override
+  void invoke (struct mi_parse *parse) const override
   {
     mi_parse_argv (parse->args, parse);
 
@@ -87,13 +81,11 @@ struct mi_command_cli : public mi_command
       m_args_p (args_p)
   { /* Nothing.  */ }
 
-protected:
-
   /* Called when this MI command has been invoked, calls the m_cli_name
      CLI function.  In m_args_p is true then the argument string from
      within PARSE is passed through to the CLI function, otherwise nullptr
      is passed through to the CLI function as its argument string.  */
-  void do_invoke (struct mi_parse *parse) const override
+  void invoke (struct mi_parse *parse) const override
   {
     const char *args = m_args_p ? parse->args : nullptr;
     mi_execute_cli_command (m_cli_name, m_args_p, args);
@@ -108,12 +100,9 @@ private:
   bool m_args_p;
 };
 
-/* Insert COMMAND into the global mi_cmd_table.  Return false if
-   COMMAND->name already exists in mi_cmd_table, in which case COMMAND will
-   not have been added to mi_cmd_table.  Otherwise, return true, and
-   COMMAND was added to mi_cmd_table.  */
+/* See mi-cmds.h.  */
 
-static bool
+bool
 insert_mi_cmd_entry (mi_command_up command)
 {
   gdb_assert (command != nullptr);
@@ -125,6 +114,32 @@ insert_mi_cmd_entry (mi_command_up command)
 
   mi_cmd_table[name] = std::move (command);
   return true;
+}
+
+/* See mi-cmds.h.  */
+
+bool
+remove_mi_cmd_entry (const std::string &name)
+{
+  if (mi_cmd_table.find (name) == mi_cmd_table.end ())
+    return false;
+
+  mi_cmd_table.erase (name);
+  return true;
+}
+
+/* See mi-cmds.h.  */
+
+void
+remove_mi_cmd_entries (remove_mi_cmd_entries_ftype callback)
+{
+  for (auto it = mi_cmd_table.cbegin (); it != mi_cmd_table.cend (); )
+    {
+      if (callback (it->second.get ()))
+	it = mi_cmd_table.erase (it);
+      else
+	++it;
+    }
 }
 
 /* Create and register a new MI command with an MI specific implementation.
@@ -164,16 +179,6 @@ mi_command::mi_command (const char *name, int *suppress_notification)
     m_suppress_notification (suppress_notification)
 {
   gdb_assert (m_name != nullptr && m_name[0] != '\0');
-}
-
-/* See mi-cmds.h.  */
-
-void
-mi_command::invoke (struct mi_parse *parse) const
-{
-  gdb::optional<scoped_restore_tmpl<int>> restore
-    = do_suppress_notification ();
-  this->do_invoke (parse);
 }
 
 /* See mi-cmds.h.  */

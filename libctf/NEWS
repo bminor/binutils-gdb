@@ -1,5 +1,14 @@
 -*- text -*-
 
+Changes in 2.39:
+
+* New features
+
+** The CTF variable section (if generated via ld --ctf-variables) now contains
+   entries for static functions, hidden functions, and other functions with
+   no associated symbol.  The associated type is of kind CTF_K_FUNCTION.
+   (No change if --ctf-variables is not specified, which is the default.)
+
 Changes in 2.37:
 
 * New features

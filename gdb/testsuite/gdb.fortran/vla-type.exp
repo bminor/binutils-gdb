@@ -33,7 +33,7 @@ set int [fortran_int4]
 # Check if not allocated VLA in type does not break
 # the debugger when accessing it.
 # break main for Flang compiler already breaks here
-if ![test_compiler_info "clang-*"] {
+if { ![test_compiler_info {flang-*} f90] } {
     gdb_breakpoint [gdb_get_line_number "before-allocated"]
     gdb_continue_to_breakpoint "before-allocated"
 }

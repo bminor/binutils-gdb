@@ -110,7 +110,7 @@ enum arc_regnum
 /* Special value for register offset arrays.  */
 #define ARC_OFFSET_NO_REGISTER (-1)
 
-#define arc_print(fmt, args...) fprintf_unfiltered (gdb_stdlog, fmt, ##args)
+#define arc_print(fmt, args...) gdb_printf (gdb_stdlog, fmt, ##args)
 
 extern bool arc_debug;
 
@@ -185,11 +185,6 @@ arc_arch_is_em (const struct bfd_arch_info* arch)
    undesired, then this stream should be set to some invisible stream, but it
    can't be set to an actual NULL value - that would cause a crash.  */
 int arc_delayed_print_insn (bfd_vma addr, struct disassemble_info *info);
-
-/* Return properly initialized disassemble_info for ARC disassembler - it will
-   not print disassembled instructions to stderr.  */
-
-struct disassemble_info arc_disassemble_info (struct gdbarch *gdbarch);
 
 /* Get branch/jump target address for the INSN.  Note that this function
    returns branch target and doesn't evaluate if this branch is taken or not.

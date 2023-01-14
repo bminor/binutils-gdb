@@ -61,7 +61,7 @@ proc gdb_py_module_available { name } {
 	-re -wrap "ModuleNotFoundError: No module named '${name}'.*" {
 	    set available false
 	}
-	-re -wrap "ImportError: No module named ${name}.*" {
+	-re -wrap "ImportError: No module named '?${name}'?.*" {
 	    set available false
 	}
 	-re -wrap "python import ${name}" {

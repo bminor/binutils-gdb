@@ -50,7 +50,7 @@ static reloc_howto_type epiphany_elf_howto_table [] =
 #define AHOW(t,rs,s,bs,pr,bp,co,name,sm,dm)	\
     HOWTO(t,			/* type */ \
 	  rs,			/* rightshift */ \
-	  s,			/* size (0 = byte, 1 = short, 2 = long) */ \
+	  s,			/* size */ \
 	  bs,			/* bitsize */ \
 	  pr,			/* pc_relative */ \
 	  bp,			/* bitpos */ \
@@ -63,39 +63,39 @@ static reloc_howto_type epiphany_elf_howto_table [] =
 	  pr)			/* pcrel_offset */
 
   /* This reloc does nothing.  */
-  AHOW (R_EPIPHANY_NONE,    0, 3,0, false, 0, complain_overflow_dont,	  "R_EPIPHANY_NONE",	    0,		0),
+  AHOW (R_EPIPHANY_NONE,    0, 0,0, false, 0, complain_overflow_dont,	  "R_EPIPHANY_NONE",	    0,		0),
 
   /* 8 bit absolute (not likely) */
-  AHOW (R_EPIPHANY_8,	    0, 0, 8, false, 0, complain_overflow_bitfield, "R_EPIPHANY_8",	0x000000ff, 0x000000ff),
+  AHOW (R_EPIPHANY_8,	    0, 1, 8, false, 0, complain_overflow_bitfield, "R_EPIPHANY_8",	0x000000ff, 0x000000ff),
   /* 16 bit absolute */
-  AHOW (R_EPIPHANY_16,	    0, 1,16, false, 0, complain_overflow_bitfield, "R_EPIPHANY_16",	0x0000ffff, 0x00ff1fe0),
+  AHOW (R_EPIPHANY_16,	    0, 2,16, false, 0, complain_overflow_bitfield, "R_EPIPHANY_16",	0x0000ffff, 0x00ff1fe0),
   /* A 32 bit absolute relocation.  */
-  AHOW (R_EPIPHANY_32,	    0, 2,32, false, 0, complain_overflow_dont,	   "R_EPIPHANY_32",	0xffffffff, 0xffffffff),
+  AHOW (R_EPIPHANY_32,	    0, 4,32, false, 0, complain_overflow_dont,	   "R_EPIPHANY_32",	0xffffffff, 0xffffffff),
 
   /*  8 bit relative relocation */
-  HOWTO ( R_EPIPHANY_8_PCREL,  0, 0,  8, true, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_EPIPHANY_8_PCREL", false, 0x000000ff, 0x000000ff, false),
+  HOWTO ( R_EPIPHANY_8_PCREL,  0, 1,  8, true, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_EPIPHANY_8_PCREL", false, 0x000000ff, 0x000000ff, false),
   /* 16 bit relative relocation */
-  HOWTO ( R_EPIPHANY_16_PCREL, 0, 1, 16, true, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_EPIPHANY_8_PCREL", false, 0x000000ff, 0x000000ff, false),
+  HOWTO ( R_EPIPHANY_16_PCREL, 0, 2, 16, true, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_EPIPHANY_8_PCREL", false, 0x000000ff, 0x000000ff, false),
   /* 32 bit relative relocation */
-  HOWTO ( R_EPIPHANY_32_PCREL, 0, 2, 32, true, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_EPIPHANY_8_PCREL", false, 0x000000ff, 0x000000ff, false),
+  HOWTO ( R_EPIPHANY_32_PCREL, 0, 4, 32, true, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_EPIPHANY_8_PCREL", false, 0x000000ff, 0x000000ff, false),
 
   /* 8 bit pc-relative relocation */
-  AHOW (R_EPIPHANY_SIMM8,   1, 0, 8,  true, 8, complain_overflow_signed,   "R_EPIPHANY_SIMM8",	 0x000000ff, 0x0000ff00),
+  AHOW (R_EPIPHANY_SIMM8,   1, 1, 8,  true, 8, complain_overflow_signed,   "R_EPIPHANY_SIMM8",	 0x000000ff, 0x0000ff00),
   /* 24 bit pc-relative relocation */
-  AHOW (R_EPIPHANY_SIMM24,  1, 2,24,  true, 8, complain_overflow_signed,   "R_EPIPHANY_SIMM24",	 0x00ffffff, 0xffffff00),
+  AHOW (R_EPIPHANY_SIMM24,  1, 4,24,  true, 8, complain_overflow_signed,   "R_EPIPHANY_SIMM24",	 0x00ffffff, 0xffffff00),
 
   /* %HIGH(EA) */
-  AHOW (R_EPIPHANY_HIGH,    0, 2,16, false, 0, complain_overflow_dont,	   "R_EPIPHANY_HIGH",	 0x0ff01fe0, 0x0ff01fe0),
+  AHOW (R_EPIPHANY_HIGH,    0, 4,16, false, 0, complain_overflow_dont,	   "R_EPIPHANY_HIGH",	 0x0ff01fe0, 0x0ff01fe0),
 
   /* %LOW(EA) */
-  AHOW (R_EPIPHANY_LOW,	    0, 2,16, false, 0, complain_overflow_dont,	"R_EPIPHANY_LOW",     0x0ff01fe0, 0x0ff01fe0),
+  AHOW (R_EPIPHANY_LOW,	    0, 4,16, false, 0, complain_overflow_dont,	"R_EPIPHANY_LOW",     0x0ff01fe0, 0x0ff01fe0),
 
   /* simm11 */
-  AHOW (R_EPIPHANY_SIMM11,  0, 2,11, false, 0, complain_overflow_bitfield, "R_EPIPHANY_SIMM11",	 0x00ff0380, 0x00ff0380),
+  AHOW (R_EPIPHANY_SIMM11,  0, 4,11, false, 0, complain_overflow_bitfield, "R_EPIPHANY_SIMM11",	 0x00ff0380, 0x00ff0380),
   /* imm12 - sign-magnitude */
-  AHOW (R_EPIPHANY_IMM11,   0, 2,11, false, 0, complain_overflow_bitfield, "R_EPIPHANY_IMM12",	 0x00ff0380, 0x00ff0380),
+  AHOW (R_EPIPHANY_IMM11,   0, 4,11, false, 0, complain_overflow_bitfield, "R_EPIPHANY_IMM12",	 0x00ff0380, 0x00ff0380),
   /* imm8 */
-  AHOW (R_EPIPHANY_IMM8,    0, 1, 8, false, 8, complain_overflow_signed,   "R_EPIPHANY_IMM8",	 0x0000ff00, 0x0000ff00)
+  AHOW (R_EPIPHANY_IMM8,    0, 2, 8, false, 8, complain_overflow_signed,   "R_EPIPHANY_IMM8",	 0x0000ff00, 0x0000ff00)
 
 
 };

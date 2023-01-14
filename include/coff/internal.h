@@ -469,8 +469,8 @@ struct internal_syment
     char _n_name[SYMNMLEN] ATTRIBUTE_NONSTRING;	/* old COFF version	*/
     struct
     {
-      bfd_hostptr_t _n_zeroes;	/* new == 0			*/
-      bfd_hostptr_t _n_offset;	/* offset into string table	*/
+      uintptr_t _n_zeroes;	/* new == 0			*/
+      uintptr_t _n_offset;	/* offset into string table	*/
     }      _n_n;
     char *_n_nptr[2];		/* allows for overlaying	*/
   }     _n;
@@ -595,11 +595,11 @@ union internal_auxent
       char x_fname[20];
       struct
       {
-	/* PR 28630: We use bfd_hostptr_t because these fields may be
+	/* PR 28630: We use uintptr_t because these fields may be
 	   used to hold pointers.  We assume that this type is at least
-	   as big as the long type.  */
-	bfd_hostptr_t x_zeroes;
-	bfd_hostptr_t x_offset;
+	   32 bits.  */
+	uintptr_t x_zeroes;
+	uintptr_t x_offset;
       }      x_n;
     } x_n;
 
@@ -693,5 +693,21 @@ struct internal_reloc
   unsigned char r_extern;	/* Used by ECOFF		*/
   unsigned long r_offset;	/* Used by Alpha ECOFF, SPARC, others */
 };
+
+#define IMAGE_REL_BASED_ABSOLUTE		0
+#define IMAGE_REL_BASED_HIGH			1
+#define IMAGE_REL_BASED_LOW			2
+#define IMAGE_REL_BASED_HIGHLOW			3
+#define IMAGE_REL_BASED_HIGHADJ			4
+#define IMAGE_REL_BASED_MIPS_JMPADDR		5
+#define IMAGE_REL_BASED_ARM_MOV32		5
+#define IMAGE_REL_BASED_RISCV_HIGH20		5
+#define IMAGE_REL_BASED_THUMB_MOV32		7
+#define IMAGE_REL_BASED_RISCV_LOW12I		7
+#define IMAGE_REL_BASED_RISCV_LOW12S		8
+#define IMAGE_REL_BASED_LOONGARCH32_MARK_LA	8
+#define IMAGE_REL_BASED_LOONGARCH64_MARK_LA	8
+#define IMAGE_REL_BASED_MIPS_JMPADDR16		9
+#define IMAGE_REL_BASED_DIR64			10
 
 #endif /* GNU_COFF_INTERNAL_H */

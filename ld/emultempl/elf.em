@@ -53,6 +53,8 @@ fragment <<EOF
 
 /* Declare functions used by various EXTRA_EM_FILEs.  */
 static void gld${EMULATION_NAME}_before_parse (void);
+static void gld${EMULATION_NAME}_before_plugin_all_symbols_read
+  (void);
 static void gld${EMULATION_NAME}_after_open (void);
 static void gld${EMULATION_NAME}_before_allocation (void);
 static void gld${EMULATION_NAME}_after_allocation (void);
@@ -90,6 +92,9 @@ EOF
 fi
 fragment <<EOF
   link_info.separate_code = DEFAULT_LD_Z_SEPARATE_CODE;
+  link_info.warn_execstack = DEFAULT_LD_WARN_EXECSTACK;
+  link_info.no_warn_rwx_segments = ! DEFAULT_LD_WARN_RWX_SEGMENTS;
+  link_info.default_execstack = DEFAULT_LD_EXECSTACK;
 }
 
 EOF
@@ -124,6 +129,17 @@ if test x"$LDEMUL_AFTER_OPEN" != xgld"$EMULATION_NAME"_after_open; then
   fi
 
 fragment <<EOF
+
+/* This is called before calling plugin 'all symbols read' hook.  */
+
+static void
+gld${EMULATION_NAME}_before_plugin_all_symbols_read (void)
+{
+  ldelf_before_plugin_all_symbols_read ($IS_LIBPATH, $IS_NATIVE,
+				        $IS_LINUX_TARGET,
+					$IS_FREEBSD_TARGET,
+					$ELFSIZE, "$prefix");
+}
 
 /* This is called after all the input files have been opened.  */
 
@@ -556,6 +572,7 @@ enum elf_options
   OPTION_EXCLUDE_LIBS,
   OPTION_HASH_STYLE,
   OPTION_BUILD_ID,
+  OPTION_PACKAGE_METADATA,
   OPTION_AUDIT,
   OPTION_COMPRESS_DEBUG
 };
@@ -586,6 +603,7 @@ EOF
 fi
 fragment <<EOF
     {"build-id", optional_argument, NULL, OPTION_BUILD_ID},
+    {"package-metadata", optional_argument, NULL, OPTION_PACKAGE_METADATA},
     {"compress-debug-sections", required_argument, NULL, OPTION_COMPRESS_DEBUG},
 EOF
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
@@ -632,6 +650,13 @@ gld${EMULATION_NAME}_handle_option (int optc)
 	optarg = DEFAULT_BUILD_ID_STYLE;
       if (strcmp (optarg, "none"))
 	ldelf_emit_note_gnu_build_id = xstrdup (optarg);
+      break;
+
+    case OPTION_PACKAGE_METADATA:
+      free ((char *) ldelf_emit_note_fdo_package_metadata);
+      ldelf_emit_note_fdo_package_metadata = NULL;
+      if (optarg != NULL && strlen(optarg) > 0)
+	ldelf_emit_note_fdo_package_metadata = xstrdup (optarg);
       break;
 
     case OPTION_COMPRESS_DEBUG:
@@ -910,6 +935,7 @@ fi
 fi
 
 LDEMUL_AFTER_PARSE=${LDEMUL_AFTER_PARSE-ldelf_after_parse}
+LDEMUL_BEFORE_PLUGIN_ALL_SYMBOLS_READ=${LDEMUL_BEFORE_PLUGIN_ALL_SYMBOLS_READ-gld${EMULATION_NAME}_before_plugin_all_symbols_read}
 LDEMUL_AFTER_OPEN=${LDEMUL_AFTER_OPEN-gld${EMULATION_NAME}_after_open}
 LDEMUL_BEFORE_PLACE_ORPHANS=${LDEMUL_BEFORE_PLACE_ORPHANS-ldelf_before_place_orphans}
 LDEMUL_AFTER_ALLOCATION=${LDEMUL_AFTER_ALLOCATION-gld${EMULATION_NAME}_after_allocation}

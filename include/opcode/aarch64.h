@@ -140,6 +140,7 @@ typedef uint32_t aarch64_insn;
 					 | AARCH64_FEATURE_HBC)
 
 #define AARCH64_ARCH_V9_FEATURES	(AARCH64_FEATURE_V9		\
+					 | AARCH64_FEATURE_F16          \
 					 | AARCH64_FEATURE_SVE		\
 					 | AARCH64_FEATURE_SVE2)
 #define AARCH64_ARCH_V9_1_FEATURES	(AARCH64_ARCH_V8_6_FEATURES)
@@ -1370,7 +1371,7 @@ aarch64_get_opcode (enum aarch64_op);
 extern void
 aarch64_print_operand (char *, size_t, bfd_vma, const aarch64_opcode *,
 		       const aarch64_opnd_info *, int, int *, bfd_vma *,
-		       char **,
+		       char **, char *, size_t,
 		       aarch64_feature_set features);
 
 /* Miscellaneous interface.  */

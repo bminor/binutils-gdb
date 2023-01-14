@@ -587,7 +587,6 @@ LIBOBJS
 SIM_COMMON_BUILD_FALSE
 SIM_COMMON_BUILD_TRUE
 sim_float
-cgen_breaks
 target_alias
 host_alias
 build_alias
@@ -1740,16 +1739,9 @@ fi
 fi
 
 
-cgen_breaks=""
-if grep CGEN_MAINT $srcdir/Makefile.in >/dev/null; then
-cgen_breaks="break cgen_rtx_error";
-fi
-
 ac_config_files="$ac_config_files Makefile.sim:Makefile.in"
 
 ac_config_files="$ac_config_files Make-common.sim:../common/Make-common.in"
-
-ac_config_files="$ac_config_files .gdbinit:../common/gdbinit.in"
 
 ac_config_commands="$ac_config_commands Makefile"
 
@@ -2475,7 +2467,6 @@ do
   case $ac_config_target in
     "Makefile.sim") CONFIG_FILES="$CONFIG_FILES Makefile.sim:Makefile.in" ;;
     "Make-common.sim") CONFIG_FILES="$CONFIG_FILES Make-common.sim:../common/Make-common.in" ;;
-    ".gdbinit") CONFIG_FILES="$CONFIG_FILES .gdbinit:../common/gdbinit.in" ;;
     "Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS Makefile" ;;
     "stamp-h") CONFIG_COMMANDS="$CONFIG_COMMANDS stamp-h" ;;
 

@@ -389,19 +389,19 @@ adi_print_versions (CORE_ADDR vaddr, size_t cnt, gdb_byte *tags)
   while (cnt > 0)
     {
       QUIT;
-      printf_filtered ("%s:\t",
-		       paddress (target_gdbarch (), vaddr * adi_stat.blksize));
+      gdb_printf ("%s:\t",
+		  paddress (target_gdbarch (), vaddr * adi_stat.blksize));
       for (int i = maxelts; i > 0 && cnt > 0; i--, cnt--)
 	{
 	  if (tags[v_idx] == 0xff)    /* no version tag */
-	    printf_filtered ("-");
+	    gdb_printf ("-");
 	  else
-	    printf_filtered ("%1X", tags[v_idx]);
+	    gdb_printf ("%1X", tags[v_idx]);
 	  if (cnt > 1)
-	    printf_filtered (" ");
+	    gdb_printf (" ");
 	  ++v_idx;
 	}
-      printf_filtered ("\n");
+      gdb_printf ("\n");
       vaddr += maxelts;
     }
 }

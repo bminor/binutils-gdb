@@ -124,9 +124,9 @@ coff_arm_reloc (bfd *abfd,
       if (!bfd_reloc_offset_in_range (howto, abfd, input_section, octets))
 	return bfd_reloc_outofrange;
 
-      switch (howto->size)
+      switch (bfd_get_reloc_size (howto))
 	{
-	case 0:
+	case 1:
 	  {
 	    char x = bfd_get_8 (abfd, addr);
 	    DOIT (x);
@@ -134,7 +134,7 @@ coff_arm_reloc (bfd *abfd,
 	  }
 	  break;
 
-	case 1:
+	case 2:
 	  {
 	    short x = bfd_get_16 (abfd, addr);
 	    DOIT (x);
@@ -142,7 +142,7 @@ coff_arm_reloc (bfd *abfd,
 	  }
 	  break;
 
-	case 2:
+	case 4:
 	  {
 	    long x = bfd_get_32 (abfd, addr);
 	    DOIT (x);
@@ -221,7 +221,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 #ifdef ARM_WINCE
     HOWTO (ARM_26D,
 	   2,
-	   2,
+	   4,
 	   24,
 	   true,
 	   0,
@@ -234,7 +234,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   PCRELOFFSET),
     HOWTO (ARM_32,
 	   0,
-	   2,
+	   4,
 	   32,
 	   false,
 	   0,
@@ -247,7 +247,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   PCRELOFFSET),
     HOWTO (ARM_RVA32,
 	   0,
-	   2,
+	   4,
 	   32,
 	   false,
 	   0,
@@ -260,7 +260,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   PCRELOFFSET),
     HOWTO (ARM_26,
 	   2,
-	   2,
+	   4,
 	   24,
 	   true,
 	   0,
@@ -273,7 +273,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   PCRELOFFSET),
     HOWTO (ARM_THUMB12,
 	   1,
-	   1,
+	   2,
 	   11,
 	   true,
 	   0,
@@ -295,7 +295,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
     EMPTY_HOWTO (-1),
     HOWTO (ARM_SECTION,
 	   0,
-	   1,
+	   2,
 	   16,
 	   false,
 	   0,
@@ -308,7 +308,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   PCRELOFFSET),
     HOWTO (ARM_SECREL,
 	   0,
-	   2,
+	   4,
 	   32,
 	   false,
 	   0,
@@ -322,7 +322,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 #else /* not ARM_WINCE */
     HOWTO (ARM_8,
 	   0,
-	   0,
+	   1,
 	   8,
 	   false,
 	   0,
@@ -335,7 +335,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   PCRELOFFSET),
     HOWTO (ARM_16,
 	   0,
-	   1,
+	   2,
 	   16,
 	   false,
 	   0,
@@ -348,7 +348,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   PCRELOFFSET),
     HOWTO (ARM_32,
 	   0,
-	   2,
+	   4,
 	   32,
 	   false,
 	   0,
@@ -361,7 +361,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   PCRELOFFSET),
     HOWTO (ARM_26,
 	   2,
-	   2,
+	   4,
 	   24,
 	   true,
 	   0,
@@ -374,7 +374,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   PCRELOFFSET),
     HOWTO (ARM_DISP8,
 	   0,
-	   0,
+	   1,
 	   8,
 	   true,
 	   0,
@@ -387,7 +387,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   true),
     HOWTO (ARM_DISP16,
 	   0,
-	   1,
+	   2,
 	   16,
 	   true,
 	   0,
@@ -400,7 +400,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   true),
     HOWTO (ARM_DISP32,
 	   0,
-	   2,
+	   4,
 	   32,
 	   true,
 	   0,
@@ -413,7 +413,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   true),
     HOWTO (ARM_26D,
 	   2,
-	   2,
+	   4,
 	   24,
 	   false,
 	   0,
@@ -428,7 +428,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
     EMPTY_HOWTO (-1),
     HOWTO (ARM_NEG16,
 	   0,
-	   -1,
+	   -2,
 	   16,
 	   false,
 	   0,
@@ -441,7 +441,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   false),
     HOWTO (ARM_NEG32,
 	   0,
-	   -2,
+	   -4,
 	   32,
 	   false,
 	   0,
@@ -454,7 +454,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   false),
     HOWTO (ARM_RVA32,
 	   0,
-	   2,
+	   4,
 	   32,
 	   false,
 	   0,
@@ -467,7 +467,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   PCRELOFFSET),
     HOWTO (ARM_THUMB9,
 	   1,
-	   1,
+	   2,
 	   8,
 	   true,
 	   0,
@@ -480,7 +480,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   PCRELOFFSET),
     HOWTO (ARM_THUMB12,
 	   1,
-	   1,
+	   2,
 	   11,
 	   true,
 	   0,
@@ -493,7 +493,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   PCRELOFFSET),
     HOWTO (ARM_THUMB23,
 	   1,
-	   2,
+	   4,
 	   22,
 	   true,
 	   0,
@@ -1241,7 +1241,7 @@ coff_arm_relocate_section (bfd *output_bfd,
 	  static reloc_howto_type fake_arm26_reloc =
 	    HOWTO (ARM_26,
 	       2,
-	       2,
+	       4,
 	       24,
 	       true,
 	       0,

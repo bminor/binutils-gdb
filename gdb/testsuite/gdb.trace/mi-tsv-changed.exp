@@ -80,7 +80,7 @@ proc test_create_delete_modify_tsv { } {
 	}
 	gdb_exit
 	if [mi_gdb_start] {
-	    continue
+	    return
 	}
 
 	mi_gdb_reinitialize_dir $srcdir/$subdir

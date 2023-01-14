@@ -19,9 +19,6 @@ if { [skip_ada_tests] } { return -1 }
 
 standard_ada_testfile foo_ra24_010
 
-if [get_compiler_info] {
-    return -1
-}
 set old_gcc [expr [test_compiler_info {gcc-[0-8]-*}]]
 
 foreach_with_prefix scenario {all minimal} {

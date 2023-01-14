@@ -18,6 +18,7 @@
 
 #include "server.h"
 #include "gdbsupport/job-control.h"
+#include "gdbsupport/scoped_restore.h"
 #include "nat/fork-inferior.h"
 #ifdef HAVE_SIGNAL_H
 #include <signal.h>
@@ -103,9 +104,22 @@ post_fork_inferior (int pid, const char *program)
   atexit (restore_old_foreground_pgrp);
 #endif
 
+  process_info *proc = find_process_pid (pid);
+
+  /* If the inferior fails to start, startup_inferior mourns the
+     process (which deletes it), and then throws an error.  This means
+     that on exception return, we don't need or want to clear this
+     flag back, as PROC won't exist anymore.  Thus, we don't use a
+     scoped_restore.  */
+  proc->starting_up = true;
+
   startup_inferior (the_target, pid,
 		    START_INFERIOR_TRAPS_EXPECTED,
 		    &cs.last_status, &cs.last_ptid);
+
+  /* If we get here, the process was successfully started.  */
+  proc->starting_up = false;
+
   current_thread->last_resume_kind = resume_stop;
   current_thread->last_status = cs.last_status;
   signal_pid = pid;

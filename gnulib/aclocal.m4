@@ -108,6 +108,43 @@ AC_DEFUN([AM_AUX_DIR_EXPAND],
 am_aux_dir=`cd "$ac_aux_dir" && pwd`
 ])
 
+# AM_COND_IF                                            -*- Autoconf -*-
+
+# Copyright (C) 2008-2017 Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# _AM_COND_IF
+# _AM_COND_ELSE
+# _AM_COND_ENDIF
+# --------------
+# These macros are only used for tracing.
+m4_define([_AM_COND_IF])
+m4_define([_AM_COND_ELSE])
+m4_define([_AM_COND_ENDIF])
+
+# AM_COND_IF(COND, [IF-TRUE], [IF-FALSE])
+# ---------------------------------------
+# If the shell condition COND is true, execute IF-TRUE, otherwise execute
+# IF-FALSE.  Allow automake to learn about conditional instantiating macros
+# (the AC_CONFIG_FOOS).
+AC_DEFUN([AM_COND_IF],
+[m4_ifndef([_AM_COND_VALUE_$1],
+	   [m4_fatal([$0: no such condition "$1"])])dnl
+_AM_COND_IF([$1])dnl
+if test -z "$$1_TRUE"; then :
+  m4_n([$2])[]dnl
+m4_ifval([$3],
+[_AM_COND_ELSE([$1])dnl
+else
+  $3
+])dnl
+_AM_COND_ENDIF([$1])dnl
+fi[]dnl
+])
+
 # AM_CONDITIONAL                                            -*- Autoconf -*-
 
 # Copyright (C) 1997-2017 Free Software Foundation, Inc.
@@ -811,53 +848,6 @@ AC_DEFUN([_AM_SET_OPTIONS],
 AC_DEFUN([_AM_IF_OPTION],
 [m4_ifset(_AM_MANGLE_OPTION([$1]), [$2], [$3])])
 
-# Copyright (C) 1999-2017 Free Software Foundation, Inc.
-#
-# This file is free software; the Free Software Foundation
-# gives unlimited permission to copy and/or distribute it,
-# with or without modifications, as long as this notice is preserved.
-
-# _AM_PROG_CC_C_O
-# ---------------
-# Like AC_PROG_CC_C_O, but changed for automake.  We rewrite AC_PROG_CC
-# to automatically call this.
-AC_DEFUN([_AM_PROG_CC_C_O],
-[AC_REQUIRE([AM_AUX_DIR_EXPAND])dnl
-AC_REQUIRE_AUX_FILE([compile])dnl
-AC_LANG_PUSH([C])dnl
-AC_CACHE_CHECK(
-  [whether $CC understands -c and -o together],
-  [am_cv_prog_cc_c_o],
-  [AC_LANG_CONFTEST([AC_LANG_PROGRAM([])])
-  # Make sure it works both with $CC and with simple cc.
-  # Following AC_PROG_CC_C_O, we do the test twice because some
-  # compilers refuse to overwrite an existing .o file with -o,
-  # though they will create one.
-  am_cv_prog_cc_c_o=yes
-  for am_i in 1 2; do
-    if AM_RUN_LOG([$CC -c conftest.$ac_ext -o conftest2.$ac_objext]) \
-         && test -f conftest2.$ac_objext; then
-      : OK
-    else
-      am_cv_prog_cc_c_o=no
-      break
-    fi
-  done
-  rm -f core conftest*
-  unset am_i])
-if test "$am_cv_prog_cc_c_o" != yes; then
-   # Losing compiler, so override with the script.
-   # FIXME: It is wrong to rewrite CC.
-   # But if we don't then we get into trouble of one sort or another.
-   # A longer-term fix would be to have automake use am__CC in this case,
-   # and then we could set am__CC="\$(top_srcdir)/compile \$(CC)"
-   CC="$am_aux_dir/compile $CC"
-fi
-AC_LANG_POP([C])])
-
-# For backward compatibility.
-AC_DEFUN_ONCE([AM_PROG_CC_C_O], [AC_REQUIRE([AC_PROG_CC])])
-
 # Check to make sure that the build environment is sane.    -*- Autoconf -*-
 
 # Copyright (C) 1996-2017 Free Software Foundation, Inc.
@@ -1198,7 +1188,7 @@ m4_include([import/m4/clock_time.m4])
 m4_include([import/m4/close.m4])
 m4_include([import/m4/closedir.m4])
 m4_include([import/m4/codeset.m4])
-m4_include([import/m4/ctype.m4])
+m4_include([import/m4/ctype_h.m4])
 m4_include([import/m4/d-ino.m4])
 m4_include([import/m4/d-type.m4])
 m4_include([import/m4/dirent_h.m4])
@@ -1345,6 +1335,7 @@ m4_include([import/m4/time_h.m4])
 m4_include([import/m4/time_r.m4])
 m4_include([import/m4/unistd-safer.m4])
 m4_include([import/m4/unistd_h.m4])
+m4_include([import/m4/vararrays.m4])
 m4_include([import/m4/visibility.m4])
 m4_include([import/m4/warn-on-use.m4])
 m4_include([import/m4/wchar_h.m4])
@@ -1353,4 +1344,5 @@ m4_include([import/m4/wctype_h.m4])
 m4_include([import/m4/wint_t.m4])
 m4_include([import/m4/wmemchr.m4])
 m4_include([import/m4/wmempcpy.m4])
+m4_include([import/m4/year2038.m4])
 m4_include([import/m4/zzgnulib.m4])

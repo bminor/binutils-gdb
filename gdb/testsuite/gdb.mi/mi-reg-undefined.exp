@@ -28,7 +28,7 @@ if {![istarget "x86_64-*-*"] || ![is_lp64_target]} {
 
 gdb_exit
 if [mi_gdb_start] {
-    continue
+    return
 }
 
 standard_testfile .S

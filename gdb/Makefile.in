@@ -393,6 +393,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-cmd.c \
 	python/py-connection.c \
 	python/py-continueevent.c \
+	python/py-disasm.c \
 	python/py-event.c \
 	python/py-evtregistry.c \
 	python/py-evts.c \
@@ -409,6 +410,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-lazy-string.c \
 	python/py-linetable.c \
 	python/py-membuf.c \
+	python/py-micmd.c \
 	python/py-newobjfileevent.c \
 	python/py-objfile.c \
 	python/py-param.c \
@@ -464,6 +466,7 @@ SELFTESTS_SRCS = \
 	unittests/optional-selftests.c \
 	unittests/parallel-for-selftests.c \
 	unittests/parse-connection-spec-selftests.c \
+	unittests/path-join-selftests.c \
 	unittests/ptid-selftests.c \
 	unittests/main-thread-selftests.c \
 	unittests/mkdir-recursive-selftests.c \
@@ -478,6 +481,7 @@ SELFTESTS_SRCS = \
 	unittests/tracepoint-selftests.c \
 	unittests/tui-selftests.c \
 	unittests/ui-file-selftests.c \
+	unittests/unique_xmalloc_ptr_char.c \
 	unittests/unpack-selftests.c \
 	unittests/utils-selftests.c \
 	unittests/vec-utils-selftests.c \
@@ -485,7 +489,7 @@ SELFTESTS_SRCS = \
 
 SELFTESTS_OBS = $(patsubst %.c,%.o,$(SELFTESTS_SRCS))
 
-SUBDIR_TARGET_SRCS = target/waitstatus.c
+SUBDIR_TARGET_SRCS = target/target.c target/waitstatus.c
 SUBDIR_TARGET_OBS = $(patsubst %.c,%.o,$(SUBDIR_TARGET_SRCS))
 
 
@@ -712,9 +716,12 @@ ALL_64_TARGET_OBS = \
 	arch/aarch64-mte-linux.o \
 	arch/amd64.o \
 	arch/riscv.o \
+	bpf-tdep.o \
 	ia64-linux-tdep.o \
 	ia64-tdep.o \
 	ia64-vms-tdep.o \
+	loongarch-linux-tdep.o \
+	loongarch-tdep.o \
 	mips-fbsd-tdep.o \
 	mips-linux-tdep.o \
 	mips-netbsd-tdep.o \
@@ -731,7 +738,10 @@ ALL_64_TARGET_OBS = \
 	sparc64-netbsd-tdep.o \
 	sparc64-obsd-tdep.o \
 	sparc64-sol2-tdep.o \
-	sparc64-tdep.o
+	sparc64-tdep.o \
+	tilegx-linux-tdep.o \
+	tilegx-tdep.o
+
 
 # All other target-dependent objects files (used with --enable-targets=all).
 ALL_TARGET_OBS = \
@@ -759,7 +769,6 @@ ALL_TARGET_OBS = \
 	avr-tdep.o \
 	bfin-linux-tdep.o \
 	bfin-tdep.o \
-	bpf-tdep.o \
 	bsd-uthread.o \
 	cris-linux-tdep.o \
 	cris-tdep.o \
@@ -795,8 +804,6 @@ ALL_TARGET_OBS = \
 	linux-record.o \
 	linux-tdep.o \
 	lm32-tdep.o \
-	loongarch-linux-tdep.o \
-	loongarch-tdep.o \
 	m32c-tdep.o \
 	m32r-linux-tdep.o \
 	m32r-tdep.o \
@@ -835,7 +842,6 @@ ALL_TARGET_OBS = \
 	s12z-tdep.o \
 	s390-linux-tdep.o \
 	s390-tdep.o \
-	score-tdep.o \
 	sh-linux-tdep.o \
 	sh-netbsd-tdep.o \
 	sh-tdep.o \
@@ -854,8 +860,6 @@ ALL_TARGET_OBS = \
 	symfile-mem.o \
 	tic6x-linux-tdep.o \
 	tic6x-tdep.o \
-	tilegx-linux-tdep.o \
-	tilegx-tdep.o \
 	v850-tdep.o \
 	vax-netbsd-tdep.o \
 	vax-tdep.o \
@@ -1004,6 +1008,7 @@ COMMON_SFILES = \
 	blockframe.c \
 	break-catch-exec.c \
 	break-catch-fork.c \
+	break-catch-load.c \
 	break-catch-sig.c \
 	break-catch-syscall.c \
 	break-catch-throw.c \
@@ -1043,8 +1048,10 @@ COMMON_SFILES = \
 	displaced-stepping.c \
 	dummy-frame.c \
 	dwarf2/abbrev.c \
+	dwarf2/abbrev-cache.c \
 	dwarf2/attribute.c \
 	dwarf2/comp-unit-head.c \
+	dwarf2/cooked-index.c \
 	dwarf2/cu.c \
 	dwarf2/dwz.c \
 	dwarf2/expr.c \
@@ -1159,6 +1166,7 @@ COMMON_SFILES = \
 	solib-target.c \
 	source.c \
 	source-cache.c \
+	split-name.c \
 	stabsread.c \
 	stack.c \
 	std-regs.c \
@@ -1288,8 +1296,10 @@ HFILES_NO_SRCDIR = \
 	defs.h \
 	dicos-tdep.h \
 	dictionary.h \
+	disasm-flags.h \
 	disasm.h \
 	dummy-frame.h \
+	dwarf2/cooked-index.h \
 	dwarf2/cu.h \
 	dwarf2/frame-tailcall.h \
 	dwarf2/frame.h \
@@ -1320,7 +1330,6 @@ HFILES_NO_SRCDIR = \
 	gdb_curses.h \
 	gdb_expat.h \
 	gdb_proc_service.h \
-	gdb_select.h \
 	gdb-stabs.h \
 	gdb_vfork.h \
 	gdb_wchar.h \
@@ -1424,7 +1433,6 @@ HFILES_NO_SRCDIR = \
 	run-on-main-thread.h \
 	s390-linux-tdep.h \
 	s390-tdep.h \
-	score-tdep.h \
 	selftest-arch.h \
 	sentinel-frame.h \
 	ser-base.h \
@@ -1448,6 +1456,7 @@ HFILES_NO_SRCDIR = \
 	sparc-ravenscar-thread.h \
 	sparc-tdep.h \
 	sparc64-tdep.h \
+	split-name.h \
 	stabsread.h \
 	stack.h \
 	stap-probe.h \
@@ -1590,7 +1599,235 @@ HFILES_WITH_SRCDIR = \
 
 DEPFILES = $(TARGET_OBS) $(SER_HARDWIRE) $(NATDEPFILES) $(SIM_OBS)
 
-SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES) $(CONFIG_SRCS)
+ALLDEPFILES = \
+	arch/aarch32.c \
+	arch/aarch64.c \
+	arch/aarch64-insn.c \
+	arch/aarch64-mte-linux.c \
+	arch/amd64.c \
+	arch/arc.c \
+	arch/arm.c \
+	arch/arm-get-next-pcs.c \
+	arch/arm-linux.c \
+	arch/i386.c \
+	arch/loongarch.c \
+	arch/ppc-linux-common.c \
+	arch/riscv.c \
+	arch/tic6x.c \
+	aarch32-tdep.c \
+	aarch64-fbsd-nat.c \
+	aarch64-fbsd-tdep.c \
+	aarch64-linux-nat.c \
+	aarch64-linux-tdep.c \
+	aarch64-newlib-tdep.c \
+	aarch64-ravenscar-thread.c \
+	aarch64-tdep.c \
+	aix-thread.c \
+	alpha-bsd-nat.c \
+	alpha-bsd-tdep.c \
+	alpha-linux-nat.c \
+	alpha-linux-tdep.c \
+	alpha-mdebug-tdep.c \
+	alpha-netbsd-tdep.c \
+	alpha-obsd-tdep.c \
+	alpha-tdep.c \
+	amd64-bsd-nat.c \
+	amd64-darwin-tdep.c \
+	amd64-dicos-tdep.c \
+	amd64-fbsd-nat.c \
+	amd64-fbsd-tdep.c \
+	amd64-linux-nat.c \
+	amd64-linux-tdep.c \
+	amd64-nat.c \
+	amd64-netbsd-nat.c \
+	amd64-netbsd-tdep.c \
+	amd64-obsd-nat.c \
+	amd64-obsd-tdep.c \
+	amd64-ravenscar-thread.c \
+	amd64-sol2-tdep.c \
+	amd64-tdep.c \
+	arc-linux-nat.c \
+	arc-tdep.c \
+	arm-bsd-tdep.c \
+	arm-fbsd-nat.c \
+	arm-fbsd-tdep.c \
+	arm-linux-nat.c \
+	arm-linux-tdep.c \
+	arm-netbsd-nat.c \
+	arm-netbsd-tdep.c \
+	arm-none-tdep.c \
+	arm-obsd-tdep.c \
+	arm-tdep.c \
+	avr-tdep.c \
+	bfin-linux-tdep.c \
+	bfin-tdep.c \
+	bpf-tdep.c \
+	bsd-kvm.c \
+	bsd-uthread.c \
+	csky-linux-tdep.c \
+	csky-tdep.c \
+	darwin-nat.c \
+	dicos-tdep.c \
+	fbsd-nat.c \
+	fbsd-tdep.c \
+	fork-child.c \
+	ft32-tdep.c \
+	glibc-tdep.c \
+	go32-nat.c \
+	h8300-tdep.c \
+	hppa-bsd-tdep.c \
+	hppa-linux-nat.c \
+	hppa-linux-tdep.c \
+	hppa-netbsd-nat.c \
+	hppa-netbsd-tdep.c \
+	hppa-obsd-nat.c \
+	hppa-obsd-tdep.c \
+	hppa-tdep.c \
+	i386-bsd-nat.c \
+	i386-bsd-tdep.c \
+	i386-darwin-nat.c \
+	i386-darwin-tdep.c \
+	i386-dicos-tdep.c \
+	i386-fbsd-nat.c \
+	i386-fbsd-tdep.c \
+	i386-gnu-nat.c \
+	i386-gnu-tdep.c \
+	i386-linux-nat.c \
+	i386-linux-tdep.c \
+	i386-netbsd-nat.c \
+	i386-netbsd-tdep.c \
+	i386-obsd-nat.c \
+	i386-obsd-tdep.c \
+	i386-sol2-nat.c \
+	i386-sol2-tdep.c \
+	i386-tdep.c \
+	i386-windows-tdep.c \
+	i387-tdep.c \
+	ia64-libunwind-tdep.c \
+	ia64-linux-nat.c \
+	ia64-linux-tdep.c \
+	ia64-tdep.c \
+	ia64-vms-tdep.c \
+	inf-ptrace.c \
+	linux-fork.c \
+	linux-record.c \
+	linux-tdep.c \
+	lm32-tdep.c \
+	loongarch-linux-nat.c \
+	loongarch-linux-tdep.c \
+	loongarch-tdep.c \
+	m32r-linux-nat.c \
+	m32r-linux-tdep.c \
+	m32r-tdep.c \
+	m68hc11-tdep.c \
+	m68k-bsd-nat.c \
+	m68k-bsd-tdep.c \
+	m68k-linux-nat.c \
+	m68k-linux-tdep.c \
+	m68k-tdep.c \
+	microblaze-linux-tdep.c \
+	microblaze-tdep.c \
+	mingw-hdep.c \
+	mips-fbsd-nat.c \
+	mips-fbsd-tdep.c \
+	mips-linux-nat.c \
+	mips-linux-tdep.c \
+	mips-netbsd-nat.c \
+	mips-netbsd-tdep.c \
+	mips-sde-tdep.c \
+	mips-tdep.c \
+	mips64-obsd-nat.c \
+	mips64-obsd-tdep.c \
+	msp430-tdep.c \
+	netbsd-nat.c \
+	netbsd-tdep.c \
+	nds32-tdep.c \
+	nios2-linux-tdep.c \
+	nios2-tdep.c \
+	obsd-nat.c \
+	obsd-tdep.c \
+	or1k-linux-nat.c \
+	posix-hdep.c \
+	ppc-fbsd-nat.c \
+	ppc-fbsd-tdep.c \
+	ppc-linux-nat.c \
+	ppc-linux-tdep.c \
+	ppc-netbsd-nat.c \
+	ppc-netbsd-tdep.c \
+	ppc-obsd-nat.c \
+	ppc-obsd-tdep.c \
+	ppc-ravenscar-thread.c \
+	ppc-sysv-tdep.c \
+	ppc64-tdep.c \
+	procfs.c \
+	ravenscar-thread.c \
+	remote-sim.c \
+	riscv-fbsd-nat.c \
+	riscv-fbsd-tdep.c \
+	riscv-linux-nat.c \
+	riscv-linux-tdep.c \
+	riscv-none-tdep.c \
+	riscv-ravenscar-thread.c \
+	riscv-tdep.c \
+	rl78-tdep.c \
+	rs6000-aix-nat.c \
+	rs6000-lynx178-tdep.c \
+	rs6000-tdep.c \
+	rx-tdep.c \
+	s390-linux-nat.c \
+	s390-linux-tdep.c \
+	s390-tdep.c \
+	ser-go32.c \
+	ser-mingw.c \
+	ser-pipe.c \
+	ser-tcp.c \
+	ser-uds.c \
+	sh-netbsd-nat.c \
+	sh-netbsd-tdep.c \
+	sh-tdep.c \
+	sol2-tdep.c \
+	solib-aix.c \
+	solib-svr4.c \
+	sparc-linux-nat.c \
+	sparc-linux-tdep.c \
+	sparc-nat.c \
+	sparc-netbsd-nat.c \
+	sparc-netbsd-tdep.c \
+	sparc-obsd-tdep.c \
+	sparc-ravenscar-thread.c \
+	sparc-sol2-nat.c \
+	sparc-sol2-tdep.c \
+	sparc-tdep.c \
+	sparc64-fbsd-nat.c \
+	sparc64-fbsd-tdep.c \
+	sparc64-linux-nat.c \
+	sparc64-linux-tdep.c \
+	sparc64-nat.c \
+	sparc64-netbsd-nat.c \
+	sparc64-netbsd-tdep.c \
+	sparc64-obsd-nat.c \
+	sparc64-obsd-tdep.c \
+	sparc64-sol2-tdep.c \
+	sparc64-tdep.c \
+	tilegx-linux-nat.c \
+	tilegx-linux-tdep.c \
+	tilegx-tdep.c \
+	v850-tdep.c \
+	vax-bsd-nat.c \
+	vax-netbsd-tdep.c \
+	vax-tdep.c \
+	windows-nat.c \
+	windows-tdep.c \
+	x86-nat.c \
+	x86-tdep.c \
+	xcoffread.c \
+	xstormy16-tdep.c \
+	xtensa-config.c \
+	xtensa-linux-nat.c \
+	xtensa-linux-tdep.c \
+	xtensa-tdep.c \
+	xtensa-xtregs.c
+
 # Don't include YYFILES (*.c) because we already include *.y in SFILES,
 # and it's more useful to see it in the .y file.
 TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
@@ -1958,7 +2195,7 @@ clean mostlyclean: $(CONFIG_CLEAN)
 # functionality described is if the distributed files are unmodified.
 distclean: clean
 	@$(MAKE) $(FLAGS_TO_PASS) DO=distclean "DODIRS=$(CLEANDIRS)" subdir_do
-	rm -f nm.h config.status config.h stamp-h b jit-reader.h
+	rm -f nm.h config.status config.h stamp-h b jit-reader.h gcore stamp-nmh
 	rm -f gdb-gdb.py gdb-gdb.gdb
 	rm -f y.output yacc.acts yacc.tmp y.tab.h
 	rm -f config.log config.cache
@@ -2133,225 +2370,6 @@ force_update:
 # overrides onto the definition of $(MAKE).  This variable setting
 # will remove them.
 MAKEOVERRIDES =
-
-ALLDEPFILES = \
-	aarch32-tdep.c \
-	aarch64-fbsd-nat.c \
-	aarch64-fbsd-tdep.c \
-	aarch64-linux-nat.c \
-	aarch64-linux-tdep.c \
-	aarch64-newlib-tdep.c \
-	aarch64-ravenscar-thread.c \
-	aarch64-tdep.c \
-	aix-thread.c \
-	alpha-bsd-nat.c \
-	alpha-bsd-tdep.c \
-	alpha-linux-nat.c \
-	alpha-linux-tdep.c \
-	alpha-mdebug-tdep.c \
-	alpha-netbsd-tdep.c \
-	alpha-obsd-tdep.c \
-	alpha-tdep.c \
-	amd64-bsd-nat.c \
-	amd64-darwin-tdep.c \
-	amd64-dicos-tdep.c \
-	amd64-fbsd-nat.c \
-	amd64-fbsd-tdep.c \
-	amd64-linux-nat.c \
-	amd64-linux-tdep.c \
-	amd64-nat.c \
-	amd64-netbsd-nat.c \
-	amd64-netbsd-tdep.c \
-	amd64-obsd-nat.c \
-	amd64-obsd-tdep.c \
-	amd64-ravenscar-thread.c \
-	amd64-sol2-tdep.c \
-	amd64-tdep.c \
-	arc-linux-nat.c \
-	arc-tdep.c \
-	arm.c \
-	arm-bsd-tdep.c \
-	arm-fbsd-nat.c \
-	arm-fbsd-tdep.c \
-	arm-get-next-pcs.c \
-	arm-linux.c \
-	arm-linux-nat.c \
-	arm-linux-tdep.c \
-	arm-netbsd-nat.c \
-	arm-netbsd-tdep.c \
-	arm-none-tdep.c \
-	arm-obsd-tdep.c \
-	arm-tdep.c \
-	avr-tdep.c \
-	bfin-linux-tdep.c \
-	bfin-tdep.c \
-	bpf-tdep.c \
-	bsd-kvm.c \
-	bsd-uthread.c \
-	csky-linux-tdep.c \
-	csky-tdep.c \
-	darwin-nat.c \
-	dicos-tdep.c \
-	fbsd-nat.c \
-	fbsd-tdep.c \
-	fork-child.c \
-	ft32-tdep.c \
-	glibc-tdep.c \
-	go32-nat.c \
-	h8300-tdep.c \
-	hppa-bsd-tdep.c \
-	hppa-linux-nat.c \
-	hppa-linux-tdep.c \
-	hppa-netbsd-nat.c \
-	hppa-netbsd-tdep.c \
-	hppa-obsd-nat.c \
-	hppa-obsd-tdep.c \
-	hppa-tdep.c \
-	i386-bsd-nat.c \
-	i386-bsd-tdep.c \
-	i386-darwin-nat.c \
-	i386-darwin-tdep.c \
-	i386-dicos-tdep.c \
-	i386-fbsd-nat.c \
-	i386-fbsd-tdep.c \
-	i386-gnu-nat.c \
-	i386-gnu-tdep.c \
-	i386-linux-nat.c \
-	i386-linux-tdep.c \
-	i386-netbsd-nat.c \
-	i386-netbsd-tdep.c \
-	i386-obsd-nat.c \
-	i386-obsd-tdep.c \
-	i386-sol2-nat.c \
-	i386-sol2-tdep.c \
-	i386-tdep.c \
-	i386-windows-tdep.c \
-	i387-tdep.c \
-	ia64-libunwind-tdep.c \
-	ia64-linux-nat.c \
-	ia64-linux-tdep.c \
-	ia64-tdep.c \
-	ia64-vms-tdep.c \
-	inf-ptrace.c \
-	linux-fork.c \
-	linux-record.c \
-	linux-tdep.c \
-	lm32-tdep.c \
-	loongarch-linux-nat.c \
-	loongarch-linux-tdep.c \
-	loongarch-tdep.c \
-	m32r-linux-nat.c \
-	m32r-linux-tdep.c \
-	m32r-tdep.c \
-	m68hc11-tdep.c \
-	m68k-bsd-nat.c \
-	m68k-bsd-tdep.c \
-	m68k-linux-nat.c \
-	m68k-linux-tdep.c \
-	m68k-tdep.c \
-	microblaze-linux-tdep.c \
-	microblaze-tdep.c \
-	mingw-hdep.c \
-	mips-fbsd-nat.c \
-	mips-fbsd-tdep.c \
-	mips-linux-nat.c \
-	mips-linux-tdep.c \
-	mips-netbsd-nat.c \
-	mips-netbsd-tdep.c \
-	mips-sde-tdep.c \
-	mips-tdep.c \
-	mips64-obsd-nat.c \
-	mips64-obsd-tdep.c \
-	msp430-tdep.c \
-	netbsd-nat.c \
-	netbsd-tdep.c \
-	nds32-tdep.c \
-	nios2-linux-tdep.c \
-	nios2-tdep.c \
-	obsd-nat.c \
-	obsd-tdep.c \
-	or1k-linux-nat.c \
-	posix-hdep.c \
-	ppc-fbsd-nat.c \
-	ppc-fbsd-tdep.c \
-	ppc-linux-nat.c \
-	ppc-linux-tdep.c \
-	ppc-netbsd-nat.c \
-	ppc-netbsd-tdep.c \
-	ppc-obsd-nat.c \
-	ppc-obsd-tdep.c \
-	ppc-ravenscar-thread.c \
-	ppc-sysv-tdep.c \
-	ppc64-tdep.c \
-	procfs.c \
-	ravenscar-thread.c \
-	remote-sim.c \
-	riscv-fbsd-nat.c \
-	riscv-fbsd-tdep.c \
-	riscv-linux-nat.c \
-	riscv-linux-tdep.c \
-	riscv-none-tdep.c \
-	riscv-ravenscar-thread.c \
-	riscv-tdep.c \
-	rl78-tdep.c \
-	rs6000-aix-nat.c \
-	rs6000-lynx178-tdep.c \
-	rs6000-tdep.c \
-	rx-tdep.c \
-	s390-linux-nat.c \
-	s390-linux-tdep.c \
-	s390-tdep.c \
-	score-tdep.c \
-	ser-go32.c \
-	ser-mingw.c \
-	ser-pipe.c \
-	ser-tcp.c \
-	ser-uds.c \
-	sh-netbsd-nat.c \
-	sh-netbsd-tdep.c \
-	sh-tdep.c \
-	sol2-tdep.c \
-	solib-aix.c \
-	solib-svr4.c \
-	sparc-linux-nat.c \
-	sparc-linux-tdep.c \
-	sparc-nat.c \
-	sparc-netbsd-nat.c \
-	sparc-netbsd-tdep.c \
-	sparc-obsd-tdep.c \
-	sparc-ravenscar-thread.c \
-	sparc-sol2-nat.c \
-	sparc-sol2-tdep.c \
-	sparc-tdep.c \
-	sparc64-fbsd-nat.c \
-	sparc64-fbsd-tdep.c \
-	sparc64-linux-nat.c \
-	sparc64-linux-tdep.c \
-	sparc64-nat.c \
-	sparc64-netbsd-nat.c \
-	sparc64-netbsd-tdep.c \
-	sparc64-obsd-nat.c \
-	sparc64-obsd-tdep.c \
-	sparc64-sol2-tdep.c \
-	sparc64-tdep.c \
-	tilegx-linux-nat.c \
-	tilegx-linux-tdep.c \
-	tilegx-tdep.c \
-	v850-tdep.c \
-	vax-bsd-nat.c \
-	vax-netbsd-tdep.c \
-	vax-tdep.c \
-	windows-nat.c \
-	windows-tdep.c \
-	x86-nat.c \
-	x86-tdep.c \
-	xcoffread.c \
-	xstormy16-tdep.c \
-	xtensa-config.c \
-	xtensa-linux-nat.c \
-	xtensa-linux-tdep.c \
-	xtensa-tdep.c \
-	xtensa-xtregs.c
 
 # Some files need explicit build rules (due to -Werror problems) or due
 # to sub-directory fun 'n' games.

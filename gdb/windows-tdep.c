@@ -481,24 +481,24 @@ display_one_tib (ptid_t ptid)
 
   if (target_get_tib_address (ptid, &thread_local_base) == 0)
     {
-      printf_filtered (_("Unable to get thread local base for %s\n"),
-		       target_pid_to_str (ptid).c_str ());
+      gdb_printf (_("Unable to get thread local base for %s\n"),
+		  target_pid_to_str (ptid).c_str ());
       return -1;
     }
 
   if (target_read (current_inferior ()->top_target (), TARGET_OBJECT_MEMORY,
 		   NULL, tib, thread_local_base, tib_size) != tib_size)
     {
-      printf_filtered (_("Unable to read thread information "
-			 "block for %s at address %s\n"),
-		       target_pid_to_str (ptid).c_str (), 
-		       paddress (target_gdbarch (), thread_local_base));
+      gdb_printf (_("Unable to read thread information "
+		    "block for %s at address %s\n"),
+		  target_pid_to_str (ptid).c_str (), 
+		  paddress (target_gdbarch (), thread_local_base));
       return -1;
     }
 
-  printf_filtered (_("Thread Information Block %s at %s\n"),
-		   target_pid_to_str (ptid).c_str (),
-		   paddress (target_gdbarch (), thread_local_base));
+  gdb_printf (_("Thread Information Block %s at %s\n"),
+	      target_pid_to_str (ptid).c_str (),
+	      paddress (target_gdbarch (), thread_local_base));
 
   index = (gdb_byte *) tib;
 
@@ -508,10 +508,10 @@ display_one_tib (ptid_t ptid)
     {
       val = extract_unsigned_integer (index, size, byte_order);
       if (i < max_name)
-	printf_filtered (_("%s is 0x%s\n"), TIB_NAME[i], phex (val, size));
+	gdb_printf (_("%s is 0x%s\n"), TIB_NAME[i], phex (val, size));
       else if (val != 0)
-	printf_filtered (_("TIB[0x%s] is 0x%s\n"), phex (i * size, 2),
-			 phex (val, size));
+	gdb_printf (_("TIB[0x%s] is 0x%s\n"), phex (i * size, 2),
+		    phex (val, size));
       index += size;
     } 
   return 1;  
@@ -573,36 +573,29 @@ windows_xfer_shared_library (const char* so_name, CORE_ADDR load_addr,
 
 static void
 windows_iterate_over_objfiles_in_search_order
-  (struct gdbarch *gdbarch,
-   iterate_over_objfiles_in_search_order_cb_ftype *cb,
-   void *cb_data, struct objfile *current_objfile)
+  (gdbarch *gdbarch, iterate_over_objfiles_in_search_order_cb_ftype cb,
+   objfile *current_objfile)
 {
-  int stop;
-
   if (current_objfile)
     {
-      stop = cb (current_objfile, cb_data);
-      if (stop)
+      if (cb (current_objfile))
 	return;
     }
 
   for (objfile *objfile : current_program_space->objfiles ())
-    {
-      if (objfile != current_objfile)
-	{
-	  stop = cb (objfile, cb_data);
-	  if (stop)
-	    return;
-	}
-    }
+    if (objfile != current_objfile)
+      {
+	if (cb (objfile))
+	  return;
+      }
 }
 
 static void
 show_maint_show_all_tib (struct ui_file *file, int from_tty,
 		struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Show all non-zero elements of "
-			    "Thread Information Block is %s.\n"), value);
+  gdb_printf (file, _("Show all non-zero elements of "
+		      "Thread Information Block is %s.\n"), value);
 }
 
 
@@ -970,7 +963,6 @@ static const struct internalvar_funcs tlb_funcs =
 {
   tlb_make_value,
   NULL,
-  NULL
 };
 
 /* Layout of an element of a PE's Import Directory Table.  Based on:

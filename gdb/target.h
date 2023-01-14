@@ -79,7 +79,7 @@ struct inferior;
 #include "btrace.h"
 #include "record.h"
 #include "command.h"
-#include "disasm.h"
+#include "disasm-flags.h"
 #include "tracepoint.h"
 
 #include "gdbsupport/break-common.h" /* For enum target_hw_bp_type.  */
@@ -688,7 +688,7 @@ struct target_ops
       TARGET_DEFAULT_FUNC (default_target_pass_ctrlc);
     virtual void rcmd (const char *command, struct ui_file *output)
       TARGET_DEFAULT_FUNC (default_rcmd);
-    virtual char *pid_to_exec_file (int pid)
+    virtual const char *pid_to_exec_file (int pid)
       TARGET_DEFAULT_RETURN (NULL);
     virtual void log_command (const char *)
       TARGET_DEFAULT_IGNORE ();
@@ -1471,23 +1471,32 @@ extern void target_detach (inferior *inf, int from_tty);
 
 extern void target_disconnect (const char *, int);
 
-/* Resume execution (or prepare for execution) of a target thread,
-   process or all processes.  STEP says whether to hardware
-   single-step or to run free; SIGGNAL is the signal to be given to
-   the target, or GDB_SIGNAL_0 for no signal.  The caller may not pass
-   GDB_SIGNAL_DEFAULT.  A specific PTID means `step/resume only this
-   process id'.  A wildcard PTID (all threads, or all threads of
-   process) means `step/resume INFERIOR_PTID, and let other threads
-   (for which the wildcard PTID matches) resume with their
-   'thread->suspend.stop_signal' signal (usually GDB_SIGNAL_0) if it
-   is in "pass" state, or with no signal if in "no pass" state.
+/* Resume execution (or prepare for execution) of the current thread
+   (INFERIOR_PTID), while optionally letting other threads of the
+   current process or all processes run free.
+
+   STEP says whether to hardware single-step the current thread or to
+   let it run free; SIGNAL is the signal to be given to the current
+   thread, or GDB_SIGNAL_0 for no signal.  The caller may not pass
+   GDB_SIGNAL_DEFAULT.
+
+   SCOPE_PTID indicates the resumption scope.  I.e., which threads
+   (other than the current) run free.  If resuming a single thread,
+   SCOPE_PTID is the same thread as the current thread.  A wildcard
+   SCOPE_PTID (all threads, or all threads of process) lets threads
+   other than the current (for which the wildcard SCOPE_PTID matches)
+   resume with their 'thread->suspend.stop_signal' signal (usually
+   GDB_SIGNAL_0) if it is in "pass" state, or with no signal if in "no
+   pass" state.  Note neither STEP nor SIGNAL apply to any thread
+   other than the current.
 
    In order to efficiently handle batches of resumption requests,
    targets may implement this method such that it records the
    resumption request, but defers the actual resumption to the
    target_commit_resume method implementation.  See
    target_commit_resume below.  */
-extern void target_resume (ptid_t ptid, int step, enum gdb_signal signal);
+extern void target_resume (ptid_t scope_ptid,
+			   int step, enum gdb_signal signal);
 
 /* Ensure that all resumed threads are committed to the target.
 
@@ -1566,14 +1575,6 @@ extern void target_dumpcore (const char *filename);
    on its end.  */
 
 extern bool target_can_run_breakpoint_commands ();
-
-/* Read a string from target memory at address MEMADDR.  The string
-   will be at most LEN bytes long (note that excess bytes may be read
-   in some cases -- but these will not be returned).  Returns nullptr
-   on error.  */
-
-extern gdb::unique_xmalloc_ptr<char> target_read_string
-  (CORE_ADDR memaddr, int len, int *bytes_read = nullptr);
 
 /* For target_read_memory see target/target.h.  */
 
@@ -1950,7 +1951,7 @@ extern gdb::byte_vector target_thread_info_to_thread_handle
    the client if the string will not be immediately used, or if
    it must persist.  */
 
-extern char *target_pid_to_exec_file (int pid);
+extern const char *target_pid_to_exec_file (int pid);
 
 /* See the to_thread_architecture description in struct target_ops.  */
 

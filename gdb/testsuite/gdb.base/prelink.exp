@@ -23,11 +23,8 @@ if { ![isnative] || [is_remote host] || [skip_shlib_tests]} {
     return
 }
 
-if [get_compiler_info] {
-    return -1
-}
-
-if {$gcc_compiled == 0} {
+if {![is_c_compiler_gcc]} {
+    unsupported "gcc compiler is required"
     return -1
 }
 

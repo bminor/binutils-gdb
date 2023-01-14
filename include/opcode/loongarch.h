@@ -163,11 +163,11 @@ dec2 : [1-9][0-9]?
     const char *format, const char *macro, const char *const arg_strs[],
     const char *(*map) (char esc1, char esc2, const char *arg),
     char *(*helper) (const char *const arg_strs[], void *context),
-    void *context);
+    void *context, size_t len_str);
   extern char *loongarch_expand_macro (
     const char *macro, const char *const arg_strs[],
     char *(*helper) (const char *const arg_strs[], void *context),
-    void *context);
+    void *context, size_t len_str);
   extern size_t loongarch_bits_imm_needed (int64_t imm, int si);
 
   extern void loongarch_eliminate_adjacent_repeat_char (char *dest, char c);

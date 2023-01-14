@@ -499,7 +499,7 @@ gen_offset (struct agent_expr *ax, int offset)
 static void
 gen_sym_offset (struct agent_expr *ax, struct symbol *var)
 {
-  gen_offset (ax, SYMBOL_VALUE (var));
+  gen_offset (ax, var->value_longest ());
 }
 
 
@@ -523,12 +523,12 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
   switch (var->aclass ())
     {
     case LOC_CONST:		/* A constant, like an enum value.  */
-      ax_const_l (ax, (LONGEST) SYMBOL_VALUE (var));
+      ax_const_l (ax, (LONGEST) var->value_longest ());
       value->kind = axs_rvalue;
       break;
 
     case LOC_LABEL:		/* A goto label, being used as a value.  */
-      ax_const_l (ax, (LONGEST) SYMBOL_VALUE_ADDRESS (var));
+      ax_const_l (ax, (LONGEST) var->value_address ());
       value->kind = axs_rvalue;
       break;
 
@@ -540,7 +540,7 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
       /* Variable at a fixed location in memory.  Easy.  */
     case LOC_STATIC:
       /* Push the address of the variable.  */
-      ax_const_l (ax, SYMBOL_VALUE_ADDRESS (var));
+      ax_const_l (ax, var->value_address ());
       value->kind = axs_lvalue_memory;
       break;
 
@@ -571,7 +571,7 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
       break;
 
     case LOC_BLOCK:
-      ax_const_l (ax, BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (var)));
+      ax_const_l (ax, var->value_block ()->entry_pc ());
       value->kind = axs_rvalue;
       break;
 
@@ -603,7 +603,7 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
 	  error (_("Couldn't resolve symbol `%s'."), var->print_name ());
 
 	/* Push the address of the variable.  */
-	ax_const_l (ax, BMSYMBOL_VALUE_ADDRESS (msym));
+	ax_const_l (ax, msym.value_address ());
 	value->kind = axs_lvalue_memory;
       }
       break;
@@ -1826,6 +1826,25 @@ unop_cast_operation::do_generate_ax (struct expression *exp,
 }
 
 void
+unop_extract_operation::do_generate_ax (struct expression *exp,
+					struct agent_expr *ax,
+					struct axs_value *value,
+					struct type *cast_type)
+{
+  std::get<0> (m_storage)->generate_ax (exp, ax, value);
+
+  struct type *to_type = get_type ();
+
+  if (!is_scalar_type (to_type))
+    error (_("can't generate agent expression to extract non-scalar type"));
+
+  if (to_type->is_unsigned ())
+    gen_extend (ax, to_type);
+  else
+    gen_sign_extend (ax, to_type);
+}
+
+void
 unop_memval_operation::do_generate_ax (struct expression *exp,
 				       struct agent_expr *ax,
 				       struct axs_value *value,
@@ -2507,9 +2526,9 @@ maint_agent_command_1 (const char *exp, int eval)
     {
       struct linespec_result canonical;
 
-      event_location_up location
-	= new_linespec_location (&exp, symbol_name_match_type::WILD);
-      decode_line_full (location.get (), DECODE_LINE_FUNFIRSTLINE, NULL,
+      location_spec_up locspec
+	= new_linespec_location_spec (&exp, symbol_name_match_type::WILD);
+      decode_line_full (locspec.get (), DECODE_LINE_FUNFIRSTLINE, NULL,
 			NULL, 0, &canonical,
 			NULL, NULL);
       exp = skip_spaces (exp);

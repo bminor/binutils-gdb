@@ -72,7 +72,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   /* This reloc does nothing.  */
   HOWTO (R_TILEGX_NONE,	/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -87,7 +87,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   /* A 64 bit absolute relocation.  */
   HOWTO (R_TILEGX_64,	/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -102,7 +102,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   /* A 32 bit absolute relocation.  */
   HOWTO (R_TILEGX_32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -117,7 +117,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   /* A 16 bit absolute relocation.  */
   HOWTO (R_TILEGX_16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -132,7 +132,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   /* An 8 bit absolute relocation.  */
   HOWTO (R_TILEGX_8,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -147,7 +147,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   /* A 64 bit pc-relative relocation.  */
   HOWTO (R_TILEGX_64_PCREL,/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -162,7 +162,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   /* A 32 bit pc-relative relocation.  */
   HOWTO (R_TILEGX_32_PCREL,/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -177,7 +177,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   /* A 16 bit pc-relative relocation.  */
   HOWTO (R_TILEGX_16_PCREL,/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -192,7 +192,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   /* An 8 bit pc-relative relocation.  */
   HOWTO (R_TILEGX_8_PCREL,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -207,7 +207,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   /* A 16 bit relocation without overflow.  */
   HOWTO (R_TILEGX_HW0,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -222,7 +222,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   /* A 16 bit relocation without overflow.  */
   HOWTO (R_TILEGX_HW1,	/* type */
 	 16,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -237,7 +237,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   /* A 16 bit relocation without overflow.  */
   HOWTO (R_TILEGX_HW2,	/* type */
 	 32,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -252,7 +252,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   /* A 16 bit relocation without overflow.  */
   HOWTO (R_TILEGX_HW3,	/* type */
 	 48,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -267,7 +267,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   /* A 16 bit relocation with overflow.  */
   HOWTO (R_TILEGX_HW0_LAST,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -282,7 +282,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   /* A 16 bit relocation with overflow.  */
   HOWTO (R_TILEGX_HW1_LAST,	/* type */
 	 16,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -297,7 +297,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   /* A 16 bit relocation with overflow.  */
   HOWTO (R_TILEGX_HW2_LAST,	/* type */
 	 32,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -311,7 +311,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
 
   HOWTO (R_TILEGX_COPY,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -325,7 +325,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
 
   HOWTO (R_TILEGX_GLOB_DAT,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -339,7 +339,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
 
   HOWTO (R_TILEGX_JMP_SLOT,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -353,7 +353,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
 
   HOWTO (R_TILEGX_RELATIVE,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -367,7 +367,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
 
   HOWTO (R_TILEGX_BROFF_X1, /* type */
 	 TILEGX_LOG2_BUNDLE_ALIGNMENT_IN_BYTES, /* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 17,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -381,7 +381,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
 
   HOWTO (R_TILEGX_JUMPOFF_X1, /* type */
 	 TILEGX_LOG2_BUNDLE_ALIGNMENT_IN_BYTES, /* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 27,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -395,7 +395,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
 
   HOWTO (R_TILEGX_JUMPOFF_X1_PLT, /* type */
 	 TILEGX_LOG2_BUNDLE_ALIGNMENT_IN_BYTES, /* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 27,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -417,25 +417,25 @@ static reloc_howto_type tilegx_elf_howto_table [] =
 	 complain_overflow_unsigned, bfd_elf_generic_reloc, \
 	 #name, false, 0, -1, false)
 
-  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_X0, 0, 8),
-  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_Y0, 0, 8),
-  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_X1, 0, 8),
-  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_Y1, 0, 8),
-  TILEGX_IMM_HOWTO(R_TILEGX_DEST_IMM8_X1, 0, 8),
+  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_X0, 1, 8),
+  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_Y0, 1, 8),
+  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_X1, 1, 8),
+  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_Y1, 1, 8),
+  TILEGX_IMM_HOWTO(R_TILEGX_DEST_IMM8_X1, 1, 8),
 
-  TILEGX_UIMM_HOWTO(R_TILEGX_MT_IMM14_X1, 1, 14),
-  TILEGX_UIMM_HOWTO(R_TILEGX_MF_IMM14_X1, 1, 14),
+  TILEGX_UIMM_HOWTO(R_TILEGX_MT_IMM14_X1, 2, 14),
+  TILEGX_UIMM_HOWTO(R_TILEGX_MF_IMM14_X1, 2, 14),
 
-  TILEGX_UIMM_HOWTO(R_TILEGX_MMSTART_X0, 0, 6),
-  TILEGX_UIMM_HOWTO(R_TILEGX_MMEND_X0,   0, 6),
+  TILEGX_UIMM_HOWTO(R_TILEGX_MMSTART_X0, 1, 6),
+  TILEGX_UIMM_HOWTO(R_TILEGX_MMEND_X0,   1, 6),
 
-  TILEGX_UIMM_HOWTO(R_TILEGX_SHAMT_X0, 0, 6),
-  TILEGX_UIMM_HOWTO(R_TILEGX_SHAMT_X1, 0, 6),
-  TILEGX_UIMM_HOWTO(R_TILEGX_SHAMT_Y0, 0, 6),
-  TILEGX_UIMM_HOWTO(R_TILEGX_SHAMT_Y1, 0, 6),
+  TILEGX_UIMM_HOWTO(R_TILEGX_SHAMT_X0, 1, 6),
+  TILEGX_UIMM_HOWTO(R_TILEGX_SHAMT_X1, 1, 6),
+  TILEGX_UIMM_HOWTO(R_TILEGX_SHAMT_Y0, 1, 6),
+  TILEGX_UIMM_HOWTO(R_TILEGX_SHAMT_Y1, 1, 6),
 
 #define TILEGX_IMM16_HOWTO(name, rshift) \
-  HOWTO (name, rshift, 1, 16, false, 0, \
+  HOWTO (name, rshift, 2, 16, false, 0, \
 	 complain_overflow_dont, bfd_elf_generic_reloc, \
 	 #name, false, 0, 0xffff, false)
 
@@ -449,7 +449,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   TILEGX_IMM16_HOWTO (R_TILEGX_IMM16_X1_HW3, 48),
 
 #define TILEGX_IMM16_HOWTO_LAST(name, rshift) \
-  HOWTO (name, rshift, 1, 16, false, 0, \
+  HOWTO (name, rshift, 2, 16, false, 0, \
 	 complain_overflow_signed, bfd_elf_generic_reloc, \
 	 #name, false, 0, 0xffff, false)
 
@@ -463,7 +463,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   /* PC-relative offsets. */
 
 #define TILEGX_IMM16_HOWTO_PCREL(name, rshift) \
-  HOWTO (name, rshift, 1, 16, true, 0, \
+  HOWTO (name, rshift, 2, 16, true, 0, \
 	 complain_overflow_dont, bfd_elf_generic_reloc, \
 	 #name, false, 0, 0xffff, true)
 
@@ -477,7 +477,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   TILEGX_IMM16_HOWTO_PCREL (R_TILEGX_IMM16_X1_HW3_PCREL, 48),
 
 #define TILEGX_IMM16_HOWTO_LAST_PCREL(name, rshift) \
-  HOWTO (name, rshift, 1, 16, true, 0, \
+  HOWTO (name, rshift, 2, 16, true, 0, \
 	 complain_overflow_signed, bfd_elf_generic_reloc, \
 	 #name, false, 0, 0xffff, true)
 
@@ -524,7 +524,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   EMPTY_HOWTO (91),
 
 #define TILEGX_IMM16_HOWTO_TLS_IE(name, rshift) \
-  HOWTO (name, rshift, 1, 16, false, 0, \
+  HOWTO (name, rshift, 2, 16, false, 0, \
 	 complain_overflow_dont, bfd_elf_generic_reloc, \
 	 #name, false, 0, 0xffff, true)
 
@@ -539,7 +539,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   TILEGX_IMM16_HOWTO_LAST_PCREL (R_TILEGX_IMM16_X1_HW2_LAST_PLT_PCREL, 32),
 
 #define TILEGX_IMM16_HOWTO_LAST_TLS_IE(name, rshift) \
-  HOWTO (name, rshift, 1, 16, false, 0, \
+  HOWTO (name, rshift, 2, 16, false, 0, \
 	 complain_overflow_signed, bfd_elf_generic_reloc, \
 	 #name, false, 0, 0xffff, true)
 
@@ -553,7 +553,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   HOWTO(R_TILEGX_TLS_DTPMOD64, 0, 0, 0, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_TILEGX_TLS_DTPMOD64",
 	false, 0, 0, true),
-  HOWTO(R_TILEGX_TLS_DTPOFF64, 0, 4, 64, false, 0, complain_overflow_bitfield,
+  HOWTO(R_TILEGX_TLS_DTPOFF64, 0, 8, 64, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_TILEGX_TLS_DTPOFF64",
 	false, 0, -1, true),
   HOWTO(R_TILEGX_TLS_TPOFF64, 0, 0, 0, false, 0, complain_overflow_dont,
@@ -563,7 +563,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   HOWTO(R_TILEGX_TLS_DTPMOD32, 0, 0, 0, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_TILEGX_TLS_DTPMOD32",
 	false, 0, 0, true),
-  HOWTO(R_TILEGX_TLS_DTPOFF32, 0, 4, 32, false, 0, complain_overflow_bitfield,
+  HOWTO(R_TILEGX_TLS_DTPOFF32, 0, 8, 32, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_TILEGX_TLS_DTPOFF32",
 	false, 0, -1, true),
   HOWTO(R_TILEGX_TLS_TPOFF32, 0, 0, 0, false, 0, complain_overflow_dont,
@@ -572,7 +572,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
 
   HOWTO (R_TILEGX_TLS_GD_CALL, /* type */
 	 TILEGX_LOG2_BUNDLE_ALIGNMENT_IN_BYTES, /* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 27,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -584,15 +584,15 @@ static reloc_howto_type tilegx_elf_howto_table [] =
 	 -1,			/* dst_mask */
 	 true),			/* pcrel_offset */
 
-  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_X0_TLS_GD_ADD,  0,  8),
-  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_X1_TLS_GD_ADD,  0,  8),
-  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_Y0_TLS_GD_ADD,  0,  8),
-  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_Y1_TLS_GD_ADD,  0,  8),
-  TILEGX_IMM_HOWTO(R_TILEGX_TLS_IE_LOAD, 0,  8),
-  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_X0_TLS_ADD,  0,  8),
-  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_X1_TLS_ADD,  0,  8),
-  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_Y0_TLS_ADD,  0,  8),
-  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_Y1_TLS_ADD,  0,  8),
+  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_X0_TLS_GD_ADD,  1,  8),
+  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_X1_TLS_GD_ADD,  1,  8),
+  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_Y0_TLS_GD_ADD,  1,  8),
+  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_Y1_TLS_GD_ADD,  1,  8),
+  TILEGX_IMM_HOWTO(R_TILEGX_TLS_IE_LOAD, 1,  8),
+  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_X0_TLS_ADD,  1,  8),
+  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_X1_TLS_ADD,  1,  8),
+  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_Y0_TLS_ADD,  1,  8),
+  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_Y1_TLS_ADD,  1,  8),
 };
 
 static reloc_howto_type tilegx_elf_howto_table2 [] =
@@ -600,7 +600,7 @@ static reloc_howto_type tilegx_elf_howto_table2 [] =
   /* GNU extension to record C++ vtable hierarchy */
   HOWTO (R_TILEGX_GNU_VTINHERIT, /* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -615,7 +615,7 @@ static reloc_howto_type tilegx_elf_howto_table2 [] =
   /* GNU extension to record C++ vtable member usage */
   HOWTO (R_TILEGX_GNU_VTENTRY,	   /* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

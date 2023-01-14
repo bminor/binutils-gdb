@@ -100,7 +100,7 @@ get_number_trailer (const char **pp, int trailer)
 	    retval = value_as_long (val);
 	  else
 	    {
-	      printf_filtered (_("History value must have integer type.\n"));
+	      gdb_printf (_("History value must have integer type.\n"));
 	      retval = 0;
 	    }
 	}
@@ -122,8 +122,8 @@ get_number_trailer (const char **pp, int trailer)
 	    retval = (int) longest_val;
 	  else
 	    {
-	      printf_filtered (_("Convenience variable must "
-				 "have integer value.\n"));
+	      gdb_printf (_("Convenience variable must "
+			    "have integer value.\n"));
 	      retval = 0;
 	    }
 	}

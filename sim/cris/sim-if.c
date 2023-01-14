@@ -100,9 +100,11 @@ static const OPTION cris_options[] =
   { {"cris-naked", no_argument, NULL, OPTION_CRIS_NAKED},
      '\0', NULL, "Don't set up stack and environment",
      cris_option_handler, NULL },
+#if WITH_HW
   { {"cris-900000xx", no_argument, NULL, OPTION_CRIS_900000XXIF},
      '\0', NULL, "Define addresses at 0x900000xx with simulator semantics",
      cris_option_handler, NULL },
+#endif
   { {"cris-unknown-syscall", required_argument, NULL,
      OPTION_CRIS_UNKNOWN_SYSCALL},
      '\0', "stop|enosys|enosys-quiet", "Action at an unknown system call",
@@ -255,7 +257,8 @@ cris_load_elf_file (SIM_DESC sd, struct bfd *abfd, sim_write_fn do_write)
 
       if (verbose)
 	sim_io_printf (sd,
-		       "Loading segment at 0x%" BFD_VMA_FMT "x, size 0x%lx\n",
+		       "Loading segment at 0x%" BFD_VMA_FMT "x, "
+		       "size 0x%" BFD_VMA_FMT "x\n",
 		       lma, phdr[i].p_filesz);
 
       if (bfd_seek (abfd, phdr[i].p_offset, SEEK_SET) != 0
@@ -263,7 +266,7 @@ cris_load_elf_file (SIM_DESC sd, struct bfd *abfd, sim_write_fn do_write)
 	{
 	  sim_io_eprintf (sd,
 			  "%s: could not read segment at 0x%" BFD_VMA_FMT "x, "
-			  "size 0x%lx\n",
+			  "size 0x%" BFD_VMA_FMT "x\n",
 			  STATE_MY_NAME (sd), lma, phdr[i].p_filesz);
 	  free (buf);
 	  return FALSE;
@@ -273,7 +276,7 @@ cris_load_elf_file (SIM_DESC sd, struct bfd *abfd, sim_write_fn do_write)
 	{
 	  sim_io_eprintf (sd,
 			  "%s: could not load segment at 0x%" BFD_VMA_FMT "x, "
-			  "size 0x%lx\n",
+			  "size 0x%" BFD_VMA_FMT "x\n",
 			  STATE_MY_NAME (sd), lma, phdr[i].p_filesz);
 	  free (buf);
 	  return FALSE;
@@ -570,7 +573,8 @@ cris_handle_interpreter (SIM_DESC sd, struct bfd *abfd)
 	 memory area, so we go via a temporary area.  Luckily, the
 	 interpreter is supposed to be small, less than 0x40000
 	 bytes.  */
-      sim_do_commandf (sd, "memory region 0x%" BFD_VMA_FMT "x,0x%lx",
+      sim_do_commandf (sd, "memory region 0x%" BFD_VMA_FMT "x,"
+		       "0x%" BFD_VMA_FMT "x",
 		       interp_load_addr, interpsiz);
 
       /* Now that memory for the interpreter is defined, load it.  */
@@ -887,12 +891,18 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 
   /* Allocate core managed memory if none specified by user.  */
   if (sim_core_read_buffer (sd, NULL, read_map, &c, startmem, 1) == 0)
-    sim_do_commandf (sd, "memory region 0x%" PRIx32 ",0x%" PRIu32,
+    sim_do_commandf (sd, "memory region 0x%" PRIx32 ",0x%" PRIx32,
 		     startmem, endmem - startmem);
 
   /* Allocate simulator I/O managed memory if none specified by user.  */
+#if WITH_HW
   if (cris_have_900000xxif)
     sim_hw_parse (sd, "/core/%s/reg %#x %i", "cris_900000xx", 0x90000000, 0x100);
+#else
+  /* With the option disabled, nothing should be able to set this variable.
+     We should "use" it, though, and why not assert that it isn't set.  */
+  ASSERT (! cris_have_900000xxif);
+#endif
 
   /* Establish any remaining configuration options.  */
   if (sim_config (sd) != SIM_RC_OK)
@@ -1009,11 +1019,12 @@ cris_disassemble_insn (SIM_CPU *cpu,
 
   sfile.buffer = sfile.current = buf;
   INIT_DISASSEMBLE_INFO (disasm_info, (FILE *) &sfile,
-			 (fprintf_ftype) sim_disasm_sprintf);
+			 (fprintf_ftype) sim_disasm_sprintf,
+			 (fprintf_styled_ftype) sim_disasm_styled_sprintf);
   disasm_info.endian = BFD_ENDIAN_LITTLE;
   disasm_info.read_memory_func = sim_disasm_read_memory;
   disasm_info.memory_error_func = sim_disasm_perror_memory;
-  disasm_info.application_data = (PTR) cpu;
+  disasm_info.application_data = cpu;
   pinsn = cris_get_disassembler (STATE_PROG_BFD (sd));
   (*pinsn) (pc, &disasm_info);
 }

@@ -546,7 +546,7 @@ operand_value_powerpc (const struct powerpc_operand *operand,
 /* Determine whether the optional operand(s) should be printed.  */
 
 static bool
-skip_optional_operands (const unsigned char *opindex,
+skip_optional_operands (const ppc_opindex_t *opindex,
 			uint64_t insn, ppc_cpu_t dialect, bool *is_pcrel)
 {
   const struct powerpc_operand *operand;
@@ -592,14 +592,15 @@ lookup_powerpc (uint64_t insn, ppc_cpu_t dialect)
        opcode < opcode_end;
        ++opcode)
     {
-      const unsigned char *opindex;
+      const ppc_opindex_t *opindex;
       const struct powerpc_operand *operand;
       int invalid;
 
       if ((insn & opcode->mask) != opcode->opcode
 	  || ((dialect & PPC_OPCODE_ANY) == 0
-	      && (opcode->flags & dialect) == 0)
-	  || (opcode->deprecated & dialect) != 0)
+	      && ((opcode->flags & dialect) == 0
+		  || (opcode->deprecated & dialect) != 0))
+	  || (opcode->deprecated & dialect & PPC_OPCODE_RAW) != 0)
 	continue;
 
       /* Check validity of operands.  */
@@ -636,7 +637,7 @@ lookup_prefix (uint64_t insn, ppc_cpu_t dialect)
        opcode < opcode_end;
        ++opcode)
     {
-      const unsigned char *opindex;
+      const ppc_opindex_t *opindex;
       const struct powerpc_operand *operand;
       int invalid;
 
@@ -690,7 +691,7 @@ lookup_vle (uint64_t insn, ppc_cpu_t dialect)
       uint64_t table_mask = opcode->mask;
       bool table_op_is_short = PPC_OP_SE_VLE(table_mask);
       uint64_t insn2;
-      const unsigned char *opindex;
+      const ppc_opindex_t *opindex;
       const struct powerpc_operand *operand;
       int invalid;
 
@@ -745,7 +746,7 @@ lookup_spe2 (uint64_t insn, ppc_cpu_t dialect)
       uint64_t table_opcd = opcode->opcode;
       uint64_t table_mask = opcode->mask;
       uint64_t insn2;
-      const unsigned char *opindex;
+      const ppc_opindex_t *opindex;
       const struct powerpc_operand *operand;
       int invalid;
 
@@ -924,7 +925,7 @@ print_insn_powerpc (bfd_vma memaddr,
 
   if (opcode != NULL)
     {
-      const unsigned char *opindex;
+      const ppc_opindex_t *opindex;
       const struct powerpc_operand *operand;
       enum {
 	need_comma = 0,

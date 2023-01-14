@@ -35,7 +35,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug pthreads}
 }
 
 if ![runto_main] {
-    continue
+    return
 }
 
 # Make sure it's GDB's decr_pc logic that's being tested, not the

@@ -29,7 +29,7 @@ if { [prepare_for_testing "prepare for testing" ${testfile} ${srcfile} \
 
 if ![runto f] then {
     perror "couldn't run to f"
-    continue
+    return
 }
 
 gdb_test_no_output "set print frame-arguments all"

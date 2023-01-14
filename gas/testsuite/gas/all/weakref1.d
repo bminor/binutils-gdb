@@ -9,7 +9,7 @@
 
 #...
 RELOCATION RECORDS FOR \[(\.text|\$CODE\$)\]:
-OFFSET +TYPE +VALUE *
+OFFSET +TYPE +VALUE
 # the rest of this file is generated with the following script:
 # # script begin
 # echo \#...

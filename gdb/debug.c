@@ -30,5 +30,5 @@ int debug_print_depth = 0;
 void
 debug_vprintf (const char *fmt, va_list ap)
 {
-  vfprintf_unfiltered (gdb_stdlog, fmt, ap);
+  gdb_vprintf (gdb_stdlog, fmt, ap);
 }

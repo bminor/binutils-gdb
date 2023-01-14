@@ -1,4 +1,5 @@
 # mach: crisv32
+# requires: simoption --cris-900000xx
 # sim: --cris-900000xx
 # output: ce11d0c\n
 

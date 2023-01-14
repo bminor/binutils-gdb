@@ -20,27 +20,18 @@
 #ifndef STACK_H
 #define STACK_H
 
-/* Access method used by the MI -stack-select-frame command to switch to
-   frame FI.  This differs from SELECT_FRAME in that the observers for a
-   user selected context change will be triggered.  */
-
-void select_frame_for_mi (struct frame_info *fi);
-
 gdb::unique_xmalloc_ptr<char> find_frame_funname (struct frame_info *frame,
 						  enum language *funlang,
 						  struct symbol **funcp);
 
-typedef void (*iterate_over_block_arg_local_vars_cb) (const char *print_name,
-						      struct symbol *sym,
-						      void *cb_data);
+typedef gdb::function_view<void (const char *print_name, struct symbol *sym)>
+     iterate_over_block_arg_local_vars_cb;
 
 void iterate_over_block_arg_vars (const struct block *block,
-				  iterate_over_block_arg_local_vars_cb cb,
-				  void *cb_data);
+				  iterate_over_block_arg_local_vars_cb cb);
 
 void iterate_over_block_local_vars (const struct block *block,
-				    iterate_over_block_arg_local_vars_cb cb,
-				    void *cb_data);
+				    iterate_over_block_arg_local_vars_cb cb);
 
 /* Initialize *WHAT to be a copy of the user desired print what frame info.
    If !WHAT.has_value (), the printing function chooses a default set of

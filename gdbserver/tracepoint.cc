@@ -2784,21 +2784,10 @@ cmd_qtenable_disable (char *own_buf, int enable)
 
       if (tp->type == fast_tracepoint || tp->type == static_tracepoint)
 	{
-	  int ret;
 	  int offset = offsetof (struct tracepoint, enabled);
 	  CORE_ADDR obj_addr = tp->obj_addr_on_target + offset;
 
-	  ret = prepare_to_access_memory ();
-	  if (ret)
-	    {
-	      trace_debug ("Failed to temporarily stop inferior threads");
-	      write_enn (own_buf);
-	      return;
-	    }
-
-	  ret = write_inferior_int8 (obj_addr, enable);
-	  done_accessing_memory ();
-	  
+	  int ret = write_inferior_int8 (obj_addr, enable);
 	  if (ret)
 	    {
 	      trace_debug ("Cannot write enabled flag into "

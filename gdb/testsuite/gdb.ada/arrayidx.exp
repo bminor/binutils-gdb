@@ -23,9 +23,6 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable {debug}] != ""} {
     return -1
 }
 
-if [get_compiler_info] {
-    return -1
-}
 set old_gcc [expr [test_compiler_info {gcc-[0-3]-*}] \
 	     || [test_compiler_info {gcc-4-[0-6]-*}]]
 

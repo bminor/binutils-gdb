@@ -232,11 +232,11 @@ show_host_charset_name (struct ui_file *file, int from_tty,
 			const char *value)
 {
   if (!strcmp (value, "auto"))
-    fprintf_filtered (file,
-		      _("The host character set is \"auto; currently %s\".\n"),
-		      auto_host_charset_name);
+    gdb_printf (file,
+		_("The host character set is \"auto; currently %s\".\n"),
+		auto_host_charset_name);
   else
-    fprintf_filtered (file, _("The host character set is \"%s\".\n"), value);
+    gdb_printf (file, _("The host character set is \"%s\".\n"), value);
 }
 
 static const char *target_charset_name = "auto";
@@ -245,13 +245,13 @@ show_target_charset_name (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
   if (!strcmp (value, "auto"))
-    fprintf_filtered (file,
-		      _("The target character set is \"auto; "
-			"currently %s\".\n"),
-		      gdbarch_auto_charset (get_current_arch ()));
+    gdb_printf (file,
+		_("The target character set is \"auto; "
+		  "currently %s\".\n"),
+		gdbarch_auto_charset (get_current_arch ()));
   else
-    fprintf_filtered (file, _("The target character set is \"%s\".\n"),
-		      value);
+    gdb_printf (file, _("The target character set is \"%s\".\n"),
+		value);
 }
 
 static const char *target_wide_charset_name = "auto";
@@ -262,13 +262,13 @@ show_target_wide_charset_name (struct ui_file *file,
 			       const char *value)
 {
   if (!strcmp (value, "auto"))
-    fprintf_filtered (file,
-		      _("The target wide character set is \"auto; "
-			"currently %s\".\n"),
-		      gdbarch_auto_wide_charset (get_current_arch ()));
+    gdb_printf (file,
+		_("The target wide character set is \"auto; "
+		  "currently %s\".\n"),
+		gdbarch_auto_wide_charset (get_current_arch ()));
   else
-    fprintf_filtered (file, _("The target wide character set is \"%s\".\n"),
-		      value);
+    gdb_printf (file, _("The target wide character set is \"%s\".\n"),
+		value);
 }
 
 static const char * const default_charset_names[] =

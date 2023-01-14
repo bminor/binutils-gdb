@@ -254,7 +254,7 @@ static reloc_howto_type elf_d30v_howto_table[] =
   /* This reloc does nothing.  */
   HOWTO (R_D30V_NONE,		/* Type.  */
 	 0,			/* Rightshift.  */
-	 3,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 0,			/* Size.  */
 	 0,			/* Bitsize.  */
 	 false,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -269,7 +269,7 @@ static reloc_howto_type elf_d30v_howto_table[] =
   /* A 6 bit absolute relocation.  */
   HOWTO (R_D30V_6,		/* Type.  */
 	 0,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 6,			/* Bitsize.  */
 	 false,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -284,7 +284,7 @@ static reloc_howto_type elf_d30v_howto_table[] =
   /* A relative 9 bit relocation, right shifted by 3.  */
   HOWTO (R_D30V_9_PCREL,	/* Type.  */
 	 3,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 6,			/* Bitsize.  */
 	 true,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -299,7 +299,7 @@ static reloc_howto_type elf_d30v_howto_table[] =
   /* A relative 9 bit relocation, right shifted by 3.  */
   HOWTO (R_D30V_9_PCREL_R,	/* Type.  */
 	 3,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 6,			/* Bitsize.  */
 	 true,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -314,7 +314,7 @@ static reloc_howto_type elf_d30v_howto_table[] =
   /* An absolute 15 bit relocation, right shifted by 3.  */
   HOWTO (R_D30V_15,		/* Type.  */
 	 3,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 12,			/* Bitsize.  */
 	 false,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -329,7 +329,7 @@ static reloc_howto_type elf_d30v_howto_table[] =
   /* A relative 15 bit relocation, right shifted by 3.  */
   HOWTO (R_D30V_15_PCREL,	/* Type.  */
 	 3,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 12,			/* Bitsize.  */
 	 true,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -344,7 +344,7 @@ static reloc_howto_type elf_d30v_howto_table[] =
   /* A relative 15 bit relocation, right shifted by 3.  */
   HOWTO (R_D30V_15_PCREL_R,	/* Type.  */
 	 3,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 12,			/* Bitsize.  */
 	 true,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -359,7 +359,7 @@ static reloc_howto_type elf_d30v_howto_table[] =
   /* An absolute 21 bit relocation, right shifted by 3.  */
   HOWTO (R_D30V_21,		/* Type.  */
 	 3,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 18,			/* Bitsize.  */
 	 false,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -374,7 +374,7 @@ static reloc_howto_type elf_d30v_howto_table[] =
   /* A relative 21 bit relocation, right shifted by 3.  */
   HOWTO (R_D30V_21_PCREL,	/* Type.  */
 	 3,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 18,			/* Bitsize.  */
 	 true,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -389,7 +389,7 @@ static reloc_howto_type elf_d30v_howto_table[] =
   /* A relative 21 bit relocation, right shifted by 3, in the Right container.  */
   HOWTO (R_D30V_21_PCREL_R,	/* Type.  */
 	 3,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 18,			/* Bitsize.  */
 	 true,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -404,7 +404,7 @@ static reloc_howto_type elf_d30v_howto_table[] =
   /* A D30V 32 bit absolute relocation.  */
   HOWTO (R_D30V_32,		/* Type.  */
 	 0,			/* Rightshift.  */
-	 4,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 8,			/* Size.  */
 	 32,			/* Bitsize.  */
 	 false,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -419,7 +419,7 @@ static reloc_howto_type elf_d30v_howto_table[] =
   /* A relative 32 bit relocation.  */
   HOWTO (R_D30V_32_PCREL,	/* Type.  */
 	 0,			/* Rightshift.  */
-	 4,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 8,			/* Size.  */
 	 32,			/* Bitsize.  */
 	 true,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -434,7 +434,7 @@ static reloc_howto_type elf_d30v_howto_table[] =
   /* A regular 32 bit absolute relocation.  */
   HOWTO (R_D30V_32_NORMAL,	/* Type.  */
 	 0,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 32,			/* Bitsize.  */
 	 false,			/* PC_relative.  */
 	 0,			/* Bitpos.  */

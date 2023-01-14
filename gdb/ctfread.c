@@ -329,7 +329,7 @@ set_symbol_address (struct objfile *of, struct symbol *sym, const char *name)
   msym = lookup_minimal_symbol (name, nullptr, of);
   if (msym.minsym != NULL)
     {
-      SET_SYMBOL_VALUE_ADDRESS (sym, BMSYMBOL_VALUE_ADDRESS (msym));
+      sym->set_value_address (msym.value_address ());
       sym->set_aclass_index (LOC_STATIC);
       sym->set_section_index (msym.minsym->section_index ());
     }
@@ -1246,14 +1246,14 @@ get_objfile_text_range (struct objfile *of, int *tsize)
 /* Start a symtab for OBJFILE in CTF format.  */
 
 static void
-ctf_start_symtab (ctf_psymtab *pst,
-		  struct objfile *of, CORE_ADDR text_offset)
+ctf_start_compunit_symtab (ctf_psymtab *pst,
+			   struct objfile *of, CORE_ADDR text_offset)
 {
   struct ctf_context *ccp;
 
   ccp = &pst->context;
   ccp->builder = new buildsym_compunit
-		       (of, of->original_name, nullptr,
+		       (of, pst->filename, nullptr,
 		       language_c, text_offset);
   ccp->builder->record_debugformat ("ctf");
 }
@@ -1263,14 +1263,14 @@ ctf_start_symtab (ctf_psymtab *pst,
    the .text section number.  */
 
 static struct compunit_symtab *
-ctf_end_symtab (ctf_psymtab *pst,
-		CORE_ADDR end_addr, int section)
+ctf_end_compunit_symtab (ctf_psymtab *pst,
+			 CORE_ADDR end_addr, int section)
 {
   struct ctf_context *ccp;
 
   ccp = &pst->context;
   struct compunit_symtab *result
-    = ccp->builder->end_symtab (end_addr, section);
+    = ccp->builder->end_compunit_symtab (end_addr, section);
   delete ccp->builder;
   ccp->builder = nullptr;
   return result;
@@ -1398,7 +1398,7 @@ ctf_psymtab::read_symtab (struct objfile *objfile)
     {
       if (info_verbose)
 	{
-	  printf_filtered (_("Reading in CTF data for %s..."), filename);
+	  gdb_printf (_("Reading in CTF data for %s..."), filename);
 	  gdb_flush (gdb_stdout);
 	}
 
@@ -1407,17 +1407,17 @@ ctf_psymtab::read_symtab (struct objfile *objfile)
       int tsize;
 
       offset = get_objfile_text_range (objfile, &tsize);
-      ctf_start_symtab (this, objfile, offset);
+      ctf_start_compunit_symtab (this, objfile, offset);
       expand_psymtab (objfile);
 
       set_text_low (offset);
       set_text_high (offset + tsize);
-      compunit_symtab = ctf_end_symtab (this, offset + tsize,
-					SECT_OFF_TEXT (objfile));
+      compunit_symtab = ctf_end_compunit_symtab (this, offset + tsize,
+						 SECT_OFF_TEXT (objfile));
 
       /* Finish up the debug error message.  */
       if (info_verbose)
-	printf_filtered (_("done.\n"));
+	gdb_printf (_("done.\n"));
     }
 }
 
@@ -1449,6 +1449,7 @@ create_partial_symtab (const char *name,
   pst->context.of = objfile;
   pst->context.partial_symtabs = partial_symtabs;
   pst->context.pst = pst;
+  pst->context.builder = nullptr;
 
   return pst;
 }
@@ -1530,21 +1531,6 @@ ctf_psymtab_var_cb (const char *name, ctf_id_t id, void *arg)
   return 0;
 }
 
-/* Start a subfile for CTF. FNAME is the name of the archive.  */
-
-static void
-ctf_start_archive (struct ctf_context *ccx, struct objfile *of,
-		   const char *fname)
-{
-  if (ccx->builder == nullptr)
-    {
-      ccx->builder = new buildsym_compunit (of,
-		      of->original_name, nullptr, language_c, 0);
-      ccx->builder->record_debugformat ("ctf");
-    }
-  ccx->builder->start_subfile (fname);
-}
-
 /* Setup partial_symtab's describing each source file for which
    debugging information is available.  */
 
@@ -1566,10 +1552,7 @@ scan_partial_symbols (ctf_dict_t *cfp, psymtab_storage *partial_symtabs,
 
   struct ctf_context *ccx = &pst->context;
   if (isparent == false)
-    {
-      ctf_start_archive (ccx, of, fname);
-      ccx->pst = pst;
-    }
+    ccx->pst = pst;
 
   if (ctf_type_iter (cfp, ctf_psymtab_type_cb, ccx) == CTF_ERR)
     complaint (_("ctf_type_iter scan_partial_symbols failed - %s"),
@@ -1601,7 +1584,7 @@ build_ctf_archive_member (ctf_dict_t *ctf, const char *name, void *arg)
 
   if (info_verbose)
     {
-      printf_filtered (_("Scanning archive member %s..."), name);
+      gdb_printf (_("Scanning archive member %s..."), name);
       gdb_flush (gdb_stdout);
     }
 

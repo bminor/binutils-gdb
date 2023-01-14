@@ -17,27 +17,23 @@ import sys
 import gdb
 import gdb.types
 
-# Following is for Python 3 compatibility...
-if sys.version_info[0] > 2:
-    long = int
-
 
 class cons_pp(object):
     def __init__(self, val):
         self._val = val
 
     def to_string(self):
-        if long(self._val) == 0:
+        if int(self._val) == 0:
             return "nil"
-        elif long(self._val["type"]) == 0:
+        elif int(self._val["type"]) == 0:
             return "( . )"
         else:
             return "%d" % self._val["atom"]["ival"]
 
     def children(self):
-        if long(self._val) == 0:
+        if int(self._val) == 0:
             return []
-        elif long(self._val["type"]) == 0:
+        elif int(self._val["type"]) == 0:
             return [("atom", self._val["atom"])]
         else:
             return [

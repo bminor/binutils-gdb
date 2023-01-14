@@ -524,6 +524,24 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
     {
       asection *sreloc;
 
+      if (eh->def_protected
+	  && elf_has_no_copy_on_protected (h->root.u.def.section->owner))
+	{
+	  /* Disallow copy relocation against non-copyable protected
+	     symbol.  */
+	  asection *s = p->sec->output_section;
+	  if (s != NULL && (s->flags & SEC_READONLY) != 0)
+	    {
+	      info->callbacks->einfo
+		/* xgettext:c-format */
+		(_("%F%P: %pB: copy relocation against non-copyable "
+		   "protected symbol `%s' in %pB\n"),
+		 p->sec->owner, h->root.root.string,
+		 h->root.u.def.section->owner);
+	      return false;
+	    }
+	}
+
       sreloc = elf_section_data (p->sec)->sreloc;
 
       BFD_ASSERT (sreloc != NULL);

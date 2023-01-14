@@ -39,7 +39,7 @@ if { [prepare_for_testing "failed to prepare" "${testfile}" $srcfile \
 
 if ![runto MAIN__] then {
     perror "couldn't run to breakpoint MAIN__"
-    continue
+    return
 }
 
 gdb_breakpoint [gdb_get_line_number "stop-here-out" \

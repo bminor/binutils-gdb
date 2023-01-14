@@ -15,7 +15,7 @@
 
 if [target_info exists gdb,nosignals] {
     verbose "Skipping interrupt-daemon-attach.exp because of nosignals."
-    continue
+    return
 }
 
 # This test requires sending ^C to interrupt the running target.

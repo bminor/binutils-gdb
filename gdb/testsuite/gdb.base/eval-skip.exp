@@ -39,17 +39,16 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      return -1
     }
 
-if [get_compiler_info] {
-    return -1
-}
-
 clean_restart ${binfile}
 
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
+
+# This is used as an expected result value.
+set false 0
 
 gdb_test_no_output "set variable x=14" "set variable x=14"
 gdb_test_no_output "set variable y=2" "set variable y=2"

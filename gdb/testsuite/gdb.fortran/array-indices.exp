@@ -83,7 +83,7 @@ proc array_repeat { variant } {
 
     if {![fortran_runto_main]} {
 	perror "Could not run to main."
-	continue
+	return
     }
 
     gdb_breakpoint [gdb_get_line_number "Break here"]

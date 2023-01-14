@@ -109,8 +109,8 @@ extern bool gnu_debug_flag;
 
 #define debug(msg, args...) \
  do { if (gnu_debug_flag) \
-	fprintf_unfiltered (gdb_stdlog, "%s:%d: " msg "\r\n", \
-			    __FILE__ , __LINE__ , ##args); } while (0)
+     gdb_printf (gdb_stdlog, "%s:%d: " msg "\r\n",		\
+		 __FILE__ , __LINE__ , ##args); } while (0)
 
 /* A prototype generic GNU/Hurd target.  The client can override it
    with local methods.  */

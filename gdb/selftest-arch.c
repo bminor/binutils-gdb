@@ -28,12 +28,6 @@ namespace selftests {
 
 static bool skip_arch (const char *arch)
 {
-  if (strcmp ("fr300", arch) == 0)
-    {
-      /* PR 20946 */
-      return true;
-    }
-
   if (strcmp ("powerpc:EC603e", arch) == 0
       || strcmp ("powerpc:e500mc", arch) == 0
       || strcmp ("powerpc:e500mc64", arch) == 0
@@ -49,34 +43,65 @@ static bool skip_arch (const char *arch)
   return false;
 }
 
-/* Register a kind of selftest that calls the test function once for each
-   gdbarch known to GDB.  */
+/* Generate a selftest for each gdbarch known to GDB.  */
 
-void
-register_test_foreach_arch (const std::string &name,
-			    self_test_foreach_arch_function *function)
+static std::vector<selftest>
+foreach_arch_test_generator (const std::string &name,
+			     self_test_foreach_arch_function *function)
 {
+  std::vector<selftest> tests;
   std::vector<const char *> arches = gdbarch_printable_names ();
+  tests.reserve (arches.size ());
   for (const char *arch : arches)
     {
       if (skip_arch (arch))
 	continue;
 
+      struct gdbarch_info info;
+      info.bfd_arch_info = bfd_scan_arch (arch);
+      info.osabi = GDB_OSABI_NONE;
+
       auto test_fn
 	= ([=] ()
 	   {
-	     struct gdbarch_info info;
-	     info.bfd_arch_info = bfd_scan_arch (arch);
 	     struct gdbarch *gdbarch = gdbarch_find_by_info (info);
 	     SELF_CHECK (gdbarch != NULL);
 	     function (gdbarch);
 	     reset ();
 	   });
 
-      std::string test_name
-	= name + std::string ("::") + std::string (arch);
-      register_test (test_name, test_fn);
+      std::string id;
+
+      bool has_sep = strchr (arch, ':') != nullptr;
+      if (has_sep)
+	/* Avoid avr::avr:1.  */
+	id = arch;
+      else if (strncasecmp (info.bfd_arch_info->arch_name, arch,
+			    strlen (info.bfd_arch_info->arch_name)) == 0)
+	/* Avoid arm::arm.  */
+	id = arch;
+      else
+	/* Use arc::A6 instead of A6.  This still leaves us with an unfortunate
+	   redundant id like am33_2::am33-2, but that doesn't seem worth the
+	   effort to avoid.  */
+	id = string_printf ("%s::%s", info.bfd_arch_info->arch_name, arch);
+
+      id = string_printf ("%s::%s", name.c_str (), id.c_str ());
+      tests.emplace_back (id, test_fn);
     }
+  return tests;
+}
+
+/* See selftest-arch.h.  */
+
+void
+register_test_foreach_arch (const std::string &name,
+			    self_test_foreach_arch_function *function)
+{
+  add_lazy_generator ([=] ()
+		      {
+		        return foreach_arch_test_generator (name, function);
+		      });
 }
 
 void

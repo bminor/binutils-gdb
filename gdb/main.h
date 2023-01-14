@@ -36,7 +36,7 @@ extern int batch_silent;
 extern int batch_flag;
 
 /* * The name of the interpreter if specified on the command line.  */
-extern char *interpreter_p;
+extern std::string interpreter_p;
 
 /* From mingw-hdep.c, used by main.c.  */
 

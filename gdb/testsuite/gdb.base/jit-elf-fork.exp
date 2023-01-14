@@ -20,11 +20,6 @@ if {[skip_shlib_tests]} {
     return -1
 }
 
-if {[get_compiler_info]} {
-    untested "could not get compiler info"
-    return 1
-}
-
 load_lib jit-elf-helpers.exp
 
 # The main code that loads and registers JIT objects.

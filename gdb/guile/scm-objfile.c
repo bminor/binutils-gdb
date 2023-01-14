@@ -314,7 +314,7 @@ gdbscm_source_objfile_script (const struct extension_language_defn *extlang,
 
   gdb::unique_xmalloc_ptr<char> msg = gdbscm_safe_source_script (filename);
   if (msg != NULL)
-    fprintf_filtered (gdb_stderr, "%s", msg.get ());
+    gdb_printf (gdb_stderr, "%s", msg.get ());
 
   ofscm_current_objfile = NULL;
 }
@@ -335,7 +335,7 @@ gdbscm_execute_objfile_script (const struct extension_language_defn *extlang,
   gdb::unique_xmalloc_ptr<char> msg
     = gdbscm_safe_eval_string (script, 0 /* display_result */);
   if (msg != NULL)
-    fprintf_filtered (gdb_stderr, "%s", msg.get ());
+    gdb_printf (gdb_stderr, "%s", msg.get ());
 
   ofscm_current_objfile = NULL;
 }

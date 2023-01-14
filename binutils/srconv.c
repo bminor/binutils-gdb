@@ -316,6 +316,7 @@ wr_hd (struct coff_ofile *p)
   struct IT_hd hd;
 
   hd.spare1 = 0;
+  hd.spare2 = 0;
   if (bfd_get_file_flags (abfd) & EXEC_P)
     hd.mt = MTYPE_ABS_LM;
   else
@@ -1827,10 +1828,7 @@ main (int ac, char **av)
       bfd_nonfatal (input_file);
 
       if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
-	{
-	  list_matching_formats (matching);
-	  free (matching);
-	}
+	list_matching_formats (matching);
       exit (1);
     }
 

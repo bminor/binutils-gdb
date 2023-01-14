@@ -7,9 +7,9 @@
 
 RELOCATION RECORDS FOR \[.text\]:
 OFFSET[ 	]+TYPE[ 	]+VALUE[ 	]*
-[0-9a-f]+[ 	]+R_X86_64_GOT32[ 	]+xtrn[ 	]*
-[0-9a-f]+[ 	]+R_X86_64_PLT32[ 	]+xtrn-0x0*4[ 	]*
-[0-9a-f]+[ 	]+R_X86_64_GOT32[ 	]+xtrn[ 	]*
-[0-9a-f]+[ 	]+R_X86_64_PLT32[ 	]+xtrn-0x0*4[ 	]*
-[0-9a-f]+[ 	]+R_X86_64_GOT32[ 	]+xtrn[ 	]*
-[0-9a-f]+[ 	]+R_X86_64_PLT32[ 	]+xtrn-0x0*4[ 	]*
+[0-9a-f]+[ 	]+R_X86_64_GOT32[ 	]+xtrn
+[0-9a-f]+[ 	]+R_X86_64_PLT32[ 	]+xtrn-0x0*4
+[0-9a-f]+[ 	]+R_X86_64_GOT32[ 	]+xtrn
+[0-9a-f]+[ 	]+R_X86_64_PLT32[ 	]+xtrn-0x0*4
+[0-9a-f]+[ 	]+R_X86_64_GOT32[ 	]+xtrn
+[0-9a-f]+[ 	]+R_X86_64_PLT32[ 	]+xtrn-0x0*4

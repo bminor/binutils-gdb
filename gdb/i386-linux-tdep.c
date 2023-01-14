@@ -54,7 +54,7 @@
    group.  Put the LINUX_ORIG_EAX register in the system group.  */
 static int
 i386_linux_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-				struct reggroup *group)
+				const struct reggroup *group)
 {
   if (regnum == I386_LINUX_ORIG_EAX_REGNUM)
     return (group == system_reggroup
@@ -466,10 +466,10 @@ i386_linux_intx80_sysenter_syscall_record (struct regcache *regcache)
 
   if (syscall_gdb < 0)
     {
-      fprintf_unfiltered (gdb_stderr,
-			  _("Process record and replay target doesn't "
-			    "support syscall number %s\n"), 
-			  plongest (syscall_native));
+      gdb_printf (gdb_stderr,
+		  _("Process record and replay target doesn't "
+		    "support syscall number %s\n"), 
+		  plongest (syscall_native));
       return -1;
     }
 

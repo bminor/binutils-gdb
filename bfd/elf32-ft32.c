@@ -40,11 +40,11 @@ static reloc_howto_type ft32_elf_howto_table [] =
   /* This reloc does nothing.  */
   HOWTO (R_FT32_NONE,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
+	 0,			/* size */
+	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
+	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FT32_NONE",		/* name */
 	 false,			/* partial_inplace */
@@ -56,7 +56,7 @@ static reloc_howto_type ft32_elf_howto_table [] =
 
   HOWTO (R_FT32_32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -70,7 +70,7 @@ static reloc_howto_type ft32_elf_howto_table [] =
 
   HOWTO (R_FT32_16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -84,7 +84,7 @@ static reloc_howto_type ft32_elf_howto_table [] =
 
   HOWTO (R_FT32_8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -98,7 +98,7 @@ static reloc_howto_type ft32_elf_howto_table [] =
 
   HOWTO (R_FT32_10,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 10,			/* bitsize */
 	 false,			/* pc_relative */
 	 4,			/* bitpos */
@@ -112,7 +112,7 @@ static reloc_howto_type ft32_elf_howto_table [] =
 
   HOWTO (R_FT32_20,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 20,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -126,7 +126,7 @@ static reloc_howto_type ft32_elf_howto_table [] =
 
   HOWTO (R_FT32_17,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 17,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -140,7 +140,7 @@ static reloc_howto_type ft32_elf_howto_table [] =
 
   HOWTO (R_FT32_18,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 18,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -154,7 +154,7 @@ static reloc_howto_type ft32_elf_howto_table [] =
 
   HOWTO (R_FT32_RELAX,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 10,			/* bitsize */
 	 false,			/* pc_relative */
 	 4,			/* bitpos */
@@ -168,7 +168,7 @@ static reloc_howto_type ft32_elf_howto_table [] =
 
   HOWTO (R_FT32_SC0,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 10,			/* bitsize */
 	 false,			/* pc_relative */
 	 4,			/* bitpos */
@@ -181,7 +181,7 @@ static reloc_howto_type ft32_elf_howto_table [] =
 	 false),		/* pcrel_offset */
   HOWTO (R_FT32_SC1,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 22,			/* bitsize */
 	 true,			/* pc_relative */
 	 7,			/* bitpos */
@@ -194,7 +194,7 @@ static reloc_howto_type ft32_elf_howto_table [] =
 	 false),		/* pcrel_offset */
   HOWTO (R_FT32_15,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 15,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -207,7 +207,7 @@ static reloc_howto_type ft32_elf_howto_table [] =
 	 false),		/* pcrel_offset */
   HOWTO (R_FT32_DIFF32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -219,7 +219,6 @@ static reloc_howto_type ft32_elf_howto_table [] =
 	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 };
-
 
 /* Map BFD reloc types to FT32 ELF reloc types.  */
 

@@ -30,13 +30,13 @@
 
 # This test is only for extended remote targets.
 if {[target_info gdb_protocol] != "extended-remote"} {
-    continue
+    return
 }
 
 # This test also makes use of 'detach-on-fork' which is not supported
 # on all platforms.
 if { ![istarget "*-*-linux*"] && ![istarget "*-*-openbsd*"] } then {
-    continue
+    return
 }
 
 # And we need to be able to reconnect to gdbserver.

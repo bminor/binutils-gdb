@@ -23,10 +23,7 @@ if {![dwarf2_support]} {
 }
 
 # The .c files use __attribute__.
-if [get_compiler_info] {
-    return -1
-}
-if !$gcc_compiled {
+if ![is_c_compiler_gcc] {
     return 0
 }
 
@@ -83,37 +80,37 @@ Dwarf::assemble $asm_file {
 	file_name "$srcfile" 1
 
 	program {
-	    {DW_LNE_set_address line_label_1}
-	    {DW_LNS_advance_line 15}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address line_label_1
+	    DW_LNS_advance_line 15
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address line_label_2}
-	    {DW_LNS_advance_line 1}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address line_label_2
+	    DW_LNS_advance_line 1
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address line_label_3}
-	    {DW_LNS_advance_line 4}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address line_label_3
+	    DW_LNS_advance_line 4
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address line_label_4}
-	    {DW_LNS_advance_line 1}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address line_label_4
+	    DW_LNS_advance_line 1
+	    DW_LNS_copy
 
-	    {DW_LNS_advance_line -4}
-	    {DW_LNS_negate_stmt}
-	    {DW_LNS_copy}
+	    DW_LNS_advance_line -4
+	    DW_LNS_negate_stmt
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address line_label_5}
-	    {DW_LNS_advance_line 1}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address line_label_5
+	    DW_LNS_advance_line 1
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address line_label_6}
-	    {DW_LNS_advance_line 1}
-	    {DW_LNS_negate_stmt}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address line_label_6
+	    DW_LNS_advance_line 1
+	    DW_LNS_negate_stmt
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address line_label_7}
-	    {DW_LNE_end_sequence}
+	    DW_LNE_set_address line_label_7
+	    DW_LNE_end_sequence
 	}
     }
 }

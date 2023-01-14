@@ -52,7 +52,7 @@ test (int n_threads)
 #define NUMBER 10000
 
   std::atomic<int> counter (0);
-  gdb::parallel_for_each (0, NUMBER,
+  gdb::parallel_for_each (1, 0, NUMBER,
 			  [&] (int start, int end)
 			  {
 			    counter += end - start;

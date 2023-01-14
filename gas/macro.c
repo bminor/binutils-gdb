@@ -126,6 +126,24 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
   else
     from_len = strlen (from);
 
+  /* Except for macros record the present source position, such that
+     diagnostics and debug info will be properly associated with the
+     respective original lines, rather than with the line of the ending
+     directive (TO).  */
+  if (from == NULL || strcasecmp (from, "MACRO") != 0)
+    {
+      unsigned int line;
+      char *linefile;
+
+      as_where (&line);
+      if (!flag_m68k_mri)
+	linefile = xasprintf ("\t.linefile %u .\n", line);
+      else
+	linefile = xasprintf ("\tlinefile %u .\n", line);
+      sb_add_buffer (ptr, linefile, strlen (linefile));
+      xfree (linefile);
+    }
+
   while (more)
     {
       /* Try to find the first pseudo op on the line.  */
@@ -184,23 +202,35 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
 	{
 	  if (! flag_m68k_mri && ptr->ptr[i] == '.')
 	    i++;
-	  if (from == NULL
-	     && strncasecmp (ptr->ptr + i, "IRPC", from_len = 4) != 0
-	     && strncasecmp (ptr->ptr + i, "IRP", from_len = 3) != 0
-	     && strncasecmp (ptr->ptr + i, "IREPC", from_len = 5) != 0
-	     && strncasecmp (ptr->ptr + i, "IREP", from_len = 4) != 0
-	     && strncasecmp (ptr->ptr + i, "REPT", from_len = 4) != 0
-	     && strncasecmp (ptr->ptr + i, "REP", from_len = 3) != 0)
-	    from_len = 0;
+	  size_t len = ptr->len - i;
+	  if (from == NULL)
+	    {
+	      if (len >= 5 && strncasecmp (ptr->ptr + i, "IREPC", 5) == 0)
+		from_len = 5;
+	      else if (len >= 4 && strncasecmp (ptr->ptr + i, "IREP", 4) == 0)
+		from_len = 4;
+	      else if (len >= 4 && strncasecmp (ptr->ptr + i, "IRPC", 4) == 0)
+		from_len = 4;
+	      else if (len >= 4 && strncasecmp (ptr->ptr + i, "REPT", 4) == 0)
+		from_len = 4;
+	      else if (len >= 3 && strncasecmp (ptr->ptr + i, "IRP", 3) == 0)
+		from_len = 3;
+	      else if (len >= 3 && strncasecmp (ptr->ptr + i, "REP", 3) == 0)
+		from_len = 3;
+	      else
+		from_len = 0;
+	    }
 	  if ((from != NULL
-	       ? strncasecmp (ptr->ptr + i, from, from_len) == 0
+	       ? (len >= from_len
+		  && strncasecmp (ptr->ptr + i, from, from_len) == 0)
 	       : from_len > 0)
-	      && (ptr->len == (i + from_len)
+	      && (len == from_len
 		  || ! (is_part_of_name (ptr->ptr[i + from_len])
 			|| is_name_ender (ptr->ptr[i + from_len]))))
 	    depth++;
-	  if (strncasecmp (ptr->ptr + i, to, to_len) == 0
-	      && (ptr->len == (i + to_len)
+	  if (len >= to_len
+	      && strncasecmp (ptr->ptr + i, to, to_len) == 0
+	      && (len == to_len
 		  || ! (is_part_of_name (ptr->ptr[i + to_len])
 			|| is_name_ender (ptr->ptr[i + to_len]))))
 	    {
@@ -222,13 +252,14 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
 	     number when expanding the macro), and since for short
 	     macros we clearly prefer reporting the point of expansion
 	     anyway, there's not an obviously better fix here.  */
-	  if (strncasecmp (ptr->ptr + i, "linefile", 8) == 0)
+	  if (from != NULL && strcasecmp (from, "MACRO") == 0
+	      && len >= 8 && strncasecmp (ptr->ptr + i, "linefile", 8) == 0)
 	    {
 	      char saved_eol_char = ptr->ptr[ptr->len];
 
 	      ptr->ptr[ptr->len] = '\0';
 	      temp_ilp (ptr->ptr + i + 8);
-	      s_app_line (0);
+	      s_linefile (0);
 	      restore_ilp ();
 	      ptr->ptr[ptr->len] = saved_eol_char;
 	      ptr->len = line_start;

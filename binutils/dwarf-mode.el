@@ -1,6 +1,6 @@
 ;;; dwarf-mode.el --- Browser for DWARF information. -*-lexical-binding:t-*-
 
-;; Version: 1.6
+;; Version: 1.7
 
 ;; Copyright (C) 2012-2022 Free Software Foundation, Inc.
 
@@ -62,9 +62,11 @@
           (set-marker (process-mark proc) (point))
 	  (set-buffer-modified-p nil))))))
 
-(defun dwarf--sentinel (_proc _status)
-  (setq mode-line-process nil)
-  (setq dwarf--process nil))
+(defun dwarf--sentinel (proc _status)
+  (when (buffer-live-p (process-buffer proc))
+    (with-current-buffer (process-buffer proc)
+      (setq mode-line-process nil)
+      (setq dwarf--process nil))))
 
 (defun dwarf--invoke (start end &rest command)
   "Invoke a command and arrange to insert output into the current buffer."

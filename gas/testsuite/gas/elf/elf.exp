@@ -277,6 +277,7 @@ if { [is_elf_format] } then {
     run_dump_test "section28"
     run_dump_test "section29"
     run_dump_test "sh-link-zero"
+    run_dump_test "size"
     run_dump_test "dwarf2-1" $dump_opts
     run_dump_test "dwarf2-2" $dump_opts
     run_dump_test "dwarf2-3" $dump_opts
@@ -306,6 +307,21 @@ if { [is_elf_format] } then {
     run_dump_test "dwarf-4-cu" $dump_opts
     run_dump_test "dwarf-5-cu" $dump_opts
     run_dump_test "dwarf-5-nop-for-line-table" $dump_opts
+    run_dump_test "dwarf-5-irp" $dump_opts
+    run_dump_test "dwarf-3-func" $dump_opts
+    run_dump_test "dwarf-5-func" $dump_opts
+    run_dump_test "dwarf-5-func-global" $dump_opts
+    run_dump_test "dwarf-5-func-local" $dump_opts
+
+    # Exclude targets defining ONLY_STANDARD_ESCAPES. It's not clear how these
+    # are supposed to reference macro arguments in double-quoted strings.
+    if { ![istarget "avr-*-*"]
+	 && ![istarget "cris*-*-*"]
+	 && ![istarget "msp430-*-*"]
+	 && ![istarget "z80-*-*"] } then {
+	run_list_test line
+    }
+
     run_dump_test "pr25917"
     run_dump_test "bss"
     run_dump_test "bad-bss"

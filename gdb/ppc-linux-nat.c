@@ -1138,7 +1138,7 @@ fetch_all_gp_regs (struct regcache *regcache, int tid)
 	  have_ptrace_getsetregs = 0;
 	  return 0;
 	}
-      perror_with_name (_("Couldn't get general-purpose registers."));
+      perror_with_name (_("Couldn't get general-purpose registers"));
     }
 
   supply_gregset (regcache, (const gdb_gregset_t *) &gregset);
@@ -1190,7 +1190,7 @@ fetch_all_fp_regs (struct regcache *regcache, int tid)
 	  have_ptrace_getsetfpregs = 0;
 	  return 0;
 	}
-      perror_with_name (_("Couldn't get floating-point registers."));
+      perror_with_name (_("Couldn't get floating-point registers"));
     }
 
   supply_fpregset (regcache, (const gdb_fpregset_t *) &fpregs);
@@ -1690,7 +1690,7 @@ store_all_gp_regs (const struct regcache *regcache, int tid, int regno)
 	  have_ptrace_getsetregs = 0;
 	  return 0;
 	}
-      perror_with_name (_("Couldn't get general-purpose registers."));
+      perror_with_name (_("Couldn't get general-purpose registers"));
     }
 
   fill_gregset (regcache, &gregset, regno);
@@ -1702,7 +1702,7 @@ store_all_gp_regs (const struct regcache *regcache, int tid, int regno)
 	  have_ptrace_getsetregs = 0;
 	  return 0;
 	}
-      perror_with_name (_("Couldn't set general-purpose registers."));
+      perror_with_name (_("Couldn't set general-purpose registers"));
     }
 
   return 1;
@@ -1752,7 +1752,7 @@ store_all_fp_regs (const struct regcache *regcache, int tid, int regno)
 	  have_ptrace_getsetfpregs = 0;
 	  return 0;
 	}
-      perror_with_name (_("Couldn't get floating-point registers."));
+      perror_with_name (_("Couldn't get floating-point registers"));
     }
 
   fill_fpregset (regcache, &fpregs, regno);
@@ -1764,7 +1764,7 @@ store_all_fp_regs (const struct regcache *regcache, int tid, int regno)
 	  have_ptrace_getsetfpregs = 0;
 	  return 0;
 	}
-      perror_with_name (_("Couldn't set floating-point registers."));
+      perror_with_name (_("Couldn't set floating-point registers"));
     }
 
   return 1;

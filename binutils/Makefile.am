@@ -256,7 +256,7 @@ objcopy_SOURCES = objcopy.c not-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 strings_SOURCES = strings.c $(BULIBS)
 
 readelf_SOURCES = readelf.c version.c unwind-ia64.c dwarf.c demanguse.c $(ELFLIBS)
-readelf_LDADD   = $(LIBCTF_NOBFD) $(LIBINTL) $(LIBIBERTY) $(ZLIB) $(DEBUGINFOD_LIBS)
+readelf_LDADD   = $(LIBCTF_NOBFD) $(LIBINTL) $(LIBIBERTY) $(ZLIB) $(DEBUGINFOD_LIBS) $(MSGPACK_LIBS)
 
 elfedit_SOURCES = elfedit.c version.c $(ELFLIBS)
 elfedit_LDADD = $(LIBINTL) $(LIBIBERTY)
@@ -379,6 +379,18 @@ if AMDEP
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
 	$(AM_V_CC)$(COMPILE) $(DEBUGINFOD_CFLAGS) -c -o $@ $(srcdir)/dwarf.c
+endif
+
+readelf.@OBJEXT@: readelf.c
+if am__fastdepCC
+	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo $(MSGPACK_CFLAGS) -c -o $@ $(srcdir)/readelf.c
+	$(AM_V_at)mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+else
+if AMDEP
+	source='readelf.c' object='$@' libtool=no @AMDEPBACKSLASH@
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+endif
+	$(AM_V_CC)$(COMPILE) $(MSGPACK_CFLAGS) -c -o $@ $(srcdir)/readelf.c
 endif
 
 sysroff.@OBJEXT@: sysroff.c

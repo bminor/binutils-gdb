@@ -28,6 +28,7 @@
 #define GDB_DWARF2_FILE_AND_DIR_H
 
 #include "objfiles.h"
+#include "source.h"
 #include <string>
 
 /* The return type of find_file_and_directory.  Note, the enclosed
@@ -90,6 +91,20 @@ struct file_and_directory
     m_name = m_name_storage.get ();
   }
 
+  /* Return the full name, computing it if necessary.  */
+  const char *get_fullname ()
+  {
+    if (m_fullname == nullptr)
+      m_fullname = find_source_or_rewrite (get_name (), get_comp_dir ());
+    return m_fullname.get ();
+  }
+
+  /* Forget the full name.  */
+  void forget_fullname ()
+  {
+    m_fullname.reset ();
+  }
+
 private:
 
   /* The filename.  */
@@ -106,6 +121,9 @@ private:
 
   /* The compilation directory, if it needed to be allocated.  */
   std::string m_comp_dir_storage;
+
+  /* The full name.  */
+  gdb::unique_xmalloc_ptr<char> m_fullname;
 };
 
 #endif /* GDB_DWARF2_FILE_AND_DIR_H */

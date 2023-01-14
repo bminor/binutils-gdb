@@ -1007,17 +1007,17 @@ h8300_print_register (struct gdbarch *gdbarch, struct ui_file *file,
 
   rval = get_frame_register_signed (frame, regno);
 
-  fprintf_filtered (file, "%-14s ", name);
+  gdb_printf (file, "%-14s ", name);
   if ((regno == E_PSEUDO_CCR_REGNUM (gdbarch)) || \
       (regno == E_PSEUDO_EXR_REGNUM (gdbarch) && is_h8300smode (gdbarch)))
     {
-      fprintf_filtered (file, "0x%02x        ", (unsigned char) rval);
+      gdb_printf (file, "0x%02x        ", (unsigned char) rval);
       print_longest (file, 'u', 1, rval);
     }
   else
     {
-      fprintf_filtered (file, "0x%s  ", phex ((ULONGEST) rval,
-			BINWORD (gdbarch)));
+      gdb_printf (file, "0x%s  ", phex ((ULONGEST) rval,
+					BINWORD (gdbarch)));
       print_longest (file, 'd', 1, rval);
     }
   if (regno == E_PSEUDO_CCR_REGNUM (gdbarch))
@@ -1025,51 +1025,51 @@ h8300_print_register (struct gdbarch *gdbarch, struct ui_file *file,
       /* CCR register */
       int C, Z, N, V;
       unsigned char l = rval & 0xff;
-      fprintf_filtered (file, "\t");
-      fprintf_filtered (file, "I-%d ", (l & 0x80) != 0);
-      fprintf_filtered (file, "UI-%d ", (l & 0x40) != 0);
-      fprintf_filtered (file, "H-%d ", (l & 0x20) != 0);
-      fprintf_filtered (file, "U-%d ", (l & 0x10) != 0);
+      gdb_printf (file, "\t");
+      gdb_printf (file, "I-%d ", (l & 0x80) != 0);
+      gdb_printf (file, "UI-%d ", (l & 0x40) != 0);
+      gdb_printf (file, "H-%d ", (l & 0x20) != 0);
+      gdb_printf (file, "U-%d ", (l & 0x10) != 0);
       N = (l & 0x8) != 0;
       Z = (l & 0x4) != 0;
       V = (l & 0x2) != 0;
       C = (l & 0x1) != 0;
-      fprintf_filtered (file, "N-%d ", N);
-      fprintf_filtered (file, "Z-%d ", Z);
-      fprintf_filtered (file, "V-%d ", V);
-      fprintf_filtered (file, "C-%d ", C);
+      gdb_printf (file, "N-%d ", N);
+      gdb_printf (file, "Z-%d ", Z);
+      gdb_printf (file, "V-%d ", V);
+      gdb_printf (file, "C-%d ", C);
       if ((C | Z) == 0)
-	fprintf_filtered (file, "u> ");
+	gdb_printf (file, "u> ");
       if ((C | Z) == 1)
-	fprintf_filtered (file, "u<= ");
+	gdb_printf (file, "u<= ");
       if (C == 0)
-	fprintf_filtered (file, "u>= ");
+	gdb_printf (file, "u>= ");
       if (C == 1)
-	fprintf_filtered (file, "u< ");
+	gdb_printf (file, "u< ");
       if (Z == 0)
-	fprintf_filtered (file, "!= ");
+	gdb_printf (file, "!= ");
       if (Z == 1)
-	fprintf_filtered (file, "== ");
+	gdb_printf (file, "== ");
       if ((N ^ V) == 0)
-	fprintf_filtered (file, ">= ");
+	gdb_printf (file, ">= ");
       if ((N ^ V) == 1)
-	fprintf_filtered (file, "< ");
+	gdb_printf (file, "< ");
       if ((Z | (N ^ V)) == 0)
-	fprintf_filtered (file, "> ");
+	gdb_printf (file, "> ");
       if ((Z | (N ^ V)) == 1)
-	fprintf_filtered (file, "<= ");
+	gdb_printf (file, "<= ");
     }
   else if (regno == E_PSEUDO_EXR_REGNUM (gdbarch) && is_h8300smode (gdbarch))
     {
       /* EXR register */
       unsigned char l = rval & 0xff;
-      fprintf_filtered (file, "\t");
-      fprintf_filtered (file, "T-%d - - - ", (l & 0x80) != 0);
-      fprintf_filtered (file, "I2-%d ", (l & 4) != 0);
-      fprintf_filtered (file, "I1-%d ", (l & 2) != 0);
-      fprintf_filtered (file, "I0-%d", (l & 1) != 0);
+      gdb_printf (file, "\t");
+      gdb_printf (file, "T-%d - - - ", (l & 0x80) != 0);
+      gdb_printf (file, "I2-%d ", (l & 4) != 0);
+      gdb_printf (file, "I1-%d ", (l & 2) != 0);
+      gdb_printf (file, "I0-%d", (l & 1) != 0);
     }
-  fprintf_filtered (file, "\n");
+  gdb_printf (file, "\n");
 }
 
 static void

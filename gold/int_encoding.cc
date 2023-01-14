@@ -119,12 +119,7 @@ get_length_as_unsigned_LEB_128(uint64_t value)
   size_t length = 0;
   do
     {
-      unsigned char current_byte = value & 0x7f;
       value >>= 7;
-      if (value != 0)
-        {
-          current_byte |= 0x80;
-        }
       length++;
     }
   while (value != 0);

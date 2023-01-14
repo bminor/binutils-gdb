@@ -148,64 +148,64 @@ tic54x_relocation (bfd *abfd ATTRIBUTE_UNUSED,
 
 reloc_howto_type tic54x_howto_table[] =
   {
-    /* type,rightshift,size (0=byte, 1=short, 2=long),
+    /* type,rightshift,size,
        bit size, pc_relative, bitpos, dont complain_on_overflow,
        special_function, name, partial_inplace, src_mask, dst_mask, pcrel_offset.  */
 
     /* NORMAL BANK */
     /* 16-bit direct reference to symbol's address.  */
-    HOWTO (R_RELWORD,0,1,16,false,0,complain_overflow_dont,
+    HOWTO (R_RELWORD,0,2,16,false,0,complain_overflow_dont,
 	   tic54x_relocation,"REL16",false,0xFFFF,0xFFFF,false),
 
     /* 7 LSBs of an address */
-    HOWTO (R_PARTLS7,0,1,7,false,0,complain_overflow_dont,
+    HOWTO (R_PARTLS7,0,2,7,false,0,complain_overflow_dont,
 	   tic54x_relocation,"LS7",false,0x007F,0x007F,false),
 
     /* 9 MSBs of an address */
     /* TI assembler doesn't shift its encoding, and is thus incompatible */
-    HOWTO (R_PARTMS9,7,1,9,false,0,complain_overflow_dont,
+    HOWTO (R_PARTMS9,7,2,9,false,0,complain_overflow_dont,
 	   tic54x_relocation,"MS9",false,0x01FF,0x01FF,false),
 
     /* 23-bit relocation */
-    HOWTO (R_EXTWORD,0,2,23,false,0,complain_overflow_dont,
+    HOWTO (R_EXTWORD,0,4,23,false,0,complain_overflow_dont,
 	   tic54x_relocation,"RELEXT",false,0x7FFFFF,0x7FFFFF,false),
 
     /* 16 bits of 23-bit extended address */
-    HOWTO (R_EXTWORD16,0,1,16,false,0,complain_overflow_dont,
+    HOWTO (R_EXTWORD16,0,2,16,false,0,complain_overflow_dont,
 	   tic54x_relocation,"RELEXT16",false,0x7FFFFF,0x7FFFFF,false),
 
     /* upper 7 bits of 23-bit extended address */
-    HOWTO (R_EXTWORDMS7,16,1,7,false,0,complain_overflow_dont,
+    HOWTO (R_EXTWORDMS7,16,2,7,false,0,complain_overflow_dont,
 	   tic54x_relocation,"RELEXTMS7",false,0x7F,0x7F,false),
 
     /* ABSOLUTE BANK */
     /* 16-bit direct reference to symbol's address, absolute */
-    HOWTO (R_RELWORD,0,1,16,false,0,complain_overflow_dont,
+    HOWTO (R_RELWORD,0,2,16,false,0,complain_overflow_dont,
 	   tic54x_relocation,"AREL16",false,0xFFFF,0xFFFF,false),
 
     /* 7 LSBs of an address, absolute */
-    HOWTO (R_PARTLS7,0,1,7,false,0,complain_overflow_dont,
+    HOWTO (R_PARTLS7,0,2,7,false,0,complain_overflow_dont,
 	   tic54x_relocation,"ALS7",false,0x007F,0x007F,false),
 
     /* 9 MSBs of an address, absolute */
     /* TI assembler doesn't shift its encoding, and is thus incompatible */
-    HOWTO (R_PARTMS9,7,1,9,false,0,complain_overflow_dont,
+    HOWTO (R_PARTMS9,7,2,9,false,0,complain_overflow_dont,
 	   tic54x_relocation,"AMS9",false,0x01FF,0x01FF,false),
 
     /* 23-bit direct reference, absolute */
-    HOWTO (R_EXTWORD,0,2,23,false,0,complain_overflow_dont,
+    HOWTO (R_EXTWORD,0,4,23,false,0,complain_overflow_dont,
 	   tic54x_relocation,"ARELEXT",false,0x7FFFFF,0x7FFFFF,false),
 
     /* 16 bits of 23-bit extended address, absolute */
-    HOWTO (R_EXTWORD16,0,1,16,false,0,complain_overflow_dont,
+    HOWTO (R_EXTWORD16,0,2,16,false,0,complain_overflow_dont,
 	   tic54x_relocation,"ARELEXT16",false,0x7FFFFF,0x7FFFFF,false),
 
     /* upper 7 bits of 23-bit extended address, absolute */
-    HOWTO (R_EXTWORDMS7,16,1,7,false,0,complain_overflow_dont,
+    HOWTO (R_EXTWORDMS7,16,2,7,false,0,complain_overflow_dont,
 	   tic54x_relocation,"ARELEXTMS7",false,0x7F,0x7F,false),
 
     /* 32-bit relocation exclusively for stabs */
-    HOWTO (R_RELLONG,0,2,32,false,0,complain_overflow_dont,
+    HOWTO (R_RELLONG,0,4,32,false,0,complain_overflow_dont,
 	   tic54x_relocation,"STAB",false,0xFFFFFFFF,0xFFFFFFFF,false),
   };
 

@@ -432,6 +432,10 @@ struct xcoff_loader_info
   /* Number of ldsym structures.  */
   size_t ldsym_count;
 
+  /* A count of non TOC relative relocs which will need to be
+     allocated in the .loader section.  */
+  size_t ldrel_count;
+
   /* Size of string table.  */
   size_t string_size;
 
@@ -440,6 +444,9 @@ struct xcoff_loader_info
 
   /* Allocated size of string table.  */
   size_t string_alc;
+
+  /* The libpath being used.  */
+  const char *libpath;
 };
 
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value

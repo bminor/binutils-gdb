@@ -969,7 +969,7 @@ public:
 	  show = 0;
       }
 
-    c_print_type (type, varstring, stream, show, level, flags);
+    c_print_type (type, varstring, stream, show, level, la_language, flags);
   }
 
   /* See language.h.  */

@@ -60,6 +60,17 @@ struct loongarch_gdbarch_features
   }
 };
 
+#ifdef GDBSERVER
+
+/* Create and return a target description that is compatible with FEATURES.
+   This is only used directly from the gdbserver where the created target
+   description is modified after it is return.  */
+
+target_desc_up loongarch_create_target_description
+	(const struct loongarch_gdbarch_features features);
+
+#else
+
 /* Lookup an already existing target description matching FEATURES, or
    create a new target description if this is the first time we have seen
    FEATURES.  For the same FEATURES the same target_desc is always
@@ -69,5 +80,7 @@ struct loongarch_gdbarch_features
 
 const target_desc *loongarch_lookup_target_description
 	(const struct loongarch_gdbarch_features features);
+
+#endif /* GDBSERVER */
 
 #endif /* ARCH_LOONGARCH_H  */

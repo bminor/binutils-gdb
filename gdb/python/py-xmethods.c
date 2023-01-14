@@ -103,7 +103,7 @@ invoke_match_method (PyObject *matcher, PyObject *py_obj_type,
   if (match_method == NULL)
     return NULL;
 
-  gdbpy_ref<> py_xmethod_name (PyString_FromString (xmethod_name));
+  gdbpy_ref<> py_xmethod_name (PyUnicode_FromString (xmethod_name));
   if (py_xmethod_name == NULL)
     return NULL;
 
@@ -601,12 +601,12 @@ python_xmethod_worker::python_xmethod_worker (PyObject *py_worker,
 int
 gdbpy_initialize_xmethods (void)
 {
-  py_match_method_name = PyString_FromString (match_method_name);
+  py_match_method_name = PyUnicode_FromString (match_method_name);
   if (py_match_method_name == NULL)
     return -1;
 
   py_get_arg_types_method_name
-    = PyString_FromString (get_arg_types_method_name);
+    = PyUnicode_FromString (get_arg_types_method_name);
   if (py_get_arg_types_method_name == NULL)
     return -1;
 

@@ -82,7 +82,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
   /* No relocation.  */
   HOWTO (R_NIOS2_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -97,7 +97,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
   /* 16-bit signed immediate relocation.  */
   HOWTO (R_NIOS2_S16,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 6,			/* bitpos */
@@ -112,7 +112,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
   /* 16-bit unsigned immediate relocation.  */
   HOWTO (R_NIOS2_U16,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 6,			/* bitpos */
@@ -126,7 +126,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_PCREL16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 6,			/* bitpos */
@@ -140,7 +140,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_CALL26,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 26,			/* bitsize */
 	 false,			/* pc_relative */
 	 6,			/* bitpos */
@@ -154,7 +154,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_IMM5,
 	 0,
-	 2,
+	 4,
 	 5,
 	 false,
 	 6,
@@ -168,7 +168,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_CACHE_OPX,
 	 0,
-	 2,
+	 4,
 	 5,
 	 false,
 	 22,
@@ -182,7 +182,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_IMM6,
 	 0,
-	 2,
+	 4,
 	 6,
 	 false,
 	 6,
@@ -196,7 +196,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_IMM8,
 	 0,
-	 2,
+	 4,
 	 8,
 	 false,
 	 6,
@@ -210,7 +210,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_HI16,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 6,
@@ -224,7 +224,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_LO16,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 6,
@@ -238,7 +238,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_HIADJ16,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 6,
@@ -252,7 +252,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_BFD_RELOC_32,
 	 0,
-	 2,			/* long */
+	 4,			/* long */
 	 32,
 	 false,
 	 0,
@@ -266,7 +266,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_BFD_RELOC_16,
 	 0,
-	 1,			/* short */
+	 2,			/* short */
 	 16,
 	 false,
 	 0,
@@ -280,7 +280,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_BFD_RELOC_8,
 	 0,
-	 0,			/* byte */
+	 1,			/* byte */
 	 8,
 	 false,
 	 0,
@@ -294,7 +294,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_GPREL,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 6,
@@ -308,7 +308,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_GNU_VTINHERIT,
 	 0,
-	 2,			/* short */
+	 4,
 	 0,
 	 false,
 	 0,
@@ -322,7 +322,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_GNU_VTENTRY,
 	 0,
-	 2,			/* byte */
+	 4,
 	 0,
 	 false,
 	 0,
@@ -336,7 +336,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_UJMP,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 6,
@@ -350,7 +350,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_CJMP,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 6,
@@ -364,7 +364,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_CALLR,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 6,
@@ -378,7 +378,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_ALIGN,
 	 0,
-	 2,
+	 4,
 	 0,
 	 false,
 	 0,
@@ -393,7 +393,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_GOT16,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 6,
@@ -407,7 +407,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_CALL16,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 6,
@@ -421,7 +421,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_GOTOFF_LO,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 6,
@@ -435,7 +435,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_GOTOFF_HA,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 6,
@@ -449,7 +449,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_PCREL_LO,
 	 0,
-	 2,
+	 4,
 	 16,
 	 true,
 	 6,
@@ -463,7 +463,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_PCREL_HA,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false, /* This is a PC-relative relocation, but we need to subtract
 		   PC ourselves before the HIADJ.  */
@@ -478,7 +478,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_TLS_GD16,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 6,
@@ -492,7 +492,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_TLS_LDM16,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 6,
@@ -506,7 +506,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_TLS_LDO16,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 6,
@@ -520,7 +520,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_TLS_IE16,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 6,
@@ -534,7 +534,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_TLS_LE16,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 6,
@@ -548,7 +548,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_TLS_DTPMOD,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 0,
@@ -562,7 +562,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_TLS_DTPREL,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 0,
@@ -576,7 +576,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_TLS_TPREL,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 0,
@@ -590,7 +590,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_COPY,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 0,
@@ -604,7 +604,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_GLOB_DAT,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 0,
@@ -618,7 +618,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_JUMP_SLOT,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 0,
@@ -632,7 +632,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_RELATIVE,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 0,
@@ -646,7 +646,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_GOTOFF,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 0,
@@ -660,7 +660,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_CALL26_NOAT,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 26,			/* bitsize */
 	 false,			/* pc_relative */
 	 6,			/* bitpos */
@@ -674,7 +674,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_GOT_LO,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 6,
@@ -688,7 +688,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_GOT_HA,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 6,
@@ -702,7 +702,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_CALL_LO,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 6,
@@ -716,7 +716,7 @@ static reloc_howto_type elf_nios2_r1_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_CALL_HA,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 6,
@@ -735,7 +735,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
   /* No relocation.  */
   HOWTO (R_NIOS2_NONE,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -750,7 +750,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
   /* 16-bit signed immediate relocation.  */
   HOWTO (R_NIOS2_S16,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 16,			/* bitpos */
@@ -765,7 +765,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
   /* 16-bit unsigned immediate relocation.  */
   HOWTO (R_NIOS2_U16,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 16,			/* bitpos */
@@ -779,7 +779,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_PCREL16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 16,			/* bitpos */
@@ -793,7 +793,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_CALL26,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 26,			/* bitsize */
 	 false,			/* pc_relative */
 	 6,			/* bitpos */
@@ -807,7 +807,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_IMM5,
 	 0,
-	 2,
+	 4,
 	 5,
 	 false,
 	 21,
@@ -821,7 +821,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_CACHE_OPX,
 	 0,
-	 2,
+	 4,
 	 5,
 	 false,
 	 11,
@@ -835,7 +835,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_IMM6,
 	 0,
-	 2,
+	 4,
 	 6,
 	 false,
 	 26,
@@ -849,7 +849,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_IMM8,
 	 0,
-	 2,
+	 4,
 	 8,
 	 false,
 	 24,
@@ -863,7 +863,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_HI16,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 16,
@@ -877,7 +877,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_LO16,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 16,
@@ -891,7 +891,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_HIADJ16,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 16,
@@ -905,7 +905,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_BFD_RELOC_32,
 	 0,
-	 2,			/* long */
+	 4,			/* long */
 	 32,
 	 false,
 	 0,
@@ -919,7 +919,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_BFD_RELOC_16,
 	 0,
-	 1,			/* short */
+	 2,			/* short */
 	 16,
 	 false,
 	 0,
@@ -933,7 +933,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_BFD_RELOC_8,
 	 0,
-	 0,			/* byte */
+	 1,			/* byte */
 	 8,
 	 false,
 	 0,
@@ -947,7 +947,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_GPREL,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 16,
@@ -961,7 +961,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_GNU_VTINHERIT,
 	 0,
-	 2,			/* short */
+	 4,
 	 0,
 	 false,
 	 0,
@@ -975,7 +975,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_GNU_VTENTRY,
 	 0,
-	 2,			/* byte */
+	 4,
 	 0,
 	 false,
 	 0,
@@ -989,7 +989,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_UJMP,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 16,
@@ -1003,7 +1003,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_CJMP,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 16,
@@ -1017,7 +1017,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_CALLR,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 16,
@@ -1031,7 +1031,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_ALIGN,
 	 0,
-	 2,
+	 4,
 	 0,
 	 false,
 	 0,
@@ -1045,7 +1045,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_GOT16,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 16,
@@ -1059,7 +1059,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_CALL16,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 16,
@@ -1073,7 +1073,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_GOTOFF_LO,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 16,
@@ -1087,7 +1087,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_GOTOFF_HA,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 16,
@@ -1101,7 +1101,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_PCREL_LO,
 	 0,
-	 2,
+	 4,
 	 16,
 	 true,
 	 16,
@@ -1115,7 +1115,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_PCREL_HA,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false, /* This is a PC-relative relocation, but we need to subtract
 		   PC ourselves before the HIADJ.  */
@@ -1130,7 +1130,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_TLS_GD16,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 16,
@@ -1144,7 +1144,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_TLS_LDM16,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 16,
@@ -1158,7 +1158,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_TLS_LDO16,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 16,
@@ -1172,7 +1172,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_TLS_IE16,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 16,
@@ -1186,7 +1186,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_TLS_LE16,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 16,
@@ -1200,7 +1200,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_TLS_DTPMOD,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 0,
@@ -1214,7 +1214,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_TLS_DTPREL,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 0,
@@ -1228,7 +1228,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_TLS_TPREL,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 0,
@@ -1242,7 +1242,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_COPY,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 0,
@@ -1256,7 +1256,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_GLOB_DAT,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 0,
@@ -1270,7 +1270,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_JUMP_SLOT,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 0,
@@ -1284,7 +1284,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_RELATIVE,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 0,
@@ -1298,7 +1298,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_GOTOFF,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 0,
@@ -1312,7 +1312,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_CALL26_NOAT,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 26,			/* bitsize */
 	 false,			/* pc_relative */
 	 6,			/* bitpos */
@@ -1326,7 +1326,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_GOT_LO,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 16,
@@ -1340,7 +1340,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_GOT_HA,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 16,
@@ -1354,7 +1354,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_CALL_LO,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 16,
@@ -1368,7 +1368,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_CALL_HA,
 	 0,
-	 2,
+	 4,
 	 16,
 	 false,
 	 16,
@@ -1382,7 +1382,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_R2_S12,
 	 0,
-	 2,
+	 4,
 	 12,
 	 false,
 	 16,
@@ -1396,7 +1396,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_R2_I10_1_PCREL,
 	 1,
-	 1,
+	 2,
 	 10,
 	 true,
 	 6,
@@ -1410,7 +1410,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_R2_T1I7_1_PCREL,
 	 1,
-	 1,
+	 2,
 	 7,
 	 true,
 	 9,
@@ -1424,7 +1424,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_R2_T1I7_2,
 	 2,
-	 1,
+	 2,
 	 7,
 	 false,
 	 9,
@@ -1438,7 +1438,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_R2_T2I4,
 	 0,
-	 1,
+	 2,
 	 4,
 	 false,
 	 12,
@@ -1452,7 +1452,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_R2_T2I4_1,
 	 1,
-	 1,
+	 2,
 	 4,
 	 false,
 	 12,
@@ -1466,7 +1466,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_R2_T2I4_2,
 	 2,
-	 1,
+	 2,
 	 4,
 	 false,
 	 12,
@@ -1480,7 +1480,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_R2_X1I7_2,
 	 2,
-	 1,
+	 2,
 	 7,
 	 false,
 	 6,
@@ -1494,7 +1494,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_R2_X2L5,
 	 0,
-	 1,
+	 2,
 	 5,
 	 false,
 	 6,
@@ -1508,7 +1508,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_R2_F1I5_2,
 	 2,
-	 1,
+	 2,
 	 5,
 	 false,
 	 6,
@@ -1522,7 +1522,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_R2_L5I4X1,
 	 2,
-	 1,
+	 2,
 	 4,
 	 false,
 	 6,
@@ -1536,7 +1536,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_R2_T1X1I6,
 	 0,
-	 1,
+	 2,
 	 6,
 	 false,
 	 9,
@@ -1550,7 +1550,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 
   HOWTO (R_NIOS2_R2_T1X1I6_2,
 	 2,
-	 2,
+	 4,
 	 6,
 	 false,
 	 9,
@@ -5413,7 +5413,7 @@ nios2_elf32_adjust_dynamic_symbol (struct bfd_link_info *info,
 
 /* Worker function for nios2_elf32_size_dynamic_sections.  */
 static bool
-adjust_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
+adjust_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 {
   struct bfd_link_info *info;
   struct elf32_nios2_link_hash_table *htab;
@@ -5442,7 +5442,7 @@ adjust_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
    Allocate space in .plt, .got and associated reloc sections for
    dynamic relocs.  */
 static bool
-allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
+allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 {
   struct bfd_link_info *info;
   struct elf32_nios2_link_hash_table *htab;

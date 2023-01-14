@@ -108,7 +108,8 @@ tyscm_type_name (struct type *type)
     {
       string_file stb;
 
-      LA_PRINT_TYPE (type, "", &stb, -1, 0, &type_print_raw_options);
+      current_language->print_type (type, "", &stb, -1, 0,
+				    &type_print_raw_options);
       return stb.release ();
     }
   catch (const gdb_exception &except)

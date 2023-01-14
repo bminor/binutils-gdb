@@ -18,15 +18,11 @@
 
 standard_testfile
 
+set gcc_compiled [is_c_compiler_gcc]
+
 set compile_flags {debug nowarnings quiet}
 if [support_complex_tests] {
     lappend compile_flags "additional_flags=-DTEST_COMPLEX"
-}
-
-# Create and source the file that provides information about the compiler
-# used to compile the test case.
-if [get_compiler_info] {
-    return -1
 }
 
 set skip_float_test [gdb_skip_float_test]

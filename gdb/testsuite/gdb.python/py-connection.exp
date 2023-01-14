@@ -55,8 +55,8 @@ gdb_test "python print('Same object: %s' % (conn is conn2))" "True"
 # starts to return False.
 gdb_test "info connections" "\r\n\\* 1 .*" \
     "info connections while the connection is still around"
-gdb_test "disconnect" "" "kill the inferior" \
-    "A program is being debugged already\\.  Kill it\\? .*y or n. $" "y"
+gdb_test "with confirm off -- kill" "" "kill inferior"
+gdb_test "disconnect"
 gdb_test "info connections" "No connections\\." \
     "info connections now all the connections have gone"
 gdb_test "python print(conn)" "<gdb.${connection_type} \\(invalid\\)>" \

@@ -39,7 +39,7 @@ if { [prepare_for_testing "failed to prepare" whatis-exp int-type.c {debug nowar
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 #

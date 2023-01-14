@@ -1,7 +1,8 @@
-#name: jirl zero-offset symbols
+#name: jirl zero-offset symbols for LoongArch64
 #source: disas-jirl.s
 #ld: --no-relax
 #objdump: -d
+#skip: loongarch32-*-*
 
 .*:[ 	]+file format .*
 

@@ -512,11 +512,11 @@ libunwind_load (void)
     }
   if (handle == NULL)
     {
-      fprintf_unfiltered (gdb_stderr, _("[GDB failed to load %s: %s]\n"),
-			  LIBUNWIND_SO, so_error);
+      gdb_printf (gdb_stderr, _("[GDB failed to load %s: %s]\n"),
+		  LIBUNWIND_SO, so_error);
 #ifdef LIBUNWIND_SO_7
-      fprintf_unfiltered (gdb_stderr, _("[GDB failed to load %s: %s]\n"),
-			  LIBUNWIND_SO_7, dlerror ());
+      gdb_printf (gdb_stderr, _("[GDB failed to load %s: %s]\n"),
+		  LIBUNWIND_SO_7, dlerror ());
 #endif /* LIBUNWIND_SO_7 */
     }
   xfree (so_error);

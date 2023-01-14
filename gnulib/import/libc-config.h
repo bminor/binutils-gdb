@@ -1,18 +1,18 @@
 /* System definitions for code taken from the GNU C Library
 
-   Copyright 2017-2021 Free Software Foundation, Inc.
+   Copyright 2017-2022 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public
+   modify it under the terms of the GNU Lesser General Public
    License as published by the Free Software Foundation; either
-   version 3 of the License, or (at your option) any later version.
+   version 2.1 of the License, or (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   General Public License for more details.
+   Lesser General Public License for more details.
 
-   You should have received a copy of the GNU General Public
+   You should have received a copy of the GNU Lesser General Public
    License along with this program; if not, see
    <https://www.gnu.org/licenses/>.  */
 
@@ -28,14 +28,17 @@
 
    When compiled as part of glibc this is a no-op; when compiled as
    part of Gnulib this includes Gnulib's <config.h> and defines macros
-   that glibc library code would normally assume.  */
+   that glibc library code would normally assume.
+
+   Note: This header file MUST NOT be included by public header files
+   of Gnulib.  */
 
 #include <config.h>
 
 /* On glibc this includes <features.h> and <sys/cdefs.h> and #defines
-   _FEATURES_H, __WORDSIZE, and __set_errno.  On FreeBSD 11 it
-   includes <sys/cdefs.h> which defines __nonnull.  Elsewhere it
-   is harmless.  */
+   _FEATURES_H, __WORDSIZE, and __set_errno.  On FreeBSD 11 and
+   DragonFlyBSD 5.9 it includes <sys/cdefs.h> which defines __nonnull.
+   Elsewhere it is harmless.  */
 #include <errno.h>
 
 /* From glibc <errno.h>.  */
@@ -71,24 +74,18 @@
 # endif
 #endif
 
-#ifndef __glibc_likely
-/* <sys/cdefs.h> either does not exist, or predates glibc commit
-   2012-12-28T06:33:01Z!siddhesh@redhat.com
-   (91998e449e0ce758db55aecf2abc3ee510fcbc8f)
-   and so does not suffice for Gnulib.  Prepare to include <cdefs.h>,
-   which is Gnulib's copy of a more-recent glibc <sys/cdefs.h>.  */
+#ifndef __attribute_nonnull__
+/* <sys/cdefs.h> either does not exist, or is too old for Gnulib.
+   Prepare to include <cdefs.h>, which is Gnulib's version of a
+   more-recent glibc <sys/cdefs.h>.  */
 
 /* Define _FEATURES_H so that <cdefs.h> does not include <features.h>.  */
 # ifndef _FEATURES_H
 #  define _FEATURES_H 1
 # endif
-/* Define __WORDSIZE so that <cdefs.h> does not attempt to include
-   nonexistent files.  Make it a syntax error, since Gnulib does not
-   use __WORDSIZE now, and if Gnulib uses it later the syntax error
-   will let us know that __WORDSIZE needs configuring.  */
-# ifndef __WORDSIZE
-#  define __WORDSIZE %%%
-# endif
+/* Define __GNULIB_CDEFS so that <cdefs.h> does not attempt to include
+   nonexistent files.  */
+# define __GNULIB_CDEFS
 /* Undef the macros unconditionally defined by our copy of glibc
    <sys/cdefs.h>, so that they do not clash with any system-defined
    versions.  */
@@ -120,6 +117,9 @@
 # undef __THROW
 # undef __THROWNL
 # undef __attr_access
+# undef __attr_access_none
+# undef __attr_dealloc
+# undef __attr_dealloc_free
 # undef __attribute__
 # undef __attribute_alloc_size__
 # undef __attribute_artificial__
@@ -144,9 +144,9 @@
 # undef __flexarr
 # undef __fortify_function
 # undef __glibc_c99_flexarr_available
-# undef __glibc_clang_has_attribute
-# undef __glibc_clang_has_builtin
-# undef __glibc_clang_has_extension
+# undef __glibc_has_attribute
+# undef __glibc_has_builtin
+# undef __glibc_has_extension
 # undef __glibc_macro_warning
 # undef __glibc_macro_warning1
 # undef __glibc_objsize

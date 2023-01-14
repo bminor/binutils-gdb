@@ -18,7 +18,7 @@
 
 set nl		"\[\r\n\]+"
 
-if { [skip_cplus_tests] } { continue }
+if { [skip_cplus_tests] } { return }
 
 load_lib "cp-support.exp"
 
@@ -30,7 +30,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 # set a breakpoint at the return stmt

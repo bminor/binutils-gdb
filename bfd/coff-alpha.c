@@ -116,7 +116,7 @@ static reloc_howto_type alpha_howto_table[] =
      of the gp register are loaded.  */
   HOWTO (ALPHA_R_IGNORE,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -131,7 +131,7 @@ static reloc_howto_type alpha_howto_table[] =
   /* A 32 bit reference to a symbol.  */
   HOWTO (ALPHA_R_REFLONG,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -146,7 +146,7 @@ static reloc_howto_type alpha_howto_table[] =
   /* A 64 bit reference to a symbol.  */
   HOWTO (ALPHA_R_REFQUAD,	/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -163,7 +163,7 @@ static reloc_howto_type alpha_howto_table[] =
      added in.  */
   HOWTO (ALPHA_R_GPREL32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -180,7 +180,7 @@ static reloc_howto_type alpha_howto_table[] =
      reloc always seems to be against the .lita section.  */
   HOWTO (ALPHA_R_LITERAL,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -203,7 +203,7 @@ static reloc_howto_type alpha_howto_table[] =
      relocation.  */
   HOWTO (ALPHA_R_LITUSE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -228,7 +228,7 @@ static reloc_howto_type alpha_howto_table[] =
      address.  */
   HOWTO (ALPHA_R_GPDISP,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -245,7 +245,7 @@ static reloc_howto_type alpha_howto_table[] =
      relative offset in the instruction.  */
   HOWTO (ALPHA_R_BRADDR,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 21,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -260,7 +260,7 @@ static reloc_howto_type alpha_howto_table[] =
   /* A hint for a jump to a register.  */
   HOWTO (ALPHA_R_HINT,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 14,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -275,7 +275,7 @@ static reloc_howto_type alpha_howto_table[] =
   /* 16 bit PC relative offset.  */
   HOWTO (ALPHA_R_SREL16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -290,7 +290,7 @@ static reloc_howto_type alpha_howto_table[] =
   /* 32 bit PC relative offset.  */
   HOWTO (ALPHA_R_SREL32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -305,7 +305,7 @@ static reloc_howto_type alpha_howto_table[] =
   /* A 64 bit PC relative offset.  */
   HOWTO (ALPHA_R_SREL64,	/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -320,7 +320,7 @@ static reloc_howto_type alpha_howto_table[] =
   /* Push a value on the reloc evaluation stack.  */
   HOWTO (ALPHA_R_OP_PUSH,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -336,7 +336,7 @@ static reloc_howto_type alpha_howto_table[] =
      a bitfield of size r_size starting at bit position r_offset.  */
   HOWTO (ALPHA_R_OP_STORE,	/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -352,7 +352,7 @@ static reloc_howto_type alpha_howto_table[] =
      relocation stack.  */
   HOWTO (ALPHA_R_OP_PSUB,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -368,7 +368,7 @@ static reloc_howto_type alpha_howto_table[] =
      given value.  */
   HOWTO (ALPHA_R_OP_PRSHIFT,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -383,7 +383,7 @@ static reloc_howto_type alpha_howto_table[] =
   /* Adjust the GP value for a new range in the object file.  */
   HOWTO (ALPHA_R_GPVALUE,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

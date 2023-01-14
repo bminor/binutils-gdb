@@ -118,9 +118,6 @@ using RequireLongest = gdb::Requires<gdb::Or<std::is_same<T, LONGEST>,
 
 #include "hashtab.h"
 
-/* * Enable dbx commands if set.  */
-extern int dbx_commands;
-
 /* * System root path, used to find libraries etc.  */
 extern std::string gdb_sysroot;
 

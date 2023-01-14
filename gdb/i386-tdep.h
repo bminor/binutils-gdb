@@ -418,7 +418,7 @@ extern int i386_sigtramp_p (struct frame_info *this_frame);
 
 /* Return non-zero if REGNUM is a member of the specified group.  */
 extern int i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-				     struct reggroup *group);
+				     const struct reggroup *group);
 
 /* Supply register REGNUM from the general-purpose register set REGSET
    to register cache REGCACHE.  If REGNUM is -1, do this for all

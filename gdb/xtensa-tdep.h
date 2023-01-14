@@ -31,7 +31,7 @@
 
 /*  Xtensa register type.  */
 
-typedef enum 
+enum xtensa_register_type_t
 {
   xtRegisterTypeArRegfile = 1,	/* Register File ar0..arXX.  */
   xtRegisterTypeSpecialReg,	/* CPU states, such as PS, Booleans, (rsr).  */
@@ -43,14 +43,14 @@ typedef enum
   xtRegisterTypeWindow,		/* Live window registers (a0..a15).  */
   xtRegisterTypeVirtual,	/* PC, FP.  */
   xtRegisterTypeUnknown
-} xtensa_register_type_t;
+};
 
 
 /*  Xtensa register group.  */
 
 #define XTENSA_MAX_COPROCESSOR	0x10  /* Number of Xtensa coprocessors.  */
 
-typedef enum 
+enum xtensa_register_group_t
 {
   xtRegisterGroupUnknown = 0,
   xtRegisterGroupRegFile	= 0x0001,    /* Register files without ARx.  */
@@ -75,16 +75,16 @@ typedef enum
   xtRegisterGroupCP6	    = 0x40000000,    /* CP6.  */
   xtRegisterGroupCP7	    = 0x80000000,    /* CP7.  */
 
-} xtensa_register_group_t;
+};
 
 
 /*  Xtensa target flags.  */
 
-typedef enum 
+enum xtensa_target_flags_t
 {
   xtTargetFlagsNonVisibleRegs	= 0x0001,
   xtTargetFlagsUseFetchStore	= 0x0002,
-} xtensa_target_flags_t;
+};
 
 
 /*  Mask.  */
@@ -143,11 +143,11 @@ typedef struct
 
 /*  Call-ABI for stack frame.  */
 
-typedef enum 
+enum call_abi_t
 {
   CallAbiDefault = 0,		/* Any 'callX' instructions; default stack.  */
   CallAbiCall0Only,		/* Only 'call0' instructions; flat stack.  */
-} call_abi_t;
+};
 
 
 struct ctype_cache

@@ -44,7 +44,7 @@ static reloc_howto_type elf_howto_table[] =
 {
   HOWTO (R_390_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = 2 byte, 2 = 4 byte) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -56,77 +56,77 @@ static reloc_howto_type elf_howto_table[] =
 	 0,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  HOWTO(R_390_8,	 0, 0,	8, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_8,	 0, 1,	8, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_8",	 false, 0,0x000000ff, false),
-  HOWTO(R_390_12,	 0, 1, 12, false, 0, complain_overflow_dont,
+  HOWTO(R_390_12,	 0, 2, 12, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_390_12",	 false, 0,0x00000fff, false),
-  HOWTO(R_390_16,	 0, 1, 16, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_16,	 0, 2, 16, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_16",	 false, 0,0x0000ffff, false),
-  HOWTO(R_390_32,	 0, 2, 32, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_32,	 0, 4, 32, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_32",	 false, 0,0xffffffff, false),
-  HOWTO(R_390_PC32,	 0, 2, 32,  true, 0, complain_overflow_bitfield,
+  HOWTO(R_390_PC32,	 0, 4, 32,  true, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PC32",	 false, 0,0xffffffff, true),
-  HOWTO(R_390_GOT12,	 0, 1, 12, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_GOT12,	 0, 2, 12, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GOT12",	 false, 0,0x00000fff, false),
-  HOWTO(R_390_GOT32,	 0, 2, 32, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_GOT32,	 0, 4, 32, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GOT32",	 false, 0,0xffffffff, false),
-  HOWTO(R_390_PLT32,	 0, 2, 32,  true, 0, complain_overflow_bitfield,
+  HOWTO(R_390_PLT32,	 0, 4, 32,  true, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PLT32",	 false, 0,0xffffffff, true),
-  HOWTO(R_390_COPY,	 0, 4, 64, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_COPY,	 0, 8, 64, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_COPY",	 false, 0,MINUS_ONE,  false),
-  HOWTO(R_390_GLOB_DAT,	 0, 4, 64, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_GLOB_DAT,	 0, 8, 64, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GLOB_DAT", false, 0,MINUS_ONE,  false),
-  HOWTO(R_390_JMP_SLOT,	 0, 4, 64, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_JMP_SLOT,	 0, 8, 64, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_JMP_SLOT", false, 0,MINUS_ONE,  false),
-  HOWTO(R_390_RELATIVE,	 0, 4, 64,  true, 0, complain_overflow_bitfield,
+  HOWTO(R_390_RELATIVE,	 0, 8, 64,  true, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_RELATIVE", false, 0,MINUS_ONE,  false),
-  HOWTO(R_390_GOTOFF32,	 0, 2, 32, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_GOTOFF32,	 0, 4, 32, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GOTOFF32", false, 0,MINUS_ONE,  false),
-  HOWTO(R_390_GOTPC,	 0, 4, 64,  true, 0, complain_overflow_bitfield,
+  HOWTO(R_390_GOTPC,	 0, 8, 64,  true, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GOTPC",	 false, 0,MINUS_ONE,  true),
-  HOWTO(R_390_GOT16,	 0, 1, 16, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_GOT16,	 0, 2, 16, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GOT16",	 false, 0,0x0000ffff, false),
-  HOWTO(R_390_PC16,	 0, 1, 16,  true, 0, complain_overflow_bitfield,
+  HOWTO(R_390_PC16,	 0, 2, 16,  true, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PC16",	 false, 0,0x0000ffff, true),
-  HOWTO(R_390_PC16DBL,	 1, 1, 16,  true, 0, complain_overflow_bitfield,
+  HOWTO(R_390_PC16DBL,	 1, 2, 16,  true, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PC16DBL",	 false, 0,0x0000ffff, true),
-  HOWTO(R_390_PLT16DBL,	 1, 1, 16,  true, 0, complain_overflow_bitfield,
+  HOWTO(R_390_PLT16DBL,	 1, 2, 16,  true, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PLT16DBL", false, 0,0x0000ffff, true),
-  HOWTO(R_390_PC32DBL,	 1, 2, 32,  true, 0, complain_overflow_bitfield,
+  HOWTO(R_390_PC32DBL,	 1, 4, 32,  true, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PC32DBL",	 false, 0,0xffffffff, true),
-  HOWTO(R_390_PLT32DBL,	 1, 2, 32,  true, 0, complain_overflow_bitfield,
+  HOWTO(R_390_PLT32DBL,	 1, 4, 32,  true, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PLT32DBL", false, 0,0xffffffff, true),
-  HOWTO(R_390_GOTPCDBL,	 1, 2, 32,  true, 0, complain_overflow_bitfield,
+  HOWTO(R_390_GOTPCDBL,	 1, 4, 32,  true, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GOTPCDBL", false, 0,MINUS_ONE,  true),
-  HOWTO(R_390_64,	 0, 4, 64, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_64,	 0, 8, 64, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_64",	 false, 0,MINUS_ONE,  false),
-  HOWTO(R_390_PC64,	 0, 4, 64,  true, 0, complain_overflow_bitfield,
+  HOWTO(R_390_PC64,	 0, 8, 64,  true, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PC64",	 false, 0,MINUS_ONE,  true),
-  HOWTO(R_390_GOT64,	 0, 4, 64, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_GOT64,	 0, 8, 64, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GOT64",	 false, 0,MINUS_ONE,  false),
-  HOWTO(R_390_PLT64,	 0, 4, 64,  true, 0, complain_overflow_bitfield,
+  HOWTO(R_390_PLT64,	 0, 8, 64,  true, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PLT64",	 false, 0,MINUS_ONE,  true),
-  HOWTO(R_390_GOTENT,	 1, 2, 32,  true, 0, complain_overflow_bitfield,
+  HOWTO(R_390_GOTENT,	 1, 4, 32,  true, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GOTENT",	 false, 0,MINUS_ONE,  true),
-  HOWTO(R_390_GOTOFF16,	 0, 1, 16, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_GOTOFF16,	 0, 2, 16, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GOTOFF16", false, 0,0x0000ffff, false),
-  HOWTO(R_390_GOTOFF64,	 0, 4, 64, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_GOTOFF64,	 0, 8, 64, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GOTOFF64", false, 0,MINUS_ONE,  false),
-  HOWTO(R_390_GOTPLT12,	 0, 1, 12, false, 0, complain_overflow_dont,
+  HOWTO(R_390_GOTPLT12,	 0, 2, 12, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_390_GOTPLT12", false, 0,0x00000fff, false),
-  HOWTO(R_390_GOTPLT16,	 0, 1, 16, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_GOTPLT16,	 0, 2, 16, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GOTPLT16", false, 0,0x0000ffff, false),
-  HOWTO(R_390_GOTPLT32,	 0, 2, 32, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_GOTPLT32,	 0, 4, 32, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GOTPLT32", false, 0,0xffffffff, false),
-  HOWTO(R_390_GOTPLT64,	 0, 4, 64, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_GOTPLT64,	 0, 8, 64, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GOTPLT64", false, 0,MINUS_ONE,  false),
-  HOWTO(R_390_GOTPLTENT, 1, 2, 32,  true, 0, complain_overflow_bitfield,
+  HOWTO(R_390_GOTPLTENT, 1, 4, 32,  true, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GOTPLTENT",false, 0,MINUS_ONE,  true),
-  HOWTO(R_390_PLTOFF16,	 0, 1, 16, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_PLTOFF16,	 0, 2, 16, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PLTOFF16", false, 0,0x0000ffff, false),
-  HOWTO(R_390_PLTOFF32,	 0, 2, 32, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_PLTOFF32,	 0, 4, 32, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PLTOFF32", false, 0,0xffffffff, false),
-  HOWTO(R_390_PLTOFF64,	 0, 4, 64, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_PLTOFF64,	 0, 8, 64, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PLTOFF64", false, 0,MINUS_ONE,  false),
   HOWTO(R_390_TLS_LOAD, 0, 0, 0, false, 0, complain_overflow_dont,
 	s390_tls_reloc, "R_390_TLS_LOAD", false, 0, 0, false),
@@ -135,58 +135,58 @@ static reloc_howto_type elf_howto_table[] =
   HOWTO(R_390_TLS_LDCALL, 0, 0, 0, false, 0, complain_overflow_dont,
 	s390_tls_reloc, "R_390_TLS_LDCALL", false, 0, 0, false),
   EMPTY_HOWTO (R_390_TLS_GD32),	/* Empty entry for R_390_TLS_GD32.  */
-  HOWTO(R_390_TLS_GD64,	 0, 4, 64, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_TLS_GD64,	 0, 8, 64, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_TLS_GD64", false, 0, MINUS_ONE, false),
-  HOWTO(R_390_TLS_GOTIE12, 0, 1, 12, false, 0, complain_overflow_dont,
+  HOWTO(R_390_TLS_GOTIE12, 0, 2, 12, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_390_TLS_GOTIE12", false, 0, 0x00000fff, false),
   EMPTY_HOWTO (R_390_TLS_GOTIE32),	/* Empty entry for R_390_TLS_GOTIE32.  */
-  HOWTO(R_390_TLS_GOTIE64, 0, 4, 64, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_TLS_GOTIE64, 0, 8, 64, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_TLS_GOTIE64", false, 0, MINUS_ONE, false),
   EMPTY_HOWTO (R_390_TLS_LDM32),	/* Empty entry for R_390_TLS_LDM32.  */
-  HOWTO(R_390_TLS_LDM64, 0, 4, 64, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_TLS_LDM64, 0, 8, 64, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_TLS_LDM64", false, 0, MINUS_ONE, false),
   EMPTY_HOWTO (R_390_TLS_IE32),	/* Empty entry for R_390_TLS_IE32.  */
-  HOWTO(R_390_TLS_IE64,	 0, 4, 64, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_TLS_IE64,	 0, 8, 64, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_TLS_IE64", false, 0, MINUS_ONE, false),
-  HOWTO(R_390_TLS_IEENT, 1, 2, 32, true, 0, complain_overflow_bitfield,
+  HOWTO(R_390_TLS_IEENT, 1, 4, 32, true, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_TLS_IEENT", false, 0, MINUS_ONE, true),
   EMPTY_HOWTO (R_390_TLS_LE32),	/* Empty entry for R_390_TLS_LE32.  */
-  HOWTO(R_390_TLS_LE64,	 0, 2, 32, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_TLS_LE64,	 0, 4, 32, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_TLS_LE64", false, 0, MINUS_ONE, false),
   EMPTY_HOWTO (R_390_TLS_LDO32),	/* Empty entry for R_390_TLS_LDO32.  */
-  HOWTO(R_390_TLS_LDO64, 0, 4, 64, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_TLS_LDO64, 0, 8, 64, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_TLS_LDO64", false, 0, MINUS_ONE, false),
-  HOWTO(R_390_TLS_DTPMOD, 0, 4, 64, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_TLS_DTPMOD, 0, 8, 64, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_TLS_DTPMOD", false, 0, MINUS_ONE, false),
-  HOWTO(R_390_TLS_DTPOFF, 0, 4, 64, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_TLS_DTPOFF, 0, 8, 64, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_TLS_DTPOFF", false, 0, MINUS_ONE, false),
-  HOWTO(R_390_TLS_TPOFF, 0, 4, 64, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_TLS_TPOFF, 0, 8, 64, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_TLS_TPOFF", false, 0, MINUS_ONE, false),
-  HOWTO(R_390_20,	 0, 2, 20, false, 8, complain_overflow_dont,
+  HOWTO(R_390_20,	 0, 4, 20, false, 8, complain_overflow_dont,
 	s390_elf_ldisp_reloc, "R_390_20",      false, 0,0x0fffff00, false),
-  HOWTO(R_390_GOT20,	 0, 2, 20, false, 8, complain_overflow_dont,
+  HOWTO(R_390_GOT20,	 0, 4, 20, false, 8, complain_overflow_dont,
 	s390_elf_ldisp_reloc, "R_390_GOT20",   false, 0,0x0fffff00, false),
-  HOWTO(R_390_GOTPLT20,	 0, 2, 20, false, 8, complain_overflow_dont,
+  HOWTO(R_390_GOTPLT20,	 0, 4, 20, false, 8, complain_overflow_dont,
 	s390_elf_ldisp_reloc, "R_390_GOTPLT20", false, 0,0x0fffff00, false),
-  HOWTO(R_390_TLS_GOTIE20, 0, 2, 20, false, 8, complain_overflow_dont,
+  HOWTO(R_390_TLS_GOTIE20, 0, 4, 20, false, 8, complain_overflow_dont,
 	s390_elf_ldisp_reloc, "R_390_TLS_GOTIE20", false, 0,0x0fffff00, false),
-  HOWTO(R_390_IRELATIVE, 0, 4, 64, false, 0, complain_overflow_bitfield,
+  HOWTO(R_390_IRELATIVE, 0, 8, 64, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_IRELATIVE", false, 0, MINUS_ONE, false),
-  HOWTO(R_390_PC12DBL,	 1, 1, 12,  true, 0, complain_overflow_bitfield,
+  HOWTO(R_390_PC12DBL,	 1, 2, 12,  true, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PC12DBL",	 false, 0,0x00000fff, true),
-  HOWTO(R_390_PLT12DBL,	 1, 1, 12,  true, 0, complain_overflow_bitfield,
+  HOWTO(R_390_PLT12DBL,	 1, 2, 12,  true, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PLT12DBL", false, 0,0x00000fff, true),
-  HOWTO(R_390_PC24DBL,	 1, 2, 24,  true, 0, complain_overflow_bitfield,
+  HOWTO(R_390_PC24DBL,	 1, 4, 24,  true, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PC24DBL",	 false, 0,0x00ffffff, true),
-  HOWTO(R_390_PLT24DBL,	 1, 2, 24,  true, 0, complain_overflow_bitfield,
+  HOWTO(R_390_PLT24DBL,	 1, 4, 24,  true, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PLT24DBL", false, 0,0x00ffffff, true),
 };
 
 /* GNU extension to record C++ vtable hierarchy.  */
 static reloc_howto_type elf64_s390_vtinherit_howto =
-  HOWTO (R_390_GNU_VTINHERIT, 0,4,0,false,0,complain_overflow_dont, NULL, "R_390_GNU_VTINHERIT", false,0, 0, false);
+  HOWTO (R_390_GNU_VTINHERIT, 0,8,0,false,0,complain_overflow_dont, NULL, "R_390_GNU_VTINHERIT", false,0, 0, false);
 static reloc_howto_type elf64_s390_vtentry_howto =
-  HOWTO (R_390_GNU_VTENTRY, 0,4,0,false,0,complain_overflow_dont, _bfd_elf_rel_vtable_reloc_fn,"R_390_GNU_VTENTRY", false,0,0, false);
+  HOWTO (R_390_GNU_VTENTRY, 0,8,0,false,0,complain_overflow_dont, _bfd_elf_rel_vtable_reloc_fn,"R_390_GNU_VTENTRY", false,0,0, false);
 
 static reloc_howto_type *
 elf_s390_reloc_type_lookup (bfd *abfd,
@@ -774,7 +774,7 @@ elf_s390_tls_transition (struct bfd_link_info *info,
 			 int r_type,
 			 int is_local)
 {
-  if (bfd_link_pic (info))
+  if (bfd_link_dll (info))
     return r_type;
 
   switch (r_type)
@@ -1026,7 +1026,7 @@ elf_s390_check_relocs (bfd *abfd,
 	case R_390_TLS_GOTIE20:
 	case R_390_TLS_GOTIE64:
 	case R_390_TLS_IEENT:
-	  if (bfd_link_pic (info))
+	  if (bfd_link_dll (info))
 	    info->flags |= DF_STATIC_TLS;
 	  /* Fall through */
 
@@ -1107,7 +1107,7 @@ elf_s390_check_relocs (bfd *abfd,
 	  if (r_type == R_390_TLS_LE64 && bfd_link_pie (info))
 	    break;
 
-	  if (!bfd_link_pic (info))
+	  if (!bfd_link_dll (info))
 	    break;
 	  info->flags |= DF_STATIC_TLS;
 	  /* Fall through */
@@ -1571,7 +1571,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h,
      to R_390_TLS_LE64 requiring no TLS entry. For GOTIE12 and IEENT
      we can save the dynamic TLS relocation.  */
   if (h->got.refcount > 0
-      && !bfd_link_pic (info)
+      && !bfd_link_dll (info)
       && h->dynindx == -1
       && elf_s390_hash_entry(h)->tls_type >= GOT_TLS_IE)
     {
@@ -1876,7 +1876,20 @@ elf_s390_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       else if (startswith (bfd_section_name (s), ".rela"))
 	{
 	  if (s->size != 0 && s != htab->elf.srelplt)
-	    relocs = true;
+	    {
+	      relocs = true;
+	      if (s == htab->elf.irelplt)
+		{
+		  /* In static-pie case, there are IRELATIVE-relocs in
+		     .rela.iplt (htab->irelplt), which will later be grouped
+		     to .rela.plt.  On s390, the IRELATIVE relocations are
+		     always located in .rela.iplt - even for non-static case.
+		     Ensure that DT_JMPREL, DT_PLTRELA, DT_PLTRELASZ is added
+		     to the dynamic section even if htab->srelplt->size == 0.
+		     See _bfd_elf_add_dynamic_tags in bfd/elflink.c.  */
+		  htab->elf.dt_jmprel_required = true;
+		}
+	    }
 
 	  /* We use the reloc_count field as a counter if we need
 	     to copy relocs into the output file.  */
@@ -2662,7 +2675,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 
 	  /* Relocations for tls literal pool entries.  */
 	case R_390_TLS_IE64:
-	  if (bfd_link_pic (info))
+	  if (bfd_link_dll (info))
 	    {
 	      Elf_Internal_Rela outrel;
 	      asection *sreloc;
@@ -2690,7 +2703,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 	  else if (h != NULL)
 	    {
 	      tls_type = elf_s390_hash_entry(h)->tls_type;
-	      if (!bfd_link_pic (info) && h->dynindx == -1 && tls_type >= GOT_TLS_IE)
+	      if (!bfd_link_dll (info) && h->dynindx == -1 && tls_type >= GOT_TLS_IE)
 		r_type = R_390_TLS_LE64;
 	    }
 	  if (r_type == R_390_TLS_GD64 && tls_type >= GOT_TLS_IE)
@@ -2801,14 +2814,14 @@ elf_s390_relocate_section (bfd *output_bfd,
 	      if (local_got_offsets == NULL)
 		abort();
 	      off = local_got_offsets[r_symndx];
-	      if (bfd_link_pic (info))
+	      if (bfd_link_dll (info))
 		goto emit_tls_relocs;
 	    }
 	  else
 	    {
 	      off = h->got.offset;
 	      tls_type = elf_s390_hash_entry(h)->tls_type;
-	      if (bfd_link_pic (info) || h->dynindx != -1 || tls_type < GOT_TLS_IE)
+	      if (bfd_link_dll (info) || h->dynindx != -1 || tls_type < GOT_TLS_IE)
 		goto emit_tls_relocs;
 	    }
 
@@ -2825,7 +2838,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_390_TLS_LDM64:
-	  if (! bfd_link_pic (info))
+	  if (! bfd_link_dll (info))
 	    /* The literal pool entry this relocation refers to gets ignored
 	       by the optimized code of the local exec model. Do nothing
 	       and the value will turn out zero.  */
@@ -2900,7 +2913,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 	  continue;
 
 	case R_390_TLS_LDO64:
-	  if (bfd_link_pic (info) || (input_section->flags & SEC_DEBUGGING))
+	  if (bfd_link_dll (info) || (input_section->flags & SEC_DEBUGGING))
 	    relocation -= dtpoff_base (info);
 	  else
 	    /* When converting LDO to LE, we must negate.  */
@@ -2922,7 +2935,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 
 	  if (r_type == R_390_TLS_LOAD)
 	    {
-	      if (!bfd_link_pic (info) && (h == NULL || h->dynindx == -1))
+	      if (!bfd_link_dll (info) && (h == NULL || h->dynindx == -1))
 		{
 		  /* IE->LE transition. Four valid cases:
 		     lg %rx,(0,%ry)    -> sllg %rx,%ry,0
@@ -2972,7 +2985,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 		  invalid_tls_insn (input_bfd, input_section, rel);
 		  return false;
 		}
-	      if (!bfd_link_pic (info) && (h == NULL || h->dynindx == -1))
+	      if (!bfd_link_dll (info) && (h == NULL || h->dynindx == -1))
 		{
 		  /* GD->LE transition.
 		     brasl %r14,__tls_get_addr@plt -> brcl 0,. */
@@ -2991,7 +3004,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 	    }
 	  else if (r_type == R_390_TLS_LDCALL)
 	    {
-	      if (!bfd_link_pic (info))
+	      if (!bfd_link_dll (info))
 		{
 		  unsigned int insn0, insn1;
 

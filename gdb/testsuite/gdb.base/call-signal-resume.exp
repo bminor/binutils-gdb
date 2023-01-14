@@ -22,7 +22,7 @@
 
 if [target_info exists gdb,nosignals] {
     verbose "Skipping call-signal-resume.exp because of nosignals."
-    continue
+    return
 }
 
 
@@ -37,7 +37,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 # test.
 if [target_info exists gdb,cannot_call_functions] {
     unsupported "this target can not call functions"
-    continue
+    return
 }
 
 proc get_dummy_frame_number { } {

@@ -10,7 +10,7 @@
 Disassembly of section .text.default_process_op.isra.0:
 
 0+737c <default_process_op.isra.0>:
- +[a-f0-9]+:	66 c3                	retl   
+ +[a-f0-9]+:	66 c3                	retl
 
 Disassembly of section .text.mpt_scsi_process_op:
 

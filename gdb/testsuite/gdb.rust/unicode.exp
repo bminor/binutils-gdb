@@ -17,7 +17,7 @@
 
 load_lib rust-support.exp
 if {[skip_rust_tests]} {
-    continue
+    return
 }
 
 # Non-ASCII identifiers were allowed starting in 1.53.

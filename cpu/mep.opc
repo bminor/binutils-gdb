@@ -869,11 +869,8 @@ mep_cgen_expand_macros_and_parse_operand (CGEN_CPU_DESC cd, int opindex,
 
 #define CGEN_VALIDATE_INSN_SUPPORTED
 
-static void print_tpreg (CGEN_CPU_DESC, PTR, CGEN_KEYWORD *, long, unsigned int);
-static void print_spreg (CGEN_CPU_DESC, PTR, CGEN_KEYWORD *, long, unsigned int);
-
 static void
-print_tpreg (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, PTR dis_info,
+print_tpreg (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, void *dis_info,
 	     CGEN_KEYWORD *table ATTRIBUTE_UNUSED, long val ATTRIBUTE_UNUSED,
 	     unsigned int flags ATTRIBUTE_UNUSED)
 {
@@ -883,7 +880,7 @@ print_tpreg (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, PTR dis_info,
 }
 
 static void
-print_spreg (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, PTR dis_info, 
+print_spreg (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, void *dis_info,
 	     CGEN_KEYWORD *table ATTRIBUTE_UNUSED, long val ATTRIBUTE_UNUSED,
 	     unsigned int flags ATTRIBUTE_UNUSED)
 {
@@ -1451,12 +1448,15 @@ mep_print_insn (CGEN_CPU_DESC cd, bfd_vma pc, disassemble_info *info)
   if (info->section && info->section->owner)
     {
       bfd *abfd = info->section->owner;
-      mep_config_index = abfd->tdata.elf_obj_data->elf_header->e_flags & EF_MEP_INDEX_MASK;
-      /* This instantly redefines MEP_CONFIG, MEP_OMASK, .... MEP_VLIW64 */
+      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+	{
+	  mep_config_index = abfd->tdata.elf_obj_data->elf_header->e_flags & EF_MEP_INDEX_MASK;
+	  /* This instantly redefines MEP_CONFIG, MEP_OMASK, .... MEP_VLIW64 */
 
-      cop_type = abfd->tdata.elf_obj_data->elf_header->e_flags & EF_MEP_COP_MASK;
-      if (cop_type == EF_MEP_COP_IVC2)
-	ivc2 = 1;
+	  cop_type = abfd->tdata.elf_obj_data->elf_header->e_flags & EF_MEP_COP_MASK;
+	  if (cop_type == EF_MEP_COP_IVC2)
+	    ivc2 = 1;
+	}
     }
 
   /* Picking the right ISA bitmask for the current context is tricky.  */

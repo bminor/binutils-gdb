@@ -8,6 +8,7 @@
 
 Contents of the .eh_frame section:
 
+
 0+ 0000000000000014 00000000 CIE
   Version:               1
   Augmentation:          "zR"
@@ -15,7 +16,6 @@ Contents of the .eh_frame section:
   Data alignment factor: -8
   Return address column: 16
   Augmentation data:     1b
-
   DW_CFA_def_cfa: r7 \(rsp\) ofs 8
   DW_CFA_offset: r16 \(rip\) at cfa-8
   DW_CFA_nop
@@ -50,8 +50,8 @@ Contents of the .eh_frame section:
 Disassembly of section .plt:
 
 0+1b0 <.plt>:
- +[a-f0-9]+:	ff 35 32 0e 20 00    	push   0x200e32\(%rip\)        # 200fe8 <_GLOBAL_OFFSET_TABLE_\+0x8>
- +[a-f0-9]+:	f2 ff 25 33 0e 20 00 	bnd jmp \*0x200e33\(%rip\)        # 200ff0 <_GLOBAL_OFFSET_TABLE_\+0x10>
+ +[a-f0-9]+:	ff 35 32 fe 3f 00    	push   0x3ffe32\(%rip\)        # 3fffe8 <_GLOBAL_OFFSET_TABLE_\+0x8>
+ +[a-f0-9]+:	f2 ff 25 33 fe 3f 00 	bnd jmp \*0x3ffe33\(%rip\)        # 3ffff0 <_GLOBAL_OFFSET_TABLE_\+0x10>
  +[a-f0-9]+:	0f 1f 00             	nopl   \(%rax\)
  +[a-f0-9]+:	68 00 00 00 00       	push   \$0x0
  +[a-f0-9]+:	f2 e9 e5 ff ff ff    	bnd jmp 1b0 <func@plt-0x20>
@@ -60,7 +60,7 @@ Disassembly of section .plt:
 Disassembly of section .plt.sec:
 
 0+1d0 <func@plt>:
- +[a-f0-9]+:	f2 ff 25 21 0e 20 00 	bnd jmp \*0x200e21\(%rip\)        # 200ff8 <func>
+ +[a-f0-9]+:	f2 ff 25 21 fe 3f 00 	bnd jmp \*0x3ffe21\(%rip\)        # 3ffff8 <func>
  +[a-f0-9]+:	90                   	nop
 
 Disassembly of section .text:

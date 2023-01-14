@@ -1,4 +1,5 @@
 # mach: crisv32
+# requires: simoption --cris-900000xx
 # sim: --cris-900000xx
 # xerror:
 # output: b1e\n

@@ -31,8 +31,7 @@ standard_testfile solib-list-main.c
 set srclibfile ${testfile}-lib.c
 set binlibfile [standard_output_file ${testfile}.so]
 
-if { [get_compiler_info]
-     || [gdb_compile_shlib "${srcdir}/${subdir}/${srclibfile}" "${binlibfile}" {debug}] != ""
+if { [gdb_compile_shlib "${srcdir}/${subdir}/${srclibfile}" "${binlibfile}" {debug}] != ""
      || [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable "shlib=${binlibfile}"] != "" } {
     untested "failed to compile"
     return -1
@@ -92,8 +91,7 @@ foreach nonstop { 0 1 } { with_test_prefix "non-stop $nonstop" {
     # but before "target remote" below so that qSymbol data get already
     # initialized from BINFILE (and not from ld.so first needing a change to
     # BINFILE later).
-    gdb_test "file ${binfile}" {Reading symbols from .*\.\.\..*} "file binfile" \
-	     {(Are you sure you want to change the file|Load new symbol table from ".*")\? \(y or n\) } "y"
+    gdb_test "file ${binfile}" {Reading symbols from .*\.\.\..*} "file binfile"
 
     set test "target $gdbserver_protocol"
     set ok 0

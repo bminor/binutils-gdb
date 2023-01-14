@@ -68,7 +68,8 @@ proc do_bp_tests {with_src_prefix_p with_nest_prefix_p} {
     # mangling.
     proc get_linkage_name_pattern {symbol_name} {
 
-	if { [test_compiler_info icc*] || [test_compiler_info intel*]} {
+	if { [test_compiler_info {ifort-*} f90]
+	     || [test_compiler_info {ifx-*} f90] } {
 	    return "\(?:.*_\)?${symbol_name}_?"
 	} else {
 	    return ${symbol_name}
@@ -109,7 +110,7 @@ proc do_bp_tests {with_src_prefix_p with_nest_prefix_p} {
     # Break on a contained function and run to it.
     if {![runto ${src_prefix}[gdb_get_line_number "pre_init"]]} then {
 	perror "couldn't run to breakpoint pre_init"
-	continue
+	return
     }
 
     # Call a contained function.

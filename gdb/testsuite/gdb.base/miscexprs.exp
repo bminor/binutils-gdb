@@ -44,10 +44,6 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [lis
     return -1
 }
 
-if [get_compiler_info] {
-    return -1
-}
-
 clean_restart ${binfile}
 
 
@@ -56,8 +52,11 @@ clean_restart ${binfile}
 #
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
+
+# This is used as an expected result value.
+set false 0
 
 gdb_test "break marker1" ".*" ""
 

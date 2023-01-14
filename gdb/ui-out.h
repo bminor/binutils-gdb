@@ -53,12 +53,9 @@ enum ui_out_flag
 {
   ui_source_list = (1 << 0),
   fix_multi_location_breakpoint_output = (1 << 1),
-  /* For CLI output, this flag is set if unfiltered output is desired.
-     This should only be used by low-level formatting functions.  */
-  unfiltered_output = (1 << 2),
   /* This indicates that %pF should be disallowed in a printf format
      string.  */
-  disallow_ui_out_field = (1 << 3)
+  disallow_ui_out_field = (1 << 2)
 };
 
 DEF_ENUM_FLAGS_TYPE (ui_out_flag, ui_out_flags);
@@ -301,17 +298,17 @@ class ui_out
     progress_meter (const progress_meter &) = delete;
     progress_meter &operator= (const progress_meter &) = delete;
 
+    /* Emit some progress for this progress meter.  HOWMUCH may range
+       from 0.0 to 1.0.  */
+    void progress (double howmuch)
+    {
+      m_uiout->do_progress_notify (howmuch);
+    }
+
   private:
 
     struct ui_out *m_uiout;
   };
-
-  /* Emit some progress corresponding to the most recently created
-     progress meter.  HOWMUCH may range from 0.0 to 1.0.  */
-  void progress (double howmuch)
-  {
-    do_progress_notify (howmuch);
-  }
 
  protected:
 

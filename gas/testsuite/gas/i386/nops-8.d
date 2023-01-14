@@ -1948,8 +1948,8 @@ Disassembly of section .text:
  +[a-f0-9]+:	f3 0f 1e f7          	repz nop %edi
  +[a-f0-9]+:	f3 0f 1e f8          	repz nop %eax
  +[a-f0-9]+:	f3 0f 1e f9          	repz nop %ecx
- +[a-f0-9]+:	f3 0f 1e fa          	endbr64 *
- +[a-f0-9]+:	f3 0f 1e fb          	endbr32 *
+ +[a-f0-9]+:	f3 0f 1e fa          	endbr64
+ +[a-f0-9]+:	f3 0f 1e fb          	endbr32
  +[a-f0-9]+:	f3 0f 1e fc          	repz nop %esp
  +[a-f0-9]+:	f3 0f 1e fd          	repz nop %ebp
  +[a-f0-9]+:	f3 0f 1e fe          	repz nop %esi

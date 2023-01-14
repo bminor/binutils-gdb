@@ -28,6 +28,7 @@ struct objfile;
 struct thread_info;
 struct inferior;
 struct process_stratum_target;
+struct target_ops;
 struct trace_state_variable;
 
 namespace gdb
@@ -255,6 +256,12 @@ extern observable<int> gdb_exiting;
 
 /* When a connection is removed.  */
 extern observable<process_stratum_target */* target */> connection_removed;
+
+/* About to enter target_wait (). */
+extern observable <ptid_t /* ptid */> target_pre_wait;
+
+/* About to leave target_wait (). */
+extern observable <ptid_t /* event_ptid */> target_post_wait;
 
 } /* namespace observers */
 

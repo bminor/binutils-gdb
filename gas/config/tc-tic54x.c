@@ -2034,7 +2034,7 @@ tic54x_loop (int count)
   if (!is_end_of_line[(unsigned char) *input_line_pointer])
     count = get_absolute_expression ();
 
-  do_repeat ((size_t) count, "LOOP", "ENDLOOP");
+  do_repeat ((size_t) count, "LOOP", "ENDLOOP", NULL);
 }
 
 /* Normally, endloop gets eaten by the preceding loop.  */
@@ -4966,7 +4966,7 @@ tic54x_adjust_symtab (void)
     {
       unsigned lineno;
       const char * filename = as_where (&lineno);
-      c_dot_file_symbol (filename, 0);
+      c_dot_file_symbol (filename);
     }
 }
 

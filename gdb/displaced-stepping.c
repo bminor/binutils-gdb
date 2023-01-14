@@ -40,7 +40,7 @@ static void
 show_debug_displaced (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Displace stepping debugging is %s.\n"), value);
+  gdb_printf (file, _("Displace stepping debugging is %s.\n"), value);
 }
 
 displaced_step_prepare_status

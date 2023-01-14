@@ -17,6 +17,9 @@
 
 sim_init
 
+global global_cc_works
+global global_cc_os
+
 set CFLAGS_FOR_TARGET "-O2"
 if [istarget cris-*-*] {
     set mach "crisv10"
@@ -24,13 +27,16 @@ if [istarget cris-*-*] {
     set mach "crisv32"
 }
 
-if [istarget *] {
-    append CFLAGS_FOR_TARGET " -sim"
+# Make sure we're using the right runtime for simulator runs.  If the
+# cris-sim dejagnu baseboard is used, -sim3 will be duplicated, but
+# that's ok.  For e.g. cris*-linux-gnu, neither -sim not -sim3 are
+# supported options and likely not other targets too.
+set saved_CFLAGS_FOR_TARGET $CFLAGS_FOR_TARGET
+if { $global_cc_os == "newlib" } {
+    append CFLAGS_FOR_TARGET " -sim3"
 }
 
 # Using target_compile, since it is less noisy,
-global global_cc_works
-global global_cc_os
 if { $global_cc_works == 1 } {
     # Now check if we can link a program dynamically, and where
     # libc.so is located.  If it is, we provide a sym link to the
@@ -178,7 +184,7 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
     verbose -log "Compiling $src with $opts(cc)"
 
     if { [target_compile $src "$objdir/$testname.x" "executable" "$opts(cc)" ] != "" } {
-	unresolved $testname
+	fail "$mach $testname (compilation)"
 	continue
     }
 
@@ -239,3 +245,5 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
 	$status "$mach $testname"
     }
 }
+
+set CFLAGS_FOR_TARGET $saved_CFLAGS_FOR_TARGET

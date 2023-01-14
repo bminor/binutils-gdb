@@ -24,7 +24,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint main"
-    continue
+    return
 }
 
 # Test that koenig lookup finds correct function

@@ -70,7 +70,7 @@
 
 if {[skip_cplus_tests]} {
     untested "c++ test skipped"
-    continue
+    return
 }
 
 # The program source is generated in the output directory.

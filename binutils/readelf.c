@@ -46,6 +46,10 @@
 #include <zlib.h>
 #include <wchar.h>
 
+#if defined HAVE_MSGPACK
+#include <msgpack.h>
+#endif
+
 #if __GNUC__ >= 2
 /* Define BFD64 here, even if our default architecture is 32 bit ELF
    as this will allow us to read in and parse 64bit and 32bit ELF files.
@@ -92,6 +96,7 @@
 
 #include "elf/aarch64.h"
 #include "elf/alpha.h"
+#include "elf/amdgpu.h"
 #include "elf/arc.h"
 #include "elf/arm.h"
 #include "elf/avr.h"
@@ -158,7 +163,6 @@
 #include "elf/visium.h"
 #include "elf/wasm32.h"
 #include "elf/x86-64.h"
-#include "elf/xc16x.h"
 #include "elf/xgate.h"
 #include "elf/xstormy16.h"
 #include "elf/xtensa.h"
@@ -1396,7 +1400,7 @@ slurp_relr_relocs (Filedata * filedata,
 	    size++;
     }
 
-  *relrsp = (bfd_vma *) xmalloc (size * sizeof (bfd_vma));
+  *relrsp = (bfd_vma *) malloc (size * sizeof (bfd_vma));
   if (*relrsp == NULL)
     {
       free (relrs);
@@ -1877,11 +1881,6 @@ dump_relocations (Filedata *          filedata,
 	  rtype = elf_metag_reloc_type (type);
 	  break;
 
-	case EM_XC16X:
-	case EM_C166:
-	  rtype = elf_xc16x_reloc_type (type);
-	  break;
-
 	case EM_TI_C6000:
 	  rtype = elf_tic6x_reloc_type (type);
 	  break;
@@ -1925,6 +1924,9 @@ dump_relocations (Filedata *          filedata,
 	  rtype = elf_loongarch_reloc_type (type);
 	  break;
 
+	case EM_AMDGPU:
+	  rtype = elf_amdgpu_reloc_type (type);
+	  break;
 	}
 
       if (rtype == NULL)
@@ -3565,6 +3567,153 @@ decode_NDS32_machine_flags (unsigned e_flags, char buf[], size_t size)
     r += snprintf (buf + r, size -r, ", L2C");
 }
 
+static void
+decode_AMDGPU_machine_flags (Filedata *filedata, unsigned int e_flags,
+			     char *buf)
+{
+  unsigned char *e_ident = filedata->file_header.e_ident;
+  unsigned char osabi = e_ident[EI_OSABI];
+  unsigned char abiversion = e_ident[EI_ABIVERSION];
+  unsigned int mach;
+
+  /* HSA OS ABI v2 used a different encoding, but we don't need to support it,
+     it has been deprecated for a while.
+
+     The PAL, MESA3D and NONE OS ABIs are not properly versioned, at the time
+     of writing, they use the same flags as HSA v3, so the code below uses that
+     assumption.  */
+  if (osabi == ELFOSABI_AMDGPU_HSA && abiversion < ELFABIVERSION_AMDGPU_HSA_V3)
+    return;
+
+  mach = e_flags & EF_AMDGPU_MACH;
+  switch (mach)
+    {
+#define AMDGPU_CASE(code, string) \
+  case code: strcat (buf, ", " string); break;
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX600, "gfx600")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX601, "gfx601")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX700, "gfx700")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX701, "gfx701")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX702, "gfx702")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX703, "gfx703")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX704, "gfx704")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX801, "gfx801")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX802, "gfx802")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX803, "gfx803")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX810, "gfx810")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX900, "gfx900")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX902, "gfx902")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX904, "gfx904")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX906, "gfx906")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX908, "gfx908")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX909, "gfx909")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX90C, "gfx90c")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX1010, "gfx1010")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX1011, "gfx1011")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX1012, "gfx1012")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX1030, "gfx1030")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX1031, "gfx1031")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX1032, "gfx1032")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX1033, "gfx1033")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX602, "gfx602")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX705, "gfx705")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX805, "gfx805")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX1035, "gfx1035")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX1034, "gfx1034")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX90A, "gfx90a")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX940, "gfx940")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX1013, "gfx1013")
+    AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX1036, "gfx1036")
+    default:
+      sprintf (buf, _(", <unknown AMDGPU GPU type: %#x>"), mach);
+      break;
+#undef AMDGPU_CASE
+    }
+
+  buf += strlen (buf);
+  e_flags &= ~EF_AMDGPU_MACH;
+
+  if ((osabi == ELFOSABI_AMDGPU_HSA
+       && abiversion == ELFABIVERSION_AMDGPU_HSA_V3)
+      || osabi != ELFOSABI_AMDGPU_HSA)
+    {
+      /* For HSA v3 and other OS ABIs.  */
+      if (e_flags & EF_AMDGPU_FEATURE_XNACK_V3)
+	{
+	  strcat (buf, ", xnack on");
+	  buf += strlen (buf);
+	  e_flags &= ~EF_AMDGPU_FEATURE_XNACK_V3;
+	}
+
+      if (e_flags & EF_AMDGPU_FEATURE_SRAMECC_V3)
+	{
+	  strcat (buf, ", sramecc on");
+	  buf += strlen (buf);
+	  e_flags &= ~EF_AMDGPU_FEATURE_SRAMECC_V3;
+	}
+    }
+  else
+    {
+      /* For HSA v4+.  */
+      int xnack, sramecc;
+
+      xnack = e_flags & EF_AMDGPU_FEATURE_XNACK_V4;
+      switch (xnack)
+	{
+	case EF_AMDGPU_FEATURE_XNACK_UNSUPPORTED_V4:
+	  break;
+
+	case EF_AMDGPU_FEATURE_XNACK_ANY_V4:
+	  strcat (buf, ", xnack any");
+	  break;
+
+	case EF_AMDGPU_FEATURE_XNACK_OFF_V4:
+	  strcat (buf, ", xnack off");
+	  break;
+
+	case EF_AMDGPU_FEATURE_XNACK_ON_V4:
+	  strcat (buf, ", xnack on");
+	  break;
+
+	default:
+	  sprintf (buf, _(", <unknown xnack value: %#x>"), xnack);
+	  break;
+	}
+
+      buf += strlen (buf);
+      e_flags &= ~EF_AMDGPU_FEATURE_XNACK_V4;
+
+      sramecc = e_flags & EF_AMDGPU_FEATURE_SRAMECC_V4;
+      switch (sramecc)
+	{
+	case EF_AMDGPU_FEATURE_SRAMECC_UNSUPPORTED_V4:
+	  break;
+
+	case EF_AMDGPU_FEATURE_SRAMECC_ANY_V4:
+	  strcat (buf, ", sramecc any");
+	  break;
+
+	case EF_AMDGPU_FEATURE_SRAMECC_OFF_V4:
+	  strcat (buf, ", sramecc off");
+	  break;
+
+	case EF_AMDGPU_FEATURE_SRAMECC_ON_V4:
+	  strcat (buf, ", sramecc on");
+	  break;
+
+	default:
+	  sprintf (buf, _(", <unknown sramecc value: %#x>"), sramecc);
+	  break;
+	}
+
+      buf += strlen (buf);
+      e_flags &= ~EF_AMDGPU_FEATURE_SRAMECC_V4;
+    }
+
+  if (e_flags != 0)
+    sprintf (buf, _(", unknown flags bits: %#x"), e_flags);
+}
+
 static char *
 get_machine_flags (Filedata * filedata, unsigned e_flags, unsigned e_machine)
 {
@@ -3715,6 +3864,10 @@ get_machine_flags (Filedata * filedata, unsigned e_flags, unsigned e_machine)
 		  strcat (buf, mac);
 		}
 	    }
+	  break;
+
+	case EM_AMDGPU:
+	  decode_AMDGPU_machine_flags (filedata, e_flags, buf);
 	  break;
 
 	case EM_CYGNUS_MEP:
@@ -4284,6 +4437,17 @@ get_osabi_name (Filedata * filedata, unsigned int osabi)
       if (osabi >= 64)
 	switch (filedata->file_header.e_machine)
 	  {
+	  case EM_AMDGPU:
+	    switch (osabi)
+	      {
+	      case ELFOSABI_AMDGPU_HSA:    return "AMD HSA";
+	      case ELFOSABI_AMDGPU_PAL:    return "AMD PAL";
+	      case ELFOSABI_AMDGPU_MESA3D: return "AMD Mesa3D";
+	      default:
+		break;
+	      }
+	    break;
+
 	  case EM_ARM:
 	    switch (osabi)
 	      {
@@ -5127,6 +5291,14 @@ usage (FILE * stream)
                          Do not follow links to separate debug info files\n\
                           (default)\n"));
 #endif
+#if HAVE_LIBDEBUGINFOD
+  fprintf (stream, _("\
+  -wD --debug-dump=use-debuginfod\n\
+                         When following links, also query debuginfod servers (default)\n"));
+  fprintf (stream, _("\
+  -wE --debug-dump=do-not-use-debuginfod\n\
+                         When following links, do not query debuginfod servers\n"));
+#endif
   fprintf (stream, _("\
   --dwarf-depth=N        Do not display DIEs at depth N or greater\n"));
   fprintf (stream, _("\
@@ -5348,31 +5520,39 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 	  decompress_dumps = true;
 	  break;
 	case 'w':
-	  do_dump = true;
-	  dump_any_debugging = true;
 	  if (optarg == NULL)
 	    {
 	      do_debugging = true;
+	      do_dump = true;
+	      dump_any_debugging = true;
 	      dwarf_select_sections_all ();
 	    }
 	  else
 	    {
 	      do_debugging = false;
-	      dwarf_select_sections_by_letters (optarg);
+	      if (dwarf_select_sections_by_letters (optarg))
+		{
+		  do_dump = true;
+		  dump_any_debugging = true;
+		}
 	    }
 	  break;
 	case OPTION_DEBUG_DUMP:
-	  do_dump = true;
-	  dump_any_debugging = true;
 	  if (optarg == NULL)
 	    {
+	      do_dump = true;
 	      do_debugging = true;
+	      dump_any_debugging = true;
 	      dwarf_select_sections_all ();
 	    }
 	  else
 	    {
 	      do_debugging = false;
-	      dwarf_select_sections_by_names (optarg);
+	      if (dwarf_select_sections_by_names (optarg))
+		{
+		  do_dump = true;
+		  dump_any_debugging = true;
+		}
 	    }
 	  break;
 	case OPTION_DWARF_DEPTH:
@@ -10543,7 +10723,7 @@ dynamic_section_parisc_val (Elf_Internal_Dyn * entry)
 /* Display a VMS time in a human readable format.  */
 
 static void
-print_vms_time (bfd_int64_t vmstime)
+print_vms_time (int64_t vmstime)
 {
   struct tm *tm = NULL;
   time_t unxtime;
@@ -11297,12 +11477,12 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 		filedata->file_name,
 		filedata->dynamic_addr,
 		(unsigned long) filedata->dynamic_nent);
-	  else
-	    printf (ngettext ("\nDynamic section at offset 0x%lx contains %lu entry:\n",
-			      "\nDynamic section at offset 0x%lx contains %lu entries:\n",
-			      (unsigned long) filedata->dynamic_nent),
-		    filedata->dynamic_addr,
-		    (unsigned long) filedata->dynamic_nent);
+      else
+	printf (ngettext ("\nDynamic section at offset 0x%lx contains %lu entry:\n",
+			  "\nDynamic section at offset 0x%lx contains %lu entries:\n",
+			  (unsigned long) filedata->dynamic_nent),
+		filedata->dynamic_addr,
+		(unsigned long) filedata->dynamic_nent);
     }
   if (do_dynamic)
     printf (_("  Tag        Type                         Name/Value\n"));
@@ -14094,7 +14274,7 @@ is_32bit_abs_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_MT:
       return reloc_type == 2; /* R_MT_32.  */
     case EM_NDS32:
-      return reloc_type == 20; /* R_NDS32_RELA.  */
+      return reloc_type == 20; /* R_NDS32_32_RELA.  */
     case EM_ALTERA_NIOS2:
       return reloc_type == 12; /* R_NIOS2_BFD_RELOC_32.  */
     case EM_NIOS32:
@@ -14157,9 +14337,6 @@ is_32bit_abs_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_L1OM:
     case EM_K1OM:
       return reloc_type == 10; /* R_X86_64_32.  */
-    case EM_XC16X:
-    case EM_C166:
-      return reloc_type == 3; /* R_XC16C_ABS_32.  */
     case EM_XGATE:
       return reloc_type == 4; /* R_XGATE_32.  */
     case EM_XSTORMY16:
@@ -14406,7 +14583,7 @@ is_16bit_abs_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_MSP430_OLD:
       return reloc_type == 5; /* R_MSP430_16_BYTE.  */
     case EM_NDS32:
-      return reloc_type == 19; /* R_NDS32_RELA.  */
+      return reloc_type == 19; /* R_NDS32_16_RELA.  */
     case EM_ALTERA_NIOS2:
       return reloc_type == 13; /* R_NIOS2_BFD_RELOC_16.  */
     case EM_NIOS32:
@@ -14421,9 +14598,6 @@ is_16bit_abs_reloc (Filedata * filedata, unsigned int reloc_type)
       return reloc_type == 2; /* R_C6000_ABS16.  */
     case EM_VISIUM:
       return reloc_type == 2; /* R_VISIUM_16. */
-    case EM_XC16X:
-    case EM_C166:
-      return reloc_type == 2; /* R_XC16C_ABS_16.  */
     case EM_XGATE:
       return reloc_type == 3; /* R_XGATE_16.  */
     case EM_Z80:
@@ -14625,7 +14799,6 @@ is_none_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_ARC_COMPACT2: /* R_ARC_NONE.  */
     case EM_ARC_COMPACT: /* R_ARC_NONE.  */
     case EM_ARM:     /* R_ARM_NONE.  */
-    case EM_C166:    /* R_XC16X_NONE.  */
     case EM_CRIS:    /* R_CRIS_NONE.  */
     case EM_FT32:    /* R_FT32_NONE.  */
     case EM_IA_64:   /* R_IA64_NONE.  */
@@ -14651,7 +14824,6 @@ is_none_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_TILEPRO: /* R_TILEPRO_NONE.  */
     case EM_TI_C6000:/* R_C6000_NONE.  */
     case EM_X86_64:  /* R_X86_64_NONE.  */
-    case EM_XC16X:
     case EM_Z80:     /* R_Z80_NONE. */
     case EM_WEBASSEMBLY: /* R_WASM32_NONE.  */
       return reloc_type == 0;
@@ -14667,11 +14839,11 @@ is_none_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_METAG:
       return reloc_type == 3; /* R_METAG_NONE.  */
     case EM_NDS32:
-      return (reloc_type == 0       /* R_XTENSA_NONE.  */
-	      || reloc_type == 204  /* R_NDS32_DIFF8.  */
-	      || reloc_type == 205  /* R_NDS32_DIFF16.  */
-	      || reloc_type == 206  /* R_NDS32_DIFF32.  */
-	      || reloc_type == 207  /* R_NDS32_ULEB128.  */);
+      return (reloc_type == 0       /* R_NDS32_NONE.  */
+	      || reloc_type == 205  /* R_NDS32_DIFF8.  */
+	      || reloc_type == 206  /* R_NDS32_DIFF16.  */
+	      || reloc_type == 207  /* R_NDS32_DIFF32.  */
+	      || reloc_type == 208  /* R_NDS32_DIFF_ULEB128.  */);
     case EM_TI_PRU:
       return (reloc_type == 0       /* R_PRU_NONE.  */
 	      || reloc_type == 65   /* R_PRU_DIFF8.  */
@@ -19201,6 +19373,8 @@ get_note_type (Filedata * filedata, unsigned e_type)
 	return _("NT_ARM_HW_BREAK (AArch hardware breakpoint registers)");
       case NT_ARM_HW_WATCH:
 	return _("NT_ARM_HW_WATCH (AArch hardware watchpoint registers)");
+      case NT_ARM_SYSTEM_CALL:
+	return _("NT_ARM_SYSTEM_CALL (AArch system call number)");
       case NT_ARM_SVE:
 	return _("NT_ARM_SVE (AArch SVE registers)");
       case NT_ARM_PAC_MASK:
@@ -19550,6 +19724,22 @@ decode_x86_compat_2_isa (unsigned int bitmask)
 	}
       if (bitmask)
 	printf (", ");
+    }
+}
+
+static const char *
+get_amdgpu_elf_note_type (unsigned int e_type)
+{
+  switch (e_type)
+    {
+    case NT_AMDGPU_METADATA:
+      return _("NT_AMDGPU_METADATA (code object metadata)");
+    default:
+      {
+	static char buf[64];
+	snprintf (buf, sizeof (buf), _("Unknown note type: (0x%08x)"), e_type);
+	return buf;
+      }
     }
 }
 
@@ -20254,6 +20444,8 @@ get_freebsd_elfcore_note_type (Filedata * filedata, unsigned e_type)
       return _("NT_PROCSTAT_AUXV (auxv data)");
     case NT_FREEBSD_PTLWPINFO:
       return _("NT_PTLWPINFO (ptrace_lwpinfo structure)");
+    case NT_FREEBSD_X86_SEGBASES:
+      return _("NT_X86_SEGBASES (x86 segment base registers)");
     }
   return get_note_type (filedata, e_type);
 }
@@ -20558,7 +20750,7 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
       /* FIXME: Generate an error if descsz > 8 ?  */
 
       printf ("0x%016" BFD_VMA_FMT "x\n",
-	      (bfd_vma) byte_get ((unsigned char *)pnote->descdata, 8));
+	      (bfd_vma) byte_get ((unsigned char *) pnote->descdata, 8));
       break;
 
     case NT_VMS_LINKTIME:
@@ -20567,8 +20759,7 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
 	goto desc_size_fail;
       /* FIXME: Generate an error if descsz > 8 ?  */
 
-      print_vms_time
-	((bfd_int64_t) byte_get ((unsigned char *)pnote->descdata, 8));
+      print_vms_time (byte_get ((unsigned char *) pnote->descdata, 8));
       printf ("\n");
       break;
 
@@ -20578,8 +20769,7 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
 	goto desc_size_fail;
       /* FIXME: Generate an error if descsz > 8 ?  */
 
-      print_vms_time
-	((bfd_int64_t) byte_get ((unsigned char *)pnote->descdata, 8));
+      print_vms_time (byte_get ((unsigned char *) pnote->descdata, 8));
       printf ("\n");
       break;
 
@@ -20588,16 +20778,15 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
 	goto desc_size_fail;
 
       printf (_("   Major id: %u,  minor id: %u\n"),
-              (unsigned) byte_get ((unsigned char *)pnote->descdata, 4),
-              (unsigned) byte_get ((unsigned char *)pnote->descdata + 4, 4));
+	      (unsigned) byte_get ((unsigned char *) pnote->descdata, 4),
+	      (unsigned) byte_get ((unsigned char *) pnote->descdata + 4, 4));
       printf (_("   Last modified  : "));
-      print_vms_time
-        ((bfd_int64_t) byte_get ((unsigned char *)pnote->descdata + 8, 8));
+      print_vms_time (byte_get ((unsigned char *) pnote->descdata + 8, 8));
       printf (_("\n   Link flags  : "));
       printf ("0x%016" BFD_VMA_FMT "x\n",
-              (bfd_vma) byte_get ((unsigned char *)pnote->descdata + 16, 8));
+	      (bfd_vma) byte_get ((unsigned char *) pnote->descdata + 16, 8));
       printf (_("   Header flags: 0x%08x\n"),
-              (unsigned) byte_get ((unsigned char *)pnote->descdata + 24, 4));
+	      (unsigned) byte_get ((unsigned char *) pnote->descdata + 24, 4));
       printf (_("   Image id    : %.*s\n"), maxlen - 32, pnote->descdata + 32);
       break;
 #endif
@@ -21120,6 +21309,177 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
   return true;
 }
 
+/* Print the contents of PNOTE as hex.  */
+
+static void
+print_note_contents_hex (Elf_Internal_Note *pnote)
+{
+  if (pnote->descsz)
+    {
+      unsigned long i;
+
+      printf (_("   description data: "));
+      for (i = 0; i < pnote->descsz; i++)
+	printf ("%02x ", pnote->descdata[i] & 0xff);
+      if (!do_wide)
+	printf ("\n");
+    }
+
+  if (do_wide)
+    printf ("\n");
+}
+
+#if defined HAVE_MSGPACK
+
+static void
+print_indents (int n)
+{
+  printf ("    ");
+
+  for (int i = 0; i < n; i++)
+    printf ("  ");
+}
+
+/* Print OBJ in human-readable form.  */
+
+static void
+dump_msgpack_obj (const msgpack_object *obj, int indent)
+{
+  switch (obj->type)
+    {
+    case MSGPACK_OBJECT_NIL:
+      printf ("(nil)");
+      break;
+
+    case MSGPACK_OBJECT_BOOLEAN:
+      printf ("%s", obj->via.boolean ? "true" : "false");
+      break;
+
+    case MSGPACK_OBJECT_POSITIVE_INTEGER:
+      printf ("%" PRIu64, obj->via.u64);
+      break;
+
+    case MSGPACK_OBJECT_NEGATIVE_INTEGER:
+      printf ("%" PRIi64, obj->via.i64);
+      break;
+
+    case MSGPACK_OBJECT_FLOAT32:
+    case MSGPACK_OBJECT_FLOAT64:
+      printf ("%f", obj->via.f64);
+      break;
+
+    case MSGPACK_OBJECT_STR:
+      printf ("\"%.*s\"", obj->via.str.size, obj->via.str.ptr);
+      break;
+
+    case MSGPACK_OBJECT_ARRAY:
+      {
+	const msgpack_object_array *array = &obj->via.array;
+
+	printf ("[\n");
+	++indent;
+
+	for (uint32_t i = 0; i < array->size; ++i)
+	  {
+	    const msgpack_object *item = &array->ptr[i];
+
+	    print_indents (indent);
+	    dump_msgpack_obj (item, indent);
+	    printf (",\n");
+	  }
+
+	--indent;
+	print_indents (indent);
+	printf ("]");
+	break;
+      }
+      break;
+
+    case MSGPACK_OBJECT_MAP:
+      {
+	const msgpack_object_map *map = &obj->via.map;
+
+	printf ("{\n");
+	++indent;
+
+	for (uint32_t i = 0; i < map->size; ++i)
+	  {
+	    const msgpack_object_kv *kv = &map->ptr[i];
+	    const msgpack_object *key = &kv->key;
+	    const msgpack_object *val = &kv->val;
+
+	    print_indents (indent);
+	    dump_msgpack_obj (key, indent);
+	    printf (": ");
+	    dump_msgpack_obj (val, indent);
+
+	    printf (",\n");
+	  }
+
+	--indent;
+	print_indents (indent);
+	printf ("}");
+
+	break;
+      }
+
+    case MSGPACK_OBJECT_BIN:
+      printf ("(bin)");
+      break;
+
+    case MSGPACK_OBJECT_EXT:
+      printf ("(ext)");
+      break;
+    }
+}
+
+static void
+dump_msgpack (const msgpack_unpacked *msg)
+{
+  print_indents (0);
+  dump_msgpack_obj (&msg->data, 0);
+  printf ("\n");
+}
+
+#endif /* defined HAVE_MSGPACK */
+
+static bool
+print_amdgpu_note (Elf_Internal_Note *pnote)
+{
+#if defined HAVE_MSGPACK
+  /* If msgpack is available, decode and dump the note's content.  */
+  bool ret;
+  msgpack_unpacked msg;
+  msgpack_unpack_return msgpack_ret;
+
+  assert (pnote->type == NT_AMDGPU_METADATA);
+
+  msgpack_unpacked_init (&msg);
+  msgpack_ret = msgpack_unpack_next (&msg, pnote->descdata, pnote->descsz,
+				     NULL);
+
+  switch (msgpack_ret)
+    {
+    case MSGPACK_UNPACK_SUCCESS:
+      dump_msgpack (&msg);
+      ret = true;
+      break;
+
+    default:
+      error (_("failed to unpack msgpack contents in NT_AMDGPU_METADATA note"));
+      ret = false;
+      break;
+    }
+
+  msgpack_unpacked_destroy (&msg);
+  return ret;
+#else
+  /* msgpack is not available, dump contents as hex.  */
+  print_note_contents_hex (pnote);
+  return true;
+#endif
+}
+
 /* Note that by the ELF standard, the name field is already null byte
    terminated, and namesz includes the terminating null byte.
    I.E. the value of namesz for the name "FSF" is 4.
@@ -21141,6 +21501,10 @@ process_note (Elf_Internal_Note *  pnote,
   else if (startswith (pnote->namedata, "GNU"))
     /* GNU-specific object file notes.  */
     nt = get_gnu_elf_note_type (pnote->type);
+
+  else if (startswith (pnote->namedata, "AMDGPU"))
+    /* AMDGPU-specific object file notes.  */
+    nt = get_amdgpu_elf_note_type (pnote->type);
 
   else if (startswith (pnote->namedata, "FreeBSD"))
     /* FreeBSD-specific core file notes.  */
@@ -21213,21 +21577,11 @@ process_note (Elf_Internal_Note *  pnote,
 	   && (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN
 	       || pnote->type == NT_GNU_BUILD_ATTRIBUTE_FUNC))
     return print_gnu_build_attribute_description (pnote, filedata);
+  else if (startswith (pnote->namedata, "AMDGPU")
+	   && pnote->type == NT_AMDGPU_METADATA)
+    return print_amdgpu_note (pnote);
 
-  if (pnote->descsz)
-    {
-      unsigned long i;
-
-      printf (_("   description data: "));
-      for (i = 0; i < pnote->descsz; i++)
-	printf ("%02x ", pnote->descdata[i] & 0xff);
-      if (!do_wide)
-	printf ("\n");
-    }
-
-  if (do_wide)
-    printf ("\n");
-
+  print_note_contents_hex (pnote);
   return true;
 }
 
@@ -21889,6 +22243,26 @@ initialise_dump_sects (Filedata * filedata)
     }
 }
 
+static bool
+might_need_separate_debug_info (Filedata * filedata)
+{
+  /* Debuginfo files do not need further separate file loading.  */
+  if (filedata->file_header.e_shstrndx == SHN_UNDEF)
+    return false;
+
+  /* Since do_follow_links might be enabled by default, only treat it as an
+     indication that separate files should be loaded if setting it was a
+     deliberate user action.  */
+  if (DEFAULT_FOR_FOLLOW_LINKS == 0 && do_follow_links)
+    return true;
+  
+  if (process_links || do_syms || do_unwind 
+      || dump_any_debugging || do_dump || do_debugging)
+    return true;
+
+  return false;
+}
+
 /* Process one ELF object file according to the command line options.
    This file may actually be stored in an archive.  The file is
    positioned at the start of the ELF object.  Returns TRUE if no
@@ -21972,7 +22346,7 @@ process_object (Filedata * filedata)
   if (! process_version_sections (filedata))
     res = false;
 
-  if (filedata->file_header.e_shstrndx != SHN_UNDEF)
+  if (might_need_separate_debug_info (filedata))
     have_separate_files = load_separate_debug_files (filedata, filedata->file_name);
   else
     have_separate_files = false;

@@ -100,18 +100,18 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	a3 11 22 33 44 55 66 77 88 	movabs %eax,0x8877665544332211
 [ 	]*[a-f0-9]+:	48 a1 11 22 33 44 55 66 77 88 	movabs 0x8877665544332211,%rax
 [ 	]*[a-f0-9]+:	48 a3 11 22 33 44 55 66 77 88 	movabs %rax,0x8877665544332211
-[ 	]*[a-f0-9]+:	48 99                	cqto   
-[ 	]*[a-f0-9]+:	48 98                	cltq   
+[ 	]*[a-f0-9]+:	48 99                	cqto
+[ 	]*[a-f0-9]+:	48 98                	cltq
 [ 	]*[a-f0-9]+:	48 63 c0             	movslq %eax,%rax
 [ 	]*[a-f0-9]+:	48 0f bf c0          	movswq %ax,%rax
 [ 	]*[a-f0-9]+:	48 0f be c0          	movsbq %al,%rax
-[ 	]*[a-f0-9]+:	cb                   	lret *
+[ 	]*[a-f0-9]+:	cb                   	lret
 [ 	]*[a-f0-9]+:	ca 10 00             	lret   \$0x10
-[ 	]*[a-f0-9]+:	66 cb                	lretw *
+[ 	]*[a-f0-9]+:	66 cb                	lretw
 [ 	]*[a-f0-9]+:	66 ca 02 00          	lretw  \$0x2
-[ 	]*[a-f0-9]+:	cb                   	lret *
+[ 	]*[a-f0-9]+:	cb                   	lret
 [ 	]*[a-f0-9]+:	ca 04 00             	lret   \$0x4
-[ 	]*[a-f0-9]+:	48 cb                	lretq *
+[ 	]*[a-f0-9]+:	48 cb                	lretq
 [ 	]*[a-f0-9]+:	48 ca 08 00          	lretq  \$0x8
 
 [0-9a-f]+ <bar>:

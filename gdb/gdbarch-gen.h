@@ -20,7 +20,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* This file was created with the aid of ``gdbarch.py''.  */
+/* To regenerate this file, run:
+   ./gdbarch.py
+*/
 
 
 
@@ -293,8 +295,6 @@ extern void set_gdbarch_register_name (struct gdbarch *gdbarch, gdbarch_register
 /* Return the type of a register specified by the architecture.  Only
    the register cache should call this function directly; others should
    use "register_type". */
-
-extern bool gdbarch_register_type_p (struct gdbarch *gdbarch);
 
 typedef struct type * (gdbarch_register_type_ftype) (struct gdbarch *gdbarch, int reg_nr);
 extern struct type * gdbarch_register_type (struct gdbarch *gdbarch, int reg_nr);
@@ -833,8 +833,8 @@ extern void set_gdbarch_address_class_name_to_type_flags (struct gdbarch *gdbarc
 
 /* Is a register in a group */
 
-typedef int (gdbarch_register_reggroup_p_ftype) (struct gdbarch *gdbarch, int regnum, struct reggroup *reggroup);
-extern int gdbarch_register_reggroup_p (struct gdbarch *gdbarch, int regnum, struct reggroup *reggroup);
+typedef int (gdbarch_register_reggroup_p_ftype) (struct gdbarch *gdbarch, int regnum, const struct reggroup *reggroup);
+extern int gdbarch_register_reggroup_p (struct gdbarch *gdbarch, int regnum, const struct reggroup *reggroup);
 extern void set_gdbarch_register_reggroup_p (struct gdbarch *gdbarch, gdbarch_register_reggroup_p_ftype *register_reggroup_p);
 
 /* Fetch the pointer to the ith function argument. */
@@ -1461,19 +1461,14 @@ extern void set_gdbarch_core_info_proc (struct gdbarch *gdbarch, gdbarch_core_in
 /* Iterate over all objfiles in the order that makes the most sense
    for the architecture to make global symbol searches.
 
-   CB is a callback function where OBJFILE is the objfile to be searched,
-   and CB_DATA a pointer to user-defined data (the same data that is passed
-   when calling this gdbarch method).  The iteration stops if this function
-   returns nonzero.
-
-   CB_DATA is a pointer to some user-defined data to be passed to
-   the callback.
+   CB is a callback function passed an objfile to be searched.  The iteration stops
+   if this function returns nonzero.
 
    If not NULL, CURRENT_OBJFILE corresponds to the objfile being
    inspected when the symbol search was requested. */
 
-typedef void (gdbarch_iterate_over_objfiles_in_search_order_ftype) (struct gdbarch *gdbarch, iterate_over_objfiles_in_search_order_cb_ftype *cb, void *cb_data, struct objfile *current_objfile);
-extern void gdbarch_iterate_over_objfiles_in_search_order (struct gdbarch *gdbarch, iterate_over_objfiles_in_search_order_cb_ftype *cb, void *cb_data, struct objfile *current_objfile);
+typedef void (gdbarch_iterate_over_objfiles_in_search_order_ftype) (struct gdbarch *gdbarch, iterate_over_objfiles_in_search_order_cb_ftype cb, struct objfile *current_objfile);
+extern void gdbarch_iterate_over_objfiles_in_search_order (struct gdbarch *gdbarch, iterate_over_objfiles_in_search_order_cb_ftype cb, struct objfile *current_objfile);
 extern void set_gdbarch_iterate_over_objfiles_in_search_order (struct gdbarch *gdbarch, gdbarch_iterate_over_objfiles_in_search_order_ftype *iterate_over_objfiles_in_search_order);
 
 /* Ravenscar arch-dependent ops. */

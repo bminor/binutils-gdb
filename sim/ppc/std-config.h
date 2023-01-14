@@ -183,7 +183,7 @@ extern int current_environment;
    This model.  Instead allows both little and big endian modes to
    either take exceptions or handle miss aligned transfers.
 
-   If 0 is specified then for big-endian mode miss alligned accesses
+   If 0 is specified then for big-endian mode miss aligned accesses
    are permitted (NONSTRICT_ALIGNMENT) while in little-endian mode the
    processor will fault on them (STRICT_ALIGNMENT). */
 

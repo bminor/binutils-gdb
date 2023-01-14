@@ -55,6 +55,13 @@ if {![info exists CC_FOR_TARGET]} {
 if {![info exists CFLAGS_FOR_TARGET]} {
     set CFLAGS_FOR_TARGET $CFLAGS
 }
+if ![info exists AR] then {
+    set AR [findfile $base_dir/../binutils/ar]
+}
+
+if {![info exists OBJDUMP]} {
+    set OBJDUMP [findfile $base_dir/../binutils/objdump]
+}
 
 # load the utility procedures
 load_lib ctf-lib.exp

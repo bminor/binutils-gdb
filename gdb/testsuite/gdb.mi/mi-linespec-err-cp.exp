@@ -18,7 +18,7 @@
 # file with a Windows-style logical drive names and C++.
 
 if {[skip_cplus_tests]} {
-    continue
+    return
 }
 
 load_lib mi-support.exp

@@ -24,7 +24,7 @@
 # inferiors have terminated, and this test requires that.
 if { [target_info exists gdb_protocol]
      && [target_info gdb_protocol] == "remote" } {
-    continue
+    return
 }
 
 standard_testfile
@@ -76,28 +76,53 @@ proc do_test { detach-on-fork } {
     set saw_cannot_remove_breakpoints 0
     set saw_thread_stopped 0
 
+    set expected_num_inferior_exits [expr ${detach-on-fork} == "off" ? 11 : 1]
+
+    # Flags indicating if we have see the exit for each inferior.
+    for {set i 1} {$i <= $expected_num_inferior_exits} {incr i} {
+	set inferior_exits_seen($i) 0
+    }
+
+    # Number of inferior exits seen so far.
+    set num_inferior_exits_seen 0
+
     set test "inferior 1 exited"
     gdb_test_multiple "" $test {
-	-re "Cannot remove breakpoints" {
+	-re "^Cannot remove breakpoints" {
 	    set saw_cannot_remove_breakpoints 1
 	    exp_continue
 	}
-	-re "Thread \[^\r\n\]+ stopped\\." {
+	-re "^\\\[Thread \[^\r\n\]+ stopped\\." {
 	    set saw_thread_stopped 1
 	    exp_continue
 	}
-	-re "(Thread|LWP) \[^\r\n\]+ exited" {
-	    # Avoid timeout with check-read1
-	    exp_continue
+	-re "^\\\[Inferior ($::decimal) \(\[^\r\n\]+\) exited normally\\\]" {
+	    set infnum $expect_out(1,string)
+	    incr num_inferior_exits_seen
+	    incr inferior_exits_seen($infnum) 1
+
+	    if { $num_inferior_exits_seen == $expected_num_inferior_exits } {
+		pass $test
+	    } else {
+		exp_continue
+	    }
 	}
-	-re "New (Thread|LWP) \[^\r\n\]+" {
-	    # Avoid timeout with check-read1
+	-re "^\[^\r\n]*\r\n" {
+	    # Skip line.
 	    exp_continue
-	}
-	-re "Inferior 1 \(\[^\r\n\]+\) exited normally" {
-	    pass $test
 	}
     }
+
+    # Verify that we got all the inferior exits we expected.
+    set num_ok_exits 0
+    for {set i 1} {$i <= $expected_num_inferior_exits} {incr i} {
+	if { $inferior_exits_seen($i) == 1 } {
+	    incr num_ok_exits
+	}
+    }
+
+    gdb_assert { $num_ok_exits == $expected_num_inferior_exits } \
+	"seen all expected inferior exits"
 
     gdb_assert !$saw_cannot_remove_breakpoints \
 	"no failure to remove breakpoints"

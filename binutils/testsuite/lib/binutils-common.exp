@@ -637,6 +637,10 @@ proc prune_warnings_extra { text } {
     }
     # PR binutils/23898: It is OK to have gaps in build notes.
     regsub -all "(^|\n)(\[^\n\]*: Warning: Gap in build notes detected from\[^\n\]*\n?)+" $text "\\1" text
+    regsub -all "(^|\n)(\[^\n\]*: warning:\[^\n\]*missing \\.note\\.GNU-stack section\[^\n\]*\n?)+" $text "\\1" text
+    regsub -all "(^|\n)(\[^\n\]*: NOTE: This behaviour is deprecated\[^\n\]*\n?)+" $text "\\1" text
+    regsub -all "(^|\n)(\[^\n\]*: warning:\[^\n\]*has a LOAD segment with RWX permissions\[^\n\]*\n?)+" $text "\\1" text
+    regsub -all "(^|\n)(\[^\n\]*: warning:\[^\n\]*has a TLS segment with execute permission\[^\n\]*\n?)+" $text "\\1" text
     return $text
 }
 
@@ -1326,7 +1330,7 @@ proc run_dump_test { name {extra_options {}} } {
 	    send_log "$cmd\n"
 	    set cmdret [remote_exec host [concat sh -c [list "$cmd 2>&1"]] "" "/dev/null" "dump.tmp"]
 	    remote_upload host "dump.tmp"
-	    append comp_output [file_contents "dump.tmp"]
+	    append comp_output [prune_warnings [file_contents "dump.tmp"]]
 	    remote_file host delete "dump.tmp"
 	    remote_file build delete "dump.tmp"
 	    set cmdret [lindex $cmdret 0]
@@ -1343,7 +1347,7 @@ proc run_dump_test { name {extra_options {}} } {
 		send_log "$cmd\n"
 		set cmdret [remote_exec host [concat sh -c [list "$cmd 2>&1"]] "" "/dev/null" "dump.tmp"]
 		remote_upload host "dump.tmp"
-		append comp_output [file_contents "dump.tmp"]
+		append comp_output [prune_warnings [file_contents "dump.tmp"]]
 		remote_file host delete "dump.tmp"
 		remote_file build delete "dump.tmp"
 		set cmdret [lindex $cmdret 0]

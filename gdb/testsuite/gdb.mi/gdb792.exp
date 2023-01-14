@@ -23,10 +23,6 @@ set MIFLAGS "-i=mi"
 
 standard_testfile .cc
 
-if [get_compiler_info "c++"] {
-    return -1
-}
-
 if {[gdb_compile $srcdir/$subdir/$srcfile $binfile executable {debug c++}] != ""} {
   untested "failed to compile"
   return -1

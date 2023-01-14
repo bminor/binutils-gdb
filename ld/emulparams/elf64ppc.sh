@@ -37,7 +37,7 @@ OTHER_GOT_RELOC_SECTIONS="
 OTHER_RELRO_SECTIONS_2="
   .opd		${RELOCATING-0} :${RELOCATING+ ALIGN(8)} { KEEP (*(.opd)) }
   .toc1		${RELOCATING-0} :${RELOCATING+ ALIGN(8)} { *(.toc1) }
-  .branch_lt	${RELOCATING-0} :${RELOCATING+ ALIGN(8)} { *(.branch_lt) }"
+  .branch_lt	${RELOCATING-0}${RELOCATING+(SIZEOF(.got) != 0 ? . + 255 - (255 & (. - 1 + ALIGN(SIZEOF(.branch_lt),8)${RELRO_NOW+ + ALIGN(SIZEOF(.plt),8) + ALIGN(SIZEOF(.iplt),8)})) : ALIGN(8))} : { *(.branch_lt) }"
 INITIAL_READWRITE_SECTIONS="
   .toc		${RELOCATING-0} :${RELOCATING+ ALIGN(8)} { *(.toc) }"
 # Put .got before .data

@@ -22,7 +22,7 @@ tuiterm_env
 
 standard_testfile tui-layout.c
 
-set core "${testfile}.core"
+set core [standard_output_file "${testfile}.core"]
 
 if { [prepare_for_testing "failed to prepare" $testfile $srcfile debug] } {
     return -1

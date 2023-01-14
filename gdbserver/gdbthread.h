@@ -252,6 +252,7 @@ public:
 
 private:
   bool m_dont_restore = false;
+  process_info *m_process;
   thread_info *m_thread;
 };
 

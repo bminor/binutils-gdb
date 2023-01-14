@@ -60,7 +60,7 @@ sympy_str (PyObject *self)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  result = PyString_FromString (symbol->print_name ());
+  result = PyUnicode_FromString (symbol->print_name ());
 
   return result;
 }
@@ -91,7 +91,7 @@ sympy_get_symtab (PyObject *self, void *closure)
   if (!symbol->is_objfile_owned ())
     Py_RETURN_NONE;
 
-  return symtab_to_symtab_object (symbol_symtab (symbol));
+  return symtab_to_symtab_object (symbol->symtab ());
 }
 
 static PyObject *
@@ -101,7 +101,7 @@ sympy_get_name (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  return PyString_FromString (symbol->natural_name ());
+  return PyUnicode_FromString (symbol->natural_name ());
 }
 
 static PyObject *
@@ -111,7 +111,7 @@ sympy_get_linkage_name (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  return PyString_FromString (symbol->linkage_name ());
+  return PyUnicode_FromString (symbol->linkage_name ());
 }
 
 static PyObject *
@@ -303,9 +303,9 @@ set_symbol (symbol_object *obj, struct symbol *symbol)
   obj->symbol = symbol;
   obj->prev = NULL;
   if (symbol->is_objfile_owned ()
-      && symbol_symtab (symbol) != NULL)
+      && symbol->symtab () != NULL)
     {
-      struct objfile *objfile = symbol_objfile (symbol);
+      struct objfile *objfile = symbol->objfile ();
 
       obj->next = ((symbol_object *)
 		   objfile_data (objfile, sympy_objfile_data_key));
@@ -349,9 +349,9 @@ sympy_dealloc (PyObject *obj)
     sym_obj->prev->next = sym_obj->next;
   else if (sym_obj->symbol != NULL
 	   && sym_obj->symbol->is_objfile_owned ()
-	   && symbol_symtab (sym_obj->symbol) != NULL)
+	   && sym_obj->symbol->symtab () != NULL)
     {
-      set_objfile_data (symbol_objfile (sym_obj->symbol),
+      set_objfile_data (sym_obj->symbol->objfile (),
 			sympy_objfile_data_key, sym_obj->next);
     }
   if (sym_obj->next)
@@ -426,8 +426,7 @@ gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw)
     }
   PyTuple_SET_ITEM (ret_tuple.get (), 0, sym_obj);
 
-  bool_obj = (is_a_field_of_this.type != NULL) ? Py_True : Py_False;
-  Py_INCREF (bool_obj);
+  bool_obj = PyBool_FromLong (is_a_field_of_this.type != NULL);
   PyTuple_SET_ITEM (ret_tuple.get (), 1, bool_obj);
 
   return ret_tuple.release ();
@@ -569,10 +568,9 @@ gdbpy_lookup_static_symbols (PyObject *self, PyObject *args, PyObject *kw)
 	  for (compunit_symtab *cust : objfile->compunits ())
 	    {
 	      const struct blockvector *bv;
-	      const struct block *block;
 
 	      bv = cust->blockvector ();
-	      block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+	      const struct block *block = bv->static_block ();
 
 	      if (block != nullptr)
 		{

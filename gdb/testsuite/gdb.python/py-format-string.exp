@@ -20,10 +20,6 @@ load_lib gdb-python.exp
 
 standard_testfile
 
-if [get_compiler_info c++] {
-    return -1
-}
-
 # Skip all tests if Python scripting is not enabled.
 gdb_exit
 gdb_start
@@ -536,6 +532,78 @@ proc_with_prefix test_address {} {
   }
 }
 
+# Test the nibbles option for gdb.Value.format_string.
+proc_with_prefix test_nibbles {} {
+  global current_lang
+
+  set opts "format='t', nibbles=True"
+  with_test_prefix $opts {
+    if { $current_lang == "c" } {
+	set binary_pointer_regexp "\[ 0-1\]+"
+	gdb_test "python print (gdb.Value (42).format_string (${opts}))" \
+	  "0010 1010" \
+	  "42 with option ${opts}"
+
+	check_format_string "a_point_t" $opts
+	check_format_string "a_point_t_pointer" $opts \
+	  $binary_pointer_regexp
+	check_format_string "another_point" $opts
+
+	check_format_string "a_struct_with_union" $opts \
+	  "\\{the_union = \\{an_int = 0010 1010 0010 1010 0010 1010 0010 1010, a_char = 0010 1010\\}\\}"
+	check_format_string "an_enum" $opts \
+	  "0001"
+	check_format_string "a_string" $opts \
+	  $binary_pointer_regexp
+	check_format_string "a_binary_string" $opts \
+	  $binary_pointer_regexp
+	check_format_string "a_binary_string_array" $opts \
+	  "\\{0110 1000, 0110 0101, 0110 1100, 0110 1100, 0110 1111, 0, 0111 0111, 0110 1111, 0111 0010, 0110 1100, 0110 0100, 0\\}"
+	check_format_string "a_big_string" $opts \
+	  "\\{0100 0001, 0100 0010, 0100 0011, 0100 0100, 0100 0101, \[, 0-1\]+\.\.\.\\}"
+	check_format_string "an_array" $opts \
+	  "\\{0010, 0011, 0101\\}"
+	check_format_string "an_array_with_repetition" $opts \
+	  "\\{0001, 0011 <repeats 12 times>, 0101, 0101, 0101\\}"
+	check_format_string "a_symbol_pointer" $opts \
+	  $binary_pointer_regexp
+    }
+    if { $current_lang == "c++" } {
+	set binary_pointer_regexp "\['0-1\]+"
+	gdb_test "python print (gdb.Value (42).format_string (${opts}))" \
+	  "0010'1010" \
+	  "42 with option ${opts}"
+
+	check_format_string "a_point_t" $opts
+	check_format_string "a_point_t_pointer" $opts \
+	  $binary_pointer_regexp
+	check_format_string "another_point" $opts
+
+	check_format_string "a_struct_with_union" $opts \
+	  "\\{the_union = \\{an_int = 0010'1010'0010'1010'0010'1010'0010'1010, a_char = 0010'1010\\}\\}"
+	check_format_string "an_enum" $opts \
+	  "0001"
+	check_format_string "a_string" $opts \
+	  $binary_pointer_regexp
+	check_format_string "a_binary_string" $opts \
+	  $binary_pointer_regexp
+	check_format_string "a_binary_string_array" $opts \
+	  "\\{0110'1000, 0110'0101, 0110'1100, 0110'1100, 0110'1111, 0, 0111'0111, 0110'1111, 0111'0010, 0110'1100, 0110'0100, 0\\}"
+	check_format_string "a_big_string" $opts \
+	  "\\{0100'0001, 0100'0010, 0100'0011, 0100'0100, 0100'0101, \[, '0-1\]+\.\.\.\\}"
+	check_format_string "an_array" $opts \
+	  "\\{0010, 0011, 0101\\}"
+	check_format_string "an_array_with_repetition" $opts \
+	  "\\{0001, 0011 <repeats 12 times>, 0101, 0101, 0101\\}"
+	check_format_string "a_symbol_pointer" $opts \
+	  $binary_pointer_regexp
+
+	check_format_string "a_point_t_ref" $opts
+	check_format_string "a_base_ref" $opts
+    }
+  }
+}
+
 # Test the deref_refs option for gdb.Value.format_string.
 proc_with_prefix test_deref_refs {} {
   global current_lang
@@ -898,6 +966,43 @@ proc_with_prefix test_format {} {
     }
   }
 
+  # Binary.
+  set opts "format='t'"
+  with_test_prefix $opts {
+    set binary_pointer_regexp "\[0-1\]+"
+    gdb_test "python print (gdb.Value (42).format_string (${opts}))" \
+      "101010" \
+      "42 with option ${opts}"
+
+    check_format_string "a_point_t" $opts
+    check_format_string "a_point_t_pointer" $opts \
+      $binary_pointer_regexp
+    check_format_string "another_point" $opts
+    check_format_string "a_struct_with_union" $opts \
+      "\\{the_union = \\{an_int = 101010001010100010101000101010, a_char = 101010\\}\\}"
+    check_format_string "an_enum" $opts \
+      "1"
+    check_format_string "a_string" $opts \
+      $binary_pointer_regexp
+    check_format_string "a_binary_string" $opts \
+      $binary_pointer_regexp
+    check_format_string "a_binary_string_array" $opts \
+      "\\{1101000, 1100101, 1101100, 1101100, 1101111, 0, 1110111, 1101111, 1110010, 1101100, 1100100, 0\\}"
+    check_format_string "a_big_string" $opts \
+      "\\{1000001, 1000010, 1000011, 1000100, 1000101, \[, 0-1\]+\.\.\.\\}"
+    check_format_string "an_array" $opts \
+      "\\{10, 11, 101\\}"
+    check_format_string "an_array_with_repetition" $opts \
+      "\\{1, 11 <repeats 12 times>, 101, 101, 101\\}"
+    check_format_string "a_symbol_pointer" $opts \
+      $binary_pointer_regexp
+
+    if { $current_lang == "c++" } {
+      check_format_string "a_point_t_ref" $opts
+      check_format_string "a_base_ref" $opts
+    }
+  }
+
   # Decimal.
   set opts "format='d'"
   with_test_prefix $opts {
@@ -1010,6 +1115,7 @@ proc_with_prefix test_all_common {} {
   test_symbols
   test_unions
   test_address
+  test_nibbles
   test_deref_refs
   test_actual_objects
   test_static_members

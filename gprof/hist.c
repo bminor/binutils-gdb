@@ -39,7 +39,7 @@
 static void scale_and_align_entries (void);
 static void print_header (int);
 static void print_line (Sym *, double);
-static int cmp_time (const PTR, const PTR);
+static int cmp_time (const void *, const void *);
 
 /* Declarations of automatically generated functions to output blurbs.  */
 extern void flat_blurb (FILE * fp);
@@ -535,7 +535,7 @@ print_line (Sym *sym, double scale)
    lexicographic order of the function names.  */
 
 static int
-cmp_time (const PTR lp, const PTR rp)
+cmp_time (const void *lp, const void *rp)
 {
   const Sym *left = *(const Sym **) lp;
   const Sym *right = *(const Sym **) rp;

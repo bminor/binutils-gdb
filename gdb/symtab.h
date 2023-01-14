@@ -36,6 +36,7 @@
 #include "gdbsupport/iterator-range.h"
 #include "completer.h"
 #include "gdb-demangle.h"
+#include "split-name.h"
 
 /* Opaque declarations.  */
 struct ui_file;
@@ -54,6 +55,7 @@ struct obj_section;
 struct cmd_list_element;
 class probe;
 struct lookup_name_info;
+struct code_breakpoint;
 
 /* How to match a lookup name against a symbol search name.  */
 enum class symbol_name_match_type
@@ -120,6 +122,21 @@ class ada_lookup_name_info final
   /* Return true if doing a verbatim match.  */
   bool verbatim_p () const
   { return m_verbatim_p; }
+
+  /* A wrapper for ::split_name that handles some Ada-specific
+     peculiarities.  */
+  std::vector<gdb::string_view> split_name () const
+  {
+    if (m_verbatim_p || m_standard_p)
+      {
+	std::vector<gdb::string_view> result;
+	if (m_standard_p)
+	  result.emplace_back ("standard");
+	result.emplace_back (m_encoded_name);
+	return result;
+      }
+    return ::split_name (m_encoded_name.c_str (), split_style::UNDERSCORE);
+  }
 
 private:
   /* The Ada-encoded lookup name.  */
@@ -270,6 +287,27 @@ class lookup_name_info final
       default:
 	return m_name.data ();
       }
+  }
+
+  /* A wrapper for ::split_name (see split-name.h) that splits this
+     name, and that handles any language-specific peculiarities.  */  
+  std::vector<gdb::string_view> split_name (language lang) const
+  {
+    if (lang == language_ada)
+      return ada ().split_name ();
+    split_style style = split_style::NONE;
+    switch (lang)
+      {
+      case language_cplus:
+      case language_rust:
+	style = split_style::CXX;
+	break;
+      case language_d:
+      case language_go:
+	style = split_style::DOT;
+	break;
+      }
+    return ::split_name (language_lookup_name (lang), style);
   }
 
   /* Get the Ada-specific lookup info.  */
@@ -475,6 +513,16 @@ struct general_symbol_info
 			      gdb::optional<hashval_t> hash
 				= gdb::optional<hashval_t> ());
 
+  CORE_ADDR value_address () const
+  {
+    return m_value.address;
+  }
+
+  void set_value_address (CORE_ADDR address)
+  {
+    m_value.address = address;
+  }
+
   /* Name of the symbol.  This is a required field.  Storage for the
      name is allocated on the objfile_obstack for the associated
      objfile.  For languages like C++ that make a distinction between
@@ -507,7 +555,7 @@ struct general_symbol_info
 
     struct symbol *chain;
   }
-  value;
+  m_value;
 
   /* Since one and only one language can apply, wrap the language specific
      information inside a union.  */
@@ -572,19 +620,6 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, struct obj_section *);
    SYMBOL_VALUE_ADDRESS macro.  */
 
 extern CORE_ADDR get_symbol_address (const struct symbol *sym);
-
-/* Note that these macros only work with symbol, not partial_symbol.  */
-
-#define SYMBOL_VALUE(symbol)		(symbol)->value.ivalue
-#define SYMBOL_VALUE_ADDRESS(symbol)			      \
-  (((symbol)->maybe_copied) ? get_symbol_address (symbol)     \
-   : ((symbol)->value.address))
-#define SET_SYMBOL_VALUE_ADDRESS(symbol, new_value)	\
-  ((symbol)->value.address = (new_value))
-#define SYMBOL_VALUE_BYTES(symbol)	(symbol)->value.bytes
-#define SYMBOL_VALUE_COMMON_BLOCK(symbol) (symbol)->value.common_block
-#define SYMBOL_BLOCK_VALUE(symbol)	(symbol)->value.block
-#define SYMBOL_VALUE_CHAIN(symbol)	(symbol)->value.chain
 
 /* Try to determine the demangled name for a symbol, based on the
    language of that symbol.  If the language is set to language_auto,
@@ -664,6 +699,15 @@ enum minimal_symbol_type
 #define MINSYM_TYPE_BITS 4
 gdb_static_assert (nr_minsym_types <= (1 << MINSYM_TYPE_BITS));
 
+/* Return the address of MINSYM, which comes from OBJF.  The
+   MAYBE_COPIED flag must be set on MINSYM.  If MINSYM appears in the
+   main program's minimal symbols, then that minsym's address is
+   returned; otherwise, MINSYM's address is returned.  This should
+   generally only be used via the MSYMBOL_VALUE_ADDRESS macro.  */
+
+extern CORE_ADDR get_msymbol_address (struct objfile *objf,
+				      const struct minimal_symbol *minsym);
+
 /* Define a simple structure used to hold some very basic information about
    all defined global symbols (text, data, bss, abs, etc).  The only required
    information is the general_symbol_info.
@@ -678,31 +722,110 @@ gdb_static_assert (nr_minsym_types <= (1 << MINSYM_TYPE_BITS));
 
 struct minimal_symbol : public general_symbol_info
 {
+  LONGEST value_longest () const
+  {
+    return m_value.ivalue;
+  }
+
+  /* The relocated address of the minimal symbol, using the section
+     offsets from OBJFILE.  */
+  CORE_ADDR value_address (objfile *objfile) const;
+
+  /* The unrelocated address of the minimal symbol.  */
+  CORE_ADDR value_raw_address () const
+  {
+    return m_value.address;
+  }
+
+  /* Return this minimal symbol's type.  */
+
+  minimal_symbol_type type () const
+  {
+    return m_type;
+  }
+
+  /* Set this minimal symbol's type.  */
+
+  void set_type (minimal_symbol_type type)
+  {
+    m_type = type;
+  }
+
+  /* Return this minimal symbol's size.  */
+
+  unsigned long size () const
+  {
+    return m_size;
+  }
+
+  /* Set this minimal symbol's size.  */
+
+  void set_size (unsigned long size)
+  {
+    m_size = size;
+    m_has_size = 1;
+  }
+
+  /* Return true if this minimal symbol's size is known.  */
+
+  bool has_size () const
+  {
+    return m_has_size;
+  }
+
+  /* Return this minimal symbol's first target-specific flag.  */
+
+  bool target_flag_1 () const
+  {
+    return m_target_flag_1;
+  }
+
+  /* Set this minimal symbol's first target-specific flag.  */
+
+  void set_target_flag_1 (bool target_flag_1)
+  {
+    m_target_flag_1 = target_flag_1;
+  }
+
+  /* Return this minimal symbol's second target-specific flag.  */
+
+  bool target_flag_2 () const
+  {
+    return m_target_flag_2;
+  }
+
+  /* Set this minimal symbol's second target-specific flag.  */
+
+  void set_target_flag_2 (bool target_flag_2)
+  {
+    m_target_flag_2 = target_flag_2;
+  }
+
   /* Size of this symbol.  dbx_end_psymtab in dbxread.c uses this
      information to calculate the end of the partial symtab based on the
      address of the last symbol plus the size of the last symbol.  */
 
-  unsigned long size;
+  unsigned long m_size;
 
   /* Which source file is this symbol in?  Only relevant for mst_file_*.  */
   const char *filename;
 
   /* Classification type for this minimal symbol.  */
 
-  ENUM_BITFIELD(minimal_symbol_type) type : MINSYM_TYPE_BITS;
+  ENUM_BITFIELD(minimal_symbol_type) m_type : MINSYM_TYPE_BITS;
 
   /* Non-zero if this symbol was created by gdb.
      Such symbols do not appear in the output of "info var|fun".  */
   unsigned int created_by_gdb : 1;
 
   /* Two flag bits provided for the use of the target.  */
-  unsigned int target_flag_1 : 1;
-  unsigned int target_flag_2 : 1;
+  unsigned int m_target_flag_1 : 1;
+  unsigned int m_target_flag_2 : 1;
 
   /* Nonzero iff the size of the minimal symbol has been set.
      Symbol size information can sometimes not be determined, because
      the object file format may not carry that piece of information.  */
-  unsigned int has_size : 1;
+  unsigned int m_has_size : 1;
 
   /* For data symbols only, if this is set, then the symbol might be
      subject to copy relocation.  In this case, a minimal symbol
@@ -735,45 +858,6 @@ struct minimal_symbol : public general_symbol_info
   bool text_p () const;
 };
 
-/* Return the address of MINSYM, which comes from OBJF.  The
-   MAYBE_COPIED flag must be set on MINSYM.  If MINSYM appears in the
-   main program's minimal symbols, then that minsym's address is
-   returned; otherwise, MINSYM's address is returned.  This should
-   generally only be used via the MSYMBOL_VALUE_ADDRESS macro.  */
-
-extern CORE_ADDR get_msymbol_address (struct objfile *objf,
-				      const struct minimal_symbol *minsym);
-
-#define MSYMBOL_TARGET_FLAG_1(msymbol)  (msymbol)->target_flag_1
-#define MSYMBOL_TARGET_FLAG_2(msymbol)  (msymbol)->target_flag_2
-#define MSYMBOL_SIZE(msymbol)		((msymbol)->size + 0)
-#define SET_MSYMBOL_SIZE(msymbol, sz)		\
-  do						\
-    {						\
-      (msymbol)->size = sz;			\
-      (msymbol)->has_size = 1;			\
-    } while (0)
-#define MSYMBOL_HAS_SIZE(msymbol)	((msymbol)->has_size + 0)
-#define MSYMBOL_TYPE(msymbol)		(msymbol)->type
-
-#define MSYMBOL_VALUE(symbol)		(symbol)->value.ivalue
-/* The unrelocated address of the minimal symbol.  */
-#define MSYMBOL_VALUE_RAW_ADDRESS(symbol) ((symbol)->value.address + 0)
-/* The relocated address of the minimal symbol, using the section
-   offsets from OBJFILE.  */
-#define MSYMBOL_VALUE_ADDRESS(objfile, symbol)				\
-  (((symbol)->maybe_copied) ? get_msymbol_address (objfile, symbol)	\
-   : ((symbol)->value.address						\
-      + (objfile)->section_offsets[(symbol)->section_index ()]))
-/* For a bound minsym, we can easily compute the address directly.  */
-#define BMSYMBOL_VALUE_ADDRESS(symbol) \
-  MSYMBOL_VALUE_ADDRESS ((symbol).objfile, (symbol).minsym)
-#define SET_MSYMBOL_VALUE_ADDRESS(symbol, new_value)	\
-  ((symbol)->value.address = (new_value))
-#define MSYMBOL_VALUE_BYTES(symbol)	(symbol)->value.bytes
-#define MSYMBOL_BLOCK_VALUE(symbol)	(symbol)->value.block
-#define MSYMBOL_VALUE_CHAIN(symbol)	(symbol)->value.chain
-
 #include "minsyms.h"
 
 
@@ -783,7 +867,7 @@ extern CORE_ADDR get_msymbol_address (struct objfile *objf,
 /* Different name domains for symbols.  Looking up a symbol specifies a
    domain and ignores symbol definitions in other name domains.  */
 
-typedef enum domain_enum_tag
+enum domain_enum
 {
   /* UNDEF_DOMAIN is used when a domain has not been discovered or
      none of the following apply.  This usually indicates an error either
@@ -816,7 +900,7 @@ typedef enum domain_enum_tag
 
   /* This must remain last.  */
   NR_DOMAINS
-} domain_enum;
+};
 
 /* The number of bits in a symbol used to represent the domain.  */
 
@@ -1105,7 +1189,7 @@ enum symbol_subclass_kind
   SYMBOL_RUST_VTABLE
 };
 
-extern const struct symbol_impl *symbol_impls;
+extern gdb::array_view<const struct symbol_impl> symbol_impls;
 
 /* This structure is space critical.  See space comments at the top.  */
 
@@ -1120,12 +1204,12 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
       m_is_inlined (0),
       maybe_copied (0),
       subclass (SYMBOL_NONE),
-      artificial (false)
+      m_artificial (false)
     {
       /* We can't use an initializer list for members of a base class, and
 	 general_symbol_info needs to stay a POD type.  */
       m_name = nullptr;
-      value.ivalue = 0;
+      m_value.ivalue = 0;
       language_specific.obstack = nullptr;
       m_language = language_unknown;
       ada_mangled = 0;
@@ -1138,11 +1222,6 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
   symbol (const symbol &) = default;
   symbol &operator= (const symbol &) = default;
 
-  unsigned int aclass_index () const
-  {
-    return m_aclass_index;
-  }
-
   void set_aclass_index (unsigned int aclass_index)
   {
     m_aclass_index = aclass_index;
@@ -1150,7 +1229,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
 
   const symbol_impl &impl () const
   {
-    return symbol_impls[this->aclass_index ()];
+    return symbol_impls[this->m_aclass_index];
   }
 
   address_class aclass () const
@@ -1223,6 +1302,103 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
     m_line = line;
   }
 
+  LONGEST value_longest () const
+  {
+    return m_value.ivalue;
+  }
+
+  void set_value_longest (LONGEST value)
+  {
+    m_value.ivalue = value;
+  }
+
+  CORE_ADDR value_address () const
+  {
+    if (this->maybe_copied)
+      return get_symbol_address (this);
+    else
+      return m_value.address;
+  }
+
+  void set_value_address (CORE_ADDR address)
+  {
+    m_value.address = address;
+  }
+
+  const gdb_byte *value_bytes () const
+  {
+    return m_value.bytes;
+  }
+
+  void set_value_bytes (const gdb_byte *bytes)
+  {
+    m_value.bytes = bytes;
+  }
+
+  const common_block *value_common_block () const
+  {
+    return m_value.common_block;
+  }
+
+  void set_value_common_block (const common_block *common_block)
+  {
+    m_value.common_block = common_block;
+  }
+
+  const block *value_block () const
+  {
+    return m_value.block;
+  }
+
+  void set_value_block (const block *block)
+  {
+    m_value.block = block;
+  }
+
+  symbol *value_chain () const
+  {
+    return m_value.chain;
+  }
+
+  void set_value_chain (symbol *sym)
+  {
+    m_value.chain = sym;
+  }
+
+  /* Return true if this symbol was marked as artificial.  */
+  bool is_artificial () const
+  {
+    return m_artificial;
+  }
+
+  /* Set the 'artificial' flag on this symbol.  */
+  void set_is_artificial (bool artificial)
+  {
+    m_artificial = artificial;
+  }
+
+  /* Return the OBJFILE of this symbol.  It is an error to call this
+     if is_objfile_owned is false, which only happens for
+     architecture-provided types.  */
+
+  struct objfile *objfile () const;
+
+  /* Return the ARCH of this symbol.  */
+
+  struct gdbarch *arch () const;
+
+  /* Return the symtab of this symbol.  It is an error to call this if
+     is_objfile_owned is false, which only happens for
+     architecture-provided types.  */
+
+  struct symtab *symtab () const;
+
+  /* Set the symtab of this symbol to SYMTAB.  It is an error to call
+     this if is_objfile_owned is false, which only happens for
+     architecture-provided types.  */
+
+  void set_symtab (struct symtab *symtab);
+
   /* Data type of value */
 
   struct type *m_type = nullptr;
@@ -1243,7 +1419,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
 
   /* Domain code.  */
 
-  ENUM_BITFIELD(domain_enum_tag) m_domain : SYMBOL_DOMAIN_BITS;
+  ENUM_BITFIELD(domain_enum) m_domain : SYMBOL_DOMAIN_BITS;
 
   /* Address class.  This holds an index into the 'symbol_impls'
      table.  The actual enum address_class value is stored there,
@@ -1277,7 +1453,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
 
   /* Whether this symbol is artificial.  */
 
-  bool artificial : 1;
+  bool m_artificial : 1;
 
   /* Line number of this symbol's definition, except for inlined
      functions.  For an inlined function (class LOC_BLOCK and
@@ -1339,28 +1515,6 @@ extern int register_symbol_block_impl (enum address_class aclass,
 extern int register_symbol_register_impl (enum address_class,
 					  const struct symbol_register_ops *);
 
-/* Return the OBJFILE of SYMBOL.
-   It is an error to call this if symbol.is_objfile_owned is false, which
-   only happens for architecture-provided types.  */
-
-extern struct objfile *symbol_objfile (const struct symbol *symbol);
-
-/* Return the ARCH of SYMBOL.  */
-
-extern struct gdbarch *symbol_arch (const struct symbol *symbol);
-
-/* Return the SYMTAB of SYMBOL.
-   It is an error to call this if symbol.is_objfile_owned is false, which
-   only happens for architecture-provided types.  */
-
-extern struct symtab *symbol_symtab (const struct symbol *symbol);
-
-/* Set the symtab of SYMBOL to SYMTAB.
-   It is an error to call this if symbol.is_objfile_owned is false, which
-   only happens for architecture-provided types.  */
-
-extern void symbol_set_symtab (struct symbol *symbol, struct symtab *symtab);
-
 /* An instance of this type is used to represent a C++ template
    function.  A symbol is really of this type iff
    symbol::is_cplus_template_function is true.  */
@@ -1397,6 +1551,10 @@ struct linetable_entry
 
   /* True if this PC is a good location to place a breakpoint for LINE.  */
   unsigned is_stmt : 1;
+
+  /* True if this location is a good location to place a breakpoint after a
+     function prologue.  */
+  bool prologue_end : 1;
 
   /* The address for this entry.  */
   CORE_ADDR pc;
@@ -1471,14 +1629,6 @@ struct symtab
   {
     m_language = language;
   }
-
-  const struct blockvector *blockvector () const;
-
-  struct objfile *objfile () const;
-
-  program_space *pspace () const;
-
-  const char *dirname () const;
 
   /* Unordered chain of all filetabs in the compunit,  with the exception
      that the "main" source file is the first entry in the list.  */
@@ -1608,12 +1758,17 @@ struct compunit_symtab
     m_dirname = dirname;
   }
 
+  struct blockvector *blockvector ()
+  {
+    return m_blockvector;
+  }
+
   const struct blockvector *blockvector () const
   {
     return m_blockvector;
   }
 
-  void set_blockvector (const struct blockvector *blockvector)
+  void set_blockvector (struct blockvector *blockvector)
   {
     m_blockvector = blockvector;
   }
@@ -1711,7 +1866,7 @@ struct compunit_symtab
 
   /* List of all symbol scope blocks for this symtab.  It is shared among
      all symtabs in a given compilation unit.  */
-  const struct blockvector *m_blockvector;
+  struct blockvector *m_blockvector;
 
   /* Section in objfile->section_offsets for the blockvector and
      the linetable.  Probably always SECT_OFF_TEXT.  */
@@ -1752,24 +1907,6 @@ struct compunit_symtab
 };
 
 using compunit_symtab_range = next_range<compunit_symtab>;
-
-inline const struct blockvector *
-symtab::blockvector () const
-{
-  return this->compunit ()->blockvector ();
-}
-
-inline struct objfile *
-symtab::objfile () const
-{
-  return this->compunit ()->objfile ();
-}
-
-inline const char *
-symtab::dirname () const
-{
-  return this->compunit ()->dirname ();
-}
 
 /* Return the language of CUST.  */
 
@@ -2091,10 +2228,10 @@ struct gnu_ifunc_fns
 				 CORE_ADDR *function_address_p);
 
   /* See elf_gnu_ifunc_resolver_stop for its real implementation.  */
-  void (*gnu_ifunc_resolver_stop) (struct breakpoint *b);
+  void (*gnu_ifunc_resolver_stop) (code_breakpoint *b);
 
   /* See elf_gnu_ifunc_resolver_return_stop for its real implementation.  */
-  void (*gnu_ifunc_resolver_return_stop) (struct breakpoint *b);
+  void (*gnu_ifunc_resolver_return_stop) (code_breakpoint *b);
 };
 
 #define gnu_ifunc_resolve_addr gnu_ifunc_fns_p->gnu_ifunc_resolve_addr

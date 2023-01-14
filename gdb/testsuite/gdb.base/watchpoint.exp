@@ -18,10 +18,6 @@
 
 standard_testfile
 
-if [get_compiler_info] {
-    return -1
-}
-
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
      untested "failed to compile"
      return -1
@@ -924,7 +920,8 @@ proc do_tests {} {
     clean_restart $testfile
 
     if {$no_hw || [target_info exists gdb,no_hardware_watchpoints]} {
-	gdb_test_no_output "set can-use-hw-watchpoints 0" ""
+	gdb_test_no_output "set can-use-hw-watchpoints 0"\
+	    "disable fast watches, 1"
     }
 
     if [initialize] then {
@@ -943,7 +940,8 @@ proc do_tests {} {
     clean_restart $testfile
 
     if {$no_hw || [target_info exists gdb,no_hardware_watchpoints]} {
-	gdb_test_no_output "set can-use-hw-watchpoints 0" ""
+	gdb_test_no_output "set can-use-hw-watchpoints 0" \
+	    "disable fast watches, 2"
     }
 
     # Only enabled for some targets merely because it has not been tested 

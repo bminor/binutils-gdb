@@ -273,7 +273,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* This reloc does nothing.  */
   HOWTO2 (R_NDS32_NONE,		/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -288,7 +288,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* A 16 bit absolute relocation.  */
   HOWTO2 (R_NDS32_16,		/* type  */
 	 0,			/* rightshift  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 2,			/* size  */
 	 16,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -303,7 +303,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* A 32 bit absolute relocation.  */
   HOWTO2 (R_NDS32_32,		/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -318,7 +318,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* A 20 bit address.  */
   HOWTO2 (R_NDS32_20,		/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 20,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -340,7 +340,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
      again.  */
   HOWTO2 (R_NDS32_9_PCREL,	/* type  */
 	 1,			/* rightshift  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 2,			/* size  */
 	 8,			/* bitsize  */
 	 true,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -355,7 +355,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* A relative 15 bit relocation, right shifted by 1.  */
   HOWTO2 (R_NDS32_15_PCREL,	/* type  */
 	 1,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 14,			/* bitsize  */
 	 true,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -370,7 +370,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* A relative 17 bit relocation, right shifted by 1.  */
   HOWTO2 (R_NDS32_17_PCREL,	/* type  */
 	 1,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 16,			/* bitsize  */
 	 true,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -389,7 +389,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
      again.  */
   HOWTO2 (R_NDS32_25_PCREL,	/* type  */
 	 1,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 24,			/* bitsize  */
 	 true,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -404,7 +404,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* High 20 bits of address when lower 12 is or'd in.  */
   HOWTO2 (R_NDS32_HI20,		/* type  */
 	 12,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 20,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -419,7 +419,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Lower 12 bits of address.  */
   HOWTO2 (R_NDS32_LO12S3,	/* type  */
 	 3,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 9,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -434,7 +434,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Lower 12 bits of address.  */
   HOWTO2 (R_NDS32_LO12S2,	/* type  */
 	 2,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 10,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -449,7 +449,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Lower 12 bits of address.  */
   HOWTO2 (R_NDS32_LO12S1,	/* type  */
 	 1,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 11,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -464,7 +464,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Lower 12 bits of address.  */
   HOWTO2 (R_NDS32_LO12S0,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 12,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -479,7 +479,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Small data area 15 bits offset.  */
   HOWTO2 (R_NDS32_SDA15S3,	/* type  */
 	 3,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 15,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -494,7 +494,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Small data area 15 bits offset.  */
   HOWTO2 (R_NDS32_SDA15S2,	/* type  */
 	 2,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 15,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -509,7 +509,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Small data area 15 bits offset.  */
   HOWTO2 (R_NDS32_SDA15S1,	/* type  */
 	 1,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 15,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -524,7 +524,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Small data area 15 bits offset.  */
   HOWTO2 (R_NDS32_SDA15S0,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 15,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -539,7 +539,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* GNU extension to record C++ vtable hierarchy  */
   HOWTO2 (R_NDS32_GNU_VTINHERIT,/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 0,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -554,7 +554,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* GNU extension to record C++ vtable member usage  */
   HOWTO2 (R_NDS32_GNU_VTENTRY,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 0,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -569,7 +569,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* A 16 bit absolute relocation.  */
   HOWTO2 (R_NDS32_16_RELA,	/* type  */
 	 0,			/* rightshift  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 2,			/* size  */
 	 16,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -584,7 +584,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* A 32 bit absolute relocation.  */
   HOWTO2 (R_NDS32_32_RELA,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -599,7 +599,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* A 20 bit address.  */
   HOWTO2 (R_NDS32_20_RELA,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 20,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -613,7 +613,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
 
   HOWTO2 (R_NDS32_9_PCREL_RELA,	/* type  */
 	 1,			/* rightshift  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 2,			/* size  */
 	 8,			/* bitsize  */
 	 true,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -628,7 +628,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* A relative 15 bit relocation, right shifted by 1.  */
   HOWTO2 (R_NDS32_15_PCREL_RELA,/* type  */
 	 1,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 14,			/* bitsize  */
 	 true,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -643,7 +643,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* A relative 17 bit relocation, right shifted by 1.  */
   HOWTO2 (R_NDS32_17_PCREL_RELA,/* type  */
 	 1,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 16,			/* bitsize  */
 	 true,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -658,7 +658,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* A relative 25 bit relocation, right shifted by 2.  */
   HOWTO2 (R_NDS32_25_PCREL_RELA,/* type  */
 	 1,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 24,			/* bitsize  */
 	 true,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -673,7 +673,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* High 20 bits of address when lower 16 is or'd in.  */
   HOWTO2 (R_NDS32_HI20_RELA,	/* type  */
 	 12,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 20,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -688,7 +688,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Lower 12 bits of address.  */
   HOWTO2 (R_NDS32_LO12S3_RELA,	/* type  */
 	 3,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 9,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -703,7 +703,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Lower 12 bits of address.  */
   HOWTO2 (R_NDS32_LO12S2_RELA,	/* type  */
 	 2,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 10,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -718,7 +718,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Lower 12 bits of address.  */
   HOWTO2 (R_NDS32_LO12S1_RELA,	/* type  */
 	 1,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 11,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -733,7 +733,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Lower 12 bits of address.  */
   HOWTO2 (R_NDS32_LO12S0_RELA,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 12,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -748,7 +748,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Small data area 15 bits offset.  */
   HOWTO2 (R_NDS32_SDA15S3_RELA,	/* type  */
 	 3,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 15,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -763,7 +763,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Small data area 15 bits offset.  */
   HOWTO2 (R_NDS32_SDA15S2_RELA,	/* type  */
 	 2,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 15,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -777,7 +777,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
 
   HOWTO2 (R_NDS32_SDA15S1_RELA,	/* type  */
 	 1,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 15,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -791,7 +791,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
 
   HOWTO2 (R_NDS32_SDA15S0_RELA,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 15,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -806,7 +806,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* GNU extension to record C++ vtable hierarchy  */
   HOWTO2 (R_NDS32_RELA_GNU_VTINHERIT,/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 0,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -821,7 +821,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* GNU extension to record C++ vtable member usage  */
   HOWTO2 (R_NDS32_RELA_GNU_VTENTRY,/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 0,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -837,7 +837,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
      the symbol.  */
   HOWTO2 (R_NDS32_GOT20,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 20,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -853,7 +853,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
      entry for the symbol.  */
   HOWTO2 (R_NDS32_25_PLTREL,	/* type  */
 	 1,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 24,			/* bitsize  */
 	 true,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -872,7 +872,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
      run has to have the data at some particular address.  */
   HOWTO2 (R_NDS32_COPY,		/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -888,7 +888,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
      entries.  */
   HOWTO2 (R_NDS32_GLOB_DAT,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -903,7 +903,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Marks a procedure linkage table entry for a symbol.  */
   HOWTO2 (R_NDS32_JMP_SLOT,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -920,7 +920,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
      addend.  */
   HOWTO2 (R_NDS32_RELATIVE,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -934,7 +934,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
 
   HOWTO2 (R_NDS32_GOTOFF,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 20,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -950,7 +950,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
      table register.  */
   HOWTO2 (R_NDS32_GOTPC20,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 20,			/* bitsize  */
 	 true,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -966,7 +966,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
      the symbol.  */
   HOWTO2 (R_NDS32_GOT_HI20,	/* type  */
 	 12,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 20,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -977,9 +977,10 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0x000fffff,		/* src_mask  */
 	 0x000fffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO2 (R_NDS32_GOT_LO12,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 12,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -996,7 +997,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
      the symbol.  */
   HOWTO2 (R_NDS32_GOTPC_HI20,	/* type  */
 	 12,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 20,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1007,9 +1008,10 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0x000fffff,		/* src_mask  */
 	 0x000fffff,		/* dst_mask  */
 	 true),			/* pcrel_offset  */
+
   HOWTO2 (R_NDS32_GOTPC_LO12,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 12,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1023,7 +1025,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
 
   HOWTO2 (R_NDS32_GOTOFF_HI20,	/* type  */
 	 12,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 20,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1034,9 +1036,10 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0x000fffff,		/* src_mask  */
 	 0x000fffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO2 (R_NDS32_GOTOFF_LO12,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 12,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1053,7 +1056,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
      in order to make next label aligned on word boundary.  */
   HOWTO2 (R_NDS32_INSN16,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1068,7 +1071,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Alignment hint for label.  */
   HOWTO2 (R_NDS32_LABEL,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1083,7 +1086,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Relax hint for unconditional call sequence  */
   HOWTO2 (R_NDS32_LONGCALL1,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1098,7 +1101,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Relax hint for conditional call sequence.  */
   HOWTO2 (R_NDS32_LONGCALL2,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1113,7 +1116,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Relax hint for conditional call sequence.  */
   HOWTO2 (R_NDS32_LONGCALL3,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1128,7 +1131,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Relax hint for unconditional branch sequence.  */
   HOWTO2 (R_NDS32_LONGJUMP1,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1143,7 +1146,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Relax hint for conditional branch sequence.  */
   HOWTO2 (R_NDS32_LONGJUMP2,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1158,7 +1161,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Relax hint for conditional branch sequence.  */
   HOWTO2 (R_NDS32_LONGJUMP3,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1173,7 +1176,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Relax hint for load/store sequence.   */
   HOWTO2 (R_NDS32_LOADSTORE,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1188,7 +1191,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Relax hint for load/store sequence.  */
   HOWTO2 (R_NDS32_9_FIXED_RELA,	/* type  */
 	 0,			/* rightshift  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 2,			/* size  */
 	 16,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1203,7 +1206,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Relax hint for load/store sequence.  */
   HOWTO2 (R_NDS32_15_FIXED_RELA,/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1218,7 +1221,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Relax hint for load/store sequence.  */
   HOWTO2 (R_NDS32_17_FIXED_RELA,/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1233,7 +1236,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Relax hint for load/store sequence.  */
   HOWTO2 (R_NDS32_25_FIXED_RELA,/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1248,7 +1251,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* High 20 bits of PLT symbol offset relative to PC.  */
   HOWTO2 (R_NDS32_PLTREL_HI20,	/* type  */
 	 12,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 20,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1263,7 +1266,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Low 12 bits of PLT symbol offset relative to PC.  */
   HOWTO2 (R_NDS32_PLTREL_LO12,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 12,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1278,7 +1281,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* High 20 bits of PLT symbol offset relative to GOT (GP).  */
   HOWTO2 (R_NDS32_PLT_GOTREL_HI20,	/* type  */
 	 12,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 20,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1293,7 +1296,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Low 12 bits of PLT symbol offset relative to GOT (GP).  */
   HOWTO2 (R_NDS32_PLT_GOTREL_LO12,/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 12,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1308,7 +1311,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Small data area 12 bits offset.  */
   HOWTO2 (R_NDS32_SDA12S2_DP_RELA,/* type  */
 	 2,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 12,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1323,7 +1326,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Small data area 12 bits offset.  */
   HOWTO2 (R_NDS32_SDA12S2_SP_RELA,/* type  */
 	 2,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 12,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1338,7 +1341,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
 
   HOWTO2 (R_NDS32_LO12S2_DP_RELA,	/* type  */
 	 2,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 10,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1353,7 +1356,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Lower 12 bits of address.  */
   HOWTO2 (R_NDS32_LO12S2_SP_RELA,/* type  */
 	 2,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 10,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1364,10 +1367,11 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0x000003ff,		/* src_mask  */
 	 0x000003ff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   /* Lower 12 bits of address.  Special identity for or case.  */
   HOWTO2 (R_NDS32_LO12S0_ORI_RELA,/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 12,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1378,10 +1382,11 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0x00000fff,		/* src_mask  */
 	 0x00000fff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   /* Small data area 19 bits offset.  */
   HOWTO2 (R_NDS32_SDA16S3_RELA,	/* type  */
 	 3,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 16,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1396,7 +1401,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Small data area 15 bits offset.  */
   HOWTO2 (R_NDS32_SDA17S2_RELA,	/* type  */
 	 2,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 17,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1410,7 +1415,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
 
   HOWTO2 (R_NDS32_SDA18S1_RELA,	/* type  */
 	 1,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 18,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1424,7 +1429,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
 
   HOWTO2 (R_NDS32_SDA19S0_RELA,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 19,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1437,7 +1442,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 false),		/* pcrel_offset  */
   HOWTO2 (R_NDS32_DWARF2_OP1_RELA,/* type  */
 	 0,			/* rightshift  */
-	 0,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 1,			/* size  */
 	 8,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1448,9 +1453,10 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0xff,			/* src_mask  */
 	 0xff,			/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO2 (R_NDS32_DWARF2_OP2_RELA,/* type  */
 	 0,			/* rightshift  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 2,			/* size  */
 	 16,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1461,9 +1467,10 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0xffff,		/* src_mask  */
 	 0xffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO2 (R_NDS32_DWARF2_LEB_RELA,/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1474,9 +1481,10 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO2 (R_NDS32_UPDATE_TA_RELA,/* type  */
 	 0,			/* rightshift  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 2,			/* size  */
 	 16,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1487,11 +1495,12 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0xffff,		/* src_mask  */
 	 0xffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   /* Like R_NDS32_PCREL, but referring to the procedure linkage table
      entry for the symbol.  */
   HOWTO2 (R_NDS32_9_PLTREL,	/* type  */
 	 1,			/* rightshift  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 2,			/* size  */
 	 8,			/* bitsize  */
 	 true,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1502,10 +1511,11 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0xff,			/* src_mask  */
 	 0xff,			/* dst_mask  */
 	 true),			/* pcrel_offset  */
+
   /* Low 20 bits of PLT symbol offset relative to GOT (GP).  */
   HOWTO2 (R_NDS32_PLT_GOTREL_LO20,/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 20,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1516,10 +1526,11 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0x000fffff,		/* src_mask  */
 	 0x000fffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   /* low 15 bits of PLT symbol offset relative to GOT (GP)  */
   HOWTO2 (R_NDS32_PLT_GOTREL_LO15,/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 15,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1530,10 +1541,11 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0x00007fff,		/* src_mask  */
 	 0x00007fff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   /* Low 19 bits of PLT symbol offset relative to GOT (GP).  */
   HOWTO2 (R_NDS32_PLT_GOTREL_LO19,/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 19,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1544,9 +1556,10 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0x0007ffff,		/* src_mask  */
 	 0x0007ffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO2 (R_NDS32_GOT_LO15,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 15,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1557,9 +1570,10 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0x00007fff,		/* src_mask  */
 	 0x00007fff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO2 (R_NDS32_GOT_LO19,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 19,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1570,9 +1584,10 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0x0007ffff,		/* src_mask  */
 	 0x0007ffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO2 (R_NDS32_GOTOFF_LO15,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 15,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1583,9 +1598,10 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0x00007fff,		/* src_mask  */
 	 0x00007fff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO2 (R_NDS32_GOTOFF_LO19,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 19,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1596,10 +1612,11 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0x0007ffff,		/* src_mask  */
 	 0x0007ffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   /* GOT 15 bits offset.  */
   HOWTO2 (R_NDS32_GOT15S2_RELA,	/* type  */
 	 2,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 15,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1610,10 +1627,11 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0x00007fff,		/* src_mask  */
 	 0x00007fff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   /* GOT 17 bits offset.  */
   HOWTO2 (R_NDS32_GOT17S2_RELA,	/* type  */
 	 2,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 17,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1624,10 +1642,11 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0x0001ffff,		/* src_mask  */
 	 0x0001ffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   /* A 5 bit address.  */
   HOWTO2 (R_NDS32_5_RELA,	/* type  */
 	 0,			/* rightshift  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 2,			/* size  */
 	 5,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1638,9 +1657,10 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0x1f,			/* src_mask  */
 	 0x1f,			/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO2 (R_NDS32_10_UPCREL_RELA,/* type  */
 	 1,			/* rightshift  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 2,			/* size  */
 	 9,			/* bitsize  */
 	 true,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1651,9 +1671,10 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0x1ff,			/* src_mask  */
 	 0x1ff,			/* dst_mask  */
 	 true),			/* pcrel_offset  */
+
   HOWTO2 (R_NDS32_SDA_FP7U2_RELA,/* type  */
 	 2,			/* rightshift  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 2,			/* size  */
 	 7,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1664,9 +1685,10 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0x0000007f,		/* src_mask  */
 	 0x0000007f,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO2 (R_NDS32_WORD_9_PCREL_RELA,/* type  */
 	 1,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 8,			/* bitsize  */
 	 true,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1677,9 +1699,10 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0xff,			/* src_mask  */
 	 0xff,			/* dst_mask  */
 	 true),			/* pcrel_offset  */
+
   HOWTO2 (R_NDS32_25_ABS_RELA,	/* type  */
 	 1,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 24,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1694,7 +1717,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* A relative 17 bit relocation for ifc, right shifted by 1.  */
   HOWTO2 (R_NDS32_17IFC_PCREL_RELA,/* type  */
 	 1,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 16,			/* bitsize  */
 	 true,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1709,7 +1732,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* A relative unsigned 10 bit relocation for ifc, right shifted by 1.  */
   HOWTO2 (R_NDS32_10IFCU_PCREL_RELA,/* type  */
 	 1,			/* rightshift  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 2,			/* size  */
 	 9,			/* bitsize  */
 	 true,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1724,7 +1747,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Like R_NDS32_HI20, but referring to the TLS LE entry for the symbol.  */
   HOWTO2 (R_NDS32_TLS_LE_HI20,	/* type  */
 	 12,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 20,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1738,7 +1761,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
 
   HOWTO2 (R_NDS32_TLS_LE_LO12,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 12,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1753,7 +1776,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Like R_NDS32_HI20, but referring to the TLS IE entry for the symbol.  */
   HOWTO2 (R_NDS32_TLS_IE_HI20,	/* type  */
 	 12,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 20,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1767,7 +1790,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
 
   HOWTO2 (R_NDS32_TLS_IE_LO12S2,/* type  */
 	 2,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 10,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1782,7 +1805,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* TLS LE TP offset relocation  */
   HOWTO2 (R_NDS32_TLS_TPOFF,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1797,7 +1820,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* A 20 bit address.  */
   HOWTO2 (R_NDS32_TLS_LE_20,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 20,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1811,7 +1834,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
 
   HOWTO2 (R_NDS32_TLS_LE_15S0,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 15,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1822,9 +1845,10 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0x7fff,		/* src_mask  */
 	 0x7fff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO2 (R_NDS32_TLS_LE_15S1,	/* type  */
 	 1,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 15,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1835,9 +1859,10 @@ static reloc_howto_type nds32_elf_howto_table[] =
 	 0x7fff,		/* src_mask  */
 	 0x7fff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO2 (R_NDS32_TLS_LE_15S2,	/* type  */
 	 2,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 15,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1852,7 +1877,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Relax hint for unconditional call sequence  */
   HOWTO2 (R_NDS32_LONGCALL4,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1867,7 +1892,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Relax hint for conditional call sequence.  */
   HOWTO2 (R_NDS32_LONGCALL5,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1882,7 +1907,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Relax hint for conditional call sequence.  */
   HOWTO2 (R_NDS32_LONGCALL6,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1897,7 +1922,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Relax hint for unconditional branch sequence.  */
   HOWTO2 (R_NDS32_LONGJUMP4,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1912,7 +1937,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Relax hint for conditional branch sequence.  */
   HOWTO2 (R_NDS32_LONGJUMP5,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1927,7 +1952,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Relax hint for conditional branch sequence.  */
   HOWTO2 (R_NDS32_LONGJUMP6,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1942,7 +1967,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* Relax hint for conditional branch sequence.  */
   HOWTO2 (R_NDS32_LONGJUMP7,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1958,7 +1983,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
 
   HOWTO2 (R_NDS32_TLS_IE_LO12,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 12,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1974,7 +1999,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
      entry for the symbol.  */
   HOWTO2 (R_NDS32_TLS_IEGP_HI20,/* type  */
 	 12,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 20,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -1988,7 +2013,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
 
   HOWTO2 (R_NDS32_TLS_IEGP_LO12,/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 12,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2002,7 +2027,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
 
   HOWTO2 (R_NDS32_TLS_IEGP_LO12S2,/* type  */
 	 2,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 10,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2017,7 +2042,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* TLS description relocation  */
   HOWTO2 (R_NDS32_TLS_DESC,	/* type  */
 	 12,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 20,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2032,7 +2057,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* TLS GD/LD description offset high part.  */
   HOWTO2 (R_NDS32_TLS_DESC_HI20,/* type  */
 	 12,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 20,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2047,7 +2072,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* TLS GD/LD description offset low part.  */
   HOWTO2 (R_NDS32_TLS_DESC_LO12,/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 12,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2062,7 +2087,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* TLS GD/LD description offset set (movi).  */
   HOWTO2 (R_NDS32_TLS_DESC_20,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 20,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2077,7 +2102,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
   /* TLS GD/LD description offset set (lwi.gp).  */
   HOWTO2 (R_NDS32_TLS_DESC_SDA17S2,/* type  */
 	 2,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 17,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2097,7 +2122,7 @@ static reloc_howto_type nds32_elf_howto_table[] =
 static reloc_howto_type nds32_elf_relax_howto_table[] = {
   HOWTO3 (R_NDS32_RELAX_ENTRY,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2108,9 +2133,10 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO3 (R_NDS32_GOT_SUFF,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2121,9 +2147,10 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO3 (R_NDS32_GOTOFF_SUFF,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2134,9 +2161,10 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO3 (R_NDS32_PLT_GOT_SUFF,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2147,9 +2175,10 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO3 (R_NDS32_MULCALL_SUFF,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2160,9 +2189,10 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO3 (R_NDS32_PTR,		/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2173,9 +2203,10 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO3 (R_NDS32_PTR_COUNT,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2186,9 +2217,10 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO3 (R_NDS32_PTR_RESOLVED,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2199,9 +2231,10 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO3 (R_NDS32_PLTBLOCK,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2212,9 +2245,10 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO3 (R_NDS32_RELAX_REGION_BEGIN,/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2225,9 +2259,10 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO3 (R_NDS32_RELAX_REGION_END,/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2238,9 +2273,10 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO3 (R_NDS32_MINUEND,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2251,9 +2287,10 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO3 (R_NDS32_SUBTRAHEND,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2264,9 +2301,10 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO3 (R_NDS32_DIFF8,	/* type  */
 	 0,			/* rightshift  */
-	 0,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 1,			/* size  */
 	 8,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2277,9 +2315,10 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0x000000ff,		/* src_mask  */
 	 0x000000ff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO3 (R_NDS32_DIFF16,	/* type  */
 	 0,			/* rightshift  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 2,			/* size  */
 	 16,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2290,9 +2329,10 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0x0000ffff,		/* src_mask  */
 	 0x0000ffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO3 (R_NDS32_DIFF32,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2303,9 +2343,10 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO3 (R_NDS32_DIFF_ULEB128,	/* type  */
 	 0,			/* rightshift  */
-	 0,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 1,			/* size  */
 	 0,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2316,9 +2357,10 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO3 (R_NDS32_DATA,		/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2329,9 +2371,10 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO3 (R_NDS32_TRAN,		/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2342,9 +2385,10 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO3 (R_NDS32_TLS_LE_ADD,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2355,9 +2399,10 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO3 (R_NDS32_TLS_LE_LS,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2368,9 +2413,10 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO3 (R_NDS32_EMPTY,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2381,10 +2427,11 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   /* TLS GD/LD description address base addition.  */
   HOWTO3 (R_NDS32_TLS_DESC_ADD,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2395,10 +2442,11 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   /* TLS GD/LD description function load.  */
   HOWTO3 (R_NDS32_TLS_DESC_FUNC,/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2409,10 +2457,11 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   /* TLS DESC resolve function call.  */
   HOWTO3 (R_NDS32_TLS_DESC_CALL,/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2423,10 +2472,11 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   /* TLS DESC variable access.  */
   HOWTO3 (R_NDS32_TLS_DESC_MEM,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2437,10 +2487,11 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   /* TLS GD/LD description mark (@tlsdec).  */
   HOWTO3 (R_NDS32_RELAX_REMOVE,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2451,10 +2502,11 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   /* TLS GD/LD description mark (@tlsdec).  */
   HOWTO3 (R_NDS32_RELAX_GROUP,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2465,9 +2517,10 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   HOWTO3 (R_NDS32_TLS_IEGP_LW,	/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2478,10 +2531,11 @@ static reloc_howto_type nds32_elf_relax_howto_table[] = {
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
+
   /* LA and FLSI relaxation.  */
   HOWTO3 (R_NDS32_LSI,		/* type  */
 	 0,			/* rightshift  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 4,			/* size  */
 	 32,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -2932,9 +2986,9 @@ nds32_elf_generic_reloc (bfd *input_bfd, arelent *reloc_entry,
   (((x & reloc_entry->howto->src_mask) +  relocation) &	\
   reloc_entry->howto->dst_mask))
 
-  switch (reloc_entry->howto->size)
+  switch (bfd_get_reloc_size (reloc_entry->howto))
     {
-    case 1:
+    case 2:
       {
 	short x = bfd_getb16 (inplace_address);
 
@@ -2942,7 +2996,7 @@ nds32_elf_generic_reloc (bfd *input_bfd, arelent *reloc_entry,
 	bfd_putb16 ((bfd_vma) x, inplace_address);
       }
       break;
-    case 2:
+    case 4:
       {
 	unsigned long x = bfd_getb32 (inplace_address);
 

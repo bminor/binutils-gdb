@@ -74,7 +74,7 @@ Disassembly of section .text:
  110:	f3 0f 5e 1c 24 [ 	]*divss  \(%esp\),%xmm3
  115:	0f ae 55 00 [ 	]*ldmxcsr 0x0\(%ebp\)
  119:	0f ae 1e [ 	]*stmxcsr \(%esi\)
- 11c:	0f ae f8 [ 	]*sfence 
+ 11c:	0f ae f8 [ 	]*sfence
  11f:	0f 5f c1 [ 	]*maxps  %xmm1,%xmm0
  122:	0f 5f 0a [ 	]*maxps  \(%edx\),%xmm1
  125:	f3 0f 5f d3 [ 	]*maxss  %xmm3,%xmm2

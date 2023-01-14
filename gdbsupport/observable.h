@@ -62,6 +62,22 @@ struct token
   DISABLE_COPY_AND_ASSIGN (token);
 };
 
+namespace detail
+{
+  /* Types that don't depend on any template parameter.  This saves a
+     bit of code and debug info size, compared to putting them inside
+     class observable.  */
+
+  /* Use for sorting algorithm, to indicate which observer we have
+     visited.  */
+  enum class visit_state
+  {
+    NOT_VISITED,
+    VISITING,
+    VISITED,
+  };
+}
+
 template<typename... T>
 class observable
 {
@@ -156,14 +172,6 @@ private:
   std::vector<observer> m_observers;
   const char *m_name;
 
-  /* Use for sorting algorithm, to indicate which observer we have visited.  */
-  enum class visit_state
-  {
-    NOT_VISITED,
-    VISITING,
-    VISITED,
-  };
-
   /* Helper method for topological sort using depth-first search algorithm.
 
      Visit all dependencies of observer at INDEX in M_OBSERVERS (later referred
@@ -171,15 +179,16 @@ private:
 
      If the observer is already visited, do nothing.  */
   void visit_for_sorting (std::vector<observer> &sorted_observers,
-                          std::vector<visit_state> &visit_states, int index)
+			  std::vector<detail::visit_state> &visit_states,
+			  int index)
   {
-    if (visit_states[index] == visit_state::VISITED)
+    if (visit_states[index] == detail::visit_state::VISITED)
       return;
 
     /* If we are already visiting this observer, it means there's a cycle.  */
-    gdb_assert (visit_states[index] != visit_state::VISITING);
+    gdb_assert (visit_states[index] != detail::visit_state::VISITING);
 
-    visit_states[index] = visit_state::VISITING;
+    visit_states[index] = detail::visit_state::VISITING;
 
     /* For each dependency of this observer...  */
     for (const token *dep : m_observers[index].dependencies)
@@ -195,7 +204,7 @@ private:
           }
       }
 
-    visit_states[index] = visit_state::VISITED;
+    visit_states[index] = detail::visit_state::VISITED;
     sorted_observers.push_back (m_observers[index]);
   }
 
@@ -207,8 +216,8 @@ private:
   void sort_observers ()
   {
     std::vector<observer> sorted_observers;
-    std::vector<visit_state> visit_states (m_observers.size (),
-					   visit_state::NOT_VISITED);
+    std::vector<detail::visit_state> visit_states
+      (m_observers.size (), detail::visit_state::NOT_VISITED);
 
     for (size_t i = 0; i < m_observers.size (); i++)
       visit_for_sorting (sorted_observers, visit_states, i);

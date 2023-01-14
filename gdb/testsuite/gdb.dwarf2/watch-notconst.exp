@@ -33,7 +33,7 @@ if { [prepare_for_testing "failed to prepare" "${test}" \
 
 if { ![runto f] } {
     perror "Could not run to breakpoint `f'."
-    continue
+    return
 }
 
 gdb_test "watch x" ".*\[Ww\]atchpoint 2: x" "watch x"

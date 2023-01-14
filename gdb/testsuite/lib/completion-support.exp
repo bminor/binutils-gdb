@@ -551,7 +551,7 @@ proc test_gdb_completion_offers_commands {input_line} {
     }
 
     # Force showing two commands.
-    gdb_test_no_output "set max-completions 2" ""
+    gdb_test_no_output -nopass "set max-completions 2"
 
     # TUI adds additional commands to the possible completions, so we
     # need different patterns depending on whether or not it is enabled.
@@ -568,5 +568,5 @@ proc test_gdb_completion_offers_commands {input_line} {
     }
 
     # Restore.
-    gdb_test_no_output "set max-completions $max_completions" ""
+    gdb_test_no_output -nopass "set max-completions $max_completions"
 }

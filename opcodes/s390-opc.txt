@@ -1851,8 +1851,8 @@ e30000000038 agh RXY_RRRD "add halfword to 64 bit value" arch12 zarch
 e30000000047 bic RXY_URRD "branch indirect on condition" arch12 zarch
 e3f000000047 bi RXY_0RRD "unconditional indirect branch" arch12 zarch
 e30000000047 bi*8 RXY_0RRD "branch indirect on condition" arch12 zarch
-b9ec mgrk RRF_R0RR2 "multiply 64x64reg -> 128" arch12 zarch
-e30000000084 mg RXY_RRRD "multiply 64x64mem -> 128" arch12 zarch
+b9ec mgrk RRF_R0RER "multiply 64x64reg -> 128" arch12 zarch
+e30000000084 mg RXY_RERRD "multiply 64x64mem -> 128" arch12 zarch
 e3000000003c mgh RXY_RRRD "multiply halfword 64x16mem -> 64" arch12 zarch
 b9fd msrkc RRF_R0RR2 "multiply single 32x32 -> 32" arch12 zarch
 b9ed msgrkc RRF_R0RR2 "multiply single 64x64 -> 64" arch12 zarch

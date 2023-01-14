@@ -33,7 +33,7 @@
 set ws	"\[\r\n\t \]+"
 set nl	"\[\r\n\]+"
 
-if { [skip_stl_tests] } { continue }
+if { [skip_stl_tests] } { return }
 
 standard_testfile .cc
  
@@ -86,7 +86,7 @@ gdb_test_multiple "" "run to main" {
 }
 
 if { !$ok } {
-    continue
+    return
 }
 
 set name "info breakpoints (after inferior run)"

@@ -1891,8 +1891,8 @@ lang_insert_orphan (asection *s,
     address = exp_intop (0);
 
   os_tail = (lang_output_section_statement_type **) lang_os_list.tail;
-  os = lang_enter_output_section_statement (secname, address, normal_section,
-					    NULL, NULL, NULL, constraint, 0);
+  os = lang_enter_output_section_statement (
+      secname, address, normal_section, 0, NULL, NULL, NULL, constraint, 0);
 
   if (add_child == NULL)
     add_child = &os->children;
@@ -2635,10 +2635,12 @@ lang_add_section (lang_statement_list_type *ptr,
     case normal_section:
     case overlay_section:
     case first_overlay_section:
+    case type_section:
       break;
     case noalloc_section:
       flags &= ~SEC_ALLOC;
       break;
+    case typed_readonly_section:
     case readonly_section:
       flags |= SEC_READONLY;
       break;
@@ -3054,7 +3056,11 @@ load_symbols (lang_input_statement_type *entry,
 
       /* See if the emulation has some special knowledge.  */
       if (ldemul_unrecognized_file (entry))
-	return true;
+	{
+	  if (err == bfd_error_file_ambiguously_recognized)
+	    free (matching);
+	  return true;
+	}
 
       if (err == bfd_error_file_ambiguously_recognized)
 	{
@@ -3064,6 +3070,7 @@ load_symbols (lang_input_statement_type *entry,
 		   " matching formats:"), entry->the_bfd);
 	  for (p = matching; *p != NULL; p++)
 	    einfo (" %s", *p);
+	  free (matching);
 	  einfo ("%F\n");
 	}
       else if (err != bfd_error_file_not_recognized
@@ -4209,6 +4216,7 @@ map_input_to_output_sections
     {
       lang_output_section_statement_type *tos;
       flagword flags;
+      unsigned int type = 0;
 
       switch (s->header.type)
 	{
@@ -4264,6 +4272,42 @@ map_input_to_output_sections
 	    case readonly_section:
 	      flags |= SEC_READONLY;
 	      break;
+	    case typed_readonly_section:
+	      flags |= SEC_READONLY;
+	      /* Fall through.  */
+	    case type_section:
+	      if (os->sectype_value->type.node_class == etree_name
+		  && os->sectype_value->type.node_code == NAME)
+		{
+		  const char *name = os->sectype_value->name.name;
+		  if (strcmp (name, "SHT_PROGBITS") == 0)
+		    type = SHT_PROGBITS;
+		  else if (strcmp (name, "SHT_STRTAB") == 0)
+		    type = SHT_STRTAB;
+		  else if (strcmp (name, "SHT_NOTE") == 0)
+		    type = SHT_NOTE;
+		  else if (strcmp (name, "SHT_NOBITS") == 0)
+		    type = SHT_NOBITS;
+		  else if (strcmp (name, "SHT_INIT_ARRAY") == 0)
+		    type = SHT_INIT_ARRAY;
+		  else if (strcmp (name, "SHT_FINI_ARRAY") == 0)
+		    type = SHT_FINI_ARRAY;
+		  else if (strcmp (name, "SHT_PREINIT_ARRAY") == 0)
+		    type = SHT_PREINIT_ARRAY;
+		  else
+		    einfo (_ ("%F%P: invalid type for output section `%s'\n"),
+			   os->name);
+		}
+	     else
+	       {
+		 exp_fold_tree_no_dot (os->sectype_value);
+		 if (expld.result.valid_p)
+		   type = expld.result.value;
+		 else
+		   einfo (_ ("%F%P: invalid type for output section `%s'\n"),
+			  os->name);
+	       }
+	      break;
 	    case noload_section:
 	      if (bfd_get_flavour (link_info.output_bfd)
 		  == bfd_target_elf_flavour)
@@ -4276,6 +4320,7 @@ map_input_to_output_sections
 	    init_os (os, flags | SEC_READONLY);
 	  else
 	    os->bfd_section->flags |= flags;
+	  os->bfd_section->type = type;
 	  break;
 	case lang_input_section_enum:
 	  break;
@@ -5665,9 +5710,10 @@ os_region_check (lang_output_section_statement_type *os,
 }
 
 static void
-ldlang_check_relro_region (lang_statement_union_type *s,
-			   seg_align_type *seg)
+ldlang_check_relro_region (lang_statement_union_type *s)
 {
+  seg_align_type *seg = &expld.dataseg;
+
   if (seg->relro == exp_seg_relro_start)
     {
       if (!seg->relro_start_stat)
@@ -5732,7 +5778,6 @@ lang_size_sections_1
 	      os->addr_tree = exp_intop (0);
 	    if (os->addr_tree != NULL)
 	      {
-		os->processed_vma = false;
 		exp_fold_tree (os->addr_tree, bfd_abs_section_ptr, &dot);
 
 		if (expld.result.valid_p)
@@ -6166,7 +6211,7 @@ lang_size_sections_1
 			   output_section_statement->bfd_section,
 			   &newdot);
 
-	    ldlang_check_relro_region (s, &expld.dataseg);
+	    ldlang_check_relro_region (s);
 
 	    expld.dataseg.relro = exp_seg_relro_none;
 
@@ -6346,18 +6391,19 @@ one_lang_size_sections_pass (bool *relax, bool check_regions)
 }
 
 static bool
-lang_size_segment (seg_align_type *seg)
+lang_size_segment (void)
 {
   /* If XXX_SEGMENT_ALIGN XXX_SEGMENT_END pair was seen, check whether
      a page could be saved in the data segment.  */
+  seg_align_type *seg = &expld.dataseg;
   bfd_vma first, last;
 
-  first = -seg->base & (seg->pagesize - 1);
-  last = seg->end & (seg->pagesize - 1);
+  first = -seg->base & (seg->commonpagesize - 1);
+  last = seg->end & (seg->commonpagesize - 1);
   if (first && last
-      && ((seg->base & ~(seg->pagesize - 1))
-	  != (seg->end & ~(seg->pagesize - 1)))
-      && first + last <= seg->pagesize)
+      && ((seg->base & ~(seg->commonpagesize - 1))
+	  != (seg->end & ~(seg->commonpagesize - 1)))
+      && first + last <= seg->commonpagesize)
     {
       seg->phase = exp_seg_adjust;
       return true;
@@ -6368,14 +6414,14 @@ lang_size_segment (seg_align_type *seg)
 }
 
 static bfd_vma
-lang_size_relro_segment_1 (seg_align_type *seg)
+lang_size_relro_segment_1 (void)
 {
+  seg_align_type *seg = &expld.dataseg;
   bfd_vma relro_end, desired_end;
   asection *sec;
 
   /* Compute the expected PT_GNU_RELRO/PT_LOAD segment end.  */
-  relro_end = ((seg->relro_end + seg->pagesize - 1)
-	       & ~(seg->pagesize - 1));
+  relro_end = (seg->relro_end + seg->relropagesize - 1) & -seg->relropagesize;
 
   /* Adjust by the offset arg of XXX_SEGMENT_RELRO_END.  */
   desired_end = relro_end - seg->relro_offset;
@@ -6416,7 +6462,7 @@ lang_size_relro_segment (bool *relax, bool check_regions)
   if (link_info.relro && expld.dataseg.relro_end)
     {
       bfd_vma data_initial_base = expld.dataseg.base;
-      bfd_vma data_relro_end = lang_size_relro_segment_1 (&expld.dataseg);
+      bfd_vma data_relro_end = lang_size_relro_segment_1 ();
 
       lang_reset_memory_regions ();
       one_lang_size_sections_pass (relax, check_regions);
@@ -6425,11 +6471,11 @@ lang_size_relro_segment (bool *relax, bool check_regions)
 	 script have increased padding over the original.  Revert.  */
       if (expld.dataseg.relro_end > data_relro_end)
 	{
-	  expld.dataseg.base = data_initial_base;;
+	  expld.dataseg.base = data_initial_base;
 	  do_reset = true;
 	}
     }
-  else if (lang_size_segment (&expld.dataseg))
+  else if (lang_size_segment ())
     do_reset = true;
 
   return do_reset;
@@ -6684,7 +6730,7 @@ section_for_dot (void)
 	if (stmt->header.type == lang_output_section_statement_enum)
 	  break;
 
-      os = &stmt->output_section_statement;
+      os = stmt ? &stmt->output_section_statement : NULL;
       while (os != NULL
 	     && !os->after_end
 	     && (os->bfd_section == NULL
@@ -7504,6 +7550,7 @@ lang_output_section_statement_type *
 lang_enter_output_section_statement (const char *output_section_statement_name,
 				     etree_type *address_exp,
 				     enum section_type sectype,
+				     etree_type *sectype_value,
 				     etree_type *align,
 				     etree_type *subalign,
 				     etree_type *ebase,
@@ -7521,10 +7568,12 @@ lang_enter_output_section_statement (const char *output_section_statement_name,
       os->addr_tree = address_exp;
     }
   os->sectype = sectype;
-  if (sectype != noload_section)
-    os->flags = SEC_NO_FLAGS;
-  else
+  if (sectype == type_section || sectype == typed_readonly_section)
+    os->sectype_value = sectype_value;
+  else if (sectype == noload_section)
     os->flags = SEC_NEVER_LOAD;
+  else
+    os->flags = SEC_NO_FLAGS;
   os->block_value = 1;
 
   /* Make next things chain into subchain of this.  */
@@ -7680,7 +7729,6 @@ find_relro_section_callback (lang_wild_statement_type *ptr ATTRIBUTE_UNUSED,
 
 static void
 lang_find_relro_sections_1 (lang_statement_union_type *s,
-			    seg_align_type *seg,
 			    bool *has_relro_section)
 {
   if (*has_relro_section)
@@ -7688,7 +7736,7 @@ lang_find_relro_sections_1 (lang_statement_union_type *s,
 
   for (; s != NULL; s = s->header.next)
     {
-      if (s == seg->relro_end_stat)
+      if (s == expld.dataseg.relro_end_stat)
 	break;
 
       switch (s->header.type)
@@ -7700,15 +7748,15 @@ lang_find_relro_sections_1 (lang_statement_union_type *s,
 	  break;
 	case lang_constructors_statement_enum:
 	  lang_find_relro_sections_1 (constructor_list.head,
-				      seg, has_relro_section);
+				      has_relro_section);
 	  break;
 	case lang_output_section_statement_enum:
 	  lang_find_relro_sections_1 (s->output_section_statement.children.head,
-				      seg, has_relro_section);
+				      has_relro_section);
 	  break;
 	case lang_group_statement_enum:
 	  lang_find_relro_sections_1 (s->group_statement.children.head,
-				      seg, has_relro_section);
+				      has_relro_section);
 	  break;
 	default:
 	  break;
@@ -7724,7 +7772,7 @@ lang_find_relro_sections (void)
   /* Check all sections in the link script.  */
 
   lang_find_relro_sections_1 (expld.dataseg.relro_start_stat,
-			      &expld.dataseg, &has_relro_section);
+			      &has_relro_section);
 
   if (!has_relro_section)
     link_info.relro = false;
@@ -8035,6 +8083,8 @@ lang_process (void)
     {
       lang_statement_list_type added;
       lang_statement_list_type files, inputfiles;
+
+      ldemul_before_plugin_all_symbols_read ();
 
       /* Now all files are read, let the plugin(s) decide if there
 	 are any more to be added to the link before we call the
@@ -8841,7 +8891,7 @@ lang_enter_overlay_section (const char *name)
   etree_type *size;
 
   lang_enter_output_section_statement (name, overlay_vma, overlay_section,
-				       0, overlay_subalign, 0, 0, 0);
+				       0, 0, overlay_subalign, 0, 0, 0);
 
   /* If this is the first section, then base the VMA of future
      sections on this one.  This will work correctly even if `.' is

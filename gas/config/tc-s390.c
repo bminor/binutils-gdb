@@ -293,7 +293,7 @@ s390_parse_cpu (const char *arg,
       S390_INSTR_FLAG_HTM | S390_INSTR_FLAG_VX },
     { STRING_COMMA_LEN ("z15"), STRING_COMMA_LEN ("arch13"),
       S390_INSTR_FLAG_HTM | S390_INSTR_FLAG_VX },
-    { STRING_COMMA_LEN (""), STRING_COMMA_LEN ("arch14"),
+    { STRING_COMMA_LEN ("z16"), STRING_COMMA_LEN ("arch14"),
       S390_INSTR_FLAG_HTM | S390_INSTR_FLAG_VX }
   };
   static struct
@@ -617,20 +617,20 @@ s390_insert_operand (unsigned char *insn,
       if (val < min || val > max)
 	{
 	  const char *err =
-	    _("operand out of range (%s not between %ld and %ld)");
-	  char buf[100];
+	    _("operand out of range (%" PRId64 " not between %" PRId64
+	      " and %" PRId64 ")");
 
 	  if (operand->flags & S390_OPERAND_PCREL)
 	    {
-	      val <<= 1;
-	      min <<= 1;
-	      max <<= 1;
+	      val = (offsetT) ((addressT) val << 1);
+	      min = (offsetT) ((addressT) min << 1);
+	      max = (offsetT) ((addressT) max << 1);
 	    }
-	  bfd_sprintf_vma (stdoutput, buf, val);
 	  if (file == (char *) NULL)
-	    as_bad (err, buf, (int) min, (int) max);
+	    as_bad (err, (int64_t) val, (int64_t) min, (int64_t) max);
 	  else
-	    as_bad_where (file, line, err, buf, (int) min, (int) max);
+	    as_bad_where (file, line,
+			  err, (int64_t) val, (int64_t) min, (int64_t) max);
 	  return;
 	}
       /* val is ok, now restrict it to operand->bits bits.  */
@@ -1619,6 +1619,7 @@ md_gather_operands (char *str,
      md_apply_fix.  */
   for (i = 0; i < fc; i++)
     {
+      fixS *fixP;
 
       if (fixups[i].opindex < 0)
 	{
@@ -1633,7 +1634,6 @@ md_gather_operands (char *str,
       if (fixups[i].reloc != BFD_RELOC_UNUSED)
 	{
 	  reloc_howto_type *reloc_howto;
-	  fixS *fixP;
 	  int size;
 
 	  reloc_howto = bfd_reloc_type_lookup (stdoutput, fixups[i].reloc);
@@ -1661,10 +1661,14 @@ md_gather_operands (char *str,
 	    fixP->fx_pcrel_adjust = operand->shift / 8;
 	}
       else
-	fix_new_exp (frag_now, f - frag_now->fr_literal, 4, &fixups[i].exp,
-		     (operand->flags & S390_OPERAND_PCREL) != 0,
-		     ((bfd_reloc_code_real_type)
-		      (fixups[i].opindex + (int) BFD_RELOC_UNUSED)));
+	fixP = fix_new_exp (frag_now, f - frag_now->fr_literal, 4,
+			    &fixups[i].exp,
+			    (operand->flags & S390_OPERAND_PCREL) != 0,
+			    ((bfd_reloc_code_real_type)
+			     (fixups[i].opindex + (int) BFD_RELOC_UNUSED)));
+      /* s390_insert_operand () does the range checking.  */
+      if (operand->flags & S390_OPERAND_PCREL)
+	fixP->fx_no_overflow = 1;
     }
   return str;
 }

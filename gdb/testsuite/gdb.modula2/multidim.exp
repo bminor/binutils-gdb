@@ -26,7 +26,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
 
 if ![runto here] then {
     perror "couldn't run to breakpoint 'here'"
-    continue
+    return
 }
 
 gdb_test "set lang modula-2" ".*does not match.*" "switch to modula-2"

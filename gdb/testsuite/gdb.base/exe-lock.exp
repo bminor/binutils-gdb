@@ -39,7 +39,7 @@ if { ! [file exists $binfile] } {
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 gdb_continue_to_end

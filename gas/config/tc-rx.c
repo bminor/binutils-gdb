@@ -566,7 +566,7 @@ rx_rept (int ignore ATTRIBUTE_UNUSED)
 {
   size_t count = get_absolute_expression ();
 
-  do_repeat_with_expander (count, "MREPEAT", "ENDR", "..MACREP");
+  do_repeat (count, "MREPEAT", "ENDR", "..MACREP");
 }
 
 /* Like cons() accept that strings are allowed.  */

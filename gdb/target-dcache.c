@@ -102,7 +102,7 @@ static void
 show_stack_cache (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Cache use for stack accesses is %s.\n"), value);
+  gdb_printf (file, _("Cache use for stack accesses is %s.\n"), value);
 }
 
 /* Return true if "stack cache" is enabled, otherwise, return false.  */
@@ -142,7 +142,7 @@ static void
 show_code_cache (struct ui_file *file, int from_tty,
 		 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Cache use for code accesses is %s.\n"), value);
+  gdb_printf (file, _("Cache use for code accesses is %s.\n"), value);
 }
 
 /* Return true if "code cache" is enabled, otherwise, return false.  */
@@ -160,7 +160,7 @@ maint_flush_dcache_command (const char *command, int from_tty)
 {
   target_dcache_invalidate ();
   if (from_tty)
-    printf_filtered (_("The dcache was flushed.\n"));
+    gdb_printf (_("The dcache was flushed.\n"));
 }
 
 void _initialize_target_dcache ();

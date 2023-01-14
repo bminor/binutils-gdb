@@ -22,11 +22,6 @@ standard_testfile
 
 # Unnamed union is a GNU extension, thus we restrict the test
 # to gcc compiler.
-
-if [get_compiler_info] {
-    return -1
-}
-
 if { ![test_compiler_info gcc*] } {
     return 0
 }

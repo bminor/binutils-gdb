@@ -130,6 +130,7 @@ gdb_test "p g.size_mul<  5  >()" "From Python G<>::size_mul.*" \
 gdb_test "p g.mul<double>(2.0)" "From Python G<>::mul.*" \
   "after: g.mul<double>(2.0)"
 gdb_test "p g.mul<char>('a')" "From Python G<>::mul.*" \
+  "after: g.mul<char>('a')"
 gdb_test "p g_ptr->mul<char>('a')" "From Python G<>::mul.*" \
   "after: g_ptr->mul<char>('a')"
 

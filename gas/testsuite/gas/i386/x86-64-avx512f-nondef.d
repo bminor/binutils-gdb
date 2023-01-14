@@ -1,4 +1,4 @@
-#as: 
+#as:
 #objdump: -dw
 #name: x86-64 AVX512F insns with nondefault values in ignored bits
 

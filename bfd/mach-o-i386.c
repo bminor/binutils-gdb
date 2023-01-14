@@ -63,49 +63,49 @@ bfd_mach_o_i386_mkobject (bfd *abfd)
 static reloc_howto_type i386_howto_table[]=
 {
   /* 0 */
-  HOWTO(BFD_RELOC_32, 0, 2, 32, false, 0,
+  HOWTO(BFD_RELOC_32, 0, 4, 32, false, 0,
 	complain_overflow_bitfield,
 	NULL, "32",
 	false, 0xffffffff, 0xffffffff, false),
-  HOWTO(BFD_RELOC_16, 0, 1, 16, false, 0,
+  HOWTO(BFD_RELOC_16, 0, 2, 16, false, 0,
 	complain_overflow_bitfield,
 	NULL, "16",
 	false, 0xffff, 0xffff, false),
-  HOWTO(BFD_RELOC_8, 0, 0, 8, false, 0,
+  HOWTO(BFD_RELOC_8, 0, 1, 8, false, 0,
 	complain_overflow_bitfield,
 	NULL, "8",
 	false, 0xff, 0xff, false),
-  HOWTO(BFD_RELOC_32_PCREL, 0, 2, 32, true, 0,
+  HOWTO(BFD_RELOC_32_PCREL, 0, 4, 32, true, 0,
 	complain_overflow_bitfield,
 	NULL, "DISP32",
 	false, 0xffffffff, 0xffffffff, true),
   /* 4 */
-  HOWTO(BFD_RELOC_16_PCREL, 0, 1, 16, true, 0,
+  HOWTO(BFD_RELOC_16_PCREL, 0, 2, 16, true, 0,
 	complain_overflow_bitfield,
 	NULL, "DISP16",
 	false, 0xffff, 0xffff, true),
-  HOWTO(BFD_RELOC_MACH_O_SECTDIFF, 0, 2, 32, false, 0,
+  HOWTO(BFD_RELOC_MACH_O_SECTDIFF, 0, 4, 32, false, 0,
 	complain_overflow_bitfield,
 	NULL, "SECTDIFF_32",
 	false, 0xffffffff, 0xffffffff, false),
-  HOWTO(BFD_RELOC_MACH_O_LOCAL_SECTDIFF, 0, 2, 32, false, 0,
+  HOWTO(BFD_RELOC_MACH_O_LOCAL_SECTDIFF, 0, 4, 32, false, 0,
 	complain_overflow_bitfield,
 	NULL, "LSECTDIFF_32",
 	false, 0xffffffff, 0xffffffff, false),
-  HOWTO(BFD_RELOC_MACH_O_PAIR, 0, 2, 32, false, 0,
+  HOWTO(BFD_RELOC_MACH_O_PAIR, 0, 4, 32, false, 0,
 	complain_overflow_bitfield,
 	NULL, "PAIR_32",
 	false, 0xffffffff, 0xffffffff, false),
   /* 8 */
-  HOWTO(BFD_RELOC_MACH_O_SECTDIFF, 0, 1, 16, false, 0,
+  HOWTO(BFD_RELOC_MACH_O_SECTDIFF, 0, 2, 16, false, 0,
 	complain_overflow_bitfield,
 	NULL, "SECTDIFF_16",
 	false, 0xffff, 0xffff, false),
-  HOWTO(BFD_RELOC_MACH_O_LOCAL_SECTDIFF, 0, 1, 16, false, 0,
+  HOWTO(BFD_RELOC_MACH_O_LOCAL_SECTDIFF, 0, 2, 16, false, 0,
 	complain_overflow_bitfield,
 	NULL, "LSECTDIFF_16",
 	false, 0xffff, 0xffff, false),
-  HOWTO(BFD_RELOC_MACH_O_PAIR, 0, 1, 16, false, 0,
+  HOWTO(BFD_RELOC_MACH_O_PAIR, 0, 2, 16, false, 0,
 	complain_overflow_bitfield,
 	NULL, "PAIR_16",
 	false, 0xffff, 0xffff, false),
@@ -218,7 +218,7 @@ bfd_mach_o_i386_swap_reloc_out (arelent *rel, bfd_mach_o_reloc_info *rinfo)
       rinfo->r_scattered = 0;
       rinfo->r_type = BFD_MACH_O_GENERIC_RELOC_VANILLA;
       rinfo->r_pcrel = rel->howto->pc_relative;
-      rinfo->r_length = rel->howto->size; /* Correct in practice.  */
+      rinfo->r_length = bfd_log2 (bfd_get_reloc_size (rel->howto));
       if ((*rel->sym_ptr_ptr)->flags & BSF_SECTION_SYM)
 	{
 	  rinfo->r_extern = 0;
@@ -235,7 +235,7 @@ bfd_mach_o_i386_swap_reloc_out (arelent *rel, bfd_mach_o_reloc_info *rinfo)
       rinfo->r_scattered = 1;
       rinfo->r_type = BFD_MACH_O_GENERIC_RELOC_SECTDIFF;
       rinfo->r_pcrel = 0;
-      rinfo->r_length = rel->howto->size;
+      rinfo->r_length = bfd_log2 (bfd_get_reloc_size (rel->howto));
       rinfo->r_extern = 0;
       rinfo->r_value = rel->addend;
       break;
@@ -243,7 +243,7 @@ bfd_mach_o_i386_swap_reloc_out (arelent *rel, bfd_mach_o_reloc_info *rinfo)
       rinfo->r_scattered = 1;
       rinfo->r_type = BFD_MACH_O_GENERIC_RELOC_LOCAL_SECTDIFF;
       rinfo->r_pcrel = 0;
-      rinfo->r_length = rel->howto->size;
+      rinfo->r_length = bfd_log2 (bfd_get_reloc_size (rel->howto));
       rinfo->r_extern = 0;
       rinfo->r_value = rel->addend;
       break;
@@ -252,7 +252,7 @@ bfd_mach_o_i386_swap_reloc_out (arelent *rel, bfd_mach_o_reloc_info *rinfo)
       rinfo->r_scattered = 1;
       rinfo->r_type = BFD_MACH_O_GENERIC_RELOC_PAIR;
       rinfo->r_pcrel = 0;
-      rinfo->r_length = rel->howto->size;
+      rinfo->r_length = bfd_log2 (bfd_get_reloc_size (rel->howto));
       rinfo->r_extern = 0;
       rinfo->r_value = rel->addend;
       break;

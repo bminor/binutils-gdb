@@ -29,10 +29,6 @@ if {([istarget *-*-mingw*]
 }
 
 # This test uses GCC-specific syntax.
-if [get_compiler_info] {
-    return -1
-}
-
 if {![test_compiler_info "gcc-*"]} {
     return 0
 }

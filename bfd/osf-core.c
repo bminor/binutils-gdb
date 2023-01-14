@@ -169,9 +169,9 @@ swap_abort (void)
 #define	NO_GET ((bfd_vma (*) (const void *)) swap_abort)
 #define	NO_PUT ((void (*) (bfd_vma, void *)) swap_abort)
 #define	NO_GETS ((bfd_signed_vma (*) (const void *)) swap_abort)
-#define	NO_GET64 ((bfd_uint64_t (*) (const void *)) swap_abort)
-#define	NO_PUT64 ((void (*) (bfd_uint64_t, void *)) swap_abort)
-#define	NO_GETS64 ((bfd_int64_t (*) (const void *)) swap_abort)
+#define	NO_GET64 ((uint64_t (*) (const void *)) swap_abort)
+#define	NO_PUT64 ((void (*) (uint64_t, void *)) swap_abort)
+#define	NO_GETS64 ((int64_t (*) (const void *)) swap_abort)
 
 const bfd_target core_osf_vec =
   {

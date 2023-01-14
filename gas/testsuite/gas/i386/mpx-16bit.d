@@ -68,7 +68,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	f2 0f 84 88 01       	bnd je [a-f0-9]+ <foo>
 [ 	]*[a-f0-9]+:	f2 e9 84 01          	bnd jmp [a-f0-9]+ <foo>
 [ 	]*[a-f0-9]+:	67 f2 ff 21          	bnd jmp \*\(%ecx\)
-[ 	]*[a-f0-9]+:	f2 c3                	bnd ret *
+[ 	]*[a-f0-9]+:	f2 c3                	bnd ret
 [ 	]*[a-f0-9]+:	67 f3 0f 1b 08       	bndmk  \(%eax\),%bnd1
 [ 	]*[a-f0-9]+:	67 f3 0f 1b 0d 99 03 00 00 	addr32 bndmk 0x399,%bnd1
 [ 	]*[a-f0-9]+:	67 f3 0f 1b 49 03    	bndmk  0x3\(%ecx\),%bnd1
@@ -127,10 +127,10 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	f2 74 09             	bnd je [a-f0-9]+ <foo>
 [ 	]*[a-f0-9]+:	f2 eb 06             	bnd jmp [a-f0-9]+ <foo>
 [ 	]*[a-f0-9]+:	66 f2 ff e1          	bnd jmpl? \*%ecx
-[ 	]*[a-f0-9]+:	f2 c3                	bnd ret *
+[ 	]*[a-f0-9]+:	f2 c3                	bnd ret
 
 [a-f0-9]+ <foo>:
-[ 	]*[a-f0-9]+:	f2 c3                	bnd ret *
+[ 	]*[a-f0-9]+:	f2 c3                	bnd ret
 
 [a-f0-9]+ <bad>:
 #...

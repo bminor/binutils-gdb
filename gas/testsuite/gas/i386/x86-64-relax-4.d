@@ -7,7 +7,7 @@
 Disassembly of section .text:
 
 0+ <printk>:
- +[a-f0-9]+:	c3                   	ret *
+ +[a-f0-9]+:	c3                   	ret
 
 Disassembly of section .init.text:
 

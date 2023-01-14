@@ -1942,6 +1942,22 @@ parse_reg_list (char ** strp, enum reg_list_els etype)
 		rt = REG_TYPE_PSEUDO;
 
 	      reg = arm_reg_parse (&str, rt);
+
+	      /* Skip over allowed registers of alternative types in mixed-type
+	         register lists.  */
+	      if (reg == FAIL && rt == REG_TYPE_PSEUDO
+		  && ((reg = arm_reg_parse (&str, REG_TYPE_RN)) != FAIL))
+		{
+		  cur_reg = reg;
+		  continue;
+		}
+	      else if (reg == FAIL && rt == REG_TYPE_RN
+		       && ((reg = arm_reg_parse (&str, REG_TYPE_PSEUDO)) != FAIL))
+		{
+		  cur_reg = reg;
+		  continue;
+		}
+
 	      if (etype == REGLIST_CLRM)
 		{
 		  if (reg == REG_SP || reg == REG_PC)
@@ -3549,7 +3565,7 @@ add_to_lit_pool (unsigned int nbytes)
       imm1 = inst.operands[1].imm;
       imm2 = (inst.operands[1].regisimm ? inst.operands[1].reg
 	       : inst.relocs[0].exp.X_unsigned ? 0
-	       : ((bfd_int64_t) inst.operands[1].imm) >> 32);
+	       : (int64_t) inst.operands[1].imm >> 32);
       if (target_big_endian)
 	{
 	  imm1 = imm2;
@@ -4033,6 +4049,8 @@ s_arm_elf_inst (int nbytes)
       mapping_state (MAP_ARM);
     }
 
+  dwarf2_emit_insn (0);
+
   do
     {
       expressionS exp;
@@ -4279,22 +4297,11 @@ s_arm_unwind_personality (int ignored ATTRIBUTE_UNUSED)
 /* Parse a directive saving pseudo registers.  */
 
 static void
-s_arm_unwind_save_pseudo (void)
+s_arm_unwind_save_pseudo (long range)
 {
   valueT op;
-  long range;
 
-  range = parse_reg_list (&input_line_pointer, REGLIST_PSEUDO);
-  if (range == FAIL)
-    {
-      as_bad (_("expected pseudo register list"));
-      ignore_rest_of_line ();
-      return;
-    }
-
-  demand_empty_rest_of_line ();
-
-  if (range & (1 << 9))
+  if (range & (1 << 12))
     {
       /* Opcode for restoring RA_AUTH_CODE.  */
       op = 0xb4;
@@ -4306,21 +4313,10 @@ s_arm_unwind_save_pseudo (void)
 /* Parse a directive saving core registers.  */
 
 static void
-s_arm_unwind_save_core (void)
+s_arm_unwind_save_core (long range)
 {
   valueT op;
-  long range;
   int n;
-
-  range = parse_reg_list (&input_line_pointer, REGLIST_RN);
-  if (range == FAIL)
-    {
-      as_bad (_("expected register list"));
-      ignore_rest_of_line ();
-      return;
-    }
-
-  demand_empty_rest_of_line ();
 
   /* Turn .unwind_movsp ip followed by .unwind_save {..., ip, ...}
      into .unwind_save {..., sp...}.  We aren't bothered about the value of
@@ -4720,6 +4716,30 @@ s_arm_unwind_save_mmxwcg (void)
   ignore_rest_of_line ();
 }
 
+/* Convert range and mask_range into a sequence of s_arm_unwind_core
+   and s_arm_unwind_pseudo operations.  We assume that mask_range will
+   not have consecutive bits set, or that one operation per bit is
+   acceptable.  */
+
+static void
+s_arm_unwind_save_mixed (long range, long mask_range)
+{
+  while (mask_range)
+    {
+      long mask_bit = mask_range & -mask_range;
+      long subrange = range & (mask_bit - 1);
+
+      if (subrange)
+	s_arm_unwind_save_core (subrange);
+
+      s_arm_unwind_save_pseudo (mask_bit);
+      range &= ~subrange;
+      mask_range &= ~mask_bit;
+    }
+
+  if (range)
+    s_arm_unwind_save_core (range);
+}
 
 /* Parse an unwind_save directive.
    If the argument is non-zero, this is a .vsave directive.  */
@@ -4727,7 +4747,8 @@ s_arm_unwind_save_mmxwcg (void)
 static void
 s_arm_unwind_save (int arch_v6)
 {
-  char *peek;
+  char *peek, *mask_peek;
+  long range, mask_range;
   struct reg_entry *reg;
   bool had_brace = false;
 
@@ -4735,7 +4756,7 @@ s_arm_unwind_save (int arch_v6)
     as_bad (MISSING_FNSTART);
 
   /* Figure out what sort of save we have.  */
-  peek = input_line_pointer;
+  peek = mask_peek = input_line_pointer;
 
   if (*peek == '{')
     {
@@ -4765,12 +4786,21 @@ s_arm_unwind_save (int arch_v6)
       s_arm_unwind_save_fpa (reg->number);
       return;
 
-    case REG_TYPE_RN:
-      s_arm_unwind_save_core ();
-      return;
-
     case REG_TYPE_PSEUDO:
-      s_arm_unwind_save_pseudo ();
+    case REG_TYPE_RN:
+      mask_range = parse_reg_list (&mask_peek, REGLIST_PSEUDO);
+      range = parse_reg_list (&input_line_pointer, REGLIST_RN);
+
+      if (range == FAIL || mask_range == FAIL)
+	{
+	  as_bad (_("expected register list"));
+	  ignore_rest_of_line ();
+	  return;
+	}
+
+      demand_empty_rest_of_line ();
+
+      s_arm_unwind_save_mixed (range, mask_range);
       return;
 
     case REG_TYPE_VFD:
@@ -6512,7 +6542,13 @@ parse_sys_vldr_vstr (char **str)
     {"VPR",		0x4, 0x1},
     {"P0",		0x5, 0x1},
     {"FPCXTNS",		0x6, 0x1},
-    {"FPCXTS",		0x7, 0x1}
+    {"FPCXT_NS",	0x6, 0x1},
+    {"fpcxtns",		0x6, 0x1},
+    {"fpcxt_ns",	0x6, 0x1},
+    {"FPCXTS",		0x7, 0x1},
+    {"FPCXT_S",		0x7, 0x1},
+    {"fpcxts",		0x7, 0x1},
+    {"fpcxt_s",		0x7, 0x1}
   };
   char *op_end = strchr (*str, ',');
   size_t op_strlen = op_end - *str;
@@ -8783,15 +8819,14 @@ neon_cmode_for_move_imm (unsigned immlo, unsigned immhi, int float_p,
   return FAIL;
 }
 
-#if defined BFD_HOST_64_BIT
 /* Returns TRUE if double precision value V may be cast
    to single precision without loss of accuracy.  */
 
 static bool
-is_double_a_single (bfd_uint64_t v)
+is_double_a_single (uint64_t v)
 {
   int exp = (v >> 52) & 0x7FF;
-  bfd_uint64_t mantissa = v & 0xFFFFFFFFFFFFFULL;
+  uint64_t mantissa = v & 0xFFFFFFFFFFFFFULL;
 
   return ((exp == 0 || exp == 0x7FF
 	   || (exp >= 1023 - 126 && exp <= 1023 + 127))
@@ -8802,11 +8837,11 @@ is_double_a_single (bfd_uint64_t v)
    (ignoring the least significant bits in exponent and mantissa).  */
 
 static int
-double_to_single (bfd_uint64_t v)
+double_to_single (uint64_t v)
 {
   unsigned int sign = (v >> 63) & 1;
   int exp = (v >> 52) & 0x7FF;
-  bfd_uint64_t mantissa = v & 0xFFFFFFFFFFFFFULL;
+  uint64_t mantissa = v & 0xFFFFFFFFFFFFFULL;
 
   if (exp == 0x7FF)
     exp = 0xFF;
@@ -8829,7 +8864,6 @@ double_to_single (bfd_uint64_t v)
   mantissa >>= 29;
   return (sign << 31) | (exp << 23) | mantissa;
 }
-#endif /* BFD_HOST_64_BIT */
 
 enum lit_type
 {
@@ -8878,11 +8912,7 @@ move_or_literal_pool (int i, enum lit_type t, bool mode_3)
   if (inst.relocs[0].exp.X_op == O_constant
       || inst.relocs[0].exp.X_op == O_big)
     {
-#if defined BFD_HOST_64_BIT
-      bfd_uint64_t v;
-#else
-      valueT v;
-#endif
+      uint64_t v;
       if (inst.relocs[0].exp.X_op == O_big)
 	{
 	  LITTLENUM_TYPE w[X_PRECISION];
@@ -8897,7 +8927,6 @@ move_or_literal_pool (int i, enum lit_type t, bool mode_3)
 	  else
 	    l = generic_bignum;
 
-#if defined BFD_HOST_64_BIT
 	  v = l[3] & LITTLENUM_MASK;
 	  v <<= LITTLENUM_NUMBER_OF_BITS;
 	  v |= l[2] & LITTLENUM_MASK;
@@ -8905,11 +8934,6 @@ move_or_literal_pool (int i, enum lit_type t, bool mode_3)
 	  v |= l[1] & LITTLENUM_MASK;
 	  v <<= LITTLENUM_NUMBER_OF_BITS;
 	  v |= l[0] & LITTLENUM_MASK;
-#else
-	  v = l[1] & LITTLENUM_MASK;
-	  v <<= LITTLENUM_NUMBER_OF_BITS;
-	  v |= l[0] & LITTLENUM_MASK;
-#endif
 	}
       else
 	v = inst.relocs[0].exp.X_add_number;
@@ -9005,7 +9029,7 @@ move_or_literal_pool (int i, enum lit_type t, bool mode_3)
 		? inst.operands[1].reg
 		: inst.relocs[0].exp.X_unsigned
 		? 0
-		: ((bfd_int64_t)((int) immlo)) >> 32;
+		: (int64_t) (int) immlo >> 32;
 	      int cmode = neon_cmode_for_move_imm (immlo, immhi, false, &immbits,
 						   &op, 64, NT_invtype);
 
@@ -9054,7 +9078,6 @@ move_or_literal_pool (int i, enum lit_type t, bool mode_3)
 	     discrepancy between the output produced by an assembler built for
 	     a 32-bit-only host and the output produced from a 64-bit host, but
 	     this cannot be helped.  */
-#if defined BFD_HOST_64_BIT
 	  else if (!inst.operands[1].issingle
 		   && ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v3))
 	    {
@@ -9067,7 +9090,6 @@ move_or_literal_pool (int i, enum lit_type t, bool mode_3)
 		  return true;
 		}
 	    }
-#endif
 	}
     }
 
@@ -10108,8 +10130,8 @@ do_vmrs (void)
 		  _(BAD_FPU));
       break;
 
-    case 14: /* fpcxt_ns.  */
-    case 15: /* fpcxt_s.  */
+    case 14: /* fpcxt_ns, fpcxtns, FPCXT_NS, FPCXTNS.  */
+    case 15: /* fpcxt_s, fpcxts, FPCXT_S, FPCXTS.  */
       constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8_1m_main),
 		  _("selected processor does not support instruction"));
       break;
@@ -23938,6 +23960,8 @@ static const struct reg_entry reg_names[] =
   REGDEF(vpr,12,VFC), REGDEF(VPR,12,VFC),
   REGDEF(fpcxt_ns,14,VFC), REGDEF(FPCXT_NS,14,VFC),
   REGDEF(fpcxt_s,15,VFC), REGDEF(FPCXT_S,15,VFC),
+  REGDEF(fpcxtns,14,VFC), REGDEF(FPCXTNS,14,VFC),
+  REGDEF(fpcxts,15,VFC), REGDEF(FPCXTS,15,VFC),
 
   /* Maverick DSP coprocessor registers.  */
   REGSET(mvf,MVF),  REGSET(mvd,MVD),  REGSET(mvfx,MVFX),  REGSET(mvdx,MVDX),
@@ -23974,7 +23998,7 @@ static const struct reg_entry reg_names[] =
      for tc_arm_regname_to_dw2regnum to translate to DWARF reg number using
      134 + reg_number should the range 134 to 142 be used for more pseudo regs
      in the future.  This also helps fit RA_AUTH_CODE into a bitmask.  */
-  REGDEF(ra_auth_code,9,PSEUDO),
+  REGDEF(ra_auth_code,12,PSEUDO),
 };
 #undef REGDEF
 #undef REGNUM

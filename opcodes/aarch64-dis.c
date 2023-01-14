@@ -3287,6 +3287,8 @@ print_operands (bfd_vma pc, const aarch64_opcode *opcode,
   for (i = 0, num_printed = 0; i < AARCH64_MAX_OPND_NUM; ++i)
     {
       char str[128];
+      char cmt[128];
+
       /* We regard the opcode operand info more, however we also look into
 	 the inst->operands to support the disassembling of the optional
 	 operand.
@@ -3298,7 +3300,8 @@ print_operands (bfd_vma pc, const aarch64_opcode *opcode,
 
       /* Generate the operand string in STR.  */
       aarch64_print_operand (str, sizeof (str), pc, opcode, opnds, i, &pcrel_p,
-			     &info->target, &notes, arch_variant);
+			     &info->target, &notes, cmt, sizeof (cmt),
+			     arch_variant);
 
       /* Print the delimiter (taking account of omitted operand(s)).  */
       if (str[0] != '\0')
@@ -3309,7 +3312,15 @@ print_operands (bfd_vma pc, const aarch64_opcode *opcode,
       if (pcrel_p)
 	(*info->print_address_func) (info->target, info);
       else
-	(*info->fprintf_func) (info->stream, "%s", str);
+	{
+	  (*info->fprintf_func) (info->stream, "%s", str);
+
+	  /* Print the comment.  This works because only the last operand
+	     ever adds a comment.  If that ever changes then we'll need to
+	     be smarter here.  */
+	  if (cmt[0] != '\0')
+	    (*info->fprintf_func) (info->stream, "\t// %s", cmt);
+	}
     }
 
     if (notes && !no_notes)

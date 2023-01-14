@@ -16,5 +16,5 @@ Disassembly of section .text:
  +[a-f0-9]+:	2e 2e 2e 2e 48 8b 98 fc ff ff ff 	cs cs cs cs mov -0x4\(%rax\),%rbx
  +[a-f0-9]+:	48 85 db             	test   %rbx,%rbx
  +[a-f0-9]+:	74 00                	je     [a-f0-9]+ <_start\+0x25>
- +[a-f0-9]+:	c3                   	ret *
+ +[a-f0-9]+:	c3                   	ret
 #pass

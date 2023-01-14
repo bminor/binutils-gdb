@@ -29,7 +29,7 @@
 
 if [target_info exists gdb,nosignals] {
     verbose "Skipping signull.exp because of nosignals."
-    continue
+    return
 }
 
 

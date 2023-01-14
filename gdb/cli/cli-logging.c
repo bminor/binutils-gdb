@@ -31,8 +31,8 @@ static void
 show_logging_filename (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("The current logfile is \"%ps\".\n"),
-		    styled_string (file_name_style.style (), value));
+  gdb_printf (file, _("The current logfile is \"%ps\".\n"),
+	      styled_string (file_name_style.style (), value));
 }
 
 static bool logging_overwrite;
@@ -57,9 +57,9 @@ show_logging_overwrite (struct ui_file *file, int from_tty,
 			struct cmd_list_element *c, const char *value)
 {
   if (logging_overwrite)
-    fprintf_filtered (file, _("on: Logging overwrites the log file.\n"));
+    gdb_printf (file, _("on: Logging overwrites the log file.\n"));
   else
-    fprintf_filtered (file, _("off: Logging appends to the log file.\n"));
+    gdb_printf (file, _("off: Logging appends to the log file.\n"));
 }
 
 /* Value as configured by the user.  */
@@ -78,9 +78,9 @@ show_logging_redirect (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c, const char *value)
 {
   if (logging_redirect)
-    fprintf_filtered(file, _("on: Output will go only to the log file.\n"));
+    gdb_printf (file, _("on: Output will go only to the log file.\n"));
   else
-    fprintf_filtered
+    gdb_printf
       (file,
        _("off: Output will go to both the screen and the log file.\n"));
 }
@@ -90,10 +90,9 @@ show_logging_debug_redirect (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c, const char *value)
 {
   if (debug_redirect)
-    fprintf_filtered(file,
-		     _("on: Debug output will go only to the log file.\n"));
+    gdb_printf (file, _("on: Debug output will go only to the log file.\n"));
   else
-    fprintf_filtered
+    gdb_printf
       (file,
        _("off: Debug output will go to both the screen and the log file.\n"));
 }
@@ -115,8 +114,8 @@ handle_redirections (int from_tty)
 {
   if (!saved_filename.empty ())
     {
-      printf_filtered ("Already logging to %s.\n",
-		       saved_filename.c_str ());
+      gdb_printf ("Already logging to %s.\n",
+		  saved_filename.c_str ());
       return;
     }
 
@@ -128,18 +127,18 @@ handle_redirections (int from_tty)
   if (from_tty)
     {
       if (!logging_redirect)
-	printf_filtered ("Copying output to %s.\n",
-			 logging_filename.c_str ());
+	gdb_printf ("Copying output to %s.\n",
+		    logging_filename.c_str ());
       else
-	printf_filtered ("Redirecting output to %s.\n",
-			 logging_filename.c_str ());
+	gdb_printf ("Redirecting output to %s.\n",
+		    logging_filename.c_str ());
 
       if (!debug_redirect)
-	printf_filtered ("Copying debug output to %s.\n",
-			 logging_filename.c_str ());
+	gdb_printf ("Copying debug output to %s.\n",
+		    logging_filename.c_str ());
       else
-	printf_filtered ("Redirecting debug output to %s.\n",
-			 logging_filename.c_str ());
+	gdb_printf ("Redirecting debug output to %s.\n",
+		    logging_filename.c_str ());
     }
 
   saved_filename = logging_filename;
@@ -177,8 +176,8 @@ set_logging_off (const char *args, int from_tty)
 
   pop_output_files ();
   if (from_tty)
-    printf_filtered ("Done logging to %s.\n",
-		     saved_filename.c_str ());
+    gdb_printf ("Done logging to %s.\n",
+		saved_filename.c_str ());
   saved_filename.clear ();
 }
 
@@ -199,9 +198,9 @@ show_logging_enabled (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c, const char *value)
 {
   if (logging_enabled)
-    fprintf_unfiltered (file, _("on: Logging is enabled.\n"));
+    gdb_printf (file, _("on: Logging is enabled.\n"));
   else
-    fprintf_unfiltered (file, _("off: Logging is disabled.\n"));
+    gdb_printf (file, _("off: Logging is disabled.\n"));
 }
 
 void _initialize_cli_logging ();

@@ -121,6 +121,10 @@ proc test_d_expressions {} {
 
     gdb_test_no_output "set \$var = 144 ^^ 0.5" ""
     gdb_test "print \$var ^^= 2" "144"
+
+    gdb_test "print 1 ~ \[2, 3\]" " = \\\{1, 2, 3\\\}"
+    gdb_test "print \[1, 2\] ~ 3" " = \\\{1, 2, 3\\\}"
+    gdb_test "print \[1, 2\] ~ \[2, 3\]" " = \\\{1, 2, 2, 3\\\}"
 }
 
 # Start with a fresh gdb.

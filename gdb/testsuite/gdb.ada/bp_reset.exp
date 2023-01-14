@@ -35,5 +35,4 @@ gdb_test "break do_nothing" \
 # the first breakpoint inside nested_sub.
 
 gdb_run_cmd
-gdb_test "" "Breakpoint $decimal, foo\\.nested_sub \\(\\).*"
-
+gdb_test "" "Breakpoint $decimal, foo\\.nested_sub \\(\\).*" "run to first breakpoint"

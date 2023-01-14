@@ -245,15 +245,15 @@ print_percentage (int portion, int total)
 {
   if (total == 0)
     /* i18n: Like "Percentage of duplicates, by count: (not applicable)".  */
-    printf_filtered (_("(not applicable)\n"));
+    gdb_printf (_("(not applicable)\n"));
   else
-    printf_filtered ("%3d%%\n", (int) (portion * 100.0 / total));
+    gdb_printf ("%3d%%\n", (int) (portion * 100.0 / total));
 }
 
 
 /* Print statistics on BCACHE's memory usage and efficacity at
    eliminating duplication.  NAME should describe the kind of data
-   BCACHE holds.  Statistics are printed using `printf_filtered' and
+   BCACHE holds.  Statistics are printed using `gdb_printf' and
    its ilk.  */
 void
 bcache::print_statistics (const char *type)
@@ -325,59 +325,59 @@ bcache::print_statistics (const char *type)
     xfree (entry_size);
   }
 
-  printf_filtered (_("  M_Cached '%s' statistics:\n"), type);
-  printf_filtered (_("    Total object count:  %ld\n"), m_total_count);
-  printf_filtered (_("    Unique object count: %lu\n"), m_unique_count);
-  printf_filtered (_("    Percentage of duplicates, by count: "));
+  gdb_printf (_("  M_Cached '%s' statistics:\n"), type);
+  gdb_printf (_("    Total object count:  %ld\n"), m_total_count);
+  gdb_printf (_("    Unique object count: %lu\n"), m_unique_count);
+  gdb_printf (_("    Percentage of duplicates, by count: "));
   print_percentage (m_total_count - m_unique_count, m_total_count);
-  printf_filtered ("\n");
+  gdb_printf ("\n");
 
-  printf_filtered (_("    Total object size:   %ld\n"), m_total_size);
-  printf_filtered (_("    Unique object size:  %ld\n"), m_unique_size);
-  printf_filtered (_("    Percentage of duplicates, by size:  "));
+  gdb_printf (_("    Total object size:   %ld\n"), m_total_size);
+  gdb_printf (_("    Unique object size:  %ld\n"), m_unique_size);
+  gdb_printf (_("    Percentage of duplicates, by size:  "));
   print_percentage (m_total_size - m_unique_size, m_total_size);
-  printf_filtered ("\n");
+  gdb_printf ("\n");
 
-  printf_filtered (_("    Max entry size:     %d\n"), max_entry_size);
-  printf_filtered (_("    Average entry size: "));
+  gdb_printf (_("    Max entry size:     %d\n"), max_entry_size);
+  gdb_printf (_("    Average entry size: "));
   if (m_unique_count > 0)
-    printf_filtered ("%ld\n", m_unique_size / m_unique_count);
+    gdb_printf ("%ld\n", m_unique_size / m_unique_count);
   else
     /* i18n: "Average entry size: (not applicable)".  */
-    printf_filtered (_("(not applicable)\n"));    
-  printf_filtered (_("    Median entry size:  %d\n"), median_entry_size);
-  printf_filtered ("\n");
+    gdb_printf (_("(not applicable)\n"));    
+  gdb_printf (_("    Median entry size:  %d\n"), median_entry_size);
+  gdb_printf ("\n");
 
-  printf_filtered (_("    \
+  gdb_printf (_("    \
 Total memory used by bcache, including overhead: %ld\n"),
-		   m_structure_size);
-  printf_filtered (_("    Percentage memory overhead: "));
+	      m_structure_size);
+  gdb_printf (_("    Percentage memory overhead: "));
   print_percentage (m_structure_size - m_unique_size, m_unique_size);
-  printf_filtered (_("    Net memory savings:         "));
+  gdb_printf (_("    Net memory savings:         "));
   print_percentage (m_total_size - m_structure_size, m_total_size);
-  printf_filtered ("\n");
+  gdb_printf ("\n");
 
-  printf_filtered (_("    Hash table size:           %3d\n"), 
-		   m_num_buckets);
-  printf_filtered (_("    Hash table expands:        %lu\n"),
-		   m_expand_count);
-  printf_filtered (_("    Hash table hashes:         %lu\n"),
-		   m_total_count + m_expand_hash_count);
-  printf_filtered (_("    Half hash misses:          %lu\n"),
-		   m_half_hash_miss_count);
-  printf_filtered (_("    Hash table population:     "));
+  gdb_printf (_("    Hash table size:           %3d\n"), 
+	      m_num_buckets);
+  gdb_printf (_("    Hash table expands:        %lu\n"),
+	      m_expand_count);
+  gdb_printf (_("    Hash table hashes:         %lu\n"),
+	      m_total_count + m_expand_hash_count);
+  gdb_printf (_("    Half hash misses:          %lu\n"),
+	      m_half_hash_miss_count);
+  gdb_printf (_("    Hash table population:     "));
   print_percentage (occupied_buckets, m_num_buckets);
-  printf_filtered (_("    Median hash chain length:  %3d\n"),
-		   median_chain_length);
-  printf_filtered (_("    Average hash chain length: "));
+  gdb_printf (_("    Median hash chain length:  %3d\n"),
+	      median_chain_length);
+  gdb_printf (_("    Average hash chain length: "));
   if (m_num_buckets > 0)
-    printf_filtered ("%3lu\n", m_unique_count / m_num_buckets);
+    gdb_printf ("%3lu\n", m_unique_count / m_num_buckets);
   else
     /* i18n: "Average hash chain length: (not applicable)".  */
-    printf_filtered (_("(not applicable)\n"));
-  printf_filtered (_("    Maximum hash chain length: %3d\n"), 
-		   max_chain_length);
-  printf_filtered ("\n");
+    gdb_printf (_("(not applicable)\n"));
+  gdb_printf (_("    Maximum hash chain length: %3d\n"), 
+	      max_chain_length);
+  gdb_printf ("\n");
 }
 
 int

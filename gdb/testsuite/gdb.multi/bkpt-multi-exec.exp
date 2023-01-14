@@ -14,13 +14,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 if ![target_can_use_run_cmd] {
-    continue
+    return
 }
 
 # Until "catch exec" is implemented on other targets...
 #
 if {![istarget "*-linux*"]} then {
-    continue
+    return
 }
 
 set testfile "bkpt-multi-exec"

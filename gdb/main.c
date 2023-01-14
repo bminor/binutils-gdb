@@ -56,13 +56,8 @@
 #include "observable.h"
 #include "serial.h"
 
-/* The selected interpreter.  This will be used as a set command
-   variable, so it should always be malloc'ed - since
-   do_setshow_command will free it.  */
-char *interpreter_p;
-
-/* Whether dbx commands will be handled.  */
-int dbx_commands = 0;
+/* The selected interpreter.  */
+std::string interpreter_p;
 
 /* System root path, used to find libraries etc.  */
 std::string gdb_sysroot;
@@ -122,7 +117,7 @@ set_gdb_data_directory (const char *new_datadir)
     {
       int save_errno = errno;
 
-      fprintf_unfiltered (gdb_stderr, "Warning: ");
+      gdb_printf (gdb_stderr, "Warning: ");
       print_sys_errmsg (new_datadir, save_errno);
     }
   else if (!S_ISDIR (st.st_mode))
@@ -136,12 +131,7 @@ set_gdb_data_directory (const char *new_datadir)
      "../foo" and "../foo" doesn't exist then we'll record $(pwd)/../foo which
      isn't canonical, but that's ok.  */
   if (!IS_ABSOLUTE_PATH (gdb_datadir.c_str ()))
-    {
-      gdb::unique_xmalloc_ptr<char> abs_datadir
-	= gdb_abspath (gdb_datadir.c_str ());
-
-      gdb_datadir = abs_datadir.get ();
-    }
+    gdb_datadir = gdb_abspath (gdb_datadir.c_str ());
 }
 
 /* Relocate a file or directory.  PROGNAME is the name by which gdb
@@ -737,7 +727,7 @@ captured_main_1 (struct captured_main_args *context)
      this captured main, or one specified by the user at start up, or
      the console.  Initialize the interpreter to the one requested by 
      the application.  */
-  interpreter_p = xstrdup (context->interpreter_p);
+  interpreter_p = context->interpreter_p;
 
   /* Parse arguments and options.  */
   {
@@ -766,7 +756,6 @@ captured_main_1 (struct captured_main_args *context)
     static struct option long_options[] =
     {
       {"tui", no_argument, 0, OPT_TUI},
-      {"dbx", no_argument, &dbx_commands, 1},
       {"readnow", no_argument, NULL, OPT_READNOW},
       {"readnever", no_argument, NULL, OPT_READNEVER},
       {"r", no_argument, NULL, OPT_READNOW},
@@ -875,8 +864,7 @@ captured_main_1 (struct captured_main_args *context)
 	  case OPT_TUI:
 	    /* --tui is equivalent to -i=tui.  */
 #ifdef TUI
-	    xfree (interpreter_p);
-	    interpreter_p = xstrdup (INTERP_TUI);
+	    interpreter_p = INTERP_TUI;
 #else
 	    error (_("%s: TUI mode is not supported"), gdb_program_name);
 #endif
@@ -886,14 +874,12 @@ captured_main_1 (struct captured_main_args *context)
 	       actually useful, and if it is, what it should do.  */
 #ifdef GDBTK
 	    /* --windows is equivalent to -i=insight.  */
-	    xfree (interpreter_p);
-	    interpreter_p = xstrdup (INTERP_INSIGHT);
+	    interpreter_p = INTERP_INSIGHT;
 #endif
 	    break;
 	  case OPT_NOWINDOWS:
 	    /* -nw is equivalent to -i=console.  */
-	    xfree (interpreter_p);
-	    interpreter_p = xstrdup (INTERP_CONSOLE);
+	    interpreter_p = INTERP_CONSOLE;
 	    break;
 	  case 'f':
 	    annotation_level = 1;
@@ -959,8 +945,7 @@ captured_main_1 (struct captured_main_args *context)
 	    }
 #endif /* GDBTK */
 	  case 'i':
-	    xfree (interpreter_p);
-	    interpreter_p = xstrdup (optarg);
+	    interpreter_p = optarg;
 	    break;
 	  case 'd':
 	    dirarg.push_back (optarg);
@@ -1098,11 +1083,11 @@ captured_main_1 (struct captured_main_args *context)
       /* Any argument left on the command line is unexpected and
 	 will be ignored.  Inform the user.  */
       if (optind < argc)
-	fprintf_unfiltered (gdb_stderr,
-			    _("Excess command line "
-			      "arguments ignored. (%s%s)\n"),
-			    argv[optind],
-			    (optind == argc - 1) ? "" : " ...");
+	gdb_printf (gdb_stderr,
+		    _("Excess command line "
+		      "arguments ignored. (%s%s)\n"),
+		    argv[optind],
+		    (optind == argc - 1) ? "" : " ...");
     }
 
   /* Lookup gdbinit files.  Note that the gdbinit file name may be
@@ -1121,8 +1106,7 @@ captured_main_1 (struct captured_main_args *context)
   if (print_version)
     {
       print_gdb_version (gdb_stdout, false);
-      gdb_stdout->wrap_here (0);
-      printf_filtered ("\n");
+      gdb_printf ("\n");
       exit (0);
     }
 
@@ -1135,8 +1119,7 @@ captured_main_1 (struct captured_main_args *context)
   if (print_configuration)
     {
       print_gdb_configuration (gdb_stdout);
-      gdb_stdout->wrap_here (0);
-      printf_filtered ("\n");
+      gdb_printf ("\n");
       exit (0);
     }
 
@@ -1144,22 +1127,21 @@ captured_main_1 (struct captured_main_args *context)
      GDB retain the old MI1 interpreter startup behavior.  Output the
      copyright message before the interpreter is installed.  That way
      it isn't encapsulated in MI output.  */
-  if (!quiet && strcmp (interpreter_p, INTERP_MI1) == 0)
+  if (!quiet && interpreter_p == INTERP_MI1)
     {
       /* Print all the junk at the top, with trailing "..." if we are
 	 about to read a symbol file (possibly slowly).  */
       print_gdb_version (gdb_stdout, true);
       if (symarg)
-	printf_filtered ("..");
-      gdb_stdout->wrap_here (0);
-      printf_filtered ("\n");
+	gdb_printf ("..");
+      gdb_printf ("\n");
       gdb_flush (gdb_stdout);	/* Force to screen during slow
 				   operations.  */
     }
 
   /* Install the default UI.  All the interpreters should have had a
      look at things by now.  Initialize the default interpreter.  */
-  set_top_level_interpreter (interpreter_p);
+  set_top_level_interpreter (interpreter_p.c_str ());
 
   /* FIXME: cagney/2003-02-03: The big hack (part 2 of 2) that lets
      GDB retain the old MI1 interpreter startup behavior.  Output the
@@ -1171,9 +1153,8 @@ captured_main_1 (struct captured_main_args *context)
 	 about to read a symbol file (possibly slowly).  */
       print_gdb_version (gdb_stdout, true);
       if (symarg)
-	printf_filtered ("..");
-      gdb_stdout->wrap_here (0);
-      printf_filtered ("\n");
+	gdb_printf ("..");
+      gdb_printf ("\n");
       gdb_flush (gdb_stdout);	/* Force to screen during slow
 				   operations.  */
     }
@@ -1391,12 +1372,12 @@ print_gdb_help (struct ui_file *stream)
   /* Note: The options in the list below are only approximately sorted
      in the alphabetical order, so as to group closely related options
      together.  */
-  fputs_unfiltered (_("\
+  gdb_puts (_("\
 This is the GNU debugger.  Usage:\n\n\
     gdb [options] [executable-file [core-file or process-id]]\n\
     gdb [options] --args executable-file [inferior-arguments ...]\n\n\
 "), stream);
-  fputs_unfiltered (_("\
+  gdb_puts (_("\
 Selection of debuggee and its files:\n\n\
   --args             Arguments after executable-file are passed to inferior.\n\
   --core=COREFILE    Analyze the core dump COREFILE.\n\
@@ -1409,7 +1390,7 @@ Selection of debuggee and its files:\n\n\
   --readnever        Do not read symbol files.\n\
   --write            Set writing into executable and core files.\n\n\
 "), stream);
-  fputs_unfiltered (_("\
+  gdb_puts (_("\
 Initial commands and command files:\n\n\
   --command=FILE, -x Execute GDB commands from FILE.\n\
   --init-command=FILE, -ix\n\
@@ -1423,7 +1404,7 @@ Initial commands and command files:\n\n\
   --nh               Do not read ~/.gdbinit.\n\
   --nx               Do not read any .gdbinit files in any directory.\n\n\
 "), stream);
-  fputs_unfiltered (_("\
+  gdb_puts (_("\
 Output and user interface control:\n\n\
   --fullname         Output information used by emacs-GDB interface.\n\
   --interpreter=INTERP\n\
@@ -1433,16 +1414,15 @@ Output and user interface control:\n\n\
   --nw               Do not use the GUI interface.\n\
 "), stream);
 #if defined(TUI)
-  fputs_unfiltered (_("\
+  gdb_puts (_("\
   --tui              Use a terminal user interface.\n\
 "), stream);
 #endif
-  fputs_unfiltered (_("\
-  --dbx              DBX compatibility mode.\n\
+  gdb_puts (_("\
   -q, --quiet, --silent\n\
 		     Do not print version number on startup.\n\n\
 "), stream);
-  fputs_unfiltered (_("\
+  gdb_puts (_("\
 Operating modes:\n\n\
   --batch            Exit after processing options.\n\
   --batch-silent     Like --batch, but suppress all gdb stdout output.\n\
@@ -1459,18 +1439,18 @@ Other options:\n\n\
   --data-directory=DIR, -D\n\
 		     Set GDB's data-directory to DIR.\n\
 "), stream);
-  fputs_unfiltered (_("\n\
+  gdb_puts (_("\n\
 At startup, GDB reads the following early init files and executes their\n\
 commands:\n\
 "), stream);
   if (!home_gdbearlyinit.empty ())
-    fprintf_unfiltered (stream, _("\
+    gdb_printf (stream, _("\
    * user-specific early init file: %s\n\
 "), home_gdbearlyinit.c_str ());
   if (home_gdbearlyinit.empty ())
-    fprintf_unfiltered (stream, _("\
+    gdb_printf (stream, _("\
    None found.\n"));
-  fputs_unfiltered (_("\n\
+  gdb_puts (_("\n\
 At startup, GDB reads the following init files and executes their commands:\n\
 "), stream);
   if (!system_gdbinit.empty ())
@@ -1482,32 +1462,32 @@ At startup, GDB reads the following init files and executes their commands:\n\
 	  if (idx < system_gdbinit.size () - 1)
 	    output += ", ";
 	}
-      fprintf_unfiltered (stream, _("\
+      gdb_printf (stream, _("\
    * system-wide init files: %s\n\
 "), output.c_str ());
     }
   if (!home_gdbinit.empty ())
-    fprintf_unfiltered (stream, _("\
+    gdb_printf (stream, _("\
    * user-specific init file: %s\n\
 "), home_gdbinit.c_str ());
   if (!local_gdbinit.empty ())
-    fprintf_unfiltered (stream, _("\
+    gdb_printf (stream, _("\
    * local init file (see also 'set auto-load local-gdbinit'): ./%s\n\
 "), local_gdbinit.c_str ());
   if (system_gdbinit.empty () && home_gdbinit.empty ()
       && local_gdbinit.empty ())
-    fprintf_unfiltered (stream, _("\
+    gdb_printf (stream, _("\
    None found.\n"));
-  fputs_unfiltered (_("\n\
+  gdb_puts (_("\n\
 For more information, type \"help\" from within GDB, or consult the\n\
 GDB manual (available as on-line info or a printed manual).\n\
 "), stream);
   if (REPORT_BUGS_TO[0] && stream == gdb_stdout)
-    fprintf_unfiltered (stream, _("\n\
-Report bugs to %s.\n\
-"), REPORT_BUGS_TO);
+    gdb_printf (stream, _("\n\
+Report bugs to %ps.\n\
+"), styled_string (file_name_style.style (), REPORT_BUGS_TO));
   if (stream == gdb_stdout)
-    fprintf_unfiltered (stream, _("\n\
+    gdb_printf (stream, _("\n\
 You can ask GDB-related questions on the GDB users mailing list\n\
 (gdb@sourceware.org) or on GDB's IRC channel (#gdb on Freenode).\n"));
 }

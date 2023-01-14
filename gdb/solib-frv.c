@@ -291,26 +291,26 @@ lm_base (void)
   if (got_sym.minsym == 0)
     {
       if (solib_frv_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "lm_base: _GLOBAL_OFFSET_TABLE_ not found.\n");
+	gdb_printf (gdb_stdlog,
+		    "lm_base: _GLOBAL_OFFSET_TABLE_ not found.\n");
       return 0;
     }
 
-  addr = BMSYMBOL_VALUE_ADDRESS (got_sym) + 8;
+  addr = got_sym.value_address () + 8;
 
   if (solib_frv_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"lm_base: _GLOBAL_OFFSET_TABLE_ + 8 = %s\n",
-			hex_string_custom (addr, 8));
+    gdb_printf (gdb_stdlog,
+		"lm_base: _GLOBAL_OFFSET_TABLE_ + 8 = %s\n",
+		hex_string_custom (addr, 8));
 
   if (target_read_memory (addr, buf, sizeof buf) != 0)
     return 0;
   lm_base_cache = extract_unsigned_integer (buf, sizeof buf, byte_order);
 
   if (solib_frv_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"lm_base: lm_base_cache = %s\n",
-			hex_string_custom (lm_base_cache, 8));
+    gdb_printf (gdb_stdlog,
+		"lm_base: lm_base_cache = %s\n",
+		hex_string_custom (lm_base_cache, 8));
 
   return lm_base_cache;
 }
@@ -355,9 +355,9 @@ frv_current_sos (void)
       CORE_ADDR got_addr;
 
       if (solib_frv_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "current_sos: reading link_map entry at %s\n",
-			    hex_string_custom (lm_addr, 8));
+	gdb_printf (gdb_stdlog,
+		    "current_sos: reading link_map entry at %s\n",
+		    hex_string_custom (lm_addr, 8));
 
       if (target_read_memory (lm_addr, (gdb_byte *) &lm_buf,
 			      sizeof (lm_buf)) != 0)
@@ -406,8 +406,8 @@ frv_current_sos (void)
 	    = target_read_string (addr, SO_NAME_MAX_PATH_SIZE - 1);
 
 	  if (solib_frv_debug)
-	    fprintf_unfiltered (gdb_stdlog, "current_sos: name = %s\n",
-				name_buf.get ());
+	    gdb_printf (gdb_stdlog, "current_sos: name = %s\n",
+			name_buf.get ());
 	  
 	  if (name_buf == nullptr)
 	    warning (_("Can't read pathname for link map entry."));
@@ -583,9 +583,9 @@ enable_break2 (void)
 	}
 
       if (solib_frv_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "enable_break: interp_loadmap_addr = %s\n",
-			    hex_string_custom (interp_loadmap_addr, 8));
+	gdb_printf (gdb_stdlog,
+		    "enable_break: interp_loadmap_addr = %s\n",
+		    hex_string_custom (interp_loadmap_addr, 8));
 
       ldm = fetch_loadmap (interp_loadmap_addr);
       if (ldm == NULL)
@@ -628,18 +628,18 @@ enable_break2 (void)
 	}
 
       if (solib_frv_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "enable_break: _dl_debug_addr "
-			    "(prior to relocation) = %s\n",
-			    hex_string_custom (addr, 8));
+	gdb_printf (gdb_stdlog,
+		    "enable_break: _dl_debug_addr "
+		    "(prior to relocation) = %s\n",
+		    hex_string_custom (addr, 8));
 
       addr += displacement_from_map (ldm, addr);
 
       if (solib_frv_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "enable_break: _dl_debug_addr "
-			    "(after relocation) = %s\n",
-			    hex_string_custom (addr, 8));
+	gdb_printf (gdb_stdlog,
+		    "enable_break: _dl_debug_addr "
+		    "(after relocation) = %s\n",
+		    hex_string_custom (addr, 8));
 
       /* Fetch the address of the r_debug struct.  */
       if (target_read_memory (addr, addr_buf, sizeof addr_buf) != 0)
@@ -651,17 +651,17 @@ enable_break2 (void)
       addr = extract_unsigned_integer (addr_buf, sizeof addr_buf, byte_order);
 
       if (solib_frv_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "enable_break: _dl_debug_addr[0..3] = %s\n",
-			    hex_string_custom (addr, 8));
+	gdb_printf (gdb_stdlog,
+		    "enable_break: _dl_debug_addr[0..3] = %s\n",
+		    hex_string_custom (addr, 8));
 
       /* If it's zero, then the ldso hasn't initialized yet, and so
 	 there are no shared libs yet loaded.  */
       if (addr == 0)
 	{
 	  if (solib_frv_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"enable_break: ldso not yet initialized\n");
+	    gdb_printf (gdb_stdlog,
+			"enable_break: ldso not yet initialized\n");
 	  /* Do not warn, but mark to run again.  */
 	  return 0;
 	}
@@ -720,16 +720,16 @@ enable_break (void)
   if (current_program_space->symfile_object_file == NULL)
     {
       if (solib_frv_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "enable_break: No symbol file found.\n");
+	gdb_printf (gdb_stdlog,
+		    "enable_break: No symbol file found.\n");
       return 0;
     }
 
   if (!entry_point_address_query (&entry_point))
     {
       if (solib_frv_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "enable_break: Symbol file has no entry point.\n");
+	gdb_printf (gdb_stdlog,
+		    "enable_break: Symbol file has no entry point.\n");
       return 0;
     }
 
@@ -742,18 +742,18 @@ enable_break (void)
   if (interp_sect == NULL)
     {
       if (solib_frv_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "enable_break: No .interp section found.\n");
+	gdb_printf (gdb_stdlog,
+		    "enable_break: No .interp section found.\n");
       return 0;
     }
 
   create_solib_event_breakpoint (target_gdbarch (), entry_point);
 
   if (solib_frv_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"enable_break: solib event breakpoint "
-			"placed at entry point: %s\n",
-			hex_string_custom (entry_point, 8));
+    gdb_printf (gdb_stdlog,
+		"enable_break: solib event breakpoint "
+		"placed at entry point: %s\n",
+		hex_string_custom (entry_point, 8));
   return 1;
 }
 
@@ -900,7 +900,7 @@ main_got (void)
   if (got_sym.minsym == 0)
     return 0;
 
-  return BMSYMBOL_VALUE_ADDRESS (got_sym);
+  return got_sym.value_address ();
 }
 
 /* Find the global pointer for the given function address ADDR.  */

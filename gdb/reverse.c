@@ -150,8 +150,8 @@ save_bookmark_command (const char *args, int from_tty)
 	b1 = b1->next;
       b1->next = b;
     }
-  printf_filtered (_("Saved bookmark %d at %s\n"), b->number,
-		     paddress (gdbarch, b->sal.pc));
+  gdb_printf (_("Saved bookmark %d at %s\n"), b->number,
+	      paddress (gdbarch, b->sal.pc));
 }
 
 /* Implement "delete bookmark" command.  */
@@ -288,16 +288,16 @@ bookmark_1 (int bnum)
   {
     if (bnum == -1 || bnum == b->number)
       {
-	printf_filtered ("   %d       %s    '%s'\n",
-			 b->number,
-			 paddress (gdbarch, b->pc),
-			 b->opaque_data);
+	gdb_printf ("   %d       %s    '%s'\n",
+		    b->number,
+		    paddress (gdbarch, b->pc),
+		    b->opaque_data);
 	matched++;
       }
   }
 
   if (bnum > 0 && matched == 0)
-    printf_filtered ("No bookmark #%d\n", bnum);
+    gdb_printf ("No bookmark #%d\n", bnum);
 
   return matched;
 }
@@ -308,7 +308,7 @@ static void
 info_bookmarks_command (const char *args, int from_tty)
 {
   if (!bookmark_chain)
-    printf_filtered (_("No bookmarks.\n"));
+    gdb_printf (_("No bookmarks.\n"));
   else if (args == NULL || *args == '\0')
     bookmark_1 (-1);
   else

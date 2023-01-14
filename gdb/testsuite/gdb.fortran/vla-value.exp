@@ -132,7 +132,7 @@ clean_restart ${testfile}
 
 if ![fortran_runto_main] then {
     perror "couldn't run to main"
-    continue
+    return
 }
 gdb_breakpoint [gdb_get_line_number "vla2-allocated"]
 gdb_continue_to_breakpoint "vla2-allocated, second time"

@@ -21,14 +21,10 @@
 
 set vhn "\\$\[0-9\]+"
 
-if { [skip_cplus_tests] } { continue }
+if { [skip_cplus_tests] } { return }
 
 
 standard_testfile .cc
-
-if [get_compiler_info "c++"] {
-    return -1
-}
 
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
     return -1
@@ -36,7 +32,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 gdb_breakpoint [gdb_get_line_number "Breakpoint 1 here"]

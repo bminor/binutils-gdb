@@ -85,7 +85,6 @@ static int set_target_endian = 0;
 
 static bool reg_names_p = TARGET_REG_NAMES_P;
 
-static void ppc_macro (char *, const struct powerpc_macro *);
 static void ppc_byte (int);
 
 #if defined (OBJ_XCOFF) || defined (OBJ_ELF)
@@ -980,9 +979,6 @@ static unsigned int ppc_obj64 = BFD_DEFAULT_TARGET_SIZE == 64;
 /* Opcode hash table.  */
 static htab_t ppc_hash;
 
-/* Macro hash table.  */
-static htab_t ppc_macro_hash;
-
 #ifdef OBJ_ELF
 /* What type of shared library support to use.  */
 static enum { SHLIB_NONE, SHLIB_PIC, SHLIB_MRELOCATABLE } shlib = SHLIB_NONE;
@@ -1557,7 +1553,7 @@ ppc_target_format (void)
 static bool
 insn_validate (const struct powerpc_opcode *op)
 {
-  const unsigned char *o;
+  const ppc_opindex_t *o;
   uint64_t omask = op->mask;
 
   /* The mask had better not trim off opcode bits.  */
@@ -1589,10 +1585,10 @@ insn_validate (const struct powerpc_opcode *op)
 	      val = -1;
 	      if ((operand->flags & PPC_OPERAND_NEGATIVE) != 0)
 		val = -val;
-	      else if ((operand->flags & PPC_OPERAND_PLUS1) != 0)
-		val += 1;
 	      mask = (*operand->insert) (0, val, ppc_cpu, &errmsg);
 	    }
+	  else if (operand->shift == (int) PPC_OPSHIFT_SH6)
+	    mask = (0x1f << 11) | 0x2;
 	  else if (operand->shift >= 0)
 	    mask = operand->bitm << operand->shift;
 	  else
@@ -1617,22 +1613,18 @@ insn_validate (const struct powerpc_opcode *op)
   return false;
 }
 
-/* Insert opcodes and macros into hash tables.  Called at startup and
-   for .machine pseudo.  */
+/* Insert opcodes into hash tables.  Called at startup and for
+   .machine pseudo.  */
 
 static void
 ppc_setup_opcodes (void)
 {
   const struct powerpc_opcode *op;
   const struct powerpc_opcode *op_end;
-  const struct powerpc_macro *macro;
-  const struct powerpc_macro *macro_end;
   bool bad_insn = false;
 
   if (ppc_hash != NULL)
     htab_delete (ppc_hash);
-  if (ppc_macro_hash != NULL)
-    htab_delete (ppc_macro_hash);
 
   /* Insert the opcodes into a hash table.  */
   ppc_hash = str_htab_create ();
@@ -1642,8 +1634,8 @@ ppc_setup_opcodes (void)
       unsigned int i;
 
       /* An index into powerpc_operands is stored in struct fix
-	 fx_pcrel_adjust which is 8 bits wide.  */
-      gas_assert (num_powerpc_operands < 256);
+	 fx_pcrel_adjust which is a 16 bit field.  */
+      gas_assert (num_powerpc_operands <= PPC_OPINDEX_MAX + 1);
 
       /* Check operand masks.  Code here and in the disassembler assumes
 	 all the 1's in the mask are contiguous.  */
@@ -1838,19 +1830,6 @@ ppc_setup_opcodes (void)
       for (op = spe2_opcodes; op < op_end; op++)
 	str_hash_insert (ppc_hash, op->name, op, 0);
     }
-
-  /* Insert the macros into a hash table.  */
-  ppc_macro_hash = str_htab_create ();
-
-  macro_end = powerpc_macros + powerpc_num_macros;
-  for (macro = powerpc_macros; macro < macro_end; macro++)
-    if (((macro->flags & ppc_cpu) != 0
-	 || (ppc_cpu & PPC_OPCODE_ANY) != 0)
-	&& str_hash_insert (ppc_macro_hash, macro->name, macro, 0) != NULL)
-      {
-	as_bad (_("duplicate %s"), macro->name);
-	bad_insn = true;
-      }
 
   if (bad_insn)
     abort ();
@@ -3272,7 +3251,7 @@ md_assemble (char *str)
   char *s;
   const struct powerpc_opcode *opcode;
   uint64_t insn;
-  const unsigned char *opindex_ptr;
+  const ppc_opindex_t *opindex_ptr;
   int need_paren;
   int next_opindex;
   struct ppc_fixup fixups[MAX_INSN_FIXUPS];
@@ -3292,15 +3271,7 @@ md_assemble (char *str)
   opcode = (const struct powerpc_opcode *) str_hash_find (ppc_hash, str);
   if (opcode == (const struct powerpc_opcode *) NULL)
     {
-      const struct powerpc_macro *macro;
-
-      macro = (const struct powerpc_macro *) str_hash_find (ppc_macro_hash,
-							    str);
-      if (macro == (const struct powerpc_macro *) NULL)
-	as_bad (_("unrecognized opcode: `%s'"), str);
-      else
-	ppc_macro (s, macro);
-
+      as_bad (_("unrecognized opcode: `%s'"), str);
       ppc_clear_labels ();
       return;
     }
@@ -3377,7 +3348,7 @@ md_assemble (char *str)
 	{
 	  if (num_optional_operands == 0)
 	    {
-	      const unsigned char *optr;
+	      const ppc_opindex_t *optr;
 	      int total = 0;
 	      int provided = 0;
 	      int omitted;
@@ -4132,85 +4103,6 @@ md_assemble (char *str)
 	}
       fixP->fx_pcrel_adjust = fixups[i].opindex;
     }
-}
-
-/* Handle a macro.  Gather all the operands, transform them as
-   described by the macro, and call md_assemble recursively.  All the
-   operands are separated by commas; we don't accept parentheses
-   around operands here.  */
-
-static void
-ppc_macro (char *str, const struct powerpc_macro *macro)
-{
-  char *operands[10];
-  unsigned int count;
-  char *s;
-  unsigned int len;
-  const char *format;
-  unsigned int arg;
-  char *send;
-  char *complete;
-
-  /* Gather the users operands into the operands array.  */
-  count = 0;
-  s = str;
-  while (1)
-    {
-      if (count >= sizeof operands / sizeof operands[0])
-	break;
-      operands[count++] = s;
-      s = strchr (s, ',');
-      if (s == (char *) NULL)
-	break;
-      *s++ = '\0';
-    }
-
-  if (count != macro->operands)
-    {
-      as_bad (_("wrong number of operands"));
-      return;
-    }
-
-  /* Work out how large the string must be (the size is unbounded
-     because it includes user input).  */
-  len = 0;
-  format = macro->format;
-  while (*format != '\0')
-    {
-      if (*format != '%')
-	{
-	  ++len;
-	  ++format;
-	}
-      else
-	{
-	  arg = strtol (format + 1, &send, 10);
-	  know (send != format && arg < count);
-	  len += strlen (operands[arg]);
-	  format = send;
-	}
-    }
-
-  /* Put the string together.  */
-  complete = s = XNEWVEC (char, len + 1);
-  format = macro->format;
-  while (*format != '\0')
-    {
-      if (*format != '%')
-	*s++ = *format++;
-      else
-	{
-	  arg = strtol (format + 1, &send, 10);
-	  strcpy (s, operands[arg]);
-	  s += strlen (s);
-	  format = send;
-	}
-    }
-  *s = '\0';
-
-  /* Assemble the constructed instruction.  */
-  md_assemble (complete);
-  free (complete);
 }
 
 #ifdef OBJ_ELF
@@ -5302,7 +5194,7 @@ ppc_file (int ignore ATTRIBUTE_UNUSED)
 	}
 
       /* Use coff dot_file creation and adjust auxiliary entries.  */
-      c_dot_file_symbol (sfname, 0);
+      c_dot_file_symbol (sfname);
       S_SET_NUMBER_AUXILIARY (symbol_rootP, auxnb);
       coffsym = coffsymbol (symbol_get_bfdsym (symbol_rootP));
       coffsym->native[1].u.auxent.x_file.x_ftype = XFT_FN;
@@ -5965,7 +5857,30 @@ ppc_machine (int ignore ATTRIBUTE_UNUSED)
 	     options do not count as a new machine, instead they add
 	     to currently selected opcodes.  */
 	  ppc_cpu_t machine_sticky = 0;
-	  new_cpu = ppc_parse_cpu (ppc_cpu, &machine_sticky, cpu_string);
+	  /* Unfortunately, some versions of gcc emit a .machine
+	     directive very near the start of the compiler's assembly
+	     output file.  This is bad because it overrides user -Wa
+	     cpu selection.  Worse, there are versions of gcc that
+	     emit the *wrong* cpu, not even respecting the -mcpu given
+	     to gcc.  See gcc pr101393.  And to compound the problem,
+	     as of 20220222 gcc doesn't pass the correct cpu option to
+	     gas on the command line.  See gcc pr59828.  Hack around
+	     this by keeping sticky options for an early .machine.  */
+	  asection *sec;
+	  for (sec = stdoutput->sections; sec != NULL; sec = sec->next)
+	    {
+	      segment_info_type *info = seg_info (sec);
+	      /* Are the frags for this section perturbed from their
+		 initial state?  Even .align will count here.  */
+	      if (info != NULL
+		  && (info->frchainP->frch_root != info->frchainP->frch_last
+		      || info->frchainP->frch_root->fr_type != rs_fill
+		      || info->frchainP->frch_root->fr_fix != 0))
+		break;
+	    }
+	  new_cpu = ppc_parse_cpu (ppc_cpu,
+				   sec == NULL ? &sticky : &machine_sticky,
+				   cpu_string);
 	  if (new_cpu != 0)
 	    ppc_cpu = new_cpu;
 	  else
@@ -7096,7 +7011,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
   if (fixP->fx_pcrel_adjust != 0)
     {
       /* This is a fixup on an instruction.  */
-      int opindex = fixP->fx_pcrel_adjust & 0xff;
+      ppc_opindex_t opindex = fixP->fx_pcrel_adjust & PPC_OPINDEX_MAX;
 
       operand = &powerpc_operands[opindex];
 #ifdef OBJ_XCOFF

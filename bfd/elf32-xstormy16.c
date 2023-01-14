@@ -73,7 +73,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
   /* This reloc does nothing.  */
   HOWTO (R_XSTORMY16_NONE,	/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -88,7 +88,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
   /* A 32 bit absolute relocation.  */
   HOWTO (R_XSTORMY16_32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -103,7 +103,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
   /* A 16 bit absolute relocation.  */
   HOWTO (R_XSTORMY16_16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -118,7 +118,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
   /* An 8 bit absolute relocation.  */
   HOWTO (R_XSTORMY16_8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -133,7 +133,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
   /* A 32 bit pc-relative relocation.  */
   HOWTO (R_XSTORMY16_PC32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -148,7 +148,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
   /* A 16 bit pc-relative relocation.  */
   HOWTO (R_XSTORMY16_PC16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -163,7 +163,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
   /* An 8 bit pc-relative relocation.  */
   HOWTO (R_XSTORMY16_PC8,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -178,7 +178,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
   /* A 12-bit pc-relative relocation suitable for the branch instructions.  */
   HOWTO (R_XSTORMY16_REL_12,	/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 11,			/* bitsize */
 	 true,			/* pc_relative */
 	 1,			/* bitpos */
@@ -193,7 +193,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
   /* A 24-bit absolute relocation suitable for the jump instructions.  */
   HOWTO (R_XSTORMY16_24,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -208,7 +208,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
   /* A 16 bit absolute relocation to a function pointer.  */
   HOWTO (R_XSTORMY16_FPTR16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -223,7 +223,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
   /* Low order 16 bit value of a high memory address.  */
   HOWTO (R_XSTORMY16_LO16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -238,7 +238,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
   /* High order 16 bit value of a high memory address.  */
   HOWTO (R_XSTORMY16_HI16,	/* type */
 	 16,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -253,7 +253,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
   /* A 12 bit absolute relocation.  */
   HOWTO (R_XSTORMY16_12,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -271,7 +271,7 @@ static reloc_howto_type xstormy16_elf_howto_table2 [] =
   /* GNU extension to record C++ vtable hierarchy */
   HOWTO (R_XSTORMY16_GNU_VTINHERIT, /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -286,7 +286,7 @@ static reloc_howto_type xstormy16_elf_howto_table2 [] =
   /* GNU extension to record C++ vtable member usage */
   HOWTO (R_XSTORMY16_GNU_VTENTRY,     /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

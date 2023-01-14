@@ -172,8 +172,8 @@ gdb_has_a_terminal (void)
 
 #define	OOPSY(what)	\
   if (result == -1)	\
-    fprintf_unfiltered(gdb_stderr, "[%s failed in terminal_inferior: %s]\n", \
-	    what, safe_strerror (errno))
+    gdb_printf(gdb_stderr, "[%s failed in terminal_inferior: %s]\n",	\
+	       what, safe_strerror (errno))
 
 /* Initialize the terminal settings we record for the inferior,
    before we actually run the inferior.  */
@@ -382,7 +382,7 @@ child_terminal_inferior (struct target_ops *self)
 		 process running on another terminal and we couldn't
 		 tell whether it was sharing GDB's terminal (and so
 		 assumed yes).  */
-	      fprintf_unfiltered
+	      gdb_printf
 		(gdb_stderr,
 		 "[tcsetpgrp failed in child_terminal_inferior: %s]\n",
 		 safe_strerror (errno));
@@ -492,9 +492,9 @@ child_terminal_ours_1 (target_terminal_state desired_state)
 	     used to check for an error here, so perhaps there are other
 	     such situations as well.  */
 	  if (result == -1)
-	    fprintf_unfiltered (gdb_stderr,
-				"[tcsetpgrp failed in child_terminal_ours: %s]\n",
-				safe_strerror (errno));
+	    gdb_printf (gdb_stderr,
+			"[tcsetpgrp failed in child_terminal_ours: %s]\n",
+			safe_strerror (errno));
 #endif
 #endif /* termios */
 	}
@@ -681,7 +681,7 @@ child_terminal_info (struct target_ops *self, const char *args, int from_tty)
 
   if (!gdb_has_a_terminal ())
     {
-      printf_filtered (_("This GDB does not control a terminal.\n"));
+      gdb_printf (_("This GDB does not control a terminal.\n"));
       return;
     }
 
@@ -691,8 +691,8 @@ child_terminal_info (struct target_ops *self, const char *args, int from_tty)
   inf = current_inferior ();
   tinfo = get_inflow_inferior_data (inf);
 
-  printf_filtered (_("Inferior's terminal status "
-		     "(currently saved by GDB):\n"));
+  gdb_printf (_("Inferior's terminal status "
+		"(currently saved by GDB):\n"));
 
   /* First the fcntl flags.  */
   {
@@ -700,7 +700,7 @@ child_terminal_info (struct target_ops *self, const char *args, int from_tty)
 
     flags = tinfo->tflags;
 
-    printf_filtered ("File descriptor flags = ");
+    gdb_printf ("File descriptor flags = ");
 
 #ifndef O_ACCMODE
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
@@ -709,20 +709,20 @@ child_terminal_info (struct target_ops *self, const char *args, int from_tty)
     switch (flags & (O_ACCMODE))
       {
       case O_RDONLY:
-	printf_filtered ("O_RDONLY");
+	gdb_printf ("O_RDONLY");
 	break;
       case O_WRONLY:
-	printf_filtered ("O_WRONLY");
+	gdb_printf ("O_WRONLY");
 	break;
       case O_RDWR:
-	printf_filtered ("O_RDWR");
+	gdb_printf ("O_RDWR");
 	break;
       }
     flags &= ~(O_ACCMODE);
 
 #ifdef O_NONBLOCK
     if (flags & O_NONBLOCK)
-      printf_filtered (" | O_NONBLOCK");
+      gdb_printf (" | O_NONBLOCK");
     flags &= ~O_NONBLOCK;
 #endif
 
@@ -731,27 +731,27 @@ child_terminal_info (struct target_ops *self, const char *args, int from_tty)
        print it as O_NONBLOCK, which is good cause that is what POSIX
        has, and the flag will already be cleared by the time we get here.  */
     if (flags & O_NDELAY)
-      printf_filtered (" | O_NDELAY");
+      gdb_printf (" | O_NDELAY");
     flags &= ~O_NDELAY;
 #endif
 
     if (flags & O_APPEND)
-      printf_filtered (" | O_APPEND");
+      gdb_printf (" | O_APPEND");
     flags &= ~O_APPEND;
 
 #if defined (O_BINARY)
     if (flags & O_BINARY)
-      printf_filtered (" | O_BINARY");
+      gdb_printf (" | O_BINARY");
     flags &= ~O_BINARY;
 #endif
 
     if (flags)
-      printf_filtered (" | 0x%x", flags);
-    printf_filtered ("\n");
+      gdb_printf (" | 0x%x", flags);
+    gdb_printf ("\n");
   }
 
 #ifdef HAVE_TERMIOS_H
-  printf_filtered ("Process group = %d\n", (int) tinfo->process_group);
+  gdb_printf ("Process group = %d\n", (int) tinfo->process_group);
 #endif
 
   serial_print_tty_state (stdin_serial, tinfo->ttystate, gdb_stdout);

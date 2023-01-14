@@ -62,7 +62,7 @@ static reloc_howto_type h8_elf_howto_table[] =
 #define R_H8_NONE_X 0
   HOWTO (R_H8_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -76,7 +76,7 @@ static reloc_howto_type h8_elf_howto_table[] =
 #define R_H8_DIR32_X (R_H8_NONE_X + 1)
   HOWTO (R_H8_DIR32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -90,7 +90,7 @@ static reloc_howto_type h8_elf_howto_table[] =
 #define R_H8_DIR16_X (R_H8_DIR32_X + 1)
   HOWTO (R_H8_DIR16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -104,7 +104,7 @@ static reloc_howto_type h8_elf_howto_table[] =
 #define R_H8_DIR8_X (R_H8_DIR16_X + 1)
   HOWTO (R_H8_DIR8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -118,7 +118,7 @@ static reloc_howto_type h8_elf_howto_table[] =
 #define R_H8_DIR16A8_X (R_H8_DIR8_X + 1)
   HOWTO (R_H8_DIR16A8,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -132,7 +132,7 @@ static reloc_howto_type h8_elf_howto_table[] =
 #define R_H8_DIR16R8_X (R_H8_DIR16A8_X + 1)
   HOWTO (R_H8_DIR16R8,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -146,7 +146,7 @@ static reloc_howto_type h8_elf_howto_table[] =
 #define R_H8_DIR24A8_X (R_H8_DIR16R8_X + 1)
   HOWTO (R_H8_DIR24A8,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -160,7 +160,7 @@ static reloc_howto_type h8_elf_howto_table[] =
 #define R_H8_DIR24R8_X (R_H8_DIR24A8_X + 1)
   HOWTO (R_H8_DIR24R8,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 24,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -174,7 +174,7 @@ static reloc_howto_type h8_elf_howto_table[] =
 #define R_H8_DIR32A16_X (R_H8_DIR24R8_X + 1)
   HOWTO (R_H8_DIR32A16,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -188,7 +188,7 @@ static reloc_howto_type h8_elf_howto_table[] =
 #define R_H8_DISP32A16_X (R_H8_DIR32A16_X + 1)
   HOWTO (R_H8_DISP32A16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -202,7 +202,7 @@ static reloc_howto_type h8_elf_howto_table[] =
 #define R_H8_PCREL16_X (R_H8_DISP32A16_X + 1)
   HOWTO (R_H8_PCREL16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -216,7 +216,7 @@ static reloc_howto_type h8_elf_howto_table[] =
 #define R_H8_PCREL8_X (R_H8_PCREL16_X + 1)
   HOWTO (R_H8_PCREL8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */

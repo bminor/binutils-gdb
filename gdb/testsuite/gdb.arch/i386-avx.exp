@@ -31,10 +31,6 @@ if { ![have_avx] } {
 
 standard_testfile .c
 
-if [get_compiler_info] {
-    return -1
-}
-
 set flags { debug }
 
 # C11 for _Alignas, gnu for asm.

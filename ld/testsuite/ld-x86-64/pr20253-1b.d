@@ -9,10 +9,10 @@
 Disassembly of section .text:
 
 0+4000e0 <foo>:
- +[a-f0-9]+:	c3                   	ret *
+ +[a-f0-9]+:	c3                   	ret
 
 0+4000e1 <bar>:
- +[a-f0-9]+:	c3                   	ret *
+ +[a-f0-9]+:	c3                   	ret
 
 0+4000e2 <_start>:
  +[a-f0-9]+:	ff 15 28 00 20 00    	call   \*0x200028\(%rip\)        # 600110 <.*>

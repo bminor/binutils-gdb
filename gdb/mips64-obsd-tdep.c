@@ -29,10 +29,6 @@
 #include "mips-tdep.h"
 #include "solib-svr4.h"
 
-/* The MIPS64 Floating-Point Quad-Precision format is similar to
-   big-endian IA-64 Quad-Precision format.  */
-#define floatformats_mips64_quad floatformats_ia64_quad
-
 #define MIPS64OBSD_NUM_REGS 73
 
 /* Core file support.  */
@@ -150,7 +146,7 @@ mips64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tramp_frame_prepend_unwinder (gdbarch, &mips64obsd_sigframe);
 
   set_gdbarch_long_double_bit (gdbarch, 128);
-  set_gdbarch_long_double_format (gdbarch, floatformats_mips64_quad);
+  set_gdbarch_long_double_format (gdbarch, floatformats_ieee_quad);
 
   obsd_init_abi(info, gdbarch);
 

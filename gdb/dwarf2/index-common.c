@@ -54,3 +54,17 @@ dwarf5_djb_hash (const char *str_)
     hash = hash * 33 + tolower (c);
   return hash;
 }
+
+/* See dwarf-index-common.h.  */
+
+uint32_t
+dwarf5_djb_hash (gdb::string_view str)
+{
+  /* Note: tolower here ignores UTF-8, which isn't fully compliant.
+     See http://dwarfstd.org/ShowIssue.php?issue=161027.1.  */
+
+  uint32_t hash = 5381;
+  for (char c : str)
+    hash = hash * 33 + tolower (c & 0xff);
+  return hash;
+}

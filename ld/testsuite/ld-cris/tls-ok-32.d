@@ -9,7 +9,7 @@
 .*:     file format elf32-cris
 
 DYNAMIC RELOCATION RECORDS
-OFFSET   TYPE              VALUE 
+OFFSET +TYPE +VALUE
 0000a1b0 R_CRIS_DTPMOD     \*ABS\*
 
 Contents of section \.text:

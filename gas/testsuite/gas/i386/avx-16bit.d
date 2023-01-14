@@ -7,8 +7,8 @@
 Disassembly of section .text:
 
 0+ <_start>:
-[ 	]*[a-f0-9]+:	c5 fc 77             	vzeroall 
-[ 	]*[a-f0-9]+:	c5 f8 77             	vzeroupper 
+[ 	]*[a-f0-9]+:	c5 fc 77             	vzeroall
+[ 	]*[a-f0-9]+:	c5 f8 77             	vzeroupper
 [ 	]*[a-f0-9]+:	67 c5 f8 ae 11       	vldmxcsr \(%ecx\)
 [ 	]*[a-f0-9]+:	67 c5 f8 ae 19       	vstmxcsr \(%ecx\)
 [ 	]*[a-f0-9]+:	67 c4 e2 5d 2d 31    	vmaskmovpd \(%ecx\),%ymm4,%ymm6

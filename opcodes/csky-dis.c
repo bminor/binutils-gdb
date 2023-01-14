@@ -49,7 +49,7 @@ struct csky_dis_info
   disassemble_info *info;
   /* Opcode information.  */
   struct csky_opcode_info const *opinfo;
-  BFD_HOST_U_64_BIT isa;
+  uint64_t isa;
   /* The value of operand to show.  */
   int value;
   /* Whether to look up/print a symbol name.  */
@@ -239,7 +239,7 @@ csky_get_disassembler (bfd *abfd)
 {
   obj_attribute *attr;
   const char *sec_name = NULL;
-  if (!abfd)
+  if (!abfd || bfd_get_flavour (abfd) != bfd_target_elf_flavour)
     dis_info.isa = CSKY_DEFAULT_ISA;
   else
     {

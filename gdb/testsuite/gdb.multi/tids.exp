@@ -428,7 +428,7 @@ if { ![skip_python_tests] } {
 # Remove the second inferior and confirm that GDB goes back to showing
 # single-number thread IDs.
 with_test_prefix "back to one inferior" {
-    gdb_test "kill inferior 2" "" "kill inferior 2" "Kill the program being debugged.*" "y"
+    gdb_test "kill inferior 2" "" "kill inferior 2"
     gdb_test "thread 1.1" "Switching to thread 1\.1 .*"
     gdb_test "remove-inferior 2" ".*" "remove inferior 2"
 

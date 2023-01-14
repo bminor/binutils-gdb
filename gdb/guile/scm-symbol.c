@@ -103,7 +103,7 @@ syscm_get_symbol_map (struct symbol *symbol)
 
   if (symbol->is_objfile_owned ())
     {
-      struct objfile *objfile = symbol_objfile (symbol);
+      struct objfile *objfile = symbol->objfile ();
 
       htab = (htab_t) objfile_data (objfile, syscm_objfile_data_key);
       if (htab == NULL)
@@ -115,7 +115,7 @@ syscm_get_symbol_map (struct symbol *symbol)
     }
   else
     {
-      struct gdbarch *gdbarch = symbol_arch (symbol);
+      struct gdbarch *gdbarch = symbol->arch ();
       struct syscm_gdbarch_data *data
 	= (struct syscm_gdbarch_data *) gdbarch_data (gdbarch,
 						      syscm_gdbarch_data_key);
@@ -364,7 +364,7 @@ gdbscm_symbol_symtab (SCM self)
 
   if (!symbol->is_objfile_owned ())
     return SCM_BOOL_F;
-  return stscm_scm_from_symtab (symbol_symtab (symbol));
+  return stscm_scm_from_symtab (symbol->symtab ());
 }
 
 /* (symbol-name <gdb:symbol>) -> string */

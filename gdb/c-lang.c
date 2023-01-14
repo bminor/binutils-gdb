@@ -167,19 +167,19 @@ language_defn::printchar (int c, struct type *type,
     case C_CHAR:
       break;
     case C_WIDE_CHAR:
-      fputc_filtered ('L', stream);
+      gdb_putc ('L', stream);
       break;
     case C_CHAR_16:
-      fputc_filtered ('u', stream);
+      gdb_putc ('u', stream);
       break;
     case C_CHAR_32:
-      fputc_filtered ('U', stream);
+      gdb_putc ('U', stream);
       break;
     }
 
-  fputc_filtered ('\'', stream);
+  gdb_putc ('\'', stream);
   emitchar (c, type, stream, '\'');
-  fputc_filtered ('\'', stream);
+  gdb_putc ('\'', stream);
 }
 
 /* Print the character string STRING, printing at most LENGTH
@@ -206,13 +206,13 @@ c_printstr (struct ui_file *stream, struct type *type,
     case C_STRING:
       break;
     case C_WIDE_STRING:
-      fputs_filtered ("L", stream);
+      gdb_puts ("L", stream);
       break;
     case C_STRING_16:
-      fputs_filtered ("u", stream);
+      gdb_puts ("u", stream);
       break;
     case C_STRING_32:
-      fputs_filtered ("U", stream);
+      gdb_puts ("U", stream);
       break;
     }
 
@@ -352,8 +352,8 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
       if (*length > 0)
 	fetchlimit = UINT_MAX;
 
-      err = read_string (addr, *length, width, fetchlimit,
-			 byte_order, buffer, length);
+      err = target_read_string (addr, *length, width, fetchlimit,
+				buffer, length);
       if (err != 0)
 	memory_error (TARGET_XFER_E_IO, addr);
     }
@@ -820,7 +820,7 @@ public:
 		   struct ui_file *stream, int show, int level,
 		   const struct type_print_options *flags) const override
   {
-    c_print_type (type, varstring, stream, show, level, flags);
+    c_print_type (type, varstring, stream, show, level, la_language, flags);
   }
 
   /* See language.h.  */
@@ -856,6 +856,10 @@ public:
 
   const char *natural_name () const override
   { return "C++"; }
+
+  /* See language.h  */
+  const char *get_digit_separator () const override
+  { return "\'"; }
 
   /* See language.h.  */
 
@@ -966,7 +970,7 @@ public:
 		   struct ui_file *stream, int show, int level,
 		   const struct type_print_options *flags) const override
   {
-    c_print_type (type, varstring, stream, show, level, flags);
+    c_print_type (type, varstring, stream, show, level, la_language, flags);
   }
 
   /* See language.h.  */
@@ -1066,7 +1070,7 @@ public:
 		   struct ui_file *stream, int show, int level,
 		   const struct type_print_options *flags) const override
   {
-    c_print_type (type, varstring, stream, show, level, flags);
+    c_print_type (type, varstring, stream, show, level, la_language, flags);
   }
 
   /* See language.h.  */
@@ -1118,7 +1122,7 @@ public:
 		   struct ui_file *stream, int show, int level,
 		   const struct type_print_options *flags) const override
   {
-    c_print_type (type, varstring, stream, show, level, flags);
+    c_print_type (type, varstring, stream, show, level, la_language, flags);
   }
 
   /* See language.h.  */

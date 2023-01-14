@@ -85,7 +85,7 @@ win32_get_current_dr (int dr)
   case DR:					\
     return th->wow64_context.Dr ## DR
 
-  if (wow64_process)
+  if (windows_process.wow64_process)
     {
       switch (dr)
 	{
@@ -245,7 +245,7 @@ i386_get_thread_context (windows_thread_info *th)
 
  again:
 #ifdef __x86_64__
-  if (wow64_process)
+  if (windows_process.wow64_process)
     th->wow64_context.ContextFlags = (CONTEXT_FULL
 				      | CONTEXT_FLOATING_POINT
 				      | CONTEXT_DEBUG_REGISTERS
@@ -259,7 +259,7 @@ i386_get_thread_context (windows_thread_info *th)
 
   BOOL ret;
 #ifdef __x86_64__
-  if (wow64_process)
+  if (windows_process.wow64_process)
     ret = Wow64GetThreadContext (th->h, &th->wow64_context);
   else
 #endif
@@ -288,7 +288,7 @@ i386_prepare_to_resume (windows_thread_info *th)
       win32_require_context (th);
 
 #ifdef __x86_64__
-      if (wow64_process)
+      if (windows_process.wow64_process)
 	{
 	  th->wow64_context.Dr0 = dr->dr_mirror[0];
 	  th->wow64_context.Dr1 = dr->dr_mirror[1];
@@ -324,7 +324,7 @@ static void
 i386_single_step (windows_thread_info *th)
 {
 #ifdef __x86_64__
-  if (wow64_process)
+  if (windows_process.wow64_process)
     th->wow64_context.EFlags |= FLAG_TRACE_BIT;
   else
 #endif
@@ -466,7 +466,7 @@ i386_fetch_inferior_register (struct regcache *regcache,
 {
   const int *mappings;
 #ifdef __x86_64__
-  if (!wow64_process)
+  if (!windows_process.wow64_process)
     mappings = amd64_mappings;
   else
 #endif
@@ -474,7 +474,7 @@ i386_fetch_inferior_register (struct regcache *regcache,
 
   char *context_offset;
 #ifdef __x86_64__
-  if (wow64_process)
+  if (windows_process.wow64_process)
     context_offset = (char *) &th->wow64_context + mappings[r];
   else
 #endif
@@ -502,7 +502,7 @@ i386_store_inferior_register (struct regcache *regcache,
 {
   const int *mappings;
 #ifdef __x86_64__
-  if (!wow64_process)
+  if (!windows_process.wow64_process)
     mappings = amd64_mappings;
   else
 #endif
@@ -510,7 +510,7 @@ i386_store_inferior_register (struct regcache *regcache,
 
   char *context_offset;
 #ifdef __x86_64__
-  if (wow64_process)
+  if (windows_process.wow64_process)
     context_offset = (char *) &th->wow64_context + mappings[r];
   else
 #endif
@@ -550,7 +550,7 @@ i386_win32_num_regs (void)
 {
   int num_regs;
 #ifdef __x86_64__
-  if (!wow64_process)
+  if (!windows_process.wow64_process)
     num_regs = sizeof (amd64_mappings) / sizeof (amd64_mappings[0]);
   else
 #endif

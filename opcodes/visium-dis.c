@@ -766,7 +766,7 @@ print_insn_visium (bfd_vma addr, disassemble_info *info)
   /* Stuff copied from m68k-dis.c.  */
   struct private priv;
   bfd_byte *buffer = priv.the_buffer;
-  info->private_data = (PTR) & priv;
+  info->private_data = &priv;
   priv.max_fetched = priv.the_buffer;
   priv.insn_start = addr;
   if (setjmp (priv.bailout) != 0)

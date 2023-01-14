@@ -753,10 +753,10 @@ infpy_repr (PyObject *obj)
   inferior *inf = self->inferior;
 
   if (inf == nullptr)
-    return PyString_FromString ("<gdb.Inferior (invalid)>");
+    return PyUnicode_FromString ("<gdb.Inferior (invalid)>");
 
-  return PyString_FromFormat ("<gdb.Inferior num=%d, pid=%d>",
-			      inf->num, inf->pid);
+  return PyUnicode_FromFormat ("<gdb.Inferior num=%d, pid=%d>",
+			       inf->num, inf->pid);
 }
 
 

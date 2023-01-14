@@ -248,6 +248,7 @@ run_dump_test_lp64 "local-addend-r"
 # test error handling on pcrel relocation for shared libraries.
 run_dump_test_lp64 "pcrel_pic_undefined"
 run_dump_test_lp64 "pcrel_pic_defined"
+run_dump_test_lp64 "pcrel_pic_protected"
 
 run_dump_test "limit-b"
 run_dump_test "limit-bl"
@@ -407,6 +408,8 @@ set aarch64elflinktests {
     {copy-reloc-exe-2.s} {{objdump -R copy-reloc-2.d}} "copy-reloc-2"}
   {"ld-aarch64/exe with copy relocation elimination" "-e0 tmpdir/copy-reloc-so.so" "" ""
     {copy-reloc-exe-eliminate.s} {{objdump -R copy-reloc-eliminate.d}} "copy-reloc-elimination"}
+  {"Build .so with protected data" "-shared" "" "" {protected.s}
+    {} "protected.so"}
   {"ld-aarch64/so with global func" "-shared" "" "" {func-in-so.s}
     {} "func-in-so.so"}
   {"ld-aarch64/func sym hash opt for exe"
@@ -416,8 +419,15 @@ set aarch64elflinktests {
     {} "libbti-plt-so.so"}
 }
 
+set aarch64elfcclinktests [list \
+  [list "copy relocation on protected data" \
+    "-no-pie tmpdir/copy-reloc-exe.o tmpdir/protected.so" "" \
+    {} {{error_output copy-reloc-protected.d}} "copy-reloc-protected"]
+]
+
 if [check_shared_lib_support] {
     run_ld_link_tests $aarch64elflinktests
+    run_cc_link_tests $aarch64elfcclinktests
 }
 
 run_dump_test "bti-plt-3"

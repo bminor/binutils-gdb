@@ -22,9 +22,23 @@ if {[build_executable "failed to build" $testfile $srcfile]} {
     return -1
 }
 
+set custom_signal_handle_re \
+    "warning: Found custom handler for signal $decimal \(\[^\r\n\]+\) preinstalled\."
+set signal_dispositions_re \
+    [multi_line \
+	 "Some signal dispositions inherited from the environment \(\[^\r\n\]+\)" \
+	 "won't be propagated to spawned programs\." ]
+set gdb_sanitizer_msg_re \
+    [multi_line \
+	 "($custom_signal_handle_re" \
+	 ")+$signal_dispositions_re" \
+	 ""]
+
 # Start gdb and ensure that the initial version string is styled in
 # STYLE, use MESSAGE as the name of the test.
 proc check_gdb_startup_version_string { style { message "" } } {
+    global gdb_sanitizer_msg_re
+
     if { $message == "" } {
 	set message "check startup version string has style $style"
     }
@@ -32,7 +46,7 @@ proc check_gdb_startup_version_string { style { message "" } } {
     gdb_exit
     gdb_spawn
     set vers [style "GNU gdb.*" $style]
-    gdb_test "" "^${vers}.*" $message
+    gdb_test "" "^(${gdb_sanitizer_msg_re})?${vers}.*" $message
 }
 
 # Return a list containing two directory paths for newly created home
@@ -70,12 +84,13 @@ proc setup_home_directories { prefix content } {
 # drop straight to the prompt.
 proc check_gdb_startups_up_quietly { message } {
     global gdb_prompt
+    global gdb_sanitizer_msg_re
 
     gdb_exit
     gdb_spawn
 
     gdb_test_multiple "" $message {
-	-re "^$gdb_prompt $" {
+	-re "^(${gdb_sanitizer_msg_re})?$gdb_prompt $" {
 	    pass $gdb_test_name
 	}
     }

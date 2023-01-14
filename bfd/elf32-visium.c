@@ -28,13 +28,13 @@
 #include "libiberty.h"
 
 static bfd_reloc_status_type visium_elf_howto_parity_reloc
-  (bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **);
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 
 static reloc_howto_type visium_elf_howto_table[] = {
   /* This reloc does nothing.  */
   HOWTO (R_VISIUM_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -49,7 +49,7 @@ static reloc_howto_type visium_elf_howto_table[] = {
   /* A 8 bit absolute relocation.  */
   HOWTO (R_VISIUM_8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -64,7 +64,7 @@ static reloc_howto_type visium_elf_howto_table[] = {
   /* A 16 bit absolute relocation.  */
   HOWTO (R_VISIUM_16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -79,7 +79,7 @@ static reloc_howto_type visium_elf_howto_table[] = {
   /* A 32 bit absolute relocation.  */
   HOWTO (R_VISIUM_32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -95,7 +95,7 @@ static reloc_howto_type visium_elf_howto_table[] = {
   /* A 8 bit PC relative relocation.  */
   HOWTO (R_VISIUM_8_PCREL,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -110,7 +110,7 @@ static reloc_howto_type visium_elf_howto_table[] = {
   /* A 16 bit PC relative relocation.  */
   HOWTO (R_VISIUM_16_PCREL,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -125,7 +125,7 @@ static reloc_howto_type visium_elf_howto_table[] = {
   /* A 32-bit PC relative relocation.  */
   HOWTO (R_VISIUM_32_PCREL,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -141,7 +141,7 @@ static reloc_howto_type visium_elf_howto_table[] = {
      and always in the second half of the instruction.  */
   HOWTO (R_VISIUM_PC16,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -156,7 +156,7 @@ static reloc_howto_type visium_elf_howto_table[] = {
   /* The high 16 bits of symbol value.  */
   HOWTO (R_VISIUM_HI16,		/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -171,7 +171,7 @@ static reloc_howto_type visium_elf_howto_table[] = {
   /* The low 16 bits of symbol value.  */
   HOWTO (R_VISIUM_LO16,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -186,7 +186,7 @@ static reloc_howto_type visium_elf_howto_table[] = {
   /* A 16 bit immediate value.  */
   HOWTO (R_VISIUM_IM16,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -201,7 +201,7 @@ static reloc_howto_type visium_elf_howto_table[] = {
   /* The high 16 bits of symbol value, pc relative.  */
   HOWTO (R_VISIUM_HI16_PCREL,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -216,7 +216,7 @@ static reloc_howto_type visium_elf_howto_table[] = {
   /* The low 16 bits of symbol value, pc relative.  */
   HOWTO (R_VISIUM_LO16_PCREL,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -231,7 +231,7 @@ static reloc_howto_type visium_elf_howto_table[] = {
   /* A 16 bit immediate value, pc relative.  */
   HOWTO (R_VISIUM_IM16_PCREL,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -249,7 +249,7 @@ static reloc_howto_type visium_elf_howto_table[] = {
 static reloc_howto_type visium_elf_vtinherit_howto =
   HOWTO (R_VISIUM_GNU_VTINHERIT,      /* type */
 	 0,			   /* rightshift */
-	 2,			   /* size (0 = byte, 1 = short, 2 = long) */
+	 4,			   /* size */
 	 0,			   /* bitsize */
 	 false,			   /* pc_relative */
 	 0,			   /* bitpos */
@@ -265,7 +265,7 @@ static reloc_howto_type visium_elf_vtinherit_howto =
 static reloc_howto_type visium_elf_vtentry_howto =
   HOWTO (R_VISIUM_GNU_VTENTRY,	   /* type */
 	 0,			   /* rightshift */
-	 2,			   /* size (0 = byte, 1 = short, 2 = long) */
+	 4,			   /* size */
 	 0,			   /* bitsize */
 	 false,			   /* pc_relative */
 	 0,			   /* bitpos */
@@ -304,7 +304,7 @@ visium_parity_bit (bfd_vma insn)
 
 static bfd_reloc_status_type
 visium_elf_howto_parity_reloc (bfd * input_bfd, arelent *reloc_entry,
-			       asymbol *symbol, PTR data,
+			       asymbol *symbol, void *data,
 			       asection *input_section, bfd *output_bfd,
 			       char **error_message ATTRIBUTE_UNUSED)
 {

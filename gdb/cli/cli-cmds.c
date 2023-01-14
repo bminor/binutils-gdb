@@ -460,7 +460,7 @@ static void
 show_version (const char *args, int from_tty)
 {
   print_gdb_version (gdb_stdout, true);
-  printf_filtered ("\n");
+  gdb_printf ("\n");
 }
 
 static void
@@ -506,14 +506,14 @@ pwd_command (const char *args, int from_tty)
 	   safe_strerror (errno));
 
   if (strcmp (cwd.get (), current_directory) != 0)
-    printf_filtered (_("Working directory %ps\n (canonically %ps).\n"),
-		     styled_string (file_name_style.style (),
-				    current_directory),
-		     styled_string (file_name_style.style (), cwd.get ()));
+    gdb_printf (_("Working directory %ps\n (canonically %ps).\n"),
+		styled_string (file_name_style.style (),
+			       current_directory),
+		styled_string (file_name_style.style (), cwd.get ()));
   else
-    printf_filtered (_("Working directory %ps.\n"),
-		     styled_string (file_name_style.style (),
-				    current_directory));
+    gdb_printf (_("Working directory %ps.\n"),
+		styled_string (file_name_style.style (),
+			       current_directory));
 }
 
 void
@@ -626,9 +626,9 @@ static void
 show_script_ext_mode (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file,
-		    _("Script filename extension recognition is \"%s\".\n"),
-		    value);
+  gdb_printf (file,
+	      _("Script filename extension recognition is \"%s\".\n"),
+	      value);
 }
 
 /* Try to open SCRIPT_FILE.
@@ -749,13 +749,13 @@ source_script_with_search (const char *file, int from_tty, int search_path)
      this if we (may have) used search_path, as printing the full path in
      errors for the non-search case can be more noise than signal.  */
   const char *file_to_open;
-  gdb::unique_xmalloc_ptr<char> tilde_expanded_file;
+  std::string tilde_expanded_file;
   if (search_path)
     file_to_open = opened->full_path.get ();
   else
     {
-      tilde_expanded_file = gdb_tilde_expand_up (file);
-      file_to_open = tilde_expanded_file.get ();
+      tilde_expanded_file = gdb_tilde_expand (file);
+      file_to_open = tilde_expanded_file.c_str ();
     }
   source_script_from_stream (opened->stream.get (), file, file_to_open);
 }
@@ -837,16 +837,15 @@ echo_command (const char *text, int from_tty)
 
 	    c = parse_escape (get_current_arch (), &p);
 	    if (c >= 0)
-	      printf_filtered ("%c", c);
+	      gdb_printf ("%c", c);
 	  }
 	else
-	  printf_filtered ("%c", c);
+	  gdb_printf ("%c", c);
       }
 
-  reset_terminal_style (gdb_stdout);
+  gdb_stdout->reset_style ();
 
   /* Force this output to appear now.  */
-  gdb_stdout->wrap_here (0);
   gdb_flush (gdb_stdout);
 }
 
@@ -894,10 +893,10 @@ shell_escape (const char *arg, int from_tty)
     arg = "inferior shell";
 
   if (rc == -1)
-    fprintf_unfiltered (gdb_stderr, "Cannot execute %s: %s\n", arg,
-			safe_strerror (errno));
+    gdb_printf (gdb_stderr, "Cannot execute %s: %s\n", arg,
+		safe_strerror (errno));
   else if (rc)
-    fprintf_unfiltered (gdb_stderr, "%s exited with status %d\n", arg, rc);
+    gdb_printf (gdb_stderr, "%s exited with status %d\n", arg, rc);
 #ifdef GLOBAL_CURDIR
   /* Make sure to return to the directory GDB thinks it is, in case
      the shell command we just ran changed it.  */
@@ -921,8 +920,8 @@ shell_escape (const char *arg, int from_tty)
       else
 	execl (user_shell, p, "-c", arg, (char *) 0);
 
-      fprintf_unfiltered (gdb_stderr, "Cannot execute %s: %s\n", user_shell,
-			  safe_strerror (errno));
+      gdb_printf (gdb_stderr, "Cannot execute %s: %s\n", user_shell,
+		  safe_strerror (errno));
       _exit (0177);
     }
 
@@ -971,13 +970,13 @@ edit_command (const char *arg, int from_tty)
 
       /* Now should only be one argument -- decode it in SAL.  */
       arg1 = arg;
-      event_location_up location = string_to_event_location (&arg1,
-							     current_language);
+      location_spec_up locspec = string_to_location_spec (&arg1,
+							  current_language);
 
       if (*arg1)
 	error (_("Junk at end of line specification."));
 
-      std::vector<symtab_and_line> sals = decode_line_1 (location.get (),
+      std::vector<symtab_and_line> sals = decode_line_1 (locspec.get (),
 							 DECODE_LINE_LIST_MODE,
 							 NULL, NULL, 0);
 
@@ -1008,19 +1007,19 @@ edit_command (const char *arg, int from_tty)
 	    error (_("No source file for address %s."),
 		   paddress (get_current_arch (), sal.pc));
 
-	  gdbarch = sal.symtab->objfile ()->arch ();
+	  gdbarch = sal.symtab->compunit ()->objfile ()->arch ();
 	  sym = find_pc_function (sal.pc);
 	  if (sym)
-	    printf_filtered ("%s is in %s (%s:%d).\n",
-			     paddress (gdbarch, sal.pc),
-			     sym->print_name (),
-			     symtab_to_filename_for_display (sal.symtab),
-			     sal.line);
+	    gdb_printf ("%s is in %s (%s:%d).\n",
+			paddress (gdbarch, sal.pc),
+			sym->print_name (),
+			symtab_to_filename_for_display (sal.symtab),
+			sal.line);
 	  else
-	    printf_filtered ("%s is at %s:%d.\n",
-			     paddress (gdbarch, sal.pc),
-			     symtab_to_filename_for_display (sal.symtab),
-			     sal.line);
+	    gdb_printf ("%s is at %s:%d.\n",
+			paddress (gdbarch, sal.pc),
+			symtab_to_filename_for_display (sal.symtab),
+			sal.line);
 	}
 
       /* If what was given does not imply a symtab, it must be an
@@ -1242,18 +1241,18 @@ list_command (const char *arg, int from_tty)
     dummy_beg = 1;
   else
     {
-      event_location_up location = string_to_event_location (&arg1,
-							     current_language);
+      location_spec_up locspec
+	= string_to_location_spec (&arg1, current_language);
 
-      /* We know that the ARG string is not empty, yet the attempt to parse
-	 a location from the string consumed no characters.  This most
-	 likely means that the first thing in ARG looks like a location
-	 condition, and so the string_to_event_location call stopped
-	 parsing.  */
+      /* We know that the ARG string is not empty, yet the attempt to
+	 parse a location spec from the string consumed no characters.
+	 This most likely means that the first thing in ARG looks like
+	 a location spec condition, and so the string_to_location_spec
+	 call stopped parsing.  */
       if (arg1 == arg)
 	error (_("Junk at end of line specification."));
 
-      sals = decode_line_1 (location.get (), DECODE_LINE_LIST_MODE,
+      sals = decode_line_1 (locspec.get (), DECODE_LINE_LIST_MODE,
 			    NULL, NULL, 0);
       filter_sals (sals);
       if (sals.empty ())
@@ -1298,17 +1297,17 @@ list_command (const char *arg, int from_tty)
 	     know it was ambiguous.  */
 	  const char *end_arg = arg1;
 
-	  event_location_up location
-	    = string_to_event_location (&arg1, current_language);
+	  location_spec_up locspec
+	    = string_to_location_spec (&arg1, current_language);
 
 	  if (*arg1)
 	    error (_("Junk at end of line specification."));
 
 	  std::vector<symtab_and_line> sals_end
 	    = (dummy_beg
-	       ? decode_line_1 (location.get (), DECODE_LINE_LIST_MODE,
+	       ? decode_line_1 (locspec.get (), DECODE_LINE_LIST_MODE,
 				NULL, NULL, 0)
-	       : decode_line_1 (location.get (), DECODE_LINE_LIST_MODE,
+	       : decode_line_1 (locspec.get (), DECODE_LINE_LIST_MODE,
 				NULL, sal.symtab, sal.line));
 
 	  filter_sals (sals_end);
@@ -1347,17 +1346,17 @@ list_command (const char *arg, int from_tty)
 	error (_("No source file for address %s."),
 	       paddress (get_current_arch (), sal.pc));
 
-      gdbarch = sal.symtab->objfile ()->arch ();
+      gdbarch = sal.symtab->compunit ()->objfile ()->arch ();
       sym = find_pc_function (sal.pc);
       if (sym)
-	printf_filtered ("%s is in %s (%s:%d).\n",
-			 paddress (gdbarch, sal.pc),
-			 sym->print_name (),
-			 symtab_to_filename_for_display (sal.symtab), sal.line);
+	gdb_printf ("%s is in %s (%s:%d).\n",
+		    paddress (gdbarch, sal.pc),
+		    sym->print_name (),
+		    symtab_to_filename_for_display (sal.symtab), sal.line);
       else
-	printf_filtered ("%s is at %s:%d.\n",
-			 paddress (gdbarch, sal.pc),
-			 symtab_to_filename_for_display (sal.symtab), sal.line);
+	gdb_printf ("%s is at %s:%d.\n",
+		    paddress (gdbarch, sal.pc),
+		    symtab_to_filename_for_display (sal.symtab), sal.line);
     }
 
   /* If line was not specified by just a line number, and it does not
@@ -1425,38 +1424,39 @@ print_disassembly (struct gdbarch *gdbarch, const char *name,
   else
 #endif
     {
-      printf_filtered (_("Dump of assembler code "));
+      gdb_printf (_("Dump of assembler code "));
       if (name != NULL)
-	printf_filtered (_("for function %ps:\n"),
-			 styled_string (function_name_style.style (), name));
-      if (block == nullptr || BLOCK_CONTIGUOUS_P (block))
+	gdb_printf (_("for function %ps:\n"),
+		    styled_string (function_name_style.style (), name));
+      if (block == nullptr || block->is_contiguous ())
 	{
 	  if (name == NULL)
-	    printf_filtered (_("from %ps to %ps:\n"),
-			     styled_string (address_style.style (),
-					    paddress (gdbarch, low)),
-			     styled_string (address_style.style (),
-					    paddress (gdbarch, high)));
+	    gdb_printf (_("from %ps to %ps:\n"),
+			styled_string (address_style.style (),
+				       paddress (gdbarch, low)),
+			styled_string (address_style.style (),
+				       paddress (gdbarch, high)));
 
 	  /* Dump the specified range.  */
 	  gdb_disassembly (gdbarch, current_uiout, flags, -1, low, high);
 	}
       else
 	{
-	  for (int i = 0; i < BLOCK_NRANGES (block); i++)
+	  for (const blockrange &range : block->ranges ())
 	    {
-	      CORE_ADDR range_low = BLOCK_RANGE_START (block, i);
-	      CORE_ADDR range_high = BLOCK_RANGE_END (block, i);
-	      printf_filtered (_("Address range %ps to %ps:\n"),
-			       styled_string (address_style.style (),
-					      paddress (gdbarch, range_low)),
-			       styled_string (address_style.style (),
-					      paddress (gdbarch, range_high)));
+	      CORE_ADDR range_low = range.start ();
+	      CORE_ADDR range_high = range.end ();
+
+	      gdb_printf (_("Address range %ps to %ps:\n"),
+			  styled_string (address_style.style (),
+					 paddress (gdbarch, range_low)),
+			  styled_string (address_style.style (),
+					 paddress (gdbarch, range_high)));
 	      gdb_disassembly (gdbarch, current_uiout, flags, -1,
 			       range_low, range_high);
 	    }
 	}
-      printf_filtered (_("End of assembler dump.\n"));
+      gdb_printf (_("End of assembler dump.\n"));
     }
 }
 
@@ -2020,9 +2020,9 @@ print_sal_location (const symtab_and_line &sal)
   const char *sym_name = NULL;
   if (sal.symbol != NULL)
     sym_name = sal.symbol->print_name ();
-  printf_filtered (_("file: \"%s\", line number: %d, symbol: \"%s\"\n"),
-		   symtab_to_filename_for_display (sal.symtab),
-		   sal.line, sym_name != NULL ? sym_name : "???");
+  gdb_printf (_("file: \"%s\", line number: %d, symbol: \"%s\"\n"),
+	      symtab_to_filename_for_display (sal.symtab),
+	      sal.line, sym_name != NULL ? sym_name : "???");
 }
 
 /* Print a list of files and line numbers which a user may choose from
@@ -2038,7 +2038,7 @@ ambiguous_line_spec (gdb::array_view<const symtab_and_line> sals,
 {
   va_list ap;
   va_start (ap, format);
-  vprintf_filtered (format, ap);
+  gdb_vprintf (format, ap);
   va_end (ap);
 
   for (const auto &sal : sals)
@@ -2051,8 +2051,8 @@ ambiguous_line_spec (gdb::array_view<const symtab_and_line> sals,
 static int
 cmp_symtabs (const symtab_and_line &sala, const symtab_and_line &salb)
 {
-  const char *dira = sala.symtab->dirname ();
-  const char *dirb = salb.symtab->dirname ();
+  const char *dira = sala.symtab->compunit ()->dirname ();
+  const char *dirb = salb.symtab->compunit ()->dirname ();
   int r;
 
   if (dira == NULL)
@@ -2117,28 +2117,28 @@ show_info_verbose (struct ui_file *file, int from_tty,
 		   const char *value)
 {
   if (info_verbose)
-    fprintf_filtered (file,
-		      _("Verbose printing of informational messages is %s.\n"),
-		      value);
+    gdb_printf (file,
+		_("Verbose printing of informational messages is %s.\n"),
+		value);
   else
-    fprintf_filtered (file, _("Verbosity is %s.\n"), value);
+    gdb_printf (file, _("Verbosity is %s.\n"), value);
 }
 
 static void
 show_history_expansion_p (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("History expansion on command input is %s.\n"),
-		    value);
+  gdb_printf (file, _("History expansion on command input is %s.\n"),
+	      value);
 }
 
 static void
 show_max_user_call_depth (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file,
-		    _("The max call depth for user-defined commands is %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("The max call depth for user-defined commands is %s.\n"),
+	      value);
 }
 
 /* Implement 'show suppress-cli-notifications'.  */
@@ -2147,8 +2147,8 @@ static void
 show_suppress_cli_notifications (ui_file *file, int from_tty,
 				 cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Suppression of printing CLI notifications "
-			    "is %s.\n"), value);
+  gdb_printf (file, _("Suppression of printing CLI notifications "
+		      "is %s.\n"), value);
 }
 
 /* Implement 'set suppress-cli-notifications'.  */
@@ -2422,8 +2422,7 @@ User-defined commands.\n\
 The commands in this class are those defined by the user.\n\
 Use the \"define\" command to define a command."), &cmdlist);
   add_cmd ("support", class_support, _("Support facilities."), &cmdlist);
-  if (!dbx_commands)
-    add_cmd ("status", class_info, _("Status inquiries."), &cmdlist);
+  add_cmd ("status", class_info, _("Status inquiries."), &cmdlist);
   add_cmd ("files", class_files, _("Specifying and examining files."),
 	   &cmdlist);
   add_cmd ("breakpoints", class_breakpoint,
@@ -2667,9 +2666,6 @@ This can be changed using \"set listsize\", and the current value\n\
 can be shown using \"show listsize\"."));
 
   add_com_alias ("l", list_cmd, class_files, 1);
-
-  if (dbx_commands)
-    add_com_alias ("file", list_cmd, class_files, 1);
 
   c = add_com ("disassemble", class_vars, disassemble_command, _("\
 Disassemble a specified section of memory.\n\

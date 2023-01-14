@@ -33,7 +33,14 @@ enum lr_type_t
 /* Target-dependent structure in gdbarch.  */
 struct csky_gdbarch_tdep : gdbarch_tdep
 {
-  /* This is Unused.  */
+  /* Save FPU, VDSP ABI.  */
+  unsigned int fpu_abi;
+  unsigned int fpu_hardfp;
+  unsigned int vdsp_version;
+
+  /* Save fv_pseudo_registers_count.  */
+  unsigned int has_vr0;
+  unsigned int fv_pseudo_registers_count;
 };
 
 /* Instruction sizes.  */
@@ -48,9 +55,10 @@ enum csky_regnum
 {
   CSKY_R0_REGNUM = 0, /* General registers.  */
   CSKY_R15_REGNUM = 15,
+  CSKY_HI_REGNUM = 36,
+  CSKY_LO_REGNUM = 37,
   CSKY_PC_REGNUM = 72,
-  CSKY_HI_REGNUM = 20,
-  CSKY_LO_REGNUM = 21,
+  CSKY_AR0_REGNUM = 73,
   CSKY_CR0_REGNUM = 89,
   CSKY_VBR_REGNUM = CSKY_CR0_REGNUM + 1,
   CSKY_EPSR_REGNUM = CSKY_CR0_REGNUM + 2,
@@ -60,7 +68,8 @@ enum csky_regnum
 
   /* Float register 0.  */
   CSKY_FR0_REGNUM = 40,
-  CSKY_VCR0_REGNUM = 121,
+  CSKY_FR16_REGNUM = 1172,
+  CSKY_FCR_REGNUM = 121,
   CSKY_MMU_REGNUM = 128,
   CSKY_PROFCR_REGNUM = 140,
   CSKY_PROFGR_REGNUM = 144,
@@ -89,6 +98,15 @@ enum csky_regnum
 
 /* ICE registers.  */
 #define CSKY_CRBANK_NUM_REGS 32
+
+/* Tdesc registers essential check.  */
+#define CSKY_TDESC_REGS_PC_NUMBERED             (1 << 0)
+#define CSKY_TDESC_REGS_SP_NUMBERED             (1 << 1)
+#define CSKY_TDESC_REGS_LR_NUMBERED             (1 << 2)
+#define CSKY_TDESC_REGS_ESSENTIAL_VALUE         (7)
+
+/* For fr0~fr15, fr16~fr31, vr0~vr15 check.  */
+#define CSKY_FULL16_ONEHOT_VALUE   0xffff
 
 /* Number of processor registers w/o ICE registers.  */
 #define CSKY_NUM_REGS (CSKY_MAX_REGS - CSKY_CRBANK_NUM_REGS)

@@ -83,15 +83,11 @@ public:
   void thread_events (int) override;
 
   bool can_async_p () override;
-  bool is_async_p () override;
 
   bool supports_non_stop () override;
   bool always_non_stop_p () override;
 
-  int async_wait_fd () override;
   void async (int) override;
-
-  void close () override;
 
   void stop (ptid_t) override;
 
@@ -127,7 +123,7 @@ public:
   int set_syscall_catchpoint (int pid, bool needed, int any_count,
 			      gdb::array_view<const int> syscall_counts) override;
 
-  char *pid_to_exec_file (int pid) override;
+  const char *pid_to_exec_file (int pid) override;
 
   void post_attach (int) override;
 

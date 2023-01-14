@@ -348,12 +348,12 @@ py_print_single_arg (struct ui_out *out,
     {
       string_file stb;
 
-      fputs_filtered (fa->sym->print_name (), &stb);
+      gdb_puts (fa->sym->print_name (), &stb);
       if (fa->entry_kind == print_entry_values_compact)
 	{
 	  stb.puts ("=");
 
-	  fputs_filtered (fa->sym->print_name (), &stb);
+	  gdb_puts (fa->sym->print_name (), &stb);
 	}
       if (fa->entry_kind == print_entry_values_only
 	  || fa->entry_kind == print_entry_values_compact)
@@ -920,11 +920,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 
 	      function = function_to_free.get ();
 	    }
-	  else if (PyLong_Check (py_func.get ())
-#if PY_MAJOR_VERSION == 2
-		   || PyInt_Check (py_func.get ())
-#endif
-		   )
+	  else if (PyLong_Check (py_func.get ()))
 	    {
 	      CORE_ADDR addr;
 	      struct bound_minimal_symbol msymbol;
@@ -1226,7 +1222,7 @@ gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,
 	    {
 	      /* We've printed all the frames we were asked to
 		 print, but more frames existed.  */
-	      printf_filtered (_("(More stack frames follow...)\n"));
+	      gdb_printf (_("(More stack frames follow...)\n"));
 	      break;
 	    }
 	}

@@ -46,7 +46,7 @@ typedef struct initializer
 static initializer cpu_flag_init[] =
 {
   { "CPU_UNKNOWN_FLAGS",
-    "~(CpuL1OM|CpuK1OM)" },
+    "~CpuIAMCU" },
   { "CPU_GENERIC32_FLAGS",
     "Cpu186|Cpu286|Cpu386" },
   { "CPU_GENERIC64_FLAGS",
@@ -245,12 +245,8 @@ static initializer cpu_flag_init[] =
     "CPU_AVX512F_FLAGS|CpuAVX512_BF16" },
   { "CPU_AVX512_FP16_FLAGS",
     "CPU_AVX512BW_FLAGS|CpuAVX512_FP16" },
-  { "CPU_L1OM_FLAGS",
-    "unknown" },
-  { "CPU_K1OM_FLAGS",
-    "unknown" },
   { "CPU_IAMCU_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuIAMCU" },
   { "CPU_ADX_FLAGS",
     "CpuADX" },
   { "CPU_RDSEED_FLAGS",
@@ -479,8 +475,6 @@ static initializer operand_type_init[] =
     "Disp16" },
   { "OPERAND_TYPE_DISP32",
     "Disp32" },
-  { "OPERAND_TYPE_DISP32S",
-    "Disp32S" },
   { "OPERAND_TYPE_DISP64",
     "Disp64" },
   { "OPERAND_TYPE_INOUTPORTREG",
@@ -524,7 +518,7 @@ static initializer operand_type_init[] =
   { "OPERAND_TYPE_DISP16_32",
     "Disp16|Disp32" },
   { "OPERAND_TYPE_ANYDISP",
-    "Disp8|Disp16|Disp32|Disp32S|Disp64" },
+    "Disp8|Disp16|Disp32|Disp64" },
   { "OPERAND_TYPE_IMM16_32",
     "Imm16|Imm32" },
   { "OPERAND_TYPE_IMM16_32S",
@@ -588,8 +582,6 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuAVX512VL),
   BITFIELD (CpuAVX512DQ),
   BITFIELD (CpuAVX512BW),
-  BITFIELD (CpuL1OM),
-  BITFIELD (CpuK1OM),
   BITFIELD (CpuIAMCU),
   BITFIELD (CpuSSE4a),
   BITFIELD (Cpu3dnow),
@@ -634,8 +626,6 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuPREFETCHWT1),
   BITFIELD (CpuSE1),
   BITFIELD (CpuCLWB),
-  BITFIELD (Cpu64),
-  BITFIELD (CpuNo64),
   BITFIELD (CpuMPX),
   BITFIELD (CpuAVX512IFMA),
   BITFIELD (CpuAVX512VBMI),
@@ -682,6 +672,8 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuINVLPGB),
   BITFIELD (CpuTLBSYNC),
   BITFIELD (CpuSNP),
+  BITFIELD (Cpu64),
+  BITFIELD (CpuNo64),
 #ifdef CpuUnused
   BITFIELD (CpuUnused),
 #endif
@@ -792,7 +784,6 @@ static bitfield operand_types[] =
   BITFIELD (Disp8),
   BITFIELD (Disp16),
   BITFIELD (Disp32),
-  BITFIELD (Disp32S),
   BITFIELD (Disp64),
   BITFIELD (Byte),
   BITFIELD (Word),
@@ -1050,22 +1041,15 @@ process_i386_cpu_flag (FILE *table, char *flag, int macro,
 		       const char *comma, const char *indent,
 		       int lineno)
 {
-  char *str, *next, *last;
+  char *str, *next = flag, *last;
   unsigned int i;
+  int value = 1;
   bitfield flags [ARRAY_SIZE (cpu_flags)];
 
   /* Copy the default cpu flags.  */
   memcpy (flags, cpu_flags, sizeof (cpu_flags));
 
-  if (strcasecmp (flag, "unknown") == 0)
-    {
-      /* We turn on everything except for cpu64 in case of
-	 CPU_UNKNOWN_FLAGS.  */
-      for (i = 0; i < ARRAY_SIZE (flags); i++)
-	if (flags[i].position != Cpu64)
-	  flags[i].value = 1;
-    }
-  else if (flag[0] == '~')
+  if (flag[0] == '~')
     {
       last = flag + strlen (flag);
 
@@ -1081,28 +1065,25 @@ process_i386_cpu_flag (FILE *table, char *flag, int macro,
       else
 	next = flag + 1;
 
-      /* First we turn on everything except for cpu64.  */
+      /* First we turn on everything except for cpu64, cpuno64, and - if
+         present - the padding field.  */
       for (i = 0; i < ARRAY_SIZE (flags); i++)
-	if (flags[i].position != Cpu64)
+	if (flags[i].position < Cpu64)
 	  flags[i].value = 1;
 
       /* Turn off selective bits.  */
+      value = 0;
+    }
+
+  if (strcmp (flag, "0"))
+    {
+      /* Turn on/off selective bits.  */
+      last = flag + strlen (flag);
       for (; next && next < last; )
 	{
 	  str = next_field (next, '|', &next, last);
 	  if (str)
-	    set_bitfield (str, flags, 0, ARRAY_SIZE (flags), lineno);
-	}
-    }
-  else if (strcmp (flag, "0"))
-    {
-      /* Turn on selective bits.  */
-      last = flag + strlen (flag);
-      for (next = flag; next && next < last; )
-	{
-	  str = next_field (next, '|', &next, last);
-	  if (str)
-	    set_bitfield (str, flags, 1, ARRAY_SIZE (flags), lineno);
+	    set_bitfield (str, flags, value, ARRAY_SIZE (flags), lineno);
 	}
     }
 
@@ -1359,10 +1340,7 @@ process_i386_operand_type (FILE *table, char *op, enum stage stage,
 	  if (!active_cpu_flags.bitfield.cpu64
 	      && !active_cpu_flags.bitfield.cpumpx)
 	    set_bitfield("Disp16", types, 1, ARRAY_SIZE (types), lineno);
-	  if (!active_cpu_flags.bitfield.cpu64)
-	    set_bitfield("Disp32", types, 1, ARRAY_SIZE (types), lineno);
-	  if (!active_cpu_flags.bitfield.cpuno64)
-	    set_bitfield("Disp32S", types, 1, ARRAY_SIZE (types), lineno);
+	  set_bitfield("Disp32", types, 1, ARRAY_SIZE (types), lineno);
 	}
     }
   output_operand_type (table, class, instance, types, ARRAY_SIZE (types),

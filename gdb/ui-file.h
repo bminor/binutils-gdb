@@ -51,7 +51,7 @@ public:
      write_async_safe method.  */
   void putstrn (const char *str, int n, int quoter, bool async_safe = false);
 
-  int putc (int c);
+  void putc (int c);
 
   void vprintf (const char *, va_list) ATTRIBUTE_PRINTF (2, 0);
 
@@ -99,14 +99,6 @@ public:
   virtual int fd () const
   { return -1; }
 
-  /* Return true if this object supports paging, false otherwise.  */
-  virtual bool can_page () const
-  {
-    /* Almost no file supports paging, which is why this is the
-       default.  */
-    return false;
-  }
-
   /* Indicate that if the next sequence of characters overflows the
      line, a newline should be inserted here rather than when it hits
      the end.  If INDENT is non-zero, it is a number of spaces to be
@@ -122,7 +114,28 @@ public:
      This routine is guaranteed to force out any output which has been
      squirreled away in the wrap_buffer, so wrap_here (0) can be
      used to force out output from the wrap_buffer.  */
-  void wrap_here (int indent);
+  virtual void wrap_here (int indent)
+  {
+  }
+
+  /* Emit an ANSI style escape for STYLE.  */
+  virtual void emit_style_escape (const ui_file_style &style);
+
+  /* Rest the current output style to the empty style.  */
+  virtual void reset_style ();
+
+  /* Print STR, bypassing any paging that might be done by this
+     ui_file.  Note that nearly no code should call this -- it's
+     intended for use by gdb_printf, but nothing else.  */
+  virtual void puts_unfiltered (const char *str)
+  {
+    this->puts (str);
+  }
+
+protected:
+
+  /* The currently applied style.  */
+  ui_file_style m_applied_style;
 
 private:
 
@@ -191,6 +204,14 @@ public:
     return ret;
   }
 
+  /* Set the internal buffer contents to STR.  Any existing contents are
+     discarded.  */
+  string_file &operator= (std::string &&str)
+  {
+    m_string = std::move (str);
+    return *this;
+  }
+
   /* Provide a few convenience methods with the same API as the
      underlying std::string.  */
   const char *data () const { return m_string.data (); }
@@ -247,11 +268,6 @@ public:
   /* Return the underlying file descriptor.  */
   int fd () const override
   { return m_fd; }
-
-  virtual bool can_page () const override
-  {
-    return m_file == stdout;
-  }
 
 private:
   /* Sets the internal stream to FILE, and saves the FILE's file
@@ -327,11 +343,22 @@ public:
   bool can_emit_style_escape () override;
   void flush () override;
 
-  virtual bool can_page () const override
+  void emit_style_escape (const ui_file_style &style) override
   {
-    /* If one of the underlying files can page, then we allow it
-       here.  */
-    return m_one->can_page () || m_two->can_page ();
+    m_one->emit_style_escape (style);
+    m_two->emit_style_escape (style);
+  }
+
+  void reset_style () override
+  {
+    m_one->reset_style ();
+    m_two->reset_style ();
+  }
+
+  void puts_unfiltered (const char *str) override
+  {
+    m_one->puts_unfiltered (str);
+    m_two->puts_unfiltered (str);
   }
 
 private:
@@ -354,6 +381,86 @@ public:
      sequences.  */
   void write (const char *buf, long length_buf) override;
   void puts (const char *linebuffer) override;
+
+  void emit_style_escape (const ui_file_style &style) override
+  {
+  }
+
+  void reset_style () override
+  {
+  }
+};
+
+/* A base class for ui_file types that wrap another ui_file.  */
+
+class wrapped_file : public ui_file
+{
+public:
+
+  bool isatty () override
+  { return m_stream->isatty (); }
+
+  bool term_out () override
+  { return m_stream->term_out (); }
+
+  bool can_emit_style_escape () override
+  { return m_stream->can_emit_style_escape (); }
+
+  void flush () override
+  { m_stream->flush (); }
+
+  void wrap_here (int indent) override
+  { m_stream->wrap_here (indent); }
+
+  void emit_style_escape (const ui_file_style &style) override
+  { m_stream->emit_style_escape (style); }
+
+  /* Rest the current output style to the empty style.  */
+  void reset_style () override
+  { m_stream->reset_style (); }
+
+  int fd () const override
+  { return m_stream->fd (); }
+
+  void puts_unfiltered (const char *str) override
+  { m_stream->puts_unfiltered (str); }
+
+  void write_async_safe (const char *buf, long length_buf) override
+  { return m_stream->write_async_safe (buf, length_buf); }
+
+protected:
+
+  /* Note that this class does not assume ownership of the stream.
+     However, a subclass may choose to, by adding a 'delete' to its
+     destructor.  */
+  explicit wrapped_file (ui_file *stream)
+    : m_stream (stream)
+  {
+  }
+
+  /* The underlying stream.  */
+  ui_file *m_stream;
+};
+
+/* A ui_file that optionally puts a timestamp at the start of each
+   line of output.  */
+
+class timestamped_file : public wrapped_file
+{
+public:
+  explicit timestamped_file (ui_file *stream)
+    : wrapped_file (stream)
+  {
+  }
+
+  DISABLE_COPY_AND_ASSIGN (timestamped_file);
+
+  void write (const char *buf, long len) override;
+
+private:
+
+  /* True if the next output should be timestamped.  */
+  bool m_needs_timestamp = true;
 };
 
 #endif

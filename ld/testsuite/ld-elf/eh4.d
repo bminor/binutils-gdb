@@ -1,7 +1,7 @@
 #source: eh4.s
 #source: eh4a.s
 #as: --64
-#ld: -melf_x86_64 -shared -Ttext 0x400 -z max-page-size=0x200000 -z noseparate-code
+#ld: -melf_x86_64 -shared -Ttext 0x400 -z max-page-size=0x200000 -z noseparate-code -z noexecstack
 #readelf: -wf
 #target: x86_64-*-*
 

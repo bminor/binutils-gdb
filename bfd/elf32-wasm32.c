@@ -29,7 +29,7 @@ static reloc_howto_type elf32_wasm32_howto_table[] =
 {
   HOWTO (R_WASM32_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -44,7 +44,7 @@ static reloc_howto_type elf32_wasm32_howto_table[] =
   /* 32 bit absolute */
   HOWTO (R_WASM32_32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

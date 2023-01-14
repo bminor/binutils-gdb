@@ -215,7 +215,7 @@ enum
 unsigned int mach_flag = 0;
 unsigned int arch_flag = 0;
 unsigned int other_flag = 0;
-BFD_HOST_U_64_BIT isa_flag = 0;
+uint64_t isa_flag = 0;
 unsigned int dsp_flag = 0;
 
 typedef struct stack_size_entry
@@ -245,7 +245,7 @@ struct csky_macro_info
   const char *name;
   /* How many operands : if operands == 5, all of 1,2,3,4 are ok.  */
   long oprnd_num;
-  BFD_HOST_U_64_BIT isa_flag;
+  uint64_t isa_flag;
   /* Do the work.  */
   void (*handle_func)(void);
 };
@@ -591,14 +591,14 @@ struct csky_cpu_feature
 {
   const char unique;
   unsigned int arch_flag;
-  bfd_uint64_t isa_flag;
+  uint64_t isa_flag;
 };
 
 struct csky_cpu_version
 {
   int r;
   int p;
-  bfd_uint64_t isa_flag;
+  uint64_t isa_flag;
 };
 
 #define CSKY_FEATURE_MAX  10
@@ -608,7 +608,7 @@ struct csky_cpu_info
 {
   const char *name;
   unsigned int arch_flag;
-  bfd_uint64_t isa_flag;
+  uint64_t isa_flag;
   struct csky_cpu_feature features[CSKY_FEATURE_MAX];
   struct csky_cpu_version ver[CSKY_CPU_REVERISON_MAX];
 };

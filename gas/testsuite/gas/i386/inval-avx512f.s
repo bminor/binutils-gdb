@@ -317,4 +317,53 @@ _start:
 	vcvtneps2bf16 (%eax){1to4}, %xmm1
 	vcvtneps2bf16 (%eax){1to8}, %xmm1
 	vcvtneps2bf16 (%eax){1to16}, %xmm1
+
+	vaddps $0xcc, %zmm0, %zmm0, %zmm0
+	vcmpss $0, $0xcc, %xmm0, %xmm0, %k0
+
+	vaddss {sae}, %xmm0, %xmm0, %xmm0
+	vcmpps $0, {rn-sae}, %zmm0, %zmm0, %k0
+
+	.intel_syntax noprefix
+	vaddps zmm2, zmm1, WORD BCST [eax]
+	vaddps zmm2, zmm1, DWORD BCST [eax]
+	vaddps zmm2, zmm1, QWORD BCST [eax]
+	vaddps zmm2, zmm1, ZMMWORD BCST [eax]
+
+	vaddpd zmm2, zmm1, WORD BCST [eax]
+	vaddpd zmm2, zmm1, DWORD BCST [eax]
+	vaddpd zmm2, zmm1, QWORD BCST [eax]
+	vaddpd zmm2, zmm1, ZMMWORD BCST [eax]
+
+	.att_syntax prefix
+	vaddps {rn-sae}, %zmm0, %zmm0, %zmm0
+	vaddps %zmm0, {rn-sae}, %zmm0, %zmm0
+	vaddps %zmm0, %zmm0, {rn-sae}, %zmm0
+	vaddps %zmm0, %zmm0, %zmm0, {rn-sae}
+
+	vcmpps {sae}, $0, %zmm0, %zmm0, %k0
+	vcmpps $0, {sae}, %zmm0, %zmm0, %k0
+	vcmpps $0, %zmm0, {sae}, %zmm0, %k0
+	vcmpps $0, %zmm0, %zmm0, {sae}, %k0
+	vcmpps $0, %zmm0, %zmm0, %k0, {sae}
+
+	vcvtsi2ss {rn-sae}, %eax, %xmm0, %xmm0
+	vcvtsi2ss %eax, {rn-sae}, %xmm0, %xmm0
+	vcvtsi2ss %eax, %xmm0, {rn-sae}, %xmm0
+	vcvtsi2ss %eax, %xmm0, %xmm0, {rn-sae}
+
+	.intel_syntax noprefix
+	vaddps zmm0{rn-sae}, zmm0, zmm0
+	vaddps zmm0, zmm0{rn-sae}, zmm0
+	vaddps zmm0, zmm0, zmm0{rn-sae}
+
+	vcmpps k0{sae}, zmm0, zmm0, 0
+	vcmpps k0, zmm0{sae}, zmm0, 0
+	vcmpps k0, zmm0, zmm0{sae}, 0
+	vcmpps k0, zmm0, zmm0, 0{sae}
+
+	vcvtsi2ss xmm0{rn-sae}, xmm0, eax
+	vcvtsi2ss xmm0, xmm0{rn-sae}, eax
+	vcvtsi2ss xmm0, xmm0, eax{rn-sae}
+
 	.p2align 4

@@ -65,8 +65,8 @@ static reloc_howto_type elf_pru_howto_table_rel[] = {
   /* No relocation.  */
   HOWTO (R_PRU_NONE,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 3,			/* bitsize */
+	 0,			/* size */
+	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,/* complain_on_overflow */
@@ -79,7 +79,7 @@ static reloc_howto_type elf_pru_howto_table_rel[] = {
 
   HOWTO (R_PRU_16_PMEM,
 	 2,
-	 1,			/* short */
+	 2,			/* short */
 	 32,
 	 false,
 	 0,
@@ -93,7 +93,7 @@ static reloc_howto_type elf_pru_howto_table_rel[] = {
 
   HOWTO (R_PRU_U16_PMEMIMM,
 	 2,
-	 2,
+	 4,
 	 32,
 	 false,
 	 8,
@@ -107,7 +107,7 @@ static reloc_howto_type elf_pru_howto_table_rel[] = {
 
   HOWTO (R_PRU_BFD_RELOC_16,
 	 0,
-	 1,			/* short */
+	 2,			/* short */
 	 16,
 	 false,
 	 0,
@@ -122,7 +122,7 @@ static reloc_howto_type elf_pru_howto_table_rel[] = {
   /* 16-bit unsigned immediate relocation.  */
   HOWTO (R_PRU_U16,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 8,			/* bitpos */
@@ -136,7 +136,7 @@ static reloc_howto_type elf_pru_howto_table_rel[] = {
 
   HOWTO (R_PRU_32_PMEM,
 	 2,
-	 2,			/* long */
+	 4,			/* long */
 	 32,
 	 false,
 	 0,
@@ -150,7 +150,7 @@ static reloc_howto_type elf_pru_howto_table_rel[] = {
 
   HOWTO (R_PRU_BFD_RELOC_32,
 	 0,
-	 2,			/* long */
+	 4,			/* long */
 	 32,
 	 false,
 	 0,
@@ -164,7 +164,7 @@ static reloc_howto_type elf_pru_howto_table_rel[] = {
 
   HOWTO (R_PRU_S10_PCREL,
 	 2,
-	 2,
+	 4,
 	 10,
 	 true,
 	 0,
@@ -178,7 +178,7 @@ static reloc_howto_type elf_pru_howto_table_rel[] = {
 
   HOWTO (R_PRU_U8_PCREL,
 	 2,
-	 2,
+	 4,
 	 8,
 	 true,
 	 0,
@@ -192,7 +192,7 @@ static reloc_howto_type elf_pru_howto_table_rel[] = {
 
   HOWTO (R_PRU_LDI32,
 	 0,			/* rightshift */
-	 4,			/* size (4 = 8bytes) */
+	 8,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -207,7 +207,7 @@ static reloc_howto_type elf_pru_howto_table_rel[] = {
   /* GNU-specific relocations.  */
   HOWTO (R_PRU_GNU_BFD_RELOC_8,
 	 0,
-	 0,			/* byte */
+	 1,			/* byte */
 	 8,
 	 false,
 	 0,
@@ -221,7 +221,7 @@ static reloc_howto_type elf_pru_howto_table_rel[] = {
 
   HOWTO (R_PRU_GNU_DIFF8,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -235,7 +235,7 @@ static reloc_howto_type elf_pru_howto_table_rel[] = {
 
   HOWTO (R_PRU_GNU_DIFF16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -249,7 +249,7 @@ static reloc_howto_type elf_pru_howto_table_rel[] = {
 
   HOWTO (R_PRU_GNU_DIFF32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -263,7 +263,7 @@ static reloc_howto_type elf_pru_howto_table_rel[] = {
 
   HOWTO (R_PRU_GNU_DIFF16_PMEM,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -277,7 +277,7 @@ static reloc_howto_type elf_pru_howto_table_rel[] = {
 
   HOWTO (R_PRU_GNU_DIFF32_PMEM, /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

@@ -75,6 +75,13 @@ struct process_info
 
   /* Flag to mark that the DLL list has changed.  */
   bool dlls_changed = false;
+
+  /* True if the inferior is starting up (inside startup_inferior),
+     and we're nursing it along (through the shell) until it is ready
+     to execute its first instruction.  Until that is done, we must
+     not access inferior memory or registers, as we haven't determined
+     the target architecture/description.  */
+  bool starting_up = false;
 };
 
 /* Get the pid of PROC.  */

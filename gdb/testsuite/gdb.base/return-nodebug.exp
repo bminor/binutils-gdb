@@ -38,7 +38,12 @@ proc do_test {type} {
 		"advance to marker"
 
 	    # And if it returned the full width of the result.
-	    gdb_test "print /d t" " = -1" "full width of the returned result"
+	    if {$type == "float" || $type == "double"} {
+		set flag ""
+	    } else {
+		set flag "/d"
+	    }
+	    gdb_test "print $flag t" " = -1" "full width of the returned result"
 	}
     }
 }

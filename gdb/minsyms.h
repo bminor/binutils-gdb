@@ -28,15 +28,30 @@ struct type;
 
 struct bound_minimal_symbol
 {
+  bound_minimal_symbol (struct minimal_symbol *msym, struct objfile *objf)
+    : minsym (msym),
+      objfile (objf)
+  {
+  }
+
+  bound_minimal_symbol () = default;
+
+  /* Return the address of the minimal symbol in the context of the objfile.  */
+
+  CORE_ADDR value_address () const
+  {
+    return this->minsym->value_address (this->objfile);
+  }
+
   /* The minimal symbol that was found, or NULL if no minimal symbol
      was found.  */
 
-  struct minimal_symbol *minsym;
+  struct minimal_symbol *minsym = nullptr;
 
   /* If MINSYM is not NULL, then this is the objfile in which the
      symbol is defined.  */
 
-  struct objfile *objfile;
+  struct objfile *objfile = nullptr;
 
   /* Return the obj_section from OBJFILE for MINSYM.  */
 

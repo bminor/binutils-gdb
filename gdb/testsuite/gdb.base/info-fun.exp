@@ -26,10 +26,6 @@ standard_testfile .c
 set executable ${testfile}
 set bin_flags [list debug shlib=${binfile_lib}]
 
-if [get_compiler_info] {
-    return -1
-}
-
 foreach_with_prefix n_flag { 0 1 } {
 
     # SEP must be last for the possible `unsupported' error path.

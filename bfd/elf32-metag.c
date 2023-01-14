@@ -95,7 +95,7 @@ static reloc_howto_type elf_metag_howto_table[] =
   /* High order 16 bit absolute.  */
   HOWTO (R_METAG_HIADDR16,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 3,			/* bitpos */
@@ -110,7 +110,7 @@ static reloc_howto_type elf_metag_howto_table[] =
   /* Low order 16 bit absolute.  */
   HOWTO (R_METAG_LOADDR16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 3,			/* bitpos */
@@ -125,7 +125,7 @@ static reloc_howto_type elf_metag_howto_table[] =
   /* 32 bit absolute.  */
   HOWTO (R_METAG_ADDR32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -140,7 +140,7 @@ static reloc_howto_type elf_metag_howto_table[] =
   /* No relocation.  */
   HOWTO (R_METAG_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -155,7 +155,7 @@ static reloc_howto_type elf_metag_howto_table[] =
   /* 19 bit pc relative */
   HOWTO (R_METAG_RELBRANCH,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 19,			/* bitsize */
 	 true,			/* pc_relative */
 	 5,			/* bitpos */
@@ -170,7 +170,7 @@ static reloc_howto_type elf_metag_howto_table[] =
   /* GET/SET offset */
   HOWTO (R_METAG_GETSETOFF,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -209,7 +209,7 @@ static reloc_howto_type elf_metag_howto_table[] =
 
   HOWTO (R_METAG_GNU_VTINHERIT, /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,		/* pc_relative */
 	 0,			/* bitpos */
@@ -223,7 +223,7 @@ static reloc_howto_type elf_metag_howto_table[] =
 
   HOWTO (R_METAG_GNU_VTENTRY,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -238,7 +238,7 @@ static reloc_howto_type elf_metag_howto_table[] =
   /* High order 16 bit GOT offset */
   HOWTO (R_METAG_HI16_GOTOFF,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 3,			/* bitpos */
@@ -253,7 +253,7 @@ static reloc_howto_type elf_metag_howto_table[] =
   /* Low order 16 bit GOT offset */
   HOWTO (R_METAG_LO16_GOTOFF,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 3,			/* bitpos */
@@ -268,7 +268,7 @@ static reloc_howto_type elf_metag_howto_table[] =
   /* GET/SET GOT offset */
   HOWTO (R_METAG_GETSET_GOTOFF, /* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -283,7 +283,7 @@ static reloc_howto_type elf_metag_howto_table[] =
   /* GET/SET GOT relative */
   HOWTO (R_METAG_GETSET_GOT,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -298,7 +298,7 @@ static reloc_howto_type elf_metag_howto_table[] =
   /* High order 16 bit GOT reference */
   HOWTO (R_METAG_HI16_GOTPC,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 3,			/* bitpos */
@@ -313,7 +313,7 @@ static reloc_howto_type elf_metag_howto_table[] =
   /* Low order 16 bit GOT reference */
   HOWTO (R_METAG_LO16_GOTPC,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 3,			/* bitpos */
@@ -328,7 +328,7 @@ static reloc_howto_type elf_metag_howto_table[] =
   /* High order 16 bit PLT */
   HOWTO (R_METAG_HI16_PLT,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 3,			/* bitpos */
@@ -343,7 +343,7 @@ static reloc_howto_type elf_metag_howto_table[] =
   /* Low order 16 bit PLT */
   HOWTO (R_METAG_LO16_PLT,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 3,			/* bitpos */
@@ -357,7 +357,7 @@ static reloc_howto_type elf_metag_howto_table[] =
 
   HOWTO (R_METAG_RELBRANCH_PLT, /* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 19,			/* bitsize */
 	 true,			/* pc_relative */
 	 5,			/* bitpos */
@@ -372,7 +372,7 @@ static reloc_howto_type elf_metag_howto_table[] =
   /* Dummy relocs used by the linker internally.  */
   HOWTO (R_METAG_GOTOFF,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -386,7 +386,7 @@ static reloc_howto_type elf_metag_howto_table[] =
 
   HOWTO (R_METAG_PLT,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -405,7 +405,7 @@ static reloc_howto_type elf_metag_howto_table[] =
      run has to have the data at some particular address.  */
   HOWTO (R_METAG_COPY,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -420,7 +420,7 @@ static reloc_howto_type elf_metag_howto_table[] =
   /* Marks a procedure linkage table entry for a symbol.  */
   HOWTO (R_METAG_JMP_SLOT,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -437,7 +437,7 @@ static reloc_howto_type elf_metag_howto_table[] =
      addend.  */
   HOWTO (R_METAG_RELATIVE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -451,7 +451,7 @@ static reloc_howto_type elf_metag_howto_table[] =
 
   HOWTO (R_METAG_GLOB_DAT,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -465,7 +465,7 @@ static reloc_howto_type elf_metag_howto_table[] =
 
   HOWTO (R_METAG_TLS_GD,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 3,			/* bitpos */
@@ -479,7 +479,7 @@ static reloc_howto_type elf_metag_howto_table[] =
 
   HOWTO (R_METAG_TLS_LDM,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 3,			/* bitpos */
@@ -493,7 +493,7 @@ static reloc_howto_type elf_metag_howto_table[] =
 
   HOWTO (R_METAG_TLS_LDO_HI16,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 3,			/* bitpos */
@@ -507,7 +507,7 @@ static reloc_howto_type elf_metag_howto_table[] =
 
   HOWTO (R_METAG_TLS_LDO_LO16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 3,			/* bitpos */
@@ -522,7 +522,7 @@ static reloc_howto_type elf_metag_howto_table[] =
   /* Dummy reloc used by the linker internally.  */
   HOWTO (R_METAG_TLS_LDO,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 3,			/* bitpos */
@@ -536,7 +536,7 @@ static reloc_howto_type elf_metag_howto_table[] =
 
   HOWTO (R_METAG_TLS_IE,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 7,			/* bitpos */
@@ -551,7 +551,7 @@ static reloc_howto_type elf_metag_howto_table[] =
   /* Dummy reloc used by the linker internally.  */
   HOWTO (R_METAG_TLS_IENONPIC,  /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 3,			/* bitpos */
@@ -565,7 +565,7 @@ static reloc_howto_type elf_metag_howto_table[] =
 
   HOWTO (R_METAG_TLS_IENONPIC_HI16,/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 3,			/* bitpos */
@@ -579,7 +579,7 @@ static reloc_howto_type elf_metag_howto_table[] =
 
   HOWTO (R_METAG_TLS_IENONPIC_LO16,/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 3,			/* bitpos */
@@ -593,7 +593,7 @@ static reloc_howto_type elf_metag_howto_table[] =
 
   HOWTO (R_METAG_TLS_TPOFF,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -607,7 +607,7 @@ static reloc_howto_type elf_metag_howto_table[] =
 
   HOWTO (R_METAG_TLS_DTPMOD,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -621,7 +621,7 @@ static reloc_howto_type elf_metag_howto_table[] =
 
   HOWTO (R_METAG_TLS_DTPOFF,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -636,7 +636,7 @@ static reloc_howto_type elf_metag_howto_table[] =
   /* Dummy reloc used by the linker internally.  */
   HOWTO (R_METAG_TLS_LE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -650,7 +650,7 @@ static reloc_howto_type elf_metag_howto_table[] =
 
   HOWTO (R_METAG_TLS_LE_HI16,	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 3,			/* bitpos */
@@ -664,7 +664,7 @@ static reloc_howto_type elf_metag_howto_table[] =
 
   HOWTO (R_METAG_TLS_LE_LO16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 3,			/* bitpos */

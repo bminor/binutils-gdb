@@ -92,11 +92,9 @@ static int i386bsd_r_reg_offset[] =
 #define GETREGS_SUPPLIES(regnum) \
   ((0 <= (regnum) && (regnum) <= 15))
 
-#ifdef HAVE_PT_GETXMMREGS
 /* Set to 1 if the kernel supports PT_GETXMMREGS.  Initialized to -1
    so that we try PT_GETXMMREGS the first time around.  */
 static int have_ptrace_xmmregs = -1;
-#endif
 
 
 /* Supply the general-purpose registers in GREGS, to REGCACHE.  */
@@ -162,7 +160,6 @@ i386bsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
   if (regnum == -1 || regnum >= I386_ST0_REGNUM)
     {
       struct fpreg fpregs;
-#ifdef HAVE_PT_GETXMMREGS
       char xmmregs[512];
 
       if (have_ptrace_xmmregs != 0
@@ -175,15 +172,12 @@ i386bsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
       else
 	{
 	  have_ptrace_xmmregs = 0;
-#endif
 	  if (gdb_ptrace (PT_GETFPREGS, ptid,
 			  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	    perror_with_name (_("Couldn't get floating point status"));
 
 	  i387_supply_fsave (regcache, -1, &fpregs);
-#ifdef HAVE_PT_GETXMMREGS
 	}
-#endif
     }
 }
 
@@ -214,7 +208,6 @@ i386bsd_store_inferior_registers (struct regcache *regcache, int regnum)
   if (regnum == -1 || regnum >= I386_ST0_REGNUM)
     {
       struct fpreg fpregs;
-#ifdef HAVE_PT_GETXMMREGS
       char xmmregs[512];
 
       if (have_ptrace_xmmregs != 0
@@ -232,7 +225,6 @@ i386bsd_store_inferior_registers (struct regcache *regcache, int regnum)
       else
 	{
 	  have_ptrace_xmmregs = 0;
-#endif
 	  if (gdb_ptrace (PT_GETFPREGS, ptid,
 			  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	    perror_with_name (_("Couldn't get floating point status"));
@@ -242,9 +234,7 @@ i386bsd_store_inferior_registers (struct regcache *regcache, int regnum)
 	  if (gdb_ptrace (PT_SETFPREGS, ptid,
 			  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	    perror_with_name (_("Couldn't write floating point status"));
-#ifdef HAVE_PT_GETXMMREGS
 	}
-#endif
     }
 }
 

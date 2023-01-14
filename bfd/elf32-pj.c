@@ -114,7 +114,7 @@ static reloc_howto_type pj_elf_howto_table[] =
   /* No relocation.  */
   HOWTO (R_PJ_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -130,7 +130,7 @@ static reloc_howto_type pj_elf_howto_table[] =
      src_mask to a non-zero value is similar to the COFF toolchain.  */
   HOWTO (R_PJ_DATA_DIR32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -145,7 +145,7 @@ static reloc_howto_type pj_elf_howto_table[] =
   /* 32 bit PC relative relocation.  */
   HOWTO (R_PJ_CODE_REL32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -160,7 +160,7 @@ static reloc_howto_type pj_elf_howto_table[] =
 /* 16 bit PC relative relocation.  */
   HOWTO (R_PJ_CODE_REL16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -175,7 +175,7 @@ static reloc_howto_type pj_elf_howto_table[] =
   EMPTY_HOWTO (5),
   HOWTO (R_PJ_CODE_DIR32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -196,7 +196,7 @@ static reloc_howto_type pj_elf_howto_table[] =
 
   HOWTO (R_PJ_CODE_LO16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -210,7 +210,7 @@ static reloc_howto_type pj_elf_howto_table[] =
 
     HOWTO (R_PJ_CODE_HI16,	/* type */
 	 16,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -225,7 +225,7 @@ static reloc_howto_type pj_elf_howto_table[] =
   /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_PJ_GNU_VTINHERIT,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -240,7 +240,7 @@ static reloc_howto_type pj_elf_howto_table[] =
   /* GNU extension to record C++ vtable member usage.  */
   HOWTO (R_PJ_GNU_VTENTRY,     /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

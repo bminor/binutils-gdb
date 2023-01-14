@@ -25,10 +25,6 @@ set libipa [get_in_proc_agent]
 
 set lib_opts debug
 
-if [get_compiler_info] {
-    return -1
-}
-
 set additional_flags [list quiet debug shlib=$libipa shlib_load \
 			  "additional_flags=-lust -lurcu-bp" ]
 

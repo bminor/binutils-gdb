@@ -337,7 +337,6 @@ display_bfd (bfd *abfd)
     {
       bfd_nonfatal (bfd_get_filename (abfd));
       list_matching_formats (matching);
-      free (matching);
       return_code = 3;
       return;
     }
@@ -360,10 +359,7 @@ display_bfd (bfd *abfd)
   bfd_nonfatal (bfd_get_filename (abfd));
 
   if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
-    {
-      list_matching_formats (matching);
-      free (matching);
-    }
+    list_matching_formats (matching);
 
   return_code = 3;
 }

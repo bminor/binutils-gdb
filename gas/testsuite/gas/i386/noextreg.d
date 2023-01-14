@@ -50,5 +50,5 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 e3 79 48 00 00    	vpermil2ps \$0x0,%xmm0,\(%eax\),%xmm0,%xmm0
 [ 	]*[a-f0-9]+:	c4 e3 39 48 00 00    	vpermil2ps \$0x0,%xmm0,\(%eax\),%xmm0,%xmm0
 [ 	]*[a-f0-9]+:	c4 e3 79 48 00 80    	vpermil2ps \$0x0,%xmm0,\(%eax\),%xmm0,%xmm0
-[ 	]*[a-f0-9]+:	c3                   	ret[ 	]*
+[ 	]*[a-f0-9]+:	c3                   	ret
 #pass

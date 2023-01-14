@@ -179,10 +179,11 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
   int tracepoint = 0;
   symbol_name_match_type match_type = symbol_name_match_type::WILD;
   enum bptype type_wanted;
-  event_location_up location;
-  struct breakpoint_ops *ops;
+  location_spec_up locspec;
+  const struct breakpoint_ops *ops;
   int is_explicit = 0;
-  struct explicit_location explicit_loc;
+  std::unique_ptr<explicit_location_spec> explicit_loc
+    (new explicit_location_spec ());
   std::string extra_string;
   bool force_condition = false;
 
@@ -219,8 +220,6 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
      to denote the end of the option list. */
   int oind = 0;
   char *oarg;
-
-  initialize_explicit_location (&explicit_loc);
 
   while (1)
     {
@@ -259,19 +258,19 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
 	  break;
 	case EXPLICIT_SOURCE_OPT:
 	  is_explicit = 1;
-	  explicit_loc.source_filename = oarg;
+	  explicit_loc->source_filename = xstrdup (oarg);
 	  break;
 	case EXPLICIT_FUNC_OPT:
 	  is_explicit = 1;
-	  explicit_loc.function_name = oarg;
+	  explicit_loc->function_name = xstrdup (oarg);
 	  break;
 	case EXPLICIT_LABEL_OPT:
 	  is_explicit = 1;
-	  explicit_loc.label_name = oarg;
+	  explicit_loc->label_name = xstrdup (oarg);
 	  break;
 	case EXPLICIT_LINE_OPT:
 	  is_explicit = 1;
-	  explicit_loc.line_offset = linespec_parse_line_offset (oarg);
+	  explicit_loc->line_offset = linespec_parse_line_offset (oarg);
 	  break;
 	case FORCE_CONDITION_OPT:
 	  force_condition = true;
@@ -322,43 +321,43 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
 	 A simulator or an emulator could conceivably implement fast
 	 regular non-jump based tracepoints.  */
       type_wanted = hardware ? bp_fast_tracepoint : bp_tracepoint;
-      ops = &tracepoint_breakpoint_ops;
+      ops = breakpoint_ops_for_location_spec (nullptr, true);
     }
   else if (dprintf)
     {
       type_wanted = bp_dprintf;
-      ops = &dprintf_breakpoint_ops;
+      ops = &code_breakpoint_ops;
     }
   else
     {
       type_wanted = hardware ? bp_hardware_breakpoint : bp_breakpoint;
-      ops = &bkpt_breakpoint_ops;
+      ops = &code_breakpoint_ops;
     }
 
   if (is_explicit)
     {
       /* Error check -- we must have one of the other
 	 parameters specified.  */
-      if (explicit_loc.source_filename != NULL
-	  && explicit_loc.function_name == NULL
-	  && explicit_loc.label_name == NULL
-	  && explicit_loc.line_offset.sign == LINE_OFFSET_UNKNOWN)
+      if (explicit_loc->source_filename != NULL
+	  && explicit_loc->function_name == NULL
+	  && explicit_loc->label_name == NULL
+	  && explicit_loc->line_offset.sign == LINE_OFFSET_UNKNOWN)
 	error (_("-%s-insert: --source option requires --function, --label,"
 		 " or --line"), dprintf ? "dprintf" : "break");
 
-      explicit_loc.func_name_match_type = match_type;
+      explicit_loc->func_name_match_type = match_type;
 
-      location = new_explicit_location (&explicit_loc);
+      locspec = std::move (explicit_loc);
     }
   else
     {
-      location = string_to_event_location_basic (&address, current_language,
-						 match_type);
+      locspec = string_to_location_spec_basic (&address, current_language,
+					       match_type);
       if (*address)
 	error (_("Garbage '%s' at end of location"), address);
     }
 
-  create_breakpoint (get_current_arch (), location.get (), condition, thread,
+  create_breakpoint (get_current_arch (), locspec.get (), condition, thread,
 		     extra_string.c_str (),
 		     force_condition,
 		     0 /* condition and thread are valid.  */,

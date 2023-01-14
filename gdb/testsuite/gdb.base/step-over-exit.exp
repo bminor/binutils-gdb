@@ -23,7 +23,7 @@ set syscall_insn ""
 # Define the syscall instruction for each target.
 
 if { [istarget "i\[34567\]86-*-linux*"] || [istarget "x86_64-*-linux*"] } {
-    set syscall_insn "\[ \t\](int|syscall|sysenter)\[ \t\]"
+    set syscall_insn "\[ \t\](int|syscall|sysenter)\[ \t\]*"
 } elseif { [istarget "aarch64*-*-linux*"] || [istarget "arm*-*-linux*"] } {
     set syscall_insn "\[ \t\](swi|svc)\[ \t\]"
 } else {

@@ -27,6 +27,19 @@
 #include "elf/loongarch.h"
 #include "opcode/loongarch.h"
 
+/* Register numbers of various important registers.  */
+enum
+{
+  LOONGARCH_RA_REGNUM = 1,		/* Return Address.  */
+  LOONGARCH_SP_REGNUM = 3,		/* Stack Pointer.  */
+  LOONGARCH_A0_REGNUM = 4,		/* First Argument/Return Value.  */
+  LOONGARCH_A7_REGNUM = 11,		/* Seventh Argument/Syscall Number.  */
+  LOONGARCH_FP_REGNUM = 22,		/* Frame Pointer.  */
+  LOONGARCH_PC_REGNUM = 32,		/* Program Counter.  */
+  LOONGARCH_BADV_REGNUM = 33,		/* Bad Vaddr for Addressing Exception.  */
+  LOONGARCH_LINUX_NUM_GREGSET = 45,	/* 32 GPR, PC, BADV, RESERVED 11.  */
+};
+
 /* Register set definitions.  */
 extern const struct regset loongarch_gregset;
 
@@ -36,14 +49,8 @@ struct loongarch_gdbarch_tdep : gdbarch_tdep
   /* Features about the abi that impact how the gdbarch is configured.  */
   struct loongarch_gdbarch_features abi_features;
 
-  struct
-  {
-    int r;	/* General register. */
-    int ra;	/* Return Address.  */
-    int sp;	/* Stack Pointer.  */
-    int pc;	/* Program Counter.  */
-    int badv;	/* Bad vaddr for addressing exception.  */
-  } regs;	/* LoongArch registers  */
+  /* Return the expected next PC if FRAME is stopped at a syscall instruction.  */
+  CORE_ADDR (*syscall_next_pc) (struct frame_info *frame) = nullptr;
 };
 
 #endif /* LOONGARCH_TDEP_H  */

@@ -442,7 +442,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* Deprecated, but retained for backwards compatibility.  */
   HOWTO64 (R_AARCH64_NULL,	/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -455,7 +455,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_AARCH64_NONE,	/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -470,7 +470,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* .xword: (S+A) */
   HOWTO64 (AARCH64_R (ABS64),	/* type */
 	 0,			/* rightshift */
-	 4,			/* size (4 = long long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -485,7 +485,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* .word: (S+A) */
   HOWTO (AARCH64_R (ABS32),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -500,7 +500,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* .half:  (S+A) */
   HOWTO (AARCH64_R (ABS16),	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -515,7 +515,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* .xword: (S+A-P) */
   HOWTO64 (AARCH64_R (PREL64),	/* type */
 	 0,			/* rightshift */
-	 4,			/* size (4 = long long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -530,7 +530,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* .word: (S+A-P) */
   HOWTO (AARCH64_R (PREL32),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -545,7 +545,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* .half: (S+A-P) */
   HOWTO (AARCH64_R (PREL16),	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -563,7 +563,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* MOVZ:   ((S+A) >>  0) & 0xffff */
   HOWTO (AARCH64_R (MOVW_UABS_G0),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -578,7 +578,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* MOVK:   ((S+A) >>  0) & 0xffff [no overflow check] */
   HOWTO (AARCH64_R (MOVW_UABS_G0_NC),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -593,7 +593,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* MOVZ:   ((S+A) >> 16) & 0xffff */
   HOWTO (AARCH64_R (MOVW_UABS_G1),	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -608,7 +608,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* MOVK:   ((S+A) >> 16) & 0xffff [no overflow check] */
   HOWTO64 (AARCH64_R (MOVW_UABS_G1_NC),	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -623,7 +623,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* MOVZ:   ((S+A) >> 32) & 0xffff */
   HOWTO64 (AARCH64_R (MOVW_UABS_G2),	/* type */
 	 32,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -638,7 +638,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* MOVK:   ((S+A) >> 32) & 0xffff [no overflow check] */
   HOWTO64 (AARCH64_R (MOVW_UABS_G2_NC),	/* type */
 	 32,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -653,7 +653,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* MOVZ:   ((S+A) >> 48) & 0xffff */
   HOWTO64 (AARCH64_R (MOVW_UABS_G3),	/* type */
 	 48,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -672,7 +672,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* MOV[ZN]:   ((S+A) >>  0) & 0xffff */
   HOWTO (AARCH64_R (MOVW_SABS_G0),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 17,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -687,7 +687,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* MOV[ZN]:   ((S+A) >> 16) & 0xffff */
   HOWTO64 (AARCH64_R (MOVW_SABS_G1),	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 17,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -702,7 +702,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* MOV[ZN]:   ((S+A) >> 32) & 0xffff */
   HOWTO64 (AARCH64_R (MOVW_SABS_G2),	/* type */
 	 32,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 17,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -720,7 +720,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* MOV[NZ]:   ((S+A-P) >>  0) & 0xffff */
   HOWTO (AARCH64_R (MOVW_PREL_G0),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 17,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -735,7 +735,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* MOVK:   ((S+A-P) >>  0) & 0xffff [no overflow check] */
   HOWTO (AARCH64_R (MOVW_PREL_G0_NC),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -750,7 +750,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* MOV[NZ]:   ((S+A-P) >> 16) & 0xffff */
   HOWTO (AARCH64_R (MOVW_PREL_G1),	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 17,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -765,7 +765,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* MOVK:   ((S+A-P) >> 16) & 0xffff [no overflow check] */
   HOWTO64 (AARCH64_R (MOVW_PREL_G1_NC),	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -780,7 +780,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* MOV[NZ]:   ((S+A-P) >> 32) & 0xffff */
   HOWTO64 (AARCH64_R (MOVW_PREL_G2),	/* type */
 	 32,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 17,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -795,7 +795,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* MOVK:   ((S+A-P) >> 32) & 0xffff [no overflow check] */
   HOWTO64 (AARCH64_R (MOVW_PREL_G2_NC),	/* type */
 	 32,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -810,7 +810,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* MOV[NZ]:   ((S+A-P) >> 48) & 0xffff */
   HOWTO64 (AARCH64_R (MOVW_PREL_G3),	/* type */
 	 48,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -828,7 +828,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* LD-lit: ((S+A-P) >> 2) & 0x7ffff */
   HOWTO (AARCH64_R (LD_PREL_LO19),	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 19,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -843,7 +843,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* ADR:    (S+A-P) & 0x1fffff */
   HOWTO (AARCH64_R (ADR_PREL_LO21),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 21,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -858,7 +858,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* ADRP:   ((PG(S+A)-PG(P)) >> 12) & 0x1fffff */
   HOWTO (AARCH64_R (ADR_PREL_PG_HI21),	/* type */
 	 12,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 21,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -873,7 +873,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* ADRP:   ((PG(S+A)-PG(P)) >> 12) & 0x1fffff [no overflow check] */
   HOWTO64 (AARCH64_R (ADR_PREL_PG_HI21_NC),	/* type */
 	 12,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 21,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -888,7 +888,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* ADD:    (S+A) & 0xfff [no overflow check] */
   HOWTO (AARCH64_R (ADD_ABS_LO12_NC),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 10,			/* bitpos */
@@ -903,7 +903,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* LD/ST8:  (S+A) & 0xfff */
   HOWTO (AARCH64_R (LDST8_ABS_LO12_NC),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -920,7 +920,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* TBZ/NZ: ((S+A-P) >> 2) & 0x3fff */
   HOWTO (AARCH64_R (TSTBR14),	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 14,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -935,7 +935,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* B.cond: ((S+A-P) >> 2) & 0x7ffff */
   HOWTO (AARCH64_R (CONDBR19),	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 19,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -950,7 +950,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* B:      ((S+A-P) >> 2) & 0x3ffffff */
   HOWTO (AARCH64_R (JUMP26),	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 26,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -965,7 +965,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* BL:     ((S+A-P) >> 2) & 0x3ffffff */
   HOWTO (AARCH64_R (CALL26),	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 26,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -980,7 +980,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* LD/ST16:  (S+A) & 0xffe */
   HOWTO (AARCH64_R (LDST16_ABS_LO12_NC),	/* type */
 	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -995,7 +995,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* LD/ST32:  (S+A) & 0xffc */
   HOWTO (AARCH64_R (LDST32_ABS_LO12_NC),	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1010,7 +1010,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* LD/ST64:  (S+A) & 0xff8 */
   HOWTO (AARCH64_R (LDST64_ABS_LO12_NC),	/* type */
 	 3,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1025,7 +1025,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* LD/ST128:  (S+A) & 0xff0 */
   HOWTO (AARCH64_R (LDST128_ABS_LO12_NC),	/* type */
 	 4,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1041,7 +1041,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
      0x1FFFFC of G(S)-P */
   HOWTO (AARCH64_R (GOT_LD_PREL19),	/* type */
 	 2,				/* rightshift */
-	 2,				/* size (0 = byte,1 = short,2 = long) */
+	 4,				/* size */
 	 19,				/* bitsize */
 	 true,				/* pc_relative */
 	 0,				/* bitpos */
@@ -1057,7 +1057,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
      (G(S) - P) using an ADRP instruction.  */
   HOWTO (AARCH64_R (ADR_GOT_PAGE),	/* type */
 	 12,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 21,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1072,7 +1072,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* LD64: GOT offset G(S) & 0xff8  */
   HOWTO64 (AARCH64_R (LD64_GOT_LO12_NC),	/* type */
 	 3,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1087,7 +1087,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* LD32: GOT offset G(S) & 0xffc  */
   HOWTO32 (AARCH64_R (LD32_GOT_LO12_NC),	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1102,7 +1102,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* Lower 16 bits of GOT offset for the symbol.  */
   HOWTO64 (AARCH64_R (MOVW_GOTOFF_G0_NC),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1117,7 +1117,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* Higher 16 bits of GOT offset for the symbol.  */
   HOWTO64 (AARCH64_R (MOVW_GOTOFF_G1),	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1132,7 +1132,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* LD64: GOT offset for the symbol.  */
   HOWTO64 (AARCH64_R (LD64_GOTOFF_LO15),	/* type */
 	 3,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1148,7 +1148,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
      (G(S) - PAGE (_GLOBAL_OFFSET_TABLE_)) & 0x5ffc.  */
   HOWTO32 (AARCH64_R (LD32_GOTPAGE_LO14),	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1164,7 +1164,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
      (G(S) - PAGE (_GLOBAL_OFFSET_TABLE_)) & 0x7ff8.  */
   HOWTO64 (AARCH64_R (LD64_GOTPAGE_LO15),	/* type */
 	 3,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1180,7 +1180,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
      (G(S) - P) using an ADRP instruction.  */
   HOWTO (AARCH64_R (TLSGD_ADR_PAGE21),	/* type */
 	 12,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 21,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1194,7 +1194,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO (AARCH64_R (TLSGD_ADR_PREL21),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 21,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1209,7 +1209,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* ADD: GOT offset G(S) & 0xff8 [no overflow check] */
   HOWTO (AARCH64_R (TLSGD_ADD_LO12_NC),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1224,7 +1224,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* Lower 16 bits of GOT offset to tls_index.  */
   HOWTO64 (AARCH64_R (TLSGD_MOVW_G0_NC),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1239,7 +1239,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* Higher 16 bits of GOT offset to tls_index.  */
   HOWTO64 (AARCH64_R (TLSGD_MOVW_G1),	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1253,7 +1253,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO (AARCH64_R (TLSIE_ADR_GOTTPREL_PAGE21),	/* type */
 	 12,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 21,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1267,7 +1267,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO64 (AARCH64_R (TLSIE_LD64_GOTTPREL_LO12_NC),	/* type */
 	 3,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1281,7 +1281,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO32 (AARCH64_R (TLSIE_LD32_GOTTPREL_LO12_NC),	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1295,7 +1295,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO (AARCH64_R (TLSIE_LD_GOTTPREL_PREL19),	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 19,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1309,7 +1309,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO64 (AARCH64_R (TLSIE_MOVW_GOTTPREL_G0_NC),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1323,7 +1323,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO64 (AARCH64_R (TLSIE_MOVW_GOTTPREL_G1),	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1338,7 +1338,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* ADD: bit[23:12] of byte offset to module TLS base address.  */
   HOWTO (AARCH64_R (TLSLD_ADD_DTPREL_HI12),	/* type */
 	 12,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1353,7 +1353,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* Unsigned 12 bit byte offset to module TLS base address.  */
   HOWTO (AARCH64_R (TLSLD_ADD_DTPREL_LO12),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1368,7 +1368,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* No overflow check version of BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12.  */
   HOWTO (AARCH64_R (TLSLD_ADD_DTPREL_LO12_NC),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1383,7 +1383,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* ADD: GOT offset G(S) & 0xff8 [no overflow check] */
   HOWTO (AARCH64_R (TLSLD_ADD_LO12_NC),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1399,7 +1399,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
      (G(S) - P) using an ADRP instruction.  */
   HOWTO (AARCH64_R (TLSLD_ADR_PAGE21),	/* type */
 	 12,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 21,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1413,7 +1413,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO (AARCH64_R (TLSLD_ADR_PREL21),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 21,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1428,7 +1428,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* LD/ST16: bit[11:1] of byte offset to module TLS base address.  */
   HOWTO64 (AARCH64_R (TLSLD_LDST16_DTPREL_LO12),	/* type */
 	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 11,			/* bitsize */
 	 false,			/* pc_relative */
 	 10,			/* bitpos */
@@ -1443,7 +1443,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* Same as BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12, but no overflow check.  */
   HOWTO64 (AARCH64_R (TLSLD_LDST16_DTPREL_LO12_NC),	/* type */
 	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 11,			/* bitsize */
 	 false,			/* pc_relative */
 	 10,			/* bitpos */
@@ -1458,7 +1458,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* LD/ST32: bit[11:2] of byte offset to module TLS base address.  */
   HOWTO64 (AARCH64_R (TLSLD_LDST32_DTPREL_LO12),	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 10,			/* bitsize */
 	 false,			/* pc_relative */
 	 10,			/* bitpos */
@@ -1473,7 +1473,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* Same as BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12, but no overflow check.  */
   HOWTO64 (AARCH64_R (TLSLD_LDST32_DTPREL_LO12_NC),	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 10,			/* bitsize */
 	 false,			/* pc_relative */
 	 10,			/* bitpos */
@@ -1488,7 +1488,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* LD/ST64: bit[11:3] of byte offset to module TLS base address.  */
   HOWTO64 (AARCH64_R (TLSLD_LDST64_DTPREL_LO12),	/* type */
 	 3,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 9,			/* bitsize */
 	 false,			/* pc_relative */
 	 10,			/* bitpos */
@@ -1503,7 +1503,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* Same as BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12, but no overflow check.  */
   HOWTO64 (AARCH64_R (TLSLD_LDST64_DTPREL_LO12_NC),	/* type */
 	 3,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 9,			/* bitsize */
 	 false,			/* pc_relative */
 	 10,			/* bitpos */
@@ -1518,7 +1518,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* LD/ST8: bit[11:0] of byte offset to module TLS base address.  */
   HOWTO64 (AARCH64_R (TLSLD_LDST8_DTPREL_LO12),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 10,			/* bitpos */
@@ -1533,7 +1533,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* Same as BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12, but no overflow check.  */
   HOWTO64 (AARCH64_R (TLSLD_LDST8_DTPREL_LO12_NC),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 10,			/* bitpos */
@@ -1548,7 +1548,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* MOVZ: bit[15:0] of byte offset to module TLS base address.  */
   HOWTO (AARCH64_R (TLSLD_MOVW_DTPREL_G0),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1563,7 +1563,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* No overflow check version of BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0.  */
   HOWTO (AARCH64_R (TLSLD_MOVW_DTPREL_G0_NC),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1578,7 +1578,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* MOVZ: bit[31:16] of byte offset to module TLS base address.  */
   HOWTO (AARCH64_R (TLSLD_MOVW_DTPREL_G1),	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1593,7 +1593,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* No overflow check version of BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1.  */
   HOWTO64 (AARCH64_R (TLSLD_MOVW_DTPREL_G1_NC),	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1608,7 +1608,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* MOVZ: bit[47:32] of byte offset to module TLS base address.  */
   HOWTO64 (AARCH64_R (TLSLD_MOVW_DTPREL_G2),	/* type */
 	 32,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1622,7 +1622,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO64 (AARCH64_R (TLSLE_MOVW_TPREL_G2),	/* type */
 	 32,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1636,7 +1636,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO (AARCH64_R (TLSLE_MOVW_TPREL_G1),	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1650,7 +1650,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO64 (AARCH64_R (TLSLE_MOVW_TPREL_G1_NC),	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1664,7 +1664,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO (AARCH64_R (TLSLE_MOVW_TPREL_G0),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1678,7 +1678,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO (AARCH64_R (TLSLE_MOVW_TPREL_G0_NC),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1692,7 +1692,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO (AARCH64_R (TLSLE_ADD_TPREL_HI12),	/* type */
 	 12,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1706,7 +1706,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO (AARCH64_R (TLSLE_ADD_TPREL_LO12),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1720,7 +1720,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO (AARCH64_R (TLSLE_ADD_TPREL_LO12_NC),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1735,7 +1735,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* LD/ST16: bit[11:1] of byte offset to module TLS base address.  */
   HOWTO (AARCH64_R (TLSLE_LDST16_TPREL_LO12),	/* type */
 	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 11,			/* bitsize */
 	 false,			/* pc_relative */
 	 10,			/* bitpos */
@@ -1750,7 +1750,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* Same as BFD_RELOC_AARCH64_TLSLE_LDST16_TPREL_LO12, but no overflow check.  */
   HOWTO (AARCH64_R (TLSLE_LDST16_TPREL_LO12_NC),	/* type */
 	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 11,			/* bitsize */
 	 false,			/* pc_relative */
 	 10,			/* bitpos */
@@ -1765,7 +1765,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* LD/ST32: bit[11:2] of byte offset to module TLS base address.  */
   HOWTO (AARCH64_R (TLSLE_LDST32_TPREL_LO12),	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 10,			/* bitsize */
 	 false,			/* pc_relative */
 	 10,			/* bitpos */
@@ -1780,7 +1780,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* Same as BFD_RELOC_AARCH64_TLSLE_LDST32_TPREL_LO12, but no overflow check.  */
   HOWTO (AARCH64_R (TLSLE_LDST32_TPREL_LO12_NC),	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 10,			/* bitsize */
 	 false,			/* pc_relative */
 	 10,			/* bitpos */
@@ -1795,7 +1795,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* LD/ST64: bit[11:3] of byte offset to module TLS base address.  */
   HOWTO (AARCH64_R (TLSLE_LDST64_TPREL_LO12),	/* type */
 	 3,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 9,			/* bitsize */
 	 false,			/* pc_relative */
 	 10,			/* bitpos */
@@ -1810,7 +1810,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* Same as BFD_RELOC_AARCH64_TLSLE_LDST64_TPREL_LO12, but no overflow check.  */
   HOWTO (AARCH64_R (TLSLE_LDST64_TPREL_LO12_NC),	/* type */
 	 3,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 9,			/* bitsize */
 	 false,			/* pc_relative */
 	 10,			/* bitpos */
@@ -1825,7 +1825,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* LD/ST8: bit[11:0] of byte offset to module TLS base address.  */
   HOWTO (AARCH64_R (TLSLE_LDST8_TPREL_LO12),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 10,			/* bitpos */
@@ -1840,7 +1840,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* Same as BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12, but no overflow check.  */
   HOWTO (AARCH64_R (TLSLE_LDST8_TPREL_LO12_NC),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 10,			/* bitpos */
@@ -1854,7 +1854,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO (AARCH64_R (TLSDESC_LD_PREL19),	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 19,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1868,7 +1868,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO (AARCH64_R (TLSDESC_ADR_PREL21),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 21,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1884,7 +1884,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
      (G(S) - P) using an ADRP instruction.  */
   HOWTO (AARCH64_R (TLSDESC_ADR_PAGE21),	/* type */
 	 12,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 21,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1899,7 +1899,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* LD64: GOT offset G(S) & 0xff8.  */
   HOWTO64 (AARCH64_R (TLSDESC_LD64_LO12),	/* type */
 	 3,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1914,7 +1914,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* LD32: GOT offset G(S) & 0xffc.  */
   HOWTO32 (AARCH64_R (TLSDESC_LD32_LO12_NC),	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1929,7 +1929,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
   /* ADD: GOT offset G(S) & 0xfff.  */
   HOWTO (AARCH64_R (TLSDESC_ADD_LO12),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1943,7 +1943,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO64 (AARCH64_R (TLSDESC_OFF_G1),	/* type */
 	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1957,7 +1957,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO64 (AARCH64_R (TLSDESC_OFF_G0_NC),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1971,7 +1971,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO64 (AARCH64_R (TLSDESC_LDR),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1985,7 +1985,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO64 (AARCH64_R (TLSDESC_ADD),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1999,7 +1999,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO (AARCH64_R (TLSDESC_CALL),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -2013,7 +2013,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO (AARCH64_R (COPY),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -2027,7 +2027,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO (AARCH64_R (GLOB_DAT),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -2041,7 +2041,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO (AARCH64_R (JUMP_SLOT),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -2055,7 +2055,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO (AARCH64_R (RELATIVE),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -2069,7 +2069,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO (AARCH64_R (TLS_DTPMOD),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -2087,7 +2087,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO (AARCH64_R (TLS_DTPREL),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -2105,7 +2105,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO (AARCH64_R (TLS_TPREL),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -2123,7 +2123,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO (AARCH64_R (TLSDESC),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -2137,7 +2137,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
   HOWTO (AARCH64_R (IRELATIVE),	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -2155,7 +2155,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 static reloc_howto_type elfNN_aarch64_howto_none =
   HOWTO (R_AARCH64_NONE,	/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -2579,6 +2579,9 @@ struct elf_aarch64_link_hash_entry
      this symbol.  */
   unsigned int got_type;
 
+  /* TRUE if symbol is defined as a protected symbol.  */
+  unsigned int def_protected : 1;
+
   /* A pointer to the most recently used stub hash entry against this
      symbol.  */
   struct elf_aarch64_stub_hash_entry *stub_cache;
@@ -2712,6 +2715,7 @@ elfNN_aarch64_link_hash_newfunc (struct bfd_hash_entry *entry,
   if (ret != NULL)
     {
       ret->got_type = GOT_UNKNOWN;
+      ret->def_protected = 0;
       ret->plt_got_offset = (bfd_vma) - 1;
       ret->stub_cache = NULL;
       ret->tlsdesc_got_jump_table_offset = (bfd_vma) - 1;
@@ -2855,9 +2859,16 @@ elfNN_aarch64_copy_indirect_symbol (struct bfd_link_info *info,
 static void
 elfNN_aarch64_merge_symbol_attribute (struct elf_link_hash_entry *h,
 				      unsigned int st_other,
-				      bool definition ATTRIBUTE_UNUSED,
+				      bool definition,
 				      bool dynamic ATTRIBUTE_UNUSED)
 {
+  if (definition)
+    {
+      struct elf_aarch64_link_hash_entry *eh
+	  = (struct elf_aarch64_link_hash_entry *)h;
+      eh->def_protected = ELF_ST_VISIBILITY (st_other) == STV_PROTECTED;
+    }
+
   unsigned int isym_sto = st_other & ~ELF_ST_VISIBILITY (-1);
   unsigned int h_sto = h->other & ~ELF_ST_VISIBILITY (-1);
 
@@ -5878,7 +5889,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       if (bfd_link_pic (info)
 	  && (input_section->flags & SEC_ALLOC) != 0
 	  && (input_section->flags & SEC_READONLY) != 0
-	  && !SYMBOL_REFERENCES_LOCAL (info, h))
+	  && !_bfd_elf_symbol_refs_local_p (h, info, 1))
 	{
 	  int howto_index = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
 
@@ -8701,6 +8712,22 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   if (h->dyn_relocs == NULL)
     return true;
 
+  for (p = h->dyn_relocs; p != NULL; p = p->next)
+    if (eh->def_protected)
+      {
+	/* Disallow copy relocations against protected symbol.  */
+	asection *s = p->sec->output_section;
+	if (s != NULL && (s->flags & SEC_READONLY) != 0)
+	  {
+	    info->callbacks->einfo
+		/* xgettext:c-format */
+		(_ ("%F%P: %pB: copy relocation against non-copyable "
+		    "protected symbol `%s'\n"),
+		 p->sec->owner, h->root.root.string);
+	    return false;
+	  }
+      }
+
   /* In the shared -Bsymbolic case, discard space allocated for
      dynamic pc-relative relocs against symbols which turn out to be
      defined in regular objects.  For the normal shared case, discard
@@ -10090,7 +10117,7 @@ const struct elf_size_info elfNN_aarch64_size_info =
 #define elf_backend_dtrel_excludes_plt 1
 #define elf_backend_got_header_size (GOT_ENTRY_SIZE * 3)
 #define elf_backend_default_execstack  0
-#define elf_backend_extern_protected_data 1
+#define elf_backend_extern_protected_data 0
 #define elf_backend_hash_symbol elf_aarch64_hash_symbol
 
 #undef	elf_backend_obj_attrs_section

@@ -108,13 +108,13 @@ reschedule (struct serial *scb)
 	    {
 	    case FD_SCHEDULED:
 	      if (scb->async_state != FD_SCHEDULED)
-		fprintf_unfiltered (gdb_stdlog, "[fd%d->fd-scheduled]\n",
-				    scb->fd);
+		gdb_printf (gdb_stdlog, "[fd%d->fd-scheduled]\n",
+			    scb->fd);
 	      break;
 	    default: /* TIMER SCHEDULED */
 	      if (scb->async_state == FD_SCHEDULED)
-		fprintf_unfiltered (gdb_stdlog, "[fd%d->timer-scheduled]\n",
-				    scb->fd);
+		gdb_printf (gdb_stdlog, "[fd%d->timer-scheduled]\n",
+			    scb->fd);
 	      break;
 	    }
 	}
@@ -306,12 +306,12 @@ ser_base_read_error_fd (struct serial *scb, int close_fd)
 	  while ((newline = strstr (current, "\n")) != NULL)
 	    {
 	      *newline = '\0';
-	      fputs_unfiltered (current, gdb_stderr);
-	      fputs_unfiltered ("\n", gdb_stderr);
+	      gdb_puts (current, gdb_stderr);
+	      gdb_puts ("\n", gdb_stderr);
 	      current = newline + 1;
 	    }
 
-	  fputs_unfiltered (current, gdb_stderr);
+	  gdb_puts (current, gdb_stderr);
        }
     }
 }
@@ -592,8 +592,8 @@ ser_base_async (struct serial *scb,
       /* Force a re-schedule.  */
       scb->async_state = NOTHING_SCHEDULED;
       if (serial_debug_p (scb))
-	fprintf_unfiltered (gdb_stdlog, "[fd%d->asynchronous]\n",
-			    scb->fd);
+	gdb_printf (gdb_stdlog, "[fd%d->asynchronous]\n",
+		    scb->fd);
       reschedule (scb);
 
       if (scb->error_fd != -1)
@@ -602,8 +602,8 @@ ser_base_async (struct serial *scb,
   else
     {
       if (serial_debug_p (scb))
-	fprintf_unfiltered (gdb_stdlog, "[fd%d->synchronous]\n",
-			    scb->fd);
+	gdb_printf (gdb_stdlog, "[fd%d->synchronous]\n",
+		    scb->fd);
       /* De-schedule whatever tasks are currently scheduled.  */
       switch (scb->async_state)
 	{

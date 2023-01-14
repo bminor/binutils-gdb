@@ -18,12 +18,6 @@ if {[skip_shlib_tests]} {
     return -1
 }
 
-if {[get_compiler_info]} {
-    warning "Could not get compiler info"
-    untested "no compiler info"
-    return -1
-}
-
 standard_testfile .c
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug shlib_load}] != "" } {
     untested "failed to compile"

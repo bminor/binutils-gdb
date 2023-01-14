@@ -36,6 +36,8 @@
 #include "mi-parse.h"
 #include "gdbsupport/gdb_optional.h"
 #include "safe-ctype.h"
+#include "inferior.h"
+#include "observable.h"
 
 enum what_to_list { locals, arguments, all };
 
@@ -669,10 +671,10 @@ list_args_or_locals (const frame_print_options &fp_opts,
 	    }
 	}
 
-      if (BLOCK_FUNCTION (block))
+      if (block->function ())
 	break;
       else
-	block = BLOCK_SUPERBLOCK (block);
+	block = block->superblock ();
     }
 }
 
@@ -755,8 +757,7 @@ mi_cmd_stack_select_frame (const char *command, char **argv, int argc)
 {
   if (argc == 0 || argc > 1)
     error (_("-stack-select-frame: Usage: FRAME_SPEC"));
-
-  select_frame_for_mi (parse_frame_specification (argv[0]));
+  select_frame (parse_frame_specification (argv[0]));
 }
 
 void

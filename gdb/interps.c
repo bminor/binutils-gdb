@@ -79,14 +79,12 @@ static struct interp *interp_lookup_existing (struct ui *ui,
 					      const char *name);
 
 interp::interp (const char *name)
-  : m_name (xstrdup (name))
+  : m_name (make_unique_xstrdup (name))
 {
-  this->inited = false;
 }
 
 interp::~interp ()
 {
-  xfree (m_name);
 }
 
 /* An interpreter factory.  Maps an interpreter name to the factory
@@ -127,7 +125,7 @@ interp_factory_register (const char *name, interp_factory_func func)
 
 /* Add interpreter INTERP to the gdb interpreter list.  The
    interpreter must not have previously been added.  */
-void
+static void
 interp_add (struct ui *ui, struct interp *interp)
 {
   struct ui_interp_info *ui_interp = get_interp_info (ui);
@@ -170,15 +168,8 @@ interp_set (struct interp *interp, bool top_level)
   if (top_level)
     ui_interp->top_level_interpreter = interp;
 
-  /* We use interpreter_p for the "set interpreter" variable, so we need
-     to make sure we have a malloc'ed copy for the set command to free.  */
-  if (interpreter_p != NULL
-      && strcmp (interp->name (), interpreter_p) != 0)
-    {
-      xfree (interpreter_p);
-
-      interpreter_p = xstrdup (interp->name ());
-    }
+  if (interpreter_p != interp->name ())
+    interpreter_p = interp->name ();
 
   /* Run the init proc.  */
   if (!interp->inited)
@@ -357,7 +348,6 @@ clear_interpreter_hooks (void)
   deprecated_readline_hook = 0;
   deprecated_readline_end_hook = 0;
   deprecated_context_hook = 0;
-  deprecated_target_wait_hook = 0;
   deprecated_call_command_hook = 0;
   deprecated_error_begin_hook = 0;
 }

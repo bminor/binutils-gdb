@@ -64,12 +64,25 @@ if { ![is_address_zero_readable] } {
 }
 
 foreach size {0 1 2 3 4 8 16} {
-    foreach sign {"" ", True" ", False" ", None" ", \"blah\""} {
+    foreach sign_data {{"" True} \
+			   {", True" True} \
+			   {", False" False} \
+			   {", None" False} \
+			   {", \"blah\"" True}} {
+	set sign [lindex $sign_data 0]
+	# GDB's 0 bit type is always signed.
+	if { $size == 0 } {
+	    set sign_result True
+	} else {
+	    set sign_result [lindex $sign_data 1]
+	}
 	set fullsize [expr 8 * $size]
 	gdb_test_no_output "python t = arch.integer_type($fullsize$sign)" \
 	    "get integer type for $size$sign"
 	gdb_test "python print(t.sizeof)" "$size" \
 	    "print size of integer type for $size$sign"
+	gdb_test "python print(t.is_signed == ${sign_result})" "True" \
+	    "check signedness of type for $size$sign"
     }
 }
 

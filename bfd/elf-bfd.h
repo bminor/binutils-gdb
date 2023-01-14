@@ -499,6 +499,7 @@ enum elf_target_id
 {
   AARCH64_ELF_DATA = 1,
   ALPHA_ELF_DATA,
+  AMDGCN_ELF_DATA,
   ARC_ELF_DATA,
   ARM_ELF_DATA,
   AVR_ELF_DATA,
@@ -598,6 +599,9 @@ struct elf_link_hash_table
 
   /* TRUE if DT_JMPREL is a required dynamic tag.  */
   bool dt_jmprel_required;
+
+  /* TRUE when we are handling DT_NEEDED entries.  */
+  bool handling_dt_needed;
 
   /* The BFD used to hold special sections created by the linker.
      This will be the first BFD found which requires these sections to
@@ -945,9 +949,6 @@ struct elf_backend_data
 
   /* The common page size for this backend.  */
   bfd_vma commonpagesize;
-
-  /* The value of commonpagesize to use when -z relro for this backend.  */
-  bfd_vma relropagesize;
 
   /* The p_align value for this backend.  If it is set, p_align of
       PT_LOAD alignment will be to p_align by default.  */
@@ -1917,6 +1918,14 @@ struct output_elf_obj_tdata
     asection *sec;
   } build_id;
 
+  /* FDO_PACKAGING_METADATA note type info.  */
+  struct
+  {
+    bool (*after_write_object_contents) (bfd *);
+    const char *json;
+    asection *sec;
+  } package_metadata;
+
   /* Records the result of `get_program_header_size'.  */
   bfd_size_type program_header_size;
 
@@ -2784,6 +2793,8 @@ extern char *elfcore_write_prfpreg
 extern char *elfcore_write_prxfpreg
   (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_xstatereg
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_x86_segbases
   (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_ppc_vmx
   (bfd *, char *, int *, const void *, int);

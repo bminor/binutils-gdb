@@ -1144,6 +1144,10 @@ proc objcopy_test_symbol_manipulation {} {
         verbose [file rootname $t]
         run_dump_test [file rootname $t]
     }
+
+    if { [supports_gnu_unique] } {
+	run_dump_test "weaken-gnu-unique"
+    }
 }
 
 proc objcopy_test_elf_common_symbols {} {

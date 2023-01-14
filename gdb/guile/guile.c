@@ -130,8 +130,12 @@ static const struct extension_language_ops guile_extension_ops =
   gdbscm_breakpoint_has_cond,
   gdbscm_breakpoint_cond_says_stop,
 
-  NULL, /* gdbscm_check_quit_flag, */
   NULL, /* gdbscm_set_quit_flag, */
+  NULL, /* gdbscm_check_quit_flag, */
+  NULL, /* gdbscm_before_prompt, */
+  NULL, /* gdbscm_get_matching_xmethod_workers */
+  NULL, /* gdbscm_colorize */
+  NULL, /* gdbscm_print_insn */
 };
 #endif
 
@@ -273,7 +277,7 @@ gdbscm_source_script (const struct extension_language_defn *extlang,
   gdb::unique_xmalloc_ptr<char> msg = gdbscm_safe_source_script (filename);
 
   if (msg != NULL)
-    fprintf_filtered (gdb_stderr, "%s\n", msg.get ());
+    gdb_printf (gdb_stderr, "%s\n", msg.get ());
 }
 
 /* (execute string [#:from-tty boolean] [#:to-string boolean])
@@ -528,11 +532,11 @@ print_throw_error (SCM key, SCM args)
 static SCM
 handle_boot_error (void *boot_scm_file, SCM key, SCM args)
 {
-  fprintf_unfiltered (gdb_stderr, ("Exception caught while booting Guile.\n"));
+  gdb_printf (gdb_stderr, ("Exception caught while booting Guile.\n"));
 
   print_throw_error (key, args);
 
-  fprintf_unfiltered (gdb_stderr, "\n");
+  gdb_printf (gdb_stderr, "\n");
   warning (_("Could not complete Guile gdb module initialization from:\n"
 	     "%s.\n"
 	     "Limited Guile support is available.\n"

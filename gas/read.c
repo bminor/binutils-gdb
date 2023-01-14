@@ -412,10 +412,8 @@ static const pseudo_typeS potable[] = {
   {"exitm", s_mexit, 0},
 /* extend  */
   {"extern", s_ignore, 0},	/* We treat all undef as ext.  */
-  {"appfile", s_app_file, 1},
-  {"appline", s_app_line, 1},
   {"fail", s_fail, 0},
-  {"file", s_app_file, 0},
+  {"file", s_file, 0},
   {"fill", s_fill, 0},
   {"float", float_cons, 'f'},
   {"format", s_ignore, 0},
@@ -448,7 +446,7 @@ static const pseudo_typeS potable[] = {
   {"irepc", s_irp, 1},
   {"lcomm", s_lcomm, 0},
   {"lflags", s_ignore, 0},	/* Listing flags.  */
-  {"linefile", s_app_line, 0},
+  {"linefile", s_linefile, 0},
   {"linkonce", s_linkonce, 0},
   {"list", listing_list, 1},	/* Turn listing on.  */
   {"llen", listing_psize, 1},
@@ -625,25 +623,6 @@ pobegin (void)
       continue;								\
     }
 
-/* This function is used when scrubbing the characters between #APP
-   and #NO_APP.  */
-
-static char *scrub_string;
-static char *scrub_string_end;
-
-static size_t
-scrub_from_string (char *buf, size_t buflen)
-{
-  size_t copy;
-
-  copy = scrub_string_end - scrub_string;
-  if (copy > buflen)
-    copy = buflen;
-  memcpy (buf, scrub_string, copy);
-  scrub_string += copy;
-  return copy;
-}
-
 /* Helper function of read_a_source_file, which tries to expand a macro.  */
 static int
 try_macro (char term, const char *line)
@@ -658,7 +637,7 @@ try_macro (char term, const char *line)
 	as_bad ("%s", err);
       *input_line_pointer++ = term;
       input_scrub_include_sb (&out,
-			      input_line_pointer, 1);
+			      input_line_pointer, expanding_macro);
       sb_kill (&out);
       buffer_limit =
 	input_scrub_next_buffer (&input_line_pointer);
@@ -929,7 +908,7 @@ read_a_source_file (const char *name)
 		  if (s != last_eol)
 		    {
 		      char *copy;
-		      int len;
+		      size_t len;
 
 		      last_eol = s;
 		      /* Copy it for safe keeping.  Also give an indication of
@@ -1266,7 +1245,7 @@ read_a_source_file (const char *name)
 	      while (ISDIGIT (*input_line_pointer))
 		{
 		  const long digit = *input_line_pointer - '0';
-		  if (temp > (LONG_MAX - digit) / 10)
+		  if (temp > (INT_MAX - digit) / 10)
 		    {
 		      as_bad (_("local label too large near %s"), backup);
 		      temp = -1;
@@ -1314,10 +1293,7 @@ read_a_source_file (const char *name)
 	    {			/* Its a comment.  Better say APP or NO_APP.  */
 	      sb sbuf;
 	      char *ends;
-	      char *new_buf;
-	      char *new_tmp;
-	      unsigned int new_length;
-	      char *tmp_buf = 0;
+	      size_t len;
 
 	      s = input_line_pointer;
 	      if (!startswith (s, "APP\n"))
@@ -1330,91 +1306,32 @@ read_a_source_file (const char *name)
 	      s += 4;
 
 	      ends = strstr (s, "#NO_APP\n");
+	      len = ends ? ends - s : buffer_limit - s;
 
+	      sb_build (&sbuf, len + 100);
+	      sb_add_buffer (&sbuf, s, len);
 	      if (!ends)
 		{
-		  unsigned int tmp_len;
-		  unsigned int num;
-
 		  /* The end of the #APP wasn't in this buffer.  We
 		     keep reading in buffers until we find the #NO_APP
 		     that goes with this #APP  There is one.  The specs
 		     guarantee it...  */
-		  tmp_len = buffer_limit - s;
-		  tmp_buf = XNEWVEC (char, tmp_len + 1);
-		  memcpy (tmp_buf, s, tmp_len);
 		  do
 		    {
-		      new_tmp = input_scrub_next_buffer (&buffer);
-		      if (!new_tmp)
+		      buffer_limit = input_scrub_next_buffer (&buffer);
+		      if (!buffer_limit)
 			break;
-		      else
-			buffer_limit = new_tmp;
-		      input_line_pointer = buffer;
 		      ends = strstr (buffer, "#NO_APP\n");
-		      if (ends)
-			num = ends - buffer;
-		      else
-			num = buffer_limit - buffer;
-
-		      tmp_buf = XRESIZEVEC (char, tmp_buf, tmp_len + num);
-		      memcpy (tmp_buf + tmp_len, buffer, num);
-		      tmp_len += num;
+		      len = ends ? ends - buffer : buffer_limit - buffer;
+		      sb_add_buffer (&sbuf, buffer, len);
 		    }
 		  while (!ends);
-
-		  input_line_pointer = ends ? ends + 8 : NULL;
-
-		  s = tmp_buf;
-		  ends = s + tmp_len;
-
-		}
-	      else
-		{
-		  input_line_pointer = ends + 8;
 		}
 
-	      scrub_string = s;
-	      scrub_string_end = ends;
-
-	      new_length = ends - s;
-	      new_buf = XNEWVEC (char, new_length);
-	      new_tmp = new_buf;
-	      for (;;)
-		{
-		  size_t space;
-		  size_t size;
-
-		  space = (new_buf + new_length) - new_tmp;
-		  size = do_scrub_chars (scrub_from_string, new_tmp, space);
-
-		  if (size < space)
-		    {
-		      new_tmp[size] = 0;
-		      break;
-		    }
-
-		  new_buf = XRESIZEVEC (char, new_buf, new_length + 100);
-		  new_tmp = new_buf + new_length;
-		  new_length += 100;
-		}
-
-	      free (tmp_buf);
-
-	      /* We've "scrubbed" input to the preferred format.  In the
-		 process we may have consumed the whole of the remaining
-		 file (and included files).  We handle this formatted
-		 input similar to that of macro expansion, letting
-		 actual macro expansion (possibly nested) and other
-		 input expansion work.  Beware that in messages, line
-		 numbers and possibly file names will be incorrect.  */
-	      new_length = strlen (new_buf);
-	      sb_build (&sbuf, new_length);
-	      sb_add_buffer (&sbuf, new_buf, new_length);
-	      input_scrub_include_sb (&sbuf, input_line_pointer, 0);
+	      input_line_pointer = ends ? ends + 8 : NULL;
+	      input_scrub_include_sb (&sbuf, input_line_pointer, expanding_none);
 	      sb_kill (&sbuf);
 	      buffer_limit = input_scrub_next_buffer (&input_line_pointer);
-	      free (new_buf);
 	      continue;
 	    }
 
@@ -1940,7 +1857,6 @@ s_mri_common (int small ATTRIBUTE_UNUSED)
   if (S_IS_DEFINED (sym) && !S_IS_COMMON (sym))
     {
       as_bad (_("symbol `%s' is already defined"), S_GET_NAME (sym));
-      ignore_rest_of_line ();
       mri_comment_end (stop, stopc);
       return;
     }
@@ -2001,15 +1917,11 @@ s_data (int ignore ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
-/* Handle the .appfile pseudo-op.  This is automatically generated by
-   do_scrub_chars when a preprocessor # line comment is seen with a
-   file name.  This default definition may be overridden by the object
-   or CPU specific pseudo-ops.  This function is also the default
-   definition for .file; the APPFILE argument is 1 for .appfile, 0 for
-   .file.  */
+/* Handle the .file pseudo-op.  This default definition may be overridden by
+   the object or CPU specific pseudo-ops.  */
 
 void
-s_app_file_string (char *file, int appfile ATTRIBUTE_UNUSED)
+s_file_string (char *file)
 {
 #ifdef LISTING
   if (listing)
@@ -2017,12 +1929,12 @@ s_app_file_string (char *file, int appfile ATTRIBUTE_UNUSED)
 #endif
   register_dependency (file);
 #ifdef obj_app_file
-  obj_app_file (file, appfile);
+  obj_app_file (file);
 #endif
 }
 
 void
-s_app_file (int appfile)
+s_file (int ignore ATTRIBUTE_UNUSED)
 {
   char *s;
   int length;
@@ -2030,8 +1942,7 @@ s_app_file (int appfile)
   /* Some assemblers tolerate immediately following '"'.  */
   if ((s = demand_copy_string (&length)) != 0)
     {
-      int may_omit
-	= (!new_logical_line_flags (s, -1, 1) && appfile);
+      new_logical_line_flags (s, -1, 1);
 
       /* In MRI mode, the preprocessor may have inserted an extraneous
 	 backquote.  */
@@ -2041,47 +1952,61 @@ s_app_file (int appfile)
 	++input_line_pointer;
 
       demand_empty_rest_of_line ();
-      if (!may_omit)
-	s_app_file_string (s, appfile);
+      s_file_string (s);
     }
 }
 
-static int
+static bool
 get_linefile_number (int *flag)
 {
+  expressionS exp;
+
   SKIP_WHITESPACE ();
 
   if (*input_line_pointer < '0' || *input_line_pointer > '9')
-    return 0;
+    return false;
 
-  *flag = get_absolute_expression ();
+  /* Don't mistakenly interpret octal numbers as line numbers.  */
+  if (*input_line_pointer == '0')
+    {
+      *flag = 0;
+      ++input_line_pointer;
+      return true;
+    }
 
-  return 1;
+  expression_and_evaluate (&exp);
+  if (exp.X_op != O_constant)
+    return false;
+
+#if defined (BFD64) || LONG_MAX > INT_MAX
+  if (exp.X_add_number < INT_MIN || exp.X_add_number > INT_MAX)
+    return false;
+#endif
+
+  *flag = exp.X_add_number;
+
+  return true;
 }
 
-/* Handle the .appline pseudo-op.  This is automatically generated by
+/* Handle the .linefile pseudo-op.  This is automatically generated by
    do_scrub_chars when a preprocessor # line comment is seen.  This
    default definition may be overridden by the object or CPU specific
    pseudo-ops.  */
 
 void
-s_app_line (int appline)
+s_linefile (int ignore ATTRIBUTE_UNUSED)
 {
   char *file = NULL;
-  int l;
+  int linenum, flags = 0;
 
   /* The given number is that of the next line.  */
-  if (appline)
-    l = get_absolute_expression ();
-  else if (!get_linefile_number (&l))
+  if (!get_linefile_number (&linenum))
     {
       ignore_rest_of_line ();
       return;
     }
 
-  l--;
-
-  if (l < -1)
+  if (linenum < 0)
     /* Some of the back ends can't deal with non-positive line numbers.
        Besides, it's silly.  GCC however will generate a line number of
        zero when it is pre-processing builtins for assembler-with-cpp files:
@@ -2092,74 +2017,75 @@ s_app_line (int appline)
        in the GCC and GDB testsuites.  So we check for negative line numbers
        rather than non-positive line numbers.  */
     as_warn (_("line numbers must be positive; line number %d rejected"),
-	     l + 1);
+	     linenum);
   else
     {
-      int flags = 0;
       int length = 0;
 
-      if (!appline)
+      SKIP_WHITESPACE ();
+
+      if (*input_line_pointer == '"')
+	file = demand_copy_string (&length);
+      else if (*input_line_pointer == '.')
 	{
-	  SKIP_WHITESPACE ();
-
-	  if (*input_line_pointer == '"')
-	    file = demand_copy_string (&length);
-
-	  if (file)
-	    {
-	      int this_flag;
-
-	      while (get_linefile_number (&this_flag))
-		switch (this_flag)
-		  {
-		    /* From GCC's cpp documentation:
-		       1: start of a new file.
-		       2: returning to a file after having included
-			  another file.
-		       3: following text comes from a system header file.
-		       4: following text should be treated as extern "C".
-
-		       4 is nonsensical for the assembler; 3, we don't
-		       care about, so we ignore it just in case a
-		       system header file is included while
-		       preprocessing assembly.  So 1 and 2 are all we
-		       care about, and they are mutually incompatible.
-		       new_logical_line_flags() demands this.  */
-		  case 1:
-		  case 2:
-		    if (flags && flags != (1 << this_flag))
-		      as_warn (_("incompatible flag %i in line directive"),
-			       this_flag);
-		    else
-		      flags |= 1 << this_flag;
-		    break;
-
-		  case 3:
-		  case 4:
-		    /* We ignore these.  */
-		    break;
-
-		  default:
-		    as_warn (_("unsupported flag %i in line directive"),
-			     this_flag);
-		    break;
-		  }
-
-	      if (!is_end_of_line[(unsigned char)*input_line_pointer])
-		file = 0;
-	    }
+	  /* buffer_and_nest() may insert this form.  */
+	  ++input_line_pointer;
+	  flags = 1 << 3;
 	}
 
-      if (appline || file)
+      if (file)
 	{
-	  new_logical_line_flags (file, l, flags);
+	  int this_flag;
+
+	  while (get_linefile_number (&this_flag))
+	    switch (this_flag)
+	      {
+		/* From GCC's cpp documentation:
+		   1: start of a new file.
+		   2: returning to a file after having included another file.
+		   3: following text comes from a system header file.
+		   4: following text should be treated as extern "C".
+
+		   4 is nonsensical for the assembler; 3, we don't care about,
+		   so we ignore it just in case a system header file is
+		   included while preprocessing assembly.  So 1 and 2 are all
+		   we care about, and they are mutually incompatible.
+		   new_logical_line_flags() demands this.  */
+	      case 1:
+	      case 2:
+		if (flags && flags != (1 << this_flag))
+		  as_warn (_("incompatible flag %i in line directive"),
+			   this_flag);
+		else
+		  flags |= 1 << this_flag;
+		break;
+
+	      case 3:
+	      case 4:
+		/* We ignore these.  */
+		break;
+
+	      default:
+		as_warn (_("unsupported flag %i in line directive"),
+			 this_flag);
+		break;
+	      }
+
+	  if (!is_end_of_line[(unsigned char)*input_line_pointer])
+	    file = NULL;
+        }
+
+      if (file || flags)
+	{
+	  linenum--;
+	  new_logical_line_flags (file, linenum, flags);
 #ifdef LISTING
 	  if (listing)
-	    listing_source_line (l);
+	    listing_source_line (linenum);
 #endif
 	}
     }
-  if (appline || file)
+  if (file || flags)
     demand_empty_rest_of_line ();
   else
     ignore_rest_of_line ();
@@ -2436,7 +2362,7 @@ s_irp (int irpc)
 
   sb_kill (&s);
 
-  input_scrub_include_sb (&out, input_line_pointer, 1);
+  input_scrub_include_sb (&out, input_line_pointer, expanding_repeat);
   sb_kill (&out);
   buffer_limit = input_scrub_next_buffer (&input_line_pointer);
 }
@@ -3106,14 +3032,17 @@ s_rept (int ignore ATTRIBUTE_UNUSED)
 
   count = (size_t) get_absolute_expression ();
 
-  do_repeat (count, "REPT", "ENDR");
+  do_repeat (count, "REPT", "ENDR", NULL);
 }
 
 /* This function provides a generic repeat block implementation.   It allows
-   different directives to be used as the start/end keys.  */
+   different directives to be used as the start/end keys.  Any text matching
+   the optional EXPANDER in the block is replaced by the remaining iteration
+   count.  */
 
 void
-do_repeat (size_t count, const char *start, const char *end)
+do_repeat (size_t count, const char *start, const char *end,
+	   const char *expander)
 {
   sb one;
   sb many;
@@ -3131,46 +3060,16 @@ do_repeat (size_t count, const char *start, const char *end)
       return;
     }
 
-  sb_build (&many, count * one.len);
-  while (count-- > 0)
-    sb_add_sb (&many, &one);
-
-  sb_kill (&one);
-
-  input_scrub_include_sb (&many, input_line_pointer, 1);
-  sb_kill (&many);
-  buffer_limit = input_scrub_next_buffer (&input_line_pointer);
-}
-
-/* Like do_repeat except that any text matching EXPANDER in the
-   block is replaced by the iteration count.  */
-
-void
-do_repeat_with_expander (size_t count,
-			 const char * start,
-			 const char * end,
-			 const char * expander)
-{
-  sb one;
-  sb many;
-
-  if (((ssize_t) count) < 0)
+  if (expander == NULL || strstr (one.ptr, expander) == NULL)
     {
-      as_bad (_("negative count for %s - ignored"), start);
-      count = 0;
+      sb_build (&many, count * one.len);
+      while (count-- > 0)
+	sb_add_sb (&many, &one);
     }
-
-  sb_new (&one);
-  if (!buffer_and_nest (start, end, &one, get_non_macro_line_sb))
+  else
     {
-      as_bad (_("%s without %s"), start, end);
-      return;
-    }
+      sb_new (&many);
 
-  sb_new (&many);
-
-  if (expander != NULL && strstr (one.ptr, expander) != NULL)
-    {
       while (count -- > 0)
 	{
 	  int len;
@@ -3189,13 +3088,10 @@ do_repeat_with_expander (size_t count,
 	  sb_kill (& processed);
 	}
     }
-  else
-    while (count-- > 0)
-      sb_add_sb (&many, &one);
 
   sb_kill (&one);
 
-  input_scrub_include_sb (&many, input_line_pointer, 1);
+  input_scrub_include_sb (&many, input_line_pointer, expanding_repeat);
   sb_kill (&many);
   buffer_limit = input_scrub_next_buffer (&input_line_pointer);
 }
@@ -3952,12 +3848,19 @@ s_weakref (int ignore ATTRIBUTE_UNUSED)
 
 
 /* Verify that we are at the end of a line.  If not, issue an error and
-   skip to EOL.  */
+   skip to EOL.  This function may leave input_line_pointer one past
+   buffer_limit, so should not be called from places that may
+   dereference input_line_pointer unconditionally.  Note that when the
+   gas parser is switched to handling a string (where buffer_limit
+   should be the size of the string excluding the NUL terminator) this
+   will be one past the NUL; is_end_of_line(0) returns true.  */
 
 void
 demand_empty_rest_of_line (void)
 {
   SKIP_WHITESPACE ();
+  if (input_line_pointer > buffer_limit)
+    return;
   if (is_end_of_line[(unsigned char) *input_line_pointer])
     input_line_pointer++;
   else
@@ -3970,26 +3873,22 @@ demand_empty_rest_of_line (void)
 		 *input_line_pointer);
       ignore_rest_of_line ();
     }
-
   /* Return pointing just after end-of-line.  */
-  know (is_end_of_line[(unsigned char) input_line_pointer[-1]]);
 }
 
 /* Silently advance to the end of line.  Use this after already having
-   issued an error about something bad.  */
+   issued an error about something bad.  Like demand_empty_rest_of_line,
+   this function may leave input_line_pointer one after buffer_limit;
+   Don't call it from within expression parsing code in an attempt to
+   silence further errors.  */
 
 void
 ignore_rest_of_line (void)
 {
-  while (input_line_pointer < buffer_limit
-	 && !is_end_of_line[(unsigned char) *input_line_pointer])
-    input_line_pointer++;
-
-  input_line_pointer++;
-
+  while (input_line_pointer <= buffer_limit)
+    if (is_end_of_line[(unsigned char) *input_line_pointer++])
+      break;
   /* Return pointing just after end-of-line.  */
-  if (input_line_pointer <= buffer_limit)
-    know (is_end_of_line[(unsigned char) input_line_pointer[-1]]);
 }
 
 /* Sets frag for given symbol to zero_address_frag, except when the
@@ -6305,7 +6204,7 @@ input_scrub_insert_line (const char *line)
   size_t len = strlen (line);
   sb_build (&newline, len);
   sb_add_buffer (&newline, line, len);
-  input_scrub_include_sb (&newline, input_line_pointer, 0);
+  input_scrub_include_sb (&newline, input_line_pointer, expanding_none);
   sb_kill (&newline);
   buffer_limit = input_scrub_next_buffer (&input_line_pointer);
 }

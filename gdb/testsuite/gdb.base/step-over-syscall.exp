@@ -22,7 +22,7 @@ array set syscall_number {}
 # Define the syscall instructions, registers and numbers for each target.
 
 if { [istarget "i\[34567\]86-*-linux*"] || [istarget "x86_64-*-linux*"] } {
-    set syscall_insn "\[ \t\](int|syscall|sysenter)\[ \t\]"
+    set syscall_insn "\[ \t\](int|syscall|sysenter)\[ \t\]*"
     set syscall_register "eax"
     array set syscall_number {fork "(56|120)" vfork "(58|190)" \
       clone "(56|120)"}

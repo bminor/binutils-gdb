@@ -17,10 +17,6 @@ if {[skip_shlib_tests]} {
     return 0
 }
 
-if [get_compiler_info] {
-    return -1
-}
-
 standard_testfile .cc infcall-dlopen-lib.cc
 set libfile [standard_output_file ${testfile}.so]
 set lib_dlopen [shlib_target_file ${testfile}.so]

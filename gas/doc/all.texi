@@ -46,7 +46,6 @@
 @set LM32
 @set M32C
 @set M32R
-@set xc16x
 @set M68HC11
 @set S12Z
 @set M680X0

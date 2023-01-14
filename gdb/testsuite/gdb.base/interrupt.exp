@@ -15,7 +15,7 @@
 
 if [target_info exists gdb,nointerrupts] {
     verbose "Skipping interrupt.exp because of nointerrupts."
-    continue
+    return
 }
 
 if [target_info exists gdb,noinferiorio] {

@@ -60,6 +60,13 @@ ldemul_before_parse (void)
 }
 
 void
+ldemul_before_plugin_all_symbols_read (void)
+{
+  if (ld_emulation->before_plugin_all_symbols_read)
+    ld_emulation->before_plugin_all_symbols_read ();
+}
+
+void
 ldemul_after_open (void)
 {
   ld_emulation->after_open ();
@@ -235,8 +242,7 @@ after_parse_default (void)
   if (link_info.maxpagesize == 0)
     link_info.maxpagesize = bfd_emul_get_maxpagesize (default_target);
   if (link_info.commonpagesize == 0)
-    link_info.commonpagesize = bfd_emul_get_commonpagesize (default_target,
-							    link_info.relro);
+    link_info.commonpagesize = bfd_emul_get_commonpagesize (default_target);
 }
 
 void

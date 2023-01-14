@@ -176,6 +176,7 @@ static const char *print_format_string = NULL;
 static int do_demangle = 0;	/* Pretty print C++ symbol names.  */
 static int external_only = 0;	/* Print external symbols only.  */
 static int defined_only = 0;	/* Print defined symbols only.  */
+static int non_weak = 0;	/* Ignore weak symbols.  */
 static int no_sort = 0;		/* Don't sort; print syms in order found.  */
 static int print_debug_syms = 0;/* Print debugger-only symbols too.  */
 static int print_armap = 0;	/* Describe __.SYMDEF data in archive files.  */
@@ -242,6 +243,7 @@ enum long_option_values
   OPTION_RECURSE_LIMIT,
   OPTION_NO_RECURSE_LIMIT,
   OPTION_IFUNC_CHARS,
+  OPTION_UNICODE,
   OPTION_QUIET
 };
 
@@ -276,10 +278,11 @@ static struct option long_options[] =
   {"special-syms", no_argument, &allow_special_symbols, 1},
   {"synthetic", no_argument, &show_synthetic, 1},
   {"target", required_argument, 0, OPTION_TARGET},
-  {"defined-only", no_argument, &defined_only, 1},
-  {"undefined-only", no_argument, &undefined_only, 1},
-  {"unicode", required_argument, NULL, 'U'},
+  {"defined-only", no_argument, 0, 'U'},
+  {"undefined-only", no_argument, 0, 'u'},
+  {"unicode", required_argument, NULL, OPTION_UNICODE},
   {"version", no_argument, &show_version, 1},
+  {"no-weak", no_argument, 0, 'W'},
   {"with-symbol-versions", no_argument, &with_symbol_versions, 1},
   {"without-symbol-versions", no_argument, &with_symbol_versions, 0},
   {0, no_argument, 0, 0}
@@ -311,8 +314,6 @@ usage (FILE *stream, int status)
       --no-recurse-limit Disable a demangling recursion limit.\n"));
   fprintf (stream, _("\
   -D, --dynamic          Display dynamic symbols instead of normal symbols\n"));
-  fprintf (stream, _("\
-      --defined-only     Display only defined symbols\n"));
   fprintf (stream, _("\
   -e                     (ignored)\n"));
   fprintf (stream, _("\
@@ -361,8 +362,12 @@ usage (FILE *stream, int status)
   fprintf (stream, _("\
   -u, --undefined-only   Display only undefined symbols\n"));
   fprintf (stream, _("\
-  -U {d|s|i|x|e|h}       Specify how to treat UTF-8 encoded unicode characters\n\
-      --unicode={default|show|invalid|hex|escape|highlight}\n"));
+  -U, --defined-only     Display only defined symbols\n"));
+  fprintf (stream, _("\
+      --unicode={default|show|invalid|hex|escape|highlight}\n\
+                         Specify how to treat UTF-8 encoded unicode characters\n"));
+  fprintf (stream, _("\
+  -W, --no-weak          Ignore weak symbols\n"));
   fprintf (stream, _("\
       --with-symbol-versions  Display version strings after symbol names\n"));
   fprintf (stream, _("\
@@ -807,6 +812,8 @@ filter_symbols (bfd *abfd, bool is_dynamic, void *minisyms,
 			       | BSF_GNU_UNIQUE)) != 0
 		|| bfd_is_und_section (sym->section)
 		|| bfd_is_com_section (sym->section));
+      else if (non_weak)
+	keep = ((sym->flags & BSF_WEAK) == 0);
       else
 	keep = 1;
 
@@ -1550,29 +1557,15 @@ get_print_format (void)
       padding = "016";
     }
 
-  const char * length = "l";
-  if (print_width == 64)
-    {
-#if BFD_HOST_64BIT_LONG
-      ;
-#elif BFD_HOST_64BIT_LONG_LONG
-#ifndef __MSVCRT__
-      length = "ll";
-#else
-      length = "I64";
-#endif
-#endif
-    }
-
   const char * radix = NULL;
   switch (print_radix)
     {
-    case 8:  radix = "o"; break;
-    case 10: radix = "d"; break;
-    case 16: radix = "x"; break;
+    case 8:  radix = PRIo64; break;
+    case 10: radix = PRId64; break;
+    case 16: radix = PRIx64; break;
     }
 
-  return concat ("%", padding, length, radix, NULL);
+  return concat ("%", padding, radix, NULL);
 }
 
 static void
@@ -1633,10 +1626,7 @@ display_archive (bfd *file)
 	{
 	  bfd_nonfatal (bfd_get_filename (arfile));
 	  if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
-	    {
-	      list_matching_formats (matching);
-	      free (matching);
-	    }
+	    list_matching_formats (matching);
 	}
 
       if (last_arfile != NULL)
@@ -1693,10 +1683,7 @@ display_file (char *filename)
     {
       bfd_nonfatal (filename);
       if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
-	{
-	  list_matching_formats (matching);
-	  free (matching);
-	}
+	list_matching_formats (matching);
       retval = false;
     }
 
@@ -1867,33 +1854,8 @@ print_value (bfd *abfd ATTRIBUTE_UNUSED, bfd_vma val)
   switch (print_width)
     {
     case 32:
-      printf (print_format_string, (unsigned long) val);
-      break;
-
     case 64:
-#if BFD_HOST_64BIT_LONG || BFD_HOST_64BIT_LONG_LONG
-      printf (print_format_string, val);
-#else
-      /* We have a 64 bit value to print, but the host is only 32 bit.  */
-      if (print_radix == 16)
-	bfd_fprintf_vma (abfd, stdout, val);
-      else
-	{
-	  char buf[30];
-	  char *s;
-
-	  s = buf + sizeof buf;
-	  *--s = '\0';
-	  while (val > 0)
-	    {
-	      *--s = (val % print_radix) + '0';
-	      val /= print_radix;
-	    }
-	  while ((buf + sizeof buf - 1) - s < 16)
-	    *--s = '0';
-	  printf ("%s", s);
-	}
-#endif
+      printf (print_format_string, (uint64_t) val);
       break;
 
     default:
@@ -2051,7 +2013,7 @@ main (int argc, char **argv)
     fatal (_("fatal error: libbfd ABI mismatch"));
   set_default_bfd_target ();
 
-  while ((c = getopt_long (argc, argv, "aABCDef:gHhjJlnopPrSst:uU:vVvX:",
+  while ((c = getopt_long (argc, argv, "aABCDef:gHhjJlnopPrSst:uU:vVvWX:",
 			   long_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -2143,9 +2105,14 @@ main (int argc, char **argv)
 	  break;
 	case 'u':
 	  undefined_only = 1;
+	  defined_only = 0;
+	  break;
+	case 'U':
+	  defined_only = 1;
+	  undefined_only = 0;
 	  break;
 
-	case 'U':
+	case OPTION_UNICODE:
 	  if (streq (optarg, "default") || streq (optarg, "d"))
 	    unicode_display = unicode_default;
 	  else if (streq (optarg, "locale") || streq (optarg, "l"))
@@ -2164,6 +2131,9 @@ main (int argc, char **argv)
 
 	case 'V':
 	  show_version = 1;
+	  break;
+	case 'W':
+	  non_weak = 1;
 	  break;
 	case 'X':
 	  /* Ignored for (partial) AIX compatibility.  On AIX, the

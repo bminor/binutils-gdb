@@ -20,5 +20,5 @@ Disassembly of section .text:
  +[a-f0-9]+:	3e 3e 3e 8b 90 fc ff ff ff 	ds ds mov %ds:-0x4\(%eax\),%edx
  +[a-f0-9]+:	85 d2                	test   %edx,%edx
  +[a-f0-9]+:	74 00                	je     +[a-f0-9]+ <_start\+0x24>
- +[a-f0-9]+:	c3                   	ret    
+ +[a-f0-9]+:	c3                   	ret
 #pass

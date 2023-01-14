@@ -1090,6 +1090,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
   const struct elf_backend_data *bed;
   char *new_version;
   bool default_sym = *matched;
+  struct elf_link_hash_table *htab;
 
   *skip = false;
   *override = NULL;
@@ -1220,6 +1221,8 @@ _bfd_elf_merge_symbol (bfd *abfd,
      symbols.  */
   bfd_elf_link_mark_dynamic_symbol (info, h, sym);
 
+  htab = elf_hash_table (info);
+
   /* NEWDYN and OLDDYN indicate whether the new or old symbol,
      respectively, is from a dynamic object.  */
 
@@ -1283,7 +1286,9 @@ _bfd_elf_merge_symbol (bfd *abfd,
       olddyn = (oldsec->symbol->flags & BSF_DYNAMIC) != 0;
     }
 
-  if (oldbfd != NULL
+  /* Set non_ir_ref_dynamic only when not handling DT_NEEDED entries.  */
+  if (!htab->handling_dt_needed
+      && oldbfd != NULL
       && (oldbfd->flags & BFD_PLUGIN) != (abfd->flags & BFD_PLUGIN))
     {
       if (newdyn != olddyn)
@@ -1294,9 +1299,8 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	  h->root.non_ir_ref_dynamic = true;
 	  hi->root.non_ir_ref_dynamic = true;
 	}
-
-      if ((oldbfd->flags & BFD_PLUGIN) != 0
-	  && hi->root.type == bfd_link_hash_indirect)
+      else if ((oldbfd->flags & BFD_PLUGIN) != 0
+	       && hi->root.type == bfd_link_hash_indirect)
 	{
 	  /* Change indirect symbol from IR to undefined.  */
 	  hi->root.type = bfd_link_hash_undefined;
@@ -6350,15 +6354,11 @@ compute_bucket_count (struct bfd_link_info *info ATTRIBUTE_UNUSED,
   size_t best_size = 0;
   unsigned long int i;
 
-  /* We have a problem here.  The following code to optimize the table
-     size requires an integer type with more the 32 bits.  If
-     BFD_HOST_U_64_BIT is set we know about such a type.  */
-#ifdef BFD_HOST_U_64_BIT
   if (info->optimize)
     {
       size_t minsize;
       size_t maxsize;
-      BFD_HOST_U_64_BIT best_chlen = ~((BFD_HOST_U_64_BIT) 0);
+      uint64_t best_chlen = ~((uint64_t) 0);
       bfd *dynobj = elf_hash_table (info)->dynobj;
       size_t dynsymcount = elf_hash_table (info)->dynsymcount;
       const struct elf_backend_data *bed = get_elf_backend_data (dynobj);
@@ -6395,7 +6395,7 @@ compute_bucket_count (struct bfd_link_info *info ATTRIBUTE_UNUSED,
       for (i = minsize; i < maxsize; ++i)
 	{
 	  /* Walk through the array of hashcodes and count the collisions.  */
-	  BFD_HOST_U_64_BIT max;
+	  uint64_t max;
 	  unsigned long int j;
 	  unsigned long int fact;
 
@@ -6460,11 +6460,7 @@ compute_bucket_count (struct bfd_link_info *info ATTRIBUTE_UNUSED,
       free (counts);
     }
   else
-#endif /* defined (BFD_HOST_U_64_BIT) */
     {
-      /* This is the fallback solution if no 64bit type is available or if we
-	 are not supposed to spend much time on optimizations.  We select the
-	 bucket count using a fixed set of numbers.  */
       for (i = 0; elf_buckets[i] != 0; i++)
 	{
 	  best_size = elf_buckets[i];
@@ -7120,13 +7116,23 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
   /* Determine any GNU_STACK segment requirements, after the backend
      has had a chance to set a default segment size.  */
   if (info->execstack)
-    elf_stack_flags (output_bfd) = PF_R | PF_W | PF_X;
+    {
+      /* If the user has explicitly requested warnings, then generate one even
+	 though the choice is the result of another command line option.  */
+      if (info->warn_execstack == 1)
+	_bfd_error_handler
+	  (_("\
+warning: enabling an executable stack because of -z execstack command line option"));
+      elf_stack_flags (output_bfd) = PF_R | PF_W | PF_X;
+    }
   else if (info->noexecstack)
     elf_stack_flags (output_bfd) = PF_R | PF_W;
   else
     {
       bfd *inputobj;
       asection *notesec = NULL;
+      bfd *noteobj = NULL;
+      bfd *emptyobj = NULL;
       int exec = 0;
 
       for (inputobj = info->input_bfds;
@@ -7145,15 +7151,49 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	  s = bfd_get_section_by_name (inputobj, ".note.GNU-stack");
 	  if (s)
 	    {
-	      if (s->flags & SEC_CODE)
-		exec = PF_X;
 	      notesec = s;
+	      if (s->flags & SEC_CODE)
+		{
+		  noteobj = inputobj;
+		  exec = PF_X;
+		  /* There is no point in scanning the remaining bfds.  */
+		  break;
+		}
 	    }
-	  else if (bed->default_execstack)
-	    exec = PF_X;
+	  else if (bed->default_execstack && info->default_execstack)
+	    {
+	      exec = PF_X;
+	      emptyobj = inputobj;
+	    }
 	}
+
       if (notesec || info->stacksize > 0)
-	elf_stack_flags (output_bfd) = PF_R | PF_W | exec;
+	{
+	  if (exec)
+	    {
+	      if (info->warn_execstack != 0)
+		{
+		  /* PR 29072: Because an executable stack is a serious
+		     security risk, make sure that the user knows that it is
+		     being enabled despite the fact that it was not requested
+		     on the command line.  */
+		  if (noteobj)
+		    _bfd_error_handler (_("\
+warning: %s: requires executable stack (because the .note.GNU-stack section is executable)"),
+		       bfd_get_filename (noteobj));
+		  else if (emptyobj)
+		    {
+		      _bfd_error_handler (_("\
+warning: %s: missing .note.GNU-stack section implies executable stack"),
+					  bfd_get_filename (emptyobj));
+		      _bfd_error_handler (_("\
+NOTE: This behaviour is deprecated and will be removed in a future version of the linker"));
+		    }
+		}
+	    }
+	  elf_stack_flags (output_bfd) = PF_R | PF_W | exec;
+	}
+
       if (notesec && exec && bfd_link_relocatable (info)
 	  && notesec->output_section != bfd_abs_section_ptr)
 	notesec->output_section->flags |= SEC_CODE;
@@ -8332,8 +8372,7 @@ elf_create_symbuf (size_t symcount, Elf_Internal_Sym *isymbuf)
       ssymhead->count++;
     }
   BFD_ASSERT ((size_t) (ssymhead - ssymbuf) == shndx_count
-	      && (((bfd_hostptr_t) ssym - (bfd_hostptr_t) ssymbuf)
-		  == total_size));
+	      && (uintptr_t) ssym - (uintptr_t) ssymbuf == total_size);
 
   free (indbuf);
   return ssymbuf;
@@ -9306,7 +9345,6 @@ ext32b_r_offset (const void *p)
   return aval;
 }
 
-#ifdef BFD_HOST_64_BIT
 static bfd_vma
 ext64l_r_offset (const void *p)
 {
@@ -9350,7 +9388,6 @@ ext64b_r_offset (const void *p)
 		   | (uint64_t) a->c[7]);
   return aval;
 }
-#endif
 
 /* When performing a relocatable link, the input relocations are
    preserved.  But, if they reference global symbols, the indices
@@ -9454,13 +9491,11 @@ elf_link_adjust_relocs (bfd *abfd,
 	}
       else
 	{
-#ifdef BFD_HOST_64_BIT
 	  if (abfd->xvec->header_byteorder == BFD_ENDIAN_LITTLE)
 	    ext_r_off = ext64l_r_offset;
 	  else if (abfd->xvec->header_byteorder == BFD_ENDIAN_BIG)
 	    ext_r_off = ext64b_r_offset;
 	  else
-#endif
 	    abort ();
 	}
 
@@ -9513,12 +9548,20 @@ elf_link_adjust_relocs (bfd *abfd,
 	      size_t sortlen = p - loc;
 	      bfd_vma r_off2 = (*ext_r_off) (loc);
 	      size_t runlen = elt_size;
+	      bfd_vma r_off_runend = r_off;
+	      bfd_vma r_off_runend_next;
 	      size_t buf_size = 96 * 1024;
 	      while (p + runlen < end
 		     && (sortlen <= buf_size
 			 || runlen + elt_size <= buf_size)
-		     && r_off2 > (*ext_r_off) (p + runlen))
-		runlen += elt_size;
+		     /* run must not break the ordering of base..loc+1 */
+		     && r_off2 > (r_off_runend_next = (*ext_r_off) (p + runlen))
+		     /* run must be already sorted */
+		     && r_off_runend_next >= r_off_runend)
+		{
+		  runlen += elt_size;
+		  r_off_runend = r_off_runend_next;
+		}
 	      if (buf == NULL)
 		{
 		  buf = bfd_malloc (buf_size);

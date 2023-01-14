@@ -74,8 +74,7 @@ proc do_test {fork_kind exit_kind} {
 	    "Catchpoint \[0-9\]* \\(${fork_kind}ed process \[0-9\]*\\),.*" \
 	    "continue to grandchild ${fork_kind}"
 
-	gdb_test "kill inferior 2" "" "kill child" \
-	    "Kill the program being debugged.*y or n. $" "y"
+	gdb_test "kill inferior 2" "" "kill child"
 
 	gdb_test "inferior 1" "Switching to inferior 1 .*" "switch to parent"
 

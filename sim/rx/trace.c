@@ -83,7 +83,7 @@ remove_useless_symbols (asymbol ** symbols, long count)
 }
 
 static int
-compare_symbols (const PTR ap, const PTR bp)
+compare_symbols (const void *ap, const void *bp)
 {
   const asymbol *a = *(const asymbol **) ap;
   const asymbol *b = *(const asymbol **) bp;
@@ -99,6 +99,18 @@ static char opbuf[1000];
 
 static int ATTRIBUTE_PRINTF (2, 3)
 op_printf (char *buf, char *fmt, ...)
+{
+  int ret;
+  va_list ap;
+
+  va_start (ap, fmt);
+  ret = vsprintf (opbuf + strlen (opbuf), fmt, ap);
+  va_end (ap);
+  return ret;
+}
+
+static int ATTRIBUTE_PRINTF (3, 4)
+op_styled_printf (char *buf, enum disassembler_style style, char *fmt, ...)
 {
   int ret;
   va_list ap;
@@ -209,7 +221,7 @@ sim_get_current_source_location (const char **  pfilename,
 
       initted = 1;
       memset (& info, 0, sizeof (info));
-      INIT_DISASSEMBLE_INFO (info, stdout, op_printf);
+      INIT_DISASSEMBLE_INFO (info, stdout, op_printf, op_styled_printf);
       info.read_memory_func = sim_dis_read;
       info.arch = bfd_get_arch (current_bfd);
       info.mach = bfd_get_mach (current_bfd);

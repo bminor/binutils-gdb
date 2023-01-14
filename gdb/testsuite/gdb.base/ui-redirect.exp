@@ -117,12 +117,10 @@ with_test_prefix "debugging" {
     gdb_test "set logging enabled on" \
     "Copying output to /dev/null.*Copying debug output to /dev/null\\."
 
-    set prompt "$gdb_prompt \\\[infrun\\\] fetch_inferior_event: exit\r\n$"
-    gdb_test_multiple "continue" "continue" -prompt $prompt {
-	-re "Continuing.*\\\[infrun\\\] .*\\\[infrun\\\] .*Breakpoint \[0-9\]+, foo.*$prompt$" {
-	    pass $gdb_test_name
-	}
-    }
+    gdb_test \
+	-prompt "$gdb_prompt \\\[infrun\\\] fetch_inferior_event: exit\r\n$" \
+	"continue" \
+	"Continuing.*\\\[infrun\\\] .*\\\[infrun\\\] .*Breakpoint \[0-9\]+, foo.*"
 
     gdb_test "set debug infrun 0"
     gdb_test "set logging enabled off" "Done logging to /dev/null\\."

@@ -25,9 +25,9 @@ Disassembly of section .plt.sec:
 Disassembly of section .text:
 
 0+198 <foo>:
- +[a-f0-9]+:	f2 c3                	bnd ret *
+ +[a-f0-9]+:	f2 c3                	bnd ret
 
 0+19a <bar>:
  +[a-f0-9]+:	f2 e8 f0 ff ff ff    	bnd call 190 <\*ABS\*\+0x198@plt>
- +[a-f0-9]+:	f2 c3                	bnd ret *
+ +[a-f0-9]+:	f2 c3                	bnd ret
 #pass

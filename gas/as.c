@@ -836,6 +836,8 @@ This program has absolutely no warranty.\n"));
 	     versions/sections/options.  */
 	  if (startswith (old_argv[optind - 1], "-gdwarf"))
 	    as_fatal (_("unknown DWARF option %s\n"), old_argv[optind - 1]);
+	  else if (old_argv[optind - 1][1] == 'g' && optarg != NULL)
+	    as_fatal (_("unknown option `%s'"), old_argv[optind - 1]);
 
 	  if (md_debug_format_selector)
 	    debug_type = md_debug_format_selector (& use_gnu_debug_info_extensions);

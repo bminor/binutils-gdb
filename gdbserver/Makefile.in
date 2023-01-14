@@ -176,6 +176,7 @@ SFILES = \
 	$(srcdir)/linux-arc-low.cc \
 	$(srcdir)/linux-arm-low.cc \
 	$(srcdir)/linux-ia64-low.cc \
+	$(srcdir)/linux-loongarch-low.cc \
 	$(srcdir)/linux-low.cc \
 	$(srcdir)/linux-m68k-low.cc \
 	$(srcdir)/linux-mips-low.cc \
@@ -211,6 +212,7 @@ SFILES = \
 	$(srcdir)/../gdb/arch/arm.c \
 	$(srcdir)/../gdb/arch/arm-get-next-pcs.c \
 	$(srcdir)/../gdb/arch/arm-linux.c \
+	$(srcdir)/../gdb/arch/loongarch.c \
 	$(srcdir)/../gdb/arch/ppc-linux-common.c \
 	$(srcdir)/../gdb/arch/riscv.c \
 	$(srcdir)/../gdb/nat/aarch64-mte-linux-ptrace.c \
@@ -223,6 +225,7 @@ SFILES = \
 	$(srcdir)/../gdb/nat/ppc-linux.c \
 	$(srcdir)/../gdb/nat/riscv-linux-tdesc.c \
 	$(srcdir)/../gdb/nat/fork-inferior.c \
+	$(srcdir)/../gdb/target/target.c \
 	$(srcdir)/../gdb/target/waitstatus.c
 
 DEPFILES = @GDBSERVER_DEPFILES@
@@ -250,6 +253,7 @@ OBS = \
 	tracepoint.o \
 	utils.o \
 	version.o \
+	target/target.o \
 	target/waitstatus.o \
 	$(DEPFILES) \
 	$(LIBOBJS) \
@@ -468,7 +472,8 @@ UST_CFLAGS = $(ustinc) -DCONFIG_UST_GDB_INTEGRATION
 # Undo gnulib replacements for the IPA shared library build.
 # The gnulib headers are still needed, but gnulib is not linked
 # into the IPA lib so replacement apis don't work.
-UNDO_GNULIB_CFLAGS = -Drpl_strerror_r=strerror_r -Drpl_free=free
+UNDO_GNULIB_CFLAGS = -Drpl_strerror_r=strerror_r -Drpl_free=free \
+	-Drpl_malloc=malloc -Drpl_realloc=realloc
 
 # Note, we only build the IPA if -fvisibility=hidden is supported in
 # the first place.

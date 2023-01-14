@@ -17,9 +17,9 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	df 08                	fisttps \(%eax\)
 [ 	]*[a-f0-9]+:	db 08                	fisttpl \(%eax\)
 [ 	]*[a-f0-9]+:	dd 08                	fisttpll \(%eax\)
-[ 	]*[a-f0-9]+:	0f ae e8             	lfence 
+[ 	]*[a-f0-9]+:	0f ae e8             	lfence
 [ 	]*[a-f0-9]+:	0f f7 c7             	maskmovq %mm7,%mm0
-[ 	]*[a-f0-9]+:	0f ae f0             	mfence 
+[ 	]*[a-f0-9]+:	0f ae f0             	mfence
 [ 	]*[a-f0-9]+:	0f 01 c8             	monitor %eax,%ecx,%edx
 [ 	]*[a-f0-9]+:	f2 0f d6 c8          	movdq2q %xmm0,%mm1
 [ 	]*[a-f0-9]+:	0f c3 00             	movnti %eax,\(%eax\)
@@ -62,5 +62,5 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	0f 38 0a c1          	psignd %mm1,%mm0
 [ 	]*[a-f0-9]+:	0f 38 09 c1          	psignw %mm1,%mm0
 [ 	]*[a-f0-9]+:	0f fb c1             	psubq  %mm1,%mm0
-[ 	]*[a-f0-9]+:	0f ae f8             	sfence 
+[ 	]*[a-f0-9]+:	0f ae f8             	sfence
 #pass

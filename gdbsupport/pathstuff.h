@@ -21,10 +21,12 @@
 #define COMMON_PATHSTUFF_H
 
 #include "gdbsupport/byte-vector.h"
+#include "gdbsupport/array-view.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <array>
 
 /* Path utilities.  */
 
@@ -39,8 +41,7 @@ extern gdb::unique_xmalloc_ptr<char> gdb_realpath (const char *filename);
 /* Return a copy of FILENAME, with its directory prefix canonicalized
    by gdb_realpath.  */
 
-extern gdb::unique_xmalloc_ptr<char>
-  gdb_realpath_keepfile (const char *filename);
+extern std::string gdb_realpath_keepfile (const char *filename);
 
 /* Return PATH in absolute form, performing tilde-expansion if necessary.
    PATH cannot be NULL or the empty string.
@@ -53,13 +54,35 @@ extern gdb::unique_xmalloc_ptr<char>
    If CURRENT_DIRECTORY is NULL, this function returns a copy of
    PATH.  */
 
-extern gdb::unique_xmalloc_ptr<char> gdb_abspath (const char *path);
+extern std::string gdb_abspath (const char *path);
 
 /* If the path in CHILD is a child of the path in PARENT, return a
    pointer to the first component in the CHILD's pathname below the
    PARENT.  Otherwise, return NULL.  */
 
 extern const char *child_path (const char *parent, const char *child);
+
+/* Join elements in PATHS into a single path.
+
+   The first element can be absolute or relative.  All the others must be
+   relative.  */
+
+extern std::string path_join (gdb::array_view<const gdb::string_view> paths);
+
+/* Same as the above, but accept paths as distinct parameters.  */
+
+template<typename ...Args>
+std::string
+path_join (Args... paths)
+{
+  /* It doesn't make sense to join less than two paths.  */
+  gdb_static_assert (sizeof... (Args) >= 2);
+
+  std::array<gdb::string_view, sizeof... (Args)> views
+    { gdb::string_view (paths)... };
+
+  return path_join (gdb::array_view<const gdb::string_view> (views));
+}
 
 /* Return whether PATH contains a directory separator character.  */
 
@@ -135,5 +158,8 @@ extern const char *get_shell ();
    /tmp/foo -> /tmp/foo-XXXXXX).  */
 
 extern gdb::char_vector make_temp_filename (const std::string &f);
+
+/* String containing the current directory (what getwd would return).  */
+extern char *current_directory;
 
 #endif /* COMMON_PATHSTUFF_H */

@@ -52,4 +52,8 @@ hashval_t mapped_index_string_hash (int index_version, const void *p);
 
 uint32_t dwarf5_djb_hash (const char *str_);
 
+/* Symbol name hashing function as specified by DWARF-5.  */
+
+uint32_t dwarf5_djb_hash (gdb::string_view str_);
+
 #endif /* DWARF_INDEX_COMMON_H */

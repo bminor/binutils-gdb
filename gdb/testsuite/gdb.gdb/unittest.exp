@@ -58,11 +58,12 @@ proc run_selftests { binfile } {
 	}
 	-re "Selftests have been disabled for this build.\r\n$gdb_prompt $" {
 	    unsupported $test
+	    set num_ran 0
 	    set enabled 0
 	}
     }
 
-    return $enabled
+    return [list $enabled $num_ran]
 }
 
 # Test completion of command "maintenance selftest".
@@ -86,7 +87,27 @@ proc_with_prefix test_completion {} {
 }
 
 with_test_prefix "no executable loaded" {
-    set self_tests_enabled [run_selftests ""]
+    set res [run_selftests ""]
+    set self_tests_enabled [lindex $res 0]
+    set num_ran [lindex $res 1]
+}
+
+if { $self_tests_enabled && ![is_remote host] } {
+    # Check that we have the same amount of selftests whatever the
+    # initialization order of GDB.
+    with_test_prefix "reversed initialization" {
+	save_vars { env(GDB_REVERSE_INIT_FUNCTIONS) } {
+	    if [info exists env(GDB_REVERSE_INIT_FUNCTIONS)] {
+		unset env(GDB_REVERSE_INIT_FUNCTIONS)
+	    } else {
+		set env(GDB_REVERSE_INIT_FUNCTIONS) 1
+	    }
+
+	    set res [run_selftests ""]
+	    gdb_assert "$num_ran == [lindex $res 1]" \
+		"selftest not dependent on initialization order"
+	}
+    }
 }
 
 with_test_prefix "executable loaded" {

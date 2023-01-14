@@ -50,6 +50,19 @@
 #include "gdb_curses.h"
 #include "interps.h"
 
+/* See tui.h.  */
+
+bool debug_tui = false;
+
+/* Implement 'show debug tui'.  */
+
+static void
+show_tui_debug (struct ui_file *file, int from_tty,
+		struct cmd_list_element *c, const char *value)
+{
+  gdb_printf (file, _("TUI debugging is \"%s\".\n"), value);
+}
+
 /* This redefines CTRL if it is not already defined, so it must come
    after terminal state releated include files like <term.h> and
    "gdb_curses.h".  */
@@ -354,6 +367,8 @@ gdb_getenv_term (void)
 void
 tui_enable (void)
 {
+  TUI_SCOPED_DEBUG_ENTER_EXIT;
+
   if (tui_active)
     return;
 
@@ -494,6 +509,8 @@ tui_enable (void)
 void
 tui_disable (void)
 {
+  TUI_SCOPED_DEBUG_ENTER_EXIT;
+
   if (!tui_active)
     return;
 
@@ -587,4 +604,13 @@ Usage: tui enable"),
 	   _("Disable TUI display mode.\n\
 Usage: tui disable"),
 	   tuicmd);
+
+  /* Debug this tui internals.  */
+  add_setshow_boolean_cmd ("tui", class_maintenance, &debug_tui,  _("\
+Set tui debugging."), _("\
+Show tui debugging."), _("\
+When true, tui specific internal debugging is enabled."),
+			   NULL,
+			   show_tui_debug,
+			   &setdebuglist, &showdebuglist);
 }

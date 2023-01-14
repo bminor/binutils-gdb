@@ -161,7 +161,7 @@ inf_child_open_target (const char *arg, int from_tty)
   current_inferior ()->push_target (target);
   inf_child_explicitly_opened = 1;
   if (from_tty)
-    printf_filtered ("Done.  Use the \"run\" command to start a process.\n");
+    gdb_printf ("Done.  Use the \"run\" command to start a process.\n");
 }
 
 /* Implement the to_disconnect target_ops method.  */
@@ -220,7 +220,7 @@ inf_child_target::can_attach ()
   return true;
 }
 
-char *
+const char *
 inf_child_target::pid_to_exec_file (int pid)
 {
   /* This target doesn't support translation of a process ID to the

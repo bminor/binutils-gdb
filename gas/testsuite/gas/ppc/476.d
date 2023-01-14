@@ -59,7 +59,7 @@ Disassembly of section \.text:
 .*:	(4c 86 00 21|21 00 86 4c) 	bnelrl  cr1
 .*:	(48 00 00 00|00 00 00 48) 	b       c8 <ppc476\+0xc8>
 .*:	(48 00 00 01|01 00 00 48) 	bl      cc <ppc476\+0xcc>
-.*:	(54 83 00 36|36 00 83 54) 	rlwinm  r3,r4,0,0,27
+.*:	(54 83 00 36|36 00 83 54) 	clrrwi  r3,r4,4
 .*:	(7c 03 20 00|00 20 03 7c) 	cmpw    r3,r4
 .*:	(7f 83 20 00|00 20 83 7f) 	cmpw    cr7,r3,r4
 .*:	(7c 83 2b f8|f8 2b 83 7c) 	cmpb    r3,r4,r5
@@ -209,7 +209,7 @@ Disassembly of section \.text:
 .*:	(7c 20 07 8c|8c 07 20 7c) 	ici     1
 .*:	(7c 03 27 cc|cc 27 03 7c) 	icread  r3,r4
 .*:	(50 83 65 36|36 65 83 50) 	rlwimi  r3,r4,12,20,27
-.*:	(7c 43 27 1e|1e 27 43 7c) 	isel    r2,r3,r4,28
+.*:	(7c 43 27 1e|1e 27 43 7c) 	isel    r2,r3,r4,4\*cr7\+lt
 .*:	(4c 00 01 2c|2c 01 00 4c) 	isync
 .*:	(89 21 00 00|00 00 21 89) 	lbz     r9,0\(r1\)
 .*:	(8d 41 00 01|01 00 41 8d) 	lbzu    r10,1\(r1\)
@@ -401,10 +401,10 @@ Disassembly of section \.text:
 .*:	(4c 00 00 4c|4c 00 00 4c) 	rfmci
 .*:	(50 83 65 36|36 65 83 50) 	rlwimi  r3,r4,12,20,27
 .*:	(50 83 65 37|37 65 83 50) 	rlwimi\. r3,r4,12,20,27
-.*:	(54 83 00 36|36 00 83 54) 	rlwinm  r3,r4,0,0,27
-.*:	(54 83 d1 be|be d1 83 54) 	rlwinm  r3,r4,26,6,31
+.*:	(54 83 00 36|36 00 83 54) 	clrrwi  r3,r4,4
+.*:	(54 83 d1 be|be d1 83 54) 	srwi    r3,r4,6
 .*:	(54 83 20 26|26 20 83 54) 	rlwinm  r3,r4,4,0,19
-.*:	(54 83 00 37|37 00 83 54) 	rlwinm\. r3,r4,0,0,27
+.*:	(54 83 00 37|37 00 83 54) 	clrrwi\. r3,r4,4
 .*:	(5c 83 28 3e|3e 28 83 5c) 	rotlw   r3,r4,r5
 .*:	(5c 83 28 3f|3f 28 83 5c) 	rotlw\.  r3,r4,r5
 .*:	(5c 83 28 3e|3e 28 83 5c) 	rotlw   r3,r4,r5
@@ -418,7 +418,7 @@ Disassembly of section \.text:
 .*:	(7c 83 86 71|71 86 83 7c) 	srawi\.  r3,r4,16
 .*:	(7c 83 2c 30|30 2c 83 7c) 	srw     r3,r4,r5
 .*:	(7c 83 2c 31|31 2c 83 7c) 	srw\.    r3,r4,r5
-.*:	(54 83 d1 be|be d1 83 54) 	rlwinm  r3,r4,26,6,31
+.*:	(54 83 d1 be|be d1 83 54) 	srwi    r3,r4,6
 .*:	(99 61 00 02|02 00 61 99) 	stb     r11,2\(r1\)
 .*:	(9d 81 00 03|03 00 81 9d) 	stbu    r12,3\(r1\)
 .*:	(7d ae 79 ee|ee 79 ae 7d) 	stbux   r13,r14,r15
