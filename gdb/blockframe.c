@@ -236,19 +236,7 @@ find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
     goto return_cached_value;
 
   msymbol = lookup_minimal_symbol_by_pc_section (mapped_pc, section);
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
-      if (objfile->sf)
-	{
-	  compunit_symtab
-	    = objfile->sf->qf->find_pc_sect_compunit_symtab (objfile, msymbol,
-							     mapped_pc,
-							     section,
-							     0);
-	}
-      if (compunit_symtab != NULL)
-	break;
-    }
+  compunit_symtab = find_pc_sect_compunit_symtab (mapped_pc, section);
 
   if (compunit_symtab != NULL)
     {

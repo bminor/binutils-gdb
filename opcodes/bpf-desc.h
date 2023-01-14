@@ -80,8 +80,8 @@ typedef enum insn_op_src {
 
 /* Enum declaration for eBPF instruction class.  */
 typedef enum insn_op_class {
-  OP_CLASS_LD = 0, OP_CLASS_LDX = 1, OP_CLASS_ST = 2, OP_CLASS_STX = 3
- , OP_CLASS_ALU = 4, OP_CLASS_JMP = 5, OP_CLASS_ALU64 = 7
+  OP_CLASS_LD, OP_CLASS_LDX, OP_CLASS_ST, OP_CLASS_STX
+ , OP_CLASS_ALU, OP_CLASS_JMP, OP_CLASS_JMP32, OP_CLASS_ALU64
 } INSN_OP_CLASS;
 
 /* Enum declaration for eBPF load/store instruction modes.  */

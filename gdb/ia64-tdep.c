@@ -2764,7 +2764,7 @@ ia64_find_unwind_table (struct objfile *objfile, unw_word_t ip,
 
   dip->start_ip = p_text->p_vaddr + load_base;
   dip->end_ip = dip->start_ip + p_text->p_memsz;
-  dip->gp = ia64_find_global_pointer (get_objfile_arch (objfile), ip);
+  dip->gp = ia64_find_global_pointer (objfile->arch (), ip);
   dip->format = UNW_INFO_FORMAT_REMOTE_TABLE;
   dip->u.rti.name_ptr = (unw_word_t) bfd_get_filename (bfd);
   dip->u.rti.segbase = segbase;

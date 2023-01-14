@@ -95,27 +95,6 @@ int sh_elf_get_flags_from_mach (unsigned long mach);
 					   be relocated independently.  */
 #define EF_SH_FDPIC		0x8000	/* Uses the FDPIC ABI.  */
 
-/* Flags for the st_other symbol field.
-   Keep away from the STV_ visibility flags (bit 0..1).  */
-
-/* A reference to this symbol should by default add 1.  */
-#define STO_SH5_ISA32 (1 << 2)
-
-/* Section contains only SHmedia code (no SHcompact code).  */
-#define SHF_SH5_ISA32		0x40000000
-
-/* Section contains both SHmedia and SHcompact code, and possibly also
-   constants.  */
-#define SHF_SH5_ISA32_MIXED	0x20000000
-
-/* If applied to a .cranges section, marks that the section is sorted by
-   increasing cr_addr values.  */
-#define SHT_SH5_CR_SORTED 0x80000001
-
-/* Symbol should be handled as DataLabel (attached to global SHN_UNDEF
-   symbols).  */
-#define STT_DATALABEL STT_LOPROC
-
 #include "elf/reloc-macros.h"
 
 /* Relocations.  */

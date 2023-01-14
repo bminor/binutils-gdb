@@ -500,19 +500,6 @@ language_str (enum language lang)
   return languages[lang]->la_name;
 }
 
-static void
-set_check (const char *ignore, int from_tty)
-{
-  printf_unfiltered (
-     "\"set check\" must be followed by the name of a check subcommand.\n");
-  help_list (setchecklist, "set check ", all_commands, gdb_stdout);
-}
-
-static void
-show_check (const char *ignore, int from_tty)
-{
-  cmd_show_list (showchecklist, from_tty, "");
-}
 
 
 /* Build and install the "set language LANG" command.  */
@@ -1149,15 +1136,15 @@ _initialize_language ()
 
   /* GDB commands for language specific stuff.  */
 
-  add_prefix_cmd ("check", no_class, set_check,
-		  _("Set the status of the type/range checker."),
-		  &setchecklist, "set check ", 0, &setlist);
+  add_basic_prefix_cmd ("check", no_class,
+			_("Set the status of the type/range checker."),
+			&setchecklist, "set check ", 0, &setlist);
   add_alias_cmd ("c", "check", no_class, 1, &setlist);
   add_alias_cmd ("ch", "check", no_class, 1, &setlist);
 
-  add_prefix_cmd ("check", no_class, show_check,
-		  _("Show the status of the type/range checker."),
-		  &showchecklist, "show check ", 0, &showlist);
+  add_show_prefix_cmd ("check", no_class,
+		       _("Show the status of the type/range checker."),
+		       &showchecklist, "show check ", 0, &showlist);
   add_alias_cmd ("c", "check", no_class, 1, &showlist);
   add_alias_cmd ("ch", "check", no_class, 1, &showlist);
 

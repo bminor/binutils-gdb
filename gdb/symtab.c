@@ -2285,6 +2285,8 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
 			  name, domain_name (domain));
     }
 
+  struct block_symbol other;
+  other.symbol = NULL;
   for (compunit_symtab *cust : objfile->compunits ())
     {
       const struct blockvector *bv;
@@ -2295,18 +2297,36 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
       block = BLOCKVECTOR_BLOCK (bv, block_index);
       result.symbol = block_lookup_symbol_primary (block, name, domain);
       result.block = block;
-      if (result.symbol != NULL)
+      if (result.symbol == NULL)
+	continue;
+      if (best_symbol (result.symbol, domain))
 	{
-	  if (symbol_lookup_debug > 1)
-	    {
-	      fprintf_unfiltered (gdb_stdlog, " = %s (block %s)\n",
-				  host_address_to_string (result.symbol),
-				  host_address_to_string (block));
-	    }
-	  result.symbol = fixup_symbol_section (result.symbol, objfile);
-	  return result;
-
+	  other = result;
+	  break;
 	}
+      if (symbol_matches_domain (result.symbol->language (),
+				 SYMBOL_DOMAIN (result.symbol), domain))
+	{
+	  struct symbol *better
+	    = better_symbol (other.symbol, result.symbol, domain);
+	  if (better != other.symbol)
+	    {
+	      other.symbol = better;
+	      other.block = block;
+	    }
+	}
+    }
+
+  if (other.symbol != NULL)
+    {
+      if (symbol_lookup_debug > 1)
+	{
+	  fprintf_unfiltered (gdb_stdlog, " = %s (block %s)\n",
+			      host_address_to_string (other.symbol),
+			      host_address_to_string (other.block));
+	}
+      other.symbol = fixup_symbol_section (other.symbol, objfile);
+      return other;
     }
 
   if (symbol_lookup_debug > 1)
@@ -2666,7 +2686,7 @@ lookup_global_or_static_symbol (const char *name,
       lookup_data.block_index = block_index;
       lookup_data.domain = domain;
       gdbarch_iterate_over_objfiles_in_search_order
-	(objfile != NULL ? get_objfile_arch (objfile) : target_gdbarch (),
+	(objfile != NULL ? objfile->arch () : target_gdbarch (),
 	 lookup_symbol_global_or_static_iterator_cb, &lookup_data, objfile);
       result = lookup_data.result;
     }
@@ -2698,17 +2718,23 @@ lookup_global_symbol (const char *name,
      global block first.  This yields "more expected" behavior, and is
      needed to support 'FILENAME'::VARIABLE lookups.  */
   const struct block *global_block = block_global_block (block);
+  symbol *sym = NULL;
   if (global_block != nullptr)
     {
-      symbol *sym = lookup_symbol_in_block (name,
-					    symbol_name_match_type::FULL,
-					    global_block, domain);
-      if (sym != nullptr)
+      sym = lookup_symbol_in_block (name,
+				    symbol_name_match_type::FULL,
+				    global_block, domain);
+      if (sym != NULL && best_symbol (sym, domain))
 	return { sym, global_block };
     }
 
   struct objfile *objfile = lookup_objfile_from_block (block);
-  return lookup_global_or_static_symbol (name, GLOBAL_BLOCK, objfile, domain);
+  block_symbol bs
+    = lookup_global_or_static_symbol (name, GLOBAL_BLOCK, objfile, domain);
+  if (better_symbol (sym, bs.symbol, domain) == sym)
+    return { sym, global_block };
+  else
+    return bs;
 }
 
 bool
@@ -3647,7 +3673,7 @@ find_function_start_sal_1 (CORE_ADDR func_addr, obj_section *section,
       && (COMPUNIT_LOCATIONS_VALID (SYMTAB_COMPUNIT (sal.symtab))
 	  || SYMTAB_LANGUAGE (sal.symtab) == language_asm))
     {
-      struct gdbarch *gdbarch = get_objfile_arch (SYMTAB_OBJFILE (sal.symtab));
+      struct gdbarch *gdbarch = SYMTAB_OBJFILE (sal.symtab)->arch ();
 
       sal.pc = func_addr;
       if (gdbarch_skip_entrypoint_p (gdbarch))
@@ -3806,7 +3832,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
       name = msymbol.minsym->linkage_name ();
     }
 
-  gdbarch = get_objfile_arch (objfile);
+  gdbarch = objfile->arch ();
 
   /* Process the prologue in two passes.  In the first pass try to skip the
      prologue (SKIP is true) and verify there is a real need for it (indicated
@@ -4540,7 +4566,7 @@ global_symbol_searcher::expand_symtabs
        {
 	 return file_matches (filename, filenames, basenames);
        },
-       lookup_name_info::match_any (),
+       &lookup_name_info::match_any (),
        [&] (const char *symname)
        {
 	 return (!preg.has_value ()
@@ -4928,7 +4954,7 @@ print_symbol_info (enum search_domain kind,
 static void
 print_msymbol_info (struct bound_minimal_symbol msymbol)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (msymbol.objfile);
+  struct gdbarch *gdbarch = msymbol.objfile->arch ();
   char *tmp;
 
   if (gdbarch_addr_bit (gdbarch) <= 32)
@@ -5550,7 +5576,7 @@ find_gnu_ifunc (const symbol *sym)
 	  CORE_ADDR msym_addr = MSYMBOL_VALUE_ADDRESS (objfile, minsym);
 	  if (MSYMBOL_TYPE (minsym) == mst_data_gnu_ifunc)
 	    {
-	      struct gdbarch *gdbarch = get_objfile_arch (objfile);
+	      struct gdbarch *gdbarch = objfile->arch ();
 	      msym_addr
 		= gdbarch_convert_from_func_ptr_addr (gdbarch,
 						      msym_addr,
@@ -6405,7 +6431,7 @@ symbol_arch (const struct symbol *symbol)
 {
   if (!SYMBOL_OBJFILE_OWNED (symbol))
     return symbol->owner.arch;
-  return get_objfile_arch (SYMTAB_OBJFILE (symbol->owner.symtab));
+  return SYMTAB_OBJFILE (symbol->owner.symtab)->arch ();
 }
 
 /* See symtab.h.  */
@@ -6438,6 +6464,9 @@ get_symbol_address (const struct symbol *sym)
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
+      if (objfile->separate_debug_objfile_backlink != nullptr)
+	continue;
+
       bound_minimal_symbol minsym
 	= lookup_minimal_symbol_linkage (linkage_name, objfile);
       if (minsym.minsym != nullptr)
@@ -6458,7 +6487,8 @@ get_msymbol_address (struct objfile *objf, const struct minimal_symbol *minsym)
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      if ((objfile->flags & OBJF_MAINLINE) != 0)
+      if (objfile->separate_debug_objfile_backlink == nullptr
+	  && (objfile->flags & OBJF_MAINLINE) != 0)
 	{
 	  bound_minimal_symbol found
 	    = lookup_minimal_symbol_linkage (linkage_name, objfile);
@@ -6474,15 +6504,6 @@ get_msymbol_address (struct objfile *objf, const struct minimal_symbol *minsym)
 /* Hold the sub-commands of 'info module'.  */
 
 static struct cmd_list_element *info_module_cmdlist = NULL;
-
-/* Implement the 'info module' command, just displays some help text for
-   the available sub-commands.  */
-
-static void
-info_module_command (const char *args, int from_tty)
-{
-  help_list (info_module_cmdlist, "info module ", class_info, gdb_stdout);
-}
 
 /* See symtab.h.  */
 
@@ -6842,10 +6863,10 @@ Options:\n\
 		_("All module names, or those matching REGEXP."));
   set_cmd_completer_handle_brkchars (c, info_types_command_completer);
 
-  add_prefix_cmd ("module", class_info, info_module_command, _("\
+  add_basic_prefix_cmd ("module", class_info, _("\
 Print information about modules."),
-		  &info_module_cmdlist, "info module ",
-		  0, &infolist);
+			&info_module_cmdlist, "info module ",
+			0, &infolist);
 
   c = add_cmd ("functions", class_info, info_module_functions_command, _("\
 Display functions arranged by modules.\n\

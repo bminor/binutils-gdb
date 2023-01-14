@@ -251,6 +251,8 @@ enum
   CpuMCOMMIT,
   /* SEV-ES instruction(s) required */
   CpuSEV_ES,
+  /* TSXLDTRK instruction required */
+  CpuTSXLDTRK,
   /* 64bit support required  */
   Cpu64,
   /* Not supported in the 64bit mode  */
@@ -384,6 +386,7 @@ typedef union i386_cpu_flags
       unsigned int cpurdpru:1;
       unsigned int cpumcommit:1;
       unsigned int cpusev_es:1;
+      unsigned int cputsxldtrk:1;
       unsigned int cpu64:1;
       unsigned int cpuno64:1;
 #ifdef CpuUnused

@@ -330,7 +330,7 @@ ctf_init_float_type (struct objfile *objfile,
 		     const char *name,
 		     const char *name_hint)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   const struct floatformat **format;
   struct type *type;
 
@@ -521,7 +521,7 @@ read_base_type (struct ctf_context *ccp, ctf_id_t tid)
   if (kind == CTF_K_INTEGER)
     {
       uint32_t issigned, ischar, isbool;
-      struct gdbarch *gdbarch = get_objfile_arch (of);
+      struct gdbarch *gdbarch = of->arch ();
 
       issigned = cet.cte_format & CTF_INT_SIGNED;
       ischar = cet.cte_format & CTF_INT_CHAR;

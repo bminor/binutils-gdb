@@ -385,7 +385,9 @@ dwarf2_tailcall_sniffer_first (struct frame_info *this_frame,
       prev_gdbarch = frame_unwind_arch (this_frame);
 
       /* Simulate frame_unwind_pc without setting this_frame->prev_pc.p.  */
-      prev_pc = gdbarch_unwind_pc (prev_gdbarch, this_frame);
+      get_frame_register (this_frame, gdbarch_pc_regnum (prev_gdbarch),
+			  (gdb_byte *) &prev_pc);
+      prev_pc = gdbarch_addr_bits_remove (prev_gdbarch, prev_pc);
 
       /* call_site_find_chain can throw an exception.  */
       chain = call_site_find_chain (prev_gdbarch, prev_pc, this_pc);

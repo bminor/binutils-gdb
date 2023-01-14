@@ -725,6 +725,7 @@ coff_swap_aouthdr_out (bfd * abfd, void * in, void * out)
   return AOUTSZ;
 }
 
+ATTRIBUTE_UNUSED
 static void
 coff_swap_scnhdr_in (bfd * abfd, void * ext, void * in)
 {
@@ -751,6 +752,7 @@ coff_swap_scnhdr_in (bfd * abfd, void * ext, void * in)
 #endif
 }
 
+ATTRIBUTE_UNUSED
 static unsigned int
 coff_swap_scnhdr_out (bfd * abfd, void * in, void * out)
 {

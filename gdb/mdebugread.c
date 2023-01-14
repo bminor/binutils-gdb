@@ -573,7 +573,7 @@ static int
 parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	      const section_offsets &section_offsets, struct objfile *objfile)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   const bfd_size_type external_sym_size = debug_swap->external_sym_size;
   void (*const swap_sym_in) (bfd *, void *, SYMR *) = debug_swap->swap_sym_in;
   const char *name;
@@ -1357,7 +1357,7 @@ static const struct objfile_key<struct type *,
 static struct type *
 basic_type (int bt, struct objfile *objfile)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   struct type **map_bt = basic_type_data.get (objfile);
   struct type *tp;
 
@@ -2283,7 +2283,7 @@ static void
 parse_partial_symbols (minimal_symbol_reader &reader,
 		       struct objfile *objfile)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   const bfd_size_type external_sym_size = debug_swap->external_sym_size;
   const bfd_size_type external_rfd_size = debug_swap->external_rfd_size;
   const bfd_size_type external_ext_size = debug_swap->external_ext_size;
@@ -3899,7 +3899,7 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 
   if (processing_gcc_compilation != 0)
     {
-      struct gdbarch *gdbarch = get_objfile_arch (objfile);
+      struct gdbarch *gdbarch = objfile->arch ();
 
       /* This symbol table contains stabs-in-ecoff entries.  */
 

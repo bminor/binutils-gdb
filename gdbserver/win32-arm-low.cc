@@ -18,6 +18,8 @@
 #include "server.h"
 #include "win32-low.h"
 
+using namespace windows_nat;
+
 #ifndef CONTEXT_FLOATING_POINT
 #define CONTEXT_FLOATING_POINT 0
 #endif
@@ -27,7 +29,7 @@ void init_registers_arm (void);
 extern const struct target_desc *tdesc_arm;
 
 static void
-arm_get_thread_context (win32_thread_info *th)
+arm_get_thread_context (windows_thread_info *th)
 {
   th->context.ContextFlags = \
     CONTEXT_FULL | \
@@ -88,7 +90,7 @@ regptr (CONTEXT* c, int r)
 /* Fetch register from gdbserver regcache data.  */
 static void
 arm_fetch_inferior_register (struct regcache *regcache,
-			     win32_thread_info *th, int r)
+			     windows_thread_info *th, int r)
 {
   char *context_offset = regptr (&th->context, r);
   supply_register (regcache, r, context_offset);
@@ -97,7 +99,7 @@ arm_fetch_inferior_register (struct regcache *regcache,
 /* Store a new register value into the thread context of TH.  */
 static void
 arm_store_inferior_register (struct regcache *regcache,
-			     win32_thread_info *th, int r)
+			     windows_thread_info *th, int r)
 {
   collect_register (regcache, r, regptr (&th->context, r));
 }
@@ -113,6 +115,27 @@ arm_arch_setup (void)
 static const unsigned long arm_wince_breakpoint = 0xe6000010;
 #define arm_wince_breakpoint_len 4
 
+/* Implement win32_target_ops "get_pc" method.  */
+
+static CORE_ADDR
+arm_win32_get_pc (struct regcache *regcache)
+{
+  uint32_t pc;
+
+  collect_register_by_name (regcache, "pc", &pc);
+  return (CORE_ADDR) pc;
+}
+
+/* Implement win32_target_ops "set_pc" method.  */
+
+static void
+arm_win32_set_pc (struct regcache *regcache, CORE_ADDR pc)
+{
+  uint32_t newpc = pc;
+
+  supply_register_by_name (regcache, "pc", &newpc);
+}
+
 struct win32_target_ops the_low_target = {
   arm_arch_setup,
   sizeof (mappings) / sizeof (mappings[0]),
@@ -125,6 +148,9 @@ struct win32_target_ops the_low_target = {
   NULL, /* single_step */
   (const unsigned char *) &arm_wince_breakpoint,
   arm_wince_breakpoint_len,
+  0,
+  arm_win32_get_pc,
+  arm_win32_set_pc,
   /* Watchpoint related functions.  See target.h for comments.  */
   NULL, /* supports_z_point_type */
   NULL, /* insert_point */

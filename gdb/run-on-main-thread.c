@@ -22,7 +22,7 @@
 #if CXX_STD_THREAD
 #include <mutex>
 #endif
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 
 /* The serial event used when posting runnables.  */
 

@@ -8,9 +8,9 @@
 
 Disassembly of section \.text:
 
-.* <.*\.plt_call\.foo>:
+.* <.*\.plt_call\.aaaaa>:
 .*:	(18 00 41 f8|f8 41 00 18) 	std     r2,24\(r1\)
-.*:	(28 80 82 e9|e9 82 80 28) 	ld      r12,-32728\(r2\)
+.*:	(30 80 82 e9|e9 82 80 30) 	ld      r12,-32720\(r2\)
 .*:	(a6 03 89 7d|7d 89 03 a6) 	mtctr   r12
 .*:	(20 04 80 4e|4e 80 04 20) 	bctr
 	\.\.\.
@@ -35,7 +35,7 @@ Disassembly of section \.text:
 .*:	(f8 ff 61 f9|f9 61 ff f8) 	std     r11,-8\(r1\)
 .*:	(a1 ff 21 f8|f8 21 ff a1) 	stdu    r1,-96\(r1\)
 .*:	(18 00 41 f8|f8 41 00 18) 	std     r2,24\(r1\)
-.*:	(30 80 82 e9|e9 82 80 30) 	ld      r12,-32720\(r2\)
+.*:	(28 80 82 e9|e9 82 80 28) 	ld      r12,-32728\(r2\)
 .*:	(a6 03 89 7d|7d 89 03 a6) 	mtctr   r12
 .*:	(21 04 80 4e|4e 80 04 21) 	bctrl
 .*:	(18 00 41 e8|e8 41 00 18) 	ld      r2,24\(r1\)
@@ -57,7 +57,7 @@ Disassembly of section \.text:
 .*:	(08 80 62 38|38 62 80 08) 	addi    r3,r2,-32760
 .*:	(5d ff ff 4b|4b ff ff 5d) 	bl      .* <.*\.plt_call\.__tls_get_addr_opt@@GLIBC_2\.22>
 .*:	(00 00 00 60|60 00 00 00) 	nop
-.*:	(35 ff ff 4b|4b ff ff 35) 	bl      .* <.*\.plt_call\.foo>
+.*:	(35 ff ff 4b|4b ff ff 35) 	bl      .* <.*\.plt_call\.aaaaa>
 .*:	(18 00 41 e8|e8 41 00 18) 	ld      r2,24\(r1\)
 .*:	(00 00 00 60|60 00 00 00) 	nop
 .*
@@ -79,8 +79,8 @@ Disassembly of section \.text:
 .*:	(08 00 6b e9|e9 6b 00 08) 	ld      r11,8\(r11\)
 .*:	(20 04 80 4e|4e 80 04 20) 	bctr
 
-.* <foo@plt>:
+.* <__tls_get_addr_opt@plt>:
 .*	(c8 ff ff 4b|4b ff ff c8) 	b       .*
 
-.* <__tls_get_addr_opt@plt>:
+.* <aaaaa@plt>:
 .*:	(c4 ff ff 4b|4b ff ff c4) 	b       .*

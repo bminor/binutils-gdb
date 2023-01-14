@@ -20,41 +20,13 @@
 #define GDBSERVER_WIN32_LOW_H
 
 #include <windows.h>
+#include "nat/windows-nat.h"
 
 struct target_desc;
 
 /* The inferior's target description.  This is a global because the
    Windows ports support neither bi-arch nor multi-process.  */
 extern const struct target_desc *win32_tdesc;
-
-/* Thread information structure used to track extra information about
-   each thread.  */
-typedef struct win32_thread_info
-{
-  /* The Win32 thread identifier.  */
-  DWORD tid;
-
-  /* The handle to the thread.  */
-  HANDLE h;
-
-  /* Thread Information Block address.  */
-  CORE_ADDR thread_local_base;
-
-  /* Non zero if SuspendThread was called on this thread.  */
-  int suspended;
-
-#ifdef _WIN32_WCE
-  /* The context as retrieved right after suspending the thread. */
-  CONTEXT base_context;
-#endif
-
-  /* The context of the thread, including any manipulations.  */
-  CONTEXT context;
-
-  /* Whether debug registers changed since we last set CONTEXT back to
-     the thread.  */
-  int debug_registers_changed;
-} win32_thread_info;
 
 struct win32_target_ops
 {
@@ -68,26 +40,37 @@ struct win32_target_ops
   void (*initial_stuff) (void);
 
   /* Fetch the context from the inferior.  */
-  void (*get_thread_context) (win32_thread_info *th);
+  void (*get_thread_context) (windows_nat::windows_thread_info *th);
 
   /* Called just before resuming the thread.  */
-  void (*prepare_to_resume) (win32_thread_info *th);
+  void (*prepare_to_resume) (windows_nat::windows_thread_info *th);
 
   /* Called when a thread was added.  */
-  void (*thread_added) (win32_thread_info *th);
+  void (*thread_added) (windows_nat::windows_thread_info *th);
 
   /* Fetch register from gdbserver regcache data.  */
   void (*fetch_inferior_register) (struct regcache *regcache,
-				   win32_thread_info *th, int r);
+				   windows_nat::windows_thread_info *th,
+				   int r);
 
   /* Store a new register value into the thread context of TH.  */
   void (*store_inferior_register) (struct regcache *regcache,
-				   win32_thread_info *th, int r);
+				   windows_nat::windows_thread_info *th,
+				   int r);
 
-  void (*single_step) (win32_thread_info *th);
+  void (*single_step) (windows_nat::windows_thread_info *th);
 
   const unsigned char *breakpoint;
   int breakpoint_len;
+
+  /* Amount by which to decrement the PC after a breakpoint is
+     hit.  */
+  int decr_pc_after_break;
+
+  /* Get the PC register from REGCACHE.  */
+  CORE_ADDR (*get_pc) (struct regcache *regcache);
+  /* Set the PC register in REGCACHE.  */
+  void (*set_pc) (struct regcache *regcache, CORE_ADDR newpc);
 
   /* Breakpoint/Watchpoint related functions.  See target.h for comments.  */
   int (*supports_z_point_type) (char z_type);
@@ -168,10 +151,18 @@ public:
   int get_tib_address (ptid_t ptid, CORE_ADDR *addr) override;
 
   const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
+  CORE_ADDR read_pc (regcache *regcache) override;
+
+  void write_pc (regcache *regcache, CORE_ADDR pc) override;
+
+  bool stopped_by_sw_breakpoint () override;
+
+  bool supports_stopped_by_sw_breakpoint () override;
 };
 
 /* Retrieve the context for this thread, if not already retrieved.  */
-extern void win32_require_context (win32_thread_info *th);
+extern void win32_require_context (windows_nat::windows_thread_info *th);
 
 /* Map the Windows error number in ERROR to a locale-dependent error
    message string and return a pointer to it.  Typically, the values

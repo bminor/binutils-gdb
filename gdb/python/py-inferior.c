@@ -193,7 +193,7 @@ python_new_objfile (struct objfile *objfile)
     return;
 
   gdbpy_enter enter_py (objfile != NULL
-			? get_objfile_arch (objfile)
+			? objfile->arch ()
 			: target_gdbarch (),
 			current_language);
 

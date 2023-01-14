@@ -56,7 +56,7 @@
 #include "target-dcache.h"
 #include "terminal.h"
 #include "solist.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 #include "thread-fsm.h"
 #include "gdbsupport/enum-flags.h"
 #include "progspace-and-thread.h"
@@ -64,8 +64,9 @@
 #include "arch-utils.h"
 #include "gdbsupport/scope-exit.h"
 #include "gdbsupport/forward-scope-exit.h"
-#include "gdb_select.h"
+#include "gdbsupport/gdb_select.h"
 #include <unordered_map>
+#include "async-event.h"
 
 /* Prototypes for local functions */
 
@@ -1883,14 +1884,15 @@ displaced_step_fixup (thread_info *event_thread, enum gdb_signal signal)
   if (displaced->step_thread != event_thread)
     return 0;
 
+  /* Fixup may need to read memory/registers.  Switch to the thread
+     that we're fixing up.  Also, target_stopped_by_watchpoint checks
+     the current thread, and displaced_step_restore performs ptid-dependent
+     memory accesses using current_inferior() and current_top_target().  */
+  switch_to_thread (event_thread);
+
   displaced_step_reset_cleanup cleanup (displaced);
 
   displaced_step_restore (displaced, displaced->step_thread->ptid);
-
-  /* Fixup may need to read memory/registers.  Switch to the thread
-     that we're fixing up.  Also, target_stopped_by_watchpoint checks
-     the current thread.  */
-  switch_to_thread (event_thread);
 
   /* Did the instruction complete successfully?  */
   if (signal == GDB_SIGNAL_TRAP
@@ -7818,7 +7820,7 @@ insert_exception_resume_from_probe (struct thread_info *tp,
   if (debug_infrun)
     fprintf_unfiltered (gdb_stdlog,
 			"infrun: exception resume at %s\n",
-			paddress (get_objfile_arch (probe->objfile),
+			paddress (probe->objfile->arch (),
 				  handler));
 
   bp = set_momentary_breakpoint_at_pc (get_frame_arch (frame),

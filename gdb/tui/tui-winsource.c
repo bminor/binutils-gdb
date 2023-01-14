@@ -216,7 +216,7 @@ tui_update_source_windows_with_line (struct symtab_and_line sal)
   if (sal.symtab != nullptr)
     {
       find_line_pc (sal.symtab, sal.line, &sal.pc);
-      gdbarch = get_objfile_arch (SYMTAB_OBJFILE (sal.symtab));
+      gdbarch = SYMTAB_OBJFILE (sal.symtab)->arch ();
     }
 
   for (struct tui_source_window_base *win_info : tui_source_windows ())

@@ -589,20 +589,6 @@ extern struct inferior *find_inferior_id (int num);
 extern struct inferior *
   find_inferior_for_program_space (struct program_space *pspace);
 
-/* Inferior iterator function.
-
-   Calls a callback function once for each inferior, so long as the
-   callback function returns false.  If the callback function returns
-   true, the iteration will end and the current inferior will be
-   returned.  This can be useful for implementing a search for a
-   inferior with arbitrary attributes, or for applying some operation
-   to every inferior.
-
-   It is safe to delete the iterated inferior from the callback.  */
-extern struct inferior *iterate_over_inferiors (int (*) (struct inferior *,
-							 void *),
-						void *);
-
 /* Returns true if the inferior list is not empty.  */
 extern int have_inferiors (void);
 

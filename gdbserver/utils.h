@@ -20,6 +20,5 @@
 #define GDBSERVER_UTILS_H
 
 char *paddress (CORE_ADDR addr);
-char *pfildes (gdb_fildes_t fd);
 
 #endif /* GDBSERVER_UTILS_H */

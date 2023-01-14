@@ -42,7 +42,7 @@
 #include "gdbsupport/version.h"
 #include "serial.h"
 #include "main.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 #include "gdbthread.h"
 #include "extension.h"
 #include "interps.h"
@@ -51,7 +51,7 @@
 #include "filenames.h"
 #include "frame.h"
 #include "gdbsupport/buffer.h"
-#include "gdb_select.h"
+#include "gdbsupport/gdb_select.h"
 #include "gdbsupport/scope-exit.h"
 #include "gdbarch.h"
 #include "gdbsupport/pathstuff.h"
@@ -1947,20 +1947,6 @@ set_history_size_command (const char *args,
 			  int from_tty, struct cmd_list_element *c)
 {
   set_readline_history_size (history_size_setshow_var);
-}
-
-void
-set_history (const char *args, int from_tty)
-{
-  printf_unfiltered (_("\"set history\" must be followed "
-		       "by the name of a history subcommand.\n"));
-  help_list (sethistlist, "set history ", all_commands, gdb_stdout);
-}
-
-void
-show_history (const char *args, int from_tty)
-{
-  cmd_show_list (showhistlist, from_tty, "");
 }
 
 bool info_verbose = false;	/* Default verbose msgs off.  */

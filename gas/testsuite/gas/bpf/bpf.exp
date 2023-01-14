@@ -23,6 +23,7 @@ if {[istarget bpf*-*-*]} {
     run_dump_test alu32
     run_dump_test mem
     run_dump_test jump
+    run_dump_test jump32
     run_dump_test call
     run_dump_test exit
     run_dump_test atomic

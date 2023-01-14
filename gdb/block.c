@@ -62,7 +62,7 @@ block_gdbarch (const struct block *block)
   if (BLOCK_FUNCTION (block) != NULL)
     return symbol_arch (BLOCK_FUNCTION (block));
 
-  return get_objfile_arch (block_objfile (block));
+  return block_objfile (block)->arch ();
 }
 
 /* See block.h.  */
@@ -657,19 +657,18 @@ block_iter_match_next (const lookup_name_info &name,
   return block_iter_match_step (iterator, name, 0);
 }
 
-/* Return true if symbol A is the best match possible for DOMAIN.  */
+/* See block.h.  */
 
-static bool
+bool
 best_symbol (struct symbol *a, const domain_enum domain)
 {
   return (SYMBOL_DOMAIN (a) == domain
 	  && SYMBOL_CLASS (a) != LOC_UNRESOLVED);
 }
 
-/* Return symbol B if it is a better match than symbol A for DOMAIN.
-   Otherwise return A.  */
+/* See block.h.  */
 
-static struct symbol *
+struct symbol *
 better_symbol (struct symbol *a, struct symbol *b, const domain_enum domain)
 {
   if (a == NULL)

@@ -668,6 +668,10 @@ proc test_strip_vers_lib { test srclib libname verexp versymexp } {
     global tmpdir
     global objdump
 
+    if {! [file exists $tmpdir/$srclib] } then {
+	fail "$test ($tmpdir/$srclib does not exist)"
+	return	
+    }
     verbose -log "cp $tmpdir/$srclib $tmpdir/$libname.so"
     exec cp $tmpdir/$srclib $tmpdir/$libname.so
 
@@ -903,8 +907,12 @@ build_vers_lib_pic "vers18" vers18.c vers18 vers17.so vers18.map vers18.ver vers
 build_exec "vers19" vers19.c vers19 "-Wl,--no-as-needed,-rpath,.,-rpath-link,." vers18.so vers19.ver vers19.dsym ""
 
 build_vers_lib_no_pic "vers20a" vers20.c vers20a "" vers20.map vers20a.ver vers20.dsym ""
-exec cp $tmpdir/vers20a.so $tmpdir/vers20b.so
-build_vers_lib_no_pic "vers20" vers20.c vers20 "vers20a.so vers20b.so" vers20.map vers20.ver vers20.dsym ""
+if {! [file exists $tmpdir/vers20a.so] } then {
+    fail "Building vers20a.so"
+} else {
+    exec cp $tmpdir/vers20a.so $tmpdir/vers20b.so
+    build_vers_lib_no_pic "vers20" vers20.c vers20 "vers20a.so vers20b.so" vers20.map vers20.ver vers20.dsym ""
+}
 
 # Test .symver override.
 build_vers_lib_pic "vers21" vers21.c vers21 "" vers21.map vers21.ver vers21.dsym vers21.sym
@@ -984,7 +992,7 @@ if [string match "yes" $pic] then {
     build_vers_lib_no_pic "vers27c1" vers27c.c vers27c1 "vers27b.o vers27a.so" "" vers27c.ver vers27c.dsym ""
     build_vers_lib_no_pic "vers27c2" vers27c.c vers27c2 "vers27a.so vers27b.o" "" vers27c.ver vers27c.dsym ""
     build_vers_lib_pic "vers27d1" vers27d1.c vers27d1 "" vers27a.map vers27d.ver vers27d.dsym vers27d.sym
-   build_vers_lib_pic "vers27d2" vers27d2.c vers27d2 "" "" vers27b.ver vers27b.dsym ""
+    build_vers_lib_pic "vers27d2" vers27d2.c vers27d2 "" "" vers27b.ver vers27b.dsym ""
     build_executable "vers27d3" vers27d3.c vers27d3 "vers27b.o vers27d2.so vers27d1.so" "" vers27b.ver vers27b.dsym ""
     build_vers_lib_pic "vers27d4" vers27d2.c vers27d4 "vers27a.so" "" vers27d4.ver vers27d4.dsym ""
     build_executable "vers27d5" vers27d3.c vers27d5 "vers27d4.so vers27b.o vers27a.so" "" vers27b.ver vers27b.dsym ""

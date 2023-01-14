@@ -124,16 +124,26 @@ struct partial_symtab
   {
   }
 
-  /* Read the full symbol table corresponding to this partial symbol
-     table.  */
+  /* Psymtab expansion is done in two steps:
+     - a call to read_symtab
+     - while that call is in progress, calls to expand_psymtab can be made,
+       both for this psymtab, and its dependencies.
+     This makes a distinction between a toplevel psymtab (for which both
+     read_symtab and expand_psymtab will be called) and a non-toplevel
+     psymtab (for which only expand_psymtab will be called). The
+     distinction can be used f.i. to do things before and after all
+     dependencies of a top-level psymtab have been expanded.
+
+     Read the full symbol table corresponding to this partial symbol
+     table.  Typically calls expand_psymtab.  */
   virtual void read_symtab (struct objfile *) = 0;
 
-  /* Psymtab expansion is done in two steps.  The first step is a call
-     to read_symtab; but while that is in progress, calls to
-     expand_psymtab can be made.  */
+  /* Expand the full symbol table for this partial symbol table.  Typically
+     calls expand_dependencies.  */
   virtual void expand_psymtab (struct objfile *) = 0;
 
-  /* Ensure that all the dependencies are read in.  */
+  /* Ensure that all the dependencies are read in.  Calls
+     expand_psymtab for each non-shared dependency.  */
   void expand_dependencies (struct objfile *);
 
   /* Return true if the symtab corresponding to this psymtab has been

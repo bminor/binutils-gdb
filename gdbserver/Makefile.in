@@ -241,7 +241,6 @@ OBS = \
 	ax.o \
 	debug.o \
 	dll.o \
-	event-loop.o \
 	hostio.o \
 	inferiors.o \
 	mem-break.o \

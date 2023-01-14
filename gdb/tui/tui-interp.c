@@ -22,7 +22,7 @@
 #include "interps.h"
 #include "top.h"
 #include "event-top.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 #include "ui-out.h"
 #include "cli-out.h"
 #include "tui/tui-data.h"

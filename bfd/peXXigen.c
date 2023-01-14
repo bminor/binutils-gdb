@@ -177,25 +177,25 @@ _bfd_XXi_swap_sym_in (bfd * abfd, void * ext1, void * in1)
 	  int unused_section_number = 0;
 	  asection *sec;
 	  flagword flags;
+	  size_t name_len;
+	  char *sec_name;
 
 	  for (sec = abfd->sections; sec; sec = sec->next)
 	    if (unused_section_number <= sec->target_index)
 	      unused_section_number = sec->target_index + 1;
 
-	  if (name == namebuf)
+	  name_len = strlen (name) + 1;
+	  sec_name = bfd_alloc (abfd, name_len);
+	  if (sec_name == NULL)
 	    {
-	      name = (const char *) bfd_alloc (abfd, strlen (namebuf) + 1);
-	      if (name == NULL)
-		{
-		  _bfd_error_handler (_("%pB: out of memory creating name for empty section"),
-				      abfd);
-		  return;
-		}
-	      strcpy ((char *) name, namebuf);
+	      _bfd_error_handler (_("%pB: out of memory creating name "
+				    "for empty section"), abfd);
+	      return;
 	    }
+	  memcpy (sec_name, name, name_len);
 
 	  flags = SEC_HAS_CONTENTS | SEC_ALLOC | SEC_DATA | SEC_LOAD;
-	  sec = bfd_make_section_anyway_with_flags (abfd, name, flags);
+	  sec = bfd_make_section_anyway_with_flags (abfd, sec_name, flags);
 	  if (sec == NULL)
 	    {
 	      _bfd_error_handler (_("%pB: unable to create fake empty section"),

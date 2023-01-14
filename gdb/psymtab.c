@@ -157,17 +157,15 @@ psym_map_symtabs_matching_filename
 
   for (partial_symtab *pst : require_partial_symbols (objfile, true))
     {
-      /* We can skip shared psymtabs here, because any file name will be
-	 attached to the unshared psymtab.  */
-      if (pst->user != NULL)
-	continue;
-
       /* Anonymous psymtabs don't have a file name.  */
       if (pst->anonymous)
 	continue;
 
       if (compare_filenames_for_search (pst->filename, name))
 	{
+	  while (pst->user)
+	    pst = pst->user;
+
 	  if (partial_map_expand_apply (objfile, name, real_path,
 					pst, callback))
 	    return true;
@@ -392,7 +390,7 @@ psym_find_pc_sect_compunit_symtab (struct objfile *objfile,
 	   continue, so let's not.  */
 	warning (_("\
 (Internal error: pc %s in read in psymtab, but not in symtab.)\n"),
-		 paddress (get_objfile_arch (objfile), pc));
+		 paddress (objfile->arch (), pc));
       psymtab_to_symtab (objfile, ps);
       return ps->get_compunit_symtab ();
     }
@@ -927,7 +925,7 @@ static void
 dump_psymtab (struct objfile *objfile, struct partial_symtab *psymtab,
 	      struct ui_file *outfile)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   int i;
 
   if (psymtab->anonymous)
@@ -1304,13 +1302,11 @@ static void
 psym_expand_symtabs_matching
   (struct objfile *objfile,
    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
-   const lookup_name_info &lookup_name_in,
+   const lookup_name_info *lookup_name,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    enum search_domain domain)
 {
-  lookup_name_info lookup_name = lookup_name_in.make_ignore_params ();
-
   /* Clear the search flags.  */
   for (partial_symtab *ps : require_partial_symbols (objfile, true))
     ps->searched_flag = PST_NOT_SEARCHED;
@@ -1347,8 +1343,10 @@ psym_expand_symtabs_matching
 	    continue;
 	}
 
-      if (recursively_search_psymtabs (ps, objfile, domain,
-				       lookup_name, symbol_matcher))
+      if ((symbol_matcher == NULL && lookup_name == NULL)
+	  || recursively_search_psymtabs (ps, objfile, domain,
+					  lookup_name->make_ignore_params (),
+					  symbol_matcher))
 	{
 	  struct compunit_symtab *symtab =
 	    psymtab_to_symtab (objfile, ps);
@@ -1779,7 +1777,7 @@ dump_psymtab_addrmap_1 (void *datap, CORE_ADDR start_addr, void *obj)
 {
   struct dump_psymtab_addrmap_data *data
     = (struct dump_psymtab_addrmap_data *) datap;
-  struct gdbarch *gdbarch = get_objfile_arch (data->objfile);
+  struct gdbarch *gdbarch = data->objfile->arch ();
   struct partial_symtab *addrmap_psymtab = (struct partial_symtab *) obj;
   const char *psymtab_address_or_end = NULL;
 
@@ -1999,7 +1997,7 @@ maintenance_info_psymtabs (const char *regexp, int from_tty)
   ALL_PSPACES (pspace)
     for (objfile *objfile : pspace->objfiles ())
       {
-	struct gdbarch *gdbarch = get_objfile_arch (objfile);
+	struct gdbarch *gdbarch = objfile->arch ();
 
 	/* We don't want to print anything for this objfile until we
 	   actually find a symtab whose name matches.  */
@@ -2113,12 +2111,12 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
   struct compunit_symtab *cust = NULL;
   const struct blockvector *bv;
   const struct block *b;
-  int length;
+  int i;
 
   for (objfile *objfile : current_program_space->objfiles ())
     for (partial_symtab *ps : require_partial_symbols (objfile, true))
       {
-	struct gdbarch *gdbarch = get_objfile_arch (objfile);
+	struct gdbarch *gdbarch = objfile->arch ();
 
 	/* We don't call psymtab_to_symtab here because that may cause symtab
 	   expansion.  When debugging a problem it helps if checkers leave
@@ -2147,9 +2145,14 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 	b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 	partial_symbol **psym
 	  = &objfile->partial_symtabs->static_psymbols[ps->statics_offset];
-	length = ps->n_static_syms;
-	while (length--)
+	for (i = 0; i < ps->n_static_syms; psym++, i++)
 	  {
+	    /* Skip symbols for inlined functions without address.  These may
+	       or may not have a match in the full symtab.  */
+	    if ((*psym)->aclass == LOC_BLOCK
+		&& (*psym)->ginfo.value.address == 0)
+	      continue;
+
 	    sym = block_lookup_symbol (b, (*psym)->ginfo.search_name (),
 				       symbol_name_match_type::SEARCH_NAME,
 				       (*psym)->domain);
@@ -2161,12 +2164,10 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 		puts_filtered (ps->filename);
 		printf_filtered (" psymtab\n");
 	      }
-	    psym++;
 	  }
 	b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 	psym = &objfile->partial_symtabs->global_psymbols[ps->globals_offset];
-	length = ps->n_global_syms;
-	while (length--)
+	for (i = 0; i < ps->n_global_syms; psym++, i++)
 	  {
 	    sym = block_lookup_symbol (b, (*psym)->ginfo.search_name (),
 				       symbol_name_match_type::SEARCH_NAME,
@@ -2179,7 +2180,6 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 		puts_filtered (ps->filename);
 		printf_filtered (" psymtab\n");
 	      }
-	    psym++;
 	  }
 	if (ps->raw_text_high () != 0
 	    && (ps->text_low (objfile) < BLOCK_START (b)

@@ -200,12 +200,12 @@ i386_windows_auto_wide_charset (void)
   return "UTF-16";
 }
 
+/* Common parts for gdbarch initialization for Windows and Cygwin on i386.  */
+
 static void
-i386_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+i386_windows_init_abi_common (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  windows_init_abi (info, gdbarch);
 
   set_gdbarch_skip_trampoline_code (gdbarch, i386_windows_skip_trampoline_code);
 
@@ -225,6 +225,24 @@ i386_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_core_pid_to_str (gdbarch, i386_windows_core_pid_to_str);
 
   set_gdbarch_auto_wide_charset (gdbarch, i386_windows_auto_wide_charset);
+}
+
+/* gdbarch initialization for Windows on i386.  */
+
+static void
+i386_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  i386_windows_init_abi_common (info, gdbarch);
+  windows_init_abi (info, gdbarch);
+}
+
+/* gdbarch initialization for Cygwin on i386.  */
+
+static void
+i386_cygwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  i386_windows_init_abi_common (info, gdbarch);
+  cygwin_init_abi (info, gdbarch);
 }
 
 static gdb_osabi
@@ -270,9 +288,8 @@ _initialize_i386_windows_tdep ()
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_elf_flavour,
                                   i386_cygwin_core_osabi_sniffer);
 
-  /* The Windows and Cygwin OS ABIs are currently equivalent on i386.  */
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_WINDOWS,
                           i386_windows_init_abi);
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_CYGWIN,
-                          i386_windows_init_abi);
+			  i386_cygwin_init_abi);
 }

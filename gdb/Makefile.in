@@ -955,6 +955,7 @@ COMMON_SFILES = \
 	alloc.c \
 	annotate.c \
 	arch-utils.c \
+	async-event.c \
 	auto-load.c \
 	auxv.c \
 	ax-gdb.c \
@@ -1018,7 +1019,6 @@ COMMON_SFILES = \
 	dwarf2/section.c \
 	dwarf2/stringify.c \
 	eval.c \
-	event-loop.c \
 	event-top.c \
 	exceptions.c \
 	exec.c \
@@ -1212,6 +1212,7 @@ HFILES_NO_SRCDIR = \
 	arm-linux-tdep.h \
 	arm-nbsd-tdep.h \
 	arm-tdep.h \
+	async-event.h \
 	auto-load.h \
 	auxv.h \
 	ax.h \
@@ -1252,7 +1253,6 @@ HFILES_NO_SRCDIR = \
 	dwarf2/index-common.h \
 	dwarf2/loc.h \
 	dwarf2/read.h \
-	event-loop.h \
 	event-top.h \
 	exceptions.h \
 	exec.h \

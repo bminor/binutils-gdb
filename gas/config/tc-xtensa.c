@@ -5974,18 +5974,24 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
     case BFD_RELOC_8:
       if (fixP->fx_subsy)
 	{
+	  bfd_boolean neg = S_GET_VALUE (fixP->fx_addsy) + fixP->fx_offset
+	    < S_GET_VALUE (fixP->fx_subsy);
+
 	  switch (fixP->fx_r_type)
 	    {
 	    case BFD_RELOC_8:
-	      fixP->fx_r_type = BFD_RELOC_XTENSA_DIFF8;
+	      fixP->fx_r_type = neg
+		? BFD_RELOC_XTENSA_NDIFF8 : BFD_RELOC_XTENSA_PDIFF8;
 	      fixP->fx_signed = 0;
 	      break;
 	    case BFD_RELOC_16:
-	      fixP->fx_r_type = BFD_RELOC_XTENSA_DIFF16;
+	      fixP->fx_r_type = neg
+		? BFD_RELOC_XTENSA_NDIFF16 : BFD_RELOC_XTENSA_PDIFF16;
 	      fixP->fx_signed = 0;
 	      break;
 	    case BFD_RELOC_32:
-	      fixP->fx_r_type = BFD_RELOC_XTENSA_DIFF32;
+	      fixP->fx_r_type = neg
+		? BFD_RELOC_XTENSA_NDIFF32 : BFD_RELOC_XTENSA_PDIFF32;
 	      fixP->fx_signed = 0;
 	      break;
 	    default:

@@ -37,7 +37,6 @@ extern const char *m32r_target_format (void);
 #endif
 
 /* Call md_pcrel_from_section, not md_pcrel_from.  */
-long md_pcrel_from_section (struct fix *, segT);
 #define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section(FIX, SEC)
 
 /* Permit temporary numeric labels.  */

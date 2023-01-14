@@ -1,3 +1,1149 @@
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/read.c (handle_data_member_location): New overload.
+	(dwarf2_add_field): Use it.
+	(decode_locdesc): Add "computed" parameter.  Update comment.
+	* gdbtypes.c (is_dynamic_type_internal): Also look for
+	FIELD_LOC_KIND_DWARF_BLOCK.
+	(resolve_dynamic_struct): Handle FIELD_LOC_KIND_DWARF_BLOCK.
+	* gdbtypes.c (is_dynamic_type_internal): Add special case for C++
+	virtual base classes.
+	* gnu-v3-abi.c (gnuv3_baseclass_offset): Handle
+	FIELD_LOC_KIND_DWARF_BLOCK.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/read.c (read_structure_type): Handle dynamic length.
+	* gdbtypes.c (is_dynamic_type_internal): Check
+	TYPE_HAS_DYNAMIC_LENGTH.
+	(resolve_dynamic_type_internal): Use TYPE_DYNAMIC_LENGTH.
+	* gdbtypes.h (TYPE_HAS_DYNAMIC_LENGTH, TYPE_DYNAMIC_LENGTH):
+	New macros.
+	(enum dynamic_prop_node_kind) <DYN_PROP_BYTE_SIZE>: New
+	constant.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/read.c (struct variant_field): Rewrite.
+	(struct variant_part_builder): New.
+	(struct nextfield): Remove "variant" field.  Add "offset".
+	(struct field_info): Add "current_variant_part" and
+	"variant_parts".
+	(alloc_discriminant_info): Remove.
+	(alloc_rust_variant): New function.
+	(quirk_rust_enum): Update.
+	(dwarf2_add_field): Set "offset" member.  Don't handle
+	DW_TAG_variant_part.
+	(offset_map_type): New typedef.
+	(convert_variant_range, create_one_variant)
+	(create_one_variant_part, create_variant_parts)
+	(add_variant_property): New functions.
+	(dwarf2_attach_fields_to_type): Call add_variant_property.
+	(read_structure_type): Don't handle DW_TAG_variant_part.
+	(handle_variant_part, handle_variant): New functions.
+	(handle_struct_member_die): Use them.
+	(process_structure_scope): Don't handle variant parts.
+	* gdbtypes.h (TYPE_FLAG_DISCRIMINATED_UNION): Remove.
+	(struct discriminant_info): Remove.
+	(enum dynamic_prop_node_kind) <DYN_PROP_DISCRIMINATED>: Remove.
+	(struct main_type) <flag_discriminated_union>: Remove.
+	* rust-lang.c (rust_enum_p, rust_empty_enum_p): Rewrite.
+	(rust_enum_variant): Return int.  Remove "contents".  Rewrite.
+	(rust_print_enum, rust_print_struct_def, rust_evaluate_subexp):
+	Update.
+	* valops.c (value_union_variant): Remove.
+	* value.h (value_union_variant): Don't declare.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (ada_discrete_type_high_bound, ada_discrete_type_low)
+	(ada_value_primitive_packed_val): Update.
+	* ada-valprint.c (ada_value_print_1): Update.
+	* dwarf2/loc.c (evaluate_for_locexpr_baton): New struct.
+	(dwarf2_locexpr_baton_eval): Take a property_addr_info rather than
+	just an address.  Use evaluate_for_locexpr_baton.
+	(dwarf2_evaluate_property): Update.
+	* dwarf2/loc.h (struct property_addr_info) <valaddr>: Now an
+	array_view.
+	* findvar.c (default_read_var_value): Update.
+	* gdbtypes.c (compute_variant_fields_inner)
+	(resolve_dynamic_type_internal): Update.
+	(resolve_dynamic_type): Change type of valaddr parameter.
+	* gdbtypes.h (resolve_dynamic_type): Update.
+	* valarith.c (value_subscripted_rvalue): Update.
+	* value.c (value_from_contents_and_address): Update.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/loc.c (dwarf2_locexpr_baton_eval): Add
+	"push_initial_value" parameter.
+	(dwarf2_evaluate_property): Likewise.
+	* dwarf2/loc.h (dwarf2_evaluate_property): Update.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
+	* gdbtypes.c (is_dynamic_type_internal): Check for variant parts.
+	(variant::matches, compute_variant_fields_recurse)
+	(compute_variant_fields_inner, compute_variant_fields): New
+	functions.
+	(resolve_dynamic_struct): Check for DYN_PROP_VARIANT_PARTS.
+	Use resolved_type after type is made.
+	(operator==): Add new cases.
+	* gdbtypes.h (TYPE_HAS_VARIANT_PARTS): New macro.
+	(struct discriminant_range, struct variant, struct variant_part):
+	New.
+	(union dynamic_prop_data) <variant_parts, original_type>: New
+	members.
+	(enum dynamic_prop_node_kind) <DYN_PROP_VARIANT_PARTS>: New constant.
+	(enum dynamic_prop_kind) <PROP_TYPE, PROP_VARIANT_PARTS>: New
+	constants.
+	* value.c (unpack_bits_as_long): Now public.
+	* value.h (unpack_bits_as_long): Declare.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
+	* rs6000-tdep.c (struct ppc_variant): Rename from "variant".
+	(variants, find_variant_by_arch, rs6000_gdbarch_init): Update.
+
+2020-04-24  Hannes Domani  <ssbssa@yahoo.de>
+
+	* windows-tdep.c (exception_values): Add WOW64 exception numbers.
+
+2020-04-24  Kamil Rytarowski  <n54@gmx.com>
+
+	* inf-ptrace.h (follow_fork, insert_fork_catchpoint)
+	(remove_fork_catchpoint, post_startup_inferior)
+	(post_attach): Move...
+	* obsd-nat.h (follow_fork, insert_fork_catchpoint)
+	(remove_fork_catchpoint, post_startup_inferior)
+	(post_attach): ...here.
+	* inf-ptrace.c (follow_fork, insert_fork_catchpoint)
+	(remove_fork_catchpoint, post_startup_inferior)
+	(post_attach): Move...
+	* obsd-nat.c (follow_fork, insert_fork_catchpoint)
+	(remove_fork_catchpoint, post_startup_inferior)
+	(post_attach): ...here.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
+	* nat/windows-nat.h (struct windows_thread_info)
+	<pc_adjusted>: New member.
+	* windows-nat.c (windows_fetch_one_register): Check
+	pc_adjusted.
+	(windows_nat_target::get_windows_debug_event)
+	(windows_nat_target::wait): Set pc_adjusted.
+
+2020-04-24  Tom de Vries  <tdevries@suse.de>
+
+	* contrib/cc-with-tweaks.sh: Remove <exec>.gdb-index file handling.
+	Run gdb-add-index inside temp dir.
+
+2020-04-23  Tom Tromey  <tromey@adacore.com>
+
+	* windows-tdep.c (is_linked_with_cygwin_dll): Always update "iter"
+	in loop.
+
+2020-04-23  Luis Machado  <luis.machado@linaro.org>
+
+	* dwarf2/frame-tailcall.c (dwarf2_tailcall_sniffer_first): Use
+	get_frame_register instead of gdbarch_unwind_pc.
+
+2020-04-23  Tom de Vries  <tdevries@suse.de>
+
+	* symtab.c (lookup_global_symbol): Prefer def over decl.
+
+2020-04-23  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25807
+	* block.c (best_symbol, better_symbol): Promote to external.
+	* block.h (best_symbol, better_symbol): Declare.
+	* symtab.c (lookup_symbol_in_objfile_symtabs): Prefer def over
+	decl.
+
+2020-04-23  Tom Tromey  <tromey@adacore.com>
+
+	PR ada/25837:
+	* dwarf2/read.c (dw2_expand_symtabs_matching_symbol): Store a
+	"const char *", not a "const std::string &".
+	<name_and_matcher::operator==>: Update.
+	* unittests/lookup_name_info-selftests.c: Change type of
+	"result".
+
+2020-04-23  Tom Tromey  <tom@tromey.com>
+
+	* inferior.h (iterate_over_inferiors): Don't declare.
+	* inferior.c (iterate_over_inferiors): Remove.
+	* darwin-nat.c (find_inferior_task_it, find_inferior_pid_it):
+	Remove.
+	(darwin_find_inferior_by_task, darwin_find_inferior_by_pid): Don't
+	use iterate_over_inferiors.
+	(darwin_resume_inferior_it)
+	(struct resume_inferior_threads_param)
+	(darwin_resume_inferior_threads_it): Remove.
+	(darwin_nat_target::resume): Don't use iterate_over_inferiors.
+
+2020-04-23  Tom de Vries  <tdevries@suse.de>
+
+	* blockframe.c (find_pc_partial_function): Use
+	find_pc_sect_compunit_symtab rather than
+	objfile->sf->qf->find_pc_sect_compunit_symtab.
+
+2020-04-22  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25764
+	* dwarf2/read.c (scan_partial_symbols): Allow external variable decls
+	in psymtabs.
+
+2020-04-22  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25801
+	* psymtab.c (psym_map_symtabs_matching_filename): Don't skip shared
+	symtabs.
+
+2020-04-22  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25700
+	* dwarf2/read.c (dwarf2_build_psymtabs_hard): Don't create psymtab for
+	CU if already created.
+
+2020-04-21  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* infrun.c (displaced_step_fixup): Switch to the event_thread
+	before calling displaced_step_restore, not after.
+
+2020-04-21  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_enable_warn): Ignore thread if
+	its inferior is not recorded by us.
+	(record_btrace_target_open): Replace call to
+	all_non_exited_threads () with call to current_inferior
+	()->non_exited_threads ().
+	(record_btrace_target::stop_recording): Likewise.
+	(record_btrace_target::close): Likewise.
+	(record_btrace_target::wait): Likewise.
+	(record_btrace_target::record_stop_replaying): Likewise.
+
+2020-04-21  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c (btrace_enable): Throw an error on double enables and
+	when enabling recording fails.
+	(btrace_disable): Throw an error if the thread is not recorded.
+
+2020-04-21  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_target::fetch_registers): Forward
+	request if we do not have a thread_info.
+
+2020-04-21  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/25471
+	* thread.c
+	(scoped_restore_current_thread::scoped_restore_current_thread): Catch
+	exception in get_frame_id.
+
+2020-04-20  Tom Tromey  <tromey@adacore.com>
+
+	* python/python.c (struct gdbpy_event): Mark move constructor as
+	noexcept.
+	* python/py-tui.c (class gdbpy_tui_window_maker): Mark move
+	constructor as noexcept.
+	* completer.h (struct completion_result): Mark move constructor as
+	noexcept.
+	* completer.c (completion_result::completion_result): Use
+	initialization style.  Don't call reset_match_list.
+
+2020-04-20  Mihails Strasuns  <mihails.strasuns@intel.com>
+
+	* MAINTAINERS (Write After Approval): Add myself.
+
+2020-04-18  Tom Tromey  <tom@tromey.com>
+
+	* windows-tdep.c (init_w32_command_list)
+	(w32_prefix_command_valid): Restore.
+	(_initialize_windows_tdep): Call init_w32_command_list.
+
+2020-04-18  Tom Tromey  <tom@tromey.com>
+
+	* xcoffread.c (enter_line_range, scan_xcoff_symtab): Update.
+	* value.c (value_fn_field): Update.
+	* valops.c (find_function_in_inferior)
+	(value_allocate_space_in_inferior): Update.
+	* tui/tui-winsource.c (tui_update_source_windows_with_line):
+	Update.
+	* tui/tui-source.c (tui_source_window::set_contents): Update.
+	* symtab.c (lookup_global_or_static_symbol)
+	(find_function_start_sal_1, skip_prologue_sal)
+	(print_msymbol_info, find_gnu_ifunc, symbol_arch): Update.
+	* symmisc.c (dump_msymbols, dump_symtab_1)
+	(maintenance_print_one_line_table): Update.
+	* symfile.c (init_entry_point_info, section_is_mapped)
+	(list_overlays_command, simple_read_overlay_table)
+	(simple_overlay_update_1): Update.
+	* stap-probe.c (handle_stap_probe): Update.
+	* stabsread.c (dbx_init_float_type, define_symbol)
+	(read_one_struct_field, read_enum_type, read_range_type): Update.
+	* source.c (info_line_command): Update.
+	* python/python.c (gdbpy_source_objfile_script)
+	(gdbpy_execute_objfile_script): Update.
+	* python/py-type.c (save_objfile_types): Update.
+	* python/py-objfile.c (py_free_objfile): Update.
+	* python/py-inferior.c (python_new_objfile): Update.
+	* psymtab.c (psym_find_pc_sect_compunit_symtab, dump_psymtab)
+	(dump_psymtab_addrmap_1, maintenance_info_psymtabs)
+	(maintenance_check_psymtabs): Update.
+	* printcmd.c (info_address_command): Update.
+	* objfiles.h (struct objfile) <arch>: New method, from
+	get_objfile_arch.
+	(get_objfile_arch): Don't declare.
+	* objfiles.c (get_objfile_arch): Remove.
+	(filter_overlapping_sections): Update.
+	* minsyms.c (msymbol_is_function): Update.
+	* mi/mi-symbol-cmds.c (mi_cmd_symbol_list_lines)
+	(output_nondebug_symbol): Update.
+	* mdebugread.c (parse_symbol, basic_type, parse_partial_symbols)
+	(mdebug_expand_psymtab): Update.
+	* machoread.c (macho_add_oso_symfile): Update.
+	* linux-tdep.c (linux_infcall_mmap, linux_infcall_munmap):
+	Update.
+	* linux-fork.c (checkpoint_command): Update.
+	* linespec.c (convert_linespec_to_sals): Update.
+	* jit.c (finalize_symtab): Update.
+	* infrun.c (insert_exception_resume_from_probe): Update.
+	* ia64-tdep.c (ia64_find_unwind_table): Update.
+	* hppa-tdep.c (internalize_unwinds): Update.
+	* gdbtypes.c (get_type_arch, init_float_type, objfile_type):
+	Update.
+	* gcore.c (call_target_sbrk): Update.
+	* elfread.c (record_minimal_symbol, elf_symtab_read)
+	(elf_rel_plt_read, elf_gnu_ifunc_record_cache)
+	(elf_gnu_ifunc_resolve_by_got): Update.
+	* dwarf2/read.c (create_addrmap_from_index)
+	(create_addrmap_from_aranges, dw2_find_pc_sect_compunit_symtab)
+	(read_debug_names_from_section)
+	(process_psymtab_comp_unit_reader, add_partial_symbol)
+	(add_partial_subprogram, process_full_comp_unit)
+	(read_file_scope, read_func_scope, read_lexical_block_scope)
+	(read_call_site_scope, dwarf2_ranges_read)
+	(dwarf2_record_block_ranges, dwarf2_add_field)
+	(mark_common_block_symbol_computed, read_tag_pointer_type)
+	(read_tag_string_type, dwarf2_init_float_type)
+	(dwarf2_init_complex_target_type, read_base_type)
+	(partial_die_info::read, partial_die_info::read)
+	(read_attribute_value, dwarf_decode_lines_1, new_symbol)
+	(dwarf2_fetch_die_loc_sect_off): Update.
+	* dwarf2/loc.c (dwarf2_find_location_expression)
+	(class dwarf_evaluate_loc_desc, rw_pieced_value)
+	(dwarf2_evaluate_loc_desc_full, dwarf2_locexpr_baton_eval)
+	(dwarf2_loc_desc_get_symbol_read_needs)
+	(locexpr_describe_location_piece, locexpr_describe_location_1)
+	(loclist_describe_location): Update.
+	* dwarf2/index-write.c (write_debug_names): Update.
+	* dwarf2/frame.c (dwarf2_build_frame_info): Update.
+	* dtrace-probe.c (dtrace_process_dof): Update.
+	* dbxread.c (read_dbx_symtab, dbx_end_psymtab)
+	(process_one_symbol): Update.
+	* ctfread.c (ctf_init_float_type, read_base_type): Update.
+	* coffread.c (coff_symtab_read, enter_linenos, decode_base_type)
+	(coff_read_enum_type): Update.
+	* cli/cli-cmds.c (edit_command, list_command): Update.
+	* buildsym.c (buildsym_compunit::finish_block_internal): Update.
+	* breakpoint.c (create_overlay_event_breakpoint)
+	(create_longjmp_master_breakpoint)
+	(create_std_terminate_master_breakpoint)
+	(create_exception_master_breakpoint, get_sal_arch): Update.
+	* block.c (block_gdbarch): Update.
+	* annotate.c (annotate_source_line): Update.
+
+2020-04-17  Tom Tromey  <tromey@adacore.com>
+
+	* auto-load.c (show_auto_load_cmd): Remove.
+	(auto_load_show_cmdlist_get): Use add_show_prefix_cmd.
+	* arc-tdep.c (_initialize_arc_tdep): Use add_show_prefix_cmd.
+	(maintenance_print_arc_command): Remove.
+	* tui/tui-win.c (tui_command): Remove.
+	(tui_get_cmd_list): Use add_basic_prefix_cmd.
+	* tui/tui-layout.c (tui_layout_command): Remove.
+	(_initialize_tui_layout): Use add_basic_prefix_cmd.
+	* python/python.c (user_set_python, user_show_python): Remove.
+	(_initialize_python): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* guile/guile.c (set_guile_command, show_guile_command): Remove.
+	(install_gdb_commands): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	(info_guile_command): Remove.
+	* dwarf2/read.c (set_dwarf_cmd, show_dwarf_cmd): Remove.
+	(_initialize_dwarf2_read): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* cli/cli-style.h (class cli_style_option) <add_setshow_commands>:
+	Remove do_set and do_show parameters.
+	* cli/cli-style.c (set_style, show_style): Remove.
+	(_initialize_cli_style): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	(cli_style_option::add_setshow_commands): Remove do_set and
+	do_show parameters.
+	(cli_style_option::add_setshow_commands): Use
+	add_basic_prefix_cmd, add_show_prefix_cmd.
+	(STYLE_ADD_SETSHOW_COMMANDS): Remove macro.
+	(set_style_name): Remove.
+	* cli/cli-dump.c (dump_command, append_command): Remove.
+	(srec_dump_command, ihex_dump_command, verilog_dump_command)
+	(tekhex_dump_command, binary_dump_command)
+	(binary_append_command): Remove.
+	(_initialize_cli_dump): Use add_basic_prefix_cmd.
+	* windows-tdep.c (w32_prefix_command_valid): Remove global.
+	(init_w32_command_list): Remove; move into ...
+	(_initialize_windows_tdep): ... here.  Use add_basic_prefix_cmd.
+	* valprint.c (set_print, show_print, set_print_raw)
+	(show_print_raw): Remove.
+	(_initialize_valprint): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* typeprint.c (set_print_type, show_print_type): Remove.
+	(_initialize_typeprint): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* record.c (set_record_command, show_record_command): Remove.
+	(_initialize_record): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* cli/cli-cmds.c (_initialize_cli_cmds): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	(info_command, show_command, set_debug, show_debug): Remove.
+	* top.h (set_history, show_history): Don't declare.
+	* top.c (set_history, show_history): Remove.
+	* target-descriptions.c (set_tdesc_cmd, show_tdesc_cmd)
+	(unset_tdesc_cmd): Remove.
+	(_initialize_target_descriptions): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* symtab.c (info_module_command): Remove.
+	(_initialize_symtab): Use add_basic_prefix_cmd.
+	* symfile.c (overlay_command): Remove.
+	(_initialize_symfile): Use add_basic_prefix_cmd.
+	* sparc64-tdep.c (info_adi_command): Remove.
+	(_initialize_sparc64_adi_tdep): Use add_basic_prefix_cmd.
+	* sh-tdep.c (show_sh_command, set_sh_command): Remove.
+	(_initialize_sh_tdep): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* serial.c (serial_set_cmd, serial_show_cmd): Remove.
+	(_initialize_serial): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* ser-tcp.c (set_tcp_cmd, show_tcp_cmd): Remove.
+	(_initialize_ser_tcp): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* rs6000-tdep.c (set_powerpc_command, show_powerpc_command)
+	(_initialize_rs6000_tdep): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* riscv-tdep.c (show_riscv_command, set_riscv_command)
+	(show_debug_riscv_command, set_debug_riscv_command): Remove.
+	(_initialize_riscv_tdep): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* remote.c (remote_command, set_remote_cmd): Remove.
+	(_initialize_remote): Use add_basic_prefix_cmd.
+	* record-full.c (set_record_full_command)
+	(show_record_full_command): Remove.
+	(_initialize_record_full): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* record-btrace.c (cmd_set_record_btrace)
+	(cmd_show_record_btrace, cmd_set_record_btrace_bts)
+	(cmd_show_record_btrace_bts, cmd_set_record_btrace_pt)
+	(cmd_show_record_btrace_pt): Remove.
+	(_initialize_record_btrace): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* ravenscar-thread.c (set_ravenscar_command)
+	(show_ravenscar_command): Remove.
+	(_initialize_ravenscar): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* mips-tdep.c (show_mips_command, set_mips_command)
+	(_initialize_mips_tdep): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* maint.c (maintenance_command, maintenance_info_command)
+	(maintenance_check_command, maintenance_print_command)
+	(maintenance_set_cmd, maintenance_show_cmd): Remove.
+	(_initialize_maint_cmds): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	(show_per_command_cmd): Remove.
+	* maint-test-settings.c (maintenance_set_test_settings_cmd):
+	Remove.
+	(maintenance_show_test_settings_cmd): Remove.
+	(_initialize_maint_test_settings): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* maint-test-options.c (maintenance_test_options_command):
+	Remove.
+	(_initialize_maint_test_options): Use add_basic_prefix_cmd.
+	* macrocmd.c (macro_command): Remove
+	(_initialize_macrocmd): Use add_basic_prefix_cmd.
+	* language.c (set_check, show_check): Remove.
+	(_initialize_language): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* infcmd.c (unset_command): Remove.
+	(_initialize_infcmd): Use add_basic_prefix_cmd.
+	* i386-tdep.c (set_mpx_cmd, show_mpx_cmd): Remove.
+	(_initialize_i386_tdep): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* go32-nat.c (go32_info_dos_command): Remove.
+	(_initialize_go32_nat): Use add_basic_prefix_cmd.
+	* cli/cli-decode.c (do_prefix_cmd, add_basic_prefix_cmd)
+	(do_show_prefix_cmd, add_show_prefix_cmd): New functions.
+	* frame.c (set_backtrace_cmd, show_backtrace_cmd): Remove.
+	(_initialize_frame): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* dcache.c (set_dcache_command, show_dcache_command): Remove.
+	(_initialize_dcache): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* cp-support.c (maint_cplus_command): Remove.
+	(_initialize_cp_support): Use add_basic_prefix_cmd.
+	* btrace.c (maint_btrace_cmd, maint_btrace_set_cmd)
+	(maint_btrace_show_cmd, maint_btrace_pt_set_cmd)
+	(maint_btrace_pt_show_cmd, _initialize_btrace): Use
+	add_basic_prefix_cmd, add_show_prefix_cmd.
+	* breakpoint.c (save_command): Remove.
+	(_initialize_breakpoint): Use add_basic_prefix_cmd.
+	* arm-tdep.c (set_arm_command, show_arm_command): Remove.
+	(_initialize_arm_tdep): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* ada-lang.c (maint_set_ada_cmd, maint_show_ada_cmd)
+	(set_ada_command, show_ada_command): Remove.
+	(_initialize_ada_language): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* command.h (add_basic_prefix_cmd, add_show_prefix_cmd): Declare.
+
+2020-04-16  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-nat.c (inf_ptrace_target::auxv_parse): Remove.
+	* nbsd-nat.h (inf_ptrace_target::auxv_parse): Likewise.
+
+2020-04-16  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* windows-tdep.c (is_linked_with_cygwin_dll): Add filename to
+	warning messages.
+
+2020-04-16  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* windows-tdep.c (is_linked_with_cygwin_dll): Consider case where
+	import table is not at beginning of .idata section.
+
+2020-04-16  Pedro Alves  <palves@redhat.com>
+
+	* inferior.c (delete_inferior): Use delete operator directly
+	instead of delete_program_space.
+	* progspace.c (add_program_space): New, factored out from
+	program_space::program_space.
+	(remove_program_space): New, factored out from
+	delete_program_space.
+	(program_space::program_space): Remove intro comment.  Rewrite.
+	(program_space::~program_space): Remove intro comment.  Call
+	remove_program_space.
+	(delete_program_space): Delete.
+	* progspace.h (program_space::program_space): Make explicit.  Move
+	intro comment here, adjusted.
+	(program_space::~program_space): Move intro comment here,
+	adjusted.
+	(delete_program_space): Remove.
+
+2020-04-16  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (windows_nat::handle_access_violation): New
+	function.
+	* nat/windows-nat.h (handle_access_violation): Declare.
+	* nat/windows-nat.c (handle_exception): Move Cygwin code to
+	windows-nat.c.  Call handle_access_violation.
+
+2020-04-16  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25791
+	* dwarf2/index-write.c (write_gdbindex): Generate CU table entries for
+	CUs without psymtab.
+
+2020-04-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* python/python.c (do_start_initialization): Don't call
+	PyEval_InitThreads for Python 3.9 and beyond.
+
+2020-04-15  Kamil Rytarowski  <n54@gmx.com>
+
+	* obsd-nat.c (obsd_nat_target::update_thread_list): Pass "this" to
+	thread functions.
+	(obsd_nat_target::wait): Likewise.
+
+2020-04-15  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (DEBUG_EXEC, DEBUG_EVENTS, DEBUG_MEM)
+	(DEBUG_EXCEPT): Use debug_printf.
+
+2020-04-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* completer.c (class completion_tracker::completion_hash_entry)
+	<hash_name>: New member function.
+	(completion_tracker::discard_completions): New callback to hash a
+	completion_hash_entry, pass this to htab_create_alloc.
+
+2016-01-20  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* windows-nat.c (windows_make_so): Warn rather than stopping with
+	an error if realpath() fails.
+
+2020-04-14  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-nat.c (nbsd_pid_to_kinfo_proc2): New.
+	(nbsd_nat_target::info_proc): Add do_status.
+
+2020-04-14  Simon Marchi  <simon.marchi@polymtl.ca>
+	    Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25718
+	* psympriv.h (struct partial_symtab::read_symtab)
+	(struct partial_symtab::expand_psymtab)
+	(struct partial_symtab::read_dependencies): Update comments.
+	* dwarf2/read.c (struct dwarf2_include_psymtab::read_symtab): Call
+	read_symtab for includer.
+	(struct dwarf2_include_psymtab::expand_psymtab): Assert false.
+	(struct dwarf2_include_psymtab::readin_p): Call readin_p () for includer.
+	(struct dwarf2_include_psymtab::m_readin): Remove.
+	(struct dwarf2_include_psymtab::includer): New member function.
+	(dwarf2_psymtab::expand_psymtab): Assert !readin.
+
+2020-04-14  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25720
+	* symmisc.c (maintenance_expand_symtabs): Call expand_symtabs_matching
+	with NULL symbol_matcher and lookup_name.
+	* psymtab.c (psym_expand_symtabs_matching): Handle NULL symbol_matcher
+	and lookup_name.
+	* dwarf2/read.c (dw2_expand_symtabs_matching)
+	(dw2_debug_names_expand_symtabs_matching): Same.
+	* symfile.h (struct quick_symbol_functions::expand_symtabs_matching):
+	Make lookup_name a pointer.  Update comment.
+	* symtab.c (global_symbol_searcher::expand_symtabs): Handle
+	lookup_name being a pointer.
+	* symfile.c (expand_symtabs_matching): Same.
+	* symfile-debug.c (debug_qf_expand_symtabs_matching): Same.
+	* linespec.c (iterate_over_all_matching_symtabs): Same.
+
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
+	* run-on-main-thread.c: Update include.
+	* unittests/main-thread-selftests.c: Update include.
+	* tui/tui-win.c: Update include.
+	* tui/tui-io.c: Update include.
+	* tui/tui-interp.c: Update include.
+	* tui/tui-hooks.c: Update include.
+	* top.h: Update include.
+	* top.c: Update include.
+	* ser-base.c: Update include.
+	* remote.c: Update include.
+	* remote-notif.c: Update include.
+	* remote-fileio.c: Update include.
+	* record-full.c: Update include.
+	* record-btrace.c: Update include.
+	* python/python.c: Update include.
+	* posix-hdep.c: Update include.
+	* mingw-hdep.c: Update include.
+	* mi/mi-main.c: Update include.
+	* mi/mi-interp.c: Update include.
+	* main.c: Update include.
+	* linux-nat.c: Update include.
+	* interps.c: Update include.
+	* infrun.c: Update include.
+	* inf-loop.c: Update include.
+	* event-top.c: Update include.
+	* event-loop.c: Move to ../gdbsupport/.
+	* event-loop.h: Move to ../gdbsupport/.
+	* async-event.h: Update include.
+	* Makefile.in (COMMON_SFILES, HFILES_NO_SRCDIR): Update.
+
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-win.c: Include async-event.h.
+	* remote.c: Include async-event.h.
+	* remote-notif.c: Include async-event.h.
+	* record-full.c: Include async-event.h.
+	* record-btrace.c: Include async-event.h.
+	* infrun.c: Include async-event.h.
+	* event-top.c: Include async-event.h.
+	* event-loop.h: Move some declarations to async-event.h.
+	* event-loop.c: Don't include ser-event.h or top.h.  Move some
+	code to async-event.c.
+	* async-event.h: New file.
+	* async-event.c: New file.
+	* Makefile.in (COMMON_SFILES): Add async-event.c.
+	(HFILES_NO_SRCDIR): Add async-event.h.
+
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
+	* utils.c (flush_streams): New function.
+	* event-loop.c (gdb_wait_for_event): Call flush_streams.
+
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
+	* event-loop.c (handle_file_event): Use warning, not
+	printf_unfiltered.
+
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
+	* event-loop.c: Include <chrono>.
+
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
+	* gdb_select.h: Move to ../gdbsupport/.
+	* event-loop.c: Update include path.
+	* top.c: Update include path.
+	* ser-base.c: Update include path.
+	* ui-file.c: Update include path.
+	* ser-tcp.c: Update include path.
+	* guile/scm-ports.c: Update include path.
+	* posix-hdep.c: Update include path.
+	* ser-unix.c: Update include path.
+	* gdb_usleep.c: Update include path.
+	* mingw-hdep.c: Update include path.
+	* inflow.c: Update include path.
+	* infrun.c: Update include path.
+	* event-top.c: Update include path.
+
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+	* configure.ac: Remove checks that are now in GDB_AC_COMMON.
+
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
+	* event-loop.h (start_event_loop): Don't declare.
+	* event-loop.c (start_event_loop): Move...
+	* main.c (start_event_loop): ...here.  Now static.
+
+2020-04-13  Sergio Durigan Junior  <sergiodj@sergiodj.net>
+
+	* MAINTAINERS: Update my email address.
+
+2020-04-12  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-nat.c (nbsd_nat_target::info_proc): Add IP_MINIMAL and
+	IP_ALL.
+
+2020-04-12  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-nat.c (nbsd_pid_to_cmdline): Add.
+	(nbsd_nat_target::info_proc): Add do_cmdline.
+
+2020-04-12  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-nat.c (nbsd_pid_to_cwd): Add.
+	(nbsd_nat_target::info_proc): Add do_cwd.
+
+2020-04-12  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-nat.c (nbsd_nat_target::info_proc): Add do_exe.
+
+2020-04-11  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-nat.c; Include "nbsd-tdep.h" and "gdbarch.h".
+	* nbsd-nat.c (nbsd_nat_target::find_memory_regions)
+	(nbsd_nat_target::info_proc): New functions.
+	* nbsd-nat.c (kinfo_get_vmmap): New function.
+	* nbsd-nat.c (nbsd_nat_target::info_proc) Use
+	nbsd_info_proc_mappings_header and nbsd_info_proc_mappings_entry.
+	* nbsd-tdep.c (nbsd_info_proc_mappings_header)
+	(nbsd_info_proc_mappings_entry, nbsd_vm_map_entry_flags): New
+	functions.
+	* nbsd-tdep.c (KINFO_VME_PROT_READ, KINFO_VME_PROT_WRITE)
+	(KINFO_VME_PROT_EXEC, KINFO_VME_FLAG_COW)
+	(KINFO_VME_FLAG_NEEDS_COPY, KINFO_VME_FLAG_NOCOREDUMP)
+	(KINFO_VME_FLAG_PAGEABLE, KINFO_VME_FLAG_GROWS_UP)
+	(KINFO_VME_FLAG_GROWS_DOWN): New.
+
+2020-04-10  Artur Shepilko  <nomadbyte@gmail.com>
+
+	* utils.c (copy_bitwise): Use unsigned 0 constant as operand of
+	bit shift.
+
+2020-04-10  Tom Tromey  <tromey@adacore.com>
+
+	* symfile.c (symbol_file_add_separate): Preserve OBJF_MAINLINE.
+
+2020-04-10  Tom Tromey  <tromey@adacore.com>
+
+	* symtab.c (get_symbol_address, get_msymbol_address): Skip
+	separate debug files.
+
+2020-04-10  Hannes Domani  <ssbssa@yahoo.de>
+
+	* nat/windows-nat.c (STATUS_WX86_BREAKPOINT, STATUS_WX86_SINGLE_STEP):
+	Move to...
+	* nat/windows-nat.h (STATUS_WX86_BREAKPOINT, STATUS_WX86_SINGLE_STEP):
+	... here.
+	* windows-nat.c (windows_nat_target::get_windows_debug_event):
+	Check for STATUS_WX86_BREAKPOINT.
+	(windows_nat_target::wait): Same.
+
+2020-04-10  Tom de Vries  <tdevries@suse.de>
+
+	PR cli/25808
+	* python/lib/gdb/__init__.py: Initialize lexer with stripnl=False.
+
+2020-04-09  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* MAINTAINERS (Global Maintainers): Add Tom de Vries.
+	(Write After Approval): Remove Tom de Vries.
+
+2020-04-09  Bernd Edlinger  <bernd.edlinger@hotmail.de>
+
+	revert partially:
+	2020-04-01  Bernd Edlinger  <bernd.edlinger@hotmail.de>
+
+	* buildsym.c (record_line): Fix undefined behavior and preserve
+	lines at eof.
+
+2020-04-09  Kamil Rytarowski  <n54@gmx.com>
+
+	* auxv.h (svr4_auxv_parse): New.
+	* auxv.c (default_auxv_parse): Split into default_auxv_parse
+	and generic_auxv_parse.
+	(svr4_auxv_parse): Add.
+	* obsd-tdep.c: Include "auxv.h".
+	(obsd_auxv_parse): Remove.
+	(obsd_init_abi): Remove comment.
+	(obsd_init_abi): Change set_gdbarch_auxv_parse passed argument
+	from `obsd_auxv_parse' to `svr4_auxv_parse'.
+	* nbsd-tdep.c: Include "auxv.h".
+	(nbsd_init_abi): Call set_gdbarch_auxv_parse.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* nat/windows-nat.h (last_wait_event): Don't declare.
+	(wait_for_debug_event): Update comment.
+	* nat/windows-nat.c (last_wait_event): Now static.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (wait_for_debug_event): Move to
+	nat/windows-nat.c.
+	* nat/windows-nat.h (wait_for_debug_event): Declare.
+	* nat/windows-nat.c (wait_for_debug_event): Move from
+	windows-nat.c.  No longer static.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (get_windows_debug_event): Use
+	fetch_pending_stop.
+	* nat/windows-nat.h (fetch_pending_stop): Declare.
+	* nat/windows-nat.c (fetch_pending_stop): New function.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (windows_continue): Use matching_pending_stop and
+	continue_last_debug_event.
+	* nat/windows-nat.h (matching_pending_stop)
+	(continue_last_debug_event): Declare.
+	* nat/windows-nat.c (DEBUG_EVENTS): New define.
+	(matching_pending_stop, continue_last_debug_event): New
+	functions.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (MS_VC_EXCEPTION): Move to nat/windows-nat.c.
+	(handle_exception_result): Move to nat/windows-nat.h.
+	(DEBUG_EXCEPTION_SIMPLE): Remove.
+	(windows_nat::handle_ms_vc_exception): New function.
+	(handle_exception): Move to nat/windows-nat.c.
+	(get_windows_debug_event): Update.
+	(STATUS_WX86_BREAKPOINT, STATUS_WX86_SINGLE_STEP): Move to
+	nat/windows-nat.c.
+	* nat/windows-nat.h (handle_ms_vc_exception): Declare.
+	(handle_exception_result): Move from windows-nat.c.
+	(handle_exception): Declare.
+	* nat/windows-nat.c (MS_VC_EXCEPTION, handle_exception)
+	(STATUS_WX86_SINGLE_STEP, STATUS_WX86_BREAKPOINT): Move from
+	windows-nat.c.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (exception_count, event_count): Remove.
+	(handle_exception, get_windows_debug_event)
+	(do_initial_windows_stuff): Update.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (windows_nat::handle_load_dll)
+	(windows_nat::handle_unload_dll): Rename.  No longer static.
+	* nat/windows-nat.h (handle_load_dll, handle_unload_dll):
+	Declare.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* complaints.h (stop_whining): Declare at top-level.
+	(complaint): Don't declare stop_whining.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (windows_nat::handle_output_debug_string):
+	Rename.  No longer static.
+	* nat/windows-nat.h (handle_output_debug_string): Declare.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (current_process_handle, current_process_id)
+	(main_thread_id, last_sig, current_event, last_wait_event)
+	(current_windows_thread, desired_stop_thread_id, pending_stops)
+	(struct pending_stop, siginfo_er): Move to nat/windows-nat.c.
+	(display_selectors, fake_create_process)
+	(get_windows_debug_event): Update.
+	* nat/windows-nat.h (current_process_handle, current_process_id)
+	(main_thread_id, last_sig, current_event, last_wait_event)
+	(current_windows_thread, desired_stop_thread_id, pending_stops)
+	(struct pending_stop, siginfo_er): Move from windows-nat.c.
+	* nat/windows-nat.c (current_process_handle, current_process_id)
+	(main_thread_id, last_sig, current_event, last_wait_event)
+	(current_windows_thread, desired_stop_thread_id, pending_stops)
+	(siginfo_er): New globals.  Move from windows-nat.c.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (get_image_name): Move to nat/windows-nat.c.
+	(handle_load_dll): Update.
+	* nat/windows-nat.c (get_image_name): Move from windows-nat.c.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (enum thread_disposition_type): Move to
+	nat/windows-nat.h.
+	(windows_nat::thread_rec): Rename from thread_rec.  No longer
+	static.
+	(windows_add_thread, windows_nat_target::fetch_registers)
+	(windows_nat_target::store_registers, handle_exception)
+	(windows_nat_target::resume, get_windows_debug_event)
+	(windows_nat_target::get_tib_address)
+	(windows_nat_target::thread_name)
+	(windows_nat_target::thread_alive): Update.
+	* nat/windows-nat.h (enum thread_disposition_type): Move from
+	windows-nat.c.
+	(thread_rec): Declare.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c: Add "using namespace".
+	* nat/windows-nat.h: Wrap contents in windows_nat namespace.
+	* nat/windows-nat.c: Wrap contents in windows_nat namespace.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* nat/windows-nat.h (struct windows_thread_info): Declare
+	destructor.
+	* nat/windows-nat.c (~windows_thread_info): New.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	PR gdb/22992
+	* windows-nat.c (current_event): Update comment.
+	(last_wait_event, desired_stop_thread_id): New globals.
+	(struct pending_stop): New.
+	(pending_stops): New global.
+	(windows_nat_target) <stopped_by_sw_breakpoint>
+	<supports_stopped_by_sw_breakpoint>: New methods.
+	(windows_fetch_one_register): Add assertions.  Adjust PC.
+	(windows_continue): Handle pending stops.  Suspend other threads
+	when stepping.  Use last_wait_event
+	(wait_for_debug_event): New function.
+	(get_windows_debug_event): Use wait_for_debug_event.  Handle
+	pending stops.  Queue spurious stops.
+	(windows_nat_target::wait): Set stopped_at_software_breakpoint.
+	(windows_nat_target::kill): Use wait_for_debug_event.
+	* nat/windows-nat.h (struct windows_thread_info)
+	<stopped_at_software_breakpoint>: New field.
+	* nat/windows-nat.c (windows_thread_info::resume): Clear
+	stopped_at_software_breakpoint.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (enum thread_disposition_type): New.
+	(thread_rec): Replace "get_context" parameter with "disposition";
+	change type.
+	(windows_add_thread, windows_nat_target::fetch_registers)
+	(windows_nat_target::store_registers, handle_exception)
+	(windows_nat_target::resume, get_windows_debug_event)
+	(windows_nat_target::get_tib_address)
+	(windows_nat_target::thread_name)
+	(windows_nat_target::thread_alive): Update.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (thread_rec): Use windows_thread_info::suspend.
+	(windows_continue): Use windows_continue::resume.
+	* nat/windows-nat.h (struct windows_thread_info) <suspend,
+	resume>: Declare new methods.
+	* nat/windows-nat.c: New file.
+	* configure.nat (NATDEPFILES): Add nat/windows-nat.o when needed.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (windows_add_thread, windows_delete_thread)
+	(windows_nat_target::fetch_registers)
+	(windows_nat_target::store_registers, fake_create_process)
+	(windows_nat_target::resume, windows_nat_target::resume)
+	(get_windows_debug_event, windows_nat_target::wait)
+	(windows_nat_target::pid_to_str)
+	(windows_nat_target::get_tib_address)
+	(windows_nat_target::get_ada_task_ptid)
+	(windows_nat_target::thread_name)
+	(windows_nat_target::thread_alive): Use lwp, not tid.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (handle_exception)
+	(windows_nat_target::thread_name): Update.
+	* nat/windows-nat.h (windows_thread_info): Remove destructor.
+	<name>: Now unique_xmalloc_ptr.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (thread_rec)
+	(windows_nat_target::fetch_registers): Update.
+	* nat/windows-nat.h (struct windows_thread_info) <suspended>:
+	Update comment.
+	<debug_registers_changed, reload_context>: Now bool.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (windows_add_thread): Use new.
+	(windows_init_thread_list, windows_delete_thread): Use delete.
+	(get_windows_debug_event): Update.
+	* nat/windows-nat.h (struct windows_thread_info): Add constructor,
+	destructor, and initializers.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (struct windows_thread_info): Remove.
+	* nat/windows-nat.h: New file.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (struct windows_thread_info) <tid>: Rename from "id".
+	(thread_rec, windows_add_thread, windows_delete_thread)
+	(windows_continue): Update.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (struct windows_thread_info): Remove typedef.
+	(thread_head): Remove.
+	(thread_list): New global.
+	(thread_rec, windows_add_thread, windows_init_thread_list)
+	(windows_delete_thread, windows_continue): Update.
+
+2020-04-08  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* windows-tdep.h (windows_init_abi): Add comment.
+	(cygwin_init_abi): New declaration.
+	* windows-tdep.c: Split signal enumeration in two, one for
+	Windows and one for Cygwin.
+	(windows_gdb_signal_to_target): Only deal with signal of the
+	Windows OS ABI.
+	(cygwin_gdb_signal_to_target): New function.
+	(windows_init_abi): Rename to windows_init_abi_common, don't set
+	gdb_signal_to_target gdbarch method.  Add new new function with
+	this name.
+	(cygwin_init_abi): New function.
+	* amd64-windows-tdep.c (amd64_windows_init_abi_common): Add
+	comment.  Don't call windows_init_abi.
+	(amd64_windows_init_abi): Add comment, call windows_init_abi.
+	(amd64_cygwin_init_abi): Add comment, call cygwin_init_abi.
+	* i386-windows-tdep.c (i386_windows_init_abi): Rename to
+	i386_windows_init_abi_common, don't call windows_init_abi.  Add
+	a new function of this name.
+	(i386_cygwin_init_abi): New function.
+	(_initialize_i386_windows_tdep): Bind i386_cygwin_init_abi to
+	OS ABI Cygwin.
+
+2020-04-08  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/read.c (read_gdb_index_from_buffer): Remove objfile
+	parameter.c.
+	(dwarf2_read_gdb_index): Update.
+
+2020-04-07  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-tdep.c: Include "objfiles.h".
+	(nbsd_skip_solib_resolver): New.
+	(nbsd_init_abi): Call set_gdbarch_skip_solib_resolver().
+
+2020-04-07  Nitika Achra  <Nitika.Achra@amd.com>
+
+	* dwarf2/loc.c (loclist_describe_location): Call the function decode_debug_loclists_
+	addresses if DWARF version is 5 or more because DW_LLE_start* or DW_LLE_offset_pair
+	with DW_LLE_base_addressx are being emitted in DWARFv5.
+	Add the newly added kind DW_LOC_OFFSET_PAIR also.
+	The length of location description is an unsigned ULEB integer in DWARFv5 instead of
+	unsigned integer.
+
+2020-04-07  Nitika Achra  <Nitika.Achra@amd.com>
+
+	* dwarf2/loc.c (enum debug_loc_kind): Add a new kind DEBUG_LOC_OFFSET_PAIR.
+	(dwarf2_find_location_expression): Call the function decode_debug_loclists_
+	addresses if DWARF version is 5 or more. DW_LLE_start* or DW_LLE_offset_pair
+	with DW_LLE_base_addressx are being emitted in DWARFv5 instead of DW_LLE_GNU*.
+	Add applicable base address if the entry is DW_LLE_offset_pair from DWO.
+	(decode_debug_loclists_addresses): Return DEBUG_LOC_OFFSET_PAIR instead of
+	DEBUG_LOC_START_END in case of DW_LLE_offset_pair.
+
+
+2020-04-07  Nitika Achra  <Nitika.Achra@amd.com>
+
+	* dwarf2/read.c (cu_debug_loc_section): Added the declaration for the function.
+	(read_loclist_index): New function definition.
+	(lookup_loclist_base): New function definition.
+	(read_loclist_header): New function definition.
+	(dwarf2_cu): Add loclist_base and loclist_header field.
+	(dwarf2_locate_dwo_sections): Handle .debug_loclists.dwo section.
+	(read_full_die_1): Read the value of DW_AT_loclists_base.
+	(read_attribute_reprocess): Handle DW_FORM_loclistx.
+	(read_attribute_value): Handle DW_FORM_loclistx.
+	(skip_one_die): Handle DW_FORM_loclistx.
+	(loclist_header): New structure declaration.
+	* dwarf2/attribute.c (form_is_section_offset): Handle DW_FORM_loclistx.
+
+2020-04-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/read.h (struct dwarf2_psymtab): Remove two-parameters
+	constructor.  Remove `addr` parameter from other constructor and
+	add `per_cu` parameter.
+	* dwarf2/read.c (create_partial_symtab): Update.
+
+2020-04-07  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25796
+	* dwarf2/read.c (can_have_DW_AT_const_value_p): New function.
+	(partial_die_info::fixup): Inherit has_const_value.
+
+2020-04-07  Tom de Vries  <tdevries@suse.de>
+
+	* psymtab.c (maintenance_check_psymtabs): Skip static LOC_BLOCK
+	symbols without address.
+
+2020-04-06  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-nat.h (struct thread_info): Add forward declaration.
+	(nbsd_nat_target::thread_alive): Add.
+	(nbsd_nat_target::thread_name): Likewise.
+	(nbsd_nat_target::update_thread_list): Likewise.
+	(update_thread_list::post_attach): Likewise.
+	(post_attach::pid_to_str): Likewise.
+	* nbsd-nat.c: Include "gdbthread.h" and "inferior.h".
+	(nbsd_thread_lister): Add.
+	(nbsd_nat_target::thread_alive): Likewise.
+	(nbsd_nat_target::thread_name): Likewise.
+	(nbsd_add_threads): Likewise.
+	(update_thread_list::post_attach): Likewise.
+	(nbsd_nat_target::update_thread_list): Likewise.
+	(post_attach::pid_to_str): Likewise.
+
+2020-04-06  Tom Tromey  <tromey@adacore.com>
+
+	* ada-valprint.c (print_variant_part): Extract the variant field.
+	(print_field_values): Use the field as the outer value when
+	recursing.
+
+2020-04-06  Tom Tromey  <tromey@adacore.com>
+
+	* sh-nbsd-tdep.c: Include nbsd-tdep.h.
+	* ppc-nbsd-tdep.c: Include nbsd-tdep.h.
+	* mips-nbsd-tdep.c (mipsnbsd_init_abi): Add missing ";".
+	* arm-nbsd-tdep.c: Include nbsd-tdep.h.
+	* hppa-nbsd-tdep.c: Include nbsd-tdep.h.
+
 2020-04-06  Tom Tromey  <tromey@adacore.com>
 
 	* dwarf2/read.c (read_base_type) <DW_ATE_complex_float>: Handle
@@ -854,7 +2000,7 @@
 	* configure.tgt: Likewise.
 	* arc-tdep.c (arc_tdesc_init): Use arc_read_description.
 	(_initialize_arc_tdep): Don't initialize old target descriptions.
-        (arc_read_description): New function to cache target descriptions.
+	(arc_read_description): New function to cache target descriptions.
 	* arc-tdep.h (arc_read_description): Add proto type.
 	* arch/arc.c: New file.
 	* arch/arc.h: Likewise.
@@ -3220,32 +4366,32 @@
 2020-02-05  Iain Buclaw  <ibuclaw@gdcproject.org>
 
 	PR gdb/25190:
-        * gdb/remote-sim.c (gdb_os_write_stderr): Update.
-        * gdb/remote.c (remote_console_output): Update.
-        * gdb/ui-file.c (fputs_unfiltered): Rename to...
-        (ui_file_puts): ...this.
-        * gdb/ui-file.h (ui_file_puts): Add declaration.
-        * gdb/utils.c (emit_style_escape): Update.
-        (flush_wrap_buffer): Update.
-        (fputs_maybe_filtered): Update.
-        (fputs_unfiltered): Add function.
+	* gdb/remote-sim.c (gdb_os_write_stderr): Update.
+	* gdb/remote.c (remote_console_output): Update.
+	* gdb/ui-file.c (fputs_unfiltered): Rename to...
+	(ui_file_puts): ...this.
+	* gdb/ui-file.h (ui_file_puts): Add declaration.
+	* gdb/utils.c (emit_style_escape): Update.
+	(flush_wrap_buffer): Update.
+	(fputs_maybe_filtered): Update.
+	(fputs_unfiltered): Add function.
 
 2020-02-05  Iain Buclaw  <ibuclaw@gdcproject.org>
 
-        * gdb/event-loop.c (gdb_wait_for_event): Update.
-        * gdb/printcmd.c (printf_command): Update.
-        * gdb/remote-fileio.c (remote_fileio_func_write): Update.
-        * gdb/remote-sim.c (gdb_os_flush_stdout): Update.
-        (gdb_os_flush_stderr): Update.
-        * gdb/remote.c (remote_console_output): Update.
-        * gdb/ui-file.c (gdb_flush): Rename to...
-        (ui_file_flush): ...this.
-        (stderr_file::write): Update.
-        (stderr_file::puts): Update.
-        * gdb/ui-file.h (gdb_flush): Rename to...
-        (ui_file_flush): ...this.
-        * gdb/utils.c (gdb_flush): Add function.
-        * gdb/utils.h (gdb_flush): Add declaration.
+	* gdb/event-loop.c (gdb_wait_for_event): Update.
+	* gdb/printcmd.c (printf_command): Update.
+	* gdb/remote-fileio.c (remote_fileio_func_write): Update.
+	* gdb/remote-sim.c (gdb_os_flush_stdout): Update.
+	(gdb_os_flush_stderr): Update.
+	* gdb/remote.c (remote_console_output): Update.
+	* gdb/ui-file.c (gdb_flush): Rename to...
+	(ui_file_flush): ...this.
+	(stderr_file::write): Update.
+	(stderr_file::puts): Update.
+	* gdb/ui-file.h (gdb_flush): Rename to...
+	(ui_file_flush): ...this.
+	* gdb/utils.c (gdb_flush): Add function.
+	* gdb/utils.h (gdb_flush): Add declaration.
 
 2020-02-07  Tom Tromey  <tromey@adacore.com>
 
@@ -3959,7 +5105,7 @@
 	Add rtl_user_process_parameters type.
 
 2020-01-16  Pedro Alves  <palves@redhat.com>
-            Norbert Lange  <nolange79@gmail.com>
+	    Norbert Lange  <nolange79@gmail.com>
 
 	PR build/24805
 	* gdbsupport/gdb_proc_service.h (PS_EXPORT): New.
@@ -5384,7 +6530,7 @@
 
 	* tui/tui-disasm.c (tui_disasm_window::addr_is_displayed): Avoid
 	overflow by an early check of content vs threshold.
-        * tui/tui-source.c (tui_source_window::line_is_displayed):
+	* tui/tui-source.c (tui_source_window::line_is_displayed):
 	Likewise.
 
 2020-01-06  Eli Zaretskii  <eliz@gnu.org>

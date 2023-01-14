@@ -179,7 +179,7 @@ dump_objfile (struct objfile *objfile)
 static void
 dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   int index;
   char ms_type;
 
@@ -269,7 +269,7 @@ static void
 dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 {
   struct objfile *objfile = SYMTAB_OBJFILE (symtab);
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   int i;
   struct mdict_iterator miter;
   int len;
@@ -977,12 +977,8 @@ maintenance_expand_symtabs (const char *args, int from_tty)
 		 return (!basenames
 			 && (regexp == NULL || re_exec (filename)));
 	       },
-	       lookup_name_info::match_any (),
-	       [] (const char *symname)
-	       {
-		 /* Since we're not searching on symbols, just return true.  */
-		 return true;
-	       },
+	       NULL,
+	       NULL,
 	       NULL,
 	       ALL_DOMAIN);
 	  }
@@ -1054,7 +1050,7 @@ maintenance_print_one_line_table (struct symtab *symtab, void *data)
 	    uiout->field_signed ("line", item->line);
 	  else
 	    uiout->field_string ("line", _("END"));
-	  uiout->field_core_addr ("address", get_objfile_arch (objfile),
+	  uiout->field_core_addr ("address", objfile->arch (),
 				  item->pc);
 	  uiout->field_string ("is-stmt", item->is_stmt ? "Y" : "");
 	  uiout->text ("\n");

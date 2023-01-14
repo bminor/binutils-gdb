@@ -78,6 +78,17 @@ insert_all_fields (const aarch64_operand *self, aarch64_insn *code,
 
 /* Operand inserters.  */
 
+/* Insert nothing.  */
+bfd_boolean
+aarch64_ins_none (const aarch64_operand *self ATTRIBUTE_UNUSED,
+		  const aarch64_opnd_info *info ATTRIBUTE_UNUSED,
+		  aarch64_insn *code ATTRIBUTE_UNUSED,
+		  const aarch64_inst *inst ATTRIBUTE_UNUSED,
+		  aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  return TRUE;
+}
+
 /* Insert register number.  */
 bfd_boolean
 aarch64_ins_regno (const aarch64_operand *self, const aarch64_opnd_info *info,

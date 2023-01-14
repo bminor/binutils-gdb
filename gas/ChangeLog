@@ -1,3 +1,191 @@
+2020-04-22  Max Filippov  <jcmvbkbc@gmail.com>
+
+	PR ld/25861
+	* config/tc-xtensa.c (md_apply_fix): Replace
+	BFD_RELOC_XTENSA_DIFF{8,16,32} generation with
+	BFD_RELOC_XTENSA_PDIFF{8,16,32} and
+	BFD_RELOC_XTENSA_NDIFF{8,16,32} generation.
+	* testsuite/gas/xtensa/loc.d: Replace BFD_RELOC_XTENSA_DIFF16
+	with BFD_RELOC_XTENSA_PDIFF16 in the expected output.
+
+2020-04-22  Alan Modra  <amodra@gmail.com>
+
+	* config/obj-elf.c (elf_frob_symbol): Unconditionally remove
+	symbol for ".symver .. remove".
+	* doc/as.texi (.symver): Update.
+	* testsuite/gas/symver/symver11.s: Make foo weak.
+	* testsuite/gas/symver/symver11.d: Expect an error.
+	* testsuite/gas/symver/symver7.d: Allow other random symbols.
+
+2020-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/gas/symver/symver11.s: Add ".balign 8".
+
+2020-04-21  Andreas Schwab  <schwab@linux-m68k.org>
+
+	PR 25848
+	* testsuite/gas/m68k/operands.s: Add tests for cmpi.
+	* testsuite/gas/m68k/operands.d: Update.
+	* testsuite/gas/m68k/op68000.d: Update for new error messages.
+
+2020-04-21  Tamar Christina  <tamar.christina@arm.com>
+
+	PR binutils/24753
+	* testsuite/gas/arm/pr24753.d: New test.
+	* testsuite/gas/arm/pr24753.s: New test.
+
+2020-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/23840
+	PR gas/25295
+	* NEWS: Mention .symver extension.
+	* config/obj-elf.c (obj_elf_find_and_add_versioned_name): New
+	function.
+	(obj_elf_symver): Call obj_elf_find_and_add_versioned_name to
+	add a version name.  Add local, hidden and remove visibility
+	support.
+	(elf_frob_symbol): Handle the list of version names.  Update the
+	original symbol to local, hidden or remove it from the symbol
+	table.
+	(elf_frob_file_before_adjust): Handle the list of version names.
+	* config/obj-elf.h (elf_visibility): New.
+	(elf_versioned_name_list): Likewise.
+	(elf_obj_sy): Change local to bitfield. Add rename, bad_version
+	and visibility.  Change versioned_name pointer to struct
+	elf_versioned_name_list.
+	* doc/as.texi: Update .symver directive.
+	* testsuite/gas/symver/symver.exp: Run all *.d tests.  Add more
+	error checking tests.
+	* testsuite/gas/symver/symver6.d: New file.
+	* testsuite/gas/symver/symver7.d: Likewise.
+	* testsuite/gas/symver/symver7.s: Likewise.
+	* testsuite/gas/symver/symver8.d: Likewise.
+	* testsuite/gas/symver/symver8.s: Likewise.
+	* testsuite/gas/symver/symver9.s: Likewise.
+	* testsuite/gas/symver/symver9a.d: Likewise.
+	* testsuite/gas/symver/symver9b.d: Likewise.
+	* testsuite/gas/symver/symver10.s: Likewise.
+	* testsuite/gas/symver/symver10a.d: Likewise.
+	* testsuite/gas/symver/symver10b.d: Likewise.
+	* testsuite/gas/symver/symver11.d: Likewise.
+	* testsuite/gas/symver/symver11.s: Likewise.
+	* testsuite/gas/symver/symver12.d: Likewise.
+	* testsuite/gas/symver/symver12.s: Likewise.
+	* testsuite/gas/symver/symver13.d: Likewise.
+	* testsuite/gas/symver/symver13.s: Likewise.
+	* testsuite/gas/symver/symver14.d: Likewise.
+	* testsuite/gas/symver/symver14.l: Likewise.
+	* testsuite/gas/symver/symver15.d: Likewise.
+	* testsuite/gas/symver/symver15.l: Likewise.
+	* testsuite/gas/symver/symver6.l: Removed.
+	* testsuite/gas/symver/symver6.s: Updated.
+
+2020-04-20  Sudakshina Das  <sudi.das@arm.com>
+
+	* config/tc-aarch64.c (parse_barrier_psb): Update error messages
+	to include TSB.
+	* testsuite/gas/aarch64/system-2.d: Update -march and new tsb tests.
+	* testsuite/gas/aarch64/system-2.s: Add new tsb tests.
+	* testsuite/gas/aarch64/system.d: Update.
+
+2020-04-20  Sudakshina Das  <sudi.das@arm.com>
+
+	* testsuite/gas/aarch64/bti.d: Update -march option.
+	* testsuite/gas/aarch64/illegal-bti.d: Remove.
+	* testsuite/gas/aarch64/illegal-bti.l: Remove.
+	* testsuite/gas/aarch64/illegal-ras-1.l: Remove esb.
+	* testsuite/gas/aarch64/illegal-ras-1.s: Remove esb.
+
+2020-04-17  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-bfin.h (TC_EQUAL_IN_INSN): Allow assignment to dot.
+
+2020-04-16  Gagan Singh Sidhu  <broly@mac.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 25803
+	* config/obj-elf.c (obj_elf_type): Reject ifunc symbols on MIPS
+	targets.
+	* testsuite/gas/elf/elf.exp: Add MIPS targets to the list to skip
+	for the type-2 test.
+	* testsuite/gas/elf/type-noifunc.e: Update to allow for MIPS
+	targets running this test.
+
+2020-02-16  David Faust  <david.faust@oracle.com>
+
+	* testsuite/gas/bpf/bpf.exp: Run jump32 tests.
+	* testsuite/gas/bpf/jump32.s: New file.
+	* testsuite/gas/bpf/jump32.d: Likewise.
+
+2020-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* doc/c-i386.texi: Correct -mlfence-before-indirect-branch=
+	documentation.
+
+2020-04-08  Gunther Nikl  <gnikl@justmail.de>
+
+	* config/tc-moxie.h (MD_PCREL_FROM_SECTION): Delete define.
+	(md_pcrel_from): Remove prototytpe.
+	* config/tc-m32c.h (MD_PCREL_FROM_SECTION): Delete duplicate
+	define.
+	(md_pcrel_from_section): Remove duplicate prototype.
+	* tc.h (md_pcrel_from_section): Add prototype.
+	* config/tc-aarch64.h (md_pcrel_from_section): Remove prototype.
+	* config/tc-arc.h (md_pcrel_from_section): Likewise.
+	* config/tc-arm.h (md_pcrel_from_section): Likewise.
+	* config/tc-avr.h (md_pcrel_from_section): Likewise.
+	* config/tc-bfin.h (md_pcrel_from_section): Likewise.
+	* config/tc-bpf.h (md_pcrel_from_section): Likewise.
+	* config/tc-csky.h (md_pcrel_from_section): Likewise.
+	* config/tc-d10v.h (md_pcrel_from_section): Likewise.
+	* config/tc-d30v.h (md_pcrel_from_section): Likewise.
+	* config/tc-epiphany.h (md_pcrel_from_section): Likewise.
+	* config/tc-fr30.h (md_pcrel_from_section): Likewise.
+	* config/tc-frv.h (md_pcrel_from_section): Likewise.
+	* config/tc-iq2000.h (md_pcrel_from_section): Likewise.
+	* config/tc-lm32.h (md_pcrel_from_section): Likewise.
+	* config/tc-m32c.h (md_pcrel_from_section): Likewise.
+	* config/tc-m32r.h (md_pcrel_from_section): Likewise.
+	* config/tc-mcore.h (md_pcrel_from_section): Likewise.
+	* config/tc-mep.h (md_pcrel_from_section): Likewise.
+	* config/tc-metag.h (md_pcrel_from_section): Likewise.
+	* config/tc-microblaze.h (md_pcrel_from_section): Likewise.
+	* config/tc-mmix.h (md_pcrel_from_section): Likewise.
+	* config/tc-moxie.h (md_pcrel_from_section): Likewise.
+	* config/tc-msp430.h (md_pcrel_from_section): Likewise.
+	* config/tc-mt.h (md_pcrel_from_section): Likewise.
+	* config/tc-or1k.h (md_pcrel_from_section): Likewise.
+	* config/tc-ppc.h (md_pcrel_from_section): Likewise.
+	* config/tc-rl78.h (md_pcrel_from_section): Likewise.
+	* config/tc-rx.h (md_pcrel_from_section): Likewise.
+	* config/tc-s390.h (md_pcrel_from_section): Likewise.
+	* config/tc-sh.h (md_pcrel_from_section): Likewise.
+	* config/tc-xc16x.h (md_pcrel_from_section): Likewise.
+	* config/tc-xstormy16.h (md_pcrel_from_section): Likewise.
+	* config/tc-microblaze.h (md_begin, md_assemble, md_undefined_symbol,
+	md_show_usage, md_convert_frag, md_operand, md_number_to_chars,
+	md_estimate_size_before_relax, md_section_align, tc_gen_reloc,
+	md_apply_fix3): Delete prototypes.
+
+2020-04-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention support for Intel SERIALIZE and TSXLDTRK
+	instructions.
+
+2020-04-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* doc/c-z80.texi: Fix @xref warnings.
+
+2020-04-07  Lili Cui  <lili.cui@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .TSXLDTRK.
+	(cpu_noarch): Likewise.
+	* doc/c-i386.texi: Document TSXLDTRK.
+	* testsuite/gas/i386/i386.exp: Run TSXLDTRK tests.
+	* testsuite/gas/i386/tsxldtrk.d: Likewise.
+	* testsuite/gas/i386/tsxldtrk.s: Likewise.
+	* testsuite/gas/i386/x86-64-tsxldtrk.d: Likewise.
+
 2020-04-02  Lili Cui  <lili.cui@intel.com>
 
 	* config/tc-i386.c (cpu_arch): Add .serialize.

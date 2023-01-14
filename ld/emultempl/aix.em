@@ -472,8 +472,8 @@ gld${EMULATION_NAME}_handle_option (int optc)
       break;
 
     case OPTION_ERNOTOK:
-      link_info.unresolved_syms_in_objects = RM_GENERATE_ERROR;
-      link_info.unresolved_syms_in_shared_libs = RM_GENERATE_ERROR;
+      link_info.unresolved_syms_in_objects = RM_DIAGNOSE;
+      link_info.unresolved_syms_in_shared_libs = RM_DIAGNOSE;
       break;
 
     case OPTION_EROK:

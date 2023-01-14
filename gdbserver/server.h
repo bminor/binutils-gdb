@@ -81,20 +81,13 @@ extern bool disable_packet_T;
 extern bool run_once;
 extern bool non_stop;
 
-#if USE_WIN32API
-#include <winsock2.h>
-typedef SOCKET gdb_fildes_t;
-#else
-typedef int gdb_fildes_t;
-#endif
-
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 
 /* Functions from server.c.  */
 extern void handle_v_requests (char *own_buf, int packet_len,
 			       int *new_packet_len);
-extern int handle_serial_event (int err, gdb_client_data client_data);
-extern int handle_target_event (int err, gdb_client_data client_data);
+extern void handle_serial_event (int err, gdb_client_data client_data);
+extern void handle_target_event (int err, gdb_client_data client_data);
 
 /* Get rid of the currently pending stop replies that match PTID.  */
 extern void discard_queued_stop_replies (ptid_t ptid);

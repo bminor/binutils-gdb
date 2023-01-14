@@ -1,3 +1,159 @@
+2020-04-24  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (get_num_dynamic_syms): Check for nbuckets and nchains
+	non-zero.
+	(process_dynamic_section): Call get_num_dynamic_syms once rather
+	than in segment loop.  Break out of segment loop on a successful
+	load of dynamic symbols.  Formatting.
+	(process_object): Return error status from process_dynamic_section.
+
+2020-04-23  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* elf-bfd.h (elfcore_write_arc_v2): Add prototype.
+	* elf.c (elfcore_grok_arc_v2): New function.
+	(elfcore_grok_note): Call the new function to handle the corresponding
+	note.
+	(elfcore_write_arc_v2): New function.
+	(elfcore_write_register_note): Call the new function to handle the
+	corresponding pseudo-sections.
+
+2020-04-22  Max Filippov  <jcmvbkbc@gmail.com>
+
+	PR ld/25861
+	* readelf.c (is_none_reloc): Recognize
+	BFD_RELOC_XTENSA_PDIFF{8,16,32} and
+	BFD_RELOC_XTENSA_NDIFF{8,16,32}.
+
+2020-04-22  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: Remove Chris Faylor as the ix86 PE maintainer.
+
+2020-04-22  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (archive_file_offset, archive_file_size, dynamic_addr),
+	(dynamic_size, dynamic_nent, dynamic_strings, dynamic_strings_length),
+	(num_dynamic_syms, nbuckets, nchains, buckets, chains),
+	(ngnubuckets, gnubuckets, gnuchains, mipsxlat, ngnuchains),
+	(gnusymidx, dynamic_symbols, dynamic_syminfo, dynamic_syminfo_offset),
+	(dynamic_syminfo_nent, program_interpreter, dynamic_info),
+	(dynamic_info_DT_GNU_HASH, dynamic_info_DT_MIPS_XHASH, version_info),
+	(dynamic_section, symtab_shndx_list, group_count, section_groups),
+	(section_headers_groups): Move to struct filedata.  Update use
+	throughout file.
+
+2020-04-22  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (struct dump_data): New, used..
+	(cmdline): ..here, and..
+	(struct filedata): ..here.  Adjust all uses.
+	(request_dump_bynumber, request_dump, parse_args): Pass in a
+	struct dump_data* rather than Filedata*.  Adjust callers.
+	(main): Don't set cmdline.file_name.
+
+2020-04-20  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_symbol_table): Clear ngnuchains, ngnubuckets
+	and nbuckets.
+
+2020-04-20  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_section_headers): Free dynamic symbols etc.
+	earlier.
+
+2020-04-20  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (get_num_dynamic_syms): Formatting.  Don't return
+	on error without freeing.
+	(process_dynamic_section): Don't recreate dynamic symbols from
+	dynamic tag info when the dynamic symbols have already been
+	read via section headers.
+
+2020-04-17  Fredrik Strupe  <fredrik@strupe.net>
+
+	* testsuite/binutils-all/arm/vdup-cond.d: New test for testing that
+	conditional VDUP instructions are disassembled correctly.
+	* testsuite/binutils-all/arm/vdup-cond.s: New file used by
+	vdup-cond.d.
+	* testsuite/binutils-all/arm/vdup-thumb.d: New test for testing
+	that VDUP instructions (which are conditional in A32) can be
+	disassembled in thumb mode.
+	* testsuite/binutils-all/arm/vdup-cond.s: New file used by
+	vdup-thumb.d.
+
+2020-04-17  Alan Modra  <amodra@gmail.com>
+
+	PR 25840
+	* debug.c (debug_class_type_samep): Don't segfault on NULL type.
+
+2020-04-16  Alan Modra  <amodra@gmail.com>
+
+	* doc/binutils.texi: Mention --no-show-raw-insn in objdump
+	--no-addresses description.
+
+2020-04-15  Alan Modra  <amodra@gmail.com>
+
+	* objdump.c (no_addresses): New static var.
+	(usage): Print help for --no-addresses.
+	(long_options): Add --no-addresses entry.
+	(objdump_print_addr_with_sym, objdump_print_addr): Omit symbol address.
+	(disassemble_bytes): Don't print current line address, or reloc
+	address.
+	* doc/binutils.texi: Document objdump --no-addresses.
+
+2020-04-15  Alan Modra  <amodra@gmail.com>
+
+	PR 25822
+	* readelf.c (get_num_dynamic_syms): Don't set num_of_syms when
+	reading buckets or chains fails.
+
+2020-04-15  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_symbol_table): Zero gnubuckets, gnuchains
+	etc. after freeing.
+
+2020-04-15  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (get_group_flags): Translate text.
+	(get_file_type, get_symbol_binding, get_symbol_type),
+	(get_ppc64_symbol_other, get_symbol_other): Increase size of buffer.
+
+2020-04-15  Alan Modra  <amodra@gmail.com>
+
+	PR 25821
+	* readelf.c (get_num_dynamic_syms): Typo fix.
+
+2020-04-14  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_mips_specific): Free eopt and iopt.  Avoid
+	possibility of overflow when checking number of conflicts.
+
+2020-04-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25707
+	* readelf.c (nbuckets): New.
+	(nchains): Likewise.
+	(buckets): Likewise.
+	(chains): Likewise.
+	(ngnubuckets): Likewise.
+	(gnubuckets): Likewise.
+	(gnuchains): Likewise.
+	(mipsxlat): Likewise.
+	(ngnuchains): Likewise.
+	(gnusymidx): Likewise.
+	(VALID_SYMBOL_NAME): Likewise.
+	(VALID_DYNAMIC_NAME): Use it.
+	(get_dynamic_data): Moved before process_dynamic_section.
+	(get_num_dynamic_syms): New function.
+	(process_dynamic_section): Use DT_SYMTAB, DT_SYMENT, DT_HASH,
+	DT_GNU_HASH and DT_MIPS_XHASH to reconstruct dynamic symbol
+	table.  Use DT_STRTAB and DT_STRSZ to reconstruct dynamic string
+	table.
+	(get_symbol_index_type): Don't print "bad section index" when
+	there is no section header.
+	(print_dynamic_symbol): Rewrite.
+	(process_symbol_table): Call print_dynamic_symbol to dump dynamic
+	symbol table.
+
 2020-04-02  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* testsuite/lib/binutils-common.exp (supports_gnu_osabi): Don't

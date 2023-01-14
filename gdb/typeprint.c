@@ -715,20 +715,6 @@ struct cmd_list_element *setprinttypelist;
 
 struct cmd_list_element *showprinttypelist;
 
-static void
-set_print_type (const char *arg, int from_tty)
-{
-  printf_unfiltered (
-     "\"set print type\" must be followed by the name of a subcommand.\n");
-  help_list (setprintlist, "set print type ", all_commands, gdb_stdout);
-}
-
-static void
-show_print_type (const char *args, int from_tty)
-{
-  cmd_show_list (showprinttypelist, from_tty, "");
-}
-
 static bool print_methods = true;
 
 static void
@@ -827,12 +813,14 @@ Available FLAGS are:\n\
 Only one level of typedefs is unrolled.  See also \"ptype\"."));
   set_cmd_completer (c, expression_completer);
 
-  add_prefix_cmd ("type", no_class, show_print_type,
-		  _("Generic command for showing type-printing settings."),
-		  &showprinttypelist, "show print type ", 0, &showprintlist);
-  add_prefix_cmd ("type", no_class, set_print_type,
-		  _("Generic command for setting how types print."),
-		  &setprinttypelist, "set print type ", 0, &setprintlist);
+  add_show_prefix_cmd ("type", no_class,
+		       _("Generic command for showing type-printing settings."),
+		       &showprinttypelist, "show print type ", 0,
+		       &showprintlist);
+  add_basic_prefix_cmd ("type", no_class,
+			_("Generic command for setting how types print."),
+			&setprinttypelist, "set print type ", 0,
+			&setprintlist);
 
   add_setshow_boolean_cmd ("methods", no_class, &print_methods,
 			   _("\

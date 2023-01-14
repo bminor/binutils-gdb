@@ -27,26 +27,6 @@ static cmd_list_element *maintenance_set_test_settings_list;
 /* Command list for "maint show test-settings".  */
 static cmd_list_element *maintenance_show_test_settings_list;
 
-/* The "maintenance set test-settings" prefix command.  */
-
-static void
-maintenance_set_test_settings_cmd (const char *args, int from_tty)
-{
-  printf_unfiltered (_("\"maintenance set test-settings\" must be followed "
-		       "by the name of a set command.\n"));
-  help_list (maintenance_set_test_settings_list,
-	     "maintenance set test-settings ",
-	     all_commands, gdb_stdout);
-}
-
-/* The "maintenance show test-settings" prefix command.  */
-
-static void
-maintenance_show_test_settings_cmd (const char *args, int from_tty)
-{
-  cmd_show_list (maintenance_show_test_settings_list, from_tty, "");
-}
-
 /* Control variables for all the "maintenance set/show test-settings
    xxx" commands.  */
 
@@ -105,21 +85,21 @@ _initialize_maint_test_settings ()
 {
   maintenance_test_settings_filename = xstrdup ("/foo/bar");
 
-  add_prefix_cmd ("test-settings", class_maintenance,
-		  maintenance_set_test_settings_cmd, _("\
+  add_basic_prefix_cmd ("test-settings", class_maintenance,
+			_("\
 Set GDB internal variables used for set/show command infrastructure testing."),
-		  &maintenance_set_test_settings_list,
-		  "maintenance set test-settings ",
-		  0/*allow-unknown*/,
-		  &maintenance_set_cmdlist);
+			&maintenance_set_test_settings_list,
+			"maintenance set test-settings ",
+			0/*allow-unknown*/,
+			&maintenance_set_cmdlist);
 
-  add_prefix_cmd ("test-settings", class_maintenance,
-		  maintenance_show_test_settings_cmd, _("\
+  add_show_prefix_cmd ("test-settings", class_maintenance,
+		       _("\
 Show GDB internal variables used for set/show command infrastructure testing."),
-		  &maintenance_show_test_settings_list,
-		  "maintenance show test-settings ",
-		  0/*allow-unknown*/,
-		  &maintenance_show_cmdlist);
+		       &maintenance_show_test_settings_list,
+		       "maintenance show test-settings ",
+		       0/*allow-unknown*/,
+		       &maintenance_show_cmdlist);
 
   add_setshow_boolean_cmd ("boolean", class_maintenance,
 			   &maintenance_test_settings_boolean, _("\

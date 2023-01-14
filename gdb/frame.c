@@ -2913,19 +2913,6 @@ frame_prepare_for_sniffer (struct frame_info *frame,
 static struct cmd_list_element *set_backtrace_cmdlist;
 static struct cmd_list_element *show_backtrace_cmdlist;
 
-static void
-set_backtrace_cmd (const char *args, int from_tty)
-{
-  help_list (set_backtrace_cmdlist, "set backtrace ", all_commands,
-	     gdb_stdout);
-}
-
-static void
-show_backtrace_cmd (const char *args, int from_tty)
-{
-  cmd_show_list (show_backtrace_cmdlist, from_tty, "");
-}
-
 /* Definition of the "set backtrace" settings that are exposed as
    "backtrace" command options.  */
 
@@ -2969,16 +2956,16 @@ _initialize_frame ()
 
   gdb::observers::target_changed.attach (frame_observer_target_changed);
 
-  add_prefix_cmd ("backtrace", class_maintenance, set_backtrace_cmd, _("\
+  add_basic_prefix_cmd ("backtrace", class_maintenance, _("\
 Set backtrace specific variables.\n\
 Configure backtrace variables such as the backtrace limit"),
-		  &set_backtrace_cmdlist, "set backtrace ",
-		  0/*allow-unknown*/, &setlist);
-  add_prefix_cmd ("backtrace", class_maintenance, show_backtrace_cmd, _("\
+			&set_backtrace_cmdlist, "set backtrace ",
+			0/*allow-unknown*/, &setlist);
+  add_show_prefix_cmd ("backtrace", class_maintenance, _("\
 Show backtrace specific variables.\n\
 Show backtrace variables such as the backtrace limit."),
-		  &show_backtrace_cmdlist, "show backtrace ",
-		  0/*allow-unknown*/, &showlist);
+		       &show_backtrace_cmdlist, "show backtrace ",
+		       0/*allow-unknown*/, &showlist);
 
   add_setshow_uinteger_cmd ("limit", class_obscure,
 			    &user_set_backtrace_options.backtrace_limit, _("\

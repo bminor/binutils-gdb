@@ -136,7 +136,6 @@ extern int avr_force_relocation (struct fix *);
    of a PC relative instruction is the next instruction, so this
    macro would return the length of an instruction.  */
 #define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section (FIX, SEC)
-extern long md_pcrel_from_section (struct fix *, segT);
 
 /* The number of bytes to put into a word in a listing.  This affects
    the way the bytes are clumped together in the listing.  For

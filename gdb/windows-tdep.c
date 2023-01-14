@@ -41,55 +41,69 @@
 #define CYGWIN_DLL_NAME "cygwin1.dll"
 
 /* Windows signal numbers differ between MinGW flavors and between
-   those and Cygwin.  The below enumeration was gleaned from the
-   respective headers; the ones marked with MinGW64/Cygwin are defined
-   only by MinGW64 and Cygwin, not by mingw.org's MinGW.  FIXME: We
-   should really have distinct MinGW vs Cygwin OSABIs, and two
-   separate enums, selected at runtime.  */
+   those and Cygwin.  The below enumerations were gleaned from the
+   respective headers.  */
+
+/* Signal numbers for the various MinGW flavors.  The ones marked with
+   MinGW-w64 are defined by MinGW-w64, not by mingw.org's MinGW.  */
 
 enum
-  {
-   WINDOWS_SIGHUP = 1,	/* MinGW64/Cygwin */
-   WINDOWS_SIGINT = 2,
-   WINDOWS_SIGQUIT = 3,	/* MinGW64/Cygwin */
-   WINDOWS_SIGILL = 4,
-   WINDOWS_SIGTRAP = 5,	/* MinGW64/Cygwin */
-#ifdef __CYGWIN__
-   WINDOWS_SIGABRT = 6,
-#else
-   WINDOWS_SIGIOT = 6,	/* MinGW64 */
-#endif
-   WINDOWS_SIGEMT = 7,	/* MinGW64/Cygwin */
-   WINDOWS_SIGFPE = 8,
-   WINDOWS_SIGKILL = 9,	/* MinGW64/Cygwin */
-   WINDOWS_SIGBUS = 10,	/* MinGW64/Cygwin */
-   WINDOWS_SIGSEGV = 11,
-   WINDOWS_SIGSYS = 12,	/* MinGW64/Cygwin */
-   WINDOWS_SIGPIPE = 13,/* MinGW64/Cygwin */
-   WINDOWS_SIGALRM = 14,/* MinGW64/Cygwin */
-   WINDOWS_SIGTERM = 15,
-#ifdef __CYGWIN__
-   WINDOWS_SIGURG = 16,
-   WINDOWS_SIGSTOP = 17,
-   WINDOWS_SIGTSTP = 18,
-   WINDOWS_SIGCONT = 19,
-   WINDOWS_SIGCHLD = 20,
-   WINDOWS_SIGTTIN = 21,
-   WINDOWS_SIGTTOU = 22,
-   WINDOWS_SIGIO = 23,
-   WINDOWS_SIGXCPU = 24,
-   WINDOWS_SIGXFSZ = 25,
-   WINDOWS_SIGVTALRM = 26,
-   WINDOWS_SIGPROF = 27,
-   WINDOWS_SIGWINCH = 28,
-   WINDOWS_SIGLOST = 29,
-   WINDOWS_SIGUSR1 = 30,
-   WINDOWS_SIGUSR2 = 31
-#else
-   WINDOWS_SIGBREAK = 21,
-   WINDOWS_SIGABRT = 22
-#endif
-  };
+{
+  WINDOWS_SIGHUP = 1,	/* MinGW-w64 */
+  WINDOWS_SIGINT = 2,
+  WINDOWS_SIGQUIT = 3,	/* MinGW-w64 */
+  WINDOWS_SIGILL = 4,
+  WINDOWS_SIGTRAP = 5,	/* MinGW-w64 */
+  WINDOWS_SIGIOT = 6,	/* MinGW-w64 */
+  WINDOWS_SIGEMT = 7,	/* MinGW-w64 */
+  WINDOWS_SIGFPE = 8,
+  WINDOWS_SIGKILL = 9,	/* MinGW-w64 */
+  WINDOWS_SIGBUS = 10,	/* MinGW-w64 */
+  WINDOWS_SIGSEGV = 11,
+  WINDOWS_SIGSYS = 12,	/* MinGW-w64 */
+  WINDOWS_SIGPIPE = 13,	/* MinGW-w64 */
+  WINDOWS_SIGALRM = 14,	/* MinGW-w64 */
+  WINDOWS_SIGTERM = 15,
+  WINDOWS_SIGBREAK = 21,
+  WINDOWS_SIGABRT = 22,
+};
+
+/* Signal numbers for Cygwin.  */
+
+enum
+{
+  CYGWIN_SIGHUP = 1,
+  CYGWIN_SIGINT = 2,
+  CYGWIN_SIGQUIT = 3,
+  CYGWIN_SIGILL = 4,
+  CYGWIN_SIGTRAP = 5,
+  CYGWIN_SIGABRT = 6,
+  CYGWIN_SIGEMT = 7,
+  CYGWIN_SIGFPE = 8,
+  CYGWIN_SIGKILL = 9,
+  CYGWIN_SIGBUS = 10,
+  CYGWIN_SIGSEGV = 11,
+  CYGWIN_SIGSYS = 12,
+  CYGWIN_SIGPIPE = 13,
+  CYGWIN_SIGALRM = 14,
+  CYGWIN_SIGTERM = 15,
+  CYGWIN_SIGURG = 16,
+  CYGWIN_SIGSTOP = 17,
+  CYGWIN_SIGTSTP = 18,
+  CYGWIN_SIGCONT = 19,
+  CYGWIN_SIGCHLD = 20,
+  CYGWIN_SIGTTIN = 21,
+  CYGWIN_SIGTTOU = 22,
+  CYGWIN_SIGIO = 23,
+  CYGWIN_SIGXCPU = 24,
+  CYGWIN_SIGXFSZ = 25,
+  CYGWIN_SIGVTALRM = 26,
+  CYGWIN_SIGPROF = 27,
+  CYGWIN_SIGWINCH = 28,
+  CYGWIN_SIGLOST = 29,
+  CYGWIN_SIGUSR1 = 30,
+  CYGWIN_SIGUSR2 = 31,
+};
 
 struct cmd_list_element *info_w32_cmdlist;
 
@@ -588,11 +602,6 @@ show_maint_show_all_tib (struct ui_file *file, int from_tty,
 			    "Thread Information Block is %s.\n"), value);
 }
 
-static void
-info_w32_command (const char *args, int from_tty)
-{
-  help_list (info_w32_cmdlist, "info w32 ", class_info, gdb_stdout);
-}
 
 static int w32_prefix_command_valid = 0;
 void
@@ -600,14 +609,15 @@ init_w32_command_list (void)
 {
   if (!w32_prefix_command_valid)
     {
-      add_prefix_cmd ("w32", class_info, info_w32_command,
-		      _("Print information specific to Win32 debugging."),
-		      &info_w32_cmdlist, "info w32 ", 0, &infolist);
+      add_basic_prefix_cmd
+	("w32", class_info,
+	 _("Print information specific to Win32 debugging."),
+	 &info_w32_cmdlist, "info w32 ", 0, &infolist);
       w32_prefix_command_valid = 1;
     }
 }
 
-/* Implementation of `gdbarch_gdb_signal_to_target'.  */
+/* Implementation of `gdbarch_gdb_signal_to_target' for Windows.  */
 
 static int
 windows_gdb_signal_to_target (struct gdbarch *gdbarch, enum gdb_signal signal)
@@ -646,40 +656,81 @@ windows_gdb_signal_to_target (struct gdbarch *gdbarch, enum gdb_signal signal)
       return WINDOWS_SIGALRM;
     case GDB_SIGNAL_TERM:
       return WINDOWS_SIGTERM;
-#ifdef __CYGWIN__
+    }
+  return -1;
+}
+
+/* Implementation of `gdbarch_gdb_signal_to_target' for Cygwin.  */
+
+static int
+cygwin_gdb_signal_to_target (struct gdbarch *gdbarch, enum gdb_signal signal)
+{
+  switch (signal)
+    {
+    case GDB_SIGNAL_0:
+      return 0;
+    case GDB_SIGNAL_HUP:
+      return CYGWIN_SIGHUP;
+    case GDB_SIGNAL_INT:
+      return CYGWIN_SIGINT;
+    case GDB_SIGNAL_QUIT:
+      return CYGWIN_SIGQUIT;
+    case GDB_SIGNAL_ILL:
+      return CYGWIN_SIGILL;
+    case GDB_SIGNAL_TRAP:
+      return CYGWIN_SIGTRAP;
+    case GDB_SIGNAL_ABRT:
+      return CYGWIN_SIGABRT;
+    case GDB_SIGNAL_EMT:
+      return CYGWIN_SIGEMT;
+    case GDB_SIGNAL_FPE:
+      return CYGWIN_SIGFPE;
+    case GDB_SIGNAL_KILL:
+      return CYGWIN_SIGKILL;
+    case GDB_SIGNAL_BUS:
+      return CYGWIN_SIGBUS;
+    case GDB_SIGNAL_SEGV:
+      return CYGWIN_SIGSEGV;
+    case GDB_SIGNAL_SYS:
+      return CYGWIN_SIGSYS;
+    case GDB_SIGNAL_PIPE:
+      return CYGWIN_SIGPIPE;
+    case GDB_SIGNAL_ALRM:
+      return CYGWIN_SIGALRM;
+    case GDB_SIGNAL_TERM:
+      return CYGWIN_SIGTERM;
     case GDB_SIGNAL_URG:
-      return WINDOWS_SIGURG;
+      return CYGWIN_SIGURG;
     case GDB_SIGNAL_STOP:
-      return WINDOWS_SIGSTOP;
+      return CYGWIN_SIGSTOP;
     case GDB_SIGNAL_TSTP:
-      return WINDOWS_SIGTSTP;
+      return CYGWIN_SIGTSTP;
     case GDB_SIGNAL_CONT:
-      return WINDOWS_SIGCONT;
+      return CYGWIN_SIGCONT;
     case GDB_SIGNAL_CHLD:
-      return WINDOWS_SIGCHLD;
+      return CYGWIN_SIGCHLD;
     case GDB_SIGNAL_TTIN:
-      return WINDOWS_SIGTTIN;
+      return CYGWIN_SIGTTIN;
     case GDB_SIGNAL_TTOU:
-      return WINDOWS_SIGTTOU;
+      return CYGWIN_SIGTTOU;
     case GDB_SIGNAL_IO:
-      return WINDOWS_SIGIO;
+      return CYGWIN_SIGIO;
     case GDB_SIGNAL_XCPU:
-      return WINDOWS_SIGXCPU;
+      return CYGWIN_SIGXCPU;
     case GDB_SIGNAL_XFSZ:
-      return WINDOWS_SIGXFSZ;
+      return CYGWIN_SIGXFSZ;
     case GDB_SIGNAL_VTALRM:
-      return WINDOWS_SIGVTALRM;
+      return CYGWIN_SIGVTALRM;
     case GDB_SIGNAL_PROF:
-      return WINDOWS_SIGPROF;
+      return CYGWIN_SIGPROF;
     case GDB_SIGNAL_WINCH:
-      return WINDOWS_SIGWINCH;
+      return CYGWIN_SIGWINCH;
     case GDB_SIGNAL_PWR:
-      return WINDOWS_SIGLOST;
+      return CYGWIN_SIGLOST;
     case GDB_SIGNAL_USR1:
-      return WINDOWS_SIGUSR1;
+      return CYGWIN_SIGUSR1;
     case GDB_SIGNAL_USR2:
-      return WINDOWS_SIGUSR2;
-#endif	/* __CYGWIN__ */
+      return CYGWIN_SIGUSR2;
     }
   return -1;
 }
@@ -717,6 +768,8 @@ create_enum (struct gdbarch *gdbarch, int bit, const char *name,
 static const struct enum_value_name exception_values[] =
 {
   { 0x40000015, "FATAL_APP_EXIT" },
+  { 0x4000001E, "WX86_SINGLE_STEP" },
+  { 0x4000001F, "WX86_BREAKPOINT" },
   { 0x40010005, "DBG_CONTROL_C" },
   { 0x40010008, "DBG_CONTROL_BREAK" },
   { 0x80000002, "DATATYPE_MISALIGNMENT" },
@@ -865,11 +918,11 @@ windows_solib_create_inferior_hook (int from_tty)
 
 static struct target_so_ops windows_so_ops;
 
-/* To be called from the various GDB_OSABI_CYGWIN handlers for the
-   various Windows architectures and machine types.  */
+/* Common parts for gdbarch initialization for the Windows and Cygwin OS
+   ABIs.  */
 
-void
-windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+static void
+windows_init_abi_common (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   set_gdbarch_wchar_bit (gdbarch, 16);
   set_gdbarch_wchar_signed (gdbarch, 0);
@@ -881,14 +934,29 @@ windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_iterate_over_objfiles_in_search_order
     (gdbarch, windows_iterate_over_objfiles_in_search_order);
 
-  set_gdbarch_gdb_signal_to_target (gdbarch, windows_gdb_signal_to_target);
-
   windows_so_ops = solib_target_so_ops;
   windows_so_ops.solib_create_inferior_hook
     = windows_solib_create_inferior_hook;
   set_solib_ops (gdbarch, &windows_so_ops);
 
   set_gdbarch_get_siginfo_type (gdbarch, windows_get_siginfo_type);
+}
+
+/* See windows-tdep.h.  */
+void
+windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  windows_init_abi_common (info, gdbarch);
+  set_gdbarch_gdb_signal_to_target (gdbarch, windows_gdb_signal_to_target);
+}
+
+/* See windows-tdep.h.  */
+
+void
+cygwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  windows_init_abi_common (info, gdbarch);
+  set_gdbarch_gdb_signal_to_target (gdbarch, cygwin_gdb_signal_to_target);
 }
 
 /* Implementation of `tlb' variable.  */
@@ -929,23 +997,46 @@ is_linked_with_cygwin_dll (bfd *abfd)
   if (idata_section == nullptr)
     return false;
 
-  /* Find the virtual address of the .idata section.  We must subtract this
-     from the RVAs (relative virtual addresses) to obtain an offset in the
-     section. */
-  bfd_vma idata_addr
-    = pe_data (abfd)->pe_opthdr.DataDirectory[PE_IMPORT_TABLE].VirtualAddress;
+  bfd_size_type idata_section_size = bfd_section_size (idata_section);
+  internal_extra_pe_aouthdr *pe_extra = &pe_data (abfd)->pe_opthdr;
+  bfd_vma import_table_va = pe_extra->DataDirectory[PE_IMPORT_TABLE].VirtualAddress;
+  bfd_vma idata_section_va = bfd_section_vma (idata_section);
+
+  /* The section's virtual address as reported by BFD has the image base applied,
+     remove it.  */
+  gdb_assert (idata_section_va >= pe_extra->ImageBase);
+  idata_section_va -= pe_extra->ImageBase;
+
+  bfd_vma idata_section_end_va = idata_section_va + idata_section_size;
+
+  /* Make sure that the import table is indeed within the .idata section's range.  */
+  if (import_table_va < idata_section_va
+      || import_table_va >= idata_section_end_va)
+    {
+      warning (_("\
+%s: import table's virtual address (0x%" BFD_VMA_FMT "x) is outside .idata \
+section's range [0x%" BFD_VMA_FMT "x, 0x%" BFD_VMA_FMT "x[."),
+	       bfd_get_filename (abfd), import_table_va, idata_section_va,
+	       idata_section_end_va);
+      return false;
+    }
+
+  /* The import table starts at this offset into the .idata section.  */
+  bfd_vma import_table_offset_in_sect = import_table_va - idata_section_va;
 
   /* Get the section's data.  */
   gdb::byte_vector idata_contents;
   if (!gdb_bfd_get_full_section_contents (abfd, idata_section, &idata_contents))
     {
-      warning (_("Failed to get content of .idata section."));
+      warning (_("%s: failed to get contents of .idata section."),
+	       bfd_get_filename (abfd));
       return false;
     }
 
-  size_t idata_size = idata_contents.size ();
-  const gdb_byte *iter = idata_contents.data ();
-  const gdb_byte *end = idata_contents.data () + idata_size;
+  gdb_assert (idata_contents.size () == idata_section_size);
+
+  const gdb_byte *iter = idata_contents.data () + import_table_offset_in_sect;
+  const gdb_byte *end = idata_contents.data () + idata_section_size;
   const pe_import_directory_entry null_dir_entry = { 0 };
 
   /* Iterate through all directory entries.  */
@@ -954,8 +1045,8 @@ is_linked_with_cygwin_dll (bfd *abfd)
       /* Is there enough space left in the section for another entry?  */
       if (iter + sizeof (pe_import_directory_entry) > end)
 	{
-	  warning (_("Failed to parse .idata section: unexpected end of "
-		     ".idata section."));
+	  warning (_("%s: unexpected end of .idata section."),
+		   bfd_get_filename (abfd));
 	  break;
 	}
 
@@ -966,34 +1057,35 @@ is_linked_with_cygwin_dll (bfd *abfd)
 		  sizeof (pe_import_directory_entry)) == 0)
 	break;
 
-      bfd_vma name_addr = dir_entry->name_rva;
+      bfd_vma name_va = dir_entry->name_rva;
 
       /* If the name's virtual address is smaller than the section's virtual
          address, there's a problem.  */
-      if (name_addr < idata_addr
-	  || name_addr >= (idata_addr + idata_size))
+      if (name_va < idata_section_va || name_va >= idata_section_end_va)
 	{
 	  warning (_("\
-Failed to parse .idata section: name's virtual address (0x%" BFD_VMA_FMT "x) \
-is outside .idata section's range [0x%" BFD_VMA_FMT "x, 0x%" BFD_VMA_FMT "x[."),
-		   name_addr, idata_addr, idata_addr + idata_size);
+%s: name's virtual address (0x%" BFD_VMA_FMT "x) is outside .idata section's \
+range [0x%" BFD_VMA_FMT "x, 0x%" BFD_VMA_FMT "x[."),
+		   bfd_get_filename (abfd), name_va, idata_section_va,
+		   idata_section_end_va);
 	  break;
 	}
 
-      const gdb_byte *name = &idata_contents[name_addr - idata_addr];
+      const gdb_byte *name = &idata_contents[name_va - idata_section_va];
 
-      /* Make sure we don't overshoot the end of the section with the streq.  */
-      if (name + sizeof (CYGWIN_DLL_NAME) > end)
-	continue;
-
-      /* Finally, check if this is the dll name we are looking for.  */
-      if (streq ((const char *) name, CYGWIN_DLL_NAME))
-	return true;
+      /* Make sure we don't overshoot the end of the section with the
+	 streq.  */
+      if (name + sizeof (CYGWIN_DLL_NAME) <= end)
+	{
+	  /* Finally, check if this is the dll name we are looking for.  */
+	  if (streq ((const char *) name, CYGWIN_DLL_NAME))
+	    return true;
+	}
 
       iter += sizeof (pe_import_directory_entry);
     }
 
-    return false;
+  return false;
 }
 
 void _initialize_windows_tdep ();

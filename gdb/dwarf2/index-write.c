@@ -1426,18 +1426,15 @@ write_gdbindex (struct dwarf2_per_objfile *dwarf2_per_objfile, FILE *out_file,
 	= dwarf2_per_objfile->all_comp_units[i];
       partial_symtab *psymtab = per_cu->v.psymtab;
 
-      /* CU of a shared file from 'dwz -m' may be unused by this main file.
-	 It may be referenced from a local scope but in such case it does not
-	 need to be present in .gdb_index.  */
-      if (psymtab == NULL)
-	continue;
+      if (psymtab != NULL)
+	{
+	  if (psymtab->user == NULL)
+	    recursively_write_psymbols (objfile, psymtab, &symtab,
+					psyms_seen, i);
 
-      if (psymtab->user == NULL)
-	recursively_write_psymbols (objfile, psymtab, &symtab,
-				    psyms_seen, i);
-
-      const auto insertpair = cu_index_htab.emplace (psymtab, i);
-      gdb_assert (insertpair.second);
+	  const auto insertpair = cu_index_htab.emplace (psymtab, i);
+	  gdb_assert (insertpair.second);
+	}
 
       /* The all_comp_units list contains CUs read from the objfile as well as
 	 from the eventual dwz file.  We need to place the entry in the
@@ -1496,7 +1493,7 @@ write_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile,
   const bool dwarf5_is_dwarf64 = check_dwarf64_offsets (dwarf2_per_objfile);
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   const enum bfd_endian dwarf5_byte_order
-    = gdbarch_byte_order (get_objfile_arch (objfile));
+    = gdbarch_byte_order (objfile->arch ());
 
   /* The CU list is already sorted, so we don't need to do additional
      work here.  Also, the debug_types entries do not appear in

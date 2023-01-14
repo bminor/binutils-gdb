@@ -1,3 +1,63 @@
+2020-04-21  Andreas Schwab  <schwab@linux-m68k.org>
+
+	PR 25848
+	* m68k-opc.c (m68k_opcodes): Allow pc-rel for second operand of
+	cmpi only on m68020up and cpu32.
+
+2020-04-20  Sudakshina Das  <sudi.das@arm.com>
+
+	* aarch64-asm.c (aarch64_ins_none): New.
+	* aarch64-asm.h (ins_none): New declaration.
+	* aarch64-dis.c (aarch64_ext_none): New.
+	* aarch64-dis.h (ext_none): New declaration.
+	* aarch64-opc.c (aarch64_print_operand): Update case for
+	AARCH64_OPND_BARRIER_PSB.
+	* aarch64-tbl.h (aarch64_opcode_table): Add tsb.
+	(AARCH64_OPERANDS): Update inserter/extracter for
+	AARCH64_OPND_BARRIER_PSB to use new dummy functions.
+	* aarch64-asm-2.c: Regenerated.
+	* aarch64-dis-2.c: Regenerated.
+	* aarch64-opc-2.c: Regenerated.
+
+2020-04-20  Sudakshina Das  <sudi.das@arm.com>
+
+	* aarch64-tbl.h (aarch64_feature_bti, BTI, BTI_INSN): Remove.
+	(aarch64_feature_ras, RAS): Likewise.
+	(aarch64_feature_stat_profile, STAT_PROFILE): Likewise.
+	(aarch64_opcode_table): Update bti, xpaclri, pacia1716, pacib1716,
+	autia1716, autib1716, esb, psb, dgh, paciaz, paciasp, pacibz, pacibsp,
+	autiaz, autiasp, autibz, autibsp to be CORE_INSN.
+	* aarch64-asm-2.c: Regenerated.
+	* aarch64-dis-2.c: Regenerated.
+	* aarch64-opc-2.c: Regenerated.
+
+2020-04-17  Fredrik Strupe  <fredrik@strupe.net>
+
+	* arm-dis.c (neon_opcodes): Fix VDUP instruction masks.
+	(print_insn_neon): Support disassembly of conditional
+	instructions.
+
+2020-02-16  David Faust  <david.faust@oracle.com>
+
+	* bpf-desc.c: Regenerate.
+	* bpf-desc.h: Likewise.
+	* bpf-opc.c: Regenerate.
+	* bpf-opc.h: Likewise.
+
+2020-04-07  Lili Cui  <lili.cui@intel.com>
+
+	* i386-dis.c (enum): Add PREFIX_0F01_REG_5_MOD_3_RM_1,
+	(prefix_table): New instructions (see prefixes above).
+	(rm_table): Likewise
+	* i386-gen.c (cpu_flag_init): Add CPU_TSXLDTRK_FLAGS,
+	CPU_ANY_TSXLDTRK_FLAGS.
+	(cpu_flags): Add CpuTSXLDTRK.
+	* i386-opc.h (enum): Add CpuTSXLDTRK.
+	(i386_cpu_flags): Add cputsxldtrk.
+	* i386-opc.tbl: Add XSUSPLDTRK insns.
+	* i386-init.h: Regenerate.
+	* i386-tbl.h: Likewise.
+
 2020-04-02  Lili Cui  <lili.cui@intel.com>
 
 	* i386-dis.c (prefix_table): New instructions serialize.

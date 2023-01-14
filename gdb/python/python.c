@@ -27,7 +27,7 @@
 #include "objfiles.h"
 #include "value.h"
 #include "language.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 #include "readline/tilde.h"
 #include "python.h"
 #include "extension-priv.h"
@@ -975,7 +975,7 @@ struct gdbpy_event
   {
   }
 
-  gdbpy_event (gdbpy_event &&other)
+  gdbpy_event (gdbpy_event &&other) noexcept
     : m_func (other.m_func)
   {
     other.m_func = nullptr;
@@ -1389,7 +1389,7 @@ gdbpy_source_objfile_script (const struct extension_language_defn *extlang,
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (get_objfile_arch (objfile), current_language);
+  gdbpy_enter enter_py (objfile->arch (), current_language);
   gdbpy_current_objfile = objfile;
 
   python_run_simple_file (file, filename);
@@ -1411,7 +1411,7 @@ gdbpy_execute_objfile_script (const struct extension_language_defn *extlang,
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (get_objfile_arch (objfile), current_language);
+  gdbpy_enter enter_py (objfile->arch (), current_language);
   gdbpy_current_objfile = objfile;
 
   PyRun_SimpleString (script);
@@ -1590,23 +1590,6 @@ python_command (const char *arg, int from_tty)
 static struct cmd_list_element *user_set_python_list;
 static struct cmd_list_element *user_show_python_list;
 
-/* Function for use by 'set python' prefix command.  */
-
-static void
-user_set_python (const char *args, int from_tty)
-{
-  help_list (user_set_python_list, "set python ", all_commands,
-	     gdb_stdout);
-}
-
-/* Function for use by 'show python' prefix command.  */
-
-static void
-user_show_python (const char *args, int from_tty)
-{
-  cmd_show_list (user_show_python_list, from_tty, "");
-}
-
 /* Initialize the Python code.  */
 
 #ifdef HAVE_PYTHON
@@ -1701,7 +1684,12 @@ do_start_initialization ()
 #endif
 
   Py_Initialize ();
+#if PY_VERSION_HEX < 0x03090000
+  /* PyEval_InitThreads became deprecated in Python 3.9 and will
+     be removed in Python 3.11.  Prior to Python 3.7, this call was
+     required to initialize the GIL.  */
   PyEval_InitThreads ();
+#endif
 
 #ifdef IS_PY3K
   gdb_module = PyImport_ImportModule ("_gdb");
@@ -1866,15 +1854,15 @@ This command is only a placeholder.")
   add_com_alias ("py", "python", class_obscure, 1);
 
   /* Add set/show python print-stack.  */
-  add_prefix_cmd ("python", no_class, user_show_python,
-		  _("Prefix command for python preference settings."),
-		  &user_show_python_list, "show python ", 0,
-		  &showlist);
+  add_basic_prefix_cmd ("python", no_class,
+			_("Prefix command for python preference settings."),
+			&user_show_python_list, "show python ", 0,
+			&showlist);
 
-  add_prefix_cmd ("python", no_class, user_set_python,
-		  _("Prefix command for python preference settings."),
-		  &user_set_python_list, "set python ", 0,
-		  &setlist);
+  add_show_prefix_cmd ("python", no_class,
+		       _("Prefix command for python preference settings."),
+		       &user_set_python_list, "set python ", 0,
+		       &setlist);
 
   add_setshow_enum_cmd ("print-stack", no_class, python_excp_enums,
 			&gdbpy_should_print_stack, _("\

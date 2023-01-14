@@ -691,6 +691,15 @@ malloc_failure (long size)
     }
 }
 
+/* See common/errors.h.  */
+
+void
+flush_streams ()
+{
+  gdb_stdout->flush ();
+  gdb_stderr->flush ();
+}
+
 /* My replacement for the read system call.
    Used like `read' but keeps going if `read' returns too soon.  */
 
@@ -3433,7 +3442,7 @@ copy_bitwise (gdb_byte *dest, ULONGEST dest_offset,
 	buf |= *source << avail;
 
       buf &= (1 << nbits) - 1;
-      *dest = (*dest & (~0 << nbits)) | buf;
+      *dest = (*dest & (~0U << nbits)) | buf;
     }
 }
 

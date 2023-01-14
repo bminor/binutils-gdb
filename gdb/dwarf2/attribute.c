@@ -78,7 +78,8 @@ attribute::form_is_section_offset () const
 {
   return (form == DW_FORM_data4
           || form == DW_FORM_data8
-	  || form == DW_FORM_sec_offset);
+	  || form == DW_FORM_sec_offset
+	  || form == DW_FORM_loclistx);
 }
 
 /* See attribute.h.  */

@@ -1,3 +1,200 @@
+2020-04-22  Hannes Domani  <ssbssa@yahoo.de>
+
+	* server.cc (handle_search_memory_1): Fix gdb_read_memory return value
+	comparison.
+
+2020-04-16  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.cc (windows_nat::handle_access_violation): New
+	function.
+
+2020-04-15  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* win32-low.cc (get_child_debug_event): Fix format string warning.
+
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
+	* server.h (gdb_fildes_t): Remove typedef.
+	* remote-utils.c (remote_desc, list_desc): Now int.
+	(INVALID_DESCRIPTOR): Remove.
+	(gdb_connected, remote_close)
+	(check_remote_input_interrupt_request): Update.
+	* utils.h (pfildes): Don't declare.
+	* utils.c (pfildes): Remove.
+
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
+	* server.h (handle_serial_event, handle_target_event): Update.
+	* server.c: Don't call initialize_event_loop.
+	(keep_processing_events): New global.
+	(handle_serial_event): Return void.  Set keep_processing_events.
+	(handle_target_event): Return void.
+	(start_event_loop): Move from event-loop.c.  Rewrite.
+	* remote-utils.c (handle_accept_event): Return void.
+	(reset_readchar): Use delete_timer.
+	(process_remaining): Return void.
+	(reschedule): Use create_timer.
+	* event-loop.h: Remove.
+	* event-loop.cc: Remove.
+	* Makefile.in (OBS): Use gdbsupport/event-loop.o, not event-loop.o.
+
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
+	* server.c (invoke_async_signal_handlers)
+	(check_async_event_handlers, flush_streams, gdb_select): New
+	functions.
+
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+	* config.in: Rebuild.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	PR gdb/22992
+	* win32-low.c (child_continue): Call matching_pending_stop.
+	(get_child_debug_event): Call fetch_pending_stop.  Push pending
+	stop when needed.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.h  (win32_process_target::stopped_by_sw_breakpoint)
+	(win32_process_target::supports_stopped_by_sw_breakpoint):
+	Declare.
+	* win32-low.c (win32_supports_z_point_type): Always handle
+	Z_PACKET_SW_BP.
+	(win32_insert_point): Call insert_memory_breakpoint when needed.
+	(win32_remove_point): Call remove_memory_breakpoint when needed.
+	(win32_process_target::stopped_by_sw_breakpoint)
+	(win32_process_target::supports_stopped_by_sw_breakpoint): New
+	methods.
+	(win32_target_ops): Update.
+	(maybe_adjust_pc): New function.
+	(win32_wait): Call maybe_adjust_pc.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.h (struct win32_target_ops) <decr_pc_after_break>: New
+	field.
+	* win32-i386-low.c (the_low_target): Update.
+	* win32-arm-low.c (the_low_target): Update.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.h (win32_process_target::read_pc)
+	(win32_process_target::write_pc): Declare.
+	* win32-low.c (win32_process_target::read_pc)
+	(win32_process_target::write_pc): New methods.
+	* win32-i386-low.c (i386_win32_get_pc, i386_win32_set_pc): New
+	functions.
+	(the_low_target): Update.
+	* win32-arm-low.c (arm_win32_get_pc, arm_win32_set_pc): New
+	functions.
+	(the_low_target): Update.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.c (win32_kill, get_child_debug_event): Use
+	wait_for_debug_event.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.c (child_continue): Call continue_last_debug_event.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.c (handle_exception): Remove.
+	(windows_nat::handle_ms_vc_exception): New function.
+	(get_child_debug_event): Add "continue_status" parameter.
+	Update.
+	(win32_wait): Update.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.c (windows_nat::handle_load_dll): Rename from
+	handle_load_dll.  No longer static.
+	(windows_nat::handle_unload_dll): Rename from handle_unload_dll.
+	No longer static.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.c (handle_output_debug_string): Add parameter.  Change
+	return type.
+	(win32_kill, get_child_debug_event): Update.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.c (current_process_handle, current_process_id)
+	(main_thread_id, last_sig, current_event, siginfo_er): Move to
+	nat/windows-nat.c.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.c (get_image_name): Remove.
+	(handle_load_dll): Update.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.c (windows_nat::thread_rec): Rename from thread_rec.
+	No longer static.  Change parameters.
+	(child_add_thread, child_fetch_inferior_registers)
+	(child_store_inferior_registers, win32_resume)
+	(win32_get_tib_address): Update.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.h (struct win32_target_ops): Use qualified names where
+	needed.
+	* win32-i386-low.c: Add "using namespace".
+	* win32-low.c: Add "using namespace".
+	* win32-arm-low.c: Add "using namespace".
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.c (delete_thread_info): Don't call CloseHandle.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.c (win32_require_context, suspend_one_thread): Use
+	windows_thread_info::suspend.
+	(continue_one_thread): Use windows_thread_info::resume.
+	* configure.srv (srv_tgtobj): Add windows-nat.o when needed.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* win32-i386-low.c (update_debug_registers)
+	(i386_prepare_to_resume, i386_thread_added): Update.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.c (child_add_thread): Use new.
+	(delete_thread_info): Use delete.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.h (struct windows_thread_info): Remove.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.h (struct windows_thread_info): Rename from
+	win32_thread_info.  Remove typedef.
+	(struct win32_target_ops, win32_require_context): Update.
+	* win32-low.c (win32_get_thread_context)
+	(win32_set_thread_context, win32_prepare_to_resume)
+	(win32_require_context, thread_rec, child_add_thread)
+	(delete_thread_info, continue_one_thread)
+	(child_fetch_inferior_registers, child_store_inferior_registers)
+	(win32_resume, suspend_one_thread, win32_get_tib_address):
+	Update.
+	* win32-i386-low.c (update_debug_registers)
+	(win32_get_current_dr, i386_get_thread_context)
+	(i386_prepare_to_resume, i386_thread_added, i386_single_step)
+	(i386_fetch_inferior_register, i386_store_inferior_register):
+	Update.
+	* win32-arm-low.c (arm_get_thread_context)
+	(arm_fetch_inferior_register, arm_store_inferior_register):
+	Update.
+
 2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* linux-low.h (struct linux_target_ops): Remove.

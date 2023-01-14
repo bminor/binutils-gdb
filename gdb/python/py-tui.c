@@ -233,7 +233,7 @@ public:
 
   ~gdbpy_tui_window_maker ();
 
-  gdbpy_tui_window_maker (gdbpy_tui_window_maker &&other)
+  gdbpy_tui_window_maker (gdbpy_tui_window_maker &&other) noexcept
     : m_constr (std::move (other.m_constr))
   {
   }

@@ -30,7 +30,7 @@ set objmainfile [standard_output_file ${testfile}-main.o]
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" $objsfile object {}] != ""
      || [gdb_compile "${srcdir}/${subdir}/${srcfile2}" $objfuncfile object {}] != ""
      || [gdb_compile "${srcdir}/${subdir}/${srcfile3}" $objmainfile object {debug}] != ""
-     || [gdb_compile "$objsfile $objfuncfile $objmainfile" $binfile executable {}] != "" } {
+     || [gdb_compile "$objfuncfile $objsfile $objmainfile" $binfile executable {}] != "" } {
     return -1
 }
 

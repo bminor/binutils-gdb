@@ -25,7 +25,7 @@
 #include "infrun.h"
 #include "target.h"
 #include "terminal.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 #include "event-top.h"
 #include "interps.h"
 #include <signal.h>
@@ -39,8 +39,9 @@
 #include "maint.h"
 #include "gdbsupport/buffer.h"
 #include "ser-event.h"
-#include "gdb_select.h"
+#include "gdbsupport/gdb_select.h"
 #include "gdbsupport/gdb-sigmask.h"
+#include "async-event.h"
 
 /* readline include files.  */
 #include "readline/readline.h"

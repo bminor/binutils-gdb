@@ -3389,7 +3389,8 @@ xcoff_ppc_relocate_section (bfd *output_bfd,
 		  (info, h->root.root.string,
 		   input_bfd, input_section,
 		   rel->r_vaddr - input_section->vma,
-		   info->unresolved_syms_in_objects == RM_GENERATE_ERROR);
+		   info->unresolved_syms_in_objects == RM_DIAGNOSE &&
+		       !info->warn_unresolved_syms);
 
 	      if (h->root.type == bfd_link_hash_defined
 		  || h->root.type == bfd_link_hash_defweak)

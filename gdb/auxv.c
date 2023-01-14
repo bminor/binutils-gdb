@@ -248,32 +248,63 @@ memory_xfer_auxv (struct target_ops *ops,
   return procfs_xfer_auxv (readbuf, writebuf, offset, len, xfered_len);
 }
 
-/* Read one auxv entry from *READPTR, not reading locations >= ENDPTR.
-   Return 0 if *READPTR is already at the end of the buffer.
-   Return -1 if there is insufficient buffer for a whole entry.
-   Return 1 if an entry was read into *TYPEP and *VALP.  */
-int
-default_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
-		   gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+/* This function compared to other auxv_parse functions: it takes the size of
+   the auxv type field as a parameter.  */
+
+static int
+generic_auxv_parse (struct gdbarch *gdbarch, gdb_byte **readptr,
+		    gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp,
+		    int sizeof_auxv_type)
 {
-  const int sizeof_auxv_field = gdbarch_ptr_bit (target_gdbarch ())
-				/ TARGET_CHAR_BIT;
-  const enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
+  const int sizeof_auxv_val = TYPE_LENGTH (ptr_type);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte *ptr = *readptr;
 
   if (endptr == ptr)
     return 0;
 
-  if (endptr - ptr < sizeof_auxv_field * 2)
+  if (endptr - ptr < 2 * sizeof_auxv_val)
     return -1;
 
-  *typep = extract_unsigned_integer (ptr, sizeof_auxv_field, byte_order);
-  ptr += sizeof_auxv_field;
-  *valp = extract_unsigned_integer (ptr, sizeof_auxv_field, byte_order);
-  ptr += sizeof_auxv_field;
+  *typep = extract_unsigned_integer (ptr, sizeof_auxv_type, byte_order);
+  /* Even if the auxv type takes less space than an auxv value, there is
+     padding after the type such that the value is aligned on a multiple of
+     its size (and this is why we advance by `sizeof_auxv_val` and not
+     `sizeof_auxv_type`).  */
+  ptr += sizeof_auxv_val;
+  *valp = extract_unsigned_integer (ptr, sizeof_auxv_val, byte_order);
+  ptr += sizeof_auxv_val;
 
   *readptr = ptr;
   return 1;
+}
+
+/* See auxv.h.  */
+
+int
+default_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
+		    gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+{
+  struct gdbarch *gdbarch = target_gdbarch ();
+  struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
+  const int sizeof_auxv_type = TYPE_LENGTH (ptr_type);
+
+  return generic_auxv_parse (gdbarch, readptr, endptr, typep, valp,
+			     sizeof_auxv_type);
+}
+
+/* See auxv.h.  */
+
+int
+svr4_auxv_parse (struct gdbarch *gdbarch, gdb_byte **readptr,
+		 gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+{
+  struct type *int_type = builtin_type (gdbarch)->builtin_int;
+  const int sizeof_auxv_type = TYPE_LENGTH (int_type);
+
+  return generic_auxv_parse (gdbarch, readptr, endptr, typep, valp,
+			     sizeof_auxv_type);
 }
 
 /* Read one auxv entry from *READPTR, not reading locations >= ENDPTR.

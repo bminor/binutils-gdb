@@ -753,7 +753,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 		  long symtab_offset, unsigned int nsyms,
 		  struct objfile *objfile)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   struct context_stack *newobj = nullptr;
   struct coff_symbol coff_symbol;
   struct coff_symbol *cs = &coff_symbol;
@@ -1402,7 +1402,7 @@ static void
 enter_linenos (long file_offset, int first_line,
 	       int last_line, struct objfile *objfile)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   char *rawptr;
   struct internal_lineno lptr;
 
@@ -1834,7 +1834,7 @@ decode_base_type (struct coff_symbol *cs,
 		  union internal_auxent *aux, 
 		  struct objfile *objfile)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   struct type *type;
 
   switch (c_type)
@@ -2062,7 +2062,7 @@ static struct type *
 coff_read_enum_type (int index, int length, int lastsym,
 		     struct objfile *objfile)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   struct symbol *sym;
   struct type *type;
   int nsyms = 0;

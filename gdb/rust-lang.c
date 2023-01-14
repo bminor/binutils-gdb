@@ -68,38 +68,37 @@ rust_crate_for_block (const struct block *block)
    enum.  */
 
 static bool
-rust_enum_p (const struct type *type)
+rust_enum_p (struct type *type)
 {
-  return (TYPE_CODE (type) == TYPE_CODE_STRUCT
-	  && TYPE_NFIELDS (type) == 1
-	  && TYPE_FLAG_DISCRIMINATED_UNION (TYPE_FIELD_TYPE (type, 0)));
+  /* is_dynamic_type will return true if any field has a dynamic
+     attribute -- but we only want to check the top level.  */
+  return TYPE_HAS_VARIANT_PARTS (type);
 }
 
-/* Return true if TYPE, which must be an enum type, has no
-   variants.  */
+/* Return true if TYPE, which must be an already-resolved enum type,
+   has no variants.  */
 
 static bool
 rust_empty_enum_p (const struct type *type)
 {
-  gdb_assert (rust_enum_p (type));
-  /* In Rust the enum always fills the containing structure.  */
-  gdb_assert (TYPE_FIELD_BITPOS (type, 0) == 0);
-
-  return TYPE_NFIELDS (TYPE_FIELD_TYPE (type, 0)) == 0;
+  return TYPE_NFIELDS (type) == 0;
 }
 
-/* Given an enum type and contents, find which variant is active.  */
+/* Given an already-resolved enum type and contents, find which
+   variant is active.  */
 
-static struct field *
-rust_enum_variant (struct type *type, const gdb_byte *contents)
+static int
+rust_enum_variant (struct type *type)
 {
-  /* In Rust the enum always fills the containing structure.  */
-  gdb_assert (TYPE_FIELD_BITPOS (type, 0) == 0);
+  /* The active variant is simply the first non-artificial field.  */
+  for (int i = 0; i < TYPE_NFIELDS (type); ++i)
+    if (!TYPE_FIELD_ARTIFICIAL (type, i))
+      return i;
 
-  struct type *union_type = TYPE_FIELD_TYPE (type, 0);
-
-  int fieldno = value_union_variant (union_type, contents);
-  return &TYPE_FIELD (union_type, fieldno);
+  /* Perhaps we could get here by trying to print an Ada variant
+     record in Rust mode.  Unlikely, but an error is safer than an
+     assert.  */
+  error (_("Could not find active enum variant"));
 }
 
 /* See rust-lang.h.  */
@@ -471,6 +470,11 @@ rust_print_enum (struct value *val, struct ui_file *stream, int recurse,
 
   opts.deref_ref = 0;
 
+  gdb_assert (rust_enum_p (type));
+  gdb::array_view<const gdb_byte> view (value_contents_for_printing (val),
+					TYPE_LENGTH (value_type (val)));
+  type = resolve_dynamic_type (type, view, value_address (val));
+
   if (rust_empty_enum_p (type))
     {
       /* Print the enum type name here to be more clear.  */
@@ -480,9 +484,9 @@ rust_print_enum (struct value *val, struct ui_file *stream, int recurse,
       return;
     }
 
-  const gdb_byte *valaddr = value_contents_for_printing (val);
-  struct field *variant_field = rust_enum_variant (type, valaddr);
-  struct type *variant_type = FIELD_TYPE (*variant_field);
+  int variant_fieldno = rust_enum_variant (type);
+  val = value_field (val, variant_fieldno);
+  struct type *variant_type = TYPE_FIELD_TYPE (type, variant_fieldno);
 
   int nfields = TYPE_NFIELDS (variant_type);
 
@@ -504,10 +508,6 @@ rust_print_enum (struct value *val, struct ui_file *stream, int recurse,
       /* struct variant.  */
       fprintf_filtered (stream, "{");
     }
-
-  struct value *union_value = value_field (val, 0);
-  int fieldno = (variant_field - &TYPE_FIELD (value_type (union_value), 0));
-  val = value_field (union_value, fieldno);
 
   bool first_field = true;
   for (int j = 0; j < TYPE_NFIELDS (variant_type); j++)
@@ -698,8 +698,6 @@ rust_print_struct_def (struct type *type, const char *varstring,
   bool is_tuple = rust_tuple_type_p (type);
   bool is_enum = rust_enum_p (type);
 
-  int enum_discriminant_index = -1;
-
   if (for_rust_enum)
     {
       /* Already printing an outer enum, so nothing to print here.  */
@@ -710,25 +708,10 @@ rust_print_struct_def (struct type *type, const char *varstring,
       if (is_enum)
 	{
 	  fputs_filtered ("enum ", stream);
-
-	  if (rust_empty_enum_p (type))
-	    {
-	      if (tagname != NULL)
-		{
-		  fputs_filtered (tagname, stream);
-		  fputs_filtered (" ", stream);
-		}
-	      fputs_filtered ("{}", stream);
-	      return;
-	    }
-
-	  type = TYPE_FIELD_TYPE (type, 0);
-
-	  struct dynamic_prop *discriminant_prop
-	    = get_dyn_prop (DYN_PROP_DISCRIMINATED, type);
-	  struct discriminant_info *info
-	    = (struct discriminant_info *) discriminant_prop->data.baton;
-	  enum_discriminant_index = info->discriminant_index;
+	  struct dynamic_prop *prop = get_dyn_prop (DYN_PROP_VARIANT_PARTS,
+						    type);
+	  if (prop != nullptr && prop->kind == PROP_TYPE)
+	    type = prop->data.original_type;
 	}
       else if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
 	fputs_filtered ("struct ", stream);
@@ -755,7 +738,7 @@ rust_print_struct_def (struct type *type, const char *varstring,
     {
       if (field_is_static (&TYPE_FIELD (type, i)))
 	continue;
-      if (is_enum && i == enum_discriminant_index)
+      if (is_enum && TYPE_FIELD_ARTIFICIAL (type, i))
 	continue;
       fields.push_back (i);
     }
@@ -772,7 +755,7 @@ rust_print_struct_def (struct type *type, const char *varstring,
       QUIT;
 
       gdb_assert (!field_is_static (&TYPE_FIELD (type, i)));
-      gdb_assert (! (is_enum && i == enum_discriminant_index));
+      gdb_assert (! (is_enum && TYPE_FIELD_ARTIFICIAL (type, i)));
 
       if (flags->print_offsets)
 	podata->update (type, i, stream);
@@ -1679,20 +1662,16 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
 	    if (rust_enum_p (type))
 	      {
+		gdb::array_view<const gdb_byte> view (value_contents (lhs),
+						      TYPE_LENGTH (type));
+		type = resolve_dynamic_type (type, view, value_address (lhs));
+
 		if (rust_empty_enum_p (type))
 		  error (_("Cannot access field %d of empty enum %s"),
 			 field_number, TYPE_NAME (type));
 
-		const gdb_byte *valaddr = value_contents (lhs);
-		struct field *variant_field = rust_enum_variant (type, valaddr);
-
-		struct value *union_value = value_primitive_field (lhs, 0, 0,
-								   type);
-
-		int fieldno = (variant_field
-			       - &TYPE_FIELD (value_type (union_value), 0));
-		lhs = value_primitive_field (union_value, 0, fieldno,
-					     value_type (union_value));
+		int fieldno = rust_enum_variant (type);
+		lhs = value_primitive_field (lhs, 0, fieldno, type);
 		outer_type = type;
 		type = value_type (lhs);
 	      }
@@ -1751,20 +1730,16 @@ tuple structs, and tuple-like enum variants"));
         type = value_type (lhs);
         if (TYPE_CODE (type) == TYPE_CODE_STRUCT && rust_enum_p (type))
 	  {
+	    gdb::array_view<const gdb_byte> view (value_contents (lhs),
+						  TYPE_LENGTH (type));
+	    type = resolve_dynamic_type (type, view, value_address (lhs));
+
 	    if (rust_empty_enum_p (type))
 	      error (_("Cannot access field %s of empty enum %s"),
 		     field_name, TYPE_NAME (type));
 
-	    const gdb_byte *valaddr = value_contents (lhs);
-	    struct field *variant_field = rust_enum_variant (type, valaddr);
-
-	    struct value *union_value = value_primitive_field (lhs, 0, 0,
-							       type);
-
-	    int fieldno = (variant_field
-			   - &TYPE_FIELD (value_type (union_value), 0));
-	    lhs = value_primitive_field (union_value, 0, fieldno,
-					 value_type (union_value));
+	    int fieldno = rust_enum_variant (type);
+	    lhs = value_primitive_field (lhs, 0, fieldno, type);
 
 	    struct type *outer_type = type;
 	    type = value_type (lhs);

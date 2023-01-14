@@ -416,7 +416,24 @@ ldfile_open_file (lang_input_statement_type *entry)
       search_arch_type *arch;
       bfd_boolean found = FALSE;
 
-      /* Try to open <filename><suffix> or lib<filename><suffix>.a */
+      /* If extra_search_path is set, entry->filename is a relative path.
+         Search the directory of the current linker script before searching
+         other paths. */
+      if (entry->extra_search_path)
+        {
+          char *path = concat (entry->extra_search_path, slash, entry->filename,
+                               (const char *)0);
+          if (ldfile_try_open_bfd (path, entry))
+            {
+              entry->filename = path;
+              entry->flags.search_dirs = FALSE;
+              return;
+            }
+
+	  free (path);
+        }
+
+      /* Try to open <filename><suffix> or lib<filename><suffix>.a.  */
       for (arch = search_arch_head; arch != NULL; arch = arch->next)
 	{
 	  found = ldfile_open_file_search (arch->name, entry, "lib", ".a");

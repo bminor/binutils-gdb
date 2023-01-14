@@ -62,4 +62,3 @@
 extern void         iq2000_frob_file         (void);
 extern bfd_boolean  iq2000_fix_adjustable    (struct fix *);
 extern int          iq2000_force_relocation  (struct fix *);
-extern long         md_pcrel_from_section    (struct fix *, segT);

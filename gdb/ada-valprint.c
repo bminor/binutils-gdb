@@ -565,7 +565,8 @@ print_variant_part (struct value *value, int field_num,
   if (which < 0)
     return 0;
 
-  struct value *active_component = value_field (value, which);
+  struct value *variant_field = value_field (value, field_num);
+  struct value *active_component = value_field (variant_field, which);
   return print_field_values (active_component, outer_value, stream, recurse,
 			     options, comma_needed, language);
 }
@@ -603,8 +604,9 @@ print_field_values (struct value *value, struct value *outer_value,
 
       if (ada_is_wrapper_field (type, i))
 	{
+	  struct value *field_val = value_field (value, i);
 	  comma_needed =
-	    print_field_values (value_field (value, i), outer_value,
+	    print_field_values (field_val, field_val,
 				stream, recurse, options,
 				comma_needed, language);
 	  continue;
@@ -1055,7 +1057,9 @@ ada_value_print_1 (struct value *val, struct ui_file *stream, int recurse,
 
   const gdb_byte *valaddr = value_contents_for_printing (val);
   CORE_ADDR address = value_address (val);
-  type = ada_check_typedef (resolve_dynamic_type (type, valaddr, address));
+  gdb::array_view<const gdb_byte> view
+    = gdb::make_array_view (valaddr, TYPE_LENGTH (type));
+  type = ada_check_typedef (resolve_dynamic_type (type, view, address));
   if (type != saved_type)
     {
       val = value_copy (val);

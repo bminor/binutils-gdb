@@ -46,7 +46,7 @@ if [istarget "tic6x-*-*"] {
     append AFLAGS_PIC " -mpic -mpid=near"
 }
 if [istarget "sparc*-*-*"] {
-    append AFLAGS_PIC " -K PIC"
+    append AFLAGS_PIC " -K PIC -Av9"
 }
 
 # GAS options to disable program property note.

@@ -21,7 +21,7 @@
 
 #include "defs.h"
 #include "target.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 #include "event-top.h"
 #include "command.h"
 #include "top.h"

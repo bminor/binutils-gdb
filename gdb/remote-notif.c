@@ -35,11 +35,12 @@
 #include "remote.h"
 #include "remote-notif.h"
 #include "observable.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 #include "target.h"
 #include "inferior.h"
 #include "infrun.h"
 #include "gdbcmd.h"
+#include "async-event.h"
 
 bool notif_debug = false;
 

@@ -663,7 +663,7 @@ checkpoint_command (const char *args, int from_tty)
   if (!fork_fn)
     error (_("checkpoint: can't find fork function in inferior."));
 
-  gdbarch = get_objfile_arch (fork_objf);
+  gdbarch = fork_objf->arch ();
   ret = value_from_longest (builtin_type (gdbarch)->builtin_int, 0);
 
   /* Tell linux-nat.c that we're checkpointing this inferior.  */

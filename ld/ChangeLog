@@ -1,3 +1,156 @@
+2020-04-22  Max Filippov  <jcmvbkbc@gmail.com>
+
+	PR ld/25861
+	* testsuite/ld-xtensa/relax-loc.d: New test definition.
+	* testsuite/ld-xtensa/relax-loc.s: New test source.
+	* testsuite/ld-xtensa/xtensa.exp (relax-loc): New test.
+
+2020-04-22  Fangrui Song <maskray@google.com>
+
+	PR ld/25806
+	* ldlang.h (struct lang_input_statement_struct): Add extra_search_path.
+	* ldlang.c (current_input_file): New.
+	(ldirname): New.
+	(new_afile): Add from_filename parameter.  Set extra_search_path.
+	(lang_add_input_file): Pass current_input_file to new_afile.
+	(load_symbols): Set current_input_file.
+	* ldfile.c (ldfile_open_file): If extra_search_path has been set
+	then scan it for the file that needs to be opened.
+	* ld.texi: Document the new behaviour.
+	* NEWS: Mention the new feature.
+
+2020-04-22  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-scripts/default-script1.d: Correct mingw skip.
+	* testsuite/ld-scripts/default-script2.d: Likewise.
+	* testsuite/ld-scripts/default-script3.d: Likewise.
+	* testsuite/ld-scripts/default-script4.d: Likewise.
+
+2020-04-21  Stephen Casner  <casner@acm.org>
+
+	PR 25829
+	* testsuite/ld-scripts/script.exp (check_script)
+	(extract_symbol_test): Make test addresses fit in 16 bits.
+	* testsuite/ld-scripts/memory.t: Likewise.
+	* testsuite/ld-scripts/memory_sym.t (TXT_LENGTH): Likewise.
+	* testsuite/ld-scripts/default-script.t (_START): Likewise.
+	* testsuite/ld-scripts/default-script1.d: Likewise.
+	* testsuite/ld-scripts/default-script2.d: Likewise.
+	* testsuite/ld-scripts/default-script3.d: Likewise.
+	* testsuite/ld-scripts/default-script4.d: Likewise.
+	* testsuite/ld-scripts/empty-address-1.t: Likewise.
+	* testsuite/ld-scripts/empty-address-1.d: Likewise.
+	* testsuite/ld-scripts/empty-address-2a.d: Likewise.
+	* testsuite/ld-scripts/empty-address-2b.d: Likewise.
+	* testsuite/ld-misc/start.s: .long -> .dc.a to allow relocation to
+	fit target address size.
+	* testsuite/ld-scripts/empty-address-1.s: Likewise.
+	* testsuite/ld-scripts/empty-address-2.s: Likewise.
+
+2020-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/25849
+	* ldelfgen.c (ldelf_map_segments): Call
+	elf_backend_strip_zero_sized_dynamic_sections.
+	* testsuite/ld-alpha/tlsbinr.rd: Updated.
+
+2020-04-20  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/tlsopt5.s: Rename foo to aaaaa.
+	* testsuite/ld-powerpc/tlsopt5.d: Adjust to suit.
+	* testsuite/ld-powerpc/tlsopt6.d: Likewise.
+
+2020-04-18  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* testsuite/ld-elf/warn1.d: Don't xfail on 64-bit Solaris/SPARC.
+	* testsuite/ld-elf/warn2.d: Likewise.
+
+2020-04-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/elf.exp (ASFLAGS): Add "--defsym NO_SET=1" for
+	alpha target.
+	* testsuite/ld-elf/pr19789.s: Use "=" if NO_SET is defined.
+
+2020-04-16  Stephen Casner  <casner@acm.org>
+
+	PR 18963
+	* testsuite/ld-scripts/pr18963.t: Reduce section sizes to fit in
+	16-bit address space.
+	* testsuite/ld-scripts/pr18963.d: Likewise.
+
+2020-04-17  Juan Manuel Guerrero  <juan.guerrero@gmx.de>
+            Jan W. Jagersma  <jwjagersma@gmail.com>
+
+	* scripttempl/i386go32.sc: Provide symbol _environ.  Link in
+	.ctors and .dtors.  Discard LTO sections.
+
+2020-04-17  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/config/default.exp: If not already set then create the
+	CCC_OVERRIDE_OPTIONS environment variable to help when running the
+	testsuite with clang.
+	* testsuite/ld-elf/pr22269-1.c: Add a missing return statement.
+	* testsuite/ld-elfvers/vers.exp: Add checks to detect if files
+	were built before attempting to copy them.
+
+2020-04-15  Fangrui Song <maskray@google.com>
+
+	PR binutils/24613
+	* lexsup.c (parse_args): Change RM_GENERATE_WARNING and
+	RM_GENERATE_ERROR to RM_DIAGNOSE.
+	* emultempl/aix.em (ld_${EMULATION_NAME}_emulation): Change
+	RM_GENERATE_ERROR to RM_DIAGNOSE.
+	* emultempl/elf.em (ld_${EMULATION_NAME}_emulation): Likewise.
+
+2020-04-14  Stephen Casner  <casner@acm.org>
+
+	PR ld/25677
+	* emulparams/pdp11.sh (SCRIPT_NAME): Change to pdp11.
+	(EXTRA_EM_FILE): New, add emulation file pdp11.
+	* scripttempl/pdp11.sc: New, derived from aout.sc without
+	irrelevant input sections.
+	* emultempl/pdp11.em (_add_options, _handle_option)
+	(_list_options): New. Add options -z, --imagic for pdp11-aout.
+	(_before_parse): Make --omagic be default instead of --nmagic.
+	(_get_script): Modify special-case linker script for --imagic.
+	* lexsup.c (parse_args): Explictly set config.text_read_only for -n.
+	* ld.texi (Options): Add documentation of PDP11-specific options.
+	(Options): Fix unrelated typo to --no-compact-branches.
+	* gen-doc.texi: @set PDP11.
+	* testsuite/ld-pdp11/pdp11.exp: New, start pdp11 testing.
+	* testsuite/ld-pdp11/sections.s: New, source for options tests.
+	* testsuite/ld-pdp11/imagic.d: New, test --imagic format.
+	* testsuite/ld-pdp11/imagicz.d: New, test -z (imagic) format.
+	* testsuite/ld-pdp11/nmagic.d: New, test --nmagic format.
+	* testsuite/ld-pdp11/omagic.d: New, test --omagic format.
+
+2020-04-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25707
+	* testsuite/ld-arm/armthumb-lib.sym: Updated.
+	* testsuite/ld-arm/farcall-mixed-app.sym: Likewise.
+	* testsuite/ld-arm/farcall-mixed-app2.sym: Likewise.
+	* testsuite/ld-arm/fdpic-main-m.sym: Likewise.
+	* testsuite/ld-arm/fdpic-main.sym: Likewise.
+	* testsuite/ld-arm/fdpic-shared-m.sym: Likewise.
+	* testsuite/ld-arm/fdpic-shared.sym: Likewise.
+	* testsuite/ld-arm/mixed-app.sym: Likewise.
+	* testsuite/ld-arm/mixed-lib.sym: Likewise.
+	* testsuite/ld-arm/preempt-app.sym: Likewise.
+	* testsuite/ld-elf/hash.d: Likewise.
+	* testsuite/ld-elf/pr13195.d: Likewise.
+	* testsuite/ld-elfvsb/hidden2.d: Likewise.
+	* testsuite/ld-mips-elf/hash2.d: Likewise.
+
+2020-04-10  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* testsuite/ld-shared/shared.exp: Remove dangling comments.
+	xfail shared non PIC tests on Solaris.
+
+2020-04-09  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* testsuite/ld-elf/shared.exp: Add -Av9 to AFLAGS_PIC on sparc*-*-*.
+
 2020-04-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/config/default.exp (NOCF_PROTECTION_CFLAGS): Replace

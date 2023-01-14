@@ -1,3 +1,169 @@
+2020-04-23  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* elf-bfd.h (elfcore_write_arc_v2): Add prototype.
+	* elf.c (elfcore_grok_arc_v2): New function.
+	(elfcore_grok_note): Call the new function to handle the corresponding
+	note.
+	(elfcore_write_arc_v2): New function.
+	(elfcore_write_register_note): Call the new function to handle the
+	corresponding pseudo-sections.
+
+2020-04-22  Max Filippov  <jcmvbkbc@gmail.com>
+
+	PR ld/25861
+	* bfd-in2.h: Regenerated.
+	* elf32-xtensa.c (elf_howto_table): New entries for
+	R_XTENSA_PDIFF{8,16,32} and R_XTENSA_NDIFF{8,16,32}.
+	(elf_xtensa_reloc_type_lookup, elf_xtensa_do_reloc)
+	(relax_section): Add cases for R_XTENSA_PDIFF{8,16,32} and
+	R_XTENSA_NDIFF{8,16,32}.
+	* libbfd.h (bfd_reloc_code_real_names): Add names for
+	BFD_RELOC_XTENSA_PDIFF{8,16,32} and
+	BFD_RELOC_XTENSA_NDIFF{8,16,32}.
+	* reloc.c: Add documentation for BFD_RELOC_XTENSA_PDIFF{8,16,32}
+	and BFD_RELOC_XTENSA_NDIFF{8,16,32}.
+
+2020-04-21  Tamar Christina  <tamar.christina@arm.com>
+
+	PR binutils/24753
+	* compress.c (bfd_get_full_section_contents): Exclude sections with no
+	content.
+
+2020-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/25849
+	* elf-bfd.h (elf_backend_data): Add
+	elf_backend_strip_zero_sized_dynamic_sections.
+	(_bfd_elf_strip_zero_sized_dynamic_sections): New prototype.
+	* elf64-alpha.c (elf_backend_strip_zero_sized_dynamic_sections):
+	New macro.
+	* elflink.c (_bfd_elf_strip_zero_sized_dynamic_sections): New
+	function.
+	* elfxx-target.h (elf_backend_strip_zero_sized_dynamic_sections):
+	New macro.
+	(elfNN_bed): Add elf_backend_strip_zero_sized_dynamic_sections.
+
+2020-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-alpha.c (alpha_elf_reloc_entry): Replace reltext with
+	sec.
+	(elf64_alpha_check_relocs): Set sec instead of reltext.  Warn
+	DT_TEXTREL with -M.
+	(elf64_alpha_calc_dynrel_sizes): Warn DT_TEXTREL with -M.
+
+2020-04-21  Nick Clifton  <nickc@redhat.com>
+
+	* po/sr.po: Updated Serbian translation.
+
+2020-04-21  Alan Modra  <amodra@gmail.com>
+
+	* elf32-sh.c (sh_elf_relocate_section): Remove STO_SH5_ISA32
+	processing.
+
+2020-04-20  Stephen Casner  <casner@acm.org>
+
+	* pdp11.c (N_STAB): Modify value to avoid conflict with N_EXT
+	causing globals from linker script to be treated as debug symbols.
+	(translate_symbol_table): Don't sign-extend symbol values from 16
+	to 64 bits in nm output.
+
+2020-04-20  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_size_stubs): Strip relbrlt too.
+
+2020-04-18  Alan Modra  <amodra@gmail.com>
+
+	* section.c (bfd_is_const_section): Correct test for special
+	sections.
+	* bfd-in2.h: Regenerate.
+
+2020-04-17  Alan Modra  <amodra@gmail.com>
+
+	PR 25842
+	* elf.c (_bfd_elf_get_symbol_version_string): Don't segfault on
+	NULL nodename.
+
+2020-04-16  Nick Clifton  <nickc@redhat.com>
+
+	PR 25803
+	* elfxx-mips.c (_bfd_mips_elf_adjust_dynamic_symbol): Replace an
+	abort with a more helpful error message.
+
+2020-04-16  Alan Modra  <amodra@gmail.com>
+
+	PR 25827
+	* dwarf2.c (scan_unit_for_symbols): Wrap overlong lines.  Don't
+	strdup(0).
+
+2020-04-15  Fangrui Song <maskray@google.com>
+
+	PR binutils/24613
+	* coff-rs6000.c (xcoff_ppc_relocate_section): Change RM_GENERATE_ERROR
+	to RM_DIAGNOSE plus a check of warn_unresolved_syms.
+	* coff64-rs6000.c (xcoff_ppc_relocate_section): Likewise.
+	* elf-bfd.h (_bfd_elf_large_com_section): Likewise.
+	* elf32-m32r.c (m32r_elf_relocate_section): Likewise.
+	* elf32-score.c (s3_bfd_score_elf_relocate_section): Likewise.
+	* elf32-score7.c (s7_bfd_score_elf_relocate_section): Likewise.
+	* elf32-sh.c (sh_elf_relocate_section): Likewise.
+	* elf32-spu.c (spu_elf_relocate_section): Likewise.
+	* elf64-hppa.c (elf64_hppa_relocate_section): Likewise.
+	* elflink.c (elf_link_output_extsym): Likewise.
+	* elfxx-mips.c (mips_elf_calculate_relocation): Likewise.
+
+2020-04-15  Alan Modra  <amodra@gmail.com>
+
+	PR 25823
+	* peXXigen.c (_bfd_XXi_swap_sym_in <C_SECTION>): Don't use a
+	pointer into strings that may be freed for section name, always
+	allocate a new string.
+
+2020-04-14  Juan Manuel Guerrero  <juan.guerrero@gmx.de>
+            Jan W. Jagersma  <jwjagersma@gmail.com>
+
+	* coff-go32.c (COFF_GO32, IMAGE_SCN_LNK_NRELOC_OVFL)
+	(coff_SWAP_scnhdr_in, coff_SWAP_scnhdr_out): Define.
+	(_bfd_go32_swap_scnhdr_in, _bfd_go32_swap_scnhdr_out)
+	(_bfd_go32_mkobject): New functions.
+	* coff-stgo32.c (IMAGE_SCN_LNK_NRELOC_OVFL)
+	(coff_SWAP_scnhdr_in, coff_SWAP_scnhdr_out): Define.
+	(go32exe_mkobject): Call _bfd_go32_mkobject.
+	* coffcode.h (COFF_WITH_EXTENDED_RELOC_COUNTER): Define.
+	(coff_set_alignment_hook): Define function for COFF_GO32_EXE
+	and COFF_GO32.
+	(coff_write_relocs): Enable extended reloc counter code if
+	COFF_WITH_EXTENDED_RELOC_COUNTER is defined.  Test for obj_go32.
+	(coff_write_object_contents): Likewise.  Pad section headers
+	for COFF_GO32 and COFF_GO32EXE.  Use bfd_coff_swap_scnhdr_out
+	instead of coff_swap_scnhdr_out.
+	* cofflink.c (_bfd_coff_final_link): Test also for obj_go32 to
+	enable extended reloc counter.
+	* coffswap.h: (coff_swap_scnhdr_in, coff_swap_scnhdr_out):
+	Declare with ATTRIBUTE_UNUSED.
+	* libcoff-in.h: (struct coff_tdata): New field go32.
+	(obj_go32): Define.
+	* libcoff.h: Regenerate.
+
+2020-04-14  Fangrui Song  <maskray@google.com>
+
+	PR gas/25768
+	* elf.c (assign_section_numbers): Always set .stab sh_entsize to
+	12.
+
+2020-04-14  Stephen Casner  <casner@acm.org>
+
+	PR ld/25677
+	* pdp11.c: Add implementation of --imagic option.
+	(adjust_o_magic): Fix objcopy --extract-symbol test.
+	* libaout.h (enum aout_magic): Add i_magic.
+
+2020-04-07  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* elf32-sparc.c (sparc_final_write_processing): Fix whitespace.
+	<0>: Ignore.
+	<default>: Error rather than abort.
+
 2020-04-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/25767

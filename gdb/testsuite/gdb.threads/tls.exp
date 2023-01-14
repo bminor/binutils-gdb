@@ -153,8 +153,14 @@ proc check_thread_stack {number spin_threads spin_threads_level} {
 
 clean_restart ${binfile}
 
-gdb_test "print a_thread_local" \
-    "Cannot read .a_thread_local. without registers"
+gdb_test_multiple "print a_thread_local" "" {
+    -re -wrap "Cannot find thread-local variables on this target" {
+	kfail "gdb/25807" $gdb_test_name
+    }
+    -re -wrap "Cannot read .a_thread_local. without registers" {
+	pass $gdb_test_name
+    }
+}
 
 if ![runto_main] then {
    fail "can't run to main"

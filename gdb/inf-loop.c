@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "inferior.h"
 #include "infrun.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 #include "event-top.h"
 #include "inf-loop.h"
 #include "remote.h"

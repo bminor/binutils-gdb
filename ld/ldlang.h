@@ -293,6 +293,9 @@ typedef struct lang_input_statement_struct
      Usually the same as filename, but for a file spec'd with
      -l this is the -l switch itself rather than the filename.  */
   const char *local_sym_name;
+  /* Extra search path. Used to find a file relative to the
+     directory of the current linker script.  */
+  const char *extra_search_path;
 
   bfd *the_bfd;
 

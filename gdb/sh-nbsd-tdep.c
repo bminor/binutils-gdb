@@ -26,6 +26,7 @@
 #include "osabi.h"
 
 #include "sh-tdep.h"
+#include "nbsd-tdep.h"
 #include "solib-svr4.h"
 #include "gdbarch.h"
 

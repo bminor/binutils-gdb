@@ -688,7 +688,9 @@ CODE_FRAGMENT
 .static inline bfd_boolean
 .bfd_is_const_section (const asection *sec)
 .{
-.  return sec >= bfd_abs_section_ptr && sec <= bfd_ind_section_ptr;
+.  return (sec >= _bfd_std_section
+.          && sec < _bfd_std_section + (sizeof (_bfd_std_section)
+.                                       / sizeof (_bfd_std_section[0])));
 .}
 .
 .{* Return TRUE if input section SEC has been discarded.  *}

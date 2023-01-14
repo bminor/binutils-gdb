@@ -22,6 +22,7 @@
 
 #include "arch/arm.h"
 #include "arm-nbsd-tdep.h"
+#include "nbsd-tdep.h"
 #include "arm-tdep.h"
 #include "regset.h"
 #include "solib-svr4.h"

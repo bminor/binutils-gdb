@@ -95,6 +95,56 @@ if {![info exists CXXFLAGS]} {
     set CXXFLAGS ""
 }
 
+# This allows us to run the linker testsuite with clang as the compilation
+# driver instead of gcc.  The syntax of the overrides are as follows, one
+# per line:
+#
+#  '#': Silence information about the changes to the command line arguments.
+#
+#  '^': Add FOO as a new argument at the beginning of the command line.
+#
+#  '+': Add FOO as a new argument at the end of the command line.
+#
+#  's/XXX/YYY/': Substitute the regular expression XXX with YYY in the command
+#  line.
+#
+#  'xOPTION': Removes all instances of the literal argument OPTION.
+#
+#  'XOPTION': Removes all instances of the literal argument OPTION,
+#  and the following argument.
+#
+#  'Ox': Removes all flags matching 'O' or 'O[sz0-9]' and adds 'Ox'
+#  at the end of the command line.
+#
+# \param OS - The stream to write edit information to.
+# \param Args - The vector of command line arguments.
+# \param Edit - The override command to perform.
+# \param SavedStrings - Set to use for storing string representations.
+
+global env
+# Only set up the environment variable if the user has not already provided one.
+if {! [info exists env(CCC_OVERRIDE_OPTIONS)]} {
+    set env(CCC_OVERRIDE_OPTIONS) "#\
+  +-Wno-unused-command-line-argument \
+  +-Wno-unknown-attributes \
+  +-Wno-tautological-compare \
+  +-Wno-ignored-optimization-argument \
+  +-Wno-deprecated \
+  +-fuse-ld=$ld \
+  x-Wa,--elf-stt-common=yes \
+  x-Wa,-mx86-used-note=no \
+  x-Wa,-mx86-used-note=yes \
+  x-Wa,-madd-bnd-prefix \
+  x-fno-early-inlining \
+  x-fno-toplevel-reorder \
+  x-flto-partition=none \
+  x-feliminate-dwarf2-dups \
+  s/-Wa,-mrelax-relocations=yes,-mx86-used-note=yes/-Wa,-mrelax-relocations=yes/ \
+  s/-Wa,--compress-debug-sections=zlib/-Wa,-compress-debug-sections=zlib/ \
+  s/-Wa,--compress-debug-sections=zlib-gabi/-Wa,-compress-debug-sections=zlib-gabi/ \
+"
+}
+
 # The mips64-*-linux-gnu compiler defaults to the N32 ABI after
 # installed, but to the O32 ABI in the build tree, because of some
 # specs-file hacks.  Make sure we use an ABI that is compatible with

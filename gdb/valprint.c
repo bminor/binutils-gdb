@@ -2942,34 +2942,6 @@ show_radix (const char *arg, int from_tty)
 }
 
 
-static void
-set_print (const char *arg, int from_tty)
-{
-  printf_unfiltered (
-     "\"set print\" must be followed by the name of a print subcommand.\n");
-  help_list (setprintlist, "set print ", all_commands, gdb_stdout);
-}
-
-static void
-show_print (const char *args, int from_tty)
-{
-  cmd_show_list (showprintlist, from_tty, "");
-}
-
-static void
-set_print_raw (const char *arg, int from_tty)
-{
-  printf_unfiltered (
-     "\"set print raw\" must be followed by the name of a \"print raw\" subcommand.\n");
-  help_list (setprintrawlist, "set print raw ", all_commands, gdb_stdout);
-}
-
-static void
-show_print_raw (const char *args, int from_tty)
-{
-  cmd_show_list (showprintrawlist, from_tty, "");
-}
-
 /* Controls printing of vtbl's.  */
 static void
 show_vtblprint (struct ui_file *file, int from_tty,
@@ -3161,30 +3133,30 @@ _initialize_valprint ()
 {
   cmd_list_element *cmd;
 
-  add_prefix_cmd ("print", no_class, set_print,
-		  _("Generic command for setting how things print."),
-		  &setprintlist, "set print ", 0, &setlist);
+  add_basic_prefix_cmd ("print", no_class,
+			_("Generic command for setting how things print."),
+			&setprintlist, "set print ", 0, &setlist);
   add_alias_cmd ("p", "print", no_class, 1, &setlist);
   /* Prefer set print to set prompt.  */
   add_alias_cmd ("pr", "print", no_class, 1, &setlist);
 
-  add_prefix_cmd ("print", no_class, show_print,
-		  _("Generic command for showing print settings."),
-		  &showprintlist, "show print ", 0, &showlist);
+  add_show_prefix_cmd ("print", no_class,
+		       _("Generic command for showing print settings."),
+		       &showprintlist, "show print ", 0, &showlist);
   add_alias_cmd ("p", "print", no_class, 1, &showlist);
   add_alias_cmd ("pr", "print", no_class, 1, &showlist);
 
-  cmd = add_prefix_cmd ("raw", no_class, set_print_raw,
-			_("\
+  cmd = add_basic_prefix_cmd ("raw", no_class,
+			      _("\
 Generic command for setting what things to print in \"raw\" mode."),
-			&setprintrawlist, "set print raw ", 0,
-			&setprintlist);
+			      &setprintrawlist, "set print raw ", 0,
+			      &setprintlist);
   deprecate_cmd (cmd, nullptr);
 
-  cmd = add_prefix_cmd ("raw", no_class, show_print_raw,
-			_("Generic command for showing \"print raw\" settings."),
-			&showprintrawlist, "show print raw ", 0,
-			&showprintlist);
+  cmd = add_show_prefix_cmd ("raw", no_class,
+			     _("Generic command for showing \"print raw\" settings."),
+			     &showprintrawlist, "show print raw ", 0,
+			     &showprintlist);
   deprecate_cmd (cmd, nullptr);
 
   gdb::option::add_setshow_cmds_for_options

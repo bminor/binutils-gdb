@@ -26,6 +26,8 @@
 #include "tdesc.h"
 #include "x86-tdesc.h"
 
+using namespace windows_nat;
+
 #ifndef CONTEXT_EXTENDED_REGISTERS
 #define CONTEXT_EXTENDED_REGISTERS 0
 #endif
@@ -40,11 +42,11 @@ static struct x86_debug_reg_state debug_reg_state;
 static void
 update_debug_registers (thread_info *thread)
 {
-  win32_thread_info *th = (win32_thread_info *) thread_target_data (thread);
+  windows_thread_info *th = (windows_thread_info *) thread_target_data (thread);
 
   /* The actual update is done later just before resuming the lwp,
      we just mark that the registers need updating.  */
-  th->debug_registers_changed = 1;
+  th->debug_registers_changed = true;
 }
 
 /* Update the inferior's debug register REGNUM from STATE.  */
@@ -73,8 +75,8 @@ x86_dr_low_set_control (unsigned long control)
 static DWORD64
 win32_get_current_dr (int dr)
 {
-  win32_thread_info *th
-    = (win32_thread_info *) thread_target_data (current_thread);
+  windows_thread_info *th
+    = (windows_thread_info *) thread_target_data (current_thread);
 
   win32_require_context (th);
 
@@ -210,7 +212,7 @@ i386_initial_stuff (void)
 }
 
 static void
-i386_get_thread_context (win32_thread_info *th)
+i386_get_thread_context (windows_thread_info *th)
 {
   /* Requesting the CONTEXT_EXTENDED_REGISTERS register set fails if
      the system doesn't support extended registers.  */
@@ -237,7 +239,7 @@ i386_get_thread_context (win32_thread_info *th)
 }
 
 static void
-i386_prepare_to_resume (win32_thread_info *th)
+i386_prepare_to_resume (windows_thread_info *th)
 {
   if (th->debug_registers_changed)
     {
@@ -253,18 +255,18 @@ i386_prepare_to_resume (win32_thread_info *th)
 	 FIXME: should we set dr6 also ?? */
       th->context.Dr7 = dr->dr_control_mirror;
 
-      th->debug_registers_changed = 0;
+      th->debug_registers_changed = false;
     }
 }
 
 static void
-i386_thread_added (win32_thread_info *th)
+i386_thread_added (windows_thread_info *th)
 {
-  th->debug_registers_changed = 1;
+  th->debug_registers_changed = true;
 }
 
 static void
-i386_single_step (win32_thread_info *th)
+i386_single_step (windows_thread_info *th)
 {
   th->context.EFlags |= FLAG_TRACE_BIT;
 }
@@ -398,7 +400,7 @@ static const int mappings[] =
 /* Fetch register from gdbserver regcache data.  */
 static void
 i386_fetch_inferior_register (struct regcache *regcache,
-			      win32_thread_info *th, int r)
+			      windows_thread_info *th, int r)
 {
   char *context_offset = (char *) &th->context + mappings[r];
 
@@ -420,7 +422,7 @@ i386_fetch_inferior_register (struct regcache *regcache,
 /* Store a new register value into the thread context of TH.  */
 static void
 i386_store_inferior_register (struct regcache *regcache,
-			      win32_thread_info *th, int r)
+			      windows_thread_info *th, int r)
 {
   char *context_offset = (char *) &th->context + mappings[r];
   collect_register (regcache, r, context_offset);
@@ -448,6 +450,50 @@ i386_arch_setup (void)
   win32_tdesc = tdesc;
 }
 
+/* Implement win32_target_ops "get_pc" method.  */
+
+static CORE_ADDR
+i386_win32_get_pc (struct regcache *regcache)
+{
+  bool use_64bit = register_size (regcache->tdesc, 0) == 8;
+
+  if (use_64bit)
+    {
+      uint64_t pc;
+
+      collect_register_by_name (regcache, "rip", &pc);
+      return (CORE_ADDR) pc;
+    }
+  else
+    {
+      uint32_t pc;
+
+      collect_register_by_name (regcache, "eip", &pc);
+      return (CORE_ADDR) pc;
+    }
+}
+
+/* Implement win32_target_ops "set_pc" method.  */
+
+static void
+i386_win32_set_pc (struct regcache *regcache, CORE_ADDR pc)
+{
+  bool use_64bit = register_size (regcache->tdesc, 0) == 8;
+
+  if (use_64bit)
+    {
+      uint64_t newpc = pc;
+
+      supply_register_by_name (regcache, "rip", &newpc);
+    }
+  else
+    {
+      uint32_t newpc = pc;
+
+      supply_register_by_name (regcache, "eip", &newpc);
+    }
+}
+
 struct win32_target_ops the_low_target = {
   i386_arch_setup,
   sizeof (mappings) / sizeof (mappings[0]),
@@ -460,6 +506,9 @@ struct win32_target_ops the_low_target = {
   i386_single_step,
   &i386_win32_breakpoint,
   i386_win32_breakpoint_len,
+  1,
+  i386_win32_get_pc,
+  i386_win32_set_pc,
   i386_supports_z_point_type,
   i386_insert_point,
   i386_remove_point,

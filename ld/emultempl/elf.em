@@ -675,8 +675,8 @@ fragment <<EOF
     case OPTION_GROUP:
       link_info.flags_1 |= (bfd_vma) DF_1_GROUP;
       /* Groups must be self-contained.  */
-      link_info.unresolved_syms_in_objects = RM_GENERATE_ERROR;
-      link_info.unresolved_syms_in_shared_libs = RM_GENERATE_ERROR;
+      link_info.unresolved_syms_in_objects = RM_DIAGNOSE;
+      link_info.unresolved_syms_in_shared_libs = RM_DIAGNOSE;
       break;
 
     case OPTION_EXCLUDE_LIBS:
@@ -704,7 +704,7 @@ fi
 fragment <<EOF
     case 'z':
       if (strcmp (optarg, "defs") == 0)
-	link_info.unresolved_syms_in_objects = RM_GENERATE_ERROR;
+	link_info.unresolved_syms_in_objects = RM_DIAGNOSE;
       else if (strcmp (optarg, "undefs") == 0)
 	link_info.unresolved_syms_in_objects = RM_IGNORE;
       else if (strcmp (optarg, "muldefs") == 0)

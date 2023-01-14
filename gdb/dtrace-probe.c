@@ -520,7 +520,7 @@ dtrace_process_dof (asection *sect, struct objfile *objfile,
 		    std::vector<std::unique_ptr<probe>> *probesp,
 		    struct dtrace_dof_hdr *dof)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   struct dtrace_dof_sect *section;
   int i;
 

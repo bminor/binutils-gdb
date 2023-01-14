@@ -51,6 +51,7 @@
 #include "gdbsupport/underlying.h"
 #include "gdbsupport/print-utils.h"
 #include "dwarf2.h"
+#include "gdb_obstack.h"
 
 /* Forward declarations for prototypes.  */
 struct field;
@@ -318,14 +319,6 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 
 #define TYPE_FLAG_ENUM(t) (TYPE_MAIN_TYPE (t)->flag_flag_enum)
 
-/* * True if this type is a discriminated union type.  Only valid for
-   TYPE_CODE_UNION.  A discriminated union stores a reference to the
-   discriminant field along with the discriminator values in a dynamic
-   property.  */
-
-#define TYPE_FLAG_DISCRIMINATED_UNION(t) \
-  (TYPE_MAIN_TYPE (t)->flag_discriminated_union)
-
 /* * Constant type.  If this is set, the corresponding type has a
    const modifier.  */
 
@@ -357,6 +350,14 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 /* * True if this type is allocatable.  */
 #define TYPE_IS_ALLOCATABLE(t) \
   (get_dyn_prop (DYN_PROP_ALLOCATED, t) != NULL)
+
+/* * True if this type has variant parts.  */
+#define TYPE_HAS_VARIANT_PARTS(t) \
+  (get_dyn_prop (DYN_PROP_VARIANT_PARTS, t) != nullptr)
+
+/* * True if this type has a dynamic length.  */
+#define TYPE_HAS_DYNAMIC_LENGTH(t) \
+  (get_dyn_prop (DYN_PROP_BYTE_SIZE, t) != nullptr)
 
 /* * Instruction-space delimited type.  This is for Harvard architectures
    which have separate instruction and data address spaces (and perhaps
@@ -399,38 +400,83 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 #define TYPE_ADDRESS_CLASS_ALL(t) (TYPE_INSTANCE_FLAGS(t) \
 				   & TYPE_INSTANCE_FLAG_ADDRESS_CLASS_ALL)
 
-/* * Information needed for a discriminated union.  A discriminated
-   union is handled somewhat differently from an ordinary union.
+/* * Information about a single discriminant.  */
 
-   One field is designated as the discriminant.  Only one other field
-   is active at a time; which one depends on the value of the
-   discriminant and the data in this structure.
-
-   Additionally, it is possible to have a univariant discriminated
-   union.  In this case, the union has just a single field, which is
-   assumed to be the only active variant -- in this case no
-   discriminant is provided.  */
-
-struct discriminant_info
+struct discriminant_range
 {
-  /* * The index of the discriminant field.  If -1, then this union
-     must have just a single field.  */
+  /* * The range of values for the variant.  This is an inclusive
+     range.  */
+  ULONGEST low, high;
 
+  /* * Return true if VALUE is contained in this range.  IS_UNSIGNED
+     is true if this should be an unsigned comparison; false for
+     signed.  */
+  bool contains (ULONGEST value, bool is_unsigned) const
+  {
+    if (is_unsigned)
+      return value >= low && value <= high;
+    LONGEST valuel = (LONGEST) value;
+    return valuel >= (LONGEST) low && valuel <= (LONGEST) high;
+  }
+};
+
+struct variant_part;
+
+/* * A single variant.  A variant has a list of discriminant values.
+   When the discriminator matches one of these, the variant is
+   enabled.  Each variant controls zero or more fields; and may also
+   control other variant parts as well.  This struct corresponds to
+   DW_TAG_variant in DWARF.  */
+
+struct variant : allocate_on_obstack
+{
+  /* * The discriminant ranges for this variant.  */
+  gdb::array_view<discriminant_range> discriminants;
+
+  /* * The fields controlled by this variant.  This is inclusive on
+     the low end and exclusive on the high end.  A variant may not
+     control any fields, in which case the two values will be equal.
+     These are indexes into the type's array of fields.  */
+  int first_field;
+  int last_field;
+
+  /* * Variant parts controlled by this variant.  */
+  gdb::array_view<variant_part> parts;
+
+  /* * Return true if this is the default variant.  The default
+     variant can be recognized because it has no associated
+     discriminants.  */
+  bool is_default () const
+  {
+    return discriminants.empty ();
+  }
+
+  /* * Return true if this variant matches VALUE.  IS_UNSIGNED is true
+     if this should be an unsigned comparison; false for signed.  */
+  bool matches (ULONGEST value, bool is_unsigned) const;
+};
+
+/* * A variant part.  Each variant part has an optional discriminant
+   and holds an array of variants.  This struct corresponds to
+   DW_TAG_variant_part in DWARF.  */
+
+struct variant_part : allocate_on_obstack
+{
+  /* * The index of the discriminant field in the outer type.  This is
+     an index into the type's array of fields.  If this is -1, there
+     is no discriminant, and only the default variant can be
+     considered to be selected.  */
   int discriminant_index;
 
-  /* * The index of the default branch of the union.  If -1, then
-     there is no default branch.  */
+  /* * True if this discriminant is unsigned; false if signed.  This
+     comes from the type of the discriminant.  */
+  bool is_unsigned;
 
-  int default_index;
-
-  /* * The discriminant values corresponding to each branch.  This has
-     a number of entries equal to the number of fields in this union.
-     If discriminant_index is not -1, then that entry in this array is
-     not used.  If default_index is not -1, then that entry in this
-     array is not used.  */
-
-  ULONGEST discriminants[1];
+  /* * The variants that are controlled by this variant part.  Note
+     that these will always be sorted by field number.  */
+  gdb::array_view<variant> variants;
 };
+
 
 enum dynamic_prop_kind
 {
@@ -438,7 +484,9 @@ enum dynamic_prop_kind
   PROP_CONST,     /* Constant.  */
   PROP_ADDR_OFFSET, /* Address offset.  */
   PROP_LOCEXPR,   /* Location expression.  */
-  PROP_LOCLIST    /* Location list.  */
+  PROP_LOCLIST,    /* Location list.  */
+  PROP_VARIANT_PARTS, /* Variant parts.  */
+  PROP_TYPE,	   /* Type.  */
 };
 
 union dynamic_prop_data
@@ -450,6 +498,21 @@ union dynamic_prop_data
   /* Storage for dynamic property.  */
 
   void *baton;
+
+  /* Storage of variant parts for a type.  A type with variant parts
+     has all its fields "linearized" -- stored in a single field
+     array, just as if they had all been declared that way.  The
+     variant parts are attached via a dynamic property, and then are
+     used to control which fields end up in the final type during
+     dynamic type resolution.  */
+
+  const gdb::array_view<variant_part> *variant_parts;
+
+  /* Once a variant type is resolved, we may want to be able to go
+     from the resolved type to the original type.  In this case we
+     rewrite the property's kind and set this field.  */
+
+  struct type *original_type;
 };
 
 /* * Used to store a dynamic property.  */
@@ -491,8 +554,11 @@ enum dynamic_prop_node_kind
   /* A property providing an array's byte stride.  */
   DYN_PROP_BYTE_STRIDE,
 
-  /* A property holding information about a discriminated union.  */
-  DYN_PROP_DISCRIMINATED,
+  /* A property holding variant parts.  */
+  DYN_PROP_VARIANT_PARTS,
+
+  /* A property holding the size of the type.  */
+  DYN_PROP_BYTE_SIZE,
 };
 
 /* * List for dynamic type attributes.  */
@@ -727,13 +793,6 @@ struct main_type
      affects how the enum is printed.  */
 
   unsigned int flag_flag_enum : 1;
-
-  /* * True if this type is a discriminated union type.  Only valid
-     for TYPE_CODE_UNION.  A discriminated union stores a reference to
-     the discriminant field along with the discriminator values in a
-     dynamic property.  */
-
-  unsigned int flag_discriminated_union : 1;
 
   /* * A discriminant telling us which field of the type_specific
      union is being used for this type, if any.  */
@@ -1393,6 +1452,8 @@ extern bool set_type_align (struct type *, ULONGEST);
   TYPE_DATA_LOCATION (thistype)->data.const_val
 #define TYPE_DATA_LOCATION_KIND(thistype) \
   TYPE_DATA_LOCATION (thistype)->kind
+#define TYPE_DYNAMIC_LENGTH(thistype) \
+  get_dyn_prop (DYN_PROP_BYTE_SIZE, thistype)
 
 /* Property accessors for the type allocated/associated.  */
 #define TYPE_ALLOCATED_PROP(thistype) \
@@ -2037,9 +2098,9 @@ extern void get_signed_type_minmax (struct type *, LONGEST *, LONGEST *);
    ADDR specifies the location of the variable the type is bound to.
    If TYPE has no dynamic properties return TYPE; otherwise a new type with
    static properties is returned.  */
-extern struct type *resolve_dynamic_type (struct type *type,
-					  const gdb_byte *valaddr,
-					  CORE_ADDR addr);
+extern struct type *resolve_dynamic_type
+  (struct type *type, gdb::array_view<const gdb_byte> valaddr,
+   CORE_ADDR addr);
 
 /* * Predicate if the type has dynamic values, which are not resolved yet.  */
 extern int is_dynamic_type (struct type *type);

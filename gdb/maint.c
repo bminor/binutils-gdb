@@ -52,16 +52,6 @@
 
 static void maintenance_do_deprecate (const char *, int);
 
-/* Access the maintenance subcommands.  */
-
-static void
-maintenance_command (const char *args, int from_tty)
-{
-  printf_unfiltered (_("\"maintenance\" must be followed by "
-		       "the name of a maintenance command.\n"));
-  help_list (maintenancelist, "maintenance ", all_commands, gdb_stdout);
-}
-
 #ifndef _WIN32
 static void
 maintenance_dump_me (const char *args, int from_tty)
@@ -137,32 +127,6 @@ maintenance_space_display (const char *args, int from_tty)
     printf_unfiltered ("\"maintenance space\" takes a numeric argument.\n");
   else
     set_per_command_space (strtol (args, NULL, 10));
-}
-
-/* The "maintenance info" command is defined as a prefix, with
-   allow_unknown 0.  Therefore, its own definition is called only for
-   "maintenance info" with no args.  */
-
-static void
-maintenance_info_command (const char *arg, int from_tty)
-{
-  printf_unfiltered (_("\"maintenance info\" must be followed "
-		       "by the name of an info command.\n"));
-  help_list (maintenanceinfolist, "maintenance info ", all_commands,
-	     gdb_stdout);
-}
-
-/* The "maintenance check" command is defined as a prefix, with
-   allow_unknown 0.  Therefore, its own definition is called only for
-   "maintenance check" with no args.  */
-
-static void
-maintenance_check_command (const char *arg, int from_tty)
-{
-  printf_unfiltered (_("\"maintenance check\" must be followed "
-		       "by the name of a check command.\n"));
-  help_list (maintenancechecklist, "maintenance check ", all_commands,
-	     gdb_stdout);
 }
 
 /* Mini tokenizing lexer for 'maint info sections' command.  */
@@ -511,19 +475,6 @@ maintenance_print_architecture (const char *args, int from_tty)
     }
 }
 
-/* The "maintenance print" command is defined as a prefix, with
-   allow_unknown 0.  Therefore, its own definition is called only for
-   "maintenance print" with no args.  */
-
-static void
-maintenance_print_command (const char *arg, int from_tty)
-{
-  printf_unfiltered (_("\"maintenance print\" must be followed "
-		       "by the name of a print command.\n"));
-  help_list (maintenanceprintlist, "maintenance print ", all_commands,
-	     gdb_stdout);
-}
-
 /* The "maintenance translate-address" command converts a section and address
    to a symbol.  This can be called in two ways:
    maintenance translate-address <secname> <addr>
@@ -738,21 +689,6 @@ maintenance_do_deprecate (const char *text, int deprecate)
 
 struct cmd_list_element *maintenance_set_cmdlist;
 struct cmd_list_element *maintenance_show_cmdlist;
-
-static void
-maintenance_set_cmd (const char *args, int from_tty)
-{
-  printf_unfiltered (_("\"maintenance set\" must be followed "
-		       "by the name of a set command.\n"));
-  help_list (maintenance_set_cmdlist, "maintenance set ", all_commands,
-	     gdb_stdout);
-}
-
-static void
-maintenance_show_cmd (const char *args, int from_tty)
-{
-  cmd_show_list (maintenance_show_cmdlist, from_tty, "");
-}
 
 /* "maintenance with" command.  */
 
@@ -1097,14 +1033,6 @@ set_per_command_cmd (const char *args, int from_tty)
       }
 }
 
-/* Command "show per-command" displays summary of all the current
-   "show per-command " settings.  */
-
-static void
-show_per_command_cmd (const char *args, int from_tty)
-{
-  cmd_show_list (per_command_showlist, from_tty, "");
-}
 
 
 /* The "maintenance selftest" command.  */
@@ -1141,19 +1069,19 @@ _initialize_maint_cmds ()
 {
   struct cmd_list_element *cmd;
 
-  add_prefix_cmd ("maintenance", class_maintenance, maintenance_command, _("\
+  add_basic_prefix_cmd ("maintenance", class_maintenance, _("\
 Commands for use by GDB maintainers.\n\
 Includes commands to dump specific internal GDB structures in\n\
 a human readable form, to cause GDB to deliberately dump core, etc."),
-		  &maintenancelist, "maintenance ", 0,
-		  &cmdlist);
+			&maintenancelist, "maintenance ", 0,
+			&cmdlist);
 
   add_com_alias ("mt", "maintenance", class_maintenance, 1);
 
-  add_prefix_cmd ("info", class_maintenance, maintenance_info_command, _("\
+  add_basic_prefix_cmd ("info", class_maintenance, _("\
 Commands for showing internal info about the program being debugged."),
-		  &maintenanceinfolist, "maintenance info ", 0,
-		  &maintenancelist);
+			&maintenanceinfolist, "maintenance info ", 0,
+			&maintenancelist);
   add_alias_cmd ("i", "info", class_maintenance, 1, &maintenancelist);
 
   add_cmd ("sections", class_maintenance, maintenance_info_sections, _("\
@@ -1168,24 +1096,24 @@ implies all sections).  In addition, the special argument\n\
 lists all sections from all object files, including shared libraries."),
 	   &maintenanceinfolist);
 
-  add_prefix_cmd ("print", class_maintenance, maintenance_print_command,
-		  _("Maintenance command for printing GDB internal state."),
-		  &maintenanceprintlist, "maintenance print ", 0,
-		  &maintenancelist);
+  add_basic_prefix_cmd ("print", class_maintenance,
+			_("Maintenance command for printing GDB internal state."),
+			&maintenanceprintlist, "maintenance print ", 0,
+			&maintenancelist);
 
-  add_prefix_cmd ("set", class_maintenance, maintenance_set_cmd, _("\
+  add_basic_prefix_cmd ("set", class_maintenance, _("\
 Set GDB internal variables used by the GDB maintainer.\n\
 Configure variables internal to GDB that aid in GDB's maintenance"),
-		  &maintenance_set_cmdlist, "maintenance set ",
-		  0/*allow-unknown*/,
-		  &maintenancelist);
+			&maintenance_set_cmdlist, "maintenance set ",
+			0/*allow-unknown*/,
+			&maintenancelist);
 
-  add_prefix_cmd ("show", class_maintenance, maintenance_show_cmd, _("\
+  add_show_prefix_cmd ("show", class_maintenance, _("\
 Show GDB internal variables used by the GDB maintainer.\n\
 Configure variables internal to GDB that aid in GDB's maintenance"),
-		  &maintenance_show_cmdlist, "maintenance show ",
-		  0/*allow-unknown*/,
-		  &maintenancelist);
+		       &maintenance_show_cmdlist, "maintenance show ",
+		       0/*allow-unknown*/,
+		       &maintenancelist);
 
   cmd = add_cmd ("with", class_maintenance, maintenance_with_cmd, _("\
 Like \"with\", but works with \"maintenance set\" variables.\n\
@@ -1232,10 +1160,10 @@ Per-command statistics settings."),
 		    &per_command_setlist, "maintenance set per-command ",
 		    1/*allow-unknown*/, &maintenance_set_cmdlist);
 
-  add_prefix_cmd ("per-command", class_maintenance, show_per_command_cmd, _("\
+  add_show_prefix_cmd ("per-command", class_maintenance, _("\
 Show per-command statistics settings."),
-		    &per_command_showlist, "maintenance show per-command ",
-		    0/*allow-unknown*/, &maintenance_show_cmdlist);
+		       &per_command_showlist, "maintenance show per-command ",
+		       0/*allow-unknown*/, &maintenance_show_cmdlist);
 
   add_setshow_boolean_cmd ("time", class_maintenance,
 			   &per_command_time, _("\
@@ -1299,10 +1227,10 @@ Print the internal architecture configuration.\n\
 Takes an optional file parameter."),
 	   &maintenanceprintlist);
 
-  add_prefix_cmd ("check", class_maintenance, maintenance_check_command, _("\
+  add_basic_prefix_cmd ("check", class_maintenance, _("\
 Commands for checking internal gdb state."),
-		  &maintenancechecklist, "maintenance check ", 0,
-		  &maintenancelist);
+			&maintenancechecklist, "maintenance check ", 0,
+			&maintenancelist);
 
   add_cmd ("translate-address", class_maintenance,
 	   maintenance_translate_address,

@@ -1083,6 +1083,12 @@ struct elf_backend_data
   bfd_boolean (*elf_backend_size_dynamic_sections)
     (bfd *output_bfd, struct bfd_link_info *info);
 
+  /* The STRIP_ZERO_SIZED_DYNAMIC_SECTIONS function is called by the
+     ELF backend linker to strip zero-sized dynamic sections after
+     the section sizes have been set.  */
+  bfd_boolean (*elf_backend_strip_zero_sized_dynamic_sections)
+    (struct bfd_link_info *info);
+
   /* Set TEXT_INDEX_SECTION and DATA_INDEX_SECTION, the output sections
      we keep to use as a base for relocs and symbols.  */
   void (*elf_backend_init_index_section)
@@ -2520,6 +2526,8 @@ extern bfd_boolean bfd_elf_link_add_symbols
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_add_dynamic_entry
   (struct bfd_link_info *, bfd_vma, bfd_vma);
+extern bfd_boolean _bfd_elf_strip_zero_sized_dynamic_sections
+  (struct bfd_link_info *);
 extern int bfd_elf_add_dt_needed_tag
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_link_check_relocs
@@ -2730,6 +2738,8 @@ extern char *elfcore_write_aarch_sve
   (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_aarch_pauth
   (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_arc_v2
+  (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_lwpstatus
   (bfd *, char *, int *, long, int, const void *);
 extern char *elfcore_write_register_note
@@ -2930,8 +2940,9 @@ extern asection _bfd_elf_large_com_section;
       else if (!bfd_link_relocatable (info))				\
 	{								\
 	  bfd_boolean err;						\
-	  err = (info->unresolved_syms_in_objects == RM_GENERATE_ERROR	\
-		 || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT);	\
+	  err = (info->unresolved_syms_in_objects == RM_DIAGNOSE &&	\
+		 !info->warn_unresolved_syms)				\
+		 || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT;	\
 	  (*info->callbacks->undefined_symbol) (info,			\
 						h->root.root.string,	\
 						input_bfd,		\

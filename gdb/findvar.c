@@ -615,7 +615,7 @@ default_read_var_value (struct symbol *var, const struct block *var_block,
       if (is_dynamic_type (type))
 	{
 	  /* Value is a constant byte-sequence and needs no memory access.  */
-	  type = resolve_dynamic_type (type, NULL, /* Unused address.  */ 0);
+	  type = resolve_dynamic_type (type, {}, /* Unused address.  */ 0);
 	}
       /* Put the constant back in target format. */
       v = allocate_value (type);
@@ -647,7 +647,7 @@ default_read_var_value (struct symbol *var, const struct block *var_block,
       if (is_dynamic_type (type))
 	{
 	  /* Value is a constant byte-sequence and needs no memory access.  */
-	  type = resolve_dynamic_type (type, NULL, /* Unused address.  */ 0);
+	  type = resolve_dynamic_type (type, {}, /* Unused address.  */ 0);
 	}
       v = allocate_value (type);
       memcpy (value_contents_raw (v), SYMBOL_VALUE_BYTES (var),
@@ -788,7 +788,7 @@ default_read_var_value (struct symbol *var, const struct block *var_block,
 
     case LOC_OPTIMIZED_OUT:
       if (is_dynamic_type (type))
-	type = resolve_dynamic_type (type, NULL, /* Unused address.  */ 0);
+	type = resolve_dynamic_type (type, {}, /* Unused address.  */ 0);
       return allocate_optimized_out_value (type);
 
     default:

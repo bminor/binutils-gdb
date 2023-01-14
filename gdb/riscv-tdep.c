@@ -284,46 +284,10 @@ show_use_compressed_breakpoints (struct ui_file *file, int from_tty,
 static struct cmd_list_element *setriscvcmdlist = NULL;
 static struct cmd_list_element *showriscvcmdlist = NULL;
 
-/* The show callback for the 'show riscv' prefix command.  */
-
-static void
-show_riscv_command (const char *args, int from_tty)
-{
-  help_list (showriscvcmdlist, "show riscv ", all_commands, gdb_stdout);
-}
-
-/* The set callback for the 'set riscv' prefix command.  */
-
-static void
-set_riscv_command (const char *args, int from_tty)
-{
-  printf_unfiltered
-    (_("\"set riscv\" must be followed by an appropriate subcommand.\n"));
-  help_list (setriscvcmdlist, "set riscv ", all_commands, gdb_stdout);
-}
-
 /* The set and show lists for 'set riscv' and 'show riscv' prefixes.  */
 
 static struct cmd_list_element *setdebugriscvcmdlist = NULL;
 static struct cmd_list_element *showdebugriscvcmdlist = NULL;
-
-/* The show callback for the 'show debug riscv' prefix command.  */
-
-static void
-show_debug_riscv_command (const char *args, int from_tty)
-{
-  help_list (showdebugriscvcmdlist, "show debug riscv ", all_commands, gdb_stdout);
-}
-
-/* The set callback for the 'set debug riscv' prefix command.  */
-
-static void
-set_debug_riscv_command (const char *args, int from_tty)
-{
-  printf_unfiltered
-    (_("\"set debug riscv\" must be followed by an appropriate subcommand.\n"));
-  help_list (setdebugriscvcmdlist, "set debug riscv ", all_commands, gdb_stdout);
-}
 
 /* The show callback for all 'show debug riscv VARNAME' variables.  */
 
@@ -3527,15 +3491,15 @@ _initialize_riscv_tdep ()
 
   /* Add root prefix command for all "set debug riscv" and "show debug
      riscv" commands.  */
-  add_prefix_cmd ("riscv", no_class, set_debug_riscv_command,
-		  _("RISC-V specific debug commands."),
-		  &setdebugriscvcmdlist, "set debug riscv ", 0,
-		  &setdebuglist);
+  add_basic_prefix_cmd ("riscv", no_class,
+			_("RISC-V specific debug commands."),
+			&setdebugriscvcmdlist, "set debug riscv ", 0,
+			&setdebuglist);
 
-  add_prefix_cmd ("riscv", no_class, show_debug_riscv_command,
-		  _("RISC-V specific debug commands."),
-		  &showdebugriscvcmdlist, "show debug riscv ", 0,
-		  &showdebuglist);
+  add_show_prefix_cmd ("riscv", no_class,
+		       _("RISC-V specific debug commands."),
+		       &showdebugriscvcmdlist, "show debug riscv ", 0,
+		       &showdebuglist);
 
   add_setshow_zuinteger_cmd ("breakpoints", class_maintenance,
 			     &riscv_debug_breakpoints,  _("\
@@ -3578,13 +3542,13 @@ initialisation process."),
 			     &setdebugriscvcmdlist, &showdebugriscvcmdlist);
 
   /* Add root prefix command for all "set riscv" and "show riscv" commands.  */
-  add_prefix_cmd ("riscv", no_class, set_riscv_command,
-		  _("RISC-V specific commands."),
-		  &setriscvcmdlist, "set riscv ", 0, &setlist);
+  add_basic_prefix_cmd ("riscv", no_class,
+			_("RISC-V specific commands."),
+			&setriscvcmdlist, "set riscv ", 0, &setlist);
 
-  add_prefix_cmd ("riscv", no_class, show_riscv_command,
-		  _("RISC-V specific commands."),
-		  &showriscvcmdlist, "show riscv ", 0, &showlist);
+  add_show_prefix_cmd ("riscv", no_class,
+		       _("RISC-V specific commands."),
+		       &showriscvcmdlist, "show riscv ", 0, &showlist);
 
 
   use_compressed_breakpoints = AUTO_BOOLEAN_AUTO;

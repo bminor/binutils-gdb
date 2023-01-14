@@ -1208,6 +1208,8 @@ amd64_windows_auto_wide_charset (void)
   return "UTF-16";
 }
 
+/* Common parts for gdbarch initialization for Windows and Cygwin on AMD64.  */
+
 static void
 amd64_windows_init_abi_common (gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -1227,8 +1229,6 @@ amd64_windows_init_abi_common (gdbarch_info info, struct gdbarch *gdbarch)
   amd64_init_abi (info, gdbarch,
 		  amd64_target_description (X86_XSTATE_SSE_MASK, false));
 
-  windows_init_abi (info, gdbarch);
-
   /* Function calls.  */
   set_gdbarch_push_dummy_call (gdbarch, amd64_windows_push_dummy_call);
   set_gdbarch_return_value (gdbarch, amd64_windows_return_value);
@@ -1241,19 +1241,25 @@ amd64_windows_init_abi_common (gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_auto_wide_charset (gdbarch, amd64_windows_auto_wide_charset);
 }
 
+/* gdbarch initialization for Windows on AMD64.  */
+
 static void
 amd64_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   amd64_windows_init_abi_common (info, gdbarch);
+  windows_init_abi (info, gdbarch);
 
   /* On Windows, "long"s are only 32bit.  */
   set_gdbarch_long_bit (gdbarch, 32);
 }
 
+/* gdbarch initialization for Cygwin on AMD64.  */
+
 static void
 amd64_cygwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   amd64_windows_init_abi_common (info, gdbarch);
+  cygwin_init_abi (info, gdbarch);
 }
 
 static gdb_osabi

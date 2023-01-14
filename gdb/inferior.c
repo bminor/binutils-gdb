@@ -162,7 +162,7 @@ delete_inferior (struct inferior *todel)
 
   /* If this program space is rendered useless, remove it. */
   if (program_space_empty_p (inf->pspace))
-    delete_program_space (inf->pspace);
+    delete inf->pspace;
 
   delete inf;
 }
@@ -305,17 +305,6 @@ find_inferior_for_program_space (struct program_space *pspace)
 
   for (inferior *inf : all_inferiors ())
     if (inf->pspace == pspace)
-      return inf;
-
-  return NULL;
-}
-
-struct inferior *
-iterate_over_inferiors (int (*callback) (struct inferior *, void *),
-			void *data)
-{
-  for (inferior *inf : all_inferiors_safe ())
-    if ((*callback) (inf, data))
       return inf;
 
   return NULL;

@@ -6877,23 +6877,6 @@ mips_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
     return mips32_stack_frame_destroyed_p (gdbarch, pc);
 }
 
-/* Root of all "set mips "/"show mips " commands.  This will eventually be
-   used for all MIPS-specific commands.  */
-
-static void
-show_mips_command (const char *args, int from_tty)
-{
-  help_list (showmipscmdlist, "show mips ", all_commands, gdb_stdout);
-}
-
-static void
-set_mips_command (const char *args, int from_tty)
-{
-  printf_unfiltered
-    ("\"set mips\" must be followed by an appropriate subcommand.\n");
-  help_list (setmipscmdlist, "set mips ", all_commands, gdb_stdout);
-}
-
 /* Commands to show/set the MIPS FPU type.  */
 
 static void
@@ -8990,13 +8973,13 @@ _initialize_mips_tdep ()
   set_tdesc_property (mips_tdesc_gp64, PROPERTY_GP64, "");
 
   /* Add root prefix command for all "set mips"/"show mips" commands.  */
-  add_prefix_cmd ("mips", no_class, set_mips_command,
-		  _("Various MIPS specific commands."),
-		  &setmipscmdlist, "set mips ", 0, &setlist);
+  add_basic_prefix_cmd ("mips", no_class,
+			_("Various MIPS specific commands."),
+			&setmipscmdlist, "set mips ", 0, &setlist);
 
-  add_prefix_cmd ("mips", no_class, show_mips_command,
-		  _("Various MIPS specific commands."),
-		  &showmipscmdlist, "show mips ", 0, &showlist);
+  add_show_prefix_cmd ("mips", no_class,
+		       _("Various MIPS specific commands."),
+		       &showmipscmdlist, "show mips ", 0, &showlist);
 
   /* Allow the user to override the ABI.  */
   add_setshow_enum_cmd ("abi", class_obscure, mips_abi_strings,

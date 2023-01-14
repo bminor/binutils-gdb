@@ -46,11 +46,12 @@ AC_DEFUN([GDB_AC_COMMON], [
 		   thread_db.h wait.h dnl
 		   termios.h dnl
 		   dlfcn.h dnl
-		   linux/elf.h sys/procfs.h proc_service.h)
+		   linux/elf.h sys/procfs.h proc_service.h dnl
+		   poll.h sys/poll.h sys/select.h)
 
   AC_FUNC_MMAP
   AC_FUNC_VFORK
-  AC_CHECK_FUNCS([fdwalk getrlimit pipe pipe2 socketpair sigaction \
+  AC_CHECK_FUNCS([fdwalk getrlimit pipe pipe2 poll socketpair sigaction \
 		  ptrace64 sbrk setns sigaltstack sigprocmask \
 		  setpgid setpgrp getrusage getauxval])
 

@@ -829,7 +829,7 @@ enter_line_range (struct subfile *subfile, unsigned beginoffset,
 		  CORE_ADDR endaddr, unsigned *firstLine)
 {
   struct objfile *objfile = this_symtab_objfile;
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   unsigned int curoffset;
   CORE_ADDR addr;
   void *ext_lnno;
@@ -2121,7 +2121,7 @@ static void
 scan_xcoff_symtab (minimal_symbol_reader &reader,
 		   struct objfile *objfile)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   CORE_ADDR toc_offset = 0;	/* toc offset value in data section.  */
   const char *filestring = NULL;
 

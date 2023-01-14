@@ -17,8 +17,6 @@
 
 // Test file for exception handling support.
 
-using namespace std;
-
 int foo (int i)
 {
   if (i < 32)

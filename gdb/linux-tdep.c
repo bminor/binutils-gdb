@@ -2326,7 +2326,7 @@ linux_infcall_mmap (CORE_ADDR size, unsigned prot)
      "mmap" uses 64-bit off_t on x86_64 and 32-bit off_t on i386 and x32.  */
   struct value *mmap_val = find_function_in_inferior ("mmap64", &objf);
   struct value *addr_val;
-  struct gdbarch *gdbarch = get_objfile_arch (objf);
+  struct gdbarch *gdbarch = objf->arch ();
   CORE_ADDR retval;
   enum
     {
@@ -2365,7 +2365,7 @@ linux_infcall_munmap (CORE_ADDR addr, CORE_ADDR size)
   struct objfile *objf;
   struct value *munmap_val = find_function_in_inferior ("munmap", &objf);
   struct value *retval_val;
-  struct gdbarch *gdbarch = get_objfile_arch (objf);
+  struct gdbarch *gdbarch = objf->arch ();
   LONGEST retval;
   enum
     {

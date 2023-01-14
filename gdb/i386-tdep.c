@@ -9018,22 +9018,6 @@ i386_mpx_set_bounds (const char *args, int from_tty)
 
 static struct cmd_list_element *mpx_set_cmdlist, *mpx_show_cmdlist;
 
-/* Helper function for the CLI commands.  */
-
-static void
-set_mpx_cmd (const char *args, int from_tty)
-{
-  help_list (mpx_set_cmdlist, "set mpx ", all_commands, gdb_stdout);
-}
-
-/* Helper function for the CLI commands.  */
-
-static void
-show_mpx_cmd (const char *args, int from_tty)
-{
-  cmd_show_list (mpx_show_cmdlist, from_tty, "");
-}
-
 void _initialize_i386_tdep ();
 void
 _initialize_i386_tdep ()
@@ -9064,17 +9048,17 @@ is \"default\"."),
 
   /* Add "mpx" prefix for the set commands.  */
 
-  add_prefix_cmd ("mpx", class_support, set_mpx_cmd, _("\
+  add_basic_prefix_cmd ("mpx", class_support, _("\
 Set Intel Memory Protection Extensions specific variables."),
-		  &mpx_set_cmdlist, "set mpx ",
-		  0 /* allow-unknown */, &setlist);
+			&mpx_set_cmdlist, "set mpx ",
+			0 /* allow-unknown */, &setlist);
 
   /* Add "mpx" prefix for the show commands.  */
 
-  add_prefix_cmd ("mpx", class_support, show_mpx_cmd, _("\
+  add_show_prefix_cmd ("mpx", class_support, _("\
 Show Intel Memory Protection Extensions specific variables."),
-		  &mpx_show_cmdlist, "show mpx ",
-		  0 /* allow-unknown */, &showlist);
+		       &mpx_show_cmdlist, "show mpx ",
+		       0 /* allow-unknown */, &showlist);
 
   /* Add "bound" command for the show mpx commands list.  */
 

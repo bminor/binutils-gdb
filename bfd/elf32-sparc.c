@@ -121,37 +121,41 @@ sparc_final_write_processing (bfd *abfd)
 {
   switch (bfd_get_mach (abfd))
     {
-    case bfd_mach_sparc :
-    case bfd_mach_sparc_sparclet :
-    case bfd_mach_sparc_sparclite :
+    case bfd_mach_sparc:
+    case bfd_mach_sparc_sparclet:
+    case bfd_mach_sparc_sparclite:
       break; /* nothing to do */
-    case bfd_mach_sparc_v8plus :
+    case bfd_mach_sparc_v8plus:
       elf_elfheader (abfd)->e_machine = EM_SPARC32PLUS;
       elf_elfheader (abfd)->e_flags &=~ EF_SPARC_32PLUS_MASK;
       elf_elfheader (abfd)->e_flags |= EF_SPARC_32PLUS;
       break;
-    case bfd_mach_sparc_v8plusa :
+    case bfd_mach_sparc_v8plusa:
       elf_elfheader (abfd)->e_machine = EM_SPARC32PLUS;
       elf_elfheader (abfd)->e_flags &=~ EF_SPARC_32PLUS_MASK;
       elf_elfheader (abfd)->e_flags |= EF_SPARC_32PLUS | EF_SPARC_SUN_US1;
       break;
-    case bfd_mach_sparc_v8plusb :
-    case bfd_mach_sparc_v8plusc :
-    case bfd_mach_sparc_v8plusd :
-    case bfd_mach_sparc_v8pluse :
-    case bfd_mach_sparc_v8plusv :
-    case bfd_mach_sparc_v8plusm :
-    case bfd_mach_sparc_v8plusm8 :
+    case bfd_mach_sparc_v8plusb:
+    case bfd_mach_sparc_v8plusc:
+    case bfd_mach_sparc_v8plusd:
+    case bfd_mach_sparc_v8pluse:
+    case bfd_mach_sparc_v8plusv:
+    case bfd_mach_sparc_v8plusm:
+    case bfd_mach_sparc_v8plusm8:
       elf_elfheader (abfd)->e_machine = EM_SPARC32PLUS;
       elf_elfheader (abfd)->e_flags &=~ EF_SPARC_32PLUS_MASK;
       elf_elfheader (abfd)->e_flags |= EF_SPARC_32PLUS | EF_SPARC_SUN_US1
 				       | EF_SPARC_SUN_US3;
       break;
-    case bfd_mach_sparc_sparclite_le :
+    case bfd_mach_sparc_sparclite_le:
       elf_elfheader (abfd)->e_flags |= EF_SPARC_LEDATA;
       break;
-    default :
-      abort ();
+    case 0: /* A non-sparc architecture - ignore.  */
+      break;
+    default:
+      _bfd_error_handler
+	(_("%pB: unhandled sparc machine value '%lu' detected during write processing"),
+	 abfd, (long) bfd_get_mach (abfd));
       break;
     }
 }

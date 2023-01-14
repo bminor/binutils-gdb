@@ -20,9 +20,9 @@
 #include "defs.h"
 #include "serial.h"
 #include "ser-base.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 
-#include "gdb_select.h"
+#include "gdbsupport/gdb_select.h"
 #include "gdbsupport/gdb_sys_time.h"
 #ifdef USE_WIN32API
 #include <winsock2.h>

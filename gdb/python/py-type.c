@@ -1049,7 +1049,7 @@ save_objfile_types (struct objfile *objfile, void *datum)
 
   /* This prevents another thread from freeing the objects we're
      operating on.  */
-  gdbpy_enter enter_py (get_objfile_arch (objfile), current_language);
+  gdbpy_enter enter_py (objfile->arch (), current_language);
 
   copied_types = create_copied_types_hash (objfile);
 

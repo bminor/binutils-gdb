@@ -129,20 +129,6 @@ static struct cmd_list_element *binary_dump_cmdlist;
 static struct cmd_list_element *binary_append_cmdlist;
 
 static void
-dump_command (const char *cmd, int from_tty)
-{
-  printf_unfiltered (_("\"dump\" must be followed by a subcommand.\n\n"));
-  help_list (dump_cmdlist, "dump ", all_commands, gdb_stdout);
-}
-
-static void
-append_command (const char *cmd, int from_tty)
-{
-  printf_unfiltered (_("\"append\" must be followed by a subcommand.\n\n"));
-  help_list (dump_cmdlist, "append ", all_commands, gdb_stdout);
-}
-
-static void
 dump_binary_file (const char *filename, const char *mode, 
 		  const bfd_byte *buf, ULONGEST len)
 {
@@ -579,65 +565,22 @@ restore_command (const char *args, int from_tty)
     }
 }
 
-static void
-srec_dump_command (const char *cmd, int from_tty)
-{
-  printf_unfiltered (_("\"dump srec\" must be followed by a subcommand.\n"));
-  help_list (srec_cmdlist, "dump srec ", all_commands, gdb_stdout);
-}
-
-static void
-ihex_dump_command (const char *cmd, int from_tty)
-{
-  printf_unfiltered (_("\"dump ihex\" must be followed by a subcommand.\n"));
-  help_list (ihex_cmdlist, "dump ihex ", all_commands, gdb_stdout);
-}
-
-static void
-verilog_dump_command (const char *cmd, int from_tty)
-{
-  printf_unfiltered (_("\"dump verilog\" must be followed by a subcommand.\n"));
-  help_list (verilog_cmdlist, "dump verilog ", all_commands, gdb_stdout);
-}
-
-static void
-tekhex_dump_command (const char *cmd, int from_tty)
-{
-  printf_unfiltered (_("\"dump tekhex\" must be followed by a subcommand.\n"));
-  help_list (tekhex_cmdlist, "dump tekhex ", all_commands, gdb_stdout);
-}
-
-static void
-binary_dump_command (const char *cmd, int from_tty)
-{
-  printf_unfiltered (_("\"dump binary\" must be followed by a subcommand.\n"));
-  help_list (binary_dump_cmdlist, "dump binary ", all_commands, gdb_stdout);
-}
-
-static void
-binary_append_command (const char *cmd, int from_tty)
-{
-  printf_unfiltered (_("\"append binary\" must be followed by a subcommand.\n"));
-  help_list (binary_append_cmdlist, "append binary ", all_commands,
-	     gdb_stdout);
-}
-
 void _initialize_cli_dump ();
 void
 _initialize_cli_dump ()
 {
   struct cmd_list_element *c;
 
-  add_prefix_cmd ("dump", class_vars, dump_command,
-		  _("Dump target code/data to a local file."),
-		  &dump_cmdlist, "dump ",
-		  0/*allow-unknown*/,
-		  &cmdlist);
-  add_prefix_cmd ("append", class_vars, append_command,
-		  _("Append target code/data to a local file."),
-		  &append_cmdlist, "append ",
-		  0/*allow-unknown*/,
-		  &cmdlist);
+  add_basic_prefix_cmd ("dump", class_vars,
+			_("Dump target code/data to a local file."),
+			&dump_cmdlist, "dump ",
+			0/*allow-unknown*/,
+			&cmdlist);
+  add_basic_prefix_cmd ("append", class_vars,
+			_("Append target code/data to a local file."),
+			&append_cmdlist, "append ",
+			0/*allow-unknown*/,
+			&cmdlist);
 
   add_dump_command ("memory", dump_memory_command, "\
 Write contents of memory to a raw binary file.\n\
@@ -649,41 +592,41 @@ Write the value of an expression to a raw binary file.\n\
 Arguments are FILE EXPRESSION.  Writes the value of EXPRESSION to\n\
 the specified FILE in raw target ordered bytes.");
 
-  add_prefix_cmd ("srec", all_commands, srec_dump_command,
-		  _("Write target code/data to an srec file."),
-		  &srec_cmdlist, "dump srec ", 
-		  0 /*allow-unknown*/, 
-		  &dump_cmdlist);
+  add_basic_prefix_cmd ("srec", all_commands,
+			_("Write target code/data to an srec file."),
+			&srec_cmdlist, "dump srec ", 
+			0 /*allow-unknown*/, 
+			&dump_cmdlist);
 
-  add_prefix_cmd ("ihex", all_commands, ihex_dump_command,
-		  _("Write target code/data to an intel hex file."),
-		  &ihex_cmdlist, "dump ihex ", 
-		  0 /*allow-unknown*/, 
-		  &dump_cmdlist);
+  add_basic_prefix_cmd ("ihex", all_commands,
+			_("Write target code/data to an intel hex file."),
+			&ihex_cmdlist, "dump ihex ", 
+			0 /*allow-unknown*/, 
+			&dump_cmdlist);
 
-  add_prefix_cmd ("verilog", all_commands, verilog_dump_command,
-		  _("Write target code/data to a verilog hex file."),
-		  &verilog_cmdlist, "dump verilog ",
-		  0 /*allow-unknown*/,
-		  &dump_cmdlist);
+  add_basic_prefix_cmd ("verilog", all_commands,
+			_("Write target code/data to a verilog hex file."),
+			&verilog_cmdlist, "dump verilog ",
+			0 /*allow-unknown*/,
+			&dump_cmdlist);
 
-  add_prefix_cmd ("tekhex", all_commands, tekhex_dump_command,
-		  _("Write target code/data to a tekhex file."),
-		  &tekhex_cmdlist, "dump tekhex ", 
-		  0 /*allow-unknown*/, 
-		  &dump_cmdlist);
+  add_basic_prefix_cmd ("tekhex", all_commands,
+			_("Write target code/data to a tekhex file."),
+			&tekhex_cmdlist, "dump tekhex ", 
+			0 /*allow-unknown*/, 
+			&dump_cmdlist);
 
-  add_prefix_cmd ("binary", all_commands, binary_dump_command,
-		  _("Write target code/data to a raw binary file."),
-		  &binary_dump_cmdlist, "dump binary ", 
-		  0 /*allow-unknown*/, 
-		  &dump_cmdlist);
+  add_basic_prefix_cmd ("binary", all_commands,
+			_("Write target code/data to a raw binary file."),
+			&binary_dump_cmdlist, "dump binary ", 
+			0 /*allow-unknown*/, 
+			&dump_cmdlist);
 
-  add_prefix_cmd ("binary", all_commands, binary_append_command,
-		  _("Append target code/data to a raw binary file."),
-		  &binary_append_cmdlist, "append binary ", 
-		  0 /*allow-unknown*/, 
-		  &append_cmdlist);
+  add_basic_prefix_cmd ("binary", all_commands,
+			_("Append target code/data to a raw binary file."),
+			&binary_append_cmdlist, "append binary ", 
+			0 /*allow-unknown*/, 
+			&append_cmdlist);
 
   add_cmd ("memory", all_commands, dump_srec_memory, _("\
 Write contents of memory to an srec file.\n\

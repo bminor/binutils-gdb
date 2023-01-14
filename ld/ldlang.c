@@ -117,6 +117,7 @@ lang_statement_list_type file_chain = { NULL, NULL };
    lang_input_statement_type statement (reached via input_statement field in a
    lang_statement_union).  */
 lang_statement_list_type input_file_chain;
+static const char *current_input_file;
 struct bfd_sym_chain entry_symbol = { NULL, NULL };
 const char *entry_section = ".text";
 struct lang_input_statement_flags input_flags;
@@ -174,6 +175,21 @@ name_match (const char *pattern, const char *name)
   if (wildcardp (pattern))
     return fnmatch (pattern, name, 0);
   return strcmp (pattern, name);
+}
+
+static char *
+ldirname (const char *name)
+{
+  const char *base = lbasename (name);
+  char *dirname;
+
+  while (base > name && IS_DIR_SEPARATOR (base[-1]))
+    --base;
+  if (base == name)
+    return strdup (".");
+  dirname = strdup (name);
+  dirname[base - name] = '\0';
+  return dirname;
 }
 
 /* If PATTERN is of the form archive:file, return a pointer to the
@@ -1093,7 +1109,8 @@ new_statement (enum statement_enum type,
 static lang_input_statement_type *
 new_afile (const char *name,
 	   lang_input_file_enum_type file_type,
-	   const char *target)
+	   const char *target,
+	   const char *from_filename)
 {
   lang_input_statement_type *p;
 
@@ -1102,6 +1119,7 @@ new_afile (const char *name,
   p = new_stat (lang_input_statement, stat_ptr);
   memset (&p->the_bfd, 0,
 	  sizeof (*p) - offsetof (lang_input_statement_type, the_bfd));
+  p->extra_search_path = NULL;
   p->target = target;
   p->flags.dynamic = input_flags.dynamic;
   p->flags.add_DT_NEEDED_for_dynamic = input_flags.add_DT_NEEDED_for_dynamic;
@@ -1142,6 +1160,10 @@ new_afile (const char *name,
     case lang_input_file_is_search_file_enum:
       p->filename = name;
       p->local_sym_name = name;
+      /* If name is a relative path, search the directory of the current linker
+         script first. */
+      if (from_filename && !IS_ABSOLUTE_PATH (name))
+        p->extra_search_path = ldirname (from_filename);
       p->flags.real = TRUE;
       p->flags.search_dirs = TRUE;
       break;
@@ -1181,12 +1203,12 @@ lang_add_input_file (const char *name,
 	 within the sysroot subdirectory.)  */
       unsigned int outer_sysrooted = input_flags.sysrooted;
       input_flags.sysrooted = 0;
-      ret = new_afile (sysrooted_name, file_type, target);
+      ret = new_afile (sysrooted_name, file_type, target, NULL);
       input_flags.sysrooted = outer_sysrooted;
       return ret;
     }
 
-  return new_afile (name, file_type, target);
+  return new_afile (name, file_type, target, current_input_file);
 }
 
 struct out_section_hash_entry
@@ -2909,7 +2931,7 @@ lookup_name (const char *name)
       lang_statement_union_type *rest = *after;
       stat_ptr->tail = after;
       search = new_afile (name, lang_input_file_is_search_file_enum,
-			  default_target);
+			  default_target, NULL);
       *stat_ptr->tail = rest;
       if (*tail == NULL)
 	stat_ptr->tail = tail;
@@ -3051,7 +3073,9 @@ load_symbols (lang_input_statement_type *entry,
 
       ldfile_assumed_script = TRUE;
       parser_input = input_script;
+      current_input_file = entry->filename;
       yyparse ();
+      current_input_file = NULL;
       ldfile_assumed_script = FALSE;
 
       /* missing_file is sticky.  sysrooted will already have been

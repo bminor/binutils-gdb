@@ -1517,7 +1517,7 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
 {
   bfd *abfd = objfile->obfd;
   int size = bfd_get_arch_size (abfd) / 8;
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
 
   /* Provider and the name of the probe.  */

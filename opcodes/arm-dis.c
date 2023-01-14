@@ -1494,17 +1494,17 @@ static const struct opcode32 neon_opcodes[] =
 
   /* Data transfer between ARM and NEON registers.  */
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
-    0x0e800b10, 0x1ff00f70, "vdup%c.32\t%16-19,7D, %12-15r"},
+    0x0e800b10, 0x0ff00f70, "vdup%c.32\t%16-19,7D, %12-15r"},
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
-    0x0e800b30, 0x1ff00f70, "vdup%c.16\t%16-19,7D, %12-15r"},
+    0x0e800b30, 0x0ff00f70, "vdup%c.16\t%16-19,7D, %12-15r"},
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
-    0x0ea00b10, 0x1ff00f70, "vdup%c.32\t%16-19,7Q, %12-15r"},
+    0x0ea00b10, 0x0ff00f70, "vdup%c.32\t%16-19,7Q, %12-15r"},
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
-    0x0ea00b30, 0x1ff00f70, "vdup%c.16\t%16-19,7Q, %12-15r"},
+    0x0ea00b30, 0x0ff00f70, "vdup%c.16\t%16-19,7Q, %12-15r"},
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
-    0x0ec00b10, 0x1ff00f70, "vdup%c.8\t%16-19,7D, %12-15r"},
+    0x0ec00b10, 0x0ff00f70, "vdup%c.8\t%16-19,7D, %12-15r"},
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
-    0x0ee00b10, 0x1ff00f70, "vdup%c.8\t%16-19,7Q, %12-15r"},
+    0x0ee00b10, 0x0ff00f70, "vdup%c.8\t%16-19,7Q, %12-15r"},
 
   /* Move data element to all lanes.  */
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
@@ -9032,13 +9032,51 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 	       || (given & 0xff000000) == 0xfc000000)
 	;
       /* vdup is also a valid neon instruction.  */
-      else if ((given & 0xff910f5f) != 0xee800b10)
+      else if ((given & 0xff900f5f) != 0xee800b10)
 	return FALSE;
     }
 
   for (insn = neon_opcodes; insn->assembler; insn++)
     {
-      if ((given & insn->mask) == insn->value)
+      unsigned long cond_mask = insn->mask;
+      unsigned long cond_value = insn->value;
+      int cond;
+
+      if (thumb)
+        {
+          if ((cond_mask & 0xf0000000) == 0) {
+              /* For the entries in neon_opcodes, an opcode mask/value with
+                 the high 4 bits equal to 0 indicates a conditional
+                 instruction. For thumb however, we need to include those
+                 bits in the instruction matching.  */
+              cond_mask |= 0xf0000000;
+              /* Furthermore, the thumb encoding of a conditional instruction
+                 will have the high 4 bits equal to 0xe.  */
+              cond_value |= 0xe0000000;
+          }
+          if (ifthen_state)
+            cond = IFTHEN_COND;
+          else
+            cond = COND_UNCOND;
+        }
+      else
+        {
+          if ((given & 0xf0000000) == 0xf0000000)
+            {
+              /* If the instruction is unconditional, update the mask to only
+                 match against unconditional opcode values.  */
+              cond_mask |= 0xf0000000;
+              cond = COND_UNCOND;
+            }
+          else
+            {
+              cond = (given >> 28) & 0xf;
+              if (cond == 0xe)
+                cond = COND_UNCOND;
+            }
+        }
+
+      if ((given & cond_mask) == cond_value)
 	{
 	  signed long value_in_comment = 0;
 	  bfd_boolean is_unpredictable = FALSE;
@@ -9060,8 +9098,7 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 
 		      /* Fall through.  */
 		    case 'c':
-		      if (thumb && ifthen_state)
-			func (stream, "%s", arm_conditional[IFTHEN_COND]);
+		      func (stream, "%s", arm_conditional[cond]);
 		      break;
 
 		    case 'A':

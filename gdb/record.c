@@ -314,23 +314,6 @@ cmd_record_stop (const char *args, int from_tty)
   gdb::observers::record_changed.notify (current_inferior (), 0, NULL, NULL);
 }
 
-/* The "set record" command.  */
-
-static void
-set_record_command (const char *args, int from_tty)
-{
-  printf_unfiltered (_("\"set record\" must be followed "
-		       "by an appropriate subcommand.\n"));
-  help_list (set_record_cmdlist, "set record ", all_commands, gdb_stdout);
-}
-
-/* The "show record" command.  */
-
-static void
-show_record_command (const char *args, int from_tty)
-{
-  cmd_show_list (show_record_cmdlist, from_tty, "");
-}
 
 /* The "info record" command.  */
 
@@ -808,13 +791,13 @@ A size of \"unlimited\" means unlimited lines.  The default is 10."),
   set_cmd_completer (c, filename_completer);
 
   add_com_alias ("rec", "record", class_obscure, 1);
-  add_prefix_cmd ("record", class_support, set_record_command,
-		  _("Set record options."), &set_record_cmdlist,
-		  "set record ", 0, &setlist);
+  add_basic_prefix_cmd ("record", class_support,
+			_("Set record options."), &set_record_cmdlist,
+			"set record ", 0, &setlist);
   add_alias_cmd ("rec", "record", class_obscure, 1, &setlist);
-  add_prefix_cmd ("record", class_support, show_record_command,
-		  _("Show record options."), &show_record_cmdlist,
-		  "show record ", 0, &showlist);
+  add_show_prefix_cmd ("record", class_support,
+		       _("Show record options."), &show_record_cmdlist,
+		       "show record ", 0, &showlist);
   add_alias_cmd ("rec", "record", class_obscure, 1, &showlist);
   add_prefix_cmd ("record", class_support, info_record_command,
 		  _("Info record options."), &info_record_cmdlist,

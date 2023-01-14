@@ -216,7 +216,7 @@ try:
     def colorize(filename, contents):
         # Don't want any errors.
         try:
-            lexer = lexers.get_lexer_for_filename(filename)
+            lexer = lexers.get_lexer_for_filename(filename, stripnl=False)
             formatter = formatters.TerminalFormatter()
             return highlight(contents, lexer, formatter)
         except:

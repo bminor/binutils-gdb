@@ -487,15 +487,15 @@ gdb_test_multiple "maint info breakpoints" "maint info breakpoints" {
 }
 
 gdb_test "maint print" \
-    "\"maintenance print\" must be followed by the name of a print command\\.\r\nList.*unambiguous\\..*" \
+    "List.*unambiguous\\..*" \
     "maint print w/o args" 
 
 gdb_test "maint info" \
-    "\"maintenance info\" must be followed by the name of an info command\\.\r\nList.*unambiguous\\..*" \
+    "List.*unambiguous\\..*" \
     "maint info w/o args"
 
 gdb_test "maint" \
-    "\"maintenance\" must be followed by the name of a maintenance command\\.\r\nList.*unambiguous\\..*" \
+    "List.*unambiguous\\..*" \
     "maint w/o args"
 
 # Test that "main info line-table" w/o a file name shows the symtab for

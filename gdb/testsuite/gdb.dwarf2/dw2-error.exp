@@ -29,7 +29,7 @@ if { ![istarget "x86_64-*-*"] || ![is_lp64_target] } {
 
 # We can't use prepare_for_testing here because we need to check the
 # 'file' command's output.
-if {[build_executable $testfile.exp $testfile $srcfile {nodebug}]} {
+if {[build_executable $testfile.exp $testfile $srcfile {nodebug quiet}]} {
     return -1
 }
 

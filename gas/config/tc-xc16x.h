@@ -55,6 +55,5 @@ extern void tc_reloc_mangle (struct fix *, struct internal_reloc *, bfd_vma);
 #define LISTING_HEADER "Infineon XC16X GAS "
 #define NEED_FX_R_TYPE 1
 #define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section (FIX, SEC)
-extern long md_pcrel_from_section (struct fix *, segT);
 
 #define md_operand(x)

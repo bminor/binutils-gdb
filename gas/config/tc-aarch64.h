@@ -255,7 +255,6 @@ extern void aarch64_after_parse_args (void);
 
 #define MD_PCREL_FROM_SECTION(F,S) md_pcrel_from_section(F,S)
 
-extern long md_pcrel_from_section (struct fix *, segT);
 extern void aarch64_frag_align_code (int, int);
 extern const char * elf64_aarch64_target_format (void);
 extern int aarch64_force_relocation (struct fix *);

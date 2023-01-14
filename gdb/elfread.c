@@ -206,7 +206,7 @@ record_minimal_symbol (minimal_symbol_reader &reader,
 		       enum minimal_symbol_type ms_type,
 		       asection *bfd_section, struct objfile *objfile)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
 
   if (ms_type == mst_text || ms_type == mst_file_text
       || ms_type == mst_text_gnu_ifunc)
@@ -251,7 +251,7 @@ elf_symtab_read (minimal_symbol_reader &reader,
 		 long number_of_symbols, asymbol **symbol_table,
 		 bool copy_names)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   asymbol *sym;
   long i;
   CORE_ADDR symaddr;
@@ -559,7 +559,7 @@ elf_rel_plt_read (minimal_symbol_reader &reader,
   const struct elf_backend_data *bed = get_elf_backend_data (obfd);
   asection *relplt, *got_plt;
   bfd_size_type reloc_count, reloc;
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
   size_t ptr_size = TYPE_LENGTH (ptr_type);
 
@@ -747,7 +747,7 @@ elf_gnu_ifunc_record_cache (const char *name, CORE_ADDR addr)
     {
       struct elf_gnu_ifunc_cache *entry_found_p
 	= (struct elf_gnu_ifunc_cache *) *slot;
-      struct gdbarch *gdbarch = get_objfile_arch (objfile);
+      struct gdbarch *gdbarch = objfile->arch ();
 
       if (entry_found_p->addr != addr)
 	{
@@ -825,7 +825,7 @@ elf_gnu_ifunc_resolve_by_got (const char *name, CORE_ADDR *addr_p)
   for (objfile *objfile : current_program_space->objfiles ())
     {
       bfd *obfd = objfile->obfd;
-      struct gdbarch *gdbarch = get_objfile_arch (objfile);
+      struct gdbarch *gdbarch = objfile->arch ();
       struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
       size_t ptr_size = TYPE_LENGTH (ptr_type);
       CORE_ADDR pointer_address, addr;

@@ -30,7 +30,7 @@ class scoped_fd
 public:
   explicit scoped_fd (int fd = -1) noexcept : m_fd (fd) {}
 
-  scoped_fd (scoped_fd &&other)
+  scoped_fd (scoped_fd &&other) noexcept
     : m_fd (other.m_fd)
   {
     other.m_fd = -1;

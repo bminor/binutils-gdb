@@ -270,8 +270,7 @@ enum report_method
      allowed to set the value.  */
   RM_NOT_YET_SET = 0,
   RM_IGNORE,
-  RM_GENERATE_WARNING,
-  RM_GENERATE_ERROR
+  RM_DIAGNOSE,
 };
 
 typedef enum {with_flags, without_flags} flag_type;
@@ -373,7 +372,7 @@ struct bfd_link_info
   ENUM_BITFIELD (bfd_link_elf_stt_common) elf_stt_common : 2;
 
   /* Criteria for skipping symbols when determining
-     whether to include an object from an archive. */
+     whether to include an object from an archive.  */
   ENUM_BITFIELD (bfd_link_common_skip_ar_symbols) common_skip_ar_symbols : 2;
 
   /* What to do with unresolved symbols in an object file.
@@ -386,6 +385,9 @@ struct bfd_link_info
   /* What to do with unresolved symbols in a shared library.
      The same defaults apply.  */
   ENUM_BITFIELD (report_method) unresolved_syms_in_shared_libs : 2;
+
+  /* TRUE if unresolved symbols are to be warned, rather than errored.  */
+  unsigned int warn_unresolved_syms: 1;
 
   /* TRUE if shared objects should be linked directly, not shared.  */
   unsigned int static_link: 1;

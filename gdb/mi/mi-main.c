@@ -33,7 +33,7 @@
 #include "ui-out.h"
 #include "mi-out.h"
 #include "interps.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 #include "event-top.h"
 #include "gdbcore.h"		/* For write_memory().  */
 #include "value.h"

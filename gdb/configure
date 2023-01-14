@@ -11615,11 +11615,11 @@ $as_echo "#define STDC_HEADERS 1" >>confdefs.h
 fi
 
 # elf_hp.h is for HP/UX 64-bit shared library support.
-for ac_header in nlist.h machine/reg.h poll.h sys/poll.h \
+for ac_header in nlist.h machine/reg.h \
                   thread_db.h \
 		  sys/file.h sys/filio.h sys/ioctl.h sys/param.h \
 		  sys/resource.h sys/ptrace.h ptrace.h \
-		  sys/reg.h sys/debugreg.h sys/select.h \
+		  sys/reg.h sys/debugreg.h \
 		  termios.h elf_hp.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
@@ -12265,7 +12265,7 @@ $as_echo "#define AC_APPLE_UNIVERSAL_BUILD 1" >>confdefs.h
 # ------------------------------ #
 
 for ac_func in getuid getgid \
-		pipe poll pread pread64 pwrite resize_term \
+		pipe pread pread64 pwrite resize_term \
 		getpgid setsid \
 		sigaction sigsetmask socketpair \
 		ttrace wborder wresize setlocale iconvlist libiconvlist btowc \
@@ -12778,7 +12778,7 @@ $as_echo "#define HAVE_LANGINFO_CODESET 1" >>confdefs.h
   fi
 
 
-  for ac_header in linux/perf_event.h locale.h memory.h signal.h 		   sys/resource.h sys/socket.h 		   sys/un.h sys/wait.h 		   thread_db.h wait.h 		   termios.h 		   dlfcn.h 		   linux/elf.h sys/procfs.h proc_service.h
+  for ac_header in linux/perf_event.h locale.h memory.h signal.h 		   sys/resource.h sys/socket.h 		   sys/un.h sys/wait.h 		   thread_db.h wait.h 		   termios.h 		   dlfcn.h 		   linux/elf.h sys/procfs.h proc_service.h 		   poll.h sys/poll.h sys/select.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -13183,7 +13183,7 @@ $as_echo "#define HAVE_WORKING_FORK 1" >>confdefs.h
 
 fi
 
-  for ac_func in fdwalk getrlimit pipe pipe2 socketpair sigaction \
+  for ac_func in fdwalk getrlimit pipe pipe2 poll socketpair sigaction \
 		  ptrace64 sbrk setns sigaltstack sigprocmask \
 		  setpgid setpgrp getrusage getauxval
 do :

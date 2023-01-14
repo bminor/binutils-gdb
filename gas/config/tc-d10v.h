@@ -21,6 +21,8 @@
 
 #define TC_D10V
 
+struct fix;
+
 #define TARGET_BYTES_BIG_ENDIAN 1
 
 /* The target BFD architecture.  */
@@ -30,8 +32,6 @@
 
 /* Call md_pcrel_from_section, not md_pcrel_from.  */
 #define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section (FIX, SEC)
-struct fix;
-long md_pcrel_from_section (struct fix *, segT);
 
 /* Permit temporary numeric labels.  */
 #define LOCAL_LABELS_FB 1

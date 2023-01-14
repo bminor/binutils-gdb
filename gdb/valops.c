@@ -139,7 +139,7 @@ find_function_in_inferior (const char *name, struct objfile **objf_p)
       if (msymbol.minsym != NULL)
 	{
 	  struct objfile *objfile = msymbol.objfile;
-	  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+	  struct gdbarch *gdbarch = objfile->arch ();
 
 	  struct type *type;
 	  CORE_ADDR maddr;
@@ -175,7 +175,7 @@ value_allocate_space_in_inferior (int len)
 {
   struct objfile *objf;
   struct value *val = find_function_in_inferior ("malloc", &objf);
-  struct gdbarch *gdbarch = get_objfile_arch (objf);
+  struct gdbarch *gdbarch = objf->arch ();
   struct value *blocklen;
 
   blocklen = value_from_longest (builtin_type (gdbarch)->builtin_int, len);
@@ -2231,50 +2231,6 @@ value_struct_elt_bitpos (struct value **argp, int bitpos, struct type *ftype,
 
   /* Never hit.  */
   return NULL;
-}
-
-/* See value.h.  */
-
-int
-value_union_variant (struct type *union_type, const gdb_byte *contents)
-{
-  gdb_assert (TYPE_CODE (union_type) == TYPE_CODE_UNION
-	      && TYPE_FLAG_DISCRIMINATED_UNION (union_type));
-
-  struct dynamic_prop *discriminant_prop
-    = get_dyn_prop (DYN_PROP_DISCRIMINATED, union_type);
-  gdb_assert (discriminant_prop != nullptr);
-
-  struct discriminant_info *info
-    = (struct discriminant_info *) discriminant_prop->data.baton;
-  gdb_assert (info != nullptr);
-
-  /* If this is a univariant union, just return the sole field.  */
-  if (TYPE_NFIELDS (union_type) == 1)
-    return 0;
-  /* This should only happen for univariants, which we already dealt
-     with.  */
-  gdb_assert (info->discriminant_index != -1);
-
-  /* Compute the discriminant.  Note that unpack_field_as_long handles
-     sign extension when necessary, as does the DWARF reader -- so
-     signed discriminants will be handled correctly despite the use of
-     an unsigned type here.  */
-  ULONGEST discriminant = unpack_field_as_long (union_type, contents,
-						info->discriminant_index);
-
-  for (int i = 0; i < TYPE_NFIELDS (union_type); ++i)
-    {
-      if (i != info->default_index
-	  && i != info->discriminant_index
-	  && discriminant == info->discriminants[i])
-	return i;
-    }
-
-  if (info->default_index == -1)
-    error (_("Could not find variant corresponding to discriminant %s"),
-	   pulongest (discriminant));
-  return info->default_index;
 }
 
 /* Search through the methods of an object (and its bases) to find a

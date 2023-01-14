@@ -651,6 +651,27 @@ extern CORE_ADDR unpack_pointer (struct type *type, const gdb_byte *valaddr);
 extern LONGEST unpack_field_as_long (struct type *type,
 				     const gdb_byte *valaddr,
 				     int fieldno);
+
+/* Unpack a bitfield of the specified FIELD_TYPE, from the object at
+   VALADDR, and store the result in *RESULT.
+   The bitfield starts at BITPOS bits and contains BITSIZE bits; if
+   BITSIZE is zero, then the length is taken from FIELD_TYPE.
+
+   Extracting bits depends on endianness of the machine.  Compute the
+   number of least significant bits to discard.  For big endian machines,
+   we compute the total number of bits in the anonymous object, subtract
+   off the bit count from the MSB of the object to the MSB of the
+   bitfield, then the size of the bitfield, which leaves the LSB discard
+   count.  For little endian machines, the discard count is simply the
+   number of bits from the LSB of the anonymous object to the LSB of the
+   bitfield.
+
+   If the field is signed, we also do sign extension.  */
+
+extern LONGEST unpack_bits_as_long (struct type *field_type,
+				    const gdb_byte *valaddr,
+				    LONGEST bitpos, LONGEST bitsize);
+
 extern int unpack_value_field_as_long (struct type *type, const gdb_byte *valaddr,
 				LONGEST embedded_offset, int fieldno,
 				const struct value *val, LONGEST *result);
@@ -1204,14 +1225,6 @@ extern struct type *result_type_of_xmethod (struct value *method,
 
 extern struct value *call_xmethod (struct value *method,
 				   gdb::array_view<value *> argv);
-
-/* Given a discriminated union type and some corresponding value
-   contents, this will return the field index of the currently active
-   variant.  This will throw an exception if no active variant can be
-   found.  */
-
-extern int value_union_variant (struct type *union_type,
-				const gdb_byte *contents);
 
 /* Destroy the values currently allocated.  This is called when GDB is
    exiting (e.g., on quit_force).  */

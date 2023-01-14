@@ -9,3 +9,8 @@
 	psb csync
 	psb CSYNC
 	hint #0x11
+
+	/* Trace sync barrier.  */
+	tsb csync
+	tsb CSYNC
+	hint #0x12

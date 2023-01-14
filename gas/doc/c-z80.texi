@@ -241,7 +241,7 @@ For each @var{string} the characters are copied to the object file, for
 each other @var{expression} the value is stored in one byte.
 A warning is issued in case of an overflow.
 Backslash symbol in the strings is generic symbol, it cannot be used as
-escape character (@xref{Ascii,,@code{.ascii}}).
+escape character.  @xref{Ascii,,@code{.ascii}}.
 
 @item @code{dw @var{expression}[,@var{expression}...]}
 @cindex @code{dw} directive, Z80
@@ -275,24 +275,28 @@ Fill @var{count} bytes in the object file with @var{value}, if
 
 @item @code{@var{symbol} defl @var{expression}}
 @cindex @code{defl} directive, Z80
-The @code{defl} directive is like @code{.set} but with different syntax (@xref{Set,,@code{.set}}).
+The @code{defl} directive is like @code{.set} but with different
+syntax.  @xref{Set,,@code{.set}}.
 It set the value of @var{symbol} to @var{expression}. Symbols defined
 with @code{defl} are not protected from redefinition.
 
 @item @code{@var{symbol} equ @var{expression}}
 @cindex @code{equ} directive, Z80
-The @code{equ} directive is like @code{.equiv} but with different syntax (@xref{Equiv,,@code{.equiv}}).
+The @code{equ} directive is like @code{.equiv} but with different
+syntax.  @xref{Equiv, ,@code{.equiv}}.
 It set the value of @var{symbol} to @var{expression}. It is an error
 if @var{symbol} is already defined. Symbols defined with @code{equ}
 are not protected from redefinition.
 
 @item @code{psect @var{name}}
 @cindex @code{psect} directive, Z80
-A synonym for @code{.section}, no second argument should be given (@xref{Section,,@code{.section}}).
+A synonym for @code{.section}, no second argument should be given.
+@xref{Section,,@code{.section}}.
 
 @item @code{xdef @var{symbol}}
 @cindex @code{xdef} directive, Z80
-A synonym for @code{.global}, make @var{symbol} is visible to linker (@xref{Global,,@code{.global}}).
+A synonym for @code{.global}, make @var{symbol} is visible to linker.
+@xref{Global,,@code{.global}}.
 
 @item @code{xref @var{name}}
 @cindex @code{xref} directive, Z80

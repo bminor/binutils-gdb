@@ -325,6 +325,20 @@ static reloc_howto_type elf_howto_table[] =
   HOWTO (R_XTENSA_TLS_CALL, 0, 0, 0, FALSE, 0, complain_overflow_dont,
 	 bfd_elf_xtensa_reloc, "R_XTENSA_TLS_CALL",
 	 FALSE, 0, 0, FALSE),
+
+  HOWTO (R_XTENSA_PDIFF8, 0, 0, 8, FALSE, 0, complain_overflow_bitfield,
+	 bfd_elf_xtensa_reloc, "R_XTENSA_PDIFF8", FALSE, 0, 0xff, FALSE),
+  HOWTO (R_XTENSA_PDIFF16, 0, 1, 16, FALSE, 0, complain_overflow_bitfield,
+	 bfd_elf_xtensa_reloc, "R_XTENSA_PDIFF16", FALSE, 0, 0xffff, FALSE),
+  HOWTO (R_XTENSA_PDIFF32, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+	 bfd_elf_xtensa_reloc, "R_XTENSA_PDIFF32", FALSE, 0, 0xffffffff, FALSE),
+
+  HOWTO (R_XTENSA_NDIFF8, 0, 0, 8, FALSE, 0, complain_overflow_bitfield,
+	 bfd_elf_xtensa_reloc, "R_XTENSA_NDIFF8", FALSE, 0, 0xff, FALSE),
+  HOWTO (R_XTENSA_NDIFF16, 0, 1, 16, FALSE, 0, complain_overflow_bitfield,
+	 bfd_elf_xtensa_reloc, "R_XTENSA_NDIFF16", FALSE, 0, 0xffff, FALSE),
+  HOWTO (R_XTENSA_NDIFF32, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+	 bfd_elf_xtensa_reloc, "R_XTENSA_NDIFF32", FALSE, 0, 0xffffffff, FALSE),
 };
 
 #if DEBUG_GEN_RELOC
@@ -363,6 +377,30 @@ elf_xtensa_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     case BFD_RELOC_XTENSA_DIFF32:
       TRACE ("BFD_RELOC_XTENSA_DIFF32");
       return &elf_howto_table[(unsigned) R_XTENSA_DIFF32 ];
+
+    case BFD_RELOC_XTENSA_PDIFF8:
+      TRACE ("BFD_RELOC_XTENSA_PDIFF8");
+      return &elf_howto_table[(unsigned) R_XTENSA_PDIFF8 ];
+
+    case BFD_RELOC_XTENSA_PDIFF16:
+      TRACE ("BFD_RELOC_XTENSA_PDIFF16");
+      return &elf_howto_table[(unsigned) R_XTENSA_PDIFF16 ];
+
+    case BFD_RELOC_XTENSA_PDIFF32:
+      TRACE ("BFD_RELOC_XTENSA_PDIFF32");
+      return &elf_howto_table[(unsigned) R_XTENSA_PDIFF32 ];
+
+    case BFD_RELOC_XTENSA_NDIFF8:
+      TRACE ("BFD_RELOC_XTENSA_NDIFF8");
+      return &elf_howto_table[(unsigned) R_XTENSA_NDIFF8 ];
+
+    case BFD_RELOC_XTENSA_NDIFF16:
+      TRACE ("BFD_RELOC_XTENSA_NDIFF16");
+      return &elf_howto_table[(unsigned) R_XTENSA_NDIFF16 ];
+
+    case BFD_RELOC_XTENSA_NDIFF32:
+      TRACE ("BFD_RELOC_XTENSA_NDIFF32");
+      return &elf_howto_table[(unsigned) R_XTENSA_NDIFF32 ];
 
     case BFD_RELOC_XTENSA_RTLD:
       TRACE ("BFD_RELOC_XTENSA_RTLD");
@@ -1851,6 +1889,12 @@ elf_xtensa_do_reloc (reloc_howto_type *howto,
     case R_XTENSA_DIFF8:
     case R_XTENSA_DIFF16:
     case R_XTENSA_DIFF32:
+    case R_XTENSA_PDIFF8:
+    case R_XTENSA_PDIFF16:
+    case R_XTENSA_PDIFF32:
+    case R_XTENSA_NDIFF8:
+    case R_XTENSA_NDIFF16:
+    case R_XTENSA_NDIFF32:
     case R_XTENSA_TLS_FUNC:
     case R_XTENSA_TLS_ARG:
     case R_XTENSA_TLS_CALL:
@@ -9604,7 +9648,13 @@ relax_section (bfd *abfd, asection *sec, struct bfd_link_info *link_info)
 
 	      if (r_type == R_XTENSA_DIFF8
 		  || r_type == R_XTENSA_DIFF16
-		  || r_type == R_XTENSA_DIFF32)
+		  || r_type == R_XTENSA_DIFF32
+		  || r_type == R_XTENSA_PDIFF8
+		  || r_type == R_XTENSA_PDIFF16
+		  || r_type == R_XTENSA_PDIFF32
+		  || r_type == R_XTENSA_NDIFF8
+		  || r_type == R_XTENSA_NDIFF16
+		  || r_type == R_XTENSA_NDIFF32)
 		{
 		  bfd_signed_vma diff_value = 0;
 		  bfd_vma new_end_offset, diff_mask = 0;
@@ -9631,7 +9681,26 @@ relax_section (bfd *abfd, asection *sec, struct bfd_link_info *link_info)
 		      diff_value =
 			bfd_get_signed_32 (abfd, &contents[old_source_offset]);
 		      break;
+		    case R_XTENSA_PDIFF8:
+		    case R_XTENSA_NDIFF8:
+		      diff_value =
+			bfd_get_8 (abfd, &contents[old_source_offset]);
+		      break;
+		    case R_XTENSA_PDIFF16:
+		    case R_XTENSA_NDIFF16:
+		      diff_value =
+			bfd_get_16 (abfd, &contents[old_source_offset]);
+		      break;
+		    case R_XTENSA_PDIFF32:
+		    case R_XTENSA_NDIFF32:
+		      diff_value =
+			bfd_get_32 (abfd, &contents[old_source_offset]);
+		      break;
 		    }
+
+		  if (r_type >= R_XTENSA_NDIFF8
+		      && r_type <= R_XTENSA_NDIFF32)
+		    diff_value = -diff_value;
 
 		  new_end_offset = offset_with_removed_text_map
 		    (&target_relax_info->action_list,
@@ -9653,6 +9722,24 @@ relax_section (bfd *abfd, asection *sec, struct bfd_link_info *link_info)
 		    case R_XTENSA_DIFF32:
 		      diff_mask = 0x7fffffff;
 		      bfd_put_signed_32 (abfd, diff_value,
+				  &contents[old_source_offset]);
+		      break;
+		    case R_XTENSA_PDIFF8:
+		    case R_XTENSA_NDIFF8:
+		      diff_mask = 0xff;
+		      bfd_put_8 (abfd, diff_value,
+				 &contents[old_source_offset]);
+		      break;
+		    case R_XTENSA_PDIFF16:
+		    case R_XTENSA_NDIFF16:
+		      diff_mask = 0xffff;
+		      bfd_put_16 (abfd, diff_value,
+				  &contents[old_source_offset]);
+		      break;
+		    case R_XTENSA_PDIFF32:
+		    case R_XTENSA_NDIFF32:
+		      diff_mask = 0xffffffff;
+		      bfd_put_32 (abfd, diff_value,
 				  &contents[old_source_offset]);
 		      break;
 		    }

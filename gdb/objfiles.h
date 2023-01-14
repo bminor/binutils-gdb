@@ -544,6 +544,12 @@ public:
 							str.size () + 1);
   }
 
+  /* Retrieve the gdbarch associated with this objfile.  */
+  struct gdbarch *arch () const
+  {
+    return per_bfd->gdbarch;
+  }
+
 
   /* The object file's original name as specified by the user,
      made absolute, and tilde-expanded.  However, it is not canonicalized
@@ -708,8 +714,6 @@ struct objfile_deleter
 typedef std::unique_ptr<objfile, objfile_deleter> objfile_up;
 
 /* Declarations for functions defined in objfiles.c */
-
-extern struct gdbarch *get_objfile_arch (const struct objfile *);
 
 extern int entry_point_address_query (CORE_ADDR *entry_p);
 

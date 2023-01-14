@@ -2118,18 +2118,6 @@ test_cp_remove_params ()
 
 #endif /* GDB_SELF_CHECK */
 
-/* Don't allow just "maintenance cplus".  */
-
-static  void
-maint_cplus_command (const char *arg, int from_tty)
-{
-  printf_unfiltered (_("\"maintenance cplus\" must be followed "
-		       "by the name of a command.\n"));
-  help_list (maint_cplus_cmd_list,
-	     "maintenance cplus ",
-	     all_commands, gdb_stdout);
-}
-
 /* This is a front end for cp_find_first_component, for unit testing.
    Be careful when using it: see the NOTE above
    cp_find_first_component.  */
@@ -2167,12 +2155,11 @@ void _initialize_cp_support ();
 void
 _initialize_cp_support ()
 {
-  add_prefix_cmd ("cplus", class_maintenance,
-		  maint_cplus_command,
-		  _("C++ maintenance commands."),
-		  &maint_cplus_cmd_list,
-		  "maintenance cplus ",
-		  0, &maintenancelist);
+  add_basic_prefix_cmd ("cplus", class_maintenance,
+			_("C++ maintenance commands."),
+			&maint_cplus_cmd_list,
+			"maintenance cplus ",
+			0, &maintenancelist);
   add_alias_cmd ("cp", "cplus",
 		 class_maintenance, 1,
 		 &maintenancelist);

@@ -258,7 +258,7 @@ internalize_unwinds (struct objfile *objfile, struct unwind_table_entry *table,
 
   if (size > 0)
     {
-      struct gdbarch *gdbarch = get_objfile_arch (objfile);
+      struct gdbarch *gdbarch = objfile->arch ();
       unsigned long tmp;
       unsigned i;
       char *buf = (char *) alloca (size);

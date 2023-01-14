@@ -1,3 +1,250 @@
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/variant.exp: Add dynamic field offset tests.
+	* gdb.ada/variant/pck.ads (Nested_And_Variable): New type.
+	* gdb.ada/variant/pkg.adb: Add new variables.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/variant.exp: New file
+	* gdb.ada/variant/pkg.adb: New file
+	* gdb.ada/variant/pck.adb: New file
+
+2020-04-24  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (clean_restart): Reset errcnt and warncnt.
+
+2020-04-24  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/dwzbuildid.exp: Add quiet to dwzbuildid-mismatch compile
+	flags.
+
+2020-04-24  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/dw2-error.exp: Add quiet to compile flags.
+
+2020-04-24  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (default_gdb_start): Handle eof.
+	(clean_restart): Detect and handle gdb_start failure.  Return -1 upon
+	failure.
+	* gdb.base/readnever.exp: Handle clean_restart failure.
+
+2020-04-23  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/decl-before-def.exp: Run to main and print a again.
+
+2020-04-23  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/decl-before-def-decl.c: New test.
+	* gdb.base/decl-before-def-def.c: New test.
+	* gdb.base/decl-before-def.exp: New file.
+
+2020-04-23  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/readnever.exp: Skip if GDBFLAGS contain -readnow/--readnow.
+
+2020-04-22  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.mi/dw2-ref-missing-frame-func.c (.debug_aranges): Fix
+	debug_info_offset.
+	* gdb.mi/dw2-ref-missing-frame.exp: Make sure $objfuncfile comes
+	before $objsfile in the line line.
+
+2020-04-22  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dlang/watch-loc.c (.debug_aranges): Fix _Dmain length.
+
+2020-02-18  Mihails Strasuns  <mihails.strasuns@intel.com>
+
+	* gdb.base/jit-attach-pie.c: Use jit-protocol.h.
+	* gdb.base/jit-elf-main.c: Use jit-protocol.h.
+	* gdb.base/jit-reader-host.c: Use jit-protocol.h.
+	* gdb.base/jit-reader-simple-jit.c: Use jit-protocol.h.
+	* gdb.base/jit-protocol.h: Update definitions to match all usage
+	  contexts.
+
+2020-02-18  Mihails Strasuns  <mihails.strasuns@intel.com>
+
+	* gdb.base: Rename all jit related test and source files.
+
+2020-02-18  Mihails Strasuns  <mihails.strasuns@intel.com>
+
+	* gdb.base/jit-reader.exp: Relax register output check.
+
+2020-04-22  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25764
+	* gdb.base/psym-external-decl-2.c: New test.
+	* gdb.base/psym-external-decl.c: New test.
+	* gdb.base/psym-external-decl.exp: New file.
+	* gdb.threads/tls.exp: Add PR25807 kfail.
+
+2020-04-22  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25801
+	* gdb.dwarf2/imported-unit.exp: Test that we can get imported_unit.c
+	in "info source" output.
+
+2020-04-22  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25700
+	* gdb.dwarf2/imported-unit.exp: Verify that there's only one partial
+	symtab for imported_unit.c.
+
+2020-04-21  Gary Benson <gbenson@redhat.com>
+
+	* gdb.base/advance.c (func): New argument, to match call site.
+	(func2, func3): Add return statements.
+
+2020-04-21  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.multi/run-only-second-inf.c: New file.
+	* gdb.multi/run-only-second-inf.exp: New file.
+
+2020-04-21  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/multi-inferior.c: New test.
+	* gdb.btrace/multi-inferior.exp: New file.
+
+2020-04-21  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/enable-new-thread.c: New test.
+	* gdb.btrace/enable-new-thread.exp: New file.
+
+2020-04-21  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/25471
+	* gdb.threads/killed-outside.c: New test.
+	* gdb.threads/killed-outside.exp: New file.
+
+2020-04-20  Gary Benson <gbenson@redhat.com>
+
+	* gdb.base/nested-subp1.exp: Use support_nested_function_tests.
+	* gdb.base/nested-subp2.exp: Likewise.
+	* gdb.base/nested-subp3.exp: Likewise.
+
+2020-04-20  Gary Benson <gbenson@redhat.com>
+
+	* gdb.base/nested-subp1.exp: Disable test when using clang.
+	* gdb.base/nested-subp2.exp: Likewise.
+	* gdb.base/nested-subp3.exp: Likewise.
+
+2020-04-20  Gary Benson <gbenson@redhat.com>
+
+	* gdb.cp/exception.cc: Fix compilation error with clang.
+
+2020-04-20  Gary Benson <gbenson@redhat.com>
+
+	* gdb.trace/tspeed.c: Fix compilation error with clang.
+
+2020-04-20  Gary Benson <gbenson@redhat.com>
+
+	* gdb.base/jit-main.c: Fix compilation error with clang.
+
+2020-04-17  Kamil Rytarowski  <n54@gmx.com>
+
+	* gdb.base/attach-twice.c: Include "sys/types.h".
+	(PTRACE_ATTACH): Add fallback definition.
+	(main): Pass `0' to the 4th argument of `ptrace'.
+
+2020-04-17  Kamil Rytarowski  <n54@gmx.com>
+
+	* gdb.base/fork-running-state.c: Include "signal.h".
+
+2020-04-17  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.cp/maint.exp (test_help): Simplify multiple_help_body.
+	Update tests.
+	* gdb.btrace/cpu.exp: Update tests.
+	* gdb.base/maint.exp: Update tests.
+	* gdb.base/default.exp: Update tests.
+	* gdb.base/completion.exp: Update tests.
+
+2020-04-16  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25791
+	* gdb.dwarf2/gdb-add-index.exp (add_gdb_index): Move ...
+	(ensure_gdb_index): and factor out and move ...
+	* lib/gdb.exp (add_gdb_index, ensure_gdb_index): ... here.
+	* gdb.dwarf2/imported-unit-runto-main.exp: New file.
+
+2020-04-16  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/maint-expand-symbols-header-file.exp: Set language before
+	loading exec.
+
+2020-04-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/many-completions.exp: New file.
+
+2020-04-14  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25718
+	* gdb.dwarf2/dw2-symtab-includes.exp: New file.
+
+2020-04-14  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25720
+	* gdb.base/maint-expand-symbols-header-file.c: New test.
+	* gdb.base/maint-expand-symbols-header-file.exp: New file.
+	* gdb.base/maint-expand-symbols-header-file.h: New test.
+
+2020-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.dwarf2/dw2-inline-many-frames.exp (get_func_info): Delete.
+	* gdb.dwarf2/dw2-inline-small-func.exp: Pass options to
+	get_func_info.
+	(get_func_info): Delete.
+	* gdb.dwarf2/dw2-is-stmt-2.exp (get_func_info): Delete.
+	* gdb.dwarf2/dw2-is-stmt.exp (get_func_info): Delete.
+	* lib/dwarf.exp (get_func_info): New function.
+
+2020-04-13  Tom de Vries  <tdevries@suse.de>
+
+	* lib/ada.exp (find_ada_tool): Pass --GCC and -B to gnatlink, similar
+	to what find_gnatmake does.
+
+2020-04-10  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/style.exp: Expect "Expanding full symbols" message for
+	-readnow.
+
+2020-04-10  Tom de Vries  <tdevries@suse.de>
+
+	PR cli/25808
+	* gdb.base/style.c: Add leading newlines.
+	* gdb.base/style.exp: Use gdb_get_line_number to get specific lines.
+	Check listing of main's one-line body.
+
+2020-04-08  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (psymtabs_p): New proc.
+	* gdb.dwarf2/imported-unit.exp: Mark "no static partial symbols in
+	importing unit" unsupported if there are no partial symbols.
+
+2020-04-08  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/25760
+	* gdb.ada/call_pn.exp: Call "maint expand-symtabs".  Add xfails.
+
+2020-04-07  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25796
+	* gdb.dwarf2/imported-unit-abstract-const-value.exp: New file.
+
+2020-04-07  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/check-psymtab.c: New test.
+	* gdb.base/check-psymtab.exp: New file.
+
+2020-04-06  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/variant-record/proc.adb: New file.
+	* gdb.ada/variant-record/value.adb: New file.
+	* gdb.ada/variant-record/value.s: New file.
+	* gdb.ada/variant-record.exp: New file.
+
 2020-04-03  Hannes Domani  <ssbssa@yahoo.de>
 
 	PR gdb/25325
@@ -1838,7 +2085,7 @@
 
 2019-09-29  Tom de Vries  <tdevries@suse.de>
 
-        * gdb.dwarf2/gdb-index.exp: Handle new location of .dwz file.
+	* gdb.dwarf2/gdb-index.exp: Handle new location of .dwz file.
 
 2019-09-29  Tom de Vries  <tdevries@suse.de>
 
@@ -2333,7 +2580,7 @@
 2019-07-29  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/maint.exp: Use "\r\n" instead of "\[\r\n\]+" in "maint
-          print registers" regexps.
+	print registers" regexps.
 
 2019-07-29  Tom de Vries  <tdevries@suse.de>
 

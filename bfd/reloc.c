@@ -6556,6 +6556,8 @@ ENUMX
 ENUMX
   BFD_RELOC_XTENSA_DIFF32
 ENUMDOC
+  Xtensa relocations for backward compatibility.  These have been replaced
+  by BFD_RELOC_XTENSA_PDIFF and BFD_RELOC_XTENSA_NDIFF.
   Xtensa relocations to mark the difference of two local symbols.
   These are only needed to support linker relaxation and can be ignored
   when not relaxing.  The field is set to the value of the difference
@@ -6668,6 +6670,28 @@ ENUMX
   BFD_RELOC_XTENSA_TLS_CALL
 ENUMDOC
   Xtensa TLS relocations.
+ENUM
+  BFD_RELOC_XTENSA_PDIFF8
+ENUMX
+  BFD_RELOC_XTENSA_PDIFF16
+ENUMX
+  BFD_RELOC_XTENSA_PDIFF32
+ENUMX
+  BFD_RELOC_XTENSA_NDIFF8
+ENUMX
+  BFD_RELOC_XTENSA_NDIFF16
+ENUMX
+  BFD_RELOC_XTENSA_NDIFF32
+ENUMDOC
+  Xtensa relocations to mark the difference of two local symbols.
+  These are only needed to support linker relaxation and can be ignored
+  when not relaxing.  The field is set to the value of the difference
+  assuming no relaxation.  The relocation encodes the position of the
+  subtracted symbol so the linker can determine whether to adjust the field
+  value.  PDIFF relocations are used for positive differences, NDIFF
+  relocations are used for negative differences.  The difference value
+  is treated as unsigned with these relocation types, giving full
+  8/16 value ranges.
 
 ENUM
   BFD_RELOC_Z80_DISP8

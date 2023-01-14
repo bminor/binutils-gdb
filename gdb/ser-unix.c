@@ -28,7 +28,7 @@
 #include <sys/socket.h>
 #include "gdbsupport/gdb_sys_time.h"
 
-#include "gdb_select.h"
+#include "gdbsupport/gdb_select.h"
 #include "gdbcmd.h"
 #include "gdbsupport/filestuff.h"
 #include <termios.h>

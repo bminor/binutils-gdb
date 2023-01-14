@@ -78,7 +78,7 @@ class ref_ptr
   }
 
   /* Transfer ownership from OTHER.  */
-  ref_ptr (ref_ptr &&other)
+  ref_ptr (ref_ptr &&other) noexcept
     : m_obj (other.m_obj)
   {
     other.m_obj = NULL;

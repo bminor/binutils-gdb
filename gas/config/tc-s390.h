@@ -75,7 +75,6 @@ extern int target_big_endian;
 
 /* call md_pcrel_from_section, not md_pcrel_from */
 #define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section(FIX, SEC)
-extern long md_pcrel_from_section (struct fix *, segT);
 
 #define md_operand(x)
 

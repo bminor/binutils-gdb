@@ -3041,14 +3041,6 @@ info_float_command (const char *args, int from_tty)
   gdbarch_print_float_info (get_frame_arch (frame), gdb_stdout, frame, args);
 }
 
-static void
-unset_command (const char *args, int from_tty)
-{
-  printf_filtered (_("\"unset\" must be followed by the "
-		     "name of an unset subcommand.\n"));
-  help_list (unsetlist, "unset ", all_commands, gdb_stdout);
-}
-
 /* Implement `info proc' family of commands.  */
 
 static void
@@ -3229,9 +3221,9 @@ give the program being debugged.  With no arguments, prints the entire\n\
 environment to be given to the program."), &showlist);
   set_cmd_completer (c, noop_completer);
 
-  add_prefix_cmd ("unset", no_class, unset_command,
-		  _("Complement to certain \"set\" commands."),
-		  &unsetlist, "unset ", 0, &cmdlist);
+  add_basic_prefix_cmd ("unset", no_class,
+			_("Complement to certain \"set\" commands."),
+			&unsetlist, "unset ", 0, &cmdlist);
 
   c = add_cmd ("environment", class_run, unset_environment_command, _("\
 Cancel environment variable VAR for the program.\n\

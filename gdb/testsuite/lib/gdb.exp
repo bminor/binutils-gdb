@@ -1894,6 +1894,11 @@ proc default_gdb_start { } {
 	    unset gdb_spawn_id
 	    return -1
 	}
+	eof {
+	    perror "(eof) GDB never initialized."
+	    unset gdb_spawn_id
+	    return -1
+	}
     }
 
     # force the height to "unlimited", so no pagers get used
@@ -6097,24 +6102,44 @@ proc build_executable { testname executable {sources ""} {options {debug}} } {
 # Starts fresh GDB binary and loads an optional executable into GDB.
 # Usage: clean_restart [executable]
 # EXECUTABLE is the basename of the binary.
+# Return -1 if starting gdb or loading the executable failed.
 
 proc clean_restart { args } {
     global srcdir
     global subdir
+    global errcnt
+    global warncnt
 
     if { [llength $args] > 1 } {
 	error "bad number of args: [llength $args]"
     }
 
     gdb_exit
+
+    # This is a clean restart, so reset error and warning count.
+    set errcnt 0
+    set warncnt 0
+
+    # We'd like to do:
+    #   if { [gdb_start] == -1 } {
+    #     return -1
+    #   }
+    # but gdb_start is a ${tool}_start proc, which doesn't have a defined
+    # return value.  So instead, we test for errcnt.
     gdb_start
+    if { $errcnt > 0 } {
+	return -1
+    }
+
     gdb_reinitialize_dir $srcdir/$subdir
 
     if { [llength $args] >= 1 } {
 	set executable [lindex $args 0]
 	set binfile [standard_output_file ${executable}]
-	gdb_load ${binfile}
+	return [gdb_load ${binfile}]
     }
+
+    return 0
 }
 
 # Prepares for testing by calling build_executable_full, then
@@ -6998,6 +7023,24 @@ proc readnow { } {
     return 0
 }
 
+# Return 1 if partial symbols are available.  Otherwise, return 0.
+
+proc psymtabs_p {  } {
+    global gdb_prompt
+
+    set cmd "maint info psymtab"
+    gdb_test_multiple $cmd "" {
+	-re "$cmd\r\n$gdb_prompt $" {
+	    return 0
+	}
+	-re -wrap "" {
+	    return 1
+	}
+    }
+
+    return 0
+}
+
 # Verify that partial symtab expansion for $filename has state $readin.
 
 proc verify_psymtab_expanded { filename readin } {
@@ -7018,6 +7061,49 @@ proc verify_psymtab_expanded { filename readin } {
 	    pass $gdb_test_name
 	}
     }
+}
+
+# Add a .gdb_index section to PROGRAM.
+# PROGRAM is assumed to be the output of standard_output_file.
+# Returns the 0 if there is a failure, otherwise 1.
+
+proc add_gdb_index { program } {
+    global srcdir GDB env BUILD_DATA_DIRECTORY
+    set contrib_dir "$srcdir/../contrib"
+    set env(GDB) "$GDB --data-directory=$BUILD_DATA_DIRECTORY"
+    set result [catch "exec $contrib_dir/gdb-add-index.sh $program" output]
+    if { $result != 0 } {
+	verbose -log "result is $result"
+	verbose -log "output is $output"
+	return 0
+    }
+
+    return 1
+}
+
+# Add a .gdb_index section to PROGRAM, unless it alread has an index
+# (.gdb_index/.debug_names).  Gdb doesn't support building an index from a
+# program already using one.  Return 1 if a .gdb_index was added, return 0
+# if it already contained an index, and -1 if an error occurred.
+
+proc ensure_gdb_index { binfile } {
+    set testfile [file tail $binfile]
+    set test "check if index present"
+    gdb_test_multiple "mt print objfiles ${testfile}" $test {
+	-re -wrap "gdb_index.*" {
+	    return 0
+	}
+	-re -wrap "debug_names.*" {
+	    return 0
+	}
+	-re -wrap "Psymtabs.*" {
+	    if { [add_gdb_index $binfile] != "1" } {
+		return -1
+	    }
+	    return 1
+	}
+    }
+    return -1
 }
 
 # Always load compatibility stuff.

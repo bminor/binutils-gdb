@@ -54,6 +54,9 @@ void    md_create_short_jump (char *, addressT, addressT, fragS *, symbolS *);
 #ifndef md_pcrel_from
 long    md_pcrel_from (fixS *);
 #endif
+#ifndef md_pcrel_from_section
+long    md_pcrel_from_section (fixS *, segT);
+#endif
 #ifndef md_operand
 void    md_operand (expressionS *);
 #endif

@@ -670,20 +670,6 @@ set_dcache_line_size (const char *args, int from_tty,
   target_dcache_invalidate ();
 }
 
-static void
-set_dcache_command (const char *arg, int from_tty)
-{
-  printf_unfiltered (
-     "\"set dcache\" must be followed by the name of a subcommand.\n");
-  help_list (dcache_set_list, "set dcache ", all_commands, gdb_stdout);
-}
-
-static void
-show_dcache_command (const char *args, int from_tty)
-{
-  cmd_show_list (dcache_show_list, from_tty, "");
-}
-
 void _initialize_dcache ();
 void
 _initialize_dcache ()
@@ -708,12 +694,14 @@ With no arguments, this command prints the cache configuration and a\n\
 summary of each line in the cache.  With an argument, dump\"\n\
 the contents of the given line."));
 
-  add_prefix_cmd ("dcache", class_obscure, set_dcache_command, _("\
+  add_basic_prefix_cmd ("dcache", class_obscure, _("\
 Use this command to set number of lines in dcache and line-size."),
-		  &dcache_set_list, "set dcache ", /*allow_unknown*/0, &setlist);
-  add_prefix_cmd ("dcache", class_obscure, show_dcache_command, _("\
+			&dcache_set_list, "set dcache ", /*allow_unknown*/0,
+			&setlist);
+  add_show_prefix_cmd ("dcache", class_obscure, _("\
 Show dcachesettings."),
-		  &dcache_show_list, "show dcache ", /*allow_unknown*/0, &showlist);
+		       &dcache_show_list, "show dcache ", /*allow_unknown*/0,
+		       &showlist);
 
   add_setshow_zuinteger_cmd ("line-size", class_obscure,
 			     &dcache_line_size, _("\

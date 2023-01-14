@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-standard_testfile jithost.c
+standard_testfile jit-reader-host.c
 
 if { (![istarget x86_64-*-*] && ![istarget i?86-*-*]) || ![is_lp64_target] } {
     return -1;
@@ -47,7 +47,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${jit_host_src}" "${jit_host_bin}" \
     return -1
 }
 
-set jit_reader jitreader
+set jit_reader jit-reader
 set jit_reader_src ${jit_reader}.c
 set jit_reader_bin [standard_output_file ${jit_reader}.so]
 
@@ -66,7 +66,8 @@ proc info_registers_current_frame {sp} {
     set any "\[^\r\n\]*"
 
     set neg_decimal "-?$decimal"
-    gdb_test "info registers" \
+
+    set expected \
 	[multi_line \
 	     "rax            $hex +$neg_decimal" \
 	     "rbx            $hex +$neg_decimal" \
@@ -93,6 +94,11 @@ proc info_registers_current_frame {sp} {
 	     "fs             $hex +$neg_decimal" \
 	     "gs             $hex +$neg_decimal" \
 	    ]
+
+    # There may be more registers.
+    append expected ".*"
+
+    gdb_test "info registers" $expected
 }
 
 proc jit_reader_test {} {
@@ -170,7 +176,8 @@ proc jit_reader_test {} {
 
 		# Since the JIT unwinder only provides RIP/RSP/RBP,
 		# all other registers should show as "<not saved>".
-		gdb_test "info registers" \
+
+		set expected \
 		    [multi_line \
 			 "rax            <not saved>" \
 			 "rbx            <not saved>" \
@@ -197,6 +204,11 @@ proc jit_reader_test {} {
 			 "fs             <not saved>" \
 			 "gs             <not saved>" \
 			]
+
+		# There may be more registers.
+		append expected ".*"
+
+		gdb_test "info registers" $expected
 
 		# Make sure that "info frame" doesn't crash.
 		gdb_test "info frame" "Stack level 1, .*in main.*"

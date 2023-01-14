@@ -20,9 +20,28 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "auxv.h"
 #include "solib-svr4.h"
 #include "nbsd-tdep.h"
 #include "gdbarch.h"
+#include "objfiles.h"
+
+/* Flags in the 'kve_protection' field in struct kinfo_vmentry.  These
+   match the KVME_PROT_* constants in <sys/sysctl.h>.  */
+
+#define	KINFO_VME_PROT_READ	0x00000001
+#define	KINFO_VME_PROT_WRITE	0x00000002
+#define	KINFO_VME_PROT_EXEC	0x00000004
+
+/* Flags in the 'kve_flags' field in struct kinfo_vmentry.  These
+   match the KVME_FLAG_* constants in <sys/sysctl.h>.  */
+
+#define	KINFO_VME_FLAG_COW		0x00000001
+#define	KINFO_VME_FLAG_NEEDS_COPY	0x00000002
+#define	KINFO_VME_FLAG_NOCOREDUMP	0x00000004
+#define	KINFO_VME_FLAG_PAGEABLE		0x00000008
+#define	KINFO_VME_FLAG_GROWS_UP		0x00000010
+#define	KINFO_VME_FLAG_GROWS_DOWN	0x00000020
 
 /* FIXME: kettenis/20060115: We should really eliminate the next two
    functions completely.  */
@@ -339,6 +358,92 @@ nbsd_gdb_signal_to_target (struct gdbarch *gdbarch,
   return -1;
 }
 
+/* Shared library resolver handling.  */
+
+static CORE_ADDR
+nbsd_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  struct bound_minimal_symbol msym;
+
+  msym = lookup_minimal_symbol ("_rtld_bind_start", NULL, NULL);
+  if (msym.minsym && BMSYMBOL_VALUE_ADDRESS (msym) == pc)
+    return frame_unwind_caller_pc (get_current_frame ());
+  else
+    return find_solib_trampoline_target (get_current_frame (), pc);
+}
+
+/* See nbsd-tdep.h.  */
+
+void
+nbsd_info_proc_mappings_header (int addr_bit)
+{
+  printf_filtered (_("Mapped address spaces:\n\n"));
+  if (addr_bit == 64)
+    {
+      printf_filtered ("  %18s %18s %10s %10s %9s %s\n",
+		       "Start Addr",
+		       "  End Addr",
+		       "      Size", "    Offset", "Flags  ", "File");
+    }
+  else
+    {
+      printf_filtered ("\t%10s %10s %10s %10s %9s %s\n",
+		       "Start Addr",
+		       "  End Addr",
+		       "      Size", "    Offset", "Flags  ", "File");
+    }
+}
+
+/* Helper function to generate mappings flags for a single VM map
+   entry in 'info proc mappings'.  */
+
+static const char *
+nbsd_vm_map_entry_flags (int kve_flags, int kve_protection)
+{
+  static char vm_flags[9];
+
+  vm_flags[0] = (kve_protection & KINFO_VME_PROT_READ) ? 'r' : '-';
+  vm_flags[1] = (kve_protection & KINFO_VME_PROT_WRITE) ? 'w' : '-';
+  vm_flags[2] = (kve_protection & KINFO_VME_PROT_EXEC) ? 'x' : '-';
+  vm_flags[3] = ' ';
+  vm_flags[4] = (kve_flags & KINFO_VME_FLAG_COW) ? 'C' : '-';
+  vm_flags[5] = (kve_flags & KINFO_VME_FLAG_NEEDS_COPY) ? 'N' : '-';
+  vm_flags[6] = (kve_flags & KINFO_VME_FLAG_PAGEABLE) ? 'P' : '-';
+  vm_flags[7] = (kve_flags & KINFO_VME_FLAG_GROWS_UP) ? 'U'
+    : (kve_flags & KINFO_VME_FLAG_GROWS_DOWN) ? 'D' : '-';
+  vm_flags[8] = '\0';
+
+  return vm_flags;
+}
+
+void
+nbsd_info_proc_mappings_entry (int addr_bit, ULONGEST kve_start,
+			       ULONGEST kve_end, ULONGEST kve_offset,
+			       int kve_flags, int kve_protection,
+			       const char *kve_path)
+{
+  if (addr_bit == 64)
+    {
+      printf_filtered ("  %18s %18s %10s %10s %9s %s\n",
+		       hex_string (kve_start),
+		       hex_string (kve_end),
+		       hex_string (kve_end - kve_start),
+		       hex_string (kve_offset),
+		       nbsd_vm_map_entry_flags (kve_flags, kve_protection),
+		       kve_path);
+    }
+  else
+    {
+      printf_filtered ("\t%10s %10s %10s %10s %9s %s\n",
+		       hex_string (kve_start),
+		       hex_string (kve_end),
+		       hex_string (kve_end - kve_start),
+		       hex_string (kve_offset),
+		       nbsd_vm_map_entry_flags (kve_flags, kve_protection),
+		       kve_path);
+    }
+}
+
 /* See nbsd-tdep.h.  */
 
 void
@@ -346,4 +451,6 @@ nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   set_gdbarch_gdb_signal_from_target (gdbarch, nbsd_gdb_signal_from_target);
   set_gdbarch_gdb_signal_to_target (gdbarch, nbsd_gdb_signal_to_target);
+  set_gdbarch_skip_solib_resolver (gdbarch, nbsd_skip_solib_resolver);
+  set_gdbarch_auxv_parse (gdbarch, svr4_auxv_parse);
 }

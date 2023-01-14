@@ -92,6 +92,11 @@ enum debug_loc_kind
      as in .debug_loc.  */
   DEBUG_LOC_START_LENGTH = 3,
 
+  /* This is followed by two unsigned LEB128 operands. The values of these
+     operands are the starting and ending offsets, respectively, relative to
+     the applicable base address.  */
+  DEBUG_LOC_OFFSET_PAIR = 4,
+
   /* An internal value indicating there is insufficient data.  */
   DEBUG_LOC_BUFFER_OVERFLOW = -1,
 
@@ -232,7 +237,7 @@ decode_debug_loclists_addresses (struct dwarf2_per_cu_data *per_cu,
 	return DEBUG_LOC_BUFFER_OVERFLOW;
       *high = u64;
       *new_ptr = loc_ptr;
-      return DEBUG_LOC_START_END;
+      return DEBUG_LOC_OFFSET_PAIR;
     /* Following cases are not supported yet.  */
     case DW_LLE_startx_endx:
     case DW_LLE_start_end:
@@ -313,7 +318,7 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 				 size_t *locexpr_length, CORE_ADDR pc)
 {
   struct objfile *objfile = baton->per_cu->objfile ();
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int addr_size = baton->per_cu->addr_size ();
   int signed_addr_p = bfd_get_sign_extend_vma (objfile->obfd);
@@ -332,7 +337,7 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
       enum debug_loc_kind kind;
       const gdb_byte *new_ptr = NULL; /* init for gcc -Wall */
 
-      if (baton->from_dwo)
+      if (baton->per_cu->version () < 5 && baton->from_dwo)
 	kind = decode_debug_loc_dwo_addresses (baton->per_cu,
 					       loc_ptr, buf_end, &new_ptr,
 					       &low, &high, byte_order);
@@ -358,6 +363,7 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 	  continue;
 	case DEBUG_LOC_START_END:
 	case DEBUG_LOC_START_LENGTH:
+	case DEBUG_LOC_OFFSET_PAIR:
 	  break;
 	case DEBUG_LOC_BUFFER_OVERFLOW:
 	case DEBUG_LOC_INVALID_ENTRY:
@@ -369,9 +375,11 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 
       /* Otherwise, a location expression entry.
 	 If the entry is from a DWO, don't add base address: the entry is from
-	 .debug_addr which already has the DWARF "base address".  We still add
-	 base_offset in case we're debugging a PIE executable.  */
-      if (baton->from_dwo)
+	 .debug_addr which already has the DWARF "base address". We still add
+	 base_offset in case we're debugging a PIE executable. However, if the
+	 entry is DW_LLE_offset_pair from a DWO, add the base address as the
+	 operands are offsets relative to the applicable base address.  */
+      if (baton->from_dwo && kind != DEBUG_LOC_OFFSET_PAIR)
 	{
 	  low += base_offset;
 	  high += base_offset;
@@ -721,7 +729,7 @@ class dwarf_evaluate_loc_desc : public dwarf_expr_context
 							(CORE_ADDR) 0);
 
     scoped_restore save_arch = make_scoped_restore (&this->gdbarch);
-    this->gdbarch = get_objfile_arch (per_cu->objfile ());
+    this->gdbarch = per_cu->objfile ()->arch ();
     scoped_restore save_addr_size = make_scoped_restore (&this->addr_size);
     this->addr_size = per_cu->addr_size ();
     scoped_restore save_offset = make_scoped_restore (&this->offset);
@@ -1808,7 +1816,7 @@ rw_pieced_value (struct value *v, struct value *from)
 	      }
 
 	    struct objfile *objfile = c->per_cu->objfile ();
-	    struct gdbarch *objfile_gdbarch = get_objfile_arch (objfile);
+	    struct gdbarch *objfile_gdbarch = objfile->arch ();
 	    ULONGEST stack_value_size_bits
 	      = 8 * TYPE_LENGTH (value_type (p->v.value));
 
@@ -2184,7 +2192,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 
   scoped_value_mark free_values;
 
-  ctx.gdbarch = get_objfile_arch (objfile);
+  ctx.gdbarch = objfile->arch ();
   ctx.addr_size = per_cu->addr_size ();
   ctx.ref_addr_size = per_cu->ref_addr_size ();
   ctx.offset = per_cu->text_offset ();
@@ -2307,7 +2315,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	    size_t n = TYPE_LENGTH (value_type (value));
 	    size_t len = TYPE_LENGTH (subobj_type);
 	    size_t max = TYPE_LENGTH (type);
-	    struct gdbarch *objfile_gdbarch = get_objfile_arch (objfile);
+	    struct gdbarch *objfile_gdbarch = objfile->arch ();
 
 	    if (subobj_byte_offset + len > max)
 	      invalid_synthetic_pointer ();
@@ -2376,35 +2384,85 @@ dwarf2_evaluate_loc_desc (struct type *type, struct frame_info *frame,
 					NULL, 0);
 }
 
-/* Evaluates a dwarf expression and stores the result in VAL, expecting
-   that the dwarf expression only produces a single CORE_ADDR.  FRAME is the
-   frame in which the expression is evaluated.  ADDR is a context (location of
-   a variable) and might be needed to evaluate the location expression.
-   Returns 1 on success, 0 otherwise.   */
+/* A specialization of dwarf_evaluate_loc_desc that is used by
+   dwarf2_locexpr_baton_eval.  This subclass exists to handle the case
+   where a caller of dwarf2_locexpr_baton_eval passes in some data,
+   but with the address being 0.  In this situation, we arrange for
+   memory reads to come from the passed-in buffer.  */
+
+struct evaluate_for_locexpr_baton : public dwarf_evaluate_loc_desc
+{
+  /* The data that was passed in.  */
+  gdb::array_view<const gdb_byte> data_view;
+
+  CORE_ADDR get_object_address () override
+  {
+    if (data_view.data () == nullptr && obj_address == 0)
+      error (_("Location address is not set."));
+    return obj_address;
+  }
+
+  void read_mem (gdb_byte *buf, CORE_ADDR addr, size_t len) override
+  {
+    if (len == 0)
+      return;
+
+    /* Prefer the passed-in memory, if it exists.  */
+    CORE_ADDR offset = addr - obj_address;
+    if (offset < data_view.size () && offset + len <= data_view.size ())
+      {
+	memcpy (buf, data_view.data (), len);
+	return;
+      }
+
+    read_memory (addr, buf, len);
+  }
+};
+
+/* Evaluates a dwarf expression and stores the result in VAL,
+   expecting that the dwarf expression only produces a single
+   CORE_ADDR.  FRAME is the frame in which the expression is
+   evaluated.  ADDR_STACK is a context (location of a variable) and
+   might be needed to evaluate the location expression.
+   PUSH_INITIAL_VALUE is true if the address (either from ADDR_STACK,
+   or the default of 0) should be pushed on the DWARF expression
+   evaluation stack before evaluating the expression; this is required
+   by certain forms of DWARF expression.  Returns 1 on success, 0
+   otherwise.  */
 
 static int
 dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 			   struct frame_info *frame,
-			   CORE_ADDR addr,
-			   CORE_ADDR *valp)
+			   const struct property_addr_info *addr_stack,
+			   CORE_ADDR *valp,
+			   bool push_initial_value)
 {
   struct objfile *objfile;
 
   if (dlbaton == NULL || dlbaton->size == 0)
     return 0;
 
-  dwarf_evaluate_loc_desc ctx;
+  evaluate_for_locexpr_baton ctx;
 
   ctx.frame = frame;
   ctx.per_cu = dlbaton->per_cu;
-  ctx.obj_address = addr;
+  if (addr_stack == nullptr)
+    ctx.obj_address = 0;
+  else
+    {
+      ctx.obj_address = addr_stack->addr;
+      ctx.data_view = addr_stack->valaddr;
+    }
 
   objfile = dlbaton->per_cu->objfile ();
 
-  ctx.gdbarch = get_objfile_arch (objfile);
+  ctx.gdbarch = objfile->arch ();
   ctx.addr_size = dlbaton->per_cu->addr_size ();
   ctx.ref_addr_size = dlbaton->per_cu->ref_addr_size ();
   ctx.offset = dlbaton->per_cu->text_offset ();
+
+  if (push_initial_value)
+    ctx.push_address (ctx.obj_address, false);
 
   try
     {
@@ -2454,7 +2512,8 @@ bool
 dwarf2_evaluate_property (const struct dynamic_prop *prop,
 			  struct frame_info *frame,
 			  const struct property_addr_info *addr_stack,
-			  CORE_ADDR *value)
+			  CORE_ADDR *value,
+			  bool push_initial_value)
 {
   if (prop == NULL)
     return false;
@@ -2470,9 +2529,8 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 	  = (const struct dwarf2_property_baton *) prop->data.baton;
 	gdb_assert (baton->property_type != NULL);
 
-	if (dwarf2_locexpr_baton_eval (&baton->locexpr, frame,
-				       addr_stack ? addr_stack->addr : 0,
-				       value))
+	if (dwarf2_locexpr_baton_eval (&baton->locexpr, frame, addr_stack,
+				       value, push_initial_value))
 	  {
 	    if (baton->locexpr.is_reference)
 	      {
@@ -2554,10 +2612,10 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 	  }
 	if (pinfo == NULL)
 	  error (_("cannot find reference address for offset property"));
-	if (pinfo->valaddr != NULL)
+	if (pinfo->valaddr.data () != NULL)
 	  val = value_from_contents
 		  (baton->offset_info.type,
-		   pinfo->valaddr + baton->offset_info.offset);
+		   pinfo->valaddr.data () + baton->offset_info.offset);
 	else
 	  val = value_at (baton->offset_info.type,
 			  pinfo->addr + baton->offset_info.offset);
@@ -2732,7 +2790,7 @@ dwarf2_loc_desc_get_symbol_read_needs (const gdb_byte *data, size_t size,
 
   ctx.needs = SYMBOL_NEEDS_NONE;
   ctx.per_cu = per_cu;
-  ctx.gdbarch = get_objfile_arch (objfile);
+  ctx.gdbarch = objfile->arch ();
   ctx.addr_size = per_cu->addr_size ();
   ctx.ref_addr_size = per_cu->ref_addr_size ();
   ctx.offset = per_cu->text_offset ();
@@ -3630,7 +3688,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 				 const gdb_byte *data, const gdb_byte *end,
 				 unsigned int addr_size)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   size_t leb128_size;
 
   if (data[0] >= DW_OP_reg0 && data[0] <= DW_OP_reg31)
@@ -4226,7 +4284,7 @@ locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
 	{
 	  fprintf_filtered (stream, _("a complex DWARF expression:\n"));
 	  data = disassemble_dwarf_expression (stream,
-					       get_objfile_arch (objfile),
+					       objfile->arch (),
 					       addr_size, offset_size, data,
 					       data, end, 0,
 					       dwarf_always_disassemble,
@@ -4428,7 +4486,7 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
     = (struct dwarf2_loclist_baton *) SYMBOL_LOCATION_BATON (symbol);
   const gdb_byte *loc_ptr, *buf_end;
   struct objfile *objfile = dlbaton->per_cu->objfile ();
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int addr_size = dlbaton->per_cu->addr_size ();
   int offset_size = dlbaton->per_cu->offset_size ();
@@ -4451,15 +4509,20 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
       enum debug_loc_kind kind;
       const gdb_byte *new_ptr = NULL; /* init for gcc -Wall */
 
-      if (dlbaton->from_dwo)
+      if (dlbaton->per_cu->version () < 5 && dlbaton->from_dwo)
 	kind = decode_debug_loc_dwo_addresses (dlbaton->per_cu,
 					       loc_ptr, buf_end, &new_ptr,
 					       &low, &high, byte_order);
-      else
+      else if (dlbaton->per_cu->version () < 5)
 	kind = decode_debug_loc_addresses (loc_ptr, buf_end, &new_ptr,
 					   &low, &high,
 					   byte_order, addr_size,
 					   signed_addr_p);
+      else
+	kind = decode_debug_loclists_addresses (dlbaton->per_cu,
+						loc_ptr, buf_end, &new_ptr,
+						&low, &high, byte_order,
+						addr_size, signed_addr_p);
       loc_ptr = new_ptr;
       switch (kind)
 	{
@@ -4473,6 +4536,7 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 	  continue;
 	case DEBUG_LOC_START_END:
 	case DEBUG_LOC_START_LENGTH:
+	case DEBUG_LOC_OFFSET_PAIR:
 	  break;
 	case DEBUG_LOC_BUFFER_OVERFLOW:
 	case DEBUG_LOC_INVALID_ENTRY:
@@ -4489,8 +4553,17 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
       low = gdbarch_adjust_dwarf2_addr (gdbarch, low);
       high = gdbarch_adjust_dwarf2_addr (gdbarch, high);
 
-      length = extract_unsigned_integer (loc_ptr, 2, byte_order);
-      loc_ptr += 2;
+      if (dlbaton->per_cu->version () < 5)
+	 {
+	   length = extract_unsigned_integer (loc_ptr, 2, byte_order);
+	   loc_ptr += 2;
+	 }
+      else
+	 {
+	   unsigned int bytes_read;
+	   length = read_unsigned_leb128 (NULL, loc_ptr, &bytes_read);
+	   loc_ptr += bytes_read;
+	 }
 
       /* (It would improve readability to print only the minimum
 	 necessary digits of the second number of the range.)  */

@@ -73,6 +73,19 @@ ldelf_map_segments (bfd_boolean need_layout)
 
   if (tries == 0)
     einfo (_("%F%P: looping in map_segments"));
+
+  if (link_info.output_bfd->xvec->flavour == bfd_target_elf_flavour
+      && lang_phdr_list == NULL)
+    {
+      /* If we don't have user supplied phdrs, strip zero-sized dynamic
+	 sections and regenerate program headers.  */
+      const struct elf_backend_data *bed
+	= get_elf_backend_data (link_info.output_bfd);
+      if (bed->elf_backend_strip_zero_sized_dynamic_sections
+	  && !bed->elf_backend_strip_zero_sized_dynamic_sections
+		(&link_info))
+	  einfo (_("%F%P: failed to strip zero-sized dynamic sections"));
+    }
 }
 
 /* We want to emit CTF early if and only if we are not targetting ELF with this

@@ -43,17 +43,6 @@ struct inf_ptrace_target : public inf_child_target
 
   void create_inferior (const char *, const std::string &,
 			char **, int) override;
-#ifdef PT_GET_PROCESS_STATE
-  bool follow_fork (bool, bool) override;
-
-  int insert_fork_catchpoint (int) override;
-
-  int remove_fork_catchpoint (int) override;
-
-  void post_startup_inferior (ptid_t) override;
-
-  void post_attach (int) override;
-#endif
 
   void mourn_inferior () override;
 
@@ -67,11 +56,6 @@ struct inf_ptrace_target : public inf_child_target
 					const gdb_byte *writebuf,
 					ULONGEST offset, ULONGEST len,
 					ULONGEST *xfered_len) override;
-
-#if defined (PT_IO) && defined (PIOD_READ_AUXV)
-  int auxv_parse (gdb_byte **readptr,
-		  gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp) override;
-#endif
 
 protected:
   /* Cleanup the inferior after a successful ptrace detach.  */

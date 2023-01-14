@@ -73,7 +73,7 @@ struct property_addr_info
   struct type *type;
 
   /* If not NULL, a buffer containing the object's value.  */
-  const gdb_byte *valaddr;
+  gdb::array_view<const gdb_byte> valaddr;
 
   /* The address of that object.  */
   CORE_ADDR addr;
@@ -92,12 +92,16 @@ struct property_addr_info
    be NULL.
 
    Returns true if PROP could be converted and the static value is passed
-   back into VALUE, otherwise returns false.  */
+   back into VALUE, otherwise returns false.
+
+   If PUSH_INITIAL_VALUE is true, then the top value of ADDR_STACK
+   will be pushed before evaluating a location expression.  */
 
 bool dwarf2_evaluate_property (const struct dynamic_prop *prop,
 			       struct frame_info *frame,
 			       const struct property_addr_info *addr_stack,
-			       CORE_ADDR *value);
+			       CORE_ADDR *value,
+			       bool push_initial_value = false);
 
 /* A helper for the compiler interface that compiles a single dynamic
    property to C code.

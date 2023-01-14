@@ -156,6 +156,7 @@ Doug Evans			dje@google.com
 Simon Marchi			simon.marchi@polymtl.ca
 Yao Qi				qiyao@sourceware.org
 Tom Tromey			tom@tromey.com
+Tom de Vries			tdevries@suse.de
 Ulrich Weigand			Ulrich.Weigand@de.ibm.com
 Eli Zaretskii			eliz@gnu.org
 
@@ -371,7 +372,7 @@ documentation		Eli Zaretskii		eliz@gnu.org
 testsuite
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
 
-SystemTap		Sergio Durigan Junior	sergiodj@redhat.com
+SystemTap		Sergio Durigan Junior	sergiodj@sergiodj.net
 
 
 
@@ -439,6 +440,7 @@ To get recommended for the Write After Approval list you need a valid
 FSF assignment and have submitted one good patch.
 
 Tankut Baris Aktemur				tankut.baris.aktemur@intel.com
+Mihails Strasuns				mihails.strasuns@intel.com
 Pedro Alves					pedro_alves@portugalmail.pt
 David Anderson					davea@sgi.com
 John David Anglin				dave.anglin@nrc-cnrc.gc.ca
@@ -490,7 +492,7 @@ Markus Deuling					deuling@de.ibm.com
 Klee Dienes					kdienes@apple.com
 Hannes Domani					ssbssa@yahoo.de
 Gabriel Dos Reis                                gdr@integrable-solutions.net
-Sergio Durigan Junior				sergiodj@redhat.com
+Sergio Durigan Junior				sergiodj@sergiodj.net
 Michael Eager					eager@eagercon.com
 Richard Earnshaw				rearnsha@arm.com
 Bernd Edlinger					bernd.edlinger@hotmail.de
@@ -665,7 +667,6 @@ Shahab Vahedi					shahab@synopsys.com
 D Venkatasubramanian				dvenkat@noida.hcltech.com
 Corinna Vinschen				vinschen@redhat.com
 Jan Vrany					jan.vrany@fit.cvut.cz
-Tom de Vries					tdevries@suse.de
 Sami Wagiaalla					swagiaal@redhat.com
 Keith Walker					keith.walker@arm.com
 Ricard Wanderlof				ricardw@axis.com

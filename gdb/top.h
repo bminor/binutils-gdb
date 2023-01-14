@@ -21,7 +21,7 @@
 #define TOP_H
 
 #include "gdbsupport/buffer.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 #include "value.h"
 
 struct tl_interp_info;
@@ -287,10 +287,6 @@ extern char *lim_at_start;
 extern void gdb_add_history (const char *);
 
 extern void show_commands (const char *args, int from_tty);
-
-extern void set_history (const char *, int);
-
-extern void show_history (const char *, int);
 
 extern void set_verbose (const char *, int, struct cmd_list_element *);
 

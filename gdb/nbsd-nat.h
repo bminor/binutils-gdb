@@ -22,11 +22,22 @@
 
 #include "inf-ptrace.h"
 
+struct thread_info;
+
 /* A prototype NetBSD target.  */
 
 struct nbsd_nat_target : public inf_ptrace_target
 {
   char *pid_to_exec_file (int pid) override;
+
+  bool thread_alive (ptid_t ptid) override;
+  const char *thread_name (struct thread_info *thr) override;
+  void post_attach (int pid) override;
+  void update_thread_list () override;
+  std::string pid_to_str (ptid_t ptid) override;
+
+  int find_memory_regions (find_memory_region_ftype func, void *data) override;
+  bool info_proc (const char *, enum info_proc_what) override;
 };
 
 #endif /* nbsd-nat.h */

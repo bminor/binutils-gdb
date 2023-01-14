@@ -24,6 +24,11 @@ standard_testfile
 
 set testcase "nested-subp3"
 
+if ![support_nested_function_tests] {
+    untested "compiler does not support nested functions"
+    return -1
+}
+
 if { [gdb_compile "${srcdir}/${subdir}/${testcase}.c" \
                   [standard_output_file "${testcase}"] \
                   executable \

@@ -63,6 +63,7 @@
 #define N_SET_FLAGS(execp, flags) do { } while (0)
 #define N_BADMAG(x) (N_MAGIC(x) != OMAGIC	\
 		     && N_MAGIC(x) != NMAGIC	\
+		     && N_MAGIC(x) != IMAGIC	\
 		     && N_MAGIC(x) != ZMAGIC)
 
 #include "sysdep.h"
@@ -90,7 +91,8 @@ struct pdp11_external_exec
 #define	A_MAGIC2	NMAGIC
 #define NMAGIC		0410	/* Pure executable.  */
 #define ZMAGIC		0413	/* Demand-paged executable.  */
-#define	A_MAGIC3	0411	/* Separated I&D.  */
+#define	IMAGIC		0411	/* Separated I&D.  */
+#define	A_MAGIC3	IMAGIC
 #define	A_MAGIC4	0405	/* Overlay.  */
 #define	A_MAGIC5	0430	/* Auto-overlay (nonseparate).  */
 #define	A_MAGIC6	0431	/* Auto-overlay (separate).  */
@@ -158,6 +160,7 @@ static bfd_boolean MY(write_object_contents) (bfd *);
 #undef N_REG
 #undef N_FN
 #undef N_EXT
+#undef N_STAB
 #define N_TYPE		0x1f	/* Type mask.  */
 #define N_UNDF		0x00	/* Undefined.  */
 #define N_ABS		0x01	/* Absolute.  */
@@ -167,6 +170,7 @@ static bfd_boolean MY(write_object_contents) (bfd *);
 #define N_REG		0x14	/* Register symbol.  */
 #define N_FN		0x1f	/* File name.  */
 #define N_EXT		0x20	/* External flag.  */
+#define N_STAB	 	0xc0	/* Not relevant; modified aout64.h's 0xe0 to avoid N_EXT.  */
 
 #define RELOC_SIZE 2
 
@@ -241,6 +245,10 @@ struct aout_final_link_info
   /* A buffer large enough to hold output symbols of any input BFD.  */
   struct external_nlist *output_syms;
 };
+
+/* Copy of the link_info.separate_code boolean to select the output format with
+   separate instruction and data spaces selected by --imagic */
+static bfd_boolean separate_i_d = FALSE;
 
 reloc_howto_type howto_table_pdp11[] =
 {
@@ -498,6 +506,8 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
     }
   else if (N_MAGIC (execp) == OMAGIC)
     adata (abfd).magic = o_magic;
+  else if (N_MAGIC (execp) == IMAGIC)
+    adata (abfd).magic = i_magic;
   else
     {
       /* Should have been checked with N_BADMAG before this routine
@@ -825,7 +835,7 @@ adjust_o_magic (bfd *abfd, struct internal_exec *execp)
       vma += pad;
       bss->vma = vma;
     }
-  else
+  else if (data->size > 0 || bss->size > 0) /* PR25677: for objcopy --extract-symbol */
     {
       /* The VMA of the .bss section is set by the VMA of the
 	 .data section plus the size of the .data section.  We may
@@ -988,6 +998,47 @@ adjust_n_magic (bfd *abfd, struct internal_exec *execp)
   N_SET_MAGIC (execp, NMAGIC);
 }
 
+static void
+adjust_i_magic (bfd *abfd, struct internal_exec *execp)
+{
+  file_ptr pos = adata (abfd).exec_bytes_size;
+  bfd_vma vma = 0;
+  int pad;
+  asection *text = obj_textsec (abfd);
+  asection *data = obj_datasec (abfd);
+  asection *bss = obj_bsssec (abfd);
+
+  /* Text.  */
+  text->filepos = pos;
+  if (!text->user_set_vma)
+    text->vma = vma;
+  else
+    vma = text->vma;
+  pos += execp->a_text;
+
+  /* Data.  */
+  data->filepos = pos;
+  if (!data->user_set_vma)
+    data->vma = 0;
+  vma = data->vma;
+
+  /* Since BSS follows data immediately, see if it needs alignment.  */
+  vma += data->size;
+  pad = align_power (vma, bss->alignment_power) - vma;
+  execp->a_data = data->size + pad;
+  pos += execp->a_data;
+
+  /* BSS.  */
+  if (!bss->user_set_vma)
+    bss->vma = vma;
+  else
+    vma = bss->vma;
+
+  /* Fix up exec header.  */
+  execp->a_bss = bss->size;
+  N_SET_MAGIC (execp, IMAGIC);
+}
+
 bfd_boolean
 NAME (aout, adjust_sizes_and_vmas) (bfd *abfd)
 {
@@ -1018,7 +1069,9 @@ NAME (aout, adjust_sizes_and_vmas) (bfd *abfd)
      I understand it better now, but I haven't time to do the cleanup this
      minute.  */
 
-  if (abfd->flags & WP_TEXT)
+  if (separate_i_d)
+    adata (abfd).magic = i_magic;
+  else if (abfd->flags & WP_TEXT)
     adata (abfd).magic = n_magic;
   else
     adata (abfd).magic = o_magic;
@@ -1031,6 +1084,7 @@ NAME (aout, adjust_sizes_and_vmas) (bfd *abfd)
 		{
 		case n_magic: str = "NMAGIC"; break;
 		case o_magic: str = "OMAGIC"; break;
+		case i_magic: str = "IMAGIC"; break;
 		case z_magic: str = "ZMAGIC"; break;
 		default: abort ();
 		}
@@ -1055,6 +1109,9 @@ NAME (aout, adjust_sizes_and_vmas) (bfd *abfd)
       break;
     case n_magic:
       adjust_n_magic (abfd, execp);
+      break;
+    case i_magic:
+      adjust_i_magic (abfd, execp);
       break;
     default:
       abort ();
@@ -1446,7 +1503,7 @@ NAME (aout, translate_symbol_table) (bfd *abfd,
       else
 	return FALSE;
 
-      in->symbol.value = GET_SWORD (abfd,  ext->e_value);
+      in->symbol.value = GET_WORD (abfd,  ext->e_value);
       /* TODO: is 0 a safe value here?  */
       in->desc = 0;
       in->other = 0;
@@ -3624,6 +3681,7 @@ NAME (aout, final_link) (bfd *abfd,
   if (bfd_link_pic (info))
     abfd->flags |= DYNAMIC;
 
+  separate_i_d = info->separate_code;
   aout_info.info = info;
   aout_info.output_bfd = abfd;
   aout_info.contents = NULL;

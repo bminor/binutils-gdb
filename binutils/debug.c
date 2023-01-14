@@ -3277,6 +3277,8 @@ debug_class_type_samep (struct debug_handle *info, struct debug_type_s *t1,
              names, since that sometimes fails in the presence of
              typedefs and we really don't care.  */
 	  if (strcmp (f1->name, f2->name) != 0
+	      || f1->type == NULL
+	      || f2->type == NULL
 	      || ! debug_type_samep (info,
 				     debug_get_real_type ((void *) info,
 							  f1->type, NULL),
