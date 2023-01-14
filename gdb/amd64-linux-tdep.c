@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux x86-64.
 
-   Copyright (C) 2001-2020 Free Software Foundation, Inc.
+   Copyright (C) 2001-2021 Free Software Foundation, Inc.
    Contributed by Jiri Smid, SuSE Labs.
 
    This file is part of GDB.
@@ -146,7 +146,7 @@ amd64_linux_sigtramp_start (struct frame_info *this_frame)
      PC is not at the start of the instruction sequence, there will be
      a few trailing readable bytes on the stack.  */
 
-  if (!safe_frame_unwind_memory (this_frame, pc, buf, sizeof buf))
+  if (!safe_frame_unwind_memory (this_frame, pc, buf))
     return 0;
 
   if (buf[0] != LINUX_SIGTRAMP_INSN0)
@@ -155,7 +155,7 @@ amd64_linux_sigtramp_start (struct frame_info *this_frame)
 	return 0;
 
       pc -= LINUX_SIGTRAMP_OFFSET1;
-      if (!safe_frame_unwind_memory (this_frame, pc, buf, sizeof buf))
+      if (!safe_frame_unwind_memory (this_frame, pc, buf))
 	return 0;
     }
 
@@ -284,8 +284,8 @@ amd64_linux_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
       || regnum == AMD64_FSBASE_REGNUM
       || regnum == AMD64_GSBASE_REGNUM)
     return (group == system_reggroup
-            || group == save_reggroup
-            || group == restore_reggroup);
+	    || group == save_reggroup
+	    || group == restore_reggroup);
   return i386_register_reggroup_p (gdbarch, regnum, group);
 }
 
@@ -1464,7 +1464,7 @@ amd64_linux_syscall_record_common (struct regcache *regcache,
     case amd64_sys_rt_sigreturn:
     case amd64_x32_sys_rt_sigreturn:
       if (amd64_all_but_ip_registers_record (regcache))
-        return -1;
+	return -1;
       return 0;
       break;
 
@@ -1496,16 +1496,16 @@ amd64_linux_syscall_record_common (struct regcache *regcache,
   if (syscall_gdb == gdb_sys_no_syscall)
     {
       printf_unfiltered (_("Process record and replay target doesn't "
-                           "support syscall number %s\n"), 
+			   "support syscall number %s\n"), 
 			 pulongest (syscall_native));
       return -1;
     }
   else
     {
       ret = record_linux_system_call (syscall_gdb, regcache,
-                                      linux_record_tdep_p);
+				      linux_record_tdep_p);
       if (ret)
-        return ret;
+	return ret;
     }
 
  record_regs:
@@ -1538,8 +1538,8 @@ amd64_x32_linux_syscall_record (struct regcache *regcache)
 
 static int
 amd64_linux_record_signal (struct gdbarch *gdbarch,
-                           struct regcache *regcache,
-                           enum gdb_signal signal)
+			   struct regcache *regcache,
+			   enum gdb_signal signal)
 {
   ULONGEST rsp;
 
@@ -1561,8 +1561,8 @@ amd64_linux_record_signal (struct gdbarch *gdbarch,
      sp -= sizeof (struct rt_sigframe);  */
   rsp -= AMD64_LINUX_frame_size;
   if (record_full_arch_list_add_mem (rsp, AMD64_LINUX_redzone
-                                     + AMD64_LINUX_xstate
-                                     + AMD64_LINUX_frame_size))
+				     + AMD64_LINUX_xstate
+				     + AMD64_LINUX_frame_size))
     return -1;
 
   if (record_full_arch_list_add_end ())
@@ -1795,11 +1795,12 @@ amd64_dtrace_parse_probe_argument (struct gdbarch *gdbarch,
 }
 
 static void
-amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch)
+amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch,
+			    int num_disp_step_buffers)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  linux_init_abi (info, gdbarch);
+  linux_init_abi (info, gdbarch, num_disp_step_buffers);
 
   tdep->sigtramp_p = amd64_linux_sigtramp_p;
   tdep->sigcontext_addr = amd64_linux_sigcontext_addr;
@@ -1816,11 +1817,11 @@ amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Functions for 'catch syscall'.  */
   set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_AMD64);
   set_gdbarch_get_syscall_number (gdbarch,
-                                  amd64_linux_get_syscall_number);
+				  amd64_linux_get_syscall_number);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
-                                             svr4_fetch_objfile_link_map);
+					     svr4_fetch_objfile_link_map);
 
   /* GNU/Linux uses SVR4-style shared libraries.  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
@@ -1837,10 +1838,8 @@ amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Displaced stepping.  */
   set_gdbarch_displaced_step_copy_insn (gdbarch,
-                                        amd64_displaced_step_copy_insn);
+					amd64_displaced_step_copy_insn);
   set_gdbarch_displaced_step_fixup (gdbarch, amd64_displaced_step_fixup);
-  set_gdbarch_displaced_step_location (gdbarch,
-                                       linux_displaced_step_location);
 
   set_gdbarch_process_record (gdbarch, i386_process_record);
   set_gdbarch_process_record_signal (gdbarch, amd64_linux_record_signal);
@@ -1881,7 +1880,7 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   if (!valid_p)
     return;
 
-  amd64_linux_init_abi_common (info, gdbarch);
+  amd64_linux_init_abi_common (info, gdbarch, 2);
 
   /* Initialize the amd64_linux_record_tdep.  */
   /* These values are the size of the type that will be used in a system
@@ -2096,7 +2095,7 @@ amd64_x32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   if (!valid_p)
     return;
 
-  amd64_linux_init_abi_common (info, gdbarch);
+  amd64_linux_init_abi_common (info, gdbarch, 0);
 
   /* Initialize the amd64_x32_linux_record_tdep.  */
   /* These values are the size of the type that will be used in a system

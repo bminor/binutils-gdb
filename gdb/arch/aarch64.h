@@ -1,6 +1,6 @@
 /* Common target-dependent functionality for AArch64.
 
-   Copyright (C) 2017-2020 Free Software Foundation, Inc.
+   Copyright (C) 2017-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -57,6 +57,8 @@ enum aarch64_regnum
   AARCH64_STRUCT_RETURN_REGNUM = AARCH64_X0_REGNUM + 8,
   AARCH64_LAST_V_ARG_REGNUM = AARCH64_V0_REGNUM + 7
 };
+
+#define V_REGISTER_SIZE 16
 
 /* Pseudo register base numbers.  */
 #define AARCH64_Q0_REGNUM 0

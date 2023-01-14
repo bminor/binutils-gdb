@@ -1,6 +1,6 @@
 /* Path manipulation routines for GDB and gdbserver.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,6 +21,10 @@
 #define COMMON_PATHSTUFF_H
 
 #include "gdbsupport/byte-vector.h"
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 /* Path utilities.  */
 
@@ -84,6 +88,43 @@ extern std::string get_standard_cache_dir ();
    Throw an exception on error.  */
 
 extern std::string get_standard_temp_dir ();
+
+/* Get the usual user config directory for the current platform.
+
+   On Linux, it follows the XDG Base Directory specification: use
+   $XDG_CONFIG_HOME/gdb if the XDG_CONFIG_HOME environment variable is
+   defined, otherwise $HOME/.config.
+
+   On macOS, it follows the local convention and uses
+   ~/Library/Preferences/gdb.
+
+  The return value is absolute and tilde-expanded.  Return an empty
+  string if neither XDG_CONFIG_HOME (on Linux) or HOME are defined.  */
+
+extern std::string get_standard_config_dir ();
+
+/* Look for FILENAME in the standard configuration directory as returned by
+   GET_STANDARD_CONFIG_DIR and return the path to the file.  No check is
+   performed that the file actually exists or not.
+
+   If FILENAME begins with a '.' then the path returned will remove the
+   leading '.' character, for example passing '.gdbinit' could return the
+   path '/home/username/.config/gdb/gdbinit'.  */
+
+extern std::string get_standard_config_filename (const char *filename);
+
+/* Look for a file called NAME in either the standard config directory or
+   in the users home directory.  If a suitable file is found then *BUF will
+   be filled with the contents of a call to 'stat' on the found file,
+   otherwise *BUF is undefined after this call.
+
+   If NAME starts with a '.' character then, when looking in the standard
+   config directory the file searched for has the '.' removed.  For
+   example, if NAME is '.gdbinit' then on a Linux target GDB might look for
+   '~/.config/gdb/gdbinit' and then '~/.gdbinit'.  */
+
+extern std::string find_gdb_home_config_file (const char *name,
+					      struct stat *buf);
 
 /* Return the file name of the user's shell.  Normally this comes from
    the SHELL environment variable.  */

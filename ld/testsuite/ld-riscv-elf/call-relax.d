@@ -4,6 +4,6 @@
 #source: call-relax-2.s
 #source: call-relax-3.s
 #as: -march=rv32ic -mno-arch-attr
-#ld: -melf32lriscv
+#ld: -m[riscv_choose_ilp32_emul]
 #objdump: -d
 #pass

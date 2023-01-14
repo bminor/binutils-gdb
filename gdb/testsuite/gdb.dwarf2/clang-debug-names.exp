@@ -1,4 +1,4 @@
-# Copyright 2020 Free Software Foundation, Inc.
+# Copyright 2020-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ if {![dwarf2_support]} {
     return 0
 }
 
-standard_testfile clang-debug-names.c clang-debug-names-debug.S
+standard_testfile .c -debug.S
 
 lassign [function_range main ${srcdir}/${subdir}/${srcfile}] \
     main_start main_length

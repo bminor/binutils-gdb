@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 #
-#   Copyright (C) 2020 Free Software Foundation, Inc.
+#   Copyright (C) 2020-2021 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -65,6 +65,7 @@ libgdbsupport_a_SOURCES = \
     run-time-clock.cc \
     safe-strerror.cc \
     scoped_mmap.cc \
+    search.cc \
     signals.cc \
     signals-state-save-restore.cc \
     tdesc.cc \

@@ -1,5 +1,5 @@
 /* Support for printing C and C++ types for GDB, the GNU debugger.
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -151,7 +151,7 @@ c_print_type_1 (struct type *type,
 	fputs_styled (varstring, variable_name_style.style (), stream);
 
       /* For demangled function names, we have the arglist as part of
-         the name, so don't print an additional pair of ()'s.  */
+	 the name, so don't print an additional pair of ()'s.  */
       if (local_name == NULL)
 	{
 	  demangled_args = strchr (varstring, '(') != NULL;
@@ -465,8 +465,9 @@ c_type_print_varspec_prefix (struct type *type,
     case TYPE_CODE_COMPLEX:
     case TYPE_CODE_NAMESPACE:
     case TYPE_CODE_DECFLOAT:
+    case TYPE_CODE_FIXED_POINT:
       /* These types need no prefix.  They are listed here so that
-         gcc -Wall will reveal any types that haven't been handled.  */
+	 gcc -Wall will reveal any types that haven't been handled.  */
       break;
     default:
       error (_("type not handled in c_type_print_varspec_prefix()"));
@@ -526,8 +527,9 @@ c_type_print_modifier (struct type *type, struct ui_file *stream,
       did_print_modifier = 1;
     }
 
-  address_space_id = address_space_int_to_name (get_type_arch (type),
-						TYPE_INSTANCE_FLAGS (type));
+  address_space_id
+    = address_space_type_instance_flags_to_name (get_type_arch (type),
+						 type->instance_flags ());
   if (address_space_id)
     {
       if (did_print_modifier || need_pre_space)
@@ -843,9 +845,10 @@ c_type_print_varspec_suffix (struct type *type,
     case TYPE_CODE_COMPLEX:
     case TYPE_CODE_NAMESPACE:
     case TYPE_CODE_DECFLOAT:
+    case TYPE_CODE_FIXED_POINT:
       /* These types do not need a suffix.  They are listed so that
-         gcc -Wall will report types that may not have been
-         considered.  */
+	 gcc -Wall will report types that may not have been
+	 considered.  */
       break;
     default:
       error (_("type not handled in c_type_print_varspec_suffix()"));
@@ -1119,13 +1122,13 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	  && TYPE_TYPEDEF_FIELD_COUNT (type) == 0)
 	{
 	  if (type->is_stub ())
-	    fprintfi_filtered (level + 4, stream,
-			       _("%p[<incomplete type>%p]\n"),
-			       metadata_style.style ().ptr (), nullptr);
+	    fprintf_filtered (stream, _("%*s%p[<incomplete type>%p]\n"),
+			      level + 4, "",
+			      metadata_style.style ().ptr (), nullptr);
 	  else
-	    fprintfi_filtered (level + 4, stream,
-			       _("%p[<no data fields>%p]\n"),
-			       metadata_style.style ().ptr (), nullptr);
+	    fprintf_filtered (stream, _("%*s%p[<no data fields>%p]\n"),
+			      level + 4, "",
+			      metadata_style.style ().ptr (), nullptr);
 	}
 
       /* Start off with no specific section type, so we can print
@@ -1436,7 +1439,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	    print_spaces_filtered (2, stream);
 	}
 
-      fprintfi_filtered (level, stream, "}");
+      fprintf_filtered (stream, "%*s}", level, "");
     }
 }
 
@@ -1552,10 +1555,10 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
       if (TYPE_DECLARED_CLASS (type))
 	fprintf_filtered (stream, "class ");
       /* Print the tag name if it exists.
-         The aCC compiler emits a spurious 
-         "{unnamed struct}"/"{unnamed union}"/"{unnamed enum}"
-         tag for unnamed struct/union/enum's, which we don't
-         want to print.  */
+	 The aCC compiler emits a spurious 
+	 "{unnamed struct}"/"{unnamed union}"/"{unnamed enum}"
+	 tag for unnamed struct/union/enum's, which we don't
+	 want to print.  */
       if (type->name () != NULL
 	  && !startswith (type->name (), "{unnamed"))
 	{
@@ -1630,13 +1633,15 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 	    if (type->num_fields () == 0)
 	      {
 		if (type->is_stub ())
-		  fprintfi_filtered (level + 4, stream,
-				     _("%p[<incomplete type>%p]\n"),
-				     metadata_style.style ().ptr (), nullptr);
+		  fprintf_filtered (stream,
+				    _("%*s%p[<incomplete type>%p]\n"),
+				    level + 4, "",
+				    metadata_style.style ().ptr (), nullptr);
 		else
-		  fprintfi_filtered (level + 4, stream,
-				     _("%p[<no data fields>%p]\n"),
-				     metadata_style.style ().ptr (), nullptr);
+		  fprintf_filtered (stream,
+				    _("%*s%p[<no data fields>%p]\n"),
+				    level + 4, "",
+				    metadata_style.style ().ptr (), nullptr);
 	      }
 	    len = type->num_fields ();
 	    for (i = 0; i < len; i++)
@@ -1660,7 +1665,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 		  }
 		fprintf_filtered (stream, ";\n");
 	      }
-	    fprintfi_filtered (level, stream, "}");
+	    fprintf_filtered (stream, "%*s}", level, "");
 	  }
       }
       break;
@@ -1682,6 +1687,10 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
       fprintf_styled (stream, metadata_style.style (), _("<range type>"));
       break;
 
+    case TYPE_CODE_FIXED_POINT:
+      print_type_fixed_point (type, stream);
+      break;
+
     case TYPE_CODE_NAMESPACE:
       fputs_filtered ("namespace ", stream);
       fputs_filtered (type->name (), stream);
@@ -1689,9 +1698,9 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 
     default:
       /* Handle types not explicitly handled by the other cases, such
-         as fundamental types.  For these, just print whatever the
-         type name is, as recorded in the type itself.  If there is no
-         type name, then complain.  */
+	 as fundamental types.  For these, just print whatever the
+	 type name is, as recorded in the type itself.  If there is no
+	 type name, then complain.  */
       if (type->name () != NULL)
 	{
 	  c_type_print_modifier (type, stream, 0, 1, language);

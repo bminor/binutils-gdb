@@ -1,6 +1,6 @@
 /* MI Command Set - MI parser.
 
-   Copyright (C) 2000-2020 Free Software Foundation, Inc.
+   Copyright (C) 2000-2021 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions (a Red Hat company).
 
@@ -305,9 +305,9 @@ mi_parse (const char *cmd, char **token)
       /* See if --all is the last token in the input.  */
       if (strcmp (chp, "--all") == 0)
 	{
-          parse->all = 1;
-          chp += strlen (chp);
-        }
+	  parse->all = 1;
+	  chp += strlen (chp);
+	}
       if (strncmp (chp, "--thread-group ", tgs) == 0)
 	{
 	  char *endp;

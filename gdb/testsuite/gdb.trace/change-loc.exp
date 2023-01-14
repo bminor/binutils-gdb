@@ -1,4 +1,4 @@
-# Copyright 2011-2020 Free Software Foundation, Inc.
+# Copyright 2011-2021 Free Software Foundation, Inc.
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
@@ -214,7 +214,7 @@ proc tracepoint_change_loc_2 { trace_type } {
 	    "tracepoint with one location"
 
 	set main_bp 0
-	gdb_test_multiple "break main" "set breakpoint on main" {
+	gdb_test_multiple "break -q main" "set breakpoint on main" {
 	    -re "Breakpoint (\[0-9\]*) at .*, line.*$gdb_prompt $" {
 		set main_bp $expect_out(1,string)
 	    }

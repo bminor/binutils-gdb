@@ -1,3 +1,54 @@
+2021-01-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* compile.c (memory_size): Move definition to top of file.
+	(h8_get_memory, h8_set_memory): Assert access is within memory_size.
+	(h8_get_eightbit_buf): Delete.
+	h8_set_eightbit_buf, h8_get_eightbit, h8_set_eightbit): Likewise.
+	(GET_MEMORY_L): Delete eightbit references.
+	(GET_MEMORY_W, GET_MEMORY_B, SET_MEMORY_L, SET_MEMORY_W,
+	SET_MEMORY_B, init_pointers, step_once, sim_load): Likewise.
+	(sim_write): Likewise.  Return i instead of size.
+	(sim_read): Check addr is within memory_size.
+	* sim-main.h (struct h8300_cpu_state): Delete eightbit.
+
+2021-01-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Call SIM_AC_OPTION_WARNINGS.
+	* configure: Regenerate.
+
+2021-01-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+	* compile.c: Delete HAVE_TIME_H & HAVE_STDLIB_H.
+
+2021-01-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-01-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-01-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* compile.c (set_simcache_size, h8_get_cache_top, h8_set_cache_top,
+	h8_get_compiles, h8_increment_compiles, h8_get_cache_idx_buf,
+	h8_set_cache_idx_buf, h8_get_cache_idx, h8_set_cache_idx, compile,
+	set_simcache_size): Delete.
+	(init_pointers): Delete calls to h8_get_cache_idx_buf,
+	h8_set_cache_idx_buf, and set_simcache_size.
+	(step_once): Replace call to h8_get_cache_idx with decode.  Delete
+	case 0 handling and call to compile.
+	(sim_write): Delete call to h8_set_cache_idx.
+	(sim_info): Delete call to h8_get_compiles & sim_cache_size.
+	(sim_load): Delete calls to h8_get_cache_idx_buf & h8_set_cache_idx_buf.
+	* sim-main.h (sim_state): Delete sim_cache_size, sim_cache, cache_idx,
+	cache_top, and compiles.
+
+2021-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2017-09-06  John Baldwin  <jhb@FreeBSD.org>
 
 	* configure: Regenerate.
@@ -1249,4 +1300,3 @@ Sun Jan  3 14:15:07 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 Tue Dec 22 13:56:48 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* new
-

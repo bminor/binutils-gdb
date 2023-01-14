@@ -1,4 +1,4 @@
-dnl Copyright (C) 1996-2020 Free Software Foundation, Inc.
+dnl Copyright (C) 1996-2021 Free Software Foundation, Inc.
 dnl
 dnl This program is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ AC_INIT(Makefile.in)
 sinclude(../common/acinclude.m4)
 
 SIM_AC_COMMON
+SIM_AC_OPTION_WARNINGS(no)
 
 # In the Cygwin environment, we need some additional flags.
 AC_CACHE_CHECK([for cygwin], sim_cv_os_cygwin,

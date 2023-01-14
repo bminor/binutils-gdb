@@ -1,6 +1,6 @@
 /* Scheme interface to types.
 
-   Copyright (C) 2008-2020 Free Software Foundation, Inc.
+   Copyright (C) 2008-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -34,10 +34,9 @@
 /* The <gdb:type> smob.
    The type is chained with all types associated with its objfile, if any.
    This lets us copy the underlying struct type when the objfile is
-   deleted.
-   The typedef for this struct is in guile-internal.h.  */
+   deleted.  */
 
-struct _type_smob
+struct type_smob
 {
   /* This always appears first.
      eqable_gdb_smob is used so that types are eq?-able.
@@ -52,7 +51,7 @@ struct _type_smob
 
 /* A field smob.  */
 
-typedef struct
+struct field_smob
 {
   /* This always appears first.  */
   gdb_smob base;
@@ -62,7 +61,7 @@ typedef struct
 
   /* The field number in TYPE_SCM.  */
   int field_num;
-} field_smob;
+};
 
 static const char type_smob_name[] = "gdb:type";
 static const char field_smob_name[] = "gdb:field";
@@ -152,7 +151,7 @@ tyscm_eq_type_smob (const void *ap, const void *bp)
 static htab_t
 tyscm_type_map (struct type *type)
 {
-  struct objfile *objfile = TYPE_OBJFILE (type);
+  struct objfile *objfile = type->objfile ();
   htab_t htab;
 
   if (objfile == NULL)
@@ -352,7 +351,7 @@ tyscm_copy_type_recursive (void **slot, void *info)
 {
   type_smob *t_smob = (type_smob *) *slot;
   htab_t copied_types = (htab_t) info;
-  struct objfile *objfile = TYPE_OBJFILE (t_smob->type);
+  struct objfile *objfile = t_smob->type->objfile ();
   htab_t htab;
   eqable_gdb_smob **new_slot;
   type_smob t_smob_for_lookup;
@@ -387,20 +386,17 @@ static void
 save_objfile_types (struct objfile *objfile, void *datum)
 {
   htab_t htab = (htab_t) datum;
-  htab_t copied_types;
 
   if (!gdb_scheme_initialized)
     return;
 
-  copied_types = create_copied_types_hash (objfile);
+  htab_up copied_types = create_copied_types_hash (objfile);
 
   if (htab != NULL)
     {
-      htab_traverse_noresize (htab, tyscm_copy_type_recursive, copied_types);
+      htab_traverse_noresize (htab, tyscm_copy_type_recursive, copied_types.get ());
       htab_delete (htab);
     }
-
-  htab_delete (copied_types);
 }
 
 /* Administrivia for field smobs.  */

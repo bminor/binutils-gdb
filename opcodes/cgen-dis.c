@@ -1,5 +1,5 @@
 /* CGEN generic disassembler support code.
-   Copyright (C) 1996-2020 Free Software Foundation, Inc.
+   Copyright (C) 1996-2021 Free Software Foundation, Inc.
 
    This file is part of libopcodes.
 
@@ -95,7 +95,7 @@ add_insn_to_hash_chain (CGEN_INSN_LIST *hentbuf,
    The result is a pointer to the next entry to use.
 
    The table is scanned backwards as additions are made to the front of the
-   list and we want earlier ones to be prefered.  */
+   list and we want earlier ones to be preferred.  */
 
 static CGEN_INSN_LIST *
 hash_insn_array (CGEN_CPU_DESC cd,
@@ -211,7 +211,7 @@ build_dis_hash_table (CGEN_CPU_DESC cd)
 				    dis_hash_table, hash_entry_buf);
 
   /* Add runtime added insns.
-     Later added insns will be prefered over earlier ones.  */
+     Later added insns will be preferred over earlier ones.  */
 
   hash_entry_buf = hash_insn_list (cd, insn_table->new_entries,
 				   dis_hash_table, hash_entry_buf);

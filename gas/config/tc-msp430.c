@@ -1,6 +1,6 @@
 /* tc-msp430.c -- Assembler code for the Texas Instruments MSP430
 
-  Copyright (C) 2002-2020 Free Software Foundation, Inc.
+  Copyright (C) 2002-2021 Free Software Foundation, Inc.
   Contributed by Dmitry Diky <diwil@mail.ru>
 
   This file is part of GAS, the GNU Assembler.
@@ -689,6 +689,9 @@ static bfd_boolean do_unknown_interrupt_nops = TRUE;
 static bfd_boolean upper_data_region_in_use = FALSE;
 /* The default is to use the lower region only.  */
 static bfd_boolean lower_data_region_only = TRUE;
+
+/* Deprecated option, silently ignore it for compatibility with GCC <= 10.  */
+#define OPTION_MOVE_DATA 'd'
 
 enum
 {
@@ -1465,6 +1468,10 @@ md_parse_option (int c, const char * arg)
       do_unknown_interrupt_nops = FALSE;
       return 1;
 
+    case OPTION_MOVE_DATA:
+      /* Silently ignored.  */
+      return 1;
+
     case OPTION_DATA_REGION:
       if (strcmp (arg, "upper") == 0
 	  || strcmp (arg, "either") == 0)
@@ -1750,6 +1757,7 @@ struct option md_longopts[] =
   {"my", no_argument, NULL, OPTION_WARN_INTR_NOPS},
   {"mu", no_argument, NULL, OPTION_UNKNOWN_INTR_NOPS},
   {"mU", no_argument, NULL, OPTION_NO_UNKNOWN_INTR_NOPS},
+  {"md", no_argument, NULL, OPTION_MOVE_DATA},
   {"mdata-region", required_argument, NULL, OPTION_DATA_REGION},
   {NULL, no_argument, NULL, 0}
 };

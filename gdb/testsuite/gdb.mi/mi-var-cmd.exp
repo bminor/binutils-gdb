@@ -1,4 +1,4 @@
-# Copyright 1999-2020 Free Software Foundation, Inc.
+# Copyright 1999-2021 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -657,7 +657,7 @@ with_test_prefix "second run" {
 mi_create_varobj "L" "lsimple" "in-and-out-of-scope: create varobj"
 mi_check_varobj_value "L" "{...}" "in-and-out-of-scope: check initial value"
 
-mi_runto main
+mi_runto_main
 
 mi_gdb_test "-var-update L" \
     {\^done,changelist=\[{name="L",in_scope="false",type_changed="false",has_more="0"}\]} \

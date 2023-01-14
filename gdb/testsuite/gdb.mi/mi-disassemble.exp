@@ -1,4 +1,4 @@
-# Copyright 1999-2020 Free Software Foundation, Inc.
+# Copyright 1999-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,11 +22,6 @@
 
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
-
-gdb_exit
-if [mi_gdb_start] {
-    continue
-}
 
 standard_testfile basics.c
 
@@ -244,7 +239,8 @@ proc test_disassembly_bogus_args {} {
 
 }
 
-mi_run_to_main
+mi_clean_restart $binfile
+mi_runto_main
 test_disassembly_only
 test_disassembly_with_opcodes
 test_disassembly_mixed

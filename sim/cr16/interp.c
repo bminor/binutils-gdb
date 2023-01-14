@@ -1,5 +1,5 @@
 /* Simulation code for the CR16 processor.
-   Copyright (C) 2008-2020 Free Software Foundation, Inc.
+   Copyright (C) 2008-2021 Free Software Foundation, Inc.
    Contributed by M Ranga Swami Reddy <MR.Swami.Reddy@nsc.com>
 
    This file is part of GDB, the GNU debugger.
@@ -32,6 +32,8 @@
 #include "gdb/sim-cr16.h"
 #include "gdb/signals.h"
 #include "opcode/cr16.h"
+
+struct _state State;
 
 int cr16_debug;
 

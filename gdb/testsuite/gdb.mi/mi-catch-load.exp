@@ -1,4 +1,4 @@
-# Copyright 2012-2020 Free Software Foundation, Inc.
+# Copyright 2012-2021 Free Software Foundation, Inc.
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
@@ -16,11 +16,6 @@ load_lib mi-support.exp
 
 if {[skip_shlib_tests]} {
     return -1
-}
-
-gdb_exit
-if [mi_gdb_start] {
-    continue
 }
 
 if {[get_compiler_info]} {
@@ -44,7 +39,9 @@ if { [gdb_compile_shlib "${srcdir}/${subdir}/${srcfile2}" ${binfile2} {debug}] !
     untested "failed to compile shared library"
     return -1
 }
-mi_run_to_main
+
+mi_clean_restart $binfile
+mi_runto_main
 
 # test -catch-load
 mi_gdb_test "111-gdb-set auto-solib-add on" "111\\^done" "catch-load: auto-solib-add on"
@@ -66,13 +63,8 @@ gdb_expect {
     }
 }
 
-mi_gdb_exit
-
-
-if [mi_gdb_start] {
-    continue
-}
-mi_run_to_main
+mi_clean_restart $binfile
+mi_runto_main
 
 # test -catch-unload
 mi_gdb_test "111-gdb-set auto-solib-add on" "111\\^done" "catch-unload: auto-solib-add on"

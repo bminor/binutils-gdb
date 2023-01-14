@@ -1,5 +1,5 @@
 /* Build symbol tables in GDB's internal format - legacy APIs
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -63,7 +63,7 @@ extern struct block *finish_block (struct symbol *symbol,
 				   CORE_ADDR end);
 
 extern void record_block_range (struct block *,
-                                CORE_ADDR start, CORE_ADDR end_inclusive);
+				CORE_ADDR start, CORE_ADDR end_inclusive);
 
 extern void start_subfile (const char *name);
 

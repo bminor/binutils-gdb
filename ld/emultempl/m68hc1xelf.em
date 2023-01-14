@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright (C) 1991-2020 Free Software Foundation, Inc.
+#   Copyright (C) 1991-2021 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -104,7 +104,7 @@ m68hc11_elf_${EMULATION_NAME}_before_allocation (void)
      window (rx) : ORIGIN = 0x8000, LENGTH = 16K
 
      But for 68HC11 this is board specific.  The definition of such
-     memory region allows to control how this paged memory is accessed.  */
+     memory region allows one to control how this paged memory is accessed.  */
   region = lang_memory_region_lookup (bank_window_name, FALSE);
 
   /* Check the length to see if it was defined in the script.  */
@@ -275,7 +275,7 @@ m68hc11elf_add_stub_section (const char *stub_sec_name,
      at the correct place.  */
   info.input_section = tramp_section;
   lang_list_init (&info.add);
-  lang_add_section (&info.add, stub_sec, NULL, os);
+  lang_add_section (&info.add, stub_sec, NULL, NULL, os);
 
   if (info.add.head == NULL)
     goto err_ret;

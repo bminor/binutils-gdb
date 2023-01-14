@@ -1,5 +1,5 @@
 /* Target-dependent code for the GNU Hurd.
-   Copyright (C) 2002-2020 Free Software Foundation, Inc.
+   Copyright (C) 2002-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -63,7 +63,7 @@ i386_gnu_sigtramp_start (struct frame_info *this_frame)
 
   if (!safe_frame_unwind_memory (this_frame,
 				 pc + GNU_SIGTRAMP_TAIL - GNU_SIGTRAMP_LEN,
-				 buf, GNU_SIGTRAMP_LEN))
+				 buf))
     return 0;
 
   if (memcmp (buf, gnu_sigtramp_code, GNU_SIGTRAMP_LEN) != 0)

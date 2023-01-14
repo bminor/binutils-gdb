@@ -1,6 +1,6 @@
 /* Parse expressions for GDB.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    Modified from expread.y by the Department of Computer Science at the
    State University of New York at Buffalo, 1991.
@@ -39,7 +39,6 @@
 #include "value.h"
 #include "command.h"
 #include "language.h"
-#include "f-lang.h"
 #include "parser-defs.h"
 #include "gdbcmd.h"
 #include "symfile.h"		/* for overlay functions */
@@ -60,7 +59,6 @@ const struct exp_descriptor exp_descriptor_standard =
     print_subexp_standard,
     operator_length_standard,
     operator_check_standard,
-    op_name_standard,
     dump_subexp_body_standard,
     evaluate_subexp_standard
   };
@@ -90,7 +88,7 @@ static int prefixify_subexp (struct expression *, struct expression *, int,
 
 static expression_up parse_exp_in_context (const char **, CORE_ADDR,
 					   const struct block *, int,
-					   int, int *,
+					   bool, int *,
 					   innermost_block_tracker *,
 					   expr_completion_state *);
 
@@ -116,13 +114,9 @@ innermost_block_tracker::update (const struct block *b,
 expr_builder::expr_builder (const struct language_defn *lang,
 			    struct gdbarch *gdbarch)
   : expout_size (10),
-    expout (XNEWVAR (expression,
-		     (sizeof (expression)
-		      + EXP_ELEM_TO_BYTES (expout_size)))),
+    expout (new expression (lang, gdbarch, expout_size)),
     expout_ptr (0)
 {
-  expout->language_defn = lang;
-  expout->gdbarch = gdbarch;
 }
 
 expression_up
@@ -133,11 +127,29 @@ expr_builder::release ()
      excess elements.  */
 
   expout->nelts = expout_ptr;
-  expout.reset (XRESIZEVAR (expression, expout.release (),
-			    (sizeof (expression)
-			     + EXP_ELEM_TO_BYTES (expout_ptr))));
+  expout->resize (expout_ptr);
 
   return std::move (expout);
+}
+
+expression::expression (const struct language_defn *lang, struct gdbarch *arch,
+			size_t n)
+  : language_defn (lang),
+    gdbarch (arch),
+    elts (nullptr)
+{
+  resize (n);
+}
+
+expression::~expression ()
+{
+  xfree (elts);
+}
+
+void
+expression::resize (size_t n)
+{
+  elts = XRESIZEVAR (union exp_element, elts, EXP_ELEM_TO_BYTES (n));
 }
 
 /* This page contains the functions for adding data to the struct expression
@@ -154,9 +166,7 @@ write_exp_elt (struct expr_builder *ps, const union exp_element *expelt)
   if (ps->expout_ptr >= ps->expout_size)
     {
       ps->expout_size *= 2;
-      ps->expout.reset (XRESIZEVAR (expression, ps->expout.release (),
-				    (sizeof (expression)
-				     + EXP_ELEM_TO_BYTES (ps->expout_size))));
+      ps->expout->resize (ps->expout_size);
     }
   ps->expout->elts[ps->expout_ptr++] = *expelt;
 }
@@ -723,16 +733,14 @@ int
 prefixify_expression (struct expression *expr, int last_struct)
 {
   gdb_assert (expr->nelts > 0);
-  int len = sizeof (struct expression) + EXP_ELEM_TO_BYTES (expr->nelts);
-  struct expression *temp;
+  int len = EXP_ELEM_TO_BYTES (expr->nelts);
+  struct expression temp (expr->language_defn, expr->gdbarch, expr->nelts);
   int inpos = expr->nelts, outpos = 0;
 
-  temp = (struct expression *) alloca (len);
-
   /* Copy the original expression into temp.  */
-  memcpy (temp, expr, len);
+  memcpy (temp.elts, expr->elts, len);
 
-  return prefixify_subexp (temp, expr, inpos, outpos, last_struct);
+  return prefixify_subexp (&temp, expr, inpos, outpos, last_struct);
 }
 
 /* Return the number of exp_elements in the postfix subexpression 
@@ -762,8 +770,8 @@ void
 operator_length (const struct expression *expr, int endpos, int *oplenp,
 		 int *argsp)
 {
-  expr->language_defn->la_exp_desc->operator_length (expr, endpos,
-						     oplenp, argsp);
+  expr->language_defn->expression_ops ()->operator_length (expr, endpos,
+							   oplenp, argsp);
 }
 
 /* Default value for operator_length in exp_descriptor vectors.  */
@@ -774,7 +782,7 @@ operator_length_standard (const struct expression *expr, int endpos,
 {
   int oplen = 1;
   int args = 0;
-  enum range_type range_type;
+  enum range_flag range_flag;
   int i;
 
   if (endpos < 1)
@@ -817,7 +825,6 @@ operator_length_standard (const struct expression *expr, int endpos,
       break;
 
     case OP_FUNCALL:
-    case OP_F77_UNDETERMINED_ARGLIST:
       oplen = 3;
       args = 1 + longest_to_int (expr->elts[endpos - 2].longconst);
       break;
@@ -919,24 +926,18 @@ operator_length_standard (const struct expression *expr, int endpos,
 
     case OP_RANGE:
       oplen = 3;
-      range_type = (enum range_type)
+      range_flag = (enum range_flag)
 	longest_to_int (expr->elts[endpos - 2].longconst);
 
-      switch (range_type)
-	{
-	case LOW_BOUND_DEFAULT:
-	case LOW_BOUND_DEFAULT_EXCLUSIVE:
-	case HIGH_BOUND_DEFAULT:
-	  args = 1;
-	  break;
-	case BOTH_BOUND_DEFAULT:
-	  args = 0;
-	  break;
-	case NONE_BOUND_DEFAULT:
-	case NONE_BOUND_DEFAULT_EXCLUSIVE:
-	  args = 2;
-	  break;
-	}
+      /* Assume the range has 2 arguments (low bound and high bound), then
+	 reduce the argument count if any bounds are set to default.  */
+      args = 2;
+      if (range_flag & RANGE_HAS_STRIDE)
+	++args;
+      if (range_flag & RANGE_LOW_BOUND_DEFAULT)
+	--args;
+      if (range_flag & RANGE_HIGH_BOUND_DEFAULT)
+	--args;
 
       break;
 
@@ -1027,7 +1028,7 @@ expression_up
 parse_exp_1 (const char **stringptr, CORE_ADDR pc, const struct block *block,
 	     int comma, innermost_block_tracker *tracker)
 {
-  return parse_exp_in_context (stringptr, pc, block, comma, 0, NULL,
+  return parse_exp_in_context (stringptr, pc, block, comma, false, NULL,
 			       tracker, nullptr);
 }
 
@@ -1041,7 +1042,7 @@ parse_exp_1 (const char **stringptr, CORE_ADDR pc, const struct block *block,
 static expression_up
 parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
 		      const struct block *block,
-		      int comma, int void_context_p, int *out_subexp,
+		      int comma, bool void_context_p, int *out_subexp,
 		      innermost_block_tracker *tracker,
 		      expr_completion_state *cstate)
 {
@@ -1082,25 +1083,25 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
   if (language_mode == language_mode_auto && block != NULL)
     {
       /* Find the language associated to the given context block.
-         Default to the current language if it can not be determined.
+	 Default to the current language if it can not be determined.
 
-         Note that using the language corresponding to the current frame
-         can sometimes give unexpected results.  For instance, this
-         routine is often called several times during the inferior
-         startup phase to re-parse breakpoint expressions after
-         a new shared library has been loaded.  The language associated
-         to the current frame at this moment is not relevant for
-         the breakpoint.  Using it would therefore be silly, so it seems
-         better to rely on the current language rather than relying on
-         the current frame language to parse the expression.  That's why
-         we do the following language detection only if the context block
-         has been specifically provided.  */
+	 Note that using the language corresponding to the current frame
+	 can sometimes give unexpected results.  For instance, this
+	 routine is often called several times during the inferior
+	 startup phase to re-parse breakpoint expressions after
+	 a new shared library has been loaded.  The language associated
+	 to the current frame at this moment is not relevant for
+	 the breakpoint.  Using it would therefore be silly, so it seems
+	 better to rely on the current language rather than relying on
+	 the current frame language to parse the expression.  That's why
+	 we do the following language detection only if the context block
+	 has been specifically provided.  */
       struct symbol *func = block_linkage_function (block);
 
       if (func != NULL)
-        lang = language_def (func->language ());
+	lang = language_def (func->language ());
       if (lang == NULL || lang->la_language == language_unknown)
-        lang = current_language;
+	lang = current_language;
     }
   else
     lang = current_language;
@@ -1112,7 +1113,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
 
   parser_state ps (lang, get_current_arch (), expression_context_block,
 		   expression_context_pc, comma, *stringptr,
-		   cstate != nullptr, tracker);
+		   cstate != nullptr, tracker, void_context_p);
 
   scoped_restore_current_language lang_saver;
   set_language (lang->la_language);
@@ -1146,7 +1147,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
   if (out_subexp)
     *out_subexp = subexp;
 
-  lang->post_parser (&result, void_context_p, ps.parse_completion, tracker);
+  lang->post_parser (&result, &ps);
 
   if (expressiondebug)
     dump_prefix_expression (result.get (), gdb_stdlog);
@@ -1157,13 +1158,20 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
   return result;
 }
 
-/* Parse STRING as an expression, and complain if this fails
-   to use up all of the contents of STRING.  */
+/* Parse STRING as an expression, and complain if this fails to use up
+   all of the contents of STRING.  TRACKER, if non-null, will be
+   updated by the parser.  VOID_CONTEXT_P should be true to indicate
+   that the expression may be expected to return a value with void
+   type.  Parsers are free to ignore this, or to use it to help with
+   overload resolution decisions.  */
 
 expression_up
-parse_expression (const char *string, innermost_block_tracker *tracker)
+parse_expression (const char *string, innermost_block_tracker *tracker,
+		  bool void_context_p)
 {
-  expression_up exp = parse_exp_1 (&string, 0, 0, 0, tracker);
+  expression_up exp = parse_exp_in_context (&string, 0, nullptr, 0,
+					    void_context_p, nullptr,
+					    tracker, nullptr);
   if (*string)
     error (_("Junk after end of expression."));
   return exp;
@@ -1204,7 +1212,7 @@ parse_expression_for_completion (const char *string,
 
   try
     {
-      exp = parse_exp_in_context (&string, 0, 0, 0, 0, &subexp,
+      exp = parse_exp_in_context (&string, 0, 0, 0, false, &subexp,
 				  nullptr, &cstate);
     }
   catch (const gdb_exception_error &except)
@@ -1312,7 +1320,7 @@ operator_check_standard (struct expression *exp, int pos,
 	for (arg = 0; arg < nargs; arg++)
 	  {
 	    struct type *inst_type = elts[pos + 3 + arg].type;
-	    struct objfile *inst_objfile = TYPE_OBJFILE (inst_type);
+	    struct objfile *inst_objfile = inst_type->objfile ();
 
 	    if (inst_objfile && (*objfile_func) (inst_objfile, data))
 	      return 1;
@@ -1343,9 +1351,10 @@ operator_check_standard (struct expression *exp, int pos,
 
   /* Invoke callbacks for TYPE and OBJFILE if they were set as non-NULL.  */
 
-  if (type && TYPE_OBJFILE (type)
-      && (*objfile_func) (TYPE_OBJFILE (type), data))
+  if (type != nullptr && type->objfile () != nullptr
+      && objfile_func (type->objfile (), data))
     return 1;
+
   if (objfile && (*objfile_func) (objfile, data))
     return 1;
 
@@ -1374,8 +1383,9 @@ exp_iterate (struct expression *exp,
       gdb_assert (oplen > 0);
 
       pos = endpos - oplen;
-      if (exp->language_defn->la_exp_desc->operator_check (exp, pos,
-							   objfile_func, data))
+      if (exp->language_defn->expression_ops ()->operator_check (exp, pos,
+								 objfile_func,
+								 data))
 	return 1;
 
       endpos = pos;
@@ -1420,10 +1430,7 @@ increase_expout_size (struct expr_builder *ps, size_t lenelt)
     {
       ps->expout_size = std::max (ps->expout_size * 2,
 				  ps->expout_ptr + lenelt + 10);
-      ps->expout.reset (XRESIZEVAR (expression,
-				    ps->expout.release (),
-				    (sizeof (struct expression)
-				     + EXP_ELEM_TO_BYTES (ps->expout_size))));
+      ps->expout->resize (ps->expout_size);
     }
 }
 

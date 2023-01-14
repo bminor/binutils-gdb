@@ -1,4 +1,4 @@
-#   Copyright 2011-2020 Free Software Foundation, Inc.
+#   Copyright 2011-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -84,11 +84,11 @@ gdb_test "info skip 999" "No skiplist entries found with number 999."
 # Does |info skip| look right?
 
 gdb_test "info skip" \
-    "Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
-1\\s+y\\s+n\\s+.*$srcfile\\s+n\\s+<none>\\s*
-2\\s+y\\s+n\\s+<none>\\s+n\\s+main\\s*
-3\\s+y\\s+n\\s+$srcfile1\\s+n\\s+<none>\\s*
-4\\s+y\\s+n\\s+<none>\\s+n\\s+baz\\s*"
+    [multi_line "Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function" \
+		"1\\s+y\\s+n\\s+.*$srcfile\\s+n\\s+<none>" \
+		"2\\s+y\\s+n\\s+<none>\\s+n\\s+main" \
+		"3\\s+y\\s+n\\s+$srcfile1\\s+n\\s+<none>" \
+		"4\\s+y\\s+n\\s+<none>\\s+n\\s+baz"]
 
 # Right now, we have an outstanding skiplist entry on both source
 # files, so when we step into the first line in main(), we should step
@@ -109,10 +109,10 @@ with_test_prefix "step after deleting 1" {
     gdb_test "skip delete 1"
     # Check that entry 1 is missing from |info skip|
     gdb_test "info skip" \
-	"Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
-2\\s+y\\s+n\\s+<none>\\s+n\\s+main\\s*
-3\\s+y\\s+n\\s+$srcfile1\\s+n\\s+<none>\\s*
-4\\s+y\\s+n\\s+<none>\\s+n\\s+baz\\s*" \
+	[multi_line "Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function" \
+		    "2\\s+y\\s+n\\s+<none>\\s+n\\s+main" \
+		    "3\\s+y\\s+n\\s+$srcfile1\\s+n\\s+<none>" \
+		    "4\\s+y\\s+n\\s+<none>\\s+n\\s+baz"] \
 	"info skip (delete 1)"
 
     if ![runto_main] {
@@ -174,45 +174,45 @@ with_test_prefix "step after enable 3" {
 with_test_prefix "admin" {
     gdb_test "skip disable"
     gdb_test "info skip" \
-	"Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
-2\\s+n\\s+n\\s+<none>\\s+n\\s+main\\s*
-3\\s+n\\s+n\\s+$srcfile1\\s+n\\s+<none>\\s*
-4\\s+n\\s+n\\s+<none>\\s+n\\s+baz\\s*" \
+	[multi_line "Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function" \
+		    "2\\s+n\\s+n\\s+<none>\\s+n\\s+main" \
+		    "3\\s+n\\s+n\\s+$srcfile1\\s+n\\s+<none>" \
+		    "4\\s+n\\s+n\\s+<none>\\s+n\\s+baz"] \
 	"info skip after disabling all"
 
     gdb_test "skip enable"
     gdb_test "info skip" \
-	"Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
-2\\s+y\\s+n\\s+<none>\\s+n\\s+main\\s*
-3\\s+y\\s+n\\s+$srcfile1\\s+n\\s+<none>\\s*
-4\\s+y\\s+n\\s+<none>\\s+n\\s+baz\\s*" \
+	[multi_line "Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function" \
+		    "2\\s+y\\s+n\\s+<none>\\s+n\\s+main" \
+		    "3\\s+y\\s+n\\s+$srcfile1\\s+n\\s+<none>" \
+		    "4\\s+y\\s+n\\s+<none>\\s+n\\s+baz"] \
 	"info skip after enabling all"
 
     gdb_test "skip disable 4 2-3"
     gdb_test "info skip" \
-	"Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
-2\\s+n\\s+n\\s+<none>\\s+n\\s+main\\s*
-3\\s+n\\s+n\\s+$srcfile1\\s+n\\s+<none>\\s*
-4\\s+n\\s+n\\s+<none>\\s+n\\s+baz\\s*" \
+	[multi_line "Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function" \
+		    "2\\s+n\\s+n\\s+<none>\\s+n\\s+main" \
+		    "3\\s+n\\s+n\\s+$srcfile1\\s+n\\s+<none>" \
+		    "4\\s+n\\s+n\\s+<none>\\s+n\\s+baz"] \
 	"info skip after disabling 4 2-3"
 
     gdb_test "skip enable 2-3"
     gdb_test "info skip" \
-	"Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
-2\\s+y\\s+n\\s+<none>\\s+n\\s+main\\s*
-3\\s+y\\s+n\\s+$srcfile1\\s+n\\s+<none>\\s*
-4\\s+n\\s+n\\s+<none>\\s+n\\s+baz\\s*" \
+	[multi_line "Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function" \
+		    "2\\s+y\\s+n\\s+<none>\\s+n\\s+main" \
+		    "3\\s+y\\s+n\\s+$srcfile1\\s+n\\s+<none>" \
+		    "4\\s+n\\s+n\\s+<none>\\s+n\\s+baz"] \
 	"info skip after enabling 2-3"
 
     gdb_test "info skip 2-3" \
-	"Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
-2\\s+y\\s+n\\s+<none>\\s+n\\s+main\\s*
-3\\s+y\\s+n\\s+$srcfile1\\s+n\\s+<none>\\s*"
+	[multi_line "Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function" \
+		    "2\\s+y\\s+n\\s+<none>\\s+n\\s+main" \
+		    "3\\s+y\\s+n\\s+$srcfile1\\s+n\\s+<none>"]
 
     gdb_test "skip delete 2 3"
     gdb_test "info skip" \
-	"Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
-4\\s+n\\s+n\\s+<none>\\s+n\\s+baz\\s*" \
+	[multi_line "Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function" \
+		    "4\\s+n\\s+n\\s+<none>\\s+n\\s+baz"] \
 	"info skip after deleting 2 3"
 
     gdb_test "skip delete"

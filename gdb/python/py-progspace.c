@@ -1,6 +1,6 @@
 /* Python interface to program spaces.
 
-   Copyright (C) 2010-2020 Free Software Foundation, Inc.
+   Copyright (C) 2010-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,7 +27,7 @@
 #include "solib.h"
 #include "block.h"
 
-typedef struct
+struct pspace_object
 {
   PyObject_HEAD
 
@@ -52,7 +52,7 @@ typedef struct
 
   /* The debug method list.  */
   PyObject *xmethods;
-} pspace_object;
+};
 
 extern PyTypeObject pspace_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("pspace_object");

@@ -1,6 +1,6 @@
 /* Solaris threads debugging interface.
 
-   Copyright (C) 1996-2020 Free Software Foundation, Inc.
+   Copyright (C) 1996-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -84,7 +84,7 @@ public:
   strata stratum () const override { return thread_stratum; }
 
   void detach (inferior *, int) override;
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
   void resume (ptid_t, int, enum gdb_signal) override;
   void mourn_inferior () override;
   std::string pid_to_str (ptid_t) override;
@@ -425,7 +425,7 @@ sol_thread_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 
 ptid_t
 sol_thread_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
-			 int options)
+			 target_wait_flags options)
 {
   if (ptid.pid () != -1)
     {
@@ -588,7 +588,7 @@ sol_thread_target::xfer_partial (enum target_object object,
   if (inferior_ptid.tid_p () || !target_thread_alive (inferior_ptid))
     {
       /* It's either a thread or an LWP that isn't alive.  Any live
-         LWP will do so use the first available.
+	 LWP will do so use the first available.
 
 	 NOTE: We don't need to call switch_to_thread; we're just
 	 reading memory.  */
@@ -784,7 +784,7 @@ rw_common (int dowrite, const struct ps_prochandle *ph, psaddr_t addr,
   if (inferior_ptid.tid_p () || !target_thread_alive (inferior_ptid))
     {
       /* It's either a thread or an LWP that isn't alive.  Any live
-         LWP will do so use the first available.
+	 LWP will do so use the first available.
 
 	 NOTE: We don't need to call switch_to_thread; we're just
 	 reading memory.  */
@@ -794,7 +794,7 @@ rw_common (int dowrite, const struct ps_prochandle *ph, psaddr_t addr,
 #if defined (__sparcv9)
   /* For Sparc64 cross Sparc32, make sure the address has not been
      accidentally sign-extended (or whatever) to beyond 32 bits.  */
-  if (bfd_get_arch_size (exec_bfd) == 32)
+  if (bfd_get_arch_size (current_program_space->exec_bfd ()) == 32)
     addr &= 0xffffffff;
 #endif
 
@@ -950,9 +950,9 @@ ps_lsetfpregs (struct ps_prochandle *ph, lwpid_t lwpid,
 ps_err_e
 ps_pdmodel (struct ps_prochandle *ph, int *data_model)
 {
-  if (exec_bfd == 0)
+  if (current_program_space->exec_bfd () == 0)
     *data_model = PR_MODEL_UNKNOWN;
-  else if (bfd_get_arch_size (exec_bfd) == 32)
+  else if (bfd_get_arch_size (current_program_space->exec_bfd ()) == 32)
     *data_model = PR_MODEL_ILP32;
   else
     *data_model = PR_MODEL_LP64;
@@ -1137,10 +1137,10 @@ sol_thread_target::get_ada_task_ptid (long lwp, long thread)
   if (thread_info == NULL)
     {
       /* The list of threads is probably not up to date.  Find any
-         thread that is missing from the list, and try again.  */
+	 thread that is missing from the list, and try again.  */
       update_thread_list ();
       thread_info = iterate_over_threads (thread_db_find_thread_from_tid,
-                                          &thread);
+					  &thread);
     }
 
   gdb_assert (thread_info != NULL);

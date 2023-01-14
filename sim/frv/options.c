@@ -1,5 +1,5 @@
 /* FRV simulator memory option handling.
-   Copyright (C) 1999-2020 Free Software Foundation, Inc.
+   Copyright (C) 1999-2021 Free Software Foundation, Inc.
    Contributed by Red Hat.
 
 This file is part of GDB, the GNU debugger.
@@ -24,16 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-assert.h"
 #include "sim-options.h"
 
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 
 /* FRV specific command line options. */
 

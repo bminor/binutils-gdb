@@ -1,3 +1,40 @@
+2021-01-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-01-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-01-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* wrapper.c: Include stdlib.h.
+
+2021-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* iwmmxt.c: Include stdlib.h.
+
+2021-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2020-12-15  Nick Clifton  <nickc@redhat.com>
+
+	* wrapper.c (sim_create_inferior): Accept some more ARM machine numbers.
+
+2020-12-15  Jens Bauer <jens@plustv.dk>
+
+	* armemu.c (handle_v6_insn): Add support for SDIV and UDIV.
+	* thumbemu.c (handle_T2_insn): Likewise.
+
+2020-10-20  Dr. David Alan Gilbert  <dgilbert@redhat.com>
+
+	* armos.c (SWIread): Fix printf format.
+
 2020-08-13  Luis Machado  <luis.machado@linaro.org>
 
 	PR sim/26365

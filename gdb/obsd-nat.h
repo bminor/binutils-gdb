@@ -1,6 +1,6 @@
 /* Native-dependent code for OpenBSD.
 
-   Copyright (C) 2014-2020 Free Software Foundation, Inc.
+   Copyright (C) 2014-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,7 +27,7 @@ class obsd_nat_target : public inf_ptrace_target
   /* Override some methods to support threads.  */
   std::string pid_to_str (ptid_t) override;
   void update_thread_list () override;
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
 #ifdef PT_GET_PROCESS_STATE
   bool follow_fork (bool, bool) override;

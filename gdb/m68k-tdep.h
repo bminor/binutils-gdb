@@ -1,6 +1,6 @@
 /* Target-dependent code for the Motorola 68000 series.
 
-   Copyright (C) 1990-2020 Free Software Foundation, Inc.
+   Copyright (C) 1990-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -78,6 +78,10 @@ struct gdbarch_tdep
   /* Register in which the address to store a structure value is
      passed to a function.  */
   int struct_value_regnum;
+
+  /* Register in which a pointer value is returned.  In the SVR4 ABI,
+     this is %a0, but in GCC's "embedded" ABI, this is %d0.  */
+  int pointer_result_regnum;
 
   /* Convention for returning structures.  */
   enum struct_return struct_return;

@@ -1,6 +1,6 @@
 # This testcase is part of GDB, the GNU debugger.
 
-# Copyright 2018-2020 Free Software Foundation, Inc.
+# Copyright 2018-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,6 +31,13 @@ set compile_flags {debug}
 if [support_complex_tests] {
     lappend compile_flags "additional_flags=-DTEST_COMPLEX"
     lappend compile_flags "additional_flags=-Wno-psabi"
+}
+
+if { $lang == "c++" && [test_compiler_info clang*] } {
+    # Clang rightly deduces that the static member tests are
+    # tautological comparisons, so we need to inhibit that
+    # particular warning in order to build.
+    lappend compile_flags "additional_flags=-Wno-tautological-compare"
 }
 
 # Given N (0..25), return the corresponding alphabetic letter in upper

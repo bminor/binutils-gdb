@@ -1,4 +1,4 @@
-@c Copyright (C) 1991-2020 Free Software Foundation, Inc.
+@c Copyright (C) 1991-2021 Free Software Foundation, Inc.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
 @c man end
@@ -125,6 +125,7 @@ processor names are recognized:
 @code{bdver4},
 @code{znver1},
 @code{znver2},
+@code{znver3},
 @code{btver1},
 @code{btver2},
 @code{generic32} and
@@ -189,6 +190,11 @@ accept various extension mnemonics.  For example,
 @code{enqcmd},
 @code{serialize},
 @code{tsxldtrk},
+@code{kl},
+@code{nokl},
+@code{widekl},
+@code{nowidekl},
+@code{hreset},
 @code{avx512f},
 @code{avx512cd},
 @code{avx512er},
@@ -205,7 +211,9 @@ accept various extension mnemonics.  For example,
 @code{avx512_vnni},
 @code{avx512_bitalg},
 @code{avx512_vp2intersect},
+@code{tdx},
 @code{avx512_bf16},
+@code{avx_vnni},
 @code{noavx512f},
 @code{noavx512cd},
 @code{noavx512er},
@@ -222,7 +230,9 @@ accept various extension mnemonics.  For example,
 @code{noavx512_vnni},
 @code{noavx512_bitalg},
 @code{noavx512_vp2intersect},
+@code{notdx},
 @code{noavx512_bf16},
+@code{noavx_vnni},
 @code{noenqcmd},
 @code{noserialize},
 @code{notsxldtrk},
@@ -232,6 +242,8 @@ accept various extension mnemonics.  For example,
 @code{noamx_bf16},
 @code{amx_tile},
 @code{noamx_tile},
+@code{nouintr},
+@code{nohreset},
 @code{vmx},
 @code{vmfunc},
 @code{smx},
@@ -259,6 +271,7 @@ accept various extension mnemonics.  For example,
 @code{wbnoinvd},
 @code{pconfig},
 @code{waitpkg},
+@code{uintr},
 @code{cldemote},
 @code{rdpru},
 @code{mcommit},
@@ -273,6 +286,9 @@ accept various extension mnemonics.  For example,
 @code{3dnowa},
 @code{sse4a},
 @code{sse5},
+@code{snp},
+@code{invlpgb},
+@code{tlbsync},
 @code{svme} and
 @code{padlock}.
 Note that rather than extending a basic instruction set, the extension
@@ -497,7 +513,7 @@ before indirect near branch instructions.
 before indirect near branch via register and issue a warning before
 indirect near branch via memory.
 It also implicitly sets @option{-mlfence-before-ret=@var{shl}} when
-there's no explict @option{-mlfence-before-ret=}.
+there's no explicit @option{-mlfence-before-ret=}.
 @option{-mlfence-before-indirect-branch=@var{register}} will generate
 lfence before indirect near branch via register.
 @option{-mlfence-before-indirect-branch=@var{memory}} will issue a
@@ -850,6 +866,10 @@ prefix which generates REX prefix unconditionally.
 @item
 @samp{@{nooptimize@}} -- disable instruction size optimization.
 @end itemize
+
+Mnemonics of Intel VNNI instructions are encoded with the EVEX prefix
+by default.  The pseudo @samp{@{vex@}} prefix can be used to encode
+mnemonics of Intel VNNI instructions with the VEX prefix.
 
 @cindex conversion instructions, i386
 @cindex i386 conversion instructions
@@ -1315,7 +1335,7 @@ top) and @samp{fstpt} (store 80-bit real and pop stack) instructions.
 @item
 Integer constructors are @samp{.word}, @samp{.long} or @samp{.int}, and
 @samp{.quad} for the 16-, 32-, and 64-bit integer formats.  The
-corresponding instruction mnemonic suffixes are @samp{s} (single),
+corresponding instruction mnemonic suffixes are @samp{s} (short),
 @samp{l} (long), and @samp{q} (quad).  As with the 80-bit real format,
 the 64-bit @samp{q} format is only present in the @samp{fildq} (load
 quad integer to stack top) and @samp{fistpq} (store quad integer and pop
@@ -1480,8 +1500,8 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{corei7} @tab @samp{l1om} @tab @samp{k1om} @tab @samp{iamcu}
 @item @samp{k6} @tab @samp{k6_2} @tab @samp{athlon} @tab @samp{k8}
 @item @samp{amdfam10} @tab @samp{bdver1} @tab @samp{bdver2} @tab @samp{bdver3}
-@item @samp{bdver4} @tab @samp{znver1} @tab @samp{znver2} @tab @samp{btver1}
-@item @samp{btver2} @tab @samp{generic32} @tab @samp{generic64}
+@item @samp{bdver4} @tab @samp{znver1} @tab @samp{znver2} @tab @samp{znver3}
+@item @samp{btver1} @tab @samp{btver2} @tab @samp{generic32} @tab @samp{generic64}
 @item @samp{.cmov} @tab @samp{.fxsr} @tab @samp{.mmx}
 @item @samp{.sse} @tab @samp{.sse2} @tab @samp{.sse3} @tab @samp{.sse4a}
 @item @samp{.ssse3} @tab @samp{.sse4.1} @tab @samp{.sse4.2} @tab @samp{.sse4}
@@ -1499,16 +1519,19 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.avx512vbmi} @tab @samp{.avx512_4fmaps} @tab @samp{.avx512_4vnniw}
 @item @samp{.avx512_vpopcntdq} @tab @samp{.avx512_vbmi2} @tab @samp{.avx512_vnni}
 @item @samp{.avx512_bitalg} @tab @samp{.avx512_bf16} @tab @samp{.avx512_vp2intersect}
+@item @samp{.tdx} @tab @samp{.avx_vnni}
 @item @samp{.clwb} @tab @samp{.rdpid} @tab @samp{.ptwrite} @tab @item @samp{.ibt}
 @item @samp{.wbnoinvd} @tab @samp{.pconfig} @tab @samp{.waitpkg} @tab @samp{.cldemote}
 @item @samp{.shstk} @tab @samp{.gfni} @tab @samp{.vaes} @tab @samp{.vpclmulqdq}
 @item @samp{.movdiri} @tab @samp{.movdir64b} @tab @samp{.enqcmd} @tab @samp{.tsxldtrk}
 @item @samp{.amx_int8} @tab @samp{.amx_bf16} @tab @samp{.amx_tile}
+@item @samp{.kl} @tab @samp{.widekl} @tab @samp{.uintr} @tab @samp{.hreset}
 @item @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.sse4a} @tab @samp{.sse5}
 @item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme}
 @item @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop} @tab @samp{.cx16}
 @item @samp{.padlock} @tab @samp{.clzero} @tab @samp{.mwaitx} @tab @samp{.rdpru}
-@item @samp{.mcommit} @tab @samp{.sev_es}
+@item @samp{.mcommit} @tab @samp{.sev_es} @tab @samp{.snp} @tab @samp{.invlpgb}
+@item @samp{.tlbsync}
 @end multitable
 
 Apart from the warning, there are only two other effects on

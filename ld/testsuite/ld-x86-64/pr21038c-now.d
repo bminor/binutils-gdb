@@ -63,7 +63,7 @@ Disassembly of section .plt:
  +[a-f0-9]+:	f2 ff 25 eb 0d 20 00 	bnd jmp \*0x200deb\(%rip\)        # 200fe8 <_GLOBAL_OFFSET_TABLE_\+0x10>
  +[a-f0-9]+:	0f 1f 00             	nopl   \(%rax\)
  +[a-f0-9]+:	68 00 00 00 00       	push   \$0x0
- +[a-f0-9]+:	f2 e9 e5 ff ff ff    	bnd jmp 1f0 <.plt>
+ +[a-f0-9]+:	f2 e9 e5 ff ff ff    	bnd jmp 1f0 <func1@plt-0x20>
  +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
 
 Disassembly of section .plt.got:

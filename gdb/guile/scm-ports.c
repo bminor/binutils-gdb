@@ -1,7 +1,7 @@
 /* Support for connecting Guile's stdio to GDB's.
    as well as r/w memory via ports.
 
-   Copyright (C) 2014-2020 Free Software Foundation, Inc.
+   Copyright (C) 2014-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -59,7 +59,7 @@ private:
 
 /* Data for a memory port.  */
 
-typedef struct
+struct ioscm_memory_port
 {
   /* Bounds of memory range this port is allowed to access: [start, end).
      This means that 0xff..ff is not accessible.  I can live with that.  */
@@ -80,7 +80,7 @@ typedef struct
      the user to specify these values to help get something similar.  */
   unsigned read_buf_size, write_buf_size;
 #endif
-} ioscm_memory_port;
+};
 
 /* Copies of the original system input/output/error ports.
    These are recorded for debugging purposes.  */
@@ -269,7 +269,7 @@ ioscm_input_waiting (SCM port)
       {
 	/* Guile doesn't export SIGINT hooks like Python does.
 	   For now pass EINTR to scm_syserror, that's what fports.c does.  */
-        scm_syserror (FUNC_NAME);
+	scm_syserror (FUNC_NAME);
       }
     return num_found > 0 && FD_ISSET (fdes, &input_fds);
   }

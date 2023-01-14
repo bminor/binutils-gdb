@@ -1,6 +1,6 @@
 /* Shared general utility routines for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -163,7 +163,7 @@ in_inclusive_range (T value, T low, T high)
   return value >= low && value <= high;
 }
 
-/* Ensure that V is aligned to an N byte boundary (B's assumed to be a
+/* Ensure that V is aligned to an N byte boundary (N's assumed to be a
    power of 2).  Round up/down when necessary.  Examples of correct
    use include:
 

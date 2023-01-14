@@ -14,8 +14,9 @@
 Contents of CTF section .ctf:
 
   Header:
-    Magic number: dff2
+    Magic number: 0xdff2
     Version: 4 \(CTF_VERSION_3\)
+#...
     Type section:	0x0 -- 0x57 \(0x58 bytes\)
     String section:	.*
 
@@ -29,9 +30,8 @@ Contents of CTF section .ctf:
 
   Types:
 #...
-     [0-9a-f]*: int \[0x0:0x[0-9a-f]*\] \(size 0x[0-9a-f]*\)
-        \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 1\) int:[0-9]* \(aligned at 0x[0-9a-f]*, format 0x1, offset:bits 0x0:0x[0-9a-f]*\)
+    0x[0-9a-f]*: \(kind 1\) int \(format 0x1\) \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
 #...
   Strings:
-    0: 
+    0x0: 
 #...

@@ -1,4 +1,4 @@
-# Copyright 1992-2020 Free Software Foundation, Inc.
+# Copyright 1992-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -604,9 +604,9 @@ proc test_watch_location {} {
     gdb_continue_to_breakpoint "func5 breakpoint here"
 
     # Check first if a null pointer can be dereferenced on the target.
-    gdb_test_multiple "p *nullptr" "" {
+    gdb_test_multiple "p *null_ptr" "" {
 	-re "Cannot access memory at address 0x0.*$gdb_prompt $" {
-	    gdb_test "watch -location nullptr->p->x" \
+	    gdb_test "watch -location null_ptr->p->x" \
 		"Cannot access memory at address 0x0"
 	}
 	-re ".*$gdb_prompt $" {

@@ -1,6 +1,6 @@
 /* Remote notification in GDB protocol
 
-   Copyright (C) 1988-2020 Free Software Foundation, Inc.
+   Copyright (C) 1988-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -219,7 +219,7 @@ remote_notif_state_allocate (remote_target *remote)
 
   notif_state->get_pending_events_token
     = create_async_event_handler (remote_async_get_pending_events_handler,
-				  notif_state);
+				  notif_state, "remote-notif");
 
   return notif_state;
 }

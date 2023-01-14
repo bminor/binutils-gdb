@@ -1,4 +1,4 @@
-# Copyright 2008-2020 Free Software Foundation, Inc.
+# Copyright 2008-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ if { [gdb_breakpoint [standard_output_file tmp-${srcfile}]:${line} {no-message}]
     fail $msg
 }
 
-gdb_test "break main" \
+gdb_test "break -q main" \
 	 "Breakpoint.*at.*line.*" "set breakpoint at main - built absolute"
 
 set msg "set breakpoint by full path after loading symbols - built absolute"
@@ -86,7 +86,7 @@ if { [gdb_breakpoint [standard_output_file tmp-${srcfile}]:${line} {no-message}]
     fail $msg
 }
 
-gdb_test "break main" \
+gdb_test "break -q main" \
 	 "Breakpoint.*at.*line.*" "set breakpoint at main - built relative"
 
 set msg "set breakpoint by full path after loading symbols - built relative"
@@ -119,7 +119,7 @@ if { [gdb_breakpoint [standard_output_file tmp-${srcfile}]:${line} {no-message}]
     fail $msg
 }
 
-gdb_test "break main" \
+gdb_test "break -q main" \
 	 "Breakpoint.*at.*line.*" "set breakpoint at main - built other"
 
 set msg "set breakpoint by full path after loading symbols - built other"

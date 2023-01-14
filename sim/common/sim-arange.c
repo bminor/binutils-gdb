@@ -1,5 +1,5 @@
 /* Address ranges.
-   Copyright (C) 1998-2020 Free Software Foundation, Inc.
+   Copyright (C) 1998-2021 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions.
 
 This file is part of the GNU Simulators.
@@ -24,13 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-basics.h"
 #include "sim-arange.h"
 
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
-
-#ifdef HAVE_STRING_H
 #include <string.h>
-#endif
 
 /* Insert a range.  */
 

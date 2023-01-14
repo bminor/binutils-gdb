@@ -1,5 +1,5 @@
 /* Support routines for building symbol tables in GDB's internal format.
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -621,15 +621,15 @@ buildsym_compunit::patch_subfile_names (struct subfile *subfile,
       set_last_source_file (name);
 
       /* Default the source language to whatever can be deduced from
-         the filename.  If nothing can be deduced (such as for a C/C++
-         include file with a ".h" extension), then inherit whatever
-         language the previous subfile had.  This kludgery is
-         necessary because there is no standard way in some object
-         formats to record the source language.  Also, when symtabs
-         are allocated we try to deduce a language then as well, but
-         it is too late for us to use that information while reading
-         symbols, since symtabs aren't allocated until after all the
-         symbols have been processed for a given source file.  */
+	 the filename.  If nothing can be deduced (such as for a C/C++
+	 include file with a ".h" extension), then inherit whatever
+	 language the previous subfile had.  This kludgery is
+	 necessary because there is no standard way in some object
+	 formats to record the source language.  Also, when symtabs
+	 are allocated we try to deduce a language then as well, but
+	 it is too late for us to use that information while reading
+	 symbols, since symtabs aren't allocated until after all the
+	 symbols have been processed for a given source file.  */
 
       subfile->language = deduce_language_from_filename (subfile->name);
       if (subfile->language == language_unknown
@@ -707,13 +707,18 @@ buildsym_compunit::record_line (struct subfile *subfile, int line,
      anyway.  */
   if (line == 0)
     {
+      struct linetable_entry *last = nullptr;
       while (subfile->line_vector->nitems > 0)
 	{
-	  e = subfile->line_vector->item + subfile->line_vector->nitems - 1;
-	  if (e->pc != pc)
+	  last = subfile->line_vector->item + subfile->line_vector->nitems - 1;
+	  if (last->pc != pc)
 	    break;
 	  subfile->line_vector->nitems--;
 	}
+
+      /* Ignore an end-of-sequence marker marking an empty sequence.  */
+      if (last == nullptr || last->line == 0)
+	return;
     }
 
   e = subfile->line_vector->item + subfile->line_vector->nitems++;

@@ -1,3 +1,40 @@
+2021-01-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Call SIM_AC_OPTION_WARNINGS.
+	* configure: Regenerate.
+
+2021-01-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+	* sim-if.c: Delete HAVE_STRING_H, HAVE_STRINGS_H, HAVE_STDLIB_H,
+	and strings.h include.
+
+2021-01-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-01-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2020-11-12  Nick Clifton  <nickc@redhat.com>
+
+	* m32r-sim.h (m32rbf_h_accum_get_handler): Always provide a
+	prototype for this function.
+	(m32rbf_h_accum_set_handler): Likewise.
+	(m32r2f_h_accums_get_handler): Prototype.
+	(m32r2f_h_accums_set_handler): Prototype.
+
+2020-09-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* m32r.c (m32rbf_register_size): New function.
+	(m32rbf_fetch_register): Use new function.
+	(m32rbf_store_register): Likewise.
+
 2017-09-06  John Baldwin  <jhb@FreeBSD.org>
 
 	* configure: Regenerate.

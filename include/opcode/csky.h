@@ -1,5 +1,5 @@
 /* C-SKY assembler/disassembler support.
-   Copyright (C) 2004-2020 Free Software Foundation, Inc.
+   Copyright (C) 2004-2021 Free Software Foundation, Inc.
    Contributed by C-SKY Microsystems and Mentor Graphics.
 
    This file is part of GDB and GAS.
@@ -92,6 +92,11 @@
 #define CSKY_ARCH_CACHE     (1 << 9)
 #define CSKY_ARCH_JAVA      (1 << 8)
 #define CSKY_ARCH_APS       (1 << 7)
+
+/* eflag's Versions.  */
+#define CSKY_VERSION_V1     (1 << 24)
+#define CSKY_VERSION_V2     (2 << 24)
+#define CSKY_VERSION_V3     (3 << 24)
 
 #define IS_CSKY_V1(a) \
   (((a) & CSKY_ABI_MASK) == CSKY_ABI_V1)

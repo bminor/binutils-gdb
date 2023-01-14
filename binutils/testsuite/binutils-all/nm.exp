@@ -1,4 +1,4 @@
-#   Copyright (C) 1993-2020 Free Software Foundation, Inc.
+#   Copyright (C) 1993-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -298,6 +298,49 @@ if [is_elf_format] {
 	    remote_file host delete $tmpfile
 	}
     }
+
+    # PR 22967
+    # Test nm --ifunc-chars on a indirect symbols.
+    
+    # The following targets are known to not support ifuncs.
+    setup_xfail "alpha*-*-*"
+    setup_xfail "arm*-elf" "arm*-*-nto*" "arm*-*-netbsdelf*"
+    setup_xfail "*-*-hpux*"
+    setup_xfail "mips*-*-*" "tx39*-*-*"
+    setup_xfail "msp430*-*-*"
+    setup_xfail "visium*-*-*"
+    setup_xfail "x86_64-*-cloudabi*"
+
+    set testname "nm --ifunc-chars"
+    if {![binutils_assemble $srcdir/$subdir/ifunc.s tmpdir/ifunc.o]} then {
+	fail "$testname (assembly)"
+    } else {
+	if [is_remote host] {
+	    set tmpfile [remote_download host tmpdir/ifunc.o]
+	} else {
+	    set tmpfile tmpdir/ifunc.o
+	}
+
+	set got [binutils_run $NM "$NMFLAGS --ifunc-chars=Ff $tmpfile"]
+
+	if [regexp "F global_foo" $got] then {
+	    pass "$testname (global ifunc)"
+	} else {
+	    fail "$testname (global ifunc)"
+	}
+
+	if [regexp "f local_foo" $got] then {
+	    pass "$testname (local ifunc)"
+	} else {
+	    fail "$testname (local ifunc)"
+	}
+
+	if { $verbose < 1 } {
+	    remote_file host delete "tmpdir/ifunc.o"
+	}
+    }
+
+    
 }
 
 # There are certainly other tests that could be run.

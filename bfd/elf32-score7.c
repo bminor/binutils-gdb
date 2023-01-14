@@ -1,5 +1,5 @@
 /* 32-bit ELF support for S+core.
-   Copyright (C) 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2009-2021 Free Software Foundation, Inc.
    Contributed by
    Brain.lin (brain.lin@sunplusct.com)
    Mei Ligang (ligang@sunnorth.com.cn)
@@ -197,9 +197,12 @@ static bfd *reldyn_sorting_bfd;
    together, and then referenced via the gp pointer, which yields
    faster assembler code.  This is what we use for the small common
    section.  This approach is copied from ecoff.c.  */
-static asection  score_elf_scom_section;
-static asymbol   score_elf_scom_symbol;
-static asymbol * score_elf_scom_symbol_ptr;
+static asection score_elf_scom_section;
+static const asymbol score_elf_scom_symbol =
+  GLOBAL_SYM_INIT (".scommon", &score_elf_scom_section);
+static asection score_elf_scom_section =
+  BFD_FAKE_SECTION (score_elf_scom_section, &score_elf_scom_symbol,
+		    ".scommon", 0, SEC_IS_COMMON | SEC_SMALL_DATA);
 
 static bfd_reloc_status_type
 score_elf_hi16_reloc (bfd *abfd ATTRIBUTE_UNUSED,
@@ -2215,7 +2218,7 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
 /* Score backend functions.  */
 
 bfd_boolean
-s7_bfd_score_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
+s7_bfd_score_info_to_howto (bfd *abfd,
 			    arelent *bfd_reloc,
 			    Elf_Internal_Rela *elf_reloc)
 {
@@ -2223,7 +2226,13 @@ s7_bfd_score_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 
   r_type = ELF32_R_TYPE (elf_reloc->r_info);
   if (r_type >= ARRAY_SIZE (elf32_score_howto_table))
-    return FALSE;
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
 
   bfd_reloc->howto = &elf32_score_howto_table[r_type];
   return TRUE;
@@ -2836,19 +2845,6 @@ s7_bfd_score_elf_symbol_processing (bfd *abfd, asymbol *asym)
 	break;
       /* Fall through.  */
     case SHN_SCORE_SCOMMON:
-      if (score_elf_scom_section.name == NULL)
-	{
-	  /* Initialize the small common section.  */
-	  score_elf_scom_section.name = ".scommon";
-	  score_elf_scom_section.flags = SEC_IS_COMMON | SEC_SMALL_DATA;
-	  score_elf_scom_section.output_section = &score_elf_scom_section;
-	  score_elf_scom_section.symbol = &score_elf_scom_symbol;
-	  score_elf_scom_section.symbol_ptr_ptr = &score_elf_scom_symbol_ptr;
-	  score_elf_scom_symbol.name = ".scommon";
-	  score_elf_scom_symbol.flags = BSF_SECTION_SYM;
-	  score_elf_scom_symbol.section = &score_elf_scom_section;
-	  score_elf_scom_symbol_ptr = &score_elf_scom_symbol;
-	}
       asym->section = &score_elf_scom_section;
       asym->value = elfsym->internal_elf_sym.st_size;
       break;

@@ -1,6 +1,6 @@
 /* Target-dependent code for the Sanyo Xstormy16a (LC590000) processor.
 
-   Copyright (C) 2001-2020 Free Software Foundation, Inc.
+   Copyright (C) 2001-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -189,7 +189,7 @@ xstormy16_store_return_value (struct type *type, struct regcache *regcache,
       int i, regnum = E_1ST_ARG_REGNUM;
 
       for (i = 0; i < len; i += xstormy16_reg_size)
-        regcache->raw_write (regnum++, valbuf + i);
+	regcache->raw_write (regnum++, valbuf + i);
     }
 }
 
@@ -425,7 +425,7 @@ xstormy16_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       plg_end = xstormy16_analyze_prologue (gdbarch, func_addr, func_end,
 					    &cache, NULL);
       if (!cache.uses_fp)
-        return plg_end;
+	return plg_end;
 
       /* Found a function.  */
       sym = lookup_symbol (func_name, NULL, VAR_DOMAIN, NULL).symbol;
@@ -470,7 +470,7 @@ xstormy16_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 	return 0;
 
       /* Check if we're on a `ret' instruction.  Otherwise it's
-         too dangerous to proceed.  */
+	 too dangerous to proceed.  */
       inst = read_memory_unsigned_integer (addr,
 					   xstormy16_inst_size, byte_order);
       if (inst != 0x0003)
@@ -576,7 +576,7 @@ xstormy16_find_jmp_table_entry (struct gdbarch *gdbarch, CORE_ADDR faddr)
 					       xstormy16_inst_size,
 					       byte_order);
 	      inst2 = extract_unsigned_integer (buf + xstormy16_inst_size,
-					        xstormy16_inst_size,
+						xstormy16_inst_size,
 						byte_order);
 	      faddr2 = inst2 << 8 | (inst & 0xff);
 	      if (faddr == faddr2)
@@ -700,7 +700,7 @@ xstormy16_frame_prev_register (struct frame_info *this_frame,
 			       void **this_cache, int regnum)
 {
   struct xstormy16_frame_cache *cache = xstormy16_frame_cache (this_frame,
-                                                               this_cache);
+							       this_cache);
   gdb_assert (regnum >= 0);
 
   if (regnum == E_SP_REGNUM && cache->saved_sp)

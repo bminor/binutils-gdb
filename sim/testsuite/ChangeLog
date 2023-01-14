@@ -1,24 +1,86 @@
-2020-09-08  David Faust  <david.faust@oracle.com>
+2021-01-15  Mike Frysinger  <vapier@gentoo.org>
 
-	* sim/bpf/alu.s: Correct div and mod tests.
-	* sim/bpf/alu32.s: Likewise.
+	* Makefile.in (site.exp): Delete tool setting.
+	* sim/*/: Move subdirs up a directory.
+
+2021-01-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure, configure.ac: Delete.
+	* Makefile.in (Makefile, config.status): Switch to ../config.status.
+
+2021-01-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (target): Delete d10v-*-elf case.
+	* configure: Regenerate.
+	* d10v-elf/: Move directory ...
+	* sim/d10v/: ... here.
+
+2021-01-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (target): Delete mips64el-*-elf case.
+	* configure: Regenerate.
+	* mips64el-elf/: Delete directory.
+
+2021-01-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (target): Delete frv-*-elf case.
+	* configure: Regenerate.
+	* frv-elf/: Delete directory.
+
+2021-01-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (target): Delete m32r-*-elf case.
+	* configure: Regenerate.
+	* m32r-elf/: Delete directory.
+
+2021-01-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* lib/sim-defs.exp (sim_run): Delete status and return return_code.
+	(run_sim_test): Define status option.  Change sim_run return to
+	return_code.  Define status.  Log return_code.
+
+2021-01-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* common/alu-tst.c: Include stdlib.h.
+	(PACKAGE): Define.
+	(print_hex): Change printf to use %llx.
+	* common/bits-gen.c: Include stdlib.h, string.h, and unistd.h.
+	(gen_struct): Change long long to unsigned64.
+	(gen_bit): Change bit cast to bit mask.  Change printf to use %llx.
+	(gen_mask): Likewise.
+	(usage): Delete default case.
+	(main): Change WITH_HOST_WORD_BITSIZE printf from %d to %zu.  Emit
+	PACKAGE define and stdlib.h & string.h includes.
+	* common/bits-tst.c (calc): Change printf to use %llx.
+	(check_sext, check_rot, check_extract, check_bits): Likewise.
+
+2021-01-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+	* sim/sh64/: Delete.
+
+2021-01-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim/fr30/: Delete.
+
+2021-01-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* common/Make-common.in: Delete.
+
+2021-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2020-10-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* configure: Regnerate.
+	* configure.ac (AC_CONFIG_AUX_DIR): Update.
 
 2020-08-04  David Faust  <david.faust@oracle.com>
 	    Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* configure: Regenerate.
-	* sim/bpf/allinsn.exp: New file.
-	* sim/bpf/alu.s: Likewise.
-	* sim/bpf/alu32.s: Likewise.
-	* sim/bpf/endbe.s: Likewise.
-	* sim/bpf/endle.s: Likewise.
-	* sim/bpf/jmp.s: Likewise.
-	* sim/bpf/jmp32.s: Likewise.
-	* sim/bpf/ldabs.s: Likewise.
-	* sim/bpf/mem.s: Likewise.
-	* sim/bpf/mov.s: Likewise.
-	* sim/bpf/testutils.inc: Likewise.
-	* sim/bpf/xadd.s: Likewise.
+	* sim/bpf: New directory.
 
 2020-07-29  Simon Marchi  <simon.marchi@efficios.com>
 
@@ -362,4 +424,3 @@ Mon Sep  1 16:43:55 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (configdirs): Test for the target directory instead
  	of matching on a target.
-

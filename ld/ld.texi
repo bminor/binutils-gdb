@@ -1,6 +1,6 @@
 \input texinfo
 @setfilename ld.info
-@c Copyright (C) 1991-2020 Free Software Foundation, Inc.
+@c Copyright (C) 1991-2021 Free Software Foundation, Inc.
 @syncodeindex ky cp
 @c man begin INCLUDE
 @include configdoc.texi
@@ -57,7 +57,7 @@ This file documents the @sc{gnu} linker LD
 @end ifset
 version @value{VERSION}.
 
-Copyright @copyright{} 1991-2020 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2021 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -94,7 +94,7 @@ section entitled ``GNU Free Documentation License''.
 
 @vskip 0pt plus 1filll
 @c man begin COPYRIGHT
-Copyright @copyright{} 1991-2020 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2021 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -126,6 +126,7 @@ in the section entitled ``GNU Free Documentation License''.
 * Overview::                    Overview
 * Invocation::                  Invocation
 * Scripts::                     Linker Scripts
+* Plugins::                     Linker Plugins
 @ifset GENERIC
 * Machine Dependent::           Machine Dependent Features
 @end ifset
@@ -938,7 +939,7 @@ just copy in the newest one.
 @kindex --push-state
 @cindex push state governing input file handling
 @item --push-state
-The @option{--push-state} allows to preserve the current state of the
+The @option{--push-state} allows one to preserve the current state of the
 flags which govern the input file handling so that they can all be
 restored with one corresponding @option{--pop-state} option.
 
@@ -1305,6 +1306,60 @@ Specify that the dynamic loader should modify its symbol search order
 so that symbols in this shared library interpose all other shared
 libraries not so marked.
 
+@item unique
+@itemx nounique
+When generating a shared library or other dynamically loadable ELF
+object mark it as one that should (by default) only ever be loaded once,
+and only in the main namespace (when using @code{dlmopen}). This is
+primarily used to mark fundamental libraries such as libc, libpthread et
+al which do not usually function correctly unless they are the sole instances
+of themselves. This behaviour can be overridden by the @code{dlmopen} caller
+and does not apply to certain loading mechanisms (such as audit libraries).
+
+@item lam-u48
+Generate GNU_PROPERTY_X86_FEATURE_1_LAM_U48 in .note.gnu.property section
+to indicate compatibility with Intel LAM_U48.  Supported for Linux/x86_64.
+
+@item lam-u57
+Generate GNU_PROPERTY_X86_FEATURE_1_LAM_U57 in .note.gnu.property section
+to indicate compatibility with Intel LAM_U57.  Supported for Linux/x86_64.
+
+@item lam-u48-report=none
+@itemx lam-u48-report=warning
+@itemx lam-u48-report=error
+Specify how to report the missing GNU_PROPERTY_X86_FEATURE_1_LAM_U48
+property in input .note.gnu.property section.
+@option{lam-u48-report=none}, which is the default, will make the
+linker not report missing properties in input files.
+@option{lam-u48-report=warning} will make the linker issue a warning for
+missing properties in input files.  @option{lam-u48-report=error} will
+make the linker issue an error for missing properties in input files.
+Supported for Linux/x86_64.
+
+@item lam-u57-report=none
+@itemx lam-u57-report=warning
+@itemx lam-u57-report=error
+Specify how to report the missing GNU_PROPERTY_X86_FEATURE_1_LAM_U57
+property in input .note.gnu.property section.
+@option{lam-u57-report=none}, which is the default, will make the
+linker not report missing properties in input files.
+@option{lam-u57-report=warning} will make the linker issue a warning for
+missing properties in input files.  @option{lam-u57-report=error} will
+make the linker issue an error for missing properties in input files.
+Supported for Linux/x86_64.
+
+@item lam-report=none
+@itemx lam-report=warning
+@itemx lam-report=error
+Specify how to report the missing GNU_PROPERTY_X86_FEATURE_1_LAM_U48 and
+GNU_PROPERTY_X86_FEATURE_1_LAM_U57 properties in input .note.gnu.property
+section.  @option{lam-report=none}, which is the default, will make the
+linker not report missing properties in input files.
+@option{lam-report=warning} will make the linker issue a warning for
+missing properties in input files.  @option{lam-report=error} will make
+the linker issue an error for missing properties in input files.
+Supported for Linux/x86_64.
+
 @item lazy
 When generating an executable or shared library, mark it to tell the
 dynamic linker to defer function call resolution to the point when
@@ -1371,6 +1426,10 @@ relocation, if supported.  Specifying @samp{common-page-size} smaller
 than the system page size will render this protection ineffective.
 Don't create an ELF @code{PT_GNU_RELRO} segment if @samp{norelro}.
 
+@item report-relative-reloc
+Report dynamic relative relocations generated by linker.  Supported for
+Linux/i386 and Linux/x86_64.
+
 @item separate-code
 @itemx noseparate-code
 Create separate code @code{PT_LOAD} segment header in the object.  This
@@ -1418,6 +1477,17 @@ report an error if @samp{notext} or @samp{textoff}.
 Do not report unresolved symbol references from regular object files,
 either when creating an executable, or when creating a shared library.
 This option is the inverse of @samp{-z defs}.
+
+@item x86-64-baseline
+@item x86-64-v2
+@item x86-64-v3
+@itemx x86-64-v4
+Specify the x86-64 ISA level needed in .note.gnu.property section.
+@option{x86-64-baseline} generates @code{GNU_PROPERTY_X86_ISA_1_BASELINE}.
+@option{x86-64-v2} generates @code{GNU_PROPERTY_X86_ISA_1_V2}.
+@option{x86-64-v3} generates @code{GNU_PROPERTY_X86_ISA_1_V3}.
+@option{x86-64-v4} generates @code{GNU_PROPERTY_X86_ISA_1_V4}.
+Supported for Linux/i386 and Linux/x86_64.
 
 @end table
 
@@ -1696,6 +1766,15 @@ using the linker command language from a script (@pxref{Assignments}).
 @emph{Note:} there should be no white space between @var{symbol}, the
 equals sign (``@key{=}''), and @var{expression}.
 
+The linker processes @samp{--defsym} arguments and @samp{-T} arguments
+in order, placing @samp{--defsym} before @samp{-T} will define the
+symbol before the linker script from @samp{-T} is processed, while
+placing @samp{--defsym} after @samp{-T} will define the symbol after
+the linker script has been processed.  This difference has
+consequences for expressions within the linker script that use the
+@samp{--defsym} symbols, which order is correct will depend on what
+you are trying to achieve.
+
 @cindex demangling, from command line
 @kindex --demangle[=@var{style}]
 @kindex --no-demangle
@@ -1787,6 +1866,9 @@ specified either by one of the options @samp{--entry},
 @samp{--undefined}, or @samp{--gc-keep-exported} or by a @code{ENTRY}
 command in the linker script.
 
+As a GNU extension, ELF input sections marked with the
+@code{SHF_GNU_RETAIN} flag will not be garbage collected.
+
 @kindex --print-gc-sections
 @kindex --no-print-gc-sections
 @cindex garbage collection
@@ -1846,10 +1928,34 @@ Print a summary of all target-specific options on the standard output and exit.
 @kindex -Map=@var{mapfile}
 @item -Map=@var{mapfile}
 Print a link map to the file @var{mapfile}.  See the description of the
-@option{-M} option, above.  Specifying a directory as @var{mapfile}
-causes the linker map to be written into a file inside the directory.
-The name of the file is based upon the @var{output} filename with
-@code{.map} appended.
+@option{-M} option, above.  If @var{mapfile} is just the character
+@code{-} then the map will be written to stdout.
+
+Specifying a directory as @var{mapfile} causes the linker map to be
+written as a file inside the directory.  Normally name of the file
+inside the directory is computed as the basename of the @var{output}
+file with @code{.map} appended.   If however the special character
+@code{%} is used then this will be replaced by the full path of the
+output file.  Additionally if there are any characters after the
+@var{%} symbol then @code{.map} will no longer be appended.
+
+@smallexample
+ -o foo.exe -Map=bar                  [Creates ./bar]
+ -o ../dir/foo.exe -Map=bar           [Creates ./bar]
+ -o foo.exe -Map=../dir               [Creates ../dir/foo.exe.map]
+ -o ../dir2/foo.exe -Map=../dir       [Creates ../dir/foo.exe.map]
+ -o foo.exe -Map=%                    [Creates ./foo.exe.map]
+ -o ../dir/foo.exe -Map=%             [Creates ../dir/foo.exe.map]
+ -o foo.exe -Map=%.bar                [Creates ./foo.exe.bar]
+ -o ../dir/foo.exe -Map=%.bar         [Creates ../dir/foo.exe.bar]
+ -o ../dir2/foo.exe -Map=../dir/%     [Creates ../dir/../dir2/foo.exe.map]
+ -o ../dir2/foo.exe -Map=../dir/%.bar [Creates ../dir/../dir2/foo.exe.bar]
+@end smallexample
+
+It is an error to specify more than one @code{%} character.
+
+If the map file already exists then it will be overwritten by this
+operation.
 
 @cindex memory usage
 @kindex --no-keep-memory
@@ -1913,6 +2019,21 @@ select whichever function is most appropriate for the current
 architecture.  This is used, for example, to dynamically select an
 appropriate memset function.
 @end itemize
+
+@kindex --error-handling-script=@var{scriptname}
+@item --error-handling-script=@var{scriptname}
+If this option is provided then the linker will invoke
+@var{scriptname} whenever an error is encountered.  Currently however
+only two kinds of error are supported: missing symbols and missing
+libraries.  Two arguments will be passed to script: the keyword
+``undefined-symbol'' or `missing-lib'' and the @var{name} of the 
+undefined symbol or missing library.  The intention is that the script
+will provide suggestions to the user as to where the symbol or library
+might be found.  After the script has finished then the normal linker
+error message will be displayed.
+
+The availability of this option is controlled by a configure time
+switch, so it may not be present in specific implementations.
 
 @kindex --no-undefined-version
 @item --no-undefined-version
@@ -5232,6 +5353,10 @@ The special output section name @samp{/DISCARD/} may be used to discard
 input sections.  Any input sections which are assigned to an output
 section named @samp{/DISCARD/} are not included in the output file.
 
+This can be used to discard input sections marked with the ELF flag
+@code{SHF_GNU_RETAIN}, which would otherwise have been saved from linker
+garbage collection.
+
 Note, sections that match the @samp{/DISCARD/} output section will be
 discarded even if they are in an ELF section group which has other
 members which are not being discarded.  This is deliberate.
@@ -6887,6 +7012,58 @@ commands.
 Any input files read because of an implicit linker script will be read
 at the position in the command line where the implicit linker script was
 read.  This can affect archive searching.
+
+@node Plugins
+@chapter Linker Plugins
+
+@cindex plugins
+@cindex linker plugins
+The linker can use dynamically loaded plugins to modify its behavior.
+For example, the link-time optimization feature that some compilers
+support is implemented with a linker plugin.
+
+Currently there is only one plugin shipped by default, but more may
+be added here later.
+
+@menu
+* libdep Plugin::	Static Library Dependencies Plugin
+@end menu
+
+@node libdep Plugin
+@section Static Library Dependencies Plugin
+@cindex static library dependencies
+Originally, static libraries were contained in an archive file consisting
+just of a collection of relocatable object files.  Later they evolved to
+optionally include a symbol table, to assist in finding the needed objects
+within a library.  There their evolution ended, and dynamic libraries
+rose to ascendance.
+
+One useful feature of dynamic libraries was that, more than just collecting
+multiple objects into a single file, they also included a list of their
+dependencies, such that one could specify just the name of a single dynamic
+library at link time, and all of its dependencies would be implicitly
+referenced as well.  But static libraries lacked this feature, so if a
+link invocation was switched from using dynamic libraries to static
+libraries, the link command would usually fail unless it was rewritten to
+explicitly list the dependencies of the static library.
+
+The GNU @command{ar} utility now supports a @option{--record-libdeps} option
+to embed dependency lists into static libraries as well, and the @file{libdep}
+plugin may be used to read this dependency information at link time.  The
+dependency information is stored as a single string, carrying @option{-l}
+and @option{-L} arguments as they would normally appear in a linker
+command line.  As such, the information can be written with any text
+utility and stored into any archive, even if GNU @command{ar} is not
+being used to create the archive.  The information is stored in an
+archive member named @samp{__.LIBDEP}.
+
+For example, given a library @file{libssl.a} that depends on another
+library @file{libcrypto.a} which may be found in @file{/usr/local/lib},
+the @samp{__.LIBDEP} member of @file{libssl.a} would contain
+
+@smallexample
+-L/usr/local/lib -lcrypto
+@end smallexample
 
 @ifset GENERIC
 @node Machine Dependent

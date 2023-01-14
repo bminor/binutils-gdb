@@ -1,6 +1,6 @@
 /* Target-dependent code for PowerPC systems running FreeBSD.
 
-   Copyright (C) 2013-2020 Free Software Foundation, Inc.
+   Copyright (C) 2013-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -176,7 +176,7 @@ ppcfbsd_sigtramp_frame_sniffer (const struct frame_unwind *self,
       unsigned long insn;
 
       if (!safe_frame_unwind_memory (this_frame, start_pc + *offset,
-				     buf, sizeof buf))
+				     {buf, sizeof buf}))
 	continue;
 
       /* Check for "li r0,SYS_sigreturn".  */
@@ -214,7 +214,7 @@ ppcfbsd_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   func = get_frame_pc (this_frame);
   func &= ~(ppcfbsd_page_size - 1);
-  if (!safe_frame_unwind_memory (this_frame, func, buf, sizeof buf))
+  if (!safe_frame_unwind_memory (this_frame, func, {buf, sizeof buf}))
     return cache;
 
   base = get_frame_register_unsigned (this_frame, gdbarch_sp_regnum (gdbarch));

@@ -1,5 +1,5 @@
 /* Agent expression code for remote server.
-   Copyright (C) 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2009-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -65,7 +65,7 @@ enum gdb_agent_op
     gdb_agent_op_last
   };
 
-static const char *gdb_agent_op_names [gdb_agent_op_last] =
+static const char * const gdb_agent_op_names [gdb_agent_op_last] =
   {
     "?undef?"
 #define DEFOP(NAME, SIZE, DATA_SIZE, CONSUMED, PRODUCED, VALUE)  , # NAME
@@ -146,7 +146,7 @@ CORE_ADDR current_insn_ptr;
 
 int emit_error;
 
-struct bytecode_address
+static struct bytecode_address
 {
   int pc;
   CORE_ADDR address;
@@ -873,7 +873,7 @@ ax_printf (CORE_ADDR fn, CORE_ADDR chan, const char *format,
 		read_inferior_memory (tem, str, j);
 	      str[j] = 0;
 
-              printf (current_substring, (char *) str);
+	      printf (current_substring, (char *) str);
 	    }
 	    break;
 
@@ -882,7 +882,7 @@ ax_printf (CORE_ADDR fn, CORE_ADDR chan, const char *format,
 	    {
 	      long long val = args[i];
 
-              printf (current_substring, val);
+	      printf (current_substring, val);
 	      break;
 	    }
 #else

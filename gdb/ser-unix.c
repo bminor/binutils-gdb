@@ -1,6 +1,6 @@
 /* Serial interface for local (hardwired) serial ports on Un*x like systems
 
-   Copyright (C) 1992-2020 Free Software Foundation, Inc.
+   Copyright (C) 1992-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -343,31 +343,31 @@ rate_to_code (int rate)
     {
       /* test for perfect macth.  */
       if (rate == baudtab[i].rate)
-        return baudtab[i].code;
+	return baudtab[i].code;
       else
-        {
+	{
 	  /* check if it is in between valid values.  */
-          if (rate < baudtab[i].rate)
+	  if (rate < baudtab[i].rate)
 	    {
 	      if (i)
-	        {
-	          warning (_("Invalid baud rate %d.  "
+		{
+		  warning (_("Invalid baud rate %d.  "
 			     "Closest values are %d and %d."),
 			   rate, baudtab[i - 1].rate, baudtab[i].rate);
 		}
 	      else
-	        {
-	          warning (_("Invalid baud rate %d.  Minimum value is %d."),
+		{
+		  warning (_("Invalid baud rate %d.  Minimum value is %d."),
 			   rate, baudtab[0].rate);
 		}
 	      return -1;
 	    }
-        }
+	}
     }
  
   /* The requested speed was too large.  */
   warning (_("Invalid baud rate %d.  Maximum value is %d."),
-            rate, baudtab[i - 1].rate);
+	    rate, baudtab[i - 1].rate);
   return -1;
 }
 
@@ -380,7 +380,7 @@ hardwire_setbaudrate (struct serial *scb, int rate)
   if (baud_code < 0)
     {
       /* The baud rate was not valid.
-         A warning has already been issued.  */
+	 A warning has already been issued.  */
       errno = EINVAL;
       return -1;
     }

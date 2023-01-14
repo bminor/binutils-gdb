@@ -27,17 +27,8 @@
 
 #undef printf_filtered /* blow away the mapping */
 
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
-
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
 
 #include "libiberty.h"
 #include "bfd.h"
@@ -261,6 +252,12 @@ sim_do_command (SIM_DESC sd, const char *cmd)
 
 char **
 sim_complete_command (SIM_DESC sd, const char *text, const char *word)
+{
+  return NULL;
+}
+
+char *
+sim_memory_map (SIM_DESC sd)
 {
   return NULL;
 }

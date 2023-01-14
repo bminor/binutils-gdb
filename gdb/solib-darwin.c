@@ -1,6 +1,6 @@
 /* Handle Darwin shared libraries for GDB, the GNU Debugger.
 
-   Copyright (C) 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2009-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -192,14 +192,15 @@ find_program_interpreter (void)
 {
   char *buf = NULL;
 
-  /* If we have an exec_bfd, get the interpreter from the load commands.  */
-  if (exec_bfd)
+  /* If we have an current exec_bfd, get the interpreter from the load
+     commands.  */
+  if (current_program_space->exec_bfd ())
     {
       bfd_mach_o_load_command *cmd;
 
-      if (bfd_mach_o_lookup_command (exec_bfd,
-                                     BFD_MACH_O_LC_LOAD_DYLINKER, &cmd) == 1)
-        return cmd->command.dylinker.name_str;
+      if (bfd_mach_o_lookup_command (current_program_space->exec_bfd (),
+				     BFD_MACH_O_LC_LOAD_DYLINKER, &cmd) == 1)
+	return cmd->command.dylinker.name_str;
     }
 
   /* If we didn't find it, read from memory.
@@ -264,14 +265,14 @@ darwin_current_sos (void)
 	break;
       /* Discard wrong magic numbers.  Shouldn't happen.  */
       hdr_val = extract_unsigned_integer
-        (hdr.magic, sizeof (hdr.magic), byte_order);
+	(hdr.magic, sizeof (hdr.magic), byte_order);
       if (hdr_val != BFD_MACH_O_MH_MAGIC && hdr_val != BFD_MACH_O_MH_MAGIC_64)
-        continue;
+	continue;
       /* Discard executable.  Should happen only once.  */
       hdr_val = extract_unsigned_integer
-        (hdr.filetype, sizeof (hdr.filetype), byte_order);
+	(hdr.filetype, sizeof (hdr.filetype), byte_order);
       if (hdr_val == BFD_MACH_O_MH_EXECUTE)
-        continue;
+	continue;
 
       gdb::unique_xmalloc_ptr<char> file_path
 	= target_read_string (path_addr, SO_NAME_MAX_PATH_SIZE - 1);
@@ -461,7 +462,7 @@ darwin_solib_get_all_image_info_addr_at_init (struct darwin_info *info)
      the current pc (which should point at the entry point for the
      dynamic linker) and subtracting the offset of the entry point.  */
   load_addr = (regcache_read_pc (get_current_regcache ())
-               - bfd_get_start_address (dyld_bfd.get ()));
+	       - bfd_get_start_address (dyld_bfd.get ()));
 
   /* Now try to set a breakpoint in the dynamic linker.  */
   info->all_image_addr =
@@ -538,16 +539,17 @@ darwin_solib_create_inferior_hook (int from_tty)
       load_addr = darwin_read_exec_load_addr_at_init (info);
     }
 
-  if (load_addr != 0 && symfile_objfile != NULL)
+  if (load_addr != 0 && current_program_space->symfile_object_file != NULL)
     {
       CORE_ADDR vmaddr;
 
       /* Find the base address of the executable.  */
-      vmaddr = bfd_mach_o_get_base_address (exec_bfd);
+      vmaddr = bfd_mach_o_get_base_address (current_program_space->exec_bfd ());
 
       /* Relocate.  */
       if (vmaddr != load_addr)
-	objfile_rebase (symfile_objfile, load_addr - vmaddr);
+	objfile_rebase (current_program_space->symfile_object_file,
+			load_addr - vmaddr);
     }
 
   /* Set solib notifier (to reload list of shared libraries).  */
@@ -557,35 +559,36 @@ darwin_solib_create_inferior_hook (int from_tty)
     {
       /* Dyld hasn't yet relocated itself, so the notifier address may
 	 be incorrect (as it has to be relocated).  */
-      CORE_ADDR start = bfd_get_start_address (exec_bfd);
+      CORE_ADDR start
+	= bfd_get_start_address (current_program_space->exec_bfd ());
       if (start == 0)
 	notifier = 0;
       else
-        {
-          gdb_bfd_ref_ptr dyld_bfd = darwin_get_dyld_bfd ();
-          if (dyld_bfd != NULL)
-            {
-              CORE_ADDR dyld_bfd_start_address;
-              CORE_ADDR dyld_relocated_base_address;
-              CORE_ADDR pc;
+	{
+	  gdb_bfd_ref_ptr dyld_bfd = darwin_get_dyld_bfd ();
+	  if (dyld_bfd != NULL)
+	    {
+	      CORE_ADDR dyld_bfd_start_address;
+	      CORE_ADDR dyld_relocated_base_address;
+	      CORE_ADDR pc;
 
-              dyld_bfd_start_address = bfd_get_start_address (dyld_bfd.get());
+	      dyld_bfd_start_address = bfd_get_start_address (dyld_bfd.get());
 
-              /* We find the dynamic linker's base address by examining
-                 the current pc (which should point at the entry point
-                 for the dynamic linker) and subtracting the offset of
-                 the entry point.  */
+	      /* We find the dynamic linker's base address by examining
+		 the current pc (which should point at the entry point
+		 for the dynamic linker) and subtracting the offset of
+		 the entry point.  */
 
-              pc = regcache_read_pc (get_current_regcache ());
-              dyld_relocated_base_address = pc - dyld_bfd_start_address;
+	      pc = regcache_read_pc (get_current_regcache ());
+	      dyld_relocated_base_address = pc - dyld_bfd_start_address;
 
-              /* We get the proper notifier relocated address by
-                 adding the dyld relocated base address to the current
-                 notifier offset value.  */
+	      /* We get the proper notifier relocated address by
+		 adding the dyld relocated base address to the current
+		 notifier offset value.  */
 
-              notifier += dyld_relocated_base_address;
-            }
-        }
+	      notifier += dyld_relocated_base_address;
+	    }
+	}
     }
 
   /* Add the breakpoint which is hit by dyld when the list of solib is

@@ -1,6 +1,6 @@
 /* TUI display locator.
 
-   Copyright (C) 1998-2020 Free Software Foundation, Inc.
+   Copyright (C) 1998-2021 Free Software Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -48,6 +48,11 @@ struct tui_locator_window : public tui_win_info
   }
 
   bool can_box () const override
+  {
+    return false;
+  }
+
+  bool can_focus () const override
   {
     return false;
   }

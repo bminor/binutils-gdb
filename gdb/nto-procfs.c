@@ -1,7 +1,7 @@
 /* Machine independent support for QNX Neutrino /proc (process file system)
    for GDB.  Written by Colin Burgess at QNX Software Systems Limited.
 
-   Copyright (C) 2003-2020 Free Software Foundation, Inc.
+   Copyright (C) 2003-2021 Free Software Foundation, Inc.
 
    Contributed by QNX Software Systems Ltd.
 
@@ -69,7 +69,7 @@ struct nto_procfs_target : public inf_child_target
 
   void resume (ptid_t, int, enum gdb_signal) override;
 
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
@@ -728,7 +728,7 @@ nto_procfs_target::attach (const char *args, int from_tty)
 void
 nto_procfs_target::post_attach (pid_t pid)
 {
-  if (exec_bfd)
+  if (current_program_space->exec_bfd ())
     solib_create_inferior_hook (0);
 }
 
@@ -795,7 +795,7 @@ nto_handle_sigint (int signo)
 
 sptid_t
 nto_procfs_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
-			 int options)
+			 target_wait_flags options)
 {
   sigset_t set;
   siginfo_t info;
@@ -972,7 +972,7 @@ nto_procfs_target::xfer_partial (enum target_object object,
 	    return TARGET_XFER_E_IO;
 
 	  err = devctl (ctl_fd, DCMD_PROC_INFO, &procinfo,
-		        sizeof procinfo, 0);
+			sizeof procinfo, 0);
 	  if (err != EOK)
 	    return TARGET_XFER_E_IO;
 
@@ -1316,14 +1316,15 @@ nto_procfs_target::create_inferior (const char *exec_file,
     {
       /* FIXME: expected warning?  */
       /* warning( "Failed to set Kill-on-Last-Close flag: errno = %d(%s)\n",
-         errn, safe_strerror(errn) ); */
+	 errn, safe_strerror(errn) ); */
     }
   if (!target_is_pushed (ops))
     push_target (ops);
   target_terminal::init ();
 
-  if (exec_bfd != NULL
-      || (symfile_objfile != NULL && symfile_objfile->obfd != NULL))
+  if (current_program_space->exec_bfd () != NULL
+      || (current_program_space->symfile_object_file != NULL
+	  && current_program_space->symfile_object_file->obfd != NULL))
     solib_create_inferior_hook (0);
 }
 
@@ -1450,7 +1451,7 @@ nto_procfs_target::pass_signals
     {
       int target_signo = gdb_signal_from_host (signo);
       if (target_signo < pass_signals.size () && pass_signals[target_signo])
-        sigdelset (&run.trace, signo);
+	sigdelset (&run.trace, signo);
     }
 }
 

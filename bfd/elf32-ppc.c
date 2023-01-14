@@ -1,5 +1,5 @@
 /* PowerPC-specific support for 32-bit ELF
-   Copyright (C) 1994-2020 Free Software Foundation, Inc.
+   Copyright (C) 1994-2021 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -19,11 +19,8 @@
    Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
    Boston, MA 02110-1301, USA.  */
 
-
-/* This file is based on a preliminary PowerPC ELF ABI.  The
-   information may not match the final PowerPC ELF ABI.  It includes
-   suggestions from the in-progress Embedded PowerPC ABI, and that
-   information may also not match.  */
+/* Don't generate unused section symbols.  */
+#define TARGET_KEEP_UNUSED_SECTION_SYMBOLS FALSE
 
 #include "sysdep.h"
 #include <stdarg.h>
@@ -985,10 +982,12 @@ ppc_elf_unhandled_reloc (bfd *abfd,
 
   if (error_message != NULL)
     {
-      static char buf[60];
-      sprintf (buf, _("generic linker can't handle %s"),
-	       reloc_entry->howto->name);
-      *error_message = buf;
+      static char *message;
+      free (message);
+      if (asprintf (&message, _("generic linker can't handle %s"),
+		    reloc_entry->howto->name) < 0)
+	message = NULL;
+      *error_message = message;
     }
   return bfd_reloc_dangerous;
 }
@@ -1491,7 +1490,7 @@ static const struct bfd_elf_special_section ppc_elf_special_sections[] =
 };
 
 /* This is what we want for new plt/got.  */
-static struct bfd_elf_special_section ppc_alt_plt =
+static const struct bfd_elf_special_section ppc_alt_plt =
   { STRING_COMMA_LEN (".plt"),		   0, SHT_PROGBITS, SHF_ALLOC };
 
 static const struct bfd_elf_special_section *
@@ -5092,6 +5091,18 @@ ensure_undef_dynamic (struct bfd_link_info *info,
   return TRUE;
 }
 
+/* Choose whether to use htab->iplt or htab->pltlocal rather than the
+   usual htab->elf.splt section for a PLT entry.  */
+
+static inline
+bfd_boolean use_local_plt (struct bfd_link_info *info,
+			   struct elf_link_hash_entry *h)
+{
+  return (h == NULL
+	  || h->dynindx == -1
+	  || !elf_hash_table (info)->dynamic_sections_created);
+}
+
 /* Allocate space in associated reloc sections for dynamic relocs.  */
 
 static bfd_boolean
@@ -5101,7 +5112,6 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   struct ppc_elf_link_hash_entry *eh;
   struct ppc_elf_link_hash_table *htab;
   struct elf_dyn_relocs *p;
-  bfd_boolean dyn;
 
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
@@ -5269,8 +5279,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
      b) is an ifunc, or
      c) has plt16 relocs and has been processed by adjust_dynamic_symbol, or
      d) has plt16 relocs and we are linking statically.  */
-  dyn = htab->elf.dynamic_sections_created && h->dynindx != -1;
-  if (dyn
+  if ((htab->elf.dynamic_sections_created && h->dynindx != -1)
       || h->type == STT_GNU_IFUNC
       || (h->needs_plt && h->dynamic_adjusted)
       || (h->needs_plt
@@ -5288,6 +5297,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	if (ent->plt.refcount > 0)
 	  {
 	    asection *s = htab->elf.splt;
+	    bfd_boolean dyn = !use_local_plt (info, h);
 
 	    if (!dyn)
 	      {
@@ -8371,9 +8381,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
 		  unresolved_reloc = FALSE;
 		  plt = htab->elf.splt;
-		  if (!htab->elf.dynamic_sections_created
-		      || h == NULL
-		      || h->dynindx == -1)
+		  if (use_local_plt (info, h))
 		    {
 		      if (ifunc != NULL)
 			plt = htab->elf.iplt;
@@ -9349,6 +9357,8 @@ write_global_sym_plt (struct elf_link_hash_entry *h, void *inf)
   for (ent = h->plt.plist; ent != NULL; ent = ent->next)
     if (ent->plt.offset != (bfd_vma) -1)
       {
+	bfd_boolean dyn = !use_local_plt (info, h);
+
 	if (!doneone)
 	  {
 	    Elf_Internal_Rela rela;
@@ -9357,9 +9367,7 @@ write_global_sym_plt (struct elf_link_hash_entry *h, void *inf)
 	    asection *plt = htab->elf.splt;
 	    asection *relplt = htab->elf.srelplt;
 
-	    if (htab->plt_type == PLT_NEW
-		|| !htab->elf.dynamic_sections_created
-		|| h->dynindx == -1)
+	    if (htab->plt_type == PLT_NEW || !dyn)
 	      reloc_index = ent->plt.offset / 4;
 	    else
 	      {
@@ -9372,9 +9380,7 @@ write_global_sym_plt (struct elf_link_hash_entry *h, void *inf)
 
 	    /* This symbol has an entry in the procedure linkage table.
 	       Set it up.  */
-	    if (htab->plt_type == PLT_VXWORKS
-		&& htab->elf.dynamic_sections_created
-		&& h->dynindx != -1)
+	    if (htab->plt_type == PLT_VXWORKS && dyn)
 	      {
 		bfd_vma got_offset;
 		const bfd_vma *plt_entry;
@@ -9497,8 +9503,7 @@ write_global_sym_plt (struct elf_link_hash_entry *h, void *inf)
 	    else
 	      {
 		rela.r_addend = 0;
-		if (!htab->elf.dynamic_sections_created
-		    || h->dynindx == -1)
+		if (!dyn)
 		  {
 		    if (h->type == STT_GNU_IFUNC)
 		      {
@@ -9527,9 +9532,7 @@ write_global_sym_plt (struct elf_link_hash_entry *h, void *inf)
 				     + plt->output_offset
 				     + ent->plt.offset);
 
-		    if (htab->plt_type == PLT_OLD
-			|| !htab->elf.dynamic_sections_created
-			|| h->dynindx == -1)
+		    if (htab->plt_type == PLT_OLD || !dyn)
 		      {
 			/* We don't need to fill in the .plt.  The ppc dynamic
 			   linker will fill it in.  */
@@ -9548,8 +9551,7 @@ write_global_sym_plt (struct elf_link_hash_entry *h, void *inf)
 	    if (relplt != NULL)
 	      {
 		/* Fill in the entry in the .rela.plt section.  */
-		if (!htab->elf.dynamic_sections_created
-		    || h->dynindx == -1)
+		if (!dyn)
 		  {
 		    if (h->type == STT_GNU_IFUNC)
 		      rela.r_info = ELF32_R_INFO (0, R_PPC_IRELATIVE);
@@ -9572,15 +9574,12 @@ write_global_sym_plt (struct elf_link_hash_entry *h, void *inf)
 	    doneone = TRUE;
 	  }
 
-	if (htab->plt_type == PLT_NEW
-	    || !htab->elf.dynamic_sections_created
-	    || h->dynindx == -1)
+	if (htab->plt_type == PLT_NEW || !dyn)
 	  {
 	    unsigned char *p;
 	    asection *plt = htab->elf.splt;
 
-	    if (!htab->elf.dynamic_sections_created
-		|| h->dynindx == -1)
+	    if (!dyn)
 	      {
 		if (h->type == STT_GNU_IFUNC)
 		  plt = htab->elf.iplt;

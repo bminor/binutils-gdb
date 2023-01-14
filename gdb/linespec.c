@@ -1,6 +1,6 @@
 /* Parser for linespec for the GNU debugger, GDB.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -72,7 +72,7 @@ enum class linespec_complete_what
   /* An expression.  E.g., "break foo if EXPR", or "break *EXPR".  */
   EXPRESSION,
 
-  /* A linespec keyword ("if"/"thread"/"task").
+  /* A linespec keyword ("if"/"thread"/"task"/"-force-condition").
      E.g., "break func threa<tab>".  */
   KEYWORD,
 };
@@ -254,12 +254,13 @@ typedef enum ls_token_type linespec_token_type;
 
 /* List of keywords.  This is NULL-terminated so that it can be used
    as enum completer.  */
-const char * const linespec_keywords[] = { "if", "thread", "task", NULL };
+const char * const linespec_keywords[] = { "if", "thread", "task", "-force-condition", NULL };
 #define IF_KEYWORD_INDEX 0
+#define FORCE_KEYWORD_INDEX 3
 
 /* A token of the linespec lexer  */
 
-struct ls_token
+struct linespec_token
 {
   /* The type of the token  */
   linespec_token_type type;
@@ -274,7 +275,6 @@ struct ls_token
     const char *keyword;
   } data;
 };
-typedef struct ls_token linespec_token;
 
 #define LS_TOKEN_STOKEN(TOK) (TOK).data.string
 #define LS_TOKEN_KEYWORD(TOK) (TOK).data.keyword
@@ -421,7 +421,7 @@ static bool compare_msymbols (const bound_minimal_symbol &a,
 /* Permitted quote characters for the parser.  This is different from the
    completer's quote characters to allow backward compatibility with the
    previous parser.  */
-static const char *const linespec_quote_characters = "\"\'";
+static const char linespec_quote_characters[] = "\"\'";
 
 /* Lexer functions.  */
 
@@ -477,21 +477,45 @@ linespec_lexer_lex_keyword (const char *p)
 	{
 	  int len = strlen (linespec_keywords[i]);
 
-	  /* If P begins with one of the keywords and the next
-	     character is whitespace, we may have found a keyword.
-	     It is only a keyword if it is not followed by another
-	     keyword.  */
-	  if (strncmp (p, linespec_keywords[i], len) == 0
-	      && isspace (p[len]))
+	  /* If P begins with
+
+	     - "thread" or "task" and the next character is
+	     whitespace, we may have found a keyword.  It is only a
+	     keyword if it is not followed by another keyword.
+
+	     - "-force-condition", the next character may be EOF
+	     since this keyword does not take any arguments.  Otherwise,
+	     it should be followed by a keyword.
+
+	     - "if", ALWAYS stop the lexer, since it is not possible to
+	     predict what is going to appear in the condition, which can
+	     only be parsed after SaLs have been found.  */
+	  if (strncmp (p, linespec_keywords[i], len) == 0)
 	    {
 	      int j;
 
-	      /* Special case: "if" ALWAYS stops the lexer, since it
-		 is not possible to predict what is going to appear in
-		 the condition, which can only be parsed after SaLs have
-		 been found.  */
-	      if (i != IF_KEYWORD_INDEX)
+	      if (i == FORCE_KEYWORD_INDEX && p[len] == '\0')
+		return linespec_keywords[i];
+
+	      if (!isspace (p[len]))
+		continue;
+
+	      if (i == FORCE_KEYWORD_INDEX)
 		{
+		  p += len;
+		  p = skip_spaces (p);
+		  for (j = 0; linespec_keywords[j] != NULL; ++j)
+		    {
+		      int nextlen = strlen (linespec_keywords[j]);
+
+		      if (strncmp (p, linespec_keywords[j], nextlen) == 0
+			  && isspace (p[nextlen]))
+			return linespec_keywords[i];
+		    }
+		}
+	      else if (i != IF_KEYWORD_INDEX)
+		{
+		  /* We matched a "thread" or "task".  */
 		  p += len;
 		  p = skip_spaces (p);
 		  for (j = 0; linespec_keywords[j] != NULL; ++j)
@@ -906,10 +930,10 @@ linespec_lexer_lex_one (linespec_parser *parser)
 
 	case '+': case '-':
 	case '0': case '1': case '2': case '3': case '4':
-        case '5': case '6': case '7': case '8': case '9':
-           if (!linespec_lexer_lex_number (parser, &(parser->lexer.current)))
+	case '5': case '6': case '7': case '8': case '9':
+	   if (!linespec_lexer_lex_number (parser, &(parser->lexer.current)))
 	     parser->lexer.current = linespec_lexer_lex_string (parser);
-          break;
+	  break;
 
 	case ':':
 	  /* If we have a scope operator, lex the input as a string.
@@ -1209,7 +1233,7 @@ iterate_over_file_blocks
   for (block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab), STATIC_BLOCK);
        block != NULL;
        block = BLOCK_SUPERBLOCK (block))
-    LA_ITERATE_OVER_SYMBOLS (block, name, domain, callback);
+    current_language->iterate_over_symbols (block, name, domain, callback);
 }
 
 /* A helper for find_method.  This finds all methods in type T of
@@ -1237,8 +1261,8 @@ find_methods (struct type *t, enum language t_lang, const char *name,
       t = check_typedef (t);
 
       /* Loop over each method name.  At this level, all overloads of a name
-         are counted as a single name.  There is an inner loop which loops over
-         each overload.  */
+	 are counted as a single name.  There is an inner loop which loops over
+	 each overload.  */
 
       for (method_counter = TYPE_NFN_FIELDS (t) - 1;
 	   method_counter >= 0;
@@ -1682,12 +1706,12 @@ undefined_label_error (const char *function, const char *label)
 {
   if (function != NULL)
     throw_error (NOT_FOUND_ERROR,
-                _("No label \"%s\" defined in function \"%s\"."),
-                label, function);
+		_("No label \"%s\" defined in function \"%s\"."),
+		label, function);
   else
     throw_error (NOT_FOUND_ERROR,
-                _("No label \"%s\" defined in current function."),
-                label);
+		_("No label \"%s\" defined in current function."),
+		label);
 }
 
 /* Throw a source file not found error.  */
@@ -1874,7 +1898,7 @@ linespec_parse_basic (linespec_parser *parser)
 	    = new std::vector<block_symbol> (std::move (symbols));
 	  PARSER_RESULT (parser)->minimal_symbols
 	    = new std::vector<bound_minimal_symbol>
-	        (std::move (minimal_symbols));
+		(std::move (minimal_symbols));
 	  PARSER_EXPLICIT (parser)->function_name = name.release ();
 	}
       else
@@ -2472,7 +2496,7 @@ convert_explicit_location_to_sals (struct linespec_state *self,
    label_name_spec -> STRING
    function_name_spec -> STRING
    offset_spec -> NUMBER
-               -> '+' NUMBER
+	       -> '+' NUMBER
 	       -> '-' NUMBER
 
    This may all be followed by several keywords such as "if EXPR",
@@ -3341,7 +3365,7 @@ initialize_defaults (struct symtab **default_symtab, int *default_line)
   if (*default_symtab == 0)
     {
       /* Use whatever we have for the default source line.  We don't use
-         get_current_or_default_symtab_and_line as it can recurse and call
+	 get_current_or_default_symtab_and_line as it can recurse and call
 	 us back!  */
       struct symtab_and_line cursal = 
 	get_current_source_symtab_and_line ();
@@ -3453,16 +3477,10 @@ class decode_compound_collector
 {
 public:
   decode_compound_collector ()
+    : m_unique_syms (htab_create_alloc (1, htab_hash_pointer,
+					htab_eq_pointer, NULL,
+					xcalloc, xfree))
   {
-    m_unique_syms = htab_create_alloc (1, htab_hash_pointer,
-				       htab_eq_pointer, NULL,
-				       xcalloc, xfree);
-  }
-
-  ~decode_compound_collector ()
-  {
-    if (m_unique_syms != NULL)
-      htab_delete (m_unique_syms);
   }
 
   /* Return all symbols collected.  */
@@ -3477,7 +3495,7 @@ public:
 private:
   /* A hash table of all symbols we found.  We use this to avoid
      adding any symbol more than once.  */
-  htab_t m_unique_syms;
+  htab_up m_unique_syms;
 
   /* The result vector.  */
   std::vector<block_symbol>  m_symbols;
@@ -3500,7 +3518,7 @@ decode_compound_collector::operator () (block_symbol *bsym)
       && t->code () != TYPE_CODE_NAMESPACE)
     return true; /* Continue iterating.  */
 
-  slot = htab_find_slot (m_unique_syms, sym, INSERT);
+  slot = htab_find_slot (m_unique_syms.get (), sym, INSERT);
   if (!*slot)
     {
       *slot = sym;
@@ -3730,15 +3748,9 @@ class symtab_collector
 {
 public:
   symtab_collector ()
+    : m_symtab_table (htab_create (1, htab_hash_pointer, htab_eq_pointer,
+				   NULL))
   {
-    m_symtab_table = htab_create (1, htab_hash_pointer, htab_eq_pointer,
-				  NULL);
-  }
-
-  ~symtab_collector ()
-  {
-    if (m_symtab_table != NULL)
-      htab_delete (m_symtab_table);
   }
 
   /* Callable as a symbol_found_callback_ftype callback.  */
@@ -3755,7 +3767,7 @@ private:
   std::vector<symtab *> m_symtabs;
 
   /* This is used to ensure the symtabs are unique.  */
-  htab_t m_symtab_table;
+  htab_up m_symtab_table;
 };
 
 bool
@@ -3763,7 +3775,7 @@ symtab_collector::operator () (struct symtab *symtab)
 {
   void **slot;
 
-  slot = htab_find_slot (m_symtab_table, symtab, INSERT);
+  slot = htab_find_slot (m_symtab_table.get (), symtab, INSERT);
   if (!*slot)
     {
       *slot = symtab;
@@ -3789,7 +3801,7 @@ collect_symtabs_from_filename (const char *file,
   if (search_pspace == NULL)
     {
       for (struct program_space *pspace : program_spaces)
-        {
+	{
 	  if (pspace->executing_startup)
 	    continue;
 

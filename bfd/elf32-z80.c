@@ -1,5 +1,5 @@
 /* Zilog (e)Z80-specific support for 32-bit ELF
-   Copyright (C) 1999-2019 Free Software Foundation, Inc.
+   Copyright (C) 1999-2021 Free Software Foundation, Inc.
    (Heavily copied from the S12Z port by Sergey Belyashov (sergey.belyashov@gmail.com))
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -30,7 +30,7 @@
 /* All users of this file have bfd_octets_per_byte (abfd, sec) == 1.  */
 #define OCTETS_PER_BYTE(ABFD, SEC) 1
 
-typedef struct {
+typedef const struct {
   bfd_reloc_code_real_type r_type;
   reloc_howto_type howto;
 } bfd_howto_type;

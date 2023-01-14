@@ -215,6 +215,10 @@
 /* Define if you can safely include both <string.h> and <strings.h>. */
 #undef STRING_WITH_STRINGS
 
+/* Define to 1 if you want to support the --error-handling-script command line
+   option. */
+#undef SUPPORT_ERROR_HANDLING_SCRIPT
+
 /* Use b modifier when opening binary files? */
 #undef USE_BINARY_FOPEN
 

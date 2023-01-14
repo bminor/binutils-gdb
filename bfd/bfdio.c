@@ -1,6 +1,6 @@
 /* Low-level I/O routines for BFDs.
 
-   Copyright (C) 1990-2020 Free Software Foundation, Inc.
+   Copyright (C) 1990-2021 Free Software Foundation, Inc.
 
    Written by Cygnus Support.
 
@@ -116,13 +116,32 @@ _bfd_real_fopen (const char *filename, const char *modes)
     }
 
 #elif defined (_WIN32)
-  size_t filelen = strlen (filename) + 1;
+  size_t filelen;
+
+  /* PR 25713: Handle extra long path names.
+     For relative paths, convert them to absolute, in case that version is too long.  */
+  if (! IS_ABSOLUTE_PATH (filename) && (strstr (filename, ".o") != NULL))
+    {
+      char cwd[1024];
+
+      getcwd (cwd, sizeof (cwd));
+      filelen = strlen (cwd) + 1;
+      strncat (cwd, "\\", sizeof (cwd) - filelen);
+      ++ filelen;
+      strncat (cwd, filename, sizeof (cwd) - filelen);
+
+      filename = cwd;
+    }
+
+  filelen = strlen (filename) + 1;
 
   if (filelen > MAX_PATH - 1)
     {
       FILE * file;
-      char * fullpath = (char *) malloc (filelen + 8);
+      char * fullpath;
       int    i;
+
+      fullpath = (char *) malloc (filelen + 8);
 
       /* Add a Microsoft recommended prefix that
 	 will allow the extra-long path to work.  */

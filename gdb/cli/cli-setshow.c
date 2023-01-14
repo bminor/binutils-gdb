@@ -1,6 +1,6 @@
 /* Handle set and show GDB commands.
 
-   Copyright (C) 2000-2020 Free Software Foundation, Inc.
+   Copyright (C) 2000-2021 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -743,7 +743,7 @@ cmd_show_list (struct cmd_list_element *list, int from_tty)
       /* We skip show command aliases to avoid showing duplicated values.  */
 
       /* If we find a prefix, run its list, prefixing our output by its
-         prefix (with "show " skipped).  */
+	 prefix (with "show " skipped).  */
       if (list->prefixlist && list->cmd_pointer == nullptr)
 	{
 	  ui_out_emit_tuple optionlist_emitter (uiout, "optionlist");

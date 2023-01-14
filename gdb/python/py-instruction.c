@@ -1,6 +1,6 @@
 /* Python interface to instruction objects.
 
-   Copyright 2017-2020 Free Software Foundation, Inc.
+   Copyright 2017-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,9 +28,9 @@ PyTypeObject py_insn_type = {
 
 /* Python instruction object.  */
 
-typedef struct {
+struct py_insn_obj {
   PyObject_HEAD
-} py_insn_obj;
+};
 
 /* Getter function for gdb.Instruction attributes.  */
 

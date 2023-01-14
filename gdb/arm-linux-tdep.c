@@ -1,6 +1,6 @@
 /* GNU/Linux on ARM target support.
 
-   Copyright (C) 1999-2020 Free Software Foundation, Inc.
+   Copyright (C) 1999-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -728,15 +728,15 @@ arm_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 
 static const struct target_desc *
 arm_linux_core_read_description (struct gdbarch *gdbarch,
-                                 struct target_ops *target,
-                                 bfd *abfd)
+				 struct target_ops *target,
+				 bfd *abfd)
 {
   CORE_ADDR arm_hwcap = linux_get_hwcap (target);
 
   if (arm_hwcap & HWCAP_VFP)
     {
       /* NEON implies VFPv3-D32 or no-VFP unit.  Say that we only support
-         Neon with VFPv3-D32.  */
+	 Neon with VFPv3-D32.  */
       if (arm_hwcap & HWCAP_NEON)
 	return aarch32_read_description ();
       else if ((arm_hwcap & (HWCAP_VFPv3 | HWCAP_VFPv3D16)) == HWCAP_VFPv3)
@@ -850,12 +850,12 @@ arm_linux_get_syscall_number (struct gdbarch *gdbarch,
 
       if (svc_operand)
 	{
-          /* OABI */
+	  /* OABI */
 	  svc_number = svc_operand - 0x900000;
 	}
       else
 	{
-          /* EABI */
+	  /* EABI */
 	  regcache_cooked_read_unsigned (regs, 7, &svc_number);
 	}
     }
@@ -946,7 +946,7 @@ arm_linux_software_single_step (struct regcache *regcache)
 static void
 arm_linux_cleanup_svc (struct gdbarch *gdbarch,
 		       struct regcache *regs,
-		       arm_displaced_step_closure *dsc)
+		       arm_displaced_step_copy_insn_closure *dsc)
 {
   ULONGEST apparent_pc;
   int within_scratch;
@@ -957,15 +957,11 @@ arm_linux_cleanup_svc (struct gdbarch *gdbarch,
 		    && apparent_pc < (dsc->scratch_base
 				      + ARM_DISPLACED_MODIFIED_INSNS * 4 + 4));
 
-  if (debug_displaced)
-    {
-      fprintf_unfiltered (gdb_stdlog, "displaced: PC is apparently %.8lx after "
-			  "SVC step ", (unsigned long) apparent_pc);
-      if (within_scratch)
-        fprintf_unfiltered (gdb_stdlog, "(within scratch space)\n");
-      else
-        fprintf_unfiltered (gdb_stdlog, "(outside scratch space)\n");
-    }
+  displaced_debug_printf ("PC is apparently %.8lx after SVC step %s",
+			  (unsigned long) apparent_pc,
+			  (within_scratch
+			   ? "(within scratch space)"
+			   : "(outside scratch space)"));
 
   if (within_scratch)
     displaced_write_reg (regs, dsc, ARM_PC_REGNUM,
@@ -974,7 +970,7 @@ arm_linux_cleanup_svc (struct gdbarch *gdbarch,
 
 static int
 arm_linux_copy_svc (struct gdbarch *gdbarch, struct regcache *regs,
-		    arm_displaced_step_closure *dsc)
+		    arm_displaced_step_copy_insn_closure *dsc)
 {
   CORE_ADDR return_to = 0;
 
@@ -991,16 +987,12 @@ arm_linux_copy_svc (struct gdbarch *gdbarch, struct regcache *regs,
     {
       struct symtab_and_line sal;
 
-      if (debug_displaced)
-	fprintf_unfiltered (gdb_stdlog, "displaced: found "
-			    "sigreturn/rt_sigreturn SVC call.  PC in "
-			    "frame = %lx\n",
-			    (unsigned long) get_frame_pc (frame));
+      displaced_debug_printf ("found sigreturn/rt_sigreturn SVC call.  "
+			      "PC in frame = %lx",
+			      (unsigned long) get_frame_pc (frame));
 
-      if (debug_displaced)
-	fprintf_unfiltered (gdb_stdlog, "displaced: unwind pc = %lx.  "
-			    "Setting momentary breakpoint.\n",
-			    (unsigned long) return_to);
+      displaced_debug_printf ("unwind pc = %lx.  Setting momentary breakpoint.",
+			      (unsigned long) return_to);
 
       gdb_assert (inferior_thread ()->control.step_resume_breakpoint
 		  == NULL);
@@ -1025,19 +1017,18 @@ arm_linux_copy_svc (struct gdbarch *gdbarch, struct regcache *regs,
 	     breakpoint set above.  */
 	  insert_breakpoints ();
 	}
-      else if (debug_displaced)
-	fprintf_unfiltered (gdb_stderr, "displaced: couldn't find previous "
-			    "frame to set momentary breakpoint for "
-			    "sigreturn/rt_sigreturn\n");
+      else
+	displaced_debug_printf ("couldn't find previous frame to set momentary "
+				"breakpoint for sigreturn/rt_sigreturn");
     }
-  else if (debug_displaced)
-    fprintf_unfiltered (gdb_stdlog, "displaced: found SVC call\n");
+  else
+    displaced_debug_printf ("found SVC call");
 
   /* Preparation: If we detect sigreturn, set momentary breakpoint at resume
 		  location, else nothing.
      Insn: unmodified svc.
      Cleanup: if pc lands in scratch space, pc <- insn_addr + insn_size
-              else leave pc alone.  */
+	      else leave pc alone.  */
 
 
   dsc->cleanup = &arm_linux_cleanup_svc;
@@ -1065,7 +1056,7 @@ arm_linux_copy_svc (struct gdbarch *gdbarch, struct regcache *regs,
 static void
 cleanup_kernel_helper_return (struct gdbarch *gdbarch,
 			      struct regcache *regs,
-			      arm_displaced_step_closure *dsc)
+			      arm_displaced_step_copy_insn_closure *dsc)
 {
   displaced_write_reg (regs, dsc, ARM_LR_REGNUM, dsc->tmp[0], CANNOT_WRITE_PC);
   displaced_write_reg (regs, dsc, ARM_PC_REGNUM, dsc->tmp[0], BRANCH_WRITE_PC);
@@ -1074,7 +1065,7 @@ cleanup_kernel_helper_return (struct gdbarch *gdbarch,
 static void
 arm_catch_kernel_helper_return (struct gdbarch *gdbarch, CORE_ADDR from,
 				CORE_ADDR to, struct regcache *regs,
-				arm_displaced_step_closure *dsc)
+				arm_displaced_step_copy_insn_closure *dsc)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
@@ -1086,7 +1077,7 @@ arm_catch_kernel_helper_return (struct gdbarch *gdbarch, CORE_ADDR from,
   dsc->wrote_to_pc = 1;
 
   /* Preparation: tmp[0] <- r14
-                  r14 <- <scratch space>+4
+		  r14 <- <scratch space>+4
 		  *(<scratch space>+8) <- from
      Insn: ldr pc, [r14, #4]
      Cleanup: r14 <- tmp[0], pc <- tmp[0].  */
@@ -1103,21 +1094,20 @@ arm_catch_kernel_helper_return (struct gdbarch *gdbarch, CORE_ADDR from,
    the program has stepped into a Linux kernel helper routine (which must be
    handled as a special case).  */
 
-static displaced_step_closure_up
+static displaced_step_copy_insn_closure_up
 arm_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
 				    CORE_ADDR from, CORE_ADDR to,
 				    struct regcache *regs)
 {
-  std::unique_ptr<arm_displaced_step_closure> dsc
-    (new arm_displaced_step_closure);
+  std::unique_ptr<arm_displaced_step_copy_insn_closure> dsc
+    (new arm_displaced_step_copy_insn_closure);
 
   /* Detect when we enter an (inaccessible by GDB) Linux kernel helper, and
      stop at the return location.  */
   if (from > 0xffff0000)
     {
-      if (debug_displaced)
-        fprintf_unfiltered (gdb_stdlog, "displaced: detected kernel helper "
-			    "at %.8lx\n", (unsigned long) from);
+      displaced_debug_printf ("detected kernel helper at %.8lx",
+			      (unsigned long) from);
 
       arm_catch_kernel_helper_return (gdbarch, from, to, regs, dsc.get ());
     }
@@ -1132,7 +1122,7 @@ arm_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
   arm_displaced_init_closure (gdbarch, from, to, dsc.get ());
 
   /* This is a work around for a problem with g++ 4.8.  */
-  return displaced_step_closure_up (dsc.release ());
+  return displaced_step_copy_insn_closure_up (dsc.release ());
 }
 
 /* Implementation of `gdbarch_stap_is_single_operand', as defined in
@@ -1258,7 +1248,7 @@ arm_stap_parse_special_token (struct gdbarch *gdbarch,
 
 /* ARM process record-replay constructs: syscall, signal etc.  */
 
-struct linux_record_tdep arm_linux_record_tdep;
+static linux_record_tdep arm_linux_record_tdep;
 
 /* arm_canonicalize_syscall maps from the native arm Linux set
    of syscall ids into a canonical set of syscall ids used by
@@ -1644,7 +1634,7 @@ arm_all_but_pc_registers_record (struct regcache *regcache)
   for (i = 0; i < ARM_PC_REGNUM; i++)
     {
       if (record_full_arch_list_add_reg (regcache, ARM_A1_REGNUM + i))
-        return -1;
+	return -1;
     }
 
   if (record_full_arch_list_add_reg (regcache, ARM_PS_REGNUM))
@@ -1666,8 +1656,8 @@ arm_linux_syscall_record (struct regcache *regcache, unsigned long svc_number)
   if (syscall_gdb == gdb_sys_no_syscall)
     {
       printf_unfiltered (_("Process record and replay target doesn't "
-                           "support syscall number %s\n"),
-                           plongest (svc_number));
+			   "support syscall number %s\n"),
+			   plongest (svc_number));
       return -1;
     }
 
@@ -1680,7 +1670,7 @@ arm_linux_syscall_record (struct regcache *regcache, unsigned long svc_number)
    }
 
   ret = record_linux_system_call (syscall_gdb, regcache,
-                                  &arm_linux_record_tdep);
+				  &arm_linux_record_tdep);
   if (ret != 0)
     return ret;
 
@@ -1731,7 +1721,7 @@ arm_linux_init_abi (struct gdbarch_info info,
 								    NULL };
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  linux_init_abi (info, gdbarch);
+  linux_init_abi (info, gdbarch, 1);
 
   tdep->lowest_pc = 0x8000;
   if (info.byte_order_for_code == BFD_ENDIAN_BIG)
@@ -1772,7 +1762,7 @@ arm_linux_init_abi (struct gdbarch_info info,
     default:
       internal_error
 	(__FILE__, __LINE__,
-         _("arm_linux_init_abi: Floating point model not supported"));
+	 _("arm_linux_init_abi: Floating point model not supported"));
       break;
     }
   tdep->jb_elt_size = ARM_LINUX_JB_ELEMENT_SIZE;
@@ -1789,7 +1779,7 @@ arm_linux_init_abi (struct gdbarch_info info,
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
-                                             svr4_fetch_objfile_link_map);
+					     svr4_fetch_objfile_link_map);
 
   tramp_frame_prepend_unwinder (gdbarch,
 				&arm_linux_sigreturn_tramp_frame);
@@ -1817,7 +1807,6 @@ arm_linux_init_abi (struct gdbarch_info info,
   set_gdbarch_displaced_step_copy_insn (gdbarch,
 					arm_linux_displaced_step_copy_insn);
   set_gdbarch_displaced_step_fixup (gdbarch, arm_displaced_step_fixup);
-  set_gdbarch_displaced_step_location (gdbarch, linux_displaced_step_location);
 
   /* Reversible debugging, process record.  */
   set_gdbarch_process_record (gdbarch, arm_process_record);

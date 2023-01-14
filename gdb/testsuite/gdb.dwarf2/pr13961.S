@@ -1,4 +1,4 @@
-/* Copyright 2012-2020 Free Software Foundation, Inc.
+/* Copyright 2012-2021 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -207,7 +207,6 @@ SYMBOL(main):
 	.byte	0x4	/* DW_AT_byte_size */
 	.byte	0x5	/* DW_AT_encoding */
 	.ascii "int\0"	/* DW_AT_name */
-	.byte	0	/* end of children of DIE 0x17 */
 	/* End of manual insertion */
 
 	.byte	0	/* end of children of DIE 0xb */

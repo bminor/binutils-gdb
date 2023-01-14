@@ -1,7 +1,7 @@
 /* *INDENT-OFF* */ /* ATTRIBUTE_PRINTF confuses indent, avoid running it
 		      for now.  */
 /* I/O, string, cleanup, and other random utilities for GDB.
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -165,6 +165,20 @@ public:
   gdb_argv (const gdb_argv &) = delete;
   gdb_argv &operator= (const gdb_argv &) = delete;
 
+  gdb_argv &operator= (gdb_argv &&other)
+  {
+    freeargv (m_argv);
+    m_argv = other.m_argv;
+    other.m_argv = nullptr;
+    return *this;
+  }
+
+  gdb_argv (gdb_argv &&other)
+  {
+    m_argv = other.m_argv;
+    other.m_argv = nullptr;
+  }
+
   ~gdb_argv ()
   {
     freeargv (m_argv);
@@ -216,6 +230,35 @@ public:
   gdb::array_view<char *> as_array_view ()
   {
     return gdb::array_view<char *> (this->get (), this->count ());
+  }
+
+  /* Append arguments to this array.  */
+  void append (gdb_argv &&other)
+  {
+    int size = count ();
+    int argc = other.count ();
+    m_argv = XRESIZEVEC (char *, m_argv, (size + argc + 1));
+
+    for (int argi = 0; argi < argc; argi++)
+      {
+	/* Transfer ownership of the string.  */
+	m_argv[size++] = other.m_argv[argi];
+	/* Ensure that destruction of OTHER works correctly.  */
+	other.m_argv[argi] = nullptr;
+      }
+    m_argv[size] = nullptr;
+  }
+
+  /* Append arguments to this array.  */
+  void append (const gdb_argv &other)
+  {
+    int size = count ();
+    int argc = other.count ();
+    m_argv = XRESIZEVEC (char *, m_argv, (size + argc + 1));
+
+    for (int argi = 0; argi < argc; argi++)
+      m_argv[size++] = xstrdup (other.m_argv[argi]);
+    m_argv[size] = nullptr;
   }
 
   /* The iterator type.  */
@@ -321,6 +364,10 @@ extern void wrap_here (const char *);
 
 extern void reinitialize_more_filter (void);
 
+/* Return the number of characters in a line.  */
+
+extern int get_chars_per_line ();
+
 extern bool pagination_enabled;
 
 extern struct ui_file **current_ui_gdb_stdout_ptr (void);
@@ -396,12 +443,7 @@ extern void vfprintf_filtered (struct ui_file *, const char *, va_list)
 extern void fprintf_filtered (struct ui_file *, const char *, ...)
   ATTRIBUTE_PRINTF (2, 3);
 
-extern void fprintfi_filtered (int, struct ui_file *, const char *, ...)
-  ATTRIBUTE_PRINTF (3, 4);
-
 extern void printf_filtered (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
-
-extern void printfi_filtered (int, const char *, ...) ATTRIBUTE_PRINTF (2, 3);
 
 extern void vprintf_unfiltered (const char *, va_list) ATTRIBUTE_PRINTF (1, 0);
 
@@ -549,6 +591,13 @@ extern pid_t wait_to_die_with_timeout (pid_t pid, int *status, int timeout);
 #endif
 
 extern int myread (int, char *, int);
+
+/* Integer exponentiation: Return V1**V2, where both arguments
+   are integers.
+
+   Requires V1 != 0 if V2 < 0.
+   Returns 1 for 0 ** 0.  */
+extern ULONGEST uinteger_pow (ULONGEST v1, LONGEST v2);
 
 /* Resource limits used by getrlimit and setrlimit.  */
 

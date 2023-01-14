@@ -16,7 +16,7 @@
 Contents of CTF section .ctf:
 
   Header:
-    Magic number: dff2
+    Magic number: 0xdff2
     Version: 4 \(CTF_VERSION_3\)
 #...
 
@@ -27,20 +27,16 @@ Contents of CTF section .ctf:
   Function objects:
 
   Variables:
-    a ->  .*
-    conflicty ->  .*
+    a -> .*
+    conflicty -> .*
 
   Types:
-     [0-9a-f]*: struct A .*
-        \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct A .*
-            \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct B \* foo .*
-     [0-9a-f]*: struct B .*
-        \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct B .*
-            \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct B \* next .*
-     [0-9a-f]*: struct B \* .*
-        \[0x0\] .*
-     [0-9a-f]*: struct A \* .*
-        \[0x0\] .*
+    0x[0-9a-f]*: \(kind 6\) struct A .*
+        *\[0x0\] foo: ID 0x[0-9a-f]*: \(kind 3\) struct B \* .*
+    0x[0-9a-f]*: \(kind 6\) struct B .*
+        *\[0x0\] next: ID 0x[0-9a-f]*: \(kind 3\) struct B \* .*
+    0x[0-9a-f]*: \(kind 3\) struct B \* .*
+    0x[0-9a-f]*: \(kind 3\) struct A \* .*
 
   Strings:
 #...
@@ -56,7 +52,7 @@ CTF archive member: .*/ld/testsuite/ld-ctf/cross-tu-cyclic-[34].c:
   Function objects:
 
   Variables:
-    conflicty ->  .*
+    conflicty -> .*
 
   Types:
 

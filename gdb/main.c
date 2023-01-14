@@ -1,6 +1,6 @@
 /* Top level stuff for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -54,6 +54,7 @@
 #endif
 #include "gdbsupport/alt-stack.h"
 #include "observable.h"
+#include "serial.h"
 
 /* The selected interpreter.  This will be used as a set command
    variable, so it should always be malloc'ed - since
@@ -137,7 +138,7 @@ set_gdb_data_directory (const char *new_datadir)
   if (!IS_ABSOLUTE_PATH (gdb_datadir.c_str ()))
     {
       gdb::unique_xmalloc_ptr<char> abs_datadir
-        = gdb_abspath (gdb_datadir.c_str ());
+	= gdb_abspath (gdb_datadir.c_str ());
 
       gdb_datadir = abs_datadir.get ();
     }
@@ -301,8 +302,6 @@ get_init_files (std::vector<std::string> *system_gdbinit,
 	  }
 	}
 
-      const char *homedir = getenv ("HOME");
-
       /* If the .gdbinit file in the current directory is the same as
 	 the $HOME/.gdbinit file, it should not be sourced.  homebuf
 	 and cwdbuf are used in that purpose.  Make sure that the stats
@@ -312,14 +311,7 @@ get_init_files (std::vector<std::string> *system_gdbinit,
       memset (&homebuf, 0, sizeof (struct stat));
       memset (&cwdbuf, 0, sizeof (struct stat));
 
-      if (homedir)
-	{
-	  homeinit = std::string (homedir) + SLASH_STRING + GDBINIT;
-	  if (stat (homeinit.c_str (), &homebuf) != 0)
-	    {
-	      homeinit = "";
-	    }
-	}
+      homeinit = find_gdb_home_config_file (GDBINIT, &homebuf);
 
       if (stat (GDBINIT, &cwdbuf) == 0)
 	{
@@ -328,7 +320,7 @@ get_init_files (std::vector<std::string> *system_gdbinit,
 			 sizeof (struct stat)))
 	    localinit = GDBINIT;
 	}
-      
+
       initialized = 1;
     }
 
@@ -448,7 +440,8 @@ typedef void (catch_command_errors_const_ftype) (const char *, int);
 
 static int
 catch_command_errors (catch_command_errors_const_ftype command,
-		      const char *arg, int from_tty)
+		      const char *arg, int from_tty,
+		      bool do_bp_actions = false)
 {
   try
     {
@@ -457,6 +450,10 @@ catch_command_errors (catch_command_errors_const_ftype command,
       command (arg, from_tty);
 
       maybe_wait_sync_command_done (was_sync);
+
+      /* Do any commands attached to breakpoint we stopped at.  */
+      if (do_bp_actions)
+	bpstat_do_actions ();
     }
   catch (const gdb_exception &e)
     {
@@ -523,6 +520,26 @@ struct cmdarg
      is not owned by this structure despite it is 'const'.  */
   char *string;
 };
+
+/* From CMDARG_VEC execute command files (matching FILE_TYPE) or commands
+   (matching CMD_TYPE).  Update the value in *RET if and scripts or
+   commands are executed.  */
+
+static void
+execute_cmdargs (const std::vector<struct cmdarg> *cmdarg_vec,
+		 cmdarg_kind file_type, cmdarg_kind cmd_type,
+		 int *ret)
+{
+  for (const auto &cmdarg_p : *cmdarg_vec)
+    {
+      if (cmdarg_p.type == file_type)
+	*ret = catch_command_errors (source_script, cmdarg_p.string,
+				     !batch_flag);
+      else if (cmdarg_p.type == cmd_type)
+	*ret = catch_command_errors (execute_command, cmdarg_p.string,
+				     !batch_flag, true);
+    }
+}
 
 static void
 captured_main_1 (struct captured_main_args *context)
@@ -786,7 +803,7 @@ captured_main_1 (struct captured_main_args *context)
 	    break;
 	  case OPT_WINDOWS:
 	    /* FIXME: cagney/2003-03-01: Not sure if this option is
-               actually useful, and if it is, what it should do.  */
+	       actually useful, and if it is, what it should do.  */
 #ifdef GDBTK
 	    /* --windows is equivalent to -i=insight.  */
 	    xfree (interpreter_p);
@@ -880,7 +897,7 @@ captured_main_1 (struct captured_main_args *context)
 	      else
 		baud_rate = rate;
 	    }
-            break;
+	    break;
 	  case 'l':
 	    {
 	      int timeout;
@@ -1024,7 +1041,7 @@ captured_main_1 (struct captured_main_args *context)
   if (!quiet && strcmp (interpreter_p, INTERP_MI1) == 0)
     {
       /* Print all the junk at the top, with trailing "..." if we are
-         about to read a symbol file (possibly slowly).  */
+	 about to read a symbol file (possibly slowly).  */
       print_gdb_version (gdb_stdout, true);
       if (symarg)
 	printf_filtered ("..");
@@ -1045,7 +1062,7 @@ captured_main_1 (struct captured_main_args *context)
   if (!quiet && !current_interp_named_p (INTERP_MI1))
     {
       /* Print all the junk at the top, with trailing "..." if we are
-         about to read a symbol file (possibly slowly).  */
+	 about to read a symbol file (possibly slowly).  */
       print_gdb_version (gdb_stdout, true);
       if (symarg)
 	printf_filtered ("..");
@@ -1078,22 +1095,7 @@ captured_main_1 (struct captured_main_args *context)
     ret = catch_command_errors (source_script, home_gdbinit.c_str (), 0);
 
   /* Process '-ix' and '-iex' options early.  */
-  for (i = 0; i < cmdarg_vec.size (); i++)
-    {
-      const struct cmdarg &cmdarg_p = cmdarg_vec[i];
-
-      switch (cmdarg_p.type)
-	{
-	case CMDARG_INIT_FILE:
-	  ret = catch_command_errors (source_script, cmdarg_p.string,
-				      !batch_flag);
-	  break;
-	case CMDARG_INIT_COMMAND:
-	  ret = catch_command_errors (execute_command, cmdarg_p.string,
-				      !batch_flag);
-	  break;
-	}
-    }
+  execute_cmdargs (&cmdarg_vec, CMDARG_INIT_FILE, CMDARG_INIT_COMMAND, &ret);
 
   /* Now perform all the actions indicated by the arguments.  */
   if (cdarg != NULL)
@@ -1115,8 +1117,8 @@ captured_main_1 (struct captured_main_args *context)
       && strcmp (execarg, symarg) == 0)
     {
       /* The exec file and the symbol-file are the same.  If we can't
-         open it, better only print one error message.
-         catch_command_errors returns non-zero on success!  */
+	 open it, better only print one error message.
+	 catch_command_errors returns non-zero on success!  */
       ret = catch_command_errors (exec_file_attach, execarg,
 				  !batch_flag);
       if (ret != 0)
@@ -1183,15 +1185,17 @@ captured_main_1 (struct captured_main_args *context)
       auto_load_local_gdbinit_pathname
 	= gdb_realpath (local_gdbinit.c_str ()).release ();
 
-      if (!inhibit_gdbinit && auto_load_local_gdbinit
-	  && file_is_auto_load_safe (local_gdbinit.c_str (),
-				     _("auto-load: Loading .gdbinit "
-				       "file \"%s\".\n"),
-				     local_gdbinit.c_str ()))
+      if (!inhibit_gdbinit && auto_load_local_gdbinit)
 	{
-	  auto_load_local_gdbinit_loaded = 1;
+	  auto_load_debug_printf ("Loading .gdbinit file \"%s\".",
+				  local_gdbinit.c_str ());
 
-	  ret = catch_command_errors (source_script, local_gdbinit.c_str (), 0);
+	  if (file_is_auto_load_safe (local_gdbinit.c_str ()))
+	    {
+	      auto_load_local_gdbinit_loaded = 1;
+
+	      ret = catch_command_errors (source_script, local_gdbinit.c_str (), 0);
+	    }
 	}
     }
 
@@ -1204,22 +1208,7 @@ captured_main_1 (struct captured_main_args *context)
     load_auto_scripts_for_objfile (objfile);
 
   /* Process '-x' and '-ex' options.  */
-  for (i = 0; i < cmdarg_vec.size (); i++)
-    {
-      const struct cmdarg &cmdarg_p = cmdarg_vec[i];
-
-      switch (cmdarg_p.type)
-	{
-	case CMDARG_FILE:
-	  ret = catch_command_errors (source_script, cmdarg_p.string,
-				      !batch_flag);
-	  break;
-	case CMDARG_COMMAND:
-	  ret = catch_command_errors (execute_command, cmdarg_p.string,
-				      !batch_flag);
-	  break;
-	}
-    }
+  execute_cmdargs (&cmdarg_vec, CMDARG_FILE, CMDARG_COMMAND, &ret);
 
   /* Read in the old history after all the command files have been
      read.  */
@@ -1316,13 +1305,13 @@ Selection of debuggee and its files:\n\n\
 Initial commands and command files:\n\n\
   --command=FILE, -x Execute GDB commands from FILE.\n\
   --init-command=FILE, -ix\n\
-                     Like -x but execute commands before loading inferior.\n\
+		     Like -x but execute commands before loading inferior.\n\
   --eval-command=COMMAND, -ex\n\
-                     Execute a single GDB command.\n\
-                     May be used multiple times and in conjunction\n\
-                     with --command.\n\
+		     Execute a single GDB command.\n\
+		     May be used multiple times and in conjunction\n\
+		     with --command.\n\
   --init-eval-command=COMMAND, -iex\n\
-                     Like -ex but before loading inferior.\n\
+		     Like -ex but before loading inferior.\n\
   --nh               Do not read ~/.gdbinit.\n\
   --nx               Do not read any .gdbinit files in any directory.\n\n\
 "), stream);
@@ -1330,7 +1319,7 @@ Initial commands and command files:\n\n\
 Output and user interface control:\n\n\
   --fullname         Output information used by emacs-GDB interface.\n\
   --interpreter=INTERP\n\
-                     Select a specific interpreter / user interface\n\
+		     Select a specific interpreter / user interface\n\
   --tty=TTY          Use TTY for input/output by the program being debugged.\n\
   -w                 Use the GUI interface.\n\
   --nw               Do not use the GUI interface.\n\
@@ -1343,14 +1332,14 @@ Output and user interface control:\n\n\
   fputs_unfiltered (_("\
   --dbx              DBX compatibility mode.\n\
   -q, --quiet, --silent\n\
-                     Do not print version number on startup.\n\n\
+		     Do not print version number on startup.\n\n\
 "), stream);
   fputs_unfiltered (_("\
 Operating modes:\n\n\
   --batch            Exit after processing options.\n\
   --batch-silent     Like --batch, but suppress all gdb stdout output.\n\
   --return-child-result\n\
-                     GDB exit code will be the child's exit code.\n\
+		     GDB exit code will be the child's exit code.\n\
   --configuration    Print details about GDB configuration and then exit.\n\
   --help             Print this message and then exit.\n\
   --version          Print version information and then exit.\n\n\
@@ -1360,7 +1349,7 @@ Remote debugging options:\n\n\
 Other options:\n\n\
   --cd=DIR           Change current directory to DIR.\n\
   --data-directory=DIR, -D\n\
-                     Set GDB's data-directory to DIR.\n\
+		     Set GDB's data-directory to DIR.\n\
 "), stream);
   fputs_unfiltered (_("\n\
 At startup, GDB reads the following init files and executes their commands:\n\
@@ -1369,7 +1358,7 @@ At startup, GDB reads the following init files and executes their commands:\n\
     {
       std::string output;
       for (size_t idx = 0; idx < system_gdbinit.size (); ++idx)
-        {
+	{
 	  output += system_gdbinit[idx];
 	  if (idx < system_gdbinit.size () - 1)
 	    output += ", ";

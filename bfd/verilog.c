@@ -1,5 +1,5 @@
 /* BFD back-end for verilog hex memory dump files.
-   Copyright (C) 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2009-2021 Free Software Foundation, Inc.
    Written by Anthony Green <green@moxielogic.com>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -165,12 +165,25 @@ verilog_set_section_contents (bfd *abfd,
 static bfd_boolean
 verilog_write_address (bfd *abfd, bfd_vma address)
 {
-  char buffer[12];
+  char buffer[20];
   char *dst = buffer;
   bfd_size_type wrlen;
 
   /* Write the address.  */
   *dst++ = '@';
+#ifdef BFD64
+  if (address >= (bfd_vma)1 << 32)
+    {
+      TOHEX (dst, (address >> 56));
+      dst += 2;
+      TOHEX (dst, (address >> 48));
+      dst += 2;
+      TOHEX (dst, (address >> 40));
+      dst += 2;
+      TOHEX (dst, (address >> 32));
+      dst += 2;
+    }
+#endif
   TOHEX (dst, (address >> 24));
   dst += 2;
   TOHEX (dst, (address >> 16));
@@ -392,6 +405,7 @@ const bfd_target verilog_vec =
   ' ',				/* AR_pad_char.  */
   16,				/* AR_max_namelen.  */
   0,				/* match priority.  */
+  TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
   bfd_getb32, bfd_getb_signed_32, bfd_putb32,
   bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* Data.  */

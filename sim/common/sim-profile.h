@@ -1,5 +1,5 @@
 /* Profile header for simulators using common framework.
-   Copyright (C) 1996-2020 Free Software Foundation, Inc.
+   Copyright (C) 1996-2021 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define SIM_PROFILE_H
 
 #ifndef WITH_PROFILE
-Error, WITH_PROFILE not defined.
+#error "WITH_PROFILE not defined"
 #endif
 
 /* Standard profilable entities.  */

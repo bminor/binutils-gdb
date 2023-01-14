@@ -1,6 +1,6 @@
 /* GDB routines for supporting auto-loaded scripts.
 
-   Copyright (C) 2012-2020 Free Software Foundation, Inc.
+   Copyright (C) 2012-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,6 +25,15 @@ struct program_space;
 struct auto_load_pspace_info;
 struct extension_language_defn;
 
+/* Value of the 'set debug auto-load' configuration variable.  */
+
+extern bool debug_auto_load;
+
+/* Print an "auto-load" debug statement.  */
+
+#define auto_load_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (debug_auto_load, "auto-load", fmt, ##__VA_ARGS__)
+
 extern bool global_auto_load;
 
 extern bool auto_load_local_gdbinit;
@@ -44,11 +53,19 @@ extern struct cmd_list_element **auto_load_set_cmdlist_get (void);
 extern struct cmd_list_element **auto_load_show_cmdlist_get (void);
 extern struct cmd_list_element **auto_load_info_cmdlist_get (void);
 
-extern int file_is_auto_load_safe (const char *filename,
-				   const char *debug_fmt, ...)
-  ATTRIBUTE_PRINTF (2, 3);
+/* Return true if FILENAME is located in one of the directories of
+   AUTO_LOAD_SAFE_PATH.  Otherwise call warning and return false.  FILENAME does
+   not have to be an absolute path.
 
-extern int auto_load_gdb_scripts_enabled
+   Existence of FILENAME is not checked.  Function will still give a warning
+   even if the caller would quietly skip non-existing file in unsafe
+   directory.  */
+
+extern bool file_is_auto_load_safe (const char *filename);
+
+/* Return true if auto-loading gdb scripts is enabled.  */
+
+extern bool auto_load_gdb_scripts_enabled
   (const struct extension_language_defn *extlang);
 
 #endif /* AUTO_LOAD_H */

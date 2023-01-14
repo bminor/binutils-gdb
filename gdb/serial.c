@@ -1,6 +1,6 @@
 /* Generic serial interface routines
 
-   Copyright (C) 1992-2020 Free Software Foundation, Inc.
+   Copyright (C) 1992-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -216,7 +216,7 @@ serial_open (const char *name)
     {
 #ifndef USE_WIN32API
       /* Check to see if name is a socket.  If it is, then treat it
-         as such.  Otherwise assume that it's a character device.  */
+	 as such.  Otherwise assume that it's a character device.  */
       struct stat sb;
       if (stat (name, &sb) == 0 && (sb.st_mode & S_IFMT) == S_IFSOCK)
 	ops = serial_interface_lookup ("local");
@@ -401,7 +401,7 @@ serial_readchar (struct serial *scb, int timeout)
       serial_logchar (serial_logfp, 'r', ch, timeout);
 
       /* Make sure that the log file is as up-to-date as possible,
-         in case we are getting ready to dump core or something.  */
+	 in case we are getting ready to dump core or something.  */
       gdb_flush (serial_logfp);
     }
   if (serial_debug_p (scb))
@@ -427,7 +427,7 @@ serial_write (struct serial *scb, const void *buf, size_t count)
 	serial_logchar (serial_logfp, 'w', str[c] & 0xff, 0);
 
       /* Make sure that the log file is as up-to-date as possible,
-         in case we are getting ready to dump core or something.  */
+	 in case we are getting ready to dump core or something.  */
       gdb_flush (serial_logfp);
     }
   if (serial_debug_p (scb))
@@ -623,10 +623,7 @@ serial_pipe (struct serial *scbs[2])
 static struct cmd_list_element *serial_set_cmdlist;
 static struct cmd_list_element *serial_show_cmdlist;
 
-/* Baud rate specified for talking to serial target systems.  Default
-   is left as -1, so targets can choose their own defaults.  */
-/* FIXME: This means that "show serial baud" and gr_files_info can
-   print -1 or (unsigned int)-1.  This is a Bad User Interface.  */
+/* See serial.h.  */
 
 int baud_rate = -1;
 
@@ -638,7 +635,7 @@ serial_baud_show_cmd (struct ui_file *file, int from_tty,
 		    value);
 }
 
-/* Parity for serial port.  */
+/* See serial.h.  */
 
 int serial_parity = GDBPARITY_NONE;
 
@@ -696,12 +693,12 @@ using remote targets."),
 			    &serial_set_cmdlist, &serial_show_cmdlist);
 
   add_setshow_enum_cmd ("parity", no_class, parity_enums,
-                        &parity, _("\
+			&parity, _("\
 Set parity for remote serial I/O."), _("\
 Show parity for remote serial I/O."), NULL,
-                        set_parity,
-                        NULL, /* FIXME: i18n: */
-                        &serial_set_cmdlist, &serial_show_cmdlist);
+			set_parity,
+			NULL, /* FIXME: i18n: */
+			&serial_set_cmdlist, &serial_show_cmdlist);
 
   add_setshow_filename_cmd ("remotelogfile", no_class, &serial_logfile, _("\
 Set filename for remote session recording."), _("\

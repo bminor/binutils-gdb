@@ -99,16 +99,16 @@ static int ibuffer_space PARAMS((void));
 static int rl_get_char PARAMS((int *));
 static int rl_gather_tyi PARAMS((void));
 
+/* Windows isatty returns true for every character device, including the null
+   device, so we need to perform additional checks. */
 #if defined (_WIN32) && !defined (__CYGWIN__)
-
-/* 'isatty' in the Windows runtime returns non-zero for every
-   character device, including the null device.  Repair that.  */
 #include <io.h>
 #include <conio.h>
 #define WIN32_LEAN_AND_MEAN 1
 #include <windows.h>
 
-int w32_isatty (int fd)
+int
+win32_isatty (int fd)
 {
   if (_isatty(fd))
     {
@@ -127,7 +127,7 @@ int w32_isatty (int fd)
   return 0;
 }
 
-#define isatty(x)  w32_isatty(x)
+#define isatty(x)	win32_isatty(x)
 #endif
 
 /* **************************************************************** */

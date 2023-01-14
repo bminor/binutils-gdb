@@ -1,3 +1,145 @@
+2021-01-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Specify Location): Move menu to the end of the
+	node.
+	(Auto-loading): Likewise.
+	(Extending GDB): Likewise.
+	(TUI): Likewise.
+	(Operating System Information): Likewise.
+
+2021-01-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR cli/25956
+	* gdb.texinfo (Output Styling): Document version style.
+
+2021-01-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Auto-loading extensions): Add additional cross
+	references and move @menu to the end of the node.
+
+2021-01-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Aliases): Move @menu to the end of the node.
+
+2021-01-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (PowerPC Embedded): Down case contents of @var.
+
+2021-01-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Commands): Update menu.
+	(Extending GDB): Likewise.
+	(Command aliases default args): Moved later into the document,
+	added a cindex entry.  Renamed the section 'Automatically prepend
+	default arguments to user-defined aliases' to 'Default Arguments'.
+	(Aliases): Moved earlier in the document.  Minor rewording of the
+	first paragraph, down-cased the text inside all uses of @var, and
+	added a cross reference to the Python code.  Renamed the section
+	'Creating new spellings of existing commands' to 'Command
+	Aliases'.
+
+2021-01-21  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR python/19151
+	* python.texi (Breakpoints In Python): Document
+	gdb.BP_HARDWARE_BREAKPOINT.
+
+2021-01-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo, refcard.tex: Update copyright year range.
+
+2020-12-29  Hannes Domani  <ssbssa@yahoo.de>
+
+	* python.texi (Frame Decorator API): Fix method name.
+
+2020-12-23  Alex Bennée  <alex.bennee@linaro.org>
+
+	* gdb.texinfo (Packets): Clarify language for ? packet.
+
+2020-12-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Requirements): Add GMP to list of requirements.
+
+2020-12-18  Hannes Domani  <ssbssa@yahoo.de>
+
+	* python.texi (TUI Windows In Python): Remove erroneous 'a'.
+
+2020-12-18  Hannes Domani  <ssbssa@yahoo.de>
+
+	* python.texi (Values From Inferior): Document the address keyword.
+
+2020-12-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/27088
+	* gdb.texinfo (Range Checking): Fix "show check range" command
+	name.
+
+2020-12-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Caching Target Data): Document 'maint flush
+	dcache'.
+
+2020-12-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Symbols): Document 'maint flush symbol-cache'.
+	(Maintenance Commands): Document 'maint flush register-cache'.
+
+2020-12-04  Bernd Edlinger  <bernd.edlinger@hotmail.de>
+
+	* Makefile.in: Delete GDBvn.texi and version.subst only in
+	the maintainer-clean target.
+
+2020-11-29  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR python/26974
+	* python.texi: Fix docu for static members argument.
+
+2020-11-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Debugging Output): Document 'set/show debug
+	fortran-array-slicing'.
+	(Special Fortran Commands): Document 'set/show fortran
+	repack-array-slices'.
+
+2020-11-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Maintenance Commands): Update description of 'maint
+	print c-tdesc'.
+
+2020-11-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Mode Options): Descriptions of initialization files
+	has been moved to 'Initialization Files'.
+	(Startup): Likewise.
+	(Initialization Files): New node.
+	(gdb man): Update to mention alternative file paths.
+	(gdbinit man): Likewise.
+
+2020-10-27  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.texinfo (Set Breaks): Document the '-force-condition' flag
+	of the 'break'command.
+	* gdb.texinfo (Conditions): Document the '-force' flag of the
+	'condition' command.
+
+2020-10-27  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.texinfo (Set Breaks): Document disabling of breakpoint
+	locations for which the breakpoint condition is invalid.
+
+2020-10-06  Michael Forney  <mforney@mforney.org>
+
+	* Makefile.in (HAVE_NATIVE_GCORE_HOST): Add for gcore.1
+	install condition.
+
+2020-10-04  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.texinfo (Debugging Output): Add set/show debug event-loop.
+
+2020-10-04  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.texinfo (Debugging Output): Add empty lines, fix typo.
+
 2020-09-13  Pedro Alves  <pedro@palves.net>
 
 	* gdb.texinfo (GDB/MI Breakpoint Commands): Document

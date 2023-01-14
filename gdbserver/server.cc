@@ -1,5 +1,5 @@
 /* Main code for remote server for GDB.
-   Copyright (C) 1989-2020 Free Software Foundation, Inc.
+   Copyright (C) 1989-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -49,6 +49,7 @@
 #include "gdbsupport/scope-exit.h"
 #include "gdbsupport/gdb_select.h"
 #include "gdbsupport/scoped_restore.h"
+#include "gdbsupport/search.h"
 
 #define require_running_or_return(BUF)		\
   if (!target_running ())			\
@@ -828,8 +829,10 @@ handle_general_set (char *own_buf)
       else
 	{
 	  /* We don't know what this mode is, so complain to GDB.  */
-	  sprintf (own_buf, "E.Unknown thread-events mode requested: %s\n",
-		   mode);
+	  std::string err
+	    = string_printf ("E.Unknown thread-events mode requested: %s\n",
+			     mode);
+	  strcpy (own_buf, err.c_str ());
 	  return;
 	}
 
@@ -955,6 +958,8 @@ monitor_show_help (void)
   monitor_output ("    Enable h/w breakpoint/watchpoint debugging messages\n");
   monitor_output ("  set remote-debug <0|1>\n");
   monitor_output ("    Enable remote protocol debugging messages\n");
+  monitor_output ("  set event-loop-debug <0|1>\n");
+  monitor_output ("    Enable event loop debugging messages\n");
   monitor_output ("  set debug-format option1[,option2,...]\n");
   monitor_output ("    Add additional information to debugging messages\n");
   monitor_output ("    Options: all, none");
@@ -1038,89 +1043,6 @@ gdb_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
     }
 }
 
-/* Subroutine of handle_search_memory to simplify it.  */
-
-static int
-handle_search_memory_1 (CORE_ADDR start_addr, CORE_ADDR search_space_len,
-			gdb_byte *pattern, unsigned pattern_len,
-			gdb_byte *search_buf,
-			unsigned chunk_size, unsigned search_buf_size,
-			CORE_ADDR *found_addrp)
-{
-  /* Prime the search buffer.  */
-
-  if (gdb_read_memory (start_addr, search_buf, search_buf_size)
-      != search_buf_size)
-    {
-      warning ("Unable to access %ld bytes of target "
-	       "memory at 0x%lx, halting search.",
-	       (long) search_buf_size, (long) start_addr);
-      return -1;
-    }
-
-  /* Perform the search.
-
-     The loop is kept simple by allocating [N + pattern-length - 1] bytes.
-     When we've scanned N bytes we copy the trailing bytes to the start and
-     read in another N bytes.  */
-
-  while (search_space_len >= pattern_len)
-    {
-      gdb_byte *found_ptr;
-      unsigned nr_search_bytes = (search_space_len < search_buf_size
-				  ? search_space_len
-				  : search_buf_size);
-
-      found_ptr = (gdb_byte *) memmem (search_buf, nr_search_bytes, pattern,
-				       pattern_len);
-
-      if (found_ptr != NULL)
-	{
-	  CORE_ADDR found_addr = start_addr + (found_ptr - search_buf);
-	  *found_addrp = found_addr;
-	  return 1;
-	}
-
-      /* Not found in this chunk, skip to next chunk.  */
-
-      /* Don't let search_space_len wrap here, it's unsigned.  */
-      if (search_space_len >= chunk_size)
-	search_space_len -= chunk_size;
-      else
-	search_space_len = 0;
-
-      if (search_space_len >= pattern_len)
-	{
-	  unsigned keep_len = search_buf_size - chunk_size;
-	  CORE_ADDR read_addr = start_addr + chunk_size + keep_len;
-	  int nr_to_read;
-
-	  /* Copy the trailing part of the previous iteration to the front
-	     of the buffer for the next iteration.  */
-	  memcpy (search_buf, search_buf + chunk_size, keep_len);
-
-	  nr_to_read = (search_space_len - keep_len < chunk_size
-			? search_space_len - keep_len
-			: chunk_size);
-
-	  if (gdb_read_memory (read_addr, search_buf + keep_len,
-			       nr_to_read) != nr_to_read)
-	    {
-	      warning ("Unable to access %ld bytes of target memory "
-		       "at 0x%lx, halting search.",
-		       (long) nr_to_read, (long) read_addr);
-	      return -1;
-	    }
-
-	  start_addr += chunk_size;
-	}
-    }
-
-  /* Not found.  */
-
-  return 0;
-}
-
 /* Handle qSearch:memory packets.  */
 
 static void
@@ -1130,23 +1052,14 @@ handle_search_memory (char *own_buf, int packet_len)
   CORE_ADDR search_space_len;
   gdb_byte *pattern;
   unsigned int pattern_len;
-  /* NOTE: also defined in find.c testcase.  */
-#define SEARCH_CHUNK_SIZE 16000
-  const unsigned chunk_size = SEARCH_CHUNK_SIZE;
-  /* Buffer to hold memory contents for searching.  */
-  gdb_byte *search_buf;
-  unsigned search_buf_size;
   int found;
   CORE_ADDR found_addr;
   int cmd_name_len = sizeof ("qSearch:memory:") - 1;
 
   pattern = (gdb_byte *) malloc (packet_len);
   if (pattern == NULL)
-    {
-      error ("Unable to allocate memory to perform the search");
-      strcpy (own_buf, "E00");
-      return;
-    }
+    error ("Unable to allocate memory to perform the search");
+
   if (decode_search_memory_packet (own_buf + cmd_name_len,
 				   packet_len - cmd_name_len,
 				   &start_addr, &search_space_len,
@@ -1154,29 +1067,15 @@ handle_search_memory (char *own_buf, int packet_len)
     {
       free (pattern);
       error ("Error in parsing qSearch:memory packet");
-      strcpy (own_buf, "E00");
-      return;
     }
 
-  search_buf_size = chunk_size + pattern_len - 1;
-
-  /* No point in trying to allocate a buffer larger than the search space.  */
-  if (search_space_len < search_buf_size)
-    search_buf_size = search_space_len;
-
-  search_buf = (gdb_byte *) malloc (search_buf_size);
-  if (search_buf == NULL)
+  auto read_memory = [] (CORE_ADDR addr, gdb_byte *result, size_t len)
     {
-      free (pattern);
-      error ("Unable to allocate memory to perform the search");
-      strcpy (own_buf, "E00");
-      return;
-    }
+      return gdb_read_memory (addr, result, len) == len;
+    };
 
-  found = handle_search_memory_1 (start_addr, search_space_len,
-				  pattern, pattern_len,
-				  search_buf, chunk_size, search_buf_size,
-				  &found_addr);
+  found = simple_search_memory (read_memory, start_addr, search_space_len,
+				pattern, pattern_len, &found_addr);
 
   if (found > 0)
     sprintf (own_buf, "1,%lx", (long) found_addr);
@@ -1185,7 +1084,6 @@ handle_search_memory (char *own_buf, int packet_len)
   else
     strcpy (own_buf, "E00");
 
-  free (search_buf);
   free (pattern);
 }
 
@@ -1388,6 +1286,16 @@ handle_monitor_command (char *mon, char *own_buf)
     {
       remote_debug = 0;
       monitor_output ("Protocol debug output disabled.\n");
+    }
+  else if (strcmp (mon, "set event-loop-debug 1") == 0)
+    {
+      debug_event_loop = debug_event_loop_kind::ALL;
+      monitor_output ("Event loop debug output enabled.\n");
+    }
+  else if (strcmp (mon, "set event-loop-debug 0") == 0)
+    {
+      debug_event_loop = debug_event_loop_kind::OFF;
+      monitor_output ("Event loop debug output disabled.\n");
     }
   else if (startswith (mon, "set debug-format "))
     {
@@ -2899,7 +2807,7 @@ resume (struct thread_resume *actions, size_t num_actions)
 	}
 
       if (cs.last_status.kind != TARGET_WAITKIND_EXITED
-          && cs.last_status.kind != TARGET_WAITKIND_SIGNALLED
+	  && cs.last_status.kind != TARGET_WAITKIND_SIGNALLED
 	  && cs.last_status.kind != TARGET_WAITKIND_NO_RESUMED)
 	current_thread->last_status = cs.last_status;
 
@@ -2912,8 +2820,8 @@ resume (struct thread_resume *actions, size_t num_actions)
       disable_async_io ();
 
       if (cs.last_status.kind == TARGET_WAITKIND_EXITED
-          || cs.last_status.kind == TARGET_WAITKIND_SIGNALLED)
-        target_mourn_inferior (cs.last_ptid);
+	  || cs.last_status.kind == TARGET_WAITKIND_SIGNALLED)
+	target_mourn_inferior (cs.last_ptid);
     }
 }
 
@@ -3413,7 +3321,7 @@ static void
 gdbserver_version (void)
 {
   printf ("GNU gdbserver %s%s\n"
-	  "Copyright (C) 2020 Free Software Foundation, Inc.\n"
+	  "Copyright (C) 2021 Free Software Foundation, Inc.\n"
 	  "gdbserver is free software, covered by the "
 	  "GNU General Public License.\n"
 	  "This gdbserver was configured as \"%s\"\n",
@@ -3468,10 +3376,11 @@ gdbserver_usage (FILE *stream)
 	   "                            none\n"
 	   "                            timestamp\n"
 	   "  --remote-debug        Enable remote protocol debugging output.\n"
+	   "  --event-loop-debug    Enable event loop debugging output.\n"
 	   "  --disable-packet=OPT1[,OPT2,...]\n"
 	   "                        Disable support for RSP packets or features.\n"
 	   "                          Options:\n"
-	   "                            vCont, Tthread, qC, qfThreadInfo and \n"
+	   "                            vCont, T, Tthread, qC, qfThreadInfo and \n"
 	   "                            threads (disable all threading packets).\n"
 	   "\n"
 	   "For more information, consult the GDB manual (available as on-line \n"
@@ -3489,7 +3398,8 @@ gdbserver_show_disableable (FILE *stream)
 	   "  qfThreadInfo\tThread listing\n"
 	   "  Tthread     \tPassing the thread specifier in the "
 	   "T stop reply packet\n"
-	   "  threads     \tAll of the above\n");
+	   "  threads     \tAll of the above\n"
+	   "  T           \tAll 'T' packets\n");
 }
 
 /* Start up the event loop.  This is the entry point to the event
@@ -3683,6 +3593,8 @@ captured_main (int argc, char *argv[])
 	}
       else if (strcmp (*next_arg, "--remote-debug") == 0)
 	remote_debug = 1;
+      else if (strcmp (*next_arg, "--event-loop-debug") == 0)
+	debug_event_loop = debug_event_loop_kind::ALL;
       else if (startswith (*next_arg, "--debug-file="))
 	debug_set_output ((*next_arg) + sizeof ("--debug-file=") -1);
       else if (strcmp (*next_arg, "--disable-packet") == 0)
@@ -3918,11 +3830,11 @@ captured_main (int argc, char *argv[])
 	      - If --once was specified, we're done.
 
 	      - If not in extended-remote mode, and we're no longer
-	        debugging anything, simply exit: GDB has disconnected
-	        after processing the last process exit.
+		debugging anything, simply exit: GDB has disconnected
+		after processing the last process exit.
 
 	      - Otherwise, close the connection and reopen it at the
-	        top of the loop.  */
+		top of the loop.  */
 	  if (run_once || (!extended_protocol && !target_running ()))
 	    throw_quit ("Quit");
 

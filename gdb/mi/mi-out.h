@@ -1,5 +1,5 @@
 /* MI Command Set - MI output generating routines for GDB.
-   Copyright (C) 2000-2020 Free Software Foundation, Inc.
+   Copyright (C) 2000-2021 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -82,6 +82,18 @@ protected:
 
   virtual bool do_is_mi_like_p () const override
   { return true; }
+
+  virtual void do_progress_start (const std::string &, bool) override
+  {
+  }
+
+  virtual void do_progress_notify (double) override
+  {
+  }
+
+  virtual void do_progress_end () override
+  {
+  }
 
 private:
 

@@ -1,4 +1,4 @@
-# Copyright 1997-2020 Free Software Foundation, Inc.
+# Copyright 1997-2021 Free Software Foundation, Inc.
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ standard_testfile overlays.c ovlymgr.c foo.c bar.c baz.c grbx.c
 
 if {[build_executable $testfile.exp $testfile \
 	 [list $srcfile $srcfile2 $srcfile3 $srcfile4 $srcfile5 $srcfile6] \
-	 {debug ldscript=-Wl,-T$linker_script}] == -1} {
+	 "debug ldscript=-Wl,-T$linker_script"] == -1} {
      untested "failed to compile"
      return -1
 }

@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2020 Free Software Foundation, Inc.
+# Copyright (C) 2009-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -487,11 +487,54 @@ proc test_unions {} {
   }
 }
 
+# Test the address option for gdb.Value.format_string.
+proc test_address {} {
+  global undefined
+  global current_lang
+
+  check_var_with_bool_opt "address" "a_point_t"
+  check_var_with_bool_opt "address" "a_point_t_pointer" \
+    $undefined \
+    ""
+  check_var_with_bool_opt "address" "another_point"
+  check_var_with_bool_opt "symbols" "a_struct_with_union"
+  check_var_with_bool_opt "address" "an_enum"
+  check_var_with_bool_opt "address" "a_string" \
+    $undefined \
+    "\"hello world\""
+  check_var_with_bool_opt "address" "a_binary_string" \
+    $undefined \
+    "\"hello\""
+  check_var_with_bool_opt "address" "a_binary_string_array"
+  check_var_with_bool_opt "address" "a_big_string"
+  check_var_with_bool_opt "address" "an_array"
+  check_var_with_bool_opt "address" "an_array_with_repetition"
+  check_var_with_bool_opt "address" "a_symbol_pointer" \
+    $undefined \
+    "<global_symbol>"
+
+  if { $current_lang == "c++" } {
+    check_var_with_bool_opt "address" "a_point_t_ref"
+    check_var_with_bool_opt "address" "a_base_ref" \
+      $undefined \
+      ""
+  }
+
+  with_temp_option "set print address off" "set print address on" {
+    check_var_with_no_opts "a_string" \
+      "\"hello world\""
+    check_var_with_bool_opt "address" "a_string" \
+      $undefined \
+      "\"hello world\""
+  }
+}
+
 # Test the deref_refs option for gdb.Value.format_string.
 proc test_deref_refs {} {
   global current_lang
   global default_pointer_regexp
   global default_ref_regexp
+  global decimal
 
   check_var_with_bool_opt "deref_refs" "a_point_t"
   check_var_with_bool_opt "deref_refs" "a_point_t_pointer"
@@ -509,7 +552,7 @@ proc test_deref_refs {} {
   if { $current_lang == "c++" } {
     check_var_with_bool_opt "deref_refs" "a_point_t_ref"
     check_var_with_bool_opt "deref_refs" "a_base_ref" \
-      "${default_ref_regexp}: \\{_vptr\\.Base = ${default_pointer_regexp} <vtable for Deriv\\+16>, a = 42, static a_static_member = 2019\\}"
+	"${default_ref_regexp}: \\{_vptr\[.\$\]Base = ${default_pointer_regexp} <vtable for Deriv\\+$decimal>, a = 42, static a_static_member = 2019\\}"
   }
 }
 
@@ -881,6 +924,7 @@ proc test_mixed {} {
   global current_lang
   global default_ref_regexp
   global default_pointer_regexp
+  global decimal
 
   check_format_string "a_point_t" \
     "raw=True, format='x'" \
@@ -905,7 +949,7 @@ proc test_mixed {} {
 
     check_format_string "a_base_ref" \
       "deref_refs=True, static_members=False" \
-      "${default_ref_regexp}: \\{_vptr\\.Base = ${default_pointer_regexp} <vtable for Deriv\\+16>, a = 42\\}"
+      "${default_ref_regexp}: \\{_vptr\[.\$\]Base = ${default_pointer_regexp} <vtable for Deriv\\+$decimal>, a = 42\\}"
   }
 }
 
@@ -943,6 +987,7 @@ proc test_all_common {} {
   test_array_indexes
   test_symbols
   test_unions
+  test_address
   test_deref_refs
   test_actual_objects
   test_static_members

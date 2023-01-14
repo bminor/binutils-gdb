@@ -1,6 +1,6 @@
 /* Read ELF (Executable and Linking Format) object files for GDB.
 
-   Copyright (C) 1991-2020 Free Software Foundation, Inc.
+   Copyright (C) 1991-2021 Free Software Foundation, Inc.
 
    Written by Fred Fish at Cygnus Support.
 
@@ -147,10 +147,15 @@ elf_symfile_segments (bfd *abfd)
 	 RealView) use SHT_NOBITS for uninitialized data.  Since it is
 	 uninitialized, it doesn't need a program header.  Such
 	 binaries are not relocatable.  */
-      if (bfd_section_size (sect) > 0 && j == num_segments
+
+      /* Exclude debuginfo files from this warning, too, since those
+	 are often not strictly compliant with the standard. See, e.g.,
+	 ld/24717 for more discussion.  */
+      if (!is_debuginfo_file (abfd)
+	  && bfd_section_size (sect) > 0 && j == num_segments
 	  && (bfd_section_flags (sect) & SEC_LOAD) != 0)
-	warning (_("Loadable section \"%s\" outside of ELF segments"),
-		 bfd_section_name (sect));
+	warning (_("Loadable section \"%s\" outside of ELF segments\n  in %s"),
+		 bfd_section_name (sect), bfd_get_filename (abfd));
     }
 
   return data;
@@ -176,11 +181,8 @@ elf_symfile_segments (bfd *abfd)
    -kingdon).  */
 
 static void
-elf_locate_sections (bfd *ignore_abfd, asection *sectp, void *eip)
+elf_locate_sections (asection *sectp, struct elfinfo *ei)
 {
-  struct elfinfo *ei;
-
-  ei = (struct elfinfo *) eip;
   if (strcmp (sectp->name, ".stab") == 0)
     {
       ei->stabsect = sectp;
@@ -1211,7 +1213,10 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 
   memset ((char *) &ei, 0, sizeof (ei));
   if (!(objfile->flags & OBJF_READNEVER))
-    bfd_map_over_sections (abfd, elf_locate_sections, (void *) & ei);
+    {
+      for (asection *sect : gdb_bfd_sections (abfd))
+	elf_locate_sections (sect, &ei);
+    }
 
   elf_read_minimal_symbols (objfile, symfile_flags, &ei);
 
@@ -1232,7 +1237,7 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
       const struct ecoff_debug_swap *swap;
 
       /* .mdebug section, presumably holding ECOFF debugging
-         information.  */
+	 information.  */
       swap = get_elf_backend_data (abfd)->elf_backend_ecoff_debug_swap;
       if (swap)
 	elfmdebug_build_psymtabs (objfile, swap, ei.mdebugsect);
@@ -1242,7 +1247,7 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
       asection *str_sect;
 
       /* Stab sections have an associated string table that looks like
-         a separate section.  */
+	 a separate section.  */
       str_sect = bfd_get_section_by_name (abfd, ".stabstr");
 
       /* FIXME should probably warn about a stab section without a stabstr.  */

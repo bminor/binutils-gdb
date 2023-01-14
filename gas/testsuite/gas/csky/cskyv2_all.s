@@ -76,8 +76,8 @@ all:
    st.d    r2, (r3, 4)
    stex.w   r2, (r3, 4)
    ldex.w   r2, (r3, 4)
-   addi    sp,  sp, 0x30
-   addi    r3,  sp, 0x4
+   addi    r14,  r14, 0x30
+   addi    r3,  r14, 0x4
    addi    r1,  20
    addi    r1,  r1, 20
    addi    r21, 20
@@ -86,16 +86,16 @@ all:
    addi    r8,  r4, 1
    addi    r1,  r4, 9
    addi    r1,  r28, 9
-   addi    r3,  sp, 0x1
-   addi    r3,  sp, 0x400
-   addi    sp,  sp, 0x33
-   addi    sp,  sp, 0x200
+   addi    r3,  r14, 0x1
+   addi    r3,  r14, 0x400
+   addi    r14,  r14, 0x33
+   addi    r14,  r14, 0x200
    addi16  r1,  20
    addi16  r2,  r4, 1
    addi32  r2,  r4, 1
-   addi32  r3,  sp, 0x400
-   addi32  sp,  sp, 0x33
-   subi    sp,  sp, 0x30
+   addi32  r3,  r14, 0x400
+   addi32  r14,  r14, 0x33
+   subi    r14,  r14, 0x30
    subi    r1,  20
    subi    r1,  r1, 20
    subi    r21, 20
@@ -104,12 +104,12 @@ all:
    subi    r8,  r4, 1
    subi    r1,  r4, 9
    subi    r1,  r28, 9
-   subi    sp,  sp, 0x33
-   subi    sp,  sp, 0x200
+   subi    r14,  r14, 0x33
+   subi    r14,  r14, 0x200
    subi16  r1,  20
    subi16  r2,  r4, 1
    subi32  r2,  r4, 1
-   subi32  sp,  sp, 0x33
+   subi32  r14,  r14, 0x33
    sub     r3, r0
    sub     r8, r0
    sub     r9, r3, r0

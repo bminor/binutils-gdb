@@ -126,7 +126,6 @@ struct _sim_cpu {
   char **command_line;		/* Pointer to command line arguments.  */
 
   unsigned char *memory;
-  unsigned char *eightbit;
   int mask;
   
   sim_cpu_base base;
@@ -135,12 +134,7 @@ struct _sim_cpu {
 /* The sim_state struct.  */
 struct sim_state {
   sim_cpu *cpu[MAX_NR_PROCESSORS];
-  unsigned int sim_cache_size;
-  decoded_inst *sim_cache;
-  unsigned short *cache_idx;
   unsigned long memory_size;
-  int cache_top;
-  int compiles;
 #ifdef ADEBUG
   int stats[O_LAST];
 #endif

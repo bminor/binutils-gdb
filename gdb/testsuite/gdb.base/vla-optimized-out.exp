@@ -1,4 +1,4 @@
-# Copyright 2018-2020 Free Software Foundation, Inc.
+# Copyright 2018-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ proc vla_optimized_out {exe_suffix options} {
 	"printed optimized out vla"
 
     gdb_test "p sizeof (a)" \
-	" = $sizeof_result" \
+	" = ($sizeof_result)" \
 	"printed size of optimized out vla"
 
     # At lower optimisation levels, the upper bound of the array is

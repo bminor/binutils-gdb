@@ -1,6 +1,6 @@
 /* The IGEN simulator generator for GDB, the GNU Debugger.
 
-   Copyright 2002-2020 Free Software Foundation, Inc.
+   Copyright 2002-2021 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney.
 
@@ -35,10 +35,7 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 
 typedef struct _open_table open_table;
 struct _open_table

@@ -1,6 +1,6 @@
 /* Declarations for value printing routines for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -125,7 +125,7 @@ extern void get_formatted_print_options (struct value_print_options *opts,
 					 char format);
 
 extern void maybe_print_array_index (struct type *index_type, LONGEST index,
-                                     struct ui_file *stream,
+				     struct ui_file *stream,
 				     const struct value_print_options *);
 
 
@@ -156,9 +156,6 @@ extern void print_decimal_chars (struct ui_file *, const gdb_byte *,
 
 extern void print_hex_chars (struct ui_file *, const gdb_byte *,
 			     unsigned int, enum bfd_endian, bool);
-
-extern void print_char_chars (struct ui_file *, struct type *,
-			      const gdb_byte *, unsigned int, enum bfd_endian);
 
 extern void print_function_pointer_address (const struct value_print_options *options,
 					    struct gdbarch *gdbarch,

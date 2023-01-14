@@ -1,5 +1,5 @@
 \input texinfo @c                               -*-Texinfo-*-
-@c  Copyright (C) 1991-2020 Free Software Foundation, Inc.
+@c  Copyright (C) 1991-2021 Free Software Foundation, Inc.
 @c UPDATE!!  On future updates--
 @c   (1)   check for new machine-dep cmdline options in
 @c         md_parse_option definitions in config/tc-*.c
@@ -100,7 +100,7 @@
 This file documents the GNU Assembler "@value{AS}".
 
 @c man begin COPYRIGHT
-Copyright @copyright{} 1991-2020 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2021 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -149,7 +149,7 @@ done.
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991-2020 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2021 Free Software Foundation, Inc.
 
       Permission is granted to copy, distribute and/or modify this document
       under the terms of the GNU Free Documentation License, Version 1.3
@@ -536,6 +536,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-fpic}|@b{-fPIC}|@b{-fno-pic}]
    [@b{-march}=@var{ISA}]
    [@b{-mabi}=@var{ABI}]
+   [@b{-mlittle-endian}|@b{-mbig-endian}]
 @end ifset
 @ifset RL78
 
@@ -972,7 +973,7 @@ This option selects the core processor variant.
 @item -EB | -EL
 Select either big-endian (-EB) or little-endian (-EL) output.
 @item -mcode-density
-Enable Code Density extenssion instructions.
+Enable Code Density extension instructions.
 @end table
 @end ifset
 
@@ -4362,6 +4363,7 @@ Some machine configurations provide additional directives.
 * Altmacro::                    @code{.altmacro}
 * Ascii::                       @code{.ascii "@var{string}"}@dots{}
 * Asciz::                       @code{.asciz "@var{string}"}@dots{}
+* Attach_to_group::             @code{.attach_to_group @var{name}}
 * Balign::                      @code{.balign [@var{abs-expr}[, @var{abs-expr}]]}
 * Bundle directives::           @code{.bundle_align_mode @var{abs-expr}}, etc
 * Byte::                        @code{.byte @var{expressions}}
@@ -4446,6 +4448,7 @@ Some machine configurations provide additional directives.
 * MRI::				@code{.mri @var{val}}
 * Noaltmacro::                  @code{.noaltmacro}
 * Nolist::                      @code{.nolist}
+* Nop::                         @code{.nop}
 * Nops::                        @code{.nops @var{size}[, @var{control}]}
 * Octa::                        @code{.octa @var{bignums}}
 * Offset::			@code{.offset @var{loc}}
@@ -4534,11 +4537,9 @@ Some machine configurations provide additional directives.
 @ifclear no-space-dir
 * Zero::                        @code{.zero @var{size}}
 @end ifclear
-@ifset ELF
 * 2byte::                       @code{.2byte @var{expressions}}
 * 4byte::                       @code{.4byte @var{expressions}}
 * 8byte::                       @code{.8byte @var{bignums}}
-@end ifset
 * Deprecated::                  Deprecated Directives
 @end menu
 
@@ -4660,7 +4661,16 @@ trailing zero byte) into consecutive addresses.
 @cindex zero-terminated strings
 @cindex null-terminated strings
 @code{.asciz} is just like @code{.ascii}, but each string is followed by
-a zero byte.  The ``z'' in @samp{.asciz} stands for ``zero''.
+a zero byte.  The ``z'' in @samp{.asciz} stands for ``zero''.  Note that
+multiple string arguments not separated by commas will be concatenated
+together and only one final zero byte will be stored.
+
+@node Attach_to_group
+@section @code{.attach_to_group @var{name}}
+Attaches the current section to the named group.  This is like declaring
+the section with the @code{G} attribute, but can be done after the section
+has been created.  Note if the group section  does not exist at the point that
+this directive is used then it will be created.
 
 @node Balign
 @section @code{.balign[wl] [@var{abs-expr}[, @var{abs-expr}[, @var{abs-expr}]]]}
@@ -6157,22 +6167,35 @@ internal counter (which is zero initially).   @code{.list} increments the
 counter, and @code{.nolist} decrements it.  Assembly listings are
 generated whenever the counter is greater than zero.
 
+@node Nop
+@section @code{.nop [@var{size}]}
+
+@cindex @code{nop} directive
+@cindex filling memory with no-op instructions
+This directive emits no-op instructions.  It is provided on all architectures,
+allowing the creation of architecture neutral tests involving actual code.  The
+size of the generated instruction is target specific, but if the optional
+@var{size} argument is given and resolves to an absolute positive value at that
+point in assembly (no forward expressions allowed) then the fewest no-op
+instructions are emitted that equal or exceed a total @var{size} in bytes.
+@code{.nop} does affect the generation of DWARF debug line information.
+Some targets do not support using @code{.nop} with @var{size}.
+
 @node Nops
 @section @code{.nops @var{size}[, @var{control}]}
 
 @cindex @code{nops} directive
 @cindex filling memory with no-op instructions
-This directive emits @var{size} bytes filled with no-op instructions.
-@var{size} is absolute expression, which must be a positve value.
-@var{control} controls how no-op instructions should be generated.  If
-the comma and @var{control} are omitted, @var{control} is assumed to be
-zero.
+This directive emits no-op instructions.  It is specific to the Intel 80386 and
+AMD x86-64 targets.  It takes a @var{size} argument and generates @var{size}
+bytes of no-op instructions.  @var{size} must be absolute and positive.  These
+bytes do not affect the generation of DWARF debug line information.
 
-Note: For Intel 80386 and AMD x86-64 targets, @var{control} specifies
-the size limit of a no-op instruction.  The valid values of @var{control}
-are between 0 and 4 in 16-bit mode, between 0 and 7 when tuning for
-older processors in 32-bit mode, between 0 and 11 in 64-bit mode or when
-tuning for newer processors in 32-bit mode.  When 0 is used, the no-op
+The optional @var{control} argument specifies a size limit for a single no-op
+instruction.  If not provided then a value of 0 is assumed.  The valid values
+of @var{control} are between 0 and 4 in 16-bit mode, between 0 and 7 when
+tuning for older processors in 32-bit mode, between 0 and 11 in 64-bit mode or
+when tuning for newer processors in 32-bit mode.  When 0 is used, the no-op
 instruction size limit is set to the maximum supported size.
 
 @node Octa
@@ -6639,6 +6662,9 @@ section is a member of a section group
 section is used for thread-local-storage
 @item ?
 section is a member of the previously-current section's group, if any
+@item R
+retained section (apply SHF_GNU_RETAIN to prevent linker garbage
+collection, GNU ELF extension)
 @item @code{<number>}
 a numeric value indicating the bits to be set in the ELF section header's flags
 field.  Note - if one or more of the alphabetic characters described above is
@@ -6653,7 +6679,9 @@ a few exceptions to this rule however.  Processor and application specific
 flags can be added to an already defined section.  The @code{.interp},
 @code{.strtab} and @code{.symtab} sections can have the allocate flag
 (@code{a}) set after they are initially defined, and the @code{.note-GNU-stack}
-section may have the executable (@code{x}) flag added.
+section may have the executable (@code{x}) flag added.  Also note that the
+@code{.attach_to_group} directive can be used to add a section to a group even
+if the section was not originally declared to be part of that group.
 
 The optional @var{type} argument may contain one of the following constants:
 
@@ -6708,11 +6736,14 @@ If @var{flags} contains the @code{o} flag, then the @var{type} argument
 must be present along with an additional field like this:
 
 @smallexample
-.section @var{name},"@var{flags}"o,@@@var{type},@var{SymbolName}
+.section @var{name},"@var{flags}"o,@@@var{type},@var{SymbolName}|@var{SectionIndex}
 @end smallexample
 
 The @var{SymbolName} field specifies the symbol name which the section
-references.
+references.  Alternatively a numeric @var{SectionIndex} can be provided.  This
+is not generally a good idea as section indicies are rarely known at assembly
+time, but the facility is provided for testing purposes.  An index of zero is
+allowed.  It indicates that the linked-to section has already been discarded.
 
 Note: If both the @var{M} and @var{o} flags are present, then the fields
 for the Merge flag should come first, like this:
@@ -7472,7 +7503,6 @@ so it can take an optional second argument of the value to store in the bytes
 instead of zero.  Using @samp{.zero} in this way would be confusing however.
 @end ifclear
 
-@ifset ELF
 @node 2byte
 @section @code{.2byte @var{expression} [, @var{expression}]*}
 @cindex @code{2byte} directive
@@ -7492,8 +7522,6 @@ This directive does not apply any alignment before or after inserting the
 values.  As a result of this, if relocations are generated, they may be
 different from those used for inserting values with a guaranteed alignment.
 
-This directive is only available for ELF targets,
-
 @node 4byte
 @section @code{.4byte @var{expression} [, @var{expression}]*}
 @cindex @code{4byte} directive
@@ -7511,8 +7539,6 @@ long values into the output.
 
 Like the @option{.2byte} directive, except that it inserts unaligned, eight
 byte long bignum values into the output.
-
-@end ifset
 
 @node Deprecated
 @section Deprecated Directives

@@ -1,6 +1,6 @@
 /* Top level stuff for GDB, the GNU debugger.
 
-   Copyright (C) 1999-2020 Free Software Foundation, Inc.
+   Copyright (C) 1999-2021 Free Software Foundation, Inc.
 
    Written by Elena Zannoni <ezannoni@cygnus.com> of Cygnus Solutions.
 
@@ -415,8 +415,8 @@ display_gdb_prompt (const char *new_prompt)
   else
     {
       /* Don't use a _filtered function here.  It causes the assumed
-         character position to be off, since the newline we read from
-         the user is not accounted for.  */
+	 character position to be off, since the newline we read from
+	 the user is not accounted for.  */
       fprintf_unfiltered (gdb_stdout, "%s", actual_gdb_prompt.c_str ());
       gdb_flush (gdb_stdout);
     }
@@ -524,7 +524,8 @@ stdin_event_handler (int error, gdb_client_data client_data)
 void
 ui_register_input_event_handler (struct ui *ui)
 {
-  add_file_handler (ui->input_fd, stdin_event_handler, ui);
+  add_file_handler (ui->input_fd, stdin_event_handler, ui,
+		    string_printf ("ui-%d", ui->num), true);
 }
 
 /* See top.h.  */
@@ -675,8 +676,8 @@ handle_line_of_input (struct buffer *cmd_line_buffer,
   if (server_command)
     {
       /* Note that we don't call `save_command_line'.  Between this
-         and the check in dont_repeat, this insures that repeating
-         will still do the right thing.  */
+	 and the check in dont_repeat, this insures that repeating
+	 will still do the right thing.  */
       return cmd + strlen (SERVER_COMMAND_PREFIX);
     }
 
@@ -815,7 +816,7 @@ gdb_readline_no_editing_callback (gdb_client_data client_data)
   while (1)
     {
       /* Read from stdin if we are executing a user defined command.
-         This is the right thing for prompt_for_continue, at least.  */
+	 This is the right thing for prompt_for_continue, at least.  */
       c = fgetc (ui->instream != NULL ? ui->instream : ui->stdin_stream);
 
       if (c == EOF)
@@ -915,10 +916,10 @@ async_init_signals (void)
 
   signal (SIGINT, handle_sigint);
   sigint_token =
-    create_async_signal_handler (async_request_quit, NULL);
+    create_async_signal_handler (async_request_quit, NULL, "sigint");
   signal (SIGTERM, handle_sigterm);
   async_sigterm_token
-    = create_async_signal_handler (async_sigterm_handler, NULL);
+    = create_async_signal_handler (async_sigterm_handler, NULL, "sigterm");
 
   /* If SIGTRAP was set to SIG_IGN, then the SIG_IGN will get passed
      to the inferior and breakpoints will be ignored.  */
@@ -937,23 +938,23 @@ async_init_signals (void)
      to SIG_DFL for us.  */
   signal (SIGQUIT, handle_sigquit);
   sigquit_token =
-    create_async_signal_handler (async_do_nothing, NULL);
+    create_async_signal_handler (async_do_nothing, NULL, "sigquit");
 #endif
 #ifdef SIGHUP
   if (signal (SIGHUP, handle_sighup) != SIG_IGN)
     sighup_token =
-      create_async_signal_handler (async_disconnect, NULL);
+      create_async_signal_handler (async_disconnect, NULL, "sighup");
   else
     sighup_token =
-      create_async_signal_handler (async_do_nothing, NULL);
+      create_async_signal_handler (async_do_nothing, NULL, "sighup");
 #endif
   signal (SIGFPE, handle_sigfpe);
   sigfpe_token =
-    create_async_signal_handler (async_float_handler, NULL);
+    create_async_signal_handler (async_float_handler, NULL, "sigfpe");
 
 #ifdef SIGTSTP
   sigtstp_token =
-    create_async_signal_handler (async_sigtstp_handler, NULL);
+    create_async_signal_handler (async_sigtstp_handler, NULL, "sigtstp");
 #endif
 
   install_handle_sigsegv ();
@@ -1285,4 +1286,54 @@ gdb_disable_readline (void)
   if (ui->command_editing)
     gdb_rl_callback_handler_remove ();
   delete_file_handler (ui->input_fd);
+}
+
+static const char debug_event_loop_off[] = "off";
+static const char debug_event_loop_all_except_ui[] = "all-except-ui";
+static const char debug_event_loop_all[] = "all";
+
+static const char *debug_event_loop_enum[] = {
+  debug_event_loop_off,
+  debug_event_loop_all_except_ui,
+  debug_event_loop_all,
+  nullptr
+};
+
+static const char *debug_event_loop_value = debug_event_loop_off;
+
+static void
+set_debug_event_loop_command (const char *args, int from_tty,
+			      cmd_list_element *c)
+{
+  if (debug_event_loop_value == debug_event_loop_off)
+    debug_event_loop = debug_event_loop_kind::OFF;
+  else if (debug_event_loop_value == debug_event_loop_all_except_ui)
+    debug_event_loop = debug_event_loop_kind::ALL_EXCEPT_UI;
+  else if (debug_event_loop_value == debug_event_loop_all)
+    debug_event_loop = debug_event_loop_kind::ALL;
+  else
+    gdb_assert_not_reached ("Invalid debug event look kind value.");
+}
+
+static void
+show_debug_event_loop_command (struct ui_file *file, int from_tty,
+			       struct cmd_list_element *cmd, const char *value)
+{
+  fprintf_filtered (file, _("Event loop debugging is %s.\n"), value);
+}
+
+void _initialize_event_top ();
+void
+_initialize_event_top ()
+{
+  add_setshow_enum_cmd ("event-loop", class_maintenance,
+			debug_event_loop_enum,
+			&debug_event_loop_value,
+			_("Set event-loop debugging."),
+			_("Show event-loop debugging."),
+			_("\
+Control whether to show event loop-related debug messages."),
+			set_debug_event_loop_command,
+			show_debug_event_loop_command,
+			&setdebuglist, &showdebuglist);
 }

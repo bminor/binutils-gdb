@@ -1,6 +1,6 @@
 /* Target description support for GDB.
 
-   Copyright (C) 2006-2020 Free Software Foundation, Inc.
+   Copyright (C) 2006-2021 Free Software Foundation, Inc.
 
    Contributed by CodeSourcery.
 
@@ -104,6 +104,18 @@ typedef int (*tdesc_unknown_register_ftype)
 	(struct gdbarch *gdbarch, tdesc_feature *feature,
 	 const char *reg_name, int possible_regnum);
 
+/* A deleter adapter for a target arch data.  */
+
+struct tdesc_arch_data_deleter
+{
+  void operator() (struct tdesc_arch_data *data) const;
+};
+
+/* A unique pointer specialization that holds a target_desc.  */
+
+typedef std::unique_ptr<tdesc_arch_data, tdesc_arch_data_deleter>
+  tdesc_arch_data_up;
+
 /* Update GDBARCH to use the TARGET_DESC for registers.  TARGET_DESC
    may be GDBARCH's target description or (if GDBARCH does not have
    one which describes registers) another target description
@@ -119,19 +131,13 @@ typedef int (*tdesc_unknown_register_ftype)
 
 void tdesc_use_registers (struct gdbarch *gdbarch,
 			  const struct target_desc *target_desc,
-			  struct tdesc_arch_data *early_data,
+			  tdesc_arch_data_up &&early_data,
 			  tdesc_unknown_register_ftype unk_reg_cb = NULL);
 
 /* Allocate initial data for validation of a target description during
    gdbarch initialization.  */
 
-struct tdesc_arch_data *tdesc_data_alloc (void);
-
-/* Clean up data allocated by tdesc_data_alloc.  This should only
-   be called to discard the data; tdesc_use_registers takes ownership
-   of its EARLY_DATA argument.  */
-
-void tdesc_data_cleanup (void *data_untyped);
+tdesc_arch_data_up tdesc_data_alloc ();
 
 /* Search FEATURE for a register named NAME.  Record REGNO and the
    register in DATA; when tdesc_use_registers is called, REGNO will be

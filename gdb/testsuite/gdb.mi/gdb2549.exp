@@ -1,4 +1,4 @@
-# Copyright 2008-2020 Free Software Foundation, Inc.
+# Copyright 2008-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,11 +24,6 @@
 
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
-
-gdb_exit
-if [mi_gdb_start] {
-    continue
-}
 
 standard_testfile basics.c
 
@@ -103,8 +98,12 @@ proc register_tests { } {
     }
 }
 
+mi_clean_restart $binfile
+
 register_tests_no_exec
-mi_run_to_main
+
+mi_runto_main
+
 register_tests
 
 mi_gdb_exit

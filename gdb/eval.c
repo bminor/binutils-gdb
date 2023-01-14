@@ -1,6 +1,6 @@
 /* Evaluate expressions for GDB.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,7 +26,6 @@
 #include "frame.h"
 #include "gdbthread.h"
 #include "language.h"		/* For CAST_IS_CONVERSION.  */
-#include "f-lang.h"		/* For array bound stuff.  */
 #include "cp-abi.h"
 #include "infcall.h"
 #include "objc-lang.h"
@@ -58,10 +57,6 @@ static struct value *evaluate_struct_tuple (struct value *,
 					    struct expression *, int *,
 					    enum noside, int);
 
-static LONGEST init_array_element (struct value *, struct value *,
-				   struct expression *, int *, enum noside,
-				   LONGEST, LONGEST);
-
 struct value *
 evaluate_subexp (struct type *expect_type, struct expression *exp,
 		 int *pos, enum noside noside)
@@ -69,12 +64,12 @@ evaluate_subexp (struct type *expect_type, struct expression *exp,
   struct value *retval;
 
   gdb::optional<enable_thread_stack_temporaries> stack_temporaries;
-  if (*pos == 0 && target_has_execution
+  if (*pos == 0 && target_has_execution ()
       && exp->language_defn->la_language == language_cplus
       && !thread_stack_temporaries_enabled_p (inferior_thread ()))
     stack_temporaries.emplace (inferior_thread ());
 
-  retval = (*exp->language_defn->la_exp_desc->evaluate_exp)
+  retval = (*exp->language_defn->expression_ops ()->evaluate_exp)
     (expect_type, exp, pos, noside);
 
   if (stack_temporaries.has_value ()
@@ -125,17 +120,15 @@ parse_to_comma_and_eval (const char **expp)
   return evaluate_expression (expr.get ());
 }
 
-/* Evaluate an expression in internal prefix form
-   such as is constructed by parse.y.
 
-   See expression.h for info on the format of an expression.  */
+/* See value.h.  */
 
 struct value *
-evaluate_expression (struct expression *exp)
+evaluate_expression (struct expression *exp, struct type *expect_type)
 {
   int pc = 0;
 
-  return evaluate_subexp (nullptr, exp, &pc, EVAL_NORMAL);
+  return evaluate_subexp (expect_type, exp, &pc, EVAL_NORMAL);
 }
 
 /* Evaluate an expression, avoiding all memory references
@@ -184,7 +177,7 @@ void
 fetch_subexp_value (struct expression *exp, int *pc, struct value **valp,
 		    struct value **resultp,
 		    std::vector<value_ref_ptr> *val_chain,
-		    int preserve_errors)
+		    bool preserve_errors)
 {
   struct value *mark, *new_mark, *result;
 
@@ -338,65 +331,6 @@ evaluate_struct_tuple (struct value *struct_val,
   return struct_val;
 }
 
-/* Recursive helper function for setting elements of array tuples.
-   The target is ARRAY (which has bounds LOW_BOUND to HIGH_BOUND); the
-   element value is ELEMENT; EXP, POS and NOSIDE are as usual.
-   Evaluates index expressions and sets the specified element(s) of
-   ARRAY to ELEMENT.  Returns last index value.  */
-
-static LONGEST
-init_array_element (struct value *array, struct value *element,
-		    struct expression *exp, int *pos,
-		    enum noside noside, LONGEST low_bound, LONGEST high_bound)
-{
-  LONGEST index;
-  int element_size = TYPE_LENGTH (value_type (element));
-
-  if (exp->elts[*pos].opcode == BINOP_COMMA)
-    {
-      (*pos)++;
-      init_array_element (array, element, exp, pos, noside,
-			  low_bound, high_bound);
-      return init_array_element (array, element,
-				 exp, pos, noside, low_bound, high_bound);
-    }
-  else
-    {
-      index = value_as_long (evaluate_subexp (nullptr, exp, pos, noside));
-      if (index < low_bound || index > high_bound)
-	error (_("tuple index out of range"));
-      memcpy (value_contents_raw (array) + (index - low_bound) * element_size,
-	      value_contents (element), element_size);
-    }
-  return index;
-}
-
-static struct value *
-value_f90_subarray (struct value *array,
-		    struct expression *exp, int *pos, enum noside noside)
-{
-  int pc = (*pos) + 1;
-  LONGEST low_bound, high_bound;
-  struct type *range = check_typedef (value_type (array)->index_type ());
-  enum range_type range_type
-    = (enum range_type) longest_to_int (exp->elts[pc].longconst);
- 
-  *pos += 3;
-
-  if (range_type == LOW_BOUND_DEFAULT || range_type == BOTH_BOUND_DEFAULT)
-    low_bound = range->bounds ()->low.const_val ();
-  else
-    low_bound = value_as_long (evaluate_subexp (nullptr, exp, pos, noside));
-
-  if (range_type == HIGH_BOUND_DEFAULT || range_type == BOTH_BOUND_DEFAULT)
-    high_bound = range->bounds ()->high.const_val ();
-  else
-    high_bound = value_as_long (evaluate_subexp (nullptr, exp, pos, noside));
-
-  return value_slice (array, low_bound, high_bound - low_bound + 1);
-}
-
-
 /* Promote value ARG1 as appropriate before performing a unary operation
    on this argument.
    If the result is not appropriate for any particular language then it
@@ -457,6 +391,9 @@ binop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
 	  && !is_integral_type (type2)))
     return;
 
+  if (is_fixed_point_type (type1) || is_fixed_point_type (type2))
+        return;
+
   if (type1->code () == TYPE_CODE_DECFLOAT
       || type2->code () == TYPE_CODE_DECFLOAT)
     {
@@ -506,7 +443,7 @@ binop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
       int unsigned_operation;
 
       /* Determine type length and signedness after promotion for
-         both operands.  */
+	 both operands.  */
       if (promoted_len1 < TYPE_LENGTH (builtin->builtin_int))
 	{
 	  is_unsigned1 = 0;
@@ -622,7 +559,7 @@ ptrmath_type_p (const struct language_defn *lang, struct type *type)
       return 1;
 
     case TYPE_CODE_ARRAY:
-      return type->is_vector () ? 0 : lang->c_style_arrays;
+      return type->is_vector () ? 0 : lang->c_style_arrays_p ();
 
     default:
       return 0;
@@ -659,7 +596,7 @@ fake_method::fake_method (type_instance_flags flags,
   TYPE_LENGTH (type) = 1;
   type->set_code (TYPE_CODE_METHOD);
   TYPE_CHAIN (type) = type;
-  TYPE_INSTANCE_FLAGS (type) = flags;
+  type->set_instance_flags (flags);
   if (num_types > 0)
     {
       if (param_types[num_types - 1] == NULL)
@@ -735,7 +672,7 @@ evaluate_var_msym_value (enum noside noside,
   CORE_ADDR address;
   type *the_type = find_minsym_type_and_address (msymbol, objfile, &address);
 
-  if (noside == EVAL_AVOID_SIDE_EFFECTS && !TYPE_GNU_IFUNC (the_type))
+  if (noside == EVAL_AVOID_SIDE_EFFECTS && !the_type->is_gnu_ifunc ())
     return value_zero (the_type, not_lval);
   else
     return value_at_lazy (the_type, address);
@@ -749,19 +686,16 @@ eval_skip_value (expression *exp)
   return value_from_longest (builtin_type (exp->gdbarch)->builtin_int, 1);
 }
 
-/* Evaluate a function call.  The function to be called is in
-   ARGVEC[0] and the arguments passed to the function are in
-   ARGVEC[1..NARGS].  FUNCTION_NAME is the name of the function, if
-   known.  DEFAULT_RETURN_TYPE is used as the function's return type
-   if the return type is unknown.  */
+/* See expression.h.  */
 
-static value *
-eval_call (expression *exp, enum noside noside,
-	   int nargs, value **argvec,
-	   const char *function_name,
-	   type *default_return_type)
+value *
+evaluate_subexp_do_call (expression *exp, enum noside noside,
+			 value *callee,
+			 gdb::array_view<value *> argvec,
+			 const char *function_name,
+			 type *default_return_type)
 {
-  if (argvec[0] == NULL)
+  if (callee == NULL)
     error (_("Cannot evaluate function -- may be inlined"));
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     {
@@ -769,7 +703,7 @@ eval_call (expression *exp, enum noside noside,
 	 call an error.  This can happen if somebody tries to turn
 	 a variable into a function call.  */
 
-      type *ftype = value_type (argvec[0]);
+      type *ftype = value_type (callee);
 
       if (ftype->code () == TYPE_CODE_INTERNAL_FUNCTION)
 	{
@@ -781,10 +715,7 @@ eval_call (expression *exp, enum noside noside,
 	}
       else if (ftype->code () == TYPE_CODE_XMETHOD)
 	{
-	  type *return_type
-	    = result_type_of_xmethod (argvec[0],
-				      gdb::make_array_view (argvec + 1,
-							    nargs));
+	  type *return_type = result_type_of_xmethod (callee, argvec);
 
 	  if (return_type == NULL)
 	    error (_("Xmethod is missing return type."));
@@ -793,9 +724,9 @@ eval_call (expression *exp, enum noside noside,
       else if (ftype->code () == TYPE_CODE_FUNC
 	       || ftype->code () == TYPE_CODE_METHOD)
 	{
-	  if (TYPE_GNU_IFUNC (ftype))
+	  if (ftype->is_gnu_ifunc ())
 	    {
-	      CORE_ADDR address = value_address (argvec[0]);
+	      CORE_ADDR address = value_address (callee);
 	      type *resolved_type = find_gnu_ifunc_target_type (address);
 
 	      if (resolved_type != NULL)
@@ -816,16 +747,15 @@ eval_call (expression *exp, enum noside noside,
 	error (_("Expression of type other than "
 		 "\"Function returning ...\" used as function"));
     }
-  switch (value_type (argvec[0])->code ())
+  switch (value_type (callee)->code ())
     {
     case TYPE_CODE_INTERNAL_FUNCTION:
       return call_internal_function (exp->gdbarch, exp->language_defn,
-				     argvec[0], nargs, argvec + 1);
+				     callee, argvec.size (), argvec.data ());
     case TYPE_CODE_XMETHOD:
-      return call_xmethod (argvec[0], gdb::make_array_view (argvec + 1, nargs));
+      return call_xmethod (callee, argvec);
     default:
-      return call_function_by_hand (argvec[0], default_return_type,
-				    gdb::make_array_view (argvec + 1, nargs));
+      return call_function_by_hand (callee, default_return_type, argvec);
     }
 }
 
@@ -1230,20 +1160,9 @@ evaluate_funcall (type *expect_type, expression *exp, int *pos,
       /* Nothing to be done; argvec already correctly set up.  */
     }
 
-  return eval_call (exp, noside, nargs, argvec, var_func_name, expect_type);
-}
-
-/* Helper for skipping all the arguments in an undetermined argument list.
-   This function was designed for use in the OP_F77_UNDETERMINED_ARGLIST
-   case of evaluate_subexp_standard as multiple, but not all, code paths
-   require a generic skip.  */
-
-static void
-skip_undetermined_arglist (int nargs, struct expression *exp, int *pos,
-			   enum noside noside)
-{
-  for (int i = 0; i < nargs; ++i)
-    evaluate_subexp (nullptr, exp, pos, noside);
+  return evaluate_subexp_do_call (exp, noside, argvec[0],
+				  gdb::make_array_view (argvec + 1, nargs),
+				  var_func_name, expect_type);
 }
 
 /* Return true if type is integral or reference to integral */
@@ -1274,7 +1193,6 @@ evaluate_subexp_standard (struct type *expect_type,
   struct type *type;
   int nargs;
   struct value **argvec;
-  int code;
   int ix;
   long mem_offset;
   struct type **arg_types;
@@ -1398,11 +1316,11 @@ evaluate_subexp_standard (struct type *expect_type,
 	if (regno == -1)
 	  error (_("Register $%s not available."), name);
 
-        /* In EVAL_AVOID_SIDE_EFFECTS mode, we only need to return
-           a value with the appropriate register type.  Unfortunately,
-           we don't have easy access to the type of user registers.
-           So for these registers, we fetch the register value regardless
-           of the evaluation mode.  */
+	/* In EVAL_AVOID_SIDE_EFFECTS mode, we only need to return
+	   a value with the appropriate register type.  Unfortunately,
+	   we don't have easy access to the type of user registers.
+	   So for these registers, we fetch the register value regardless
+	   of the evaluation mode.  */
 	if (noside == EVAL_AVOID_SIDE_EFFECTS
 	    && regno < gdbarch_num_cooked_regs (exp->gdbarch))
 	  val = value_zero (register_type (exp->gdbarch, regno), not_lval);
@@ -1464,7 +1382,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  int element_size = TYPE_LENGTH (check_typedef (element_type));
 	  LONGEST low_bound, high_bound, index;
 
-	  if (get_discrete_bounds (range_type, &low_bound, &high_bound) < 0)
+	  if (!get_discrete_bounds (range_type, &low_bound, &high_bound))
 	    {
 	      low_bound = 0;
 	      high_bound = (TYPE_LENGTH (type) / element_size) - 1;
@@ -1474,30 +1392,17 @@ evaluate_subexp_standard (struct type *expect_type,
 	  for (tem = nargs; --nargs >= 0;)
 	    {
 	      struct value *element;
-	      int index_pc = 0;
 
 	      element = evaluate_subexp (element_type, exp, pos, noside);
 	      if (value_type (element) != element_type)
 		element = value_cast (element_type, element);
-	      if (index_pc)
-		{
-		  int continue_pc = *pos;
-
-		  *pos = index_pc;
-		  index = init_array_element (array, element, exp, pos, noside,
-					      low_bound, high_bound);
-		  *pos = continue_pc;
-		}
-	      else
-		{
-		  if (index > high_bound)
-		    /* To avoid memory corruption.  */
-		    error (_("Too many array elements"));
-		  memcpy (value_contents_raw (array)
-			  + (index - low_bound) * element_size,
-			  value_contents (element),
-			  element_size);
-		}
+	      if (index > high_bound)
+		/* To avoid memory corruption.  */
+		error (_("Too many array elements"));
+	      memcpy (value_contents_raw (array)
+		      + (index - low_bound) * element_size,
+		      value_contents (element),
+		      element_size);
 	      index++;
 	    }
 	  return array;
@@ -1517,7 +1422,7 @@ evaluate_subexp_standard (struct type *expect_type,
 		 || check_type->code () == TYPE_CODE_TYPEDEF)
 	    check_type = TYPE_TARGET_TYPE (check_type);
 
-	  if (get_discrete_bounds (element_type, &low_bound, &high_bound) < 0)
+	  if (!get_discrete_bounds (element_type, &low_bound, &high_bound))
 	    error (_("(power)set type with unknown size"));
 	  memset (valaddr, '\0', TYPE_LENGTH (type));
 	  for (tem = 0; tem < nargs; tem++)
@@ -1531,8 +1436,8 @@ evaluate_subexp_standard (struct type *expect_type,
 	      range_low = range_high = value_as_long (elem_val);
 
 	      /* Check types of elements to avoid mixture of elements from
-	         different types. Also check if type of element is "compatible"
-	         with element type of powerset.  */
+		 different types. Also check if type of element is "compatible"
+		 with element type of powerset.  */
 	      if (range_low_type->code () == TYPE_CODE_RANGE)
 		range_low_type = TYPE_TARGET_TYPE (range_low_type);
 	      if (range_high_type->code () == TYPE_CODE_RANGE)
@@ -1784,7 +1689,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  }
 
 	/* If we found a method with symbol information, check to see
-           if it returns a struct.  Otherwise assume it doesn't.  */
+	   if it returns a struct.  Otherwise assume it doesn't.  */
 
 	if (method)
 	  {
@@ -1915,112 +1820,9 @@ evaluate_subexp_standard (struct type *expect_type,
     case OP_FUNCALL:
       return evaluate_funcall (expect_type, exp, pos, noside);
 
-    case OP_F77_UNDETERMINED_ARGLIST:
-
-      /* Remember that in F77, functions, substring ops and 
-         array subscript operations cannot be disambiguated 
-         at parse time.  We have made all array subscript operations, 
-         substring operations as well as function calls  come here 
-         and we now have to discover what the heck this thing actually was.
-         If it is a function, we process just as if we got an OP_FUNCALL.  */
-
-      nargs = longest_to_int (exp->elts[pc + 1].longconst);
-      (*pos) += 2;
-
-      /* First determine the type code we are dealing with.  */
-      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
-      type = check_typedef (value_type (arg1));
-      code = type->code ();
-
-      if (code == TYPE_CODE_PTR)
-	{
-	  /* Fortran always passes variable to subroutines as pointer.
-	     So we need to look into its target type to see if it is
-	     array, string or function.  If it is, we need to switch
-	     to the target value the original one points to.  */ 
-	  struct type *target_type = check_typedef (TYPE_TARGET_TYPE (type));
-
-	  if (target_type->code () == TYPE_CODE_ARRAY
-	      || target_type->code () == TYPE_CODE_STRING
-	      || target_type->code () == TYPE_CODE_FUNC)
-	    {
-	      arg1 = value_ind (arg1);
-	      type = check_typedef (value_type (arg1));
-	      code = type->code ();
-	    }
-	} 
-
-      switch (code)
-	{
-	case TYPE_CODE_ARRAY:
-	  if (exp->elts[*pos].opcode == OP_RANGE)
-	    return value_f90_subarray (arg1, exp, pos, noside);
-	  else
-	    {
-	      if (noside == EVAL_SKIP)
-		{
-		  skip_undetermined_arglist (nargs, exp, pos, noside);
-		  /* Return the dummy value with the correct type.  */
-		  return arg1;
-		}
-	      goto multi_f77_subscript;
-	    }
-
-	case TYPE_CODE_STRING:
-	  if (exp->elts[*pos].opcode == OP_RANGE)
-	    return value_f90_subarray (arg1, exp, pos, noside);
-	  else
-	    {
-	      if (noside == EVAL_SKIP)
-		{
-		  skip_undetermined_arglist (nargs, exp, pos, noside);
-		  /* Return the dummy value with the correct type.  */
-		  return arg1;
-		}
-	      arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
-	      return value_subscript (arg1, value_as_long (arg2));
-	    }
-
-	case TYPE_CODE_PTR:
-	case TYPE_CODE_FUNC:
-	case TYPE_CODE_INTERNAL_FUNCTION:
-	  /* It's a function call.  */
-	  /* Allocate arg vector, including space for the function to be
-	     called in argvec[0] and a terminating NULL.  */
-	  argvec = (struct value **)
-	    alloca (sizeof (struct value *) * (nargs + 2));
-	  argvec[0] = arg1;
-	  tem = 1;
-	  for (; tem <= nargs; tem++)
-	    {
-	      argvec[tem] = evaluate_subexp_with_coercion (exp, pos, noside);
-	      /* Arguments in Fortran are passed by address.  Coerce the
-		 arguments here rather than in value_arg_coerce as otherwise
-		 the call to malloc to place the non-lvalue parameters in
-		 target memory is hit by this Fortran specific logic.  This
-		 results in malloc being called with a pointer to an integer
-		 followed by an attempt to malloc the arguments to malloc in
-		 target memory.  Infinite recursion ensues.  */
-	      if (code == TYPE_CODE_PTR || code == TYPE_CODE_FUNC)
-		{
-		  bool is_artificial
-		    = TYPE_FIELD_ARTIFICIAL (value_type (arg1), tem - 1);
-		  argvec[tem] = fortran_argument_convert (argvec[tem],
-							  is_artificial);
-		}
-	    }
-	  argvec[tem] = 0;	/* signal end of arglist */
-	  if (noside == EVAL_SKIP)
-	    return eval_skip_value (exp);
-	  return eval_call (exp, noside, nargs, argvec, NULL, expect_type);
-
-	default:
-	  error (_("Cannot perform substring on this type"));
-	}
-
     case OP_COMPLEX:
       /* We have a complex number, There should be 2 floating 
-         point numbers that compose it.  */
+	 point numbers that compose it.  */
       (*pos) += 2;
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       arg2 = evaluate_subexp (nullptr, exp, pos, noside);
@@ -2047,7 +1849,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	return eval_skip_value (exp);
 
       /* Check to see if operator '->' has been overloaded.  If so replace
-         arg1 with the value returned by evaluating operator->().  */
+	 arg1 with the value returned by evaluating operator->().  */
       while (unop_user_defined_p (op, arg1))
 	{
 	  struct value *value = NULL;
@@ -2071,21 +1873,21 @@ evaluate_subexp_standard (struct type *expect_type,
 	 with rtti type in order to continue on with successful
 	 lookup of member / method only available in the rtti type.  */
       {
-        struct type *arg_type = value_type (arg1);
-        struct type *real_type;
-        int full, using_enc;
-        LONGEST top;
+	struct type *arg_type = value_type (arg1);
+	struct type *real_type;
+	int full, using_enc;
+	LONGEST top;
 	struct value_print_options opts;
 
 	get_user_print_options (&opts);
-        if (opts.objectprint && TYPE_TARGET_TYPE (arg_type)
-            && (TYPE_TARGET_TYPE (arg_type)->code () == TYPE_CODE_STRUCT))
-          {
-            real_type = value_rtti_indirect_type (arg1, &full, &top,
+	if (opts.objectprint && TYPE_TARGET_TYPE (arg_type)
+	    && (TYPE_TARGET_TYPE (arg_type)->code () == TYPE_CODE_STRUCT))
+	  {
+	    real_type = value_rtti_indirect_type (arg1, &full, &top,
 						  &using_enc);
-            if (real_type)
-                arg1 = value_cast (real_type, arg1);
-          }
+	    if (real_type)
+		arg1 = value_cast (real_type, arg1);
+	  }
       }
 
       arg3 = value_struct_elt (&arg1, NULL, &exp->elts[pc + 2].string,
@@ -2286,12 +2088,11 @@ evaluate_subexp_standard (struct type *expect_type,
 		  || op == BINOP_MOD)
 	      && value_logical_not (arg2))
 	    {
-	      struct value *v_one, *retval;
+	      struct value *v_one;
 
 	      v_one = value_one (value_type (arg2));
 	      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &v_one);
-	      retval = value_binop (arg1, v_one, op);
-	      return retval;
+	      return value_binop (arg1, v_one, op);
 	    }
 	  else
 	    {
@@ -2341,36 +2142,14 @@ evaluate_subexp_standard (struct type *expect_type,
       (*pos) += 2;
       nargs = longest_to_int (exp->elts[pc + 1].longconst);
       arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
-      while (nargs-- > 0)
+      argvec = XALLOCAVEC (struct value *, nargs);
+      for (ix = 0; ix < nargs; ++ix)
+	argvec[ix] = evaluate_subexp_with_coercion (exp, pos, noside);
+      if (noside == EVAL_SKIP)
+	return arg1;
+      for (ix = 0; ix < nargs; ++ix)
 	{
-	  arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
-	  /* FIXME:  EVAL_SKIP handling may not be correct.  */
-	  if (noside == EVAL_SKIP)
-	    {
-	      if (nargs > 0)
-		continue;
-	      return eval_skip_value (exp);
-	    }
-	  /* FIXME:  EVAL_AVOID_SIDE_EFFECTS handling may not be correct.  */
-	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	    {
-	      /* If the user attempts to subscript something that has no target
-	         type (like a plain int variable for example), then report this
-	         as an error.  */
-
-	      type = TYPE_TARGET_TYPE (check_typedef (value_type (arg1)));
-	      if (type != NULL)
-		{
-		  arg1 = value_zero (type, VALUE_LVAL (arg1));
-		  noside = EVAL_SKIP;
-		  continue;
-		}
-	      else
-		{
-		  error (_("cannot subscript something of type `%s'"),
-			 value_type (arg1)->name ());
-		}
-	    }
+	  arg2 = argvec[ix];
 
 	  if (binop_user_defined_p (op, arg1, arg2))
 	    {
@@ -2399,49 +2178,6 @@ evaluate_subexp_standard (struct type *expect_type,
 	    }
 	}
       return (arg1);
-
-    multi_f77_subscript:
-      {
-	LONGEST subscript_array[MAX_FORTRAN_DIMS];
-	int ndimensions = 1, i;
-	struct value *array = arg1;
-
-	if (nargs > MAX_FORTRAN_DIMS)
-	  error (_("Too many subscripts for F77 (%d Max)"), MAX_FORTRAN_DIMS);
-
-	ndimensions = calc_f77_array_dims (type);
-
-	if (nargs != ndimensions)
-	  error (_("Wrong number of subscripts"));
-
-	gdb_assert (nargs > 0);
-
-	/* Now that we know we have a legal array subscript expression 
-	   let us actually find out where this element exists in the array.  */
-
-	/* Take array indices left to right.  */
-	for (i = 0; i < nargs; i++)
-	  {
-	    /* Evaluate each subscript; it must be a legal integer in F77.  */
-	    arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
-
-	    /* Fill in the subscript array.  */
-
-	    subscript_array[i] = value_as_long (arg2);
-	  }
-
-	/* Internal type of array is arranged right to left.  */
-	for (i = nargs; i > 0; i--)
-	  {
-	    struct type *array_type = check_typedef (value_type (array));
-	    LONGEST index = subscript_array[i - 1];
-
-	    array = value_subscripted_rvalue (array, index,
-					      f77_get_lowerbound (array_type));
-	  }
-
-	return array;
-      }
 
     case BINOP_LOGICAL_AND:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
@@ -2606,7 +2342,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	return eval_skip_value (exp);
       type = check_typedef (value_type (arg2));
       if (type->code () != TYPE_CODE_INT
-          && type->code () != TYPE_CODE_ENUM)
+	  && type->code () != TYPE_CODE_ENUM)
 	error (_("Non-integral right operand for \"@\" operator."));
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{
@@ -2719,12 +2455,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  return eval_skip_value (exp);
 	}
       else
-	{
-	  struct value *retvalp = evaluate_subexp_for_address (exp, pos,
-							       noside);
-
-	  return retvalp;
-	}
+	return evaluate_subexp_for_address (exp, pos, noside);
 
     case UNOP_SIZEOF:
       if (noside == EVAL_SKIP)
@@ -2902,14 +2633,14 @@ evaluate_subexp_standard (struct type *expect_type,
 
     case OP_TYPE:
       /* The value is not supposed to be used.  This is here to make it
-         easier to accommodate expressions that contain types.  */
+	 easier to accommodate expressions that contain types.  */
       (*pos) += 2;
       if (noside == EVAL_SKIP)
 	return eval_skip_value (exp);
       else if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	return allocate_value (exp->elts[pc + 1].type);
       else
-        error (_("Attempt to use a type name as an expression"));
+	error (_("Attempt to use a type name as an expression"));
 
     case OP_TYPEOF:
     case OP_DECLTYPE:
@@ -2947,7 +2678,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  return result;
 	}
       else
-        error (_("Attempt to use a type as an expression"));
+	error (_("Attempt to use a type as an expression"));
 
     case OP_TYPEID:
       {
@@ -2967,13 +2698,13 @@ evaluate_subexp_standard (struct type *expect_type,
 
     default:
       /* Removing this case and compiling with gcc -Wall reveals that
-         a lot of cases are hitting this case.  Some of these should
-         probably be removed from expression.h; others are legitimate
-         expressions which are (apparently) not fully implemented.
+	 a lot of cases are hitting this case.  Some of these should
+	 probably be removed from expression.h; others are legitimate
+	 expressions which are (apparently) not fully implemented.
 
-         If there are any cases landing here which mean a user error,
-         then they should be separate cases, with more descriptive
-         error messages.  */
+	 If there are any cases landing here which mean a user error,
+	 then they should be separate cases, with more descriptive
+	 error messages.  */
 
       error (_("GDB does not (yet) know how to "
 	       "evaluate that kind of expression"));
@@ -3175,9 +2906,9 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
   switch (op)
     {
       /* This case is handled specially
-         so that we avoid creating a value for the result type.
-         If the result type is very big, it's desirable not to
-         create a value unnecessarily.  */
+	 so that we avoid creating a value for the result type.
+	 If the result type is very big, it's desirable not to
+	 create a value unnecessarily.  */
     case UNOP_IND:
       (*pos)++;
       val = evaluate_subexp (nullptr, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
@@ -3208,10 +2939,14 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
 	{
 	  val = evaluate_subexp (nullptr, exp, pos, EVAL_NORMAL);
 	  type = value_type (val);
-	  if (type->code () == TYPE_CODE_ARRAY
-              && is_dynamic_type (type->index_type ())
-              && type->bounds ()->high.kind () == PROP_UNDEFINED)
-	    return allocate_optimized_out_value (size_type);
+	  if (type->code () == TYPE_CODE_ARRAY)
+	    {
+	      if (type_not_allocated (type) || type_not_associated (type))
+		return value_zero (size_type, not_lval);
+	      else if (is_dynamic_type (type->index_type ())
+		       && type->bounds ()->high.kind () == PROP_UNDEFINED)
+		return allocate_optimized_out_value (size_type);
+	    }
 	}
       else
 	(*pos) += 4;
@@ -3339,7 +3074,7 @@ evaluate_subexp_for_cast (expression *exp, int *pos,
 /* Parse a type expression in the string [P..P+LENGTH).  */
 
 struct type *
-parse_and_eval_type (char *p, int length)
+parse_and_eval_type (const char *p, int length)
 {
   char *tmp = (char *) alloca (length + 4);
 
@@ -3349,26 +3084,7 @@ parse_and_eval_type (char *p, int length)
   tmp[length + 2] = '0';
   tmp[length + 3] = '\0';
   expression_up expr = parse_expression (tmp);
-  if (expr->elts[0].opcode != UNOP_CAST)
+  if (expr->first_opcode () != UNOP_CAST)
     error (_("Internal error in eval_type."));
   return expr->elts[1].type;
-}
-
-int
-calc_f77_array_dims (struct type *array_type)
-{
-  int ndimen = 1;
-  struct type *tmp_type;
-
-  if ((array_type->code () != TYPE_CODE_ARRAY))
-    error (_("Can't get dimensions for a non-array type"));
-
-  tmp_type = array_type;
-
-  while ((tmp_type = TYPE_TARGET_TYPE (tmp_type)))
-    {
-      if (tmp_type->code () == TYPE_CODE_ARRAY)
-	++ndimen;
-    }
-  return ndimen;
 }

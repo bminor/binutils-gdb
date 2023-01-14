@@ -1,6 +1,6 @@
 /* TUI support I/O functions.
 
-   Copyright (C) 1998-2020 Free Software Foundation, Inc.
+   Copyright (C) 1998-2021 Free Software Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -435,6 +435,69 @@ tui_write (const char *buf, size_t length)
   tui_puts (copy.c_str ());
 }
 
+/* Print a string in the curses command window.  The output is
+   buffered.  It is up to the caller to refresh the screen if
+   necessary.  */
+
+void
+tui_puts (const char *string, WINDOW *w)
+{
+  if (w == nullptr)
+    w = TUI_CMD_WIN->handle.get ();
+
+  while (true)
+    {
+      const char *next = strpbrk (string, "\n\1\2\033\t");
+
+      /* Print the plain text prefix.  */
+      size_t n_chars = next == nullptr ? strlen (string) : next - string;
+      if (n_chars > 0)
+	waddnstr (w, string, n_chars);
+
+      /* We finished.  */
+      if (next == nullptr)
+	break;
+
+      char c = *next;
+      switch (c)
+	{
+	case '\1':
+	case '\2':
+	  /* Ignore these, they are readline escape-marking
+	     sequences.  */
+	  ++next;
+	  break;
+
+	case '\n':
+	case '\t':
+	  do_tui_putc (w, c);
+	  ++next;
+	  break;
+
+	case '\033':
+	  {
+	    size_t bytes_read = apply_ansi_escape (w, next);
+	    if (bytes_read > 0)
+	      next += bytes_read;
+	    else
+	      {
+		/* Just drop the escape.  */
+		++next;
+	      }
+	  }
+	  break;
+
+	default:
+	  gdb_assert_not_reached ("missing case in tui_puts");
+	}
+
+      string = next;
+    }
+
+  if (TUI_CMD_WIN != nullptr && w == TUI_CMD_WIN->handle.get ())
+    update_cmdwin_start_line ();
+}
+
 static void
 tui_puts_internal (WINDOW *w, const char *string, int *height)
 {
@@ -478,18 +541,6 @@ tui_puts_internal (WINDOW *w, const char *string, int *height)
     update_cmdwin_start_line ();
   if (saw_nl)
     wrefresh (w);
-}
-
-/* Print a string in the curses command window.  The output is
-   buffered.  It is up to the caller to refresh the screen if
-   necessary.  */
-
-void
-tui_puts (const char *string, WINDOW *w)
-{
-  if (w == nullptr)
-    w = TUI_CMD_WIN->handle.get ();
-  tui_puts_internal (w, string, nullptr);
 }
 
 /* Readline callback.
@@ -539,17 +590,17 @@ tui_redisplay_readline (void)
       
       if (in == rl_point)
 	{
-          getyx (w, c_line, c_pos);
+	  getyx (w, c_line, c_pos);
 	}
 
       if (in == rl_end)
-        break;
+	break;
 
       c = (unsigned char) rl_line_buffer[in];
       if (CTRL_CHAR (c) || c == RUBOUT)
 	{
-          waddch (w, '^');
-          waddch (w, CTRL_CHAR (c) ? UNCTRL (c) : '?');
+	  waddch (w, '^');
+	  waddch (w, CTRL_CHAR (c) ? UNCTRL (c) : '?');
 	}
       else if (c == '\t')
 	{
@@ -563,13 +614,13 @@ tui_redisplay_readline (void)
 	}
       else
 	{
-          waddch (w, c);
+	  waddch (w, c);
 	}
       if (c == '\n')
 	TUI_CMD_WIN->start_line = getcury (w);
       col = getcurx (w);
       if (col < prev_col)
-        height++;
+	height++;
       prev_col = col;
     }
   wclrtobot (w);
@@ -824,7 +875,7 @@ tui_cont_sig (int sig)
   if (tui_active)
     {
       /* Restore the terminal setting because another process (shell)
-         might have changed it.  */
+	 might have changed it.  */
       resetty ();
 
       /* Force a refresh of the screen.  */
@@ -870,7 +921,7 @@ tui_initialize_io (void)
   (void) fcntl (tui_readline_pipe[0], F_SETFL, O_NDELAY);
 #endif
 #endif
-  add_file_handler (tui_readline_pipe[0], tui_readline_output, 0);
+  add_file_handler (tui_readline_pipe[0], tui_readline_output, 0, "tui");
 #else
   tui_rl_outstream = stdout;
 #endif
@@ -931,7 +982,7 @@ tui_dispatch_ctrl_char (unsigned int ch)
       break;
     default:
       /* We didn't recognize the character as a control character, so pass it
-         through.  */
+	 through.  */
       return ch;
     }
 
@@ -964,22 +1015,22 @@ tui_getc_1 (FILE *fp)
   if (ch == '\n' || ch == '\r')
     {
       /* When hitting return with an empty input, gdb executes the last
-         command.  If we emit a newline, this fills up the command window
-         with empty lines with gdb prompt at beginning.  Instead of that,
-         stay on the same line but provide a visual effect to show the
-         user we recognized the command.  */
+	 command.  If we emit a newline, this fills up the command window
+	 with empty lines with gdb prompt at beginning.  Instead of that,
+	 stay on the same line but provide a visual effect to show the
+	 user we recognized the command.  */
       if (rl_end == 0 && !gdb_in_secondary_prompt_p (current_ui))
-        {
+	{
 	  wmove (w, getcury (w), 0);
 
-          /* Clear the line.  This will blink the gdb prompt since
-             it will be redrawn at the same line.  */
-          wclrtoeol (w);
-          wrefresh (w);
-          napms (20);
-        }
+	  /* Clear the line.  This will blink the gdb prompt since
+	     it will be redrawn at the same line.  */
+	  wclrtoeol (w);
+	  wrefresh (w);
+	  napms (20);
+	}
       else
-        {
+	{
 	  /* Move cursor to the end of the command line before emitting the
 	     newline.  We need to do so because when ncurses outputs a newline
 	     it truncates any text that appears past the end of the cursor.  */
@@ -990,7 +1041,7 @@ tui_getc_1 (FILE *fp)
 	  px %= TUI_CMD_WIN->width;
 	  wmove (w, py, px);
 	  tui_putc ('\n');
-        }
+	}
     }
   
   /* Handle prev/next/up/down here.  */

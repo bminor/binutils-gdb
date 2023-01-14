@@ -9,26 +9,26 @@
 Contents of CTF section .ctf:
 
   Header:
-    Magic number: dff2
+    Magic number: 0xdff2
     Version: 4 \(CTF_VERSION_3\)
+#...
     Compilation unit name: .*super-sub-cycles.c
 #...
     Type section:	.*\(0x108 bytes\)
 #...
   Types:
 #...
-     [0-9a-f]*: struct A \(.*
-        \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct A \(.*
-            \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct B b \(.*
-                \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct C c \(.*
-                    \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct A \* a \(.*
-                    \[0x[0-9a-f]*\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct D d \(.*
-                        \[0x[0-9a-f]*\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct B \* b \(.*
-                \[0x[0-9a-f]*\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct D d \(.*
-                    \[0x[0-9a-f]*\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct B \* b \(.*
-            \[0x[0-9a-f]*\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct X x \(.*
-                \[0x[0-9a-f]*\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct Y y \(.*
-                    \[0x[0-9a-f]*\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct Z z \(.*
-                        \[0x[0-9a-f]*\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct Y \* y \(.*
-                        \[0x[0-9a-f]*\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct D \* d \(.*
+    0x[0-9a-f]: \(kind 6\) struct A \(.*
+         \[0x0\] b: ID 0x[0-9a-f]*: \(kind 6\) struct B \(.*
+             \[0x0\] c: ID 0x[0-9a-f]*: \(kind 6\) struct C \(.*
+                 \[0x0\] a: ID 0x[0-9a-f]*: \(kind 3\) struct A \* \(.*
+                 \[0x[0-9a-f]*\] d: ID 0x[0-9a-f]*: \(kind 6\) struct D \(.*
+                     \[0x[0-9a-f]*\] b: ID 0x[0-9a-f]*: \(kind 3\) struct B \* \(.*
+             \[0x[0-9a-f]*\] d: ID 0x[0-9a-f]*: \(kind 6\) struct D \(.*
+                 \[0x[0-9a-f]*\] b: ID 0x[0-9a-f]*: \(kind 3\) struct B \* \(.*
+         \[0x[0-9a-f]*\] x: ID 0x[0-9a-f]*: \(kind 6\) struct X \(.*
+             \[0x[0-9a-f]*\] y: ID 0x[0-9a-f]*: \(kind 6\) struct Y \(.*
+                 \[0x[0-9a-f]*\] z: ID 0x[0-9a-f]*: \(kind 6\) struct Z \(.*
+                     \[0x[0-9a-f]*\] y: ID 0x[0-9a-f]*: \(kind 3\) struct Y \* \(.*
+                     \[0x[0-9a-f]*\] d: ID 0x[0-9a-f]*: \(kind 3\) struct D \* \(.*
 #...

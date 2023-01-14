@@ -1,6 +1,6 @@
 /* TUI data manipulation routines.
 
-   Copyright (C) 1998-2020 Free Software Foundation, Inc.
+   Copyright (C) 1998-2021 Free Software Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -97,6 +97,12 @@ public:
   bool is_visible () const
   {
     return handle != nullptr;
+  }
+
+  /* Return true if this window can accept the focus.  */
+  virtual bool can_focus () const
+  {
+    return true;
   }
 
   /* Disable output until the next call to doupdate.  */

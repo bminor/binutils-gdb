@@ -1,6 +1,6 @@
 /* Native-dependent code for OpenBSD/powerpc.
 
-   Copyright (C) 2004-2020 Free Software Foundation, Inc.
+   Copyright (C) 2004-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -69,7 +69,7 @@ getfpregs_supplies (struct gdbarch *gdbarch, int regnum)
   gdb_assert (ppc_floating_point_unit_p (gdbarch));
 
   return ((regnum >= tdep->ppc_fp0_regnum
-           && regnum < tdep->ppc_fp0_regnum + ppc_num_fprs)
+	   && regnum < tdep->ppc_fp0_regnum + ppc_num_fprs)
 	  || regnum == tdep->ppc_fpscr_regnum);
 }
 

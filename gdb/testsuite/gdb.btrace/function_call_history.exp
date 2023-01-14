@@ -1,6 +1,6 @@
 # This testcase is part of GDB, the GNU debugger.
 #
-# Copyright 2013-2020 Free Software Foundation, Inc.
+# Copyright 2013-2021 Free Software Foundation, Inc.
 #
 # Contributed by Intel Corp. <christian.himpel@intel.com>
 #
@@ -22,8 +22,10 @@ if { [skip_btrace_tests] } {
     return -1
 }
 
+# We expect a specific function call history.  This gets messed up with
+# PIE on 32-bit.
 standard_testfile
-if [prepare_for_testing "failed to prepare" $testfile {} {debug}] {
+if [prepare_for_testing "failed to prepare" $testfile {} {nopie debug}] {
     return -1
 }
 
@@ -240,7 +242,7 @@ gdb_continue_to_breakpoint "cont to fib.3"
 gdb_continue_to_breakpoint "cont to fib.4"
 
 # start tracing
-gdb_test_no_output "record btrace"
+gdb_test_no_output "record btrace" "start recording after rerun"
 
 # continue until line 30 above
 delete_breakpoints

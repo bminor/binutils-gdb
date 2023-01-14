@@ -10,7 +10,7 @@
 Contents of CTF section .ctf:
 
   Header:
-    Magic number: dff2
+    Magic number: 0xdff2
     Version: 4 \(CTF_VERSION_3\)
 #...
   Types:
@@ -20,16 +20,28 @@ Contents of CTF section .ctf:
 CTF archive member: .*enum.*\.c:
 #...
   Types:
-     8[0-9a-f]*: enum day_of_the_week \(size 0x[0-9a-f]*\)
-        \[0x0\] \(ID 0x8[0-9a-f]*\) \(kind 8\) enum day_of_the_week \(aligned at 0x[0-9a-f]*\)
+    0x80000001: \(kind 8\) enum day_of_the_week \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+                Sunday: 0
+                Monday: 1
+                Tuesday: 2
+                Wednesday: 3
+                Thursday: 4
+                Friday: 5
+                Saturday: 6
 
   Strings:
 #...
 CTF archive member: .*enum.*\.c:
 #...
   Types:
-     8[0-9a-f]*: enum day_of_the_week \(size 0x[0-9a-f]*\)
-        \[0x0\] \(ID 0x8[0-9a-f]*\) \(kind 8\) enum day_of_the_week \(aligned at 0x[0-9a-f]*\)
+    0x80000001: \(kind 8\) enum day_of_the_week \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+                Monday: 0
+                Tuesday: 1
+                Wednesday: 2
+                Thursday: 3
+                Friday: 4
+                Saturday: 5
+                Sunday: 6
 
   Strings:
 #...

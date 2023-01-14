@@ -1,6 +1,6 @@
 /* Definitions for BFD wrappers used by GDB.
 
-   Copyright (C) 2011-2020 Free Software Foundation, Inc.
+   Copyright (C) 2011-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -194,6 +194,12 @@ int gdb_bfd_requires_relocations (bfd *abfd);
 bool gdb_bfd_get_full_section_contents (bfd *abfd, asection *section,
 					gdb::byte_vector *contents);
 
+/* Create and initialize a BFD handle from a target in-memory range.  */
+
+gdb_bfd_ref_ptr gdb_bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size,
+						 const char *target,
+						 const char *filename = nullptr);
+
 /* Range adapter for a BFD's sections.
 
    To be used as:
@@ -205,10 +211,16 @@ bool gdb_bfd_get_full_section_contents (bfd *abfd, asection *section,
 using gdb_bfd_section_iterator = next_iterator<asection>;
 using gdb_bfd_section_range = next_adapter<asection, gdb_bfd_section_iterator>;
 
-static inline
-gdb_bfd_section_range gdb_bfd_sections (bfd *abfd)
+static inline gdb_bfd_section_range
+gdb_bfd_sections (bfd *abfd)
 {
   return gdb_bfd_section_range (abfd->sections);
 }
+
+static inline gdb_bfd_section_range
+gdb_bfd_sections (const gdb_bfd_ref_ptr &abfd)
+{
+  return gdb_bfd_section_range (abfd->sections);
+};
 
 #endif /* GDB_BFD_H */

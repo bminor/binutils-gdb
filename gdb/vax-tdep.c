@@ -1,6 +1,6 @@
 /* Target-dependent code for the VAX.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -211,8 +211,8 @@ vax_return_value (struct gdbarch *gdbarch, struct value *function,
       || type->code () == TYPE_CODE_ARRAY)
     {
       /* The default on VAX is to return structures in static memory.
-         Consequently a function must return the address where we can
-         find the return value.  */
+	 Consequently a function must return the address where we can
+	 find the return value.  */
 
       if (readbuf)
 	{
@@ -301,7 +301,7 @@ struct vax_frame_cache
   CORE_ADDR base;
 
   /* Table of saved registers.  */
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 static struct vax_frame_cache *
@@ -329,10 +329,10 @@ vax_frame_cache (struct frame_info *this_frame, void **this_cache)
   mask = get_frame_memory_unsigned (this_frame, cache->base + 4, 4) >> 16;
 
   /* These are always saved.  */
-  cache->saved_regs[VAX_PC_REGNUM].addr = cache->base + 16;
-  cache->saved_regs[VAX_FP_REGNUM].addr = cache->base + 12;
-  cache->saved_regs[VAX_AP_REGNUM].addr = cache->base + 8;
-  cache->saved_regs[VAX_PS_REGNUM].addr = cache->base + 4;
+  cache->saved_regs[VAX_PC_REGNUM].set_addr (cache->base + 16);
+  cache->saved_regs[VAX_FP_REGNUM].set_addr (cache->base + 12);
+  cache->saved_regs[VAX_AP_REGNUM].set_addr (cache->base + 8);
+  cache->saved_regs[VAX_PS_REGNUM].set_addr (cache->base + 4);
 
   /* Scan the register save mask and record the location of the saved
      registers.  */
@@ -341,7 +341,7 @@ vax_frame_cache (struct frame_info *this_frame, void **this_cache)
     {
       if (mask & (1 << regnum))
 	{
-	  cache->saved_regs[regnum].addr = addr;
+	  cache->saved_regs[regnum].set_addr (addr);
 	  addr += 4;
 	}
     }
@@ -353,15 +353,15 @@ vax_frame_cache (struct frame_info *this_frame, void **this_cache)
       ULONGEST numarg;
 
       /* This is a procedure with Stack Argument List.  Adjust the
-         stack address for the arguments that were pushed onto the
-         stack.  The return instruction will automatically pop the
-         arguments from the stack.  */
+	 stack address for the arguments that were pushed onto the
+	 stack.  The return instruction will automatically pop the
+	 arguments from the stack.  */
       numarg = get_frame_memory_unsigned (this_frame, addr, 1);
       addr += 4 + numarg * 4;
     }
 
   /* Bits 1:0 of the stack pointer were saved in the control bits.  */
-  trad_frame_set_value (cache->saved_regs, VAX_SP_REGNUM, addr + (mask >> 14));
+  cache->saved_regs[VAX_SP_REGNUM].set_value (addr + (mask >> 14));
 
   return cache;
 }

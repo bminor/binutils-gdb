@@ -1,5 +1,5 @@
 /* BFD back-end for s-record objects.
-   Copyright (C) 1990-2020 Free Software Foundation, Inc.
+   Copyright (C) 1990-2021 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1085,8 +1085,11 @@ srec_write_symbols (bfd *abfd)
       for (i = 0; i < count; i++)
 	{
 	  asymbol *s = table[i];
+
 	  if (! bfd_is_local_label (abfd, s)
-	      && (s->flags & BSF_DEBUGGING) == 0)
+	      && (s->flags & BSF_DEBUGGING) == 0
+	      && s->section != NULL
+	      && s->section->output_section != NULL)
 	    {
 	      /* Just dump out non debug symbols.  */
 	      char buf[43], *p;
@@ -1292,6 +1295,7 @@ const bfd_target srec_vec =
   ' ',				/* AR_pad_char.  */
   16,				/* AR_max_namelen.  */
   0,				/* match priority.  */
+  TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
   bfd_getb32, bfd_getb_signed_32, bfd_putb32,
   bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* Data.  */
@@ -1348,6 +1352,7 @@ const bfd_target symbolsrec_vec =
   ' ',				/* AR_pad_char.  */
   16,				/* AR_max_namelen.  */
   0,				/* match priority.  */
+  TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
   bfd_getb32, bfd_getb_signed_32, bfd_putb32,
   bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* Data.  */

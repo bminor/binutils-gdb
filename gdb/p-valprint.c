@@ -1,6 +1,6 @@
 /* Support for printing Pascal values for GDB, the GNU debugger.
 
-   Copyright (C) 2000-2020 Free Software Foundation, Inc.
+   Copyright (C) 2000-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -64,9 +64,9 @@ static const struct generic_val_print_decorations p_decorations =
 /* See p-lang.h.  */
 
 void
-pascal_value_print_inner (struct value *val, struct ui_file *stream,
-			  int recurse,
-			  const struct value_print_options *options)
+pascal_language::value_print_inner (struct value *val,
+				    struct ui_file *stream, int recurse,
+				    const struct value_print_options *options) const
 
 {
   struct type *type = check_typedef (value_type (val));
@@ -116,8 +116,8 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
 		    len = temp_len;
 		  }
 
-		LA_PRINT_STRING (stream, TYPE_TARGET_TYPE (type),
-				 valaddr, len, NULL, 0, options);
+		printstr (stream, TYPE_TARGET_TYPE (type), valaddr, len,
+			  NULL, 0, options);
 		i = len;
 	      }
 	    else
@@ -184,9 +184,9 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
 	 pointed to, unless pointer is null.  */
       if (((TYPE_LENGTH (elttype) == 1
 	   && (elttype->code () == TYPE_CODE_INT
-               || elttype->code () == TYPE_CODE_CHAR))
-           || ((TYPE_LENGTH (elttype) == 2 || TYPE_LENGTH (elttype) == 4)
-               && elttype->code () == TYPE_CODE_CHAR))
+	       || elttype->code () == TYPE_CODE_CHAR))
+	   || ((TYPE_LENGTH (elttype) == 2 || TYPE_LENGTH (elttype) == 4)
+	       && elttype->code () == TYPE_CODE_CHAR))
 	  && (options->format == 0 || options->format == 's')
 	  && addr != 0)
 	{
@@ -200,8 +200,8 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
 	 as GDB does not recognize stabs pascal strings
 	 Pascal strings are mapped to records
 	 with lowercase names PM.  */
-      if (is_pascal_string_type (elttype, &length_pos, &length_size,
-				 &string_pos, &char_type, NULL)
+      if (pascal_is_string_type (elttype, &length_pos, &length_size,
+				 &string_pos, &char_type, NULL) > 0
 	  && addr != 0)
 	{
 	  ULONGEST string_length;
@@ -313,13 +313,13 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
 	}
       else
 	{
-          if (is_pascal_string_type (type, &length_pos, &length_size,
-                                     &string_pos, &char_type, NULL))
+          if (pascal_is_string_type (type, &length_pos, &length_size,
+				     &string_pos, &char_type, NULL) > 0)
 	    {
 	      len = extract_unsigned_integer (valaddr + length_pos,
 					      length_size, byte_order);
-	      LA_PRINT_STRING (stream, char_type, valaddr + string_pos,
-			       len, NULL, 0, options);
+	      printstr (stream, char_type, valaddr + string_pos, len,
+			NULL, 0, options);
 	    }
 	  else
 	    pascal_object_print_value_fields (val, stream, recurse,
@@ -343,7 +343,8 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
 
 	  fputs_filtered ("[", stream);
 
-	  int bound_info = get_discrete_bounds (range, &low_bound, &high_bound);
+	  int bound_info = (get_discrete_bounds (range, &low_bound, &high_bound)
+			    ? 0 : -1);
 	  if (low_bound == 0 && high_bound == -1 && TYPE_LENGTH (type) > 0)
 	    {
 	      /* If we know the size of the set type, we can figure out the
@@ -401,8 +402,8 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
 
 
 void
-pascal_value_print (struct value *val, struct ui_file *stream,
-		    const struct value_print_options *options)
+pascal_language::value_print (struct value *val, struct ui_file *stream,
+			      const struct value_print_options *options) const
 {
   struct type *type = value_type (val);
   struct value_print_options opts = *options;
@@ -419,7 +420,7 @@ pascal_value_print (struct value *val, struct ui_file *stream,
       || type->code () == TYPE_CODE_REF)
     {
       /* Hack:  remove (char *) for char strings.  Their
-         type is indicated by the quoted string anyway.  */
+	 type is indicated by the quoted string anyway.  */
       if (type->code () == TYPE_CODE_PTR
 	  && type->name () == NULL
 	  && TYPE_TARGET_TYPE (type)->name () != NULL
@@ -490,7 +491,7 @@ pascal_object_is_vtbl_member (struct type *type)
 	      || type->code () == TYPE_CODE_PTR)	/* If using thunks.  */
 	    {
 	      /* Virtual functions tables are full of pointers
-	         to virtual functions.  */
+		 to virtual functions.  */
 	      return pascal_object_is_vtbl_ptr_type (type);
 	    }
 	}
@@ -498,9 +499,7 @@ pascal_object_is_vtbl_member (struct type *type)
   return 0;
 }
 
-/* Mutually recursive subroutines of pascal_object_print_value and
-   pascal_value_print to print out a structure's fields:
-   pascal_object_print_value_fields and pascal_object_print_value.
+/* Helper function for print pascal objects.
 
    VAL, STREAM, RECURSE, and OPTIONS have the same meanings as in
    pascal_object_print_value and c_value_print.
@@ -601,7 +600,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 	      struct value *v;
 
 	      /* Bitfields require special handling, especially due to byte
-	         order problems.  */
+		 order problems.  */
 	      if (TYPE_FIELD_IGNORE (type, i))
 		{
 		  fputs_styled ("<optimized out or zero length>",
@@ -698,8 +697,8 @@ pascal_object_print_value (struct value *val, struct ui_file *stream,
   if (dont_print_vb == 0)
     {
       /* If we're at top level, carve out a completely fresh
-         chunk of the obstack and use that until this particular
-         invocation returns.  */
+	 chunk of the obstack and use that until this particular
+	 invocation returns.  */
       /* Bump up the high-water mark.  Now alpha is omega.  */
       obstack_finish (&dont_print_vb_obstack);
     }
@@ -769,7 +768,7 @@ pascal_object_print_value (struct value *val, struct ui_file *stream,
 	}
       fputs_filtered ("<", stream);
       /* Not sure what the best notation is in the case where there is no
-         baseclass name.  */
+	 baseclass name.  */
 
       fputs_filtered (basename ? basename : "", stream);
       fputs_filtered ("> = ", stream);
@@ -792,10 +791,10 @@ pascal_object_print_value (struct value *val, struct ui_file *stream,
   if (dont_print_vb == 0)
     {
       /* Free the space used to deal with the printing
-         of this type from top level.  */
+	 of this type from top level.  */
       obstack_free (&dont_print_vb_obstack, last_dont_print);
       /* Reset watermark so that we can continue protecting
-         ourselves from whatever we were protecting ourselves.  */
+	 ourselves from whatever we were protecting ourselves.  */
       dont_print_vb_obstack = tmp_obstack;
     }
 }

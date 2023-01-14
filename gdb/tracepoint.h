@@ -1,5 +1,5 @@
 /* Data structures associated with tracepoints in GDB.
-   Copyright (C) 1997-2020 Free Software Foundation, Inc.
+   Copyright (C) 1997-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -257,7 +257,7 @@ public:
 
   void add_wholly_collected (const char *print_name);
 
-  void append_exp (struct expression *exp);
+  void append_exp (std::string &&exp);
 
   /* Add AEXPR to the list, taking ownership.  */
   void add_aexpr (agent_expr_up aexpr);

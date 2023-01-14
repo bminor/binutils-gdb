@@ -1,6 +1,6 @@
 /* Cache and manage the values of registers for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -167,11 +167,11 @@ typedef gdb::function_view<register_status (int regnum, gdb_byte *buf)>
 
 /* A (register_number, register_value) pair.  */
 
-typedef struct cached_reg
+struct cached_reg_t
 {
   int num;
   gdb_byte *data;
-} cached_reg_t;
+};
 
 /* Buffer of registers.  */
 

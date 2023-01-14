@@ -1,5 +1,5 @@
 /* YACC parser for Ada expressions, for GDB.
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -208,7 +208,7 @@ primary :	primary '(' arglist ')'
 			  write_exp_elt_opcode (pstate, OP_FUNCALL);
 			  write_exp_elt_longcst (pstate, $3);
 			  write_exp_elt_opcode (pstate, OP_FUNCALL);
-		        }
+			}
 	|	var_or_type '(' arglist ')'
 			{
 			  if ($1 != NULL)
@@ -248,7 +248,7 @@ primary :
 			{ write_exp_elt_opcode (pstate, TERNOP_SLICE); }
 	|	var_or_type '(' simple_exp DOTDOT simple_exp ')'
 			{ if ($1 == NULL) 
-                            write_exp_elt_opcode (pstate, TERNOP_SLICE);
+			    write_exp_elt_opcode (pstate, TERNOP_SLICE);
 			  else
 			    error (_("Cannot slice a type"));
 			}
@@ -280,7 +280,7 @@ primary :	DOLLAR_VARIABLE /* Various GDB extensions */
 	;
 
 primary :     	aggregate
-        ;        
+	;        
 
 simple_exp : 	primary
 	;
@@ -380,7 +380,7 @@ relation :	simple_exp LEQ simple_exp
 
 relation :	simple_exp IN simple_exp DOTDOT simple_exp
 			{ write_exp_elt_opcode (pstate, TERNOP_IN_RANGE); }
-        |       simple_exp IN primary TICK_RANGE tick_arglist
+	|       simple_exp IN primary TICK_RANGE tick_arglist
 			{ write_exp_elt_opcode (pstate, BINOP_IN_BOUNDS);
 			  write_exp_elt_longcst (pstate, (LONGEST) $5);
 			  write_exp_elt_opcode (pstate, BINOP_IN_BOUNDS);
@@ -390,27 +390,27 @@ relation :	simple_exp IN simple_exp DOTDOT simple_exp
 			  if ($3 == NULL)
 			    error (_("Right operand of 'in' must be type"));
 			  write_exp_elt_opcode (pstate, UNOP_IN_RANGE);
-		          write_exp_elt_type (pstate, $3);
-		          write_exp_elt_opcode (pstate, UNOP_IN_RANGE);
+			  write_exp_elt_type (pstate, $3);
+			  write_exp_elt_opcode (pstate, UNOP_IN_RANGE);
 			}
 	|	simple_exp NOT IN simple_exp DOTDOT simple_exp
 			{ write_exp_elt_opcode (pstate, TERNOP_IN_RANGE);
-		          write_exp_elt_opcode (pstate, UNOP_LOGICAL_NOT);
+			  write_exp_elt_opcode (pstate, UNOP_LOGICAL_NOT);
 			}
-        |       simple_exp NOT IN primary TICK_RANGE tick_arglist
+	|       simple_exp NOT IN primary TICK_RANGE tick_arglist
 			{ write_exp_elt_opcode (pstate, BINOP_IN_BOUNDS);
 			  write_exp_elt_longcst (pstate, (LONGEST) $6);
 			  write_exp_elt_opcode (pstate, BINOP_IN_BOUNDS);
-		          write_exp_elt_opcode (pstate, UNOP_LOGICAL_NOT);
+			  write_exp_elt_opcode (pstate, UNOP_LOGICAL_NOT);
 			}
  	|	simple_exp NOT IN var_or_type	%prec TICK_ACCESS
 			{ 
 			  if ($4 == NULL)
 			    error (_("Right operand of 'in' must be type"));
 			  write_exp_elt_opcode (pstate, UNOP_IN_RANGE);
-		          write_exp_elt_type (pstate, $4);
-		          write_exp_elt_opcode (pstate, UNOP_IN_RANGE);
-		          write_exp_elt_opcode (pstate, UNOP_LOGICAL_NOT);
+			  write_exp_elt_type (pstate, $4);
+			  write_exp_elt_opcode (pstate, UNOP_IN_RANGE);
+			  write_exp_elt_opcode (pstate, UNOP_LOGICAL_NOT);
 			}
 	;
 
@@ -446,7 +446,7 @@ and_then_exp :
 			{ write_exp_elt_opcode (pstate, BINOP_LOGICAL_AND); }
 	|	and_then_exp _AND_ THEN relation
 			{ write_exp_elt_opcode (pstate, BINOP_LOGICAL_AND); }
-        ;
+	;
 
 or_exp :
 		relation OR relation 
@@ -460,13 +460,13 @@ or_else_exp :
 			{ write_exp_elt_opcode (pstate, BINOP_LOGICAL_OR); }
 	|      or_else_exp OR ELSE relation
 			{ write_exp_elt_opcode (pstate, BINOP_LOGICAL_OR); }
-        ;
+	;
 
 xor_exp :       relation XOR relation
 			{ write_exp_elt_opcode (pstate, BINOP_BITWISE_XOR); }
 	|	xor_exp XOR relation
 			{ write_exp_elt_opcode (pstate, BINOP_BITWISE_XOR); }
-        ;
+	;
 
 /* Primaries can denote types (OP_TYPE).  In cases such as 
    primary TICK_ADDRESS, where a type would be invalid, it will be
@@ -494,13 +494,13 @@ primary :	primary TICK_ACCESS
 	| 	primary TICK_LENGTH tick_arglist
 			{ write_int (pstate, $3, type_int (pstate));
 			  write_exp_elt_opcode (pstate, OP_ATR_LENGTH); }
-        |       primary TICK_SIZE
+	|       primary TICK_SIZE
 			{ write_exp_elt_opcode (pstate, OP_ATR_SIZE); }
 	|	primary TICK_TAG
 			{ write_exp_elt_opcode (pstate, OP_ATR_TAG); }
-        |       opt_type_prefix TICK_MIN '(' exp ',' exp ')'
+	|       opt_type_prefix TICK_MIN '(' exp ',' exp ')'
 			{ write_exp_elt_opcode (pstate, OP_ATR_MIN); }
-        |       opt_type_prefix TICK_MAX '(' exp ',' exp ')'
+	|       opt_type_prefix TICK_MAX '(' exp ',' exp ')'
 			{ write_exp_elt_opcode (pstate, OP_ATR_MAX); }
 	| 	opt_type_prefix TICK_POS '(' exp ')'
 			{ write_exp_elt_opcode (pstate, OP_ATR_POS); }
@@ -517,7 +517,7 @@ tick_arglist :			%prec '('
 	;
 
 type_prefix :
-                var_or_type
+		var_or_type
 			{ 
 			  if ($1 == NULL)
 			    error (_("Prefix must be type"));
@@ -541,7 +541,7 @@ primary	:	INT
 	;
 
 primary	:	CHARLIT
-                  { write_int (pstate,
+		  { write_int (pstate,
 			       convert_char_literal (type_qualifier, $1.val),
 			       (type_qualifier == NULL) 
 			       ? $1.type : type_qualifier);
@@ -568,7 +568,7 @@ primary	:	STRING
 
 primary :	TRUEKEYWORD
 			{ write_int (pstate, 1, type_boolean (pstate)); }
-        |	FALSEKEYWORD
+	|	FALSEKEYWORD
 			{ write_int (pstate, 0, type_boolean (pstate)); }
 	;
 
@@ -579,7 +579,7 @@ primary	: 	NEW NAME
 var_or_type:	NAME   	    %prec VAR
 				{ $$ = write_var_or_type (pstate, NULL, $1); }
 	|	block NAME  %prec VAR
-                                { $$ = write_var_or_type (pstate, $1, $2); }
+				{ $$ = write_var_or_type (pstate, $1, $2); }
 	|       NAME TICK_ACCESS 
 			{ 
 			  $$ = write_var_or_type (pstate, NULL, $1);
@@ -611,7 +611,7 @@ aggregate :
 			  write_exp_elt_opcode (pstate, OP_AGGREGATE);
 			  write_exp_elt_longcst (pstate, $2);
 			  write_exp_elt_opcode (pstate, OP_AGGREGATE);
-		        }
+			}
 	;
 
 aggregate_component_list :
@@ -658,7 +658,7 @@ component_group :
 			  write_exp_elt_opcode (pstate, OP_CHOICES);
 			  write_exp_elt_longcst (pstate, $1);
 			  write_exp_elt_opcode (pstate, OP_CHOICES);
-		        }
+			}
 	;
 
 /* We use this somewhat obscure definition in order to handle NAME => and
@@ -679,10 +679,10 @@ component_associations :
 			}
 		    exp { $$ = 1; }
 	|	NAME '|' 
-		        { write_name_assoc (pstate, $1); }
+			{ write_name_assoc (pstate, $1); }
 		    component_associations  { $$ = $4 + 1; }
 	|	simple_exp '|'  
-	            component_associations  { $$ = $3 + 1; }
+		    component_associations  { $$ = $3 + 1; }
 	|	simple_exp DOTDOT simple_exp '|'
 			{ write_exp_elt_opcode (pstate, OP_DISCRETE_RANGE); }
 		    component_associations  { $$ = $6 + 1; }
@@ -851,9 +851,9 @@ write_object_renaming (struct parser_state *par_state,
 
       switch (*renaming_expr) {
       case 'A':
-        renaming_expr += 1;
-        write_exp_elt_opcode (par_state, UNOP_IND);
-        break;
+	renaming_expr += 1;
+	write_exp_elt_opcode (par_state, UNOP_IND);
+	break;
       case 'L':
 	slice_state = LOWER_BOUND;
 	/* FALLTHROUGH */
@@ -953,13 +953,17 @@ block_lookup (const struct block *context, const char *raw_name)
   struct symtab *symtab;
   const struct block *result = NULL;
 
+  std::string name_storage;
   if (raw_name[0] == '\'')
     {
       raw_name += 1;
       name = raw_name;
     }
   else
-    name = ada_encode (raw_name);
+    {
+      name_storage = ada_encode (raw_name);
+      name = name_storage.c_str ();
+    }
 
   nsyms = ada_lookup_symbol_list (name, context, VAR_DOMAIN, &syms);
 
@@ -1022,7 +1026,7 @@ select_possible_type_sym (const std::vector<struct block_symbol> &syms)
 }
 
 static struct type*
-find_primitive_type (struct parser_state *par_state, char *name)
+find_primitive_type (struct parser_state *par_state, const char *name)
 {
   struct type *type;
   type = language_lookup_primitive_type (par_state->language (),
@@ -1120,7 +1124,7 @@ write_ambiguous_var (struct parser_state *par_state,
 
 static int
 ada_nget_field_index (const struct type *type, const char *field_name0,
-                      int field_name_len, int maybe_missing)
+		      int field_name_len, int maybe_missing)
 {
   char *field_name = (char *) alloca ((field_name_len + 1) * sizeof (char));
 
@@ -1158,7 +1162,7 @@ get_symbol_field_type (struct symbol *sym, char *encoded_field_name)
 
       fieldno = ada_get_field_index (type, field_name, 1);
       if (fieldno >= 0)
-        return type->field (fieldno).type ();
+	return type->field (fieldno).type ();
 
       subfield_name = field_name;
       while (*subfield_name != '\0' && *subfield_name != '.' 
@@ -1166,12 +1170,12 @@ get_symbol_field_type (struct symbol *sym, char *encoded_field_name)
 	subfield_name += 1;
 
       if (subfield_name[0] == '\0')
-        return NULL;
+	return NULL;
 
       fieldno = ada_nget_field_index (type, field_name,
-                                      subfield_name - field_name, 1);
+				      subfield_name - field_name, 1);
       if (fieldno < 0)
-        return NULL;
+	return NULL;
 
       type = type->field (fieldno).type ();
       field_name = subfield_name;
@@ -1201,9 +1205,10 @@ write_var_or_type (struct parser_state *par_state,
   if (block == NULL)
     block = par_state->expression_context_block;
 
-  encoded_name = ada_encode (name0.ptr);
-  name_len = strlen (encoded_name);
-  encoded_name = obstack_strndup (&temp_parse_space, encoded_name, name_len);
+  std::string name_storage = ada_encode (name0.ptr);
+  name_len = name_storage.size ();
+  encoded_name = obstack_strndup (&temp_parse_space, name_storage.c_str (),
+				  name_len);
   for (depth = 0; depth < MAX_RENAMING_CHAIN_LENGTH; depth += 1)
     {
       int tail_index;
@@ -1243,7 +1248,7 @@ write_var_or_type (struct parser_state *par_state,
 	    case ADA_EXCEPTION_RENAMING:
 	    case ADA_SUBPROGRAM_RENAMING:
 	      {
-	        int alloc_len = renaming_len + name_len - tail_index + 1;
+		int alloc_len = renaming_len + name_len - tail_index + 1;
 		char *new_name
 		  = (char *) obstack_alloc (&temp_parse_space, alloc_len);
 		strncpy (new_name, renaming, renaming_len);
@@ -1264,21 +1269,21 @@ write_var_or_type (struct parser_state *par_state,
 
 	  if (type_sym != NULL)
 	    {
-              struct type *field_type;
-              
-              if (tail_index == name_len)
+	      struct type *field_type;
+	      
+	      if (tail_index == name_len)
 		return SYMBOL_TYPE (type_sym);
 
-              /* We have some extraneous characters after the type name.
-                 If this is an expression "TYPE_NAME.FIELD0.[...].FIELDN",
-                 then try to get the type of FIELDN.  */
-              field_type
-                = get_symbol_field_type (type_sym, encoded_name + tail_index);
-              if (field_type != NULL)
+	      /* We have some extraneous characters after the type name.
+		 If this is an expression "TYPE_NAME.FIELD0.[...].FIELDN",
+		 then try to get the type of FIELDN.  */
+	      field_type
+		= get_symbol_field_type (type_sym, encoded_name + tail_index);
+	      if (field_type != NULL)
 		return field_type;
 	      else 
 		error (_("Invalid attempt to select from type: \"%s\"."),
-                       name0.ptr);
+		       name0.ptr);
 	    }
 	  else if (tail_index == name_len && nsyms == 0)
 	    {

@@ -6,7 +6,7 @@
 Disassembly of section .text:
 
 0+ <foo>:
- +[a-f0-9]+:	2e 66 0f 3a 60 00 03 	pcmpestrm \$0x3,%cs:\(%rax\),%xmm0
+ +[a-f0-9]+:	2e 66 0f 3a 60 00 03 	cs pcmpestrm \$0x3,\(%rax\),%xmm0
  +[a-f0-9]+:	2e 2e 48 89 e5       	cs cs mov %rsp,%rbp
  +[a-f0-9]+:	89 7d f8             	mov    %edi,-0x8\(%rbp\)
  +[a-f0-9]+:	89 75 f4             	mov    %esi,-0xc\(%rbp\)

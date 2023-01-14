@@ -1,6 +1,6 @@
 /* DWARF 2 debugging format support for GDB.
 
-   Copyright (C) 1994-2020 Free Software Foundation, Inc.
+   Copyright (C) 1994-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -100,9 +100,9 @@ struct dwarf2_per_bfd
      for (i = 0; i < (dwarf2_per_bfd->n_comp_units
 		      + dwarf2_per_bfd->n_type_units); ++i)
        {
-         dwarf2_per_cu_data *per_cu = dwarf2_per_bfd->get_cutu (i);
+	 dwarf2_per_cu_data *per_cu = dwarf2_per_bfd->get_cutu (i);
 
-         ...;
+	 ...;
        }
   */
   dwarf2_per_cu_data *get_cutu (int index);

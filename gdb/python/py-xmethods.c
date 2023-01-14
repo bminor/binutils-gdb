@@ -1,6 +1,6 @@
 /* Support for debug methods in Python.
 
-   Copyright (C) 2013-2020 Free Software Foundation, Inc.
+   Copyright (C) 2013-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -435,7 +435,7 @@ python_xmethod_worker::do_get_result_type (value *obj,
   else if (TYPE_IS_REFERENCE (obj_type))
     {
       struct type *this_ref
-        = lookup_reference_type (this_type, obj_type->code ());
+	= lookup_reference_type (this_type, obj_type->code ());
 
       if (!types_equal (obj_type, this_ref))
 	obj = value_cast (this_ref, obj);

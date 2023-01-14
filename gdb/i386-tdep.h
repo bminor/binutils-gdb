@@ -1,6 +1,6 @@
 /* Target-dependent code for the i386.
 
-   Copyright (C) 2001-2020 Free Software Foundation, Inc.
+   Copyright (C) 2001-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -145,21 +145,21 @@ struct gdbarch_tdep
   int xsave_xcr0_offset;
 
   /* Register names.  */
-  const char **register_names;
+  const char * const *register_names;
 
   /* Register number for %ymm0h.  Set this to -1 to indicate the absence
      of upper YMM register support.  */
   int ymm0h_regnum;
 
   /* Upper YMM register names.  Only used for tdesc_numbered_register.  */
-  const char **ymmh_register_names;
+  const char * const *ymmh_register_names;
 
   /* Register number for %ymm16h.  Set this to -1 to indicate the absence
   of support for YMM16-31.  */
   int ymm16h_regnum;
 
   /* YMM16-31 register names.  Only used for tdesc_numbered_register.  */
-  const char **ymm16h_register_names;
+  const char * const *ymm16h_register_names;
 
   /* Register number for %bnd0r.  Set this to -1 to indicate the absence
      bound registers.  */
@@ -174,23 +174,23 @@ struct gdbarch_tdep
   int bndcfgu_regnum;
 
   /* MPX register names.  Only used for tdesc_numbered_register.  */
-  const char **mpx_register_names;
+  const char * const *mpx_register_names;
 
   /* Register number for %zmm0h.  Set this to -1 to indicate the absence
      of ZMM_HI256 register support.  */
   int zmm0h_regnum;
 
   /* OpMask register names.  */
-  const char **k_register_names;
+  const char * const *k_register_names;
 
   /* ZMM register names.  Only used for tdesc_numbered_register.  */
-  const char **zmmh_register_names;
+  const char * const *zmmh_register_names;
 
   /* XMM16-31 register names.  Only used for tdesc_numbered_register.  */
-  const char **xmm_avx512_register_names;
+  const char * const *xmm_avx512_register_names;
 
   /* YMM16-31 register names.  Only used for tdesc_numbered_register.  */
-  const char **ymm_avx512_register_names;
+  const char * const *ymm_avx512_register_names;
 
   /* Number of PKEYS registers.  */
   int num_pkeys_regs;
@@ -199,7 +199,7 @@ struct gdbarch_tdep
   int pkru_regnum;
 
   /* PKEYS register names.  */
-  const char **pkeys_register_names;
+  const char * const *pkeys_register_names;
 
   /* Register number for %fsbase.  Set this to -1 to indicate the
      absence of segment base registers.  */
@@ -439,15 +439,15 @@ extern void
 				     void *cb_data,
 				     const struct regcache *regcache);
 
-typedef buf_displaced_step_closure i386_displaced_step_closure;
+typedef buf_displaced_step_copy_insn_closure
+  i386_displaced_step_copy_insn_closure;
 
-extern displaced_step_closure_up i386_displaced_step_copy_insn
+extern displaced_step_copy_insn_closure_up i386_displaced_step_copy_insn
   (struct gdbarch *gdbarch, CORE_ADDR from, CORE_ADDR to,
    struct regcache *regs);
-extern void i386_displaced_step_fixup (struct gdbarch *gdbarch,
-				       struct displaced_step_closure *closure,
-				       CORE_ADDR from, CORE_ADDR to,
-				       struct regcache *regs);
+extern void i386_displaced_step_fixup
+  (struct gdbarch *gdbarch, displaced_step_copy_insn_closure *closure,
+   CORE_ADDR from, CORE_ADDR to, regcache *regs);
 
 /* Initialize a basic ELF architecture variant.  */
 extern void i386_elf_init_abi (struct gdbarch_info, struct gdbarch *);
@@ -460,7 +460,7 @@ extern void i386_svr4_init_abi (struct gdbarch_info, struct gdbarch *);
 extern int i386_svr4_reg_to_regnum (struct gdbarch *gdbarch, int reg);
 
 extern int i386_process_record (struct gdbarch *gdbarch,
-                                struct regcache *regcache, CORE_ADDR addr);
+				struct regcache *regcache, CORE_ADDR addr);
 extern const struct target_desc *i386_target_description (uint64_t xcr0,
 							  bool segments);
 
@@ -477,7 +477,6 @@ extern CORE_ADDR i386obsd_sigtramp_start_addr;
 extern CORE_ADDR i386obsd_sigtramp_end_addr;
 extern int i386fbsd4_sc_reg_offset[];
 extern int i386fbsd_sc_reg_offset[];
-extern int i386nbsd_sc_reg_offset[];
 extern int i386obsd_sc_reg_offset[];
 extern int i386bsd_sc_reg_offset[];
 

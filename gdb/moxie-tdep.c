@@ -1,6 +1,6 @@
 /* Target-dependent code for Moxie.
 
-   Copyright (C) 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2009-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -70,7 +70,7 @@ typedef BP_MANIPULATION (moxie_break_insn) moxie_breakpoint;
 
 /* Moxie register names.  */
 
-static const char *moxie_register_names[] = {
+static const char * const moxie_register_names[] = {
   "$fp",  "$sp",  "$r0",  "$r1",  "$r2",
   "$r3",  "$r4",  "$r5", "$r6", "$r7",
   "$r8", "$r9", "$r10", "$r11", "$r12",
@@ -267,7 +267,7 @@ struct moxie_unwind_cache
   LONGEST r13_offset;
   int uses_frame;
   /* Table indicating the location of each and every register.  */
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 /* Read an unsigned integer from the inferior, and adjust
@@ -628,7 +628,7 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 
   if (record_debug > 1)
     fprintf_unfiltered (gdb_stdlog, "Process record: moxie_process_record "
-			            "addr = 0x%s\n",
+				    "addr = 0x%s\n",
 			paddress (target_gdbarch (), addr));
 
   inst = (uint16_t) moxie_process_readu (addr, buf, 2, byte_order);

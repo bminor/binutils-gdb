@@ -1,4 +1,4 @@
-##Copyright (C) 1991-2020 Free Software Foundation, Inc.
+##Copyright (C) 1991-2021 Free Software Foundation, Inc.
 
 # Makefile for GDB documentation.
 # This file is part of GDB.
@@ -180,6 +180,7 @@ MAN5S = gdbinit.5
 MANS = $(MAN1S) $(MAN5S)
 
 HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
+HAVE_NATIVE_GCORE_HOST = @HAVE_NATIVE_GCORE_HOST@
 
 ###
 
@@ -230,7 +231,7 @@ Doxyfile-gdbserver:	$(srcdir)/Doxyfile-gdbserver.in
 
 all-doc: info dvi ps # pdf
 diststuff: info man
-	rm -f gdb-cfg.texi GDBvn.texi
+	rm -f gdb-cfg.texi
 
 install-info: $(INFO_DEPS)
 	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(infodir)
@@ -666,10 +667,9 @@ mostlyclean:
 	rm -f $(STABS_TEX_TMPS)
 	rm -f $(ANNOTATE_TEX_TMPS)
 	rm -f sedref.dvi sedref.tex tmp.sed
-	rm -f version.subst
 
 clean: mostlyclean
-	rm -f gdb-cfg.texi GDBvn.texi
+	rm -f gdb-cfg.texi
 
 distclean: clean
 	rm -f Makefile
@@ -679,7 +679,7 @@ distclean: clean
 # "clean" or "distclean".  Use maintainer-clean to remove them.
 
 maintainer-clean realclean: distclean
-	rm -f GDBvn.texi *.info* *.dvi *.ps *.html *.pdf $(MANS)
+	rm -f GDBvn.texi version.subst *.info* *.dvi *.ps *.html *.pdf $(MANS)
 
 install: install-info install-man
 

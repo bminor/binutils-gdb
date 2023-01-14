@@ -1,5 +1,5 @@
 /* Line completion stuff for GDB, the GNU debugger.
-   Copyright (C) 2000-2020 Free Software Foundation, Inc.
+   Copyright (C) 2000-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -228,7 +228,7 @@ filename_completer (struct cmd_list_element *ignore,
 	 will loop indefinitely.  */
       subsequent_name = 1;
       /* Like emacs, don't complete on old versions.  Especially
-         useful in the "source" command.  */
+	 useful in the "source" command.  */
       const char *p = p_rl.get ();
       if (p[strlen (p) - 1] == '~')
 	continue;
@@ -892,7 +892,11 @@ complete_explicit_location (completion_tracker &tracker,
   int keyword = skip_keyword (tracker, explicit_options, &text);
 
   if (keyword == -1)
-    complete_on_enum (tracker, explicit_options, text, text);
+    {
+      complete_on_enum (tracker, explicit_options, text, text);
+      /* There are keywords that start with "-".   Include them, too.  */
+      complete_on_enum (tracker, linespec_keywords, text, text);
+    }
   else
     {
       /* Completing on value.  */
@@ -1384,9 +1388,8 @@ complete_line_internal_1 (completion_tracker &tracker,
       result_list = 0;
     }
   else
-    {
-      c = lookup_cmd_1 (&p, cmdlist, &result_list, NULL, ignore_help_classes);
-    }
+    c = lookup_cmd_1 (&p, cmdlist, &result_list, NULL, ignore_help_classes,
+		      true);
 
   /* Move p up to the next interesting thing.  */
   while (*p == ' ' || *p == '\t')
@@ -1587,10 +1590,7 @@ completion_tracker::discard_completions ()
   m_lowest_common_denominator_unique = false;
   m_lowest_common_denominator_valid = false;
 
-  /* A null check here allows this function to be used from the
-     constructor.  */
-  if (m_entries_hash != NULL)
-    htab_delete (m_entries_hash);
+  m_entries_hash.reset (nullptr);
 
   /* A callback used by the hash table to compare new entries with existing
      entries.  We can't use the standard streq_hash function here as the
@@ -1618,10 +1618,10 @@ completion_tracker::discard_completions ()
 	return entry->hash_name ();
       };
 
-  m_entries_hash = htab_create_alloc (INITIAL_COMPLETION_HTAB_SIZE,
-				      entry_hash_func, entry_eq_func,
-				      completion_hash_entry::deleter,
-				      xcalloc, xfree);
+  m_entries_hash.reset (htab_create_alloc (INITIAL_COMPLETION_HTAB_SIZE,
+					   entry_hash_func, entry_eq_func,
+					   completion_hash_entry::deleter,
+					   xcalloc, xfree));
 }
 
 /* See completer.h.  */
@@ -1629,7 +1629,6 @@ completion_tracker::discard_completions ()
 completion_tracker::~completion_tracker ()
 {
   xfree (m_lowest_common_denominator);
-  htab_delete (m_entries_hash);
 }
 
 /* See completer.h.  */
@@ -1645,11 +1644,12 @@ completion_tracker::maybe_add_completion
   if (max_completions == 0)
     return false;
 
-  if (htab_elements (m_entries_hash) >= max_completions)
+  if (htab_elements (m_entries_hash.get ()) >= max_completions)
     return false;
 
   hashval_t hash = htab_hash_string (name.get ());
-  slot = htab_find_slot_with_hash (m_entries_hash, name.get (), hash, INSERT);
+  slot = htab_find_slot_with_hash (m_entries_hash.get (), name.get (),
+				   hash, INSERT);
   if (*slot == HTAB_EMPTY_ENTRY)
     {
       const char *match_for_lcd_str = NULL;
@@ -1700,10 +1700,10 @@ void
 completion_tracker::remove_completion (const char *name)
 {
   hashval_t hash = htab_hash_string (name);
-  if (htab_find_slot_with_hash (m_entries_hash, name, hash, NO_INSERT)
+  if (htab_find_slot_with_hash (m_entries_hash.get (), name, hash, NO_INSERT)
       != NULL)
     {
-      htab_remove_elt_with_hash (m_entries_hash, name, hash);
+      htab_remove_elt_with_hash (m_entries_hash.get (), name, hash);
       m_lowest_common_denominator_valid = false;
     }
 }
@@ -2144,7 +2144,7 @@ completion_tracker::recompute_lowest_common_denominator ()
 	return 1;
       };
 
-  htab_traverse (m_entries_hash, visitor_func, this);
+  htab_traverse (m_entries_hash.get (), visitor_func, this);
   m_lowest_common_denominator_valid = true;
 }
 
@@ -2227,7 +2227,7 @@ completion_result
 completion_tracker::build_completion_result (const char *text,
 					     int start, int end)
 {
-  size_t element_count = htab_elements (m_entries_hash);
+  size_t element_count = htab_elements (m_entries_hash.get ());
 
   if (element_count == 0)
     return {};
@@ -2256,9 +2256,11 @@ completion_tracker::build_completion_result (const char *text,
       /* If the tracker wants to, or we already have a space at the
 	 end of the match, tell readline to skip appending
 	 another.  */
+      char *match = match_list[0];
       bool completion_suppress_append
 	= (suppress_append_ws ()
-	   || match_list[0][strlen (match_list[0]) - 1] == ' ');
+	   || (match[0] != '\0'
+	       && match[strlen (match) - 1] == ' '));
 
       return completion_result (match_list, 1, completion_suppress_append);
     }
@@ -2294,7 +2296,7 @@ completion_tracker::build_completion_result (const char *text,
 	  };
 
       /* Build the completion list and add a null at the end.  */
-      htab_traverse_noresize (m_entries_hash, func, &builder);
+      htab_traverse_noresize (m_entries_hash.get (), func, &builder);
       match_list[builder.index] = NULL;
 
       return completion_result (match_list, builder.index - 1, false);
@@ -2653,8 +2655,8 @@ gdb_printable_part (char *pathname)
   else if (temp[1] == '\0')
     {
       for (x = temp - 1; x > pathname; x--)
-        if (*x == '/')
-          break;
+	if (*x == '/')
+	  break;
       return ((*x == '/') ? x + 1 : pathname);
     }
   else
@@ -2756,15 +2758,15 @@ gdb_fnprint (const char *to_print, int prefix_bytes,
   while (*s)
     {
       if (CTRL_CHAR (*s))
-        {
-          displayer->putch (displayer, '^');
-          displayer->putch (displayer, UNCTRL (*s));
-          printed_len += 2;
-          s++;
+	{
+	  displayer->putch (displayer, '^');
+	  displayer->putch (displayer, UNCTRL (*s));
+	  printed_len += 2;
+	  s++;
 #if defined (HANDLE_MULTIBYTE)
 	  memset (&ps, 0, sizeof (mbstate_t));
 #endif
-        }
+	}
       else if (*s == RUBOUT)
 	{
 	  displayer->putch (displayer, '^');

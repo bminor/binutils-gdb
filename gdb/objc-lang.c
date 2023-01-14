@@ -1,6 +1,6 @@
 /* Objective-C language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 2002-2020 Free Software Foundation, Inc.
+   Copyright (C) 2002-2021 Free Software Foundation, Inc.
 
    Contributed by Apple Computer, Inc.
    Written by Michael Snyder.
@@ -33,7 +33,7 @@
 #include "value.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "target.h"		/* for target_has_execution */
+#include "target.h"
 #include "gdbcore.h"
 #include "gdbcmd.h"
 #include "frame.h"
@@ -112,7 +112,7 @@ lookup_objc_class (struct gdbarch *gdbarch, const char *classname)
   struct type *char_type = builtin_type (gdbarch)->builtin_char;
   struct value * function, *classval;
 
-  if (! target_has_execution)
+  if (! target_has_execution ())
     {
       /* Can't call into inferior to lookup class.  */
       return 0;
@@ -141,7 +141,7 @@ lookup_child_selector (struct gdbarch *gdbarch, const char *selname)
   struct type *char_type = builtin_type (gdbarch)->builtin_char;
   struct value * function, *selstring;
 
-  if (! target_has_execution)
+  if (! target_has_execution ())
     {
       /* Can't call into inferior to lookup selector.  */
       return 0;
@@ -164,7 +164,7 @@ lookup_child_selector (struct gdbarch *gdbarch, const char *selname)
 }
 
 struct value * 
-value_nsstring (struct gdbarch *gdbarch, char *ptr, int len)
+value_nsstring (struct gdbarch *gdbarch, const char *ptr, int len)
 {
   struct type *char_type = builtin_type (gdbarch)->builtin_char;
   struct value *stringValue[3];
@@ -172,7 +172,7 @@ value_nsstring (struct gdbarch *gdbarch, char *ptr, int len)
   struct symbol *sym;
   struct type *type;
 
-  if (!target_has_execution)
+  if (!target_has_execution ())
     return 0;		/* Can't call into inferior to create NSString.  */
 
   stringValue[2] = value_string(ptr, len, char_type);
@@ -319,41 +319,32 @@ static const struct op_print objc_op_print_tab[] =
     {NULL, OP_NULL, PREC_NULL, 0}
 };
 
-static const char *objc_extensions[] =
-{
-  ".m", NULL
-};
-
-/* Constant data representing the Objective-C language.  */
-
-extern const struct language_data objc_language_data =
-{
-  "objective-c",		/* Language name */
-  "Objective-C",
-  language_objc,
-  range_check_off,
-  case_sensitive_on,
-  array_row_major,
-  macro_expansion_c,
-  objc_extensions,
-  &exp_descriptor_standard,
-  "self",		        /* name_of_this */
-  false,			/* la_store_sym_names_in_linkage_form_p */
-  objc_op_print_tab,		/* Expression operators for printing */
-  1,				/* C-style arrays */
-  0,				/* String lower bound */
-  &default_varobj_ops,
-  "{...}"			/* la_struct_too_deep_ellipsis */
-};
-
 /* Class representing the Objective-C language.  */
 
 class objc_language : public language_defn
 {
 public:
   objc_language ()
-    : language_defn (language_objc, objc_language_data)
+    : language_defn (language_objc)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+
+  const char *name () const override
+  { return "objective-c"; }
+
+  /* See language.h.  */
+
+  const char *natural_name () const override
+  { return "Objective-C"; }
+
+  /* See language.h.  */
+
+  const std::vector<const char *> &filename_extensions () const override
+  {
+    static const std::vector<const char *> extensions = { ".m" };
+    return extensions;
+  }
 
   /* See language.h.  */
   void language_arch_info (struct gdbarch *gdbarch,
@@ -372,7 +363,7 @@ public:
 
   /* See language.h.  */
 
-  char *demangle (const char *mangled, int options) const override
+  char *demangle_symbol (const char *mangled, int options) const override
   {
     return objc_demangle (mangled, options);
   }
@@ -419,6 +410,21 @@ public:
 
     return real_stop_pc;
   }
+
+  /* See language.h.  */
+
+  const char *name_of_this () const override
+  { return "self"; }
+
+  /* See language.h.  */
+
+  enum macro_expansion macro_expansion () const override
+  { return macro_expansion_c; }
+
+  /* See language.h.  */
+
+  const struct op_print *opcode_print_table () const override
+  { return objc_op_print_tab; }
 };
 
 /* Single instance of the class representing the Objective-C language.  */
@@ -1188,10 +1194,10 @@ print_object_command (const char *args, int from_tty)
 
   {
     expression_up expr = parse_expression (args);
-    int pc = 0;
 
-    object = evaluate_subexp (builtin_type (expr->gdbarch)->builtin_data_ptr,
-			      expr.get (), &pc, EVAL_NORMAL);
+    object
+      = evaluate_expression (expr.get (),
+			     builtin_type (expr->gdbarch)->builtin_data_ptr);
   }
 
   /* Validate the address for sanity.  */

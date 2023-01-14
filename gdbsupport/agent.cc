@@ -1,6 +1,6 @@
 /* Shared utility routines for GDB to interact with agent.
 
-   Copyright (C) 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2009-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -138,7 +138,7 @@ static int
 gdb_connect_sync_socket (int pid)
 {
 #ifdef HAVE_SYS_UN_H
-  struct sockaddr_un addr;
+  struct sockaddr_un addr = {};
   int res, fd;
   char path[UNIX_PATH_MAX];
 

@@ -1,5 +1,5 @@
 /* BFD back-end for AMD 64 COFF files.
-   Copyright (C) 2006-2020 Free Software Foundation, Inc.
+   Copyright (C) 2006-2021 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -222,7 +222,7 @@ static reloc_howto_type howto_table[] =
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
-	 "R_X86_64_64",		/* name */
+	 "IMAGE_REL_AMD64_ADDR64", /* name */
 	 TRUE,			/* partial_inplace */
 	 0xffffffffffffffffll,	/* src_mask */
 	 0xffffffffffffffffll,	/* dst_mask */
@@ -235,7 +235,7 @@ static reloc_howto_type howto_table[] =
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
-	 "R_X86_64_32",		/* name */
+	 "IMAGE_REL_AMD64_ADDR32", /* name */
 	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
@@ -249,7 +249,7 @@ static reloc_howto_type howto_table[] =
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
-	 "rva32",		/* name */
+	 "IMAGE_REL_AMD64_ADDR32NB", /* name */
 	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
@@ -263,7 +263,7 @@ static reloc_howto_type howto_table[] =
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
-	 "R_X86_64_PC32",	/* name */
+	 "IMAGE_REL_AMD64_REL32", /* name */
 	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
@@ -277,7 +277,7 @@ static reloc_howto_type howto_table[] =
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
-	 "DISP32+1",		/* name */
+	 "IMAGE_REL_AMD64_REL32_1", /* name */
 	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
@@ -290,7 +290,7 @@ static reloc_howto_type howto_table[] =
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
-	 "DISP32+2",		/* name */
+	 "IMAGE_REL_AMD64_REL32_2", /* name */
 	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
@@ -303,7 +303,7 @@ static reloc_howto_type howto_table[] =
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
-	 "DISP32+3",		/* name */
+	 "IMAGE_REL_AMD64_REL32_3", /* name */
 	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
@@ -316,7 +316,7 @@ static reloc_howto_type howto_table[] =
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
-	 "DISP32+4",		/* name */
+	 "IMAGE_REL_AMD64_REL32_4", /* name */
 	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
@@ -329,7 +329,7 @@ static reloc_howto_type howto_table[] =
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
-	 "DISP32+5",		/* name */
+	 "IMAGE_REL_AMD64_REL32_5", /* name */
 	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
@@ -345,7 +345,7 @@ static reloc_howto_type howto_table[] =
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
-	 "secrel32",		/* name */
+	 "IMAGE_REL_AMD64_SECREL", /* name */
 	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
@@ -782,6 +782,7 @@ const bfd_target
   '/',				/* Ar_pad_char.  */
   15,				/* Ar_max_namelen.  */
   0,				/* match priority.  */
+  TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */
 
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,
      bfd_getl32, bfd_getl_signed_32, bfd_putl32,
@@ -854,6 +855,7 @@ const bfd_target
   '/',				/* Ar_pad_char.  */
   15,				/* Ar_max_namelen.  */
   0,				/* match priority.  */
+  TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */
 
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,
      bfd_getl32, bfd_getl_signed_32, bfd_putl32,

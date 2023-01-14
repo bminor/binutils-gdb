@@ -1,6 +1,6 @@
 /* Reverse execution and reverse debugging.
 
-   Copyright (C) 2006-2020 Free Software Foundation, Inc.
+   Copyright (C) 2006-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -44,7 +44,7 @@ exec_reverse_once (const char *cmd, const char *args, int from_tty)
     error (_("Already in reverse mode.  Use '%s' or 'set exec-dir forward'."),
 	   cmd);
 
-  if (!target_can_execute_reverse)
+  if (!target_can_execute_reverse ())
     error (_("Target %s does not support this command."), target_shortname);
 
   std::string reverse_command = string_printf ("%s %s", cmd, args ? args : "");
@@ -106,8 +106,8 @@ static int bookmark_count;
 
 #define ALL_BOOKMARKS_SAFE(B,TMP)           \
      for ((B) = bookmark_chain;             \
-          (B) ? ((TMP) = (B)->next, 1) : 0; \
-          (B) = (TMP))
+	  (B) ? ((TMP) = (B)->next, 1) : 0; \
+	  (B) = (TMP))
 
 /* save_bookmark_command -- implement "bookmark" command.
    Call target method to get a bookmark identifier.

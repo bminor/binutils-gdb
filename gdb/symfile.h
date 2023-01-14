@@ -1,6 +1,6 @@
 /* Definitions for reading symbol files into GDB.
 
-   Copyright (C) 1990-2020 Free Software Foundation, Inc.
+   Copyright (C) 1990-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,6 +27,7 @@
 #include "objfile-flags.h"
 #include "gdb_bfd.h"
 #include "gdbsupport/function-view.h"
+#include "target-section.h"
 
 /* Opaque declarations.  */
 struct target_section;
@@ -235,9 +236,9 @@ struct quick_symbol_functions
      strcmp_iw_ordered(x,y) == 0 --> MATCH(x,y) == 0.  ORDERED_COMPARE,
      if non-null, must be an ordering relation compatible with
      strcmp_iw_ordered in the sense that
-            strcmp_iw_ordered(x,y) == 0 --> ORDERED_COMPARE(x,y) == 0
+	    strcmp_iw_ordered(x,y) == 0 --> ORDERED_COMPARE(x,y) == 0
      and 
-            strcmp_iw_ordered(x,y) <= 0 --> ORDERED_COMPARE(x,y) <= 0
+	    strcmp_iw_ordered(x,y) <= 0 --> ORDERED_COMPARE(x,y) <= 0
      (allowing strcmp_iw_ordered(x,y) < 0 while ORDERED_COMPARE(x, y) == 0).
      CALLBACK returns true to indicate that the scan should continue, or
      false to indicate that the scan should be terminated.  */
@@ -413,7 +414,7 @@ extern symfile_segment_data_up default_symfile_segments (bfd *abfd);
    do anything special.  */
 
 extern bfd_byte *default_symfile_relocate (struct objfile *objfile,
-                                           asection *sectp, bfd_byte *buf);
+					   asection *sectp, bfd_byte *buf);
 
 extern struct symtab *allocate_symtab (struct compunit_symtab *, const char *)
   ATTRIBUTE_NONNULL (1);
@@ -440,7 +441,7 @@ extern struct objfile *symbol_file_add (const char *, symfile_add_flags,
 
 extern struct objfile *symbol_file_add_from_bfd (bfd *, const char *, symfile_add_flags,
 						 section_addr_info *,
-                                                 objfile_flags, struct objfile *parent);
+						 objfile_flags, struct objfile *parent);
 
 extern void symbol_file_add_separate (bfd *, const char *, symfile_add_flags,
 				      struct objfile *);
@@ -451,10 +452,7 @@ extern std::string find_separate_debug_file_by_debuglink (struct objfile *);
    existing section table.  */
 
 extern section_addr_info
-   build_section_addr_info_from_section_table (const struct target_section
-					       *start,
-					       const struct target_section
-					       *end);
+    build_section_addr_info_from_section_table (const target_section_table &table);
 
 			/*   Variables   */
 
@@ -473,8 +471,6 @@ extern bool auto_solib_add;
 /* From symfile.c */
 
 extern void set_initial_language (void);
-
-extern void find_lowest_section (bfd *, asection *, void *);
 
 extern gdb_bfd_ref_ptr symfile_bfd_open (const char *);
 
@@ -604,7 +600,7 @@ struct dwarf2_debug_sections {
 };
 
 extern int dwarf2_has_info (struct objfile *,
-                            const struct dwarf2_debug_sections *,
+			    const struct dwarf2_debug_sections *,
 			    bool = false);
 
 /* Dwarf2 sections that can be accessed by dwarf2_get_section_info.  */
@@ -614,7 +610,7 @@ enum dwarf2_section_enum {
 };
 
 extern void dwarf2_get_section_info (struct objfile *,
-                                     enum dwarf2_section_enum,
+				     enum dwarf2_section_enum,
 				     asection **, const gdb_byte **,
 				     bfd_size_type *);
 
@@ -644,5 +640,13 @@ extern gdb_bfd_ref_ptr find_separate_debug_file_in_section (struct objfile *);
 /* True if we are printing debug output about separate debug info files.  */
 
 extern bool separate_debug_file_debug;
+
+/* Read full symbols immediately.  */
+
+extern int readnow_symbol_files;
+
+/* Never read full symbols.  */
+
+extern int readnever_symbol_files;
 
 #endif /* !defined(SYMFILE_H) */

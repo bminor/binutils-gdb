@@ -1,5 +1,5 @@
 /* Compressed section support (intended for debug sections).
-   Copyright (C) 2008-2020 Free Software Foundation, Inc.
+   Copyright (C) 2008-2021 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -60,8 +60,7 @@ decompress_contents (bfd_byte *compressed_buffer,
 	break;
       rc = inflateReset (&strm);
     }
-  rc |= inflateEnd (&strm);
-  return rc == Z_OK && strm.avail_out == 0;
+  return inflateEnd (&strm) == Z_OK && rc == Z_OK && strm.avail_out == 0;
 }
 
 /* Compress data of the size specified in @var{uncompressed_size}

@@ -1,4 +1,4 @@
-/* Copyright (C) 1986-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -29,21 +29,22 @@ struct process_stratum_target;
 struct thread_info;
 
 /* True if we are debugging run control.  */
-extern unsigned int debug_infrun;
+extern bool debug_infrun;
 
-/* Print an "infrun" debug statement.  Should be used through
-   infrun_debug_printf.  */
-void ATTRIBUTE_PRINTF (2, 3) infrun_debug_printf_1
-  (const char *func_name, const char *fmt, ...);
+/* Print an "infrun" debug statement.  */
 
 #define infrun_debug_printf(fmt, ...) \
-  do { \
-    if (debug_infrun) \
-      infrun_debug_printf_1 (__func__, fmt, ##__VA_ARGS__); \
-  } while (0)
+  debug_prefixed_printf_cond (debug_infrun, "infrun",fmt, ##__VA_ARGS__)
 
-/* True if we are debugging displaced stepping.  */
-extern bool debug_displaced;
+/* Print "infrun" start/end debug statements.  */
+
+#define INFRUN_SCOPED_DEBUG_START_END(msg) \
+  scoped_debug_start_end (debug_infrun, "infrun", msg)
+
+/* Print "infrun" enter/exit debug statements.  */
+
+#define INFRUN_SCOPED_DEBUG_ENTER_EXIT \
+  scoped_debug_enter_exit (debug_infrun, "infrun")
 
 /* Nonzero if we want to give control to the user when we're notified
    of shared library events by the dynamic linker.  */
@@ -227,12 +228,8 @@ extern void update_signals_program_target (void);
    $_exitsignal.  */
 extern void clear_exit_convenience_vars (void);
 
-/* Dump LEN bytes at BUF in hex to FILE, followed by a newline.  */
-extern void displaced_step_dump_bytes (struct ui_file *file,
-				       const gdb_byte *buf, size_t len);
-
-extern struct displaced_step_closure *get_displaced_step_closure_by_addr
-    (CORE_ADDR addr);
+/* Dump LEN bytes at BUF in hex to a string and return it.  */
+extern std::string displaced_step_dump_bytes (const gdb_byte *buf, size_t len);
 
 extern void update_observer_mode (void);
 
@@ -254,9 +251,9 @@ extern void infrun_async (int enable);
    loop.  */
 extern void mark_infrun_async_event_handler (void);
 
-/* The global queue of threads that need to do a step-over operation
+/* The global chain of threads that need to do a step-over operation
    to get past e.g., a breakpoint.  */
-extern struct thread_info *step_over_queue_head;
+extern struct thread_info *global_thread_step_over_chain_head;
 
 /* Remove breakpoints if possible (usually that means, if everything
    is stopped).  On failure, print a message.  */
@@ -271,69 +268,5 @@ extern void all_uis_check_sync_execution_done (void);
    yet, re-disable its prompt (a synchronous execution command was
    started or re-started).  */
 extern void all_uis_on_sync_execution_starting (void);
-
-/* Base class for displaced stepping closures (the arch-specific data).  */
-
-struct displaced_step_closure
-{
-  virtual ~displaced_step_closure () = 0;
-};
-
-using displaced_step_closure_up = std::unique_ptr<displaced_step_closure>;
-
-/* A simple displaced step closure that contains only a byte buffer.  */
-
-struct buf_displaced_step_closure : displaced_step_closure
-{
-  buf_displaced_step_closure (int buf_size)
-  : buf (buf_size)
-  {}
-
-  gdb::byte_vector buf;
-};
-
-/* Per-inferior displaced stepping state.  */
-struct displaced_step_inferior_state
-{
-  displaced_step_inferior_state ()
-  {
-    reset ();
-  }
-
-  /* Put this object back in its original state.  */
-  void reset ()
-  {
-    failed_before = 0;
-    step_thread = nullptr;
-    step_gdbarch = nullptr;
-    step_closure.reset ();
-    step_original = 0;
-    step_copy = 0;
-    step_saved_copy.clear ();
-  }
-
-  /* True if preparing a displaced step ever failed.  If so, we won't
-     try displaced stepping for this inferior again.  */
-  int failed_before;
-
-  /* If this is not nullptr, this is the thread carrying out a
-     displaced single-step in process PID.  This thread's state will
-     require fixing up once it has completed its step.  */
-  thread_info *step_thread;
-
-  /* The architecture the thread had when we stepped it.  */
-  gdbarch *step_gdbarch;
-
-  /* The closure provided gdbarch_displaced_step_copy_insn, to be used
-     for post-step cleanup.  */
-  displaced_step_closure_up step_closure;
-
-  /* The address of the original instruction, and the copy we
-     made.  */
-  CORE_ADDR step_original, step_copy;
-
-  /* Saved contents of copy area.  */
-  gdb::byte_vector step_saved_copy;
-};
 
 #endif /* INFRUN_H */

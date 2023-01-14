@@ -1,6 +1,6 @@
 /* IBM RS/6000 native-dependent code for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -90,7 +90,7 @@ public:
   void create_inferior (const char *, const std::string &,
 			char **, int) override;
 
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
 private:
   enum target_xfer_status
@@ -118,8 +118,8 @@ regmap (struct gdbarch *gdbarch, int regno, int *isfloat)
       && regno < tdep->ppc_gp0_regnum + ppc_num_gprs)
     return regno;
   else if (tdep->ppc_fp0_regnum >= 0
-           && tdep->ppc_fp0_regnum <= regno
-           && regno < tdep->ppc_fp0_regnum + ppc_num_fprs)
+	   && tdep->ppc_fp0_regnum <= regno
+	   && regno < tdep->ppc_fp0_regnum + ppc_num_fprs)
     {
       *isfloat = 1;
       return regno - tdep->ppc_fp0_regnum + FPR0;
@@ -137,7 +137,7 @@ regmap (struct gdbarch *gdbarch, int regno, int *isfloat)
   else if (regno == tdep->ppc_xer_regnum)
     return XER;
   else if (tdep->ppc_fpscr_regnum >= 0
-           && regno == tdep->ppc_fpscr_regnum)
+	   && regno == tdep->ppc_fpscr_regnum)
     return FPSCR;
   else if (tdep->ppc_mq_regnum >= 0 && regno == tdep->ppc_mq_regnum)
     return MQ;
@@ -277,7 +277,7 @@ store_register (struct regcache *regcache, int regno)
   else
     {
       /* The PT_WRITE_GPR operation is rather odd.  For 32-bit inferiors,
-         the register's value is passed by value, but for 64-bit inferiors,
+	 the register's value is passed by value, but for 64-bit inferiors,
 	 the address of a buffer containing the value is passed.  */
       if (!ARCH64 ())
 	rs6000_ptrace32 (PT_WRITE_GPR, pid, (int *) nr, *addr, 0);
@@ -317,7 +317,7 @@ rs6000_nat_target::fetch_registers (struct regcache *regcache, int regno)
 
       /* Read 32 general purpose registers.  */
       for (regno = tdep->ppc_gp0_regnum;
-           regno < tdep->ppc_gp0_regnum + ppc_num_gprs;
+	   regno < tdep->ppc_gp0_regnum + ppc_num_gprs;
 	   regno++)
 	{
 	  fetch_register (regcache, regno);
@@ -325,8 +325,8 @@ rs6000_nat_target::fetch_registers (struct regcache *regcache, int regno)
 
       /* Read general purpose floating point registers.  */
       if (tdep->ppc_fp0_regnum >= 0)
-        for (regno = 0; regno < ppc_num_fprs; regno++)
-          fetch_register (regcache, tdep->ppc_fp0_regnum + regno);
+	for (regno = 0; regno < ppc_num_fprs; regno++)
+	  fetch_register (regcache, tdep->ppc_fp0_regnum + regno);
 
       /* Read special registers.  */
       fetch_register (regcache, gdbarch_pc_regnum (gdbarch));
@@ -336,7 +336,7 @@ rs6000_nat_target::fetch_registers (struct regcache *regcache, int regno)
       fetch_register (regcache, tdep->ppc_ctr_regnum);
       fetch_register (regcache, tdep->ppc_xer_regnum);
       if (tdep->ppc_fpscr_regnum >= 0)
-        fetch_register (regcache, tdep->ppc_fpscr_regnum);
+	fetch_register (regcache, tdep->ppc_fpscr_regnum);
       if (tdep->ppc_mq_regnum >= 0)
 	fetch_register (regcache, tdep->ppc_mq_regnum);
     }
@@ -359,7 +359,7 @@ rs6000_nat_target::store_registers (struct regcache *regcache, int regno)
 
       /* Write general purpose registers first.  */
       for (regno = tdep->ppc_gp0_regnum;
-           regno < tdep->ppc_gp0_regnum + ppc_num_gprs;
+	   regno < tdep->ppc_gp0_regnum + ppc_num_gprs;
 	   regno++)
 	{
 	  store_register (regcache, regno);
@@ -367,8 +367,8 @@ rs6000_nat_target::store_registers (struct regcache *regcache, int regno)
 
       /* Write floating point registers.  */
       if (tdep->ppc_fp0_regnum >= 0)
-        for (regno = 0; regno < ppc_num_fprs; regno++)
-          store_register (regcache, tdep->ppc_fp0_regnum + regno);
+	for (regno = 0; regno < ppc_num_fprs; regno++)
+	  store_register (regcache, tdep->ppc_fp0_regnum + regno);
 
       /* Write special registers.  */
       store_register (regcache, gdbarch_pc_regnum (gdbarch));
@@ -378,7 +378,7 @@ rs6000_nat_target::store_registers (struct regcache *regcache, int regno)
       store_register (regcache, tdep->ppc_ctr_regnum);
       store_register (regcache, tdep->ppc_xer_regnum);
       if (tdep->ppc_fpscr_regnum >= 0)
-        store_register (regcache, tdep->ppc_fpscr_regnum);
+	store_register (regcache, tdep->ppc_fpscr_regnum);
       if (tdep->ppc_mq_regnum >= 0)
 	store_register (regcache, tdep->ppc_mq_regnum);
     }
@@ -495,7 +495,7 @@ rs6000_nat_target::xfer_partial (enum target_object object,
 
 ptid_t
 rs6000_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
-			 int options)
+			 target_wait_flags options)
 {
   pid_t pid;
   int status, save_errno;
@@ -581,11 +581,12 @@ rs6000_nat_target::create_inferior (const char *exec_file,
      Blindly calling rs6000_gdbarch_init used to work in older versions of
      GDB, as rs6000_gdbarch_init incorrectly used the previous tdep to
      determine the wordsize.  */
-  if (exec_bfd)
+  if (current_program_space->exec_bfd ())
     {
       const struct bfd_arch_info *exec_bfd_arch_info;
 
-      exec_bfd_arch_info = bfd_get_arch_info (exec_bfd);
+      exec_bfd_arch_info
+	= bfd_get_arch_info (current_program_space->exec_bfd ());
       if (arch == exec_bfd_arch_info->arch)
 	return;
     }
@@ -594,7 +595,7 @@ rs6000_nat_target::create_inferior (const char *exec_file,
 
   gdbarch_info_init (&info);
   info.bfd_arch_info = bfd_get_arch_info (&abfd);
-  info.abfd = exec_bfd;
+  info.abfd = current_program_space->exec_bfd ();
 
   if (!gdbarch_update_p (info))
     internal_error (__FILE__, __LINE__,
@@ -650,7 +651,7 @@ rs6000_nat_target::xfer_shared_libraries
 
   /* This function assumes that it is being run with a live process.
      Core files are handled via gdbarch.  */
-  gdb_assert (target_has_execution);
+  gdb_assert (target_has_execution ());
 
   if (writebuf)
     return TARGET_XFER_E_IO;

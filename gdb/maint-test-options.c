@@ -1,6 +1,6 @@
 /* Maintenance commands for testing the options framework.
 
-   Copyright (C) 2019-2020 Free Software Foundation, Inc.
+   Copyright (C) 2019-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -409,7 +409,7 @@ maintenance_test_options_unknown_is_operand_command_completer
 }
 
 /* Command list for maint test-options.  */
-struct cmd_list_element *maintenance_test_options_list;
+static cmd_list_element *maintenance_test_options_list;
 
 
 void _initialize_maint_test_options ();

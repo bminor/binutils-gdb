@@ -1,6 +1,6 @@
 /* TUI display registers in window.
 
-   Copyright (C) 1998-2020 Free Software Foundation, Inc.
+   Copyright (C) 1998-2021 Free Software Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -112,12 +112,12 @@ tui_register_format (struct frame_info *frame, int regnum)
    changed with respect to the previous call.  */
 static void
 tui_get_register (struct frame_info *frame,
-                  struct tui_data_item_window *data, 
+		  struct tui_data_item_window *data, 
 		  int regnum, bool *changedp)
 {
   if (changedp)
     *changedp = false;
-  if (target_has_registers)
+  if (target_has_registers ())
     {
       std::string new_content = tui_register_format (frame, regnum);
 
@@ -182,7 +182,7 @@ tui_data_window::show_registers (struct reggroup *group)
   if (group == 0)
     group = general_reggroup;
 
-  if (target_has_registers && target_has_stack && target_has_memory)
+  if (target_has_registers () && target_has_stack () && target_has_memory ())
     {
       show_register_group (group, get_selected_frame (NULL),
 			   group == m_current_group);
@@ -436,7 +436,7 @@ tui_data_window::do_scroll_vertical (int num_to_scroll)
     first_line = line_from_reg_element_no (first_element_no);
   else
     { /* Calculate the first line from the element number which is in
-        the general data content.  */
+	the general data content.  */
     }
 
   if (first_line >= 0)
@@ -514,7 +514,7 @@ tui_reg_next (struct reggroup *current_group, struct gdbarch *gdbarch)
     {
       group = reggroup_next (gdbarch, current_group);
       if (group == NULL)
-        group = reggroup_next (gdbarch, NULL);
+	group = reggroup_next (gdbarch, NULL);
     }
   return group;
 }

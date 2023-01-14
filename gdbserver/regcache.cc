@@ -1,5 +1,5 @@
 /* Register support routines for the remote server for GDB.
-   Copyright (C) 2001-2020 Free Software Foundation, Inc.
+   Copyright (C) 2001-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -300,7 +300,7 @@ regcache_register_size (const struct regcache *regcache, int n)
 }
 
 static unsigned char *
-register_data (const struct regcache *regcache, int n, int fetch)
+register_data (const struct regcache *regcache, int n)
 {
   return (regcache->registers
 	  + find_register_by_number (regcache->tdesc, n).offset / 8);
@@ -319,7 +319,7 @@ regcache::raw_supply (int n, const void *buf)
 {
   if (buf)
     {
-      memcpy (register_data (this, n, 0), buf, register_size (tdesc, n));
+      memcpy (register_data (this, n), buf, register_size (tdesc, n));
 #ifndef IN_PROCESS_AGENT
       if (register_status != NULL)
 	register_status[n] = REG_VALID;
@@ -327,7 +327,7 @@ regcache::raw_supply (int n, const void *buf)
     }
   else
     {
-      memset (register_data (this, n, 0), 0, register_size (tdesc, n));
+      memset (register_data (this, n), 0, register_size (tdesc, n));
 #ifndef IN_PROCESS_AGENT
       if (register_status != NULL)
 	register_status[n] = REG_UNAVAILABLE;
@@ -340,7 +340,7 @@ regcache::raw_supply (int n, const void *buf)
 void
 supply_register_zeroed (struct regcache *regcache, int n)
 {
-  memset (register_data (regcache, n, 0), 0,
+  memset (register_data (regcache, n), 0,
 	  register_size (regcache->tdesc, n));
 #ifndef IN_PROCESS_AGENT
   if (regcache->register_status != NULL)
@@ -420,7 +420,7 @@ collect_register (struct regcache *regcache, int n, void *buf)
 void
 regcache::raw_collect (int n, void *buf) const
 {
-  memcpy (buf, register_data (this, n, 1), register_size (tdesc, n));
+  memcpy (buf, register_data (this, n), register_size (tdesc, n));
 }
 
 enum register_status
@@ -437,8 +437,8 @@ regcache_raw_read_unsigned (struct regcache *regcache, int regnum,
 
   if (size > (int) sizeof (ULONGEST))
     error (_("That operation is not available on integers of more than"
-            "%d bytes."),
-          (int) sizeof (ULONGEST));
+	    "%d bytes."),
+	  (int) sizeof (ULONGEST));
 
   *val = 0;
   collect_register (regcache, regnum, val);
@@ -461,7 +461,7 @@ regcache_raw_get_unsigned_by_name (struct regcache *regcache,
 void
 collect_register_as_string (struct regcache *regcache, int n, char *buf)
 {
-  bin2hex (register_data (regcache, n, 1), buf,
+  bin2hex (register_data (regcache, n), buf,
 	   register_size (regcache->tdesc, n));
 }
 
@@ -508,7 +508,7 @@ regcache::raw_compare (int regnum, const void *buf, int offset) const
 {
   gdb_assert (buf != NULL);
 
-  const unsigned char *regbuf = register_data (this, regnum, 1);
+  const unsigned char *regbuf = register_data (this, regnum);
   int size = register_size (tdesc, regnum);
   gdb_assert (size >= offset);
 

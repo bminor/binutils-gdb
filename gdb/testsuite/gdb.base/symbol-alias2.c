@@ -1,6 +1,6 @@
 /* This test is part of GDB, the GNU debugger.
 
-   Copyright 2017-2020 Free Software Foundation, Inc.
+   Copyright 2017-2021 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -22,6 +22,12 @@ struct S
 };
 
 struct S g_var_s = { 1, 2 };
+
+#ifdef __cplusplus
+/* So that the alias attribute below work without having to figure out
+   this function's mangled name.  */
+static struct S *func (void) asm ("func");
+#endif
 
 static struct S *
 func (void)

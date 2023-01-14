@@ -1,5 +1,5 @@
 /* ELF support for BFD.
-   Copyright (C) 1991-2020 Free Software Foundation, Inc.
+   Copyright (C) 1991-2021 Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
@@ -339,9 +339,21 @@
 #define EM_AMDGPU 	224 	/* AMD GPU architecture */
 #define EM_RISCV 	243 	/* RISC-V */
 #define EM_LANAI	244	/* Lanai 32-bit processor.  */
+#define EM_CEVA		245	/* CEVA Processor Architecture Family */
+#define EM_CEVA_X2	246	/* CEVA X2 Processor Family */
 #define EM_BPF		247	/* Linux BPF – in-kernel virtual machine.  */
+#define EM_GRAPHCORE_IPU 248	/* Graphcore Intelligent Processing Unit */
+#define EM_IMG1		249	/* Imagination Technologies */
 #define EM_NFP		250	/* Netronome Flow Processor.  */
+#define EM_VE		251	/* NEC Vector Engine */
 #define EM_CSKY		252	/* C-SKY processor family.  */
+#define EM_ARC_COMPACT3_64 253	/* Synopsys ARCv2.3 64-bit */
+#define EM_MCS6502	254	/* MOS Technology MCS 6502 processor */
+#define EM_ARC_COMPACT3	255	/* Synopsys ARCv2.3 32-bit */
+#define EM_KVX		256	/* Kalray VLIW core of the MPPA processor family */
+#define EM_65816	257	/* WDC 65816/65C816 */
+#define EM_LOONGARCH	258	/* Loongson Loongarch */
+#define EM_KF32		259	/* ChipON KungFu32 */
 
 /* If it is necessary to assign new unofficial EM_* values, please pick large
    random numbers (0x8523, 0xa7f2, etc.) to minimize the chances of collision
@@ -553,7 +565,7 @@
 
 /* #define SHF_MASKOS	0x0F000000    *//* OS-specific semantics */
 #define SHF_MASKOS	0x0FF00000	/* New value, Oct 4, 1999 Draft */
-#define SHF_GNU_BUILD_NOTE    (1 << 20)	/* Section contains GNU BUILD ATTRIBUTE notes.  */
+#define SHF_GNU_RETAIN	      (1 << 21)	/* Section should not be garbage collected by the linker.  */
 #define SHF_MASKPROC	0xF0000000	/* Processor-specific semantics */
 
 /* This used to be implemented as a processor specific section flag.
@@ -805,43 +817,33 @@
   (GNU_PROPERTY_X86_UINT32_AND_LO + 0)
 
 #define GNU_PROPERTY_X86_ISA_1_NEEDED \
-  (GNU_PROPERTY_X86_UINT32_OR_LO + 0)
+  (GNU_PROPERTY_X86_UINT32_OR_LO + 2)
 #define GNU_PROPERTY_X86_FEATURE_2_NEEDED \
   (GNU_PROPERTY_X86_UINT32_OR_LO + 1)
 
 #define GNU_PROPERTY_X86_ISA_1_USED \
-  (GNU_PROPERTY_X86_UINT32_OR_AND_LO + 0)
+  (GNU_PROPERTY_X86_UINT32_OR_AND_LO + 2)
 #define GNU_PROPERTY_X86_FEATURE_2_USED \
   (GNU_PROPERTY_X86_UINT32_OR_AND_LO + 1)
 
+/* GNU_PROPERTY_X86_ISA_1_BASELINE: CMOV, CX8 (cmpxchg8b), FPU (fld),
+   MMX, OSFXSR (fxsave), SCE (syscall), SSE and SSE2.  */
+#define GNU_PROPERTY_X86_ISA_1_BASELINE		(1U << 0)
+/* GNU_PROPERTY_X86_ISA_1_V2: GNU_PROPERTY_X86_ISA_1_BASELINE,
+   CMPXCHG16B (cmpxchg16b), LAHF-SAHF (lahf), POPCNT (popcnt), SSE3,
+   SSSE3, SSE4.1 and SSE4.2.  */
+#define GNU_PROPERTY_X86_ISA_1_V2		(1U << 1)
+/* GNU_PROPERTY_X86_ISA_1_V3: GNU_PROPERTY_X86_ISA_1_V2, AVX, AVX2, BMI1,
+   BMI2, F16C, FMA, LZCNT, MOVBE, XSAVE.  */
+#define GNU_PROPERTY_X86_ISA_1_V3		(1U << 2)
+/* GNU_PROPERTY_X86_ISA_1_V4: GNU_PROPERTY_X86_ISA_1_V3, AVX512F,
+   AVX512BW, AVX512CD, AVX512DQ and AVX512VL.  */
+#define GNU_PROPERTY_X86_ISA_1_V4		(1U << 3)
+
 #define GNU_PROPERTY_X86_FEATURE_1_IBT		(1U << 0)
 #define GNU_PROPERTY_X86_FEATURE_1_SHSTK	(1U << 1)
-
-#define GNU_PROPERTY_X86_ISA_1_CMOV		(1U << 0)
-#define GNU_PROPERTY_X86_ISA_1_SSE		(1U << 1)
-#define GNU_PROPERTY_X86_ISA_1_SSE2		(1U << 2)
-#define GNU_PROPERTY_X86_ISA_1_SSE3		(1U << 3)
-#define GNU_PROPERTY_X86_ISA_1_SSSE3		(1U << 4)
-#define GNU_PROPERTY_X86_ISA_1_SSE4_1		(1U << 5)
-#define GNU_PROPERTY_X86_ISA_1_SSE4_2		(1U << 6)
-#define GNU_PROPERTY_X86_ISA_1_AVX		(1U << 7)
-#define GNU_PROPERTY_X86_ISA_1_AVX2		(1U << 8)
-#define GNU_PROPERTY_X86_ISA_1_FMA		(1U << 9)
-#define GNU_PROPERTY_X86_ISA_1_AVX512F		(1U << 10)
-#define GNU_PROPERTY_X86_ISA_1_AVX512CD		(1U << 11)
-#define GNU_PROPERTY_X86_ISA_1_AVX512ER		(1U << 12)
-#define GNU_PROPERTY_X86_ISA_1_AVX512PF		(1U << 13)
-#define GNU_PROPERTY_X86_ISA_1_AVX512VL		(1U << 14)
-#define GNU_PROPERTY_X86_ISA_1_AVX512DQ		(1U << 15)
-#define GNU_PROPERTY_X86_ISA_1_AVX512BW		(1U << 16)
-#define GNU_PROPERTY_X86_ISA_1_AVX512_4FMAPS	(1U << 17)
-#define GNU_PROPERTY_X86_ISA_1_AVX512_4VNNIW	(1U << 18)
-#define GNU_PROPERTY_X86_ISA_1_AVX512_BITALG	(1U << 19)
-#define GNU_PROPERTY_X86_ISA_1_AVX512_IFMA	(1U << 20)
-#define GNU_PROPERTY_X86_ISA_1_AVX512_VBMI	(1U << 21)
-#define GNU_PROPERTY_X86_ISA_1_AVX512_VBMI2	(1U << 22)
-#define GNU_PROPERTY_X86_ISA_1_AVX512_VNNI	(1U << 23)
-#define GNU_PROPERTY_X86_ISA_1_AVX512_BF16	(1U << 24)
+#define GNU_PROPERTY_X86_FEATURE_1_LAM_U48	(1U << 2)
+#define GNU_PROPERTY_X86_FEATURE_1_LAM_U57	(1U << 3)
 
 #define GNU_PROPERTY_X86_FEATURE_2_X86		(1U << 0)
 #define GNU_PROPERTY_X86_FEATURE_2_X87		(1U << 1)
@@ -854,6 +856,39 @@
 #define GNU_PROPERTY_X86_FEATURE_2_XSAVEOPT	(1U << 8)
 #define GNU_PROPERTY_X86_FEATURE_2_XSAVEC	(1U << 9)
 #define GNU_PROPERTY_X86_FEATURE_2_TMM		(1U << 10)
+#define GNU_PROPERTY_X86_FEATURE_2_MASK		(1U << 11)
+
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_NEEDED \
+  (GNU_PROPERTY_X86_UINT32_OR_LO + 0)
+
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_USED \
+  (GNU_PROPERTY_X86_UINT32_OR_AND_LO + 0)
+
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_CMOV		(1U << 0)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_SSE		(1U << 1)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_SSE2		(1U << 2)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_SSE3		(1U << 3)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_SSSE3		(1U << 4)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_SSE4_1		(1U << 5)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_SSE4_2		(1U << 6)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_AVX		(1U << 7)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_AVX2		(1U << 8)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_FMA		(1U << 9)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_AVX512F		(1U << 10)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_AVX512CD	(1U << 11)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_AVX512ER	(1U << 12)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_AVX512PF	(1U << 13)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_AVX512VL	(1U << 14)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_AVX512DQ	(1U << 15)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_AVX512BW	(1U << 16)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_AVX512_4FMAPS	(1U << 17)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_AVX512_4VNNIW	(1U << 18)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_AVX512_BITALG	(1U << 19)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_AVX512_IFMA	(1U << 20)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_AVX512_VBMI	(1U << 21)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_AVX512_VBMI2	(1U << 22)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_AVX512_VNNI	(1U << 23)
+#define GNU_PROPERTY_X86_COMPAT_2_ISA_1_AVX512_BF16	(1U << 24)
 
 /* AArch64 specific GNU PROPERTY.  */
 #define GNU_PROPERTY_AARCH64_FEATURE_1_AND	0xc0000000
@@ -1011,6 +1046,7 @@
    deliberate special case and we maintain it for backwards compatability.
  */
 #define DT_VALRNGLO	0x6ffffd00
+#define DT_GNU_FLAGS_1  0x6ffffdf4
 #define DT_GNU_PRELINKED 0x6ffffdf5
 #define DT_GNU_CONFLICTSZ 0x6ffffdf6
 #define DT_GNU_LIBLISTSZ 0x6ffffdf7
@@ -1073,6 +1109,9 @@
 /* Flag values used in the DT_POSFLAG_1 .dynamic entry.	 */
 #define DF_P1_LAZYLOAD	0x00000001
 #define DF_P1_GROUPPERM	0x00000002
+
+/* Flag value in the DT_GNU_FLAGS_1 /dynamic entry.  */
+#define DF_GNU_1_UNIQUE 0x00000001
 
 /* Flag value in in the DT_FLAGS_1 .dynamic entry.  */
 #define DF_1_NOW	0x00000001

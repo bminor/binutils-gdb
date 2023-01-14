@@ -1,6 +1,6 @@
 /* Skipping uninteresting files and functions while stepping.
 
-   Copyright (C) 2011-2020 Free Software Foundation, Inc.
+   Copyright (C) 2011-2021 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -139,14 +139,8 @@ skiplist_entry::skiplist_entry (bool file_is_glob,
   if (m_function_is_regexp)
     {
       gdb_assert (!m_function.empty ());
-
-      int flags = REG_NOSUB;
-#ifdef REG_EXTENDED
-      flags |= REG_EXTENDED;
-#endif
-
-      gdb_assert (!m_function.empty ());
-      m_compiled_function_regexp.emplace (m_function.c_str (), flags,
+      m_compiled_function_regexp.emplace (m_function.c_str (),
+					  REG_NOSUB | REG_EXTENDED,
 					  _("regexp"));
     }
 }
@@ -589,7 +583,7 @@ skiplist_entry::skip_function_p (const char *function_name) const
   if (m_function_is_regexp)
     {
       if (debug_skip)
-        fprintf_unfiltered (gdb_stdlog,
+	fprintf_unfiltered (gdb_stdlog,
 			    "skip: checking if function %s matches regex %s...",
 			    function_name, m_function.c_str ());
 
@@ -600,7 +594,7 @@ skiplist_entry::skip_function_p (const char *function_name) const
   else
     {
       if (debug_skip)
-        fprintf_unfiltered (gdb_stdlog,
+	fprintf_unfiltered (gdb_stdlog,
 			    ("skip: checking if function %s matches non-regex "
 			     "%s..."),
 			    function_name, m_function.c_str ());
@@ -682,7 +676,7 @@ FILE-SPEC is one of:\n\
 FUNCTION-SPEC is one of:\n\
        -fu|-function FUNCTION-NAME\n\
        -rfu|-rfunction FUNCTION-NAME-REGULAR-EXPRESSION"),
-                  &skiplist, "skip ", 1, &cmdlist);
+		  &skiplist, "skip ", 1, &cmdlist);
 
   c = add_cmd ("file", class_breakpoint, skip_file_command, _("\
 Ignore a file while stepping.\n\

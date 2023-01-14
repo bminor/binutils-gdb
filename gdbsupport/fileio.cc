@@ -1,6 +1,6 @@
 /* File-I/O functions for GDB, the GNU debugger.
 
-   Copyright (C) 2003-2020 Free Software Foundation, Inc.
+   Copyright (C) 2003-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,47 +30,47 @@ host_to_fileio_error (int error)
   switch (error)
     {
       case EPERM:
-        return FILEIO_EPERM;
+	return FILEIO_EPERM;
       case ENOENT:
-        return FILEIO_ENOENT;
+	return FILEIO_ENOENT;
       case EINTR:
-        return FILEIO_EINTR;
+	return FILEIO_EINTR;
       case EIO:
-        return FILEIO_EIO;
+	return FILEIO_EIO;
       case EBADF:
-        return FILEIO_EBADF;
+	return FILEIO_EBADF;
       case EACCES:
-        return FILEIO_EACCES;
+	return FILEIO_EACCES;
       case EFAULT:
-        return FILEIO_EFAULT;
+	return FILEIO_EFAULT;
       case EBUSY:
-        return FILEIO_EBUSY;
+	return FILEIO_EBUSY;
       case EEXIST:
-        return FILEIO_EEXIST;
+	return FILEIO_EEXIST;
       case ENODEV:
-        return FILEIO_ENODEV;
+	return FILEIO_ENODEV;
       case ENOTDIR:
-        return FILEIO_ENOTDIR;
+	return FILEIO_ENOTDIR;
       case EISDIR:
-        return FILEIO_EISDIR;
+	return FILEIO_EISDIR;
       case EINVAL:
-        return FILEIO_EINVAL;
+	return FILEIO_EINVAL;
       case ENFILE:
-        return FILEIO_ENFILE;
+	return FILEIO_ENFILE;
       case EMFILE:
-        return FILEIO_EMFILE;
+	return FILEIO_EMFILE;
       case EFBIG:
-        return FILEIO_EFBIG;
+	return FILEIO_EFBIG;
       case ENOSPC:
-        return FILEIO_ENOSPC;
+	return FILEIO_ENOSPC;
       case ESPIPE:
-        return FILEIO_ESPIPE;
+	return FILEIO_ESPIPE;
       case EROFS:
-        return FILEIO_EROFS;
+	return FILEIO_EROFS;
       case ENOSYS:
-        return FILEIO_ENOSYS;
+	return FILEIO_ENOSYS;
       case ENAMETOOLONG:
-        return FILEIO_ENAMETOOLONG;
+	return FILEIO_ENAMETOOLONG;
     }
   return FILEIO_EUNKNOWN;
 }

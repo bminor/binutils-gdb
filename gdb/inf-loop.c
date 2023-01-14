@@ -1,5 +1,5 @@
 /* Handling of inferior events for the event loop for GDB, the GNU debugger.
-   Copyright (C) 1999-2020 Free Software Foundation, Inc.
+   Copyright (C) 1999-2021 Free Software Foundation, Inc.
    Written by Elena Zannoni <ezannoni@cygnus.com> of Cygnus Solutions.
 
    This file is part of GDB.
@@ -48,7 +48,7 @@ inferior_event_handler (enum inferior_event_type event_type)
 	  /* Unregister the inferior from the event loop.  This is done
 	     so that when the inferior is not running we don't get
 	     distracted by spurious inferior output.  */
-	  if (target_has_execution && target_can_async_p ())
+	  if (target_has_execution () && target_can_async_p ())
 	    target_async (0);
 	}
 

@@ -14,7 +14,10 @@
 
 #define SIM_BITS_INLINE (INCLUDE_MODULE | INCLUDED_BY_MODULE)
 
+#include <stdlib.h>
 #include <string.h>
+
+#define PACKAGE "sim"
 
 #include "sim-basics.h"
 
@@ -62,9 +65,7 @@ print_hex (unsigned64 val, int nr_bits)
       printf ("0x%08lx", (long) (unsigned32) (val));
       break;
     case 64:
-      printf ("0x%08lx%08lx",
-	      (long) (unsigned32) (val >> 32),
-	      (long) (unsigned32) (val));
+      printf ("0x%016llx", (long long) (unsigned64) (val));
       break;
     default:
       abort ();

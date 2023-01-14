@@ -1,6 +1,6 @@
 /* Top level stuff for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -173,6 +173,8 @@ public:
     current_ui = ui_list;
   }
 
+  DISABLE_COPY_AND_ASSIGN (switch_thru_all_uis);
+
   /* If done iterating, return true; otherwise return false.  */
   bool done () const
   {
@@ -189,11 +191,6 @@ public:
   }
 
  private:
-
-  /* No need for these.  They are intentionally not defined
-     anywhere.  */
-  switch_thru_all_uis &operator= (const switch_thru_all_uis &);
-  switch_thru_all_uis (const switch_thru_all_uis &);
 
   /* Used to iterate through the UIs.  */
   struct ui *m_iter;
@@ -272,10 +269,6 @@ extern void set_prompt (const char *s);
    otherwise.  */
 
 extern int gdb_in_secondary_prompt_p (struct ui *ui);
-
-/* From random places.  */
-extern int readnow_symbol_files;
-extern int readnever_symbol_files;
 
 /* Perform _initialize initialization.  */
 extern void gdb_init (char *);

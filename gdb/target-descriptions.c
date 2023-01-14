@@ -1,6 +1,6 @@
 /* Target description support for GDB.
 
-   Copyright (C) 2006-2020 Free Software Foundation, Inc.
+   Copyright (C) 2006-2021 Free Software Foundation, Inc.
 
    Contributed by CodeSourcery.
 
@@ -779,21 +779,17 @@ tdesc_data_init (struct obstack *obstack)
 /* Similar, but for the temporary copy used during architecture
    initialization.  */
 
-struct tdesc_arch_data *
+tdesc_arch_data_up
 tdesc_data_alloc (void)
 {
-  return new tdesc_arch_data ();
+  return tdesc_arch_data_up (new tdesc_arch_data ());
 }
 
-/* Free something allocated by tdesc_data_alloc, if it is not going
-   to be used (for instance if it was unsuitable for the
-   architecture).  */
+/* See target-descriptions.h.  */
 
 void
-tdesc_data_cleanup (void *data_untyped)
+tdesc_arch_data_deleter::operator() (struct tdesc_arch_data *data) const
 {
-  struct tdesc_arch_data *data = (struct tdesc_arch_data *) data_untyped;
-
   delete data;
 }
 
@@ -1103,12 +1099,11 @@ set_tdesc_pseudo_register_reggroup_p
 void
 tdesc_use_registers (struct gdbarch *gdbarch,
 		     const struct target_desc *target_desc,
-		     struct tdesc_arch_data *early_data,
+		     tdesc_arch_data_up &&early_data,
 		     tdesc_unknown_register_ftype unk_reg_cb)
 {
   int num_regs = gdbarch_num_regs (gdbarch);
   struct tdesc_arch_data *data;
-  htab_t reg_hash;
 
   /* We can't use the description for registers if it doesn't describe
      any.  This function should only be called after validating
@@ -1117,17 +1112,17 @@ tdesc_use_registers (struct gdbarch *gdbarch,
   gdb_assert (tdesc_has_registers (target_desc));
 
   data = (struct tdesc_arch_data *) gdbarch_data (gdbarch, tdesc_data);
-  data->arch_regs = early_data->arch_regs;
-  delete early_data;
+  data->arch_regs = std::move (early_data->arch_regs);
 
   /* Build up a set of all registers, so that we can assign register
      numbers where needed.  The hash table expands as necessary, so
      the initial size is arbitrary.  */
-  reg_hash = htab_create (37, htab_hash_pointer, htab_eq_pointer, NULL);
+  htab_up reg_hash (htab_create (37, htab_hash_pointer, htab_eq_pointer,
+				 NULL));
   for (const tdesc_feature_up &feature : target_desc->features)
     for (const tdesc_reg_up &reg : feature->registers)
       {
-	void **slot = htab_find_slot (reg_hash, reg.get (), INSERT);
+	void **slot = htab_find_slot (reg_hash.get (), reg.get (), INSERT);
 
 	*slot = reg.get ();
 	/* Add reggroup if its new.  */
@@ -1142,7 +1137,7 @@ tdesc_use_registers (struct gdbarch *gdbarch,
      architecture.  */
   for (const tdesc_arch_reg &arch_reg : data->arch_regs)
     if (arch_reg.reg != NULL)
-      htab_remove_elt (reg_hash, arch_reg.reg);
+      htab_remove_elt (reg_hash.get (), arch_reg.reg);
 
   /* Assign numbers to the remaining registers and add them to the
      list of registers.  The new numbers are always above gdbarch_num_regs.
@@ -1160,7 +1155,7 @@ tdesc_use_registers (struct gdbarch *gdbarch,
     {
       for (const tdesc_feature_up &feature : target_desc->features)
 	for (const tdesc_reg_up &reg : feature->registers)
-	  if (htab_find (reg_hash, reg.get ()) != NULL)
+	  if (htab_find (reg_hash.get (), reg.get ()) != NULL)
 	    {
 	      int regno = unk_reg_cb (gdbarch, feature.get (),
 				      reg->name.c_str (), num_regs);
@@ -1171,7 +1166,7 @@ tdesc_use_registers (struct gdbarch *gdbarch,
 		    data->arch_regs.emplace_back (nullptr, nullptr);
 		  data->arch_regs[regno] = tdesc_arch_reg (reg.get (), NULL);
 		  num_regs = regno + 1;
-		  htab_remove_elt (reg_hash, reg.get ());
+		  htab_remove_elt (reg_hash.get (), reg.get ());
 		}
 	    }
     }
@@ -1183,13 +1178,11 @@ tdesc_use_registers (struct gdbarch *gdbarch,
      unnumbered registers.  */
   for (const tdesc_feature_up &feature : target_desc->features)
     for (const tdesc_reg_up &reg : feature->registers)
-      if (htab_find (reg_hash, reg.get ()) != NULL)
+      if (htab_find (reg_hash.get (), reg.get ()) != NULL)
 	{
 	  data->arch_regs.emplace_back (reg.get (), nullptr);
 	  num_regs++;
 	}
-
-  htab_delete (reg_hash);
 
   /* Update the architecture.  */
   set_gdbarch_num_regs (gdbarch, num_regs);
@@ -1214,10 +1207,10 @@ tdesc_create_feature (struct target_desc *tdesc, const char *name)
 
 /* See gdbsupport/tdesc.h.  */
 
-struct target_desc *
+target_desc_up
 allocate_target_description (void)
 {
-  return new target_desc ();
+  return target_desc_up (new target_desc ());
 }
 
 /* See gdbsupport/tdesc.h.  */
@@ -1384,12 +1377,12 @@ public:
     printf_unfiltered ("initialize_tdesc_%s (void)\n", m_function);
     printf_unfiltered ("{\n");
     printf_unfiltered
-      ("  struct target_desc *result = allocate_target_description ();\n");
+      ("  target_desc_up result = allocate_target_description ();\n");
 
     if (tdesc_architecture (e) != NULL)
       {
 	printf_unfiltered
-	  ("  set_tdesc_architecture (result, bfd_scan_arch (\"%s\"));\n",
+	  ("  set_tdesc_architecture (result.get (), bfd_scan_arch (\"%s\"));\n",
 	   tdesc_architecture (e)->printable_name);
 	printf_unfiltered ("\n");
       }
@@ -1397,21 +1390,21 @@ public:
 	&& tdesc_osabi (e) < GDB_OSABI_INVALID)
       {
 	printf_unfiltered
-	  ("  set_tdesc_osabi (result, osabi_from_tdesc_string (\"%s\"));\n",
+	  ("  set_tdesc_osabi (result.get (), osabi_from_tdesc_string (\"%s\"));\n",
 	   gdbarch_osabi_name (tdesc_osabi (e)));
 	printf_unfiltered ("\n");
       }
 
     for (const tdesc_compatible_info_up &compatible : e->compatible)
       printf_unfiltered
-	("  tdesc_add_compatible (result, bfd_scan_arch (\"%s\"));\n",
+	("  tdesc_add_compatible (result.get (), bfd_scan_arch (\"%s\"));\n",
 	 compatible->arch ()->printable_name);
 
     if (!e->compatible.empty ())
       printf_unfiltered ("\n");
 
     for (const property &prop : e->properties)
-      printf_unfiltered ("  set_tdesc_property (result, \"%s\", \"%s\");\n",
+      printf_unfiltered ("  set_tdesc_property (result.get (), \"%s\", \"%s\");\n",
 			 prop.key.c_str (), prop.value.c_str ());
 
     printf_unfiltered ("  struct tdesc_feature *feature;\n");
@@ -1419,7 +1412,7 @@ public:
 
   void visit_pre (const tdesc_feature *e) override
   {
-    printf_unfiltered ("\n  feature = tdesc_create_feature (result, \"%s\");\n",
+    printf_unfiltered ("\n  feature = tdesc_create_feature (result.get (), \"%s\");\n",
 		       e->name.c_str ());
   }
 
@@ -1428,7 +1421,7 @@ public:
 
   void visit_post (const target_desc *e) override
   {
-    printf_unfiltered ("\n  tdesc_%s = result;\n", m_function);
+    printf_unfiltered ("\n  tdesc_%s = result.release ();\n", m_function);
     printf_unfiltered ("}\n");
   }
 
@@ -1738,11 +1731,44 @@ tdesc_get_features_xml (const target_desc *tdesc)
   return tdesc->xmltarget;
 }
 
+/* Data structures and functions to setup the option flags for 'maintenance
+   print c-tdesc command.  */
+
+struct maint_print_c_tdesc_options
+{
+  /* True when the '-single-feature' flag was passed.  */
+  bool single_feature = false;
+};
+
+using maint_print_c_tdesc_opt_def
+  = gdb::option::flag_option_def<maint_print_c_tdesc_options>;
+
+static const gdb::option::option_def maint_print_c_tdesc_opt_defs[] = {
+  maint_print_c_tdesc_opt_def {
+    "single-feature",
+    [] (maint_print_c_tdesc_options *opt) { return &opt->single_feature; },
+    N_("Print C description of just a single feature.")
+  },
+};
+
+static inline gdb::option::option_def_group
+make_maint_print_c_tdesc_options_def_group (maint_print_c_tdesc_options *opts)
+{
+  return {{maint_print_c_tdesc_opt_defs}, opts};
+}
+
+/* Implement 'maintenance print c-tdesc' command.  */
+
 static void
 maint_print_c_tdesc_cmd (const char *args, int from_tty)
 {
   const struct target_desc *tdesc;
   const char *filename;
+
+  maint_print_c_tdesc_options opts;
+  auto grp = make_maint_print_c_tdesc_options_def_group (&opts);
+  gdb::option::process_options
+    (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, grp);
 
   if (args == NULL)
     {
@@ -1775,15 +1801,12 @@ maint_print_c_tdesc_cmd (const char *args, int from_tty)
   /* Print c files for target features instead of target descriptions,
      because c files got from target features are more flexible than the
      counterparts.  */
-  if (startswith (filename_after_features.c_str (), "i386/32bit-")
-      || startswith (filename_after_features.c_str (), "i386/64bit-")
-      || startswith (filename_after_features.c_str (), "i386/x32-core.xml")
-      || startswith (filename_after_features.c_str (), "riscv/")
-      || startswith (filename_after_features.c_str (), "tic6x-")
-      || startswith (filename_after_features.c_str (), "aarch64")
-      || startswith (filename_after_features.c_str (), "arm/")
-      || startswith (filename_after_features.c_str (), "arc/"))
+  if (opts.single_feature)
     {
+      if (tdesc->features.size () != 1)
+	error (_("only target descriptions with 1 feature can be used "
+		 "with -single-feature option"));
+
       print_c_feature v (filename_after_features);
 
       tdesc->accept (v);
@@ -1794,6 +1817,22 @@ maint_print_c_tdesc_cmd (const char *args, int from_tty)
 
       tdesc->accept (v);
     }
+}
+
+/* Completer for the "backtrace" command.  */
+
+static void
+maint_print_c_tdesc_cmd_completer (struct cmd_list_element *ignore,
+				   completion_tracker &tracker,
+				   const char *text, const char *word)
+{
+  auto grp = make_maint_print_c_tdesc_options_def_group (nullptr);
+  if (gdb::option::complete_options
+      (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, grp))
+    return;
+
+  word = advance_to_filename_complete_word_point (tracker, text);
+  filename_completer (ignore, tracker, text, word);
 }
 
 /* Implement the maintenance print xml-tdesc command.  */
@@ -1958,10 +1997,25 @@ Unset the file to read for an XML target description.\n\
 When unset, GDB will read the description from the target."),
 	   &tdesc_unset_cmdlist);
 
-  cmd = add_cmd ("c-tdesc", class_maintenance, maint_print_c_tdesc_cmd, _("\
-Print the current target description as a C source file."),
-	   &maintenanceprintlist);
-  set_cmd_completer (cmd, filename_completer);
+  auto grp = make_maint_print_c_tdesc_options_def_group (nullptr);
+  static std::string help_text
+    = gdb::option::build_help (_("\
+Print the current target description as a C source file.\n\
+Usage: maintenance print c-tdesc [OPTION] [FILENAME]\n\
+\n\
+Options:\n\
+%OPTIONS%\n\
+\n\
+When FILENAME is not provided then print the current target\n\
+description, otherwise an XML target description is read from\n\
+FILENAME and printed as a C function.\n\
+\n\
+When '-single-feature' is used then the target description should\n\
+contain a single feature and the generated C code will only create\n\
+that feature within an already existing target_desc object."), grp);
+  cmd = add_cmd ("c-tdesc", class_maintenance, maint_print_c_tdesc_cmd,
+		 help_text.c_str (), &maintenanceprintlist);
+  set_cmd_completer_handle_brkchars (cmd, maint_print_c_tdesc_cmd_completer);
 
   cmd = add_cmd ("xml-tdesc", class_maintenance, maint_print_xml_tdesc_cmd, _("\
 Print the current target description as an XML file."),

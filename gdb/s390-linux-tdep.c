@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux on s390.
 
-   Copyright (C) 2001-2020 Free Software Foundation, Inc.
+   Copyright (C) 2001-2021 Free Software Foundation, Inc.
 
    Contributed by D.J. Barrow (djbarrow@de.ibm.com,barrow_dj@yahoo.com)
    for IBM Deutschland Entwicklung GmbH, IBM Corporation.
@@ -379,7 +379,7 @@ s390_core_read_description (struct gdbarch *gdbarch,
 
 struct s390_sigtramp_unwind_cache {
   CORE_ADDR frame_base;
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 /* Unwind THIS_FRAME and return the corresponding unwind cache for
@@ -443,33 +443,33 @@ s390_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
 	    double fprs[16];  */
 
   /* PSW mask and address.  */
-  info->saved_regs[S390_PSWM_REGNUM].addr = sigreg_ptr;
+  info->saved_regs[S390_PSWM_REGNUM].set_addr (sigreg_ptr);
   sigreg_ptr += word_size;
-  info->saved_regs[S390_PSWA_REGNUM].addr = sigreg_ptr;
+  info->saved_regs[S390_PSWA_REGNUM].set_addr (sigreg_ptr);
   sigreg_ptr += word_size;
 
   /* Then the GPRs.  */
   for (i = 0; i < 16; i++)
     {
-      info->saved_regs[S390_R0_REGNUM + i].addr = sigreg_ptr;
+      info->saved_regs[S390_R0_REGNUM + i].set_addr (sigreg_ptr);
       sigreg_ptr += word_size;
     }
 
   /* Then the ACRs.  */
   for (i = 0; i < 16; i++)
     {
-      info->saved_regs[S390_A0_REGNUM + i].addr = sigreg_ptr;
+      info->saved_regs[S390_A0_REGNUM + i].set_addr (sigreg_ptr);
       sigreg_ptr += 4;
     }
 
   /* The floating-point control word.  */
-  info->saved_regs[S390_FPC_REGNUM].addr = sigreg_ptr;
+  info->saved_regs[S390_FPC_REGNUM].set_addr (sigreg_ptr);
   sigreg_ptr += 8;
 
   /* And finally the FPRs.  */
   for (i = 0; i < 16; i++)
     {
-      info->saved_regs[S390_F0_REGNUM + i].addr = sigreg_ptr;
+      info->saved_regs[S390_F0_REGNUM + i].set_addr (sigreg_ptr);
       sigreg_ptr += 8;
     }
 
@@ -478,13 +478,13 @@ s390_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
   if (tdep->gpr_full_regnum != -1)
     for (i = 0; i < 16; i++)
       {
-	info->saved_regs[S390_R0_UPPER_REGNUM + i].addr = sigreg_ptr;
+	info->saved_regs[S390_R0_UPPER_REGNUM + i].set_addr (sigreg_ptr);
 	sigreg_ptr += 4;
       }
 
   /* Restore the previous frame's SP.  */
   prev_sp = read_memory_unsigned_integer (
-			info->saved_regs[S390_SP_REGNUM].addr,
+			info->saved_regs[S390_SP_REGNUM].addr (),
 			word_size, byte_order);
 
   /* Determine our frame base.  */
@@ -599,21 +599,21 @@ s390_all_but_pc_registers_record (struct regcache *regcache)
   for (i = 0; i < 16; i++)
     {
       if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + i))
-        return -1;
+	return -1;
       if (record_full_arch_list_add_reg (regcache, S390_A0_REGNUM + i))
-        return -1;
+	return -1;
       if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + i))
-        return -1;
+	return -1;
       if (tdep->gpr_full_regnum != -1)
-        if (record_full_arch_list_add_reg (regcache, S390_R0_UPPER_REGNUM + i))
-          return -1;
+	if (record_full_arch_list_add_reg (regcache, S390_R0_UPPER_REGNUM + i))
+	  return -1;
       if (tdep->v0_full_regnum != -1)
-        {
-          if (record_full_arch_list_add_reg (regcache, S390_V0_LOWER_REGNUM + i))
-            return -1;
-          if (record_full_arch_list_add_reg (regcache, S390_V16_REGNUM + i))
-            return -1;
-        }
+	{
+	  if (record_full_arch_list_add_reg (regcache, S390_V0_LOWER_REGNUM + i))
+	    return -1;
+	  if (record_full_arch_list_add_reg (regcache, S390_V16_REGNUM + i))
+	    return -1;
+	}
     }
   if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
     return -1;
@@ -670,7 +670,7 @@ s390_canonicalize_syscall (int syscall, enum s390_abi_kind abi)
     case 197: /* fstat64 */
     case 221: /* fcntl64 */
       if (abi == ABI_LINUX_S390)
-        return (enum gdb_syscall) syscall;
+	return (enum gdb_syscall) syscall;
       return gdb_sys_no_syscall;
     /* These syscalls don't exist on s390.  */
     case 17: /* break */
@@ -701,7 +701,7 @@ s390_canonicalize_syscall (int syscall, enum s390_abi_kind abi)
       return gdb_sys_readahead;
     case 223:
       if (abi == ABI_LINUX_S390)
-        return gdb_sys_sendfile64;
+	return gdb_sys_sendfile64;
       return gdb_sys_no_syscall;
     /* 224-235 handled below */
     case 236:
@@ -743,7 +743,7 @@ s390_canonicalize_syscall (int syscall, enum s390_abi_kind abi)
     /* 263 reserved */
     case 264:
       if (abi == ABI_LINUX_S390)
-        return gdb_sys_fadvise64_64;
+	return gdb_sys_fadvise64_64;
       return gdb_sys_no_syscall;
     case 265:
       return gdb_sys_statfs64;
@@ -764,7 +764,7 @@ s390_canonicalize_syscall (int syscall, enum s390_abi_kind abi)
     /* 282-312 handled below */
     case 293:
       if (abi == ABI_LINUX_S390)
-        return gdb_sys_fstatat64;
+	return gdb_sys_fstatat64;
       return gdb_sys_newfstatat;
     /* 313+ not yet supported */
     default:
@@ -815,8 +815,8 @@ s390_linux_syscall_record (struct regcache *regcache, LONGEST syscall_native)
   if (syscall_gdb < 0)
     {
       printf_unfiltered (_("Process record and replay target doesn't "
-                           "support syscall number %s\n"),
-                         plongest (syscall_native));
+			   "support syscall number %s\n"),
+			 plongest (syscall_native));
       return -1;
     }
 
@@ -824,16 +824,16 @@ s390_linux_syscall_record (struct regcache *regcache, LONGEST syscall_native)
       || syscall_gdb == gdb_sys_rt_sigreturn)
     {
       if (s390_all_but_pc_registers_record (regcache))
-        return -1;
+	return -1;
       return 0;
     }
 
   if (tdep->abi == ABI_LINUX_ZSERIES)
     ret = record_linux_system_call (syscall_gdb, regcache,
-                                    &s390x_linux_record_tdep);
+				    &s390x_linux_record_tdep);
   else
     ret = record_linux_system_call (syscall_gdb, regcache,
-                                    &s390_linux_record_tdep);
+				    &s390_linux_record_tdep);
 
   if (ret)
     return ret;
@@ -849,23 +849,23 @@ s390_linux_syscall_record (struct regcache *regcache, LONGEST syscall_native)
 
 static int
 s390_linux_record_signal (struct gdbarch *gdbarch, struct regcache *regcache,
-                          enum gdb_signal signal)
+			  enum gdb_signal signal)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   /* There are two kinds of signal frames on s390. rt_sigframe is always
      the larger one, so don't even bother with sigframe.  */
   const int sizeof_rt_sigframe = (tdep->abi == ABI_LINUX_ZSERIES ?
-                                  160 + 8 + 128 + 1024 : 96 + 8 + 128 + 1000);
+				  160 + 8 + 128 + 1024 : 96 + 8 + 128 + 1000);
   ULONGEST sp;
   int i;
 
   for (i = 0; i < 16; i++)
     {
       if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + i))
-        return -1;
+	return -1;
       if (tdep->gpr_full_regnum != -1)
-        if (record_full_arch_list_add_reg (regcache, S390_R0_UPPER_REGNUM + i))
-          return -1;
+	if (record_full_arch_list_add_reg (regcache, S390_R0_UPPER_REGNUM + i))
+	  return -1;
     }
   if (record_full_arch_list_add_reg (regcache, S390_PSWA_REGNUM))
     return -1;
@@ -890,7 +890,7 @@ s390_linux_record_signal (struct gdbarch *gdbarch, struct regcache *regcache,
 
 static void
 s390_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
-                             enum s390_abi_kind abi)
+			     enum s390_abi_kind abi)
 {
   /* These values are the size of the type that will be used in a system
      call.  They are obtained from Linux Kernel source.  */
@@ -1119,7 +1119,7 @@ s390_linux_init_abi_any (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->s390_syscall_record = s390_linux_syscall_record;
 
-  linux_init_abi (info, gdbarch);
+  linux_init_abi (info, gdbarch, 0);
 
   /* Register handling.  */
   set_gdbarch_core_read_description (gdbarch, s390_core_read_description);

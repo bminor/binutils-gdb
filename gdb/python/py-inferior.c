@@ -1,6 +1,6 @@
 /* Python interface to inferiors.
 
-   Copyright (C) 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2009-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -61,14 +61,14 @@ extern PyTypeObject inferior_object_type
 
 static const struct inferior_data *infpy_inf_data_key;
 
-typedef struct {
+struct membuf_object {
   PyObject_HEAD
   void *buffer;
 
   /* These are kept just for mbpy_str.  */
   CORE_ADDR addr;
   CORE_ADDR length;
-} membuf_object;
+};
 
 extern PyTypeObject membuf_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("membuf_object");
@@ -423,7 +423,7 @@ infpy_get_num (PyObject *self, void *closure)
 
   INFPY_REQUIRE_VALID (inf);
 
-  return PyLong_FromLong (inf->inferior->num);
+  return gdb_py_object_from_longest (inf->inferior->num).release ();
 }
 
 static PyObject *
@@ -433,7 +433,7 @@ infpy_get_pid (PyObject *self, void *closure)
 
   INFPY_REQUIRE_VALID (inf);
 
-  return PyLong_FromLong (inf->inferior->pid);
+  return gdb_py_object_from_longest (inf->inferior->pid).release ();
 }
 
 static PyObject *
@@ -756,7 +756,7 @@ infpy_is_valid (PyObject *self, PyObject *args)
 }
 
 /* Implementation of gdb.Inferior.thread_from_handle (self, handle)
-                        ->  gdb.InferiorThread.  */
+			->  gdb.InferiorThread.  */
 
 static PyObject *
 infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
@@ -801,7 +801,7 @@ infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
       struct thread_info *thread_info;
 
       thread_info = find_thread_by_handle
-        (gdb::array_view<const gdb_byte> (bytes, bytes_len),
+	(gdb::array_view<const gdb_byte> (bytes, bytes_len),
 	 inf_obj->inferior);
       if (thread_info != NULL)
 	return thread_to_thread_object (thread_info).release ();

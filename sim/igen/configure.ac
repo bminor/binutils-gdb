@@ -32,7 +32,8 @@ AC_ARG_PROGRAM
 
 AC_CONFIG_HEADER(config.h:config.in)
 
-AC_CHECK_HEADERS(stdlib.h string.h strings.h sys/stat.h sys/types.h unistd.h)
+# NB: You can assume C11 headers exist.
+AC_CHECK_HEADERS(sys/stat.h sys/types.h unistd.h)
 AC_HEADER_DIRENT
 
 AC_SUBST(AR_FOR_BUILD)

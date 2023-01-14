@@ -1,5 +1,5 @@
 /* Support for the generic parts of PE/PEI, for BFD.
-   Copyright (C) 1995-2020 Free Software Foundation, Inc.
+   Copyright (C) 1995-2021 Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -699,7 +699,7 @@ typedef struct
 }
 jump_table;
 
-static jump_table jtab[] =
+static const jump_table jtab[] =
 {
 #ifdef I386MAGIC
   { I386MAGIC,

@@ -1,5 +1,5 @@
 /* Target-dependent code for the S12Z, for the GDB.
-   Copyright (C) 2018-2020 Free Software Foundation, Inc.
+   Copyright (C) 2018-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -87,7 +87,7 @@ s12z_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       CORE_ADDR prologue_end = skip_prologue_using_sal (gdbarch, pc);
 
       if (prologue_end != 0)
-        return prologue_end;
+	return prologue_end;
     }
 
   warning (_("%s Failed to find end of prologue PC = %08x"),
@@ -297,8 +297,8 @@ s12z_frame_cache (struct frame_info *this_frame, void **prologue_cache)
   if (start_addr == 0)
     {
       warning (_("Couldn't find function including address %s SP is %s"),
-               paddress (gdbarch, this_pc),
-               paddress (gdbarch, this_sp));
+	       paddress (gdbarch, this_pc),
+	       paddress (gdbarch, this_sp));
 
       /* JPB: 28-Apr-11.  This is a temporary patch, to get round GDB
 	 crashing right at the beginning.  Build the frame ID as best we
@@ -417,10 +417,10 @@ s12z_frame_cache (struct frame_info *this_frame, void **prologue_cache)
     {
       /* Only do if executing.  */
       if (0 != this_sp)
-        {
-          this_sp_for_id = this_sp - frame_size;
-          trad_frame_set_this_base (info, this_sp_for_id);
-        }
+	{
+	  this_sp_for_id = this_sp - frame_size;
+	  trad_frame_set_this_base (info, this_sp_for_id);
+	}
       trad_frame_set_reg_value (info, REG_S, this_sp + 3);
       trad_frame_set_reg_addr (info, REG_P, this_sp);
     }
@@ -428,10 +428,10 @@ s12z_frame_cache (struct frame_info *this_frame, void **prologue_cache)
     {
       gdb_assert (this_sp == this_sp_for_id);
       /* The stack pointer of the prev frame is frame_size greater
-         than the stack pointer of this frame plus one address
-         size (caused by the JSR or BSR).  */
+	 than the stack pointer of this frame plus one address
+	 size (caused by the JSR or BSR).  */
       trad_frame_set_reg_value (info, REG_S,
-                                this_sp + frame_size + 3);
+				this_sp + frame_size + 3);
       trad_frame_set_reg_addr (info, REG_P, this_sp + frame_size);
     }
 
@@ -513,9 +513,9 @@ static const char ccw_bits[] =
    0xD0.  */
 static void
 s12z_print_ccw_info (struct gdbarch *gdbarch,
-                     struct ui_file *file,
-                     struct frame_info *frame,
-                     int reg)
+		     struct ui_file *file,
+		     struct frame_info *frame,
+		     int reg)
 {
   struct value *v = value_of_register (reg, frame);
   const char *name = gdbarch_register_name (gdbarch, reg);
@@ -532,14 +532,14 @@ s12z_print_ccw_info (struct gdbarch *gdbarch,
   for (int b = 15; b >= 0; --b)
     {
       if (ccw & (0x1u << b))
-        {
-          if (ccw_bits[b] == 0)
-            fputc_filtered ('1', file);
-          else
-            fputc_filtered (ccw_bits[b], file);
-        }
+	{
+	  if (ccw_bits[b] == 0)
+	    fputc_filtered ('1', file);
+	  else
+	    fputc_filtered (ccw_bits[b], file);
+	}
       else
-        fputc_filtered (tolower (ccw_bits[b]), file);
+	fputc_filtered (tolower (ccw_bits[b]), file);
     }
   fputc_filtered ('\n', file);
 }
@@ -556,14 +556,14 @@ s12z_print_registers_info (struct gdbarch *gdbarch,
   if (regnum == -1)
     {
       for (int reg = 0; reg < numregs; reg++)
-        {
-          if (REG_CCW == reg_perm[reg])
-            {
-              s12z_print_ccw_info (gdbarch, file, frame, reg);
-              continue;
-            }
-          default_print_registers_info (gdbarch, file, frame, reg, print_all);
-        }
+	{
+	  if (REG_CCW == reg_perm[reg])
+	    {
+	      s12z_print_ccw_info (gdbarch, file, frame, reg);
+	      continue;
+	    }
+	  default_print_registers_info (gdbarch, file, frame, reg, print_all);
+	}
     }
   else if (REG_CCW == reg_perm[regnum])
     s12z_print_ccw_info (gdbarch, file, frame, regnum);
@@ -576,7 +576,7 @@ s12z_print_registers_info (struct gdbarch *gdbarch,
 
 static void
 s12z_extract_return_value (struct type *type, struct regcache *regcache,
-                              void *valbuf)
+			      void *valbuf)
 {
   int reg = -1;
 
@@ -611,8 +611,8 @@ s12z_extract_return_value (struct type *type, struct regcache *regcache,
 
 static enum return_value_convention
 s12z_return_value (struct gdbarch *gdbarch, struct value *function,
-                   struct type *type, struct regcache *regcache,
-                   gdb_byte *readbuf, const gdb_byte *writebuf)
+		   struct type *type, struct regcache *regcache,
+		   gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   if (type->code () == TYPE_CODE_STRUCT
       || type->code () == TYPE_CODE_UNION
@@ -644,7 +644,7 @@ s12z_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   add_cmd ("bdccsr", class_support, show_bdccsr_command,
 	   _("Show the current value of the microcontroller's BDCCSR."),
-           &maintenanceinfolist);
+	   &maintenanceinfolist);
 
   /* Target data types.  */
   set_gdbarch_short_bit (gdbarch, 16);

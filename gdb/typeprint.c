@@ -1,6 +1,6 @@
 /* Language independent support for printing types for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -209,7 +209,7 @@ typedef_hash_table::recursively_update (struct type *t)
       struct decl_field *tdef = &TYPE_TYPEDEF_FIELD (t, i);
       void **slot;
 
-      slot = htab_find_slot (m_table, tdef, INSERT);
+      slot = htab_find_slot (m_table.get (), tdef, INSERT);
       /* Only add a given typedef name once.  Really this shouldn't
 	 happen; but it is safe enough to do the updates breadth-first
 	 and thus use the most specific typedef.  */
@@ -242,7 +242,7 @@ typedef_hash_table::add_template_parameters (struct type *t)
       tf->name = TYPE_TEMPLATE_ARGUMENT (t, i)->linkage_name ();
       tf->type = SYMBOL_TYPE (TYPE_TEMPLATE_ARGUMENT (t, i));
 
-      slot = htab_find_slot (m_table, tf, INSERT);
+      slot = htab_find_slot (m_table.get (), tf, INSERT);
       if (*slot == NULL)
 	*slot = tf;
     }
@@ -251,16 +251,9 @@ typedef_hash_table::add_template_parameters (struct type *t)
 /* See typeprint.h.  */
 
 typedef_hash_table::typedef_hash_table ()
+  : m_table (htab_create_alloc (10, hash_typedef_field, eq_typedef_field,
+				NULL, xcalloc, xfree))
 {
-  m_table = htab_create_alloc (10, hash_typedef_field, eq_typedef_field,
-			       NULL, xcalloc, xfree);
-}
-
-/* Free a typedef field table.  */
-
-typedef_hash_table::~typedef_hash_table ()
-{
-  htab_delete (m_table);
 }
 
 /* Helper function for typedef_hash_table::copy.  */
@@ -282,10 +275,10 @@ copy_typedef_hash_element (void **slot, void *nt)
 
 typedef_hash_table::typedef_hash_table (const typedef_hash_table &table)
 {
-  m_table = htab_create_alloc (10, hash_typedef_field, eq_typedef_field,
-			       NULL, xcalloc, xfree);
-  htab_traverse_noresize (table.m_table, copy_typedef_hash_element,
-			  m_table);
+  m_table.reset (htab_create_alloc (10, hash_typedef_field, eq_typedef_field,
+				    NULL, xcalloc, xfree));
+  htab_traverse_noresize (table.m_table.get (), copy_typedef_hash_element,
+			  m_table.get ());
 }
 
 /* Look up the type T in the global typedef hash.  If it is found,
@@ -307,7 +300,7 @@ typedef_hash_table::find_global_typedef (const struct type_print_options *flags,
   tf.name = NULL;
   tf.type = t;
 
-  slot = htab_find_slot (flags->global_typedefs->m_table, &tf, INSERT);
+  slot = htab_find_slot (flags->global_typedefs->m_table.get (), &tf, INSERT);
   if (*slot != NULL)
     {
       new_tf = (struct decl_field *) *slot;
@@ -346,8 +339,8 @@ typedef_hash_table::find_typedef (const struct type_print_options *flags,
 
       tf.name = NULL;
       tf.type = t;
-      found = (struct decl_field *) htab_find (flags->local_typedefs->m_table,
-					       &tf);
+      htab_t table = flags->local_typedefs->m_table.get ();
+      found = (struct decl_field *) htab_find (table, &tf);
 
       if (found != NULL)
 	return found->name;
@@ -365,7 +358,7 @@ typedef_hash_table::find_typedef (const struct type_print_options *flags,
 void
 typedef_print (struct type *type, struct symbol *newobj, struct ui_file *stream)
 {
-  LA_PRINT_TYPEDEF (type, newobj, stream);
+  current_language->print_typedef (type, newobj, stream);
 }
 
 /* Print a description of a type TYPE in the form of a declaration of a
@@ -497,10 +490,12 @@ whatis_exp (const char *exp, int show)
 	 "whatis" prints the type of the expression without stripping
 	 any typedef level.  "ptype" always strips all levels of
 	 typedefs.  */
-      if (show == -1 && expr->elts[0].opcode == OP_TYPE)
+      val = evaluate_type (expr.get ());
+      type = value_type (val);
+
+      if (show == -1 && expr->first_opcode () == OP_TYPE)
 	{
 	  /* The user expression names a type directly.  */
-	  type = expr->elts[1].type;
 
 	  /* If this is a typedef, then find its immediate target.
 	     Use check_typedef to resolve stubs, but ignore its result
@@ -512,14 +507,6 @@ whatis_exp (const char *exp, int show)
 	  /* If the expression is actually a type, then there's no
 	     value to fetch the dynamic type from.  */
 	  val = NULL;
-	}
-      else
-	{
-	  /* The user expression names a type indirectly by naming an
-	     object or expression of that type.  Find that
-	     indirectly-named type.  */
-	  val = evaluate_type (expr.get ());
-	  type = value_type (val);
 	}
     }
   else
@@ -533,7 +520,7 @@ whatis_exp (const char *exp, int show)
     {
       if (((type->code () == TYPE_CODE_PTR) || TYPE_IS_REFERENCE (type))
 	  && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_STRUCT))
-        real_type = value_rtti_indirect_type (val, &full, &top, &using_enc);
+	real_type = value_rtti_indirect_type (val, &full, &top, &using_enc);
       else if (type->code () == TYPE_CODE_STRUCT)
 	real_type = value_rtti_type (val, &full, &top, &using_enc);
     }
@@ -561,7 +548,7 @@ whatis_exp (const char *exp, int show)
       printf_filtered ("/* real type = ");
       type_print (real_type, "", gdb_stdout, -1);
       if (! full)
-        printf_filtered (" (incomplete object)");
+	printf_filtered (" (incomplete object)");
       printf_filtered (" */\n");    
     }
 
@@ -644,6 +631,10 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
       print_type_scalar (TYPE_TARGET_TYPE (type), val, stream);
       return;
 
+    case TYPE_CODE_FIXED_POINT:
+      print_type_fixed_point (type, stream);
+      break;
+
     case TYPE_CODE_UNDEF:
     case TYPE_CODE_PTR:
     case TYPE_CODE_ARRAY:
@@ -669,6 +660,17 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
     }
 }
 
+/* See typeprint.h.  */
+
+void
+print_type_fixed_point (struct type *type, struct ui_file *stream)
+{
+  std::string small_img = type->fixed_point_scaling_factor ().str ();
+
+  fprintf_filtered (stream, "%s-byte fixed point (small = %s)",
+		    pulongest (TYPE_LENGTH (type)), small_img.c_str ());
+}
+
 /* Dump details of a type specified either directly or indirectly.
    Uses the same sort of type lookup mechanism as ptype_command()
    and whatis_command().  */
@@ -676,28 +678,14 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
 void
 maintenance_print_type (const char *type_name, int from_tty)
 {
-  struct value *val;
-  struct type *type;
-
   if (type_name != NULL)
     {
       expression_up expr = parse_expression (type_name);
-      if (expr->elts[0].opcode == OP_TYPE)
-	{
-	  /* The user expression names a type directly, just use that type.  */
-	  type = expr->elts[1].type;
-	}
-      else
-	{
-	  /* The user expression may name a type indirectly by naming an
-	     object of that type.  Find that indirectly named type.  */
-	  val = evaluate_type (expr.get ());
-	  type = value_type (val);
-	}
-      if (type != NULL)
-	{
-	  recursive_dump_type (type, 0);
-	}
+      struct value *val = evaluate_type (expr.get ());
+      struct type *type = value_type (val);
+
+      if (type != nullptr)
+	recursive_dump_type (type, 0);
     }
 }
 

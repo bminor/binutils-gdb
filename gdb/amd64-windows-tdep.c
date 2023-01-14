@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2009-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -42,6 +42,71 @@ static int amd64_windows_dummy_call_integer_regs[] =
   AMD64_R9_REGNUM            /* %r9 */
 };
 
+/* This vector maps GDB's idea of a register's number into an offset into
+   the Windows API CONTEXT structure.  */
+static int amd64_windows_gregset_reg_offset[] =
+{
+  120, /* Rax */
+  144, /* Rbx */
+  128, /* Rcx */
+  136, /* Rdx */
+  168, /* Rsi */
+  176, /* Rdi */
+  160, /* Rbp */
+  152, /* Rsp */
+  184, /* R8 */
+  192, /* R9 */
+  200, /* R10 */
+  208, /* R11 */
+  216, /* R12 */
+  224, /* R13 */
+  232, /* R14 */
+  240, /* R15 */
+  248, /* Rip */
+  68,  /* EFlags */
+  56,  /* SegCs */
+  66,  /* SegSs */
+  58,  /* SegDs */
+  60,  /* SegEs */
+  62,  /* SegFs */
+  64,  /* SegGs */
+  288, /* FloatSave.FloatRegisters[0] */
+  304, /* FloatSave.FloatRegisters[1] */
+  320, /* FloatSave.FloatRegisters[2] */
+  336, /* FloatSave.FloatRegisters[3] */
+  352, /* FloatSave.FloatRegisters[4] */
+  368, /* FloatSave.FloatRegisters[5] */
+  384, /* FloatSave.FloatRegisters[6] */
+  400, /* FloatSave.FloatRegisters[7] */
+  256, /* FloatSave.ControlWord */
+  258, /* FloatSave.StatusWord */
+  260, /* FloatSave.TagWord */
+  268, /* FloatSave.ErrorSelector */
+  264, /* FloatSave.ErrorOffset */
+  276, /* FloatSave.DataSelector */
+  272, /* FloatSave.DataOffset */
+  268, /* FloatSave.ErrorSelector */
+  416, /* Xmm0 */
+  432, /* Xmm1 */
+  448, /* Xmm2 */
+  464, /* Xmm3 */
+  480, /* Xmm4 */
+  496, /* Xmm5 */
+  512, /* Xmm6 */
+  528, /* Xmm7 */
+  544, /* Xmm8 */
+  560, /* Xmm9 */
+  576, /* Xmm10 */
+  592, /* Xmm11 */
+  608, /* Xmm12 */
+  624, /* Xmm13 */
+  640, /* Xmm14 */
+  656, /* Xmm15 */
+  280, /* FloatSave.MxCsr */
+};
+
+#define AMD64_WINDOWS_SIZEOF_GREGSET 1232
+
 /* Return nonzero if an argument of type TYPE should be passed
    via one of the integer registers.  */
 
@@ -60,6 +125,7 @@ amd64_windows_passed_by_integer_register (struct type *type)
       case TYPE_CODE_RVALUE_REF:
       case TYPE_CODE_STRUCT:
       case TYPE_CODE_UNION:
+      case TYPE_CODE_COMPLEX:
 	return (TYPE_LENGTH (type) == 1
 		|| TYPE_LENGTH (type) == 2
 		|| TYPE_LENGTH (type) == 4
@@ -78,7 +144,7 @@ amd64_windows_passed_by_xmm_register (struct type *type)
 {
   return ((type->code () == TYPE_CODE_FLT
 	   || type->code () == TYPE_CODE_DECFLOAT)
-          && (TYPE_LENGTH (type) == 4 || TYPE_LENGTH (type) == 8));
+	  && (TYPE_LENGTH (type) == 4 || TYPE_LENGTH (type) == 8));
 }
 
 /* Return non-zero iff an argument of the given TYPE should be passed
@@ -202,7 +268,7 @@ amd64_windows_push_arguments (struct regcache *regcache, int nargs,
 	  else if (amd64_windows_passed_by_xmm_register (type))
 	    {
 	      amd64_windows_store_arg_in_reg
-	        (regcache, args[i], AMD64_XMM0_REGNUM + reg_idx);
+		(regcache, args[i], AMD64_XMM0_REGNUM + reg_idx);
 	      /* In case of varargs, these parameters must also be
 		 passed via the integer registers.  */
 	      amd64_windows_store_arg_in_reg
@@ -258,7 +324,7 @@ amd64_windows_push_dummy_call
   if (return_method == return_method_struct)
     {
       /* The "hidden" argument is passed throught the first argument
-         register.  */
+	 register.  */
       const int arg_regnum = amd64_windows_dummy_call_integer_regs[0];
 
       store_unsigned_integer (buf, 8, byte_order, struct_addr);
@@ -299,25 +365,37 @@ amd64_windows_return_value (struct gdbarch *gdbarch, struct value *function,
   switch (type->code ())
     {
       case TYPE_CODE_FLT:
-      case TYPE_CODE_DECFLOAT:
-        /* __m128, __m128i, __m128d, floats, and doubles are returned
-           via XMM0.  */
-        if (len == 4 || len == 8 || len == 16)
-          regnum = AMD64_XMM0_REGNUM;
-        break;
+	/* floats, and doubles are returned via XMM0.  */
+	if (len == 4 || len == 8)
+	  regnum = AMD64_XMM0_REGNUM;
+	break;
+      case TYPE_CODE_ARRAY:
+	/* __m128, __m128i and __m128d are returned via XMM0.  */
+	if (type->is_vector () && len == 16)
+	  {
+	    enum type_code code = TYPE_TARGET_TYPE (type)->code ();
+	    if (code == TYPE_CODE_INT || code == TYPE_CODE_FLT)
+	      {
+		regnum = AMD64_XMM0_REGNUM;
+		break;
+	      }
+	  }
+	/* fall through */
       default:
-        /* All other values that are 1, 2, 4 or 8 bytes long are returned
-           via RAX.  */
-        if (len == 1 || len == 2 || len == 4 || len == 8)
-          regnum = AMD64_RAX_REGNUM;
-        break;
+	/* All other values that are 1, 2, 4 or 8 bytes long are returned
+	   via RAX.  */
+	if (len == 1 || len == 2 || len == 4 || len == 8)
+	  regnum = AMD64_RAX_REGNUM;
+	else if (len == 16 && type->code () == TYPE_CODE_INT)
+	  regnum = AMD64_XMM0_REGNUM;
+	break;
     }
 
   if (regnum < 0)
     {
       /* RAX contains the address where the return value has been stored.  */
       if (readbuf)
-        {
+	{
 	  ULONGEST addr;
 
 	  regcache_raw_read_unsigned (regcache, AMD64_RAX_REGNUM, &addr);
@@ -1213,6 +1291,8 @@ amd64_windows_auto_wide_charset (void)
 static void
 amd64_windows_init_abi_common (gdbarch_info info, struct gdbarch *gdbarch)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   /* The dwarf2 unwinder (appended very early by i386_gdbarch_init) is
      preferred over the SEH one.  The reasons are:
      - binaries without SEH but with dwarf2 debug info are correctly handled
@@ -1237,6 +1317,16 @@ amd64_windows_init_abi_common (gdbarch_info info, struct gdbarch *gdbarch)
 				    amd64_windows_skip_trampoline_code);
 
   set_gdbarch_skip_prologue (gdbarch, amd64_windows_skip_prologue);
+
+  tdep->gregset_reg_offset = amd64_windows_gregset_reg_offset;
+  tdep->gregset_num_regs = ARRAY_SIZE (amd64_windows_gregset_reg_offset);
+  tdep->sizeof_gregset = AMD64_WINDOWS_SIZEOF_GREGSET;
+  tdep->sizeof_fpregset = 0;
+
+  /* Core file support.  */
+  set_gdbarch_core_xfer_shared_libraries
+    (gdbarch, windows_core_xfer_shared_libraries);
+  set_gdbarch_core_pid_to_str (gdbarch, windows_core_pid_to_str);
 
   set_gdbarch_auto_wide_charset (gdbarch, amd64_windows_auto_wide_charset);
 }
@@ -1276,15 +1366,38 @@ amd64_windows_osabi_sniffer (bfd *abfd)
   return GDB_OSABI_WINDOWS;
 }
 
+static enum gdb_osabi
+amd64_cygwin_core_osabi_sniffer (bfd *abfd)
+{
+  const char *target_name = bfd_get_target (abfd);
+
+  /* Cygwin uses elf core dumps.  Do not claim all ELF executables,
+     check whether there is a .reg section of proper size.  */
+  if (strcmp (target_name, "elf64-x86-64") == 0)
+    {
+      asection *section = bfd_get_section_by_name (abfd, ".reg");
+      if (section != nullptr
+	  && bfd_section_size (section) == AMD64_WINDOWS_SIZEOF_GREGSET)
+	return GDB_OSABI_CYGWIN;
+    }
+
+  return GDB_OSABI_UNKNOWN;
+}
+
 void _initialize_amd64_windows_tdep ();
 void
 _initialize_amd64_windows_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64, GDB_OSABI_WINDOWS,
-                          amd64_windows_init_abi);
+			  amd64_windows_init_abi);
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64, GDB_OSABI_CYGWIN,
-                          amd64_cygwin_init_abi);
+			  amd64_cygwin_init_abi);
 
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_coff_flavour,
 				  amd64_windows_osabi_sniffer);
+
+  /* Cygwin uses elf core dumps.  */
+  gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_elf_flavour,
+				  amd64_cygwin_core_osabi_sniffer);
+
 }

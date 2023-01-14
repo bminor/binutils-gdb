@@ -1,6 +1,6 @@
 // object.h -- support for an object file for linking in gold  -*- C++ -*-
 
-// Copyright (C) 2006-2020 Free Software Foundation, Inc.
+// Copyright (C) 2006-2021 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -383,6 +383,47 @@ Compressed_section_map*
 build_compressed_section_map(const unsigned char* pshdrs, unsigned int shnum,
 			     const char* names, section_size_type names_size,
 			     Object* obj, bool decompress_if_needed);
+
+// Osabi represents the EI_OSABI field from the ELF header.
+
+class Osabi
+{
+ public:
+  Osabi(unsigned char ei_osabi)
+    : ei_osabi_(static_cast<elfcpp::ELFOSABI>(ei_osabi))
+  { }
+
+  bool
+  has_shf_retain(elfcpp::Elf_Xword sh_flags) const
+  {
+    switch (this->ei_osabi_)
+      {
+      case elfcpp::ELFOSABI_GNU:
+      case elfcpp::ELFOSABI_FREEBSD:
+	return (sh_flags & elfcpp::SHF_GNU_RETAIN) != 0;
+      default:
+        break;
+      }
+    return false;
+  }
+
+  elfcpp::Elf_Xword
+  ignored_sh_flags() const
+  {
+    switch (this->ei_osabi_)
+      {
+      case elfcpp::ELFOSABI_GNU:
+      case elfcpp::ELFOSABI_FREEBSD:
+	return elfcpp::SHF_GNU_RETAIN;
+      default:
+        break;
+      }
+    return 0;
+  }
+
+ private:
+  elfcpp::ELFOSABI ei_osabi_;
+};
 
 // Object is an abstract base class which represents either a 32-bit
 // or a 64-bit input object.  This can be a regular object file
@@ -2205,6 +2246,11 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   e_type() const
   { return this->e_type_; }
 
+  // Return the EI_OSABI.
+  const Osabi&
+  osabi() const
+  { return this->osabi_; }
+
   // Return the number of symbols.  This is only valid after
   // Object::add_symbols has been called.
   unsigned int
@@ -2845,6 +2891,8 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
 
   // General access to the ELF file.
   elfcpp::Elf_file<size, big_endian, Object> elf_file_;
+  // The EI_OSABI.
+  const Osabi osabi_;
   // Type of ELF file (ET_REL or ET_EXEC).  ET_EXEC files are allowed
   // as input files only for the --just-symbols option.
   int e_type_;

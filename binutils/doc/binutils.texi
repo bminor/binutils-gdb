@@ -10,7 +10,7 @@
 
 @copying
 @c man begin COPYRIGHT
-Copyright @copyright{} 1991-2020 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2021 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -170,7 +170,7 @@ in the section entitled ``GNU Free Documentation License''.
 @c man title ar create, modify, and extract from archives
 
 @smallexample
-ar [-]@var{p}[@var{mod}] [@option{--plugin} @var{name}] [@option{--target} @var{bfdname}] [@option{--output} @var{dirname}] [@var{relpos}] [@var{count}] @var{archive} [@var{member}@dots{}]
+ar [-]@var{p}[@var{mod}] [@option{--plugin} @var{name}] [@option{--target} @var{bfdname}] [@option{--output} @var{dirname}] [@option{--record-libdeps} @var{libdeps}] [@var{relpos}] [@var{count}] @var{archive} [@var{member}@dots{}]
 ar -M [ <mri-script ]
 @end smallexample
 
@@ -196,7 +196,9 @@ characters (typical of formats related to coff).
 @cindex libraries
 @command{ar} is considered a binary utility because archives of this sort
 are most often used as @dfn{libraries} holding commonly needed
-subroutines.
+subroutines.  Since libraries often will depend on other libraries,
+@command{ar} can also record the dependencies of a library when the
+@option{--record-libdeps} option is specified.
 
 @cindex symbol index
 @command{ar} creates an index to the symbols defined in relocatable
@@ -254,7 +256,7 @@ program.
 
 @smallexample
 @c man begin SYNOPSIS ar
-ar [@option{-X32_64}] [@option{-}]@var{p}[@var{mod}] [@option{--plugin} @var{name}] [@option{--target} @var{bfdname}] [@option{--output} @var{dirname}] [@var{relpos}] [@var{count}] @var{archive} [@var{member}@dots{}]
+ar [@option{-X32_64}] [@option{-}]@var{p}[@var{mod}] [@option{--plugin} @var{name}] [@option{--target} @var{bfdname}] [@option{--output} @var{dirname}] [@option{--record-libdeps} @var{libdeps}] [@var{relpos}] [@var{count}] @var{archive} [@var{member}@dots{}]
 @c man end
 @end smallexample
 
@@ -448,9 +450,14 @@ member must be present as the @var{relpos} argument, before the
 @var{archive} specification.  (same as @samp{b}).
 
 @item l
-This modifier is accepted but not used.
+@c This modifier was accepted but not used.
 @c whaffor ar l modifier??? presumably compat; with
 @c what???---doc@@cygnus.com, 25jan91
+Specify dependencies of this library.  The dependencies must immediately
+follow this option character, must use the same syntax as the linker
+command line, and must be specified within a single argument.  I.e., if
+multiple items are needed, they must be quoted to form a single command
+line argument.  For example @samp{L "-L/usr/local/lib -lmydep1 -lmydep2"}
 
 @item N
 Uses the @var{count} parameter.  This is used if there are multiple
@@ -591,6 +598,10 @@ option is not specified then the current directory will be used.
 Note - although the presence of this option does imply a @option{x} 
 extraction operation that option must still be included on the command
 line.
+
+@item --record-libdeps @var{libdeps}
+The @option{--record-libdeps} option is identical to the @option{l} modifier,
+just handled in long form.
 
 @end table
 @c man end
@@ -786,6 +797,7 @@ nm [@option{-A}|@option{-o}|@option{--print-file-name}] [@option{-a}|@option{--d
    [@option{-B}|@option{--format=bsd}] [@option{-C}|@option{--demangle}[=@var{style}]]
    [@option{-D}|@option{--dynamic}] [@option{-f}@var{format}|@option{--format=}@var{format}]
    [@option{-g}|@option{--extern-only}] [@option{-h}|@option{--help}]
+   [@option{--ifunc-chars=@var{CHARS}}]
    [@option{-l}|@option{--line-numbers}] [@option{--inlines}]
    [@option{-n}|@option{-v}|@option{--numeric-sort}]
    [@option{-P}|@option{--portability}] [@option{-p}|@option{--no-sort}]
@@ -834,6 +846,7 @@ contains zero-initialized or uninitialized data, although the exact
 behavior is system dependent.
 
 @item C
+@itemx c
 The symbol is common.  Common symbols are uninitialized data.  When
 linking, multiple common symbols may appear with the same name.  If the
 symbol is defined anywhere, the common symbols are treated as undefined
@@ -842,6 +855,8 @@ references.
 For more details on common symbols, see the discussion of
 --warn-common in @ref{Options,,Linker options,ld.info,The GNU linker}.
 @end ifclear
+The lower case @var{c} character is used when the symbol is in a
+special section for small commons.
 
 @item D
 @itemx d
@@ -855,12 +870,21 @@ such as a global int variable as opposed to a large global array.
 
 @item i
 For PE format files this indicates that the symbol is in a section
-specific to the implementation of DLLs.  For ELF format files this
-indicates that the symbol is an indirect function.  This is a GNU
-extension to the standard set of ELF symbol types.  It indicates a
-symbol which if referenced by a relocation does not evaluate to its
-address, but instead must be invoked at runtime.  The runtime
-execution will then return the value to be used in the relocation.
+specific to the implementation of DLLs.
+
+For ELF format files this indicates that the symbol is an indirect
+function.  This is a GNU extension to the standard set of ELF symbol
+types.  It indicates a symbol which if referenced by a relocation does
+not evaluate to its address, but instead must be invoked at runtime.
+The runtime execution will then return the value to be used in the
+relocation.
+
+Note - the actual symbols display for GNU indirect symbols is
+controlled by the @option{--ifunc-chars} command line option.  If this
+option has been provided then the first character in the string will
+be used for global indirect function symbols.  If the string contains
+a second character then that will be used for local indirect function
+symbols.
 
 @item I
 The symbol is an indirect reference to another symbol.
@@ -980,7 +1004,7 @@ Do not demangle low-level symbol names.  This is the default.
 @itemx --no-recursion-limit
 Enables or disables a limit on the amount of recursion performed
 whilst demangling strings.  Since the name mangling formats allow for
-an inifinite level of recursion it is possible to create strings whose
+an infinite level of recursion it is possible to create strings whose
 decoding will exhaust the amount of stack space available on the host
 machine, triggering a memory fault.  The limit tries to prevent this
 from happening by restricting recursion to 2048 levels of nesting.
@@ -1014,6 +1038,15 @@ Display only external symbols.
 @item -h
 @itemx --help
 Show a summary of the options to @command{nm} and exit.
+
+@item --ifunc-chars=@var{CHARS}
+When display GNU indirect function symbols @command{nm} will default
+to using the @code{i} character for both local indirect functions and
+global indirect functions.  The @option{--ifunc-chars} option allows
+the user to specify a string containing one or two characters. The
+first character will be used for global indirect function symbols and
+the second character, if present, will be used for local indirect
+function symbols.
 
 @item -l
 @itemx --line-numbers
@@ -1342,7 +1375,7 @@ otherwise copy it.  For example:
   --only-section=.text.* --only-section=!.text.foo
 @end smallexample
 
-will copy all sectinos maching '.text.*' but not the section
+will copy all sectinos matching '.text.*' but not the section
 '.text.foo'.
 
 @item -R @var{sectionpattern}
@@ -1404,13 +1437,16 @@ will remove all relocations for sections matching the pattern
 @item -S
 @itemx --strip-all
 Do not copy relocation and symbol information from the source file.
+Also deletes debug sections.
 
 @item -g
 @itemx --strip-debug
 Do not copy debugging symbols or sections from the source file.
 
 @item --strip-unneeded
-Strip all symbols that are not needed for relocation processing.
+Remove all symbols that are not needed for relocation processing in
+addition to debugging symbols and sections stripped by
+@option{--strip-debug}.
 
 @item -K @var{symbolname}
 @itemx --keep-symbol=@var{symbolname}
@@ -2252,7 +2288,7 @@ for more information on demangling.
 @itemx --no-recursion-limit
 Enables or disables a limit on the amount of recursion performed
 whilst demangling strings.  Since the name mangling formats allow for
-an inifinite level of recursion it is possible to create strings whose
+an infinite level of recursion it is possible to create strings whose
 decoding will exhaust the amount of stack space available on the host
 machine, triggering a memory fault.  The limit tries to prevent this
 from happening by restricting recursion to 2048 levels of nesting.
@@ -2435,7 +2471,7 @@ hexadecimal using @option{hex}.  By default, the short immediates are
 printed using the decimal representation, while the long immediate
 values are printed as hexadecimal.
 
-@option{cpu=...} allows to enforce a particular ISA when disassembling
+@option{cpu=...} allows one to enforce a particular ISA when disassembling
 instructions, overriding the @option{-m} value or whatever is in the ELF file.
 This might be useful to select ARC EM or HS ISA, because architecture is same
 for those and disassembler relies on private ELF header data to decide if code
@@ -2754,7 +2790,7 @@ where the number inside the square brackets is the number of the entry
 in the symbol table, the @var{sec} number is the section number, the
 @var{fl} value are the symbol's flag bits, the @var{ty} number is the
 symbol's type, the @var{scl} number is the symbol's storage class and
-the @var{nx} value is the number of auxilary entries associated with
+the @var{nx} value is the number of auxiliary entries associated with
 the symbol.  The last two fields are the symbol's value and its name.
 
 The other common output format, usually seen with ELF based files,
@@ -2765,7 +2801,7 @@ looks like this:
 00000000 g       .text  00000000 fred
 @end smallexample
 
-Here the first number is the symbol's value (sometimes refered to as
+Here the first number is the symbol's value (sometimes referred to as
 its address).  The next field is actually a set of characters and
 spaces indicating the flag bits that are set on the symbol.  These
 characters are described below.  Next is the section with which the
@@ -3387,7 +3423,9 @@ See the description of this option in the @command{objcopy} section
 for more information.
 
 @item --strip-unneeded
-Remove all symbols that are not needed for relocation processing.
+Remove all symbols that are not needed for relocation processing in
+addition to debugging symbols and sections stripped by
+@option{--strip-debug}.
 
 @item -K @var{symbolname}
 @itemx --keep-symbol=@var{symbolname}
@@ -3669,7 +3707,7 @@ output.
 @itemx --no-recursion-limit
 Enables or disables a limit on the amount of recursion performed
 whilst demangling strings.  Since the name mangling formats allow for
-an inifinite level of recursion it is possible to create strings whose
+an infinite level of recursion it is possible to create strings whose
 decoding will exhaust the amount of stack space available on the host
 machine, triggering a memory fault.  The limit tries to prevent this
 from happening by restricting recursion to 2048 levels of nesting.
@@ -3892,7 +3930,7 @@ prefixed with @samp{(inlined by)}.
 @itemx --no-recursion-limit
 Enables or disables a limit on the amount of recursion performed
 whilst demangling strings.  Since the name mangling formats allow for
-an inifinite level of recursion it is possible to create strings whose
+an infinite level of recursion it is possible to create strings whose
 decoding will exhaust the amount of stack space available on the host
 machine, triggering a memory fault.  The limit tries to prevent this
 from happening by restricting recursion to 2048 levels of nesting.
@@ -4699,7 +4737,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{-t}|@option{--section-details}]
         [@option{-e}|@option{--headers}]
         [@option{-s}|@option{--syms}|@option{--symbols}]
-        [@option{--dyn-syms}]
+        [@option{--dyn-syms}|@option{--lto-syms}]
         [@option{--demangle@var{=style}}|@option{--no-demangle}]
         [@option{--recurse-limit}|@option{--no-recurse-limit}]
         [@option{-n}|@option{--notes}]
@@ -4817,6 +4855,10 @@ Displays the entries in dynamic symbol table section of the file, if it
 has one.  The output format is the same as the format used by the
 @option{--syms} option.
 
+@item --lto-syms
+@cindex LTO symbol table
+Displays the contents of any LTO symbol tables in the file.
+
 @item -C
 @itemx --demangle[=@var{style}]
 @cindex demangling in nm
@@ -4835,7 +4877,7 @@ Do not demangle low-level symbol names.  This is the default.
 @itemx --no-recursion-limit
 Enables or disables a limit on the amount of recursion performed
 whilst demangling strings.  Since the name mangling formats allow for
-an inifinite level of recursion it is possible to create strings whose
+an infinite level of recursion it is possible to create strings whose
 decoding will exhaust the amount of stack space available on the host
 machine, triggering a memory fault.  The limit tries to prevent this
 from happening by restricting recursion to 2048 levels of nesting.
@@ -5075,7 +5117,8 @@ supported ELF OSABI are the same as @option{--input-osabi}.
 @item --enable-x86-feature=@var{feature}
 Set the @var{feature} bit in program property in @var{exec} or @var{dyn}
 ELF files with machine types of @var{i386} or @var{x86-64}.  The
-supported features are, @var{ibt} and @var{shstk}.
+supported features are, @var{ibt}, @var{shstk}, @var{lam_u48} and
+@var{lam_u57}.
 
 @item --disable-x86-feature=@var{feature}
 Clear the @var{feature} bit in program property in @var{exec} or

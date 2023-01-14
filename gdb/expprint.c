@@ -1,6 +1,6 @@
 /* Print in infix form a struct expression.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -50,7 +50,27 @@ void
 print_subexp (struct expression *exp, int *pos,
 	      struct ui_file *stream, enum precedence prec)
 {
-  exp->language_defn->la_exp_desc->print_subexp (exp, pos, stream, prec);
+  exp->language_defn->expression_ops ()->print_subexp (exp, pos, stream,
+						       prec);
+}
+
+/* See parser-defs.h.  */
+
+void
+print_subexp_funcall (struct expression *exp, int *pos,
+		      struct ui_file *stream)
+{
+  unsigned nargs = longest_to_int (exp->elts[*pos].longconst);
+  (*pos) += 2;
+  print_subexp (exp, pos, stream, PREC_SUFFIX);
+  fputs_filtered (" (", stream);
+  for (unsigned tem = 0; tem < nargs; tem++)
+    {
+      if (tem != 0)
+	fputs_filtered (", ", stream);
+      print_subexp (exp, pos, stream, PREC_ABOVE_COMMA);
+    }
+  fputs_filtered (")", stream);
 }
 
 /* Standard implementation of print_subexp for use in language_defn
@@ -72,7 +92,7 @@ print_subexp_standard (struct expression *exp, int *pos,
   struct value *val;
   char *tempstr = NULL;
 
-  op_print_tab = exp->language_defn->la_op_print_tab;
+  op_print_tab = exp->language_defn->opcode_print_table ();
   pc = (*pos)++;
   opcode = exp->elts[pc].opcode;
   switch (opcode)
@@ -187,18 +207,7 @@ print_subexp_standard (struct expression *exp, int *pos,
       return;
 
     case OP_FUNCALL:
-    case OP_F77_UNDETERMINED_ARGLIST:
-      (*pos) += 2;
-      nargs = longest_to_int (exp->elts[pc + 1].longconst);
-      print_subexp (exp, pos, stream, PREC_SUFFIX);
-      fputs_filtered (" (", stream);
-      for (tem = 0; tem < nargs; tem++)
-	{
-	  if (tem != 0)
-	    fputs_filtered (", ", stream);
-	  print_subexp (exp, pos, stream, PREC_ABOVE_COMMA);
-	}
-      fputs_filtered (")", stream);
+      print_subexp_funcall (exp, pos, stream);
       return;
 
     case OP_NAME:
@@ -217,9 +226,10 @@ print_subexp_standard (struct expression *exp, int *pos,
 	   If necessary, we can temporarily set it to zero, or pass it as an
 	   additional parameter to LA_PRINT_STRING.  -fnf */
 	get_user_print_options (&opts);
-	LA_PRINT_STRING (stream, builtin_type (exp->gdbarch)->builtin_char,
-			 (gdb_byte *) &exp->elts[pc + 2].string, nargs,
-			 NULL, 0, &opts);
+	exp->language_defn
+	  ->printstr (stream, builtin_type (exp->gdbarch)->builtin_char,
+		      (gdb_byte *) &exp->elts[pc + 2].string, nargs,
+		      NULL, 0, &opts);
       }
       return;
 
@@ -232,9 +242,10 @@ print_subexp_standard (struct expression *exp, int *pos,
 	(*pos) += 3 + BYTES_TO_EXP_ELEM (nargs + 1);
 	fputs_filtered ("@\"", stream);
 	get_user_print_options (&opts);
-	LA_PRINT_STRING (stream, builtin_type (exp->gdbarch)->builtin_char,
-			 (gdb_byte *) &exp->elts[pc + 2].string, nargs,
-			 NULL, 0, &opts);
+	exp->language_defn
+	  ->printstr (stream, builtin_type (exp->gdbarch)->builtin_char,
+		      (gdb_byte *) &exp->elts[pc + 2].string, nargs,
+		      NULL, 0, &opts);
 	fputs_filtered ("\"", stream);
       }
       return;
@@ -316,8 +327,9 @@ print_subexp_standard (struct expression *exp, int *pos,
 	  struct value_print_options opts;
 
 	  get_user_print_options (&opts);
-	  LA_PRINT_STRING (stream, builtin_type (exp->gdbarch)->builtin_char,
-			   (gdb_byte *) tempstr, nargs - 1, NULL, 0, &opts);
+	  exp->language_defn
+	    ->printstr (stream, builtin_type (exp->gdbarch)->builtin_char,
+			(gdb_byte *) tempstr, nargs - 1, NULL, 0, &opts);
 	  (*pos) = pc;
 	}
       else
@@ -339,9 +351,9 @@ print_subexp_standard (struct expression *exp, int *pos,
       if ((int) prec > (int) PREC_COMMA)
 	fputs_filtered ("(", stream);
       /* Print the subexpressions, forcing parentheses
-         around any binary operations within them.
-         This is more parentheses than are strictly necessary,
-         but it looks clearer.  */
+	 around any binary operations within them.
+	 This is more parentheses than are strictly necessary,
+	 but it looks clearer.  */
       print_subexp (exp, pos, stream, PREC_HYPER);
       fputs_filtered (" ? ", stream);
       print_subexp (exp, pos, stream, PREC_HYPER);
@@ -504,12 +516,12 @@ print_subexp_standard (struct expression *exp, int *pos,
 
     case OP_THIS:
       ++(*pos);
-      if (exp->language_defn->la_name_of_this)
-	fputs_filtered (exp->language_defn->la_name_of_this, stream);
+      if (exp->language_defn->name_of_this () != NULL)
+	fputs_filtered (exp->language_defn->name_of_this (), stream);
       else
 	fprintf_styled (stream, metadata_style.style (),
 			_("<language %s has no 'this'>"),
-			exp->language_defn->la_name);
+			exp->language_defn->name ());
       return;
 
       /* Modula-2 ops */
@@ -570,23 +582,19 @@ print_subexp_standard (struct expression *exp, int *pos,
 
     case OP_RANGE:
       {
-	enum range_type range_type;
+	enum range_flag range_flag;
 
-	range_type = (enum range_type)
+	range_flag = (enum range_flag)
 	  longest_to_int (exp->elts[pc + 1].longconst);
 	*pos += 2;
 
-	if (range_type == NONE_BOUND_DEFAULT_EXCLUSIVE
-	    || range_type == LOW_BOUND_DEFAULT_EXCLUSIVE)
+	if (range_flag & RANGE_HIGH_BOUND_EXCLUSIVE)
 	  fputs_filtered ("EXCLUSIVE_", stream);
 	fputs_filtered ("RANGE(", stream);
-	if (range_type == HIGH_BOUND_DEFAULT
-	    || range_type == NONE_BOUND_DEFAULT
-	    || range_type == NONE_BOUND_DEFAULT_EXCLUSIVE)
+	if (!(range_flag & RANGE_LOW_BOUND_DEFAULT))
 	  print_subexp (exp, pos, stream, PREC_ABOVE_COMMA);
 	fputs_filtered ("..", stream);
-	if (range_type == LOW_BOUND_DEFAULT
-	    || range_type == NONE_BOUND_DEFAULT)
+	if (!(range_flag & RANGE_HIGH_BOUND_DEFAULT))
 	  print_subexp (exp, pos, stream, PREC_ABOVE_COMMA);
 	fputs_filtered (")", stream);
 	return;
@@ -637,8 +645,8 @@ print_subexp_standard (struct expression *exp, int *pos,
     {
       /* Binary operator.  */
       /* Print left operand.
-         If operator is right-associative,
-         increment precedence for this operand.  */
+	 If operator is right-associative,
+	 increment precedence for this operand.  */
       print_subexp (exp, pos, stream,
 		    (enum precedence) ((int) myprec + assoc));
       /* Print the operator itself.  */
@@ -649,8 +657,8 @@ print_subexp_standard (struct expression *exp, int *pos,
       else
 	fprintf_filtered (stream, " %s ", op_str);
       /* Print right operand.
-         If operator is left-associative,
-         increment precedence for this operand.  */
+	 If operator is left-associative,
+	 increment precedence for this operand.  */
       print_subexp (exp, pos, stream,
 		    (enum precedence) ((int) myprec + !assoc));
     }
@@ -668,7 +676,7 @@ op_string (enum exp_opcode op)
   int tem;
   const struct op_print *op_print_tab;
 
-  op_print_tab = current_language->la_op_print_tab;
+  op_print_tab = current_language->opcode_print_table ();
   for (tem = 0; op_print_tab[tem].opcode != OP_NULL; tem++)
     if (op_print_tab[tem].opcode == op)
       return op_print_tab[tem].string;
@@ -680,26 +688,11 @@ op_string (enum exp_opcode op)
 
 static int dump_subexp_body (struct expression *exp, struct ui_file *, int);
 
-/* Name for OPCODE, when it appears in expression EXP.  */
-
-const char *
-op_name (struct expression *exp, enum exp_opcode opcode)
-{
-  if (opcode >= OP_UNUSED_LAST)
-    {
-      char *cell = get_print_cell ();
-      xsnprintf (cell, PRINT_CELL_SIZE, "unknown opcode: %u",
-		 unsigned (opcode));
-      return cell;
-    }
-  return exp->language_defn->la_exp_desc->op_name (opcode);
-}
-
 /* Default name for the standard operator OPCODE (i.e., one defined in
    the definition of enum exp_opcode).  */
 
 const char *
-op_name_standard (enum exp_opcode opcode)
+op_name (enum exp_opcode opcode)
 {
   switch (opcode)
     {
@@ -734,7 +727,7 @@ dump_raw_expression (struct expression *exp, struct ui_file *stream,
   if (note)
     fprintf_filtered (stream, ", %s:", note);
   fprintf_filtered (stream, "\n\tLanguage %s, %d elements, %ld bytes each.\n",
-		    exp->language_defn->la_name, exp->nelts,
+		    exp->language_defn->name (), exp->nelts,
 		    (long) sizeof (union exp_element));
   fprintf_filtered (stream, "\t%5s  %20s  %16s  %s\n", "Index", "Opcode",
 		    "Hex Value", "String Value");
@@ -742,7 +735,7 @@ dump_raw_expression (struct expression *exp, struct ui_file *stream,
     {
       fprintf_filtered (stream, "\t%5d  ", elt);
 
-      const char *opcode_name = op_name (exp, exp->elts[elt].opcode);
+      const char *opcode_name = op_name (exp->elts[elt].opcode);
       fprintf_filtered (stream, "%20s  ", opcode_name);
 
       print_longest (stream, 'd', 0, exp->elts[elt].longconst);
@@ -777,7 +770,7 @@ dump_subexp (struct expression *exp, struct ui_file *stream, int elt)
     fprintf_filtered (stream, " ");
   indent += 2;
 
-  fprintf_filtered (stream, "%-20s  ", op_name (exp, exp->elts[elt].opcode));
+  fprintf_filtered (stream, "%-20s  ", op_name (exp->elts[elt].opcode));
 
   elt = dump_subexp_body (exp, stream, elt);
 
@@ -793,7 +786,24 @@ dump_subexp (struct expression *exp, struct ui_file *stream, int elt)
 static int
 dump_subexp_body (struct expression *exp, struct ui_file *stream, int elt)
 {
-  return exp->language_defn->la_exp_desc->dump_subexp_body (exp, stream, elt);
+  return exp->language_defn->expression_ops ()->dump_subexp_body (exp, stream,
+								  elt);
+}
+
+/* See parser-defs.h.  */
+
+int
+dump_subexp_body_funcall (struct expression *exp,
+			  struct ui_file *stream, int elt)
+{
+  int nargs = longest_to_int (exp->elts[elt].longconst);
+  fprintf_filtered (stream, "Number of args: %d", nargs);
+  elt += 2;
+
+  for (int i = 1; i <= nargs + 1; i++)
+    elt = dump_subexp (exp, stream, elt);
+
+  return elt;
 }
 
 /* Default value for subexp_body in exp_descriptor vector.  */
@@ -931,18 +941,7 @@ dump_subexp_body_standard (struct expression *exp,
       elt += 2;
       break;
     case OP_FUNCALL:
-    case OP_F77_UNDETERMINED_ARGLIST:
-      {
-	int i, nargs;
-
-	nargs = longest_to_int (exp->elts[elt].longconst);
-
-	fprintf_filtered (stream, "Number of args: %d", nargs);
-	elt += 2;
-
-	for (i = 1; i <= nargs + 1; i++)
-	  elt = dump_subexp (exp, stream, elt);
-      }
+      elt = dump_subexp_body_funcall (exp, stream, elt);
       break;
     case OP_ARRAY:
       {
@@ -1095,43 +1094,38 @@ dump_subexp_body_standard (struct expression *exp,
       break;
     case OP_RANGE:
       {
-	enum range_type range_type;
+	enum range_flag range_flag;
 
-	range_type = (enum range_type)
+	range_flag = (enum range_flag)
 	  longest_to_int (exp->elts[elt].longconst);
 	elt += 2;
 
-	switch (range_type)
-	  {
-	  case BOTH_BOUND_DEFAULT:
-	    fputs_filtered ("Range '..'", stream);
-	    break;
-	  case LOW_BOUND_DEFAULT:
-	    fputs_filtered ("Range '..EXP'", stream);
-	    break;
-	  case LOW_BOUND_DEFAULT_EXCLUSIVE:
-	    fputs_filtered ("ExclusiveRange '..EXP'", stream);
-	    break;
-	  case HIGH_BOUND_DEFAULT:
-	    fputs_filtered ("Range 'EXP..'", stream);
-	    break;
-	  case NONE_BOUND_DEFAULT:
-	    fputs_filtered ("Range 'EXP..EXP'", stream);
-	    break;
-	  case NONE_BOUND_DEFAULT_EXCLUSIVE:
-	    fputs_filtered ("ExclusiveRange 'EXP..EXP'", stream);
-	    break;
-	  default:
-	    fputs_filtered ("Invalid Range!", stream);
-	    break;
-	  }
+	if (range_flag & RANGE_HIGH_BOUND_EXCLUSIVE)
+	  fputs_filtered ("Exclusive", stream);
+	fputs_filtered ("Range '", stream);
+	if (!(range_flag & RANGE_LOW_BOUND_DEFAULT))
+	  fputs_filtered ("EXP", stream);
+	fputs_filtered ("..", stream);
+	if (!(range_flag & RANGE_HIGH_BOUND_DEFAULT))
+	  fputs_filtered ("EXP", stream);
+	if (range_flag & RANGE_HAS_STRIDE)
+	  fputs_filtered (":EXP", stream);
+	fputs_filtered ("'", stream);
 
-	if (range_type == HIGH_BOUND_DEFAULT
-	    || range_type == NONE_BOUND_DEFAULT)
+	if (!(range_flag & RANGE_LOW_BOUND_DEFAULT))
 	  elt = dump_subexp (exp, stream, elt);
-	if (range_type == LOW_BOUND_DEFAULT
-	    || range_type == NONE_BOUND_DEFAULT)
+	if (!(range_flag & RANGE_HIGH_BOUND_DEFAULT))
 	  elt = dump_subexp (exp, stream, elt);
+	if (range_flag & RANGE_HAS_STRIDE)
+	  elt = dump_subexp (exp, stream, elt);
+      }
+      break;
+
+    case OP_BOOL:
+      {
+	bool val = (bool) (exp->elts[elt].longconst);
+	fputs_filtered (val ? "TRUE" : "FALSE", stream);
+	elt += 2;
       }
       break;
 
@@ -1139,7 +1133,6 @@ dump_subexp_body_standard (struct expression *exp,
     case OP_NULL:
     case MULTI_SUBSCRIPT:
     case OP_COMPLEX:
-    case OP_BOOL:
     case OP_M2_STRING:
     case OP_THIS:
     case OP_NAME:
@@ -1159,7 +1152,7 @@ dump_prefix_expression (struct expression *exp, struct ui_file *stream)
   fputs_filtered (", after conversion to prefix form:\nExpression: `", stream);
   print_expression (exp, stream);
   fprintf_filtered (stream, "'\n\tLanguage %s, %d elements, %ld bytes each.\n",
-		    exp->language_defn->la_name, exp->nelts,
+		    exp->language_defn->name (), exp->nelts,
 		    (long) sizeof (union exp_element));
   fputs_filtered ("\n", stream);
 

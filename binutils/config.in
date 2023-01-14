@@ -18,6 +18,9 @@
 /* Should ar and ranlib use -D behavior by default? */
 #undef DEFAULT_AR_DETERMINISTIC
 
+/* Have nm use F and f for global and local ifunc symbols */
+#undef DEFAULT_F_FOR_IFUNC_SYMBOLS
+
 /* Should strings use -a behavior by default? */
 #undef DEFAULT_STRINGS_ALL
 

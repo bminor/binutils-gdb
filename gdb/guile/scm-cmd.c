@@ -1,6 +1,6 @@
 /* GDB commands implemented in Scheme.
 
-   Copyright (C) 2008-2020 Free Software Foundation, Inc.
+   Copyright (C) 2008-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -37,7 +37,7 @@
    any side-effects.  This means that the smob needs to store everything
    that was passed to make-command.  */
 
-typedef struct _command_smob
+struct command_smob
 {
   /* This always appears first.  */
   gdb_smob base;
@@ -85,7 +85,7 @@ typedef struct _command_smob
      the object since a reference to it comes from non-gc-managed space
      (the command context pointer).  */
   SCM containing_scm;
-} command_smob;
+};
 
 static const char command_smob_name[] = "gdb:command";
 
@@ -635,9 +635,9 @@ gdbscm_canonicalize_command_name (const char *name, int want_trailing_space)
      One of the COMPLETE_* constants defined in the gdb module.
      A procedure of three arguments: (lambda (self text word) ...).
        Its result is one of:
-         A list of strings.
-         A <gdb:iterator> object that returns the set of possible completions,
-         ending with #f.
+	 A list of strings.
+	 A <gdb:iterator> object that returns the set of possible completions,
+	 ending with #f.
 	 TODO(dje): Once PR 16699 is fixed, add support for returning
 	 a COMPLETE_* constant.
    If not specified, then completion is not supported for this command.

@@ -1,4 +1,4 @@
-# Copyright 1999-2020 Free Software Foundation, Inc.
+# Copyright 1999-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -61,8 +61,6 @@ proc mi_uncatched_gdb_exit {} {
     global mi_gdb_prompt
     global MIFLAGS
 
-    gdb_stop_suppressing_tests
-
     if { [info procs sid_exit] != "" } {
 	sid_exit
     }
@@ -87,6 +85,18 @@ proc mi_uncatched_gdb_exit {} {
 	    -re "DOSEXIT code" { }
 	    default { }
 	}
+    }
+
+    # Switch back to the main spawn id, so that remote_close below
+    # closes it, and not a secondary channel.  Closing a secondary
+    # channel does not make GDB exit.
+    if {$gdb_spawn_id != $gdb_main_spawn_id} {
+	switch_gdb_spawn_id $gdb_main_spawn_id
+    }
+
+    # Close secondary MI channel, if there's one.
+    if {$mi_spawn_id != $gdb_main_spawn_id} {
+	close -i $mi_spawn_id
     }
 
     if ![is_remote host] {
@@ -194,6 +204,12 @@ proc default_mi_gdb_start { args } {
     global MIFLAGS
     global FORCE_SEPARATE_MI_TTY
 
+    # Keep track of the number of times GDB has been launched.
+    global gdb_instances
+    incr gdb_instances
+
+    gdb_stdin_log_init
+
     if {[info exists FORCE_SEPARATE_MI_TTY]} {
 	set separate_mi_pty $FORCE_SEPARATE_MI_TTY
     } else {
@@ -214,7 +230,6 @@ proc default_mi_gdb_start { args } {
 	return [eval mi_gdb_start_separate_mi_tty $args]
     }
 
-    gdb_stop_suppressing_tests
     set inferior_pty no-tty
 
     # Set the default value, it may be overriden later by specific testfile.
@@ -372,11 +387,6 @@ proc mi_gdb_reinitialize_dir { subdir } {
     global mi_gdb_prompt
     global MIFLAGS
 
-    global suppress_flag
-    if { $suppress_flag } {
-	return
-    }
-
     if [is_remote host] {
 	return ""
     }
@@ -486,6 +496,11 @@ proc mi_gdb_file_cmd { arg } {
     global mi_gdb_prompt
     global last_loaded_file
     upvar timeout timeout
+
+    # GCC for Windows target may create foo.exe given "-o foo".
+    if { ![file exists $arg] && [file exists "$arg.exe"] } {
+	set arg "$arg.exe"
+    }
 
     set last_loaded_file $arg
 
@@ -706,13 +721,7 @@ proc mi_gdb_test { args } {
 	    if { $foo < [expr $len - 1] } {
 		set str [string range "$string" 0 $foo]
 		if { [send_gdb "$str"] != "" } {
-		    global suppress_flag
-
-		    if { ! $suppress_flag } {
-			perror "Couldn't send $command to GDB."
-		    }
-		    fail "$message"
-		    return $result
+		    perror "Couldn't send $command to GDB."
 		}
 		gdb_expect 2 {
 		    -re "\[\r\n\]" { }
@@ -725,13 +734,7 @@ proc mi_gdb_test { args } {
 	}
 	if { "$string" != "" } {
 	    if { [send_gdb "$string"] != "" } {
-		global suppress_flag
-
-		if { ! $suppress_flag } {
-		    perror "Couldn't send $command to GDB."
-		}
-		fail "$message"
-		return $result
+		perror "Couldn't send $command to GDB."
 	    }
 	}
     }
@@ -757,7 +760,6 @@ proc mi_gdb_test { args } {
 	     if { $message != "" } {
 		 fail "$message"
 	     }
-	     gdb_suppress_entire_file "GDB died"
 	     return -1
 	 }
 	 -re "Ending remote debugging.*$mi_gdb_prompt\[ \]*$" {
@@ -917,10 +919,6 @@ proc mi_gdb_expect_cli_output {until message} {
 # If USE_MI_COMMAND is false, they are effectively arguments passed
 # to the test program.  If the global USE_GDB_STUB is true, ARGS is not used.
 proc mi_run_cmd_full {use_mi_command args} {
-    global suppress_flag
-    if { $suppress_flag } {
-	return -1
-    }
     global mi_gdb_prompt use_gdb_stub
     global thread_selected_re
     global library_loaded_re
@@ -938,7 +936,7 @@ proc mi_run_cmd_full {use_mi_command args} {
 	gdb_expect 30 {
 	    -re "$mi_gdb_prompt$" { }
 	    default {
-		perror "gdb_init_command for target failed"
+		unresolved "gdb_init_command for target failed"
 		return -1
 	    }
 	}
@@ -972,7 +970,7 @@ proc mi_run_cmd_full {use_mi_command args} {
 	gdb_expect {
 	    -re "&\"jump \\*${start}\\\\n\"\[\r\n\]+~\"Continuing at 0x\[0-9A-Fa-f\]+\.\\\\n\"\[\r\n\]+\\^running\[\r\n\]+\\*running,thread-id=\"\[^\"\]+\"\[\r\n\]+${mi_gdb_prompt}" {}
 	    timeout {
-		perror "Unable to start target"
+		unresolved "unable to start target"
 		return -1
 	    }
 	}
@@ -988,7 +986,7 @@ proc mi_run_cmd_full {use_mi_command args} {
 	    return -1
 	}
 	timeout {
-	    perror "Unable to start target"
+	    unresolved "unable to start target"
 	    return -1
 	}
     }
@@ -1011,28 +1009,41 @@ proc mi_run_with_cli {args} {
     return [eval mi_run_cmd_full 0 $args]
 }
 
-#
-# Just like run-to-main but works with the MI interface
-#
+# Starts fresh GDB binary and loads an optional executable into GDB.
+# Usage: mi_clean_restart [executable]
+# EXECUTABLE is the basename of the binary.
+# Return -1 if starting gdb or loading the executable failed.
 
-proc mi_run_to_main { } {
-    global suppress_flag
-    if { $suppress_flag } {
+proc mi_clean_restart { args } {
+    global srcdir
+    global subdir
+    global errcnt
+    global warncnt
+
+    if { [llength $args] > 1 } {
+	error "bad number of args: [llength $args]"
+    }
+
+    gdb_exit
+
+    # This is a clean restart, so reset error and warning count.
+    set errcnt 0
+    set warncnt 0
+
+    if {[mi_gdb_start]} {
 	return -1
     }
 
-    global srcdir
-    global subdir
-    global binfile
-    global srcfile
-
-    mi_delete_breakpoints
     mi_gdb_reinitialize_dir $srcdir/$subdir
-    mi_gdb_load ${binfile}
 
-    mi_runto main
+    if { [llength $args] >= 1 } {
+	set executable [lindex $args 0]
+	set binfile [standard_output_file ${executable}]
+	return [mi_gdb_load ${binfile}]
+    }
+
+    return 0
 }
-
 
 # Just like gdb's "runto" proc, it will run the target to a given
 # function.  The big difference here between mi_runto and mi_execute_to
@@ -1041,22 +1052,27 @@ proc mi_run_to_main { } {
 #
 # FUNC is the linespec of the place to stop (it inserts a breakpoint here).
 # It returns:
-#   -1  if test suppressed, failed, timedout
+#   -1  if failed, timedout
 #    0  if test passed
+#
+# Supported options:
+#
+#  -qualified -- pass --qualified to -break-insert
 
-proc mi_runto_helper {func run_or_continue} {
-  global suppress_flag
-  if { $suppress_flag } {
-    return -1
-  }
-
+proc mi_runto_helper {func run_or_continue args} {
   global mi_gdb_prompt expect_out
   global hex decimal fullname_syntax
+
+  parse_args {{qualified}}
 
   set test "mi runto $func"
   set bp [mi_make_breakpoint -type breakpoint -disp del \
 	      -func $func\(\\\(.*\\\)\)?]
-  mi_gdb_test "200-break-insert -t $func" "200\\^done,$bp" \
+  set extra_opts ""
+  if {$qualified} {
+      append extra_opts "--qualified"
+  }
+  mi_gdb_test "200-break-insert $extra_opts -t $func" "200\\^done,$bp" \
       "breakpoint at $func"
 
   if {$run_or_continue == "run"} {
@@ -1072,6 +1088,12 @@ proc mi_runto_helper {func run_or_continue} {
 
 proc mi_runto {func} {
     return [mi_runto_helper $func "run"]
+}
+
+# Just like runto_main but works with the MI interface.
+
+proc mi_runto_main {} {
+    return [mi_runto_helper "main" "run" -qualified]
 }
 
 # Next to the next statement
@@ -1307,11 +1329,6 @@ proc mi_expect_interrupt { test } {
 # after the first prompt is printed.
 
 proc mi_execute_to { cmd reason func args file line extra test } {
-    global suppress_flag
-    if { $suppress_flag } {
-	return -1
-    }
-
     mi_send_resuming_command "$cmd" "$test"
     set r [mi_expect_stop $reason $func $args $file $line $extra $test]
     return $r

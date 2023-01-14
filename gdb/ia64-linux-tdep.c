@@ -1,6 +1,6 @@
 /* Target-dependent code for the IA-64 for GDB, the GNU debugger.
 
-   Copyright (C) 2000-2020 Free Software Foundation, Inc.
+   Copyright (C) 2000-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -223,7 +223,7 @@ ia64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   static const char *const stap_register_indirection_suffixes[] = { "]",
 								    NULL };
 
-  linux_init_abi (info, gdbarch);
+  linux_init_abi (info, gdbarch, 0);
 
   /* Set the method of obtaining the sigcontext addresses at which
      registers are saved.  */
@@ -241,7 +241,7 @@ ia64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
-                                             svr4_fetch_objfile_link_map);
+					     svr4_fetch_objfile_link_map);
 
   /* Core file support. */
   set_gdbarch_iterate_over_regset_sections

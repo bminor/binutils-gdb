@@ -1,4 +1,4 @@
-# Copyright (C) 2011-2020 Free Software Foundation, Inc.
+# Copyright (C) 2011-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ foreach name {different breakhere_different breakhere_validity breakhere_invalid
 
 # Test various kinds of `set print entry-values'.
 
-if {[mi_runto main] == -1} {
+if {[mi_runto_main] == -1} {
     return -1
 }
 mi_gdb_test "-gdb-set print entry-values no" {\^done} "no: set print entry-values"
@@ -66,7 +66,7 @@ mi_send_resuming_command "exec-continue" "no: invalid: continue"
 mi_expect_stop "breakpoint-hit" .* {{name="inv",value="<optimized out>"}} .* .* {.* disp="keep"} "no: invalid: stop"
 mi_gdb_test "-stack-list-variables --all-values" {\^done,variables=\[{name="inv",arg="1",value="<optimized out>"}\]} "no: invalid: -stack-list-variables"
 
-if {[mi_runto main] == -1} {
+if {[mi_runto_main] == -1} {
     return -1
 }
 mi_gdb_test "-gdb-set print entry-values only" {\^done} "only: set print entry-values"
@@ -83,7 +83,7 @@ mi_send_resuming_command "exec-continue" "only: invalid: continue"
 mi_expect_stop "breakpoint-hit" .* {{name="inv@entry",value="<optimized out>"}} .* .* {.* disp="keep"} "only: invalid: stop"
 mi_gdb_test "-stack-list-variables --all-values" {\^done,variables=\[{name="inv@entry",arg="1",value="<optimized out>"}\]} "only: invalid: -stack-list-variables"
 
-if {[mi_runto main] == -1} {
+if {[mi_runto_main] == -1} {
     return -1
 }
 mi_gdb_test "-gdb-set print entry-values preferred" {\^done} "preferred: set print entry-values"
@@ -100,7 +100,7 @@ mi_send_resuming_command "exec-continue" "preferred: invalid: continue"
 mi_expect_stop "breakpoint-hit" .* {{name="inv@entry",value="<optimized out>"}} .* .* {.* disp="keep"} "preferred: invalid: stop"
 mi_gdb_test "-stack-list-variables --all-values" {\^done,variables=\[{name="inv@entry",arg="1",value="<optimized out>"}\]} "preferred: invalid: -stack-list-variables"
 
-if {[mi_runto main] == -1} {
+if {[mi_runto_main] == -1} {
     return -1
 }
 mi_gdb_test "-gdb-set print entry-values if-needed" {\^done} "if-needed: set print entry-values"
@@ -117,7 +117,7 @@ mi_send_resuming_command "exec-continue" "if-needed: invalid: continue"
 mi_expect_stop "breakpoint-hit" .* {{name="inv",value="<optimized out>"}} .* .* {.* disp="keep"} "if-needed: invalid: stop"
 mi_gdb_test "-stack-list-variables --all-values" {\^done,variables=\[{name="inv",arg="1",value="<optimized out>"}\]} "if-needed: invalid: -stack-list-variables"
 
-if {[mi_runto main] == -1} {
+if {[mi_runto_main] == -1} {
     return -1
 }
 mi_gdb_test "-gdb-set print entry-values both" {\^done} "both: set print entry-values"
@@ -134,7 +134,7 @@ mi_send_resuming_command "exec-continue" "both: invalid: continue"
 mi_expect_stop "breakpoint-hit" .* {{name="inv",value="<optimized out>"},{name="inv@entry",value="<optimized out>"}} .* .* {.* disp="keep"} "both: invalid: stop"
 mi_gdb_test "-stack-list-variables --all-values" {\^done,variables=\[{name="inv",arg="1",value="<optimized out>"},{name="inv@entry",arg="1",value="<optimized out>"}\]} "both: invalid: -stack-list-variables"
 
-if {[mi_runto main] == -1} {
+if {[mi_runto_main] == -1} {
     return -1
 }
 mi_gdb_test "-gdb-set print entry-values compact" {\^done} "compact: set print entry-values"
@@ -151,7 +151,7 @@ mi_send_resuming_command "exec-continue" "compact: invalid: continue"
 mi_expect_stop "breakpoint-hit" .* {{name="inv",value="<optimized out>"}} .* .* {.* disp="keep"} "compact: invalid: stop"
 mi_gdb_test "-stack-list-variables --all-values" {\^done,variables=\[{name="inv",arg="1",value="<optimized out>"}\]} "compact: invalid: -stack-list-variables"
 
-if {[mi_runto main] == -1} {
+if {[mi_runto_main] == -1} {
     return -1
 }
 mi_gdb_test "-gdb-set print entry-values default" {\^done} "default: set print entry-values"

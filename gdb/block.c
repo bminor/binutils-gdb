@@ -1,6 +1,6 @@
 /* Block-related functions for the GNU debugger, GDB.
 
-   Copyright (C) 2003-2020 Free Software Foundation, Inc.
+   Copyright (C) 2003-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -79,9 +79,9 @@ contained_in (const struct block *a, const struct block *b,
       if (a == b)
 	return true;
       /* If A is a function block, then A cannot be contained in B,
-         except if A was inlined.  */
+	 except if A was inlined.  */
       if (!allow_nested && BLOCK_FUNCTION (a) != NULL && !block_inlined_p (a))
-        return false;
+	return false;
       a = BLOCK_SUPERBLOCK (a);
     }
   while (a != NULL);
@@ -166,6 +166,8 @@ find_block_in_blockvector (const struct blockvector *bl, CORE_ADDR pc)
   while (bot >= STATIC_BLOCK)
     {
       b = BLOCKVECTOR_BLOCK (bl, bot);
+      if (!(BLOCK_START (b) <= pc))
+	return NULL;
       if (BLOCK_END (b) > pc)
 	return b;
       bot--;
@@ -877,14 +879,14 @@ block_find_non_opaque_type_preferred (struct symbol *sym, void *data)
 
 struct blockranges *
 make_blockranges (struct objfile *objfile,
-                  const std::vector<blockrange> &rangevec)
+		  const std::vector<blockrange> &rangevec)
 {
   struct blockranges *blr;
   size_t n = rangevec.size();
 
   blr = (struct blockranges *)
     obstack_alloc (&objfile->objfile_obstack,
-                   sizeof (struct blockranges)
+		   sizeof (struct blockranges)
 		   + (n - 1) * sizeof (struct blockrange));
 
   blr->nranges = n;

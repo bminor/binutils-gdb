@@ -1,5 +1,5 @@
 # Makefile template for configure for the or1k simulator
-# Copyright (C) 2017-2020 Free Software Foundation, Inc.
+# Copyright (C) 2017-2021 Free Software Foundation, Inc.
 #
 # This file is part of GDB, the GNU debugger.
 #
@@ -31,21 +31,12 @@ OR1K_OBJS = \
 
 SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
-	sim-cpu.o \
-	sim-hload.o \
-	sim-hrw.o \
-	sim-reg.o \
 	cgen-utils.o \
 	cgen-trace.o \
 	cgen-scache.o \
 	cgen-run.o \
 	cgen-fpu.o \
-	cgen-accfp.o \
-	sim-reason.o \
-	sim-engine.o \
-	sim-model.o \
-	sim-stop.o \
-	$(TRAPS_OBJ)
+	cgen-accfp.o
 
 SIM_OBJS += $(OR1K_OBJS)
 
@@ -62,7 +53,6 @@ SIM_EXTRA_CFLAGS =
 
 SIM_EXTRA_LIBS = -lm
 
-SIM_RUN_OBJS = nrun.o
 SIM_EXTRA_CLEAN = or1k-clean
 
 ## COMMON_POST_CONFIG_FRAG

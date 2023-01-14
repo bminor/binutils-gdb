@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright (C) 2004-2020 Free Software Foundation, Inc.
+#   Copyright (C) 2004-2021 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -42,7 +42,7 @@ riscv_elf_before_allocation (void)
 	ENABLE_RELAXATION;
     }
 
-  link_info.relax_pass = 3;
+  link_info.relax_pass = 4;
 }
 
 static void

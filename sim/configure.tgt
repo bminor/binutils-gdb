@@ -91,9 +91,6 @@ case "${target}" in
    rx-*-*)
        SIM_ARCH(rx)
        ;;
-   sh64*-*-*)
-       SIM_ARCH(sh64)
-       ;;
    sh*-*-*)
        SIM_ARCH(sh)
        ;;

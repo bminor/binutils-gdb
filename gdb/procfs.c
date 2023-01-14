@@ -1,6 +1,6 @@
 /* Machine independent support for Solaris /proc (process file system) for GDB.
 
-   Copyright (C) 1999-2020 Free Software Foundation, Inc.
+   Copyright (C) 1999-2021 Free Software Foundation, Inc.
 
    Written by Michael Snyder at Cygnus Solutions.
    Based on work by Fred Fish, Stu Grossman, Geoff Noer, and others.
@@ -105,7 +105,7 @@ public:
   void detach (inferior *inf, int) override;
 
   void resume (ptid_t, int, enum gdb_signal) override;
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
@@ -136,7 +136,7 @@ public:
   int find_memory_regions (find_memory_region_ftype func, void *data)
     override;
 
-  char *make_corefile_notes (bfd *, int *) override;
+  gdb::unique_xmalloc_ptr<char> make_corefile_notes (bfd *, int *) override;
 
   bool info_proc (const char *, enum info_proc_what) override;
 
@@ -2033,7 +2033,7 @@ procfs_target::store_registers (struct regcache *regcache, int regnum)
 
 ptid_t
 procfs_target::wait (ptid_t ptid, struct target_waitstatus *status,
-		     int options)
+		     target_wait_flags options)
 {
   /* First cut: loosely based on original version 2.1.  */
   procinfo *pi;
@@ -2867,13 +2867,6 @@ procfs_target::create_inferior (const char *exec_file,
   procfs_init_inferior (pid);
 }
 
-/* An observer for the "inferior_created" event.  */
-
-static void
-procfs_inferior_created (struct target_ops *ops, int from_tty)
-{
-}
-
 /* Callback for update_thread_list.  Calls "add_thread".  */
 
 static int
@@ -3085,7 +3078,7 @@ procfs_target::insert_watchpoint (CORE_ADDR addr, int len,
 				  enum target_hw_bp_type type,
 				  struct expression *cond)
 {
-  if (!target_have_steppable_watchpoint
+  if (!target_have_steppable_watchpoint ()
       && !gdbarch_have_nonsteppable_watchpoint (target_gdbarch ()))
     /* When a hardware watchpoint fires off the PC will be left at
        the instruction following the one which caused the
@@ -3470,8 +3463,6 @@ void _initialize_procfs ();
 void
 _initialize_procfs ()
 {
-  gdb::observers::inferior_created.attach (procfs_inferior_created);
-
   add_com ("proc-trace-entry", no_class, proc_trace_sysentry_cmd,
 	   _("Give a trace of entries into the syscall."));
   add_com ("proc-trace-exit", no_class, proc_trace_sysexit_cmd,
@@ -3504,10 +3495,10 @@ procfs_first_available (void)
 
 /* ===================  GCORE .NOTE "MODULE" =================== */
 
-static char *
+static void
 procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
-			    char *note_data, int *note_size,
-			    enum gdb_signal stop_signal)
+			    gdb::unique_xmalloc_ptr<char> &note_data,
+			    int *note_size, enum gdb_signal stop_signal)
 {
   struct regcache *regcache = get_thread_regcache (&the_procfs_target, ptid);
   gdb_gregset_t gregs;
@@ -3524,25 +3515,31 @@ procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
   target_fetch_registers (regcache, -1);
 
   fill_gregset (regcache, &gregs, -1);
-  note_data = (char *) elfcore_write_lwpstatus (obfd,
-						note_data,
-						note_size,
-						merged_pid,
-						stop_signal,
-						&gregs);
+  note_data.reset (elfcore_write_lwpstatus (obfd,
+					    note_data.release (),
+					    note_size,
+					    merged_pid,
+					    stop_signal,
+					    &gregs));
   fill_fpregset (regcache, &fpregs, -1);
-  note_data = (char *) elfcore_write_prfpreg (obfd,
-					      note_data,
-					      note_size,
-					      &fpregs,
-					      sizeof (fpregs));
-
-  return note_data;
+  note_data.reset (elfcore_write_prfpreg (obfd,
+					  note_data.release (),
+					  note_size,
+					  &fpregs,
+					  sizeof (fpregs)));
 }
 
-struct procfs_corefile_thread_data {
+struct procfs_corefile_thread_data
+{
+  procfs_corefile_thread_data (bfd *obfd,
+			       gdb::unique_xmalloc_ptr<char> &note_data,
+			       int *note_size, gdb_signal stop_signal)
+    : obfd (obfd), note_data (note_data), note_size (note_size),
+      stop_signal (stop_signal)
+  {}
+
   bfd *obfd;
-  char *note_data;
+  gdb::unique_xmalloc_ptr<char> &note_data;
   int *note_size;
   enum gdb_signal stop_signal;
 };
@@ -3557,10 +3554,10 @@ procfs_corefile_thread_callback (procinfo *pi, procinfo *thread, void *data)
     {
       ptid_t ptid = ptid_t (pi->pid, thread->tid, 0);
 
-      args->note_data = procfs_do_thread_registers (args->obfd, ptid,
-						    args->note_data,
-						    args->note_size,
-						    args->stop_signal);
+      procfs_do_thread_registers (args->obfd, ptid,
+				  args->note_data,
+				  args->note_size,
+				  args->stop_signal);
     }
   return 0;
 }
@@ -3587,16 +3584,15 @@ find_stop_signal (void)
     return GDB_SIGNAL_0;
 }
 
-char *
+gdb::unique_xmalloc_ptr<char>
 procfs_target::make_corefile_notes (bfd *obfd, int *note_size)
 {
   gdb_gregset_t gregs;
   char fname[16] = {'\0'};
   char psargs[80] = {'\0'};
   procinfo *pi = find_procinfo_or_die (inferior_ptid.pid (), 0);
-  char *note_data = NULL;
+  gdb::unique_xmalloc_ptr<char> note_data;
   const char *inf_args;
-  struct procfs_corefile_thread_data thread_args;
   enum gdb_signal stop_signal;
 
   if (get_exec_file (0))
@@ -3618,33 +3614,30 @@ procfs_target::make_corefile_notes (bfd *obfd, int *note_size)
 	}
     }
 
-  note_data = (char *) elfcore_write_prpsinfo (obfd,
-					       note_data,
-					       note_size,
-					       fname,
-					       psargs);
+  note_data.reset (elfcore_write_prpsinfo (obfd,
+					   note_data.release (),
+					   note_size,
+					   fname,
+					   psargs));
 
   stop_signal = find_stop_signal ();
 
   fill_gregset (get_current_regcache (), &gregs, -1);
-  note_data = elfcore_write_pstatus (obfd, note_data, note_size,
-				     inferior_ptid.pid (),
-				     stop_signal, &gregs);
+  note_data.reset (elfcore_write_pstatus (obfd, note_data.release (), note_size,
+					  inferior_ptid.pid (),
+					  stop_signal, &gregs));
 
-  thread_args.obfd = obfd;
-  thread_args.note_data = note_data;
-  thread_args.note_size = note_size;
-  thread_args.stop_signal = stop_signal;
+  procfs_corefile_thread_data thread_args (obfd, note_data, note_size,
+					   stop_signal);
   proc_iterate_over_threads (pi, procfs_corefile_thread_callback,
 			     &thread_args);
-  note_data = thread_args.note_data;
 
   gdb::optional<gdb::byte_vector> auxv =
     target_read_alloc (current_top_target (), TARGET_OBJECT_AUXV, NULL);
   if (auxv && !auxv->empty ())
-    note_data = elfcore_write_note (obfd, note_data, note_size,
-				    "CORE", NT_AUXV, auxv->data (),
-				    auxv->size ());
+    note_data.reset (elfcore_write_note (obfd, note_data.release (), note_size,
+					 "CORE", NT_AUXV, auxv->data (),
+					 auxv->size ()));
 
   return note_data;
 }

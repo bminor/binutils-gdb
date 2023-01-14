@@ -1,6 +1,6 @@
 # This testcase is part of GDB, the GNU debugger.
 
-# Copyright 2004-2020 Free Software Foundation, Inc.
+# Copyright 2004-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ proc start_scalars_test { type } {
 
     # Advance to main
     if { ![runto_main] } then {
-	gdb_suppress_tests
+	return
     }
 
     # Get the debug format
@@ -273,6 +273,19 @@ proc test_scalar_returns { } {
 		# would be by reference, and that can't happen, the
 		# value should be unmodified and hence Z is expected.
 		# Is this a reasonable assumption?
+		pass "${test}"
+	    } else {
+		# This contradicts the above claim that GDB knew
+		# the location of the return-value.
+		fail "${test}"
+	    }
+	}
+	-re " = 57 .*${gdb_prompt} $" {
+	    if $return_value_unknown {
+		# The struct return case.
+		# The return value is stored on the stack, and since GDB
+		# didn't override it, it still has value that was stored
+		# there in the earlier Foo(init) call.
 		pass "${test}"
 	    } else {
 		# This contradicts the above claim that GDB knew

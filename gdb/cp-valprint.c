@@ -1,6 +1,6 @@
 /* Support for printing C++ values for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -84,7 +84,7 @@ cp_is_vtbl_member (struct type *type)
 	      || type->code () == TYPE_CODE_PTR)   /* if using thunks */
 	    {
 	      /* Virtual functions tables are full of pointers
-	         to virtual functions.  */
+		 to virtual functions.  */
 	      return cp_is_vtbl_ptr_type (type);
 	    }
 	}
@@ -262,7 +262,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 	      struct value *v;
 
 	      /* Bitfields require special handling, especially due to
-	         byte order problems.  */
+		 byte order problems.  */
 	      if (TYPE_FIELD_IGNORE (type, i))
 		{
 		  fputs_styled ("<optimized out or zero length>",
@@ -342,7 +342,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
       if (dont_print_statmem == 0)
 	{
 	  size_t obstack_final_size =
-           obstack_object_size (&dont_print_statmem_obstack);
+	   obstack_object_size (&dont_print_statmem_obstack);
 
 	  if (obstack_final_size > statmem_obstack_initial_size)
 	    {
@@ -400,8 +400,8 @@ cp_print_value (struct value *val, struct ui_file *stream,
   if (dont_print_vb == 0)
     {
       /* If we're at top level, carve out a completely fresh chunk of
-         the obstack and use that until this particular invocation
-         returns.  */
+	 the obstack and use that until this particular invocation
+	 returns.  */
       /* Bump up the high-water mark.  Now alpha is omega.  */
       obstack_finish (&dont_print_vb_obstack);
     }
@@ -483,7 +483,7 @@ cp_print_value (struct value *val, struct ui_file *stream,
 	}
       fputs_filtered ("<", stream);
       /* Not sure what the best notation is in the case where there is
-         no baseclass name.  */
+	 no baseclass name.  */
       fputs_filtered (basename ? basename : "", stream);
       fputs_filtered ("> = ", stream);
 
@@ -499,8 +499,8 @@ cp_print_value (struct value *val, struct ui_file *stream,
 	      && recurse >= options->max_depth)
 	    {
 	      const struct language_defn *language = current_language;
-	      gdb_assert (language->la_struct_too_deep_ellipsis != NULL);
-	      fputs_filtered (language->la_struct_too_deep_ellipsis, stream);
+	      gdb_assert (language->struct_too_deep_ellipsis () != NULL);
+	      fputs_filtered (language->struct_too_deep_ellipsis (), stream);
 	    }
 	  else
 	    {
@@ -531,10 +531,10 @@ cp_print_value (struct value *val, struct ui_file *stream,
   if (dont_print_vb == 0)
     {
       /* Free the space used to deal with the printing
-         of this type from top level.  */
+	 of this type from top level.  */
       obstack_free (&dont_print_vb_obstack, last_dont_print);
       /* Reset watermark so that we can continue protecting
-         ourselves from whatever we were protecting ourselves.  */
+	 ourselves from whatever we were protecting ourselves.  */
       dont_print_vb_obstack = tmp_obstack;
     }
 }

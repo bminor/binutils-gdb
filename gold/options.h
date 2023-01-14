@@ -1,6 +1,6 @@
 // options.h -- handle command line options for gold  -*- C++ -*-
 
-// Copyright (C) 2006-2020 Free Software Foundation, Inc.
+// Copyright (C) 2006-2021 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -1260,7 +1260,7 @@ class General_options
 		 "output sections"),
 	      N_("(PowerPC only) Each output section has its own stubs"));
 
-  DEFINE_uint(split_stack_adjust_size, options::TWO_DASHES, '\0', 0x4000,
+  DEFINE_uint(split_stack_adjust_size, options::TWO_DASHES, '\0', 0x100000,
 	      N_("Stack size when -fsplit-stack function calls non-split"),
 	      N_("SIZE"));
 
@@ -1469,6 +1469,9 @@ class General_options
   DEFINE_bool(interpose, options::DASH_Z, '\0', false,
 	      N_("Mark object to interpose all DSOs but executable"),
 	      NULL);
+  DEFINE_bool(unique, options::DASH_Z, '\0', false,
+	      N_("Mark DSO to be loaded at most once, and only in the main namespace"),
+	      N_("Do not mark the DSO as one to be loaded only in the main namespace"));
   DEFINE_bool_alias(lazy, now, options::DASH_Z, '\0',
 		    N_("Mark object for lazy runtime binding"),
 		    NULL, true);

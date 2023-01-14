@@ -1,6 +1,6 @@
 /* Native-dependent code for FreeBSD.
 
-   Copyright (C) 2004-2020 Free Software Foundation, Inc.
+   Copyright (C) 2004-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -55,7 +55,6 @@ public:
 					ULONGEST offset, ULONGEST len,
 					ULONGEST *xfered_len) override;
 
-#ifdef PT_LWPINFO
   bool thread_alive (ptid_t ptid) override;
   std::string pid_to_str (ptid_t) override;
 
@@ -70,7 +69,7 @@ public:
 
   void resume (ptid_t, int, enum gdb_signal) override;
 
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
   void post_startup_inferior (ptid_t) override;
   void post_attach (int) override;
@@ -90,16 +89,13 @@ public:
   int remove_vfork_catchpoint (int) override;
 #endif
 
-#ifdef PL_FLAG_EXEC
   int insert_exec_catchpoint (int) override;
   int remove_exec_catchpoint (int) override;
-#endif
 
 #ifdef HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE
   int set_syscall_catchpoint (int, bool, int, gdb::array_view<const int>)
     override;
 #endif
-#endif /* PT_LWPINFO */
 
   bool supports_multi_process () override;
 };

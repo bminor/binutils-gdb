@@ -1,5 +1,5 @@
 /* OpenRISC simulator main header
-   Copyright (C) 2017-2020 Free Software Foundation, Inc.
+   Copyright (C) 2017-2021 Free Software Foundation, Inc.
 
    This file is part of GDB, the GNU debugger.
 
@@ -20,6 +20,8 @@
 #define SIM_MAIN_H
 
 #define WITH_SCACHE_PBB 1
+
+#include "config.h"
 
 #include "ansidecl.h"
 #include "or1k-desc.h"

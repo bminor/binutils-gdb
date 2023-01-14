@@ -1,6 +1,6 @@
 /* Target dependent code for ARC architecture, for GDB.
 
-   Copyright 2005-2020 Free Software Foundation, Inc.
+   Copyright 2005-2021 Free Software Foundation, Inc.
    Contributed by Synopsys Inc.
 
    This file is part of GDB.
@@ -85,7 +85,9 @@ enum arc_regnum
     ARC_LP_END_REGNUM,
     /* Branch target address.  */
     ARC_BTA_REGNUM,
-    ARC_LAST_AUX_REGNUM = ARC_BTA_REGNUM,
+    /* Exception return address.  */
+    ARC_ERET_REGNUM,
+    ARC_LAST_AUX_REGNUM = ARC_ERET_REGNUM,
     ARC_LAST_REGNUM = ARC_LAST_AUX_REGNUM,
 
     /* Additional ABI constants.  */
@@ -105,9 +107,17 @@ enum arc_regnum
 /* STATUS32 register: current instruction is a delay slot.  */
 #define ARC_STATUS32_DE_MASK (1 << 6)
 
+/* Special value for register offset arrays.  */
+#define ARC_OFFSET_NO_REGISTER (-1)
+
 #define arc_print(fmt, args...) fprintf_unfiltered (gdb_stdlog, fmt, ##args)
 
-extern int arc_debug;
+extern bool arc_debug;
+
+/* Print an "arc" debug statement.  */
+
+#define arc_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (arc_debug, "arc", fmt, ##__VA_ARGS__)
 
 /* Target-dependent information.  */
 
@@ -119,6 +129,19 @@ struct gdbarch_tdep
 
   /* Whether target has hardware (aka zero-delay) loops.  */
   bool has_hw_loops;
+
+  /* Detect sigtramp.  */
+  bool (*is_sigtramp) (struct frame_info *);
+
+  /* Get address of sigcontext for sigtramp.  */
+  CORE_ADDR (*sigcontext_addr) (struct frame_info *);
+
+  /* Offset of registers in `struct sigcontext'.  */
+  const int *sc_reg_offset;
+
+  /* Number of registers in sc_reg_offsets.  Most likely a ARC_LAST_REGNUM,
+     but in theory it could be less, so it is kept separate.  */
+  int sc_num_regs;
 };
 
 /* Utility functions used by other ARC-specific modules.  */
@@ -181,5 +204,10 @@ CORE_ADDR arc_insn_get_branch_target (const struct arc_instruction &insn);
    instruction length with LIMM".  */
 
 CORE_ADDR arc_insn_get_linear_next_pc (const struct arc_instruction &insn);
+
+/* Create an arc_arch_features instance from the provided data.  */
+
+arc_arch_features arc_arch_features_create (const bfd *abfd,
+					    const unsigned long mach);
 
 #endif /* ARC_TDEP_H */

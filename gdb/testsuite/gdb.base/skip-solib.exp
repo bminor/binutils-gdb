@@ -1,4 +1,4 @@
-#   Copyright 2011-2020 Free Software Foundation, Inc.
+#   Copyright 2011-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ set binfile_lib [standard_output_file ${libname}.so]
 # the main program.
 #
 
-if {[gdb_compile_shlib ${srcdir}/${subdir}/${srcfile_lib} ${binfile_lib} [list debug additional_flags=-fPIC -Wl,-soname,${libname}.so]] != ""} {
+if {[gdb_compile_shlib ${srcdir}/${subdir}/${srcfile_lib} ${binfile_lib} [list debug -Wl,-soname,${libname}.so]] != ""} {
     return -1
 }
 

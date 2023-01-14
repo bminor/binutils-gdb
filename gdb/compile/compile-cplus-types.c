@@ -1,6 +1,6 @@
 /* Convert types from GDB to GCC
 
-   Copyright (C) 2014-2020 Free Software Foundation, Inc.
+   Copyright (C) 2014-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -383,7 +383,7 @@ compile_cplus_instance::new_scope (const char *type_name, struct type *type)
 	{
 	  scope_component comp
 	    = {
-	        decl_name (type->name ()).get (),
+		decl_name (type->name ()).get (),
 		lookup_symbol (type->name (), block (), VAR_DOMAIN, nullptr)
 	      };
 	  scope.push_back (comp);
@@ -491,7 +491,7 @@ compile_cplus_convert_array (compile_cplus_instance *instance,
     {
       LONGEST low_bound, high_bound, count;
 
-      if (get_array_bounds (type, &low_bound, &high_bound) == 0)
+      if (!get_array_bounds (type, &low_bound, &high_bound))
 	count = -1;
       else
 	{
@@ -668,7 +668,7 @@ compile_cplus_convert_method (compile_cplus_instance *instance,
      type and corresponding qualifier flags.  */
   gcc_type func_type = compile_cplus_convert_func (instance, method_type, true);
   gcc_type class_type = instance->convert_type (parent_type);
-  gcc_cp_qualifiers_flags quals = (enum gcc_cp_qualifiers) 0;
+  gcc_cp_qualifiers_flags quals = 0;
 
   if (TYPE_CONST (method_type))
     quals |= GCC_CP_QUALIFIER_CONST;
@@ -681,7 +681,7 @@ compile_cplus_convert_method (compile_cplus_instance *instance,
   gcc_cp_ref_qualifiers_flags rquals = GCC_CP_REF_QUAL_NONE;
 
   return instance->plugin ().build_method_type
-    (class_type, func_type, quals, rquals);
+    (class_type, func_type, quals.raw (), rquals.raw ());
 }
 
 /* Convert a member or method pointer represented by TYPE.  */
@@ -745,7 +745,7 @@ compile_cplus_convert_struct_or_union_methods (compile_cplus_instance *instance,
 		     (sym_kind
 		      | get_method_access_flag (type, i, j)
 		      | GCC_CP_FLAG_VIRTUAL_FUNCTION
-		      | GCC_CP_FLAG_PURE_VIRTUAL_FUNCTION),
+		      | GCC_CP_FLAG_PURE_VIRTUAL_FUNCTION).raw (),
 		     method_type, nullptr, 0, nullptr, 0);
 		  continue;
 		}
@@ -787,7 +787,7 @@ compile_cplus_convert_struct_or_union_methods (compile_cplus_instance *instance,
 
 	  instance->plugin ().build_decl
 	    (kind, overloaded_name.get (),
-	     sym_kind | get_method_access_flag (type, i, j),
+	     (sym_kind | get_method_access_flag (type, i, j)).raw (),
 	     method_type, nullptr, address, filename, line);
 	}
     }
@@ -848,33 +848,29 @@ compile_cplus_convert_struct_or_union (compile_cplus_instance *instance,
   gcc_type result;
   if (type->code () == TYPE_CODE_STRUCT)
     {
-      struct gcc_vbase_array bases;
       int num_baseclasses = TYPE_N_BASECLASSES (type);
+      std::vector<gcc_type> elements (num_baseclasses);
+      std::vector<enum gcc_cp_symbol_kind> flags (num_baseclasses);
 
-      memset (&bases, 0, sizeof (bases));
+      struct gcc_vbase_array bases {};
+      bases.elements = elements.data ();
+      bases.flags = flags.data ();
+      bases.n_elements = num_baseclasses;
 
-      if (num_baseclasses > 0)
+      for (int i = 0; i < num_baseclasses; ++i)
 	{
-	  bases.elements = XNEWVEC (gcc_type, num_baseclasses);
-	  bases.flags = XNEWVEC (enum gcc_cp_symbol_kind, num_baseclasses);
-	  bases.n_elements = num_baseclasses;
-	  for (int i = 0; i < num_baseclasses; ++i)
-	    {
-	      struct type *base_type = TYPE_BASECLASS (type, i);
+	  struct type *base_type = TYPE_BASECLASS (type, i);
 
-	      bases.flags[i] = GCC_CP_SYMBOL_BASECLASS
-		| get_field_access_flag (type, i)
-		| (BASETYPE_VIA_VIRTUAL (type, i)
-		   ? GCC_CP_FLAG_BASECLASS_VIRTUAL
-		   : GCC_CP_FLAG_BASECLASS_NOFLAG);
-	      bases.elements[i] = instance->convert_type (base_type);
-	    }
+	  bases.flags[i] = (GCC_CP_SYMBOL_BASECLASS
+			    | get_field_access_flag (type, i)
+			    | (BASETYPE_VIA_VIRTUAL (type, i)
+			       ? GCC_CP_FLAG_BASECLASS_VIRTUAL
+			       : GCC_CP_FLAG_BASECLASS_NOFLAG));
+	  bases.elements[i] = instance->convert_type (base_type);
 	}
 
       result = instance->plugin ().start_class_type
 	(name.get (), resuld, &bases, filename, line);
-      xfree (bases.flags);
-      xfree (bases.elements);
     }
   else
     {
@@ -974,10 +970,10 @@ compile_cplus_convert_func (compile_cplus_instance *instance,
      GDB's parser used to do.  */
   if (target_type == nullptr)
     {
-      if (TYPE_OBJFILE_OWNED (type))
-	target_type = objfile_type (TYPE_OWNER (type).objfile)->builtin_int;
+      if (type->is_objfile_owned ())
+	target_type = objfile_type (type->objfile ())->builtin_int;
       else
-	target_type = builtin_type (TYPE_OWNER (type).gdbarch)->builtin_int;
+	target_type = builtin_type (type->arch ())->builtin_int;
       warning (_("function has unknown return type; assuming int"));
     }
 
@@ -985,8 +981,8 @@ compile_cplus_convert_func (compile_cplus_instance *instance,
      types.  Those are impossible in C, though.  */
   gcc_type return_type = instance->convert_type (target_type);
 
-  struct gcc_type_array array =
-    { type->num_fields (), XNEWVEC (gcc_type, type->num_fields ()) };
+  std::vector<gcc_type> elements (type->num_fields ());
+  struct gcc_type_array array = { type->num_fields (), elements.data () };
   int artificials = 0;
   for (int i = 0; i < type->num_fields (); ++i)
     {
@@ -1006,7 +1002,6 @@ compile_cplus_convert_func (compile_cplus_instance *instance,
      with some minsyms like printf (compile-cplus.exp has examples).  */
   gcc_type result = instance->plugin ().build_function_type
     (return_type, &array, is_varargs);
-  xfree (array.elements);
   return result;
 }
 
@@ -1060,7 +1055,7 @@ compile_cplus_instance::convert_qualified_base (gcc_type base,
   gcc_type result = base;
 
   if (quals != 0)
-    result = plugin ().build_qualified_type (base, quals);
+    result = plugin ().build_qualified_type (base, quals.raw ());
 
   return result;
 }
@@ -1135,9 +1130,9 @@ convert_type_cplus_basic (compile_cplus_instance *instance,
 {
   /* If we are converting a qualified type, first convert the
      unqualified type and then apply the qualifiers.  */
-  if ((TYPE_INSTANCE_FLAGS (type) & (TYPE_INSTANCE_FLAG_CONST
-				     | TYPE_INSTANCE_FLAG_VOLATILE
-				     | TYPE_INSTANCE_FLAG_RESTRICT)) != 0)
+  if ((type->instance_flags () & (TYPE_INSTANCE_FLAG_CONST
+				  | TYPE_INSTANCE_FLAG_VOLATILE
+				  | TYPE_INSTANCE_FLAG_RESTRICT)) != 0)
     return compile_cplus_convert_qualified (instance, type);
 
   switch (type->code ())

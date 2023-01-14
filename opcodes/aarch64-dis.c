@@ -1,5 +1,5 @@
 /* aarch64-dis.c -- AArch64 disassembler.
-   Copyright (C) 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2009-2021 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of the GNU opcodes library.
@@ -1290,6 +1290,21 @@ aarch64_ext_barrier (const aarch64_operand *self ATTRIBUTE_UNUSED,
 {
   /* CRm */
   info->barrier = aarch64_barrier_options + extract_field (FLD_CRm, code, 0);
+  return TRUE;
+}
+
+/* Decode the memory barrier option operand for DSB <option>nXS|#<imm>.  */
+
+bfd_boolean
+aarch64_ext_barrier_dsb_nxs (const aarch64_operand *self ATTRIBUTE_UNUSED,
+		     aarch64_opnd_info *info,
+		     aarch64_insn code,
+		     const aarch64_inst *inst ATTRIBUTE_UNUSED,
+		     aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  /* For the DSB nXS barrier variant immediate is encoded in 2-bit field.  */
+  aarch64_insn field = extract_field (FLD_CRm_dsb_nxs, code, 0);
+  info->barrier = aarch64_barrier_dsb_nxs_options + field;
   return TRUE;
 }
 
@@ -2714,8 +2729,10 @@ determine_disassembling_preference (struct aarch64_inst *inst,
 	     successfully converted to the form of ALIAS.  */
 	  if (convert_to_alias (&copy, alias) == 1)
 	    {
+	      int res;
 	      aarch64_replace_opcode (&copy, alias);
-	      assert (aarch64_match_operands_constraint (&copy, NULL));
+	      res = aarch64_match_operands_constraint (&copy, NULL);
+	      assert (res == 1);
 	      DEBUG_TRACE ("succeed with %s via conversion", alias->name);
 	      memcpy (inst, &copy, sizeof (aarch64_inst));
 	      return;

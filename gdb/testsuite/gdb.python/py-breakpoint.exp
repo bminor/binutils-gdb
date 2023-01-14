@@ -1,4 +1,4 @@
-# Copyright (C) 2010-2020 Free Software Foundation, Inc.
+# Copyright (C) 2010-2021 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -250,6 +250,29 @@ proc_with_prefix test_bkpt_invisible { } {
     gdb_test "maint info breakpoints" \
 	"py-breakpoint\.c:$ibp_location.*" \
 	"Check maint info breakpoints shows invisible breakpoints"
+}
+
+proc_with_prefix test_hardware_breakpoints { } {
+    global srcfile testfile hex decimal
+
+    # Start with a fresh gdb.
+    clean_restart ${testfile}
+
+    if ![runto_main] then {
+	fail "cannot run to main."
+	return 0
+    }
+
+    delete_breakpoints
+
+    gdb_test "python hbp1 = gdb.Breakpoint(\"add\", type=gdb.BP_HARDWARE_BREAKPOINT)" \
+	".*Hardware assisted breakpoint ($decimal)+ at .*$srcfile, line ($decimal)+\." \
+	"Set hardware breakpoint"
+    gdb_test "python print (gdb.breakpoints()\[0\].type == gdb.BP_HARDWARE_BREAKPOINT)" \
+	"True" "Check hardware breakpoint type"
+    gdb_test "continue" \
+	".*Breakpoint ($decimal)+, add.*" \
+	"Test hardware breakpoint stop"
 }
 
 proc_with_prefix test_watchpoints { } {
@@ -718,6 +741,7 @@ test_bkpt_basic
 test_bkpt_deletion
 test_bkpt_cond_and_cmds
 test_bkpt_invisible
+test_hardware_breakpoints
 test_watchpoints
 test_bkpt_internal
 test_bkpt_eval_funcs

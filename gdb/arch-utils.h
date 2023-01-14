@@ -1,6 +1,6 @@
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998-2020 Free Software Foundation, Inc.
+   Copyright (C) 1998-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -75,9 +75,7 @@ struct bp_manipulation_endian
   BREAK_INSN_LITTLE, BREAK_INSN_BIG>
 
 /* Default implementation of gdbarch_displaced_hw_singlestep.  */
-extern int
-  default_displaced_step_hw_singlestep (struct gdbarch *,
-					struct displaced_step_closure *);
+extern bool default_displaced_step_hw_singlestep (struct gdbarch *);
 
 /* Possible value for gdbarch_displaced_step_location:
    Place displaced instructions at the program's entry point,
@@ -289,7 +287,6 @@ extern void default_read_core_file_mappings (struct gdbarch *gdbarch,
 								      ULONGEST start,
 								      ULONGEST end,
 								      ULONGEST file_ofs,
-								      const char *filename,
-								      const void *other)>
+								      const char *filename)>
 					       loop_cb);
 #endif /* ARCH_UTILS_H */

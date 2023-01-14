@@ -1,4 +1,4 @@
-#   Copyright 1988-2020 Free Software Foundation, Inc.
+#   Copyright 1988-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ gdb_expect {
 #
 # test break at function
 #
-gdb_test "break main" \
+gdb_test "break -q main" \
     "Breakpoint.*at.* file .*$srcfile, line.*" \
     "breakpoint function"
 
@@ -76,7 +76,7 @@ set bp_location1 [gdb_get_line_number "set breakpoint 1 here"]
 # it's wherever the processor was stopped when we connected to the
 # board.  So, to be sure, we do a list command.
 #
-gdb_test "list main" \
+gdb_test "list -q main" \
     ".*main \\(int argc, char \\*\\*argv, char \\*\\*envp\\).*" \
     "use `list' to establish default source file"
 gdb_test "break $bp_location1" \
@@ -121,16 +121,22 @@ set main_line $bp_location6
 set bp_location7 [gdb_get_line_number "set breakpoint 7 here"]
 set bp_location8 [gdb_get_line_number "set breakpoint 8 here" $srcfile1]
 
+# In C++ mode, we see a full prototype; in C mode, we only see the
+# function name, with no parameter info.
+proc func {name} {
+    return "${name}(?:\(\[^\r\n\]*\))?"
+}
+
 gdb_test "info break" \
     "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$main_line.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in marker2 at .*$srcfile1:$bp_location8.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in factorial at .*$srcfile:$bp_location7.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$bp_location1.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$bp_location1.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$bp_location2.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in multi_line_if_conditional at .*$srcfile:$bp_location3.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in multi_line_while_conditional at .*$srcfile:$bp_location4" \
+\[0-9\]+\[\t \]+breakpoint     keep y.* in [func main] at .*$srcfile:$main_line.*
+\[0-9\]+\[\t \]+breakpoint     keep y.* in [func marker2] at .*$srcfile1:$bp_location8.*
+\[0-9\]+\[\t \]+breakpoint     keep y.* in [func factorial] at .*$srcfile:$bp_location7.*
+\[0-9\]+\[\t \]+breakpoint     keep y.* in [func main] at .*$srcfile:$bp_location1.*
+\[0-9\]+\[\t \]+breakpoint     keep y.* in [func main] at .*$srcfile:$bp_location1.*
+\[0-9\]+\[\t \]+breakpoint     keep y.* in [func main] at .*$srcfile:$bp_location2.*
+\[0-9\]+\[\t \]+breakpoint     keep y.* in [func multi_line_if_conditional] at .*$srcfile:$bp_location3.*
+\[0-9\]+\[\t \]+breakpoint     keep y.* in [func multi_line_while_conditional] at .*$srcfile:$bp_location4" \
     "breakpoint info"
 
 #
@@ -149,7 +155,7 @@ gdb_test_multiple "info break 2 4 6" "info break 2 4 6" {
 	set see1 1
 	exp_continue
     }
-    -re "2\[\t \]+breakpoint *keep y\[^\r\n\]* in marker2 at \[^\r\n\]*" {
+    -re "2\[\t \]+breakpoint *keep y\[^\r\n\]* in [func marker2] at \[^\r\n\]*" {
 	set see2 1
 	exp_continue
     }
@@ -186,11 +192,11 @@ set see5 0
 set see6 0
 
 gdb_test_multiple "info break 3-5" "info break 3-5" {
-    -re "1\[\t \]+breakpoint *keep y.* in main at .*:$main_line\[^\r\n\]*" {
+    -re "1\[\t \]+breakpoint *keep y.* in [func main] at .*:$main_line\[^\r\n\]*" {
 	set see1 1
 	exp_continue
     }
-    -re "2\[\t \]+breakpoint *keep y\[^\r\n\]* in marker2 at \[^\r\n\]*" {
+    -re "2\[\t \]+breakpoint *keep y\[^\r\n\]* in [func marker2] at \[^\r\n\]*" {
 	set see2 1
 	exp_continue
     }
@@ -243,11 +249,11 @@ set see5 0
 set see6 0
 
 gdb_test_multiple "info break" "check disable with history values" {
-    -re "1\[\t \]+breakpoint *keep y.* in main at .*:$main_line\[^\r\n\]*" {
+    -re "1\[\t \]+breakpoint *keep y.* in [func main] at .*:$main_line\[^\r\n\]*" {
 	set see1 1
 	exp_continue
     }
-    -re "2\[\t \]+breakpoint *keep n\[^\r\n\]* in marker2 at \[^\r\n\]*" {
+    -re "2\[\t \]+breakpoint *keep n\[^\r\n\]* in [func marker2] at \[^\r\n\]*" {
 	set see2 1
 	exp_continue
     }
@@ -289,11 +295,11 @@ set see5 0
 set see6 0
 
 gdb_test_multiple "info break" "check disable with convenience values" {
-    -re "1\[\t \]+breakpoint *keep y.* in main at .*:$main_line\[^\r\n\]*" {
+    -re "1\[\t \]+breakpoint *keep y.* in [func main] at .*:$main_line\[^\r\n\]*" {
 	set see1 1
 	exp_continue
     }
-    -re "2\[\t \]+breakpoint *keep y\[^\r\n\]* in marker2 at \[^\r\n\]*" {
+    -re "2\[\t \]+breakpoint *keep y\[^\r\n\]* in [func marker2] at \[^\r\n\]*" {
 	set see2 1
 	exp_continue
     }
@@ -420,7 +426,7 @@ delete_breakpoints
 # test temporary breakpoint at function
 #
 
-gdb_test "tbreak main" "Temporary breakpoint.*at.* file .*$srcfile, line.*" "temporary breakpoint function"
+gdb_test "tbreak -q main" "Temporary breakpoint.*at.* file .*$srcfile, line.*" "temporary breakpoint function"
 
 #
 # test break at function in file
@@ -452,12 +458,12 @@ gdb_test  "tbreak $srcfile:$bp_location11" "Temporary breakpoint.*at.* file .*$s
 # check to see what breakpoints are set (temporary this time)
 #
 gdb_test "info break" "Num     Type.*Disp Enb Address.*What.*\[\r\n\]
-\[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:$main_line.*\[\r\n\]
-\[0-9\]+\[\t \]+breakpoint     del.*y.*in factorial at .*$srcfile:$bp_location7.*\[\r\n\]
-\[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:$bp_location1.*\[\r\n\]
-\[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:$bp_location6.*\[\r\n\]
-\[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:$bp_location2.*\[\r\n\]
-\[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:$bp_location11.*" \
+\[0-9\]+\[\t \]+breakpoint     del.*y.*in [func main] at .*$srcfile:$main_line.*\[\r\n\]
+\[0-9\]+\[\t \]+breakpoint     del.*y.*in [func factorial] at .*$srcfile:$bp_location7.*\[\r\n\]
+\[0-9\]+\[\t \]+breakpoint     del.*y.*in [func main] at .*$srcfile:$bp_location1.*\[\r\n\]
+\[0-9\]+\[\t \]+breakpoint     del.*y.*in [func main] at .*$srcfile:$bp_location6.*\[\r\n\]
+\[0-9\]+\[\t \]+breakpoint     del.*y.*in [func main] at .*$srcfile:$bp_location2.*\[\r\n\]
+\[0-9\]+\[\t \]+breakpoint     del.*y.*in [func main] at .*$srcfile:$bp_location11.*" \
     "Temporary breakpoint info"
 
 
@@ -606,7 +612,7 @@ gdb_test "break marker2" \
     "set breakpoint on to-be-called function"
 
 gdb_test "print marker2(99)" \
-    "The program being debugged stopped while in a function called from GDB.\r\nEvaluation of the expression containing the function\r\n.marker2. will be abandoned.\r\nWhen the function is done executing, GDB will silently stop.*" \
+    "The program being debugged stopped while in a function called from GDB.\r\nEvaluation of the expression containing the function\r\n.[func marker2]. will be abandoned.\r\nWhen the function is done executing, GDB will silently stop.*" \
     "hit breakpoint on called function"
 
 # As long as we're stopped (breakpointed) in a called function,
@@ -681,22 +687,22 @@ proc test_next_with_recursion {} {
 
     # Continue until we call factorial recursively with 5.
 
-    if [gdb_test "continue" \
+    gdb_test "continue" \
 	"Continuing.*Break.* factorial .value=5. .*" \
-	"continue to factorial(5)"] then { gdb_suppress_tests }
+	"continue to factorial(5)"
 
     # Do a backtrace just to confirm how many levels deep we are.
 
-    if [gdb_test "backtrace" \
+    gdb_test "backtrace" \
 	"#0\[ \t\]+ factorial .value=5..*" \
-	"backtrace from factorial(5)"] then { gdb_suppress_tests }
+	"backtrace from factorial(5)"
 
     # Now a "next" should position us at the recursive call, which
     # we will be performing with 4.
 
-    if [gdb_test "next" \
+    gdb_test "next" \
 	".* factorial .value - 1.;.*" \
-	"next to recursive call"] then { gdb_suppress_tests }
+	"next to recursive call"
 
     # Disable the breakpoint at the entry to factorial by deleting them all.
     # The "next" should run until we return to the next line from this
@@ -728,14 +734,13 @@ proc test_next_with_recursion {} {
     # OK, we should be back in the same stack frame we started from.
     # Do a backtrace just to confirm.
 
-    set result [gdb_test "backtrace" \
+    gdb_test "backtrace" \
 	    "#0\[ \t\]+ factorial .value=120.*\r\n#1\[ \t\]+ \[0-9a-fx\]+ in factorial .value=6..*" \
-	    "backtrace from factorial(5.1)"]
-    if { $result != 0 } { gdb_suppress_tests }
+	    "backtrace from factorial(5.1)"
 
-    if [target_info exists gdb,noresults] { gdb_suppress_tests }
-  gdb_continue_to_end "recursive next test"
-   gdb_stop_suppressing_tests
+    if { ![target_info exists gdb,noresults] } {
+	gdb_continue_to_end "recursive next test"
+    }
 }
 
 test_next_with_recursion
@@ -753,7 +758,7 @@ if { [prepare_for_testing "failed to prepare" "breako2" {break.c break1.c} {debu
 #
 # test break at function
 #
-gdb_test "break main" \
+gdb_test "break -q main" \
     "Breakpoint.*at.* file .*, line.*" \
     "breakpoint function, optimized file"
 

@@ -1,6 +1,6 @@
 /* Target-dependent code for the HP PA-RISC architecture.
 
-   Copyright (C) 2003-2020 Free Software Foundation, Inc.
+   Copyright (C) 2003-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -107,7 +107,7 @@ struct gdbarch_tdep
      adjust the pc to the real caller.  This improves the behavior of commands
      that traverse frames such as "up" and "finish".  */
   void (*unwind_adjust_stub) (struct frame_info *this_frame, CORE_ADDR base,
-  			      struct trad_frame_saved_reg *saved_regs);
+			      trad_frame_saved_reg *saved_regs);
 
   /* These are solib-dependent methods.  They are really HPUX only, but
      we don't have a HPUX-specific tdep vector at the moment.  */
@@ -199,7 +199,7 @@ CORE_ADDR hppa_symbol_address(const char *sym);
 
 extern struct value *
   hppa_frame_prev_register_helper (struct frame_info *this_frame,
-				   struct trad_frame_saved_reg *saved_regs,
+				   trad_frame_saved_reg *saved_regs,
 				   int regnum);
 
 extern CORE_ADDR hppa_read_pc (struct regcache *regcache);
@@ -209,7 +209,7 @@ extern CORE_ADDR hppa_unwind_pc (struct gdbarch *gdbarch,
 
 extern struct bound_minimal_symbol
   hppa_lookup_stub_minimal_symbol (const char *name,
-                                   enum unwind_stub_types stub_type);
+				   enum unwind_stub_types stub_type);
 
 extern int hppa_in_solib_call_trampoline (struct gdbarch *gdbarch,
 					  CORE_ADDR pc);

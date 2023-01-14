@@ -1,5 +1,5 @@
 /* Common things used by the various *gnu-nat.c files
-   Copyright (C) 1995-2020 Free Software Foundation, Inc.
+   Copyright (C) 1995-2021 Free Software Foundation, Inc.
 
    Written by Miles Bader <miles@gnu.ai.mit.edu>
 
@@ -109,7 +109,7 @@ extern bool gnu_debug_flag;
 
 #define debug(msg, args...) \
  do { if (gnu_debug_flag) \
-        fprintf_unfiltered (gdb_stdlog, "%s:%d: " msg "\r\n", \
+	fprintf_unfiltered (gdb_stdlog, "%s:%d: " msg "\r\n", \
 			    __FILE__ , __LINE__ , ##args); } while (0)
 
 /* A prototype generic GNU/Hurd target.  The client can override it
@@ -124,7 +124,7 @@ struct gnu_nat_target : public inf_child_target
   void detach (inferior *, int) override;
   void resume (ptid_t, int, enum gdb_signal) override;
 
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
   enum target_xfer_status xfer_partial (enum target_object object,
 					const char *annex,
 					gdb_byte *readbuf,

@@ -1,6 +1,6 @@
 /* Motorola m68k native support for GNU/Linux.
 
-   Copyright (C) 1996-2020 Free Software Foundation, Inc.
+   Copyright (C) 1996-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -260,7 +260,7 @@ fetch_regs (struct regcache *regcache, int tid)
       if (errno == EIO)
 	{
 	  /* The kernel we're running on doesn't support the GETREGS
-             request.  Reset `have_ptrace_getregs'.  */
+	     request.  Reset `have_ptrace_getregs'.  */
 	  have_ptrace_getregs = 0;
 	  return;
 	}

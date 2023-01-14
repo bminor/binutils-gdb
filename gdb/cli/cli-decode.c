@@ -1,6 +1,6 @@
 /* Handle lists of commands, their decoding and documentation, for GDB.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -49,6 +49,12 @@ static void help_cmd_list (struct cmd_list_element *list,
 			   struct ui_file *stream);
 
 static void help_all (struct ui_file *stream);
+
+static int lookup_cmd_composition_1 (const char *text,
+				     struct cmd_list_element **alias,
+				     struct cmd_list_element **prefix_cmd,
+				     struct cmd_list_element **cmd,
+				     struct cmd_list_element *cur_list);
 
 /* Look up a command whose 'prefixlist' is KEY.  Return the command if found,
    otherwise return NULL.  */
@@ -354,11 +360,11 @@ update_prefix_field_of_prefixed_commands (struct cmd_list_element *c)
       /* We must recursively update the prefix field to cover
 	 e.g.  'info auto-load libthread-db' where the creation
 	 order was:
-           libthread-db
-           auto-load
-           info
+	   libthread-db
+	   auto-load
+	   info
 	 In such a case, when 'auto-load' was created by do_add_cmd,
-         the 'libthread-db' prefix field could not be updated, as the
+	 the 'libthread-db' prefix field could not be updated, as the
 	 'auto-load' command was not yet reachable by
 	    lookup_cmd_for_prefixlist (list, cmdlist)
 	    that searches from the top level 'cmdlist'.  */
@@ -450,7 +456,7 @@ add_show_prefix_cmd (const char *name, enum command_class theclass,
 
 struct cmd_list_element *
 add_prefix_cmd_suppress_notification
-               (const char *name, enum command_class theclass,
+	       (const char *name, enum command_class theclass,
 		cmd_const_cfunc_ftype *fun,
 		const char *doc, struct cmd_list_element **prefixlist,
 		const char *prefixname, int allow_unknown,
@@ -1260,16 +1266,16 @@ help_cmd (const char *command, struct ui_file *stream)
 
   if (c->hook_pre || c->hook_post)
     fprintf_filtered (stream,
-                      "\nThis command has a hook (or hooks) defined:\n");
+		      "\nThis command has a hook (or hooks) defined:\n");
 
   if (c->hook_pre)
     fprintf_filtered (stream,
-                      "\tThis command is run after  : %s (pre hook)\n",
-                    c->hook_pre->name);
+		      "\tThis command is run after  : %s (pre hook)\n",
+		    c->hook_pre->name);
   if (c->hook_post)
     fprintf_filtered (stream,
-                      "\tThis command is run before : %s (post hook)\n",
-                    c->hook_post->name);
+		      "\tThis command is run before : %s (post hook)\n",
+		    c->hook_post->name);
 }
 
 /*
@@ -1352,7 +1358,7 @@ help_all (struct ui_file *stream)
   for (c = cmdlist; c; c = c->next)
     {
       if (c->abbrev_flag)
-        continue;
+	continue;
       /* If this is a class name, print all of the commands in the
 	 class.  */
 
@@ -1370,7 +1376,7 @@ help_all (struct ui_file *stream)
   for (c = cmdlist; c; c = c->next)
     {
       if (c->abbrev_flag)
-        continue;
+	continue;
 
       if (c->theclass == no_class)
 	{
@@ -1496,7 +1502,7 @@ help_cmd_list (struct cmd_list_element *list, enum command_class theclass,
 	  || (theclass == c->theclass && c->func != NULL))
 	{
 	  /* show C when
-             - showing all commands
+	     - showing all commands
 	     - showing all classes and C is a help class
 	     - showing commands of THECLASS and C is not the help class  */
 
@@ -1613,50 +1619,12 @@ valid_user_defined_cmd_name_p (const char *name)
   return true;
 }
 
-/* This routine takes a line of TEXT and a CLIST in which to start the
-   lookup.  When it returns it will have incremented the text pointer past
-   the section of text it matched, set *RESULT_LIST to point to the list in
-   which the last word was matched, and will return a pointer to the cmd
-   list element which the text matches.  It will return NULL if no match at
-   all was possible.  It will return -1 (cast appropriately, ick) if ambigous
-   matches are possible; in this case *RESULT_LIST will be set to point to
-   the list in which there are ambiguous choices (and *TEXT will be set to
-   the ambiguous text string).
-
-   if DEFAULT_ARGS is not null, *DEFAULT_ARGS is set to the found command
-   default args (possibly empty).
-
-   If the located command was an abbreviation, this routine returns the base
-   command of the abbreviation.  Note that *DEFAULT_ARGS will contain the
-   default args defined for the alias.
-
-   It does no error reporting whatsoever; control will always return
-   to the superior routine.
-
-   In the case of an ambiguous return (-1), *RESULT_LIST will be set to point
-   at the prefix_command (ie. the best match) *or* (special case) will be NULL
-   if no prefix command was ever found.  For example, in the case of "info a",
-   "info" matches without ambiguity, but "a" could be "args" or "address", so
-   *RESULT_LIST is set to the cmd_list_element for "info".  So in this case
-   RESULT_LIST should not be interpreted as a pointer to the beginning of a
-   list; it simply points to a specific command.  In the case of an ambiguous
-   return *TEXT is advanced past the last non-ambiguous prefix (e.g.
-   "info t" can be "info types" or "info target"; upon return *TEXT has been
-   advanced past "info ").
-
-   If RESULT_LIST is NULL, don't set *RESULT_LIST (but don't otherwise
-   affect the operation).
-
-   This routine does *not* modify the text pointed to by TEXT.
-
-   If IGNORE_HELP_CLASSES is nonzero, ignore any command list elements which
-   are actually help classes rather than commands (i.e. the function field of
-   the struct cmd_list_element is NULL).  */
+/* See command.h.  */
 
 struct cmd_list_element *
 lookup_cmd_1 (const char **text, struct cmd_list_element *clist,
 	      struct cmd_list_element **result_list, std::string *default_args,
-	      int ignore_help_classes)
+	      int ignore_help_classes, bool lookup_for_completion_p)
 {
   char *command;
   int len, nfound;
@@ -1715,8 +1683,9 @@ lookup_cmd_1 (const char **text, struct cmd_list_element *clist,
        itself and we will adjust the appropriate DEPRECATED_WARN_USER
        flags.  */
 
-      if (found->deprecated_warn_user)
-	deprecated_cmd_warning (line);
+      if (found->deprecated_warn_user && !lookup_for_completion_p)
+	deprecated_cmd_warning (line, clist);
+
 
       /* Return the default_args of the alias, not the default_args
 	 of the command it is pointing to.  */
@@ -1729,8 +1698,8 @@ lookup_cmd_1 (const char **text, struct cmd_list_element *clist,
 
   if (found->prefixlist)
     {
-      c = lookup_cmd_1 (text, *found->prefixlist, result_list,
-			default_args, ignore_help_classes);
+      c = lookup_cmd_1 (text, *found->prefixlist, result_list, default_args,
+			ignore_help_classes, lookup_for_completion_p);
       if (!c)
 	{
 	  /* Didn't find anything; this is as far as we got.  */
@@ -1748,9 +1717,9 @@ lookup_cmd_1 (const char **text, struct cmd_list_element *clist,
 	  if (result_list != nullptr)
 	    if (!*result_list)
 	      /* This used to say *result_list = *found->prefixlist.
-	         If that was correct, need to modify the documentation
-	         at the top of this function to clarify what is
-	         supposed to be going on.  */
+		 If that was correct, need to modify the documentation
+		 at the top of this function to clarify what is
+		 supposed to be going on.  */
 	      *result_list = found;
 	  /* For ambiguous commands, do not return any default_args args.  */
 	  if (default_args != nullptr)
@@ -1840,7 +1809,7 @@ lookup_cmd (const char **line, struct cmd_list_element *list,
   else if (c == CMD_LIST_AMBIGUOUS)
     {
       /* Ambigous.  Local values should be off prefixlist or called
-         values.  */
+	 values.  */
       int local_allow_unknown = (last_list ? last_list->allow_unknown :
 				 allow_unknown);
       const char *local_cmdtype = last_list ? last_list->prefixname : cmdtype;
@@ -1890,10 +1859,10 @@ lookup_cmd (const char **line, struct cmd_list_element *list,
   else
     {
       if (c->type == set_cmd && **line != '\0' && !isspace (**line))
-        error (_("Argument must be preceded by space."));
+	error (_("Argument must be preceded by space."));
 
       /* We've got something.  It may still not be what the caller
-         wants (if this command *needs* a subcommand).  */
+	 wants (if this command *needs* a subcommand).  */
       while (**line == ' ' || **line == '\t')
 	(*line)++;
 
@@ -1929,64 +1898,159 @@ lookup_cmd (const char **line, struct cmd_list_element *list,
    
 */
 void
-deprecated_cmd_warning (const char *text)
+deprecated_cmd_warning (const char *text, struct cmd_list_element *list)
 {
-  struct cmd_list_element *alias = NULL;
-  struct cmd_list_element *prefix_cmd = NULL;
-  struct cmd_list_element *cmd = NULL;
+  struct cmd_list_element *alias = nullptr;
+  struct cmd_list_element *cmd = nullptr;
 
-  if (!lookup_cmd_composition (text, &alias, &prefix_cmd, &cmd))
-    /* Return if text doesn't evaluate to a command.  */
+  /* Return if text doesn't evaluate to a command.  We place this lookup
+     within its own scope so that the PREFIX_CMD local is not visible
+     later in this function.  The value returned in PREFIX_CMD is based on
+     the prefix found in TEXT, and is our case this prefix can be missing
+     in some situations (when LIST is not the global CMDLIST).
+
+     It is better for our purposes to use the prefix commands directly from
+     the ALIAS and CMD results.  */
+  {
+    struct cmd_list_element *prefix_cmd = nullptr;
+    if (!lookup_cmd_composition_1 (text, &alias, &prefix_cmd, &cmd, list))
+      return;
+  }
+
+  /* Return if nothing is deprecated.  */
+  if (!((alias != nullptr ? alias->deprecated_warn_user : 0)
+	|| cmd->deprecated_warn_user))
     return;
 
-  if (!((alias ? alias->deprecated_warn_user : 0)
-      || cmd->deprecated_warn_user) ) 
-    /* Return if nothing is deprecated.  */
-    return;
-  
-  printf_filtered ("Warning:");
-  
-  if (alias && !cmd->cmd_deprecated)
-    printf_filtered (" '%s', an alias for the", alias->name);
-    
-  printf_filtered (" command '");
-  
-  if (prefix_cmd)
-    printf_filtered ("%s", prefix_cmd->prefixname);
-  
-  printf_filtered ("%s", cmd->name);
+  /* Join command prefix (if any) and the command name.  */
+  std::string tmp_cmd_str;
+  if (cmd->prefix != nullptr)
+    tmp_cmd_str += std::string (cmd->prefix->prefixname);
+  tmp_cmd_str += std::string (cmd->name);
 
-  if (alias && cmd->cmd_deprecated)
-    printf_filtered ("' (%s) is deprecated.\n", alias->name);
-  else
-    printf_filtered ("' is deprecated.\n"); 
-  
-
-  /* If it is only the alias that is deprecated, we want to indicate
-     the new alias, otherwise we'll indicate the new command.  */
-
-  if (alias && !cmd->cmd_deprecated)
+  /* Display the appropriate first line, this warns that the thing the user
+     entered is deprecated.  */
+  if (alias != nullptr)
     {
-      if (alias->replacement)
-	printf_filtered ("Use '%s'.\n\n", alias->replacement);
+      /* Join the alias prefix (if any) and the alias name.  */
+      std::string tmp_alias_str;
+      if (alias->prefix != nullptr)
+	tmp_alias_str += std::string (alias->prefix->prefixname);
+      tmp_alias_str += std::string (alias->name);
+
+      if (cmd->cmd_deprecated)
+	printf_filtered (_("Warning: command '%ps' (%ps) is deprecated.\n"),
+			 styled_string (title_style.style (),
+					tmp_cmd_str.c_str ()),
+			 styled_string (title_style.style (),
+					tmp_alias_str.c_str ()));
       else
-	printf_filtered ("No alternative known.\n\n");
-     }  
-  else
-    {
-      if (cmd->replacement)
-	printf_filtered ("Use '%s'.\n\n", cmd->replacement);
-      else
-	printf_filtered ("No alternative known.\n\n");
+	printf_filtered (_("Warning: '%ps', an alias for the command '%ps', "
+			   "is deprecated.\n"),
+			 styled_string (title_style.style (),
+					tmp_alias_str.c_str ()),
+			 styled_string (title_style.style (),
+					tmp_cmd_str.c_str ()));
     }
+  else
+    printf_filtered (_("Warning: command '%ps' is deprecated.\n"),
+		     styled_string (title_style.style (),
+				    tmp_cmd_str.c_str ()));
+
+  /* Now display a second line indicating what the user should use instead.
+     If it is only the alias that is deprecated, we want to indicate the
+     new alias, otherwise we'll indicate the new command.  */
+  const char *replacement;
+  if (alias != nullptr && !cmd->cmd_deprecated)
+    replacement = alias->replacement;
+  else
+    replacement = cmd->replacement;
+  if (replacement != nullptr)
+    printf_filtered (_("Use '%ps'.\n\n"),
+		     styled_string (title_style.style (),
+				    replacement));
+  else
+    printf_filtered (_("No alternative known.\n\n"));
 
   /* We've warned you, now we'll keep quiet.  */
-  if (alias)
+  if (alias != nullptr)
     alias->deprecated_warn_user = 0;
-  
   cmd->deprecated_warn_user = 0;
 }
 
+/* Look up the contents of TEXT as a command in the command list CUR_LIST.
+   Return 1 on success, 0 on failure.
+
+   If TEXT refers to an alias, *ALIAS will point to that alias.
+
+   If TEXT is a subcommand (i.e. one that is preceded by a prefix
+   command) set *PREFIX_CMD.
+
+   Set *CMD to point to the command TEXT indicates.
+
+   If any of *ALIAS, *PREFIX_CMD, or *CMD cannot be determined or do not
+   exist, they are NULL when we return.
+
+*/
+
+static int
+lookup_cmd_composition_1 (const char *text,
+			  struct cmd_list_element **alias,
+			  struct cmd_list_element **prefix_cmd,
+			  struct cmd_list_element **cmd,
+			  struct cmd_list_element *cur_list)
+{
+  *alias = nullptr;
+  *prefix_cmd = cur_list->prefix;
+  *cmd = nullptr;
+
+  text = skip_spaces (text);
+
+  /* Go through as many command lists as we need to, to find the command
+     TEXT refers to.  */
+  while (1)
+    {
+      /* Identify the name of the command.  */
+      int len = find_command_name_length (text);
+
+      /* If nothing but whitespace, return.  */
+      if (len == 0)
+	return 0;
+
+      /* TEXT is the start of the first command word to lookup (and
+	 it's length is LEN).  We copy this into a local temporary.  */
+      std::string command (text, len);
+
+      /* Look it up.  */
+      int nfound = 0;
+      *cmd = find_cmd (command.c_str (), len, cur_list, 1, &nfound);
+
+      /* We only handle the case where a single command was found.  */
+      if (*cmd == CMD_LIST_AMBIGUOUS || *cmd == nullptr)
+	return 0;
+      else
+	{
+	  if ((*cmd)->cmd_pointer)
+	    {
+	      /* If the command was actually an alias, we note that an
+		 alias was used (by assigning *ALIAS) and we set *CMD.  */
+	      *alias = *cmd;
+	      *cmd = (*cmd)->cmd_pointer;
+	    }
+	}
+
+      text += len;
+      text = skip_spaces (text);
+
+      if ((*cmd)->prefixlist != nullptr && *text != '\0')
+	{
+	  cur_list = *(*cmd)->prefixlist;
+	  *prefix_cmd = *cmd;
+	}
+      else
+	return 1;
+    }
+}
 
 /* Look up the contents of TEXT as a command in the command list 'cmdlist'.
    Return 1 on success, 0 on failure.
@@ -2002,78 +2066,14 @@ deprecated_cmd_warning (const char *text)
    exist, they are NULL when we return.
 
 */
+
 int
 lookup_cmd_composition (const char *text,
 			struct cmd_list_element **alias,
 			struct cmd_list_element **prefix_cmd,
 			struct cmd_list_element **cmd)
 {
-  char *command;
-  int len, nfound;
-  struct cmd_list_element *cur_list;
-  struct cmd_list_element *prev_cmd;
-
-  *alias = NULL;
-  *prefix_cmd = NULL;
-  *cmd = NULL;
-
-  cur_list = cmdlist;
-
-  text = skip_spaces (text);
-
-  while (1)
-    {
-      /* Go through as many command lists as we need to,
-	 to find the command TEXT refers to.  */
-
-      prev_cmd = *cmd;
-
-      /* Identify the name of the command.  */
-      len = find_command_name_length (text);
-
-      /* If nothing but whitespace, return.  */
-      if (len == 0)
-	return 0;
-
-      /* TEXT is the start of the first command word to lookup (and
-	 it's length is LEN).  We copy this into a local temporary.  */
-
-      command = (char *) alloca (len + 1);
-      memcpy (command, text, len);
-      command[len] = '\0';
-
-      /* Look it up.  */
-      *cmd = 0;
-      nfound = 0;
-      *cmd = find_cmd (command, len, cur_list, 1, &nfound);
-
-      if (*cmd == CMD_LIST_AMBIGUOUS)
-	{
-	  return 0;              /* ambiguous */
-	}
-
-      if (*cmd == NULL)
-	return 0;                /* nothing found */
-      else
-	{
-	  if ((*cmd)->cmd_pointer)
-	    {
-	      /* cmd was actually an alias, we note that an alias was
-		 used (by assigning *ALIAS) and we set *CMD.  */
-	      *alias = *cmd;
-	      *cmd = (*cmd)->cmd_pointer;
-	    }
-	  *prefix_cmd = prev_cmd;
-	}
-
-      text += len;
-      text = skip_spaces (text);
-
-      if ((*cmd)->prefixlist && *text != '\0')
-	cur_list = *(*cmd)->prefixlist;
-      else
-	return 1;
-    }
+  return lookup_cmd_composition_1 (text, alias, prefix_cmd, cmd, cmdlist);
 }
 
 /* Helper function for SYMBOL_COMPLETION_FUNCTION.  */

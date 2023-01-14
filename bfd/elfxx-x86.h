@@ -1,5 +1,5 @@
 /* x86 specific support for ELF
-   Copyright (C) 2017-2020 Free Software Foundation, Inc.
+   Copyright (C) 2017-2021 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -17,6 +17,9 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
+
+/* Don't generate unused section symbols.  */
+#define TARGET_KEEP_UNUSED_SECTION_SYMBOLS FALSE
 
 #include "sysdep.h"
 #include "bfd.h"
@@ -638,8 +641,7 @@ extern bfd_boolean _bfd_x86_elf_always_size_sections
   (bfd *, struct bfd_link_info *);
 
 extern void _bfd_x86_elf_merge_symbol_attribute
-  (struct elf_link_hash_entry *, const Elf_Internal_Sym *,
-   bfd_boolean, bfd_boolean);
+  (struct elf_link_hash_entry *, unsigned int, bfd_boolean, bfd_boolean);
 
 extern void _bfd_x86_elf_copy_indirect_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *,
@@ -683,6 +685,10 @@ extern bfd * _bfd_x86_elf_link_setup_gnu_properties
 extern void _bfd_x86_elf_link_fixup_ifunc_symbol
   (struct bfd_link_info *, struct elf_x86_link_hash_table *,
    struct elf_link_hash_entry *, Elf_Internal_Sym *sym);
+
+extern void _bfd_x86_elf_link_report_relative_reloc
+  (struct bfd_link_info *, asection *, struct elf_link_hash_entry *,
+   Elf_Internal_Sym *, const char *, const void *);
 
 #define bfd_elf64_mkobject \
   _bfd_x86_elf_mkobject

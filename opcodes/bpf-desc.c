@@ -3,7 +3,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996-2020 Free Software Foundation, Inc.
+Copyright (C) 1996-2021 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
@@ -520,6 +520,46 @@ static const CGEN_IBASE bpf_cgen_insn_table[MAX_INSNS] =
     BPF_INSN_ARSH32RLE, "arsh32rle", "arsh32", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }
   },
+/* sdiv $dstle,$imm32 */
+  {
+    BPF_INSN_SDIVILE, "sdivile", "sdiv", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } } } }
+  },
+/* sdiv $dstle,$srcle */
+  {
+    BPF_INSN_SDIVRLE, "sdivrle", "sdiv", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } } } }
+  },
+/* sdiv32 $dstle,$imm32 */
+  {
+    BPF_INSN_SDIV32ILE, "sdiv32ile", "sdiv32", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } } } }
+  },
+/* sdiv32 $dstle,$srcle */
+  {
+    BPF_INSN_SDIV32RLE, "sdiv32rle", "sdiv32", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } } } }
+  },
+/* smod $dstle,$imm32 */
+  {
+    BPF_INSN_SMODILE, "smodile", "smod", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } } } }
+  },
+/* smod $dstle,$srcle */
+  {
+    BPF_INSN_SMODRLE, "smodrle", "smod", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } } } }
+  },
+/* smod32 $dstle,$imm32 */
+  {
+    BPF_INSN_SMOD32ILE, "smod32ile", "smod32", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } } } }
+  },
+/* smod32 $dstle,$srcle */
+  {
+    BPF_INSN_SMOD32RLE, "smod32rle", "smod32", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } } } }
+  },
 /* neg $dstle */
   {
     BPF_INSN_NEGLE, "negle", "neg", 64,
@@ -769,6 +809,46 @@ static const CGEN_IBASE bpf_cgen_insn_table[MAX_INSNS] =
   {
     BPF_INSN_ARSH32RBE, "arsh32rbe", "arsh32", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x50" } } } }
+  },
+/* sdiv $dstbe,$imm32 */
+  {
+    BPF_INSN_SDIVIBE, "sdivibe", "sdiv", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } } } }
+  },
+/* sdiv $dstbe,$srcbe */
+  {
+    BPF_INSN_SDIVRBE, "sdivrbe", "sdiv", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } } } }
+  },
+/* sdiv32 $dstbe,$imm32 */
+  {
+    BPF_INSN_SDIV32IBE, "sdiv32ibe", "sdiv32", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } } } }
+  },
+/* sdiv32 $dstbe,$srcbe */
+  {
+    BPF_INSN_SDIV32RBE, "sdiv32rbe", "sdiv32", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } } } }
+  },
+/* smod $dstbe,$imm32 */
+  {
+    BPF_INSN_SMODIBE, "smodibe", "smod", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } } } }
+  },
+/* smod $dstbe,$srcbe */
+  {
+    BPF_INSN_SMODRBE, "smodrbe", "smod", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } } } }
+  },
+/* smod32 $dstbe,$imm32 */
+  {
+    BPF_INSN_SMOD32IBE, "smod32ibe", "smod32", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } } } }
+  },
+/* smod32 $dstbe,$srcbe */
+  {
+    BPF_INSN_SMOD32RBE, "smod32rbe", "smod32", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } } } }
   },
 /* neg $dstbe */
   {

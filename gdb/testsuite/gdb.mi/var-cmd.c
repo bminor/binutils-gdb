@@ -1,4 +1,4 @@
-/* Copyright 1999-2020 Free Software Foundation, Inc.
+/* Copyright 1999-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -566,7 +566,7 @@ do_anonymous_type_tests (void)
     };
   } v = {1, {2}, {3}};
 
-  anon = malloc (sizeof (struct anonymous));
+  anon = (struct anonymous *) malloc (sizeof (struct anonymous));
   anon->a = 1;
   anon->b = 2;
   anon->c = (char *) 3;

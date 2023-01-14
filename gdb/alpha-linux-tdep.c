@@ -1,5 +1,5 @@
 /* Target-dependent code for GNU/Linux on Alpha.
-   Copyright (C) 2002-2020 Free Software Foundation, Inc.
+   Copyright (C) 2002-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -64,11 +64,11 @@ enum
 
    This is somewhat complicated in that:
      (1) the expansion of the "mov" assembler macro has changed over
-         time, from "bis src,src,dst" to "bis zero,src,dst",
+	 time, from "bis src,src,dst" to "bis zero,src,dst",
      (2) the kernel has changed from using "addq" to "lda" to load the
-         syscall number,
+	 syscall number,
      (3) there is a "normal" sigreturn and an "rt" sigreturn which
-         has a different stack layout.  */
+	 has a different stack layout.  */
 
 static long
 alpha_linux_sigtramp_offset_1 (struct gdbarch *gdbarch, CORE_ADDR pc)
@@ -144,7 +144,7 @@ alpha_linux_sigcontext_addr (struct frame_info *this_frame)
 	struct rt_sigframe {
 	  struct siginfo info;
 	  struct ucontext uc;
-        };
+	};
 
 	offsetof (struct rt_sigframe, uc.uc_mcontext);  */
 
@@ -356,7 +356,7 @@ alpha_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep;
 
-  linux_init_abi (info, gdbarch);
+  linux_init_abi (info, gdbarch, 0);
 
   /* Hook into the DWARF CFI frame unwinder.  */
   alpha_dwarf2_init_abi (info, gdbarch);
@@ -378,7 +378,7 @@ alpha_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
-                                             svr4_fetch_objfile_link_map);
+					     svr4_fetch_objfile_link_map);
 
   set_gdbarch_iterate_over_regset_sections
     (gdbarch, alpha_linux_iterate_over_regset_sections);
@@ -394,5 +394,5 @@ void
 _initialize_alpha_linux_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_alpha, 0, GDB_OSABI_LINUX,
-                          alpha_linux_init_abi);
+			  alpha_linux_init_abi);
 }

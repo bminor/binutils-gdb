@@ -1,7 +1,7 @@
 /* Get info from stack frames; convert between frames, blocks,
    functions and pc values.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -285,7 +285,7 @@ find_pc_partial_function_sym (CORE_ADDR pc,
 	    {
 	      int i;
 	      for (i = 0; i < BLOCK_NRANGES (b); i++)
-	        {
+		{
 		  if (BLOCK_RANGE_START (b, i) <= mapped_pc
 		      && mapped_pc < BLOCK_RANGE_END (b, i))
 		    {
@@ -395,24 +395,24 @@ find_function_entry_range_from_pc (CORE_ADDR pc, const char **name,
       CORE_ADDR entry_pc = BLOCK_ENTRY_PC (block);
 
       for (int i = 0; i < BLOCK_NRANGES (block); i++)
-        {
+	{
 	  if (BLOCK_RANGE_START (block, i) <= entry_pc
 	      && entry_pc < BLOCK_RANGE_END (block, i))
 	    {
 	      if (address != nullptr)
-	        *address = BLOCK_RANGE_START (block, i);
+		*address = BLOCK_RANGE_START (block, i);
 
 	      if (endaddr != nullptr)
-	        *endaddr = BLOCK_RANGE_END (block, i);
+		*endaddr = BLOCK_RANGE_END (block, i);
 
 	      return status;
 	    }
 	}
 
       /* It's an internal error if we exit the above loop without finding
-         the range.  */
+	 the range.  */
       internal_error (__FILE__, __LINE__,
-                      _("Entry block not found in find_function_entry_range_from_pc"));
+		      _("Entry block not found in find_function_entry_range_from_pc"));
     }
 
   return status;
@@ -464,14 +464,10 @@ find_gnu_ifunc_target_type (CORE_ADDR resolver_funaddr)
 struct frame_info *
 block_innermost_frame (const struct block *block)
 {
-  struct frame_info *frame;
-
   if (block == NULL)
     return NULL;
 
-  frame = get_selected_frame_if_set ();
-  if (frame == NULL)
-    frame = get_current_frame ();
+  frame_info *frame = get_selected_frame ();
   while (frame != NULL)
     {
       const struct block *frame_block = get_frame_block (frame, NULL);

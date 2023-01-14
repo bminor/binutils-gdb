@@ -1,4 +1,4 @@
-# Copyright 2019-2020 Free Software Foundation, Inc.
+# Copyright 2019-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,12 +33,9 @@ if {[prepare_for_testing "failed to prepare" ${testfile} \
     return -1
 }
 
-gdb_exit
-if {[mi_gdb_start]} {
-    continue
-}
+mi_clean_restart $binfile
 
-mi_run_to_main
+mi_runto_main
 
 set qstr "\"\[^\"\]+\""
 set fun_re "\{line=\"$decimal\",name=${qstr},type=${qstr},description=${qstr}\}"
@@ -236,8 +233,8 @@ mi_gdb_test "118-symbol-info-variables --name global_f2" \
     "118\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]*$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"21\",name=\"global_f2\",type=\"int\",description=\"int global_f2;\"\}\\\]\}\\\]\}" \
     "List all variables matching pattern global_f2"
 
-set lineno1 [gdb_get_line_number "static float global_f1;" ${srcfile}]
-set lineno2 [gdb_get_line_number "static float global_f1;" ${srcfile2}]
+set lineno1 [gdb_get_line_number "static float __attribute__ ((used)) global_f1;" ${srcfile}]
+set lineno2 [gdb_get_line_number "static float __attribute__ ((used)) global_f1;" ${srcfile2}]
 mi_gdb_test "119-symbol-info-variables --type float --name ^global_" \
     "119\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]*$srcfile\",fullname=\"\[^\"\]+$srcfile\",symbols=\\\[\{line=\"25\",name=\"global_f1\",type=\"float\",description=\"static float global_f1;\"\}\\\]\},\{filename=\"\[^\"\]*$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"19\",name=\"global_f1\",type=\"float\",description=\"static float global_f1;\"\}\\\]\}\\\]\}" \
     "List all variables matching type float"

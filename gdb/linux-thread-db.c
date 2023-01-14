@@ -1,6 +1,6 @@
 /* libthread_db assisted debugging support, generic parts.
 
-   Copyright (C) 1999-2020 Free Software Foundation, Inc.
+   Copyright (C) 1999-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -92,7 +92,7 @@ public:
   strata stratum () const override { return thread_stratum; }
 
   void detach (inferior *, int) override;
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
   void resume (ptid_t, int, enum gdb_signal) override;
   void mourn_inferior () override;
   void update_thread_list () override;
@@ -209,7 +209,7 @@ struct thread_db_info
 
 /* List of known processes using thread_db, and the required
    bookkeeping.  */
-struct thread_db_info *thread_db_list;
+static thread_db_info *thread_db_list;
 
 static void thread_db_find_new_threads_1 (thread_info *stopped);
 static void thread_db_find_new_threads_2 (thread_info *stopped,
@@ -237,7 +237,7 @@ add_thread_db_info (void *handle)
 
   /* The workaround works by reading from /proc/pid/status, so it is
      disabled for core files.  */
-  if (target_has_execution)
+  if (target_has_execution ())
     info->need_stale_parent_threads_check = 1;
 
   info->next = thread_db_list;
@@ -531,7 +531,7 @@ thread_db_find_new_threads_silently (thread_info *stopped)
 	 corrupted.  For core files it does not apply, no 'later enumeration'
 	 is possible.  */
 
-      if (!target_has_execution || !inferior_has_bug ("nptl_version", 2, 7))
+      if (!target_has_execution () || !inferior_has_bug ("nptl_version", 2, 7))
 	{
 	  exception_fprintf (gdb_stderr, except,
 			     _("Warning: couldn't activate thread debugging "
@@ -658,7 +658,7 @@ check_thread_db_callback (const td_thrhandle_t *th, void *arg)
   memset (&th2, 23, sizeof (td_thrhandle_t));
   CALL_UNCHECKED (td_ta_map_lwp2thr, th->th_ta_p, ti.ti_lid, &th2);
 
-  if (tdb_testinfo->last_result == TD_ERR && !target_has_execution)
+  if (tdb_testinfo->last_result == TD_ERR && !target_has_execution ())
     {
       /* Some platforms require execution for td_ta_map_lwp2thr.  */
       LOG (_("; can't map_lwp2thr"));
@@ -850,19 +850,19 @@ try_thread_db_load_1 (struct thread_db_info *info)
 	fprintf_unfiltered (gdb_stdlog, _("td_ta_new failed: %s\n"),
 			    thread_db_err_str (err));
       else
-        switch (err)
-          {
-            case TD_NOLIBTHREAD:
+	switch (err)
+	  {
+	    case TD_NOLIBTHREAD:
 #ifdef THREAD_DB_HAS_TD_VERSION
-            case TD_VERSION:
+	    case TD_VERSION:
 #endif
-              /* The errors above are not unexpected and silently ignored:
-                 they just mean we haven't found correct version of
-                 libthread_db yet.  */
-              break;
-            default:
-              warning (_("td_ta_new failed: %s"), thread_db_err_str (err));
-          }
+	      /* The errors above are not unexpected and silently ignored:
+		 they just mean we haven't found correct version of
+		 libthread_db yet.  */
+	      break;
+	    default:
+	      warning (_("td_ta_new failed: %s"), thread_db_err_str (err));
+	  }
       return false;
     }
 
@@ -884,7 +884,7 @@ try_thread_db_load_1 (struct thread_db_info *info)
 
      td_ta_map_lwp2thr uses ps_get_thread_area, but we can't use that
      currently on core targets, as it uses ptrace directly.  */
-  if (target_has_execution
+  if (target_has_execution ()
       && linux_proc_task_list_dir_exists (inferior_ptid.pid ()))
     info->td_ta_thr_iter_p = NULL;
   else
@@ -918,8 +918,8 @@ try_thread_db_load_1 (struct thread_db_info *info)
   else if (thread_db_find_new_threads_silently (inferior_thread ()) != 0)
     {
       /* Even if libthread_db initializes, if the thread list is
-         corrupted, we'd not manage to list any threads.  Better reject this
-         thread_db, and fall back to at least listing LWPs.  */
+	 corrupted, we'd not manage to list any threads.  Better reject this
+	 thread_db, and fall back to at least listing LWPs.  */
       return false;
     }
 
@@ -976,10 +976,11 @@ try_thread_db_load (const char *library, bool check_auto_load_safe)
 	  return false;
 	}
 
-      if (!file_is_auto_load_safe (library, _("auto-load: Loading libthread-db "
-					      "library \"%s\" from explicit "
-					      "directory.\n"),
-				   library))
+      auto_load_debug_printf
+	("Loading libthread-db library \"%s\" from explicit directory.",
+	 library);
+
+      if (!file_is_auto_load_safe (library))
 	return false;
     }
 
@@ -997,13 +998,13 @@ try_thread_db_load (const char *library, bool check_auto_load_safe)
 
       td_init = dlsym (handle, "td_init");
       if (td_init != NULL)
-        {
-          const char *const libpath = dladdr_to_soname (td_init);
+	{
+	  const char *const libpath = dladdr_to_soname (td_init);
 
-          if (libpath != NULL)
-            fprintf_unfiltered (gdb_stdlog, _("Host %s resolved to: %s.\n"),
-                               library, libpath);
-        }
+	  if (libpath != NULL)
+	    fprintf_unfiltered (gdb_stdlog, _("Host %s resolved to: %s.\n"),
+			       library, libpath);
+	}
     }
 
   info = add_thread_db_info (handle);
@@ -1194,7 +1195,7 @@ thread_db_load (void)
 
   /* Don't attempt to use thread_db on executables not running
      yet.  */
-  if (!target_has_registers)
+  if (!target_has_registers ())
     return false;
 
   /* Don't attempt to use thread_db for remote targets.  */
@@ -1286,7 +1287,7 @@ thread_db_new_objfile (struct objfile *objfile)
 }
 
 static void
-check_pid_namespace_match (void)
+check_pid_namespace_match (inferior *inf)
 {
   /* Check is only relevant for local targets targets.  */
   if (target_can_run ())
@@ -1296,7 +1297,7 @@ check_pid_namespace_match (void)
 	 child's thread list, we'll mistakenly think it has no threads
 	 since the thread PID fields won't match the PID we give to
 	 libthread_db.  */
-      if (!linux_ns_same (inferior_ptid.pid (), LINUX_NS_PID))
+      if (!linux_ns_same (inf->pid, LINUX_NS_PID))
 	{
 	  warning (_ ("Target and debugger are in different PID "
 		      "namespaces; thread lists and other data are "
@@ -1310,9 +1311,9 @@ check_pid_namespace_match (void)
    This handles the case of debugging statically linked executables.  */
 
 static void
-thread_db_inferior_created (struct target_ops *target, int from_tty)
+thread_db_inferior_created (inferior *inf)
 {
-  check_pid_namespace_match ();
+  check_pid_namespace_match (inf);
   check_for_thread_db ();
 }
 
@@ -1358,7 +1359,7 @@ record_thread (struct thread_db_info *info,
   else
     tp->priv.reset (priv);
 
-  if (target_has_execution)
+  if (target_has_execution ())
     check_thread_signals ();
 
   return tp;
@@ -1379,7 +1380,7 @@ thread_db_target::detach (inferior *inf, int from_tty)
 
 ptid_t
 thread_db_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
-			int options)
+			target_wait_flags options)
 {
   struct thread_db_info *info;
 
@@ -1701,7 +1702,7 @@ thread_db_target::thread_handle_to_thread_info (const gdb_byte *thread_handle,
       thread_db_thread_info *priv = get_thread_db_thread_info (tp);
 
       if (priv != NULL && handle_tid == priv->tid)
-        return tp;
+	return tp;
     }
 
   return NULL;
@@ -1789,19 +1790,19 @@ thread_db_target::get_thread_local_address (ptid_t ptid,
 	  /* Now, if libthread_db provided the initialization image's
 	     address, we *could* try to build a non-lvalue value from
 	     the initialization image.  */
-        throw_error (TLS_NOT_ALLOCATED_YET_ERROR,
-                     _("TLS not allocated yet"));
+	throw_error (TLS_NOT_ALLOCATED_YET_ERROR,
+		     _("TLS not allocated yet"));
 #endif
 
       /* Something else went wrong.  */
       if (err != TD_OK)
-        throw_error (TLS_GENERIC_ERROR,
-                     (("%s")), thread_db_err_str (err));
+	throw_error (TLS_GENERIC_ERROR,
+		     (("%s")), thread_db_err_str (err));
 
       /* Cast assuming host == target.  Joy.  */
       /* Do proper sign extension for the target.  */
-      gdb_assert (exec_bfd);
-      return (bfd_get_sign_extend_vma (exec_bfd) > 0
+      gdb_assert (current_program_space->exec_bfd ());
+      return (bfd_get_sign_extend_vma (current_program_space->exec_bfd ()) > 0
 	      ? (CORE_ADDR) (intptr_t) address
 	      : (CORE_ADDR) (uintptr_t) address);
     }

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Copyright (C) 2013-2019 Free Software Foundation, Inc.
+# Copyright (C) 2013-2021 Free Software Foundation, Inc.
 #
 # This script is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -597,6 +597,7 @@ class BinutilsCmdLine (CmdLine):
         self.add_dir ('gprof')
         self.add_dir ('include')
         self.add_dir ('ld', LdFilter())
+        self.add_dir ('libctf')
         self.add_dir ('libdecnumber')
         self.add_dir ('libiberty')
         self.add_dir ('opcodes')
@@ -613,6 +614,7 @@ class BinutilsCmdLine (CmdLine):
             'gprof',
             'include',
             'ld',
+            'libctf',
             'libiberty',
             'opcodes',
             ]

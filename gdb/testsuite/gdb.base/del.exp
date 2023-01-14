@@ -1,4 +1,4 @@
-# Copyright 2006-2020 Free Software Foundation, Inc.
+# Copyright 2006-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ proc test_delete_alias { alias } {
     # Now, insert a breakpoint at an easy location, and then remove it
     # using $alias. We verified that the removal worked by checking
     # the list of breakpoints.
-    gdb_test "break main" \
+    gdb_test "break -q main" \
              "Breakpoint.*at.* file .*$srcfile, line.*" \
              "breakpoint insertion ($alias)"
     

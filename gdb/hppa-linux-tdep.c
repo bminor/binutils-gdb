@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux running on PA-RISC, for GDB.
 
-   Copyright (C) 2004-2020 Free Software Foundation, Inc.
+   Copyright (C) 2004-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -88,8 +88,8 @@ static struct insn_pattern hppa_sigtramp[] = {
    matched.  */
 static int
 insns_match_pattern (struct gdbarch *gdbarch, CORE_ADDR pc,
-                     struct insn_pattern *pattern,
-                     unsigned int *insn)
+		     struct insn_pattern *pattern,
+		     unsigned int *insn)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int i;
@@ -102,9 +102,9 @@ insns_match_pattern (struct gdbarch *gdbarch, CORE_ADDR pc,
       target_read_memory (npc, buf, 4);
       insn[i] = extract_unsigned_integer (buf, 4, byte_order);
       if ((insn[i] & pattern[i].mask) == pattern[i].data)
-        npc += 4;
+	npc += 4;
       else
-        return 0;
+	return 0;
     }
   return 1;
 }
@@ -158,7 +158,7 @@ hppa_linux_sigtramp_find_sigcontext (struct gdbarch *gdbarch, CORE_ADDR pc)
       if (insns_match_pattern (gdbarch, sp + pcoffs[attempt],
 			       hppa_sigtramp, dummy))
 	{
-          offs = sfoffs[attempt];
+	  offs = sfoffs[attempt];
 	  break;
 	}
     }
@@ -175,7 +175,7 @@ hppa_linux_sigtramp_find_sigcontext (struct gdbarch *gdbarch, CORE_ADDR pc)
 	}
       else
       {
-        return 0;
+	return 0;
       }
     }
 
@@ -191,7 +191,7 @@ hppa_linux_sigtramp_find_sigcontext (struct gdbarch *gdbarch, CORE_ADDR pc)
 struct hppa_linux_sigtramp_unwind_cache
 {
   CORE_ADDR base;
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 static struct hppa_linux_sigtramp_unwind_cache *
@@ -227,13 +227,13 @@ hppa_linux_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
   scptr += 4;
 
   /* GR[0] is the psw.  */
-  info->saved_regs[HPPA_IPSW_REGNUM].addr = scptr;
+  info->saved_regs[HPPA_IPSW_REGNUM].set_addr (scptr);
   scptr += 4;
 
   /* General registers.  */
   for (i = 1; i < 32; i++)
     {
-      info->saved_regs[HPPA_R0_REGNUM + i].addr = scptr;
+      info->saved_regs[HPPA_R0_REGNUM + i].set_addr (scptr);
       scptr += 4;
     }
 
@@ -245,24 +245,24 @@ hppa_linux_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
 
   for (i = 4; i < 32; i++)
     {
-      info->saved_regs[HPPA_FP0_REGNUM + (i * 2)].addr = scptr;
+      info->saved_regs[HPPA_FP0_REGNUM + (i * 2)].set_addr (scptr);
       scptr += 4;
-      info->saved_regs[HPPA_FP0_REGNUM + (i * 2) + 1].addr = scptr;
+      info->saved_regs[HPPA_FP0_REGNUM + (i * 2) + 1].set_addr (scptr);
       scptr += 4;
     }
 
   /* IASQ/IAOQ.  */
-  info->saved_regs[HPPA_PCSQ_HEAD_REGNUM].addr = scptr;
+  info->saved_regs[HPPA_PCSQ_HEAD_REGNUM].set_addr (scptr);
   scptr += 4;
-  info->saved_regs[HPPA_PCSQ_TAIL_REGNUM].addr = scptr;
-  scptr += 4;
-
-  info->saved_regs[HPPA_PCOQ_HEAD_REGNUM].addr = scptr;
-  scptr += 4;
-  info->saved_regs[HPPA_PCOQ_TAIL_REGNUM].addr = scptr;
+  info->saved_regs[HPPA_PCSQ_TAIL_REGNUM].set_addr (scptr);
   scptr += 4;
 
-  info->saved_regs[HPPA_SAR_REGNUM].addr = scptr;
+  info->saved_regs[HPPA_PCOQ_HEAD_REGNUM].set_addr (scptr);
+  scptr += 4;
+  info->saved_regs[HPPA_PCOQ_TAIL_REGNUM].set_addr (scptr);
+  scptr += 4;
+
+  info->saved_regs[HPPA_SAR_REGNUM].set_addr (scptr);
 
   info->base = get_frame_register_unsigned (this_frame, HPPA_SP_REGNUM);
 
@@ -489,7 +489,7 @@ hppa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  linux_init_abi (info, gdbarch);
+  linux_init_abi (info, gdbarch, 0);
 
   /* GNU/Linux is always ELF.  */
   tdep->is_elf = 1;
@@ -523,7 +523,7 @@ hppa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
-                                             svr4_fetch_objfile_link_map);
+					     svr4_fetch_objfile_link_map);
 }
 
 void _initialize_hppa_linux_tdep ();

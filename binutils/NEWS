@@ -1,8 +1,33 @@
 -*- text -*-
 
+Changes in 2.36:
+
+* Update elfedit and readelf with LAM_U48 and LAM_U57 support.
+
+* Nm has a new command line option: --ifunc-chars=CHARS.  This specifies a
+  string of one or two characters.  The first character is used as the type
+  character when displaying global ifunc symbols.  The second character, if
+  present is used when displaying local ifunc symbols.
+
+  In addition a new configure time option --enable-f-for-ifunc-symbols has been
+  created, which if used will change nm's default characters for ifunc symbols
+  from i (both local and global) to F (global) and f (local).
+
+* The ar tool's previously unused l modifier is now used for specifying
+  dependencies of a static library. The arguments of this option
+  (or --record-libdeps long form option) will be stored verbatim in the
+  __.LIBDEP member of the archive, which the linker may read at link time.
+
+* Readelf can now display the contents of LTO symbol table sections when asked
+  to do so via the --lto-syms command line option.
+
 * Readelf now accepts the -C command line option to enable the demangling of
   symbol names.  In addition the --demangle=<style>, --no-demangle,
   --recurse-limit and --no-recurse-limit options are also now availale.
+
+* Add support for the SHF_GNU_RETAIN ELF section flag.
+  This flag specifies that the section should not be garbage collected by the
+  linker.
 
 Changes in 2.35:
 
@@ -733,7 +758,7 @@ Changes in binutils 2.1:
   and/or local symbols only.  They now also support long options.
 
 
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
+Copyright (C) 2012-2021 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

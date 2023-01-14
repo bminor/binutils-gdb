@@ -65,7 +65,7 @@
 	reply		OK		for success
 			ENN		for an error
 
-        write reg	Pn...=r...	Write register n... with value r...,
+	write reg	Pn...=r...	Write register n... with value r...,
 					which contains two hex digits for each
 					byte in the register (target byte
 					order).
@@ -97,7 +97,7 @@
 					resume at same address.
 
 	last signal     ?               Reply the current reason for stopping.
-                                        This is the same reply as is generated
+					This is the same reply as is generated
 					for step or cont : SAA where AA is the
 					signal number.
 
@@ -406,8 +406,8 @@ retry:
       while (count < BUFMAX - 1)
 	{
 	  ch = getDebugChar ();
-          if (ch == '$')
-            goto retry;
+	  if (ch == '$')
+	    goto retry;
 	  if (ch == '#')
 	    break;
 	  checksum = checksum + ch;
@@ -1154,13 +1154,13 @@ static void sr()
 
   /* Calling Reset does the same as pressing the button */
   asm (".global _Reset
-        .global _WarmReset
+	.global _WarmReset
 _Reset:
 _WarmReset:
-         mov.l L_sp,r15
-         bra   _INIT
-         nop
-         .align 2
+	 mov.l L_sp,r15
+	 bra   _INIT
+	 nop
+	 .align 2
 L_sp:    .long _init_stack + 8000");
 
   asm("saveRegisters:
@@ -1221,7 +1221,7 @@ static void rr()
 {
 asm("
 	.align 2	
-        .global _resume
+	.global _resume
 _resume:
 	mov	r4,r1
 restoreRegisters:

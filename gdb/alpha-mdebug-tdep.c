@@ -1,5 +1,5 @@
 /* Target-dependent mdebug code for the ALPHA architecture.
-   Copyright (C) 1993-2020 Free Software Foundation, Inc.
+   Copyright (C) 1993-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -34,10 +34,10 @@
 /* *INDENT-OFF* */
 /* Layout of a stack frame on the alpha:
 
-                |				|
+		|				|
  pdr members:	|  7th ... nth arg,		|
-                |  `pushed' by caller.		|
-                |				|
+		|  `pushed' by caller.		|
+		|				|
 ----------------|-------------------------------|<--  old_sp == vfp
    ^  ^  ^  ^	|				|
    |  |  |  |	|				|
@@ -72,7 +72,7 @@
    |            |  called procedure.		|
    v            |  				|
    -------------|-------------------------------|<-- sp
-                |				|
+		|				|
 */
 /* *INDENT-ON* */
 
@@ -117,7 +117,7 @@ find_proc_desc (CORE_ADDR pc)
       proc_desc = (struct mdebug_extra_func_info *) SYMBOL_VALUE_BYTES (sym);
 
       /* Correct incorrect setjmp procedure descriptor from the library
-         to make backtrace through setjmp work.  */
+	 to make backtrace through setjmp work.  */
       if (proc_desc->pdr.pcreg == 0
 	  && strcmp (sh_name, "setjmp") == 0)
 	{
@@ -154,7 +154,7 @@ alpha_mdebug_after_prologue (CORE_ADDR pc,
   if (proc_desc)
     {
       /* If function is frameless, then we need to do it the hard way.  I
-         strongly suspect that frameless always means prologueless...  */
+	 strongly suspect that frameless always means prologueless...  */
       if (alpha_mdebug_frameless (proc_desc))
 	return 0;
     }
@@ -180,7 +180,7 @@ struct alpha_mdebug_unwind_cache
 {
   struct mdebug_extra_func_info *proc_desc;
   CORE_ADDR vfp;
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 /* Extract all of the information about the frame from PROC_DESC
@@ -231,14 +231,14 @@ alpha_mdebug_frame_unwind_cache (struct frame_info *this_frame,
       /* Clear bit for RA so we don't save it again later.  */
       mask &= ~(1 << returnreg);
 
-      info->saved_regs[returnreg].addr = reg_position;
+      info->saved_regs[returnreg].set_addr (reg_position);
       reg_position += 8;
     }
 
   for (ireg = 0; ireg <= 31; ++ireg)
     if (mask & (1 << ireg))
       {
-	info->saved_regs[ireg].addr = reg_position;
+	info->saved_regs[ireg].set_addr (reg_position);
 	reg_position += 8;
       }
 
@@ -248,14 +248,14 @@ alpha_mdebug_frame_unwind_cache (struct frame_info *this_frame,
   for (ireg = 0; ireg <= 31; ++ireg)
     if (mask & (1 << ireg))
       {
-	info->saved_regs[ALPHA_FP0_REGNUM + ireg].addr = reg_position;
+	info->saved_regs[ALPHA_FP0_REGNUM + ireg].set_addr (reg_position);
 	reg_position += 8;
       }
 
   /* The stack pointer of the previous frame is computed by popping
      the current stack frame.  */
-  if (!trad_frame_addr_p (info->saved_regs, ALPHA_SP_REGNUM))
-   trad_frame_set_value (info->saved_regs, ALPHA_SP_REGNUM, vfp);
+  if (!info->saved_regs[ALPHA_SP_REGNUM].is_addr ())
+    info->saved_regs[ALPHA_SP_REGNUM].set_value (vfp);
 
   return info;
 }
@@ -308,8 +308,8 @@ alpha_mdebug_max_frame_size_exceeded (struct mdebug_extra_func_info *proc_desc)
 
 static int
 alpha_mdebug_frame_sniffer (const struct frame_unwind *self,
-                            struct frame_info *this_frame,
-                            void **this_cache)
+			    struct frame_info *this_frame,
+			    void **this_cache)
 {
   CORE_ADDR pc = get_frame_address_in_block (this_frame);
   struct mdebug_extra_func_info *proc_desc;

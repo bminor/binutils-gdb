@@ -1,5 +1,5 @@
 /* Target definitions for NN-bit ELF
-   Copyright (C) 1993-2020 Free Software Foundation, Inc.
+   Copyright (C) 1993-2021 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -802,7 +802,7 @@
 
 extern const struct elf_size_info _bfd_elfNN_size_info;
 
-static struct elf_backend_data elfNN_bed =
+static const struct elf_backend_data elfNN_bed =
 {
   ELF_ARCH,			/* arch */
   ELF_TARGET_ID,		/* target_id */
@@ -1007,6 +1007,9 @@ const bfd_target TARGET_BIG_SYM =
 
   elf_match_priority,
 
+  /* TRUE if unused section symbols should be kept.  */
+  TARGET_KEEP_UNUSED_SECTION_SYMBOLS,
+
   /* Routines to byte-swap various sized integers from the data sections */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
@@ -1107,6 +1110,9 @@ const bfd_target TARGET_LITTLE_SYM =
   15,
 
   elf_match_priority,
+
+  /* TRUE if unused section symbols should be kept.  */
+  TARGET_KEEP_UNUSED_SECTION_SYMBOLS,
 
   /* Routines to byte-swap various sized integers from the data sections */
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,

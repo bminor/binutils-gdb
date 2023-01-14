@@ -8,5 +8,5 @@ Displaying notes found in: .note.gnu.property
   GNU                  0x00000010	NT_GNU_PROPERTY_TYPE_0
       Properties: x86 feature: <None>
   GNU                  0x00000020	NT_GNU_PROPERTY_TYPE_0
-      Properties: x86 ISA used: <None>
+      Properties: x86 ISA used: 
 	x86 feature used: x86

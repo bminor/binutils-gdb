@@ -1,6 +1,6 @@
 /* Program and address space management, for GDB, the GNU debugger.
 
-   Copyright (C) 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2009-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -29,7 +29,7 @@
 #include <algorithm>
 
 /* The last program space number assigned.  */
-int last_program_space_num = 0;
+static int last_program_space_num = 0;
 
 /* The head of the program spaces list.  */
 std::vector<struct program_space *> program_spaces;
@@ -147,15 +147,12 @@ program_space::~program_space ()
 
   breakpoint_program_space_exit (this);
   no_shared_libraries (NULL, 0);
-  exec_close ();
   free_all_objfiles ();
   /* Defer breakpoint re-set because we don't want to create new
      locations for this pspace which we're tearing down.  */
   clear_symtab_users (SYMFILE_DEFER_BP_RESET);
   if (!gdbarch_has_shared_address_space (target_gdbarch ()))
     free_address_space (this->aspace);
-  clear_section_table (&this->target_sections);
-  clear_program_space_solib_cache (this);
     /* Discard any data modules have associated with the PSPACE.  */
   program_space_free_data (this);
 }
@@ -224,6 +221,24 @@ program_space::solibs () const
   return next_adapter<struct so_list> (this->so_list);
 }
 
+/* See progspace.h.  */
+
+void
+program_space::exec_close ()
+{
+  if (ebfd != nullptr)
+    {
+      /* Removing target sections may close the exec_ops target.
+	 Clear ebfd before doing so to prevent recursion.  */
+      ebfd.reset (nullptr);
+      ebfd_mtime = 0;
+
+      remove_target_sections (&ebfd);
+
+      exec_filename.reset (nullptr);
+    }
+}
+
 /* Copies program space SRC to DEST.  Copies the main executable file,
    and the main symbol file.  Returns DEST.  */
 
@@ -234,8 +249,8 @@ clone_program_space (struct program_space *dest, struct program_space *src)
 
   set_current_program_space (dest);
 
-  if (src->pspace_exec_filename != NULL)
-    exec_file_attach (src->pspace_exec_filename, 0);
+  if (src->exec_filename != NULL)
+    exec_file_attach (src->exec_filename.get (), 0);
 
   if (src->symfile_object_file != NULL)
     symbol_file_add_main (objfile_name (src->symfile_object_file),
@@ -264,13 +279,10 @@ set_current_program_space (struct program_space *pspace)
 
 /* Returns true iff there's no inferior bound to PSPACE.  */
 
-int
-program_space_empty_p (struct program_space *pspace)
+bool
+program_space::empty ()
 {
-  if (find_inferior_for_program_space (pspace) != NULL)
-      return 0;
-
-  return 1;
+  return find_inferior_for_program_space (this) == nullptr;
 }
 
 /* Prints the list of program spaces and their details on UIOUT.  If
@@ -316,8 +328,8 @@ print_program_space (struct ui_out *uiout, int requested)
 
       uiout->field_signed ("id", pspace->num);
 
-      if (pspace->pspace_exec_filename)
-	uiout->field_string ("exec", pspace->pspace_exec_filename);
+      if (pspace->exec_filename != nullptr)
+	uiout->field_string ("exec", pspace->exec_filename.get ());
       else
 	uiout->field_skip ("exec");
 
@@ -431,10 +443,10 @@ update_address_spaces (void)
 /* See progspace.h.  */
 
 void
-clear_program_space_solib_cache (struct program_space *pspace)
+program_space::clear_solib_cache ()
 {
-  pspace->added_solibs.clear ();
-  pspace->deleted_solibs.clear ();
+  added_solibs.clear ();
+  deleted_solibs.clear ();
 }
 
 
@@ -452,7 +464,7 @@ initialize_progspace (void)
      _initialize_foo routines may need to install their per-pspace
      data keys.  We can only allocate a progspace when all those
      modules have done that.  Do this before
-     initialize_current_architecture, because that accesses exec_bfd,
-     which in turn dereferences current_program_space.  */
+     initialize_current_architecture, because that accesses the ebfd
+     of current_program_space.  */
   current_program_space = new program_space (new_address_space ());
 }

@@ -1,6 +1,6 @@
 /* Self tests for disassembler for GDB, the GNU debugger.
 
-   Copyright (C) 2017-2020 Free Software Foundation, Inc.
+   Copyright (C) 2017-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -69,11 +69,6 @@ print_one_insn_test (struct gdbarch *gdbarch)
       insn = xstormy16_insn;
       len = sizeof (xstormy16_insn);
       break;
-    case bfd_arch_arc:
-      /* PR 21003 */
-      if (gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_arc_arc601)
-	return;
-      /* fall through */
     case bfd_arch_nios2:
     case bfd_arch_score:
     case bfd_arch_riscv:
@@ -86,6 +81,11 @@ print_one_insn_test (struct gdbarch *gdbarch)
 	len = bplen;
       }
       break;
+    case bfd_arch_arc:
+      /* PR 21003 */
+      if (gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_arc_arc601)
+	return;
+      /* fall through */
     default:
       {
 	/* Test disassemble breakpoint instruction.  */

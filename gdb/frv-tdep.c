@@ -1,6 +1,6 @@
 /* Target-dependent code for the Fujitsu FR-V, for GDB, the GNU Debugger.
 
-   Copyright (C) 2002-2020 Free Software Foundation, Inc.
+   Copyright (C) 2002-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -49,7 +49,7 @@ struct frv_unwind_cache		/* was struct frame_extra_info */
     CORE_ADDR base;
 
     /* Table indicating the location of each and every register.  */
-    struct trad_frame_saved_reg *saved_regs;
+    trad_frame_saved_reg *saved_regs;
   };
 
 /* A structure describing a particular variant of the FRV.
@@ -100,7 +100,7 @@ frv_abi (struct gdbarch *gdbarch)
    not.  (E.g, -1 will be returned if the ABI isn't the FDPIC ABI.)  */
 int
 frv_fdpic_loadmap_addresses (struct gdbarch *gdbarch, CORE_ADDR *interp_addr,
-                             CORE_ADDR *exec_addr)
+			     CORE_ADDR *exec_addr)
 {
   if (frv_abi (gdbarch) != FRV_ABI_FDPIC)
     return -1;
@@ -296,7 +296,7 @@ frv_register_type (struct gdbarch *gdbarch, int reg)
 
 static enum register_status
 frv_pseudo_register_read (struct gdbarch *gdbarch, readable_regcache *regcache,
-                          int reg, gdb_byte *buffer)
+			  int reg, gdb_byte *buffer)
 {
   enum register_status status;
 
@@ -309,7 +309,7 @@ frv_pseudo_register_read (struct gdbarch *gdbarch, readable_regcache *regcache,
   else if (accg0_regnum <= reg && reg <= accg7_regnum)
     {
       /* The accg raw registers have four values in each slot with the
-         lowest register number occupying the first byte.  */
+	 lowest register number occupying the first byte.  */
 
       int raw_regnum = accg0123_regnum + (reg - accg0_regnum) / 4;
       int byte_num = (reg - accg0_regnum) % 4;
@@ -333,7 +333,7 @@ frv_pseudo_register_read (struct gdbarch *gdbarch, readable_regcache *regcache,
 
 static void
 frv_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
-                          int reg, const gdb_byte *buffer)
+			  int reg, const gdb_byte *buffer)
 {
   if (reg == iacc0_regnum)
     {
@@ -343,7 +343,7 @@ frv_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
   else if (accg0_regnum <= reg && reg <= accg7_regnum)
     {
       /* The accg raw registers have four values in each slot with the
-         lowest register number occupying the first byte.  */
+	 lowest register number occupying the first byte.  */
 
       int raw_regnum = accg0123_regnum + (reg - accg0_regnum) / 4;
       int byte_num = (reg - accg0_regnum) % 4;
@@ -409,7 +409,7 @@ frv_register_sim_regno (struct gdbarch *gdbarch, int reg)
   else if (pc_regnum == reg)
     return SIM_FRV_PC_REGNUM;
   else if (reg >= first_spr_regnum
-           && reg < first_spr_regnum + sizeof (spr_map) / sizeof (spr_map[0]))
+	   && reg < first_spr_regnum + sizeof (spr_map) / sizeof (spr_map[0]))
     {
       int spr_reg_offset = spr_map[reg - first_spr_regnum];
 
@@ -457,8 +457,8 @@ frv_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
 	break;
 
       /* This is a big endian architecture, so byte zero will have most
-         significant byte.  The most significant bit of this byte is the
-         packing bit.  */
+	 significant byte.  The most significant bit of this byte is the
+	 packing bit.  */
       if (instr[0] & 0x80)
 	break;
 
@@ -478,8 +478,8 @@ static int
 is_caller_saves_reg (int reg)
 {
   return ((4 <= reg && reg <= 7)
-          || (14 <= reg && reg <= 15)
-          || (32 <= reg && reg <= 47));
+	  || (14 <= reg && reg <= 15)
+	  || (32 <= reg && reg <= 47));
 }
 
 
@@ -488,7 +488,7 @@ static int
 is_callee_saves_reg (int reg)
 {
   return ((16 <= reg && reg <= 31)
-          || (48 <= reg && reg <= 63));
+	  || (48 <= reg && reg <= 63));
 }
 
 
@@ -514,7 +514,7 @@ is_argument_reg (int reg)
 static CORE_ADDR
 frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 		      struct frame_info *this_frame,
-                      struct frv_unwind_cache *info)
+		      struct frv_unwind_cache *info)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
@@ -638,7 +638,7 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 	 Media Trap
 	  X XXXX XX 0000100 XXXXXX XXXX 10 XXXXXX */
       if ((op & 0x01d80000) == 0x00180000 /* Conditional branches and Call */
-          || (op & 0x01f80000) == 0x00300000  /* Jump and Link */
+	  || (op & 0x01f80000) == 0x00300000  /* Jump and Link */
 	  || (op & 0x01f80000) == 0x00100000  /* Return from Trap, Trap */
 	  || (op & 0x01f80000) == 0x00700000) /* Trap immediate */
 	{
@@ -647,13 +647,13 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 	}
 
       /* Loading something from memory into fp probably means that
-         we're in the epilogue.  Stop scanning the prologue.
-         ld @(GRi, GRk), fp
+	 we're in the epilogue.  Stop scanning the prologue.
+	 ld @(GRi, GRk), fp
 	 X 000010 0000010 XXXXXX 000100 XXXXXX
 	 ldi @(GRi, d12), fp
 	 X 000010 0110010 XXXXXX XXXXXXXXXXXX */
       else if ((op & 0x7ffc0fc0) == 0x04080100
-               || (op & 0x7ffc0000) == 0x04c80000)
+	       || (op & 0x7ffc0000) == 0x04c80000)
 	{
 	  break;
 	}
@@ -662,7 +662,7 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 	 ori sp, 0, fp
 	 P 000010 0100010 000001 000000000000 = 0x04881000
 	 0 111111 1111111 111111 111111111111 = 0x7fffffff
-             .    .   .    .   .    .   .   .
+	     .    .   .    .   .    .   .   .
 	 We treat this as part of the prologue.  */
       else if ((op & 0x7fffffff) == 0x04881000)
 	{
@@ -672,25 +672,25 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 	}
 
       /* Move the link register to the scratch register grJ, before saving:
-         movsg lr, grJ
-         P 000100 0000011 010000 000111 JJJJJJ = 0x080d01c0
-         0 111111 1111111 111111 111111 000000 = 0x7fffffc0
-             .    .   .    .   .    .    .   .
+	 movsg lr, grJ
+	 P 000100 0000011 010000 000111 JJJJJJ = 0x080d01c0
+	 0 111111 1111111 111111 111111 000000 = 0x7fffffc0
+	     .    .   .    .   .    .    .   .
 	 We treat this as part of the prologue.  */
       else if ((op & 0x7fffffc0) == 0x080d01c0)
-        {
-          int gr_j = op & 0x3f;
+	{
+	  int gr_j = op & 0x3f;
 
-          /* If we're moving it to a scratch register, that's fine.  */
-          if (is_caller_saves_reg (gr_j))
+	  /* If we're moving it to a scratch register, that's fine.  */
+	  if (is_caller_saves_reg (gr_j))
 	    {
 	      lr_save_reg = gr_j;
 	      last_prologue_pc = next_pc;
 	    }
-        }
+	}
 
       /* To save multiple callee-saves registers on the stack, at
-         offset zero:
+	 offset zero:
 
 	 std grK,@(sp,gr0)
 	 P KKKKKK 0000011 000001 000011 000000 = 0x000c10c0
@@ -699,28 +699,28 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 	 stq grK,@(sp,gr0)
 	 P KKKKKK 0000011 000001 000100 000000 = 0x000c1100
 	 0 000000 1111111 111111 111111 111111 = 0x01ffffff
-             .    .   .    .   .    .    .   .
-         We treat this as part of the prologue, and record the register's
+	     .    .   .    .   .    .    .   .
+	 We treat this as part of the prologue, and record the register's
 	 saved address in the frame structure.  */
       else if ((op & 0x01ffffff) == 0x000c10c0
-            || (op & 0x01ffffff) == 0x000c1100)
+	    || (op & 0x01ffffff) == 0x000c1100)
 	{
 	  int gr_k = ((op >> 25) & 0x3f);
 	  int ope  = ((op >> 6)  & 0x3f);
-          int count;
+	  int count;
 	  int i;
 
-          /* Is it an std or an stq?  */
-          if (ope == 0x03)
-            count = 2;
-          else
-            count = 4;
+	  /* Is it an std or an stq?  */
+	  if (ope == 0x03)
+	    count = 2;
+	  else
+	    count = 4;
 
 	  /* Is it really a callee-saves register?  */
 	  if (is_callee_saves_reg (gr_k))
 	    {
 	      for (i = 0; i < count; i++)
-	        {
+		{
 		  gr_saved[gr_k + i] = 1;
 		  gr_sp_offset[gr_k + i] = 4 * i;
 		}
@@ -730,12 +730,12 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 
       /* Adjusting the stack pointer.  (The stack pointer is GR1.)
 	 addi sp, S, sp
-         P 000001 0010000 000001 SSSSSSSSSSSS = 0x02401000
-         0 111111 1111111 111111 000000000000 = 0x7ffff000
-             .    .   .    .   .    .   .   .
+	 P 000001 0010000 000001 SSSSSSSSSSSS = 0x02401000
+	 0 111111 1111111 111111 000000000000 = 0x7ffff000
+	     .    .   .    .   .    .   .   .
 	 We treat this as part of the prologue.  */
       else if ((op & 0x7ffff000) == 0x02401000)
-        {
+	{
 	  if (framesize == 0)
 	    {
 	      /* Sign-extend the twelve-bit field.
@@ -748,7 +748,7 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 	  else
 	    {
 	      /* If the prologue is being adjusted again, we've
-	         likely gone too far; i.e. we're probably in the
+		 likely gone too far; i.e. we're probably in the
 		 epilogue.  */
 	      break;
 	    }
@@ -756,9 +756,9 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 
       /* Setting the FP to a constant distance from the SP:
 	 addi sp, S, fp
-         P 000010 0010000 000001 SSSSSSSSSSSS = 0x04401000
-         0 111111 1111111 111111 000000000000 = 0x7ffff000
-             .    .   .    .   .    .   .   .
+	 P 000010 0010000 000001 SSSSSSSSSSSS = 0x04401000
+	 0 111111 1111111 111111 000000000000 = 0x7ffff000
+	     .    .   .    .   .    .   .   .
 	 We treat this as part of the prologue.  */
       else if ((op & 0x7ffff000) == 0x04401000)
 	{
@@ -786,7 +786,7 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 	{
 	  int gr_i = ((op >> 12) & 0x3f);
 
-          /* Make sure that the source is an arg register; if it is, we'll
+	  /* Make sure that the source is an arg register; if it is, we'll
 	     treat it as a prologue instruction.  */
 	  if (is_argument_reg (gr_i))
 	    last_prologue_pc = next_pc;
@@ -796,50 +796,50 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 	     sthi GRk, @(fp, s)
 	 P KKKKKK 1010001 000010 SSSSSSSSSSSS = 0x01442000
 	 0 000000 1111111 111111 000000000000 = 0x01fff000
-             .    .   .    .   .    .   .   . 
-         And for 8-bit values, we use STB instructions.
+	     .    .   .    .   .    .   .   . 
+	 And for 8-bit values, we use STB instructions.
 	     stbi GRk, @(fp, s)
 	 P KKKKKK 1010000 000010 SSSSSSSSSSSS = 0x01402000
 	 0 000000 1111111 111111 000000000000 = 0x01fff000
 	     .    .   .    .   .    .   .   .
-         We check that GRk is really an argument register, and treat
-         all such as part of the prologue.  */
+	 We check that GRk is really an argument register, and treat
+	 all such as part of the prologue.  */
       else if (   (op & 0x01fff000) == 0x01442000
 	       || (op & 0x01fff000) == 0x01402000)
 	{
 	  int gr_k = ((op >> 25) & 0x3f);
 
-          /* Make sure that GRk is really an argument register; treat
+	  /* Make sure that GRk is really an argument register; treat
 	     it as a prologue instruction if so.  */
 	  if (is_argument_reg (gr_k))
 	    last_prologue_pc = next_pc;
 	}
 
       /* To save multiple callee-saves register on the stack, at a
-         non-zero offset:
+	 non-zero offset:
 
 	 stdi GRk, @(sp, s)
 	 P KKKKKK 1010011 000001 SSSSSSSSSSSS = 0x014c1000
 	 0 000000 1111111 111111 000000000000 = 0x01fff000
-             .    .   .    .   .    .   .   .
+	     .    .   .    .   .    .   .   .
 	 stqi GRk, @(sp, s)
 	 P KKKKKK 1010100 000001 SSSSSSSSSSSS = 0x01501000
 	 0 000000 1111111 111111 000000000000 = 0x01fff000
 	     .    .   .    .   .    .   .   .
-         We treat this as part of the prologue, and record the register's
+	 We treat this as part of the prologue, and record the register's
 	 saved address in the frame structure.  */
       else if ((op & 0x01fff000) == 0x014c1000
-            || (op & 0x01fff000) == 0x01501000)
+	    || (op & 0x01fff000) == 0x01501000)
 	{
 	  int gr_k = ((op >> 25) & 0x3f);
-          int count;
+	  int count;
 	  int i;
 
-          /* Is it a stdi or a stqi?  */
-          if ((op & 0x01fff000) == 0x014c1000)
-            count = 2;
-          else
-            count = 4;
+	  /* Is it a stdi or a stqi?  */
+	  if ((op & 0x01fff000) == 0x014c1000)
+	    count = 2;
+	  else
+	    count = 4;
 
 	  /* Is it really a callee-saves register?  */
 	  if (is_callee_saves_reg (gr_k))
@@ -858,77 +858,77 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 	}
 
       /* Storing any kind of integer register at any constant offset
-         from any other register.
+	 from any other register.
 
 	 st GRk, @(GRi, gr0)
-         P KKKKKK 0000011 IIIIII 000010 000000 = 0x000c0080
-         0 000000 1111111 000000 111111 111111 = 0x01fc0fff
-             .    .   .    .   .    .    .   .
+	 P KKKKKK 0000011 IIIIII 000010 000000 = 0x000c0080
+	 0 000000 1111111 000000 111111 111111 = 0x01fc0fff
+	     .    .   .    .   .    .    .   .
 	 sti GRk, @(GRi, d12)
 	 P KKKKKK 1010010 IIIIII SSSSSSSSSSSS = 0x01480000
 	 0 000000 1111111 000000 000000000000 = 0x01fc0000
-             .    .   .    .   .    .   .   .
-         These could be almost anything, but a lot of prologue
-         instructions fall into this pattern, so let's decode the
-         instruction once, and then work at a higher level.  */
+	     .    .   .    .   .    .   .   .
+	 These could be almost anything, but a lot of prologue
+	 instructions fall into this pattern, so let's decode the
+	 instruction once, and then work at a higher level.  */
       else if (((op & 0x01fc0fff) == 0x000c0080)
-            || ((op & 0x01fc0000) == 0x01480000))
-        {
-          int gr_k = ((op >> 25) & 0x3f);
-          int gr_i = ((op >> 12) & 0x3f);
-          int offset;
+	    || ((op & 0x01fc0000) == 0x01480000))
+	{
+	  int gr_k = ((op >> 25) & 0x3f);
+	  int gr_i = ((op >> 12) & 0x3f);
+	  int offset;
 
-          /* Are we storing with gr0 as an offset, or using an
-             immediate value?  */
-          if ((op & 0x01fc0fff) == 0x000c0080)
-            offset = 0;
-          else
-            offset = (((op & 0xfff) - 0x800) & 0xfff) - 0x800;
+	  /* Are we storing with gr0 as an offset, or using an
+	     immediate value?  */
+	  if ((op & 0x01fc0fff) == 0x000c0080)
+	    offset = 0;
+	  else
+	    offset = (((op & 0xfff) - 0x800) & 0xfff) - 0x800;
 
-          /* If the address isn't relative to the SP or FP, it's not a
-             prologue instruction.  */
-          if (gr_i != sp_regnum && gr_i != fp_regnum)
+	  /* If the address isn't relative to the SP or FP, it's not a
+	     prologue instruction.  */
+	  if (gr_i != sp_regnum && gr_i != fp_regnum)
 	    {
 	      /* Do nothing; not a prologue instruction.  */
 	    }
 
-          /* Saving the old FP in the new frame (relative to the SP).  */
-          else if (gr_k == fp_regnum && gr_i == sp_regnum)
+	  /* Saving the old FP in the new frame (relative to the SP).  */
+	  else if (gr_k == fp_regnum && gr_i == sp_regnum)
 	    {
 	      gr_saved[fp_regnum] = 1;
-              gr_sp_offset[fp_regnum] = offset;
+	      gr_sp_offset[fp_regnum] = offset;
 	      last_prologue_pc = next_pc;
 	    }
 
-          /* Saving callee-saves register(s) on the stack, relative to
-             the SP.  */
-          else if (gr_i == sp_regnum
-                   && is_callee_saves_reg (gr_k))
-            {
-              gr_saved[gr_k] = 1;
+	  /* Saving callee-saves register(s) on the stack, relative to
+	     the SP.  */
+	  else if (gr_i == sp_regnum
+		   && is_callee_saves_reg (gr_k))
+	    {
+	      gr_saved[gr_k] = 1;
 	      if (gr_i == sp_regnum)
 		gr_sp_offset[gr_k] = offset;
 	      else
 		gr_sp_offset[gr_k] = offset + fp_offset;
 	      last_prologue_pc = next_pc;
-            }
+	    }
 
-          /* Saving the scratch register holding the return address.  */
-          else if (lr_save_reg != -1
-                   && gr_k == lr_save_reg)
+	  /* Saving the scratch register holding the return address.  */
+	  else if (lr_save_reg != -1
+		   && gr_k == lr_save_reg)
 	    {
 	      lr_saved_on_stack = 1;
 	      if (gr_i == sp_regnum)
 		lr_sp_offset = offset;
 	      else
-	        lr_sp_offset = offset + fp_offset;
+		lr_sp_offset = offset + fp_offset;
 	      last_prologue_pc = next_pc;
 	    }
 
-          /* Spilling int-sized arguments to the stack.  */
-          else if (is_argument_reg (gr_k))
+	  /* Spilling int-sized arguments to the stack.  */
+	  else if (is_argument_reg (gr_k))
 	    last_prologue_pc = next_pc;
-        }
+	}
       pc = next_pc;
     }
 
@@ -938,10 +938,10 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
       ULONGEST this_base;
 
       /* If we know the relationship between the stack and frame
-         pointers, record the addresses of the registers we noticed.
-         Note that we have to do this as a separate step at the end,
-         because instructions may save relative to the SP, but we need
-         their addresses relative to the FP.  */
+	 pointers, record the addresses of the registers we noticed.
+	 Note that we have to do this as a separate step at the end,
+	 because instructions may save relative to the SP, but we need
+	 their addresses relative to the FP.  */
       if (fp_set)
 	this_base = get_frame_register_unsigned (this_frame, fp_regnum);
       else
@@ -949,15 +949,16 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 
       for (i = 0; i < 64; i++)
 	if (gr_saved[i])
-	  info->saved_regs[i].addr = this_base - fp_offset + gr_sp_offset[i];
+	  info->saved_regs[i].set_addr (this_base - fp_offset
+					+ gr_sp_offset[i]);
 
       info->prev_sp = this_base - fp_offset + framesize;
       info->base = this_base;
 
       /* If LR was saved on the stack, record its location.  */
       if (lr_saved_on_stack)
-	info->saved_regs[lr_regnum].addr
-	  = this_base - fp_offset + lr_sp_offset;
+	info->saved_regs[lr_regnum].set_addr (this_base - fp_offset
+					      + lr_sp_offset);
 
       /* The call instruction moves the caller's PC in the callee's LR.
 	 Since this is an unwind, do the reverse.  Copy the location of LR
@@ -966,7 +967,7 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
       info->saved_regs[pc_regnum] = info->saved_regs[lr_regnum];
 
       /* Save the previous frame's computed SP value.  */
-      trad_frame_set_value (info->saved_regs, sp_regnum, info->prev_sp);
+      info->saved_regs[sp_regnum].set_value (info->prev_sp);
     }
 
   return last_prologue_pc;
@@ -1055,7 +1056,7 @@ frv_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
      call label24
      P HHHHHH 0001111 LLLLLLLLLLLLLLLLLL = 0x003c0000
      0 000000 1111111 000000000000000000 = 0x01fc0000
-         .    .   .    .   .   .   .   .
+	 .    .   .    .   .   .   .   .
 
      where label24 is constructed by concatenating the H bits with the
      L bits.  The call target is PC + (4 * sign_ext(label24)).  */
@@ -1074,7 +1075,7 @@ frv_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       s = lookup_minimal_symbol_by_pc (call_dest);
 
       if (s.minsym != NULL
-          && s.minsym->linkage_name () != NULL
+	  && s.minsym->linkage_name () != NULL
 	  && strcmp (s.minsym->linkage_name (), "__main") == 0)
 	{
 	  pc += 4;
@@ -1108,7 +1109,7 @@ frv_frame_unwind_cache (struct frame_info *this_frame,
 
 static void
 frv_extract_return_value (struct type *type, struct regcache *regcache,
-                          gdb_byte *valbuf)
+			  gdb_byte *valbuf)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -1167,14 +1168,14 @@ find_func_descr (struct gdbarch *gdbarch, CORE_ADDR entry_point)
   store_unsigned_integer (valbuf, 4, byte_order, entry_point);
   write_memory (descr, valbuf, 4);
   store_unsigned_integer (valbuf, 4, byte_order,
-                          frv_fdpic_find_global_pointer (entry_point));
+			  frv_fdpic_find_global_pointer (entry_point));
   write_memory (descr + 4, valbuf, 4);
   return descr;
 }
 
 static CORE_ADDR
 frv_convert_from_func_ptr_addr (struct gdbarch *gdbarch, CORE_ADDR addr,
-                                struct target_ops *targ)
+				struct target_ops *targ)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR entry_point;
@@ -1191,8 +1192,8 @@ frv_convert_from_func_ptr_addr (struct gdbarch *gdbarch, CORE_ADDR addr,
 
 static CORE_ADDR
 frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
-                     struct regcache *regcache, CORE_ADDR bp_addr,
-                     int nargs, struct value **args, CORE_ADDR sp,
+		     struct regcache *regcache, CORE_ADDR bp_addr,
+		     int nargs, struct value **args, CORE_ADDR sp,
 		     function_call_return_method return_method,
 		     CORE_ADDR struct_addr)
 {
@@ -1233,7 +1234,7 @@ frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   if (return_method == return_method_struct)
     regcache_cooked_write_unsigned (regcache, struct_return_regnum,
-                                    struct_addr);
+				    struct_addr);
 
   for (argnum = 0; argnum < nargs; ++argnum)
     {
@@ -1252,8 +1253,8 @@ frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	}
       else if (abi == FRV_ABI_FDPIC
 	       && len == 4
-               && typecode == TYPE_CODE_PTR
-               && TYPE_TARGET_TYPE (arg_type)->code () == TYPE_CODE_FUNC)
+	       && typecode == TYPE_CODE_PTR
+	       && TYPE_TARGET_TYPE (arg_type)->code () == TYPE_CODE_FUNC)
 	{
 	  /* The FDPIC ABI requires function descriptors to be passed instead
 	     of entry points.  */
@@ -1308,7 +1309,7 @@ frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       /* Set the GOT register for the FDPIC ABI.  */
       regcache_cooked_write_unsigned
 	(regcache, first_gpr_regnum + 15,
-         frv_fdpic_find_global_pointer (func_addr));
+	 frv_fdpic_find_global_pointer (func_addr));
     }
 
   /* Finally, update the SP register.  */
@@ -1319,7 +1320,7 @@ frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 static void
 frv_store_return_value (struct type *type, struct regcache *regcache,
-                        const gdb_byte *valbuf)
+			const gdb_byte *valbuf)
 {
   int len = TYPE_LENGTH (type);
 
@@ -1337,7 +1338,7 @@ frv_store_return_value (struct type *type, struct regcache *regcache,
     }
   else
     internal_error (__FILE__, __LINE__,
-                    _("Don't know how to return a %d-byte value."), len);
+		    _("Don't know how to return a %d-byte value."), len);
 }
 
 static enum return_value_convention
@@ -1568,7 +1569,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
-                                             frv_fetch_objfile_link_map);
+					     frv_fetch_objfile_link_map);
 
   return gdbarch;
 }

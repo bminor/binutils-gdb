@@ -1,6 +1,6 @@
 /*> cp1.c <*/
 /* MIPS Simulator FPU (CoProcessor 1) support.
-   Copyright (C) 2002-2020 Free Software Foundation, Inc.
+   Copyright (C) 2002-2021 Free Software Foundation, Inc.
    Originally created by Cygnus Solutions.  Extensive modifications,
    including paired-single operation support and MIPS-3D support
    contributed by Ed Satterthwaite and Chris Demetriou, of Broadcom
@@ -41,6 +41,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 */
 
 #include "sim-main.h"
+
+#include <stdlib.h>
 
 /* Within cp1.c we refer to sim_cpu directly.  */
 #define CPU cpu

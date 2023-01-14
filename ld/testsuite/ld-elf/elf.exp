@@ -1,5 +1,5 @@
 # Expect script for various ELF tests.
-#   Copyright (C) 2002-2020 Free Software Foundation, Inc.
+#   Copyright (C) 2002-2021 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -25,6 +25,19 @@ if ![is_elf_format] {
     return
 }
 
+# Return true if target is riscv little endian.
+# xfail the riscv little endain targets for the compressed1d1 test;
+# The riscv big endian targets and others should pass.
+proc riscv_little_endian { } {
+    if { [istarget "riscv32-*-*"]
+	 || [istarget "riscv64-*-*"]
+	 || [istarget "riscv32le-*-*"]
+	 || [istarget "riscv64le-*-*"] } {
+	return 1
+    }
+    return 0
+}
+
 set old_ldflags $LDFLAGS
 if { [istarget spu*-*-*] } {
     set LDFLAGS "$LDFLAGS --local-store 0:0"
@@ -44,6 +57,10 @@ if { [istarget alpha*-*-* ] } {
     # ??? How can we adjust just the one testcase?
     set LDFLAGS "$LDFLAGS -Ttext-segment 0x1000000"
     set ASFLAGS "$ASFLAGS --defsym NO_SET=1"
+}
+
+if [istarget "tic6x-*-*"] {
+    append ASFLAGS " -mpic -mpid=near"
 }
 
 if { [istarget "*-*-solaris*"] } {
@@ -117,6 +134,16 @@ if [is_underscore_target] {
 set saved_ASFLAGS "$ASFLAGS"
 if { [istarget "i?86-*-*"] || [istarget "x86_64-*-*"] } {
     set ASFLAGS "$ASFLAGS -mx86-used-note=no"
+}
+
+# Build libraries required for SHF_GNU_RETAIN tests.
+if { [check_gc_sections_available] && [supports_gnu_osabi] } {
+    run_ld_link_tests [list \
+	[list "Build libretain5.a" "" "" "" \
+	    {retain5lib.s} {} "libretain5.a"] \
+	[list "Build libretain6.a" "" "" "" \
+	    {retain6lib.s} {} "libretain6.a"] \
+	]
 }
 
 set test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
@@ -401,7 +428,10 @@ run_ld_link_tests [list \
 	"" \
 	"" \
 	{pr26391a.c pr26391b.c pr26391c.c pr26391d.c} \
-	{{nm "" pr26391.nd}} \
+	[list \
+	    [list "nm" "$dep_plug_opt" "pr26391.nd"] \
+	    [list "nm" "$dep_plug_opt" "pr26391.fd"] \
+	] \
 	"pr26391-5.o" \
 	"-fno-function-sections" \
     ] \

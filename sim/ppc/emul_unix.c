@@ -28,14 +28,7 @@
 #include "emul_generic.h"
 #include "emul_unix.h"
 
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -130,9 +123,7 @@ int getrusage();
 #include <unistd.h>
 #endif
 
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 
 #if defined(BSD) && !defined(errno) && (BSD < 199306)	/* here BSD as just a bug */
 extern int errno;

@@ -1,6 +1,6 @@
 /* C language support definitions for GDB, the GNU debugger.
 
-   Copyright (C) 1992-2020 Free Software Foundation, Inc.
+   Copyright (C) 1992-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,7 +28,6 @@ struct parser_state;
 
 #include "value.h"
 #include "macroexp.h"
-#include "parser-defs.h"
 #include "gdbsupport/enum-flags.h"
 
 
@@ -95,8 +94,6 @@ extern struct value *evaluate_subexp_c (struct type *expect_type,
 					struct expression *exp,
 					int *pos,
 					enum noside noside);
-
-extern void c_printchar (int, struct type *, struct ui_file *);
 
 extern void c_printstr (struct ui_file * stream,
 			struct type *elttype,

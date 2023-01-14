@@ -1,5 +1,5 @@
 /* BFD back-end for IBM RS/6000 "XCOFF64" files.
-   Copyright (C) 2000-2020 Free Software Foundation, Inc.
+   Copyright (C) 2000-2021 Free Software Foundation, Inc.
    Written Clinton Popetz.
    Contributed by Cygnus Support.
 
@@ -177,11 +177,10 @@ static bfd_boolean xcoff64_bad_format_hook
   (bfd *, void *);
 
 /* Relocation functions */
-static bfd_boolean xcoff64_reloc_type_br
-  (XCOFF_RELOC_FUNCTION_ARGS);
+static xcoff_reloc_function xcoff64_reloc_type_br;
 
-bfd_boolean (*xcoff64_calculate_relocation[XCOFF_MAX_CALCULATE_RELOCATION])
-  (XCOFF_RELOC_FUNCTION_ARGS) =
+xcoff_reloc_function *const
+xcoff64_calculate_relocation[XCOFF_MAX_CALCULATE_RELOCATION] =
 {
   xcoff_reloc_type_pos,	 /* R_POS   (0x00) */
   xcoff_reloc_type_neg,	 /* R_NEG   (0x01) */
@@ -2539,7 +2538,7 @@ HOWTO (0,			/* type */
        MINUS_ONE,		/* dst_mask */
        FALSE);			/* pcrel_offset */
 
-static unsigned long xcoff64_glink_code[10] =
+static const unsigned long xcoff64_glink_code[10] =
 {
   0xe9820000,	/* ld r12,0(r2) */
   0xf8410028,	/* std r2,40(r1) */
@@ -2666,6 +2665,7 @@ const bfd_target rs6000_xcoff64_vec =
     '/',			/* ar_pad_char */
     15,				/* ar_max_namelen */
     0,				/* match priority.  */
+    TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */
 
     /* data */
     bfd_getb64,
@@ -2929,6 +2929,7 @@ const bfd_target rs6000_xcoff64_aix_vec =
     '/',			/* ar_pad_char */
     15,				/* ar_max_namelen */
     0,				/* match priority.  */
+    TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */
 
     /* data */
     bfd_getb64,

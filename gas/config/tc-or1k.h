@@ -1,5 +1,5 @@
 /* tc-or1k.h -- Header file for tc-or1k.c.
-   Copyright (C) 2001-2020 Free Software Foundation, Inc.
+   Copyright (C) 2001-2021 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -74,3 +74,5 @@ void or1k_elf_final_processing (void);
 #define tc_cfi_frame_initial_instructions \
     or1k_cfi_frame_initial_instructions
 extern void or1k_cfi_frame_initial_instructions (void);
+
+#define md_single_noop_insn "l.nop"

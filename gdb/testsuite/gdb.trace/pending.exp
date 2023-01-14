@@ -1,4 +1,4 @@
-# Copyright 2011-2020 Free Software Foundation, Inc.
+# Copyright 2011-2021 Free Software Foundation, Inc.
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
@@ -90,7 +90,7 @@ proc pending_tracepoint_resolved { trace_type } {
 
 	gdb_load ${binfile}
 
-	gdb_test "break main" "Breakpoint.*at.* file .*$srcfile, line.*" \
+	gdb_test "break -q main" "Breakpoint.*at.* file .*$srcfile, line.*" \
 	    "breakpoint function"
 
 	gdb_run_cmd
@@ -132,7 +132,7 @@ proc pending_tracepoint_works { trace_type } {
 	    "single pending tracepoint info"
 
 	# Run to main which should resolve a pending tracepoint
-	gdb_test "break main" "Breakpoint.*at.* file .*$srcfile, line.*" \
+	gdb_test "break -q main" "Breakpoint.*at.* file .*$srcfile, line.*" \
 	    "breakpoint function"
 	gdb_run_cmd
 	gdb_test "" "Breakpoint 2, main.*"

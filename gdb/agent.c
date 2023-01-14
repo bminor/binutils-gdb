@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2012-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,7 +27,7 @@
 
 static const char can_use_agent_on[] = "on";
 static const char can_use_agent_off[] = "off";
-static const char *can_use_agent_enum[] =
+static const char * const can_use_agent_enum[] =
 {
   can_use_agent_on,
   can_use_agent_off,
@@ -52,7 +52,7 @@ set_can_use_agent (const char *args, int from_tty, struct cmd_list_element *c)
   if (can_use && !agent_loaded_p ())
     {
       /* Since the setting was off, we may not have observed the objfiles and
-         therefore not looked up the required symbols.  Do so now.  */
+	 therefore not looked up the required symbols.  Do so now.  */
       for (objfile *objfile : current_program_space->objfiles ())
 	if (agent_look_up_symbols (objfile) == 0)
 	  break;

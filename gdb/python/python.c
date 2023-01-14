@@ -1,6 +1,6 @@
 /* General python/gdb code
 
-   Copyright (C) 2008-2020 Free Software Foundation, Inc.
+   Copyright (C) 2008-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -105,10 +105,6 @@ const struct extension_language_defn extension_language_python =
 int gdb_python_initialized;
 
 extern PyMethodDef python_GdbMethods[];
-
-#ifdef IS_PY3K
-extern struct PyModuleDef python_GdbModuleDef;
-#endif
 
 PyObject *gdb_module;
 PyObject *gdb_python_module;
@@ -380,7 +376,7 @@ python_run_simple_file (FILE *file, const char *filename)
   if (return_value == nullptr)
     {
       /* Use PyErr_PrintEx instead of gdbpy_print_stack to better match the
-         behavior of the non-Windows codepath.  */
+	 behavior of the non-Windows codepath.  */
       PyErr_PrintEx(0);
     }
 
@@ -496,7 +492,7 @@ gdbpy_parameter_value (enum var_types type, void *var)
       /* Fall through.  */
     case var_zinteger:
     case var_zuinteger_unlimited:
-      return PyLong_FromLong (* (int *) var);
+      return gdb_py_object_from_longest (* (int *) var).release ();
 
     case var_uinteger:
       {
@@ -504,13 +500,13 @@ gdbpy_parameter_value (enum var_types type, void *var)
 
 	if (val == UINT_MAX)
 	  Py_RETURN_NONE;
-	return PyLong_FromUnsignedLong (val);
+	return gdb_py_object_from_ulongest (val).release ();
       }
 
     case var_zuinteger:
       {
 	unsigned int val = * (unsigned int *) var;
-	return PyLong_FromUnsignedLong (val);
+	return gdb_py_object_from_ulongest (val).release ();
       }
     }
 
@@ -1208,20 +1204,20 @@ gdbpy_write (PyObject *self, PyObject *args, PyObject *kw)
   try
     {
       switch (stream_type)
-        {
-        case 1:
-          {
+	{
+	case 1:
+	  {
 	    fprintf_filtered (gdb_stderr, "%s", arg);
 	    break;
-          }
-        case 2:
-          {
+	  }
+	case 2:
+	  {
 	    fprintf_filtered (gdb_stdlog, "%s", arg);
 	    break;
-          }
-        default:
-          fprintf_filtered (gdb_stdout, "%s", arg);
-        }
+	  }
+	default:
+	  fprintf_filtered (gdb_stdout, "%s", arg);
+	}
     }
   catch (const gdb_exception &except)
     {
@@ -1625,6 +1621,19 @@ finalize_python (void *ignore)
 }
 
 #ifdef IS_PY3K
+static struct PyModuleDef python_GdbModuleDef =
+{
+  PyModuleDef_HEAD_INIT,
+  "_gdb",
+  NULL,
+  -1,
+  python_GdbMethods,
+  NULL,
+  NULL,
+  NULL,
+  NULL
+};
+
 /* This is called via the PyImport_AppendInittab mechanism called
    during initialization, to make the built-in _gdb module known to
    Python.  */
@@ -1639,18 +1648,6 @@ init__gdb_module (void)
 static bool
 do_start_initialization ()
 {
-#ifdef IS_PY3K
-  size_t progsize, count;
-  /* Python documentation indicates that the memory given
-     to Py_SetProgramName cannot be freed.  However, it seems that
-     at least Python 3.7.4 Py_SetProgramName takes a copy of the
-     given program_name.  Making progname_copy static and not release
-     the memory avoids a leak report for Python versions that duplicate
-     program_name, and respect the requirement of Py_SetProgramName
-     for Python versions that do not duplicate program_name.  */
-  static wchar_t *progname_copy;
-#endif
-
 #ifdef WITH_PYTHON_PATH
   /* Work around problem where python gets confused about where it is,
      and then can't find its libraries, etc.
@@ -1662,11 +1659,20 @@ do_start_initialization ()
     (concat (ldirname (python_libdir.c_str ()).c_str (), SLASH_STRING, "bin",
 	      SLASH_STRING, "python", (char *) NULL));
 #ifdef IS_PY3K
+  /* Python documentation indicates that the memory given
+     to Py_SetProgramName cannot be freed.  However, it seems that
+     at least Python 3.7.4 Py_SetProgramName takes a copy of the
+     given program_name.  Making progname_copy static and not release
+     the memory avoids a leak report for Python versions that duplicate
+     program_name, and respect the requirement of Py_SetProgramName
+     for Python versions that do not duplicate program_name.  */
+  static wchar_t *progname_copy;
+
   std::string oldloc = setlocale (LC_ALL, NULL);
   setlocale (LC_ALL, "");
-  progsize = strlen (progname.get ());
+  size_t progsize = strlen (progname.get ());
   progname_copy = XNEWVEC (wchar_t, progsize + 1);
-  count = mbstowcs (progname_copy, progname.get (), progsize + 1);
+  size_t count = mbstowcs (progname_copy, progname.get (), progsize + 1);
   if (count == (size_t) -1)
     {
       fprintf (stderr, "Could not convert python path to string\n");
@@ -1976,12 +1982,6 @@ gdbpy_initialized (const struct extension_language_defn *extlang)
   return gdb_python_initialized;
 }
 
-#endif /* HAVE_PYTHON */
-
-
-
-#ifdef HAVE_PYTHON
-
 PyMethodDef python_GdbMethods[] =
 {
   { "history", gdbpy_history, METH_VARARGS,
@@ -2124,25 +2124,10 @@ Register a TUI window constructor." },
   {NULL, NULL, 0, NULL}
 };
 
-#ifdef IS_PY3K
-struct PyModuleDef python_GdbModuleDef =
-{
-  PyModuleDef_HEAD_INIT,
-  "_gdb",
-  NULL,
-  -1,
-  python_GdbMethods,
-  NULL,
-  NULL,
-  NULL,
-  NULL
-};
-#endif
-
 /* Define all the event objects.  */
 #define GDB_PY_DEFINE_EVENT_TYPE(name, py_name, doc, base) \
   PyTypeObject name##_event_object_type		    \
-        CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object") \
+	CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object") \
     = { \
       PyVarObject_HEAD_INIT (NULL, 0)				\
       "gdb." py_name,                             /* tp_name */ \

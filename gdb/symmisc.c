@@ -1,6 +1,6 @@
 /* Do various things to symbol tables (other than lookup), for GDB.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -39,6 +39,7 @@
 #include "readline/tilde.h"
 
 #include "psymtab.h"
+#include "psympriv.h"
 
 /* Unfortunately for debugging, stderr is usually a macro.  This is painful
    when calling functions that take FILE *'s from the debugger.
@@ -46,9 +47,9 @@
    debugging GDB with itself.  Because stdin et al need not be constants,
    we initialize them in the _initialize_symmisc function at the bottom
    of the file.  */
-FILE *std_in;
-FILE *std_out;
-FILE *std_err;
+static FILE *std_in;
+static FILE *std_out;
+static FILE *std_err;
 
 /* Prototypes for local functions */
 
@@ -73,6 +74,20 @@ print_symbol_bcache_statistics (void)
       }
 }
 
+/* Count the number of partial symbols in OBJFILE.  */
+
+static int
+count_psyms (struct objfile *objfile)
+{
+  int count = 0;
+  for (partial_symtab *pst : objfile->psymtabs ())
+    {
+      count += pst->global_psymbols.size ();
+      count += pst->static_psymbols.size ();
+    }
+  return count;
+}
+
 void
 print_objfile_statistics (void)
 {
@@ -89,9 +104,11 @@ print_objfile_statistics (void)
 	if (objfile->per_bfd->n_minsyms > 0)
 	  printf_filtered (_("  Number of \"minimal\" symbols read: %d\n"),
 			   objfile->per_bfd->n_minsyms);
-	if (OBJSTAT (objfile, n_psyms) > 0)
+
+	int n_psyms = count_psyms (objfile);
+	if (n_psyms > 0)
 	  printf_filtered (_("  Number of \"partial\" symbols read: %d\n"),
-			   OBJSTAT (objfile, n_psyms));
+			   n_psyms);
 	if (OBJSTAT (objfile, n_syms) > 0)
 	  printf_filtered (_("  Number of \"full\" symbols read: %d\n"),
 			   OBJSTAT (objfile, n_syms));
@@ -827,7 +844,7 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 			printf_filtered ("    blockvector"
 					 " ((struct blockvector *) %s)\n",
 					 host_address_to_string
-				         (COMPUNIT_BLOCKVECTOR (cust)));
+					 (COMPUNIT_BLOCKVECTOR (cust)));
 			printf_filtered ("    user"
 					 " ((struct compunit_symtab *) %s)\n",
 					 cust->user != nullptr

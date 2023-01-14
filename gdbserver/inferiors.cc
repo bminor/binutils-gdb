@@ -1,5 +1,5 @@
 /* Inferior process information for the remote server for GDB.
-   Copyright (C) 2002-2020 Free Software Foundation, Inc.
+   Copyright (C) 2002-2021 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
 
@@ -103,9 +103,9 @@ remove_thread (struct thread_info *thread)
 
   discard_queued_stop_replies (ptid_of (thread));
   all_threads.remove (thread);
-  free_one_thread (thread);
   if (current_thread == thread)
     current_thread = NULL;
+  free_one_thread (thread);
 }
 
 void *

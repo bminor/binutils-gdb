@@ -1,6 +1,6 @@
 /* Python interface to architecture
 
-   Copyright (C) 2013-2020 Free Software Foundation, Inc.
+   Copyright (C) 2013-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,10 +23,10 @@
 #include "disasm.h"
 #include "python-internal.h"
 
-typedef struct arch_object_type_object {
+struct arch_object {
   PyObject_HEAD
   struct gdbarch *gdbarch;
-} arch_object;
+};
 
 static struct gdbarch_data *arch_object_data = NULL;
 
@@ -138,41 +138,41 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
 	 to be done first to ensure we do not lose information in the
 	 conversion process.  */
       if (PyLong_Check (end_obj))
-        end = PyLong_AsUnsignedLongLong (end_obj);
+	end = PyLong_AsUnsignedLongLong (end_obj);
 #if PY_MAJOR_VERSION == 2
       else if (PyInt_Check (end_obj))
-        /* If the end_pc value is specified without a trailing 'L', end_obj will
-           be an integer and not a long integer.  */
-        end = PyInt_AsLong (end_obj);
+	/* If the end_pc value is specified without a trailing 'L', end_obj will
+	   be an integer and not a long integer.  */
+	end = PyInt_AsLong (end_obj);
 #endif
       else
-        {
-          PyErr_SetString (PyExc_TypeError,
-                           _("Argument 'end_pc' should be a (long) integer."));
+	{
+	  PyErr_SetString (PyExc_TypeError,
+			   _("Argument 'end_pc' should be a (long) integer."));
 
-          return NULL;
-        }
+	  return NULL;
+	}
 
       if (end < start)
-        {
-          PyErr_SetString (PyExc_ValueError,
-                           _("Argument 'end_pc' should be greater than or "
-                             "equal to the argument 'start_pc'."));
+	{
+	  PyErr_SetString (PyExc_ValueError,
+			   _("Argument 'end_pc' should be greater than or "
+			     "equal to the argument 'start_pc'."));
 
-          return NULL;
-        }
+	  return NULL;
+	}
     }
   if (count_obj)
     {
       count = PyInt_AsLong (count_obj);
       if (PyErr_Occurred () || count < 0)
-        {
-          PyErr_SetString (PyExc_TypeError,
-                           _("Argument 'count' should be an non-negative "
-                             "integer."));
+	{
+	  PyErr_SetString (PyExc_TypeError,
+			   _("Argument 'count' should be an non-negative "
+			     "integer."));
 
-          return NULL;
-        }
+	  return NULL;
+	}
     }
 
   gdbpy_ref<> result_list (PyList_New (0));
@@ -200,23 +200,32 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
       string_file stb;
 
       try
-        {
-          insn_len = gdb_print_insn (gdbarch, pc, &stb, NULL);
-        }
+	{
+	  insn_len = gdb_print_insn (gdbarch, pc, &stb, NULL);
+	}
       catch (const gdb_exception &except)
-        {
+	{
 	  gdbpy_convert_exception (except);
 	  return NULL;
-        }
+	}
 
-      if (PyDict_SetItemString (insn_dict.get (), "addr",
-                                gdb_py_long_from_ulongest (pc))
-          || PyDict_SetItemString (insn_dict.get (), "asm",
-                                   PyString_FromString (!stb.empty ()
-							? stb.c_str ()
-							: "<unknown>"))
-          || PyDict_SetItemString (insn_dict.get (), "length",
-                                   PyInt_FromLong (insn_len)))
+      gdbpy_ref<> pc_obj = gdb_py_object_from_ulongest (pc);
+      if (pc_obj == nullptr)
+	return nullptr;
+
+      gdbpy_ref<> asm_obj (PyString_FromString (!stb.empty ()
+						? stb.c_str ()
+						: "<unknown>"));
+      if (asm_obj == nullptr)
+	return nullptr;
+
+      gdbpy_ref<> len_obj = gdb_py_object_from_longest (insn_len);
+      if (len_obj == nullptr)
+	return nullptr;
+
+      if (PyDict_SetItemString (insn_dict.get (), "addr", pc_obj.get ())
+	  || PyDict_SetItemString (insn_dict.get (), "asm", asm_obj.get ())
+	  || PyDict_SetItemString (insn_dict.get (), "length", len_obj.get ()))
 	return NULL;
 
       pc += insn_len;

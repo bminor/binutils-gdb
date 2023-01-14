@@ -190,8 +190,23 @@ Disassembly of section \.text:
 .*:	d5033edf 	isb	#0xe
 .*:	d5033fdf 	isb
 .*:	d5033fdf 	isb
+.*:	d5033fdf 	isb
 .*:	d503309f 	ssbb
 .*:	d503349f 	pssbb
+.*:	d503319f 	dsb	oshld
+.*:	d503329f 	dsb	oshst
+.*:	d503339f 	dsb	osh
+.*:	d503359f 	dsb	nshld
+.*:	d503369f 	dsb	nshst
+.*:	d503379f 	dsb	nsh
+.*:	d503389f 	dsb	#0x08
+.*:	d503399f 	dsb	ishld
+.*:	d5033a9f 	dsb	ishst
+.*:	d5033b9f 	dsb	ish
+.*:	d5033c9f 	dsb	#0x0c
+.*:	d5033d9f 	dsb	ld
+.*:	d5033e9f 	dsb	st
+.*:	d5033f9f 	dsb	sy
 .*:	d8000000 	prfm	pldl1keep, 0 <LABEL1>
 .*: R_AARCH64_(P32_|)LD_PREL_LO19	LABEL1
 .*:	f8af6be0 	prfm	pldl1keep, \[sp, x15\]

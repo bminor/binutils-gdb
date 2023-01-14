@@ -1,6 +1,6 @@
 /* TUI windows implemented in Python
 
-   Copyright (C) 2020 Free Software Foundation, Inc.
+   Copyright (C) 2020-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -86,15 +86,23 @@ public:
   void do_scroll_vertical (int num_to_scroll) override;
   void do_scroll_horizontal (int num_to_scroll) override;
 
+  void refresh_window () override
+  {
+    tui_win_info::refresh_window ();
+    if (m_inner_window != nullptr)
+      {
+	touchwin (m_inner_window.get ());
+	tui_wrefresh (m_inner_window.get ());
+      }
+  }
+
   /* Erase and re-box the window.  */
   void erase ()
   {
-    if (is_visible ())
+    if (is_visible () && m_inner_window != nullptr)
       {
-	werase (handle.get ());
+	werase (m_inner_window.get ());
 	check_and_display_highlight_if_needed ();
-	cursor_x = 0;
-	cursor_y = 0;
       }
   }
 
@@ -115,12 +123,12 @@ public:
 
 private:
 
-  /* Location of the cursor.  */
-  int cursor_x = 0;
-  int cursor_y = 0;
-
   /* The name of this window.  */
   std::string m_name;
+
+  /* We make our own inner window, so that it is easy to print without
+     overwriting the border.  */
+  std::unique_ptr<WINDOW, curses_deleter> m_inner_window;
 
   /* The underlying Python window object.  */
   gdbpy_ref<> m_window;
@@ -155,7 +163,20 @@ tui_py_window::~tui_py_window ()
 void
 tui_py_window::rerender ()
 {
+  tui_win_info::rerender ();
+
   gdbpy_enter enter_py (get_current_arch (), current_language);
+
+  int h = viewport_height ();
+  int w = viewport_width ();
+  if (h == 0 || w == 0)
+    {
+      /* The window would be too small, so just remove the
+	 contents.  */
+      m_inner_window.reset (nullptr);
+      return;
+    }
+  m_inner_window.reset (newwin (h, w, y + 1, x + 1));
 
   if (PyObject_HasAttrString (m_window.get (), "render"))
     {
@@ -197,27 +218,11 @@ tui_py_window::do_scroll_vertical (int num_to_scroll)
 void
 tui_py_window::output (const char *text)
 {
-  int vwidth = viewport_width ();
-
-  while (cursor_y < viewport_height () && *text != '\0')
+  if (m_inner_window != nullptr)
     {
-      wmove (handle.get (), cursor_y + 1, cursor_x + 1);
-
-      std::string line = tui_copy_source_line (&text, 0, 0,
-					       vwidth - cursor_x, 0);
-      tui_puts (line.c_str (), handle.get ());
-
-      if (*text == '\n')
-	{
-	  ++text;
-	  ++cursor_y;
-	  cursor_x = 0;
-	}
-      else
-	cursor_x = getcurx (handle.get ()) - 1;
+      tui_puts (text, m_inner_window.get ());
+      tui_wrefresh (m_inner_window.get ());
     }
-
-  wrefresh (handle.get ());
 }
 
 
@@ -340,8 +345,8 @@ gdbpy_register_tui_window (PyObject *self, PyObject *args, PyObject *kw)
 #define REQUIRE_WINDOW(Window)					\
     do {							\
       if ((Window)->window == nullptr)				\
-        return PyErr_Format (PyExc_RuntimeError,		\
-                             _("TUI window is invalid."));	\
+	return PyErr_Format (PyExc_RuntimeError,		\
+			     _("TUI window is invalid."));	\
     } while (0)
 
 /* Python function which checks the validity of a TUI window
@@ -392,7 +397,9 @@ gdbpy_tui_width (PyObject *self, void *closure)
 {
   gdbpy_tui_window *win = (gdbpy_tui_window *) self;
   REQUIRE_WINDOW (win);
-  return PyLong_FromLong (win->window->viewport_width ());
+  gdbpy_ref<> result
+    = gdb_py_object_from_longest (win->window->viewport_width ());
+  return result.release ();
 }
 
 /* Return the height of the TUI window.  */
@@ -401,7 +408,9 @@ gdbpy_tui_height (PyObject *self, void *closure)
 {
   gdbpy_tui_window *win = (gdbpy_tui_window *) self;
   REQUIRE_WINDOW (win);
-  return PyLong_FromLong (win->window->viewport_height ());
+  gdbpy_ref<> result
+    = gdb_py_object_from_longest (win->window->viewport_height ());
+  return result.release ();
 }
 
 /* Return the title of the TUI window.  */

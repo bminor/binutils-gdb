@@ -1,6 +1,6 @@
 /* Target-dependent code for Xilinx MicroBlaze.
 
-   Copyright (C) 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2009-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -65,7 +65,7 @@
 
 /* The registers of the Xilinx microblaze processor.  */
 
-static const char *microblaze_register_names[] =
+static const char * const microblaze_register_names[] =
 {
   "r0",   "r1",  "r2",    "r3",   "r4",   "r5",   "r6",   "r7",
   "r8",   "r9",  "r10",   "r11",  "r12",  "r13",  "r14",  "r15",
@@ -302,7 +302,7 @@ microblaze_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
       else if (IS_SETUP_FP(op, ra, rb))
 	{
 	  /* We have a frame pointer.  Note the register which is 
-             acting as the frame pointer.  */
+	     acting as the frame pointer.  */
 	  flags |= MICROBLAZE_MY_FRAME_IN_FP;
 	  flags &= ~MICROBLAZE_MY_FRAME_IN_SP;
 	  cache->fp_regnum = rd;
@@ -478,9 +478,9 @@ microblaze_frame_prev_register (struct frame_info *this_frame,
   if (cache->frameless_p)
     {
       if (regnum == MICROBLAZE_PC_REGNUM)
-        regnum = 15;
+	regnum = 15;
       if (regnum == MICROBLAZE_SP_REGNUM)
-        regnum = 1;
+	regnum = 1;
       return trad_frame_get_prev_register (this_frame,
 					   cache->saved_regs, regnum);
     }
@@ -638,12 +638,12 @@ static void
 microblaze_register_g_packet_guesses (struct gdbarch *gdbarch)
 {
   register_remote_g_packet_guess (gdbarch,
-                                  4 * MICROBLAZE_NUM_CORE_REGS,
-                                  tdesc_microblaze);
+				  4 * MICROBLAZE_NUM_CORE_REGS,
+				  tdesc_microblaze);
 
   register_remote_g_packet_guess (gdbarch,
-                                  4 * MICROBLAZE_NUM_REGS,
-                                  tdesc_microblaze_with_stack_protect);
+				  4 * MICROBLAZE_NUM_REGS,
+				  tdesc_microblaze_with_stack_protect);
 }
 
 static struct gdbarch *
@@ -651,7 +651,7 @@ microblaze_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
-  struct tdesc_arch_data *tdesc_data = NULL;
+  tdesc_arch_data_up tdesc_data;
   const struct target_desc *tdesc = info.target_desc;
 
   /* If there is already a candidate, use it.  */
@@ -669,33 +669,30 @@ microblaze_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       int i;
 
       feature = tdesc_find_feature (tdesc,
-                                    "org.gnu.gdb.microblaze.core");
+				    "org.gnu.gdb.microblaze.core");
       if (feature == NULL)
-        return NULL;
+	return NULL;
       tdesc_data = tdesc_data_alloc ();
 
       valid_p = 1;
       for (i = 0; i < MICROBLAZE_NUM_CORE_REGS; i++)
-        valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
-                                            microblaze_register_names[i]);
+	valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), i,
+					    microblaze_register_names[i]);
       feature = tdesc_find_feature (tdesc,
-                                    "org.gnu.gdb.microblaze.stack-protect");
+				    "org.gnu.gdb.microblaze.stack-protect");
       if (feature != NULL)
-        {
-          valid_p = 1;
-          valid_p &= tdesc_numbered_register (feature, tdesc_data,
-                                              MICROBLAZE_SLR_REGNUM,
-                                              "rslr");
-          valid_p &= tdesc_numbered_register (feature, tdesc_data,
-                                              MICROBLAZE_SHR_REGNUM,
-                                              "rshr");
-        }
+	{
+	  valid_p = 1;
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
+					      MICROBLAZE_SLR_REGNUM,
+					      "rslr");
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
+					      MICROBLAZE_SHR_REGNUM,
+					      "rshr");
+	}
 
       if (!valid_p)
-        {
-          tdesc_data_cleanup (tdesc_data);
-          return NULL;
-        }
+	return NULL;
     }
 
   /* Allocate space for the new architecture.  */
@@ -748,7 +745,7 @@ microblaze_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   frame_unwind_append_unwinder (gdbarch, &microblaze_frame_unwind);
   frame_base_append_sniffer (gdbarch, dwarf2_frame_base_sniffer);
   if (tdesc_data != NULL)
-    tdesc_use_registers (gdbarch, tdesc, tdesc_data);
+    tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
 
   return gdbarch;
 }

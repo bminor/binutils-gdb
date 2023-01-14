@@ -1,3 +1,234 @@
+2021-01-23  Lancelot SIX  <lsix@lancelotsix.com>
+
+	* gdb_tilde_expand.cc (gdb_tilde_expand): Improve
+	implementation.
+	(gdb_tilde_expand_up): Delegate logic to gdb_tilde_expand.
+	* gdb_tilde_expand.h (gdb_tilde_expand): Update description.
+
+2021-01-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common-debug.h (debug_prefixed_printf_cond_nofunc): New.
+	* common-debug.c (debug_prefixed_vprintf): Handle a nullptr
+	func.
+
+2021-01-08  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/27157
+	* pathstuff.cc (get_standard_cache_dir, get_standard_config_dir,
+	find_gdb_home_config_file): Add empty string check.
+
+2021-01-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* common-utils.h (align_up): Fix typo in header comment.
+
+2021-01-04  Simon Marchi  <simon.marchi@efficios.com>
+
+	* common-debug.h (debug_print_depth): New.
+	(struct scoped_debug_start_end): New.
+	(scoped_debug_start_end): New.
+	(scoped_debug_enter_exit): New.
+	* common-debug.cc (debug_prefixed_vprintf): Print indentation.
+
+2020-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdbsupport/common-utils.cc: Change 'ctype.h' include to
+	'safe-ctype.h'.
+	(extract_string_maybe_quoted): Use safe-ctype function versions.
+	(is_digit_in_base): Likewise.
+	(digit_to_int): Likewise.
+	(strtoulst): Likewise.
+	(skip_spaces): Likewise.
+	(skip_to_space): Likewise.
+
+2020-12-11  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common-debug.h (debug_prefixed_printf_cond): New.
+	* event-loop.h (event_loop_debug_printf): Use
+	debug_prefixed_printf_cond.
+
+2020-12-08  Alexander Fedotov  <alfedotov@gmail.com>
+
+	* pathstuff.cc (get_standard_cache_dir): Use LOCALAPPDATA environment
+	variable when running on Windows.
+
+2020-12-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tdesc.cc (print_xml_feature::visit): Print enum fields using
+	'evalue' syntax.
+
+2020-12-01  Chungyi Chi  <demonic@csie.io>
+
+	* tdesc.cc (print_xml_feature::visit): Print enum size attribute.
+
+2020-11-20  Tom Tromey  <tromey@adacore.com>
+
+	* thread-pool.cc (thread_pool::set_thread_count): Ignore system
+	errors.
+
+2020-11-10  Tom Tromey  <tromey@adacore.com>
+
+	PR build/26848:
+	* pathstuff.h: Move include block here...
+	* pathstuff.cc: ... from here.
+
+2020-11-02  Tom Tromey  <tom@tromey.com>
+
+	* pathstuff.h (get_standard_config_dir): Declare.
+	* pathstuff.cc (get_standard_config_dir): New function.
+
+2020-11-02  Simon Marchi  <simon.marchi@efficios.com>
+
+	* common-exceptions.h: Fix indentation.
+	* event-loop.cc: Fix indentation.
+	* fileio.cc: Fix indentation.
+	* filestuff.cc: Fix indentation.
+	* gdb-dlfcn.cc: Fix indentation.
+	* gdb_string_view.h: Fix indentation.
+	* job-control.cc: Fix indentation.
+	* signals.cc: Fix indentation.
+
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common-debug.cc (debug_prefixed_printf): New.
+	* common-debug.h (debug_prefixed_printf): New declaration.
+	* event-loop.cc (event_loop_debug_printf_1): Remove.
+	* event-loop.h (event_loop_debug_printf_1): Remove.
+	(event_loop_debug_printf): Use debug_prefixed_printf.
+	(event_loop_ui_debug_printf): Use debug_prefixed_printf.
+
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common.m4: Replace AC_TRY_COMPILE with AC_COMPILE_IFELSE +
+	AC_LANG_PROGRAM.
+	* configure: Re-generate.
+
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common.m4: Replace AC_FUNC_VFORK with AC_FUNC_FORK.
+
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure: Re-generate.
+	* warning.m4: Replace AC_TRY_COMPILE with AC_COMPILE_IFELSE +
+	AC_LANG_PROGRAM.
+
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure: Re-generate.
+	* ptrace.m4: Replace AC_TRY_COMPILE with AC_COMPILE_IFELSE +
+	AC_LANG_PROGRAM.
+
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure: Re-generate.
+	* ptrace.m4: Re-indent.
+
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* aclocal.m4: Re-generate.
+	* configure: Re-generate.
+	* configure.ac: Remove AM_PROG_CC_STDC.
+
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure.ac: Use AC_CANONICAL_{BUILD,HOST,TARGET} instead of
+	AC_CANONICAL_SYSTEM.
+	* configure: Re-generate.
+
+2020-10-26  Pedro Alves  <pedro@palves.net>
+
+	* eintr.h (handle_eintr): Replace Ret template parameter with
+	ErrorValType.  Use it as type of the failure value.  Deduce the
+	function's return type using decltype.  Use lowercase for function
+	parameter names.
+
+2020-10-25  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in: Re-generate.
+	* acinclude.m4: Update ptrace.m4 path.
+	* ptrace.m4: Move here.
+
+2020-10-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tdesc.h (allocate_target_description): Update return type.
+
+2020-10-07  Tom Tromey  <tromey@adacore.com>
+
+	* Makefile.in: Rebuild.
+	* Makefile.am (libgdbsupport_a_SOURCES): Add search.cc.
+	* search.h: New file.
+	* search.cc: New file.
+
+2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* event-loop.h (debug_event_loop): New variable declaration.
+	(event_loop_debug_printf_1): New function declaration.
+	(event_loop_debug_printf): New macro.
+	* event-loop.cc (debug_event_loop): New variable.
+	(handle_file_event): Add debug print.
+	(event_loop_debug_printf_1): New function.
+
+2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common-debug.cc (debug_prefixed_vprintf): Move here.
+	* common-debug.h (debug_prefixed_vprintf): Move here.
+
+2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* event-loop.h (add_file_handler): Add "name" parameter.
+	* event-loop.cc (struct file_handler) <name>: New field.
+	(create_file_handler): Add "name" parameter, assign it to file
+	handler.
+	(add_file_handler): Add "name" parameter.
+
+2020-10-01  Kamil Rytarowski  <n54@gmx.com>
+
+	* agent.cc (gdb_connect_sync_socket): Preinitialize addr with zeros.
+
+2020-09-29  Pedro Alves  <pedro@palves.net>
+
+	* valid-expr.h (CHECK_VALID_EXPR_INT): Make archetype a template
+	class instead of an alias template and adjust static_assert.
+
+2020-09-24  Simon Marchi  <simon.marchi@efficios.com>
+
+	* event-loop.c (struct file_handler): Remove typedef, re-format.
+
+2020-09-16  John Baldwin  <jhb@FreeBSD.org>
+
+	* common.m4 (GDB_AC_COMMON): Refactor checks for kinfo_getfile().
+	* configure, config.in: Regenerate.
+
+2020-09-14  Pedro Alves  <pedro@palves.net>
+
+	* enum-flags.h: Include "traits.h".
+	(DEF_ENUM_FLAGS_TYPE): Declare a function instead of defining a
+	structure.
+	(enum_underlying_type): Update comment.
+	(namespace enum_flags_detail): New.  Move struct zero_type here.
+	(EnumIsUnsigned, EnumIsSigned): New.
+	(class enum_flags): Make most methods constexpr.
+	(operator&=, operator|=, operator^=): Take an enum_flags instead
+	of an enum_type.  Make rvalue ref versions deleted.
+	(operator enum_type()): Delete.
+	(operator&, operator|, operator^, operator~): Delete, moved out of
+	class.
+	(raw()): New method.
+	(is_enum_flags_enum_type_t): Declare.
+	(ENUM_FLAGS_GEN_BINOP, ENUM_FLAGS_GEN_COMPOUND_ASSIGN)
+	(ENUM_FLAGS_GEN_COMP): New.  Use them to reimplement global
+	operators.
+	(operator~): Now constexpr and reimplemented.
+	(operator<<, operator>>): New deleted functions.
+	* valid-expr.h (CHECK_VALID_EXPR_5, CHECK_VALID_EXPR_6): New.
+
+2020-09-14  Pedro Alves  <pedro@palves.net>
+
+	* traits.h (struct nonesuch, struct detector, detected_or)
+	(detected_or_t, is_detected, detected_t, detected_or)
+	(detected_or_t, is_detected_exact, is_detected_convertible): New.
+	* valid-expr.h (CHECK_VALID_EXPR_INT): Use gdb::is_detected_exact.
+
 2020-09-10  Kamil Rytarowski  <n54@gmx.com>
 
 	* eintr.h: New file.
@@ -283,4 +514,3 @@
 	* acinclude.m4, aclocal.m4, config.in, configure, configure.ac,
 	Makefile.am, Makefile.in, README: New files.
 	* Moved from ../gdb/gdbsupport/
-

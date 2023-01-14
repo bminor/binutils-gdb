@@ -10,5 +10,5 @@
 Disassembly of section .text:
 
 [0-9a-f]+ <__start>:
-    [0-9a-f]+:	ea21dead 	movih      	r1, 57005
-    [0-9a-f]+:	ec21beef 	ori      	r1, r1, 48879
+\s*[0-9a-f]+:	ea21dead 	movih      	r1, 57005
+\s*[0-9a-f]+:	ec21beef 	ori      	r1, r1, 48879

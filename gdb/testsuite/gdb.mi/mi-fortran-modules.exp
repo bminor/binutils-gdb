@@ -1,4 +1,4 @@
-# Copyright 2019-2020 Free Software Foundation, Inc.
+# Copyright 2019-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,6 +15,8 @@
 
 # Test -symbol-info-modules, listing Fortran modules.
 
+if { [skip_fortran_tests] } { return -1 }
+
 load_lib fortran.exp
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
@@ -26,12 +28,9 @@ if {[prepare_for_testing "failed to prepare" ${testfile} \
     return -1
 }
 
-gdb_exit
-if {[mi_gdb_start]} {
-    continue
-}
+mi_clean_restart $binfile
 
-mi_run_to_main
+mi_runto_main
 
 
 # Patterns to skip optional system modules that appear with later versions of GFortran.

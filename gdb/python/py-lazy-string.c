@@ -1,6 +1,6 @@
 /* Python interface to lazy strings.
 
-   Copyright (C) 2010-2020 Free Software Foundation, Inc.
+   Copyright (C) 2010-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,7 +24,7 @@
 #include "valprint.h"
 #include "language.h"
 
-typedef struct {
+struct lazy_string_object {
   PyObject_HEAD
 
   /*  Holds the address of the lazy string.  */
@@ -51,7 +51,7 @@ typedef struct {
      This is recorded as a PyObject so that we take advantage of support for
      preserving the type should its owning objfile go away.  */
   PyObject *type;
-} lazy_string_object;
+};
 
 extern PyTypeObject lazy_string_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("lazy_string_object");
@@ -61,7 +61,7 @@ stpy_get_address (PyObject *self, void *closure)
 {
   lazy_string_object *self_string = (lazy_string_object *) self;
 
-  return gdb_py_long_from_ulongest (self_string->address);
+  return gdb_py_object_from_ulongest (self_string->address).release ();
 }
 
 static PyObject *
@@ -88,7 +88,7 @@ stpy_get_length (PyObject *self, void *closure)
 {
   lazy_string_object *self_string = (lazy_string_object *) self;
 
-  return PyLong_FromLong (self_string->length);
+  return gdb_py_object_from_longest (self_string->length).release ();
 }
 
 static PyObject *

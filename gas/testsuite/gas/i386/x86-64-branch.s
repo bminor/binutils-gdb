@@ -22,6 +22,10 @@
 	retw
 	retw	$8
 
+	jz,pt label
+	jz,pn label
+label:
+
 	.intel_syntax noprefix
 	call	rax
 	callq	rax

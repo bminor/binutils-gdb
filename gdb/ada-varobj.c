@@ -1,6 +1,6 @@
 /* varobj support for Ada.
 
-   Copyright (C) 2012-2020 Free Software Foundation, Inc.
+   Copyright (C) 2012-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -208,7 +208,7 @@ ada_varobj_adjust_for_child_access (struct value **value,
       the (value, type) couple.  */
   if ((*type)->code () == TYPE_CODE_PTR
       && (TYPE_TARGET_TYPE (*type)->code () == TYPE_CODE_STRUCT
-          || TYPE_TARGET_TYPE (*type)->code () == TYPE_CODE_UNION)
+	  || TYPE_TARGET_TYPE (*type)->code () == TYPE_CODE_UNION)
       && *value != nullptr
       && value_as_address (*value) != 0
       && !ada_is_array_descriptor_type (TYPE_TARGET_TYPE (*type))

@@ -1,6 +1,6 @@
 /* Target-vector operations for controlling windows child processes, for GDB.
 
-   Copyright (C) 1995-2020 Free Software Foundation, Inc.
+   Copyright (C) 1995-2021 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions, A Red Hat Company.
 
@@ -71,6 +71,7 @@
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/gdb_wait.h"
 #include "nat/windows-nat.h"
+#include "gdbsupport/symbol.h"
 
 using namespace windows_nat;
 
@@ -200,8 +201,8 @@ enum
 #endif
 
 #define CONTEXT_DEBUGGER_DR CONTEXT_FULL | CONTEXT_FLOATING_POINT \
-        | CONTEXT_SEGMENTS | CONTEXT_DEBUG_REGISTERS \
-        | CONTEXT_EXTENDED_REGISTERS
+	| CONTEXT_SEGMENTS | CONTEXT_DEBUG_REGISTERS \
+	| CONTEXT_EXTENDED_REGISTERS
 
 static uintptr_t dr[8];
 static int debug_registers_changed;
@@ -234,7 +235,7 @@ static std::vector<windows_thread_info *> thread_list;
 static int saw_create;
 static int open_process_used = 0;
 #ifdef __x86_64__
-static bool wow64_process = false;
+static void *wow64_dbgbreak;
 #endif
 
 /* User options.  */
@@ -310,7 +311,7 @@ struct windows_nat_target final : public x86_nat_target<inf_child_target>
 
   void resume (ptid_t, int , enum gdb_signal) override;
 
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
@@ -1522,9 +1523,36 @@ ctrl_c_handler (DWORD event_type)
   if (!new_console && !attach_flag)
     return TRUE;
 
-  if (!DebugBreakProcess (current_process_handle))
-    warning (_("Could not interrupt program.  "
-	       "Press Ctrl-c in the program console."));
+#ifdef __x86_64__
+  if (wow64_process)
+    {
+      /* Call DbgUiRemoteBreakin of the 32bit ntdll.dll in the target process.
+	 DebugBreakProcess would call the one of the 64bit ntdll.dll, which
+	 can't be correctly handled by gdb.  */
+      if (wow64_dbgbreak == nullptr)
+	{
+	  CORE_ADDR addr;
+	  if (!find_minimal_symbol_address ("ntdll!DbgUiRemoteBreakin",
+					    &addr, 0))
+	    wow64_dbgbreak = (void *) addr;
+	}
+
+      if (wow64_dbgbreak != nullptr)
+	{
+	  HANDLE thread = CreateRemoteThread (current_process_handle, NULL,
+					      0, (LPTHREAD_START_ROUTINE)
+					      wow64_dbgbreak, NULL, 0, NULL);
+	  if (thread)
+	    CloseHandle (thread);
+	}
+    }
+  else
+#endif
+    {
+      if (!DebugBreakProcess (current_process_handle))
+	warning (_("Could not interrupt program.  "
+		   "Press Ctrl-c in the program console."));
+    }
 
   /* Return true to tell that Ctrl-C has been handled.  */
   return TRUE;
@@ -1592,7 +1620,7 @@ windows_nat_target::get_windows_debug_event (int pid,
       /* Record the existence of this thread.  */
       thread_id = current_event.dwThreadId;
       windows_add_thread
-        (ptid_t (current_event.dwProcessId, current_event.dwThreadId, 0),
+	(ptid_t (current_event.dwProcessId, current_event.dwThreadId, 0),
 	 current_event.u.CreateThread.hThread,
 	 current_event.u.CreateThread.lpThreadLocalBase,
 	 false /* main_thread_p */);
@@ -1622,7 +1650,7 @@ windows_nat_target::get_windows_debug_event (int pid,
       current_process_handle = current_event.u.CreateProcessInfo.hProcess;
       /* Add the main thread.  */
       windows_add_thread
-        (ptid_t (current_event.dwProcessId,
+	(ptid_t (current_event.dwProcessId,
 		 current_event.dwThreadId, 0),
 	 current_event.u.CreateProcessInfo.hThread,
 	 current_event.u.CreateProcessInfo.lpThreadLocalBase,
@@ -1774,7 +1802,7 @@ out:
 /* Wait for interesting events to occur in the target process.  */
 ptid_t
 windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
-			  int options)
+			  target_wait_flags options)
 {
   int pid = -1;
 
@@ -2385,7 +2413,7 @@ clear_win32_environment (char **env)
       mbstowcs (copy, env[i], len);
       equalpos = wcschr (copy, L'=');
       if (equalpos)
-        *equalpos = L'\0';
+	*equalpos = L'\0';
       SetEnvironmentVariableW (copy, NULL);
     }
   xfree (copy);
@@ -3582,7 +3610,7 @@ _initialize_loadable ()
 #endif
       GPA (hm, GetModuleInformation);
       GetModuleFileNameEx = (GetModuleFileNameEx_ftype *)
-        GetProcAddress (hm, GetModuleFileNameEx_name);
+	GetProcAddress (hm, GetModuleFileNameEx_name);
     }
 
   if (!EnumProcessModules || !GetModuleInformation || !GetModuleFileNameEx)

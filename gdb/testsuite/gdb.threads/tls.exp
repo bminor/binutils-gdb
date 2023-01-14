@@ -1,5 +1,5 @@
 # tls.exp -- Expect script to test thread-local storage
-# Copyright (C) 1992-2020 Free Software Foundation, Inc.
+# Copyright (C) 1992-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -127,7 +127,9 @@ proc check_thread_stack {number spin_threads spin_threads_level} {
     upvar $spin_threads tarr
     upvar $spin_threads_level tarrl
 
-    select_thread $number
+    with_test_prefix "thread stack" {
+	select_thread $number
+    }
     send_gdb "where\n"
     gdb_expect {
 	-re ".*(\[0-9\]+)\[ \t\]+$hex in spin \\(vp=(0x\[0-9a-f\]+).*\r\n$gdb_prompt $" {
@@ -257,7 +259,10 @@ set thrs_in_spin 0
 foreach i [array names spin_threads] {
     if {$spin_threads($i) == 1} {
       incr thrs_in_spin
-      select_thread $i
+
+      with_test_prefix "spin_threads" {
+	select_thread $i
+      }
       set level $spin_threads_level($i)
       # We expect to be in sem_wait, but if the thread has not yet
       # been scheduled, we might be in sem_post still.  We could be at

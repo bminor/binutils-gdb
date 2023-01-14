@@ -1,4 +1,4 @@
-# Copyright 2007-2020 Free Software Foundation, Inc.
+# Copyright 2007-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ load_lib dwarf.exp
 
 # This test can only be run on targets which support DWARF-2 and use gas.
 if {![dwarf2_support]} {
-    verbose "Skipping DW_AT_ranges test."
+    verbose "Skipping $gdb_test_file_name."
     return 0  
 }
 
@@ -28,11 +28,11 @@ if [get_compiler_info] {
     return -1
 }
 if !$gcc_compiled {
-    verbose "Skipping DW_AT_ranges test."
+    verbose "Skipping $gdb_test_file_name."
     return 0  
 }
 
-standard_testfile dw2-ranges.c dw2-ranges2.c dw2-ranges3.c
+standard_testfile .c -2.c -3.c
 set asmfile [standard_output_file ${testfile}.s]
 set asmfile2 [standard_output_file ${testfile}2.s]
 set asmfile3 [standard_output_file ${testfile}3.s]

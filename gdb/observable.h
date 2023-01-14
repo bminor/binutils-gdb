@@ -1,6 +1,6 @@
 /* Observers
 
-   Copyright (C) 2016-2020 Free Software Foundation, Inc.
+   Copyright (C) 2016-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -87,8 +87,10 @@ extern observable<> executable_changed;
    instruction.  For 'attach' and 'core', gdb calls this observer
    immediately after connecting to the inferior, and before any
    information on the inferior has been printed.  */
-extern observable<struct target_ops */* target */,
-		  int /* from_tty */> inferior_created;
+extern observable<inferior */* inferior */> inferior_created;
+
+/* The inferior INF has exec'ed a new executable file.  */
+extern observable<struct inferior */* inf */> inferior_execd;
 
 /* The status of process record for inferior inferior in gdb has
    changed.  The process record is started if STARTED is true, and

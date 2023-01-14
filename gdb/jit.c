@@ -1,6 +1,6 @@
 /* Handle JIT code generation in the inferior for GDB, the GNU Debugger.
 
-   Copyright (C) 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2009-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -45,11 +45,11 @@
 
 static std::string jit_reader_dir;
 
-static const char *const jit_break_name = "__jit_debug_register_code";
+static const char jit_break_name[] = "__jit_debug_register_code";
 
-static const char *const jit_descriptor_name = "__jit_debug_descriptor";
+static const char jit_descriptor_name[] = "__jit_debug_descriptor";
 
-static void jit_inferior_init (struct gdbarch *gdbarch);
+static void jit_inferior_created_hook (inferior *inf);
 static void jit_inferior_exit_hook (struct inferior *inf);
 
 /* An unwinder is registered for every gdbarch.  This key is used to
@@ -58,95 +58,20 @@ static void jit_inferior_exit_hook (struct inferior *inf);
 
 static struct gdbarch_data *jit_gdbarch_data;
 
-/* Non-zero if we want to see trace of jit level stuff.  */
+/* True if we want to see trace of jit level stuff.  */
 
-static unsigned int jit_debug = 0;
+static bool jit_debug = false;
+
+/* Print a "jit" debug statement.  */
+
+#define jit_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (jit_debug, "jit", fmt, ##__VA_ARGS__)
 
 static void
 show_jit_debug (struct ui_file *file, int from_tty,
 		struct cmd_list_element *c, const char *value)
 {
   fprintf_filtered (file, _("JIT debugging is %s.\n"), value);
-}
-
-struct target_buffer
-{
-  CORE_ADDR base;
-  ULONGEST size;
-};
-
-/* Opening the file is a no-op.  */
-
-static void *
-mem_bfd_iovec_open (struct bfd *abfd, void *open_closure)
-{
-  return open_closure;
-}
-
-/* Closing the file is just freeing the base/size pair on our side.  */
-
-static int
-mem_bfd_iovec_close (struct bfd *abfd, void *stream)
-{
-  xfree (stream);
-
-  /* Zero means success.  */
-  return 0;
-}
-
-/* For reading the file, we just need to pass through to target_read_memory and
-   fix up the arguments and return values.  */
-
-static file_ptr
-mem_bfd_iovec_pread (struct bfd *abfd, void *stream, void *buf,
-		     file_ptr nbytes, file_ptr offset)
-{
-  int err;
-  struct target_buffer *buffer = (struct target_buffer *) stream;
-
-  /* If this read will read all of the file, limit it to just the rest.  */
-  if (offset + nbytes > buffer->size)
-    nbytes = buffer->size - offset;
-
-  /* If there are no more bytes left, we've reached EOF.  */
-  if (nbytes == 0)
-    return 0;
-
-  err = target_read_memory (buffer->base + offset, (gdb_byte *) buf, nbytes);
-  if (err)
-    return -1;
-
-  return nbytes;
-}
-
-/* For statting the file, we only support the st_size attribute.  */
-
-static int
-mem_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
-{
-  struct target_buffer *buffer = (struct target_buffer*) stream;
-
-  memset (sb, 0, sizeof (struct stat));
-  sb->st_size = buffer->size;
-  return 0;
-}
-
-/* Open a BFD from the target's memory.  */
-
-static gdb_bfd_ref_ptr
-bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size,
-			     const char *target)
-{
-  struct target_buffer *buffer = XNEW (struct target_buffer);
-
-  buffer->base = addr;
-  buffer->size = size;
-  return gdb_bfd_openr_iovec ("<in-memory>", target,
-			      mem_bfd_iovec_open,
-			      buffer,
-			      mem_bfd_iovec_pread,
-			      mem_bfd_iovec_close,
-			      mem_bfd_iovec_stat);
 }
 
 struct jit_reader
@@ -173,7 +98,7 @@ struct jit_reader
 static struct jit_reader *loaded_jit_reader = NULL;
 
 typedef struct gdb_reader_funcs * (reader_init_fn_type) (void);
-static const char *reader_init_fn_sym = "gdb_init_reader";
+static const char reader_init_fn_sym[] = "gdb_init_reader";
 
 /* Try to load FILE_NAME as a JIT debug info reader.  */
 
@@ -183,9 +108,8 @@ jit_reader_load (const char *file_name)
   reader_init_fn_type *init_fn;
   struct gdb_reader_funcs *funcs = NULL;
 
-  if (jit_debug)
-    fprintf_unfiltered (gdb_stdlog, _("Opening shared object %s.\n"),
-			file_name);
+  jit_debug_printf ("Opening shared object %s", file_name);
+
   gdb_dlhandle_up so = gdb_dlopen (file_name);
 
   init_fn = (reader_init_fn_type *) gdb_dlsym (so, reader_init_fn_sym);
@@ -221,7 +145,7 @@ jit_reader_load_command (const char *args, int from_tty)
 
   loaded_jit_reader = jit_reader_load (file.get ());
   reinit_frame_cache ();
-  jit_inferior_created_hook ();
+  jit_inferior_created_hook (current_inferior ());
 }
 
 /* Provides the jit-reader-unload command.  */
@@ -291,10 +215,7 @@ jit_read_descriptor (gdbarch *gdbarch,
 
   CORE_ADDR addr = MSYMBOL_VALUE_ADDRESS (jiter, objf_data->descriptor);
 
-  if (jit_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"jit_read_descriptor, descriptor_addr = %s\n",
-			paddress (gdbarch, addr));
+  jit_debug_printf ("descriptor_addr = %s", paddress (gdbarch, addr));
 
   /* Figure out how big the descriptor is on the remote and how to read it.  */
   ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
@@ -748,9 +669,9 @@ jit_reader_try_read_symtab (struct jit_code_entry *code_entry,
 	status = 0;
     }
 
-  if (jit_debug && status == 0)
-    fprintf_unfiltered (gdb_stdlog,
-			"Could not read symtab using the loaded JIT reader.\n");
+  if (status == 0)
+    jit_debug_printf ("Could not read symtab using the loaded JIT reader.");
+
   return status;
 }
 
@@ -766,16 +687,12 @@ jit_bfd_try_read_symtab (struct jit_code_entry *code_entry,
   struct objfile *objfile;
   const struct bfd_arch_info *b;
 
-  if (jit_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"jit_bfd_try_read_symtab, symfile_addr = %s, "
-			"symfile_size = %s\n",
-			paddress (gdbarch, code_entry->symfile_addr),
-			pulongest (code_entry->symfile_size));
+  jit_debug_printf ("symfile_addr = %s, symfile_size = %s",
+		    paddress (gdbarch, code_entry->symfile_addr),
+		    pulongest (code_entry->symfile_size));
 
-  gdb_bfd_ref_ptr nbfd (bfd_open_from_target_memory (code_entry->symfile_addr,
-						     code_entry->symfile_size,
-						     gnutarget));
+  gdb_bfd_ref_ptr nbfd (gdb_bfd_open_from_target_memory
+      (code_entry->symfile_addr, code_entry->symfile_size, gnutarget));
   if (nbfd == NULL)
     {
       puts_unfiltered (_("Error opening JITed symbol file, ignoring it.\n"));
@@ -833,12 +750,9 @@ jit_register_code (struct gdbarch *gdbarch,
 {
   int success;
 
-  if (jit_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"jit_register_code, symfile_addr = %s, "
-			"symfile_size = %s\n",
-			paddress (gdbarch, code_entry->symfile_addr),
-			pulongest (code_entry->symfile_size));
+  jit_debug_printf ("symfile_addr = %s, symfile_size = %s",
+		    paddress (gdbarch, code_entry->symfile_addr),
+		    pulongest (code_entry->symfile_size));
 
   success = jit_reader_try_read_symtab (code_entry, entry_addr);
 
@@ -926,11 +840,7 @@ jit_breakpoint_re_set_internal (struct gdbarch *gdbarch, program_space *pspace)
       CORE_ADDR addr = MSYMBOL_VALUE_ADDRESS (the_objfile,
 					      objf_data->register_code);
 
-      if (jit_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "jit_breakpoint_re_set_internal, "
-			    "breakpoint_addr = %s\n",
-			    paddress (gdbarch, addr));
+      jit_debug_printf ("breakpoint_addr = %s", paddress (gdbarch, addr));
 
       /* Check if we need to re-create the breakpoint.  */
       if (objf_data->cached_code_address == addr)
@@ -974,10 +884,7 @@ jit_unwind_reg_set_impl (struct gdb_unwind_callbacks *cb, int dwarf_regnum,
 					  dwarf_regnum);
   if (gdb_reg == -1)
     {
-      if (jit_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    _("Could not recognize DWARF regnum %d"),
-			    dwarf_regnum);
+      jit_debug_printf ("Could not recognize DWARF regnum %d", dwarf_regnum);
       value->free (value);
       return;
     }
@@ -1068,14 +975,11 @@ jit_frame_sniffer (const struct frame_unwind *self,
   /* Try to coax the provided unwinder to unwind the stack */
   if (funcs->unwind (funcs, &callbacks) == GDB_SUCCESS)
     {
-      if (jit_debug)
-	fprintf_unfiltered (gdb_stdlog, _("Successfully unwound frame using "
-					  "JIT reader.\n"));
+      jit_debug_printf ("Successfully unwound frame using JIT reader.");
       return 1;
     }
-  if (jit_debug)
-    fprintf_unfiltered (gdb_stdlog, _("Could not unwind frame using "
-				      "JIT reader.\n"));
+
+  jit_debug_printf ("Could not unwind frame using JIT reader.");
 
   jit_dealloc_cache (this_frame, *cache);
   *cache = NULL;
@@ -1178,20 +1082,21 @@ jit_prepend_unwinder (struct gdbarch *gdbarch)
 /* Register any already created translations.  */
 
 static void
-jit_inferior_init (struct gdbarch *gdbarch)
+jit_inferior_init (inferior *inf)
 {
   struct jit_descriptor descriptor;
   struct jit_code_entry cur_entry;
   CORE_ADDR cur_entry_addr;
+  struct gdbarch *gdbarch = inf->gdbarch;
+  program_space *pspace = inf->pspace;
 
-  if (jit_debug)
-    fprintf_unfiltered (gdb_stdlog, "jit_inferior_init\n");
+  jit_debug_printf ("called");
 
   jit_prepend_unwinder (gdbarch);
 
-  jit_breakpoint_re_set_internal (gdbarch, current_program_space);
+  jit_breakpoint_re_set_internal (gdbarch, pspace);
 
-  for (objfile *jiter : current_program_space->objfiles ())
+  for (objfile *jiter : pspace->objfiles ())
     {
       if (jiter->jiter_data == nullptr)
 	continue;
@@ -1229,20 +1134,15 @@ jit_inferior_init (struct gdbarch *gdbarch)
     }
 }
 
-/* inferior_created observer.  */
+/* Looks for the descriptor and registration symbols and breakpoints
+   the registration function.  If it finds both, it registers all the
+   already JITed code.  If it has already found the symbols, then it
+   doesn't try again.  */
 
 static void
-jit_inferior_created (struct target_ops *ops, int from_tty)
+jit_inferior_created_hook (inferior *inf)
 {
-  jit_inferior_created_hook ();
-}
-
-/* Exported routine to call when an inferior has been created.  */
-
-void
-jit_inferior_created_hook (void)
-{
-  jit_inferior_init (target_gdbarch ());
+  jit_inferior_init (inf);
 }
 
 /* Exported routine to call to re-set the jit breakpoints,
@@ -1335,15 +1235,16 @@ _initialize_jit ()
 {
   jit_reader_dir = relocate_gdb_directory (JIT_READER_DIR,
 					   JIT_READER_DIR_RELOCATABLE);
-  add_setshow_zuinteger_cmd ("jit", class_maintenance, &jit_debug,
-			     _("Set JIT debugging."),
-			     _("Show JIT debugging."),
-			     _("When non-zero, JIT debugging is enabled."),
-			     NULL,
-			     show_jit_debug,
-			     &setdebuglist, &showdebuglist);
+  add_setshow_boolean_cmd ("jit", class_maintenance, &jit_debug,
+			   _("Set JIT debugging."),
+			   _("Show JIT debugging."),
+			   _("When set, JIT debugging is enabled."),
+			   NULL,
+			   show_jit_debug,
+			   &setdebuglist, &showdebuglist);
 
-  gdb::observers::inferior_created.attach (jit_inferior_created);
+  gdb::observers::inferior_created.attach (jit_inferior_created_hook);
+  gdb::observers::inferior_execd.attach (jit_inferior_created_hook);
   gdb::observers::inferior_exit.attach (jit_inferior_exit_hook);
   gdb::observers::breakpoint_deleted.attach (jit_breakpoint_deleted);
 

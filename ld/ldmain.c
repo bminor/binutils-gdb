@@ -1,5 +1,5 @@
 /* Main program of GNU linker.
-   Copyright (C) 1991-2020 Free Software Foundation, Inc.
+   Copyright (C) 1991-2021 Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
    This file is part of the GNU Binutils.
@@ -151,7 +151,9 @@ static struct bfd_link_callbacks link_callbacks =
   info_msg,
   minfo,
   ldlang_override_segment_assignment,
-  ldlang_ctf_apply_strsym,
+  ldlang_ctf_acquire_strings,
+  NULL,
+  ldlang_ctf_new_dynsym,
   ldlang_write_ctf_late
 };
 
@@ -698,9 +700,13 @@ get_emulation (int argc, char **argv)
 		   || strcmp (argv[i], "-mips5") == 0
 		   || strcmp (argv[i], "-mips32") == 0
 		   || strcmp (argv[i], "-mips32r2") == 0
+		   || strcmp (argv[i], "-mips32r3") == 0
+		   || strcmp (argv[i], "-mips32r5") == 0
 		   || strcmp (argv[i], "-mips32r6") == 0
 		   || strcmp (argv[i], "-mips64") == 0
 		   || strcmp (argv[i], "-mips64r2") == 0
+		   || strcmp (argv[i], "-mips64r3") == 0
+		   || strcmp (argv[i], "-mips64r5") == 0
 		   || strcmp (argv[i], "-mips64r6") == 0)
 	    {
 	      /* FIXME: The arguments -mips1, -mips2, -mips3, etc. are
@@ -1382,6 +1388,10 @@ warning_find_reloc (bfd *abfd, asection *sec, void *iarg)
   free (relpp);
 }
 
+#if SUPPORT_ERROR_HANDLING_SCRIPT
+char * error_handling_script = NULL;
+#endif
+
 /* This is called when an undefined symbol is found.  */
 
 static void
@@ -1419,6 +1429,40 @@ undefined_symbol (struct bfd_link_info *info,
       error_name = xstrdup (name);
     }
 
+#if SUPPORT_ERROR_HANDLING_SCRIPT
+  if (error_handling_script != NULL
+      && error_count < MAX_ERRORS_IN_A_ROW)
+    {
+      char *        argv[4];
+      const char *  res;
+      int           status, err;
+
+      argv[0] = error_handling_script;
+      argv[1] = "undefined-symbol";
+      argv[2] = (char *) name;
+      argv[3] = NULL;
+      
+      if (verbose)
+	einfo (_("%P: About to run error handling script '%s' with arguments: '%s' '%s'\n"),
+	       argv[0], argv[1], argv[2]);
+
+      res = pex_one (PEX_SEARCH, error_handling_script, argv,
+		     N_("error handling script"),
+		     NULL /* Send stdout to random, temp file.  */,
+		     NULL /* Write to stderr.  */,
+		     &status, &err);
+      if (res != NULL)
+	{
+	  einfo (_("%P: Failed to run error handling script '%s', reason: "),
+		 error_handling_script);
+	  /* FIXME: We assume here that errrno == err.  */
+	  perror (res);
+	}
+      /* We ignore the return status of the script and
+	 carry on to issue the normal error message.  */
+    }
+#endif /* SUPPORT_ERROR_HANDLING_SCRIPT */
+  
   if (section != NULL)
     {
       if (error_count < MAX_ERRORS_IN_A_ROW)

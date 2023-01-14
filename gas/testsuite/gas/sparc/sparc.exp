@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2020 Free Software Foundation, Inc.
+# Copyright (C) 2012-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -59,7 +59,6 @@ if [istarget sparc*-*-*] {
         # and a.out targets.  Running them only in ELF targets allows
         # us to don't have to replicate pattern test files as that
         # would bring no practical advantage.
-        run_dump_test "natural"
         run_dump_test "natural-32"
         run_list_test "pr4587" ""
         run_dump_test "ticc-imm-reg"
@@ -75,7 +74,6 @@ if [istarget sparc*-*-*] {
 	run_dump_test "edge"
 
 	set_tests_arch "v9v"
-	run_dump_test "cbcond"
 	run_dump_test "cfr"
 	run_dump_test "crypto"
 	run_dump_test "hpcvis3"
@@ -95,9 +93,8 @@ if [istarget sparc*-*-*] {
 	run_dump_test "on"
 	run_dump_test "rle"
 	run_dump_test "sparc6"
-	set_tests_arch ""
 
-        run_list_test "cbcond-diag" "-64"
+	set_tests_arch ""
         run_dump_test "flush"
         run_dump_test "ld_st_fsr"
         run_dump_test "ldtw_sttw"
@@ -108,11 +105,6 @@ if [istarget sparc*-*-*] {
         run_dump_test "imm-plus-rreg"
         run_dump_test "dcti-couples-v9"
         run_dump_test "call-relax"
-        run_list_test "sparc6-diag" "-64"
-        run_list_test "fpcmpshl-diag" "-64"
-        run_list_test "ldm-stm-diag" "-64"
-        run_list_test "ldmf-stmf-diag" "-64"
-        run_list_test "on-diag" "-64"
     } else {
         # The next tests are a.out only.
         run_dump_test "call-relax-aout"
@@ -120,18 +112,28 @@ if [istarget sparc*-*-*] {
 
     if [gas_64_check] {
 	run_dump_test "asi"
+	set_tests_arch "v9v"
+	run_dump_test "cbcond"
+	set_tests_arch ""
+	run_dump_test "gotop64"
 	run_dump_test "membar"
+	run_dump_test "natural"
+	run_dump_test "pcrel64"
+	run_dump_test "plt64"
 	run_dump_test "prefetch"
+	run_dump_test "reloc64"
 	run_dump_test "set64"
 	run_dump_test "synth64"
 	run_dump_test "window"
-	run_dump_test "reloc64"
-	run_dump_test "pcrel64"
-	run_dump_test "plt64"
-	run_dump_test "gotop64"
-        run_list_test "hwcaps-bump" "-64 -bump"
-        run_list_test "asi-bump-warn" "-64 -bump"
-        run_list_test "asi-arch-error" "-Av9"
+	run_list_test "asi-arch-error" "-Av9"
+	run_list_test "asi-bump-warn" "-64 -bump"
+	run_list_test "cbcond-diag" "-64"
+	run_list_test "fpcmpshl-diag" "-64"
+	run_list_test "hwcaps-bump" "-64 -bump"
+	run_list_test "ldm-stm-diag" "-64"
+	run_list_test "ldmf-stmf-diag" "-64"
+	run_list_test "on-diag" "-64"
+	run_list_test "sparc6-diag" "-64"
 
 	set_tests_arch "v9m"
 	run_dump_test "rdhpr"

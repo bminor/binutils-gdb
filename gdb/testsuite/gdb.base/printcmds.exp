@@ -1,6 +1,6 @@
 # This testcase is part of GDB, the GNU debugger.
 
-# Copyright 1992-2020 Free Software Foundation, Inc.
+# Copyright 1992-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -1004,6 +1004,11 @@ gdb_test "print sizeof (\$cvar)" " = 4"
 
 # Similarly, printf of a string convenience var should work without a target.
 test_printf_convenience_var "no target"
+
+# Test void results.
+gdb_test "p (void)10" " = void"
+gdb_test "p/x (void)10" " = void"
+gdb_test "p \$abcd" " = void"
 
 # GDB used to complete the explicit location options even when
 # printing expressions.

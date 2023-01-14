@@ -1,6 +1,6 @@
 /* Simulator for Analog Devices Blackfin processors.
 
-   Copyright (C) 2005-2020 Free Software Foundation, Inc.
+   Copyright (C) 2005-2021 Free Software Foundation, Inc.
    Contributed by Analog Devices, Inc.
 
    This file is part of simulators.
@@ -53,9 +53,7 @@ struct sim_state {
 #include "dv-bfin_trace.h"
 
 #undef CLAMP
-#undef ALIGN
 #define CLAMP(a, b, c) min (max (a, b), c)
-#define ALIGN(addr, size) (((addr) + ((size)-1)) & ~((size)-1))
 
 /* TODO: Move all this trace logic to the common code.  */
 #define BFIN_TRACE_CORE(cpu, addr, size, map, val) \

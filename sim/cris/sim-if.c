@@ -1,5 +1,5 @@
 /* Main simulator entry points specific to the CRIS.
-   Copyright (C) 2004-2020 Free Software Foundation, Inc.
+   Copyright (C) 2004-2021 Free Software Foundation, Inc.
    Contributed by Axis Communications.
 
 This file is part of the GNU simulators.
@@ -26,9 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "elf-bfd.h"
 
 #include "sim-main.h"
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 #include <errno.h>
 #include "sim-options.h"
 #include "dis-asm.h"

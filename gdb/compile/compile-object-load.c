@@ -1,6 +1,6 @@
 /* Load module for 'compile' command.
 
-   Copyright (C) 2014-2020 Free Software Foundation, Inc.
+   Copyright (C) 2014-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -62,34 +62,50 @@ munmap_list::~munmap_list ()
     }
 }
 
-/* Helper data for setup_sections.  */
+/* A data structure that is used to lay out sections of our objfile in
+   inferior memory.  */
 
 struct setup_sections_data
 {
-  /* Size of all recent sections with matching LAST_PROT.  */
-  CORE_ADDR last_size;
+  explicit setup_sections_data (bfd *abfd)
+    : m_bfd (abfd),
+      m_last_section_first (abfd->sections)
+  {
+  }
 
-  /* First section matching LAST_PROT.  */
-  asection *last_section_first;
-
-  /* Memory protection like the prot parameter of gdbarch_infcall_mmap. */
-  unsigned last_prot;
-
-  /* Maximum of alignments of all sections matching LAST_PROT.
-     This value is always at least 1.  This value is always a power of 2.  */
-  CORE_ADDR last_max_alignment;
+  /* Place all ABFD sections next to each other obeying all
+     constraints.  */
+  void setup_one_section (asection *sect);
 
   /* List of inferior mmap ranges where setup_sections should add its
      next range.  */
-  std::unique_ptr<struct munmap_list> munmap_list;
+  struct munmap_list munmap_list;
+
+private:
+
+  /* The BFD.  */
+  bfd *m_bfd;
+
+  /* Size of all recent sections with matching LAST_PROT.  */
+  CORE_ADDR m_last_size = 0;
+
+  /* First section matching LAST_PROT.  */
+  asection *m_last_section_first;
+
+  /* Memory protection like the prot parameter of gdbarch_infcall_mmap. */
+  unsigned m_last_prot = -1;
+
+  /* Maximum of alignments of all sections matching LAST_PROT.
+     This value is always at least 1.  This value is always a power of 2.  */
+  CORE_ADDR m_last_max_alignment = -1;
+
 };
 
-/* Place all ABFD sections next to each other obeying all constraints.  */
+/* See setup_sections_data.  */
 
-static void
-setup_sections (bfd *abfd, asection *sect, void *data_voidp)
+void
+setup_sections_data::setup_one_section (asection *sect)
 {
-  struct setup_sections_data *data = (struct setup_sections_data *) data_voidp;
   CORE_ADDR alignment;
   unsigned prot;
 
@@ -112,7 +128,7 @@ setup_sections (bfd *abfd, asection *sect, void *data_voidp)
       if (compile_debug)
 	fprintf_unfiltered (gdb_stdlog,
 			    "module \"%s\" section \"%s\" size %s prot %u\n",
-			    bfd_get_filename (abfd),
+			    bfd_get_filename (m_bfd),
 			    bfd_section_name (sect),
 			    paddress (target_gdbarch (),
 				      bfd_section_size (sect)),
@@ -122,55 +138,55 @@ setup_sections (bfd *abfd, asection *sect, void *data_voidp)
     prot = -1;
 
   if (sect == NULL
-      || (data->last_prot != prot && bfd_section_size (sect) != 0))
+      || (m_last_prot != prot && bfd_section_size (sect) != 0))
     {
       CORE_ADDR addr;
       asection *sect_iter;
 
-      if (data->last_size != 0)
+      if (m_last_size != 0)
 	{
-	  addr = gdbarch_infcall_mmap (target_gdbarch (), data->last_size,
-				       data->last_prot);
-	  data->munmap_list->add (addr, data->last_size);
+	  addr = gdbarch_infcall_mmap (target_gdbarch (), m_last_size,
+				       m_last_prot);
+	  munmap_list.add (addr, m_last_size);
 	  if (compile_debug)
 	    fprintf_unfiltered (gdb_stdlog,
 				"allocated %s bytes at %s prot %u\n",
-				paddress (target_gdbarch (), data->last_size),
+				paddress (target_gdbarch (), m_last_size),
 				paddress (target_gdbarch (), addr),
-				data->last_prot);
+				m_last_prot);
 	}
       else
 	addr = 0;
 
-      if ((addr & (data->last_max_alignment - 1)) != 0)
+      if ((addr & (m_last_max_alignment - 1)) != 0)
 	error (_("Inferior compiled module address %s "
 		 "is not aligned to BFD required %s."),
 	       paddress (target_gdbarch (), addr),
-	       paddress (target_gdbarch (), data->last_max_alignment));
+	       paddress (target_gdbarch (), m_last_max_alignment));
 
-      for (sect_iter = data->last_section_first; sect_iter != sect;
+      for (sect_iter = m_last_section_first; sect_iter != sect;
 	   sect_iter = sect_iter->next)
 	if ((bfd_section_flags (sect_iter) & SEC_ALLOC) != 0)
 	  bfd_set_section_vma (sect_iter, addr + bfd_section_vma (sect_iter));
 
-      data->last_size = 0;
-      data->last_section_first = sect;
-      data->last_prot = prot;
-      data->last_max_alignment = 1;
+      m_last_size = 0;
+      m_last_section_first = sect;
+      m_last_prot = prot;
+      m_last_max_alignment = 1;
     }
 
   if (sect == NULL)
     return;
 
   alignment = ((CORE_ADDR) 1) << bfd_section_alignment (sect);
-  data->last_max_alignment = std::max (data->last_max_alignment, alignment);
+  m_last_max_alignment = std::max (m_last_max_alignment, alignment);
 
-  data->last_size = (data->last_size + alignment - 1) & -alignment;
+  m_last_size = (m_last_size + alignment - 1) & -alignment;
 
-  bfd_set_section_vma (sect, data->last_size);
+  bfd_set_section_vma (sect, m_last_size);
 
-  data->last_size += bfd_section_size (sect);
-  data->last_size = (data->last_size + alignment - 1) & -alignment;
+  m_last_size += bfd_section_size (sect);
+  m_last_size = (m_last_size + alignment - 1) & -alignment;
 }
 
 /* Helper for link_callbacks callbacks vector.  */
@@ -192,7 +208,7 @@ link_callbacks_multiple_definition (struct bfd_link_info *link_info,
 
 static void
 link_callbacks_warning (struct bfd_link_info *link_info, const char *xwarning,
-                        const char *symbol, bfd *abfd, asection *section,
+			const char *symbol, bfd *abfd, asection *section,
 			bfd_vma address)
 {
   warning (_("Compiled module \"%s\" section \"%s\": warning: %s"),
@@ -582,11 +598,10 @@ store_regs (struct type *regs_type, CORE_ADDR regs_base)
    COMPILE_I_PRINT_ADDRESS_SCOPE when COMPILE_I_PRINT_VALUE_SCOPE
    should have been used instead.  */
 
-struct compile_module *
+compile_module_up
 compile_object_load (const compile_file_names &file_names,
 		     enum compile_i_scope_types scope, void *scope_data)
 {
-  struct setup_sections_data setup_sections_data;
   CORE_ADDR regs_addr, out_value_addr = 0;
   struct symbol *func_sym;
   struct type *func_type;
@@ -594,7 +609,6 @@ compile_object_load (const compile_file_names &file_names,
   long storage_needed;
   asymbol **symbol_table, **symp;
   long number_of_symbols, missing_symbols;
-  struct compile_module *retval;
   struct type *regs_type, *out_value_type = NULL;
   char **matching;
   struct objfile *objfile;
@@ -607,7 +621,7 @@ compile_object_load (const compile_file_names &file_names,
   gdb_bfd_ref_ptr abfd (gdb_bfd_open (filename.get (), gnutarget));
   if (abfd == NULL)
     error (_("\"%s\": could not open as compiled module: %s"),
-          filename.get (), bfd_errmsg (bfd_get_error ()));
+	  filename.get (), bfd_errmsg (bfd_get_error ()));
 
   if (!bfd_check_format_matches (abfd.get (), bfd_object, &matching))
     error (_("\"%s\": not in loadable format: %s"),
@@ -617,14 +631,10 @@ compile_object_load (const compile_file_names &file_names,
   if ((bfd_get_file_flags (abfd.get ()) & (EXEC_P | DYNAMIC)) != 0)
     error (_("\"%s\": not in object format."), filename.get ());
 
-  setup_sections_data.last_size = 0;
-  setup_sections_data.last_section_first = abfd->sections;
-  setup_sections_data.last_prot = -1;
-  setup_sections_data.last_max_alignment = 1;
-  setup_sections_data.munmap_list.reset (new struct munmap_list);
-
-  bfd_map_over_sections (abfd.get (), setup_sections, &setup_sections_data);
-  setup_sections (abfd.get (), NULL, &setup_sections_data);
+  struct setup_sections_data setup_sections_data (abfd.get ());
+  for (asection *sect = abfd->sections; sect != nullptr; sect = sect->next)
+    setup_sections_data.setup_one_section (sect);
+  setup_sections_data.setup_one_section (nullptr);
 
   storage_needed = bfd_get_symtab_upper_bound (abfd.get ());
   if (storage_needed < 0)
@@ -758,7 +768,7 @@ compile_object_load (const compile_file_names &file_names,
 					TYPE_LENGTH (regs_type),
 					GDB_MMAP_PROT_READ);
       gdb_assert (regs_addr != 0);
-      setup_sections_data.munmap_list->add (regs_addr, TYPE_LENGTH (regs_type));
+      setup_sections_data.munmap_list.add (regs_addr, TYPE_LENGTH (regs_type));
       if (compile_debug)
 	fprintf_unfiltered (gdb_stdlog,
 			    "allocated %s bytes at %s for registers\n",
@@ -780,8 +790,8 @@ compile_object_load (const compile_file_names &file_names,
 					     (GDB_MMAP_PROT_READ
 					      | GDB_MMAP_PROT_WRITE));
       gdb_assert (out_value_addr != 0);
-      setup_sections_data.munmap_list->add (out_value_addr,
-					    TYPE_LENGTH (out_value_type));
+      setup_sections_data.munmap_list.add (out_value_addr,
+					   TYPE_LENGTH (out_value_type));
       if (compile_debug)
 	fprintf_unfiltered (gdb_stdlog,
 			    "allocated %s bytes at %s for printed value\n",
@@ -790,16 +800,16 @@ compile_object_load (const compile_file_names &file_names,
 			    paddress (target_gdbarch (), out_value_addr));
     }
 
-  retval = XNEW (struct compile_module);
+  compile_module_up retval (new struct compile_module);
   retval->objfile = objfile_holder.release ();
-  retval->source_file = xstrdup (file_names.source_file ());
+  retval->source_file = file_names.source_file ();
   retval->func_sym = func_sym;
   retval->regs_addr = regs_addr;
   retval->scope = scope;
   retval->scope_data = scope_data;
   retval->out_value_type = out_value_type;
   retval->out_value_addr = out_value_addr;
-  retval->munmap_list_head = setup_sections_data.munmap_list.release ();
+  retval->munmap_list = std::move (setup_sections_data.munmap_list);
 
   return retval;
 }

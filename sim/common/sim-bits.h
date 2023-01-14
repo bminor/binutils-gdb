@@ -1,6 +1,6 @@
 /* The common simulator framework for GDB, the GNU Debugger.
 
-   Copyright 2002-2020 Free Software Foundation, Inc.
+   Copyright 2002-2021 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney and Red Hat.
 
@@ -92,11 +92,8 @@
    EXTEND*(VALUE): Convert the `*' bit value to the targets natural
    word size.  Sign extend the value if needed.
 
-   ALIGN_*(VALUE): Round the value upwards so that it is aligned to a
-   `_*' byte boundary.
-
-   FLOOR_*(VALUE): Truncate the value so that it is aligned to a `_*'
-   byte boundary.
+   align_*(VALUE, BYTES): Round the value so that it is aligned to a
+   BYTES boundary.
 
    ROT*(VALUE, NR_BITS): Return the `*' bit VALUE rotated by NR_BITS
    right (positive) or left (negative).
@@ -525,14 +522,8 @@ INLINE_SIM_BITS(unsigned_word) MSINSERTED (unsigned_word val, int start, int sto
 
 
 /* memory alignment macro's */
-#define _ALIGNa(A,X)  (((X) + ((A) - 1)) & ~((A) - 1))
-#define _FLOORa(A,X)  ((X) & ~((A) - 1))
-
-#define ALIGN_8(X)	_ALIGNa (8, X)
-#define ALIGN_16(X)	_ALIGNa (16, X)
-
-#define ALIGN_PAGE(X)	_ALIGNa (0x1000, X)
-#define FLOOR_PAGE(X)   ((X) & ~(0x1000 - 1))
+#define align_up(v, n)		(((v) + (n) - 1) & -(n))
+#define align_down(v, n)	((v) & -(n))
 
 
 /* bit bliting macro's */

@@ -1,4 +1,4 @@
-# Copyright 2020 Free Software Foundation, Inc.
+# Copyright 2020-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,10 +24,12 @@ if {[build_executable "failed to prepare" ${testfile} ${srcfile}] == -1} {
 }
 
 # Make sure TUI is supported before continuing.
-Term::clean_restart 24 80 $testfile
-if {![Term::enter_tui]} {
-    unsupported "TUI not supported"
-    return
+with_test_prefix "initial check" {
+    Term::clean_restart 24 80 $testfile
+    if {![Term::enter_tui]} {
+	unsupported "TUI not supported"
+	return
+    }
 }
 
 Term::clean_restart 24 80 $testfile
@@ -42,12 +44,16 @@ gdb_test "tui new-layout example src 1 src 1" \
     "Window \"src\" seen twice in layout"
 gdb_test "tui new-layout example src 1" \
     "New layout does not contain the \"cmd\" window"
-gdb_test "tui new-layout example src 1}" \
-    "Extra '}' in layout specification"
-gdb_test "tui new-layout example {src 1} 1}" \
-    "Extra '}' in layout specification"
-gdb_test "tui new-layout example {src 1" \
-    "Missing '}' in layout specification"
+
+# Avoid unbalanced curly braces problems with tcl 8.5.
+if { [tcl_version_at_least 8 6] } {
+    gdb_test "tui new-layout example src 1\}" \
+	"Extra '\}' in layout specification"
+    gdb_test "tui new-layout example {src 1} 1\}" \
+	"Extra '\}' in layout specification"
+    gdb_test "tui new-layout example \{src 1" \
+	"Missing '\}' in layout specification"
+}
 
 gdb_test_no_output "tui new-layout example asm 1 status 0 cmd 1"
 

@@ -1,4 +1,4 @@
-# Copyright 2009-2020 Free Software Foundation, Inc.
+# Copyright 2009-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -97,7 +97,7 @@ proc disp_step_func { func } {
     gdb_test_no_output "set debug displaced on"
 
     gdb_test "continue" \
-	"Continuing.*displaced: displaced pc to.*Breakpoint.*, ${test_end_label} ().*" \
+	"Continuing.*prepared successfully .*Breakpoint.*, ${test_end_label} ().*" \
 	"continue to ${test_end_label}"
 
     gdb_test_no_output "set debug displaced off"

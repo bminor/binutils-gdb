@@ -1,6 +1,6 @@
 // layout.cc -- lay out output file sections for gold
 
-// Copyright (C) 2006-2020 Free Software Foundation, Inc.
+// Copyright (C) 2006-2021 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -1099,7 +1099,8 @@ Layout::init_fixed_output_section(const char* name,
   typename elfcpp::Elf_types<size>::Elf_Addr sh_addr = shdr.get_sh_addr();
   typename elfcpp::Elf_types<size>::Elf_Off sh_offset = shdr.get_sh_offset();
   typename elfcpp::Elf_types<size>::Elf_WXword sh_size = shdr.get_sh_size();
-  typename elfcpp::Elf_types<size>::Elf_WXword sh_flags = shdr.get_sh_flags();
+  typename elfcpp::Elf_types<size>::Elf_WXword sh_flags =
+      this->get_output_section_flags(shdr.get_sh_flags());
   typename elfcpp::Elf_types<size>::Elf_WXword sh_addralign =
       shdr.get_sh_addralign();
 
@@ -1172,14 +1173,20 @@ Layout::layout(Sized_relobj_file<size, big_endian>* object, unsigned int shndx,
     {
       // Some flags in the input section should not be automatically
       // copied to the output section.
-      elfcpp::Elf_Xword flags = (shdr.get_sh_flags()
-				 & ~ elfcpp::SHF_COMPRESSED);
+      elfcpp::Elf_Xword sh_flags = (shdr.get_sh_flags()
+				    & ~ elfcpp::SHF_COMPRESSED);
       name = this->namepool_.add(name, true, NULL);
-      os = this->make_output_section(name, sh_type, flags,
-				     ORDER_INVALID, false);
+      os = this->make_output_section(name, sh_type, sh_flags, ORDER_INVALID,
+				     false);
     }
   else
     {
+      // Get the section flags and mask out any flags that do not
+      // take part in section matching.
+      elfcpp::Elf_Xword sh_flags
+	  = (this->get_output_section_flags(shdr.get_sh_flags())
+	     & ~object->osabi().ignored_sh_flags());
+
       // All ".text.unlikely.*" sections can be moved to a unique
       // segment with --text-unlikely-segment option.
       bool text_unlikely_segment
@@ -1188,13 +1195,10 @@ Layout::layout(Sized_relobj_file<size, big_endian>* object, unsigned int shndx,
 			     object->section_name(shndx).c_str()));
       if (text_unlikely_segment)
 	{
-	  elfcpp::Elf_Xword flags
-	    = this->get_output_section_flags(shdr.get_sh_flags());
-
 	  Stringpool::Key name_key;
 	  const char* os_name = this->namepool_.add(".text.unlikely", true,
 						    &name_key);
-	  os = this->get_output_section(os_name, name_key, sh_type, flags,
+	  os = this->get_output_section(os_name, name_key, sh_type, sh_flags,
 					ORDER_INVALID, false);
 	  // Map this output section to a unique segment.  This is done to
 	  // separate "text" that is not likely to be executed from "text"
@@ -1212,22 +1216,18 @@ Layout::layout(Sized_relobj_file<size, big_endian>* object, unsigned int shndx,
 	  if (it == this->section_segment_map_.end())
 	    {
 	      os = this->choose_output_section(object, name, sh_type,
-					       shdr.get_sh_flags(), true,
-					       ORDER_INVALID, false, false,
-					       true);
+					       sh_flags, true, ORDER_INVALID,
+					       false, false, true);
 	    }
 	  else
 	    {
 	      // We know the name of the output section, directly call
 	      // get_output_section here by-passing choose_output_section.
-	      elfcpp::Elf_Xword flags
-		= this->get_output_section_flags(shdr.get_sh_flags());
-
 	      const char* os_name = it->second->name;
 	      Stringpool::Key name_key;
 	      os_name = this->namepool_.add(os_name, true, &name_key);
-	      os = this->get_output_section(os_name, name_key, sh_type, flags,
-					ORDER_INVALID, false);
+	      os = this->get_output_section(os_name, name_key, sh_type,
+					    sh_flags, ORDER_INVALID, false);
 	      if (!os->is_unique_segment())
 		{
 		  os->set_is_unique_segment();
@@ -2062,12 +2062,15 @@ Layout::attach_allocated_section_to_segment(const Target* target,
   // segment.
   if (os->type() == elfcpp::SHT_NOTE)
     {
+      uint64_t os_align = os->addralign();
+
       // See if we already have an equivalent PT_NOTE segment.
       for (p = this->segment_list_.begin();
 	   p != segment_list_.end();
 	   ++p)
 	{
 	  if ((*p)->type() == elfcpp::PT_NOTE
+	      && (*p)->align() == os_align
 	      && (((*p)->flags() & elfcpp::PF_W)
 		  == (seg_flags & elfcpp::PF_W)))
 	    {
@@ -2081,6 +2084,7 @@ Layout::attach_allocated_section_to_segment(const Target* target,
 	  Output_segment* oseg = this->make_output_segment(elfcpp::PT_NOTE,
 							   seg_flags);
 	  oseg->add_output_section_to_nonload(os, seg_flags);
+	  oseg->set_align(os_align);
 	}
     }
 
@@ -3184,6 +3188,10 @@ Layout::create_note(const char* name, int note_type,
 #else
   const int size = 32;
 #endif
+  // The NT_GNU_PROPERTY_TYPE_0 note is aligned to the pointer size.
+  const int addralign = ((note_type == elfcpp::NT_GNU_PROPERTY_TYPE_0
+			 ? parameters->target().get_size()
+			 : size) / 8);
 
   // The contents of the .note section.
   size_t namesz = strlen(name) + 1;
@@ -3247,7 +3255,7 @@ Layout::create_note(const char* name, int note_type,
     return NULL;
 
   Output_section_data* posd = new Output_data_const_buffer(buffer, notehdrsz,
-							   size / 8,
+							   addralign,
 							   "** note header");
   os->add_output_section_data(posd);
 
@@ -3705,6 +3713,11 @@ Layout::segment_precedes(const Output_segment* seg1,
     {
       if (type1 != type2)
 	return type1 < type2;
+      uint64_t align1 = seg1->align();
+      uint64_t align2 = seg2->align();
+      // Place segments with larger alignments first.
+      if (align1 != align2)
+	return align1 > align2;
       gold_assert(flags1 != flags2
 		  || this->script_options_->saw_phdrs_clause());
       return flags1 < flags2;
@@ -5358,6 +5371,12 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
     flags |= elfcpp::DF_1_PIE;
   if (flags != 0)
     odyn->add_constant(elfcpp::DT_FLAGS_1, flags);
+
+  flags = 0;
+  if (parameters->options().unique())
+    flags |= elfcpp::DF_GNU_1_UNIQUE;
+  if (flags != 0)
+    odyn->add_constant(elfcpp::DT_GNU_FLAGS_1, flags);
 }
 
 // Set the size of the _DYNAMIC symbol table to be the size of the

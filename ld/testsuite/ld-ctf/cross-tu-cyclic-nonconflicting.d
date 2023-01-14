@@ -14,7 +14,7 @@
 Contents of CTF section .ctf:
 
   Header:
-    Magic number: dff2
+    Magic number: 0xdff2
     Version: 4 \(CTF_VERSION_3\)
 #...
 
@@ -29,22 +29,16 @@ Contents of CTF section .ctf:
 
   Types:
 #...
-     [0-9a-f]*: struct A \(size 0x[0-9a-f]*\)
-        \[0x0\] \(ID 0x[0-9a-f]\) \(kind 6\) struct A \(aligned at 0x[0-9a-f]*\)
-            \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 1\) long int a:[0-9]* \(aligned at 0x[0-9a-f]*, format 0x1, offset:bits 0x0:0x[0-9a-f]*\)
-            \[0x[0-9a-f]*\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct B \* foo \(aligned at 0x[0-9a-f]*\)
-     [0-9a-f]*: long int .*
-        \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 1\) long int:[0-9].*
-     [0-9a-f]*: struct B \(size 0x[0-9a-f]*\)
-        \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct B \(aligned at 0x[0-9a-f]*\)
-            \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 1\) int foo:[0-9]* \(aligned at 0x[0-9a-f]*, format 0x1, offset:bits 0x0:0x[0-9a-f]*\)
-            \[0x[0-9a-f]*\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct A \* bar \(aligned at 0x[0-9a-f]*\)
-     [0-9a-f]*: struct B \* \(size 0x[0-9a-f]*\) -> [0-9a-f]*: struct B \(size 0x[0-9a-f]*\)
-        \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct B \* \(aligned at 0x[0-9a-f]*\)
-     [0-9a-f]*: struct A \* \(size 0x[0-9a-f]*\) -> [0-9a-f]*: struct A \(size 0x[0-9a-f]*\)
-        \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct A \* \(aligned at 0x[0-9a-f]*\)
-     [0-9a-f]*: int .*
-        \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 1\) int:.*
+    0x[0-9a-f]*: \(kind 6\) struct A \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+        *\[0x0\] a: ID 0x[0-9a-f]*: \(kind 1\) long int \(format 0x1\) \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+        *\[0x[0-9a-f]*\] foo: ID 0x[0-9a-f]*: \(kind 3\) struct B \* \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+    0x[0-9a-f]*: \(kind 1\) long int .*
+    0x[0-9a-f]*: \(kind 6\) struct B \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+        *\[0x0\] foo: ID 0x[0-9a-f]*: \(kind 1\) int \(format 0x1\) \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+        *\[0x[0-9a-f]*\] bar: ID 0x[0-9a-f]*: \(kind 3\) struct A \* \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+    0x[0-9a-f]*: \(kind 3\) struct B \* \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\) -> 0x[0-9a-f]*: \(kind 6\) struct B \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+    0x[0-9a-f]*: \(kind 3\) struct A \* \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\) -> 0x[0-9a-f]*: \(kind 6\) struct A \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+    0x[0-9a-f]*: \(kind 1\) int .*
 
   Strings:
 #...

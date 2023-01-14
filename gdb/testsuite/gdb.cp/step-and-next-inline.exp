@@ -1,4 +1,4 @@
-# Copyright 2019-2020 Free Software Foundation, Inc.
+# Copyright 2019-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,7 +15,12 @@
 
 standard_testfile .cc
 
-if { ![supports_statement_frontiers] } {
+if [get_compiler_info "c++"] {
+    unsupported "couldn't find a valid c++ compiler"
+    return -1
+}
+
+if {[test_compiler_info gcc*] && ![supports_statement_frontiers] } {
     return -1
 }
 
@@ -31,7 +36,10 @@ proc do_test { use_header } {
 	return
     }
 
-    set options {c++ debug nowarnings optimize=-O2\ -gstatement-frontiers}
+    set options {c++ debug nowarnings optimize=-O2}
+    if { [supports_statement_frontiers] } {
+	lappend options additional_flags=-gstatement-frontiers
+    }
     if { $use_header } {
 	lappend options additional_flags=-DUSE_NEXT_INLINE_H
 	set executable "$testfile-with-header"
@@ -65,14 +73,18 @@ proc do_test { use_header } {
     # that some easier heuristic could be figured out).  Still, it is
     # not certain that the first failure wouldn't also be fixed by
     # having location view support, so for now it is tagged as such.
-    if {!$use_header} { setup_kfail "*-*-*" symtab/25507 }
+    if {[test_compiler_info gcc*] && !$use_header} {
+	setup_kfail "*-*-*" symtab/25507
+    }
     gdb_test "next" ".*TREE_TYPE.*" "next step 1"
     gdb_test "bt" "\\s*\\#0\\s+get_alias_set\[^\r\]*${srcfile}:.*" \
 	"not in inline 2"
     gdb_test "next" ".*TREE_TYPE.*" "next step 2"
     gdb_test "bt" "\\s*\\#0\\s+get_alias_set\[^\r\]*${srcfile}:.*" \
 	"not in inline 3"
-    if {!$use_header} { setup_kfail "*-*-*" symtab/25507 }
+    if {[test_compiler_info gcc*] && !$use_header} {
+	setup_kfail "*-*-*" symtab/25507
+    }
     gdb_test "next" ".*TREE_TYPE.*" "next step 3"
     gdb_test "bt" "\\s*\\#0\\s+get_alias_set\[^\r\]*${srcfile}:.*" \
 	"not in inline 4"

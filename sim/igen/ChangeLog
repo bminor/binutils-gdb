@@ -1,3 +1,26 @@
+2021-01-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_CHECK_HEADERS): Delete stdlib.h, string.h, and
+	strings.h.
+	* configure, configure.ac: Regenerate.
+
+2021-01-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* filter.c, if.c, misc.c, misc.h, table.c: Delete HAVE_STRING_H,
+	HAVE_STRINGS_H, HAVE_STDLIB_H, and strings.h include.
+
+2021-01-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* gen-icache.c, igen.c: Include stdlib.h.
+
+2021-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2020-07-03  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	PR sim/26194

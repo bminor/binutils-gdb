@@ -1,5 +1,5 @@
 /* BFD back-end for archive files (libraries).
-   Copyright (C) 1990-2020 Free Software Foundation, Inc.
+   Copyright (C) 1990-2021 Free Software Foundation, Inc.
    Written by Cygnus Support.  Mostly Gumby Henkel-Wallace's fault.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -172,7 +172,7 @@ struct ar_cache
 void
 _bfd_ar_spacepad (char *p, size_t n, const char *fmt, long val)
 {
-  static char buf[20];
+  char buf[20];
   size_t len;
 
   snprintf (buf, sizeof (buf), fmt, val);
@@ -189,7 +189,7 @@ _bfd_ar_spacepad (char *p, size_t n, const char *fmt, long val)
 bfd_boolean
 _bfd_ar_sizepad (char *p, size_t n, bfd_size_type size)
 {
-  static char buf[21];
+  char buf[21];
   size_t len;
 
   snprintf (buf, sizeof (buf), "%-10" BFD_VMA_FMT "u", size);
@@ -1842,14 +1842,6 @@ hpux_uid_gid_encode (char str[6], long int id)
 }
 #endif	/* HPUX_LARGE_AR_IDS */
 
-#ifndef HAVE_GETUID
-#define getuid() 0
-#endif
-
-#ifndef HAVE_GETGID
-#define getgid() 0
-#endif
-
 /* Takes a filename, returns an arelt_data for it, or NULL if it can't
    make one.  The filename must refer to a filename in the filesystem.
    The filename field of the ar_hdr will NOT be initialized.  If member
@@ -1875,7 +1867,7 @@ bfd_ar_hdr_from_filesystem (bfd *abfd, const char *filename, bfd *member)
     }
   else if (stat (filename, &status) != 0)
     {
-      bfd_set_error (bfd_error_system_call);
+      bfd_set_input_error (member, bfd_error_system_call);
       return NULL;
     }
 

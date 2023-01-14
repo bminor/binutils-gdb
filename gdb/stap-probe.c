@@ -1,6 +1,6 @@
 /* SystemTap probe support for GDB.
 
-   Copyright (C) 2012-2020 Free Software Foundation, Inc.
+   Copyright (C) 2012-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -843,9 +843,9 @@ stap_parse_register_operand (struct stap_parse_info *p)
    A single operand can be:
 
       - an unary operation (e.g., `-5', `~2', or even with subexpressions
-        like `-(2 + 1)')
+	like `-(2 + 1)')
       - a register displacement, which will be treated as a register
-        operand (e.g., `-4(%eax)' on x86)
+	operand (e.g., `-4(%eax)' on x86)
       - a numeric constant, or
       - a register operand (see function `stap_parse_register_operand')
 
@@ -870,7 +870,7 @@ stap_parse_single_operand (struct stap_parse_info *p)
       return;
     }
 
-  if (*p->arg == '-' || *p->arg == '~' || *p->arg == '+')
+  if (*p->arg == '-' || *p->arg == '~' || *p->arg == '+' || *p->arg == '!')
     {
       char c = *p->arg;
       /* We use this variable to do a lookahead.  */
@@ -924,6 +924,8 @@ stap_parse_single_operand (struct stap_parse_info *p)
 	    write_exp_elt_opcode (&p->pstate, UNOP_NEG);
 	  else if (c == '~')
 	    write_exp_elt_opcode (&p->pstate, UNOP_COMPLEMENT);
+	  else if (c == '!')
+	    write_exp_elt_opcode (&p->pstate, UNOP_LOGICAL_NOT);
 	}
     }
   else if (isdigit (*p->arg))
@@ -1012,7 +1014,7 @@ stap_parse_argument_conditionally (struct stap_parse_info *p)
 {
   gdb_assert (gdbarch_stap_is_single_operand_p (p->gdbarch));
 
-  if (*p->arg == '-' || *p->arg == '~' || *p->arg == '+' /* Unary.  */
+  if (*p->arg == '-' || *p->arg == '~' || *p->arg == '+' || *p->arg == '!'
       || isdigit (*p->arg)
       || gdbarch_stap_is_single_operand (p->gdbarch, p->arg))
     stap_parse_single_operand (p);
@@ -1027,11 +1029,12 @@ stap_parse_argument_conditionally (struct stap_parse_info *p)
 
       stap_parse_argument_1 (p, 0, STAP_OPERAND_PREC_NONE);
 
-      --p->inside_paren_p;
+      p->arg = skip_spaces (p->arg);
       if (*p->arg != ')')
-	error (_("Missign close-paren on expression `%s'."),
+	error (_("Missign close-parenthesis on expression `%s'."),
 	       p->saved_arg);
 
+      --p->inside_paren_p;
       ++p->arg;
       if (p->inside_paren_p)
 	p->arg = skip_spaces (p->arg);
@@ -1066,6 +1069,9 @@ stap_parse_argument_1 (struct stap_parse_info *p, bool has_lhs,
 	 left-side in order to continue the process.  */
       stap_parse_argument_conditionally (p);
     }
+
+  if (p->inside_paren_p)
+    p->arg = skip_spaces (p->arg);
 
   /* Start to parse the right-side, and to "join" left and right sides
      depending on the operation specified.
@@ -1104,8 +1110,21 @@ stap_parse_argument_1 (struct stap_parse_info *p, bool has_lhs,
       if (p->inside_paren_p)
 	p->arg = skip_spaces (p->arg);
 
-      /* Parse the right-side of the expression.  */
+      /* Parse the right-side of the expression.
+
+	 We save whether the right-side is a parenthesized
+	 subexpression because, if it is, we will have to finish
+	 processing this part of the expression before continuing.  */
+      bool paren_subexp = *p->arg == '(';
+
       stap_parse_argument_conditionally (p);
+      if (p->inside_paren_p)
+	p->arg = skip_spaces (p->arg);
+      if (paren_subexp)
+	{
+	  write_exp_elt_opcode (&p->pstate, opcode);
+	  continue;
+	}
 
       /* While we still have operators, try to parse another
 	 right-side, but using the current right-side as a left-side.  */
@@ -1130,6 +1149,8 @@ stap_parse_argument_1 (struct stap_parse_info *p, bool has_lhs,
 	  /* Parse the right-side of the expression, but since we already
 	     have a left-side at this point, set `has_lhs' to 1.  */
 	  stap_parse_argument_1 (p, 1, lookahead_prec);
+	  if (p->inside_paren_p)
+	    p->arg = skip_spaces (p->arg);
 	}
 
       write_exp_elt_opcode (&p->pstate, opcode);
@@ -1389,12 +1410,10 @@ struct value *
 stap_probe::evaluate_argument (unsigned n, struct frame_info *frame)
 {
   struct stap_probe_arg *arg;
-  int pos = 0;
   struct gdbarch *gdbarch = get_frame_arch (frame);
 
   arg = this->get_arg_by_number (n, gdbarch);
-  return evaluate_subexp_standard (arg->atype, arg->aexpr.get (), &pos,
-				   EVAL_NORMAL);
+  return evaluate_expression (arg->aexpr.get (), arg->atype);
 }
 
 /* Compile the probe's argument N (indexed from 0) to agent expression.
@@ -1578,19 +1597,6 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
   probesp->emplace_back (ret);
 }
 
-/* Helper function which tries to find the base address of the SystemTap
-   base section named STAP_BASE_SECTION_NAME.  */
-
-static void
-get_stap_base_address_1 (bfd *abfd, asection *sect, void *obj)
-{
-  asection **ret = (asection **) obj;
-
-  if ((sect->flags & (SEC_DATA | SEC_ALLOC | SEC_HAS_CONTENTS))
-      && sect->name && !strcmp (sect->name, STAP_BASE_SECTION_NAME))
-    *ret = sect;
-}
-
 /* Helper function which iterates over every section in the BFD file,
    trying to find the base address of the SystemTap base section.
    Returns 1 if found (setting BASE to the proper value), zero otherwise.  */
@@ -1600,7 +1606,10 @@ get_stap_base_address (bfd *obfd, bfd_vma *base)
 {
   asection *ret = NULL;
 
-  bfd_map_over_sections (obfd, get_stap_base_address_1, (void *) &ret);
+  for (asection *sect : gdb_bfd_sections (obfd))
+    if ((sect->flags & (SEC_DATA | SEC_ALLOC | SEC_HAS_CONTENTS))
+	&& sect->name && !strcmp (sect->name, STAP_BASE_SECTION_NAME))
+      ret = sect;
 
   if (ret == NULL)
     {

@@ -1,5 +1,5 @@
 /* opncls.c -- open and close a BFD.
-   Copyright (C) 1990-2020 Free Software Foundation, Inc.
+   Copyright (C) 1990-2021 Free Software Foundation, Inc.
 
    Written by Cygnus Support.
 
@@ -391,6 +391,39 @@ bfd_fdopenr (const char *filename, const char *target, int fd)
 #endif
 
   return bfd_fopen (filename, target, mode, fd);
+}
+
+/*
+FUNCTION
+	bfd_fdopenw
+
+SYNOPSIS
+	bfd *bfd_fdopenw (const char *filename, const char *target, int fd);
+
+DESCRIPTION
+	<<bfd_fdopenw>> is exactly like <<bfd_fdopenr>> with the exception that
+	the resulting BFD is suitable for output.
+*/
+
+bfd *
+bfd_fdopenw (const char *filename, const char *target, int fd)
+{
+  bfd *out = bfd_fdopenr (filename, target, fd);
+
+  if (out != NULL)
+    {
+      if (!bfd_write_p (out))
+	{
+	  close (fd);
+	  _bfd_delete_bfd (out);
+	  out = NULL;
+	  bfd_set_error (bfd_error_invalid_operation);
+	}
+      else
+	out->direction = write_direction;
+    }
+
+  return out;
 }
 
 /*
@@ -1314,7 +1347,7 @@ DESCRIPTION
 static bfd_boolean
 separate_debug_file_exists (const char *name, void *crc32_p)
 {
-  static unsigned char buffer [8 * 1024];
+  unsigned char buffer[8 * 1024];
   unsigned long file_crc = 0;
   FILE *f;
   bfd_size_type count;
@@ -1732,7 +1765,7 @@ bfd_fill_in_gnu_debuglink_section (bfd *abfd,
   char * contents;
   bfd_size_type crc_offset;
   FILE * handle;
-  static unsigned char buffer[8 * 1024];
+  unsigned char buffer[8 * 1024];
   size_t count;
   size_t filelen;
 

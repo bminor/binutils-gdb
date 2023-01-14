@@ -1,6 +1,6 @@
 /* build-id-related functions.
 
-   Copyright (C) 1991-2020 Free Software Foundation, Inc.
+   Copyright (C) 1991-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -57,7 +57,7 @@ build_id_verify (bfd *abfd, size_t check_len, const bfd_byte *check)
     warning (_("File \"%s\" has no build-id, file skipped"),
 	     bfd_get_filename (abfd));
   else if (found->size != check_len
-           || memcmp (found->data, check, found->size) != 0)
+	   || memcmp (found->data, check, found->size) != 0)
     warning (_("File \"%s\" has a different build-id, file skipped"),
 	     bfd_get_filename (abfd));
   else
@@ -140,7 +140,7 @@ build_id_to_bfd_suffix (size_t build_id_len, const bfd_byte *build_id,
       /* Compute where the file named after the build-id would be.
 
 	 If debugdir is "/usr/lib/debug" and the build-id is abcdef, this will
-         give "/usr/lib/debug/.build-id/ab/cdef.debug".  */
+	 give "/usr/lib/debug/.build-id/ab/cdef.debug".  */
       std::string link = debugdir.get ();
       link += "/.build-id/";
 
@@ -161,12 +161,12 @@ build_id_to_bfd_suffix (size_t build_id_len, const bfd_byte *build_id,
 	return debug_bfd;
 
       /* Try to look under the sysroot as well.  If the sysroot is
-         "/the/sysroot", it will give
-         "/the/sysroot/usr/lib/debug/.build-id/ab/cdef.debug".
+	 "/the/sysroot", it will give
+	 "/the/sysroot/usr/lib/debug/.build-id/ab/cdef.debug".
 
-         Don't do it if the sysroot is the target system ("target:").  It
-         could work in theory, but the lrealpath in build_id_to_debug_bfd_1
-         only works with local paths.  */
+	 Don't do it if the sysroot is the target system ("target:").  It
+	 could work in theory, but the lrealpath in build_id_to_debug_bfd_1
+	 only works with local paths.  */
       if (strcmp (gdb_sysroot, TARGET_SYSROOT_PREFIX) != 0)
 	{
 	  link = gdb_sysroot + link;

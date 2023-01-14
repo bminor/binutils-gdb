@@ -1,4 +1,4 @@
-# Copyright 2012-2020 Free Software Foundation, Inc.
+# Copyright 2012-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -46,15 +46,13 @@ if { [gdb_compile $srcdir/$subdir/$srcfile $binfile executable $exec_opts] != ""
 proc test_insert_delete_modify { } {
     global mi_gdb_prompt
     global lib_sl1 lib_sl2
+    global binfile
 
-    gdb_exit
-    if [mi_gdb_start] {
-	continue
-    }
+    mi_clean_restart $binfile
 
     mi_load_shlibs $lib_sl1 $lib_sl2
 
-    mi_run_to_main
+    mi_runto_main
 
     mi_gdb_test "break marker" \
 	{(&.*)*.*~"Breakpoint 2 at.*\\n".*=breakpoint-created,bkpt=\{number="2",type="breakpoint".*\}.*\n\^done}

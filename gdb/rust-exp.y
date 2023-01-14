@@ -1,5 +1,5 @@
 /* Bison parser for Rust expressions, for GDB.
-   Copyright (C) 2016-2020 Free Software Foundation, Inc.
+   Copyright (C) 2016-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -123,7 +123,7 @@ static struct stoken make_stoken (const char *);
    since it is very long and this gives us a way to comment the
    sections.  */
 
-static const char *number_regex_text =
+static const char number_regex_text[] =
   /* subexpression 1: allows use of alternation, otherwise uninteresting */
   "^("
   /* First comes floating point.  */
@@ -2043,7 +2043,7 @@ rust_parser::convert_params_to_types (rust_op_vector *params)
   if (params != nullptr)
     {
       for (const rust_op *op : *params)
-        result.push_back (convert_ast_to_type (op));
+	result.push_back (convert_ast_to_type (op));
     }
 
   return result;
@@ -2492,24 +2492,29 @@ rust_parser::convert_ast_to_expression (const struct rust_op *operation,
 
     case OP_RANGE:
       {
-	enum range_type kind = BOTH_BOUND_DEFAULT;
+	enum range_flag kind = (RANGE_HIGH_BOUND_DEFAULT
+				| RANGE_LOW_BOUND_DEFAULT);
 
 	if (operation->left.op != NULL)
 	  {
 	    convert_ast_to_expression (operation->left.op, top);
-	    kind = HIGH_BOUND_DEFAULT;
+	    kind &= ~RANGE_LOW_BOUND_DEFAULT;
 	  }
 	if (operation->right.op != NULL)
 	  {
 	    convert_ast_to_expression (operation->right.op, top);
-	    if (kind == BOTH_BOUND_DEFAULT)
-	      kind = (operation->inclusive
-		      ? LOW_BOUND_DEFAULT : LOW_BOUND_DEFAULT_EXCLUSIVE);
+	    if (kind == (RANGE_HIGH_BOUND_DEFAULT | RANGE_LOW_BOUND_DEFAULT))
+	      {
+		kind = RANGE_LOW_BOUND_DEFAULT;
+		if (!operation->inclusive)
+		  kind |= RANGE_HIGH_BOUND_EXCLUSIVE;
+	      }
 	    else
 	      {
-		gdb_assert (kind == HIGH_BOUND_DEFAULT);
-		kind = (operation->inclusive
-			? NONE_BOUND_DEFAULT : NONE_BOUND_DEFAULT_EXCLUSIVE);
+		gdb_assert (kind == RANGE_HIGH_BOUND_DEFAULT);
+		kind = RANGE_STANDARD;
+		if (!operation->inclusive)
+		  kind |= RANGE_HIGH_BOUND_EXCLUSIVE;
 	      }
 	  }
 	else
@@ -2535,7 +2540,7 @@ rust_parser::convert_ast_to_expression (const struct rust_op *operation,
 /* The parser as exposed to gdb.  */
 
 int
-rust_parse (struct parser_state *state)
+rust_language::parser (struct parser_state *state) const
 {
   int result;
 
@@ -2727,7 +2732,7 @@ rust_lex_tests (void)
 
   /* Set up dummy "parser", so that rust_type works.  */
   struct parser_state ps (language_def (language_rust), target_gdbarch (),
-			  nullptr, 0, 0, nullptr, 0, nullptr);
+			  nullptr, 0, 0, nullptr, 0, nullptr, false);
   rust_parser parser (&ps);
 
   rust_lex_test_one (&parser, "", 0);

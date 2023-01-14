@@ -1,4 +1,4 @@
-# Copyright (C) 1993-2020 Free Software Foundation, Inc.
+# Copyright (C) 1993-2021 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -195,12 +195,14 @@ proc match_target { target } {
 
 # True if the ELF target supports setting the ELF header OSABI field
 # to ELFOSABI_GNU or ELFOSABI_FREEBSD, a requirement for STT_GNU_IFUNC
-# symbol and SHF_GNU_MBIND section support.
+# symbol and SHF_GNU_MBIND or SHF_GNU_RETAIN section support.
 #
 # This generally depends on the target OS only, however there are a
 # number of exceptions for bare metal targets as follows.  The MSP430
 # and Visium targets set OSABI to ELFOSABI_STANDALONE.  Likewise
 # non-EABI ARM targets set OSABI to ELFOSABI_ARM
+#
+# Non-Linux HPPA defaults to ELFOSABI_HPUX.
 #
 # Note that some TI C6X targets use ELFOSABI_C6000_* but one doesn't,
 # so we don't try to sort out tic6x here.  (The effect is that linker
@@ -227,6 +229,7 @@ proc supports_gnu_osabi {} {
     }
     if { [istarget "arm*-*-*"]
 	 || [istarget "msp430-*-*"]
+	 || [istarget "hppa-unknown-elf"]
 	 || [istarget "visium-*-*"] } {
 	return 0
     }
@@ -243,6 +246,37 @@ proc is_generic { } {
 	return 1
     }
     return 0
+}
+
+# True if the object format is ELF with unused section symbols.
+proc is_elf_unused_section_symbols {} {
+    global AS ASFLAGS READELF
+
+    if {![info exists elf_unused_section_symbols_saved]} {
+	set elf_unused_section_symbols_saved 1
+	if { [is_elf_format] } {
+	    set base "empty[pid]"
+	    set src "$base.s"
+	    set obj "$base.obj"
+	    set f [open $src "w"]
+	    close $f
+	    set cmd "$AS $ASFLAGS -o $obj $src"
+	    send_log "$cmd\n"
+	    set cmdret [remote_exec host $cmd]
+	    set cmdret [lindex $cmdret 0]
+	    if { $cmdret == 0 } {
+		set cmd "$READELF -sW $obj"
+		send_log "$cmd\n"
+		set got [remote_exec host $cmd]
+		if { ![string match "*SECTION*" $got] }  {
+		    set elf_unused_section_symbols_saved 0
+		}
+	    }
+	    file delete $obj
+	    file delete $src
+	}
+    }
+    return $elf_unused_section_symbols_saved
 }
 
 # True if the ELF target supports STB_GNU_UNIQUE.
@@ -340,6 +374,45 @@ proc check_relro_support { } {
 	}
     }
     return $relro_available_saved
+}
+
+# Check for support of the .noinit section, used for data that is not
+# initialized at load, or during the application's initialization sequence.
+proc supports_noinit_section {} {
+    # .noinit is only supported by ELF targets.
+    if { ![is_elf_format] } {
+	return 0;
+    }
+
+    # Targets that set HAVE_NOINIT=yes in their emulparams script utilizing
+    # elf.sc, or explicitly define a .noinit section in their linker script.
+    #
+    # arc-*-* is not included here, since it only supports .noinit with the
+    # non-default arcv2elf emulation.
+    if {[istarget "arm-*-*"]
+	  || [istarget "avr-*-*"]
+	  || [istarget "msp430-*-*"]
+	  || [istarget "pru-*-*"] } {
+	return 1;
+    }
+    return 0;
+}
+
+# Check for support of the .persistent section, used for data that is
+# initialized at load, but not during the application's initialization sequence.
+proc supports_persistent_section {} {
+    # .persistent is only supported by ELF targets.
+    if { ![is_elf_format] } {
+	return 0;
+    }
+
+    # Targets that set HAVE_PERSISTENT=yes in their emulparams script utilizing
+    # elf.sc, or explicitly define a .persistent section in their linker script.
+    if { [istarget "arm-*-*"]
+	  || [istarget "msp430-*-*"] } {
+	return 1;
+    }
+    return 0;
 }
 
 # Compare two files line-by-line.  FILE_1 is the actual output and FILE_2

@@ -1,7 +1,7 @@
 /* Test-driver for the remote-virtual-component simulator framework
    for GDB, the GNU Debugger.
 
-   Copyright 2006-2020 Free Software Foundation, Inc.
+   Copyright 2006-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -41,13 +41,8 @@ main (int argc, char *argv[])
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
-#ifdef HAVE_STRING_H
 #include <string.h>
-#endif
-
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -60,9 +55,7 @@ main (int argc, char *argv[])
 #include <sys/select.h>
 #endif
 
-#ifdef HAVE_ERRNO_H
 #include <errno.h>
-#endif
 
 /* Not guarded in dv-sockser.c, so why here.  */
 #include <netinet/in.h>

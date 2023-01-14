@@ -1,6 +1,6 @@
 /* Target-dependent code for s390.
 
-   Copyright (C) 2001-2020 Free Software Foundation, Inc.
+   Copyright (C) 2001-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -421,18 +421,19 @@ is_non_branch_ril (gdb_byte *insn)
   return 0;
 }
 
-typedef buf_displaced_step_closure s390_displaced_step_closure;
+typedef buf_displaced_step_copy_insn_closure
+  s390_displaced_step_copy_insn_closure;
 
 /* Implementation of gdbarch_displaced_step_copy_insn.  */
 
-static displaced_step_closure_up
+static displaced_step_copy_insn_closure_up
 s390_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			       CORE_ADDR from, CORE_ADDR to,
 			       struct regcache *regs)
 {
   size_t len = gdbarch_max_insn_length (gdbarch);
-  std::unique_ptr<s390_displaced_step_closure> closure
-    (new s390_displaced_step_closure (len));
+  std::unique_ptr<s390_displaced_step_copy_insn_closure> closure
+    (new s390_displaced_step_copy_insn_closure (len));
   gdb_byte *buf = closure->buf.data ();
 
   read_memory (from, buf, len);
@@ -454,13 +455,8 @@ s390_displaced_step_copy_insn (struct gdbarch *gdbarch,
 	{
 	  /* Let the core fall back to stepping over the breakpoint
 	     in-line.  */
-	  if (debug_displaced)
-	    {
-	      fprintf_unfiltered (gdb_stdlog,
-				  "displaced: can't displaced step "
-				  "RIL instruction: offset %s out of range\n",
-				  plongest (offset));
-	    }
+	  displaced_debug_printf ("can't displaced step RIL instruction: offset "
+				  "%s out of range", plongest (offset));
 
 	  return NULL;
 	}
@@ -470,15 +466,12 @@ s390_displaced_step_copy_insn (struct gdbarch *gdbarch,
 
   write_memory (to, buf, len);
 
-  if (debug_displaced)
-    {
-      fprintf_unfiltered (gdb_stdlog, "displaced: copy %s->%s: ",
-			  paddress (gdbarch, from), paddress (gdbarch, to));
-      displaced_step_dump_bytes (gdb_stdlog, buf, len);
-    }
+  displaced_debug_printf ("copy %s->%s: %s",
+			  paddress (gdbarch, from), paddress (gdbarch, to),
+			  displaced_step_dump_bytes (buf, len).c_str ());
 
   /* This is a work around for a problem with g++ 4.8.  */
-  return displaced_step_closure_up (closure.release ());
+  return displaced_step_copy_insn_closure_up (closure.release ());
 }
 
 /* Fix up the state of registers and memory after having single-stepped
@@ -486,13 +479,13 @@ s390_displaced_step_copy_insn (struct gdbarch *gdbarch,
 
 static void
 s390_displaced_step_fixup (struct gdbarch *gdbarch,
-			   struct displaced_step_closure *closure_,
+			   displaced_step_copy_insn_closure *closure_,
 			   CORE_ADDR from, CORE_ADDR to,
 			   struct regcache *regs)
 {
   /* Our closure is a copy of the instruction.  */
-  s390_displaced_step_closure *closure
-    = (s390_displaced_step_closure *) closure_;
+  s390_displaced_step_copy_insn_closure *closure
+    = (s390_displaced_step_copy_insn_closure *) closure_;
   gdb_byte *insn = closure->buf.data ();
   static int s390_instrlen[] = { 2, 4, 4, 6 };
   int insnlen = s390_instrlen[insn[0] >> 6];
@@ -511,11 +504,9 @@ s390_displaced_step_fixup (struct gdbarch *gdbarch,
       amode &= 0x80000000;
     }
 
-  if (debug_displaced)
-    fprintf_unfiltered (gdb_stdlog,
-			"displaced: (s390) fixup (%s, %s) pc %s len %d amode 0x%x\n",
-			paddress (gdbarch, from), paddress (gdbarch, to),
-			paddress (gdbarch, pc), insnlen, (int) amode);
+  displaced_debug_printf ("(s390) fixup (%s, %s) pc %s len %d amode 0x%x",
+			  paddress (gdbarch, from), paddress (gdbarch, to),
+			  paddress (gdbarch, pc), insnlen, (int) amode);
 
   /* Handle absolute branch and save instructions.  */
   int op_basr_p = is_rr (insn, op_basr, &r1, &r2);
@@ -578,19 +569,16 @@ s390_displaced_step_fixup (struct gdbarch *gdbarch,
   else
     regcache_write_pc (regs, pc - to + from);
 
-  if (debug_displaced)
-    fprintf_unfiltered (gdb_stdlog,
-			"displaced: (s390) pc is now %s\n",
-			paddress (gdbarch, regcache_read_pc (regs)));
+  displaced_debug_printf ("(s390) pc is now %s",
+			  paddress (gdbarch, regcache_read_pc (regs)));
 }
 
 /* Implement displaced_step_hw_singlestep gdbarch method.  */
 
-static int
-s390_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
-				   struct displaced_step_closure *closure)
+static bool
+s390_displaced_step_hw_singlestep (struct gdbarch *gdbarch)
 {
-  return 1;
+  return true;
 }
 
 /* Prologue analysis.  */
@@ -1583,7 +1571,7 @@ s390_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr)
 /* Implement addr_class_type_flags gdbarch method.
    Only used for ABI_LINUX_ZSERIES.  */
 
-static int
+static type_instance_flags
 s390_address_class_type_flags (int byte_size, int dwarf2_addr_class)
 {
   if (byte_size == 4)
@@ -1596,7 +1584,8 @@ s390_address_class_type_flags (int byte_size, int dwarf2_addr_class)
    Only used for ABI_LINUX_ZSERIES.  */
 
 static const char *
-s390_address_class_type_flags_to_name (struct gdbarch *gdbarch, int type_flags)
+s390_address_class_type_flags_to_name (struct gdbarch *gdbarch,
+				       type_instance_flags type_flags)
 {
   if (type_flags & TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1)
     return "mode32";
@@ -1607,18 +1596,18 @@ s390_address_class_type_flags_to_name (struct gdbarch *gdbarch, int type_flags)
 /* Implement addr_class_name_to_type_flags gdbarch method.
    Only used for ABI_LINUX_ZSERIES.  */
 
-static int
+static bool
 s390_address_class_name_to_type_flags (struct gdbarch *gdbarch,
 				       const char *name,
-				       int *type_flags_ptr)
+				       type_instance_flags *type_flags_ptr)
 {
   if (strcmp (name, "mode32") == 0)
     {
       *type_flags_ptr = TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1;
-      return 1;
+      return true;
     }
   else
-    return 0;
+    return false;
 }
 
 /* Inferior function calls.  */
@@ -2310,7 +2299,7 @@ s390_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 
 struct value *
 s390_trad_frame_prev_register (struct frame_info *this_frame,
-			       struct trad_frame_saved_reg saved_regs[],
+			       trad_frame_saved_reg saved_regs[],
 			       int regnum)
 {
   if (regnum < S390_NUM_REGS)
@@ -2327,7 +2316,7 @@ struct s390_unwind_cache {
   CORE_ADDR frame_base;
   CORE_ADDR local_base;
 
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 /* Unwind THIS_FRAME and write the information into unwind cache INFO using
@@ -2462,10 +2451,10 @@ s390_prologue_frame_unwind_cache (struct frame_info *this_frame,
   /* Set up ABI call-saved/call-clobbered registers.  */
   for (i = 0; i < S390_NUM_REGS; i++)
     if (!s390_register_call_saved (gdbarch, i))
-      trad_frame_set_unknown (info->saved_regs, i);
+      info->saved_regs[i].set_unknown ();
 
   /* CC is always call-clobbered.  */
-  trad_frame_set_unknown (info->saved_regs, S390_PSWM_REGNUM);
+  info->saved_regs[S390_PSWM_REGNUM].set_unknown ();
 
   /* Record the addresses of all register spill slots the prologue parser
      has recognized.  Consider only registers defined as call-saved by the
@@ -2475,12 +2464,12 @@ s390_prologue_frame_unwind_cache (struct frame_info *this_frame,
   for (i = 0; i < 16; i++)
     if (s390_register_call_saved (gdbarch, S390_R0_REGNUM + i)
 	&& data.gpr_slot[i] != 0)
-      info->saved_regs[S390_R0_REGNUM + i].addr = cfa - data.gpr_slot[i];
+      info->saved_regs[S390_R0_REGNUM + i].set_addr (cfa - data.gpr_slot[i]);
 
   for (i = 0; i < 16; i++)
     if (s390_register_call_saved (gdbarch, S390_F0_REGNUM + i)
 	&& data.fpr_slot[i] != 0)
-      info->saved_regs[S390_F0_REGNUM + i].addr = cfa - data.fpr_slot[i];
+      info->saved_regs[S390_F0_REGNUM + i].set_addr (cfa - data.fpr_slot[i]);
 
   /* Function return will set PC to %r14.  */
   info->saved_regs[S390_PSWA_REGNUM] = info->saved_regs[S390_RETADDR_REGNUM];
@@ -2490,9 +2479,9 @@ s390_prologue_frame_unwind_cache (struct frame_info *this_frame,
      save area, use that -- we might only think the function frameless
      because we're in the middle of the prologue ...  */
   if (size == 0
-      && !trad_frame_addr_p (info->saved_regs, S390_PSWA_REGNUM))
+      && !info->saved_regs[S390_PSWA_REGNUM].is_addr ())
     {
-      info->saved_regs[S390_PSWA_REGNUM].realreg = S390_RETADDR_REGNUM;
+      info->saved_regs[S390_PSWA_REGNUM].set_realreg (S390_RETADDR_REGNUM);
     }
 
   /* Another sanity check: unless this is a frameless function,
@@ -2501,8 +2490,8 @@ s390_prologue_frame_unwind_cache (struct frame_info *this_frame,
      libc's thread_start routine.  */
   if (size > 0)
     {
-      if (!trad_frame_addr_p (info->saved_regs, S390_SP_REGNUM)
-	  || !trad_frame_addr_p (info->saved_regs, S390_PSWA_REGNUM))
+      if (!info->saved_regs[S390_SP_REGNUM].is_addr ()
+	  || !info->saved_regs[S390_PSWA_REGNUM].is_addr ())
 	prev_sp = -1;
     }
 
@@ -2535,10 +2524,10 @@ s390_backchain_frame_unwind_cache (struct frame_info *this_frame,
   /* Set up ABI call-saved/call-clobbered registers.  */
   for (i = 0; i < S390_NUM_REGS; i++)
     if (!s390_register_call_saved (gdbarch, i))
-      trad_frame_set_unknown (info->saved_regs, i);
+      info->saved_regs[i].set_unknown ();
 
   /* CC is always call-clobbered.  */
-  trad_frame_set_unknown (info->saved_regs, S390_PSWM_REGNUM);
+  info->saved_regs[S390_PSWM_REGNUM].set_unknown ();
 
   /* Get the backchain.  */
   reg = get_frame_register_unsigned (this_frame, S390_SP_REGNUM);
@@ -2558,8 +2547,8 @@ s390_backchain_frame_unwind_cache (struct frame_info *this_frame,
       /* We don't know which registers were saved, but it will have
 	 to be at least %r14 and %r15.  This will allow us to continue
 	 unwinding, but other prev-frame registers may be incorrect ...  */
-      info->saved_regs[S390_SP_REGNUM].addr = backchain + 15*word_size;
-      info->saved_regs[S390_RETADDR_REGNUM].addr = backchain + 14*word_size;
+      info->saved_regs[S390_SP_REGNUM].set_addr (backchain + 15*word_size);
+      info->saved_regs[S390_RETADDR_REGNUM].set_addr (backchain + 14*word_size);
 
       /* Function return will set PC to %r14.  */
       info->saved_regs[S390_PSWA_REGNUM]
@@ -2659,7 +2648,7 @@ static const struct frame_unwind s390_frame_unwind = {
 struct s390_stub_unwind_cache
 {
   CORE_ADDR frame_base;
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 /* Unwind THIS_FRAME and return the corresponding unwind cache for
@@ -2682,7 +2671,7 @@ s390_stub_frame_unwind_cache (struct frame_info *this_frame,
   info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   /* The return address is in register %r14.  */
-  info->saved_regs[S390_PSWA_REGNUM].realreg = S390_RETADDR_REGNUM;
+  info->saved_regs[S390_PSWA_REGNUM].set_realreg (S390_RETADDR_REGNUM);
 
   /* Retrieve stack pointer and determine our frame base.  */
   reg = get_frame_register_unsigned (this_frame, S390_SP_REGNUM);
@@ -5382,7 +5371,6 @@ ex:
 	case 0xe325: /* NTSTG - nontransactional store */
 	case 0xe326: /* CVDY - convert to decimal */
 	case 0xe32f: /* STRVG - store reversed */
-	case 0xebe3: /* STOCG - store on condition */
 	case 0xed67: /* STDY - store */
 	  oaddr = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1], ibyte[4]);
 	  if (record_full_arch_list_add_mem (oaddr, 8))
@@ -5411,8 +5399,6 @@ ex:
 	case 0xe33e: /* STRV - store reversed */
 	case 0xe350: /* STY - store */
 	case 0xe3cb: /* STFH - store high */
-	case 0xebe1: /* STOCFH - store high on condition */
-	case 0xebf3: /* STOC - store on condition */
 	case 0xed66: /* STEY - store */
 	  oaddr = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1], ibyte[4]);
 	  if (record_full_arch_list_add_mem (oaddr, 4))
@@ -6125,6 +6111,20 @@ ex:
 
 	/* 0xeb9c-0xebbf undefined */
 	/* 0xebc1-0xebdb undefined */
+
+	case 0xebe1: /* STOCFH - store high on condition */
+	case 0xebf3: /* STOC - store on condition */
+	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
+	  if (record_full_arch_list_add_mem (oaddr, 4))
+	    return -1;
+	  break;
+
+	case 0xebe3: /* STOCG - store on condition */
+	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
+	  if (record_full_arch_list_add_mem (oaddr, 8))
+	    return -1;
+	  break;
+
 	/* 0xebe5 undefined */
 	/* 0xebe9 undefined */
 	/* 0xebeb-0xebf1 undefined */
@@ -7021,8 +7021,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   struct gdbarch_tdep *tdep = s390_gdbarch_tdep_alloc ();
   struct gdbarch *gdbarch = gdbarch_alloc (&info, tdep);
-  struct tdesc_arch_data *tdesc_data = tdesc_data_alloc ();
-  info.tdesc_data = tdesc_data;
+  tdesc_arch_data_up tdesc_data = tdesc_data_alloc ();
+  info.tdesc_data = tdesc_data.get ();
 
   set_gdbarch_believe_pcc_promotion (gdbarch, 0);
   set_gdbarch_char_signed (gdbarch, 0);
@@ -7047,7 +7047,10 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_displaced_step_copy_insn (gdbarch,
 					s390_displaced_step_copy_insn);
   set_gdbarch_displaced_step_fixup (gdbarch, s390_displaced_step_fixup);
-  set_gdbarch_displaced_step_location (gdbarch, linux_displaced_step_location);
+  set_gdbarch_displaced_step_prepare (gdbarch, linux_displaced_step_prepare);
+  set_gdbarch_displaced_step_finish (gdbarch, linux_displaced_step_finish);
+  set_gdbarch_displaced_step_restore_all_in_ptid
+    (gdbarch, linux_displaced_step_restore_all_in_ptid);
   set_gdbarch_displaced_step_hw_singlestep (gdbarch, s390_displaced_step_hw_singlestep);
   set_gdbarch_software_single_step (gdbarch, s390_software_single_step);
   set_gdbarch_max_insn_length (gdbarch, S390_MAX_INSTR_SIZE);
@@ -7148,9 +7151,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->tdesc = tdesc;
 
   /* Check any target description for validity.  */
-  if (!s390_tdesc_valid (tdep, tdesc_data))
+  if (!s390_tdesc_valid (tdep, tdesc_data.get ()))
     {
-      tdesc_data_cleanup (tdesc_data);
       xfree (tdep);
       gdbarch_free (gdbarch);
       return NULL;
@@ -7181,13 +7183,12 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       if (tmp->vector_abi != tdep->vector_abi)
 	continue;
 
-      tdesc_data_cleanup (tdesc_data);
       xfree (tdep);
       gdbarch_free (gdbarch);
       return arches->gdbarch;
     }
 
-  tdesc_use_registers (gdbarch, tdep->tdesc, tdesc_data);
+  tdesc_use_registers (gdbarch, tdep->tdesc, std::move (tdesc_data));
   set_gdbarch_register_name (gdbarch, s390_register_name);
 
   /* Assign pseudo register numbers.  */

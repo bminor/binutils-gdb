@@ -1,3 +1,46 @@
+2021-01-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (version.c): Simplifiy args and call move-if-change.
+
+2021-01-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete checks for stdlib.h, string.h,
+	strings.h, and time.h.
+	* config.in, configure: Regenerate.
+	* cpu.c, debug.c, device.c, device_table.c, device_table.h,
+	dgen.c, emul_bugapi.c, emul_chirp.c, emul_netbsd.c, emul_unix.c,
+	filter.c, hw_com.c, hw_eeprom.c, hw_nvram.c, hw_opic.c, hw_pal.c,
+	hw_phb.c, hw_sem.c, hw_shm.c, lf.c, main.c, misc.c, misc.h,
+	mon.c, pk_disklabel.c, psim.c, registers.c, sim_calls.c, table.c,
+	tree.c: Delete HAVE_ERRNO_H, HAVE_STDLIB_H, HAVE_STRING_H,
+	HAVE_STRINGS_H, HAVE_LIMITS_H, HAVE_TIME_H, and strings.h include.
+	* hw_nvram.c: Likewise.
+	(_hw_nvram_device): Always define host_time as time_t.
+	(hw_nvram_update_clock): Delete error fallback.
+	* gen-model.c (gen_model_c): Delete HAVE_STDLIB_H output.
+
+
+2021-01-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-01-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim_calls.c (sim_memory_map): Define.
+
+2021-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* gen-icache.c, igen.c: Include stdlib.h.
+
+2021-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4 (ACX_BUGURL): Change http:// to https://.
+	* configure: Regenerate.
+
+2020-10-20  Dr. David Alan Gilbert  <dgilbert@redhat.com>
+
+	* emul_netbsd.c (do_sigprocmask): Fix printf format.
+
 2020-07-03  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	* ld-insn.h (last_model, last_model_data, last_model_function,
@@ -23,6 +66,10 @@
 
 	PR build/24572:
 	* Makefile.in (install-strip): New target.
+
+2019-09-20  Alan Modra  <amodra@gmail.com>
+
+	* emul_generic.c (emul_add_tree_options): Delete old bfd code.
 
 2019-01-26  Tom Tromey  <tom@tromey.com>
 

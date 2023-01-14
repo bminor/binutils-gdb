@@ -1,7 +1,7 @@
 #as: -march=rv64ic -mabi=lp64
 #objdump: -dr
 
-.*:     file format elf64-littleriscv
+.*:     file format elf64-(little|big)riscv
 
 
 Disassembly of section .text:

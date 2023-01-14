@@ -1,6 +1,6 @@
 /* Routines for name->symbol lookups in GDB.
    
-   Copyright (C) 2003-2020 Free Software Foundation, Inc.
+   Copyright (C) 2003-2021 Free Software Foundation, Inc.
 
    Contributed by David Carlton <carlton@bactrian.org> and by Kealia,
    Inc.
@@ -760,6 +760,13 @@ language_defn::search_name_hash (const char *string0) const
 	  if (string[1] == '_' && string != string0)
 	    {
 	      int c = string[2];
+
+	      if (c == 'B' && string[3] == '_')
+		{
+		  for (string += 4; ISDIGIT (*string); ++string)
+		    ;
+		  continue;
+		}
 
 	      if ((c < 'a' || c > 'z') && c != 'O')
 		return hash;

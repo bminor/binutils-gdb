@@ -1,5 +1,5 @@
 /* Hardware event manager.
-   Copyright (C) 1998-2020 Free Software Foundation, Inc.
+   Copyright (C) 1998-2021 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -23,9 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "sim-events.h"
 
-#if HAVE_STRING_H
 #include <string.h>
-#endif
 
 /* The hw-events object is implemented using sim-events */
 
@@ -187,6 +185,7 @@ hw_event_remain_time (struct hw *me, struct hw_event *event)
 #include "sim-main.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 static void
 test_handler (struct hw *me,

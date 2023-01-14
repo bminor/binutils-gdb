@@ -1,6 +1,6 @@
 /* Definitions for frame unwinder, for GDB, the GNU debugger.
 
-   Copyright (C) 2003-2020 Free Software Foundation, Inc.
+   Copyright (C) 2003-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -117,7 +117,7 @@ frame_unwind_append_unwinder (struct gdbarch *gdbarch,
 
 static int
 frame_unwind_try_unwinder (struct frame_info *this_frame, void **this_cache,
-                          const struct frame_unwind *unwinder)
+			  const struct frame_unwind *unwinder)
 {
   int res = 0;
 
@@ -180,13 +180,13 @@ frame_unwind_find_by_frame (struct frame_info *this_frame, void **this_cache)
   unwinder_from_target = target_get_unwinder ();
   if (unwinder_from_target != NULL
       && frame_unwind_try_unwinder (this_frame, this_cache,
-                                   unwinder_from_target))
+				   unwinder_from_target))
     return;
 
   unwinder_from_target = target_get_tailcall_unwinder ();
   if (unwinder_from_target != NULL
       && frame_unwind_try_unwinder (this_frame, this_cache,
-                                   unwinder_from_target))
+				   unwinder_from_target))
     return;
 
   for (entry = table->list; entry != NULL; entry = entry->next)
@@ -296,7 +296,7 @@ frame_unwind_got_constant (struct frame_info *frame, int regnum,
 }
 
 struct value *
-frame_unwind_got_bytes (struct frame_info *frame, int regnum, gdb_byte *buf)
+frame_unwind_got_bytes (struct frame_info *frame, int regnum, const gdb_byte *buf)
 {
   struct gdbarch *gdbarch = frame_unwind_arch (frame);
   struct value *reg_val;

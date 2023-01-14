@@ -1,6 +1,6 @@
 /* GDB routines for manipulating objfiles.
 
-   Copyright (C) 1992-2020 Free Software Foundation, Inc.
+   Copyright (C) 1992-2021 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -257,13 +257,13 @@ objfile_lookup_static_link (struct objfile *objfile,
 
 
 
-/* Called via bfd_map_over_sections to build up the section table that
-   the objfile references.  The objfile contains pointers to the start
-   of the table (objfile->sections) and to the first location after
-   the end of the table (objfile->sections_end).  */
+/* Build up the section table that the objfile references.  The
+   objfile contains pointers to the start of the table
+   (objfile->sections) and to the first location after the end of the
+   table (objfile->sections_end).  */
 
 static void
-add_to_objfile_sections_full (struct bfd *abfd, struct bfd_section *asect,
+add_to_objfile_sections (struct bfd *abfd, struct bfd_section *asect,
 			      struct objfile *objfile, int force)
 {
   struct obj_section *section;
@@ -283,13 +283,6 @@ add_to_objfile_sections_full (struct bfd *abfd, struct bfd_section *asect,
   section->ovly_mapped = 0;
 }
 
-static void
-add_to_objfile_sections (struct bfd *abfd, struct bfd_section *asect,
-			 void *objfilep)
-{
-  add_to_objfile_sections_full (abfd, asect, (struct objfile *) objfilep, 0);
-}
-
 /* Builds a section table for OBJFILE.
 
    Note that the OFFSET and OVLY_MAPPED in each table entry are
@@ -304,14 +297,14 @@ build_objfile_section_table (struct objfile *objfile)
 				      count,
 				      struct obj_section);
   objfile->sections_end = (objfile->sections + count);
-  bfd_map_over_sections (objfile->obfd,
-			 add_to_objfile_sections, (void *) objfile);
+  for (asection *sect : gdb_bfd_sections (objfile->obfd))
+    add_to_objfile_sections (objfile->obfd, sect, objfile, 0);
 
   /* See gdb_bfd_section_index.  */
-  add_to_objfile_sections_full (objfile->obfd, bfd_com_section_ptr, objfile, 1);
-  add_to_objfile_sections_full (objfile->obfd, bfd_und_section_ptr, objfile, 1);
-  add_to_objfile_sections_full (objfile->obfd, bfd_abs_section_ptr, objfile, 1);
-  add_to_objfile_sections_full (objfile->obfd, bfd_ind_section_ptr, objfile, 1);
+  add_to_objfile_sections (objfile->obfd, bfd_com_section_ptr, objfile, 1);
+  add_to_objfile_sections (objfile->obfd, bfd_und_section_ptr, objfile, 1);
+  add_to_objfile_sections (objfile->obfd, bfd_abs_section_ptr, objfile, 1);
+  add_to_objfile_sections (objfile->obfd, bfd_ind_section_ptr, objfile, 1);
 }
 
 /* Given a pointer to an initialized bfd (ABFD) and some flag bits,
@@ -380,12 +373,12 @@ objfile::objfile (bfd *abfd, const char *name, objfile_flags flags_)
 int
 entry_point_address_query (CORE_ADDR *entry_p)
 {
-  if (symfile_objfile == NULL || !symfile_objfile->per_bfd->ei.entry_point_p)
+  objfile *objf = current_program_space->symfile_object_file;
+  if (objf == NULL || !objf->per_bfd->ei.entry_point_p)
     return 0;
 
-  int idx = symfile_objfile->per_bfd->ei.the_bfd_section_index;
-  *entry_p = (symfile_objfile->per_bfd->ei.entry_point
-	      + symfile_objfile->section_offsets[idx]);
+  int idx = objf->per_bfd->ei.the_bfd_section_index;
+  *entry_p = objf->per_bfd->ei.entry_point + objf->section_offsets[idx];
 
   return 1;
 }
@@ -532,26 +525,26 @@ objfile::~objfile ()
       child = separate_debug_objfile_backlink->separate_debug_objfile;
 
       if (child == this)
-        {
-          /* THIS is the first child.  */
-          separate_debug_objfile_backlink->separate_debug_objfile =
-            separate_debug_objfile_link;
-        }
+	{
+	  /* THIS is the first child.  */
+	  separate_debug_objfile_backlink->separate_debug_objfile =
+	    separate_debug_objfile_link;
+	}
       else
-        {
-          /* Find THIS in the list.  */
-          while (1)
-            {
-              if (child->separate_debug_objfile_link == this)
-                {
-                  child->separate_debug_objfile_link =
-                    separate_debug_objfile_link;
-                  break;
-                }
-              child = child->separate_debug_objfile_link;
-              gdb_assert (child);
-            }
-        }
+	{
+	  /* Find THIS in the list.  */
+	  while (1)
+	    {
+	      if (child->separate_debug_objfile_link == this)
+		{
+		  child->separate_debug_objfile_link =
+		    separate_debug_objfile_link;
+		  break;
+		}
+	      child = child->separate_debug_objfile_link;
+	      gdb_assert (child);
+	    }
+	}
     }
 
   /* Remove any references to this objfile in the global value
@@ -1243,7 +1236,7 @@ find_pc_section (CORE_ADDR pc)
 			  &pspace_info->num_sections);
 
       /* Don't need updates to section map until objfiles are added,
-         removed or relocated.  */
+	 removed or relocated.  */
       pspace_info->new_objfiles_available = 0;
       pspace_info->section_map_dirty = 0;
     }

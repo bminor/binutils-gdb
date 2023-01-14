@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 #
-#   Copyright (C) 2019-2020 Free Software Foundation, Inc.
+#   Copyright (C) 2019-2021 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 
 ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
 
-AUTOMAKE_OPTIONS = foreign no-texinfo.tex
+AUTOMAKE_OPTIONS = dejagnu foreign no-texinfo.tex
 
 # This is where we get zlib from.  zlibdir is -L../zlib and zlibinc is
 # -I../zlib, unless we were configured with --with-system-zlib, in which
@@ -27,6 +27,8 @@ AUTOMAKE_OPTIONS = foreign no-texinfo.tex
 ZLIB = @zlibdir@ -lz
 ZLIBINC = @zlibinc@
 
+BASEDIR = $(srcdir)/..
+BFDDIR = $(BASEDIR)/bfd
 INCDIR = $(srcdir)/../include
 AM_CPPFLAGS = -D_GNU_SOURCE -I$(srcdir) -I$(srcdir)/../include -I$(srcdir)/../bfd -I../bfd @INCINTL@
 AM_CFLAGS = -std=gnu99 @ac_libctf_warn_cflags@ @warn@ @c_warn@ @WARN_PEDANTIC@ @WERROR@ $(ZLIBINC)
@@ -39,7 +41,7 @@ include_HEADERS =
 noinst_LTLIBRARIES = libctf.la libctf-nobfd.la
 endif
 
-libctf_nobfd_la_LIBADD = @SHARED_LIBADD@ $(ZLIB)
+libctf_nobfd_la_LIBADD = @CTF_LIBADD@ $(LIBINTL) $(ZLIB)
 libctf_nobfd_la_LDFLAGS = -version-info 0:0:0 @SHARED_LDFLAGS@ @VERSION_FLAGS@
 libctf_nobfd_la_CPPFLAGS = $(AM_CPPFLAGS) -DNOBFD=1
 libctf_nobfd_la_SOURCES = ctf-archive.c ctf-dump.c ctf-create.c ctf-decl.c ctf-error.c \
@@ -50,13 +52,51 @@ if NEED_CTF_QSORT_R
 libctf_nobfd_la_SOURCES += ctf-qsort_r.c
 endif
 
-libctf_la_LIBADD = @BFD_LIBADD@ $(libctf_nobfd_la_LIBADD)
+libctf_la_LIBADD = ../bfd/libbfd.la $(libctf_nobfd_la_LIBADD)
 libctf_la_CPPFLAGS = $(AM_CPPFLAGS) -DNOBFD=0
-libctf_la_DEPENDENCIES = @BFD_DEPENDENCIES@
 libctf_la_LDFLAGS = $(libctf_nobfd_la_LDFLAGS)
 libctf_la_SOURCES = $(libctf_nobfd_la_SOURCES) ctf-open-bfd.c
 
-BUILT_SOURCES = ctf-error.h
+# Setup the testing framework, if you have one
+EXPECT = expect
+RUNTEST = runtest
+RUNTESTFLAGS =
 
-ctf-error.h: $(srcdir)/mkerrors.sed $(srcdir)/../include/ctf-api.h
-	sed -nf $(srcdir)/mkerrors.sed < $(srcdir)/../include/ctf-api.h > $@
+CC_FOR_TARGET = ` \
+  if [ -f $$r/../gcc/xgcc ] ; then \
+    if [ -f $$r/../newlib/Makefile ] ; then \
+      echo $$r/../gcc/xgcc -B$$r/../gcc/ -idirafter $$r/../newlib/targ-include -idirafter $${srcroot}/../newlib/libc/include -nostdinc; \
+    else \
+      echo $$r/../gcc/xgcc -B$$r/../gcc/; \
+    fi; \
+  else \
+    if [ "@host@" = "@target@" ] ; then \
+      echo $(CC); \
+    else \
+      echo gcc | sed '$(transform)'; \
+    fi; \
+  fi`
+
+check-DEJAGNU: site.exp development.exp
+	srcroot=`cd $(srcdir) && pwd`; export srcroot; \
+	r=`pwd`; export r; \
+	LC_ALL=C; export LC_ALL; \
+	EXPECT=$(EXPECT); export EXPECT; \
+	runtest=$(RUNTEST); \
+	if $(SHELL) -c "$$runtest --version" > /dev/null 2>&1; then \
+	  $$runtest --tool $(DEJATOOL) --srcdir $${srcroot}/testsuite \
+		CC="$(CC_FOR_TARGET)" CFLAGS="$(CFLAGS) -I$(INCDIR) -I$(srcdir) -I$(builddir) -I$(builddir)/../bfd $(ZLIBINC)" \
+		CC_FOR_HOST="$(CC)" LIBS="$(LIBS)" $(RUNTESTFLAGS); \
+	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
+	fi
+
+development.exp: $(BFDDIR)/development.sh
+	$(EGREP) "(development|experimental)=" $(BFDDIR)/development.sh  \
+	  | $(AWK) -F= '{ print "set " $$1 " " $$2 }' > $@
+
+# development.sh is used to determine -Werror default.
+CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/development.sh
+
+EXTRA_DEJAGNU_SITE_CONFIG = development.exp
+
+DISTCLEANFILES = site.exp development.exp

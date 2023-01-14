@@ -1,5 +1,5 @@
 /* Parse options for the GNU linker.
-   Copyright (C) 1991-2020 Free Software Foundation, Inc.
+   Copyright (C) 1991-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -22,8 +22,10 @@
 #include "bfd.h"
 #include "bfdver.h"
 #include "libiberty.h"
+#include "filenames.h"
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include "safe-ctype.h"
 #include "getopt.h"
 #include "bfdlink.h"
@@ -386,6 +388,11 @@ static const struct ld_option ld_options[] =
   { {"allow-multiple-definition", no_argument, NULL,
      OPTION_ALLOW_MULTIPLE_DEFINITION},
     '\0', NULL, N_("Allow multiple definitions"), TWO_DASHES },
+#if SUPPORT_ERROR_HANDLING_SCRIPT
+  { {"error-handling-script", required_argument, NULL,
+     OPTION_ERROR_HANDLING_SCRIPT},
+    '\0', N_("SCRIPT"), N_("Provide a script to help with undefined symbol errors"), TWO_DASHES},
+#endif
   { {"no-undefined-version", no_argument, NULL, OPTION_NO_UNDEFINED_VERSION},
     '\0', NULL, N_("Disallow undefined version"), TWO_DASHES },
   { {"default-symver", no_argument, NULL, OPTION_DEFAULT_SYMVER},
@@ -711,7 +718,7 @@ parse_args (unsigned argc, char **argv)
   last_optind = -1;
   while (1)
     {
-      int longind;
+      int longind = 0;
       int optc;
       static unsigned int defsym_count;
 
@@ -734,6 +741,20 @@ parse_args (unsigned argc, char **argv)
 	{
 	  optind = last_optind;
 	  optc = getopt_long (argc, argv, "-", really_longopts, &longind);
+	}
+      /* Attempt to detect grouped short options,  eg: "-non-start".
+	 Accepting such options is error prone as it is not clear if the user
+	 intended "-n -o n-start" or "--non-start".  */
+      else if (longind == 0  /* This is a short option.  */
+	       && optc > 32  /* It is a valid option.  */
+        /* The character is not the second character of argv[last_optind].  */
+	       && optc != argv[last_optind][1])
+	{
+	  if (optarg)
+	    einfo (_("%F%P: Error: unable to disambiguate: %s (did you mean -%s ?)\n"),
+		   argv[last_optind], argv[last_optind]);
+	  else
+	    einfo (_("%P: Warning: grouped short command line options are deprecated: %s\n"), argv[last_optind]);
 	}
 
       if (ldemul_handle_option (optc))
@@ -1029,6 +1050,15 @@ parse_args (unsigned argc, char **argv)
 	case OPTION_ALLOW_MULTIPLE_DEFINITION:
 	  link_info.allow_multiple_definition = TRUE;
 	  break;
+
+#if SUPPORT_ERROR_HANDLING_SCRIPT
+	case OPTION_ERROR_HANDLING_SCRIPT:
+	  /* FIXME: Should we warn if the script is being overridden by another ?
+	     Or maybe they should be chained together ?  */
+	  error_handling_script = optarg;
+	  break;
+#endif
+
 	case OPTION_NO_UNDEFINED_VERSION:
 	  link_info.allow_undefined_version = FALSE;
 	  break;
@@ -1669,13 +1699,37 @@ parse_args (unsigned argc, char **argv)
 	}
     }
 
+  free (really_longopts);
+  free (longopts);
+  free (shortopts);
+
   /* Run a couple of checks on the map filename.  */
   if (config.map_filename)
     {
+      char * new_name = NULL;
+      char * percent;
+      int    res = 0;
+
       if (config.map_filename[0] == 0)
 	{
 	  einfo (_("%P: no file/directory name provided for map output; ignored\n"));
 	  config.map_filename = NULL;
+	}
+      else if (strcmp (config.map_filename, "-") == 0)
+	; /* Write to stdout.  Handled in main().  */
+      else if ((percent = strchr (config.map_filename, '%')) != NULL)
+	{
+	  /* FIXME: Check for a second % character and issue an error ?  */
+
+	  /* Construct a map file by replacing the % character with the (full)
+	     output filename.  If the % character was the last character in
+	     the original map filename then add a .map extension.  */
+	  percent[0] = 0;
+	  res = asprintf (&new_name, "%s%s%s", config.map_filename,
+			  output_filename,
+			  percent[1] ? percent + 1 : ".map");
+
+	  /* FIXME: Should we ensure that any directory components in new_name exist ?  */
 	}
       else
 	{
@@ -1683,24 +1737,38 @@ parse_args (unsigned argc, char **argv)
 
 	  /* If the map filename is actually a directory then create
 	     a file inside it, based upon the output filename.  */
-	  if (stat (config.map_filename, &s) >= 0
-	      && S_ISDIR (s.st_mode))
+	  if (stat (config.map_filename, &s) < 0)
 	    {
-	      char * new_name;
-
-	      /* FIXME: This is a (trivial) memory leak.  */
-	      if (asprintf (&new_name, "%s/%s.map",
-			    config.map_filename, output_filename) < 0)
-		{
-		  /* If this alloc fails then something is probably very
-		     wrong.  Better to halt now rather than continue on
-		     into more problems.  */
-		  einfo (_("%P%F: cannot create name for linker map file: %E\n"));
-		  new_name = NULL;
-		}
-
-	      config.map_filename = new_name;
+	      if (errno != ENOENT)
+		einfo (_("%P: cannot stat linker map file: %E\n"));
 	    }
+	  else if (S_ISDIR (s.st_mode))
+	    {
+	      char lastc = config.map_filename[strlen (config.map_filename) - 1];
+	      res = asprintf (&new_name, "%s%s%s.map",
+			      config.map_filename,
+			      IS_DIR_SEPARATOR (lastc) ? "" : "/",
+			      lbasename (output_filename));
+	    }
+	  else if (! S_ISREG (s.st_mode))
+	    {
+	      einfo (_("%P: linker map file is not a regular file\n"));
+	      config.map_filename = NULL;
+	    }
+	  /* else FIXME: Check write permission ?  */
+	}
+
+      if (res < 0)
+	{
+	  /* If the asprintf failed then something is probably very
+	     wrong.  Better to halt now rather than continue on
+	     into more problems.  */
+	  einfo (_("%P%F: cannot create name for linker map file: %E\n"));
+	}
+      else if (new_name != NULL)
+	{
+	  /* This is a trivial memory leak.  */
+	  config.map_filename = new_name;
 	}
     }
 
@@ -1953,6 +2021,10 @@ elf_shlib_list_options (FILE *file)
   -z initfirst                Mark DSO to be initialized first at runtime\n"));
   fprintf (file, _("\
   -z interpose                Mark object to interpose all DSOs but executable\n"));
+  fprintf (file, _("\
+  -z unique                   Mark DSO to be loaded at most once by default, and only in the main namespace\n"));
+  fprintf (file, _("\
+  -z nounique                 Don't mark DSO as a loadable at most once\n"));
   fprintf (file, _("\
   -z lazy                     Mark object lazy runtime binding (default)\n"));
   fprintf (file, _("\

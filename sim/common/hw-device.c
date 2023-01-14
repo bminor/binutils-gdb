@@ -1,6 +1,6 @@
 /* The common simulator framework for GDB, the GNU Debugger.
 
-   Copyright 2002-2020 Free Software Foundation, Inc.
+   Copyright 2002-2021 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney and Red Hat.
 
@@ -23,13 +23,8 @@
 #include "hw-main.h"
 #include "hw-base.h"
 
-#if HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
-
-#if HAVE_STRING_H
 #include <string.h>
-#endif
 
 /* Address methods */
 

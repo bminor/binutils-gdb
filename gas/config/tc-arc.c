@@ -1,5 +1,5 @@
 /* tc-arc.c -- Assembler for the ARC
-   Copyright (C) 1994-2020 Free Software Foundation, Inc.
+   Copyright (C) 1994-2021 Free Software Foundation, Inc.
 
    Contributor: Claudiu Zissulescu <claziss@synopsys.com>
 
@@ -1485,7 +1485,7 @@ emit_insn0 (struct arc_insn *insn, char *where, bfd_boolean relax)
   size_t total_len;
 
   pr_debug ("Emit insn : 0x%llx\n", insn->insn);
-  pr_debug ("\tLength  : 0x%d\n", insn->len);
+  pr_debug ("\tLength  : %d\n", insn->len);
   pr_debug ("\tLong imm: 0x%lx\n", insn->limm);
 
   /* Write out the instruction.  */

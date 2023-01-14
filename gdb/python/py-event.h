@@ -1,6 +1,6 @@
 /* Python interface to inferior events.
 
-   Copyright (C) 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2009-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,16 +28,16 @@
 /* Declare all event types.  */
 #define GDB_PY_DEFINE_EVENT_TYPE(name, py_name, doc, base) \
   extern PyTypeObject name##_event_object_type		    \
-        CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
+	CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
 #include "py-event-types.def"
 #undef GDB_PY_DEFINE_EVENT_TYPE
 
-typedef struct
+struct event_object
 {
   PyObject_HEAD
 
   PyObject *dict;
-} event_object;
+};
 
 extern int emit_continue_event (ptid_t ptid);
 extern int emit_exited_event (const LONGEST *exit_code, struct inferior *inf);
@@ -56,10 +56,10 @@ typedef enum
 extern int emit_inferior_call_event (inferior_call_kind kind,
 				     ptid_t thread, CORE_ADDR addr);
 extern int emit_register_changed_event (struct frame_info *frame,
-				        int regnum);
+					int regnum);
 extern int emit_memory_changed_event (CORE_ADDR addr, ssize_t len);
 extern int evpy_emit_event (PyObject *event,
-                            eventregistry_object *registry);
+			    eventregistry_object *registry);
 
 extern gdbpy_ref<> create_event_object (PyTypeObject *py_type);
 
@@ -78,7 +78,7 @@ extern int emit_clear_objfiles_event (void);
 
 extern void evpy_dealloc (PyObject *self);
 extern int evpy_add_attribute (PyObject *event,
-                               const char *name, PyObject *attr)
+			       const char *name, PyObject *attr)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_event_generic (PyTypeObject *type, const char *name)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;

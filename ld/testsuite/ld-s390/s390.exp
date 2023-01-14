@@ -1,5 +1,5 @@
 # Expect script for ld-s390 tests
-#   Copyright (C) 2003-2020 Free Software Foundation, Inc.
+#   Copyright (C) 2003-2021 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -94,4 +94,11 @@ if [istarget "s390-*-*"] {
 if [istarget "s390x-*-*"] {
     run_ld_link_tests $s390tests
     run_ld_link_tests $s390xtests
+}
+
+set test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
+foreach t $test_list {
+    # We need to strip the ".d", but can leave the dirname.
+    verbose [file rootname $t]
+    run_dump_test [file rootname $t]
 }

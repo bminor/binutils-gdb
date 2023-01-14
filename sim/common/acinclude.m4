@@ -5,18 +5,7 @@
 # SIM_AC_OUTPUT is a cover function to AC_OUTPUT to generate the Makefile.
 # It is intended to be invoked last.
 #
-# The simulator's configure.ac should look like:
-#
-# dnl Process this file with autoconf to produce a configure script.
-# AC_PREREQ(2.64)dnl
-# AC_INIT(Makefile.in)
-# sinclude(../common/aclocal.m4)
-#
-# SIM_AC_COMMON
-#
-# ... target specific stuff ...
-#
-# SIM_AC_OUTPUT
+# See README-HACKING for more details.
 
 # Include global overrides and fixes for Autoconf.
 m4_include(../../config/override.m4)
@@ -56,6 +45,32 @@ AR=${AR-ar}
 AC_SUBST(AR)
 AC_PROG_RANLIB
 
+# Require C11 or newer.  Autoconf-2.70 provides ac_cv_prog_cc_c11 when using
+# AC_PROG_CC, but we're still using Autoconf-2.69, and the newest it understands
+# is C99.  So handle it ourselves.
+m4_version_prereq([2.70], [AC_MSG_ERROR([clean this up!])], [:])
+C_DIALECT=
+AC_MSG_CHECKING([whether C11 is supported by default])
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+#if !defined __STDC_VERSION__ || __STDC_VERSION__ < 201112L
+# error "C11 support not found"
+#endif
+])], [AC_MSG_RESULT([yes])], [
+  AC_MSG_RESULT([no])
+  AC_MSG_CHECKING([for -std=c11 support])
+  ac_save_CC="$CC"
+  CC="$CC -std=c11"
+  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+#if !defined __STDC_VERSION__ || __STDC_VERSION__ < 201112L
+# error "C11 support not found"
+#endif
+])], [
+  AC_MSG_RESULT([yes])
+  CC="$ac_save_CC"
+  C_DIALECT="-std=c11"
+], [AC_MSG_ERROR([C11 is required])])])
+AC_SUBST(C_DIALECT)
+
 # Some of the common include files depend on bfd.h, and bfd.h checks
 # that config.h is included first by testing that the PACKAGE macro
 # is defined.
@@ -83,12 +98,11 @@ ALL_LINGUAS=
 ZW_GNU_GETTEXT_SISTER_DIR(../../intl)
 
 # Check for common headers.
-# FIXME: Seems to me this can cause problems for i386-windows hosts.
-# At one point there were hardcoded AC_DEFINE's if ${host} = i386-*-windows*.
-AC_CHECK_HEADERS(stdlib.h string.h strings.h unistd.h time.h)
+# NB: You can assume C11 headers exist.
+AC_CHECK_HEADERS(unistd.h)
 AC_CHECK_HEADERS(sys/time.h sys/times.h sys/resource.h sys/mman.h)
 AC_CHECK_HEADERS(fcntl.h fpu_control.h)
-AC_CHECK_HEADERS(dlfcn.h errno.h sys/stat.h)
+AC_CHECK_HEADERS(dlfcn.h sys/stat.h)
 AC_CHECK_FUNCS(getrusage time sigaction __setfpucw)
 AC_CHECK_FUNCS(mmap munmap lstat truncate ftruncate posix_fallocate)
 AC_CHECK_MEMBERS([[struct stat.st_dev], [struct stat.st_ino],
@@ -237,7 +251,7 @@ SIM_AC_OPTION_ENVIRONMENT
 SIM_AC_OPTION_INLINE
 
 ACX_PKGVERSION([SIM])
-ACX_BUGURL([http://www.gnu.org/software/gdb/bugs/])
+ACX_BUGURL([https://www.gnu.org/software/gdb/bugs/])
 AC_DEFINE_UNQUOTED([PKGVERSION], ["$PKGVERSION"], [Additional package description])
 AC_DEFINE_UNQUOTED([REPORT_BUGS_TO], ["$REPORT_BUGS_TO"], [Bug reporting address])
 
@@ -711,6 +725,7 @@ AC_MSG_RESULT($sim_smp)
 
 dnl --enable-build-warnings is for developers of the simulator.
 dnl it enables extra GCC specific warnings.
+dnl arg[1] Enable -Werror by default? ("yes" or "no")
 AC_DEFUN([SIM_AC_OPTION_WARNINGS],
 [
 AC_ARG_ENABLE(werror,
@@ -727,11 +742,11 @@ if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" ; then
 fi
 
 WERROR_CFLAGS=""
-if test "${ERROR_ON_WARNING}" = yes ; then
-# NOTE: Disabled in the sim dir due to most sims generating warnings.
-#    WERROR_CFLAGS="-Werror"
-     true
-fi
+m4_if(m4_default([$1], [yes]), [yes], [dnl
+  if test "${ERROR_ON_WARNING}" = yes ; then
+    WERROR_CFLAGS="-Werror"
+  fi
+])dnl
 
 build_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith \
 -Wpointer-sign \
@@ -806,7 +821,9 @@ dnl one afterwards.  The two pieces of the common fragment are inserted into
 dnl the target's fragment at the appropriate points.
 
 AC_DEFUN([SIM_AC_OUTPUT],
-[
+[dnl
+AC_REQUIRE([SIM_AC_OPTION_WARNINGS])dnl
+
 dnl Make @cgen_breaks@ non-null only if the sim uses CGEN.
 cgen_breaks=""
 if grep CGEN_MAINT $srcdir/Makefile.in >/dev/null; then

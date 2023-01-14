@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright (C) 2004-2020 Free Software Foundation, Inc.
+#   Copyright (C) 2004-2021 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -175,7 +175,7 @@ mips_add_stub_section (const char *stub_sec_name, asection *input_section,
 
   /* Initialize a statement list that contains only the new statement.  */
   lang_list_init (&info.add);
-  lang_add_section (&info.add, stub_sec, NULL, os);
+  lang_add_section (&info.add, stub_sec, NULL, NULL, os);
   if (info.add.head == NULL)
     goto err_ret;
 

@@ -1,6 +1,6 @@
 /* Support for GDB maintenance commands.
 
-   Copyright (C) 1992-2020 Free Software Foundation, Inc.
+   Copyright (C) 1992-2021 Free Software Foundation, Inc.
 
    Written by Fred Fish at Cygnus Support.
 
@@ -380,14 +380,16 @@ print_bfd_section_info_maybe_relocated (bfd *abfd, asection *asect,
 static void
 maintenance_info_sections (const char *arg, int from_tty)
 {
-  if (exec_bfd)
+  if (current_program_space->exec_bfd ())
     {
       bool allobj = false;
 
       printf_filtered (_("Exec file:\n"));
-      printf_filtered ("    `%s', ", bfd_get_filename (exec_bfd));
+      printf_filtered ("    `%s', ",
+		       bfd_get_filename (current_program_space->exec_bfd ()));
       wrap_here ("        ");
-      printf_filtered (_("file type %s.\n"), bfd_get_target (exec_bfd));
+      printf_filtered (_("file type %s.\n"),
+		       bfd_get_target (current_program_space->exec_bfd ()));
 
       /* Only this function cares about the 'ALLOBJ' argument;
 	 if 'ALLOBJ' is the only argument, discard it rather than
@@ -404,7 +406,7 @@ maintenance_info_sections (const char *arg, int from_tty)
 	  if (allobj)
 	    printf_filtered (_("  Object file: %s\n"),
 			     bfd_get_filename (ofile->obfd));
-	  else if (ofile->obfd != exec_bfd)
+	  else if (ofile->obfd != current_program_space->exec_bfd ())
 	    continue;
 
 	  int section_count = gdb_bfd_count_sections (ofile->obfd);
@@ -1081,6 +1083,11 @@ lists all sections from all object files, including shared libraries."),
 			&maintenanceprintlist, "maintenance print ", 0,
 			&maintenancelist);
 
+  add_basic_prefix_cmd ("flush", class_maintenance,
+			_("Maintenance command for flushing GDB internal caches."),
+			&maintenanceflushlist, "maintenance flush ", 0,
+			&maintenancelist);
+
   add_basic_prefix_cmd ("set", class_maintenance, _("\
 Set GDB internal variables used by the GDB maintainer.\n\
 Configure variables internal to GDB that aid in GDB's maintenance"),
@@ -1191,11 +1198,12 @@ If nonzero, will cause the execution space for each command to be\n\
 displayed, following the command's output."),
 	   &maintenancelist);
 
-  add_cmd ("type", class_maintenance, maintenance_print_type, _("\
+  cmd = add_cmd ("type", class_maintenance, maintenance_print_type, _("\
 Print a type chain for a given symbol.\n\
 For each node in a type chain, print the raw data for each member of\n\
 the type structure, and the interpretation of the data."),
 	   &maintenanceprintlist);
+  set_cmd_completer (cmd, expression_completer);
 
   add_cmd ("statistics", class_maintenance, maintenance_print_statistics,
 	   _("Print statistics about internal gdb state."),

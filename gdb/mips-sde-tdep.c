@@ -1,6 +1,6 @@
 /* Target-dependent code for SDE on MIPS processors.
 
-   Copyright (C) 2014-2020 Free Software Foundation, Inc.
+   Copyright (C) 2014-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -226,9 +226,8 @@ mips_sde_elf_osabi_sniffer (bfd *abfd)
 
   /* If the generic sniffer gets a hit, return and let other sniffers
      get a crack at it.  */
-  bfd_map_over_sections (abfd,
-			 generic_elf_osabi_sniff_abi_tag_sections,
-			 &osabi);
+  for (asection *sect : gdb_bfd_sections (abfd))
+    generic_elf_osabi_sniff_abi_tag_sections (abfd, sect, &osabi);
   if (osabi != GDB_OSABI_UNKNOWN)
     return GDB_OSABI_UNKNOWN;
 

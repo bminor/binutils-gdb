@@ -27,17 +27,8 @@
 
 #include "device_table.h"
 
-#ifdef HAVE_TIME_H
 #include <time.h>
-#endif
-
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
 
 /* DEVICE
 
@@ -73,11 +64,7 @@
 typedef struct _hw_nvram_device {
   unsigned8 *memory;
   unsigned sizeof_memory;
-#ifdef HAVE_TIME_H
   time_t host_time;
-#else
-  long host_time;
-#endif
   unsigned timezone;
   /* useful */
   unsigned addr_year;
@@ -177,7 +164,6 @@ static void
 hw_nvram_update_clock(hw_nvram_device *nvram,
 		      cpu *processor)
 {
-#ifdef HAVE_TIME_H
   if (!(nvram->memory[nvram->addr_control] & 0xc0)) {
     time_t host_time = time(NULL);
     if (nvram->host_time != host_time) {
@@ -193,9 +179,6 @@ hw_nvram_update_clock(hw_nvram_device *nvram,
       nvram->memory[nvram->addr_seconds] = hw_nvram_bcd(clock->tm_sec);
     }
   }
-#else
-  error("fixme - where do I find out GMT\n");
-#endif
 }
 
 static void

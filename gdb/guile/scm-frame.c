@@ -1,6 +1,6 @@
 /* Scheme interface to stack frames.
 
-   Copyright (C) 2008-2020 Free Software Foundation, Inc.
+   Copyright (C) 2008-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -32,10 +32,9 @@
 #include "value.h"
 #include "guile-internal.h"
 
-/* The <gdb:frame> smob.
-   The typedef for this struct is in guile-internal.h.  */
+/* The <gdb:frame> smob.  */
 
-struct _frame_smob
+struct frame_smob
 {
   /* This always appears first.  */
   eqable_gdb_smob base;
@@ -1132,7 +1131,7 @@ Return the frame's symtab-and-line <gdb:sal> object." },
 Return the value of the symbol in the frame.\n\
 \n\
   Arguments: <gdb:frame> <gdb:symbol>\n\
-         Or: <gdb:frame> string [#:block <gdb:block>]" },
+	 Or: <gdb:frame> string [#:block <gdb:block>]" },
 
   { "frame-read-register", 2, 0, 0,
     as_a_scm_t_subr (gdbscm_frame_read_register),

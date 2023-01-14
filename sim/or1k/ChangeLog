@@ -1,0 +1,92 @@
+2021-01-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* traps.c (or1k32bf_exception): Move handler_pc decl to top of scope.
+	(or1k32bf_mfspr): Move val decl to top of function body.
+
+2021-01-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Delete redundant sim-cpu.o, sim-hload.o,
+	sim-hrw.o, sim-reg.o, sim-reason.o, sim-engine.o, sim-model.o,
+	sim-stop.o, and $(TRAPS_OBJ) entries.
+	(SIM_RUN_OBJS): Delete.
+
+2021-01-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_INLINE): Delete call.
+	* configure: Regenerate.
+
+2021-01-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Call SIM_AC_OPTION_WARNINGS.
+	* configure: Regenerate.
+
+2021-01-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h: Include config.h.
+
+2021-01-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+	* sim-if.c: Delete HAVE_STRING_H, HAVE_STRINGS_H, HAVE_STDLIB_H,
+	and strings.h include.
+
+2021-01-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-01-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2019-06-13  Stafford Horne  <shorne@gmail.com>
+
+	* cpu.c: Regenerate.
+	* cpu.h: Regenerate.
+	* decode.c: Regenerate.
+	* decode.h: Regenerate.
+	* model.c: Regenerate.
+	* sem-switch.c: Regenerate.
+	* sem.c: Regenerate.
+
+2018-10-05  Stafford Horne  <shorne@gmail.com>
+
+	* cpu.h: Regenerate.
+	* decode.c: Regenerate.
+	* decode.h: Regenerate.
+	* model.c: Regenerate.
+	* sem-switch.c: Regenerate.
+	* sem.c: Regenerate:
+
+2017-12-12  Stafford Horne  <shorne@gmail.com>
+	    Peter Gavin  <pgavin@gmail.com>
+
+	* aclocal.m4: Generated.
+	* config.in: Generated.
+	* configure: Generated.
+
+2017-12-12  Stafford Horne  <shorne@gmail.com>
+	    Peter Gavin  <pgavin@gmail.com>
+
+	* arch.c: Generated.
+	* arch.h: Generated.
+	* cpu.c: Generated.
+	* cpu.h: Generated.
+	* cpuall.h: Generated.
+	* decode.c: Generated.
+	* decode.h: Generated.
+	* model.c: Generated.
+	* sem-switch.c: Generated.
+	* sem.c: Generated.
+
+2017-12-12  Stafford Horne  <shorne@gmail.com>
+	    Peter Gavin  <pgavin@gmail.com>
+
+	* README: New file.
+	* Makefile.in: New file.
+	* configure.ac: New file.
+	* mloop.in: New file.
+	* or1k-sim.h: New file.
+	* or1k.c: New file.
+	* sim-if.c: New file.
+	* sim-main.h: New file.
+	* traps.c: New file.

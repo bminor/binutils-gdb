@@ -1,6 +1,6 @@
 /* Definitions for dealing with stack frames, for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -149,8 +149,8 @@ struct frame_id
 
   /* The frame's special address.  This shall be constant through out the
      lifetime of the frame.  This is used for architectures that may have
-     frames that do not change the stack but are still distinct and have 
-     some form of distinct identifier (e.g. the ia64 which uses a 2nd 
+     frames that do not change the stack but are still distinct and have
+     some form of distinct identifier (e.g. the ia64 which uses a 2nd
      stack for registers).  This field is treated as unordered - i.e. will
      not be used in frame ordering comparisons.
 
@@ -186,8 +186,14 @@ public:
 
 private:
 
-  /* The ID of the previously selected frame.  */
+  /* The ID and level of the previously selected frame.  */
   struct frame_id m_fid;
+  int m_level;
+
+  /* Save/restore the language as well, because selecting a frame
+     changes the current language to the frame's language if "set
+     language auto".  */
+  enum language m_lang;
 };
 
 /* Methods for constructing and comparing Frame IDs.  */
@@ -316,23 +322,48 @@ extern bool has_stack_frames ();
    modifies the target invalidating the frame cache).  */
 extern void reinit_frame_cache (void);
 
-/* On demand, create the selected frame and then return it.  If the
-   selected frame can not be created, this function prints then throws
-   an error.  When MESSAGE is non-NULL, use it for the error message,
+/* Return the selected frame.  Always returns non-NULL.  If there
+   isn't an inferior sufficient for creating a frame, an error is
+   thrown.  When MESSAGE is non-NULL, use it for the error message,
    otherwise use a generic error message.  */
 /* FIXME: cagney/2002-11-28: At present, when there is no selected
    frame, this function always returns the current (inner most) frame.
    It should instead, when a thread has previously had its frame
    selected (but not resumed) and the frame cache invalidated, find
    and then return that thread's previously selected frame.  */
-extern struct frame_info *get_selected_frame (const char *message);
+extern struct frame_info *get_selected_frame (const char *message = nullptr);
 
-/* If there is a selected frame, return it.  Otherwise, return NULL.  */
-extern struct frame_info *get_selected_frame_if_set (void);
-
-/* Select a specific frame.  NULL, apparently implies re-select the
-   inner most frame.  */
+/* Select a specific frame.  NULL implies re-select the inner most
+   frame.  */
 extern void select_frame (struct frame_info *);
+
+/* Save the frame ID and frame level of the selected frame in FRAME_ID
+   and FRAME_LEVEL, to be restored later with restore_selected_frame.
+
+   This is preferred over getting the same info out of
+   get_selected_frame directly because this function does not create
+   the selected-frame's frame_info object if it hasn't been created
+   yet, and thus is more efficient and doesn't throw.  */
+extern void save_selected_frame (frame_id *frame_id, int *frame_level)
+  noexcept;
+
+/* Restore selected frame as saved with save_selected_frame.
+
+   Does not try to find the corresponding frame_info object.  Instead
+   the next call to get_selected_frame will look it up and cache the
+   result.
+
+   This function does not throw.  It is designed to be safe to called
+   from the destructors of RAII types.  */
+extern void restore_selected_frame (frame_id frame_id, int frame_level)
+  noexcept;
+
+/* Lookup the frame_info object for the selected frame FRAME_ID /
+   FRAME_LEVEL and cache the result.
+
+   If FRAME_LEVEL > 0 and the originally selected frame isn't found,
+   warn and select the innermost (current) frame.  */
+extern void lookup_selected_frame (frame_id frame_id, int frame_level);
 
 /* Given a FRAME, return the next (more inner, younger) or previous
    (more outer, older) frame.  */
@@ -622,15 +653,15 @@ extern void put_frame_register (struct frame_info *frame, int regnum,
    contents are optimized out or unavailable, set *OPTIMIZEDP,
    *UNAVAILABLEP accordingly.  */
 extern bool get_frame_register_bytes (frame_info *frame, int regnum,
-				      CORE_ADDR offset, int len,
-				      gdb_byte *myaddr,
+				      CORE_ADDR offset,
+				      gdb::array_view<gdb_byte> buffer,
 				      int *optimizedp, int *unavailablep);
 
-/* Write LEN bytes to one or multiple registers starting with REGNUM
-   in frame FRAME, starting at OFFSET, into BUF.  */
+/* Write bytes from BUFFER to one or multiple registers starting with REGNUM
+   in frame FRAME, starting at OFFSET.  */
 extern void put_frame_register_bytes (struct frame_info *frame, int regnum,
-				      CORE_ADDR offset, int len,
-				      const gdb_byte *myaddr);
+				      CORE_ADDR offset,
+				      gdb::array_view<const gdb_byte> buffer);
 
 /* Unwind the PC.  Strictly speaking return the resume address of the
    calling frame.  For GDB, `pc' is the resume address and not a
@@ -656,7 +687,7 @@ extern void frame_pop (struct frame_info *frame);
    adaptor frames this should be ok.  */
 
 extern void get_frame_memory (struct frame_info *this_frame, CORE_ADDR addr,
-			      gdb_byte *buf, int len);
+			      gdb::array_view<gdb_byte> buffer);
 extern LONGEST get_frame_memory_signed (struct frame_info *this_frame,
 					CORE_ADDR memaddr, int len);
 extern ULONGEST get_frame_memory_unsigned (struct frame_info *this_frame,
@@ -665,7 +696,7 @@ extern ULONGEST get_frame_memory_unsigned (struct frame_info *this_frame,
 /* Same as above, but return true zero when the entire memory read
    succeeds, false otherwise.  */
 extern bool safe_frame_unwind_memory (frame_info *this_frame, CORE_ADDR addr,
-				      gdb_byte *buf, int len);
+				      gdb::array_view<gdb_byte> buffer);
 
 /* Return this frame's architecture.  */
 extern struct gdbarch *get_frame_arch (struct frame_info *this_frame);

@@ -1,5 +1,5 @@
 /* Output generating routines for GDB CLI.
-   Copyright (C) 1999-2020 Free Software Foundation, Inc.
+   Copyright (C) 1999-2021 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions.
 
    This file is part of GDB.
@@ -71,6 +71,10 @@ protected:
   virtual void do_flush () override;
   virtual void do_redirect (struct ui_file *outstream) override;
 
+  virtual void do_progress_start (const std::string &, bool) override;
+  virtual void do_progress_notify (double) override;
+  virtual void do_progress_end () override;
+
   bool suppress_output ()
   { return m_suppress_output; }
 
@@ -80,6 +84,33 @@ private:
 
   std::vector<ui_file *> m_streams;
   bool m_suppress_output;
+
+  /* Represents the printing state of a progress meter.  */
+  enum meter_state
+  {
+    /* Printing will start with the next output.  */
+    START,
+    /* Printing has already started.  */
+    WORKING,
+    /* Progress printing has already started.  */
+    PROGRESS,
+    /* Printing should not be done.  */
+    NO_PRINT
+  };
+
+  /* The state of a recent progress meter.  */
+  struct cli_progress_info
+  {
+    /* The current state.  */
+    enum meter_state printing;
+    /* The name to print.  */
+    std::string name;
+    /* The last notification value.  */
+    double last_value;
+  };
+
+  /* Stack of progress meters.  */
+  std::vector<cli_progress_info> m_meters;
 };
 
 extern cli_ui_out *cli_out_new (struct ui_file *stream);

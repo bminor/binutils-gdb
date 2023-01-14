@@ -1,6 +1,6 @@
 /* Macros for general registry objects.
 
-   Copyright (C) 2011-2020 Free Software Foundation, Inc.
+   Copyright (C) 2011-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -154,7 +154,7 @@ void *registry_data (struct registry_fields *fields,
 /* Define a new registry implementation.  */
 
 #define DEFINE_REGISTRY(TAG, ACCESS)					\
-struct registry_data_registry TAG ## _data_registry = { NULL, 0 };	\
+static struct registry_data_registry TAG ## _data_registry = { NULL, 0 }; \
 									\
 const struct TAG ## _data *						\
 register_ ## TAG ## _data_with_cleanup (void (*save) (struct TAG *, void *), \

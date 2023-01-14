@@ -1,5 +1,5 @@
 /* Low level interface to Windows debugging, for gdbserver.
-   Copyright (C) 2006-2020 Free Software Foundation, Inc.
+   Copyright (C) 2006-2021 Free Software Foundation, Inc.
 
    Contributed by Leo Zayas.  Based on "win32-nat.c" from GDB.
 
@@ -90,10 +90,6 @@ static int faked_breakpoint = 0;
 
 /* True if current_process_handle needs to be closed.  */
 static bool open_process_used = false;
-
-#ifdef __x86_64__
-bool wow64_process = false;
-#endif
 
 const struct target_desc *win32_tdesc;
 #ifdef __x86_64__
@@ -1610,7 +1606,7 @@ get_child_debug_event (DWORD *continue_status,
    Returns the signal which caused the process to stop. */
 ptid_t
 win32_process_target::wait (ptid_t ptid, target_waitstatus *ourstatus,
-			    int options)
+			    target_wait_flags options)
 {
   if (cached_status.kind != TARGET_WAITKIND_IGNORE)
     {

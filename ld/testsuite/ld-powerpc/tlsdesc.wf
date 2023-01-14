@@ -38,9 +38,9 @@ Contents of the \.eh_frame section:
   DW_CFA_nop
 
 0+4c 0+14 0+50 FDE cie=0+ pc=0+2f8\.\.0+32c
-  DW_CFA_advance_loc: 4 to 0+2fc
+  DW_CFA_advance_loc: 8 to 0+300
   DW_CFA_register: r65 in r12
-  DW_CFA_advance_loc: 20 to 0+310
+  DW_CFA_advance_loc: 16 to 0+310
   DW_CFA_restore_extended: r65
 
 0+64 0+10 0+68 FDE cie=0+ pc=0+2e0\.\.0+2ec

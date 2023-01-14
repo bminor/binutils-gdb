@@ -1,4 +1,4 @@
-# Copyright 1992-2020 Free Software Foundation, Inc.
+# Copyright 1992-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,11 +37,9 @@ proc recurse_tests {} {
 	    "set first instance watchpoint"
 
 	# Continue until initial set of b.
-	if [gdb_test "continue" \
+	gdb_test "continue" \
 	    "Continuing.*\[Ww\]atchpoint.*: b.*Old value = 0.*New value = 10.*" \
-	    "continue to first instance watchpoint, first time"] then {
-	    gdb_suppress_tests
-	}
+	    "continue to first instance watchpoint, first time"
 
 	# Continue inward for a few iterations
 	gdb_test "continue" "Breakpoint.* recurse \\(a=9\\).*" \
@@ -63,11 +61,9 @@ proc recurse_tests {} {
 	    "set second instance watchpoint"
 
 	# Continue until initial set of b (second instance).
-	if [gdb_test "continue" \
+	gdb_test "continue" \
 	    "Continuing.*\[Ww\]atchpoint.*: b.*Old value = 0.*New value = 5.*"\
-	    "continue to second instance watchpoint, first time"] then {
-	gdb_suppress_tests
-	}
+	    "continue to second instance watchpoint, first time"
 
 	# Continue inward for a few iterations
 	gdb_test "continue" "Breakpoint.* recurse \\(a=4\\).*" \
@@ -80,29 +76,23 @@ proc recurse_tests {} {
 	    "continue to recurse (a = 1)"
 
 	# Continue until second set of b (second instance).
-	if [gdb_test "continue" \
+	gdb_test "continue" \
 	    "Continuing.*\[Ww\]atchpoint.*: b.*Old value = 5.*New value = 120.*return.*" \
-	    "continue to second instance watchpoint, second time"] then { 
-	    gdb_suppress_tests
-	}
+	    "continue to second instance watchpoint, second time"
 
 	# Continue again.  We should have a watchpoint go out of scope now
-	if [gdb_test "continue" \
+	gdb_test "continue" \
 	    "Continuing.*\[Ww\]atchpoint.*deleted.*recurse \\(a=6\\) .*" \
-	    "second instance watchpoint deleted when leaving scope"] then {
-	    gdb_suppress_tests
-	}
+	    "second instance watchpoint deleted when leaving scope"
 
 	# Continue until second set of b (first instance).
 	# 24320 is allowed as the final value for b as that's the value
 	# b would have on systems with 16bit integers.
 	#
 	# We could fix the test program to deal with this too.
-	if [gdb_test "continue" \
+	gdb_test "continue" \
 	    "Continuing.*\[Ww\]atchpoint.*b.*Old value = 10.*New value = \(3628800|24320\).*return.*" \
-	    "continue to first instance watchpoint, second time"] then {
-	    gdb_suppress_tests
-	}
+	    "continue to first instance watchpoint, second time"
 
 	# Continue again.  We should have a watchpoint go out of scope now.
 	#
@@ -126,13 +116,10 @@ proc recurse_tests {} {
 	# this basically by watching for the frame pointer to change.  When
 	# the frame pointer changes, the test expects to be back in main, but
 	# instead it is still in the epilogue of the callee.
-	if [gdb_test "continue" \
+	gdb_test "continue" \
 	    "Continuing.*\[Ww\]atchpoint.*deleted.*\(main \\(\\) \|21.*\}\).*" \
-	    "first instance watchpoint deleted when leaving scope"] then {
-	    gdb_suppress_tests
-	}
+	    "first instance watchpoint deleted when leaving scope"
     }
-    gdb_stop_suppressing_tests
 }
 
 # Preserve the old timeout, and set a new one that should be

@@ -1,5 +1,5 @@
 /* Event loop machinery for GDB, the GNU debugger.
-   Copyright (C) 1999-2020 Free Software Foundation, Inc.
+   Copyright (C) 1999-2021 Free Software Foundation, Inc.
    Written by Elena Zannoni <ezannoni@cygnus.com> of Cygnus Solutions.
 
    This file is part of GDB.
@@ -34,6 +34,10 @@
 #include "gdbsupport/gdb_sys_time.h"
 #include "gdbsupport/gdb_select.h"
 
+/* See event-loop.h.  */
+
+debug_event_loop_kind debug_event_loop;
+
 /* Tell create_file_handler what events we are interested in.
    This is used by the select version of the event loop.  */
 
@@ -44,18 +48,35 @@
 /* Information about each file descriptor we register with the event
    loop.  */
 
-typedef struct file_handler
-  {
-    int fd;			/* File descriptor.  */
-    int mask;			/* Events we want to monitor: POLLIN, etc.  */
-    int ready_mask;		/* Events that have been seen since
-				   the last time.  */
-    handler_func *proc;		/* Procedure to call when fd is ready.  */
-    gdb_client_data client_data;	/* Argument to pass to proc.  */
-    int error;			/* Was an error detected on this fd?  */
-    struct file_handler *next_file;	/* Next registered file descriptor.  */
-  }
-file_handler;
+struct file_handler
+{
+  /* File descriptor.  */
+  int fd;
+
+  /* Events we want to monitor: POLLIN, etc.  */
+  int mask;
+
+  /* Events that have been seen since the last time.  */
+  int ready_mask;
+
+  /* Procedure to call when fd is ready.  */
+  handler_func *proc;
+
+  /* Argument to pass to proc.  */
+  gdb_client_data client_data;
+
+  /* User-friendly name of this handler.  Heap-allocated, owned by this.*/
+  std::string *name;
+
+  /* If set, this file descriptor is used for a user interface.  */
+  bool is_ui;
+
+  /* Was an error detected on this fd?  */
+  int error;
+
+  /* Next registered file descriptor.  */
+  struct file_handler *next_file;
+};
 
 /* Do we use poll or select ? */
 #ifdef HAVE_POLL
@@ -149,7 +170,8 @@ static struct
 timer_list;
 
 static void create_file_handler (int fd, int mask, handler_func *proc,
-				 gdb_client_data client_data);
+				 gdb_client_data client_data,
+				 std::string &&name, bool is_ui);
 static int gdb_wait_for_event (int);
 static int update_wait_timeout (void);
 static int poll_timers (void);
@@ -220,13 +242,11 @@ gdb_do_one_event (void)
   return 1;
 }
 
-
+/* See event-loop.h  */
 
-/* Wrapper function for create_file_handler, so that the caller
-   doesn't have to know implementation details about the use of poll
-   vs. select.  */
 void
-add_file_handler (int fd, handler_func * proc, gdb_client_data client_data)
+add_file_handler (int fd, handler_func *proc, gdb_client_data client_data,
+		  std::string &&name, bool is_ui)
 {
 #ifdef HAVE_POLL
   struct pollfd fds;
@@ -236,10 +256,10 @@ add_file_handler (int fd, handler_func * proc, gdb_client_data client_data)
     {
 #ifdef HAVE_POLL
       /* Check to see if poll () is usable.  If not, we'll switch to
-         use select.  This can happen on systems like
-         m68k-motorola-sys, `poll' cannot be used to wait for `stdin'.
-         On m68k-motorola-sysv, tty's are not stream-based and not
-         `poll'able.  */
+	 use select.  This can happen on systems like
+	 m68k-motorola-sys, `poll' cannot be used to wait for `stdin'.
+	 On m68k-motorola-sysv, tty's are not stream-based and not
+	 `poll'able.  */
       fds.fd = fd;
       fds.events = POLLIN;
       if (poll (&fds, 1, 0) == 1 && (fds.revents & POLLNVAL))
@@ -252,21 +272,19 @@ add_file_handler (int fd, handler_func * proc, gdb_client_data client_data)
   if (use_poll)
     {
 #ifdef HAVE_POLL
-      create_file_handler (fd, POLLIN, proc, client_data);
+      create_file_handler (fd, POLLIN, proc, client_data, std::move (name),
+			   is_ui);
 #else
       internal_error (__FILE__, __LINE__,
 		      _("use_poll without HAVE_POLL"));
 #endif
     }
   else
-    create_file_handler (fd, GDB_READABLE | GDB_EXCEPTION, 
-			 proc, client_data);
+    create_file_handler (fd, GDB_READABLE | GDB_EXCEPTION,
+			 proc, client_data, std::move (name), is_ui);
 }
 
-/* Add a file handler/descriptor to the list of descriptors we are
-   interested in.
-
-   FD is the file descriptor for the file/stream to be listened to.
+/* Helper for add_file_handler.
 
    For the poll case, MASK is a combination (OR) of POLLIN,
    POLLRDNORM, POLLRDBAND, POLLPRI, POLLOUT, POLLWRNORM, POLLWRBAND:
@@ -278,8 +296,9 @@ add_file_handler (int fd, handler_func * proc, gdb_client_data client_data)
    occurs for FD.  CLIENT_DATA is the argument to pass to PROC.  */
 
 static void
-create_file_handler (int fd, int mask, handler_func * proc, 
-		     gdb_client_data client_data)
+create_file_handler (int fd, int mask, handler_func * proc,
+		     gdb_client_data client_data, std::string &&name,
+		     bool is_ui)
 {
   file_handler *file_ptr;
 
@@ -347,6 +366,8 @@ create_file_handler (int fd, int mask, handler_func * proc,
   file_ptr->proc = proc;
   file_ptr->client_data = client_data;
   file_ptr->mask = mask;
+  file_ptr->name = new std::string (std::move (name));
+  file_ptr->is_ui = is_ui;
 }
 
 /* Return the next file handler to handle, and advance to the next
@@ -402,7 +423,7 @@ delete_file_handler (int fd)
     {
 #ifdef HAVE_POLL
       /* Create a new poll_fds array by copying every fd's information
-         but the one we want to get rid of.  */
+	 but the one we want to get rid of.  */
 
       new_poll_fds = (struct pollfd *) 
 	xmalloc ((gdb_notifier.num_fds - 1) * sizeof (struct pollfd));
@@ -478,6 +499,8 @@ delete_file_handler (int fd)
 	;
       prev_ptr->next_file = file_ptr->next_file;
     }
+
+  delete file_ptr->name;
   xfree (file_ptr);
 }
 
@@ -545,7 +568,12 @@ handle_file_event (file_handler *file_ptr, int ready_mask)
 
 	  /* If there was a match, then call the handler.  */
 	  if (mask != 0)
-	    (*file_ptr->proc) (file_ptr->error, file_ptr->client_data);
+	    {
+	      event_loop_ui_debug_printf (file_ptr->is_ui,
+					  "invoking fd file handler `%s`",
+					  file_ptr->name->c_str ());
+	      file_ptr->proc (file_ptr->error, file_ptr->client_data);
+	    }
 	}
     }
 }

@@ -1,6 +1,6 @@
 /* Debug printing functions.
 
-   Copyright (C) 2014-2020 Free Software Foundation, Inc.
+   Copyright (C) 2014-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,7 +19,11 @@
 
 #include "defs.h"
 
-#include "debug.h"
+#include "gdbsupport/common-debug.h"
+
+/* See gdbsupport/common-debug.h.  */
+
+int debug_print_depth = 0;
 
 /* See gdbsupport/common-debug.h.  */
 
@@ -27,15 +31,4 @@ void
 debug_vprintf (const char *fmt, va_list ap)
 {
   vfprintf_unfiltered (gdb_stdlog, fmt, ap);
-}
-
-/* See debug.h.  */
-
-void
-debug_prefixed_vprintf (const char *module, const char *func, const char *format,
-			va_list args)
-{
-  debug_printf ("[%s] %s: ", module, func);
-  debug_vprintf (format, args);
-  debug_printf ("\n");
 }

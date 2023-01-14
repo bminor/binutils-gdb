@@ -1,6 +1,6 @@
 /* Definitions for symbol file management in GDB.
 
-   Copyright (C) 1992-2020 Free Software Foundation, Inc.
+   Copyright (C) 1992-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -194,9 +194,6 @@ struct obj_section
 
 struct objstats
 {
-  /* Number of partial symbols read.  */
-  int n_psyms = 0;
-
   /* Number of full symbols read.  */
   int n_syms = 0;
 
@@ -765,7 +762,7 @@ extern bool is_addr_in_objfile (CORE_ADDR addr, const struct objfile *objfile);
    OBJF_SHARED objfile of PSPACE and false otherwise.  */
 
 extern bool shared_objfile_contains_address_p (struct program_space *pspace,
-                                               CORE_ADDR address);
+					       CORE_ADDR address);
 
 /* This operation deletes all objfile entries that represent solibs that
    weren't explicitly loaded by the user, via e.g., the add-symbol-file
@@ -789,7 +786,8 @@ extern int pc_in_section (CORE_ADDR, const char *);
 static inline int
 in_plt_section (CORE_ADDR pc)
 {
-  return pc_in_section (pc, ".plt");
+  return (pc_in_section (pc, ".plt")
+	  || pc_in_section (pc, ".plt.sec"));
 }
 
 /* Keep a registry of per-objfile data-pointers required by other GDB

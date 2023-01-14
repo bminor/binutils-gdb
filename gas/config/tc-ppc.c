@@ -1,5 +1,5 @@
 /* tc-ppc.c -- Assemble for the PowerPC or POWER (RS/6000)
-   Copyright (C) 1994-2020 Free Software Foundation, Inc.
+   Copyright (C) 1994-2021 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -2464,7 +2464,7 @@ ppc_elf_localentry (int ignore ATTRIBUTE_UNUSED)
       if (ok)
 	{
 	  bfdsym = symbol_get_bfdsym (sym);
-	  elfsym = elf_symbol_from (bfd_asymbol_bfd (bfdsym), bfdsym);
+	  elfsym = elf_symbol_from (bfdsym);
 	  gas_assert (elfsym);
 	  elfsym->internal_elf_sym.st_other &= ~STO_PPC64_LOCAL_MASK;
 	  elfsym->internal_elf_sym.st_other |= encoded;
@@ -6161,8 +6161,7 @@ ppc_force_relocation (fixS *fix)
       if (fix->fx_addsy)
 	{
 	  asymbol *bfdsym = symbol_get_bfdsym (fix->fx_addsy);
-	  elf_symbol_type *elfsym
-	    = elf_symbol_from (bfd_asymbol_bfd (bfdsym), bfdsym);
+	  elf_symbol_type *elfsym = elf_symbol_from (bfdsym);
 	  gas_assert (elfsym);
 	  if ((STO_PPC64_LOCAL_MASK & elfsym->internal_elf_sym.st_other) != 0)
 	    return 1;
@@ -6198,8 +6197,7 @@ ppc_fix_adjustable (fixS *fix)
       if (fix->fx_addsy)
 	{
 	  asymbol *bfdsym = symbol_get_bfdsym (fix->fx_addsy);
-	  elf_symbol_type *elfsym
-	    = elf_symbol_from (bfd_asymbol_bfd (bfdsym), bfdsym);
+	  elf_symbol_type *elfsym = elf_symbol_from (bfdsym);
 	  gas_assert (elfsym);
 	  if ((STO_PPC64_LOCAL_MASK & elfsym->internal_elf_sym.st_other) != 0)
 	    return 0;

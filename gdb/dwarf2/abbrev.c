@@ -1,6 +1,6 @@
 /* DWARF 2 abbreviations
 
-   Copyright (C) 1994-2020 Free Software Foundation, Inc.
+   Copyright (C) 1994-2021 Free Software Foundation, Inc.
 
    Adapted by Gary Funck (gary@intrepid.com), Intrepid Technology,
    Inc.  with support from Florida State University (under contract
@@ -91,8 +91,7 @@ abbrev_table::add_abbrev (struct abbrev_info *abbrev)
 /* Read in an abbrev table.  */
 
 abbrev_table_up
-abbrev_table::read (struct objfile *objfile,
-		    struct dwarf2_section_info *section,
+abbrev_table::read (struct dwarf2_section_info *section,
 		    sect_offset sect_off)
 {
   bfd *abfd = section->get_bfd_owner ();
@@ -104,7 +103,8 @@ abbrev_table::read (struct objfile *objfile,
 
   abbrev_table_up abbrev_table (new struct abbrev_table (sect_off));
 
-  section->read (objfile);
+  /* Caller must ensure this.  */
+  gdb_assert (section->readin);
   abbrev_ptr = section->buffer + to_underlying (sect_off);
   abbrev_number = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
   abbrev_ptr += bytes_read;
@@ -165,12 +165,12 @@ abbrev_table::read (struct objfile *objfile,
       abbrev_table->add_abbrev (cur_abbrev);
 
       /* Get next abbreviation.
-         Under Irix6 the abbreviations for a compilation unit are not
-         always properly terminated with an abbrev number of 0.
-         Exit loop if we encounter an abbreviation which we have
-         already read (which means we are about to read the abbreviations
-         for the next compile unit) or if the end of the abbreviation
-         table is reached.  */
+	 Under Irix6 the abbreviations for a compilation unit are not
+	 always properly terminated with an abbrev number of 0.
+	 Exit loop if we encounter an abbreviation which we have
+	 already read (which means we are about to read the abbreviations
+	 for the next compile unit) or if the end of the abbreviation
+	 table is reached.  */
       if ((unsigned int) (abbrev_ptr - section->buffer) >= section->size)
 	break;
       abbrev_number = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);

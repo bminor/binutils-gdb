@@ -1,6 +1,6 @@
 /* Output generating routines for GDB.
 
-   Copyright (C) 1999-2020 Free Software Foundation, Inc.
+   Copyright (C) 1999-2021 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions.
    Written by Fernando Nasser for Cygnus.
@@ -216,10 +216,10 @@ class ui_out
        uiout->field_signed(), uiout_>field_string() etc. calls when
        the formatted message is translatable.  E.g.:
 
-         uiout->message (_("\nWatchpoint %pF deleted because the program has "
-                         "left the block in\n"
-                         "which its expression is valid.\n"),
-                         signed_field ("wpnum", b->number));
+	 uiout->message (_("\nWatchpoint %pF deleted because the program has "
+			 "left the block in\n"
+			 "which its expression is valid.\n"),
+			 signed_field ("wpnum", b->number));
 
      - '%p[' - output the following text in a specified style.
        '%p]' - output the following text in the default style.
@@ -275,6 +275,39 @@ class ui_out
      escapes.  */
   virtual bool can_emit_style_escape () const = 0;
 
+  /* An object that starts and finishes a progress meter.  */
+  class progress_meter
+  {
+  public:
+    /* SHOULD_PRINT indicates whether something should be printed for a tty.  */
+    progress_meter (struct ui_out *uiout, const std::string &name,
+		    bool should_print)
+      : m_uiout (uiout)
+    {
+      m_uiout->do_progress_start (name, should_print);
+    }
+
+    ~progress_meter ()
+    {
+      m_uiout->do_progress_notify (1.0);
+      m_uiout->do_progress_end ();
+    }
+
+    progress_meter (const progress_meter &) = delete;
+    progress_meter &operator= (const progress_meter &) = delete;
+
+  private:
+
+    struct ui_out *m_uiout;
+  };
+
+  /* Emit some progress corresponding to the most recently created
+     progress meter.  HOWMUCH may range from 0.0 to 1.0.  */
+  void progress (double howmuch)
+  {
+    do_progress_notify (howmuch);
+  }
+
  protected:
 
   virtual void do_table_begin (int nbrofcols, int nr_rows, const char *tblid)
@@ -308,6 +341,10 @@ class ui_out
   virtual void do_wrap_hint (const char *identstring) = 0;
   virtual void do_flush () = 0;
   virtual void do_redirect (struct ui_file *outstream) = 0;
+
+  virtual void do_progress_start (const std::string &, bool) = 0;
+  virtual void do_progress_notify (double) = 0;
+  virtual void do_progress_end () = 0;
 
   /* Set as not MI-like by default.  It is overridden in subclasses if
      necessary.  */

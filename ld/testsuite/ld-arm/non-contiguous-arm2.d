@@ -21,7 +21,7 @@ SYMBOL TABLE:
 20000000 l    d  .ramu	00000000 .ramu
 20040000 l    d  .ramz	00000000 .ramz
 00000000 l    d  .ARM.attributes	00000000 .ARM.attributes
-00000000 l    df \*ABS\*	00000000 .*/non-contiguous-arm.o
+00000000 l    df \*ABS\*	00000000 .*non-contiguous-arm.o
 1fff0018 g       .raml	00000000 _raml_end
 20000000 g       .ramu	00000000 _ramu_start
 1fff000c g     F .raml	00000000 code2

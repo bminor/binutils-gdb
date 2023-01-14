@@ -1,5 +1,5 @@
 /* Utility to load a file into the simulator.
-   Copyright (C) 1997-2020 Free Software Foundation, Inc.
+   Copyright (C) 1997-2021 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -24,9 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "ansidecl.h"
 #include <stdio.h> /* for NULL */
 #include <stdarg.h>
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 #include <time.h>
 
 #include "sim-basics.h"

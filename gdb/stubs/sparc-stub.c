@@ -309,8 +309,8 @@ retry:
       while (count < BUFMAX - 1)
 	{
 	  ch = getDebugChar ();
-          if (ch == '$')
-            goto retry;
+	  if (ch == '$')
+	    goto retry;
 	  if (ch == '#')
 	    break;
 	  checksum = checksum + ch;

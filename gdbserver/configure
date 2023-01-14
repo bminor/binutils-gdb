@@ -2713,6 +2713,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+
 ac_config_headers="$ac_config_headers config.h:config.in"
 
 
@@ -4245,7 +4246,6 @@ $as_echo "$ac_cv_safe_to_define___extensions__" >&6; }
   $as_echo "#define _TANDEM_SOURCE 1" >>confdefs.h
 
 
-
 # Check whether --enable-largefile was given.
 if test "${enable_largefile+set}" = set; then :
   enableval=$enable_largefile;
@@ -4588,6 +4588,7 @@ fi
 INSTALL_STRIP_PROGRAM="\$(install_sh) -c -s"
 
 
+# Set build, build_cpu, build_vendor and build_os.
 # Make sure we can run config.sub.
 $SHELL "$ac_aux_dir/config.sub" sun4 >/dev/null 2>&1 ||
   as_fn_error $? "cannot run $SHELL $ac_aux_dir/config.sub" "$LINENO" 5
@@ -4626,6 +4627,8 @@ IFS=$ac_save_IFS
 case $build_os in *\ *) build_os=`echo "$build_os" | sed 's/ /-/g'`;; esac
 
 
+
+# Set host, host_cpu, host_vendor, and host_os.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking host system type" >&5
 $as_echo_n "checking host system type... " >&6; }
 if ${ac_cv_host+:} false; then :
@@ -4659,6 +4662,8 @@ IFS=$ac_save_IFS
 case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 
+
+# Set target, target_cpu, target_vendor, and target_os.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking target system type" >&5
 $as_echo_n "checking target system type... " >&6; }
 if ${ac_cv_target+:} false; then :
@@ -4698,7 +4703,6 @@ test -n "$target_alias" &&
   test "$program_prefix$program_suffix$program_transform_name" = \
     NONENONEs,x,x, &&
   program_prefix=${target_alias}-
-
 
 # Find a good install program.  We prefer a C program (faster),
 # so one script is as good as another.  But avoid the broken or
@@ -7236,6 +7240,9 @@ _ACEOF
 fi
 
 
+  # On FreeBSD we need libutil for the kinfo_get* functions.  On
+  # GNU/kFreeBSD systems, FreeBSD libutil is renamed to libutil-freebsd.
+  # Figure out which one to use.
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing kinfo_getfile" >&5
 $as_echo_n "checking for library containing kinfo_getfile... " >&6; }
 if ${ac_cv_search_kinfo_getfile+:} false; then :
@@ -7290,9 +7297,20 @@ ac_res=$ac_cv_search_kinfo_getfile
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
-$as_echo "#define HAVE_KINFO_GETFILE 1" >>confdefs.h
+fi
+
+
+  # Define HAVE_KINFO_GETFILE if kinfo_getfile is available.
+  for ac_func in kinfo_getfile
+do :
+  ac_fn_c_check_func "$LINENO" "kinfo_getfile" "ac_cv_func_kinfo_getfile"
+if test "x$ac_cv_func_kinfo_getfile" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_KINFO_GETFILE 1
+_ACEOF
 
 fi
+done
 
 
   # Check for std::thread.  This does not work on some platforms, like
@@ -8011,13 +8029,14 @@ if ${gdb_cv_func_sigsetjmp+:} false; then :
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-
-  #include <setjmp.h>
-
+#include <setjmp.h>
 int
 main ()
 {
-sigjmp_buf env; while (! sigsetjmp (env, 1)) siglongjmp (env, 1);
+sigjmp_buf env;
+           while (! sigsetjmp (env, 1))
+             siglongjmp (env, 1);
+
   ;
   return 0;
 }
@@ -8026,8 +8045,10 @@ if ac_fn_c_try_compile "$LINENO"; then :
   gdb_cv_func_sigsetjmp=yes
 else
   gdb_cv_func_sigsetjmp=no
+
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_func_sigsetjmp" >&5
 $as_echo "$gdb_cv_func_sigsetjmp" >&6; }
@@ -9430,11 +9451,12 @@ if ${gdb_cv_func_ptrace_ret+:} false; then :
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-$gdb_ptrace_headers
+ $gdb_ptrace_headers
 int
 main ()
 {
 extern long ptrace (enum __ptrace_request, ...);
+
   ;
   return 0;
 }
@@ -9449,6 +9471,7 @@ int
 main ()
 {
 extern int ptrace ();
+
   ;
   return 0;
 }
@@ -9457,17 +9480,22 @@ if ac_fn_c_try_compile "$LINENO"; then :
   gdb_cv_func_ptrace_ret='int'
 else
   gdb_cv_func_ptrace_ret='long'
+
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_func_ptrace_ret" >&5
 $as_echo "$gdb_cv_func_ptrace_ret" >&6; }
 
+
 cat >>confdefs.h <<_ACEOF
 #define PTRACE_TYPE_RET $gdb_cv_func_ptrace_ret
 _ACEOF
+
 
 # Check argument types.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking types of arguments for ptrace" >&5
@@ -9475,7 +9503,6 @@ $as_echo_n "checking types of arguments for ptrace... " >&6; }
 if ${gdb_cv_func_ptrace_args+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 $gdb_ptrace_headers
@@ -9483,6 +9510,7 @@ int
 main ()
 {
 extern long ptrace (enum __ptrace_request, ...);
+
   ;
   return 0;
 }
@@ -9490,20 +9518,17 @@ _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
   gdb_cv_func_ptrace_args='enum __ptrace_request,int,long,long'
 else
-
-for gdb_arg1 in 'int' 'long'; do
- for gdb_arg2 in 'pid_t' 'int' 'long'; do
-  for gdb_arg3 in 'int *' 'caddr_t' 'int' 'long' 'void *'; do
-   for gdb_arg4 in 'int' 'long' 'void *'; do
-     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+  for gdb_arg1 in 'int' 'long'; do
+	for gdb_arg2 in 'pid_t' 'int' 'long'; do
+	  for gdb_arg3 in 'int *' 'caddr_t' 'int' 'long' 'void *'; do
+	    for gdb_arg4 in 'int' 'long' 'void *'; do
+	      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 $gdb_ptrace_headers
 int
 main ()
 {
-
-extern $gdb_cv_func_ptrace_ret
-  ptrace ($gdb_arg1, $gdb_arg2, $gdb_arg3, $gdb_arg4);
+extern $gdb_cv_func_ptrace_ret ptrace ($gdb_arg1, $gdb_arg2, $gdb_arg3, $gdb_arg4);
 
   ;
   return 0;
@@ -9511,43 +9536,45 @@ extern $gdb_cv_func_ptrace_ret
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
   gdb_cv_func_ptrace_args="$gdb_arg1,$gdb_arg2,$gdb_arg3,$gdb_arg4";
-    break 4;
+		 break 4;
+
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-    for gdb_arg5 in 'int *' 'int' 'long'; do
-     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+
+	      for gdb_arg5 in 'int *' 'int' 'long'; do
+		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 $gdb_ptrace_headers
 int
 main ()
 {
-
-extern $gdb_cv_func_ptrace_ret
-  ptrace ($gdb_arg1, $gdb_arg2, $gdb_arg3, $gdb_arg4, $gdb_arg5);
+extern $gdb_cv_func_ptrace_ret ptrace ($gdb_arg1, $gdb_arg2, $gdb_arg3, $gdb_arg4, $gdb_arg5);
 
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
-
-gdb_cv_func_ptrace_args="$gdb_arg1,$gdb_arg2,$gdb_arg3,$gdb_arg4,$gdb_arg5";
-    break 5;
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-    done
-   done
-  done
- done
-done
-# Provide a safe default value.
-: ${gdb_cv_func_ptrace_args='int,int,long,long'}
+  gdb_cv_func_ptrace_args="$gdb_arg1,$gdb_arg2,$gdb_arg3,$gdb_arg4,$gdb_arg5";
+		   break 5;
 
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+	      done
+	    done
+	  done
+	done
+      done
+      # Provide a safe default value.
+      : ${gdb_cv_func_ptrace_args='int,int,long,long'}
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_func_ptrace_args" >&5
 $as_echo "$gdb_cv_func_ptrace_args" >&6; }
+
 ac_save_IFS=$IFS; IFS=','
 set dummy `echo "$gdb_cv_func_ptrace_args" | sed 's/\*/\*/g'`
 IFS=$ac_save_IFS
@@ -9635,6 +9662,7 @@ int
 main ()
 {
 
+
   ;
   return 0;
 }
@@ -9642,11 +9670,14 @@ _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; };
+
 $as_echo "#define HAVE_UST 1" >>confdefs.h
 
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }; ustlibs= ; ustinc=
+$as_echo "no" >&6; }
+     ustlibs= ; ustinc=
+
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
   CFLAGS="$saved_CFLAGS"
@@ -9792,13 +9823,14 @@ $as_echo_n "checking compiler warning flags... " >&6; }
 	      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 struct scoped_restore_base {};
-                 struct scoped_restore_tmpl : public scoped_restore_base {
-		   ~scoped_restore_tmpl() {}
-		 };
+		    struct scoped_restore_tmpl : public scoped_restore_base {
+		      ~scoped_restore_tmpl() {}
+		    };
 int
 main ()
 {
 const scoped_restore_base &b = scoped_restore_tmpl();
+
   ;
   return 0;
 }
@@ -10296,8 +10328,10 @@ if ac_fn_c_try_compile "$LINENO"; then :
   gdbsrv_cv_have_ptrace_getregs=yes
 else
   gdbsrv_cv_have_ptrace_getregs=no
+
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
 fi
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdbsrv_cv_have_ptrace_getregs" >&5
@@ -10328,8 +10362,10 @@ if ac_fn_c_try_compile "$LINENO"; then :
   gdbsrv_cv_have_ptrace_getfpxregs=yes
 else
   gdbsrv_cv_have_ptrace_getfpxregs=no
+
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
 fi
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdbsrv_cv_have_ptrace_getfpxregs" >&5
@@ -10350,12 +10386,11 @@ fi
 if test "$bfd_cv_have_sys_procfs_type_lwpid_t" != yes; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for lwpid_t in thread_db.h" >&5
 $as_echo_n "checking for lwpid_t in thread_db.h... " >&6; }
- if ${gdbserver_cv_have_thread_db_type_lwpid_t+:} false; then :
+   if ${gdbserver_cv_have_thread_db_type_lwpid_t+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-
 #include <thread_db.h>
 int
 main ()
@@ -10372,14 +10407,15 @@ else
 
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
 fi
 
- if test $gdbserver_cv_have_thread_db_type_lwpid_t = yes; then
+   if test $gdbserver_cv_have_thread_db_type_lwpid_t = yes; then
 
 $as_echo "#define HAVE_LWPID_T 1" >>confdefs.h
 
- fi
- { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdbserver_cv_have_thread_db_type_lwpid_t" >&5
+   fi
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdbserver_cv_have_thread_db_type_lwpid_t" >&5
 $as_echo "$gdbserver_cv_have_thread_db_type_lwpid_t" >&6; }
 
 fi
@@ -10387,12 +10423,11 @@ fi
 if test "$bfd_cv_have_sys_procfs_type_psaddr_t" != yes; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for psaddr_t in thread_db.h" >&5
 $as_echo_n "checking for psaddr_t in thread_db.h... " >&6; }
- if ${gdbserver_cv_have_thread_db_type_psaddr_t+:} false; then :
+   if ${gdbserver_cv_have_thread_db_type_psaddr_t+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-
 #include <thread_db.h>
 int
 main ()
@@ -10409,14 +10444,15 @@ else
 
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
 fi
 
- if test $gdbserver_cv_have_thread_db_type_psaddr_t = yes; then
+   if test $gdbserver_cv_have_thread_db_type_psaddr_t = yes; then
 
 $as_echo "#define HAVE_PSADDR_T 1" >>confdefs.h
 
- fi
- { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdbserver_cv_have_thread_db_type_psaddr_t" >&5
+   fi
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdbserver_cv_have_thread_db_type_psaddr_t" >&5
 $as_echo "$gdbserver_cv_have_thread_db_type_psaddr_t" >&6; }
 
 fi
@@ -10495,11 +10531,11 @@ main ()
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
   found="-Wl,--dynamic-list"
-		 RDYNAMIC='-Wl,--dynamic-list=$(srcdir)/proc-service.list'
+       RDYNAMIC='-Wl,--dynamic-list=$(srcdir)/proc-service.list'
 else
   RDYNAMIC="-rdynamic"
-		 LDFLAGS="$old_LDFLAGS $RDYNAMIC"
-		 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+       LDFLAGS="$old_LDFLAGS $RDYNAMIC"
+       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 int
@@ -10514,10 +10550,12 @@ if ac_fn_c_try_link "$LINENO"; then :
   found="-rdynamic"
 else
   found="no"
-			      RDYNAMIC=""
+	  RDYNAMIC=""
+
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
+
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
@@ -10553,8 +10591,10 @@ if ac_fn_c_try_compile "$LINENO"; then :
   gdbsrv_cv_have_td_version=yes
 else
   gdbsrv_cv_have_td_version=no
+
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdbsrv_cv_have_td_version" >&5
 $as_echo "$gdbsrv_cv_have_td_version" >&6; }
@@ -10601,14 +10641,15 @@ $as_echo_n "checking whether the target supports __sync_*_compare_and_swap... " 
 if ${gdbsrv_cv_have_sync_builtins+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 int
 main ()
 {
-int foo, bar; bar = __sync_val_compare_and_swap(&foo, 0, 1);
+int foo, bar;
+	 bar = __sync_val_compare_and_swap(&foo, 0, 1);
+
   ;
   return 0;
 }
@@ -10617,9 +10658,11 @@ if ac_fn_c_try_link "$LINENO"; then :
   gdbsrv_cv_have_sync_builtins=yes
 else
   gdbsrv_cv_have_sync_builtins=no
+
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
+
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdbsrv_cv_have_sync_builtins" >&5
 $as_echo "$gdbsrv_cv_have_sync_builtins" >&6; }

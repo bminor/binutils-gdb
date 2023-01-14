@@ -1,6 +1,6 @@
 /* Python pretty-printing
 
-   Copyright (C) 2008-2020 Free Software Foundation, Inc.
+   Copyright (C) 2008-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -318,8 +318,8 @@ print_string_repr (PyObject *printer, const char *hint,
 	      type = builtin_type (gdbarch)->builtin_char;
 
 	      if (hint && !strcmp (hint, "string"))
-		LA_PRINT_STRING (stream, type, (gdb_byte *) output,
-				 length, NULL, 0, options);
+		language->printstr (stream, type, (gdb_byte *) output,
+				    length, NULL, 0, options);
 	      else
 		fputs_filtered (output, stream);
 	    }
@@ -438,10 +438,10 @@ print_children (PyObject *printer, const char *hint,
 	 3. Other.  Always print a ",".  */
       if (i == 0)
 	{
-         if (is_py_none)
-           fputs_filtered ("{", stream);
-         else
-           fputs_filtered (" = {", stream);
+	 if (is_py_none)
+	   fputs_filtered ("{", stream);
+	 else
+	   fputs_filtered (" = {", stream);
        }
 
       else if (! is_map || i % 2 == 0)

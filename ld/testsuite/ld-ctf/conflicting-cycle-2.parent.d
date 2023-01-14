@@ -15,11 +15,11 @@
 Contents of CTF section .ctf:
 
   Header:
-    Magic number: dff2
+    Magic number: 0xdff2
     Version: 4 \(CTF_VERSION_3\)
-    Variable section:	0x0 -- 0x7 \(0x8 bytes\)
-    Type section:	0x8 -- 0x9b \(0x94 bytes\)
-    String section:	0x9c -- 0xac \(0x11 bytes\)
+#...
+    Type section:	.* \(0x94 bytes\)
+    String section:	.* \(0x1d bytes\)
 
   Labels:
 
@@ -28,13 +28,12 @@ Contents of CTF section .ctf:
   Function objects:
 
   Variables:
-    cycle_1 ->  [0-9a-f]*: struct cycle_1 \* \(size 0x[0-9a-f]*\) -> [0-9a-f]*: struct cycle_1 \(size 0x[0-9a-f]*\)
+    cycle_1 -> 0x[0-9a-f]*: \(kind 3\) struct cycle_1 \* \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\) -> 0x[0-9a-f]*: \(kind 6\) struct cycle_1 \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
 
   Types:
 #...
-     [0-9a-f]*: struct cycle_1 \(size 0x[0-9a-f]*\)
-        \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct cycle_1 \(aligned at 0x[0-9a-f]*\)
-            \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct A \* a \(aligned at 0x[0-9a-f]*\)
-            \[0x[0-9a-f]*\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct B \* b \(aligned at 0x[0-9a-f]*\)
-            \[0x[0-9a-f]*\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct cycle_1 \* next \(aligned at 0x[0-9a-f]*\)
+    0x[0-9a-f]*: \(kind 6\) struct cycle_1 \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+        *\[0x0\] a: ID 0x[0-9a-f]*: \(kind 3\) struct A \* \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+        *\[0x[0-9a-f]*\] b: ID 0x[0-9a-f]*: \(kind 3\) struct B \* \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+        *\[0x[0-9a-f]*\] next: ID 0x[0-9a-f]*: \(kind 3\) struct cycle_1 \* \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
 #...

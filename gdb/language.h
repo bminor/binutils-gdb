@@ -1,6 +1,6 @@
 /* Source-language-related definitions for GDB.
 
-   Copyright (C) 1991-2020 Free Software Foundation, Inc.
+   Copyright (C) 1991-2021 Free Software Foundation, Inc.
 
    Contributed by the Department of Computer Science at the State University
    of New York at Buffalo.
@@ -42,16 +42,6 @@ class innermost_block_tracker;
 
 #define MAX_FORTRAN_DIMS  7	/* Maximum number of F77 array dims.  */
 
-/* range_mode ==
-   range_mode_auto:   range_check set automatically to default of language.
-   range_mode_manual: range_check set manually by user.  */
-
-extern enum range_mode
-  {
-    range_mode_auto, range_mode_manual
-  }
-range_mode;
-
 /* range_check ==
    range_check_on:    Ranges are checked in GDB expressions, producing errors.
    range_check_warn:  Ranges are checked, producing warnings.
@@ -62,16 +52,6 @@ extern enum range_check
     range_check_off, range_check_warn, range_check_on
   }
 range_check;
-
-/* case_mode ==
-   case_mode_auto:   case_sensitivity set upon selection of scope.
-   case_mode_manual: case_sensitivity set only by user.  */
-
-extern enum case_mode
-  {
-    case_mode_auto, case_mode_manual
-  }
-case_mode;
 
 /* array_ordering ==
    array_row_major:     Arrays are in row major order.
@@ -109,23 +89,129 @@ enum macro_expansion
 
 struct language_arch_info
 {
-  /* Its primitive types.  This is a vector ended by a NULL pointer.
-     These types can be specified by name in parsing types in
-     expressions, regardless of whether the program being debugged
-     actually defines such a type.  */
-  struct type **primitive_type_vector;
+  /* A default constructor.  */
+  language_arch_info () = default;
 
-  /* Symbol wrappers around primitive_type_vector, so that the symbol lookup
-     machinery can return them.  */
-  struct symbol **primitive_type_symbols;
+  DISABLE_COPY_AND_ASSIGN (language_arch_info);
+
+  /* Set the default boolean type to be TYPE.  If NAME is not nullptr then
+     before using TYPE a symbol called NAME will be looked up, and the type
+     of this symbol will be used instead.  Should only be called once when
+     performing setup for a particular language in combination with a
+     particular gdbarch.  */
+  void set_bool_type (struct type *type, const char *name = nullptr)
+  {
+    gdb_assert (m_bool_type_default == nullptr);
+    gdb_assert (m_bool_type_name == nullptr);
+    gdb_assert (type != nullptr);
+    m_bool_type_default = type;
+    m_bool_type_name = name;
+  }
+
+  /* Set the type to be used for characters within a string.  Should only
+     be called once when performing setup for a particular language in
+     combination with a particular gdbarch.  */
+  void set_string_char_type (struct type *type)
+  {
+    gdb_assert (m_string_char_type == nullptr);
+    gdb_assert (type != nullptr);
+    m_string_char_type = type;
+  }
+
+  /* Return the type for characters within a string.  */
+  struct type *string_char_type () const
+  { return m_string_char_type; }
+
+  /* Return the type to be used for booleans.  */
+  struct type *bool_type () const;
+
+  /* Add TYPE to the list of primitive types for this particular language,
+     with this OS/ABI combination.  */
+  void add_primitive_type (struct type *type)
+  {
+    gdb_assert (type != nullptr);
+    primitive_types_and_symbols.push_back (type_and_symbol (type));
+  }
+
+  /* Lookup a primitive type called NAME.  Will return nullptr if no
+     matching type is found.  */
+  struct type *lookup_primitive_type (const char *name);
+
+  /* Lookup a primitive type for which FILTER returns true.  Will return
+     nullptr if no matching type is found.  */
+  struct type *lookup_primitive_type
+    (gdb::function_view<bool (struct type *)> filter);
+
+  /* Lookup a primitive type called NAME and return the type as a symbol.
+     LANG is the language for which type is being looked up.  */
+  struct symbol *lookup_primitive_type_as_symbol (const char *name,
+						  enum language lang);
+private:
+
+  /* A structure storing a type and a corresponding symbol.  The type is
+     defined at construction time, while the symbol is lazily created only
+     when asked for, but is then cached for future use.  */
+  struct type_and_symbol
+  {
+    /* Constructor.  */
+    explicit type_and_symbol (struct type *type)
+      : m_type (type)
+    { /* Nothing.  */ }
+
+    /* Default move constructor.  */
+    type_and_symbol (type_and_symbol&&) = default;
+
+    DISABLE_COPY_AND_ASSIGN (type_and_symbol);
+
+    /* Return the type from this object.  */
+    struct type *type () const
+    { return m_type; }
+
+    /* Create and return a symbol wrapping M_TYPE from this object.  */
+    struct symbol *symbol (enum language lang)
+    {
+      if (m_symbol == nullptr)
+	m_symbol = alloc_type_symbol (lang, m_type);
+      return m_symbol;
+    }
+
+  private:
+    /* The type primitive type.  */
+    struct type *m_type = nullptr;
+
+    /* A symbol wrapping M_TYPE, only created when first asked for.  */
+    struct symbol *m_symbol = nullptr;
+
+    /* Helper function for type lookup as a symbol.  Create the symbol
+       corresponding to type TYPE in language LANG.  */
+    static struct symbol *alloc_type_symbol (enum language lang,
+					     struct type *type);
+  };
+
+  /* Lookup a type_and_symbol entry from the primitive_types_and_symbols
+     vector for a type matching NAME.  Return a pointer to the
+     type_and_symbol object from the vector.  This will return nullptr if
+     there is no type matching NAME found.  */
+  type_and_symbol *lookup_primitive_type_and_symbol (const char *name);
+
+  /* Vector of the primitive types added through add_primitive_type.  These
+     types can be specified by name in parsing types in expressions,
+     regardless of whether the program being debugged actually defines such
+     a type.
+
+     Within the vector each type is paired with a lazily created symbol,
+     which can be fetched by the symbol lookup machinery, should they be
+     needed.  */
+  std::vector<type_and_symbol> primitive_types_and_symbols;
 
   /* Type of elements of strings.  */
-  struct type *string_char_type;
+  struct type *m_string_char_type = nullptr;
 
   /* Symbol name of type to use as boolean type, if defined.  */
-  const char *bool_type_symbol;
+  const char *m_bool_type_name = nullptr;
+
   /* Otherwise, this is the default boolean builtin type.  */
-  struct type *bool_type_default;
+  struct type *m_bool_type_default = nullptr;
 };
 
 /* In a language (particularly C++) a function argument of an aggregate
@@ -172,118 +258,39 @@ struct language_pass_by_ref_info
 /* Splitting strings into words.  */
 extern const char *default_word_break_characters (void);
 
-/* Structure tying together assorted information about a language.
-
-   As we move over from the old structure based languages to a class
-   hierarchy of languages this structure will continue to contain a
-   mixture of both data and function pointers.
-
-   Once the class hierarchy of languages in place the first task is to
-   remove the function pointers from this structure and convert them into
-   member functions on the different language classes.
-
-   The current plan it to keep the constant data that describes a language
-   in this structure, and have each language pass in an instance of this
-   structure at construction time.  */
-
-struct language_data
-  {
-    /* Name of the language.  */
-
-    const char *la_name;
-
-    /* Natural or official name of the language.  */
-
-    const char *la_natural_name;
-
-    /* its symtab language-enum (defs.h).  */
-
-    enum language la_language;
-
-    /* Default range checking.  */
-
-    enum range_check la_range_check;
-
-    /* Default case sensitivity.  */
-    enum case_sensitivity la_case_sensitivity;
-
-    /* Multi-dimensional array ordering.  */
-    enum array_ordering la_array_ordering;
-
-    /* Style of macro expansion, if any, supported by this language.  */
-    enum macro_expansion la_macro_expansion;
-
-    /* A NULL-terminated array of file extensions for this language.
-       The extension must include the ".", like ".c".  If this
-       language doesn't need to provide any filename extensions, this
-       may be NULL.  */
-
-    const char *const *la_filename_extensions;
-
-    /* Definitions related to expression printing, prefixifying, and
-       dumping.  */
-
-    const struct exp_descriptor *la_exp_desc;
-
-    /* Now come some hooks for lookup_symbol.  */
-
-    /* If this is non-NULL, specifies the name that of the implicit
-       local variable that refers to the current object instance.  */
-
-    const char *la_name_of_this;
-
-    /* True if the symbols names should be stored in GDB's data structures
-       for minimal/partial/full symbols using their linkage (aka mangled)
-       form; false if the symbol names should be demangled first.
-
-       Most languages implement symbol lookup by comparing the demangled
-       names, in which case it is advantageous to store that information
-       already demangled, and so would set this field to false.
-
-       On the other hand, some languages have opted for doing symbol
-       lookups by comparing mangled names instead, for reasons usually
-       specific to the language.  Those languages should set this field
-       to true.
-
-       And finally, other languages such as C or Asm do not have
-       the concept of mangled vs demangled name, so those languages
-       should set this field to true as well, to prevent any accidental
-       demangling through an unrelated language's demangler.  */
-
-    const bool la_store_sym_names_in_linkage_form_p;
-
-    /* Table for printing expressions.  */
-
-    const struct op_print *la_op_print_tab;
-
-    /* Zero if the language has first-class arrays.  True if there are no
-       array values, and array objects decay to pointers, as in C.  */
-
-    char c_style_arrays;
-
-    /* Index to use for extracting the first element of a string.  */
-    char string_lower_bound;
-
-    /* Various operations on varobj.  */
-    const struct lang_varobj_ops *la_varobj_ops;
-
-    /* This string is used by the 'set print max-depth' setting.  When GDB
-       replaces a struct or union (during value printing) that is "too
-       deep" this string is displayed instead.  */
-    const char *la_struct_too_deep_ellipsis;
-
-  };
-
 /* Base class from which all other language classes derive.  */
 
-struct language_defn : language_data
+struct language_defn
 {
-  language_defn (enum language lang, const language_data &init_data)
-    : language_data (init_data)
+  language_defn (enum language lang)
+    : la_language (lang)
   {
     /* We should only ever create one instance of each language.  */
     gdb_assert (languages[lang] == nullptr);
     languages[lang] = this;
+  }
+
+  /* Which language this is.  */
+
+  const enum language la_language;
+
+  /* Name of the language.  */
+
+  virtual const char *name () const = 0;
+
+  /* Natural or official name of the language.  */
+
+  virtual const char *natural_name () const = 0;
+
+  /* Return a vector of file extensions for this language.  The extension
+     must include the ".", like ".c".  If this language doesn't need to
+     provide any filename extensions, this may be an empty vector (which is
+     the default).  */
+
+  virtual const std::vector<const char *> &filename_extensions () const
+  {
+    static const std::vector<const char *> no_extensions;
+    return no_extensions;
   }
 
   /* Print the index of an element of an array.  This default
@@ -427,15 +434,19 @@ struct language_defn : language_data
   }
 
   /* Return demangled language symbol version of MANGLED, or NULL.  */
-  virtual char *demangle (const char *mangled, int options) const
+  virtual char *demangle_symbol (const char *mangled, int options) const
   {
     return nullptr;
   }
 
-  /* Print a type using syntax appropriate for this language.  */
+  /* Print TYPE to STREAM using syntax appropriate for this language.
+     LEVEL is the depth to indent lines by.  VARSTRING, if not NULL or the
+     empty string, is the name of a variable and TYPE should be printed in
+     the form of a declaration of a variable named VARSTRING.  */
 
-  virtual void print_type (struct type *, const char *, struct ui_file *, int,
-			   int, const struct type_print_options *) const = 0;
+  virtual void print_type (struct type *type, const char *varstring,
+			   struct ui_file *stream, int show, int level,
+			   const struct type_print_options *flags) const = 0;
 
   /* PC is possibly an unknown languages trampoline.
      If that PC falls in a trampoline belonging to this language, return
@@ -511,14 +522,10 @@ struct language_defn : language_data
   /* Given an expression *EXPP created by prefixifying the result of
      la_parser, perform any remaining processing necessary to complete its
      translation.  *EXPP may change; la_post_parser is responsible for
-     releasing its previous contents, if necessary.  If VOID_CONTEXT_P,
-     then no value is expected from the expression.  If COMPLETING is
-     non-zero, then the expression has been parsed for completion, not
-     evaluation.  */
+     releasing its previous contents, if necessary.  */
 
-  virtual void post_parser (expression_up *expp, int void_context_p,
-			    int completing,
-			    innermost_block_tracker *tracker) const
+  virtual void post_parser (expression_up *expp, struct parser_state *ps)
+    const
   {
     /* By default the post-parser does nothing.  */
   }
@@ -552,6 +559,101 @@ struct language_defn : language_data
 
   /* Return true if TYPE is a string type.  */
   virtual bool is_string_type_p (struct type *type) const;
+
+  /* Return a string that is used by the 'set print max-depth' setting.
+     When GDB replaces a struct or union (during value printing) that is
+     "too deep" this string is displayed instead.  The default value here
+     suits most languages.  If overriding then the string here should
+     ideally be similar in style to the default; an opener, three '.', and
+     a closer.  */
+
+  virtual const char *struct_too_deep_ellipsis () const
+  { return "{...}"; }
+
+  /* If this returns non-NULL then the string returned specifies the name
+     of the implicit local variable that refers to the current object
+     instance.  Return NULL (the default) for languages that have no name
+     for the current object instance.  */
+
+  virtual const char *name_of_this () const
+  { return nullptr; }
+
+  /* Return false if the language has first-class arrays.  Return true if
+     there are no array values, and array objects decay to pointers, as in
+     C.  The default is true as currently most supported languages behave
+     in this manor.  */
+
+  virtual bool c_style_arrays_p () const
+  { return true; }
+
+  /* Return the index to use for extracting the first element of a string,
+     or as the lower bound when creating a new string.  The default of
+     choosing 0 or 1 based on C_STYLE_ARRAYS_P works for all currently
+     supported languages except Modula-2.  */
+
+  virtual char string_lower_bound () const
+  { return c_style_arrays_p () ? 0 : 1; }
+
+  /* Returns true if the symbols names should be stored in GDB's data
+     structures for minimal/partial/full symbols using their linkage (aka
+     mangled) form; false if the symbol names should be demangled first.
+
+     Most languages implement symbol lookup by comparing the demangled
+     names, in which case it is advantageous to store that information
+     already demangled, and so would return false, which is the default.
+
+     On the other hand, some languages have opted for doing symbol lookups
+     by comparing mangled names instead, for reasons usually specific to
+     the language.  Those languages should override this function and
+     return true.
+
+     And finally, other languages such as C or Asm do not have the concept
+     of mangled vs demangled name, so those languages should also override
+     this function and return true, to prevent any accidental demangling
+     through an unrelated language's demangler.  */
+
+  virtual bool store_sym_names_in_linkage_form_p () const
+  { return false; }
+
+  /* Default range checking preference.  The return value from this
+     function provides the automatic setting for 'set check range'.  As a
+     consequence a user is free to override this setting if they want.  */
+
+  virtual bool range_checking_on_by_default () const
+  { return false; }
+
+  /* Is this language case sensitive?  The return value from this function
+     provides the automativ setting for 'set case-sensitive', as a
+     consequence, a user is free to override this setting if they want.  */
+
+  virtual enum case_sensitivity case_sensitivity () const
+  { return case_sensitive_on; }
+
+
+  /* Multi-dimensional array ordering.  */
+
+  virtual enum array_ordering array_ordering () const
+  { return array_row_major; }
+
+  /* Style of macro expansion, if any, supported by this language.  The
+     default is no macro expansion.  */
+
+  virtual enum macro_expansion macro_expansion () const
+  { return macro_expansion_no; }
+
+  /* Return a structure containing various operations on varobj specific
+     for this language.  */
+
+  virtual const struct lang_varobj_ops *varobj_ops () const;
+
+  /* Definitions related to expression printing, prefixifying, and
+     dumping.  */
+
+  virtual const struct exp_descriptor *expression_ops () const;
+
+  /* Table for printing expressions.  */
+
+  virtual const struct op_print *opcode_print_table () const = 0;
 
 protected:
 
@@ -601,18 +703,38 @@ extern enum language_mode
   }
 language_mode;
 
+/* Return the type that should be used for booleans for language L in
+   GDBARCH.  */
+
 struct type *language_bool_type (const struct language_defn *l,
 				 struct gdbarch *gdbarch);
+
+/* Return the type that should be used for characters within a string for
+   language L in GDBARCH.  */
 
 struct type *language_string_char_type (const struct language_defn *l,
 					struct gdbarch *gdbarch);
 
-/* Look up type NAME in language L, and return its definition for architecture
-   GDBARCH.  Returns NULL if not found.  */
+/* Look up a type from the set of OS/ABI specific types defined in
+   GDBARCH for language L.  NAME is used for selecting the matching
+   type, and is passed through to the corresponding
+   lookup_primitive_type member function inside the language_arch_info
+   class.  */
 
 struct type *language_lookup_primitive_type (const struct language_defn *l,
 					     struct gdbarch *gdbarch,
 					     const char *name);
+
+/* Look up a type from the set of OS/ABI specific types defined in
+   GDBARCH for language L.  FILTER is used for selecting the matching
+   type, and is passed through to the corresponding
+   lookup_primitive_type member function inside the language_arch_info
+   class.  */
+
+struct type *language_lookup_primitive_type
+  (const struct language_defn *la,
+   struct gdbarch *gdbarch,
+   gdb::function_view<bool (struct type *)> filter);
 
 /* Wrapper around language_lookup_primitive_type to return the
    corresponding symbol.  */
@@ -648,26 +770,11 @@ extern enum language set_language (enum language);
 #define LA_PRINT_TYPE(type,varstring,stream,show,level,flags)		\
   (current_language->print_type(type,varstring,stream,show,level,flags))
 
-#define LA_PRINT_TYPEDEF(type,new_symbol,stream) \
-  (current_language->print_typedef (type,new_symbol,stream))
-
-#define LA_VALUE_PRINT(val,stream,options) \
-  (current_language->value_print (val,stream,options))
-
 #define LA_PRINT_CHAR(ch, type, stream) \
   (current_language->printchar (ch, type, stream))
 #define LA_PRINT_STRING(stream, elttype, string, length, encoding, force_ellipses, options) \
   (current_language->printstr (stream, elttype, string, length, \
 			       encoding, force_ellipses,options))
-#define LA_EMIT_CHAR(ch, type, stream, quoter) \
-  (current_language->emitchar (ch, type, stream, quoter))
-
-#define LA_PRINT_ARRAY_INDEX(index_type, index_value, stream, options)	\
-  (current_language->print_array_index(index_type, index_value, stream, \
-				       options))
-
-#define LA_ITERATE_OVER_SYMBOLS(BLOCK, NAME, DOMAIN, CALLBACK) \
-  (current_language->iterate_over_symbols (BLOCK, NAME, DOMAIN, CALLBACK))
 
 /* Test a character to decide whether it can be printed in literal form
    or needs to be printed in another representation.  For example,

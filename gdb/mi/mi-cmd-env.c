@@ -1,5 +1,5 @@
 /* MI Command Set - environment commands.
-   Copyright (C) 2002-2020 Free Software Foundation, Inc.
+   Copyright (C) 2002-2021 Free Software Foundation, Inc.
 
    Contributed by Red Hat Inc.
 
@@ -64,7 +64,7 @@ mi_cmd_env_pwd (const char *command, char **argv, int argc)
 
   if (argc > 0)
     error (_("-environment-pwd: No arguments allowed"));
-          
+	  
   if (mi_version (uiout) < 2)
     {
       env_execute_cli_command ("pwd", NULL);
@@ -76,7 +76,7 @@ mi_cmd_env_pwd (const char *command, char **argv, int argc)
   gdb::unique_xmalloc_ptr<char> cwd (getcwd (NULL, 0));
   if (cwd == NULL)
     error (_("-environment-pwd: error finding name of working directory: %s"),
-           safe_strerror (errno));
+	   safe_strerror (errno));
 
   uiout->field_string ("cwd", cwd.get ());
 }
@@ -88,7 +88,7 @@ mi_cmd_env_cd (const char *command, char **argv, int argc)
 {
   if (argc == 0 || argc > 1)
     error (_("-environment-cd: Usage DIRECTORY"));
-          
+	  
   env_execute_cli_command ("cd", argv[0]);
 }
 
@@ -138,16 +138,16 @@ mi_cmd_env_path (const char *command, char **argv, int argc)
   while (1)
     {
       int opt = mi_getopt ("-environment-path", argc, argv, opts,
-                           &oind, &oarg);
+			   &oind, &oarg);
 
       if (opt < 0)
-        break;
+	break;
       switch ((enum opt) opt)
-        {
-        case RESET_OPT:
-          reset = 1;
-          break;
-        }
+	{
+	case RESET_OPT:
+	  reset = 1;
+	  break;
+	}
     }
   argv += oind;
   argc -= oind;
@@ -165,7 +165,7 @@ mi_cmd_env_path (const char *command, char **argv, int argc)
 
       /* Can be null if path is not set.  */
       if (!env)
-        env = "";
+	env = "";
       exec_path = xstrdup (env);
     }
 
@@ -211,16 +211,16 @@ mi_cmd_env_dir (const char *command, char **argv, int argc)
   while (1)
     {
       int opt = mi_getopt ("-environment-directory", argc, argv, opts,
-                           &oind, &oarg);
+			   &oind, &oarg);
 
       if (opt < 0)
-        break;
+	break;
       switch ((enum opt) opt)
-        {
-        case RESET_OPT:
-          reset = 1;
-          break;
-        }
+	{
+	case RESET_OPT:
+	  reset = 1;
+	  break;
+	}
     }
   argv += oind;
   argc -= oind;

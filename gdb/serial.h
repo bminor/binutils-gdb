@@ -1,5 +1,5 @@
 /* Remote serial support interface definitions for GDB, the GNU Debugger.
-   Copyright (C) 1992-2020 Free Software Foundation, Inc.
+   Copyright (C) 1992-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -35,6 +35,14 @@ struct ui_file;
 typedef void *serial_ttystate;
 struct serial;
 struct serial_ops;
+
+/* Speed in bits per second, or -1 which means don't mess with the speed.  */
+
+extern int baud_rate;
+
+/* Parity for serial port  */
+
+extern int serial_parity;
 
 /* Create a new serial for OPS.  The new serial is not opened.  */
 

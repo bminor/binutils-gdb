@@ -1,6 +1,6 @@
 /* Branch trace support for GDB, the GNU debugger.
 
-   Copyright (C) 2013-2020 Free Software Foundation, Inc.
+   Copyright (C) 2013-2021 Free Software Foundation, Inc.
 
    Contributed by Intel Corp. <markus.t.metzger@intel.com>
 
@@ -116,9 +116,8 @@ public:
 
   const struct frame_unwind *get_tailcall_unwinder () override;
 
-  void commit_resume () override;
   void resume (ptid_t, int, enum gdb_signal) override;
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
   void stop (ptid_t) override;
   void update_thread_list () override;
@@ -212,7 +211,7 @@ static struct cmd_list_element *set_record_btrace_cpu_cmdlist;
   do									\
     {									\
       if (record_debug != 0)						\
-        fprintf_unfiltered (gdb_stdlog,					\
+	fprintf_unfiltered (gdb_stdlog,					\
 			    "[record-btrace] " msg "\n", ##args);	\
     }									\
   while (0)
@@ -342,7 +341,7 @@ record_btrace_push_target (void)
 
   record_btrace_async_inferior_event_handler
     = create_async_event_handler (record_btrace_handle_async_inferior_event,
-				  NULL);
+				  NULL, "record-btrace");
   record_btrace_generating_corefile = 0;
 
   format = btrace_format_short_string (record_btrace_conf.format);
@@ -390,7 +389,7 @@ record_btrace_target_open (const char *args, int from_tty)
 
   record_preopen ();
 
-  if (!target_has_execution)
+  if (!target_has_execution ())
     error (_("The program is not being run."));
 
   for (thread_info *tp : current_inferior ()->non_exited_threads ())
@@ -798,7 +797,7 @@ btrace_insn_history (struct ui_out *uiout,
   gdb_pretty_print_disassembler disasm (gdbarch, uiout);
 
   for (btrace_insn_iterator it = *begin; btrace_insn_cmp (&it, end) != 0;
-         btrace_insn_next (&it, 1))
+	 btrace_insn_next (&it, 1))
     {
       const struct btrace_insn *insn;
 
@@ -1928,7 +1927,7 @@ record_btrace_target::get_tailcall_unwinder ()
 /* Return a human-readable string for FLAG.  */
 
 static const char *
-btrace_thread_flag_to_str (enum btrace_thread_flag flag)
+btrace_thread_flag_to_str (btrace_thread_flags flag)
 {
   switch (flag)
     {
@@ -2206,22 +2205,12 @@ record_btrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
     }
 }
 
-/* The commit_resume method of target record-btrace.  */
-
-void
-record_btrace_target::commit_resume ()
-{
-  if ((::execution_direction != EXEC_REVERSE)
-      && !record_is_replaying (minus_one_ptid))
-    beneath ()->commit_resume ();
-}
-
 /* Cancel resuming TP.  */
 
 static void
 record_btrace_cancel_resume (struct thread_info *tp)
 {
-  enum btrace_thread_flag flags;
+  btrace_thread_flags flags;
 
   flags = tp->btrace.flags & (BTHR_MOVE | BTHR_STOP);
   if (flags == 0)
@@ -2229,7 +2218,7 @@ record_btrace_cancel_resume (struct thread_info *tp)
 
   DEBUG ("cancel resume thread %s (%s): %x (%s)",
 	 print_thread_id (tp),
-	 target_pid_to_str (tp->ptid).c_str (), flags,
+	 target_pid_to_str (tp->ptid).c_str (), flags.raw (),
 	 btrace_thread_flag_to_str (flags));
 
   tp->btrace.flags &= ~(BTHR_MOVE | BTHR_STOP);
@@ -2449,7 +2438,7 @@ record_btrace_step_thread (struct thread_info *tp)
 {
   struct btrace_thread_info *btinfo;
   struct target_waitstatus status;
-  enum btrace_thread_flag flags;
+  btrace_thread_flags flags;
 
   btinfo = &tp->btrace;
 
@@ -2457,7 +2446,7 @@ record_btrace_step_thread (struct thread_info *tp)
   btinfo->flags &= ~(BTHR_MOVE | BTHR_STOP);
 
   DEBUG ("stepping thread %s (%s): %x (%s)", print_thread_id (tp),
-	 target_pid_to_str (tp->ptid).c_str (), flags,
+	 target_pid_to_str (tp->ptid).c_str (), flags.raw (),
 	 btrace_thread_flag_to_str (flags));
 
   /* We can't step without an execution history.  */
@@ -2537,12 +2526,13 @@ record_btrace_maybe_mark_async_event
 
 ptid_t
 record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
-			    int options)
+			    target_wait_flags options)
 {
   std::vector<thread_info *> moving;
   std::vector<thread_info *> no_history;
 
-  DEBUG ("wait %s (0x%x)", target_pid_to_str (ptid).c_str (), options);
+  DEBUG ("wait %s (0x%x)", target_pid_to_str (ptid).c_str (),
+	 (unsigned) options);
 
   /* As long as we're not replaying, just forward the request.  */
   if ((::execution_direction != EXEC_REVERSE)

@@ -1,6 +1,6 @@
 /* Target-dependent header for the MIPS architecture, for GDB, the GNU Debugger.
 
-   Copyright (C) 2002-2020 Free Software Foundation, Inc.
+   Copyright (C) 2002-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -104,7 +104,7 @@ struct gdbarch_tdep
      add any that do not need to be public.  */
   const struct mips_regnum *regnum;
   /* Register names table for the current register set.  */
-  const char **mips_processor_reg_names;
+  const char * const *mips_processor_reg_names;
 
   /* The size of register data available from the target, if known.
      This doesn't quite obsolete the manual

@@ -1,5 +1,5 @@
 /* Helper routines for C++ support in GDB.
-   Copyright (C) 2003-2020 Free Software Foundation, Inc.
+   Copyright (C) 2003-2021 Free Software Foundation, Inc.
 
    Contributed by David Carlton and by Kealia, Inc.
 
@@ -359,7 +359,7 @@ cp_lookup_symbol_in_namespace (const char *the_namespace, const char *name,
      namespace A {
        using namespace X;
        namespace B {
-         using namespace Y;
+	 using namespace Y;
        }
      }
 
@@ -404,14 +404,14 @@ cp_lookup_symbol_via_imports (const char *scope,
 
       len = strlen (current->import_dest);
       directive_match = (search_parents
-                         ? (startswith (scope, current->import_dest)
-                            && (len == 0
-                                || scope[len] == ':'
+			 ? (startswith (scope, current->import_dest)
+			    && (len == 0
+				|| scope[len] == ':'
 				|| scope[len] == '\0'))
-                         : strcmp (scope, current->import_dest) == 0);
+			 : strcmp (scope, current->import_dest) == 0);
 
       /* If the import destination is the current scope or one of its
-         ancestors then it is applicable.  */
+	 ancestors then it is applicable.  */
       if (directive_match && !current->searched)
 	{
 	  /* Mark this import as searched so that the recursive call
@@ -628,9 +628,9 @@ cp_lookup_symbol_via_all_imports (const char *scope, const char *name,
 
 struct block_symbol
 cp_lookup_symbol_namespace (const char *scope,
-                            const char *name,
-                            const struct block *block,
-                            const domain_enum domain)
+			    const char *name,
+			    const struct block *block,
+			    const domain_enum domain)
 {
   struct block_symbol sym;
 

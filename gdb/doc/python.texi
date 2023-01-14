@@ -1,4 +1,4 @@
-@c Copyright (C) 2008--2020 Free Software Foundation, Inc.
+@c Copyright (C) 2008--2021 Free Software Foundation, Inc.
 @c Permission is granted to copy, distribute and/or modify this document
 @c under the terms of the GNU Free Documentation License, Version 1.3 or
 @c any later version published by the Free Software Foundation; with the
@@ -906,6 +906,11 @@ corresponding symbol name (if one exists), @code{False} if it shouldn't
 should be expanded, @code{False} if they shouldn't (see @code{set print
 union} in @ref{Print Settings}).
 
+@item address
+@code{True} if the string representation of a pointer should include the
+address, @code{False} if it shouldn't (see @code{set print address} in
+@ref{Print Settings}).
+
 @item deref_refs
 @code{True} if C@t{++} references should be resolved to the value they
 refer to, @code{False} (the default) if they shouldn't.  Note that, unlike
@@ -921,7 +926,7 @@ identify the @emph{actual} (derived) type of the object rather than the
 the @emph{declared} type should be used.  (See @code{set print object} in
 @ref{Print Settings}).
 
-@item static_fields
+@item static_members
 @code{True} if static members should be included in the string
 representation of a C@t{++} object, @code{False} if they shouldn't (see
 @code{set print static-members} in @ref{Print Settings}).
@@ -2040,7 +2045,7 @@ empty iterable, or @code{None} means frame arguments will not be
 printed for this frame.  This iterable must contain objects that
 implement two methods, described here.
 
-This object must implement a @code{argument} method which takes a
+This object must implement a @code{symbol} method which takes a
 single @code{self} parameter and must return a @code{gdb.Symbol}
 (@pxref{Symbols In Python}), or a Python string.  The object must also
 implement a @code{value} method which takes a single @code{self}
@@ -5397,6 +5402,10 @@ module:
 @item gdb.BP_BREAKPOINT
 Normal code breakpoint.
 
+@vindex BP_HARDWARE_BREAKPOINT
+@item gdb.BP_HARDWARE_BREAKPOINT
+Hardware assisted code breakpoint.
+
 @vindex BP_WATCHPOINT
 @item gdb.BP_WATCHPOINT
 Watchpoint breakpoint.
@@ -5829,7 +5838,7 @@ window.  This is called with a single argument of type
 that implements the TUI window protocol, also described below.
 @end defun
 
-As mentioned above, when a factory function is called, it is passed a
+As mentioned above, when a factory function is called, it is passed
 an object of type @code{gdb.TuiWindow}.  This object has these
 methods and attributes:
 

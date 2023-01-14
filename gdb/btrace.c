@@ -1,6 +1,6 @@
 /* Branch trace support for GDB, the GNU debugger.
 
-   Copyright (C) 2013-2020 Free Software Foundation, Inc.
+   Copyright (C) 2013-2021 Free Software Foundation, Inc.
 
    Contributed by Intel Corp. <markus.t.metzger@intel.com>
 
@@ -62,7 +62,7 @@ static void btrace_add_pc (struct thread_info *tp);
   do									\
     {									\
       if (record_debug != 0)						\
-        fprintf_unfiltered (gdb_stdlog,					\
+	fprintf_unfiltered (gdb_stdlog,					\
 			    "[btrace] " msg "\n", ##args);		\
     }									\
   while (0)
@@ -265,7 +265,7 @@ ftrace_new_function (struct btrace_thread_info *btinfo,
 static void
 ftrace_update_caller (struct btrace_function *bfun,
 		      struct btrace_function *caller,
-		      enum btrace_function_flag flags)
+		      btrace_function_flags flags)
 {
   if (bfun->up != 0)
     ftrace_debug (bfun, "updating caller");
@@ -283,7 +283,7 @@ static void
 ftrace_fixup_caller (struct btrace_thread_info *btinfo,
 		     struct btrace_function *bfun,
 		     struct btrace_function *caller,
-		     enum btrace_function_flag flags)
+		     btrace_function_flags flags)
 {
   unsigned int prev, next;
 

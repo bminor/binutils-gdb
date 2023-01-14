@@ -1,6 +1,6 @@
 /* Python interface to objfiles.
 
-   Copyright (C) 2008-2020 Free Software Foundation, Inc.
+   Copyright (C) 2008-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,7 +25,7 @@
 #include "build-id.h"
 #include "symtab.h"
 
-typedef struct
+struct objfile_object
 {
   PyObject_HEAD
 
@@ -50,7 +50,7 @@ typedef struct
 
   /* The debug method matcher list.  */
   PyObject *xmethods;
-} objfile_object;
+};
 
 extern PyTypeObject objfile_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("objfile_object");
@@ -453,7 +453,7 @@ objfpy_lookup_global_symbol (PyObject *self, PyObject *args, PyObject *kw)
   try
     {
       struct symbol *sym = lookup_global_symbol_from_objfile
-        (obj->objfile, GLOBAL_BLOCK, symbol_name, (domain_enum) domain).symbol;
+	(obj->objfile, GLOBAL_BLOCK, symbol_name, (domain_enum) domain).symbol;
       if (sym == nullptr)
 	Py_RETURN_NONE;
 
@@ -487,7 +487,7 @@ objfpy_lookup_static_symbol (PyObject *self, PyObject *args, PyObject *kw)
   try
     {
       struct symbol *sym = lookup_global_symbol_from_objfile
-        (obj->objfile, STATIC_BLOCK, symbol_name, (domain_enum) domain).symbol;
+	(obj->objfile, STATIC_BLOCK, symbol_name, (domain_enum) domain).symbol;
       if (sym == nullptr)
 	Py_RETURN_NONE;
 

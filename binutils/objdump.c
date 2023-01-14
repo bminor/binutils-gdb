@@ -1,5 +1,5 @@
 /* objdump.c -- dump information about an object file.
-   Copyright (C) 1990-2020 Free Software Foundation, Inc.
+   Copyright (C) 1990-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -4073,7 +4073,7 @@ make_ctfsect (const char *name, bfd_byte *data,
 
 /* Dump CTF errors/warnings.  */
 static void
-dump_ctf_errs (ctf_file_t *fp)
+dump_ctf_errs (ctf_dict_t *fp)
 {
   ctf_next_t *it = NULL;
   char *errtext;
@@ -4097,9 +4097,9 @@ dump_ctf_errs (ctf_file_t *fp)
 /* Dump one CTF archive member.  */
 
 static int
-dump_ctf_archive_member (ctf_file_t *ctf, const char *name, void *arg)
+dump_ctf_archive_member (ctf_dict_t *ctf, const char *name, void *arg)
 {
-  ctf_file_t *parent = (ctf_file_t *) arg;
+  ctf_dict_t *parent = (ctf_dict_t *) arg;
   const char *things[] = {"Header", "Labels", "Data objects",
 			  "Function objects", "Variables", "Types", "Strings",
 			  ""};
@@ -4155,7 +4155,7 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
   bfd_byte *ctfdata, *parentdata = NULL;
   bfd_size_type ctfsize, parentsize;
   ctf_sect_t ctfsect;
-  ctf_file_t *parent = NULL;
+  ctf_dict_t *parent = NULL;
   int err;
 
   if ((ctfdata = read_section_stabs (abfd, sect_name, &ctfsize, NULL)) == NULL)
@@ -4194,7 +4194,7 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
   /* Assume that the applicable parent archive member is the default one.
      (This is what all known implementations are expected to do, if they
      put CTFs and their parents in archives together.)  */
-  if ((parent = ctf_arc_open_by_name (lookparent, NULL, &err)) == NULL)
+  if ((parent = ctf_dict_open (lookparent, NULL, &err)) == NULL)
     {
       dump_ctf_errs (NULL);
       non_fatal (_("CTF open failure: %s"), ctf_errmsg (err));
@@ -4203,8 +4203,13 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
 
   printf (_("Contents of CTF section %s:\n"), sanitize_string (sect_name));
 
-  ctf_archive_iter (ctfa, dump_ctf_archive_member, parent);
-  ctf_file_close (parent);
+  if ((err = ctf_archive_iter (ctfa, dump_ctf_archive_member, parent)) != 0)
+    {
+      dump_ctf_errs (NULL);
+      non_fatal (_("CTF archive member open failure: %s"), ctf_errmsg (err));
+      bfd_fatal (bfd_get_filename (abfd));
+    }
+  ctf_dict_close (parent);
   ctf_close (ctfa);
   ctf_close (parenta);
   free (parentdata);

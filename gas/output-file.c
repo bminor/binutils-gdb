@@ -1,5 +1,5 @@
 /* output-file.c -  Deal with the output file
-   Copyright (C) 1987-2020 Free Software Foundation, Inc.
+   Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -68,6 +68,5 @@ output_file_close (const char *filename)
   stdoutput = NULL;
 
   if (! res)
-    as_fatal (_("can't close %s: %s"), filename,
-	      bfd_errmsg (bfd_get_error ()));
+    as_fatal ("%s: %s", filename, bfd_errmsg (bfd_get_error ()));
 }

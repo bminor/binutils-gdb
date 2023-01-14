@@ -1,5 +1,47 @@
 -*- text -*-
 
+Changes in 2.36:
+
+* Add support for Intel AVX VNNI instructions.
+
+* Add support for Intel HRESET instruction.
+
+* Add support for Intel UINTR instructions.
+
+* Support non-absolute segment values for i386 lcall and ljmp.
+
+* When setting the link order attribute of ELF sections, it is now possible to
+  use a numeric section index instead of symbol name.
+
+* Add support for Cortex-A78, Cortex-A78AE, Cortex-A78C and Cortex-X1 for
+  AArch64 and ARM.
+  Add support for Cortex-R82, Neoverse V1, and Neoverse N2 for ARM.
+
+* Add support for ETMv4 (Embedded Trace Macrocell), ETE (Embedded Trace
+  Extension), TRBE (Trace Buffer Extension)and BRBE (Branch Record Buffer
+  Extension) system registers for AArch64.
+
+* Add support for Armv8-R and Armv8.7-A AArch64.
+
+* Add support for DSB memory nXS barrier, WFET and WFIT instruction for Armv8.7
+  AArch64.
+
+* Add support for +flagm feature for -march in Armv8.4 AArch64.
+
+* Add support for +ls64 feature for -march in Armv8.7 AArch64. Add atomic
+  64-byte load/store instructions for this feature.
+
+* Add support for +pauth (Pointer Authentication) feature for -march in
+  AArch64.
+
+* Add support for Intel TDX instructions.
+
+* Add support for Intel Key Locker instructions.
+
+* Added a .nop directive to generate a single no-op instruction in a target
+  neutral manner.  This instruction does have an effect on DWARF line number
+  generation, if that is active.
+
 * Removed --reduce-memory-overheads and --hash-size as gas now
   uses hash tables that can be expand and shrink automatically.
 
@@ -8,6 +50,11 @@
 * Add support for Intel AMX instructions.
 
 * Configure with --enable-x86-used-note by default for Linux/x86.
+
+* Add support for the SHF_GNU_RETAIN flag, which can be applied to
+  sections using the 'R' flag in the .section directive.
+  SHF_GNU_RETAIN specifies that the section should not be garbage
+  collected by the linker.  It requires the GNU or FreeBSD ELF OSABIs.
 
 Changes in 2.35:
 
@@ -842,7 +889,7 @@ Changes in 1.93.01:
   of new CPUs and formats, lots of bugs fixed.
 
 
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
+Copyright (C) 2012-2021 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

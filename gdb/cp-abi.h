@@ -3,7 +3,7 @@
 
    Contributed by Daniel Berlin <dberlin@redhat.com>
 
-   Copyright (C) 2001-2020 Free Software Foundation, Inc.
+   Copyright (C) 2001-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -135,7 +135,7 @@ extern struct value *value_virtual_fn_field (struct value **valuep,
    FULL, TOP, and USING_ENC can each be zero, in which case we don't
    provide the corresponding piece of information.  */
 extern struct type *value_rtti_type (struct value *value,
-                                     int *full, LONGEST *top,
+				     int *full, LONGEST *top,
 				     int *using_enc);
 
 /* Compute the offset of the baseclass which is the INDEXth baseclass

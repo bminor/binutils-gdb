@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright (C) 2010-2020 Free Software Foundation, Inc.
+#   Copyright (C) 2010-2021 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -116,7 +116,7 @@ vms_place_orphan (asection *s,
 
   if (hold_data.os != NULL)
     {
-      lang_add_section (&hold_data.os->children, s, NULL, hold_data.os);
+      lang_add_section (&hold_data.os->children, s, NULL, NULL, hold_data.os);
       return hold_data.os;
     }
   else

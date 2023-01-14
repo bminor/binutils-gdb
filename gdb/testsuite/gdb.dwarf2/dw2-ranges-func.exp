@@ -1,4 +1,4 @@
-# Copyright 2018-2020 Free Software Foundation, Inc.
+# Copyright 2018-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -199,15 +199,15 @@ proc do_test {suffix} {
 	# Generate ranges data.
 	ranges {is_64 [is_64_target]} {
 	    func_ranges_label: sequence {
-		{range {$foo_start } $foo_end}
-		{range {$foo_cold_start} $foo_cold_end}
+		range $foo_start $foo_end
+		range $foo_cold_start $foo_cold_end
 	    }
 	    cu_ranges_label: sequence {
-		{range {$foo_start } $foo_end}
-		{range {$foo_cold_start} $foo_cold_end}
-		{range {$main_start} $main_end}
-		{range {$bar_start} $bar_end}
-		{range {$baz_start} $baz_end}
+		range $foo_start $foo_end
+		range $foo_cold_start $foo_cold_end
+		range $main_start $main_end
+		range $bar_start $bar_end
+		range $baz_start $baz_end
 	    }
 	}
     }

@@ -1,6 +1,6 @@
 /* DWARF 2 location expression support for GDB.
 
-   Copyright (C) 2003-2020 Free Software Foundation, Inc.
+   Copyright (C) 2003-2021 Free Software Foundation, Inc.
 
    Contributed by Daniel Jacobowitz, MontaVista Software, Inc.
 
@@ -1590,7 +1590,7 @@ value_of_dwarf_block_entry (struct type *type, struct frame_info *frame,
 
   if (dwarf_block_to_fb_offset (block, block + block_len, &kind_u.fb_offset))
     return value_of_dwarf_reg_entry (type, frame, CALL_SITE_PARAMETER_FB_OFFSET,
-                                     kind_u);
+				     kind_u);
 
   /* This can normally happen - throw NO_ENTRY_VALUE_ERROR to get the message
      suppressed during normal operation.  The expression can be arbitrary if
@@ -1748,7 +1748,7 @@ rw_pieced_value (struct value *v, struct value *from)
 		/* Read mode.  */
 		if (!get_frame_register_bytes (frame, gdb_regnum,
 					       bits_to_skip / 8,
-					       this_size, buffer.data (),
+					       buffer,
 					       &optim, &unavail))
 		  {
 		    if (optim)
@@ -1773,7 +1773,7 @@ rw_pieced_value (struct value *v, struct value *from)
 		       Need some bits from original register value.  */
 		    get_frame_register_bytes (frame, gdb_regnum,
 					      bits_to_skip / 8,
-					      this_size, buffer.data (),
+					      buffer,
 					      &optim, &unavail);
 		    if (optim)
 		      throw_error (OPTIMIZED_OUT_ERROR,
@@ -1792,7 +1792,7 @@ rw_pieced_value (struct value *v, struct value *from)
 			      this_size_bits, bits_big_endian);
 		put_frame_register_bytes (frame, gdb_regnum,
 					  bits_to_skip / 8,
-					  this_size, buffer.data ());
+					  buffer);
 	      }
 	  }
 	  break;
@@ -2499,7 +2499,8 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 			   struct frame_info *frame,
 			   const struct property_addr_info *addr_stack,
 			   CORE_ADDR *valp,
-			   bool push_initial_value)
+			   bool push_initial_value,
+			   bool *is_reference)
 {
   if (dlbaton == NULL || dlbaton->size == 0)
     return 0;
@@ -2546,9 +2547,12 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 
   switch (ctx.location)
     {
+    case DWARF_VALUE_STACK:
+      *is_reference = false;
+      /* FALLTHROUGH */
+
     case DWARF_VALUE_REGISTER:
     case DWARF_VALUE_MEMORY:
-    case DWARF_VALUE_STACK:
       *valp = ctx.fetch_address (0);
       if (ctx.location == DWARF_VALUE_REGISTER)
 	*valp = ctx.read_addr_from_reg (*valp);
@@ -2589,10 +2593,11 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 	  = (const struct dwarf2_property_baton *) prop->baton ();
 	gdb_assert (baton->property_type != NULL);
 
+	bool is_reference = baton->locexpr.is_reference;
 	if (dwarf2_locexpr_baton_eval (&baton->locexpr, frame, addr_stack,
-				       value, push_initial_value))
+				       value, push_initial_value, &is_reference))
 	  {
-	    if (baton->locexpr.is_reference)
+	    if (is_reference)
 	      {
 		struct value *val = value_at (baton->property_type, *value);
 		*value = value_as_address (val);
@@ -2694,7 +2699,7 @@ void
 dwarf2_compile_property_to_c (string_file *stream,
 			      const char *result_name,
 			      struct gdbarch *gdbarch,
-			      unsigned char *registers_used,
+			      std::vector<bool> &registers_used,
 			      const struct dynamic_prop *prop,
 			      CORE_ADDR pc,
 			      struct symbol *sym)
@@ -3556,7 +3561,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	case DW_OP_nop:
 	  break;
 
-        case DW_OP_piece:
+	case DW_OP_piece:
 	case DW_OP_bit_piece:
 	  {
 	    uint64_t size;
@@ -3565,7 +3570,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	      error (_("Cannot translate empty pieces to agent expressions"));
 	    previous_piece = op_ptr - 1;
 
-            op_ptr = safe_read_uleb128 (op_ptr, op_end, &size);
+	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &size);
 	    if (op == DW_OP_piece)
 	      {
 		size *= 8;
@@ -3857,7 +3862,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
      64-bit LE machine):
 
      DW_AT_location    : 10 byte block: 3 4 0 0 0 0 0 0 0 e0
-                        (DW_OP_addr: 4; DW_OP_GNU_push_tls_address)
+			(DW_OP_addr: 4; DW_OP_GNU_push_tls_address)
 
      0x3 is the encoding for DW_OP_addr, which has an operand as long
      as the size of an address on the target machine (here is 8
@@ -3889,7 +3894,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 
   /* With -gsplit-dwarf a TLS variable can also look like this:
      DW_AT_location    : 3 byte block: fc 4 e0
-                        (DW_OP_GNU_const_index: 4;
+			(DW_OP_GNU_const_index: 4;
 			 DW_OP_GNU_push_tls_address)  */
   else if (data + 3 <= end
 	   && data + 1 + (leb128_size = skip_leb128 (data + 1, end)) < end
@@ -4166,7 +4171,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	  fprintf_filtered (stream, " offset %s", phex_nz (ul, offset_size));
 	  break;
 
-        case DW_OP_piece:
+	case DW_OP_piece:
 	  data = safe_read_uleb128 (data, end, &ul);
 	  fprintf_filtered (stream, " %s (bytes)", pulongest (ul));
 	  break;
@@ -4470,7 +4475,7 @@ locexpr_tracepoint_var_ref (struct symbol *symbol, struct agent_expr *ax,
 static void
 locexpr_generate_c_location (struct symbol *sym, string_file *stream,
 			     struct gdbarch *gdbarch,
-			     unsigned char *registers_used,
+			     std::vector<bool> &registers_used,
 			     CORE_ADDR pc, const char *result_name)
 {
   struct dwarf2_locexpr_baton *dlbaton
@@ -4702,7 +4707,7 @@ loclist_tracepoint_var_ref (struct symbol *symbol, struct agent_expr *ax,
 static void
 loclist_generate_c_location (struct symbol *sym, string_file *stream,
 			     struct gdbarch *gdbarch,
-			     unsigned char *registers_used,
+			     std::vector<bool> &registers_used,
 			     CORE_ADDR pc, const char *result_name)
 {
   struct dwarf2_loclist_baton *dlbaton

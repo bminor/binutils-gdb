@@ -1,5 +1,5 @@
 /* MIPS-specific support for ELF
-   Copyright (C) 1993-2020 Free Software Foundation, Inc.
+   Copyright (C) 1993-2021 Free Software Foundation, Inc.
 
    Most of the information added by Ian Lance Taylor, Cygnus Support,
    <ian@cygnus.com>.
@@ -7058,15 +7058,21 @@ elf_mips_abi_name (bfd *abfd)
    faster assembler code.  This is what we use for the small common
    section.  This approach is copied from ecoff.c.  */
 static asection mips_elf_scom_section;
-static asymbol mips_elf_scom_symbol;
-static asymbol *mips_elf_scom_symbol_ptr;
+static const asymbol mips_elf_scom_symbol =
+  GLOBAL_SYM_INIT (".scommon", &mips_elf_scom_section);
+static asection mips_elf_scom_section =
+  BFD_FAKE_SECTION (mips_elf_scom_section, &mips_elf_scom_symbol,
+		    ".scommon", 0, SEC_IS_COMMON | SEC_SMALL_DATA);
 
 /* MIPS ELF also uses an acommon section, which represents an
    allocated common symbol which may be overridden by a
    definition in a shared library.  */
 static asection mips_elf_acom_section;
-static asymbol mips_elf_acom_symbol;
-static asymbol *mips_elf_acom_symbol_ptr;
+static const asymbol mips_elf_acom_symbol =
+  GLOBAL_SYM_INIT (".acommon", &mips_elf_acom_section);
+static asection mips_elf_acom_section =
+  BFD_FAKE_SECTION (mips_elf_acom_section, &mips_elf_acom_symbol,
+		    ".acommon", 0, SEC_ALLOC);
 
 /* This is used for both the 32-bit and the 64-bit ABI.  */
 
@@ -7085,19 +7091,6 @@ _bfd_mips_elf_symbol_processing (bfd *abfd, asymbol *asym)
 	 either resolve these symbols to something in a shared
 	 library, or it can just leave them here.  For our purposes,
 	 we can consider these symbols to be in a new section.  */
-      if (mips_elf_acom_section.name == NULL)
-	{
-	  /* Initialize the acommon section.  */
-	  mips_elf_acom_section.name = ".acommon";
-	  mips_elf_acom_section.flags = SEC_ALLOC;
-	  mips_elf_acom_section.output_section = &mips_elf_acom_section;
-	  mips_elf_acom_section.symbol = &mips_elf_acom_symbol;
-	  mips_elf_acom_section.symbol_ptr_ptr = &mips_elf_acom_symbol_ptr;
-	  mips_elf_acom_symbol.name = ".acommon";
-	  mips_elf_acom_symbol.flags = BSF_SECTION_SYM;
-	  mips_elf_acom_symbol.section = &mips_elf_acom_section;
-	  mips_elf_acom_symbol_ptr = &mips_elf_acom_symbol;
-	}
       asym->section = &mips_elf_acom_section;
       break;
 
@@ -7110,19 +7103,6 @@ _bfd_mips_elf_symbol_processing (bfd *abfd, asymbol *asym)
 	break;
       /* Fall through.  */
     case SHN_MIPS_SCOMMON:
-      if (mips_elf_scom_section.name == NULL)
-	{
-	  /* Initialize the small common section.  */
-	  mips_elf_scom_section.name = ".scommon";
-	  mips_elf_scom_section.flags = SEC_IS_COMMON | SEC_SMALL_DATA;
-	  mips_elf_scom_section.output_section = &mips_elf_scom_section;
-	  mips_elf_scom_section.symbol = &mips_elf_scom_symbol;
-	  mips_elf_scom_section.symbol_ptr_ptr = &mips_elf_scom_symbol_ptr;
-	  mips_elf_scom_symbol.name = ".scommon";
-	  mips_elf_scom_symbol.flags = BSF_SECTION_SYM;
-	  mips_elf_scom_symbol.section = &mips_elf_scom_section;
-	  mips_elf_scom_symbol_ptr = &mips_elf_scom_symbol;
-	}
       asym->section = &mips_elf_scom_section;
       asym->value = elfsym->internal_elf_sym.st_size;
       break;
@@ -16320,21 +16300,21 @@ const struct bfd_elf_special_section _bfd_mips_elf_special_sections[] =
    definiton of the symbol.  */
 void
 _bfd_mips_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
-				      const Elf_Internal_Sym *isym,
+				      unsigned int st_other,
 				      bfd_boolean definition,
 				      bfd_boolean dynamic ATTRIBUTE_UNUSED)
 {
-  if ((isym->st_other & ~ELF_ST_VISIBILITY (-1)) != 0)
+  if ((st_other & ~ELF_ST_VISIBILITY (-1)) != 0)
     {
       unsigned char other;
 
-      other = (definition ? isym->st_other : h->other);
+      other = (definition ? st_other : h->other);
       other &= ~ELF_ST_VISIBILITY (-1);
       h->other = other | ELF_ST_VISIBILITY (h->other);
     }
 
   if (!definition
-      && ELF_MIPS_IS_OPTIONAL (isym->st_other))
+      && ELF_MIPS_IS_OPTIONAL (st_other))
     h->other |= STO_OPTIONAL;
 }
 

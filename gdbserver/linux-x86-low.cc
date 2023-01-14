@@ -1,6 +1,6 @@
 /* GNU/Linux/x86-64 specific low level interface, for the remote server
    for GDB.
-   Copyright (C) 2002-2020 Free Software Foundation, Inc.
+   Copyright (C) 2002-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -48,9 +48,9 @@
 #include "linux-x86-tdesc.h"
 
 #ifdef __x86_64__
-static struct target_desc *tdesc_amd64_linux_no_xml;
+static target_desc_up tdesc_amd64_linux_no_xml;
 #endif
-static struct target_desc *tdesc_i386_linux_no_xml;
+static target_desc_up tdesc_i386_linux_no_xml;
 
 
 static unsigned char jump_insn[] = { 0xe9, 0, 0, 0, 0 };
@@ -58,13 +58,13 @@ static unsigned char small_jump_insn[] = { 0x66, 0xe9, 0, 0 };
 
 /* Backward compatibility for gdb without XML support.  */
 
-static const char *xmltarget_i386_linux_no_xml = "@<target>\
+static const char xmltarget_i386_linux_no_xml[] = "@<target>\
 <architecture>i386</architecture>\
 <osabi>GNU/Linux</osabi>\
 </target>";
 
 #ifdef __x86_64__
-static const char *xmltarget_amd64_linux_no_xml = "@<target>\
+static const char xmltarget_amd64_linux_no_xml[] = "@<target>\
 <architecture>i386:x86-64</architecture>\
 <osabi>GNU/Linux</osabi>\
 </target>";
@@ -398,6 +398,35 @@ x86_target::low_cannot_fetch_register (int regno)
 }
 
 static void
+collect_register_i386 (struct regcache *regcache, int regno, void *buf)
+{
+  collect_register (regcache, regno, buf);
+
+#ifdef __x86_64__
+  /* In case of x86_64 -m32, collect_register only writes 4 bytes, but the
+     space reserved in buf for the register is 8 bytes.  Make sure the entire
+     reserved space is initialized.  */
+
+  gdb_assert (register_size (regcache->tdesc, regno) == 4);
+
+  if (regno == RAX)
+    {
+      /* Sign extend EAX value to avoid potential syscall restart
+	 problems.
+
+	 See amd64_linux_collect_native_gregset() in
+	 gdb/amd64-linux-nat.c for a detailed explanation.  */
+      *(int64_t *) buf = *(int32_t *) buf;
+    }
+  else
+    {
+      /* Zero-extend.  */
+      *(uint64_t *) buf = *(uint32_t *) buf;
+    }
+#endif
+}
+
+static void
 x86_fill_gregset (struct regcache *regcache, void *buf)
 {
   int i;
@@ -411,32 +440,14 @@ x86_fill_gregset (struct regcache *regcache, void *buf)
 
       return;
     }
-
-  /* 32-bit inferior registers need to be zero-extended.
-     Callers would read uninitialized memory otherwise.  */
-  memset (buf, 0x00, X86_64_USER_REGS * 8);
 #endif
 
   for (i = 0; i < I386_NUM_REGS; i++)
-    collect_register (regcache, i, ((char *) buf) + i386_regmap[i]);
+    collect_register_i386 (regcache, i, ((char *) buf) + i386_regmap[i]);
 
-  collect_register_by_name (regcache, "orig_eax",
-			    ((char *) buf) + ORIG_EAX * REGSIZE);
-
-#ifdef __x86_64__
-  /* Sign extend EAX value to avoid potential syscall restart
-     problems. 
-
-     See amd64_linux_collect_native_gregset() in gdb/amd64-linux-nat.c
-     for a detailed explanation.  */
-  if (register_size (regcache->tdesc, 0) == 4)
-    {
-      void *ptr = ((gdb_byte *) buf
-                   + i386_regmap[find_regno (regcache->tdesc, "eax")]);
-
-      *(int64_t *) ptr = *(int32_t *) ptr;
-    }
-#endif
+  /* Handle ORIG_EAX, which is not in i386_regmap.  */
+  collect_register_i386 (regcache, find_regno (regcache->tdesc, "orig_eax"),
+			 ((char *) buf) + ORIG_EAX * REGSIZE);
 }
 
 static void
@@ -899,10 +910,10 @@ x86_linux_read_description (void)
       /* Don't use XML.  */
 #ifdef __x86_64__
       if (machine == EM_X86_64)
-	return tdesc_amd64_linux_no_xml;
+	return tdesc_amd64_linux_no_xml.get ();
       else
 #endif
-	return tdesc_i386_linux_no_xml;
+	return tdesc_i386_linux_no_xml.get ();
     }
 
   if (have_ptrace_getregset == -1)
@@ -2208,7 +2219,7 @@ amd64_emit_ge_goto (int *offset_p, int *size_p)
     *size_p = 4;
 }
 
-struct emit_ops amd64_emit_ops =
+static emit_ops amd64_emit_ops =
   {
     amd64_emit_prologue,
     amd64_emit_epilogue,
@@ -2877,7 +2888,7 @@ i386_emit_ge_goto (int *offset_p, int *size_p)
     *size_p = 4;
 }
 
-struct emit_ops i386_emit_ops =
+static emit_ops i386_emit_ops =
   {
     i386_emit_prologue,
     i386_emit_epilogue,
@@ -2955,7 +2966,7 @@ x86_target::get_ipa_tdesc_idx ()
   return amd64_get_ipa_tdesc_idx (tdesc);
 #endif
 
-  if (tdesc == tdesc_i386_linux_no_xml)
+  if (tdesc == tdesc_i386_linux_no_xml.get ())
     return X86_TDESC_SSE;
 
   return i386_get_ipa_tdesc_idx (tdesc);
@@ -2971,14 +2982,14 @@ initialize_low_arch (void)
   /* Initialize the Linux target descriptions.  */
 #ifdef __x86_64__
   tdesc_amd64_linux_no_xml = allocate_target_description ();
-  copy_target_description (tdesc_amd64_linux_no_xml,
+  copy_target_description (tdesc_amd64_linux_no_xml.get (),
 			   amd64_linux_read_description (X86_XSTATE_SSE_MASK,
 							 false));
   tdesc_amd64_linux_no_xml->xmltarget = xmltarget_amd64_linux_no_xml;
 #endif
 
   tdesc_i386_linux_no_xml = allocate_target_description ();
-  copy_target_description (tdesc_i386_linux_no_xml,
+  copy_target_description (tdesc_i386_linux_no_xml.get (),
 			   i386_linux_read_description (X86_XSTATE_SSE_MASK));
   tdesc_i386_linux_no_xml->xmltarget = xmltarget_i386_linux_no_xml;
 

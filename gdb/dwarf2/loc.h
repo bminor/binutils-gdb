@@ -1,6 +1,6 @@
 /* DWARF 2 location expression support for GDB.
 
-   Copyright (C) 2003-2020 Free Software Foundation, Inc.
+   Copyright (C) 2003-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -120,7 +120,7 @@ bool dwarf2_evaluate_property (const struct dynamic_prop *prop,
 void dwarf2_compile_property_to_c (string_file *stream,
 				   const char *result_name,
 				   struct gdbarch *gdbarch,
-				   unsigned char *registers_used,
+				   std::vector<bool> &registers_used,
 				   const struct dynamic_prop *prop,
 				   CORE_ADDR address,
 				   struct symbol *sym);

@@ -1,6 +1,6 @@
 /* Python interface to inferior signal stop events.
 
-   Copyright (C) 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2009-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -35,8 +35,8 @@ create_signal_event_object (enum gdb_signal stop_signal)
   if (signal_name_obj == NULL)
     return NULL;
   if (evpy_add_attribute (signal_event_obj.get (),
-                          "stop_signal",
-                          signal_name_obj.get ()) < 0)
+			  "stop_signal",
+			  signal_name_obj.get ()) < 0)
     return NULL;
 
   return signal_event_obj;

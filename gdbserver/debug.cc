@@ -1,5 +1,5 @@
 /* Debugging routines for the remote server for GDB.
-   Copyright (C) 2014-2020 Free Software Foundation, Inc.
+   Copyright (C) 2014-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,7 +24,7 @@ int remote_debug = 0;
 #endif
 
 /* Output file for debugging.  Default to standard error.  */
-FILE *debug_file = stderr;
+static FILE *debug_file = stderr;
 
 /* See debug.h.  */
 int debug_threads;
@@ -63,6 +63,10 @@ debug_set_output (const char *new_debug_file)
 }
 
 #endif
+
+/* See gdbsupport/common-debug.h.  */
+
+int debug_print_depth = 0;
 
 /* Print a debugging message.
    If the text begins a new line it is preceded by a timestamp.

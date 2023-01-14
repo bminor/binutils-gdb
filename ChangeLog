@@ -1,3 +1,187 @@
+2021-01-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* src-release.sh (do_proto_toplev): Rewrite indentation.
+
+2021-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/26766
+	* configure.ac:
+	* configure: Regenerated.
+
+2021-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27173
+	* configure: Regenerated.
+	* libtool.m4 (_LT_CMD_OLD_ARCHIVE): Check if AR works with
+	--plugin and rc before enabling --plugin.
+
+2021-01-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/26766
+	* Makefile.tpl (BUILD_CFLAGS): New.
+	(CFLAGS): Append $(BUILD_CFLAGS).
+	(CXXFLAGS): Likewise.
+	(PGO_BUILD_GEN_FLAGS_TO_PASS): New.
+	(PGO_BUILD_TRAINING_CFLAGS): Likewise.
+	(PGO_BUILD_TRAINING_CXXFLAGS): Likewise.
+	(PGO_BUILD_TRAINING_FLAGS_TO_PASS): Likewise.
+	(PGO_BUILD_TRAINING_MFLAGS): Likewise.
+	(PGO_BUILD_USE_FLAGS_TO_PASS): Likewise.
+	(PGO-TRAINING-TARGETS): Likewise.
+	(PGO_BUILD_TRAINING): Likewise.
+	(all): Add '+' to the command line for recursive make.  Support
+	the PGO build.
+	* configure.ac: Add --enable-pgo-build[=lto].
+	AC_SUBST PGO_BUILD_GEN_CFLAGS, PGO_BUILD_USE_CFLAGS and
+	PGO_BUILD_LTO_CFLAGS.  Enable the PGO build in Makefile.
+	* Makefile.in: Regenerated.
+	* configure: Likewise.
+
+2021-01-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.tpl (AR): Add @AR_PLUGIN_OPTION@
+	(RANLIB): Add @RANLIB_PLUGIN_OPTION@.
+	* configure.ac: Include config/gcc-plugin.m4.
+	AC_SUBST AR_PLUGIN_OPTION and RANLIB_PLUGIN_OPTION.
+	* libtool.m4 (_LT_CMD_OLD_ARCHIVE): Pass --plugin to AR and
+	RANLIB if possible.
+	* Makefile.in: Regenerated.
+	* configure: Likewise.
+
+2021-01-09  Nick Clifton  <nickc@redhat.com>
+
+	* 2.36 release branch crated.
+
+2021-01-07  Samuel Thibault  <samuel.thibault@gnu.org>
+
+	* libtool.m4: Match gnu* along with other GNU systems.
+
+2021-01-07  Alan Modra  <amodra@gmail.com>
+
+	* config.sub: Accept OS of eabi* and gnueabi*.
+
+2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
+
+	* Makefile.def (libctf): No longer no_check.  Checking depends on
+	all-ld.
+	* Makefile.in: Regenerated.
+
+2021-01-05  Nick Clifton  <nickc@redhat.com>
+
+	* libiberty: Sync with gcc.  Bring in:
+	2021-01-04  Martin Liska  <mliska@suse.cz>
+
+	* strverscmp.c: Convert to utf8 from iso8859.
+
+	2020-12-22  Jason Merrill  <jason@redhat.com>
+
+	PR c++/67343
+	* cp-demangle.h (struct d_info): Add unresolved_name_state.
+	* cp-demangle.c (d_prefix): Add subst parm.
+	(d_nested_name): Pass it.
+	(d_unresolved_name): Split out from...
+	(d_expression_1): ...here.
+	(d_demangle_callback): Maybe retry with old sr mangling.
+	* testsuite/demangle-expected: Add test.
+
+	2020-12-21  Jason Merrill  <jason@redhat.com>
+
+	* cp-demangle.c (d_expression_1): Recognize qualified-id
+	on RHS of dt/pt.
+	* testsuite/demangle-expected: Add test.
+
+	2020-12-21  Jason Merrill  <jason@redhat.com>
+
+	* cp-demangle.c (d_unqualified_name): Clear is_expression.
+	* testsuite/demangle-expected: Add tests.
+
+	2020-11-25  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* configure: Regenerate.
+	* configure.ac: Avoid using sanitizer.
+
+	2020-11-13  Eduard-Mihai Burtescu  <eddyb@lyken.rs>
+
+	* rust-demangle.c (struct rust_demangler): Add
+	skipping_printing and bound_lifetime_depth fields.
+	(eat): Add (v0-only).
+	(parse_integer_62): Add (v0-only).
+	(parse_opt_integer_62): Add (v0-only).
+	(parse_disambiguator): Add (v0-only).
+	(struct rust_mangled_ident): Add punycode{,_len} fields.
+	(parse_ident): Support v0 identifiers.
+	(print_str): Respect skipping_printing.
+	(print_uint64): Add (v0-only).
+	(print_uint64_hex): Add (v0-only).
+	(print_ident): Respect skipping_printing,
+	Support v0 identifiers.
+	(print_lifetime_from_index): Add (v0-only).
+	(demangle_binder): Add (v0-only).
+	(demangle_path): Add (v0-only).
+	(demangle_generic_arg): Add (v0-only).
+	(demangle_type): Add (v0-only).
+	(demangle_path_maybe_open_generics): Add (v0-only).
+	(demangle_dyn_trait): Add (v0-only).
+	(demangle_const): Add (v0-only).
+	(demangle_const_uint): Add (v0-only).
+	(basic_type): Add (v0-only).
+	(rust_demangle_callback): Support v0 symbols.
+	* testsuite/rust-demangle-expected: Add v0 testcases.
+
+	2020-11-13  Seija Kijin  <doremylover456@gmail.com>
+
+	* strstr.c (strstr): Make implementation ANSI/POSIX compliant.
+
+	2020-11-11  Patrick Palka  <ppalka@redhat.com>
+
+	PR c++/88115
+	* cp-demangle.c (d_print_comp_inner)
+	<case DEMANGLE_COMPONENT_EXTENDED_OPERATOR>: Don't print the
+	"operator " prefix for __alignof__.
+	<case DEMANGLE_COMPONENT_UNARY>: Always print parens around the
+	operand of __alignof__.
+	* testsuite/demangle-expected: Test demangling for __alignof__.
+
+	2020-11-09  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	* pex-win32.c (pex_win32_exec_child): Initialize orig_err.
+
+	2020-10-06  Martin Liska  <mliska@suse.cz>
+
+	PR lto/97290
+	* simple-object-elf.c (simple_object_elf_copy_lto_debug_sections):
+	Use sh_link of a .symtab_shndx section.
+
+2021-01-05  Alan Modra  <amodra@gmail.com>
+
+	* config.guess: Import from upstream.
+	* config.sub: Likewise.
+
+2020-12-16  Martin Liska  <mliska@suse.cz>
+	    Tom de Vries  <tdevries@suse.de>
+
+	* gdb/debuginfod-support.c (struct user_data): Remove has_printed
+	field.  Add meter field.
+	(progressfn): Print progress using meter.
+
+2020-12-02  Enze Li  <lienze2010@hotmail.com>
+
+	* .gitignore: Add gnu global outputs.
+
+2020-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* .gitignore: Sync with gcc.
+
+2020-10-26  Andreas Rammhold <andreas@rammhold.de>
+
+	* src-release.sh: Use sha256sum instead of md5sum.
+
+2020-10-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* Makefile.in: Rebuild.
+	* Makefile.def: Make distclean-gnulib depend on distclean-gdb and
+	distclean-gdbserver.
+
 2020-07-24  Aaron Merey  <amerey@redhat.com>
 
 	* configure: Rebuild.

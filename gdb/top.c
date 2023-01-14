@@ -1,6 +1,6 @@
 /* Top level stuff for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -161,7 +161,7 @@ static const char *repeat_arguments;
    command.  We need this as when a command is running, saved_command_line
    already contains the line of the currently executing command.  */
 
-char *previous_saved_command_line;
+static char *previous_saved_command_line;
 
 /* If not NULL, the arguments that should be passed if the
    previous_saved_command_line is repeated.  */
@@ -197,10 +197,6 @@ bool server_command;
    back to 2 seconds in 1999.  */
 
 int remote_timeout = 2;
-
-/* Non-zero tells remote* modules to output debugging info.  */
-
-int remote_debug = 0;
 
 /* Sbrk location on entry to main.  Used for statistics only.  */
 #ifdef HAVE_USEFUL_SBRK
@@ -447,8 +443,6 @@ read_command_file (FILE *stream)
       command_handler (command);
     }
 }
-
-void (*pre_init_ui_hook) (void);
 
 #ifdef __MSDOS__
 static void
@@ -610,15 +604,15 @@ execute_command (const char *p, int from_tty)
 	}
 
       /* FIXME: cagney/2002-02-02: The c->type test is pretty dodgy
-         while the is_complete_command(cfunc) test is just plain
-         bogus.  They should both be replaced by a test of the form
-         c->strip_trailing_white_space_p.  */
+	 while the is_complete_command(cfunc) test is just plain
+	 bogus.  They should both be replaced by a test of the form
+	 c->strip_trailing_white_space_p.  */
       /* NOTE: cagney/2002-02-02: The function.cfunc in the below
-         can't be replaced with func.  This is because it is the
-         cfunc, and not the func, that has the value that the
-         is_complete_command hack is testing for.  */
+	 can't be replaced with func.  This is because it is the
+	 cfunc, and not the func, that has the value that the
+	 is_complete_command hack is testing for.  */
       /* Clear off trailing whitespace, except for set and complete
-         command.  */
+	 command.  */
       std::string without_whitespace;
       if (arg
 	  && c->type != set_cmd
@@ -639,7 +633,7 @@ execute_command (const char *p, int from_tty)
       execute_cmd_pre_hook (c);
 
       if (c->deprecated_warn_user)
-	deprecated_cmd_warning (line);
+	deprecated_cmd_warning (line, cmdlist);
 
       /* c->user_commands would be NULL in the case of a python command.  */
       if (c->theclass == class_user && c->user_commands)
@@ -833,8 +827,8 @@ gdb_readline_no_editing (const char *prompt)
   if (prompt != NULL)
     {
       /* Don't use a _filtered function here.  It causes the assumed
-         character position to be off, since the newline we read from
-         the user is not accounted for.  */
+	 character position to be off, since the newline we read from
+	 the user is not accounted for.  */
       fputs_unfiltered (prompt, gdb_stdout);
       gdb_flush (gdb_stdout);
     }
@@ -1265,7 +1259,7 @@ gdb_safe_append_history (void)
       ret = rename (local_history_filename.c_str (), history_filename);
       saved_errno = errno;
       if (ret < 0 && saved_errno != EEXIST)
-        warning (_("Could not rename %s to %s: %s"),
+	warning (_("Could not rename %s to %s: %s"),
 		 local_history_filename.c_str (), history_filename,
 		 safe_strerror (saved_errno));
     }
@@ -1331,8 +1325,8 @@ command_line_input (const char *prompt_arg, const char *annotation_suffix)
       gdb::unique_xmalloc_ptr<char> rl;
 
       /* Make sure that all output has been output.  Some machines may
-         let you get away with leaving out some of the gdb_flush, but
-         not all.  */
+	 let you get away with leaving out some of the gdb_flush, but
+	 not all.  */
       wrap_here ("");
       gdb_flush (gdb_stdout);
       gdb_flush (gdb_stderr);
@@ -1397,19 +1391,14 @@ print_gdb_version (struct ui_file *stream, bool interactive)
      program to parse, and is just canonical program name and version
      number, which starts after last space.  */
 
-  ui_file_style style;
-  if (interactive)
-    {
-      ui_file_style nstyle = { ui_file_style::MAGENTA, ui_file_style::NONE,
-			       ui_file_style::BOLD };
-      style = nstyle;
-    }
-  fprintf_styled (stream, style, "GNU gdb %s%s\n", PKGVERSION, version);
+  std::string v_str = string_printf ("GNU gdb %s%s", PKGVERSION, version);
+  fprintf_filtered (stream, "%ps\n",
+		    styled_string (version_style.style (), v_str.c_str ()));
 
   /* Second line is a copyright notice.  */
 
   fprintf_filtered (stream,
-		    "Copyright (C) 2020 Free Software Foundation, Inc.\n");
+		    "Copyright (C) 2021 Free Software Foundation, Inc.\n");
 
   /* Following the copyright is a brief statement that the program is
      free software, that users are free to copy and change it on
@@ -1470,167 +1459,167 @@ This GDB was configured as follows:\n\
 "), host_name, target_name);
 
   fprintf_filtered (stream, _("\
-             --with-auto-load-dir=%s\n\
-             --with-auto-load-safe-path=%s\n\
+	     --with-auto-load-dir=%s\n\
+	     --with-auto-load-safe-path=%s\n\
 "), AUTO_LOAD_DIR, AUTO_LOAD_SAFE_PATH);
 
 #if HAVE_LIBEXPAT
   fprintf_filtered (stream, _("\
-             --with-expat\n\
+	     --with-expat\n\
 "));
 #else
   fprintf_filtered (stream, _("\
-             --without-expat\n\
+	     --without-expat\n\
 "));
 #endif
 
   if (GDB_DATADIR[0])
     fprintf_filtered (stream, _("\
-             --with-gdb-datadir=%s%s\n\
+	     --with-gdb-datadir=%s%s\n\
 "), GDB_DATADIR, GDB_DATADIR_RELOCATABLE ? " (relocatable)" : "");
 
 #ifdef ICONV_BIN
   fprintf_filtered (stream, _("\
-             --with-iconv-bin=%s%s\n\
+	     --with-iconv-bin=%s%s\n\
 "), ICONV_BIN, ICONV_BIN_RELOCATABLE ? " (relocatable)" : "");
 #endif
 
   if (JIT_READER_DIR[0])
     fprintf_filtered (stream, _("\
-             --with-jit-reader-dir=%s%s\n\
+	     --with-jit-reader-dir=%s%s\n\
 "), JIT_READER_DIR, JIT_READER_DIR_RELOCATABLE ? " (relocatable)" : "");
 
 #if HAVE_LIBUNWIND_IA64_H
   fprintf_filtered (stream, _("\
-             --with-libunwind-ia64\n\
+	     --with-libunwind-ia64\n\
 "));
 #else
   fprintf_filtered (stream, _("\
-             --without-libunwind-ia64\n\
+	     --without-libunwind-ia64\n\
 "));
 #endif
 
 #if HAVE_LIBLZMA
   fprintf_filtered (stream, _("\
-             --with-lzma\n\
+	     --with-lzma\n\
 "));
 #else
   fprintf_filtered (stream, _("\
-             --without-lzma\n\
+	     --without-lzma\n\
 "));
 #endif
 
 #if HAVE_LIBBABELTRACE
   fprintf_filtered (stream, _("\
-             --with-babeltrace\n\
+	     --with-babeltrace\n\
 "));
 #else
   fprintf_filtered (stream, _("\
-             --without-babeltrace\n\
+	     --without-babeltrace\n\
 "));
 #endif
 
 #if HAVE_LIBIPT
   fprintf_filtered (stream, _("\
-             --with-intel-pt\n\
+	     --with-intel-pt\n\
 "));
 #else
   fprintf_filtered (stream, _("\
-             --without-intel-pt\n\
+	     --without-intel-pt\n\
 "));
 #endif
 
 #if HAVE_LIBMPFR
   fprintf_filtered (stream, _("\
-             --with-mpfr\n\
+	     --with-mpfr\n\
 "));
 #else
   fprintf_filtered (stream, _("\
-             --without-mpfr\n\
+	     --without-mpfr\n\
 "));
 #endif
 #if HAVE_LIBXXHASH
   fprintf_filtered (stream, _("\
-             --with-xxhash\n\
+	     --with-xxhash\n\
 "));
 #else
   fprintf_filtered (stream, _("\
-             --without-xxhash\n\
+	     --without-xxhash\n\
 "));
 #endif
 #ifdef WITH_PYTHON_PATH
   fprintf_filtered (stream, _("\
-             --with-python=%s%s\n\
+	     --with-python=%s%s\n\
 "), WITH_PYTHON_PATH, PYTHON_PATH_RELOCATABLE ? " (relocatable)" : "");
 #else
   fprintf_filtered (stream, _("\
-             --without-python\n\
+	     --without-python\n\
 "));
 #endif
 #ifdef WITH_PYTHON_LIBDIR
   fprintf_filtered (stream, _("\
-             --with-python-libdir=%s%s\n\
+	     --with-python-libdir=%s%s\n\
 "), WITH_PYTHON_LIBDIR, PYTHON_LIBDIR_RELOCATABLE ? " (relocatable)" : "");
 #else
   fprintf_filtered (stream, _("\
-             --without-python-libdir\n\
+	     --without-python-libdir\n\
 "));
 #endif
 
 #if HAVE_LIBDEBUGINFOD
   fprintf_filtered (stream, _("\
-             --with-debuginfod\n\
+	     --with-debuginfod\n\
 "));
 #else
    fprintf_filtered (stream, _("\
-             --without-debuginfod\n\
+	     --without-debuginfod\n\
 "));
 #endif
 
 #if HAVE_GUILE
   fprintf_filtered (stream, _("\
-             --with-guile\n\
+	     --with-guile\n\
 "));
 #else
   fprintf_filtered (stream, _("\
-             --without-guile\n\
+	     --without-guile\n\
 "));
 #endif
 
 #if HAVE_SOURCE_HIGHLIGHT
   fprintf_filtered (stream, _("\
-             --enable-source-highlight\n\
+	     --enable-source-highlight\n\
 "));
 #else
   fprintf_filtered (stream, _("\
-             --disable-source-highlight\n\
+	     --disable-source-highlight\n\
 "));
 #endif
 
 #ifdef RELOC_SRCDIR
   fprintf_filtered (stream, _("\
-             --with-relocated-sources=%s\n\
+	     --with-relocated-sources=%s\n\
 "), RELOC_SRCDIR);
 #endif
 
   if (DEBUGDIR[0])
     fprintf_filtered (stream, _("\
-             --with-separate-debug-dir=%s%s\n\
+	     --with-separate-debug-dir=%s%s\n\
 "), DEBUGDIR, DEBUGDIR_RELOCATABLE ? " (relocatable)" : "");
 
   if (TARGET_SYSTEM_ROOT[0])
     fprintf_filtered (stream, _("\
-             --with-sysroot=%s%s\n\
+	     --with-sysroot=%s%s\n\
 "), TARGET_SYSTEM_ROOT, TARGET_SYSTEM_ROOT_RELOCATABLE ? " (relocatable)" : "");
 
   if (SYSTEM_GDBINIT[0])
     fprintf_filtered (stream, _("\
-             --with-system-gdbinit=%s%s\n\
+	     --with-system-gdbinit=%s%s\n\
 "), SYSTEM_GDBINIT, SYSTEM_GDBINIT_RELOCATABLE ? " (relocatable)" : "");
 
   if (SYSTEM_GDBINIT_DIR[0])
     fprintf_filtered (stream, _("\
-             --with-system-gdbinit-dir=%s%s\n\
+	     --with-system-gdbinit-dir=%s%s\n\
 "), SYSTEM_GDBINIT_DIR, SYSTEM_GDBINIT_DIR_RELOCATABLE ? " (relocatable)" : "");
 
   /* We assume "relocatable" will be printed at least once, thus we always
@@ -1681,7 +1670,7 @@ kill_or_detach (inferior *inf, int from_tty)
       switch_to_thread (thread);
 
       /* Leave core files alone.  */
-      if (target_has_execution)
+      if (target_has_execution ())
 	{
 	  if (inf->attach_flag)
 	    target_detach (inf, from_tty);
@@ -1852,13 +1841,13 @@ static enum auto_boolean interactive_mode = AUTO_BOOLEAN_AUTO;
 
 static void
 show_interactive_mode (struct ui_file *file, int from_tty,
-                       struct cmd_list_element *c,
-                       const char *value)
+		       struct cmd_list_element *c,
+		       const char *value)
 {
   if (interactive_mode == AUTO_BOOLEAN_AUTO)
     fprintf_filtered (file, "Debugger's interactive mode "
-		            "is %s (currently %s).\n",
-                      value, input_interactive_p (current_ui) ? "on" : "off");
+			    "is %s (currently %s).\n",
+		      value, input_interactive_p (current_ui) ? "on" : "off");
   else
     fprintf_filtered (file, "Debugger's interactive mode is %s.\n", value);
 }
@@ -2056,8 +2045,8 @@ init_history (void)
   else if (history_filename == nullptr)
     {
       /* We include the current directory so that if the user changes
-         directories the file written will be the same as the one
-         that was read.  */
+	 directories the file written will be the same as the one
+	 that was read.  */
 #ifdef __MSDOS__
       /* No leading dots in file names are allowed on MSDOS.  */
       const char *fname = "_gdb_history";
@@ -2289,16 +2278,16 @@ Use \"on\" to enable the notification, and \"off\" to disable it."),
 			   &setlist, &showlist);
 
   add_setshow_filename_cmd ("data-directory", class_maintenance,
-                           &staged_gdb_datadir, _("Set GDB's data directory."),
-                           _("Show GDB's data directory."),
-                           _("\
+			   &staged_gdb_datadir, _("Set GDB's data directory."),
+			   _("Show GDB's data directory."),
+			   _("\
 When set, GDB uses the specified path to search for data files."),
-                           set_gdb_datadir, show_gdb_datadir,
-                           &setlist,
-                           &showlist);
+			   set_gdb_datadir, show_gdb_datadir,
+			   &setlist,
+			   &showlist);
 
   add_setshow_auto_boolean_cmd ("interactive-mode", class_support,
-                                &interactive_mode, _("\
+				&interactive_mode, _("\
 Set whether GDB's standard input is a terminal."), _("\
 Show whether GDB's standard input is a terminal."), _("\
 If on, GDB assumes that standard input is a terminal.  In practice, it\n\
@@ -2307,9 +2296,9 @@ commands entered at the command prompt.  If off, GDB assumes that standard\n\
 input is not a terminal, and uses the default answer to all queries.\n\
 If auto (the default), determine which mode to use based on the standard\n\
 input settings."),
-                        NULL,
-                        show_interactive_mode,
-                        &setlist, &showlist);
+			NULL,
+			show_interactive_mode,
+			&setlist, &showlist);
 
   c = add_cmd ("new-ui", class_support, new_ui_command, _("\
 Create a new UI.\n\
@@ -2324,9 +2313,6 @@ gdb_init (char *argv0)
 {
   saved_command_line = xstrdup ("");
   previous_saved_command_line = xstrdup ("");
-
-  if (pre_init_ui_hook)
-    pre_init_ui_hook ();
 
   /* Run the init function of each source file.  */
 

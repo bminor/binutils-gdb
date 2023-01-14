@@ -6,7 +6,7 @@ SIM_AC_COMMON
 
 dnl Options available in this module
 SIM_AC_OPTION_ALIGNMENT(NONSTRICT_ALIGNMENT)
-SIM_AC_OPTION_WARNINGS
+SIM_AC_OPTION_WARNINGS(no)
 SIM_AC_OPTION_RESERVED_BITS(1)
 
 # DEPRECATED
@@ -221,7 +221,7 @@ if test ${sim_gen} = MULTI; then
 
   cat << __EOF__ > multi-run.c
 /* Main entry point for MULTI simulators.
-   Copyright (C) 2003-2020 Free Software Foundation, Inc.
+   Copyright (C) 2003-2021 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by

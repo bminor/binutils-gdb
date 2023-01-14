@@ -1,6 +1,6 @@
 # This testcase is part of GDB, the GNU debugger.
 
-# Copyright 2001-2020 Free Software Foundation, Inc.
+# Copyright 2001-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -409,7 +409,7 @@ foreach target_charset $charset_subset {
              "parse character literal in ${target_charset}"
 
     # Check that the character literal was encoded correctly.
-    gdb_test "print $L'A' == $var_name\[7\]" \
+    gdb_test "print /d $L'A' == $var_name\[7\]" \
              " = 1" \
              "check value of parsed character literal in ${target_charset}"
 
@@ -419,7 +419,7 @@ foreach target_charset $charset_subset {
              "parse string literal in ${target_charset}"
 
     # Check that the string literal was encoded correctly.
-    gdb_test "print $L\"q\"\[0\] == $var_name\[49\]" \
+    gdb_test "print /d $L\"q\"\[0\] == $var_name\[49\]" \
              " = 1" \
              "check value of parsed string literal in ${target_charset}"
 
@@ -470,12 +470,12 @@ foreach target_charset $charset_subset {
         if {$have_escape} {
 
             # Try parsing a backslash escape in a character literal.
-            gdb_test "print $L'\\${escape}' == $var_name\[$i\]" \
+            gdb_test "print /d $L'\\${escape}' == $var_name\[$i\]" \
                      " = 1" \
                      "check value of '\\${escape}' in ${target_charset}"
 
             # Try parsing a backslash escape in a string literal.
-            gdb_test "print $L\"\\${escape}\"\[0\] == $var_name\[$i\]" \
+            gdb_test "print /d $L\"\\${escape}\"\[0\] == $var_name\[$i\]" \
                      " = 1" \
                      "check value of \"\\${escape}\" in ${target_charset}"
         }
@@ -485,7 +485,7 @@ foreach target_charset $charset_subset {
     # get the unescaped character, in the target character set.
     gdb_test "print $L'\\q'" " = \[0-9-\]+ $L'q'" \
              "print escape that doesn't exist in $target_charset"
-    gdb_test "print $L'\\q' == $var_name\[49\]" " = 1" \
+    gdb_test "print /d $L'\\q' == $var_name\[49\]" " = 1" \
              "check value of escape that doesn't exist in $target_charset"
 }
 
@@ -585,7 +585,7 @@ if {$ucs2_ok} {
 }
 
 # Regression test for a cleanup bug in the charset code.
-gdb_test "print 'a' == 'a' || 'b' == 'b'" \
+gdb_test "print /d 'a' == 'a' || 'b' == 'b'" \
   ".* = 1" \
   "EVAL_SKIP cleanup handling regression test"
 

@@ -10,8 +10,9 @@
 Contents of CTF section .ctf:
 
   Header:
-    Magic number: dff2
+    Magic number: 0xdff2
     Version: 4 \(CTF_VERSION_3\)
+#...
     Variable section:	0x0 -- 0x17 \(0x18 bytes\)
     Type section:	0x18 -- 0x83 \(0x6c bytes\)
     String section:	.*
@@ -24,16 +25,16 @@ Contents of CTF section .ctf:
 
   Variables:
 #...
-    b ->  [0-9a-f]*: struct B \(.*
+    b ->  0x[0-9a-f]*: struct B \(.*
 #...
   Types:
 #...
-     [0-9a-f]*: struct B \(.*
-        \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct B \(.*
-            \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct C \* c \(.*
+    0x[0-9a-f]*: struct B \(.*
+          *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct B \(.*
+              *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct C \* c \(.*
 #...
   Strings:
-    0: 
+    0x0: 
 #...
-    [0-9a-f]*: B
+    0x[0-9a-f]*: B
 #...

@@ -1,6 +1,6 @@
 /* Target-dependent code for OpenBSD/sparc64.
 
-   Copyright (C) 2004-2020 Free Software Foundation, Inc.
+   Copyright (C) 2004-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -168,7 +168,7 @@ sparc64obsd_frame_cache (struct frame_info *this_frame, void **this_cache)
       cache->pc &= ~(sparc64obsd_page_size - 1);
 
       /* Since we couldn't find the frame's function, the cache was
-         initialized under the assumption that we're frameless.  */
+	 initialized under the assumption that we're frameless.  */
       sparc_record_save_insn (cache);
       addr = get_frame_register_unsigned (this_frame, SPARC_FP_REGNUM);
       if (addr & 1)
@@ -249,13 +249,13 @@ sparc64obsd_trapframe_cache (struct frame_info *this_frame, void **this_cache)
 
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
-  cache->saved_regs[SPARC64_STATE_REGNUM].addr = trapframe_addr;
-  cache->saved_regs[SPARC64_PC_REGNUM].addr = trapframe_addr + 8;
-  cache->saved_regs[SPARC64_NPC_REGNUM].addr = trapframe_addr + 16;
+  cache->saved_regs[SPARC64_STATE_REGNUM].set_addr (trapframe_addr);
+  cache->saved_regs[SPARC64_PC_REGNUM].set_addr (trapframe_addr + 8);
+  cache->saved_regs[SPARC64_NPC_REGNUM].set_addr (trapframe_addr + 16);
 
   for (regnum = SPARC_G0_REGNUM; regnum <= SPARC_I7_REGNUM; regnum++)
-    cache->saved_regs[regnum].addr =
-      trapframe_addr + 48 + (regnum - SPARC_G0_REGNUM) * 8;
+    cache->saved_regs[regnum].set_addr (trapframe_addr + 48
+					+ (regnum - SPARC_G0_REGNUM) * 8);
 
   return cache;
 }

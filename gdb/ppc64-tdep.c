@@ -1,6 +1,6 @@
 /* Common target-dependent code for ppc64 GDB, the GNU debugger.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -506,8 +506,8 @@ ppc64_skip_trampoline_code_1 (struct frame_info *frame, CORE_ADDR pc)
 	}
 
       /* The PLT descriptor will either point to the already resolved target
-         address, or else to a glink stub.  As the latter carry synthetic @plt
-         symbols, find_solib_trampoline_target should be able to resolve them.  */
+	 address, or else to a glink stub.  As the latter carry synthetic @plt
+	 symbols, find_solib_trampoline_target should be able to resolve them.  */
       target = find_solib_trampoline_target (frame, pc);
       return target ? target : pc;
   }

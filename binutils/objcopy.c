@@ -1,5 +1,5 @@
 /* objcopy.c -- copy object file from input to output, optionally massaging it.
-   Copyright (C) 1991-2020 Free Software Foundation, Inc.
+   Copyright (C) 1991-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -20,6 +20,7 @@
 
 #include "sysdep.h"
 #include "bfd.h"
+#include "libbfd.h"
 #include "progress.h"
 #include "getopt.h"
 #include "libiberty.h"
@@ -1268,8 +1269,15 @@ group_signature (asection *group)
 static bfd_boolean
 is_dwo_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 {
-  const char *name = bfd_section_name (sec);
-  int len = strlen (name);
+  const char *name;
+  int len;
+
+  if (sec == NULL || (name = bfd_section_name (sec)) == NULL)
+    return FALSE;
+
+  len = strlen (name);
+  if (len < 5)
+    return FALSE;
 
   return strncmp (name + len - 4, ".dwo", 4) == 0;
 }
@@ -1303,11 +1311,7 @@ is_mergeable_note_section (bfd * abfd, asection * sec)
       && elf_section_data (sec)->this_hdr.sh_type == SHT_NOTE
       /* FIXME: We currently only support merging GNU_BUILD_NOTEs.
 	 We should add support for more note types.  */
-      && ((elf_section_data (sec)->this_hdr.sh_flags & SHF_GNU_BUILD_NOTE) != 0
-	  /* Old versions of GAS (prior to 2.27) could not set the section
-	     flags to OS-specific values, so we also accept sections that
-	     start with the expected name.  */
-	  || (CONST_STRNEQ (sec->name, GNU_BUILD_ATTRS_SECTION_NAME))))
+      && (CONST_STRNEQ (sec->name, GNU_BUILD_ATTRS_SECTION_NAME)))
     return TRUE;
 
   return FALSE;
@@ -1443,7 +1447,7 @@ is_hidden_symbol (asymbol *sym)
 {
   elf_symbol_type *elf_sym;
 
-  elf_sym = elf_symbol_from (sym->the_bfd, sym);
+  elf_sym = elf_symbol_from (sym);
   if (elf_sym != NULL)
     switch (ELF_ST_VISIBILITY (elf_sym->internal_elf_sym.st_other))
       {
@@ -3200,6 +3204,30 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
   if (convert_debugging)
     dhandle = read_debugging_info (ibfd, isympp, symcount, FALSE);
 
+   if ((obfd->flags & (EXEC_P | DYNAMIC)) != 0
+       && (obfd->flags & HAS_RELOC) == 0)
+    {
+      if (bfd_keep_unused_section_symbols (obfd))
+	{
+	  /* Non-relocatable inputs may not have the unused section
+	     symbols.  Mark all section symbols as used to generate
+	     section symbols.  */
+	  asection *asect;
+	  for (asect = obfd->sections; asect != NULL; asect = asect->next)
+	    if (asect->symbol)
+	      asect->symbol->flags |= BSF_SECTION_SYM_USED;
+	}
+      else
+	{
+	  /* Non-relocatable inputs may have the unused section symbols.
+	     Mark all section symbols as unused to excluded them.  */
+	  long s;
+	  for (s = 0; s < symcount; s++)
+	    if ((isympp[s]->flags & BSF_SECTION_SYM_USED))
+	      isympp[s]->flags &= ~BSF_SECTION_SYM_USED;
+	}
+    }
+
   if (strip_symbols == STRIP_DEBUG
       || strip_symbols == STRIP_ALL
       || strip_symbols == STRIP_UNNEEDED
@@ -3322,14 +3350,12 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	  /* It is likely that output sections are in the same order
 	     as the input sections, but do not assume that this is
 	     the case.  */
-	  if (strcmp (bfd_section_name (merged->sec),
-		      bfd_section_name (osec)) != 0)
+	  if (merged->sec->output_section != osec)
 	    {
 	      for (merged = merged_note_sections;
 		   merged != NULL;
 		   merged = merged->next)
-		if (strcmp (bfd_section_name (merged->sec),
-			    bfd_section_name (osec)) == 0)
+		if (merged->sec->output_section == osec)
 		  break;
 
 	      if (merged == NULL)
@@ -3722,9 +3748,9 @@ set_long_section_mode (bfd *output_bfd, bfd *input_bfd, enum long_section_name_h
 /* The top-level control.  */
 
 static void
-copy_file (const char *input_filename, const char *output_filename,
-	   const char *input_target,   const char *output_target,
-	   const bfd_arch_info_type *input_arch)
+copy_file (const char *input_filename, const char *output_filename, int ofd,
+	   struct stat *in_stat, const char *input_target,
+	   const char *output_target, const bfd_arch_info_type *input_arch)
 {
   bfd *ibfd;
   char **obj_matching;
@@ -3743,7 +3769,7 @@ copy_file (const char *input_filename, const char *output_filename,
   /* To allow us to do "strip *" without dying on the first
      non-object file, failures are nonfatal.  */
   ibfd = bfd_openr (input_filename, input_target);
-  if (ibfd == NULL)
+  if (ibfd == NULL || fstat (fileno ((FILE *) ibfd->iostream), in_stat) != 0)
     {
       bfd_nonfatal_message (input_filename, NULL, NULL, NULL);
       status = 1;
@@ -3797,9 +3823,14 @@ copy_file (const char *input_filename, const char *output_filename,
       else
 	force_output_target = TRUE;
 
-      obfd = bfd_openw (output_filename, output_target);
+      if (ofd >= 0)
+	obfd = bfd_fdopenw (output_filename, output_target, ofd);
+      else
+	obfd = bfd_openw (output_filename, output_target);
+
       if (obfd == NULL)
 	{
+	  close (ofd);
 	  bfd_nonfatal_message (output_filename, NULL, NULL, NULL);
 	  status = 1;
 	  return;
@@ -3827,13 +3858,19 @@ copy_file (const char *input_filename, const char *output_filename,
       if (output_target == NULL)
 	output_target = bfd_get_target (ibfd);
 
-      obfd = bfd_openw (output_filename, output_target);
+      if (ofd >= 0)
+	obfd = bfd_fdopenw (output_filename, output_target, ofd);
+      else
+	obfd = bfd_openw (output_filename, output_target);
+
       if (obfd == NULL)
  	{
+	  close (ofd);
  	  bfd_nonfatal_message (output_filename, NULL, NULL, NULL);
  	  status = 1;
  	  return;
  	}
+
       /* This is a no-op on non-Coff targets.  */
       set_long_section_mode (obfd, ibfd, long_section_names);
 
@@ -4797,6 +4834,8 @@ strip_main (int argc, char *argv[])
       int hold_status = status;
       struct stat statbuf;
       char *tmpname;
+      int tmpfd = -1;
+      int copyfd = -1;
 
       if (get_file_size (argv[i]) < 1)
 	{
@@ -4804,18 +4843,18 @@ strip_main (int argc, char *argv[])
 	  continue;
 	}
 
-      if (preserve_dates)
-	/* No need to check the return value of stat().
-	   It has already been checked in get_file_size().  */
-	stat (argv[i], &statbuf);
-
       if (output_file == NULL
 	  || filename_cmp (argv[i], output_file) == 0)
-	tmpname = make_tempname (argv[i]);
+	tmpname = make_tempname (argv[i], &tmpfd);
       else
 	tmpname = output_file;
 
-      if (tmpname == NULL)
+      if (tmpname == NULL
+#if !defined (_WIN32) || defined (__CYGWIN32__)
+	  /* Retain a copy of TMPFD since we will need it for SMART_RENAME.  */
+	  || (tmpfd >= 0 && (copyfd = dup (tmpfd)) == -1)
+#endif
+      )
 	{
 	  bfd_nonfatal_message (argv[i], NULL, NULL,
 				_("could not create temporary file to hold stripped copy"));
@@ -4824,7 +4863,8 @@ strip_main (int argc, char *argv[])
 	}
 
       status = 0;
-      copy_file (argv[i], tmpname, input_target, output_target, NULL);
+      copy_file (argv[i], tmpname, tmpfd, &statbuf, input_target,
+		 output_target, NULL);
       if (status == 0)
 	{
 	  if (preserve_dates)
@@ -4832,12 +4872,18 @@ strip_main (int argc, char *argv[])
 	  if (output_file != tmpname)
 	    status = (smart_rename (tmpname,
 				    output_file ? output_file : argv[i],
-				    preserve_dates) != 0);
+				    copyfd, &statbuf, preserve_dates) != 0);
 	  if (status == 0)
 	    status = hold_status;
 	}
       else
-	unlink_if_ordinary (tmpname);
+	{
+#if !defined (_WIN32) || defined (__CYGWIN32__)
+	  if (copyfd >= 0)
+	    close (copyfd);
+#endif
+	  unlink_if_ordinary (tmpname);
+	}
       if (output_file != tmpname)
 	free (tmpname);
     }
@@ -5044,7 +5090,8 @@ copy_main (int argc, char *argv[])
   bfd_boolean formats_info = FALSE;
   bfd_boolean use_globalize = FALSE;
   bfd_boolean use_keep_global = FALSE;
-  int c;
+  int c, tmpfd = -1;
+  int copyfd = -1;
   struct stat statbuf;
   const bfd_arch_info_type *input_arch = NULL;
 
@@ -5881,34 +5928,43 @@ copy_main (int argc, char *argv[])
       convert_efi_target (efi);
     }
 
-  if (preserve_dates)
-    if (stat (input_filename, & statbuf) < 0)
-      fatal (_("warning: could not locate '%s'.  System error message: %s"),
-	     input_filename, strerror (errno));
-
   /* If there is no destination file, or the source and destination files
      are the same, then create a temp and rename the result into the input.  */
   if (output_filename == NULL
       || filename_cmp (input_filename, output_filename) == 0)
-    tmpname = make_tempname (input_filename);
+    tmpname = make_tempname (input_filename, &tmpfd);
   else
     tmpname = output_filename;
 
-  if (tmpname == NULL)
-    fatal (_("warning: could not create temporary file whilst copying '%s', (error: %s)"),
-	   input_filename, strerror (errno));
+  if (tmpname == NULL
+#if !defined (_WIN32) || defined (__CYGWIN32__)
+      /* Retain a copy of TMPFD since we will need it for SMART_RENAME.  */
+      || (tmpfd >= 0 && (copyfd = dup (tmpfd)) == -1)
+#endif
+  )
+    {
+      fatal (_("warning: could not create temporary file whilst copying '%s', (error: %s)"),
+	     input_filename, strerror (errno));
+    }
 
-  copy_file (input_filename, tmpname, input_target, output_target, input_arch);
+  copy_file (input_filename, tmpname, tmpfd, &statbuf, input_target,
+	     output_target, input_arch);
   if (status == 0)
     {
       if (preserve_dates)
 	set_times (tmpname, &statbuf);
       if (tmpname != output_filename)
-	status = (smart_rename (tmpname, input_filename,
+	status = (smart_rename (tmpname, input_filename, copyfd, &statbuf,
 				preserve_dates) != 0);
     }
   else
-    unlink_if_ordinary (tmpname);
+    {
+#if !defined (_WIN32) || defined (__CYGWIN32__)
+      if (copyfd >= 0)
+	close (copyfd);
+#endif
+      unlink_if_ordinary (tmpname);
+    }
 
   if (tmpname != output_filename)
     free (tmpname);

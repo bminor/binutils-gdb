@@ -7,7 +7,7 @@
 
 /* Main header file for the bfd library -- portable access to object files.
 
-   Copyright (C) 1990-2020 Free Software Foundation, Inc.
+   Copyright (C) 1990-2021 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -587,6 +587,8 @@ bfd *bfd_fopen (const char *filename, const char *target,
 bfd *bfd_openr (const char *filename, const char *target);
 
 bfd *bfd_fdopenr (const char *filename, const char *target, int fd);
+
+bfd *bfd_fdopenw (const char *filename, const char *target, int fd);
 
 bfd *bfd_openstreamr (const char * filename, const char * target,
     void * stream);
@@ -6411,6 +6413,9 @@ typedef struct bfd_symbol
      with this name and type in use.  BSF_OBJECT must also be set.  */
 #define BSF_GNU_UNIQUE          (1 << 23)
 
+  /* This section symbol should be included in the symbol table.  */
+#define BSF_SECTION_SYM_USED    (1 << 24)
+
   flagword flags;
 
   /* A pointer to the section to which this symbol is
@@ -7222,11 +7227,7 @@ bfd_boolean bfd_alt_mach_code (bfd *abfd, int alternative);
 
 bfd_vma bfd_emul_get_maxpagesize (const char *);
 
-void bfd_emul_set_maxpagesize (const char *, bfd_vma);
-
 bfd_vma bfd_emul_get_commonpagesize (const char *, bfd_boolean);
-
-void bfd_emul_set_commonpagesize (const char *, bfd_vma);
 
 char *bfd_demangle (bfd *, const char *, int);
 
@@ -7288,6 +7289,11 @@ bfd_boolean generic_core_file_matches_executable_p
   (((bfd) && (bfd)->xvec && (bfd)->xvec->message) ? \
    (((bfd)->xvec->message[(int) ((bfd)->format)]) arglist) : \
    (bfd_assert (__FILE__,__LINE__), NULL))
+#endif
+
+/* Defined to TRUE if unused section symbol should be kept.  */
+#ifndef TARGET_KEEP_UNUSED_SECTION_SYMBOLS
+#define TARGET_KEEP_UNUSED_SECTION_SYMBOLS TRUE
 #endif
 
 enum bfd_flavour
@@ -7362,6 +7368,9 @@ typedef struct bfd_target
   /* How well this target matches, used to select between various
      possible targets when more than one target matches.  */
   unsigned char match_priority;
+
+ /* TRUE if unused section symbols should be kept.  */
+  bfd_boolean keep_unused_section_symbols;
 
   /* Entries for byte swapping for data. These are different from the
      other entry points, since they don't take a BFD as the first argument.
@@ -7791,6 +7800,12 @@ bfd_asymbol_flavour (const asymbol *sy)
   if ((sy->flags & BSF_SYNTHETIC) != 0)
     return bfd_target_unknown_flavour;
   return sy->the_bfd->xvec->flavour;
+}
+
+static inline bfd_boolean
+bfd_keep_unused_section_symbols (const bfd *abfd)
+{
+  return abfd->xvec->keep_unused_section_symbols;
 }
 
 bfd_boolean bfd_set_default_target (const char *name);

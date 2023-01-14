@@ -1,5 +1,5 @@
 /* Plugin control for the GNU linker.
-   Copyright (C) 2010-2020 Free Software Foundation, Inc.
+   Copyright (C) 2010-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -415,7 +415,7 @@ asymbol_from_plugin_symbol (bfd *abfd, asymbol *asym,
 
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     {
-      elf_symbol_type *elfsym = elf_symbol_from (abfd, asym);
+      elf_symbol_type *elfsym = elf_symbol_from (asym);
       unsigned char visibility;
 
       if (!elfsym)
@@ -1436,8 +1436,10 @@ plugin_notice (struct bfd_link_info *info,
 	 this by making the symbol appear to be undefined.
 
 	 NB: We change the previous definition in the IR object to
-	 undefweak only after all LTO symbols have been read.  */
-      else if (info->lto_all_symbols_read
+	 undefweak only after all LTO symbols have been read or for
+	 non-ELF targets.  */
+      else if ((info->lto_all_symbols_read
+		|| bfd_get_flavour (abfd) != bfd_target_elf_flavour)
 	       && (((h->type == bfd_link_hash_defweak
 		     || h->type == bfd_link_hash_defined)
 		    && is_ir_dummy_bfd (sym_bfd = h->u.def.section->owner))

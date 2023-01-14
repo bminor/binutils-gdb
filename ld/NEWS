@@ -1,5 +1,34 @@
 -*- text -*-
 
+* Add -z report-relative-reloc to x86 ELF linker to report dynamic
+  relative relocations.
+
+Changes in 2.36:
+
+* Add libdep plugin, for linking dependencies of static libraries that
+  were recorded by ar in the __.LIBDEP archive member.
+
+* Add --error-handling-script=<NAME> command line option to allow a helper
+  script to be invoked when an undefined symbol or a missing library is
+  encountered.  This option can be suppressed via the configure time
+  switch: --enable-error-handling-script=no.
+
+* Add -z lam-u48 to x86-64 ELF linker to generate LAM_U48 property.
+
+* Add -z lam-u57 to x86-64 ELF linker to enerate LAM_U57 property.
+
+* Add -z lam-u48-report=[none|warning|error] to report missing LAM_U48
+  property.
+
+* Add -z lam-u57-report=[none|warning|error] to report missing LAM_U57
+  property.
+
+* Add -z lam-report=[none|warning|error] to report missing LAM_U48 and
+  LAM_U57 properties.
+
+* Add -z x86-64-{baseline|v[234]} to the x86 ELF linker to mark
+  x86-64-{baseline|v[234]} ISA level as needed.
+
 * Add -z unique-symbol to avoid duplicated local symbol names.
 
 * The creation of PE format DLLs now defaults to using a more secure set of DLL
@@ -14,6 +43,10 @@
   default, saving space.  This is almost certainly what you want
   unless you are working on a project that has its own analogue
   of symbol tables that are not reflected in the ELF symtabs.
+
+* Add support for the SHF_GNU_RETAIN ELF section flag.
+  This flag specifies that the section should not be garbage collected by the
+  linker.
 
 Changes in 2.35:
 
@@ -832,7 +865,7 @@ Changes in version 2.1:
   other utilities should work on Risc/Ultrix and Irix.
 
 
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
+Copyright (C) 2012-2021 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

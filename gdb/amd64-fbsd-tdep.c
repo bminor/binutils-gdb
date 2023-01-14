@@ -1,6 +1,6 @@
 /* Target-dependent code for FreeBSD/amd64.
 
-   Copyright (C) 2003-2020 Free Software Foundation, Inc.
+   Copyright (C) 2003-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -52,7 +52,7 @@ amd64fbsd_sigtramp_p (struct frame_info *this_frame)
   CORE_ADDR pc = get_frame_pc (this_frame);
   gdb_byte buf[sizeof amd64fbsd_sigtramp_code];
 
-  if (!safe_frame_unwind_memory (this_frame, pc, buf, sizeof buf))
+  if (!safe_frame_unwind_memory (this_frame, pc, buf))
     return 0;
   if (memcmp (buf, amd64fbsd_sigtramp_code, sizeof amd64fbsd_sigtramp_code)
       != 0)

@@ -1,6 +1,6 @@
 /* Target-dependent code for FreeBSD/i386.
 
-   Copyright (C) 2003-2020 Free Software Foundation, Inc.
+   Copyright (C) 2003-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -135,8 +135,8 @@ i386fbsd_sigtramp_p (struct frame_info *this_frame)
   const gdb_byte *middle, *end;
 
   /* Look for a matching start.  */
-  if (!safe_frame_unwind_memory (this_frame, pc, buf,
-				 sizeof i386fbsd_sigtramp_start))
+  if (!safe_frame_unwind_memory (this_frame, pc,
+				 {buf, sizeof i386fbsd_sigtramp_start}))
     return 0;
   if (memcmp (buf, i386fbsd_sigtramp_start, sizeof i386fbsd_sigtramp_start)
       == 0)
@@ -162,23 +162,23 @@ i386fbsd_sigtramp_p (struct frame_info *this_frame)
   /* Since the end is shorter than the middle, check for a matching end
      next.  */
   pc += sizeof i386fbsd_sigtramp_start;
-  if (!safe_frame_unwind_memory (this_frame, pc, buf,
-				 sizeof i386fbsd_sigtramp_end))
+  if (!safe_frame_unwind_memory (this_frame, pc,
+				 {buf, sizeof i386fbsd_sigtramp_end}))
     return 0;
   if (memcmp (buf, end, sizeof i386fbsd_sigtramp_end) == 0)
     return 1;
 
   /* If the end didn't match, check for a matching middle.  */
-  if (!safe_frame_unwind_memory (this_frame, pc, buf,
-				 sizeof i386fbsd_sigtramp_middle))
+  if (!safe_frame_unwind_memory (this_frame, pc,
+				 {buf, sizeof i386fbsd_sigtramp_middle}))
     return 0;
   if (memcmp (buf, middle, sizeof i386fbsd_sigtramp_middle) != 0)
     return 0;
 
   /* The middle matched, check for a matching end.  */
   pc += sizeof i386fbsd_sigtramp_middle;
-  if (!safe_frame_unwind_memory (this_frame, pc, buf,
-				 sizeof i386fbsd_sigtramp_end))
+  if (!safe_frame_unwind_memory (this_frame, pc,
+				 {buf, sizeof i386fbsd_sigtramp_end}))
     return 0;
   if (memcmp (buf, end, sizeof i386fbsd_sigtramp_end) != 0)
     return 0;

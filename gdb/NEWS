@@ -3,6 +3,9 @@
 
 *** Changes since GDB 10
 
+* Building GDB now requires GMP (The GNU Multiple Precision Arithmetic
+  Library).
+
 * MI changes
 
  ** '-break-insert --qualified' and '-dprintf-insert --qualified'
@@ -12,6 +15,70 @@
     function name as a complete fully-qualified name.  This is the
     equivalent of the CLI's "break -qualified" and "dprintf
     -qualified".
+
+* GDB now supports core file debugging for x86_64 Cygwin programs.
+
+* GDB will now look for the .gdbinit file in a config directory before
+  looking for ~/.gdbinit.  The file is searched for in the following
+  locations: $XDG_CONFIG_HOME/gdb/gdbinit, $HOME/.config/gdb/gdbinit,
+  $HOME/.gdbinit.  On Apple hosts the search order is instead:
+  $HOME/Library/Preferences/gdb/gdbinit, $HOME/.gdbinit.
+
+* GDB now supports fixed point types which are described in DWARF
+  as base types with a fixed-point encoding.  Additionally, support
+  for the DW_AT_GNU_numerator and DW_AT_GNU_denominator has also
+  been added.
+
+  For Ada, this allows support for fixed point types without requiring
+  the use of the GNAT encoding (based on information added to the type's
+  name following a GNAT-specific format).
+
+* New commands
+
+set debug event-loop
+show debug event-loop
+  Control the display of debug output about GDB's event loop.
+
+maintenance flush symbol-cache
+maintenance flush register-cache
+  These new commands are equivalent to the already existing commands
+  'maintenance flush-symbol-cache' and 'flushregs' respectively.
+
+maintenance flush dcache
+  A new command to flush the dcache.
+
+* Changed commands
+
+break [PROBE_MODIFIER] [LOCATION] [thread THREADNUM]
+      [-force-condition] [if CONDITION]
+  This command would previously refuse setting a breakpoint if the
+  CONDITION expression is invalid at a location.  It now accepts and
+  defines the breakpoint if there is at least one location at which
+  the CONDITION is valid.  The locations for which the CONDITION is
+  invalid, are automatically disabled.  If CONDITION is invalid at all
+  of the locations, setting the breakpoint is still rejected.  However,
+  the '-force-condition' flag can be used in this case for forcing GDB to
+  define the breakpoint, making all the current locations automatically
+  disabled.  This may be useful if the user knows the condition will
+  become meaningful at a future location, e.g. due to a shared library
+  load.
+
+condition [-force] N COND
+  The behavior of this command is changed the same way for the 'break'
+  command as explained above.  The '-force' flag can be used to force
+  GDB into defining the condition even when COND is invalid for all the
+  current locations of breakpoint N.
+
+flushregs
+maintenance flush-symbol-cache
+  These commands are deprecated in favor of the new commands
+  'maintenance flush register-cache' and 'maintenance flush
+  symbol-cache' respectively.
+
+set style version foreground COLOR
+set style version background COLOR
+set style version intensity VALUE
+  Control the styling of GDB's version number text.
 
 *** Changes in GDB 10
 
@@ -58,6 +125,8 @@
   target-non-stop" in the user manual.
 
 * New features in the GDB remote stub, GDBserver
+
+  ** GDBserver is now supported on ARC GNU/Linux.
 
   ** GDBserver is now supported on RISC-V GNU/Linux.
 
@@ -120,6 +189,19 @@ maintenance print xml-tdesc [FILE]
 maintenance print core-file-backed-mappings
   Prints file-backed mappings loaded from a core file's note section.
   Output is expected to be similar to that of "info proc mappings".
+
+set debug fortran-array-slicing on|off
+show debug fortran-array-slicing
+  Print debugging when taking slices of Fortran arrays.
+
+set fortran repack-array-slices on|off
+show fortran repack-array-slices
+  When taking slices from Fortran arrays and strings, if the slice is
+  non-contiguous within the original value then, when this option is
+  on, the new value will be repacked into a single contiguous value.
+  When this option is off, then the value returned will consist of a
+  descriptor that describes the slice within the memory of the
+  original parent value.
 
 * Changed commands
 

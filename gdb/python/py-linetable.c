@@ -1,6 +1,6 @@
 /* Python interface to line tables.
 
-   Copyright (C) 2013-2020 Free Software Foundation, Inc.
+   Copyright (C) 2013-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,29 +20,29 @@
 #include "defs.h"
 #include "python-internal.h"
 
-typedef struct {
+struct linetable_entry_object {
   PyObject_HEAD
   /* The line table source line.  */
   int line;
   /* The pc associated with the source line.  */
   CORE_ADDR pc;
-} linetable_entry_object;
+};
 
 extern PyTypeObject linetable_entry_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("linetable_entry_object");
 
-typedef struct {
+struct linetable_object {
   PyObject_HEAD
   /* The symtab python object.  We store the Python object here as the
      underlying symtab can become invalid, and we have to run validity
      checks on it.  */
   PyObject *symtab;
-} linetable_object;
+};
 
 extern PyTypeObject linetable_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("linetable_object");
 
-typedef struct {
+struct ltpy_iterator_object {
   PyObject_HEAD
   /* The current entry in the line table for the iterator  */
   int current_index;
@@ -50,7 +50,7 @@ typedef struct {
      check if the line table is still valid, and has not been invalidated
      when an object file has been freed.  */
   PyObject *source;
-} ltpy_iterator_object;
+};
 
 extern PyTypeObject ltpy_iterator_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("ltpy_iterator_object");

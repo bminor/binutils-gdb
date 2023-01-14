@@ -1,4 +1,4 @@
-# Copyright 2012-2020 Free Software Foundation, Inc.
+# Copyright 2012-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,10 +33,10 @@ set libsrc [list "${srcdir}/${subdir}/ctxobj-v.c" \
 set libobj1 [standard_output_file libctxobj1.so]
 set libobj2 [standard_output_file libctxobj2.so]
 
-set libobj1_opts { debug additional_flags=-fPIC
+set libobj1_opts { debug
                    additional_flags=-DVERSION=104
                    additional_flags=-DGET_VERSION=get_version_1 }
-set libobj2_opts { debug additional_flags=-fPIC
+set libobj2_opts { debug
                    additional_flags=-DVERSION=203
                    additional_flags=-DGET_VERSION=get_version_2 }
 

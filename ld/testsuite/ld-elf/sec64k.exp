@@ -1,5 +1,5 @@
 # Expect script for tests for >64k sections
-#   Copyright (C) 2002-2020 Free Software Foundation, Inc.
+#   Copyright (C) 2002-2021 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -170,11 +170,13 @@ if [catch { set ofd [open "tmpdir/$test2.d" w] } x] {
 
 # too big for avr, d10v and msp
 # lack of fancy orphan section handling causes overlap on fr30 and iq2000
+# lm32 complains about relocations in read-only sections
 if { ![istarget "d10v-*-*"]
      && ![istarget "avr-*-*"]
      && ![istarget "msp*-*-*"]
      && ![istarget "fr30-*-*"] 
      && ![istarget "iq2000-*-*"]
+     && ![istarget "lm32-*-linux*"]
      && ![istarget "pru-*-*"] } {
     foreach sfile $sfiles { puts $ofd "#source: $sfile" }
     if { [istarget spu*-*-*] } {
@@ -196,11 +198,15 @@ if { ![istarget "d10v-*-*"]
     puts $ofd "  \\\[65279\\\] \\.foo\\.\[0-9\]+ .*"
     puts $ofd "  \\\[65280\\\] \\.foo\\.\[0-9\]+ .*"
     puts $ofd "#..."
-    puts $ofd " 660..: \[0-9a-f\]+\[ \]+0\[ \]+SECTION\[ \]+LOCAL\[ \]+DEFAULT\[ \]+660.. "
-    puts $ofd "#..."
-    puts $ofd " 660..: \[0-9a-f\]+\[ \]+0\[ \]+NOTYPE\[ \]+LOCAL\[ \]+DEFAULT\[ \]+\[0-9\] bar_1$"
-    puts $ofd "#..."
-    puts $ofd ".* bar_66000$"
+    if { [is_elf_unused_section_symbols ] } {
+	puts $ofd " 660..: \[0-9a-f\]+\[ \]+0\[ \]+SECTION\[ \]+LOCAL\[ \]+DEFAULT\[ \]+660.. "
+	puts $ofd "#..."
+	puts $ofd " 660..: \[0-9a-f\]+\[ \]+0\[ \]+NOTYPE\[ \]+LOCAL\[ \]+DEFAULT\[ \]+\[0-9\] bar_1$"
+	puts $ofd "#..."
+	puts $ofd ".* bar_66000$"
+    } else {
+	puts $ofd " 66...: \[0-9a-f\]+\[ \]+0\[ \]+NOTYPE\[ \]+LOCAL\[ \]+DEFAULT\[ \]+660.. bar_66000$"
+    }
     puts $ofd "#..."
     # Global symbols are not in "alphanumeric" order, so we just check
     # that the first and the last are present in any order (assuming no

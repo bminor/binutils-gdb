@@ -1,6 +1,6 @@
 /* Machine independent support for Solaris /proc (process file system) for GDB.
 
-   Copyright (C) 1999-2020 Free Software Foundation, Inc.
+   Copyright (C) 1999-2021 Free Software Foundation, Inc.
 
    Written by Michael Snyder at Cygnus Solutions.
    Based on work by Fred Fish, Stu Grossman, Geoff Noer, and others.
@@ -187,7 +187,7 @@ write_with_trace (int fd, void *varg, size_t len, char *file, int line)
 		 "write (PCSSIG) ");
 	proc_prettyfprint_signal (procfs_file ? procfs_file : stdout,
 				  arg[1] ? ((siginfo_t *) &arg[1])->si_signo 
-				         : 0, 
+					 : 0, 
 				  0);
 	fprintf (procfs_file ? procfs_file : stdout, "\n");
 	break;

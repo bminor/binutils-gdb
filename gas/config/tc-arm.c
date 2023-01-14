@@ -1,5 +1,5 @@
 /* tc-arm.c -- Assemble for the ARM
-   Copyright (C) 1994-2020 Free Software Foundation, Inc.
+   Copyright (C) 1994-2021 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
 	Cirrus coprocessor mods by Aldy Hernandez (aldyh@redhat.com)
@@ -5936,7 +5936,15 @@ parse_address_main (char **str, int i, int group_relocations,
 
   if (skip_past_char (&p, '[') == FAIL)
     {
-      if (skip_past_char (&p, '=') == FAIL)
+      if (group_type == GROUP_MVE
+	  && (reg = arm_reg_parse (&p, REG_TYPE_RN)) != FAIL)
+	{
+	  /* [r0-r15] expected as argument but receiving r0-r15 without
+	     [] brackets.  */
+	  inst.error = BAD_SYNTAX;
+	  return PARSE_OPERAND_FAIL;
+	}
+      else if (skip_past_char (&p, '=') == FAIL)
 	{
 	  /* Bare address - translate to PC-relative offset.  */
 	  inst.relocs[0].pc_rel = 1;
@@ -8757,25 +8765,25 @@ neon_cmode_for_move_imm (unsigned immlo, unsigned immhi, int float_p,
    to single precision without loss of accuracy.  */
 
 static bfd_boolean
-is_double_a_single (bfd_int64_t v)
+is_double_a_single (bfd_uint64_t v)
 {
-  int exp = (int)((v >> 52) & 0x7FF);
-  bfd_int64_t mantissa = (v & (bfd_int64_t)0xFFFFFFFFFFFFFULL);
+  int exp = (v >> 52) & 0x7FF;
+  bfd_uint64_t mantissa = v & 0xFFFFFFFFFFFFFULL;
 
-  return (exp == 0 || exp == 0x7FF
-	  || (exp >= 1023 - 126 && exp <= 1023 + 127))
-    && (mantissa & 0x1FFFFFFFl) == 0;
+  return ((exp == 0 || exp == 0x7FF
+	   || (exp >= 1023 - 126 && exp <= 1023 + 127))
+	  && (mantissa & 0x1FFFFFFFL) == 0);
 }
 
 /* Returns a double precision value casted to single precision
    (ignoring the least significant bits in exponent and mantissa).  */
 
 static int
-double_to_single (bfd_int64_t v)
+double_to_single (bfd_uint64_t v)
 {
   unsigned int sign = (v >> 63) & 1;
   int exp = (v >> 52) & 0x7FF;
-  bfd_int64_t mantissa = (v & (bfd_int64_t) 0xFFFFFFFFFFFFFULL);
+  bfd_uint64_t mantissa = v & 0xFFFFFFFFFFFFFULL;
 
   if (exp == 0x7FF)
     exp = 0xFF;
@@ -8848,9 +8856,9 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
       || inst.relocs[0].exp.X_op == O_big)
     {
 #if defined BFD_HOST_64_BIT
-      bfd_int64_t v;
+      bfd_uint64_t v;
 #else
-      offsetT v;
+      valueT v;
 #endif
       if (inst.relocs[0].exp.X_op == O_big)
 	{
@@ -8867,16 +8875,17 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 	    l = generic_bignum;
 
 #if defined BFD_HOST_64_BIT
-	  v = ((((bfd_uint64_t) l[3] & LITTLENUM_MASK)
-		<< LITTLENUM_NUMBER_OF_BITS)
-	       | (((bfd_int64_t) l[2] & LITTLENUM_MASK)
-		  << LITTLENUM_NUMBER_OF_BITS)
-	       | (((bfd_uint64_t) l[1] & LITTLENUM_MASK)
-		  << LITTLENUM_NUMBER_OF_BITS)
-	       | (l[0] & LITTLENUM_MASK));
+	  v = l[3] & LITTLENUM_MASK;
+	  v <<= LITTLENUM_NUMBER_OF_BITS;
+	  v |= l[2] & LITTLENUM_MASK;
+	  v <<= LITTLENUM_NUMBER_OF_BITS;
+	  v |= l[1] & LITTLENUM_MASK;
+	  v <<= LITTLENUM_NUMBER_OF_BITS;
+	  v |= l[0] & LITTLENUM_MASK;
 #else
-	  v = ((((valueT) l[1] & LITTLENUM_MASK) << LITTLENUM_NUMBER_OF_BITS)
-	       | (l[0] & LITTLENUM_MASK));
+	  v = l[1] & LITTLENUM_MASK;
+	  v <<= LITTLENUM_NUMBER_OF_BITS;
+	  v |= l[0] & LITTLENUM_MASK;
 #endif
 	}
       else
@@ -26509,14 +26518,14 @@ static const struct asm_opcode insns[] =
 #define ARM_VARIANT  & fpu_vfp_ext_v1
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_v6t2
- mnCEF(vmla,     _vmla,    3, (RNSDQMQ, oRNSDQMQ, RNSDQ_RNSC_MQ_RR), neon_mac_maybe_scalar),
- mnCEF(vmul,     _vmul,    3, (RNSDQMQ, oRNSDQMQ, RNSDQ_RNSC_MQ_RR), neon_mul),
 
  mcCE(fcpyd,	eb00b40, 2, (RVD, RVD),	      vfp_dp_rd_rm),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_vfp_ext_v1xd
 
+ mnCEF(vmla,     _vmla,    3, (RNSDQMQ, oRNSDQMQ, RNSDQ_RNSC_MQ_RR), neon_mac_maybe_scalar),
+ mnCEF(vmul,     _vmul,    3, (RNSDQMQ, oRNSDQMQ, RNSDQ_RNSC_MQ_RR), neon_mul),
  MNCE(vmov,   0,	1, (VMOV),	      neon_mov),
  mcCE(fmrs,	e100a10, 2, (RR, RVS),	      vfp_reg_from_sp),
  mcCE(fmsr,	e000a10, 2, (RVS, RR),	      vfp_sp_from_reg),
@@ -31539,6 +31548,15 @@ static const struct arm_cpu_option_table arm_cpus[] =
   ARM_CPU_OPT ("cortex-a77",    "Cortex-A77",	       ARM_ARCH_V8_2A,
 	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
 	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_DOTPROD),
+  ARM_CPU_OPT ("cortex-a78",   "Cortex-A78",	       ARM_ARCH_V8_2A,
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST | ARM_EXT2_SB),
+	       FPU_ARCH_DOTPROD_NEON_VFP_ARMV8),
+  ARM_CPU_OPT ("cortex-a78ae",   "Cortex-A78AE",	   ARM_ARCH_V8_2A,
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST | ARM_EXT2_SB),
+	       FPU_ARCH_DOTPROD_NEON_VFP_ARMV8),
+  ARM_CPU_OPT ("cortex-a78c",   "Cortex-A78C",	   ARM_ARCH_V8_2A,
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST | ARM_EXT2_SB),
+	       FPU_ARCH_DOTPROD_NEON_VFP_ARMV8),
   ARM_CPU_OPT ("ares",    "Ares",	       ARM_ARCH_V8_2A,
 	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
 	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_DOTPROD),
@@ -31587,12 +31605,25 @@ static const struct arm_cpu_option_table arm_cpus[] =
   ARM_CPU_OPT ("cortex-m0plus",	  "Cortex-M0+",	       ARM_ARCH_V6SM,
 	       ARM_ARCH_NONE,
 	       FPU_NONE),
+  ARM_CPU_OPT ("cortex-x1",   "Cortex-X1",	       ARM_ARCH_V8_2A,
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST | ARM_EXT2_SB),
+	       FPU_ARCH_DOTPROD_NEON_VFP_ARMV8),
   ARM_CPU_OPT ("exynos-m1",	  "Samsung Exynos M1", ARM_ARCH_V8A,
 	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
 	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
   ARM_CPU_OPT ("neoverse-n1",    "Neoverse N1",	       ARM_ARCH_V8_2A,
 	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
 	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_DOTPROD),
+  ARM_CPU_OPT ("neoverse-n2",	 "Neoverse N2",	       ARM_ARCH_V8_5A,
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST
+				    | ARM_EXT2_BF16
+				    | ARM_EXT2_I8MM),
+	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_4),
+  ARM_CPU_OPT ("neoverse-v1", "Neoverse V1", ARM_ARCH_V8_4A,
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST
+				    | ARM_EXT2_BF16
+				    | ARM_EXT2_I8MM),
+	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_4),
   /* ??? XSCALE is really an architecture.  */
   ARM_CPU_OPT ("xscale",	  NULL,		       ARM_ARCH_XSCALE,
 	       ARM_ARCH_NONE,

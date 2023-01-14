@@ -1,5 +1,5 @@
 /* Annotation routines for GDB.
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -238,8 +238,8 @@ annotate_thread_exited (struct thread_info *t, int silent)
   if (annotation_level > 1)
     {
       printf_filtered(("\n\032\032thread-exited,"
-                       "id=\"%d\",group-id=\"i%d\"\n"),
-                      t->global_num, t->inf->num);
+		       "id=\"%d\",group-id=\"i%d\"\n"),
+		      t->global_num, t->inf->num);
     }
 }
 

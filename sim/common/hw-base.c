@@ -1,6 +1,6 @@
 /* The common simulator framework for GDB, the GNU Debugger.
 
-   Copyright 2002-2020 Free Software Foundation, Inc.
+   Copyright 2002-2021 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney and Red Hat.
 
@@ -23,19 +23,8 @@
 #include "hw-main.h"
 #include "hw-base.h"
 
-
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-
-#if HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
-
 #include <ctype.h>
 
 #include "hw-config.h"
@@ -281,11 +270,10 @@ full_name_of_hw (struct hw *leaf,
 		 unsigned sizeof_buf)
 {
   /* get a buffer */
-  char full_name[1024];
-  if (buf == (char*)0)
+  if (buf == NULL)
     {
-      buf = full_name;
-      sizeof_buf = sizeof (full_name);
+      sizeof_buf = 1024;
+      buf = hw_malloc (leaf, sizeof_buf);
     }
 
   /* use head recursion to construct the path */
@@ -318,9 +306,6 @@ full_name_of_hw (struct hw *leaf,
       strcat (buf, unit);
     }
 
-  /* return it usefully */
-  if (buf == full_name)
-    buf = hw_strdup (leaf, full_name);
   return buf;
 }
 

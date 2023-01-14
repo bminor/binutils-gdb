@@ -1,6 +1,6 @@
 /* Compact ANSI-C Type Format (CTF) support in GDB.
 
-   Copyright (C) 2019-2020 Free Software Foundation, Inc.
+   Copyright (C) 2019-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -91,30 +91,31 @@ static const struct objfile_key<htab, htab_deleter> ctf_tid_key;
 
 struct ctf_fp_info
 {
-  explicit ctf_fp_info (ctf_file_t *cfp) : fp (cfp) {}
+  explicit ctf_fp_info (ctf_dict_t *cfp) : fp (cfp) {}
   ~ctf_fp_info ();
-  ctf_file_t *fp;
+  ctf_dict_t *fp;
 };
 
-/* Cleanup function for the ctf_file_key data.  */
+/* Cleanup function for the ctf_dict_key data.  */
 ctf_fp_info::~ctf_fp_info ()
 {
   if (!fp)
     return;
 
   ctf_archive_t *arc = ctf_get_arc (fp);
-  ctf_file_close (fp);
+  ctf_dict_close (fp);
   ctf_close (arc);
 }
 
-static const objfile_key<ctf_fp_info> ctf_file_key;
+static const objfile_key<ctf_fp_info> ctf_dict_key;
 
 /* A CTF context consists of a file pointer and an objfile pointer.  */
 
 struct ctf_context
 {
-  ctf_file_t *fp;
+  ctf_dict_t *fp;
   struct objfile *of;
+  partial_symtab *pst;
   struct buildsym_compunit *builder;
 };
 
@@ -271,7 +272,7 @@ get_tid_type (struct objfile *of, ctf_id_t tid)
 /* Return the size of storage in bits for INTEGER, FLOAT, or ENUM.  */
 
 static int
-get_bitsize (ctf_file_t *fp, ctf_id_t tid, uint32_t kind)
+get_bitsize (ctf_dict_t *fp, ctf_id_t tid, uint32_t kind)
 {
   ctf_encoding_t cet;
 
@@ -433,7 +434,7 @@ static struct symbol *
 new_symbol (struct ctf_context *ccp, struct type *type, ctf_id_t tid)
 {
   struct objfile *objfile = ccp->of;
-  ctf_file_t *fp = ccp->fp;
+  ctf_dict_t *fp = ccp->fp;
   struct symbol *sym = NULL;
 
   gdb::unique_xmalloc_ptr<char> name (ctf_type_aname_raw (fp, tid));
@@ -496,7 +497,7 @@ static struct type *
 read_base_type (struct ctf_context *ccp, ctf_id_t tid)
 {
   struct objfile *of = ccp->of;
-  ctf_file_t *fp = ccp->fp;
+  ctf_dict_t *fp = ccp->fp;
   ctf_encoding_t cet;
   struct type *type = NULL;
   char *name;
@@ -591,7 +592,7 @@ static struct type *
 read_structure_type (struct ctf_context *ccp, ctf_id_t tid)
 {
   struct objfile *of = ccp->of;
-  ctf_file_t *fp = ccp->fp;
+  ctf_dict_t *fp = ccp->fp;
   struct type *type;
   uint32_t kind;
 
@@ -649,7 +650,7 @@ static struct type *
 read_func_kind_type (struct ctf_context *ccp, ctf_id_t tid)
 {
   struct objfile *of = ccp->of;
-  ctf_file_t *fp = ccp->fp;
+  ctf_dict_t *fp = ccp->fp;
   struct type *type, *rettype;
   ctf_funcinfo_t cfi;
 
@@ -675,7 +676,7 @@ static struct type *
 read_enum_type (struct ctf_context *ccp, ctf_id_t tid)
 {
   struct objfile *of = ccp->of;
-  ctf_file_t *fp = ccp->fp;
+  ctf_dict_t *fp = ccp->fp;
   struct type *type, *target_type;
   ctf_funcinfo_t fi;
 
@@ -750,7 +751,7 @@ static struct type *
 read_array_type (struct ctf_context *ccp, ctf_id_t tid)
 {
   struct objfile *objfile = ccp->of;
-  ctf_file_t *fp = ccp->fp;
+  ctf_dict_t *fp = ccp->fp;
   struct type *element_type, *range_type, *idx_type;
   struct type *type;
   ctf_arinfo_t ar;
@@ -815,7 +816,7 @@ static struct type *
 read_volatile_type (struct ctf_context *ccp, ctf_id_t tid, ctf_id_t btid)
 {
   struct objfile *objfile = ccp->of;
-  ctf_file_t *fp = ccp->fp;
+  ctf_dict_t *fp = ccp->fp;
   struct type *base_type, *cv_type;
 
   base_type = get_tid_type (objfile, btid);
@@ -912,7 +913,7 @@ read_pointer_type (struct ctf_context *ccp, ctf_id_t tid, ctf_id_t btid)
 static struct type *
 read_type_record (struct ctf_context *ccp, ctf_id_t tid)
 {
-  ctf_file_t *fp = ccp->fp;
+  ctf_dict_t *fp = ccp->fp;
   uint32_t kind;
   struct type *type = NULL;
   ctf_id_t btid;
@@ -1309,7 +1310,7 @@ ctf_psymtab::read_symtab (struct objfile *objfile)
 
 static ctf_psymtab *
 create_partial_symtab (const char *name,
-		       ctf_file_t *cfp,
+		       ctf_dict_t *cfp,
 		       struct objfile *objfile)
 {
   ctf_psymtab *pst;
@@ -1320,6 +1321,8 @@ create_partial_symtab (const char *name,
   ccx = XOBNEW (&objfile->objfile_obstack, struct ctf_context);
   ccx->fp = cfp;
   ccx->of = objfile;
+  ccx->pst = pst;
+  ccx->builder = nullptr;
   pst->context = ccx;
 
   return pst;
@@ -1377,7 +1380,7 @@ ctf_psymtab_type_cb (ctf_id_t tid, void *arg)
 	return 0;
     }
 
-    add_psymbol_to_list (name.get (), true,
+  ccp->pst->add_psymbol (name.get (), true,
 			 domain, aclass, section,
 			 psymbol_placement::GLOBAL,
 			 0, language_c, ccp->of);
@@ -1392,10 +1395,10 @@ ctf_psymtab_var_cb (const char *name, ctf_id_t id, void *arg)
 {
   struct ctf_context *ccp = (struct ctf_context *) arg;
 
-  add_psymbol_to_list (name, true,
-		       VAR_DOMAIN, LOC_STATIC, -1,
-		       psymbol_placement::GLOBAL,
-		       0, language_c, ccp->of);
+  ccp->pst->add_psymbol (name, true,
+			 VAR_DOMAIN, LOC_STATIC, -1,
+			 psymbol_placement::GLOBAL,
+			 0, language_c, ccp->of);
   return 0;
 }
 
@@ -1403,21 +1406,19 @@ ctf_psymtab_var_cb (const char *name, ctf_id_t id, void *arg)
    debugging information is available.  */
 
 static void
-scan_partial_symbols (ctf_file_t *cfp, struct objfile *of)
+scan_partial_symbols (ctf_dict_t *cfp, struct objfile *of)
 {
-  struct ctf_context ccx;
   bfd *abfd = of->obfd;
   const char *name = bfd_get_filename (abfd);
   ctf_psymtab *pst = create_partial_symtab (name, cfp, of);
 
-  ccx.fp = cfp;
-  ccx.of = of;
+  struct ctf_context *ccx = pst->context;
 
-  if (ctf_type_iter (cfp, ctf_psymtab_type_cb, &ccx) == CTF_ERR)
+  if (ctf_type_iter (cfp, ctf_psymtab_type_cb, ccx) == CTF_ERR)
     complaint (_("ctf_type_iter scan_partial_symbols failed - %s"),
 	       ctf_errmsg (ctf_errno (cfp)));
 
-  if (ctf_variable_iter (cfp, ctf_psymtab_var_cb, &ccx) == CTF_ERR)
+  if (ctf_variable_iter (cfp, ctf_psymtab_var_cb, ccx) == CTF_ERR)
     complaint (_("ctf_variable_iter scan_partial_symbols failed - %s"),
 	       ctf_errmsg (ctf_errno (cfp)));
 
@@ -1457,13 +1458,13 @@ scan_partial_symbols (ctf_file_t *cfp, struct objfile *of)
       else
 	aclass = LOC_TYPEDEF;
 
-      add_psymbol_to_list (tname.get (), true,
-			   tdomain, aclass, -1,
-			   psymbol_placement::STATIC,
-			   0, language_c, of);
+      pst->add_psymbol (tname.get (), true,
+			tdomain, aclass, -1,
+			psymbol_placement::STATIC,
+			0, language_c, of);
     }
 
-  end_psymtab_common (of, pst);
+  pst->end ();
 }
 
 /* Read CTF debugging information from a BFD section.  This is
@@ -1481,11 +1482,11 @@ elfctf_build_psymtabs (struct objfile *of)
     error (_("ctf_bfdopen failed on %s - %s"),
 	   bfd_get_filename (abfd), ctf_errmsg (err));
 
-  ctf_file_t *fp = ctf_arc_open_by_name (arc, NULL, &err);
+  ctf_dict_t *fp = ctf_dict_open (arc, NULL, &err);
   if (fp == NULL)
-    error (_("ctf_arc_open_by_name failed on %s - %s"),
+    error (_("ctf_dict_open failed on %s - %s"),
 	   bfd_get_filename (abfd), ctf_errmsg (err));
-  ctf_file_key.emplace (of, fp);
+  ctf_dict_key.emplace (of, fp);
 
   scan_partial_symbols (fp, of);
 }

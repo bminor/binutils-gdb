@@ -110,7 +110,7 @@ hello:
     plsri.u16.r  r2, r3, 8
     plsr.u16.r   r2, r3, r4
     plsli.16    r2, r3, 8
-    plsl.u16     r2, r3, r16
+    plsl.16     r2, r3, r16
     plsli.u16.s  r2, r3, 8
     plsli.s16.s  r2, r3, 8
     plsl.u16.s   r2, r3, r4

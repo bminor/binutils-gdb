@@ -1,7 +1,7 @@
 /* Target-dependent code for Lattice Mico32 processor, for GDB.
    Contributed by Jon Beniston <jon@beniston.com>
 
-   Copyright (C) 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2009-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -58,7 +58,7 @@ struct lm32_frame_cache
   /* Size of frame.  */
   int size;
   /* Table indicating the location of each and every register.  */
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 /* Add the available register groups.  */
@@ -146,8 +146,7 @@ lm32_analyze_prologue (struct gdbarch *gdbarch,
 	  /* Any stack displaced store is likely part of the prologue.
 	     Record that the register is being saved, and the offset 
 	     into the stack.  */
-	  info->saved_regs[LM32_REG1 (instruction)].addr =
-	    LM32_IMM16 (instruction);
+	  info->saved_regs[LM32_REG1 (instruction)].set_addr (LM32_IMM16 (instruction));
 	}
       else if ((LM32_OPCODE (instruction) == OP_ADDI)
 	       && (LM32_REG1 (instruction) == SIM_LM32_SP_REGNUM))
@@ -188,7 +187,7 @@ lm32_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR func_addr, limit_pc;
   struct lm32_frame_cache frame_info;
-  struct trad_frame_saved_reg saved_regs[SIM_LM32_NUM_REGS];
+  trad_frame_saved_reg saved_regs[SIM_LM32_NUM_REGS];
 
   /* See if we can determine the end of the prologue via the symbol table.
      If so, then return either PC, or the PC after the prologue, whichever
@@ -280,7 +279,7 @@ lm32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 				      byte_order);
 
       /* First num_arg_regs parameters are passed by registers, 
-         and the rest are passed on the stack.  */
+	 and the rest are passed on the stack.  */
       if (i < num_arg_regs)
 	regcache_cooked_write_unsigned (regcache, first_arg_reg + i, val);
       else
@@ -328,7 +327,7 @@ lm32_extract_return_value (struct type *type, struct regcache *regcache,
   else
     {
       /* Aggregate types greater than a single register are returned
-         in memory.  FIXME: Unless they are only 2 regs?.  */
+	 in memory.  FIXME: Unless they are only 2 regs?.  */
       regcache_cooked_read_unsigned (regcache, SIM_LM32_R1_REGNUM, &l);
       return_buffer = l;
       read_memory (return_buffer, valbuf, TYPE_LENGTH (type));
@@ -418,8 +417,8 @@ lm32_frame_cache (struct frame_info *this_frame, void **this_prologue_cache)
   /* Convert callee save offsets into addresses.  */
   for (i = 0; i < gdbarch_num_regs (get_frame_arch (this_frame)) - 1; i++)
     {
-      if (trad_frame_addr_p (info->saved_regs, i))
-	info->saved_regs[i].addr = this_base + info->saved_regs[i].addr;
+      if (info->saved_regs[i].is_addr ())
+	info->saved_regs[i].set_addr (this_base + info->saved_regs[i].addr ());
     }
 
   /* The call instruction moves the caller's PC in the callee's RA register.
@@ -430,7 +429,7 @@ lm32_frame_cache (struct frame_info *this_frame, void **this_prologue_cache)
 
   /* The previous frame's SP needed to be computed.  Save the computed
      value.  */
-  trad_frame_set_value (info->saved_regs, SIM_LM32_SP_REGNUM, prev_sp);
+  info->saved_regs[SIM_LM32_SP_REGNUM].set_value (prev_sp);
 
   return info;
 }

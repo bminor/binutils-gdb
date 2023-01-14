@@ -1,5 +1,5 @@
 /* ELF executable support for BFD.
-   Copyright (C) 1991-2020 Free Software Foundation, Inc.
+   Copyright (C) 1991-2021 Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
@@ -704,6 +704,9 @@ elf_object_p (bfd *abfd)
       elf_elfsections (abfd) = (Elf_Internal_Shdr **) bfd_alloc (abfd, amt);
       if (!elf_elfsections (abfd))
 	goto got_no_match;
+      elf_tdata (abfd)->being_created = bfd_zalloc (abfd, num_sec);
+      if (!elf_tdata (abfd)->being_created)
+	goto got_no_match;
 
       memcpy (i_shdrp, &i_shdr, sizeof (*i_shdrp));
       for (shdrp = i_shdrp, shindex = 0; shindex < num_sec; shindex++)
@@ -1344,7 +1347,13 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 	  switch (ELF_ST_TYPE (isym->st_info))
 	    {
 	    case STT_SECTION:
-	      sym->symbol.flags |= BSF_SECTION_SYM | BSF_DEBUGGING;
+	      /* Mark the input section symbol as used since it may be
+	         used for relocation and section group.
+		 NB: BSF_SECTION_SYM_USED is ignored by linker and may
+		 be cleared by objcopy for non-relocatable inputs.  */
+	      sym->symbol.flags |= (BSF_SECTION_SYM
+				    | BSF_DEBUGGING
+				    | BSF_SECTION_SYM_USED);
 	      break;
 	    case STT_FILE:
 	      sym->symbol.flags |= BSF_FILE | BSF_DEBUGGING;
@@ -1603,7 +1612,7 @@ elf_slurp_reloc_table (bfd *abfd,
 					      symbols, dynamic))
     return FALSE;
 
-  if (!bed->slurp_secondary_relocs (abfd, asect, symbols))
+  if (!bed->slurp_secondary_relocs (abfd, asect, symbols, dynamic))
     return FALSE;
 
   asect->relocation = relents;

@@ -1,6 +1,6 @@
 /* The common simulator framework for GDB, the GNU Debugger.
 
-   Copyright 2002-2020 Free Software Foundation, Inc.
+   Copyright 2002-2021 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney and Red Hat.
 
@@ -313,7 +313,7 @@ extern SIM_RC sim_config (SIM_DESC sd);
 
 /* Print the simulator configuration.  */
 
-extern void print_sim_config (SIM_DESC sd);
+extern void sim_config_print (SIM_DESC sd);
 
 
 #endif

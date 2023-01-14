@@ -1,5 +1,5 @@
 /* Generic ECOFF (Extended-COFF) routines.
-   Copyright (C) 1990-2020 Free Software Foundation, Inc.
+   Copyright (C) 1990-2021 Free Software Foundation, Inc.
    Original version by Per Bothner.
    Full support added by Ian Lance Taylor, ian@cygnus.com.
 
@@ -51,38 +51,7 @@
 
 /* This stuff is somewhat copied from coffcode.h.  */
 static asection bfd_debug_section =
-{
-  /* name,	id,  section_id, index, next, prev, flags,	  */
-     "*DEBUG*", 0,   0,		 0,	NULL, NULL, 0,
-  /* user_set_vma,	   */
-     0,
-  /* linker_mark, linker_has_input, gc_mark, compress_status,	   */
-     0,		  0,		    1,	     0,
-  /* segment_mark, sec_info_type, use_rela_p,			   */
-     0,		   0,		  0,
-  /* sec_flg0, sec_flg1, sec_flg2, sec_flg3, sec_flg4, sec_flg5,   */
-     0,	       0,	 0,	   0,	     0,	       0,
-  /* vma, lma, size, rawsize, compressed_size, relax, relax_count, */
-     0,	  0,   0,    0,	      0,	       0,     0,
-  /* output_offset, output_section, alignment_power,		   */
-     0,		    NULL,	    0,
-  /* relocation, orelocation, reloc_count, filepos, rel_filepos,   */
-     NULL,	 NULL,	      0,	   0,	    0,
-  /* line_filepos, userdata, contents, lineno, lineno_count,	   */
-     0,		   NULL,     NULL,     NULL,   0,
-  /* entsize, kept_section, moving_line_filepos,		   */
-     0,	      NULL,	    0,
-  /* target_index, used_by_bfd, constructor_chain, owner,	   */
-     0,		   NULL,	NULL,		   NULL,
-  /* symbol,							   */
-     NULL,
-  /* symbol_ptr_ptr,						   */
-     NULL,
-  /* map_head, map_tail,					   */
-     { NULL }, { NULL },
-  /* already_assigned 						   */
-     NULL,
-};
+  BFD_FAKE_SECTION (bfd_debug_section, NULL, "*DEBUG*", 0, 0);
 
 /* Create an ECOFF object.  */
 
@@ -644,8 +613,11 @@ _bfd_ecoff_slurp_symbolic_info (bfd *abfd,
    faster assembler code.  This is what we use for the small common
    section.  */
 static asection ecoff_scom_section;
-static asymbol ecoff_scom_symbol;
-static asymbol *ecoff_scom_symbol_ptr;
+static const asymbol ecoff_scom_symbol =
+  GLOBAL_SYM_INIT (SCOMMON, &ecoff_scom_section);
+static asection ecoff_scom_section =
+  BFD_FAKE_SECTION (ecoff_scom_section, &ecoff_scom_symbol,
+		    SCOMMON, 0, SEC_IS_COMMON | SEC_SMALL_DATA);
 
 /* Create an empty symbol.  */
 
@@ -787,19 +759,6 @@ ecoff_set_symbol_info (bfd *abfd,
 	}
       /* Fall through.  */
     case scSCommon:
-      if (ecoff_scom_section.name == NULL)
-	{
-	  /* Initialize the small common section.  */
-	  ecoff_scom_section.name = SCOMMON;
-	  ecoff_scom_section.flags = SEC_IS_COMMON | SEC_SMALL_DATA;
-	  ecoff_scom_section.output_section = &ecoff_scom_section;
-	  ecoff_scom_section.symbol = &ecoff_scom_symbol;
-	  ecoff_scom_section.symbol_ptr_ptr = &ecoff_scom_symbol_ptr;
-	  ecoff_scom_symbol.name = SCOMMON;
-	  ecoff_scom_symbol.flags = BSF_SECTION_SYM;
-	  ecoff_scom_symbol.section = &ecoff_scom_section;
-	  ecoff_scom_symbol_ptr = &ecoff_scom_symbol;
-	}
       asym->section = &ecoff_scom_section;
       asym->flags = 0;
       break;
@@ -1097,7 +1056,7 @@ ecoff_emit_aggregate (bfd *abfd,
 /* Convert the type information to string format.  */
 
 static char *
-ecoff_type_to_string (bfd *abfd, FDR *fdr, unsigned int indx)
+ecoff_type_to_string (bfd *abfd, FDR *fdr, unsigned int indx, char *buff)
 {
   union aux_ext *aux_ptr;
   int bigendian;
@@ -1112,9 +1071,8 @@ ecoff_type_to_string (bfd *abfd, FDR *fdr, unsigned int indx)
   unsigned int basic_type;
   int i;
   char buffer1[1024];
-  static char buffer2[1024];
   char *p1 = buffer1;
-  char *p2 = buffer2;
+  char *p2 = buff;
   RNDXR rndx;
 
   aux_ptr = ecoff_data (abfd)->debug_info.external_aux + fdr->iauxBase;
@@ -1280,7 +1238,7 @@ ecoff_type_to_string (bfd *abfd, FDR *fdr, unsigned int indx)
       break;
     }
 
-  p1 += strlen (buffer1);
+  p1 += strlen (p1);
 
   /* If this is a bitfield, get the bitsize.  */
   if (u.ti.fBitfield)
@@ -1289,7 +1247,6 @@ ecoff_type_to_string (bfd *abfd, FDR *fdr, unsigned int indx)
 
       bitsize = AUX_GET_WIDTH (bigendian, &aux_ptr[indx++]);
       sprintf (p1, " : %d", bitsize);
-      p1 += strlen (buffer1);
     }
 
   /* Deal with any qualifiers.  */
@@ -1373,7 +1330,7 @@ ecoff_type_to_string (bfd *abfd, FDR *fdr, unsigned int indx)
 			       (long) (qualifiers[j].stride));
 
 		    else
-		      sprintf (p2, " {%ld bits}", (long) (qualifiers[j].stride));
+		      sprintf (p2, " {%ld bits}", (long) qualifiers[j].stride);
 
 		    p2 += strlen (p2);
 		    strcpy (p2, "] of ");
@@ -1386,7 +1343,7 @@ ecoff_type_to_string (bfd *abfd, FDR *fdr, unsigned int indx)
     }
 
   strcpy (p2, buffer1);
-  return buffer2;
+  return buff;
 }
 
 /* Return information about ECOFF symbol SYMBOL in RET.  */
@@ -1555,13 +1512,16 @@ _bfd_ecoff_print_symbol (bfd *abfd,
 		if (ECOFF_IS_STAB (&ecoff_ext.asym))
 		  ;
 		else if (ecoffsymbol (symbol)->local)
-		  /* xgettext:c-format */
-		  fprintf (file, _("\n      End+1 symbol: %-7ld   Type:  %s"),
-			   ((long)
-			    (AUX_GET_ISYM (bigendian,
-					   &aux_base[ecoff_ext.asym.index])
-			     + sym_base)),
-			   ecoff_type_to_string (abfd, fdr, indx + 1));
+		  {
+		    char buff[1024];
+		    /* xgettext:c-format */
+		    fprintf (file, _("\n      End+1 symbol: %-7ld   Type:  %s"),
+			     ((long)
+			      (AUX_GET_ISYM (bigendian,
+					     &aux_base[ecoff_ext.asym.index])
+			       + sym_base)),
+			     ecoff_type_to_string (abfd, fdr, indx + 1, buff));
+		  }
 		else
 		  fprintf (file, _("\n      Local symbol: %ld"),
 			   ((long) indx
@@ -1587,8 +1547,11 @@ _bfd_ecoff_print_symbol (bfd *abfd,
 
 	      default:
 		if (! ECOFF_IS_STAB (&ecoff_ext.asym))
-		  fprintf (file, _("\n      Type: %s"),
-			   ecoff_type_to_string (abfd, fdr, indx));
+		  {
+		    char buff[1024];
+		    fprintf (file, _("\n      Type: %s"),
+			     ecoff_type_to_string (abfd, fdr, indx, buff));
+		  }
 		break;
 	      }
 	  }
@@ -3400,19 +3363,6 @@ ecoff_link_add_externals (bfd *abfd,
 	    }
 	  /* Fall through.  */
 	case scSCommon:
-	  if (ecoff_scom_section.name == NULL)
-	    {
-	      /* Initialize the small common section.  */
-	      ecoff_scom_section.name = SCOMMON;
-	      ecoff_scom_section.flags = SEC_IS_COMMON | SEC_SMALL_DATA;
-	      ecoff_scom_section.output_section = &ecoff_scom_section;
-	      ecoff_scom_section.symbol = &ecoff_scom_symbol;
-	      ecoff_scom_section.symbol_ptr_ptr = &ecoff_scom_symbol_ptr;
-	      ecoff_scom_symbol.name = SCOMMON;
-	      ecoff_scom_symbol.flags = BSF_SECTION_SYM;
-	      ecoff_scom_symbol.section = &ecoff_scom_section;
-	      ecoff_scom_symbol_ptr = &ecoff_scom_symbol;
-	    }
 	  section = &ecoff_scom_section;
 	  break;
 	case scSUndefined:

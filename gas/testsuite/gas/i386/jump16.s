@@ -1,6 +1,7 @@
 .psize 0
 .text
 .extern xxx
+.extern yyy
 
 .code16gcc
 1:	jmp	1b
@@ -71,6 +72,14 @@
 	jmp	0x9090:0x1010
 	jmp	0x9090,xxx
 	jmp	0x9090:xxx
+	ljmp	yyy,0x1010
+	ljmp	yyy:0x1010
+	ljmp	yyy,xxx
+	ljmp	yyy:xxx
+	jmp	yyy,0x1010
+	jmp	yyy:0x1010
+	jmp	yyy,xxx
+	jmp	yyy:xxx
 
 	.att_syntax
 .code16gcc

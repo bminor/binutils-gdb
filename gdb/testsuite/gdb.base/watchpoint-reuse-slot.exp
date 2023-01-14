@@ -1,4 +1,4 @@
-# Copyright 2014-2020 Free Software Foundation, Inc.
+# Copyright 2014-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -118,7 +118,7 @@ proc build_cmds_list {} {
     }
 
     set test "hbreak"
-    gdb_test_multiple "hbreak main" $test {
+    gdb_test_multiple "hbreak -q main" $test {
 	-re "You may have requested too many.*$gdb_prompt $" {
 	    unsupported $test
 	}

@@ -1,5 +1,5 @@
 /* Interface to hashtable implementations.
-   Copyright (C) 2006-2020 Free Software Foundation, Inc.
+   Copyright (C) 2006-2021 Free Software Foundation, Inc.
 
    This file is part of libctf.
 
@@ -476,6 +476,13 @@ ctf_dynhash_next (ctf_dynhash_t *h, ctf_next_t **it, void **key, void **value)
   return ECTF_NEXT_END;
 }
 
+int
+ctf_dynhash_sort_by_name (const ctf_next_hkv_t *one, const ctf_next_hkv_t *two,
+			  void *unused _libctf_unused_)
+{
+  return strcmp ((char *) one->hkv_key, (char *) two->hkv_key);
+}
+
 /* Traverse a sorted dynhash, in _next iterator form.
 
    See ctf_dynhash_next for notes on error returns, etc.
@@ -781,7 +788,7 @@ ctf_hash_size (const ctf_hash_t *hp)
 }
 
 int
-ctf_hash_insert_type (ctf_hash_t *hp, ctf_file_t *fp, uint32_t type,
+ctf_hash_insert_type (ctf_hash_t *hp, ctf_dict_t *fp, uint32_t type,
 		      uint32_t name)
 {
   const char *str = ctf_strraw (fp, name);
@@ -811,7 +818,7 @@ ctf_hash_insert_type (ctf_hash_t *hp, ctf_file_t *fp, uint32_t type,
    this new official definition. If the key is not present, then call
    ctf_hash_insert_type and hash it in.  */
 int
-ctf_hash_define_type (ctf_hash_t *hp, ctf_file_t *fp, uint32_t type,
+ctf_hash_define_type (ctf_hash_t *hp, ctf_dict_t *fp, uint32_t type,
                       uint32_t name)
 {
   /* This matches the semantics of ctf_hash_insert_type in this
@@ -821,7 +828,7 @@ ctf_hash_define_type (ctf_hash_t *hp, ctf_file_t *fp, uint32_t type,
 }
 
 ctf_id_t
-ctf_hash_lookup_type (ctf_hash_t *hp, ctf_file_t *fp __attribute__ ((__unused__)),
+ctf_hash_lookup_type (ctf_hash_t *hp, ctf_dict_t *fp __attribute__ ((__unused__)),
 		      const char *key)
 {
   ctf_helem_t **slot;

@@ -1,5 +1,5 @@
 # Expect script for TLS tests.
-#   Copyright (C) 2017-2020 Free Software Foundation, Inc.
+#   Copyright (C) 2017-2021 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -36,7 +36,7 @@ if { ![check_compiler_available] } {
 # This target requires extra GAS options when building PIC/PIE code.
 set AFLAGS_PIC ""
 if [istarget "sparc*-*-*"] {
-    append AFLAGS_PIC " -K PIC"
+    append AFLAGS_PIC " -K PIC -Av9"
 }
 
 run_ld_link_tests [list \

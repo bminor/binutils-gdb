@@ -244,9 +244,7 @@ gen_model_c(insn_table *table, lf *file)
   lf_printf(file, "#include \"cpu.h\"\n");
   lf_printf(file, "#include \"mon.h\"\n");
   lf_printf(file, "\n");
-  lf_printf(file, "#ifdef HAVE_STDLIB_H\n");
   lf_printf(file, "#include <stdlib.h>\n");
-  lf_printf(file, "#endif\n");
   lf_printf(file, "\n");
 
   for(insn_ptr = model_data; insn_ptr; insn_ptr = insn_ptr->next) {

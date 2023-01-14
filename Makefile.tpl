@@ -390,7 +390,7 @@ MAKEINFOFLAGS = --split-size=5000000
 # ---------------------------------------------
 
 AS = @AS@
-AR = @AR@
+AR = @AR@ @AR_PLUGIN_OPTION@
 AR_FLAGS = rc
 CC = @CC@
 CXX = @CXX@
@@ -399,7 +399,7 @@ LD = @LD@
 LIPO = @LIPO@
 NM = @NM@
 OBJDUMP = @OBJDUMP@
-RANLIB = @RANLIB@
+RANLIB = @RANLIB@ @RANLIB_PLUGIN_OPTION@
 READELF = @READELF@
 STRIP = @STRIP@
 WINDRES = @WINDRES@
@@ -414,6 +414,45 @@ LIBCFLAGS = $(CFLAGS)
 CXXFLAGS = @CXXFLAGS@
 LIBCXXFLAGS = $(CXXFLAGS) -fno-implicit-templates
 GOCFLAGS = $(CFLAGS)
+
+# Pass additional PGO and LTO compiler options to the PGO build.
+BUILD_CFLAGS = $(PGO_BUILD_CFLAGS) $(PGO_BUILD_LTO_CFLAGS)
+override CFLAGS += $(BUILD_CFLAGS)
+override CXXFLAGS += $(BUILD_CFLAGS)
+
+# Additional PGO and LTO compiler options to generate profiling data
+# for the PGO build.
+PGO_BUILD_GEN_FLAGS_TO_PASS = \
+	PGO_BUILD_CFLAGS="@PGO_BUILD_GEN_CFLAGS@" \
+	PGO_BUILD_LTO_CFLAGS="@PGO_BUILD_LTO_CFLAGS@"
+
+# NB: Filter out any compiler options which may fail PGO training runs.
+PGO_BUILD_TRAINING_CFLAGS:= \
+	$(filter-out -Werror=%,$(CFLAGS))
+PGO_BUILD_TRAINING_CXXFLAGS:=\
+	$(filter-out -Werror=%,$(CXXFLAGS))
+PGO_BUILD_TRAINING_CFLAGS:= \
+	$(filter-out -Wall,$(PGO_BUILD_TRAINING_CFLAGS))
+PGO_BUILD_TRAINING_CXXFLAGS:= \
+	$(filter-out -Wall,$(PGO_BUILD_TRAINING_CXXFLAGS))
+PGO_BUILD_TRAINING_CFLAGS:= \
+	$(filter-out -specs=%,$(PGO_BUILD_TRAINING_CFLAGS))
+PGO_BUILD_TRAINING_CXXFLAGS:= \
+	$(filter-out -specs=%,$(PGO_BUILD_TRAINING_CXXFLAGS))
+PGO_BUILD_TRAINING_FLAGS_TO_PASS = \
+	CFLAGS_FOR_TARGET="$(PGO_BUILD_TRAINING_CFLAGS)" \
+	CXXFLAGS_FOR_TARGET="$(PGO_BUILD_TRAINING_CXXFLAGS)"
+
+# Additional PGO and LTO compiler options to use profiling data for the
+# PGO build.
+PGO_BUILD_USE_FLAGS_TO_PASS = \
+	PGO_BUILD_CFLAGS="@PGO_BUILD_USE_CFLAGS@" \
+	PGO_BUILD_LTO_CFLAGS="@PGO_BUILD_LTO_CFLAGS@"
+
+# PGO training targets for the PGO build.  FIXME: Add gold tests to
+# training.
+PGO-TRAINING-TARGETS = binutils gas gdb ld sim
+PGO_BUILD_TRAINING = $(addprefix maybe-check-,$(PGO-TRAINING-TARGETS))
 
 CREATE_GCOV = create_gcov
 
@@ -719,6 +758,12 @@ configure-target: [+
 
 # The target built for a native non-bootstrap build.
 .PHONY: all
+
+# --enable-pgo-build enables the PGO build.
+# 1. First build with -fprofile-generate.
+# 2. Use "make maybe-check-*" to generate profiling data.
+# 3. Use "make clean" to remove the previous build.
+# 4. Rebuild with -fprofile-use.
 all:
 @if gcc-bootstrap
 	[ -f stage_final ] || echo stage3 > stage_final
@@ -727,7 +772,7 @@ all:
 	$(MAKE) $(RECURSE_FLAGS_TO_PASS) `cat stage_final`-bubble
 @endif gcc-bootstrap
 	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
+	+@r=`${PWD_COMMAND}`; export r; \
 	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
 @if gcc-bootstrap
 	if [ -f stage_last ]; then \
@@ -735,7 +780,16 @@ all:
 	  $(MAKE) $(TARGET_FLAGS_TO_PASS) all-host all-target; \
 	else \
 @endif gcc-bootstrap
-	  $(MAKE) $(RECURSE_FLAGS_TO_PASS) all-host all-target \
+	  $(MAKE) $(RECURSE_FLAGS_TO_PASS) \
+		$(PGO_BUILD_GEN_FLAGS_TO_PASS) all-host all-target \
+@if pgo-build
+	&& $(MAKE) $(RECURSE_FLAGS_TO_PASS) \
+		$(PGO_BUILD_TRAINING_FLAGS_TO_PASS) \
+		$(PGO_BUILD_TRAINING) \
+	&& $(MAKE) $(RECURSE_FLAGS_TO_PASS) clean \
+	&& $(MAKE) $(RECURSE_FLAGS_TO_PASS) \
+		$(PGO_BUILD_USE_FLAGS_TO_PASS) all-host all-target \
+@endif pgo-build
 @if gcc-bootstrap
 	    ; \
 	fi \
@@ -1967,6 +2021,7 @@ AUTOCONF = autoconf
 $(srcdir)/configure: @MAINT@ $(srcdir)/configure.ac $(srcdir)/config/acx.m4 \
 	$(srcdir)/config/override.m4 $(srcdir)/config/proginstall.m4 \
 	$(srcdir)/config/elf.m4 $(srcdir)/config/isl.m4 \
+	$(srcdir)/config/gcc-plugin.m4 \
 	$(srcdir)/libtool.m4 $(srcdir)/ltoptions.m4 $(srcdir)/ltsugar.m4 \
 	$(srcdir)/ltversion.m4 $(srcdir)/lt~obsolete.m4
 	cd $(srcdir) && $(AUTOCONF)

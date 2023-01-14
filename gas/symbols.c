@@ -1,5 +1,5 @@
 /* symbols.c -symbol table-
-   Copyright (C) 1987-2020 Free Software Foundation, Inc.
+   Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -196,7 +196,8 @@ static void *
 symbol_entry_find (htab_t table, const char *name)
 {
   hashval_t hash = htab_hash_string (name);
-  symbol_entry_t needle = { { { 0 }, hash, name, 0, 0, 0 } };
+  symbol_entry_t needle = { { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			      hash, name, 0, 0, 0 } };
   return htab_find_with_hash (table, &needle, hash);
 }
 
@@ -2430,14 +2431,13 @@ S_SET_EXTERNAL (symbolS *s)
   if (s->bsym->flags & BSF_SECTION_SYM)
     {
       /* Do not reassign section symbols.  */
-      as_warn (_("section symbols are already global"));
+      as_warn (_("can't make section symbol global"));
       return;
     }
 #ifndef TC_GLOBAL_REGISTER_SYMBOL_OK
   if (S_GET_SEGMENT (s) == reg_section)
     {
-      as_bad ("can't make register symbol `%s' global",
-	      S_GET_NAME (s));
+      as_bad (_("can't make register symbol global"));
       return;
     }
 #endif

@@ -1,6 +1,6 @@
 /* cpu.c --- CPU for RL78 simulator.
 
-   Copyright (C) 2011-2020 Free Software Foundation, Inc.
+   Copyright (C) 2011-2021 Free Software Foundation, Inc.
    Contributed by Red Hat, Inc.
 
    This file is part of the GNU simulators.
@@ -35,6 +35,8 @@ int timer_enabled = 2;
 int rl78_g10_mode = 0;
 int g13_multiply = 0;
 int g14_multiply = 0;
+
+SI pc;
 
 #define REGISTER_ADDRESS 0xffee0
 

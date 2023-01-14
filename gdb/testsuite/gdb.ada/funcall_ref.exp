@@ -1,4 +1,4 @@
-# Copyright 2008-2020 Free Software Foundation, Inc.
+# Copyright 2008-2021 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ foreach_with_prefix scenario {all minimal} {
     # references).
     set pass_re [multi_line "type = <ref> record" \
 		     "    n: natural;" \
-		     "    s: access array \\(1 \\.\\. n\\) of character;" \
+		     "    s: array \\(1 \\.\\. n\\) of character;" \
 		     "end record"]
     # With DWARF we get debuginfo that could in theory show "1..n" for
     # the range:

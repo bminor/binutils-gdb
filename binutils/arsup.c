@@ -1,5 +1,5 @@
 /* arsup.c - Archive support for MRI compatibility
-   Copyright (C) 1992-2020 Free Software Foundation, Inc.
+   Copyright (C) 1992-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -345,13 +345,25 @@ ar_save (void)
   else
     {
       char *ofilename = xstrdup (bfd_get_filename (obfd));
+      bfd_boolean skip_stat = FALSE;
+      struct stat target_stat;
+      int ofd = -1;
 
       if (deterministic > 0)
         obfd->flags |= BFD_DETERMINISTIC_OUTPUT;
 
+#if !defined (_WIN32) || defined (__CYGWIN32__)
+      /* It's OK to fail; at worst it will result in SMART_RENAME using a slow
+         copy fallback to write the output.  */
+      ofd = dup (fileno ((FILE *) obfd->iostream));
+      if (lstat (real_name, &target_stat) != 0)
+	skip_stat = TRUE;
+#endif
+
       bfd_close (obfd);
 
-      smart_rename (ofilename, real_name, 0);
+      smart_rename (ofilename, real_name, ofd,
+		    skip_stat ? NULL : &target_stat, 0);
       obfd = 0;
       free (ofilename);
     }

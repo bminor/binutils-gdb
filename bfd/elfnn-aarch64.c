@@ -1,5 +1,5 @@
 /* AArch64-specific support for NN-bit ELF.
-   Copyright (C) 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2009-2021 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -2854,11 +2854,11 @@ elfNN_aarch64_copy_indirect_symbol (struct bfd_link_info *info,
 
 static void
 elfNN_aarch64_merge_symbol_attribute (struct elf_link_hash_entry *h,
-				      const Elf_Internal_Sym *isym,
+				      unsigned int st_other,
 				      bfd_boolean definition ATTRIBUTE_UNUSED,
 				      bfd_boolean dynamic ATTRIBUTE_UNUSED)
 {
-  unsigned int isym_sto = isym->st_other & ~ELF_ST_VISIBILITY (-1);
+  unsigned int isym_sto = st_other & ~ELF_ST_VISIBILITY (-1);
   unsigned int h_sto = h->other & ~ELF_ST_VISIBILITY (-1);
 
   if (isym_sto == h_sto)
@@ -7331,10 +7331,10 @@ elfNN_aarch64_print_private_bfd_data (bfd *abfd, void *ptr)
      containing valid data.  */
 
   /* xgettext:c-format */
-  fprintf (file, _("private flags = %lx:"), elf_elfheader (abfd)->e_flags);
+  fprintf (file, _("private flags = 0x%lx:"), elf_elfheader (abfd)->e_flags);
 
   if (flags)
-    fprintf (file, _("<Unrecognised flag bits set>"));
+    fprintf (file, _(" <Unrecognised flag bits set>"));
 
   fputc ('\n', file);
 

@@ -1,6 +1,6 @@
 /* Very simple "bfd" target, for GDB, the GNU debugger.
 
-   Copyright (C) 2003-2020 Free Software Foundation, Inc.
+   Copyright (C) 2003-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -35,7 +35,6 @@ class target_bfd : public target_ops
 {
 public:
   explicit target_bfd (struct bfd *bfd);
-  ~target_bfd () override;
 
   const target_info &info () const override
   { return target_bfd_target_info; }
@@ -60,7 +59,7 @@ private:
   /* The section table build from the ALLOC sections in BFD.  Note
      that we can't rely on extracting the BFD from a random section in
      the table, since the table can be legitimately empty.  */
-  struct target_section_table m_table;
+  target_section_table m_table;
 };
 
 target_xfer_status
@@ -76,8 +75,7 @@ target_bfd::xfer_partial (target_object object,
       {
 	return section_table_xfer_memory_partial (readbuf, writebuf,
 						  offset, len, xfered_len,
-						  m_table.sections,
-						  m_table.sections_end);
+						  m_table);
       }
     default:
       return TARGET_XFER_E_IO;
@@ -91,16 +89,9 @@ target_bfd::get_section_table ()
 }
 
 target_bfd::target_bfd (struct bfd *abfd)
-  : m_bfd (gdb_bfd_ref_ptr::new_reference (abfd))
+  : m_bfd (gdb_bfd_ref_ptr::new_reference (abfd)),
+    m_table (build_section_table (abfd))
 {
-  m_table.sections = NULL;
-  m_table.sections_end = NULL;
-  build_section_table (abfd, &m_table.sections, &m_table.sections_end);
-}
-
-target_bfd::~target_bfd ()
-{
-  xfree (m_table.sections);
 }
 
 target_ops *

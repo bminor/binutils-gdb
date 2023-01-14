@@ -1,6 +1,6 @@
 /* Python interface to types.
 
-   Copyright (C) 2008-2020 Free Software Foundation, Inc.
+   Copyright (C) 2008-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,7 +28,7 @@
 #include "language.h"
 #include "typeprint.h"
 
-typedef struct pyty_type_object
+struct type_object
 {
   PyObject_HEAD
   struct type *type;
@@ -36,35 +36,35 @@ typedef struct pyty_type_object
   /* If a Type object is associated with an objfile, it is kept on a
      doubly-linked list, rooted in the objfile.  This lets us copy the
      underlying struct type when the objfile is deleted.  */
-  struct pyty_type_object *prev;
-  struct pyty_type_object *next;
-} type_object;
+  struct type_object *prev;
+  struct type_object *next;
+};
 
 extern PyTypeObject type_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("type_object");
 
 /* A Field object.  */
-typedef struct pyty_field_object
+struct field_object
 {
   PyObject_HEAD
 
   /* Dictionary holding our attributes.  */
   PyObject *dict;
-} field_object;
+};
 
 extern PyTypeObject field_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("field_object");
 
 /* A type iterator object.  */
-typedef struct {
+struct typy_iterator_object {
   PyObject_HEAD
   /* The current field index.  */
   int field;
   /* What to return.  */
   enum gdbpy_iter_kind kind;
   /* Pointer back to the original source type object.  */
-  struct pyty_type_object *source;
-} typy_iterator_object;
+  type_object *source;
+};
 
 extern PyTypeObject type_iterator_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("typy_iterator_object");
@@ -157,7 +157,7 @@ typy_get_code (PyObject *self, void *closure)
 {
   struct type *type = ((type_object *) self)->type;
 
-  return PyInt_FromLong (type->code ());
+  return gdb_py_object_from_longest (type->code ()).release ();
 }
 
 /* Helper function for typy_fields which converts a single field to a
@@ -183,8 +183,7 @@ convert_field (struct type *type, int field)
 
       if (type->code () == TYPE_CODE_ENUM)
 	{
-	  arg.reset (gdb_py_long_from_longest (TYPE_FIELD_ENUMVAL (type,
-								   field)));
+	  arg = gdb_py_object_from_longest (TYPE_FIELD_ENUMVAL (type, field));
 	  attrstring = "enumval";
 	}
       else
@@ -192,8 +191,7 @@ convert_field (struct type *type, int field)
 	  if (TYPE_FIELD_LOC_KIND (type, field) == FIELD_LOC_KIND_DWARF_BLOCK)
 	    arg = gdbpy_ref<>::new_reference (Py_None);
 	  else
-	    arg.reset (gdb_py_long_from_longest (TYPE_FIELD_BITPOS (type,
-								    field)));
+	    arg = gdb_py_object_from_longest (TYPE_FIELD_BITPOS (type, field));
 	  attrstring = "bitpos";
 	}
 
@@ -235,7 +233,7 @@ convert_field (struct type *type, int field)
   if (PyObject_SetAttrString (result.get (), "is_base_class", arg.get ()) < 0)
     return NULL;
 
-  arg.reset (PyLong_FromLong (TYPE_FIELD_BITSIZE (type, field)));
+  arg = gdb_py_object_from_longest (TYPE_FIELD_BITSIZE (type, field));
   if (arg == NULL)
     return NULL;
   if (PyObject_SetAttrString (result.get (), "bitsize", arg.get ()) < 0)
@@ -420,7 +418,7 @@ static PyObject *
 typy_get_objfile (PyObject *self, void *closure)
 {
   struct type *type = ((type_object *) self)->type;
-  struct objfile *objfile = TYPE_OBJFILE (type);
+  struct objfile *objfile = type->objfile ();
 
   if (objfile == nullptr)
     Py_RETURN_NONE;
@@ -473,6 +471,7 @@ typy_get_composite (struct type *type)
   if (type->code () != TYPE_CODE_STRUCT
       && type->code () != TYPE_CODE_UNION
       && type->code () != TYPE_CODE_ENUM
+      && type->code () != TYPE_CODE_METHOD
       && type->code () != TYPE_CODE_FUNC)
     {
       PyErr_SetString (PyExc_TypeError,
@@ -598,11 +597,11 @@ typy_range (PyObject *self, PyObject *args)
       break;
     }
 
-  gdbpy_ref<> low_bound (PyLong_FromLong (low));
+  gdbpy_ref<> low_bound = gdb_py_object_from_longest (low);
   if (low_bound == NULL)
     return NULL;
 
-  gdbpy_ref<> high_bound (PyLong_FromLong (high));
+  gdbpy_ref<> high_bound = gdb_py_object_from_longest (high);
   if (high_bound == NULL)
     return NULL;
 
@@ -725,7 +724,7 @@ typy_get_sizeof (PyObject *self, void *closure)
 
   if (size_varies)
     Py_RETURN_NONE;
-  return gdb_py_long_from_longest (TYPE_LENGTH (type));
+  return gdb_py_object_from_longest (TYPE_LENGTH (type)).release ();
 }
 
 /* Return the alignment of the type represented by SELF, in bytes.  */
@@ -1068,7 +1067,6 @@ static void
 save_objfile_types (struct objfile *objfile, void *datum)
 {
   type_object *obj = (type_object *) datum;
-  htab_t copied_types;
 
   if (!gdb_python_initialized)
     return;
@@ -1077,23 +1075,22 @@ save_objfile_types (struct objfile *objfile, void *datum)
      operating on.  */
   gdbpy_enter enter_py (objfile->arch (), current_language);
 
-  copied_types = create_copied_types_hash (objfile);
+  htab_up copied_types = create_copied_types_hash (objfile);
 
   while (obj)
     {
       type_object *next = obj->next;
 
-      htab_empty (copied_types);
+      htab_empty (copied_types.get ());
 
-      obj->type = copy_type_recursive (objfile, obj->type, copied_types);
+      obj->type = copy_type_recursive (objfile, obj->type,
+				       copied_types.get ());
 
       obj->next = NULL;
       obj->prev = NULL;
 
       obj = next;
     }
-
-  htab_delete (copied_types);
 }
 
 static void
@@ -1101,11 +1098,11 @@ set_type (type_object *obj, struct type *type)
 {
   obj->type = type;
   obj->prev = NULL;
-  if (type && TYPE_OBJFILE (type))
+  if (type != nullptr && type->objfile () != nullptr)
     {
-      struct objfile *objfile = TYPE_OBJFILE (type);
+      struct objfile *objfile = type->objfile ();
 
-      obj->next = ((struct pyty_type_object *)
+      obj->next = ((type_object *)
 		   objfile_data (objfile, typy_objfile_data_key));
       if (obj->next)
 	obj->next->prev = obj;
@@ -1122,10 +1119,10 @@ typy_dealloc (PyObject *obj)
 
   if (type->prev)
     type->prev->next = type->next;
-  else if (type->type && TYPE_OBJFILE (type->type))
+  else if (type->type != nullptr && type->type->objfile () != nullptr)
     {
       /* Must reset head of list.  */
-      struct objfile *objfile = TYPE_OBJFILE (type->type);
+      struct objfile *objfile = type->type->objfile ();
 
       if (objfile)
 	set_objfile_data (objfile, typy_objfile_data_key, type->next);

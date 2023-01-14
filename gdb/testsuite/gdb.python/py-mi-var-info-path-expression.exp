@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2020 Free Software Foundation, Inc.
+# Copyright (C) 2018-2021 Free Software Foundation, Inc.
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
@@ -18,11 +18,6 @@
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
-gdb_exit
-if {[mi_gdb_start]} {
-    continue
-}
-
 #
 # Start here
 #
@@ -31,6 +26,8 @@ standard_testfile
 if {[gdb_compile "$srcdir/$subdir/$srcfile" $binfile executable {debug}] != "" } {
     return -1
 }
+
+mi_clean_restart $binfile
 
 # Skip all tests if Python scripting is not enabled.
 if { [mi_skip_python_tests] } { continue }
@@ -48,9 +45,7 @@ mi_gdb_test "set python print-stack full" \
   ".*\\^done" \
   "set python print-stack full"
 
-
-mi_run_to_main
-
+mi_runto_main
 
 mi_continue_to_line [gdb_get_line_number "next line" ${srcfile}] \
   "step to breakpoint"

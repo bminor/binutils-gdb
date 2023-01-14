@@ -1,5 +1,5 @@
 # Expect script for RISC-V ELF linker tests
-#   Copyright (C) 2017-2020 Free Software Foundation, Inc.
+#   Copyright (C) 2017-2021 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -19,8 +19,68 @@
 # MA 02110-1301, USA.
 #
 
+proc riscv_choose_ilp32_emul {} {
+    if { [istarget "riscvbe-*"] \
+	 || [istarget "riscv32be-*"] \
+	 || [istarget "riscv64be-*"] } {
+        return "elf32briscv"
+    }
+    return "elf32lriscv"
+}
+
+proc riscv_choose_lp64_emul {} {
+    if { [istarget "riscvbe-*"] \
+	 || [istarget "riscv32be-*"] \
+	 || [istarget "riscv64be-*"] } {
+        return "elf64briscv"
+    }
+    return "elf64lriscv"
+}
+
+# target: rv32 or rv64.
+# output: Which output you want?  (exe, pie, .so)
+proc run_dump_test_ifunc { name target output} {
+    set asflags ""
+    set ldflags "-z nocombreloc"
+
+    switch -- $output {
+	exe {
+	    set ext "exe"
+	}
+	pie {
+	    set ext "pie"
+	    set ldflags "$ldflags -pie"
+	}
+	pic {
+	    set ext "so"
+	    set ldflags "$ldflags -shared"
+	}
+    }
+
+    switch -- $target {
+	rv32 {
+	    set asflags "$asflags -march=rv32i -mabi=ilp32"
+	    set ldflags "$ldflags -m[riscv_choose_ilp32_emul]"
+	}
+	rv64 {
+	    set asflags "$asflags -march=rv64i -mabi=lp64 -defsym __64_bit__=1"
+	    set ldflags "$ldflags -m[riscv_choose_lp64_emul]"
+	}
+    }
+
+    run_ld_link_tests [list \
+	[list "$name ($target-$output)" \
+	      "$ldflags" "" \
+	      "$asflags" \
+	      [list "$name.s"] \
+	      [concat [list "readelf -rW $name-$output.rd"] \
+		      [list "objdump -dw $name.d"]] \
+	      "$name-$target.$ext"]]
+}
+
 if [istarget "riscv*-*-*"] {
     run_dump_test "call-relax"
+    run_dump_test "pcgp-relax"
     run_dump_test "c-lui"
     run_dump_test "c-lui-2"
     run_dump_test "disas-jalr"
@@ -47,21 +107,20 @@ if [istarget "riscv*-*-*"] {
     run_dump_test "attr-merge-priv-spec-failed-04"
     run_dump_test "attr-merge-priv-spec-failed-05"
     run_dump_test "attr-merge-priv-spec-failed-06"
-    run_ld_link_tests {
-	{ "Weak reference 32" "-T weakref.ld -melf32lriscv" ""
-	    "-march=rv32i -mabi=ilp32" {weakref32.s}
-	    {{objdump -d weakref32.d}} "weakref32"}
-	{ "Weak reference 64" "-T weakref.ld -melf64lriscv" ""
-	    "-march=rv64i -mabi=lp64" {weakref64.s}
-	    {{objdump -d weakref64.d}} "weakref64"}
-    }
+    run_ld_link_tests [list \
+	[list "Weak reference 32" "-T weakref.ld -m[riscv_choose_ilp32_emul]" "" \
+	    "-march=rv32i -mabi=ilp32" {weakref32.s} \
+	    {{objdump -d weakref32.d}} "weakref32"] \
+	[list "Weak reference 64" "-T weakref.ld -m[riscv_choose_lp64_emul]" "" \
+	    "-march=rv64i -mabi=lp64" {weakref64.s} \
+	    {{objdump -d weakref64.d}} "weakref64"]]
 
     # The following tests require shared library support.
     if ![check_shared_lib_support] {
 	return
     }
 
-    set abis { rv32gc ilp32 elf32lriscv rv64gc lp64 elf64lriscv }
+    set abis [list rv32gc ilp32 [riscv_choose_ilp32_emul] rv64gc lp64 [riscv_choose_lp64_emul]]
     foreach { arch abi emul } $abis {
 	# This checks whether our linker scripts handle __global_pointer$
 	# correctly.  It should be defined in executables and PIE, but not
@@ -88,4 +147,81 @@ if [istarget "riscv*-*-*"] {
 	    {} "lib-nopic-01a.so" }
     }
     run_dump_test "lib-nopic-01b"
+
+    # IFUNC testcases.
+    # Check IFUNC by single type relocs.
+    run_dump_test_ifunc "ifunc-reloc-call-01" rv32 exe
+    run_dump_test_ifunc "ifunc-reloc-call-01" rv32 pie
+    run_dump_test_ifunc "ifunc-reloc-call-01" rv32 pic
+    run_dump_test_ifunc "ifunc-reloc-call-02" rv32 exe
+    run_dump_test_ifunc "ifunc-reloc-call-02" rv32 pie
+    run_dump_test_ifunc "ifunc-reloc-call-02" rv32 pic
+    run_dump_test_ifunc "ifunc-reloc-pcrel" rv32 exe
+    run_dump_test_ifunc "ifunc-reloc-pcrel" rv32 pie
+    run_dump_test_ifunc "ifunc-reloc-pcrel" rv32 pic
+    run_dump_test_ifunc "ifunc-reloc-data" rv32 exe
+    run_dump_test_ifunc "ifunc-reloc-data" rv32 pie
+    run_dump_test_ifunc "ifunc-reloc-data" rv32 pic
+    run_dump_test_ifunc "ifunc-reloc-got" rv32 exe
+    run_dump_test_ifunc "ifunc-reloc-got" rv32 pie
+    run_dump_test_ifunc "ifunc-reloc-got" rv32 pic
+    run_dump_test_ifunc "ifunc-reloc-pcrel" rv64 exe
+    run_dump_test_ifunc "ifunc-reloc-pcrel" rv64 pie
+    run_dump_test_ifunc "ifunc-reloc-pcrel" rv64 pic
+    run_dump_test_ifunc "ifunc-reloc-data" rv64 exe
+    run_dump_test_ifunc "ifunc-reloc-data" rv64 pie
+    run_dump_test_ifunc "ifunc-reloc-data" rv64 pic
+    run_dump_test_ifunc "ifunc-reloc-got" rv64 exe
+    run_dump_test_ifunc "ifunc-reloc-got" rv64 pie
+    run_dump_test_ifunc "ifunc-reloc-got" rv64 pic
+    # Check the IFUNC PLT and non-PLT relocs.
+    run_dump_test_ifunc "ifunc-nonplt" rv32 exe
+    run_dump_test_ifunc "ifunc-nonplt" rv32 pie
+    run_dump_test_ifunc "ifunc-nonplt" rv32 pic
+    run_dump_test_ifunc "ifunc-plt-01" rv32 exe
+    run_dump_test_ifunc "ifunc-plt-01" rv32 pie
+    run_dump_test_ifunc "ifunc-plt-01" rv32 pic
+    run_dump_test_ifunc "ifunc-plt-02" rv32 exe
+    run_dump_test_ifunc "ifunc-plt-02" rv32 pie
+    run_dump_test_ifunc "ifunc-plt-02" rv32 pic
+    run_dump_test_ifunc "ifunc-nonplt" rv64 exe
+    run_dump_test_ifunc "ifunc-nonplt" rv64 pie
+    run_dump_test_ifunc "ifunc-nonplt" rv64 pic
+    run_dump_test_ifunc "ifunc-plt-01" rv64 exe
+    run_dump_test_ifunc "ifunc-plt-01" rv64 pie
+    run_dump_test_ifunc "ifunc-plt-01" rv64 pic
+    run_dump_test_ifunc "ifunc-plt-02" rv64 exe
+    run_dump_test_ifunc "ifunc-plt-02" rv64 pie
+    run_dump_test_ifunc "ifunc-plt-02" rv64 pic
+    # Check the .rela.iplt overwrite issue.
+    run_dump_test_ifunc "ifunc-plt-got-overwrite" rv32 exe
+    run_dump_test_ifunc "ifunc-plt-got-overwrite" rv32 pie
+    run_dump_test_ifunc "ifunc-plt-got-overwrite" rv32 pic
+    run_dump_test_ifunc "ifunc-plt-got-overwrite" rv64 exe
+    run_dump_test_ifunc "ifunc-plt-got-overwrite" rv64 pie
+    run_dump_test_ifunc "ifunc-plt-got-overwrite" rv64 pic
+
+    # Setup shared libraries.
+    run_ld_link_tests {
+       { "Build shared library for IFUNC non-PLT caller"
+	 "-shared" "" "" {ifunc-seperate-caller-nonplt.s}
+	 {} "ifunc-seperate-caller.so" }
+       { "Build shared library for IFUNC PLT caller"
+	 "-shared" "" "" {ifunc-seperate-caller-plt.s}
+	 {} "ifunc-seperate-caller.so" }
+       { "Build shared library for IFUNC resolver"
+	 "-shared" "" "" {ifunc-seperate-resolver.s}
+	 {} "ifunc-seperate-resolver.so" }
+    }
+    # The IFUNC resolver and caller are in the seperate modules.
+    # If IFUNC resolver and caller are linked to the same module,
+    # then the result are the same as the run_dump_test_ifunc.
+    run_dump_test "ifunc-seperate-nonplt-exe"
+    run_dump_test "ifunc-seperate-nonplt-pie"
+    run_dump_test "ifunc-seperate-nonplt-pic"
+    run_dump_test "ifunc-seperate-plt-exe"
+    run_dump_test "ifunc-seperate-plt-pie"
+    run_dump_test "ifunc-seperate-plt-pic"
+    run_dump_test "ifunc-seperate-pcrel-pie"
+    run_dump_test "ifunc-seperate-pcrel-pic"
 }

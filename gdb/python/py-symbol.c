@@ -1,6 +1,6 @@
 /* Python interface to symbols.
 
-   Copyright (C) 2008-2020 Free Software Foundation, Inc.
+   Copyright (C) 2008-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,7 +25,7 @@
 #include "objfiles.h"
 #include "symfile.h"
 
-typedef struct sympy_symbol_object {
+struct symbol_object {
   PyObject_HEAD
   /* The GDB symbol structure this object is wrapping.  */
   struct symbol *symbol;
@@ -33,9 +33,9 @@ typedef struct sympy_symbol_object {
      doubly-linked list, rooted in the objfile.  This lets us
      invalidate the underlying struct symbol when the objfile is
      deleted.  */
-  struct sympy_symbol_object *prev;
-  struct sympy_symbol_object *next;
-} symbol_object;
+  symbol_object *prev;
+  symbol_object *next;
+};
 
 /* Require a valid symbol.  All access to symbol_object->symbol should be
    gated by this call.  */
@@ -131,7 +131,7 @@ sympy_get_addr_class (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  return PyInt_FromLong (SYMBOL_CLASS (symbol));
+  return gdb_py_object_from_longest (SYMBOL_CLASS (symbol)).release ();
 }
 
 static PyObject *
@@ -221,7 +221,7 @@ sympy_line (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  return PyInt_FromLong (SYMBOL_LINE (symbol));
+  return gdb_py_object_from_longest (SYMBOL_LINE (symbol)).release ();
 }
 
 /* Implementation of gdb.Symbol.is_valid (self) -> Boolean.
@@ -307,7 +307,7 @@ set_symbol (symbol_object *obj, struct symbol *symbol)
     {
       struct objfile *objfile = symbol_objfile (symbol);
 
-      obj->next = ((struct sympy_symbol_object *)
+      obj->next = ((symbol_object *)
 		   objfile_data (objfile, sympy_objfile_data_key));
       if (obj->next)
 	obj->next->prev = obj;

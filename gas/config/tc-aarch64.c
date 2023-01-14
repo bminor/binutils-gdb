@@ -1,6 +1,6 @@
 /* tc-aarch64.c -- Assemble for the AArch64 ISA
 
-   Copyright (C) 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2009-2021 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GAS.
@@ -246,12 +246,6 @@ set_fatal_syntax_error (const char *error)
 /* This is an invalid condition code that means no conditional field is
    present. */
 #define COND_ALWAYS 0x10
-
-typedef struct
-{
-  const char *template;
-  unsigned long value;
-} asm_barrier_opt;
 
 typedef struct
 {
@@ -2001,7 +1995,7 @@ s_variant_pcs (int ignored ATTRIBUTE_UNUSED)
   restore_line_pointer (c);
   demand_empty_rest_of_line ();
   bfdsym = symbol_get_bfdsym (sym);
-  elfsym = elf_symbol_from (bfd_asymbol_bfd (bfdsym), bfdsym);
+  elfsym = elf_symbol_from (bfdsym);
   gas_assert (elfsym);
   elfsym->internal_elf_sym.st_other |= STO_AARCH64_VARIANT_PCS;
 }
@@ -3993,7 +3987,7 @@ static int
 parse_barrier (char **str)
 {
   char *p, *q;
-  const asm_barrier_opt *o;
+  const struct aarch64_name_value_pair *o;
 
   p = q = *str;
   while (ISALPHA (*q))
@@ -5259,6 +5253,7 @@ process_omitted_operand (enum aarch64_opnd type, const aarch64_opcode *opcode,
     case AARCH64_OPND_Rm:
     case AARCH64_OPND_Rt:
     case AARCH64_OPND_Rt2:
+    case AARCH64_OPND_Rt_LS64:
     case AARCH64_OPND_Rt_SP:
     case AARCH64_OPND_Rs:
     case AARCH64_OPND_Ra:
@@ -5628,10 +5623,26 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_Rt2:
 	case AARCH64_OPND_Rs:
 	case AARCH64_OPND_Ra:
+	case AARCH64_OPND_Rt_LS64:
 	case AARCH64_OPND_Rt_SYS:
 	case AARCH64_OPND_PAIRREG:
 	case AARCH64_OPND_SVE_Rm:
 	  po_int_reg_or_fail (REG_TYPE_R_Z);
+
+	  /* In LS64 load/store instructions Rt register number must be even
+	     and <=22.  */
+	  if (operands[i] == AARCH64_OPND_Rt_LS64)
+	  {
+	    /* We've already checked if this is valid register.
+	       This will check if register number (Rt) is not undefined for LS64
+	       instructions:
+	       if Rt<4:3> == '11' || Rt<0> == '1' then UNDEFINED.  */
+	    if ((info->reg.regno & 0x18) == 0x18 || (info->reg.regno & 0x01) == 0x01)
+	    {
+	      set_syntax_error (_("invalid Rt register number in 64-byte load/store"));
+	      goto failure;
+	    }
+	  }
 	  break;
 
 	case AARCH64_OPND_Rd_SP:
@@ -6692,10 +6703,51 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	      backtrack_pos = 0;
 	      goto failure;
 	    }
+	  if (val != PARSE_FAIL
+	      && operands[i] == AARCH64_OPND_BARRIER)
+	    {
+	      /* Regular barriers accept options CRm (C0-C15).
+	         DSB nXS barrier variant accepts values > 15.  */
+	      if (val < 0 || val > 15)
+	      {
+	        set_syntax_error (_("the specified option is not accepted in DSB"));
+	        goto failure;
+	      }
+	    }
 	  /* This is an extension to accept a 0..15 immediate.  */
 	  if (val == PARSE_FAIL)
 	    po_imm_or_fail (0, 15);
 	  info->barrier = aarch64_barrier_options + val;
+	  break;
+
+	case AARCH64_OPND_BARRIER_DSB_NXS:
+	  val = parse_barrier (&str);
+	  if (val != PARSE_FAIL)
+	    {
+	      /* DSB nXS barrier variant accept only <option>nXS qualifiers.  */
+	      if (!(val == 16 || val == 20 || val == 24 || val == 28))
+	        {
+	          set_syntax_error (_("the specified option is not accepted in DSB"));
+	          /* Turn off backtrack as this optional operand is present.  */
+	          backtrack_pos = 0;
+	          goto failure;
+	        }
+	    }
+	  else
+	    {
+	      /* DSB nXS barrier variant accept 5-bit unsigned immediate, with
+	         possible values 16, 20, 24 or 28 , encoded as val<3:2>.  */
+	      if (! parse_constant_immediate (&str, &val, imm_reg_type))
+	        goto failure;
+	      if (!(val == 16 || val == 20 || val == 24 || val == 28))
+	        {
+	          set_syntax_error (_("immediate value must be 16, 20, 24, 28"));
+	          goto failure;
+	        }
+	    }
+	  /* Option index is encoded as 2-bit value in val<3:2>.  */
+	  val = (val >> 2) - 4;
+	  info->barrier = aarch64_barrier_dsb_nxs_options + val;
 	  break;
 
 	case AARCH64_OPND_PRFOP:
@@ -8788,6 +8840,16 @@ md_begin (void)
 			   (void *) (aarch64_barrier_options + i));
     }
 
+  for (i = 0; i < ARRAY_SIZE (aarch64_barrier_dsb_nxs_options); i++)
+    {
+      const char *name = aarch64_barrier_dsb_nxs_options[i].name;
+      checked_hash_insert (aarch64_barrier_opt_hsh, name,
+			   (void *) (aarch64_barrier_dsb_nxs_options + i));
+      /* Also hash the name in the upper case.  */
+      checked_hash_insert (aarch64_barrier_opt_hsh, get_upper_str (name),
+			   (void *) (aarch64_barrier_dsb_nxs_options + i));
+    }
+
   for (i = 0; i < ARRAY_SIZE (aarch64_prfops); i++)
     {
       const char* name = aarch64_prfops[i].name;
@@ -8934,6 +8996,29 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
 				    | AARCH64_FEATURE_DOTPROD
 				    | AARCH64_FEATURE_SSBS),
 				    "Cortex-A65AE"},
+  {"cortex-a78", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
+                 AARCH64_FEATURE_F16
+                 | AARCH64_FEATURE_RCPC
+                 | AARCH64_FEATURE_DOTPROD
+                 | AARCH64_FEATURE_SSBS
+                 | AARCH64_FEATURE_PROFILE),
+   "Cortex-A78"},
+  {"cortex-a78ae", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
+                   AARCH64_FEATURE_F16
+                   | AARCH64_FEATURE_RCPC
+                   | AARCH64_FEATURE_DOTPROD
+                   | AARCH64_FEATURE_SSBS
+                   | AARCH64_FEATURE_PROFILE),
+   "Cortex-A78AE"},
+  {"cortex-a78c", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
+                   AARCH64_FEATURE_DOTPROD
+                   | AARCH64_FEATURE_F16
+                   | AARCH64_FEATURE_FLAGM
+                   | AARCH64_FEATURE_PAC
+                   | AARCH64_FEATURE_PROFILE
+                   | AARCH64_FEATURE_RCPC
+                   | AARCH64_FEATURE_SSBS),
+   "Cortex-A78C"},
   {"ares", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
 				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16
 				  | AARCH64_FEATURE_DOTPROD
@@ -8956,6 +9041,25 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
 				  | AARCH64_FEATURE_DOTPROD
 				  | AARCH64_FEATURE_PROFILE),
 				  "Neoverse N1"},
+  {"neoverse-n2", AARCH64_FEATURE (AARCH64_ARCH_V8_5,
+				   AARCH64_FEATURE_BFLOAT16
+				 | AARCH64_FEATURE_I8MM
+				 | AARCH64_FEATURE_F16
+				 | AARCH64_FEATURE_SVE
+				 | AARCH64_FEATURE_SVE2
+				 | AARCH64_FEATURE_SVE2_BITPERM
+				 | AARCH64_FEATURE_MEMTAG
+				 | AARCH64_FEATURE_RNG),
+				 "Neoverse N2"},
+  {"neoverse-v1", AARCH64_FEATURE (AARCH64_ARCH_V8_4,
+			    AARCH64_FEATURE_PROFILE
+			  | AARCH64_FEATURE_CVADP
+			  | AARCH64_FEATURE_SVE
+			  | AARCH64_FEATURE_SSBS
+			  | AARCH64_FEATURE_RNG
+			  | AARCH64_FEATURE_F16
+			  | AARCH64_FEATURE_BFLOAT16
+			  | AARCH64_FEATURE_I8MM), "Neoverse V1"},
   {"qdf24xx", AARCH64_FEATURE (AARCH64_ARCH_V8,
 			       AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO
 			       | AARCH64_FEATURE_RDMA),
@@ -8977,6 +9081,13 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
   {"xgene2", AARCH64_FEATURE (AARCH64_ARCH_V8,
 			      AARCH64_FEATURE_CRC), "APM X-Gene 2"},
   {"cortex-r82", AARCH64_ARCH_V8_R, "Cortex-R82"},
+  {"cortex-x1", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
+                AARCH64_FEATURE_F16
+                | AARCH64_FEATURE_RCPC
+                | AARCH64_FEATURE_DOTPROD
+                | AARCH64_FEATURE_SSBS
+                | AARCH64_FEATURE_PROFILE),
+                "Cortex-X1"},
   {"generic", AARCH64_ARCH_V8, NULL},
 
   {NULL, AARCH64_ARCH_NONE, NULL}
@@ -8999,6 +9110,7 @@ static const struct aarch64_arch_option_table aarch64_archs[] = {
   {"armv8.4-a", AARCH64_ARCH_V8_4},
   {"armv8.5-a", AARCH64_ARCH_V8_5},
   {"armv8.6-a", AARCH64_ARCH_V8_6},
+  {"armv8.7-a", AARCH64_ARCH_V8_7},
   {"armv8-r",	AARCH64_ARCH_V8_R},
   {NULL, AARCH64_ARCH_NONE}
 };
@@ -9089,6 +9201,12 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
 			AARCH64_FEATURE (AARCH64_FEATURE_SVE, 0)},
   {"f64mm",		AARCH64_FEATURE (AARCH64_FEATURE_F64MM, 0),
 			AARCH64_FEATURE (AARCH64_FEATURE_SVE, 0)},
+  {"ls64",		AARCH64_FEATURE (AARCH64_FEATURE_LS64, 0),
+			AARCH64_ARCH_NONE},
+  {"flagm",		AARCH64_FEATURE (AARCH64_FEATURE_FLAGM, 0),
+			AARCH64_ARCH_NONE},
+  {"pauth",		AARCH64_FEATURE (AARCH64_FEATURE_PAC, 0),
+			AARCH64_ARCH_NONE},
   {NULL,		AARCH64_ARCH_NONE, AARCH64_ARCH_NONE},
 };
 

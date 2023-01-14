@@ -1,6 +1,6 @@
 /* Scheme interface to lazy strings.
 
-   Copyright (C) 2010-2020 Free Software Foundation, Inc.
+   Copyright (C) 2010-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -29,7 +29,7 @@
 
 /* The <gdb:lazy-string> smob.  */
 
-typedef struct
+struct lazy_string_smob
 {
   /* This always appears first.  */
   gdb_smob base;
@@ -58,7 +58,7 @@ typedef struct
      This is recorded as an SCM object so that we take advantage of support for
      preserving the type should its owning objfile go away.  */
   SCM type;
-} lazy_string_smob;
+};
 
 static const char lazy_string_smob_name[] = "gdb:lazy-string";
 

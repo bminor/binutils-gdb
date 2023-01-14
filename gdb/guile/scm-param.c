@@ -1,6 +1,6 @@
 /* GDB parameters implemented in Guile.
 
-   Copyright (C) 2008-2020 Free Software Foundation, Inc.
+   Copyright (C) 2008-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -62,7 +62,7 @@ union pascm_variable
    N.B. There is no free function for this smob.
    All objects pointed to by this smob must live in GC space.  */
 
-typedef struct _param_smob
+struct param_smob
 {
   /* This always appears first.  */
   gdb_smob base;
@@ -112,7 +112,7 @@ typedef struct _param_smob
      protect/unprotect the object since a reference to it comes from
      non-gc-managed space (the command context pointer).  */
   SCM containing_scm;
-} param_smob;
+};
 
 static const char param_smob_name[] = "gdb:parameter";
 

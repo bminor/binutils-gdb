@@ -1,6 +1,6 @@
 /* Target-machine dependent code for Renesas H8/300, for GDB.
 
-   Copyright (C) 1988-2020 Free Software Foundation, Inc.
+   Copyright (C) 1988-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -294,7 +294,7 @@ h8300_analyze_prologue (struct gdbarch *gdbarch,
       cache->saved_regs[E_FP_REGNUM] = 0;
       pc += 4;
       if (pc >= current_pc)
-        return current_pc;
+	return current_pc;
       op = read_memory_unsigned_integer (pc, 2, byte_order);
       if (IS_MOV_SP_FP (op))
 	{
@@ -332,7 +332,7 @@ h8300_analyze_prologue (struct gdbarch *gdbarch,
 	  pc += 2;
 	}
       else if (IS_MOV_IMM_Rn (op))
-        {
+	{
 	  int offset = read_memory_integer (pc + 2, 2, byte_order);
 	  regno = op & 0x000f;
 	  op = read_memory_unsigned_integer (pc + 4, 2, byte_order);
@@ -376,7 +376,7 @@ h8300_analyze_prologue (struct gdbarch *gdbarch,
 	  if (IS_PUSH (op1))
 	    {
 	      /* Since the prefix is 0x01x0, this is not a simple pushm but a
-	         stm.l reglist,@-sp */
+		 stm.l reglist,@-sp */
 	      i = ((op & 0x0030) >> 4) + 1;
 	      regno = op1 & 0x000f;
 	      for (; i > 0; regno++, --i)
@@ -397,7 +397,7 @@ h8300_analyze_prologue (struct gdbarch *gdbarch,
      This could also be an initializing store from non-prologue code,
      but I don't think there's any harm in skipping that.  */
   while ((spill_size = h8300_is_argument_spill (gdbarch, pc)) > 0
-         && pc + spill_size <= current_pc)
+	 && pc + spill_size <= current_pc)
     pc += spill_size;
 
   return pc;
@@ -438,12 +438,12 @@ h8300_frame_cache (struct frame_info *this_frame, void **this_cache)
   if (!cache->uses_fp)
     {
       /* We didn't find a valid frame, which means that CACHE->base
-         currently holds the frame pointer for our calling frame.  If
-         we're at the start of a function, or somewhere half-way its
-         prologue, the function's frame probably hasn't been fully
-         setup yet.  Try to reconstruct the base address for the stack
-         frame by looking at the stack pointer.  For truly "frameless"
-         functions this might work too.  */
+	 currently holds the frame pointer for our calling frame.  If
+	 we're at the start of a function, or somewhere half-way its
+	 prologue, the function's frame probably hasn't been fully
+	 setup yet.  Try to reconstruct the base address for the stack
+	 frame by looking at the stack pointer.  For truly "frameless"
+	 functions this might work too.  */
 
       cache->base = get_frame_register_unsigned (this_frame, E_SP_REGNUM)
 		    + cache->sp_offset;
@@ -495,7 +495,7 @@ h8300_frame_prev_register (struct frame_info *this_frame, void **this_cache,
   if (regnum < gdbarch_num_regs (gdbarch)
       && cache->saved_regs[regnum] != -1)
     return frame_unwind_got_memory (this_frame, regnum,
-                                    cache->saved_regs[regnum]);
+				    cache->saved_regs[regnum]);
 
   return frame_unwind_got_register (this_frame, regnum, regnum);
 }
@@ -536,8 +536,8 @@ h8300_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       /* Found a function.  */
       sal = find_pc_line (func_addr, 0);
       if (sal.end && sal.end < func_end)
-        /* Found a line number, use it as end of prologue.  */
-        return sal.end;
+	/* Found a line number, use it as end of prologue.  */
+	return sal.end;
 
       /* No useable line symbol.  Use prologue parsing method.  */
       h8300_init_frame_cache (gdbarch, &cache);
@@ -670,15 +670,15 @@ h8300_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      stack_offset += padded_len;
 
 	      /* That's right --- even though we passed the argument
-	         on the stack, we consume the registers anyway!  Love
-	         me, love my dog.  */
+		 on the stack, we consume the registers anyway!  Love
+		 me, love my dog.  */
 	      reg += padded_len / wordsize;
 	    }
 	  else
 	    {
 	      /* Heavens to Betsy --- it's really going in registers!
-	         Note that on the h8/300s, there are gaps between the
-	         registers in the register file.  */
+		 Note that on the h8/300s, there are gaps between the
+		 registers in the register file.  */
 	      int offset;
 
 	      for (offset = 0; offset < padded_len; offset += wordsize)

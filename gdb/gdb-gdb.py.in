@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2020 Free Software Foundation, Inc.
+# Copyright (C) 2009-2021 Free Software Foundation, Inc.
 #
 # This file is part of GDB.
 #
@@ -113,7 +113,7 @@ class StructTypePrettyPrinter:
         fields.append("reference_type = %s" % self.val['reference_type'])
         fields.append("chain = %s" % self.val['reference_type'])
         fields.append("instance_flags = %s"
-                      % TypeFlagsPrinter(self.val['instance_flags']))
+                      % TypeFlagsPrinter(self.val['m_instance_flags']))
         fields.append("length = %d" % self.val['length'])
         fields.append("main_type = %s" % self.val['main_type'])
         return "\n{" + ",\n ".join(fields) + "}"
@@ -175,7 +175,7 @@ class StructMainTypePrettyPrinter:
             label += " (artificial)"
         fields = []
         fields.append("name = %s" % f['name'])
-        fields.append("type = %s" % f['type'])
+        fields.append("type = %s" % f['m_type'])
         fields.append("loc_kind = %s" % f['loc_kind'])
         fields.append("bitsize = %d" % f['bitsize'])
         fields.append(self.struct_field_location_img(f))
@@ -183,17 +183,18 @@ class StructMainTypePrettyPrinter:
 
     def bound_img(self, bound_name):
         """Return an image of the given main_type's bound."""
-        b = self.val['flds_bnds']['bounds'].dereference()[bound_name]
-        bnd_kind = str(b['kind'])
+        bounds = self.val['flds_bnds']['bounds'].dereference()
+        b = bounds[bound_name]
+        bnd_kind = str(b['m_kind'])
         if bnd_kind == 'PROP_CONST':
-            return str(b['data']['const_val'])
+            return str(b['m_data']['const_val'])
         elif bnd_kind == 'PROP_UNDEFINED':
             return '(undefined)'
         else:
             info = [bnd_kind]
-            if bound_name == 'high' and b['flag_upper_bound_is_count']:
+            if bound_name == 'high' and bounds['flag_upper_bound_is_count']:
                 info.append('upper_bound_is_count')
-            return '{} ({})'.format(str(b['data']['baton']), ','.join(info))
+            return '{} ({})'.format(str(b['m_data']['baton']), ','.join(info))
 
     def bounds_img(self):
         """Return an image of the main_type bounds.
@@ -229,6 +230,11 @@ class StructMainTypePrettyPrinter:
             # tail_call_list is not printed.
         elif type_specific_kind == "TYPE_SPECIFIC_SELF_TYPE":
             img = "self_type = %s" % type_specific['self_type']
+        elif type_specific_kind == "TYPE_SPECIFIC_FIXED_POINT":
+            # The scaling factor is an opaque structure, so we cannot
+            # decode its value from Python (not without insider knowledge).
+            img = ('scaling_factor: <opaque> (call __gmpz_dump with '
+                   ' _mp_num and _mp_den fields if needed)')
         else:
             img = ("type_specific = ??? (unknown type_secific_kind: %s)"
                    % type_specific_kind)

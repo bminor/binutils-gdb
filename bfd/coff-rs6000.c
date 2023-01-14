@@ -1,5 +1,5 @@
 /* BFD back-end for IBM RS/6000 "XCOFF" files.
-   Copyright (C) 1990-2020 Free Software Foundation, Inc.
+   Copyright (C) 1990-2021 Free Software Foundation, Inc.
    Written by Metin G. Ozisik, Mimi Phuong-Thao Vo, and John Gilmore.
    Archive support from Damon A. Permezel.
    Contributed by IBM Corporation and Cygnus Support.
@@ -148,19 +148,15 @@ static bfd_boolean do_pad (bfd *, unsigned int);
 static bfd_boolean do_copy (bfd *, bfd *);
 
 /* Relocation functions */
-static bfd_boolean xcoff_reloc_type_br (XCOFF_RELOC_FUNCTION_ARGS);
+static xcoff_reloc_function xcoff_reloc_type_br;
 
-static bfd_boolean xcoff_complain_overflow_dont_func
-  (XCOFF_COMPLAIN_FUNCTION_ARGS);
-static bfd_boolean xcoff_complain_overflow_bitfield_func
-  (XCOFF_COMPLAIN_FUNCTION_ARGS);
-static bfd_boolean xcoff_complain_overflow_signed_func
-  (XCOFF_COMPLAIN_FUNCTION_ARGS);
-static bfd_boolean xcoff_complain_overflow_unsigned_func
-  (XCOFF_COMPLAIN_FUNCTION_ARGS);
+static xcoff_complain_function xcoff_complain_overflow_dont_func;
+static xcoff_complain_function xcoff_complain_overflow_bitfield_func;
+static xcoff_complain_function xcoff_complain_overflow_signed_func;
+static xcoff_complain_function xcoff_complain_overflow_unsigned_func;
 
-bfd_boolean (*xcoff_calculate_relocation[XCOFF_MAX_CALCULATE_RELOCATION])
-  (XCOFF_RELOC_FUNCTION_ARGS) =
+xcoff_reloc_function *const
+xcoff_calculate_relocation[XCOFF_MAX_CALCULATE_RELOCATION] =
 {
   xcoff_reloc_type_pos,	 /* R_POS   (0x00) */
   xcoff_reloc_type_neg,	 /* R_NEG   (0x01) */
@@ -192,8 +188,8 @@ bfd_boolean (*xcoff_calculate_relocation[XCOFF_MAX_CALCULATE_RELOCATION])
   xcoff_reloc_type_ba,	 /* R_RBRC  (0x1b) */
 };
 
-bfd_boolean (*xcoff_complain_overflow[XCOFF_MAX_COMPLAIN_OVERFLOW])
-  (XCOFF_COMPLAIN_FUNCTION_ARGS) =
+xcoff_complain_function *const
+xcoff_complain_overflow[XCOFF_MAX_COMPLAIN_OVERFLOW] =
 {
   xcoff_complain_overflow_dont_func,
   xcoff_complain_overflow_bitfield_func,
@@ -2096,11 +2092,23 @@ xcoff_write_archive_contents_old (bfd *abfd)
 	  struct xcoff_ar_hdr *ahdrp;
 	  struct stat s;
 
-	  if (stat (bfd_get_filename (sub), &s) != 0)
+	  if ((sub->flags & BFD_IN_MEMORY) != 0)
 	    {
-	      bfd_set_error (bfd_error_system_call);
+	      /* Assume we just "made" the member, and fake it.  */
+	      struct bfd_in_memory *bim
+		= (struct bfd_in_memory *) sub->iostream;
+	      time (&s.st_mtime);
+	      s.st_uid = getuid ();
+	      s.st_gid = getgid ();
+	      s.st_mode = 0644;
+	      s.st_size = bim->size;
+	    }
+	  else if (stat (bfd_get_filename (sub), &s) != 0)
+	    {
+	      bfd_set_input_error (sub, bfd_error_system_call);
 	      return FALSE;
 	    }
+
 	  if ((abfd->flags & BFD_DETERMINISTIC_OUTPUT) != 0)
 	    {
 	      s.st_mtime = 0;
@@ -2320,14 +2328,23 @@ xcoff_write_archive_contents_big (bfd *abfd)
 	  struct xcoff_ar_hdr_big *ahdrp;
 	  struct stat s;
 
-	  /* XXX This should actually be a call to stat64 (at least on
-	     32-bit machines).
-	     XXX This call will fail if the original object is not found.  */
-	  if (stat (bfd_get_filename (current_bfd), &s) != 0)
+	  if ((current_bfd->flags & BFD_IN_MEMORY) != 0)
 	    {
-	      bfd_set_error (bfd_error_system_call);
+	      /* Assume we just "made" the member, and fake it.  */
+	      struct bfd_in_memory *bim
+		= (struct bfd_in_memory *) current_bfd->iostream;
+	      time (&s.st_mtime);
+	      s.st_uid = getuid ();
+	      s.st_gid = getgid ();
+	      s.st_mode = 0644;
+	      s.st_size = bim->size;
+	    }
+	  else if (stat (bfd_get_filename (current_bfd), &s) != 0)
+	    {
+	      bfd_set_input_error (current_bfd, bfd_error_system_call);
 	      return FALSE;
 	    }
+
 	  if ((abfd->flags & BFD_DETERMINISTIC_OUTPUT) != 0)
 	    {
 	      s.st_mtime = 0;
@@ -3960,7 +3977,7 @@ HOWTO (0,			/* type */
    The first word of global linkage code must be modified by filling in
    the correct TOC offset.  */
 
-static unsigned long xcoff_glink_code[9] =
+static const unsigned long xcoff_glink_code[9] =
   {
     0x81820000,	/* lwz r12,0(r2) */
     0x90410014,	/* stw r2,20(r1) */
@@ -4184,6 +4201,7 @@ const bfd_target rs6000_xcoff_vec =
     '/',			/* ar_pad_char */
     15,				/* ar_max_namelen */
     0,				/* match priority.  */
+    TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */
 
     /* data */
     bfd_getb64,
@@ -4365,6 +4383,7 @@ const bfd_target powerpc_xcoff_vec =
     '/',			/* ar_pad_char */
     15,				/* ar_max_namelen */
     0,				/* match priority.  */
+    TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */
 
     /* data */
     bfd_getb64,

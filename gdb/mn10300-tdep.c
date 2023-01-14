@@ -1,6 +1,6 @@
 /* Target-dependent code for the Matsushita MN10300 for GDB, the GNU debugger.
 
-   Copyright (C) 1996-2020 Free Software Foundation, Inc.
+   Copyright (C) 1996-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -364,8 +364,8 @@ check_for_saved (void *result_untyped, pv_t addr, CORE_ADDR size, pv_t value)
    information.  */
 static void
 mn10300_analyze_prologue (struct gdbarch *gdbarch,
-                          CORE_ADDR start_pc, CORE_ADDR limit_pc,
-                          struct mn10300_prologue *result)
+			  CORE_ADDR start_pc, CORE_ADDR limit_pc,
+			  struct mn10300_prologue *result)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR pc;
@@ -399,7 +399,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
       gdb_byte instr[2];
 
       /* Instructions can be as small as one byte; however, we usually
-         need at least two bytes to do the decoding, so fetch that many
+	 need at least two bytes to do the decoding, so fetch that many
 	 to begin with.  */
       status = target_read_memory (pc, instr, 2);
       if (status != 0)
@@ -472,7 +472,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	}
       /* mov aM, aN */
       else if ((instr[0] & 0xf0) == 0x90
-               && (instr[0] & 0x03) != ((instr[0] & 0x0c) >> 2))
+	       && (instr[0] & 0x03) != ((instr[0] & 0x0c) >> 2))
 	{
 	  int aN = instr[0] & 0x03;
 	  int aM = (instr[0] & 0x0c) >> 2;
@@ -483,7 +483,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	}
       /* mov dM, dN */
       else if ((instr[0] & 0xf0) == 0x80
-               && (instr[0] & 0x03) != ((instr[0] & 0x0c) >> 2))
+	       && (instr[0] & 0x03) != ((instr[0] & 0x0c) >> 2))
 	{
 	  int dN = instr[0] & 0x03;
 	  int dM = (instr[0] & 0x0c) >> 2;
@@ -575,7 +575,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	  imm8 = extract_signed_integer (&instr[1], 1, byte_order);
 
 	  regs[E_A0_REGNUM + aN] = pv_add_constant (regs[E_A0_REGNUM + aN],
-	                                            imm8);
+						    imm8);
 
 	  pc += 2;
 	}
@@ -596,7 +596,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	  imm16 = extract_signed_integer (buf, 2, byte_order);
 
 	  regs[E_A0_REGNUM + aN] = pv_add_constant (regs[E_A0_REGNUM + aN],
-	                                            imm16);
+						    imm16);
 
 	  pc += 4;
 	}
@@ -616,7 +616,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	  imm32 = extract_signed_integer (buf, 2, byte_order);
 
 	  regs[E_A0_REGNUM + aN] = pv_add_constant (regs[E_A0_REGNUM + aN],
-	                                            imm32);
+						    imm32);
 	  pc += 6;
 	}
       /* fmov fsM, (rN) */
@@ -919,7 +919,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	}
       /* mov imm8, aN */
       else if ((instr[0] & 0xf0) == 0x90)
-        {
+	{
 	  int aN = instr[0] & 0x03;
 	  LONGEST imm8;
 
@@ -930,7 +930,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	}
       /* mov imm16, aN */
       else if ((instr[0] & 0xfc) == 0x24)
-        {
+	{
 	  int aN = instr[0] & 0x03;
 	  gdb_byte buf[2];
 	  LONGEST imm16;
@@ -945,7 +945,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	}
       /* mov imm32, aN */
       else if (instr[0] == 0xfc && ((instr[1] & 0xfc) == 0xdc))
-        {
+	{
 	  int aN = instr[1] & 0x03;
 	  gdb_byte buf[4];
 	  LONGEST imm32;
@@ -960,7 +960,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	}
       /* mov imm8, dN */
       else if ((instr[0] & 0xf0) == 0x80)
-        {
+	{
 	  int dN = instr[0] & 0x03;
 	  LONGEST imm8;
 
@@ -971,7 +971,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	}
       /* mov imm16, dN */
       else if ((instr[0] & 0xfc) == 0x2c)
-        {
+	{
 	  int dN = instr[0] & 0x03;
 	  gdb_byte buf[2];
 	  LONGEST imm16;
@@ -986,7 +986,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	}
       /* mov imm32, dN */
       else if (instr[0] == 0xfc && ((instr[1] & 0xfc) == 0xcc))
-        {
+	{
 	  int dN = instr[1] & 0x03;
 	  gdb_byte buf[4];
 	  LONGEST imm32;
@@ -1059,9 +1059,9 @@ mn10300_analyze_frame_prologue (struct frame_info *this_frame,
       stop_addr = get_frame_pc (this_frame);
 
       /* If we couldn't find any function containing the PC, then
-         just initialize the prologue cache, but don't do anything.  */
+	 just initialize the prologue cache, but don't do anything.  */
       if (!func_start)
-        stop_addr = func_start;
+	stop_addr = func_start;
 
       mn10300_analyze_prologue (get_frame_arch (this_frame),
 				func_start, stop_addr,
@@ -1111,7 +1111,7 @@ mn10300_frame_this_id (struct frame_info *this_frame,
 
 static struct value *
 mn10300_frame_prev_register (struct frame_info *this_frame,
-		             void **this_prologue_cache, int regnum)
+			     void **this_prologue_cache, int regnum)
 {
   struct mn10300_prologue *p
     = mn10300_analyze_frame_prologue (this_frame, this_prologue_cache);
@@ -1124,7 +1124,7 @@ mn10300_frame_prev_register (struct frame_info *this_frame,
      return a description of the stack slot holding it.  */
   if (p->reg_offset[regnum] != 1)
     return frame_unwind_got_memory (this_frame, regnum,
-                                    frame_base + p->reg_offset[regnum]);
+				    frame_base + p->reg_offset[regnum]);
 
   /* Otherwise, presume we haven't changed the value of this
      register, and get it from the next frame.  */
@@ -1281,7 +1281,7 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
       = gdbarch_unwind_sp (gdbarch, create_new_frame (sp, func_addr));
     if (sp != unwound_sp)
       regcache_cooked_write_unsigned (regcache, E_SP_REGNUM,
-                                      sp - (unwound_sp - sp));
+				      sp - (unwound_sp - sp));
   }
 
   return sp;

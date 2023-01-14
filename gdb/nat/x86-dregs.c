@@ -1,6 +1,6 @@
 /* Debug register code for x86 (i386 and x86-64).
 
-   Copyright (C) 2001-2020 Free Software Foundation, Inc.
+   Copyright (C) 2001-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -251,7 +251,7 @@ Invalid hardware breakpoint type %d in x86_length_and_rw_bits.\n"),
       case 4:
 	return (DR_LEN_4 | rw);
       case 8:
-        if (TARGET_HAS_DR_LEN_8)
+	if (TARGET_HAS_DR_LEN_8)
  	  return (DR_LEN_8 | rw);
 	/* FALL THROUGH */
       default:

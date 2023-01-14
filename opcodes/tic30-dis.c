@@ -1,5 +1,5 @@
 /* Disassembly routines for TMS320C30 architecture
-   Copyright (C) 1998-2020 Free Software Foundation, Inc.
+   Copyright (C) 1998-2021 Free Software Foundation, Inc.
    Contributed by Steven Haworth (steve@pm.cse.rmit.edu.au)
 
    This file is part of the GNU opcodes library.
@@ -701,7 +701,7 @@ print_insn_tic30 (bfd_vma pc, disassemble_info *info)
 	       | (*(info->buffer + bufaddr + 2) << 8)
 	       | *(info->buffer + bufaddr + 3));
   _pc = pc / 4;
-  /* Get the instruction refered to by the current instruction word
+  /* Get the instruction referred to by the current instruction word
      and print it out based on its type.  */
   if (!get_tic30_instruction (insn_word, &insn))
     return -1;

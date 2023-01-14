@@ -1,6 +1,6 @@
 /* Pascal language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 2000-2020 Free Software Foundation, Inc.
+   Copyright (C) 2000-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -84,20 +84,11 @@ pascal_main_name (void)
   return NULL;
 }
 
-/* Determines if type TYPE is a pascal string type.
-   Returns a positive value if the type is a known pascal string type.
-   This function is used by p-valprint.c code to allow better string display.
-   If it is a pascal string type, then it also sets info needed
-   to get the length and the data of the string
-   length_pos, length_size and string_pos are given in bytes.
-   char_size gives the element size in bytes.
-   FIXME: if the position or the size of these fields
-   are not multiple of TARGET_CHAR_BIT then the results are wrong
-   but this does not happen for Free Pascal nor for GPC.  */
+/* See p-lang.h.  */
+
 int
-is_pascal_string_type (struct type *type,int *length_pos,
-                       int *length_size, int *string_pos,
-		       struct type **char_type,
+pascal_is_string_type (struct type *type,int *length_pos, int *length_size,
+		       int *string_pos, struct type **char_type,
 		       const char **arrayname)
 {
   if (type != NULL && type->code () == TYPE_CODE_STRUCT)
@@ -109,19 +100,19 @@ is_pascal_string_type (struct type *type,int *length_pos,
 	  && strcmp (TYPE_FIELD_NAME (type, 0), "length") == 0
 	  && TYPE_FIELD_NAME (type, 1)
 	  && strcmp (TYPE_FIELD_NAME (type, 1), "st") == 0)
-        {
-          if (length_pos)
+	{
+	  if (length_pos)
 	    *length_pos = TYPE_FIELD_BITPOS (type, 0) / TARGET_CHAR_BIT;
-          if (length_size)
+	  if (length_size)
 	    *length_size = TYPE_LENGTH (type->field (0).type ());
-          if (string_pos)
+	  if (string_pos)
 	    *string_pos = TYPE_FIELD_BITPOS (type, 1) / TARGET_CHAR_BIT;
-          if (char_type)
+	  if (char_type)
 	    *char_type = TYPE_TARGET_TYPE (type->field (1).type ());
  	  if (arrayname)
 	    *arrayname = TYPE_FIELD_NAME (type, 1);
-         return 2;
-        };
+	 return 2;
+	};
       /* GNU pascal strings.  */
       /* Three fields: Capacity, length and schema$ or _p_schema.  */
       if (type->num_fields () == 3
@@ -129,15 +120,15 @@ is_pascal_string_type (struct type *type,int *length_pos,
 	  && strcmp (TYPE_FIELD_NAME (type, 0), "Capacity") == 0
 	  && TYPE_FIELD_NAME (type, 1)
 	  && strcmp (TYPE_FIELD_NAME (type, 1), "length") == 0)
-        {
+	{
 	  if (length_pos)
 	    *length_pos = TYPE_FIELD_BITPOS (type, 1) / TARGET_CHAR_BIT;
 	  if (length_size)
 	    *length_size = TYPE_LENGTH (type->field (1).type ());
 	  if (string_pos)
 	    *string_pos = TYPE_FIELD_BITPOS (type, 2) / TARGET_CHAR_BIT;
-          /* FIXME: how can I detect wide chars in GPC ??  */
-          if (char_type)
+	  /* FIXME: how can I detect wide chars in GPC ??  */
+	  if (char_type)
 	    {
 	      *char_type = TYPE_TARGET_TYPE (type->field (2).type ());
 
@@ -146,20 +137,17 @@ is_pascal_string_type (struct type *type,int *length_pos,
 	    }
  	  if (arrayname)
 	    *arrayname = TYPE_FIELD_NAME (type, 2);
-         return 3;
-        };
+	 return 3;
+	};
     }
   return 0;
 }
 
-static void pascal_one_char (int, struct ui_file *, int *);
+/* See p-lang.h.  */
 
-/* Print the character C on STREAM as part of the contents of a literal
-   string.
-   In_quotes is reset to 0 if a char is written with #4 notation.  */
-
-static void
-pascal_one_char (int c, struct ui_file *stream, int *in_quotes)
+void
+pascal_language::print_one_char (int c, struct ui_file *stream,
+				 int *in_quotes) const
 {
   if (c == '\'' || ((unsigned int) c <= 0xff && (PRINT_LITERAL_FORM (c))))
     {
@@ -182,12 +170,15 @@ pascal_one_char (int c, struct ui_file *stream, int *in_quotes)
     }
 }
 
+/* See language.h.  */
+
 void
-pascal_printchar (int c, struct type *type, struct ui_file *stream)
+pascal_language::printchar (int c, struct type *type,
+			    struct ui_file *stream) const
 {
   int in_quotes = 0;
 
-  pascal_one_char (c, stream, &in_quotes);
+  print_one_char (c, stream, &in_quotes);
   if (in_quotes)
     fputs_filtered ("'", stream);
 }
@@ -197,7 +188,7 @@ pascal_printchar (int c, struct type *type, struct ui_file *stream)
 /* Table mapping opcodes into strings for printing operators
    and precedences of the operators.  */
 
-const struct op_print pascal_op_print_tab[] =
+const struct op_print pascal_language::op_print_tab[] =
 {
   {",", BINOP_COMMA, PREC_COMMA, 0},
   {":=", BINOP_ASSIGN, PREC_ASSIGN, 1},
@@ -227,278 +218,139 @@ const struct op_print pascal_op_print_tab[] =
   {NULL, OP_NULL, PREC_PREFIX, 0}
 };
 
-enum pascal_primitive_types {
-  pascal_primitive_type_int,
-  pascal_primitive_type_long,
-  pascal_primitive_type_short,
-  pascal_primitive_type_char,
-  pascal_primitive_type_float,
-  pascal_primitive_type_double,
-  pascal_primitive_type_void,
-  pascal_primitive_type_long_long,
-  pascal_primitive_type_signed_char,
-  pascal_primitive_type_unsigned_char,
-  pascal_primitive_type_unsigned_short,
-  pascal_primitive_type_unsigned_int,
-  pascal_primitive_type_unsigned_long,
-  pascal_primitive_type_unsigned_long_long,
-  pascal_primitive_type_long_double,
-  pascal_primitive_type_complex,
-  pascal_primitive_type_double_complex,
-  nr_pascal_primitive_types
-};
 
-static const char *p_extensions[] =
+/* See language.h.  */
+
+void pascal_language::language_arch_info
+	(struct gdbarch *gdbarch, struct language_arch_info *lai) const
 {
-  ".pas", ".p", ".pp", NULL
-};
+  const struct builtin_type *builtin = builtin_type (gdbarch);
 
-/* Constant data representing the Pascal language.  */
+  /* Helper function to allow shorter lines below.  */
+  auto add  = [&] (struct type * t)
+  {
+    lai->add_primitive_type (t);
+  };
 
-extern const struct language_data pascal_language_data =
+  add (builtin->builtin_int);
+  add (builtin->builtin_long);
+  add (builtin->builtin_short);
+  add (builtin->builtin_char);
+  add (builtin->builtin_float);
+  add (builtin->builtin_double);
+  add (builtin->builtin_void);
+  add (builtin->builtin_long_long);
+  add (builtin->builtin_signed_char);
+  add (builtin->builtin_unsigned_char);
+  add (builtin->builtin_unsigned_short);
+  add (builtin->builtin_unsigned_int);
+  add (builtin->builtin_unsigned_long);
+  add (builtin->builtin_unsigned_long_long);
+  add (builtin->builtin_long_double);
+  add (builtin->builtin_complex);
+  add (builtin->builtin_double_complex);
+
+  lai->set_string_char_type (builtin->builtin_char);
+  lai->set_bool_type (builtin->builtin_bool, "boolean");
+}
+
+/* See language.h.  */
+
+void
+pascal_language::printstr (struct ui_file *stream, struct type *elttype,
+			   const gdb_byte *string, unsigned int length,
+			   const char *encoding, int force_ellipses,
+			   const struct value_print_options *options) const
 {
-  "pascal",			/* Language name */
-  "Pascal",
-  language_pascal,
-  range_check_on,
-  case_sensitive_on,
-  array_row_major,
-  macro_expansion_no,
-  p_extensions,
-  &exp_descriptor_standard,
-  "this",		        /* name_of_this */
-  false,			/* la_store_sym_names_in_linkage_form_p */
-  pascal_op_print_tab,		/* expression operators for printing */
-  1,				/* c-style arrays */
-  0,				/* String lower bound */
-  &default_varobj_ops,
-  "{...}"			/* la_struct_too_deep_ellipsis */
-};
+  enum bfd_endian byte_order = type_byte_order (elttype);
+  unsigned int i;
+  unsigned int things_printed = 0;
+  int in_quotes = 0;
+  int need_comma = 0;
+  int width;
 
-/* Class representing the Pascal language.  */
+  /* Preserve ELTTYPE's original type, just set its LENGTH.  */
+  check_typedef (elttype);
+  width = TYPE_LENGTH (elttype);
 
-class pascal_language : public language_defn
-{
-public:
-  pascal_language ()
-    : language_defn (language_pascal, pascal_language_data)
-  { /* Nothing.  */ }
+  /* If the string was not truncated due to `set print elements', and
+     the last byte of it is a null, we don't print that, in traditional C
+     style.  */
+  if ((!force_ellipses) && length > 0
+      && extract_unsigned_integer (string + (length - 1) * width, width,
+				   byte_order) == 0)
+    length--;
 
-  /* See language.h.  */
-  void language_arch_info (struct gdbarch *gdbarch,
-			   struct language_arch_info *lai) const override
-  {
-    const struct builtin_type *builtin = builtin_type (gdbarch);
+  if (length == 0)
+    {
+      fputs_filtered ("''", stream);
+      return;
+    }
 
-    lai->string_char_type = builtin->builtin_char;
-    lai->primitive_type_vector
-      = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_pascal_primitive_types + 1,
-                              struct type *);
-    lai->primitive_type_vector [pascal_primitive_type_int]
-      = builtin->builtin_int;
-    lai->primitive_type_vector [pascal_primitive_type_long]
-      = builtin->builtin_long;
-    lai->primitive_type_vector [pascal_primitive_type_short]
-      = builtin->builtin_short;
-    lai->primitive_type_vector [pascal_primitive_type_char]
-      = builtin->builtin_char;
-    lai->primitive_type_vector [pascal_primitive_type_float]
-      = builtin->builtin_float;
-    lai->primitive_type_vector [pascal_primitive_type_double]
-      = builtin->builtin_double;
-    lai->primitive_type_vector [pascal_primitive_type_void]
-      = builtin->builtin_void;
-    lai->primitive_type_vector [pascal_primitive_type_long_long]
-      = builtin->builtin_long_long;
-    lai->primitive_type_vector [pascal_primitive_type_signed_char]
-      = builtin->builtin_signed_char;
-    lai->primitive_type_vector [pascal_primitive_type_unsigned_char]
-      = builtin->builtin_unsigned_char;
-    lai->primitive_type_vector [pascal_primitive_type_unsigned_short]
-      = builtin->builtin_unsigned_short;
-    lai->primitive_type_vector [pascal_primitive_type_unsigned_int]
-      = builtin->builtin_unsigned_int;
-    lai->primitive_type_vector [pascal_primitive_type_unsigned_long]
-      = builtin->builtin_unsigned_long;
-    lai->primitive_type_vector [pascal_primitive_type_unsigned_long_long]
-      = builtin->builtin_unsigned_long_long;
-    lai->primitive_type_vector [pascal_primitive_type_long_double]
-      = builtin->builtin_long_double;
-    lai->primitive_type_vector [pascal_primitive_type_complex]
-      = builtin->builtin_complex;
-    lai->primitive_type_vector [pascal_primitive_type_double_complex]
-      = builtin->builtin_double_complex;
+  for (i = 0; i < length && things_printed < options->print_max; ++i)
+    {
+      /* Position of the character we are examining
+	 to see whether it is repeated.  */
+      unsigned int rep1;
+      /* Number of repetitions we have detected so far.  */
+      unsigned int reps;
+      unsigned long int current_char;
 
-    lai->bool_type_symbol = "boolean";
-    lai->bool_type_default = builtin->builtin_bool;
-  }
+      QUIT;
 
-  /* See language.h.  */
+      if (need_comma)
+	{
+	  fputs_filtered (", ", stream);
+	  need_comma = 0;
+	}
 
-  void print_type (struct type *type, const char *varstring,
-		   struct ui_file *stream, int show, int level,
-		   const struct type_print_options *flags) const override
-  {
-    pascal_print_type (type, varstring, stream, show, level, flags);
-  }
+      current_char = extract_unsigned_integer (string + i * width, width,
+					       byte_order);
 
-  /* See language.h.  */
+      rep1 = i + 1;
+      reps = 1;
+      while (rep1 < length
+	     && extract_unsigned_integer (string + rep1 * width, width,
+					  byte_order) == current_char)
+	{
+	  ++rep1;
+	  ++reps;
+	}
 
-  void value_print (struct value *val, struct ui_file *stream,
-		    const struct value_print_options *options) const override
-  {
-    return pascal_value_print (val, stream, options);
-  }
+      if (reps > options->repeat_count_threshold)
+	{
+	  if (in_quotes)
+	    {
+	      fputs_filtered ("', ", stream);
+	      in_quotes = 0;
+	    }
+	  printchar (current_char, elttype, stream);
+	  fprintf_filtered (stream, " %p[<repeats %u times>%p]",
+			    metadata_style.style ().ptr (),
+			    reps, nullptr);
+	  i = rep1 - 1;
+	  things_printed += options->repeat_count_threshold;
+	  need_comma = 1;
+	}
+      else
+	{
+	  if ((!in_quotes) && (PRINT_LITERAL_FORM (current_char)))
+	    {
+	      fputs_filtered ("'", stream);
+	      in_quotes = 1;
+	    }
+	  print_one_char (current_char, stream, &in_quotes);
+	  ++things_printed;
+	}
+    }
 
-  /* See language.h.  */
+  /* Terminate the quotes if necessary.  */
+  if (in_quotes)
+    fputs_filtered ("'", stream);
 
-  void value_print_inner
-	(struct value *val, struct ui_file *stream, int recurse,
-	 const struct value_print_options *options) const override
-  {
-    return pascal_value_print_inner (val, stream, recurse, options);
-  }
-
-  /* See language.h.  */
-
-  int parser (struct parser_state *ps) const override
-  {
-    return pascal_parse (ps);
-  }
-
-  /* See language.h.  */
-
-  void emitchar (int ch, struct type *chtype,
-		 struct ui_file *stream, int quoter) const override
-  {
-    int in_quotes = 0;
-
-    pascal_one_char (ch, stream, &in_quotes);
-    if (in_quotes)
-      fputs_filtered ("'", stream);
-  }
-
-  /* See language.h.  */
-
-  void printchar (int ch, struct type *chtype,
-		  struct ui_file *stream) const override
-  {
-    pascal_printchar (ch, chtype, stream);
-  }
-
-  /* See language.h.  */
-
-  void printstr (struct ui_file *stream, struct type *elttype,
-		 const gdb_byte *string, unsigned int length,
-		 const char *encoding, int force_ellipses,
-		 const struct value_print_options *options) const override
-  {
-    enum bfd_endian byte_order = type_byte_order (elttype);
-    unsigned int i;
-    unsigned int things_printed = 0;
-    int in_quotes = 0;
-    int need_comma = 0;
-    int width;
-
-    /* Preserve ELTTYPE's original type, just set its LENGTH.  */
-    check_typedef (elttype);
-    width = TYPE_LENGTH (elttype);
-
-    /* If the string was not truncated due to `set print elements', and
-       the last byte of it is a null, we don't print that, in traditional C
-       style.  */
-    if ((!force_ellipses) && length > 0
-	&& extract_unsigned_integer (string + (length - 1) * width, width,
-				     byte_order) == 0)
-      length--;
-
-    if (length == 0)
-      {
-	fputs_filtered ("''", stream);
-	return;
-      }
-
-    for (i = 0; i < length && things_printed < options->print_max; ++i)
-      {
-	/* Position of the character we are examining
-	   to see whether it is repeated.  */
-	unsigned int rep1;
-	/* Number of repetitions we have detected so far.  */
-	unsigned int reps;
-	unsigned long int current_char;
-
-	QUIT;
-
-	if (need_comma)
-	  {
-	    fputs_filtered (", ", stream);
-	    need_comma = 0;
-	  }
-
-	current_char = extract_unsigned_integer (string + i * width, width,
-						 byte_order);
-
-	rep1 = i + 1;
-	reps = 1;
-	while (rep1 < length
-	       && extract_unsigned_integer (string + rep1 * width, width,
-					    byte_order) == current_char)
-	  {
-	    ++rep1;
-	    ++reps;
-	  }
-
-	if (reps > options->repeat_count_threshold)
-	  {
-	    if (in_quotes)
-	      {
-		fputs_filtered ("', ", stream);
-		in_quotes = 0;
-	      }
-	    pascal_printchar (current_char, elttype, stream);
-	    fprintf_filtered (stream, " %p[<repeats %u times>%p]",
-			      metadata_style.style ().ptr (),
-			      reps, nullptr);
-	    i = rep1 - 1;
-	    things_printed += options->repeat_count_threshold;
-	    need_comma = 1;
-	  }
-	else
-	  {
-	    if ((!in_quotes) && (PRINT_LITERAL_FORM (current_char)))
-	      {
-		fputs_filtered ("'", stream);
-		in_quotes = 1;
-	      }
-	    pascal_one_char (current_char, stream, &in_quotes);
-	    ++things_printed;
-	  }
-      }
-
-    /* Terminate the quotes if necessary.  */
-    if (in_quotes)
-      fputs_filtered ("'", stream);
-
-    if (force_ellipses || i < length)
-      fputs_filtered ("...", stream);
-  }
-
-  /* See language.h.  */
-
-  void print_typedef (struct type *type, struct symbol *new_symbol,
-		      struct ui_file *stream) const override
-  {
-    pascal_print_typedef (type, new_symbol, stream);
-  }
-
-  /* See language.h.  */
-
-  bool is_string_type_p (struct type *type) const override
-  {
-    return is_pascal_string_type (type, nullptr, nullptr, nullptr,
-				  nullptr, nullptr) > 0;
-  }
-};
+  if (force_ellipses || i < length)
+    fputs_filtered ("...", stream);
+}
 
 /* Single instance of the Pascal language class.  */
 

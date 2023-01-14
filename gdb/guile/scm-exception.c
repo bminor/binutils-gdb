@@ -1,6 +1,6 @@
 /* GDB/Scheme exception support.
 
-   Copyright (C) 2014-2020 Free Software Foundation, Inc.
+   Copyright (C) 2014-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -37,7 +37,7 @@
    One important invariant is that <gdb:exception> smobs are never a valid
    result of a function, other than to signify an exception occurred.  */
 
-typedef struct
+struct exception_smob
 {
   /* This always appears first.  */
   gdb_smob base;
@@ -45,7 +45,7 @@ typedef struct
   /* The key and args parameters to "throw".  */
   SCM key;
   SCM args;
-} exception_smob;
+};
 
 static const char exception_smob_name[] = "gdb:exception";
 

@@ -1,5 +1,5 @@
 /* tc-riscv.h -- header file for tc-riscv.c.
-   Copyright (C) 2011-2020 Free Software Foundation, Inc.
+   Copyright (C) 2011-2021 Free Software Foundation, Inc.
 
    Contributed by Andrew Waterman (andrew@sifive.com).
    Based on MIPS target.
@@ -28,7 +28,9 @@
 struct frag;
 struct expressionS;
 
+#ifndef TARGET_BYTES_BIG_ENDIAN
 #define TARGET_BYTES_BIG_ENDIAN 0
+#endif
 
 #define TARGET_ARCH bfd_arch_riscv
 
@@ -65,16 +67,16 @@ extern void riscv_handle_align (fragS *);
 #define MAX_MEM_FOR_RS_ALIGN_CODE (3 + 4)
 
 /* The ISA of the target may change based on command-line arguments.  */
-#define TARGET_FORMAT riscv_target_format()
+#define TARGET_FORMAT riscv_target_format ()
 extern const char * riscv_target_format (void);
 
-#define md_after_parse_args() riscv_after_parse_args()
+#define md_after_parse_args() riscv_after_parse_args ()
 extern void riscv_after_parse_args (void);
 
 #define md_parse_long_option(arg) riscv_parse_long_option (arg)
 extern int riscv_parse_long_option (const char *);
 
-#define md_pre_output_hook riscv_pre_output_hook()
+#define md_pre_output_hook riscv_pre_output_hook ()
 extern void riscv_pre_output_hook (void);
 
 /* Let the linker resolve all the relocs due to relaxation.  */

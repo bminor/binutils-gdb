@@ -1,6 +1,6 @@
 // output.h -- manage the output file for gold   -*- C++ -*-
 
-// Copyright (C) 2006-2020 Free Software Foundation, Inc.
+// Copyright (C) 2006-2021 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -4688,6 +4688,16 @@ class Output_segment
   offset() const
   { return this->offset_; }
 
+  // Return the segment alignment.
+  uint64_t
+  align() const
+  { return this->align_; }
+
+  // Set the segment alignment.
+  void
+  set_align(uint64_t align)
+  { this->align_ = align; }
+
   // Whether this is a segment created to hold large data sections.
   bool
   is_large_data_segment() const
@@ -4910,6 +4920,8 @@ class Output_segment
   uint64_t paddr_;
   // The size of the segment in memory.
   uint64_t memsz_;
+  // The segment alignment.
+  uint64_t align_;
   // The maximum section alignment.  The is_max_align_known_ field
   // indicates whether this has been finalized.
   uint64_t max_align_;

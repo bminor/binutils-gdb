@@ -1,5 +1,5 @@
 /* tc-ia64.h -- Header file for tc-ia64.c.
-   Copyright (C) 1998-2020 Free Software Foundation, Inc.
+   Copyright (C) 1998-2021 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -327,3 +327,5 @@ typedef struct unwind_record
 #ifdef TE_VMS
 #define DWARF2_VERSION      (dwarf_level < 3 ? 3  : dwarf_level)
 #endif
+
+#define md_single_noop_insn "nop 0"

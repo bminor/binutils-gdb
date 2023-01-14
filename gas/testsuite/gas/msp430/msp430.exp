@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2020 Free Software Foundation, Inc.
+# Copyright (C) 2012-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -53,4 +53,5 @@ if [expr [istarget "msp430-*-*"]]  then {
     run_dump_test "attr-430x-large-any-bad"
     run_dump_test "attr-430x-large-any-good"
     run_dump_test "reloc-lo-430x"
+    run_dump_test "ignore-md"
 }

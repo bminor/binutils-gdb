@@ -1,6 +1,6 @@
 /* Convert symbols from GDB to GCC
 
-   Copyright (C) 2014-2020 Free Software Foundation, Inc.
+   Copyright (C) 2014-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -94,7 +94,7 @@ convert_one_symbol (compile_c_instance *context,
 	case LOC_BLOCK:
 	  kind = GCC_C_SYMBOL_FUNCTION;
 	  addr = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym.symbol));
-	  if (is_global && TYPE_GNU_IFUNC (SYMBOL_TYPE (sym.symbol)))
+	  if (is_global && SYMBOL_TYPE (sym.symbol)->is_gnu_ifunc ())
 	    addr = gnu_ifunc_resolve_addr (target_gdbarch (), addr);
 	  break;
 
@@ -405,7 +405,7 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 				"gcc_symbol_address \"%s\": full symbol\n",
 				identifier);
 	  result = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym));
-	  if (TYPE_GNU_IFUNC (SYMBOL_TYPE (sym)))
+	  if (SYMBOL_TYPE (sym)->is_gnu_ifunc ())
 	    result = gnu_ifunc_resolve_addr (target_gdbarch (), result);
 	  found = 1;
 	}
@@ -487,7 +487,7 @@ static void
 generate_vla_size (compile_instance *compiler,
 		   string_file *stream,
 		   struct gdbarch *gdbarch,
-		   unsigned char *registers_used,
+		   std::vector<bool> &registers_used,
 		   CORE_ADDR pc,
 		   struct type *type,
 		   struct symbol *sym)
@@ -541,7 +541,7 @@ static void
 generate_c_for_for_one_variable (compile_instance *compiler,
 				 string_file *stream,
 				 struct gdbarch *gdbarch,
-				 unsigned char *registers_used,
+				 std::vector<bool> &registers_used,
 				 CORE_ADDR pc,
 				 struct symbol *sym)
 {
@@ -606,7 +606,7 @@ generate_c_for_for_one_variable (compile_instance *compiler,
 
 /* See compile-c.h.  */
 
-gdb::unique_xmalloc_ptr<unsigned char>
+std::vector<bool>
 generate_c_for_variable_locations (compile_instance *compiler,
 				   string_file *stream,
 				   struct gdbarch *gdbarch,
@@ -618,10 +618,9 @@ generate_c_for_variable_locations (compile_instance *compiler,
   /* If we're already in the static or global block, there is nothing
      to write.  */
   if (static_block == NULL || block == static_block)
-    return NULL;
+    return {};
 
-  gdb::unique_xmalloc_ptr<unsigned char> registers_used
-    (XCNEWVEC (unsigned char, gdbarch_num_regs (gdbarch)));
+  std::vector<bool> registers_used (gdbarch_num_regs (gdbarch));
 
   /* Ensure that a given name is only entered once.  This reflects the
      reality of shadowing.  */
@@ -641,7 +640,7 @@ generate_c_for_variable_locations (compile_instance *compiler,
 	{
 	  if (!symbol_seen (symhash.get (), sym))
 	    generate_c_for_for_one_variable (compiler, stream, gdbarch,
-					     registers_used.get (), pc, sym);
+					     registers_used, pc, sym);
 	}
 
       /* If we just finished the outermost block of a function, we're

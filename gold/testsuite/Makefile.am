@@ -508,6 +508,12 @@ basic_pie_test.o: basic_test.cc
 basic_pie_test: basic_pie_test.o gcctestdir/ld
 	$(CXXLINK) -pie basic_pie_test.o
 
+if THREADS
+check_PROGRAMS += basic_threads_test
+basic_threads_test: basic_test.o gcctestdir/ld
+	$(CXXLINK) -Wl,--threads basic_test.o
+endif
+
 check_PROGRAMS += constructor_test
 constructor_test_SOURCES = constructor_test.cc
 constructor_test_DEPENDENCIES = gcctestdir/ld
@@ -1113,12 +1119,15 @@ check_DATA += x86_64_mov_to_lea1.stdout x86_64_mov_to_lea2.stdout \
 	x86_64_mov_to_lea7.stdout x86_64_mov_to_lea8.stdout \
 	x86_64_mov_to_lea9.stdout x86_64_mov_to_lea10.stdout \
 	x86_64_mov_to_lea11.stdout x86_64_mov_to_lea12.stdout \
-	x86_64_mov_to_lea13.stdout x86_64_mov_to_lea14.stdout
+	x86_64_mov_to_lea13.stdout x86_64_mov_to_lea14.stdout \
+	x86_64_mov_to_lea15.stdout x86_64_mov_to_lea16.stdout
+
 MOSTLYCLEANFILES += x86_64_mov_to_lea1 x86_64_mov_to_lea2 \
 	x86_64_mov_to_lea3 x86_64_mov_to_lea4 x86_64_mov_to_lea5 \
 	x86_64_mov_to_lea6 x86_64_mov_to_lea7 x86_64_mov_to_lea8 \
 	x86_64_mov_to_lea9 x86_64_mov_to_lea10 x86_64_mov_to_lea11 \
-	x86_64_mov_to_lea12 x86_64_mov_to_lea13 x86_64_mov_to_lea14
+	x86_64_mov_to_lea12 x86_64_mov_to_lea13 x86_64_mov_to_lea14 \
+	x86_64_mov_to_lea15 x86_64_mov_to_lea16
 
 x86_64_mov_to_lea1.o: x86_64_mov_to_lea1.s
 	$(TEST_AS) --64 -o $@ $<
@@ -1136,6 +1145,10 @@ x86_64_mov_to_lea7.o: x86_64_mov_to_lea4.s
 	$(TEST_AS) --x32 -o $@ $<
 x86_64_mov_to_lea8.o: x86_64_mov_to_lea4.s
 	$(TEST_AS) --64 -o $@ $<
+x86_64_mov_to_lea9.o: x86_64_mov_to_lea5.s
+	$(TEST_AS) --x32 -mrelax-relocations=yes -o $@ $<
+x86_64_mov_to_lea10.o: x86_64_mov_to_lea5.s
+	$(TEST_AS) --64 -mrelax-relocations=yes -o $@ $<
 x86_64_mov_to_lea1: x86_64_mov_to_lea1.o ../ld-new
 	../ld-new -Bsymbolic -shared -melf_x86_64 -o $@ $<
 x86_64_mov_to_lea2: x86_64_mov_to_lea1.o ../ld-new
@@ -1164,6 +1177,10 @@ x86_64_mov_to_lea13: x86_64_mov_to_lea7.o ../ld-new
 	../ld-new -melf32_x86_64 -shared -o $@ $<
 x86_64_mov_to_lea14: x86_64_mov_to_lea8.o ../ld-new
 	../ld-new -melf_x86_64 -shared -o $@ $<
+x86_64_mov_to_lea15: x86_64_mov_to_lea9.o ../ld-new
+	../ld-new -melf32_x86_64 -shared -o $@ $<
+x86_64_mov_to_lea16: x86_64_mov_to_lea10.o ../ld-new
+	../ld-new -melf_x86_64 -shared -o $@ $<
 x86_64_mov_to_lea1.stdout: x86_64_mov_to_lea1
 	$(TEST_OBJDUMP) -dw $< > $@
 x86_64_mov_to_lea2.stdout: x86_64_mov_to_lea2
@@ -1191,6 +1208,10 @@ x86_64_mov_to_lea12.stdout: x86_64_mov_to_lea12
 x86_64_mov_to_lea13.stdout: x86_64_mov_to_lea13
 	$(TEST_OBJDUMP) -dw $< > $@
 x86_64_mov_to_lea14.stdout: x86_64_mov_to_lea14
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea15.stdout: x86_64_mov_to_lea15
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea16.stdout: x86_64_mov_to_lea16
 	$(TEST_OBJDUMP) -dw $< > $@
 
 check_SCRIPTS += x86_64_indirect_call_to_direct.sh
@@ -2044,7 +2065,7 @@ MOSTLYCLEANFILES += justsyms_lib
 justsyms_lib.o: justsyms_lib.c
 	$(COMPILE) -c -o $@ $<
 justsyms_lib: justsyms_lib.o gcctestdir/ld
-	gcctestdir/ld -o $@ -z norelro -Ttext=0x1000200 -Tdata=0x2000000 -e exported_func justsyms_lib.o
+	gcctestdir/ld -o $@ -z norelro -T $(srcdir)/justsyms_lib.t -Ttext=0x1000200 -Tdata=0x2000000 -e exported_func justsyms_lib.o
 
 check_PROGRAMS += binary_test
 MOSTLYCLEANFILES += binary.txt
@@ -3199,7 +3220,9 @@ two_file_test_2_ndebug.o: two_file_test_2.cc
 two_file_test_main_ndebug.o: two_file_test_main.cc
 	$(CXXCOMPILE) -O0 -g0 -c -o $@ $<
 
+if !CFLAGS_CF_PROTECTION
 check_PROGRAMS += incremental_test_2
+endif
 MOSTLYCLEANFILES += two_file_test_tmp_2.o
 incremental_test_2: two_file_test_1_v1_ndebug.o two_file_test_1_ndebug.o two_file_test_1b_ndebug.o \
 		    two_file_test_2_ndebug.o two_file_test_main_ndebug.o gcctestdir/ld
@@ -3209,7 +3232,9 @@ incremental_test_2: two_file_test_1_v1_ndebug.o two_file_test_1_ndebug.o two_fil
 	cp -f two_file_test_1_ndebug.o two_file_test_tmp_2.o
 	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro,-no-pie two_file_test_tmp_2.o two_file_test_1b_ndebug.o two_file_test_2_ndebug.o two_file_test_main_ndebug.o
 
+if !CFLAGS_CF_PROTECTION
 check_PROGRAMS += incremental_test_3
+endif
 MOSTLYCLEANFILES += two_file_test_tmp_3.o
 incremental_test_3: two_file_test_1.o two_file_test_1b_v1.o two_file_test_1b.o \
 		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
@@ -3219,7 +3244,9 @@ incremental_test_3: two_file_test_1.o two_file_test_1b_v1.o two_file_test_1b.o \
 	cp -f two_file_test_1b.o two_file_test_tmp_3.o
 	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro,-no-pie two_file_test_1.o two_file_test_tmp_3.o two_file_test_2.o two_file_test_main.o
 
+if !CFLAGS_CF_PROTECTION
 check_PROGRAMS += incremental_test_4
+endif
 MOSTLYCLEANFILES += incremental_test_4.base two_file_test_tmp_4.o
 incremental_test_4: two_file_test_1.o two_file_test_1b.o two_file_test_2_v1.o \
 		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
@@ -3230,7 +3257,9 @@ incremental_test_4: two_file_test_1.o two_file_test_1b.o two_file_test_2_v1.o \
 	cp -f two_file_test_2.o two_file_test_tmp_4.o
 	$(CXXLINK) -Wl,--incremental-update,--incremental-base=incremental_test_4.base -Wl,-z,norelro,-no-pie two_file_test_1.o two_file_test_1b.o two_file_test_tmp_4.o two_file_test_main.o
 
+if !CFLAGS_CF_PROTECTION
 check_PROGRAMS += incremental_test_5
+endif
 MOSTLYCLEANFILES += two_file_test_5.a
 incremental_test_5: two_file_test_1.o two_file_test_1b_v1.o two_file_test_1b.o \
 		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
@@ -3256,7 +3285,9 @@ incremental_test_6: two_file_test_1.o two_file_test_1b_v1.o two_file_test_1b.o \
 	$(TEST_AR) rc two_file_test_6.a two_file_test_1.o two_file_test_tmp_6.o two_file_test_2.o
 	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro,-no-pie two_file_test_main.o -Wl,--incremental-unchanged two_file_test_6.a -Wl,--incremental-unknown
 
+if !CFLAGS_CF_PROTECTION
 check_PROGRAMS += incremental_copy_test
+endif
 incremental_copy_test: copy_test_v1.o copy_test.o copy_test_1.so copy_test_2.so
 	cp -f copy_test_v1.o copy_test_tmp.o
 	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro,-no-pie -Wl,-R,. -Wl,--no-as-needed copy_test_tmp.o copy_test_1.so copy_test_2.so
@@ -3264,7 +3295,9 @@ incremental_copy_test: copy_test_v1.o copy_test.o copy_test_1.so copy_test_2.so
 	cp -f copy_test.o copy_test_tmp.o
 	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro,-no-pie -Wl,-R,. -Wl,--no-as-needed copy_test_tmp.o copy_test_1.so copy_test_2.so
 
+if !CFLAGS_CF_PROTECTION
 check_PROGRAMS += incremental_common_test_1
+endif
 incremental_common_test_1: common_test_1_v1.o common_test_1_v2.o gcctestdir/ld
 	cp -f common_test_1_v1.o common_test_1_tmp.o
 	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro,-no-pie common_test_1_tmp.o
@@ -3276,7 +3309,9 @@ common_test_1_v1.o: common_test_1_v1.c
 common_test_1_v2.o: common_test_1_v2.c
 	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
 
+if !CFLAGS_CF_PROTECTION
 check_PROGRAMS += incremental_comdat_test_1
+endif
 incremental_comdat_test_1: incr_comdat_test_1.o incr_comdat_test_2_v1.o incr_comdat_test_2_v2.o incr_comdat_test_2_v3.o gcctestdir/ld
 	cp -f incr_comdat_test_2_v1.o incr_comdat_test_1_tmp.o
 	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro,-no-pie incr_comdat_test_1.o incr_comdat_test_1_tmp.o
@@ -3306,9 +3341,9 @@ check_SCRIPTS += gnu_property_test.sh
 check_DATA += gnu_property_test.stdout
 MOSTLYCLEANFILES += gnu_property_test
 gnu_property_test.stdout: gnu_property_test
-	$(TEST_READELF) -n $< >$@
+	$(TEST_READELF) -lhSWn $< >$@
 gnu_property_test: gcctestdir/ld gnu_property_a.o gnu_property_b.o gnu_property_c.o
-	gcctestdir/ld -o $@ gnu_property_a.o gnu_property_b.o gnu_property_c.o
+	gcctestdir/ld --build-id -o $@ gnu_property_a.o gnu_property_b.o gnu_property_c.o
 gnu_property_main.o: gnu_property_main.c
 	$(COMPILE) -c -o $@ $<
 gnu_property_a.o: gnu_property_a.S
@@ -4360,5 +4395,43 @@ dwp_test_2a.dwp: ../dwp dwp_test_main.dwo dwp_test_1.dwo
 	../dwp -o $@ dwp_test_main.dwo dwp_test_1.dwo
 dwp_test_2b.dwp: ../dwp dwp_test_1b.dwo dwp_test_2.dwo
 	../dwp -o $@ dwp_test_1b.dwo dwp_test_2.dwo
+
+check_SCRIPTS += pr26936.sh
+check_DATA += pr26936a.stdout pr26936b.stdout
+MOSTLYCLEANFILES += pr26936a pr26936b
+pr26936a.stdout: pr26936a
+	$(TEST_READELF) -wL -wR -wr $< >$@ 2>/dev/null
+pr26936a: pr26936a.o pr26936b.o pr26936c.o ../ld-new
+	../ld-new -Ttext-segment 0x10000 -z max-page-size=0x1000 \
+		-e _start -o $@ pr26936a.o pr26936b.o pr26936c.o
+pr26936b.stdout: pr26936b
+	$(TEST_READELF) -wL -wR -wr $< >$@ 2>/dev/null
+pr26936b: pr26936d.o pr26936b.o pr26936c.o ../ld-new
+	../ld-new -Ttext-segment 0x10000 -z max-page-size=0x1000 \
+		-e _start -o $@ pr26936d.o pr26936b.o pr26936c.o
+pr26936a.o: pr26936a.s
+	$(TEST_AS) --gen-debug -mx86-used-note=yes -o $@ $<
+pr26936b.o: pr26936b.s
+	$(TEST_AS) --gen-debug -mx86-used-note=yes -o $@ $<
+pr26936c.o: pr26936c.s
+	$(TEST_AS) --gen-debug -mx86-used-note=yes -o $@ $<
+pr26936d.o: pr26936d.s
+	$(TEST_AS) --gen-debug -mx86-used-note=yes -o $@ $<
+
+check_SCRIPTS += retain.sh
+check_DATA += retain_1.out retain_2.out
+MOSTLYCLEANFILES += retain_1 retain_2
+retain_1.out: retain_1
+	$(TEST_NM) $< >$@
+retain_1: retain_1.o ../ld-new
+	../ld-new  -e _start --gc-sections -o $@  retain_1.o
+retain_1.o: retain_1.s
+	$(TEST_AS) -o $@ $<
+retain_2.out: retain_2
+	$(TEST_READELF) -d $< >$@
+retain_2: retain_2.o ../ld-new
+	../ld-new -pie -e _start --gc-sections -o $@  retain_2.o
+retain_2.o: retain_2.s
+	$(TEST_AS) -o $@ $<
 
 endif DEFAULT_TARGET_X86_64

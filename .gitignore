@@ -37,12 +37,22 @@ TAGS.sub
 .lvimrc
 
 .clang-format
+.clang-tidy
+.clangd
+.cache
+compile_commands.json
 
 .gdbinit
 .gdb_history
 
 perf.data
 perf.data.old
+
+# gnu global files
+GPATH
+GRTAGS
+GTAGS
+GSYMS
 
 # ignore core files, but not java/net/protocol/core/
 core

@@ -1,6 +1,6 @@
 /* Definitions for values of C expressions, for GDB.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,6 +23,7 @@
 #include "frame.h"		/* For struct frame_id.  */
 #include "extension.h"
 #include "gdbsupport/gdb_ref_ptr.h"
+#include "gmp-utils.h"
 
 struct block;
 struct expression;
@@ -420,7 +421,7 @@ extern void set_value_initialized (struct value *, int);
 /* Set COMPONENT's location as appropriate for a component of WHOLE
    --- regardless of what kind of lvalue WHOLE is.  */
 extern void set_value_component_location (struct value *component,
-                                          const struct value *whole);
+					  const struct value *whole);
 
 /* While the following fields are per- VALUE .CONTENT .PIECE (i.e., a
    single value might have multiple LVALs), this hacked interface is
@@ -905,7 +906,14 @@ extern int using_struct_return (struct gdbarch *gdbarch,
 				struct value *function,
 				struct type *value_type);
 
-extern struct value *evaluate_expression (struct expression *exp);
+/* Evaluate the expression EXP.  If set, EXPECT_TYPE is passed to the
+   outermost operation's evaluation.  This is ignored by most
+   operations, but may be used, e.g., to determine the type of an
+   otherwise untyped symbol.  The caller should not assume that the
+   returned value has this type.  */
+
+extern struct value *evaluate_expression (struct expression *exp,
+					  struct type *expect_type = nullptr);
 
 extern struct value *evaluate_type (struct expression *exp);
 
@@ -928,7 +936,7 @@ extern value *eval_skip_value (expression *exp);
 extern void fetch_subexp_value (struct expression *exp, int *pc,
 				struct value **valp, struct value **resultp,
 				std::vector<value_ref_ptr> *val_chain,
-				int preserve_errors);
+				bool preserve_errors);
 
 extern const char *extract_field_op (struct expression *exp, int *subexp);
 
@@ -939,7 +947,7 @@ extern struct value *parse_and_eval (const char *exp);
 
 extern struct value *parse_to_comma_and_eval (const char **expp);
 
-extern struct type *parse_and_eval_type (char *p, int length);
+extern struct type *parse_and_eval_type (const char *p, int length);
 
 extern CORE_ADDR parse_and_eval_address (const char *exp);
 
@@ -1122,7 +1130,7 @@ extern void print_variable_and_value (const char *name,
 extern void typedef_print (struct type *type, struct symbol *news,
 			   struct ui_file *stream);
 
-extern char *internalvar_name (const struct internalvar *var);
+extern const char *internalvar_name (const struct internalvar *var);
 
 extern void preserve_values (struct objfile *);
 
@@ -1198,7 +1206,7 @@ struct value *call_internal_function (struct gdbarch *gdbarch,
 				      struct value *function,
 				      int argc, struct value **argv);
 
-char *value_internal_function_name (struct value *);
+const char *value_internal_function_name (struct value *);
 
 /* Build a value wrapping and representing WORKER.  The value takes ownership
    of the xmethod_worker object.  */
@@ -1214,5 +1222,9 @@ extern struct value *call_xmethod (struct value *method,
 /* Destroy the values currently allocated.  This is called when GDB is
    exiting (e.g., on quit_force).  */
 extern void finalize_values ();
+
+/* Convert VALUE to a gdb_mpq.  The caller must ensure that VALUE is
+   of floating-point, fixed-point, or integer type.  */
+extern gdb_mpq value_to_gdb_mpq (struct value *value);
 
 #endif /* !defined (VALUE_H) */

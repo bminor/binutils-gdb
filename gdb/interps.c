@@ -1,6 +1,6 @@
 /* Manages interpreters for GDB, the GNU debugger.
 
-   Copyright (C) 2000-2020 Free Software Foundation, Inc.
+   Copyright (C) 2000-2021 Free Software Foundation, Inc.
 
    Written by Jim Ingham <jingham@apple.com> of Apple Computer, Inc.
 
@@ -369,6 +369,14 @@ interpreter_exec_cmd (const char *args, int from_tty)
   struct interp *old_interp, *interp_to_use;
   unsigned int nrules;
   unsigned int i;
+
+  /* Interpreters may clobber stdout/stderr (e.g.  in mi_interp::resume at time
+     of writing), preserve their state here.  */
+  scoped_restore save_stdout = make_scoped_restore (&gdb_stdout);
+  scoped_restore save_stderr = make_scoped_restore (&gdb_stderr);
+  scoped_restore save_stdlog = make_scoped_restore (&gdb_stdlog);
+  scoped_restore save_stdtarg = make_scoped_restore (&gdb_stdtarg);
+  scoped_restore save_stdtargerr = make_scoped_restore (&gdb_stdtargerr);
 
   if (args == NULL)
     error_no_arg (_("interpreter-exec command"));

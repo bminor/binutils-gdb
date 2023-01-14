@@ -1,4 +1,4 @@
-#   Copyright 1988-2020 Free Software Foundation, Inc.
+#   Copyright 1988-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -289,7 +289,7 @@ proc_with_prefix breakpoint_clear_command_test {} {
     delete_breakpoints
     gdb_test "break factorial" "Breakpoint.*at.*"
     gdb_test_no_output "set \$bpnumfactorial = \$bpnum"
-    gdb_test "break main" "Breakpoint.*at.*"
+    gdb_test "break -q main" "Breakpoint.*at.*"
     gdb_test_no_output "set \$bpnummain = \$bpnum"
 
     gdb_test \
@@ -663,7 +663,7 @@ proc_with_prefix deprecated_command_test {} {
 
     gdb_test_no_output "maintenance deprecate p \"new_p\"" "maintenance deprecate p \"new_p\" /1/"
     gdb_test "p 5" \
-	    "Warning: 'p', an alias for the command 'print' is deprecated.*Use 'new_p'.*" \
+	    "Warning: 'p', an alias for the command 'print', is deprecated.*Use 'new_p'.*" \
 	    "p deprecated warning, with replacement"
     gdb_test "p 5" ".\[0-9\]* = 5.*" "deprecated warning goes away /1/"
 
@@ -689,6 +689,25 @@ proc_with_prefix deprecated_command_test {} {
     gdb_test "maintenance deprecate" \
 	    "\"maintenance deprecate\".*" \
 	    "deprecate with no arguments"
+
+    # Test that an alias with a prefix still gives a warning.
+    set file1 [standard_output_file xxx_yyy_cmd]
+    set fd [open "$file1" w]
+    puts $fd \
+"define set xxx_yyy
+echo in command xxx_yyy\\n
+end
+
+alias set qqq_aaa=set xxx_yyy
+maintenance deprecate set qqq_aaa"
+    close $fd
+    gdb_test_no_output "source $file1" \
+	"source file containing xxx_yyy command and its alias"
+    gdb_test "set qqq_aaa" \
+	"Warning: 'set qqq_aaa', an alias for the command 'set xxx_yyy', is deprecated\\.\r\n.*No alternative known\\..*" \
+	"deprecated alias with prefix give a warning"
+
+    file delete $file1
 }
 
 proc_with_prefix bp_deleted_in_command_test {} {
@@ -873,7 +892,7 @@ proc_with_prefix if_commands_test {} {
 
     set test "if_commands_test 1"
     gdb_test_no_prompt "if \$tem == 2" { >} $test
-    gdb_test_no_prompt "break main" { >} $test
+    gdb_test_no_prompt "break -q main" { >} $test
     gdb_test_no_prompt "else" { >} $test
     gdb_test_no_prompt "break factorial" { >} $test
     gdb_test_no_prompt "commands" {  >} $test
@@ -899,7 +918,7 @@ proc_with_prefix if_commands_test {} {
 
     set test "if_commands_test 2"
     gdb_test_no_prompt "if \$tem == 1" { >} $test
-    gdb_test_no_prompt "break main" { >} $test
+    gdb_test_no_prompt "break -q main" { >} $test
     gdb_test_no_prompt "else" { >} $test
     gdb_test_no_prompt "break factorial" { >} $test
     gdb_test_no_prompt "commands" {  >} $test

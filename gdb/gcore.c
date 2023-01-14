@@ -1,6 +1,6 @@
 /* Generate a core file for the inferior process.
 
-   Copyright (C) 2001-2020 Free Software Foundation, Inc.
+   Copyright (C) 2001-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -46,7 +46,6 @@
 
 static const char *default_gcore_target (void);
 static enum bfd_architecture default_gcore_arch (void);
-static unsigned long default_gcore_mach (void);
 static int gcore_memory_sections (bfd *);
 
 /* create_gcore_bfd -- helper for gcore_command (exported).
@@ -60,7 +59,7 @@ create_gcore_bfd (const char *filename)
   if (obfd == NULL)
     error (_("Failed to open '%s' for output."), filename);
   bfd_set_format (obfd.get (), bfd_core);
-  bfd_set_arch_mach (obfd.get (), default_gcore_arch (), default_gcore_mach ());
+  bfd_set_arch_mach (obfd.get (), default_gcore_arch (), 0);
   return obfd;
 }
 
@@ -78,10 +77,10 @@ write_gcore_file_1 (bfd *obfd)
      generation should be converted to gdbarch_make_corefile_notes; at that
      point, the target vector method can be removed.  */
   if (!gdbarch_make_corefile_notes_p (target_gdbarch ()))
-    note_data.reset (target_make_corefile_notes (obfd, &note_size));
+    note_data = target_make_corefile_notes (obfd, &note_size);
   else
-    note_data.reset (gdbarch_make_corefile_notes (target_gdbarch (), obfd,
-						  &note_size));
+    note_data = gdbarch_make_corefile_notes (target_gdbarch (), obfd,
+					     &note_size);
 
   if (note_data == NULL || note_size == 0)
     error (_("Target does not support core file generation."));
@@ -129,7 +128,7 @@ gcore_command (const char *args, int from_tty)
   gdb::unique_xmalloc_ptr<char> corefilename;
 
   /* No use generating a corefile without a target process.  */
-  if (!target_has_execution)
+  if (!target_has_execution ())
     noprocess ();
 
   if (args && *args)
@@ -165,24 +164,6 @@ gcore_command (const char *args, int from_tty)
   fprintf_filtered (gdb_stdout, "Saved corefile %s\n", corefilename.get ());
 }
 
-static unsigned long
-default_gcore_mach (void)
-{
-#if 1	/* See if this even matters...  */
-  return 0;
-#else
-
-  const struct bfd_arch_info *bfdarch = gdbarch_bfd_arch_info (target_gdbarch ());
-
-  if (bfdarch != NULL)
-    return bfdarch->mach;
-  if (exec_bfd == NULL)
-    error (_("Can't find default bfd machine type (need execfile)."));
-
-  return bfd_get_mach (exec_bfd);
-#endif /* 1 */
-}
-
 static enum bfd_architecture
 default_gcore_arch (void)
 {
@@ -190,10 +171,10 @@ default_gcore_arch (void)
 
   if (bfdarch != NULL)
     return bfdarch->arch;
-  if (exec_bfd == NULL)
+  if (current_program_space->exec_bfd () == NULL)
     error (_("Can't find bfd architecture for corefile (need execfile)."));
 
-  return bfd_get_arch (exec_bfd);
+  return bfd_get_arch (current_program_space->exec_bfd ());
 }
 
 static const char *
@@ -203,12 +184,12 @@ default_gcore_target (void)
   if (gdbarch_gcore_bfd_target_p (target_gdbarch ()))
     return gdbarch_gcore_bfd_target (target_gdbarch ());
 
-  /* Otherwise, try to fall back to the exec_bfd target.  This will probably
+  /* Otherwise, try to fall back to the exec target.  This will probably
      not work for non-ELF targets.  */
-  if (exec_bfd == NULL)
+  if (current_program_space->exec_bfd () == NULL)
     return NULL;
   else
-    return bfd_get_target (exec_bfd);
+    return bfd_get_target (current_program_space->exec_bfd ());
 }
 
 /* Derive a reasonable stack segment by unwinding the target stack,
@@ -224,7 +205,7 @@ derive_stack_segment (bfd_vma *bottom, bfd_vma *top)
   gdb_assert (top);
 
   /* Can't succeed without stack and registers.  */
-  if (!target_has_stack || !target_has_registers)
+  if (!target_has_stack () || !target_has_registers ())
     return 0;
 
   /* Can't succeed without current frame.  */
@@ -321,7 +302,7 @@ derive_heap_segment (bfd *abfd, bfd_vma *bottom, bfd_vma *top)
 
   /* This function depends on being able to call a function in the
      inferior.  */
-  if (!target_has_execution)
+  if (!target_has_execution ())
     return 0;
 
   /* The following code assumes that the link map is arranged as
@@ -364,7 +345,7 @@ derive_heap_segment (bfd *abfd, bfd_vma *bottom, bfd_vma *top)
 }
 
 static void
-make_output_phdrs (bfd *obfd, asection *osec, void *ignored)
+make_output_phdrs (bfd *obfd, asection *osec)
 {
   int p_flags = 0;
   int p_type = 0;
@@ -403,10 +384,10 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size, int read,
   if (read == 0 && write == 0 && exec == 0 && modified == 0)
     {
       if (info_verbose)
-        {
-          fprintf_filtered (gdb_stdout, "Ignore segment, %s bytes at %s\n",
-                            plongest (size), paddress (target_gdbarch (), vaddr));
-        }
+	{
+	  fprintf_filtered (gdb_stdout, "Ignore segment, %s bytes at %s\n",
+			    plongest (size), paddress (target_gdbarch (), vaddr));
+	}
 
       return 0;
     }
@@ -519,7 +500,8 @@ objfile_find_memory_regions (struct target_ops *self,
 	     obfd);
 
   /* Make a heap segment.  */
-  if (derive_heap_segment (exec_bfd, &temp_bottom, &temp_top))
+  if (derive_heap_segment (current_program_space->exec_bfd (), &temp_bottom,
+			   &temp_top))
     (*func) (temp_bottom, temp_top - temp_bottom,
 	     1, /* Heap section will be readable.  */
 	     1, /* Heap section will be writable.  */
@@ -531,7 +513,7 @@ objfile_find_memory_regions (struct target_ops *self,
 }
 
 static void
-gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
+gcore_copy_callback (bfd *obfd, asection *osec)
 {
   bfd_size_type size, total_size = bfd_section_size (osec);
   file_ptr offset = 0;
@@ -587,10 +569,12 @@ gcore_memory_sections (bfd *obfd)
     }
 
   /* Record phdrs for section-to-segment mapping.  */
-  bfd_map_over_sections (obfd, make_output_phdrs, NULL);
+  for (asection *sect : gdb_bfd_sections (obfd))
+    make_output_phdrs (obfd, sect);
 
   /* Copy memory region contents.  */
-  bfd_map_over_sections (obfd, gcore_copy_callback, NULL);
+  for (asection *sect : gdb_bfd_sections (obfd))
+    gcore_copy_callback (obfd, sect);
 
   return 1;
 }

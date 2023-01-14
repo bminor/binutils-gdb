@@ -29,19 +29,8 @@
 #include "device.h"
 #include "tree.h"
 
-
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
-
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-
 #include <ctype.h>
 
 #include "libiberty.h"

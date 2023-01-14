@@ -1,6 +1,6 @@
 /* Definitions for expressions stored in reversed prefix form, for GDB.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -61,74 +61,11 @@ enum exp_opcode : uint8_t
 
 #include "std-operator.def"
 
-    /* First extension operator.  Individual language modules define extra
-       operators in *.def include files below with numbers higher than
-       OP_EXTENDED0.  */
-    OP (OP_EXTENDED0)
-
-/* Language specific operators.  */
-#include "ada-operator.def"
-#include "fortran-operator.def"
-
 #undef OP
 
     /* Existing only to swallow the last comma (',') from last .inc file.  */
     OP_UNUSED_LAST
   };
-
-union exp_element
-  {
-    enum exp_opcode opcode;
-    struct symbol *symbol;
-    struct minimal_symbol *msymbol;
-    LONGEST longconst;
-    gdb_byte floatconst[16];
-    /* Really sizeof (union exp_element) characters (or less for the last
-       element of a string).  */
-    char string;
-    struct type *type;
-    struct internalvar *internalvar;
-    const struct block *block;
-    struct objfile *objfile;
-  };
-
-struct expression
-  {
-    const struct language_defn *language_defn;	/* language it was
-						   entered in.  */
-    struct gdbarch *gdbarch;  /* architecture it was parsed in.  */
-    int nelts;
-    union exp_element elts[1];
-  };
-
-typedef gdb::unique_xmalloc_ptr<expression> expression_up;
-
-/* Macros for converting between number of expression elements and bytes
-   to store that many expression elements.  */
-
-#define EXP_ELEM_TO_BYTES(elements) \
-    ((elements) * sizeof (union exp_element))
-#define BYTES_TO_EXP_ELEM(bytes) \
-    (((bytes) + sizeof (union exp_element) - 1) / sizeof (union exp_element))
-
-/* From parse.c */
-
-class innermost_block_tracker;
-extern expression_up parse_expression (const char *,
-				       innermost_block_tracker * = nullptr);
-
-extern expression_up parse_expression_with_language (const char *string,
-						     enum language lang);
-
-extern struct type *parse_expression_for_completion
-    (const char *, gdb::unique_xmalloc_ptr<char> *, enum type_code *);
-
-class innermost_block_tracker;
-extern expression_up parse_exp_1 (const char **, CORE_ADDR pc,
-				  const struct block *, int,
-				  innermost_block_tracker * = nullptr);
-
-/* From eval.c */
 
 /* Values of NOSIDE argument to eval_subexp.  */
 
@@ -152,14 +89,96 @@ enum noside
 				   does in many situations.  */
   };
 
+union exp_element
+  {
+    enum exp_opcode opcode;
+    struct symbol *symbol;
+    struct minimal_symbol *msymbol;
+    LONGEST longconst;
+    gdb_byte floatconst[16];
+    /* Really sizeof (union exp_element) characters (or less for the last
+       element of a string).  */
+    char string;
+    struct type *type;
+    struct internalvar *internalvar;
+    const struct block *block;
+    struct objfile *objfile;
+  };
+
+struct expression
+{
+  expression (const struct language_defn *, struct gdbarch *, size_t);
+  ~expression ();
+  DISABLE_COPY_AND_ASSIGN (expression);
+
+  void resize (size_t);
+
+  /* Return the opcode for the outermost sub-expression of this
+     expression.  */
+  enum exp_opcode first_opcode () const
+  {
+      return elts[0].opcode;
+  }
+
+  /* Language it was entered in.  */
+  const struct language_defn *language_defn;
+  /* Architecture it was parsed in.  */
+  struct gdbarch *gdbarch;
+  int nelts = 0;
+  union exp_element *elts;
+};
+
+typedef std::unique_ptr<expression> expression_up;
+
+/* Macros for converting between number of expression elements and bytes
+   to store that many expression elements.  */
+
+#define EXP_ELEM_TO_BYTES(elements) \
+    ((elements) * sizeof (union exp_element))
+#define BYTES_TO_EXP_ELEM(bytes) \
+    (((bytes) + sizeof (union exp_element) - 1) / sizeof (union exp_element))
+
+/* From parse.c */
+
+class innermost_block_tracker;
+extern expression_up parse_expression (const char *,
+				       innermost_block_tracker * = nullptr,
+				       bool void_context_p = false);
+
+extern expression_up parse_expression_with_language (const char *string,
+						     enum language lang);
+
+extern struct type *parse_expression_for_completion
+    (const char *, gdb::unique_xmalloc_ptr<char> *, enum type_code *);
+
+class innermost_block_tracker;
+extern expression_up parse_exp_1 (const char **, CORE_ADDR pc,
+				  const struct block *, int,
+				  innermost_block_tracker * = nullptr);
+
+/* From eval.c */
+
 extern struct value *evaluate_subexp_standard
   (struct type *, struct expression *, int *, enum noside);
+
+/* Evaluate a function call.  The function to be called is in CALLEE and
+   the arguments passed to the function are in ARGVEC.
+   FUNCTION_NAME is the name of the function, if known.
+   DEFAULT_RETURN_TYPE is used as the function's return type if the return
+   type is unknown.  */
+
+extern struct value *evaluate_subexp_do_call (expression *exp,
+					      enum noside noside,
+					      value *callee,
+					      gdb::array_view<value *> argvec,
+					      const char *function_name,
+					      type *default_return_type);
 
 /* From expprint.c */
 
 extern void print_expression (struct expression *, struct ui_file *);
 
-extern const char *op_name (struct expression *exp, enum exp_opcode opcode);
+extern const char *op_name (enum exp_opcode opcode);
 
 extern const char *op_string (enum exp_opcode);
 
@@ -173,22 +192,25 @@ extern void dump_prefix_expression (struct expression *, struct ui_file *);
    or inclusive.  So we have six sorts of subrange.  This enumeration
    type is to identify this.  */
 
-enum range_type
+enum range_flag : unsigned
 {
-  /* Neither the low nor the high bound was given -- so this refers to
-     the entire available range.  */
-  BOTH_BOUND_DEFAULT,
-  /* The low bound was not given and the high bound is inclusive.  */
-  LOW_BOUND_DEFAULT,
-  /* The high bound was not given and the low bound in inclusive.  */
-  HIGH_BOUND_DEFAULT,
-  /* Both bounds were given and both are inclusive.  */
-  NONE_BOUND_DEFAULT,
-  /* The low bound was not given and the high bound is exclusive.  */
-  NONE_BOUND_DEFAULT_EXCLUSIVE,
-  /* Both bounds were given.  The low bound is inclusive and the high
-     bound is exclusive.  */
-  LOW_BOUND_DEFAULT_EXCLUSIVE,
+  /* This is a standard range.  Both the lower and upper bounds are
+     defined, and the bounds are inclusive.  */
+  RANGE_STANDARD = 0,
+
+  /* The low bound was not given.  */
+  RANGE_LOW_BOUND_DEFAULT = 1 << 0,
+
+  /* The high bound was not given.  */
+  RANGE_HIGH_BOUND_DEFAULT = 1 << 1,
+
+  /* The high bound of this range is exclusive.  */
+  RANGE_HIGH_BOUND_EXCLUSIVE = 1 << 2,
+
+  /* The range has a stride.  */
+  RANGE_HAS_STRIDE = 1 << 3,
 };
+
+DEF_ENUM_FLAGS_TYPE (enum range_flag, range_flags);
 
 #endif /* !defined (EXPRESSION_H) */

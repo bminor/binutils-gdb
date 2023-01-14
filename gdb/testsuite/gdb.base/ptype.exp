@@ -1,4 +1,4 @@
-# Copyright 1988-2020 Free Software Foundation, Inc.
+# Copyright 1988-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -116,7 +116,7 @@ if {!$gcc_compiled} {
 }
 
 # For get_debug_format to do its job, we need to have a current source file.
-gdb_test "list main" ".*"
+gdb_test "list -q main" ".*"
 get_debug_format
 gdb_test "whatis v_boolean" "type = (enum |)boolean" \
   "whatis unnamed typedef'd enum (compiler bug in IBM's xlc)"

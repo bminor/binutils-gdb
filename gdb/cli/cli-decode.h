@@ -1,6 +1,6 @@
 /* Header file for GDB command decoding library.
 
-   Copyright (C) 2000-2020 Free Software Foundation, Inc.
+   Copyright (C) 2000-2021 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -89,7 +89,7 @@ struct cmd_list_element
     /* The user needs to be warned that this is a deprecated command.
        The user should only be warned the first time a command is
        used.  */
-        
+	
     unsigned int deprecated_warn_user : 1;
 
     /* When functions are deprecated at compile time (this is the way

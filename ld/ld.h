@@ -1,5 +1,5 @@
 /* ld.h -- general linker header file
-   Copyright (C) 1991-2020 Free Software Foundation, Inc.
+   Copyright (C) 1991-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -293,12 +293,6 @@ typedef struct
 
   /* The size of the hash table to use.  */
   unsigned long hash_table_size;
-
-  /* The maximum page size for ELF.  */
-  bfd_vma maxpagesize;
-
-  /* The common page size for ELF.  */
-  bfd_vma commonpagesize;
 
   /* If set, print discarded sections in map file output.  */
   bfd_boolean print_map_discarded;

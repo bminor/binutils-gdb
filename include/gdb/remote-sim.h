@@ -1,6 +1,6 @@
 /* This file defines the interface between the simulator and gdb.
 
-   Copyright (C) 1993-2020 Free Software Foundation, Inc.
+   Copyright (C) 1993-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -211,6 +211,15 @@ int sim_store_register (SIM_DESC sd, int regno, unsigned char *buf, int length);
    VERBOSE is currently unused and must always be zero.  */
 
 void sim_info (SIM_DESC sd, int verbose);
+
+
+/* Return a memory map in XML format.
+
+   The caller must free the returned string.
+
+   For details on the format, see GDB's Memory Map Format documentation.  */
+
+char *sim_memory_map (SIM_DESC sd);
 
 
 /* Run (or resume) the simulated program.

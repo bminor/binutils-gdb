@@ -1,7 +1,7 @@
 /* Target-dependent code for the S+core architecture, for GDB,
    the GNU Debugger.
 
-   Copyright (C) 2006-2020 Free Software Foundation, Inc.
+   Copyright (C) 2006-2021 Free Software Foundation, Inc.
 
    Contributed by Qinwei (qinwei@sunnorth.com.cn)
    Contributed by Ching-Peng Lin (cplin@sunplus.com)
@@ -50,7 +50,7 @@ struct score_frame_cache
 {
   CORE_ADDR base;
   CORE_ADDR fp;
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 static int target_mach = bfd_mach_score7;
@@ -59,7 +59,7 @@ static struct type *
 score_register_type (struct gdbarch *gdbarch, int regnum)
 {
   gdb_assert (regnum >= 0 
-              && regnum < ((target_mach == bfd_mach_score7)
+	      && regnum < ((target_mach == bfd_mach_score7)
 			   ? SCORE7_NUM_REGS : SCORE3_NUM_REGS));
   return builtin_type (gdbarch)->builtin_uint32;
 }
@@ -108,7 +108,7 @@ static int
 score_register_sim_regno (struct gdbarch *gdbarch, int regnum)
 {
   gdb_assert (regnum >= 0 
-              && regnum < ((target_mach == bfd_mach_score7)
+	      && regnum < ((target_mach == bfd_mach_score7)
 			   ? SCORE7_NUM_REGS : SCORE3_NUM_REGS));
   return regnum;
 }
@@ -123,7 +123,7 @@ score7_fetch_inst (struct gdbarch *gdbarch, CORE_ADDR addr, gdb_byte *memblock)
   int big;
   int ret;
 
-  if (target_has_execution && memblock != NULL)
+  if (target_has_execution () && memblock != NULL)
     {
       /* Fetch instruction from local MEMBLOCK.  */
       memcpy (buf, memblock, SCORE_INSTLEN);
@@ -133,11 +133,11 @@ score7_fetch_inst (struct gdbarch *gdbarch, CORE_ADDR addr, gdb_byte *memblock)
       /* Fetch instruction from target.  */
       ret = target_read_memory (addr & ~0x3, buf, SCORE_INSTLEN);
       if (ret)
-        {
-          error (_("Error: target_read_memory in file:%s, line:%d!"),
-                  __FILE__, __LINE__);
-          return 0;
-        }
+	{
+	  error (_("Error: target_read_memory in file:%s, line:%d!"),
+		  __FILE__, __LINE__);
+	  return 0;
+	}
     }
 
   inst.raw = extract_unsigned_integer (buf, SCORE_INSTLEN, byte_order);
@@ -147,9 +147,9 @@ score7_fetch_inst (struct gdbarch *gdbarch, CORE_ADDR addr, gdb_byte *memblock)
   if (inst.len == 2)
     {
       if (big ^ ((addr & 0x2) == 2))
-        inst.v = G_FLD (inst.v, 29, 15);
+	inst.v = G_FLD (inst.v, 29, 15);
       else
-        inst.v = G_FLD (inst.v, 14, 0);
+	inst.v = G_FLD (inst.v, 14, 0);
     }
   return &inst;
 }
@@ -169,7 +169,7 @@ score3_adjust_pc_and_fetch_inst (CORE_ADDR *pcptr, int *lenptr,
     *  0  1  0  *   # 2
     *  0  1  1  0   # 3
     0  1  1  0  *   # 6
-                    table 2 (column 1, 2, 3)
+		    table 2 (column 1, 2, 3)
     *  0  0  *  *   # 0, 4
     0  1  0  *  *   # 2
     1  1  0  *  *   # 6
@@ -222,13 +222,13 @@ score3_adjust_pc_and_fetch_inst (CORE_ADDR *pcptr, int *lenptr,
     {
       ret = target_read_memory (adjust_pc + 2 * i, buf[i], EXTRACT_LEN);
       if (ret != 0)
-        {
-          buf[i][0] = '\0';
-          buf[i][1] = '\0';
+	{
+	  buf[i][0] = '\0';
+	  buf[i][1] = '\0';
 	  if (i == 2)
-            error (_("Error: target_read_memory in file:%s, line:%d!"),
+	    error (_("Error: target_read_memory in file:%s, line:%d!"),
 		   __FILE__, __LINE__);
-        }
+	}
 
       raw = extract_unsigned_integer (buf[i], EXTRACT_LEN, byte_order);
       cbits = (cbits << 1) | (raw >> 15); 
@@ -258,7 +258,7 @@ score3_adjust_pc_and_fetch_inst (CORE_ADDR *pcptr, int *lenptr,
   for (; count > 0; i++, count--)
     {
       inst.raw = (inst.raw << 16)
-	         | extract_unsigned_integer (buf[i], EXTRACT_LEN, byte_order);
+		 | extract_unsigned_integer (buf[i], EXTRACT_LEN, byte_order);
     }
 
   switch (inst.len)
@@ -405,12 +405,12 @@ score_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
 
 static void
 score_xfer_register (struct regcache *regcache, int regnum, int length,
-                     enum bfd_endian endian, gdb_byte *readbuf,
-                     const gdb_byte *writebuf, int buf_offset)
+		     enum bfd_endian endian, gdb_byte *readbuf,
+		     const gdb_byte *writebuf, int buf_offset)
 {
   int reg_offset = 0;
   gdb_assert (regnum >= 0 
-              && regnum < ((target_mach == bfd_mach_score7)
+	      && regnum < ((target_mach == bfd_mach_score7)
 			   ? SCORE7_NUM_REGS : SCORE3_NUM_REGS));
 
   switch (endian)
@@ -426,7 +426,7 @@ score_xfer_register (struct regcache *regcache, int regnum, int length,
       break;
     default:
       error (_("Error: score_xfer_register in file:%s, line:%d!"),
-             __FILE__, __LINE__);
+	     __FILE__, __LINE__);
     }
 
   if (readbuf != NULL)
@@ -439,8 +439,8 @@ score_xfer_register (struct regcache *regcache, int regnum, int length,
 
 static enum return_value_convention
 score_return_value (struct gdbarch *gdbarch, struct value *function,
-                    struct type *type, struct regcache *regcache,
-                    gdb_byte * readbuf, const gdb_byte * writebuf)
+		    struct type *type, struct regcache *regcache,
+		    gdb_byte * readbuf, const gdb_byte * writebuf)
 {
   if (type->code () == TYPE_CODE_STRUCT
       || type->code () == TYPE_CODE_UNION
@@ -451,17 +451,17 @@ score_return_value (struct gdbarch *gdbarch, struct value *function,
       int offset;
       int regnum;
       for (offset = 0, regnum = SCORE_A0_REGNUM;
-           offset < TYPE_LENGTH (type);
-           offset += SCORE_REGSIZE, regnum++)
-        {
-          int xfer = SCORE_REGSIZE;
+	   offset < TYPE_LENGTH (type);
+	   offset += SCORE_REGSIZE, regnum++)
+	{
+	  int xfer = SCORE_REGSIZE;
 
-          if (offset + xfer > TYPE_LENGTH (type))
-            xfer = TYPE_LENGTH (type) - offset;
-          score_xfer_register (regcache, regnum, xfer,
+	  if (offset + xfer > TYPE_LENGTH (type))
+	    xfer = TYPE_LENGTH (type) - offset;
+	  score_xfer_register (regcache, regnum, xfer,
 			       gdbarch_byte_order(gdbarch),
-                               readbuf, writebuf, offset);
-        }
+			       readbuf, writebuf, offset);
+	}
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
 }
@@ -480,8 +480,8 @@ score_type_needs_double_align (struct type *type)
 
       n = type->num_fields ();
       for (i = 0; i < n; i++)
-        if (score_type_needs_double_align (type->field (i).type ()))
-          return 1;
+	if (score_type_needs_double_align (type->field (i).type ()))
+	  return 1;
       return 0;
     }
   return 0;
@@ -489,8 +489,8 @@ score_type_needs_double_align (struct type *type)
 
 static CORE_ADDR
 score_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
-                       struct regcache *regcache, CORE_ADDR bp_addr,
-                       int nargs, struct value **args, CORE_ADDR sp,
+		       struct regcache *regcache, CORE_ADDR bp_addr,
+		       int nargs, struct value **args, CORE_ADDR sp,
 		       function_call_return_method return_method,
 		       CORE_ADDR struct_addr)
 {
@@ -509,7 +509,7 @@ score_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   sp = align_down (sp, 16);
   for (argnum = 0; argnum < nargs; argnum++)
     arglen += align_up (TYPE_LENGTH (value_type (args[argnum])),
-                        SCORE_REGSIZE);
+			SCORE_REGSIZE);
   sp -= align_up (arglen, 16);
 
   argreg = SCORE_BEGIN_ARG_REGNUM;
@@ -537,64 +537,64 @@ score_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       arglen = TYPE_LENGTH (arg_type);
 
       /* If a arg should be aligned to 8 bytes (long long or double),
-         the value should be put to even register numbers.  */
+	 the value should be put to even register numbers.  */
       if (score_type_needs_double_align (arg_type))
-        {
-          if (argreg & 1)
-            argreg++;
-        }
+	{
+	  if (argreg & 1)
+	    argreg++;
+	}
 
       /* If sizeof a block < SCORE_REGSIZE, then Score GCC will chose
-         the default "downward"/"upward" method:
+	 the default "downward"/"upward" method:
 
-         Example:
+	 Example:
 
-         struct struc
-         {
-           char a; char b; char c;
-         } s = {'a', 'b', 'c'};
+	 struct struc
+	 {
+	   char a; char b; char c;
+	 } s = {'a', 'b', 'c'};
 
-         Big endian:    s = {X, 'a', 'b', 'c'}
-         Little endian: s = {'a', 'b', 'c', X}
+	 Big endian:    s = {X, 'a', 'b', 'c'}
+	 Little endian: s = {'a', 'b', 'c', X}
 
-         Where X is a hole.  */
+	 Where X is a hole.  */
 
       if (gdbarch_byte_order(gdbarch) == BFD_ENDIAN_BIG
-          && (typecode == TYPE_CODE_STRUCT
-              || typecode == TYPE_CODE_UNION)
-          && argreg > SCORE_LAST_ARG_REGNUM
-          && arglen < SCORE_REGSIZE)
-        downward_offset += (SCORE_REGSIZE - arglen);
+	  && (typecode == TYPE_CODE_STRUCT
+	      || typecode == TYPE_CODE_UNION)
+	  && argreg > SCORE_LAST_ARG_REGNUM
+	  && arglen < SCORE_REGSIZE)
+	downward_offset += (SCORE_REGSIZE - arglen);
 
       while (arglen > 0)
-        {
-          int partial_len = arglen < SCORE_REGSIZE ? arglen : SCORE_REGSIZE;
-          ULONGEST regval = extract_unsigned_integer (val, partial_len,
+	{
+	  int partial_len = arglen < SCORE_REGSIZE ? arglen : SCORE_REGSIZE;
+	  ULONGEST regval = extract_unsigned_integer (val, partial_len,
 			  			      byte_order);
 
-          /* The last part of a arg should shift left when
-             gdbarch_byte_order is BFD_ENDIAN_BIG.  */
-          if (byte_order == BFD_ENDIAN_BIG
-              && arg_last_part_p == 1
-              && (typecode == TYPE_CODE_STRUCT
-                  || typecode == TYPE_CODE_UNION))
-            regval <<= ((SCORE_REGSIZE - partial_len) * TARGET_CHAR_BIT);
+	  /* The last part of a arg should shift left when
+	     gdbarch_byte_order is BFD_ENDIAN_BIG.  */
+	  if (byte_order == BFD_ENDIAN_BIG
+	      && arg_last_part_p == 1
+	      && (typecode == TYPE_CODE_STRUCT
+		  || typecode == TYPE_CODE_UNION))
+	    regval <<= ((SCORE_REGSIZE - partial_len) * TARGET_CHAR_BIT);
 
-          /* Always increase the stack_offset and save args to stack.  */
-          addr = sp + stack_offset + downward_offset;
-          write_memory (addr, val, partial_len);
+	  /* Always increase the stack_offset and save args to stack.  */
+	  addr = sp + stack_offset + downward_offset;
+	  write_memory (addr, val, partial_len);
 
-          if (argreg <= SCORE_LAST_ARG_REGNUM)
-            {
-              regcache_cooked_write_unsigned (regcache, argreg++, regval);
-              if (arglen > SCORE_REGSIZE && arglen < SCORE_REGSIZE * 2)
-                arg_last_part_p = 1;
-            }
+	  if (argreg <= SCORE_LAST_ARG_REGNUM)
+	    {
+	      regcache_cooked_write_unsigned (regcache, argreg++, regval);
+	      if (arglen > SCORE_REGSIZE && arglen < SCORE_REGSIZE * 2)
+		arg_last_part_p = 1;
+	    }
 
-          val += partial_len;
-          arglen -= partial_len;
-          stack_offset += align_up (partial_len, SCORE_REGSIZE);
-        }
+	  val += partial_len;
+	  arglen -= partial_len;
+	  stack_offset += align_up (partial_len, SCORE_REGSIZE);
+	}
     }
 
   /* Step 5, Save SP.  */
@@ -612,48 +612,48 @@ score7_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
     {
       inst_t *inst = score7_fetch_inst (gdbarch, cpc, NULL);
       if (!inst)
-        break;
+	break;
       if ((inst->len == 4) && !stack_sub
-          && (G_FLD (inst->v, 29, 25) == 0x1
-              && G_FLD (inst->v, 24, 20) == 0x0))
-        {
-          /* addi r0, offset */
-          stack_sub = cpc + SCORE_INSTLEN;
-          pc = cpc + SCORE_INSTLEN;
-        }
+	  && (G_FLD (inst->v, 29, 25) == 0x1
+	      && G_FLD (inst->v, 24, 20) == 0x0))
+	{
+	  /* addi r0, offset */
+	  stack_sub = cpc + SCORE_INSTLEN;
+	  pc = cpc + SCORE_INSTLEN;
+	}
       else if ((inst->len == 4)
-               && (G_FLD (inst->v, 29, 25) == 0x0)
-               && (G_FLD (inst->v, 24, 20) == 0x2)
-               && (G_FLD (inst->v, 19, 15) == 0x0)
-               && (G_FLD (inst->v, 14, 10) == 0xF)
-               && (G_FLD (inst->v, 9, 0) == 0x56))
-        {
-          /* mv r2, r0  */
-          pc = cpc + SCORE_INSTLEN;
-          break;
-        }
+	       && (G_FLD (inst->v, 29, 25) == 0x0)
+	       && (G_FLD (inst->v, 24, 20) == 0x2)
+	       && (G_FLD (inst->v, 19, 15) == 0x0)
+	       && (G_FLD (inst->v, 14, 10) == 0xF)
+	       && (G_FLD (inst->v, 9, 0) == 0x56))
+	{
+	  /* mv r2, r0  */
+	  pc = cpc + SCORE_INSTLEN;
+	  break;
+	}
       else if ((inst->len == 2)
-               && (G_FLD (inst->v, 14, 12) == 0x0)
-               && (G_FLD (inst->v, 11, 8) == 0x2)
-               && (G_FLD (inst->v, 7, 4) == 0x0)
-               && (G_FLD (inst->v, 3, 0) == 0x3))
-        {
-          /* mv! r2, r0 */
-          pc = cpc + SCORE16_INSTLEN;
-          break;
-        }
+	       && (G_FLD (inst->v, 14, 12) == 0x0)
+	       && (G_FLD (inst->v, 11, 8) == 0x2)
+	       && (G_FLD (inst->v, 7, 4) == 0x0)
+	       && (G_FLD (inst->v, 3, 0) == 0x3))
+	{
+	  /* mv! r2, r0 */
+	  pc = cpc + SCORE16_INSTLEN;
+	  break;
+	}
       else if ((inst->len == 2)
-               && ((G_FLD (inst->v, 14, 12) == 3)    /* j15 form */
-                   || (G_FLD (inst->v, 14, 12) == 4) /* b15 form */
-                   || (G_FLD (inst->v, 14, 12) == 0x0
-                       && G_FLD (inst->v, 3, 0) == 0x4))) /* br! */
-        break;
+	       && ((G_FLD (inst->v, 14, 12) == 3)    /* j15 form */
+		   || (G_FLD (inst->v, 14, 12) == 4) /* b15 form */
+		   || (G_FLD (inst->v, 14, 12) == 0x0
+		       && G_FLD (inst->v, 3, 0) == 0x4))) /* br! */
+	break;
       else if ((inst->len == 4)
-               && ((G_FLD (inst->v, 29, 25) == 2)    /* j32 form */
-                   || (G_FLD (inst->v, 29, 25) == 4) /* b32 form */
-                   || (G_FLD (inst->v, 29, 25) == 0x0
-                       && G_FLD (inst->v, 6, 1) == 0x4)))  /* br */
-        break;
+	       && ((G_FLD (inst->v, 29, 25) == 2)    /* j32 form */
+		   || (G_FLD (inst->v, 29, 25) == 4) /* b32 form */
+		   || (G_FLD (inst->v, 29, 25) == 0x0
+		       && G_FLD (inst->v, 6, 1) == 0x4)))  /* br */
+	break;
 
       cpc += (inst->len == 2) ? SCORE16_INSTLEN : SCORE_INSTLEN;
     }
@@ -672,45 +672,45 @@ score3_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 					   gdbarch_byte_order (gdbarch));
 
       if (!inst)
-        break;
+	break;
       if (inst->len == 4 && !stack_sub
-          && (G_FLD (inst->v, 29, 25) == 0x1)
-          && (G_FLD (inst->v, 19, 17) == 0x0)
+	  && (G_FLD (inst->v, 29, 25) == 0x1)
+	  && (G_FLD (inst->v, 19, 17) == 0x0)
 	  && (G_FLD (inst->v, 24, 20) == 0x0))
-        {
-          /* addi r0, offset */
-          stack_sub = cpc + inst->len;
-          pc = cpc + inst->len;
-        }
+	{
+	  /* addi r0, offset */
+	  stack_sub = cpc + inst->len;
+	  pc = cpc + inst->len;
+	}
       else if (inst->len == 4
-               && (G_FLD (inst->v, 29, 25) == 0x0)
+	       && (G_FLD (inst->v, 29, 25) == 0x0)
 	       && (G_FLD (inst->v, 24, 20) == 0x2)
 	       && (G_FLD (inst->v, 19, 15) == 0x0)
 	       && (G_FLD (inst->v, 14, 10) == 0xF)
 	       && (G_FLD (inst->v, 9, 0) == 0x56))
-        {
-          /* mv r2, r0  */
-          pc = cpc + inst->len;
-          break;
-        }
+	{
+	  /* mv r2, r0  */
+	  pc = cpc + inst->len;
+	  break;
+	}
       else if ((inst->len == 2)
-               && (G_FLD (inst->v, 14, 10) == 0x10)
-               && (G_FLD (inst->v, 9, 5) == 0x2)
+	       && (G_FLD (inst->v, 14, 10) == 0x10)
+	       && (G_FLD (inst->v, 9, 5) == 0x2)
 	       && (G_FLD (inst->v, 4, 0) == 0x0))
-        {
-          /* mv! r2, r0 */
-          pc = cpc + inst->len;
-          break;
-        }
+	{
+	  /* mv! r2, r0 */
+	  pc = cpc + inst->len;
+	  break;
+	}
       else if (inst->len == 2
-               && ((G_FLD (inst->v, 14, 12) == 3) /* b15 form */
-                   || (G_FLD (inst->v, 14, 12) == 0x0
-                       && G_FLD (inst->v, 11, 5) == 0x4))) /* br! */
-        break;
+	       && ((G_FLD (inst->v, 14, 12) == 3) /* b15 form */
+		   || (G_FLD (inst->v, 14, 12) == 0x0
+		       && G_FLD (inst->v, 11, 5) == 0x4))) /* br! */
+	break;
       else if (inst->len == 4
-               && ((G_FLD (inst->v, 29, 25) == 2)    /* j32 form */
-                   || (G_FLD (inst->v, 29, 25) == 4))) /* b32 form */
-        break;
+	       && ((G_FLD (inst->v, 29, 25) == 2)    /* j32 form */
+		   || (G_FLD (inst->v, 29, 25) == 4))) /* b32 form */
+	break;
 
       cpc += inst->len;
     }
@@ -727,17 +727,17 @@ score7_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR cur_pc)
   if (inst->v == 0x23)
     return 1;   /* mv! r0, r2 */
   else if (G_FLD (inst->v, 14, 12) == 0x2
-           && G_FLD (inst->v, 3, 0) == 0xa)
+	   && G_FLD (inst->v, 3, 0) == 0xa)
     return 1;   /* pop! */
   else if (G_FLD (inst->v, 14, 12) == 0x0
-           && G_FLD (inst->v, 7, 0) == 0x34)
+	   && G_FLD (inst->v, 7, 0) == 0x34)
     return 1;   /* br! r3 */
   else if (G_FLD (inst->v, 29, 15) == 0x2
-           && G_FLD (inst->v, 6, 1) == 0x2b)
+	   && G_FLD (inst->v, 6, 1) == 0x2b)
     return 1;   /* mv r0, r2 */
   else if (G_FLD (inst->v, 29, 25) == 0x0
-           && G_FLD (inst->v, 6, 1) == 0x4
-           && G_FLD (inst->v, 19, 15) == 0x3)
+	   && G_FLD (inst->v, 6, 1) == 0x4
+	   && G_FLD (inst->v, 19, 15) == 0x3)
     return 1;   /* br r3 */
   else
     return 0;
@@ -759,32 +759,32 @@ score3_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR cur_pc)
       && (G_FLD (inst->v, 4, 0) == 0x2))
     return 1;   /* mv! r0, r2 */
   else if (inst->len == 4
-           && (G_FLD (inst->v, 29, 25) == 0x0)
-           && (G_FLD (inst->v, 24, 20) == 0x2)
-           && (G_FLD (inst->v, 19, 15) == 0x0)
+	   && (G_FLD (inst->v, 29, 25) == 0x0)
+	   && (G_FLD (inst->v, 24, 20) == 0x2)
+	   && (G_FLD (inst->v, 19, 15) == 0x0)
 	   && (G_FLD (inst->v, 14, 10) == 0xF)
 	   && (G_FLD (inst->v, 9, 0) == 0x56))
     return 1;   /* mv r0, r2 */
   else if (inst->len == 2
-           && (G_FLD (inst->v, 14, 12) == 0x0)
-           && (G_FLD (inst->v, 11, 5) == 0x2))
+	   && (G_FLD (inst->v, 14, 12) == 0x0)
+	   && (G_FLD (inst->v, 11, 5) == 0x2))
     return 1;   /* pop! */
   else if (inst->len == 2
-           && (G_FLD (inst->v, 14, 12) == 0x0)
-           && (G_FLD (inst->v, 11, 7) == 0x0)
-           && (G_FLD (inst->v, 6, 5) == 0x2))
+	   && (G_FLD (inst->v, 14, 12) == 0x0)
+	   && (G_FLD (inst->v, 11, 7) == 0x0)
+	   && (G_FLD (inst->v, 6, 5) == 0x2))
     return 1;   /* rpop! */
   else if (inst->len == 2
-           && (G_FLD (inst->v, 14, 12) == 0x0)
-           && (G_FLD (inst->v, 11, 5) == 0x4)
-           && (G_FLD (inst->v, 4, 0) == 0x3))
+	   && (G_FLD (inst->v, 14, 12) == 0x0)
+	   && (G_FLD (inst->v, 11, 5) == 0x4)
+	   && (G_FLD (inst->v, 4, 0) == 0x3))
     return 1;   /* br! r3 */
   else if (inst->len == 4
-           && (G_FLD (inst->v, 29, 25) == 0x0)
-           && (G_FLD (inst->v, 24, 20) == 0x0)
-           && (G_FLD (inst->v, 19, 15) == 0x3)
-           && (G_FLD (inst->v, 14, 10) == 0xF)
-           && (G_FLD (inst->v, 9, 0) == 0x8))
+	   && (G_FLD (inst->v, 29, 25) == 0x0)
+	   && (G_FLD (inst->v, 24, 20) == 0x0)
+	   && (G_FLD (inst->v, 19, 15) == 0x3)
+	   && (G_FLD (inst->v, 14, 10) == 0xF)
+	   && (G_FLD (inst->v, 9, 0) == 0x8))
     return 1;   /* br r3 */
   else
     return 0;
@@ -805,7 +805,7 @@ score7_malloc_and_get_memblock (CORE_ADDR addr, CORE_ADDR size)
   if (ret)
     {
       error (_("Error: target_read_memory in file:%s, line:%d!"),
-             __FILE__, __LINE__);
+	     __FILE__, __LINE__);
       return NULL;
     }
   return memblock;
@@ -819,7 +819,7 @@ score7_free_memblock (gdb_byte *memblock)
 
 static void
 score7_adjust_memblock_ptr (gdb_byte **memblock, CORE_ADDR prev_pc,
-                           CORE_ADDR cur_pc)
+			   CORE_ADDR cur_pc)
 {
   if (prev_pc == -1)
     {
@@ -839,8 +839,8 @@ score7_adjust_memblock_ptr (gdb_byte **memblock, CORE_ADDR prev_pc,
 
 static void
 score7_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
-                        struct frame_info *this_frame,
-                        struct score_frame_cache *this_cache)
+			struct frame_info *this_frame,
+			struct score_frame_cache *this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR sp;
@@ -869,172 +869,176 @@ score7_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
     {
       inst_t *inst = NULL;
       if (memblock != NULL)
-        {
-          /* Reading memory block from target successfully and got all
-             the instructions(from STARTADDR to PC) needed.  */
-          score7_adjust_memblock_ptr (&memblock, prev_pc, cur_pc);
-          inst = score7_fetch_inst (gdbarch, cur_pc, memblock);
-        }
+	{
+	  /* Reading memory block from target successfully and got all
+	     the instructions(from STARTADDR to PC) needed.  */
+	  score7_adjust_memblock_ptr (&memblock, prev_pc, cur_pc);
+	  inst = score7_fetch_inst (gdbarch, cur_pc, memblock);
+	}
       else
-        {
-          /* Otherwise, we fetch 4 bytes from target, and GDB also
-             work correctly.  */
-          inst = score7_fetch_inst (gdbarch, cur_pc, NULL);
-        }
+	{
+	  /* Otherwise, we fetch 4 bytes from target, and GDB also
+	     work correctly.  */
+	  inst = score7_fetch_inst (gdbarch, cur_pc, NULL);
+	}
 
       /* FIXME: make a full-power prologue analyzer.  */
       if (inst->len == 2)
-        {
-          inst_len = SCORE16_INSTLEN;
+	{
+	  inst_len = SCORE16_INSTLEN;
 
-          if (G_FLD (inst->v, 14, 12) == 0x2
-              && G_FLD (inst->v, 3, 0) == 0xe)
-            {
-              /* push! */
-              sp_offset += 4;
+	  if (G_FLD (inst->v, 14, 12) == 0x2
+	      && G_FLD (inst->v, 3, 0) == 0xe)
+	    {
+	      /* push! */
+	      sp_offset += 4;
 
-              if (G_FLD (inst->v, 11, 7) == 0x6
-                  && ra_offset_p == 0)
-                {
-                  /* push! r3, [r0] */
-                  ra_offset = sp_offset;
-                  ra_offset_p = 1;
-                }
-              else if (G_FLD (inst->v, 11, 7) == 0x4
-                       && fp_offset_p == 0)
-                {
-                  /* push! r2, [r0] */
-                  fp_offset = sp_offset;
-                  fp_offset_p = 1;
-                }
-            }
-          else if (G_FLD (inst->v, 14, 12) == 0x2
-                   && G_FLD (inst->v, 3, 0) == 0xa)
-            {
-              /* pop! */
-              sp_offset -= 4;
-            }
-          else if (G_FLD (inst->v, 14, 7) == 0xc1
-                   && G_FLD (inst->v, 2, 0) == 0x0)
-            {
-              /* subei! r0, n */
-              sp_offset += (int) pow (2.0, G_FLD (inst->v, 6, 3));
-            }
-          else if (G_FLD (inst->v, 14, 7) == 0xc0
-                   && G_FLD (inst->v, 2, 0) == 0x0)
-            {
-              /* addei! r0, n */
+	      if (G_FLD (inst->v, 11, 7) == 0x6
+		  && ra_offset_p == 0)
+		{
+		  /* push! r3, [r0] */
+		  ra_offset = sp_offset;
+		  ra_offset_p = 1;
+		}
+	      else if (G_FLD (inst->v, 11, 7) == 0x4
+		       && fp_offset_p == 0)
+		{
+		  /* push! r2, [r0] */
+		  fp_offset = sp_offset;
+		  fp_offset_p = 1;
+		}
+	    }
+	  else if (G_FLD (inst->v, 14, 12) == 0x2
+		   && G_FLD (inst->v, 3, 0) == 0xa)
+	    {
+	      /* pop! */
+	      sp_offset -= 4;
+	    }
+	  else if (G_FLD (inst->v, 14, 7) == 0xc1
+		   && G_FLD (inst->v, 2, 0) == 0x0)
+	    {
+	      /* subei! r0, n */
+	      sp_offset += (int) pow (2.0, G_FLD (inst->v, 6, 3));
+	    }
+	  else if (G_FLD (inst->v, 14, 7) == 0xc0
+		   && G_FLD (inst->v, 2, 0) == 0x0)
+	    {
+	      /* addei! r0, n */
 	      /* Solaris 11+gcc 5.5 has ambiguous overloads of pow, so we
 		 pass 2.0 instead of 2 to get the right one.  */
-              sp_offset -= (int) pow (2.0, G_FLD (inst->v, 6, 3));
-            }
-        }
+	      sp_offset -= (int) pow (2.0, G_FLD (inst->v, 6, 3));
+	    }
+	}
       else
-        {
-          inst_len = SCORE_INSTLEN;
+	{
+	  inst_len = SCORE_INSTLEN;
 
-          if (G_FLD(inst->v, 29, 25) == 0x3
-              && G_FLD(inst->v, 2, 0) == 0x4
-              && G_FLD(inst->v, 19, 15) == 0)
-            {
-                /* sw rD, [r0, offset]+ */
-                sp_offset += SCORE_INSTLEN;
+	  if (G_FLD(inst->v, 29, 25) == 0x3
+	      && G_FLD(inst->v, 2, 0) == 0x4
+	      && G_FLD(inst->v, 19, 15) == 0)
+	    {
+		/* sw rD, [r0, offset]+ */
+		sp_offset += SCORE_INSTLEN;
 
-                if (G_FLD(inst->v, 24, 20) == 0x3)
-                  {
-                      /* rD = r3 */
-                      if (ra_offset_p == 0)
-                        {
-                            ra_offset = sp_offset;
-                            ra_offset_p = 1;
-                        }
-                  }
-                else if (G_FLD(inst->v, 24, 20) == 0x2)
-                  {
-                      /* rD = r2 */
-                      if (fp_offset_p == 0)
-                        {
-                            fp_offset = sp_offset;
-                            fp_offset_p = 1;
-                        }
-                  }
-            }
-          else if (G_FLD(inst->v, 29, 25) == 0x14
-                   && G_FLD(inst->v, 19,15) == 0)
-            {
-                /* sw rD, [r0, offset] */
-                if (G_FLD(inst->v, 24, 20) == 0x3)
-                  {
-                      /* rD = r3 */
-                      ra_offset = sp_offset - G_FLD(inst->v, 14, 0);
-                      ra_offset_p = 1;
-                  }
-                else if (G_FLD(inst->v, 24, 20) == 0x2)
-                  {
-                      /* rD = r2 */
-                      fp_offset = sp_offset - G_FLD(inst->v, 14, 0);
-                      fp_offset_p = 1;
-                  }
-            }
-          else if (G_FLD (inst->v, 29, 15) == 0x1c60
-                   && G_FLD (inst->v, 2, 0) == 0x0)
-            {
-              /* lw r3, [r0]+, 4 */
-              sp_offset -= SCORE_INSTLEN;
-              ra_offset_p = 1;
-            }
-          else if (G_FLD (inst->v, 29, 15) == 0x1c40
-                   && G_FLD (inst->v, 2, 0) == 0x0)
-            {
-              /* lw r2, [r0]+, 4 */
-              sp_offset -= SCORE_INSTLEN;
-              fp_offset_p = 1;
-            }
+		if (G_FLD(inst->v, 24, 20) == 0x3)
+		  {
+		      /* rD = r3 */
+		      if (ra_offset_p == 0)
+			{
+			    ra_offset = sp_offset;
+			    ra_offset_p = 1;
+			}
+		  }
+		else if (G_FLD(inst->v, 24, 20) == 0x2)
+		  {
+		      /* rD = r2 */
+		      if (fp_offset_p == 0)
+			{
+			    fp_offset = sp_offset;
+			    fp_offset_p = 1;
+			}
+		  }
+	    }
+	  else if (G_FLD(inst->v, 29, 25) == 0x14
+		   && G_FLD(inst->v, 19,15) == 0)
+	    {
+		/* sw rD, [r0, offset] */
+		if (G_FLD(inst->v, 24, 20) == 0x3)
+		  {
+		      /* rD = r3 */
+		      ra_offset = sp_offset - G_FLD(inst->v, 14, 0);
+		      ra_offset_p = 1;
+		  }
+		else if (G_FLD(inst->v, 24, 20) == 0x2)
+		  {
+		      /* rD = r2 */
+		      fp_offset = sp_offset - G_FLD(inst->v, 14, 0);
+		      fp_offset_p = 1;
+		  }
+	    }
+	  else if (G_FLD (inst->v, 29, 15) == 0x1c60
+		   && G_FLD (inst->v, 2, 0) == 0x0)
+	    {
+	      /* lw r3, [r0]+, 4 */
+	      sp_offset -= SCORE_INSTLEN;
+	      ra_offset_p = 1;
+	    }
+	  else if (G_FLD (inst->v, 29, 15) == 0x1c40
+		   && G_FLD (inst->v, 2, 0) == 0x0)
+	    {
+	      /* lw r2, [r0]+, 4 */
+	      sp_offset -= SCORE_INSTLEN;
+	      fp_offset_p = 1;
+	    }
 
-          else if (G_FLD (inst->v, 29, 17) == 0x100
-                   && G_FLD (inst->v, 0, 0) == 0x0)
-            {
-              /* addi r0, -offset */
-              sp_offset += 65536 - G_FLD (inst->v, 16, 1);
-            }
-          else if (G_FLD (inst->v, 29, 17) == 0x110
-                   && G_FLD (inst->v, 0, 0) == 0x0)
-            {
-              /* addi r2, offset */
-              if (pc - cur_pc > 4)
-                {
-                  unsigned int save_v = inst->v;
-                  inst_t *inst2 =
-                    score7_fetch_inst (gdbarch, cur_pc + SCORE_INSTLEN, NULL);
-                  if (inst2->v == 0x23)
-                    {
-                      /* mv! r0, r2 */
-                      sp_offset -= G_FLD (save_v, 16, 1);
-                    }
-                }
-            }
-        }
+	  else if (G_FLD (inst->v, 29, 17) == 0x100
+		   && G_FLD (inst->v, 0, 0) == 0x0)
+	    {
+	      /* addi r0, -offset */
+	      sp_offset += 65536 - G_FLD (inst->v, 16, 1);
+	    }
+	  else if (G_FLD (inst->v, 29, 17) == 0x110
+		   && G_FLD (inst->v, 0, 0) == 0x0)
+	    {
+	      /* addi r2, offset */
+	      if (pc - cur_pc > 4)
+		{
+		  unsigned int save_v = inst->v;
+		  inst_t *inst2 =
+		    score7_fetch_inst (gdbarch, cur_pc + SCORE_INSTLEN, NULL);
+		  if (inst2->v == 0x23)
+		    {
+		      /* mv! r0, r2 */
+		      sp_offset -= G_FLD (save_v, 16, 1);
+		    }
+		}
+	    }
+	}
     }
 
   /* Save RA.  */
   if (ra_offset_p == 1)
     {
-      if (this_cache->saved_regs[SCORE_PC_REGNUM].addr == -1)
-        this_cache->saved_regs[SCORE_PC_REGNUM].addr =
-          sp + sp_offset - ra_offset;
+      if (this_cache->saved_regs[SCORE_PC_REGNUM].is_realreg ()
+	  && this_cache->saved_regs[SCORE_PC_REGNUM].realreg ()
+	     == SCORE_PC_REGNUM)
+	this_cache->saved_regs[SCORE_PC_REGNUM].set_addr (sp + sp_offset
+							  - ra_offset);
     }
   else
     {
       this_cache->saved_regs[SCORE_PC_REGNUM] =
-        this_cache->saved_regs[SCORE_RA_REGNUM];
+	this_cache->saved_regs[SCORE_RA_REGNUM];
     }
 
   /* Save FP.  */
   if (fp_offset_p == 1)
     {
-      if (this_cache->saved_regs[SCORE_FP_REGNUM].addr == -1)
-        this_cache->saved_regs[SCORE_FP_REGNUM].addr =
-          sp + sp_offset - fp_offset;
+      if (this_cache->saved_regs[SCORE_FP_REGNUM].is_realreg ()
+	  && this_cache->saved_regs[SCORE_FP_REGNUM].realreg ()
+	     == SCORE_FP_REGNUM)
+	this_cache->saved_regs[SCORE_FP_REGNUM].set_addr (sp + sp_offset
+							  - fp_offset);
     }
 
   /* Save SP and FP.  */
@@ -1048,8 +1052,8 @@ score7_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
 
 static void
 score3_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
-                        struct frame_info *this_frame,
-                        struct score_frame_cache *this_cache)
+			struct frame_info *this_frame,
+			struct score_frame_cache *this_cache)
 {
   CORE_ADDR sp;
   CORE_ADDR fp;
@@ -1075,212 +1079,216 @@ score3_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
 
       /* FIXME: make a full-power prologue analyzer.  */
       if (inst->len == 2)
-        {
-          if (G_FLD (inst->v, 14, 12) == 0x0
-              && G_FLD (inst->v, 11, 7) == 0x0
-              && G_FLD (inst->v, 6, 5) == 0x3)
-            {
-              /* push! */
-              sp_offset += 4;
+	{
+	  if (G_FLD (inst->v, 14, 12) == 0x0
+	      && G_FLD (inst->v, 11, 7) == 0x0
+	      && G_FLD (inst->v, 6, 5) == 0x3)
+	    {
+	      /* push! */
+	      sp_offset += 4;
 
-              if (G_FLD (inst->v, 4, 0) == 0x3
-                  && ra_offset_p == 0)
-                {
-                  /* push! r3, [r0] */
-                  ra_offset = sp_offset;
-                  ra_offset_p = 1;
-                }
-              else if (G_FLD (inst->v, 4, 0) == 0x2
-                       && fp_offset_p == 0)
-                {
-                  /* push! r2, [r0] */
-                  fp_offset = sp_offset;
-                  fp_offset_p = 1;
-                }
-            }
-          else if (G_FLD (inst->v, 14, 12) == 0x6
-                   && G_FLD (inst->v, 11, 10) == 0x3)
-            {
-              /* rpush! */
-              int start_r = G_FLD (inst->v, 9, 5);
-              int cnt = G_FLD (inst->v, 4, 0);
+	      if (G_FLD (inst->v, 4, 0) == 0x3
+		  && ra_offset_p == 0)
+		{
+		  /* push! r3, [r0] */
+		  ra_offset = sp_offset;
+		  ra_offset_p = 1;
+		}
+	      else if (G_FLD (inst->v, 4, 0) == 0x2
+		       && fp_offset_p == 0)
+		{
+		  /* push! r2, [r0] */
+		  fp_offset = sp_offset;
+		  fp_offset_p = 1;
+		}
+	    }
+	  else if (G_FLD (inst->v, 14, 12) == 0x6
+		   && G_FLD (inst->v, 11, 10) == 0x3)
+	    {
+	      /* rpush! */
+	      int start_r = G_FLD (inst->v, 9, 5);
+	      int cnt = G_FLD (inst->v, 4, 0);
      
-              if ((ra_offset_p == 0)
+	      if ((ra_offset_p == 0)
 		  && (start_r <= SCORE_RA_REGNUM)
-                  && (SCORE_RA_REGNUM < start_r + cnt))
-                {
-                  /* rpush! contains r3 */
-                  ra_offset_p = 1;
-                  ra_offset = sp_offset + 4 * (SCORE_RA_REGNUM - start_r) + 4;
-                }
+		  && (SCORE_RA_REGNUM < start_r + cnt))
+		{
+		  /* rpush! contains r3 */
+		  ra_offset_p = 1;
+		  ra_offset = sp_offset + 4 * (SCORE_RA_REGNUM - start_r) + 4;
+		}
 
-              if ((fp_offset_p == 0)
+	      if ((fp_offset_p == 0)
 		  && (start_r <= SCORE_FP_REGNUM)
-                  && (SCORE_FP_REGNUM < start_r + cnt))
-                {
-                  /* rpush! contains r2 */
-                  fp_offset_p = 1;
-                  fp_offset = sp_offset + 4 * (SCORE_FP_REGNUM - start_r) + 4;
-                }
+		  && (SCORE_FP_REGNUM < start_r + cnt))
+		{
+		  /* rpush! contains r2 */
+		  fp_offset_p = 1;
+		  fp_offset = sp_offset + 4 * (SCORE_FP_REGNUM - start_r) + 4;
+		}
 
-              sp_offset += 4 * cnt;
-            }
-          else if (G_FLD (inst->v, 14, 12) == 0x0
-                   && G_FLD (inst->v, 11, 7) == 0x0
-                   && G_FLD (inst->v, 6, 5) == 0x2)
-            {
-              /* pop! */
-              sp_offset -= 4;
-            }
-          else if (G_FLD (inst->v, 14, 12) == 0x6
-                   && G_FLD (inst->v, 11, 10) == 0x2)
-            {
-              /* rpop! */
-              sp_offset -= 4 * G_FLD (inst->v, 4, 0);
-            }
-          else if (G_FLD (inst->v, 14, 12) == 0x5
-                   && G_FLD (inst->v, 11, 10) == 0x3
-                   && G_FLD (inst->v, 9, 6) == 0x0)
-            {
-              /* addi! r0, -offset */
-              int imm = G_FLD (inst->v, 5, 0);
+	      sp_offset += 4 * cnt;
+	    }
+	  else if (G_FLD (inst->v, 14, 12) == 0x0
+		   && G_FLD (inst->v, 11, 7) == 0x0
+		   && G_FLD (inst->v, 6, 5) == 0x2)
+	    {
+	      /* pop! */
+	      sp_offset -= 4;
+	    }
+	  else if (G_FLD (inst->v, 14, 12) == 0x6
+		   && G_FLD (inst->v, 11, 10) == 0x2)
+	    {
+	      /* rpop! */
+	      sp_offset -= 4 * G_FLD (inst->v, 4, 0);
+	    }
+	  else if (G_FLD (inst->v, 14, 12) == 0x5
+		   && G_FLD (inst->v, 11, 10) == 0x3
+		   && G_FLD (inst->v, 9, 6) == 0x0)
+	    {
+	      /* addi! r0, -offset */
+	      int imm = G_FLD (inst->v, 5, 0);
 	      if (imm >> 5)
 		imm = -(0x3F - imm + 1);
 	      sp_offset -= imm;
-            }
-          else if (G_FLD (inst->v, 14, 12) == 0x5
-                   && G_FLD (inst->v, 11, 10) == 0x3
-                   && G_FLD (inst->v, 9, 6) == 0x2)
-            {
-              /* addi! r2, offset */
-              if (pc - cur_pc >= 2)
-                {
+	    }
+	  else if (G_FLD (inst->v, 14, 12) == 0x5
+		   && G_FLD (inst->v, 11, 10) == 0x3
+		   && G_FLD (inst->v, 9, 6) == 0x2)
+	    {
+	      /* addi! r2, offset */
+	      if (pc - cur_pc >= 2)
+		{
 		  inst_t *inst2;
 		  
 		  cur_pc += inst->len;
 		  inst2 = score3_adjust_pc_and_fetch_inst (&cur_pc, NULL,
 							   byte_order);
 
-                  if (inst2->len == 2
-                      && G_FLD (inst2->v, 14, 10) == 0x10
-                      && G_FLD (inst2->v, 9, 5) == 0x0
-                      && G_FLD (inst2->v, 4, 0) == 0x2)
-                    {
-                      /* mv! r0, r2 */
-                      int imm = G_FLD (inst->v, 5, 0);
-	              if (imm >> 5)
-		        imm = -(0x3F - imm + 1);
-                      sp_offset -= imm;
-                    }
-                }
+		  if (inst2->len == 2
+		      && G_FLD (inst2->v, 14, 10) == 0x10
+		      && G_FLD (inst2->v, 9, 5) == 0x0
+		      && G_FLD (inst2->v, 4, 0) == 0x2)
+		    {
+		      /* mv! r0, r2 */
+		      int imm = G_FLD (inst->v, 5, 0);
+		      if (imm >> 5)
+			imm = -(0x3F - imm + 1);
+		      sp_offset -= imm;
+		    }
+		}
 	    }
-        }
+	}
       else if (inst->len == 4)
-        {
-          if (G_FLD (inst->v, 29, 25) == 0x3
-              && G_FLD (inst->v, 2, 0) == 0x4
-              && G_FLD (inst->v, 24, 20) == 0x3
-              && G_FLD (inst->v, 19, 15) == 0x0)
-            {
-              /* sw r3, [r0, offset]+ */
-              sp_offset += inst->len;
-              if (ra_offset_p == 0)
-                {
-                  ra_offset = sp_offset;
-                  ra_offset_p = 1;
-                }
-            }
-          else if (G_FLD (inst->v, 29, 25) == 0x3
-                   && G_FLD (inst->v, 2, 0) == 0x4
-                   && G_FLD (inst->v, 24, 20) == 0x2
-                   && G_FLD (inst->v, 19, 15) == 0x0)
-            {
-              /* sw r2, [r0, offset]+ */
-              sp_offset += inst->len;
-              if (fp_offset_p == 0)
-                {
-                  fp_offset = sp_offset;
-                  fp_offset_p = 1;
-                }
-            }
-          else if (G_FLD (inst->v, 29, 25) == 0x7
-                   && G_FLD (inst->v, 2, 0) == 0x0
-                   && G_FLD (inst->v, 24, 20) == 0x3
-                   && G_FLD (inst->v, 19, 15) == 0x0)
-            {
-              /* lw r3, [r0]+, 4 */
-              sp_offset -= inst->len;
-              ra_offset_p = 1;
-            }
-          else if (G_FLD (inst->v, 29, 25) == 0x7
-                   && G_FLD (inst->v, 2, 0) == 0x0
-                   && G_FLD (inst->v, 24, 20) == 0x2
-                   && G_FLD (inst->v, 19, 15) == 0x0)
-            {
-              /* lw r2, [r0]+, 4 */
-              sp_offset -= inst->len;
-              fp_offset_p = 1;
-            }
-          else if (G_FLD (inst->v, 29, 25) == 0x1
-                   && G_FLD (inst->v, 19, 17) == 0x0
-                   && G_FLD (inst->v, 24, 20) == 0x0
-                   && G_FLD (inst->v, 0, 0) == 0x0)
-            {
-              /* addi r0, -offset */
-              int imm = G_FLD (inst->v, 16, 1);
+	{
+	  if (G_FLD (inst->v, 29, 25) == 0x3
+	      && G_FLD (inst->v, 2, 0) == 0x4
+	      && G_FLD (inst->v, 24, 20) == 0x3
+	      && G_FLD (inst->v, 19, 15) == 0x0)
+	    {
+	      /* sw r3, [r0, offset]+ */
+	      sp_offset += inst->len;
+	      if (ra_offset_p == 0)
+		{
+		  ra_offset = sp_offset;
+		  ra_offset_p = 1;
+		}
+	    }
+	  else if (G_FLD (inst->v, 29, 25) == 0x3
+		   && G_FLD (inst->v, 2, 0) == 0x4
+		   && G_FLD (inst->v, 24, 20) == 0x2
+		   && G_FLD (inst->v, 19, 15) == 0x0)
+	    {
+	      /* sw r2, [r0, offset]+ */
+	      sp_offset += inst->len;
+	      if (fp_offset_p == 0)
+		{
+		  fp_offset = sp_offset;
+		  fp_offset_p = 1;
+		}
+	    }
+	  else if (G_FLD (inst->v, 29, 25) == 0x7
+		   && G_FLD (inst->v, 2, 0) == 0x0
+		   && G_FLD (inst->v, 24, 20) == 0x3
+		   && G_FLD (inst->v, 19, 15) == 0x0)
+	    {
+	      /* lw r3, [r0]+, 4 */
+	      sp_offset -= inst->len;
+	      ra_offset_p = 1;
+	    }
+	  else if (G_FLD (inst->v, 29, 25) == 0x7
+		   && G_FLD (inst->v, 2, 0) == 0x0
+		   && G_FLD (inst->v, 24, 20) == 0x2
+		   && G_FLD (inst->v, 19, 15) == 0x0)
+	    {
+	      /* lw r2, [r0]+, 4 */
+	      sp_offset -= inst->len;
+	      fp_offset_p = 1;
+	    }
+	  else if (G_FLD (inst->v, 29, 25) == 0x1
+		   && G_FLD (inst->v, 19, 17) == 0x0
+		   && G_FLD (inst->v, 24, 20) == 0x0
+		   && G_FLD (inst->v, 0, 0) == 0x0)
+	    {
+	      /* addi r0, -offset */
+	      int imm = G_FLD (inst->v, 16, 1);
 	      if (imm >> 15)
 		imm = -(0xFFFF - imm + 1);
-              sp_offset -= imm;
-            }
-          else if (G_FLD (inst->v, 29, 25) == 0x1
-                   && G_FLD (inst->v, 19, 17) == 0x0
-                   && G_FLD (inst->v, 24, 20) == 0x2
-                   && G_FLD (inst->v, 0, 0) == 0x0)
-            {
-              /* addi r2, offset */
-              if (pc - cur_pc >= 2)
-                {
+	      sp_offset -= imm;
+	    }
+	  else if (G_FLD (inst->v, 29, 25) == 0x1
+		   && G_FLD (inst->v, 19, 17) == 0x0
+		   && G_FLD (inst->v, 24, 20) == 0x2
+		   && G_FLD (inst->v, 0, 0) == 0x0)
+	    {
+	      /* addi r2, offset */
+	      if (pc - cur_pc >= 2)
+		{
 		  inst_t *inst2;
 		  
 		  cur_pc += inst->len;
 		  inst2 = score3_adjust_pc_and_fetch_inst (&cur_pc, NULL,
 							   byte_order);
 
-                  if (inst2->len == 2
-                      && G_FLD (inst2->v, 14, 10) == 0x10
-                      && G_FLD (inst2->v, 9, 5) == 0x0
-                      && G_FLD (inst2->v, 4, 0) == 0x2)
-                    {
-                      /* mv! r0, r2 */
-                      int imm = G_FLD (inst->v, 16, 1);
-	              if (imm >> 15)
-		        imm = -(0xFFFF - imm + 1);
-                      sp_offset -= imm;
-                    }
-                }
-            }
-        }
+		  if (inst2->len == 2
+		      && G_FLD (inst2->v, 14, 10) == 0x10
+		      && G_FLD (inst2->v, 9, 5) == 0x0
+		      && G_FLD (inst2->v, 4, 0) == 0x2)
+		    {
+		      /* mv! r0, r2 */
+		      int imm = G_FLD (inst->v, 16, 1);
+		      if (imm >> 15)
+			imm = -(0xFFFF - imm + 1);
+		      sp_offset -= imm;
+		    }
+		}
+	    }
+	}
     }
 
   /* Save RA.  */
   if (ra_offset_p == 1)
     {
-      if (this_cache->saved_regs[SCORE_PC_REGNUM].addr == -1)
-        this_cache->saved_regs[SCORE_PC_REGNUM].addr =
-          sp + sp_offset - ra_offset;
+      if (this_cache->saved_regs[SCORE_PC_REGNUM].is_realreg ()
+	  && this_cache->saved_regs[SCORE_PC_REGNUM].realreg ()
+	     == SCORE_PC_REGNUM)
+	this_cache->saved_regs[SCORE_PC_REGNUM].set_addr (sp + sp_offset
+							  - ra_offset);
     }
   else
     {
       this_cache->saved_regs[SCORE_PC_REGNUM] =
-        this_cache->saved_regs[SCORE_RA_REGNUM];
+	this_cache->saved_regs[SCORE_RA_REGNUM];
     }
 
   /* Save FP.  */
   if (fp_offset_p == 1)
     {
-      if (this_cache->saved_regs[SCORE_FP_REGNUM].addr == -1)
-        this_cache->saved_regs[SCORE_FP_REGNUM].addr =
-          sp + sp_offset - fp_offset;
+      if (this_cache->saved_regs[SCORE_FP_REGNUM].is_realreg ()
+	  && this_cache->saved_regs[SCORE_FP_REGNUM].realreg ()
+	     == SCORE_FP_REGNUM)
+	this_cache->saved_regs[SCORE_FP_REGNUM].set_addr (sp + sp_offset
+							  - fp_offset);
     }
 
   /* Save SP and FP.  */
@@ -1318,26 +1326,26 @@ score_make_prologue_cache (struct frame_info *this_frame, void **this_cache)
   }
 
   /* Save SP.  */
-  trad_frame_set_value (cache->saved_regs, SCORE_SP_REGNUM, cache->base);
+  cache->saved_regs[SCORE_SP_REGNUM].set_value (cache->base);
 
   return (struct score_frame_cache *) (*this_cache);
 }
 
 static void
 score_prologue_this_id (struct frame_info *this_frame, void **this_cache,
-                        struct frame_id *this_id)
+			struct frame_id *this_id)
 {
   struct score_frame_cache *info = score_make_prologue_cache (this_frame,
-                                                              this_cache);
+							      this_cache);
   (*this_id) = frame_id_build (info->base, get_frame_func (this_frame));
 }
 
 static struct value *
 score_prologue_prev_register (struct frame_info *this_frame,
-                              void **this_cache, int regnum)
+			      void **this_cache, int regnum)
 {
   struct score_frame_cache *info = score_make_prologue_cache (this_frame,
-                                                              this_cache);
+							      this_cache);
   return trad_frame_get_prev_register (this_frame, info->saved_regs, regnum);
 }
 
@@ -1354,7 +1362,7 @@ static const struct frame_unwind score_prologue_unwind =
 
 static CORE_ADDR
 score_prologue_frame_base_address (struct frame_info *this_frame,
-                                   void **this_cache)
+				   void **this_cache)
 {
   struct score_frame_cache *info =
     score_make_prologue_cache (this_frame, this_cache);

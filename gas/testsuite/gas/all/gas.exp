@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2020 Free Software Foundation, Inc.
+# Copyright (C) 2012-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -443,6 +443,7 @@ dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/err-*.s $srcdir/$subdir/warn
 dg-finish
 
 # Set $nop_type appropriately to indicate the NOP instruction mnemonic.
+# Note - this code is made obsolete by the new .nops pseudo-op.
 switch -glob $target_triplet {
     bpf-*-* {
         set nop_type 6
@@ -470,3 +471,6 @@ run_dump_test "org-6"
 run_dump_test "fill-1"
 
 gas_test "pr23938.s" "" "" ".xstabs"
+
+run_dump_test "nop"
+run_dump_test "asciz"

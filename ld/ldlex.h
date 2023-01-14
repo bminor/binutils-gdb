@@ -1,5 +1,5 @@
 /* ldlex.h -
-   Copyright (C) 1991-2020 Free Software Foundation, Inc.
+   Copyright (C) 1991-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -116,6 +116,9 @@ enum option_values
   OPTION_ALLOW_SHLIB_UNDEFINED,
   OPTION_NO_ALLOW_SHLIB_UNDEFINED,
   OPTION_ALLOW_MULTIPLE_DEFINITION,
+#if SUPPORT_ERROR_HANDLING_SCRIPT
+  OPTION_ERROR_HANDLING_SCRIPT,
+#endif
   OPTION_NO_UNDEFINED_VERSION,
   OPTION_DEFAULT_SYMVER,
   OPTION_DEFAULT_IMPORTED_SYMVER,

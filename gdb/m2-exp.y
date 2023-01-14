@@ -1,5 +1,5 @@
 /* YACC grammar for Modula-2 expressions, for GDB.
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
    Generated from expread.y (now c-exp.y) and contributed by the Department
    of Computer Science at the State University of New York at Buffalo, 1991.
 
@@ -125,7 +125,7 @@ static int number_sign = 1;
 /* The GDB scope operator */
 %token COLONCOLON
 
-%token <voidval> DOLLAR_VARIABLE
+%token <sval> DOLLAR_VARIABLE
 
 /* M2 tokens */
 %left ','
@@ -162,7 +162,7 @@ type_exp:	type
 /* Expressions */
 
 exp     :       exp '^'   %prec UNARY
-                        { write_exp_elt_opcode (pstate, UNOP_IND); }
+			{ write_exp_elt_opcode (pstate, UNOP_IND); }
 	;
 
 exp	:	'-'
@@ -295,11 +295,11 @@ set	:	'{' arglist '}'
 
 /* Modula-2 array subscript notation [a,b,c...].  */
 exp     :       exp '['
-                        /* This function just saves the number of arguments
+			/* This function just saves the number of arguments
 			   that follow in the list.  It is *not* specific to
 			   function types */
-                        { pstate->start_arglist(); }
-                non_empty_arglist ']'  %prec DOT
+			{ pstate->start_arglist(); }
+		non_empty_arglist ']'  %prec DOT
 			{
 			  gdb_assert (pstate->arglist_len > 0);
 			  write_exp_elt_opcode (pstate, MULTI_SUBSCRIPT);
@@ -332,12 +332,12 @@ arglist	:	arglist ',' exp   %prec ABOVE_COMMA
 	;
 
 non_empty_arglist
-        :       exp
-                        { pstate->arglist_len = 1; }
+	:       exp
+			{ pstate->arglist_len = 1; }
 	;
 
 non_empty_arglist
-        :       non_empty_arglist ',' exp %prec ABOVE_COMMA
+	:       non_empty_arglist ',' exp %prec ABOVE_COMMA
      	       	    	{ pstate->arglist_len++; }
      	;
 
@@ -349,7 +349,7 @@ exp	:	'{' type '}' exp  %prec UNARY
 	;
 
 exp     :       type '(' exp ')' %prec UNARY
-                        { write_exp_elt_opcode (pstate, UNOP_CAST);
+			{ write_exp_elt_opcode (pstate, UNOP_CAST);
 			  write_exp_elt_type (pstate, $1);
 			  write_exp_elt_opcode (pstate, UNOP_CAST); }
 	;
@@ -375,8 +375,8 @@ exp	:	exp '/' exp
 	;
 
 exp     :       exp DIV exp
-                        { write_exp_elt_opcode (pstate, BINOP_INTDIV); }
-        ;
+			{ write_exp_elt_opcode (pstate, BINOP_INTDIV); }
+	;
 
 exp	:	exp MOD exp
 			{ write_exp_elt_opcode (pstate, BINOP_REM); }
@@ -396,8 +396,8 @@ exp	:	exp '=' exp
 
 exp	:	exp NOTEQUAL exp
 			{ write_exp_elt_opcode (pstate, BINOP_NOTEQUAL); }
-        |       exp '#' exp
-                        { write_exp_elt_opcode (pstate, BINOP_NOTEQUAL); }
+	|       exp '#' exp
+			{ write_exp_elt_opcode (pstate, BINOP_NOTEQUAL); }
 	;
 
 exp	:	exp LEQ exp
@@ -535,6 +535,7 @@ variable:	fblock
 
 /* GDB internal ($foo) variable */
 variable:	DOLLAR_VARIABLE
+			{ write_dollar_variable (pstate, $1); }
 	;
 
 /* GDB scope operator */
@@ -908,7 +909,7 @@ yylex (void)
 	    break;
 	}
 	toktype = parse_number (p - tokstart);
-        if (toktype == ERROR)
+	if (toktype == ERROR)
 	  {
 	    char *err_copy = (char *) alloca (p - tokstart + 1);
 
@@ -952,10 +953,7 @@ yylex (void)
   yylval.sval.length = namelen;
 
   if (*tokstart == '$')
-    {
-      write_dollar_variable (pstate, yylval.sval);
-      return DOLLAR_VARIABLE;
-    }
+    return DOLLAR_VARIABLE;
 
   /* Use token-type BLOCKNAME for symbols that happen to be defined as
      functions.  If this is not so, then ...
@@ -1031,7 +1029,7 @@ yylex (void)
 }
 
 int
-m2_parse (struct parser_state *par_state)
+m2_language::parser (struct parser_state *par_state) const
 {
   /* Setting up the parser state.  */
   scoped_restore pstate_restore = make_scoped_restore (&pstate);

@@ -1,4 +1,4 @@
-# Copyright 2019-2020 Free Software Foundation, Inc.
+# Copyright 2019-2021 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,5 +34,5 @@ if ![runto "storage.adb:$bp_location" ] then {
   return
 }
 
-gdb_test "print V_LE" "= \\(value => 126\\)"
-gdb_test "print V_BE" "= \\(value => 126\\)"
+gdb_test "print V_LE" "= \\(value => 126, another_value => 12\\)"
+gdb_test "print V_BE" "= \\(value => 126, another_value => 12\\)"

@@ -1,6 +1,6 @@
 /* Convert types from GDB to GCC
 
-   Copyright (C) 2014-2020 Free Software Foundation, Inc.
+   Copyright (C) 2014-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -70,7 +70,7 @@ convert_array (compile_c_instance *context, struct type *type)
     {
       LONGEST low_bound, high_bound, count;
 
-      if (get_array_bounds (type, &low_bound, &high_bound) == 0)
+      if (!get_array_bounds (type, &low_bound, &high_bound))
 	count = -1;
       else
 	{
@@ -164,10 +164,10 @@ convert_func (compile_c_instance *context, struct type *type)
      GDB's parser used to do.  */
   if (target_type == NULL)
     {
-      if (TYPE_OBJFILE_OWNED (type))
-	target_type = objfile_type (TYPE_OWNER (type).objfile)->builtin_int;
+      if (type->is_objfile_owned ())
+	target_type = objfile_type (type->objfile ())->builtin_int;
       else
-	target_type = builtin_type (TYPE_OWNER (type).gdbarch)->builtin_int;
+	target_type = builtin_type (type->arch ())->builtin_int;
       warning (_("function has unknown return type; assuming int"));
     }
 
@@ -176,13 +176,13 @@ convert_func (compile_c_instance *context, struct type *type)
   return_type = context->convert_type (target_type);
 
   array.n_elements = type->num_fields ();
-  array.elements = XNEWVEC (gcc_type, type->num_fields ());
+  std::vector<gcc_type> elements (array.n_elements);
+  array.elements = elements.data ();
   for (i = 0; i < type->num_fields (); ++i)
     array.elements[i] = context->convert_type (type->field (i).type ());
 
   result = context->plugin ().build_function_type (return_type,
 						   &array, is_varargs);
-  xfree (array.elements);
 
   return result;
 }
@@ -254,7 +254,8 @@ convert_qualified (compile_c_instance *context, struct type *type)
   if (TYPE_RESTRICT (type))
     quals |= GCC_QUALIFIER_RESTRICT;
 
-  return context->plugin ().build_qualified_type (unqual_converted, quals);
+  return context->plugin ().build_qualified_type (unqual_converted,
+						  quals.raw ());
 }
 
 /* Convert a complex type to its gcc representation.  */
@@ -277,9 +278,9 @@ convert_type_basic (compile_c_instance *context, struct type *type)
 {
   /* If we are converting a qualified type, first convert the
      unqualified type and then apply the qualifiers.  */
-  if ((TYPE_INSTANCE_FLAGS (type) & (TYPE_INSTANCE_FLAG_CONST
-				     | TYPE_INSTANCE_FLAG_VOLATILE
-				     | TYPE_INSTANCE_FLAG_RESTRICT)) != 0)
+  if ((type->instance_flags () & (TYPE_INSTANCE_FLAG_CONST
+				  | TYPE_INSTANCE_FLAG_VOLATILE
+				  | TYPE_INSTANCE_FLAG_RESTRICT)) != 0)
     return convert_qualified (context, type);
 
   switch (type->code ())
@@ -322,10 +323,10 @@ convert_type_basic (compile_c_instance *context, struct type *type)
 	   built-in parser does.  For now, assume "int" like GDB's
 	   built-in parser used to do, but at least warn.  */
 	struct type *fallback;
-	if (TYPE_OBJFILE_OWNED (type))
-	  fallback = objfile_type (TYPE_OWNER (type).objfile)->builtin_int;
+	if (type->is_objfile_owned ())
+	  fallback = objfile_type (type->objfile ())->builtin_int;
 	else
-	  fallback = builtin_type (TYPE_OWNER (type).gdbarch)->builtin_int;
+	  fallback = builtin_type (type->arch ())->builtin_int;
 	warning (_("variable has unknown type; assuming int"));
 	return convert_int (context, fallback);
       }

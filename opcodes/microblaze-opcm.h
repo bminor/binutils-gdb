@@ -1,6 +1,6 @@
 /* microblaze-opcm.h -- Header used in microblaze-opc.h
 
-   Copyright (C) 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2009-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
 

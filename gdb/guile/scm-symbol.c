@@ -1,6 +1,6 @@
 /* Scheme interface to symbols.
 
-   Copyright (C) 2008-2020 Free Software Foundation, Inc.
+   Copyright (C) 2008-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,14 +30,14 @@
 
 /* The <gdb:symbol> smob.  */
 
-typedef struct
+struct symbol_smob
 {
   /* This always appears first.  */
   eqable_gdb_smob base;
 
   /* The GDB symbol structure this smob is wrapping.  */
   struct symbol *symbol;
-} symbol_smob;
+};
 
 static const char symbol_smob_name[] = "gdb:symbol";
 

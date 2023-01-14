@@ -1,6 +1,6 @@
 /* Native-dependent code for OpenBSD.
 
-   Copyright (C) 2012-2020 Free Software Foundation, Inc.
+   Copyright (C) 2012-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -74,7 +74,7 @@ obsd_nat_target::update_thread_list ()
 
 ptid_t
 obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
-		       int options)
+		       target_wait_flags options)
 {
   pid_t pid;
   int status, save_errno;

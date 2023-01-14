@@ -1,6 +1,6 @@
 /* Gdb/Python header for private use by Python module.
 
-   Copyright (C) 2008-2020 Free Software Foundation, Inc.
+   Copyright (C) 2008-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -96,8 +96,6 @@
 #define Py_TPFLAGS_CHECKTYPES 0
 
 #define PyInt_Check PyLong_Check
-#define PyInt_FromLong PyLong_FromLong
-#define PyInt_FromSsize_t PyLong_FromSsize_t
 #define PyInt_AsLong PyLong_AsLong
 #define PyInt_AsSsize_t PyLong_AsSsize_t
 
@@ -127,8 +125,6 @@
 #define GDB_PY_LLU_ARG "K"
 typedef PY_LONG_LONG gdb_py_longest;
 typedef unsigned PY_LONG_LONG gdb_py_ulongest;
-#define gdb_py_long_from_longest PyLong_FromLongLong
-#define gdb_py_long_from_ulongest PyLong_FromUnsignedLongLong
 #define gdb_py_long_as_ulongest PyLong_AsUnsignedLongLong
 
 #else /* HAVE_LONG_LONG */
@@ -137,8 +133,6 @@ typedef unsigned PY_LONG_LONG gdb_py_ulongest;
 #define GDB_PY_LLU_ARG "K"
 typedef long gdb_py_longest;
 typedef unsigned long gdb_py_ulongest;
-#define gdb_py_long_from_longest PyLong_FromLong
-#define gdb_py_long_from_ulongest PyLong_FromUnsignedLong
 #define gdb_py_long_as_ulongest PyLong_AsUnsignedLong
 
 #endif /* HAVE_LONG_LONG */
@@ -324,7 +318,7 @@ extern PyTypeObject frame_object_type
 extern PyTypeObject thread_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("thread_object");
 
-typedef struct gdbpy_breakpoint_object
+struct gdbpy_breakpoint_object
 {
   PyObject_HEAD
 
@@ -337,16 +331,16 @@ typedef struct gdbpy_breakpoint_object
 
   /* 1 is this is a FinishBreakpoint object, 0 otherwise.  */
   int is_finish_bp;
-} gdbpy_breakpoint_object;
+};
 
 /* Require that BREAKPOINT be a valid breakpoint ID; throw a Python
    exception if it is invalid.  */
 #define BPPY_REQUIRE_VALID(Breakpoint)                                  \
     do {                                                                \
       if ((Breakpoint)->bp == NULL)                                     \
-        return PyErr_Format (PyExc_RuntimeError,                        \
-                             _("Breakpoint %d is invalid."),            \
-                             (Breakpoint)->number);                     \
+	return PyErr_Format (PyExc_RuntimeError,                        \
+			     _("Breakpoint %d is invalid."),            \
+			     (Breakpoint)->number);                     \
     } while (0)
 
 /* Require that BREAKPOINT be a valid breakpoint ID; throw a Python
@@ -354,11 +348,11 @@ typedef struct gdbpy_breakpoint_object
 #define BPPY_SET_REQUIRE_VALID(Breakpoint)                              \
     do {                                                                \
       if ((Breakpoint)->bp == NULL)                                     \
-        {                                                               \
-          PyErr_Format (PyExc_RuntimeError, _("Breakpoint %d is invalid."), \
-                        (Breakpoint)->number);                          \
-          return -1;                                                    \
-        }                                                               \
+	{                                                               \
+	  PyErr_Format (PyExc_RuntimeError, _("Breakpoint %d is invalid."), \
+			(Breakpoint)->number);                          \
+	  return -1;                                                    \
+	}                                                               \
     } while (0)
 
 
@@ -367,7 +361,7 @@ typedef struct gdbpy_breakpoint_object
 extern gdbpy_breakpoint_object *bppy_pending_object;
 
 
-typedef struct
+struct thread_object
 {
   PyObject_HEAD
 
@@ -376,7 +370,7 @@ typedef struct
 
   /* The Inferior object to which this thread belongs.  */
   PyObject *inf_obj;
-} thread_object;
+};
 
 struct inferior_object;
 
@@ -385,7 +379,10 @@ extern struct cmd_list_element *show_python_list;
 
 /* extension_language_script_ops "methods".  */
 
-extern int gdbpy_auto_load_enabled (const struct extension_language_defn *);
+/* Return true if auto-loading Python scripts is enabled.
+   This is the extension_language_script_ops.auto_load_enabled "method".  */
+
+extern bool gdbpy_auto_load_enabled (const struct extension_language_defn *);
 
 /* extension_language_ops "methods".  */
 
@@ -681,7 +678,7 @@ extern const struct language_defn *python_language;
     if (Exception.reason < 0)			\
       {						\
 	gdbpy_convert_exception (Exception);	\
-        return NULL;				\
+	return NULL;				\
       }						\
   } while (0)
 
@@ -690,7 +687,7 @@ extern const struct language_defn *python_language;
 #define GDB_PY_SET_HANDLE_EXCEPTION(Exception)				\
     do {								\
       if (Exception.reason < 0)						\
-        {								\
+	{								\
 	  gdbpy_convert_exception (Exception);				\
 	  return -1;							\
 	}								\
@@ -760,8 +757,8 @@ int gdb_pymodule_addobject (PyObject *module, const char *name,
 
 struct varobj_iter;
 struct varobj;
-struct varobj_iter *py_varobj_get_iterator (struct varobj *var,
-					    PyObject *printer);
+std::unique_ptr<varobj_iter> py_varobj_get_iterator (struct varobj *var,
+						     PyObject *printer);
 
 /* Deleter for Py_buffer unique_ptr specialization.  */
 

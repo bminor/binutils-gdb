@@ -1,5 +1,5 @@
 /* read.c - read a source file -
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -465,6 +465,7 @@ static const pseudo_typeS potable[] = {
   {"noformat", s_ignore, 0},
   {"nolist", listing_list, 0},	/* Turn listing off.  */
   {"nopage", listing_nopage, 0},
+  {"nop", s_nop, 0},
   {"nops", s_nops, 0},
   {"octa", cons, 16},
   {"offset", s_struct, 0},
@@ -529,6 +530,9 @@ static const pseudo_typeS potable[] = {
   {"weakref", s_weakref, 0},
   {"word", cons, 2},
   {"zero", s_space, 0},
+  {"2byte", cons, 2},
+  {"4byte", cons, 4},
+  {"8byte", cons, 8},
   {NULL, NULL, 0}			/* End sentinel.  */
 };
 
@@ -1547,7 +1551,7 @@ static void
 s_align (signed int arg, int bytes_p)
 {
   unsigned int align_limit = TC_ALIGN_LIMIT;
-  unsigned int align;
+  addressT align;
   char *stop = NULL;
   char stopc = 0;
   offsetT fill = 0;
@@ -1594,7 +1598,7 @@ s_align (signed int arg, int bytes_p)
   if (align > align_limit)
     {
       align = align_limit;
-      as_warn (_("alignment too large: %u assumed"), align);
+      as_warn (_("alignment too large: %u assumed"), align_limit);
     }
 
   if (*input_line_pointer != ',')
@@ -2546,7 +2550,7 @@ bss_alloc (symbolS *symbolP, addressT size, unsigned int align)
     symbol_get_frag (symbolP)->fr_symbol = NULL;
 
   symbol_set_frag (symbolP, frag_now);
-  pfrag = frag_var (rs_org, 1, 1, 0, symbolP, size, NULL);
+  pfrag = frag_var (rs_org, 1, 1, 0, symbolP, size * OCTETS_PER_BYTE, NULL);
   *pfrag = 0;
 
 #ifdef S_SET_SIZE
@@ -3503,6 +3507,61 @@ s_space (int mult)
 }
 
 void
+s_nop (int ignore ATTRIBUTE_UNUSED)
+{
+  expressionS exp;
+  fragS *start;
+  addressT start_off;
+  offsetT frag_off;
+
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
+#ifdef md_cons_align
+  md_cons_align (1);
+#endif
+
+  SKIP_WHITESPACE ();
+  expression (&exp);
+  demand_empty_rest_of_line ();
+
+  start = frag_now;
+  start_off = frag_now_fix ();
+  do
+    {
+#ifdef md_emit_single_noop
+      md_emit_single_noop;
+#else
+      char *nop;
+
+#ifndef md_single_noop_insn
+#define md_single_noop_insn "nop"
+#endif
+      /* md_assemble might modify its argument, so
+	 we must pass it a string that is writable.  */
+      if (asprintf (&nop, "%s", md_single_noop_insn) < 0)
+	as_fatal ("%s", xstrerror (errno));
+
+      /* Some targets assume that they can update input_line_pointer
+	 inside md_assemble, and, worse, that they can leave it
+	 assigned to the string pointer that was provided as an
+	 argument.  So preserve ilp here.  */
+      char *saved_ilp = input_line_pointer;
+      md_assemble (nop);
+      input_line_pointer = saved_ilp;
+      free (nop);
+#endif
+#ifdef md_flush_pending_output
+      md_flush_pending_output ();
+#endif
+    } while (exp.X_op == O_constant
+	     && exp.X_add_number > 0
+	     && frag_offset_ignore_align_p (start, frag_now, &frag_off)
+	     && frag_off + frag_now_fix () < start_off + exp.X_add_number);
+}
+
+void
 s_nops (int ignore ATTRIBUTE_UNUSED)
 {
   expressionS exp;
@@ -3516,8 +3575,12 @@ s_nops (int ignore ATTRIBUTE_UNUSED)
   md_cons_align (1);
 #endif
 
+  SKIP_WHITESPACE ();
   expression (&exp);
+  /* Note - this expression is tested for an absolute value in
+     write.c:relax_segment().  */
 
+  SKIP_WHITESPACE ();
   if (*input_line_pointer == ',')
     {
       ++input_line_pointer;
@@ -3529,29 +3592,30 @@ s_nops (int ignore ATTRIBUTE_UNUSED)
       val.X_add_number = 0;
     }
 
-  if (val.X_op == O_constant)
+  if (val.X_op != O_constant)
     {
-      if (val.X_add_number < 0)
-	{
-	  as_warn (_("negative nop control byte, ignored"));
-	  val.X_add_number = 0;
-	}
-
-      if (!need_pass_2)
-	{
-	  /* Store the no-op instruction control byte in the first byte
-	     of frag.  */
-	  char *p;
-	  symbolS *sym = make_expr_symbol (&exp);
-	  p = frag_var (rs_space_nop, 1, 1, (relax_substateT) 0,
-			sym, (offsetT) 0, (char *) 0);
-	  *p = val.X_add_number;
-	}
+      as_bad (_("unsupported variable nop control in .nops directive"));
+      val.X_op = O_constant;
+      val.X_add_number = 0;
     }
-  else
-    as_bad (_("unsupported variable nop control in .nops directive"));
+  else if (val.X_add_number < 0)
+    {
+      as_warn (_("negative nop control byte, ignored"));
+      val.X_add_number = 0;
+    }
 
   demand_empty_rest_of_line ();
+
+  if (need_pass_2)
+    /* Ignore this directive if we are going to perform a second pass.  */
+    return;
+
+  /* Store the no-op instruction control byte in the first byte of frag.  */
+  char *p;
+  symbolS *sym = make_expr_symbol (&exp);
+  p = frag_var (rs_space_nop, 1, 1, (relax_substateT) 0,
+		sym, (offsetT) 0, (char *) 0);
+  *p = val.X_add_number;
 }
 
 /* This is like s_space, but the value is a floating point number with
@@ -4146,6 +4210,9 @@ s_reloc (int ignore ATTRIBUTE_UNUSED)
       goto err_out;
     case O_constant:
       exp.X_add_symbol = section_symbol (now_seg);
+      /* Mark the section symbol used in relocation so that it will be
+	 included in the symbol table.  */
+      symbol_mark_used_in_reloc (exp.X_add_symbol);
       exp.X_op = O_symbol;
       /* Fallthru */
     case O_symbol:
@@ -5424,6 +5491,11 @@ stringer (int bits_appendzero)
 
 	  while (is_a_char (c = next_char_of_string ()))
 	    stringer_append_char (c, bitsize);
+
+	  /* Treat "a" "b" as "ab".  Even if we are appending zeros.  */
+	  SKIP_ALL_WHITESPACE ();
+	  if (*input_line_pointer == '"')
+	    break;
 
 	  if (append_zero)
 	    stringer_append_char (0, bitsize);

@@ -18,7 +18,7 @@ esac
 rm -f e${EMULATION_NAME}.c
 (echo;echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
 fragment <<EOF
-/* Copyright (C) 2006-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2006-2021 Free Software Foundation, Inc.
    Written by Kai Tietz, OneVision Software GmbH&CoKg.
 
    This file is part of the GNU Binutils.
@@ -537,7 +537,7 @@ set_entry_point (void)
   /* Entry point name for arbitrary subsystem numbers.  */
   static const char default_entry[] = "mainCRTStartup";
 
-  if (bfd_link_pic (&link_info) || dll)
+  if (bfd_link_dll (&link_info) || dll)
     {
       entry = "DllMainCRTStartup";
     }
@@ -1824,7 +1824,8 @@ gld_${EMULATION_NAME}_finish (void)
     {
       pep_dll_fill_sections (link_info.output_bfd, &link_info);
       if (command_line.out_implib_filename
-          && pep_def_file->num_exports != 0)
+          && (pep_def_file->num_exports != 0
+              || bfd_link_pic (&link_info)))
 	pep_dll_generate_implib (pep_def_file,
 				 command_line.out_implib_filename, &link_info);
     }
@@ -1904,7 +1905,7 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
 	       If the section already exists but does not have any flags set,
 	       then it has been created by the linker, probably as a result of
 	       a --section-start command line switch.  */
-	    lang_add_section (&add_child, s, NULL, os);
+	    lang_add_section (&add_child, s, NULL, NULL, os);
 	    break;
 	  }
 
@@ -1918,7 +1919,7 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
      unused one and use that.  */
   if (os == NULL && match_by_name)
     {
-      lang_add_section (&match_by_name->children, s, NULL, match_by_name);
+      lang_add_section (&match_by_name->children, s, NULL, NULL, match_by_name);
       return match_by_name;
     }
 
@@ -2234,7 +2235,8 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   NULL,	/* new_vers_pattern.  */
   NULL,	/* extra_map_file_text */
   ${LDEMUL_EMIT_CTF_EARLY-NULL},
-  ${LDEMUL_EXAMINE_STRTAB_FOR_CTF-NULL},
+  ${LDEMUL_ACQUIRE_STRINGS_FOR_CTF-NULL},
+  ${LDEMUL_NEW_DYNSYM_FOR_CTF-NULL},
   ${LDEMUL_PRINT_SYMBOL-NULL}
 };
 EOF

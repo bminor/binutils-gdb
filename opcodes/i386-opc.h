@@ -1,5 +1,5 @@
 /* Declarations for Intel 80386 opcode table
-   Copyright (C) 2007-2020 Free Software Foundation, Inc.
+   Copyright (C) 2007-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
 
@@ -210,6 +210,10 @@ enum
   CpuAVX512_BF16,
   /* Intel AVX-512 VP2INTERSECT Instructions support required.  */
   CpuAVX512_VP2INTERSECT,
+  /* TDX Instructions support required.  */
+  CpuTDX,
+  /* Intel AVX VNNI Instructions support required.  */
+  CpuAVX_VNNI,
   /* mwaitx instruction required */
   CpuMWAITX,
   /* Clzero instruction required */
@@ -241,6 +245,8 @@ enum
   CpuPCONFIG,
   /* WAITPKG instructions required */
   CpuWAITPKG,
+  /* UINTR instructions required */
+  CpuUINTR,
   /* CLDEMOTE instruction required */
   CpuCLDEMOTE,
   /* MOVDIRI instruction support required */
@@ -259,6 +265,18 @@ enum
   CpuSEV_ES,
   /* TSXLDTRK instruction required */
   CpuTSXLDTRK,
+  /* KL instruction support required */
+  CpuKL,
+  /* WideKL instruction support required */
+  CpuWideKL,
+  /* HRESET instruction required */
+  CpuHRESET,
+  /* INVLPGB instructions required */
+  CpuINVLPGB,
+  /* TLBSYNC instructions required */
+  CpuTLBSYNC,
+  /* SNP instructions required */
+  CpuSNP,
   /* 64bit support required  */
   Cpu64,
   /* Not supported in the 64bit mode  */
@@ -371,6 +389,8 @@ typedef union i386_cpu_flags
       unsigned int cpuavx512_bitalg:1;
       unsigned int cpuavx512_bf16:1;
       unsigned int cpuavx512_vp2intersect:1;
+      unsigned int cputdx:1;
+      unsigned int cpuavx_vnni:1;
       unsigned int cpumwaitx:1;
       unsigned int cpuclzero:1;
       unsigned int cpuospke:1;
@@ -387,6 +407,7 @@ typedef union i386_cpu_flags
       unsigned int cpuwbnoinvd:1;
       unsigned int cpupconfig:1;
       unsigned int cpuwaitpkg:1;
+      unsigned int cpuuintr:1;
       unsigned int cpucldemote:1;
       unsigned int cpumovdiri:1;
       unsigned int cpumovdir64b:1;
@@ -396,6 +417,12 @@ typedef union i386_cpu_flags
       unsigned int cpumcommit:1;
       unsigned int cpusev_es:1;
       unsigned int cputsxldtrk:1;
+      unsigned int cpukl:1;
+      unsigned int cpuwidekl:1;
+      unsigned int cpuhreset:1;
+      unsigned int cpuinvlpgb:1;
+      unsigned int cputlbsync:1;
+      unsigned int cpusnp:1;
       unsigned int cpu64:1;
       unsigned int cpuno64:1;
 #ifdef CpuUnused
@@ -513,6 +540,8 @@ enum
   NoRex64,
   /* deprecated fp insn, gets a warning */
   Ugh,
+  /* Intel AVX Instructions support via {vex} prefix */
+  PseudoVexPrefix,
   /* insn has VEX prefix:
 	1: 128bit VEX prefix (or operand dependent).
 	2: 256bit VEX prefix.
@@ -552,6 +581,16 @@ enum
 #define VEXW1	2
 #define VEXWIG	3
   VexW,
+  /* Regular opcode prefix:
+     0: None
+     1: Add 0x66 opcode prefix.
+     2: Add 0xf2 opcode prefix.
+     3: Add 0xf3 opcode prefix.
+   */
+#define PREFIX_NONE	0
+#define PREFIX_0X66	1
+#define PREFIX_0XF2	2
+#define PREFIX_0XF3	3
   /* VEX opcode prefix:
      0: VEX 0x0F opcode prefix.
      1: VEX 0x0F38 opcode prefix.
@@ -566,7 +605,7 @@ enum
 #define XOP08		3
 #define XOP09		4
 #define XOP0A		5
-  VexOpcode,
+  OpcodePrefix,
   /* number of VEX source operands:
      0: <= 2 source operands.
      1: 2 XOP source operands.
@@ -708,10 +747,11 @@ typedef struct i386_opcode_modifier
   unsigned int immext:1;
   unsigned int norex64:1;
   unsigned int ugh:1;
+  unsigned int pseudovexprefix:1;
   unsigned int vex:2;
   unsigned int vexvvvv:2;
   unsigned int vexw:2;
-  unsigned int vexopcode:3;
+  unsigned int opcodeprefix:3;
   unsigned int vexsources:2;
   unsigned int sib:3;
   unsigned int sse2avx:1;

@@ -1,5 +1,5 @@
 /* Simulator for Atmel's AVR core.
-   Copyright (C) 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2009-2021 Free Software Foundation, Inc.
    Written by Tristan Gingold, AdaCore.
 
    This file is part of GDB, the GNU debugger.
@@ -19,9 +19,8 @@
 
 #include "config.h"
 
-#ifdef HAVE_STRING_H
 #include <string.h>
-#endif
+
 #include "bfd.h"
 #include "libiberty.h"
 #include "gdb/remote-sim.h"

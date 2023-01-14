@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2010-2020 Free Software Foundation, Inc.
+   Copyright 2010-2021 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -50,7 +50,6 @@
 	.ascii	"GNU C++ 4.4.3 20100127 (Red Hat 4.4.3-4)\0"	/* DW_AT_producer */
 	.byte	0x4	/* DW_AT_language */
 	.ascii	"duplicate-type.cc\0"	/* DW_AT_name */
-	.4byte	.Ldebug_line0	/* DW_AT_stmt_list */
 
 .Ldie_38:
 	.uleb128 0x3	/* (DIE (0x38) DW_TAG_typedef) */
@@ -247,7 +246,7 @@
 	.4byte	OFFSET (3d5)	/* DW_AT_type */
 
 .Ldie_3e0:
-	.Uleb128 0x20	/* (DIE (0x3e0) DW_TAG_class_type) */
+	.uleb128 0x20	/* (DIE (0x3e0) DW_TAG_class_type) */
 	.4byte	OFFSET (70)	/* DW_AT_specification */
 	.byte	0x1	/* DW_AT_byte_size */
 	.4byte	OFFSET (44e)	/* DW_AT_sibling */
@@ -351,6 +350,7 @@
 
 /* Abbrev table */
 	.section	.debug_abbrev
+.Labbrev1_begin:
 	.uleb128 0x1	/* (abbrev code) */
 	.uleb128 0x11	/* (TAG: DW_TAG_compile_unit) */
 	.byte	0x1	/* DW_children_yes */
@@ -360,8 +360,6 @@
 	.uleb128 0xb	/* (DW_FORM_data1) */
 	.uleb128 0x3	/* (DW_AT_name) */
 	.uleb128 0x8	/* (DW_FORM_sting) */
-	.uleb128 0x10	/* (DW_AT_stmt_list) */
-	.uleb128 0x6	/* (DW_FORM_data4) */
 	.byte	0x0
 	.byte	0x0
 

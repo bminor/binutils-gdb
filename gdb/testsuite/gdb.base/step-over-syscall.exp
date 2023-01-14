@@ -1,6 +1,6 @@
 # This testcase is part of GDB, the GNU debugger.
 
-# Copyright 2011-2020 Free Software Foundation, Inc.
+# Copyright 2011-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -76,7 +76,7 @@ proc setup { syscall } {
 
     clean_restart $testfile
 
-    if { ![runto main] } then {
+    if { ![runto_main] } then {
 	fail "run to main ($syscall)"
 	return -1
     }
@@ -155,8 +155,31 @@ proc setup { syscall } {
     gdb_test_multiple "x/2i \$pc" "pc before/after syscall instruction" {
 	-re "x/2i .*=> ($hex) .*:.*$syscall_insn.* ($hex) .*:.*$gdb_prompt $" {
 	    set syscall_insn_addr $expect_out(1,string)
+	    set actual_syscall_insn $expect_out(2,string)
 	    set next_insn_addr $expect_out(3,string)
 	    pass $gdb_test_name
+	}
+    }
+
+    # If we encounter a sequence:
+    #   0xf7fd5155 <__kernel_vsyscall+5>:    sysenter
+    #   0xf7fd5157 <__kernel_vsyscall+7>:    int    $0x80
+    #   0xf7fd5159 <__kernel_vsyscall+9>:    pop    %ebp
+    # then a stepi at sysenter will step over the int insn, so make sure
+    # next_insn_addr points after the int insn.
+    if { $actual_syscall_insn == "sysenter" } {
+	set test "pc after sysenter instruction"
+	set re_int_insn "\[ \t\]*int\[ \t\]\[^\r\n\]*"
+	set re [multi_line \
+		    "x/2i $hex" \
+		    "\[^\r\n\]* $hex \[^\r\n\]*:$re_int_insn" \
+		    "\[^\r\n\]* ($hex) \[^\r\n\]*:\[^\r\n\]*"]
+	gdb_test_multiple "x/2i $next_insn_addr" $test {
+	    -re -wrap $re {
+		set next_insn_addr $expect_out(1,string)
+	    }
+	    -re -wrap "" {
+	    }
 	}
     }
 
@@ -317,7 +340,7 @@ step_over_syscall "clone"
 
 set testfile "step-over-fork"
 clean_restart $testfile
-if { ![runto main] } then {
+if { ![runto_main] } then {
     fail "run to main"
     return -1
 }

@@ -1,6 +1,6 @@
 /* The common simulator framework for GDB, the GNU Debugger.
 
-   Copyright 2002-2020 Free Software Foundation, Inc.
+   Copyright 2002-2021 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney and Red Hat.
 
@@ -27,18 +27,8 @@
 #include "sim-assert.h"
 #include "libiberty.h"
 
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
-
 #include <signal.h> /* For SIGPROCMASK et al. */
 
 typedef enum {
@@ -623,7 +613,7 @@ sim_event *
 sim_events_watch_sim (SIM_DESC sd,
 		      void *host_addr,
 		      int nr_bytes,
-		      int byte_order,
+		      enum bfd_endian byte_order,
 		      int is_within,
 		      unsigned64 lb,
 		      unsigned64 ub,
@@ -702,7 +692,7 @@ sim_events_watch_core (SIM_DESC sd,
 		       address_word core_addr,
 		       unsigned core_map,
 		       int nr_bytes,
-		       int byte_order,
+		       enum bfd_endian byte_order,
 		       int is_within,
 		       unsigned64 lb,
 		       unsigned64 ub,

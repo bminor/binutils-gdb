@@ -1,7 +1,7 @@
 # Test that the linker reports undefined symbol errors correctly.
 # By Ian Lance Taylor, Cygnus Support
 #
-#   Copyright (C) 1995-2020 Free Software Foundation, Inc.
+#   Copyright (C) 1995-2021 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -29,7 +29,7 @@ if { ![check_compiler_available] } {
     untested $testund
     untested $testfn
     untested $testline
-} elseif { ![ld_compile "$CC -g" $srcdir/$subdir/undefined.c tmpdir/undefined.o] } {
+} elseif { ![ld_compile "$CC -g $NOLTO_CFLAGS" $srcdir/$subdir/undefined.c tmpdir/undefined.o] } {
     verbose "Unable to compile test file!" 1
     unresolved $testund
     unresolved $testfn

@@ -1,4 +1,4 @@
-# Copyright 2013-2020 Free Software Foundation, Inc.
+# Copyright 2013-2021 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,13 +19,19 @@ if { [skip_ada_tests] } { return -1 }
 
 standard_ada_testfile foo
 
-if {[gdb_compile_ada "${srcfile}" "${binfile}" executable {debug optimize=-O2}] != ""} {
-    return -1
+foreach_with_prefix scenario {all minimal} {
+    set flags [list debug \
+		   optimize=-O2 \
+		   additional_flags=-fgnat-encodings=$scenario]
+
+    if {[gdb_compile_ada "${srcfile}" "${binfile}" executable $flags] != ""} {
+	return -1
+    }
+
+    clean_restart ${testfile}
+
+    runto "increment"
+
+    gdb_test "frame" \
+	"#0\\s+callee\\.increment \\(val(=val@entry)?=99\\.0, msg=\\.\\.\\.\\).*"
 }
-
-clean_restart ${testfile}
-
-runto "increment"
-
-gdb_test "frame" \
-         "#0\\s+callee\\.increment \\(val(=val@entry)?=99\\.0, msg=\\.\\.\\.\\).*"

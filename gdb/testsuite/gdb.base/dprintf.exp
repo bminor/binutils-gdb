@@ -1,4 +1,4 @@
-#   Copyright (C) 2012-2020 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
 set bp_location1 [gdb_get_line_number "set breakpoint 1 here"]
 set dp_location1 [gdb_get_line_number "set dprintf 1 here"]
 
-if ![runto main] {
+if ![runto_main] {
     return -1
 }
 
@@ -72,7 +72,7 @@ proc restart {} {
 
     clean_restart $binfile
 
-    if ![runto main] {
+    if ![runto_main] {
 	return -1
     }
 

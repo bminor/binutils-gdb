@@ -1,3 +1,24 @@
+2021-01-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-01-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-01-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_WARNINGS): Pass "no".
+	* configure: Regenerate.
+
+2021-01-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2017-09-06  John Baldwin  <jhb@FreeBSD.org>
 
 	* configure: Regenerate.
@@ -265,6 +286,13 @@
 	(m32c_sim_restore_console): Disable if no termios.
 	(mem_get_byte): Disable console input if no termios.
 
+2009-05-08  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb-if.c (m32c_signal_to_host): Rename to
+	m32c_signal_to_target.  Change signal return values from SIGILL,
+	SIGTRAP, SIGSEGV, etc. to TARGET_SIGNAL_ILL, TARGET_SIGNAL_TRAP,
+	TARGET_SIGNAL_SEGV, etc.  Fix all callers.
+
 2009-01-06  Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* r8c.opc, m32c.opc: Add parentheses to remove warnings.
@@ -402,5 +430,3 @@
 	* syscalls.h: New.
 	* trace.c: New.
 	* trace.h: New.
-
-

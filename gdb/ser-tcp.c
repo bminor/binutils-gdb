@@ -1,6 +1,6 @@
 /* Serial interface for raw TCP connections on Un*x like systems.
 
-   Copyright (C) 1992-2020 Free Software Foundation, Inc.
+   Copyright (C) 1992-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -144,7 +144,7 @@ wait_for_connect (int sock, unsigned int *polls)
   else
     /* Use gdb_select here, since we have no file descriptors, and on
        Windows, plain select doesn't work in that case.  */
-    n = gdb_select (0, NULL, NULL, NULL, &t);
+    n = interruptible_select (0, NULL, NULL, NULL, &t);
 
   /* If we didn't time out, only count it as one poll.  */
   if (n > 0 || *polls < POLL_INTERVAL)

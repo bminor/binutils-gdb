@@ -1,5 +1,5 @@
 /* elfedit.c -- Update the ELF header of an ELF format file
-   Copyright (C) 2010-2020 Free Software Foundation, Inc.
+   Copyright (C) 2010-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -20,6 +20,7 @@
 
 #include "config.h"
 #include "sysdep.h"
+#include "libiberty.h"
 #include <assert.h>
 
 #if __GNUC__ >= 2
@@ -259,6 +260,10 @@ elf_x86_feature (const char *feature, int enable)
     x86_feature = GNU_PROPERTY_X86_FEATURE_1_IBT;
   else if (strcasecmp (feature, "shstk") == 0)
     x86_feature = GNU_PROPERTY_X86_FEATURE_1_SHSTK;
+  else if (strcasecmp (feature, "lam_u48") == 0)
+    x86_feature = GNU_PROPERTY_X86_FEATURE_1_LAM_U48;
+  else if (strcasecmp (feature, "lam_u57") == 0)
+    x86_feature = GNU_PROPERTY_X86_FEATURE_1_LAM_U57;
   else
     {
       error (_("Unknown x86 feature: %s\n"), feature);
@@ -655,7 +660,6 @@ process_archive (const char * file_name, FILE * file,
 
           fclose (member_file);
           free (member_file_name);
-	  free (qualified_name);
         }
       else if (is_thin_archive)
         {
@@ -894,23 +898,36 @@ static struct option options[] =
 ATTRIBUTE_NORETURN static void
 usage (FILE *stream, int exit_status)
 {
+  unsigned int i;
+  char *osabi = concat (osabis[0].name, NULL);
+
+  for (i = 1; i < ARRAY_SIZE (osabis); i++)
+    osabi = reconcat (osabi, osabi, "|", osabis[i].name, NULL);
+
   fprintf (stream, _("Usage: %s <option(s)> elffile(s)\n"),
 	   program_name);
   fprintf (stream, _(" Update the ELF header of ELF files\n"));
   fprintf (stream, _(" The options are:\n"));
   fprintf (stream, _("\
-  --input-mach <machine>      Set input machine type to <machine>\n\
-  --output-mach <machine>     Set output machine type to <machine>\n\
-  --input-type <type>         Set input file type to <type>\n\
-  --output-type <type>        Set output file type to <type>\n\
-  --input-osabi <osabi>       Set input OSABI to <osabi>\n\
-  --output-osabi <osabi>      Set output OSABI to <osabi>\n"));
+  --input-mach [none|i386|iamcu|l1om|k1om|x86_64]\n\
+                              Set input machine type\n\
+  --output-mach [none|i386|iamcu|l1om|k1om|x86_64]\n\
+                              Set output machine type\n\
+  --input-type [none|rel|exec|dyn]\n\
+                              Set input file type\n\
+  --output-type [none|rel|exec|dyn]\n\
+                              Set output file type\n\
+  --input-osabi [%s]\n\
+                              Set input OSABI\n\
+  --output-osabi [%s]\n\
+                              Set output OSABI\n"),
+	   osabi, osabi);
 #ifdef HAVE_MMAP
   fprintf (stream, _("\
-  --enable-x86-feature <feature>\n\
-                              Enable x86 feature <feature>\n\
-  --disable-x86-feature <feature>\n\
-                              Disable x86 feature <feature>\n"));
+  --enable-x86-feature [ibt|shstk|lam_u48|lam_u57]\n\
+                              Enable x86 feature\n\
+  --disable-x86-feature [ibt|shstk|lam_u48|lam_u57]\n\
+                              Disable x86 feature\n"));
 #endif
   fprintf (stream, _("\
   -h --help                   Display this information\n\
@@ -919,6 +936,7 @@ usage (FILE *stream, int exit_status)
 	   program_name);
   if (REPORT_BUGS_TO[0] && exit_status == 0)
     fprintf (stream, _("Report bugs to %s\n"), REPORT_BUGS_TO);
+  free (osabi);
   exit (exit_status);
 }
 

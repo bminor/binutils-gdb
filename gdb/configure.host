@@ -60,6 +60,7 @@ case "${host_cpu}" in
 
 aarch64*)		gdb_host_cpu=aarch64 ;;
 alpha*)			gdb_host_cpu=alpha ;;
+arc*)			gdb_host_cpu=arc ;;
 arm*)			gdb_host_cpu=arm ;;
 hppa*)			gdb_host_cpu=pa ;;
 i[34567]86*)		gdb_host_cpu=i386 ;;
@@ -90,6 +91,8 @@ alpha*-*-linux*)	gdb_host=alpha-linux ;;
 alpha*-*-netbsd* | alpha*-*-knetbsd*-gnu)
 			gdb_host=nbsd ;;
 alpha*-*-openbsd*)	gdb_host=nbsd ;;
+
+arc*-*-linux*)		gdb_host=linux ;;
 
 arm*-*-freebsd*)	gdb_host=fbsd ;;
 arm*-*-linux*)		gdb_host=linux ;;

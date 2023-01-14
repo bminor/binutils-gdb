@@ -1,4 +1,4 @@
-# Copyright 1998-2020 Free Software Foundation, Inc.
+# Copyright 1998-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -67,6 +67,8 @@ foreach_with_prefix opts {
 	gdb_rename_execfile ${binfile1} ${binfile}
 	gdb_load ${binfile}
 
+	set readnow_p [readnow ${binfile}]
+	
 	# Set a breakpoint at foo
 
 	gdb_test "break foo" \
@@ -97,6 +99,9 @@ foreach_with_prefix opts {
 	    unsupported $test
 	} else {
 	    gdb_run_cmd
+	    if { $readnow_p } {
+		setup_kfail "gdb/26800" *-*-*
+	    }
 	    gdb_test "" "Breakpoint.* foo .* at .*:9.*" $test
 	}
 
@@ -133,6 +138,9 @@ foreach_with_prefix opts {
 	    gdb_rename_execfile ${binfile} ${binfile1}
 	    gdb_rename_execfile ${binfile2} ${binfile}
 	    gdb_run_cmd
+	    if { $readnow_p } {
+		setup_kfail "gdb/26800" *-*-*
+	    }
 	    gdb_test "" "Breakpoint.* foo .* at .*:9.*" \
 		"second pass: run to foo() second time"
 	}

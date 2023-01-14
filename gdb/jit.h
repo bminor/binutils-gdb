@@ -1,6 +1,6 @@
 /* JIT declarations for GDB, the GNU Debugger.
 
-   Copyright (C) 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2009-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,6 +20,7 @@
 #ifndef JIT_H
 #define JIT_H
 
+struct inferior;
 struct objfile;
 struct minimal_symbol;
 
@@ -101,13 +102,6 @@ struct jited_objfile_data
   /* Address of struct jit_code_entry for this objfile.  */
   CORE_ADDR addr;
 };
-
-/* Looks for the descriptor and registration symbols and breakpoints
-   the registration function.  If it finds both, it registers all the
-   already JITed code.  If it has already found the symbols, then it
-   doesn't try again.  */
-
-extern void jit_inferior_created_hook (void);
 
 /* Re-establish the jit breakpoint(s).  */
 

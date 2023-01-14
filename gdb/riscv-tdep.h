@@ -1,7 +1,7 @@
 /* Target-dependent header for the RISC-V architecture, for GDB, the
    GNU Debugger.
 
-   Copyright (C) 2018-2020 Free Software Foundation, Inc.
+   Copyright (C) 2018-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -63,6 +63,8 @@ enum
   RISCV_DWARF_REGNUM_X31 = 31,
   RISCV_DWARF_REGNUM_F0 = 32,
   RISCV_DWARF_REGNUM_F31 = 63,
+  RISCV_DWARF_FIRST_CSR = 4096,
+  RISCV_DWARF_LAST_CSR = 8191,
 };
 
 /* RISC-V specific per-architecture information.  */
@@ -126,8 +128,36 @@ extern int riscv_abi_xlen (struct gdbarch *gdbarch);
    with RISCV_ISA_FLEN.  */
 extern int riscv_abi_flen (struct gdbarch *gdbarch);
 
+/* Return true if GDBARCH is using the embedded x-regs abi, that is the
+   target only has 16 x-registers, which includes a reduced number of
+   argument registers.  */
+extern bool riscv_abi_embedded (struct gdbarch *gdbarch);
+
 /* Single step based on where the current instruction will take us.  */
 extern std::vector<CORE_ADDR> riscv_software_single_step
   (struct regcache *regcache);
+
+/* Supply register REGNUM from the buffer REGS (length LEN) into
+   REGCACHE.  REGSET describes the layout of the buffer.  If REGNUM is -1
+   then all registers described by REGSET are supplied.
+
+   The register RISCV_ZERO_REGNUM should not be described by REGSET,
+   however, this register (which always has the value 0) will be supplied
+   by this function if requested.
+
+   The registers RISCV_CSR_FFLAGS_REGNUM and RISCV_CSR_FRM_REGNUM should
+   not be described by REGSET, however, these register will be provided if
+   requested assuming either:
+   (a) REGCACHE already contains the value of RISCV_CSR_FCSR_REGNUM, or
+   (b) REGSET describes the location of RISCV_CSR_FCSR_REGNUM in the REGS
+       buffer.
+
+   This function can be used as the supply function for either x-regs or
+   f-regs when loading corefiles, and doesn't care which abi is currently
+   in use.  */
+
+extern void riscv_supply_regset (const struct regset *regset,
+				  struct regcache *regcache, int regnum,
+				  const void *regs, size_t len);
 
 #endif /* RISCV_TDEP_H */

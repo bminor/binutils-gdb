@@ -1,6 +1,6 @@
 /* Exception (throw catch) mechanism, for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -197,9 +197,9 @@ extern int exceptions_state_mc_catch (struct gdb_exception *, int);
    CATCH_SJLJ (e, RETURN_MASK_ERROR)
      {
        switch (e.reason)
-         {
-           case RETURN_ERROR: ...
-         }
+	 {
+	   case RETURN_ERROR: ...
+	 }
      }
    END_CATCH_SJLJ
 

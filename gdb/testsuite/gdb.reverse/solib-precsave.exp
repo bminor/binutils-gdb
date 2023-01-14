@@ -1,4 +1,4 @@
-# Copyright 2009-2020 Free Software Foundation, Inc.
+# Copyright 2009-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -79,7 +79,7 @@ gdb_load ${binfile}
 gdb_load_shlib $library1
 gdb_load_shlib $library2
 
-runto main
+runto_main
 
 if [supports_process_record] {
     # Activate process record/replay

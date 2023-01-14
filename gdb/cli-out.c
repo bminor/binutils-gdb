@@ -1,6 +1,6 @@
 /* Output generating routines for GDB CLI.
 
-   Copyright (C) 1999-2020 Free Software Foundation, Inc.
+   Copyright (C) 1999-2021 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions.
    Written by Fernando Nasser for Cygnus.
@@ -263,6 +263,107 @@ cli_ui_out::do_redirect (ui_file *outstream)
     m_streams.push_back (outstream);
   else
     m_streams.pop_back ();
+}
+
+/* The cli_ui_out::do_progress_* functions result in the following:
+   - printed for tty, SHOULD_PRINT == true:
+     <NAME
+      [#####                      ]\r>
+   - printed for tty, SHOULD_PRINT == false:
+     <>
+   - printed for not-a-tty:
+     <NAME...
+     >
+*/
+
+void
+cli_ui_out::do_progress_start (const std::string &name, bool should_print)
+{
+  struct ui_file *stream = m_streams.back ();
+  cli_progress_info meter;
+
+  meter.last_value = 0;
+  meter.name = name;
+  if (!stream->isatty ())
+    {
+      fprintf_unfiltered (stream, "%s...", meter.name.c_str ());
+      gdb_flush (stream);
+      meter.printing = WORKING;
+    }
+  else
+    {
+      /* Don't actually emit anything until the first call notifies us
+	 of progress.  This makes it so a second progress message can
+	 be started before the first one has been notified, without
+	 messy output.  */
+      meter.printing = should_print ? START : NO_PRINT;
+    }
+
+  m_meters.push_back (std::move (meter));
+}
+
+void
+cli_ui_out::do_progress_notify (double howmuch)
+{
+  struct ui_file *stream = m_streams.back ();
+  cli_progress_info &meter (m_meters.back ());
+
+  if (meter.printing == NO_PRINT)
+    return;
+
+  if (meter.printing == START)
+    {
+      fprintf_unfiltered (stream, "%s\n", meter.name.c_str ());
+      gdb_flush (stream);
+      meter.printing = WORKING;
+    }
+
+  if (meter.printing == WORKING && howmuch >= 1.0)
+    return;
+
+  if (!stream->isatty ())
+    return;
+
+  int chars_per_line = get_chars_per_line ();
+  if (chars_per_line > 0)
+    {
+      int i, max;
+      int width = chars_per_line - 3;
+
+      max = width * howmuch;
+      fprintf_unfiltered (stream, "\r[");
+      for (i = 0; i < width; ++i)
+	fprintf_unfiltered (stream, i < max ? "#" : " ");
+      fprintf_unfiltered (stream, "]");
+      gdb_flush (stream);
+      meter.printing = PROGRESS;
+    }
+}
+
+void
+cli_ui_out::do_progress_end ()
+{
+  struct ui_file *stream = m_streams.back ();
+  cli_progress_info &meter = m_meters.back ();
+
+  if (!stream->isatty ())
+    {
+      fprintf_unfiltered (stream, "\n");
+      gdb_flush (stream);
+    }
+  else if (meter.printing == PROGRESS)
+    {
+      int i;
+      int width = get_chars_per_line () - 3;
+
+      fprintf_unfiltered (stream, "\r");
+      for (i = 0; i < width + 2; ++i)
+	fprintf_unfiltered (stream, " ");
+      fprintf_unfiltered (stream, "\r");
+      gdb_flush (stream);
+    }
+
+  m_meters.pop_back ();
 }
 
 /* local functions */

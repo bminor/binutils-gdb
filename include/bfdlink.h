@@ -1,5 +1,5 @@
 /* bfdlink.h -- header file for BFD link routines
-   Copyright (C) 1993-2020 Free Software Foundation, Inc.
+   Copyright (C) 1993-2021 Free Software Foundation, Inc.
    Written by Steve Chamberlain and Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -655,8 +655,17 @@ struct bfd_link_info
   /* May be used to set DT_FLAGS_1 for ELF. */
   bfd_vma flags_1;
 
+  /* May be used to set DT_GNU_FLAGS_1 for ELF. */
+  bfd_vma gnu_flags_1;
+
   /* May be used to set ELF visibility for __start_* / __stop_.  */
   unsigned int start_stop_visibility;
+
+  /* The maximum page size for ELF.  */
+  bfd_vma maxpagesize;
+
+  /* The common page size for ELF.  */
+  bfd_vma commonpagesize;
 
   /* Start and end of RELRO region.  */
   bfd_vma relro_start, relro_end;
@@ -671,7 +680,7 @@ struct bfd_link_info
 /* Some forward-definitions used by some callbacks.  */
 
 struct elf_strtab_hash;
-struct elf_sym_strtab;
+struct elf_internal_sym;
 
 /* This structures holds a set of callback functions.  These are called
    by the BFD linker routines.  */
@@ -795,11 +804,17 @@ struct bfd_link_callbacks
      asection * current_section, asection * previous_section,
      bfd_boolean new_segment);
   /* This callback provides a chance for callers of the BFD to examine the
-     ELF string table and symbol table once they are complete and indexes and
-     offsets assigned.  */
+     ELF (dynamic) string table once it is complete.  */
   void (*examine_strtab)
-    (struct elf_sym_strtab *syms, bfd_size_type symcount,
-     struct elf_strtab_hash *symstrtab);
+    (struct elf_strtab_hash *symstrtab);
+  /* This callback is called just before a symbol is swapped out, so that the
+     CTF machinery can look up symbols during construction.  The name is
+     already an external strtab offset at this point.  */
+  void (*ctf_new_symbol)
+    (int symidx, struct elf_internal_sym *sym);
+  /* Likewise, for dynamic symbols.  */
+  void (*ctf_new_dynsym)
+    (int symidx, struct elf_internal_sym *sym);
   /* This callback should emit the CTF section into a non-loadable section in
      the output BFD named .ctf or a name beginning with ".ctf.".  */
   void (*emit_ctf)

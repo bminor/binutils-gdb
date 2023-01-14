@@ -1,5 +1,5 @@
 /* Xtensa-specific support for 32-bit ELF.
-   Copyright (C) 2003-2020 Free Software Foundation, Inc.
+   Copyright (C) 2003-2021 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -4341,7 +4341,7 @@ struct string_pair
   const char *narrow;
 };
 
-struct string_pair narrowable[] =
+const struct string_pair narrowable[] =
 {
   { "add", "add.n" },
   { "addi", "addi.n" },
@@ -4354,7 +4354,7 @@ struct string_pair narrowable[] =
   { "or", "mov.n" } /* special case only when op1 == op2 */
 };
 
-struct string_pair widenable[] =
+const struct string_pair widenable[] =
 {
   { "add", "add.n" },
   { "addi", "addi.n" },

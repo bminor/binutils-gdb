@@ -1,6 +1,6 @@
 /* Header only used inside opcodes library for disassemble.
 
-   Copyright (C) 2017-2020 Free Software Foundation, Inc.
+   Copyright (C) 2017-2021 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -103,6 +103,7 @@ extern int print_insn_z8002		(bfd_vma, disassemble_info *);
 
 extern disassembler_ftype csky_get_disassembler (bfd *);
 extern disassembler_ftype rl78_get_disassembler (bfd *);
+extern disassembler_ftype riscv_get_disassembler (bfd *);
 
 extern void ATTRIBUTE_NORETURN opcodes_assert (const char *, int);
 

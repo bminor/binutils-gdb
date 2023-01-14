@@ -1,5 +1,5 @@
 /* M16C/M32C specific support for 32-bit ELF.
-   Copyright (C) 2005-2020 Free Software Foundation, Inc.
+   Copyright (C) 2005-2021 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -1347,7 +1347,7 @@ static int bytes_to_reloc[] = {
 /* If the displacement is within the given range and the new encoding
    differs from the old encoding (the index), then the insn can be
    relaxed to the new encoding.  */
-typedef struct {
+typedef const struct {
   int bytes;
   unsigned int max_disp;
   unsigned char new_encoding;

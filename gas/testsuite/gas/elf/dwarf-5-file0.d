@@ -1,4 +1,4 @@
-#as: --gdwarf-5
+#as: --gdwarf-3
 #name: DWARF5 .line 0
 #readelf: -wl
 

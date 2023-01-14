@@ -1,6 +1,6 @@
 /* The common simulator framework for GDB, the GNU Debugger.
 
-   Copyright 2002-2020 Free Software Foundation, Inc.
+   Copyright 2002-2021 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney and Red Hat.
 
@@ -36,11 +36,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <setjmp.h>
-
-#ifdef __CYGWIN32__
-extern int vasprintf (char **result, const char *format, va_list args);
-extern int asprintf (char **result, const char *format, ...);
-#endif
 
 
 #ifndef NULL

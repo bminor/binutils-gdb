@@ -1,6 +1,6 @@
 /* Target-dependent code for the ia64.
 
-   Copyright (C) 2004-2020 Free Software Foundation, Inc.
+   Copyright (C) 2004-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -219,7 +219,7 @@ struct ia64_infcall_ops
   /* Store the argument stored in BUF into the appropriate location
      given the BSP and the SLOTNUM.  */
   void (*store_argument_in_slot) (struct regcache *regcache, CORE_ADDR bsp,
-                                  int slotnum, gdb_byte *buf);
+				  int slotnum, gdb_byte *buf);
 
   /* For targets where we cannot call the function directly, store
      the address of the function we want to call at the location

@@ -1,6 +1,6 @@
 /* Target-dependent code for OpenBSD/alpha.
 
-   Copyright (C) 2006-2020 Free Software Foundation, Inc.
+   Copyright (C) 2006-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -131,5 +131,5 @@ void
 _initialize_alphaobsd_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_alpha, 0, GDB_OSABI_OPENBSD,
-                          alphaobsd_init_abi);
+			  alphaobsd_init_abi);
 }

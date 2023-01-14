@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020 Free Software Foundation, Inc.
+# Copyright (C) 2015-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ class NullLookup(perftest.TestCaseWithBasicMeasurements):
             utils.safe_execute("mt expand-symtabs")
             iteration = 5
             while iteration > 0:
-                utils.safe_execute("mt flush-symbol-cache")
+                utils.safe_execute("mt flush symbol-cache")
                 func = lambda: utils.safe_execute("p symbol_not_found")
                 self.measure.measure(func, run)
                 iteration -= 1

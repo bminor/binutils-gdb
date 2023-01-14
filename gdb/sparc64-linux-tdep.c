@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux UltraSPARC.
 
-   Copyright (C) 2003-2020 Free Software Foundation, Inc.
+   Copyright (C) 2003-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -137,7 +137,7 @@ sparc64_linux_report_signal_info (struct gdbarch *gdbarch, struct ui_out *uiout,
       si_code = parse_and_eval_long ("$_siginfo.si_code\n");
 
       if (si_code >= SEGV_ACCADI && si_code <= SEGV_ADIPERR)
-        addr = parse_and_eval_long ("$_siginfo._sifields._sigfault.si_addr");
+	addr = parse_and_eval_long ("$_siginfo._sifields._sigfault.si_addr");
     }
   catch (const gdb_exception &exception)
     {
@@ -365,7 +365,7 @@ sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  linux_init_abi (info, gdbarch);
+  linux_init_abi (info, gdbarch, 0);
 
   tdep->gregset = &sparc64_linux_gregset;
   tdep->sizeof_gregset = 288;
@@ -391,7 +391,7 @@ sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
-                                             svr4_fetch_objfile_link_map);
+					     svr4_fetch_objfile_link_map);
 
   /* Make sure we can single-step over signal return system calls.  */
   tdep->step_trap = sparc64_linux_step_trap;
@@ -404,7 +404,7 @@ sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Functions for 'catch syscall'.  */
   set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_SPARC64);
   set_gdbarch_get_syscall_number (gdbarch,
-                                  sparc64_linux_get_syscall_number);
+				  sparc64_linux_get_syscall_number);
   set_gdbarch_report_signal_info (gdbarch, sparc64_linux_report_signal_info);
 }
 

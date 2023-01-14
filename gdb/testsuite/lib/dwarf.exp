@@ -1,4 +1,4 @@
-# Copyright 2010-2020 Free Software Foundation, Inc.
+# Copyright 2010-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -234,8 +234,9 @@ proc get_func_info { name {options {debug}} } {
 # section automatically.
 #
 # If FORM is 'SPECIAL_expr', then VALUE is treated as a location
-# expression.  The effective form is then DW_FORM_block, and VALUE
-# is passed to the (internal) '_location' proc to be translated.
+# expression.  The effective form is then DW_FORM_block or DW_FORM_exprloc
+# for DWARF version >= 4, and VALUE is passed to the (internal)
+# '_location' proc to be translated.
 # This proc implements a miniature DW_OP_ assembler.
 #
 # If FORM is not given, it is guessed:
@@ -247,11 +248,10 @@ proc get_func_info { name {options {debug}} } {
 #   and DW_FORM_ref4 is used.  See 'new_label' and 'define_label'.
 # * If VALUE starts with the "%" character, then it is a label
 #   reference too, but DW_FORM_ref_addr is used.
-# * Otherwise, VALUE is taken to be a string and DW_FORM_string is
-#   used.  In order to prevent bugs where a numeric value is given but
-#   no form is specified, it is an error if the value looks like a number
-#   (using Tcl's "string is integer") and no form is provided.
-# More form-guessing functionality may be added.
+# * Otherwise, if the attribute name has a default form (f.i. DW_FORM_addr for
+#   DW_AT_low_pc), then that one is used.
+# * Otherwise, an error is reported.  Either specify a form explicitly, or
+#   add a default for the the attribute name in _default_form.
 #
 # CHILDREN is just Tcl code that can be used to define child DIEs.  It
 # is evaluated in the caller's context.
@@ -390,7 +390,6 @@ namespace eval Dwarf {
 
     proc _read_constants {} {
 	global srcdir hex decimal
-	variable _constants
 
 	# DWARF name-matching regexp.
 	set dwrx "DW_\[a-zA-Z0-9_\]+"
@@ -417,8 +416,6 @@ namespace eval Dwarf {
 	    }
 	}
 	close $fd
-
-	set _constants(SPECIAL_expr) $_constants(DW_FORM_block)
     }
 
     proc _quote {string} {
@@ -590,9 +587,25 @@ namespace eval Dwarf {
 	    }
 
 	    default {
+		return ""
+	    }
+	}
+    }
+
+    proc _default_form { attr } {
+	switch -exact -- $attr {
+	    DW_AT_low_pc  {
+		return DW_FORM_addr
+	    }
+	    DW_AT_producer -
+	    DW_AT_comp_dir -
+	    DW_AT_linkage_name -
+	    DW_AT_MIPS_linkage_name -
+	    DW_AT_name {
 		return DW_FORM_string
 	    }
 	}
+	return ""
     }
 
     # Map NAME to its canonical form.
@@ -609,12 +622,22 @@ namespace eval Dwarf {
     proc _handle_attribute { attr_name attr_value attr_form } {
 	variable _abbrev_section
 	variable _constants
+	variable _cu_version
 
 	_handle_DW_FORM $attr_form $attr_value
 
 	_defer_output $_abbrev_section {
+	    if { $attr_form eq "SPECIAL_expr" } {
+		if { $_cu_version < 4 } {
+		    set attr_form_comment "DW_FORM_block"
+		} else {
+		    set attr_form_comment "DW_FORM_exprloc"
+		}
+	    } else {
+		set attr_form_comment $attr_form
+	    }
 	    _op .uleb128 $_constants($attr_name) $attr_name
-	    _op .uleb128 $_constants($attr_form) $attr_form
+	    _op .uleb128 $_constants($attr_form) $attr_form_comment
 	}
     }
 
@@ -692,11 +715,13 @@ namespace eval Dwarf {
 			_guess_form $attr_value attr_value
 		    }
 		} else {
-		    # If the value looks like an integer, a form is required.
-		    if [string is integer $attr_value] {
-			error "Integer value requires a form"
-		    }
 		    set attr_form [_guess_form $attr_value attr_value]
+		    if { $attr_form eq "" } {
+			set attr_form [_default_form $attr_name]
+		    }
+		    if { $attr_form eq "" } {
+			error "No form for $attr_name $attr_value"
+		    }
 		}
 		set attr_form [_map_name $attr_form _FORM]
 
@@ -706,8 +731,8 @@ namespace eval Dwarf {
 
 	_defer_output $_abbrev_section {
 	    # Terminator.
-	    _op .byte 0x0 Terminator
-	    _op .byte 0x0 Terminator
+	    _op .byte 0x0 "DW_AT - Terminator"
+	    _op .byte 0x0 "DW_FORM - Terminator"
 	}
 
 	if {$has_children} {
@@ -846,12 +871,12 @@ namespace eval Dwarf {
 	    set name [lindex $arg 0]
 	    set text [lindex $arg 1]
 
-	    upvar $name label_var
-	    if {$text == ""} {
-		set label_var [new_label]
-	    } else {
-		set label_var [new_label $text]
+	    if { $text == "" } {
+		set text $name
 	    }
+
+	    upvar $name label_var
+	    set label_var [new_label $text]
 
 	    proc ${name}: {args} [format {
 		define_label %s
@@ -1025,6 +1050,7 @@ namespace eval Dwarf {
     # BODY is Tcl code that emits the DIEs which make up the body of
     # the CU.  It is evaluated in the caller's context.
     proc cu {options body} {
+	variable _constants
 	variable _cu_count
 	variable _abbrev_section
 	variable _abbrev_num
@@ -1064,6 +1090,12 @@ namespace eval Dwarf {
 	    set _abbrev_section ".debug_abbrev.dwo"
 	}
 
+	if {$_cu_version < 4} {
+	    set _constants(SPECIAL_expr) $_constants(DW_FORM_block)
+	} else {
+	    set _constants(SPECIAL_expr) $_constants(DW_FORM_exprloc)
+	}
+
 	_section $section
 
 	set cu_num [incr _cu_count]
@@ -1094,8 +1126,7 @@ namespace eval Dwarf {
 
 	_defer_output $_abbrev_section {
 	    # Emit the terminator.
-	    _op .byte 0x0 Terminator
-	    _op .byte 0x0 Terminator
+	    _op .byte 0x0 "Abbrev end - Terminator"
 	}
 
 	define_label $end_label
@@ -1203,8 +1234,7 @@ namespace eval Dwarf {
 
 	_defer_output $_abbrev_section {
 	    # Emit the terminator.
-	    _op .byte 0x0 Terminator
-	    _op .byte 0x0 Terminator
+	    _op .byte 0x0 "Abbrev end - Terminator"
 	}
 
 	define_label $end_label
@@ -1232,41 +1262,36 @@ namespace eval Dwarf {
 	set section ".debug_ranges"
 	_section $section
 
-	proc sequence {{ranges {}}} {
+	proc sequence { body } {
 	    variable _debug_ranges_64_bit
 
 	    # Emit the sequence of addresses.
-	    set base ""
-	    foreach range $ranges {
-		set range [uplevel 1 "subst \"$range\""]
-		set type [lindex $range 0]
-		switch -exact -- $type {
-		    base {
-			set base [lrange $range 1 end]
 
-			if { $_debug_ranges_64_bit } then {
-			    _op .8byte 0xffffffffffffffff "Base Marker"
-			    _op .8byte $base "Base Address"
-			} else {
-			    _op .4byte 0xffffffff "Base Marker"
-			    _op .4byte $base "Base Address"
-			}
-		    }
-		    range {
-			set start [lindex $range 1]
-			set end [lrange $range 2 end]
+	    proc base { addr } {
+		variable _debug_ranges_64_bit
 
-			if { $_debug_ranges_64_bit } then {
-			    _op .8byte $start "Start Address"
-			    _op .8byte $end "End Address"
-			} else {
-			    _op .4byte $start "Start Address"
-			    _op .4byte $end "End Address"
-			}
-		    }
-		    default { error "unknown range type: $type " }
+		if { $_debug_ranges_64_bit } then {
+		    _op .8byte 0xffffffffffffffff "Base Marker"
+		    _op .8byte $addr "Base Address"
+		} else {
+		    _op .4byte 0xffffffff "Base Marker"
+		    _op .4byte $addr "Base Address"
 		}
 	    }
+
+	    proc range { start end } {
+		variable _debug_ranges_64_bit
+
+		if { $_debug_ranges_64_bit } then {
+		    _op .8byte $start "Start Address"
+		    _op .8byte $end "End Address"
+		} else {
+		    _op .4byte $start "Start Address"
+		    _op .4byte $end "End Address"
+		}
+	    }
+
+	    uplevel $body
 
 	    # End of the sequence.
 	    if { $_debug_ranges_64_bit } then {

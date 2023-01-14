@@ -1,5 +1,5 @@
 /* MI Command Set - stack commands.
-   Copyright (C) 2000-2020 Free Software Foundation, Inc.
+   Copyright (C) 2000-2021 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -130,7 +130,7 @@ mi_cmd_stack_list_frames (const char *command, char **argv, int argc)
   else
     {
       /* Called with no arguments, it means we want the whole
-         backtrace.  */
+	 backtrace.  */
       frame_low = -1;
       frame_high = -1;
     }
@@ -344,7 +344,7 @@ mi_cmd_stack_list_args (const char *command, char **argv, int argc)
   else
     {
       /* Called with no arguments, it means we want args for the whole
-         backtrace.  */
+	 backtrace.  */
       frame_low = -1;
       frame_high = -1;
     }
@@ -496,7 +496,7 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 		  && (arg->val != NULL || arg->error != NULL)));
   gdb_assert (arg->entry_kind == print_entry_values_no
 	      || (arg->entry_kind == print_entry_values_only
-	          && (arg->val || arg->error)));
+		  && (arg->val || arg->error)));
 
   if (skip_unavailable && arg->val != NULL
       && (value_entirely_unavailable (arg->val)
@@ -597,7 +597,7 @@ list_args_or_locals (const frame_print_options &fp_opts,
     {
       ALL_BLOCK_SYMBOLS (block, iter, sym)
 	{
-          int print_me = 0;
+	  int print_me = 0;
 
 	  switch (SYMBOL_CLASS (sym))
 	    {

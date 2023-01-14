@@ -1,6 +1,6 @@
 /* BSD user-level threads support.
 
-   Copyright (C) 2005-2020 Free Software Foundation, Inc.
+   Copyright (C) 2005-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -53,7 +53,7 @@ struct bsd_uthread_target final : public target_ops
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
 
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
   void resume (ptid_t, int, enum gdb_signal) override;
 
   bool thread_alive (ptid_t ptid) override;
@@ -263,13 +263,13 @@ bsd_uthread_deactivate (void)
 }
 
 static void
-bsd_uthread_inferior_created (struct target_ops *ops, int from_tty)
+bsd_uthread_inferior_created (inferior *inf)
 {
   bsd_uthread_activate (NULL);
 }
 
 /* Likely candidates for the threads library.  */
-static const char *bsd_uthread_solib_names[] =
+static const char * const bsd_uthread_solib_names[] =
 {
   "/usr/lib/libc_r.so",		/* FreeBSD */
   "/usr/lib/libpthread.so",	/* OpenBSD */
@@ -279,7 +279,7 @@ static const char *bsd_uthread_solib_names[] =
 static void
 bsd_uthread_solib_loaded (struct so_list *so)
 {
-  const char **names = bsd_uthread_solib_names;
+  const char * const *names = bsd_uthread_solib_names;
 
   for (names = bsd_uthread_solib_names; *names; names++)
     {
@@ -370,14 +370,14 @@ bsd_uthread_target::store_registers (struct regcache *regcache, int regnum)
   else
     {
       /* Updating the thread that is currently running; pass the
-         request to the layer beneath.  */
+	 request to the layer beneath.  */
       beneath ()->store_registers (regcache, regnum);
     }
 }
 
 ptid_t
 bsd_uthread_target::wait (ptid_t ptid, struct target_waitstatus *status,
-			  int options)
+			  target_wait_flags options)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   CORE_ADDR addr;
@@ -401,9 +401,9 @@ bsd_uthread_target::wait (ptid_t ptid, struct target_waitstatus *status,
       gdb_byte buf[4];
 
       /* FIXME: For executables linked statically with the threads
-         library, we end up here before the program has actually been
-         executed.  In that case ADDR will be garbage since it has
-         been read from the wrong virtual memory image.  */
+	 library, we end up here before the program has actually been
+	 executed.  In that case ADDR will be garbage since it has
+	 been read from the wrong virtual memory image.  */
       if (target_read_memory (addr, buf, 4) == 0)
 	{
 	  ULONGEST magic = extract_unsigned_integer (buf, 4, byte_order);
@@ -488,7 +488,7 @@ bsd_uthread_target::update_thread_list ()
 }
 
 /* Possible states a thread can be in.  */
-static const char *bsd_uthread_state[] =
+static const char * const bsd_uthread_state[] =
 {
   "RUNNING",
   "SIGTHREAD",

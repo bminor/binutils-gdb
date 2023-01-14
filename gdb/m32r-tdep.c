@@ -1,6 +1,6 @@
 /* Target-dependent code for Renesas M32R, for GDB.
 
-   Copyright (C) 1996-2020 Free Software Foundation, Inc.
+   Copyright (C) 1996-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -202,7 +202,7 @@ m32r_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
     }
 }
 
-static const char *m32r_register_names[] = {
+static const char * const m32r_register_names[] = {
   "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
   "r8", "r9", "r10", "r11", "r12", "fp", "lr", "sp",
   "psw", "cbr", "spi", "spu", "bpc", "pc", "accl", "acch",
@@ -293,7 +293,7 @@ decode_prologue (struct gdbarch *gdbarch,
 	break;
 
       /* If this is a 32 bit instruction, we dont want to examine its
-         immediate data as though it were an instruction.  */
+	 immediate data as though it were an instruction.  */
       if (current_pc & 0x02)
 	{
 	  /* Decode this instruction further.  */
@@ -367,7 +367,7 @@ decode_prologue (struct gdbarch *gdbarch,
 	      framesize -= stack_adjust;
 	      after_prologue = 0;
 	      /* A frameless function may have no "mv fp, sp".
-	         In that case, this is the end of the prologue.  */
+		 In that case, this is the end of the prologue.  */
 	      after_stack_adjust = current_pc + 2;
 	    }
 	  continue;
@@ -509,7 +509,7 @@ struct m32r_unwind_cache
   LONGEST r13_offset;
   int uses_frame;
   /* Table indicating the location of each and every register.  */
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 /* Put here the code to store, into fi->saved_regs, the addresses of
@@ -581,7 +581,7 @@ m32r_frame_unwind_cache (struct frame_info *this_frame,
 	  /* st rn, @-sp */
 	  int regno = ((op >> 8) & 0xf);
 	  info->sp_offset -= 4;
-	  info->saved_regs[regno].addr = info->sp_offset;
+	  info->saved_regs[regno].set_addr (info->sp_offset);
 	}
       else if ((op & 0xff00) == 0x4f00)
 	{
@@ -610,17 +610,17 @@ m32r_frame_unwind_cache (struct frame_info *this_frame,
   if (info->uses_frame)
     {
       /* The SP was moved to the FP.  This indicates that a new frame
-         was created.  Get THIS frame's FP value by unwinding it from
-         the next frame.  */
+	 was created.  Get THIS frame's FP value by unwinding it from
+	 the next frame.  */
       this_base = get_frame_register_unsigned (this_frame, M32R_FP_REGNUM);
       /* The FP points at the last saved register.  Adjust the FP back
-         to before the first saved register giving the SP.  */
+	 to before the first saved register giving the SP.  */
       prev_sp = this_base + info->size;
     }
   else
     {
       /* Assume that the FP is this frame's SP but with that pushed
-         stack space added back.  */
+	 stack space added back.  */
       this_base = get_frame_register_unsigned (this_frame, M32R_SP_REGNUM);
       prev_sp = this_base + info->size;
     }
@@ -632,8 +632,9 @@ m32r_frame_unwind_cache (struct frame_info *this_frame,
   /* Adjust all the saved registers so that they contain addresses and
      not offsets.  */
   for (i = 0; i < gdbarch_num_regs (get_frame_arch (this_frame)) - 1; i++)
-    if (trad_frame_addr_p (info->saved_regs, i))
-      info->saved_regs[i].addr = (info->prev_sp + info->saved_regs[i].addr);
+    if (info->saved_regs[i].is_addr ())
+      info->saved_regs[i].set_addr (info->prev_sp
+				    + info->saved_regs[i].addr ());
 
   /* The call instruction moves the caller's PC in the callee's LR.
      Since this is an unwind, do the reverse.  Copy the location of LR
@@ -643,7 +644,7 @@ m32r_frame_unwind_cache (struct frame_info *this_frame,
 
   /* The previous frame's SP needed to be computed.  Save the computed
      value.  */
-  trad_frame_set_value (info->saved_regs, M32R_SP_REGNUM, prev_sp);
+  info->saved_regs[M32R_SP_REGNUM].set_value (prev_sp);
 
   return info;
 }

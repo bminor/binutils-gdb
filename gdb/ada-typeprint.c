@@ -1,5 +1,5 @@
 /* Support for printing Ada types for GDB, the GNU debugger.
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -198,16 +198,16 @@ print_range_bound (struct type *type, const char *bounds, int *n,
   if (ada_scan_number (bounds, *n, &B, n))
     {
       /* STABS decodes all range types which bounds are 0 .. -1 as
-         unsigned integers (ie. the type code is TYPE_CODE_INT, not
-         TYPE_CODE_RANGE).  Unfortunately, ada_print_scalar() relies
-         on the unsigned flag to determine whether the bound should
-         be printed as a signed or an unsigned value.  This causes
-         the upper bound of the 0 .. -1 range types to be printed as
-         a very large unsigned number instead of -1.
-         To workaround this stabs deficiency, we replace the TYPE by NULL
-         to indicate default output when we detect that the bound is negative,
-         and the type is a TYPE_CODE_INT.  The bound is negative when
-         'm' is the last character of the number scanned in BOUNDS.  */
+	 unsigned integers (ie. the type code is TYPE_CODE_INT, not
+	 TYPE_CODE_RANGE).  Unfortunately, ada_print_scalar() relies
+	 on the unsigned flag to determine whether the bound should
+	 be printed as a signed or an unsigned value.  This causes
+	 the upper bound of the 0 .. -1 range types to be printed as
+	 a very large unsigned number instead of -1.
+	 To workaround this stabs deficiency, we replace the TYPE by NULL
+	 to indicate default output when we detect that the bound is negative,
+	 and the type is a TYPE_CODE_INT.  The bound is negative when
+	 'm' is the last character of the number scanned in BOUNDS.  */
       if (bounds[*n - 1] == 'm' && type->code () == TYPE_CODE_INT)
 	type = NULL;
       ada_print_scalar (type, B, stream);
@@ -345,7 +345,7 @@ static void
 print_gnat_encoded_fixed_point_type (struct type *type, struct ui_file *stream)
 {
   struct value *delta = gnat_encoded_fixed_point_delta (type);
-  struct value *small = ada_scaling_factor (type);
+  struct value *small = gnat_encoded_fixed_point_scaling_factor (type);
 
   if (delta == nullptr)
     fprintf_filtered (stream, "delta ??");
@@ -955,7 +955,20 @@ ada_print_type (struct type *type0, const char *varstring,
 		const struct type_print_options *flags)
 {
   struct type *type = ada_check_typedef (ada_get_base_type (type0));
-  char *type_name = decoded_type_name (type0);
+  /* If we can decode the original type name, use it.  However, there
+     are cases where the original type is an internally-generated type
+     with a name that can't be decoded (and whose encoded name might
+     not actually bear any relation to the type actually declared in
+     the sources). In that case, try using the name of the base type
+     in its place.
+
+     Note that we looked at the possibility of always using the name
+     of the base type. This does not always work, unfortunately, as
+     there are situations where it's the base type which has an
+     internally-generated name.  */
+  const char *type_name = decoded_type_name (type0);
+  if (type_name == nullptr)
+    type_name = decoded_type_name (type);
   int is_var_decl = (varstring != NULL && varstring[0] != '\0');
 
   if (type == NULL)
@@ -966,9 +979,6 @@ ada_print_type (struct type *type0, const char *varstring,
       fprintf_styled (stream, metadata_style.style (), "<null type?>");
       return;
     }
-
-  if (show > 0)
-    type = ada_check_typedef (type);
 
   if (is_var_decl && type->code () != TYPE_CODE_FUNC)
     fprintf_filtered (stream, "%.*s: ",
@@ -996,7 +1006,11 @@ ada_print_type (struct type *type0, const char *varstring,
 	break;
       case TYPE_CODE_PTR:
       case TYPE_CODE_TYPEDEF:
-	fprintf_filtered (stream, "access ");
+	/* An __XVL field is not truly a pointer, so don't print
+	   "access" in this case.  */
+	if (type->code () != TYPE_CODE_PTR
+	    || strstr (varstring, "___XVL") == nullptr)
+	  fprintf_filtered (stream, "access ");
 	ada_print_type (TYPE_TARGET_TYPE (type), "", stream, show, level,
 			flags);
 	break;
@@ -1032,6 +1046,12 @@ ada_print_type (struct type *type0, const char *varstring,
       case TYPE_CODE_RANGE:
 	if (ada_is_gnat_encoded_fixed_point_type (type))
 	  print_gnat_encoded_fixed_point_type (type, stream);
+	else if (is_fixed_point_type (type))
+	  {
+	    fprintf_filtered (stream, "<");
+	    print_type_fixed_point (type, stream);
+	    fprintf_filtered (stream, ">");
+	  }
 	else if (ada_is_modular_type (type))
 	  fprintf_filtered (stream, "mod %s", 
 			    int_string (ada_modulus (type), 10, 0, 0, 1));
@@ -1074,7 +1094,7 @@ ada_print_type (struct type *type0, const char *varstring,
 
 void
 ada_print_typedef (struct type *type, struct symbol *new_symbol,
-                   struct ui_file *stream)
+		   struct ui_file *stream)
 {
   type = ada_check_typedef (type);
   ada_print_type (type, "", stream, 0, 0, &type_print_raw_options);

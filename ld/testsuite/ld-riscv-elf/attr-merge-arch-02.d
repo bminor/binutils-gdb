@@ -1,7 +1,7 @@
 #source: attr-merge-arch-02a.s
 #source: attr-merge-arch-02b.s
 #as:
-#ld: -r -melf32lriscv
+#ld: -r -m[riscv_choose_ilp32_emul]
 #readelf: -A
 
 Attribute Section: riscv

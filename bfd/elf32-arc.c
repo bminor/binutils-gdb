@@ -1,5 +1,5 @@
 /* ARC-specific support for 32-bit ELF
-   Copyright (C) 1994-2020 Free Software Foundation, Inc.
+   Copyright (C) 1994-2021 Free Software Foundation, Inc.
    Contributed by Cupertino Miranda (cmiranda@synopsys.com).
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -391,17 +391,17 @@ static const struct arc_reloc_map arc_reloc_map[] =
 
 #undef ARC_RELOC_HOWTO
 
-typedef ATTRIBUTE_UNUSED bfd_vma (*replace_func) (unsigned, int ATTRIBUTE_UNUSED);
+typedef ATTRIBUTE_UNUSED unsigned (*replace_func) (unsigned, int ATTRIBUTE_UNUSED);
 
 #define ARC_RELOC_HOWTO(TYPE, VALUE, SIZE, BITSIZE, RELOC_FUNCTION, OVERFLOW, FORMULA) \
   case TYPE: \
-    func = (void *) RELOC_FUNCTION; \
+    func = RELOC_FUNCTION; \
     break;
 
 static replace_func
 get_replace_function (bfd *abfd, unsigned int r_type)
 {
-  void *func = NULL;
+  replace_func func = NULL;
 
   switch (r_type)
     {
@@ -411,7 +411,7 @@ get_replace_function (bfd *abfd, unsigned int r_type)
   if (func == replace_bits24 && bfd_big_endian (abfd))
     func = replace_bits24_be;
 
-  return (replace_func) func;
+  return func;
 }
 #undef ARC_RELOC_HOWTO
 
@@ -2112,7 +2112,7 @@ elf_arc_check_relocs (bfd *			 abfd,
 
 #define ELF_DYNAMIC_INTERPRETER  "/sbin/ld-uClibc.so"
 
-static struct plt_version_t *
+static const struct plt_version_t *
 arc_get_plt_version (struct bfd_link_info *info)
 {
   int i;
@@ -2146,7 +2146,7 @@ add_symbol_to_plt (struct bfd_link_info *info)
   struct elf_link_hash_table *htab = elf_hash_table (info);
   bfd_vma ret;
 
-  struct plt_version_t *plt_data = arc_get_plt_version (info);
+  const struct plt_version_t *plt_data = arc_get_plt_version (info);
 
   /* If this is the first .plt entry, make room for the special first
      entry.  */
@@ -2226,7 +2226,7 @@ relocate_plt_for_symbol (bfd *output_bfd,
 			 struct bfd_link_info *info,
 			 struct elf_link_hash_entry *h)
 {
-  struct plt_version_t *plt_data = arc_get_plt_version (info);
+  const struct plt_version_t *plt_data = arc_get_plt_version (info);
   struct elf_link_hash_table *htab = elf_hash_table (info);
 
   bfd_vma plt_index = (h->plt.offset  - plt_data->entry_size)
@@ -2292,7 +2292,7 @@ static void
 relocate_plt_for_entry (bfd *abfd,
 			struct bfd_link_info *info)
 {
-  struct plt_version_t *plt_data = arc_get_plt_version (info);
+  const struct plt_version_t *plt_data = arc_get_plt_version (info);
   struct elf_link_hash_table *htab = elf_hash_table (info);
 
   {

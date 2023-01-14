@@ -1,6 +1,6 @@
 /* Declarations for common target functions.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,6 +21,8 @@
 #define TARGET_TARGET_H
 
 #include "target/waitstatus.h"
+#include "target/wait.h"
+
 /* This header is a stopgap until more code is shared.  */
 
 /* Read LEN bytes of target memory at address MEMADDR, placing the
@@ -84,7 +86,7 @@ extern void target_continue (ptid_t ptid, enum gdb_signal signal);
    options.  */
 
 extern ptid_t target_wait (ptid_t ptid, struct target_waitstatus *status,
-			   int options);
+			   target_wait_flags options);
 
 /* The inferior process has died.  Do what is right.  */
 

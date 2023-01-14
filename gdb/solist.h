@@ -1,5 +1,5 @@
 /* Shared library declarations for GDB, the GNU Debugger.
-   Copyright (C) 1990-2020 Free Software Foundation, Inc.
+   Copyright (C) 1990-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,6 +23,7 @@
 /* For domain_enum domain.  */
 #include "symtab.h"
 #include "gdb_bfd.h"
+#include "target-section.h"
 
 /* Base class for target-specific link map information.  */
 
@@ -71,8 +72,7 @@ struct so_list
      the file cannot be found or after the command "nosharedlibrary".  */
   struct objfile *objfile;
 
-  struct target_section *sections;
-  struct target_section *sections_end;
+  target_section_table *sections;
 
   /* Record the range of addresses belonging to this shared library.
      There may not be just one (e.g. if two segments are relocated

@@ -1,6 +1,6 @@
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998-2020 Free Software Foundation, Inc.
+   Copyright (C) 1998-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -38,9 +38,8 @@
 
 #include "dis-asm.h"
 
-int
-default_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
-				      struct displaced_step_closure *closure)
+bool
+default_displaced_step_hw_singlestep (struct gdbarch *gdbarch)
 {
   return !gdbarch_software_single_step_p (gdbarch);
 }
@@ -211,7 +210,7 @@ legacy_virtual_frame_pointer (struct gdbarch *gdbarch,
     *frame_regnum = gdbarch_deprecated_fp_regnum (gdbarch);
   else if (gdbarch_sp_regnum (gdbarch) >= 0
 	   && gdbarch_sp_regnum (gdbarch)
-	        < gdbarch_num_regs (gdbarch))
+		< gdbarch_num_regs (gdbarch))
     *frame_regnum = gdbarch_sp_regnum (gdbarch);
   else
     /* Should this be an internal error?  I guess so, it is reflecting
@@ -527,7 +526,7 @@ gdbarch_update_p (struct gdbarch_info info)
 
   /* Check for the current file.  */
   if (info.abfd == NULL)
-    info.abfd = exec_bfd;
+    info.abfd = current_program_space->exec_bfd ();
   if (info.abfd == NULL)
     info.abfd = core_bfd;
 
@@ -989,7 +988,7 @@ default_print_insn (bfd_vma memaddr, disassemble_info *info)
   disassembler_ftype disassemble_fn;
 
   disassemble_fn = disassembler (info->arch, info->endian == BFD_ENDIAN_BIG,
-				 info->mach, exec_bfd);
+				 info->mach, current_program_space->exec_bfd ());
 
   gdb_assert (disassemble_fn != NULL);
   return (*disassemble_fn) (memaddr, info);
@@ -1039,15 +1038,14 @@ default_get_pc_address_flags (frame_info *frame, CORE_ADDR pc)
 /* See arch-utils.h.  */
 void
 default_read_core_file_mappings (struct gdbarch *gdbarch,
-                                 struct bfd *cbfd,
+				 struct bfd *cbfd,
 				 gdb::function_view<void (ULONGEST count)>
 				   pre_loop_cb,
 				 gdb::function_view<void (int num,
-				                          ULONGEST start,
+							  ULONGEST start,
 							  ULONGEST end,
 							  ULONGEST file_ofs,
-							  const char *filename,
-							  const void *other)>
+							  const char *filename)>
 				   loop_cb)
 {
 }

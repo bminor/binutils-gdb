@@ -1,5 +1,5 @@
 /* Support for printing Modula 2 types for GDB, the GNU debugger.
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -158,8 +158,8 @@ m2_print_type (struct type *type, const char *varstring,
    which to print.  */
 
 void
-m2_print_typedef (struct type *type, struct symbol *new_symbol,
-		  struct ui_file *stream)
+m2_language::print_typedef (struct type *type, struct symbol *new_symbol,
+			    struct ui_file *stream) const
 {
   type = check_typedef (type);
   fprintf_filtered (stream, "TYPE ");
@@ -368,11 +368,11 @@ m2_is_long_set (struct type *type)
 }
 
 /* m2_get_discrete_bounds - a wrapper for get_discrete_bounds which
-                            understands that CHARs might be signed.
-                            This should be integrated into gdbtypes.c
-                            inside get_discrete_bounds.  */
+			    understands that CHARs might be signed.
+			    This should be integrated into gdbtypes.c
+			    inside get_discrete_bounds.  */
 
-static int
+static bool
 m2_get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
 {
   type = check_typedef (type);
@@ -395,8 +395,8 @@ m2_get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
 }
 
 /* m2_is_long_set_of_type - returns TRUE if the long set was declared as
-                            SET OF <oftype> of_type is assigned to the
-                            subtype.  */
+			    SET OF <oftype> of_type is assigned to the
+			    subtype.  */
 
 int
 m2_is_long_set_of_type (struct type *type, struct type **of_type)
@@ -419,7 +419,7 @@ m2_is_long_set_of_type (struct type *type, struct type **of_type)
       l1 = type->field (i).type ()->bounds ()->low.const_val ();
       h1 = type->field (len - 1).type ()->bounds ()->high.const_val ();
       *of_type = target;
-      if (m2_get_discrete_bounds (target, &l2, &h2) >= 0)
+      if (m2_get_discrete_bounds (target, &l2, &h2))
 	return (l1 == l2 && h1 == h2);
       error (_("long_set failed to find discrete bounds for its subtype"));
       return 0;
@@ -477,7 +477,7 @@ m2_long_set (struct type *type, struct ui_file *stream, int show, int level,
 }
 
 /* m2_is_unbounded_array - returns TRUE if, type, should be regarded
-                           as a Modula-2 unbounded ARRAY type.  */
+			   as a Modula-2 unbounded ARRAY type.  */
 
 int
 m2_is_unbounded_array (struct type *type)
@@ -504,9 +504,9 @@ m2_is_unbounded_array (struct type *type)
 }
 
 /* m2_unbounded_array - if the struct type matches a Modula-2 unbounded
-                        parameter type then display the type as an
-                        ARRAY OF type.  Returns TRUE if an unbounded
-                        array type was detected.  */
+			parameter type then display the type as an
+			ARRAY OF type.  Returns TRUE if an unbounded
+			array type was detected.  */
 
 static int
 m2_unbounded_array (struct type *type, struct ui_file *stream, int show,
@@ -582,7 +582,7 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
 	  fprintf_filtered (stream, ";\n");
 	}
       
-      fprintfi_filtered (level, stream, "END ");
+      fprintf_filtered (stream, "%*sEND ", level, "");
     }
 }
 

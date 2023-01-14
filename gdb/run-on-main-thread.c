@@ -1,5 +1,5 @@
 /* Run a function on the main thread
-   Copyright (C) 2019-2020 Free Software Foundation, Inc.
+   Copyright (C) 2019-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -94,5 +94,6 @@ void
 _initialize_run_on_main_thread ()
 {
   runnable_event = make_serial_event ();
-  add_file_handler (serial_event_fd (runnable_event), run_events, nullptr);
+  add_file_handler (serial_event_fd (runnable_event), run_events, nullptr,
+		    "run-on-main-thread");
 }

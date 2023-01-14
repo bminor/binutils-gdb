@@ -1,6 +1,6 @@
 /* Python frame filters
 
-   Copyright (C) 2013-2020 Free Software Foundation, Inc.
+   Copyright (C) 2013-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1013,8 +1013,8 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 	    }
 	}
       if (out->is_mi_like_p ())
-        out->field_string ("arch",
-                           (gdbarch_bfd_arch_info (gdbarch))->printable_name);
+	out->field_string ("arch",
+			   (gdbarch_bfd_arch_info (gdbarch))->printable_name);
     }
 
   bool source_print
@@ -1098,11 +1098,11 @@ bootstrap_python_frame_filters (struct frame_info *frame,
   if (sort_func == NULL)
     return NULL;
 
-  gdbpy_ref<> py_frame_low (PyInt_FromLong (frame_low));
+  gdbpy_ref<> py_frame_low = gdb_py_object_from_longest (frame_low);
   if (py_frame_low == NULL)
     return NULL;
 
-  gdbpy_ref<> py_frame_high (PyInt_FromLong (frame_high));
+  gdbpy_ref<> py_frame_high = gdb_py_object_from_longest (frame_high);
   if (py_frame_high == NULL)
     return NULL;
 

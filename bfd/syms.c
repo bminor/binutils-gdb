@@ -1,5 +1,5 @@
 /* Generic symbol-table support for the BFD library.
-   Copyright (C) 1990-2020 Free Software Foundation, Inc.
+   Copyright (C) 1990-2021 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -306,6 +306,9 @@ CODE_FRAGMENT
 .     will make sure that in the entire process there is just one symbol
 .     with this name and type in use.  BSF_OBJECT must also be set.  *}
 .#define BSF_GNU_UNIQUE          (1 << 23)
+.
+.  {* This section symbol should be included in the symbol table.  *}
+.#define BSF_SECTION_SYM_USED    (1 << 24)
 .
 .  flagword flags;
 .

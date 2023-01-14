@@ -1,6 +1,6 @@
 /* Target dependent code for CRIS, for GDB, the GNU debugger.
 
-   Copyright (C) 2001-2020 Free Software Foundation, Inc.
+   Copyright (C) 2001-2021 Free Software Foundation, Inc.
 
    Contributed by Axis Communications AB.
    Written by Hendrik Ruijter, Stefan Andersson, and Orjan Friberg.
@@ -198,7 +198,7 @@ cris_sigtramp_start (struct frame_info *this_frame)
   CORE_ADDR pc = get_frame_pc (this_frame);
   gdb_byte buf[SIGTRAMP_LEN];
 
-  if (!safe_frame_unwind_memory (this_frame, pc, buf, SIGTRAMP_LEN))
+  if (!safe_frame_unwind_memory (this_frame, pc, buf))
     return 0;
 
   if (((buf[1] << 8) + buf[0]) != SIGTRAMP_INSN0)
@@ -207,7 +207,7 @@ cris_sigtramp_start (struct frame_info *this_frame)
 	return 0;
 
       pc -= SIGTRAMP_OFFSET1;
-      if (!safe_frame_unwind_memory (this_frame, pc, buf, SIGTRAMP_LEN))
+      if (!safe_frame_unwind_memory (this_frame, pc, buf))
 	return 0;
     }
 
@@ -226,7 +226,7 @@ cris_rt_sigtramp_start (struct frame_info *this_frame)
   CORE_ADDR pc = get_frame_pc (this_frame);
   gdb_byte buf[SIGTRAMP_LEN];
 
-  if (!safe_frame_unwind_memory (this_frame, pc, buf, SIGTRAMP_LEN))
+  if (!safe_frame_unwind_memory (this_frame, pc, buf))
     return 0;
 
   if (((buf[1] << 8) + buf[0]) != SIGTRAMP_INSN0)
@@ -235,7 +235,7 @@ cris_rt_sigtramp_start (struct frame_info *this_frame)
 	return 0;
 
       pc -= SIGTRAMP_OFFSET1;
-      if (!safe_frame_unwind_memory (this_frame, pc, buf, SIGTRAMP_LEN))
+      if (!safe_frame_unwind_memory (this_frame, pc, buf))
 	return 0;
     }
 
@@ -305,7 +305,7 @@ struct cris_unwind_cache
   int leaf_function;
 
   /* Table indicating the location of each and every register.  */
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 static struct cris_unwind_cache *
@@ -354,18 +354,18 @@ cris_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
       /* R0 to R13 are stored in reverse order at offset (2 * 4) in 
 	 struct pt_regs.  */
       for (i = 0; i <= 13; i++)
-	info->saved_regs[i].addr = addr + ((15 - i) * 4);
+	info->saved_regs[i].set_addr (addr + ((15 - i) * 4));
 
-      info->saved_regs[MOF_REGNUM].addr = addr + (16 * 4);
-      info->saved_regs[DCCR_REGNUM].addr = addr + (17 * 4);
-      info->saved_regs[SRP_REGNUM].addr = addr + (18 * 4);
+      info->saved_regs[MOF_REGNUM].set_addr (addr + (16 * 4));
+      info->saved_regs[DCCR_REGNUM].set_addr (addr + (17 * 4));
+      info->saved_regs[SRP_REGNUM].set_addr (addr + (18 * 4));
       /* Note: IRP is off by 2 at this point.  There's no point in correcting
 	 it though since that will mean that the backtrace will show a PC 
 	 different from what is shown when stopped.  */
-      info->saved_regs[IRP_REGNUM].addr = addr + (19 * 4);
+      info->saved_regs[IRP_REGNUM].set_addr (addr + (19 * 4));
       info->saved_regs[gdbarch_pc_regnum (gdbarch)]
 	= info->saved_regs[IRP_REGNUM];
-      info->saved_regs[gdbarch_sp_regnum (gdbarch)].addr = addr + (24 * 4);
+      info->saved_regs[gdbarch_sp_regnum (gdbarch)].set_addr (addr + (24 * 4));
     }
   else
     {
@@ -373,17 +373,17 @@ cris_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
       /* R0 to R13 are stored in order at offset (1 * 4) in 
 	 struct pt_regs.  */
       for (i = 0; i <= 13; i++)
-	info->saved_regs[i].addr = addr + ((i + 1) * 4);
+	info->saved_regs[i].set_addr (addr + ((i + 1) * 4));
 
-      info->saved_regs[ACR_REGNUM].addr = addr + (15 * 4);
-      info->saved_regs[SRS_REGNUM].addr = addr + (16 * 4);
-      info->saved_regs[MOF_REGNUM].addr = addr + (17 * 4);
-      info->saved_regs[SPC_REGNUM].addr = addr + (18 * 4);
-      info->saved_regs[CCS_REGNUM].addr = addr + (19 * 4);
-      info->saved_regs[SRP_REGNUM].addr = addr + (20 * 4);
-      info->saved_regs[ERP_REGNUM].addr = addr + (21 * 4);
-      info->saved_regs[EXS_REGNUM].addr = addr + (22 * 4);
-      info->saved_regs[EDA_REGNUM].addr = addr + (23 * 4);
+      info->saved_regs[ACR_REGNUM].set_addr (addr + (15 * 4));
+      info->saved_regs[SRS_REGNUM].set_addr (addr + (16 * 4));
+      info->saved_regs[MOF_REGNUM].set_addr (addr + (17 * 4));
+      info->saved_regs[SPC_REGNUM].set_addr (addr + (18 * 4));
+      info->saved_regs[CCS_REGNUM].set_addr (addr + (19 * 4));
+      info->saved_regs[SRP_REGNUM].set_addr (addr + (20 * 4));
+      info->saved_regs[ERP_REGNUM].set_addr (addr + (21 * 4));
+      info->saved_regs[EXS_REGNUM].set_addr (addr + (22 * 4));
+      info->saved_regs[EDA_REGNUM].set_addr (addr + (23 * 4));
 
       /* FIXME: If ERP is in a delay slot at this point then the PC will
 	 be wrong at this point.  This problem manifests itself in the
@@ -395,8 +395,7 @@ cris_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
       info->saved_regs[gdbarch_pc_regnum (gdbarch)]
 	= info->saved_regs[ERP_REGNUM];
 
-      info->saved_regs[gdbarch_sp_regnum (gdbarch)].addr
-	= addr + (25 * 4);
+      info->saved_regs[gdbarch_sp_regnum (gdbarch)].set_addr (addr + (25 * 4));
     }
   
   return info;
@@ -404,7 +403,7 @@ cris_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
 
 static void
 cris_sigtramp_frame_this_id (struct frame_info *this_frame, void **this_cache,
-                             struct frame_id *this_id)
+			     struct frame_id *this_id)
 {
   struct cris_unwind_cache *cache =
     cris_sigtramp_frame_unwind_cache (this_frame, this_cache);
@@ -417,7 +416,7 @@ static struct value *cris_frame_prev_register (struct frame_info *this_frame,
 					       void **this_cache, int regnum);
 static struct value *
 cris_sigtramp_frame_prev_register (struct frame_info *this_frame,
-                                   void **this_cache, int regnum)
+				   void **this_cache, int regnum)
 {
   /* Make sure we've initialized the cache.  */
   cris_sigtramp_frame_unwind_cache (this_frame, this_cache);
@@ -534,9 +533,9 @@ enum cris_opcode_masks
 /* Functions for opcodes.  The general form of the ETRAX 16-bit instruction:
    Bit 15 - 12   Operand2
        11 - 10   Mode
-        9 -  6   Opcode
-        5 -  4   Size
-        3 -  0   Operand1  */
+	9 -  6   Opcode
+	5 -  4   Size
+	3 -  0   Operand1  */
 
 static int 
 cris_get_operand2 (unsigned short insn)
@@ -631,7 +630,7 @@ static void cris_gdb_func (struct gdbarch *, enum cris_op_type, unsigned short,
 			   inst_env_type *);
 
 static struct gdbarch *cris_gdbarch_init (struct gdbarch_info,
-                                          struct gdbarch_list *);
+					  struct gdbarch_list *);
 
 static void cris_dump_tdep (struct gdbarch *, struct ui_file *);
 
@@ -772,10 +771,10 @@ cris_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 
 static CORE_ADDR
 cris_push_dummy_code (struct gdbarch *gdbarch,
-                      CORE_ADDR sp, CORE_ADDR funaddr,
-                      struct value **args, int nargs,
-                      struct type *value_type,
-                      CORE_ADDR *real_pc, CORE_ADDR *bp_addr,
+		      CORE_ADDR sp, CORE_ADDR funaddr,
+		      struct value **args, int nargs,
+		      struct type *value_type,
+		      CORE_ADDR *real_pc, CORE_ADDR *bp_addr,
 		      struct regcache *regcache)
 {
   /* Allocate space sufficient for a breakpoint.  */
@@ -825,40 +824,40 @@ cris_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       
       /* How may registers worth of storage do we need for this argument?  */
       reg_demand = (len / 4) + (len % 4 != 0 ? 1 : 0);
-        
+	
       if (len <= (2 * 4) && (argreg + reg_demand - 1 <= ARG4_REGNUM))
-        {
-          /* Data passed by value.  Fits in available register(s).  */
-          for (i = 0; i < reg_demand; i++)
-            {
-              regcache->cooked_write (argreg, val);
-              argreg++;
-              val += 4;
-            }
-        }
+	{
+	  /* Data passed by value.  Fits in available register(s).  */
+	  for (i = 0; i < reg_demand; i++)
+	    {
+	      regcache->cooked_write (argreg, val);
+	      argreg++;
+	      val += 4;
+	    }
+	}
       else if (len <= (2 * 4) && argreg <= ARG4_REGNUM)
-        {
-          /* Data passed by value. Does not fit in available register(s).
-             Use the register(s) first, then the stack.  */
-          for (i = 0; i < reg_demand; i++)
-            {
-              if (argreg <= ARG4_REGNUM)
-                {
-        	  regcache->cooked_write (argreg, val);
-                  argreg++;
-                  val += 4;
-                }
-              else
-                {
+	{
+	  /* Data passed by value. Does not fit in available register(s).
+	     Use the register(s) first, then the stack.  */
+	  for (i = 0; i < reg_demand; i++)
+	    {
+	      if (argreg <= ARG4_REGNUM)
+		{
+		  regcache->cooked_write (argreg, val);
+		  argreg++;
+		  val += 4;
+		}
+	      else
+		{
 		  /* Push item for later so that pushed arguments
 		     come in the right order.  */
 		  si = push_stack_item (si, val, 4);
-                  val += 4;
-                }
-            }
-        }
+		  val += 4;
+		}
+	    }
+	}
       else if (len > (2 * 4))
-        {
+	{
 	  /* Data passed by reference.  Push copy of data onto stack
 	     and pass pointer to this copy as argument.  */
 	  sp = (sp - len) & ~3;
@@ -875,13 +874,13 @@ cris_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      store_unsigned_integer (buf, 4, byte_order, sp);
 	      si = push_stack_item (si, buf, 4);
 	    }
-        }
+	}
       else
-        {
-          /* Data passed by value.  No available registers.  Put it on
-             the stack.  */
+	{
+	  /* Data passed by value.  No available registers.  Put it on
+	     the stack.  */
 	   si = push_stack_item (si, val, len);
-        }
+	}
     }
 
   while (si)
@@ -1049,165 +1048,165 @@ cris_scan_prologue (CORE_ADDR pc, struct frame_info *this_frame,
       insn = read_memory_unsigned_integer (pc, 2, byte_order);
       pc += 2;
       if (insn == 0xE1FC)
-        {
-          /* push <reg> 32 bit instruction.  */
-          insn_next = read_memory_unsigned_integer (pc, 2, byte_order);
-          pc += 2;
-          regno = cris_get_operand2 (insn_next);
+	{
+	  /* push <reg> 32 bit instruction.  */
+	  insn_next = read_memory_unsigned_integer (pc, 2, byte_order);
+	  pc += 2;
+	  regno = cris_get_operand2 (insn_next);
 	  if (info)
 	    {
 	      info->sp_offset += 4;
 	    }
-          /* This check, meant to recognize srp, used to be regno == 
-             (SRP_REGNUM - NUM_GENREGS), but that covers r11 also.  */
-          if (insn_next == 0xBE7E)
-            {
+	  /* This check, meant to recognize srp, used to be regno == 
+	     (SRP_REGNUM - NUM_GENREGS), but that covers r11 also.  */
+	  if (insn_next == 0xBE7E)
+	    {
 	      if (info)
 		{
 		  info->leaf_function = 0;
 		}
-            }
+	    }
 	  else if (insn_next == 0x8FEE)
-            {
+	    {
 	      /* push $r8 */
 	      if (info)
 		{
 		  info->r8_offset = info->sp_offset;
 		}
-            }
-        }
+	    }
+	}
       else if (insn == 0x866E)
-        {
-          /* move.d sp,r8 */
+	{
+	  /* move.d sp,r8 */
 	  if (info)
 	    {
 	      info->uses_frame = 1;
 	    }
-          continue;
-        }
+	  continue;
+	}
       else if (cris_get_operand2 (insn) == gdbarch_sp_regnum (gdbarch)
-               && cris_get_mode (insn) == 0x0000
-               && cris_get_opcode (insn) == 0x000A)
-        {
-          /* subq <val>,sp */
+	       && cris_get_mode (insn) == 0x0000
+	       && cris_get_opcode (insn) == 0x000A)
+	{
+	  /* subq <val>,sp */
 	  if (info)
 	    {
 	      info->sp_offset += cris_get_quick_value (insn);
 	    }
-        }
+	}
       else if (cris_get_mode (insn) == 0x0002 
-               && cris_get_opcode (insn) == 0x000F
-               && cris_get_size (insn) == 0x0003
-               && cris_get_operand1 (insn) == gdbarch_sp_regnum (gdbarch))
-        {
-          /* movem r<regsave>,[sp] */
-          regsave = cris_get_operand2 (insn);
-        }
+	       && cris_get_opcode (insn) == 0x000F
+	       && cris_get_size (insn) == 0x0003
+	       && cris_get_operand1 (insn) == gdbarch_sp_regnum (gdbarch))
+	{
+	  /* movem r<regsave>,[sp] */
+	  regsave = cris_get_operand2 (insn);
+	}
       else if (cris_get_operand2 (insn) == gdbarch_sp_regnum (gdbarch)
-               && ((insn & 0x0F00) >> 8) == 0x0001
-               && (cris_get_signed_offset (insn) < 0))
-        {
-          /* Immediate byte offset addressing prefix word with sp as base 
-             register.  Used for CRIS v8 i.e. ETRAX 100 and newer if <val> 
-             is between 64 and 128. 
-             movem r<regsave>,[sp=sp-<val>] */
+	       && ((insn & 0x0F00) >> 8) == 0x0001
+	       && (cris_get_signed_offset (insn) < 0))
+	{
+	  /* Immediate byte offset addressing prefix word with sp as base 
+	     register.  Used for CRIS v8 i.e. ETRAX 100 and newer if <val> 
+	     is between 64 and 128. 
+	     movem r<regsave>,[sp=sp-<val>] */
 	  if (info)
 	    {
 	      info->sp_offset += -cris_get_signed_offset (insn);
 	    }
 	  insn_next = read_memory_unsigned_integer (pc, 2, byte_order);
-          pc += 2;
-          if (cris_get_mode (insn_next) == PREFIX_ASSIGN_MODE
-              && cris_get_opcode (insn_next) == 0x000F
-              && cris_get_size (insn_next) == 0x0003
-              && cris_get_operand1 (insn_next) == gdbarch_sp_regnum
+	  pc += 2;
+	  if (cris_get_mode (insn_next) == PREFIX_ASSIGN_MODE
+	      && cris_get_opcode (insn_next) == 0x000F
+	      && cris_get_size (insn_next) == 0x0003
+	      && cris_get_operand1 (insn_next) == gdbarch_sp_regnum
 						  (gdbarch))
-            {
-              regsave = cris_get_operand2 (insn_next);
-            }
-          else
-            {
-              /* The prologue ended before the limit was reached.  */
-              pc -= 4;
-              break;
-            }
-        }
+	    {
+	      regsave = cris_get_operand2 (insn_next);
+	    }
+	  else
+	    {
+	      /* The prologue ended before the limit was reached.  */
+	      pc -= 4;
+	      break;
+	    }
+	}
       else if (cris_get_mode (insn) == 0x0001
-               && cris_get_opcode (insn) == 0x0009
-               && cris_get_size (insn) == 0x0002)
-        {
-          /* move.d r<10..13>,r<0..15> */
-          source_register = cris_get_operand1 (insn);
+	       && cris_get_opcode (insn) == 0x0009
+	       && cris_get_size (insn) == 0x0002)
+	{
+	  /* move.d r<10..13>,r<0..15> */
+	  source_register = cris_get_operand1 (insn);
 
-          /* FIXME?  In the glibc solibs, the prologue might contain something
-             like (this example taken from relocate_doit):
-             move.d $pc,$r0
-             sub.d 0xfffef426,$r0
-             which isn't covered by the source_register check below.  Question
-             is whether to add a check for this combo, or make better use of
-             the limit variable instead.  */
-          if (source_register < ARG1_REGNUM || source_register > ARG4_REGNUM)
-            {
-              /* The prologue ended before the limit was reached.  */
-              pc -= 2;
-              break;
-            }
-        }
+	  /* FIXME?  In the glibc solibs, the prologue might contain something
+	     like (this example taken from relocate_doit):
+	     move.d $pc,$r0
+	     sub.d 0xfffef426,$r0
+	     which isn't covered by the source_register check below.  Question
+	     is whether to add a check for this combo, or make better use of
+	     the limit variable instead.  */
+	  if (source_register < ARG1_REGNUM || source_register > ARG4_REGNUM)
+	    {
+	      /* The prologue ended before the limit was reached.  */
+	      pc -= 2;
+	      break;
+	    }
+	}
       else if (cris_get_operand2 (insn) == CRIS_FP_REGNUM 
-               /* The size is a fixed-size.  */
-               && ((insn & 0x0F00) >> 8) == 0x0001 
-               /* A negative offset.  */
-               && (cris_get_signed_offset (insn) < 0))  
-        {
-          /* move.S rZ,[r8-U] (?) */
-          insn_next = read_memory_unsigned_integer (pc, 2, byte_order);
-          pc += 2;
-          regno = cris_get_operand2 (insn_next);
-          if ((regno >= 0 && regno < gdbarch_sp_regnum (gdbarch))
-              && cris_get_mode (insn_next) == PREFIX_OFFSET_MODE
-              && cris_get_opcode (insn_next) == 0x000F)
-            {
-              /* move.S rZ,[r8-U] */
-              continue;
-            }
-          else
-            {
-              /* The prologue ended before the limit was reached.  */
-              pc -= 4;
-              break;
-            }
-        }
-      else if (cris_get_operand2 (insn) == CRIS_FP_REGNUM 
-               /* The size is a fixed-size.  */
-               && ((insn & 0x0F00) >> 8) == 0x0001 
-               /* A positive offset.  */
-               && (cris_get_signed_offset (insn) > 0))  
-        {
-          /* move.S [r8+U],rZ (?) */
+	       /* The size is a fixed-size.  */
+	       && ((insn & 0x0F00) >> 8) == 0x0001 
+	       /* A negative offset.  */
+	       && (cris_get_signed_offset (insn) < 0))  
+	{
+	  /* move.S rZ,[r8-U] (?) */
 	  insn_next = read_memory_unsigned_integer (pc, 2, byte_order);
-          pc += 2;
-          regno = cris_get_operand2 (insn_next);
-          if ((regno >= 0 && regno < gdbarch_sp_regnum (gdbarch))
-              && cris_get_mode (insn_next) == PREFIX_OFFSET_MODE
-              && cris_get_opcode (insn_next) == 0x0009
-              && cris_get_operand1 (insn_next) == regno)
-            {
-              /* move.S [r8+U],rZ */
-              continue;
-            }
-          else
-            {
-              /* The prologue ended before the limit was reached.  */
-              pc -= 4;
-              break;
-            }
-        }
+	  pc += 2;
+	  regno = cris_get_operand2 (insn_next);
+	  if ((regno >= 0 && regno < gdbarch_sp_regnum (gdbarch))
+	      && cris_get_mode (insn_next) == PREFIX_OFFSET_MODE
+	      && cris_get_opcode (insn_next) == 0x000F)
+	    {
+	      /* move.S rZ,[r8-U] */
+	      continue;
+	    }
+	  else
+	    {
+	      /* The prologue ended before the limit was reached.  */
+	      pc -= 4;
+	      break;
+	    }
+	}
+      else if (cris_get_operand2 (insn) == CRIS_FP_REGNUM 
+	       /* The size is a fixed-size.  */
+	       && ((insn & 0x0F00) >> 8) == 0x0001 
+	       /* A positive offset.  */
+	       && (cris_get_signed_offset (insn) > 0))  
+	{
+	  /* move.S [r8+U],rZ (?) */
+	  insn_next = read_memory_unsigned_integer (pc, 2, byte_order);
+	  pc += 2;
+	  regno = cris_get_operand2 (insn_next);
+	  if ((regno >= 0 && regno < gdbarch_sp_regnum (gdbarch))
+	      && cris_get_mode (insn_next) == PREFIX_OFFSET_MODE
+	      && cris_get_opcode (insn_next) == 0x0009
+	      && cris_get_operand1 (insn_next) == regno)
+	    {
+	      /* move.S [r8+U],rZ */
+	      continue;
+	    }
+	  else
+	    {
+	      /* The prologue ended before the limit was reached.  */
+	      pc -= 4;
+	      break;
+	    }
+	}
       else
-        {
-          /* The prologue ended before the limit was reached.  */
-          pc -= 2;
-          break;
-        }
+	{
+	  /* The prologue ended before the limit was reached.  */
+	  pc -= 2;
+	  break;
+	}
     }
 
   /* We only want to know the end of the prologue when this_frame and info
@@ -1225,21 +1224,21 @@ cris_scan_prologue (CORE_ADDR pc, struct frame_info *this_frame,
     {
       ULONGEST this_base;
       /* The SP was moved to the FP.  This indicates that a new frame
-         was created.  Get THIS frame's FP value by unwinding it from
-         the next frame.  */
+	 was created.  Get THIS frame's FP value by unwinding it from
+	 the next frame.  */
       this_base = get_frame_register_unsigned (this_frame, CRIS_FP_REGNUM);
       info->base = this_base;
-      info->saved_regs[CRIS_FP_REGNUM].addr = info->base;
+      info->saved_regs[CRIS_FP_REGNUM].set_addr (info->base);
   
       /* The FP points at the last saved register.  Adjust the FP back
-         to before the first saved register giving the SP.  */
+	 to before the first saved register giving the SP.  */
       info->prev_sp = info->base + info->r8_offset;
     }
   else
     {
       ULONGEST this_base;      
       /* Assume that the FP is this frame's SP but with that pushed
-         stack space added back.  */
+	 stack space added back.  */
       this_base = get_frame_register_unsigned (this_frame,
 					       gdbarch_sp_regnum (gdbarch));
       info->base = this_base;
@@ -1254,14 +1253,13 @@ cris_scan_prologue (CORE_ADDR pc, struct frame_info *this_frame,
 
   for (regno = regsave; regno >= 0; regno--)
     {
-      info->saved_regs[regno].addr = info->base + info->r8_offset - val;
+      info->saved_regs[regno].set_addr (info->base + info->r8_offset - val);
       val -= 4;
     }
 
   /* The previous frame's SP needed to be computed.  Save the computed
      value.  */
-  trad_frame_set_value (info->saved_regs,
-			gdbarch_sp_regnum (gdbarch), info->prev_sp);
+  info->saved_regs[gdbarch_sp_regnum (gdbarch)].set_value (info->prev_sp);
 
   if (!info->leaf_function)
     {
@@ -1269,12 +1267,12 @@ cris_scan_prologue (CORE_ADDR pc, struct frame_info *this_frame,
       if (info->r8_offset == 0)
 	{
 	  /* R8 not pushed yet.  */
-	  info->saved_regs[SRP_REGNUM].addr = info->base;
+	  info->saved_regs[SRP_REGNUM].set_addr (info->base);
 	}
       else
 	{
 	  /* R8 pushed, but SP may or may not be moved to R8 yet.  */
-	  info->saved_regs[SRP_REGNUM].addr = info->base + 4;
+	  info->saved_regs[SRP_REGNUM].set_addr (info->base + 4);
 	}
     }
 
@@ -1440,16 +1438,16 @@ cris_register_size (struct gdbarch *gdbarch, int regno)
   else if (regno >= NUM_GENREGS && regno < (NUM_GENREGS + NUM_SPECREGS))
     {
       /* Special register (R16 - R31).  cris_spec_regs is zero-based. 
-         Adjust regno accordingly.  */
+	 Adjust regno accordingly.  */
       spec_regno = regno - NUM_GENREGS;
       
       for (i = 0; cris_spec_regs[i].name != NULL; i++)
-        {
-          if (cris_spec_regs[i].number == spec_regno 
-              && cris_spec_reg_applicable (gdbarch, cris_spec_regs[i]))
-            /* Go with the first applicable register.  */
-            return cris_spec_regs[i].reg_size;
-        }
+	{
+	  if (cris_spec_regs[i].number == spec_regno 
+	      && cris_spec_reg_applicable (gdbarch, cris_spec_regs[i]))
+	    /* Go with the first applicable register.  */
+	    return cris_spec_regs[i].reg_size;
+	}
       /* Special register not applicable to this CRIS version.  */
       return 0;
     }
@@ -1472,7 +1470,7 @@ static int
 cris_cannot_fetch_register (struct gdbarch *gdbarch, int regno)
 {
   return ((regno < 0 || regno >= gdbarch_num_regs (gdbarch))
-          || (cris_register_size (gdbarch, regno) == 0));
+	  || (cris_register_size (gdbarch, regno) == 0));
 }
 
 /* Nonzero if regno should not be written to the target, for various 
@@ -1513,7 +1511,7 @@ static int
 crisv32_cannot_fetch_register (struct gdbarch *gdbarch, int regno)
 {
   return ((regno < 0 || regno >= gdbarch_num_regs (gdbarch))
-          || (cris_register_size (gdbarch, regno) == 0));
+	  || (cris_register_size (gdbarch, regno) == 0));
 }
 
 /* Nonzero if regno should not be written to the target, for various 
@@ -1753,7 +1751,7 @@ cris_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 
 static void
 cris_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
-                            struct dwarf2_frame_state_reg *reg,
+			    struct dwarf2_frame_state_reg *reg,
 			    struct frame_info *this_frame)
 {
   /* The return address column.  */
@@ -1825,7 +1823,7 @@ cris_return_value (struct gdbarch *gdbarch, struct value *function,
 
 static int
 constraint (unsigned int insn, const char *inst_args,
-            inst_env_type *inst_env)
+	    inst_env_type *inst_env)
 {
   int retval = 0;
   int tmp, i;
@@ -1836,61 +1834,61 @@ constraint (unsigned int insn, const char *inst_args,
     switch (*s) 
       {
       case 'm':
-        if ((insn & 0x30) == 0x30)
-          return -1;
-        break;
-        
+	if ((insn & 0x30) == 0x30)
+	  return -1;
+	break;
+	
       case 'S':
-        /* A prefix operand.  */
-        if (inst_env->prefix_found)
-          break;
-        else
-          return -1;
+	/* A prefix operand.  */
+	if (inst_env->prefix_found)
+	  break;
+	else
+	  return -1;
 
       case 'B':
-        /* A "push" prefix.  (This check was REMOVED by san 970921.)  Check for
-           valid "push" size.  In case of special register, it may be != 4.  */
-        if (inst_env->prefix_found)
-          break;
-        else
-          return -1;
+	/* A "push" prefix.  (This check was REMOVED by san 970921.)  Check for
+	   valid "push" size.  In case of special register, it may be != 4.  */
+	if (inst_env->prefix_found)
+	  break;
+	else
+	  return -1;
 
       case 'D':
-        retval = (((insn >> 0xC) & 0xF) == (insn & 0xF));
-        if (!retval)
-          return -1;
-        else 
-          retval += 4;
-        break;
+	retval = (((insn >> 0xC) & 0xF) == (insn & 0xF));
+	if (!retval)
+	  return -1;
+	else 
+	  retval += 4;
+	break;
 
       case 'P':
-        tmp = (insn >> 0xC) & 0xF;
+	tmp = (insn >> 0xC) & 0xF;
 
-        for (i = 0; cris_spec_regs[i].name != NULL; i++)
-          {
-            /* Since we match four bits, we will give a value of
-               4 - 1 = 3 in a match.  If there is a corresponding
-               exact match of a special register in another pattern, it
-               will get a value of 4, which will be higher.  This should
-               be correct in that an exact pattern would match better that
-               a general pattern.
-               Note that there is a reason for not returning zero; the
-               pattern for "clear" is partly  matched in the bit-pattern
-               (the two lower bits must be zero), while the bit-pattern
-               for a move from a special register is matched in the
-               register constraint.
-               This also means we will will have a race condition if
-               there is a partly match in three bits in the bit pattern.  */
-            if (tmp == cris_spec_regs[i].number)
-              {
-                retval += 3;
-                break;
-              }
-          }
-        
-        if (cris_spec_regs[i].name == NULL)
-          return -1;
-        break;
+	for (i = 0; cris_spec_regs[i].name != NULL; i++)
+	  {
+	    /* Since we match four bits, we will give a value of
+	       4 - 1 = 3 in a match.  If there is a corresponding
+	       exact match of a special register in another pattern, it
+	       will get a value of 4, which will be higher.  This should
+	       be correct in that an exact pattern would match better that
+	       a general pattern.
+	       Note that there is a reason for not returning zero; the
+	       pattern for "clear" is partly  matched in the bit-pattern
+	       (the two lower bits must be zero), while the bit-pattern
+	       for a move from a special register is matched in the
+	       register constraint.
+	       This also means we will will have a race condition if
+	       there is a partly match in three bits in the bit pattern.  */
+	    if (tmp == cris_spec_regs[i].number)
+	      {
+		retval += 3;
+		break;
+	      }
+	  }
+	
+	if (cris_spec_regs[i].name == NULL)
+	  return -1;
+	break;
       }
   return retval;
 }
@@ -1924,27 +1922,27 @@ find_cris_op (unsigned short insn, inst_env_type *inst_env)
   for (i = 0; cris_opcodes[i].name != NULL; i++)
     {
       if (((cris_opcodes[i].match & insn) == cris_opcodes[i].match) 
-          && ((cris_opcodes[i].lose & insn) == 0)
+	  && ((cris_opcodes[i].lose & insn) == 0)
 	  /* Only CRISv10 instructions, please.  */
 	  && (cris_opcodes[i].applicable_version != cris_ver_v32p))
-        {
-          level_of_match = constraint (insn, cris_opcodes[i].args, inst_env);
-          if (level_of_match >= 0)
-            {
-              level_of_match +=
-                number_of_bits (cris_opcodes[i].match | cris_opcodes[i].lose);
-              if (level_of_match > max_level_of_match)
-                {
-                  max_matched = i;
-                  max_level_of_match = level_of_match;
-                  if (level_of_match == 16)
-                    {
-                      /* All bits matched, cannot find better.  */
-                      break;
-                    }
-                }
-            }
-        }
+	{
+	  level_of_match = constraint (insn, cris_opcodes[i].args, inst_env);
+	  if (level_of_match >= 0)
+	    {
+	      level_of_match +=
+		number_of_bits (cris_opcodes[i].match | cris_opcodes[i].lose);
+	      if (level_of_match > max_level_of_match)
+		{
+		  max_matched = i;
+		  max_level_of_match = level_of_match;
+		  if (level_of_match == 16)
+		    {
+		      /* All bits matched, cannot find better.  */
+		      break;
+		    }
+		}
+	    }
+	}
     }
   return max_matched;
 }
@@ -1990,33 +1988,33 @@ find_step_target (struct regcache *regcache, inst_env_type *inst_env)
 	     (inst_env->reg[gdbarch_pc_regnum (gdbarch)], 2, byte_order);
 
       /* If the instruction is not in a delay slot the new content of the
-         PC is [PC] + 2.  If the instruction is in a delay slot it is not
-         that simple.  Since a instruction in a delay slot cannot change 
-         the content of the PC, it does not matter what value PC will have. 
-         Just make sure it is a valid instruction.  */
+	 PC is [PC] + 2.  If the instruction is in a delay slot it is not
+	 that simple.  Since a instruction in a delay slot cannot change 
+	 the content of the PC, it does not matter what value PC will have. 
+	 Just make sure it is a valid instruction.  */
       if (!inst_env->delay_slot_pc_active)
-        {
-          inst_env->reg[gdbarch_pc_regnum (gdbarch)] += 2;
-        }
+	{
+	  inst_env->reg[gdbarch_pc_regnum (gdbarch)] += 2;
+	}
       else
-        {
-          inst_env->delay_slot_pc_active = 0;
-          inst_env->reg[gdbarch_pc_regnum (gdbarch)]
+	{
+	  inst_env->delay_slot_pc_active = 0;
+	  inst_env->reg[gdbarch_pc_regnum (gdbarch)]
 	    = inst_env->delay_slot_pc;
-        }
+	}
       /* Analyse the present instruction.  */
       i = find_cris_op (insn, inst_env);
       if (i == -1)
-        {
-          inst_env->invalid = 1;
-        }
+	{
+	  inst_env->invalid = 1;
+	}
       else
-        {
-          cris_gdb_func (gdbarch, cris_opcodes[i].op, insn, inst_env);
-        }
+	{
+	  cris_gdb_func (gdbarch, cris_opcodes[i].op, insn, inst_env);
+	}
     } while (!inst_env->invalid 
-             && (inst_env->prefix_found || inst_env->xflag_found 
-                 || inst_env->slot_needed));
+	     && (inst_env->prefix_found || inst_env->xflag_found 
+		 || inst_env->slot_needed));
   return i;
 }
 
@@ -2043,7 +2041,7 @@ cris_software_single_step (struct regcache *regcache)
   else
     {
       /* Insert at most two breakpoints.  One for the next PC content
-         and possibly another one for a branch, jump, etc.  */
+	 and possibly another one for a branch, jump, etc.  */
       CORE_ADDR next_pc
 	= (CORE_ADDR) inst_env.reg[gdbarch_pc_regnum (gdbarch)];
 
@@ -2095,11 +2093,11 @@ process_autoincrement (int size, unsigned short inst, inst_env_type *inst_env)
       inst_env->reg[cris_get_operand1 (inst)] += 1;
 
       /* The PC must be word aligned, so increase the PC with one
-         word even if the size is byte.  */
+	 word even if the size is byte.  */
       if (cris_get_operand1 (inst) == REG_PC)
-        {
-          inst_env->reg[REG_PC] += 1;
-        }
+	{
+	  inst_env->reg[REG_PC] += 1;
+	}
     }
   else if (size == INST_WORD_SIZE)
     {
@@ -2316,19 +2314,19 @@ abs_op (unsigned short inst, inst_env_type *inst_env)
     
       /* It's invalid to change to the PC if we are in a delay slot.  */
       if (inst_env->slot_needed)
-        {
-          inst_env->invalid = 1;
-          return;
-        }
+	{
+	  inst_env->invalid = 1;
+	  return;
+	}
 
       value = (long) inst_env->reg[REG_PC];
 
       /* The value of abs (SIGNED_DWORD_MASK) is SIGNED_DWORD_MASK.  */
       if (value != SIGNED_DWORD_MASK)
-        {
-          value = -value;
-          inst_env->reg[REG_PC] = (long) value;
-        }
+	{
+	  value = -value;
+	  inst_env->reg[REG_PC] = (long) value;
+	}
     }
 
   inst_env->slot_needed = 0;
@@ -2377,10 +2375,10 @@ asr_op (unsigned short inst, inst_env_type *inst_env)
     {
       /* It's invalid to change the PC in a delay slot.  */
       if (inst_env->slot_needed)
-        {
-          inst_env->invalid = 1;
-          return;
-        }
+	{
+	  inst_env->invalid = 1;
+	  return;
+	}
       /* Get the number of bits to shift.  */
       shift_steps
 	= cris_get_asr_shift_steps (inst_env->reg[cris_get_operand1 (inst)]);
@@ -2388,45 +2386,45 @@ asr_op (unsigned short inst, inst_env_type *inst_env)
 
       /* Find out how many bits the operation should apply to.  */
       if (cris_get_size (inst) == INST_BYTE_SIZE)
-        {
-          if (value & SIGNED_BYTE_MASK)
-            {
-              signed_extend_mask = 0xFF;
-              signed_extend_mask = signed_extend_mask >> shift_steps;
-              signed_extend_mask = ~signed_extend_mask;
-            }
-          value = value >> shift_steps;
-          value |= signed_extend_mask;
-          value &= 0xFF;
-          inst_env->reg[REG_PC] &= 0xFFFFFF00;
-          inst_env->reg[REG_PC] |= value;
-        }
+	{
+	  if (value & SIGNED_BYTE_MASK)
+	    {
+	      signed_extend_mask = 0xFF;
+	      signed_extend_mask = signed_extend_mask >> shift_steps;
+	      signed_extend_mask = ~signed_extend_mask;
+	    }
+	  value = value >> shift_steps;
+	  value |= signed_extend_mask;
+	  value &= 0xFF;
+	  inst_env->reg[REG_PC] &= 0xFFFFFF00;
+	  inst_env->reg[REG_PC] |= value;
+	}
       else if (cris_get_size (inst) == INST_WORD_SIZE)
-        {
-          if (value & SIGNED_WORD_MASK)
-            {
-              signed_extend_mask = 0xFFFF;
-              signed_extend_mask = signed_extend_mask >> shift_steps;
-              signed_extend_mask = ~signed_extend_mask;
-            }
-          value = value >> shift_steps;
-          value |= signed_extend_mask;
-          value &= 0xFFFF;
-          inst_env->reg[REG_PC] &= 0xFFFF0000;
-          inst_env->reg[REG_PC] |= value;
-        }
+	{
+	  if (value & SIGNED_WORD_MASK)
+	    {
+	      signed_extend_mask = 0xFFFF;
+	      signed_extend_mask = signed_extend_mask >> shift_steps;
+	      signed_extend_mask = ~signed_extend_mask;
+	    }
+	  value = value >> shift_steps;
+	  value |= signed_extend_mask;
+	  value &= 0xFFFF;
+	  inst_env->reg[REG_PC] &= 0xFFFF0000;
+	  inst_env->reg[REG_PC] |= value;
+	}
       else if (cris_get_size (inst) == INST_DWORD_SIZE)
-        {
-          if (value & SIGNED_DWORD_MASK)
-            {
-              signed_extend_mask = 0xFFFFFFFF;
-              signed_extend_mask = signed_extend_mask >> shift_steps;
-              signed_extend_mask = ~signed_extend_mask;
-            }
-          value = value >> shift_steps;
-          value |= signed_extend_mask;
-          inst_env->reg[REG_PC]  = value;
-        }
+	{
+	  if (value & SIGNED_DWORD_MASK)
+	    {
+	      signed_extend_mask = 0xFFFFFFFF;
+	      signed_extend_mask = signed_extend_mask >> shift_steps;
+	      signed_extend_mask = ~signed_extend_mask;
+	    }
+	  value = value >> shift_steps;
+	  value |= signed_extend_mask;
+	  inst_env->reg[REG_PC]  = value;
+	}
     }
   inst_env->slot_needed = 0;
   inst_env->prefix_found = 0;
@@ -2457,20 +2455,20 @@ asrq_op (unsigned short inst, inst_env_type *inst_env)
 
       /* It's invalid to change the PC in a delay slot.  */
       if (inst_env->slot_needed)
-        {
-          inst_env->invalid = 1;
-          return;
-        }
+	{
+	  inst_env->invalid = 1;
+	  return;
+	}
       /* The shift size is given as a 5 bit quick value, i.e. we don't
-         want the sign bit of the quick value.  */
+	 want the sign bit of the quick value.  */
       shift_steps = cris_get_asr_shift_steps (inst);
       value = inst_env->reg[REG_PC];
       if (value & SIGNED_DWORD_MASK)
-        {
-          signed_extend_mask = 0xFFFFFFFF;
-          signed_extend_mask = signed_extend_mask >> shift_steps;
-          signed_extend_mask = ~signed_extend_mask;
-        }
+	{
+	  signed_extend_mask = 0xFFFFFFFF;
+	  signed_extend_mask = signed_extend_mask >> shift_steps;
+	  signed_extend_mask = ~signed_extend_mask;
+	}
       value = value >> shift_steps;
       value |= signed_extend_mask;
       inst_env->reg[REG_PC]  = value;
@@ -2541,10 +2539,10 @@ two_operand_bound_op (unsigned short inst, inst_env_type *inst_env)
     {
       /* It's invalid to change the PC in a delay slot.  */
       if (inst_env->slot_needed)
-        {
-          inst_env->invalid = 1;
-          return;
-        }
+	{
+	  inst_env->invalid = 1;
+	  return;
+	}
       process_autoincrement (cris_get_size (inst), inst, inst_env);
     }
   inst_env->slot_needed = 0;
@@ -2618,19 +2616,19 @@ reg_mode_clear_op (unsigned short inst, inst_env_type *inst_env)
       /* The instruction will clear the instruction's size bits.  */
       int clear_size = cris_get_clear_size (inst);
       if (clear_size == INST_BYTE_SIZE)
-        {
-          inst_env->delay_slot_pc = inst_env->reg[REG_PC] & 0xFFFFFF00;
-        }
+	{
+	  inst_env->delay_slot_pc = inst_env->reg[REG_PC] & 0xFFFFFF00;
+	}
       if (clear_size == INST_WORD_SIZE)
-        {
-          inst_env->delay_slot_pc = inst_env->reg[REG_PC] & 0xFFFF0000;
-        }
+	{
+	  inst_env->delay_slot_pc = inst_env->reg[REG_PC] & 0xFFFF0000;
+	}
       if (clear_size == INST_DWORD_SIZE)
-        {
-          inst_env->delay_slot_pc = 0x0;
-        }
+	{
+	  inst_env->delay_slot_pc = 0x0;
+	}
       /* The jump will be delayed with one delay slot.  So we need a delay 
-         slot.  */
+	 slot.  */
       inst_env->slot_needed = 1;
       inst_env->delay_slot_pc_active = 1;
     }
@@ -2672,7 +2670,7 @@ none_reg_mode_clear_test_op (unsigned short inst, inst_env_type *inst_env)
   if (inst_env->prefix_found)
     {
       /* The only way the PC can change is if this instruction is in
-         assign addressing mode.  */
+	 assign addressing mode.  */
       check_assign (inst, inst_env);
     }
   /* Indirect mode can't change the PC so just check if the mode is
@@ -2783,27 +2781,27 @@ none_reg_mode_jump_op (unsigned short inst, inst_env_type *inst_env)
     {
       /* Check if we have a prefix.  */
       if (inst_env->prefix_found)
-        {
-          check_assign (inst, inst_env);
+	{
+	  check_assign (inst, inst_env);
 
-          /* Get the new value for the PC.  */
-          newpc = 
-            read_memory_unsigned_integer ((CORE_ADDR) inst_env->prefix_value,
-                                          4, inst_env->byte_order);
-        }
+	  /* Get the new value for the PC.  */
+	  newpc = 
+	    read_memory_unsigned_integer ((CORE_ADDR) inst_env->prefix_value,
+					  4, inst_env->byte_order);
+	}
       else
-        {
-          /* Get the new value for the PC.  */
-          address = (CORE_ADDR) inst_env->reg[cris_get_operand1 (inst)];
-          newpc = read_memory_unsigned_integer (address,
+	{
+	  /* Get the new value for the PC.  */
+	  address = (CORE_ADDR) inst_env->reg[cris_get_operand1 (inst)];
+	  newpc = read_memory_unsigned_integer (address,
 						4, inst_env->byte_order);
 
-          /* Check if we should increment a register.  */
-          if (cris_get_mode (inst) == AUTOINC_MODE)
-            {
-              inst_env->reg[cris_get_operand1 (inst)] += 4;
-            }
-        }
+	  /* Check if we should increment a register.  */
+	  if (cris_get_mode (inst) == AUTOINC_MODE)
+	    {
+	      inst_env->reg[cris_get_operand1 (inst)] += 4;
+	    }
+	}
       inst_env->reg[REG_PC] = newpc;
     }
   inst_env->slot_needed = 0;
@@ -2821,45 +2819,45 @@ move_to_preg_op (struct gdbarch *gdbarch, unsigned short inst,
   if (inst_env->prefix_found)
     {
       /* The instruction has a prefix that means we are only interested if
-         the instruction is in assign mode.  */
+	 the instruction is in assign mode.  */
       if (cris_get_mode (inst) == PREFIX_ASSIGN_MODE)
-        {
-          /* The prefix handles the problem if we are in a delay slot.  */
-          if (cris_get_operand1 (inst) == REG_PC)
-            {
-              /* Just take care of the assign.  */
-              check_assign (inst, inst_env);
-            }
-        }
+	{
+	  /* The prefix handles the problem if we are in a delay slot.  */
+	  if (cris_get_operand1 (inst) == REG_PC)
+	    {
+	      /* Just take care of the assign.  */
+	      check_assign (inst, inst_env);
+	    }
+	}
     }
   else if (cris_get_mode (inst) == AUTOINC_MODE)
     {
       /* The instruction doesn't have a prefix, the only case left that we
-         are interested in is the autoincrement mode.  */
+	 are interested in is the autoincrement mode.  */
       if (cris_get_operand1 (inst) == REG_PC)
-        {
-          /* If the PC is to be incremented it's invalid to be in a 
-             delay slot.  */
-          if (inst_env->slot_needed)
-            {
-              inst_env->invalid = 1;
-              return;
-            }
+	{
+	  /* If the PC is to be incremented it's invalid to be in a 
+	     delay slot.  */
+	  if (inst_env->slot_needed)
+	    {
+	      inst_env->invalid = 1;
+	      return;
+	    }
 
-          /* The increment depends on the size of the special register.  */
-          if (cris_register_size (gdbarch, cris_get_operand2 (inst)) == 1)
-            {
-              process_autoincrement (INST_BYTE_SIZE, inst, inst_env);
-            }
-          else if (cris_register_size (gdbarch, cris_get_operand2 (inst)) == 2)
-            {
-              process_autoincrement (INST_WORD_SIZE, inst, inst_env);
-            }
-          else
-            {
-              process_autoincrement (INST_DWORD_SIZE, inst, inst_env);
-            }
-        }
+	  /* The increment depends on the size of the special register.  */
+	  if (cris_register_size (gdbarch, cris_get_operand2 (inst)) == 1)
+	    {
+	      process_autoincrement (INST_BYTE_SIZE, inst, inst_env);
+	    }
+	  else if (cris_register_size (gdbarch, cris_get_operand2 (inst)) == 2)
+	    {
+	      process_autoincrement (INST_WORD_SIZE, inst, inst_env);
+	    }
+	  else
+	    {
+	      process_autoincrement (INST_DWORD_SIZE, inst, inst_env);
+	    }
+	}
     }
   inst_env->slot_needed = 0;
   inst_env->prefix_found = 0;
@@ -2877,45 +2875,45 @@ none_reg_mode_move_from_preg_op (struct gdbarch *gdbarch, unsigned short inst,
   if (inst_env->prefix_found)
     {
       /* The instruction has a prefix that means we are only interested if
-         the instruction is in assign mode.  */
+	 the instruction is in assign mode.  */
       if (cris_get_mode (inst) == PREFIX_ASSIGN_MODE)
-        {
-          /* The prefix handles the problem if we are in a delay slot.  */
-          if (cris_get_operand1 (inst) == REG_PC)
-            {
-              /* Just take care of the assign.  */
-              check_assign (inst, inst_env);
-            }
-        }
+	{
+	  /* The prefix handles the problem if we are in a delay slot.  */
+	  if (cris_get_operand1 (inst) == REG_PC)
+	    {
+	      /* Just take care of the assign.  */
+	      check_assign (inst, inst_env);
+	    }
+	}
     }    
   /* The instruction doesn't have a prefix, the only case left that we
      are interested in is the autoincrement mode.  */
   else if (cris_get_mode (inst) == AUTOINC_MODE)
     {
       if (cris_get_operand1 (inst) == REG_PC)
-        {
-          /* If the PC is to be incremented it's invalid to be in a 
-             delay slot.  */
-          if (inst_env->slot_needed)
-            {
-              inst_env->invalid = 1;
-              return;
-            }
-          
-          /* The increment depends on the size of the special register.  */
-          if (cris_register_size (gdbarch, cris_get_operand2 (inst)) == 1)
-            {
-              process_autoincrement (INST_BYTE_SIZE, inst, inst_env);
-            }
-          else if (cris_register_size (gdbarch, cris_get_operand2 (inst)) == 2)
-            {
-              process_autoincrement (INST_WORD_SIZE, inst, inst_env);
-            }
-          else
-            {
-              process_autoincrement (INST_DWORD_SIZE, inst, inst_env);
-            }
-        }
+	{
+	  /* If the PC is to be incremented it's invalid to be in a 
+	     delay slot.  */
+	  if (inst_env->slot_needed)
+	    {
+	      inst_env->invalid = 1;
+	      return;
+	    }
+	  
+	  /* The increment depends on the size of the special register.  */
+	  if (cris_register_size (gdbarch, cris_get_operand2 (inst)) == 1)
+	    {
+	      process_autoincrement (INST_BYTE_SIZE, inst, inst_env);
+	    }
+	  else if (cris_register_size (gdbarch, cris_get_operand2 (inst)) == 2)
+	    {
+	      process_autoincrement (INST_WORD_SIZE, inst, inst_env);
+	    }
+	  else
+	    {
+	      process_autoincrement (INST_DWORD_SIZE, inst, inst_env);
+	    }
+	}
     }
   inst_env->slot_needed = 0;
   inst_env->prefix_found = 0;
@@ -2940,10 +2938,10 @@ reg_mode_move_from_preg_op (unsigned short inst, inst_env_type *inst_env)
     {
       /* It's invalid to change the PC in a delay slot.  */
       if (inst_env->slot_needed)
-        {
-          inst_env->invalid = 1;
-          return;
-        }
+	{
+	  inst_env->invalid = 1;
+	  return;
+	}
       /* The destination is the PC, the jump will have a delay slot.  */
       inst_env->delay_slot_pc = inst_env->preg[cris_get_operand2 (inst)];
       inst_env->slot_needed = 1;
@@ -2967,50 +2965,50 @@ move_mem_to_reg_movem_op (unsigned short inst, inst_env_type *inst_env)
   if (inst_env->prefix_found)
     {
       /* The prefix handles the problem if we are in a delay slot.  Is the
-         MOVEM instruction going to change the PC?  */
+	 MOVEM instruction going to change the PC?  */
       if (cris_get_operand2 (inst) >= REG_PC)
-        {
-          inst_env->reg[REG_PC] = 
-            read_memory_unsigned_integer (inst_env->prefix_value,
+	{
+	  inst_env->reg[REG_PC] = 
+	    read_memory_unsigned_integer (inst_env->prefix_value,
 					  4, inst_env->byte_order);
-        }
+	}
       /* The assign value is the value after the increment.  Normally, the   
-         assign value is the value before the increment.  */
+	 assign value is the value before the increment.  */
       if ((cris_get_operand1 (inst) == REG_PC) 
-          && (cris_get_mode (inst) == PREFIX_ASSIGN_MODE))
-        {
-          inst_env->reg[REG_PC] = inst_env->prefix_value;
-          inst_env->reg[REG_PC] += 4 * (cris_get_operand2 (inst) + 1);
-        }
+	  && (cris_get_mode (inst) == PREFIX_ASSIGN_MODE))
+	{
+	  inst_env->reg[REG_PC] = inst_env->prefix_value;
+	  inst_env->reg[REG_PC] += 4 * (cris_get_operand2 (inst) + 1);
+	}
     }
   else
     {
       /* Is the MOVEM instruction going to change the PC?  */
       if (cris_get_operand2 (inst) == REG_PC)
-        {
-          /* It's invalid to change the PC in a delay slot.  */
-          if (inst_env->slot_needed)
-            {
-              inst_env->invalid = 1;
-              return;
-            }
-          inst_env->reg[REG_PC] =
-            read_memory_unsigned_integer (inst_env->reg[cris_get_operand1 (inst)], 
-                                          4, inst_env->byte_order);
-        }
+	{
+	  /* It's invalid to change the PC in a delay slot.  */
+	  if (inst_env->slot_needed)
+	    {
+	      inst_env->invalid = 1;
+	      return;
+	    }
+	  inst_env->reg[REG_PC] =
+	    read_memory_unsigned_integer (inst_env->reg[cris_get_operand1 (inst)], 
+					  4, inst_env->byte_order);
+	}
       /* The increment is not depending on the size, instead it's depending
-         on the number of registers loaded from memory.  */
+	 on the number of registers loaded from memory.  */
       if ((cris_get_operand1 (inst) == REG_PC)
 	  && (cris_get_mode (inst) == AUTOINC_MODE))
-        {
-          /* It's invalid to change the PC in a delay slot.  */
-          if (inst_env->slot_needed)
-            {
-              inst_env->invalid = 1;
-              return;
-            }
-          inst_env->reg[REG_PC] += 4 * (cris_get_operand2 (inst) + 1); 
-        }
+	{
+	  /* It's invalid to change the PC in a delay slot.  */
+	  if (inst_env->slot_needed)
+	    {
+	      inst_env->invalid = 1;
+	      return;
+	    }
+	  inst_env->reg[REG_PC] += 4 * (cris_get_operand2 (inst) + 1); 
+	}
     }
   inst_env->slot_needed = 0;
   inst_env->prefix_found = 0;
@@ -3026,30 +3024,30 @@ move_reg_to_mem_movem_op (unsigned short inst, inst_env_type *inst_env)
   if (inst_env->prefix_found)
     {
       /* The assign value is the value after the increment.  Normally, the
-         assign value is the value before the increment.  */
+	 assign value is the value before the increment.  */
       if ((cris_get_operand1 (inst) == REG_PC)
-          && (cris_get_mode (inst) == PREFIX_ASSIGN_MODE))
-        {
-          /* The prefix handles the problem if we are in a delay slot.  */
-          inst_env->reg[REG_PC] = inst_env->prefix_value;
-          inst_env->reg[REG_PC] += 4 * (cris_get_operand2 (inst) + 1);
-        }
+	  && (cris_get_mode (inst) == PREFIX_ASSIGN_MODE))
+	{
+	  /* The prefix handles the problem if we are in a delay slot.  */
+	  inst_env->reg[REG_PC] = inst_env->prefix_value;
+	  inst_env->reg[REG_PC] += 4 * (cris_get_operand2 (inst) + 1);
+	}
     }
   else
     {
       /* The increment is not depending on the size, instead it's depending
-         on the number of registers loaded to memory.  */
+	 on the number of registers loaded to memory.  */
       if ((cris_get_operand1 (inst) == REG_PC)
 	  && (cris_get_mode (inst) == AUTOINC_MODE))
-        {
-          /* It's invalid to change the PC in a delay slot.  */
-          if (inst_env->slot_needed)
-            {
-              inst_env->invalid = 1;
-              return;
-            }
-          inst_env->reg[REG_PC] += 4 * (cris_get_operand2 (inst) + 1);
-        }
+	{
+	  /* It's invalid to change the PC in a delay slot.  */
+	  if (inst_env->slot_needed)
+	    {
+	      inst_env->invalid = 1;
+	      return;
+	    }
+	  inst_env->reg[REG_PC] += 4 * (cris_get_operand2 (inst) + 1);
+	}
     }
   inst_env->slot_needed = 0;
   inst_env->prefix_found = 0;
@@ -3083,10 +3081,10 @@ xor_op (unsigned short inst, inst_env_type *inst_env)
     {
       /* It's invalid to change the PC in a delay slot.  */
       if (inst_env->slot_needed)
-        {
-          inst_env->invalid = 1;
-          return;
-        }
+	{
+	  inst_env->invalid = 1;
+	  return;
+	}
       inst_env->reg[REG_PC] ^= inst_env->reg[cris_get_operand1 (inst)];
     }
   inst_env->slot_needed = 0;
@@ -3148,7 +3146,7 @@ mulu_op (unsigned short inst, inst_env_type *inst_env)
 
 static void 
 add_sub_cmp_and_or_move_action (unsigned short inst, inst_env_type *inst_env, 
-                                unsigned long source1, unsigned long source2)
+				unsigned long source1, unsigned long source2)
 {
   unsigned long pc_mask;
   unsigned long operation_mask;
@@ -3240,11 +3238,11 @@ do_sign_or_zero_extend (unsigned long value, unsigned short *inst)
       value &= 0xFFFF;
 
       /* Check if the instruction is signed extend.  If so, check if value has
-         the sign bit on.  */
+	 the sign bit on.  */
       if (cris_is_signed_extend_bit_on (*inst) && (value & SIGNED_WORD_MASK))
-        {
-          value |= SIGNED_WORD_EXTEND_MASK;
-        } 
+	{
+	  value |= SIGNED_WORD_EXTEND_MASK;
+	} 
     }
   else
     {
@@ -3252,11 +3250,11 @@ do_sign_or_zero_extend (unsigned long value, unsigned short *inst)
       value &= 0xFF;
 
       /* Check if the instruction is signed extend.  If so, check if value has
-         the sign bit on.  */
+	 the sign bit on.  */
       if (cris_is_signed_extend_bit_on (*inst) && (value & SIGNED_BYTE_MASK))
-        {
-          value |= SIGNED_BYTE_EXTEND_MASK;
-        }
+	{
+	  value |= SIGNED_BYTE_EXTEND_MASK;
+	}
     }
   /* The size should now be dword.  */
   cris_set_size_to_dword (inst);
@@ -3268,7 +3266,7 @@ do_sign_or_zero_extend (unsigned long value, unsigned short *inst)
 
 static void 
 reg_mode_add_sub_cmp_and_or_move_op (unsigned short inst,
-                                     inst_env_type *inst_env)
+				     inst_env_type *inst_env)
 {
   unsigned long operand1;
   unsigned long operand2;
@@ -3284,21 +3282,21 @@ reg_mode_add_sub_cmp_and_or_move_op (unsigned short inst,
   if (cris_get_operand2 (inst) == REG_PC)
     {
       if (inst_env->slot_needed)
-        {
-          inst_env->invalid = 1;
-          return;
-        }
+	{
+	  inst_env->invalid = 1;
+	  return;
+	}
       /* The instruction has the PC as its target register.  */
       operand1 = inst_env->reg[cris_get_operand1 (inst)]; 
       operand2 = inst_env->reg[REG_PC];
 
       /* Check if it's a extend, signed or zero instruction.  */
       if (cris_get_opcode (inst) < 4)
-        {
-          operand1 = do_sign_or_zero_extend (operand1, &inst);
-        }
+	{
+	  operand1 = do_sign_or_zero_extend (operand1, &inst);
+	}
       /* Calculate the PC value after the instruction, i.e. where the
-         breakpoint should be.  The order of the udw_operands is vital.  */
+	 breakpoint should be.  The order of the udw_operands is vital.  */
       add_sub_cmp_and_or_move_action (inst, inst_env, operand2, operand1); 
     }
   inst_env->slot_needed = 0;
@@ -3342,7 +3340,7 @@ get_data_from_address (unsigned short *inst, CORE_ADDR address,
 
 static void 
 handle_prefix_assign_mode_for_aritm_op (unsigned short inst, 
-                                        inst_env_type *inst_env)
+					inst_env_type *inst_env)
 {
   unsigned long operand2;
   unsigned long operand3;
@@ -3357,7 +3355,7 @@ handle_prefix_assign_mode_for_aritm_op (unsigned short inst,
 					inst_env->byte_order);
 
       /* Calculate the PC value after the instruction, i.e. where the
-         breakpoint should be.  The order of the udw_operands is vital.  */
+	 breakpoint should be.  The order of the udw_operands is vital.  */
       add_sub_cmp_and_or_move_action (inst, inst_env, operand2, operand3);
     }
   inst_env->slot_needed = 0;
@@ -3372,7 +3370,7 @@ handle_prefix_assign_mode_for_aritm_op (unsigned short inst,
 
 static void 
 three_operand_add_sub_cmp_and_or_op (unsigned short inst, 
-                                     inst_env_type *inst_env)
+				     inst_env_type *inst_env)
 {
   unsigned long operand2;
   unsigned long operand3;
@@ -3387,7 +3385,7 @@ three_operand_add_sub_cmp_and_or_op (unsigned short inst,
 					inst_env->byte_order);
 
       /* Calculate the PC value after the instruction, i.e. where the
-         breakpoint should be.  */
+	 breakpoint should be.  */
       add_sub_cmp_and_or_move_action (inst, inst_env, operand2, operand3);
     }
   inst_env->slot_needed = 0;
@@ -3401,20 +3399,20 @@ three_operand_add_sub_cmp_and_or_op (unsigned short inst,
 
 static void 
 handle_prefix_index_mode_for_aritm_op (unsigned short inst, 
-                                       inst_env_type *inst_env)
+				       inst_env_type *inst_env)
 {
   if (cris_get_operand1 (inst) != cris_get_operand2 (inst))
     {
       /* If the instruction is MOVE it's invalid.  If the instruction is ADD,
-         SUB, AND or OR something weird is going on (if everything works these
-         instructions should end up in the three operand version).  */
+	 SUB, AND or OR something weird is going on (if everything works these
+	 instructions should end up in the three operand version).  */
       inst_env->invalid = 1;
       return;
     }
   else
     {
       /* three_operand_add_sub_cmp_and_or does the same as we should do here
-         so use it.  */
+	 so use it.  */
       three_operand_add_sub_cmp_and_or_op (inst, inst_env);
     }
   inst_env->slot_needed = 0;
@@ -3429,7 +3427,7 @@ handle_prefix_index_mode_for_aritm_op (unsigned short inst,
 
 static void 
 handle_inc_and_index_mode_for_aritm_op (unsigned short inst, 
-                                        inst_env_type *inst_env)
+					inst_env_type *inst_env)
 {
   unsigned long operand1;
   unsigned long operand2;
@@ -3441,7 +3439,7 @@ handle_inc_and_index_mode_for_aritm_op (unsigned short inst,
   if (cris_get_operand2 (inst) == REG_PC)
     {
       /* Must be done here, get_data_from_address may change the size 
-         field.  */
+	 field.  */
       size = cris_get_size (inst);
       operand2 = inst_env->reg[REG_PC];
 
@@ -3450,7 +3448,7 @@ handle_inc_and_index_mode_for_aritm_op (unsigned short inst,
       operand3 = get_data_from_address (&inst, operand1, inst_env->byte_order);
 
       /* Calculate the PC value after the instruction, i.e. where the
-         breakpoint should be.  The order of the udw_operands is vital.  */
+	 breakpoint should be.  The order of the udw_operands is vital.  */
       add_sub_cmp_and_or_move_action (inst, inst_env, operand2, operand3); 
     }
   /* If this is an autoincrement addressing mode, check if the increment
@@ -3462,11 +3460,11 @@ handle_inc_and_index_mode_for_aritm_op (unsigned short inst,
       size = cris_get_size (inst);
 
       /* If it's an extend instruction we don't want the signed extend bit,
-         because it influences the size.  */
+	 because it influences the size.  */
       if (cris_get_opcode (inst) < 4)
-        {
-          size &= ~SIGNED_EXTEND_BIT_MASK;
-        }
+	{
+	  size &= ~SIGNED_EXTEND_BIT_MASK;
+	}
       process_autoincrement (size, inst, inst_env);
     } 
   inst_env->slot_needed = 0;
@@ -3480,24 +3478,24 @@ handle_inc_and_index_mode_for_aritm_op (unsigned short inst,
 
 static void 
 none_reg_mode_add_sub_cmp_and_or_move_op (unsigned short inst, 
-                                          inst_env_type *inst_env)
+					  inst_env_type *inst_env)
 {
   if (inst_env->prefix_found)
     {
       if (cris_get_mode (inst) == PREFIX_INDEX_MODE)
-        {
-          handle_prefix_index_mode_for_aritm_op (inst, inst_env);
-        }
+	{
+	  handle_prefix_index_mode_for_aritm_op (inst, inst_env);
+	}
       else if (cris_get_mode (inst) == PREFIX_ASSIGN_MODE)
-        {
-          handle_prefix_assign_mode_for_aritm_op (inst, inst_env);
-        }
+	{
+	  handle_prefix_assign_mode_for_aritm_op (inst, inst_env);
+	}
       else
-        {
-          /* The mode is invalid for a prefixed base instruction.  */
-          inst_env->invalid = 1;
-          return;
-        }
+	{
+	  /* The mode is invalid for a prefixed base instruction.  */
+	  inst_env->invalid = 1;
+	  return;
+	}
     }
   else
     {
@@ -3525,10 +3523,10 @@ quick_mode_add_sub_op (unsigned short inst, inst_env_type *inst_env)
   if (cris_get_operand2 (inst) == REG_PC)
     {
       if (inst_env->slot_needed)
-        {
-          inst_env->invalid = 1;
-          return;
-        }
+	{
+	  inst_env->invalid = 1;
+	  return;
+	}
       operand1 = cris_get_quick_value (inst);
       operand2 = inst_env->reg[REG_PC];
 
@@ -3536,7 +3534,7 @@ quick_mode_add_sub_op (unsigned short inst, inst_env_type *inst_env)
       cris_set_size_to_dword (&inst);
 
       /* Calculate the PC value after the instruction, i.e. where the
-         breakpoint should be.  */
+	 breakpoint should be.  */
       add_sub_cmp_and_or_move_action (inst, inst_env, operand2, operand1);
     }
   inst_env->slot_needed = 0;
@@ -3564,25 +3562,25 @@ quick_mode_and_cmp_move_or_op (unsigned short inst, inst_env_type *inst_env)
   if (cris_get_operand2 (inst) == REG_PC)
     {
       if (inst_env->slot_needed)
-        {
-          inst_env->invalid = 1;
-          return;
-        }
+	{
+	  inst_env->invalid = 1;
+	  return;
+	}
       /* The instruction has the PC as its target register.  */
       operand1 = cris_get_quick_value (inst);
       operand2 = inst_env->reg[REG_PC];
 
       /* The quick value is signed, so check if we must do a signed extend.  */
       if (operand1 & SIGNED_QUICK_VALUE_MASK)
-        {
-          /* sign extend  */
-          operand1 |= SIGNED_QUICK_VALUE_EXTEND_MASK;
-        }
+	{
+	  /* sign extend  */
+	  operand1 |= SIGNED_QUICK_VALUE_EXTEND_MASK;
+	}
       /* The size should now be dword.  */
       cris_set_size_to_dword (&inst);
 
       /* Calculate the PC value after the instruction, i.e. where the
-         breakpoint should be.  */
+	 breakpoint should be.  */
       add_sub_cmp_and_or_move_action (inst, inst_env, operand2, operand1);
     }
   inst_env->slot_needed = 0;
@@ -3864,11 +3862,11 @@ cris_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   if (tdep != NULL)
     {
       fprintf_unfiltered (file, "cris_dump_tdep: tdep->cris_version = %i\n",
-                          tdep->cris_version);
+			  tdep->cris_version);
       fprintf_unfiltered (file, "cris_dump_tdep: tdep->cris_mode = %s\n",
-                          tdep->cris_mode);
+			  tdep->cris_mode);
       fprintf_unfiltered (file, "cris_dump_tdep: tdep->cris_dwarf2_cfi = %i\n",
-                          tdep->cris_dwarf2_cfi);
+			  tdep->cris_dwarf2_cfi);
     }
 }
 
@@ -3949,7 +3947,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	   == usr_cmd_cris_mode)
 	  && (gdbarch_tdep (arches->gdbarch)->cris_dwarf2_cfi 
 	      == usr_cmd_cris_dwarf2_cfi))
-        return arches->gdbarch;
+	return arches->gdbarch;
     }
 
   /* No matching architecture was found.  Create a new one.  */
@@ -3991,7 +3989,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case 10:
     case 11: 
       /* CRIS v10 and v11, a.k.a. ETRAX 100LX.  In addition to ETRAX 100, 
-         P7 (32 bits), and P15 (32 bits) have been implemented.  */
+	 P7 (32 bits), and P15 (32 bits) have been implemented.  */
       set_gdbarch_pc_regnum (gdbarch, 15);
       set_gdbarch_register_type (gdbarch, cris_register_type);
       /* There are 32 registers (some of which may not be implemented).  */

@@ -1,5 +1,5 @@
 /* BFD support for the ARM processor
-   Copyright (C) 1994-2020 Free Software Foundation, Inc.
+   Copyright (C) 1994-2021 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -150,6 +150,9 @@ processors[] =
   { bfd_mach_arm_8,	  "cortex-a76"	    },
   { bfd_mach_arm_8,	  "cortex-a76ae"    },
   { bfd_mach_arm_8,	  "cortex-a77"	    },
+  { bfd_mach_arm_8,	  "cortex-a78"	    },
+  { bfd_mach_arm_8,	  "cortex-a78ae"    },
+  { bfd_mach_arm_8,	  "cortex-a78c"     },
   { bfd_mach_arm_6SM,	  "cortex-m0"	    },
   { bfd_mach_arm_6SM,	  "cortex-m0plus"   },
   { bfd_mach_arm_6SM,	  "cortex-m1"	    },
@@ -165,6 +168,7 @@ processors[] =
   { bfd_mach_arm_8R,	  "cortex-r52"	    },
   { bfd_mach_arm_7,	  "cortex-r7"	    },
   { bfd_mach_arm_7,	  "cortex-r8"	    },
+  { bfd_mach_arm_8,	  "cortex-x1"	    },
   { bfd_mach_arm_4T,	  "ep9312"	    },
   { bfd_mach_arm_8,	  "exynos-m1"	    },
   { bfd_mach_arm_4,	  "fa526"	    },

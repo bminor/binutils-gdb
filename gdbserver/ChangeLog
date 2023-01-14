@@ -1,3 +1,271 @@
+2021-01-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* ax.cc (bytecode_address_table): Make static.
+	* debug.cc (debug_file): Make static.
+	* linux-low.cc (stopping_threads): Make static.
+	(step_over_bkpt): Make static.
+	* linux-x86-low.cc (amd64_emit_ops, i386_emit_ops): Make static.
+	* tracepoint.cc (stop_tracing_bkpt, flush_trace_buffer_bkpt,
+	alloced_trace_state_variables, trace_buffer_ctrl,
+	tracing_start_time, tracing_stop_time, tracing_user_name,
+	tracing_notes, tracing_stop_note): Make static.
+
+2021-01-20  Tom de Vries  <tdevries@suse.de>
+
+	* linux-x86-low.cc (collect_register_i386): New function.
+	(x86_fill_gregset):  Remove memset.  Use collect_register_i386.
+
+2021-01-07  Tom de Vries  <tdevries@suse.de>
+
+	* Makefile.in (LIBIBERTY_NORMAL, LIBIBERTY_NOASAN, LIBIBERTY_PIC):
+	(LIBIBERTY_FOR_SHLIB): New var.
+	(LIBIBERTY): Set using $(LIBIBERTY_NORMAL).
+	(IPA_LIB): Use LIBIBERTY_FOR_SHLIB instead of LIBIBERTY in target rule.
+
+2021-01-04  Simon Marchi  <simon.marchi@efficios.com>
+
+	* debug.cc (debug_print_depth): New.
+
+2021-01-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* server.cc (gdbserver_version): Update copyright year.
+	* gdbreplay.cc (gdbreplay_version): Likewise.
+
+2020-12-16  Luis Machado  <luis.machado@linaro.org>
+
+	* linux-aarch64-low.cc (address_significant): New function.
+	(aarch64_target::low_stopped_data_address): Handle the TBI.
+
+2020-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* Makefile.in (IPA_LIB): Include libiberty library.
+
+2020-11-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* server.cc (gdbserver_usage): Add missing option to usage text.
+	(gdbserver_show_disableable): Likewise.
+
+2020-11-02  Simon Marchi  <simon.marchi@efficios.com>
+
+	* ax.cc: Fix indentation.
+	* dll.cc: Fix indentation.
+	* inferiors.h: Fix indentation.
+	* linux-low.cc: Fix indentation.
+	* linux-nios2-low.cc: Fix indentation.
+	* linux-ppc-ipa.cc: Fix indentation.
+	* linux-ppc-low.cc: Fix indentation.
+	* linux-x86-low.cc: Fix indentation.
+	* linux-xtensa-low.cc: Fix indentation.
+	* regcache.cc: Fix indentation.
+	* server.cc: Fix indentation.
+	* tracepoint.cc: Fix indentation.
+
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* acinclude.m4: Replace AC_TRY_COMPILE with AC_COMPILE_IFELSE +
+	AC_LANG_PROGRAM.
+	* configure: Re-generate.
+
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure: Re-generate.
+
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure: Re-generate.
+
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure: Re-generate.
+
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure: Re-generate.
+
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure.ac: Modernize.
+	* configure: Re-generate.
+
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure.ac: Use AC_CANONICAL_{BUILD,HOST,TARGET} instead of
+	AC_CANONICAL_SYSTEM.
+	* configure: Re-generate.
+
+2020-10-26  Pedro Alves  <pedro@palves.net>
+
+	* netbsd-low.cc (netbsd_waitpid, netbsd_process_target::kill)
+	(netbsd_qxfer_libraries_svr4): Use gdb::handle_eintr without
+	explicit type.
+
+2020-10-25  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* acinclude.m4: Update ptrace.m4 path.
+
+2020-10-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* config.in: Re-generate.
+	* configure: Re-generate.
+
+2020-10-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* server.cc (handle_general_set): Don't use sprintf with
+	argument overlapping buffer.
+
+2020-10-20  Tom Tromey  <tromey@adacore.com>
+
+	PR gdb/26742:
+	* inferiors.cc (remove_thread): Clear current_thread before
+	freeing the thread.
+
+2020-10-13  Kamil Rytarowski  <n54@gmx.com>x
+
+	* netbsd-low.cc (netbsd_tdesc): Remove.
+	(netbsd_add_process): Likewise.
+	(netbsd_process_target::create_inferior): Update.
+
+2020-10-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* linux-arc-low.cc (arc_linux_read_description): Release the
+	unique_ptr returned from arc_create_target_description.
+
+2020-10-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* Makefile.in: Include Makefile.gnulib.inc.  Don't define LIBGNU
+	or INCGNU.  Make use of LIBGNU_EXTRA_LIBS when linking.
+
+2020-10-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* linux-low.cc (linux_process_target::handle_extended_wait):
+	Release the unique_ptr returned from allocate_target_description.
+	* linux-riscv-low.cc (riscv_target::low_arch_setup): Likewise.
+	* linux-x86-low.cc (tdesc_amd64_linux_no_xml): Change type.
+	(tdesc_i386_linux_no_xml): Change type.
+	(x86_linux_read_description): Borrow pointer from unique_ptr
+	object.
+	(x86_target::get_ipa_tdesc_idx): Likewise.
+	(initialize_low_arch): Likewise.
+	* tdesc.cc (allocate_target_description): Update return type.
+
+2020-10-07  Tom Tromey  <tromey@adacore.com>
+
+	* server.cc (handle_search_memory): Remove dead code.
+
+2020-10-07  Tom Tromey  <tromey@adacore.com>
+
+	* server.cc (handle_search_memory_1): Remove.
+	(handle_search_memory): Use simple_search_memory.
+
+2020-10-07  Simon Marchi  <simon.marchi@efficios.com>
+
+	* Makefile.in (COMPILE): Add CXXFLAGS.
+	(INTERNAL_CFLAGS_BASE): Remove CXXFLAGS.
+	(gdbserver$(EXEEXT)): Add CXXFLAGS.
+	(gdbreplay$(EXEEXT)): Add CXXFLAGS.
+	($(IPA_LIB)): Add CXXFLAGS.
+	(IPAGENT_COMPILE): Add CXXFLAGS.
+
+2020-10-07  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* configure.srv: Support ARC architecture.
+	* Makefile.in: Add linux-arc-low.cc and arch/arc.o.
+	* linux-arc-low.cc: New file.
+
+2020-10-07  Kamil Rytarowski  <n54@gmx.com>
+
+	* netbsd-low.cc (get_dynamic, get_r_debug, read_one_ptr)
+	(netbsd_qxfer_libraries_svr4): Remove "target" argument and update.
+	(netbsd_process_target::qxfer_libraries_svr4): Update.
+
+2020-10-07  Kamil Rytarowski  <n54@gmx.com>
+
+	* netbsd-low.cc: Fix whitespace formatting.
+	* netbsd-amd64-low.cc: Likewise.
+
+2020-10-07  Kamil Rytarowski  <n54@gmx.com>
+
+	* netbsd-low.cc (netbsd_process_target::read_memory)
+	(netbsd_process_target::write_memory): Update.
+
+2020-10-07  Kamil Rytarowski  <n54@gmx.com>
+
+	* netbsd-aarch64-low.cc: Add.
+	* Makefile.in (SFILES): Register "netbsd-aarch64-low.c".
+	* configure.srv: Add aarch64*-*-netbsd*.
+
+2020-10-06  Shahab Vahedi  <shahab@synopsys.com>
+
+	* regcache.cc (register_data): Remove unused "fetch" argument.
+
+2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* server.cc (handle_monitor_command): Handle "set
+	debug-event-loop".
+	(captured_main): Handle "--debug-event-loop".
+	(monitor_show_help): Mention new setting.
+	(gdbserver_usage): Mention new flag.
+
+2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-low.cc (linux_process_target::async): Pass name to
+	add_file_handler.
+	* remote-utils.cc (handle_accept_event): Likewise.
+	(remote_open): Likewise.
+
+2020-10-01  Kamil Rytarowski  <n54@gmx.com>
+
+	* netbsd-i386-low.cc: Add.
+	* Makefile.in (SFILES): Register "netbsd-i386-low.c".
+	* configure.srv: Add i[34567]86-*-netbsd*.
+
+2020-10-01  Kamil Rytarowski  <n54@gmx.com>
+
+	* netbsd-amd64-low.cc (netbsd_x86_64_arch_setup): Remove.
+	(netbsd_target_regsets): Now const.
+	(the_low_target): Remove.
+	(class netbsd_amd64_target, the_netbsd_amd64_target)
+	(the_netbsd_target): Add.
+	* netbsd-low.cc (netbsd_process_target::post_create_inferior): Call
+	low_arch_setup ().
+	(netbsd_process_target::fetch_registers)
+	(netbsd_process_target::store_registers, initialize_low): Update.
+	(the_netbsd_target): Remove.
+	* netbsd-low.h (netbsd_target_regsets, netbsd_target_ops)
+	(the_low_target, netbsd_tdesc): Remove.
+	(netbsd_process_target::get_regs_info)
+	(netbsd_process_target::low_arch_setup): Add.
+
+2020-09-23  Hannes Domani  <ssbssa@yahoo.de>
+
+	* win32-low.cc: Remove local wow64_process variable.
+	* win32-low.h: Remove local wow64_process variable.
+
+2020-09-18  Tom Tromey  <tromey@adacore.com>
+
+	* netbsd-low.h (class netbsd_process_target) <wait>: Update.
+	* netbsd-low.cc (netbsd_waitpid, netbsd_wait)
+	(netbsd_process_target::wait): Change type of target_options.
+	* win32-low.h (class win32_process_target) <wait>: Update.
+	* win32-low.cc (win32_process_target::wait): Update.
+	* target.h (class process_stratum_target) <wait>: Update.
+	(mywait): Update.
+	* target.cc (mywait, target_wait): Change type of "options".
+	* linux-low.h (class linux_process_target) <wait, wait_1>:
+	Update.
+	* linux-low.cc (linux_process_target::wait)
+	(linux_process_target::wait_1): Update.
+
+2020-09-15  Tom Tromey  <tromey@adacore.com>
+
+	* linux-x86-low.cc (xmltarget_i386_linux_no_xml)
+	(xmltarget_amd64_linux_no_xml): Now arrays.
+
+2020-09-14  Tom Tromey  <tromey@adacore.com>
+
+	* tracepoint.cc (eval_result_names): Now const.
+	* ax.cc (gdb_agent_op_names): Now const.
+
 2020-09-10  Kamil Rytarowski  <n54@gmx.com>
 
 	* netbsd-low.cc: Add.

@@ -167,7 +167,7 @@ SECTIONS
   .noinit ${RELOCATING-0} :
   {
     ${RELOCATING+ PROVIDE (_noinit_start = .) ; }
-    *(.noinit)
+    *(.noinit${RELOCATING+ .noinit.* .gnu.linkonce.n.*})
     ${RELOCATING+ PROVIDE (_noinit_end = .) ; }
     ${RELOCATING+ PROVIDE (_heap_start = .) ; }
     ${RELOCATING+ . += __HEAP_SIZE ; }

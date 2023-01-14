@@ -1,5 +1,5 @@
 /* List lines of source files for GDB, the GNU debugger.
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -306,7 +306,12 @@ select_source_symtab (struct symtab *s)
   if (bsym.symbol != nullptr && SYMBOL_CLASS (bsym.symbol) == LOC_BLOCK)
     {
       symtab_and_line sal = find_function_start_sal (bsym.symbol, true);
-      loc->set (sal.symtab, std::max (sal.line - (lines_to_list - 1), 1));
+      if (sal.symtab == NULL)
+	/* We couldn't find the location of `main', possibly due to missing
+	   line number info, fall back to line 1 in the corresponding file.  */
+	loc->set (symbol_symtab (bsym.symbol), 1);
+      else
+	loc->set (sal.symtab, std::max (sal.line - (lines_to_list - 1), 1));
       return;
     }
 
@@ -446,6 +451,7 @@ init_source_path (void)
 static void
 directory_command (const char *dirname, int from_tty)
 {
+  bool value_changed = false;
   dont_repeat ();
   /* FIXME, this goes to "delete dir"...  */
   if (dirname == 0)
@@ -454,15 +460,21 @@ directory_command (const char *dirname, int from_tty)
 	{
 	  xfree (source_path);
 	  init_source_path ();
+	  value_changed = true;
 	}
     }
   else
     {
       mod_path (dirname, &source_path);
       forget_cached_source_info ();
+      value_changed = true;
     }
-  if (from_tty)
-    show_directories_1 ((char *) 0, from_tty);
+  if (value_changed)
+    {
+      gdb::observers::command_param_changed.notify ("directories", source_path);
+      if (from_tty)
+	show_directories_1 ((char *) 0, from_tty);
+    }
 }
 
 /* Add a path given with the -d command line switch.
@@ -518,7 +530,7 @@ add_path (const char *dirname, char **which_path, int parse_separators)
       gdb::unique_xmalloc_ptr<char> new_name_holder;
 
       /* Spaces and tabs will have been removed by buildargv().
-         NAME is the start of the directory.
+	 NAME is the start of the directory.
 	 P is the '\0' following the end.  */
       p = name + strlen (name);
 
@@ -958,7 +970,7 @@ source_full_path_of (const char *filename,
 
 static int
 substitute_path_rule_matches (const struct substitute_path_rule *rule,
-                              const char *path)
+			      const char *path)
 {
   const int from_len = strlen (rule->from);
   const int path_len = strlen (path);
@@ -1040,8 +1052,8 @@ find_and_open_source (const char *filename,
   if (*fullname)
     {
       /* The user may have requested that source paths be rewritten
-         according to substitution rules he provided.  If a substitution
-         rule applies to this path, then apply it.  */
+	 according to substitution rules he provided.  If a substitution
+	 rule applies to this path, then apply it.  */
       gdb::unique_xmalloc_ptr<char> rewritten_fullname
 	= rewrite_source_path (fullname->get ());
 
@@ -1063,7 +1075,7 @@ find_and_open_source (const char *filename,
   if (dirname != NULL)
     {
       /* If necessary, rewrite the compilation directory name according
-         to the source path substitution rules specified by the user.  */
+	 to the source path substitution rules specified by the user.  */
 
       rewritten_dirname = rewrite_source_path (dirname);
 
@@ -1351,10 +1363,10 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 
       last_line_listed = loc->line ();
       if (flags & PRINT_SOURCE_LINES_FILENAME)
-        {
-          uiout->text (symtab_to_filename_for_display (s));
-          uiout->text (":");
-        }
+	{
+	  uiout->text (symtab_to_filename_for_display (s));
+	  uiout->text (":");
+	}
       xsnprintf (buf, sizeof (buf), "%d\t", new_lineno++);
       uiout->text (buf);
 
@@ -1484,8 +1496,8 @@ info_line_command (const char *arg, int from_tty)
 	  if (sal.pc != 0)
 	    {
 	      /* This is useful for "info line *0x7f34".  If we can't tell the
-	         user about a source line, at least let them have the symbolic
-	         address.  */
+		 user about a source line, at least let them have the symbolic
+		 address.  */
 	      printf_filtered (" for address ");
 	      wrap_here ("  ");
 	      print_address (gdbarch, sal.pc, gdb_stdout);
@@ -1599,7 +1611,7 @@ search_command_helper (const char *regex, int from_tty, bool forward)
       while (c != '\n' && (c = fgetc (stream.get ())) >= 0);
 
       /* Remove the \r, if any, at the end of the line, otherwise
-         regular expressions that end with $ or \n won't work.  */
+	 regular expressions that end with $ or \n won't work.  */
       size_t sz = buf.size ();
       if (sz >= 2 && buf[sz - 2] == '\r')
 	{
@@ -1674,7 +1686,7 @@ find_substitute_path_rule (const char *from)
   while (rule != NULL)
     {
       if (FILENAME_CMP (rule->from, from) == 0)
-        return rule;
+	return rule;
       rule = rule->next;
     }
 
@@ -1726,7 +1738,7 @@ delete_substitute_path_rule (struct substitute_path_rule *rule)
       struct substitute_path_rule *prev = substitute_path_rules;
 
       while (prev != NULL && prev->next != rule)
-        prev = prev->next;
+	prev = prev->next;
 
       gdb_assert (prev != NULL);
 
@@ -1767,7 +1779,7 @@ show_substitute_path_command (const char *args, int from_tty)
   while (rule != NULL)
     {
       if (from == NULL || substitute_path_rule_matches (rule, from) != 0)
-        printf_filtered ("  `%s' -> `%s'.\n", rule->from, rule->to);
+	printf_filtered ("  `%s' -> `%s'.\n", rule->from, rule->to);
       rule = rule->next;
     }
 }
@@ -1806,10 +1818,10 @@ unset_substitute_path_command (const char *args, int from_tty)
       struct substitute_path_rule *next = rule->next;
 
       if (from == NULL || FILENAME_CMP (from, rule->from) == 0)
-        {
-          delete_substitute_path_rule (rule);
-          rule_found = 1;
-        }
+	{
+	  delete_substitute_path_rule (rule);
+	  rule_found = 1;
+	}
 
       rule = next;
     }
@@ -1968,31 +1980,31 @@ A value of \"unlimited\", or zero, means there's no limit."),
 			    &setlist, &showlist);
 
   add_cmd ("substitute-path", class_files, set_substitute_path_command,
-           _("\
+	   _("\
 Add a substitution rule to rewrite the source directories.\n\
 Usage: set substitute-path FROM TO\n\
 The rule is applied only if the directory name starts with FROM\n\
 directly followed by a directory separator.\n\
 If a substitution rule was previously set for FROM, the old rule\n\
 is replaced by the new one."),
-           &setlist);
+	   &setlist);
 
   add_cmd ("substitute-path", class_files, unset_substitute_path_command,
-           _("\
+	   _("\
 Delete one or all substitution rules rewriting the source directories.\n\
 Usage: unset substitute-path [FROM]\n\
 Delete the rule for substituting FROM in source directories.  If FROM\n\
 is not specified, all substituting rules are deleted.\n\
 If the debugger cannot find a rule for FROM, it will display a warning."),
-           &unsetlist);
+	   &unsetlist);
 
   add_cmd ("substitute-path", class_files, show_substitute_path_command,
-           _("\
+	   _("\
 Show one or all substitution rules rewriting the source directories.\n\
 Usage: show substitute-path [FROM]\n\
 Print the rule for substituting FROM in source directories. If FROM\n\
 is not specified, print all substitution rules."),
-           &showlist);
+	   &showlist);
 
   add_setshow_enum_cmd ("filename-display", class_files,
 			filename_display_kind_names,

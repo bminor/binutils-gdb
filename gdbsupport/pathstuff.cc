@@ -1,6 +1,6 @@
 /* Path manipulation routines for GDB and gdbserver.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -222,7 +222,7 @@ get_standard_cache_dir ()
 
 #ifndef __APPLE__
   const char *xdg_cache_home = getenv ("XDG_CACHE_HOME");
-  if (xdg_cache_home != NULL)
+  if (xdg_cache_home != NULL && xdg_cache_home[0] != '\0')
     {
       /* Make sure the path is absolute and tilde-expanded.  */
       gdb::unique_xmalloc_ptr<char> abs (gdb_abspath (xdg_cache_home));
@@ -231,12 +231,22 @@ get_standard_cache_dir ()
 #endif
 
   const char *home = getenv ("HOME");
-  if (home != NULL)
+  if (home != NULL && home[0] != '\0')
     {
       /* Make sure the path is absolute and tilde-expanded.  */
       gdb::unique_xmalloc_ptr<char> abs (gdb_abspath (home));
       return string_printf ("%s/" HOME_CACHE_DIR "/gdb", abs.get ());
     }
+
+#ifdef WIN32
+  const char *win_home = getenv ("LOCALAPPDATA");
+  if (win_home != NULL && win_home[0] != '\0')
+    {
+      /* Make sure the path is absolute and tilde-expanded.  */
+      gdb::unique_xmalloc_ptr<char> abs (gdb_abspath (win_home));
+      return string_printf ("%s/gdb", abs.get ());
+    }
+#endif
 
   return {};
 }
@@ -264,6 +274,83 @@ get_standard_temp_dir ()
 
   return "/tmp";
 #endif
+}
+
+/* See pathstuff.h.  */
+
+std::string
+get_standard_config_dir ()
+{
+#ifdef __APPLE__
+#define HOME_CONFIG_DIR "Library/Preferences"
+#else
+#define HOME_CONFIG_DIR ".config"
+#endif
+
+#ifndef __APPLE__
+  const char *xdg_config_home = getenv ("XDG_CONFIG_HOME");
+  if (xdg_config_home != NULL && xdg_config_home[0] != '\0')
+    {
+      /* Make sure the path is absolute and tilde-expanded.  */
+      gdb::unique_xmalloc_ptr<char> abs (gdb_abspath (xdg_config_home));
+      return string_printf ("%s/gdb", abs.get ());
+    }
+#endif
+
+  const char *home = getenv ("HOME");
+  if (home != NULL && home[0] != '\0')
+    {
+      /* Make sure the path is absolute and tilde-expanded.  */
+      gdb::unique_xmalloc_ptr<char> abs (gdb_abspath (home));
+      return string_printf ("%s/" HOME_CONFIG_DIR "/gdb", abs.get ());
+    }
+
+  return {};
+}
+
+/* See pathstuff.h. */
+
+std::string
+get_standard_config_filename (const char *filename)
+{
+  std::string config_dir = get_standard_config_dir ();
+  if (config_dir != "")
+    {
+      const char *tmp = (*filename == '.') ? (filename + 1) : filename;
+      std::string path = config_dir + SLASH_STRING + std::string (tmp);
+      return path;
+    }
+
+  return {};
+}
+
+/* See pathstuff.h.  */
+
+std::string
+find_gdb_home_config_file (const char *name, struct stat *buf)
+{
+  gdb_assert (name != nullptr);
+  gdb_assert (*name != '\0');
+
+  std::string config_dir_file = get_standard_config_filename (name);
+  if (!config_dir_file.empty ())
+    {
+      if (stat (config_dir_file.c_str (), buf) == 0)
+	return config_dir_file;
+    }
+
+  const char *homedir = getenv ("HOME");
+  if (homedir != nullptr && homedir[0] != '\0')
+    {
+      /* Make sure the path is absolute and tilde-expanded.  */
+      gdb::unique_xmalloc_ptr<char> abs (gdb_abspath (homedir));
+      std::string path = (std::string (abs.get ()) + SLASH_STRING
+			  + std::string (name));
+      if (stat (path.c_str (), buf) == 0)
+	return path;
+    }
+
+  return {};
 }
 
 /* See gdbsupport/pathstuff.h.  */

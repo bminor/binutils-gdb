@@ -1,5 +1,5 @@
 /* Styling for ui_file
-   Copyright (C) 2018-2020 Free Software Foundation, Inc.
+   Copyright (C) 2018-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,7 +23,7 @@
 /* A regular expression that is used for matching ANSI terminal escape
    sequences.  */
 
-static const char *ansi_regex_text =
+static const char ansi_regex_text[] =
   /* Introduction.  */
   "^\033\\["
 #define DATA_SUBEXP 1

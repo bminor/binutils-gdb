@@ -1,6 +1,6 @@
 /* Ravenscar RISC-V target support.
 
-   Copyright (C) 2019-2020 Free Software Foundation, Inc.
+   Copyright (C) 2019-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -70,7 +70,7 @@ riscv_ravenscar_ops::register_offset (struct gdbarch *arch, int regnum)
 
 static void
 supply_register_at_address (struct regcache *regcache, int regnum,
-                            CORE_ADDR register_addr)
+			    CORE_ADDR register_addr)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   int buf_size = register_size (gdbarch, regnum);
@@ -99,11 +99,11 @@ riscv_ravenscar_ops::fetch_registers (struct regcache *regcache, int regnum)
       int offset = register_offset (gdbarch, current_regnum);
 
       if (offset != -1)
-        {
-          current_address = thread_descriptor_address + offset;
-          supply_register_at_address (regcache, current_regnum,
-                                      current_address);
-        }
+	{
+	  current_address = thread_descriptor_address + offset;
+	  supply_register_at_address (regcache, current_regnum,
+				      current_address);
+	}
     }
 }
 

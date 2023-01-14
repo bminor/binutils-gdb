@@ -1,6 +1,6 @@
 /* MI Command Set.
 
-   Copyright (C) 2000-2020 Free Software Foundation, Inc.
+   Copyright (C) 2000-2021 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions (a Red Hat company).
 
@@ -321,7 +321,7 @@ exec_reverse_continue (char **argv, int argc)
   if (dir == EXEC_REVERSE)
     error (_("Already in reverse mode."));
 
-  if (!target_can_execute_reverse)
+  if (!target_can_execute_reverse ())
     error (_("Target %s does not support this command."), target_shortname);
 
   scoped_restore save_exec_dir = make_scoped_restore (&execution_direction,
@@ -649,10 +649,10 @@ print_one_inferior (struct inferior *inferior, bool recurse,
       if (inferior->pid != 0)
 	uiout->field_signed ("pid", inferior->pid);
 
-      if (inferior->pspace->pspace_exec_filename != NULL)
+      if (inferior->pspace->exec_filename != nullptr)
 	{
 	  uiout->field_string ("executable",
-			       inferior->pspace->pspace_exec_filename);
+			       inferior->pspace->exec_filename.get ());
 	}
 
       if (inferior->pid != 0)
@@ -1127,7 +1127,7 @@ output_register (struct frame_info *frame, int regnum, int format,
 /* Write given values into registers. The registers and values are
    given as pairs.  The corresponding MI command is
    -data-write-register-values <format>
-                               [<regnum1> <value1>...<regnumN> <valueN>] */
+			       [<regnum1> <value1>...<regnumN> <valueN>] */
 void
 mi_cmd_data_write_register_values (const char *command, char **argv, int argc)
 {
@@ -1150,7 +1150,7 @@ mi_cmd_data_write_register_values (const char *command, char **argv, int argc)
     error (_("-data-write-register-values: Usage: -data-write-register-"
 	     "values <format> [<regnum1> <value1>...<regnumN> <valueN>]"));
 
-  if (!target_has_registers)
+  if (!target_has_registers ())
     error (_("-data-write-register-values: No registers."));
 
   if (!(argc - 1))
@@ -1590,7 +1590,7 @@ mi_cmd_data_write_memory_bytes (const char *command, char **argv, int argc)
     {
       int x;
       if (sscanf (cdata + i * 2, "%02x", &x) != 1)
-        error (_("Invalid argument"));
+	error (_("Invalid argument"));
       databuf[i] = (gdb_byte) x;
     }
 
@@ -1598,7 +1598,7 @@ mi_cmd_data_write_memory_bytes (const char *command, char **argv, int argc)
   if (len_units < count_units)
     {
       /* Pattern is made of less units than count:
-         repeat pattern to fill memory.  */
+	 repeat pattern to fill memory.  */
       data = gdb::byte_vector (count_units * unit_size);
 
       /* Number of times the pattern is entirely repeated.  */
@@ -1606,16 +1606,16 @@ mi_cmd_data_write_memory_bytes (const char *command, char **argv, int argc)
       /* Number of remaining addressable memory units.  */
       remaining_units = count_units % len_units;
       for (i = 0; i < steps; i++)
-        memcpy (&data[i * len_bytes], &databuf[0], len_bytes);
+	memcpy (&data[i * len_bytes], &databuf[0], len_bytes);
 
       if (remaining_units > 0)
-        memcpy (&data[steps * len_bytes], &databuf[0],
+	memcpy (&data[steps * len_bytes], &databuf[0],
 		remaining_units * unit_size);
     }
   else
     {
       /* Pattern is longer than or equal to count:
-         just copy count addressable memory units.  */
+	 just copy count addressable memory units.  */
       data = std::move (databuf);
     }
 
@@ -1684,7 +1684,7 @@ mi_cmd_list_target_features (const char *command, char **argv, int argc)
       ui_out_emit_list list_emitter (uiout, "features");
       if (mi_async_p ())
 	uiout->field_string (NULL, "async");
-      if (target_can_execute_reverse)
+      if (target_can_execute_reverse ())
 	uiout->field_string (NULL, "reverse");
       return;
     }
@@ -2705,26 +2705,26 @@ mi_cmd_complete (const char *command, char **argv, int argc)
 
   if (result.number_matches > 0)
     uiout->field_fmt ("completion", "%s%s",
-                      arg_prefix.c_str (),result.match_list[0]);
+		      arg_prefix.c_str (),result.match_list[0]);
 
   {
     ui_out_emit_list completions_emitter (uiout, "matches");
 
     if (result.number_matches == 1)
       uiout->field_fmt (NULL, "%s%s",
-                        arg_prefix.c_str (), result.match_list[0]);
+			arg_prefix.c_str (), result.match_list[0]);
     else
       {
-        result.sort_match_list ();
-        for (size_t i = 0; i < result.number_matches; i++)
-          {
-            uiout->field_fmt (NULL, "%s%s",
-                              arg_prefix.c_str (), result.match_list[i + 1]);
-          }
+	result.sort_match_list ();
+	for (size_t i = 0; i < result.number_matches; i++)
+	  {
+	    uiout->field_fmt (NULL, "%s%s",
+			      arg_prefix.c_str (), result.match_list[i + 1]);
+	  }
       }
   }
   uiout->field_string ("max_completions_reached",
-                       result.number_matches == max_completions ? "1" : "0");
+		       result.number_matches == max_completions ? "1" : "0");
 }
 
 

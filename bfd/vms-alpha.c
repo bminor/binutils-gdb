@@ -1,5 +1,5 @@
 /* vms.c -- BFD back-end for EVAX (openVMS/Alpha) files.
-   Copyright (C) 1996-2020 Free Software Foundation, Inc.
+   Copyright (C) 1996-2021 Free Software Foundation, Inc.
 
    Initial version written by Klaus Kaempf (kkaempf@rmi.de)
    Major rewrite by Adacore.
@@ -1394,14 +1394,13 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 	    flagword old_flags;
 	    unsigned int nameoff = offsetof (struct vms_egst, namlng);
 
-	    old_flags = bfd_getl16 (egst->header.flags);
-
 	    if (nameoff >= gsd_size)
 	      goto too_small;
 	    entry = add_symbol (abfd, &egst->namlng, gsd_size - nameoff);
 	    if (entry == NULL)
 	      return FALSE;
 
+	    old_flags = bfd_getl16 (egst->header.flags);
 	    entry->typ = gsd_type;
 	    entry->data_type = egst->header.datyp;
 	    entry->flags = old_flags;
@@ -2927,6 +2926,7 @@ static void
 _bfd_vms_write_emh (bfd *abfd)
 {
   struct vms_rec_wr *recwr = &PRIV (recwr);
+  unsigned char tbuf[18];
 
   _bfd_vms_output_alignment (recwr, 2);
 
@@ -2949,7 +2949,7 @@ _bfd_vms_write_emh (bfd *abfd)
     _bfd_vms_output_counted (recwr, "NONAME");
 
   _bfd_vms_output_counted (recwr, BFD_VERSION_STRING);
-  _bfd_vms_output_dump (recwr, get_vms_time_string (), EMH_DATE_LENGTH);
+  _bfd_vms_output_dump (recwr, get_vms_time_string (tbuf), EMH_DATE_LENGTH);
   _bfd_vms_output_fill (recwr, 0, EMH_DATE_LENGTH);
   _bfd_vms_output_end (abfd, recwr);
 }
@@ -3252,7 +3252,7 @@ alpha_vms_write_exec (bfd *abfd)
   bfd_putl32 (16, eihd.virt_mem_block_size);
   bfd_putl32 (0, eihd.ext_fixup_off);
   bfd_putl32 (0, eihd.noopt_psect_off);
-  bfd_putl32 (-1, eihd.alias);
+  bfd_putl16 (-1, eihd.alias);
 
   /* Alloc EIHA.  */
   eiha = (struct vms_eiha *)((char *) &eihd + PRIV (file_pos));
@@ -9792,6 +9792,7 @@ const bfd_target alpha_vms_vec =
   ' ',				/* ar_pad_char.  */
   15,				/* ar_max_namelen.  */
   0,				/* match priority.  */
+  TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,
   bfd_getl32, bfd_getl_signed_32, bfd_putl32,
   bfd_getl16, bfd_getl_signed_16, bfd_putl16,

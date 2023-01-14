@@ -1,5 +1,5 @@
 /* CRIS exception, interrupt, and trap (EIT) support
-   Copyright (C) 2004-2020 Free Software Foundation, Inc.
+   Copyright (C) 2004-2021 Free Software Foundation, Inc.
    Contributed by Axis Communications.
 
 This file is part of the GNU simulators.
@@ -24,9 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* FIXME: get rid of targ-vals.h usage everywhere else.  */
 
 #include <stdarg.h>
-#ifdef HAVE_ERRNO_H
 #include <errno.h>
-#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

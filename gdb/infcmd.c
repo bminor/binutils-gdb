@@ -1,6 +1,6 @@
 /* Memory-access and commands for "inferior" process, for GDB.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -64,7 +64,7 @@ static void until_next_command (int);
 static void step_1 (int, int, const char *);
 
 #define ERROR_NO_INFERIOR \
-   if (!target_has_execution) error (_("The program is not being run."));
+   if (!target_has_execution ()) error (_("The program is not being run."));
 
 /* Scratch area where string containing arguments to give to the
    program will be stored by 'set args'.  As soon as anything is
@@ -131,7 +131,7 @@ get_inferior_args (void)
   if (current_inferior ()->argc != 0)
     {
       gdb::array_view<char * const> args (current_inferior ()->argv,
-                                          current_inferior ()->argc);
+					  current_inferior ()->argc);
       std::string n = construct_inferior_arguments (args);
       set_inferior_args (n.c_str ());
     }
@@ -279,7 +279,7 @@ strip_bg_char (const char *args, int *bg_char_p)
    should be stopped.  */
 
 void
-post_create_inferior (struct target_ops *target, int from_tty)
+post_create_inferior (int from_tty)
 {
 
   /* Be sure we own the terminal in case write operations are performed.  */ 
@@ -308,7 +308,7 @@ post_create_inferior (struct target_ops *target, int from_tty)
 	throw;
     }
 
-  if (exec_bfd)
+  if (current_program_space->exec_bfd ())
     {
       const unsigned solib_add_generation
 	= current_program_space->solib_add_generation;
@@ -347,7 +347,7 @@ post_create_inferior (struct target_ops *target, int from_tty)
      if the now pushed target supports hardware watchpoints.  */
   breakpoint_re_set ();
 
-  gdb::observers::inferior_created.notify (target, from_tty);
+  gdb::observers::inferior_created.notify (current_inferior ());
 }
 
 /* Kill the inferior if already running.  This function is designed
@@ -358,7 +358,7 @@ post_create_inferior (struct target_ops *target, int from_tty)
 static void
 kill_if_already_running (int from_tty)
 {
-  if (inferior_ptid != null_ptid && target_has_execution)
+  if (inferior_ptid != null_ptid && target_has_execution ())
     {
       /* Bail out before killing the program if we will not be able to
 	 restart it.  */
@@ -520,7 +520,7 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
 
   /* Pass zero for FROM_TTY, because at this point the "run" command
      has done its thing; now we are setting up the running program.  */
-  post_create_inferior (current_top_target (), 0);
+  post_create_inferior (0);
 
   /* Queue a pending event so that the program stops immediately.  */
   if (run_how == RUN_STOP_AT_FIRST_INSN)
@@ -1861,7 +1861,7 @@ info_program_command (const char *args, int from_tty)
   ptid_t ptid;
   process_stratum_target *proc_target;
 
-  if (!target_has_execution)
+  if (!target_has_execution ())
     {
       printf_filtered (_("The program being debugged is not being run.\n"));
       return;
@@ -1896,7 +1896,7 @@ info_program_command (const char *args, int from_tty)
   else if (stat != 0)
     {
       /* There may be several breakpoints in the same place, so this
-         isn't as strange as it seems.  */
+	 isn't as strange as it seems.  */
       while (stat != 0)
 	{
 	  if (stat < 0)
@@ -1972,14 +1972,14 @@ set_environment_command (const char *arg, int from_tty)
   if (p != 0 && val != 0)
     {
       /* We have both a space and an equals.  If the space is before the
-         equals, walk forward over the spaces til we see a nonspace 
-         (possibly the equals).  */
+	 equals, walk forward over the spaces til we see a nonspace 
+	 (possibly the equals).  */
       if (p > val)
 	while (*val == ' ')
 	  val++;
 
       /* Now if the = is after the char following the spaces,
-         take the char following the spaces.  */
+	 take the char following the spaces.  */
       if (p > val)
 	p = val - 1;
     }
@@ -2024,7 +2024,7 @@ unset_environment_command (const char *var, int from_tty)
   if (var == 0)
     {
       /* If there is no argument, delete all environment variables.
-         Ask for confirmation if reading from the terminal.  */
+	 Ask for confirmation if reading from the terminal.  */
       if (!from_tty || query (_("Delete all environment variables? ")))
 	current_inferior ()->environment.clear ();
     }
@@ -2091,7 +2091,7 @@ default_print_one_register_info (struct ui_file *file,
     {
       value_column_1 = 15,
       /* Give enough room for "0x", 16 hex digits and two spaces in
-         preceding column.  */
+	 preceding column.  */
       value_column_2 = value_column_1 + 2 + 16 + 2,
     };
 
@@ -2170,7 +2170,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
   for (i = 0; i < numregs; i++)
     {
       /* Decide between printing all regs, non-float / vector regs, or
-         specific reg.  */
+	 specific reg.  */
       if (regnum == -1)
 	{
 	  if (print_all)
@@ -2191,7 +2191,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
 	}
 
       /* If the register name is empty, it is undefined for this
-         processor, so don't display anything.  */
+	 processor, so don't display anything.  */
       if (gdbarch_register_name (gdbarch, i) == NULL
 	  || *(gdbarch_register_name (gdbarch, i)) == '\0')
 	continue;
@@ -2208,7 +2208,7 @@ registers_info (const char *addr_exp, int fpregs)
   struct frame_info *frame;
   struct gdbarch *gdbarch;
 
-  if (!target_has_registers)
+  if (!target_has_registers ())
     error (_("The program has no registers now."));
   frame = get_selected_frame (NULL);
   gdbarch = get_frame_arch (frame);
@@ -2229,7 +2229,7 @@ registers_info (const char *addr_exp, int fpregs)
       addr_exp = skip_spaces (addr_exp);
 
       /* Discard any leading ``$''.  Check that there is something
-         resembling a register following it.  */
+	 resembling a register following it.  */
       if (addr_exp[0] == '$')
 	addr_exp++;
       if (isspace ((*addr_exp)) || (*addr_exp) == '\0')
@@ -2349,7 +2349,7 @@ print_vector_info (struct ui_file *file,
 static void
 info_vector_command (const char *args, int from_tty)
 {
-  if (!target_has_registers)
+  if (!target_has_registers ())
     error (_("The program has no registers now."));
 
   print_vector_info (gdb_stdout, get_selected_frame (NULL), args);
@@ -2432,7 +2432,7 @@ setup_inferior (int from_tty)
   /* Take any necessary post-attaching actions for this platform.  */
   target_post_attach (inferior_ptid.pid ());
 
-  post_create_inferior (current_top_target (), from_tty);
+  post_create_inferior (from_tty);
 }
 
 /* What to do after the first program stops after attaching.  */
@@ -2569,7 +2569,7 @@ attach_command (const char *args, int from_tty)
     /* Don't complain if all processes share the same symbol
        space.  */
     ;
-  else if (target_has_execution)
+  else if (target_has_execution ())
     {
       if (query (_("A program is being debugged already.  Kill it? ")))
 	target_kill ();
@@ -2619,7 +2619,6 @@ attach_command (const char *args, int from_tty)
   /* Set up execution context to know that we should return from
      wait_for_inferior as soon as the target reports a stop.  */
   init_wait_for_inferior ();
-  clear_proceed_status (0);
 
   inferior->needs_setup = 1;
 
@@ -2887,7 +2886,7 @@ info_float_command (const char *args, int from_tty)
 {
   struct frame_info *frame;
 
-  if (!target_has_registers)
+  if (!target_has_registers ())
     error (_("The program has no registers now."));
 
   frame = get_selected_frame (NULL);

@@ -1,5 +1,5 @@
 /* NDS32-specific support for 32-bit ELF.
-   Copyright (C) 2012-2020 Free Software Foundation, Inc.
+   Copyright (C) 2012-2021 Free Software Foundation, Inc.
    Contributed by Andes Technology Corporation.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -4492,9 +4492,7 @@ nds32_relocate_contents (reloc_howto_type *howto, bfd *input_bfd,
   unsigned int rightshift = howto->rightshift;
   unsigned int bitpos = howto->bitpos;
 
-  /* If the size is negative, negate RELOCATION.  This isn't very
-     general.  */
-  if (howto->size < 0)
+  if (howto->negate)
     relocation = -relocation;
 
   /* Get the value we are going to relocate.  */
@@ -9516,11 +9514,11 @@ nds32_elf_insn_size (bfd *abfd ATTRIBUTE_UNUSED,
    to do gp relaxation.  */
 
 static void
-relax_range_measurement (bfd *abfd)
+relax_range_measurement (bfd *abfd, struct bfd_link_info *link_info)
 {
   asection *sec_f, *sec_b;
   /* For upper bound.   */
-  bfd_vma maxpgsz = get_elf_backend_data (abfd)->maxpagesize;
+  bfd_vma maxpgsz;
   bfd_vma align;
   static int decide_relax_range = 0;
   int i;
@@ -9552,6 +9550,10 @@ relax_range_measurement (bfd *abfd)
       sec_b = sec_b->next;
     }
 
+  if (link_info != NULL)
+    maxpgsz = link_info->maxpagesize;
+  else
+    maxpgsz = get_elf_backend_data (abfd)->maxpagesize;
   /* I guess we can not determine the section before
      gp located section, so we assume the align is max page size.  */
   for (i = 0; i < range_number; i++)
@@ -12123,7 +12125,7 @@ nds32_elf_relax_section (bfd *abfd, asection *sec,
       is_SDA_BASE_set = 1;
       nds32_elf_final_sda_base (sec->output_section->owner, link_info,
 				&gp, FALSE);
-      relax_range_measurement (abfd);
+      relax_range_measurement (abfd, link_info);
     }
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -13334,7 +13336,7 @@ elf32_nds32_check_relax_group (bfd *abfd, asection *asec)
 }
 
 /* Reorder RELAX_GROUP ID when command line option '-r' is applied.  */
-struct section_id_list_t *relax_group_section_id_list = NULL;
+static struct section_id_list_t *relax_group_section_id_list = NULL;
 
 struct section_id_list_t *
 elf32_nds32_lookup_section_id (int id, struct section_id_list_t **lst_ptr)

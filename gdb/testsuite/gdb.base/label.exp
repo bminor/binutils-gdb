@@ -1,4 +1,4 @@
-# Copyright 2010-2020 Free Software Foundation, Inc.
+# Copyright 2010-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,11 +29,11 @@ if {![runto_main]} {
   return -1
 }
 
-gdb_test "break here" \
+gdb_test "break -q here" \
   "Breakpoint.*at.*" \
   "breakpoint here"
 
-gdb_test "break main:there" \
+gdb_test "break -q main:there" \
   "Breakpoint.*at.*" \
   "breakpoint there"
 

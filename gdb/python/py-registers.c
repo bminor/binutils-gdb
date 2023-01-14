@@ -1,6 +1,6 @@
 /* Python interface to register, and register group information.
 
-   Copyright (C) 2020 Free Software Foundation, Inc.
+   Copyright (C) 2020-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,7 +30,7 @@
 static struct gdbarch_data *gdbpy_register_object_data = NULL;
 
 /* Structure for iterator over register descriptors.  */
-typedef struct {
+struct register_descriptor_iterator_object {
   PyObject_HEAD
 
   /* The register group that the user is iterating over.  This will never
@@ -42,13 +42,13 @@ typedef struct {
 
   /* Pointer back to the architecture we're finding registers for.  */
   struct gdbarch *gdbarch;
-} register_descriptor_iterator_object;
+};
 
 extern PyTypeObject register_descriptor_iterator_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("register_descriptor_iterator_object");
 
 /* A register descriptor.  */
-typedef struct {
+struct register_descriptor_object {
   PyObject_HEAD
 
   /* The register this is a descriptor for.  */
@@ -56,13 +56,13 @@ typedef struct {
 
   /* The architecture this is a register for.  */
   struct gdbarch *gdbarch;
-} register_descriptor_object;
+};
 
 extern PyTypeObject register_descriptor_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("register_descriptor_object");
 
 /* Structure for iterator over register groups.  */
-typedef struct {
+struct reggroup_iterator_object {
   PyObject_HEAD
 
   /* The last register group returned.  Initially this will be NULL.  */
@@ -70,18 +70,18 @@ typedef struct {
 
   /* Pointer back to the architecture we're finding registers for.  */
   struct gdbarch *gdbarch;
-} reggroup_iterator_object;
+};
 
 extern PyTypeObject reggroup_iterator_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("reggroup_iterator_object");
 
 /* A register group object.  */
-typedef struct {
+struct reggroup_object {
   PyObject_HEAD
 
   /* The register group being described.  */
   struct reggroup *reggroup;
-} reggroup_object;
+};
 
 extern PyTypeObject reggroup_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("reggroup_object");
@@ -395,13 +395,13 @@ gdbpy_parse_register_id (struct gdbarch *gdbarch, PyObject *pyo_reg_id,
     {
       long value;
       if (gdb_py_int_as_long (pyo_reg_id, &value) && (int) value == value)
-        {
+	{
 	  if (user_reg_map_regnum_to_name (gdbarch, value) != NULL)
 	    {
 	      *reg_num = (int) value;
 	      return true;
 	    }
-        }
+	}
     }
   /* The register could be a gdb.RegisterDescriptor object.  */
   else if (PyObject_IsInstance (pyo_reg_id,

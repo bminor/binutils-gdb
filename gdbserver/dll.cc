@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -67,7 +67,7 @@ unloaded_dll (const char *name, CORE_ADDR base_addr)
   else
     {
       /* DLL has been found so remove the entry and free associated
-         resources.  */
+	 resources.  */
       all_dlls.erase (iter);
       dlls_changed = 1;
     }

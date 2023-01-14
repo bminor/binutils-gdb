@@ -1,5 +1,5 @@
 /*  iwmmxt.c -- Intel(r) Wireless MMX(tm) technology co-processor interface.
-    Copyright (C) 2002-2020 Free Software Foundation, Inc.
+    Copyright (C) 2002-2021 Free Software Foundation, Inc.
     Contributed by matthew green (mrg@redhat.com).
 
     This program is free software; you can redistribute it and/or modify
@@ -15,6 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
+#include <stdlib.h>
 #include <string.h>
 
 #include "armdefs.h"

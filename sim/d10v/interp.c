@@ -11,19 +11,12 @@
 #include "gdb/sim-d10v.h"
 #include "gdb/signals.h"
 
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif /* HAVE_STRING_H */
-#endif /* HAVE_STRINGS_H */
-
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 
 enum _leftright { LEFT_FIRST, RIGHT_FIRST };
+
+struct _state State;
 
 int d10v_debug;
 

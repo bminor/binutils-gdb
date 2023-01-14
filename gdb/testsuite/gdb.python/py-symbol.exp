@@ -1,4 +1,4 @@
-# Copyright (C) 2010-2020 Free Software Foundation, Inc.
+# Copyright (C) 2010-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,6 +28,8 @@ if {[prepare_for_testing "failed to prepare" $testfile \
 
 # Skip all tests if Python scripting is not enabled.
 if { [skip_python_tests] } { continue }
+
+set readnow_p [readnow]
 
 # Check that we find all static symbols before the inferior has
 # started, at which point some of the symtabs might not have been
@@ -61,14 +63,36 @@ gdb_test "python print (gdb.lookup_global_symbol('qq').needs_frame)" \
 
 # Similarly, test looking up a static symbol before we runto_main.
 set rr_line [gdb_get_line_number "line of rr"]
+set rr_line_alt [gdb_get_line_number "line of other rr" py-symbol-2.c]
 gdb_test "python print (gdb.lookup_global_symbol ('rr') is None)" "True" \
     "lookup_global_symbol for static var"
 
-gdb_test "python print (gdb.lookup_static_symbol ('rr').line)" "$rr_line" \
-    "print line number of rr"
+set cmd "python print (gdb.lookup_static_symbol ('rr').line)"
+gdb_test_multiple $cmd "print line number of rr" {
+    -re -wrap "$rr_line" {
+	pass $gdb_test_name
+    }
+    -re -wrap "$rr_line_alt" {
+	if { $readnow_p } {
+	    setup_kfail "symtab/25857" *-*-*
+	}
+	fail $gdb_test_name
+    }
+}
 
-gdb_test "python print (gdb.lookup_static_symbol ('rr').value ())" "42" \
-    "print value of rr"
+set cmd "python print (gdb.lookup_static_symbol ('rr').value ())"
+gdb_test_multiple $cmd "print value of rr" {
+    -re -wrap "42" {
+	pass $gdb_test_name
+    }
+    -re -wrap "99" {
+	if { $readnow_p } {
+	    setup_kfail "symtab/25857" *-*-*
+	}
+	fail $gdb_test_name
+    }
+}
+    
 
 gdb_test "python print (gdb.lookup_static_symbol ('rr').needs_frame)" \
     "False" \

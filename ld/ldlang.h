@@ -1,5 +1,5 @@
 /* ldlang.h - linker command language support
-   Copyright (C) 1991-2020 Free Software Foundation, Inc.
+   Copyright (C) 1991-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -158,6 +158,9 @@ typedef struct lang_output_section_statement_struct
 
   lang_output_section_phdr_list *phdrs;
 
+  /* Used by ELF SHF_LINK_ORDER sorting.  */
+  void *data;
+
   unsigned int block_value;
   int constraint;
   flagword flags;
@@ -173,6 +176,9 @@ typedef struct lang_output_section_statement_struct
   unsigned int after_end : 1;
   /* If this section uses the alignment of its input sections.  */
   unsigned int align_lma_with_input : 1;
+  /* If script has duplicate output section statements of the same name
+     create duplicate output sections.  */
+  unsigned int dup_output : 1;
 } lang_output_section_statement_type;
 
 typedef struct
@@ -320,6 +326,7 @@ typedef struct
 {
   lang_statement_header_type header;
   asection *section;
+  void *pattern;
 } lang_input_section_type;
 
 struct map_symbol_def {
@@ -346,8 +353,7 @@ bfd_input_just_syms (const bfd *abfd)
 typedef struct lang_wild_statement_struct lang_wild_statement_type;
 
 typedef void (*callback_t) (lang_wild_statement_type *, struct wildcard_list *,
-			    asection *, struct flag_info *,
-			    lang_input_statement_type *, void *);
+			    asection *, lang_input_statement_type *, void *);
 
 typedef void (*walk_wild_section_handler_t) (lang_wild_statement_type *,
 					     lang_input_statement_type *,
@@ -362,6 +368,7 @@ typedef bfd_boolean (*lang_match_sec_type_func) (bfd *, const asection *,
 typedef struct lang_section_bst
 {
   asection *section;
+  void *pattern;
   struct lang_section_bst *left;
   struct lang_section_bst *right;
 } lang_section_bst_type;
@@ -504,6 +511,7 @@ extern lang_output_section_statement_type *abs_output_section;
 extern lang_statement_list_type lang_os_list;
 extern struct lang_input_statement_flags input_flags;
 extern bfd_boolean lang_has_input_file;
+extern lang_statement_list_type statement_list;
 extern lang_statement_list_type *stat_ptr;
 extern bfd_boolean delete_output_file_on_failure;
 
@@ -586,7 +594,7 @@ extern asection *section_for_dot
        statement = statement->next)
 
 #define lang_output_section_find(NAME) \
-  lang_output_section_statement_lookup (NAME, 0, FALSE)
+  lang_output_section_statement_lookup (NAME, 0, 0)
 
 extern void lang_process
   (void);
@@ -605,7 +613,7 @@ extern void lang_add_keepsyms_file
 extern lang_output_section_statement_type *lang_output_section_get
   (const asection *);
 extern lang_output_section_statement_type *lang_output_section_statement_lookup
-  (const char *, int, bfd_boolean);
+  (const char *, int, int);
 extern lang_output_section_statement_type *next_matching_output_section_statement
   (lang_output_section_statement_type *, int);
 extern void ldlang_add_undef
@@ -648,7 +656,7 @@ extern void lang_enter_group
 extern void lang_leave_group
   (void);
 extern void lang_add_section
-  (lang_statement_list_type *, asection *,
+  (lang_statement_list_type *, asection *, struct wildcard_list *,
    struct flag_info *, lang_output_section_statement_type *);
 extern void lang_new_phdr
   (const char *, etree_type *, bfd_boolean, bfd_boolean, etree_type *,
@@ -689,8 +697,10 @@ extern bfd_boolean load_symbols
 
 struct elf_sym_strtab;
 struct elf_strtab_hash;
-extern void ldlang_ctf_apply_strsym
-  (struct elf_sym_strtab *, bfd_size_type, struct elf_strtab_hash *);
+extern void ldlang_ctf_acquire_strings
+  (struct elf_strtab_hash *);
+extern void ldlang_ctf_new_dynsym
+  (int symidx, struct elf_internal_sym *);
 extern void ldlang_write_ctf_late
   (void);
 extern bfd_boolean

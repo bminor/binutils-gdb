@@ -1,7 +1,7 @@
 %option noyywrap
 
 /* bfin-lex.l  ADI Blackfin lexer
-   Copyright (C) 2005-2020 Free Software Foundation, Inc.
+   Copyright (C) 2005-2021 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -32,6 +32,9 @@ int yylex (void);
 
 #define _REG yylval.reg
 
+/* Flex generates static functions "input" & "unput" which are not used.  */
+#define YY_NO_INPUT
+#define YY_NO_UNPUT
 
 %}
 
@@ -343,7 +346,7 @@ static long parse_int (char **end)
   char fmt = '\0';
   int not_done = 1;
   int shiftvalue = 0;
-  char * char_bag;
+  const char *char_bag;
   unsigned long value = 0;
   char *arg = *end;
 

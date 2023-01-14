@@ -1,5 +1,5 @@
 /* dwarf2dbg.c - DWARF2 debug support
-   Copyright (C) 1999-2020 Free Software Foundation, Inc.
+   Copyright (C) 1999-2021 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -211,7 +211,6 @@ struct file_entry
 {
   const char *   filename;
   unsigned int   dir;
-  bfd_boolean    auto_assigned;
   unsigned char  md5[NUM_MD5_BYTES];
 };
 
@@ -219,6 +218,7 @@ struct file_entry
 static struct file_entry *files;
 static unsigned int files_in_use;
 static unsigned int files_allocated;
+static unsigned int num_of_auto_assigned;
 
 /* Table of directories used by .debug_line.  */
 static char **       dirs = NULL;
@@ -504,6 +504,21 @@ dwarf2_gen_line_info_1 (symbolS *label, struct dwarf2_line_info *loc)
 {
   struct line_subseg *lss;
   struct line_entry *e;
+  flagword need_flags = SEC_LOAD | SEC_CODE;
+
+  /* PR 26850: Do not record LOCs in non-executable or non-loaded
+     sections.  SEC_ALLOC isn't tested for non-ELF because obj-coff.c
+     obj_coff_section is careless in setting SEC_ALLOC.  */
+  if (IS_ELF)
+    need_flags |= SEC_ALLOC;
+  if ((now_seg->flags & need_flags) != need_flags)
+    {
+      /* FIXME: Add code to suppress multiple warnings ?  */
+      if (debug_type != DEBUG_DWARF2)
+	as_warn ("dwarf line number information for %s ignored",
+		 segment_name (now_seg));
+      return;
+    }
 
   e = XNEW (struct line_entry);
   e->next = NULL;
@@ -536,8 +551,13 @@ dwarf2_gen_line_info (addressT ofs, struct dwarf2_line_info *loc)
   /* Early out for as-yet incomplete location information.  */
   if (loc->line == 0)
     return;
-  if (loc->filenum == 0 && DWARF2_LINE_VERSION < 5)
-    return;
+  if (loc->filenum == 0)
+    {
+      if (dwarf_level < 5)
+	dwarf_level = 5;
+      if (DWARF2_LINE_VERSION < 5)
+	return;
+    }
 
   /* Don't emit sequences of line symbols for the same line when the
      symbols apply to assembler code.  It is necessary to emit
@@ -633,7 +653,7 @@ get_directory_table_entry (const char *  dirname,
 }
 
 static bfd_boolean
-assign_file_to_slot (unsigned long i, const char *file, unsigned int dir, bfd_boolean auto_assign)
+assign_file_to_slot (unsigned long i, const char *file, unsigned int dir)
 {
   if (i >= files_allocated)
     {
@@ -653,7 +673,6 @@ assign_file_to_slot (unsigned long i, const char *file, unsigned int dir, bfd_bo
 
   files[i].filename = file;
   files[i].dir = dir;
-  files[i].auto_assigned = auto_assign;
   memset (files[i].md5, 0, NUM_MD5_BYTES);
 
   if (files_in_use < i + 1)
@@ -717,8 +736,10 @@ allocate_filenum (const char * pathname)
 	return i;
       }
 
-  if (!assign_file_to_slot (i, file, dir, TRUE))
+  if (!assign_file_to_slot (i, file, dir))
     return -1;
+
+  num_of_auto_assigned++;
 
   last_used = i;
   last_used_dir_len = dir_len;
@@ -792,30 +813,15 @@ allocate_filename_to_slot (const char *  dirname,
 	}
 
     fail:
-      /* If NUM was previously allocated automatically then
-	 choose another slot for it, so that we can reuse NUM.  */
-      if (files[num].auto_assigned)
-	{
-	  /* Find an unused slot.  */
-	  for (i = 1; i < files_in_use; ++i)
-	    if (files[i].filename == NULL)
-	      break;
-	  if (! assign_file_to_slot (i, files[num].filename, files[num].dir, TRUE))
-	    return FALSE;
-	  files[num].filename = NULL;
-	}
-      else
-	{
-	  as_bad (_("file table slot %u is already occupied by a different file (%s%s%s vs %s%s%s)"),
-		  num,
-		  dir == NULL ? "" : dir,
-		  dir == NULL ? "" : "/",
-		  files[num].filename,
-		  dirname == NULL ? "" : dirname,
-		  dirname == NULL ? "" : "/",
-		  filename);
-	  return FALSE;
-	}
+      as_bad (_("file table slot %u is already occupied by a different file (%s%s%s vs %s%s%s)"),
+	      num,
+	      dir == NULL ? "" : dir,
+	      dir == NULL ? "" : "/",
+	      files[num].filename,
+	      dirname == NULL ? "" : dirname,
+	      dirname == NULL ? "" : "/",
+	      filename);
+      return FALSE;
     }
 
   if (dirname == NULL)
@@ -833,7 +839,7 @@ allocate_filename_to_slot (const char *  dirname,
   d = get_directory_table_entry (dirname, dirlen, num == 0);
   i = num;
 
-  if (! assign_file_to_slot (i, file, d, FALSE))
+  if (! assign_file_to_slot (i, file, d))
     return FALSE;
 
   if (with_md5)
@@ -1030,6 +1036,7 @@ dwarf2_directive_filename (void)
   char *filename;
   const char * dirname = NULL;
   int filename_len;
+  unsigned int i;
 
   /* Continue to accept a bare string and pass it off.  */
   SKIP_WHITESPACE ();
@@ -1041,11 +1048,16 @@ dwarf2_directive_filename (void)
 
   num = get_absolute_expression ();
 
-  if ((offsetT) num < 1 && DWARF2_LINE_VERSION < 5)
+  if ((offsetT) num < 1)
     {
-      as_bad (_("file number less than one"));
-      ignore_rest_of_line ();
-      return NULL;
+      if (num == 0 && dwarf_level < 5)
+	dwarf_level = 5;
+      if ((offsetT) num < 0 || DWARF2_LINE_VERSION < 5)
+	{
+	  as_bad (_("file number less than one"));
+	  ignore_rest_of_line ();
+	  return NULL;
+	}
     }
 
   /* FIXME: Should we allow ".file <N>\n" as an expression meaning
@@ -1096,6 +1108,18 @@ dwarf2_directive_filename (void)
       return NULL;
     }
 
+  if (num_of_auto_assigned)
+    {
+      /* Clear slots auto-assigned before the first .file <NUMBER>
+	 directive was seen.  */
+      if (files_in_use != (num_of_auto_assigned + 1))
+	abort ();
+      for (i = 1; i < files_in_use; i++)
+	files[i].filename = NULL;
+      files_in_use = 0;
+      num_of_auto_assigned = 0;
+    }
+
   if (! allocate_filename_to_slot (dirname, filename, (unsigned int) num,
 				   with_md5))
     return NULL;
@@ -1128,14 +1152,16 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 
   if (filenum < 1)
     {
-      if (filenum != 0 || DWARF2_LINE_VERSION < 5)
+      if (filenum == 0 && dwarf_level < 5)
+	dwarf_level = 5;
+      if (filenum < 0 || DWARF2_LINE_VERSION < 5)
 	{
 	  as_bad (_("file number less than one"));
 	  return;
 	}
     }
 
-  if (filenum >= (int) files_in_use || files[filenum].filename == NULL)
+  if ((valueT) filenum >= files_in_use || files[filenum].filename == NULL)
     {
       as_bad (_("unassigned file number %ld"), (long) filenum);
       return;
@@ -2342,11 +2368,10 @@ out_debug_line (segT line_seg)
 
   /* For each section, emit a statement program.  */
   for (s = all_segs; s; s = s->next)
+    /* Paranoia - this check should have already have
+       been handled in dwarf2_gen_line_info_1().  */
     if (SEG_NORMAL (s->seg))
       process_entries (s->seg, s->head->head);
-    else
-      as_warn ("dwarf line number information for %s ignored",
-	       segment_name (s->seg));
 
   if (flag_dwarf_sections)
     /* We have to switch to the special .debug_line_end section
@@ -2740,7 +2765,6 @@ dwarf2_init (void)
   if (flag_dwarf_cie_version == -1)
     flag_dwarf_cie_version = 1;
 }
-
 
 /* Finish the dwarf2 debug sections.  We emit .debug.line if there
    were any .file/.loc directives, or --gdwarf2 was given, and if the

@@ -1,6 +1,6 @@
 /* Low level packing and unpacking of values for GDB, the GNU Debugger.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -121,8 +121,8 @@ ranges_contain (const std::vector<range> &ranges, LONGEST offset,
      care for (this is a range afterall), we need to check if the
      _previous_ range overlaps the I range.  E.g.,
 
-         R
-         |---|
+	 R
+	 |---|
        |---|    |---|  |------| ... |--|
        0        1      2            N
 
@@ -136,8 +136,8 @@ ranges_contain (const std::vector<range> &ranges, LONGEST offset,
      Then we need to check if the I range overlaps the I range itself.
      E.g.,
 
-              R
-              |---|
+	      R
+	      |---|
        |---|    |---|  |-------| ... |--|
        0        1      2             N
 
@@ -506,8 +506,8 @@ insert_into_bit_range_vector (std::vector<range> *vectorp,
 
 	  R
 	 |-...-|
-	         |--|       |---|  |------| ... |--|
-	         0          1      2            N
+		 |--|       |---|  |------| ... |--|
+		 0          1      2            N
 
 	 I=0
 
@@ -521,8 +521,8 @@ insert_into_bit_range_vector (std::vector<range> *vectorp,
 
 	  R
 	 |------------------------|
-	         |--|       |---|  |------| ... |--|
-	         0          1      2            N
+		 |--|       |---|  |------| ... |--|
+		 0          1      2            N
 
 	 I=0
 
@@ -659,7 +659,7 @@ find_first_range_overlap (const std::vector<range> *ranges, int pos,
      PTR + (OFFSET_BITS / TARGET_CHAR_BIT)
    to:
      PTR + ((OFFSET_BITS + LENGTH_BITS + TARGET_CHAR_BIT - 1)
-            / TARGET_CHAR_BIT)  */
+	    / TARGET_CHAR_BIT)  */
 static int
 memcmp_with_bit_offsets (const gdb_byte *ptr1, size_t offset1_bits,
 			 const gdb_byte *ptr2, size_t offset2_bits,
@@ -1041,7 +1041,10 @@ allocate_value (struct type *type)
 struct value *
 allocate_repeat_value (struct type *type, int count)
 {
-  int low_bound = current_language->string_lower_bound;		/* ??? */
+  /* Despite the fact that we are really creating an array of TYPE here, we
+     use the string lower bound as the array lower bound.  This seems to
+     work fine for now.  */
+  int low_bound = current_language->string_lower_bound ();
   /* FIXME-type-allocation: need a way to free this type when we are
      done with it.  */
   struct type *array_type
@@ -1052,8 +1055,8 @@ allocate_repeat_value (struct type *type, int count)
 
 struct value *
 allocate_computed_value (struct type *type,
-                         const struct lval_funcs *funcs,
-                         void *closure)
+			 const struct lval_funcs *funcs,
+			 void *closure)
 {
   struct value *v = allocate_value_lazy (type);
 
@@ -1181,23 +1184,23 @@ value_actual_type (struct value *value, int resolve_simple_types,
 	  && (check_typedef (TYPE_TARGET_TYPE (result))->code ()
 	      == TYPE_CODE_STRUCT)
 	  && !value_optimized_out (value))
-        {
-          struct type *real_type;
+	{
+	  struct type *real_type;
 
-          real_type = value_rtti_indirect_type (value, NULL, NULL, NULL);
-          if (real_type)
-            {
-              if (real_type_found)
-                *real_type_found = 1;
-              result = real_type;
-            }
-        }
+	  real_type = value_rtti_indirect_type (value, NULL, NULL, NULL);
+	  if (real_type)
+	    {
+	      if (real_type_found)
+		*real_type_found = 1;
+	      result = real_type;
+	    }
+	}
       else if (resolve_simple_types)
-        {
-          if (real_type_found)
-            *real_type_found = 1;
-          result = value_enclosing_type (value);
-        }
+	{
+	  if (real_type_found)
+	    *real_type_found = 1;
+	  result = value_enclosing_type (value);
+	}
     }
 
   return result;
@@ -1701,7 +1704,7 @@ value_copy (struct value *arg)
       const struct lval_funcs *funcs = val->location.computed.funcs;
 
       if (funcs->copy_closure)
-        val->location.computed.closure = funcs->copy_closure (val);
+	val->location.computed.closure = funcs->copy_closure (val);
     }
   return val;
 }
@@ -1778,15 +1781,48 @@ set_value_component_location (struct value *component,
       const struct lval_funcs *funcs = whole->location.computed.funcs;
 
       if (funcs->copy_closure)
-        component->location.computed.closure = funcs->copy_closure (whole);
+	component->location.computed.closure = funcs->copy_closure (whole);
     }
 
-  /* If type has a dynamic resolved location property
-     update it's value address.  */
+  /* If the WHOLE value has a dynamically resolved location property then
+     update the address of the COMPONENT.  */
   type = value_type (whole);
   if (NULL != TYPE_DATA_LOCATION (type)
       && TYPE_DATA_LOCATION_KIND (type) == PROP_CONST)
     set_value_address (component, TYPE_DATA_LOCATION_ADDR (type));
+
+  /* Similarly, if the COMPONENT value has a dynamically resolved location
+     property then update its address.  */
+  type = value_type (component);
+  if (NULL != TYPE_DATA_LOCATION (type)
+      && TYPE_DATA_LOCATION_KIND (type) == PROP_CONST)
+    {
+      /* If the COMPONENT has a dynamic location, and is an
+	 lval_internalvar_component, then we change it to a lval_memory.
+
+	 Usually a component of an internalvar is created non-lazy, and has
+	 its content immediately copied from the parent internalvar.
+	 However, for components with a dynamic location, the content of
+	 the component is not contained within the parent, but is instead
+	 accessed indirectly.  Further, the component will be created as a
+	 lazy value.
+
+	 By changing the type of the component to lval_memory we ensure
+	 that value_fetch_lazy can successfully load the component.
+
+         This solution isn't ideal, but a real fix would require values to
+         carry around both the parent value contents, and the contents of
+         any dynamic fields within the parent.  This is a substantial
+         change to how values work in GDB.  */
+      if (VALUE_LVAL (component) == lval_internalvar_component)
+	{
+	  gdb_assert (value_lazy (component));
+	  VALUE_LVAL (component) = lval_memory;
+	}
+      else
+	gdb_assert (VALUE_LVAL (component) == lval_memory);
+      set_value_address (component, TYPE_DATA_LOCATION_ADDR (type));
+    }
 }
 
 /* Access to the value history.  */
@@ -1850,7 +1886,7 @@ show_values (const char *num_exp, int from_tty)
   if (num_exp)
     {
       /* "show values +" should print from the stored position.
-         "show values <exp>" should print around value number <exp>.  */
+	 "show values <exp>" should print around value number <exp>.  */
       if (num_exp[0] != '+' || num_exp[1] != '\0')
 	num = parse_and_eval_long (num_exp) - 5;
     }
@@ -1978,7 +2014,7 @@ init_if_undefined_command (const char* args, int from_tty)
   /* Validate the expression.
      Was the expression an assignment?
      Or even an expression at all?  */
-  if (expr->nelts == 0 || expr->elts[0].opcode != BINOP_ASSIGN)
+  if (expr->nelts == 0 || expr->first_opcode () != BINOP_ASSIGN)
     error (_("Init-if-undefined requires an assignment expression."));
 
   /* Extract the variable from the parsed expression.
@@ -2297,11 +2333,11 @@ set_internalvar (struct internalvar *var, struct value *val)
       new_data.value = release_value (copy).release ();
 
       /* Internal variables which are created from values with a dynamic
-         location don't need the location property of the origin anymore.
-         The resolved dynamic location is used prior then any other address
-         when accessing the value.
-         If we keep it, we would still refer to the origin value.
-         Remove the location property in case it exist.  */
+	 location don't need the location property of the origin anymore.
+	 The resolved dynamic location is used prior then any other address
+	 when accessing the value.
+	 If we keep it, we would still refer to the origin value.
+	 Remove the location property in case it exist.  */
       value_type (new_data.value)->remove_dyn_prop (DYN_PROP_DATA_LOCATION);
 
       break;
@@ -2376,7 +2412,7 @@ clear_internalvar (struct internalvar *var)
   var->kind = INTERNALVAR_VOID;
 }
 
-char *
+const char *
 internalvar_name (const struct internalvar *var)
 {
   return var->name;
@@ -2394,7 +2430,7 @@ create_internal_function (const char *name,
   return ifn;
 }
 
-char *
+const char *
 value_internal_function_name (struct value *val)
 {
   struct internal_function *ifn;
@@ -2478,10 +2514,10 @@ void
 preserve_one_value (struct value *value, struct objfile *objfile,
 		    htab_t copied_types)
 {
-  if (TYPE_OBJFILE (value->type) == objfile)
+  if (value->type->objfile () == objfile)
     value->type = copy_type_recursive (objfile, value->type, copied_types);
 
-  if (TYPE_OBJFILE (value->enclosing_type) == objfile)
+  if (value->enclosing_type->objfile () == objfile)
     value->enclosing_type = copy_type_recursive (objfile,
 						 value->enclosing_type,
 						 copied_types);
@@ -2496,7 +2532,7 @@ preserve_one_internalvar (struct internalvar *var, struct objfile *objfile,
   switch (var->kind)
     {
     case INTERNALVAR_INTEGER:
-      if (var->u.integer.type && TYPE_OBJFILE (var->u.integer.type) == objfile)
+      if (var->u.integer.type && var->u.integer.type->objfile () == objfile)
 	var->u.integer.type
 	  = copy_type_recursive (objfile, var->u.integer.type, copied_types);
       break;
@@ -2516,22 +2552,19 @@ preserve_one_internalvar (struct internalvar *var, struct objfile *objfile,
 void
 preserve_values (struct objfile *objfile)
 {
-  htab_t copied_types;
   struct internalvar *var;
 
   /* Create the hash table.  We allocate on the objfile's obstack, since
      it is soon to be deleted.  */
-  copied_types = create_copied_types_hash (objfile);
+  htab_up copied_types = create_copied_types_hash (objfile);
 
   for (const value_ref_ptr &item : value_history)
-    preserve_one_value (item.get (), objfile, copied_types);
+    preserve_one_value (item.get (), objfile, copied_types.get ());
 
   for (var = internalvars; var; var = var->next)
-    preserve_one_internalvar (var, objfile, copied_types);
+    preserve_one_internalvar (var, objfile, copied_types.get ());
 
-  preserve_ext_lang_values (objfile, copied_types);
-
-  htab_delete (copied_types);
+  preserve_ext_lang_values (objfile, copied_types.get ());
 }
 
 static void
@@ -2758,6 +2791,9 @@ value_as_address (struct value *val)
 LONGEST
 unpack_long (struct type *type, const gdb_byte *valaddr)
 {
+  if (is_fixed_point_type (type))
+    type = type->fixed_point_type_base_type ();
+
   enum bfd_endian byte_order = type_byte_order (type);
   enum type_code code = type->code ();
   int len = TYPE_LENGTH (type);
@@ -2776,10 +2812,27 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
     case TYPE_CODE_MEMBERPTR:
       {
 	LONGEST result;
-	if (nosign)
-	  result = extract_unsigned_integer (valaddr, len, byte_order);
+
+	if (type->bit_size_differs_p ())
+	  {
+	    unsigned bit_off = type->bit_offset ();
+	    unsigned bit_size = type->bit_size ();
+	    if (bit_size == 0)
+	      {
+		/* unpack_bits_as_long doesn't handle this case the
+		   way we'd like, so handle it here.  */
+		result = 0;
+	      }
+	    else
+	      result = unpack_bits_as_long (type, valaddr, bit_off, bit_size);
+	  }
 	else
-	  result = extract_signed_integer (valaddr, len, byte_order);
+	  {
+	    if (nosign)
+	      result = extract_unsigned_integer (valaddr, len, byte_order);
+	    else
+	      result = extract_signed_integer (valaddr, len, byte_order);
+	  }
 	if (code == TYPE_CODE_RANGE)
 	  result += type->bounds ()->bias;
 	return result;
@@ -2789,11 +2842,23 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
     case TYPE_CODE_DECFLOAT:
       return target_float_to_longest (valaddr, type);
 
+    case TYPE_CODE_FIXED_POINT:
+      {
+	gdb_mpq vq;
+	vq.read_fixed_point (gdb::make_array_view (valaddr, len),
+			     byte_order, nosign,
+			     type->fixed_point_scaling_factor ());
+
+	gdb_mpz vz;
+	mpz_tdiv_q (vz.val, mpq_numref (vq.val), mpq_denref (vq.val));
+	return vz.as_integer<LONGEST> ();
+      }
+
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
     case TYPE_CODE_RVALUE_REF:
       /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
-         whether we want this to be true eventually.  */
+	 whether we want this to be true eventually.  */
       return extract_typed_address (valaddr, type);
 
     default:
@@ -2998,14 +3063,14 @@ value_primitive_field (struct value *arg1, LONGEST offset,
       /* We expect an already resolved data location.  */
       gdb_assert (PROP_CONST == TYPE_DATA_LOCATION_KIND (type));
       /* For dynamic data types defer memory allocation
-         until we actual access the value.  */
+	 until we actual access the value.  */
       v = allocate_value_lazy (type);
     }
   else
     {
       /* Plain old data member */
       offset += (TYPE_FIELD_BITPOS (arg_type, fieldno)
-	         / (HOST_CHAR_BIT * unit_size));
+		 / (HOST_CHAR_BIT * unit_size));
 
       /* Lazy register values with offsets are not supported.  */
       if (VALUE_LVAL (arg1) == lval_register && value_lazy (arg1))
@@ -3093,7 +3158,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
 					value_addr (*arg1p)));
 
       /* Move the `this' pointer according to the offset.
-         VALUE_OFFSET (*arg1p) += offset; */
+	 VALUE_OFFSET (*arg1p) += offset; */
     }
 
   return v;
@@ -3294,7 +3359,7 @@ modify_field (struct type *type, gdb_byte *addr,
   if (0 != (fieldval & ~mask))
     {
       /* FIXME: would like to include fieldval in the message, but
-         we don't have a sprintf_longest.  */
+	 we don't have a sprintf_longest.  */
       warning (_("Value does not fit in %s bits."), plongest (bitsize));
 
       /* Truncate it, otherwise adjoining fields may be corrupted.  */
@@ -3339,6 +3404,13 @@ pack_long (gdb_byte *buf, struct type *type, LONGEST num)
     case TYPE_CODE_FLAGS:
     case TYPE_CODE_BOOL:
     case TYPE_CODE_MEMBERPTR:
+      if (type->bit_size_differs_p ())
+	{
+	  unsigned bit_off = type->bit_offset ();
+	  unsigned bit_size = type->bit_size ();
+	  num &= ((ULONGEST) 1 << bit_size) - 1;
+	  num <<= bit_off;
+	}
       store_signed_integer (buf, len, byte_order, num);
       break;
 
@@ -3381,6 +3453,13 @@ pack_unsigned_long (gdb_byte *buf, struct type *type, ULONGEST num)
     case TYPE_CODE_BOOL:
     case TYPE_CODE_RANGE:
     case TYPE_CODE_MEMBERPTR:
+      if (type->bit_size_differs_p ())
+	{
+	  unsigned bit_off = type->bit_offset ();
+	  unsigned bit_size = type->bit_size ();
+	  num &= ((ULONGEST) 1 << bit_size) - 1;
+	  num <<= bit_off;
+	}
       store_unsigned_integer (buf, len, byte_order, num);
       break;
 
@@ -3687,7 +3766,7 @@ coerce_array (struct value *arg)
   switch (type->code ())
     {
     case TYPE_CODE_ARRAY:
-      if (!type->is_vector () && current_language->c_style_arrays)
+      if (!type->is_vector () && current_language->c_style_arrays_p ())
 	arg = value_coerce_array (arg);
       break;
     case TYPE_CODE_FUNC:

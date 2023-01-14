@@ -1,6 +1,6 @@
 /* Public partial symbol table definitions.
 
-   Copyright (C) 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2009-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,6 +27,22 @@
 
 struct partial_symbol;
 
+/* Specialization of bcache to store partial symbols.  */
+
+struct psymbol_bcache : public gdb::bcache
+{
+  /* Calculate a hash code for the given partial symbol.  The hash is
+     calculated using the symbol's value, language, domain, class
+     and name.  These are the values which are set by
+     add_psymbol_to_bcache.  */
+  unsigned long hash (const void *addr, int length) override;
+
+  /* Returns true if the symbol LEFT equals the symbol RIGHT.
+     For the comparison this function uses a symbols value,
+     language, domain, class and name.  */
+  int compare (const void *left, const void *right, int length) override;
+};
+
 /* An instance of this class manages the partial symbol tables and
    partial symbols for a given objfile.
 
@@ -48,9 +64,7 @@ struct partial_symbol;
 class psymtab_storage
 {
 public:
-
-  psymtab_storage ();
-
+  psymtab_storage () = default;
   ~psymtab_storage ();
 
   DISABLE_COPY_AND_ASSIGN (psymtab_storage);
@@ -121,19 +135,7 @@ public:
   /* A byte cache where we can stash arbitrary "chunks" of bytes that
      will not change.  */
 
-  gdb::bcache psymbol_cache;
-
-  /* Vectors of all partial symbols read in from file.  The actual data
-     is stored in the objfile_obstack.  */
-
-  std::vector<partial_symbol *> global_psymbols;
-  std::vector<partial_symbol *> static_psymbols;
-
-  /* Stack of vectors of partial symbols, using during psymtab
-     initialization.  */
-
-  std::vector<std::vector<partial_symbol *>*> current_global_psymbols;
-  std::vector<std::vector<partial_symbol *>*> current_static_psymbols;
+  psymbol_bcache psymbol_cache;
 
 private:
 

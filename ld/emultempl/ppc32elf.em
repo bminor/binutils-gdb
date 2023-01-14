@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright (C) 2003-2020 Free Software Foundation, Inc.
+#   Copyright (C) 2003-2021 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -51,7 +51,7 @@ ppc_after_open_output (void)
     params.emit_stub_syms = (link_info.emitrelocations
 			     || bfd_link_pic (&link_info));
   if (params.pagesize == 0)
-    params.pagesize = config.commonpagesize;
+    params.pagesize = link_info.commonpagesize;
   ppc_elf_link_params (&link_info, &params);
 }
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2020 Free Software Foundation, Inc.
+# Copyright (C) 2014-2021 Free Software Foundation, Inc.
 #
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -8,6 +8,8 @@
 #	NOP - four byte opcode for no-op (defaults to none)
 #	NO_SMALL_DATA - no .sbss/.sbss2/.sdata/.sdata2 sections if not
 #		empty.
+#	HAVE_NOINIT - Include a .noinit output section in the script.
+#	HAVE_PERSISTENT - Include a .persistent output section in the script.
 #	SMALL_DATA_CTOR - .ctors contains small data.
 #	SMALL_DATA_DTOR - .dtors contains small data.
 #	DATA_ADDR - if end-of-text-plus-one-page isn't right for data start
@@ -103,6 +105,8 @@
 #  .lrodata	.gnu.linkonce.lr.foo
 #  .ldata	.gnu.linkonce.l.foo
 #  .lbss	.gnu.linkonce.lb.foo
+#  .noinit	.gnu.linkonce.n.foo
+#  .persistent	.gnu.linkonce.p.foo
 #
 #  Each of these can also have corresponding .rel.* and .rela.* sections.
 
@@ -322,6 +326,28 @@ STACK=".stack        ${RELOCATING-0}${RELOCATING+${STACK_ADDR}} :
     *(.stack)
     ${RELOCATING+${STACK_SENTINEL}}
   }"
+test "${HAVE_NOINIT}" = "yes" && NOINIT="
+  /* This section contains data that is not initialized during load,
+     or during the application's initialization sequence.  */
+  .noinit (NOLOAD) :
+  {
+    ${RELOCATING+. = ALIGN(${ALIGNMENT});}
+    ${RELOCATING+PROVIDE (__noinit_start = .);}
+    *(.noinit${RELOCATING+ .noinit.* .gnu.linkonce.n.*})
+    ${RELOCATING+. = ALIGN(${ALIGNMENT});}
+    ${RELOCATING+PROVIDE (__noinit_end = .);}
+  }"
+test "${HAVE_PERSISTENT}" = "yes" && PERSISTENT="
+  /* This section contains data that is initialized during load,
+     but not during the application's initialization sequence.  */
+  .persistent :
+  {
+    ${RELOCATING+. = ALIGN(${ALIGNMENT});}
+    ${RELOCATING+PROVIDE (__persistent_start = .);}
+    *(.persistent${RELOCATING+ .persistent.* .gnu.linkonce.p.*})
+    ${RELOCATING+. = ALIGN(${ALIGNMENT});}
+    ${RELOCATING+PROVIDE (__persistent_end = .);}
+  }"
 
 TEXT_START_ADDR="SEGMENT_START(\"text-segment\", ${TEXT_START_ADDR})"
 SHLIB_TEXT_START_ADDR="SEGMENT_START(\"text-segment\", ${SHLIB_TEXT_START_ADDR:-0})"
@@ -351,7 +377,7 @@ else
 fi
 
 cat <<EOF
-/* Copyright (C) 2014-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2014-2021 Free Software Foundation, Inc.
 
    Copying and distribution of this script, with or without modification,
    are permitted in any medium without royalty provided the copyright
@@ -645,6 +671,7 @@ cat <<EOF
   ${DATA_SDATA-${SDATA}}
   ${DATA_SDATA-${OTHER_SDATA_SECTIONS}}
   ${RELOCATING+${DATA_END_SYMBOLS-${CREATE_SHLIB+PROVIDE (}${USER_LABEL_PREFIX}_edata = .${CREATE_SHLIB+)}; PROVIDE (${USER_LABEL_PREFIX}edata = .);}}
+  ${PERSISTENT}
   ${RELOCATING+. = .;}
   ${RELOCATING+${CREATE_SHLIB+PROVIDE (}${USER_LABEL_PREFIX}__bss_start = .${CREATE_SHLIB+)};}
   ${RELOCATING+${OTHER_BSS_SYMBOLS}}
@@ -665,6 +692,7 @@ cat <<EOF
   ${OTHER_BSS_SECTIONS}
   ${LARGE_BSS_AFTER_BSS+${LARGE_BSS}}
   ${RELOCATING+${OTHER_BSS_END_SYMBOLS}}
+  ${NOINIT}
   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
 EOF
 

@@ -1,6 +1,6 @@
 /* Cache and manage the values of registers for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,6 +30,7 @@
 #include "observable.h"
 #include "regset.h"
 #include <unordered_map>
+#include "cli/cli-cmds.h"
 
 /*
  * DATA STRUCTURE
@@ -40,7 +41,7 @@
 /* Per-architecture object describing the layout of a register cache.
    Computed once when the architecture is created.  */
 
-struct gdbarch_data *regcache_descr_handle;
+static struct gdbarch_data *regcache_descr_handle;
 
 struct regcache_descr
 {
@@ -1382,6 +1383,8 @@ regcache::debug_print_register (const char *func,  int regno)
   fprintf_unfiltered (gdb_stdlog, "\n");
 }
 
+/* Implement 'maint flush register-cache' command.  */
+
 static void
 reg_flush_command (const char *command, int from_tty)
 {
@@ -2076,14 +2079,20 @@ void _initialize_regcache ();
 void
 _initialize_regcache ()
 {
+  struct cmd_list_element *c;
+
   regcache_descr_handle
     = gdbarch_data_register_post_init (init_regcache_descr);
 
   gdb::observers::target_changed.attach (regcache_observer_target_changed);
   gdb::observers::thread_ptid_changed.attach (regcache_thread_ptid_changed);
 
-  add_com ("flushregs", class_maintenance, reg_flush_command,
-	   _("Force gdb to flush its register cache (maintainer command)."));
+  add_cmd ("register-cache", class_maintenance, reg_flush_command,
+	   _("Force gdb to flush its register and frame cache."),
+	   &maintenanceflushlist);
+  c = add_com_alias ("flushregs", "maintenance flush register-cache",
+		     class_maintenance, 0);
+  deprecate_cmd (c, "maintenance flush register-cache");
 
 #if GDB_SELF_TEST
   selftests::register_test ("get_thread_arch_aspace_regcache",

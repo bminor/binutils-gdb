@@ -2,7 +2,7 @@
 
 # icf_safe_so_test.sh -- test --icf=safe
 
-# Copyright (C) 2010-2020 Free Software Foundation, Inc.
+# Copyright (C) 2010-2021 Free Software Foundation, Inc.
 # Written by Sriraman Tallam <tmsriram@google.com>.
 
 # This file is part of gold.
@@ -83,7 +83,7 @@ END {
 
 arch_specific_safe_fold()
 {
-    if grep -q -e "Intel 80386" -e "ARM" -e "PowerPC" $1;
+    if grep -q -e "Advanced Micro Devices X86-64" -e "Intel 80386" -e "ARM" -e "PowerPC" $1;
     then
 	shift
 	shift

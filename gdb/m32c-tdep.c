@@ -1,6 +1,6 @@
 /* Renesas M32C target-dependent code for GDB, the GNU debugger.
 
-   Copyright (C) 2004-2020 Free Software Foundation, Inc.
+   Copyright (C) 2004-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,31 +18,23 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "elf-bfd.h"
-#include "elf/m32c.h"
 #include "gdb/sim-m32c.h"
-#include "dis-asm.h"
 #include "gdbtypes.h"
 #include "regcache.h"
 #include "arch-utils.h"
 #include "frame.h"
 #include "frame-unwind.h"
-#include "dwarf2/frame.h"
-#include "dwarf2/expr.h"
 #include "symtab.h"
 #include "gdbcore.h"
 #include "value.h"
 #include "reggroups.h"
 #include "prologue-value.h"
-#include "target.h"
 #include "objfiles.h"
 
 
 /* The m32c tdep structure.  */
 
 static struct reggroup *m32c_dma_reggroup;
-
-struct m32c_reg;
 
 /* The type of a function that moves the value of REG between CACHE or
    BUF --- in either direction.  */
@@ -770,7 +762,7 @@ mark_save_restore (struct m32c_reg *reg)
 #define CB(name, raw_pair)				\
   (add_reg (arch, #name, (raw_pair)->type, 0,		\
 	    m32c_banked_read, m32c_banked_write,	\
-            (raw_pair), (raw_pair + 1), FLAGBIT_B))
+	    (raw_pair), (raw_pair + 1), FLAGBIT_B))
 
 /* A pair of registers named NAMEH and NAMEL, of type TYPE, that
    access the top and bottom halves of the register pointed to by
@@ -1401,10 +1393,10 @@ m32c_is_1st_arg_reg (struct m32c_pv_state *state, pv_t value)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (state->arch);
   return (value.kind == pvk_register
-          && (gdbarch_bfd_arch_info (state->arch)->mach == bfd_mach_m16c
+	  && (gdbarch_bfd_arch_info (state->arch)->mach == bfd_mach_m16c
 	      ? (value.reg == tdep->r1->num)
 	      : (value.reg == tdep->r0->num))
-          && value.k == 0);
+	  && value.k == 0);
 }
 
 /* Return non-zero if VALUE is an incoming argument register.  */
@@ -1414,10 +1406,10 @@ m32c_is_arg_reg (struct m32c_pv_state *state, pv_t value)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (state->arch);
   return (value.kind == pvk_register
-          && (gdbarch_bfd_arch_info (state->arch)->mach == bfd_mach_m16c
+	  && (gdbarch_bfd_arch_info (state->arch)->mach == bfd_mach_m16c
 	      ? (value.reg == tdep->r1->num || value.reg == tdep->r2->num)
 	      : (value.reg == tdep->r0->num))
-          && value.k == 0);
+	  && value.k == 0);
 }
 
 /* Return non-zero if a store of VALUE to LOC is probably spilling an
@@ -1439,8 +1431,8 @@ m32c_is_arg_spill (struct m32c_pv_state *st,
 
   return (m32c_is_arg_reg (st, value)
 	  && loc.kind == srcdest_mem
-          && pv_is_register (loc.addr, tdep->sp->num)
-          && ! st->stack->find_reg (st->arch, value.reg, 0));
+	  && pv_is_register (loc.addr, tdep->sp->num)
+	  && ! st->stack->find_reg (st->arch, value.reg, 0));
 }
 
 /* Return non-zero if a store of VALUE to LOC is probably 
@@ -1751,34 +1743,34 @@ m32c_analyze_prologue (struct gdbarch *arch,
 	}
 
       /* If this instruction changed the FB or decreased the SP (i.e.,
-         allocated more stack space), then this may be a good place to
-         declare the prologue finished.  However, there are some
-         exceptions:
+	 allocated more stack space), then this may be a good place to
+	 declare the prologue finished.  However, there are some
+	 exceptions:
 
-         - If the instruction just changed the FB back to its original
-           value, then that's probably a restore instruction.  The
-           prologue should definitely end before that.
+	 - If the instruction just changed the FB back to its original
+	   value, then that's probably a restore instruction.  The
+	   prologue should definitely end before that.
 
-         - If the instruction increased the value of the SP (that is,
-           shrunk the frame), then it's probably part of a frame
-           teardown sequence, and the prologue should end before
-           that.  */
+	 - If the instruction increased the value of the SP (that is,
+	   shrunk the frame), then it's probably part of a frame
+	   teardown sequence, and the prologue should end before
+	   that.  */
 
       if (! pv_is_identical (st.fb, pre_insn_fb))
-        {
-          if (! pv_is_register_k (st.fb, tdep->fb->num, 0))
-            after_last_frame_related_insn = st.next_addr;
-        }
+	{
+	  if (! pv_is_register_k (st.fb, tdep->fb->num, 0))
+	    after_last_frame_related_insn = st.next_addr;
+	}
       else if (! pv_is_identical (st.sp, pre_insn_sp))
-        {
-          /* The comparison of the constants looks odd, there, because
-             .k is unsigned.  All it really means is that the SP is
-             lower than it was before the instruction.  */
-          if (   pv_is_register (pre_insn_sp, tdep->sp->num)
-              && pv_is_register (st.sp,       tdep->sp->num)
-              && ((pre_insn_sp.k - st.sp.k) < (st.sp.k - pre_insn_sp.k)))
-            after_last_frame_related_insn = st.next_addr;
-        }
+	{
+	  /* The comparison of the constants looks odd, there, because
+	     .k is unsigned.  All it really means is that the SP is
+	     lower than it was before the instruction.  */
+	  if (   pv_is_register (pre_insn_sp, tdep->sp->num)
+	      && pv_is_register (st.sp,       tdep->sp->num)
+	      && ((pre_insn_sp.k - st.sp.k) < (st.sp.k - pre_insn_sp.k)))
+	    after_last_frame_related_insn = st.next_addr;
+	}
 
       st.scan_pc = st.next_addr;
     }
@@ -1852,9 +1844,9 @@ m32c_analyze_frame_prologue (struct frame_info *this_frame,
       CORE_ADDR stop_addr = get_frame_pc (this_frame);
 
       /* If we couldn't find any function containing the PC, then
-         just initialize the prologue cache, but don't do anything.  */
+	 just initialize the prologue cache, but don't do anything.  */
       if (! func_start)
-        stop_addr = func_start;
+	stop_addr = func_start;
 
       *this_prologue_cache = FRAME_OBSTACK_ZALLOC (struct m32c_prologue);
       m32c_analyze_prologue (get_frame_arch (this_frame),
@@ -1868,7 +1860,7 @@ m32c_analyze_frame_prologue (struct frame_info *this_frame,
 
 static CORE_ADDR
 m32c_frame_base (struct frame_info *this_frame,
-                void **this_prologue_cache)
+		void **this_prologue_cache)
 {
   struct m32c_prologue *p
     = m32c_analyze_frame_prologue (this_frame, this_prologue_cache);
@@ -1934,7 +1926,7 @@ m32c_prev_register (struct frame_info *this_frame,
      return a description of the stack slot holding it.  */
   if (p->reg_offset[regnum] != 1)
     return frame_unwind_got_memory (this_frame, regnum,
-                                    frame_base + p->reg_offset[regnum]);
+				    frame_base + p->reg_offset[regnum]);
 
   /* Otherwise, presume we haven't changed the value of this
      register, and get it from the next frame.  */
@@ -2259,11 +2251,11 @@ m32c_return_value (struct gdbarch *gdbarch,
 
      m32c_jsri16:
 
-             # Save return address.
+	     # Save return address.
 	     pop.w	m32c_jsri_ret
 	     pop.b	m32c_jsri_ret+2
 
-             # Store target function address.
+	     # Store target function address.
 	     pop.w	m32c_jsri_addr
 
 	     # Re-push return address.
@@ -2414,9 +2406,9 @@ m32c_m16c_address_to_pointer (struct gdbarch *gdbarch,
 	= lookup_minimal_symbol_by_pc (addr);
 
       if (! func_msym.minsym)
-        error (_("Cannot convert code address %s to function pointer:\n"
-               "couldn't find a symbol at that address, to find trampoline."),
-               paddress (gdbarch, addr));
+	error (_("Cannot convert code address %s to function pointer:\n"
+	       "couldn't find a symbol at that address, to find trampoline."),
+	       paddress (gdbarch, addr));
 
       func_name = func_msym.minsym->linkage_name ();
       tramp_name = (char *) xmalloc (strlen (func_name) + 5);
@@ -2427,7 +2419,7 @@ m32c_m16c_address_to_pointer (struct gdbarch *gdbarch,
       tramp_msym = lookup_minimal_symbol (tramp_name, NULL, NULL);
 
       /* We've either got another copy of the name now, or don't need
-         the name any more.  */
+	 the name any more.  */
       xfree (tramp_name);
 
       if (! tramp_msym.minsym)
@@ -2487,36 +2479,36 @@ m32c_m16c_pointer_to_address (struct gdbarch *gdbarch,
   if (target_code == TYPE_CODE_FUNC || target_code == TYPE_CODE_METHOD)
     {
       /* See if there is a minimal symbol at that address whose name is
-         "NAME.plt".  */
+	 "NAME.plt".  */
       struct bound_minimal_symbol ptr_msym = lookup_minimal_symbol_by_pc (ptr);
 
       if (ptr_msym.minsym)
-        {
-          const char *ptr_msym_name = ptr_msym.minsym->linkage_name ();
-          int len = strlen (ptr_msym_name);
+	{
+	  const char *ptr_msym_name = ptr_msym.minsym->linkage_name ();
+	  int len = strlen (ptr_msym_name);
 
-          if (len > 4
-              && strcmp (ptr_msym_name + len - 4, ".plt") == 0)
-            {
+	  if (len > 4
+	      && strcmp (ptr_msym_name + len - 4, ".plt") == 0)
+	    {
 	      struct bound_minimal_symbol func_msym;
-              /* We have a .plt symbol; try to find the symbol for the
-                 corresponding function.
+	      /* We have a .plt symbol; try to find the symbol for the
+		 corresponding function.
 
-                 Since the trampoline contains a jump instruction, we
-                 could also just extract the jump's target address.  I
-                 don't see much advantage one way or the other.  */
-              char *func_name = (char *) xmalloc (len - 4 + 1);
-              memcpy (func_name, ptr_msym_name, len - 4);
-              func_name[len - 4] = '\0';
-              func_msym
-                = lookup_minimal_symbol (func_name, NULL, NULL);
+		 Since the trampoline contains a jump instruction, we
+		 could also just extract the jump's target address.  I
+		 don't see much advantage one way or the other.  */
+	      char *func_name = (char *) xmalloc (len - 4 + 1);
+	      memcpy (func_name, ptr_msym_name, len - 4);
+	      func_name[len - 4] = '\0';
+	      func_msym
+		= lookup_minimal_symbol (func_name, NULL, NULL);
 
-              /* If we do have such a symbol, return its value as the
-                 function's true address.  */
-              if (func_msym.minsym)
-                ptr = BMSYMBOL_VALUE_ADDRESS (func_msym);
-            }
-        }
+	      /* If we do have such a symbol, return its value as the
+		 function's true address.  */
+	      if (func_msym.minsym)
+		ptr = BMSYMBOL_VALUE_ADDRESS (func_msym);
+	    }
+	}
       else
 	{
 	  int aspace;

@@ -1,5 +1,5 @@
 /* Support for HPPA 64-bit ELF
-   Copyright (C) 1999-2020 Free Software Foundation, Inc.
+   Copyright (C) 1999-2021 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -3689,7 +3689,7 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
       }
 
     case R_PARISC_SECREL32:
-      if (sym_sec)
+      if (sym_sec && sym_sec->output_section)
 	value -= sym_sec->output_section->vma;
       bfd_put_32 (input_bfd, value + addend, hit_data);
       return bfd_reloc_ok;

@@ -1,5 +1,5 @@
 /* Common things used by the various darwin files
-   Copyright (C) 1995-2020 Free Software Foundation, Inc.
+   Copyright (C) 1995-2021 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -86,7 +86,7 @@ class darwin_nat_target : public inf_child_target
 
   void detach (inferior *, int) override;
 
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
   void mourn_inferior () override;
 
@@ -117,7 +117,7 @@ private:
   ptid_t wait_1 (ptid_t, struct target_waitstatus *);
   void check_new_threads (inferior *inf);
   int decode_exception_message (mach_msg_header_t *hdr,
-			        inferior **pinf,
+				inferior **pinf,
 				darwin_thread_t **pthread);
   ptid_t decode_message (mach_msg_header_t *hdr,
 			 darwin_thread_t **pthread,

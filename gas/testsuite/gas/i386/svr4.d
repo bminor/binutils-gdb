@@ -4,9 +4,6 @@
 .*: +file format .*
 
 SYMBOL TABLE:
-0+00 .* \.text[ 	]+0+ \.text
-0+00 .* \.data[ 	]+0+ \.data
-0+00 .* \.bss[ 	]+0+ \.bss
 0+00 .* \.text[ 	]+0+ svr4
 0+04 .* \*ABS\*[ 	]+0+ a
 0+03 .* \*ABS\*[ 	]+0+ b

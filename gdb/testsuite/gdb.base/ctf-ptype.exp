@@ -1,4 +1,4 @@
-# Copyright 2019-2020 Free Software Foundation, Inc.
+# Copyright 2019-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -95,7 +95,7 @@ gdb_test "ptype enum colors" "type = enum colors \{yellow, purple, pink\}.*" "pt
 #
 gdb_test "ptype boolean" "type = enum (boolean |)\{FALSE, TRUE\}.*" "ptype unnamed typedef'd enumeration"
 
-gdb_test "list main" ".*"
+gdb_test "list -q main" ".*"
 
 # Same thing with struct and union.
 gdb_test "ptype t_struct3" "type = struct (t_struct3 |)\{.*

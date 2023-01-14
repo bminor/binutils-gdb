@@ -1,6 +1,6 @@
 /* Target-dependent code for the ALPHA architecture, for GDB, the GNU Debugger.
 
-   Copyright (C) 1993-2020 Free Software Foundation, Inc.
+   Copyright (C) 1993-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -116,7 +116,7 @@ static int
 alpha_cannot_store_register (struct gdbarch *gdbarch, int regno)
 {
   return (regno == ALPHA_ZERO_REGNUM
-          || strlen (alpha_register_name (gdbarch, regno)) == 0);
+	  || strlen (alpha_register_name (gdbarch, regno)) == 0);
 }
 
 static struct type *
@@ -974,7 +974,7 @@ alpha_sigtramp_frame_prev_register (struct frame_info *this_frame,
       addr = alpha_sigtramp_register_address (get_frame_arch (this_frame),
 					      info->sigcontext_addr, regnum);
       if (addr != 0)
-        return frame_unwind_got_memory (this_frame, regnum, addr);
+	return frame_unwind_got_memory (this_frame, regnum, addr);
     }
 
   /* This extra register may actually be in the sigcontext, but our
@@ -986,8 +986,8 @@ alpha_sigtramp_frame_prev_register (struct frame_info *this_frame,
 
 static int
 alpha_sigtramp_frame_sniffer (const struct frame_unwind *self,
-                              struct frame_info *this_frame,
-                              void **this_prologue_cache)
+			      struct frame_info *this_frame,
+			      void **this_prologue_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR pc = get_frame_pc (this_frame);
@@ -1118,7 +1118,7 @@ struct alpha_heuristic_unwind_cache
 { 
   CORE_ADDR vfp;
   CORE_ADDR start_pc;
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
   int return_reg;
 };
 
@@ -1137,16 +1137,16 @@ alpha_heuristic_analyze_probing_loop (struct gdbarch *gdbarch, CORE_ADDR *pc,
 
   /* The following pattern is recognized as a probing loop:
 
-        lda     REG_INDEX,NB_OF_ITERATIONS
-        lda     REG_PROBE,<immediate>(sp)
+	lda     REG_INDEX,NB_OF_ITERATIONS
+	lda     REG_PROBE,<immediate>(sp)
 
      LOOP_START:
-        stq     zero,<immediate>(REG_PROBE)
-        subq    REG_INDEX,0x1,REG_INDEX
-        lda     REG_PROBE,<immediate>(REG_PROBE)
-        bne     REG_INDEX, LOOP_START
+	stq     zero,<immediate>(REG_PROBE)
+	subq    REG_INDEX,0x1,REG_INDEX
+	lda     REG_PROBE,<immediate>(REG_PROBE)
+	bne     REG_INDEX, LOOP_START
  
-        lda     sp,<immediate>(REG_PROBE)
+	lda     sp,<immediate>(REG_PROBE)
 
      If anything different is found, the function returns without
      changing PC and FRAME_SIZE.  Otherwise, PC will point immediately
@@ -1282,15 +1282,15 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *this_frame,
 	    {
 	      reg = (word & 0x03e00000) >> 21;
 
-              /* Ignore this instruction if we have already encountered
-                 an instruction saving the same register earlier in the
-                 function code.  The current instruction does not tell
-                 us where the original value upon function entry is saved.
-                 All it says is that the function we are scanning reused
-                 that register for some computation of its own, and is now
-                 saving its result.  */
-              if (trad_frame_addr_p(info->saved_regs, reg))
-                continue;
+	      /* Ignore this instruction if we have already encountered
+		 an instruction saving the same register earlier in the
+		 function code.  The current instruction does not tell
+		 us where the original value upon function entry is saved.
+		 All it says is that the function we are scanning reused
+		 that register for some computation of its own, and is now
+		 saving its result.  */
+	      if (info->saved_regs[reg].is_addr ())
+		continue;
 
 	      if (reg == 31)
 		continue;
@@ -1305,7 +1305,7 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *this_frame,
 		 pointer or not.  */
 	      /* Hack: temporarily add one, so that the offset is non-zero
 		 and we can tell which registers have save offsets below.  */
-	      info->saved_regs[reg].addr = (word & 0xffff) + 1;
+	      info->saved_regs[reg].set_addr ((word & 0xffff) + 1);
 
 	      /* Starting with OSF/1-3.2C, the system libraries are shipped
 		 without local symbols, but they still contain procedure
@@ -1385,13 +1385,14 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *this_frame,
   /* Convert offsets to absolute addresses.  See above about adding
      one to the offsets to make all detected offsets non-zero.  */
   for (reg = 0; reg < ALPHA_NUM_REGS; ++reg)
-    if (trad_frame_addr_p(info->saved_regs, reg))
-      info->saved_regs[reg].addr += val - 1;
+    if (info->saved_regs[reg].is_addr ())
+      info->saved_regs[reg].set_addr (info->saved_regs[reg].addr ()
+				      + val - 1);
 
   /* The stack pointer of the previous frame is computed by popping
      the current stack frame.  */
-  if (!trad_frame_addr_p (info->saved_regs, ALPHA_SP_REGNUM))
-   trad_frame_set_value (info->saved_regs, ALPHA_SP_REGNUM, info->vfp);
+  if (!info->saved_regs[ALPHA_SP_REGNUM].is_addr ())
+   info->saved_regs[ALPHA_SP_REGNUM].set_value (info->vfp);
 
   return info;
 }
@@ -1601,7 +1602,7 @@ alpha_next_pc (struct regcache *regcache, CORE_ADDR pc)
 	  || op == 0x34)	/* BSR */
 	{
  branch_taken:
-          offset = (insn & 0x001fffff);
+	  offset = (insn & 0x001fffff);
 	  if (offset & 0x00100000)
 	    offset  |= 0xffe00000;
 	  offset *= ALPHA_INSN_SIZE;
@@ -1611,14 +1612,14 @@ alpha_next_pc (struct regcache *regcache, CORE_ADDR pc)
       /* Need to determine if branch is taken; read RA.  */
       regno = (insn >> 21) & 0x1f;
       switch (op)
-        {
-          case 0x31:              /* FBEQ */
-          case 0x36:              /* FBGE */
-          case 0x37:              /* FBGT */
-          case 0x33:              /* FBLE */
-          case 0x32:              /* FBLT */
-          case 0x35:              /* FBNE */
-            regno += gdbarch_fp0_regnum (gdbarch);
+	{
+	  case 0x31:              /* FBEQ */
+	  case 0x36:              /* FBGE */
+	  case 0x37:              /* FBGT */
+	  case 0x33:              /* FBLE */
+	  case 0x32:              /* FBLT */
+	  case 0x35:              /* FBNE */
+	    regno += gdbarch_fp0_regnum (gdbarch);
 	}
       
       rav = regcache_raw_get_signed (regcache, regno);
@@ -1658,32 +1659,32 @@ alpha_next_pc (struct regcache *regcache, CORE_ADDR pc)
 	    goto branch_taken;
 	  break;
 
-        /* Floating point branches.  */
-        
-        case 0x31:              /* FBEQ */
-          if (fp_register_zero_p (rav))
-            goto branch_taken;
-          break;
-        case 0x36:              /* FBGE */
-          if (fp_register_sign_bit (rav) == 0 || fp_register_zero_p (rav))
-            goto branch_taken;
-          break;
-        case 0x37:              /* FBGT */
-          if (fp_register_sign_bit (rav) == 0 && ! fp_register_zero_p (rav))
-            goto branch_taken;
-          break;
-        case 0x33:              /* FBLE */
-          if (fp_register_sign_bit (rav) == 1 || fp_register_zero_p (rav))
-            goto branch_taken;
-          break;
-        case 0x32:              /* FBLT */
-          if (fp_register_sign_bit (rav) == 1 && ! fp_register_zero_p (rav))
-            goto branch_taken;
-          break;
-        case 0x35:              /* FBNE */
-          if (! fp_register_zero_p (rav))
-            goto branch_taken;
-          break;
+	/* Floating point branches.  */
+	
+	case 0x31:              /* FBEQ */
+	  if (fp_register_zero_p (rav))
+	    goto branch_taken;
+	  break;
+	case 0x36:              /* FBGE */
+	  if (fp_register_sign_bit (rav) == 0 || fp_register_zero_p (rav))
+	    goto branch_taken;
+	  break;
+	case 0x37:              /* FBGT */
+	  if (fp_register_sign_bit (rav) == 0 && ! fp_register_zero_p (rav))
+	    goto branch_taken;
+	  break;
+	case 0x33:              /* FBLE */
+	  if (fp_register_sign_bit (rav) == 1 || fp_register_zero_p (rav))
+	    goto branch_taken;
+	  break;
+	case 0x32:              /* FBLT */
+	  if (fp_register_sign_bit (rav) == 1 && ! fp_register_zero_p (rav))
+	    goto branch_taken;
+	  break;
+	case 0x35:              /* FBNE */
+	  if (! fp_register_zero_p (rav))
+	    goto branch_taken;
+	  break;
 	}
     }
 

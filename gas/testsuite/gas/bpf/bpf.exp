@@ -1,6 +1,6 @@
 # GAS testsuite for the Linux eBPF -*- Tcl -*-
 #
-# Copyright (C) 2019-2020 Free Software Foundation, Inc.
+# Copyright (C) 2019-2021 Free Software Foundation, Inc.
 # Contributed by Oracle, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -41,4 +41,7 @@ if {[istarget bpf*-*-*]} {
 
     run_dump_test indcall-1
     run_list_test indcall-bad-1
+
+    run_dump_test alu-xbpf
+    run_dump_test alu32-xbpf
 }

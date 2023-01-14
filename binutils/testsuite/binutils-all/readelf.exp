@@ -1,4 +1,4 @@
-#   Copyright (C) 1999-2020 Free Software Foundation, Inc.
+#   Copyright (C) 1999-2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -100,7 +100,11 @@ proc readelf_test { options binary_file regexp_file xfails } {
 	return
     }
 
-    set target_machine ""
+    if { [is_elf_unused_section_symbols ] } {
+	set target_machine unused
+    } else {
+	set target_machine ""
+    }
     if [istarget "mips*-*-*"] then {
 	if [is_bad_symtab] then {
 	    set target_machine mips
@@ -364,8 +368,15 @@ readelf_wi_test
 readelf_compressed_wa_test
 
 readelf_dump_test
-run_dump_test "pr25543"
 
+# These dump tests require an assembler.
+if {[which $AS] != 0} then {
+    run_dump_test "pr25543"
+    run_dump_test "retain1a"
+    run_dump_test "retain1b"
+    run_dump_test "readelf-maskos-1a"
+    run_dump_test "readelf-maskos-1b"
+}
 
 # PR 13482 - Check for off-by-one errors when dumping .note sections.
 if {![binutils_assemble $srcdir/$subdir/version.s tmpdir/version.o]} then {

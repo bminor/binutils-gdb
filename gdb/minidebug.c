@@ -1,6 +1,6 @@
 /* Read MiniDebugInfo data from an objfile.
 
-   Copyright (C) 2012-2020 Free Software Foundation, Inc.
+   Copyright (C) 2012-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -96,7 +96,7 @@ lzma_open (struct bfd *nbfd, void *open_closure)
   if (size < LZMA_STREAM_HEADER_SIZE
       || bfd_seek (section->owner, offset, SEEK_SET) != 0
       || bfd_bread (footer, LZMA_STREAM_HEADER_SIZE, section->owner)
-         != LZMA_STREAM_HEADER_SIZE
+	 != LZMA_STREAM_HEADER_SIZE
       || lzma_stream_footer_decode (&options, footer) != LZMA_OK
       || offset < options.backward_size)
     {
@@ -110,10 +110,10 @@ lzma_open (struct bfd *nbfd, void *open_closure)
   pos = 0;
   if (bfd_seek (section->owner, offset, SEEK_SET) != 0
       || bfd_bread (indexdata, options.backward_size, section->owner)
-         != options.backward_size
+	 != options.backward_size
       || lzma_index_buffer_decode (&index, &memlimit, &gdb_lzma_allocator,
 				   indexdata, &pos, options.backward_size)
-         != LZMA_OK
+	 != LZMA_OK
       || lzma_index_size (index) != options.backward_size)
     {
       xfree (indexdata);

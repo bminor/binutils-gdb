@@ -14,6 +14,7 @@ foo:
 	iretl
 	iretq
 	sysretl
+	mov	%rsp,%rbp
 	sysretq
 
 	.intel_syntax noprefix
@@ -22,4 +23,5 @@ foo:
 	iret
 	iretq
 	sysretd
+	mov	rbp,rsp
 	sysretq

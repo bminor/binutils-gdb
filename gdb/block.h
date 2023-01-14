@@ -1,6 +1,6 @@
 /* Code dealing with blocks for GDB.
 
-   Copyright (C) 2003-2020 Free Software Foundation, Inc.
+   Copyright (C) 2003-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -392,7 +392,7 @@ extern int block_find_non_opaque_type (struct symbol *sym, void *data);
    struct symbol *with_opaque = NULL;
    struct symbol *sym
      = block_find_symbol (block, name, domain,
-                          block_find_non_opaque_type_preferred, &with_opaque);
+			  block_find_non_opaque_type_preferred, &with_opaque);
 
    At this point if SYM is non-NULL then a non-opaque type has been found.
    Otherwise, if WITH_OPAQUE is non-NULL then an opaque type has been found.
@@ -423,6 +423,6 @@ extern int block_find_non_opaque_type_preferred (struct symbol *sym,
 /* Given a vector of pairs, allocate and build an obstack allocated
    blockranges struct for a block.  */
 struct blockranges *make_blockranges (struct objfile *objfile,
-                                      const std::vector<blockrange> &rangevec);
+				      const std::vector<blockrange> &rangevec);
 
 #endif /* BLOCK_H */

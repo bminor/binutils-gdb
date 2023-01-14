@@ -1,6 +1,6 @@
 /* varobj support for C and C++.
 
-   Copyright (C) 1999-2020 Free Software Foundation, Inc.
+   Copyright (C) 1999-2021 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -120,10 +120,10 @@ adjust_value_for_child_access (struct value **value,
 
       enclosing_type = value_actual_type (*value, 1, &real_type_found);
       if (real_type_found)
-        {
-          *type = enclosing_type;
-          *value = value_cast (enclosing_type, *value);
-        }
+	{
+	  *type = enclosing_type;
+	  *value = value_cast (enclosing_type, *value);
+	}
     }
 }
 
@@ -210,10 +210,10 @@ c_number_of_children (const struct varobj *var)
 	 have one child, except for function ptrs, which have no children,
 	 and except for void*, as we don't know what to show.
 
-         We can show char* so we allow it to be dereferenced.  If you decide
-         to test for it, please mind that a little magic is necessary to
-         properly identify it: char* has TYPE_CODE == TYPE_CODE_INT and 
-         TYPE_NAME == "char".  */
+	 We can show char* so we allow it to be dereferenced.  If you decide
+	 to test for it, please mind that a little magic is necessary to
+	 properly identify it: char* has TYPE_CODE == TYPE_CODE_INT and 
+	 TYPE_NAME == "char".  */
       if (target->code () == TYPE_CODE_FUNC
 	  || target->code () == TYPE_CODE_VOID)
 	children = 0;
@@ -572,11 +572,11 @@ cplus_number_of_children (const struct varobj *var)
 
       /* It is necessary to access a real type (via RTTI).  */
       if (opts.objectprint)
-        {
-          value = var->value.get ();
-          lookup_actual_type = (TYPE_IS_REFERENCE (var->type)
+	{
+	  value = var->value.get ();
+	  lookup_actual_type = (TYPE_IS_REFERENCE (var->type)
 				|| var->type->code () == TYPE_CODE_PTR);
-        }
+	}
       adjust_value_for_child_access (&value, &type, NULL, lookup_actual_type);
 
       if (((type->code ()) == TYPE_CODE_STRUCT)
@@ -607,13 +607,13 @@ cplus_number_of_children (const struct varobj *var)
 
       /* It is necessary to access a real type (via RTTI).  */
       if (opts.objectprint)
-        {
+	{
 	  const struct varobj *parent = var->parent;
 
 	  value = parent->value.get ();
 	  lookup_actual_type = (TYPE_IS_REFERENCE (parent->type)
 				|| parent->type->code () == TYPE_CODE_PTR);
-        }
+	}
       adjust_value_for_child_access (&value, &type, NULL, lookup_actual_type);
 
       cplus_class_num_children (type, kids);
@@ -817,10 +817,10 @@ cplus_describe_child (const struct varobj *parent, int index,
 
 	      /* Cast the parent to the base' type.  Note that in gdb,
 		 expression like 
-		         (Base1)d
+			 (Base1)d
 		 will create an lvalue, for all appearences, so we don't
 		 need to use more fancy:
-		         *(Base1*)(&d)
+			 *(Base1*)(&d)
 		 construct.
 
 		 When we are in the scope of the base class or of one

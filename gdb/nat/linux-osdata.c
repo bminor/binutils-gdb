@@ -1,6 +1,6 @@
 /* Linux-specific functions to retrieve OS data.
 
-   Copyright (C) 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2009-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -917,7 +917,7 @@ time_from_time_t (char *time, int maxlen, TIME_T seconds)
       time_t t = (time_t) seconds;
 
       /* Per the ctime_r manpage, this buffer needs to be at least 26
-         characters long.  */
+	 characters long.  */
       char buf[30];
       const char *time_str = ctime_r (&t, buf);
       strncpy (time, time_str, maxlen);
@@ -1284,7 +1284,7 @@ linux_xfer_osdata_modules (struct buffer *buffer)
 
 static void linux_xfer_osdata_info_os_types (struct buffer *buffer);
 
-struct osdata_type {
+static struct osdata_type {
   const char *type;
   const char *title;
   const char *description;

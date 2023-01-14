@@ -1,7 +1,7 @@
 /* Target-dependent code for the Texas Instruments MSP430 for GDB, the
    GNU debugger.
 
-   Copyright (C) 2012-2020 Free Software Foundation, Inc.
+   Copyright (C) 2012-2021 Free Software Foundation, Inc.
 
    Contributed by Red Hat, Inc.
 
@@ -466,7 +466,7 @@ msp430_analyze_frame_prologue (struct frame_info *this_frame,
       stop_addr = get_frame_pc (this_frame);
 
       /* If we couldn't find any function containing the PC, then
-         just initialize the prologue cache, but don't do anything.  */
+	 just initialize the prologue cache, but don't do anything.  */
       if (!func_start)
 	stop_addr = func_start;
 
@@ -703,7 +703,7 @@ msp430_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  else
 	    {
 	      /* Scalars bigger than 8 bytes such as complex doubles are passed
-	         on the stack.  */
+		 on the stack.  */
 	      if (arg_size > 8)
 		current_arg_on_stack = 1;
 	    }
@@ -712,8 +712,8 @@ msp430_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  for (offset = 0; offset < arg_size; offset += 2)
 	    {
 	      /* The condition below prevents 8 byte scalars from being split
-	         between registers and memory (stack).  It also prevents other
-	         splits once the stack has been written to.  */
+		 between registers and memory (stack).  It also prevents other
+		 splits once the stack has been written to.  */
 	      if (!current_arg_on_stack
 		  && (arg_reg
 		      + ((arg_size == 8 || args_on_stack)
@@ -724,7 +724,7 @@ msp430_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 		  if (code_model == MSP_LARGE_CODE_MODEL
 		      && (arg_type->code () == TYPE_CODE_PTR
-		          || TYPE_IS_REFERENCE (arg_type)
+			  || TYPE_IS_REFERENCE (arg_type)
 			  || arg_type->code () == TYPE_CODE_STRUCT
 			  || arg_type->code () == TYPE_CODE_UNION))
 		    {

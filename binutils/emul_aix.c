@@ -1,5 +1,5 @@
 /* Binutils emulation layer.
-   Copyright (C) 2002-2020 Free Software Foundation, Inc.
+   Copyright (C) 2002-2021 Free Software Foundation, Inc.
    Written by Tom Rix, Red Hat Inc.
 
    This file is part of GNU Binutils.
@@ -67,30 +67,20 @@ check_aix (bfd *try_bfd)
 }
 
 static bfd_boolean
-ar_emul_aix_append (bfd **after_bfd, char *file_name, const char *target,
+ar_emul_aix_append (bfd **after_bfd, bfd *new_bfd,
 		    bfd_boolean verbose, bfd_boolean flatten)
 {
-  bfd *new_bfd;
-
-  new_bfd = bfd_openr (file_name, target);
-  AR_EMUL_ELEMENT_CHECK (new_bfd, file_name);
-
   return do_ar_emul_append (after_bfd, new_bfd, verbose, flatten, check_aix);
 }
 
 static bfd_boolean
-ar_emul_aix_replace (bfd **after_bfd, char *file_name, const char *target,
+ar_emul_aix_replace (bfd **after_bfd, bfd *new_bfd,
 		     bfd_boolean verbose)
 {
-  bfd *new_bfd;
-
-  new_bfd = bfd_openr (file_name, target);
-  AR_EMUL_ELEMENT_CHECK (new_bfd, file_name);
-
   if (!check_aix (new_bfd))
     return FALSE;
 
-  AR_EMUL_REPLACE_PRINT_VERBOSE (verbose, file_name);
+  AR_EMUL_REPLACE_PRINT_VERBOSE (verbose, bfd_get_filename (new_bfd));
 
   new_bfd->archive_next = *after_bfd;
   *after_bfd = new_bfd;

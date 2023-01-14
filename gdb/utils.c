@@ -1,6 +1,6 @@
 /* General utility routines for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -315,13 +315,13 @@ internal_vproblem (struct internal_problem *problem,
 	abort_with_message (msg);
       default:
 	dejavu = 3;
-        /* Newer GLIBC versions put the warn_unused_result attribute
-           on write, but this is one of those rare cases where
-           ignoring the return value is correct.  Casting to (void)
-           does not fix this problem.  This is the solution suggested
-           at http://gcc.gnu.org/bugzilla/show_bug.cgi?id=25509.  */
+	/* Newer GLIBC versions put the warn_unused_result attribute
+	   on write, but this is one of those rare cases where
+	   ignoring the return value is correct.  Casting to (void)
+	   does not fix this problem.  This is the solution suggested
+	   at http://gcc.gnu.org/bugzilla/show_bug.cgi?id=25509.  */
 	if (write (STDERR_FILENO, msg, sizeof (msg)) != sizeof (msg))
-          abort (); /* ARI: abort */
+	  abort (); /* ARI: abort */
 	exit (1);
       }
   }
@@ -370,7 +370,7 @@ internal_vproblem (struct internal_problem *problem,
       if (!confirm || !filtered_printing_initialized ())
 	quit_p = 1;
       else
-        quit_p = query (_("%s\nQuit this debugging session? "),
+	quit_p = query (_("%s\nQuit this debugging session? "),
 			reason.c_str ());
     }
   else if (problem->should_quit == internal_problem_yes)
@@ -640,7 +640,7 @@ quit (void)
 #else
   if (job_control
       /* If there is no terminal switching for this target, then we can't
-         possibly get screwed by the lack of job control.  */
+	 possibly get screwed by the lack of job control.  */
       || !target_supports_terminal_ours ())
     throw_quit ("Quit");
   else
@@ -707,6 +707,36 @@ myread (int desc, char *addr, int len)
       addr += val;
     }
   return orglen;
+}
+
+/* See utils.h.  */
+
+ULONGEST
+uinteger_pow (ULONGEST v1, LONGEST v2)
+{
+  if (v2 < 0)
+    {
+      if (v1 == 0)
+	error (_("Attempt to raise 0 to negative power."));
+      else
+	return 0;
+    }
+  else
+    {
+      /* The Russian Peasant's Algorithm.  */
+      ULONGEST v;
+
+      v = 1;
+      for (;;)
+	{
+	  if (v2 & 1L)
+	    v *= v1;
+	  v2 >>= 1;
+	  if (v2 == 0)
+	    return v;
+	  v1 *= v1;
+	}
+    }
 }
 
 void
@@ -875,15 +905,15 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
       if (answer >= 'a')
 	answer -= 040;
       /* Check answer.  For the non-default, the user must specify
-         the non-default explicitly.  */
+	 the non-default explicitly.  */
       if (answer == not_def_answer)
 	{
 	  retval = !def_value;
 	  break;
 	}
       /* Otherwise, if a default was specified, the user may either
-         specify the required input or have it default by entering
-         nothing.  */
+	 specify the required input or have it default by entering
+	 nothing.  */
       if (answer == def_answer
 	  || (defchar != '\0' && answer == '\0'))
 	{
@@ -1259,8 +1289,8 @@ init_page_info (void)
       chars_per_line = cols;
 
       /* Readline should have fetched the termcap entry for us.
-         Only try to use tgetnum function if rl_get_screen_size
-         did not return a useful value. */
+	 Only try to use tgetnum function if rl_get_screen_size
+	 did not return a useful value. */
       if (((rows <= 0) && (tgetnum ((char *) "li") < 0))
 	/* Also disable paging if inside Emacs.  $EMACS was used
 	   before Emacs v25.1, $INSIDE_EMACS is used since then.  */
@@ -1396,12 +1426,15 @@ static void
 emit_style_escape (const ui_file_style &style,
 		   struct ui_file *stream = nullptr)
 {
-  applied_style = style;
+  if (applied_style != style)
+    {
+      applied_style = style;
 
-  if (stream == nullptr)
-    wrap_buffer.append (style.to_ansi ());
-  else
-    stream->puts (style.to_ansi ().c_str ());
+      if (stream == nullptr)
+	wrap_buffer.append (style.to_ansi ());
+      else
+	stream->puts (style.to_ansi ().c_str ());
+    }
 }
 
 /* Set the current output style.  This will affect future uses of the
@@ -1547,6 +1580,14 @@ gdb_flush (struct ui_file *stream)
 {
   flush_wrap_buffer (stream);
   stream->flush ();
+}
+
+/* See utils.h.  */
+
+int
+get_chars_per_line ()
+{
+  return chars_per_line;
 }
 
 /* Indicate that if the next sequence of characters overflows the line,
@@ -1726,8 +1767,8 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 	    {
 	      wrap_buffer.push_back ('\t');
 	      /* Shifting right by 3 produces the number of tab stops
-	         we have already passed, and then adding one and
-	         shifting left 3 advances to the next tab stop.  */
+		 we have already passed, and then adding one and
+		 shifting left 3 advances to the next tab stop.  */
 	      chars_printed = ((chars_printed >> 3) + 1) << 3;
 	      lineptr++;
 	    }
@@ -1738,6 +1779,12 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 	      /* Note that we don't consider this a character, so we
 		 don't increment chars_printed here.  */
 	      lineptr += skip_bytes;
+	    }
+	  else if (*lineptr == '\r')
+	    {
+	      wrap_buffer.push_back (*lineptr);
+	      chars_printed = 0;
+	      lineptr++;
 	    }
 	  else
 	    {
@@ -1756,14 +1803,20 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 		 prompt is given; and to avoid emitting style
 		 sequences in the middle of a run of text, we track
 		 this as well.  */
-	      ui_file_style save_style;
+	      ui_file_style save_style = applied_style;
 	      bool did_paginate = false;
 
 	      chars_printed = 0;
 	      lines_printed++;
 	      if (wrap_column)
 		{
-		  save_style = wrap_style;
+		  /* We are about to insert a newline at an historic
+		     location in the WRAP_BUFFER.  Before we do we want to
+		     restore the default style.  To know if we actually
+		     need to insert an escape sequence we must restore the
+		     current applied style to how it was at the WRAP_COLUMN
+		     location.  */
+		  applied_style = wrap_style;
 		  if (stream->can_emit_style_escape ())
 		    emit_style_escape (ui_file_style (), stream);
 		  /* If we aren't actually wrapping, don't output
@@ -1778,10 +1831,7 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 		  stream->puts ("\n");
 		}
 	      else
-		{
-		  save_style = applied_style;
-		  flush_wrap_buffer (stream);
-		}
+		flush_wrap_buffer (stream);
 
 	      /* Possible new page.  Note that
 		 PAGINATION_DISABLED_FOR_COMMAND might be set during
@@ -1797,8 +1847,19 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 	      if (wrap_column)
 		{
 		  stream->puts (wrap_indent);
+
+		  /* Having finished inserting the wrapping we should
+		     restore the style as it was at the WRAP_COLUMN.  */
 		  if (stream->can_emit_style_escape ())
-		    emit_style_escape (save_style, stream);
+		    emit_style_escape (wrap_style, stream);
+
+		  /* The WRAP_BUFFER will still contain content, and that
+		     content might set some alternative style.  Restore
+		     APPLIED_STYLE as it was before we started wrapping,
+		     this reflects the current style for the last character
+		     in WRAP_BUFFER.  */
+		  applied_style = save_style;
+
 		  /* FIXME, this strlen is what prevents wrap_indent from
 		     containing tabs.  However, if we recurse to print it
 		     and count its chars, we risk trouble if wrap_indent is
@@ -1851,16 +1912,9 @@ void
 fputs_styled (const char *linebuffer, const ui_file_style &style,
 	      struct ui_file *stream)
 {
-  /* This just makes it so we emit somewhat fewer escape
-     sequences.  */
-  if (style.is_default ())
-    fputs_maybe_filtered (linebuffer, stream, 1);
-  else
-    {
-      set_output_style (stream, style);
-      fputs_maybe_filtered (linebuffer, stream, 1);
-      set_output_style (stream, ui_file_style ());
-    }
+  set_output_style (stream, style);
+  fputs_maybe_filtered (linebuffer, stream, 1);
+  set_output_style (stream, ui_file_style ());
 }
 
 /* See utils.h.  */
@@ -1869,16 +1923,9 @@ void
 fputs_styled_unfiltered (const char *linebuffer, const ui_file_style &style,
 			 struct ui_file *stream)
 {
-  /* This just makes it so we emit somewhat fewer escape
-     sequences.  */
-  if (style.is_default ())
-    fputs_maybe_filtered (linebuffer, stream, 0);
-  else
-    {
-      set_output_style (stream, style);
-      fputs_maybe_filtered (linebuffer, stream, 0);
-      set_output_style (stream, ui_file_style ());
-    }
+  set_output_style (stream, style);
+  fputs_maybe_filtered (linebuffer, stream, 0);
+  set_output_style (stream, ui_file_style ());
 }
 
 /* See utils.h.  */
@@ -2082,26 +2129,30 @@ vfprintf_unfiltered (struct ui_file *stream, const char *format, va_list args)
 {
   if (debug_timestamp && stream == gdb_stdlog)
     {
-      using namespace std::chrono;
-      int len, need_nl;
+      static bool needs_timestamp = true;
 
+      /* Print timestamp if previous print ended with a \n.  */
+      if (needs_timestamp)
+	{
+	  using namespace std::chrono;
+
+	  steady_clock::time_point now = steady_clock::now ();
+	  seconds s = duration_cast<seconds> (now.time_since_epoch ());
+	  microseconds us = duration_cast<microseconds> (now.time_since_epoch () - s);
+	  std::string timestamp = string_printf ("%ld.%06ld ",
+						 (long) s.count (),
+						 (long) us.count ());
+	  fputs_unfiltered (timestamp.c_str (), stream);
+	}
+
+      /* Print the message.  */
       string_file sfile;
       cli_ui_out (&sfile, 0).vmessage (ui_file_style (), format, args);
       std::string linebuffer = std::move (sfile.string ());
+      fputs_unfiltered (linebuffer.c_str (), stream);
 
-      steady_clock::time_point now = steady_clock::now ();
-      seconds s = duration_cast<seconds> (now.time_since_epoch ());
-      microseconds us = duration_cast<microseconds> (now.time_since_epoch () - s);
-
-      len = linebuffer.size ();
-      need_nl = (len > 0 && linebuffer[len - 1] != '\n');
-
-      std::string timestamp = string_printf ("%ld.%06ld %s%s",
-					     (long) s.count (),
-					     (long) us.count (),
-					     linebuffer.c_str (),
-					     need_nl ? "\n": "");
-      fputs_unfiltered (timestamp.c_str (), stream);
+      size_t len = linebuffer.length ();
+      needs_timestamp = (len > 0 && linebuffer[len - 1] == '\n');
     }
   else
     vfprintf_maybe_filtered (stream, format, args, false, true);
@@ -2136,22 +2187,6 @@ fprintf_unfiltered (struct ui_file *stream, const char *format, ...)
 
   va_start (args, format);
   vfprintf_unfiltered (stream, format, args);
-  va_end (args);
-}
-
-/* Like fprintf_filtered, but prints its result indented.
-   Called as fprintfi_filtered (spaces, stream, format, ...);  */
-
-void
-fprintfi_filtered (int spaces, struct ui_file *stream, const char *format,
-		   ...)
-{
-  va_list args;
-
-  va_start (args, format);
-  print_spaces_filtered (spaces, stream);
-
-  vfprintf_filtered (stream, format, args);
   va_end (args);
 }
 
@@ -2190,11 +2225,9 @@ vfprintf_styled_no_gdbfmt (struct ui_file *stream, const ui_file_style &style,
   std::string str = string_vprintf (format, args);
   if (!str.empty ())
     {
-      if (!style.is_default ())
-	set_output_style (stream, style);
+      set_output_style (stream, style);
       fputs_maybe_filtered (str.c_str (), stream, filter);
-      if (!style.is_default ())
-	set_output_style (stream, ui_file_style ());
+      set_output_style (stream, ui_file_style ());
     }
 }
 
@@ -2216,20 +2249,6 @@ printf_unfiltered (const char *format, ...)
 
   va_start (args, format);
   vfprintf_unfiltered (gdb_stdout, format, args);
-  va_end (args);
-}
-
-/* Like printf_filtered, but prints it's result indented.
-   Called as printfi_filtered (spaces, format, ...);  */
-
-void
-printfi_filtered (int spaces, const char *format, ...)
-{
-  va_list args;
-
-  va_start (args, format);
-  print_spaces_filtered (spaces, gdb_stdout);
-  vfprintf_filtered (gdb_stdout, format, args);
   va_end (args);
 }
 
@@ -3147,7 +3166,7 @@ substitute_path_component (char **stringp, const char *from, const char *to)
 
       if ((s == string || IS_DIR_SEPARATOR (s[-1])
 	   || s[-1] == DIRNAME_SEPARATOR)
-          && (s[from_len] == '\0' || IS_DIR_SEPARATOR (s[from_len])
+	  && (s[from_len] == '\0' || IS_DIR_SEPARATOR (s[from_len])
 	      || s[from_len] == DIRNAME_SEPARATOR))
 	{
 	  char *string_new;

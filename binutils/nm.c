@@ -1,5 +1,5 @@
 /* nm.c -- Describe symbol table of a rel file.
-   Copyright (C) 1991-2020 Free Software Foundation, Inc.
+   Copyright (C) 1991-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -162,6 +162,13 @@ static int show_synthetic = 0;	/* Display synthesized symbols too.  */
 static int line_numbers = 0;	/* Print line numbers for symbols.  */
 static int allow_special_symbols = 0;  /* Allow special symbols.  */
 
+/* The characters to use for global and local ifunc symbols.  */
+#if DEFAULT_F_FOR_IFUNC_SYMBOLS
+static const char * ifunc_type_chars = "Ff";
+#else
+static const char * ifunc_type_chars = NULL;
+#endif
+
 static int demangle_flags = DMGL_ANSI | DMGL_PARAMS;
 
 /* When to print the names of files.  Not mutually exclusive in SYSV format.  */
@@ -192,6 +199,7 @@ enum long_option_values
   OPTION_SIZE_SORT,
   OPTION_RECURSE_LIMIT,
   OPTION_NO_RECURSE_LIMIT,
+  OPTION_IFUNC_CHARS,
   OPTION_WITH_SYMBOL_VERSIONS
 };
 
@@ -203,6 +211,7 @@ static struct option long_options[] =
   {"extern-only", no_argument, &external_only, 1},
   {"format", required_argument, 0, 'f'},
   {"help", no_argument, 0, 'h'},
+  {"ifunc-chars", required_argument, 0, OPTION_IFUNC_CHARS},
   {"line-numbers", no_argument, 0, 'l'},
   {"no-cplus", no_argument, &do_demangle, 0},  /* Linux compatibility.  */
   {"no-demangle", no_argument, &do_demangle, 0},
@@ -255,6 +264,7 @@ usage (FILE *stream, int status)
   -f, --format=FORMAT    Use the output format FORMAT.  FORMAT can be `bsd',\n\
                            `sysv' or `posix'.  The default is `bsd'\n\
   -g, --extern-only      Display only external symbols\n\
+    --ifunc-chars=CHARS  Characters to use when displaying ifunc symbols\n\
   -l, --line-numbers     Use debugging information to find a filename and\n\
                            line number for each symbol\n\
   -n, --numeric-sort     Sort symbols numerically by address\n\
@@ -397,21 +407,17 @@ static void
 print_symname (const char *form, struct extended_symbol_info *info,
 	       const char *name, bfd *abfd)
 {
+  char *alloc = NULL;
+
   if (name == NULL)
     name = info->sinfo->name;
   if (do_demangle && *name)
     {
-      char *res = bfd_demangle (abfd, name, demangle_flags);
-
-      if (res != NULL)
-	{
-	  printf (form, res);
-	  free (res);
-	  return;
-	}
+      alloc = bfd_demangle (abfd, name, demangle_flags);
+      if (alloc != NULL)
+	name = alloc;
     }
 
-  printf (form, name);
   if (info != NULL && info->elfinfo)
     {
       const char *version_string;
@@ -421,11 +427,17 @@ print_symname (const char *form, struct extended_symbol_info *info,
 	= bfd_get_symbol_version_string (abfd, &info->elfinfo->symbol,
 					 FALSE, &hidden);
       if (version_string && version_string[0])
-	printf ("%s%s",
-	       (hidden || bfd_is_und_section (info->elfinfo->symbol.section)
-		? "@" : "@@"),
-	       version_string);
+	{
+	  const char *at = "@@";
+	  if (hidden || bfd_is_und_section (info->elfinfo->symbol.section))
+	    at = "@";
+	  alloc = reconcat (alloc, name, at, version_string, NULL);
+	  if (alloc != NULL)
+	    name = alloc;
+	}
     }
+  printf (form, name);
+  free (alloc);
 }
 
 static void
@@ -888,6 +900,18 @@ print_symbol (bfd *        abfd,
 
   bfd_get_symbol_info (abfd, sym, &syminfo);
 
+  /* PR 22967 - Distinguish between local and global ifunc symbols.  */
+  if (syminfo.type == 'i'
+      && sym->flags & BSF_GNU_INDIRECT_FUNCTION)
+    {
+      if (ifunc_type_chars == NULL || ifunc_type_chars[0] == 0)
+	; /* Change nothing.  */
+      else if (sym->flags & BSF_GLOBAL) 
+	syminfo.type = ifunc_type_chars[0];
+      else if (ifunc_type_chars[1] != 0)
+	syminfo.type = ifunc_type_chars[1];
+    }
+
   info.sinfo = &syminfo;
   info.ssize = ssize;
   /* Synthetic symbols do not have a full symbol type set of data available.
@@ -899,7 +923,7 @@ print_symbol (bfd *        abfd,
     }
   else
     {
-      info.elfinfo = elf_symbol_from (abfd, sym);
+      info.elfinfo = elf_symbol_from (sym);
       info.coffinfo = coff_symbol_from (sym);
     }
 
@@ -1829,6 +1853,10 @@ main (int argc, char **argv)
 #else
 	  fatal (_("sorry - this program has been built without plugin support\n"));
 #endif
+	  break;
+
+	case OPTION_IFUNC_CHARS:
+	  ifunc_type_chars = optarg;
 	  break;
 
 	case 0:		/* A long option that just sets a flag.  */

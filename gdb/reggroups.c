@@ -1,6 +1,6 @@
 /* Register groupings for GDB, the GNU debugger.
 
-   Copyright (C) 2002-2020 Free Software Foundation, Inc.
+   Copyright (C) 2002-2021 Free Software Foundation, Inc.
 
    Contributed by Red Hat.
 
@@ -278,7 +278,7 @@ reggroups_dump (struct gdbarch *gdbarch, struct ui_file *file)
       }
 
       /* Note: If you change this, be sure to also update the
-         documentation.  */
+	 documentation.  */
       
       fprintf_unfiltered (file, "\n");
 

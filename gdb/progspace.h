@@ -1,6 +1,6 @@
 /* Program and address space management, for GDB, the GNU debugger.
 
-   Copyright (C) 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2009-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -272,6 +272,42 @@ struct program_space
      for (so_list *so : pspace->solibs ()) { ... }  */
   next_adapter<struct so_list> solibs () const;
 
+  /* Close and clear exec_bfd.  If we end up with no target sections
+     to read memory from, this unpushes the exec_ops target.  */
+  void exec_close ();
+
+  /* Return the exec BFD for this program space.  */
+  bfd *exec_bfd () const
+  {
+    return ebfd.get ();
+  }
+
+  /* Set the exec BFD for this program space to ABFD.  */
+  void set_exec_bfd (gdb_bfd_ref_ptr &&abfd)
+  {
+    ebfd = std::move (abfd);
+  }
+
+  /* Reset saved solib data at the start of an solib event.  This lets
+     us properly collect the data when calling solib_add, so it can then
+     later be printed.  */
+  void clear_solib_cache ();
+
+  /* Returns true iff there's no inferior bound to this program
+     space.  */
+  bool empty ();
+
+  /* Remove all target sections owned by OWNER.  */
+  void remove_target_sections (void *owner);
+
+  /* Add the sections array defined by SECTIONS to the
+     current set of target sections.  */
+  void add_target_sections (void *owner,
+			    const target_section_table &sections);
+
+  /* Add the sections of OBJFILE to the current set of target
+     sections.  They are given OBJFILE as the "owner".  */
+  void add_target_sections (struct objfile *objfile);
 
   /* Unique ID number.  */
   int num = 0;
@@ -280,13 +316,13 @@ struct program_space
      managed by the exec target.  */
 
   /* The BFD handle for the main executable.  */
-  bfd *ebfd = NULL;
+  gdb_bfd_ref_ptr ebfd;
   /* The last-modified time, from when the exec was brought in.  */
   long ebfd_mtime = 0;
   /* Similar to bfd_get_filename (exec_bfd) but in original form given
-     by user, without symbolic links and pathname resolved.
-     It needs to be freed by xfree.  It is not NULL iff EBFD is not NULL.  */
-  char *pspace_exec_filename = NULL;
+     by user, without symbolic links and pathname resolved.  It is not
+     NULL iff EBFD is not NULL.  */
+  gdb::unique_xmalloc_ptr<char> exec_filename;
 
   /* Binary file diddling handle for the core file.  */
   gdb_bfd_ref_ptr cbfd;
@@ -325,7 +361,7 @@ struct program_space
 
   /* The set of target sections matching the sections mapped into
      this program space.  Managed by both exec_ops and solib.c.  */
-  struct target_section_table target_sections {};
+  target_section_table target_sections;
 
   /* List of shared objects mapped into this space.  Managed by
      solib.c.  */
@@ -357,23 +393,11 @@ struct address_space
   REGISTRY_FIELDS;
 };
 
-/* The object file that the main symbol table was loaded from (e.g. the
-   argument to the "symbol-file" or "file" command).  */
-
-#define symfile_objfile current_program_space->symfile_object_file
-
-/* The set of target sections matching the sections mapped into the
-   current program space.  */
-#define current_target_sections (&current_program_space->target_sections)
-
 /* The list of all program spaces.  There's always at least one.  */
 extern std::vector<struct program_space *>program_spaces;
 
 /* The current program space.  This is always non-null.  */
 extern struct program_space *current_program_space;
-
-/* Returns true iff there's no inferior bound to PSPACE.  */
-extern int program_space_empty_p (struct program_space *pspace);
 
 /* Copies program space SRC to DEST.  Copies the main executable file,
    and the main symbol file.  Returns DEST.  */
@@ -428,11 +452,6 @@ extern int address_space_num (struct address_space *aspace);
    target description, to fixup the program/address spaces
    mappings.  */
 extern void update_address_spaces (void);
-
-/* Reset saved solib data at the start of an solib event.  This lets
-   us properly collect the data when calling solib_add, so it can then
-   later be printed.  */
-extern void clear_program_space_solib_cache (struct program_space *);
 
 /* Keep a registry of per-pspace data-pointers required by other GDB
    modules.  */

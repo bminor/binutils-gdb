@@ -1,6 +1,6 @@
 /* Support for printing C values for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -416,23 +416,6 @@ c_value_print_int (struct value *val, struct ui_file *stream,
     }
 }
 
-/* c_value_print helper for TYPE_CODE_MEMBERPTR.  */
-
-static void
-c_value_print_memberptr (struct value *val, struct ui_file *stream,
-			 int recurse,
-			 const struct value_print_options *options)
-{
-  if (!options->format)
-    {
-      struct type *type = check_typedef (value_type (val));
-      const gdb_byte *valaddr = value_contents_for_printing (val);
-      cp_print_class_member (valaddr, type, stream, "&");
-    }
-  else
-    generic_value_print (val, stream, recurse, options, &c_decorations);
-}
-
 /* See c-lang.h.  */
 
 void
@@ -440,17 +423,12 @@ c_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
 		     const struct value_print_options *options)
 {
   struct type *type = value_type (val);
-  const gdb_byte *valaddr = value_contents_for_printing (val);
 
   type = check_typedef (type);
   switch (type->code ())
     {
     case TYPE_CODE_ARRAY:
       c_value_print_array (val, stream, recurse, options);
-      break;
-
-    case TYPE_CODE_METHODPTR:
-      cplus_print_method_ptr (valaddr, type, stream);
       break;
 
     case TYPE_CODE_PTR:
@@ -466,10 +444,8 @@ c_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
       c_value_print_int (val, stream, options);
       break;
 
+    case TYPE_CODE_METHODPTR:
     case TYPE_CODE_MEMBERPTR:
-      c_value_print_memberptr (val, stream, recurse, options);
-      break;
-
     case TYPE_CODE_REF:
     case TYPE_CODE_RVALUE_REF:
     case TYPE_CODE_ENUM:
@@ -517,9 +493,9 @@ c_value_print (struct value *val, struct ui_file *stream,
       struct type *original_type = value_type (val);
 
       /* Hack:  remove (char *) for char strings.  Their
-         type is indicated by the quoted string anyway.
-         (Don't use c_textual_element_type here; quoted strings
-         are always exactly (char *), (wchar_t *), or the like.  */
+	 type is indicated by the quoted string anyway.
+	 (Don't use c_textual_element_type here; quoted strings
+	 are always exactly (char *), (wchar_t *), or the like.  */
       if (original_type->code () == TYPE_CODE_PTR
 	  && original_type->name () == NULL
 	  && TYPE_TARGET_TYPE (original_type)->name () != NULL

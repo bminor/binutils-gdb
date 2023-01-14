@@ -1,6 +1,6 @@
 /* Target-dependent code for the NEC V850 for GDB, the GNU debugger.
 
-   Copyright (C) 1996-2020 Free Software Foundation, Inc.
+   Copyright (C) 1996-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -286,7 +286,7 @@ struct v850_frame_cache
   int uses_fp;
   
   /* Saved registers.  */
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 /* Info gleaned from scanning a function's prologue.  */
@@ -539,7 +539,7 @@ v850_use_struct_convention (struct gdbarch *gdbarch, struct type *type)
 	return 0;
 
       if (fld_type->code () == TYPE_CODE_ARRAY)
-        {
+	{
 	  tgt_type = TYPE_TARGET_TYPE (fld_type);
 	  if (v850_type_is_scalar (tgt_type) && TYPE_LENGTH (tgt_type) >= 4)
 	    return 0;
@@ -554,7 +554,7 @@ v850_use_struct_convention (struct gdbarch *gdbarch, struct type *type)
       && TYPE_LENGTH (type->field (0).type ()) == 4)
     {
       for (i = 1; i < type->num_fields (); ++i)
-        {
+	{
 	  fld_type = type->field (0).type ();
 	  if (fld_type->code () == TYPE_CODE_ARRAY)
 	    {
@@ -573,7 +573,7 @@ v850_use_struct_convention (struct gdbarch *gdbarch, struct type *type)
   if (type->code () == TYPE_CODE_UNION)
     {
       for (i = 0; i < type->num_fields (); ++i)
-        {
+	{
 	  fld_type = type->field (0).type ();
 	  if (!v850_use_struct_convention (gdbarch, fld_type))
 	    return 0;
@@ -880,28 +880,28 @@ v850_analyze_prologue (struct gdbarch *gdbarch,
 	}
 
       else if ((insn & 0xffe0) == ((E_SP_REGNUM << 11) | 0x0240))
-        /* add <imm>,sp */
+	/* add <imm>,sp */
 	pi->sp_offset += ((insn & 0x1f) ^ 0x10) - 0x10;
       else if (insn == ((E_SP_REGNUM << 11) | 0x0600 | E_SP_REGNUM))
-        /* addi <imm>,sp,sp */
+	/* addi <imm>,sp,sp */
 	pi->sp_offset += insn2;
       else if (insn == ((E_FP_REGNUM << 11) | 0x0000 | E_SP_REGNUM))
-        /* mov sp,fp */
+	/* mov sp,fp */
 	pi->uses_fp = 1;
       else if (insn == ((E_R12_REGNUM << 11) | 0x0640 | E_R0_REGNUM))
-        /* movhi hi(const),r0,r12 */
+	/* movhi hi(const),r0,r12 */
 	r12_tmp = insn2 << 16;
       else if (insn == ((E_R12_REGNUM << 11) | 0x0620 | E_R12_REGNUM))
-        /* movea lo(const),r12,r12 */
+	/* movea lo(const),r12,r12 */
 	r12_tmp += insn2;
       else if (insn == ((E_SP_REGNUM << 11) | 0x01c0 | E_R12_REGNUM) && r12_tmp)
-        /* add r12,sp */
+	/* add r12,sp */
 	pi->sp_offset += r12_tmp;
       else if (insn == ((E_EP_REGNUM << 11) | 0x0000 | E_SP_REGNUM))
-        /* mov sp,ep */
+	/* mov sp,ep */
 	ep_used = 1;
       else if (insn == ((E_EP_REGNUM << 11) | 0x0000 | E_R1_REGNUM))
-        /* mov r1,ep */
+	/* mov r1,ep */
 	ep_used = 0;
       else if (((insn & 0x07ff) == (0x0760 | E_SP_REGNUM)	
 		|| (pi->uses_fp
@@ -933,7 +933,7 @@ v850_analyze_prologue (struct gdbarch *gdbarch,
   for (pifsr_tmp = pifsrs; pifsr_tmp != pifsr; pifsr_tmp++)
     {
       pifsr_tmp->offset -= pi->sp_offset - pifsr_tmp->cur_frameoffset;
-      pi->saved_regs[pifsr_tmp->reg].addr = pifsr_tmp->offset;
+      pi->saved_regs[pifsr_tmp->reg].set_addr (pifsr_tmp->offset);
     }
 
   return current_pc;
@@ -1052,7 +1052,7 @@ v850_push_dummy_call (struct gdbarch *gdbarch,
       gdb_byte valbuf[v850_reg_size];
 
       if (!v850_type_is_scalar (value_type (*args))
-         && gdbarch_tdep (gdbarch)->abi == V850_ABI_GCC
+	 && gdbarch_tdep (gdbarch)->abi == V850_ABI_GCC
 	  && TYPE_LENGTH (value_type (*args)) > E_MAX_RETTYPE_SIZE_IN_REGS)
 	{
 	  store_unsigned_integer (valbuf, 4, byte_order,
@@ -1067,8 +1067,8 @@ v850_push_dummy_call (struct gdbarch *gdbarch,
 	}
 
       if (gdbarch_tdep (gdbarch)->eight_byte_align
-          && v850_eight_byte_align_p (value_type (*args)))
-        {
+	  && v850_eight_byte_align_p (value_type (*args)))
+	{
 	  if (argreg <= E_ARGLAST_REGNUM && (argreg & 1))
 	    argreg++;
 	  else if (stack_offset & 0x4)
@@ -1262,25 +1262,25 @@ v850_frame_cache (struct frame_info *this_frame, void **this_cache)
   if (!cache->uses_fp)
     {
       /* We didn't find a valid frame, which means that CACHE->base
-         currently holds the frame pointer for our calling frame.  If
-         we're at the start of a function, or somewhere half-way its
-         prologue, the function's frame probably hasn't been fully
-         setup yet.  Try to reconstruct the base address for the stack
-         frame by looking at the stack pointer.  For truly "frameless"
-         functions this might work too.  */
+	 currently holds the frame pointer for our calling frame.  If
+	 we're at the start of a function, or somewhere half-way its
+	 prologue, the function's frame probably hasn't been fully
+	 setup yet.  Try to reconstruct the base address for the stack
+	 frame by looking at the stack pointer.  For truly "frameless"
+	 functions this might work too.  */
       cache->base = get_frame_register_unsigned (this_frame, E_SP_REGNUM);
     }
 
   /* Now that we have the base address for the stack frame we can
      calculate the value of sp in the calling frame.  */
-  trad_frame_set_value (cache->saved_regs, E_SP_REGNUM,
-  			cache->base - cache->sp_offset);
+  cache->saved_regs[E_SP_REGNUM].set_value (cache->base - cache->sp_offset);
 
   /* Adjust all the saved registers such that they contain addresses
      instead of offsets.  */
   for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
-    if (trad_frame_addr_p (cache->saved_regs, i))
-      cache->saved_regs[i].addr += cache->base;
+    if (cache->saved_regs[i].is_addr ())
+      cache->saved_regs[i].set_addr (cache->saved_regs[i].addr ()
+				     + cache->base);
 
   /* The call instruction moves the caller's PC in the callee's LP.
      Since this is an unwind, do the reverse.  Copy the location of LP
@@ -1314,7 +1314,7 @@ v850_frame_this_id (struct frame_info *this_frame, void **this_cache,
   if (cache->base == 0)
     return;
 
-  *this_id = frame_id_build (cache->saved_regs[E_SP_REGNUM].addr, cache->pc);
+  *this_id = frame_id_build (cache->saved_regs[E_SP_REGNUM].addr (), cache->pc);
 }
 
 static const struct frame_unwind v850_frame_unwind = {
@@ -1369,7 +1369,7 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
       if (gdbarch_tdep (arches->gdbarch)->e_flags != e_flags
-          || gdbarch_tdep (arches->gdbarch)->e_machine != e_machine)
+	  || gdbarch_tdep (arches->gdbarch)->e_machine != e_machine)
 	continue;
 
       return arches->gdbarch;

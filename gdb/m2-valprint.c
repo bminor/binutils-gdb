@@ -1,6 +1,6 @@
 /* Support for printing Modula 2 values for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2020 Free Software Foundation, Inc.
+   Copyright (C) 1986-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -42,7 +42,7 @@ m2_print_array_contents (struct value *val,
 
 
 /* get_long_set_bounds - assigns the bounds of the long set to low and
-                         high.  */
+			 high.  */
 
 int
 get_long_set_bounds (struct type *type, LONGEST *low, LONGEST *high)
@@ -97,7 +97,7 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
 
   target = TYPE_TARGET_TYPE (range);
 
-  if (get_discrete_bounds (range, &field_low, &field_high) >= 0)
+  if (get_discrete_bounds (range, &field_low, &field_high))
     {
       for (i = low_bound; i <= high_bound; i++)
 	{
@@ -137,7 +137,7 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
 	      if (field == len)
 		break;
 	      range = type->field (field).type ()->index_type ();
-	      if (get_discrete_bounds (range, &field_low, &field_high) < 0)
+	      if (!get_discrete_bounds (range, &field_low, &field_high))
 		break;
 	      target = TYPE_TARGET_TYPE (range);
 	    }
@@ -249,10 +249,10 @@ print_variable_at_address (struct type *type,
 
 
 /* m2_print_array_contents - prints out the contents of an
-                             array up to a max_print values.
-                             It prints arrays of char as a string
-                             and all other data types as comma
-                             separated values.  */
+			     array up to a max_print values.
+			     It prints arrays of char as a string
+			     and all other data types as comma
+			     separated values.  */
 
 static void
 m2_print_array_contents (struct value *val,
@@ -298,8 +298,9 @@ static const struct generic_val_print_decorations m2_decorations =
 /* See m2-lang.h.  */
 
 void
-m2_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
-		      const struct value_print_options *options)
+m2_language::value_print_inner (struct value *val, struct ui_file *stream,
+				int recurse,
+				const struct value_print_options *options) const
 {
   unsigned len;
   struct type *elttype;
@@ -323,7 +324,7 @@ m2_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
 	      && (options->format == 0 || options->format == 's'))
 	    {
 	      /* If requested, look for the first null char and only print
-	         elements up to it.  */
+		 elements up to it.  */
 	      if (options->stop_print_at_null)
 		{
 		  unsigned int temp_len;
@@ -336,8 +337,8 @@ m2_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
 		  len = temp_len;
 		}
 
-	      LA_PRINT_STRING (stream, TYPE_TARGET_TYPE (type),
-			       valaddr, len, NULL, 0, options);
+	      printstr (stream, TYPE_TARGET_TYPE (type), valaddr, len,
+			NULL, 0, options);
 	    }
 	  else
 	    {
@@ -398,7 +399,7 @@ m2_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
 
 	  fputs_filtered ("{", stream);
 
-	  i = get_discrete_bounds (range, &low_bound, &high_bound);
+	  i = get_discrete_bounds (range, &low_bound, &high_bound) ? 0 : -1;
 	maybe_bad_bstring:
 	  if (i < 0)
 	    {
@@ -445,16 +446,9 @@ m2_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
       if (TYPE_LENGTH (type) == TYPE_LENGTH (TYPE_TARGET_TYPE (type)))
 	{
 	  struct value *v = value_cast (TYPE_TARGET_TYPE (type), val);
-	  m2_value_print_inner (v, stream, recurse, options);
+	  value_print_inner (v, stream, recurse, options);
 	  break;
 	}
-      /* FIXME: create_static_range_type does not set the unsigned bit in a
-         range type (I think it probably should copy it from the target
-         type), so we won't print values which are too large to
-         fit in a signed integer correctly.  */
-      /* FIXME: Doesn't handle ranges of enums correctly.  (Can't just
-         print with the target type, though, because the size of our type
-         and the target type might differ).  */
       /* FALLTHROUGH */
 
     case TYPE_CODE_REF:

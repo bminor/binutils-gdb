@@ -1,5 +1,5 @@
 /* YACC parser for Pascal expressions, for GDB.
-   Copyright (C) 2000-2020 Free Software Foundation, Inc.
+   Copyright (C) 2000-2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -115,7 +115,6 @@ static int parse_number (struct parser_state *,
 			 const char *, int, int, YYSTYPE *);
 
 static struct type *current_type;
-static struct internalvar *intvar;
 static int leftdiv_is_integer;
 static void push_current_type (void);
 static void pop_current_type (void);
@@ -161,7 +160,7 @@ static int search_field;
 /* Special type cases, put in to allow the parser to distinguish different
    legal basetypes.  */
 
-%token <voidval> DOLLAR_VARIABLE
+%token <sval> DOLLAR_VARIABLE
 
 
 /* Object pascal */
@@ -192,7 +191,6 @@ static int search_field;
 %%
 
 start   :	{ current_type = NULL;
-		  intvar = NULL;
 		  search_field = 0;
 		  leftdiv_is_integer = 0;
 		}
@@ -303,10 +301,9 @@ exp	:	field_exp COMPLETE
 exp	:	exp '['
 			/* We need to save the current_type value.  */
 			{ const char *arrayname;
-			  int arrayfieldindex;
-			  arrayfieldindex = is_pascal_string_type (
-				current_type, NULL, NULL,
-				NULL, NULL, &arrayname);
+			  int arrayfieldindex
+			    = pascal_is_string_type (current_type, NULL, NULL,
+						     NULL, NULL, &arrayname);
 			  if (arrayfieldindex)
 			    {
 			      struct stoken stringsval;
@@ -348,7 +345,7 @@ exp	:	exp '('
 	;
 
 arglist	:
-         | exp
+	 | exp
 			{ pstate->arglist_len = 1; }
 	 | arglist ',' exp   %prec ABOVE_COMMA
 			{ pstate->arglist_len++; }
@@ -526,17 +523,28 @@ exp	:	variable
 	;
 
 exp	:	DOLLAR_VARIABLE
-			/* Already written by write_dollar_variable.
-			   Handle current_type.  */
- 			{  if (intvar) {
- 			     struct value * val, * mark;
+			{
+			  write_dollar_variable (pstate, $1);
 
-			     mark = value_mark ();
- 			     val = value_of_internalvar (pstate->gdbarch (),
- 							 intvar);
- 			     current_type = value_type (val);
-			     value_release_to_mark (mark);
- 			   }
+			  /* $ is the normal prefix for pascal
+			     hexadecimal values but this conflicts
+			     with the GDB use for debugger variables
+			     so in expression to enter hexadecimal
+			     values we still need to use C syntax with
+			     0xff */
+			  std::string tmp ($1.ptr, $1.length);
+			  /* Handle current_type.  */
+			  struct internalvar *intvar
+			    = lookup_only_internalvar (tmp.c_str () + 1);
+			  if (intvar != nullptr)
+			    {
+			      scoped_value_mark mark;
+
+			      value *val
+				= value_of_internalvar (pstate->gdbarch (),
+							intvar);
+			      current_type = value_type (val);
+			    }
  			}
  	;
 
@@ -731,7 +739,7 @@ variable:	name_not_typename
 			      struct value * this_val;
 			      struct type * this_type;
 			      /* Object pascal: it hangs off of `this'.  Must
-			         not inadvertently convert from a method call
+				 not inadvertently convert from a method call
 				 to data ref.  */
 			      pstate->block_tracker->update (sym);
 			      write_exp_elt_opcode (pstate, OP_THIS);
@@ -861,7 +869,7 @@ parse_number (struct parser_state *par_state,
   if (parsed_float)
     {
       /* Handle suffixes: 'f' for float, 'l' for long double.
-         FIXME: This appears to be an extension -- do we want this?  */
+	 FIXME: This appears to be an extension -- do we want this?  */
       if (len >= 1 && tolower (p[len - 1]) == 'f')
 	{
 	  putithere->typed_val_float.type
@@ -1111,9 +1119,9 @@ uptok (const char *tokstart, int namelen)
   for (i = 0;i <= namelen;i++)
     {
       if ((tokstart[i]>='a' && tokstart[i]<='z'))
-        uptokstart[i] = tokstart[i]-('a'-'A');
+	uptokstart[i] = tokstart[i]-('a'-'A');
       else
-        uptokstart[i] = tokstart[i];
+	uptokstart[i] = tokstart[i];
     }
   uptokstart[namelen]='\0';
   return uptokstart;
@@ -1144,27 +1152,27 @@ yylex (void)
   if (explen > 2)
     for (int i = 0; i < sizeof (tokentab3) / sizeof (tokentab3[0]); i++)
       if (strncasecmp (tokstart, tokentab3[i].oper, 3) == 0
-          && (!isalpha (tokentab3[i].oper[0]) || explen == 3
-              || (!isalpha (tokstart[3])
+	  && (!isalpha (tokentab3[i].oper[0]) || explen == 3
+	      || (!isalpha (tokstart[3])
 		  && !isdigit (tokstart[3]) && tokstart[3] != '_')))
-        {
-          pstate->lexptr += 3;
-          yylval.opcode = tokentab3[i].opcode;
-          return tokentab3[i].token;
-        }
+	{
+	  pstate->lexptr += 3;
+	  yylval.opcode = tokentab3[i].opcode;
+	  return tokentab3[i].token;
+	}
 
   /* See if it is a special token of length 2.  */
   if (explen > 1)
   for (int i = 0; i < sizeof (tokentab2) / sizeof (tokentab2[0]); i++)
       if (strncasecmp (tokstart, tokentab2[i].oper, 2) == 0
-          && (!isalpha (tokentab2[i].oper[0]) || explen == 2
-              || (!isalpha (tokstart[2])
+	  && (!isalpha (tokentab2[i].oper[0]) || explen == 2
+	      || (!isalpha (tokstart[2])
 		  && !isdigit (tokstart[2]) && tokstart[2] != '_')))
-        {
-          pstate->lexptr += 2;
-          yylval.opcode = tokentab2[i].opcode;
-          return tokentab2[i].token;
-        }
+	{
+	  pstate->lexptr += 2;
+	  yylval.opcode = tokentab2[i].opcode;
+	  return tokentab2[i].token;
+	}
 
   switch (c = *tokstart)
     {
@@ -1204,8 +1212,8 @@ yylex (void)
 	      if (pstate->lexptr[-1] != '\'')
 		error (_("Unmatched single quote."));
 	      namelen -= 2;
-              tokstart++;
-              uptokstart = uptok(tokstart,namelen);
+	      tokstart++;
+	      uptokstart = uptok(tokstart,namelen);
 	      goto tryname;
 	    }
 	  error (_("Invalid character constant."));
@@ -1292,7 +1300,7 @@ yylex (void)
 	  }
 	toktype = parse_number (pstate, tokstart,
 				p - tokstart, got_dot | got_e, &yylval);
-        if (toktype == ERROR)
+	if (toktype == ERROR)
 	  {
 	    char *err_copy = (char *) alloca (p - tokstart + 1);
 
@@ -1459,22 +1467,22 @@ yylex (void)
 	}
       if (strcmp (uptokstart, "FALSE") == 0)
 	{
-          yylval.lval = 0;
+	  yylval.lval = 0;
 	  free (uptokstart);
-          return FALSEKEYWORD;
-        }
+	  return FALSEKEYWORD;
+	}
       break;
     case 4:
       if (strcmp (uptokstart, "TRUE") == 0)
 	{
-          yylval.lval = 1;
+	  yylval.lval = 1;
 	  free (uptokstart);
   	  return TRUEKEYWORD;
-        }
+	}
       if (strcmp (uptokstart, "SELF") == 0)
-        {
-          /* Here we search for 'this' like
-             inserted in FPC stabs debug info.  */
+	{
+	  /* Here we search for 'this' like
+	     inserted in FPC stabs debug info.  */
 	  static const char this_name[] = "this";
 
 	  if (lookup_symbol (this_name, pstate->expression_context_block,
@@ -1494,17 +1502,6 @@ yylex (void)
 
   if (*tokstart == '$')
     {
-      char *tmp;
-
-      /* $ is the normal prefix for pascal hexadecimal values
-        but this conflicts with the GDB use for debugger variables
-        so in expression to enter hexadecimal values
-        we still need to use C syntax with 0xff  */
-      write_dollar_variable (pstate, yylval.sval);
-      tmp = (char *) alloca (namelen + 1);
-      memcpy (tmp, tokstart, namelen);
-      tmp[namelen] = '\0';
-      intvar = lookup_only_internalvar (tmp + 1);
       free (uptokstart);
       return DOLLAR_VARIABLE;
     }
@@ -1534,10 +1531,10 @@ yylex (void)
     if (!sym && is_a_field_of_this.type == NULL && !is_a_field)
       {
        for (int i = 0; i <= namelen; i++)
-         {
-           if ((tmp[i] >= 'a' && tmp[i] <= 'z'))
-             tmp[i] -= ('a'-'A');
-         }
+	 {
+	   if ((tmp[i] >= 'a' && tmp[i] <= 'z'))
+	     tmp[i] -= ('a'-'A');
+	 }
        if (search_field && current_type)
 	 is_a_field = (lookup_struct_elt_type (current_type,
 					       tmp.c_str (), 1) != NULL);
@@ -1551,16 +1548,16 @@ yylex (void)
     if (!sym && is_a_field_of_this.type == NULL && !is_a_field)
       {
        for (int i = 0; i <= namelen; i++)
-         {
-           if (i == 0)
-             {
-              if ((tmp[i] >= 'a' && tmp[i] <= 'z'))
-                tmp[i] -= ('a'-'A');
-             }
-           else
-           if ((tmp[i] >= 'A' && tmp[i] <= 'Z'))
-             tmp[i] -= ('A'-'a');
-          }
+	 {
+	   if (i == 0)
+	     {
+	      if ((tmp[i] >= 'a' && tmp[i] <= 'z'))
+		tmp[i] -= ('a'-'A');
+	     }
+	   else
+	   if ((tmp[i] >= 'A' && tmp[i] <= 'Z'))
+	     tmp[i] -= ('A'-'a');
+	  }
        if (search_field && current_type)
 	 is_a_field = (lookup_struct_elt_type (current_type,
 					       tmp.c_str (), 1) != NULL);
@@ -1581,7 +1578,7 @@ yylex (void)
 	yylval.ssym.sym.symbol = NULL;
 	yylval.ssym.sym.block = NULL;
 	free (uptokstart);
-        yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
+	yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
 	if (is_a_field)
 	  return FIELDNAME;
 	else
@@ -1591,7 +1588,7 @@ yylex (void)
        no psymtabs (coff, xcoff, or some future change to blow away the
        psymtabs once once symbols are read).  */
     if ((sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
-        || lookup_symtab (tmp.c_str ()))
+	|| lookup_symtab (tmp.c_str ()))
       {
 	yylval.ssym.sym.symbol = sym;
 	yylval.ssym.sym.block = NULL;
@@ -1600,7 +1597,7 @@ yylex (void)
 	return BLOCKNAME;
       }
     if (sym && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
-        {
+	{
 #if 1
 	  /* Despite the following flaw, we need to keep this code enabled.
 	     Because we can get called from check_stub_method, if we don't
@@ -1692,7 +1689,7 @@ yylex (void)
 #endif /* not 0 */
 	  free (uptokstart);
 	  return TYPENAME;
-        }
+	}
     yylval.tsym.type
       = language_lookup_primitive_type (pstate->language (),
 					pstate->gdbarch (), tmp.c_str ());
@@ -1706,8 +1703,8 @@ yylex (void)
        when the input radix permits them, can be names or numbers
        depending on the parse.  Note we support radixes > 16 here.  */
     if (!sym
-        && ((tokstart[0] >= 'a' && tokstart[0] < 'a' + input_radix - 10)
-            || (tokstart[0] >= 'A' && tokstart[0] < 'A' + input_radix - 10)))
+	&& ((tokstart[0] >= 'a' && tokstart[0] < 'a' + input_radix - 10)
+	    || (tokstart[0] >= 'A' && tokstart[0] < 'A' + input_radix - 10)))
       {
  	YYSTYPE newlval;	/* Its value is ignored.  */
 	hextype = parse_number (pstate, tokstart, namelen, 0, &newlval);
@@ -1729,8 +1726,10 @@ yylex (void)
   }
 }
 
+/* See language.h.  */
+
 int
-pascal_parse (struct parser_state *par_state)
+pascal_language::parser (struct parser_state *par_state) const
 {
   /* Setting up the parser state.  */
   scoped_restore pstate_restore = make_scoped_restore (&pstate);
