@@ -86,13 +86,13 @@ proc test_python_helper {} {
     # stop is being detected from the inner GDB, hence the use of -i
     # here.
     gdb_test_multiple "continue" "start inner gdb" {
-	-i "$inferior_spawn_id"
 	-re "received signal SIGSEGV.* in GC_.*$outer_prompt_re" {
 	    # Some versions of the GC used by Guile cause a SEGV
 	    # during stack probing.  Ignore this and carry on.
 	    send_gdb "continue\n"
 	    exp_continue
 	}
+	-i "$inferior_spawn_id"
 	-re "\r\n$gdb_prompt $" {
 	    pass $gdb_test_name
 	}

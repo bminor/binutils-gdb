@@ -74,13 +74,13 @@ proc test_with_self { } {
 			"$gdb_prompt $"]
 	set test "xgdb is at prompt"
 	gdb_test_multiple "continue" $test {
-	    -i "$inferior_spawn_id"
 	    -re "received signal SIGSEGV.* in GC_.*$gdb_prompt" {
 		# Some versions of the GC used by Guile cause a SEGV
 		# during stack probing.  Ignore this and carry on.
 		send_gdb "continue\n"
 		exp_continue
 	    }
+	    -i "$inferior_spawn_id"
 	    -re "$banner" {
 		pass $test
 	    }
