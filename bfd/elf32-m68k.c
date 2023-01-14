@@ -971,7 +971,7 @@ static struct bfd_link_hash_table *
 elf_m68k_link_hash_table_create (bfd *abfd)
 {
   struct elf_m68k_link_hash_table *ret;
-  bfd_size_type amt = sizeof (struct elf_m68k_link_hash_table);
+  size_t amt = sizeof (struct elf_m68k_link_hash_table);
 
   ret = (struct elf_m68k_link_hash_table *) bfd_zmalloc (amt);
   if (ret == (struct elf_m68k_link_hash_table *) NULL)

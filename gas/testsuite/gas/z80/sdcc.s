@@ -149,7 +149,7 @@ _start::
 	jp	500$
 	jp	600$
 	jp	700$
-.L_func:
+_func:
 	ld	hl,0
 	ld	(hl),#<function
 00100$:

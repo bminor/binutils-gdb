@@ -87,7 +87,7 @@ static asection bfd_debug_section =
 bfd_boolean
 _bfd_ecoff_mkobject (bfd *abfd)
 {
-  bfd_size_type amt = sizeof (ecoff_data_type);
+  size_t amt = sizeof (ecoff_data_type);
 
   abfd->tdata.ecoff_obj_data = (struct ecoff_tdata *) bfd_zalloc (abfd, amt);
   if (abfd->tdata.ecoff_obj_data == NULL)
@@ -465,13 +465,12 @@ ecoff_slurp_symbolic_header (bfd *abfd)
     }
 
   /* Read the symbolic information header.  */
-  raw = bfd_malloc (external_hdr_size);
+  if (bfd_seek (abfd, ecoff_data (abfd)->sym_filepos, SEEK_SET) != 0)
+    goto error_return;
+  raw = _bfd_malloc_and_read (abfd, external_hdr_size, external_hdr_size);
   if (raw == NULL)
     goto error_return;
 
-  if (bfd_seek (abfd, ecoff_data (abfd)->sym_filepos, SEEK_SET) != 0
-      || bfd_bread (raw, external_hdr_size, abfd) != external_hdr_size)
-    goto error_return;
   internal_symhdr = &ecoff_data (abfd)->debug_info.symbolic_header;
   (*backend->debug_swap.swap_hdr_in) (abfd, raw, internal_symhdr);
 
@@ -514,6 +513,7 @@ _bfd_ecoff_slurp_symbolic_info (bfd *abfd,
   bfd_size_type raw_end;
   bfd_size_type cb_end;
   file_ptr pos;
+  size_t amt;
 
   BFD_ASSERT (debug == &ecoff_data (abfd)->debug_info);
 
@@ -570,18 +570,13 @@ _bfd_ecoff_slurp_symbolic_info (bfd *abfd,
       ecoff_data (abfd)->sym_filepos = 0;
       return TRUE;
     }
-  raw = bfd_alloc (abfd, raw_size);
-  if (raw == NULL)
-    return FALSE;
-
   pos = ecoff_data (abfd)->sym_filepos;
   pos += backend->debug_swap.external_hdr_size;
-  if (bfd_seek (abfd, pos, SEEK_SET) != 0
-      || bfd_bread (raw, raw_size, abfd) != raw_size)
-    {
-      bfd_release (abfd, raw);
-      return FALSE;
-    }
+  if (bfd_seek (abfd, pos, SEEK_SET) != 0)
+    return FALSE;
+  raw = _bfd_alloc_and_read (abfd, raw_size, raw_size);
+  if (raw == NULL)
+    return FALSE;
 
   ecoff_data (abfd)->raw_syments = raw;
 
@@ -615,8 +610,13 @@ _bfd_ecoff_slurp_symbolic_info (bfd *abfd,
 
      We need to look at the fdr to deal with a lot of information in
      the symbols, so we swap them here.  */
-  debug->fdr = (FDR *) bfd_alloc2 (abfd, internal_symhdr->ifdMax,
-				   sizeof (struct fdr));
+  if (_bfd_mul_overflow ((unsigned long) internal_symhdr->ifdMax,
+			 sizeof (struct fdr), &amt))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      return FALSE;
+    }
+  debug->fdr = (FDR *) bfd_alloc (abfd, amt);
   if (debug->fdr == NULL)
     return FALSE;
   external_fdr_size = backend->debug_swap.external_fdr_size;
@@ -650,7 +650,7 @@ asymbol *
 _bfd_ecoff_make_empty_symbol (bfd *abfd)
 {
   ecoff_symbol_type *new_symbol;
-  bfd_size_type amt = sizeof (ecoff_symbol_type);
+  size_t amt = sizeof (ecoff_symbol_type);
 
   new_symbol = (ecoff_symbol_type *) bfd_zalloc (abfd, amt);
   if (new_symbol == NULL)
@@ -872,6 +872,7 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
   char *eraw_end;
   FDR *fdr_ptr;
   FDR *fdr_end;
+  size_t amt;
 
   /* If we've already read in the symbol table, do nothing.  */
   if (ecoff_data (abfd)->canonical_symbols != NULL)
@@ -884,8 +885,13 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
   if (bfd_get_symcount (abfd) == 0)
     return TRUE;
 
-  internal = (ecoff_symbol_type *) bfd_alloc2 (abfd, bfd_get_symcount (abfd),
-					       sizeof (ecoff_symbol_type));
+  if (_bfd_mul_overflow (bfd_get_symcount (abfd),
+			 sizeof (ecoff_symbol_type), &amt))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      return FALSE;
+    }
+  internal = (ecoff_symbol_type *) bfd_alloc (abfd, amt);
   if (internal == NULL)
     return FALSE;
 
@@ -1599,7 +1605,7 @@ ecoff_slurp_reloc_table (bfd *abfd,
   arelent *internal_relocs;
   bfd_size_type external_reloc_size;
   bfd_size_type amt;
-  char *external_relocs;
+  bfd_byte *external_relocs;
   arelent *rptr;
   unsigned int i;
 
@@ -1611,19 +1617,22 @@ ecoff_slurp_reloc_table (bfd *abfd,
   if (! _bfd_ecoff_slurp_symbol_table (abfd))
     return FALSE;
 
+  external_reloc_size = backend->external_reloc_size;
+  amt = external_reloc_size * section->reloc_count;
+  if (bfd_seek (abfd, section->rel_filepos, SEEK_SET) != 0)
+    return FALSE;
+  external_relocs = _bfd_alloc_and_read (abfd, amt, amt);
+  if (external_relocs == NULL)
+    return FALSE;
+
   amt = section->reloc_count;
   amt *= sizeof (arelent);
   internal_relocs = (arelent *) bfd_alloc (abfd, amt);
-
-  external_reloc_size = backend->external_reloc_size;
-  amt = external_reloc_size * section->reloc_count;
-  external_relocs = (char *) bfd_alloc (abfd, amt);
-  if (internal_relocs == NULL || external_relocs == NULL)
-    return FALSE;
-  if (bfd_seek (abfd, section->rel_filepos, SEEK_SET) != 0)
-    return FALSE;
-  if (bfd_bread (external_relocs, amt, abfd) != amt)
-    return FALSE;
+  if (internal_relocs == NULL)
+    {
+      bfd_release (abfd, external_relocs);
+      return FALSE;
+    }
 
   for (i = 0, rptr = internal_relocs; i < section->reloc_count; i++, rptr++)
     {
@@ -1762,7 +1771,7 @@ _bfd_ecoff_find_nearest_line (bfd *abfd,
 
   if (ecoff_data (abfd)->find_line_info == NULL)
     {
-      bfd_size_type amt = sizeof (struct ecoff_find_line);
+      size_t amt = sizeof (struct ecoff_find_line);
 
       ecoff_data (abfd)->find_line_info =
 	  (struct ecoff_find_line *) bfd_zalloc (abfd, amt);
@@ -2928,15 +2937,11 @@ _bfd_ecoff_slurp_armap (bfd *abfd)
   parsed_size = mapdata->parsed_size;
   free (mapdata);
 
-  raw_armap = (char *) bfd_alloc (abfd, parsed_size);
+  raw_armap = (char *) _bfd_alloc_and_read (abfd, parsed_size, parsed_size);
   if (raw_armap == NULL)
-    return FALSE;
-
-  if (bfd_bread ((void *) raw_armap, parsed_size, abfd) != parsed_size)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_malformed_archive);
-      bfd_release (abfd, (void *) raw_armap);
       return FALSE;
     }
 
@@ -3230,7 +3235,7 @@ struct bfd_link_hash_table *
 _bfd_ecoff_bfd_link_hash_table_create (bfd *abfd)
 {
   struct ecoff_link_hash_table *ret;
-  bfd_size_type amt = sizeof (struct ecoff_link_hash_table);
+  size_t amt = sizeof (struct ecoff_link_hash_table);
 
   ret = (struct ecoff_link_hash_table *) bfd_malloc (amt);
   if (ret == NULL)
@@ -3486,23 +3491,19 @@ ecoff_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
   symhdr = &ecoff_data (abfd)->debug_info.symbolic_header;
 
   /* Read in the external symbols and external strings.  */
+  if (bfd_seek (abfd, symhdr->cbExtOffset, SEEK_SET) != 0)
+    return FALSE;
   external_ext_size = ecoff_backend (abfd)->debug_swap.external_ext_size;
   esize = symhdr->iextMax * external_ext_size;
-  external_ext = bfd_malloc (esize);
+  external_ext = _bfd_malloc_and_read (abfd, esize, esize);
   if (external_ext == NULL && esize != 0)
     goto error_return;
 
-  if (bfd_seek (abfd, (file_ptr) symhdr->cbExtOffset, SEEK_SET) != 0
-      || bfd_bread (external_ext, esize, abfd) != esize)
+  if (bfd_seek (abfd, symhdr->cbSsExtOffset, SEEK_SET) != 0)
     goto error_return;
-
-  ssext = (char *) bfd_malloc ((bfd_size_type) symhdr->issExtMax);
+  ssext = (char *) _bfd_malloc_and_read (abfd, symhdr->issExtMax,
+					 symhdr->issExtMax);
   if (ssext == NULL && symhdr->issExtMax != 0)
-    goto error_return;
-
-  if (bfd_seek (abfd, (file_ptr) symhdr->cbSsExtOffset, SEEK_SET) != 0
-      || (bfd_bread (ssext, (bfd_size_type) symhdr->issExtMax, abfd)
-	  != (bfd_size_type) symhdr->issExtMax))
     goto error_return;
 
   result = ecoff_link_add_externals (abfd, info, external_ext, ssext);
@@ -3745,25 +3746,31 @@ ecoff_final_link_debug_accumulate (bfd *output_bfd,
   HDRR *symhdr = &debug->symbolic_header;
   bfd_boolean ret;
 
-#define READ(ptr, offset, count, size, type)				 \
-  if (symhdr->count == 0)						 \
-    debug->ptr = NULL;							 \
-  else									 \
-    {									 \
-      bfd_size_type amt = (bfd_size_type) size * symhdr->count;		 \
-      debug->ptr = (type) bfd_malloc (amt);				 \
-      if (debug->ptr == NULL)						 \
-	{								 \
-	  ret = FALSE;							 \
-	  goto return_something;					 \
-	}								 \
-      if (bfd_seek (input_bfd, (file_ptr) symhdr->offset, SEEK_SET) != 0 \
-	  || bfd_bread (debug->ptr, amt, input_bfd) != amt)		 \
-	{								 \
-	  ret = FALSE;							 \
-	  goto return_something;					 \
-	}								 \
-    }
+#define READ(ptr, offset, count, size, type)				\
+  do									\
+    {									\
+      size_t amt;							\
+      debug->ptr = NULL;						\
+      if (symhdr->count == 0)						\
+	break;								\
+      if (_bfd_mul_overflow (size, symhdr->count, &amt))		\
+	{								\
+	  bfd_set_error (bfd_error_file_too_big);			\
+	  ret = FALSE;							\
+	  goto return_something;					\
+	}								\
+      if (bfd_seek (input_bfd, symhdr->offset, SEEK_SET) != 0)		\
+	{								\
+	  ret = FALSE;							\
+	  goto return_something;					\
+	}								\
+      debug->ptr = (type) _bfd_malloc_and_read (input_bfd, amt, amt);	\
+      if (debug->ptr == NULL)						\
+	{								\
+	  ret = FALSE;							\
+	  goto return_something;					\
+	}								\
+    } while (0)
 
   /* If raw_syments is not NULL, then the data was already by read by
      _bfd_ecoff_slurp_symbolic_info.  */
@@ -3863,13 +3870,11 @@ ecoff_indirect_link_order (bfd *output_bfd,
   external_reloc_size = ecoff_backend (input_bfd)->external_reloc_size;
   external_relocs_size = external_reloc_size * input_section->reloc_count;
 
-  external_relocs = bfd_malloc (external_relocs_size);
-  if (external_relocs == NULL && external_relocs_size != 0)
+  if (bfd_seek (input_bfd, input_section->rel_filepos, SEEK_SET) != 0)
     goto error_return;
-
-  if (bfd_seek (input_bfd, input_section->rel_filepos, SEEK_SET) != 0
-      || (bfd_bread (external_relocs, external_relocs_size, input_bfd)
-	  != external_relocs_size))
+  external_relocs = _bfd_malloc_and_read (input_bfd, external_relocs_size,
+					  external_relocs_size);
+  if (external_relocs == NULL && external_relocs_size != 0)
     goto error_return;
 
   /* Relocate the section contents.  */

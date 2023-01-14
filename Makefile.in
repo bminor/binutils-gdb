@@ -51976,6 +51976,8 @@ all-gdb: maybe-all-readline
 all-gdb: maybe-all-build-bison
 all-gdb: maybe-all-sim
 all-gdb: maybe-all-libtermcap
+configure-gdbserver: maybe-all-gnulib
+all-gdbserver: maybe-all-gnulib
 configure-libgui: maybe-configure-tcl
 configure-libgui: maybe-configure-tk
 all-libgui: maybe-all-tcl
@@ -52427,6 +52429,7 @@ configure-gnattools: stage_last
 configure-libcc1: stage_last
 configure-utils: stage_last
 configure-gdb: stage_last
+configure-gdbserver: stage_last
 configure-gdbsupport: stage_last
 configure-gprof: stage_last
 configure-sid: stage_last
@@ -52450,6 +52453,7 @@ all-gdb: maybe-all-libiconv
 all-gdb: maybe-all-opcodes
 all-gdb: maybe-all-libdecnumber
 all-gdb: maybe-all-libctf
+all-gdbserver: maybe-all-libiberty
 configure-gdbsupport: maybe-configure-bfd
 all-gdbsupport: maybe-all-bfd
 configure-gprof: maybe-configure-intl

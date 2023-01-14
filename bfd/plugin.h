@@ -33,6 +33,9 @@ typedef struct plugin_data_struct
 {
   int nsyms;
   const struct ld_plugin_symbol *syms;
+  bfd *real_bfd;
+  long real_nsyms;
+  asymbol **real_syms;
 }
 plugin_data_struct;
 

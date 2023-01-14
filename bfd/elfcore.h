@@ -335,6 +335,7 @@ NAME(_bfd_elf, core_find_build_id)
   Elf_Internal_Ehdr i_ehdr;	/* Elf file header, internal form.   */
   Elf_Internal_Phdr *i_phdr;
   unsigned int i;
+  size_t amt;
 
   /* Seek to the position of the segment at OFFSET.  */
   if (bfd_seek (abfd, offset, SEEK_SET) != 0)
@@ -384,8 +385,12 @@ NAME(_bfd_elf, core_find_build_id)
     goto fail;
 
   /* Read in program headers.  */
-  i_phdr = (Elf_Internal_Phdr *) bfd_alloc2 (abfd, i_ehdr.e_phnum,
-					     sizeof (*i_phdr));
+  if (_bfd_mul_overflow (i_ehdr.e_phnum, sizeof (*i_phdr), &amt))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      goto fail;
+    }
+  i_phdr = (Elf_Internal_Phdr *) bfd_alloc (abfd, amt);
   if (i_phdr == NULL)
     goto fail;
 

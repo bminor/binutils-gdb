@@ -653,9 +653,9 @@ proc test_artificial_arrays {} {
     gdb_test_escape_braces "p int1dim\[0\]${ctrlv}@2${ctrlv}@3" \
 	"({{0, 1}, {2, 3}, {4, 5}}|\[Cc\]annot.*)" \
 	{p int1dim[0]@2@3}
-    gdb_test_escape_braces "p int1dim\[0\]${ctrlv}@TWO" " = {0, 1}" \
+    gdb_test_escape_braces "p int1dim\[0\]${ctrlv}@FE_TWO" " = {0, 1}" \
         {p int1dim[0]@TWO}
-    gdb_test_escape_braces "p int1dim\[0\]${ctrlv}@TWO${ctrlv}@three" \
+    gdb_test_escape_braces "p int1dim\[0\]${ctrlv}@FE_TWO${ctrlv}@three" \
 	"({{0, 1}, {2, 3}, {4, 5}}|\[Cc\]annot.*)" \
 	{p int1dim[0]@TWO@three}
     gdb_test_escape_braces {p/x (short [])0x12345678} \
@@ -736,7 +736,21 @@ proc test_print_enums {} {
     # Regression test for PR11827.
     gdb_test "print some_volatile_enum" "enumvolval1"
 
-    gdb_test "print three" " = \\\(ONE \\| TWO\\\)"
+    # Print a flag enum.
+    gdb_test "print three" [string_to_regexp " = (FE_ONE | FE_TWO)"]
+
+    # Print a flag enum with value 0, where an enumerator has value 0.
+    gdb_test "print (enum flag_enum) 0x0" [string_to_regexp " = FE_NONE"]
+
+    # Print a flag enum with value 0, where no enumerator has value 0.
+    gdb_test "print flag_enum_without_zero" [string_to_regexp " = 0"]
+
+    # Print a flag enum with unknown bits set.
+    gdb_test "print (enum flag_enum) 0xf1" [string_to_regexp " = (FE_ONE | unknown: 0xf0)"]
+
+    # Test printing an enum not considered a "flag enum" (because one of its
+    # enumerators has multiple bits set).
+    gdb_test "print three_not_flag" [string_to_regexp " = 3"]
 }
 
 proc test_printf {} {

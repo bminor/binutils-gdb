@@ -212,7 +212,7 @@ _bfd_ar_sizepad (char *p, size_t n, bfd_size_type size)
 bfd_boolean
 _bfd_generic_mkarchive (bfd *abfd)
 {
-  bfd_size_type amt = sizeof (struct artdata);
+  size_t amt = sizeof (struct artdata);
 
   abfd->tdata.aout_ar_data = (struct artdata *) bfd_zalloc (abfd, amt);
   if (bfd_ardata (abfd) == NULL)
@@ -847,7 +847,7 @@ bfd_generic_archive_p (bfd *abfd)
 {
   struct artdata *tdata_hold;
   char armag[SARMAG + 1];
-  bfd_size_type amt;
+  size_t amt;
 
   if (bfd_bread (armag, SARMAG, abfd) != SARMAG)
     {
@@ -968,16 +968,11 @@ do_slurp_bsd_armap (bfd *abfd)
   if (parsed_size < 4)
     return FALSE;
 
-  raw_armap = (bfd_byte *) bfd_alloc (abfd, parsed_size);
+  raw_armap = (bfd_byte *) _bfd_alloc_and_read (abfd, parsed_size, parsed_size);
   if (raw_armap == NULL)
-    return FALSE;
-
-  if (bfd_bread (raw_armap, parsed_size, abfd) != parsed_size)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_malformed_archive);
-    byebye:
-      bfd_release (abfd, raw_armap);
       return FALSE;
     }
 
@@ -987,7 +982,8 @@ do_slurp_bsd_armap (bfd *abfd)
     {
       /* Probably we're using the wrong byte ordering.  */
       bfd_set_error (bfd_error_wrong_format);
-      goto byebye;
+      bfd_release (abfd, raw_armap);
+      return FALSE;
     }
 
   rbase = raw_armap + BSD_SYMDEF_COUNT_SIZE;
@@ -997,7 +993,10 @@ do_slurp_bsd_armap (bfd *abfd)
   amt = ardata->symdef_count * sizeof (carsym);
   ardata->symdefs = (struct carsym *) bfd_alloc (abfd, amt);
   if (!ardata->symdefs)
-    return FALSE;
+    {
+      bfd_release (abfd, raw_armap);
+      return FALSE;
+    }
 
   for (counter = 0, set = ardata->symdefs;
        counter < ardata->symdef_count;
@@ -1081,10 +1080,8 @@ do_slurp_coff_armap (bfd *abfd)
   stringbase = ((char *) ardata->symdefs) + carsym_size;
 
   /* Allocate and read in the raw offsets.  */
-  raw_armap = (int *) bfd_alloc (abfd, ptrsize);
-  if (raw_armap == NULL)
-    goto release_symdefs;
-  if (bfd_bread (raw_armap, ptrsize, abfd) != ptrsize
+  raw_armap = (int *) _bfd_alloc_and_read (abfd, ptrsize, ptrsize);
+  if (raw_armap == NULL
       || (bfd_bread (stringbase, stringsize, abfd) != stringsize))
     {
       if (bfd_get_error () != bfd_error_system_call)
@@ -1837,7 +1834,7 @@ bfd_ar_hdr_from_filesystem (bfd *abfd, const char *filename, bfd *member)
   struct stat status;
   struct areltdata *ared;
   struct ar_hdr *hdr;
-  bfd_size_type amt;
+  size_t amt;
 
   if (member && (member->flags & BFD_IN_MEMORY) != 0)
     {
@@ -2187,17 +2184,13 @@ _bfd_write_archive_contents (bfd *arch)
 
       while (remaining)
 	{
-	  unsigned int amt = DEFAULT_BUFFERSIZE;
+	  size_t amt = DEFAULT_BUFFERSIZE;
 
 	  if (amt > remaining)
 	    amt = remaining;
 	  errno = 0;
 	  if (bfd_bread (buffer, amt, current) != amt)
-	    {
-	      if (bfd_get_error () != bfd_error_system_call)
-		bfd_set_error (bfd_error_file_truncated);
-	      goto input_err;
-	    }
+	    goto input_err;
 	  if (bfd_bwrite (buffer, amt, arch) != amt)
 	    return FALSE;
 	  remaining -= amt;
@@ -2251,7 +2244,7 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
   asymbol **syms = NULL;
   long syms_max = 0;
   bfd_boolean ret;
-  bfd_size_type amt;
+  size_t amt;
   static bfd_boolean report_plugin_err = TRUE;
 
   /* Dunno if this is the best place for this info...  */

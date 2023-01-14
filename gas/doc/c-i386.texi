@@ -151,6 +151,7 @@ accept various extension mnemonics.  For example,
 @code{sse},
 @code{sse2},
 @code{sse3},
+@code{sse4a},
 @code{ssse3},
 @code{sse4.1},
 @code{sse4.2},
@@ -158,6 +159,7 @@ accept various extension mnemonics.  For example,
 @code{nosse},
 @code{nosse2},
 @code{nosse3},
+@code{nosse4a},
 @code{nossse3},
 @code{nosse4.1},
 @code{nosse4.2},
@@ -236,6 +238,7 @@ accept various extension mnemonics.  For example,
 @code{movbe},
 @code{ept},
 @code{lzcnt},
+@code{popcnt},
 @code{hle},
 @code{rtm},
 @code{invpcid},
@@ -258,8 +261,7 @@ accept various extension mnemonics.  For example,
 @code{3dnowa},
 @code{sse4a},
 @code{sse5},
-@code{svme},
-@code{abm} and
+@code{svme} and
 @code{padlock}.
 Note that rather than extending a basic instruction set, the extension
 mnemonics starting with @code{no} revoke the respective functionality.
@@ -488,7 +490,8 @@ with 01, 10 and 11 RC bits, respectively.
 @item -mamd64
 @itemx -mintel64
 This option specifies that the assembler should accept only AMD64 or
-Intel64 ISA in 64-bit mode.  The default is to accept both.
+Intel64 ISA in 64-bit mode.  The default is to accept common, Intel64
+only and AMD64 ISAs.
 
 @cindex @samp{-O0} option, i386
 @cindex @samp{-O0} option, x86-64
@@ -749,22 +752,6 @@ operand.
 
 @end itemize
 
-Almost all instructions have the same names in AT&T and Intel format.
-There are a few exceptions.  The sign extend and zero extend
-instructions need two sizes to specify them.  They need a size to
-sign/zero extend @emph{from} and a size to zero extend @emph{to}.  This
-is accomplished by using two instruction mnemonic suffixes in AT&T
-syntax.  Base names for sign extend and zero extend are
-@samp{movs@dots{}} and @samp{movz@dots{}} in AT&T syntax (@samp{movsx}
-and @samp{movzx} in Intel syntax).  The instruction mnemonic suffixes
-are tacked on to this base name, the @emph{from} suffix before the
-@emph{to} suffix.  Thus, @samp{movsbl %al, %edx} is AT&T syntax for
-``move sign extend @emph{from} %al @emph{to} %edx.''  Possible suffixes,
-thus, are @samp{bl} (from byte to long), @samp{bw} (from byte to word),
-@samp{wl} (from word to long), @samp{bq} (from byte to quadruple word),
-@samp{wq} (from word to quadruple word), and @samp{lq} (from long to
-quadruple word).
-
 @cindex encoding options, i386
 @cindex encoding options, x86-64
 
@@ -833,6 +820,59 @@ The Intel-syntax conversion instructions
 are called @samp{cbtw}, @samp{cwtl}, @samp{cwtd}, @samp{cltd}, @samp{cltq}, and
 @samp{cqto} in AT&T naming.  @code{@value{AS}} accepts either naming for these
 instructions.
+
+@cindex extension instructions, i386
+@cindex i386 extension instructions
+@cindex extension instructions, x86-64
+@cindex x86-64 extension instructions
+The Intel-syntax extension instructions
+
+@itemize @bullet
+@item
+@samp{movsx} --- sign-extend @samp{reg8/mem8} to @samp{reg16}.
+
+@item
+@samp{movsx} --- sign-extend @samp{reg8/mem8} to @samp{reg32}.
+
+@item
+@samp{movsx} --- sign-extend @samp{reg8/mem8} to @samp{reg64}
+(x86-64 only).
+
+@item
+@samp{movsx} --- sign-extend @samp{reg16/mem16} to @samp{reg32}
+
+@item
+@samp{movsx} --- sign-extend @samp{reg16/mem16} to @samp{reg64}
+(x86-64 only).
+
+@item
+@samp{movsxd} --- sign-extend @samp{reg32/mem32} to @samp{reg64}
+(x86-64 only).
+
+@item
+@samp{movzx} --- zero-extend @samp{reg8/mem8} to @samp{reg16}.
+
+@item
+@samp{movzx} --- zero-extend @samp{reg8/mem8} to @samp{reg32}.
+
+@item
+@samp{movzx} --- zero-extend @samp{reg8/mem8} to @samp{reg64}
+(x86-64 only).
+
+@item
+@samp{movzx} --- zero-extend @samp{reg16/mem16} to @samp{reg32}
+
+@item
+@samp{movzx} --- zero-extend @samp{reg16/mem16} to @samp{reg64}
+(x86-64 only).
+@end itemize
+
+@noindent
+are called @samp{movsbw/movsxb/movsx}, @samp{movsbl/movsxb/movsx},
+@samp{movsbq/movsb/movsx}, @samp{movswl/movsxw}, @samp{movswq/movsxw},
+@samp{movslq/movsxl}, @samp{movzbw/movzxb/movzx},
+@samp{movzbl/movzxb/movzx}, @samp{movzbq/movzxb/movzx},
+@samp{movzwl/movzxw} and @samp{movzwq/movzxw} in AT&T syntax.
 
 @cindex jump instructions, i386
 @cindex call instructions, i386
@@ -1390,13 +1430,14 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{bdver4} @tab @samp{znver1} @tab @samp{znver2} @tab @samp{btver1}
 @item @samp{btver2} @tab @samp{generic32} @tab @samp{generic64}
 @item @samp{.cmov} @tab @samp{.fxsr} @tab @samp{.mmx}
-@item @samp{.sse} @tab @samp{.sse2} @tab @samp{.sse3}
+@item @samp{.sse} @tab @samp{.sse2} @tab @samp{.sse3} @tab @samp{.sse4a}
 @item @samp{.ssse3} @tab @samp{.sse4.1} @tab @samp{.sse4.2} @tab @samp{.sse4}
 @item @samp{.avx} @tab @samp{.vmx} @tab @samp{.smx} @tab @samp{.ept}
 @item @samp{.clflush} @tab @samp{.movbe} @tab @samp{.xsave} @tab @samp{.xsaveopt}
 @item @samp{.aes} @tab @samp{.pclmul} @tab @samp{.fma} @tab @samp{.fsgsbase}
 @item @samp{.rdrnd} @tab @samp{.f16c} @tab @samp{.avx2} @tab @samp{.bmi2}
-@item @samp{.lzcnt} @tab @samp{.invpcid} @tab @samp{.vmfunc} @tab @samp{.hle}
+@item @samp{.lzcnt} @tab @samp{.popcnt} @tab @samp{.invpcid} @tab @samp{.vmfunc}
+@item @samp{.hle}
 @item @samp{.rtm} @tab @samp{.adx} @tab @samp{.rdseed} @tab @samp{.prfchw}
 @item @samp{.smap} @tab @samp{.mpx} @tab @samp{.sha} @tab @samp{.prefetchwt1}
 @item @samp{.clflushopt} @tab @samp{.xsavec} @tab @samp{.xsaves} @tab @samp{.se1}
@@ -1410,7 +1451,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.shstk} @tab @samp{.gfni} @tab @samp{.vaes} @tab @samp{.vpclmulqdq}
 @item @samp{.movdiri} @tab @samp{.movdir64b} @tab @samp{.enqcmd}
 @item @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.sse4a} @tab @samp{.sse5}
-@item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme} @tab @samp{.abm}
+@item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme}
 @item @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop} @tab @samp{.cx16}
 @item @samp{.padlock} @tab @samp{.clzero} @tab @samp{.mwaitx} @tab @samp{.rdpru}
 @item @samp{.mcommit}
@@ -1454,6 +1495,18 @@ There are some discrepancies between AMD64 and Intel64 ISAs.
 @item For @samp{movsxd} with 16-bit destination register, AMD64
 supports 32-bit source operand and Intel64 supports 16-bit source
 operand.
+
+@item For far branches (with explicit memory operand), both ISAs support
+32- and 16-bit operand size.  Intel64 additionally supports 64-bit
+operand size, encoded as @samp{ljmpq} and @samp{lcallq} in AT&T syntax
+and with an explicit @samp{tbyte ptr} operand size specifier in Intel
+syntax.
+
+@item @samp{lfs}, @samp{lgs}, and @samp{lss} similarly allow for 16-
+and 32-bit operand size (32- and 48-bit memory operand) in both ISAs,
+while Intel64 additionally supports 64-bit operand sise (80-bit memory
+operands).
+
 @end itemize
 
 @node i386-Bugs

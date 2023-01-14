@@ -942,7 +942,7 @@ static struct bfd_link_hash_table *
 frvfdpic_elf_link_hash_table_create (bfd *abfd)
 {
   struct frvfdpic_elf_link_hash_table *ret;
-  bfd_size_type amt = sizeof (struct frvfdpic_elf_link_hash_table);
+  size_t amt = sizeof (struct frvfdpic_elf_link_hash_table);
 
   ret = bfd_zmalloc (amt);
   if (ret == NULL)

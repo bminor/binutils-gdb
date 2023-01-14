@@ -446,14 +446,15 @@ bfd_pef_print_loader_section (bfd *abfd, FILE *file)
     return -1;
 
   loaderlen = loadersec->size;
-  loaderbuf = bfd_malloc (loaderlen);
+  if (loaderlen < 56)
+    return -1;
+  if (bfd_seek (abfd, loadersec->filepos, SEEK_SET) != 0)
+    return -1;
+  loaderbuf = _bfd_malloc_and_read (abfd, loaderlen, loaderlen);
   if (loaderbuf == NULL)
     return -1;
 
-  if (bfd_seek (abfd, loadersec->filepos, SEEK_SET) < 0
-      || bfd_bread ((void *) loaderbuf, loaderlen, abfd) != loaderlen
-      || loaderlen < 56
-      || bfd_pef_parse_loader_header (abfd, loaderbuf, 56, &header) < 0)
+  if (bfd_pef_parse_loader_header (abfd, loaderbuf, 56, &header) < 0)
     {
       free (loaderbuf);
       return -1;
@@ -479,17 +480,14 @@ bfd_pef_scan_start_address (bfd *abfd)
     goto end;
 
   loaderlen = loadersec->size;
-  loaderbuf = bfd_malloc (loaderlen);
-  if (loaderbuf == NULL)
-    goto end;
-
-  if (bfd_seek (abfd, loadersec->filepos, SEEK_SET) < 0)
-    goto error;
-  if (bfd_bread ((void *) loaderbuf, loaderlen, abfd) != loaderlen)
-    goto error;
-
   if (loaderlen < 56)
     goto error;
+  if (bfd_seek (abfd, loadersec->filepos, SEEK_SET) != 0)
+    goto error;
+  loaderbuf = _bfd_malloc_and_read (abfd, loaderlen, loaderlen);
+  if (loaderbuf == NULL)
+    goto error;
+
   ret = bfd_pef_parse_loader_header (abfd, loaderbuf, 56, &header);
   if (ret < 0)
     goto error;
@@ -903,12 +901,10 @@ bfd_pef_parse_symbols (bfd *abfd, asymbol **csym)
   if (codesec != NULL)
     {
       codelen = codesec->size;
-      codebuf = bfd_malloc (codelen);
+      if (bfd_seek (abfd, codesec->filepos, SEEK_SET) != 0)
+	goto end;
+      codebuf = _bfd_malloc_and_read (abfd, codelen, codelen);
       if (codebuf == NULL)
-	goto end;
-      if (bfd_seek (abfd, codesec->filepos, SEEK_SET) < 0)
-	goto end;
-      if (bfd_bread ((void *) codebuf, codelen, abfd) != codelen)
 	goto end;
     }
 
@@ -916,12 +912,10 @@ bfd_pef_parse_symbols (bfd *abfd, asymbol **csym)
   if (loadersec != NULL)
     {
       loaderlen = loadersec->size;
-      loaderbuf = bfd_malloc (loaderlen);
+      if (bfd_seek (abfd, loadersec->filepos, SEEK_SET) != 0)
+	goto end;
+      loaderbuf = _bfd_malloc_and_read (abfd, loaderlen, loaderlen);
       if (loaderbuf == NULL)
-	goto end;
-      if (bfd_seek (abfd, loadersec->filepos, SEEK_SET) < 0)
-	goto end;
-      if (bfd_bread ((void *) loaderbuf, loaderlen, abfd) != loaderlen)
 	goto end;
     }
 

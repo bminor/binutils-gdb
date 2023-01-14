@@ -20,6 +20,7 @@
 #ifndef DWARF2READ_H
 #define DWARF2READ_H
 
+#include <queue>
 #include <unordered_map>
 #include "dwarf2/index-cache.h"
 #include "dwarf2/section.h"
@@ -32,8 +33,6 @@
 extern struct cmd_list_element *set_dwarf_cmdlist;
 extern struct cmd_list_element *show_dwarf_cmdlist;
 
-extern bool dwarf_always_disassemble;
-
 struct tu_stats
 {
   int nr_uniq_abbrev_tables;
@@ -44,9 +43,28 @@ struct tu_stats
 };
 
 struct dwarf2_debug_sections;
+struct dwarf2_per_cu_data;
 struct mapped_index;
 struct mapped_debug_names;
 struct signatured_type;
+
+/* One item on the queue of compilation units to read in full symbols
+   for.  */
+struct dwarf2_queue_item
+{
+  dwarf2_queue_item (dwarf2_per_cu_data *cu, enum language lang)
+    : per_cu (cu),
+      pretend_language (lang)
+  {
+  }
+
+  ~dwarf2_queue_item ();
+
+  DISABLE_COPY_AND_ASSIGN (dwarf2_queue_item);
+
+  struct dwarf2_per_cu_data *per_cu;
+  enum language pretend_language;
+};
 
 /* Collection of data recorded per objfile.
    This hangs off of dwarf2_objfile_data_key.  */
@@ -133,11 +151,11 @@ public:
 
   /* Table of struct type_unit_group objects.
      The hash key is the DW_AT_stmt_list value.  */
-  htab_t type_unit_groups {};
+  htab_up type_unit_groups;
 
   /* A table mapping .debug_types signatures to its signatured_type entry.
      This is NULL if the .debug_types section hasn't been read in yet.  */
-  htab_t signatured_types {};
+  htab_up signatured_types;
 
   /* Type unit statistics, to see how well the scaling improvements
      are doing.  */
@@ -185,7 +203,7 @@ public:
      sorted all the TUs into "type unit groups", grouped by their
      DW_AT_stmt_list value.  Therefore the only sharing done here is with a
      CU and its associated TU group if there is one.  */
-  htab_t quick_file_names_table {};
+  htab_up quick_file_names_table;
 
   /* Set during partial symbol reading, to prevent queueing of full
      symbols.  */
@@ -194,13 +212,13 @@ public:
   /* Table mapping type DIEs to their struct type *.
      This is NULL if not allocated yet.
      The mapping is done via (CU/TU + DIE offset) -> type.  */
-  htab_t die_type_hash {};
+  htab_up die_type_hash;
 
   /* The CUs we recently read.  */
   std::vector<dwarf2_per_cu_data *> just_read_cus;
 
   /* Table containing line_header indexed by offset and offset_in_dwz.  */
-  htab_t line_header_hash {};
+  htab_up line_header_hash;
 
   /* Table containing all filenames.  This is an optional because the
      table is lazily constructed on first access.  */
@@ -215,6 +233,9 @@ public:
   std::unordered_map<sect_offset, std::vector<sect_offset>,
 		     gdb::hash_enum<sect_offset>>
     abstract_to_concrete;
+
+  /* CUs that are queued to be read.  */
+  std::queue<dwarf2_queue_item> queue;
 };
 
 /* Get the dwarf2_per_objfile associated to OBJFILE.  */
@@ -317,6 +338,32 @@ struct dwarf2_per_cu_data
     struct dwarf2_per_cu_quick_data *quick;
   } v;
 
+  /* The CUs we import using DW_TAG_imported_unit.  This is filled in
+     while reading psymtabs, used to compute the psymtab dependencies,
+     and then cleared.  Then it is filled in again while reading full
+     symbols, and only deleted when the objfile is destroyed.
+
+     This is also used to work around a difference between the way gold
+     generates .gdb_index version <=7 and the way gdb does.  Arguably this
+     is a gold bug.  For symbols coming from TUs, gold records in the index
+     the CU that includes the TU instead of the TU itself.  This breaks
+     dw2_lookup_symbol: It assumes that if the index says symbol X lives
+     in CU/TU Y, then one need only expand Y and a subsequent lookup in Y
+     will find X.  Alas TUs live in their own symtab, so after expanding CU Y
+     we need to look in TU Z to find X.  Fortunately, this is akin to
+     DW_TAG_imported_unit, so we just use the same mechanism: For
+     .gdb_index version <=7 this also records the TUs that the CU referred
+     to.  Concurrently with this change gdb was modified to emit version 8
+     indices so we only pay a price for gold generated indices.
+     http://sourceware.org/bugzilla/show_bug.cgi?id=15021.
+
+     This currently needs to be a public member due to how
+     dwarf2_per_cu_data is allocated and used.  Ideally in future things
+     could be refactored to make this private.  Until then please try to
+     avoid direct access to this member, and instead use the helper
+     functions above.  */
+  std::vector <dwarf2_per_cu_data *> *imported_symtabs;
+
   /* Return true of IMPORTED_SYMTABS is empty or not yet allocated.  */
   bool imported_symtabs_empty () const
   {
@@ -348,31 +395,55 @@ struct dwarf2_per_cu_data
     imported_symtabs = nullptr;
   }
 
-  /* The CUs we import using DW_TAG_imported_unit.  This is filled in
-     while reading psymtabs, used to compute the psymtab dependencies,
-     and then cleared.  Then it is filled in again while reading full
-     symbols, and only deleted when the objfile is destroyed.
+  /* Return the OBJFILE associated with this compilation unit.  If
+     this compilation unit came from a separate debuginfo file, then
+     the master objfile is returned.  */
+  struct objfile *objfile () const;
 
-     This is also used to work around a difference between the way gold
-     generates .gdb_index version <=7 and the way gdb does.  Arguably this
-     is a gold bug.  For symbols coming from TUs, gold records in the index
-     the CU that includes the TU instead of the TU itself.  This breaks
-     dw2_lookup_symbol: It assumes that if the index says symbol X lives
-     in CU/TU Y, then one need only expand Y and a subsequent lookup in Y
-     will find X.  Alas TUs live in their own symtab, so after expanding CU Y
-     we need to look in TU Z to find X.  Fortunately, this is akin to
-     DW_TAG_imported_unit, so we just use the same mechanism: For
-     .gdb_index version <=7 this also records the TUs that the CU referred
-     to.  Concurrently with this change gdb was modified to emit version 8
-     indices so we only pay a price for gold generated indices.
-     http://sourceware.org/bugzilla/show_bug.cgi?id=15021.
+  /* Return the address size given in the compilation unit header for
+     this CU.  */
+  int addr_size () const;
 
-     This currently needs to be a public member due to how
-     dwarf2_per_cu_data is allocated and used.  Ideally in future things
-     could be refactored to make this private.  Until then please try to
-     avoid direct access to this member, and instead use the helper
-     functions above.  */
-  std::vector <dwarf2_per_cu_data *> *imported_symtabs;
+  /* Return the offset size given in the compilation unit header for
+     this CU.  */
+  int offset_size () const;
+
+  /* Return the DW_FORM_ref_addr size given in the compilation unit
+     header for this CU.  */
+  int ref_addr_size () const;
+
+  /* Return the text offset of the CU.  The returned offset comes from
+     this CU's objfile.  If this objfile came from a separate
+     debuginfo file, then the offset may be different from the
+     corresponding offset in the parent objfile.  */
+  CORE_ADDR text_offset () const;
+
+  /* Return a type that is a generic pointer type, the size of which
+     matches the address size given in the compilation unit header for
+     this CU.  */
+  struct type *addr_type () const;
+
+  /* Find an integer type SIZE_IN_BYTES bytes in size and return it.
+     UNSIGNED_P controls if the integer is unsigned or not.  */
+  struct type *int_type (int size_in_bytes, bool unsigned_p) const;
+
+  /* Find an integer type the same size as the address size given in
+     the compilation unit header for this CU.  UNSIGNED_P controls if
+     the integer is unsigned or not.  */
+  struct type *addr_sized_int_type (bool unsigned_p) const;
+
+  /* Return DWARF version number of this CU.  */
+  short version () const
+  {
+    return dwarf_version;
+  }
+
+  /* A type unit group has a per_cu object that is recognized by
+     having no section.  */
+  bool type_unit_group_p () const
+  {
+    return section == nullptr;
+  }
 };
 
 /* Entry in the signatured_types hash table.  */
@@ -451,5 +522,8 @@ struct dwz_file
 
 extern struct dwz_file *dwarf2_get_dwz_file
     (struct dwarf2_per_objfile *dwarf2_per_objfile);
+
+/* When non-zero, dump line number entries as they are read in.  */
+extern unsigned int dwarf_line_debug;
 
 #endif /* DWARF2READ_H */

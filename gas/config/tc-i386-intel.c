@@ -694,9 +694,11 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	  if (got_a_float == 1)
 	    suffix = LONG_DOUBLE_MNEM_SUFFIX;
 	  else if ((current_templates->start->operand_types[0].bitfield.fword
-		    || current_templates->start->operand_types[0].bitfield.tbyte)
+		    || current_templates->start->operand_types[0].bitfield.tbyte
+		    || current_templates->start->opcode_modifier.jump == JUMP_DWORD
+		    || current_templates->start->opcode_modifier.jump == JUMP)
 		   && flag_code == CODE_64BIT)
-	    suffix = QWORD_MNEM_SUFFIX; /* l[fgs]s, [ls][gi]dt */
+	    suffix = QWORD_MNEM_SUFFIX; /* l[fgs]s, [ls][gi]dt, call, jmp */
 	  else
 	    i.types[this_operand].bitfield.byte = 1; /* cause an error */
 	  break;

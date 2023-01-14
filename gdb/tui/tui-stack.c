@@ -376,5 +376,6 @@ _initialize_tui_stack ()
 {
   add_com ("update", class_tui, tui_update_command,
 	   _("Update the source window and locator to "
-	     "display the current execution point."));
+	     "display the current execution point.\n\
+Usage: update"));
 }

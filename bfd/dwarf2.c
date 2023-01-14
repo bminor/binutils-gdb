@@ -995,7 +995,7 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash,
   struct abbrev_info *cur_abbrev;
   unsigned int abbrev_number, bytes_read, abbrev_name;
   unsigned int abbrev_form, hash_number;
-  bfd_size_type amt;
+  size_t amt;
   void **slot;
   struct abbrev_offset_entry ent = { offset, NULL };
 
@@ -1158,7 +1158,7 @@ read_attribute_value (struct attribute *  attr,
   bfd *abfd = unit->abfd;
   unsigned int bytes_read;
   struct dwarf_block *blk;
-  bfd_size_type amt;
+  size_t amt;
 
   if (info_ptr >= info_ptr_end && form != DW_FORM_flag_present)
     {
@@ -1513,7 +1513,7 @@ add_line_info (struct line_info_table *table,
 	       unsigned int discriminator,
 	       int end_sequence)
 {
-  bfd_size_type amt = sizeof (struct line_info);
+  size_t amt = sizeof (struct line_info);
   struct line_sequence* seq = table->sequences;
   struct line_info* info = (struct line_info *) bfd_alloc (table->abfd, amt);
 
@@ -1782,11 +1782,11 @@ static bfd_boolean
 build_line_info_table (struct line_info_table *  table,
 		       struct line_sequence *    seq)
 {
-  bfd_size_type      amt;
-  struct line_info** line_info_lookup;
-  struct line_info*  each_line;
-  unsigned int       num_lines;
-  unsigned int       line_index;
+  size_t amt;
+  struct line_info **line_info_lookup;
+  struct line_info *each_line;
+  unsigned int num_lines;
+  unsigned int line_index;
 
   if (seq->line_info_lookup != NULL)
     return TRUE;
@@ -1824,12 +1824,12 @@ build_line_info_table (struct line_info_table *  table,
 static bfd_boolean
 sort_line_sequences (struct line_info_table* table)
 {
-  bfd_size_type		 amt;
-  struct line_sequence*	 sequences;
-  struct line_sequence*	 seq;
-  unsigned int		 n = 0;
-  unsigned int		 num_sequences = table->num_sequences;
-  bfd_vma		 last_high_pc;
+  size_t amt;
+  struct line_sequence *sequences;
+  struct line_sequence *seq;
+  unsigned int n = 0;
+  unsigned int num_sequences = table->num_sequences;
+  bfd_vma last_high_pc;
 
   if (num_sequences == 0)
     return TRUE;
@@ -1897,7 +1897,7 @@ line_info_add_include_dir (struct line_info_table *table, char *cur_dir)
   if ((table->num_dirs % DIR_ALLOC_CHUNK) == 0)
     {
       char **tmp;
-      bfd_size_type amt;
+      size_t amt;
 
       amt = table->num_dirs + DIR_ALLOC_CHUNK;
       amt *= sizeof (char *);
@@ -1931,7 +1931,7 @@ line_info_add_file_name (struct line_info_table *table, char *cur_file,
   if ((table->num_files % FILE_ALLOC_CHUNK) == 0)
     {
       struct fileinfo *tmp;
-      bfd_size_type amt;
+      size_t amt;
 
       amt = table->num_files + FILE_ALLOC_CHUNK;
       amt *= sizeof (struct fileinfo);
@@ -2091,7 +2091,7 @@ decode_line_info (struct comp_unit *unit)
   char *cur_file, *cur_dir;
   unsigned char op_code, extended_op, adj_opcode;
   unsigned int exop_len;
-  bfd_size_type amt;
+  size_t amt;
 
   if (unit->line_offset == 0 && file->line_table)
     return file->line_table;
@@ -3226,7 +3226,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	  || abbrev->tag == DW_TAG_entry_point
 	  || abbrev->tag == DW_TAG_inlined_subroutine)
 	{
-	  bfd_size_type amt = sizeof (struct funcinfo);
+	  size_t amt = sizeof (struct funcinfo);
 	  func = (struct funcinfo *) bfd_zalloc (abfd, amt);
 	  if (func == NULL)
 	    goto fail;
@@ -3250,7 +3250,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	  func = NULL;
 	  if (abbrev->tag == DW_TAG_variable)
 	    {
-	      bfd_size_type amt = sizeof (struct varinfo);
+	      size_t amt = sizeof (struct varinfo);
 	      var = (struct varinfo *) bfd_zalloc (abfd, amt);
 	      if (var == NULL)
 		goto fail;
@@ -3469,7 +3469,7 @@ parse_comp_unit (struct dwarf2_debug *stash,
   struct abbrev_info *abbrev;
   struct attribute attr;
   bfd_byte *end_ptr = info_ptr + unit_length;
-  bfd_size_type amt;
+  size_t amt;
   bfd_vma low_pc = 0;
   bfd_vma high_pc = 0;
   bfd *abfd = file->bfd_ptr;
@@ -4084,7 +4084,7 @@ place_sections (bfd *orig_bfd, struct dwarf2_debug *stash)
   else
     {
       bfd_vma last_vma = 0, last_dwarf = 0;
-      bfd_size_type amt = i * sizeof (struct adjusted_section);
+      size_t amt = i * sizeof (struct adjusted_section);
 
       p = (struct adjusted_section *) bfd_malloc (amt);
       if (p == NULL)
@@ -4452,7 +4452,7 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
 			      void **pinfo,
 			      bfd_boolean do_place)
 {
-  bfd_size_type amt = sizeof (struct dwarf2_debug);
+  size_t amt = sizeof (struct dwarf2_debug);
   bfd_size_type total_size;
   asection *msec;
   struct dwarf2_debug *stash = (struct dwarf2_debug *) *pinfo;

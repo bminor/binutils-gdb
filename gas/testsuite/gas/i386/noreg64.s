@@ -77,6 +77,12 @@ noreg:
 	mov	(%rax), %es
 	movs
 	movs	(%rsi), %es:(%rdi)
+	movsx	(%rax), %ax
+	movsx	(%rax), %eax
+	movsx	(%rax), %rax
+	movzx	(%rax), %ax
+	movzx	(%rax), %eax
+	movzx	(%rax), %rax
 	mul	(%rax)
 	neg	(%rax)
 	nop	(%rax)

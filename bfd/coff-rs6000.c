@@ -323,7 +323,7 @@ bfd_boolean
 _bfd_xcoff_mkobject (bfd *abfd)
 {
   coff_data_type *coff;
-  bfd_size_type amt = sizeof (struct xcoff_tdata);
+  size_t amt = sizeof (struct xcoff_tdata);
 
   abfd->tdata.xcoff_obj_data = (struct xcoff_tdata *) bfd_zalloc (abfd, amt);
   if (abfd->tdata.xcoff_obj_data == NULL)
@@ -1267,10 +1267,8 @@ _bfd_xcoff_slurp_armap (bfd *abfd)
 	}
 
       /* Read in the entire symbol table.  */
-      contents = (bfd_byte *) bfd_alloc (abfd, sz + 1);
+      contents = (bfd_byte *) _bfd_alloc_and_read (abfd, sz + 1, sz);
       if (contents == NULL)
-	return FALSE;
-      if (bfd_bread (contents, sz, abfd) != sz)
 	return FALSE;
 
       /* Ensure strings are NULL terminated so we don't wander off the
@@ -1331,10 +1329,8 @@ _bfd_xcoff_slurp_armap (bfd *abfd)
 	}
 
       /* Read in the entire symbol table.  */
-      contents = (bfd_byte *) bfd_alloc (abfd, sz + 1);
+      contents = (bfd_byte *) _bfd_alloc_and_read (abfd, sz + 1, sz);
       if (contents == NULL)
-	return FALSE;
-      if (bfd_bread (contents, sz, abfd) != sz)
 	return FALSE;
 
       /* Ensure strings are NULL terminated so we don't wander off the
@@ -1389,7 +1385,7 @@ _bfd_xcoff_archive_p (bfd *abfd)
 {
   struct artdata *tdata_hold;
   char magic[SXCOFFARMAG];
-  bfd_size_type amt = SXCOFFARMAG;
+  size_t amt = SXCOFFARMAG;
 
   if (bfd_bread (magic, amt, abfd) != amt)
     {

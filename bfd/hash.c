@@ -762,7 +762,7 @@ struct bfd_strtab_hash *
 _bfd_stringtab_init (void)
 {
   struct bfd_strtab_hash *table;
-  bfd_size_type amt = sizeof (* table);
+  size_t amt = sizeof (* table);
 
   table = (struct bfd_strtab_hash *) bfd_malloc (amt);
   if (table == NULL)

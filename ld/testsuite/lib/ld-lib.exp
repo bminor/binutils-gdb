@@ -928,6 +928,7 @@ proc run_cc_link_tests { ldtests } {
 
 	if { $binfile eq "tmpdir/" } {
 	    # compile only
+	    set binfile $objfile
 	} elseif { [regexp ".*\\.a$" $binfile] } {
 	    if { ![ar_simple_create $ar $ldflags $binfile "$objfiles"] } {
 		set failed 1

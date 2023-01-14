@@ -2256,7 +2256,7 @@ static struct bfd_link_hash_table *
 sh_elf_link_hash_table_create (bfd *abfd)
 {
   struct elf_sh_link_hash_table *ret;
-  bfd_size_type amt = sizeof (struct elf_sh_link_hash_table);
+  size_t amt = sizeof (struct elf_sh_link_hash_table);
 
   ret = (struct elf_sh_link_hash_table *) bfd_zmalloc (amt);
   if (ret == (struct elf_sh_link_hash_table *) NULL)
@@ -5863,7 +5863,7 @@ sh_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	      p = *head;
 	      if (p == NULL || p->sec != sec)
 		{
-		  bfd_size_type amt = sizeof (*p);
+		  size_t amt = sizeof (*p);
 		  p = bfd_alloc (htab->root.dynobj, amt);
 		  if (p == NULL)
 		    return FALSE;

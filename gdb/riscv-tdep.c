@@ -240,7 +240,7 @@ static struct riscv_register_feature riscv_csr_feature =
 {
  "org.gnu.gdb.riscv.csr",
  {
-#define DECLARE_CSR(NAME,VALUE) \
+#define DECLARE_CSR(NAME,VALUE,CLASS) \
   { RISCV_ ## VALUE ## _REGNUM, { # NAME }, false },
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
@@ -534,7 +534,7 @@ riscv_register_name (struct gdbarch *gdbarch, int regnum)
 
   if (regnum >= RISCV_FIRST_CSR_REGNUM && regnum <= RISCV_LAST_CSR_REGNUM)
     {
-#define DECLARE_CSR(NAME,VALUE) \
+#define DECLARE_CSR(NAME,VALUE,CLASS) \
       case RISCV_ ## VALUE ## _REGNUM: return # NAME;
 
       switch (regnum)
@@ -870,7 +870,7 @@ riscv_is_regnum_a_named_csr (int regnum)
 
   switch (regnum)
     {
-#define DECLARE_CSR(name, num) case RISCV_ ## num ## _REGNUM:
+#define DECLARE_CSR(name, num, class) case RISCV_ ## num ## _REGNUM:
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
       return true;
@@ -2973,7 +2973,7 @@ riscv_find_default_target_description (const struct gdbarch_info info)
     features.xlen = 8;
 
   /* Now build a target description based on the feature set.  */
-  return riscv_create_target_description (features);
+  return riscv_lookup_target_description (features);
 }
 
 /* All of the registers in REG_SET are checked for in FEATURE, TDESC_DATA

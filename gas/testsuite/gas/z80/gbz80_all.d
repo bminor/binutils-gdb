@@ -1,4 +1,4 @@
-#as: -gbz80
+#as: -march=gbz80
 #objdump: -d
 #name: GBZ80 instruction set
 

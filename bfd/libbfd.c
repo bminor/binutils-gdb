@@ -279,24 +279,6 @@ bfd_malloc (bfd_size_type size)
   return ptr;
 }
 
-/* Allocate memory using malloc, nmemb * size with overflow checking.  */
-
-void *
-bfd_malloc2 (bfd_size_type nmemb, bfd_size_type size)
-{
-  if ((nmemb | size) >= HALF_BFD_SIZE_TYPE
-      && size != 0
-      && nmemb > ~(bfd_size_type) 0 / size)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
-
-  return bfd_malloc (size * nmemb);
-}
-
-/* Reallocate memory using realloc.  */
-
 void *
 bfd_realloc (void *ptr, bfd_size_type size)
 {
@@ -322,22 +304,6 @@ bfd_realloc (void *ptr, bfd_size_type size)
   return ret;
 }
 
-/* Reallocate memory using realloc, nmemb * size with overflow checking.  */
-
-void *
-bfd_realloc2 (void *ptr, bfd_size_type nmemb, bfd_size_type size)
-{
-  if ((nmemb | size) >= HALF_BFD_SIZE_TYPE
-      && size != 0
-      && nmemb > ~(bfd_size_type) 0 / size)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
-
-  return bfd_realloc (ptr, size * nmemb);
-}
-
 /* Reallocate memory using realloc.
    If this fails the pointer is freed before returning.  */
 
@@ -361,25 +327,6 @@ bfd_zmalloc (bfd_size_type size)
 
   if (ptr != NULL && size > 0)
     memset (ptr, 0, (size_t) size);
-
-  return ptr;
-}
-
-/* Allocate memory using malloc (nmemb * size) with overflow checking
-   and clear it.  */
-
-void *
-bfd_zmalloc2 (bfd_size_type nmemb, bfd_size_type size)
-{
-  void *ptr = bfd_malloc2 (nmemb, size);
-
-  if (ptr != NULL)
-    {
-      size_t sz = nmemb * size;
-
-      if (sz > 0)
-	memset (ptr, 0, sz);
-    }
 
   return ptr;
 }

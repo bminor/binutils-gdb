@@ -1575,7 +1575,7 @@ static struct bfd_link_hash_table *
 m32r_elf_link_hash_table_create (bfd *abfd)
 {
   struct elf_m32r_link_hash_table *ret;
-  bfd_size_type amt = sizeof (struct elf_m32r_link_hash_table);
+  size_t amt = sizeof (struct elf_m32r_link_hash_table);
 
   ret = bfd_zmalloc (amt);
   if (ret == NULL)
@@ -3775,7 +3775,7 @@ m32r_elf_check_relocs (bfd *abfd,
 	      p = *head;
 	      if (p == NULL || p->sec != sec)
 		{
-		  bfd_size_type amt = sizeof (*p);
+		  size_t amt = sizeof (*p);
 
 		  p = bfd_alloc (dynobj, amt);
 		  if (p == NULL)

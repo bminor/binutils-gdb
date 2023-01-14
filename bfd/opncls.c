@@ -982,32 +982,6 @@ bfd_alloc (bfd *abfd, bfd_size_type size)
 }
 
 /*
-INTERNAL_FUNCTION
-	bfd_alloc2
-
-SYNOPSIS
-	void *bfd_alloc2 (bfd *abfd, bfd_size_type nmemb, bfd_size_type size);
-
-DESCRIPTION
-	Allocate a block of @var{nmemb} elements of @var{size} bytes each
-	of memory attached to <<abfd>> and return a pointer to it.
-*/
-
-void *
-bfd_alloc2 (bfd *abfd, bfd_size_type nmemb, bfd_size_type size)
-{
-  if ((nmemb | size) >= HALF_BFD_SIZE_TYPE
-      && size != 0
-      && nmemb > ~(bfd_size_type) 0 / size)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
-
-  return bfd_alloc (abfd, size * nmemb);
-}
-
-/*
 FUNCTION
 	bfd_zalloc
 
@@ -1023,39 +997,6 @@ void *
 bfd_zalloc (bfd *abfd, bfd_size_type size)
 {
   void *res;
-
-  res = bfd_alloc (abfd, size);
-  if (res)
-    memset (res, 0, (size_t) size);
-  return res;
-}
-
-/*
-INTERNAL_FUNCTION
-	bfd_zalloc2
-
-SYNOPSIS
-	void *bfd_zalloc2 (bfd *abfd, bfd_size_type nmemb, bfd_size_type size);
-
-DESCRIPTION
-	Allocate a block of @var{nmemb} elements of @var{size} bytes each
-	of zeroed memory attached to <<abfd>> and return a pointer to it.
-*/
-
-void *
-bfd_zalloc2 (bfd *abfd, bfd_size_type nmemb, bfd_size_type size)
-{
-  void *res;
-
-  if ((nmemb | size) >= HALF_BFD_SIZE_TYPE
-      && size != 0
-      && nmemb > ~(bfd_size_type) 0 / size)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
-
-  size *= nmemb;
 
   res = bfd_alloc (abfd, size);
   if (res)
@@ -1209,6 +1150,7 @@ bfd_get_debug_link_info_1 (bfd *abfd, void *crc32_out)
   unsigned int crc_offset;
   char *name;
   bfd_size_type size;
+  ufile_ptr file_size;
 
   BFD_ASSERT (abfd);
   BFD_ASSERT (crc32_out);
@@ -1219,9 +1161,10 @@ bfd_get_debug_link_info_1 (bfd *abfd, void *crc32_out)
     return NULL;
 
   size = bfd_section_size (sect);
+  file_size = bfd_get_size (abfd);
 
   /* PR 22794: Make sure that the section has a reasonable size.  */
-  if (size < 8 || size >= bfd_get_size (abfd))
+  if (size < 8 || (file_size != 0 && size >= file_size))
     return NULL;
 
   if (!bfd_malloc_and_get_section (abfd, sect, &contents))
@@ -1298,6 +1241,7 @@ bfd_get_alt_debug_link_info (bfd * abfd, bfd_size_type *buildid_len,
   unsigned int buildid_offset;
   char *name;
   bfd_size_type size;
+  ufile_ptr file_size;
 
   BFD_ASSERT (abfd);
   BFD_ASSERT (buildid_len);
@@ -1309,7 +1253,8 @@ bfd_get_alt_debug_link_info (bfd * abfd, bfd_size_type *buildid_len,
     return NULL;
 
   size = bfd_section_size (sect);
-  if (size < 8 || size >= bfd_get_size (abfd))
+  file_size = bfd_get_size (abfd);
+  if (size < 8 || (file_size != 0 && size >= file_size))
     return NULL;
 
   if (!bfd_malloc_and_get_section (abfd, sect, & contents))

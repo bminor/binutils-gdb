@@ -538,7 +538,7 @@ DESCRIPTION
 asymbol *
 _bfd_generic_make_empty_symbol (bfd *abfd)
 {
-  bfd_size_type amt = sizeof (asymbol);
+  size_t amt = sizeof (asymbol);
   asymbol *new_symbol = (asymbol *) bfd_zalloc (abfd, amt);
   if (new_symbol)
     new_symbol->the_bfd = abfd;

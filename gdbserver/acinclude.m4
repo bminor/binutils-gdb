@@ -1,10 +1,8 @@
 dnl gdb/gdbserver/configure.in uses BFD_HAVE_SYS_PROCFS_TYPE.
 m4_include(../bfd/bfd.m4)
 
-m4_include(../gdb/acx_configure_dir.m4)
-
-# This gets AM_GDB_WARNINGS.
-m4_include(../gdb/warning.m4)
+dnl This gets AM_GDB_WARNINGS.
+m4_include(../gdbsupport/warning.m4)
 
 dnl This gets autoconf bugfixes
 m4_include(../config/override.m4)

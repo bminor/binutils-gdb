@@ -1897,15 +1897,25 @@ enum bfd_architecture
   bfd_arch_xtensa,    /* Tensilica's Xtensa cores.  */
 #define bfd_mach_xtensa        1
   bfd_arch_z80,
-#define bfd_mach_z80strict     1 /* Zilog Z80 without undocumented opcodes.  */
-#define bfd_mach_z180          2 /* Zilog Z180: successor with additional instructions, but without halves of ix and iy */
-#define bfd_mach_z80           3 /* Zilog Z80 with ixl, ixh, iyl, and iyh.  */
-#define bfd_mach_ez80_z80      4 /* Zilog eZ80 (successor of Z80 & Z180) in Z80 (16-bit address) mode */
-#define bfd_mach_ez80_adl      5 /* Zilog eZ80 (successor of Z80 & Z180) in ADL (24-bit address) mode */
-#define bfd_mach_z80n          6 /* Z80N */
-#define bfd_mach_z80full       7 /* Zilog Z80 with all undocumented instructions.  */
-#define bfd_mach_gbz80         8 /* GameBoy Z80 (reduced instruction set) */
-#define bfd_mach_r800          11 /*Ascii R800: Z80 successor with multiplication.  */
+/* Zilog Z80 without undocumented opcodes.  */
+#define bfd_mach_z80strict     1
+/* Zilog Z180: successor with additional instructions, but without
+ halves of ix and iy.  */
+#define bfd_mach_z180          2
+/* Zilog Z80 with ixl, ixh, iyl, and iyh.  */
+#define bfd_mach_z80           3
+/* Zilog eZ80 (successor of Z80 & Z180) in Z80 (16-bit address) mode.  */
+#define bfd_mach_ez80_z80      4
+/* Zilog eZ80 (successor of Z80 & Z180) in ADL (24-bit address) mode.  */
+#define bfd_mach_ez80_adl      5
+/* Z80N */
+#define bfd_mach_z80n          6
+/* Zilog Z80 with all undocumented instructions.  */
+#define bfd_mach_z80full       7
+/* GameBoy Z80 (reduced instruction set).  */
+#define bfd_mach_gbz80         8
+/* ASCII R800: successor with multiplication.  */
+#define bfd_mach_r800          11
   bfd_arch_lm32,      /* Lattice Mico32.  */
 #define bfd_mach_lm32          1
   bfd_arch_microblaze,/* Xilinx MicroBlaze.  */
@@ -5302,7 +5312,7 @@ BFD_RELOC_XTENSA_ASM_EXPAND.  */
 /* Highest 16 bits of multibyte (32 or 24 bit) value.  */
   BFD_RELOC_Z80_WORD1,
 
-/* 16 bit word big endian */
+/* Like BFD_RELOC_16 but big-endian.  */
   BFD_RELOC_Z80_16_BE,
 
 /* DJNZ offset.  */
@@ -6487,12 +6497,6 @@ struct bfd
   /* A unique identifier of the BFD  */
   unsigned int id;
 
-  /* The format which belongs to the BFD. (object, core, etc.)  */
-  ENUM_BITFIELD (bfd_format) format : 3;
-
-  /* The direction with which the BFD was opened.  */
-  ENUM_BITFIELD (bfd_direction) direction : 2;
-
   /* Format_specific flags.  */
   flagword flags;
 
@@ -6596,6 +6600,12 @@ struct bfd
    | BFD_PLUGIN | BFD_TRADITIONAL_FORMAT | BFD_DETERMINISTIC_OUTPUT \
    | BFD_COMPRESS_GABI | BFD_CONVERT_ELF_COMMON | BFD_USE_ELF_STT_COMMON)
 
+  /* The format which belongs to the BFD. (object, core, etc.)  */
+  ENUM_BITFIELD (bfd_format) format : 3;
+
+  /* The direction with which the BFD was opened.  */
+  ENUM_BITFIELD (bfd_direction) direction : 2;
+
   /* Is the file descriptor being cached?  That is, can it be closed as
      needed, and re-opened when accessed later?  */
   unsigned int cacheable : 1;
@@ -6685,7 +6695,7 @@ struct bfd
 
   /* Symbol table for output BFD (with symcount entries).
      Also used by the linker to cache input BFD symbols.  */
-  struct bfd_symbol  **outsymbols;
+  struct bfd_symbol **outsymbols;
 
   /* Used for input and output.  */
   unsigned int symcount;
@@ -6695,6 +6705,11 @@ struct bfd
 
   /* Pointer to structure which contains architecture information.  */
   const struct bfd_arch_info *arch_info;
+
+  /* Cached length of file for bfd_get_size.  0 until bfd_get_size is
+     called, 1 if stat returns an error or the file size is too large to
+     return in ufile_ptr.  Both 0 and 1 should be treated as "unknown".  */
+  ufile_ptr size;
 
   /* Stuff only useful for archives.  */
   void *arelt_data;

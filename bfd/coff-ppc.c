@@ -179,7 +179,7 @@ static struct bfd_link_hash_table *
 ppc_coff_link_hash_table_create (bfd *abfd)
 {
   struct ppc_coff_link_hash_table *ret;
-  bfd_size_type amt = sizeof (struct ppc_coff_link_hash_table);
+  size_t amt = sizeof (struct ppc_coff_link_hash_table);
 
   ret = (struct ppc_coff_link_hash_table *) bfd_malloc (amt);
   if (ret == NULL)
@@ -771,7 +771,7 @@ record_toc (asection *toc_section,
 	    const char *name)
 {
   /* Add this entry to our toc addr-offset-name list.  */
-  bfd_size_type amt = sizeof (struct list_ele);
+  size_t amt = sizeof (struct list_ele);
   struct list_ele *t = (struct list_ele *) bfd_malloc (amt);
 
   if (t == NULL)
@@ -1513,7 +1513,6 @@ ppc_allocate_toc_section (struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   asection *s;
   bfd_byte *foo;
-  bfd_size_type amt;
   static char test_char = '1';
 
   if ( global_toc_size == 0 ) /* FIXME: does this get me in trouble?  */
@@ -1528,8 +1527,7 @@ ppc_allocate_toc_section (struct bfd_link_info *info ATTRIBUTE_UNUSED)
     /* No toc section? Something is very wrong.  */
     abort ();
 
-  amt = global_toc_size;
-  foo = (bfd_byte *) bfd_alloc (bfd_of_toc_owner, amt);
+  foo = (bfd_byte *) bfd_alloc (bfd_of_toc_owner, global_toc_size);
   memset(foo, test_char, (size_t) global_toc_size);
 
   s->size = global_toc_size;

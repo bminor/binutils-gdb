@@ -1,4 +1,4 @@
-#as:
+#as: -march=rv32if
 #objdump: --dwarf=frames
 
 

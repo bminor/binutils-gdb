@@ -1,3 +1,1063 @@
+2020-02-24  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.h (struct dwarf2_per_cu_data) <type_unit_group_p>:
+	New method.
+	* dwarf2/read.c (IS_TYPE_UNIT_GROUP): Remove.
+	(dw2_do_instantiate_symtab, dw2_get_file_names)
+	(build_type_psymtab_dependencies, load_full_type_unit): Update.
+
+2020-02-24  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2read.c (dwarf2_build_psymtabs_hard): Use
+	make_scoped_restore.
+	(dwarf2_psymtab::read_symtab): Don't clear
+	reading_partial_symbols.
+
+2020-02-24  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/25592
+	* stack.c (iterate_over_block_locals): Handle LOC_CONST.
+
+2020-02-24  Tom de Vries  <tdevries@suse.de>
+
+	* tui/tui-layout.c (_initialize_tui_layout): Fix help messages for
+	commands layout next/prev/regs.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/loc.h (dwarf2_compile_expr_to_ax): Don't declare.
+	* dwarf2/loc.c (dwarf2_compile_expr_to_ax): Now static.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-data.h (TUI_DISASM_WIN): Cast to tui_disasm_window.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-win.c (_initialize_tui_win): Add usage text.
+	* tui/tui-stack.c (_initialize_tui_stack): Add usage text.
+	* tui/tui-regs.c (_initialize_tui_regs): Add usage text.
+	* tui/tui.c (_initialize_tui): Add usage text.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-win.c (tui_set_focus_command)
+	(tui_set_win_height_command): Use error_no_arg.
+	(_initialize_tui_win): Update help text.
+	(FOCUS_USAGE, WIN_HEIGHT_USAGE): Don't define.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-layout.c (extract_display_start_addr): Rewrite.
+	* tui/tui-disasm.h (struct tui_disasm_window)
+	<display_start_addr>: Declare.
+	* tui/tui-source.h (struct tui_source_window)
+	<display_start_addr>: Declare.
+	* tui/tui-winsource.h (struct tui_source_window_base)
+	<show_source_line, display_start_addr>: New methods.
+	<m_horizontal_offset, m_start_line_or_addr, m_gdbarch, m_content>:
+	Rename and move to protected section.
+	* tui/tui-winsource.c (tui_source_window_base::update_source_window)
+	(tui_source_window_base::do_erase_source_content): Update.
+	(tui_source_window_base::show_source_line): Now a method.
+	(tui_source_window_base::show_source_content)
+	(tui_source_window_base::tui_source_window_base)
+	(tui_source_window_base::rerender)
+	(tui_source_window_base::refill)
+	(tui_source_window_base::do_scroll_horizontal)
+	(tui_source_window_base::set_is_exec_point_at)
+	(tui_source_window_base::update_breakpoint_info)
+	(tui_source_window_base::update_exec_info): Update.
+	* tui/tui-source.c (tui_source_window::set_contents)
+	(tui_source_window::showing_source_p)
+	(tui_source_window::do_scroll_vertical)
+	(tui_source_window::location_matches_p)
+	(tui_source_window::line_is_displayed): Update.
+	(tui_source_window::display_start_addr): New method.
+	* tui/tui-disasm.c (tui_disasm_window::set_contents)
+	(tui_disasm_window::do_scroll_vertical)
+	(tui_disasm_window::location_matches_p): Update.
+	(tui_disasm_window::display_start_addr): New method.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* NEWS: Add entry for gdb.register_window_type.
+	* tui/tui-layout.h (window_factory): New typedef.
+	(tui_register_window): Declare.
+	* tui/tui-layout.c (saved_tui_windows): New global.
+	(tui_apply_current_layout): Use it.
+	(tui_register_window): New function.
+	* python/python.c (do_start_initialization): Call
+	gdbpy_initialize_tui.
+	(python_GdbMethods): Add "register_window_type" function.
+	* python/python-internal.h (gdbpy_register_tui_window)
+	(gdbpy_initialize_tui): Declare.
+	* python/py-tui.c: New file.
+	* Makefile.in (SUBDIR_PYTHON_SRCS): Add py-tui.c.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-io.c (do_tui_putc): Don't omit annotations.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-win.c (tui_set_win_focus_to): Move to tui-data.c.
+	* tui/tui-data.h (tui_set_win_with_focus): Don't declare.
+	* tui/tui-data.c (tui_set_win_with_focus): Remove.
+	(tui_set_win_focus_to): Move from tui-win.c.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-layout.c (make_standard_window, get_locator_window): New
+	functions.
+	(known_window_types): New global.
+	(tui_get_window_by_name): Reimplement.
+	(initialize_known_windows): New function.
+	(validate_window_name): Rewrite.
+	(_initialize_tui_layout): Call initialize_known_windows.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui.h (enum tui_win_type) <LOCATOR_WIN, DATA_ITEM_WIN>:
+	Remove constants.
+	* tui/tui-winsource.h (struct tui_source_window_base)
+	<tui_source_window_base>: Remove parameter.
+	* tui/tui-winsource.c
+	(tui_source_window_base::tui_source_window_base): Remove
+	parameter.
+	(tui_source_window_base::refill): Update.
+	* tui/tui-stack.h (struct tui_locator_window)
+	<tui_locator_window>: Update.
+	* tui/tui-source.h (struct tui_source_window) <tui_source_window>:
+	Default the constructor.
+	* tui/tui-regs.h (struct tui_data_item_window)
+	<tui_data_item_window>: Default the constructor.
+	(struct tui_data_window) <tui_data_window>: Likewise.
+	* tui/tui-disasm.h (struct tui_disasm_window) <tui_disasm_window>:
+	Default the constructor.
+	* tui/tui-data.h (struct tui_gen_win_info) <tui_gen_win_info>:
+	Default the constructor.
+	<type>: Remove.
+	(struct tui_win_info) <tui_win_info>: Default the constructor.
+	* tui/tui-data.c (tui_win_info::tui_win_info): Remove.
+	* tui/tui-command.h (struct tui_cmd_window) <tui_cmd_window>:
+	Default the constructor.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-wingeneral.h (tui_make_all_invisible): Don't declare.
+	* tui/tui-wingeneral.c (tui_make_all_invisible): Remove.
+	* tui/tui-win.c (tui_resize_all): Don't call
+	tui_delete_invisible_windows.
+	* tui/tui-layout.c (tui_apply_current_layout): Delete windows when
+	done.
+	(tui_set_layout): Update.
+	(tui_add_win_to_layout): Don't call tui_delete_invisible_windows.
+	* tui/tui-data.h (tui_delete_invisible_windows): Don't declare.
+	* tui/tui-data.c (tui_delete_invisible_windows): Remove.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-win.c (tui_partial_win_by_name): Handle ambiguity
+	correctly.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-data.c (tui_next_win, tui_prev_win): Reimplement.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-winsource.h (struct tui_source_window_iterator)
+	<inner_iterator>: New etytypedef.
+	<tui_source_window_iterator>: Take "end" parameter.
+	<tui_source_window_iterator>: Take iterator.
+	<operator*, advance>: Update.
+	<m_iter>: Change type.
+	<m_end>: New field.
+	(struct tui_source_windows) <begin, end>: Update.
+	* tui/tui-layout.c (tui_windows): New global.
+	(tui_apply_current_layout): Clear tui_windows.
+	(tui_layout_window::apply): Update tui_windows.
+	* tui/tui-data.h (tui_windows): Declare.
+	(all_tui_windows): Now inline function.
+	(class tui_window_iterator, struct all_tui_windows): Remove.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	PR tui/17850:
+	* tui/tui-win.c (tui_gen_win_info::max_width): New method.
+	* tui/tui-layout.h (class tui_layout_base) <get_sizes>: Add
+	"height" argument.
+	(class tui_layout_window) <get_sizes>: Likewise.
+	(class tui_layout_split) <tui_layout_split>: Add "vertical"
+	argument.
+	<get_sizes>: Add "height" argument.
+	<m_vertical>: New field.
+	* tui/tui-layout.c (tui_layout_split::clone): Update.
+	(tui_layout_split::get_sizes): Add "height" argument.
+	(tui_layout_split::adjust_size, tui_layout_split::apply): Update.
+	(tui_new_layout_command): Parse "-horizontal".
+	(_initialize_tui_layout): Update help string.
+	(tui_layout_split::specification): Add "-horizontal" when needed.
+	* tui/tui-layout.c (tui_layout_window::get_sizes): Add "height"
+	argument.
+	* tui/tui-data.h (struct tui_gen_win_info) <max_width, min_width>:
+	New methods.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-layout.h (enum tui_adjust_result): New.
+	(class tui_layout_base) <adjust_size>: Return tui_adjust_result.
+	(class tui_layout_window) <adjust_size>: Return
+	tui_adjust_result.  Rewrite.
+	(class tui_layout_split) <adjust_size>: Return tui_adjust_result.
+	* tui/tui-layout.c (tui_layout_split::adjust_size): Update.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-layout.h (class tui_layout_split) <add_split>: Change
+	parameter and return types.
+	(class tui_layout_base) <specification>: Add "depth".
+	(class tui_layout_window) <specification>: Add "depth".
+	(class tui_layout_split) <specification>: Add "depth".
+	* tui/tui-layout.c (tui_layout_split::add_split): Change parameter
+	and return types.
+	(tui_new_layout_command): Parse sub-layouts.
+	(_initialize_tui_layout): Update help string.
+	(tui_layout_window::specification): Add "depth".
+	(add_layout_command): Update.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* NEWS: Add "tui new-layout" item.
+	* tui/tui-layout.c (add_layout_command): Return cmd_list_element.
+	Add new-layout command to help text.
+	(validate_window_name): New function.
+	(tui_new_layout_command): New function.
+	(_initialize_tui_layout): Register "new-layout".
+	(tui_layout_window::specification): New method.
+	(tui_layout_window::specification): New method.
+	* tui/tui-layout.h (class tui_layout_base) <specification>: New
+	method.
+	(class tui_layout_window) <specification>: New method.
+	(class tui_layout_split) <specification>: New method.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui.c (tui_enable): Call tui_set_initial_layout.
+	* tui/tui-win.c (window_name_completer): Update comment.
+	* tui/tui-layout.h (class tui_layout_base) <replace_window>:
+	Declare method.
+	(class tui_layout_window) <replace_window>: Likewise.
+	(class tui_layout_split) <replace_window>: Likewise.
+	(tui_set_layout): Don't declare.
+	(tui_set_initial_layout): Declare function.
+	* tui/tui-layout.c (layouts, applied_skeleton, src_regs_layout)
+	(asm_regs_layout): New globals.
+	(tui_current_layout, show_layout): Remove.
+	(tui_set_layout, tui_add_win_to_layout): Rewrite.
+	(find_layout, tui_apply_layout): New function.
+	(layout_completer): Remove.
+	(tui_next_layout): Reimplement.
+	(tui_next_layout_command): New function.
+	(tui_set_initial_layout, tui_prev_layout_command): New functions.
+	(tui_regs_layout): Reimplement.
+	(tui_regs_layout_command): New function.
+	(extract_display_start_addr): Rewrite.
+	(next_layout, prev_layout): Remove.
+	(tui_layout_window::replace_window): New method.
+	(tui_layout_split::replace_window): New method.
+	(destroy_layout): New function.
+	(layout_list): New global.
+	(add_layout_command): New function.
+	(initialize_layouts): Update.
+	(tui_layout_command): New function.
+	(_initialize_tui_layout): Install "layout" commands.
+	* tui/tui-data.h (enum tui_layout_type): Remove.
+	(tui_current_layout): Don't declare.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-regs.c (tui_reg_layout): Remove.
+	(tui_reg_command): Use tui_regs_layout.
+	* tui/tui-layout.h (tui_reg_command): Declare.
+	* tui/tui-layout.c (tui_reg_command): New function.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui.c (tui_rl_delete_other_windows): Call
+	tui_remove_some_windows.
+	* tui/tui-layout.h (class tui_layout_base) <remove_windows>:
+	Declare method.
+	(class tui_layout_window) <remove_windows>: New method.
+	(class tui_layout_split) <remove_windows>: Declare.
+	(tui_remove_some_windows): Declare.
+	* tui/tui-layout.c (tui_remove_some_windows): New function.
+	(tui_layout_split::remove_windows): New method.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui.c (tui_rl_change_windows): Call tui_next_layout.
+	* tui/tui-layout.h (tui_next_layout): Declare.
+	* tui/tui-layout.c (tui_next_layout): New function.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-regs.c (tui_data_window::display_registers_from): Use
+	correct coordinates.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-layout.h (tui_add_win_to_layout): Add comment.
+	* tui/tui-layout.c (tui_add_win_to_layout): Add assert.  Remove
+	DATA_WIN case.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-disasm.c (tui_get_low_disassembly_address): Use
+	TUI_DISASM_WIN, not tui_win_list.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (generic_val_print_enum_1)
+	(val_print_type_code_flags): Style member names.
+	* rust-lang.c (val_print_struct, rust_print_enum)
+	(rust_print_struct_def, rust_internal_print_type): Style member
+	names.
+	* p-valprint.c (pascal_object_print_value_fields): Style member
+	names.  Only call fprintf_symbol_filtered for static members.
+	* m2-typeprint.c (m2_record_fields, m2_enum): Style member names.
+	* f-valprint.c (f_val_print): Style member names.
+	* f-typeprint.c (f_type_print_base): Style member names.
+	* cp-valprint.c (cp_print_value_fields): Style member names.  Only
+	call fprintf_symbol_filtered for static members.
+	(cp_print_class_member): Style member names.
+	* c-typeprint.c (c_print_type_1, c_type_print_base_1): Style
+	member names.
+	* ada-valprint.c (ada_print_scalar): Style enum names.
+	(ada_val_print_enum): Likewise.
+	* ada-typeprint.c (print_enum_type): Style enum names.
+
+2020-02-21  Tom Tromey  <tom@tromey.com>
+
+	* psympriv.h (struct partial_symtab): Update comment.
+
+2020-02-21  Tom Tromey  <tromey@adacore.com>
+
+	* mips-tdep.h (mips_pc_is_mips16, mips_pc_is_micromips): Parameter
+	type is CORE_ADDR.
+
+2020-02-21  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/25534
+	* psymtab.c (partial_symtab::read_dependencies): Don't read dependency
+	if dependencies[i]->user != NULL.
+
+2020-02-21  Ali Tamur  <tamur@google.com>
+
+	* dwarf2/read.c (dwarf2_name): Add null check.
+
+2020-02-20  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (dwarf2_find_containing_comp_unit): Use ">", not
+	">=", in binary search.
+	(dwarf2_find_containing_comp_unit): New overload.
+	(run_test): New self-test.
+	(_initialize_dwarf2_read): Register new test.
+
+2020-02-20  Nelson Chu  <nelson.chu@sifive.com>
+
+	* riscv-tdep.c: Updated since the DECLARE_CSR is changed.
+	* riscv-tdep.h: Likewise.
+	* features/riscv/rebuild-csr-xml.sh: Generate the 64bit-csr.xml without
+	rv32-only CSR.
+	* features/riscv/64bit-csr.xml: Regenerated.
+
+2020-02-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Tom Tromey  <tom@tromey.com>
+
+	* utils.c (fputs_maybe_filtered): Call 'stream->puts' instead
+	of 'fputc_unfiltered'.
+	(putchar_unfiltered): Call 'fputc_unfiltered'.
+	(fputc_unfiltered): Call 'fputs_unfiltered'.
+
+2020-02-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* configure.ac: Add --with-python-libdir option.
+	* main.c: Use WITH_PYTHON_LIBDIR.
+
+2020-02-19  Tom Tromey  <tom@tromey.com>
+
+	* symtab.c (general_symbol_info::compute_and_set_names): Use
+	obstack_strndup.  Simplify call to symbol_set_demangled_name.
+
+2020-02-19  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (allocate_signatured_type_table,
+	allocate_dwo_unit_table, allocate_type_unit_groups_table,
+	allocate_dwo_file_hash_table, allocate_dwp_loaded_cutus_table):
+	Remove objfile parameter, update all callers.
+
+2020-02-19  Doug Evans  <dje@google.com>
+
+	PR rust/25535
+	* rust-lang.c (rust_print_enum): Apply embedded_offset to
+	rust_enum_variant calculation.
+
+2020-02-19  Tom Tromey  <tromey@adacore.com>
+
+	* mips-tdep.h (mips_pc_is_mips): Parameter type is CORE_ADDR.
+
+2020-02-19  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (cache_symbol): Use obstack_strdup.
+
+2020-02-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* configure: Regenerate.
+
+2020-02-19  Tom Tromey  <tromey@adacore.com>
+
+	* python/python.c (do_start_initialization): Use XNEWVEC.  Remove
+	NULL check.
+
+2020-02-19  Maciej W. Rozycki  <macro@wdc.com>
+
+	* NEWS: Mention RISC-V GNU/Linux GDBserver support.
+
+2020-02-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arch/riscv.c (struct riscv_gdbarch_features_hasher): Only define
+	if GDBSERVER is not defined.
+	(riscv_tdesc_cache): Likewise, also store const target_desc.
+	(STATIC_IN_GDB): Define.
+	(riscv_create_target_description): Update declaration with
+	STATIC_IN_GDB.
+	(riscv_lookup_target_description): New function, only define if
+	GDBSERVER is not defined.
+	* arch/riscv.h (riscv_create_target_description): Declare only
+	when GDBSERVER is defined.
+	(riscv_lookup_target_description): New declaration when GDBSERVER
+	is not defined.
+	* nat/riscv-linux-tdesc.c (riscv_linux_read_description): Rename to...
+	(riscv_linux_read_features): ...this, and return
+	riscv_gdbarch_features instead of target_desc.
+	* nat/riscv-linux-tdesc.h: Include 'arch/riscv.h'.
+	(riscv_linux_read_description): Rename to...
+	(riscv_linux_read_features): ...this.
+	* riscv-linux-nat.c (riscv_linux_nat_target::read_description):
+	Update to use riscv_gdbarch_features and
+	riscv_lookup_target_description.
+	* riscv-tdep.c (riscv_find_default_target_description): Use
+	riscv_lookup_target_description instead of
+	riscv_create_target_description.
+
+2020-02-18  Simon Marchi  <simon.marchi@efficios.com>
+
+	* valprint.c (generic_val_print_enum_1): When printing a flag
+	enum with value 0 and there is no enumerator with value 0, print
+	just "0" instead of "(unknown: 0x0)".
+
+2020-02-18  Simon Marchi  <simon.marchi@efficios.com>
+
+	* valprint.c (generic_val_print_enum_1): Print unknown part of
+	flag enum in hex.
+
+2020-02-18  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (update_enumeration_type_from_children): Allow
+	flag enums to contain duplicate enumerators.
+	* valprint.c (generic_val_print_enum_1): Update comment.
+
+2020-02-18  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c: Include "count-one-bits.h".
+	(update_enumeration_type_from_children): If an enumerator has
+	multiple bits set, don't treat the enumeration as a "flag enum".
+	* valprint.c (generic_val_print_enum_1): Assert that enumerators
+	of flag enums have 0 or 1 bit set.
+
+2020-02-18  Bernd Edlinger  <bernd.edlinger@hotmail.de>
+
+	* aarch64-tdep.c (aarch64_displaced_step_copy_insn): Use an explicit
+	conversion.
+	* amd64-tdep.c (amd64_displaced_step_copy_insn): Likewise.
+	* arm-linux-tdep.c (arm_linux_displaced_step_copy_insn): Likewise.
+	* i386-tdep.c (i386_displaced_step_copy_insn): Likewise.
+	* rs6000-tdep.c (ppc_displaced_step_copy_insn): Likewise.
+	* s390-tdep.c (s390_displaced_step_copy_insn): Likewise.
+
+2020-02-18  Simon Marchi  <simon.marchi@efficios.com>
+
+	* MAINTAINERS: Change palmer@sifive.com to palmer@dabbelt.com.
+
+2020-02-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* aarch64-tdep.c (aarch64_displaced_step_copy_insn): Use
+	displaced_step_closure_up.
+	* aarch64-tdep.h (aarch64_displaced_step_copy_insn): Likewise.
+	(struct displaced_step_closure_up):
+	* amd64-tdep.c (amd64_displaced_step_copy_insn): Likewise.
+	* amd64-tdep.h (amd64_displaced_step_copy_insn): Likewise.
+	* arm-linux-tdep.c (arm_linux_displaced_step_copy_insn):
+	Likewise.
+	* gdbarch.sh (displaced_step_copy_insn): Likewise.
+	* gdbarch.c, gdbarch.h: Re-generate.
+	* i386-linux-tdep.c (i386_linux_displaced_step_copy_insn): Use
+	displaced_step_closure_up.
+	* i386-tdep.c (i386_displaced_step_copy_insn): Likewise.
+	* i386-tdep.h (i386_displaced_step_copy_insn): Likewise.
+	* infrun.h (displaced_step_closure_up): New type alias.
+	(struct displaced_step_inferior_state) <step_closure>: Change
+	type to displaced_step_closure_up.
+	* rs6000-tdep.c (ppc_displaced_step_copy_insn): Use
+	displaced_step_closure_up.
+	* s390-tdep.c (s390_displaced_step_copy_insn): Likewise.
+
+2020-02-14  Tom Tromey  <tom@tromey.com>
+
+	* minidebug.c (gnu_debug_key): New global.
+	(find_separate_debug_file_in_section): Use it.
+
+2020-02-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbarch.sh (displaced_step_copy_insn): Change return type to an
+	std::unique_ptr.
+	* gdbarch.c: Re-generate.
+	* gdbarch.h: Re-generate.
+	* infrun.c (displaced_step_prepare_throw): Adjust to std::unique_ptr
+	change.
+	* aarch64-tdep.c (aarch64_displaced_step_copy_insn): Change return
+	type to std::unique_ptr.
+	* aarch64-tdep.h (aarch64_displaced_step_copy_insn): Likewise.
+	* amd64-tdep.c (amd64_displaced_step_copy_insn): Likewise.
+	* amd64-tdep.h (amd64_displaced_step_copy_insn): Likewise.
+	* arm-linux-tdep.c (arm_linux_displaced_step_copy_insn): Likewise.
+	* i386-linux-tdep.c (i386_linux_displaced_step_copy_insn): Likewise.
+	* i386-tdep.c (i386_displaced_step_copy_insn): Likewise.
+	* i386-tdep.h (i386_displaced_step_copy_insn): Likewise.
+	* rs6000-tdep.c (ppc_displaced_step_copy_insn): Likewise.
+	* s390-tdep.c (s390_displaced_step_copy_insn): Likewise.
+
+2020-02-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* infrun.c (get_displaced_step_closure_by_addr): Adjust to
+	std::unique_ptr.
+	(displaced_step_clear): Rename to...
+	(displaced_step_reset): ... this.  Just call displaced->reset ().
+	(displaced_step_clear_cleanup): Rename to...
+	(displaced_step_reset_cleanup): ... this.
+	(displaced_step_prepare_throw): Adjust to std::unique_ptr.
+	(displaced_step_fixup): Likewise.
+	(resume_1): Likewise.
+	(handle_inferior_event): Restore child's memory before calling
+	displaced_step_fixup on the parent.
+	* infrun.h (displaced_step_inferior_state) <reset>: Adjust
+	to std::unique_ptr.
+	<step_closure>: Change type to std::unique_ptr.
+
+2020-02-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* arm-tdep.c: Include count-one-bits.h.
+	(cleanup_block_store_pc): Use count_one_bits.
+	(cleanup_block_load_pc): Use count_one_bits.
+	(arm_copy_block_xfer): Use count_one_bits.
+	(thumb2_copy_block_xfer): Use count_one_bits.
+	(thumb_copy_pop_pc_16bit): Use count_one_bits.
+	* arch/arm-get-next-pcs.c: Include count-one-bits.h.
+	(thumb_get_next_pcs_raw): Use count_one_bits.
+	(arm_get_next_pcs_raw): Use count_one_bits_l.
+	* arch/arm.c (bitcount): Remove.
+	* arch/arm.h (bitcount): Remove.
+
+2020-02-14  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/frame-tailcall.c (dwarf2_tailcall_sniffer_first):
+	Update.
+	* dwarf2/loc.h (call_site_find_chain): Return unique_xmalloc_ptr.
+	* dwarf2/loc.c (call_site_find_chain_1): Return
+	unique_xmalloc_ptr.
+	(call_site_find_chain): Likewise.
+
+2020-02-14  Richard Biener  <rguenther@suse.de>
+
+	* dwarf2/read.c (lnp_state_machine::handle_special_opcode): Apply CSE
+	on expression with division operators.
+
+2020-02-13  Alok Kumar Sharma  <AlokKumar.Sharma@amd.com>
+
+	* MAINTAINERS (Write After Approval): Adding myself.
+
+2020-02-12  Tom Tromey  <tom@tromey.com>
+
+	* event-loop.c (event_data, gdb_event, event_handler_func):
+	Remove.
+
+2020-02-12  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/frame.c (dwarf2_frame_bfd_data): New global.
+	(dwarf2_frame_objfile_data): Add comment.
+	(find_comp_unit, set_comp_unit): New functions.
+	(dwarf2_frame_find_fde): Use find_comp_unit.
+	(dwarf2_build_frame_info): Use set_comp_unit.
+
+2020-02-12  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/frame.c (struct comp_unit) <objfile>: Remove.
+	(comp_unit): Don't initialize objfile.
+	(execute_cfa_program): Add text_offset parameter.
+	(execute_cfa_program_test, dwarf2_fetch_cfa_info)
+	(dwarf2_frame_cache): Update.
+	(dwarf2_build_frame_info): Don't set "objfile" member.
+
+2020-02-12  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/frame.c (decode_frame_entry_1): Add gdbarch parameter.
+	(decode_frame_entry): Likewise.
+	(dwarf2_build_frame_info): Update.
+
+2020-02-12  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/frame.c (struct comp_unit) <obstack>: New member.
+	(decode_frame_entry_1): Use the comp_unit obstack.
+
+2020-02-12  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/frame.c (struct comp_unit): Add initializers and
+	constructor.
+	(dwarf2_frame_objfile_data): Store a comp_unit.
+	(dwarf2_frame_find_fde): Update.
+	(dwarf2_build_frame_info): Use "new".
+
+2020-02-12  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/frame.c (struct dwarf2_fde_table): Remove.
+	(dwarf2_fde_table): Typedef for std::vector.
+	(dwarf2_frame_objfile_data): Remove the deleter.  Now static.
+	(dwarf2_frame_find_fde, add_fde, decode_frame_entry_1)
+	(decode_frame_entry): Update.
+	(dwarf2_build_frame_info): Use "new".
+
+2020-02-12  Christian Biesinger  <cbiesinger@google.com>
+
+	* arm-tdep.c (arm_gdbarch_init): Update.
+	* arm-tdep.h (struct gdbarch_tdep) <have_fpa_registers,
+	have_wmmx_registers, have_vfp_pseudos, have_neon_pseudos,
+	have_neon, is_m>: Change to bool.
+
+2020-02-12  Christian Biesinger  <cbiesinger@google.com>
+
+	* arm-tdep.c (arm_dump_tdep): Print more fields of tdep.
+
+2020-02-12  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/loc.c (struct dwarf_expr_baton): Remove.
+
+2020-02-12  Hannes Domani  <ssbssa@yahoo.de>
+
+	* windows-tdep.c (struct windows_gdbarch_data): Add tib_ptr_type.
+	(windows_get_tlb_type): Use windows_gdbarch_data->tib_ptr_type.
+
+2020-02-11  Tom Tromey  <tom@tromey.com>
+
+	* psymtab.h: Update comment.
+
+2020-02-11  Tom Tromey  <tom@tromey.com>
+
+	* gdb_obstack.h (struct auto_obstack): Use
+	DISABLE_COPY_AND_ASSIGN.
+
+2020-02-11  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/frame.h (struct objfile): Don't forward declare.
+
+2020-02-11  Christian Biesinger  <cbiesinger@google.com>
+
+	* cris-tdep.c (cris_supply_gregset): Change signature to match
+	what struct regset expects.
+	(cris_regset): New struct.
+	(fetch_core_registers): Remove.
+	(cris_iterate_over_regset_sections): New function.
+	(_initialize_cris_tdep): Don't call deprecated_add_core_fns.
+	(cris_gdbarch_init): Call set_gdbarch_iterate_over_regset_sections.
+
+2020-02-11  Christian Biesinger  <cbiesinger@google.com>
+
+	* arch/arm.h (enum gdb_regnum): Add comment for the FP0..7
+	registers.
+
+2020-02-11  Christian Biesinger  <cbiesinger@google.com>
+
+	* arm-tdep.c (arm_dump_tdep): Add \n in fprintf.
+
+2020-02-11  Simon Marchi  <simon.marchi@efficios.com>
+
+	* configure: Re-generate.
+
+2020-02-11  Simon Marchi  <simon.marchi@efficios.com>
+
+	* configure: Re-generate.
+
+2020-02-11  Simon Marchi  <simon.marchi@efficios.com>
+
+	* acinclude: Update warning.m4 path.
+	* warning.m4: Move to gdbsupport.
+
+2020-02-11  Tom Tromey  <tromey@adacore.com>
+
+	* remote.c (remote_console_output): Update.
+	* printcmd.c (printf_command): Update.
+	* event-loop.c (gdb_wait_for_event): Update.
+	* linux-nat.c (sigchld_handler): Update.
+	* remote-sim.c (gdb_os_write_stdout): Update.
+	(gdb_os_flush_stdout): Update.
+	(gdb_os_flush_stderr): Update.
+	(gdb_os_write_stderr): Update.
+	* exceptions.c (print_exception): Update.
+	* remote-fileio.c (remote_fileio_func_read): Update.
+	(remote_fileio_func_write): Update.
+	* tui/tui.c (tui_enable): Update.
+	* tui/tui-interp.c (tui_interp::init): Update.
+	* utils.c (init_page_info): Update.
+	(putchar_unfiltered, fputc_unfiltered): Update.
+	(gdb_flush): Update.
+	(emit_style_escape): Update.
+	(flush_wrap_buffer, fputs_maybe_filtered): Update.
+	* ui-file.c (ui_file_isatty, ui_file_read, ui_file_write)
+	(ui_file_write_async_safe, ui_file_flush, ui_file_puts): Remove.
+	(stderr_file::write): Update.
+	(stderr_file::puts): Update.
+	* ui-file.h (ui_file_isatty, ui_file_write)
+	(ui_file_write_async_safe, ui_file_read, ui_file_flush)
+	(ui_file_puts): Don't declare.
+
+2020-02-10  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2/read.c (process_psymtab_comp_unit_reader): Cast concat NULL
+	sentinel to char *.
+
+2020-02-09  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2read.c (process_psymtab_comp_unit_reader): Append CU offset to
+	filename if it matches "<artificial>".
+
+2020-02-09  Hannes Domani  <ssbssa@yahoo.de>
+
+	* windows-tdep.c (struct enum_value_name): New struct.
+	(create_enum): New function.
+	(windows_get_siginfo_type): Create and use enum types.
+
+2020-02-09  Hannes Domani  <ssbssa@yahoo.de>
+
+	* NEWS: Mention $_siginfo support for Windows.
+	* windows-nat.c (handle_exception): Set siginfo_er.
+	(windows_nat_target::mourn_inferior): Reset siginfo_er.
+	(windows_xfer_siginfo): New function.
+	(windows_nat_target::xfer_partial): Call windows_xfer_siginfo.
+	* windows-tdep.c (struct windows_gdbarch_data): New struct.
+	(init_windows_gdbarch_data): New function.
+	(get_windows_gdbarch_data): New function.
+	(windows_get_siginfo_type): New function.
+	(windows_init_abi): Register windows_get_siginfo_type.
+	(_initialize_windows_tdep): Register init_windows_gdbarch_data.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (class cutu_reader) <cutu_reader,
+	init_tu_and_read_dwo_dies>: Remove "keep" parameter.
+	<keep>: Declare method.
+	<m_keep>: Remove member.
+	<~cutu_reader>: Remove.
+	(cutu_reader::init_tu_and_read_dwo_dies): Update.
+	(cutu_reader::cutu_reader): Update.
+	(cutu_reader::keep): Rename from ~cutu_reader.
+	(process_psymtab_comp_unit, build_type_psymtabs_1)
+	(process_skeletonless_type_unit, load_partial_comp_unit)
+	(load_full_comp_unit, dwarf2_read_addr_index)
+	(read_signatured_type): Update.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (process_psymtab_comp_unit_reader): Remove
+	"want_partial_unit" parameter.
+	(process_psymtab_comp_unit): Change want_partial_unit to bool.
+	Inline check for DW_TAG_partial_unit.
+	(dwarf2_build_psymtabs_hard, scan_partial_symbols): Update.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (read_n_bytes, read_direct_string): Move to
+	read.c.
+	* dwarf2/leb.h (read_n_bytes, read_direct_string): Move from
+	read.c.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (read_address): Move to comp-unit.c.
+	(dwarf2_rnglists_process, dwarf2_ranges_process)
+	(read_attribute_value, dwarf_decode_lines_1)
+	(var_decode_location, decode_locdesc): Update.
+	* dwarf2/comp-unit.c (comp_unit_head::read_address): Move from
+	read.c.  Remove "cu" parameter.
+	* dwarf2/comp-unit.h (struct comp_unit_head) <read_address>: New
+	method.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (read_attribute_value, read_indirect_string)
+	(read_indirect_line_string): Update.
+	* dwarf2/comp-unit.c (read_offset): Remove.
+	(read_comp_unit_head): Update.
+	* dwarf2/comp-unit.h (struct comp_unit_head) <read_offset>: New
+	method.
+	(read_offset): Don't declare.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (COMMON_SFILES): Add dwarf2/comp-unit.c.
+	* dwarf2/read.c (struct comp_unit_head): Move to
+	dwarf2/comp-unit.h.
+	(enum class rcuh_kind): Move to comp-unit.h.
+	(get_cu_length, offset_in_cu_p): Now methods on comp_unit_head.
+	(read_comp_unit_head, error_check_comp_unit_head)
+	(read_and_check_comp_unit_head): Move to comp-unit.c.
+	(read_offset, dwarf_unit_type_name): Likewise.
+	(create_debug_type_hash_table, read_cutu_die_from_dwo)
+	(cutu_reader::cutu_reader, read_call_site_scope)
+	(find_partial_die, follow_die_offset): Update.
+	* dwarf2/comp-unit.h: New file, from dwarf2read.c.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (read_offset_1): Move to leb.c.
+	(read_abbrev_offset, read_offset, dwarf_decode_line_header)
+	(dwarf_decode_macro_bytes): Update.
+	* dwarf2/leb.c (read_offset): Rename; move from read.c.
+	* dwarf2/leb.h (read_offset): Declare.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (dwarf2_section_size): Remove.
+	(error_check_comp_unit_head, dwarf2_symbol_mark_computed):
+	Update.
+	* dwarf2/section.h (struct dwarf2_section_info) <get_size>: New method.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (read_initial_length): Move to leb.c.
+	* dwarf2/leb.h (read_initial_length): Declare.
+	* dwarf2/leb.c (read_initial_length): Move from read.c.  Add
+	handle_nonstd parameter.
+	* dwarf2/frame.c (read_initial_length): Remove.
+	(decode_frame_entry_1): Update.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/loc.c (dwarf2_find_location_expression)
+	(dwarf_evaluate_loc_desc::get_tls_address)
+	(dwarf_evaluate_loc_desc::push_dwarf_reg_entry_value)
+	(rw_pieced_value, dwarf2_evaluate_loc_desc_full)
+	(dwarf2_locexpr_baton_eval, dwarf2_evaluate_property)
+	(dwarf2_compile_property_to_c)
+	(dwarf2_loc_desc_get_symbol_read_needs)
+	(dwarf2_compile_expr_to_ax, locexpr_describe_location)
+	(locexpr_tracepoint_var_ref, locexpr_generate_c_location)
+	(loclist_describe_location, loclist_tracepoint_var_ref)
+	(loclist_generate_c_location): Update.
+	* compile/compile-loc2c.c (do_compile_dwarf_expr_to_c): Update.
+	* dwarf2/loc.h (dwarf2_per_cu_objfile, dwarf2_per_cu_addr_size)
+	(dwarf2_per_cu_ref_addr_size, dwarf2_per_cu_offset_size)
+	(dwarf2_per_cu_text_offset, dwarf2_version): Don't declare.
+	* dwarf2/read.c (dwarf2_per_cu_data::objfile)
+	(dwarf2_per_cu_data::addr_size)
+	(dwarf2_per_cu_data::ref_addr_size)
+	(dwarf2_per_cu_data::text_offset)
+	(dwarf2_per_cu_data::addr_type): Now methods.
+	(per_cu_header_read_in): Make per_cu "const".
+	(dwarf2_version): Remove.
+	(dwarf2_per_cu_data::int_type): Now a method.
+	(dwarf2_per_cu_data::_addr_sized_int_type): Likewise.
+	(set_die_type, read_array_type, read_subrange_index_type)
+	(read_tag_string_type, read_subrange_type): Update.
+	* dwarf2/read.h (struct dwarf2_per_cu_data) <addr_size,
+	offset_size, ref_addr_size, text_offset, addr_type, version,
+	objfile, int_type, addr_sized_int_type>: Declare methods.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.h (struct dwarf2_per_cu_data) <imported_symtabs>:
+	Move earlier.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.h (dwarf_line_debug): Declare.
+	* Makefile.in (COMMON_SFILES): Add dwarf2/line-header.c.
+	* dwarf2/read.c: Move line_header code to new files.
+	(dwarf_line_debug): No longer static.
+	* dwarf2/line-header.c: New file.
+	* dwarf2/line-header.h: New file.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (struct line_header) <file_full_name,
+	file_file_name>: Return unique_xmalloc_ptr.
+	(line_header::file_file_name): Update.
+	(line_header::file_full_name): Update.
+	(dw2_get_file_names_reader): Update.
+	(macro_start_file): Update.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (struct line_header) <file_full_name,
+	file_file_name>: Declare methods.
+	(dw2_get_file_names_reader): Update.
+	(file_file_name): Now a method.
+	(file_full_name): Likewise.
+	(macro_start_file): Update.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (dwarf_always_disassemble)
+	(show_dwarf_always_disassemble): Move to loc.c.
+	(_initialize_dwarf2_read): Move "always-disassemble" registration
+	to loc.c.
+	* dwarf2/read.h (dwarf_always_disassemble): Don't declare.
+	* dwarf2/loc.c (dwarf_always_disassemble): Move from read.c.  Now
+	static.
+	(show_dwarf_always_disassemble): Move from read.c.
+	(_initialize_dwarf2loc): Move always-disassemble from read.c.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (~dwarf2_per_objfile): Update.
+	(create_quick_file_names_table): Return htab_up.
+	(dw2_get_file_names_reader, dw2_forget_cached_source_info):
+	Update.
+	* dwarf2/read.h (struct dwarf2_per_objfile)
+	<quick_file_names_table>: Now htab_up.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/abbrev.c (abbrev_table::read): Simplify.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/abbrev.c (abbrev_table): Move constructor from header.
+	Rewrite.
+	(abbrev_table::add_abbrev, abbrev_table::lookup_abbrev): Rewrite.
+	* dwarf2/abbrev.h (struct abbrev_info) <next>: Remove.
+	(abbrev_table::abbrev_table): No longer inline.
+	(ABBREV_HASH_SIZE): Remove.
+	(abbrev_table::m_abbrevs): Now an htab_up.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (read_cutu_die_from_dwo): Update.
+	(cutu_reader): Update.
+	(build_type_psymtabs_1): Update.
+	* dwarf2/abbrev.c (abbrev_table::read): Rename.
+	(abbrev_table::alloc_abbrev): Update.
+	* dwarf2/abbrev.h (abbrev_table_up): Move earlier.
+	(abbrev_table::read): New static method, renamed from
+	abbrev_table_read_table.
+	(abbrev_table::alloc_abbrev)
+	(abbrev_table::add_abbrev): Now private.
+	(abbrev_table::abbrev_table): Now private.
+	(abbrev_table::m_abbrev_obstack): Now private.  Rename.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (set_die_type, get_die_type_at_offset): Update.
+	* dwarf2/read.h (struct dwarf2_per_objfile) <die_type_hash>: Now
+	htab_up.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (struct dwp_file) <loaded_cus, loaded_tus>: Now
+	htab_up.
+	(lookup_dwo_unit_in_dwp): Update.
+	(allocate_dwp_loaded_cutus_table): Return htab_up.  Don't allocate
+	on obstack.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (allocate_dwo_file_hash_table): Don't allocate on
+	obstack.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (~dwarf2_per_objfile): Don't delete
+	line_header_hash.
+	(handle_DW_AT_stmt_list): Update.  Don't allocate on obstack.
+	* dwarf2/read.h (struct dwarf2_per_objfile) <line_header_hash>:
+	Change type to htab_up.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (allocate_type_unit_groups_table): Return
+	htab_up.  Don't allocate on obstack.
+	(get_type_unit_group, dwarf2_build_psymtabs_hard): Update.
+	* dwarf2/read.h (struct dwarf2_per_objfile) <type_unit_groups>:
+	Change type to htab_up.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.h (struct dwarf2_per_objfile) <signatured_types>:
+	Change type to htab_up.
+	* dwarf2/read.c (create_signatured_type_table_from_index)
+	(create_signatured_type_table_from_debug_names)
+	(create_all_type_units, add_type_unit)
+	(lookup_dwo_signatured_type, lookup_signatured_type)
+	(process_skeletonless_type_unit): Update.
+	(create_debug_type_hash_table, create_debug_types_hash_table):
+	Change type of types_htab.
+	(allocate_signatured_type_table, allocate_dwo_unit_table): Return
+	htab_up.  Don't allocate on obstack.
+	(create_cus_hash_table): Change type of cus_htab parameter.
+	(struct dwo_file) <cus, tus>: Now htab_up.
+	(lookup_dwo_signatured_type, lookup_dwo_cutu)
+	(process_dwo_file_for_skeletonless_type_units, lookup_dwo_cutu)
+	(queue_and_load_all_dwo_tus): Update.
+	* dwarf2/index-write.c (write_gdbindex): Update.
+	(write_debug_names): Update.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.h (struct dwarf2_queue_item): Move from
+	dwarf2/read.c.  Remove "next" member.  Add constructor ntad
+	destructor.
+	(struct dwarf2_per_objfile) <queue>: New member.
+	* dwarf2/read.c (struct dwarf2_queue_item): Move to
+	dwarf2/read.h.
+	(dwarf2_queue, dwarf2_queue_tail): Remove.
+	(class dwarf2_queue_guard): Add parameter to constructor.  Use
+	DISABLE_COPY_AND_ASSIGN.
+	<m_per_objfile>: New member.
+	<~dwarf2_queue_guard>: Rewrite.
+	(dw2_do_instantiate_symtab, queue_comp_unit, process_queue):
+	Update.
+	(~dwarf2_queue_item): New.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (struct die_info) <has_children>: New member.
+	(dw2_get_file_names_reader): Remove has_children.
+	(dw2_get_file_names): Update.
+	(read_cutu_die_from_dwo): Remove has_children.
+	(cutu_reader::init_tu_and_read_dwo_dies)
+	(cutu_reader::cutu_reader): Update.
+	(process_psymtab_comp_unit_reader, build_type_psymtabs_reader):
+	Remove has_children.
+	(build_type_psymtabs_1, process_skeletonless_type_unit)
+	(load_partial_comp_unit, load_full_comp_unit): Update.
+	(create_dwo_cu_reader): Remove has_children.
+	(create_cus_hash_table, read_die_and_children): Update.
+	(read_full_die_1,read_full_die): Remove has_children.
+	(read_signatured_type): Update.
+	(class cutu_reader) <has_children>: Remove.
+
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/expr.c: Rename from dwarf2expr.c.

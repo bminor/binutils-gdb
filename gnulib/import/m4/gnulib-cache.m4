@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 Free Software Foundation, Inc.
+# Copyright (C) 2002-2020 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,6 +40,7 @@
 #  --no-vc-files \
 #  alloca \
 #  canonicalize-lgpl \
+#  count-one-bits \
 #  dirent \
 #  dirfd \
 #  errno \
@@ -79,6 +80,7 @@ gl_LOCAL_DIR([])
 gl_MODULES([
   alloca
   canonicalize-lgpl
+  count-one-bits
   dirent
   dirfd
   errno

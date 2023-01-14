@@ -2743,7 +2743,7 @@ mn10300_elf_relax_section (bfd *abfd,
 			  /* A local symbol.  */
 			  Elf_Internal_Sym *isym;
 			  struct elf_link_hash_table *elftab;
-			  bfd_size_type amt;
+			  size_t amt;
 
 			  isym = isymbuf + r_index;
 			  if (isym->st_shndx == SHN_UNDEF)
@@ -2844,7 +2844,7 @@ mn10300_elf_relax_section (bfd *abfd,
 			  && ELF_ST_TYPE (isym->st_info) == STT_FUNC)
 			{
 			  struct elf_link_hash_table *elftab;
-			  bfd_size_type amt;
+			  size_t amt;
 			  struct elf_link_hash_entry **lhashes = hashes;
 
 			  /* Skip a local symbol if it aliases a
@@ -3069,7 +3069,7 @@ mn10300_elf_relax_section (bfd *abfd,
 		  const char *sym_name;
 		  char *new_name;
 		  struct elf_link_hash_table *elftab;
-		  bfd_size_type amt;
+		  size_t amt;
 
 		  if (isym->st_shndx != sec_shndx)
 		    continue;
@@ -4602,7 +4602,7 @@ static struct bfd_link_hash_table *
 elf32_mn10300_link_hash_table_create (bfd *abfd)
 {
   struct elf32_mn10300_link_hash_table *ret;
-  bfd_size_type amt = sizeof (* ret);
+  size_t amt = sizeof (* ret);
 
   ret = bfd_zmalloc (amt);
   if (ret == NULL)

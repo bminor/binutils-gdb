@@ -129,36 +129,41 @@ struct dwarf2_fde
   unsigned char eh_frame_p;
 };
 
-struct dwarf2_fde_table
-{
-  int num_entries;
-  struct dwarf2_fde **entries;
-};
+typedef std::vector<dwarf2_fde *> dwarf2_fde_table;
 
 /* A minimal decoding of DWARF2 compilation units.  We only decode
    what's needed to get to the call frame information.  */
 
 struct comp_unit
 {
+  comp_unit (struct objfile *objf)
+    : abfd (objf->obfd)
+  {
+  }
+
   /* Keep the bfd convenient.  */
   bfd *abfd;
 
-  struct objfile *objfile;
-
   /* Pointer to the .debug_frame section loaded into memory.  */
-  const gdb_byte *dwarf_frame_buffer;
+  const gdb_byte *dwarf_frame_buffer = nullptr;
 
   /* Length of the loaded .debug_frame section.  */
-  bfd_size_type dwarf_frame_size;
+  bfd_size_type dwarf_frame_size = 0;
 
   /* Pointer to the .debug_frame section.  */
-  asection *dwarf_frame_section;
+  asection *dwarf_frame_section = nullptr;
 
   /* Base for DW_EH_PE_datarel encodings.  */
-  bfd_vma dbase;
+  bfd_vma dbase = 0;
 
   /* Base for DW_EH_PE_textrel encodings.  */
-  bfd_vma tbase;
+  bfd_vma tbase = 0;
+
+  /* The FDE table.  */
+  dwarf2_fde_table fde_table;
+
+  /* Hold data used by this module.  */
+  auto_obstack obstack;
 };
 
 static struct dwarf2_fde *dwarf2_frame_find_fde (CORE_ADDR *pc,
@@ -347,7 +352,8 @@ Not implemented: computing unwound register using explicit value operator"));
 static const gdb_byte *
 execute_cfa_program (struct dwarf2_fde *fde, const gdb_byte *insn_ptr,
 		     const gdb_byte *insn_end, struct gdbarch *gdbarch,
-		     CORE_ADDR pc, struct dwarf2_frame_state *fs)
+		     CORE_ADDR pc, struct dwarf2_frame_state *fs,
+		     CORE_ADDR text_offset)
 {
   int eh_frame_p = fde->eh_frame_p;
   unsigned int bytes_read;
@@ -384,8 +390,8 @@ execute_cfa_program (struct dwarf2_fde *fde, const gdb_byte *insn_ptr,
 	      fs->pc = read_encoded_value (fde->cie->unit, fde->cie->encoding,
 					   fde->cie->ptr_size, insn_ptr,
 					   &bytes_read, fde->initial_location);
-	      /* Apply the objfile offset for relocatable objects.  */
-	      fs->pc += fde->cie->unit->objfile->text_section_offset ();
+	      /* Apply the text offset for relocatable objects.  */
+	      fs->pc += text_offset;
 	      insn_ptr += bytes_read;
 	      break;
 
@@ -644,7 +650,7 @@ execute_cfa_program_test (struct gdbarch *gdbarch)
 
   const gdb_byte *insn_end = insns + sizeof (insns);
   const gdb_byte *out = execute_cfa_program (&fde, insns, insn_end, gdbarch,
-					     0, &fs);
+					     0, &fs, 0);
 
   SELF_CHECK (out == insn_end);
   SELF_CHECK (fs.pc == 0);
@@ -892,13 +898,14 @@ dwarf2_fetch_cfa_info (struct gdbarch *gdbarch, CORE_ADDR pc,
 
   /* First decode all the insns in the CIE.  */
   execute_cfa_program (fde, fde->cie->initial_instructions,
-		       fde->cie->end, gdbarch, pc, &fs);
+		       fde->cie->end, gdbarch, pc, &fs, text_offset);
 
   /* Save the initialized register set.  */
   fs.initial = fs.regs;
 
   /* Then decode the insns in the FDE up to our target PC.  */
-  execute_cfa_program (fde, fde->instructions, fde->end, gdbarch, pc, &fs);
+  execute_cfa_program (fde, fde->instructions, fde->end, gdbarch, pc, &fs,
+		       text_offset);
 
   /* Calculate the CFA.  */
   switch (fs.regs.cfa_how)
@@ -1020,7 +1027,8 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
   /* First decode all the insns in the CIE.  */
   execute_cfa_program (fde, fde->cie->initial_instructions,
 		       fde->cie->end, gdbarch,
-		       get_frame_address_in_block (this_frame), &fs);
+		       get_frame_address_in_block (this_frame), &fs,
+		       cache->text_offset);
 
   /* Save the initialized register set.  */
   fs.initial = fs.regs;
@@ -1035,7 +1043,7 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
     {
       /* Decode the insns in the FDE up to the entry PC.  */
       instr = execute_cfa_program (fde, fde->instructions, fde->end, gdbarch,
-				   entry_pc, &fs);
+				   entry_pc, &fs, cache->text_offset);
 
       if (fs.regs.cfa_how == CFA_REG_OFFSET
 	  && (dwarf_reg_to_regnum (gdbarch, fs.regs.cfa_reg)
@@ -1050,7 +1058,8 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   /* Then decode the insns in the FDE up to our target PC.  */
   execute_cfa_program (fde, instr, fde->end, gdbarch,
-		       get_frame_address_in_block (this_frame), &fs);
+		       get_frame_address_in_block (this_frame), &fs,
+		       cache->text_offset);
 
   try
     {
@@ -1471,28 +1480,14 @@ dwarf2_frame_cfa (struct frame_info *this_frame)
   return get_frame_base (this_frame);
 }
 
-const struct objfile_key<dwarf2_fde_table,
-			 gdb::noop_deleter<dwarf2_fde_table>>
-  dwarf2_frame_objfile_data;
+/* We store the frame data on the BFD.  This is only done if it is
+   independent of the address space and so can be shared.  */
+static const struct bfd_key<comp_unit> dwarf2_frame_bfd_data;
 
-
-static ULONGEST
-read_initial_length (bfd *abfd, const gdb_byte *buf,
-		     unsigned int *bytes_read_ptr)
-{
-  ULONGEST result;
-
-  result = bfd_get_32 (abfd, buf);
-  if (result == 0xffffffff)
-    {
-      result = bfd_get_64 (abfd, buf + 4);
-      *bytes_read_ptr = 12;
-    }
-  else
-    *bytes_read_ptr = 4;
-
-  return result;
-}
+/* If any BFD sections require relocations (note; really should be if
+   any debug info requires relocations), then we store the frame data
+   on the objfile instead, and do not share it.  */
+const struct objfile_key<comp_unit> dwarf2_frame_objfile_data;
 
 
 /* Pointer encoding helper functions.  */
@@ -1646,6 +1641,29 @@ bsearch_fde_cmp (const dwarf2_fde *fde, CORE_ADDR seek_pc)
   return 1;
 }
 
+/* Find an existing comp_unit for an objfile, if any.  */
+
+static comp_unit *
+find_comp_unit (struct objfile *objfile)
+{
+  bfd *abfd = objfile->obfd;
+  if (gdb_bfd_requires_relocations (abfd))
+    return dwarf2_frame_bfd_data.get (abfd);
+  return dwarf2_frame_objfile_data.get (objfile);
+}
+
+/* Store the comp_unit on OBJFILE, or the corresponding BFD, as
+   appropriate.  */
+
+static void
+set_comp_unit (struct objfile *objfile, struct comp_unit *unit)
+{
+  bfd *abfd = objfile->obfd;
+  if (gdb_bfd_requires_relocations (abfd))
+    return dwarf2_frame_bfd_data.set (abfd, unit);
+  return dwarf2_frame_objfile_data.set (objfile, unit);
+}
+
 /* Find the FDE for *PC.  Return a pointer to the FDE, and store the
    initial location associated with it into *PC.  */
 
@@ -1654,32 +1672,32 @@ dwarf2_frame_find_fde (CORE_ADDR *pc, CORE_ADDR *out_offset)
 {
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      struct dwarf2_fde_table *fde_table;
       CORE_ADDR offset;
       CORE_ADDR seek_pc;
 
-      fde_table = dwarf2_frame_objfile_data.get (objfile);
-      if (fde_table == NULL)
+      comp_unit *unit = find_comp_unit (objfile);
+      if (unit == NULL)
 	{
 	  dwarf2_build_frame_info (objfile);
-	  fde_table = dwarf2_frame_objfile_data.get (objfile);
+	  unit = find_comp_unit (objfile);
 	}
-      gdb_assert (fde_table != NULL);
+      gdb_assert (unit != NULL);
 
-      if (fde_table->num_entries == 0)
+      dwarf2_fde_table *fde_table = &unit->fde_table;
+      if (fde_table->empty ())
 	continue;
 
       gdb_assert (!objfile->section_offsets.empty ());
       offset = objfile->text_section_offset ();
 
-      gdb_assert (fde_table->num_entries > 0);
-      if (*pc < offset + fde_table->entries[0]->initial_location)
+      gdb_assert (!fde_table->empty ());
+      if (*pc < offset + (*fde_table)[0]->initial_location)
         continue;
 
       seek_pc = *pc - offset;
-      auto end = fde_table->entries + fde_table->num_entries;
-      auto it = gdb::binary_search (fde_table->entries, end, seek_pc, bsearch_fde_cmp);
-      if (it != end)
+      auto it = gdb::binary_search (fde_table->begin (), fde_table->end (),
+				    seek_pc, bsearch_fde_cmp);
+      if (it != fde_table->end ())
         {
           *pc = (*it)->initial_location + offset;
 	  if (out_offset)
@@ -1690,18 +1708,15 @@ dwarf2_frame_find_fde (CORE_ADDR *pc, CORE_ADDR *out_offset)
   return NULL;
 }
 
-/* Add a pointer to new FDE to the FDE_TABLE, allocating space for it.  */
+/* Add FDE to FDE_TABLE.  */
 static void
-add_fde (struct dwarf2_fde_table *fde_table, struct dwarf2_fde *fde)
+add_fde (dwarf2_fde_table *fde_table, struct dwarf2_fde *fde)
 {
   if (fde->address_range == 0)
     /* Discard useless FDEs.  */
     return;
 
-  fde_table->num_entries += 1;
-  fde_table->entries = XRESIZEVEC (struct dwarf2_fde *, fde_table->entries,
-				   fde_table->num_entries);
-  fde_table->entries[fde_table->num_entries - 1] = fde;
+  fde_table->push_back (fde);
 }
 
 #define DW64_CIE_ID 0xffffffffffffffffULL
@@ -1716,24 +1731,25 @@ enum eh_frame_type
   EH_CIE_OR_FDE_TYPE_ID = EH_CIE_TYPE_ID | EH_FDE_TYPE_ID
 };
 
-static const gdb_byte *decode_frame_entry (struct comp_unit *unit,
+static const gdb_byte *decode_frame_entry (struct gdbarch *gdbarch,
+					   struct comp_unit *unit,
 					   const gdb_byte *start,
 					   int eh_frame_p,
 					   dwarf2_cie_table &cie_table,
-					   struct dwarf2_fde_table *fde_table,
+					   dwarf2_fde_table *fde_table,
 					   enum eh_frame_type entry_type);
 
 /* Decode the next CIE or FDE, entry_type specifies the expected type.
    Return NULL if invalid input, otherwise the next byte to be processed.  */
 
 static const gdb_byte *
-decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
+decode_frame_entry_1 (struct gdbarch *gdbarch,
+		      struct comp_unit *unit, const gdb_byte *start,
 		      int eh_frame_p,
                       dwarf2_cie_table &cie_table,
-                      struct dwarf2_fde_table *fde_table,
+                      dwarf2_fde_table *fde_table,
                       enum eh_frame_type entry_type)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (unit->objfile);
   const gdb_byte *buf, *end;
   ULONGEST length;
   unsigned int bytes_read;
@@ -1744,7 +1760,7 @@ decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
   uint64_t uleb128;
 
   buf = start;
-  length = read_initial_length (unit->abfd, buf, &bytes_read);
+  length = read_initial_length (unit->abfd, buf, &bytes_read, false);
   buf += bytes_read;
   end = buf + (size_t) length;
 
@@ -1795,7 +1811,7 @@ decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
       if (find_cie (cie_table, cie_pointer))
 	return end;
 
-      cie = XOBNEW (&unit->objfile->objfile_obstack, struct dwarf2_cie);
+      cie = XOBNEW (&unit->obstack, struct dwarf2_cie);
       cie->initial_instructions = NULL;
       cie->cie_pointer = cie_pointer;
 
@@ -1974,11 +1990,12 @@ decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
       if (cie_pointer >= unit->dwarf_frame_size)
 	return NULL;
 
-      fde = XOBNEW (&unit->objfile->objfile_obstack, struct dwarf2_fde);
+      fde = XOBNEW (&unit->obstack, struct dwarf2_fde);
       fde->cie = find_cie (cie_table, cie_pointer);
       if (fde->cie == NULL)
 	{
-	  decode_frame_entry (unit, unit->dwarf_frame_buffer + cie_pointer,
+	  decode_frame_entry (gdbarch, unit,
+			      unit->dwarf_frame_buffer + cie_pointer,
 			      eh_frame_p, cie_table, fde_table,
 			      EH_CIE_TYPE_ID);
 	  fde->cie = find_cie (cie_table, cie_pointer);
@@ -2029,10 +2046,11 @@ decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
    expect an FDE or a CIE.  */
 
 static const gdb_byte *
-decode_frame_entry (struct comp_unit *unit, const gdb_byte *start,
+decode_frame_entry (struct gdbarch *gdbarch,
+		    struct comp_unit *unit, const gdb_byte *start,
 		    int eh_frame_p,
 		    dwarf2_cie_table &cie_table,
-                    struct dwarf2_fde_table *fde_table,
+                    dwarf2_fde_table *fde_table,
                     enum eh_frame_type entry_type)
 {
   enum { NONE, ALIGN4, ALIGN8, FAIL } workaround = NONE;
@@ -2041,7 +2059,7 @@ decode_frame_entry (struct comp_unit *unit, const gdb_byte *start,
 
   while (1)
     {
-      ret = decode_frame_entry_1 (unit, start, eh_frame_p,
+      ret = decode_frame_entry_1 (gdbarch, unit, start, eh_frame_p,
 				  cie_table, fde_table, entry_type);
       if (ret != NULL)
 	break;
@@ -2143,21 +2161,14 @@ fde_is_less_than (const dwarf2_fde *aa, const dwarf2_fde *bb)
 void
 dwarf2_build_frame_info (struct objfile *objfile)
 {
-  struct comp_unit *unit;
   const gdb_byte *frame_ptr;
   dwarf2_cie_table cie_table;
-  struct dwarf2_fde_table fde_table;
-  struct dwarf2_fde_table *fde_table2;
+  dwarf2_fde_table fde_table;
 
-  fde_table.num_entries = 0;
-  fde_table.entries = NULL;
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
   /* Build a minimal decoding of the DWARF2 compilation unit.  */
-  unit = XOBNEW (&objfile->objfile_obstack, comp_unit);
-  unit->abfd = objfile->obfd;
-  unit->objfile = objfile;
-  unit->dbase = 0;
-  unit->tbase = 0;
+  std::unique_ptr<comp_unit> unit (new comp_unit (objfile));
 
   if (objfile->separate_debug_objfile_backlink == NULL)
     {
@@ -2189,7 +2200,8 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	    {
 	      frame_ptr = unit->dwarf_frame_buffer;
 	      while (frame_ptr < unit->dwarf_frame_buffer + unit->dwarf_frame_size)
-		frame_ptr = decode_frame_entry (unit, frame_ptr, 1,
+		frame_ptr = decode_frame_entry (gdbarch, unit.get (),
+						frame_ptr, 1,
 						cie_table, &fde_table,
 						EH_CIE_OR_FDE_TYPE_ID);
 	    }
@@ -2199,12 +2211,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	      warning (_("skipping .eh_frame info of %s: %s"),
 		       objfile_name (objfile), e.what ());
 
-	      if (fde_table.num_entries != 0)
-		{
-                  xfree (fde_table.entries);
-		  fde_table.entries = NULL;
-		  fde_table.num_entries = 0;
-		}
+	      fde_table.clear ();
 	      /* The cie_table is discarded below.  */
 	    }
 
@@ -2218,13 +2225,13 @@ dwarf2_build_frame_info (struct objfile *objfile)
                            &unit->dwarf_frame_size);
   if (unit->dwarf_frame_size)
     {
-      int num_old_fde_entries = fde_table.num_entries;
+      size_t num_old_fde_entries = fde_table.size ();
 
       try
 	{
 	  frame_ptr = unit->dwarf_frame_buffer;
 	  while (frame_ptr < unit->dwarf_frame_buffer + unit->dwarf_frame_size)
-	    frame_ptr = decode_frame_entry (unit, frame_ptr, 0,
+	    frame_ptr = decode_frame_entry (gdbarch, unit.get (), frame_ptr, 0,
 					    cie_table, &fde_table,
 					    EH_CIE_OR_FDE_TYPE_ID);
 	}
@@ -2233,97 +2240,58 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	  warning (_("skipping .debug_frame info of %s: %s"),
 		   objfile_name (objfile), e.what ());
 
-	  if (fde_table.num_entries != 0)
-	    {
-	      fde_table.num_entries = num_old_fde_entries;
-	      if (num_old_fde_entries == 0)
-		{
-		  xfree (fde_table.entries);
-		  fde_table.entries = NULL;
-		}
-	      else
-		{
-		  fde_table.entries
-		    = XRESIZEVEC (struct dwarf2_fde *, fde_table.entries,
-				  fde_table.num_entries);
-		}
-	    }
-	  fde_table.num_entries = num_old_fde_entries;
+	  fde_table.resize (num_old_fde_entries);
 	}
     }
 
-  /* Copy fde_table to obstack: it is needed at runtime.  */
-  fde_table2 = XOBNEW (&objfile->objfile_obstack, struct dwarf2_fde_table);
+  struct dwarf2_fde *fde_prev = NULL;
+  struct dwarf2_fde *first_non_zero_fde = NULL;
 
-  if (fde_table.num_entries == 0)
+  /* Prepare FDE table for lookups.  */
+  std::sort (fde_table.begin (), fde_table.end (), fde_is_less_than);
+
+  /* Check for leftovers from --gc-sections.  The GNU linker sets
+     the relevant symbols to zero, but doesn't zero the FDE *end*
+     ranges because there's no relocation there.  It's (offset,
+     length), not (start, end).  On targets where address zero is
+     just another valid address this can be a problem, since the
+     FDEs appear to be non-empty in the output --- we could pick
+     out the wrong FDE.  To work around this, when overlaps are
+     detected, we prefer FDEs that do not start at zero.
+
+     Start by finding the first FDE with non-zero start.  Below
+     we'll discard all FDEs that start at zero and overlap this
+     one.  */
+  for (struct dwarf2_fde *fde : fde_table)
     {
-      fde_table2->entries = NULL;
-      fde_table2->num_entries = 0;
+      if (fde->initial_location != 0)
+	{
+	  first_non_zero_fde = fde;
+	  break;
+	}
     }
-  else
+
+  /* Since we'll be doing bsearch, squeeze out identical (except
+     for eh_frame_p) fde entries so bsearch result is predictable.
+     Also discard leftovers from --gc-sections.  */
+  for (struct dwarf2_fde *fde : fde_table)
     {
-      struct dwarf2_fde *fde_prev = NULL;
-      struct dwarf2_fde *first_non_zero_fde = NULL;
-      int i;
+      if (fde->initial_location == 0
+	  && first_non_zero_fde != NULL
+	  && (first_non_zero_fde->initial_location
+	      < fde->initial_location + fde->address_range))
+	continue;
 
-      /* Prepare FDE table for lookups.  */
-      std::sort (fde_table.entries, fde_table.entries + fde_table.num_entries,
-		 fde_is_less_than);
+      if (fde_prev != NULL
+	  && fde_prev->initial_location == fde->initial_location)
+	continue;
 
-      /* Check for leftovers from --gc-sections.  The GNU linker sets
-	 the relevant symbols to zero, but doesn't zero the FDE *end*
-	 ranges because there's no relocation there.  It's (offset,
-	 length), not (start, end).  On targets where address zero is
-	 just another valid address this can be a problem, since the
-	 FDEs appear to be non-empty in the output --- we could pick
-	 out the wrong FDE.  To work around this, when overlaps are
-	 detected, we prefer FDEs that do not start at zero.
-
-	 Start by finding the first FDE with non-zero start.  Below
-	 we'll discard all FDEs that start at zero and overlap this
-	 one.  */
-      for (i = 0; i < fde_table.num_entries; i++)
-	{
-	  struct dwarf2_fde *fde = fde_table.entries[i];
-
-	  if (fde->initial_location != 0)
-	    {
-	      first_non_zero_fde = fde;
-	      break;
-	    }
-	}
-
-      /* Since we'll be doing bsearch, squeeze out identical (except
-	 for eh_frame_p) fde entries so bsearch result is predictable.
-	 Also discard leftovers from --gc-sections.  */
-      fde_table2->num_entries = 0;
-      for (i = 0; i < fde_table.num_entries; i++)
-	{
-	  struct dwarf2_fde *fde = fde_table.entries[i];
-
-	  if (fde->initial_location == 0
-	      && first_non_zero_fde != NULL
-	      && (first_non_zero_fde->initial_location
-		  < fde->initial_location + fde->address_range))
-	    continue;
-
-	  if (fde_prev != NULL
-	      && fde_prev->initial_location == fde->initial_location)
-	    continue;
-
-	  obstack_grow (&objfile->objfile_obstack, &fde_table.entries[i],
-			sizeof (fde_table.entries[0]));
-	  ++fde_table2->num_entries;
-	  fde_prev = fde;
-	}
-      fde_table2->entries
-	= (struct dwarf2_fde **) obstack_finish (&objfile->objfile_obstack);
-
-      /* Discard the original fde_table.  */
-      xfree (fde_table.entries);
+      unit->fde_table.push_back (fde);
+      fde_prev = fde;
     }
+  unit->fde_table.shrink_to_fit ();
 
-  dwarf2_frame_objfile_data.set (objfile, fde_table2);
+  set_comp_unit (objfile, unit.release ());
 }
 
 /* Handle 'maintenance show dwarf unwinders'.  */

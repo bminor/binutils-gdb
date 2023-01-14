@@ -1540,7 +1540,7 @@ get_displaced_step_closure_by_addr (CORE_ADDR addr)
   /* If checking the mode of displaced instruction in copy area.  */
   if (displaced->step_thread != nullptr
       && displaced->step_copy == addr)
-    return displaced->step_closure;
+    return displaced->step_closure.get ();
 
   return NULL;
 }
@@ -1596,20 +1596,18 @@ use_displaced_stepping (struct thread_info *tp)
 	  && !displaced_state->failed_before);
 }
 
-/* Clean out any stray displaced stepping state.  */
-static void
-displaced_step_clear (struct displaced_step_inferior_state *displaced)
-{
-  /* Indicate that there is no cleanup pending.  */
-  displaced->step_thread = nullptr;
+/* Simple function wrapper around displaced_step_inferior_state::reset.  */
 
-  delete displaced->step_closure;
-  displaced->step_closure = NULL;
+static void
+displaced_step_reset (displaced_step_inferior_state *displaced)
+{
+  displaced->reset ();
 }
 
-/* A cleanup that wraps displaced_step_clear.  */
-using displaced_step_clear_cleanup
-  = FORWARD_SCOPE_EXIT (displaced_step_clear);
+/* A cleanup that wraps displaced_step_reset.  We use this instead of, say,
+   SCOPE_EXIT, because it needs to be discardable with "cleanup.release ()".  */
+
+using displaced_step_reset_cleanup = FORWARD_SCOPE_EXIT (displaced_step_reset);
 
 /* Dump LEN bytes at BUF in hex to FILE, followed by a newline.  */
 void
@@ -1648,7 +1646,6 @@ displaced_step_prepare_throw (thread_info *tp)
   const address_space *aspace = regcache->aspace ();
   CORE_ADDR original, copy;
   ULONGEST len;
-  struct displaced_step_closure *closure;
   int status;
 
   /* We should never reach this function if the architecture does not
@@ -1691,7 +1688,7 @@ displaced_step_prepare_throw (thread_info *tp)
 			    target_pid_to_str (tp->ptid).c_str ());
     }
 
-  displaced_step_clear (displaced);
+  displaced_step_reset (displaced);
 
   scoped_restore_current_thread restore_thread;
 
@@ -1740,9 +1737,9 @@ displaced_step_prepare_throw (thread_info *tp)
 				 len);
     };
 
-  closure = gdbarch_displaced_step_copy_insn (gdbarch,
-					      original, copy, regcache);
-  if (closure == NULL)
+  displaced->step_closure
+    = gdbarch_displaced_step_copy_insn (gdbarch, original, copy, regcache);
+  if (displaced->step_closure == NULL)
     {
       /* The architecture doesn't know how or want to displaced step
 	 this instruction or instruction sequence.  Fallback to
@@ -1754,12 +1751,11 @@ displaced_step_prepare_throw (thread_info *tp)
      succeeds.  */
   displaced->step_thread = tp;
   displaced->step_gdbarch = gdbarch;
-  displaced->step_closure = closure;
   displaced->step_original = original;
   displaced->step_copy = copy;
 
   {
-    displaced_step_clear_cleanup cleanup (displaced);
+    displaced_step_reset_cleanup cleanup (displaced);
 
     /* Resume execution at the copy.  */
     regcache_write_pc (regcache, copy);
@@ -1862,7 +1858,7 @@ displaced_step_fixup (thread_info *event_thread, enum gdb_signal signal)
   if (displaced->step_thread != event_thread)
     return 0;
 
-  displaced_step_clear_cleanup cleanup (displaced);
+  displaced_step_reset_cleanup cleanup (displaced);
 
   displaced_step_restore (displaced, displaced->step_thread->ptid);
 
@@ -1879,7 +1875,7 @@ displaced_step_fixup (thread_info *event_thread, enum gdb_signal signal)
     {
       /* Fix up the resulting state.  */
       gdbarch_displaced_step_fixup (displaced->step_gdbarch,
-                                    displaced->step_closure,
+                                    displaced->step_closure.get (),
                                     displaced->step_original,
                                     displaced->step_copy,
                                     get_thread_regcache (displaced->step_thread));
@@ -2472,8 +2468,8 @@ resume_1 (enum gdb_signal sig)
 	  pc = regcache_read_pc (get_thread_regcache (tp));
 
 	  displaced = get_displaced_stepping_state (tp->inf);
-	  step = gdbarch_displaced_step_hw_singlestep (gdbarch,
-						       displaced->step_closure);
+	  step = gdbarch_displaced_step_hw_singlestep
+	    (gdbarch, displaced->step_closure.get ());
 	}
     }
 
@@ -5305,6 +5301,15 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	    struct regcache *child_regcache;
 	    CORE_ADDR parent_pc;
 
+	    if (ecs->ws.kind == TARGET_WAITKIND_FORKED)
+	      {
+		struct displaced_step_inferior_state *displaced
+		  = get_displaced_stepping_state (parent_inf);
+
+		/* Restore scratch pad for child process.  */
+		displaced_step_restore (displaced, ecs->ws.value.related_pid);
+	      }
+
 	    /* GDB has got TARGET_WAITKIND_FORKED or TARGET_WAITKIND_VFORKED,
 	       indicating that the displaced stepping of syscall instruction
 	       has been done.  Perform cleanup for parent process here.  Note
@@ -5314,15 +5319,6 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	    /* Start a new step-over in another thread if there's one
 	       that needs it.  */
 	    start_step_over ();
-
-	    if (ecs->ws.kind == TARGET_WAITKIND_FORKED)
-	      {
-		struct displaced_step_inferior_state *displaced
-		  = get_displaced_stepping_state (parent_inf);
-
-		/* Restore scratch pad for child process.  */
-		displaced_step_restore (displaced, ecs->ws.value.related_pid);
-	      }
 
 	    /* Since the vfork/fork syscall instruction was executed in the scratchpad,
 	       the child's PC is also within the scratchpad.  Set the child's PC

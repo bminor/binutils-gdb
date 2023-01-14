@@ -68,9 +68,6 @@ static void parse_scrolling_args (const char *,
 				  int *);
 
 
-#define WIN_HEIGHT_USAGE    "Usage: winheight WINDOW-NAME [+ | -] NUM-LINES\n"
-#define FOCUS_USAGE         "Usage: focus [WINDOW-NAME | next | prev]\n"
-
 #ifndef ACS_LRCORNER
 #  define ACS_LRCORNER '+'
 #endif
@@ -385,7 +382,7 @@ window_name_completer (completion_tracker &tracker,
   /* If no windows are considered visible then the TUI has not yet been
      initialized.  But still "focus src" and "focus cmd" will work because
      invoking the focus command will entail initializing the TUI which sets the
-     default layout to SRC_COMMAND.  */
+     default layout to "src".  */
   if (completion_name_vec.empty ())
     {
       completion_name_vec.push_back (SRC_NAME);
@@ -449,21 +446,6 @@ tui_update_gdb_sizes (void)
     }
 
   set_screen_width_and_height (width, height);
-}
-
-
-/* Set the logical focus to win_info.  */
-void
-tui_set_win_focus_to (struct tui_win_info *win_info)
-{
-  if (win_info != NULL)
-    {
-      struct tui_win_info *win_with_focus = tui_win_with_focus ();
-
-      tui_unhighlight_win (win_with_focus);
-      tui_set_win_with_focus (win_info);
-      tui_highlight_win (win_info);
-    }
 }
 
 
@@ -550,7 +532,6 @@ tui_resize_all (void)
       erase ();
       clearok (curscr, TRUE);
       tui_apply_current_layout ();
-      tui_delete_invisible_windows ();
       /* Turn keypad back on, unless focus is in the command
 	 window.  */
       if (win_with_focus != TUI_CMD_WIN)
@@ -694,18 +675,27 @@ tui_scroll_right_command (const char *arg, int from_tty)
 static struct tui_win_info *
 tui_partial_win_by_name (gdb::string_view name)
 {
+  struct tui_win_info *best = nullptr;
+
   if (name != NULL)
     {
       for (tui_win_info *item : all_tui_windows ())
 	{
 	  const char *cur_name = item->name ();
 
-	  if (startswith (cur_name, name))
+	  if (name == cur_name)
 	    return item;
+	  if (startswith (cur_name, name))
+	    {
+	      if (best != nullptr)
+		error (_("Window name \"%*s\" is ambiguous"),
+		       (int) name.size (), name.data ());
+	      best = item;
+	    }
 	}
     }
 
-  return NULL;
+  return best;
 }
 
 /* Set focus to the window named by 'arg'.  */
@@ -714,29 +704,27 @@ tui_set_focus_command (const char *arg, int from_tty)
 {
   tui_enable ();
 
-  if (arg != NULL)
-    {
-      struct tui_win_info *win_info = NULL;
+  if (arg == NULL)
+    error_no_arg (_("name of window to focus"));
 
-      if (subset_compare (arg, "next"))
-	win_info = tui_next_win (tui_win_with_focus ());
-      else if (subset_compare (arg, "prev"))
-	win_info = tui_prev_win (tui_win_with_focus ());
-      else
-	win_info = tui_partial_win_by_name (arg);
+  struct tui_win_info *win_info = NULL;
 
-      if (win_info == NULL)
-	error (_("Unrecognized window name \"%s\""), arg);
-      if (!win_info->is_visible ())
-	error (_("Window \"%s\" is not visible"), arg);
-
-      tui_set_win_focus_to (win_info);
-      keypad (TUI_CMD_WIN->handle.get (), win_info != TUI_CMD_WIN);
-      printf_filtered (_("Focus set to %s window.\n"),
-		       tui_win_with_focus ()->name ());
-    }
+  if (subset_compare (arg, "next"))
+    win_info = tui_next_win (tui_win_with_focus ());
+  else if (subset_compare (arg, "prev"))
+    win_info = tui_prev_win (tui_win_with_focus ());
   else
-    error (_("Incorrect Number of Arguments.\n%s"), FOCUS_USAGE);
+    win_info = tui_partial_win_by_name (arg);
+
+  if (win_info == NULL)
+    error (_("Unrecognized window name \"%s\""), arg);
+  if (!win_info->is_visible ())
+    error (_("Window \"%s\" is not visible"), arg);
+
+  tui_set_win_focus_to (win_info);
+  keypad (TUI_CMD_WIN->handle.get (), win_info != TUI_CMD_WIN);
+  printf_filtered (_("Focus set to %s window.\n"),
+		   tui_win_with_focus ()->name ());
 }
 
 static void
@@ -882,66 +870,59 @@ tui_set_win_height_command (const char *arg, int from_tty)
 {
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
-  if (arg != NULL)
+  if (arg == NULL)
+    error_no_arg (_("name of window"));
+
+  const char *buf = arg;
+  const char *buf_ptr = buf;
+  int new_height;
+  struct tui_win_info *win_info;
+
+  buf_ptr = skip_to_space (buf_ptr);
+
+  /* Validate the window name.  */
+  gdb::string_view wname (buf, buf_ptr - buf);
+  win_info = tui_partial_win_by_name (wname);
+
+  if (win_info == NULL)
+    error (_("Unrecognized window name \"%s\""), arg);
+  if (!win_info->is_visible ())
+    error (_("Window \"%s\" is not visible"), arg);
+
+  /* Process the size.  */
+  buf_ptr = skip_spaces (buf_ptr);
+
+  if (*buf_ptr != '\0')
     {
-      const char *buf = arg;
-      const char *buf_ptr = buf;
-      int new_height;
-      struct tui_win_info *win_info;
+      bool negate = false;
+      bool fixed_size = true;
+      int input_no;;
 
-      buf_ptr = strchr (buf_ptr, ' ');
-      if (buf_ptr != NULL)
+      if (*buf_ptr == '+' || *buf_ptr == '-')
 	{
-	  /* Validate the window name.  */
-	  gdb::string_view wname (buf, buf_ptr - buf);
-	  win_info = tui_partial_win_by_name (wname);
+	  if (*buf_ptr == '-')
+	    negate = true;
+	  fixed_size = false;
+	  buf_ptr++;
+	}
+      input_no = atoi (buf_ptr);
+      if (input_no > 0)
+	{
+	  if (negate)
+	    input_no *= (-1);
+	  if (fixed_size)
+	    new_height = input_no;
+	  else
+	    new_height = win_info->height + input_no;
 
-	  if (win_info == NULL)
-	    error (_("Unrecognized window name \"%s\""), arg);
-	  if (!win_info->is_visible ())
-	    error (_("Window \"%s\" is not visible"), arg);
-
-	  /* Process the size.  */
-	  buf_ptr = skip_spaces (buf_ptr);
-
-	  if (*buf_ptr != '\0')
-	    {
-	      bool negate = false;
-	      bool fixed_size = true;
-	      int input_no;;
-
-	      if (*buf_ptr == '+' || *buf_ptr == '-')
-		{
-		  if (*buf_ptr == '-')
-		    negate = true;
-		  fixed_size = false;
-		  buf_ptr++;
-		}
-	      input_no = atoi (buf_ptr);
-	      if (input_no > 0)
-		{
-		  if (negate)
-		    input_no *= (-1);
-		  if (fixed_size)
-		    new_height = input_no;
-		  else
-		    new_height = win_info->height + input_no;
-
-		  /* Now change the window's height, and adjust
-		     all other windows around it.  */
-		  tui_adjust_window_height (win_info, new_height);
-		  tui_update_gdb_sizes ();
-		}
-	      else
-		warning (_("Invalid window height specified.\n%s"),
-			 WIN_HEIGHT_USAGE);
-	    }
+	  /* Now change the window's height, and adjust
+	     all other windows around it.  */
+	  tui_adjust_window_height (win_info, new_height);
+	  tui_update_gdb_sizes ();
 	}
       else
-	printf_filtered (WIN_HEIGHT_USAGE);
+	error (_("Invalid window height specified"));
     }
-  else
-    printf_filtered (WIN_HEIGHT_USAGE);
 }
 
 /* See tui-data.h.  */
@@ -950,6 +931,14 @@ int
 tui_win_info::max_height () const
 {
   return tui_term_height () - 2;
+}
+
+/* See tui-data.h.  */
+
+int
+tui_gen_win_info::max_width () const
+{
+  return tui_term_width () - 2;
 }
 
 static void
@@ -1040,25 +1029,18 @@ Usage: tabset N"));
   deprecate_cmd (cmd, "set tui tab-width");
 
   cmd = add_com ("winheight", class_tui, tui_set_win_height_command, _("\
-Set or modify the height of a specified window.\n"
-WIN_HEIGHT_USAGE
-"Window names are:\n\
-   src  : the source window\n\
-   cmd  : the command window\n\
-   asm  : the disassembly window\n\
-   regs : the register display"));
+Set or modify the height of a specified window.\n\
+Usage: winheight WINDOW-NAME [+ | -] NUM-LINES\n\
+Use \"info win\" to see the names of the windows currently being displayed."));
   add_com_alias ("wh", "winheight", class_tui, 0);
   set_cmd_completer (cmd, winheight_completer);
   add_info ("win", tui_all_windows_info,
-	    _("List of all displayed windows."));
+	    _("List of all displayed windows.\n\
+Usage: info win"));
   cmd = add_com ("focus", class_tui, tui_set_focus_command, _("\
-Set focus to named window or next/prev window.\n"
-FOCUS_USAGE
-"Valid Window names are:\n\
-   src  : the source window\n\
-   asm  : the disassembly window\n\
-   regs : the register display\n\
-   cmd  : the command window"));
+Set focus to named window or next/prev window.\n\
+Usage: focus [WINDOW-NAME | next | prev]\n\
+Use \"info win\" to see the names of the windows currently being displayed."));
   add_com_alias ("fs", "focus", class_tui, 0);
   set_cmd_completer (cmd, focus_completer);
   add_com ("+", class_tui, tui_scroll_forward_command, _("\

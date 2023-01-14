@@ -18,7 +18,7 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(server.c)
+AC_INIT(server.cc)
 AC_CONFIG_HEADERS(config.h:config.in, [echo > stamp-h])
 
 AM_MAINTAINER_MODE
@@ -68,22 +68,6 @@ AC_CONFIG_COMMANDS([gdbdepdir],[
   [ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR CONFIG_SRC_SUBDIR="$CONFIG_SRC_SUBDIR"])
 
 ZW_PROG_COMPILER_DEPENDENCIES([CC])
-
-gnulib_extra_configure_args=
-# If large-file support is disabled, make sure gnulib does the same.
-if test "$enable_largefile" = no; then
-gnulib_extra_configure_args="$gnulib_extra_configure_args --disable-largefile"
-fi
-
-# Configure gnulib.  We can't use AC_CONFIG_SUBDIRS as that'd expect
-# to find the the source subdir to be configured directly under
-# gdbserver/.  We need to build gnulib under some other directory not
-# "gnulib", to avoid the problem of both GDB and GDBserver wanting to
-# build it in the same directory, when building in the source dir.
-ACX_CONFIGURE_DIR(["../gnulib"], ["build-gnulib-gdbserver"],
-                  ["$gnulib_extra_configure_args"])
-
-ACX_CONFIGURE_DIR(["../libiberty"], ["build-libiberty-gdbserver"])
 
 AC_CHECK_HEADERS(termios.h sys/reg.h string.h dnl
 		 sys/procfs.h linux/elf.h dnl
@@ -432,7 +416,7 @@ AC_SUBST(srv_xmlfiles)
 AC_SUBST(IPA_DEPFILES)
 AC_SUBST(extra_libraries)
 
-GNULIB=build-gnulib-gdbserver/import
+GNULIB=../gnulib/import
 
 GNULIB_STDINT_H=
 if test x"$STDINT_H" != x; then

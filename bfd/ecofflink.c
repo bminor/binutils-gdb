@@ -467,7 +467,7 @@ bfd_ecoff_debug_init (bfd *output_bfd ATTRIBUTE_UNUSED,
 		      struct bfd_link_info *info)
 {
   struct accumulate *ainfo;
-  bfd_size_type amt = sizeof (struct accumulate);
+  size_t amt = sizeof (struct accumulate);
 
   ainfo = (struct accumulate *) bfd_malloc (amt);
   if (!ainfo)

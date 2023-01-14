@@ -428,7 +428,7 @@ first_phase (bfd *abfd, int type, char *src, char * src_end)
 	    case '8':
 	      /* Symbols, add to section.  */
 	      {
-		bfd_size_type amt = sizeof (tekhex_symbol_type);
+		size_t amt = sizeof (tekhex_symbol_type);
 		tekhex_symbol_type *new_symbol = (tekhex_symbol_type *)
 		    bfd_alloc (abfd, amt);
 		char stype = (*src);
@@ -912,7 +912,7 @@ tekhex_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
 static asymbol *
 tekhex_make_empty_symbol (bfd *abfd)
 {
-  bfd_size_type amt = sizeof (struct tekhex_symbol_struct);
+  size_t amt = sizeof (struct tekhex_symbol_struct);
   tekhex_symbol_type *new_symbol = (tekhex_symbol_type *) bfd_zalloc (abfd,
 								      amt);
 

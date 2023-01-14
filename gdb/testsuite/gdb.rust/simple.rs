@@ -104,6 +104,12 @@ struct SimpleLayout {
 
 enum EmptyEnum {}
 
+#[derive(Debug)]
+struct EnumWithNonzeroOffset {
+    a: Option<u8>,
+    b: Option<u8>,
+}
+
 fn main () {
     let a = ();
     let b : [i32; 0] = [];
@@ -185,6 +191,8 @@ fn main () {
     let empty_enum_value: EmptyEnum;
 
     let u2 = Union2 { name: [1] };
+
+    let nonzero_offset = EnumWithNonzeroOffset { a: Some(1), b: None };
 
     println!("{}, {}", x.0, x.1);        // set breakpoint here
     println!("{}", diff2(92, 45));

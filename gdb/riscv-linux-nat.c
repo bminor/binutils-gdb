@@ -201,7 +201,9 @@ fill_fpregset (const struct regcache *regcache, prfpregset_t *fpregs,
 const struct target_desc *
 riscv_linux_nat_target::read_description ()
 {
-  return riscv_linux_read_description (inferior_ptid.lwp ());
+  const struct riscv_gdbarch_features features
+    = riscv_linux_read_features (inferior_ptid.lwp ());
+  return riscv_lookup_target_description (features);
 }
 
 /* Fetch REGNUM (or all registers if REGNUM == -1) from the target

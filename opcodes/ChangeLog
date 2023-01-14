@@ -1,3 +1,169 @@
+2020-02-20  Nelson Chu  <nelson.chu@sifive.com>
+
+	* riscv-dis.c (print_insn_args): Updated since the DECLARE_CSR is
+	changed.
+
+2020-02-19  Nelson Chu  <nelson.chu@sifive.com>
+
+	* riscv-opc.c (riscv_opcodes): Convert add/addi to the compressed
+	c.mv/c.li if rs1 is zero.
+
+2020-02-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (cpu_flag_init): Replace CpuABM with
+	CpuLZCNT|CpuPOPCNT.  Add CpuPOPCNT to CPU_SSE4_2_FLAGS.  Add
+	CPU_POPCNT_FLAGS.
+	(cpu_flags): Remove CpuABM.  Add CpuPOPCNT.
+	* i386-opc.h (CpuABM): Removed.
+	(CpuPOPCNT): New.
+	(i386_cpu_flags): Remove cpuabm.  Add cpupopcnt.
+	* i386-opc.tbl: Replace CpuABM|CpuSSE4_2 with CpuPOPCNT on
+	popcnt.  Remove CpuABM from lzcnt.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2020-02-17  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (vcvtsi2sd, vcvtsi2ss, vcvtusi2sd, vcvtusi2ss):
+	Fold CpuNo64 and Cpu64 templates. Use VexLIG/EVexLIG and VexW0/
+	VexW1 instead of open-coding them.
+	* i386-tbl.h: Re-generate.
+
+2020-02-17  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (AddrPrefixOpReg): Define.
+	(monitor, invlpga, vmload, vmrun, vmsave, clzero, monitorx,
+	umonitor, movdir64b, enqcmd, enqcmds): Fold Cpu64 and CpuNo64
+	templates. Drop NoRex64.
+	* i386-tbl.h: Re-generate.
+
+2020-02-17  Jan Beulich  <jbeulich@suse.com>
+
+	PR gas/6518
+	* i386-opc.tbl (vcvtpd2dq, vcvtpd2ps, vcvttpd2dq, vcvtpd2udq,
+	vcvttpd2udq, vcvtqq2ps, vcvtuqq2ps): Split XMM/YMM source forms
+	into Intel syntax instance (with Unpsecified) and AT&T one
+	(without).
+	(vcvtneps2bf16): Likewise, along with folding the two so far
+	separate ones.
+	* i386-tbl.h: Re-generate.
+
+2020-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (cpu_flag_init): Remove CPU_ANY_SSE3_FLAGS from
+	CPU_ANY_SSE4A_FLAGS.
+
+2020-02-17  Alan Modra  <amodra@gmail.com>
+
+	* i386-gen.c (cpu_flag_init): Correct last change.
+
+2020-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (cpu_flag_init): Add CPU_ANY_SSE4A_FLAGS.  Remove
+	CPU_ANY_SSE4_FLAGS.
+
+2020-02-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.tbl (movsx): Remove Intel syntax comments.
+	(movzx): Likewise.
+
+2020-02-14  Jan Beulich  <jbeulich@suse.com>
+
+	PR gas/25438
+	* i386-opc.tbl (movsx): Fold patterns. Also allow Reg32 as
+	destination for Cpu64-only variant.
+	(movzx): Fold patterns.
+	* i386-tbl.h: Re-generate.
+
+2020-02-13  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (cpu_flag_init): Move CpuSSE4a from
+	CPU_ANY_SSE_FLAGS entry to CPU_ANY_SSE3_FLAGS one. Add
+	CPU_ANY_SSE4_FLAGS entry.
+	* i386-init.h: Re-generate.
+
+2020-02-12  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (vfpclasspd, vfpclassps): Add Intel sytax form
+	with Unspecified, making the present one AT&T syntax only.
+	* i386-tbl.h: Re-generate.
+
+2020-02-12  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (jmp): Fold CpuNo64 and Amd64 direct variants.
+	* i386-tbl.h: Re-generate.
+
+2020-02-12  Jan Beulich  <jbeulich@suse.com>
+
+	PR gas/24546
+	* i386-dis.c (putop): Handle REX.W in '^' case for Intel64 mode.
+	* i386-opc.tbl (lfs, lgs, lss, lcall, ljmp): Split into
+	Amd64 and Intel64 templates.
+	(call, jmp): Likewise for far indirect variants. Dro
+	Unspecified.
+	* i386-tbl.h: Re-generate.
+
+2020-02-11  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (opcode_modifiers): Remove ShortForm entry.
+	* i386-opc.h (ShortForm): Delete.
+	(struct i386_opcode_modifier): Remove shortform field.
+	* i386-opc.tbl (mov, movabs, push, pop, xchg, inc, dec, fld,
+	fst, fstp, fxch, fcom, fcomp, fucom, fucomp, fadd, faddp, fsub,
+	fsubp, fsubr, fsubrp, fmul, fmulp, fdiv, fdivp, fdivr, fdivrp,
+	ffreep, bswap, fcmov*, fcomi, fcomip, fucomi, fucomip, movq):
+	Drop ShortForm.
+	* i386-tbl.h: Re-generate.
+
+2020-02-11  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (fcomi, fucomi, fcomip, fcompi, fucomip,
+	fucompi): Drop ShortForm from operand-less templates.
+	* i386-tbl.h: Re-generate.
+
+2020-02-11  Alan Modra  <amodra@gmail.com>
+
+	* cgen-ibld.in (extract_normal): Set *valuep on all return paths.
+	* bpf-ibld.c, * epiphany-ibld.c, * fr30-ibld.c, * frv-ibld.c,
+	* ip2k-ibld.c, * iq2000-ibld.c, * lm32-ibld.c, * m32c-ibld.c,
+	* m32r-ibld.c, * mep-ibld.c, * mt-ibld.c, * or1k-ibld.c,
+	* xc16x-ibld.c, * xstormy16-ibld.c: Regenerate.
+
+2020-02-10  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* arm-dis.c (print_insn_cde): Define 'V' parse character.
+	(cde_opcodes): Add VCX* instructions.
+
+2020-02-10  Stam Markianos-Wright  <stam.markianos-wright@arm.com>
+	    Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* arm-dis.c (struct cdeopcode32): New.
+	(CDE_OPCODE): New macro.
+	(cde_opcodes): New disassembly table.
+	(regnames): New option to table.
+	(cde_coprocs): New global variable.
+	(print_insn_cde): New
+	(print_insn_thumb32): Use print_insn_cde.
+	(parse_arm_disassembler_options): Parse coprocN args.
+
+2020-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/25516
+	* i386-gen.c (opcode_modifiers): Replace AMD64 and Intel64
+	with ISA64.
+	* i386-opc.h (AMD64): Removed.
+	(Intel64): Likewose.
+	(AMD64): New.
+	(INTEL64): Likewise.
+	(INTEL64ONLY): Likewise.
+	(i386_opcode_modifier): Replace amd64 and intel64 with isa64.
+	* i386-opc.tbl (Amd64): New.
+	(Intel64): Likewise.
+	(Intel64Only): Likewise.
+	Replace AMD64 with Amd64.  Update sysenter/sysenter with
+	Cpu64 and Intel64Only.  Remove AMD64 from sysenter/sysenter.
+	* i386-tbl.h: Regenerated.
+
 2020-02-07  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
 	PR 25469

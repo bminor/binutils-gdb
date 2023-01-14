@@ -1461,7 +1461,7 @@ write_gdbindex (struct dwarf2_per_objfile *dwarf2_per_objfile, FILE *out_file,
       sig_data.objfile = objfile;
       sig_data.symtab = &symtab;
       sig_data.cu_index = dwarf2_per_objfile->all_comp_units.size ();
-      htab_traverse_noresize (dwarf2_per_objfile->signatured_types,
+      htab_traverse_noresize (dwarf2_per_objfile->signatured_types.get (),
 			      write_one_signatured_type, &sig_data);
     }
 
@@ -1534,7 +1534,7 @@ write_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile,
       /* It is used only for gdb_index.  */
       sig_data.info.symtab = nullptr;
       sig_data.info.cu_index = 0;
-      htab_traverse_noresize (dwarf2_per_objfile->signatured_types,
+      htab_traverse_noresize (dwarf2_per_objfile->signatured_types.get (),
 			      debug_names::write_one_signatured_type,
 			      &sig_data);
     }

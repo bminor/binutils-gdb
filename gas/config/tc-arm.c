@@ -282,6 +282,24 @@ static const arm_feature_set arm_ext_i8mm =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_I8MM);
 static const arm_feature_set arm_ext_crc =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC);
+static const arm_feature_set arm_ext_cde =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE);
+static const arm_feature_set arm_ext_cde0 =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE0);
+static const arm_feature_set arm_ext_cde1 =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE1);
+static const arm_feature_set arm_ext_cde2 =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE2);
+static const arm_feature_set arm_ext_cde3 =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE3);
+static const arm_feature_set arm_ext_cde4 =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE4);
+static const arm_feature_set arm_ext_cde5 =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE5);
+static const arm_feature_set arm_ext_cde6 =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE6);
+static const arm_feature_set arm_ext_cde7 =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE7);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
 static const arm_feature_set fpu_any = FPU_ANY;
@@ -321,6 +339,11 @@ static const arm_feature_set mve_ext =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE);
 static const arm_feature_set mve_fp_ext =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP);
+/* Note: This has more than one bit set, which means using it with
+   mark_feature_used (which returns if *any* of the bits are set in the current
+   cpu variant) can give surprising results.  */
+static const arm_feature_set armv8m_fp =
+  ARM_FEATURE_COPROC (FPU_VFP_V5_SP_D16);
 #ifdef OBJ_ELF
 static const arm_feature_set fpu_vfp_fp16 =
   ARM_FEATURE_COPROC (FPU_VFP_EXT_FP16);
@@ -460,7 +483,7 @@ struct neon_type_el
   unsigned size;
 };
 
-#define NEON_MAX_TYPE_ELS 4
+#define NEON_MAX_TYPE_ELS 5
 
 struct neon_type
 {
@@ -482,7 +505,9 @@ enum pred_instruction_type
    VPT_INSN,		   /* The VPT/VPST insn has been parsed.  */
    MVE_OUTSIDE_PRED_INSN , /* Instruction to indicate a MVE instruction without
 			      a predication code.  */
-   MVE_UNPREDICABLE_INSN   /* MVE instruction that is non-predicable.  */
+   MVE_UNPREDICABLE_INSN,  /* MVE instruction that is non-predicable.  */
+   NEUTRAL_IT_NO_VPT_INSN, /* Instruction that can be either inside or outside
+			      an IT block, but must not be in a VPT block.  */
 };
 
 /* The maximum number of operands we need.  */
@@ -882,6 +907,7 @@ struct asm_opcode
 #define BAD_ADDR_MODE   _("instruction does not accept this addressing mode")
 #define BAD_BRANCH	_("branch must be last instruction in IT block")
 #define BAD_BRANCH_OFF	_("branch out of range or not a multiple of 2")
+#define BAD_NO_VPT	_("instruction not allowed in VPT block")
 #define BAD_NOT_IT	_("instruction not allowed in IT block")
 #define BAD_NOT_VPT	_("instruction missing MVE vector predication code")
 #define BAD_FPU		_("selected FPU does not support instruction")
@@ -899,6 +925,8 @@ struct asm_opcode
 #define BAD_RANGE	_("branch out of range")
 #define BAD_FP16	_("selected processor does not support fp16 instruction")
 #define BAD_BF16	_("selected processor does not support bf16 instruction")
+#define BAD_CDE	_("selected processor does not support cde instruction")
+#define BAD_CDE_COPROC	_("coprocessor for insn is not enabled for cde")
 #define UNPRED_REG(R)	_("using " R " results in unpredictable behaviour")
 #define THUMB1_RELOC_ONLY  _("relocation valid in thumb1 code only")
 #define MVE_NOT_IT	_("Warning: instruction is UNPREDICTABLE in an IT " \
@@ -7069,6 +7097,7 @@ enum operand_parse_code
   OP_RIWG,	/* iWMMXt wCG register */
   OP_RXA,	/* XScale accumulator register */
 
+  OP_RNSDMQ,	/* Neon single, double or MVE vector register */
   OP_RNSDQMQ,	/* Neon single, double or quad register or MVE vector register
 		 */
   OP_RNSDQMQR,	/* Neon single, double or quad register, MVE vector register or
@@ -7137,8 +7166,11 @@ enum operand_parse_code
   OP_I63s,	/*		 -64 .. 63 */
   OP_I64,	/*		   1 .. 64 */
   OP_I64z,	/*		   0 .. 64 */
+  OP_I127,	/*		   0 .. 127 */
   OP_I255,	/*		   0 .. 255 */
-
+  OP_I511,	/*		   0 .. 511 */
+  OP_I4095,	/*		   0 .. 4095 */
+  OP_I8191,	/*		   0 .. 8191 */
   OP_I4b,	/* immediate, prefix optional, 1 .. 4 */
   OP_I7b,	/*			       0 .. 7 */
   OP_I15b,	/*			       0 .. 15 */
@@ -7456,6 +7488,12 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_RVSD_COND:
 	  po_reg_or_goto (REG_TYPE_VFSD, try_cond);
 	  break;
+	case OP_RNSDMQ:
+	  po_reg_or_goto (REG_TYPE_NSD, try_mq2);
+	  break;
+	  try_mq2:
+	  po_reg_or_fail (REG_TYPE_MQ);
+	  break;
 	case OP_oRNSDQ:
 	case OP_RNSDQ: po_reg_or_fail (REG_TYPE_NSDQ);    break;
 	case OP_RNSDQMQR:
@@ -7652,8 +7690,11 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_I63:	 po_imm_or_fail (  0,     63, FALSE);   break;
 	case OP_I64:	 po_imm_or_fail (  1,     64, FALSE);   break;
 	case OP_I64z:	 po_imm_or_fail (  0,     64, FALSE);   break;
+	case OP_I127:	 po_imm_or_fail (  0,	 127, FALSE);	break;
 	case OP_I255:	 po_imm_or_fail (  0,	 255, FALSE);	break;
-
+	case OP_I511:	 po_imm_or_fail (  0,	 511, FALSE);	break;
+	case OP_I4095:	 po_imm_or_fail (  0,	 4095, FALSE);	break;
+	case OP_I8191:   po_imm_or_fail (  0,	 8191, FALSE);	break;
 	case OP_I4b:	 po_imm_or_fail (  1,	   4, TRUE);	break;
 	case OP_oI7b:
 	case OP_I7b:	 po_imm_or_fail (  0,	   7, TRUE);	break;
@@ -14772,6 +14813,15 @@ NEON_ENC_TAB
   X(2, (Q, R), QUAD),			\
   X(2, (D, I), DOUBLE),			\
   X(2, (Q, I), QUAD),			\
+  X(3, (P, F, I), SINGLE),		\
+  X(3, (P, D, I), DOUBLE),		\
+  X(3, (P, Q, I), QUAD),		\
+  X(4, (P, F, F, I), SINGLE),		\
+  X(4, (P, D, D, I), DOUBLE),		\
+  X(4, (P, Q, Q, I), QUAD),		\
+  X(5, (P, F, F, F, I), SINGLE),	\
+  X(5, (P, D, D, D, I), DOUBLE),	\
+  X(5, (P, Q, Q, Q, I), QUAD),		\
   X(3, (D, L, D), DOUBLE),		\
   X(2, (D, Q), MIXED),			\
   X(2, (Q, D), MIXED),			\
@@ -14820,6 +14870,7 @@ NEON_ENC_TAB
 #define S2(A,B)		NS_##A##B
 #define S3(A,B,C)	NS_##A##B##C
 #define S4(A,B,C,D)	NS_##A##B##C##D
+#define S5(A,B,C,D,E)	NS_##A##B##C##D##E
 
 #define X(N, L, C) S##N L
 
@@ -14833,6 +14884,7 @@ enum neon_shape
 #undef S2
 #undef S3
 #undef S4
+#undef S5
 
 enum neon_shape_class
 {
@@ -14861,7 +14913,8 @@ enum neon_shape_el
   SE_I,
   SE_S,
   SE_R,
-  SE_L
+  SE_L,
+  SE_P
 };
 
 /* Register widths of above.  */
@@ -14874,6 +14927,7 @@ static unsigned neon_shape_el_size[] =
   0,
   32,
   32,
+  0,
   0
 };
 
@@ -14886,6 +14940,7 @@ struct neon_shape_info
 #define S2(A,B)		{ SE_##A, SE_##B }
 #define S3(A,B,C)	{ SE_##A, SE_##B, SE_##C }
 #define S4(A,B,C,D)	{ SE_##A, SE_##B, SE_##C, SE_##D }
+#define S5(A,B,C,D,E)	{ SE_##A, SE_##B, SE_##C, SE_##D, SE_##E }
 
 #define X(N, L, C) { N, S##N L }
 
@@ -14898,6 +14953,7 @@ static struct neon_shape_info neon_shape_tab[] =
 #undef S2
 #undef S3
 #undef S4
+#undef S5
 
 /* Bit masks used in type checking given instructions.
   'N_EQK' means the type must be the same as (or based on in some way) the key
@@ -15087,6 +15143,7 @@ neon_select_shape (enum neon_shape shape, ...)
 		matches = 0;
 	      break;
 
+	    case SE_P:
 	    case SE_L:
 	      break;
 	    }
@@ -15815,6 +15872,8 @@ neon_logbits (unsigned x)
 
 #define LOW4(R) ((R) & 0xf)
 #define HI1(R) (((R) >> 4) & 1)
+#define LOW1(R) ((R) & 0x1)
+#define HI4(R) (((R) >> 1) & 0xf)
 
 static unsigned
 mve_get_vcmp_vpt_cond (struct neon_type_el et)
@@ -19703,8 +19762,6 @@ do_neon_fmac_maybe_scalar_long (int subtype)
   inst.instruction &= 0x00ffffff;
   inst.instruction |= high8;
 
-#define LOW1(R) ((R) & 0x1)
-#define HI4(R) (((R) >> 1) & 0xf)
   /* Unlike usually NEON three-same, encoding for Vn and Vm will depend on
      whether the instruction is in Q form and whether Vm is a scalar indexed
      operand.  */
@@ -21572,6 +21629,455 @@ do_vummla (void)
 
 }
 
+static void
+check_cde_operand (size_t index, int is_dual)
+{
+  unsigned Rx = inst.operands[index].reg;
+  bfd_boolean isvec = inst.operands[index].isvec;
+  if (is_dual == 0 && thumb_mode)
+    constraint (
+		!((Rx <= 14 && Rx != 13) || (Rx == REG_PC && isvec)),
+		_("Register must be r0-r14 except r13, or APSR_nzcv."));
+  else
+    constraint ( !((Rx <= 10 && Rx % 2 == 0 )),
+      _("Register must be an even register between r0-r10."));
+}
+
+static bfd_boolean
+cde_coproc_enabled (unsigned coproc)
+{
+  switch (coproc)
+  {
+    case 0: return mark_feature_used (&arm_ext_cde0);
+    case 1: return mark_feature_used (&arm_ext_cde1);
+    case 2: return mark_feature_used (&arm_ext_cde2);
+    case 3: return mark_feature_used (&arm_ext_cde3);
+    case 4: return mark_feature_used (&arm_ext_cde4);
+    case 5: return mark_feature_used (&arm_ext_cde5);
+    case 6: return mark_feature_used (&arm_ext_cde6);
+    case 7: return mark_feature_used (&arm_ext_cde7);
+    default: return FALSE;
+  }
+}
+
+#define cde_coproc_pos 8
+static void
+cde_handle_coproc (void)
+{
+  unsigned coproc = inst.operands[0].reg;
+  constraint (coproc > 7, _("CDE Coprocessor must be in range 0-7"));
+  constraint (!(cde_coproc_enabled (coproc)), BAD_CDE_COPROC);
+  inst.instruction |= coproc << cde_coproc_pos;
+}
+#undef cde_coproc_pos
+
+static void
+cxn_handle_predication (bfd_boolean is_accum)
+{
+  /* This function essentially checks for a suffix, not whether the instruction
+     is inside an IT block or not.
+     The CX* instructions should never have a conditional suffix -- this is not
+     mentioned in the syntax.  */
+  if (conditional_insn ())
+    inst.error = BAD_SYNTAX;
+  /* Here we ensure that if the current element  */
+  else if (is_accum)
+    set_pred_insn_type (NEUTRAL_IT_NO_VPT_INSN);
+  else
+    set_pred_insn_type (OUTSIDE_PRED_INSN);
+}
+
+static void
+do_custom_instruction_1 (int is_dual, bfd_boolean is_accum)
+{
+
+  constraint (!mark_feature_used (&arm_ext_cde), _(BAD_CDE));
+
+  unsigned imm, Rd;
+
+  Rd = inst.operands[1].reg;
+  check_cde_operand (1, is_dual);
+
+  if (is_dual == 1)
+    {
+      constraint (inst.operands[2].reg != Rd + 1,
+		  _("cx1d requires consecutive destination registers."));
+      imm = inst.operands[3].imm;
+    }
+  else if (is_dual == 0)
+    imm = inst.operands[2].imm;
+  else
+    abort ();
+
+  inst.instruction |= Rd << 12;
+  inst.instruction |= (imm & 0x1F80) << 9;
+  inst.instruction |= (imm & 0x0040) << 1;
+  inst.instruction |= (imm & 0x003f);
+
+  cde_handle_coproc ();
+  cxn_handle_predication (is_accum);
+}
+
+static void
+do_custom_instruction_2 (int is_dual, bfd_boolean is_accum)
+{
+
+  constraint (!mark_feature_used (&arm_ext_cde), _(BAD_CDE));
+
+  unsigned imm, Rd, Rn;
+
+  Rd = inst.operands[1].reg;
+
+  if (is_dual == 1)
+    {
+      constraint (inst.operands[2].reg != Rd + 1,
+		  _("cx2d requires consecutive destination registers."));
+      imm = inst.operands[4].imm;
+      Rn = inst.operands[3].reg;
+    }
+  else if (is_dual == 0)
+  {
+    imm = inst.operands[3].imm;
+    Rn = inst.operands[2].reg;
+  }
+  else
+    abort ();
+
+  check_cde_operand (2 + is_dual, /* is_dual = */0);
+  check_cde_operand (1, is_dual);
+
+  inst.instruction |= Rd << 12;
+  inst.instruction |= Rn << 16;
+
+  inst.instruction |= (imm & 0x0380) << 13;
+  inst.instruction |= (imm & 0x0040) << 1;
+  inst.instruction |= (imm & 0x003f);
+
+  cde_handle_coproc ();
+  cxn_handle_predication (is_accum);
+}
+
+static void
+do_custom_instruction_3 (int is_dual, bfd_boolean is_accum)
+{
+
+  constraint (!mark_feature_used (&arm_ext_cde), _(BAD_CDE));
+
+  unsigned imm, Rd, Rn, Rm;
+
+  Rd = inst.operands[1].reg;
+
+  if (is_dual == 1)
+    {
+      constraint (inst.operands[2].reg != Rd + 1,
+		  _("cx3d requires consecutive destination registers."));
+      imm = inst.operands[5].imm;
+      Rn = inst.operands[3].reg;
+      Rm = inst.operands[4].reg;
+    }
+  else if (is_dual == 0)
+  {
+    imm = inst.operands[4].imm;
+    Rn = inst.operands[2].reg;
+    Rm = inst.operands[3].reg;
+  }
+  else
+    abort ();
+
+  check_cde_operand (1, is_dual);
+  check_cde_operand (2 + is_dual, /* is_dual = */0);
+  check_cde_operand (3 + is_dual, /* is_dual = */0);
+
+  inst.instruction |= Rd;
+  inst.instruction |= Rn << 16;
+  inst.instruction |= Rm << 12;
+
+  inst.instruction |= (imm & 0x0038) << 17;
+  inst.instruction |= (imm & 0x0004) << 5;
+  inst.instruction |= (imm & 0x0003) << 4;
+
+  cde_handle_coproc ();
+  cxn_handle_predication (is_accum);
+}
+
+static void
+do_cx1 (void)
+{
+  return do_custom_instruction_1 (0, 0);
+}
+
+static void
+do_cx1a (void)
+{
+  return do_custom_instruction_1 (0, 1);
+}
+
+static void
+do_cx1d (void)
+{
+  return do_custom_instruction_1 (1, 0);
+}
+
+static void
+do_cx1da (void)
+{
+  return do_custom_instruction_1 (1, 1);
+}
+
+static void
+do_cx2 (void)
+{
+  return do_custom_instruction_2 (0, 0);
+}
+
+static void
+do_cx2a (void)
+{
+  return do_custom_instruction_2 (0, 1);
+}
+
+static void
+do_cx2d (void)
+{
+  return do_custom_instruction_2 (1, 0);
+}
+
+static void
+do_cx2da (void)
+{
+  return do_custom_instruction_2 (1, 1);
+}
+
+static void
+do_cx3 (void)
+{
+  return do_custom_instruction_3 (0, 0);
+}
+
+static void
+do_cx3a (void)
+{
+  return do_custom_instruction_3 (0, 1);
+}
+
+static void
+do_cx3d (void)
+{
+  return do_custom_instruction_3 (1, 0);
+}
+
+static void
+do_cx3da (void)
+{
+  return do_custom_instruction_3 (1, 1);
+}
+
+static void
+vcx_assign_vec_d (unsigned regnum)
+{
+  inst.instruction |= HI4 (regnum) << 12;
+  inst.instruction |= LOW1 (regnum) << 22;
+}
+
+static void
+vcx_assign_vec_m (unsigned regnum)
+{
+  inst.instruction |= HI4 (regnum);
+  inst.instruction |= LOW1 (regnum) << 5;
+}
+
+static void
+vcx_assign_vec_n (unsigned regnum)
+{
+  inst.instruction |= HI4 (regnum) << 16;
+  inst.instruction |= LOW1 (regnum) << 7;
+}
+
+enum vcx_reg_type {
+    q_reg,
+    d_reg,
+    s_reg
+};
+
+static enum vcx_reg_type
+vcx_get_reg_type (enum neon_shape ns)
+{
+  gas_assert (ns == NS_PQI
+	      || ns == NS_PDI
+	      || ns == NS_PFI
+	      || ns == NS_PQQI
+	      || ns == NS_PDDI
+	      || ns == NS_PFFI
+	      || ns == NS_PQQQI
+	      || ns == NS_PDDDI
+	      || ns == NS_PFFFI);
+  if (ns == NS_PQI || ns == NS_PQQI || ns == NS_PQQQI)
+    return q_reg;
+  if (ns == NS_PDI || ns == NS_PDDI || ns == NS_PDDDI)
+    return d_reg;
+  return s_reg;
+}
+
+#define vcx_size_pos 24
+#define vcx_vec_pos 6
+static unsigned
+vcx_handle_shape (enum vcx_reg_type reg_type)
+{
+  unsigned mult = 2;
+  if (reg_type == q_reg)
+    inst.instruction |= 1 << vcx_vec_pos;
+  else if (reg_type == d_reg)
+    inst.instruction |= 1 << vcx_size_pos;
+  else
+    mult = 1;
+  /* NOTE:
+     The documentation says that the Q registers are encoded as 2*N in the D:Vd
+     bits (or equivalent for N and M registers).
+     Similarly the D registers are encoded as N in D:Vd bits.
+     While the S registers are encoded as N in the Vd:D bits.
+
+     Taking into account the maximum values of these registers we can see a
+     nicer pattern for calculation:
+       Q -> 7, D -> 15, S -> 31
+
+     If we say that everything is encoded in the Vd:D bits, then we can say
+     that Q is encoded as 4*N, and D is encoded as 2*N.
+     This way the bits will end up the same, and calculation is simpler.
+     (calculation is now:
+	1. Multiply by a number determined by the register letter.
+	2. Encode resulting number in Vd:D bits.)
+
+      This is made a little more complicated by automatic handling of 'Q'
+      registers elsewhere, which means the register number is already 2*N where
+      N is the number the user wrote after the register letter.
+     */
+  return mult;
+}
+#undef vcx_vec_pos
+#undef vcx_size_pos
+
+static void
+vcx_ensure_register_in_range (unsigned R, enum vcx_reg_type reg_type)
+{
+  if (reg_type == q_reg)
+    {
+      gas_assert (R % 2 == 0);
+      constraint (R >= 16, _("'q' register must be in range 0-7"));
+    }
+  else if (reg_type == d_reg)
+    constraint (R >= 16, _("'d' register must be in range 0-15"));
+  else
+    constraint (R >= 32, _("'s' register must be in range 0-31"));
+}
+
+static void (*vcx_assign_vec[3]) (unsigned) = {
+    vcx_assign_vec_d,
+    vcx_assign_vec_m,
+    vcx_assign_vec_n
+};
+
+static void
+vcx_handle_register_arguments (unsigned num_registers,
+			       enum vcx_reg_type reg_type)
+{
+  unsigned R, i;
+  unsigned reg_mult = vcx_handle_shape (reg_type);
+  for (i = 0; i < num_registers; i++)
+    {
+      R = inst.operands[i+1].reg;
+      vcx_ensure_register_in_range (R, reg_type);
+      if (num_registers == 3 && i > 0)
+	{
+	  if (i == 2)
+	    vcx_assign_vec[1] (R * reg_mult);
+	  else
+	    vcx_assign_vec[2] (R * reg_mult);
+	  continue;
+	}
+      vcx_assign_vec[i](R * reg_mult);
+    }
+}
+
+static void
+vcx_handle_insn_block (enum vcx_reg_type reg_type)
+{
+  if (reg_type == q_reg)
+    if (inst.cond > COND_ALWAYS)
+      inst.pred_insn_type = INSIDE_VPT_INSN;
+    else
+      inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+  else if (inst.cond == COND_ALWAYS)
+    inst.pred_insn_type = OUTSIDE_PRED_INSN;
+  else
+    inst.error = BAD_NOT_IT;
+}
+
+static void
+vcx_handle_common_checks (unsigned num_args, enum neon_shape rs)
+{
+  constraint (!mark_feature_used (&arm_ext_cde), _(BAD_CDE));
+  cde_handle_coproc ();
+  enum vcx_reg_type reg_type = vcx_get_reg_type (rs);
+  vcx_handle_register_arguments (num_args, reg_type);
+  vcx_handle_insn_block (reg_type);
+  if (reg_type == q_reg)
+    constraint (!mark_feature_used (&mve_ext),
+		_("vcx instructions with Q registers require MVE"));
+  else
+    constraint (!(ARM_FSET_CPU_SUBSET (armv8m_fp, cpu_variant)
+		  && mark_feature_used (&armv8m_fp))
+		&& !mark_feature_used (&mve_ext),
+		_("vcx instructions with S or D registers require either MVE"
+		  " or Armv8-M floating point etension."));
+}
+
+static void
+do_vcx1 (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_PQI, NS_PDI, NS_PFI, NS_NULL);
+  vcx_handle_common_checks (1, rs);
+
+  unsigned imm = inst.operands[2].imm;
+  inst.instruction |= (imm & 0x03f);
+  inst.instruction |= (imm & 0x040) << 1;
+  inst.instruction |= (imm & 0x780) << 9;
+  if (rs != NS_PQI)
+    constraint (imm >= 2048,
+		_("vcx1 with S or D registers takes immediate within 0-2047"));
+  inst.instruction |= (imm & 0x800) << 13;
+}
+
+static void
+do_vcx2 (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_PQQI, NS_PDDI, NS_PFFI, NS_NULL);
+  vcx_handle_common_checks (2, rs);
+
+  unsigned imm = inst.operands[3].imm;
+  inst.instruction |= (imm & 0x01) << 4;
+  inst.instruction |= (imm & 0x02) << 6;
+  inst.instruction |= (imm & 0x3c) << 14;
+  if (rs != NS_PQQI)
+    constraint (imm >= 64,
+		_("vcx2 with S or D registers takes immediate within 0-63"));
+  inst.instruction |= (imm & 0x40) << 18;
+}
+
+static void
+do_vcx3 (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_PQQQI, NS_PDDDI, NS_PFFFI, NS_NULL);
+  vcx_handle_common_checks (3, rs);
+
+  unsigned imm = inst.operands[4].imm;
+  inst.instruction |= (imm & 0x1) << 4;
+  inst.instruction |= (imm & 0x6) << 19;
+  if (rs != NS_PQQQI)
+    constraint (imm >= 8,
+		_("vcx2 with S or D registers takes immediate within 0-7"));
+  inst.instruction |= (imm & 0x8) << 21;
+}
+
 /* Crypto v1 instructions.  */
 static void
 do_crypto_2op_1 (unsigned elttype, int op)
@@ -22474,6 +22980,7 @@ handle_pred_state (void)
 	    gas_assert (0);
 	case IF_INSIDE_IT_LAST_INSN:
 	case NEUTRAL_IT_INSN:
+	case NEUTRAL_IT_NO_VPT_INSN:
 	  break;
 
 	case VPT_INSN:
@@ -22537,6 +23044,13 @@ handle_pred_state (void)
 	    close_automatic_it_block ();
 	  break;
 
+	case NEUTRAL_IT_NO_VPT_INSN:
+	  if (now_pred.type == VECTOR_PRED)
+	    {
+	      inst.error = BAD_NO_VPT;
+	      break;
+	    }
+	  /* Fallthrough.  */
 	case NEUTRAL_IT_INSN:
 	  now_pred.block_length++;
 	  now_pred.insn_cond = TRUE;
@@ -22720,6 +23234,13 @@ handle_pred_state (void)
 	      }
 	    break;
 
+	  case NEUTRAL_IT_NO_VPT_INSN:
+	    if (now_pred.type == VECTOR_PRED)
+	      {
+		inst.error = BAD_NO_VPT;
+		break;
+	      }
+	    /* Fallthrough.  */
 	  case NEUTRAL_IT_INSN:
 	    /* The BKPT instruction is unconditional even in a IT or VPT
 	       block.  */
@@ -26099,7 +26620,35 @@ static const struct asm_opcode insns[] =
  TUF ("vusmmla", ca00c40, fca00c40, 3, (RNQ, RNQ, RNQ), vsmmla, vsmmla),
  TUF ("vusdot", c800d00, fc800d00, 3, (RNDQ, RNDQ, RNDQ_RNSC), vusdot, vusdot),
  TUF ("vsudot", c800d10, fc800d10, 3, (RNDQ, RNDQ, RNSC), vsudot, vsudot),
+
+#undef	ARM_VARIANT
+#undef	THUMB_VARIANT
+#define	THUMB_VARIANT &arm_ext_cde
+ ToC ("cx1", ee000000, 3, (RCP, APSR_RR, I8191), cx1),
+ ToC ("cx1a", fe000000, 3, (RCP, APSR_RR, I8191), cx1a),
+ ToC ("cx1d", ee000040, 4, (RCP, RR, APSR_RR, I8191), cx1d),
+ ToC ("cx1da", fe000040, 4, (RCP, RR, APSR_RR, I8191), cx1da),
+
+ ToC ("cx2", ee400000, 4, (RCP, APSR_RR, APSR_RR, I511), cx2),
+ ToC ("cx2a", fe400000, 4, (RCP, APSR_RR, APSR_RR, I511), cx2a),
+ ToC ("cx2d", ee400040, 5, (RCP, RR, APSR_RR, APSR_RR, I511), cx2d),
+ ToC ("cx2da", fe400040, 5, (RCP, RR, APSR_RR, APSR_RR, I511), cx2da),
+
+ ToC ("cx3", ee800000, 5, (RCP, APSR_RR, APSR_RR, APSR_RR, I63), cx3),
+ ToC ("cx3a", fe800000, 5, (RCP, APSR_RR, APSR_RR, APSR_RR, I63), cx3a),
+ ToC ("cx3d", ee800040, 6, (RCP, RR, APSR_RR, APSR_RR, APSR_RR, I63), cx3d),
+ ToC ("cx3da", fe800040, 6, (RCP, RR, APSR_RR, APSR_RR, APSR_RR, I63), cx3da),
+
+ mToC ("vcx1", ec200000, 3, (RCP, RNSDMQ, I4095), vcx1),
+ mToC ("vcx1a", fc200000, 3, (RCP, RNSDMQ, I4095), vcx1),
+
+ mToC ("vcx2", ec300000, 4, (RCP, RNSDMQ, RNSDMQ, I127), vcx2),
+ mToC ("vcx2a", fc300000, 4, (RCP, RNSDMQ, RNSDMQ, I127), vcx2),
+
+ mToC ("vcx3", ec800000, 5, (RCP, RNSDMQ, RNSDMQ, RNSDMQ, I15), vcx3),
+ mToC ("vcx3a", fc800000, 5, (RCP, RNSDMQ, RNSDMQ, RNSDMQ, I15), vcx3),
 };
+
 #undef ARM_VARIANT
 #undef THUMB_VARIANT
 #undef TCE
@@ -31280,12 +31829,23 @@ static const struct arm_ext_table armv86a_ext_table[] =
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
 };
 
+#define CDE_EXTENSIONS \
+  ARM_ADD ("cdecp0", ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE | ARM_EXT2_CDE0)), \
+  ARM_ADD ("cdecp1", ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE | ARM_EXT2_CDE1)), \
+  ARM_ADD ("cdecp2", ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE | ARM_EXT2_CDE2)), \
+  ARM_ADD ("cdecp3", ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE | ARM_EXT2_CDE3)), \
+  ARM_ADD ("cdecp4", ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE | ARM_EXT2_CDE4)), \
+  ARM_ADD ("cdecp5", ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE | ARM_EXT2_CDE5)), \
+  ARM_ADD ("cdecp6", ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE | ARM_EXT2_CDE6)), \
+  ARM_ADD ("cdecp7", ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE | ARM_EXT2_CDE7))
+
 static const struct arm_ext_table armv8m_main_ext_table[] =
 {
   ARM_EXT ("dsp", ARM_FEATURE_CORE_LOW (ARM_AEXT_V8M_MAIN_DSP),
 		  ARM_FEATURE_CORE_LOW (ARM_AEXT_V8M_MAIN_DSP)),
   ARM_EXT ("fp", FPU_ARCH_VFP_V5_SP_D16, ALL_FP),
   ARM_ADD ("fp.dp", FPU_ARCH_VFP_V5D16),
+  CDE_EXTENSIONS,
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
 };
 
@@ -31307,8 +31867,11 @@ static const struct arm_ext_table armv8_1m_main_ext_table[] =
 	   ARM_FEATURE (ARM_AEXT_V8M_MAIN_DSP,
 			ARM_EXT2_FP16_INST | ARM_EXT2_MVE | ARM_EXT2_MVE_FP,
 			FPU_VFP_V5_SP_D16 | FPU_VFP_EXT_FP16 | FPU_VFP_EXT_FMA)),
+  CDE_EXTENSIONS,
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
 };
+
+#undef CDE_EXTENSIONS
 
 static const struct arm_ext_table armv8r_ext_table[] =
 {

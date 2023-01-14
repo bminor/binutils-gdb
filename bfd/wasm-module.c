@@ -245,6 +245,7 @@ wasm_scan_name_function_section (bfd *abfd, sec_ptr asect)
   tdata_type *tdata = abfd->tdata.any;
   asymbol *symbols = NULL;
   sec_ptr space_function_index;
+  size_t amt;
 
   p = asect->contents;
   end = asect->contents + asect->size;
@@ -301,7 +302,12 @@ wasm_scan_name_function_section (bfd *abfd, sec_ptr asect)
   if (!space_function_index)
     return FALSE;
 
-  symbols = bfd_alloc2 (abfd, tdata->symcount, sizeof (asymbol));
+  if (_bfd_mul_overflow (tdata->symcount, sizeof (asymbol), &amt))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      return FALSE;
+    }
+  symbols = bfd_alloc (abfd, amt);
   if (!symbols)
     return FALSE;
 
@@ -446,11 +452,9 @@ wasm_scan (bfd *abfd)
 
       if (bfdsec->size != 0)
 	{
-	  bfdsec->contents = bfd_alloc (abfd, bfdsec->size);
+	  bfdsec->contents = _bfd_alloc_and_read (abfd, bfdsec->size,
+						  bfdsec->size);
 	  if (!bfdsec->contents)
-	    goto error_return;
-
-	  if (bfd_bread (bfdsec->contents, bfdsec->size, abfd) != bfdsec->size)
 	    goto error_return;
 	}
 
@@ -688,7 +692,7 @@ wasm_canonicalize_symtab (bfd *abfd, asymbol **alocation)
 static asymbol *
 wasm_make_empty_symbol (bfd *abfd)
 {
-  bfd_size_type amt = sizeof (asymbol);
+  size_t amt = sizeof (asymbol);
   asymbol *new_symbol = (asymbol *) bfd_zalloc (abfd, amt);
 
   if (! new_symbol)

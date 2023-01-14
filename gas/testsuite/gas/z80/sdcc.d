@@ -1,12 +1,12 @@
 #name: SDCC compatibility mode
-#source: sdcc.s -z80 -sdcc
+#as: -sdcc
 #objdump: -d -j _CODE
 
 .*:[     ]+file format (coff)|(elf32)\-z80
 
 Disassembly of section _CODE:
 
-00000000 <_start>:
+0+0 <_start>:
 [   ]+0:[ 	]+21 04 00[    	]+ld hl,0x0004
 [   ]+3:[ 	]+8f[          	]+adc a,a
 [   ]+4:[ 	]+88[          	]+adc a,b
@@ -135,13 +135,14 @@ Disassembly of section _CODE:
 [  ]+cf:[ 	]+c3 7b 00[    	]+jp 0x007b
 [  ]+d2:[ 	]+c3 93 00[    	]+jp 0x0093
 [  ]+d5:[ 	]+c3 ab 00[    	]+jp 0x00ab
+0+d8 <_func>:
 [  ]+d8:[ 	]+21 00 00[    	]+ld hl,0x0000
 [  ]+db:[ 	]+36 00[       	]+ld \(hl\),0x00
 [  ]+dd:[ 	]+23[          	]+inc hl
 [  ]+de:[ 	]+36 00[       	]+ld \(hl\),0x00
 [  ]+e0:[ 	]+18 fb[       	]+jr 0x00dd
 
-000000e2 <_finish>:
+0+e2 <_finish>:
 [  ]+e2:[ 	]+fd 7e 02[    	]+ld a,\(iy\+2\)
 [  ]+e5:[ 	]+dd 77 ff[    	]+ld \(ix\-1\),a
 [  ]+e8:[ 	]+3a 34 12[    	]+ld a,\(0x1234\)

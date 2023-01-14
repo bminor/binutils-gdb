@@ -23,7 +23,6 @@
 #define DWARF2_FRAME_H 1
 
 struct gdbarch;
-struct objfile;
 struct frame_info;
 struct dwarf2_per_cu_data;
 struct agent_expr;

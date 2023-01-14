@@ -163,6 +163,7 @@ optional arguments while skipping others.  Example:
                                 using Python.
 * Lazy Strings In Python::      Python representation of lazy strings.
 * Architectures In Python::     Python representation of architectures.
+* TUI Windows In Python::       Implementing new TUI windows.
 @end menu
 
 @node Basic Python
@@ -5671,6 +5672,110 @@ The value corresponding to this key is the length (integer value) of the
 instruction in bytes.
 
 @end table
+@end defun
+
+@node TUI Windows In Python
+@subsubsection Implementing new TUI windows
+@cindex Python TUI Windows
+
+New TUI (@pxref{TUI}) windows can be implemented in Python.
+
+@findex gdb.register_window_type
+@defun gdb.register_window_type (@var{name}, @var{factory})
+Because TUI windows are created and destroyed depending on the layout
+the user chooses, new window types are implemented by registering a
+factory function with @value{GDBN}.
+
+@var{name} is the name of the new window.  It's an error to try to
+replace one of the built-in windows, but other window types can be
+replaced.
+
+@var{function} is a factory function that is called to create the TUI
+window.  This is called with a single argument of type
+@code{gdb.TuiWindow}, described below.  It should return an object
+that implements the TUI window protocol, also described below.
+@end defun
+
+As mentioned above, when a factory function is called, it is passed a
+an object of type @code{gdb.TuiWindow}.  This object has these
+methods and attributes:
+
+@defun TuiWindow.is_valid ()
+This method returns @code{True} when this window is valid.  When the
+user changes the TUI layout, windows no longer visible in the new
+layout will be destroyed.  At this point, the @code{gdb.TuiWindow}
+will no longer be valid, and methods (and attributes) other than
+@code{is_valid} will throw an exception.
+@end defun
+
+@defvar TuiWindow.width
+This attribute holds the width of the window.  It is not writable.
+@end defvar
+
+@defvar TuiWindow.height
+This attribute holds the height of the window.  It is not writable.
+@end defvar
+
+@defvar TuiWindow.title
+This attribute holds the window's title, a string.  This is normally
+displayed above the window.  This attribute can be modified.
+@end defvar
+
+@defun TuiWindow.erase ()
+Remove all the contents of the window.
+@end defun
+
+@defun TuiWindow.write (@var{string})
+Write @var{string} to the window.  @var{string} can contain ANSI
+terminal escape styling sequences; @value{GDBN} will translate these
+as appropriate for the terminal.
+@end defun
+
+The factory function that you supply should return an object
+conforming to the TUI window protocol.  These are the method that can
+be called on this object, which is referred to below as the ``window
+object''.  The methods documented below are optional; if the object
+does not implement one of these methods, @value{GDBN} will not attempt
+to call it.  Additional new methods may be added to the window
+protocol in the future.  @value{GDBN} guarantees that they will begin
+with a lower-case letter, so you can start implementation methods with
+upper-case letters or underscore to avoid any future conflicts.
+
+@defun Window.close ()
+When the TUI window is closed, the @code{gdb.TuiWindow} object will be
+put into an invalid state.  At this time, @value{GDBN} will call
+@code{close} method on the window object.
+
+After this method is called, @value{GDBN} will discard any references
+it holds on this window object, and will no longer call methods on
+this object.
+@end defun
+
+@defun Window.render ()
+In some situations, a TUI window can change size.  For example, this
+can happen if the user resizes the terminal, or changes the layout.
+When this happens, @value{GDBN} will call the @code{render} method on
+the window object.
+
+If your window is intended to update in response to changes in the
+inferior, you will probably also want to register event listeners and
+send output to the @code{gdb.TuiWindow}.
+@end defun
+
+@defun Window.hscroll (@var{num})
+This is a request to scroll the window horizontally.  @var{num} is the
+amount by which to scroll, with negative numbers meaning to scroll
+right.  In the TUI model, it is the viewport that moves, not the
+contents.  A positive argument should cause the viewport to move
+right, and so the content should appear to move to the left.
+@end defun
+
+@defun Window.vscroll (@var{num})
+This is a request to scroll the window vertically.  @var{num} is the
+amount by which to scroll, with negative numbers meaning to scroll
+backward.  In the TUI model, it is the viewport that moves, not the
+contents.  A positive argument should cause the viewport to move down,
+and so the content should appear to move up.
 @end defun
 
 @node Python Auto-loading

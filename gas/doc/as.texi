@@ -630,21 +630,12 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @ifset Z80
 
 @emph{Target Z80 options:}
-  [@b{-z80}]|[@b{-z180}]|[@b{-r800}]|[@b{-ez80}]|[@b{-ez80-adl}]
+  [@b{-march=@var{CPU}@var{[-EXT]}@var{[+EXT]}}]
   [@b{-local-prefix=}@var{PREFIX}]
   [@b{-colonless}]
   [@b{-sdcc}]
   [@b{-fp-s=}@var{FORMAT}]
   [@b{-fp-d=}@var{FORMAT}]
-  [@b{-strict}]|[@b{-full}]
-  [@b{-with-inst=@var{INST}[,...]}] [@b{-Wnins @var{INST}[,...]}]
-  [@b{-without-inst=@var{INST}[,...]}] [@b{-Fins @var{INST}[,...]}]
-  [@b{ -ignore-undocumented-instructions}] [@b{-Wnud}]
-  [@b{ -ignore-unportable-instructions}] [@b{-Wnup}]
-  [@b{ -warn-undocumented-instructions}] [@b{-Wud}]
-  [@b{ -warn-unportable-instructions}] [@b{-Wup}]
-  [@b{ -forbid-undocumented-instructions}] [@b{-Fud}]
-  [@b{ -forbid-unportable-instructions}] [@b{-Fup}]
 @end ifset
 @ifset Z8000
 

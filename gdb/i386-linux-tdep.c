@@ -36,6 +36,7 @@
 #include "symtab.h"
 #include "arch-utils.h"
 #include "xml-syscall.h"
+#include "infrun.h"
 
 #include "i387-tdep.h"
 #include "gdbsupport/x86-xstate.h"
@@ -797,12 +798,12 @@ i386_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
    which does not seem worth it.  The same effect is achieved by patching that
    'nop' instruction there instead.  */
 
-static struct displaced_step_closure *
+static displaced_step_closure_up
 i386_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
 				     CORE_ADDR from, CORE_ADDR to,
 				     struct regcache *regs)
 {
-  displaced_step_closure *closure_
+  displaced_step_closure_up closure_
     =  i386_displaced_step_copy_insn (gdbarch, from, to, regs);
 
   if (i386_linux_get_syscall_number_from_regcache (regs) != -1)
@@ -810,7 +811,7 @@ i386_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
       /* The closure returned by i386_displaced_step_copy_insn is simply a
 	 buffer with a copy of the instruction. */
       i386_displaced_step_closure *closure
-	= (i386_displaced_step_closure *) closure_;
+	= (i386_displaced_step_closure *) closure_.get ();
 
       /* Fake nop.  */
       closure->buf[0] = 0x90;

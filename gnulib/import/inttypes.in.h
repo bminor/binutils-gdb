@@ -1,4 +1,4 @@
-/* Copyright (C) 2006-2019 Free Software Foundation, Inc.
+/* Copyright (C) 2006-2020 Free Software Foundation, Inc.
    Written by Paul Eggert, Bruno Haible, Derek Price.
    This file is part of gnulib.
 
@@ -38,6 +38,8 @@
 #  endif
 
 #  @INCLUDE_NEXT@ @NEXT_INTTYPES_H@
+
+#  define _GL_FINISHED_INCLUDING_SYSTEM_INTTYPES_H
 # endif
 #endif
 
@@ -189,7 +191,7 @@
 #  define _PRI64_PREFIX "l"
 # elif defined _MSC_VER || defined __MINGW32__
 #  define _PRI64_PREFIX "I64"
-# elif @HAVE_LONG_LONG_INT@ && LONG_MAX >> 30 == 1
+# elif LONG_MAX >> 30 == 1
 #  define _PRI64_PREFIX _LONG_LONG_FORMAT_PREFIX
 # endif
 # if !defined PRId64 || @PRI_MACROS_BROKEN@
@@ -206,7 +208,7 @@
 #  define _PRIu64_PREFIX "l"
 # elif defined _MSC_VER || defined __MINGW32__
 #  define _PRIu64_PREFIX "I64"
-# elif @HAVE_UNSIGNED_LONG_LONG_INT@ && ULONG_MAX >> 31 == 1
+# elif ULONG_MAX >> 31 == 1
 #  define _PRIu64_PREFIX _LONG_LONG_FORMAT_PREFIX
 # endif
 # if !defined PRIo64 || @PRI_MACROS_BROKEN@
@@ -682,7 +684,7 @@
 #  define _SCN64_PREFIX "l"
 # elif defined _MSC_VER || defined __MINGW32__
 #  define _SCN64_PREFIX "I64"
-# elif @HAVE_LONG_LONG_INT@ && LONG_MAX >> 30 == 1
+# elif LONG_MAX >> 30 == 1
 #  define _SCN64_PREFIX _LONG_LONG_FORMAT_PREFIX
 # endif
 # if !defined SCNd64 || @PRI_MACROS_BROKEN@
@@ -699,7 +701,7 @@
 #  define _SCNu64_PREFIX "l"
 # elif defined _MSC_VER || defined __MINGW32__
 #  define _SCNu64_PREFIX "I64"
-# elif @HAVE_UNSIGNED_LONG_LONG_INT@ && ULONG_MAX >> 31 == 1
+# elif ULONG_MAX >> 31 == 1
 #  define _SCNu64_PREFIX _LONG_LONG_FORMAT_PREFIX
 # endif
 # if !defined SCNo64 || @PRI_MACROS_BROKEN@

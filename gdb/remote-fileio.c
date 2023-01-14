@@ -541,7 +541,7 @@ remote_fileio_func_read (remote_target *remote, char *buf)
 		 limit this read to something smaller than that - by a
 		 safe margin, in case the limit depends on system
 		 resources or version.  */
-	      ret = ui_file_read (gdb_stdtargin, (char *) buffer, 16383);
+	      ret = gdb_stdtargin->read ((char *) buffer, 16383);
 	      if (ret > 0 && (size_t)ret > length)
 		{
 		  remaining_buf = (char *) xmalloc (ret - length);
@@ -639,10 +639,12 @@ remote_fileio_func_write (remote_target *remote, char *buf)
 	xfree (buffer);
 	return;
       case FIO_FD_CONSOLE_OUT:
-	ui_file_write (target_fd == 1 ? gdb_stdtarg : gdb_stdtargerr,
-		       (char *) buffer, length);
-	ui_file_flush (target_fd == 1 ? gdb_stdtarg : gdb_stdtargerr);
-	ret = length;
+	{
+	  ui_file *file = target_fd == 1 ? gdb_stdtarg : gdb_stdtargerr;
+	  file->write ((char *) buffer, length);
+	  file->flush ();
+	  ret = length;
+	}
 	break;
       default:
 	ret = write (fd, buffer, length);

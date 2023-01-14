@@ -69,6 +69,10 @@ noreg:
 	mov	(%bx), %es
 	movs
 	movs	(%esi), %es:(%edi)
+	movsx	(%bx), %ax
+	movsx	(%bx), %eax
+	movzx	(%bx), %ax
+	movzx	(%bx), %eax
 	mul	(%bx)
 	neg	(%bx)
 	nop	(%bx)

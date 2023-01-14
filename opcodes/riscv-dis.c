@@ -326,7 +326,7 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 	    unsigned int csr = EXTRACT_OPERAND (CSR, l);
 	    switch (csr)
 	      {
-#define DECLARE_CSR(name, num) case num: csr_name = #name; break;
+#define DECLARE_CSR(name, num, class) case num: csr_name = #name; break;
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
 	      }

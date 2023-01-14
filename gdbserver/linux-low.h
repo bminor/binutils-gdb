@@ -264,6 +264,225 @@ struct linux_target_ops
 
 extern struct linux_target_ops the_low_target;
 
+/* Target ops definitions for a Linux target.  */
+
+class linux_process_target : public process_stratum_target
+{
+public:
+
+  int create_inferior (const char *program,
+		       const std::vector<char *> &program_args) override;
+
+  void post_create_inferior () override;
+
+  int attach (unsigned long pid) override;
+
+  int kill (process_info *proc) override;
+
+  int detach (process_info *proc) override;
+
+  void mourn (process_info *proc) override;
+
+  void join (int pid) override;
+
+  bool thread_alive (ptid_t pid) override;
+
+  void resume (thread_resume *resume_info, size_t n) override;
+
+  ptid_t wait (ptid_t ptid, target_waitstatus *status,
+	       int options) override;
+
+  void fetch_registers (regcache *regcache, int regno) override;
+
+  void store_registers (regcache *regcache, int regno) override;
+
+  int prepare_to_access_memory () override;
+
+  void done_accessing_memory () override;
+
+  int read_memory (CORE_ADDR memaddr, unsigned char *myaddr,
+		   int len) override;
+
+  int write_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
+		    int len) override;
+
+  void look_up_symbols () override;
+
+  void request_interrupt () override;
+
+  bool supports_read_auxv () override;
+
+  int read_auxv (CORE_ADDR offset, unsigned char *myaddr,
+		 unsigned int len) override;
+
+  bool supports_z_point_type (char z_type) override;
+
+  int insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		    int size, raw_breakpoint *bp) override;
+
+  int remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		    int size, raw_breakpoint *bp) override;
+
+  bool stopped_by_sw_breakpoint () override;
+
+  bool supports_stopped_by_sw_breakpoint () override;
+
+  bool stopped_by_hw_breakpoint () override;
+
+  bool supports_stopped_by_hw_breakpoint () override;
+
+  bool supports_hardware_single_step () override;
+
+  bool stopped_by_watchpoint () override;
+
+  CORE_ADDR stopped_data_address () override;
+
+  bool supports_read_offsets () override;
+
+  int read_offsets (CORE_ADDR *text, CORE_ADDR *data) override;
+
+  bool supports_get_tls_address () override;
+
+  int get_tls_address (thread_info *thread, CORE_ADDR offset,
+		       CORE_ADDR load_module, CORE_ADDR *address) override;
+
+  bool supports_qxfer_osdata () override;
+
+  int qxfer_osdata (const char *annex, unsigned char *readbuf,
+		    unsigned const char *writebuf,
+		    CORE_ADDR offset, int len) override;
+
+  bool supports_qxfer_siginfo () override;
+
+  int qxfer_siginfo (const char *annex, unsigned char *readbuf,
+		     unsigned const char *writebuf,
+		     CORE_ADDR offset, int len) override;
+
+  bool supports_non_stop () override;
+
+  bool async (bool enable) override;
+
+  int start_non_stop (bool enable) override;
+
+  bool supports_multi_process () override;
+
+  bool supports_fork_events () override;
+
+  bool supports_vfork_events () override;
+
+  bool supports_exec_events () override;
+
+  void handle_new_gdb_connection () override;
+
+  int handle_monitor_command (char *mon) override;
+
+  int core_of_thread (ptid_t ptid) override;
+
+#if defined PT_GETDSBT || defined PTRACE_GETFDPIC
+  bool supports_read_loadmap () override;
+
+  int read_loadmap (const char *annex, CORE_ADDR offset,
+		    unsigned char *myaddr, unsigned int len) override;
+#endif
+
+  void process_qsupported (char **features, int count) override;
+
+  bool supports_tracepoints () override;
+
+  CORE_ADDR read_pc (regcache *regcache) override;
+
+  void write_pc (regcache *regcache, CORE_ADDR pc) override;
+
+  bool supports_thread_stopped () override;
+
+  bool thread_stopped (thread_info *thread) override;
+
+  void pause_all (bool freeze) override;
+
+  void unpause_all (bool unfreeze) override;
+
+  void stabilize_threads () override;
+
+  bool supports_fast_tracepoints () override;
+
+  int install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
+					CORE_ADDR tpaddr,
+					CORE_ADDR collector,
+					CORE_ADDR lockaddr,
+					ULONGEST orig_size,
+					CORE_ADDR *jump_entry,
+					CORE_ADDR *trampoline,
+					ULONGEST *trampoline_size,
+					unsigned char *jjump_pad_insn,
+					ULONGEST *jjump_pad_insn_size,
+					CORE_ADDR *adjusted_insn_addr,
+					CORE_ADDR *adjusted_insn_addr_end,
+					char *err) override;
+
+  int get_min_fast_tracepoint_insn_len () override;
+
+  struct emit_ops *emit_ops () override;
+
+  bool supports_disable_randomization () override;
+
+  bool supports_qxfer_libraries_svr4 () override;
+
+  int qxfer_libraries_svr4 (const char *annex,
+			    unsigned char *readbuf,
+			    unsigned const char *writebuf,
+			    CORE_ADDR offset, int len) override;
+
+  bool supports_agent () override;
+
+#ifdef HAVE_LINUX_BTRACE
+  btrace_target_info *enable_btrace (ptid_t ptid,
+				     const btrace_config *conf) override;
+
+  int disable_btrace (btrace_target_info *tinfo) override;
+
+  int read_btrace (btrace_target_info *tinfo, buffer *buf,
+		   enum btrace_read_type type) override;
+
+  int read_btrace_conf (const btrace_target_info *tinfo,
+			buffer *buf) override;
+#endif
+
+  bool supports_range_stepping () override;
+
+  bool supports_pid_to_exec_file () override;
+
+  char *pid_to_exec_file (int pid) override;
+
+  bool supports_multifs () override;
+
+  int multifs_open (int pid, const char *filename, int flags,
+		    mode_t mode) override;
+
+  int multifs_unlink (int pid, const char *filename) override;
+
+  ssize_t multifs_readlink (int pid, const char *filename, char *buf,
+			    size_t bufsiz) override;
+
+  int breakpoint_kind_from_pc (CORE_ADDR *pcptr) override;
+
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
+  int breakpoint_kind_from_current_state (CORE_ADDR *pcptr) override;
+
+  const char *thread_name (ptid_t thread) override;
+
+#if USE_THREAD_DB
+  bool thread_handle (ptid_t ptid, gdb_byte **handle,
+		      int *handle_len) override;
+#endif
+
+  bool supports_software_single_step () override;
+
+  bool supports_catch_syscall () override;
+
+  int get_ipa_tdesc_idx () override;
+};
+
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))
 #define get_lwp_thread(lwp) ((lwp)->thread)
 

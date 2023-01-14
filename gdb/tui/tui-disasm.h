@@ -30,10 +30,7 @@
 
 struct tui_disasm_window : public tui_source_window_base
 {
-  tui_disasm_window ()
-    : tui_source_window_base (DISASSEM_WIN)
-  {
-  }
+  tui_disasm_window () = default;
 
   DISABLE_COPY_AND_ASSIGN (tui_disasm_window);
 
@@ -50,6 +47,9 @@ struct tui_disasm_window : public tui_source_window_base
   {
     do_erase_source_content (_("[ No Assembly Available ]"));
   }
+
+  void display_start_addr (struct gdbarch **gdbarch_p,
+			   CORE_ADDR *addr_p) override;
 
 protected:
 

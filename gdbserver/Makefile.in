@@ -79,7 +79,7 @@ include $(srcdir)/../gdb/silent-rules.mk
 
 # Note that these are overridden by GNU make-specific code below if
 # GNU make is used.  The overrides implement dependency tracking.
-COMPILE.pre = $(CXX) -x c++ $(CXX_DIALECT)
+COMPILE.pre = $(CXX) $(CXX_DIALECT)
 COMPILE.post = -c -o $@
 COMPILE = $(ECHO_CXX) $(COMPILE.pre) $(INTERNAL_CFLAGS) $(COMPILE.post)
 POSTCOMPILE = @true
@@ -97,7 +97,7 @@ CC_LD = $(CXX) $(CXX_DIALECT)
 INCLUDE_DIR = ${srcdir}/../include
 INCLUDE_DEP = $$(INCLUDE_DIR)
 
-LIBIBERTY_BUILDDIR = build-libiberty-gdbserver
+LIBIBERTY_BUILDDIR = ../libiberty
 LIBIBERTY = $(LIBIBERTY_BUILDDIR)/libiberty.a
 
 # Where is ust?  These will be empty if ust was not available.
@@ -105,13 +105,9 @@ ustlibs = @ustlibs@
 ustinc = @ustinc@
 
 # gnulib
-GNULIB_BUILDDIR = build-gnulib-gdbserver
+GNULIB_BUILDDIR = ../gnulib
 LIBGNU = $(GNULIB_BUILDDIR)/import/libgnu.a
 INCGNU = -I$(srcdir)/../gnulib/import -I$(GNULIB_BUILDDIR)/import
-
-# Generated headers in the gnulib directory.  These must be listed
-# so that they are generated before other files are compiled.
-GNULIB_H = $(GNULIB_BUILDDIR)/import/string.h @GNULIB_STDINT_H@
 
 INCSUPPORT = -I$(srcdir)/.. -I..
 
@@ -162,77 +158,79 @@ INTERNAL_LDFLAGS = $(LDFLAGS) @RDYNAMIC@
 # All source files that go into linking GDB remote server.
 
 SFILES = \
-	$(srcdir)/debug.c \
-	$(srcdir)/dll.c \
-	$(srcdir)/gdbreplay.c \
-	$(srcdir)/hostio.c \
-	$(srcdir)/hostio-errno.c \
-	$(srcdir)/i387-fp.c \
-	$(srcdir)/inferiors.c \
-	$(srcdir)/linux-aarch64-low.c \
-	$(srcdir)/linux-arm-low.c \
-	$(srcdir)/linux-bfin-low.c \
-	$(srcdir)/linux-cris-low.c \
-	$(srcdir)/linux-crisv32-low.c \
-	$(srcdir)/linux-ia64-low.c \
-	$(srcdir)/linux-low.c \
-	$(srcdir)/linux-m32r-low.c \
-	$(srcdir)/linux-m68k-low.c \
-	$(srcdir)/linux-mips-low.c \
-	$(srcdir)/linux-nios2-low.c \
-	$(srcdir)/linux-ppc-low.c \
-	$(srcdir)/linux-s390-low.c \
-	$(srcdir)/linux-sh-low.c \
-	$(srcdir)/linux-sparc-low.c \
-	$(srcdir)/linux-tile-low.c \
-	$(srcdir)/linux-x86-low.c \
-	$(srcdir)/linux-xtensa-low.c \
-	$(srcdir)/mem-break.c \
-	$(srcdir)/proc-service.c \
+	$(srcdir)/debug.cc \
+	$(srcdir)/dll.cc \
+	$(srcdir)/gdbreplay.cc \
+	$(srcdir)/hostio.cc \
+	$(srcdir)/hostio-errno.cc \
+	$(srcdir)/i387-fp.cc \
+	$(srcdir)/inferiors.cc \
+	$(srcdir)/linux-aarch64-low.cc \
+	$(srcdir)/linux-arm-low.cc \
+	$(srcdir)/linux-bfin-low.cc \
+	$(srcdir)/linux-cris-low.cc \
+	$(srcdir)/linux-crisv32-low.cc \
+	$(srcdir)/linux-ia64-low.cc \
+	$(srcdir)/linux-low.cc \
+	$(srcdir)/linux-m32r-low.cc \
+	$(srcdir)/linux-m68k-low.cc \
+	$(srcdir)/linux-mips-low.cc \
+	$(srcdir)/linux-nios2-low.cc \
+	$(srcdir)/linux-ppc-low.cc \
+	$(srcdir)/linux-riscv-low.cc \
+	$(srcdir)/linux-s390-low.cc \
+	$(srcdir)/linux-sh-low.cc \
+	$(srcdir)/linux-sparc-low.cc \
+	$(srcdir)/linux-tile-low.cc \
+	$(srcdir)/linux-x86-low.cc \
+	$(srcdir)/linux-xtensa-low.cc \
+	$(srcdir)/mem-break.cc \
+	$(srcdir)/proc-service.cc \
 	$(srcdir)/proc-service.list \
-	$(srcdir)/regcache.c \
-	$(srcdir)/remote-utils.c \
-	$(srcdir)/server.c \
-	$(srcdir)/symbol.c \
-	$(srcdir)/target.c \
-	$(srcdir)/thread-db.c \
-	$(srcdir)/utils.c \
-	$(srcdir)/win32-arm-low.c \
-	$(srcdir)/win32-i386-low.c \
-	$(srcdir)/win32-low.c \
-	$(srcdir)/wincecompat.c \
-	$(srcdir)/x86-low.c \
+	$(srcdir)/regcache.cc \
+	$(srcdir)/remote-utils.cc \
+	$(srcdir)/server.cc \
+	$(srcdir)/symbol.cc \
+	$(srcdir)/target.cc \
+	$(srcdir)/thread-db.cc \
+	$(srcdir)/utils.cc \
+	$(srcdir)/win32-arm-low.cc \
+	$(srcdir)/win32-i386-low.cc \
+	$(srcdir)/win32-low.cc \
+	$(srcdir)/wincecompat.cc \
+	$(srcdir)/x86-low.cc \
 	$(srcdir)/../gdb/alloc.c \
 	$(srcdir)/../gdb/arch/arm.c \
 	$(srcdir)/../gdb/arch/arm-get-next-pcs.c \
 	$(srcdir)/../gdb/arch/arm-linux.c \
 	$(srcdir)/../gdb/arch/ppc-linux-common.c \
-	$(srcdir)/../gdbsupport/btrace-common.c \
-	$(srcdir)/../gdbsupport/buffer.c \
-	$(srcdir)/../gdbsupport/cleanups.c \
-	$(srcdir)/../gdbsupport/common-debug.c \
-	$(srcdir)/../gdbsupport/common-exceptions.c \
-	$(srcdir)/../gdbsupport/common-inferior.c \
-	$(srcdir)/../gdbsupport/common-regcache.c \
-	$(srcdir)/../gdbsupport/common-utils.c \
-	$(srcdir)/../gdbsupport/errors.c \
-	$(srcdir)/../gdbsupport/environ.c \
-	$(srcdir)/../gdbsupport/fileio.c \
-	$(srcdir)/../gdbsupport/filestuff.c \
-	$(srcdir)/../gdbsupport/job-control.c \
-	$(srcdir)/../gdbsupport/gdb-dlfcn.c \
-	$(srcdir)/../gdbsupport/gdb_tilde_expand.c \
-	$(srcdir)/../gdbsupport/gdb_vecs.c \
-	$(srcdir)/../gdbsupport/gdb_wait.c \
-	$(srcdir)/../gdbsupport/netstuff.c \
-	$(srcdir)/../gdbsupport/new-op.c \
-	$(srcdir)/../gdbsupport/pathstuff.c \
-	$(srcdir)/../gdbsupport/print-utils.c \
-	$(srcdir)/../gdbsupport/ptid.c \
-	$(srcdir)/../gdbsupport/rsp-low.c \
-	$(srcdir)/../gdbsupport/safe-strerror.c \
-	$(srcdir)/../gdbsupport/tdesc.c \
-	$(srcdir)/../gdbsupport/xml-utils.c \
+	$(srcdir)/../gdb/arch/riscv.c \
+	$(srcdir)/../gdbsupport/btrace-common.cc \
+	$(srcdir)/../gdbsupport/buffer.cc \
+	$(srcdir)/../gdbsupport/cleanups.cc \
+	$(srcdir)/../gdbsupport/common-debug.cc \
+	$(srcdir)/../gdbsupport/common-exceptions.cc \
+	$(srcdir)/../gdbsupport/common-inferior.cc \
+	$(srcdir)/../gdbsupport/common-regcache.cc \
+	$(srcdir)/../gdbsupport/common-utils.cc \
+	$(srcdir)/../gdbsupport/errors.cc \
+	$(srcdir)/../gdbsupport/environ.cc \
+	$(srcdir)/../gdbsupport/fileio.cc \
+	$(srcdir)/../gdbsupport/filestuff.cc \
+	$(srcdir)/../gdbsupport/job-control.cc \
+	$(srcdir)/../gdbsupport/gdb-dlfcn.cc \
+	$(srcdir)/../gdbsupport/gdb_tilde_expand.cc \
+	$(srcdir)/../gdbsupport/gdb_vecs.cc \
+	$(srcdir)/../gdbsupport/gdb_wait.cc \
+	$(srcdir)/../gdbsupport/netstuff.cc \
+	$(srcdir)/../gdbsupport/new-op.cc \
+	$(srcdir)/../gdbsupport/pathstuff.cc \
+	$(srcdir)/../gdbsupport/print-utils.cc \
+	$(srcdir)/../gdbsupport/ptid.cc \
+	$(srcdir)/../gdbsupport/rsp-low.cc \
+	$(srcdir)/../gdbsupport/safe-strerror.cc \
+	$(srcdir)/../gdbsupport/tdesc.cc \
+	$(srcdir)/../gdbsupport/xml-utils.cc \
 	$(srcdir)/../gdb/nat/aarch64-sve-linux-ptrace.c \
 	$(srcdir)/../gdb/nat/linux-btrace.c \
 	$(srcdir)/../gdb/nat/linux-namespaces.c \
@@ -240,6 +238,7 @@ SFILES = \
 	$(srcdir)/../gdb/nat/linux-personality.c \
 	$(srcdir)/../gdb/nat/mips-linux-watch.c \
 	$(srcdir)/../gdb/nat/ppc-linux.c \
+	$(srcdir)/../gdb/nat/riscv-linux-tdesc.c \
 	$(srcdir)/../gdb/nat/fork-inferior.c \
 	$(srcdir)/../gdb/target/waitstatus.c
 
@@ -329,15 +328,6 @@ XML_BUILTIN = @srv_xmlbuiltin@
 IPA_DEPFILES = @IPA_DEPFILES@
 extra_libraries = @extra_libraries@
 
-SUBDIRS = $(GNULIB_BUILDDIR) $(LIBIBERTY_BUILDDIR)
-CLEANDIRS = $(SUBDIRS)
-
-# List of subdirectories in the build tree that must exist.
-# This is used to force build failures in existing trees when
-# a new directory is added.
-# The format here is for the `case' shell command.
-REQUIRED_SUBDIRS = $(GNULIB_BUILDDIR) | $(LIBIBERTY_BUILDDIR)
-
 FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
 	"exec_prefix=$(exec_prefix)" \
@@ -371,10 +361,9 @@ FLAGS_TO_PASS = \
 	"RUNTESTFLAGS=$(RUNTESTFLAGS)"
 
 # All generated files which can be included by another file.
-generated_files = config.h $(GNULIB_H)
+generated_files = config.h
 
 all: gdbserver$(EXEEXT) gdbreplay$(EXEEXT) $(extra_libraries)
-	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 # Traditionally "install" depends on "all".  But it may be useful
 # not to; for example, if the user has made some trivial change to a
@@ -393,10 +382,6 @@ install-only:
 	fi; \
 	$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(bindir); \
 	$(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) gdbserver$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
-	# Note that we run install and not install-only, as the latter
-	# is not part of GNU standards and in particular not provided
-	# in libiberty.
-	@$(MAKE) $(FLAGS_TO_PASS) DO=install "DODIRS=$(SUBDIRS)" subdir_do
 
 install-strip:
 	$(MAKE) $(FLAGS_TO_PASS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
@@ -408,7 +393,6 @@ uninstall: force
 	n=`echo gdbserver | sed '$(program_transform_name)'`; \
 	if [ x$$n = x ]; then n=gdbserver; else true; fi; \
 	rm -f $(DESTDIR)/$(bindir)/$$n$(EXEEXT) $(DESTDIR)$(man1dir)/$$n.1
-	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 installcheck:
 check:
@@ -417,19 +401,13 @@ install-info:
 install-pdf:
 html:
 install-html:
-clean-info: force
-	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
+clean-info:
 
 gdbserver$(EXEEXT): $(sort $(OBS)) ${CDEPS} $(LIBGNU) $(LIBIBERTY)
 	$(SILENCE) rm -f gdbserver$(EXEEXT)
 	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) \
 		-o gdbserver$(EXEEXT) $(OBS) $(LIBGNU) $(LIBIBERTY) \
 		$(GDBSERVER_LIBS) $(XM_CLIBS)
-
-$(LIBGNU) $(LIBIBERTY) $(GNULIB_H): all-lib
-all-lib: $(GNULIB_BUILDDIR)/Makefile $(LIBIBERTY_BUILDDIR)/Makefile
-	@$(MAKE) $(FLAGS_TO_PASS) DO=all DODIRS="$(SUBDIRS)" subdir_do
-.PHONY: all-lib
 
 gdbreplay$(EXEEXT): $(sort $(GDBREPLAY_OBS)) $(LIBGNU) $(LIBIBERTY)
 	$(SILENCE) rm -f gdbreplay$(EXEEXT)
@@ -469,7 +447,7 @@ TAGS:	${TAGFILES}
 	etags \
 	  `for i in yzzy ${DEPFILES}; do \
 	     if [ x$$i != xyzzy ]; then \
-	       echo ${srcdir}/$$i | sed -e 's/\.o$$/\.c/' \
+	       echo ${srcdir}/$$i | sed -e 's/\.o$$/\.cc/' \
 		 -e 's,/\(arch\|nat\|target\)/,/../\1/,' \
 		 -e 's,/\(gdbsupport\)/,/../../\1/,'; \
 	     fi; \
@@ -477,42 +455,23 @@ TAGS:	${TAGFILES}
 	  ${TAGFILES}
 tags: TAGS
 
-clean:
+mostlyclean clean:
 	rm -f *.o ${ADD_FILES} *~
 	rm -f gdbserver$(EXEEXT) gdbreplay$(EXEEXT) core make.log
 	rm -f $(IPA_LIB)
-	rm -f *-generated.c
+	rm -f *-generated.cc
 	rm -f stamp-xml
 	rm -f $(DEPDIR)/*.Po
 	for i in $(CONFIG_SRC_SUBDIR); do \
 		rm -f $$i/*.o;	\
 		rm -f $$i/$(DEPDIR)/*; \
 	done
-	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 maintainer-clean realclean distclean: clean
-	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
-	rm -rf $(GNULIB_BUILDDIR)
 	rm -f Makefile config.status config.h stamp-h config.log
 	rm -f Makefile
 	for i in $(CONFIG_SRC_SUBDIR); do \
 		rmdir $$i/$(DEPDIR); \
-	done
-
-subdir_do: force
-	@for i in $(DODIRS); do \
-		case $$i in \
-		$(REQUIRED_SUBDIRS)) \
-			if [ ! -f ./$$i/Makefile ] ; then \
-				echo "Missing $$i/Makefile" >&2 ; \
-				exit 1 ; \
-			fi ;; \
-		esac ; \
-		if [ -f ./$$i/Makefile ] ; then \
-			if (cd ./$$i; \
-				$(MAKE) $(FLAGS_TO_PASS) $(DO)) ; then true ; \
-			else exit 1 ; fi ; \
-		else true ; fi ; \
 	done
 
 config.h: stamp-h ; @true
@@ -521,13 +480,6 @@ stamp-h: config.in config.status
 
 Makefile: Makefile.in config.status
 	$(SHELL) ./config.status $@
-
-$(GNULIB_BUILDDIR)/Makefile: $(srcdir)/../gnulib/Makefile.in config.status
-	  @cd $(GNULIB_BUILDDIR); CONFIG_FILES="Makefile" \
-	  CONFIG_COMMANDS="depfiles" \
-	  CONFIG_HEADERS= \
-	  CONFIG_LINKS= \
-	  $(SHELL) config.status
 
 config.status: configure configure.srv $(srcdir)/../bfd/development.sh
 	$(SHELL) ./config.status --recheck
@@ -541,19 +493,19 @@ am--refresh:
 
 force:
 
-version-generated.c: Makefile $(srcdir)/../gdb/version.in $(srcdir)/../bfd/version.h $(srcdir)/../gdbsupport/create-version.sh
+version-generated.cc: Makefile $(srcdir)/../gdb/version.in $(srcdir)/../bfd/version.h $(srcdir)/../gdbsupport/create-version.sh
 	$(ECHO_GEN) $(SHELL) $(srcdir)/../gdbsupport/create-version.sh $(srcdir)/../gdb \
 		$(host_alias) $(target_alias) $@
 
-xml-builtin-generated.c: stamp-xml; @true
+xml-builtin-generated.cc: stamp-xml; @true
 stamp-xml: $(XML_DIR)/feature_to_c.sh Makefile $(XML_FILES)
 	$(SILENCE) rm -f xml-builtin.tmp
 	$(ECHO_GEN_XML_BUILTIN_GENERATED) $(SHELL) $(XML_DIR)/feature_to_c.sh \
 		xml-builtin.tmp $(XML_FILES)
-	$(SILENCE) $(SHELL) $(srcdir)/../move-if-change xml-builtin.tmp xml-builtin-generated.c
+	$(SILENCE) $(SHELL) $(srcdir)/../move-if-change xml-builtin.tmp xml-builtin-generated.cc
 	$(SILENCE) echo stamp > stamp-xml
 
-.PRECIOUS: xml-builtin.c
+.PRECIOUS: xml-builtin.cc
 
 # GNU Make has an annoying habit of putting *all* the Makefile variables
 # into the environment, unless you include this target as a circumvention.
@@ -586,87 +538,87 @@ IPAGENT_COMPILE = $(ECHO_CXX) $(COMPILE.pre) $(IPAGENT_CFLAGS) $(COMPILE.post)
 
 # Rules for special cases.
 
-ax-ipa.o: ax.c
+ax-ipa.o: ax.cc
 	$(IPAGENT_COMPILE) $(WARN_CFLAGS_NO_FORMAT) $<
 	$(POSTCOMPILE)
 
-ax.o: ax.c
+ax.o: ax.cc
 	$(COMPILE) $(WARN_CFLAGS_NO_FORMAT) $<
 	$(POSTCOMPILE)
 
 # Rules for objects that go in the in-process agent.
 
 arch/%-ipa.o: ../gdb/arch/%.c
+	$(IPAGENT_COMPILE) -x c++ $<
+	$(POSTCOMPILE)
+
+gdbsupport/%-ipa.o: ../gdbsupport/%.cc
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 
-gdbsupport/%-ipa.o: ../gdbsupport/%.c
+%-ipa.o: %-generated.cc
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 
-%-ipa.o: %-generated.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-
-%-ipa.o: %.c
+%-ipa.o: %.cc
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 
 %-ipa.o: ../gdb/%.c
-	$(IPAGENT_COMPILE) $<
+	$(IPAGENT_COMPILE) -x c++ $<
 	$(POSTCOMPILE)
 
 # Note: Between two matching pattern rules, GNU Make 3.81 chooses the first one.
-# Therefore, this one needs to be before "%.o: %.c" for it to be considered for
-# files such as linux-amd64-ipa.o generated from linux-amd64-ipa.c.
+# Therefore, this one needs to be before "%.o: %.cc" for it to be considered for
+# files such as linux-amd64-ipa.o generated from linux-amd64-ipa.cc.
 #
 # Later versions of GNU Make choose the rule with the shortest stem, so it would
 # work in any order.
 
-%-ipa.o: %-ipa.c
+%-ipa.o: %-ipa.cc
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 
 # Rules for objects that go in the gdbserver binary.
 
 arch/%.o: ../gdb/arch/%.c
+	$(COMPILE) -x c++ $<
+	$(POSTCOMPILE)
+
+gdbsupport/%.o: ../gdbsupport/%.cc
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
-gdbsupport/%.o: ../gdbsupport/%.c
+%.o: %-generated.cc
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
-%.o: %-generated.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
-%.o: %.c
+%.o: %.cc
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
 nat/%.o: ../gdb/nat/%.c
-	$(COMPILE) $<
+	$(COMPILE) -x c++ $<
 	$(POSTCOMPILE)
 
 target/%.o: ../gdb/target/%.c
-	$(COMPILE) $<
+	$(COMPILE) -x c++ $<
 	$(POSTCOMPILE)
 
 %.o: ../gdb/%.c
-	$(COMPILE) $<
+	$(COMPILE) -x c++ $<
 	$(POSTCOMPILE)
 
 # Rules for register format descriptions.  Suffix destination files with
 # -generated to identify and clean them easily.
 
-%-generated.c: ../gdb/regformats/%.dat $(regdat_sh)
+%-generated.cc: ../gdb/regformats/%.dat $(regdat_sh)
 	$(ECHO_REGDAT) $(SHELL) $(regdat_sh) $< $@
 
-%-generated.c: ../gdb/regformats/arm/%.dat $(regdat_sh)
+%-generated.cc: ../gdb/regformats/arm/%.dat $(regdat_sh)
 	$(ECHO_REGDAT) $(SHELL) $(regdat_sh) $< $@
 
-%-generated.c: ../gdb/regformats/rs6000/%.dat $(regdat_sh)
+%-generated.cc: ../gdb/regformats/rs6000/%.dat $(regdat_sh)
 	$(ECHO_REGDAT) $(SHELL) $(regdat_sh) $< $@
 
 #
@@ -684,7 +636,7 @@ override POSTCOMPILE = @mv $(@D)/$(DEPDIR)/$(basename $(@F)).Tpo \
 else
 override COMPILE.pre = source='$<' object='$@' libtool=no \
 	DEPDIR=$(DEPDIR) $(DEPMODE) $(depcomp) \
-	$(CXX) -x c++ $(CXX_DIALECT)
+	$(CXX) $(CXX_DIALECT)
 # depcomp handles atomicity for us, so we don't need a postcompile
 # step.
 override POSTCOMPILE =
@@ -713,7 +665,7 @@ all_deps_files = $(foreach dep,$(patsubst %.o,%.Po,$(all_object_files)),\
 # Disable implicit make rules.
 include $(srcdir)/../gdb/disable-implicit-rules.mk
 
-# Do not delete intermediate files (e.g. *-generated.c).
+# Do not delete intermediate files (e.g. *-generated.cc).
 .SECONDARY:
 
 # This is the end of "Makefile.in".

@@ -21,6 +21,7 @@
 load_lib "go.exp"
 
 if { [skip_go_tests] } { continue }
+if { [support_go_compile] == 0 } { continue }
 
 standard_testfile .go
 

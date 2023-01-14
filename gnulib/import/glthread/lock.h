@@ -1,5 +1,5 @@
 /* Locking in multithreaded situations.
-   Copyright (C) 2005-2019 Free Software Foundation, Inc.
+   Copyright (C) 2005-2020 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -308,7 +308,7 @@ typedef pthread_mutex_t gl_lock_t;
 
 # if HAVE_PTHREAD_RWLOCK && (HAVE_PTHREAD_RWLOCK_RDLOCK_PREFER_WRITER || (defined PTHREAD_RWLOCK_WRITER_NONRECURSIVE_INITIALIZER_NP && (__GNU_LIBRARY__ > 1)))
 
-#  ifdef PTHREAD_RWLOCK_INITIALIZER
+#  if defined PTHREAD_RWLOCK_INITIALIZER || defined PTHREAD_RWLOCK_INITIALIZER_NP
 
 typedef pthread_rwlock_t gl_rwlock_t;
 #   define gl_rwlock_define(STORAGECLASS, NAME) \
@@ -316,8 +316,13 @@ typedef pthread_rwlock_t gl_rwlock_t;
 #   define gl_rwlock_define_initialized(STORAGECLASS, NAME) \
       STORAGECLASS pthread_rwlock_t NAME = gl_rwlock_initializer;
 #   if HAVE_PTHREAD_RWLOCK_RDLOCK_PREFER_WRITER
-#    define gl_rwlock_initializer \
-       PTHREAD_RWLOCK_INITIALIZER
+#    if defined PTHREAD_RWLOCK_INITIALIZER
+#     define gl_rwlock_initializer \
+        PTHREAD_RWLOCK_INITIALIZER
+#    else
+#     define gl_rwlock_initializer \
+        PTHREAD_RWLOCK_INITIALIZER_NP
+#    endif
 #    define glthread_rwlock_init(LOCK) \
        (pthread_in_use () ? pthread_rwlock_init (LOCK, NULL) : 0)
 #   else /* glibc with bug https://sourceware.org/bugzilla/show_bug.cgi?id=13701 */
@@ -500,10 +505,19 @@ extern int glthread_recursive_lock_destroy_multithreaded (gl_recursive_lock_t *l
 typedef pthread_once_t gl_once_t;
 # define gl_once_define(STORAGECLASS, NAME) \
     STORAGECLASS pthread_once_t NAME = PTHREAD_ONCE_INIT;
-# define glthread_once(ONCE_CONTROL, INITFUNCTION) \
-    (pthread_in_use ()                                                         \
-     ? pthread_once (ONCE_CONTROL, INITFUNCTION)                               \
-     : (glthread_once_singlethreaded (ONCE_CONTROL) ? (INITFUNCTION (), 0) : 0))
+# if PTHREAD_IN_USE_DETECTION_HARD || USE_POSIX_THREADS_WEAK
+#  define glthread_once(ONCE_CONTROL, INITFUNCTION) \
+     (pthread_in_use ()                                                        \
+      ? pthread_once (ONCE_CONTROL, INITFUNCTION)                              \
+      : (glthread_once_singlethreaded (ONCE_CONTROL) ? (INITFUNCTION (), 0) : 0))
+# else
+#  define glthread_once(ONCE_CONTROL, INITFUNCTION) \
+     (pthread_in_use ()                                                        \
+      ? glthread_once_multithreaded (ONCE_CONTROL, INITFUNCTION)               \
+      : (glthread_once_singlethreaded (ONCE_CONTROL) ? (INITFUNCTION (), 0) : 0))
+extern int glthread_once_multithreaded (pthread_once_t *once_control,
+                                        void (*init_function) (void));
+# endif
 extern int glthread_once_singlethreaded (pthread_once_t *once_control);
 
 # ifdef __cplusplus

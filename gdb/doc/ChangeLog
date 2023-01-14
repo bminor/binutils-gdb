@@ -1,3 +1,23 @@
+2020-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Threads): Fix alignment in 'info threads' example
+	output.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (Python API): Add menu item.
+	(TUI Windows In Python): New node.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	PR tui/17850:
+	* gdb.texinfo (TUI Commands): Document horizontal layouts.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (TUI Overview): Mention user layouts.
+	(TUI Commands): Document "tui new-layout".
+
 2020-01-26  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.texinfo (M68K Features): Document floating-point feature

@@ -52,6 +52,49 @@ struct lynx_target_ops
 
 extern struct lynx_target_ops the_low_target;
 
+/* Target ops definitions for a LynxOS target.  */
+
+class lynx_process_target : public process_stratum_target
+{
+public:
+
+  int create_inferior (const char *program,
+		       const std::vector<char *> &program_args) override;
+
+  int attach (unsigned long pid) override;
+
+  int kill (process_info *proc) override;
+
+  int detach (process_info *proc) override;
+
+  void mourn (process_info *proc) override;
+
+  void join (int pid) override;
+
+  bool thread_alive (ptid_t pid) override;
+
+  void resume (thread_resume *resume_info, size_t n) override;
+
+  ptid_t wait (ptid_t ptid, target_waitstatus *status,
+	       int options) override;
+
+  void fetch_registers (regcache *regcache, int regno) override;
+
+  void store_registers (regcache *regcache, int regno) override;
+
+  int read_memory (CORE_ADDR memaddr, unsigned char *myaddr,
+		   int len) override;
+
+  int write_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
+		    int len) override;
+
+  void request_interrupt () override;
+
+  bool supports_hardware_single_step () override;
+
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+};
+
 /* The inferior's target description.  This is a global because the
    LynxOS ports support neither bi-arch nor multi-process.  */
 extern const struct target_desc *lynx_tdesc;

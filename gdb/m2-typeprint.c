@@ -563,7 +563,8 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
 	  QUIT;
 
 	  print_spaces_filtered (level + 4, stream);
-	  fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
+	  fputs_styled (TYPE_FIELD_NAME (type, i),
+			variable_name_style.style (), stream);
 	  fputs_filtered (" : ", stream);
 	  m2_print_type (TYPE_FIELD_TYPE (type, i),
 			 "",
@@ -608,7 +609,8 @@ m2_enum (struct type *type, struct ui_file *stream, int show, int level)
 	  if (i > 0)
 	    fprintf_filtered (stream, ", ");
 	  wrap_here ("    ");
-	  fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
+	  fputs_styled (TYPE_FIELD_NAME (type, i),
+			variable_name_style.style (), stream);
 	  if (lastval != TYPE_FIELD_ENUMVAL (type, i))
 	    {
 	      fprintf_filtered (stream, " = %s",

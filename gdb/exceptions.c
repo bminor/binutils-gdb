@@ -85,7 +85,7 @@ print_exception (struct ui_file *file, const struct gdb_exception &e)
       else
 	{
 	  end++;
-	  ui_file_write (file, start, end - start);
+	  file->write (start, end - start);
 	}
     }					    
   fprintf_filtered (file, "\n");

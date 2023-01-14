@@ -39,4 +39,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	67 0f 01 c8 [ 	]*monitor %eax,%ecx,%edx
 [ 	]*[a-f0-9]+:	f2 0f 12 38 [ 	]*movddup \(%rax\),%xmm7
 [ 	]*[a-f0-9]+:	f2 0f 12 38 [ 	]*movddup \(%rax\),%xmm7
+[ 	]*[0-9a-f]+:	0f 01 c8[ 	]+monitor %rax,%ecx,%edx
+[ 	]*[0-9a-f]+:	67 0f 01 c8[ 	]+monitor %eax,%ecx,%edx
+[ 	]*[0-9a-f]+:	0f 01 c9[ 	]+mwait  %eax,%ecx
 #pass

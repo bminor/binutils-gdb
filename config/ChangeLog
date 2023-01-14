@@ -1,3 +1,17 @@
+2020-02-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ax_count_cpus.m4: New file, backported from GCC.
+	* bootstrap-Og.mk: New file, backported from GCC.
+	* bootstrap-lto-lean.mk: New file, backported from GCC.
+	* bootstrap-lto.mk: Changes backported from GCC.
+	* futex.m4: Changes backported from GCC.
+	* gthr.m4: Changes backported from GCC.
+	* lib-link.m4: Changes backported from GCC.
+	* mh-mingw: Changes backported from GCC.
+	* no-executables.m4: Changes backported from GCC.
+	* tls.m4: Changes backported from GCC.
+	* toolexeclibdir.m4: New file, backported from GCC.
+
 2020-01-18  Nick Clifton  <nickc@redhat.com>
 
 	Binutils 2.34 branch created.

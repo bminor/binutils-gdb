@@ -731,9 +731,6 @@ foreach cv {{} { const} { volatile} { const volatile}} {
 	  pass $test
       }
   }
-  if {"$cv" != ""} {
-      setup_kfail c++/14186 *-*-*
-  }
   gdb_test "p CV::m(int)$cv" [string_to_regexp $correct]
 }
 

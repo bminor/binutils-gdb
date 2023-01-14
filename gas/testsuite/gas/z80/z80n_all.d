@@ -1,4 +1,4 @@
-#as: -z80n
+#as: -march=z80n
 #objdump: -d
 
 .*:[     ]+file format (coff|elf32)\-z80

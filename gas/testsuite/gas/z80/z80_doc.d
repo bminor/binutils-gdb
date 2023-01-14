@@ -1,4 +1,4 @@
-#as: -z80 -without-inst=sli,op-ii-ld,idx-reg-halves,in-f-c,out-c-0
+#as: -march=z80-full
 #objdump: -d
 #name: All Z80 documented instructions
 

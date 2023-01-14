@@ -36,7 +36,9 @@ struct partial_symbol;
    other memory managed by this class), or on the per-BFD object.  The
    only link from the psymtab storage object back to the objfile (or
    objfile_obstack) that is made by the core psymtab code is the
-   compunit_symtab member in the psymtab.
+   compunit_symtab member in the standard_psymtab -- and a given
+   symbol reader can avoid this by implementing its own subclasses of
+   partial_symtab.
 
    However, it is up to each symbol reader to maintain this invariant
    in other ways, if it wants to reuse psymtabs across multiple

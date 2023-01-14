@@ -50,38 +50,6 @@
   <reg name="hpmcounter29" bitsize="64"/>
   <reg name="hpmcounter30" bitsize="64"/>
   <reg name="hpmcounter31" bitsize="64"/>
-  <reg name="cycleh" bitsize="64"/>
-  <reg name="timeh" bitsize="64"/>
-  <reg name="instreth" bitsize="64"/>
-  <reg name="hpmcounter3h" bitsize="64"/>
-  <reg name="hpmcounter4h" bitsize="64"/>
-  <reg name="hpmcounter5h" bitsize="64"/>
-  <reg name="hpmcounter6h" bitsize="64"/>
-  <reg name="hpmcounter7h" bitsize="64"/>
-  <reg name="hpmcounter8h" bitsize="64"/>
-  <reg name="hpmcounter9h" bitsize="64"/>
-  <reg name="hpmcounter10h" bitsize="64"/>
-  <reg name="hpmcounter11h" bitsize="64"/>
-  <reg name="hpmcounter12h" bitsize="64"/>
-  <reg name="hpmcounter13h" bitsize="64"/>
-  <reg name="hpmcounter14h" bitsize="64"/>
-  <reg name="hpmcounter15h" bitsize="64"/>
-  <reg name="hpmcounter16h" bitsize="64"/>
-  <reg name="hpmcounter17h" bitsize="64"/>
-  <reg name="hpmcounter18h" bitsize="64"/>
-  <reg name="hpmcounter19h" bitsize="64"/>
-  <reg name="hpmcounter20h" bitsize="64"/>
-  <reg name="hpmcounter21h" bitsize="64"/>
-  <reg name="hpmcounter22h" bitsize="64"/>
-  <reg name="hpmcounter23h" bitsize="64"/>
-  <reg name="hpmcounter24h" bitsize="64"/>
-  <reg name="hpmcounter25h" bitsize="64"/>
-  <reg name="hpmcounter26h" bitsize="64"/>
-  <reg name="hpmcounter27h" bitsize="64"/>
-  <reg name="hpmcounter28h" bitsize="64"/>
-  <reg name="hpmcounter29h" bitsize="64"/>
-  <reg name="hpmcounter30h" bitsize="64"/>
-  <reg name="hpmcounter31h" bitsize="64"/>
   <reg name="sstatus" bitsize="64"/>
   <reg name="sedeleg" bitsize="64"/>
   <reg name="sideleg" bitsize="64"/>
@@ -111,9 +79,7 @@
   <reg name="mtval" bitsize="64"/>
   <reg name="mip" bitsize="64"/>
   <reg name="pmpcfg0" bitsize="64"/>
-  <reg name="pmpcfg1" bitsize="64"/>
   <reg name="pmpcfg2" bitsize="64"/>
-  <reg name="pmpcfg3" bitsize="64"/>
   <reg name="pmpaddr0" bitsize="64"/>
   <reg name="pmpaddr1" bitsize="64"/>
   <reg name="pmpaddr2" bitsize="64"/>
@@ -161,37 +127,6 @@
   <reg name="mhpmcounter29" bitsize="64"/>
   <reg name="mhpmcounter30" bitsize="64"/>
   <reg name="mhpmcounter31" bitsize="64"/>
-  <reg name="mcycleh" bitsize="64"/>
-  <reg name="minstreth" bitsize="64"/>
-  <reg name="mhpmcounter3h" bitsize="64"/>
-  <reg name="mhpmcounter4h" bitsize="64"/>
-  <reg name="mhpmcounter5h" bitsize="64"/>
-  <reg name="mhpmcounter6h" bitsize="64"/>
-  <reg name="mhpmcounter7h" bitsize="64"/>
-  <reg name="mhpmcounter8h" bitsize="64"/>
-  <reg name="mhpmcounter9h" bitsize="64"/>
-  <reg name="mhpmcounter10h" bitsize="64"/>
-  <reg name="mhpmcounter11h" bitsize="64"/>
-  <reg name="mhpmcounter12h" bitsize="64"/>
-  <reg name="mhpmcounter13h" bitsize="64"/>
-  <reg name="mhpmcounter14h" bitsize="64"/>
-  <reg name="mhpmcounter15h" bitsize="64"/>
-  <reg name="mhpmcounter16h" bitsize="64"/>
-  <reg name="mhpmcounter17h" bitsize="64"/>
-  <reg name="mhpmcounter18h" bitsize="64"/>
-  <reg name="mhpmcounter19h" bitsize="64"/>
-  <reg name="mhpmcounter20h" bitsize="64"/>
-  <reg name="mhpmcounter21h" bitsize="64"/>
-  <reg name="mhpmcounter22h" bitsize="64"/>
-  <reg name="mhpmcounter23h" bitsize="64"/>
-  <reg name="mhpmcounter24h" bitsize="64"/>
-  <reg name="mhpmcounter25h" bitsize="64"/>
-  <reg name="mhpmcounter26h" bitsize="64"/>
-  <reg name="mhpmcounter27h" bitsize="64"/>
-  <reg name="mhpmcounter28h" bitsize="64"/>
-  <reg name="mhpmcounter29h" bitsize="64"/>
-  <reg name="mhpmcounter30h" bitsize="64"/>
-  <reg name="mhpmcounter31h" bitsize="64"/>
   <reg name="mhpmevent3" bitsize="64"/>
   <reg name="mhpmevent4" bitsize="64"/>
   <reg name="mhpmevent5" bitsize="64"/>

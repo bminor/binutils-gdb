@@ -6845,9 +6845,9 @@ remote_console_output (const char *msg)
 
       tb[0] = c;
       tb[1] = 0;
-      ui_file_puts (gdb_stdtarg, tb);
+      gdb_stdtarg->puts (tb);
     }
-  ui_file_flush (gdb_stdtarg);
+  gdb_stdtarg->flush ();
 }
 
 struct stop_reply : public notif_event

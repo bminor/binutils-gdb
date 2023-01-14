@@ -1,3 +1,36 @@
+2020-02-24  Nick Clifton  <nickc@redhat.com>
+
+	PR 25499
+	* doc/binutils.texi (objdump): Fix typo in description of
+	objdump's -g option.
+
+2020-02-20  Nelson Chu  <nelson.chu@sifive.com>
+
+	* dwarf.c (regname_internal_riscv): Updated since the DECLARE_CSR
+	is changed.
+
+2020-02-19  Jordan Rupprecht  <rupprecht@google.com>
+
+	* objdump.c (show_line): call bfd_demangle when using do_demangle.
+
+2020-02-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* configure: Regenerate.
+
+2020-02-10  Fangrui Song   <maskray@google.com>
+
+	* objcopy.c (parse_flags): Handle "exclude".
+	* doc/binutils.texi: Document the support.
+
+2020-02-10  Aaron Merey  <amerey@redhat.com>
+
+	* binutils/testsuite/binutils-all/debuginfod.exp:
+	Replace set ::env with setenv.
+	Start server before setting environment variable.
+	Specify tmpdir as the location of the server's
+	database.
+	Check additional server metrics at start-up.
+
 2020-02-07  Nick Clifton  <nickc@redhat.com>
 
 	* README-how-to-make-a-release: Add note about updating the

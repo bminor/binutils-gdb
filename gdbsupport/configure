@@ -624,6 +624,8 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+WERROR_CFLAGS
+WARN_CFLAGS
 SELFTEST_FALSE
 SELFTEST_TRUE
 LTLIBIPT
@@ -768,7 +770,11 @@ with_intel_pt
 with_gnu_ld
 enable_rpath
 with_libipt_prefix
+with_libipt_type
 enable_unit_tests
+enable_werror
+enable_build_warnings
+enable_gdb_build_warnings
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1415,6 +1421,11 @@ Optional Features:
   --disable-rpath         do not hardcode runtime library paths
   --enable-unit-tests     Enable the inclusion of unit tests when compiling
                           GDB
+  --enable-werror         treat compile warnings as errors
+  --enable-build-warnings enable build-time compiler warnings if gcc is used
+  --enable-gdb-build-warnings
+                          enable GDB specific build-time compiler warnings if
+                          gcc is used
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -1423,6 +1434,7 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld default=no
   --with-libipt-prefix[=DIR]  search for libipt in DIR/include and DIR/lib
   --without-libipt-prefix     don't search for libipt in includedir and libdir
+  --with-libipt-type=TYPE     type of library to search for (auto/static/shared)
 
 Some influential environment variables:
   CC          C compiler command
@@ -9811,6 +9823,16 @@ if test "${with_libipt_prefix+set}" = set; then :
 
 fi
 
+
+# Check whether --with-libipt-type was given.
+if test "${with_libipt_type+set}" = set; then :
+  withval=$with_libipt_type;  with_libipt_type=$withval
+else
+   with_libipt_type=auto
+fi
+
+  lib_type=`eval echo \$with_libipt_type`
+
       LIBIPT=
   LTLIBIPT=
   INCIPT=
@@ -9848,13 +9870,13 @@ fi
           found_so=
           found_a=
           if test $use_additional = yes; then
-            if test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext"; then
+            if test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext" && test x$lib_type != xstatic; then
               found_dir="$additional_libdir"
               found_so="$additional_libdir/lib$name.$shlibext"
               if test -f "$additional_libdir/lib$name.la"; then
                 found_la="$additional_libdir/lib$name.la"
               fi
-            else
+            elif test x$lib_type != xshared; then
               if test -f "$additional_libdir/lib$name.$libext"; then
                 found_dir="$additional_libdir"
                 found_a="$additional_libdir/lib$name.$libext"
@@ -9878,13 +9900,13 @@ fi
               case "$x" in
                 -L*)
                   dir=`echo "X$x" | sed -e 's/^X-L//'`
-                  if test -n "$shlibext" && test -f "$dir/lib$name.$shlibext"; then
+                  if test -n "$shlibext" && test -f "$dir/lib$name.$shlibext" && test x$lib_type != xstatic; then
                     found_dir="$dir"
                     found_so="$dir/lib$name.$shlibext"
                     if test -f "$dir/lib$name.la"; then
                       found_la="$dir/lib$name.la"
                     fi
-                  else
+                  elif test x$lib_type != xshared; then
                     if test -f "$dir/lib$name.$libext"; then
                       found_dir="$dir"
                       found_a="$dir/lib$name.$libext"
@@ -10112,8 +10134,13 @@ fi
               done
             fi
           else
-                                                            LIBIPT="${LIBIPT}${LIBIPT:+ }-l$name"
-            LTLIBIPT="${LTLIBIPT}${LTLIBIPT:+ }-l$name"
+                                                            if test "x$lib_type" = "xauto" || test "x$lib_type" = "xshared"; then
+              LIBIPT="${LIBIPT}${LIBIPT:+ }-l$name"
+              LTLIBIPT="${LTLIBIPT}${LTLIBIPT:+ }-l$name"
+            else
+              LIBIPT="${LIBIPT}${LIBIPT:+ }-l:lib$name.$libext"
+              LTLIBIPT="${LTLIBIPT}${LTLIBIPT:+ }-l:lib$name.$libext"
+            fi
           fi
         fi
       fi
@@ -10804,6 +10831,192 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 fi
+
+
+# Detect support warning flags.
+
+# Check whether --enable-werror was given.
+if test "${enable_werror+set}" = set; then :
+  enableval=$enable_werror; case "${enableval}" in
+     yes | y) ERROR_ON_WARNING="yes" ;;
+     no | n)  ERROR_ON_WARNING="no" ;;
+     *) as_fn_error $? "bad value ${enableval} for --enable-werror" "$LINENO" 5 ;;
+   esac
+fi
+
+
+# Enable -Werror by default when using gcc.  Turn it off for releases.
+if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" && $development; then
+    ERROR_ON_WARNING=yes
+fi
+
+WERROR_CFLAGS=""
+if test "${ERROR_ON_WARNING}" = yes ; then
+    WERROR_CFLAGS="-Werror"
+fi
+
+# The options we'll try to enable.
+build_warnings="-Wall -Wpointer-arith \
+-Wno-unused -Wunused-value -Wunused-variable -Wunused-function \
+-Wno-switch -Wno-char-subscripts \
+-Wempty-body -Wunused-but-set-parameter -Wunused-but-set-variable \
+-Wno-sign-compare -Wno-error=maybe-uninitialized \
+-Wno-mismatched-tags \
+-Wno-error=deprecated-register \
+-Wsuggest-override \
+-Wimplicit-fallthrough=3 \
+-Wduplicated-cond \
+-Wshadow=local \
+-Wdeprecated-copy \
+-Wdeprecated-copy-dtor \
+-Wredundant-move \
+-Wmissing-declarations \
+-Wstrict-null-sentinel \
+"
+
+case "${host}" in
+  *-*-mingw32*)
+    # Enable -Wno-format by default when using gcc on mingw since many
+    # GCC versions complain about %I64.
+    build_warnings="$build_warnings -Wno-format" ;;
+  *-*-solaris*)
+    # Solaris 11.4 <python2.7/ceval.h> uses #pragma no_inline that GCC
+    # doesn't understand.
+    build_warnings="$build_warnings -Wno-unknown-pragmas"
+    # Solaris 11 <unistd.h> marks vfork deprecated.
+    build_warnings="$build_warnings -Wno-deprecated-declarations" ;;
+  *)
+    # Note that gcc requires -Wformat for -Wformat-nonliteral to work,
+    # but there's a special case for this below.
+    build_warnings="$build_warnings -Wformat-nonliteral" ;;
+esac
+
+# Check whether --enable-build-warnings was given.
+if test "${enable_build_warnings+set}" = set; then :
+  enableval=$enable_build_warnings; case "${enableval}" in
+  yes)	;;
+  no)	build_warnings="-w";;
+  ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
+        build_warnings="${build_warnings} ${t}";;
+  *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
+        build_warnings="${t} ${build_warnings}";;
+  *)    build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
+esac
+if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
+  echo "Setting compiler warning flags = $build_warnings" 6>&1
+fi
+fi
+# Check whether --enable-gdb-build-warnings was given.
+if test "${enable_gdb_build_warnings+set}" = set; then :
+  enableval=$enable_gdb_build_warnings; case "${enableval}" in
+  yes)	;;
+  no)	build_warnings="-w";;
+  ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
+        build_warnings="${build_warnings} ${t}";;
+  *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
+        build_warnings="${t} ${build_warnings}";;
+  *)    build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
+esac
+if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
+  echo "Setting GDB specific compiler warning flags = $build_warnings" 6>&1
+fi
+fi
+
+# The set of warnings supported by a C++ compiler is not the same as
+# of the C compiler.
+ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+
+WARN_CFLAGS=""
+if test "x${build_warnings}" != x -a "x$GCC" = xyes
+then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking compiler warning flags" >&5
+$as_echo_n "checking compiler warning flags... " >&6; }
+    # Separate out the -Werror flag as some files just cannot be
+    # compiled with it enabled.
+    for w in ${build_warnings}; do
+	# GCC does not complain about -Wno-unknown-warning.  Invert
+	# and test -Wunknown-warning instead.
+	case $w in
+	-Wno-*)
+		wtest=`echo $w | sed 's/-Wno-/-W/g'` ;;
+        -Wformat-nonliteral)
+		# gcc requires -Wformat before -Wformat-nonliteral
+		# will work, so stick them together.
+		w="-Wformat $w"
+		wtest="$w"
+		;;
+	*)
+		wtest=$w ;;
+	esac
+
+	case $w in
+	-Werr*) WERROR_CFLAGS=-Werror ;;
+	*)
+	    # Check whether GCC accepts it.
+	    saved_CFLAGS="$CFLAGS"
+	    CFLAGS="$CFLAGS -Werror $wtest"
+	    saved_CXXFLAGS="$CXXFLAGS"
+	    CXXFLAGS="$CXXFLAGS -Werror $wtest"
+	    if test "x$w" = "x-Wunused-variable"; then
+	      # Check for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=38958,
+	      # fixed in GCC 4.9.  This test is derived from the gdb
+	      # source code that triggered this bug in GCC.
+	      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+struct scoped_restore_base {};
+                 struct scoped_restore_tmpl : public scoped_restore_base {
+		   ~scoped_restore_tmpl() {}
+		 };
+int
+main ()
+{
+const scoped_restore_base &b = scoped_restore_tmpl();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  WARN_CFLAGS="${WARN_CFLAGS} $w"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+	    else
+	      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  WARN_CFLAGS="${WARN_CFLAGS} $w"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+	    fi
+	    CFLAGS="$saved_CFLAGS"
+	    CXXFLAGS="$saved_CXXFLAGS"
+	esac
+    done
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${WARN_CFLAGS} ${WERROR_CFLAGS}" >&5
+$as_echo "${WARN_CFLAGS} ${WERROR_CFLAGS}" >&6; }
+fi
+
+
+
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
 
 
 TARGET_WORD_SIZE=`sed -n 's,#define BFD_ARCH_SIZE \(.*\)$,\1,p' ../bfd/bfd-in3.h`

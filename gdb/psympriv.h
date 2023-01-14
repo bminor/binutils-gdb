@@ -99,8 +99,7 @@ enum psymtab_search_status
    They are all chained on partial symtab lists.
 
    Even after the source file has been read into a symtab, the
-   partial_symtab remains around.  They are allocated on an obstack,
-   objfile_obstack.  */
+   partial_symtab remains around.  */
 
 struct partial_symtab
 {

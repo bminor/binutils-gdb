@@ -235,11 +235,16 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 	  annotate_field_begin (TYPE_FIELD_TYPE (type, i));
 
 	  if (field_is_static (&TYPE_FIELD (type, i)))
-	    fputs_filtered ("static ", stream);
-	  fprintf_symbol_filtered (stream,
-				   TYPE_FIELD_NAME (type, i),
-				   current_language->la_language,
-				   DMGL_PARAMS | DMGL_ANSI);
+	    {
+	      fputs_filtered ("static ", stream);
+	      fprintf_symbol_filtered (stream,
+				       TYPE_FIELD_NAME (type, i),
+				       current_language->la_language,
+				       DMGL_PARAMS | DMGL_ANSI);
+	    }
+	  else
+	    fputs_styled (TYPE_FIELD_NAME (type, i),
+			  variable_name_style.style (), stream);
 	  annotate_field_name_end ();
 
 	  /* We tweak various options in a few cases below.  */
@@ -782,7 +787,8 @@ cp_print_class_member (const gdb_byte *valaddr, struct type *type,
       else
 	c_type_print_base (self_type, stream, 0, 0, &type_print_raw_options);
       fprintf_filtered (stream, "::");
-      fputs_filtered (TYPE_FIELD_NAME (self_type, fieldno), stream);
+      fputs_styled (TYPE_FIELD_NAME (self_type, fieldno),
+		    variable_name_style.style (), stream);
     }
   else
     fprintf_filtered (stream, "%ld", (long) val);

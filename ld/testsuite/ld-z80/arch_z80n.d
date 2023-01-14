@@ -1,6 +1,7 @@
 #name: Z80N arch test
-#source: dummy1.s -z80n
-#source: dummy2.s -z80n
+#source: dummy1.s
+#source: dummy2.s
+#as: -march=z80n
 #ld: -e 0
 #objdump: -f
 

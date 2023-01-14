@@ -550,7 +550,7 @@ srec_scan (bfd *abfd)
 		  {
 		    char secbuf[20];
 		    char *secname;
-		    bfd_size_type amt;
+		    size_t amt;
 		    flagword flags;
 
 		    sprintf (secbuf, ".sec%d", bfd_count_sections (abfd) + 1);

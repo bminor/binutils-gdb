@@ -85,12 +85,6 @@ CODE_FRAGMENT
 .  {* A unique identifier of the BFD  *}
 .  unsigned int id;
 .
-.  {* The format which belongs to the BFD. (object, core, etc.)  *}
-.  ENUM_BITFIELD (bfd_format) format : 3;
-.
-.  {* The direction with which the BFD was opened.  *}
-.  ENUM_BITFIELD (bfd_direction) direction : 2;
-.
 .  {* Format_specific flags.  *}
 .  flagword flags;
 .
@@ -194,6 +188,12 @@ CODE_FRAGMENT
 .   | BFD_PLUGIN | BFD_TRADITIONAL_FORMAT | BFD_DETERMINISTIC_OUTPUT \
 .   | BFD_COMPRESS_GABI | BFD_CONVERT_ELF_COMMON | BFD_USE_ELF_STT_COMMON)
 .
+.  {* The format which belongs to the BFD. (object, core, etc.)  *}
+.  ENUM_BITFIELD (bfd_format) format : 3;
+.
+.  {* The direction with which the BFD was opened.  *}
+.  ENUM_BITFIELD (bfd_direction) direction : 2;
+.
 .  {* Is the file descriptor being cached?  That is, can it be closed as
 .     needed, and re-opened when accessed later?  *}
 .  unsigned int cacheable : 1;
@@ -283,7 +283,7 @@ CODE_FRAGMENT
 .
 .  {* Symbol table for output BFD (with symcount entries).
 .     Also used by the linker to cache input BFD symbols.  *}
-.  struct bfd_symbol  **outsymbols;
+.  struct bfd_symbol **outsymbols;
 .
 .  {* Used for input and output.  *}
 .  unsigned int symcount;
@@ -293,6 +293,11 @@ CODE_FRAGMENT
 .
 .  {* Pointer to structure which contains architecture information.  *}
 .  const struct bfd_arch_info *arch_info;
+.
+.  {* Cached length of file for bfd_get_size.  0 until bfd_get_size is
+.     called, 1 if stat returns an error or the file size is too large to
+.     return in ufile_ptr.  Both 0 and 1 should be treated as "unknown".  *}
+.  ufile_ptr size;
 .
 .  {* Stuff only useful for archives.  *}
 .  void *arelt_data;
@@ -2169,7 +2174,7 @@ bfd_record_phdr (bfd *abfd,
 		 asection **secs)
 {
   struct elf_segment_map *m, **pm;
-  bfd_size_type amt;
+  size_t amt;
 
   if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
     return TRUE;

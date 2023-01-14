@@ -1,5 +1,5 @@
-# threadlib.m4 serial 24
-dnl Copyright (C) 2005-2019 Free Software Foundation, Inc.
+# threadlib.m4 serial 27
+dnl Copyright (C) 2005-2020 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -8,46 +8,48 @@ dnl From Bruno Haible.
 
 AC_PREREQ([2.60])
 
-dnl gl_PTHREADLIB
-dnl -------------
-dnl Tests for the libraries needs for using the POSIX threads API.
-dnl Sets the variable LIBPTHREAD to the linker options for use in a Makefile.
-dnl Sets the variable LIBPMULTITHREAD, for programs that really need
-dnl multithread functionality. The difference between LIBPTHREAD and
-dnl LIBPMULTITHREAD is that on platforms supporting weak symbols, typically
-dnl LIBPTHREAD is empty whereas LIBPMULTITHREAD is not.
-dnl Adds to CPPFLAGS the flag -D_REENTRANT or -D_THREAD_SAFE if needed for
-dnl multithread-safe programs.
-dnl Defines the C macro HAVE_PTHREAD_API if (at least parts of) the POSIX
-dnl threads API is available.
+dnl The general structure of the multithreading modules in gnulib is that we
+dnl have three set of modules:
+dnl
+dnl   * POSIX API:
+dnl     pthread, which combines
+dnl       pthread-h
+dnl       pthread-thread
+dnl       pthread-once
+dnl       pthread-mutex
+dnl       pthread-rwlock
+dnl       pthread-cond
+dnl       pthread-tss
+dnl       pthread-spin
+dnl     sched_yield
+dnl
+dnl   * ISO C API:
+dnl     threads, which combines
+dnl       threads-h
+dnl       thrd
+dnl       mtx
+dnl       cnd
+dnl       tss
+dnl
+dnl   * Gnulib API, with an implementation that can be chosen at configure
+dnl     time through the option --enable-threads=...
+dnl       thread
+dnl       lock
+dnl       cond
+dnl       tls
+dnl       yield
+dnl
+dnl They are independent, except for the fact that
+dnl   - the implementation of the ISO C API may use the POSIX (or some other
+dnl     platform dependent) API,
+dnl   - the implementation of the Gnulib API may use the POSIX or ISO C or
+dnl     some other platform dependent API, depending on the --enable-threads
+dnl     option.
+dnl
+dnl This file contains macros for all of these APIs!
 
-dnl gl_THREADLIB
-dnl ------------
-dnl Tests for a multithreading library to be used.
-dnl If the configure.ac contains a definition of the gl_THREADLIB_DEFAULT_NO
-dnl (it must be placed before the invocation of gl_THREADLIB_EARLY!), then the
-dnl default is 'no', otherwise it is system dependent. In both cases, the user
-dnl can change the choice through the options --enable-threads=choice or
-dnl --disable-threads.
-dnl Defines at most one of the macros USE_ISOC_THREADS, USE_POSIX_THREADS,
-dnl USE_ISOC_AND_POSIX_THREADS, USE_WINDOWS_THREADS.
-dnl The choice --enable-threads=isoc+posix is available only on platforms that
-dnl have both the ISO C and the POSIX threads APIs. It has the effect of using
-dnl the ISO C API for most things and the POSIX API only for creating and
-dnl controlling threads (because there is no equivalent to pthread_atfork in
-dnl the ISO C API).
-dnl Sets the variables LIBTHREAD and LTLIBTHREAD to the linker options for use
-dnl in a Makefile (LIBTHREAD for use without libtool, LTLIBTHREAD for use with
-dnl libtool).
-dnl Sets the variables LIBMULTITHREAD and LTLIBMULTITHREAD similarly, for
-dnl programs that really need multithread functionality. The difference
-dnl between LIBTHREAD and LIBMULTITHREAD is that on platforms supporting weak
-dnl symbols, typically LIBTHREAD is empty whereas LIBMULTITHREAD is not.
-dnl Adds to CPPFLAGS the flag -D_REENTRANT or -D_THREAD_SAFE if needed for
-dnl multithread-safe programs.
-dnl Since support for GNU pth was removed, $LTLIBTHREAD and $LIBTHREAD have the
-dnl same value, and similarly $LTLIBMULTITHREAD and $LIBMULTITHREAD have the
-dnl same value. Only system libraries are needed.
+dnl ============================================================================
+dnl Macros for all thread APIs
 
 AC_DEFUN([gl_ANYTHREADLIB_EARLY],
 [
@@ -75,77 +77,11 @@ AC_DEFUN([gl_ANYTHREADLIB_EARLY],
   fi
 ])
 
-AC_DEFUN([gl_THREADLIB_EARLY],
-[
-  AC_REQUIRE([gl_THREADLIB_EARLY_BODY])
-])
-
-dnl The guts of gl_THREADLIB_EARLY. Needs to be expanded only once.
-
-AC_DEFUN([gl_THREADLIB_EARLY_BODY],
-[
-  dnl Ordering constraints: This macro modifies CPPFLAGS in a way that
-  dnl influences the result of the autoconf tests that test for *_unlocked
-  dnl declarations, on AIX 5 at least. Therefore it must come early.
-  AC_BEFORE([$0], [gl_FUNC_GLIBC_UNLOCKED_IO])dnl
-  AC_BEFORE([$0], [gl_ARGP])dnl
-
-  AC_REQUIRE([AC_CANONICAL_HOST])
-  dnl _GNU_SOURCE is needed for pthread_rwlock_t on glibc systems.
-  AC_REQUIRE([AC_USE_SYSTEM_EXTENSIONS])
-  dnl Check for multithreading.
-  m4_ifdef([gl_THREADLIB_DEFAULT_NO],
-    [m4_divert_text([DEFAULTS], [gl_use_threads_default=no])],
-    [m4_divert_text([DEFAULTS], [gl_use_threads_default=])])
-  m4_divert_text([DEFAULTS], [gl_use_winpthreads_default=])
-  AC_ARG_ENABLE([threads],
-AC_HELP_STRING([--enable-threads={isoc|posix|isoc+posix|windows}], [specify multithreading API])m4_ifdef([gl_THREADLIB_DEFAULT_NO], [], [
-AC_HELP_STRING([--disable-threads], [build without multithread safety])]),
-    [gl_use_threads=$enableval],
-    [if test -n "$gl_use_threads_default"; then
-       gl_use_threads="$gl_use_threads_default"
-     else
-changequote(,)dnl
-       case "$host_os" in
-         dnl Disable multithreading by default on OSF/1, because it interferes
-         dnl with fork()/exec(): When msgexec is linked with -lpthread, its
-         dnl child process gets an endless segmentation fault inside execvp().
-         osf*) gl_use_threads=no ;;
-         dnl Disable multithreading by default on Cygwin 1.5.x, because it has
-         dnl bugs that lead to endless loops or crashes. See
-         dnl <https://cygwin.com/ml/cygwin/2009-08/msg00283.html>.
-         cygwin*)
-               case `uname -r` in
-                 1.[0-5].*) gl_use_threads=no ;;
-                 *)         gl_use_threads=yes ;;
-               esac
-               ;;
-         dnl Obey gl_AVOID_WINPTHREAD on mingw.
-         mingw*)
-               case "$gl_use_winpthreads_default" in
-                 yes) gl_use_threads=posix ;;
-                 no)  gl_use_threads=windows ;;
-                 *)   gl_use_threads=yes ;;
-               esac
-               ;;
-         *)    gl_use_threads=yes ;;
-       esac
-changequote([,])dnl
-     fi
-    ])
-  if test "$gl_use_threads" = yes \
-     || test "$gl_use_threads" = isoc \
-     || test "$gl_use_threads" = posix \
-     || test "$gl_use_threads" = isoc+posix; then
-    # For using <threads.h> or <pthread.h>:
-    gl_ANYTHREADLIB_EARLY
-  fi
-])
-
 dnl Checks whether the compiler and linker support weak declarations of symbols.
 
 AC_DEFUN([gl_WEAK_SYMBOLS],
 [
+  AC_REQUIRE([AC_CANONICAL_HOST])
   AC_CACHE_CHECK([whether imported symbols can be declared weak],
     [gl_cv_have_weak],
     [gl_cv_have_weak=no
@@ -184,6 +120,30 @@ int main ()
      case " $LDFLAGS " in
        *" -static "*) gl_cv_have_weak=no ;;
      esac
+     dnl Test for a bug in FreeBSD 11: A link error occurs when using a weak
+     dnl symbol and linking against a shared library that has a dependency on
+     dnl the shared library that defines the symbol.
+     case "$gl_cv_have_weak" in
+       *yes)
+         case "$host_os" in
+           freebsd* | dragonfly*)
+             : > conftest1.c
+             $CC $CPPFLAGS $CFLAGS $LDFLAGS -fPIC -shared -o libempty.so conftest1.c -lpthread >&AS_MESSAGE_LOG_FD 2>&1
+             cat <<EOF > conftest2.c
+#include <pthread.h>
+#pragma weak pthread_mutexattr_gettype
+int main ()
+{
+  return (pthread_mutexattr_gettype != NULL);
+}
+EOF
+             $CC $CPPFLAGS $CFLAGS $LDFLAGS -o conftest conftest2.c libempty.so >&AS_MESSAGE_LOG_FD 2>&1 \
+               || gl_cv_have_weak=no
+             rm -f conftest1.c libempty.so conftest2.c conftest
+             ;;
+         esac
+         ;;
+     esac
     ])
   case "$gl_cv_have_weak" in
     *yes)
@@ -193,12 +153,30 @@ int main ()
   esac
 ])
 
+dnl ============================================================================
+dnl Macros for the POSIX API
+
+dnl gl_PTHREADLIB
+dnl -------------
+dnl Tests for the libraries needs for using the POSIX threads API.
+dnl Sets the variable LIBPTHREAD to the linker options for use in a Makefile.
+dnl Sets the variable LIBPMULTITHREAD, for programs that really need
+dnl multithread functionality. The difference between LIBPTHREAD and
+dnl LIBPMULTITHREAD is that on platforms supporting weak symbols, typically
+dnl LIBPTHREAD is empty whereas LIBPMULTITHREAD is not.
+dnl Sets the variable LIB_SCHED_YIELD to the linker options needed to use the
+dnl sched_yield() function.
+dnl Adds to CPPFLAGS the flag -D_REENTRANT or -D_THREAD_SAFE if needed for
+dnl multithread-safe programs.
+dnl Defines the C macro HAVE_PTHREAD_API if (at least parts of) the POSIX
+dnl threads API is available.
+
 dnl The guts of gl_PTHREADLIB. Needs to be expanded only once.
 
 AC_DEFUN([gl_PTHREADLIB_BODY],
 [
   AC_REQUIRE([gl_ANYTHREADLIB_EARLY])
-  if test -z "$gl_threadlib_body_done"; then
+  if test -z "$gl_pthreadlib_body_done"; then
     gl_pthread_api=no
     LIBPTHREAD=
     LIBPMULTITHREAD=
@@ -277,7 +255,189 @@ AC_DEFUN([gl_PTHREADLIB_BODY],
       AC_DEFINE([HAVE_PTHREAD_API], [1],
         [Define if you have the <pthread.h> header and the POSIX threads API.])
     fi
-    gl_threadlib_body_done=done
+
+    dnl On some systems, sched_yield is in librt, rather than in libpthread.
+    AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM(
+         [[#include <sched.h>]],
+         [[sched_yield ();]])],
+      [LIB_SCHED_YIELD=
+      ],
+      [dnl Solaris 7...10 has sched_yield in librt, not in libpthread or libc.
+       AC_CHECK_LIB([rt], [sched_yield], [LIB_SCHED_YIELD=-lrt],
+         [dnl Solaris 2.5.1, 2.6 has sched_yield in libposix4, not librt.
+          AC_CHECK_LIB([posix4], [sched_yield], [LIB_SCHED_YIELD=-lposix4])])
+      ])
+    AC_SUBST([LIB_SCHED_YIELD])
+
+    gl_pthreadlib_body_done=done
+  fi
+])
+
+AC_DEFUN([gl_PTHREADLIB],
+[
+  AC_REQUIRE([gl_ANYTHREADLIB_EARLY])
+  gl_PTHREADLIB_BODY
+])
+
+dnl ============================================================================
+dnl Macros for the ISO C API
+
+dnl gl_STDTHREADLIB
+dnl ---------------
+dnl Tests for the libraries needs for using the ISO C threads API.
+dnl Sets the variable LIBSTDTHREAD to the linker options for use in a Makefile.
+dnl Adds to CPPFLAGS the flag -D_REENTRANT or -D_THREAD_SAFE if needed for
+dnl multithread-safe programs.
+dnl Defines the C macro HAVE_THREADS_H if (at least parts of) the ISO C threads
+dnl API is available.
+
+dnl The guts of gl_STDTHREADLIB. Needs to be expanded only once.
+
+AC_DEFUN([gl_STDTHREADLIB_BODY],
+[
+  AC_REQUIRE([gl_ANYTHREADLIB_EARLY])
+  AC_REQUIRE([AC_CANONICAL_HOST])
+  if test -z "$gl_stdthreadlib_body_done"; then
+    AC_CHECK_HEADERS_ONCE([threads.h])
+
+    case "$host_os" in
+      mingw*)
+        LIBSTDTHREAD=
+        ;;
+      *)
+        gl_PTHREADLIB_BODY
+        if test $ac_cv_header_threads_h = yes; then
+          dnl glibc >= 2.29 has thrd_create in libpthread.
+          dnl FreeBSD >= 10 has thrd_create in libstdthreads; this library depends
+          dnl on libpthread (for the symbol 'pthread_mutexattr_gettype').
+          dnl AIX >= 7.1 and Solaris >= 11.4 have thrd_create in libc.
+          AC_CHECK_FUNCS([thrd_create])
+          if test $ac_cv_func_thrd_create = yes; then
+            LIBSTDTHREAD=
+          else
+            AC_CHECK_LIB([stdthreads], [thrd_create], [
+              LIBSTDTHREAD='-lstdthreads -lpthread'
+            ], [
+              dnl Guess that thrd_create is in libpthread.
+              LIBSTDTHREAD="$LIBPMULTITHREAD"
+            ])
+          fi
+        else
+          dnl Libraries needed by thrd.c, mtx.c, cnd.c, tss.c.
+          LIBSTDTHREAD="$LIBPMULTITHREAD $LIB_SCHED_YIELD"
+        fi
+        ;;
+    esac
+    AC_SUBST([LIBSTDTHREAD])
+
+    AC_MSG_CHECKING([whether ISO C threads API is available])
+    AC_MSG_RESULT([$ac_cv_header_threads_h])
+    gl_stdthreadlib_body_done=done
+  fi
+])
+
+AC_DEFUN([gl_STDTHREADLIB],
+[
+  AC_REQUIRE([gl_ANYTHREADLIB_EARLY])
+  gl_STDTHREADLIB_BODY
+])
+
+dnl ============================================================================
+dnl Macros for the Gnulib API
+
+dnl gl_THREADLIB
+dnl ------------
+dnl Tests for a multithreading library to be used.
+dnl If the configure.ac contains a definition of the gl_THREADLIB_DEFAULT_NO
+dnl (it must be placed before the invocation of gl_THREADLIB_EARLY!), then the
+dnl default is 'no', otherwise it is system dependent. In both cases, the user
+dnl can change the choice through the options --enable-threads=choice or
+dnl --disable-threads.
+dnl Defines at most one of the macros USE_ISOC_THREADS, USE_POSIX_THREADS,
+dnl USE_ISOC_AND_POSIX_THREADS, USE_WINDOWS_THREADS.
+dnl The choice --enable-threads=isoc+posix is available only on platforms that
+dnl have both the ISO C and the POSIX threads APIs. It has the effect of using
+dnl the ISO C API for most things and the POSIX API only for creating and
+dnl controlling threads (because there is no equivalent to pthread_atfork in
+dnl the ISO C API).
+dnl Sets the variables LIBTHREAD and LTLIBTHREAD to the linker options for use
+dnl in a Makefile (LIBTHREAD for use without libtool, LTLIBTHREAD for use with
+dnl libtool).
+dnl Sets the variables LIBMULTITHREAD and LTLIBMULTITHREAD similarly, for
+dnl programs that really need multithread functionality. The difference
+dnl between LIBTHREAD and LIBMULTITHREAD is that on platforms supporting weak
+dnl symbols, typically LIBTHREAD is empty whereas LIBMULTITHREAD is not.
+dnl Adds to CPPFLAGS the flag -D_REENTRANT or -D_THREAD_SAFE if needed for
+dnl multithread-safe programs.
+dnl Since support for GNU pth was removed, $LTLIBTHREAD and $LIBTHREAD have the
+dnl same value, and similarly $LTLIBMULTITHREAD and $LIBMULTITHREAD have the
+dnl same value. Only system libraries are needed.
+
+AC_DEFUN([gl_THREADLIB_EARLY],
+[
+  AC_REQUIRE([gl_THREADLIB_EARLY_BODY])
+])
+
+dnl The guts of gl_THREADLIB_EARLY. Needs to be expanded only once.
+
+AC_DEFUN([gl_THREADLIB_EARLY_BODY],
+[
+  dnl Ordering constraints: This macro modifies CPPFLAGS in a way that
+  dnl influences the result of the autoconf tests that test for *_unlocked
+  dnl declarations, on AIX 5 at least. Therefore it must come early.
+  AC_BEFORE([$0], [gl_FUNC_GLIBC_UNLOCKED_IO])dnl
+  AC_BEFORE([$0], [gl_ARGP])dnl
+
+  AC_REQUIRE([AC_CANONICAL_HOST])
+  dnl _GNU_SOURCE is needed for pthread_rwlock_t on glibc systems.
+  AC_REQUIRE([AC_USE_SYSTEM_EXTENSIONS])
+  dnl Check for multithreading.
+  m4_ifdef([gl_THREADLIB_DEFAULT_NO],
+    [m4_divert_text([DEFAULTS], [gl_use_threads_default=no])],
+    [m4_divert_text([DEFAULTS], [gl_use_threads_default=])])
+  m4_divert_text([DEFAULTS], [gl_use_winpthreads_default=])
+  AC_ARG_ENABLE([threads],
+AC_HELP_STRING([--enable-threads={isoc|posix|isoc+posix|windows}], [specify multithreading API])m4_ifdef([gl_THREADLIB_DEFAULT_NO], [], [
+AC_HELP_STRING([--disable-threads], [build without multithread safety])]),
+    [gl_use_threads=$enableval],
+    [if test -n "$gl_use_threads_default"; then
+       gl_use_threads="$gl_use_threads_default"
+     else
+changequote(,)dnl
+       case "$host_os" in
+         dnl Disable multithreading by default on OSF/1, because it interferes
+         dnl with fork()/exec(): When msgexec is linked with -lpthread, its
+         dnl child process gets an endless segmentation fault inside execvp().
+         osf*) gl_use_threads=no ;;
+         dnl Disable multithreading by default on Cygwin 1.5.x, because it has
+         dnl bugs that lead to endless loops or crashes. See
+         dnl <https://cygwin.com/ml/cygwin/2009-08/msg00283.html>.
+         cygwin*)
+               case `uname -r` in
+                 1.[0-5].*) gl_use_threads=no ;;
+                 *)         gl_use_threads=yes ;;
+               esac
+               ;;
+         dnl Obey gl_AVOID_WINPTHREAD on mingw.
+         mingw*)
+               case "$gl_use_winpthreads_default" in
+                 yes) gl_use_threads=posix ;;
+                 no)  gl_use_threads=windows ;;
+                 *)   gl_use_threads=yes ;;
+               esac
+               ;;
+         *)    gl_use_threads=yes ;;
+       esac
+changequote([,])dnl
+     fi
+    ])
+  if test "$gl_use_threads" = yes \
+     || test "$gl_use_threads" = isoc \
+     || test "$gl_use_threads" = posix \
+     || test "$gl_use_threads" = isoc+posix; then
+    # For using <threads.h> or <pthread.h>:
+    gl_ANYTHREADLIB_EARLY
   fi
 ])
 
@@ -303,20 +463,7 @@ AC_DEFUN([gl_THREADLIB_BODY],
     fi
     if test "$gl_use_threads" = isoc || test "$gl_use_threads" = isoc+posix; then
       AC_CHECK_HEADERS_ONCE([threads.h])
-      if test $ac_cv_header_threads_h = yes; then
-        gl_have_isoc_threads=
-        # Test whether both mtx_lock and cnd_timedwait exist in libc.
-        AC_LINK_IFELSE(
-          [AC_LANG_PROGRAM(
-             [[#include <threads.h>
-               #include <stddef.h>
-               mtx_t m;
-               cnd_t c;
-             ]],
-             [[mtx_lock (&m);
-               cnd_timedwait (&c, &m, NULL);]])],
-          [gl_have_isoc_threads=yes])
-      fi
+      gl_have_isoc_threads="$ac_cv_header_threads_h"
     fi
     if test "$gl_use_threads" = yes \
        || test "$gl_use_threads" = posix \
@@ -346,6 +493,9 @@ AC_DEFUN([gl_THREADLIB_BODY],
     fi
     if test $gl_threads_api = none; then
       if test "$gl_use_threads" = isoc && test "$gl_have_isoc_threads" = yes; then
+        gl_STDTHREADLIB_BODY
+        LIBTHREAD=$LIBSTDTHREAD LTLIBTHREAD=$LIBSTDTHREAD
+        LIBMULTITHREAD=$LIBSTDTHREAD LTLIBMULTITHREAD=$LIBSTDTHREAD
         gl_threads_api=isoc
         AC_DEFINE([USE_ISOC_THREADS], [1],
           [Define if the ISO C multithreading library can be used.])
@@ -373,12 +523,6 @@ AC_DEFUN([gl_THREADLIB_BODY],
   AC_SUBST([LTLIBTHREAD])
   AC_SUBST([LIBMULTITHREAD])
   AC_SUBST([LTLIBMULTITHREAD])
-])
-
-AC_DEFUN([gl_PTHREADLIB],
-[
-  AC_REQUIRE([gl_ANYTHREADLIB_EARLY])
-  gl_PTHREADLIB_BODY
 ])
 
 AC_DEFUN([gl_THREADLIB],
@@ -409,6 +553,9 @@ dnl configure option '--enable-threads'.
 AC_DEFUN([gl_AVOID_WINPTHREAD], [
   m4_divert_text([INIT_PREPARE], [gl_use_winpthreads_default=no])
 ])
+
+
+dnl ============================================================================
 
 
 dnl Survey of platforms:

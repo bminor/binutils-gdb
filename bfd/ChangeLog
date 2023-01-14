@@ -1,3 +1,516 @@
+2020-02-24  Alan Modra  <amodra@gmail.com>
+
+	* vms-lib.c (_bfd_vms_lib_archive_p): Correct overflow checks.
+
+2020-02-24  Alan Modra  <amodra@gmail.com>
+
+	* vms-lib.c (struct carsym_mem): Add limit.
+	(vms_add_index): Heed limit.
+	(vms_traverse_index): Catch buffer overflows.  Remove outdated fixme.
+	(vms_lib_read_index): Set up limit.  Catch 32-bit overflow.
+	Always return actual number read.
+	(_bfd_vms_lib_archive_p): Catch buffer overflows.  Replace
+	assertion with error exit.
+
+2020-02-22  Alan Modra  <amodra@gmail.com>
+
+	PR 25585
+	* elf.c (assign_file_positions_for_load_sections): Continue linking
+	on "PHDR segment not covered by LOAD segment" errors.
+
+2020-02-21  Alan Modra  <amodra@gmail.com>
+
+	* mach-o.c (bfd_mach_o_canonicalize_relocs): Fix ineffective
+	overflow check.
+	(bfd_mach_o_canonicalize_reloc): Likewise.
+	(bfd_mach_o_canonicalize_dynamic_reloc): Likewise.  Sanity check
+	counts and offsets against file size.
+	(bfd_mach_o_build_dysymtab): Fix ineffective overflow check.
+	(bfd_mach_o_mangle_sections): Remove unnecessary overflow check.
+	(bfd_mach_o_read_symtab_symbols): Sanity check count and offset
+	against file size.  Delete symbol table error message.
+	(bfd_mach_o_read_dysymtab): Sanity check counts and offsets
+	against file size.
+	(bfd_mach_o_read_symtab): Likewise.
+	(bfd_mach_o_read_command): Pass file size.
+	(bfd_mach_o_scan): Sanity check command count against file size.
+
+2020-02-21  Alan Modra  <amodra@gmail.com>
+
+	PR 25569
+	* aoutx.h (adjust_o_magic, adjust_z_magic, adjust_n_magic): Use
+	"text", "data" and "bss" section pointer vars.  Don't update
+	section size, just exec header sizes.
+	(adjust_sizes_and_vmas): Don't update text section size.  Set
+	initial exec header a_text.  Print exec headers sizes.
+	* pdp11.c (adjust_o_magic, adjust_z_magic, adjust_n_magic),
+	(adjust_sizes_and_vmas): Similarly.  Formatting.
+	(final_link): Correct final file extension.
+
+2020-02-20  Nick Clifton  <nickc@redhat.com>
+
+	* elf-bfd.h (struct elf_backend_data): Add symbol_section_index
+	callback.
+	* elfxx-target.h (elf_backend_symbol_section_index): Provide
+	default definition.
+	(elfNN_bed): Initialise the symbol_section_index field.
+	* elf.c (swap_out_syms): Call symbol_section_index, if defined, on
+	OS and PROC specific section indicies.  Warn if converting other
+	reserved incidies to SHN_ABS.
+
+2020-02-19  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25537
+	* cpu-z80.c: Add machine type compatibility checking.
+
+2020-02-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25355
+	* plugin.c (plugin_list_entry): Remove handle.
+	(try_load_plugin): Call dlclose before return.
+
+2020-02-19  Alan Modra  <amodra@gmail.com>
+
+	* libbfd-in.h (_bfd_constant_p): Define.
+	(_bfd_alloc_and_read, _bfd_malloc_and_read): Check read size against
+	file size before allocating memory.
+	* coffgen.c (_bfd_coff_get_external_symbols): Remove file size check.
+	* elf.c (bfd_elf_get_str_section): Likewise.
+	(_bfd_elf_slurp_version_tables): Likewise.
+	* libbfd.h: Regenerate.
+
+2020-02-19  Alan Modra  <amodra@gmail.com>
+
+	* libbfd-in.h (_bfd_alloc_and_read, _bfd_malloc_and_read): New.
+	* aoutx.h (aout_get_external_symbols): Replace calls to
+	bfd_[m]alloc and bfd_bread with call to _bfd_[m]alloc_and_read.
+	(slurp_reloc_table): Likewise.
+	* archive.c (do_slurp_bsd_armap): Likewise.
+	(do_slurp_coff_armap): Likewise.
+	* archive64.c (_bfd_archive_64_bit_slurp_armap): Likewise.
+	* coff-rs6000.c (_bfd_xcoff_slurp_armap): Likewise.
+	* coff64-rs6000.c (xcoff64_slurp_armap): Likewise.
+	* coffcode.h (coff_set_arch_mach_hook, buy_and_read): Likewise.
+	* coffgen.c (coff_real_object_p, coff_object_p, build_debug_section),
+	(_bfd_coff_get_external_symbols): Likewise.
+	* ecoff.c (ecoff_slurp_symbolic_header),
+	(_bfd_ecoff_slurp_symbolic_info, ecoff_slurp_reloc_table),
+	(_bfd_ecoff_slurp_armap, ecoff_link_add_object_symbols, READ),
+	(ecoff_indirect_link_order): Likewise.
+	* elf.c (bfd_elf_get_str_section, setup_group, elf_read_notes),
+	(_bfd_elf_slurp_version_tables): Likewise.
+	* elf32-m32c.c (m32c_elf_relax_section): Likewise.
+	* elf32-rl78.c (rl78_elf_relax_section): Likewise.
+	* elf32-rx.c (elf32_rx_relax_section): Likewise.
+	* elf64-alpha.c (READ): Likewise.
+	* elf64-mips.c (mips_elf64_slurp_one_reloc_table): Likewise.
+	* elf64-sparc.c (elf64_sparc_slurp_one_reloc_table): Likewise.
+	* elfcode.h (elf_slurp_symbol_table),
+	(elf_slurp_reloc_table_from_section): Likewise.
+	* elflink.c (elf_link_add_object_symbols),
+	(elf_link_check_versioned_symbol): Likewise.
+	* elfxx-mips.c (READ): Likewise.
+	* i386lynx.c (slurp_reloc_table): Likewise.
+	* lynx-core.c (lynx_core_file_p): Likewise.
+	* mach-o.c (bfd_mach_o_canonicalize_relocs),
+	(bfd_mach_o_read_symtab_strtab, bfd_mach_o_alloc_and_read),
+	(bfd_mach_o_read_prebound_dylib, bfd_mach_o_read_dyld_content
+	* pdp11.c (aout_get_external_symbols, slurp_reloc_table
+	* pef.c (bfd_pef_print_loader_section, bfd_pef_scan_start_address),
+	(bfd_pef_parse_symbols): Likewise.
+	* peicode.h (pe_ILF_object_p, pe_bfd_object_p
+	* som.c (setup_sections, som_slurp_string_table),
+	(som_slurp_reloc_table, som_bfd_count_ar_symbols),
+	(som_bfd_fill_in_ar_symbols): Likewise.
+	* vms-alpha.c (module_find_nearest_line, evax_bfd_print_dst),
+	(evax_bfd_print_image): Likewise.
+	* vms-lib.c (_bfd_vms_lib_archive_p): Likewise.
+	* wasm-module.c (wasm_scan): Likewise.
+	* xcofflink.c (xcoff_link_add_symbols): Likewise.
+	* xsym.c (bfd_sym_read_name_table),
+	(bfd_sym_print_type_information_table_entry): Likewise.
+	* libbfd.h: Regenerate.
+
+2020-02-19  Alan Modra  <amodra@gmail.com>
+
+	* aoutx.h (slurp_reloc_table): Allocate reloc_cache after
+	reading external relocs.
+	* ecoff.c (ecoff_slurp_reloc_table): Likewise.
+	* archive.c (_bfd_write_archive_contents): Don't twiddle bfd_error
+	after bfd_bread.
+	* archive64.c (_bfd_archive_64_bit_slurp_armap): Remove unnecessary
+	bfd_release.
+	* elf32-m32c.c (m32c_offset_for_reloc): Make shndx_buf a bfd_byte*.
+	(m32c_elf_relax_section): Likewise.
+	* elf32-rl78.c (rl78_offset_for_reloc): Likewise.
+	(rl78_elf_relax_section): Likewise.
+	* elf32-rx.c (rx_offset_for_reloc): Likewise.
+	(elf32_rx_relax_section): Likewise.
+	* mach-o.c (bfd_mach_o_alloc_and_read): Move earlier with better
+	parameter types and use..
+	(bfd_mach_o_read_dylinker, bfd_mach_o_read_dylib),
+	(bfd_mach_o_read_fvmlib, bfd_mach_o_read_str): ..in these functions.
+	* peicode.h (pe_bfd_object_p): Don't zero the part of opthdr
+	being read from file, just the extra.
+	* som.c (som_slurp_symbol_table): Allocate internal symbol buffer
+	after reading external syms.  Free on failure.
+
+2020-02-19  Alan Modra  <amodra@gmail.com>
+
+	* coffcode.h (buy_and_read, coff_slurp_line_table),
+	(coff_slurp_symbol_table, coff_slurp_reloc_table): Replace
+	bfd_[z][m]alloc2 calls with _bfd_mul_overflow followed by the
+	corresponding bfd_alloc call.  Adjust variables to suit.
+	* coffgen.c (_bfd_coff_get_external_symbols): Likewise.
+	* ecoff.c (_bfd_ecoff_slurp_symbolic_info),
+	(_bfd_ecoff_slurp_symbol_table, READ): Likewise.
+	* elf.c (bfd_elf_get_elf_syms, setup_group, bfd_section_from_shdr),
+	(swap_out_syms, _bfd_elf_slurp_version_tables): Likewise.
+	* elf32-m32c.c (m32c_elf_relax_section): Likewise.
+	* elf32-rl78.c (rl78_elf_relax_section): Likewise.
+	* elf32-rx.c (elf32_rx_relax_section): Likewise.
+	* elf64-alpha.c (READ): Likewise.
+	* elfcode.h (elf_object_p, elf_write_relocs, elf_write_shdrs_and_ehdr),
+	(elf_slurp_symbol_table, elf_slurp_reloc_table),
+	(bfd_from_remote_memory): Likewise.
+	* elfcore.h (core_find_build_id): Likewise.
+	* elfxx-mips.c (READ): Likewise.
+	* mach-o.c (bfd_mach_o_mangle_sections),
+	(bfd_mach_o_read_symtab_symbols, bfd_mach_o_read_thread),
+	(bfd_mach_o_read_dysymtab, bfd_mach_o_flatten_sections),
+	(bfd_mach_o_scan, bfd_mach_o_fat_archive_p): Likewise.
+	* som.c (setup_sections, som_prep_for_fixups)
+	(som_build_and_write_symbol_table, som_slurp_symbol_table),
+	(som_slurp_reloc_table, som_bfd_count_ar_symbols),
+	(som_bfd_fill_in_ar_symbols, som_slurp_armap),
+	(som_bfd_ar_write_symbol_stuff): Likewise.
+	* vms-alpha.c (vector_grow1): Likewise.
+	* vms-lib.c (vms_add_index): Likewise.
+	* wasm-module.c (wasm_scan_name_function_section): Likewise.
+	* libbfd.c (bfd_malloc2, bfd_realloc2, bfd_zmalloc2): Delete.
+	* opncls.c (bfd_alloc2, bfd_zalloc2): Delete.
+	* libbfd-in.h (bfd_malloc2, bfd_realloc2, bfd_zmalloc2),
+	(bfd_alloc2, bfd_zalloc2): Delete.
+	(_bfd_mul_overflow): Define.
+	* libbfd.h: Regenerate.
+
+2020-02-19  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (bfd_section_from_shdr): Use bfd_zalloc rather than
+	bfd_zalloc2.
+	(assign_section_numbers): Likewise.
+	(elf_map_symbols): Likewise, and bfd_alloc rather than bfd_alloc2.
+	(_bfd_elf_map_sections_to_segments): Use bfd_malloc rather than
+	bfd_malloc2, size_t amt, and unsigned tls_count.
+	(rewrite_elf_program_header): Use bfd_malloc and size_t amt.
+	* elflink.c (elf_create_symbuf): Use bfd_malloc.
+	(elf_output_implib): Use bfd_alloc.
+
+2020-02-19  Alan Modra  <amodra@gmail.com>
+
+	* bfd.c (struct bfd): Move format and direction to other
+	bitfields.  Add "size".
+	* bfdio.c (bfd_get_size): Cache size when not writing file.
+	* opncls.c (bfd_get_debug_link_info_1): Allow for bfd_get_size
+	returning zero, ie. unknown.
+	(bfd_get_alt_debug_link_info): Likewise.
+	* bfd-in2.h: Regenerate.
+
+2020-02-19  Alan Modra  <amodra@gmail.com>
+
+	* coffgen.c (_bfd_coff_get_external_symbols): Don't call
+	bfd_get_file_size twice.
+	(_bfd_coff_read_string_table): Allow for bfd_get_file_size
+	zero, ie. unknown, return.
+	* elf-attrs.c (_bfd_elf_parse_attributes): Likewise.
+	* elfcode.h (elf_swap_shdr_in): Likewise.
+	(elf_object_p): Don't call bfd_get_file_size twice and correct
+	file size check.
+
+2020-02-19  Alan Modra  <amodra@gmail.com>
+
+	* mach-o.c (bfd_mach_o_flatten_sections): Return a bfd_boolean,
+	FALSE if memory alloc fails.  Adjust calls.
+	* som.c (som_prep_for_fixups): Likewise.
+	* vms-alpha.c (alpha_vms_add_fixup_lp, alpha_vms_add_fixup_ca),
+	(alpha_vms_add_fixup_qr, alpha_vms_add_fixup_lr),
+	(alpha_vms_add_lw_reloc, alpha_vms_add_qw_reloc): Likewise.
+	* som.c (som_build_and_write_symbol_table): Return via error_return
+	on seek failure.
+	* vms-alpha.c (VEC_APPEND): Adjust for vector_grow1 changes.
+	(VEC_APPEND_EL): Delete.
+	(vector_grow1): Return pointer to element.  Catch overflow.
+	Return NULL on memory allocation failure.
+	(alpha_vms_add_fixup_lp): Replace VEC_APPEND_EL with VEC_APPEND.
+	(alpha_vms_add_fixup_ca): Likewise.
+	(alpha_vms_link_add_object_symbols): Check VEC_APPEND result
+	before using.
+	* elf.c (bfd_section_from_shdr): Check bfd_zalloc2 result.
+
+2020-02-19  Alan Modra  <amodra@gmail.com>
+
+	* aix386-core.c (aix386_core_file_p): Use size_t for "amt".
+	* aout-target.h (object_p): Likewise.
+	* aout-tic30.c (tic30_aout_object_p): Likewise.
+	* aoutx.h (some_aout_object_p, mkobject, make_empty_symbol),
+	(emit_stringtab, write_syms, link_hash_table_create),
+	(aout_link_write_other_symbol): Likewise.
+	* archive.c (_bfd_generic_mkarchive, bfd_generic_archive_p),
+	(bfd_ar_hdr_from_filesystem, _bfd_write_archive_contents),
+	(_bfd_compute_and_write_armap): Likewise.
+	* archures.c (bfd_arch_list): Likewise.
+	* bfd.c (bfd_record_phdr): Likewise.
+	* binary.c (binary_canonicalize_symtab): Likewise.
+	* cisco-core.c (cisco_core_file_validate): Likewise.
+	* coff-arm.c (coff_arm_link_hash_table_create, find_thumb_glue),
+	(find_arm_glue, record_arm_to_thumb_glue),
+	(record_thumb_to_arm_glue): Likewise.
+	* coff-ppc.c (ppc_coff_link_hash_table_create, record_toc),
+	(ppc_allocate_toc_section): Likewise.
+	* coff-rs6000.c (_bfd_xcoff_mkobject, _bfd_xcoff_archive_p): Likewise.
+	* coff-sh.c (sh_relax_section): Likewise.
+	* coff64-rs6000.c (xcoff64_archive_p): Likewise.
+	* coffcode.h (handle_COMDAT, coff_new_section_hook),
+	(coff_set_alignment_hook, coff_mkobject),
+	(coff_compute_section_file_positions): Likewise.
+	* coffgen.c (coff_make_empty_symbol, coff_bfd_make_debug_symbol),
+	(coff_find_nearest_line_with_names),
+	( bfd_coff_set_symbol_class): Likewise.
+	* cofflink.c (_bfd_coff_link_hash_table_create),
+	(_bfd_coff_link_input_bfd): Likewise.
+	* dwarf1.c (alloc_dwarf1_unit, alloc_dwarf1_func): Likewise.
+	* dwarf2.c (read_abbrevs, read_attribute_value, add_line_info),
+	(build_line_info_table, sort_line_sequences),
+	(line_info_add_include_dir, line_info_add_file_name),
+	(decode_line_info, scan_unit_for_symbols, parse_comp_unit),
+	(place_sections, _bfd_dwarf2_slurp_debug_info): Likewise.
+	* ecoff.c (_bfd_ecoff_mkobject, _bfd_ecoff_make_empty_symbol),
+	(_bfd_ecoff_find_nearest_line),
+	(_bfd_ecoff_bfd_link_hash_table_create): Likewise.
+	* ecofflink.c (bfd_ecoff_debug_init): Likewise.
+	* elf-hppa.h (_bfd_elf_hppa_gen_reloc_type): Likewise.
+	* elf-m10300.c (mn10300_elf_relax_section),
+	(elf32_mn10300_link_hash_table_create): Likewise.
+	* elf-strtab.c (_bfd_elf_strtab_init): Likewise.
+	* elf.c (make_mapping, copy_elf_program_header): Likewise.
+	* elf32-arm.c (elf32_arm_link_hash_table_create),
+	(elf32_arm_setup_section_lists, elf32_arm_check_relocs),
+	(elf32_arm_new_section_hook): Likewise.
+	* elf32-avr.c (elf_avr_new_section_hook),
+	(elf32_avr_link_hash_table_create, get_local_syms),
+	(elf32_avr_setup_section_lists): Likewise.
+	* elf32-bfin.c (bfinfdpic_elf_link_hash_table_create),
+	(bfin_link_hash_table_create): Likewise.
+	* elf32-cr16.c (elf32_cr16_link_hash_table_create): Likewise.
+	* elf32-cris.c (elf_cris_link_hash_table_create): Likewise.
+	* elf32-csky.c (csky_elf_link_hash_table_create),
+	(csky_elf_check_relocs, elf32_csky_setup_section_lists): Likewise.
+	* elf32-frv.c (frvfdpic_elf_link_hash_table_create): Likewise.
+	* elf32-hppa.c (elf32_hppa_link_hash_table_create),
+	(elf32_hppa_setup_section_lists, get_local_syms): Likewise.
+	* elf32-i386.c (elf_i386_check_relocs): Likewise.
+	* elf32-lm32.c (lm32_elf_link_hash_table_create): Likewise.
+	* elf32-m32r.c (m32r_elf_link_hash_table_create),
+	(m32r_elf_check_relocs): Likewise.
+	* elf32-m68hc1x.c (m68hc11_elf_hash_table_create),
+	(elf32_m68hc11_setup_section_lists),
+	(elf32_m68hc11_size_stubs): Likewise.
+	* elf32-m68k.c (elf_m68k_link_hash_table_create): Likewise.
+	* elf32-metag.c (elf_metag_link_hash_table_create),
+	(elf_metag_setup_section_lists): Likewise.
+	* elf32-microblaze.c (microblaze_elf_link_hash_table_create),
+	(microblaze_elf_check_relocs): Likewise.
+	* elf32-nds32.c (nds32_elf_link_hash_table_create),
+	(nds32_elf_check_relocs): Likewise.
+	* elf32-nios2.c (nios2_elf32_setup_section_lists),
+	(get_local_syms, nios2_elf32_check_relocs),
+	(nios2_elf32_link_hash_table_create): Likewise.
+	* elf32-or1k.c (or1k_elf_link_hash_table_create),
+	(or1k_elf_check_relocs): Likewise.
+	* elf32-ppc.c (ppc_elf_modify_segment_map, update_plt_info): Likewise.
+	* elf32-pru.c (pru_elf32_link_hash_table_create): Likewise.
+	* elf32-s390.c (elf_s390_link_hash_table_create),
+	(elf_s390_check_relocs): Likewise.
+	* elf32-score.c (score_elf_create_got_section),
+	(s3_elf32_score_new_section_hook),
+	(elf32_score_link_hash_table_create): Likewise.
+	* elf32-score7.c (score_elf_create_got_section),
+	(s7_elf32_score_new_section_hook): Likewise.
+	* elf32-sh.c (sh_elf_link_hash_table_create),
+	(sh_elf_check_relocs): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_link_hash_table_create),
+	(elf32_tic6x_new_section_hook, elf32_tic6x_check_relocs): Likewise.
+	* elf32-tilepro.c (tilepro_elf_link_hash_table_create),
+	(tilepro_elf_check_relocs): Likewise.
+	* elf32-v850.c (remember_hi16s_reloc): Likewise.
+	* elf32-vax.c (elf_vax_link_hash_table_create): Likewise.
+	* elf32-xtensa.c (elf_xtensa_link_hash_table_create),
+	(elf_xtensa_new_section_hook): Likewise.
+	* elf64-alpha.c (elf64_alpha_bfd_link_hash_table_create),
+	(get_got_entry, elf64_alpha_check_relocs): Likewise.
+	* elf64-hppa.c (elf64_hppa_hash_table_create): Likewise.
+	* elf64-ia64-vms.c (elf64_ia64_object_p): Likewise.
+	* elf64-mmix.c (mmix_elf_new_section_hook): Likewise.
+	* elf64-ppc.c (ppc64_elf_new_section_hook),
+	(ppc64_elf_link_hash_table_create, update_local_sym_info),
+	(update_plt_info, ppc64_elf_check_relocs): Likewise.
+	* elf64-s390.c (elf_s390_link_hash_table_create),
+	(elf_s390_check_relocs): Likewise.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+	* elflink.c (bfd_elf_link_record_local_dynamic_symbol),
+	(_bfd_elf_link_find_version_dependencies, elf_link_add_object_symbols),
+	(elf_link_add_archive_symbols, compute_bucket_count),
+	(bfd_elf_size_dynsym_hash_dynstr, _bfd_elf_link_hash_table_create),
+	(bfd_elf_get_bfd_needed_list, elf_link_swap_symbols_out),
+	(bfd_elf_final_link): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_link_hash_table_create),
+	(elfNN_aarch64_setup_section_lists, elfNN_aarch64_check_relocs),
+	(elfNN_aarch64_new_section_hook): Likewise.
+	* elfnn-ia64.c (elfNN_ia64_object_p): Likewise.
+	* elfnn-riscv.c (riscv_elf_link_hash_table_create),
+	(riscv_elf_check_relocs): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_new_section_hook),
+	(_bfd_mips_elf_add_symbol_hook, _bfd_mips_elf_check_relocs),
+	(_bfd_mips_elf_modify_segment_map, _bfd_mips_elf_set_section_contents),
+	(_bfd_mips_elf_link_hash_table_create): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_link_hash_table_create),
+	(_bfd_sparc_elf_check_relocs),
+	(_bfd_sparc_elf_new_section_hook): Likewise.
+	* elfxx-tilegx.c (tilegx_elf_link_hash_table_create),
+	(tilegx_elf_check_relocs): Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_link_hash_table_create): Likewise.
+	* format.c (bfd_check_format_matches): Likewise.
+	* hash.c (_bfd_stringtab_init): Likewise.
+	* ihex.c (ihex_scan): Likewise.
+	* irix-core.c (irix_core_core_file_p): Likewise.
+	* linker.c (bfd_wrapped_link_hash_lookup),
+	(_bfd_generic_link_hash_table_create),
+	(_bfd_generic_reloc_link_order): Likewise.
+	* lynx-core.c (lynx_core_file_p): Likewise.
+	* netbsd-core.c (netbsd_core_file_p): Likewise.
+	* osf-core.c (osf_core_core_file_p): Likewise.
+	* pdp11.c (some_aout_object_p, mkobject, make_empty_symbol),
+	(link_hash_table_create, aout_link_write_other_symbol): Likewise.
+	* peXXigen.c (_bfd_XX_bfd_copy_private_section_data): Likewise.
+	* peicode.h (pe_mkobject): Likewise.
+	* ppcboot.c (ppcboot_mkobject, ppcboot_canonicalize_symtab): Likewise.
+	* ptrace-core.c (ptrace_unix_core_file_p): Likewise.
+	* sco5-core.c (read_uarea): Likewise.
+	* som.c (hppa_som_gen_reloc_type, som_object_p, som_prep_headers),
+	(som_write_fixups, som_write_space_strings, som_write_symbol_strings),
+	(som_finish_writing, som_canonicalize_symtab, som_new_section_hook),
+	(som_bfd_copy_private_section_data, bfd_som_set_section_attributes),
+	(bfd_som_attach_aux_hdr, som_write_armap): Likewise.
+	* srec.c (srec_scan): Likewise.
+	* syms.c (_bfd_generic_make_empty_symbol): Likewise.
+	* targets.c (bfd_target_list): Likewise.
+	* tekhex.c (first_phase, tekhex_sizeof_headers): Likewise.
+	* trad-core.c (trad_unix_core_file_p): Likewise.
+	* vms-alpha.c (vms_initialize, alpha_vms_bfd_link_hash_table_create),
+	(vms_new_section_hook): Likewise.
+	* wasm-module.c (wasm_make_empty_symbol): Likewise.
+	* xcofflink.c (xcoff_get_section_contents),
+	(_bfd_xcoff_bfd_link_hash_table_create, xcoff_set_import_path),
+	(xcoff_find_function, bfd_xcoff_link_record_set, xcoff_build_ldsym),
+	(bfd_xcoff_size_dynamic_sections, xcoff_link_input_bfd): Likewise.
+
+2020-02-19  Alan Modra  <amodra@gmail.com>
+
+	* elfxx-riscv.c (riscv_multi_letter_ext_valid_p): Don't use C99.
+
+2020-02-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* plugin.c (try_load_plugin): Make plugin_list_iter an argument
+	and use it if it isn't NULL.  Remove has_plugin_p argument.  Add
+	a build_list_p argument.  Don't search plugin_list.  Short circuit
+	when building the plugin list.
+	(has_plugin): Renamed to has_plugin_list.
+	(bfd_plugin_set_plugin): Don't set has_plugin.
+	(bfd_plugin_specified_p): Check plugin_list instead.
+	(build_plugin_list): New function.
+	(load_plugin): Call build_plugin_list and use plugin_list.
+
+2020-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25355
+	* plugin.c (try_claim): Always clean up for LTO wrapper.
+	(try_load_plugin): Treat each object as independent.  Create a
+	copy for plugin name.
+
+2020-02-11  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-msp430.c (msp430_final_link_relocate): Always use longs
+	for addresses in print statements.
+	(msp430_elf_relax_delete_bytes): Likewise.
+	(msp430_elf_relax_add_words): Likewise.
+	(msp430_elf_relax_section): Likewise.
+
+2020-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* plugin.c (add_symbols): Clear plugin_data memory.
+
+2020-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25355
+	* configure.ac (HAVE_EXECUTABLE_SUFFIX): New AC_DEFINE.
+	(EXECUTABLE_SUFFIX): Likewise.
+	* config.in: Regenerated.
+	* configure: Likewise.
+	* plugin.c (bfd_plugin_close_and_cleanup): Removed.
+	(plugin_list_entry): Add all_symbols_read, cleanup_handler,
+	gcc, lto_wrapper, resolution_file, resolution_option, gcc_env,
+	real_bfd, real_nsyms, real_syms, lto_nsyms and lto_syms.
+	(get_lto_wrapper): New.
+	(setup_lto_wrapper_env): Likewise.
+	(current_plugin): Likewise.
+	(register_all_symbols_read): Likewise.
+	(register_cleanup): Likewise.
+	(get_symbols): Likewise.
+	(add_input_file): Likewise.
+	(bfd_plugin_close_and_cleanup): Likewise.
+	(claim_file): Removed.
+	(register_claim_file): Set current_plugin->claim_file.
+	(add_symbols): Make a copy of LTO symbols.  Set lto_nsyms and
+	lto_syms in current_plugin.
+	(try_claim): Use current_plugin->claim_file.  Call LTO plugin
+	all_symbols_read handler.  Copy real symbols to plugin_data.
+	Call LTO plugin cleanup handler.  Clean up for LTO wrapper.
+	(try_load_plugin): Don't reuse the previous plugin for LTO
+	wrapper.  Set up GCC LTO wrapper if possible.  Don't set
+	plugin_list_iter->claim_file.
+	(bfd_plugin_canonicalize_symtab): Use real LTO symbols if
+	possible.
+	* plugin.h (plugin_data_struct): Add real_bfd, real_nsyms and
+	real_syms.
+
+2020-02-10  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* elf32-msp430.c (msp430_elf_relax_section): Before relaxing a branch,
+	check if previous instruction matches a conditional jump inserted
+	earlier. Invert conditional jump and delete branch in this case.
+
+2020-02-10  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* elf32-msp430.c (msp430_elf_relax_add_two_words): Rename to
+	msp430_elf_relax_add_words. Support insertion of either one or two
+	words.
+	(msp430_elf_relax_section): Catch opcode of 0x3c00 when relocation
+	needs to be grown. Handle insertion of branch instruction to replace
+	jump.
+
+2020-02-10  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* elf32-msp430.c (msp430_final_link_relocate): Add printf statements for
+	debugging relocations.
+	(msp430_elf_relax_delete_bytes): Likewise.
+	(msp430_elf_relax_add_two_words): Likewise.
+	(msp430_elf_relax_section): Likewise.
+
+2020-02-10  Alan Modra  <amodra@gmail.com>
+
+	* archures.c: Wrap overlong z80 comments.
+	* bfd-in2.h: Regenerate.
+
 2020-02-07  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
 	PR 25469

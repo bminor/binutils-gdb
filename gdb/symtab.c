@@ -869,14 +869,9 @@ general_symbol_info::compute_and_set_names (gdb::string_view linkage_name,
       if (!copy_name)
 	m_name = linkage_name.data ();
       else
-	{
-	  char *name = (char *) obstack_alloc (&per_bfd->storage_obstack,
-					       linkage_name.length () + 1);
-
-	  memcpy (name, linkage_name.data (), linkage_name.length ());
-	  name[linkage_name.length ()] = '\0';
-	  m_name = name;
-	}
+	m_name = obstack_strndup (&per_bfd->storage_obstack,
+				  linkage_name.data (),
+				  linkage_name.length ());
       symbol_set_demangled_name (this, NULL, &per_bfd->storage_obstack);
 
       return;
@@ -967,11 +962,8 @@ general_symbol_info::compute_and_set_names (gdb::string_view linkage_name,
     m_language = (*slot)->language;
 
   m_name = (*slot)->mangled.data ();
-  if ((*slot)->demangled != nullptr)
-    symbol_set_demangled_name (this, (*slot)->demangled.get (),
-			       &per_bfd->storage_obstack);
-  else
-    symbol_set_demangled_name (this, NULL, &per_bfd->storage_obstack);
+  symbol_set_demangled_name (this, (*slot)->demangled.get (),
+			     &per_bfd->storage_obstack);
 }
 
 /* See symtab.h.  */

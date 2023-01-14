@@ -9,12 +9,6 @@
 .*:25: Warning:.*
 .*:27: Warning:.*
 .*:29: Warning:.*
-.*:48: Warning:.*
-.*:51: Warning:.*
-.*:124: Warning:.*
-.*:125: Warning:.*
-.*:126: Warning:.*
-.*:127: Warning:.*
 .*:128: Warning:.*
 .*:129: Warning:.*
 .*:130: Warning:.*
@@ -90,12 +84,10 @@
   45 008d 661F              		popw	%ds
   46 008f 668CD8            		mov	%ds,%ax
   47 0092 668CD8            		movw	%ds,%ax
-  48 0095 668CD8            		movw	%ds,%eax
-.*Warning:.*
+  48 0095 668CDF            		movw	%ds,%di
   49 0098 8ED8              		mov	%ax,%ds
   50 009a 8ED8              		movw	%ax,%ds
-  51 009c 8ED8              		movw	%eax,%ds
-.*Warning:.*
+  51 009c 8EDF              		movw	%di,%ds
   52                       	
   53                       	# test various pushes
   54 009e 6A0A              		pushl	\$10
@@ -167,15 +159,11 @@
  120 012e 0F9303            		setaeb	\(%ebx\)
  121 0131 0F93C0            		setae	%al
  122                       	
- 123                       	#these should give warnings
- 124 0134 0C01              		orb	\$1,%ax
-.*Warning:.*
- 125 0136 0C01              		orb	\$1,%eax
-.*Warning:.*
- 126 0138 80CB01            		orb	\$1,%bx
-.*Warning:.*
- 127 013b 80CB01            		orb	\$1,%ebx
-.*Warning:.*
+ 123 0134 0C01              		orb	\$1,%al
+ 124 0136 0D000100 00       		orl	\$0x100,%eax
+ 125 013b 80CB01            		orb	\$1,%bl
+ 126                       	
+ 127                       	#these should give warnings
  128 013e D9C1              		fldl	%st\(1\)
 .*Warning:.*
  129 0140 DDD2              		fstl	%st\(2\)

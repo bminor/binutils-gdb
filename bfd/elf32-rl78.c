@@ -1822,7 +1822,7 @@ static bfd_vma
 rl78_offset_for_reloc (bfd *			abfd,
 		       Elf_Internal_Rela *	rel,
 		       Elf_Internal_Shdr *	symtab_hdr,
-		       Elf_External_Sym_Shndx * shndx_buf ATTRIBUTE_UNUSED,
+		       bfd_byte *		shndx_buf ATTRIBUTE_UNUSED,
 		       Elf_Internal_Sym *	intsyms,
 		       Elf_Internal_Rela **	lrel,
 		       bfd *			input_bfd,
@@ -2068,7 +2068,7 @@ rl78_elf_relax_section
   bfd_byte *	      free_contents = NULL;
   Elf_Internal_Sym *  intsyms = NULL;
   Elf_Internal_Sym *  free_intsyms = NULL;
-  Elf_External_Sym_Shndx * shndx_buf = NULL;
+  bfd_byte *	      shndx_buf = NULL;
   bfd_vma pc;
   bfd_vma symval ATTRIBUTE_UNUSED = 0;
   int pcrel ATTRIBUTE_UNUSED = 0;
@@ -2121,17 +2121,20 @@ rl78_elf_relax_section
 
   if (shndx_hdr && shndx_hdr->sh_size != 0)
     {
-      bfd_size_type amt;
+      size_t amt;
 
-      amt = symtab_hdr->sh_info;
-      amt *= sizeof (Elf_External_Sym_Shndx);
-      shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
+      if (_bfd_mul_overflow (symtab_hdr->sh_info,
+			     sizeof (Elf_External_Sym_Shndx), &amt))
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  goto error_return;
+	}
+      if (bfd_seek (abfd, shndx_hdr->sh_offset, SEEK_SET) != 0)
+	goto error_return;
+      shndx_buf = _bfd_malloc_and_read (abfd, amt, amt);
       if (shndx_buf == NULL)
 	goto error_return;
-      if (bfd_seek (abfd, shndx_hdr->sh_offset, SEEK_SET) != 0
-	  || bfd_bread (shndx_buf, amt, abfd) != amt)
-	goto error_return;
-      shndx_hdr->contents = (bfd_byte *) shndx_buf;
+      shndx_hdr->contents = shndx_buf;
     }
 
   /* Get a copy of the native relocations.  */

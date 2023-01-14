@@ -754,7 +754,7 @@ _bfd_elf_hppa_gen_reloc_type (bfd *abfd,
 {
   elf_hppa_reloc_type *finaltype;
   elf_hppa_reloc_type **final_types;
-  bfd_size_type amt = sizeof (elf_hppa_reloc_type *) * 2;
+  size_t amt = sizeof (elf_hppa_reloc_type *) * 2;
 
   /* Allocate slots for the BFD relocation.  */
   final_types = bfd_alloc (abfd, amt);

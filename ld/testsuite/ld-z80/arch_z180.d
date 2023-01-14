@@ -1,6 +1,7 @@
 #name: Z180 arch test
-#source: dummy1.s -z180
-#source: dummy2.s -z180
+#source: dummy1.s
+#source: dummy2.s
+#as: -march=z180
 #ld: -e 0
 #objdump: -f
 

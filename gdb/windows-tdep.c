@@ -153,13 +153,36 @@ static const int FULL_TIB_SIZE = 0x1000;
 
 static bool maint_display_all_tib = false;
 
+static struct gdbarch_data *windows_gdbarch_data_handle;
+
+struct windows_gdbarch_data
+{
+  struct type *siginfo_type;
+  struct type *tib_ptr_type; /* Type of thread information block */
+};
+
+/* Allocate windows_gdbarch_data for an arch.  */
+
+static void *
+init_windows_gdbarch_data (struct gdbarch *gdbarch)
+{
+  return GDBARCH_OBSTACK_ZALLOC (gdbarch, struct windows_gdbarch_data);
+}
+
+/* Get windows_gdbarch_data of an arch.  */
+
+static struct windows_gdbarch_data *
+get_windows_gdbarch_data (struct gdbarch *gdbarch)
+{
+  return ((struct windows_gdbarch_data *)
+	  gdbarch_data (gdbarch, windows_gdbarch_data_handle));
+}
+
 /* Define Thread Local Base pointer type.  */
 
 static struct type *
 windows_get_tlb_type (struct gdbarch *gdbarch)
 {
-  static struct gdbarch *last_gdbarch = NULL;
-  static struct type *last_tlb_type = NULL;
   struct type *dword_ptr_type, *dword32_type, *void_ptr_type;
   struct type *peb_ldr_type, *peb_ldr_ptr_type;
   struct type *peb_type, *peb_ptr_type, *list_type;
@@ -168,10 +191,11 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
   struct type *word_type, *wchar_type, *wchar_ptr_type;
   struct type *uni_str_type, *rupp_type, *rupp_ptr_type;
 
-  /* Do not rebuild type if same gdbarch as last time.  */
-  if (last_tlb_type && last_gdbarch == gdbarch)
-    return last_tlb_type;
-  
+  windows_gdbarch_data *windows_gdbarch_data
+    = get_windows_gdbarch_data (gdbarch);
+  if (windows_gdbarch_data->tib_ptr_type != nullptr)
+    return windows_gdbarch_data->tib_ptr_type;
+
   dword_ptr_type = arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch),
 				 1, "DWORD_PTR");
   dword32_type = arch_integer_type (gdbarch, 32,
@@ -341,8 +365,7 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
 			    NULL);
   TYPE_TARGET_TYPE (tib_ptr_type) = tib_type;
 
-  last_tlb_type = tib_ptr_type;
-  last_gdbarch = gdbarch;
+  windows_gdbarch_data->tib_ptr_type = tib_ptr_type;
 
   return tib_ptr_type;
 }
@@ -656,6 +679,139 @@ windows_gdb_signal_to_target (struct gdbarch *gdbarch, enum gdb_signal signal)
   return -1;
 }
 
+struct enum_value_name
+{
+  uint32_t value;
+  const char *name;
+};
+
+/* Allocate a TYPE_CODE_ENUM type structure with its named values.  */
+
+static struct type *
+create_enum (struct gdbarch *gdbarch, int bit, const char *name,
+	     const struct enum_value_name *values, int count)
+{
+  struct type *type;
+  int i;
+
+  type = arch_type (gdbarch, TYPE_CODE_ENUM, bit, name);
+  TYPE_NFIELDS (type) = count;
+  TYPE_FIELDS (type) = (struct field *)
+    TYPE_ZALLOC (type, sizeof (struct field) * count);
+  TYPE_UNSIGNED (type) = 1;
+
+  for (i = 0; i < count; i++)
+  {
+    TYPE_FIELD_NAME (type, i) = values[i].name;
+    SET_FIELD_ENUMVAL (TYPE_FIELD (type, i), values[i].value);
+  }
+
+  return type;
+}
+
+static const struct enum_value_name exception_values[] =
+{
+  { 0x40000015, "FATAL_APP_EXIT" },
+  { 0x40010005, "DBG_CONTROL_C" },
+  { 0x40010008, "DBG_CONTROL_BREAK" },
+  { 0x80000002, "DATATYPE_MISALIGNMENT" },
+  { 0x80000003, "BREAKPOINT" },
+  { 0x80000004, "SINGLE_STEP" },
+  { 0xC0000005, "ACCESS_VIOLATION" },
+  { 0xC0000006, "IN_PAGE_ERROR" },
+  { 0xC000001D, "ILLEGAL_INSTRUCTION" },
+  { 0xC0000025, "NONCONTINUABLE_EXCEPTION" },
+  { 0xC0000026, "INVALID_DISPOSITION" },
+  { 0xC000008C, "ARRAY_BOUNDS_EXCEEDED" },
+  { 0xC000008D, "FLOAT_DENORMAL_OPERAND" },
+  { 0xC000008E, "FLOAT_DIVIDE_BY_ZERO" },
+  { 0xC000008F, "FLOAT_INEXACT_RESULT" },
+  { 0xC0000090, "FLOAT_INVALID_OPERATION" },
+  { 0xC0000091, "FLOAT_OVERFLOW" },
+  { 0xC0000092, "FLOAT_STACK_CHECK" },
+  { 0xC0000093, "FLOAT_UNDERFLOW" },
+  { 0xC0000094, "INTEGER_DIVIDE_BY_ZERO" },
+  { 0xC0000095, "INTEGER_OVERFLOW" },
+  { 0xC0000096, "PRIV_INSTRUCTION" },
+  { 0xC00000FD, "STACK_OVERFLOW" },
+  { 0xC0000409, "FAST_FAIL" },
+};
+
+static const struct enum_value_name violation_values[] =
+{
+  { 0, "READ_ACCESS_VIOLATION" },
+  { 1, "WRITE_ACCESS_VIOLATION" },
+  { 8, "DATA_EXECUTION_PREVENTION_VIOLATION" },
+};
+
+/* Implement the "get_siginfo_type" gdbarch method.  */
+
+static struct type *
+windows_get_siginfo_type (struct gdbarch *gdbarch)
+{
+  struct windows_gdbarch_data *windows_gdbarch_data;
+  struct type *dword_type, *pvoid_type, *ulongptr_type;
+  struct type *code_enum, *violation_enum;
+  struct type *violation_type, *para_type, *siginfo_ptr_type, *siginfo_type;
+
+  windows_gdbarch_data = get_windows_gdbarch_data (gdbarch);
+  if (windows_gdbarch_data->siginfo_type != NULL)
+    return windows_gdbarch_data->siginfo_type;
+
+  dword_type = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
+				  1, "DWORD");
+  pvoid_type = arch_pointer_type (gdbarch, gdbarch_ptr_bit (gdbarch), "PVOID",
+				  builtin_type (gdbarch)->builtin_void);
+  ulongptr_type = arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch),
+				     1, "ULONG_PTR");
+
+  /* ExceptionCode value names */
+  code_enum = create_enum (gdbarch, gdbarch_int_bit (gdbarch),
+			   "ExceptionCode", exception_values,
+			   ARRAY_SIZE (exception_values));
+
+  /* ACCESS_VIOLATION type names */
+  violation_enum = create_enum (gdbarch, gdbarch_ptr_bit (gdbarch),
+				"ViolationType", violation_values,
+				ARRAY_SIZE (violation_values));
+
+  /* ACCESS_VIOLATION information */
+  violation_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
+  append_composite_type_field (violation_type, "Type", violation_enum);
+  append_composite_type_field (violation_type, "Address", pvoid_type);
+
+  /* Unnamed union of the documented field ExceptionInformation,
+     and the alternative AccessViolationInformation (which displays
+     human-readable values for ExceptionCode ACCESS_VIOLATION).  */
+  para_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_UNION);
+  append_composite_type_field (para_type, "ExceptionInformation",
+			       lookup_array_range_type (ulongptr_type, 0, 14));
+  append_composite_type_field (para_type, "AccessViolationInformation",
+			       violation_type);
+
+  siginfo_type = arch_composite_type (gdbarch, "EXCEPTION_RECORD",
+				      TYPE_CODE_STRUCT);
+  siginfo_ptr_type = arch_pointer_type (gdbarch, gdbarch_ptr_bit (gdbarch),
+					NULL, siginfo_type);
+
+  /* ExceptionCode is documented as type DWORD, but here a helper
+     enum type is used instead to display a human-readable value.  */
+  append_composite_type_field (siginfo_type, "ExceptionCode", code_enum);
+  append_composite_type_field (siginfo_type, "ExceptionFlags", dword_type);
+  append_composite_type_field (siginfo_type, "ExceptionRecord",
+			       siginfo_ptr_type);
+  append_composite_type_field (siginfo_type, "ExceptionAddress",
+			       pvoid_type);
+  append_composite_type_field (siginfo_type, "NumberParameters", dword_type);
+  /* The 64-bit variant needs some padding.  */
+  append_composite_type_field_aligned (siginfo_type, "",
+				       para_type, TYPE_LENGTH (ulongptr_type));
+
+  windows_gdbarch_data->siginfo_type = siginfo_type;
+
+  return siginfo_type;
+}
+
 /* To be called from the various GDB_OSABI_CYGWIN handlers for the
    various Windows architectures and machine types.  */
 
@@ -675,6 +831,8 @@ windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_gdb_signal_to_target (gdbarch, windows_gdb_signal_to_target);
 
   set_solib_ops (gdbarch, &solib_target_so_ops);
+
+  set_gdbarch_get_siginfo_type (gdbarch, windows_get_siginfo_type);
 }
 
 /* Implementation of `tlb' variable.  */
@@ -690,6 +848,9 @@ void _initialize_windows_tdep ();
 void
 _initialize_windows_tdep ()
 {
+  windows_gdbarch_data_handle
+    = gdbarch_data_register_post_init (init_windows_gdbarch_data);
+
   init_w32_command_list ();
   add_cmd ("thread-information-block", class_info, display_tib,
 	   _("Display thread information block."),

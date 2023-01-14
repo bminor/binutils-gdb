@@ -1,6 +1,6 @@
 /* A GNU-like <stdlib.h>.
 
-   Copyright (C) 1995, 2001-2004, 2006-2019 Free Software Foundation, Inc.
+   Copyright (C) 1995, 2001-2004, 2006-2020 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -200,6 +200,10 @@ _GL_FUNCDECL_SYS (canonicalize_file_name, char *, (const char *name)
                                                   _GL_ARG_NONNULL ((1)));
 #  endif
 _GL_CXXALIAS_SYS (canonicalize_file_name, char *, (const char *name));
+# endif
+# ifndef GNULIB_defined_canonicalize_file_name
+#  define GNULIB_defined_canonicalize_file_name \
+     (!@HAVE_CANONICALIZE_FILE_NAME@ || @REPLACE_CANONICALIZE_FILE_NAME@)
 # endif
 _GL_CXXALIASWARN (canonicalize_file_name);
 #elif defined GNULIB_POSIXCHECK
@@ -515,6 +519,9 @@ _GL_CXXALIAS_RPL (ptsname_r, int, (int fd, char *buf, size_t len));
 _GL_FUNCDECL_SYS (ptsname_r, int, (int fd, char *buf, size_t len));
 #  endif
 _GL_CXXALIAS_SYS (ptsname_r, int, (int fd, char *buf, size_t len));
+# endif
+# ifndef GNULIB_defined_ptsname_r
+#  define GNULIB_defined_ptsname_r (!@HAVE_PTSNAME_R@ || @REPLACE_PTSNAME_R@)
 # endif
 _GL_CXXALIASWARN (ptsname_r);
 #elif defined GNULIB_POSIXCHECK

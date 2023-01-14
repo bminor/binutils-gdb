@@ -243,7 +243,7 @@ tui_interp::init (bool top_level)
 
   tui_initialize_io ();
   tui_initialize_win ();
-  if (ui_file_isatty (gdb_stdout))
+  if (gdb_stdout->isatty ())
     tui_initialize_readline ();
 }
 

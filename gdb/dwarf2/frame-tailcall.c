@@ -368,7 +368,7 @@ dwarf2_tailcall_sniffer_first (struct frame_info *this_frame,
   int prev_sp_p = 0;
   CORE_ADDR this_pc;
   struct gdbarch *prev_gdbarch;
-  struct call_site_chain *chain = NULL;
+  gdb::unique_xmalloc_ptr<call_site_chain> chain;
   struct tailcall_cache *cache;
 
   gdb_assert (*tailcall_cachep == NULL);
@@ -409,16 +409,13 @@ dwarf2_tailcall_sniffer_first (struct frame_info *this_frame,
 
   /* Ambiguous unwind or unambiguous unwind verified as matching.  */
   if (chain == NULL || chain->length == 0)
-    {
-      xfree (chain);
-      return;
-    }
+    return;
 
   cache = cache_new_ref1 (this_frame);
   *tailcall_cachep = cache;
-  cache->chain = chain;
+  cache->chain = chain.release ();
   cache->prev_pc = prev_pc;
-  cache->chain_levels = pretended_chain_levels (chain);
+  cache->chain_levels = pretended_chain_levels (cache->chain);
   cache->prev_sp_p = prev_sp_p;
   if (cache->prev_sp_p)
     {

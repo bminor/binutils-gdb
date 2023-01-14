@@ -1,6 +1,6 @@
 #name: Z80/Z80N arch combination test
-#source: dummy1.s -z80
-#source: dummy2.s -z80n
+#source: dummy1.s -march=z80
+#source: dummy2.s -march=z80n
 #ld: -e 0
 #objdump: -f
 

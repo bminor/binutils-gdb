@@ -2999,7 +2999,7 @@ static const struct aarch64_insn_visitor visitor =
 
 /* Implement the "displaced_step_copy_insn" gdbarch method.  */
 
-struct displaced_step_closure *
+displaced_step_closure_up
 aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
 				  CORE_ADDR from, CORE_ADDR to,
 				  struct regcache *regs)
@@ -3053,7 +3053,8 @@ aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
       dsc = NULL;
     }
 
-  return dsc.release ();
+  /* This is a work around for a problem with g++ 4.8.  */
+  return displaced_step_closure_up (dsc.release ());
 }
 
 /* Implement the "displaced_step_fixup" gdbarch method.  */

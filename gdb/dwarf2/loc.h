@@ -35,29 +35,6 @@ struct axs_value;
 /* `set debug entry-values' setting.  */
 extern unsigned int entry_values_debug;
 
-/* Return the OBJFILE associated with the compilation unit CU.  If CU
-   came from a separate debuginfo file, then the master objfile is
-   returned.  */
-struct objfile *dwarf2_per_cu_objfile (struct dwarf2_per_cu_data *cu);
-
-/* Return the address size given in the compilation unit header for CU.  */
-int dwarf2_per_cu_addr_size (struct dwarf2_per_cu_data *cu);
-
-/* Return the DW_FORM_ref_addr size given in the compilation unit header for
-   CU.  */
-int dwarf2_per_cu_ref_addr_size (struct dwarf2_per_cu_data *cu);
-
-/* Return the offset size given in the compilation unit header for CU.  */
-int dwarf2_per_cu_offset_size (struct dwarf2_per_cu_data *cu);
-
-/* Return the text offset of the CU.  The returned offset comes from
-   this CU's objfile.  If this objfile came from a separate debuginfo
-   file, then the offset may be different from the corresponding
-   offset in the parent objfile.  */
-CORE_ADDR dwarf2_per_cu_text_offset (struct dwarf2_per_cu_data *cu);
-
-short dwarf2_version (struct dwarf2_per_cu_data *per_cu);
-
 /* Find a particular location expression from a location list.  */
 const gdb_byte *dwarf2_find_location_expression
   (struct dwarf2_loclist_baton *baton,
@@ -265,26 +242,6 @@ extern const struct symbol_computed_ops dwarf2_loclist_funcs;
 extern const struct symbol_block_ops dwarf2_block_frame_base_locexpr_funcs;
 extern const struct symbol_block_ops dwarf2_block_frame_base_loclist_funcs;
 
-/* Compile a DWARF location expression to an agent expression.
-   
-   EXPR is the agent expression we are building.
-   LOC is the agent value we modify.
-   ARCH is the architecture.
-   ADDR_SIZE is the size of addresses, in bytes.
-   OP_PTR is the start of the location expression.
-   OP_END is one past the last byte of the location expression.
-   
-   This will throw an exception for various kinds of errors -- for
-   example, if the expression cannot be compiled, or if the expression
-   is invalid.  */
-
-extern void dwarf2_compile_expr_to_ax (struct agent_expr *expr,
-				       struct axs_value *loc,
-				       unsigned int addr_size,
-				       const gdb_byte *op_ptr,
-				       const gdb_byte *op_end,
-				       struct dwarf2_per_cu_data *per_cu);
-
 /* Determined tail calls for constructing virtual tail call frames.  */
 
 struct call_site_chain
@@ -300,9 +257,8 @@ struct call_site_chain
   };
 
 struct call_site_stuff;
-extern struct call_site_chain *call_site_find_chain (struct gdbarch *gdbarch,
-						     CORE_ADDR caller_pc,
-						     CORE_ADDR callee_pc);
+extern gdb::unique_xmalloc_ptr<call_site_chain> call_site_find_chain
+  (struct gdbarch *gdbarch, CORE_ADDR caller_pc, CORE_ADDR callee_pc);
 
 /* A helper function to convert a DWARF register to an arch register.
    ARCH is the architecture.

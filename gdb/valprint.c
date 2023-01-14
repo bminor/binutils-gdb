@@ -39,6 +39,7 @@
 #include "cli/cli-option.h"
 #include "gdbarch.h"
 #include "cli/cli-style.h"
+#include "count-one-bits.h"
 
 /* Maximum number of wchars returned from wchar_iterate.  */
 #define MAX_WCHARS 4
@@ -624,40 +625,65 @@ generic_val_print_enum_1 (struct type *type, LONGEST val,
     }
   if (i < len)
     {
-      fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
+      fputs_styled (TYPE_FIELD_NAME (type, i), variable_name_style.style (),
+		    stream);
     }
   else if (TYPE_FLAG_ENUM (type))
     {
       int first = 1;
 
-      /* We have a "flag" enum, so we try to decompose it into
-	 pieces as appropriate.  A flag enum has disjoint
-	 constants by definition.  */
-      fputs_filtered ("(", stream);
+      /* We have a "flag" enum, so we try to decompose it into pieces as
+	 appropriate.  The enum may have multiple enumerators representing
+	 the same bit, in which case we choose to only print the first one
+	 we find.  */
       for (i = 0; i < len; ++i)
 	{
 	  QUIT;
 
-	  if ((val & TYPE_FIELD_ENUMVAL (type, i)) != 0)
+	  ULONGEST enumval = TYPE_FIELD_ENUMVAL (type, i);
+	  int nbits = count_one_bits_ll (enumval);
+
+	  gdb_assert (nbits == 0 || nbits == 1);
+
+	  if ((val & enumval) != 0)
 	    {
-	      if (!first)
+	      if (first)
+		{
+		  fputs_filtered ("(", stream);
+		  first = 0;
+		}
+	      else
 		fputs_filtered (" | ", stream);
-	      first = 0;
 
 	      val &= ~TYPE_FIELD_ENUMVAL (type, i);
-	      fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
+	      fputs_styled (TYPE_FIELD_NAME (type, i),
+			    variable_name_style.style (), stream);
 	    }
 	}
 
-      if (first || val != 0)
+      if (val != 0)
 	{
-	  if (!first)
+	  /* There are leftover bits, print them.  */
+	  if (first)
+	    fputs_filtered ("(", stream);
+	  else
 	    fputs_filtered (" | ", stream);
-	  fputs_filtered ("unknown: ", stream);
-	  print_longest (stream, 'd', 0, val);
-	}
 
-      fputs_filtered (")", stream);
+	  fputs_filtered ("unknown: 0x", stream);
+	  print_longest (stream, 'x', 0, val);
+	  fputs_filtered (")", stream);
+	}
+      else if (first)
+	{
+	  /* Nothing has been printed and the value is 0, the enum value must
+	     have been 0.  */
+	  fputs_filtered ("0", stream);
+	}
+      else
+	{
+	  /* Something has been printed, close the parenthesis.  */
+	  fputs_filtered (")", stream);
+	}
     }
   else
     print_longest (stream, 'd', 0, val);
@@ -1244,8 +1270,10 @@ val_print_type_code_flags (struct type *type, const gdb_byte *valaddr,
 	      && TYPE_FIELD_BITSIZE (type, field) == 1)
 	    {
 	      if (val & ((ULONGEST)1 << TYPE_FIELD_BITPOS (type, field)))
-		fprintf_filtered (stream, " %s",
-				  TYPE_FIELD_NAME (type, field));
+		fprintf_filtered
+		  (stream, " %ps",
+		   styled_string (variable_name_style.style (),
+				  TYPE_FIELD_NAME (type, field)));
 	    }
 	  else
 	    {
@@ -1255,8 +1283,9 @@ val_print_type_code_flags (struct type *type, const gdb_byte *valaddr,
 
 	      if (field_len < sizeof (ULONGEST) * TARGET_CHAR_BIT)
 		field_val &= ((ULONGEST) 1 << field_len) - 1;
-	      fprintf_filtered (stream, " %s=",
-				TYPE_FIELD_NAME (type, field));
+	      fprintf_filtered (stream, " %ps=",
+				styled_string (variable_name_style.style (),
+					       TYPE_FIELD_NAME (type, field)));
 	      if (TYPE_CODE (field_type) == TYPE_CODE_ENUM)
 		generic_val_print_enum_1 (field_type, field_val, stream);
 	      else

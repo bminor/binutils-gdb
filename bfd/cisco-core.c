@@ -92,7 +92,7 @@ cisco_core_file_validate (bfd *abfd, int crash_info_loc)
   unsigned int rambase;
   sec_ptr asect;
   struct stat statbuf;
-  bfd_size_type amt;
+  size_t amt;
   flagword flags;
 
   if (bfd_seek (abfd, (file_ptr) crash_info_loc, SEEK_SET) != 0)

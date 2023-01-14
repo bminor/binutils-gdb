@@ -2947,7 +2947,7 @@ static struct bfd_link_hash_table *
 elfNN_aarch64_link_hash_table_create (bfd *abfd)
 {
   struct elf_aarch64_link_hash_table *ret;
-  bfd_size_type amt = sizeof (struct elf_aarch64_link_hash_table);
+  size_t amt = sizeof (struct elf_aarch64_link_hash_table);
 
   ret = bfd_zmalloc (amt);
   if (ret == NULL)
@@ -3456,7 +3456,7 @@ elfNN_aarch64_setup_section_lists (bfd *output_bfd,
   unsigned int top_id, top_index;
   asection *section;
   asection **input_list, **list;
-  bfd_size_type amt;
+  size_t amt;
   struct elf_aarch64_link_hash_table *htab =
     elf_aarch64_hash_table (info);
 
@@ -7853,7 +7853,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    p = *head;
 	    if (p == NULL || p->sec != sec)
 	      {
-		bfd_size_type amt = sizeof *p;
+		size_t amt = sizeof *p;
 		p = ((struct elf_dyn_relocs *)
 		     bfd_zalloc (htab->root.dynobj, amt));
 		if (p == NULL)
@@ -8419,7 +8419,7 @@ elfNN_aarch64_new_section_hook (bfd *abfd, asection *sec)
   if (!sec->used_by_bfd)
     {
       _aarch64_elf_section_data *sdata;
-      bfd_size_type amt = sizeof (*sdata);
+      size_t amt = sizeof (*sdata);
 
       sdata = bfd_zalloc (abfd, amt);
       if (sdata == NULL)

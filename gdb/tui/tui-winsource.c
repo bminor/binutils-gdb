@@ -169,7 +169,7 @@ tui_source_window_base::update_source_window
   (struct gdbarch *gdbarch,
    const struct symtab_and_line &sal)
 {
-  horizontal_offset = 0;
+  m_horizontal_offset = 0;
   update_source_window_as_is (gdbarch, sal);
 }
 
@@ -229,7 +229,7 @@ tui_source_window_base::do_erase_source_content (const char *str)
   int x_pos;
   int half_width = (width - 2) / 2;
 
-  content.clear ();
+  m_content.clear ();
   if (handle != NULL)
     {
       werase (handle.get ());
@@ -250,48 +250,46 @@ tui_source_window_base::do_erase_source_content (const char *str)
 
 
 /* Redraw the complete line of a source or disassembly window.  */
-static void
-tui_show_source_line (struct tui_source_window_base *win_info, int lineno)
+void
+tui_source_window_base::show_source_line (int lineno)
 {
   struct tui_source_element *line;
   int x;
 
-  line = &win_info->content[lineno - 1];
+  line = &m_content[lineno - 1];
   if (line->is_exec_point)
-    tui_set_reverse_mode (win_info->handle.get (), true);
+    tui_set_reverse_mode (handle.get (), true);
 
-  wmove (win_info->handle.get (), lineno, TUI_EXECINFO_SIZE);
-  tui_puts (line->line.c_str (), win_info->handle.get ());
+  wmove (handle.get (), lineno, TUI_EXECINFO_SIZE);
+  tui_puts (line->line.c_str (), handle.get ());
   if (line->is_exec_point)
-    tui_set_reverse_mode (win_info->handle.get (), false);
+    tui_set_reverse_mode (handle.get (), false);
 
   /* Clear to end of line but stop before the border.  */
-  x = getcurx (win_info->handle.get ());
-  while (x + 1 < win_info->width)
+  x = getcurx (handle.get ());
+  while (x + 1 < width)
     {
-      waddch (win_info->handle.get (), ' ');
-      x = getcurx (win_info->handle.get ());
+      waddch (handle.get (), ' ');
+      x = getcurx (handle.get ());
     }
 }
 
 void
 tui_source_window_base::show_source_content ()
 {
-  gdb_assert (!content.empty ());
+  gdb_assert (!m_content.empty ());
 
-  for (int lineno = 1; lineno <= content.size (); lineno++)
-    tui_show_source_line (this, lineno);
+  for (int lineno = 1; lineno <= m_content.size (); lineno++)
+    show_source_line (lineno);
 
   check_and_display_highlight_if_needed ();
   refresh_window ();
 }
 
-tui_source_window_base::tui_source_window_base (enum tui_win_type type)
-  : tui_win_info (type)
+tui_source_window_base::tui_source_window_base ()
 {
-  gdb_assert (type == SRC_WIN || type == DISASSEM_WIN);
-  start_line_or_addr.loa = LOA_ADDRESS;
-  start_line_or_addr.u.addr = 0;
+  m_start_line_or_addr.loa = LOA_ADDRESS;
+  m_start_line_or_addr.u.addr = 0;
 
   gdb::observers::source_styling_changed.attach
     (std::bind (&tui_source_window::style_changed, this),
@@ -315,16 +313,16 @@ tui_source_window_base::update_tab_width ()
 void
 tui_source_window_base::rerender ()
 {
-  if (!content.empty ())
+  if (!m_content.empty ())
     {
       struct symtab_and_line cursal
 	= get_current_source_symtab_and_line ();
 
-      if (start_line_or_addr.loa == LOA_LINE)
-	cursal.line = start_line_or_addr.u.line_no;
+      if (m_start_line_or_addr.loa == LOA_LINE)
+	cursal.line = m_start_line_or_addr.u.line_no;
       else
-	cursal.pc = start_line_or_addr.u.addr;
-      update_source_window (gdbarch, cursal);
+	cursal.pc = m_start_line_or_addr.u.addr;
+      update_source_window (m_gdbarch, cursal);
     }
   else if (deprecated_safe_get_selected_frame () != NULL)
     {
@@ -334,7 +332,7 @@ tui_source_window_base::rerender ()
       struct gdbarch *gdbarch = get_frame_arch (frame);
 
       struct symtab *s = find_pc_line_symtab (get_frame_pc (frame));
-      if (type != SRC_WIN)
+      if (this != TUI_SRC_WIN)
 	find_line_pc (s, cursal.line, &cursal.pc);
       update_source_window (gdbarch, cursal);
     }
@@ -349,7 +347,7 @@ tui_source_window_base::refill ()
 {
   symtab_and_line sal {};
 
-  if (type == SRC_WIN)
+  if (this == TUI_SRC_WIN)
     {
       sal = get_current_source_symtab_and_line ();
       if (sal.symtab == NULL)
@@ -363,12 +361,12 @@ tui_source_window_base::refill ()
   if (sal.pspace == nullptr)
     sal.pspace = current_program_space;
 
-  if (start_line_or_addr.loa == LOA_LINE)
-    sal.line = start_line_or_addr.u.line_no;
+  if (m_start_line_or_addr.loa == LOA_LINE)
+    sal.line = m_start_line_or_addr.u.line_no;
   else
-    sal.pc = start_line_or_addr.u.addr;
+    sal.pc = m_start_line_or_addr.u.addr;
 
-  update_source_window_as_is (gdbarch, sal);
+  update_source_window_as_is (m_gdbarch, sal);
 }
 
 /* Scroll the source forward or backward horizontally.  */
@@ -376,12 +374,12 @@ tui_source_window_base::refill ()
 void
 tui_source_window_base::do_scroll_horizontal (int num_to_scroll)
 {
-  if (!content.empty ())
+  if (!m_content.empty ())
     {
-      int offset = horizontal_offset + num_to_scroll;
+      int offset = m_horizontal_offset + num_to_scroll;
       if (offset < 0)
 	offset = 0;
-      horizontal_offset = offset;
+      m_horizontal_offset = offset;
       refill ();
     }
 }
@@ -397,11 +395,11 @@ tui_source_window_base::set_is_exec_point_at (struct tui_line_or_address l)
   int i;
 
   i = 0;
-  while (i < content.size ())
+  while (i < m_content.size ())
     {
       bool new_state;
       struct tui_line_or_address content_loa =
-	content[i].line_or_addr;
+	m_content[i].line_or_addr;
 
       if (content_loa.loa == l.loa
 	  && ((l.loa == LOA_LINE && content_loa.u.line_no == l.u.line_no)
@@ -409,11 +407,11 @@ tui_source_window_base::set_is_exec_point_at (struct tui_line_or_address l)
         new_state = true;
       else
 	new_state = false;
-      if (new_state != content[i].is_exec_point)
+      if (new_state != m_content[i].is_exec_point)
         {
           changed = true;
-          content[i].is_exec_point = new_state;
-          tui_show_source_line (this, i + 1);
+          m_content[i].is_exec_point = new_state;
+          show_source_line (i + 1);
         }
       i++;
     }
@@ -447,11 +445,11 @@ tui_source_window_base::update_breakpoint_info
   int i;
   bool need_refresh = false;
 
-  for (i = 0; i < content.size (); i++)
+  for (i = 0; i < m_content.size (); i++)
     {
       struct tui_source_element *line;
 
-      line = &content[i];
+      line = &m_content[i];
       if (current_only && !line->is_exec_point)
          continue;
 
@@ -500,9 +498,9 @@ void
 tui_source_window_base::update_exec_info ()
 {
   update_breakpoint_info (nullptr, true);
-  for (int i = 0; i < content.size (); i++)
+  for (int i = 0; i < m_content.size (); i++)
     {
-      struct tui_source_element *src_element = &content[i];
+      struct tui_source_element *src_element = &m_content[i];
       char element[TUI_EXECINFO_SIZE] = "   ";
 
       /* Now update the exec info content based upon the state

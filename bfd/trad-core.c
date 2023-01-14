@@ -77,7 +77,7 @@ trad_unix_core_file_p (bfd *abfd)
   int val;
   struct user u;
   struct trad_core_struct *rawptr;
-  bfd_size_type amt;
+  size_t amt;
   flagword flags;
 
 #ifdef TRAD_CORE_USER_OFFSET

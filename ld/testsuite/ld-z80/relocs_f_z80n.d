@@ -1,5 +1,5 @@
 #name: Z80N forward relocation
-#as: -z80n --defsym Z80N=1
+#as: -march=z80n --defsym Z80N=1
 #source: relocs.s
 #source: labels.s
 #ld: -e 0 -Ttext 0x100 -Tdata 0x200

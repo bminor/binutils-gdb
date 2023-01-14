@@ -65,6 +65,7 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_dump_test "intelok"
     run_dump_test "prefix"
     run_list_test "prefix32" "-al"
+    run_dump_test "lea"
     run_dump_test "amd"
     run_dump_test "katmai"
     run_dump_test "jump"
@@ -76,6 +77,7 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_dump_test "sse2-16bit"
     run_dump_test "sub"
     run_dump_test "sse3"
+    run_dump_test "sse3-intel"
     run_dump_test "sib"
     run_dump_test "sib-intel"
     run_dump_test "disp"
@@ -132,6 +134,8 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_list_test "noreg16"
     run_dump_test "noreg32"
     run_list_test "noreg32"
+    run_list_test "movx16" "-I${srcdir}/$subdir -al"
+    run_list_test "movx32" "-al"
     run_dump_test "addr16"
     run_dump_test "addr32"
     run_dump_test "code16"
@@ -476,6 +480,7 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_list_test "vp2intersect-inval-bcast"
     run_list_test "avx512vl-1" "-al"
     run_list_test "avx512vl-2" "-al"
+    run_list_test "avx512vl-ambig"
     run_list_test "avx512vl-plain" "-al"
     run_dump_test "fpu-bad"
     run_dump_test "cet"
@@ -501,6 +506,7 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_list_test "optimize-6a" "-I${srcdir}/$subdir -march=+noavx -al"
     run_dump_test "optimize-6b"
     run_list_test "optimize-7" "-I${srcdir}/$subdir -march=+noavx2 -al"
+    run_dump_test "lea-optimize"
     run_dump_test "align-branch-1a"
     run_dump_test "align-branch-1b"
     run_dump_test "align-branch-1c"
@@ -580,6 +586,7 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
 
 	run_dump_test "relax-3"
 	run_dump_test "relax-4"
+	run_dump_test "relax-5"
 
 	run_dump_test "got"
 	run_dump_test "got-no-relax"
@@ -594,6 +601,7 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
 	run_dump_test "evex-no-scale-32"
 	run_dump_test "property-1"
 	run_dump_test "property-2"
+	run_dump_test "property-3"
 
 	if {[istarget "*-*-linux*"]} then {
 	    run_dump_test "align-branch-3"
@@ -694,6 +702,7 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-vmfunc"
     run_dump_test "immed64"
     run_dump_test "x86-64-sse3"
+    run_dump_test "x86-64-sse3-intel"
     run_dump_test "x86-64-crx"
     run_dump_test "x86-64-crx-suffix"
     run_dump_test "x86-64-drx"
@@ -728,12 +737,14 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-nops-5"
     run_dump_test "x86-64-nops-5-k8"
     run_dump_test "x86-64-nops-7"
+    run_dump_test "x86-64-sysenter"
     run_dump_test "x86-64-sysenter-intel"
     run_dump_test "x86-64-sysenter-mixed"
     run_dump_test "x86-64-sysenter-amd"
-    run_list_test "x86-64-sysenter-amd"
+    run_list_test "x86-64-sysenter-amd" "-mamd64"
     run_dump_test "noreg64"
     run_list_test "noreg64"
+    run_list_test "movx64" "-al"
     run_list_test "cvtsi2sX"
     run_dump_test "x86-64-sse4_1"
     run_dump_test "x86-64-sse4_1-intel"
@@ -1134,11 +1145,13 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
 
 	run_dump_test "x86-64-relax-2"
 	run_dump_test "x86-64-relax-3"
+	run_dump_test "x86-64-relax-4"
 
 	run_dump_test "x86-64-jump"
 	run_dump_test "x86-64-branch-2"
 	run_dump_test "x86-64-branch-3"
 	run_list_test "x86-64-branch-4" "-al -mintel64"
+	run_list_test "x86-64-branch-5" "-al"
 
 	run_dump_test "x86-64-gotpcrel"
 	run_dump_test "x86-64-gotpcrel-no-relax"
@@ -1154,6 +1167,7 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
 	run_dump_test "evex-no-scale-64"
 	run_dump_test "x86-64-property-1"
 	run_dump_test "x86-64-property-2"
+	run_dump_test "x86-64-property-3"
 
 	if {[istarget "*-*-linux*"]} then {
 	    run_dump_test "x86-64-align-branch-3"

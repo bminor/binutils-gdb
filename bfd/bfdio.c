@@ -415,17 +415,32 @@ DESCRIPTION
 	of space for the 15 bazillon byte table it is about to read.
 	This function at least allows us to answer the question, "is the
 	size reasonable?".
+
+	A return value of zero indicates the file size is unknown.
 */
 
 ufile_ptr
 bfd_get_size (bfd *abfd)
 {
-  struct stat buf;
+  /* A size of 0 means we haven't yet called bfd_stat.  A size of 1
+     means we have a cached value of 0, ie. unknown.  */
+  if (abfd->size <= 1 || bfd_write_p (abfd))
+    {
+      struct stat buf;
 
-  if (bfd_stat (abfd, &buf) != 0)
-    return 0;
+      if (abfd->size == 1 && !bfd_write_p (abfd))
+	return 0;
 
-  return buf.st_size;
+      if (bfd_stat (abfd, &buf) != 0
+	  || buf.st_size == 0
+	  || buf.st_size - (ufile_ptr) buf.st_size != 0)
+	{
+	  abfd->size = 1;
+	  return 0;
+	}
+      abfd->size = buf.st_size;
+    }
+  return abfd->size;
 }
 
 /*

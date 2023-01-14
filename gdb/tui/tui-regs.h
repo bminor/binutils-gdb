@@ -28,10 +28,7 @@
 
 struct tui_data_item_window : public tui_gen_win_info
 {
-  tui_data_item_window ()
-    : tui_gen_win_info (DATA_ITEM_WIN)
-  {
-  }
+  tui_data_item_window () = default;
 
   DISABLE_COPY_AND_ASSIGN (tui_data_item_window);
 
@@ -61,10 +58,7 @@ struct tui_data_item_window : public tui_gen_win_info
 /* The TUI registers window.  */
 struct tui_data_window : public tui_win_info
 {
-  tui_data_window ()
-    : tui_win_info (DATA_WIN)
-  {
-  }
+  tui_data_window () = default;
 
   DISABLE_COPY_AND_ASSIGN (tui_data_window);
 

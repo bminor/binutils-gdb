@@ -1,3 +1,47 @@
+2020-02-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* configure: Regenerate.
+
+2020-02-14  Tom Tromey  <tom@tromey.com>
+
+	* common-defs.h: Change path to gnulib/config.h.
+
+2020-02-13  Simon Marchi  <simon.marchi@efficios.com>
+
+	* Makefile.am: Rename source files from .c to .cc.
+	(CC, CFLAGS): Don't override.
+	(AM_CFLAGS): Rename to ...
+	(AM_CXXFLAGS): ... this.
+	* Makefile.in: Re-generate.
+	* %.c: Rename to %.cc.
+
+2020-02-11  Simon Marchi  <simon.marchi@efficios.com>
+
+	* configure: Re-generate.
+
+2020-02-11  Simon Marchi  <simon.marchi@efficios.com>
+
+	* warning.m4: Add -Wstrict-null-sentinel.
+	* configure: Re-generate.
+
+2020-02-11  Simon Marchi  <simon.marchi@efficios.com>
+
+	* warning.m4: Move here, from gdb/warning.m4.
+	* acinclude.m4: Update warning.m4 path.
+	* Makefile.in: Re-generate.
+
+2020-02-11  Simon Marchi  <simon.marchi@efficios.com>
+
+	* acinclude.m4: Include ../gdb/warning.m4.
+	* configure.ac: Use AM_GDB_WARNINGS.
+	* Makefile.am: Set AM_CFLAGS to WARN_CFLAGS and WERROR_CFLAGS.
+	* Makefile.in: Re-generate.
+	* configure: Re-generate.
+
+2020-02-10  Tom de Vries  <tdevries@suse.de>
+
+	* environ.c (gdb_environ::set): Cast concat NULL sentinel to char *.
+
 2020-01-24  Christian Biesinger  <cbiesinger@google.com>
 
 	* thread-pool.c (set_thread_name): Add an overload for the NetBSD

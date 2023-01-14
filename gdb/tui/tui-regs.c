@@ -274,7 +274,7 @@ tui_data_window::display_registers_from (int start_element_no)
 	{
 	  /* Create the window if necessary.  */
 	  m_regs_content[i].resize (1, item_win_width,
-				    (item_win_width * j) + 1, cur_y);
+				    x + (item_win_width * j) + 1, y + cur_y);
 	  i++;		/* Next register.  */
 	}
       cur_y++;		/* Next row.  */
@@ -550,21 +550,6 @@ tui_reg_prev (struct reggroup *current_group, struct gdbarch *gdbarch)
   return group;
 }
 
-/* A helper function to display the register window in the appropriate
-   way.  */
-
-static void
-tui_reg_layout ()
-{
-  enum tui_layout_type cur_layout = tui_current_layout ();
-  enum tui_layout_type new_layout;
-  if (cur_layout == SRC_COMMAND || cur_layout == SRC_DATA_COMMAND)
-    new_layout = SRC_DATA_COMMAND;
-  else
-    new_layout = DISASSEM_DATA_COMMAND;
-  tui_set_layout (new_layout);
-}
-
 /* Implement the 'tui reg' command.  Changes the register group displayed
    in the tui register window.  Displays the tui register window if it is
    not already on display.  */
@@ -588,7 +573,7 @@ tui_reg_command (const char *args, int from_tty)
 	 appropriate layout.  We need to do this before trying to run the
 	 'next' or 'prev' commands.  */
       if (TUI_DATA_WIN == NULL || !TUI_DATA_WIN->is_visible ())
-	tui_reg_layout ();
+	tui_regs_layout ();
 
       struct reggroup *current_group = TUI_DATA_WIN->get_current_group ();
       if (strncmp (args, "next", len) == 0)
@@ -669,6 +654,8 @@ _initialize_tui_regs ()
   tuicmd = tui_get_cmd_list ();
 
   cmd = add_cmd ("reg", class_tui, tui_reg_command, _("\
-TUI command to control the register window."), tuicmd);
+TUI command to control the register window.\n\
+Usage: tui reg NAME\n\
+NAME is the name of the register group to display"), tuicmd);
   set_cmd_completer (cmd, tui_reggroup_completer);
 }

@@ -405,6 +405,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-symbol.c \
 	python/py-symtab.c \
 	python/py-threadevent.c \
+	python/py-tui.c \
 	python/py-type.c \
 	python/py-unwind.c \
 	python/py-utils.c \
@@ -996,6 +997,7 @@ COMMON_SFILES = \
 	dummy-frame.c \
 	dwarf2/abbrev.c \
 	dwarf2/attribute.c \
+	dwarf2/comp-unit.c \
 	dwarf2/expr.c \
 	dwarf2/frame-tailcall.c \
 	dwarf2/frame.c \
@@ -1003,6 +1005,7 @@ COMMON_SFILES = \
 	dwarf2/index-common.c \
 	dwarf2/index-write.c \
 	dwarf2/leb.c \
+	dwarf2/line-header.c \
 	dwarf2/loc.c \
 	dwarf2/read.c \
 	dwarf2/section.c \

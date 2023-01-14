@@ -317,11 +317,16 @@ elf_swap_shdr_in (bfd *abfd,
   /* PR 23657.  Check for invalid section size, in sections with contents.
      Note - we do not set an error value here because the contents
      of this particular section might not be needed by the consumer.  */
-  if (dst->sh_type != SHT_NOBITS
-      && dst->sh_size > bfd_get_file_size (abfd))
-    _bfd_error_handler
-      (_("warning: %pB has a corrupt section with a size (%" BFD_VMA_FMT "x) larger than the file size"),
-       abfd, dst->sh_size);
+  if (dst->sh_type != SHT_NOBITS)
+    {
+      ufile_ptr filesize = bfd_get_file_size (abfd);
+
+      if (filesize != 0 && dst->sh_size > filesize)
+	_bfd_error_handler
+	  (_("warning: %pB has a corrupt section with a size (%"
+	     BFD_VMA_FMT "x) larger than the file size"),
+	   abfd, dst->sh_size);
+    }
   dst->sh_link = H_GET_32 (abfd, src->sh_link);
   dst->sh_info = H_GET_32 (abfd, src->sh_info);
   dst->sh_addralign = H_GET_WORD (abfd, src->sh_addralign);
@@ -682,19 +687,18 @@ elf_object_p (bfd *abfd)
     {
       Elf_Internal_Shdr *shdrp;
       unsigned int num_sec;
+      size_t amt;
 
-#ifndef BFD64
-      if (i_ehdrp->e_shnum > ((bfd_size_type) -1) / sizeof (*i_shdrp))
+      if (_bfd_mul_overflow (i_ehdrp->e_shnum, sizeof (*i_shdrp), &amt))
 	goto got_wrong_format_error;
-#endif
-      i_shdrp = (Elf_Internal_Shdr *) bfd_alloc2 (abfd, i_ehdrp->e_shnum,
-						  sizeof (*i_shdrp));
+      i_shdrp = (Elf_Internal_Shdr *) bfd_alloc (abfd, amt);
       if (!i_shdrp)
 	goto got_no_match;
       num_sec = i_ehdrp->e_shnum;
       elf_numsections (abfd) = num_sec;
-      elf_elfsections (abfd)
-	= (Elf_Internal_Shdr **) bfd_alloc2 (abfd, num_sec, sizeof (i_shdrp));
+      if (_bfd_mul_overflow (num_sec, sizeof (i_shdrp), &amt))
+	goto got_wrong_format_error;
+      elf_elfsections (abfd) = (Elf_Internal_Shdr **) bfd_alloc (abfd, amt);
       if (!elf_elfsections (abfd))
 	goto got_no_match;
 
@@ -775,19 +779,19 @@ elf_object_p (bfd *abfd)
     {
       Elf_Internal_Phdr *i_phdr;
       unsigned int i;
+      ufile_ptr filesize;
+      size_t amt;
 
-#ifndef BFD64
-      if (i_ehdrp->e_phnum > ((bfd_size_type) -1) / sizeof (*i_phdr))
-	goto got_wrong_format_error;
-#endif
       /* Check for a corrupt input file with an impossibly large number
 	 of program headers.  */
-      if (bfd_get_file_size (abfd) > 0
-	  && i_ehdrp->e_phnum > bfd_get_file_size (abfd))
-	goto got_no_match;
+      filesize = bfd_get_file_size (abfd);
+      if (filesize != 0
+	  && i_ehdrp->e_phnum > filesize / sizeof (Elf_External_Phdr))
+	goto got_wrong_format_error;
+      if (_bfd_mul_overflow (i_ehdrp->e_phnum, sizeof (*i_phdr), &amt))
+	goto got_wrong_format_error;
       elf_tdata (abfd)->phdr
-	= (Elf_Internal_Phdr *) bfd_alloc2 (abfd, i_ehdrp->e_phnum,
-					    sizeof (*i_phdr));
+	= (Elf_Internal_Phdr *) bfd_alloc (abfd, amt);
       if (elf_tdata (abfd)->phdr == NULL)
 	goto got_no_match;
       if (bfd_seek (abfd, (file_ptr) i_ehdrp->e_phoff, SEEK_SET) != 0)
@@ -874,6 +878,7 @@ elf_write_relocs (bfd *abfd, asection *sec, void *data)
   unsigned int idx;
   asymbol *last_sym;
   int last_sym_idx;
+  size_t amt;
 
   /* If we have already failed, don't do anything.  */
   if (*failedp)
@@ -900,10 +905,10 @@ elf_write_relocs (bfd *abfd, asection *sec, void *data)
     rela_hdr = elf_section_data (sec)->rel.hdr;
 
   rela_hdr->sh_size = rela_hdr->sh_entsize * sec->reloc_count;
-  rela_hdr->contents = (unsigned char *) bfd_alloc2 (abfd, sec->reloc_count,
-						     rela_hdr->sh_entsize);
-  if (rela_hdr->contents == NULL)
+  if (_bfd_mul_overflow (sec->reloc_count, rela_hdr->sh_entsize, &amt)
+      || (rela_hdr->contents = bfd_alloc (abfd, amt)) == NULL)
     {
+      bfd_set_error (bfd_error_no_memory);
       *failedp = TRUE;
       return;
     }
@@ -1012,7 +1017,7 @@ elf_write_shdrs_and_ehdr (bfd *abfd)
   Elf_External_Shdr *x_shdrp;	/* Section header table, external form */
   Elf_Internal_Shdr **i_shdrp;	/* Section header table, internal form */
   unsigned int count;
-  bfd_size_type amt;
+  size_t amt;
 
   i_ehdrp = elf_elfheader (abfd);
   i_shdrp = elf_elfsections (abfd);
@@ -1038,8 +1043,12 @@ elf_write_shdrs_and_ehdr (bfd *abfd)
     i_shdrp[0]->sh_link = i_ehdrp->e_shstrndx;
 
   /* at this point we've concocted all the ELF sections...  */
-  x_shdrp = (Elf_External_Shdr *) bfd_alloc2 (abfd, i_ehdrp->e_shnum,
-					      sizeof (*x_shdrp));
+  if (_bfd_mul_overflow (i_ehdrp->e_shnum, sizeof (*x_shdrp), &amt))
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return FALSE;
+    }
+  x_shdrp = (Elf_External_Shdr *) bfd_alloc (abfd, amt);
   if (!x_shdrp)
     return FALSE;
 
@@ -1150,6 +1159,7 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
   Elf_External_Versym *xver;
   Elf_External_Versym *xverbuf = NULL;
   const struct elf_backend_data *ebd;
+  size_t amt;
 
   /* Read each raw ELF symbol, converting from external ELF form to
      internal ELF form, and then using the information to create a
@@ -1194,8 +1204,12 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
       if (isymbuf == NULL)
 	return -1;
 
-      symbase = (elf_symbol_type *) bfd_zalloc2 (abfd, symcount,
-						 sizeof (elf_symbol_type));
+      if (_bfd_mul_overflow (symcount, sizeof (elf_symbol_type), &amt))
+	{
+	  bfd_set_error (bfd_error_file_too_big);
+	  goto error_return;
+	}
+      symbase = (elf_symbol_type *) bfd_zalloc (abfd, amt);
       if (symbase == (elf_symbol_type *) NULL)
 	goto error_return;
 
@@ -1220,12 +1234,9 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 	{
 	  if (bfd_seek (abfd, verhdr->sh_offset, SEEK_SET) != 0)
 	    goto error_return;
-
-	  xverbuf = (Elf_External_Versym *) bfd_malloc (verhdr->sh_size);
+	  xverbuf = (Elf_External_Versym *)
+	    _bfd_malloc_and_read (abfd, verhdr->sh_size, verhdr->sh_size);
 	  if (xverbuf == NULL && verhdr->sh_size != 0)
-	    goto error_return;
-
-	  if (bfd_bread (xverbuf, verhdr->sh_size, abfd) != verhdr->sh_size)
 	    goto error_return;
 	}
 
@@ -1415,14 +1426,11 @@ elf_slurp_reloc_table_from_section (bfd *abfd,
   int entsize;
   unsigned int symcount;
 
-  allocated = bfd_malloc (rel_hdr->sh_size);
+  if (bfd_seek (abfd, rel_hdr->sh_offset, SEEK_SET) != 0)
+    return FALSE;
+  allocated = _bfd_malloc_and_read (abfd, rel_hdr->sh_size, rel_hdr->sh_size);
   if (allocated == NULL)
-    goto error_return;
-
-  if (bfd_seek (abfd, rel_hdr->sh_offset, SEEK_SET) != 0
-      || (bfd_bread (allocated, rel_hdr->sh_size, abfd)
-	  != rel_hdr->sh_size))
-    goto error_return;
+    return FALSE;
 
   native_relocs = (bfd_byte *) allocated;
 
@@ -1515,6 +1523,7 @@ elf_slurp_reloc_table (bfd *abfd,
   bfd_size_type reloc_count;
   bfd_size_type reloc_count2;
   arelent *relents;
+  size_t amt;
 
   if (asect->relocation != NULL)
     return TRUE;
@@ -1552,8 +1561,12 @@ elf_slurp_reloc_table (bfd *abfd,
       reloc_count2 = 0;
     }
 
-  relents = (arelent *) bfd_alloc2 (abfd, reloc_count + reloc_count2,
-				    sizeof (arelent));
+  if (_bfd_mul_overflow (reloc_count + reloc_count2, sizeof (arelent), &amt))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      return FALSE;
+    }
+  relents = (arelent *) bfd_alloc (abfd, amt);
   if (relents == NULL)
     return FALSE;
 
@@ -1653,6 +1666,7 @@ NAME(_bfd_elf,bfd_from_remote_memory)
   bfd_vma shdr_end;
   bfd_vma loadbase;
   char *filename;
+  size_t amt;
 
   /* Read in the ELF header in external format.  */
   err = target_read_memory (ehdr_vma, (bfd_byte *) &x_ehdr, sizeof x_ehdr);
@@ -1709,9 +1723,13 @@ NAME(_bfd_elf,bfd_from_remote_memory)
       return NULL;
     }
 
-  x_phdrs
-    = (Elf_External_Phdr *) bfd_malloc2 (i_ehdr.e_phnum,
-					 sizeof (*x_phdrs) + sizeof (*i_phdrs));
+  if (_bfd_mul_overflow (i_ehdr.e_phnum,
+			 sizeof (*x_phdrs) + sizeof (*i_phdrs), &amt))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      return NULL;
+    }
+  x_phdrs = (Elf_External_Phdr *) bfd_malloc (amt);
   if (x_phdrs == NULL)
     return NULL;
   err = target_read_memory (ehdr_vma + i_ehdr.e_phoff, (bfd_byte *) x_phdrs,

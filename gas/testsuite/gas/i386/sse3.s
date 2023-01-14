@@ -35,3 +35,7 @@ foo:
 	.intel_syntax noprefix
 	movddup xmm7,[eax]
 	movddup xmm7,QWORD PTR [eax]
+
+	monitor		eax, ecx, edx
+	monitor		ax, ecx, edx
+	mwait		eax, ecx

@@ -61,7 +61,7 @@ ptrace_unix_core_file_p (bfd *abfd)
   int val;
   struct ptrace_user u;
   struct trad_core_struct *rawptr;
-  bfd_size_type amt;
+  size_t amt;
   flagword flags;
 
   val = bfd_bread ((void *)&u, (bfd_size_type) sizeof u, abfd);

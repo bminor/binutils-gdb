@@ -1,3 +1,426 @@
+2020-02-20  Nelson Chu  <nelson.chu@sifive.com>
+
+	* config/tc-riscv.c (riscv_ip): New boolean insn_with_csr to indicate
+	we are assembling instruction with CSR.  Call riscv_csr_read_only_check
+	after parsing all arguments.
+	(enum csr_insn_type): New enum is used to classify the CSR instruction.
+	(riscv_csr_insn_type, riscv_csr_read_only_check): New functions.  These
+	are used to check if we write a read-only CSR by the CSR instruction.
+	* testsuite/gas/riscv/priv-reg-fail-read-only-01.s: New testcase.  Test
+	all CSR for the read-only CSR checking.
+	* testsuite/gas/riscv/priv-reg-fail-read-only-01.d: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-read-only-01.l: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-read-only-02.s: New testcase.  Test
+	all CSR instructions for the read-only CSR checking.
+	* testsuite/gas/riscv/priv-reg-fail-read-only-02.d: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-read-only-02.l: Likewise.
+
+	* config/tc-riscv.c (struct riscv_set_options): New field csr_check.
+	(riscv_opts): Initialize it.
+	(reg_lookup_internal): Check the `riscv_opts.csr_check`
+	before doing the CSR checking.
+	(enum options): Add OPTION_CSR_CHECK and OPTION_NO_CSR_CHECK.
+	(md_longopts): Add mcsr-check and mno-csr-check.
+	(md_parse_option): Handle new enum option values.
+	(s_riscv_option): Handle new long options.
+	* doc/c-riscv.texi: Add description for the new .option and assembler
+	options.
+	* testsuite/gas/riscv/priv-reg-fail-fext.d: Add `-mcsr-check` to enable
+	the CSR checking.
+	* testsuite/gas/riscv/priv-reg-fail-rv32-only.d: Likewise.
+
+	* config/tc-riscv.c (csr_extra_hash): New.
+	(enum riscv_csr_class): New enum.  Used to decide
+	whether or not this CSR is legal in the current ISA string.
+	(struct riscv_csr_extra): New structure to hold all extra information
+	of CSR.
+	(riscv_init_csr_hashes): New.  According to the DECLARE_CSR and
+	DECLARE_CSR_ALIAS, insert CSR extra information into csr_extra_hash.
+	Call hash_reg_name to insert CSR address into reg_names_hash.
+	(reg_csr_lookup_internal, riscv_csr_class_check): New functions.
+	Decide whether the CSR is valid according to the csr_extra_hash.
+	(reg_lookup_internal): Call reg_csr_lookup_internal for CSRs.
+	(init_opcode_hash): Update 'if (hash_error != NULL)' as hash_error is
+	not a boolean.  This is same as riscv_init_csr_hash, so keep the
+	consistent usage.
+	(md_begin): Call riscv_init_csr_hashes for each DECLARE_CSR.
+	* testsuite/gas/riscv/csr-dw-regnums.d: Add -march=rv32if option.
+	* testsuite/gas/riscv/priv-reg.d: Add f-ext by -march option.
+	* testsuite/gas/riscv/priv-reg-fail-fext.d: New testcase.  The source
+	file is `priv-reg.s`, and the ISA is rv32i without f-ext, so the
+	f-ext CSR are not allowed.
+	* testsuite/gas/riscv/priv-reg-fail-fext.l: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-rv32-only.d: New testcase.  The
+	source file is `priv-reg.s`, and the ISA is rv64if, so the
+	rv32-only CSR are not allowed.
+	* testsuite/gas/riscv/priv-reg-fail-rv32-only.l: Likewise.
+
+2020-02-21  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-pdp11.c (md_apply_fix): Handle BFD_RELOC_32.
+	(tc_gen_reloc): Only give a BAD_CASE assertion on pcrel relocs.
+
+2020-02-21  Alan Modra  <amodra@gmail.com>
+
+	PR 25569
+	* config/obj-aout.c (obj_aout_frob_file_before_fix): Don't loop
+	on section size adjustment, instead perform another write if
+	exec header size is larger than section size.
+
+2020-02-19  Nelson Chu  <nelson.chu@sifive.com>
+
+	* doc/c-riscv.texi: Add the doc entries for -march-attr/
+	-mno-arch-attr command line options.
+
+2020-02-19  Nelson Chu  <nelson.chu@sifive.com>
+
+	* testsuite/gas/riscv/c-add-addi.d: New testcase.
+	* testsuite/gas/riscv/c-add-addi.s: Likewise.
+
+2020-02-19  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25576
+	* config/tc-z80.c (md_parse_option): Do not use an underscore
+	prefix for local labels in SDCC compatability mode.
+	(z80_start_line_hook): Remove SDCC dollar label support.
+	* testsuite/gas/z80/sdcc.d: Update expected disassembly.
+	* testsuite/gas/z80/sdcc.s: Likewise.
+
+2020-02-19  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25517
+	* config/tc-z80.c: Add -march option.
+	* doc/as.texi: Update Z80 documentation.
+	* doc/c-z80.texi: Likewise.
+	* testsuite/gas/z80/ez80_adl_all.d: Update command line.
+	* testsuite/gas/z80/ez80_adl_suf.d: Likewise.
+	* testsuite/gas/z80/ez80_pref_dis.d: Likewise.
+	* testsuite/gas/z80/ez80_z80_all.d: Likewise.
+	* testsuite/gas/z80/ez80_z80_suf.d: Likewise.
+	* testsuite/gas/z80/gbz80_all.d: Likewise.
+	* testsuite/gas/z80/r800_extra.d: Likewise.
+	* testsuite/gas/z80/r800_ii8.d: Likewise.
+	* testsuite/gas/z80/r800_z80_doc.d: Likewise.
+	* testsuite/gas/z80/sdcc.d: Likewise.
+	* testsuite/gas/z80/z180.d: Likewise.
+	* testsuite/gas/z80/z180_z80_doc.d: Likewise.
+	* testsuite/gas/z80/z80_doc.d: Likewise.
+	* testsuite/gas/z80/z80_ii8.d: Likewise.
+	* testsuite/gas/z80/z80_in_f_c.d: Likewise.
+	* testsuite/gas/z80/z80_op_ii_ld.d: Likewise.
+	* testsuite/gas/z80/z80_out_c_0.d: Likewise.
+	* testsuite/gas/z80/z80_sli.d: Likewise.
+	* testsuite/gas/z80/z80n_all.d: Likewise.
+	* testsuite/gas/z80/z80n_reloc.d: Likewise.
+
+2020-02-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (output_insn): Mark cvtpi2ps and cvtpi2pd
+	with GNU_PROPERTY_X86_FEATURE_2_MMX.
+	* testsuite/gas/i386/i386.exp: Run property-3 and
+	x86-64-property-3.
+	* testsuite/gas/i386/property-3.d: New file.
+	* testsuite/gas/i386/property-3.s: Likewise.
+	* testsuite/gas/i386/x86-64-property-3.d: Likewise.
+
+2020-02-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .popcnt.
+	* doc/c-i386.texi: Remove abm and .abm.  Add popcnt and .popcnt.
+	Add a tab before @samp{.sse4a}.
+
+2020-02-17  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (process_suffix): Don't try to guess a suffix
+	for AddrPrefixOpReg templates. Combine the two pieces of
+	addrprefixopreg handling. Reject 16-bit address reg in 64-bit
+	mode.
+
+2020-02-17  Jan Beulich  <jbeulich@suse.com>
+
+	PR gas/14439
+	* config/tc-i386.c (md_assemble): Also suppress operand
+	swapping for MONITOR{,X} and MWAIT{,X}.
+	* testsuite/gas/i386/sse3.s, testsuite/gas/i386/x86-64-sse3.s:
+	Add Intel syntax monitor/mwait tests.
+	* testsuite/gas/i386/sse3.d, testsuite/gas/i386/x86-64-sse3.d:
+	Adjust expectations.
+	*testsuite/gas/i386/sse3-intel.d,
+	testsuite/gas/i386/x86-64-sse3-intel.d: New.
+	* testsuite/gas/i386/i386.exp: Run new tests.
+
+2020-02-17  Jan Beulich  <jbeulich@suse.com>
+
+	PR gas/6518
+	* config/tc-i386.c (process_suffix): Re-work Intel-syntax
+	[XYZ]MMWord memory operand ambiguity recognition logic (largely
+	re-indentation).
+	* testsuite/gas/i386/avx512dq-inval.s: Add vcvtqq2ps/vcvtuqq2ps
+	cases.
+	* testsuite/gas/i386/inval-avx512f.s: Also test vcvtneps2bf16.
+	* testsuite/gas/i386/avx512dq-inval.l,
+	testsuite/gas/i386/inval-avx.l,
+	testsuite/gas/i386/inval-avx512f.l: Adjust expectations.
+	* testsuite/gas/i386/avx512vl-ambig.s,
+	testsuite/gas/i386/avx512vl-ambig.l: New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
+2020-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .sse4a and nosse4a.  Restore
+	nosse4.
+	* doc/c-i386.texi: Document sse4a and nosse4a.
+
+2020-02-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* doc/c-i386.texi: Remove the old movsx and movzx documentation
+	for AT&T syntax.
+
+2020-02-14  Jan Beulich  <jbeulich@suse.com>
+
+	PR gas/25438
+	* config/tc-i386.c (md_assemble): Move movsx/movzx special
+	casing ...
+	(process_suffix): ... here. Consider just the first operand
+	initially.
+	(check_long_reg): Drop opcode 0x63 special case again.
+	* testsuite/gas/i386/i386.s, testsuite/gas/i386/iamcu-1.s,
+	testsuite/gas/i386/ilp32/x86-64.s, testsuite/gas/i386/x86_64.s:
+	Move ambiguous operand size tests ...
+	* testsuite/gas/i386/noreg16.s, testsuite/gas/i386/noreg32.s,
+	testsuite/gas/i386/noreg64.s: ... here.
+	* testsuite/gas/i386/i386.d, testsuite/gas/i386/i386-intel.d
+	testsuite/gas/i386/iamcu-1.d, testsuite/gas/i386/ilp32/x86-64.d,
+	testsuite/gas/i386/k1om.d, testsuite/gas/i386/l1om.d,
+	testsuite/gas/i386/movx16.l, testsuite/gas/i386/movx32.l,
+	testsuite/gas/i386/movx64.l, testsuite/gas/i386/noreg16.d,
+	testsuite/gas/i386/noreg32.d, testsuite/gas/i386/noreg64.d,
+	testsuite/gas/i386/x86-64-movsxd.d,
+	testsuite/gas/i386/x86-64-movsxd-intel.d,
+	testsuite/gas/i386/x86_64.d, testsuite/gas/i386/x86_64-intel.d:
+	Adjust expectations.	
+	* testsuite/gas/i386/movx16.s, testsuite/gas/i386/movx16.l,
+	testsuite/gas/i386/movx32.s, testsuite/gas/i386/movx32.l,
+	testsuite/gas/i386/movx64.s, testsuite/gas/i386/movx64.l: New.
+	* testsuite/gas/i386/i386.exp: Run new tests.
+
+2020-02-14  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (process_operands): Also skip segment
+	override prefix emission if it matches an already present one.
+	* testsuite/gas/i386/prefix32.s: Add double segment override
+	cases.
+	* testsuite/gas/i386/prefix32.l: Adjust expectations.
+
+2020-02-14  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (process_operands): Drop ineffectual segment
+	overrides when optimizing.
+	* testsuite/gas/i386/lea-optimize.d: New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
+2020-02-14  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (process_operands): Also check insn prefix
+	for ineffectual segment override warning. Don't cover possible
+	VEX/EVEX encoded insns there.
+	* testsuite/gas/i386/lea.s, testsuite/gas/i386/lea.d,
+	testsuite/gas/i386/lea.e: New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
+2020-02-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/25438
+	* doc/c-i386.texi: Document movsx, movsxd and movzx for AT&T
+	syntax.
+
+2020-02-13  Fangrui Song   <maskray@google.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/25551
+	* config/tc-i386.c (tc_i386_fix_adjustable): Don't check
+	BFD_RELOC_386_PLT32 nor BFD_RELOC_X86_64_PLT32.
+	* testsuite/gas/i386/i386.exp: Run relax-5 and x86-64-relax-4.
+	* testsuite/gas/i386/relax-5.d: New file.
+	* testsuite/gas/i386/relax-5.s: Likewise.
+	* testsuite/gas/i386/x86-64-relax-4.d: Likewise.
+	* testsuite/gas/i386/x86-64-relax-4.s: Likewise.
+
+2020-02-13  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (cpu_noarch): Use CPU_ANY_SSE4_FLAGS in
+	"nosse4" entry.
+
+2020-02-12  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (avx512): New (at file scope), moved from
+	(check_VecOperands): ... here.
+	(process_suffix): Add [XYZ]MMword operand size handling.
+	* testsuite/gas/i386/avx512dq-inval.s: Add VFPCLASS tests.
+	* testsuite/gas/i386/noavx512-2.s: Add Intel syntax VFPCLASS
+	tests.
+	* testsuite/gas/i386/avx512dq-inval.l,
+	testsuite/gas/i386/noavx512-2.l: Adjust expectations.
+
+2020-02-12  Jan Beulich  <jbeulich@suse.com>
+
+	PR gas/24546
+	* config/tc-i386.c (match_template): Apply AMD64 check to 64-bit
+	code only.
+	* config/tc-i386-intel.c (i386_intel_operand): Also handle
+	CALL/JMP in O_tbyte_ptr case.
+	* doc/c-i386.texi: Mention far call and full pointer load ISA
+	differences.
+	* testsuite/gas/i386/x86-64-branch-3.s,
+	testsuite/gas/i386/x86-64-intel64.s: Add 64-bit far call cases.
+	* testsuite/gas/i386/x86-64-branch-3.d,
+	testsuite/gas/i386/x86-64-intel64.d: Adjust expectations.
+	* testsuite/gas/i386/x86-64-branch-5.l,
+	testsuite/gas/i386/x86-64-branch-5.s: New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
+2020-02-12  Jan Beulich  <jbeulich@suse.com>
+
+	PR gas/25438
+	* config/tc-i386.c (REGISTER_WARNINGS): Delete.
+	(check_byte_reg): Skip only source operand of CRC32. Drop Non-
+	64-bit-only warning.
+	(check_word_reg): Consistently error on mismatching register
+	size and suffix.
+	* testsuite/gas/i386/general.s: Replace dword GPR with word one
+	for movw. Replace suffix / GPR for orb.
+	* testsuite/gas/i386/inval.s: Add tests for movw with dword and
+	byte GPRs as well as ones for inb/outb with a word accumulator.
+	* testsuite/gas/i386/general.l, testsuite/gas/i386/intelbad.l,
+	testsuite/gas/i386/inval.l: Adjust expectations.
+
+2020-02-12  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (operand_type_register_match): Also fall
+	through initial two if()-s when the template allows for a GPR
+	operand. Adjust comment.
+
+2020-02-11  Jan Beulich  <jbeulich@suse.com>
+
+	(struct _i386_insn): New field "short_form".
+	(optimize_encoding): Drop setting of shortform field.
+	(process_suffix): Set i.short_form. Replace shortform use.
+	(process_operands): Replace shortform use.
+
+2020-02-11  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* config/tc-arm.c (vcx_handle_register_arguments): Remove `for`
+	loop initial declaration.
+
+2020-02-10  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* config/tc-arm.c (NEON_MAX_TYPE_ELS): Increment to account for
+	instructions that can have 5 arguments.
+	(enum operand_parse_code): Add new operands.
+	(parse_operands): Account for new operands.
+	(S5): New macro.
+	(enum neon_shape_el): Introduce P suffixes for coprocessor.
+	(neon_select_shape): Account for P suffix.
+	(LOW1): Move macro to global position.
+	(HI4): Move macro to global position.
+	(vcx_assign_vec_d): New.
+	(vcx_assign_vec_m): New.
+	(vcx_assign_vec_n): New.
+	(enum vcx_reg_type): New.
+	(vcx_get_reg_type): New.
+	(vcx_size_pos): New.
+	(vcx_vec_pos): New.
+	(vcx_handle_shape): New.
+	(vcx_ensure_register_in_range): New.
+	(vcx_handle_register_arguments): New.
+	(vcx_handle_insn_block): New.
+	(vcx_handle_common_checks): New.
+	(do_vcx1): New.
+	(do_vcx2): New.
+	(do_vcx3): New.
+	* testsuite/gas/arm/cde-missing-fp.d: New test.
+	* testsuite/gas/arm/cde-missing-fp.l: New test.
+	* testsuite/gas/arm/cde-missing-mve.d: New test.
+	* testsuite/gas/arm/cde-missing-mve.l: New test.
+	* testsuite/gas/arm/cde-mve-or-neon.d: New test.
+	* testsuite/gas/arm/cde-mve-or-neon.s: New test.
+	* testsuite/gas/arm/cde-mve.s: New test.
+	* testsuite/gas/arm/cde-warnings.l:
+	* testsuite/gas/arm/cde-warnings.s:
+	* testsuite/gas/arm/cde.d:
+	* testsuite/gas/arm/cde.s:
+
+2020-02-10  Stam Markianos-Wright  <stam.markianos-wright@arm.com>
+	    Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* config/tc-arm.c (arm_ext_cde*): New feature sets for each
+	CDE coprocessor that can be enabled.
+	(enum pred_instruction_type): New pred type.
+	(BAD_NO_VPT): New error message.
+	(BAD_CDE): New error message.
+	(BAD_CDE_COPROC): New error message.
+	(enum operand_parse_code): Add new immediate operands.
+	(parse_operands): Account for new immediate operands.
+	(check_cde_operand): New.
+	(cde_coproc_enabled): New.
+	(cde_coproc_pos): New.
+	(cde_handle_coproc): New.
+	(cxn_handle_predication): New.
+	(do_custom_instruction_1): New.
+	(do_custom_instruction_2): New.
+	(do_custom_instruction_3): New.
+	(do_cx1): New.
+	(do_cx1a): New.
+	(do_cx1d): New.
+	(do_cx1da): New.
+	(do_cx2): New.
+	(do_cx2a): New.
+	(do_cx2d): New.
+	(do_cx2da): New.
+	(do_cx3): New.
+	(do_cx3a): New.
+	(do_cx3d): New.
+	(do_cx3da): New.
+	(handle_pred_state): Define new IT block behaviour.
+	(insns): Add newn CX*{,d}{,a} instructions.
+	(CDE_EXTENSIONS,armv8m_main_ext_table,armv8_1m_main_ext_table):
+	Define new cdecp extension strings.
+	* doc/c-arm.texi: Document new cdecp extension arguments.
+	* testsuite/gas/arm/cde-scalar.d: New test.
+	* testsuite/gas/arm/cde-scalar.s: New test.
+	* testsuite/gas/arm/cde-warnings.d: New test.
+	* testsuite/gas/arm/cde-warnings.l: New test.
+	* testsuite/gas/arm/cde-warnings.s: New test.
+	* testsuite/gas/arm/cde.d: New test.
+	* testsuite/gas/arm/cde.s: New test.
+
+2020-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/25516
+	* config/tc-i386.c (intel64): Renamed to ...
+	(isa64): This.
+	(match_template): Accept Intel64 only instruction by default.
+	(i386_displacement): Updated.
+	(md_parse_option): Updated.
+	* c-i386.texi: Update -mamd64/-mintel64 documentation.
+	* testsuite/gas/i386/i386.exp: Run x86-64-sysenter.  Pass
+	-mamd64 to x86-64-sysenter-amd.
+	* testsuite/gas/i386/x86-64-sysenter.d: New file.
+
+2020-02-10  Alan Modra  <amodra@gmail.com>
+
+	* config/obj-elf.c (obj_elf_change_section): Error for section
+	type, attr or entsize changes in assembly.
+	* testsuite/gas/elf/elf.exp: Pass -Z to gas for section5 test.
+	* testsuite/gas/elf/section5.l: Update.
+
+2020-02-10  Alan Modra  <amodra@gmail.com>
+
+	* output-file.c (output_file_close): Do a normal close when
+	flag_always_generate_output.
+	* write.c (write_object_file): Don't stop output when
+	flag_always_generate_output.
+
 2020-02-07  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
 	PR 25469

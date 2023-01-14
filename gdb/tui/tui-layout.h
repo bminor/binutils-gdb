@@ -22,8 +22,22 @@
 #ifndef TUI_TUI_LAYOUT_H
 #define TUI_TUI_LAYOUT_H
 
+#include "ui-file.h"
+
 #include "tui/tui.h"
 #include "tui/tui-data.h"
+
+/* Values that can be returned when handling a request to adjust a
+   window's size.  */
+enum tui_adjust_result
+{
+  /* Requested window was not found here.  */
+  NOT_FOUND,
+  /* Window was found but not handled.  */
+  FOUND,
+  /* Window was found and handled.  */
+  HANDLED
+};
 
 /* The basic object in a TUI layout.  This represents a single piece
    of screen real estate.  Subclasses determine the exact
@@ -44,8 +58,9 @@ public:
   /* Change the size and location of this layout.  */
   virtual void apply (int x, int y, int width, int height) = 0;
 
-  /* Return the minimum and maximum height of this layout.  */
-  virtual void get_sizes (int *min_height, int *max_height) = 0;
+  /* Return the minimum and maximum height or width of this layout.
+     HEIGHT is true to fetch height, false to fetch width.  */
+  virtual void get_sizes (bool height, int *min_value, int *max_value) = 0;
 
   /* True if the topmost item in this layout is boxed.  */
   virtual bool top_boxed_p () const = 0;
@@ -62,7 +77,19 @@ public:
 
   /* Adjust the size of the window named NAME to NEW_HEIGHT, updating
      the sizes of the other windows around it.  */
-  virtual bool adjust_size (const char *name, int new_height) = 0;
+  virtual tui_adjust_result adjust_size (const char *name, int new_height) = 0;
+
+  /* Remove some windows from the layout, leaving the command window
+     and the window being passed in here.  */
+  virtual void remove_windows (const char *name) = 0;
+
+  /* Replace the window named NAME in the layout with the window named
+     NEW_WINDOW.  */
+  virtual void replace_window (const char *name, const char *new_window) = 0;
+
+  /* Append the specification to this window to OUTPUT.  DEPTH is the
+     depth of this layout in the hierarchy (zero-based).  */
+  virtual void specification (ui_file *output, int depth) = 0;
 
   /* The most recent space allocation.  */
   int x = 0;
@@ -97,18 +124,26 @@ public:
     return m_contents.c_str ();
   }
 
-  bool adjust_size (const char *name, int new_height) override
+  tui_adjust_result adjust_size (const char *name, int new_height) override
   {
-    return false;
+    return m_contents == name ? FOUND : NOT_FOUND;
   }
 
   bool top_boxed_p () const override;
 
   bool bottom_boxed_p () const override;
 
+  void remove_windows (const char *name) override
+  {
+  }
+
+  void replace_window (const char *name, const char *new_window) override;
+
+  void specification (ui_file *output, int depth) override;
+
 protected:
 
-  void get_sizes (int *min_height, int *max_height) override;
+  void get_sizes (bool height, int *min_value, int *max_value) override;
 
 private:
 
@@ -125,14 +160,19 @@ class tui_layout_split : public tui_layout_base
 {
 public:
 
-  tui_layout_split () = default;
+  /* Create a new layout.  If VERTICAL is true, then windows in this
+     layout will be arranged vertically.  */
+  explicit tui_layout_split (bool vertical = true)
+    : m_vertical (vertical)
+  {
+  }
 
   DISABLE_COPY_AND_ASSIGN (tui_layout_split);
 
   /* Add a new split layout to this layout.  WEIGHT is the desired
      size, which is relative to the other weights given in this
      layout.  */
-  tui_layout_split *add_split (int weight);
+  void add_split (std::unique_ptr<tui_layout_split> &&layout, int weight);
 
   /* Add a new window to this layout.  NAME is the name of the window
      to add.  WEIGHT is the desired size, which is relative to the
@@ -143,15 +183,21 @@ public:
 
   void apply (int x, int y, int width, int height) override;
 
-  bool adjust_size (const char *name, int new_height) override;
+  tui_adjust_result adjust_size (const char *name, int new_height) override;
 
   bool top_boxed_p () const override;
 
   bool bottom_boxed_p () const override;
 
+  void remove_windows (const char *name) override;
+
+  void replace_window (const char *name, const char *new_window) override;
+
+  void specification (ui_file *output, int depth) override;
+
 protected:
 
-  void get_sizes (int *min_height, int *max_height) override;
+  void get_sizes (bool height, int *min_value, int *max_value) override;
 
 private:
 
@@ -169,12 +215,32 @@ private:
   /* The splits.  */
   std::vector<split> m_splits;
 
+  /* True if the windows in this split are arranged vertically.  */
+  bool m_vertical;
+
   /* True if this layout has already been applied at least once.  */
   bool m_applied = false;
 };
 
+/* Add the specified window to the layout in a logical way.  This
+   means setting up the most logical layout given the window to be
+   added.  Only the source or disassembly window can be added this
+   way.  */
 extern void tui_add_win_to_layout (enum tui_win_type);
-extern void tui_set_layout (enum tui_layout_type);
+
+/* Set the initial layout.  */
+extern void tui_set_initial_layout ();
+
+/* Switch to the next layout.  */
+extern void tui_next_layout ();
+
+/* Show the register window.  Like "layout regs".  */
+extern void tui_regs_layout ();
+
+/* Remove some windows from the layout, leaving only the focused
+   window and the command window; if no window has the focus, then
+   some other window is chosen to remain.  */
+extern void tui_remove_some_windows ();
 
 /* Apply the current layout.  */
 extern void tui_apply_current_layout ();
@@ -182,5 +248,15 @@ extern void tui_apply_current_layout ();
 /* Adjust the window height of WIN to NEW_HEIGHT.  */
 extern void tui_adjust_window_height (struct tui_win_info *win,
 				      int new_height);
+
+/* The type of a function that is used to create a TUI window.  */
+
+typedef std::function<tui_gen_win_info * (const char *name)> window_factory;
+
+/* Register a new TUI window type.  NAME is the name of the window
+   type.  FACTORY is a function that can be called to instantiate the
+   window.  */
+
+extern void tui_register_window (const char *name, window_factory &&factory);
 
 #endif /* TUI_TUI_LAYOUT_H */

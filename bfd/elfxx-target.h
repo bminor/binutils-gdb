@@ -769,6 +769,10 @@
 #define elf_backend_cant_unwind_opcode 0
 #endif
 
+#ifndef elf_backend_symbol_section_index
+#define elf_backend_symbol_section_index NULL
+#endif
+ 
 #ifndef elf_match_priority
 #define elf_match_priority \
   (ELF_ARCH == bfd_arch_unknown ? 2 : ELF_OSABI == ELFOSABI_NONE ? 1 : 0)
@@ -895,6 +899,7 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_fixup_gnu_properties,
   elf_backend_compact_eh_encoding,
   elf_backend_cant_unwind_opcode,
+  elf_backend_symbol_section_index,
   elf_backend_static_tls_alignment,
   elf_backend_stack_align,
   elf_backend_strtab_flags,

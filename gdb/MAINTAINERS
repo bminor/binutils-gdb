@@ -304,7 +304,7 @@ the native maintainer when resolving ABI issues.
 	riscv		--target=riscv32-elf ,-Werror
 			--target=riscv64-elf ,-Werror
 			Andrew Burgess		andrew.burgess@embecosm.com
-			Palmer Dabbelt		palmer@sifive.com
+			Palmer Dabbelt		palmer@dabbelt.com
 
 	rl78		--target=rl78-elf ,-Werror
 
@@ -633,6 +633,7 @@ Thomas Schwinge					tschwinge@gnu.org
 Keith Seitz					keiths@redhat.com
 Carlos Eduardo Seo				cseo@linux.vnet.ibm.com
 Ozkan Sezer					sezeroz@gmail.com
+Alok Kumar Sharma				AlokKumar.Sharma@amd.com
 Marcus Shawcroft				marcus.shawcroft@arm.com
 Stan Shebs					stanshebs@google.com
 Joel Sherrill					joel.sherrill@oarcorp.com

@@ -23,9 +23,11 @@
 #include "symtab.h"
 #include "tui/tui.h"
 #include "tui/tui-data.h"
+#include "tui/tui-win.h"
 #include "tui/tui-wingeneral.h"
 #include "tui/tui-winsource.h"
 #include "gdb_curses.h"
+#include <algorithm>
 
 struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 
@@ -58,11 +60,16 @@ tui_win_with_focus (void)
 }
 
 
-/* Set the window that has the logical focus.  */
+/* Set the logical focus to win_info.  */
 void
-tui_set_win_with_focus (struct tui_win_info *win_info)
+tui_set_win_focus_to (struct tui_win_info *win_info)
 {
-  win_with_focus = win_info;
+  if (win_info != NULL)
+    {
+      tui_unhighlight_win (win_with_focus);
+      win_with_focus = win_info;
+      tui_highlight_win (win_info);
+    }
 }
 
 
@@ -103,28 +110,13 @@ tui_set_term_width_to (int w)
 struct tui_win_info *
 tui_next_win (struct tui_win_info *cur_win)
 {
-  int type = cur_win->type;
-  struct tui_win_info *next_win = NULL;
+  auto iter = std::find (tui_windows.begin (), tui_windows.end (), cur_win);
+  gdb_assert (iter != tui_windows.end ());
 
-  if (cur_win->type == CMD_WIN)
-    type = SRC_WIN;
-  else
-    type = cur_win->type + 1;
-  while (type != cur_win->type && (next_win == NULL))
-    {
-      if (tui_win_list[type]
-	  && tui_win_list[type]->is_visible ())
-	next_win = tui_win_list[type];
-      else
-	{
-	  if (type == CMD_WIN)
-	    type = SRC_WIN;
-	  else
-	    type++;
-	}
-    }
-
-  return next_win;
+  ++iter;
+  if (iter == tui_windows.end ())
+    return tui_windows[0];
+  return *iter;
 }
 
 
@@ -133,58 +125,15 @@ tui_next_win (struct tui_win_info *cur_win)
 struct tui_win_info *
 tui_prev_win (struct tui_win_info *cur_win)
 {
-  int type = cur_win->type;
-  struct tui_win_info *prev = NULL;
+  auto iter = std::find (tui_windows.begin (), tui_windows.end (), cur_win);
+  gdb_assert (iter != tui_windows.end ());
 
-  if (cur_win->type == SRC_WIN)
-    type = CMD_WIN;
-  else
-    type = cur_win->type - 1;
-  while (type != cur_win->type && (prev == NULL))
-    {
-      if (tui_win_list[type]
-	  && tui_win_list[type]->is_visible ())
-	prev = tui_win_list[type];
-      else
-	{
-	  if (type == SRC_WIN)
-	    type = CMD_WIN;
-	  else
-	    type--;
-	}
-    }
-
-  return prev;
+  if (iter == tui_windows.begin ())
+    return tui_windows.back ();
+  --iter;
+  return *iter;
 }
 
-
-/* See tui-data.h.  */
-
-void
-tui_delete_invisible_windows ()
-{
-  for (int win_type = SRC_WIN; (win_type < MAX_MAJOR_WINDOWS); win_type++)
-    {
-      if (tui_win_list[win_type] != NULL
-	  && !tui_win_list[win_type]->is_visible ())
-	{
-	  /* This should always be made visible before a call to this
-	     function.  */
-	  gdb_assert (win_type != CMD_WIN);
-
-	  if (win_with_focus == tui_win_list[win_type])
-	    win_with_focus = nullptr;
-
-	  delete tui_win_list[win_type];
-	  tui_win_list[win_type] = NULL;
-	}
-    }
-}
-
-tui_win_info::tui_win_info (enum tui_win_type type)
-  : tui_gen_win_info (type)
-{
-}
 
 void
 tui_win_info::rerender ()

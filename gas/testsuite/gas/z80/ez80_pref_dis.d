@@ -1,5 +1,5 @@
 #name: multiple eZ80 opcode prefixes
-#as: -ez80
+#as: -march=ez80
 #objdump: -d
 
 .*:[     ]+file format (coff)|(elf32)\-z80

@@ -2490,6 +2490,18 @@ gdb_caching_proc support_complex_tests {
     } executable]
 }
 
+# Return 1 if compiling go is supported.
+gdb_caching_proc support_go_compile {
+
+    return [gdb_can_simple_compile go-hello {
+	package main
+	import "fmt"
+	func main() {
+	    fmt.Println("hello world")
+	}
+    } executable go]
+}
+
 # Return 1 if GDB can get a type for siginfo from the target, otherwise
 # return 0.
 
@@ -3565,11 +3577,20 @@ proc gdb_wrapper_init { args } {
     global gdb_wrapper_flags
     global gdb_wrapper_target
 
+    # If the wrapper is initialized but the wrapper file cannot be
+    # found anymore, the wrapper file must be built again.
+    if { $gdb_wrapper_initialized == 1 && \
+	    [info exists gdb_wrapper_file] && \
+	    ![file exists $gdb_wrapper_file] } {
+	verbose "reinitializing the wrapper"
+	set gdb_wrapper_initialized 0
+    }
+
     if { $gdb_wrapper_initialized == 1 } { return; }
 
     if {[target_info exists needs_status_wrapper] && \
 	    [target_info needs_status_wrapper] != "0"} {
-	set result [build_wrapper "testglue.o"]
+	set result [build_wrapper [standard_output_file "testglue.o"]]
 	if { $result != "" } {
 	    set gdb_wrapper_file [lindex $result 0]
 	    set gdb_wrapper_flags [lindex $result 1]
@@ -3631,7 +3652,14 @@ proc gdb_simple_compile {name code {type object} {compile_flags {}} {object obj}
             set postfix "s"
         }
     }
-    set src [standard_temp_file $name-[pid].c]
+    set ext "c"
+    foreach flag $compile_flags {
+	if { "$flag" == "go" } {
+	    set ext "go"
+	    break
+	}
+    }
+    set src [standard_temp_file $name-[pid].$ext]
     set obj [standard_temp_file $name-[pid].$postfix]
     set compile_flags [concat $compile_flags {debug nowarnings quiet}]
 
@@ -3812,7 +3840,7 @@ proc gdb_compile {source dest type options} {
     verbose "options are $options"
     verbose "source is $source $dest $type $options"
 
-    if { $gdb_wrapper_initialized == 0 } { gdb_wrapper_init }
+    gdb_wrapper_init
 
     if {[target_info exists needs_status_wrapper] && \
 	    [target_info needs_status_wrapper] != "0" && \
@@ -5052,6 +5080,10 @@ proc gdb_init { test_file_name } {
     global gdbserver_reconnect_p
     set gdbserver_reconnect_p 1
     unset gdbserver_reconnect_p
+
+    # Clear $last_loaded_file
+    global last_loaded_file
+    unset -nocomplain last_loaded_file
 
     # Reset GDB number of instances
     global gdb_instances

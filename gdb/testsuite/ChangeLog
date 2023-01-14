@@ -1,3 +1,206 @@
+2020-02-24  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/25592
+	* gdb.base/info-locals-unused-static-var.c: New test.
+	* gdb.base/info-locals-unused-static-var.exp: New file.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* gdb.python/tui-window.exp: New file.
+	* gdb.python/tui-window.py: New file.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	PR tui/17850:
+	* gdb.tui/new-layout.exp: Add horizontal layout and winheight
+	tests.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* gdb.tui/new-layout.exp: Add sub-layout tests.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* gdb.tui/new-layout.exp: New file.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* gdb.rust/rust-style.rs: New file.
+	* gdb.rust/rust-style.exp: New file.
+	* gdb.base/style.exp: Test structure printing.
+	* gdb.base/style.c (struct some_struct): New type.
+	(enum etype): New type.
+	(struct_value): New global.
+
+2020-02-21  Tom de Vries  <tdevries@suse.de>
+
+	PR go/18926
+	* lib/gdb.exp (bp_location2/bp_location2_regexp): Fix.
+	Remove blanket xfails.  Use message argument for gdb_breakpoint.
+	Make continuing to breakpoint test conditional on setting breakpoint.
+	Fix continuing to breakpoint regexp.  Add xfails for gccgo-6/7
+	DW_AT_name attribute.  Add xfail for GCC PR93866.
+
+2020-02-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.dwarf2/cpp-linkage-name.c: New file.
+	* gdb.dwarf2/cpp-linkage-name.exp: New file.
+
+2020-02-21  Shahab Vahedi  <shahab@synopsys.com>
+
+	* lib/gdb.exp (gdb_wrapper_init): Reset
+	"gdb_wrapper_initialized" to 0 if "wrapper_file" does
+	not exist.
+
+2020-02-20  Tom de Vries  <tdevries@suse.de>
+
+	PR go/17018
+	* gdb.go/hello.exp: Copy ...
+	* gdb.go/global-local-var-shadow.exp: ... here.  New file.  Expect
+	print of st to print value of global definition. Add xfail for GCC
+	PR93844.
+	* gdb.go/hello.exp: Remove printing of st before definition.
+	* gdb.go/hello.go: Copy ...
+	* gdb.go/global-local-var-shadow.go: ... here. New test.  Rename myst
+	to st.
+	* gdb.go/hello.go: Remove myst.  Remove comment about shadowing.
+
+2020-02-20  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (support_go_compile): New gdb_caching_proc.
+	(gdb_simple_compile): Handle compile_flags go by using .go extension
+	for source file.
+	* gdb.go/chan.exp: Use support_go_compile.
+	* gdb.go/handcall.exp: Same.
+	* gdb.go/hello.exp: Same.
+	* gdb.go/integers.exp: Same.
+	* gdb.go/max-depth.exp: Same.
+	* gdb.go/methods.exp: Same.
+	* gdb.go/package.exp: Same.
+	* gdb.go/strings.exp: Same.
+	* gdb.go/types.exp: Same.
+	* gdb.go/unsafe.exp: Same.
+
+2020-02-19  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.python/lib-types.exp: Make xfail more strict.
+
+2020-02-19  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.ada/funcall_ref.exp: Replace xfail setup by unsupported check.
+
+2020-02-19  Doug Evans  <dje@google.com>
+
+	PR rust/25535
+	* gdb.rust/simple.exp: Add test.
+	* gdb.rust/simple.rs: Add test.
+
+2020-02-19  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/corefile-buildid.exp (check_exec_file): Match info files
+	output line-by-line.
+
+2020-02-19  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.cp/cpexprs.exp: Remove c++/14186 kfail.
+
+2020-02-19  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/solib-overlap.exp: Use exec instead of system to execute
+	prelink.
+
+2020-02-19  Tom de Vries  <tdevries@suse.de>
+
+	* lib/cache.exp (ignore_pass, gdb_do_cache_wrap): New proc.
+	(gdb_do_cache): Use gdb_do_cache_wrap.
+	* gdb.base/gdb-caching-proc.exp (test_proc): Use gdb_do_cache_wrap.
+
+2020-02-19  Tom de Vries  <tdevries@suse.de>
+
+	* lib/dtrace.exp (dtrace_build_usdt_test_program): Use quiet as
+	gdb_compile option.
+
+2020-02-18  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.base/printcmds.exp (test_print_enums): Update expected
+	output.
+
+2020-02-18  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.base/printcmds.exp (test_print_enums): Expect hex values
+	for "unknown".
+
+2020-02-18  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.base/printcmds.c (enum flag_enum): Add FE_TWO_LEGACY
+	enumerator.
+
+2020-02-18  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.base/printcmds.c (enum flag_enum): Prefix enumerators with
+	FE_, add FE_NONE.
+	(three): Update.
+	(enum flag_enum_without_zero): New enum.
+	(flag_enum_without_zero): New variable.
+	(enum not_flag_enum): New enum.
+	(three_not_flag): New variable.
+	* gdb.base/printcmds.exp (test_artificial_arrays): Update.
+	(test_print_enums): Add more tests for printing flag enums.
+
+2020-02-18  Tom de Vries  <tdevries@suse.de>
+
+	* lib/ada.exp (gdb_compile_ada_1): Factor out of ...
+	(gdb_compile_ada): ... here.
+	(gnat_runtime_has_debug_info): Remove fail call for gdb_compile_ada
+	failure.  Use gdb_compile_ada_1 instead of gdb_compile_ada.
+
+2020-02-14  Tom Tromey  <tom@tromey.com>
+
+	* lib/gdbserver-support.exp (find_gdbserver): Find gdbserver in
+	build directory.
+	* boards/gdbserver-base.exp: Update path to gdbserver.
+
+2020-02-13  Tom de Vries  <tdevries@suse.de>
+
+	* lib/ada.exp (gdb_compile_ada): Delete stale exec before compilation.
+
+2020-02-13  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.ada/catch_ex_std.exp: Indicate unsupported if gnatbind/gnatlink
+	are missing.
+
+2020-02-13  Tom de Vries  <tdevries@suse.de>
+
+	* lib/ada.exp (gnatmake_version_at_least): Wrap exec call in a catch
+	call.
+
+2020-02-11  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR tui/25126
+	https://bugzilla.redhat.com/show_bug.cgi?id=1784210
+	* gdb.base/cached-source-file.c: New file.
+	* gdb.base/cached-source-file.exp: New file.
+
+2020-02-11  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/25488
+	* lib/gdb.exp (gdb_init): Unset $file_last_loaded.
+
+2020-02-10  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.multi/multi-target.exp: Skip if skip_gdbserver_tests.
+
+2020-02-10  Maciej W. Rozycki  <macro@wdc.com>
+
+	* gdb.base/step-over-no-symbols.exp: Verify that $before_addr
+	and $after_addr are both integers before making a comparison.
+
+2020-02-09  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/many-headers.exp: Echo gdb command to gdb.log.  Capture gdb
+	command output and paste it into gdb.log.  If any, paste catch message
+	to gdb.log.
+
 2020-02-07  Tom Tromey  <tromey@adacore.com>
 
 	PR breakpoints/24915:

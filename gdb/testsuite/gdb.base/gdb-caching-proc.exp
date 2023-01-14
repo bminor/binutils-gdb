@@ -28,7 +28,7 @@ proc test_proc { name } {
 
     set resultlist [list]
 
-    set first [$real_name]
+    set first [gdb_do_cache_wrap $real_name]
     lappend resultlist $first
 
     # Ten repetitions was enough to trigger target_supports_scheduler_locking,
@@ -37,7 +37,7 @@ proc test_proc { name } {
 
     set racy 0
     for {set i 0} {$i < $repeat} {incr i} {
-	set rerun [$real_name]
+	set rerun [gdb_do_cache_wrap $real_name]
 	lappend resultlist $rerun
 	if { $rerun != $first } {
 	    set racy 1

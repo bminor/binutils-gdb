@@ -140,8 +140,7 @@ tui_rl_switch_mode (int notused1, int notused2)
 /* TUI readline command.
    Change the TUI layout to show a next layout.
    This function is bound to CTRL-X 2.  It is intended to provide
-   a functionality close to the Emacs split-window command.  We
-   always show two windows (src+asm), (src+regs) or (asm+regs).  */
+   a functionality close to the Emacs split-window command.  */
 static int
 tui_rl_change_windows (int notused1, int notused2)
 {
@@ -149,41 +148,8 @@ tui_rl_change_windows (int notused1, int notused2)
     tui_rl_switch_mode (0 /* notused */, 0 /* notused */);
 
   if (tui_active)
-    {
-      enum tui_layout_type new_layout;
+    tui_next_layout ();
 
-      new_layout = tui_current_layout ();
-
-      /* Select a new layout to have a rolling layout behavior with
-	 always two windows (except when undefined).  */
-      switch (new_layout)
-	{
-	case SRC_COMMAND:
-	  new_layout = SRC_DISASSEM_COMMAND;
-	  break;
-
-	case DISASSEM_COMMAND:
-	  new_layout = SRC_DISASSEM_COMMAND;
-	  break;
-
-	case SRC_DATA_COMMAND:
-	  new_layout = SRC_DISASSEM_COMMAND;
-	  break;
-
-	case SRC_DISASSEM_COMMAND:
-	  new_layout = DISASSEM_DATA_COMMAND;
-	  break;
-	  
-	case DISASSEM_DATA_COMMAND:
-	  new_layout = SRC_DATA_COMMAND;
-	  break;
-
-	default:
-	  new_layout = SRC_COMMAND;
-	  break;
-	}
-      tui_set_layout (new_layout);
-    }
   return 0;
 }
 
@@ -196,28 +162,8 @@ tui_rl_delete_other_windows (int notused1, int notused2)
     tui_rl_switch_mode (0 /* notused */, 0 /* notused */);
 
   if (tui_active)
-    {
-      enum tui_layout_type new_layout;
+    tui_remove_some_windows ();
 
-      new_layout = tui_current_layout ();
-
-      /* Kill one window.  */
-      switch (new_layout)
-	{
-	case SRC_COMMAND:
-	case SRC_DATA_COMMAND:
-	case SRC_DISASSEM_COMMAND:
-	default:
-	  new_layout = SRC_COMMAND;
-	  break;
-
-	case DISASSEM_COMMAND:
-	case DISASSEM_DATA_COMMAND:
-	  new_layout = DISASSEM_COMMAND;
-	  break;
-	}
-      tui_set_layout (new_layout);
-    }
   return 0;
 }
 
@@ -425,7 +371,7 @@ tui_enable (void)
 
       /* Don't try to setup curses (and print funny control
 	 characters) if we're not outputting to a terminal.  */
-      if (!ui_file_isatty (gdb_stdout))
+      if (!gdb_stderr->isatty ())
 	error (_("Cannot enable the TUI when output is not a terminal"));
 
       s = newterm (NULL, stdout, stdin);
@@ -476,7 +422,7 @@ tui_enable (void)
       def_prog_mode ();
 
       tui_show_frame_info (0);
-      tui_set_layout (SRC_COMMAND);
+      tui_set_initial_layout ();
       tui_set_win_focus_to (TUI_SRC_WIN);
       keypad (TUI_CMD_WIN->handle.get (), TRUE);
       wrefresh (TUI_CMD_WIN->handle.get ());
@@ -616,9 +562,11 @@ _initialize_tui ()
   tuicmd = tui_get_cmd_list ();
 
   add_cmd ("enable", class_tui, tui_enable_command,
-	   _("Enable TUI display mode."),
+	   _("Enable TUI display mode.\n\
+Usage: tui enable"),
 	   tuicmd);
   add_cmd ("disable", class_tui, tui_disable_command,
-	   _("Disable TUI display mode."),
+	   _("Disable TUI display mode.\n\
+Usage: tui disable"),
 	   tuicmd);
 }

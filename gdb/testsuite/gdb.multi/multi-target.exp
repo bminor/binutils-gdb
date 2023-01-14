@@ -17,6 +17,10 @@
 
 load_lib gdbserver-support.exp
 
+if { [skip_gdbserver_tests] } {
+    return 0
+}
+
 standard_testfile
 
 # The plain remote target can't do multiple inferiors.

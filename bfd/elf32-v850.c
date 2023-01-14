@@ -230,7 +230,7 @@ static void
 remember_hi16s_reloc (bfd *abfd, bfd_vma addend, bfd_byte *address)
 {
   hi16s_location * entry = NULL;
-  bfd_size_type amt = sizeof (* free_hi16s);
+  size_t amt = sizeof (* free_hi16s);
 
   /* Find a free structure.  */
   if (free_hi16s == NULL)

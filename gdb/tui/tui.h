@@ -40,9 +40,6 @@ enum tui_win_type
   CMD_WIN,
   /* This must ALWAYS be AFTER the major windows last.  */
   MAX_MAJOR_WINDOWS,
-  /* Auxiliary windows.  */
-  LOCATOR_WIN,
-  DATA_ITEM_WIN
 };
 
 extern CORE_ADDR tui_get_low_disassembly_address (struct gdbarch *,

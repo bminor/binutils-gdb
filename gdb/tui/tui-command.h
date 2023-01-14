@@ -27,10 +27,7 @@
 /* The TUI command window.  */
 struct tui_cmd_window : public tui_win_info
 {
-  tui_cmd_window ()
-    : tui_win_info (CMD_WIN)
-  {
-  }
+  tui_cmd_window () = default;
 
   DISABLE_COPY_AND_ASSIGN (tui_cmd_window);
 

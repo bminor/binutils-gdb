@@ -341,7 +341,8 @@ f_val_print (struct type *type, int embedded_offset,
 	      field_name = TYPE_FIELD_NAME (type, index);
 	      if (field_name != NULL)
 		{
-		  fputs_filtered (field_name, stream);
+		  fputs_styled (field_name, variable_name_style.style (),
+				stream);
 		  fputs_filtered (" = ", stream);
 		}
 

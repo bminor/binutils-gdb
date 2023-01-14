@@ -1,6 +1,6 @@
-#name: Z80 forward relocation
-#source: relocs.s -z80
-#source: labels.s -z80
+#name: Forward relocation
+#source: relocs.s
+#source: labels.s
 #ld: -e 0 -Ttext 0x100 -Tdata 0x200
 #objdump: -d
 

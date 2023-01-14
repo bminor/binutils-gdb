@@ -45,6 +45,7 @@
 #include "target-descriptions.h"
 #include "user-regs.h"
 #include "observable.h"
+#include "count-one-bits.h"
 
 #include "arch/arm.h"
 #include "arch/arm-get-next-pcs.h"
@@ -5798,7 +5799,8 @@ cleanup_block_store_pc (struct gdbarch *gdbarch, struct regcache *regs,
 {
   uint32_t status = displaced_read_reg (regs, dsc, ARM_PS_REGNUM);
   int store_executed = condition_true (dsc->u.block.cond, status);
-  CORE_ADDR pc_stored_at, transferred_regs = bitcount (dsc->u.block.regmask);
+  CORE_ADDR pc_stored_at, transferred_regs
+    = count_one_bits (dsc->u.block.regmask);
   CORE_ADDR stm_insn_addr;
   uint32_t pc_val;
   long offset;
@@ -5850,7 +5852,7 @@ cleanup_block_load_pc (struct gdbarch *gdbarch,
   uint32_t status = displaced_read_reg (regs, dsc, ARM_PS_REGNUM);
   int load_executed = condition_true (dsc->u.block.cond, status);
   unsigned int mask = dsc->u.block.regmask, write_reg = ARM_PC_REGNUM;
-  unsigned int regs_loaded = bitcount (mask);
+  unsigned int regs_loaded = count_one_bits (mask);
   unsigned int num_to_shuffle = regs_loaded, clobbered;
 
   /* The method employed here will fail if the register list is fully populated
@@ -5982,7 +5984,7 @@ arm_copy_block_xfer (struct gdbarch *gdbarch, uint32_t insn,
 	     contiguous chunk r0...rX before doing the transfer, then shuffling
 	     registers into the correct places in the cleanup routine.  */
 	  unsigned int regmask = insn & 0xffff;
-	  unsigned int num_in_list = bitcount (regmask), new_regmask;
+	  unsigned int num_in_list = count_one_bits (regmask), new_regmask;
 	  unsigned int i;
 
 	  for (i = 0; i < num_in_list; i++)
@@ -6084,7 +6086,7 @@ thumb2_copy_block_xfer (struct gdbarch *gdbarch, uint16_t insn1, uint16_t insn2,
       else
 	{
 	  unsigned int regmask = dsc->u.block.regmask;
-	  unsigned int num_in_list = bitcount (regmask), new_regmask;
+	  unsigned int num_in_list = count_one_bits (regmask), new_regmask;
 	  unsigned int i;
 
 	  for (i = 0; i < num_in_list; i++)
@@ -7102,7 +7104,7 @@ thumb_copy_pop_pc_16bit (struct gdbarch *gdbarch, uint16_t insn1,
     }
   else
     {
-      unsigned int num_in_list = bitcount (dsc->u.block.regmask);
+      unsigned int num_in_list = count_one_bits (dsc->u.block.regmask);
       unsigned int i;
       unsigned int new_regmask;
 
@@ -8870,11 +8872,13 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   enum arm_abi_kind arm_abi = arm_abi_global;
   enum arm_float_model fp_model = arm_fp_model;
   struct tdesc_arch_data *tdesc_data = NULL;
-  int i, is_m = 0;
-  int vfp_register_count = 0, have_vfp_pseudos = 0, have_neon_pseudos = 0;
-  int have_wmmx_registers = 0;
-  int have_neon = 0;
-  int have_fpa_registers = 1;
+  int i;
+  bool is_m = false;
+  int vfp_register_count = 0;
+  bool have_vfp_pseudos = false, have_neon_pseudos = false;
+  bool have_wmmx_registers = false;
+  bool have_neon = false;
+  bool have_fpa_registers = true;
   const struct target_desc *tdesc = info.target_desc;
 
   /* If we have an object to base this architecture on, try to determine
@@ -8991,7 +8995,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		  && (attr_arch == TAG_CPU_ARCH_V6_M
 		      || attr_arch == TAG_CPU_ARCH_V6S_M
 		      || attr_profile == 'M'))
-		is_m = 1;
+		is_m = true;
 #endif
 	    }
 
@@ -9049,7 +9053,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  if (feature == NULL)
 	    return NULL;
 	  else
-	    is_m = 1;
+	    is_m = true;
 	}
 
       tdesc_data = tdesc_data_alloc ();
@@ -9095,7 +9099,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	    }
 	}
       else
-	have_fpa_registers = 0;
+	have_fpa_registers = false;
 
       feature = tdesc_find_feature (tdesc,
 				    "org.gnu.gdb.xscale.iwmmxt");
@@ -9131,7 +9135,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	      return NULL;
 	    }
 
-	  have_wmmx_registers = 1;
+	  have_wmmx_registers = true;
 	}
 
       /* If we have a VFP unit, check whether the single precision registers
@@ -9172,7 +9176,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	    }
 
 	  if (tdesc_unnumbered_register (feature, "s0") == 0)
-	    have_vfp_pseudos = 1;
+	    have_vfp_pseudos = true;
 
 	  vfp_register_count = i;
 
@@ -9194,9 +9198,9 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		 their type; otherwise (normally) provide them with
 		 the default type.  */
 	      if (tdesc_unnumbered_register (feature, "q0") == 0)
-		have_neon_pseudos = 1;
+		have_neon_pseudos = true;
 
-	      have_neon = 1;
+	      have_neon = true;
 	    }
 	}
     }
@@ -9468,7 +9472,21 @@ arm_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   if (tdep == NULL)
     return;
 
-  fprintf_unfiltered (file, _("arm_dump_tdep: Lowest pc = 0x%lx"),
+  fprintf_unfiltered (file, _("arm_dump_tdep: fp_model = %i\n"),
+		      (int) tdep->fp_model);
+  fprintf_unfiltered (file, _("arm_dump_tdep: have_fpa_registers = %i\n"),
+		      (int) tdep->have_fpa_registers);
+  fprintf_unfiltered (file, _("arm_dump_tdep: have_wmmx_registers = %i\n"),
+		      (int) tdep->have_wmmx_registers);
+  fprintf_unfiltered (file, _("arm_dump_tdep: vfp_register_count = %i\n"),
+		      (int) tdep->vfp_register_count);
+  fprintf_unfiltered (file, _("arm_dump_tdep: have_vfp_pseudos = %i\n"),
+		      (int) tdep->have_vfp_pseudos);
+  fprintf_unfiltered (file, _("arm_dump_tdep: have_neon_pseudos = %i\n"),
+		      (int) tdep->have_neon_pseudos);
+  fprintf_unfiltered (file, _("arm_dump_tdep: have_neon = %i\n"),
+		      (int) tdep->have_neon);
+  fprintf_unfiltered (file, _("arm_dump_tdep: Lowest pc = 0x%lx\n"),
 		      (unsigned long) tdep->lowest_pc);
 }
 

@@ -1,4 +1,4 @@
-#as: -z80 -with-inst=sli,op-ii-ld
+#as: -march=z80-full+sli+xdcb
 #objdump: -d
 #name: Z80 undocumented instructions DD/FD CB dis op
 

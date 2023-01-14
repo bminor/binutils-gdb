@@ -756,7 +756,7 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
 {
   struct elf_x86_link_hash_table *ret;
   const struct elf_backend_data *bed;
-  bfd_size_type amt = sizeof (struct elf_x86_link_hash_table);
+  size_t amt = sizeof (struct elf_x86_link_hash_table);
 
   ret = (struct elf_x86_link_hash_table *) bfd_zmalloc (amt);
   if (ret == NULL)

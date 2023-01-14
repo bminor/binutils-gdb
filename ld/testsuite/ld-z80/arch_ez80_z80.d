@@ -1,6 +1,7 @@
 #name: eZ80 Z80 mode arch test
-#source: dummy1.s -ez80
-#source: dummy2.s -ez80
+#source: dummy1.s
+#source: dummy2.s
+#as: -march=ez80
 #ld: -e 0
 #objdump: -f
 

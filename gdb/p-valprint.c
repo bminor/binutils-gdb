@@ -605,10 +605,16 @@ pascal_object_print_value_fields (struct type *type, const gdb_byte *valaddr,
 	  annotate_field_begin (TYPE_FIELD_TYPE (type, i));
 
 	  if (field_is_static (&TYPE_FIELD (type, i)))
-	    fputs_filtered ("static ", stream);
-	  fprintf_symbol_filtered (stream, TYPE_FIELD_NAME (type, i),
-				   language_cplus,
-				   DMGL_PARAMS | DMGL_ANSI);
+	    {
+	      fputs_filtered ("static ", stream);
+	      fprintf_symbol_filtered (stream,
+				       TYPE_FIELD_NAME (type, i),
+				       current_language->la_language,
+				       DMGL_PARAMS | DMGL_ANSI);
+	    }
+	  else
+	    fputs_styled (TYPE_FIELD_NAME (type, i),
+			  variable_name_style.style (), stream);
 	  annotate_field_name_end ();
 	  fputs_filtered (" = ", stream);
 	  annotate_field_value ();

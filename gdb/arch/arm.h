@@ -31,6 +31,7 @@ enum gdb_regnum {
   ARM_SP_REGNUM = 13,		/* Contains address of top of stack */
   ARM_LR_REGNUM = 14,		/* address to return to from a function call */
   ARM_PC_REGNUM = 15,		/* Contains program counter */
+  /* F0..F7 are the fp registers for the (obsolete) FPA architecture.  */
   ARM_F0_REGNUM = 16,		/* first floating point register */
   ARM_F3_REGNUM = 19,		/* last floating point argument register */
   ARM_F7_REGNUM = 23, 		/* last floating point register */
@@ -158,9 +159,6 @@ int thumb_insn_size (unsigned short inst1);
 
 /* Returns true if the condition evaluates to true.  */
 int condition_true (unsigned long cond, unsigned long status_reg);
-
-/* Return number of 1-bits in VAL.  */
-int bitcount (unsigned long val);
 
 /* Return 1 if THIS_INSTR might change control flow, 0 otherwise.  */
 int arm_instruction_changes_pc (uint32_t this_instr);

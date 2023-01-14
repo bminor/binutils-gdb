@@ -1,4 +1,4 @@
-#as: -z180
+#as: -march=z180
 #objdump: -d
 #name: Z180 specific instructions
 

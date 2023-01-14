@@ -1940,10 +1940,8 @@ xcoff64_slurp_armap (bfd *abfd)
     }
 
   /* Read in the entire symbol table.  */
-  contents = (bfd_byte *) bfd_alloc (abfd, sz + 1);
+  contents = (bfd_byte *) _bfd_alloc_and_read (abfd, sz + 1, sz);
   if (contents == NULL)
-    return FALSE;
-  if (bfd_bread (contents, sz, abfd) != sz)
     return FALSE;
 
   /* Ensure strings are NULL terminated so we don't wander off the end
@@ -2000,7 +1998,7 @@ xcoff64_archive_p (bfd *abfd)
   char magic[SXCOFFARMAG];
   /* This is the new format.  */
   struct xcoff_ar_file_hdr_big hdr;
-  bfd_size_type amt = SXCOFFARMAG;
+  size_t amt = SXCOFFARMAG;
 
   if (bfd_bread (magic, amt, abfd) != amt)
     {

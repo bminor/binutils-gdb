@@ -355,6 +355,16 @@ struct opcode32
   const char *  assembler;	/* How to disassemble this insn.  */
 };
 
+struct cdeopcode32
+{
+  arm_feature_set arch;		/* Architecture defining this insn.  */
+  uint8_t coproc_shift;		/* coproc is this far into op.  */
+  uint16_t coproc_mask;		/* Length of coproc field in op.  */
+  unsigned long value;		/* If arch is 0 then value is a sentinel.  */
+  unsigned long mask;		/* Recognise insn if (op & mask) == value.  */
+  const char *  assembler;	/* How to disassemble this insn.  */
+};
+
 /* MVE opcodes.  */
 
 struct mopcode32
@@ -459,6 +469,75 @@ enum opcode_sentinel_enum
 #define UNPREDICTABLE_INSTRUCTION  "\t; <UNPREDICTABLE>"
 
 /* Common coprocessor opcodes shared between Arm and Thumb-2.  */
+
+/* print_insn_cde recognizes the following format control codes:
+
+   %%			%
+
+   %a			print 'a' iff bit 28 is 1
+   %p			print bits 8-10 as coprocessor
+   %<bitfield>d		print as decimal
+   %<bitfield>r		print as an ARM register
+   %<bitfield>n		print as an ARM register but r15 is APSR_nzcv
+   %<bitfield>T		print as an ARM register + 1
+   %<bitfield>R		as %r but r13 is UNPREDICTABLE
+   %<bitfield>S		as %r but rX where X > 10 is UNPREDICTABLE
+   %j			print immediate taken from bits (16..21,7,0..5)
+   %k			print immediate taken from bits (20..21,7,0..5).
+   %l			print immediate taken from bits (20..22,7,4..5).  */
+
+/* At the moment there is only one valid position for the coprocessor number,
+   and hence that's encoded in the macro below.  */
+#define CDE_OPCODE(ARCH, VALUE, MASK, ASM) \
+  { ARCH, 8, 7, VALUE, MASK, ASM }
+static const struct cdeopcode32 cde_opcodes[] =
+{
+  /* Custom Datapath Extension instructions.  */
+  CDE_OPCODE (ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE),
+	      0xee000000, 0xefc00840,
+	      "cx1%a\t%p, %12-15n, #%0-5,7,16-21d"),
+  CDE_OPCODE (ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE),
+	      0xee000040, 0xefc00840,
+	      "cx1d%a\t%p, %12-15S, %12-15T, #%0-5,7,16-21d"),
+
+  CDE_OPCODE (ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE),
+	      0xee400000, 0xefc00840,
+	      "cx2%a\t%p, %12-15n, %16-19n, #%0-5,7,20-21d"),
+  CDE_OPCODE (ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE),
+	      0xee400040, 0xefc00840,
+	      "cx2d%a\t%p, %12-15S, %12-15T, %16-19n, #%0-5,7,20-21d"),
+
+  CDE_OPCODE (ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE),
+	      0xee800000, 0xef800840,
+	      "cx3%a\t%p, %0-3n, %16-19n, %12-15n, #%4-5,7,20-22d"),
+  CDE_OPCODE (ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE),
+	      0xee800040, 0xef800840,
+	     "cx3d%a\t%p, %0-3S, %0-3T, %16-19n, %12-15n, #%4-5,7,20-22d"),
+
+  CDE_OPCODE (ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE),
+	      0xec200000, 0xeeb00840,
+	      "vcx1%a\t%p, %12-15,22V, #%0-5,7,16-19d"),
+  CDE_OPCODE (ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE),
+	      0xec200040, 0xeeb00840,
+	      "vcx1%a\t%p, %12-15,22V, #%0-5,7,16-19,24d"),
+
+  CDE_OPCODE (ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE),
+	      0xec300000, 0xeeb00840,
+	      "vcx2%a\t%p, %12-15,22V, %0-3,5V, #%4,7,16-19d"),
+  CDE_OPCODE (ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE),
+	      0xec300040, 0xeeb00840,
+	      "vcx2%a\t%p, %12-15,22V, %0-3,5V, #%4,7,16-19,24d"),
+
+  CDE_OPCODE (ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE),
+	      0xec800000, 0xee800840,
+	      "vcx3%a\t%p, %12-15,22V, %16-19,7V, %0-3,5V, #%4,20-21d"),
+  CDE_OPCODE (ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE),
+	      0xec800040, 0xee800840,
+	      "vcx3%a\t%p, %12-15,22V, %16-19,7V, %0-3,5V, #%4,20-21,24d"),
+
+  CDE_OPCODE (ARM_FEATURE_CORE_LOW (0), 0, 0, 0)
+
+};
 
 static const struct sopcode32 coprocessor_opcodes[] =
 {
@@ -5115,7 +5194,8 @@ static const arm_regname regnames[] =
   { "reg-names-atpcs", N_("Select register names used in the ATPCS"),
     { "a1", "a2", "a3", "a4", "v1", "v2", "v3", "v4", "v5", "v6", "v7",  "v8",  "IP",  "SP",  "LR",  "PC" }},
   { "reg-names-special-atpcs", N_("Select special register names used in the ATPCS"),
-    { "a1", "a2", "a3", "a4", "v1", "v2", "v3", "WR", "v5", "SB", "SL",  "FP",  "IP",  "SP",  "LR",  "PC" }}
+    { "a1", "a2", "a3", "a4", "v1", "v2", "v3", "WR", "v5", "SB", "SL",  "FP",  "IP",  "SP",  "LR",  "PC" }},
+  { "coproc<N>=(cde|generic)", N_("Enable CDE extensions for coprocessor N space"), { NULL } }
 };
 
 static const char *const iwmmxt_wwnames[] =
@@ -5195,6 +5275,7 @@ static unsigned int regname_selected = 1;
 #define arm_regnames      regnames[regname_selected].reg_names
 
 static bfd_boolean force_thumb = FALSE;
+static uint16_t cde_coprocs = 0;
 
 /* Current IT instruction state.  This contains the same state as the IT
    bits in the CPSR.  */
@@ -8786,6 +8867,140 @@ print_arm_address (bfd_vma pc, struct disassemble_info *info, long given)
   return (signed long) offset;
 }
 
+
+/* Print one cde instruction on INFO->STREAM.
+   Return TRUE if the instuction matched, FALSE if this is not a
+   recognised cde instruction.  */
+static bfd_boolean
+print_insn_cde (struct disassemble_info *info, long given, bfd_boolean thumb)
+{
+  const struct cdeopcode32 *insn;
+  void *stream = info->stream;
+  fprintf_ftype func = info->fprintf_func;
+
+  if (thumb)
+  {
+    /* Manually extract the coprocessor code from a known point.
+       This position is the same across all CDE instructions.  */
+    for (insn = cde_opcodes; insn->assembler; insn++)
+    {
+      uint16_t coproc = (given >> insn->coproc_shift) & insn->coproc_mask;
+      uint16_t coproc_mask = 1 << coproc;
+      if (! (coproc_mask & cde_coprocs))
+	continue;
+
+      if ((given & insn->mask) == insn->value)
+      {
+	bfd_boolean is_unpredictable = FALSE;
+	const char *c;
+
+	for (c = insn->assembler; *c; c++)
+	{
+	  if (*c == '%')
+	  {
+	    switch (*++c)
+	    {
+	      case '%':
+		func (stream, "%%");
+		break;
+
+	      case '0': case '1': case '2': case '3': case '4':
+	      case '5': case '6': case '7': case '8': case '9':
+	      {
+		int width;
+		unsigned long value;
+
+		c = arm_decode_bitfield (c, given, &value, &width);
+
+		switch (*c)
+		{
+		  case 'S':
+		    if (value > 10)
+		      is_unpredictable = TRUE;
+		    /* Fall through.  */
+		  case 'R':
+		    if (value == 13)
+		      is_unpredictable = TRUE;
+		    /* Fall through.  */
+		  case 'r':
+		    func (stream, "%s", arm_regnames[value]);
+		    break;
+
+		  case 'n':
+		    if (value == 15)
+		      func (stream, "%s", "APSR_nzcv");
+		    else
+		      func (stream, "%s", arm_regnames[value]);
+		    break;
+
+		  case 'T':
+		    func (stream, "%s", arm_regnames[value + 1]);
+		    break;
+
+		  case 'd':
+		    func (stream, "%ld", value);
+		    break;
+
+		  case 'V':
+		    if (given & (1 << 6))
+		      func (stream, "q%ld", value >> 1);
+		    else if (given & (1 << 24))
+		      func (stream, "d%ld", value);
+		    else
+		      {
+			/* Encoding for S register is different than for D and
+			   Q registers.  S registers are encoded using the top
+			   single bit in position 22 as the lowest bit of the
+			   register number, while for Q and D it represents the
+			   highest bit of the register number.  */
+			uint8_t top_bit = (value >> 4) & 1;
+			uint8_t tmp = (value << 1) & 0x1e;
+			uint8_t res = tmp | top_bit;
+			func (stream, "s%u", res);
+		      }
+		    break;
+
+		default:
+		  abort ();
+		}
+	      }
+	    break;
+
+	    case 'p':
+	      {
+		uint8_t proc_number = (given >> 8) & 0x7;
+		func (stream, "p%u", proc_number);
+		break;
+	      }
+
+	    case 'a':
+	      {
+		uint8_t a_offset = 28;
+		if (given & (1 << a_offset))
+		  func (stream, "a");
+		break;
+	      }
+	  default:
+	    abort ();
+	  }
+	}
+	else
+	  func (stream, "%c", *c);
+      }
+
+      if (is_unpredictable)
+	func (stream, UNPREDICTABLE_INSTRUCTION);
+
+      return TRUE;
+      }
+    }
+    return FALSE;
+  }
+  else
+    return FALSE;
+}
+
+
 /* Print one neon instruction on INFO->STREAM.
    Return TRUE if the instuction matched, FALSE if this is not a
    recognised neon instruction.  */
@@ -10587,6 +10802,9 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
   if (is_mve && print_insn_mve (info, given))
     return;
 
+  if (print_insn_cde (info, given, TRUE))
+    return;
+
   if (print_insn_generic_coprocessor (pc, info, given, TRUE))
     return;
 
@@ -11356,6 +11574,36 @@ parse_arm_disassembler_options (const char *options)
 	force_thumb = 1;
       else if (CONST_STRNEQ (opt, "no-force-thumb"))
 	force_thumb = 0;
+      else if (CONST_STRNEQ (opt, "coproc"))
+	{
+	  const char *procptr = opt + sizeof ("coproc") - 1;
+	  char *endptr;
+	  uint8_t coproc_number = strtol (procptr, &endptr, 10);
+	  if (endptr != procptr + 1 || coproc_number > 7)
+	    {
+	      opcodes_error_handler (_("cde coprocessor not between 0-7: %s"),
+				     opt);
+	      continue;
+	    }
+	  if (*endptr != '=')
+	    {
+	      opcodes_error_handler (_("coproc must have an argument: %s"),
+				     opt);
+	      continue;
+	    }
+	  endptr += 1;
+	  if (CONST_STRNEQ (endptr, "generic"))
+	    cde_coprocs &= ~(1 << coproc_number);
+	  else if (CONST_STRNEQ (endptr, "cde")
+		   || CONST_STRNEQ (endptr, "CDE"))
+	    cde_coprocs |= (1 << coproc_number);
+	  else
+	    {
+	      opcodes_error_handler (
+		  _("coprocN argument takes options \"generic\","
+		    " \"cde\", or \"CDE\": %s"), opt);
+	    }
+	}
       else
 	/* xgettext: c-format */
 	opcodes_error_handler (_("unrecognised disassembler option: %s"), opt);

@@ -425,7 +425,7 @@ typedef buf_displaced_step_closure s390_displaced_step_closure;
 
 /* Implementation of gdbarch_displaced_step_copy_insn.  */
 
-static struct displaced_step_closure *
+static displaced_step_closure_up
 s390_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			       CORE_ADDR from, CORE_ADDR to,
 			       struct regcache *regs)
@@ -477,7 +477,8 @@ s390_displaced_step_copy_insn (struct gdbarch *gdbarch,
       displaced_step_dump_bytes (gdb_stdlog, buf, len);
     }
 
-  return closure.release ();
+  /* This is a work around for a problem with g++ 4.8.  */
+  return displaced_step_closure_up (closure.release ());
 }
 
 /* Fix up the state of registers and memory after having single-stepped

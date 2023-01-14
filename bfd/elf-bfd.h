@@ -1503,6 +1503,12 @@ struct elf_backend_data
   /* Opcode representing no unwind.  */
   int (*cant_unwind_opcode) (struct bfd_link_info *);
 
+  /* Called when emitting an ELF symbol whoes input version had an
+     ST_SHNDX field set to a value in the range SHN_LOPROC..SHN_HIOS.
+     Returns the value to be installed in the ST_SHNDX field of the
+     emitted symbol.  If not defined, the value is left unchanged.  */
+  unsigned int (*symbol_section_index) (bfd *, elf_symbol_type *);
+  
   /* This is non-zero if static TLS segments require a special alignment.  */
   unsigned static_tls_alignment;
 
