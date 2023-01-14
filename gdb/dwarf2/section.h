@@ -94,6 +94,15 @@ struct dwarf2_section_info
     return size;
   }
 
+  /* Issue a complaint that something was outside the bounds of this
+     buffer.  */
+  void overflow_complaint () const;
+
+  /* Return pointer to string in this section at offset STR_OFFSET
+     with error reporting string FORM_NAME.  */
+  const char *read_string (struct objfile *objfile, LONGEST str_offset,
+			   const char *form_name);
+
   union
   {
     /* If this is a real section, the bfd section.  */

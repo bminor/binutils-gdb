@@ -1,5 +1,128 @@
 2020-03-26  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (struct die_info): Move to die.h.
+	* dwarf2/die.h: New file.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/line-header.h (dwarf_decode_line_header): Declare.
+	* dwarf2/read.c
+	(dwarf2_statement_list_fits_in_line_number_section_complaint):
+	Move to line-header.c.
+	(read_checked_initial_length_and_offset, read_formatted_entries):
+	Likewise.
+	(dwarf_decode_line_header): Split into two.
+	* dwarf2/line-header.c
+	(dwarf2_statement_list_fits_in_line_number_section_complaint):
+	Move from read.c.
+	(read_checked_initial_length_and_offset, read_formatted_entries):
+	Likewise.
+	(dwarf_decode_line_header): New function, split from read.c.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.h (struct dwarf2_per_objfile) <read_line_string>:
+	Declare method.
+	* dwarf2/read.c (read_attribute_value): Update.
+	(dwarf2_per_objfile::read_line_string): Rename from
+	read_indirect_line_string.
+	(read_formatted_entries): Update.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/macro.c (dwarf_decode_macro_bytes): Use objfile local
+	variable.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/macro.h (dwarf_decode_macros): Make section parameter
+	const.
+	* dwarf2/macro.c (skip_form_bytes, skip_unknown_opcode)
+	(dwarf_decode_macro_bytes, dwarf_decode_macros): Make section
+	parameter const.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (dwarf_decode_macros): Make "lh" const.
+	* dwarf2/macro.h (dwarf_decode_macros): Constify "lh" parameter.
+	* dwarf2/macro.c (macro_start_file): Constify "lh" parameter.
+	(dwarf_decode_macro_bytes, dwarf_decode_macros): Likewise.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/line-header.h (struct line_header) <is_valid_file_index,
+	file_names_size, file_full_name, file_file_name>: Use const.
+	<file_name_at, file_names>: Add const overload.
+	* dwarf2/line-header.c (line_header::file_file_name)
+	(line_header::file_full_name): Update.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (dwarf2_macro_malformed_definition_complaint)
+	(macro_start_file, consume_improper_spaces)
+	(parse_macro_definition, skip_form_bytes, skip_unknown_opcode)
+	(dwarf_parse_macro_header, dwarf_decode_macro_bytes)
+	(dwarf_decode_macros): Move to macro.c.
+	* dwarf2/macro.c: New file.
+	* dwarf2/macro.h: New file.
+	* Makefile.in (COMMON_SFILES): Add dwarf2/macro.c.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/section.h (struct dwarf2_section_info) <read_string>: New
+	method.
+	* dwarf2/section.c: New method.  From
+	read_indirect_string_at_offset_from.
+	* dwarf2/read.c (mapped_debug_names::namei_to_name): Update.
+	(read_indirect_string_at_offset_from): Move to section.c.
+	(read_indirect_string_at_offset): Rewrite.
+	(read_indirect_line_string_at_offset): Remove.
+	(read_indirect_string, read_indirect_line_string)
+	(dwarf_decode_macro_bytes): Update.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/section.h (struct dwarf2_section_info)
+	<overload_complaint>: Declare.
+	(dwarf2_section_buffer_overflow_complaint): Don't declare.
+	* dwarf2/section.c (dwarf2_section_info::overflow_complaint):
+	Rename from dwarf2_section_buffer_overflow_complaint.
+	* dwarf2/read.c (skip_one_die, partial_die_info::read)
+	(skip_form_bytes, dwarf_decode_macro_bytes): Update.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/section.h (dwarf2_section_buffer_overflow_complaint):
+	Declare.
+	* dwarf2/section.c (dwarf2_section_buffer_overflow_complaint):
+	Move from read.c.
+	* dwarf2/read.c (dwarf2_section_buffer_overflow_complaint): Move
+	to section.c.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (dwarf_decode_macros): Split into two overloads.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (macro_start_file): Change "cu" parameter to
+	"builder".
+	(dwarf_decode_macro_bytes): Likewise.  Add dwarf2_per_objfile
+	parameter.
+	(dwarf_decode_macros): Update.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (read_attribute_value): Update.
+	(read_indirect_string_from_dwz): Move to dwz.c; change into
+	method.
+	(dwarf_decode_macro_bytes): Update.
+	* dwarf2/dwz.h (struct dwz_file) <read_string>: Declare method.
+	* dwarf2/dwz.c: New file.
+	* Makefile.in (COMMON_SFILES): Add dwz.c.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.h (struct dwz_file): Move to dwz.h.
 	* dwarf2/read.c: Add include.
 	* dwarf2/index-write.c: Add include.

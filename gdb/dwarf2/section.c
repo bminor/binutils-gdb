@@ -28,6 +28,15 @@
 #include "dwarf2/section.h"
 #include "gdb_bfd.h"
 #include "objfiles.h"
+#include "complaints.h"
+
+void
+dwarf2_section_info::overflow_complaint () const
+{
+  complaint (_("debug info runs off end of %s section"
+	       " [in module %s]"),
+	     get_name (), get_file_name ());
+}
 
 struct dwarf2_section_info *
 dwarf2_section_info::get_containing_section () const
@@ -177,4 +186,21 @@ dwarf2_section_info::read (struct objfile *objfile)
 	       " in section %s [in module %s]"),
 	     bfd_section_name (sectp), bfd_get_filename (abfd));
     }
+}
+
+const char *
+dwarf2_section_info::read_string (struct objfile *objfile, LONGEST str_offset,
+				  const char *form_name)
+{
+  read (objfile);
+  if (buffer == NULL)
+    error (_("%s used without %s section [in module %s]"),
+	   form_name, get_name (), get_file_name ());
+  if (str_offset >= size)
+    error (_("%s pointing outside of %s section [in module %s]"),
+	   form_name, get_name (), get_file_name ());
+  gdb_assert (HOST_CHAR_BIT == 8);
+  if (buffer[str_offset] == '\0')
+    return NULL;
+  return (const char *) (buffer + str_offset);
 }

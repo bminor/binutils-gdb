@@ -53,6 +53,13 @@ struct dwz_file
   /* If we loaded the index from an external file, this contains the
      resources associated to the open file, memory mapping, etc.  */
   std::unique_ptr<index_cache_resource> index_cache_res;
+
+  /* Read a string at offset STR_OFFSET in the .debug_str section from
+     this dwz file.  Throw an error if the offset is too large.  If
+     the string consists of a single NUL byte, return NULL; otherwise
+     return a pointer to the string.  */
+
+  const char *read_string (struct objfile *objfile, LONGEST str_offset);
 };
 
 #endif /* GDB_DWARF2_DWZ_H */

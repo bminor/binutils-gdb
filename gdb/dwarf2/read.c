@@ -38,6 +38,8 @@
 #include "dwarf2/leb.h"
 #include "dwarf2/line-header.h"
 #include "dwarf2/dwz.h"
+#include "dwarf2/macro.h"
+#include "dwarf2/die.h"
 #include "bfd.h"
 #include "elf-bfd.h"
 #include "symtab.h"
@@ -48,7 +50,6 @@
 #include "demangle.h"
 #include "gdb-demangle.h"
 #include "filenames.h"	/* for DOSish file names */
-#include "macrotab.h"
 #include "language.h"
 #include "complaints.h"
 #include "dwarf2/expr.h"
@@ -1045,45 +1046,6 @@ struct partial_die_info : public allocate_on_obstack
     }
   };
 
-/* This data structure holds a complete die structure.  */
-struct die_info
-  {
-    /* DWARF-2 tag for this DIE.  */
-    ENUM_BITFIELD(dwarf_tag) tag : 16;
-
-    /* Number of attributes */
-    unsigned char num_attrs;
-
-    /* True if we're presently building the full type name for the
-       type derived from this DIE.  */
-    unsigned char building_fullname : 1;
-
-    /* True if this die is in process.  PR 16581.  */
-    unsigned char in_process : 1;
-
-    /* True if this DIE has children.  */
-    unsigned char has_children : 1;
-
-    /* Abbrev number */
-    unsigned int abbrev;
-
-    /* Offset in .debug_info or .debug_types section.  */
-    sect_offset sect_off;
-
-    /* The dies in a compilation unit form an n-ary tree.  PARENT
-       points to this die's parent; CHILD points to the first child of
-       this node; and all the children of a given node are chained
-       together via their SIBLING fields.  */
-    struct die_info *child;	/* Its first child, if any.  */
-    struct die_info *sibling;	/* Its next sibling, if any.  */
-    struct die_info *parent;	/* Its parent, if any.  */
-
-    /* An array of attributes, with NUM_ATTRS elements.  There may be
-       zero, but it's not common and zero-sized arrays are not
-       sufficiently portable C.  */
-    struct attribute attrs[1];
-  };
-
 /* FIXME: We might want to set this from BFD via bfd_arch_bits_per_byte,
    but this would require a corresponding change in unpack_field_as_long
    and friends.  */
@@ -1239,10 +1201,6 @@ static void read_attribute_reprocess (const struct die_reader_specs *reader,
 
 static CORE_ADDR read_addr_index (struct dwarf2_cu *cu, unsigned int addr_index);
 
-static LONGEST read_checked_initial_length_and_offset
-  (bfd *, const gdb_byte *, const struct comp_unit_head *,
-   unsigned int *, unsigned int *);
-
 static sect_offset read_abbrev_offset
   (struct dwarf2_per_objfile *dwarf2_per_objfile,
    struct dwarf2_section_info *, sect_offset);
@@ -1251,16 +1209,8 @@ static const char *read_indirect_string
   (struct dwarf2_per_objfile *dwarf2_per_objfile, bfd *, const gdb_byte *,
    const struct comp_unit_head *, unsigned int *);
 
-static const char *read_indirect_line_string
-  (struct dwarf2_per_objfile *dwarf2_per_objfile, bfd *, const gdb_byte *,
-   const struct comp_unit_head *, unsigned int *);
-
 static const char *read_indirect_string_at_offset
-  (struct dwarf2_per_objfile *dwarf2_per_objfile, bfd *abfd,
-   LONGEST str_offset);
-
-static const char *read_indirect_string_from_dwz
-  (struct objfile *objfile, struct dwz_file *, LONGEST);
+  (struct dwarf2_per_objfile *dwarf2_per_objfile, LONGEST str_offset);
 
 static CORE_ADDR read_addr_index_from_leb128 (struct dwarf2_cu *,
 					      const gdb_byte *,
@@ -1682,12 +1632,6 @@ static void free_line_header_voidp (void *arg);
 /* Various complaints about symbol reading that don't abort the process.  */
 
 static void
-dwarf2_statement_list_fits_in_line_number_section_complaint (void)
-{
-  complaint (_("statement list doesn't fit in .debug_line section"));
-}
-
-static void
 dwarf2_debug_line_missing_file_complaint (void)
 {
   complaint (_(".debug_line section has line data without a file"));
@@ -1712,23 +1656,6 @@ dwarf2_const_value_length_mismatch_complaint (const char *arg1, int arg2,
 {
   complaint (_("const value length mismatch for '%s', got %d, expected %d"),
 	     arg1, arg2, arg3);
-}
-
-static void
-dwarf2_section_buffer_overflow_complaint (struct dwarf2_section_info *section)
-{
-  complaint (_("debug info runs off end of %s section"
-	       " [in module %s]"),
-	     section->get_name (),
-	     section->get_file_name ());
-}
-
-static void
-dwarf2_macro_malformed_definition_complaint (const char *arg1)
-{
-  complaint (_("macro debug info contains a "
-	       "malformed macro definition:\n`%s'"),
-	     arg1);
 }
 
 static void
@@ -5183,8 +5110,8 @@ mapped_debug_names::namei_to_name (uint32_t namei) const
 				 + namei * offset_size),
 				offset_size,
 				dwarf5_byte_order);
-  return read_indirect_string_at_offset
-    (dwarf2_per_objfile, dwarf2_per_objfile->objfile->obfd, namei_string_offs);
+  return read_indirect_string_at_offset (dwarf2_per_objfile,
+					 namei_string_offs);
 }
 
 /* Find a slot in .debug_names for the object named NAME.  If NAME is
@@ -8607,7 +8534,7 @@ skip_one_die (const struct die_reader_specs *reader, const gdb_byte *info_ptr,
 	      if (sibling_ptr < info_ptr)
 		complaint (_("DW_AT_sibling points backwards"));
 	      else if (sibling_ptr > reader->buffer_end)
-		dwarf2_section_buffer_overflow_complaint (reader->die_section);
+		reader->die_section->overflow_complaint ();
 	      else
 		return sibling_ptr;
 	    }
@@ -18119,7 +18046,7 @@ partial_die_info::read (const struct die_reader_specs *reader,
 	      if (sibling_ptr < info_ptr)
 		complaint (_("DW_AT_sibling points backwards"));
 	      else if (sibling_ptr > reader->buffer_end)
-		dwarf2_section_buffer_overflow_complaint (reader->die_section);
+		reader->die_section->overflow_complaint ();
 	      else
 		sibling = sibling_ptr;
 	    }
@@ -18599,9 +18526,9 @@ read_attribute_value (const struct die_reader_specs *reader,
     case DW_FORM_line_strp:
       if (!cu->per_cu->is_dwz)
 	{
-	  DW_STRING (attr) = read_indirect_line_string (dwarf2_per_objfile,
-							abfd, info_ptr,
-							cu_header, &bytes_read);
+	  DW_STRING (attr)
+	    = dwarf2_per_objfile->read_line_string (info_ptr, cu_header,
+						    &bytes_read);
 	  DW_STRING_IS_CANONICAL (attr) = 0;
 	  info_ptr += bytes_read;
 	  break;
@@ -18613,8 +18540,7 @@ read_attribute_value (const struct die_reader_specs *reader,
 	LONGEST str_offset = cu_header->read_offset (abfd, info_ptr,
 						     &bytes_read);
 
-	DW_STRING (attr) = read_indirect_string_from_dwz (objfile,
-							  dwz, str_offset);
+	DW_STRING (attr) = dwz->read_string (objfile, str_offset);
 	DW_STRING_IS_CANONICAL (attr) = 0;
 	info_ptr += bytes_read;
       }
@@ -18784,104 +18710,14 @@ read_attribute (const struct die_reader_specs *reader,
 			       need_reprocess);
 }
 
-/* Cover function for read_initial_length.
-   Returns the length of the object at BUF, and stores the size of the
-   initial length in *BYTES_READ and stores the size that offsets will be in
-   *OFFSET_SIZE.
-   If the initial length size is not equivalent to that specified in
-   CU_HEADER then issue a complaint.
-   This is useful when reading non-comp-unit headers.  */
-
-static LONGEST
-read_checked_initial_length_and_offset (bfd *abfd, const gdb_byte *buf,
-					const struct comp_unit_head *cu_header,
-					unsigned int *bytes_read,
-					unsigned int *offset_size)
-{
-  LONGEST length = read_initial_length (abfd, buf, bytes_read);
-
-  gdb_assert (cu_header->initial_length_size == 4
-	      || cu_header->initial_length_size == 8
-	      || cu_header->initial_length_size == 12);
-
-  if (cu_header->initial_length_size != *bytes_read)
-    complaint (_("intermixed 32-bit and 64-bit DWARF sections"));
-
-  *offset_size = (*bytes_read == 4) ? 4 : 8;
-  return length;
-}
-
-/* Return pointer to string at section SECT offset STR_OFFSET with error
-   reporting strings FORM_NAME and SECT_NAME.  */
-
-static const char *
-read_indirect_string_at_offset_from (struct objfile *objfile,
-				     bfd *abfd, LONGEST str_offset,
-				     struct dwarf2_section_info *sect,
-				     const char *form_name,
-				     const char *sect_name)
-{
-  sect->read (objfile);
-  if (sect->buffer == NULL)
-    error (_("%s used without %s section [in module %s]"),
-	   form_name, sect_name, bfd_get_filename (abfd));
-  if (str_offset >= sect->size)
-    error (_("%s pointing outside of %s section [in module %s]"),
-	   form_name, sect_name, bfd_get_filename (abfd));
-  gdb_assert (HOST_CHAR_BIT == 8);
-  if (sect->buffer[str_offset] == '\0')
-    return NULL;
-  return (const char *) (sect->buffer + str_offset);
-}
-
 /* Return pointer to string at .debug_str offset STR_OFFSET.  */
 
 static const char *
 read_indirect_string_at_offset (struct dwarf2_per_objfile *dwarf2_per_objfile,
-				bfd *abfd, LONGEST str_offset)
+				LONGEST str_offset)
 {
-  return read_indirect_string_at_offset_from (dwarf2_per_objfile->objfile,
-					      abfd, str_offset,
-					      &dwarf2_per_objfile->str,
-					      "DW_FORM_strp", ".debug_str");
-}
-
-/* Return pointer to string at .debug_line_str offset STR_OFFSET.  */
-
-static const char *
-read_indirect_line_string_at_offset (struct dwarf2_per_objfile *dwarf2_per_objfile,
-				     bfd *abfd, LONGEST str_offset)
-{
-  return read_indirect_string_at_offset_from (dwarf2_per_objfile->objfile,
-					      abfd, str_offset,
-					      &dwarf2_per_objfile->line_str,
-					      "DW_FORM_line_strp",
-					      ".debug_line_str");
-}
-
-/* Read a string at offset STR_OFFSET in the .debug_str section from
-   the .dwz file DWZ.  Throw an error if the offset is too large.  If
-   the string consists of a single NUL byte, return NULL; otherwise
-   return a pointer to the string.  */
-
-static const char *
-read_indirect_string_from_dwz (struct objfile *objfile, struct dwz_file *dwz,
-			       LONGEST str_offset)
-{
-  dwz->str.read (objfile);
-
-  if (dwz->str.buffer == NULL)
-    error (_("DW_FORM_GNU_strp_alt used without .debug_str "
-	     "section [in module %s]"),
-	   bfd_get_filename (dwz->dwz_bfd.get ()));
-  if (str_offset >= dwz->str.size)
-    error (_("DW_FORM_GNU_strp_alt pointing outside of "
-	     ".debug_str section [in module %s]"),
-	   bfd_get_filename (dwz->dwz_bfd.get ()));
-  gdb_assert (HOST_CHAR_BIT == 8);
-  if (dwz->str.buffer[str_offset] == '\0')
-    return NULL;
-  return (const char *) (dwz->str.buffer + str_offset);
+  return dwarf2_per_objfile->str.read_string (dwarf2_per_objfile->objfile,
+					      str_offset, "DW_FORM_strp");
 }
 
 /* Return pointer to string at .debug_str offset as read from BUF.
@@ -18896,23 +18732,20 @@ read_indirect_string (struct dwarf2_per_objfile *dwarf2_per_objfile, bfd *abfd,
 {
   LONGEST str_offset = cu_header->read_offset (abfd, buf, bytes_read_ptr);
 
-  return read_indirect_string_at_offset (dwarf2_per_objfile, abfd, str_offset);
+  return read_indirect_string_at_offset (dwarf2_per_objfile, str_offset);
 }
 
-/* Return pointer to string at .debug_line_str offset as read from BUF.
-   BUF is assumed to be in a compilation unit described by CU_HEADER.
-   Return *BYTES_READ_PTR count of bytes read from BUF.  */
+/* See read.h.  */
 
-static const char *
-read_indirect_line_string (struct dwarf2_per_objfile *dwarf2_per_objfile,
-			   bfd *abfd, const gdb_byte *buf,
+const char *
+dwarf2_per_objfile::read_line_string (const gdb_byte *buf,
 			   const struct comp_unit_head *cu_header,
 			   unsigned int *bytes_read_ptr)
 {
+  bfd *abfd = objfile->obfd;
   LONGEST str_offset = cu_header->read_offset (abfd, buf, bytes_read_ptr);
 
-  return read_indirect_line_string_at_offset (dwarf2_per_objfile, abfd,
-					      str_offset);
+  return line_str.read_string (objfile, str_offset, "DW_FORM_line_strp");
 }
 
 /* Given index ADDR_INDEX in .debug_addr, fetch the value.
@@ -19337,140 +19170,6 @@ get_debug_line_section (struct dwarf2_cu *cu)
   return section;
 }
 
-/* Read directory or file name entry format, starting with byte of
-   format count entries, ULEB128 pairs of entry formats, ULEB128 of
-   entries count and the entries themselves in the described entry
-   format.  */
-
-static void
-read_formatted_entries (struct dwarf2_per_objfile *dwarf2_per_objfile,
-			bfd *abfd, const gdb_byte **bufp,
-			struct line_header *lh,
-			const struct comp_unit_head *cu_header,
-			void (*callback) (struct line_header *lh,
-					  const char *name,
-					  dir_index d_index,
-					  unsigned int mod_time,
-					  unsigned int length))
-{
-  gdb_byte format_count, formati;
-  ULONGEST data_count, datai;
-  const gdb_byte *buf = *bufp;
-  const gdb_byte *format_header_data;
-  unsigned int bytes_read;
-
-  format_count = read_1_byte (abfd, buf);
-  buf += 1;
-  format_header_data = buf;
-  for (formati = 0; formati < format_count; formati++)
-    {
-      read_unsigned_leb128 (abfd, buf, &bytes_read);
-      buf += bytes_read;
-      read_unsigned_leb128 (abfd, buf, &bytes_read);
-      buf += bytes_read;
-    }
-
-  data_count = read_unsigned_leb128 (abfd, buf, &bytes_read);
-  buf += bytes_read;
-  for (datai = 0; datai < data_count; datai++)
-    {
-      const gdb_byte *format = format_header_data;
-      struct file_entry fe;
-
-      for (formati = 0; formati < format_count; formati++)
-	{
-	  ULONGEST content_type = read_unsigned_leb128 (abfd, format, &bytes_read);
-	  format += bytes_read;
-
-	  ULONGEST form  = read_unsigned_leb128 (abfd, format, &bytes_read);
-	  format += bytes_read;
-
-	  gdb::optional<const char *> string;
-	  gdb::optional<unsigned int> uint;
-
-	  switch (form)
-	    {
-	    case DW_FORM_string:
-	      string.emplace (read_direct_string (abfd, buf, &bytes_read));
-	      buf += bytes_read;
-	      break;
-
-	    case DW_FORM_line_strp:
-	      string.emplace (read_indirect_line_string (dwarf2_per_objfile,
-							 abfd, buf,
-							 cu_header,
-							 &bytes_read));
-	      buf += bytes_read;
-	      break;
-
-	    case DW_FORM_data1:
-	      uint.emplace (read_1_byte (abfd, buf));
-	      buf += 1;
-	      break;
-
-	    case DW_FORM_data2:
-	      uint.emplace (read_2_bytes (abfd, buf));
-	      buf += 2;
-	      break;
-
-	    case DW_FORM_data4:
-	      uint.emplace (read_4_bytes (abfd, buf));
-	      buf += 4;
-	      break;
-
-	    case DW_FORM_data8:
-	      uint.emplace (read_8_bytes (abfd, buf));
-	      buf += 8;
-	      break;
-
-	    case DW_FORM_data16:
-	      /*  This is used for MD5, but file_entry does not record MD5s. */
-	      buf += 16;
-	      break;
-
-	    case DW_FORM_udata:
-	      uint.emplace (read_unsigned_leb128 (abfd, buf, &bytes_read));
-	      buf += bytes_read;
-	      break;
-
-	    case DW_FORM_block:
-	      /* It is valid only for DW_LNCT_timestamp which is ignored by
-		 current GDB.  */
-	      break;
-	    }
-
-	  switch (content_type)
-	    {
-	    case DW_LNCT_path:
-	      if (string.has_value ())
-		fe.name = *string;
-	      break;
-	    case DW_LNCT_directory_index:
-	      if (uint.has_value ())
-		fe.d_index = (dir_index) *uint;
-	      break;
-	    case DW_LNCT_timestamp:
-	      if (uint.has_value ())
-		fe.mod_time = *uint;
-	      break;
-	    case DW_LNCT_size:
-	      if (uint.has_value ())
-		fe.length = *uint;
-	      break;
-	    case DW_LNCT_MD5:
-	      break;
-	    default:
-	      complaint (_("Unknown format content type %s"),
-			 pulongest (content_type));
-	    }
-	}
-
-      callback (lh, fe.name, fe.d_index, fe.mod_time, fe.length);
-    }
-
-  *bufp = buf;
-}
-
 /* Read the statement program header starting at OFFSET in
    .debug_line, or .debug_line.dwo.  Return a pointer
    to a struct line_header, allocated using xmalloc.
@@ -19484,12 +19183,7 @@ read_formatted_entries (struct dwarf2_per_objfile *dwarf2_per_objfile,
 static line_header_up
 dwarf_decode_line_header (sect_offset sect_off, struct dwarf2_cu *cu)
 {
-  const gdb_byte *line_ptr;
-  unsigned int bytes_read, offset_size;
-  int i;
-  const char *cur_dir, *cur_file;
   struct dwarf2_section_info *section;
-  bfd *abfd;
   struct dwarf2_per_objfile *dwarf2_per_objfile
     = cu->per_cu->dwarf2_per_objfile;
 
@@ -19504,159 +19198,9 @@ dwarf_decode_line_header (sect_offset sect_off, struct dwarf2_cu *cu)
       return 0;
     }
 
-  /* We can't do this until we know the section is non-empty.
-     Only then do we know we have such a section.  */
-  abfd = section->get_bfd_owner ();
-
-  /* Make sure that at least there's room for the total_length field.
-     That could be 12 bytes long, but we're just going to fudge that.  */
-  if (to_underlying (sect_off) + 4 >= section->size)
-    {
-      dwarf2_statement_list_fits_in_line_number_section_complaint ();
-      return 0;
-    }
-
-  line_header_up lh (new line_header ());
-
-  lh->sect_off = sect_off;
-  lh->offset_in_dwz = cu->per_cu->is_dwz;
-
-  line_ptr = section->buffer + to_underlying (sect_off);
-
-  /* Read in the header.  */
-  lh->total_length =
-    read_checked_initial_length_and_offset (abfd, line_ptr, &cu->header,
-					    &bytes_read, &offset_size);
-  line_ptr += bytes_read;
-
-  const gdb_byte *start_here = line_ptr;
-
-  if (line_ptr + lh->total_length > (section->buffer + section->size))
-    {
-      dwarf2_statement_list_fits_in_line_number_section_complaint ();
-      return 0;
-    }
-  lh->statement_program_end = start_here + lh->total_length;
-  lh->version = read_2_bytes (abfd, line_ptr);
-  line_ptr += 2;
-  if (lh->version > 5)
-    {
-      /* This is a version we don't understand.  The format could have
-	 changed in ways we don't handle properly so just punt.  */
-      complaint (_("unsupported version in .debug_line section"));
-      return NULL;
-    }
-  if (lh->version >= 5)
-    {
-      gdb_byte segment_selector_size;
-
-      /* Skip address size.  */
-      read_1_byte (abfd, line_ptr);
-      line_ptr += 1;
-
-      segment_selector_size = read_1_byte (abfd, line_ptr);
-      line_ptr += 1;
-      if (segment_selector_size != 0)
-	{
-	  complaint (_("unsupported segment selector size %u "
-		       "in .debug_line section"),
-		     segment_selector_size);
-	  return NULL;
-	}
-    }
-  lh->header_length = read_offset (abfd, line_ptr, offset_size);
-  line_ptr += offset_size;
-  lh->statement_program_start = line_ptr + lh->header_length;
-  lh->minimum_instruction_length = read_1_byte (abfd, line_ptr);
-  line_ptr += 1;
-  if (lh->version >= 4)
-    {
-      lh->maximum_ops_per_instruction = read_1_byte (abfd, line_ptr);
-      line_ptr += 1;
-    }
-  else
-    lh->maximum_ops_per_instruction = 1;
-
-  if (lh->maximum_ops_per_instruction == 0)
-    {
-      lh->maximum_ops_per_instruction = 1;
-      complaint (_("invalid maximum_ops_per_instruction "
-		   "in `.debug_line' section"));
-    }
-
-  lh->default_is_stmt = read_1_byte (abfd, line_ptr);
-  line_ptr += 1;
-  lh->line_base = read_1_signed_byte (abfd, line_ptr);
-  line_ptr += 1;
-  lh->line_range = read_1_byte (abfd, line_ptr);
-  line_ptr += 1;
-  lh->opcode_base = read_1_byte (abfd, line_ptr);
-  line_ptr += 1;
-  lh->standard_opcode_lengths.reset (new unsigned char[lh->opcode_base]);
-
-  lh->standard_opcode_lengths[0] = 1;  /* This should never be used anyway.  */
-  for (i = 1; i < lh->opcode_base; ++i)
-    {
-      lh->standard_opcode_lengths[i] = read_1_byte (abfd, line_ptr);
-      line_ptr += 1;
-    }
-
-  if (lh->version >= 5)
-    {
-      /* Read directory table.  */
-      read_formatted_entries (dwarf2_per_objfile, abfd, &line_ptr, lh.get (),
-			      &cu->header,
-			      [] (struct line_header *header, const char *name,
-				  dir_index d_index, unsigned int mod_time,
-				  unsigned int length)
-	{
-	  header->add_include_dir (name);
-	});
-
-      /* Read file name table.  */
-      read_formatted_entries (dwarf2_per_objfile, abfd, &line_ptr, lh.get (),
-			      &cu->header,
-			      [] (struct line_header *header, const char *name,
-				  dir_index d_index, unsigned int mod_time,
-				  unsigned int length)
-	{
-	  header->add_file_name (name, d_index, mod_time, length);
-	});
-    }
-  else
-    {
-      /* Read directory table.  */
-      while ((cur_dir = read_direct_string (abfd, line_ptr, &bytes_read)) != NULL)
-	{
-	  line_ptr += bytes_read;
-	  lh->add_include_dir (cur_dir);
-	}
-      line_ptr += bytes_read;
-
-      /* Read file name table.  */
-      while ((cur_file = read_direct_string (abfd, line_ptr, &bytes_read)) != NULL)
-	{
-	  unsigned int mod_time, length;
-	  dir_index d_index;
-
-	  line_ptr += bytes_read;
-	  d_index = (dir_index) read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
-	  line_ptr += bytes_read;
-	  mod_time = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
-	  line_ptr += bytes_read;
-	  length = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
-	  line_ptr += bytes_read;
-
-	  lh->add_file_name (cur_file, d_index, mod_time, length);
-	}
-      line_ptr += bytes_read;
-    }
-
-  if (line_ptr > (section->buffer + section->size))
-    complaint (_("line number info header doesn't "
-		 "fit in `.debug_line' section"));
-
-  return lh;
+  return dwarf_decode_line_header (sect_off, cu->per_cu->is_dwz,
+				   dwarf2_per_objfile, section,
+				   &cu->header);
 }
 
 /* Subroutine of dwarf_decode_lines to simplify it.
@@ -23179,691 +22723,25 @@ dwarf_alloc_die (struct dwarf2_cu *cu, int num_attrs)
 }
 
 
+
 /* Macro support.  */
 
-static struct macro_source_file *
-macro_start_file (struct dwarf2_cu *cu,
-		  int file, int line,
-                  struct macro_source_file *current_file,
-                  struct line_header *lh)
-{
-  /* File name relative to the compilation directory of this source file.  */
-  gdb::unique_xmalloc_ptr<char> file_name = lh->file_file_name (file);
-
-  if (! current_file)
-    {
-      /* Note: We don't create a macro table for this compilation unit
-	 at all until we actually get a filename.  */
-      struct macro_table *macro_table = cu->get_builder ()->get_macro_table ();
-
-      /* If we have no current file, then this must be the start_file
-	 directive for the compilation unit's main source file.  */
-      current_file = macro_set_main (macro_table, file_name.get ());
-      macro_define_special (macro_table);
-    }
-  else
-    current_file = macro_include (current_file, line, file_name.get ());
-
-  return current_file;
-}
-
-static const char *
-consume_improper_spaces (const char *p, const char *body)
-{
-  if (*p == ' ')
-    {
-      complaint (_("macro definition contains spaces "
-		   "in formal argument list:\n`%s'"),
-		 body);
-
-      while (*p == ' ')
-        p++;
-    }
-
-  return p;
-}
-
-
-static void
-parse_macro_definition (struct macro_source_file *file, int line,
-                        const char *body)
-{
-  const char *p;
-
-  /* The body string takes one of two forms.  For object-like macro
-     definitions, it should be:
-
-        <macro name> " " <definition>
-
-     For function-like macro definitions, it should be:
-
-        <macro name> "() " <definition>
-     or
-        <macro name> "(" <arg name> ( "," <arg name> ) * ") " <definition>
-
-     Spaces may appear only where explicitly indicated, and in the
-     <definition>.
-
-     The Dwarf 2 spec says that an object-like macro's name is always
-     followed by a space, but versions of GCC around March 2002 omit
-     the space when the macro's definition is the empty string.
-
-     The Dwarf 2 spec says that there should be no spaces between the
-     formal arguments in a function-like macro's formal argument list,
-     but versions of GCC around March 2002 include spaces after the
-     commas.  */
-
-
-  /* Find the extent of the macro name.  The macro name is terminated
-     by either a space or null character (for an object-like macro) or
-     an opening paren (for a function-like macro).  */
-  for (p = body; *p; p++)
-    if (*p == ' ' || *p == '(')
-      break;
-
-  if (*p == ' ' || *p == '\0')
-    {
-      /* It's an object-like macro.  */
-      int name_len = p - body;
-      std::string name (body, name_len);
-      const char *replacement;
-
-      if (*p == ' ')
-        replacement = body + name_len + 1;
-      else
-        {
-	  dwarf2_macro_malformed_definition_complaint (body);
-          replacement = body + name_len;
-        }
-
-      macro_define_object (file, line, name.c_str (), replacement);
-    }
-  else if (*p == '(')
-    {
-      /* It's a function-like macro.  */
-      std::string name (body, p - body);
-      int argc = 0;
-      int argv_size = 1;
-      char **argv = XNEWVEC (char *, argv_size);
-
-      p++;
-
-      p = consume_improper_spaces (p, body);
-
-      /* Parse the formal argument list.  */
-      while (*p && *p != ')')
-        {
-          /* Find the extent of the current argument name.  */
-          const char *arg_start = p;
-
-          while (*p && *p != ',' && *p != ')' && *p != ' ')
-            p++;
-
-          if (! *p || p == arg_start)
-	    dwarf2_macro_malformed_definition_complaint (body);
-          else
-            {
-              /* Make sure argv has room for the new argument.  */
-              if (argc >= argv_size)
-                {
-                  argv_size *= 2;
-                  argv = XRESIZEVEC (char *, argv, argv_size);
-                }
-
-              argv[argc++] = savestring (arg_start, p - arg_start);
-            }
-
-          p = consume_improper_spaces (p, body);
-
-          /* Consume the comma, if present.  */
-          if (*p == ',')
-            {
-              p++;
-
-              p = consume_improper_spaces (p, body);
-            }
-        }
-
-      if (*p == ')')
-        {
-          p++;
-
-          if (*p == ' ')
-            /* Perfectly formed definition, no complaints.  */
-            macro_define_function (file, line, name.c_str (),
-                                   argc, (const char **) argv,
-                                   p + 1);
-          else if (*p == '\0')
-            {
-              /* Complain, but do define it.  */
-	      dwarf2_macro_malformed_definition_complaint (body);
-              macro_define_function (file, line, name.c_str (),
-                                     argc, (const char **) argv,
-                                     p);
-            }
-          else
-            /* Just complain.  */
-	    dwarf2_macro_malformed_definition_complaint (body);
-        }
-      else
-        /* Just complain.  */
-	dwarf2_macro_malformed_definition_complaint (body);
-
-      {
-        int i;
-
-        for (i = 0; i < argc; i++)
-          xfree (argv[i]);
-      }
-      xfree (argv);
-    }
-  else
-    dwarf2_macro_malformed_definition_complaint (body);
-}
-
-/* Skip some bytes from BYTES according to the form given in FORM.
-   Returns the new pointer.  */
-
-static const gdb_byte *
-skip_form_bytes (bfd *abfd, const gdb_byte *bytes, const gdb_byte *buffer_end,
-		 enum dwarf_form form,
-		 unsigned int offset_size,
-		 struct dwarf2_section_info *section)
-{
-  unsigned int bytes_read;
-
-  switch (form)
-    {
-    case DW_FORM_data1:
-    case DW_FORM_flag:
-      ++bytes;
-      break;
-
-    case DW_FORM_data2:
-      bytes += 2;
-      break;
-
-    case DW_FORM_data4:
-      bytes += 4;
-      break;
-
-    case DW_FORM_data8:
-      bytes += 8;
-      break;
-
-    case DW_FORM_data16:
-      bytes += 16;
-      break;
-
-    case DW_FORM_string:
-      read_direct_string (abfd, bytes, &bytes_read);
-      bytes += bytes_read;
-      break;
-
-    case DW_FORM_sec_offset:
-    case DW_FORM_strp:
-    case DW_FORM_GNU_strp_alt:
-      bytes += offset_size;
-      break;
-
-    case DW_FORM_block:
-      bytes += read_unsigned_leb128 (abfd, bytes, &bytes_read);
-      bytes += bytes_read;
-      break;
-
-    case DW_FORM_block1:
-      bytes += 1 + read_1_byte (abfd, bytes);
-      break;
-    case DW_FORM_block2:
-      bytes += 2 + read_2_bytes (abfd, bytes);
-      break;
-    case DW_FORM_block4:
-      bytes += 4 + read_4_bytes (abfd, bytes);
-      break;
-
-    case DW_FORM_addrx:
-    case DW_FORM_sdata:
-    case DW_FORM_strx:
-    case DW_FORM_udata:
-    case DW_FORM_GNU_addr_index:
-    case DW_FORM_GNU_str_index:
-      bytes = gdb_skip_leb128 (bytes, buffer_end);
-      if (bytes == NULL)
-	{
-	  dwarf2_section_buffer_overflow_complaint (section);
-	  return NULL;
-	}
-      break;
-
-    case DW_FORM_implicit_const:
-      break;
-
-    default:
-      {
-	complaint (_("invalid form 0x%x in `%s'"),
-		   form, section->get_name ());
-	return NULL;
-      }
-    }
-
-  return bytes;
-}
-
-/* A helper for dwarf_decode_macros that handles skipping an unknown
-   opcode.  Returns an updated pointer to the macro data buffer; or,
-   on error, issues a complaint and returns NULL.  */
-
-static const gdb_byte *
-skip_unknown_opcode (unsigned int opcode,
-		     const gdb_byte **opcode_definitions,
-		     const gdb_byte *mac_ptr, const gdb_byte *mac_end,
-		     bfd *abfd,
-		     unsigned int offset_size,
-		     struct dwarf2_section_info *section)
-{
-  unsigned int bytes_read, i;
-  unsigned long arg;
-  const gdb_byte *defn;
-
-  if (opcode_definitions[opcode] == NULL)
-    {
-      complaint (_("unrecognized DW_MACFINO opcode 0x%x"),
-		 opcode);
-      return NULL;
-    }
-
-  defn = opcode_definitions[opcode];
-  arg = read_unsigned_leb128 (abfd, defn, &bytes_read);
-  defn += bytes_read;
-
-  for (i = 0; i < arg; ++i)
-    {
-      mac_ptr = skip_form_bytes (abfd, mac_ptr, mac_end,
-				 (enum dwarf_form) defn[i], offset_size,
-				 section);
-      if (mac_ptr == NULL)
-	{
-	  /* skip_form_bytes already issued the complaint.  */
-	  return NULL;
-	}
-    }
-
-  return mac_ptr;
-}
-
-/* A helper function which parses the header of a macro section.
-   If the macro section is the extended (for now called "GNU") type,
-   then this updates *OFFSET_SIZE.  Returns a pointer to just after
-   the header, or issues a complaint and returns NULL on error.  */
-
-static const gdb_byte *
-dwarf_parse_macro_header (const gdb_byte **opcode_definitions,
-			  bfd *abfd,
-			  const gdb_byte *mac_ptr,
-			  unsigned int *offset_size,
-			  int section_is_gnu)
-{
-  memset (opcode_definitions, 0, 256 * sizeof (gdb_byte *));
-
-  if (section_is_gnu)
-    {
-      unsigned int version, flags;
-
-      version = read_2_bytes (abfd, mac_ptr);
-      if (version != 4 && version != 5)
-	{
-	  complaint (_("unrecognized version `%d' in .debug_macro section"),
-		     version);
-	  return NULL;
-	}
-      mac_ptr += 2;
-
-      flags = read_1_byte (abfd, mac_ptr);
-      ++mac_ptr;
-      *offset_size = (flags & 1) ? 8 : 4;
-
-      if ((flags & 2) != 0)
-	/* We don't need the line table offset.  */
-	mac_ptr += *offset_size;
-
-      /* Vendor opcode descriptions.  */
-      if ((flags & 4) != 0)
-	{
-	  unsigned int i, count;
-
-	  count = read_1_byte (abfd, mac_ptr);
-	  ++mac_ptr;
-	  for (i = 0; i < count; ++i)
-	    {
-	      unsigned int opcode, bytes_read;
-	      unsigned long arg;
-
-	      opcode = read_1_byte (abfd, mac_ptr);
-	      ++mac_ptr;
-	      opcode_definitions[opcode] = mac_ptr;
-	      arg = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
-	      mac_ptr += bytes_read;
-	      mac_ptr += arg;
-	    }
-	}
-    }
-
-  return mac_ptr;
-}
-
-/* A helper for dwarf_decode_macros that handles the GNU extensions,
-   including DW_MACRO_import.  */
-
-static void
-dwarf_decode_macro_bytes (struct dwarf2_cu *cu,
-			  bfd *abfd,
-			  const gdb_byte *mac_ptr, const gdb_byte *mac_end,
-			  struct macro_source_file *current_file,
-			  struct line_header *lh,
-			  struct dwarf2_section_info *section,
-			  int section_is_gnu, int section_is_dwz,
-			  unsigned int offset_size,
-			  htab_t include_hash)
-{
-  struct dwarf2_per_objfile *dwarf2_per_objfile
-    = cu->per_cu->dwarf2_per_objfile;
-  struct objfile *objfile = dwarf2_per_objfile->objfile;
-  enum dwarf_macro_record_type macinfo_type;
-  int at_commandline;
-  const gdb_byte *opcode_definitions[256];
-
-  mac_ptr = dwarf_parse_macro_header (opcode_definitions, abfd, mac_ptr,
-				      &offset_size, section_is_gnu);
-  if (mac_ptr == NULL)
-    {
-      /* We already issued a complaint.  */
-      return;
-    }
-
-  /* Determines if GDB is still before first DW_MACINFO_start_file.  If true
-     GDB is still reading the definitions from command line.  First
-     DW_MACINFO_start_file will need to be ignored as it was already executed
-     to create CURRENT_FILE for the main source holding also the command line
-     definitions.  On first met DW_MACINFO_start_file this flag is reset to
-     normally execute all the remaining DW_MACINFO_start_file macinfos.  */
-
-  at_commandline = 1;
-
-  do
-    {
-      /* Do we at least have room for a macinfo type byte?  */
-      if (mac_ptr >= mac_end)
-	{
-	  dwarf2_section_buffer_overflow_complaint (section);
-	  break;
-	}
-
-      macinfo_type = (enum dwarf_macro_record_type) read_1_byte (abfd, mac_ptr);
-      mac_ptr++;
-
-      /* Note that we rely on the fact that the corresponding GNU and
-	 DWARF constants are the same.  */
-      DIAGNOSTIC_PUSH
-      DIAGNOSTIC_IGNORE_SWITCH_DIFFERENT_ENUM_TYPES
-      switch (macinfo_type)
-	{
-	  /* A zero macinfo type indicates the end of the macro
-	     information.  */
-	case 0:
-	  break;
-
-        case DW_MACRO_define:
-        case DW_MACRO_undef:
-	case DW_MACRO_define_strp:
-	case DW_MACRO_undef_strp:
-	case DW_MACRO_define_sup:
-	case DW_MACRO_undef_sup:
-          {
-            unsigned int bytes_read;
-            int line;
-            const char *body;
-	    int is_define;
-
-	    line = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
-	    mac_ptr += bytes_read;
-
-	    if (macinfo_type == DW_MACRO_define
-		|| macinfo_type == DW_MACRO_undef)
-	      {
-		body = read_direct_string (abfd, mac_ptr, &bytes_read);
-		mac_ptr += bytes_read;
-	      }
-	    else
-	      {
-		LONGEST str_offset;
-
-		str_offset = read_offset (abfd, mac_ptr, offset_size);
-		mac_ptr += offset_size;
-
-		if (macinfo_type == DW_MACRO_define_sup
-		    || macinfo_type == DW_MACRO_undef_sup
-		    || section_is_dwz)
-		  {
-		    struct dwz_file *dwz
-		      = dwarf2_get_dwz_file (dwarf2_per_objfile);
-
-		    body = read_indirect_string_from_dwz (objfile,
-							  dwz, str_offset);
-		  }
-		else
-		  body = read_indirect_string_at_offset (dwarf2_per_objfile,
-							 abfd, str_offset);
-	      }
-
-	    is_define = (macinfo_type == DW_MACRO_define
-			 || macinfo_type == DW_MACRO_define_strp
-			 || macinfo_type == DW_MACRO_define_sup);
-            if (! current_file)
-	      {
-		/* DWARF violation as no main source is present.  */
-		complaint (_("debug info with no main source gives macro %s "
-			     "on line %d: %s"),
-			   is_define ? _("definition") : _("undefinition"),
-			   line, body);
-		break;
-	      }
-	    if ((line == 0 && !at_commandline)
-		|| (line != 0 && at_commandline))
-	      complaint (_("debug info gives %s macro %s with %s line %d: %s"),
-			 at_commandline ? _("command-line") : _("in-file"),
-			 is_define ? _("definition") : _("undefinition"),
-			 line == 0 ? _("zero") : _("non-zero"), line, body);
-
-	    if (body == NULL)
-	      {
-		/* Fedora's rpm-build's "debugedit" binary
-		   corrupted .debug_macro sections.
-
-		   For more info, see
-		   https://bugzilla.redhat.com/show_bug.cgi?id=1708786 */
-		complaint (_("debug info gives %s invalid macro %s "
-			     "without body (corrupted?) at line %d "
-			     "on file %s"),
-			   at_commandline ? _("command-line") : _("in-file"),
-			   is_define ? _("definition") : _("undefinition"),
-			   line, current_file->filename);
-	      }
-	    else if (is_define)
-	      parse_macro_definition (current_file, line, body);
-	    else
-	      {
-		gdb_assert (macinfo_type == DW_MACRO_undef
-			    || macinfo_type == DW_MACRO_undef_strp
-			    || macinfo_type == DW_MACRO_undef_sup);
-		macro_undef (current_file, line, body);
-	      }
-          }
-          break;
-
-        case DW_MACRO_start_file:
-          {
-            unsigned int bytes_read;
-            int line, file;
-
-            line = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
-            mac_ptr += bytes_read;
-            file = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
-            mac_ptr += bytes_read;
-
-	    if ((line == 0 && !at_commandline)
-		|| (line != 0 && at_commandline))
-	      complaint (_("debug info gives source %d included "
-			   "from %s at %s line %d"),
-			 file, at_commandline ? _("command-line") : _("file"),
-			 line == 0 ? _("zero") : _("non-zero"), line);
-
-	    if (at_commandline)
-	      {
-		/* This DW_MACRO_start_file was executed in the
-		   pass one.  */
-		at_commandline = 0;
-	      }
-	    else
-	      current_file = macro_start_file (cu, file, line, current_file,
-					       lh);
-          }
-          break;
-
-        case DW_MACRO_end_file:
-          if (! current_file)
-	    complaint (_("macro debug info has an unmatched "
-			 "`close_file' directive"));
-          else
-            {
-              current_file = current_file->included_by;
-              if (! current_file)
-                {
-                  enum dwarf_macro_record_type next_type;
-
-                  /* GCC circa March 2002 doesn't produce the zero
-                     type byte marking the end of the compilation
-                     unit.  Complain if it's not there, but exit no
-                     matter what.  */
-
-                  /* Do we at least have room for a macinfo type byte?  */
-                  if (mac_ptr >= mac_end)
-                    {
-		      dwarf2_section_buffer_overflow_complaint (section);
-                      return;
-                    }
-
-                  /* We don't increment mac_ptr here, so this is just
-                     a look-ahead.  */
-                  next_type
-		    = (enum dwarf_macro_record_type) read_1_byte (abfd,
-								  mac_ptr);
-                  if (next_type != 0)
-		    complaint (_("no terminating 0-type entry for "
-				 "macros in `.debug_macinfo' section"));
-
-                  return;
-                }
-            }
-          break;
-
-	case DW_MACRO_import:
-	case DW_MACRO_import_sup:
-	  {
-	    LONGEST offset;
-	    void **slot;
-	    bfd *include_bfd = abfd;
-	    struct dwarf2_section_info *include_section = section;
-	    const gdb_byte *include_mac_end = mac_end;
-	    int is_dwz = section_is_dwz;
-	    const gdb_byte *new_mac_ptr;
-
-	    offset = read_offset (abfd, mac_ptr, offset_size);
-	    mac_ptr += offset_size;
-
-	    if (macinfo_type == DW_MACRO_import_sup)
-	      {
-		struct dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile);
-
-		dwz->macro.read (objfile);
-
-		include_section = &dwz->macro;
-		include_bfd = include_section->get_bfd_owner ();
-		include_mac_end = dwz->macro.buffer + dwz->macro.size;
-		is_dwz = 1;
-	      }
-
-	    new_mac_ptr = include_section->buffer + offset;
-	    slot = htab_find_slot (include_hash, new_mac_ptr, INSERT);
-
-	    if (*slot != NULL)
-	      {
-		/* This has actually happened; see
-		   http://sourceware.org/bugzilla/show_bug.cgi?id=13568.  */
-		complaint (_("recursive DW_MACRO_import in "
-			     ".debug_macro section"));
-	      }
-	    else
-	      {
-		*slot = (void *) new_mac_ptr;
-
-		dwarf_decode_macro_bytes (cu, include_bfd, new_mac_ptr,
-					  include_mac_end, current_file, lh,
-					  section, section_is_gnu, is_dwz,
-					  offset_size, include_hash);
-
-		htab_remove_elt (include_hash, (void *) new_mac_ptr);
-	      }
-	  }
-	  break;
-
-        case DW_MACINFO_vendor_ext:
-	  if (!section_is_gnu)
-	    {
-	      unsigned int bytes_read;
-
-	      /* This reads the constant, but since we don't recognize
-		 any vendor extensions, we ignore it.  */
-	      read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
-	      mac_ptr += bytes_read;
-	      read_direct_string (abfd, mac_ptr, &bytes_read);
-	      mac_ptr += bytes_read;
-
-	      /* We don't recognize any vendor extensions.  */
-	      break;
-	    }
-	  /* FALLTHROUGH */
-
-	default:
-	  mac_ptr = skip_unknown_opcode (macinfo_type, opcode_definitions,
-					 mac_ptr, mac_end, abfd, offset_size,
-					 section);
-	  if (mac_ptr == NULL)
-	    return;
-	  break;
-        }
-      DIAGNOSTIC_POP
-    } while (macinfo_type != 0);
-}
+/* An overload of dwarf_decode_macros that finds the correct section
+   and ensures it is read in before calling the other overload.  */
 
 static void
 dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
-                     int section_is_gnu)
+		     int section_is_gnu)
 {
   struct dwarf2_per_objfile *dwarf2_per_objfile
     = cu->per_cu->dwarf2_per_objfile;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
-  struct line_header *lh = cu->line_header;
-  bfd *abfd;
-  const gdb_byte *mac_ptr, *mac_end;
-  struct macro_source_file *current_file = 0;
-  enum dwarf_macro_record_type macinfo_type;
+  const struct line_header *lh = cu->line_header;
   unsigned int offset_size = cu->header.offset_size;
-  const gdb_byte *opcode_definitions[256];
-  void **slot;
   struct dwarf2_section_info *section;
   const char *section_name;
 
-  if (cu->dwo_unit != NULL)
+  if (cu->dwo_unit != nullptr)
     {
       if (section_is_gnu)
 	{
@@ -23891,152 +22769,16 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
     }
 
   section->read (objfile);
-  if (section->buffer == NULL)
+  if (section->buffer == nullptr)
     {
       complaint (_("missing %s section"), section_name);
       return;
     }
-  abfd = section->get_bfd_owner ();
 
-  /* First pass: Find the name of the base filename.
-     This filename is needed in order to process all macros whose definition
-     (or undefinition) comes from the command line.  These macros are defined
-     before the first DW_MACINFO_start_file entry, and yet still need to be
-     associated to the base file.
+  buildsym_compunit *builder = cu->get_builder ();
 
-     To determine the base file name, we scan the macro definitions until we
-     reach the first DW_MACINFO_start_file entry.  We then initialize
-     CURRENT_FILE accordingly so that any macro definition found before the
-     first DW_MACINFO_start_file can still be associated to the base file.  */
-
-  mac_ptr = section->buffer + offset;
-  mac_end = section->buffer + section->size;
-
-  mac_ptr = dwarf_parse_macro_header (opcode_definitions, abfd, mac_ptr,
-				      &offset_size, section_is_gnu);
-  if (mac_ptr == NULL)
-    {
-      /* We already issued a complaint.  */
-      return;
-    }
-
-  do
-    {
-      /* Do we at least have room for a macinfo type byte?  */
-      if (mac_ptr >= mac_end)
-        {
-	  /* Complaint is printed during the second pass as GDB will probably
-	     stop the first pass earlier upon finding
-	     DW_MACINFO_start_file.  */
-	  break;
-        }
-
-      macinfo_type = (enum dwarf_macro_record_type) read_1_byte (abfd, mac_ptr);
-      mac_ptr++;
-
-      /* Note that we rely on the fact that the corresponding GNU and
-	 DWARF constants are the same.  */
-      DIAGNOSTIC_PUSH
-      DIAGNOSTIC_IGNORE_SWITCH_DIFFERENT_ENUM_TYPES
-      switch (macinfo_type)
-        {
-          /* A zero macinfo type indicates the end of the macro
-             information.  */
-        case 0:
-	  break;
-
-	case DW_MACRO_define:
-	case DW_MACRO_undef:
-	  /* Only skip the data by MAC_PTR.  */
-	  {
-	    unsigned int bytes_read;
-
-	    read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
-	    mac_ptr += bytes_read;
-	    read_direct_string (abfd, mac_ptr, &bytes_read);
-	    mac_ptr += bytes_read;
-	  }
-	  break;
-
-	case DW_MACRO_start_file:
-	  {
-	    unsigned int bytes_read;
-	    int line, file;
-
-	    line = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
-	    mac_ptr += bytes_read;
-	    file = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
-	    mac_ptr += bytes_read;
-
-	    current_file = macro_start_file (cu, file, line, current_file, lh);
-	  }
-	  break;
-
-	case DW_MACRO_end_file:
-	  /* No data to skip by MAC_PTR.  */
-	  break;
-
-	case DW_MACRO_define_strp:
-	case DW_MACRO_undef_strp:
-	case DW_MACRO_define_sup:
-	case DW_MACRO_undef_sup:
-	  {
-	    unsigned int bytes_read;
-
-	    read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
-	    mac_ptr += bytes_read;
-	    mac_ptr += offset_size;
-	  }
-	  break;
-
-	case DW_MACRO_import:
-	case DW_MACRO_import_sup:
-	  /* Note that, according to the spec, a transparent include
-	     chain cannot call DW_MACRO_start_file.  So, we can just
-	     skip this opcode.  */
-	  mac_ptr += offset_size;
-	  break;
-
-	case DW_MACINFO_vendor_ext:
-	  /* Only skip the data by MAC_PTR.  */
-	  if (!section_is_gnu)
-	    {
-	      unsigned int bytes_read;
-
-	      read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
-	      mac_ptr += bytes_read;
-	      read_direct_string (abfd, mac_ptr, &bytes_read);
-	      mac_ptr += bytes_read;
-	    }
-	  /* FALLTHROUGH */
-
-	default:
-	  mac_ptr = skip_unknown_opcode (macinfo_type, opcode_definitions,
-					 mac_ptr, mac_end, abfd, offset_size,
-					 section);
-	  if (mac_ptr == NULL)
-	    return;
-	  break;
-	}
-      DIAGNOSTIC_POP
-    } while (macinfo_type != 0 && current_file == NULL);
-
-  /* Second pass: Process all entries.
-
-     Use the AT_COMMAND_LINE flag to determine whether we are still processing
-     command-line macro definitions/undefinitions.  This flag is unset when we
-     reach the first DW_MACINFO_start_file entry.  */
-
-  htab_up include_hash (htab_create_alloc (1, htab_hash_pointer,
-					   htab_eq_pointer,
-					   NULL, xcalloc, xfree));
-  mac_ptr = section->buffer + offset;
-  slot = htab_find_slot (include_hash.get (), mac_ptr, INSERT);
-  *slot = (void *) mac_ptr;
-  dwarf_decode_macro_bytes (cu, abfd, mac_ptr, mac_end,
-			    current_file, lh, section,
-			    section_is_gnu, 0, offset_size,
-			    include_hash.get ());
+  dwarf_decode_macros (dwarf2_per_objfile, builder, section, lh,
+		       offset_size, offset, section_is_gnu);
 }
 
 /* Return the .debug_loc section to use for CU.
