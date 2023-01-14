@@ -1213,6 +1213,16 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
     m_type = type;
   }
 
+  unsigned short line () const
+  {
+    return m_line;
+  }
+
+  void set_line (unsigned short line)
+  {
+    m_line = line;
+  }
+
   /* Data type of value */
 
   struct type *m_type = nullptr;
@@ -1280,7 +1290,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
      to debug files longer than 64K lines?  What about machine
      generated programs?  */
 
-  unsigned short line = 0;
+  unsigned short m_line = 0;
 
   /* An arbitrary data pointer, allowing symbol readers to record
      additional information on a per-symbol basis.  Note that this data
@@ -1315,7 +1325,6 @@ struct block_symbol
 /* Note: There is no accessor macro for symbol.owner because it is
    "private".  */
 
-#define SYMBOL_LINE(symbol)		(symbol)->line
 #define SYMBOL_COMPUTED_OPS(symbol)	((symbol)->impl ().ops_computed)
 #define SYMBOL_BLOCK_OPS(symbol)	((symbol)->impl ().ops_block)
 #define SYMBOL_REGISTER_OPS(symbol)	((symbol)->impl ().ops_register)

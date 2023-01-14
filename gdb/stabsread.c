@@ -693,11 +693,11 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
     {
       /* GCC 2.x puts the line number in desc.  SunOS apparently puts in the
 	 number of bytes occupied by a type or object, which we ignore.  */
-      SYMBOL_LINE (sym) = desc;
+      sym->set_line (desc);
     }
   else
     {
-      SYMBOL_LINE (sym) = 0;	/* unknown */
+      sym->set_line (0);	/* unknown */
     }
 
   sym->set_language (get_current_subfile ()->language,

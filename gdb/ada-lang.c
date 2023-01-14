@@ -3355,14 +3355,14 @@ See set/show multiple-symbol."));
 	  if (syms[i].symbol->is_objfile_owned ())
 	    symtab = symbol_symtab (syms[i].symbol);
 
-	  if (SYMBOL_LINE (syms[i].symbol) != 0 && symtab != NULL)
+	  if (syms[i].symbol->line () != 0 && symtab != NULL)
 	    {
 	      printf_filtered ("[%d] ", i + first_choice);
 	      ada_print_symbol_signature (gdb_stdout, syms[i].symbol,
 					  &type_print_raw_options);
 	      printf_filtered (_(" at %s:%d\n"),
 			       symtab_to_filename_for_display (symtab),
-			       SYMBOL_LINE (syms[i].symbol));
+			       syms[i].symbol->line ());
 	    }
 	  else if (is_enumeral
 		   && syms[i].symbol->type ()->name () != NULL)

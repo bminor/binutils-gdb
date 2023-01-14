@@ -2699,10 +2699,10 @@ find_frame_sal (frame_info *frame)
       gdb_assert (sym);
 
       symtab_and_line sal;
-      if (SYMBOL_LINE (sym) != 0)
+      if (sym->line () != 0)
 	{
 	  sal.symtab = symbol_symtab (sym);
-	  sal.line = SYMBOL_LINE (sym);
+	  sal.line = sym->line ();
 	}
       else
 	/* If the symbol does not have a location, we don't know where

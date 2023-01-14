@@ -3987,9 +3987,9 @@ skip_prologue_sal (struct symtab_and_line *sal)
       b = BLOCK_SUPERBLOCK (b);
     }
   if (function_block != NULL
-      && SYMBOL_LINE (BLOCK_FUNCTION (function_block)) != 0)
+      && BLOCK_FUNCTION (function_block)->line () != 0)
     {
-      sal->line = SYMBOL_LINE (BLOCK_FUNCTION (function_block));
+      sal->line = BLOCK_FUNCTION (function_block)->line ();
       sal->symtab = symbol_symtab (BLOCK_FUNCTION (function_block));
     }
 }
@@ -4850,7 +4850,7 @@ global_symbol_searcher::add_matching_symbols
 			      && sym->domain () != MODULE_DOMAIN)
 			  || (kind == MODULES_DOMAIN
 			      && sym->domain () == MODULE_DOMAIN
-			      && SYMBOL_LINE (sym) != 0))))
+			      && sym->line () != 0))))
 		{
 		  if (result_set->size () < m_max_search_results)
 		    {
@@ -5098,8 +5098,8 @@ print_symbol_info (enum search_domain kind,
 					  s_filename));
 	}
 
-      if (SYMBOL_LINE (sym) != 0)
-	printf_filtered ("%d:\t", SYMBOL_LINE (sym));
+      if (sym->line () != 0)
+	printf_filtered ("%d:\t", sym->line ());
       else
 	puts_filtered ("\t");
     }
