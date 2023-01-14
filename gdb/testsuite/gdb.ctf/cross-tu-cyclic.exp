@@ -24,10 +24,15 @@ standard_testfile cross-tu-cyclic-1.c  cross-tu-cyclic-2.c \
 	cross-tu-cyclic-3.c  cross-tu-cyclic-4.c
 
 # Using `-gctf` generates full-fledged CTF debug information.
-set opts "additional_flags=-gctf -Wl,--export-dynamic"
+set opts {}
+lappend opts additional_flags=-gctf
+lappend opts ldflags=-Wl,--export-dynamic
+lappend opts ldflags=-Wl,--strip-debug
+lappend opts nowarning
+
 if { [prepare_for_testing "failed to prepare" ${testfile} \
 	  [list $srcfile $srcfile2 $srcfile3 $srcfile4] \
-	  [list $opts nowarnings]] } {
+	  $opts] } {
     return 0
 }
 

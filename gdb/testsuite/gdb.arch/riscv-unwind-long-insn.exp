@@ -27,13 +27,15 @@ if {![istarget "riscv*-*-*"]} {
     return
 }
 
+standard_testfile riscv-unwind-long-insn.c \
+    riscv-unwind-long-insn.S
+
 foreach_with_prefix {insn_size} {6 8} {
-    standard_testfile riscv-unwind-long-insn.c \
-	riscv-unwind-long-insn-${insn_size}.s
+    set flags [list debug additional_flags=-DBAD_INSN_LEN=${insn_size}]
 
     set testfile "${testfile}-${insn_size}"
     if {[prepare_for_testing "failed to prepare" $testfile \
-	     "$srcfile $srcfile2"  debug]} {
+	     "$srcfile $srcfile2" $flags]} {
 	return -1
     }
 

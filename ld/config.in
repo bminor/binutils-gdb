@@ -7,6 +7,9 @@
 #endif
 #define __CONFIG_H__ 1
 
+/* Default compression algorithm for --enable-compressed-debug-sections. */
+#undef DEFAULT_COMPRESSED_DEBUG_ALGORITHM
+
 /* Define to 1 if you want to emit gnu hash in the ELF linker by default. */
 #undef DEFAULT_EMIT_GNU_HASH
 
@@ -75,10 +78,6 @@
 /* Is the prototype for getopt in <unistd.h> in the expected format? */
 #undef HAVE_DECL_GETOPT
 
-/* Define to 1 if you have the declaration of `sbrk', and to 0 if you don't.
-   */
-#undef HAVE_DECL_SBRK
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
@@ -127,9 +126,6 @@
 /* Define to 1 if you have the `realpath' function. */
 #undef HAVE_REALPATH
 
-/* Define to 1 if you have the `sbrk' function. */
-#undef HAVE_SBRK
-
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
 
@@ -168,6 +164,9 @@
 
 /* Define to 1 if you have the <windows.h> header file. */
 #undef HAVE_WINDOWS_H
+
+/* Define to 1 if zstd is enabled. */
+#undef HAVE_ZSTD
 
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */

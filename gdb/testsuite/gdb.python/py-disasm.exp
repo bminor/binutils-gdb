@@ -110,8 +110,8 @@ foreach plan $test_plans {
 	    gdb_test_no_output "python add_global_disassembler($global_disassembler_name)"
 	}
 
-	# Disassemble main, and check the disassembler output.
-	gdb_test "disassemble main" $expected_pattern
+	# Disassemble test, and check the disassembler output.
+	gdb_test "disassemble test" $expected_pattern
     }
 }
 
@@ -138,21 +138,21 @@ with_test_prefix "DisassemblerResult errors" {
 with_test_prefix "GLOBAL tagging disassembler" {
     py_remove_all_disassemblers
     gdb_test_no_output "python gdb.disassembler.register_disassembler(TaggingDisassembler(\"GLOBAL\"), None)"
-    gdb_test "disassemble main" "${base_pattern}\\s+## tag = GLOBAL\r\n.*"
+    gdb_test "disassemble test" "${base_pattern}\\s+## tag = GLOBAL\r\n.*"
 }
 
 # Now register an architecture specific disassembler, and check it
 # overrides the global disassembler.
 with_test_prefix "LOCAL tagging disassembler" {
     gdb_test_no_output "python gdb.disassembler.register_disassembler(TaggingDisassembler(\"LOCAL\"), \"${curr_arch}\")"
-    gdb_test "disassemble main" "${base_pattern}\\s+## tag = LOCAL\r\n.*"
+    gdb_test "disassemble test" "${base_pattern}\\s+## tag = LOCAL\r\n.*"
 }
 
 # Now remove the architecture specific disassembler, and check that
 # the global disassembler kicks back in.
 with_test_prefix "GLOBAL tagging disassembler again" {
     gdb_test_no_output "python gdb.disassembler.register_disassembler(None, \"${curr_arch}\")"
-    gdb_test "disassemble main" "${base_pattern}\\s+## tag = GLOBAL\r\n.*"
+    gdb_test "disassemble test" "${base_pattern}\\s+## tag = GLOBAL\r\n.*"
 }
 
 # Check that a DisassembleInfo becomes invalid after the call into the
@@ -160,7 +160,7 @@ with_test_prefix "GLOBAL tagging disassembler again" {
 with_test_prefix "DisassembleInfo becomes invalid" {
     py_remove_all_disassemblers
     gdb_test_no_output "python add_global_disassembler(GlobalCachingDisassembler)"
-    gdb_test "disassemble main" "${base_pattern}\\s+## CACHED\r\n.*"
+    gdb_test "disassemble test" "${base_pattern}\\s+## CACHED\r\n.*"
     gdb_test "python GlobalCachingDisassembler.check()" "PASS"
 }
 
@@ -168,10 +168,10 @@ with_test_prefix "DisassembleInfo becomes invalid" {
 with_test_prefix "memory source api" {
     py_remove_all_disassemblers
     gdb_test_no_output "python analyzing_disassembler = add_global_disassembler(AnalyzingDisassembler)"
-    gdb_test "disassemble main" "${base_pattern}\r\n.*"
+    gdb_test "disassemble test" "${base_pattern}\r\n.*"
     gdb_test "python analyzing_disassembler.find_replacement_candidate()" \
 	"Replace from $hex to $hex with NOP"
-    gdb_test "disassemble main" "${base_pattern}\r\n.*" \
+    gdb_test "disassemble test" "${base_pattern}\r\n.*" \
 	"second disassembler pass"
     gdb_test "python analyzing_disassembler.check()" \
 	"PASS"
@@ -196,6 +196,12 @@ with_test_prefix "maint info python-disassemblers" {
 	     "\[^\r\n\]+BuiltinDisassembler\\s+\\(Matches current architecture\\)" \
 	     "GLOBAL\\s+BuiltinDisassembler"] \
 	"list disassemblers, multiple disassemblers registered"
+
+    # Check that disassembling main (with the BuiltinDisassembler in
+    # place) doesn't cause GDB to crash.  The hope is that
+    # disassembling main will result in a call to print_address, which
+    # is where the problem was.
+    gdb_test "disassemble main" ".*"
 }
 
 # Check the attempt to create a "new" DisassembleInfo object fails.

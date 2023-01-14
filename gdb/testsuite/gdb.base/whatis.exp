@@ -585,10 +585,15 @@ proc do_test {dir options} {
 	"whatis applied to function with 'void' parameter type"
 }
 
+set ctf_opts {}
+lappend ctf_opts additional_flags=-gctf
+lappend ctf_opts ldflags=-Wl,--strip-debug
+lappend ctf_opts ldflags=-Wl,--ctf-variables
+
 # Build up the set of debug formats for which we will run this test.
 set specs { {dwarf {debug}} }
 if ![skip_ctf_tests] {
-    lappend specs {ctf {"additional_flags=-gt"}}
+    lappend specs [list ctf $ctf_opts]
 }
 
 # Setup and run the test for each debug format.

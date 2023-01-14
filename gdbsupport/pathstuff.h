@@ -67,7 +67,7 @@ extern const char *child_path (const char *parent, const char *child);
    The first element can be absolute or relative.  All the others must be
    relative.  */
 
-extern std::string path_join (gdb::array_view<const gdb::string_view> paths);
+extern std::string path_join (gdb::array_view<const char *> paths);
 
 /* Same as the above, but accept paths as distinct parameters.  */
 
@@ -78,10 +78,10 @@ path_join (Args... paths)
   /* It doesn't make sense to join less than two paths.  */
   gdb_static_assert (sizeof... (Args) >= 2);
 
-  std::array<gdb::string_view, sizeof... (Args)> views
-    { gdb::string_view (paths)... };
+  std::array<const char *, sizeof... (Args)> path_array
+    { paths... };
 
-  return path_join (gdb::array_view<const gdb::string_view> (views));
+  return path_join (gdb::array_view<const char *> (path_array));
 }
 
 /* Return whether PATH contains a directory separator character.  */

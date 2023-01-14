@@ -30,6 +30,7 @@ SHA256PROG=sha256sum
 MAKE=make
 CC=gcc
 CXX=g++
+release_date=
 
 # Default to avoid splitting info files by setting the threshold high.
 MAKEINFOFLAGS=--split-size=5000000
@@ -184,9 +185,17 @@ do_tar()
     ver=$2
     echo "==> Making $package-$ver.tar"
     rm -f $package-$ver.tar
-    find $package-$ver -follow \( $CVS_NAMES \) -prune \
-	-o -type f -print \
-	| tar cTfh - $package-$ver.tar
+    if test x$release_date == "x" ; then
+       find $package-$ver -follow \( $CVS_NAMES \) -prune -o -type f -print \
+	   | tar cTfh - $package-$ver.tar
+    else
+	# Attempt to create a consistent, reproducible tarball using the
+	# specified date.
+	find $package-$ver -follow \( $CVS_NAMES \) -prune -o -type f -print \
+	    | LC_ALL=C sort \
+	    | tar cTfh - $package-$ver.tar \
+		  --mtime=$release_date --group=0 --owner=0
+    fi
 }
 
 # Compress the output with bzip2
@@ -340,6 +349,7 @@ usage()
     echo "  -g: Compress with gzip"
     echo "  -l: Compress with lzip"
     echo "  -x: Compress with xz"
+    echo "  -r <date>: Create a reproducible tarball using <date> as the mtime"
     exit 1
 }
 
@@ -363,7 +373,7 @@ build_release()
 
 compressors=""
 
-while getopts ":bglx" opt; do
+while getopts ":bglr:x" opt; do
     case $opt in
 	b)
 	    compressors="$compressors bz2";;
@@ -371,6 +381,8 @@ while getopts ":bglx" opt; do
 	    compressors="$compressors gz";;
 	l)
 	    compressors="$compressors lz";;
+	r)
+	    release_date=$OPTARG;;
 	x)
 	    compressors="$compressors xz";;
 	\?)

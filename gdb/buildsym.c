@@ -52,6 +52,7 @@ struct pending_block
 buildsym_compunit::buildsym_compunit (struct objfile *objfile_,
 				      const char *name,
 				      const char *comp_dir_,
+				      const char *name_for_id,
 				      enum language language_,
 				      CORE_ADDR last_addr)
   : m_objfile (objfile_),
@@ -70,7 +71,7 @@ buildsym_compunit::buildsym_compunit (struct objfile *objfile_,
      It can happen that the debug info provides a different path to NAME than
      DIRNAME,NAME.  We cope with this in watch_main_source_file_lossage but
      that only works if the main_subfile doesn't have a symtab yet.  */
-  start_subfile (name);
+  start_subfile (name, name_for_id);
   /* Save this so that we don't have to go looking for it at the end
      of the subfiles list.  */
   m_main_subfile = m_current_subfile;
@@ -483,45 +484,30 @@ buildsym_compunit::make_blockvector ()
 
   return (blockvector);
 }
-
-/* Start recording information about source code that came from an
-   included (or otherwise merged-in) source file with a different
-   name.  NAME is the name of the file (cannot be NULL).  */
+
+/* See buildsym.h.  */
 
 void
-buildsym_compunit::start_subfile (const char *name)
+buildsym_compunit::start_subfile (const char *name, const char *name_for_id)
 {
   /* See if this subfile is already registered.  */
 
+  symtab_create_debug_printf ("name = %s, name_for_id = %s", name, name_for_id);
+
   for (subfile *subfile = m_subfiles; subfile; subfile = subfile->next)
-    {
-      std::string subfile_name_holder;
-      const char *subfile_name;
-
-      /* If NAME is an absolute path, and this subfile is not, then
-	 attempt to create an absolute path to compare.  */
-      if (IS_ABSOLUTE_PATH (name)
-	  && !IS_ABSOLUTE_PATH (subfile->name)
-	  && !m_comp_dir.empty ())
-	{
-	  subfile_name_holder = path_join (m_comp_dir.c_str (),
-					   subfile->name.c_str ());
-	  subfile_name = subfile_name_holder.c_str ();
-	}
-      else
-	subfile_name = subfile->name.c_str ();
-
-      if (FILENAME_CMP (subfile_name, name) == 0)
-	{
-	  m_current_subfile = subfile;
-	  return;
-	}
-    }
+    if (FILENAME_CMP (subfile->name_for_id.c_str (), name_for_id) == 0)
+      {
+	symtab_create_debug_printf ("found existing symtab with name_for_id %s",
+				    subfile->name_for_id.c_str ());
+	m_current_subfile = subfile;
+	return;
+      }
 
   /* This subfile is not known.  Add an entry for it.  */
 
   subfile_up subfile (new struct subfile);
   subfile->name = name;
+  subfile->name_for_id = name_for_id;
 
   m_current_subfile = subfile.get ();
 
@@ -591,6 +577,7 @@ buildsym_compunit::patch_subfile_names (struct subfile *subfile,
     {
       m_comp_dir = std::move (subfile->name);
       subfile->name = name;
+      subfile->name_for_id = name;
       set_last_source_file (name);
 
       /* Default the source language to whatever can be deduced from
@@ -740,6 +727,9 @@ buildsym_compunit::watch_main_source_file_lossage ()
 	  /* Found a match for the main source file.
 	     Copy its line_vector and symtab to the main subfile
 	     and then discard it.  */
+
+	  symtab_create_debug_printf ("using subfile %s as the main subfile",
+				      mainsub_alias->name.c_str ());
 
 	  mainsub->line_vector_entries
 	    = std::move (mainsub_alias->line_vector_entries);
@@ -925,7 +915,8 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
 
       /* Allocate a symbol table if necessary.  */
       if (subfile->symtab == NULL)
-	subfile->symtab = allocate_symtab (cu, subfile->name.c_str ());
+	subfile->symtab = allocate_symtab (cu, subfile->name.c_str (),
+					   subfile->name_for_id.c_str ());
 
       struct symtab *symtab = subfile->symtab;
 

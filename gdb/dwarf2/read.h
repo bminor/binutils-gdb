@@ -33,6 +33,7 @@
 #include "gdbsupport/gdb_obstack.h"
 #include "gdbsupport/hash_enum.h"
 #include "gdbsupport/function-view.h"
+#include "gdbsupport/packed.h"
 
 /* Hold 'maintenance (set|show) dwarf' commands.  */
 extern struct cmd_list_element *set_dwarf_cmdlist;
@@ -105,11 +106,8 @@ struct dwarf2_per_cu_data
       reading_dwo_directly (false),
       tu_read (false),
       m_header_read_in (false),
-      addresses_seen (false),
       mark (false),
       files_read (false),
-      m_unit_type {},
-      m_lang (language_unknown),
       scanned (false)
   {
   }
@@ -120,9 +118,10 @@ struct dwarf2_per_cu_data
      If the DIE refers to a DWO file, this is always of the original die,
      not the DWO file.  */
   sect_offset sect_off {};
-  unsigned int length = 0;
 
 private:
+  unsigned int m_length = 0;
+
   /* DWARF standard version this data has been read from (such as 4 or 5).  */
   unsigned char m_dwarf_version = 0;
 
@@ -161,10 +160,6 @@ public:
      it private at the moment.  */
   mutable bool m_header_read_in : 1;
 
-  /* If addresses have been read for this CU (usually from
-     .debug_aranges), then this flag is set.  */
-  bool addresses_seen : 1;
-
   /* A temporary mark bit used when iterating over all CUs in
      expand_symtabs_matching.  */
   unsigned int mark : 1;
@@ -173,12 +168,20 @@ public:
      point in trying to read it again next time.  */
   bool files_read : 1;
 
+  /* Wrap the following in struct packed instead of bitfields to avoid
+     data races when the bitfields end up on the same memory location
+     (per C++ memory model).  */
+
+  /* If addresses have been read for this CU (usually from
+     .debug_aranges), then this flag is set.  */
+  packed<bool, 1> addresses_seen = false;
+
 private:
   /* The unit type of this CU.  */
-  ENUM_BITFIELD (dwarf_unit_type) m_unit_type : 8;
+  std::atomic<packed<dwarf_unit_type, 1>> m_unit_type {(dwarf_unit_type)0};
 
   /* The language of this CU.  */
-  ENUM_BITFIELD (language) m_lang : LANGUAGE_BITS;
+  std::atomic<packed<language, LANGUAGE_BYTES>> m_lang {language_unknown};
 
 public:
   /* True if this CU has been scanned by the indexer; false if
@@ -288,6 +291,24 @@ public:
      header for this CU.  */
   int ref_addr_size () const;
 
+  /* Return length of this CU.  */
+  unsigned int length () const
+  {
+    /* Make sure it's set already.  */
+    gdb_assert (m_length != 0);
+    return m_length;
+  }
+
+  void set_length (unsigned int length, bool strict_p = true)
+  {
+    if (m_length == 0)
+      /* Set if not set already.  */
+      m_length = length;
+    else if (strict_p)
+      /* If already set, verify that it's the same value.  */
+      gdb_assert (m_length == length);
+  }
+
   /* Return DWARF version number of this CU.  */
   short version () const
   {
@@ -306,35 +327,49 @@ public:
       gdb_assert (m_dwarf_version == version);
   }
 
-  dwarf_unit_type unit_type () const
+  dwarf_unit_type unit_type (bool strict_p = true) const
   {
-    gdb_assert (m_unit_type != 0);
-    return m_unit_type;
+    dwarf_unit_type ut = m_unit_type.load ();
+    if (strict_p)
+      gdb_assert (ut != 0);
+    return ut;
   }
 
   void set_unit_type (dwarf_unit_type unit_type)
   {
-    if (m_unit_type == 0)
-      /* Set if not set already.  */
-      m_unit_type = unit_type;
-    else
-      /* If already set, verify that it's the same value.  */
-      gdb_assert (m_unit_type == unit_type);
+    /* Set if not set already.  */
+    packed<dwarf_unit_type, 1> nope = (dwarf_unit_type)0;
+    if (m_unit_type.compare_exchange_strong (nope, unit_type))
+      return;
+
+    /* If already set, verify that it's the same value.  */
+    nope = unit_type;
+    if (m_unit_type.compare_exchange_strong (nope, unit_type))
+      return;
+    gdb_assert_not_reached ();
   }
 
-  enum language lang () const
+  enum language lang (bool strict_p = true) const
   {
-    gdb_assert (m_lang != language_unknown);
-    return m_lang;
+    enum language l = m_lang.load ();
+    if (strict_p)
+      gdb_assert (l != language_unknown);
+    return l;
   }
 
   void set_lang (enum language lang)
   {
-    /* We'd like to be more strict here, similar to what is done in
-       set_unit_type,  but currently a partial unit can go from unknown to
-       minimal to ada to c.  */
-    if (m_lang != lang)
-      m_lang = lang;
+    if (unit_type () == DW_UT_partial)
+      return;
+    /* Set if not set already.  */
+    packed<language, LANGUAGE_BYTES> nope = language_unknown;
+    if (m_lang.compare_exchange_strong (nope, lang))
+      return;
+    /* If already set, verify that it's the same value.  */
+    nope = lang;
+    if (m_lang.compare_exchange_strong (nope, lang))
+      return;
+    gdb_assert_not_reached ();
   }
 
   /* Free any cached file names.  */
@@ -398,7 +433,7 @@ struct dwarf2_per_bfd
   /* Return the CU given its index.  */
   dwarf2_per_cu_data *get_cu (int index) const
   {
-    return this->all_comp_units[index].get ();
+    return this->all_units[index].get ();
   }
 
   /* A convenience function to allocate a dwarf2_per_cu_data.  The
@@ -454,7 +489,12 @@ public:
 
   /* Table of all the compilation units.  This is used to locate
      the target compilation unit of a particular reference.  */
-  std::vector<dwarf2_per_cu_data_up> all_comp_units;
+  std::vector<dwarf2_per_cu_data_up> all_units;
+
+  /* The all_units vector contains both CUs and TUs.  Provide views on the
+     vector that are limited to either the CU part or the TU part.  */
+  gdb::array_view<dwarf2_per_cu_data_up> all_comp_units;
+  gdb::array_view<dwarf2_per_cu_data_up> all_type_units;
 
   /* Table of struct type_unit_group objects.
      The hash key is the DW_AT_stmt_list value.  */

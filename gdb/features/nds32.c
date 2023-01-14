@@ -5,12 +5,12 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 
-struct target_desc *tdesc_nds32;
+const struct target_desc *tdesc_nds32;
 static void
 initialize_tdesc_nds32 (void)
 {
   target_desc_up result = allocate_target_description ();
-  set_tdesc_architecture (result.get (), bfd_scan_arch ("n1h"));
+  set_tdesc_architecture (result.get (), bfd_scan_arch ("n1"));
 
   struct tdesc_feature *feature;
 

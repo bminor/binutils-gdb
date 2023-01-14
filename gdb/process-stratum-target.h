@@ -23,6 +23,7 @@
 #include "target.h"
 #include <set>
 #include "gdbsupport/intrusive_list.h"
+#include "gdbsupport/gdb-checked-static-cast.h"
 #include "gdbthread.h"
 
 /* Abstract base class inherited by all process_stratum targets.  */
@@ -160,7 +161,7 @@ static inline process_stratum_target *
 as_process_stratum_target (target_ops *target)
 {
   gdb_assert (target->stratum () == process_stratum);
-  return static_cast<process_stratum_target *> (target);
+  return gdb::checked_static_cast<process_stratum_target *> (target);
 }
 
 /* Return a collection of targets that have non-exited inferiors.  */

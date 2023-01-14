@@ -388,7 +388,7 @@ sim_io_error (SIM_DESC sd, const char *fmt, ...)
 
 /****/
 
-void ATTRIBUTE_NORETURN
+void
 error (const char *msg, ...)
 {
   va_list ap;

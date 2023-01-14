@@ -142,6 +142,19 @@ non_fatal (const char *format, ...)
   va_end (args);
 }
 
+/* Like xmalloc except that ABFD's objalloc memory is returned.
+   Use objalloc_free_block to free this memory and all more recently
+   allocated, or more usually, leave it to bfd_close to free.  */
+
+void *
+bfd_xalloc (bfd *abfd, size_t size)
+{
+  void *ret = bfd_alloc (abfd, size);
+  if (ret == NULL)
+    bfd_fatal (NULL);
+  return ret;
+}
+
 /* Set the default BFD target based on the configured target.  Doing
    this permits the binutils to be configured for a particular target,
    and linked against a shared BFD library which was configured for a
@@ -442,7 +455,6 @@ print_arelt_descr (FILE *file, bfd *abfd, bool verbose, bool offsets)
 	  char timebuf[40];
 	  time_t when = buf.st_mtime;
 	  const char *ctime_result = (const char *) ctime (&when);
-	  bfd_size_type size;
 
 	  /* PR binutils/17605: Check for corrupt time values.  */
 	  if (ctime_result == NULL)
@@ -453,11 +465,10 @@ print_arelt_descr (FILE *file, bfd *abfd, bool verbose, bool offsets)
 
 	  mode_string (buf.st_mode, modebuf);
 	  modebuf[10] = '\0';
-	  size = buf.st_size;
 	  /* POSIX 1003.2/D11 says to skip first character (entry type).  */
-	  fprintf (file, "%s %ld/%ld %6" BFD_VMA_FMT "u %s ", modebuf + 1,
+	  fprintf (file, "%s %ld/%ld %6" PRIu64 " %s ", modebuf + 1,
 		   (long) buf.st_uid, (long) buf.st_gid,
-		   size, timebuf);
+		   (uint64_t) buf.st_size, timebuf);
 	}
     }
 

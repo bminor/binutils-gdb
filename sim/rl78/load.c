@@ -130,15 +130,15 @@ rl78_load (bfd *prog, host_callback *callbacks, const char * const simname)
       base = p->p_paddr;
       if (verbose > 1)
 	fprintf (stderr,
-		 "[load segment: lma=%08" BFD_VMA_FMT "x vma=%08x "
-		 "size=%08" BFD_VMA_FMT "x]\n",
-		 base, (int) p->p_vaddr, size);
+		 "[load segment: lma=%08" PRIx64 " vma=%08" PRIx64 " "
+		 "size=%08" PRIx64 "]\n",
+		 (uint64_t) base, (uint64_t) p->p_vaddr, (uint64_t) size);
       if (callbacks)
 	xprintf (callbacks,
-		 "Loading section %s, size %#" BFD_VMA_FMT "x "
-		 "lma %08" BFD_VMA_FMT "x vma %08lx\n",
+		 "Loading section %s, size %#" PRIx64 " "
+		 "lma %08" PRIx64 " vma %08" PRIx64 "\n",
 		 find_section_name_by_offset (prog, p->p_offset),
-		 size, base, p->p_vaddr);
+		 (uint64_t) size, (uint64_t) base, (uint64_t) p->p_vaddr);
 
       buf = xmalloc (size);
 
@@ -151,17 +151,17 @@ rl78_load (bfd *prog, host_callback *callbacks, const char * const simname)
 
       if (bfd_bread (buf, size, prog) != size)
 	{
-	  fprintf (stderr, "%s: Failed to read %" BFD_VMA_FMT "x bytes\n",
-		   simname, size);
+	  fprintf (stderr, "%s: Failed to read %" PRIx64 " bytes\n",
+		   simname, (uint64_t) size);
 	  continue;
 	}
 
       if (base > 0xeffff || base + size > 0xeffff)
 	{
 	  fprintf (stderr,
-		   "%s, Can't load image to RAM/SFR space: 0x%" BFD_VMA_FMT "x "
-		   "- 0x%" BFD_VMA_FMT "x\n",
-		   simname, base, base+size);
+		   "%s, Can't load image to RAM/SFR space: 0x%" PRIx64 " "
+		   "- 0x%" PRIx64 "\n",
+		   simname, (uint64_t) base, (uint64_t) (base + size));
 	  continue;
 	}
       if (max_rom < base + size)

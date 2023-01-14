@@ -216,6 +216,9 @@ extern void i386_cons_align (int);
 void i386_print_statistics (FILE *);
 #define tc_print_statistics i386_print_statistics
 
+void i386_md_end (void);
+#define md_end i386_md_end
+
 extern unsigned int i386_frag_max_var (fragS *);
 #define md_frag_max_var i386_frag_max_var
 
@@ -228,6 +231,8 @@ extern long i386_generic_table_relax_frag (segT, fragS *, long);
 enum processor_type
 {
   PROCESSOR_UNKNOWN,
+  PROCESSOR_GENERIC32,
+  PROCESSOR_GENERIC64,
   PROCESSOR_I386,
   PROCESSOR_I486,
   PROCESSOR_PENTIUM,
@@ -241,12 +246,12 @@ enum processor_type
   PROCESSOR_K6,
   PROCESSOR_ATHLON,
   PROCESSOR_K8,
-  PROCESSOR_GENERIC32,
-  PROCESSOR_GENERIC64,
   PROCESSOR_AMDFAM10,
   PROCESSOR_BD,
   PROCESSOR_ZNVER,
-  PROCESSOR_BT
+  PROCESSOR_BT,
+  /* Keep this last.  */
+  PROCESSOR_NONE
 };
 
 extern enum processor_type cpu_arch_tune;

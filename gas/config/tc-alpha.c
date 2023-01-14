@@ -594,8 +594,7 @@ get_alpha_reloc_tag (long sequence)
     {
       size_t len = strlen (buffer);
 
-      info = (struct alpha_reloc_tag *)
-          xcalloc (sizeof (struct alpha_reloc_tag) + len, 1);
+      info = notes_calloc (sizeof (struct alpha_reloc_tag) + len, 1);
 
       info->segment = now_seg;
       info->sequence = sequence;
@@ -4030,7 +4029,7 @@ s_alpha_coff_wrapper (int which)
    unless the compiler has done it for us.  */
 
 void
-alpha_elf_md_end (void)
+alpha_elf_md_finish (void)
 {
   struct alpha_elf_frame_data *p;
 
@@ -5434,10 +5433,12 @@ md_begin (void)
 
       if ((slash = strchr (name, '/')) != NULL)
 	{
-	  char *p = XNEWVEC (char, strlen (name));
+	  size_t len = strlen (name);
+	  char *p = notes_alloc (len);
+	  size_t len1 = slash - name;
 
-	  memcpy (p, name, slash - name);
-	  strcpy (p + (slash - name), slash + 1);
+	  memcpy (p, name, len1);
+	  memcpy (p + len1, slash + 1, len - len1);
 
 	  (void) str_hash_insert (alpha_opcode_hash, p, &alpha_opcodes[i], 0);
 	  /* Ignore failures -- the opcode table does duplicate some

@@ -55,11 +55,23 @@ struct riscv_gdbarch_features
   /* When true this target is RV32E.  */
   bool embedded = false;
 
+  /* Track if the target description has an fcsr, fflags, and frm
+     registers.  Some targets provide all these in their target
+     descriptions, while some only offer fcsr, while others don't even
+     offer that register.  If a target provides fcsr but not fflags and/or
+     frm, then we can emulate these registers as pseudo registers.  */
+  bool has_fcsr_reg = false;
+  bool has_fflags_reg = false;
+  bool has_frm_reg = false;
+
   /* Equality operator.  */
   bool operator== (const struct riscv_gdbarch_features &rhs) const
   {
     return (xlen == rhs.xlen && flen == rhs.flen
-	    && embedded == rhs.embedded && vlen == rhs.vlen);
+	    && embedded == rhs.embedded && vlen == rhs.vlen
+	    && has_fflags_reg == rhs.has_fflags_reg
+	    && has_frm_reg == rhs.has_frm_reg
+	    && has_fcsr_reg == rhs.has_fcsr_reg);
   }
 
   /* Inequality operator.  */
@@ -72,9 +84,12 @@ struct riscv_gdbarch_features
   std::size_t hash () const noexcept
   {
     std::size_t val = ((embedded ? 1 : 0) << 10
+		       | (has_fflags_reg ? 1 : 0) << 11
+		       | (has_frm_reg ? 1 : 0) << 12
+		       | (has_fcsr_reg ? 1 : 0) << 13
 		       | (xlen & 0x1f) << 5
 		       | (flen & 0x1f) << 0
-		       | (vlen & 0xfff) << 11);
+		       | (vlen & 0xfff) << 14);
     return val;
   }
 };

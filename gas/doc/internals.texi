@@ -1034,6 +1034,12 @@ Predefined symbols with fixed values, such as register names or condition
 codes, are typically entered directly into the symbol table when @code{md_begin}
 is called.  One argument is passed, a @code{char *} for the symbol.
 
+@item md_resolve_symbol
+@cindex md_resolve_symbol
+If this macro is defined, GAS will call it upon resolving machine-dependent
+symbols (that is, for any symbol with operation O_md1..O_md32 inclusively).
+If this functions returns zero, then the symbol could not be resolved.
+
 @item md_operand
 @cindex md_operand
 GAS will call this function with one argument, an @code{expressionS}

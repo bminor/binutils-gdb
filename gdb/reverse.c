@@ -92,22 +92,14 @@ reverse_finish (const char *args, int from_tty)
 /* Data structures for a bookmark list.  */
 
 struct bookmark {
-  struct bookmark *next;
-  int number;
-  CORE_ADDR pc;
+  int number = 0;
+  CORE_ADDR pc = 0;
   struct symtab_and_line sal;
-  gdb_byte *opaque_data;
+  gdb::unique_xmalloc_ptr<gdb_byte> opaque_data;
 };
 
-static struct bookmark *bookmark_chain;
+static std::vector<struct bookmark> all_bookmarks;
 static int bookmark_count;
-
-#define ALL_BOOKMARKS(B) for ((B) = bookmark_chain; (B); (B) = (B)->next)
-
-#define ALL_BOOKMARKS_SAFE(B,TMP)           \
-     for ((B) = bookmark_chain;             \
-	  (B) ? ((TMP) = (B)->next, 1) : 0; \
-	  (B) = (TMP))
 
 /* save_bookmark_command -- implement "bookmark" command.
    Call target method to get a bookmark identifier.
@@ -130,80 +122,47 @@ save_bookmark_command (const char *args, int from_tty)
     error (_("target_get_bookmark failed."));
 
   /* Set up a bookmark struct.  */
-  bookmark *b = new bookmark ();
-  b->number = ++bookmark_count;
-  b->pc = regcache_read_pc (get_current_regcache ());
-  b->sal = find_pc_line (b->pc, 0);
-  b->sal.pspace = get_frame_program_space (get_current_frame ());
-  b->opaque_data = bookmark_id;
-  b->next = NULL;
+  all_bookmarks.emplace_back ();
+  bookmark &b = all_bookmarks.back ();
+  b.number = ++bookmark_count;
+  b.pc = regcache_read_pc (get_current_regcache ());
+  b.sal = find_pc_line (b.pc, 0);
+  b.sal.pspace = get_frame_program_space (get_current_frame ());
+  b.opaque_data.reset (bookmark_id);
 
-  /* Add this bookmark to the end of the chain, so that a list
-     of bookmarks will come out in order of increasing numbers.  */
-
-  bookmark *b1 = bookmark_chain;
-  if (b1 == 0)
-    bookmark_chain = b;
-  else
-    {
-      while (b1->next)
-	b1 = b1->next;
-      b1->next = b;
-    }
-  gdb_printf (_("Saved bookmark %d at %s\n"), b->number,
-	      paddress (gdbarch, b->sal.pc));
+  gdb_printf (_("Saved bookmark %d at %s\n"), b.number,
+	      paddress (gdbarch, b.sal.pc));
 }
 
 /* Implement "delete bookmark" command.  */
 
-static int
+static bool
 delete_one_bookmark (int num)
 {
-  struct bookmark *b1, *b;
-
   /* Find bookmark with corresponding number.  */
-  ALL_BOOKMARKS (b)
-    if (b->number == num)
-      break;
-
-  /* Special case, first item in list.  */
-  if (b == bookmark_chain)
-    bookmark_chain = b->next;
-
-  /* Find bookmark preceding "marked" one, so we can unlink.  */
-  if (b)
+  for (auto iter = all_bookmarks.begin ();
+       iter != all_bookmarks.end ();
+       ++iter)
     {
-      ALL_BOOKMARKS (b1)
-	if (b1->next == b)
-	  {
-	    /* Found designated bookmark.  Unlink and delete.  */
-	    b1->next = b->next;
-	    break;
-	  }
-      xfree (b->opaque_data);
-      delete b;
-      return 1;		/* success */
+      if (iter->number == num)
+	{
+	  all_bookmarks.erase (iter);
+	  return true;
+	}
     }
-  return 0;		/* failure */
+  return false;
 }
 
 static void
-delete_all_bookmarks (void)
+delete_all_bookmarks ()
 {
-  struct bookmark *b, *b1;
-
-  ALL_BOOKMARKS_SAFE (b, b1)
-    {
-      xfree (b->opaque_data);
-      xfree (b);
-    }
-  bookmark_chain = NULL;
+  all_bookmarks.clear ();
 }
 
 static void
 delete_bookmark_command (const char *args, int from_tty)
 {
-  if (bookmark_chain == NULL)
+  if (all_bookmarks.empty ())
     {
       warning (_("No bookmarks."));
       return;
@@ -232,7 +191,6 @@ delete_bookmark_command (const char *args, int from_tty)
 static void
 goto_bookmark_command (const char *args, int from_tty)
 {
-  struct bookmark *b;
   unsigned long num;
   const char *p = args;
 
@@ -263,15 +221,14 @@ goto_bookmark_command (const char *args, int from_tty)
   if (num == 0)
     error (_("goto-bookmark: invalid bookmark number '%s'."), p);
 
-  ALL_BOOKMARKS (b)
-    if (b->number == num)
-      break;
-
-  if (b)
+  for (const bookmark &iter : all_bookmarks)
     {
-      /* Found.  Send to target method.  */
-      target_goto_bookmark (b->opaque_data, from_tty);
-      return;
+      if (iter.number == num)
+	{
+	  /* Found.  Send to target method.  */
+	  target_goto_bookmark (iter.opaque_data.get (), from_tty);
+	  return;
+	}
     }
   /* Not found.  */
   error (_("goto-bookmark: no bookmark found for '%s'."), p);
@@ -281,20 +238,19 @@ static int
 bookmark_1 (int bnum)
 {
   struct gdbarch *gdbarch = get_current_regcache ()->arch ();
-  struct bookmark *b;
   int matched = 0;
 
-  ALL_BOOKMARKS (b)
-  {
-    if (bnum == -1 || bnum == b->number)
-      {
-	gdb_printf ("   %d       %s    '%s'\n",
-		    b->number,
-		    paddress (gdbarch, b->pc),
-		    b->opaque_data);
-	matched++;
-      }
-  }
+  for (const bookmark &iter : all_bookmarks)
+    {
+      if (bnum == -1 || bnum == iter.number)
+	{
+	  gdb_printf ("   %d       %s    '%s'\n",
+		      iter.number,
+		      paddress (gdbarch, iter.pc),
+		      iter.opaque_data.get ());
+	  matched++;
+	}
+    }
 
   if (bnum > 0 && matched == 0)
     gdb_printf ("No bookmark #%d\n", bnum);
@@ -307,7 +263,7 @@ bookmark_1 (int bnum)
 static void
 info_bookmarks_command (const char *args, int from_tty)
 {
-  if (!bookmark_chain)
+  if (all_bookmarks.empty ())
     gdb_printf (_("No bookmarks.\n"));
   else if (args == NULL || *args == '\0')
     bookmark_1 (-1);

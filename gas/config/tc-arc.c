@@ -774,6 +774,15 @@ arc_insert_opcode (const struct arc_opcode *opcode)
   entry->count++;
 }
 
+static void
+arc_opcode_free (void *elt)
+{
+  string_tuple_t *tuple = (string_tuple_t *) elt;
+  struct arc_opcode_hash_entry *entry = (void *) tuple->value;
+  free (entry->opcode);
+  free (entry);
+  free (tuple);
+}
 
 /* Like md_number_to_chars but for middle-endian values.  The 4-byte limm
    value, is encoded as 'middle-endian' for a little-endian target.  This
@@ -2508,7 +2517,7 @@ md_assemble (char *str)
   struct arc_flags flags[MAX_INSN_FLGS];
 
   /* Split off the opcode.  */
-  opnamelen = strspn (str, "abcdefghijklmnopqrstuvwxyz_0123468");
+  opnamelen = strspn (str, "abcdefghijklmnopqrstuvwxyz_0123456789");
   opname = xmemdup0 (str, opnamelen);
 
   /* Signalize we are assembling the instructions.  */
@@ -2605,7 +2614,8 @@ md_begin (void)
   bfd_set_private_flags (stdoutput, selected_cpu.eflags);
 
   /* Set up a hash table for the instructions.  */
-  arc_opcode_hash = str_htab_create ();
+  arc_opcode_hash = htab_create_alloc (16, hash_string_tuple, eq_string_tuple,
+				       arc_opcode_free, xcalloc, free);
 
   /* Initialize the hash table with the insns.  */
   do
@@ -2710,6 +2720,15 @@ md_begin (void)
   declare_addrtype ("cxd", ARC_NPS400_ADDRTYPE_CXD);
 }
 
+void
+arc_md_end (void)
+{
+  htab_delete (arc_opcode_hash);
+  htab_delete (arc_reg_hash);
+  htab_delete (arc_aux_hash);
+  htab_delete (arc_addrtype_hash);
+}
+
 /* Write a value out to the object file, using the appropriate
    endianness.  */
 
@@ -2796,11 +2815,11 @@ md_pcrel_from_section (fixS *fixP,
 	}
     }
 
-  pr_debug ("pcrel from %"BFD_VMA_FMT"x + %lx = %"BFD_VMA_FMT"x, "
-	    "symbol: %s (%"BFD_VMA_FMT"x)\n",
-	    fixP->fx_frag->fr_address, fixP->fx_where, base,
+  pr_debug ("pcrel from %" PRIx64 " + %lx = %" PRIx64 ", "
+	    "symbol: %s (%" PRIx64 ")\n",
+	    (uint64_t) fixP->fx_frag->fr_address, fixP->fx_where, (uint64_t) base,
 	    fixP->fx_addsy ? S_GET_NAME (fixP->fx_addsy) : "(null)",
-	    fixP->fx_addsy ? S_GET_VALUE (fixP->fx_addsy) : 0);
+	    fixP->fx_addsy ? (uint64_t) S_GET_VALUE (fixP->fx_addsy) : (uint64_t) 0);
 
   return base;
 }
@@ -3292,9 +3311,9 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
   table_entry = TC_GENERIC_RELAX_TABLE + fragP->fr_subtype;
 
   pr_debug ("%s:%d: md_convert_frag, subtype: %d, fix: %d, "
-	    "var: %"BFD_VMA_FMT"d\n",
+	    "var: %" PRId64 "\n",
 	    fragP->fr_file, fragP->fr_line,
-	    fragP->fr_subtype, fix, fragP->fr_var);
+	    fragP->fr_subtype, fix, (int64_t) fragP->fr_var);
 
   if (fragP->fr_subtype <= 0
       && fragP->fr_subtype >= arc_num_relax_opcodes)
@@ -5055,7 +5074,7 @@ arc_set_public_attributes (void)
 /* Add the default contents for the .ARC.attributes section.  */
 
 void
-arc_md_end (void)
+arc_md_finish (void)
 {
   arc_set_public_attributes ();
 

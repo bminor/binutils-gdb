@@ -232,7 +232,7 @@ memory_error_func (int status ATTRIBUTE_UNUSED, bfd_vma addr ATTRIBUTE_UNUSED,
 
 #elif ARCH(Aarch64)
 #define FILL_CONTEXT(context) \
-    { getcontext(context);  \
+    { CALL_UTIL (getcontext) (context);  \
       context->uc_mcontext.sp = (__u64) __builtin_frame_address(0); \
     }
 
@@ -557,6 +557,7 @@ __collector_get_frame_info (hrtime_t ts, int mode, void *arg)
   int size = max_frame_size;
 
 #define MIN(a,b) ((a)<(b)?(a):(b))
+#if defined(GPROFNG_JAVA_PROFILING)
   /* get Java info */
   if (__collector_java_mode && __collector_java_asyncgetcalltrace_loaded && context && !pseudo_context)
     {
@@ -569,6 +570,7 @@ __collector_get_frame_info (hrtime_t ts, int mode, void *arg)
 	  size -= sz;
 	}
     }
+#endif
 
   /* get native stack */
   if (context)

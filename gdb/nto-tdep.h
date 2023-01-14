@@ -26,6 +26,7 @@
 #include "osabi.h"
 #include "regset.h"
 #include "gdbthread.h"
+#include "gdbsupport/gdb-checked-static-cast.h"
 
 /* Target operations defined for Neutrino targets (<target>-nto-tdep.c).  */
 
@@ -145,7 +146,7 @@ struct nto_thread_info : public private_thread_info
 static inline nto_thread_info *
 get_nto_thread_info (thread_info *thread)
 {
-  return static_cast<nto_thread_info *> (thread->priv.get ());
+  return gdb::checked_static_cast<nto_thread_info *> (thread->priv.get ());
 }
 
 /* Per-inferior data, common for both procfs and remote.  */

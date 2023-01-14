@@ -16,29 +16,6 @@
 # Regression test for PR gdb/7161.  Test that GDB cannot delete non-user
 # breakpoints with clear command.
 
-# get_maint_bp_addr num
-#
-# Purpose:
-#    Get address of the specified internal breakpoint when using command
-#    "maint info breakpoints $num".
-#
-# Parameter:
-#    The parameter "num" indicates the number of the internal breakpoint
-#    to get.  Note that this parameter must be a negative number.
-#    E.g., -1 means that we're gonna get the first internal breakpoint.
-#
-# Return:
-#    Internal breakpoint address.
-#
-proc get_maint_bp_addr { num } {
-    gdb_test_multiple "maint info break $num" "find address of internal bp $num" {
-	-re -wrap ".*(0x\[0-9a-f\]+).*" {
-	    return $expect_out(1,string)
-	}
-    }
-    return ""
-}
-
 # get_first_maint_bp_num
 #
 # Purpose:
@@ -77,7 +54,7 @@ if ![runto_main] then {
 }
 
 set bp_num [get_first_maint_bp_num]
-set bp_addr [get_maint_bp_addr $bp_num]
+set bp_addr [gdb_get_bp_addr $bp_num]
 
 gdb_test "maint info break $bp_num" \
     "$bp_num.*$bp_addr.*" \

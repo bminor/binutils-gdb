@@ -100,6 +100,14 @@ if ![runto_main] {
 gdb_test "step" ".*" "step in the main"
 gdb_test "bt" "\\s*\\#0\\s+main.*" "step after all ignored"
 
+# This proc tests that GDB can step into the function foo, exit it
+# and skip the functions bar and baz.
+proc step_foo_skip_bar_baz {} {
+    gdb_test "step" "foo \\(\\) at.*" "step and skip bar"
+    gdb_test "finish" ".*" "return from bar"
+    gdb_test "step" ".*test_skip_file_and_function.*" "step and skip baz"
+}
+
 # Now remove skip.c from the skiplist.  Our first step should take us
 # into foo(), and our second step should take us to the next line in main().
 
@@ -117,21 +125,19 @@ with_test_prefix "step after deleting 1" {
 	return
     }
 
-    gdb_test "step" "foo \\(\\) at.*" "step 1"
-    gdb_test "step" ".*" "step 2" ; # Return from foo()
-    gdb_test "step" "main \\(\\) at.*" "step 3"
+    step_foo_skip_bar_baz
 }
 
 # Test that we step into foo(), then into bar(), but not into baz().
 proc step_bar_foo_skip_baz {} {
-    gdb_test "step" "bar \\(\\) at.*" "step 1"
-    gdb_test "step" ".*" "step 2"; # Return from bar()
+    gdb_test "step" "bar \\(\\) at.*" "step into bar"
+    gdb_test "finish" ".*" "return from bar"
 
     # With at least gcc 6.5.0 and 9.2.0, we jump once back to main
     # before entering foo here.  If that happens try to step a second
     # time.
     set stepped_again 0
-    gdb_test_multiple "step" "step 3" {
+    gdb_test_multiple "step" "step into foo" {
 	-re -wrap "foo \\(\\) at.*" {
 	    pass $gdb_test_name
 	}
@@ -144,8 +150,8 @@ proc step_bar_foo_skip_baz {} {
 	}
     }
 
-    gdb_test "step" ".*" "step 4"; # Return from foo()
-    gdb_test "step" "main \\(\\) at.*" "step 5"
+    gdb_test "finish" ".*" "Return from foo"
+    gdb_test "step" ".*test_skip_file_and_function.*" "step and skip baz"
 }
 
 # Now disable the skiplist entry for  skip1.c.  We should now
@@ -178,9 +184,7 @@ with_test_prefix "step after enable 3" {
 	return
     }
 
-    gdb_test "step" "foo \\(\\) at.*" "step 1"
-    gdb_test "step" ".*" "step 2"; # Return from foo()
-    gdb_test "step" "main \\(\\) at.*" "step 3"
+    step_foo_skip_bar_baz
 }
 
 # Admin tests (disable,enable,delete).
@@ -249,9 +253,7 @@ with_test_prefix "step using -fi" {
 
     gdb_test_no_output "skip disable"
     gdb_test_no_output "skip enable 5"
-    gdb_test "step" "foo \\(\\) at.*" "step 1"
-    gdb_test "step" ".*" "step 2"; # Return from foo()
-    gdb_test "step" "main \\(\\) at.*" "step 3"
+    step_foo_skip_bar_baz
 }
 
 with_test_prefix "step using -gfi" {
@@ -261,9 +263,7 @@ with_test_prefix "step using -gfi" {
 
     gdb_test_no_output "skip disable"
     gdb_test_no_output "skip enable 6"
-    gdb_test "step" "foo \\(\\) at.*" "step 1"
-    gdb_test "step" ".*" "step 2"; # Return from foo()
-    gdb_test "step" "main \\(\\) at.*" "step 3"
+    step_foo_skip_bar_baz
 }
 
 with_test_prefix "step using -fu for baz" {

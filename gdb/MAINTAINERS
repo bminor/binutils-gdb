@@ -325,7 +325,6 @@ the native maintainer when resolving ABI issues.
 	s390		--target=s390-linux-gnu ,-Werror
 			Andreas Arnez		arnez@linux.ibm.com
 
-	score		--target=score-elf
 	sh		--target=sh-elf ,-Werror
 
 	sparc		--target=sparcv9-solaris2.11 ,-Werror
@@ -452,7 +451,6 @@ To get recommended for the Write After Approval list you need a valid
 FSF assignment and have submitted one good patch.
 
 Tankut Baris Aktemur				tankut.baris.aktemur@intel.com
-Mihails Strasuns				mihails.strasuns@intel.com
 David Anderson					davea@sgi.com
 John David Anglin				dave.anglin@nrc-cnrc.gc.ca
 Andreas Arnez					arnez@linux.ibm.com
@@ -600,6 +598,7 @@ Alan Modra					amodra@gmail.com
 Fawzi Mohamed					fawzi.mohamed@nokia.com
 Jason Molenda					jmolenda@apple.com
 Chris Moller					cmoller@redhat.com
+Patrick Monnerat				patrick@monnerat.net
 Phil Muldoon					pmuldoon@redhat.com
 Pierre Muller					muller@sourceware.org
 Gaius Mulley                                    gaius@glam.ac.uk
@@ -611,6 +610,7 @@ Will Newton					will.newton@linaro.org
 Nathanael Nerode				neroden@gcc.gnu.org
 Hans-Peter Nilsson				hp@bitrange.com
 David O'Brien					obrien@freebsd.org
+Tsukasa Oi					research_trasio@irq.a4lg.com
 Alexandre Oliva					aoliva@redhat.com
 Rainer Orth					ro@cebitec.uni-bielefeld.de
 Karen Osmond					karen.osmond@gmail.com
@@ -667,8 +667,10 @@ David Smith					dsmith@redhat.com
 Stephen P. Smith				ischis2@cox.net
 Jackie Smith Cashion				jsmith@redhat.com
 Petr Sorfa					petrs@caldera.com
+Mihails Strasuns				mihails.strasuns@intel.com
 Andrew Stubbs					ams@codesourcery.com
 Emi Suzuki					emi-suzuki@tjsys.co.jp
+Torbjörn Svensson				torbjorn.svensson@foss.st.com
 Alfred M. Szmidt				ams@gnu.org
 Ali Tamur					tamur@google.com
 David Taylor					david.taylor@emc.com

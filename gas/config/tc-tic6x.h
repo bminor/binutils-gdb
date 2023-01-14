@@ -170,8 +170,8 @@ extern bool tic6x_do_align (int n, char *fill, int len, int max);
   tic6x_convert_symbolic_attribute (name)
 extern int tic6x_convert_symbolic_attribute (const char *);
 
-#define md_end() tic6x_end ();
-extern void tic6x_end (void);
+#define md_finish() tic6x_md_finish ();
+extern void tic6x_md_finish (void);
 
 #define md_parse_name(name, exprP, mode, nextcharP)	\
   tic6x_parse_name (name, exprP, mode, nextcharP)

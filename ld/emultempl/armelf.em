@@ -497,10 +497,7 @@ gld${EMULATION_NAME}_finish (void)
 
       /* Now convert this value into a string and store it in entry_symbol
 	 where the lang_finish() function will pick it up.  */
-      buffer[0] = '0';
-      buffer[1] = 'x';
-
-      sprintf_vma (buffer + 2, val);
+      sprintf (buffer, "0x%" PRIx64, (uint64_t) val);
 
       if (params.thumb_entry_symbol != NULL && entry_symbol.name != NULL
 	  && entry_from_cmdline)

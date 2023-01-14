@@ -66,8 +66,6 @@ if !$use_gdb_stub {
     foreach i "bt ba bac" {
 	gdb_test $i "No stack." "backtrace \"$i\" abbreviation"
     }
-} else {
-    warning "Skipping backtrace and break tests because of GDB stub."
 }
 
 gdb_test "continue" "The program is not being run."

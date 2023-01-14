@@ -40,7 +40,7 @@ struct tramp_frame_cache
 };
 
 static struct trad_frame_cache *
-tramp_frame_cache (struct frame_info *this_frame,
+tramp_frame_cache (frame_info_ptr this_frame,
 		   void **this_cache)
 {
   struct tramp_frame_cache *tramp_cache
@@ -58,7 +58,7 @@ tramp_frame_cache (struct frame_info *this_frame,
 }
 
 static void
-tramp_frame_this_id (struct frame_info *this_frame,
+tramp_frame_this_id (frame_info_ptr this_frame,
 		     void **this_cache,
 		     struct frame_id *this_id)
 {
@@ -69,7 +69,7 @@ tramp_frame_this_id (struct frame_info *this_frame,
 }
 
 static struct value *
-tramp_frame_prev_register (struct frame_info *this_frame,
+tramp_frame_prev_register (frame_info_ptr this_frame,
 			   void **this_cache,
 			   int prev_regnum)
 {
@@ -81,7 +81,7 @@ tramp_frame_prev_register (struct frame_info *this_frame,
 
 static CORE_ADDR
 tramp_frame_start (const struct tramp_frame *tramp,
-		   struct frame_info *this_frame, CORE_ADDR pc)
+		   frame_info_ptr this_frame, CORE_ADDR pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -121,7 +121,7 @@ tramp_frame_start (const struct tramp_frame *tramp,
 
 static int
 tramp_frame_sniffer (const struct frame_unwind *self,
-		     struct frame_info *this_frame,
+		     frame_info_ptr this_frame,
 		     void **this_cache)
 {
   const struct tramp_frame *tramp = self->unwind_data->tramp_frame;

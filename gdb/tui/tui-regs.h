@@ -59,7 +59,7 @@ struct tui_data_window : public tui_win_info
     return DATA_NAME;
   }
 
-  void check_register_values (struct frame_info *frame);
+  void check_register_values (frame_info_ptr frame);
 
   void show_registers (const reggroup *group);
 
@@ -101,7 +101,7 @@ private:
   void display_reg_element_at_line (int start_element_no, int start_line_no);
 
   void show_register_group (const reggroup *group,
-			    struct frame_info *frame,
+			    frame_info_ptr frame,
 			    bool refresh_values_only);
 
   /* Answer the number of the last line in the regs display.  If there

@@ -4,7 +4,7 @@
 #include "gdbsupport/tdesc.h"
 
 static int
-create_feature_arm_arm_m_system (struct target_desc *result, long regnum)
+create_feature_arm_arm_secext (struct target_desc *result, long regnum)
 {
   struct tdesc_feature *feature;
 

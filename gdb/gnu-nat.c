@@ -2623,6 +2623,7 @@ gnu_nat_target::find_memory_regions (find_memory_region_ftype func,
 		     last_protection & VM_PROT_WRITE,
 		     last_protection & VM_PROT_EXECUTE,
 		     1, /* MODIFIED is unknown, pass it as true.  */
+		     false, /* No memory tags in the object file.  */
 		     data);
 	  last_region_address = region_address;
 	  last_region_end = region_address += region_length;
@@ -2637,6 +2638,7 @@ gnu_nat_target::find_memory_regions (find_memory_region_ftype func,
 	     last_protection & VM_PROT_WRITE,
 	     last_protection & VM_PROT_EXECUTE,
 	     1, /* MODIFIED is unknown, pass it as true.  */
+	     false, /* No memory tags in the object file.  */
 	     data);
 
   return 0;
@@ -3060,7 +3062,7 @@ static void
 info_port_rights (const char *args, mach_port_type_t only)
 {
   struct inf *inf = active_inf ();
-  struct value *vmark = value_mark ();
+  scoped_value_mark vmark;
 
   if (args)
     /* Explicit list of port rights.  */
@@ -3086,8 +3088,6 @@ info_port_rights (const char *args, mach_port_type_t only)
       if (err)
 	error (_("%s."), safe_strerror (err));
     }
-
-  value_free_to_mark (vmark);
 }
 
 static void

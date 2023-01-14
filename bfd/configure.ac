@@ -218,13 +218,6 @@ if test "x${ac_cv_sizeof_void_p}" = "x8"; then
   host64=true
 fi
 
-BFD_HOST_64BIT_LONG=0
-if test "x${ac_cv_sizeof_long}" = "x8"; then
-  BFD_HOST_64BIT_LONG=1
-fi
-
-AC_SUBST(BFD_HOST_64BIT_LONG)
-
 BFD_CC_FOR_BUILD
 
 AC_CHECK_HEADERS(fcntl.h sys/file.h sys/resource.h sys/stat.h sys/types.h \
@@ -237,9 +230,10 @@ AC_CHECK_DECLS([basename, ffs, stpcpy, asprintf, vasprintf, strnlen])
 
 BFD_BINARY_FOPEN
 
-# Link in zlib if we can.  This allows us to read compressed debug sections.
+# Link in zlib/zstd if we can.  This allows us to read compressed debug sections.
 # This is used only by compress.c.
 AM_ZLIB
+AC_ZSTD
 
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -Werror"
@@ -501,6 +495,7 @@ do
     lm32_elf32_fdpic_vec)	 tb="$tb elf32-lm32.lo elf32.lo $elf" ;;
     loongarch_elf32_vec)	 tb="$tb elf32-loongarch.lo elfxx-loongarch.lo elf32.lo elf-ifunc.lo $elf" ;;
     loongarch_elf64_vec)	 tb="$tb elf64-loongarch.lo elf64.lo elfxx-loongarch.lo elf32.lo elf-ifunc.lo $elf"; target_size=64 ;;
+    loongarch64_pei_vec)	 tb="$tb pei-loongarch64.lo pe-loongarch64igen.lo $coff"; target_size=64 ;;
     m32c_elf32_vec)		 tb="$tb elf32-m32c.lo elf32.lo $elf" ;;
     m32r_elf32_vec)		 tb="$tb elf32-m32r.lo elf32.lo $elf" ;;
     m32r_elf32_le_vec)		 tb="$tb elf32-m32r.lo elf32.lo $elf" ;;
@@ -566,6 +561,7 @@ do
     ns32k_aout_pc532mach_vec)	 tb="$tb pc532-mach.lo aout-ns32k.lo" ;;
     ns32k_aout_pc532nbsd_vec)	 tb="$tb ns32knetbsd.lo aout-ns32k.lo" ;;
     or1k_elf32_vec)		 tb="$tb elf32-or1k.lo elf32.lo $elf" ;;
+    pdb_vec)			 tb="$tb pdb.lo" ;;
     pdp11_aout_vec)		 tb="$tb pdp11.lo" ;;
     pef_vec)			 tb="$tb pef.lo" ;;
     pef_xlib_vec)		 tb="$tb pef.lo" ;;

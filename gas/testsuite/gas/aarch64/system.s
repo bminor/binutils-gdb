@@ -11,6 +11,7 @@
 	wfi
 	sev
 	sevl
+	clearbhb
 
 	.macro	all_hints from=0, to=127
 	hint \from

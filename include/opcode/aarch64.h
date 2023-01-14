@@ -27,6 +27,8 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#include "dis-asm.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -1367,12 +1369,36 @@ aarch64_replace_opcode (struct aarch64_inst *,
 extern const aarch64_opcode *
 aarch64_get_opcode (enum aarch64_op);
 
+/* An instance of this structure is passed to aarch64_print_operand, and
+   the callback within this structure is used to apply styling to the
+   disassembler output.  This structure encapsulates the callback and a
+   state pointer.  */
+
+struct aarch64_styler
+{
+  /* The callback used to apply styling.  Returns a string created from FMT
+     and ARGS with STYLE applied to the string.  STYLER is a pointer back
+     to this object so that the callback can access the state member.
+
+     The string returned from this callback must remain valid until the
+     call to aarch64_print_operand has completed.  */
+  const char *(*apply_style) (struct aarch64_styler *styler,
+			      enum disassembler_style style,
+			      const char *fmt,
+			      va_list args);
+
+  /* A pointer to a state object which can be used by the apply_style
+     callback function.  */
+  void *state;
+};
+
 /* Generate the string representation of an operand.  */
 extern void
 aarch64_print_operand (char *, size_t, bfd_vma, const aarch64_opcode *,
 		       const aarch64_opnd_info *, int, int *, bfd_vma *,
 		       char **, char *, size_t,
-		       aarch64_feature_set features);
+		       aarch64_feature_set features,
+		       struct aarch64_styler *styler);
 
 /* Miscellaneous interface.  */
 

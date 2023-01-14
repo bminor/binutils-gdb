@@ -76,7 +76,7 @@ typedef void (timer_handler_func) (gdb_client_data);
 
 /* Exported functions from event-loop.c */
 
-extern int gdb_do_one_event (void);
+extern int gdb_do_one_event (int mstimeout = -1);
 extern void delete_file_handler (int fd);
 
 /* Add a file handler/descriptor to the list of descriptors we are

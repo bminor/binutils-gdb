@@ -999,7 +999,9 @@ enum
   // string.
   NT_GNU_GOLD_VERSION = 4,
   // Program property note, as described in "Linux Extensions to the gABI".
-  NT_GNU_PROPERTY_TYPE_0 = 5
+  NT_GNU_PROPERTY_TYPE_0 = 5,
+  // FDO .note.package notes as defined on https://systemd.io/ELF_PACKAGE_METADATA/
+  FDO_PACKAGING_METADATA = 0xcafe1a7e
 };
 
 // The OS values which may appear in word 0 of a NT_GNU_ABI_TAG note.

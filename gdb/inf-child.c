@@ -233,7 +233,7 @@ inf_child_target::pid_to_exec_file (int pid)
 int
 inf_child_target::fileio_open (struct inferior *inf, const char *filename,
 			       int flags, int mode, int warn_if_slow,
-			       int *target_errno)
+			       fileio_error *target_errno)
 {
   int nat_flags;
   mode_t nat_mode;
@@ -257,7 +257,7 @@ inf_child_target::fileio_open (struct inferior *inf, const char *filename,
 
 int
 inf_child_target::fileio_pwrite (int fd, const gdb_byte *write_buf, int len,
-				 ULONGEST offset, int *target_errno)
+				 ULONGEST offset, fileio_error *target_errno)
 {
   int ret;
 
@@ -284,7 +284,7 @@ inf_child_target::fileio_pwrite (int fd, const gdb_byte *write_buf, int len,
 
 int
 inf_child_target::fileio_pread (int fd, gdb_byte *read_buf, int len,
-				ULONGEST offset, int *target_errno)
+				ULONGEST offset, fileio_error *target_errno)
 {
   int ret;
 
@@ -310,7 +310,7 @@ inf_child_target::fileio_pread (int fd, gdb_byte *read_buf, int len,
 /* Implementation of to_fileio_fstat.  */
 
 int
-inf_child_target::fileio_fstat (int fd, struct stat *sb, int *target_errno)
+inf_child_target::fileio_fstat (int fd, struct stat *sb, fileio_error *target_errno)
 {
   int ret;
 
@@ -324,7 +324,7 @@ inf_child_target::fileio_fstat (int fd, struct stat *sb, int *target_errno)
 /* Implementation of to_fileio_close.  */
 
 int
-inf_child_target::fileio_close (int fd, int *target_errno)
+inf_child_target::fileio_close (int fd, fileio_error *target_errno)
 {
   int ret;
 
@@ -339,7 +339,7 @@ inf_child_target::fileio_close (int fd, int *target_errno)
 
 int
 inf_child_target::fileio_unlink (struct inferior *inf, const char *filename,
-				 int *target_errno)
+				 fileio_error *target_errno)
 {
   int ret;
 
@@ -354,7 +354,7 @@ inf_child_target::fileio_unlink (struct inferior *inf, const char *filename,
 
 gdb::optional<std::string>
 inf_child_target::fileio_readlink (struct inferior *inf, const char *filename,
-				   int *target_errno)
+				   fileio_error *target_errno)
 {
   /* We support readlink only on systems that also provide a compile-time
      maximum path length (PATH_MAX), at least for now.  */

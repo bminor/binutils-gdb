@@ -52,7 +52,7 @@ go_language::print_type (struct type *type, const char *varstring,
 
   /* Print the type of "abc" as "string", not char[4].  */
   if (type->code () == TYPE_CODE_ARRAY
-      && TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_CHAR)
+      && type->target_type ()->code () == TYPE_CODE_CHAR)
     {
       gdb_puts ("string", stream);
       return;

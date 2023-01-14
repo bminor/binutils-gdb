@@ -295,7 +295,7 @@ print_formatted (struct value *val, int size,
 		 struct ui_file *stream)
 {
   struct type *type = check_typedef (value_type (val));
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
 
   if (VALUE_LVAL (val) == lval_memory)
     next_address = value_address (val) + len;
@@ -349,11 +349,11 @@ float_type_from_length (struct type *type)
   struct gdbarch *gdbarch = type->arch ();
   const struct builtin_type *builtin = builtin_type (gdbarch);
 
-  if (TYPE_LENGTH (type) == TYPE_LENGTH (builtin->builtin_float))
+  if (type->length () == builtin->builtin_float->length ())
     type = builtin->builtin_float;
-  else if (TYPE_LENGTH (type) == TYPE_LENGTH (builtin->builtin_double))
+  else if (type->length () == builtin->builtin_double->length ())
     type = builtin->builtin_double;
-  else if (TYPE_LENGTH (type) == TYPE_LENGTH (builtin->builtin_long_double))
+  else if (type->length () == builtin->builtin_long_double->length ())
     type = builtin->builtin_long_double;
 
   return type;
@@ -369,7 +369,7 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
 			int size, struct ui_file *stream)
 {
   struct gdbarch *gdbarch = type->arch ();
-  unsigned int len = TYPE_LENGTH (type);
+  unsigned int len = type->length ();
   enum bfd_endian byte_order = type_byte_order (type);
 
   /* String printing should go through val_print_scalar_formatted.  */
@@ -377,7 +377,7 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
 
   /* If the value is a pointer, and pointers and addresses are not the
      same, then at this point, the value's length (in target bytes) is
-     gdbarch_addr_bit/TARGET_CHAR_BIT, not TYPE_LENGTH (type).  */
+     gdbarch_addr_bit/TARGET_CHAR_BIT, not type->length ().  */
   if (type->code () == TYPE_CODE_PTR)
     len = gdbarch_addr_bit (gdbarch) / TARGET_CHAR_BIT;
 
@@ -387,8 +387,8 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
   if (options->format != 'c'
       && (options->format != 'd' || type->is_unsigned ()))
     {
-      if (len < TYPE_LENGTH (type) && byte_order == BFD_ENDIAN_BIG)
-	valaddr += TYPE_LENGTH (type) - len;
+      if (len < type->length () && byte_order == BFD_ENDIAN_BIG)
+	valaddr += type->length () - len;
     }
 
   /* Allow LEN == 0, and in this case, don't assume that VALADDR is
@@ -444,8 +444,8 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
       || type->bit_size_differs_p ())
     {
       val_long.emplace (unpack_long (type, valaddr));
-      converted_bytes.resize (TYPE_LENGTH (type));
-      store_signed_integer (converted_bytes.data (), TYPE_LENGTH (type),
+      converted_bytes.resize (type->length ());
+      store_signed_integer (converted_bytes.data (), type->length (),
 			    byte_order, *val_long);
       valaddr = converted_bytes.data ();
     }
@@ -749,7 +749,7 @@ pc_prefix (CORE_ADDR addr)
 {
   if (has_stack_frames ())
     {
-      struct frame_info *frame;
+      frame_info_ptr frame;
       CORE_ADDR pc;
 
       frame = get_selected_frame (NULL);
@@ -1088,19 +1088,19 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
       else if (format == 's')
 	{
 	  next_address = find_string_backward (gdbarch, addr, count,
-					       TYPE_LENGTH (val_type),
+					       val_type->length (),
 					       &opts, &count);
 	}
       else
 	{
-	  next_address = addr - count * TYPE_LENGTH (val_type);
+	  next_address = addr - count * val_type->length ();
 	}
 
       /* The following call to print_formatted updates next_address in every
 	 iteration.  In backward case, we store the start address here
 	 and update next_address with it before exiting the function.  */
       addr_rewound = (format == 's'
-		      ? next_address - TYPE_LENGTH (val_type)
+		      ? next_address - val_type->length ()
 		      : next_address);
       need_to_update_next_address = 1;
     }
@@ -2380,7 +2380,7 @@ clear_dangling_display_expressions (struct objfile *objfile)
 
 void
 print_variable_and_value (const char *name, struct symbol *var,
-			  struct frame_info *frame,
+			  frame_info_ptr frame,
 			  struct ui_file *stream, int indent)
 {
 
@@ -2433,7 +2433,7 @@ printf_c_string (struct ui_file *stream, const char *format,
       && VALUE_LVAL (value) == lval_internalvar
       && c_is_string_type_p (value_type (value)))
     {
-      size_t len = TYPE_LENGTH (value_type (value));
+      size_t len = value_type (value)->length ();
 
       /* Copy the internal var value to TEM_STR and append a terminating null
 	 character.  This protects against corrupted C-style strings that lack
@@ -2500,13 +2500,13 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
   struct gdbarch *gdbarch = value_type (value)->arch ();
   struct type *wctype = lookup_typename (current_language,
 					 "wchar_t", NULL, 0);
-  int wcwidth = TYPE_LENGTH (wctype);
+  int wcwidth = wctype->length ();
 
   if (VALUE_LVAL (value) == lval_internalvar
       && c_is_string_type_p (value_type (value)))
     {
       str = value_contents (value).data ();
-      len = TYPE_LENGTH (value_type (value));
+      len = value_type (value)->length ();
     }
   else
     {
@@ -2779,7 +2779,7 @@ ui_printf (const char *arg, struct ui_file *stream)
 	      const gdb_byte *bytes;
 
 	      valtype = value_type (val_args[i]);
-	      if (TYPE_LENGTH (valtype) != TYPE_LENGTH (wctype)
+	      if (valtype->length () != wctype->length ()
 		  || valtype->code () != TYPE_CODE_INT)
 		error (_("expected wchar_t argument for %%lc"));
 
@@ -2789,8 +2789,8 @@ ui_printf (const char *arg, struct ui_file *stream)
 
 	      convert_between_encodings (target_wide_charset (gdbarch),
 					 host_charset (),
-					 bytes, TYPE_LENGTH (valtype),
-					 TYPE_LENGTH (valtype),
+					 bytes, valtype->length (),
+					 valtype->length (),
 					 &output, translit_char);
 	      obstack_grow_str0 (&output, "");
 

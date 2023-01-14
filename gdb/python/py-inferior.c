@@ -60,7 +60,35 @@ struct inferior_object
 extern PyTypeObject inferior_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("inferior_object");
 
-static const struct inferior_data *infpy_inf_data_key;
+/* Deleter to clean up when an inferior is removed.  */
+struct infpy_deleter
+{
+  void operator() (inferior_object *obj)
+  {
+    struct threadlist_entry *th_entry, *th_tmp;
+
+    if (!gdb_python_initialized)
+      return;
+
+    gdbpy_enter enter_py;
+    gdbpy_ref<inferior_object> inf_obj (obj);
+
+    inf_obj->inferior = NULL;
+
+    /* Deallocate threads list.  */
+    for (th_entry = inf_obj->threads; th_entry != NULL;)
+      {
+	th_tmp = th_entry;
+	th_entry = th_entry->next;
+	delete th_tmp;
+      }
+
+    inf_obj->nthreads = 0;
+  }
+};
+
+static const registry<inferior>::key<inferior_object, infpy_deleter>
+     infpy_inf_data_key;
 
 /* Require that INFERIOR be a valid inferior ID.  */
 #define INFPY_REQUIRE_VALID(Inferior)				\
@@ -146,7 +174,7 @@ python_on_memory_change (struct inferior *inferior, CORE_ADDR addr, ssize_t len,
    command). */
 
 static void
-python_on_register_change (struct frame_info *frame, int regnum)
+python_on_register_change (frame_info_ptr frame, int regnum)
 {
   gdbpy_enter enter_py (target_gdbarch ());
 
@@ -197,6 +225,20 @@ python_new_objfile (struct objfile *objfile)
     }
 }
 
+/* Emit a Python event when an objfile is about to be removed.  */
+
+static void
+python_free_objfile (struct objfile *objfile)
+{
+  if (!gdb_python_initialized)
+    return;
+
+  gdbpy_enter enter_py (objfile->arch ());
+
+  if (emit_free_objfile_event (objfile) < 0)
+    gdbpy_print_stack ();
+}
+
 /* Return a reference to the Python object of type Inferior
    representing INFERIOR.  If the object has already been created,
    return it and increment the reference count,  otherwise, create it.
@@ -207,7 +249,7 @@ inferior_to_inferior_object (struct inferior *inferior)
 {
   inferior_object *inf_obj;
 
-  inf_obj = (inferior_object *) inferior_data (inferior, infpy_inf_data_key);
+  inf_obj = infpy_inf_data_key.get (inferior);
   if (!inf_obj)
     {
       inf_obj = PyObject_New (inferior_object, &inferior_object_type);
@@ -220,7 +262,7 @@ inferior_to_inferior_object (struct inferior *inferior)
 
       /* PyObject_New initializes the new object with a refcount of 1.  This
 	 counts for the reference we are keeping in the inferior data.  */
-      set_inferior_data (inferior, infpy_inf_data_key, inf_obj);
+      infpy_inf_data_key.set (inferior, inf_obj);
     }
 
   /* We are returning a new reference.  */
@@ -704,7 +746,7 @@ infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
     {
       struct value *val = value_object_to_value (handle_obj);
       bytes = value_contents_all (val).data ();
-      bytes_len = TYPE_LENGTH (value_type (val));
+      bytes_len = value_type (val)->length ();
     }
   else
     {
@@ -781,32 +823,6 @@ infpy_dealloc (PyObject *obj)
   Py_TYPE (obj)->tp_free (obj);
 }
 
-/* Clear the INFERIOR pointer in an Inferior object and clear the
-   thread list.  */
-static void
-py_free_inferior (struct inferior *inf, void *datum)
-{
-  struct threadlist_entry *th_entry, *th_tmp;
-
-  if (!gdb_python_initialized)
-    return;
-
-  gdbpy_enter enter_py;
-  gdbpy_ref<inferior_object> inf_obj ((inferior_object *) datum);
-
-  inf_obj->inferior = NULL;
-
-  /* Deallocate threads list.  */
-  for (th_entry = inf_obj->threads; th_entry != NULL;)
-    {
-      th_tmp = th_entry;
-      th_entry = th_entry->next;
-      delete th_tmp;
-    }
-
-  inf_obj->nthreads = 0;
-}
-
 /* Implementation of gdb.selected_inferior() -> gdb.Inferior.
    Returns the current inferior object.  */
 
@@ -815,14 +831,6 @@ gdbpy_selected_inferior (PyObject *self, PyObject *args)
 {
   return ((PyObject *)
 	  inferior_to_inferior_object (current_inferior ()).release ());
-}
-
-void _initialize_py_inferior ();
-void
-_initialize_py_inferior ()
-{
-  infpy_inf_data_key =
-    register_inferior_data_with_cleanup (NULL, py_free_inferior);
 }
 
 int
@@ -853,6 +861,7 @@ gdbpy_initialize_inferior (void)
   gdb::observers::new_objfile.attach
     (python_new_objfile, "py-inferior",
      { &auto_load_new_objfile_observer_token });
+  gdb::observers::free_objfile.attach (python_free_objfile, "py-inferior");
   gdb::observers::inferior_added.attach (python_new_inferior, "py-inferior");
   gdb::observers::inferior_removed.attach (python_inferior_deleted,
 					   "py-inferior");

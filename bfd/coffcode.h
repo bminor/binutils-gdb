@@ -2231,6 +2231,12 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
       machine = internal_f->f_flags & F_AARCH64_ARCHITECTURE_MASK;
       break;
 #endif
+#ifdef LOONGARCH64MAGIC
+    case LOONGARCH64MAGIC:
+      arch = bfd_arch_loongarch;
+      machine = internal_f->f_flags & F_LOONGARCH64_ARCHITECTURE_MASK;
+      break;
+#endif
 #ifdef Z80MAGIC
     case Z80MAGIC:
       arch = bfd_arch_z80;
@@ -2495,15 +2501,15 @@ coff_print_aux (bfd *abfd ATTRIBUTE_UNUSED,
       if (SMTYP_SMTYP (aux->u.auxent.x_csect.x_smtyp) != XTY_LD)
 	{
 	  BFD_ASSERT (! aux->fix_scnlen);
-	  fprintf (file, "val %5" BFD_VMA_FMT "d",
-		   aux->u.auxent.x_csect.x_scnlen.l);
+	  fprintf (file, "val %5" PRId64,
+		   (int64_t) aux->u.auxent.x_csect.x_scnlen.l);
 	}
       else
 	{
 	  fprintf (file, "indx ");
 	  if (! aux->fix_scnlen)
-	    fprintf (file, "%4" BFD_VMA_FMT "d",
-		     aux->u.auxent.x_csect.x_scnlen.l);
+	    fprintf (file, "%4" PRId64,
+		     (int64_t) aux->u.auxent.x_csect.x_scnlen.l);
 	  else
 	    fprintf (file, "%4ld",
 		     (long) (aux->u.auxent.x_csect.x_scnlen.p - table_base));
@@ -2792,6 +2798,12 @@ coff_set_flags (bfd * abfd,
 #ifdef AARCH64MAGIC
     case bfd_arch_aarch64:
       * magicp = AARCH64MAGIC;
+      return true;
+#endif
+
+#ifdef LOONGARCH64MAGIC
+    case bfd_arch_loongarch:
+      * magicp = LOONGARCH64MAGIC;
       return true;
 #endif
 
@@ -3189,7 +3201,7 @@ coff_compute_section_file_positions (bfd * abfd)
 #ifdef COFF_IMAGE_WITH_PE
 	  sofar = BFD_ALIGN (sofar, page_size);
 #else
-	  sofar = BFD_ALIGN (sofar, 1 << current->alignment_power);
+	  sofar = BFD_ALIGN (sofar, (bfd_vma) 1 << current->alignment_power);
 #endif
 
 #ifdef RS6000COFF_C
@@ -3259,7 +3271,7 @@ coff_compute_section_file_positions (bfd * abfd)
 
 	  old_size = current->size;
 	  current->size = BFD_ALIGN (current->size,
-				     1 << current->alignment_power);
+				     (bfd_vma) 1 << current->alignment_power);
 	  align_adjust = current->size != old_size;
 	  sofar += current->size - old_size;
 	}
@@ -3269,7 +3281,7 @@ coff_compute_section_file_positions (bfd * abfd)
 #ifdef COFF_IMAGE_WITH_PE
 	  sofar = BFD_ALIGN (sofar, page_size);
 #else
-	  sofar = BFD_ALIGN (sofar, 1 << current->alignment_power);
+	  sofar = BFD_ALIGN (sofar, (bfd_vma) 1 << current->alignment_power);
 #endif
 	  align_adjust = sofar != old_sofar;
 	  current->size += sofar - old_sofar;
@@ -3315,7 +3327,8 @@ coff_compute_section_file_positions (bfd * abfd)
   /* Make sure the relocations are aligned.  We don't need to make
      sure that this byte exists, because it will only matter if there
      really are relocs.  */
-  sofar = BFD_ALIGN (sofar, 1 << COFF_DEFAULT_SECTION_ALIGNMENT_POWER);
+  sofar = BFD_ALIGN (sofar,
+		     (bfd_vma) 1 << COFF_DEFAULT_SECTION_ALIGNMENT_POWER);
 
   obj_relocbase (abfd) = sofar;
   abfd->output_has_begun = true;
@@ -3889,7 +3902,7 @@ coff_write_object_contents (bfd * abfd)
     internal_f.f_flags |= IMAGE_FILE_LARGE_ADDRESS_AWARE;
 #endif
 
-#if !defined(COFF_WITH_pex64) && !defined(COFF_WITH_peAArch64)
+#if !defined(COFF_WITH_pex64) && !defined(COFF_WITH_peAArch64) && !defined(COFF_WITH_peLoongArch64)
 #ifdef COFF_WITH_PE
   internal_f.f_flags |= IMAGE_FILE_32BIT_MACHINE;
 #else
@@ -3939,6 +3952,11 @@ coff_write_object_contents (bfd * abfd)
 #endif
 
 #if defined(AARCH64)
+#define __A_MAGIC_SET__
+    internal_a.magic = ZMAGIC;
+#endif
+
+#if defined(LOONGARCH64)
 #define __A_MAGIC_SET__
     internal_a.magic = ZMAGIC;
 #endif
@@ -4284,10 +4302,13 @@ coff_set_section_contents (bfd * abfd,
 
 	rec = (bfd_byte *) location;
 	recend = rec + count;
-	while (rec < recend)
+	while (recend - rec >= 4)
 	  {
+	    size_t len = bfd_get_32 (abfd, rec);
+	    if (len == 0 || len > (size_t) (recend - rec) / 4)
+	      break;
+	    rec += len * 4;
 	    ++section->lma;
-	    rec += bfd_get_32 (abfd, rec) * 4;
 	  }
 
 	BFD_ASSERT (rec == recend);

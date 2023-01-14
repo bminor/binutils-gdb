@@ -1244,3 +1244,39 @@ _bfd_generic_init_private_section_data (bfd *ibfd ATTRIBUTE_UNUSED,
 {
   return true;
 }
+
+/* Display texts for type of compressed DWARF debug sections.  */
+static const struct compressed_type_tuple compressed_debug_section_names[] =
+{
+  { COMPRESS_DEBUG_NONE, "none" },
+  { COMPRESS_DEBUG_GABI_ZLIB, "zlib" },
+  { COMPRESS_DEBUG_GNU_ZLIB, "zlib-gnu" },
+  { COMPRESS_DEBUG_GABI_ZLIB, "zlib-gabi" },
+  { COMPRESS_DEBUG_ZSTD, "zstd" },
+};
+
+#ifndef ARRAY_SIZE
+#define ARRAY_SIZE(a) (sizeof (a) / sizeof ((a)[0]))
+#endif
+
+/* Return compressed_debug_section_type from a string representation.  */
+enum compressed_debug_section_type
+bfd_get_compression_algorithm (const char *name)
+{
+  for (unsigned i = 0; i < ARRAY_SIZE (compressed_debug_section_names); ++i)
+    if (strcasecmp (compressed_debug_section_names[i].name, name) == 0)
+      return compressed_debug_section_names[i].type;
+
+  return COMPRESS_UNKNOWN;
+}
+
+/* Return compression algorithm name based on the type.  */
+const char *
+bfd_get_compression_algorithm_name (enum compressed_debug_section_type type)
+{
+  for (unsigned i = 0; i < ARRAY_SIZE (compressed_debug_section_names); ++i)
+    if (type == compressed_debug_section_names[i].type)
+      return compressed_debug_section_names[i].name;
+
+  return NULL;
+}

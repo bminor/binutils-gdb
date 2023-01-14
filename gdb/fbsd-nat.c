@@ -125,7 +125,7 @@ fbsd_nat_target::find_memory_regions (find_memory_region_ftype func,
 	 Pass MODIFIED as true, we do not know the real modification state.  */
       func (kve->kve_start, size, kve->kve_protection & KVME_PROT_READ,
 	    kve->kve_protection & KVME_PROT_WRITE,
-	    kve->kve_protection & KVME_PROT_EXEC, 1, data);
+	    kve->kve_protection & KVME_PROT_EXEC, 1, false, data);
     }
   return 0;
 }
@@ -971,9 +971,9 @@ handle_target_event (int error, gdb_client_data client_data)
 /* Implement the "async" target method.  */
 
 void
-fbsd_nat_target::async (int enable)
+fbsd_nat_target::async (bool enable)
 {
-  if ((enable != 0) == is_async_p ())
+  if (enable == is_async_p ())
     return;
 
   /* Block SIGCHILD while we create/destroy the pipe, as the handler
@@ -1779,7 +1779,7 @@ fbsd_nat_target::store_register_set (struct regcache *regcache, int regnum,
 
 /* See fbsd-nat.h.  */
 
-bool
+size_t
 fbsd_nat_target::have_regset (ptid_t ptid, int note)
 {
   pid_t pid = get_ptrace_pid (ptid);

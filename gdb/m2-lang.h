@@ -37,11 +37,11 @@ extern int get_long_set_bounds (struct type *type, LONGEST *low,
 
 struct builtin_m2_type
 {
-  struct type *builtin_char;
-  struct type *builtin_int;
-  struct type *builtin_card;
-  struct type *builtin_real;
-  struct type *builtin_bool;
+  struct type *builtin_char = nullptr;
+  struct type *builtin_int = nullptr;
+  struct type *builtin_card = nullptr;
+  struct type *builtin_real = nullptr;
+  struct type *builtin_bool = nullptr;
 };
 
 /* Return the Modula-2 type table for the specified architecture.  */
@@ -118,12 +118,12 @@ public:
   {
     type = check_typedef (type);
     if (type->code () == TYPE_CODE_ARRAY
-	&& TYPE_LENGTH (type) > 0
-	&& TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
+	&& type->length () > 0
+	&& type->target_type ()->length () > 0)
       {
-	struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
+	struct type *elttype = check_typedef (type->target_type ());
 
-	if (TYPE_LENGTH (elttype) == 1
+	if (elttype->length () == 1
 	    && (elttype->code () == TYPE_CODE_INT
 		|| elttype->code () == TYPE_CODE_CHAR))
 	  return true;

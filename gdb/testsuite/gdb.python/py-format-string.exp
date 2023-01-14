@@ -544,10 +544,12 @@ proc_with_prefix test_nibbles {} {
 	  "0010 1010" \
 	  "42 with option ${opts}"
 
-	check_format_string "a_point_t" $opts
+	check_format_string "a_point_t" $opts \
+	    [string_to_regexp "Pretty Point (0010 1010, 1100)"]
 	check_format_string "a_point_t_pointer" $opts \
 	  $binary_pointer_regexp
-	check_format_string "another_point" $opts
+	check_format_string "another_point" $opts \
+	    [string_to_regexp "Pretty Point (0111 1011, 0001 1100 1000)"]
 
 	check_format_string "a_struct_with_union" $opts \
 	  "\\{the_union = \\{an_int = 0010 1010 0010 1010 0010 1010 0010 1010, a_char = 0010 1010\\}\\}"
@@ -574,10 +576,12 @@ proc_with_prefix test_nibbles {} {
 	  "0010'1010" \
 	  "42 with option ${opts}"
 
-	check_format_string "a_point_t" $opts
+	check_format_string "a_point_t" $opts \
+	    [string_to_regexp "Pretty Point (0010'1010, 1100)"]
 	check_format_string "a_point_t_pointer" $opts \
 	  $binary_pointer_regexp
-	check_format_string "another_point" $opts
+	check_format_string "another_point" $opts \
+	    [string_to_regexp "Pretty Point (0111'1011, 0001'1100'1000)"]
 
 	check_format_string "a_struct_with_union" $opts \
 	  "\\{the_union = \\{an_int = 0010'1010'0010'1010'0010'1010'0010'1010, a_char = 0010'1010\\}\\}"
@@ -598,7 +602,8 @@ proc_with_prefix test_nibbles {} {
 	check_format_string "a_symbol_pointer" $opts \
 	  $binary_pointer_regexp
 
-	check_format_string "a_point_t_ref" $opts
+	check_format_string "a_point_t_ref" $opts \
+	    [string_to_regexp "Pretty Point (0010'1010, 1100)"]
 	check_format_string "a_base_ref" $opts
     }
   }
@@ -938,9 +943,11 @@ proc_with_prefix test_format {} {
       "0x2a" \
       "42 with option ${opts}"
 
-    check_format_string "a_point_t" $opts
+    check_format_string "a_point_t" $opts \
+      "Pretty Point \\(0x2a, 0xc\\)"
     check_format_string "a_point_t_pointer" $opts
-    check_format_string "another_point" $opts
+    check_format_string "another_point" $opts \
+      "Pretty Point \\(0x7b, 0x1c8\\)"
     check_format_string "a_struct_with_union" $opts \
       "\\{the_union = \\{an_int = 0x2a2a2a2a, a_char = 0x2a\\}\\}"
     check_format_string "an_enum" $opts \
@@ -961,7 +968,8 @@ proc_with_prefix test_format {} {
       $default_pointer_regexp
 
     if { $current_lang == "c++" } {
-      check_format_string "a_point_t_ref" $opts
+      check_format_string "a_point_t_ref" $opts \
+	"Pretty Point \\(0x2a, 0xc\\)"
       check_format_string "a_base_ref" $opts
     }
   }
@@ -974,10 +982,12 @@ proc_with_prefix test_format {} {
       "101010" \
       "42 with option ${opts}"
 
-    check_format_string "a_point_t" $opts
+    check_format_string "a_point_t" $opts \
+      "Pretty Point \\(101010, 1100\\)"
     check_format_string "a_point_t_pointer" $opts \
       $binary_pointer_regexp
-    check_format_string "another_point" $opts
+    check_format_string "another_point" $opts \
+      "Pretty Point \\(1111011, 111001000\\)"
     check_format_string "a_struct_with_union" $opts \
       "\\{the_union = \\{an_int = 101010001010100010101000101010, a_char = 101010\\}\\}"
     check_format_string "an_enum" $opts \
@@ -998,7 +1008,8 @@ proc_with_prefix test_format {} {
       $binary_pointer_regexp
 
     if { $current_lang == "c++" } {
-      check_format_string "a_point_t_ref" $opts
+      check_format_string "a_point_t_ref" $opts \
+	"Pretty Point \\(101010, 1100\\)"
       check_format_string "a_base_ref" $opts
     }
   }
@@ -1103,6 +1114,29 @@ proc test_styling {} {
 	"{[style x variable] = 42, [style y variable] = 12}"
 }
 
+# Test the gdb.print_options API.
+proc test_print_options {} {
+    gdb_test_no_output "set print elements 500"
+    gdb_test "python print(gdb.print_options()\['max_elements'\])" "500" \
+	"examine max elements"
+    gdb_test "python print('format' in gdb.print_options())" "False" \
+	"examine format"
+
+    check_format_string "a_point_t" "format='t', nibbles=True" \
+	"Pretty Point \\(0010.1010, 1100\\)" \
+	"print in binary to fetch options"
+    gdb_test "python print(saved_options\['format'\] == 't')" "True" \
+	"format was set"
+    gdb_test "python print(saved_options\['nibbles'\])" "True" \
+	"nibbles was set"
+
+    check_format_string "a_point_t" "summary=True" \
+	"No Data" \
+	"print in summary mode"
+    gdb_test "python print(saved_options\['summary'\])" "True" \
+	"summary was set"
+}
+
 # Run all the tests in common for both C and C++.
 proc_with_prefix test_all_common {} {
   # No options.
@@ -1127,6 +1161,7 @@ proc_with_prefix test_all_common {} {
   test_mixed
   # Various error conditions.
   test_invalid_args
+  test_print_options
 }
 
 # The current language ("c" or "c++" while running tests).

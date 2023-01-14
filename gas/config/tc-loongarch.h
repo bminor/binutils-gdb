@@ -49,7 +49,8 @@ extern int loongarch_relax_frag (asection *, struct frag *, long);
 
 /* This is called to see whether a reloc against a defined symbol
    should be converted into a reloc against a section.  */
-#define tc_fix_adjustable(fixp) 0
+extern int loongarch_fix_adjustable (struct fix *fix);
+#define tc_fix_adjustable(fixp) loongarch_fix_adjustable(fixp)
 
 /* Values passed to md_apply_fix don't include symbol values.  */
 #define TC_FORCE_RELOCATION_SUB_LOCAL(FIX, SEG) 1
@@ -59,10 +60,6 @@ extern int loongarch_relax_frag (asection *, struct frag *, long);
 #define TARGET_USE_CFIPOP 1
 #define DWARF2_DEFAULT_RETURN_COLUMN 1 /* $ra.  */
 #define DWARF2_CIE_DATA_ALIGNMENT -4
-extern int loongarch_dwarf2_addr_size (void);
-#define DWARF2_FDE_RELOC_SIZE loongarch_dwarf2_addr_size ()
-#define DWARF2_ADDR_SIZE(bfd) loongarch_dwarf2_addr_size ()
-#define CFI_DIFF_EXPR_OK 0
 
 #define tc_cfi_frame_initial_instructions	\
   loongarch_cfi_frame_initial_instructions
@@ -75,6 +72,8 @@ extern void tc_loongarch_parse_to_dw2regnum (expressionS *);
    Now we want to fill 'andi $r0,$r0,0x0'.
    Here is the type 0, will fill andi insn later.  */
 #define NOP_OPCODE (0x00)
+
+#define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 0
 
 #define HANDLE_ALIGN(fragp) loongarch_handle_align (fragp)
 extern void loongarch_handle_align (struct frag *);

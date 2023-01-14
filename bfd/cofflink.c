@@ -2562,14 +2562,10 @@ _bfd_coff_write_global_sym (struct bfd_hash_entry *bh, void *data)
 	if (isym.n_value > (bfd_vma) 0xffffffff)
 	  {
 	    if (! h->root.linker_def)
-	      {
-		char value_buf[128];
-
-		sprintf_vma (value_buf, isym.n_value);
-		_bfd_error_handler
-		  (_("%pB: stripping non-representable symbol '%s' (value 0x%s)"),
-		   output_bfd, h->root.root.string, value_buf);
-	      }
+	      _bfd_error_handler
+		(_("%pB: stripping non-representable symbol '%s' "
+		   "(value 0x%" PRIx64 ")"),
+		 output_bfd, h->root.root.string, isym.n_value);
 	    return true;
 	  }
 #endif

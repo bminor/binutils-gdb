@@ -142,7 +142,7 @@ template_reverse_regs[TILEGX_NUM_PHYS_REGS] =
 static const char *
 tilegx_register_name (struct gdbarch *gdbarch, int regnum)
 {
-  static const char *const register_names[TILEGX_NUM_REGS] =
+  static const char *const register_names[] =
     {
       "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",
       "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15",
@@ -155,11 +155,7 @@ tilegx_register_name (struct gdbarch *gdbarch, int regnum)
       "pc",   "faultnum",
     };
 
-  if (regnum < 0 || regnum >= TILEGX_NUM_REGS)
-    internal_error (__FILE__, __LINE__,
-		    "tilegx_register_name: invalid register number %d",
-		    regnum);
-
+  gdb_static_assert (TILEGX_NUM_REGS == ARRAY_SIZE (register_names));
   return register_names[regnum];
 }
 
@@ -204,7 +200,7 @@ tilegx_use_struct_convention (struct type *type)
   /* Only scalars which fit in R0 - R9 can be returned in registers.
      Otherwise, they are returned via a pointer passed in R0.  */
   return (!tilegx_type_is_scalar (type)
-	  && (TYPE_LENGTH (type) > (1 + TILEGX_R9_REGNUM - TILEGX_R0_REGNUM)
+	  && (type->length () > (1 + TILEGX_R9_REGNUM - TILEGX_R0_REGNUM)
 	      * tilegx_reg_size));
 }
 
@@ -215,7 +211,7 @@ static void
 tilegx_extract_return_value (struct type *type, struct regcache *regcache,
 			     gdb_byte *valbuf)
 {
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   int i, regnum = TILEGX_R0_REGNUM;
 
   for (i = 0; i < len; i += tilegx_reg_size)
@@ -230,17 +226,17 @@ static void
 tilegx_store_return_value (struct type *type, struct regcache *regcache,
 			   const void *valbuf)
 {
-  if (TYPE_LENGTH (type) < tilegx_reg_size)
+  if (type->length () < tilegx_reg_size)
     {
       /* Add leading zeros to the (little-endian) value.  */
       gdb_byte buf[tilegx_reg_size] = { 0 };
 
-      memcpy (buf, valbuf, TYPE_LENGTH (type));
+      memcpy (buf, valbuf, type->length ());
       regcache->raw_write (TILEGX_R0_REGNUM, buf);
     }
   else
     {
-      int len = TYPE_LENGTH (type);
+      int len = type->length ();
       int i, regnum = TILEGX_R0_REGNUM;
 
       for (i = 0; i < len; i += tilegx_reg_size)
@@ -302,7 +298,7 @@ tilegx_push_dummy_call (struct gdbarch *gdbarch,
   for (i = 0; i < nargs && argreg <= TILEGX_R9_REGNUM; i++)
     {
       const gdb_byte *val;
-      typelen = TYPE_LENGTH (value_enclosing_type (args[i]));
+      typelen = value_enclosing_type (args[i])->length ();
 
       if (typelen > (TILEGX_R9_REGNUM - argreg + 1) * tilegx_reg_size)
 	break;
@@ -329,7 +325,7 @@ tilegx_push_dummy_call (struct gdbarch *gdbarch,
     {
       const gdb_byte *contents = value_contents (args[j]).data ();
 
-      typelen = TYPE_LENGTH (value_enclosing_type (args[j]));
+      typelen = value_enclosing_type (args[j])->length ();
       slacklen = align_up (typelen, 8) - typelen;
       gdb::byte_vector val (typelen + slacklen);
       memcpy (val.data (), contents, typelen);
@@ -366,7 +362,7 @@ static CORE_ADDR
 tilegx_analyze_prologue (struct gdbarch* gdbarch,
 			 CORE_ADDR start_addr, CORE_ADDR end_addr,
 			 struct tilegx_frame_cache *cache,
-			 struct frame_info *next_frame)
+			 frame_info_ptr next_frame)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR next_addr;
@@ -778,7 +774,7 @@ tilegx_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 /* This is the implementation of gdbarch method get_longjmp_target.  */
 
 static int
-tilegx_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
+tilegx_get_longjmp_target (frame_info_ptr frame, CORE_ADDR *pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -837,7 +833,7 @@ typedef BP_MANIPULATION (tilegx_break_insn) tilegx_breakpoint;
 /* Normal frames.  */
 
 static struct tilegx_frame_cache *
-tilegx_frame_cache (struct frame_info *this_frame, void **this_cache)
+tilegx_frame_cache (frame_info_ptr this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct tilegx_frame_cache *cache;
@@ -868,7 +864,7 @@ tilegx_frame_cache (struct frame_info *this_frame, void **this_cache)
 /* Retrieve the value of REGNUM in FRAME.  */
 
 static struct value*
-tilegx_frame_prev_register (struct frame_info *this_frame,
+tilegx_frame_prev_register (frame_info_ptr this_frame,
 			    void **this_cache,
 			    int regnum)
 {
@@ -882,7 +878,7 @@ tilegx_frame_prev_register (struct frame_info *this_frame,
 /* Build frame id.  */
 
 static void
-tilegx_frame_this_id (struct frame_info *this_frame, void **this_cache,
+tilegx_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 		      struct frame_id *this_id)
 {
   struct tilegx_frame_cache *info =
@@ -896,7 +892,7 @@ tilegx_frame_this_id (struct frame_info *this_frame, void **this_cache,
 }
 
 static CORE_ADDR
-tilegx_frame_base_address (struct frame_info *this_frame, void **this_cache)
+tilegx_frame_base_address (frame_info_ptr this_frame, void **this_cache)
 {
   struct tilegx_frame_cache *cache =
     tilegx_frame_cache (this_frame, this_cache);
@@ -1028,5 +1024,5 @@ void _initialize_tilegx_tdep ();
 void
 _initialize_tilegx_tdep ()
 {
-  register_gdbarch_init (bfd_arch_tilegx, tilegx_gdbarch_init);
+  gdbarch_register (bfd_arch_tilegx, tilegx_gdbarch_init);
 }

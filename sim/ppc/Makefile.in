@@ -522,7 +522,7 @@ PACKAGE_OBJ = @sim_pk_obj@
 
 
 psim$(EXEEXT): $(TARGETLIB) main.o $(LIBIBERTY_LIB) $(BFD_LIB) $(LIBINTL_DEP)
-	$(ECHO_CCLD) $(CC) $(CFLAGS) $(LDFLAGS) -o psim$(EXEEXT) main.o $(TARGETLIB) $(BFD_LIB) $(ZLIB) $(LIBINTL) $(LIBIBERTY_LIB) $(LIBS)
+	$(ECHO_CCLD) $(CC) $(CFLAGS) $(LDFLAGS) -o psim$(EXEEXT) main.o $(TARGETLIB) $(BFD_LIB) $(ZLIB) $(ZSTD_LIBS) $(LIBINTL) $(LIBIBERTY_LIB) $(LIBS)
 
 run$(EXEEXT): psim$(EXEEXT)
 	$(SILENCE) rm -f $@

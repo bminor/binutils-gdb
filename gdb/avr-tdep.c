@@ -189,7 +189,7 @@ struct avr_unwind_cache
   trad_frame_saved_reg *saved_regs;
 };
 
-struct avr_gdbarch_tdep : gdbarch_tdep
+struct avr_gdbarch_tdep : gdbarch_tdep_base
 {
   /* Number of bytes stored to the stack by call instructions.
      2 bytes for avr1-5 and avrxmega1-5, 3 bytes for avr6 and avrxmega6-7.  */
@@ -216,10 +216,8 @@ avr_register_name (struct gdbarch *gdbarch, int regnum)
     "SREG", "SP", "PC2",
     "pc"
   };
-  if (regnum < 0)
-    return NULL;
-  if (regnum >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+  gdb_static_assert (ARRAY_SIZE (register_names)
+		     == (AVR_NUM_REGS + AVR_NUM_PSEUDO_REGS));
   return register_names[regnum];
 }
 
@@ -232,7 +230,7 @@ avr_register_type (struct gdbarch *gdbarch, int reg_nr)
   if (reg_nr == AVR_PC_REGNUM)
     return builtin_type (gdbarch)->builtin_uint32;
 
-  avr_gdbarch_tdep *tdep = (avr_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  avr_gdbarch_tdep *tdep = gdbarch_tdep<avr_gdbarch_tdep> (gdbarch);
   if (reg_nr == AVR_PSEUDO_PC_REGNUM)
     return tdep->pc_type;
 
@@ -315,22 +313,22 @@ avr_address_to_pointer (struct gdbarch *gdbarch,
   if (AVR_TYPE_ADDRESS_CLASS_FLASH (type))
     {
       /* A data pointer in flash is byte addressed.  */
-      store_unsigned_integer (buf, TYPE_LENGTH (type), byte_order,
+      store_unsigned_integer (buf, type->length (), byte_order,
 			      avr_convert_iaddr_to_raw (addr));
     }
   /* Is it a code address?  */
-  else if (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_FUNC
-	   || TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_METHOD)
+  else if (type->target_type ()->code () == TYPE_CODE_FUNC
+	   || type->target_type ()->code () == TYPE_CODE_METHOD)
     {
       /* A code pointer is word (16 bits) addressed.  We shift the address down
 	 by 1 bit to convert it to a pointer.  */
-      store_unsigned_integer (buf, TYPE_LENGTH (type), byte_order,
+      store_unsigned_integer (buf, type->length (), byte_order,
 			      avr_convert_iaddr_to_raw (addr >> 1));
     }
   else
     {
       /* Strip off any upper segment bits.  */
-      store_unsigned_integer (buf, TYPE_LENGTH (type), byte_order,
+      store_unsigned_integer (buf, type->length (), byte_order,
 			      avr_convert_saddr_to_raw (addr));
     }
 }
@@ -341,7 +339,7 @@ avr_pointer_to_address (struct gdbarch *gdbarch,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR addr
-    = extract_unsigned_integer (buf, TYPE_LENGTH (type), byte_order);
+    = extract_unsigned_integer (buf, type->length (), byte_order);
 
   /* Is it a data address in flash?  */
   if (AVR_TYPE_ADDRESS_CLASS_FLASH (type))
@@ -350,9 +348,9 @@ avr_pointer_to_address (struct gdbarch *gdbarch,
       return avr_make_iaddr (addr);
     }
   /* Is it a code address?  */
-  else if (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_FUNC
-	   || TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_METHOD
-	   || TYPE_CODE_SPACE (TYPE_TARGET_TYPE (type)))
+  else if (type->target_type ()->code () == TYPE_CODE_FUNC
+	   || type->target_type ()->code () == TYPE_CODE_METHOD
+	   || TYPE_CODE_SPACE (type->target_type ()))
     {
       /* A code pointer is word (16 bits) addressed so we shift it up
 	 by 1 bit to convert it to an address.  */
@@ -750,7 +748,7 @@ avr_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc_beg, CORE_ADDR pc_end,
   gdb_assert (vpc < AVR_MAX_PROLOGUE_SIZE);
 
   /* Handle static small stack allocation using rcall or push.  */
-  avr_gdbarch_tdep *tdep = (avr_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  avr_gdbarch_tdep *tdep = gdbarch_tdep<avr_gdbarch_tdep> (gdbarch);
   while (scan_stage == 1 && vpc < len)
     {
       insn = extract_unsigned_integer (&prologue[vpc], 2, byte_order);
@@ -946,27 +944,27 @@ avr_return_value (struct gdbarch *gdbarch, struct value *function,
   if ((valtype->code () == TYPE_CODE_STRUCT
        || valtype->code () == TYPE_CODE_UNION
        || valtype->code () == TYPE_CODE_ARRAY)
-      && TYPE_LENGTH (valtype) > 8)
+      && valtype->length () > 8)
     return RETURN_VALUE_STRUCT_CONVENTION;
 
-  if (TYPE_LENGTH (valtype) <= 2)
+  if (valtype->length () <= 2)
     lsb_reg = 24;
-  else if (TYPE_LENGTH (valtype) <= 4)
+  else if (valtype->length () <= 4)
     lsb_reg = 22;
-  else if (TYPE_LENGTH (valtype) <= 8)
+  else if (valtype->length () <= 8)
     lsb_reg = 18;
   else
     gdb_assert_not_reached ("unexpected type length");
 
   if (writebuf != NULL)
     {
-      for (i = 0; i < TYPE_LENGTH (valtype); i++)
+      for (i = 0; i < valtype->length (); i++)
 	regcache->cooked_write (lsb_reg + i, writebuf + i);
     }
 
   if (readbuf != NULL)
     {
-      for (i = 0; i < TYPE_LENGTH (valtype); i++)
+      for (i = 0; i < valtype->length (); i++)
 	regcache->cooked_read (lsb_reg + i, readbuf + i);
     }
 
@@ -981,7 +979,7 @@ avr_return_value (struct gdbarch *gdbarch, struct value *function,
    for it IS the sp for the next frame.  */
 
 static struct avr_unwind_cache *
-avr_frame_unwind_cache (struct frame_info *this_frame,
+avr_frame_unwind_cache (frame_info_ptr this_frame,
 			void **this_prologue_cache)
 {
   CORE_ADDR start_pc, current_pc;
@@ -1053,7 +1051,7 @@ avr_frame_unwind_cache (struct frame_info *this_frame,
 
   /* The previous frame's SP needed to be computed.  Save the computed
      value.  */
-  avr_gdbarch_tdep *tdep = (avr_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  avr_gdbarch_tdep *tdep = gdbarch_tdep<avr_gdbarch_tdep> (gdbarch);
   info->saved_regs[AVR_SP_REGNUM].set_value (info->prev_sp
 					     - 1 + tdep->call_length);
 
@@ -1061,7 +1059,7 @@ avr_frame_unwind_cache (struct frame_info *this_frame,
 }
 
 static CORE_ADDR
-avr_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
+avr_unwind_pc (struct gdbarch *gdbarch, frame_info_ptr next_frame)
 {
   ULONGEST pc;
 
@@ -1071,7 +1069,7 @@ avr_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 }
 
 static CORE_ADDR
-avr_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
+avr_unwind_sp (struct gdbarch *gdbarch, frame_info_ptr next_frame)
 {
   ULONGEST sp;
 
@@ -1084,7 +1082,7 @@ avr_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
    frame.  This will be used to create a new GDB frame struct.  */
 
 static void
-avr_frame_this_id (struct frame_info *this_frame,
+avr_frame_this_id (frame_info_ptr this_frame,
 		   void **this_prologue_cache,
 		   struct frame_id *this_id)
 {
@@ -1109,7 +1107,7 @@ avr_frame_this_id (struct frame_info *this_frame,
 }
 
 static struct value *
-avr_frame_prev_register (struct frame_info *this_frame,
+avr_frame_prev_register (frame_info_ptr this_frame,
 			 void **this_prologue_cache, int regnum)
 {
   struct avr_unwind_cache *info
@@ -1135,7 +1133,7 @@ avr_frame_prev_register (struct frame_info *this_frame,
 	  int i;
 	  gdb_byte buf[3];
 	  struct gdbarch *gdbarch = get_frame_arch (this_frame);
-	  avr_gdbarch_tdep *tdep = (avr_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+	  avr_gdbarch_tdep *tdep = gdbarch_tdep<avr_gdbarch_tdep> (gdbarch);
 
 	  read_memory (info->saved_regs[AVR_PC_REGNUM].addr (),
 		       buf, tdep->call_length);
@@ -1168,7 +1166,7 @@ static const struct frame_unwind avr_frame_unwind = {
 };
 
 static CORE_ADDR
-avr_frame_base_address (struct frame_info *this_frame, void **this_cache)
+avr_frame_base_address (frame_info_ptr this_frame, void **this_cache)
 {
   struct avr_unwind_cache *info
     = avr_frame_unwind_cache (this_frame, this_cache);
@@ -1188,7 +1186,7 @@ static const struct frame_base avr_frame_base = {
    save_dummy_frame_tos(), and the PC match the dummy frame's breakpoint.  */
 
 static struct frame_id
-avr_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
+avr_dummy_id (struct gdbarch *gdbarch, frame_info_ptr this_frame)
 {
   ULONGEST base;
 
@@ -1277,7 +1275,7 @@ avr_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 {
   int i;
   gdb_byte buf[3];
-  avr_gdbarch_tdep *tdep = (avr_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  avr_gdbarch_tdep *tdep = gdbarch_tdep<avr_gdbarch_tdep> (gdbarch);
   int call_length = tdep->call_length;
   CORE_ADDR return_pc = avr_convert_iaddr_to_raw (bp_addr);
   int regnum = AVR_ARGN_REGNUM;
@@ -1302,7 +1300,7 @@ avr_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       struct value *arg = args[i];
       struct type *type = check_typedef (value_type (arg));
       const bfd_byte *contents = value_contents (arg).data ();
-      int len = TYPE_LENGTH (type);
+      int len = type->length ();
 
       /* Calculate the potential last register needed.
 	 E.g. For length 2, registers regnum and regnum-1 (say 25 and 24)
@@ -1461,7 +1459,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        best_arch = gdbarch_list_lookup_by_info (best_arch->next, &info))
     {
       avr_gdbarch_tdep *tdep
-	= (avr_gdbarch_tdep *) gdbarch_tdep (best_arch->gdbarch);
+	= gdbarch_tdep<avr_gdbarch_tdep> (best_arch->gdbarch);
 
       if (tdep->call_length == call_length)
 	return best_arch->gdbarch;
@@ -1633,7 +1631,7 @@ void _initialize_avr_tdep ();
 void
 _initialize_avr_tdep ()
 {
-  register_gdbarch_init (bfd_arch_avr, avr_gdbarch_init);
+  gdbarch_register (bfd_arch_avr, avr_gdbarch_init);
 
   /* Add a new command to allow the user to query the avr remote target for
      the values of the io space registers in a saner way than just using

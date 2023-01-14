@@ -241,7 +241,7 @@ push_pull_get_stack_adjustment (int n_operands,
 /* Initialize a prologue cache.  */
 
 static struct trad_frame_cache *
-s12z_frame_cache (struct frame_info *this_frame, void **prologue_cache)
+s12z_frame_cache (frame_info_ptr this_frame, void **prologue_cache)
 {
   struct trad_frame_cache *info;
 
@@ -420,7 +420,7 @@ s12z_frame_cache (struct frame_info *this_frame, void **prologue_cache)
 
 /* Implement the this_id function for the stub unwinder.  */
 static void
-s12z_frame_this_id (struct frame_info *this_frame,
+s12z_frame_this_id (frame_info_ptr this_frame,
 		    void **prologue_cache, struct frame_id *this_id)
 {
   struct trad_frame_cache *info = s12z_frame_cache (this_frame,
@@ -432,7 +432,7 @@ s12z_frame_this_id (struct frame_info *this_frame,
 
 /* Implement the prev_register function for the stub unwinder.  */
 static struct value *
-s12z_frame_prev_register (struct frame_info *this_frame,
+s12z_frame_prev_register (frame_info_ptr this_frame,
 			  void **prologue_cache, int regnum)
 {
   struct trad_frame_cache *info = s12z_frame_cache (this_frame,
@@ -458,7 +458,7 @@ constexpr gdb_byte s12z_break_insn[] = {0x00};
 
 typedef BP_MANIPULATION (s12z_break_insn) s12z_breakpoint;
 
-struct s12z_gdbarch_tdep : gdbarch_tdep
+struct s12z_gdbarch_tdep : gdbarch_tdep_base
 {
 };
 
@@ -491,7 +491,7 @@ static const char ccw_bits[] =
 static void
 s12z_print_ccw_info (struct gdbarch *gdbarch,
 		     struct ui_file *file,
-		     struct frame_info *frame,
+		     frame_info_ptr frame,
 		     int reg)
 {
   struct value *v = value_of_register (reg, frame);
@@ -524,7 +524,7 @@ s12z_print_ccw_info (struct gdbarch *gdbarch,
 static void
 s12z_print_registers_info (struct gdbarch *gdbarch,
 			    struct ui_file *file,
-			    struct frame_info *frame,
+			    frame_info_ptr frame,
 			    int regnum, int print_all)
 {
   const int numregs = (gdbarch_num_regs (gdbarch)
@@ -557,7 +557,7 @@ s12z_extract_return_value (struct type *type, struct regcache *regcache,
 {
   int reg = -1;
 
-  switch (TYPE_LENGTH (type))
+  switch (type->length ())
     {
     case 0:   /* Nothing to do */
       return;
@@ -594,7 +594,7 @@ s12z_return_value (struct gdbarch *gdbarch, struct value *function,
   if (type->code () == TYPE_CODE_STRUCT
       || type->code () == TYPE_CODE_UNION
       || type->code () == TYPE_CODE_ARRAY
-      || TYPE_LENGTH (type) > 4)
+      || type->length () > 4)
     return RETURN_VALUE_STRUCT_CONVENTION;
 
   if (readbuf)

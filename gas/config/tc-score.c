@@ -6255,20 +6255,14 @@ s3_s_score_lcomm (int bytes_p)
 static void
 s3_insert_reg (const struct s3_reg_entry *r, htab_t htab)
 {
-  int i = 0;
-  int len = strlen (r->name) + 2;
-  char *buf = XNEWVEC (char, len);
-  char *buf2 = XNEWVEC (char, len);
+  char *buf = notes_strdup (r->name);
+  char *p;
 
-  strcpy (buf + i, r->name);
-  for (i = 0; buf[i]; i++)
-    {
-      buf2[i] = TOUPPER (buf[i]);
-    }
-  buf2[i] = '\0';
+  for (p = buf; *p; p++)
+    *p = TOUPPER (*p);
 
+  str_hash_insert (htab, r->name, r, 0);
   str_hash_insert (htab, buf, r, 0);
-  str_hash_insert (htab, buf2, r, 0);
 }
 
 static void
@@ -6286,20 +6280,17 @@ static void
 s3_build_score_ops_hsh (void)
 {
   unsigned int i;
-  static struct obstack insn_obstack;
 
-  obstack_begin (&insn_obstack, 4000);
   for (i = 0; i < sizeof (s3_score_insns) / sizeof (struct s3_asm_opcode); i++)
     {
       const struct s3_asm_opcode *insn = s3_score_insns + i;
-      size_t len = strlen (insn->template_name);
+      size_t len = strlen (insn->template_name) + 1;
       struct s3_asm_opcode *new_opcode;
       char *template_name;
-      new_opcode = (struct s3_asm_opcode *)
-	obstack_alloc (&insn_obstack, sizeof (struct s3_asm_opcode));
-      template_name = (char *) obstack_alloc (& insn_obstack, len + 1);
 
-      strcpy (template_name, insn->template_name);
+      new_opcode = notes_alloc (sizeof (*new_opcode));
+      template_name = notes_memdup (insn->template_name, len, len);
+
       new_opcode->template_name = template_name;
       new_opcode->parms = insn->parms;
       new_opcode->value = insn->value;
@@ -6315,22 +6306,17 @@ static void
 s3_build_dependency_insn_hsh (void)
 {
   unsigned int i;
-  static struct obstack dependency_obstack;
 
-  obstack_begin (&dependency_obstack, 4000);
   for (i = 0; i < sizeof (s3_insn_to_dependency_table) / sizeof (s3_insn_to_dependency_table[0]); i++)
     {
       const struct s3_insn_to_dependency *tmp = s3_insn_to_dependency_table + i;
-      size_t len = strlen (tmp->insn_name);
+      size_t len = strlen (tmp->insn_name) + 1;
       struct s3_insn_to_dependency *new_i2n;
       char *buf;
 
-      new_i2n = (struct s3_insn_to_dependency *)
-	obstack_alloc (&dependency_obstack,
-		       sizeof (struct s3_insn_to_dependency));
-      buf = (char *) obstack_alloc (&dependency_obstack, len + 1);
+      new_i2n = notes_alloc (sizeof (*new_i2n));
+      buf = notes_memdup (tmp->insn_name, len, len);
 
-      strcpy (buf, tmp->insn_name);
       new_i2n->insn_name = buf;
       new_i2n->type = tmp->type;
       str_hash_insert (s3_dependency_insn_hsh, new_i2n->insn_name, new_i2n, 0);

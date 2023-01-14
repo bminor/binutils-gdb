@@ -38,6 +38,8 @@ clean_restart ${testfile}
 
 if { [skip_python_tests] } { continue }
 
+gdb_test_no_output "python import gdb.events"
+
 set pyfile [gdb_remote_download host ${srcdir}/${subdir}/py-events.py]
 gdb_test_no_output "source ${pyfile}" "load python file"
 

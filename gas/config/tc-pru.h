@@ -47,7 +47,8 @@ extern const char *pru_target_format (void);
 
 /* Function prototypes exported to rest of GAS.  */
 extern void md_assemble (char *op_str);
-extern void md_end (void);
+extern void pru_md_end (void);
+#define md_end pru_md_end
 extern void md_begin (void);
 
 #define tc_fix_adjustable(fixp) pru_fix_adjustable (fixp)

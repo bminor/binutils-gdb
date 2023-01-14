@@ -194,7 +194,4 @@ extern gdb_bfd_ref_ptr solib_bfd_fopen (const char *pathname, int fd);
 /* Find solib binary file and open it.  */
 extern gdb_bfd_ref_ptr solib_bfd_open (const char *in_pathname);
 
-/* FIXME: gdbarch needs to control this variable.  */
-extern struct target_so_ops *current_target_so_ops;
-
 #endif

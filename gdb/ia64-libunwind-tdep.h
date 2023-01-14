@@ -22,7 +22,7 @@
 #ifndef IA64_LIBUNWIND_TDEP_H
 #define IA64_LIBUNWIND_TDEP_H 1
 
-struct frame_info;
+class frame_info_ptr;
 struct frame_id;
 struct regcache;
 struct gdbarch;
@@ -40,29 +40,29 @@ struct frame_unwind;
 
 struct libunwind_descr
 {
-  int (*gdb2uw) (int);
-  int (*uw2gdb) (int);
-  int (*is_fpreg) (int);
-  void *accessors;
-  void *special_accessors;
+  int (*gdb2uw) (int) = nullptr;
+  int (*uw2gdb) (int) = nullptr;
+  int (*is_fpreg) (int) = nullptr;
+  void *accessors = nullptr;
+  void *special_accessors = nullptr;
 };
 
 int libunwind_frame_sniffer (const struct frame_unwind *self,
-			     struct frame_info *this_frame,
+			     frame_info_ptr this_frame,
 			     void **this_cache);
 			  
 int libunwind_sigtramp_frame_sniffer (const struct frame_unwind *self,
-				      struct frame_info *this_frame,
+				      frame_info_ptr this_frame,
 				      void **this_cache);
 
 void libunwind_frame_set_descr (struct gdbarch *arch,
 				struct libunwind_descr *descr);
 
-void libunwind_frame_this_id (struct frame_info *this_frame, void **this_cache,
+void libunwind_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 			      struct frame_id *this_id);
-struct value *libunwind_frame_prev_register (struct frame_info *this_frame,
+struct value *libunwind_frame_prev_register (frame_info_ptr this_frame,
 					     void **this_cache, int regnum);
-void libunwind_frame_dealloc_cache (struct frame_info *self, void *cache);
+void libunwind_frame_dealloc_cache (frame_info_ptr self, void *cache);
 
 int libunwind_is_initialized (void);
 

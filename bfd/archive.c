@@ -192,7 +192,7 @@ _bfd_ar_sizepad (char *p, size_t n, bfd_size_type size)
   char buf[21];
   size_t len;
 
-  snprintf (buf, sizeof (buf), "%-10" BFD_VMA_FMT "u", size);
+  snprintf (buf, sizeof (buf), "%-10" PRIu64, (uint64_t) size);
   len = strlen (buf);
   if (len > n)
     {
@@ -485,7 +485,7 @@ _bfd_generic_read_ar_hdr_mag (bfd *abfd, const char *mag)
 {
   struct ar_hdr hdr;
   char *hdrp = (char *) &hdr;
-  bfd_size_type parsed_size;
+  uint64_t parsed_size;
   struct areltdata *ared;
   char *filename = NULL;
   ufile_ptr filesize;
@@ -514,7 +514,7 @@ _bfd_generic_read_ar_hdr_mag (bfd *abfd, const char *mag)
   errno = 0;
   fmag_save = hdr.ar_fmag[0];
   hdr.ar_fmag[0] = 0;
-  scan = sscanf (hdr.ar_size, "%" BFD_VMA_FMT "u", &parsed_size);
+  scan = sscanf (hdr.ar_size, "%" SCNu64, &parsed_size);
   hdr.ar_fmag[0] = fmag_save;
   if (scan != 1)
     {

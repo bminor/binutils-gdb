@@ -137,7 +137,8 @@ extern sim_cpu *sim_cpu_lookup (SIM_DESC, const char *);
 /* Return prefix to use in cpu specific messages.  */
 extern const char *sim_cpu_msg_prefix (sim_cpu *);
 /* Cover fn to sim_io_eprintf.  */
-extern void sim_io_eprintf_cpu (sim_cpu *, const char *, ...);
+extern void sim_io_eprintf_cpu (sim_cpu *, const char *, ...)
+  ATTRIBUTE_PRINTF (2, 3);
 
 /* Get/set a pc value.  */
 #define CPU_PC_GET(cpu) ((* CPU_PC_FETCH (cpu)) (cpu))

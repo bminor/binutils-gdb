@@ -104,7 +104,7 @@ eval_op_m2_subscript (struct type *expect_type, struct expression *exp,
       }
 
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    return value_zero (TYPE_TARGET_TYPE (type), VALUE_LVAL (arg1));
+    return value_zero (type->target_type (), VALUE_LVAL (arg1));
   else
     return value_subscript (arg1, value_as_long (arg2));
 }
@@ -275,11 +275,10 @@ m2_language::emitchar (int ch, struct type *chtype,
 /* Called during architecture gdbarch initialisation to create language
    specific types.  */
 
-static void *
+static struct builtin_m2_type *
 build_m2_types (struct gdbarch *gdbarch)
 {
-  struct builtin_m2_type *builtin_m2_type
-    = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct builtin_m2_type);
+  struct builtin_m2_type *builtin_m2_type = new struct builtin_m2_type;
 
   /* Modula-2 "pervasive" types.  NOTE:  these can be redefined!!! */
   builtin_m2_type->builtin_int
@@ -297,20 +296,17 @@ build_m2_types (struct gdbarch *gdbarch)
   return builtin_m2_type;
 }
 
-static struct gdbarch_data *m2_type_data;
+static const registry<gdbarch>::key<struct builtin_m2_type> m2_type_data;
 
 const struct builtin_m2_type *
 builtin_m2_type (struct gdbarch *gdbarch)
 {
-  return (const struct builtin_m2_type *) gdbarch_data (gdbarch, m2_type_data);
-}
+  struct builtin_m2_type *result = m2_type_data.get (gdbarch);
+  if (result == nullptr)
+    {
+      result = build_m2_types (gdbarch);
+      m2_type_data.set (gdbarch, result);
+    }
 
-
-/* Initialization for Modula-2 */
-
-void _initialize_m2_language ();
-void
-_initialize_m2_language ()
-{
-  m2_type_data = gdbarch_data_register_post_init (build_m2_types);
+  return result;
 }

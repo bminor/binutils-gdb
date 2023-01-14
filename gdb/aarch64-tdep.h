@@ -60,7 +60,7 @@ struct regset;
 #define AARCH64_DISPLACED_MODIFIED_INSNS 1
 
 /* Target-dependent structure in gdbarch.  */
-struct aarch64_gdbarch_tdep : gdbarch_tdep
+struct aarch64_gdbarch_tdep : gdbarch_tdep_base
 {
   /* Lowest address at which instructions will appear.  */
   CORE_ADDR lowest_pc = 0;
@@ -118,9 +118,15 @@ struct aarch64_gdbarch_tdep : gdbarch_tdep
   {
     return tls_regnum != -1;
   }
+
+  /* The W pseudo-registers.  */
+  int w_pseudo_base = 0;
+  int w_pseudo_count = 0;
 };
 
 const target_desc *aarch64_read_description (const aarch64_features &features);
+aarch64_features
+aarch64_features_from_target_desc (const struct target_desc *tdesc);
 
 extern int aarch64_process_record (struct gdbarch *gdbarch,
 			       struct regcache *regcache, CORE_ADDR addr);

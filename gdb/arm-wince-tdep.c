@@ -36,7 +36,7 @@ static const gdb_byte arm_wince_thumb_le_breakpoint[] = { 0xfe, 0xdf };
 #define ARM_WINCE_JB_PC			10
 
 static CORE_ADDR
-arm_pe_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
+arm_pe_skip_trampoline_code (frame_info_ptr frame, CORE_ADDR pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -115,7 +115,7 @@ arm_wince_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 static void
 arm_wince_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   windows_init_abi (info, gdbarch);
 

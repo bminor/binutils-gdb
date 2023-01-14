@@ -2513,9 +2513,9 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	  extdynsize = get_elf_backend_data (abfd)->s->sizeof_dyn;
 	  swap_dyn_in = get_elf_backend_data (abfd)->s->swap_dyn_in;
 
-	  extdyn = dynbuf;
-	  extdynend = extdyn + dynamic->size;
-	  for (; extdyn < extdynend; extdyn += extdynsize)
+	  for (extdyn = dynbuf, extdynend = dynbuf + dynamic->size;
+	       (size_t) (extdynend - extdyn) >= extdynsize;
+	       extdyn += extdynsize)
 	    {
 	      Elf_Internal_Dyn dyn;
 	      (*swap_dyn_in) (abfd, extdyn, &dyn);
@@ -10000,20 +10000,21 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
       /* Finally, allocate space.  */
       for (p = (struct ppc_dyn_relocs *) h->dyn_relocs; p != NULL; p = p->next)
-	{
-	  unsigned int count;
-	  asection *sreloc = elf_section_data (p->sec)->sreloc;
-	  if (eh->elf.type == STT_GNU_IFUNC)
-	    sreloc = htab->elf.irelplt;
-	  count = p->count;
-	  if (info->enable_dt_relr
-	      && ((!NO_OPD_RELOCS
-		   && ppc64_elf_section_data (p->sec)->sec_type == sec_opd)
-		  || (eh->elf.type != STT_GNU_IFUNC
-		      && SYMBOL_REFERENCES_LOCAL (info, h))))
-	    count -= p->rel_count;
-	  sreloc->size += count * sizeof (Elf64_External_Rela);
-	}
+	if (!discarded_section (p->sec))
+	  {
+	    unsigned int count;
+	    asection *sreloc = elf_section_data (p->sec)->sreloc;
+	    if (eh->elf.type == STT_GNU_IFUNC)
+	      sreloc = htab->elf.irelplt;
+	    count = p->count;
+	    if (info->enable_dt_relr
+		&& ((!NO_OPD_RELOCS
+		     && ppc64_elf_section_data (p->sec)->sec_type == sec_opd)
+		    || (eh->elf.type != STT_GNU_IFUNC
+			&& SYMBOL_REFERENCES_LOCAL (info, h))))
+	      count -= p->rel_count;
+	    sreloc->size += count * sizeof (Elf64_External_Rela);
+	  }
     }
 
   /* We might need a PLT entry when the symbol
@@ -10248,8 +10249,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 
 	  for (p = elf_section_data (s)->local_dynrel; p != NULL; p = p->next)
 	    {
-	      if (!bfd_is_abs_section (p->sec)
-		  && bfd_is_abs_section (p->sec->output_section))
+	      if (discarded_section (p->sec))
 		{
 		  /* Input section has been discarded, either because
 		     it is a copy of a linkonce section or due to
@@ -11670,7 +11670,7 @@ dump_stub (const char *header,
   fprintf (stderr, "%s id = %u type = %s:%s:%s\n",
 	   header, stub_entry->id, t1, t2, t3);
   fprintf (stderr, "name = %s\n", stub_entry->root.string);
-  fprintf (stderr, "offset = %#lx:", stub_entry->stub_offset);
+  fprintf (stderr, "offset = 0x%" PRIx64 ":", stub_entry->stub_offset);
   for (size_t i = stub_entry->stub_offset; i < end_offset; i += 4)
     {
       asection *stub_sec = stub_entry->group->stub_sec;
@@ -11736,8 +11736,8 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	fprintf (stderr, "Expected id %u, got %u\n",
 		 htab->stub_id, stub_entry->id);
       if (stub_entry->stub_offset < stub_entry->group->stub_sec->size)
-	fprintf (stderr, "Expected offset >= %" BFD_VMA_FMT "x, got %"
-		 BFD_VMA_FMT "x\n", stub_entry->group->stub_sec->size,
+	fprintf (stderr, "Expected offset >= %" PRIx64 ", got %"
+		 PRIx64 "\n", stub_entry->group->stub_sec->size,
 		 stub_entry->stub_offset);
       if (esd->sec_type == sec_stub)
 	dump_stub ("Previous:", esd->u.last_ent, stub_entry->stub_offset);

@@ -81,7 +81,7 @@ case ${host} in
     ;;
 esac
 
-AC_SUBST([CONFIG_STATUS_DEPENDENCIES], ['$srcdir/../bfd/development.sh'])
+AC_SUBST([CONFIG_STATUS_DEPENDENCIES], ['$(srcdir)/../bfd/development.sh'])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

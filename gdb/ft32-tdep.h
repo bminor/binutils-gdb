@@ -22,7 +22,7 @@
 
 #include "gdbarch.h"
 
-struct ft32_gdbarch_tdep : gdbarch_tdep
+struct ft32_gdbarch_tdep : gdbarch_tdep_base
 {
   /* Type for a pointer to a function.  Used for the type of PC.  */
   struct type *pc_type = nullptr;

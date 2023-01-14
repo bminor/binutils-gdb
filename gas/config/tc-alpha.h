@@ -149,8 +149,8 @@ extern void alpha_before_fix (void);
 #endif
 
 #ifdef OBJ_ELF
-#define md_end  alpha_elf_md_end
-extern void alpha_elf_md_end (void);
+#define md_finish  alpha_elf_md_finish
+extern void alpha_elf_md_finish (void);
 #endif
 
 /* New fields for supporting explicit relocations (such as !literal to mark

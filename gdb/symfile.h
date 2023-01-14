@@ -37,7 +37,7 @@ struct obj_section;
 struct obstack;
 struct block;
 struct value;
-struct frame_info;
+class frame_info_ptr;
 struct agent_expr;
 struct axs_value;
 class probe;
@@ -201,8 +201,17 @@ extern symfile_segment_data_up default_symfile_segments (bfd *abfd);
 extern bfd_byte *default_symfile_relocate (struct objfile *objfile,
 					   asection *sectp, bfd_byte *buf);
 
-extern struct symtab *allocate_symtab (struct compunit_symtab *, const char *)
+extern struct symtab *allocate_symtab
+  (struct compunit_symtab *cust, const char *filename, const char *id)
   ATTRIBUTE_NONNULL (1);
+
+/* Same as the above, but passes FILENAME for ID.  */
+
+static inline struct symtab *
+allocate_symtab (struct compunit_symtab *cust, const char *filename)
+{
+  return allocate_symtab (cust, filename, filename);
+}
 
 extern struct compunit_symtab *allocate_compunit_symtab (struct objfile *,
 							 const char *)
@@ -224,12 +233,13 @@ extern void add_filename_language (const char *ext, enum language lang);
 extern struct objfile *symbol_file_add (const char *, symfile_add_flags,
 					section_addr_info *, objfile_flags);
 
-extern struct objfile *symbol_file_add_from_bfd (bfd *, const char *, symfile_add_flags,
+extern struct objfile *symbol_file_add_from_bfd (const gdb_bfd_ref_ptr &,
+						 const char *, symfile_add_flags,
 						 section_addr_info *,
 						 objfile_flags, struct objfile *parent);
 
-extern void symbol_file_add_separate (bfd *, const char *, symfile_add_flags,
-				      struct objfile *);
+extern void symbol_file_add_separate (const gdb_bfd_ref_ptr &, const char *,
+				      symfile_add_flags, struct objfile *);
 
 extern std::string find_separate_debug_file_by_debuglink (struct objfile *);
 

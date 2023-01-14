@@ -2107,10 +2107,28 @@ bfd_set_filename (bfd *abfd, const char *filename)
 {
   size_t len = strlen (filename) + 1;
   char *n = bfd_alloc (abfd, len);
-  if (n)
+
+  if (n == NULL)
+    return NULL;
+
+  if (abfd->filename != NULL)
     {
-      memcpy (n, filename, len);
-      abfd->filename = n;
+      /* PR 29389.  If we attempt to rename a file that has been closed due
+	 to caching, then we will not be able to reopen it later on.  */
+      if (abfd->iostream == NULL && (abfd->flags & BFD_CLOSED_BY_CACHE))
+	{
+	  bfd_set_error (bfd_error_invalid_operation);
+	  return NULL;
+	}
+
+      /* Similarly if we attempt to close a renamed file because the
+	 cache is now full, we will not be able to reopen it later on.  */
+      if (abfd->iostream != NULL)
+	abfd->cacheable = 0;
     }
+
+  memcpy (n, filename, len);
+  abfd->filename = n;
+
   return n;
 }

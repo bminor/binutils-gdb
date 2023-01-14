@@ -92,11 +92,12 @@ usage (FILE *stream, int status)
   -A|-B|-G  --format={sysv|berkeley|gnu}  Select output style (default is %s)\n\
   -o|-d|-x  --radix={8|10|16}         Display numbers in octal, decimal or hex\n\
   -t        --totals                  Display the total sizes (Berkeley only)\n\
+  -f                                  Ignored.\n\
             --common                  Display total size for *COM* syms\n\
             --target=<bfdname>        Set the binary file format\n\
             @<file>                   Read options from <file>\n\
-  -h        --help                    Display this information\n\
-  -v        --version                 Display the program's version\n\
+  -h|-H|-?  --help                    Display this information\n\
+  -v|-V     --version                 Display the program's version\n\
 \n"),
 #if BSD_DEFAULT
   "berkeley"
@@ -440,10 +441,9 @@ size_number (bfd_size_type num)
 {
   char buffer[40];
 
-  sprintf (buffer,
-	   (radix == decimal ? "%" BFD_VMA_FMT "u" :
-	   ((radix == octal) ? "0%" BFD_VMA_FMT "o" : "0x%" BFD_VMA_FMT "x")),
-	   num);
+  sprintf (buffer, (radix == decimal ? "%" PRIu64
+		    : radix == octal ? "0%" PRIo64 : "0x%" PRIx64),
+	   (uint64_t) num);
 
   return strlen (buffer);
 }
@@ -453,10 +453,9 @@ rprint_number (int width, bfd_size_type num)
 {
   char buffer[40];
 
-  sprintf (buffer,
-	   (radix == decimal ? "%" BFD_VMA_FMT "u" :
-	   ((radix == octal) ? "0%" BFD_VMA_FMT "o" : "0x%" BFD_VMA_FMT "x")),
-	   num);
+  sprintf (buffer, (radix == decimal ? "%" PRIu64
+		    : radix == octal ? "0%" PRIo64 : "0x%" PRIx64),
+	   (uint64_t) num);
 
   printf ("%*s", width, buffer);
 }

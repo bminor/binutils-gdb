@@ -77,7 +77,35 @@ static const char sal_smob_name[] = "gdb:sal";
 static scm_t_bits symtab_smob_tag;
 static scm_t_bits sal_smob_tag;
 
-static const struct objfile_data *stscm_objfile_data_key;
+/* This is called when an objfile is about to be freed.
+   Invalidate the symbol table as further actions on the symbol table
+   would result in bad data.  All access to st_smob->symtab should be
+   gated by stscm_get_valid_symtab_smob_arg_unsafe which will raise an
+   exception on invalid symbol tables.  */
+struct stscm_deleter
+{
+  /* Helper function for stscm_del_objfile_symtabs to mark the symtab
+     as invalid.  */
+
+  static int
+  stscm_mark_symtab_invalid (void **slot, void *info)
+  {
+    symtab_smob *st_smob = (symtab_smob *) *slot;
+
+    st_smob->symtab = NULL;
+    return 1;
+  }
+
+  void operator() (htab_t htab)
+  {
+    gdb_assert (htab != nullptr);
+    htab_traverse_noresize (htab, stscm_mark_symtab_invalid, NULL);
+    htab_delete (htab);
+  }
+};
+
+static const registry<objfile>::key<htab, stscm_deleter>
+     stscm_objfile_data_key;
 
 /* Administrivia for symtab smobs.  */
 
@@ -110,13 +138,13 @@ static htab_t
 stscm_objfile_symtab_map (struct symtab *symtab)
 {
   struct objfile *objfile = symtab->compunit ()->objfile ();
-  htab_t htab = (htab_t) objfile_data (objfile, stscm_objfile_data_key);
+  htab_t htab = stscm_objfile_data_key.get (objfile);
 
   if (htab == NULL)
     {
       htab = gdbscm_create_eqable_gsmob_ptr_map (stscm_hash_symtab_smob,
 						 stscm_eq_symtab_smob);
-      set_objfile_data (objfile, stscm_objfile_data_key, htab);
+      stscm_objfile_data_key.set (objfile, htab);
     }
 
   return htab;
@@ -271,35 +299,6 @@ stscm_get_valid_symtab_smob_arg_unsafe (SCM self, int arg_pos,
   return st_smob;
 }
 
-/* Helper function for stscm_del_objfile_symtabs to mark the symtab
-   as invalid.  */
-
-static int
-stscm_mark_symtab_invalid (void **slot, void *info)
-{
-  symtab_smob *st_smob = (symtab_smob *) *slot;
-
-  st_smob->symtab = NULL;
-  return 1;
-}
-
-/* This function is called when an objfile is about to be freed.
-   Invalidate the symbol table as further actions on the symbol table
-   would result in bad data.  All access to st_smob->symtab should be
-   gated by stscm_get_valid_symtab_smob_arg_unsafe which will raise an
-   exception on invalid symbol tables.  */
-
-static void
-stscm_del_objfile_symtabs (struct objfile *objfile, void *datum)
-{
-  htab_t htab = (htab_t) datum;
-
-  if (htab != NULL)
-    {
-      htab_traverse_noresize (htab, stscm_mark_symtab_invalid, NULL);
-      htab_delete (htab);
-    }
-}
 
 /* Symbol table methods.  */
 
@@ -686,15 +685,4 @@ gdbscm_initialize_symtabs (void)
   scm_set_smob_print (sal_smob_tag, stscm_print_sal_smob);
 
   gdbscm_define_functions (symtab_functions, 1);
-}
-
-void _initialize_scm_symtab ();
-void
-_initialize_scm_symtab ()
-{
-  /* Register an objfile "free" callback so we can properly
-     invalidate symbol tables, and symbol table and line data
-     structures when an object file that is about to be deleted.  */
-  stscm_objfile_data_key
-    = register_objfile_data_with_cleanup (NULL, stscm_del_objfile_symtabs);
 }

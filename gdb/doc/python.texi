@@ -134,9 +134,14 @@ initialized early during @value{GDBN}'s startup process, then this
 option must be placed into the early initialization file
 (@pxref{Initialization Files}) to have the desired effect.
 
-By default this option is set to @samp{auto}, in this mode Python will
-check the environment variable @env{PYTHONDONTWRITEBYTECODE} to see
+By default this option is set to @samp{auto}.  In this mode, provided
+the @code{python ignore-environment} setting is @samp{off}, the
+environment variable @env{PYTHONDONTWRITEBYTECODE} is examined to see
 if it should write out byte-code or not.
+@env{PYTHONDONTWRITEBYTECODE} is considered to be off/disabled either
+when set to the empty string or when the environment variable doesn't
+exist.  All other settings, including those which don't seem to make
+sense, indicate that it's on/enabled.
 
 This option is equivalent to passing @option{-B} to the real
 @command{python} executable.
@@ -506,7 +511,7 @@ relevant stream.
 @end defun
 
 @findex gdb.flush
-@defun gdb.flush ()
+@defun gdb.flush (@r{[}, stream@r{]})
 Flush the buffer of a @value{GDBN} paginated stream so that the
 contents are displayed immediately.  @value{GDBN} will flush the
 contents of a stream automatically when it encounters a newline in the
@@ -1160,6 +1165,12 @@ Additionally, @value{GDBN} only styles some value contents, so not
 every output string will contain escape sequences.
 
 When @code{False}, which is the default, no output styling is applied.
+
+@item summary
+@code{True} when just a summary should be printed.  In this mode,
+scalar values are printed in their entirety, but aggregates such as
+structures or unions are omitted.  This mode is used by @code{set
+print frame-arguments scalars} (@pxref{Print Settings}).
 @end table
 @end defun
 
@@ -1740,6 +1751,24 @@ default pretty-printer for a @code{gdb.Value}:
 This function takes a @code{gdb.Value} object as an argument.  If a
 pretty-printer for this value exists, then it is returned.  If no such
 printer exists, then this returns @code{None}.
+@end defun
+
+Normally, a pretty-printer can respect the user's print settings
+(including temporarily applied settings, such as @samp{/x}) simply by
+calling @code{Value.format_string} (@pxref{Values From Inferior}).
+However, these settings can also be queried directly:
+
+@findex gdb.print_options
+@defun gdb.print_options ()
+Return a dictionary whose keys are the valid keywords that can be
+given to @code{Value.format_string}, and whose values are the user's
+settings.  During a @code{print} or other operation, the values will
+reflect any flags that are temporarily in effect.
+
+@smallexample
+(gdb) python print (gdb.print_options ()['max_elements'])
+200
+@end smallexample
 @end defun
 
 @node Selecting Pretty-Printers
@@ -3470,6 +3499,17 @@ A reference to the object file (@code{gdb.Objfile}) which has been loaded.
 @xref{Objfiles In Python}, for details of the @code{gdb.Objfile} object.
 @end defvar
 
+@item events.free_objfile
+Emits @code{gdb.FreeObjFileEvent} which indicates that an object file
+is about to be removed from @value{GDBN}.  One reason this can happen
+is when the inferior calls @code{dlclose}.
+@code{gdb.FreeObjFileEvent} has one attribute:
+
+@defvar NewObjFileEvent.objfile
+A reference to the object file (@code{gdb.Objfile}) which will be unloaded.
+@xref{Objfiles In Python}, for details of the @code{gdb.Objfile} object.
+@end defvar
+
 @item events.clear_objfiles
 Emits @code{gdb.ClearObjFilesEvent} which indicates that the list of object
 files for a program space has been reset.
@@ -4891,6 +4931,13 @@ The value is @code{None} if the objfile is no longer valid.
 See the @code{gdb.Objfile.is_valid} method, described below.
 @end defvar
 
+@defvar Objfile.is_file
+An objfile often comes from an ordinary file, but in some cases it may
+be constructed from the contents of memory.  This attribute is
+@code{True} for file-backed objfiles, and @code{False} for other
+kinds.
+@end defvar
+
 @defvar Objfile.owner
 For separate debug info objfiles this is the corresponding @code{gdb.Objfile}
 object that debug info is being provided for.
@@ -6073,6 +6120,15 @@ the user.  It is a string.  If the breakpoint does not have a location
 attribute is not writable.
 @end defvar
 
+@defvar Breakpoint.locations
+Get the most current list of breakpoint locations that are inserted for this
+breakpoint, with elements of type @code{gdb.BreakpointLocation}
+(described below).  This functionality matches that of the
+@code{info breakpoint} command (@pxref{Set Breaks}), in that it only retrieves
+the most current list of locations, thus the list itself when returned is
+not updated behind the scenes.  This attribute is not writable.
+@end defvar
+
 @defvar Breakpoint.expression
 This attribute holds a breakpoint expression, as specified by
 the user.  It is a string.  If the breakpoint does not have an
@@ -6091,6 +6147,68 @@ This attribute holds the commands attached to the breakpoint.  If
 there are commands, this attribute's value is a string holding all the
 commands, separated by newlines.  If there are no commands, this
 attribute is @code{None}.  This attribute is writable.
+@end defvar
+
+@subheading Breakpoint Locations
+
+A breakpoint location is one of the actual places where a breakpoint has been
+set, represented in the Python API by the @code{gdb.BreakpointLocation}
+type.  This type is never instantiated by the user directly, but is retrieved
+from @code{Breakpoint.locations} which returns a list of breakpoint
+locations where it is currently set.  Breakpoint locations can become
+invalid if new symbol files are loaded or dynamically loaded libraries are
+closed.  Accessing the attributes of an invalidated breakpoint location will
+throw a @code{RuntimeError} exception.  Access the @code{Breakpoint.locations}
+attribute again to retrieve the new and valid breakpoints location list.
+
+@defvar BreakpointLocation.source
+This attribute returns the source file path and line number where this location
+was set. The type of the attribute is a tuple of @var{string} and
+@var{long}.  If the breakpoint location doesn't have a source location,
+it returns None, which is the case for watchpoints and catchpoints.
+This will throw a @code{RuntimeError} exception if the location
+has been invalidated. This attribute is not writable.
+@end defvar
+
+@defvar BreakpointLocation.address
+This attribute returns the address where this location was set.
+This attribute is of type long.  This will throw a @code{RuntimeError}
+exception if the location has been invalidated.  This attribute is
+not writable.
+@end defvar
+
+@defvar BreakpointLocation.enabled
+This attribute holds the value for whether or not this location is enabled.
+This attribute is writable (boolean).  This will throw a @code{RuntimeError}
+exception if the location has been invalidated.
+@end defvar
+
+@defvar BreakpointLocation.owner
+This attribute holds a reference to the @code{gdb.Breakpoint} owner object,
+from which this @code{gdb.BreakpointLocation} was retrieved from.
+This will throw a @code{RuntimeError} exception if the location has been
+invalidated.  This attribute is not writable.
+@end defvar
+
+@defvar BreakpointLocation.function
+This attribute gets the name of the function where this location was set.
+If no function could be found this attribute returns @code{None}.
+This will throw a @code{RuntimeError} exception if the location has
+been invalidated.  This attribute is not writable.
+@end defvar
+
+@defvar BreakpointLocation.fullname
+This attribute gets the full name of where this location was set.  If no
+full name could be found, this attribute returns @code{None}.
+This will throw a @code{RuntimeError} exception if the location has
+been invalidated.  This attribute is not writable.
+@end defvar
+
+@defvar BreakpointLocation.thread_groups
+This attribute gets the thread groups it was set in.  It returns a @code{List}
+of the thread group ID's.  This will throw a @code{RuntimeError}
+exception if the location has been invalidated.  This attribute
+is not writable.
 @end defvar
 
 @node Finish Breakpoints in Python
@@ -6479,7 +6597,9 @@ factory function with @value{GDBN}.
 
 @var{name} is the name of the new window.  It's an error to try to
 replace one of the built-in windows, but other window types can be
-replaced.
+replaced.  The @var{name} should match the regular expression
+@code{[a-zA-Z][-_.a-zA-Z0-9]*}, it is an error to try and create a
+window with an invalid name.
 
 @var{function} is a factory function that is called to create the TUI
 window.  This is called with a single argument of type

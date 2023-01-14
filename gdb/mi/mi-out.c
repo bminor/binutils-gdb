@@ -27,6 +27,7 @@
 #include "interps.h"
 #include "ui-out.h"
 #include "utils.h"
+#include "gdbsupport/gdb-checked-static-cast.h"
 
 /* Mark beginning of a table.  */
 
@@ -288,8 +289,7 @@ mi_ui_out::version ()
 /* Constructor for an `mi_out_data' object.  */
 
 mi_ui_out::mi_ui_out (int mi_version)
-: ui_out (mi_version >= 3
-	  ? fix_multi_location_breakpoint_output : (ui_out_flag) 0),
+: ui_out (make_flags (mi_version)),
   m_suppress_field_separator (false),
   m_suppress_output (false),
   m_mi_version (mi_version)
@@ -307,7 +307,10 @@ mi_ui_out::~mi_ui_out ()
 mi_ui_out *
 mi_out_new (const char *mi_version)
 {
-  if (streq (mi_version, INTERP_MI3) ||  streq (mi_version, INTERP_MI))
+  if (streq (mi_version, INTERP_MI4) ||  streq (mi_version, INTERP_MI))
+    return new mi_ui_out (4);
+
+  if (streq (mi_version, INTERP_MI3))
     return new mi_ui_out (3);
 
   if (streq (mi_version, INTERP_MI2))
@@ -325,11 +328,7 @@ mi_out_new (const char *mi_version)
 static mi_ui_out *
 as_mi_ui_out (ui_out *uiout)
 {
-  mi_ui_out *mi_uiout = dynamic_cast<mi_ui_out *> (uiout);
-
-  gdb_assert (mi_uiout != NULL);
-
-  return mi_uiout;
+  return gdb::checked_static_cast<mi_ui_out *> (uiout);
 }
 
 int

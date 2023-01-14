@@ -28,7 +28,7 @@
   "l0", "l1", "l2", "l3", "l4", "l5", "l6", "l7", \
   "i0", "i1", "i2", "i3", "i4", "i5", "fp", "i7"
 
-struct frame_info;
+class frame_info_ptr;
 struct gdbarch;
 struct regcache;
 struct regset;
@@ -57,7 +57,7 @@ struct sparc_fpregmap
 
 /* SPARC architecture-specific information.  */
 
-struct sparc_gdbarch_tdep : gdbarch_tdep
+struct sparc_gdbarch_tdep : gdbarch_tdep_base
 {
   /* Register numbers for the PN and nPC registers.  The definitions
      for (64-bit) UltraSPARC differ from the (32-bit) SPARC
@@ -85,7 +85,7 @@ struct sparc_gdbarch_tdep : gdbarch_tdep
   size_t plt_entry_size = 0;
 
   /* Alternative location for trap return.  Used for single-stepping.  */
-  CORE_ADDR (*step_trap) (struct frame_info *frame, unsigned long insn)
+  CORE_ADDR (*step_trap) (frame_info_ptr frame, unsigned long insn)
     = nullptr;
 
   /* ISA-specific data types.  */
@@ -207,10 +207,10 @@ extern CORE_ADDR sparc_analyze_prologue (struct gdbarch *gdbarch,
 					 struct sparc_frame_cache *cache);
 
 extern struct sparc_frame_cache *
-  sparc_frame_cache (struct frame_info *this_frame, void **this_cache);
+  sparc_frame_cache (frame_info_ptr this_frame, void **this_cache);
 
 extern struct sparc_frame_cache *
-  sparc32_frame_cache (struct frame_info *this_frame, void **this_cache);
+  sparc32_frame_cache (frame_info_ptr this_frame, void **this_cache);
 
 extern int
   sparc_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc);
@@ -255,13 +255,13 @@ extern const struct sparc_gregmap sparc32nbsd_gregmap;
 
 /* Return the address of a system call's alternative return
    address.  */
-extern CORE_ADDR sparcnbsd_step_trap (struct frame_info *frame,
+extern CORE_ADDR sparcnbsd_step_trap (frame_info_ptr frame,
 				      unsigned long insn);
 
 extern void sparc32nbsd_init_abi (struct gdbarch_info info,
 				  struct gdbarch *gdbarch);
 
 extern struct trad_frame_saved_reg *
-  sparc32nbsd_sigcontext_saved_regs (struct frame_info *next_frame);
+  sparc32nbsd_sigcontext_saved_regs (frame_info_ptr next_frame);
 
 #endif /* sparc-tdep.h */

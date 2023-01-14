@@ -133,7 +133,7 @@ static const gdb_byte amd64_x32_linux_sigtramp_code[] =
    the routine.  Otherwise, return 0.  */
 
 static CORE_ADDR
-amd64_linux_sigtramp_start (struct frame_info *this_frame)
+amd64_linux_sigtramp_start (frame_info_ptr this_frame)
 {
   struct gdbarch *gdbarch;
   const gdb_byte *sigtramp_code;
@@ -175,7 +175,7 @@ amd64_linux_sigtramp_start (struct frame_info *this_frame)
    routine.  */
 
 static int
-amd64_linux_sigtramp_p (struct frame_info *this_frame)
+amd64_linux_sigtramp_p (frame_info_ptr this_frame)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
   const char *name;
@@ -201,7 +201,7 @@ amd64_linux_sigtramp_p (struct frame_info *this_frame)
    address of the associated sigcontext structure.  */
 
 static CORE_ADDR
-amd64_linux_sigcontext_addr (struct frame_info *this_frame)
+amd64_linux_sigcontext_addr (frame_info_ptr this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -462,6 +462,9 @@ amd64_canonicalize_syscall (enum amd64_syscall syscall_number)
 
   case amd64_sys_pipe2:
     return gdb_sys_pipe2;
+
+  case amd64_sys_getrandom:
+    return gdb_sys_getrandom;
 
   case amd64_sys_select:
   case amd64_x32_sys_select:
@@ -1656,7 +1659,7 @@ amd64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					  void *cb_data,
 					  const struct regcache *regcache)
 {
-  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
 
   cb (".reg", 27 * 8, 27 * 8, &i386_gregset, NULL, cb_data);
   cb (".reg2", 512, 512, &amd64_fpregset, NULL, cb_data);
@@ -1793,7 +1796,7 @@ static void
 amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch,
 			    int num_disp_step_buffers)
 {
-  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
 
   linux_init_abi (info, gdbarch, num_disp_step_buffers);
 
@@ -1846,7 +1849,7 @@ amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch,
 static void
 amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
   struct tdesc_arch_data *tdesc_data = info.tdesc_data;
   const struct tdesc_feature *feature;
   int valid_p;
@@ -2060,7 +2063,7 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 static void
 amd64_x32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
   struct tdesc_arch_data *tdesc_data = info.tdesc_data;
   const struct tdesc_feature *feature;
   int valid_p;

@@ -932,40 +932,12 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  break;
 
-	case R_RISCV_GNU_VTINHERIT:
-	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
-	    return false;
-	  break;
-
-	case R_RISCV_GNU_VTENTRY:
-	  if (!bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
-	    return false;
-	  break;
-
 	default:
 	  break;
 	}
     }
 
   return true;
-}
-
-static asection *
-riscv_elf_gc_mark_hook (asection *sec,
-			struct bfd_link_info *info,
-			Elf_Internal_Rela *rel,
-			struct elf_link_hash_entry *h,
-			Elf_Internal_Sym *sym)
-{
-  if (h != NULL)
-    switch (ELFNN_R_TYPE (rel->r_info))
-      {
-      case R_RISCV_GNU_VTINHERIT:
-      case R_RISCV_GNU_VTENTRY:
-	return NULL;
-      }
-
-  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
 /* Adjust a symbol defined by a dynamic object and referenced by a
@@ -2027,8 +1999,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
       char *msg_buf = NULL;
       bool resolved_to_zero;
 
-      if (howto == NULL
-	  || r_type == R_RISCV_GNU_VTINHERIT || r_type == R_RISCV_GNU_VTENTRY)
+      if (howto == NULL)
 	continue;
 
       /* This is a final link.  */
@@ -2486,12 +2457,44 @@ riscv_elf_relocate_section (bfd *output_bfd,
 
 	case R_RISCV_JAL:
 	case R_RISCV_RVC_JUMP:
-	  /* This line has to match the check in _bfd_riscv_relax_section.  */
-	  if (bfd_link_pic (info) && h != NULL && h->plt.offset != MINUS_ONE)
+	  if (bfd_link_pic (info) && h != NULL)
 	    {
-	      /* Refer to the PLT entry.  */
-	      relocation = sec_addr (htab->elf.splt) + h->plt.offset;
-	      unresolved_reloc = false;
+	      if (h->plt.offset != MINUS_ONE)
+		{
+		  /* Refer to the PLT entry.  This check has to match the
+		     check in _bfd_riscv_relax_section.  */
+		  relocation = sec_addr (htab->elf.splt) + h->plt.offset;
+		  unresolved_reloc = false;
+		}
+	      else if (!SYMBOL_REFERENCES_LOCAL (info, h)
+		       && (input_section->flags & SEC_ALLOC) != 0
+		       && (input_section->flags & SEC_READONLY) != 0
+		       && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
+		{
+		  /* PR 28509, when generating the shared object, these
+		     referenced symbols may bind externally, which means
+		     they will be exported to the dynamic symbol table,
+		     and are preemptible by default.  These symbols cannot
+		     be referenced by the non-pic relocations, like
+		     R_RISCV_JAL and R_RISCV_RVC_JUMP relocations.
+
+		     However, consider that linker may relax the R_RISCV_CALL
+		     relocations to R_RISCV_JAL or R_RISCV_RVC_JUMP, if
+		     these relocations are relocated to the plt entries,
+		     then we won't report error for them.
+
+		     Perhaps we also need the similar checks for the
+		     R_RISCV_BRANCH and R_RISCV_RVC_BRANCH relocations.  */
+		  if (asprintf (&msg_buf,
+				_("%%X%%P: relocation %s against `%s' which "
+				  "may bind externally can not be used when "
+				  "making a shared object; recompile "
+				  "with -fPIC\n"),
+				howto->name, h->root.root.string) == -1)
+		    msg_buf = NULL;
+		  msg = msg_buf;
+		  r = bfd_reloc_notsupported;
+		}
 	    }
 	  break;
 
@@ -2784,29 +2787,12 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  && _bfd_elf_section_offset (output_bfd, info, input_section,
 				      rel->r_offset) != (bfd_vma) -1)
 	{
-	  switch (r_type)
-	    {
-	    case R_RISCV_JAL:
-	    case R_RISCV_RVC_JUMP:
-	      if (asprintf (&msg_buf,
-			    _("%%X%%P: relocation %s against `%s' can "
-			      "not be used when making a shared object; "
-			      "recompile with -fPIC\n"),
-			    howto->name,
-			    h->root.root.string) == -1)
-		msg_buf = NULL;
-	      break;
-
-	    default:
-	      if (asprintf (&msg_buf,
-			    _("%%X%%P: unresolvable %s relocation against "
-			      "symbol `%s'\n"),
-			    howto->name,
-			    h->root.root.string) == -1)
-		msg_buf = NULL;
-	      break;
-	    }
-
+	  if (asprintf (&msg_buf,
+			_("%%X%%P: unresolvable %s relocation against "
+			  "symbol `%s'\n"),
+			howto->name,
+			h->root.root.string) == -1)
+	    msg_buf = NULL;
 	  msg = msg_buf;
 	  r = bfd_reloc_notsupported;
 	}
@@ -3885,6 +3871,9 @@ _bfd_riscv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 
   /* Allow linking RVC and non-RVC, and keep the RVC flag.  */
   elf_elfheader (obfd)->e_flags |= new_flags & EF_RISCV_RVC;
+
+  /* Allow linking TSO and non-TSO, and keep the TSO flag.  */
+  elf_elfheader (obfd)->e_flags |= new_flags & EF_RISCV_TSO;
 
   return true;
 
@@ -5260,7 +5249,6 @@ riscv_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
 #define elf_backend_relocate_section		riscv_elf_relocate_section
 #define elf_backend_finish_dynamic_symbol	riscv_elf_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections	riscv_elf_finish_dynamic_sections
-#define elf_backend_gc_mark_hook		riscv_elf_gc_mark_hook
 #define elf_backend_plt_sym_val			riscv_elf_plt_sym_val
 #define elf_backend_grok_prstatus		riscv_elf_grok_prstatus
 #define elf_backend_grok_psinfo			riscv_elf_grok_psinfo

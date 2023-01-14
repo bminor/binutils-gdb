@@ -188,12 +188,13 @@ proc readelf_wi_test {} {
 	".*DW_TAG_compile_unit.*"
 	".*DW_TAG_subprogram.*"
 	".*DW_TAG_base_type.*"
-	".*DW_AT_producer.*(GNU C|indirect string).*"
+	".*DW_AT_producer.*(GNU C|indirect string|indexed string).*"
 	".*DW_AT_language.*(ANSI C|C11).*"
-	".*DW_AT_name.*(testprog.c|indirect string).*"
+	".*DW_AT_name.*(testprog.c|indirect string|indexed string).*"
 	".*DW_AT_name.*fn.*"
+	".*DW_AT_name.*(main|indirect string|indexed string).*"
+	".*(DW_OP_addr: 0|DW_OP_addrx <0>).*"
 	".*DW_AT_name.*(main|indirect string).*"
-	".*\(DW_OP_addr: 0\).*"
     }
 
     # The MSP430 in LARGE mode does not generate a DW_OP_addr.

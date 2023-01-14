@@ -17,7 +17,6 @@
     <reg name="hid0" bitsize="32"/>
     <reg name="hid1" bitsize="32"/>
     <reg name="iabr" bitsize="32"/>
-    <reg name="dabr" bitsize="32"/>
     <reg name="ummcr0" bitsize="32" regnum="124"/>
     <reg name="upmc1" bitsize="32"/>
     <reg name="upmc2" bitsize="32"/>

@@ -21,7 +21,7 @@ set srcfile_dwarf ${testfile}-dwarf.c
 set objfile_stabs [standard_output_file ${testfile}.o]
 set objfile_dwarf [standard_output_file ${testfile}-dwarf.o]
 
-if {[gdb_compile "${srcdir}/${subdir}/${srcfile_stabs}" ${objfile_stabs} object {additional_flags=-gstabs}] != ""
+if {[gdb_compile "${srcdir}/${subdir}/${srcfile_stabs}" ${objfile_stabs} object {additional_flags=-gstabs quiet}] != ""
     || [gdb_compile "${srcdir}/${subdir}/${srcfile_dwarf}" ${objfile_dwarf} object {additional_flags=-gdwarf-2}] != ""
     || [gdb_compile "${objfile_stabs} ${objfile_dwarf}" ${binfile} executable {nodebug}] != ""} {
      untested "failed to compile"

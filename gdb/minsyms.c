@@ -1062,7 +1062,7 @@ get_symbol_leading_char (bfd *abfd)
     {
       objfile *objf = current_program_space->symfile_object_file;
       if (objf->obfd != NULL)
-	return bfd_get_symbol_leading_char (objf->obfd);
+	return bfd_get_symbol_leading_char (objf->obfd.get ());
     }
   return 0;
 }
@@ -1178,17 +1178,15 @@ minimal_symbol_reader::record_full (gdb::string_view name,
 
   /* It's safe to strip the leading char here once, since the name
      is also stored stripped in the minimal symbol table.  */
-  if (name[0] == get_symbol_leading_char (m_objfile->obfd))
+  if (name[0] == get_symbol_leading_char (m_objfile->obfd.get ()))
     name = name.substr (1);
 
   if (ms_type == mst_file_text && startswith (name, "__gnu_compiled"))
     return (NULL);
 
-  if (symtab_create_debug >= 2)
-    gdb_printf (gdb_stdlog,
-		"Recording minsym:  %-21s  %18s  %4d  %.*s\n",
-		mst_str (ms_type), hex_string (address), section,
-		(int) name.size (), name.data ());
+  symtab_create_debug_printf_v ("recording minsym:  %-21s  %18s  %4d  %.*s",
+				mst_str (ms_type), hex_string (address), section,
+				(int) name.size (), name.data ());
 
   if (m_msym_bunch_index == BUNCH_SIZE)
     {
@@ -1389,12 +1387,8 @@ minimal_symbol_reader::install ()
 
   if (m_msym_count > 0)
     {
-      if (symtab_create_debug)
-	{
-	  gdb_printf (gdb_stdlog,
-		      "Installing %d minimal symbols of objfile %s.\n",
-		      m_msym_count, objfile_name (m_objfile));
-	}
+      symtab_create_debug_printf ("installing %d minimal symbols of objfile %s",
+				  m_msym_count, objfile_name (m_objfile));
 
       /* Allocate enough space, into which we will gather the bunches
 	 of new and existing minimal symbols, sort them, and then
@@ -1544,7 +1538,7 @@ lookup_solib_trampoline_symbol_by_pc (CORE_ADDR pc)
    a duplicate function in case this matters someday.  */
 
 CORE_ADDR
-find_solib_trampoline_target (struct frame_info *frame, CORE_ADDR pc)
+find_solib_trampoline_target (frame_info_ptr frame, CORE_ADDR pc)
 {
   struct minimal_symbol *tsymbol = lookup_solib_trampoline_symbol_by_pc (pc);
 

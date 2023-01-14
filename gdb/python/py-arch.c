@@ -28,7 +28,8 @@ struct arch_object {
   struct gdbarch *gdbarch;
 };
 
-static struct gdbarch_data *arch_object_data = NULL;
+static const registry<gdbarch>::key<PyObject, gdb::noop_deleter<PyObject>>
+     arch_object_data;
 
 /* Require a valid Architecture.  */
 #define ARCHPY_REQUIRE_VALID(arch_obj, arch)			\
@@ -48,7 +49,7 @@ extern PyTypeObject arch_object_type
 /* Associates an arch_object with GDBARCH as gdbarch_data via the gdbarch
    post init registration mechanism (gdbarch_data_register_post_init).  */
 
-static void *
+static PyObject *
 arch_object_data_init (struct gdbarch *gdbarch)
 {
   arch_object *arch_obj = PyObject_New (arch_object, &arch_object_type);
@@ -58,7 +59,7 @@ arch_object_data_init (struct gdbarch *gdbarch)
 
   arch_obj->gdbarch = gdbarch;
 
-  return (void *) arch_obj;
+  return (PyObject *) arch_obj;
 }
 
 /* Returns the struct gdbarch value corresponding to the given Python
@@ -88,10 +89,14 @@ gdbpy_is_architecture (PyObject *obj)
 PyObject *
 gdbarch_to_arch_object (struct gdbarch *gdbarch)
 {
-  PyObject *new_ref = (PyObject *) gdbarch_data (gdbarch, arch_object_data);
+  PyObject *new_ref = arch_object_data.get (gdbarch);
+  if (new_ref == nullptr)
+    {
+      new_ref = arch_object_data_init (gdbarch);
+      arch_object_data.set (gdbarch, new_ref);
+    }
 
-  /* new_ref could be NULL if registration of arch_object with GDBARCH failed
-     in arch_object_data_init.  */
+  /* new_ref could be NULL if creation failed.  */
   Py_XINCREF (new_ref);
 
   return new_ref;
@@ -122,39 +127,26 @@ static PyObject *
 archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
 {
   static const char *keywords[] = { "start_pc", "end_pc", "count", NULL };
-  CORE_ADDR start, end = 0;
+  CORE_ADDR start = 0, end = 0;
   CORE_ADDR pc;
-  gdb_py_ulongest start_temp;
   long count = 0, i;
-  PyObject *end_obj = NULL, *count_obj = NULL;
+  PyObject *start_obj = nullptr, *end_obj = nullptr, *count_obj = nullptr;
   struct gdbarch *gdbarch = NULL;
 
   ARCHPY_REQUIRE_VALID (self, gdbarch);
 
-  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, GDB_PY_LLU_ARG "|OO",
-					keywords, &start_temp, &end_obj,
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "O|OO",
+					keywords, &start_obj, &end_obj,
 					&count_obj))
     return NULL;
 
-  start = start_temp;
-  if (end_obj)
-    {
-      /* Make a long logic check first.  In Python 3.x, internally,
-	 all integers are represented as longs.  In Python 2.x, there
-	 is still a differentiation internally between a PyInt and a
-	 PyLong.  Explicitly do this long check conversion first. In
-	 GDB, for Python 3.x, we #ifdef PyInt = PyLong.  This check has
-	 to be done first to ensure we do not lose information in the
-	 conversion process.  */
-      if (PyLong_Check (end_obj))
-	end = PyLong_AsUnsignedLongLong (end_obj);
-      else
-	{
-	  PyErr_SetString (PyExc_TypeError,
-			   _("Argument 'end_pc' should be a (long) integer."));
+  if (get_addr_from_python (start_obj, &start) < 0)
+    return nullptr;
 
-	  return NULL;
-	}
+  if (end_obj != nullptr)
+    {
+      if (get_addr_from_python (end_obj, &end) < 0)
+	return nullptr;
 
       if (end < start)
 	{
@@ -348,13 +340,6 @@ gdbpy_all_architecture_names (PyObject *self, PyObject *args)
     }
 
  return list.release ();
-}
-
-void _initialize_py_arch ();
-void
-_initialize_py_arch ()
-{
-  arch_object_data = gdbarch_data_register_post_init (arch_object_data_init);
 }
 
 /* Initializes the Architecture class in the gdb module.  */

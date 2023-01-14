@@ -32,10 +32,12 @@
 #include "sysdep.h"
 #include "bfd.h"
 #include "libiberty.h"
+#include "demangle.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "dwarf2.h"
 #include "hashtab.h"
+#include "splay-tree.h"
 
 /* The data in the .debug_line statement prologue looks like this.  */
 
@@ -152,6 +154,45 @@ static struct trie_node *alloc_trie_leaf (bfd *abfd)
   return &leaf->head;
 }
 
+struct addr_range
+{
+  bfd_byte *start;
+  bfd_byte *end;
+};
+
+/* Return true if address range do intersect.  */
+
+static bool
+addr_range_intersects (struct addr_range *r1, struct addr_range *r2)
+{
+  return (r1->start <= r2->start && r2->start < r1->end)
+    || (r1->start <= (r2->end - 1) && (r2->end - 1) < r1->end);
+}
+
+/* Compare function for splay tree of addr_ranges.  */
+
+static int
+splay_tree_compare_addr_range (splay_tree_key xa, splay_tree_key xb)
+{
+  struct addr_range *r1 = (struct addr_range *) xa;
+  struct addr_range *r2 = (struct addr_range *) xb;
+
+  if (addr_range_intersects (r1, r2) || addr_range_intersects (r2, r1))
+    return 0;
+  else if (r1->end <= r2->start)
+    return -1;
+  else
+    return 1;
+}
+
+/* Splay tree release function for keys (addr_range).  */
+
+static void
+splay_tree_free_addr_range (splay_tree_key key)
+{
+  free ((struct addr_range *)key);
+}
+
 struct dwarf2_debug_file
 {
   /* The actual bfd from which debug info was loaded.  Might be
@@ -235,6 +276,9 @@ struct dwarf2_debug_file
 
   /* Root of a trie to map addresses to compilation units.  */
   struct trie_node *trie_root;
+
+  /* Splay tree to map info_ptr address to compilation units.  */
+  splay_tree comp_unit_tree;
 };
 
 struct dwarf2_debug
@@ -1369,7 +1413,7 @@ read_indexed_address (uint64_t idx, struct comp_unit *unit)
 		     &file->dwarf_addr_buffer, &file->dwarf_addr_size))
     return 0;
 
-  if (_bfd_mul_overflow (idx, unit->offset_size, &offset))
+  if (_bfd_mul_overflow (idx, unit->addr_size, &offset))
     return 0;
 
   offset += unit->dwarf_addr_offset;
@@ -1380,9 +1424,9 @@ read_indexed_address (uint64_t idx, struct comp_unit *unit)
 
   info_ptr = file->dwarf_addr_buffer + offset;
 
-  if (unit->offset_size == 4)
+  if (unit->addr_size == 4)
     return bfd_get_32 (unit->abfd, info_ptr);
-  else if (unit->offset_size == 8)
+  else if (unit->addr_size == 8)
     return bfd_get_64 (unit->abfd, info_ptr);
   else
     return 0;
@@ -1607,6 +1651,11 @@ read_attribute_value (struct attribute *  attr,
       attr->u.sval = _bfd_safe_read_leb128 (abfd, &info_ptr,
 					    true, info_ptr_end);
       break;
+
+    case DW_FORM_rnglistx:
+    case DW_FORM_loclistx:
+      /* FIXME: Add support for these forms!  */
+      /* Fall through.  */
     case DW_FORM_ref_udata:
     case DW_FORM_udata:
       attr->u.val = _bfd_safe_read_leb128 (abfd, &info_ptr,
@@ -1663,31 +1712,52 @@ read_attribute (struct attribute *    attr,
   return info_ptr;
 }
 
-/* Return whether DW_AT_name will return the same as DW_AT_linkage_name
-   for a function.  */
+/* Return mangling style given LANG.  */
 
-static bool
-non_mangled (int lang)
+static int
+mangle_style (int lang)
 {
   switch (lang)
     {
+    case DW_LANG_Ada83:
+    case DW_LANG_Ada95:
+      return DMGL_GNAT;
+
+    case DW_LANG_C_plus_plus:
+    case DW_LANG_C_plus_plus_03:
+    case DW_LANG_C_plus_plus_11:
+    case DW_LANG_C_plus_plus_14:
+      return DMGL_GNU_V3;
+
+    case DW_LANG_Java:
+      return DMGL_JAVA;
+
+    case DW_LANG_D:
+      return DMGL_DLANG;
+
+    case DW_LANG_Rust:
+    case DW_LANG_Rust_old:
+      return DMGL_RUST;
+
     default:
-      return false;
+      return DMGL_AUTO;
 
     case DW_LANG_C89:
     case DW_LANG_C:
-    case DW_LANG_Ada83:
     case DW_LANG_Cobol74:
     case DW_LANG_Cobol85:
     case DW_LANG_Fortran77:
     case DW_LANG_Pascal83:
-    case DW_LANG_C99:
-    case DW_LANG_Ada95:
     case DW_LANG_PLI:
+    case DW_LANG_C99:
     case DW_LANG_UPC:
     case DW_LANG_C11:
     case DW_LANG_Mips_Assembler:
-      return true;
+    case DW_LANG_Upc:
+    case DW_LANG_HP_Basic91:
+    case DW_LANG_HP_IMacro:
+    case DW_LANG_HP_Assembler:
+      return 0;
     }
 }
 
@@ -1731,6 +1801,7 @@ struct line_info_table
   unsigned int		num_files;
   unsigned int		num_dirs;
   unsigned int		num_sequences;
+  bool                  use_dir_and_file_0;
   char *		comp_dir;
   char **		dirs;
   struct fileinfo*	files;
@@ -1761,8 +1832,6 @@ struct funcinfo
   bool is_linkage;
   const char *name;
   struct arange arange;
-  /* Where the symbol is defined.  */
-  asection *sec;
   /* The offset of the funcinfo from the start of the unit.  */
   uint64_t unit_offset;
 };
@@ -1796,11 +1865,9 @@ struct varinfo
   /* The type of this variable.  */
   int tag;
   /* The name of the variable, if it has one.  */
-  char *name;
+  const char *name;
   /* The address of the variable.  */
   bfd_vma addr;
-  /* Where the symbol is defined.  */
-  asection *sec;
   /* Is this a stack variable?  */
   bool stack;
 };
@@ -1951,16 +2018,30 @@ concat_filename (struct line_info_table *table, unsigned int file)
 {
   char *filename;
 
-  if (table == NULL || file - 1 >= table->num_files)
+  /* Pre DWARF-5 entry 0 in the directory and filename tables was not used.
+     So in order to save space in the tables used here the info for, eg
+     directory 1 is stored in slot 0 of the directory table, directory 2
+     in slot 1 and so on.
+
+     Starting with DWARF-5 the 0'th entry is used so there is a one to one
+     mapping between DWARF slots and internal table entries.  */
+  if (! table->use_dir_and_file_0)
     {
-      /* FILE == 0 means unknown.  */
-      if (file)
-	_bfd_error_handler
-	  (_("DWARF error: mangled line number section (bad file number)"));
+      /* Pre DWARF-5, FILE == 0 means unknown.  */
+      if (file == 0)
+	return strdup ("<unknown>");
+      -- file;
+    }
+
+  if (table == NULL || file >= table->num_files)
+    {
+      _bfd_error_handler
+	(_("DWARF error: mangled line number section (bad file number)"));
       return strdup ("<unknown>");
     }
 
-  filename = table->files[file - 1].name;
+  filename = table->files[file].name;
+
   if (filename == NULL)
     return strdup ("<unknown>");
 
@@ -1971,12 +2052,17 @@ concat_filename (struct line_info_table *table, unsigned int file)
       char *name;
       size_t len;
 
-      if (table->files[file - 1].dir
+      if (table->files[file].dir
 	  /* PR 17512: file: 0317e960.  */
-	  && table->files[file - 1].dir <= table->num_dirs
+	  && table->files[file].dir <= table->num_dirs
 	  /* PR 17512: file: 7f3d2e4b.  */
 	  && table->dirs != NULL)
-	subdir_name = table->dirs[table->files[file - 1].dir - 1];
+	{
+	  if (table->use_dir_and_file_0)
+	    subdir_name = table->dirs[table->files[file].dir];
+	  else
+	    subdir_name = table->dirs[table->files[file].dir - 1];
+	}
 
       if (!subdir_name || !IS_ABSOLUTE_PATH (subdir_name))
 	dir_name = table->comp_dir;
@@ -2017,10 +2103,12 @@ concat_filename (struct line_info_table *table, unsigned int file)
 
 /* Check whether [low1, high1) can be combined with [low2, high2),
    i.e., they touch or overlap.  */
-static bool ranges_overlap (bfd_vma low1,
-			    bfd_vma high1,
-			    bfd_vma low2,
-			    bfd_vma high2)
+
+static bool
+ranges_overlap (bfd_vma low1,
+		bfd_vma high1,
+		bfd_vma low2,
+		bfd_vma high2)
 {
   if (low1 == low2 || high1 == high2)
     return true;
@@ -2047,15 +2135,16 @@ static bool ranges_overlap (bfd_vma low1,
 /* Insert an address range in the trie mapping addresses to compilation units.
    Will return the new trie node (usually the same as is being sent in, but
    in case of a leaf-to-interior conversion, or expansion of a leaf, it may be
-   different), or NULL on failure.
- */
-static struct trie_node *insert_arange_in_trie(bfd *abfd,
-					       struct trie_node *trie,
-					       bfd_vma trie_pc,
-					       unsigned int trie_pc_bits,
-					       struct comp_unit *unit,
-					       bfd_vma low_pc,
-					       bfd_vma high_pc)
+   different), or NULL on failure.  */
+
+static struct trie_node *
+insert_arange_in_trie (bfd *abfd,
+		       struct trie_node *trie,
+		       bfd_vma trie_pc,
+		       unsigned int trie_pc_bits,
+		       struct comp_unit *unit,
+		       bfd_vma low_pc,
+		       bfd_vma high_pc)
 {
   bfd_vma clamped_low_pc, clamped_high_pc;
   int ch, from_ch, to_ch;
@@ -2192,7 +2281,6 @@ static struct trie_node *insert_arange_in_trie(bfd *abfd,
 
     return trie;
 }
-
 
 static bool
 arange_add (struct comp_unit *unit, struct arange *first_arange,
@@ -2579,10 +2667,8 @@ read_formatted_entries (struct comp_unit *unit, bfd_byte **bufp,
 	    }
 	}
 
-      /* Skip the first "zero entry", which is the compilation dir/file.  */
-      if (datai != 0)
-	if (!callback (table, fe.name, fe.dir, fe.time, fe.size))
-	  return false;
+      if (!callback (table, fe.name, fe.dir, fe.time, fe.size))
+	return false;
     }
 
   *bufp = buf;
@@ -2759,6 +2845,7 @@ decode_line_info (struct comp_unit *unit)
       if (!read_formatted_entries (unit, &line_ptr, line_end, table,
 				   line_info_add_file_name))
 	goto fail;
+      table->use_dir_and_file_0 = true;
     }
   else
     {
@@ -2781,6 +2868,7 @@ decode_line_info (struct comp_unit *unit)
 	  if (!line_info_add_file_name (table, cur_file, dir, xtime, size))
 	    goto fail;
 	}
+      table->use_dir_and_file_0 = false;
     }
 
   /* Read the statement sequences until there's nothing left.  */
@@ -2789,7 +2877,7 @@ decode_line_info (struct comp_unit *unit)
       /* State machine registers.  */
       bfd_vma address = 0;
       unsigned char op_index = 0;
-      char * filename = table->num_files ? concat_filename (table, 1) : NULL;
+      char * filename = NULL;
       unsigned int line = 1;
       unsigned int column = 0;
       unsigned int discriminator = 0;
@@ -2803,6 +2891,14 @@ decode_line_info (struct comp_unit *unit)
 	 address, we must compare on every DW_LNS_copy, etc.  */
       bfd_vma low_pc  = (bfd_vma) -1;
       bfd_vma high_pc = 0;
+
+      if (table->num_files)
+	{
+	  if (table->use_dir_and_file_0)
+	    filename = concat_filename (table, 0);
+	  else
+	    filename = concat_filename (table, 1);
+	}
 
       /* Decode the table.  */
       while (!end_sequence && line_ptr < line_end)
@@ -3192,7 +3288,7 @@ lookup_address_in_function_table (struct comp_unit *unit,
   struct lookup_funcinfo* lookup_funcinfo = NULL;
   struct funcinfo* funcinfo = NULL;
   struct funcinfo* best_fit = NULL;
-  bfd_vma best_fit_len = 0;
+  bfd_vma best_fit_len = (bfd_vma) -1;
   bfd_size_type low, high, mid, first;
   struct arange *arange;
 
@@ -3238,8 +3334,7 @@ lookup_address_in_function_table (struct comp_unit *unit,
 	  if (addr < arange->low || addr >= arange->high)
 	    continue;
 
-	  if (!best_fit
-	      || arange->high - arange->low < best_fit_len
+	  if (arange->high - arange->low < best_fit_len
 	      /* The following comparison is designed to return the same
 		 match as the previous algorithm for routines which have the
 		 same best fit length.  */
@@ -3271,44 +3366,33 @@ lookup_symbol_in_function_table (struct comp_unit *unit,
 				 const char **filename_ptr,
 				 unsigned int *linenumber_ptr)
 {
-  struct funcinfo* each_func;
+  struct funcinfo* each;
   struct funcinfo* best_fit = NULL;
-  bfd_vma best_fit_len = 0;
+  bfd_vma best_fit_len = (bfd_vma) -1;
   struct arange *arange;
   const char *name = bfd_asymbol_name (sym);
-  asection *sec = bfd_asymbol_section (sym);
 
-  for (each_func = unit->function_table;
-       each_func;
-       each_func = each_func->prev_func)
-    {
-      for (arange = &each_func->arange;
-	   arange;
-	   arange = arange->next)
+  for (each = unit->function_table; each; each = each->prev_func)
+    for (arange = &each->arange; arange; arange = arange->next)
+      if (addr >= arange->low
+	  && addr < arange->high
+	  && arange->high - arange->low < best_fit_len
+	  && each->file
+	  && each->name
+	  && strstr (name, each->name) != NULL)
 	{
-	  if ((!each_func->sec || each_func->sec == sec)
-	      && addr >= arange->low
-	      && addr < arange->high
-	      && each_func->name
-	      && strcmp (name, each_func->name) == 0
-	      && (!best_fit
-		  || arange->high - arange->low < best_fit_len))
-	    {
-	      best_fit = each_func;
-	      best_fit_len = arange->high - arange->low;
-	    }
+	  best_fit = each;
+	  best_fit_len = arange->high - arange->low;
 	}
-    }
 
   if (best_fit)
     {
-      best_fit->sec = sec;
       *filename_ptr = best_fit->file;
       *linenumber_ptr = best_fit->line;
       return true;
     }
-  else
-    return false;
+
+  return false;
 }
 
 /* Variable table functions.  */
@@ -3323,22 +3407,19 @@ lookup_symbol_in_variable_table (struct comp_unit *unit,
 				 const char **filename_ptr,
 				 unsigned int *linenumber_ptr)
 {
-  const char *name = bfd_asymbol_name (sym);
-  asection *sec = bfd_asymbol_section (sym);
   struct varinfo* each;
+  const char *name = bfd_asymbol_name (sym);
 
   for (each = unit->variable_table; each; each = each->prev_var)
-    if (! each->stack
+    if (each->addr == addr
+	&& !each->stack
 	&& each->file != NULL
 	&& each->name != NULL
-	&& each->addr == addr
-	&& (!each->sec || each->sec == sec)
-	&& strcmp (name, each->name) == 0)
+	&& strstr (name, each->name) != NULL)
       break;
 
   if (each)
     {
-      each->sec = sec;
       *filename_ptr = each->file;
       *linenumber_ptr = each->line;
       return true;
@@ -3442,16 +3523,12 @@ find_abstract_instance (struct comp_unit *unit,
       else
 	{
 	  /* Check other CUs to see if they contain the abbrev.  */
-	  struct comp_unit *u;
-
-	  for (u = unit->prev_unit; u != NULL; u = u->prev_unit)
-	    if (info_ptr >= u->info_ptr_unit && info_ptr < u->end_ptr)
-	      break;
-
-	  if (u == NULL)
-	    for (u = unit->next_unit; u != NULL; u = u->next_unit)
-	      if (info_ptr >= u->info_ptr_unit && info_ptr < u->end_ptr)
-		break;
+	  struct comp_unit *u = NULL;
+	  struct addr_range range = { info_ptr, info_ptr };
+	  splay_tree_node v = splay_tree_lookup (unit->file->comp_unit_tree,
+						 (splay_tree_key)&range);
+	  if (v != NULL)
+	    u = (struct comp_unit *)v->value;
 
 	  if (attr_ptr->form == DW_FORM_ref_addr)
 	    while (u == NULL)
@@ -3535,7 +3612,7 @@ find_abstract_instance (struct comp_unit *unit,
 		  if (name == NULL && is_str_form (&attr))
 		    {
 		      name = attr.u.str;
-		      if (non_mangled (unit->lang))
+		      if (mangle_style (unit->lang) == 0)
 			*is_linkage = true;
 		    }
 		  break;
@@ -4031,7 +4108,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 		  if (func->name == NULL && is_str_form (&attr))
 		    {
 		      func->name = attr.u.str;
-		      if (non_mangled (unit->lang))
+		      if (mangle_style (unit->lang) == 0)
 			func->is_linkage = true;
 		    }
 		  break;
@@ -4089,11 +4166,12 @@ scan_unit_for_symbols (struct comp_unit *unit)
 		case DW_AT_specification:
 		  if (is_int_form (&attr) && attr.u.val)
 		    {
-		      struct varinfo * spec_var;
-
-		      spec_var = lookup_var_by_offset (attr.u.val,
-						       unit->variable_table);
-		      if (spec_var == NULL)
+		      bool is_linkage;
+		      if (!find_abstract_instance (unit, &attr, 0,
+						   &var->name,
+						   &is_linkage,
+						   &var->file,
+						   &var->line))
 			{
 			  _bfd_error_handler (_("DWARF error: could not find "
 						"variable specification "
@@ -4101,15 +4179,6 @@ scan_unit_for_symbols (struct comp_unit *unit)
 					      (unsigned long) attr.u.val);
 			  break;
 			}
-
-		      if (var->name == NULL)
-			var->name = spec_var->name;
-		      if (var->file == NULL && spec_var->file != NULL)
-			var->file = strdup (spec_var->file);
-		      if (var->line == 0)
-			var->line = spec_var->line;
-		      if (var->sec == NULL)
-			var->sec = spec_var->sec;
 		    }
 		  break;
 
@@ -4342,13 +4411,23 @@ parse_comp_unit (struct dwarf2_debug *stash,
   if (version < 5)
     addr_size = read_1_byte (abfd, &info_ptr, end_ptr);
 
-  if (unit_type == DW_UT_type)
+  switch (unit_type)
     {
+    case DW_UT_type:
       /* Skip type signature.  */
       info_ptr += 8;
 
       /* Skip type offset.  */
       info_ptr += offset_size;
+      break;
+
+    case DW_UT_skeleton:
+      /* Skip DWO_id field.  */
+      info_ptr += 8;
+      break;
+
+    default:
+      break;
     }
 
   if (addr_size > sizeof (bfd_vma))
@@ -5009,11 +5088,10 @@ info_hash_lookup_funcinfo (struct info_hash_table *hash_table,
 {
   struct funcinfo* each_func;
   struct funcinfo* best_fit = NULL;
-  bfd_vma best_fit_len = 0;
+  bfd_vma best_fit_len = (bfd_vma) -1;
   struct info_list_node *node;
   struct arange *arange;
   const char *name = bfd_asymbol_name (sym);
-  asection *sec = bfd_asymbol_section (sym);
 
   for (node = lookup_info_hash_table (hash_table, name);
        node;
@@ -5024,11 +5102,9 @@ info_hash_lookup_funcinfo (struct info_hash_table *hash_table,
 	   arange;
 	   arange = arange->next)
 	{
-	  if ((!each_func->sec || each_func->sec == sec)
-	      && addr >= arange->low
+	  if (addr >= arange->low
 	      && addr < arange->high
-	      && (!best_fit
-		  || arange->high - arange->low < best_fit_len))
+	      && arange->high - arange->low < best_fit_len)
 	    {
 	      best_fit = each_func;
 	      best_fit_len = arange->high - arange->low;
@@ -5038,7 +5114,6 @@ info_hash_lookup_funcinfo (struct info_hash_table *hash_table,
 
   if (best_fit)
     {
-      best_fit->sec = sec;
       *filename_ptr = best_fit->file;
       *linenumber_ptr = best_fit->line;
       return true;
@@ -5060,20 +5135,17 @@ info_hash_lookup_varinfo (struct info_hash_table *hash_table,
 			  const char **filename_ptr,
 			  unsigned int *linenumber_ptr)
 {
-  const char *name = bfd_asymbol_name (sym);
-  asection *sec = bfd_asymbol_section (sym);
   struct varinfo* each;
   struct info_list_node *node;
+  const char *name = bfd_asymbol_name (sym);
 
   for (node = lookup_info_hash_table (hash_table, name);
        node;
        node = node->next)
     {
       each = (struct varinfo *) node->info;
-      if (each->addr == addr
-	  && (!each->sec || each->sec == sec))
+      if (each->addr == addr)
 	{
-	  each->sec = sec;
 	  *filename_ptr = each->file;
 	  *linenumber_ptr = each->line;
 	  return true;
@@ -5512,6 +5584,22 @@ stash_comp_unit (struct dwarf2_debug *stash, struct dwarf2_debug_file *file)
 						info_ptr_unit, offset_size);
       if (each)
 	{
+	  if (file->comp_unit_tree == NULL)
+	    file->comp_unit_tree
+	      = splay_tree_new (splay_tree_compare_addr_range,
+				splay_tree_free_addr_range, NULL);
+
+	  struct addr_range *r
+	    = (struct addr_range *)bfd_malloc (sizeof (struct addr_range));
+	  r->start = each->info_ptr_unit;
+	  r->end = each->end_ptr;
+	  splay_tree_node v = splay_tree_lookup (file->comp_unit_tree,
+						 (splay_tree_key)r);
+	  if (v != NULL || r->end <= r->start)
+	    abort ();
+	  splay_tree_insert (file->comp_unit_tree, (splay_tree_key)r,
+			     (splay_tree_value)each);
+
 	  if (file->all_comp_units)
 	    file->all_comp_units->prev_unit = each;
 	  else
@@ -5617,18 +5705,7 @@ _bfd_dwarf2_find_symbol_bias (asymbol ** symbols, void ** pinfo)
   return result;
 }
 
-/* Find the source code location of SYMBOL.  If SYMBOL is NULL
-   then find the nearest source code location corresponding to
-   the address SECTION + OFFSET.
-   Returns 1 if the line is found without error and fills in
-   FILENAME_PTR and LINENUMBER_PTR.  In the case where SYMBOL was
-   NULL the FUNCTIONNAME_PTR is also filled in.
-   Returns 2 if partial information from _bfd_elf_find_function is
-   returned (function and maybe file) by looking at symbols.  DWARF2
-   info is present but not regarding the requested code location.
-   Returns 0 otherwise.
-   SYMBOLS contains the symbol table for ABFD.
-   DEBUG_SECTIONS contains the name of the dwarf debug sections.  */
+/* See _bfd_dwarf2_find_nearest_line_with_alt.  */
 
 int
 _bfd_dwarf2_find_nearest_line (bfd *abfd,
@@ -5642,6 +5719,43 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 			       unsigned int *discriminator_ptr,
 			       const struct dwarf_debug_section *debug_sections,
 			       void **pinfo)
+{
+  return _bfd_dwarf2_find_nearest_line_with_alt
+    (abfd, NULL, symbols, symbol, section, offset, filename_ptr,
+     functionname_ptr, linenumber_ptr, discriminator_ptr, debug_sections,
+     pinfo);
+}
+
+/* Find the source code location of SYMBOL.  If SYMBOL is NULL
+   then find the nearest source code location corresponding to
+   the address SECTION + OFFSET.
+   Returns 1 if the line is found without error and fills in
+   FILENAME_PTR and LINENUMBER_PTR.  In the case where SYMBOL was
+   NULL the FUNCTIONNAME_PTR is also filled in.
+   Returns 2 if partial information from _bfd_elf_find_function is
+   returned (function and maybe file) by looking at symbols.  DWARF2
+   info is present but not regarding the requested code location.
+   Returns 0 otherwise.
+   SYMBOLS contains the symbol table for ABFD.
+   DEBUG_SECTIONS contains the name of the dwarf debug sections.
+   If ALT_FILENAME is given, attempt to open the file and use it
+   as the .gnu_debugaltlink file. Otherwise this file will be
+   searched for when needed.  */
+
+int
+_bfd_dwarf2_find_nearest_line_with_alt
+  (bfd *abfd,
+   const char *alt_filename,
+   asymbol **symbols,
+   asymbol *symbol,
+   asection *section,
+   bfd_vma offset,
+   const char **filename_ptr,
+   const char **functionname_ptr,
+   unsigned int *linenumber_ptr,
+   unsigned int *discriminator_ptr,
+   const struct dwarf_debug_section *debug_sections,
+   void **pinfo)
 {
   /* Read each compilation unit from the section .debug_info, and check
      to see if it contains the address we are searching for.  If yes,
@@ -5672,6 +5786,23 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
     return false;
 
   stash = (struct dwarf2_debug *) *pinfo;
+
+  if (stash->alt.bfd_ptr == NULL && alt_filename != NULL)
+    {
+      bfd *alt_bfd = bfd_openr (alt_filename, NULL);
+
+      if (alt_bfd == NULL)
+	/* bfd_openr will have set the bfd_error.  */
+	return false;
+      if (!bfd_check_format (alt_bfd, bfd_object))
+	{
+	  bfd_set_error (bfd_error_wrong_format);
+	  bfd_close (alt_bfd);
+	  return false;
+	}
+
+      stash->alt.bfd_ptr = alt_bfd;
+    }
 
   do_line = symbol != NULL;
   if (do_line)
@@ -5746,25 +5877,23 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 
       if (stash->info_hash_status == STASH_INFO_HASH_ON)
 	{
-	  found = stash_find_line_fast (stash, symbol, addr, filename_ptr,
-					linenumber_ptr);
+	  found = stash_find_line_fast (stash, symbol, addr,
+					filename_ptr, linenumber_ptr);
 	  if (found)
 	    goto done;
 	}
-      else
-	{
-	  /* Check the previously read comp. units first.  */
-	  for (each = stash->f.all_comp_units; each; each = each->next_unit)
-	    if ((symbol->flags & BSF_FUNCTION) == 0
-		|| each->arange.high == 0
-		|| comp_unit_contains_address (each, addr))
-	      {
-		found = comp_unit_find_line (each, symbol, addr, filename_ptr,
-					     linenumber_ptr);
-		if (found)
-		  goto done;
-	      }
-	}
+
+      /* Check the previously read comp. units first.  */
+      for (each = stash->f.all_comp_units; each; each = each->next_unit)
+	if ((symbol->flags & BSF_FUNCTION) == 0
+	    || each->arange.high == 0
+	    || comp_unit_contains_address (each, addr))
+	  {
+	    found = comp_unit_find_line (each, symbol, addr, filename_ptr,
+					 linenumber_ptr);
+	    if (found)
+	      goto done;
+	  }
     }
   else
     {
@@ -5985,6 +6114,8 @@ _bfd_dwarf2_cleanup_debug_info (bfd *abfd, void **pinfo)
 	  free (file->line_table->dirs);
 	}
       htab_delete (file->abbrev_offsets);
+      if (file->comp_unit_tree != NULL)
+	splay_tree_delete (file->comp_unit_tree);
 
       free (file->dwarf_line_str_buffer);
       free (file->dwarf_str_buffer);

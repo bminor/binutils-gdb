@@ -39,7 +39,7 @@ if ![runto_main] then {
 # Get PID of test program.
 set inferior_pid ""
 set test "get inferior process ID"
-gdb_test_multiple "call (int) getpid()" $test {
+gdb_test_multiple "call ((int (*) (void)) getpid) ()" $test {
     -re ".* = ($decimal).*$gdb_prompt $" {
 	set inferior_pid $expect_out(1,string)
 	pass $test

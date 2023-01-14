@@ -21,6 +21,6 @@
 #define SOLIB_TARGET_H
 
 struct target_so_ops;
-extern struct target_so_ops solib_target_so_ops;
+extern const struct target_so_ops solib_target_so_ops;
 
 #endif /* solib-target.h */

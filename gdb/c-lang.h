@@ -93,19 +93,8 @@ extern void c_value_print (struct value *, struct ui_file *,
 
 extern void c_printchar (int, struct type *, struct ui_file *);
 
-extern void c_printstr (struct ui_file * stream,
-			struct type *elttype,
-			const gdb_byte *string,
-			unsigned int length,
-			const char *user_encoding,
-			int force_ellipses,
-			const struct value_print_options *options);
-
 extern void c_language_arch_info (struct gdbarch *gdbarch,
 				  struct language_arch_info *lai);
-
-extern void c_emit_char (int c, struct type *type,
-			 struct ui_file *stream, int quoter);
 
 /* These are in c-typeprint.c: */
 

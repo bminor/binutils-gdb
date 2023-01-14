@@ -76,7 +76,7 @@
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_gdb_byte_p(X)	\
   target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_gdb_byte_pp(X)	\
+#define target_debug_print_const_gdb_byte_pp(X)	\
   target_debug_do_print (host_address_to_string (*(X)))
 #define target_debug_print_enum_gdb_signal(X)	\
   target_debug_do_print (gdb_signal_to_name (X))
@@ -89,7 +89,7 @@
 #define target_debug_print_LONGEST_p(X)		\
   target_debug_do_print (phex (*(X), 0))
 #define target_debug_print_struct_address_space_p(X)	\
-  target_debug_do_print (plongest (address_space_num (X)))
+  target_debug_do_print (plongest ((X)->num ()))
 #define target_debug_print_struct_bp_target_info_p(X)	\
   target_debug_do_print (core_addr_to_string ((X)->placed_address))
 #define target_debug_print_struct_expression_p(X)	\

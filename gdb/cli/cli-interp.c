@@ -43,7 +43,7 @@ class cli_interp final : public cli_interp_base
 {
  public:
   explicit cli_interp (const char *name);
-  ~cli_interp ();
+  ~cli_interp () = default;
 
   void init (bool top_level) override;
   void resume () override;
@@ -51,20 +51,16 @@ class cli_interp final : public cli_interp_base
   gdb_exception exec (const char *command_str) override;
   ui_out *interp_ui_out () override;
 
+private:
+
   /* The ui_out for the console interpreter.  */
-  cli_ui_out *cli_uiout;
+  std::unique_ptr<cli_ui_out> m_cli_uiout;
 };
 
 cli_interp::cli_interp (const char *name)
-  : cli_interp_base (name)
+  : cli_interp_base (name),
+    m_cli_uiout (new cli_ui_out (gdb_stdout))
 {
-  /* Create a default uiout builder for the CLI.  */
-  this->cli_uiout = cli_out_new (gdb_stdout);
-}
-
-cli_interp::~cli_interp ()
-{
-  delete cli_uiout;
 }
 
 /* Suppress notification struct.  */
@@ -289,7 +285,6 @@ void
 cli_interp::resume ()
 {
   struct ui *ui = current_ui;
-  struct cli_interp *cli = this;
   struct ui_file *stream;
 
   /*sync_execution = 1; */
@@ -298,10 +293,10 @@ cli_interp::resume ()
      previously writing to gdb_stdout, then set it to the new
      gdb_stdout afterwards.  */
 
-  stream = cli->cli_uiout->set_stream (gdb_stdout);
+  stream = m_cli_uiout->set_stream (gdb_stdout);
   if (stream != gdb_stdout)
     {
-      cli->cli_uiout->set_stream (stream);
+      m_cli_uiout->set_stream (stream);
       stream = NULL;
     }
 
@@ -310,7 +305,7 @@ cli_interp::resume ()
   ui->input_handler = command_line_handler;
 
   if (stream != NULL)
-    cli->cli_uiout->set_stream (gdb_stdout);
+    m_cli_uiout->set_stream (gdb_stdout);
 }
 
 void
@@ -322,20 +317,19 @@ cli_interp::suspend ()
 gdb_exception
 cli_interp::exec (const char *command_str)
 {
-  struct cli_interp *cli = this;
   struct ui_file *old_stream;
   struct gdb_exception result;
 
-  /* gdb_stdout could change between the time cli_uiout was
+  /* gdb_stdout could change between the time m_cli_uiout was
      initialized and now.  Since we're probably using a different
      interpreter which has a new ui_file for gdb_stdout, use that one
      instead of the default.
 
      It is important that it gets reset everytime, since the user
      could set gdb to use a different interpreter.  */
-  old_stream = cli->cli_uiout->set_stream (gdb_stdout);
-  result = safe_execute_command (cli->cli_uiout, command_str, 1);
-  cli->cli_uiout->set_stream (old_stream);
+  old_stream = m_cli_uiout->set_stream (gdb_stdout);
+  result = safe_execute_command (m_cli_uiout.get (), command_str, 1);
+  m_cli_uiout->set_stream (old_stream);
   return result;
 }
 
@@ -373,9 +367,7 @@ safe_execute_command (struct ui_out *command_uiout, const char *command,
 ui_out *
 cli_interp::interp_ui_out ()
 {
-  struct cli_interp *cli = (struct cli_interp *) this;
-
-  return cli->cli_uiout;
+  return m_cli_uiout.get ();
 }
 
 /* These hold the pushed copies of the gdb output files.

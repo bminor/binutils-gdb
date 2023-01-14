@@ -18,7 +18,9 @@
 
 standard_testfile
 
-set compile_flags {debug}
+# We still want to test non-prototype functions for now, which is why
+# we disable compilers warning about them.
+set compile_flags {debug additional_flags=-Wno-deprecated-non-prototype}
 if [support_complex_tests] {
     lappend compile_flags "additional_flags=-DTEST_COMPLEX"
 }

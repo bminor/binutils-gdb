@@ -694,7 +694,13 @@ struct charset_vector
 {
   ~charset_vector ()
   {
-    clear ();
+    /* Note that we do not call charset_vector::clear, which would also xfree
+       the elements.  This destructor is only called after exit, at which point
+       those will be freed anyway on process exit, so not freeing them now is
+       not classified as a memory leak.  OTOH, freeing them now might be
+       classified as a data race, because some worker thread might still be
+       accessing them.  */
+    charsets.clear ();
   }
 
   void clear ()

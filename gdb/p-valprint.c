@@ -91,8 +91,8 @@ pascal_language::value_print_inner (struct value *val,
 	if (get_array_bounds (type, &low_bound, &high_bound))
 	  {
 	    len = high_bound - low_bound + 1;
-	    elttype = check_typedef (TYPE_TARGET_TYPE (type));
-	    eltlen = TYPE_LENGTH (elttype);
+	    elttype = check_typedef (type->target_type ());
+	    eltlen = elttype->length ();
 	    /* If 's' format is used, try to print out as string.
 	       If no format is given, print as string if element type
 	       is of TYPE_CODE_CHAR and element size is 1,2 or 4.  */
@@ -116,7 +116,7 @@ pascal_language::value_print_inner (struct value *val,
 		    len = temp_len;
 		  }
 
-		printstr (stream, TYPE_TARGET_TYPE (type), valaddr, len,
+		printstr (stream, type->target_type (), valaddr, len,
 			  NULL, 0, options);
 		i = len;
 	      }
@@ -157,15 +157,15 @@ pascal_language::value_print_inner (struct value *val,
 	     -fvtable_thunks.  (Otherwise, look under TYPE_CODE_STRUCT.)  */
 	  /* Extract the address, assume that it is unsigned.  */
 	  addr = extract_unsigned_integer (valaddr,
-					   TYPE_LENGTH (type), byte_order);
+					   type->length (), byte_order);
 	  print_address_demangle (options, gdbarch, addr, stream, demangle);
 	  break;
 	}
-      check_typedef (TYPE_TARGET_TYPE (type));
+      check_typedef (type->target_type ());
 
       addr = unpack_pointer (type, valaddr);
     print_unpacked_pointer:
-      elttype = check_typedef (TYPE_TARGET_TYPE (type));
+      elttype = check_typedef (type->target_type ());
 
       if (elttype->code () == TYPE_CODE_FUNC)
 	{
@@ -182,10 +182,10 @@ pascal_language::value_print_inner (struct value *val,
 
       /* For a pointer to char or unsigned char, also print the string
 	 pointed to, unless pointer is null.  */
-      if (((TYPE_LENGTH (elttype) == 1
+      if (((elttype->length () == 1
 	   && (elttype->code () == TYPE_CODE_INT
 	       || elttype->code () == TYPE_CODE_CHAR))
-	   || ((TYPE_LENGTH (elttype) == 2 || TYPE_LENGTH (elttype) == 4)
+	   || ((elttype->length () == 2 || elttype->length () == 4)
 	       && elttype->code () == TYPE_CODE_CHAR))
 	  && (options->format == 0 || options->format == 's')
 	  && addr != 0)
@@ -259,7 +259,7 @@ pascal_language::value_print_inner (struct value *val,
 		}
 	      else
 		{
-		  wtype = TYPE_TARGET_TYPE (type);
+		  wtype = type->target_type ();
 		}
 	      vt_val = value_at (wtype, vt_address);
 	      common_val_print (vt_val, stream, recurse + 1, options,
@@ -307,7 +307,7 @@ pascal_language::value_print_inner (struct value *val,
 	    (options, gdbarch,
 	     extract_unsigned_integer
 	       (valaddr + type->field (VTBL_FNADDR_OFFSET).loc_bitpos () / 8,
-		TYPE_LENGTH (type->field (VTBL_FNADDR_OFFSET).type ()),
+		type->field (VTBL_FNADDR_OFFSET).type ()->length (),
 		byte_order),
 	     stream, demangle);
 	}
@@ -345,12 +345,12 @@ pascal_language::value_print_inner (struct value *val,
 
 	  int bound_info = (get_discrete_bounds (range, &low_bound, &high_bound)
 			    ? 0 : -1);
-	  if (low_bound == 0 && high_bound == -1 && TYPE_LENGTH (type) > 0)
+	  if (low_bound == 0 && high_bound == -1 && type->length () > 0)
 	    {
 	      /* If we know the size of the set type, we can figure out the
 	      maximum value.  */
 	      bound_info = 0;
-	      high_bound = TYPE_LENGTH (type) * TARGET_CHAR_BIT - 1;
+	      high_bound = type->length () * TARGET_CHAR_BIT - 1;
 	      range->bounds ()->high.set_const_val (high_bound);
 	    }
 	maybe_bad_bstring:
@@ -423,8 +423,8 @@ pascal_language::value_print (struct value *val, struct ui_file *stream,
 	 type is indicated by the quoted string anyway.  */
       if (type->code () == TYPE_CODE_PTR
 	  && type->name () == NULL
-	  && TYPE_TARGET_TYPE (type)->name () != NULL
-	  && strcmp (TYPE_TARGET_TYPE (type)->name (), "char") == 0)
+	  && type->target_type ()->name () != NULL
+	  && strcmp (type->target_type ()->name (), "char") == 0)
 	{
 	  /* Print nothing.  */
 	}
@@ -482,10 +482,10 @@ pascal_object_is_vtbl_member (struct type *type)
 {
   if (type->code () == TYPE_CODE_PTR)
     {
-      type = TYPE_TARGET_TYPE (type);
+      type = type->target_type ();
       if (type->code () == TYPE_CODE_ARRAY)
 	{
-	  type = TYPE_TARGET_TYPE (type);
+	  type = type->target_type ();
 	  if (type->code () == TYPE_CODE_STRUCT	/* If not using
 							   thunks.  */
 	      || type->code () == TYPE_CODE_PTR)	/* If using thunks.  */
@@ -743,13 +743,13 @@ pascal_object_print_value (struct value *val, struct ui_file *stream,
 	     user program. Make sure that it still points to a valid memory
 	     location.  */
 
-	  if (boffset < 0 || boffset >= TYPE_LENGTH (type))
+	  if (boffset < 0 || boffset >= type->length ())
 	    {
 	      CORE_ADDR address= value_address (val);
-	      gdb::byte_vector buf (TYPE_LENGTH (baseclass));
+	      gdb::byte_vector buf (baseclass->length ());
 
 	      if (target_read_memory (address + boffset, buf.data (),
-				      TYPE_LENGTH (baseclass)) != 0)
+				      baseclass->length ()) != 0)
 		skip = 1;
 	      base_value = value_from_contents_and_address (baseclass,
 							    buf.data (),

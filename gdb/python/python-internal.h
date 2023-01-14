@@ -177,6 +177,10 @@ gdb_PySys_GetObject (const char *name)
 
 #define PySys_GetObject gdb_PySys_GetObject
 
+/* PySys_SetPath was deprecated in Python 3.11.  Disable the deprecated
+   code for Python 3.10 and newer.  */
+#if PY_VERSION_HEX < 0x030a0000
+
 /* PySys_SetPath's 'path' parameter was missing the 'const' qualifier
    before Python 3.6.  Hence, we wrap it in a function to avoid errors
    when compiled with -Werror.  */
@@ -190,6 +194,7 @@ gdb_PySys_SetPath (const GDB_PYSYS_SETPATH_CHAR *path)
 }
 
 #define PySys_SetPath gdb_PySys_SetPath
+#endif
 
 /* Wrap PyGetSetDef to allow convenient construction with string
    literals.  Unfortunately, PyGetSetDef's 'name' and 'doc' members
@@ -361,7 +366,7 @@ extern enum ext_lang_rc gdbpy_apply_val_pretty_printer
    const struct language_defn *language);
 extern enum ext_lang_bt_status gdbpy_apply_frame_filter
   (const struct extension_language_defn *,
-   struct frame_info *frame, frame_filter_flags flags,
+   frame_info_ptr frame, frame_filter_flags flags,
    enum ext_lang_frame_args args_type,
    struct ui_out *out, int frame_low, int frame_high);
 extern void gdbpy_preserve_values (const struct extension_language_defn *,
@@ -422,7 +427,7 @@ PyObject *block_to_block_object (const struct block *block,
 PyObject *value_to_value_object (struct value *v);
 PyObject *value_to_value_object_no_release (struct value *v);
 PyObject *type_to_type_object (struct type *);
-PyObject *frame_info_to_frame_object (struct frame_info *frame);
+PyObject *frame_info_to_frame_object (frame_info_ptr frame);
 PyObject *symtab_to_linetable_object (PyObject *symtab);
 gdbpy_ref<> pspace_to_pspace_object (struct program_space *);
 PyObject *pspy_get_printers (PyObject *, void *);
@@ -462,7 +467,7 @@ struct value *convert_value_from_python (PyObject *obj);
 struct type *type_object_to_type (PyObject *obj);
 struct symtab *symtab_object_to_symtab (PyObject *obj);
 struct symtab_and_line *sal_object_to_symtab_and_line (PyObject *obj);
-struct frame_info *frame_object_to_frame_info (PyObject *frame_obj);
+frame_info_ptr frame_object_to_frame_info (PyObject *frame_obj);
 struct gdbarch *arch_object_to_gdbarch (PyObject *obj);
 
 /* Convert Python object OBJ to a program_space pointer.  OBJ must be a
@@ -505,6 +510,8 @@ int gdbpy_initialize_objfile (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_breakpoints (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_breakpoint_locations ()
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_finishbreakpoints (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_lazy_string (void)
@@ -520,8 +527,6 @@ int gdbpy_initialize_inferior (void)
 int gdbpy_initialize_eventregistry (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_py_events (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_arch (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
@@ -542,6 +547,8 @@ int gdbpy_initialize_micommands (void)
 void gdbpy_finalize_micommands ();
 int gdbpy_initialize_disasm ()
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+
+PyMODINIT_FUNC gdbpy_events_mod_func ();
 
 /* A wrapper for PyErr_Fetch that handles reference counting for the
    caller.  */
@@ -746,10 +753,15 @@ int gdbpy_is_value_object (PyObject *obj);
    other pretty-printer functions, because they refer to PyObject.  */
 gdbpy_ref<> apply_varobj_pretty_printer (PyObject *print_obj,
 					 struct value **replacement,
-					 struct ui_file *stream);
+					 struct ui_file *stream,
+					 const value_print_options *opts);
 gdbpy_ref<> gdbpy_get_varobj_pretty_printer (struct value *value);
 gdb::unique_xmalloc_ptr<char> gdbpy_get_display_hint (PyObject *printer);
 PyObject *gdbpy_default_visualizer (PyObject *self, PyObject *args);
+
+PyObject *gdbpy_print_options (PyObject *self, PyObject *args);
+void gdbpy_get_print_options (value_print_options *opts);
+extern const struct value_print_options *gdbpy_current_print_options;
 
 void bpfinishpy_pre_stop_hook (struct gdbpy_breakpoint_object *bp_obj);
 void bpfinishpy_post_stop_hook (struct gdbpy_breakpoint_object *bp_obj);
@@ -784,8 +796,10 @@ int gdb_pymodule_addobject (PyObject *module, const char *name,
 
 struct varobj_iter;
 struct varobj;
-std::unique_ptr<varobj_iter> py_varobj_get_iterator (struct varobj *var,
-						     PyObject *printer);
+std::unique_ptr<varobj_iter> py_varobj_get_iterator
+     (struct varobj *var,
+      PyObject *printer,
+      const value_print_options *opts);
 
 /* Deleter for Py_buffer unique_ptr specialization.  */
 
@@ -805,7 +819,8 @@ typedef std::unique_ptr<Py_buffer, Py_buffer_deleter> Py_buffer_up;
 
    If a register is parsed successfully then *REG_NUM will have been
    updated, and true is returned.  Otherwise the contents of *REG_NUM are
-   undefined, and false is returned.
+   undefined, and false is returned.  When false is returned, the
+   Python error is set.
 
    The PYO_REG_ID object can be a string, the name of the register.  This
    is the slowest approach as GDB has to map the name to a number for each

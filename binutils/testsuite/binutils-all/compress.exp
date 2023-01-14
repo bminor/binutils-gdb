@@ -576,6 +576,50 @@ if { [regexp_diff objdump.out $srcdir/$subdir/dw2-3gabi.W] } then {
     pass "$testname"
 }
 
+if { [binutils_assemble_flags $srcdir/$subdir/dw2-1.S ${compressedfile}zstd.o --compress-debug-sections=zstd] } then {
+    set testname "objcopy compress debug sections with zstd"
+    set got [binutils_run $OBJCOPY "--compress-debug-sections=zstd ${testfile}.o ${copyfile}zstd.o"]
+    if ![string match "" $got] then {
+	fail "objcopy ($testname)"
+	return
+    }
+    send_log "cmp ${compressedfile}zstd.o ${copyfile}zstd.o\n"
+    verbose "cmp ${compressedfile}zstd.o ${copyfile}zstd.o"
+    set src1 ${compressedfile}zstd.o
+    set src2 ${copyfile}zstd.o
+    set status [remote_exec build cmp "${src1} ${src2}"]
+    set exec_output [lindex $status 1]
+    set exec_output [prune_warnings $exec_output]
+    if ![string match "" $exec_output] then {
+	send_log "$exec_output\n"
+	verbose "$exec_output" 1
+	fail "objcopy ($testname)"
+    } else {
+	pass "objcopy ($testname)"
+    }
+
+    set testname "objcopy decompress compressed debug sections with zstd"
+    set got [binutils_run $OBJCOPY "--decompress-debug-sections ${compressedfile}zstd.o ${copyfile}zstd.o"]
+    if ![string match "" $got] then {
+	fail "objcopy ($testname)"
+	return
+    }
+    send_log "cmp ${testfile}.o ${copyfile}zstd.o\n"
+    verbose "cmp ${testfile}.o ${copyfile}zstd.o"
+    set src1 ${testfile}.o
+    set src2 ${copyfile}zstd.o
+    set status [remote_exec build cmp "${src1} ${src2}"]
+    set exec_output [lindex $status 1]
+    set exec_output [prune_warnings $exec_output]
+    if ![string match "" $exec_output] then {
+	send_log "$exec_output\n"
+	verbose "$exec_output" 1
+	fail "objcopy ($testname)"
+    } else {
+	pass "objcopy ($testname)"
+    }
+}
+
 proc convert_test { testname  as_flags  objcop_flags } {
     global srcdir
     global subdir

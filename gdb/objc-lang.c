@@ -76,7 +76,7 @@ struct objc_method {
   CORE_ADDR imp;
 };
 
-static const struct objfile_key<unsigned int> objc_objfile_data;
+static const registry<objfile>::key<unsigned int> objc_objfile_data;
 
 /* Lookup a structure type named "struct NAME", visible in lexical
    block BLOCK.  If NOERR is nonzero, return zero if NAME is not
@@ -275,7 +275,7 @@ public:
 
   /* See language.h.  */
 
-  CORE_ADDR skip_trampoline (struct frame_info *frame,
+  CORE_ADDR skip_trampoline (frame_info_ptr frame,
 			     CORE_ADDR stop_pc) const override
   {
     struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -1458,7 +1458,7 @@ find_implementation (struct gdbarch *gdbarch,
 static int
 resolve_msgsend (CORE_ADDR pc, CORE_ADDR *new_pc)
 {
-  struct frame_info *frame = get_current_frame ();
+  frame_info_ptr frame = get_current_frame ();
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct type *ptr_type = builtin_type (gdbarch)->builtin_func_ptr;
 
@@ -1480,7 +1480,7 @@ resolve_msgsend (CORE_ADDR pc, CORE_ADDR *new_pc)
 static int
 resolve_msgsend_stret (CORE_ADDR pc, CORE_ADDR *new_pc)
 {
-  struct frame_info *frame = get_current_frame ();
+  frame_info_ptr frame = get_current_frame ();
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct type *ptr_type = builtin_type (gdbarch)->builtin_func_ptr;
 
@@ -1502,7 +1502,7 @@ resolve_msgsend_stret (CORE_ADDR pc, CORE_ADDR *new_pc)
 static int
 resolve_msgsend_super (CORE_ADDR pc, CORE_ADDR *new_pc)
 {
-  struct frame_info *frame = get_current_frame ();
+  frame_info_ptr frame = get_current_frame ();
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct type *ptr_type = builtin_type (gdbarch)->builtin_func_ptr;
 
@@ -1530,7 +1530,7 @@ resolve_msgsend_super (CORE_ADDR pc, CORE_ADDR *new_pc)
 static int
 resolve_msgsend_super_stret (CORE_ADDR pc, CORE_ADDR *new_pc)
 {
-  struct frame_info *frame = get_current_frame ();
+  frame_info_ptr frame = get_current_frame ();
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct type *ptr_type = builtin_type (gdbarch)->builtin_func_ptr;
 

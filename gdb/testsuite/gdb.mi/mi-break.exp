@@ -203,7 +203,7 @@ proc_with_prefix test_breakpoint_commands {} {
     # seen.
     set bp_script [mi_make_breakpoint -number 7 -disp keep -func callee2 \
 		       -file ".*basics.c" -line $line_callee2_body \
-		       -script {\{"print 10","continue"\}}]
+		       -script {\["print 10","continue"\]}]
     mi_gdb_test "-break-info 7" \
 	"\\^done,[mi_make_breakpoint_table [list $bp_script]]" \
 	"breakpoint commands: check that commands are set"

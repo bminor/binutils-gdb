@@ -56,6 +56,7 @@
 #include "dwarf2.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "gmp-utils.h"
+#include "frame-info.h"
 
 /* Forward declarations for prototypes.  */
 struct field;
@@ -105,7 +106,7 @@ enum type_code
        Regardless of the language, GDB represents multidimensional
        array types the way C does: as arrays of arrays.  So an
        instance of a GDB array type T can always be seen as a series
-       of instances of TYPE_TARGET_TYPE (T) laid out sequentially in
+       of instances of T->target_type () laid out sequentially in
        memory.
 
        Row-major languages like C lay out multi-dimensional arrays so
@@ -968,7 +969,7 @@ struct main_type
      the type.
      - Unused otherwise.  */
 
-  struct type *target_type;
+  struct type *m_target_type;
 
   /* * For structure and union types, a description of each field.
      For set and pascal array types, there is one "field",
@@ -1045,6 +1046,20 @@ struct type
     this->main_type->name = name;
   }
 
+  /* Note that if thistype is a TYPEDEF type, you have to call check_typedef.
+     But check_typedef does set the TYPE_LENGTH of the TYPEDEF type,
+     so you only have to call check_typedef once.  Since allocate_value
+     calls check_typedef, VALUE_TYPE (X)->length () is safe.  */
+  ULONGEST length () const
+  {
+    return this->m_length;
+  }
+
+  void set_length (ULONGEST length)
+  {
+    this->m_length = length;
+  }
+
   /* Get the number of fields of this type.  */
   int num_fields () const
   {
@@ -1079,6 +1094,16 @@ struct type
   type *index_type () const
   {
     return this->field (0).type ();
+  }
+
+  struct type *target_type () const
+  {
+    return this->main_type->m_target_type;
+  }
+
+  void set_target_type (struct type *target_type)
+  {
+    this->main_type->m_target_type = target_type;
   }
 
   void set_index_type (type *index_type)
@@ -1246,7 +1271,7 @@ struct type
   }
 
   /* Used only for TYPE_CODE_FUNC where it specifies the real function
-     address is returned by this function call.  TYPE_TARGET_TYPE
+     address is returned by this function call.  The target_type method
      determines the final returned function type to be presented to
      user.  */
 
@@ -1433,7 +1458,7 @@ struct type
   bool bit_size_differs_p () const
   {
     return (main_type->type_specific_field == TYPE_SPECIFIC_INT
-	    && main_type->type_specific.int_stuff.bit_size != 8 * length);
+	    && main_type->type_specific.int_stuff.bit_size != 8 * length ());
   }
 
   /* * Return the logical (bit) size for this integer type.  Only
@@ -1518,7 +1543,7 @@ struct type
      type_length_units function should be used in order to get the length
      expressed in target addressable memory units.  */
 
-  ULONGEST length;
+  ULONGEST m_length;
 
   /* * Core type, shared by a group of qualified types.  */
 
@@ -1877,7 +1902,7 @@ struct call_site_target
 
   void iterate_over_addresses (struct gdbarch *call_site_gdbarch,
 			       const struct call_site *call_site,
-			       struct frame_info *caller_frame,
+			       frame_info_ptr caller_frame,
 			       iterate_ftype callback) const;
 
 private:
@@ -1984,7 +2009,7 @@ struct call_site
        throw NO_ENTRY_VALUE_ERROR.  */
 
     void iterate_over_addresses (struct gdbarch *call_site_gdbarch,
-				 struct frame_info *caller_frame,
+				 frame_info_ptr caller_frame,
 				 call_site_target::iterate_ftype callback)
       const
     {
@@ -2087,16 +2112,10 @@ extern void allocate_gnat_aux_type (struct type *);
    allocate_fixed_point_type_info (type))
 
 #define TYPE_MAIN_TYPE(thistype) (thistype)->main_type
-#define TYPE_TARGET_TYPE(thistype) TYPE_MAIN_TYPE(thistype)->target_type
 #define TYPE_POINTER_TYPE(thistype) (thistype)->pointer_type
 #define TYPE_REFERENCE_TYPE(thistype) (thistype)->reference_type
 #define TYPE_RVALUE_REFERENCE_TYPE(thistype) (thistype)->rvalue_reference_type
 #define TYPE_CHAIN(thistype) (thistype)->chain
-/* * Note that if thistype is a TYPEDEF type, you have to call check_typedef.
-   But check_typedef does set the TYPE_LENGTH of the TYPEDEF type,
-   so you only have to call check_typedef once.  Since allocate_value
-   calls check_typedef, TYPE_LENGTH (VALUE_TYPE (X)) is safe.  */
-#define TYPE_LENGTH(thistype) (thistype)->length
 
 /* * Return the alignment of the type in target addressable memory
    units, or 0 if no alignment was specified.  */
@@ -2310,65 +2329,65 @@ struct builtin_type
   /* Integral types.  */
 
   /* Implicit size/sign (based on the architecture's ABI).  */
-  struct type *builtin_void;
-  struct type *builtin_char;
-  struct type *builtin_short;
-  struct type *builtin_int;
-  struct type *builtin_long;
-  struct type *builtin_signed_char;
-  struct type *builtin_unsigned_char;
-  struct type *builtin_unsigned_short;
-  struct type *builtin_unsigned_int;
-  struct type *builtin_unsigned_long;
-  struct type *builtin_bfloat16;
-  struct type *builtin_half;
-  struct type *builtin_float;
-  struct type *builtin_double;
-  struct type *builtin_long_double;
-  struct type *builtin_complex;
-  struct type *builtin_double_complex;
-  struct type *builtin_string;
-  struct type *builtin_bool;
-  struct type *builtin_long_long;
-  struct type *builtin_unsigned_long_long;
-  struct type *builtin_decfloat;
-  struct type *builtin_decdouble;
-  struct type *builtin_declong;
+  struct type *builtin_void = nullptr;
+  struct type *builtin_char = nullptr;
+  struct type *builtin_short = nullptr;
+  struct type *builtin_int = nullptr;
+  struct type *builtin_long = nullptr;
+  struct type *builtin_signed_char = nullptr;
+  struct type *builtin_unsigned_char = nullptr;
+  struct type *builtin_unsigned_short = nullptr;
+  struct type *builtin_unsigned_int = nullptr;
+  struct type *builtin_unsigned_long = nullptr;
+  struct type *builtin_bfloat16 = nullptr;
+  struct type *builtin_half = nullptr;
+  struct type *builtin_float = nullptr;
+  struct type *builtin_double = nullptr;
+  struct type *builtin_long_double = nullptr;
+  struct type *builtin_complex = nullptr;
+  struct type *builtin_double_complex = nullptr;
+  struct type *builtin_string = nullptr;
+  struct type *builtin_bool = nullptr;
+  struct type *builtin_long_long = nullptr;
+  struct type *builtin_unsigned_long_long = nullptr;
+  struct type *builtin_decfloat = nullptr;
+  struct type *builtin_decdouble = nullptr;
+  struct type *builtin_declong = nullptr;
 
   /* "True" character types.
       We use these for the '/c' print format, because c_char is just a
       one-byte integral type, which languages less laid back than C
       will print as ... well, a one-byte integral type.  */
-  struct type *builtin_true_char;
-  struct type *builtin_true_unsigned_char;
+  struct type *builtin_true_char = nullptr;
+  struct type *builtin_true_unsigned_char = nullptr;
 
   /* Explicit sizes - see C9X <intypes.h> for naming scheme.  The "int0"
      is for when an architecture needs to describe a register that has
      no size.  */
-  struct type *builtin_int0;
-  struct type *builtin_int8;
-  struct type *builtin_uint8;
-  struct type *builtin_int16;
-  struct type *builtin_uint16;
-  struct type *builtin_int24;
-  struct type *builtin_uint24;
-  struct type *builtin_int32;
-  struct type *builtin_uint32;
-  struct type *builtin_int64;
-  struct type *builtin_uint64;
-  struct type *builtin_int128;
-  struct type *builtin_uint128;
+  struct type *builtin_int0 = nullptr;
+  struct type *builtin_int8 = nullptr;
+  struct type *builtin_uint8 = nullptr;
+  struct type *builtin_int16 = nullptr;
+  struct type *builtin_uint16 = nullptr;
+  struct type *builtin_int24 = nullptr;
+  struct type *builtin_uint24 = nullptr;
+  struct type *builtin_int32 = nullptr;
+  struct type *builtin_uint32 = nullptr;
+  struct type *builtin_int64 = nullptr;
+  struct type *builtin_uint64 = nullptr;
+  struct type *builtin_int128 = nullptr;
+  struct type *builtin_uint128 = nullptr;
 
   /* Wide character types.  */
-  struct type *builtin_char16;
-  struct type *builtin_char32;
-  struct type *builtin_wchar;
+  struct type *builtin_char16 = nullptr;
+  struct type *builtin_char32 = nullptr;
+  struct type *builtin_wchar = nullptr;
 
   /* Pointer types.  */
 
   /* * `pointer to data' type.  Some target platforms use an implicitly
      {sign,zero} -extended 32-bit ABI pointer on a 64-bit ISA.  */
-  struct type *builtin_data_ptr;
+  struct type *builtin_data_ptr = nullptr;
 
   /* * `pointer to function (returning void)' type.  Harvard
      architectures mean that ABI function and code pointers are not
@@ -2379,21 +2398,21 @@ struct builtin_type
      However, all function pointer types are interconvertible, so void
      (*) () can server as a generic function pointer.  */
 
-  struct type *builtin_func_ptr;
+  struct type *builtin_func_ptr = nullptr;
 
   /* * `function returning pointer to function (returning void)' type.
      The final void return type is not significant for it.  */
 
-  struct type *builtin_func_func;
+  struct type *builtin_func_func = nullptr;
 
   /* Special-purpose types.  */
 
   /* * This type is used to represent a GDB internal function.  */
 
-  struct type *internal_fn;
+  struct type *internal_fn = nullptr;
 
   /* * This type is used to represent an xmethod.  */
-  struct type *xmethod;
+  struct type *xmethod = nullptr;
 };
 
 /* * Return the type table for the specified architecture.  */
@@ -2875,10 +2894,9 @@ extern int class_or_union_p (const struct type *);
 
 extern void maintenance_print_type (const char *, int);
 
-extern htab_up create_copied_types_hash (struct objfile *objfile);
+extern htab_up create_copied_types_hash ();
 
-extern struct type *copy_type_recursive (struct objfile *objfile,
-					 struct type *type,
+extern struct type *copy_type_recursive (struct type *type,
 					 htab_t copied_types);
 
 extern struct type *copy_type (const struct type *type);

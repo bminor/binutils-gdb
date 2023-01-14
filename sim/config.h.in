@@ -41,6 +41,9 @@
 /* Define to 1 if you have the `chmod' function. */
 #undef HAVE_CHMOD
 
+/* Is the prototype for getopt in <unistd.h> in the expected format? */
+#undef HAVE_DECL_GETOPT
+
 /* Define to 1 if you have the declaration of `tzname', and to 0 if you don't.
    */
 #undef HAVE_DECL_TZNAME
@@ -382,6 +385,9 @@
 
 /* Define to 1 if you have the <windows.h> header file. */
 #undef HAVE_WINDOWS_H
+
+/* Define to 1 if zstd is enabled. */
+#undef HAVE_ZSTD
 
 /* Define to 1 if the system has the type `__int128'. */
 #undef HAVE___INT128

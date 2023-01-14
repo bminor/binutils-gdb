@@ -23,7 +23,7 @@ if { [have_fuse_ld_gold] == 0} {
 
 if {[prepare_for_testing "failed to prepare" $testfile "$srcfile $srcfile2" \
 	 {debug c++ additional_flags=-fuse-ld=gold \
-	      additional_flags=-Wl,--gdb-index \
+	      ldflags=-Wl,--gdb-index \
 	      additional_flags=-ggnu-pubnames}]} {
     return -1
 }

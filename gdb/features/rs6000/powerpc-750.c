@@ -5,7 +5,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 
-struct target_desc *tdesc_powerpc_750;
+const struct target_desc *tdesc_powerpc_750;
 static void
 initialize_tdesc_powerpc_750 (void)
 {
@@ -141,7 +141,6 @@ initialize_tdesc_powerpc_750 (void)
   tdesc_create_reg (feature, "hid0", 119, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "hid1", 120, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "iabr", 121, 1, NULL, 32, "int");
-  tdesc_create_reg (feature, "dabr", 122, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "ummcr0", 124, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "upmc1", 125, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "upmc2", 126, 1, NULL, 32, "int");

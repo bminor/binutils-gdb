@@ -40,7 +40,7 @@ dynamic_array_type (struct type *type,
       && strcmp (type->field (1).name (), "ptr") == 0
       && !value_bits_any_optimized_out (val,
 					TARGET_CHAR_BIT * embedded_offset,
-					TARGET_CHAR_BIT * TYPE_LENGTH (type)))
+					TARGET_CHAR_BIT * type->length ()))
     {
       CORE_ADDR addr;
       struct type *elttype;
@@ -53,7 +53,7 @@ dynamic_array_type (struct type *type,
       length = unpack_field_as_long (type, valaddr + embedded_offset, 0);
 
       ptr_type = type->field (1).type ();
-      elttype = check_typedef (TYPE_TARGET_TYPE (ptr_type));
+      elttype = check_typedef (ptr_type->target_type ());
       addr = unpack_pointer (ptr_type,
 			     valaddr + type->field (1).loc_bitpos () / 8
 			     + embedded_offset);

@@ -19,6 +19,8 @@
 # define ASM_REG "rax"
 #elif defined __i386__
 # define ASM_REG "eax"
+#elif defined __powerpc64__
+# define ASM_REG "r9"
 #else
 # error "port me"
 #endif

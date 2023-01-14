@@ -20,6 +20,7 @@
 #include "defs.h"
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/block-signals.h"
+#include "gdbsupport/scope-exit.h"
 #include "run-on-main-thread.h"
 #include "gdbsupport/event-loop.h"
 #if CXX_STD_THREAD
@@ -52,6 +53,11 @@ run_tests ()
   {
     gdb::block_signals blocker;
 
+    SCOPE_EXIT
+      {
+	if (thread.joinable ())
+	  thread.join ();
+      };
     thread = std::thread (set_done);
   }
 
@@ -61,8 +67,6 @@ run_tests ()
   /* Actually the test will just hang, but we want to test
      something.  */
   SELF_CHECK (done);
-
-  thread.join ();
 }
 
 #endif

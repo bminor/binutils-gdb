@@ -515,17 +515,13 @@ print_base (int regno, bfd_vma disp, disassemble_info *info)
     }
   else
     {
-      char buf[50];
-
       if (regno == -2)
 	(*info->fprintf_func) (info->stream, "@(");
       else if (regno == -3)
 	(*info->fprintf_func) (info->stream, "%%zpc@(");
       else
 	(*info->fprintf_func) (info->stream, "%s@(", reg_names[regno]);
-
-      sprintf_vma (buf, disp);
-      (*info->fprintf_func) (info->stream, "%s", buf);
+      (*info->fprintf_func) (info->stream, "%" PRIx64, (uint64_t) disp);
     }
 }
 
@@ -545,7 +541,6 @@ print_indexed (int basereg,
   bfd_vma base_disp;
   bfd_vma outer_disp;
   char buf[40];
-  char vmabuf[50];
 
   NEXTWORD (p, word, NULL);
 
@@ -620,8 +615,7 @@ print_indexed (int basereg,
       (*info->fprintf_func) (info->stream, ",%s", buf);
       buf[0] = '\0';
     }
-  sprintf_vma (vmabuf, outer_disp);
-  (*info->fprintf_func) (info->stream, ")@(%s", vmabuf);
+  (*info->fprintf_func) (info->stream, ")@(%" PRIx64, (uint64_t) outer_disp);
   if (buf[0] != '\0')
     (*info->fprintf_func) (info->stream, ",%s", buf);
   (*info->fprintf_func) (info->stream, ")");

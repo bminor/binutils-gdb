@@ -142,7 +142,7 @@ class Simple{
   }
 }
 EOF
-      if AC_TRY_COMMAND($JAVAC conftest.java &AS_MESSAGE_LOG_FD 2>&1); then
+      if AC_TRY_COMMAND($JAVAC configtest.java &AS_MESSAGE_LOG_FD 2>&1); then
 	GPROFNG_BROKEN_JAVAC=no
       else
 	GPROFNG_BROKEN_JAVAC=yes
@@ -158,6 +158,31 @@ GCC_ENABLE([gprofng-debug], [no], [], [Enable debugging output])
 if test "${enable_gprofng_debug}" = yes; then
     AC_DEFINE(DEBUG, 1, [Enable debugging output.])
 fi
+
+cat > "dummy.c" << EOF
+#include <features.h>
+#if defined(__UCLIBC__)
+LIBC=uclibc
+#elif defined(__dietlibc__)
+LIBC=dietlibc
+#elif defined(__GLIBC__)
+LIBC=gnu
+#else
+#include <stdarg.h>
+/* First heuristic to detect musl libc.  */
+#ifdef __DEFINED_va_list
+LIBC=musl
+#else
+LIBC=gnu
+#endif
+#endif
+EOF
+cc_set_libc=`$CC -E "dummy.c" 2>/dev/null | grep '^LIBC=' | sed 's, ,,g'`
+eval "$cc_set_libc"
+if test "$LIBC" = musl; then
+  AC_DEFINE(__MUSL_LIBC, 1, [Build with musl-libc.])
+fi
+
 
 # Check if linker supports --as-needed and --no-as-needed options.
 AC_CACHE_CHECK(linker --as-needed support, bfd_cv_ld_as_needed,
@@ -184,11 +209,27 @@ AM_CONDITIONAL(TCL_TRY, test "${ac_cv_libctf_tcl_try}" = yes)
 AM_ZLIB
 
 # Generate manpages, if possible.
+build_man=false
 if test $cross_compiling = no; then
   AM_MISSING_PROG(HELP2MAN, help2man)
-  build_man=true
-else
-  build_man=false
+  AC_CHECK_PROGS([MAKEINFO], makeinfo, ["@echo makeinfo missing; true"])
+  case "$MAKEINFO" in
+    *true)
+      AC_MSG_WARN([gprofng: makeinfo is missing. Info documentation will not be built.])
+      ;;
+    *)
+      case x"`$MAKEINFO --version | grep 'GNU texinfo'`" in
+	x*\ [[1-5]].*|x*\ 6.[[0-4]].* )
+	  AC_MSG_WARN([gprofng: $MAKEINFO is too old. Info documentation will not be built.])
+	  MAKEINFO="@echo $MAKEINFO is too old, 6.5 or newer required; true"
+	  ;;
+	x* )
+	  build_man=true
+	  ;;
+	esac
+      ;;
+    esac
+  AC_SUBST(MAKEINFO)
 fi
 AM_CONDITIONAL([BUILD_MAN], [test x$build_man = xtrue])
 

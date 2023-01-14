@@ -59,12 +59,11 @@ extern int __collector_xml_snprintf (char *s, size_t n, const char *format, ...)
 extern int __collector_xml_vsnprintf (char *s, size_t n, const char *format, va_list args);
 
 /* -------  collector_thread ----------------- */
-pid_t __collector_gettid ();
+extern pid_t __collector_gettid ();
 extern void __collector_ext_gettid_tsd_create_key ();
-#define collector_thread_t pthread_t            // not using pid_t, since tid is defined as pthread_t in package structures, and other codes assume this type
-#define statvfs_t  struct statvfs
-#define __collector_lwp_self() (collector_thread_t)__collector_gettid() // not using pthread_self()
-#define __collector_thr_self() (collector_thread_t)__collector_gettid() // not using pthread_self()
+typedef pthread_t collector_thread_t;
+#define __collector_lwp_self() ((collector_thread_t) ((unsigned long) __collector_gettid()))
+#define __collector_thr_self() ((collector_thread_t) ((unsigned long) __collector_gettid()))
 
 /* -------  collector_mutex ----------------- */
 /*

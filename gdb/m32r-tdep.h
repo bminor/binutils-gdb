@@ -22,7 +22,7 @@
 
 #include "gdbarch.h"
 
-struct m32r_gdbarch_tdep : gdbarch_tdep
+struct m32r_gdbarch_tdep : gdbarch_tdep_base
 {
   /* gdbarch target dependent data here.  Currently unused for M32R.  */
 };

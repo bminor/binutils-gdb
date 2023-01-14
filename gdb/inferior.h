@@ -25,7 +25,7 @@
 #include <list>
 
 struct target_waitstatus;
-struct frame_info;
+class frame_info_ptr;
 struct ui_file;
 struct type;
 struct gdbarch;
@@ -156,7 +156,7 @@ extern void reopen_exec_file (void);
 
 extern void default_print_registers_info (struct gdbarch *gdbarch,
 					  struct ui_file *file,
-					  struct frame_info *frame,
+					  frame_info_ptr frame,
 					  int regnum, int all);
 
 /* Default implementation of gdbarch_print_float_info.  Print
@@ -164,7 +164,7 @@ extern void default_print_registers_info (struct gdbarch *gdbarch,
 
 extern void default_print_float_info (struct gdbarch *gdbarch,
 				      struct ui_file *file,
-				      struct frame_info *frame,
+				      frame_info_ptr frame,
 				      const char *args);
 
 extern void child_terminal_info (struct target_ops *self, const char *, int);
@@ -369,7 +369,7 @@ public:
   int unpush_target (struct target_ops *t);
 
   /* Returns true if T is pushed in this inferior's target stack.  */
-  bool target_is_pushed (target_ops *t)
+  bool target_is_pushed (const target_ops *t) const
   { return m_target_stack.is_pushed (t); }
 
   /* Find the target beneath T in this inferior's target stack.  */
@@ -595,7 +595,7 @@ public:
   displaced_step_inferior_state displaced_step_state;
 
   /* Per inferior data-pointers required by other GDB modules.  */
-  REGISTRY_FIELDS;
+  registry<inferior> registry_fields;
 
 private:
   /* The inferior's target stack.  */
@@ -614,11 +614,6 @@ private:
      this inferior.  */
   std::string m_cwd;
 };
-
-/* Keep a registry of per-inferior data-pointers required by other GDB
-   modules.  */
-
-DECLARE_REGISTRY (inferior);
 
 /* Add an inferior to the inferior list, print a message that a new
    inferior is found, and return the pointer to the new inferior.

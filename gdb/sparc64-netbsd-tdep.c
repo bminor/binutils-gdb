@@ -86,7 +86,7 @@ sparc64nbsd_pc_in_sigtramp (CORE_ADDR pc, const char *name)
 
 trad_frame_saved_reg *
 sparc64nbsd_sigcontext_saved_regs (CORE_ADDR sigcontext_addr,
-				   struct frame_info *this_frame)
+				   frame_info_ptr this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   trad_frame_saved_reg *saved_regs;
@@ -149,7 +149,7 @@ sparc64nbsd_sigcontext_saved_regs (CORE_ADDR sigcontext_addr,
 }
 
 static struct sparc_frame_cache *
-sparc64nbsd_sigcontext_frame_cache (struct frame_info *this_frame,
+sparc64nbsd_sigcontext_frame_cache (frame_info_ptr this_frame,
 				    void **this_cache)
 {
   struct sparc_frame_cache *cache;
@@ -185,7 +185,7 @@ sparc64nbsd_sigcontext_frame_cache (struct frame_info *this_frame,
 }
 
 static void
-sparc64nbsd_sigcontext_frame_this_id (struct frame_info *this_frame,
+sparc64nbsd_sigcontext_frame_this_id (frame_info_ptr this_frame,
 				      void **this_cache,
 				      struct frame_id *this_id)
 {
@@ -196,7 +196,7 @@ sparc64nbsd_sigcontext_frame_this_id (struct frame_info *this_frame,
 }
 
 static struct value *
-sparc64nbsd_sigcontext_frame_prev_register (struct frame_info *this_frame,
+sparc64nbsd_sigcontext_frame_prev_register (frame_info_ptr this_frame,
 					    void **this_cache, int regnum)
 {
   struct sparc_frame_cache *cache =
@@ -207,7 +207,7 @@ sparc64nbsd_sigcontext_frame_prev_register (struct frame_info *this_frame,
 
 static int
 sparc64nbsd_sigtramp_frame_sniffer (const struct frame_unwind *self,
-				    struct frame_info *this_frame,
+				    frame_info_ptr this_frame,
 				    void **this_cache)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
@@ -248,7 +248,7 @@ static const struct regset sparc64nbsd_fpregset =
 static void
 sparc64nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  sparc_gdbarch_tdep *tdep = (sparc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  sparc_gdbarch_tdep *tdep = gdbarch_tdep<sparc_gdbarch_tdep> (gdbarch);
 
   nbsd_init_abi (info, gdbarch);
 

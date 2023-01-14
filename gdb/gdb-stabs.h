@@ -60,7 +60,7 @@ struct dbx_symfile_info
 
 /* The tag used to find the DBX info attached to an objfile.  This is
    global because it is referenced by several modules.  */
-extern objfile_key<dbx_symfile_info> dbx_objfile_data_key;
+extern const registry<objfile>::key<dbx_symfile_info> dbx_objfile_data_key;
 
 #define DBX_SYMFILE_INFO(o)	(dbx_objfile_data_key.get (o))
 #define DBX_TEXT_ADDR(o)	(DBX_SYMFILE_INFO(o)->text_addr)

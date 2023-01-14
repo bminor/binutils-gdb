@@ -546,6 +546,7 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 f3 7c 58 66 29 7b[ 	 ]*vfpclassph k5,WORD BCST \[ecx\]\{1to32\},0x7b
 [ 	]*[a-f0-9]+:[ 	]*62 f3 7c 48 66 69 7f 7b[ 	 ]*vfpclassph k5,ZMMWORD PTR \[ecx\+0x1fc0\],0x7b
 [ 	]*[a-f0-9]+:[ 	]*62 f3 7c 5f 66 6a 80 7b[ 	 ]*vfpclassph k5\{k7\},WORD BCST \[edx-0x100\]\{1to32\},0x7b
+[ 	]*[a-f0-9]+:[ 	]*62 f3 7c 58 66 69 01 7b[ 	 ]*vfpclassph k5,WORD BCST \[ecx\+0x2\]\{1to32\},0x7b
 [ 	]*[a-f0-9]+:[ 	]*62 f3 7c 08 67 ee 7b[ 	 ]*vfpclasssh k5,xmm6,0x7b
 [ 	]*[a-f0-9]+:[ 	]*62 f3 7c 0f 67 ee 7b[ 	 ]*vfpclasssh k5\{k7\},xmm6,0x7b
 [ 	]*[a-f0-9]+:[ 	]*62 f3 7c 0f 67 ac f4 00 00 00 10 7b[ 	 ]*vfpclasssh k5\{k7\},WORD PTR \[esp\+esi\*8\+0x10000000\],0x7b

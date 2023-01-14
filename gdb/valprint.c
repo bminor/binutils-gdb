@@ -298,7 +298,7 @@ val_print_scalar_type_p (struct type *type)
   type = check_typedef (type);
   while (TYPE_IS_REFERENCE (type))
     {
-      type = TYPE_TARGET_TYPE (type);
+      type = type->target_type ();
       type = check_typedef (type);
     }
   switch (type->code ())
@@ -354,14 +354,14 @@ valprint_check_validity (struct ui_file *stream,
     {
       if (value_bits_any_optimized_out (val,
 					TARGET_CHAR_BIT * embedded_offset,
-					TARGET_CHAR_BIT * TYPE_LENGTH (type)))
+					TARGET_CHAR_BIT * type->length ()))
 	{
 	  val_print_optimized_out (val, stream);
 	  return 0;
 	}
 
       if (value_bits_synthetic_pointer (val, TARGET_CHAR_BIT * embedded_offset,
-					TARGET_CHAR_BIT * TYPE_LENGTH (type)))
+					TARGET_CHAR_BIT * type->length ()))
 	{
 	  const int is_ref = type->code () == TYPE_CODE_REF;
 	  int ref_is_addressable = 0;
@@ -382,7 +382,7 @@ valprint_check_validity (struct ui_file *stream,
 	  return is_ref;
 	}
 
-      if (!value_bytes_available (val, embedded_offset, TYPE_LENGTH (type)))
+      if (!value_bytes_available (val, embedded_offset, type->length ()))
 	{
 	  val_print_unavailable (stream);
 	  return 0;
@@ -456,10 +456,10 @@ generic_val_print_array (struct value *val,
 			     generic_val_print_decorations *decorations)
 {
   struct type *type = check_typedef (value_type (val));
-  struct type *unresolved_elttype = TYPE_TARGET_TYPE (type);
+  struct type *unresolved_elttype = type->target_type ();
   struct type *elttype = check_typedef (unresolved_elttype);
 
-  if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (unresolved_elttype) > 0)
+  if (type->length () > 0 && unresolved_elttype->length () > 0)
     {
       LONGEST low_bound, high_bound;
 
@@ -491,7 +491,7 @@ generic_value_print_ptr (struct value *val, struct ui_file *stream,
   else
     {
       struct type *type = check_typedef (value_type (val));
-      struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
+      struct type *elttype = check_typedef (type->target_type ());
       const gdb_byte *valaddr = value_contents_for_printing (val).data ();
       CORE_ADDR addr = unpack_pointer (type, valaddr);
 
@@ -544,12 +544,12 @@ generic_val_print_ref (struct type *type,
 		       struct value *original_value,
 		       const struct value_print_options *options)
 {
-  struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
+  struct type *elttype = check_typedef (type->target_type ());
   struct value *deref_val = NULL;
   const int value_is_synthetic
     = value_bits_synthetic_pointer (original_value,
 				    TARGET_CHAR_BIT * embedded_offset,
-				    TARGET_CHAR_BIT * TYPE_LENGTH (type));
+				    TARGET_CHAR_BIT * type->length ());
   const int must_coerce_ref = ((options->addressprint && value_is_synthetic)
 			       || options->deref_ref);
   const int type_is_defined = elttype->code () != TYPE_CODE_UNDEF;
@@ -565,7 +565,7 @@ generic_val_print_ref (struct type *type,
 	  gdb_assert (embedded_offset == 0);
 	}
       else
-	deref_val = value_at (TYPE_TARGET_TYPE (type),
+	deref_val = value_at (type->target_type (),
 			      unpack_pointer (type, valaddr + embedded_offset));
     }
   /* Else, original_value isn't a synthetic reference or we don't have to print
@@ -832,11 +832,11 @@ generic_val_print_fixed_point (struct value *val, struct ui_file *stream,
       const gdb_byte *valaddr = value_contents_for_printing (val).data ();
       gdb_mpf f;
 
-      f.read_fixed_point (gdb::make_array_view (valaddr, TYPE_LENGTH (type)),
+      f.read_fixed_point (gdb::make_array_view (valaddr, type->length ()),
 			  type_byte_order (type), type->is_unsigned (),
 			  type->fixed_point_scaling_factor ());
 
-      const char *fmt = TYPE_LENGTH (type) < 4 ? "%.11Fg" : "%.17Fg";
+      const char *fmt = type->length () < 4 ? "%.11Fg" : "%.17Fg";
       std::string str = gmp_string_printf (fmt, f.val);
       gdb_printf (stream, "%s", str.c_str ());
     }
@@ -900,7 +900,7 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
      printer.  */
   while (type->code () == TYPE_CODE_RANGE)
     {
-      type = check_typedef (TYPE_TARGET_TYPE (type));
+      type = check_typedef (type->target_type ());
       val = value_cast (type, val);
     }
 
@@ -1190,6 +1190,18 @@ value_print (struct value *val, struct ui_file *stream,
   current_language->value_print (val, stream, options);
 }
 
+/* Meant to be used in debug sessions, so don't export it in a header file.  */
+extern void ATTRIBUTE_UNUSED debug_val (struct value *val);
+
+/* Print VAL.  */
+
+void ATTRIBUTE_UNUSED
+debug_val (struct value *val)
+{
+  value_print (val, gdb_stdlog, &user_print_options);
+  gdb_flush (gdb_stdlog);
+}
+
 static void
 val_print_type_code_flags (struct type *type, struct value *original_value,
 			   int embedded_offset, struct ui_file *stream)
@@ -1273,9 +1285,9 @@ value_print_scalar_formatted (struct value *val,
   /* A scalar object that does not have all bits available can't be
      printed, because all bits contribute to its representation.  */
   if (value_bits_any_optimized_out (val, 0,
-				    TARGET_CHAR_BIT * TYPE_LENGTH (type)))
+				    TARGET_CHAR_BIT * type->length ()))
     val_print_optimized_out (val, stream);
-  else if (!value_bytes_available (val, 0, TYPE_LENGTH (type)))
+  else if (!value_bytes_available (val, 0, type->length ()))
     val_print_unavailable (stream);
   else
     print_scalar_formatted (valaddr, type, options, size, stream);
@@ -1926,11 +1938,11 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
 
   struct type *type = check_typedef (value_type (val));
 
-  elttype = TYPE_TARGET_TYPE (type);
+  elttype = type->target_type ();
   eltlen = type_length_units (check_typedef (elttype));
   index_type = type->index_type ();
   if (index_type->code () == TYPE_CODE_RANGE)
-    index_type = TYPE_TARGET_TYPE (index_type);
+    index_type = index_type->target_type ();
 
   if (get_array_bounds (type, &low_bound, &high_bound))
     {
@@ -2063,15 +2075,14 @@ print_wchar (gdb_wint_t w, const gdb_byte *orig,
 	     int orig_len, int width,
 	     enum bfd_endian byte_order,
 	     struct obstack *output,
-	     int quoter, int *need_escapep)
+	     int quoter, bool *need_escapep)
 {
-  int need_escape = *need_escapep;
+  bool need_escape = *need_escapep;
 
-  *need_escapep = 0;
+  *need_escapep = false;
 
-  /* iswprint implementation on Windows returns 1 for tab character.
-     In order to avoid different printout on this host, we explicitly
-     use wchar_printable function.  */
+  /* If any additional cases are added to this switch block, then the
+     function wchar_printable will likely need updating too.  */
   switch (w)
     {
       case LCST ('\a'):
@@ -2097,9 +2108,7 @@ print_wchar (gdb_wint_t w, const gdb_byte *orig,
 	break;
       default:
 	{
-	  if (wchar_printable (w) && (!need_escape || (!gdb_iswdigit (w)
-						       && w != LCST ('8')
-						       && w != LCST ('9'))))
+	  if (gdb_iswprint (w) && !(need_escape && gdb_iswxdigit (w)))
 	    {
 	      gdb_wchar_t wchar = w;
 
@@ -2121,10 +2130,19 @@ print_wchar (gdb_wint_t w, const gdb_byte *orig,
 		  /* If the value fits in 3 octal digits, print it that
 		     way.  Otherwise, print it as a hex escape.  */
 		  if (value <= 0777)
-		    xsnprintf (octal, sizeof (octal), "\\%.3o",
-			       (int) (value & 0777));
+		    {
+		      xsnprintf (octal, sizeof (octal), "\\%.3o",
+				 (int) (value & 0777));
+		      *need_escapep = false;
+		    }
 		  else
-		    xsnprintf (octal, sizeof (octal), "\\x%lx", (long) value);
+		    {
+		      xsnprintf (octal, sizeof (octal), "\\x%lx", (long) value);
+		      /* A hex escape might require the next character
+			 to be escaped, because, unlike with octal,
+			 hex escapes have no length limit.  */
+		      *need_escapep = true;
+		    }
 		  append_string_as_wide (octal, output);
 		}
 	      /* If we somehow have extra bytes, print them now.  */
@@ -2133,11 +2151,10 @@ print_wchar (gdb_wint_t w, const gdb_byte *orig,
 		  char octal[5];
 
 		  xsnprintf (octal, sizeof (octal), "\\%.3o", orig[i] & 0xff);
+		  *need_escapep = false;
 		  append_string_as_wide (octal, output);
 		  ++i;
 		}
-
-	      *need_escapep = 1;
 	    }
 	  break;
 	}
@@ -2155,12 +2172,12 @@ generic_emit_char (int c, struct type *type, struct ui_file *stream,
   enum bfd_endian byte_order
     = type_byte_order (type);
   gdb_byte *c_buf;
-  int need_escape = 0;
+  bool need_escape = false;
 
-  c_buf = (gdb_byte *) alloca (TYPE_LENGTH (type));
+  c_buf = (gdb_byte *) alloca (type->length ());
   pack_long (c_buf, type, c);
 
-  wchar_iterator iter (c_buf, TYPE_LENGTH (type), encoding, TYPE_LENGTH (type));
+  wchar_iterator iter (c_buf, type->length (), encoding, type->length ());
 
   /* This holds the printable form of the wchar_t data.  */
   auto_obstack wchar_buf;
@@ -2198,14 +2215,14 @@ generic_emit_char (int c, struct type *type, struct ui_file *stream,
 	    {
 	      for (i = 0; i < num_chars; ++i)
 		print_wchar (chars[i], buf, buflen,
-			     TYPE_LENGTH (type), byte_order,
+			     type->length (), byte_order,
 			     &wchar_buf, quoter, &need_escape);
 	    }
 	}
 
       /* This handles the NUM_CHARS == 0 case as well.  */
       if (print_escape)
-	print_wchar (gdb_WEOF, buf, buflen, TYPE_LENGTH (type),
+	print_wchar (gdb_WEOF, buf, buflen, type->length (),
 		     byte_order, &wchar_buf, quoter, &need_escape);
     }
 
@@ -2320,7 +2337,7 @@ print_converted_chars_to_obstack (struct obstack *obstack,
   const converted_character *elem;
   enum {START, SINGLE, REPEAT, INCOMPLETE, FINISH} state, last;
   gdb_wchar_t wide_quote_char = gdb_btowc (quote_char);
-  int need_escape = 0;
+  bool need_escape = false;
 
   /* Set the start state.  */
   idx = 0;
@@ -2475,7 +2492,7 @@ generic_printstr (struct ui_file *stream, struct type *type,
 {
   enum bfd_endian byte_order = type_byte_order (type);
   unsigned int i;
-  int width = TYPE_LENGTH (type);
+  int width = type->length ();
   int finished = 0;
   struct converted_character *last;
 
@@ -2504,7 +2521,7 @@ generic_printstr (struct ui_file *stream, struct type *type,
 
   if (length == 0)
     {
-      gdb_puts ("\"\"", stream);
+      gdb_printf (stream, "%c%c", quote_char, quote_char);
       return;
     }
 
@@ -2586,7 +2603,7 @@ val_print_string (struct type *elttype, const char *encoding,
   gdb::unique_xmalloc_ptr<gdb_byte> buffer;	/* Dynamically growable fetch buffer.  */
   struct gdbarch *gdbarch = elttype->arch ();
   enum bfd_endian byte_order = type_byte_order (elttype);
-  int width = TYPE_LENGTH (elttype);
+  int width = elttype->length ();
 
   /* First we need to figure out the limit on the number of characters we are
      going to attempt to fetch and print.  This is actually pretty simple.  If

@@ -273,35 +273,44 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
 		  language_cplus, DMGL_ANSI);
   gdb_puts ("(", stream);
 
-  /* Skip the class variable.  We keep this here to accommodate older
-     compilers and debug formats which may not support artificial
-     parameters.  */
-  i = staticp ? 0 : 1;
-  if (nargs > i)
+  int printed_args = 0;
+  for (i = 0; i < nargs; ++i)
     {
-      while (i < nargs)
+      if (i == 0 && !staticp)
 	{
-	  struct field arg = args[i++];
-
-	  /* Skip any artificial arguments.  */
-	  if (FIELD_ARTIFICIAL (arg))
-	    continue;
-
-	  c_print_type (arg.type (), "", stream, 0, 0, language, flags);
-
-	  if (i == nargs && varargs)
-	    gdb_printf (stream, ", ...");
-	  else if (i < nargs)
-	    {
-	      gdb_printf (stream, ", ");
-	      stream->wrap_here (8);
-	    }
+	  /* Skip the class variable.  We keep this here to accommodate older
+	     compilers and debug formats which may not support artificial
+	     parameters.  */
+	  continue;
 	}
+
+      struct field arg = args[i];
+      /* Skip any artificial arguments.  */
+      if (FIELD_ARTIFICIAL (arg))
+	continue;
+
+      if (printed_args > 0)
+	{
+	  gdb_printf (stream, ", ");
+	  stream->wrap_here (8);
+	}
+
+      c_print_type (arg.type (), "", stream, 0, 0, language, flags);
+      printed_args++;
     }
-  else if (varargs)
-    gdb_printf (stream, "...");
-  else if (language == language_cplus)
-    gdb_printf (stream, "void");
+
+  if (varargs)
+    {
+      if (printed_args == 0)
+	gdb_printf (stream, "...");
+      else
+	gdb_printf (stream, ", ...");
+    }
+  else if (printed_args == 0)
+    {
+      if (language == language_cplus)
+	gdb_printf (stream, "void");
+    }
 
   gdb_printf (stream, ")");
 
@@ -313,7 +322,7 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
 
       gdb_assert (nargs > 0);
       gdb_assert (args[0].type ()->code () == TYPE_CODE_PTR);
-      domain = TYPE_TARGET_TYPE (args[0].type ());
+      domain = args[0].type ()->target_type ();
 
       if (TYPE_CONST (domain))
 	gdb_printf (stream, " const");
@@ -366,7 +375,7 @@ c_type_print_varspec_prefix (struct type *type,
   switch (type->code ())
     {
     case TYPE_CODE_PTR:
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
+      c_type_print_varspec_prefix (type->target_type (),
 				   stream, show, 1, 1, language, flags,
 				   podata);
       gdb_printf (stream, "*");
@@ -374,7 +383,7 @@ c_type_print_varspec_prefix (struct type *type,
       break;
 
     case TYPE_CODE_MEMBERPTR:
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
+      c_type_print_varspec_prefix (type->target_type (),
 				   stream, show, 0, 0, language, flags, podata);
       name = TYPE_SELF_TYPE (type)->name ();
       if (name)
@@ -387,7 +396,7 @@ c_type_print_varspec_prefix (struct type *type,
       break;
 
     case TYPE_CODE_METHODPTR:
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
+      c_type_print_varspec_prefix (type->target_type (),
 				   stream, show, 0, 0, language, flags,
 				   podata);
       gdb_printf (stream, "(");
@@ -403,7 +412,7 @@ c_type_print_varspec_prefix (struct type *type,
 
     case TYPE_CODE_REF:
     case TYPE_CODE_RVALUE_REF:
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
+      c_type_print_varspec_prefix (type->target_type (),
 				   stream, show, 1, 0, language, flags,
 				   podata);
       gdb_printf (stream, type->code () == TYPE_CODE_REF ? "&" : "&&");
@@ -412,7 +421,7 @@ c_type_print_varspec_prefix (struct type *type,
 
     case TYPE_CODE_METHOD:
     case TYPE_CODE_FUNC:
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
+      c_type_print_varspec_prefix (type->target_type (),
 				   stream, show, 0, 0, language, flags,
 				   podata);
       if (passed_a_ptr)
@@ -420,7 +429,7 @@ c_type_print_varspec_prefix (struct type *type,
       break;
 
     case TYPE_CODE_ARRAY:
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
+      c_type_print_varspec_prefix (type->target_type (),
 				   stream, show, 0, need_post_space,
 				   language, flags, podata);
       if (passed_a_ptr)
@@ -428,7 +437,7 @@ c_type_print_varspec_prefix (struct type *type,
       break;
 
     case TYPE_CODE_TYPEDEF:
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
+      c_type_print_varspec_prefix (type->target_type (),
 				   stream, show, passed_a_ptr, 0,
 				   language, flags, podata);
       break;
@@ -775,26 +784,26 @@ c_type_print_varspec_suffix (struct type *type,
 		      plongest (high_bound - low_bound + 1));
 	gdb_printf (stream, (is_vector ? ")))" : "]"));
 
-	c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream,
+	c_type_print_varspec_suffix (type->target_type (), stream,
 				     show, 0, 0, language, flags);
       }
       break;
 
     case TYPE_CODE_MEMBERPTR:
-      c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream,
+      c_type_print_varspec_suffix (type->target_type (), stream,
 				   show, 0, 0, language, flags);
       break;
 
     case TYPE_CODE_METHODPTR:
       gdb_printf (stream, ")");
-      c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream,
+      c_type_print_varspec_suffix (type->target_type (), stream,
 				   show, 0, 0, language, flags);
       break;
 
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
     case TYPE_CODE_RVALUE_REF:
-      c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream,
+      c_type_print_varspec_suffix (type->target_type (), stream,
 				   show, 1, 0, language, flags);
       break;
 
@@ -804,12 +813,12 @@ c_type_print_varspec_suffix (struct type *type,
 	gdb_printf (stream, ")");
       if (!demangled_args)
 	c_type_print_args (type, stream, 0, language, flags);
-      c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream,
+      c_type_print_varspec_suffix (type->target_type (), stream,
 				   show, passed_a_ptr, 0, language, flags);
       break;
 
     case TYPE_CODE_TYPEDEF:
-      c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream,
+      c_type_print_varspec_suffix (type->target_type (), stream,
 				   show, passed_a_ptr, 0, language, flags);
       break;
 
@@ -1188,7 +1197,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 		 the whole struct/union.  */
 	      local_podata.end_bitpos
 		= podata->end_bitpos
-		  - TYPE_LENGTH (type->field (i).type ()) * TARGET_CHAR_BIT;
+		  - type->field (i).type ()->length () * TARGET_CHAR_BIT;
 	    }
 
 	  c_print_type_1 (type->field (i).type (),
@@ -1266,7 +1275,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 		gdb_printf (stream, "virtual ");
 	      else if (TYPE_FN_FIELD_STATIC_P (f, j))
 		gdb_printf (stream, "static ");
-	      if (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)) == 0)
+	      if (TYPE_FN_FIELD_TYPE (f, j)->target_type () == 0)
 		{
 		  /* Keep GDB from crashing here.  */
 		  gdb_printf (stream,
@@ -1282,7 +1291,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 		       && !is_type_conversion_operator (type, i, j))
 		{
 		  c_print_type_no_offsets
-		    (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)),
+		    (TYPE_FN_FIELD_TYPE (f, j)->target_type (),
 		     "", stream, -1, 0, language, &local_flags, podata);
 
 		  gdb_puts (" ", stream);
@@ -1382,7 +1391,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 
 	      /* Dereference the typedef declaration itself.  */
 	      gdb_assert (target->code () == TYPE_CODE_TYPEDEF);
-	      target = TYPE_TARGET_TYPE (target);
+	      target = target->target_type ();
 
 	      if (need_access_label)
 		{
@@ -1495,19 +1504,19 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
     {
     case TYPE_CODE_TYPEDEF:
       /* If we get here, the typedef doesn't have a name, and we
-	 couldn't resolve TYPE_TARGET_TYPE.  Not much we can do.  */
+	 couldn't resolve type::target_type.  Not much we can do.  */
       gdb_assert (type->name () == NULL);
-      gdb_assert (TYPE_TARGET_TYPE (type) == NULL);
+      gdb_assert (type->target_type () == NULL);
       fprintf_styled (stream, metadata_style.style (),
 		      _("<unnamed typedef>"));
       break;
 
     case TYPE_CODE_FUNC:
     case TYPE_CODE_METHOD:
-      if (TYPE_TARGET_TYPE (type) == NULL)
+      if (type->target_type () == NULL)
 	type_print_unknown_return_type (stream);
       else
-	c_type_print_base_1 (TYPE_TARGET_TYPE (type),
+	c_type_print_base_1 (type->target_type (),
 			     stream, show, level, language, flags, podata);
       break;
     case TYPE_CODE_ARRAY:
@@ -1516,7 +1525,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
     case TYPE_CODE_REF:
     case TYPE_CODE_RVALUE_REF:
     case TYPE_CODE_METHODPTR:
-      c_type_print_base_1 (TYPE_TARGET_TYPE (type),
+      c_type_print_base_1 (type->target_type (),
 			   stream, show, level, language, flags, podata);
       break;
 
@@ -1564,9 +1573,9 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 	     print too much than too little; but conversely not to
 	     print something egregiously outside the current
 	     language's syntax.  */
-	  if (language == language_cplus && TYPE_TARGET_TYPE (type) != NULL)
+	  if (language == language_cplus && type->target_type () != NULL)
 	    {
-	      struct type *underlying = check_typedef (TYPE_TARGET_TYPE (type));
+	      struct type *underlying = check_typedef (type->target_type ());
 
 	      if (underlying->name () != NULL)
 		gdb_printf (stream, ": %s ", underlying->name ());

@@ -335,7 +335,6 @@ split_find_device (struct hw *current,
       else if (strncmp (spec->path, "./", strlen ("./")) == 0)
 	{
 	  /* cd ./... */
-	  current = current;
 	  spec->path += strlen ("./");
 	}
       else if (strncmp (spec->path, "../", strlen ("../")) == 0)
@@ -348,7 +347,6 @@ split_find_device (struct hw *current,
       else if (strcmp (spec->path, ".") == 0)
 	{
 	  /* cd . */
-	  current = current;
 	  spec->path += strlen (".");
 	}
       else if (strcmp (spec->path, "..") == 0)

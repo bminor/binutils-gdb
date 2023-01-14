@@ -435,27 +435,15 @@ solib_target_in_dynsym_resolve_code (CORE_ADDR pc)
   return in_plt_section (pc);
 }
 
-struct target_so_ops solib_target_so_ops;
-
-void _initialize_solib_target ();
-void
-_initialize_solib_target ()
+const struct target_so_ops solib_target_so_ops =
 {
-  solib_target_so_ops.relocate_section_addresses
-    = solib_target_relocate_section_addresses;
-  solib_target_so_ops.free_so = solib_target_free_so;
-  solib_target_so_ops.clear_solib = solib_target_clear_solib;
-  solib_target_so_ops.solib_create_inferior_hook
-    = solib_target_solib_create_inferior_hook;
-  solib_target_so_ops.current_sos = solib_target_current_sos;
-  solib_target_so_ops.open_symbol_file_object
-    = solib_target_open_symbol_file_object;
-  solib_target_so_ops.in_dynsym_resolve_code
-    = solib_target_in_dynsym_resolve_code;
-  solib_target_so_ops.bfd_open = solib_bfd_open;
-
-  /* Set current_target_so_ops to solib_target_so_ops if not already
-     set.  */
-  if (current_target_so_ops == 0)
-    current_target_so_ops = &solib_target_so_ops;
-}
+  solib_target_relocate_section_addresses,
+  solib_target_free_so,
+  nullptr,
+  solib_target_clear_solib,
+  solib_target_solib_create_inferior_hook,
+  solib_target_current_sos,
+  solib_target_open_symbol_file_object,
+  solib_target_in_dynsym_resolve_code,
+  solib_bfd_open,
+};

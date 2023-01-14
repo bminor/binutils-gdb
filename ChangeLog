@@ -1,3 +1,37 @@
+2022-10-10  Nick Clifton  <nickc@redhat.com>
+
+	* src-release.sh: Add "-r <date>" option to create reproducible
+	tarballs based upon a fixed timestamp of <date>.
+	* binutils/README-how-to-make-a-release: Add a line showing how to
+	use -r <date> when creating a binutils release.
+
+2022-10-04  Nick Clifton  <nickc@redhat.com>
+
+	* README-maintainer-mode: Add a minimum version of dejagnu
+	requirement.
+
+2022-09-08  Nick Clifton  <nickc@redhat.com>
+
+	* README-maintainer-mode: Update minimum version  of gettext
+	required.
+
+2022-07-08  Nick Clifton  <nickc@redhat.com>
+
+	* 2.39 branch created.
+
+2022-07-04  Nick Clifton  <nickc@redhat.com>
+
+	* libiberty: Synchronize with GCC.  Bring in:
+	2022-07-01  Nick Clifton  <nickc@redhat.com>
+
+	PR demangler/105039
+	* rust-demangle.c (demangle_const): Add recursion limit.
+
+	2022-06-26  Simon Marchi  <simon.marchi@efficios.com>
+
+	* configure.ac: Add AC_CONFIG_MACRO_DIRS call.
+	* configure: Re-generate.
+
 2022-04-12  Nick Clifton  <nickc@redhat.com>
 
 	* zlib: Rebase to the 1.2.12 release.

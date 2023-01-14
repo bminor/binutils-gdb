@@ -193,7 +193,7 @@ struct hppa_linux_sigtramp_unwind_cache
 };
 
 static struct hppa_linux_sigtramp_unwind_cache *
-hppa_linux_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
+hppa_linux_sigtramp_frame_unwind_cache (frame_info_ptr this_frame,
 					void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -268,7 +268,7 @@ hppa_linux_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
 }
 
 static void
-hppa_linux_sigtramp_frame_this_id (struct frame_info *this_frame,
+hppa_linux_sigtramp_frame_this_id (frame_info_ptr this_frame,
 				   void **this_prologue_cache,
 				   struct frame_id *this_id)
 {
@@ -278,7 +278,7 @@ hppa_linux_sigtramp_frame_this_id (struct frame_info *this_frame,
 }
 
 static struct value *
-hppa_linux_sigtramp_frame_prev_register (struct frame_info *this_frame,
+hppa_linux_sigtramp_frame_prev_register (frame_info_ptr this_frame,
 					 void **this_prologue_cache,
 					 int regnum)
 {
@@ -296,7 +296,7 @@ hppa_linux_sigtramp_frame_prev_register (struct frame_info *this_frame,
    we can find the beginning of the struct rt_sigframe.  */
 static int
 hppa_linux_sigtramp_frame_sniffer (const struct frame_unwind *self,
-				   struct frame_info *this_frame,
+				   frame_info_ptr this_frame,
 				   void **this_prologue_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -476,7 +476,7 @@ hppa_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					 void *cb_data,
 					 const struct regcache *regcache)
 {
-  hppa_gdbarch_tdep *tdep = (hppa_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  hppa_gdbarch_tdep *tdep = gdbarch_tdep<hppa_gdbarch_tdep> (gdbarch);
 
   cb (".reg", 80 * tdep->bytes_per_address, 80 * tdep->bytes_per_address,
       &hppa_linux_regset, NULL, cb_data);
@@ -486,7 +486,7 @@ hppa_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 static void
 hppa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  hppa_gdbarch_tdep *tdep = (hppa_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  hppa_gdbarch_tdep *tdep = gdbarch_tdep<hppa_gdbarch_tdep> (gdbarch);
 
   linux_init_abi (info, gdbarch, 0);
 

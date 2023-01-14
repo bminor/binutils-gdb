@@ -48,7 +48,7 @@
 # the connection message in order for the procedure to succeed.
 #
 proc gdb_target_cmd_ext { targetname serialport {additional_text ""} } {
-    global gdb_prompt
+    global gdb_prompt gdb_target_remote_cmd_msg
 
     set serialport_re [string_to_regexp $serialport]
     for {set i 1} {$i <= 3} {incr i} {
@@ -73,22 +73,27 @@ proc gdb_target_cmd_ext { targetname serialport {additional_text ""} } {
 	    }
 	    -re "Remote MIPS debugging.*$additional_text.*$gdb_prompt" {
 		verbose "Set target to $targetname"
+		set gdb_target_remote_cmd_msg $expect_out(buffer)
 		return 0
 	    }
 	    -re "Remote debugging using .*$serialport_re.*$additional_text.*$gdb_prompt $" {
 		verbose "Set target to $targetname"
+		set gdb_target_remote_cmd_msg $expect_out(buffer)
 		return 0
 	    }
 	    -re "Remote debugging using stdio.*$additional_text.*$gdb_prompt $" {
 		verbose "Set target to $targetname"
+		set gdb_target_remote_cmd_msg $expect_out(buffer)
 		return 0
 	    }
 	    -re "Remote target $targetname connected to.*$additional_text.*$gdb_prompt $" {
 		verbose "Set target to $targetname"
+		set gdb_target_remote_cmd_msg $expect_out(buffer)
 		return 0
 	    }
 	    -re "Connected to.*$additional_text.*$gdb_prompt $" {
 		verbose "Set target to $targetname"
+		set gdb_target_remote_cmd_msg $expect_out(buffer)
 		return 0
 	    }
 	    -re "Ending remote.*$gdb_prompt $" { }

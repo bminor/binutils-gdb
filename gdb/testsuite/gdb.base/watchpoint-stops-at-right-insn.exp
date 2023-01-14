@@ -71,7 +71,7 @@
 standard_testfile
 
 # No use testing this if we can't use hardware watchpoints.
-if {[target_info exists gdb,no_hardware_watchpoints]} {
+if {[skip_hw_watchpoint_tests]} {
     return -1
 }
 

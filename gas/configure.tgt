@@ -134,6 +134,7 @@ case ${generic_target} in
       aarch64*-linux-gnu_ilp32)		arch=aarch64:32 ;;
     esac ;;
   aarch64*-*-netbsd*)			fmt=elf em=nbsd;;
+  aarch64*-*-openbsd*)			fmt=elf;;
 
   alpha-*-*vms*)			fmt=evax ;;
   alpha-*-osf*)				fmt=ecoff ;;

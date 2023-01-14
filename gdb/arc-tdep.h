@@ -121,7 +121,7 @@ extern bool arc_debug;
 
 /* Target-dependent information.  */
 
-struct arc_gdbarch_tdep : gdbarch_tdep
+struct arc_gdbarch_tdep : gdbarch_tdep_base
 {
   /* Offset to PC value in jump buffer.  If this is negative, longjmp
      support will be disabled.  */
@@ -131,10 +131,10 @@ struct arc_gdbarch_tdep : gdbarch_tdep
   bool has_hw_loops = false;
 
   /* Detect sigtramp.  */
-  bool (*is_sigtramp) (struct frame_info *) = nullptr;
+  bool (*is_sigtramp) (frame_info_ptr ) = nullptr;
 
   /* Get address of sigcontext for sigtramp.  */
-  CORE_ADDR (*sigcontext_addr) (struct frame_info *) = nullptr;
+  CORE_ADDR (*sigcontext_addr) (frame_info_ptr ) = nullptr;
 
   /* Offset of registers in `struct sigcontext'.  */
   const int *sc_reg_offset = nullptr;

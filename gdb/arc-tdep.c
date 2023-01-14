@@ -761,7 +761,7 @@ arc_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	 argument's size up to an integral number of words.  */
       for (int i = 0; i < nargs; i++)
 	{
-	  unsigned int len = TYPE_LENGTH (value_type (args[i]));
+	  unsigned int len = value_type (args[i])->length ();
 	  unsigned int space = align_up (len, 4);
 
 	  total_space += space;
@@ -776,7 +776,7 @@ arc_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       gdb_byte *data = memory_image;
       for (int i = 0; i < nargs; i++)
 	{
-	  unsigned int len = TYPE_LENGTH (value_type (args[i]));
+	  unsigned int len = value_type (args[i])->length ();
 	  unsigned int space = align_up (len, 4);
 
 	  memcpy (data, value_contents (args[i]).data (), (size_t) len);
@@ -906,7 +906,7 @@ static void
 arc_extract_return_value (struct gdbarch *gdbarch, struct type *type,
 			  struct regcache *regcache, gdb_byte *valbuf)
 {
-  unsigned int len = TYPE_LENGTH (type);
+  unsigned int len = type->length ();
 
   arc_debug_printf ("called");
 
@@ -957,7 +957,7 @@ static void
 arc_store_return_value (struct gdbarch *gdbarch, struct type *type,
 			struct regcache *regcache, const gdb_byte *valbuf)
 {
-  unsigned int len = TYPE_LENGTH (type);
+  unsigned int len = type->length ();
 
   arc_debug_printf ("called");
 
@@ -997,12 +997,12 @@ arc_store_return_value (struct gdbarch *gdbarch, struct type *type,
 /* Implement the "get_longjmp_target" gdbarch method.  */
 
 static int
-arc_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
+arc_get_longjmp_target (frame_info_ptr frame, CORE_ADDR *pc)
 {
   arc_debug_printf ("called");
 
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  arc_gdbarch_tdep *tdep = (arc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arc_gdbarch_tdep *tdep = gdbarch_tdep<arc_gdbarch_tdep> (gdbarch);
   int pc_offset = tdep->jb_pc * ARC_REGISTER_SIZE;
   gdb_byte buf[ARC_REGISTER_SIZE];
   CORE_ADDR jb_addr = get_frame_register_unsigned (frame, ARC_FIRST_ARG_REGNUM);
@@ -1029,7 +1029,7 @@ arc_return_value (struct gdbarch *gdbarch, struct value *function,
      stored.  Otherwise, the result is returned in registers.  */
   int is_struct_return = (valtype->code () == TYPE_CODE_STRUCT
 			  || valtype->code () == TYPE_CODE_UNION
-			  || TYPE_LENGTH (valtype) > 2 * ARC_REGISTER_SIZE);
+			  || valtype->length () > 2 * ARC_REGISTER_SIZE);
 
   arc_debug_printf ("readbuf = %s, writebuf = %s",
 		    host_address_to_string (readbuf),
@@ -1061,7 +1061,7 @@ arc_return_value (struct gdbarch *gdbarch, struct value *function,
    frame pointer.  */
 
 static CORE_ADDR
-arc_frame_base_address (struct frame_info *this_frame, void **prologue_cache)
+arc_frame_base_address (frame_info_ptr this_frame, void **prologue_cache)
 {
   return (CORE_ADDR) get_frame_register_unsigned (this_frame, ARC_FP_REGNUM);
 }
@@ -1642,7 +1642,7 @@ arc_print_frame_cache (struct gdbarch *gdbarch, const char *message,
 /* Frame unwinder for normal frames.  */
 
 static struct arc_frame_cache *
-arc_make_frame_cache (struct frame_info *this_frame)
+arc_make_frame_cache (frame_info_ptr this_frame)
 {
   arc_debug_printf ("called");
 
@@ -1709,7 +1709,7 @@ arc_make_frame_cache (struct frame_info *this_frame)
 /* Implement the "this_id" frame_unwind method.  */
 
 static void
-arc_frame_this_id (struct frame_info *this_frame, void **this_cache,
+arc_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 		   struct frame_id *this_id)
 {
   arc_debug_printf ("called");
@@ -1754,7 +1754,7 @@ arc_frame_this_id (struct frame_info *this_frame, void **this_cache,
 /* Implement the "prev_register" frame_unwind method.  */
 
 static struct value *
-arc_frame_prev_register (struct frame_info *this_frame,
+arc_frame_prev_register (frame_info_ptr this_frame,
 			 void **this_cache, int regnum)
 {
   if (*this_cache == NULL)
@@ -1791,7 +1791,7 @@ arc_frame_prev_register (struct frame_info *this_frame,
 static void
 arc_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 			   struct dwarf2_frame_state_reg *reg,
-			   struct frame_info *info)
+			   frame_info_ptr info)
 {
   if (regnum == gdbarch_pc_regnum (gdbarch))
     /* The return address column.  */
@@ -1805,12 +1805,12 @@ arc_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
     from within signal handlers.  */
 
 static struct arc_frame_cache *
-arc_make_sigtramp_frame_cache (struct frame_info *this_frame)
+arc_make_sigtramp_frame_cache (frame_info_ptr this_frame)
 {
   arc_debug_printf ("called");
 
   gdbarch *arch = get_frame_arch (this_frame);
-  arc_gdbarch_tdep *tdep = (arc_gdbarch_tdep *) gdbarch_tdep (arch);
+  arc_gdbarch_tdep *tdep = gdbarch_tdep<arc_gdbarch_tdep> (arch);
 
   /* Allocate new frame cache instance and space for saved register info.  */
   struct arc_frame_cache *cache = FRAME_OBSTACK_ZALLOC (struct arc_frame_cache);
@@ -1844,7 +1844,7 @@ arc_make_sigtramp_frame_cache (struct frame_info *this_frame)
    frames.  */
 
 static void
-arc_sigtramp_frame_this_id (struct frame_info *this_frame,
+arc_sigtramp_frame_this_id (frame_info_ptr this_frame,
 			    void **this_cache, struct frame_id *this_id)
 {
   arc_debug_printf ("called");
@@ -1863,7 +1863,7 @@ arc_sigtramp_frame_this_id (struct frame_info *this_frame,
 /* Get a register from a signal handler frame.  */
 
 static struct value *
-arc_sigtramp_frame_prev_register (struct frame_info *this_frame,
+arc_sigtramp_frame_prev_register (frame_info_ptr this_frame,
 				  void **this_cache, int regnum)
 {
   arc_debug_printf ("regnum = %d", regnum);
@@ -1881,13 +1881,13 @@ arc_sigtramp_frame_prev_register (struct frame_info *this_frame,
 
 static int
 arc_sigtramp_frame_sniffer (const struct frame_unwind *self,
-			    struct frame_info *this_frame,
+			    frame_info_ptr this_frame,
 			    void **this_cache)
 {
   arc_debug_printf ("called");
 
   gdbarch *arch = get_frame_arch (this_frame);
-  arc_gdbarch_tdep *tdep = (arc_gdbarch_tdep *) gdbarch_tdep (arch);
+  arc_gdbarch_tdep *tdep = gdbarch_tdep<arc_gdbarch_tdep> (arch);
 
   /* If we have a sigcontext_addr handler, then just return 1 (same as the
      "default_frame_sniffer ()").  */
@@ -2237,7 +2237,7 @@ arc_type_align (struct gdbarch *gdbarch, struct type *type)
     case TYPE_CODE_METHODPTR:
     case TYPE_CODE_MEMBERPTR:
       type = check_typedef (type);
-      return std::min<ULONGEST> (4, TYPE_LENGTH (type));
+      return std::min<ULONGEST> (4, type->length ());
     default:
       return 0;
     }
@@ -2414,7 +2414,7 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 static void
 arc_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
-  arc_gdbarch_tdep *tdep = (arc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arc_gdbarch_tdep *tdep = gdbarch_tdep<arc_gdbarch_tdep> (gdbarch);
 
   gdb_printf (file, "arc_dump_tdep: jb_pc = %i\n", tdep->jb_pc);
 

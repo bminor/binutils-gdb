@@ -1808,10 +1808,12 @@ elf_i386_scan_relocs (bfd *abfd,
 		      || (sec->flags & (SEC_CODE | SEC_READONLY)) != 0)
 		    h->plt.refcount = 1;
 
-		  if (h->pointer_equality_needed
+		  if (htab->elf.target_os != is_solaris
+		      && h->pointer_equality_needed
 		      && h->type == STT_FUNC
 		      && eh->def_protected
-		      && elf_has_indirect_extern_access (h->root.u.def.section->owner))
+		      && !SYMBOL_DEFINED_NON_SHARED_P (h)
+		      && h->def_dynamic)
 		    {
 		      /* Disallow non-canonical reference to canonical
 			 protected function.  */
@@ -2459,6 +2461,11 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      goto do_relocation;
 
 	    case R_386_GOTOFF:
+	      /* NB: We can't use the PLT entry as the function address
+		 for PIC since the PIC register may not be set up
+		 properly for indirect call. */
+	      if (bfd_link_pic (info))
+		goto bad_ifunc_reloc;
 	      relocation -= (gotplt->output_section->vma
 			     + gotplt->output_offset);
 	      goto do_relocation;
@@ -4424,7 +4431,6 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
 #define elf_backend_got_header_size	12
 #define elf_backend_plt_alignment	4
 #define elf_backend_dtrel_excludes_plt	1
-#define elf_backend_extern_protected_data 1
 #define elf_backend_caches_rawsize	1
 #define elf_backend_want_dynrelro	1
 

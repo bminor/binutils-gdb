@@ -966,6 +966,7 @@ tekhex_print_symbol (bfd *abfd,
 #define tekhex_bfd_is_local_label_name		     bfd_generic_is_local_label_name
 #define tekhex_get_lineno			    _bfd_nosymbols_get_lineno
 #define tekhex_find_nearest_line		    _bfd_nosymbols_find_nearest_line
+#define tekhex_find_nearest_line_with_alt	    _bfd_nosymbols_find_nearest_line_with_alt
 #define tekhex_find_line			    _bfd_nosymbols_find_line
 #define tekhex_find_inliner_info		    _bfd_nosymbols_find_inliner_info
 #define tekhex_get_symbol_version_string	    _bfd_nosymbols_get_symbol_version_string

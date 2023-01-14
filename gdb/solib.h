@@ -71,11 +71,6 @@ extern bool in_solib_dynsym_resolve_code (CORE_ADDR);
 
 extern void no_shared_libraries (const char *ignored, int from_tty);
 
-/* Set the solib operations for GDBARCH to NEW_OPS.  */
-
-extern void set_solib_ops (struct gdbarch *gdbarch,
-			   const struct target_so_ops *new_ops);
-
 /* Synchronize GDB's shared object list with inferior's.
 
    Extract the list of currently loaded shared objects from the

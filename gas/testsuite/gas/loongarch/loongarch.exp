@@ -20,4 +20,5 @@
 
 if [istarget loongarch*-*-*] {
     run_dump_tests [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
+    gas_test_old bfd_reloc_8.s "" "bfd_reloc_8"
 }

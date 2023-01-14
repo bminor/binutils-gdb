@@ -191,6 +191,12 @@
 #define ATTRIBUTE_UNUSED_RESULT
 #endif
 
+#if (GCC_VERSION > 4000)
+#define ATTRIBUTE_USED __attribute__ ((__used__))
+#else
+#define ATTRIBUTE_USED
+#endif
+
 #include "libiberty.h"
 #include "pathmax.h"
 #include "gdb/signals.h"

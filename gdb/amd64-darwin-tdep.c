@@ -75,7 +75,7 @@ const int amd64_darwin_thread_state_num_regs =
    address of the associated sigcontext structure.  */
 
 static CORE_ADDR
-amd64_darwin_sigcontext_addr (struct frame_info *this_frame)
+amd64_darwin_sigcontext_addr (frame_info_ptr this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -97,7 +97,7 @@ amd64_darwin_sigcontext_addr (struct frame_info *this_frame)
 static void
 x86_darwin_init_abi_64 (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
 
   amd64_init_abi (info, gdbarch,
 		  amd64_target_description (X86_XSTATE_SSE_MASK, true));
@@ -113,7 +113,7 @@ x86_darwin_init_abi_64 (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->jb_pc_offset = 56;
 
-  set_solib_ops (gdbarch, &darwin_so_ops);
+  set_gdbarch_so_ops (gdbarch, &darwin_so_ops);
 }
 
 void _initialize_amd64_darwin_tdep ();

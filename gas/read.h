@@ -141,6 +141,7 @@ extern unsigned output_leb128 (char *, valueT, int);
 extern void pseudo_set (symbolS * symbolP);
 extern void read_a_source_file (const char *name);
 extern void read_begin (void);
+extern void read_end (void);
 extern void read_print_statistics (FILE *);
 extern char *read_symbol_name (void);
 extern unsigned sizeof_leb128 (valueT, int);

@@ -176,11 +176,16 @@ CODE_FRAGMENT
 .  {* Put pathnames into archives (non-POSIX).  *}
 .#define BFD_ARCHIVE_FULL_PATH  0x100000
 .
+.#define BFD_CLOSED_BY_CACHE    0x200000
+
+.  {* Compress sections in this BFD with SHF_COMPRESSED zstd.  *}
+.#define BFD_COMPRESS_ZSTD      0x400000
+.
 .  {* Flags bits to be saved in bfd_preserve_save.  *}
 .#define BFD_FLAGS_SAVED \
 .  (BFD_IN_MEMORY | BFD_COMPRESS | BFD_DECOMPRESS | BFD_LINKER_CREATED \
 .   | BFD_PLUGIN | BFD_COMPRESS_GABI | BFD_CONVERT_ELF_COMMON \
-.   | BFD_USE_ELF_STT_COMMON)
+.   | BFD_USE_ELF_STT_COMMON | BFD_COMPRESS_ZSTD)
 .
 .  {* Flags bits which are for BFD use only.  *}
 .#define BFD_FLAGS_FOR_BFD_USE_MASK \
@@ -1741,6 +1746,7 @@ bfd_get_sign_extend_vma (bfd *abfd)
       || strcmp (name, "pei-aarch64-little") == 0
       || strcmp (name, "pe-arm-wince-little") == 0
       || strcmp (name, "pei-arm-wince-little") == 0
+      || strcmp (name, "pei-loongarch64") == 0
       || strcmp (name, "aixcoff-rs6000") == 0
       || strcmp (name, "aix5coff64-rs6000") == 0)
     return 1;
@@ -2047,6 +2053,11 @@ DESCRIPTION
 .	BFD_SEND (abfd, _bfd_find_nearest_line, \
 .		  (abfd, syms, sec, off, file, func, line, NULL))
 .
+.#define bfd_find_nearest_line_with_alt(abfd, alt_filename, sec, syms, off, \
+.					file, func, line, disc) \
+.	BFD_SEND (abfd, _bfd_find_nearest_line_with_alt, \
+.		  (abfd, alt_filename, syms, sec, off, file, func, line, disc))
+.
 .#define bfd_find_nearest_line_discriminator(abfd, sec, syms, off, file, func, \
 .					    line, disc) \
 .	BFD_SEND (abfd, _bfd_find_nearest_line, \
@@ -2236,26 +2247,26 @@ void
 bfd_sprintf_vma (bfd *abfd ATTRIBUTE_UNUSED, char *buf, bfd_vma value)
 {
 #ifdef BFD64
-  if (is32bit (abfd))
+  if (!is32bit (abfd))
     {
-      sprintf (buf, "%08lx", (unsigned long) value & 0xffffffff);
+      sprintf (buf, "%016" PRIx64, (uint64_t) value);
       return;
     }
 #endif
-  sprintf_vma (buf, value);
+  sprintf (buf, "%08lx", (unsigned long) value & 0xffffffff);
 }
 
 void
 bfd_fprintf_vma (bfd *abfd ATTRIBUTE_UNUSED, void *stream, bfd_vma value)
 {
 #ifdef BFD64
-  if (is32bit (abfd))
+  if (!is32bit (abfd))
     {
-      fprintf ((FILE *) stream, "%08lx", (unsigned long) value & 0xffffffff);
+      fprintf ((FILE *) stream, "%016" PRIx64, (uint64_t) value);
       return;
     }
 #endif
-  fprintf_vma ((FILE *) stream, value);
+  fprintf ((FILE *) stream, "%08lx", (unsigned long) value & 0xffffffff);
 }
 
 /*
@@ -2492,6 +2503,9 @@ bfd_update_compression_header (bfd *abfd, bfd_byte *contents,
 	{
 	  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 	  struct bfd_elf_section_data * esd = elf_section_data (sec);
+	  const unsigned int ch_type = abfd->flags & BFD_COMPRESS_ZSTD
+					   ? ELFCOMPRESS_ZSTD
+					   : ELFCOMPRESS_ZLIB;
 
 	  /* Set the SHF_COMPRESSED bit.  */
 	  elf_section_flags (sec) |= SHF_COMPRESSED;
@@ -2499,7 +2513,7 @@ bfd_update_compression_header (bfd *abfd, bfd_byte *contents,
 	  if (bed->s->elfclass == ELFCLASS32)
 	    {
 	      Elf32_External_Chdr *echdr = (Elf32_External_Chdr *) contents;
-	      bfd_put_32 (abfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
+	      bfd_put_32 (abfd, ch_type, &echdr->ch_type);
 	      bfd_put_32 (abfd, sec->size, &echdr->ch_size);
 	      bfd_put_32 (abfd, 1u << sec->alignment_power,
 			  &echdr->ch_addralign);
@@ -2510,7 +2524,7 @@ bfd_update_compression_header (bfd *abfd, bfd_byte *contents,
 	  else
 	    {
 	      Elf64_External_Chdr *echdr = (Elf64_External_Chdr *) contents;
-	      bfd_put_32 (abfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
+	      bfd_put_32 (abfd, ch_type, &echdr->ch_type);
 	      bfd_put_32 (abfd, 0, &echdr->ch_reserved);
 	      bfd_put_64 (abfd, sec->size, &echdr->ch_size);
 	      bfd_put_64 (abfd, UINT64_C (1) << sec->alignment_power,
@@ -2545,14 +2559,15 @@ bfd_update_compression_header (bfd *abfd, bfd_byte *contents,
    SYNOPSIS
 	bool bfd_check_compression_header
 	  (bfd *abfd, bfd_byte *contents, asection *sec,
+	  unsigned int *ch_type,
 	  bfd_size_type *uncompressed_size,
 	  unsigned int *uncompressed_alignment_power);
 
 DESCRIPTION
-	Check the compression header at CONTENTS of SEC in ABFD and
-	store the uncompressed size in UNCOMPRESSED_SIZE and the
-	uncompressed data alignment in UNCOMPRESSED_ALIGNMENT_POWER
-	if the compression header is valid.
+	Check the compression header at CONTENTS of SEC in ABFD and store the
+	ch_type in CH_TYPE, uncompressed size in UNCOMPRESSED_SIZE, and the
+	uncompressed data alignment in UNCOMPRESSED_ALIGNMENT_POWER if the
+	compression header is valid.
 
 RETURNS
 	Return TRUE if the compression header is valid.
@@ -2561,6 +2576,7 @@ RETURNS
 bool
 bfd_check_compression_header (bfd *abfd, bfd_byte *contents,
 			      asection *sec,
+			      unsigned int *ch_type,
 			      bfd_size_type *uncompressed_size,
 			      unsigned int *uncompressed_alignment_power)
 {
@@ -2583,7 +2599,9 @@ bfd_check_compression_header (bfd *abfd, bfd_byte *contents,
 	  chdr.ch_size = bfd_get_64 (abfd, &echdr->ch_size);
 	  chdr.ch_addralign = bfd_get_64 (abfd, &echdr->ch_addralign);
 	}
-      if (chdr.ch_type == ELFCOMPRESS_ZLIB
+      *ch_type = chdr.ch_type;
+      if ((chdr.ch_type == ELFCOMPRESS_ZLIB
+	   || chdr.ch_type == ELFCOMPRESS_ZSTD)
 	  && chdr.ch_addralign == (chdr.ch_addralign & -chdr.ch_addralign))
 	{
 	  *uncompressed_size = chdr.ch_size;
@@ -2783,14 +2801,14 @@ bfd_convert_section_contents (bfd *ibfd, sec_ptr isec, bfd *obfd,
   if (ohdr_size == sizeof (Elf32_External_Chdr))
     {
       Elf32_External_Chdr *echdr = (Elf32_External_Chdr *) contents;
-      bfd_put_32 (obfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
+      bfd_put_32 (obfd, chdr.ch_type, &echdr->ch_type);
       bfd_put_32 (obfd, chdr.ch_size, &echdr->ch_size);
       bfd_put_32 (obfd, chdr.ch_addralign, &echdr->ch_addralign);
     }
   else
     {
       Elf64_External_Chdr *echdr = (Elf64_External_Chdr *) contents;
-      bfd_put_32 (obfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
+      bfd_put_32 (obfd, chdr.ch_type, &echdr->ch_type);
       bfd_put_32 (obfd, 0, &echdr->ch_reserved);
       bfd_put_64 (obfd, chdr.ch_size, &echdr->ch_size);
       bfd_put_64 (obfd, chdr.ch_addralign, &echdr->ch_addralign);

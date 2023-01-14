@@ -234,7 +234,7 @@ instruction_storage_interrupt(cpu *processor,
 	break;
       default:
 	srr1_set = 0;
-	error("internal error - instruction_storage_interrupt - reason %d not implemented");
+	error("internal error - instruction_storage_interrupt - reason %d not implemented", reason);
 	break;
       }
       TRACE(trace_interrupts, ("instruction storage interrupt - cia=0x%lx SRR1|=0x%lx\n",

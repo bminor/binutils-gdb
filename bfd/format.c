@@ -202,6 +202,13 @@ bfd_preserve_finish (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_preserve *preserve)
   preserve->marker = NULL;
 }
 
+static void
+clear_warnmsg (const bfd_target *targ)
+{
+  const char **warn = _bfd_per_xvec_warn (targ);
+  *warn = NULL;
+}
+
 /*
 FUNCTION
 	bfd_check_format_matches
@@ -275,6 +282,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)	/* rewind! */
 	goto err_ret;
 
+      clear_warnmsg (abfd->xvec);
       cleanup = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
 
       if (cleanup)
@@ -341,6 +349,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
 	goto err_ret;
 
+      clear_warnmsg (abfd->xvec);
       cleanup = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
       if (cleanup)
 	{
@@ -505,6 +514,13 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       if (preserve_match.marker != NULL)
 	bfd_preserve_finish (abfd, &preserve_match);
       bfd_preserve_finish (abfd, &preserve);
+
+      if (!abfd->my_archive)
+	{
+	  const char **warn = _bfd_per_xvec_warn (abfd->xvec);
+	  if (*warn)
+	    _bfd_error_handler (*warn, abfd);
+	}
 
       /* File position has moved, BTW.  */
       return true;

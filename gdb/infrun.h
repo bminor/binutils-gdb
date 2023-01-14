@@ -24,7 +24,7 @@
 #include "gdbsupport/intrusive_list.h"
 
 struct target_waitstatus;
-struct frame_info;
+class frame_info_ptr;
 struct address_space;
 struct return_value_info;
 struct process_stratum_target;
@@ -62,6 +62,8 @@ infrun_debug_show_threads (const char *title, ThreadRange threads)
 {
   if (debug_infrun)
     {
+      INFRUN_SCOPED_DEBUG_ENTER_EXIT;
+
       infrun_debug_printf ("%s:", title);
       for (thread_info *thread : threads)
 	infrun_debug_printf ("  thread %s, executing = %d, resumed = %d, "
@@ -198,7 +200,7 @@ extern int stepping_past_nonsteppable_watchpoint (void);
 
 /* Record in TP the frame and location we're currently stepping through.  */
 extern void set_step_info (thread_info *tp,
-			   struct frame_info *frame,
+			   frame_info_ptr frame,
 			   struct symtab_and_line sal);
 
 /* Several print_*_reason helper functions to print why the inferior

@@ -484,24 +484,21 @@ const struct kinfo_proc_layout kinfo_proc_layout_64 =
     .ru_majflt = 0x48,
   };
 
-static struct gdbarch_data *fbsd_gdbarch_data_handle;
-
 struct fbsd_gdbarch_data
   {
-    struct type *siginfo_type;
+    struct type *siginfo_type = nullptr;
   };
 
-static void *
-init_fbsd_gdbarch_data (struct gdbarch *gdbarch)
-{
-  return GDBARCH_OBSTACK_ZALLOC (gdbarch, struct fbsd_gdbarch_data);
-}
+static const registry<gdbarch>::key<fbsd_gdbarch_data>
+     fbsd_gdbarch_data_handle;
 
 static struct fbsd_gdbarch_data *
 get_fbsd_gdbarch_data (struct gdbarch *gdbarch)
 {
-  return ((struct fbsd_gdbarch_data *)
-	  gdbarch_data (gdbarch, fbsd_gdbarch_data_handle));
+  struct fbsd_gdbarch_data *result = fbsd_gdbarch_data_handle.get (gdbarch);
+  if (result == nullptr)
+    result = fbsd_gdbarch_data_handle.emplace (gdbarch);
+  return result;
 }
 
 struct fbsd_pspace_data
@@ -520,7 +517,7 @@ struct fbsd_pspace_data
 };
 
 /* Per-program-space data for FreeBSD architectures.  */
-static const struct program_space_key<fbsd_pspace_data>
+static const registry<program_space>::key<fbsd_pspace_data>
   fbsd_pspace_data_handle;
 
 static struct fbsd_pspace_data *
@@ -1574,6 +1571,8 @@ fbsd_print_auxv_entry (struct gdbarch *gdbarch, struct ui_file *file,
       TAG (PS_STRINGS, _("Pointer to ps_strings"), AUXV_FORMAT_HEX);
       TAG (FXRNG, _("Pointer to root RNG seed version"), AUXV_FORMAT_HEX);
       TAG (KPRELOAD, _("Base address of vDSO"), AUXV_FORMAT_HEX);
+      TAG (USRSTACKBASE, _("Top of user stack"), AUXV_FORMAT_HEX);
+      TAG (USRSTACKLIM, _("Grow limit of user stack"), AUXV_FORMAT_HEX);
     }
 
   fprint_auxv_entry (file, name, description, format, type, val);
@@ -1611,15 +1610,15 @@ fbsd_get_siginfo_type (struct gdbarch *gdbarch)
 
   /* __pid_t */
   pid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-			TYPE_LENGTH (int32_type) * TARGET_CHAR_BIT, "__pid_t");
-  TYPE_TARGET_TYPE (pid_type) = int32_type;
+			int32_type->length () * TARGET_CHAR_BIT, "__pid_t");
+  pid_type->set_target_type (int32_type);
   pid_type->set_target_is_stub (true);
 
   /* __uid_t */
   uid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-			TYPE_LENGTH (uint32_type) * TARGET_CHAR_BIT,
+			uint32_type->length () * TARGET_CHAR_BIT,
 			"__uid_t");
-  TYPE_TARGET_TYPE (uid_type) = uint32_type;
+  uid_type->set_target_type (uint32_type);
   pid_type->set_target_is_stub (true);
 
   /* _reason */
@@ -2033,7 +2032,7 @@ fbsd_get_thread_local_address (struct gdbarch *gdbarch, CORE_ADDR dtv_addr,
   CORE_ADDR addr = gdbarch_pointer_to_address (gdbarch,
 					       builtin->builtin_data_ptr, buf);
 
-  addr += (tls_index + 1) * TYPE_LENGTH (builtin->builtin_data_ptr);
+  addr += (tls_index + 1) * builtin->builtin_data_ptr->length ();
   if (target_read_memory (addr, buf, sizeof buf) != 0)
     throw_error (TLS_GENERIC_ERROR,
 		 _("Cannot find thread-local variables on this target"));
@@ -2309,9 +2308,7 @@ fbsd_vmmap_length (struct gdbarch *gdbarch, unsigned char *entries, size_t len,
 static bool
 fbsd_vdso_range (struct gdbarch *gdbarch, struct mem_range *range)
 {
-  struct target_ops *ops = current_inferior ()->top_target ();
-
-  if (target_auxv_search (ops, AT_FREEBSD_KPRELOAD, &range->start) <= 0)
+  if (target_auxv_search (AT_FREEBSD_KPRELOAD, &range->start) <= 0)
     return false;
 
   if (!target_has_execution ())
@@ -2338,7 +2335,8 @@ fbsd_vdso_range (struct gdbarch *gdbarch, struct mem_range *range)
     {
       /* Fetch the list of address space entries from the running target. */
       gdb::optional<gdb::byte_vector> buf =
-	target_read_alloc (ops, TARGET_OBJECT_FREEBSD_VMMAP, nullptr);
+	target_read_alloc (current_inferior ()->top_target (),
+			   TARGET_OBJECT_FREEBSD_VMMAP, nullptr);
       if (!buf || buf->empty ())
 	return false;
 
@@ -2391,12 +2389,4 @@ fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* `catch syscall' */
   set_xml_syscall_file_name (gdbarch, "syscalls/freebsd.xml");
   set_gdbarch_get_syscall_number (gdbarch, fbsd_get_syscall_number);
-}
-
-void _initialize_fbsd_tdep ();
-void
-_initialize_fbsd_tdep ()
-{
-  fbsd_gdbarch_data_handle =
-    gdbarch_data_register_post_init (init_fbsd_gdbarch_data);
 }

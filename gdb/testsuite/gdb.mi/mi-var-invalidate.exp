@@ -75,8 +75,8 @@ mi_runto_main
 # Change format of floating variable immediately after reload reveals a
 # bug where gdb still uses a free'd pointer.
 mi_gdb_test "-var-set-format float_simple hexadecimal" \
-        "\\^done,format=\"hexadecimal\",value=\"\\\[-1\\\]\"" \
-       "set format variable float_simple"
+	"\\^done,format=\"hexadecimal\",value=\"\\\[3\\\]\"" \
+	"set format variable float_simple"
 
 # Check local variable is "invalid".
 mi_gdb_test "-var-update linteger" \

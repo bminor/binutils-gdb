@@ -31,6 +31,11 @@
 #include <locale.h>
 #endif
 
+#if defined(__MINGW64_VERSION_MAJOR) && __MINGW64_VERSION_MAJOR < 9
+/* This prototype was added to locale.h in version 9.0 of MinGW-w64.  */
+_CRTIMP unsigned int __cdecl ___lc_codepage_func(void);
+#endif
+
 #ifndef S_IXUSR
 #define S_IXUSR 0100    /* Execute by owner.  */
 #endif

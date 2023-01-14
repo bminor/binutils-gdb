@@ -560,7 +560,9 @@ core_create_syms_from (const char * sym_table_file)
 
       sym_init (symtab.limit);
 
-      sscanf (address, "%" BFD_VMA_FMT "x", &(symtab.limit->addr) );
+      uint64_t addr;
+      sscanf (address, "%" SCNx64, &addr);
+      symtab.limit->addr = addr;
 
       symtab.limit->name = (char *) xmalloc (strlen (name) + 1);
       strcpy ((char *) symtab.limit->name, name);

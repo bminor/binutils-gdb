@@ -84,7 +84,7 @@ enum hppa_regnum
 #define HPPA_INSN_SIZE 4
 
 /* Target-dependent structure in gdbarch.  */
-struct hppa_gdbarch_tdep : gdbarch_tdep
+struct hppa_gdbarch_tdep : gdbarch_tdep_base
 {
   /* The number of bytes in an address.  For now, this field is designed
      to allow us to differentiate hppa32 from hppa64 targets.  */
@@ -109,7 +109,7 @@ struct hppa_gdbarch_tdep : gdbarch_tdep
      not interested in them.  If we detect that we are returning to a stub,
      adjust the pc to the real caller.  This improves the behavior of commands
      that traverse frames such as "up" and "finish".  */
-  void (*unwind_adjust_stub) (struct frame_info *this_frame, CORE_ADDR base,
+  void (*unwind_adjust_stub) (frame_info_ptr this_frame, CORE_ADDR base,
 			      trad_frame_saved_reg *saved_regs) = nullptr;
 
   /* These are solib-dependent methods.  They are really HPUX only, but
@@ -201,14 +201,14 @@ int hppa_extract_14 (unsigned);
 CORE_ADDR hppa_symbol_address(const char *sym);
 
 extern struct value *
-  hppa_frame_prev_register_helper (struct frame_info *this_frame,
+  hppa_frame_prev_register_helper (frame_info_ptr this_frame,
 				   trad_frame_saved_reg *saved_regs,
 				   int regnum);
 
 extern CORE_ADDR hppa_read_pc (struct regcache *regcache);
 extern void hppa_write_pc (struct regcache *regcache, CORE_ADDR pc);
 extern CORE_ADDR hppa_unwind_pc (struct gdbarch *gdbarch,
-				 struct frame_info *next_frame);
+				 frame_info_ptr next_frame);
 
 extern struct bound_minimal_symbol
   hppa_lookup_stub_minimal_symbol (const char *name,
@@ -216,6 +216,6 @@ extern struct bound_minimal_symbol
 
 extern int hppa_in_solib_call_trampoline (struct gdbarch *gdbarch,
 					  CORE_ADDR pc);
-extern CORE_ADDR hppa_skip_trampoline_code (struct frame_info *, CORE_ADDR pc);
+extern CORE_ADDR hppa_skip_trampoline_code (frame_info_ptr , CORE_ADDR pc);
 
 #endif  /* hppa-tdep.h */

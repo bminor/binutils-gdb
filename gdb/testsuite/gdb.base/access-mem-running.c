@@ -19,7 +19,7 @@
 
 static unsigned int global_counter = 1;
 
-static volatile unsigned int global_var = 123;
+static volatile unsigned int __attribute__((used)) global_var = 123;
 
 static void
 maybe_stop_here ()

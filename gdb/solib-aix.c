@@ -80,7 +80,8 @@ struct solib_aix_inferior_data
 };
 
 /* Key to our per-inferior data.  */
-static inferior_key<solib_aix_inferior_data> solib_aix_inferior_data_handle;
+static const registry<inferior>::key<solib_aix_inferior_data>
+  solib_aix_inferior_data_handle;
 
 /* Return this module's data for the given inferior.
    If none is found, add a zero'ed one now.  */
@@ -398,7 +399,7 @@ static section_offsets
 solib_aix_get_section_offsets (struct objfile *objfile,
 			       lm_info_aix *info)
 {
-  bfd *abfd = objfile->obfd;
+  bfd *abfd = objfile->obfd.get ();
 
   section_offsets offsets (objfile->section_offsets.size ());
 
@@ -717,25 +718,23 @@ show_solib_aix_debug (struct ui_file *file, int from_tty,
 }
 
 /* The target_so_ops for AIX targets.  */
-struct target_so_ops solib_aix_so_ops;
+const struct target_so_ops solib_aix_so_ops =
+{
+  solib_aix_relocate_section_addresses,
+  solib_aix_free_so,
+  nullptr,
+  solib_aix_clear_solib,
+  solib_aix_solib_create_inferior_hook,
+  solib_aix_current_sos,
+  solib_aix_open_symbol_file_object,
+  solib_aix_in_dynsym_resolve_code,
+  solib_aix_bfd_open,
+};
 
 void _initialize_solib_aix ();
 void
 _initialize_solib_aix ()
 {
-  solib_aix_so_ops.relocate_section_addresses
-    = solib_aix_relocate_section_addresses;
-  solib_aix_so_ops.free_so = solib_aix_free_so;
-  solib_aix_so_ops.clear_solib = solib_aix_clear_solib;
-  solib_aix_so_ops.solib_create_inferior_hook
-    = solib_aix_solib_create_inferior_hook;
-  solib_aix_so_ops.current_sos = solib_aix_current_sos;
-  solib_aix_so_ops.open_symbol_file_object
-    = solib_aix_open_symbol_file_object;
-  solib_aix_so_ops.in_dynsym_resolve_code
-    = solib_aix_in_dynsym_resolve_code;
-  solib_aix_so_ops.bfd_open = solib_aix_bfd_open;
-
   gdb::observers::normal_stop.attach (solib_aix_normal_stop_observer,
 				      "solib-aix");
 

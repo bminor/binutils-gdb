@@ -84,9 +84,9 @@ static void follow_inferior_reset_breakpoints (void);
 
 static bool currently_stepping (struct thread_info *tp);
 
-static void insert_hp_step_resume_breakpoint_at_frame (struct frame_info *);
+static void insert_hp_step_resume_breakpoint_at_frame (frame_info_ptr );
 
-static void insert_step_resume_breakpoint_at_caller (struct frame_info *);
+static void insert_step_resume_breakpoint_at_caller (frame_info_ptr );
 
 static void insert_longjmp_resume_breakpoint (struct gdbarch *, CORE_ADDR);
 
@@ -501,7 +501,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	    }
 	  else
 	    {
-	      child_inf->aspace = new_address_space ();
+	      child_inf->aspace = new address_space ();
 	      child_inf->pspace = new program_space (child_inf->aspace);
 	      child_inf->removable = 1;
 	      clone_program_space (child_inf->pspace, parent_inf->pspace);
@@ -573,7 +573,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 
 	  child_inf->aspace = parent_inf->aspace;
 	  child_inf->pspace = parent_inf->pspace;
-	  parent_inf->aspace = new_address_space ();
+	  parent_inf->aspace = new address_space ();
 	  parent_inf->pspace = new program_space (parent_inf->aspace);
 	  clone_program_space (parent_inf->pspace, child_inf->pspace);
 
@@ -583,7 +583,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	}
       else
 	{
-	  child_inf->aspace = new_address_space ();
+	  child_inf->aspace = new address_space ();
 	  child_inf->pspace = new program_space (child_inf->aspace);
 	  child_inf->removable = 1;
 	  child_inf->symfile_flags = SYMFILE_NO_READ;
@@ -2353,7 +2353,7 @@ resume_1 (enum gdb_signal sig)
 
       if (target_can_async_p ())
 	{
-	  target_async (1);
+	  target_async (true);
 	  /* Tell the event loop we have an event to process. */
 	  mark_async_event_handler (infrun_async_inferior_event_token);
 	}
@@ -3475,7 +3475,7 @@ static void handle_step_into_function_backward (struct gdbarch *gdbarch,
 						struct execution_control_state *ecs);
 static void handle_signal_stop (struct execution_control_state *ecs);
 static void check_exception_resume (struct execution_control_state *,
-				    struct frame_info *);
+				    frame_info_ptr );
 
 static void end_stepping_range (struct execution_control_state *ecs);
 static void stop_waiting (struct execution_control_state *ecs);
@@ -3971,6 +3971,16 @@ prepare_for_detach (void)
     }
 }
 
+/* If all-stop, but there exists a non-stop target, stop all threads
+   now that we're presenting the stop to the user.  */
+
+static void
+stop_all_threads_if_all_stop_mode ()
+{
+  if (!non_stop && exists_non_stop_target ())
+    stop_all_threads ("presenting stop to user in all-stop");
+}
+
 /* Wait for control to return from inferior to debugger.
 
    If inferior gets a signal, we may decide to start it up again
@@ -4016,6 +4026,8 @@ wait_for_inferior (inferior *inf)
       if (!ecs->wait_some_more)
 	break;
     }
+
+  stop_all_threads_if_all_stop_mode ();
 
   /* No error, don't finish the state yet.  */
   finish_state.release ();
@@ -4096,7 +4108,7 @@ check_curr_ui_sync_execution_done (void)
     {
       target_terminal::ours ();
       gdb::observers::sync_execution_done.notify ();
-      ui_register_input_event_handler (ui);
+      ui->register_file_handler ();
     }
 }
 
@@ -4240,6 +4252,8 @@ fetch_inferior_event ()
 	    bool should_notify_stop = true;
 	    int proceeded = 0;
 
+	    stop_all_threads_if_all_stop_mode ();
+
 	    clean_up_just_stopped_threads_fsms (ecs);
 
 	    if (thr != nullptr && thr->thread_fsm () != nullptr)
@@ -4313,7 +4327,7 @@ fetch_inferior_event ()
 /* See infrun.h.  */
 
 void
-set_step_info (thread_info *tp, struct frame_info *frame,
+set_step_info (thread_info *tp, frame_info_ptr frame,
 	       struct symtab_and_line sal)
 {
   /* This can be removed once this function no longer implicitly relies on the
@@ -4545,13 +4559,13 @@ adjust_pc_after_break (struct thread_info *thread,
 }
 
 static bool
-stepped_in_from (struct frame_info *frame, struct frame_id step_frame_id)
+stepped_in_from (frame_info_ptr frame, struct frame_id step_frame_id)
 {
   for (frame = get_prev_frame (frame);
        frame != NULL;
        frame = get_prev_frame (frame))
     {
-      if (frame_id_eq (get_frame_id (frame), step_frame_id))
+      if (get_frame_id (frame) == step_frame_id)
 	return true;
 
       if (get_frame_type (frame) != INLINE_FRAME)
@@ -4570,7 +4584,7 @@ stepped_in_from (struct frame_info *frame, struct frame_id step_frame_id)
 static bool
 inline_frame_is_marked_for_skip (bool prev_frame, struct thread_info *tp)
 {
-  struct frame_info *frame = get_current_frame ();
+  frame_info_ptr frame = get_current_frame ();
 
   if (prev_frame)
     frame = get_prev_frame (frame);
@@ -4581,7 +4595,7 @@ inline_frame_is_marked_for_skip (bool prev_frame, struct thread_info *tp)
       symtab_and_line sal;
       struct symbol *sym;
 
-      if (frame_id_eq (get_frame_id (frame), tp->control.step_frame_id))
+      if (get_frame_id (frame) == tp->control.step_frame_id)
 	break;
       if (get_frame_type (frame) != INLINE_FRAME)
 	break;
@@ -4767,7 +4781,7 @@ wait_one ()
 	    {
 	      /* If nothing is resumed, remove the target from the
 		 event loop.  */
-	      target_async (0);
+	      target_async (false);
 	    }
 	  else if (event.ws.kind () != TARGET_WAITKIND_IGNORE)
 	    return event;
@@ -6104,7 +6118,7 @@ finish_step_over (struct execution_control_state *ecs)
 static void
 handle_signal_stop (struct execution_control_state *ecs)
 {
-  struct frame_info *frame;
+  frame_info_ptr frame;
   struct gdbarch *gdbarch;
   int stopped_by_watchpoint;
   enum stop_kind stop_soon;
@@ -6562,8 +6576,8 @@ handle_signal_stop (struct execution_control_state *ecs)
 	  && (pc_in_thread_step_range (ecs->event_thread->stop_pc (),
 				       ecs->event_thread)
 	      || ecs->event_thread->control.step_range_end == 1)
-	  && frame_id_eq (get_stack_frame_id (frame),
-			  ecs->event_thread->control.step_stack_frame_id)
+	  && (get_stack_frame_id (frame)
+	      == ecs->event_thread->control.step_stack_frame_id)
 	  && ecs->event_thread->control.step_resume_breakpoint == NULL)
 	{
 	  /* The inferior is about to take a signal that will take it
@@ -6615,7 +6629,7 @@ static void
 process_event_stop_test (struct execution_control_state *ecs)
 {
   struct symtab_and_line stop_pc_sal;
-  struct frame_info *frame;
+  frame_info_ptr frame;
   struct gdbarch *gdbarch;
   CORE_ADDR jmp_buf_pc;
   struct bpstat_what what;
@@ -6686,7 +6700,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 
     case BPSTAT_WHAT_CLEAR_LONGJMP_RESUME:
       {
-	struct frame_info *init_frame;
+	frame_info_ptr init_frame;
 
 	/* There are several cases to consider.
 
@@ -6730,8 +6744,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	  {
 	    struct frame_id current_id
 	      = get_frame_id (get_current_frame ());
-	    if (frame_id_eq (current_id,
-			     ecs->event_thread->initiating_frame))
+	    if (current_id == ecs->event_thread->initiating_frame)
 	      {
 		/* Case 2.  Fall through.  */
 	      }
@@ -6904,8 +6917,7 @@ process_event_stop_test (struct execution_control_state *ecs)
   if (pc_in_thread_step_range (ecs->event_thread->stop_pc (),
 			       ecs->event_thread)
       && (execution_direction != EXEC_REVERSE
-	  || frame_id_eq (get_frame_id (frame),
-			  ecs->event_thread->control.step_frame_id)))
+	  || get_frame_id (frame) == ecs->event_thread->control.step_frame_id))
     {
       infrun_debug_printf
 	("stepping inside range [%s-%s]",
@@ -7039,7 +7051,7 @@ process_event_stop_test (struct execution_control_state *ecs)
      previous frame's ID is sufficient - but it is a common case and
      cheaper than checking the previous frame's ID.
 
-     NOTE: frame_id_eq will never report two invalid frame IDs as
+     NOTE: frame_id::operator== will never report two invalid frame IDs as
      being equal, so to get into this block, both the current and
      previous frame must have valid frame IDs.  */
   /* The outer_frame_id check is a heuristic to detect stepping
@@ -7049,14 +7061,14 @@ process_event_stop_test (struct execution_control_state *ecs)
      "outermost" function.  This could be fixed by marking
      outermost frames as !stack_p,code_p,special_p.  Then the
      initial outermost frame, before sp was valid, would
-     have code_addr == &_start.  See the comment in frame_id_eq
+     have code_addr == &_start.  See the comment in frame_id::operator==
      for more.  */
-  if (!frame_id_eq (get_stack_frame_id (frame),
-		    ecs->event_thread->control.step_stack_frame_id)
-      && (frame_id_eq (frame_unwind_caller_id (get_current_frame ()),
-		       ecs->event_thread->control.step_stack_frame_id)
-	  && (!frame_id_eq (ecs->event_thread->control.step_stack_frame_id,
-			    outer_frame_id)
+  if ((get_stack_frame_id (frame)
+       != ecs->event_thread->control.step_stack_frame_id)
+      && ((frame_unwind_caller_id (get_current_frame ())
+	   == ecs->event_thread->control.step_stack_frame_id)
+	  && ((ecs->event_thread->control.step_stack_frame_id
+	       != outer_frame_id)
 	      || (ecs->event_thread->control.step_start_function
 		  != find_pc_function (ecs->event_thread->stop_pc ())))))
     {
@@ -7313,8 +7325,8 @@ process_event_stop_test (struct execution_control_state *ecs)
      frame machinery detected some skipped call sites, we have entered
      a new inline function.  */
 
-  if (frame_id_eq (get_frame_id (get_current_frame ()),
-		   ecs->event_thread->control.step_frame_id)
+  if ((get_frame_id (get_current_frame ())
+       == ecs->event_thread->control.step_frame_id)
       && inline_skipped_frames (ecs->event_thread))
     {
       infrun_debug_printf ("stepped into inlined function");
@@ -7362,8 +7374,8 @@ process_event_stop_test (struct execution_control_state *ecs)
      through a more inlined call beyond its call site.  */
 
   if (get_frame_type (get_current_frame ()) == INLINE_FRAME
-      && !frame_id_eq (get_frame_id (get_current_frame ()),
-		       ecs->event_thread->control.step_frame_id)
+      && (get_frame_id (get_current_frame ())
+	  != ecs->event_thread->control.step_frame_id)
       && stepped_in_from (get_current_frame (),
 			  ecs->event_thread->control.step_frame_id))
     {
@@ -7395,8 +7407,8 @@ process_event_stop_test (struct execution_control_state *ecs)
 	  end_stepping_range (ecs);
 	  return;
 	}
-      else if (frame_id_eq (get_frame_id (get_current_frame ()),
-                           ecs->event_thread->control.step_frame_id))
+      else if (get_frame_id (get_current_frame ())
+               == ecs->event_thread->control.step_frame_id)
 	{
 	  /* We are not at the start of a statement, and we have not changed
 	     frame.
@@ -7663,7 +7675,7 @@ restart_after_all_stop_detach (process_stratum_target *proc_target)
 static bool
 keep_going_stepped_thread (struct thread_info *tp)
 {
-  struct frame_info *frame;
+  frame_info_ptr frame;
   struct execution_control_state ecss;
   struct execution_control_state *ecs = &ecss;
 
@@ -7920,7 +7932,7 @@ insert_step_resume_breakpoint_at_sal (struct gdbarch *gdbarch,
    RETURN_FRAME.pc.  */
 
 static void
-insert_hp_step_resume_breakpoint_at_frame (struct frame_info *return_frame)
+insert_hp_step_resume_breakpoint_at_frame (frame_info_ptr return_frame)
 {
   gdb_assert (return_frame != NULL);
 
@@ -7951,7 +7963,7 @@ insert_hp_step_resume_breakpoint_at_frame (struct frame_info *return_frame)
    of frame_unwind_caller_id for an example).  */
 
 static void
-insert_step_resume_breakpoint_at_caller (struct frame_info *next_frame)
+insert_step_resume_breakpoint_at_caller (frame_info_ptr next_frame)
 {
   /* We shouldn't have gotten here if we don't know where the call site
      is.  */
@@ -7998,7 +8010,7 @@ insert_longjmp_resume_breakpoint (struct gdbarch *gdbarch, CORE_ADDR pc)
 static void
 insert_exception_resume_breakpoint (struct thread_info *tp,
 				    const struct block *b,
-				    struct frame_info *frame,
+				    frame_info_ptr frame,
 				    struct symbol *sym)
 {
   try
@@ -8042,7 +8054,7 @@ insert_exception_resume_breakpoint (struct thread_info *tp,
 static void
 insert_exception_resume_from_probe (struct thread_info *tp,
 				    const struct bound_probe *probe,
-				    struct frame_info *frame)
+				    frame_info_ptr frame)
 {
   struct value *arg_value;
   CORE_ADDR handler;
@@ -8069,7 +8081,7 @@ insert_exception_resume_from_probe (struct thread_info *tp,
 
 static void
 check_exception_resume (struct execution_control_state *ecs,
-			struct frame_info *frame)
+			frame_info_ptr frame)
 {
   struct bound_probe probe;
   struct symbol *func;
@@ -8138,11 +8150,6 @@ stop_waiting (struct execution_control_state *ecs)
 
   /* Let callers know we don't want to wait for the inferior anymore.  */
   ecs->wait_some_more = 0;
-
-  /* If all-stop, but there exists a non-stop target, stop all
-     threads now that we're presenting the stop to the user.  */
-  if (!non_stop && exists_non_stop_target ())
-    stop_all_threads ("presenting stop to user in all-stop");
 }
 
 /* Like keep_going, but passes the signal to the inferior, even if the
@@ -8458,8 +8465,8 @@ print_stop_location (const target_waitstatus &ws)
 	 should) carry around the function and does (or should) use
 	 that when doing a frame comparison.  */
       if (tp->control.stop_step
-	  && frame_id_eq (tp->control.step_frame_id,
-			  get_frame_id (get_current_frame ()))
+	  && (tp->control.step_frame_id
+	      == get_frame_id (get_current_frame ()))
 	  && (tp->control.step_start_function
 	      == find_pc_function (tp->stop_pc ())))
 	{
@@ -8733,7 +8740,7 @@ normal_stop (void)
 	  /* Pop the empty frame that contains the stack dummy.  This
 	     also restores inferior state prior to the call (struct
 	     infcall_suspend_state).  */
-	  struct frame_info *frame = get_current_frame ();
+	  frame_info_ptr frame = get_current_frame ();
 
 	  gdb_assert (get_frame_type (frame) == DUMMY_FRAME);
 	  frame_pop (frame);
@@ -9168,9 +9175,9 @@ siginfo_value_read (struct value *v)
 		 NULL,
 		 value_contents_all_raw (v).data (),
 		 value_offset (v),
-		 TYPE_LENGTH (value_type (v)));
+		 value_type (v)->length ());
 
-  if (transferred != TYPE_LENGTH (value_type (v)))
+  if (transferred != value_type (v)->length ())
     error (_("Unable to read siginfo"));
 }
 
@@ -9191,9 +9198,9 @@ siginfo_value_write (struct value *v, struct value *fromval)
 			      NULL,
 			      value_contents_all_raw (fromval).data (),
 			      value_offset (v),
-			      TYPE_LENGTH (value_type (fromval)));
+			      value_type (fromval)->length ());
 
-  if (transferred != TYPE_LENGTH (value_type (fromval)))
+  if (transferred != value_type (fromval)->length ())
     error (_("Unable to write siginfo"));
 }
 
@@ -9247,7 +9254,7 @@ public:
     if (gdbarch_get_siginfo_type_p (gdbarch))
       {
 	struct type *type = gdbarch_get_siginfo_type (gdbarch);
-	size_t len = TYPE_LENGTH (type);
+	size_t len = type->length ();
 
 	siginfo_data.reset ((gdb_byte *) xmalloc (len));
 
@@ -9289,7 +9296,7 @@ public:
 	/* Errors ignored.  */
 	target_write (current_inferior ()->top_target (),
 		      TARGET_OBJECT_SIGNAL_INFO, NULL,
-		      m_siginfo_data.get (), 0, TYPE_LENGTH (type));
+		      m_siginfo_data.get (), 0, type->length ());
       }
 
     /* The inferior can be gone if the user types "print exit(0)"
@@ -9311,7 +9318,7 @@ private:
   struct gdbarch *m_siginfo_gdbarch = nullptr;
 
   /* The inferior format depends on SIGINFO_GDBARCH and it has a length of
-     TYPE_LENGTH (gdbarch_get_siginfo_type ()).  For different gdbarch the
+     gdbarch_get_siginfo_type ()->length ().  For different gdbarch the
      content would be invalid.  */
   gdb::unique_xmalloc_ptr<gdb_byte> m_siginfo_data;
 };

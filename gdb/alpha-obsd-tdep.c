@@ -69,7 +69,7 @@ alphaobsd_pc_in_sigtramp (struct gdbarch *gdbarch,
 }
 
 static CORE_ADDR
-alphaobsd_sigcontext_addr (struct frame_info *this_frame)
+alphaobsd_sigcontext_addr (frame_info_ptr this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR pc = get_frame_pc (this_frame);
@@ -97,7 +97,7 @@ alphaobsd_sigcontext_addr (struct frame_info *this_frame)
 static void
 alphaobsd_init_abi(struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  alpha_gdbarch_tdep *tdep = (alpha_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  alpha_gdbarch_tdep *tdep = gdbarch_tdep<alpha_gdbarch_tdep> (gdbarch);
 
   /* Hook into the DWARF CFI frame unwinder.  */
   alpha_dwarf2_init_abi (info, gdbarch);

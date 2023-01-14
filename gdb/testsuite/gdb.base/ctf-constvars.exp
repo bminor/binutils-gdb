@@ -32,9 +32,14 @@ if [skip_ctf_tests] {
 standard_testfile .c
 
 # Using `-gctf` generates full-fledged CTF debug information.
-set opts "additional_flags=-gctf"
+set opts {}
+lappend opts additional_flags=-gctf
+lappend opts ldflags=-Wl,--strip-debug
+lappend opts ldflags=-Wl,--ctf-variables
+lappend opts nowarnings
+
 if { [prepare_for_testing "failed to prepare" ${testfile} \
-	  [list $srcfile] [list $opts nowarnings]] } {
+	  [list $srcfile] $opts] } {
     return 0
 }
 

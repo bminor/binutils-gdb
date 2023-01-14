@@ -147,7 +147,7 @@ struct xcoff_symfile_info
 
 /* Key for XCOFF-associated data.  */
 
-static const struct objfile_key<xcoff_symfile_info> xcoff_objfile_data_key;
+static const registry<objfile>::key<xcoff_symfile_info> xcoff_objfile_data_key;
 
 /* Convenience macro to access the per-objfile XCOFF data.  */
 
@@ -301,7 +301,7 @@ xcoff_secnum_to_sections (int n_scnum, struct objfile *objfile,
   *bfd_sect = NULL;
   *secnum = SECT_OFF_TEXT (objfile);
 
-  bfd_map_over_sections (objfile->obfd, find_targ_sec, &args);
+  bfd_map_over_sections (objfile->obfd.get (), find_targ_sec, &args);
 }
 
 /* Return the section number (SECT_OFF_*) that N_SCNUM points to.  */
@@ -419,8 +419,6 @@ add_stab_to_list (char *stabname, struct pending_stabs **stabvector)
 static void
 arrange_linetable (std::vector<linetable_entry> &old_linetable)
 {
-  int extra_lines = 0;
-
   std::vector<linetable_entry> fentries;
 
   for (int ii = 0; ii < old_linetable.size (); ++ii)
@@ -436,12 +434,6 @@ arrange_linetable (std::vector<linetable_entry> &old_linetable)
 	  e.line = ii;
 	  e.is_stmt = 1;
 	  e.pc = old_linetable[ii].pc;
-
-	  /* If the function was compiled with XLC, we may have to add an
-	     extra line entry later.  Reserve space for that.  */
-	  if (ii + 1 < old_linetable.size ()
-	      && old_linetable[ii].pc != old_linetable[ii + 1].pc)
-	    extra_lines++;
 	}
     }
 
@@ -714,6 +706,7 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 	  }
 	  struct subfile *current_subfile = get_current_subfile ();
 	  current_subfile->name = inclTable[ii].name;
+	  current_subfile->name_for_id = inclTable[ii].name;
 #endif
 
 	  start_subfile (pop_subfile ());
@@ -781,7 +774,7 @@ enter_line_range (struct subfile *subfile, unsigned beginoffset,
   else
     limit_offset -= 1;
 
-  abfd = objfile->obfd;
+  abfd = objfile->obfd.get ();
   linesz = coff_data (abfd)->local_linesz;
   ext_lnno = alloca (linesz);
 
@@ -891,7 +884,7 @@ xcoff_next_symbol_text (struct objfile *objfile)
   if (this_symtab_objfile)
     objfile = this_symtab_objfile;
 
-  bfd_coff_swap_sym_in (objfile->obfd, raw_symbol, &symbol);
+  bfd_coff_swap_sym_in (objfile->obfd.get (), raw_symbol, &symbol);
   if (symbol.n_zeroes)
     {
       complaint (_("Unexpected symbol continuation"));
@@ -922,7 +915,7 @@ xcoff_next_symbol_text (struct objfile *objfile)
 static void
 read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 {
-  bfd *abfd = objfile->obfd;
+  bfd *abfd = objfile->obfd.get ();
   char *raw_auxptr;		/* Pointer to first raw aux entry for sym.  */
   struct xcoff_symfile_info *xcoff = XCOFF_DATA (objfile);
   char *strtbl = xcoff->strtbl;
@@ -1627,7 +1620,7 @@ read_symbol (struct internal_syment *symbol, int symno)
       symbol->n_scnum = -1;
       return;
     }
-  bfd_coff_swap_sym_in (this_symtab_objfile->obfd,
+  bfd_coff_swap_sym_in (this_symtab_objfile->obfd.get (),
 			stbl + (symno * local_symesz),
 			symbol);
 }
@@ -1703,7 +1696,7 @@ read_symbol_lineno (int symno)
 gotit:
   /* Take aux entry and return its lineno.  */
   symno++;
-  bfd_coff_swap_aux_in (objfile->obfd, stbl + symno * local_symesz,
+  bfd_coff_swap_aux_in (objfile->obfd.get (), stbl + symno * local_symesz,
 			symbol->n_type, symbol->n_sclass,
 			0, symbol->n_numaux, main_aux);
 
@@ -1988,7 +1981,7 @@ swap_sym (struct internal_syment *symbol, union internal_auxent *aux,
 	  const char **name, char **raw, unsigned int *symnump,
 	  struct objfile *objfile)
 {
-  bfd_coff_swap_sym_in (objfile->obfd, *raw, symbol);
+  bfd_coff_swap_sym_in (objfile->obfd.get (), *raw, symbol);
   if (symbol->n_zeroes)
     {
       /* If it's exactly E_SYMNMLEN characters long it isn't
@@ -2022,7 +2015,7 @@ swap_sym (struct internal_syment *symbol, union internal_auxent *aux,
   *raw += coff_data (objfile->obfd)->local_symesz;
   if (symbol->n_numaux > 0)
     {
-      bfd_coff_swap_aux_in (objfile->obfd, *raw, symbol->n_type,
+      bfd_coff_swap_aux_in (objfile->obfd.get (), *raw, symbol->n_type,
 			    symbol->n_sclass, 0, symbol->n_numaux, aux);
 
       *symnump += symbol->n_numaux;
@@ -2089,7 +2082,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 
   set_last_source_file (NULL);
 
-  abfd = objfile->obfd;
+  abfd = objfile->obfd.get ();
   next_symbol_text_func = xcoff_next_symbol_text;
 
   sraw_symbol = XCOFF_DATA (objfile)->symtbl;
@@ -2119,7 +2112,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 	    if (symbol.n_numaux > 1)
 	      {
 		bfd_coff_swap_aux_in
-		  (objfile->obfd,
+		  (objfile->obfd.get (),
 		   sraw_symbol - coff_data (abfd)->local_symesz,
 		   symbol.n_type,
 		   symbol.n_sclass,
@@ -2794,7 +2787,7 @@ xcoff_initial_scan (struct objfile *objfile, symfile_add_flags symfile_flags)
   unsigned int size;
 
   info = XCOFF_DATA (objfile);
-  symfile_bfd = abfd = objfile->obfd;
+  symfile_bfd = abfd = objfile->obfd.get ();
   name = objfile_name (objfile);
 
   num_symbols = bfd_get_symcount (abfd);	/* # of symbols */

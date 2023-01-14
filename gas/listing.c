@@ -936,26 +936,10 @@ list_symbol_table (void)
 
 	  if (S_GET_NAME (ptr))
 	    {
-	      char buf[30], fmt[8];
+	      char buf[30];
 	      valueT val = S_GET_VALUE (ptr);
 
-	      /* @@ Note that this is dependent on the compilation options,
-		 not solely on the target characteristics.  */
-	      if (sizeof (val) == 4 && sizeof (int) == 4)
-		sprintf (buf, "%08lx", (unsigned long) val);
-	      else if (sizeof (val) <= sizeof (unsigned long))
-		{
-		  sprintf (fmt, "%%0%lulx",
-			   (unsigned long) (sizeof (val) * 2));
-		  sprintf (buf, fmt, (unsigned long) val);
-		}
-#if defined (BFD64)
-	      else if (sizeof (val) > 4)
-		sprintf_vma (buf, val);
-#endif
-	      else
-		abort ();
-
+	      bfd_sprintf_vma (stdoutput, buf, val);
 	      if (!got_some)
 		{
 		  fprintf (list_file, "DEFINED SYMBOLS\n");

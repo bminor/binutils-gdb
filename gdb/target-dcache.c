@@ -24,7 +24,7 @@
 /* The target dcache is kept per-address-space.  This key lets us
    associate the cache with the address space.  */
 
-static const struct address_space_key<DCACHE, dcache_deleter>
+static const registry<address_space>::key<DCACHE, dcache_deleter>
   target_dcache_aspace_key;
 
 /* Target dcache is initialized or not.  */

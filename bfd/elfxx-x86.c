@@ -524,8 +524,7 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
     {
       asection *sreloc;
 
-      if (eh->def_protected
-	  && elf_has_no_copy_on_protected (h->root.u.def.section->owner))
+      if (eh->def_protected && bfd_link_executable (info))
 	{
 	  /* Disallow copy relocation against non-copyable protected
 	     symbol.  */
@@ -3041,6 +3040,24 @@ _bfd_x86_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
     }
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
     {
+      if (eh->def_protected && bfd_link_executable (info))
+	for (p = h->dyn_relocs; p != NULL; p = p->next)
+	  {
+	    /* Disallow copy relocation against non-copyable protected
+	       symbol.  */
+	    s = p->sec->output_section;
+	    if (s != NULL && (s->flags & SEC_READONLY) != 0)
+	      {
+		info->callbacks->einfo
+		  /* xgettext:c-format */
+		  (_("%F%P: %pB: copy relocation against non-copyable "
+		     "protected symbol `%s' in %pB\n"),
+		   p->sec->owner, h->root.root.string,
+		   h->root.u.def.section->owner);
+		return false;
+	      }
+	  }
+
       srel->size += htab->sizeof_reloc;
       h->needs_copy = 1;
     }
@@ -3094,7 +3111,7 @@ _bfd_x86_elf_link_symbol_references_local (struct bfd_link_info *info,
      2. When building executable, there is no dynamic linker.  Or
      3. or "-z nodynamic-undefined-weak" is used.
    */
-  if (SYMBOL_REFERENCES_LOCAL (info, h)
+  if (_bfd_elf_symbol_refs_local_p (h, info, 1)
       || (h->root.type == bfd_link_hash_undefweak
 	  && (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
 	      || (bfd_link_executable (info)

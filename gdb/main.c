@@ -676,8 +676,9 @@ captured_main_1 (struct captured_main_args *context)
   main_ui = new ui (stdin, stdout, stderr);
   current_ui = main_ui;
 
-  gdb_stdtargerr = gdb_stderr;	/* for moment */
-  gdb_stdtargin = gdb_stdin;	/* for moment */
+  gdb_stdtarg = gdb_stderr;
+  gdb_stdtargerr = gdb_stderr;
+  gdb_stdtargin = gdb_stdin;
 
   if (bfd_init () != BFD_INIT_MAGIC)
     error (_("fatal error: libbfd ABI mismatch"));

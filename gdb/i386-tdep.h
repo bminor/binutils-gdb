@@ -24,7 +24,7 @@
 #include "infrun.h"
 #include "expression.h"
 
-struct frame_info;
+class frame_info_ptr;
 struct gdbarch;
 struct reggroup;
 struct regset;
@@ -57,7 +57,7 @@ enum struct_return
 };
 
 /* i386 architecture specific information.  */
-struct i386_gdbarch_tdep : gdbarch_tdep
+struct i386_gdbarch_tdep : gdbarch_tdep_base
 {
   /* General-purpose registers.  */
   int *gregset_reg_offset = 0;
@@ -223,10 +223,10 @@ struct i386_gdbarch_tdep : gdbarch_tdep
   CORE_ADDR sigtramp_end = 0;
 
   /* Detect sigtramp.  */
-  int (*sigtramp_p) (struct frame_info *) = nullptr;
+  int (*sigtramp_p) (frame_info_ptr ) = nullptr;
 
   /* Get address of sigcontext for sigtramp.  */
-  CORE_ADDR (*sigcontext_addr) (struct frame_info *) = nullptr;
+  CORE_ADDR (*sigcontext_addr) (frame_info_ptr ) = nullptr;
 
   /* Offset of registers in `struct sigcontext'.  */
   int *sc_reg_offset = 0;
@@ -395,7 +395,7 @@ extern int i386_ax_pseudo_register_collect (struct gdbarch *gdbarch,
 #define I386_MAX_INSN_LEN (16)
 
 /* Functions exported from i386-tdep.c.  */
-extern CORE_ADDR i386_pe_skip_trampoline_code (struct frame_info *frame,
+extern CORE_ADDR i386_pe_skip_trampoline_code (frame_info_ptr frame,
 					       CORE_ADDR pc, char *name);
 extern CORE_ADDR i386_skip_main_prologue (struct gdbarch *gdbarch,
 					  CORE_ADDR pc);
@@ -414,7 +414,7 @@ extern CORE_ADDR i386_thiscall_push_dummy_call (struct gdbarch *gdbarch,
 						bool thiscall);
 
 /* Return whether the THIS_FRAME corresponds to a sigtramp routine.  */
-extern int i386_sigtramp_p (struct frame_info *this_frame);
+extern int i386_sigtramp_p (frame_info_ptr this_frame);
 
 /* Return non-zero if REGNUM is a member of the specified group.  */
 extern int i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,

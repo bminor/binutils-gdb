@@ -119,6 +119,6 @@ CORE_ADDR frv_fdpic_find_canonical_descriptor (CORE_ADDR entry_point);
 CORE_ADDR frv_fetch_objfile_link_map (struct objfile *objfile);
 
 struct target_so_ops;
-extern struct target_so_ops frv_so_ops;
+extern const struct target_so_ops frv_so_ops;
 
 #endif /* FRV_TDEP_H */

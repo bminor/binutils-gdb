@@ -599,7 +599,7 @@ child_pass_ctrlc (struct target_ops *self)
 }
 
 /* Per-inferior data key.  */
-static const struct inferior_key<terminal_info> inflow_inferior_data;
+static const registry<inferior>::key<terminal_info> inflow_inferior_data;
 
 terminal_info::~terminal_info ()
 {

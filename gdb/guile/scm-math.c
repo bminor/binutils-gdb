@@ -65,7 +65,7 @@ enum valscm_binary_opcode
 
 /* If TYPE is a reference, return the target; otherwise return TYPE.  */
 #define STRIP_REFERENCE(TYPE) \
-  ((TYPE->code () == TYPE_CODE_REF) ? (TYPE_TARGET_TYPE (TYPE)) : (TYPE))
+  ((TYPE->code () == TYPE_CODE_REF) ? ((TYPE)->target_type ()) : (TYPE))
 
 /* Helper for vlscm_unop.  Contains all the code that may throw a GDB
    exception.  */
@@ -586,7 +586,7 @@ vlscm_integer_fits_p (SCM obj, struct type *type)
   if (type->is_unsigned ())
     {
       /* If scm_is_unsigned_integer can't work with this type, just punt.  */
-      if (TYPE_LENGTH (type) > sizeof (uintmax_t))
+      if (type->length () > sizeof (uintmax_t))
 	return 0;
 
       ULONGEST max = get_unsigned_type_max (type);
@@ -597,7 +597,7 @@ vlscm_integer_fits_p (SCM obj, struct type *type)
       LONGEST min, max;
 
       /* If scm_is_signed_integer can't work with this type, just punt.  */
-      if (TYPE_LENGTH (type) > sizeof (intmax_t))
+      if (type->length () > sizeof (intmax_t))
 	return 0;
       get_signed_type_minmax (type, &min, &max);
       return scm_is_signed_integer (obj, min, max);
@@ -681,7 +681,7 @@ vlscm_convert_bytevector (SCM bv, struct type *type, SCM type_scm,
       make_vector_type (type);
     }
   type = check_typedef (type);
-  if (TYPE_LENGTH (type) != length)
+  if (type->length () != length)
     {
       *except_scmp = gdbscm_make_out_of_range_error (func_name, arg_pos,
 						     type_scm,

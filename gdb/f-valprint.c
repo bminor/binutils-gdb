@@ -82,19 +82,17 @@ f77_get_dynamic_length_of_aggregate (struct type *type)
      This function also works for strings which behave very 
      similarly to arrays.  */
 
-  if (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_ARRAY
-      || TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_STRING)
-    f77_get_dynamic_length_of_aggregate (TYPE_TARGET_TYPE (type));
+  if (type->target_type ()->code () == TYPE_CODE_ARRAY
+      || type->target_type ()->code () == TYPE_CODE_STRING)
+    f77_get_dynamic_length_of_aggregate (type->target_type ());
 
   /* Recursion ends here, start setting up lengths.  */
   lower_bound = f77_get_lowerbound (type);
   upper_bound = f77_get_upperbound (type);
 
   /* Patch in a valid length value.  */
-
-  TYPE_LENGTH (type) =
-    (upper_bound - lower_bound + 1)
-    * TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type)));
+  type->set_length ((upper_bound - lower_bound + 1)
+		    * check_typedef (type->target_type ())->length ());
 }
 
 /* Per-dimension statistics.  */
@@ -266,7 +264,7 @@ public:
     bool repeated = (m_options->repeat_count_threshold < UINT_MAX
 		     && elt_type_prev != nullptr
 		     && value_contents_eq (m_val, elt_off_prev, m_val, elt_off,
-					   TYPE_LENGTH (elt_type)));
+					   elt_type->length ()));
 
     if (repeated)
       m_nrepeats++;
@@ -339,7 +337,7 @@ private:
 			 LONGEST offset1, LONGEST offset2)
   {
     if (type->code () == TYPE_CODE_ARRAY
-	&& TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_CHAR)
+	&& type->target_type ()->code () != TYPE_CODE_CHAR)
       {
 	/* Extract the range, and get lower and upper bounds.  */
 	struct type *range_type = check_typedef (type)->index_type ();
@@ -350,7 +348,7 @@ private:
 	/* CALC is used to calculate the offsets for each element.  */
 	fortran_array_offset_calculator calc (type);
 
-	struct type *subarray_type = check_typedef (TYPE_TARGET_TYPE (type));
+	struct type *subarray_type = check_typedef (type->target_type ());
 	for (LONGEST i = lowerbound; i < upperbound + 1; i++)
 	  {
 	    /* Use the index and the stride to work out a new offset.  */
@@ -365,7 +363,7 @@ private:
       }
     else
       return value_contents_eq (val, offset1, val, offset2,
-				TYPE_LENGTH (type));
+				type->length ());
   }
 
   /* The number of elements printed so far.  */
@@ -448,19 +446,19 @@ f_language::value_print_inner (struct value *val, struct ui_file *stream,
     case TYPE_CODE_STRING:
       f77_get_dynamic_length_of_aggregate (type);
       printstr (stream, builtin_type (gdbarch)->builtin_char, valaddr,
-		TYPE_LENGTH (type), NULL, 0, options);
+		type->length (), NULL, 0, options);
       break;
 
     case TYPE_CODE_ARRAY:
-      if (TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_CHAR)
+      if (type->target_type ()->code () != TYPE_CODE_CHAR)
 	fortran_print_array (type, address, stream, recurse, val, options);
       else
 	{
-	  struct type *ch_type = TYPE_TARGET_TYPE (type);
+	  struct type *ch_type = type->target_type ();
 
 	  f77_get_dynamic_length_of_aggregate (type);
 	  printstr (stream, ch_type, valaddr,
-		    TYPE_LENGTH (type) / TYPE_LENGTH (ch_type), NULL, 0,
+		    type->length () / ch_type->length (), NULL, 0,
 		    options);
 	}
       break;
@@ -476,7 +474,7 @@ f_language::value_print_inner (struct value *val, struct ui_file *stream,
 	  int want_space = 0;
 
 	  addr = unpack_pointer (type, valaddr);
-	  elttype = check_typedef (TYPE_TARGET_TYPE (type));
+	  elttype = check_typedef (type->target_type ());
 
 	  if (elttype->code () == TYPE_CODE_FUNC)
 	    {
@@ -496,14 +494,14 @@ f_language::value_print_inner (struct value *val, struct ui_file *stream,
 
 	  /* For a pointer to char or unsigned char, also print the string
 	     pointed to, unless pointer is null.  */
-	  if (TYPE_LENGTH (elttype) == 1
+	  if (elttype->length () == 1
 	      && elttype->code () == TYPE_CODE_INT
 	      && (options->format == 0 || options->format == 's')
 	      && addr != 0)
 	    {
 	      if (want_space)
 		gdb_puts (" ", stream);
-	      val_print_string (TYPE_TARGET_TYPE (type), NULL, addr, -1,
+	      val_print_string (type->target_type (), NULL, addr, -1,
 				stream, options);
 	    }
 	  return;
@@ -662,7 +660,7 @@ info_common_command_for_block (const struct block *block, const char *comname,
 static void
 info_common_command (const char *comname, int from_tty)
 {
-  struct frame_info *fi;
+  frame_info_ptr fi;
   const struct block *block;
   int values_printed = 0;
 

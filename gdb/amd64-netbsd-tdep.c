@@ -35,7 +35,7 @@
    routine.  */
 
 static int
-amd64nbsd_sigtramp_p (struct frame_info *this_frame)
+amd64nbsd_sigtramp_p (frame_info_ptr this_frame)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
   const char *name;
@@ -48,7 +48,7 @@ amd64nbsd_sigtramp_p (struct frame_info *this_frame)
    return the address of the associated mcontext structure.  */
 
 static CORE_ADDR
-amd64nbsd_mcontext_addr (struct frame_info *this_frame)
+amd64nbsd_mcontext_addr (frame_info_ptr this_frame)
 {
   CORE_ADDR addr;
 
@@ -97,7 +97,7 @@ int amd64nbsd_r_reg_offset[] =
 static void
 amd64nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
 
   /* Initialize general-purpose register set details first.  */
   tdep->gregset_reg_offset = amd64nbsd_r_reg_offset;

@@ -47,7 +47,7 @@ static int
 dummy_frame_id_eq (struct dummy_frame_id *id1,
 		   struct dummy_frame_id *id2)
 {
-  return frame_id_eq (id1->id, id2->id) && id1->thread == id2->thread;
+  return id1->id == id2->id && id1->thread == id2->thread;
 }
 
 /* List of dummy_frame destructors.  */
@@ -130,7 +130,7 @@ static bool
 pop_dummy_frame_bpt (struct breakpoint *b, struct dummy_frame *dummy)
 {
   if (b->thread == dummy->id.thread->global_num
-      && b->disposition == disp_del && frame_id_eq (b->frame_id, dummy->id.id))
+      && b->disposition == disp_del && b->frame_id == dummy->id.id)
     {
       while (b->related_breakpoint != b)
 	delete_breakpoint (b->related_breakpoint);
@@ -288,7 +288,7 @@ struct dummy_frame_cache
 
 static int
 dummy_frame_sniffer (const struct frame_unwind *self,
-		     struct frame_info *this_frame,
+		     frame_info_ptr this_frame,
 		     void **this_prologue_cache)
 {
   /* When unwinding a normal frame, the stack structure is determined
@@ -334,7 +334,7 @@ dummy_frame_sniffer (const struct frame_unwind *self,
    register value is taken from the local copy of the register buffer.  */
 
 static struct value *
-dummy_frame_prev_register (struct frame_info *this_frame,
+dummy_frame_prev_register (frame_info_ptr this_frame,
 			   void **this_prologue_cache,
 			   int regnum)
 {
@@ -364,7 +364,7 @@ dummy_frame_prev_register (struct frame_info *this_frame,
    dummy cache is located and saved in THIS_PROLOGUE_CACHE.  */
 
 static void
-dummy_frame_this_id (struct frame_info *this_frame,
+dummy_frame_this_id (frame_info_ptr this_frame,
 		     void **this_prologue_cache,
 		     struct frame_id *this_id)
 {
@@ -390,7 +390,7 @@ const struct frame_unwind dummy_frame_unwind =
 /* See dummy-frame.h.  */
 
 struct frame_id
-default_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
+default_dummy_id (struct gdbarch *gdbarch, frame_info_ptr this_frame)
 {
   CORE_ADDR sp, pc;
 

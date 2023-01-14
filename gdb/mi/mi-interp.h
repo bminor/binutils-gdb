@@ -52,14 +52,10 @@ public:
   /* Raw console output.  */
   struct ui_file *raw_stdout;
 
-  /* Raw logfile output.  */
-  struct ui_file *raw_stdlog;
-
-  /* Save the original value of raw_stdout and raw_stdlog here when logging, and
-     the file which we need to delete, so we can restore correctly when
+  /* Save the original value of raw_stdout here when logging, and the
+     file which we need to delete, so we can restore correctly when
      done.  */
   struct ui_file *saved_raw_stdout;
-  struct ui_file *saved_raw_stdlog;
   struct ui_file *saved_raw_file_to_delete;
 
 

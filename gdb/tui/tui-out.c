@@ -109,9 +109,3 @@ tui_ui_out::tui_ui_out (ui_file *stream)
   : cli_ui_out (stream, 0)
 {
 }
-
-tui_ui_out *
-tui_out_new (struct ui_file *stream)
-{
-  return new tui_ui_out (stream);
-}

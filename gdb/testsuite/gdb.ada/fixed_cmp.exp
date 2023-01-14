@@ -22,11 +22,11 @@ standard_ada_testfile fixed
 foreach_with_prefix gnat_encodings {all minimal} {
     set flags [list debug additional_flags=-fgnat-encodings=$gnat_encodings]
 
-    if {[gdb_compile_ada "${srcfile}" "${binfile}" executable $flags] != "" } {
+    if {[gdb_compile_ada "${srcfile}" "${binfile}-${gnat_encodings}" executable $flags] != "" } {
       return -1
     }
 
-    clean_restart ${testfile}
+    clean_restart ${testfile}-${gnat_encodings}
 
     set bp_location [gdb_get_line_number "STOP" ${testdir}/fixed.adb]
     runto "fixed.adb:$bp_location"

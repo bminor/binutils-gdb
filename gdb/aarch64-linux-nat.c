@@ -359,7 +359,7 @@ static void
 fetch_pauth_masks_from_thread (struct regcache *regcache)
 {
   aarch64_gdbarch_tdep *tdep
-    = (aarch64_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
   int ret;
   struct iovec iovec;
   uint64_t pauth_regset[2] = {0, 0};
@@ -385,7 +385,7 @@ static void
 fetch_mteregs_from_thread (struct regcache *regcache)
 {
   aarch64_gdbarch_tdep *tdep
-    = (aarch64_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
   int regno = tdep->mte_reg_base;
 
   gdb_assert (regno != -1);
@@ -410,7 +410,7 @@ static void
 store_mteregs_to_thread (struct regcache *regcache)
 {
   aarch64_gdbarch_tdep *tdep
-    = (aarch64_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
   int regno = tdep->mte_reg_base;
 
   gdb_assert (regno != -1);
@@ -439,7 +439,7 @@ static void
 fetch_tlsregs_from_thread (struct regcache *regcache)
 {
   aarch64_gdbarch_tdep *tdep
-    = (aarch64_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
   int regno = tdep->tls_regnum;
 
   gdb_assert (regno != -1);
@@ -464,7 +464,7 @@ static void
 store_tlsregs_to_thread (struct regcache *regcache)
 {
   aarch64_gdbarch_tdep *tdep
-    = (aarch64_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
   int regno = tdep->tls_regnum;
 
   gdb_assert (regno != -1);
@@ -493,7 +493,7 @@ static void
 aarch64_fetch_registers (struct regcache *regcache, int regno)
 {
   aarch64_gdbarch_tdep *tdep
-    = (aarch64_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
 
   if (regno == -1)
     {
@@ -543,7 +543,7 @@ static void
 aarch32_fetch_registers (struct regcache *regcache, int regno)
 {
   arm_gdbarch_tdep *tdep
-    = (arm_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+    = gdbarch_tdep<arm_gdbarch_tdep> (regcache->arch ());
 
   if (regno == -1)
     {
@@ -579,7 +579,7 @@ static void
 aarch64_store_registers (struct regcache *regcache, int regno)
 {
   aarch64_gdbarch_tdep *tdep
-    = (aarch64_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
 
   if (regno == -1)
     {
@@ -619,7 +619,7 @@ static void
 aarch32_store_registers (struct regcache *regcache, int regno)
 {
   arm_gdbarch_tdep *tdep
-    = (arm_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+    = gdbarch_tdep<arm_gdbarch_tdep> (regcache->arch ());
 
   if (regno == -1)
     {
@@ -781,8 +781,8 @@ aarch64_linux_nat_target::read_description ()
   if (ret == 0)
     return aarch32_read_description ();
 
-  CORE_ADDR hwcap = linux_get_hwcap (this);
-  CORE_ADDR hwcap2 = linux_get_hwcap2 (this);
+  CORE_ADDR hwcap = linux_get_hwcap ();
+  CORE_ADDR hwcap2 = linux_get_hwcap2 ();
 
   aarch64_features features;
   features.vq = aarch64_sve_get_vq (tid);
@@ -893,18 +893,23 @@ aarch64_linux_nat_target::thread_architecture (ptid_t ptid)
 
   /* Only return it if the current vector length matches the one in the tdep.  */
   aarch64_gdbarch_tdep *tdep
-    = (aarch64_gdbarch_tdep *) gdbarch_tdep (inf->gdbarch);
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (inf->gdbarch);
   uint64_t vq = aarch64_sve_get_vq (ptid.lwp ());
   if (vq == tdep->vq)
     return inf->gdbarch;
 
   /* We reach here if the vector length for the thread is different from its
      value at process start.  Lookup gdbarch via info (potentially creating a
-     new one), stashing the vector length inside id.  Use -1 for when SVE
-     unavailable, to distinguish from an unset value of 0.  */
+     new one) by using a target description that corresponds to the new vq value
+     and the current architecture features.  */
+
+  const struct target_desc *tdesc = gdbarch_target_desc (inf->gdbarch);
+  aarch64_features features = aarch64_features_from_target_desc (tdesc);
+  features.vq = vq;
+
   struct gdbarch_info info;
   info.bfd_arch_info = bfd_lookup_arch (bfd_arch_aarch64, bfd_mach_aarch64);
-  info.id = (int *) (vq == 0 ? -1 : vq);
+  info.target_desc = aarch64_read_description (features);
   return gdbarch_find_by_info (info);
 }
 
@@ -913,7 +918,7 @@ aarch64_linux_nat_target::thread_architecture (ptid_t ptid)
 bool
 aarch64_linux_nat_target::supports_memory_tagging ()
 {
-  return (linux_get_hwcap2 (this) & HWCAP2_MTE) != 0;
+  return (linux_get_hwcap2 () & HWCAP2_MTE) != 0;
 }
 
 /* Implement the "fetch_memtags" target_ops method.  */

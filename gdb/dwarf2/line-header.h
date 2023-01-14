@@ -36,9 +36,10 @@ struct file_entry
 {
   file_entry () = default;
 
-  file_entry (const char *name_, dir_index d_index_,
+  file_entry (const char *name_, file_name_index index_, dir_index d_index_,
 	      unsigned int mod_time_, unsigned int length_)
     : name (name_),
+      index (index_),
       d_index (d_index_),
       mod_time (mod_time_),
       length (length_)
@@ -51,6 +52,9 @@ struct file_entry
   /* The file name.  Note this is an observing pointer.  The memory is
      owned by debug_line_buffer.  */
   const char *name {};
+
+  /* The index of this file in the file table.  */
+  file_name_index index {};
 
   /* The directory index (1-based).  */
   dir_index d_index {};
@@ -68,8 +72,18 @@ struct file_entry
    which contains the following information.  */
 struct line_header
 {
-  line_header ()
-    : offset_in_dwz {}
+  /* COMP_DIR is the value of the DW_AT_comp_dir attribute of the compilation
+     unit in the context of which we are reading this line header, or nullptr
+     if unknown or not applicable.  */
+  explicit line_header (const char *comp_dir)
+    : offset_in_dwz {}, m_comp_dir (comp_dir)
+  {}
+
+  /* This constructor should only be used to create line_header intances to do
+     hash table lookups.  */
+  line_header (sect_offset sect_off, bool offset_in_dwz)
+    : sect_off (sect_off),
+      offset_in_dwz (offset_in_dwz)
   {}
 
   /* Add an entry to the include directory table.  */
@@ -157,9 +171,16 @@ struct line_header
      header.  These point into dwarf2_per_objfile->line_buffer.  */
   const gdb_byte *statement_program_start {}, *statement_program_end {};
 
-  /* Return file name relative to the compilation directory of file
-     number FILE in this object's file name table.  */
-  std::string file_file_name (int file) const;
+  /* Return the most "complete" file name for FILE possible.
+
+     This means prepending the directory and compilation directory, as needed,
+     until we get an absolute path.  */
+  std::string file_file_name (const file_entry &fe) const;
+
+  /* Return the compilation directory of the compilation unit in the context of
+     which this line header is read.  Return nullptr if non applicable.  */
+  const char *comp_dir () const
+  { return m_comp_dir; }
 
  private:
   /* The include_directories table.  Note these are observing
@@ -171,6 +192,10 @@ struct line_header
      before, and is 0 in DWARF 5 and later).  So the client should use
      file_name_at method for access.  */
   std::vector<file_entry> m_file_names;
+
+  /* Compilation directory of the compilation unit in the context of which this
+     line header is read.  nullptr if unknown or not applicable.  */
+  const char *m_comp_dir = nullptr;
 };
 
 typedef std::unique_ptr<line_header> line_header_up;
@@ -191,6 +216,7 @@ file_entry::include_dir (const line_header *lh) const
 
 extern line_header_up dwarf_decode_line_header
   (sect_offset sect_off, bool is_dwz, dwarf2_per_objfile *per_objfile,
-   struct dwarf2_section_info *section, const struct comp_unit_head *cu_header);
+   struct dwarf2_section_info *section, const struct comp_unit_head *cu_header,
+   const char *comp_dir);
 
 #endif /* DWARF2_LINE_HEADER_H */

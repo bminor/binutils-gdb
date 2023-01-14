@@ -1107,6 +1107,10 @@ class Layout
   void
   create_build_id();
 
+  // Create a package metadata note if needed.
+  void
+  create_package_metadata();
+
   // Link .stab and .stabstr sections.
   void
   link_stabs_sections();
@@ -1453,6 +1457,8 @@ class Layout
   Gdb_index* gdb_index_data_;
   // The space for the build ID checksum if there is one.
   Output_section_data* build_id_note_;
+  // The space for the package metadata JSON if there is one.
+  Output_section_data* package_metadata_note_;
   // The output section containing dwarf abbreviations
   Output_reduced_debug_abbrev_section* debug_abbrev_;
   // The output section containing the dwarf debug info tree

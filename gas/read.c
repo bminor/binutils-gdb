@@ -248,6 +248,7 @@ static void s_reloc (int);
 static int hex_float (int, char *);
 static segT get_known_segmented_expression (expressionS * expP);
 static void pobegin (void);
+static void poend (void);
 static size_t get_non_macro_line_sb (sb *);
 static void generate_file_debug (void);
 static char *_find_end_of_line (char *, int, int, int);
@@ -260,9 +261,6 @@ read_begin (void)
   pobegin ();
   obj_read_begin_hook ();
 
-  /* Something close -- but not too close -- to a multiple of 1024.
-     The debugging malloc I'm using has 24 bytes of overhead.  */
-  obstack_begin (&notes, chunksize);
   obstack_begin (&cond_obstack, chunksize);
 
 #ifndef tc_line_separator_chars
@@ -275,6 +273,13 @@ read_begin (void)
 
   if (flag_mri)
     lex_type['?'] = 3;
+}
+
+void
+read_end (void)
+{
+  poend ();
+  _obstack_free (&cond_obstack, NULL);
 }
 
 #ifndef TC_ADDRESS_BYTES
@@ -295,53 +300,7 @@ address_bytes (void)
 
 /* Set up pseudo-op tables.  */
 
-struct po_entry
-{
-  const char *poc_name;
-
-  const pseudo_typeS *pop;
-};
-
-typedef struct po_entry po_entry_t;
-
-/* Hash function for a po_entry.  */
-
-static hashval_t
-hash_po_entry (const void *e)
-{
-  const po_entry_t *entry = (const po_entry_t *) e;
-  return htab_hash_string (entry->poc_name);
-}
-
-/* Equality function for a po_entry.  */
-
-static int
-eq_po_entry (const void *a, const void *b)
-{
-  const po_entry_t *ea = (const po_entry_t *) a;
-  const po_entry_t *eb = (const po_entry_t *) b;
-
-  return strcmp (ea->poc_name, eb->poc_name) == 0;
-}
-
-static po_entry_t *
-po_entry_alloc (const char *poc_name, const pseudo_typeS *pop)
-{
-  po_entry_t *entry = XNEW (po_entry_t);
-  entry->poc_name = poc_name;
-  entry->pop = pop;
-  return entry;
-}
-
-static const pseudo_typeS *
-po_entry_find (htab_t table, const char *poc_name)
-{
-  po_entry_t needle = { poc_name, NULL };
-  po_entry_t *entry = htab_find (table, &needle);
-  return entry != NULL ? entry->pop : NULL;
-}
-
-static struct htab *po_hash;
+static htab_t po_hash;
 
 static const pseudo_typeS potable[] = {
   {"abort", s_abort, 0},
@@ -563,10 +522,8 @@ pop_insert (const pseudo_typeS *table)
   const pseudo_typeS *pop;
   for (pop = table; pop->poc_name; pop++)
     {
-      po_entry_t *elt = po_entry_alloc (pop->poc_name, pop);
-      if (htab_insert (po_hash, elt, 0) != NULL)
+      if (str_hash_insert (po_hash, pop->poc_name, pop, 0) != NULL)
 	{
-	  free (elt);
 	  if (!pop_override_ok)
 	    as_fatal (_("error constructing %s pseudo-op table"),
 		      pop_table_name);
@@ -589,8 +546,7 @@ pop_insert (const pseudo_typeS *table)
 static void
 pobegin (void)
 {
-  po_hash = htab_create_alloc (16, hash_po_entry, eq_po_entry, NULL,
-			       xcalloc, xfree);
+  po_hash = str_htab_create ();
 
   /* Do the target-specific pseudo ops.  */
   pop_table_name = "md";
@@ -609,6 +565,12 @@ pobegin (void)
   pop_table_name = "cfi";
   pop_override_ok = 1;
   cfi_pop_insert ();
+}
+
+static void
+poend (void)
+{
+  htab_delete (po_hash);
 }
 
 #define HANDLE_CONDITIONAL_ASSEMBLY(num_read)				\
@@ -1099,7 +1061,7 @@ read_a_source_file (const char *name)
 		    {
 		      /* The MRI assembler uses pseudo-ops without
 			 a period.  */
-		      pop = po_entry_find (po_hash, s);
+		      pop = str_hash_find (po_hash, s);
 		      if (pop != NULL && pop->poc_handler == NULL)
 			pop = NULL;
 		    }
@@ -1114,7 +1076,7 @@ read_a_source_file (const char *name)
 			 already know that the pseudo-op begins with a '.'.  */
 
 		      if (pop == NULL)
-			pop = po_entry_find (po_hash, s + 1);
+			pop = str_hash_find (po_hash, s + 1);
 		      if (pop && !pop->poc_handler)
 			pop = NULL;
 
@@ -1667,7 +1629,10 @@ read_symbol_name (void)
       /* Since quoted symbol names can contain non-ASCII characters,
 	 check the string and warn if it cannot be recognised by the
 	 current character set.  */
-      if (mbstowcs (NULL, name, len) == (size_t) -1)
+      /* PR 29447: mbstowcs ignores the third (length) parameter when
+	 the first (destination) parameter is NULL.  For clarity sake
+	 therefore we pass 0 rather than 'len' as the third parameter.  */
+      if (mbstowcs (NULL, name, 0) == (size_t) -1)
 	as_warn (_("symbol name not recognised in the current locale"));
     }
   else if (is_name_beginner (c) || (input_from_string && c == FAKE_LABEL_CHAR))
@@ -1699,6 +1664,7 @@ read_symbol_name (void)
     {
       as_bad (_("expected symbol name"));
       ignore_rest_of_line ();
+      free (start);
       return NULL;
     }
 
@@ -2716,10 +2682,10 @@ s_macro (int ignore ATTRIBUTE_UNUSED)
 	}
 
       if (((NO_PSEUDO_DOT || flag_m68k_mri)
-	   && po_entry_find (po_hash, name) != NULL)
+	   && str_hash_find (po_hash, name) != NULL)
 	  || (!flag_m68k_mri
 	      && *name == '.'
-	      && po_entry_find (po_hash, name + 1) != NULL))
+	      && str_hash_find (po_hash, name + 1) != NULL))
 	as_warn_where (file,
 		 line,
 		 _("attempt to redefine pseudo-op `%s' ignored"),
@@ -3142,7 +3108,7 @@ assign_symbol (char *name, int mode)
       if (listing & LISTING_SYMBOLS)
 	{
 	  extern struct list_info_struct *listing_tail;
-	  fragS *dummy_frag = XCNEW (fragS);
+	  fragS *dummy_frag = notes_calloc (1, sizeof (*dummy_frag));
 	  dummy_frag->line = listing_tail;
 	  dummy_frag->fr_symbol = symbolP;
 	  symbol_set_frag (symbolP, dummy_frag);
@@ -3971,10 +3937,9 @@ pseudo_set (symbolS *symbolP)
 	  return;
 	}
 #endif
+      symbol_set_value_expression (symbolP, &exp);
       S_SET_SEGMENT (symbolP, reg_section);
-      S_SET_VALUE (symbolP, (valueT) exp.X_add_number);
       set_zero_frag (symbolP);
-      symbol_get_value_expression (symbolP)->X_op = O_register;
       break;
 
     case O_symbol:
@@ -4533,14 +4498,9 @@ emit_expr_with_reloc (expressionS *exp,
       use = get & unmask;
       if ((get & mask) != 0 && (-get & mask) != 0)
 	{
-	  char get_buf[128];
-	  char use_buf[128];
-
-	  /* These buffers help to ease the translation of the warning message.  */
-	  sprintf_vma (get_buf, get);
-	  sprintf_vma (use_buf, use);
 	  /* Leading bits contain both 0s & 1s.  */
-	  as_warn (_("value 0x%s truncated to 0x%s"), get_buf, use_buf);
+	  as_warn (_("value 0x%" PRIx64 " truncated to 0x%" PRIx64),
+		   (uint64_t) get, (uint64_t) use);
 	}
       /* Put bytes in right order.  */
       md_number_to_chars (p, use, (int) nbytes);
@@ -5927,8 +5887,7 @@ s_include (int arg ATTRIBUTE_UNUSED)
     }
 
   demand_empty_rest_of_line ();
-  path = XNEWVEC (char, (unsigned long) i
-		  + include_dir_maxlen + 5 /* slop */ );
+  path = notes_alloc ((size_t) i + include_dir_maxlen + 5);
 
   for (i = 0; i < include_dir_count; i++)
     {
@@ -5942,10 +5901,9 @@ s_include (int arg ATTRIBUTE_UNUSED)
 	}
     }
 
-  free (path);
+  notes_free (path);
   path = filename;
  gotit:
-  /* malloc Storage leak when file is found on path.  FIXME-SOMEDAY.  */
   register_dependency (path);
   input_scrub_insert_file (path);
 }

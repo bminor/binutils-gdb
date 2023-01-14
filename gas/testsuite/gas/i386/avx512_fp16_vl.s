@@ -569,9 +569,11 @@ _start:
 	vfpclassph	$123, (%ecx){1to8}, %k5	 #AVX512-FP16,AVX512VL BROADCAST_EN
 	vfpclassphx	$123, 2032(%ecx), %k5	 #AVX512-FP16,AVX512VL Disp8(7f)
 	vfpclassph	$123, -256(%edx){1to8}, %k5{%k7}	 #AVX512-FP16,AVX512VL BROADCAST_EN Disp8(80) MASK_ENABLING
+	vfpclassphx	$123, 2(%ecx){1to8}, %k5	 #AVX512-FP16,AVX512VL BROADCAST_EN
 	vfpclassph	$123, (%ecx){1to16}, %k5	 #AVX512-FP16,AVX512VL BROADCAST_EN
 	vfpclassphy	$123, 4064(%ecx), %k5	 #AVX512-FP16,AVX512VL Disp8(7f)
 	vfpclassph	$123, -256(%edx){1to16}, %k5{%k7}	 #AVX512-FP16,AVX512VL BROADCAST_EN Disp8(80) MASK_ENABLING
+	vfpclassphy	$123, 2(%ecx){1to16}, %k5	 #AVX512-FP16,AVX512VL BROADCAST_EN
 	vgetexpph	%xmm5, %xmm6	 #AVX512-FP16,AVX512VL
 	vgetexpph	%xmm5, %xmm6{%k7}{z}	 #AVX512-FP16,AVX512VL MASK_ENABLING ZEROCTL
 	vgetexpph	%ymm5, %ymm6	 #AVX512-FP16,AVX512VL

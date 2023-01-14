@@ -48,8 +48,8 @@ extern void mmix_handle_mmixal (void);
 extern void mmix_md_begin (void);
 #define md_begin mmix_md_begin
 
-extern void mmix_md_end (void);
-#define md_end mmix_md_end
+extern void mmix_md_finish (void);
+#define md_finish mmix_md_finish
 
 extern int mmix_current_location \
   (void (*fn) (expressionS *), expressionS *);

@@ -32,6 +32,7 @@
 #include "parser-defs.h"
 #include "gdbarch.h"
 #include <algorithm>
+#include "observable.h"
 
 #if HAVE_PYTHON
 #include "python/python.h"
@@ -72,6 +73,12 @@ struct varobj_root
   /* The expression for this parent.  */
   expression_up exp;
 
+  /* Cached arch from exp, for use in case exp gets invalidated.  */
+  struct gdbarch *gdbarch = nullptr;
+
+  /* Cached language from exp, for use in case exp gets invalidated.  */
+  const struct language_defn *language_defn = nullptr;
+
   /* Block for which this expression is valid.  */
   const struct block *valid_block = NULL;
 
@@ -94,6 +101,9 @@ struct varobj_root
   /* Flag that indicates validity: set to false when this varobj_root refers
      to symbols that do not exist anymore.  */
   bool is_valid = true;
+
+  /* Set to true if the varobj was created as tracking a global.  */
+  bool global = false;
 
   /* Language-related operations for this variable and its
      children.  */
@@ -206,7 +216,7 @@ is_root_p (const struct varobj *var)
 
 /* See python-internal.h.  */
 gdbpy_enter_varobj::gdbpy_enter_varobj (const struct varobj *var)
-: gdbpy_enter (var->root->exp->gdbarch, var->root->exp->language_defn)
+: gdbpy_enter (var->root->gdbarch, var->root->language_defn)
 {
 }
 
@@ -215,10 +225,10 @@ gdbpy_enter_varobj::gdbpy_enter_varobj (const struct varobj *var)
 /* Return the full FRAME which corresponds to the given CORE_ADDR
    or NULL if no FRAME on the chain corresponds to CORE_ADDR.  */
 
-static struct frame_info *
+static frame_info_ptr
 find_frame_addr_in_frame_chain (CORE_ADDR frame_addr)
 {
-  struct frame_info *frame = NULL;
+  frame_info_ptr frame = NULL;
 
   if (frame_addr == (CORE_ADDR) 0)
     return NULL;
@@ -255,7 +265,7 @@ varobj_create (const char *objname,
 
   if (expression != NULL)
     {
-      struct frame_info *fi;
+      frame_info_ptr fi;
       struct frame_id old_id = null_frame_id;
       const struct block *block;
       const char *p;
@@ -303,6 +313,11 @@ varobj_create (const char *objname,
       try
 	{
 	  var->root->exp = parse_exp_1 (&p, pc, block, 0, &tracker);
+
+	  /* Cache gdbarch and language_defn as they might be used even
+	     after var is invalidated and var->root->exp cleared.  */
+	  var->root->gdbarch = var->root->exp->gdbarch;
+	  var->root->language_defn = var->root->exp->language_defn;
 	}
 
       catch (const gdb_exception_error &except)
@@ -324,6 +339,8 @@ varobj_create (const char *objname,
       var->format = variable_default_display (var.get ());
       var->root->valid_block =
 	var->root->floating ? NULL : tracker.block ();
+      var->root->global
+	= var->root->floating ? false : var->root->valid_block == nullptr;
       var->name = expression;
       /* For a root var, the name and the expr are the same.  */
       var->path_expr = expression;
@@ -658,7 +675,11 @@ varobj_get_iterator (struct varobj *var)
 {
 #if HAVE_PYTHON
   if (var->dynamic->pretty_printer)
-    return py_varobj_get_iterator (var, var->dynamic->pretty_printer);
+    {
+      value_print_options opts;
+      varobj_formatted_print_options (&opts, var->format);
+      return py_varobj_get_iterator (var, var->dynamic->pretty_printer, &opts);
+    }
 #endif
 
   gdb_assert_not_reached ("requested an iterator from a non-dynamic varobj");
@@ -1926,7 +1947,7 @@ name_of_child (struct varobj *var, int index)
 static bool
 check_scope (const struct varobj *var)
 {
-  struct frame_info *fi;
+  frame_info_ptr fi;
   bool scope;
 
   fi = frame_find_by_id (var->root->frame);
@@ -2146,6 +2167,8 @@ varobj_value_get_print_value (struct value *value,
   string_file stb;
   std::string thevalue;
 
+  varobj_formatted_print_options (&opts, format);
+
 #if HAVE_PYTHON
   if (gdb_python_initialized)
     {
@@ -2166,7 +2189,8 @@ varobj_value_get_print_value (struct value *value,
 
 	      gdbpy_ref<> output = apply_varobj_pretty_printer (value_formatter,
 								&replacement,
-								&stb);
+								&stb,
+								&opts);
 
 	      /* If we have string like output ...  */
 	      if (output != NULL)
@@ -2224,8 +2248,6 @@ varobj_value_get_print_value (struct value *value,
 	}
     }
 #endif
-
-  varobj_formatted_print_options (&opts, format);
 
   /* If the THEVALUE has contents, it is a regular string.  */
   if (!thevalue.empty ())
@@ -2331,46 +2353,85 @@ all_root_varobjs (gdb::function_view<void (struct varobj *var)> func)
     }
 }
 
-/* Invalidate varobj VAR if it is tied to locals and re-create it if it is
-   defined on globals.  It is a helper for varobj_invalidate.
-
-   This function is called after changing the symbol file, in this case the
-   pointers to "struct type" stored by the varobj are no longer valid.  All
-   varobj must be either re-evaluated, or marked as invalid here.  */
+/* Try to recreate the varobj VAR if it is a global or floating.  This is a
+   helper function for varobj_re_set.  */
 
 static void
-varobj_invalidate_iter (struct varobj *var)
+varobj_re_set_iter (struct varobj *var)
 {
-  /* global and floating var must be re-evaluated.  */
-  if (var->root->floating || var->root->valid_block == NULL)
+  /* Invalidated global varobjs must be re-evaluated.  */
+  if (!var->root->is_valid && var->root->global)
     {
       struct varobj *tmp_var;
 
       /* Try to create a varobj with same expression.  If we succeed
-	 replace the old varobj, otherwise invalidate it.  */
-      tmp_var = varobj_create (NULL, var->name.c_str (), (CORE_ADDR) 0,
+	 and have a global replace the old varobj.  */
+      tmp_var = varobj_create (nullptr, var->name.c_str (), (CORE_ADDR) 0,
 			       USE_CURRENT_FRAME);
-      if (tmp_var != NULL) 
-	{ 
+      if (tmp_var != nullptr && tmp_var->root->global)
+	{
 	  tmp_var->obj_name = var->obj_name;
 	  varobj_delete (var, 0);
 	  install_variable (tmp_var);
 	}
-      else
-	var->root->is_valid = false;
     }
-  else /* locals must be invalidated.  */
-    var->root->is_valid = false;
 }
 
-/* Invalidate the varobjs that are tied to locals and re-create the ones that
-   are defined on globals.
-   Invalidated varobjs will be always printed in_scope="invalid".  */
+/* See varobj.h.  */
 
 void 
-varobj_invalidate (void)
+varobj_re_set (void)
 {
-  all_root_varobjs (varobj_invalidate_iter);
+  all_root_varobjs (varobj_re_set_iter);
+}
+
+/* Ensure that no varobj keep references to OBJFILE.  */
+
+static void
+varobj_invalidate_if_uses_objfile (struct objfile *objfile)
+{
+  if (objfile->separate_debug_objfile_backlink != nullptr)
+    objfile = objfile->separate_debug_objfile_backlink;
+
+  all_root_varobjs ([objfile] (struct varobj *var)
+    {
+      if (var->root->valid_block != nullptr)
+	{
+	  struct objfile *bl_objfile = block_objfile (var->root->valid_block);
+	  if (bl_objfile->separate_debug_objfile_backlink != nullptr)
+	    bl_objfile = bl_objfile->separate_debug_objfile_backlink;
+
+	  if (bl_objfile == objfile)
+	    {
+	      /* The varobj is tied to a block which is going away.  There is
+		 no way to reconstruct something later, so invalidate the
+		 varobj completly and drop the reference to the block which is
+		 being freed.  */
+	      var->root->is_valid = false;
+	      var->root->valid_block = nullptr;
+	    }
+	}
+
+      if (var->root->exp != nullptr
+	  && exp_uses_objfile (var->root->exp.get (), objfile))
+	{
+	  /* The varobj's current expression references the objfile.  For
+	     globals and floating, it is possible that when we try to
+	     re-evaluate the expression later it is still valid with
+	     whatever is in scope at that moment.  Just invalidate the
+	     expression for now.  */
+	  var->root->exp.reset ();
+
+	  /* It only makes sense to keep a floating varobj around.  */
+	  if (!var->root->floating)
+	    var->root->is_valid = false;
+	}
+
+      /* var->value->type and var->type might also reference the objfile.
+	 This is taken care of in value.c:preserve_values which deals with
+	 making sure that objfile-owend types are replaced with
+	 gdbarch-owned equivalents.  */
+    });
 }
 
 /* A hash function for a varobj.  */
@@ -2407,4 +2468,7 @@ _initialize_varobj ()
 			     _("When non-zero, varobj debugging is enabled."),
 			     NULL, show_varobjdebug,
 			     &setdebuglist, &showdebuglist);
+
+  gdb::observers::free_objfile.attach (varobj_invalidate_if_uses_objfile,
+				       "varobj");
 }

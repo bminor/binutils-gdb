@@ -607,8 +607,7 @@ ioscm_with_output_to_port_worker (SCM port, SCM thunk, enum oport oport,
       gdb_stderr = port_file.get ();
     else
       {
-	current_uiout->redirect (port_file.get ());
-	redirect_popper.emplace (current_uiout);
+	redirect_popper.emplace (current_uiout, port_file.get ());
 
 	gdb_stdout = port_file.get ();
       }

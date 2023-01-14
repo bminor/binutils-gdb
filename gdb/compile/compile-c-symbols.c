@@ -144,7 +144,7 @@ convert_one_symbol (compile_c_instance *context,
 	     by their name.  */
 	  {
 	    struct value *val;
-	    struct frame_info *frame = NULL;
+	    frame_info_ptr frame = NULL;
 
 	    if (symbol_read_needs_frame (sym.symbol))
 	      {
@@ -495,7 +495,7 @@ generate_vla_size (compile_instance *compiler,
   type = check_typedef (type);
 
   if (TYPE_IS_REFERENCE (type))
-    type = check_typedef (TYPE_TARGET_TYPE (type));
+    type = check_typedef (type->target_type ());
 
   switch (type->code ())
     {
@@ -518,7 +518,7 @@ generate_vla_size (compile_instance *compiler,
       generate_vla_size (compiler, stream, gdbarch, registers_used, pc,
 			 type->index_type (), sym);
       generate_vla_size (compiler, stream, gdbarch, registers_used, pc,
-			 TYPE_TARGET_TYPE (type), sym);
+			 type->target_type (), sym);
       break;
 
     case TYPE_CODE_UNION:

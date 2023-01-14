@@ -212,10 +212,7 @@ static const char * const m32r_register_names[] = {
 static const char *
 m32r_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
-  if (reg_nr < 0)
-    return NULL;
-  if (reg_nr >= M32R_NUM_REGS)
-    return NULL;
+  gdb_static_assert (ARRAY_SIZE (m32r_register_names) == M32R_NUM_REGS);
   return m32r_register_names[reg_nr];
 }
 
@@ -247,7 +244,7 @@ m32r_store_return_value (struct type *type, struct regcache *regcache,
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR regval;
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
 
   regval = extract_unsigned_integer (valbuf, len > 4 ? 4 : len, byte_order);
   regcache_cooked_write_unsigned (regcache, RET1_REGNUM, regval);
@@ -519,7 +516,7 @@ struct m32r_unwind_cache
    for it IS the sp for the next frame.  */
 
 static struct m32r_unwind_cache *
-m32r_frame_unwind_cache (struct frame_info *this_frame,
+m32r_frame_unwind_cache (frame_info_ptr this_frame,
 			 void **this_prologue_cache)
 {
   CORE_ADDR pc, scan_limit;
@@ -685,14 +682,14 @@ m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Now make sure there's space on the stack.  */
   for (argnum = 0, stack_alloc = 0; argnum < nargs; argnum++)
-    stack_alloc += ((TYPE_LENGTH (value_type (args[argnum])) + 3) & ~3);
+    stack_alloc += ((value_type (args[argnum])->length () + 3) & ~3);
   sp -= stack_alloc;		/* Make room on stack for args.  */
 
   for (argnum = 0, stack_offset = 0; argnum < nargs; argnum++)
     {
       type = value_type (args[argnum]);
       typecode = type->code ();
-      len = TYPE_LENGTH (type);
+      len = type->length ();
 
       memset (valbuf, 0, sizeof (valbuf));
 
@@ -758,7 +755,7 @@ m32r_extract_return_value (struct type *type, struct regcache *regcache,
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   ULONGEST tmp;
 
   /* By using store_unsigned_integer we avoid having to do
@@ -780,7 +777,7 @@ m32r_return_value (struct gdbarch *gdbarch, struct value *function,
 		   struct type *valtype, struct regcache *regcache,
 		   gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  if (TYPE_LENGTH (valtype) > 8)
+  if (valtype->length () > 8)
     return RETURN_VALUE_STRUCT_CONVENTION;
   else
     {
@@ -796,7 +793,7 @@ m32r_return_value (struct gdbarch *gdbarch, struct value *function,
    frame.  This will be used to create a new GDB frame struct.  */
 
 static void
-m32r_frame_this_id (struct frame_info *this_frame,
+m32r_frame_this_id (frame_info_ptr this_frame,
 		    void **this_prologue_cache, struct frame_id *this_id)
 {
   struct m32r_unwind_cache *info
@@ -826,7 +823,7 @@ m32r_frame_this_id (struct frame_info *this_frame,
 }
 
 static struct value *
-m32r_frame_prev_register (struct frame_info *this_frame,
+m32r_frame_prev_register (frame_info_ptr this_frame,
 			  void **this_prologue_cache, int regnum)
 {
   struct m32r_unwind_cache *info
@@ -845,7 +842,7 @@ static const struct frame_unwind m32r_frame_unwind = {
 };
 
 static CORE_ADDR
-m32r_frame_base_address (struct frame_info *this_frame, void **this_cache)
+m32r_frame_base_address (frame_info_ptr this_frame, void **this_cache)
 {
   struct m32r_unwind_cache *info
     = m32r_frame_unwind_cache (this_frame, this_cache);
@@ -916,5 +913,5 @@ void _initialize_m32r_tdep ();
 void
 _initialize_m32r_tdep ()
 {
-  register_gdbarch_init (bfd_arch_m32r, m32r_gdbarch_init);
+  gdbarch_register (bfd_arch_m32r, m32r_gdbarch_init);
 }

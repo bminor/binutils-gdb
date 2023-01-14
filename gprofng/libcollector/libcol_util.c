@@ -1116,9 +1116,9 @@ __collector_util_init ()
   /*    internal calls for mapping in libcollector call mmap64 */
   ptr = dlsym (libc, "mmap64");
   if (ptr)
-    __collector_util_funcs.mmap64 = (void*(*)(void *, size_t, int, int, int, off_t))ptr;
+    __collector_util_funcs.mmap64_ = (void*(*)(void *, size_t, int, int, int, off_t))ptr;
   else
-    __collector_util_funcs.mmap64 = __collector_util_funcs.mmap;
+    __collector_util_funcs.mmap64_ = __collector_util_funcs.mmap;
 
   ptr = dlsym (libc, "munmap");
   if (ptr)
@@ -1214,16 +1214,16 @@ __collector_util_init ()
 #if ARCH(Intel) && WSIZE(32)
   ptr = dlvsym (libc, "pwrite64", "GLIBC_2.2"); // it is in /lib/libpthread.so.0
   if (ptr)
-    __collector_util_funcs.pwrite64 = (ssize_t (*)())ptr;
+    __collector_util_funcs.pwrite64_ = (ssize_t (*)())ptr;
   else
     {
       Tprintf (DBG_LT0, "libcol_util: WARNING: dlvsym for %s@%s failed. Using dlsym() instead.", "pwrite64", "GLIBC_2.2");
 #endif /* ARCH(Intel) && WSIZE(32) */
       ptr = dlsym (libc, "pwrite64");
       if (ptr)
-	__collector_util_funcs.pwrite64 = (ssize_t (*)())ptr;
+	__collector_util_funcs.pwrite64_ = (ssize_t (*)())ptr;
       else
-	__collector_util_funcs.pwrite64 = __collector_util_funcs.pwrite;
+	__collector_util_funcs.pwrite64_ = __collector_util_funcs.pwrite;
 #if ARCH(Intel) && WSIZE(32)
     }
 #endif /* ARCH(Intel) && WSIZE(32) */
@@ -1318,6 +1318,15 @@ __collector_util_init ()
 #endif
   __collector_util_funcs.getcpuid = __collector_getcpuid;
   __collector_util_funcs.memset = collector_memset;
+
+  ptr = dlsym (libc, "getcontext");
+  if (ptr)
+    __collector_util_funcs.getcontext = (int(*)())ptr;
+  else
+    {
+      CALL_UTIL (fprintf)(stderr, "collector_util_init COL_ERROR_UTIL_INIT getcontext: %s\n", dlerror ());
+      err = COL_ERROR_UTIL_INIT;
+    }
 
   ptr = dlsym (libc, "malloc");
   if (ptr)

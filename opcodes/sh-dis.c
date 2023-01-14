@@ -645,6 +645,8 @@ print_insn_sh (bfd_vma memaddr, struct disassemble_info *info)
 	      rm = (nibs[n] & 0x3);
 	      break;
 	    case REG_B:
+	      if (!(nibs[n] & 0x08)) /* Must always be 1.  */
+		goto fail;
 	      rb = nibs[n] & 0x07;
 	      break;
 	    case SDT_REG_N:

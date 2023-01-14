@@ -18,6 +18,7 @@
 
 #include "defs.h"
 #include "gdbsupport/gdb_assert.h"
+#include "gdbsupport/gdb-checked-static-cast.h"
 #include "location.h"
 #include "symtab.h"
 #include "language.h"
@@ -220,7 +221,7 @@ const linespec_location_spec *
 as_linespec_location_spec (const location_spec *locspec)
 {
   gdb_assert (locspec->type () == LINESPEC_LOCATION_SPEC);
-  return static_cast<const linespec_location_spec *> (locspec);
+  return gdb::checked_static_cast<const linespec_location_spec *> (locspec);
 }
 
 /* See description in location.h.  */
@@ -239,7 +240,7 @@ const address_location_spec *
 as_address_location_spec (const location_spec *locspec)
 {
   gdb_assert (locspec->type () == ADDRESS_LOCATION_SPEC);
-  return static_cast<const address_location_spec *> (locspec);
+  return gdb::checked_static_cast<const address_location_spec *> (locspec);
 }
 
 /* See description in location.h.  */
@@ -256,7 +257,7 @@ const probe_location_spec *
 as_probe_location_spec (const location_spec *locspec)
 {
   gdb_assert (locspec->type () == PROBE_LOCATION_SPEC);
-  return static_cast<const probe_location_spec *> (locspec);
+  return gdb::checked_static_cast<const probe_location_spec *> (locspec);
 }
 
 /* See description in location.h.  */
@@ -265,7 +266,7 @@ const explicit_location_spec *
 as_explicit_location_spec (const location_spec *locspec)
 {
   gdb_assert (locspec->type () == EXPLICIT_LOCATION_SPEC);
-  return static_cast<const explicit_location_spec *> (locspec);
+  return gdb::checked_static_cast<const explicit_location_spec *> (locspec);
 }
 
 /* See description in location.h.  */
@@ -274,7 +275,7 @@ explicit_location_spec *
 as_explicit_location_spec (location_spec *locspec)
 {
   gdb_assert (locspec->type () == EXPLICIT_LOCATION_SPEC);
-  return static_cast<explicit_location_spec *> (locspec);
+  return gdb::checked_static_cast<explicit_location_spec *> (locspec);
 }
 
 /* Return a string representation of the explicit location spec in
@@ -848,8 +849,7 @@ string_to_location_spec (const char **stringp,
 	 linespec parsing below and discard the explicit location
 	 spec.  */
       explicit_location_spec *xloc
-	= dynamic_cast<explicit_location_spec *> (locspec.get ());
-      gdb_assert (xloc != nullptr);
+	= gdb::checked_static_cast<explicit_location_spec *> (locspec.get ());
       match_type = xloc->func_name_match_type;
     }
 

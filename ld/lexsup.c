@@ -396,6 +396,8 @@ static const struct ld_option ld_options[] =
      OPTION_ERROR_HANDLING_SCRIPT},
     '\0', N_("SCRIPT"), N_("Provide a script to help with undefined symbol errors"), TWO_DASHES},
 #endif
+  { {"undefined-version", no_argument, NULL, OPTION_UNDEFINED_VERSION},
+    '\0', NULL, N_("Allow undefined version"), EXACTLY_TWO_DASHES },
   { {"no-undefined-version", no_argument, NULL, OPTION_NO_UNDEFINED_VERSION},
     '\0', NULL, N_("Disallow undefined version"), TWO_DASHES },
   { {"default-symver", no_argument, NULL, OPTION_DEFAULT_SYMVER},
@@ -1088,6 +1090,9 @@ parse_args (unsigned argc, char **argv)
 	  break;
 #endif
 
+	case OPTION_UNDEFINED_VERSION:
+	  link_info.allow_undefined_version = true;
+	  break;
 	case OPTION_NO_UNDEFINED_VERSION:
 	  link_info.allow_undefined_version = false;
 	  break;
@@ -2146,15 +2151,11 @@ elf_static_list_options (FILE *file)
   fprintf (file, _("\
   --package-metadata[=JSON]   Generate package metadata note\n"));
   fprintf (file, _("\
-  --compress-debug-sections=[none|zlib|zlib-gnu|zlib-gabi]\n\
-                              Compress DWARF debug sections using zlib\n"));
-#ifdef DEFAULT_FLAG_COMPRESS_DEBUG
+  --compress-debug-sections=[none|zlib|zlib-gnu|zlib-gabi|zstd]\n\
+			      Compress DWARF debug sections\n"));
   fprintf (file, _("\
-                                Default: zlib-gabi\n"));
-#else
-  fprintf (file, _("\
-                                Default: none\n"));
-#endif
+                                Default: %s\n"),
+	   bfd_get_compression_algorithm_name (link_info.compress_debug));
   fprintf (file, _("\
   -z common-page-size=SIZE    Set common page size to SIZE\n"));
   fprintf (file, _("\

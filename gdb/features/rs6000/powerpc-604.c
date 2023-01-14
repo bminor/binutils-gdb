@@ -5,7 +5,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 
-struct target_desc *tdesc_powerpc_604;
+const struct target_desc *tdesc_powerpc_604;
 static void
 initialize_tdesc_powerpc_604 (void)
 {
@@ -141,13 +141,12 @@ initialize_tdesc_powerpc_604 (void)
   tdesc_create_reg (feature, "hid0", 119, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "hid1", 120, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "iabr", 121, 1, NULL, 32, "int");
-  tdesc_create_reg (feature, "dabr", 122, 1, NULL, 32, "int");
-  tdesc_create_reg (feature, "pir", 123, 1, NULL, 32, "int");
-  tdesc_create_reg (feature, "mmcr0", 124, 1, NULL, 32, "int");
-  tdesc_create_reg (feature, "pmc1", 125, 1, NULL, 32, "int");
-  tdesc_create_reg (feature, "pmc2", 126, 1, NULL, 32, "int");
-  tdesc_create_reg (feature, "sia", 127, 1, NULL, 32, "int");
-  tdesc_create_reg (feature, "sda", 128, 1, NULL, 32, "int");
+  tdesc_create_reg (feature, "pir", 122, 1, NULL, 32, "int");
+  tdesc_create_reg (feature, "mmcr0", 123, 1, NULL, 32, "int");
+  tdesc_create_reg (feature, "pmc1", 124, 1, NULL, 32, "int");
+  tdesc_create_reg (feature, "pmc2", 125, 1, NULL, 32, "int");
+  tdesc_create_reg (feature, "sia", 126, 1, NULL, 32, "int");
+  tdesc_create_reg (feature, "sda", 127, 1, NULL, 32, "int");
 
   tdesc_powerpc_604 = result.release ();
 }

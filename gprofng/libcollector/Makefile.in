@@ -274,7 +274,7 @@ am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/../../ar-lib \
 	$(top_srcdir)/../../config.sub $(top_srcdir)/../../depcomp \
 	$(top_srcdir)/../../install-sh $(top_srcdir)/../../ltmain.sh \
 	$(top_srcdir)/../../missing $(top_srcdir)/../../mkinstalldirs \
-	$(top_srcdir)/../common/config.h.in ../../COPYING \
+	$(top_srcdir)/../common/lib-config.h.in ../../COPYING \
 	../../COPYING.LIB ../../ChangeLog ../../README ../../ar-lib \
 	../../compile ../../config.guess ../../config.rpath \
 	../../config.sub ../../depcomp ../../install-sh \
@@ -518,10 +518,10 @@ lib-config.h: stamp-h1
 	@test -f $@ || rm -f stamp-h1
 	@test -f $@ || $(MAKE) $(AM_MAKEFLAGS) stamp-h1
 
-stamp-h1: $(top_srcdir)/../common/config.h.in $(top_builddir)/config.status
+stamp-h1: $(top_srcdir)/../common/lib-config.h.in $(top_builddir)/config.status
 	@rm -f stamp-h1
 	cd $(top_builddir) && $(SHELL) ./config.status lib-config.h
-$(top_srcdir)/../common/config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps) 
+$(top_srcdir)/../common/lib-config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps) 
 	($(am__cd) $(top_srcdir) && $(AUTOHEADER))
 	rm -f stamp-h1
 	touch $@

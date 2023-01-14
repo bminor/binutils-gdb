@@ -1167,8 +1167,8 @@ void
   SEM_PC vpc;
 #if WITH_SEM_SWITCH_FULL
   /* For communication between cti's and cti-chain.  */
-  SEM_BRANCH_TYPE pbb_br_type;
-  PCADDR pbb_br_npc;
+  SEM_BRANCH_TYPE pbb_br_type = SEM_BRANCH_UNTAKEN;
+  PCADDR pbb_br_npc = 0;
 #endif
 
 EOF
@@ -1259,8 +1259,8 @@ void
   SEM_PC vpc;
 #if WITH_SEM_SWITCH_FAST
   /* For communication between cti's and cti-chain.  */
-  SEM_BRANCH_TYPE pbb_br_type;
-  PCADDR pbb_br_npc;
+  SEM_BRANCH_TYPE pbb_br_type = SEM_BRANCH_UNTAKEN;
+  PCADDR pbb_br_npc = 0;
 #endif
 
 EOF

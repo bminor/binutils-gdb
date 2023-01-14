@@ -295,26 +295,17 @@ unbuffer_stream (FILE *stream)
 /* See top.h.  */
 
 ui::ui (FILE *instream_, FILE *outstream_, FILE *errstream_)
-  : next (nullptr),
-    num (++highest_ui_num),
-    call_readline (nullptr),
-    input_handler (nullptr),
-    command_editing (0),
-    interp_info (nullptr),
-    async (0),
-    secondary_prompt_depth (0),
+  : num (++highest_ui_num),
     stdin_stream (instream_),
     instream (instream_),
     outstream (outstream_),
     errstream (errstream_),
     input_fd (fileno (instream)),
-    input_interactive_p (ISATTY (instream)),
-    prompt_state (PROMPT_NEEDED),
+    m_input_interactive_p (ISATTY (instream)),
     m_gdb_stdout (new pager_file (new stdio_file (outstream))),
     m_gdb_stdin (new stdio_file (instream)),
     m_gdb_stderr (new stderr_file (errstream)),
-    m_gdb_stdlog (m_gdb_stderr),
-    m_current_uiout (nullptr)
+    m_gdb_stdlog (m_gdb_stderr)
 {
   buffer_init (&line_buffer);
 
@@ -352,6 +343,8 @@ ui::~ui ()
   delete m_gdb_stdin;
   delete m_gdb_stdout;
   delete m_gdb_stderr;
+
+  buffer_free (&line_buffer);
 }
 
 /* Open file named NAME for read/write, making sure not to make it the
@@ -498,7 +491,7 @@ void
 check_frame_language_change (void)
 {
   static int warned = 0;
-  struct frame_info *frame;
+  frame_info_ptr frame;
 
   /* First make sure that a new frame has been selected, in case the
      command or the hooks changed the program state.  */
@@ -733,8 +726,7 @@ execute_fn_to_ui_file (struct ui_file *file, std::function<void(void)> fn)
   scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
   {
-    current_uiout->redirect (file);
-    ui_out_redirect_pop redirect_popper (current_uiout);
+    ui_out_redirect_pop redirect_popper (current_uiout, file);
 
     scoped_restore save_stdout
       = make_scoped_restore (&gdb_stdout, file);
@@ -1109,7 +1101,7 @@ public:
     current_ui->secondary_prompt_depth++;
 
     if (m_target_is_async_orig)
-      target_async (0);
+      target_async (false);
   }
 
   ~gdb_readline_wrapper_cleanup ()
@@ -1138,7 +1130,7 @@ public:
     saved_after_char_processing_hook = NULL;
 
     if (m_target_is_async_orig)
-      target_async (1);
+      target_async (true);
   }
 
   DISABLE_COPY_AND_ASSIGN (gdb_readline_wrapper_cleanup);
@@ -1405,13 +1397,13 @@ command_line_input (const char *prompt_arg, const char *annotation_suffix)
       /* Don't use fancy stuff if not talking to stdin.  */
       if (deprecated_readline_hook
 	  && from_tty
-	  && input_interactive_p (current_ui))
+	  && current_ui->input_interactive_p ())
 	{
 	  rl.reset ((*deprecated_readline_hook) (prompt));
 	}
       else if (command_editing_p
 	       && from_tty
-	       && input_interactive_p (current_ui))
+	       && current_ui->input_interactive_p ())
 	{
 	  rl.reset (gdb_readline_wrapper (prompt));
 	}
@@ -1875,7 +1867,7 @@ quit_force (int *exit_arg, int from_tty)
 	     any UI with a terminal, save history.  */
 	  for (ui *ui : all_uis ())
 	    {
-	      if (input_interactive_p (ui))
+	      if (ui->input_interactive_p ())
 		{
 		  save = 1;
 		  break;
@@ -1923,23 +1915,23 @@ show_interactive_mode (struct ui_file *file, int from_tty,
   if (interactive_mode == AUTO_BOOLEAN_AUTO)
     gdb_printf (file, "Debugger's interactive mode "
 		"is %s (currently %s).\n",
-		value, input_interactive_p (current_ui) ? "on" : "off");
+		value, current_ui->input_interactive_p () ? "on" : "off");
   else
     gdb_printf (file, "Debugger's interactive mode is %s.\n", value);
 }
 
 /* Returns whether GDB is running on an interactive terminal.  */
 
-int
-input_interactive_p (struct ui *ui)
+bool
+ui::input_interactive_p () const
 {
   if (batch_flag)
-    return 0;
+    return false;
 
   if (interactive_mode != AUTO_BOOLEAN_AUTO)
     return interactive_mode == AUTO_BOOLEAN_TRUE;
 
-  return ui->input_interactive_p;
+  return m_input_interactive_p;
 }
 
 static void
@@ -2232,17 +2224,6 @@ show_startup_quiet (struct ui_file *file, int from_tty,
 }
 
 static void
-init_gdb_version_vars (void)
-{
-  struct internalvar *major_version_var = create_internalvar ("_gdb_major");
-  struct internalvar *minor_version_var = create_internalvar ("_gdb_minor");
-  int vmajor = 0, vminor = 0, vrevision = 0;
-  sscanf (version, "%d.%d.%d", &vmajor, &vminor, &vrevision);
-  set_internalvar_integer (major_version_var, vmajor);
-  set_internalvar_integer (minor_version_var, vminor + (vrevision > 0));
-}
-
-static void
 init_main (void)
 {
   struct cmd_list_element *c;
@@ -2405,6 +2386,13 @@ Usage: new-ui INTERPRETER TTY\n\
 The first argument is the name of the interpreter to run.\n\
 The second argument is the terminal the UI runs on."), &cmdlist);
   set_cmd_completer (c, interpreter_completer);
+
+  struct internalvar *major_version_var = create_internalvar ("_gdb_major");
+  struct internalvar *minor_version_var = create_internalvar ("_gdb_minor");
+  int vmajor = 0, vminor = 0, vrevision = 0;
+  sscanf (version, "%d.%d.%d", &vmajor, &vminor, &vrevision);
+  set_internalvar_integer (major_version_var, vmajor);
+  set_internalvar_integer (minor_version_var, vminor + (vrevision > 0));
 }
 
 /* See top.h.  */
@@ -2422,8 +2410,6 @@ gdb_init ()
      what may, since the OS doesn't do that for us.  */
   make_final_cleanup (do_chdir_cleanup, xstrdup (current_directory));
 #endif
-
-  init_cmd_lists ();	    /* This needs to be done first.  */
 
   init_page_info ();
 
@@ -2454,9 +2440,6 @@ gdb_init ()
      during startup.  */
   set_language (language_c);
   expected_language = current_language;	/* Don't warn about the change.  */
-
-  /* Create $_gdb_major and $_gdb_minor convenience variables.  */
-  init_gdb_version_vars ();
 }
 
 void _initialize_top ();

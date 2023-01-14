@@ -28,7 +28,7 @@ if { [skip_cplus_tests] } { continue }
 standard_testfile .cc
 
 if {[build_executable_from_specs $testfile.exp $testfile \
-       {c++ additional_flags=-Wl,--gc-sections} \
+       {c++ ldflags=-Wl,--gc-sections} \
        $srcfile {debug c++ additional_flags=-ffunction-sections}]} {
     untested "failed to compile"
     return -1

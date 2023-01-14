@@ -329,7 +329,7 @@ extern void xtensa_frag_init (fragS *);
 extern int xtensa_force_relocation (struct fix *);
 extern int xtensa_validate_fix_sub (struct fix *);
 extern void xtensa_frob_label (struct symbol *);
-extern void xtensa_end (void);
+extern void xtensa_md_finish (void);
 extern void xtensa_post_relax_hook (void);
 extern void xtensa_file_arch_init (bfd *);
 extern void xtensa_flush_pending_output (void);
@@ -372,7 +372,7 @@ extern void xtensa_init (int, char **);
 #define tc_symbol_new_hook(sym)		xtensa_symbol_new_hook (sym)
 #define md_do_align(a,b,c,d,e)		xtensa_flush_pending_output ()
 #define md_elf_section_change_hook	xtensa_elf_section_change_hook
-#define md_end				xtensa_end
+#define md_finish			xtensa_md_finish
 #define md_flush_pending_output()	xtensa_flush_pending_output ()
 #define md_operand(x)
 #define TEXT_SECTION_NAME		xtensa_section_rename (".text")

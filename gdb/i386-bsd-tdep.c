@@ -32,7 +32,7 @@
    address of the associated sigcontext structure.  */
 
 static CORE_ADDR
-i386bsd_sigcontext_addr (struct frame_info *this_frame)
+i386bsd_sigcontext_addr (frame_info_ptr this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -74,7 +74,7 @@ int i386bsd_sc_reg_offset[] =
 void
 i386bsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
 
   tdep->jb_pc_offset = 0;
 

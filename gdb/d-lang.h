@@ -28,30 +28,30 @@
 
 struct builtin_d_type
 {
-  struct type *builtin_void;
-  struct type *builtin_bool;
-  struct type *builtin_byte;
-  struct type *builtin_ubyte;
-  struct type *builtin_short;
-  struct type *builtin_ushort;
-  struct type *builtin_int;
-  struct type *builtin_uint;
-  struct type *builtin_long;
-  struct type *builtin_ulong;
-  struct type *builtin_cent;
-  struct type *builtin_ucent;
-  struct type *builtin_float;
-  struct type *builtin_double;
-  struct type *builtin_real;
-  struct type *builtin_ifloat;
-  struct type *builtin_idouble;
-  struct type *builtin_ireal;
-  struct type *builtin_cfloat;
-  struct type *builtin_cdouble;
-  struct type *builtin_creal;
-  struct type *builtin_char;
-  struct type *builtin_wchar;
-  struct type *builtin_dchar;
+  struct type *builtin_void = nullptr;
+  struct type *builtin_bool = nullptr;
+  struct type *builtin_byte = nullptr;
+  struct type *builtin_ubyte = nullptr;
+  struct type *builtin_short = nullptr;
+  struct type *builtin_ushort = nullptr;
+  struct type *builtin_int = nullptr;
+  struct type *builtin_uint = nullptr;
+  struct type *builtin_long = nullptr;
+  struct type *builtin_ulong = nullptr;
+  struct type *builtin_cent = nullptr;
+  struct type *builtin_ucent = nullptr;
+  struct type *builtin_float = nullptr;
+  struct type *builtin_double = nullptr;
+  struct type *builtin_real = nullptr;
+  struct type *builtin_ifloat = nullptr;
+  struct type *builtin_idouble = nullptr;
+  struct type *builtin_ireal = nullptr;
+  struct type *builtin_cfloat = nullptr;
+  struct type *builtin_cdouble = nullptr;
+  struct type *builtin_creal = nullptr;
+  struct type *builtin_char = nullptr;
+  struct type *builtin_wchar = nullptr;
+  struct type *builtin_dchar = nullptr;
 };
 
 /* Defined in d-exp.y.  */

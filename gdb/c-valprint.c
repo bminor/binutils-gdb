@@ -87,8 +87,8 @@ c_textual_element_type (struct type *type, char format)
       /* Peel a single typedef.  If the typedef doesn't have a target
 	 type, we use check_typedef and hope the result is ok -- it
 	 might be for C++, where wchar_t is a built-in type.  */
-      if (TYPE_TARGET_TYPE (iter_type))
-	iter_type = TYPE_TARGET_TYPE (iter_type);
+      if (iter_type->target_type ())
+	iter_type = iter_type->target_type ();
       else
 	iter_type = check_typedef (iter_type);
     }
@@ -98,7 +98,7 @@ c_textual_element_type (struct type *type, char format)
       /* Print this as a string if we can manage it.  For now, no wide
 	 character support.  */
       if (true_type->code () == TYPE_CODE_INT
-	  && TYPE_LENGTH (true_type) == 1)
+	  && true_type->length () == 1)
 	return 1;
     }
   else
@@ -107,7 +107,7 @@ c_textual_element_type (struct type *type, char format)
 	 flag, then we treat it as text; otherwise, we assume it's
 	 being used as data.  */
       if (true_type->code () == TYPE_CODE_INT
-	  && TYPE_LENGTH (true_type) == 1
+	  && true_type->length () == 1
 	  && !TYPE_NOTTEXT (true_type))
 	return 1;
     }
@@ -238,10 +238,10 @@ c_value_print_array (struct value *val,
   struct type *type = check_typedef (value_type (val));
   CORE_ADDR address = value_address (val);
   const gdb_byte *valaddr = value_contents_for_printing (val).data ();
-  struct type *unresolved_elttype = TYPE_TARGET_TYPE (type);
+  struct type *unresolved_elttype = type->target_type ();
   struct type *elttype = check_typedef (unresolved_elttype);
 
-  if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (unresolved_elttype) > 0)
+  if (type->length () > 0 && unresolved_elttype->length () > 0)
     {
       LONGEST low_bound, high_bound;
       int eltlen, len;
@@ -250,16 +250,16 @@ c_value_print_array (struct value *val,
       if (!get_array_bounds (type, &low_bound, &high_bound))
 	error (_("Could not determine the array high bound"));
 
-      eltlen = TYPE_LENGTH (elttype);
+      eltlen = elttype->length ();
       len = high_bound - low_bound + 1;
 
       /* Print arrays of textual chars with a string syntax, as
 	 long as the entire array is valid.  */
       if (c_textual_element_type (unresolved_elttype,
 				  options->format)
-	  && value_bytes_available (val, 0, TYPE_LENGTH (type))
+	  && value_bytes_available (val, 0, type->length ())
 	  && !value_bits_any_optimized_out (val, 0,
-					    TARGET_CHAR_BIT * TYPE_LENGTH (type)))
+					    TARGET_CHAR_BIT * type->length ()))
 	{
 	  int force_ellipses = 0;
 
@@ -347,7 +347,7 @@ c_value_print_ptr (struct value *val, struct ui_file *stream, int recurse,
     }
   else
     {
-      struct type *unresolved_elttype = TYPE_TARGET_TYPE (type);
+      struct type *unresolved_elttype = type->target_type ();
       struct type *elttype = check_typedef (unresolved_elttype);
       CORE_ADDR addr = unpack_pointer (type, valaddr);
 
@@ -497,15 +497,15 @@ c_value_print (struct value *val, struct ui_file *stream,
 	 are always exactly (char *), (wchar_t *), or the like.  */
       if (original_type->code () == TYPE_CODE_PTR
 	  && original_type->name () == NULL
-	  && TYPE_TARGET_TYPE (original_type)->name () != NULL
-	  && (strcmp (TYPE_TARGET_TYPE (original_type)->name (),
+	  && original_type->target_type ()->name () != NULL
+	  && (strcmp (original_type->target_type ()->name (),
 		      "char") == 0
-	      || textual_name (TYPE_TARGET_TYPE (original_type)->name ())))
+	      || textual_name (original_type->target_type ()->name ())))
 	{
 	  /* Print nothing.  */
 	}
       else if (options->objectprint
-	       && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_STRUCT))
+	       && (type->target_type ()->code () == TYPE_CODE_STRUCT))
 	{
 	  int is_ref = TYPE_IS_REFERENCE (type);
 	  enum type_code refcode = TYPE_CODE_UNDEF;
@@ -569,8 +569,8 @@ c_value_print (struct value *val, struct ui_file *stream,
 	     superclass of the object's type.  In this case it is
 	     better to leave the object as-is.  */
 	  if (!(full
-		&& (TYPE_LENGTH (real_type)
-		    < TYPE_LENGTH (value_enclosing_type (val)))))
+		&& (real_type->length ()
+		    < value_enclosing_type (val)->length ())))
 	    val = value_cast (real_type, val);
 	  gdb_printf (stream, "(%s%s) ",
 		      real_type->name (),

@@ -116,7 +116,7 @@ dump_objfile (struct objfile *objfile)
   gdb_printf ("\nObject file %s:  ", objfile_name (objfile));
   gdb_printf ("Objfile at %s, bfd at %s, %d minsyms\n\n",
 	      host_address_to_string (objfile),
-	      host_address_to_string (objfile->obfd),
+	      host_address_to_string (objfile->obfd.get ()),
 	      objfile->per_bfd->minimal_symbol_count);
 
   objfile->dump ();
@@ -567,8 +567,8 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 	    struct type *type = check_typedef (symbol->type ());
 
 	    gdb_printf (outfile, "const %s hex bytes:",
-			pulongest (TYPE_LENGTH (type)));
-	    for (i = 0; i < TYPE_LENGTH (type); i++)
+			pulongest (type->length ()));
+	    for (i = 0; i < type->length (); i++)
 	      gdb_printf (outfile, " %02x",
 			  (unsigned) symbol->value_bytes ()[i]);
 	  }

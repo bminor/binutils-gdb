@@ -137,7 +137,7 @@ ada_varobj_ind (struct value *parent_value,
       /* Decode parent_type by the equivalent pointer to (decoded)
 	 array.  */
       while (parent_type->code () == TYPE_CODE_TYPEDEF)
-	parent_type = TYPE_TARGET_TYPE (parent_type);
+	parent_type = parent_type->target_type ();
       parent_type = ada_coerce_to_simple_array_type (parent_type);
       parent_type = lookup_pointer_type (parent_type);
     }
@@ -153,7 +153,7 @@ ada_varobj_ind (struct value *parent_value,
       type = value_type (value);
     }
   else
-    type = TYPE_TARGET_TYPE (parent_type);
+    type = parent_type->target_type ();
 
   if (child_value)
     *child_value = value;
@@ -184,7 +184,7 @@ ada_varobj_simple_array_elt (struct value *parent_value,
       type = value_type (value);
     }
   else
-    type = TYPE_TARGET_TYPE (parent_type);
+    type = parent_type->target_type ();
 
   if (child_value)
     *child_value = value;
@@ -207,12 +207,12 @@ ada_varobj_adjust_for_child_access (struct value **value,
       the struct/union type.  We handle this situation by dereferencing
       the (value, type) couple.  */
   if ((*type)->code () == TYPE_CODE_PTR
-      && (TYPE_TARGET_TYPE (*type)->code () == TYPE_CODE_STRUCT
-	  || TYPE_TARGET_TYPE (*type)->code () == TYPE_CODE_UNION)
+      && ((*type)->target_type ()->code () == TYPE_CODE_STRUCT
+	  || (*type)->target_type ()->code () == TYPE_CODE_UNION)
       && *value != nullptr
       && value_as_address (*value) != 0
-      && !ada_is_array_descriptor_type (TYPE_TARGET_TYPE (*type))
-      && !ada_is_constrained_packed_array_type (TYPE_TARGET_TYPE (*type)))
+      && !ada_is_array_descriptor_type ((*type)->target_type ())
+      && !ada_is_constrained_packed_array_type ((*type)->target_type ()))
     ada_varobj_ind (*value, *type, value, type);
 
   /* If this is a tagged type, we need to transform it a bit in order
@@ -327,7 +327,7 @@ static int
 ada_varobj_get_ptr_number_of_children (struct value *parent_value,
 				       struct type *parent_type)
 {
-  struct type *child_type = TYPE_TARGET_TYPE (parent_type);
+  struct type *child_type = parent_type->target_type ();
 
   /* Pointer to functions and to void do not have a child, since
      you cannot print what they point to.  */
@@ -634,7 +634,7 @@ ada_varobj_describe_simple_array_child (struct value *parent_value,
 
       /* If the index type is a range type, find the base type.  */
       while (index_type->code () == TYPE_CODE_RANGE)
-	index_type = TYPE_TARGET_TYPE (index_type);
+	index_type = index_type->target_type ();
 
       if (index_type->code () == TYPE_CODE_ENUM
 	  || index_type->code () == TYPE_CODE_BOOL)
@@ -946,7 +946,7 @@ ada_value_is_changeable_p (const struct varobj *var)
 		       ? value_type (var->value.get ()) : var->type);
 
   if (type->code () == TYPE_CODE_REF)
-    type = TYPE_TARGET_TYPE (type);
+    type = type->target_type ();
 
   if (ada_is_access_to_unconstrained_array (type))
     {

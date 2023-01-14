@@ -78,8 +78,8 @@ extern int target_big_endian;
 
 #define md_operand(x)
 
-extern void s390_md_end (void);
-#define md_end() s390_md_end ()
+extern void s390_md_finish (void);
+#define md_finish() s390_md_finish ()
 
 #define TARGET_USE_CFIPOP 1
 

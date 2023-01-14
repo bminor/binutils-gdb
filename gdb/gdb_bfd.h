@@ -26,7 +26,13 @@
 #include "gdbsupport/iterator-range.h"
 #include "gdbsupport/next-iterator.h"
 
-DECLARE_REGISTRY (bfd);
+/* A registry adaptor for BFD.  This arranges to store the registry in
+   gdb's per-BFD data, which is stored as the bfd_usrdata.  */
+template<>
+struct registry_accessor<bfd>
+{
+  static registry<bfd> *get (bfd *abfd);
+};
 
 /* If supplied a path starting with this sequence, gdb_bfd_open will
    open BFDs using target fileio operations.  */
@@ -195,11 +201,12 @@ int gdb_bfd_requires_relocations (bfd *abfd);
 bool gdb_bfd_get_full_section_contents (bfd *abfd, asection *section,
 					gdb::byte_vector *contents);
 
-/* Create and initialize a BFD handle from a target in-memory range.  */
+/* Create and initialize a BFD handle from a target in-memory range.  The
+   BFD starts at ADDR and is SIZE bytes long.  TARGET is the BFD target
+   name as used in bfd_find_target.  */
 
 gdb_bfd_ref_ptr gdb_bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size,
-						 const char *target,
-						 const char *filename = nullptr);
+						 const char *target);
 
 /* Range adapter for a BFD's sections.
 

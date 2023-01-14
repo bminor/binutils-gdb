@@ -51,7 +51,7 @@ sal_macro_scope (struct symtab_and_line sal)
   gdb::unique_xmalloc_ptr<struct macro_scope> ms (XNEW (struct macro_scope));
 
   main_file = macro_main (cust->macro_table ());
-  inclusion = macro_lookup_inclusion (main_file, sal.symtab->filename);
+  inclusion = macro_lookup_inclusion (main_file, sal.symtab->filename_for_id);
 
   if (inclusion)
     {
@@ -100,7 +100,7 @@ default_macro_scope (void)
 {
   struct symtab_and_line sal;
   gdb::unique_xmalloc_ptr<struct macro_scope> ms;
-  struct frame_info *frame;
+  frame_info_ptr frame;
   CORE_ADDR pc;
 
   /* If there's a selected frame, use its PC.  */

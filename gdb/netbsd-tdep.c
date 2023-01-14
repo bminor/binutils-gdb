@@ -373,24 +373,21 @@ nbsd_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
     return find_solib_trampoline_target (get_current_frame (), pc);
 }
 
-static struct gdbarch_data *nbsd_gdbarch_data_handle;
-
 struct nbsd_gdbarch_data
 {
-  struct type *siginfo_type;
+  struct type *siginfo_type = nullptr;
 };
 
-static void *
-init_nbsd_gdbarch_data (struct gdbarch *gdbarch)
-{
-  return GDBARCH_OBSTACK_ZALLOC (gdbarch, struct nbsd_gdbarch_data);
-}
+static const registry<gdbarch>::key<nbsd_gdbarch_data>
+     nbsd_gdbarch_data_handle;
 
 static struct nbsd_gdbarch_data *
 get_nbsd_gdbarch_data (struct gdbarch *gdbarch)
 {
-  return ((struct nbsd_gdbarch_data *)
-	  gdbarch_data (gdbarch, nbsd_gdbarch_data_handle));
+  struct nbsd_gdbarch_data *result = nbsd_gdbarch_data_handle.get (gdbarch);
+  if (result == nullptr)
+    result = nbsd_gdbarch_data_handle.emplace (gdbarch);
+  return result;
 }
 
 /* Implement the "get_siginfo_type" gdbarch method.  */
@@ -413,29 +410,29 @@ nbsd_get_siginfo_type (struct gdbarch *gdbarch)
   type *uint32_type = builtin_type (gdbarch)->builtin_uint32;
   type *uint64_type = builtin_type (gdbarch)->builtin_uint64;
 
-  bool lp64 = TYPE_LENGTH (void_ptr_type) == 8;
+  bool lp64 = void_ptr_type->length () == 8;
   size_t char_bits = gdbarch_addressable_memory_unit_size (gdbarch) * 8;
 
   /* pid_t */
   type *pid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-			      TYPE_LENGTH (int32_type) * char_bits, "pid_t");
-  TYPE_TARGET_TYPE (pid_type) = int32_type;
+			      int32_type->length () * char_bits, "pid_t");
+  pid_type->set_target_type (int32_type);
 
   /* uid_t */
   type *uid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-			      TYPE_LENGTH (uint32_type) * char_bits, "uid_t");
-  TYPE_TARGET_TYPE (uid_type) = uint32_type;
+			      uint32_type->length () * char_bits, "uid_t");
+  uid_type->set_target_type (uint32_type);
 
   /* clock_t */
   type *clock_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-				TYPE_LENGTH (int_type) * char_bits, "clock_t");
-  TYPE_TARGET_TYPE (clock_type) = int_type;
+				int_type->length () * char_bits, "clock_t");
+  clock_type->set_target_type (int_type);
 
   /* lwpid_t */
   type *lwpid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-				TYPE_LENGTH (int32_type) * char_bits,
+				int32_type->length () * char_bits,
 				"lwpid_t");
-  TYPE_TARGET_TYPE (lwpid_type) = int32_type;
+  lwpid_type->set_target_type (int32_type);
 
   /* union sigval */
   type *sigval_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_UNION);
@@ -621,12 +618,4 @@ nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* `catch syscall' */
   set_xml_syscall_file_name (gdbarch, "syscalls/netbsd.xml");
   set_gdbarch_get_syscall_number (gdbarch, nbsd_get_syscall_number);
-}
-
-void _initialize_nbsd_tdep ();
-void
-_initialize_nbsd_tdep ()
-{
-  nbsd_gdbarch_data_handle
-    = gdbarch_data_register_post_init (init_nbsd_gdbarch_data);
 }

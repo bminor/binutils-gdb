@@ -41,6 +41,7 @@ create_feature_loongarch_base64 (struct target_desc *result, long regnum)
   tdesc_create_reg (feature, "r29", regnum++, 1, "general", 64, "uint64");
   tdesc_create_reg (feature, "r30", regnum++, 1, "general", 64, "uint64");
   tdesc_create_reg (feature, "r31", regnum++, 1, "general", 64, "uint64");
+  tdesc_create_reg (feature, "orig_a0", regnum++, 1, "general", 64, "uint64");
   tdesc_create_reg (feature, "pc", regnum++, 1, "general", 64, "code_ptr");
   tdesc_create_reg (feature, "badv", regnum++, 1, "general", 64, "code_ptr");
   return regnum;

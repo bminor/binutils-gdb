@@ -99,6 +99,20 @@
 # argument, and NAME is the name.  Note that while the names could be
 # auto-generated, this approach lets the "comment" field refer to
 # arguments in a nicer way.  It is also just nicer for users.
+#
+# * "param_checks" - optional, a list of strings.  Each string is an
+# expression that is placed within a gdb_assert before the call is
+# made to the Function/Method implementation.  Each expression is
+# something that should be true, and it is expected that the
+# expression will make use of the parameters named in 'params' (though
+# this is not required).
+#
+# * "result_checks" - optional, a list of strings.  Each string is an
+# expression that is placed within a gdb_assert after the call to the
+# Function/Method implementation.  Within each expression the variable
+# 'result' can be used to reference the result of the function/method
+# implementation.  The 'result_checks' can only be used if the 'type'
+# of this Function/Method is not 'void'.
 
 Info(
     type="const struct bfd_arch_info *",
@@ -558,9 +572,18 @@ Return -1 for bad REGNUM.  Note: Several targets get this wrong.
 )
 
 Method(
+    comment="""
+Return the name of register REGNR for the specified architecture.
+REGNR can be any value greater than, or equal to zero, and less than
+'gdbarch_num_cooked_regs (GDBARCH)'.  If REGNR is not supported for
+GDBARCH, then this function will return an empty string, this function
+should never return nullptr.
+""",
     type="const char *",
     name="register_name",
     params=[("int", "regnr")],
+    param_checks=["regnr >= 0", "regnr < gdbarch_num_cooked_regs (gdbarch)"],
+    result_checks=["result != nullptr"],
     predefault="0",
     invalid=True,
 )
@@ -590,7 +613,7 @@ frame.
 """,
     type="struct frame_id",
     name="dummy_id",
-    params=[("struct frame_info *", "this_frame")],
+    params=[("frame_info_ptr ", "this_frame")],
     predefault="default_dummy_id",
     invalid=False,
 )
@@ -653,7 +676,7 @@ Return true if the code of FRAME is writable.
 """,
     type="int",
     name="code_of_frame_writable",
-    params=[("struct frame_info *", "frame")],
+    params=[("frame_info_ptr ", "frame")],
     predefault="default_code_of_frame_writable",
     invalid=False,
 )
@@ -663,7 +686,7 @@ Method(
     name="print_registers_info",
     params=[
         ("struct ui_file *", "file"),
-        ("struct frame_info *", "frame"),
+        ("frame_info_ptr ", "frame"),
         ("int", "regnum"),
         ("int", "all"),
     ],
@@ -676,7 +699,7 @@ Method(
     name="print_float_info",
     params=[
         ("struct ui_file *", "file"),
-        ("struct frame_info *", "frame"),
+        ("frame_info_ptr ", "frame"),
         ("const char *", "args"),
     ],
     predefault="default_print_float_info",
@@ -688,7 +711,7 @@ Method(
     name="print_vector_info",
     params=[
         ("struct ui_file *", "file"),
-        ("struct frame_info *", "frame"),
+        ("frame_info_ptr ", "frame"),
         ("const char *", "args"),
     ],
     predicate=True,
@@ -732,7 +755,7 @@ FRAME corresponds to the longjmp frame.
 """,
     type="int",
     name="get_longjmp_target",
-    params=[("struct frame_info *", "frame"), ("CORE_ADDR *", "pc")],
+    params=[("frame_info_ptr ", "frame"), ("CORE_ADDR *", "pc")],
     predicate=True,
     invalid=True,
 )
@@ -755,7 +778,7 @@ Function(
     type="int",
     name="register_to_value",
     params=[
-        ("struct frame_info *", "frame"),
+        ("frame_info_ptr ", "frame"),
         ("int", "regnum"),
         ("struct type *", "type"),
         ("gdb_byte *", "buf"),
@@ -769,7 +792,7 @@ Function(
     type="void",
     name="value_to_register",
     params=[
-        ("struct frame_info *", "frame"),
+        ("frame_info_ptr ", "frame"),
         ("int", "regnum"),
         ("struct type *", "type"),
         ("const gdb_byte *", "buf"),
@@ -1042,7 +1065,7 @@ Value(
 Method(
     type="CORE_ADDR",
     name="unwind_pc",
-    params=[("struct frame_info *", "next_frame")],
+    params=[("frame_info_ptr ", "next_frame")],
     predefault="default_unwind_pc",
     invalid=False,
 )
@@ -1050,7 +1073,7 @@ Method(
 Method(
     type="CORE_ADDR",
     name="unwind_sp",
-    params=[("struct frame_info *", "next_frame")],
+    params=[("frame_info_ptr ", "next_frame")],
     predefault="default_unwind_sp",
     invalid=False,
 )
@@ -1062,7 +1085,7 @@ frame-base.  Enable frame-base before frame-unwind.
 """,
     type="int",
     name="frame_num_args",
-    params=[("struct frame_info *", "frame")],
+    params=[("frame_info_ptr ", "frame")],
     predicate=True,
     invalid=True,
 )
@@ -1237,7 +1260,7 @@ further single-step is needed before the instruction finishes.
 """,
     type="int",
     name="single_step_through_delay",
-    params=[("struct frame_info *", "frame")],
+    params=[("frame_info_ptr ", "frame")],
     predicate=True,
     invalid=True,
 )
@@ -1257,9 +1280,17 @@ disassembler.  Perhaps objdump can handle it?
 Function(
     type="CORE_ADDR",
     name="skip_trampoline_code",
-    params=[("struct frame_info *", "frame"), ("CORE_ADDR", "pc")],
+    params=[("frame_info_ptr ", "frame"), ("CORE_ADDR", "pc")],
     predefault="generic_skip_trampoline_code",
     invalid=False,
+)
+
+Value(
+    comment="Vtable of solib operations functions.",
+    type="const struct target_so_ops *",
+    name="so_ops",
+    postdefault="&solib_target_so_ops",
+    printer="host_address_to_string (gdbarch->so_ops)",
 )
 
 Method(
@@ -1472,7 +1503,7 @@ Fetch the pointer to the ith function argument.
     type="CORE_ADDR",
     name="fetch_pointer_argument",
     params=[
-        ("struct frame_info *", "frame"),
+        ("frame_info_ptr ", "frame"),
         ("int", "argi"),
         ("struct type *", "type"),
     ],
@@ -1518,6 +1549,46 @@ Find core file memory regions
     type="int",
     name="find_memory_regions",
     params=[("find_memory_region_ftype", "func"), ("void *", "data")],
+    predicate=True,
+    invalid=True,
+)
+
+Method(
+    comment="""
+Given a bfd OBFD, segment ADDRESS and SIZE, create a memory tag section to be dumped to a core file
+""",
+    type="asection *",
+    name="create_memtag_section",
+    params=[("bfd *", "obfd"), ("CORE_ADDR", "address"), ("size_t", "size")],
+    predicate=True,
+    invalid=True,
+)
+
+Method(
+    comment="""
+Given a memory tag section OSEC, fill OSEC's contents with the appropriate tag data
+""",
+    type="bool",
+    name="fill_memtag_section",
+    params=[("asection *", "osec")],
+    predicate=True,
+    invalid=True,
+)
+
+Method(
+    comment="""
+Decode a memory tag SECTION and return the tags of type TYPE contained in
+the memory range [ADDRESS, ADDRESS + LENGTH).
+If no tags were found, return an empty vector.
+""",
+    type="gdb::byte_vector",
+    name="decode_memtag_section",
+    params=[
+        ("bfd_section *", "section"),
+        ("int", "type"),
+        ("CORE_ADDR", "address"),
+        ("size_t", "length"),
+    ],
     predicate=True,
     invalid=True,
 )
@@ -2444,8 +2515,8 @@ Return 1 if an entry was read into *TYPEP and *VALP.
     type="int",
     name="auxv_parse",
     params=[
-        ("gdb_byte **", "readptr"),
-        ("gdb_byte *", "endptr"),
+        ("const gdb_byte **", "readptr"),
+        ("const gdb_byte *", "endptr"),
         ("CORE_ADDR *", "typep"),
         ("CORE_ADDR *", "valp"),
     ],
@@ -2593,7 +2664,7 @@ Return a string containing any flags for the given PC in the given FRAME.
 """,
     type="std::string",
     name="get_pc_address_flags",
-    params=[("frame_info *", "frame"), ("CORE_ADDR", "pc")],
+    params=[("frame_info_ptr ", "frame"), ("CORE_ADDR", "pc")],
     predefault="default_get_pc_address_flags",
     invalid=False,
 )

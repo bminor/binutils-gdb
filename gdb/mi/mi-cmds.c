@@ -282,6 +282,8 @@ add_builtin_mi_commands ()
   add_mi_cmd_mi ("file-list-shared-libraries",
      mi_cmd_file_list_shared_libraries),
   add_mi_cmd_cli ("file-symbol-file", "symbol-file", 1);
+  add_mi_cmd_mi ("fix-breakpoint-script-output",
+		 mi_cmd_fix_breakpoint_script_output),
   add_mi_cmd_mi ("fix-multi-location-breakpoint-output",
 		 mi_cmd_fix_multi_location_breakpoint_output),
   add_mi_cmd_mi ("gdb-exit", mi_cmd_gdb_exit);

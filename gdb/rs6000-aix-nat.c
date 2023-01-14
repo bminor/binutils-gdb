@@ -115,7 +115,7 @@ static rs6000_nat_target the_rs6000_nat_target;
 static int
 regmap (struct gdbarch *gdbarch, int regno, int *isfloat)
 {
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
 
   *isfloat = 0;
   if (tdep->ppc_gp0_regnum <= regno
@@ -317,7 +317,7 @@ rs6000_nat_target::fetch_registers (struct regcache *regcache, int regno)
 
   else
     {
-      ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+      ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
 
       /* Read 32 general purpose registers.  */
       for (regno = tdep->ppc_gp0_regnum;
@@ -359,7 +359,7 @@ rs6000_nat_target::store_registers (struct regcache *regcache, int regno)
 
   else
     {
-      ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+      ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
 
       /* Write general purpose registers first.  */
       for (regno = tdep->ppc_gp0_regnum;
@@ -523,13 +523,12 @@ rs6000_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 		      _("Child process unexpectedly missing: %s.\n"),
 		      safe_strerror (save_errno));
 
-	  /* Claim it exited with unknown signal.  */
-	  ourstatus->set_signalled (GDB_SIGNAL_UNKNOWN);
-	  return inferior_ptid;
+	  ourstatus->set_ignore ();
+	  return minus_one_ptid;
 	}
 
       /* Ignore terminated detached child processes.  */
-      if (!WIFSTOPPED (status) && pid != inferior_ptid.pid ())
+      if (!WIFSTOPPED (status) && find_inferior_pid (this, pid) == nullptr)
 	pid = -1;
     }
   while (pid == -1);

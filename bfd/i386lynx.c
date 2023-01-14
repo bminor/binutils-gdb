@@ -87,7 +87,7 @@
 char *lynx_core_file_failing_command ();
 int lynx_core_file_failing_signal ();
 bool lynx_core_file_matches_executable_p ();
-const bfd_target *lynx_core_file_p ();
+bfd_cleanup lynx_core_file_p ();
 
 #define	MY_core_file_failing_command lynx_core_file_failing_command
 #define	MY_core_file_failing_signal lynx_core_file_failing_signal

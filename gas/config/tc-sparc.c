@@ -1081,7 +1081,7 @@ md_begin (void)
 /* Called after all assembly has been done.  */
 
 void
-sparc_md_end (void)
+sparc_md_finish (void)
 {
   unsigned long mach;
 #ifndef TE_SOLARIS

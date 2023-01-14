@@ -55,7 +55,7 @@ __gdb_break_handler:
      next frame - frame of caller, which has called current function
 */
 
-struct z80_gdbarch_tdep : gdbarch_tdep
+struct z80_gdbarch_tdep : gdbarch_tdep_base
 {
   /* Number of bytes used for address:
       2 bytes for all Z80 family
@@ -167,10 +167,10 @@ static const char *z80_reg_names[] =
 static const char *
 z80_register_name (struct gdbarch *gdbarch, int regnum)
 {
-  if (regnum >= 0 && regnum < ARRAY_SIZE (z80_reg_names))
+  if (regnum < ARRAY_SIZE (z80_reg_names))
     return z80_reg_names[regnum];
 
-  return NULL;
+  return "";
 }
 
 /* Return the type of a register specified by the architecture.  Only
@@ -308,7 +308,7 @@ z80_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc_beg, CORE_ADDR pc_end,
 		   struct z80_unwind_cache *info)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  z80_gdbarch_tdep *tdep = (z80_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  z80_gdbarch_tdep *tdep = gdbarch_tdep<z80_gdbarch_tdep> (gdbarch);
   int addr_len = tdep->addr_length;
   gdb_byte prologue[32]; /* max prologue is 24 bytes: __interrupt with local array */
   int pos = 0;
@@ -522,7 +522,7 @@ z80_return_value (struct gdbarch *gdbarch, struct value *function,
 		  gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   /* Byte are returned in L, word in HL, dword in DEHL.  */
-  int len = TYPE_LENGTH (valtype);
+  int len = valtype->length ();
 
   if ((valtype->code () == TYPE_CODE_STRUCT
        || valtype->code () == TYPE_CODE_UNION
@@ -555,7 +555,7 @@ z80_return_value (struct gdbarch *gdbarch, struct value *function,
 
 /* function unwinds current stack frame and returns next one */
 static struct z80_unwind_cache *
-z80_frame_unwind_cache (struct frame_info *this_frame,
+z80_frame_unwind_cache (frame_info_ptr this_frame,
 			void **this_prologue_cache)
 {
   CORE_ADDR start_pc, current_pc;
@@ -564,7 +564,7 @@ z80_frame_unwind_cache (struct frame_info *this_frame,
   gdb_byte buf[sizeof(void*)];
   struct z80_unwind_cache *info;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  z80_gdbarch_tdep *tdep = (z80_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  z80_gdbarch_tdep *tdep = gdbarch_tdep<z80_gdbarch_tdep> (gdbarch);
   int addr_len = tdep->addr_length;
 
   if (*this_prologue_cache)
@@ -658,7 +658,7 @@ z80_frame_unwind_cache (struct frame_info *this_frame,
 /* Given a GDB frame, determine the address of the calling function's
    frame.  This will be used to create a new GDB frame struct.  */
 static void
-z80_frame_this_id (struct frame_info *this_frame, void **this_cache,
+z80_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 		   struct frame_id *this_id)
 {
   struct frame_id id;
@@ -682,7 +682,7 @@ z80_frame_this_id (struct frame_info *this_frame, void **this_cache,
 }
 
 static struct value *
-z80_frame_prev_register (struct frame_info *this_frame,
+z80_frame_prev_register (frame_info_ptr this_frame,
 			 void **this_prologue_cache, int regnum)
 {
   struct z80_unwind_cache *info
@@ -697,7 +697,7 @@ z80_frame_prev_register (struct frame_info *this_frame,
 	  ULONGEST pc;
 	  gdb_byte buf[3];
 	  struct gdbarch *gdbarch = get_frame_arch (this_frame);
-	  z80_gdbarch_tdep *tdep = (z80_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+	  z80_gdbarch_tdep *tdep = gdbarch_tdep<z80_gdbarch_tdep> (gdbarch);
 	  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
 	  read_memory (info->saved_regs[Z80_PC_REGNUM].addr (),
@@ -750,7 +750,7 @@ z80_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
     }
   else /* kind is non-RST address, use CALL instead, but it is dungerous */
     {
-      z80_gdbarch_tdep *tdep = (z80_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+      z80_gdbarch_tdep *tdep = gdbarch_tdep<z80_gdbarch_tdep> (gdbarch);
       gdb_byte *p = break_insn;
       *p++ = 0xcd;
       *p++ = (kind >> 0) & 0xff;
@@ -1460,6 +1460,6 @@ extern initialize_file_ftype _initialize_z80_tdep;
 void
 _initialize_z80_tdep ()
 {
-  register_gdbarch_init (bfd_arch_z80, z80_gdbarch_init);
+  gdbarch_register (bfd_arch_z80, z80_gdbarch_init);
   initialize_tdesc_z80 ();
 }

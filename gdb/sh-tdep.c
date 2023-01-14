@@ -93,7 +93,7 @@ sh_is_renesas_calling_convention (struct type *func_type)
       func_type = check_typedef (func_type);
 
       if (func_type->code () == TYPE_CODE_PTR)
-	func_type = check_typedef (TYPE_TARGET_TYPE (func_type));
+	func_type = check_typedef (func_type->target_type ());
 
       if (func_type->code () == TYPE_CODE_FUNC
 	  && TYPE_CALLING_CONVENTION (func_type) == DW_CC_GNU_renesas_sh)
@@ -112,19 +112,11 @@ sh_sh_register_name (struct gdbarch *gdbarch, int reg_nr)
   static const char *register_names[] = {
     "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
     "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-    "pc", "pr", "gbr", "vbr", "mach", "macl", "sr",
-    "", "",
-    "", "", "", "", "", "", "", "",
-    "", "", "", "", "", "", "", "",
-    "", "",
-    "", "", "", "", "", "", "", "",
-    "", "", "", "", "", "", "", "",
-    "", "", "", "", "", "", "", "",
+    "pc", "pr", "gbr", "vbr", "mach", "macl", "sr"
   };
-  if (reg_nr < 0)
-    return NULL;
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+
+  if (reg_nr >= ARRAY_SIZE (register_names))
+    return "";
   return register_names[reg_nr];
 }
 
@@ -140,13 +132,11 @@ sh_sh3_register_name (struct gdbarch *gdbarch, int reg_nr)
     "", "", "", "", "", "", "", "",
     "ssr", "spc",
     "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0",
-    "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1"
-    "", "", "", "", "", "", "", "",
+    "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1",
   };
-  if (reg_nr < 0)
-    return NULL;
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+
+  if (reg_nr >= ARRAY_SIZE (register_names))
+    return "";
   return register_names[reg_nr];
 }
 
@@ -163,12 +153,9 @@ sh_sh3e_register_name (struct gdbarch *gdbarch, int reg_nr)
     "ssr", "spc",
     "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0",
     "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1",
-    "", "", "", "", "", "", "", "",
   };
-  if (reg_nr < 0)
-    return NULL;
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+  if (reg_nr >= ARRAY_SIZE (register_names))
+    return "";
   return register_names[reg_nr];
 }
 
@@ -182,15 +169,9 @@ sh_sh2e_register_name (struct gdbarch *gdbarch, int reg_nr)
     "fpul", "fpscr",
     "fr0", "fr1", "fr2", "fr3", "fr4", "fr5", "fr6", "fr7",
     "fr8", "fr9", "fr10", "fr11", "fr12", "fr13", "fr14", "fr15",
-    "", "",
-    "", "", "", "", "", "", "", "",
-    "", "", "", "", "", "", "", "",
-    "", "", "", "", "", "", "", "",
   };
-  if (reg_nr < 0)
-    return NULL;
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+  if (reg_nr >= ARRAY_SIZE (register_names))
+    return "";
   return register_names[reg_nr];
 }
 
@@ -227,10 +208,8 @@ sh_sh2a_register_name (struct gdbarch *gdbarch, int reg_nr)
     /* double precision (pseudo) 68 - 75 */
     "dr0", "dr2", "dr4", "dr6", "dr8", "dr10", "dr12", "dr14",
   };
-  if (reg_nr < 0)
-    return NULL;
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+  if (reg_nr >= ARRAY_SIZE (register_names))
+    return "";
   return register_names[reg_nr];
 }
 
@@ -264,13 +243,10 @@ sh_sh2a_nofpu_register_name (struct gdbarch *gdbarch, int reg_nr)
     "ibcr", "ibnr", "tbr",
     /* 67: register bank number, the user visible pseudo register.  */
     "bank",
-    /* double precision (pseudo) 68 - 75 */
-    "", "", "", "", "", "", "", "",
+    /* double precision (pseudo) 68 - 75: report blank, see below.  */
   };
-  if (reg_nr < 0)
-    return NULL;
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+  if (reg_nr >= ARRAY_SIZE (register_names))
+    return "";
   return register_names[reg_nr];
 }
 
@@ -285,14 +261,10 @@ sh_sh_dsp_register_name (struct gdbarch *gdbarch, int reg_nr)
     "a0g", "a0", "a1g", "a1", "m0", "m1", "x0", "x1",
     "y0", "y1", "", "", "", "", "", "mod",
     "", "",
-    "rs", "re", "", "", "", "", "", "",
-    "", "", "", "", "", "", "", "",
-    "", "", "", "", "", "", "", "",
+    "rs", "re",
   };
-  if (reg_nr < 0)
-    return NULL;
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+  if (reg_nr >= ARRAY_SIZE (register_names))
+    return "";
   return register_names[reg_nr];
 }
 
@@ -309,13 +281,9 @@ sh_sh3_dsp_register_name (struct gdbarch *gdbarch, int reg_nr)
     "ssr", "spc",
     "rs", "re", "", "", "", "", "", "",
     "r0b", "r1b", "r2b", "r3b", "r4b", "r5b", "r6b", "r7b",
-    "", "", "", "", "", "", "", "",
-    "", "", "", "", "", "", "", "",
   };
-  if (reg_nr < 0)
-    return NULL;
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+  if (reg_nr >= ARRAY_SIZE (register_names))
+    return "";
   return register_names[reg_nr];
 }
 
@@ -350,10 +318,8 @@ sh_sh4_register_name (struct gdbarch *gdbarch, int reg_nr)
     /* FIXME: missing XF */
     /* FIXME: missing XD */
   };
-  if (reg_nr < 0)
-    return NULL;
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+  if (reg_nr >= ARRAY_SIZE (register_names))
+    return "";
   return register_names[reg_nr];
 }
 
@@ -383,13 +349,11 @@ sh_sh4_nofpu_register_name (struct gdbarch *gdbarch, int reg_nr)
     "",
     /* double precision (pseudo) 68 - 75 -- not for nofpu target */
     "", "", "", "", "", "", "", "",
-    /* vectors (pseudo) 76 - 79 -- not for nofpu target */
-    "", "", "", "",
+    /* vectors (pseudo) 76 - 79 -- not for nofpu target: report blank
+       below.  */
   };
-  if (reg_nr < 0)
-    return NULL;
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+  if (reg_nr >= ARRAY_SIZE (register_names))
+    return "";
   return register_names[reg_nr];
 }
 
@@ -406,13 +370,9 @@ sh_sh4al_dsp_register_name (struct gdbarch *gdbarch, int reg_nr)
     "ssr", "spc",
     "rs", "re", "", "", "", "", "", "",
     "r0b", "r1b", "r2b", "r3b", "r4b", "r5b", "r6b", "r7b",
-    "", "", "", "", "", "", "", "",
-    "", "", "", "", "", "", "", "",
   };
-  if (reg_nr < 0)
-    return NULL;
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+  if (reg_nr >= ARRAY_SIZE (register_names))
+    return "";
   return register_names[reg_nr];
 }
 
@@ -812,7 +772,7 @@ sh_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 static int
 sh_use_struct_convention (int renesas_abi, struct type *type)
 {
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   int nelem = type->num_fields ();
 
   /* The Renesas ABI returns aggregate types always on stack.  */
@@ -832,13 +792,13 @@ sh_use_struct_convention (int renesas_abi, struct type *type)
 
   /* If the first field in the aggregate has the same length as the entire
      aggregate type, the type is returned in registers.  */
-  if (TYPE_LENGTH (type->field (0).type ()) == len)
+  if (type->field (0).type ()->length () == len)
     return 0;
 
   /* If the size of the aggregate is 8 bytes and the first field is
      of size 4 bytes its alignment is equal to long long's alignment,
      so it's returned in registers.  */
-  if (len == 8 && TYPE_LENGTH (type->field (0).type ()) == 4)
+  if (len == 8 && type->field (0).type ()->length () == 4)
     return 0;
 
   /* Otherwise use struct convention.  */
@@ -849,7 +809,7 @@ static int
 sh_use_struct_convention_nofpu (int renesas_abi, struct type *type)
 {
   /* The Renesas ABI returns long longs/doubles etc. always on stack.  */
-  if (renesas_abi && type->num_fields () == 0 && TYPE_LENGTH (type) >= 8)
+  if (renesas_abi && type->num_fields () == 0 && type->length () >= 8)
     return 1;
   return sh_use_struct_convention (renesas_abi, type);
 }
@@ -937,7 +897,7 @@ sh_stack_allocsize (int nargs, struct value **args)
 {
   int stack_alloc = 0;
   while (nargs-- > 0)
-    stack_alloc += ((TYPE_LENGTH (value_type (args[nargs])) + 3) & ~3);
+    stack_alloc += ((value_type (args[nargs])->length () + 3) & ~3);
   return stack_alloc;
 }
 
@@ -1101,7 +1061,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       type = value_type (args[argnum]);
-      len = TYPE_LENGTH (type);
+      len = type->length ();
       val = sh_justify_value_in_reg (gdbarch, args[argnum], len);
 
       /* Some decisions have to be made how various types are handled.
@@ -1150,7 +1110,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 		 and then proceeds as normal by writing the second 32 bits
 		 into the next register.  */
 	      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE
-		  && TYPE_LENGTH (type) == 2 * reg_size)
+		  && type->length () == 2 * reg_size)
 		{
 		  regcache_cooked_write_unsigned (regcache, flt_argreg + 1,
 						  regval);
@@ -1239,7 +1199,7 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       type = value_type (args[argnum]);
-      len = TYPE_LENGTH (type);
+      len = type->length ();
       val = sh_justify_value_in_reg (gdbarch, args[argnum], len);
 
       /* Some decisions have to be made how various types are handled.
@@ -1312,7 +1272,7 @@ sh_extract_return_value_nofpu (struct type *type, struct regcache *regcache,
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
 
   if (len <= 4)
     {
@@ -1338,7 +1298,7 @@ sh_extract_return_value_fpu (struct type *type, struct regcache *regcache,
   struct gdbarch *gdbarch = regcache->arch ();
   if (sh_treat_as_flt_p (type))
     {
-      int len = TYPE_LENGTH (type);
+      int len = type->length ();
       int i, regnum = gdbarch_fp0_regnum (gdbarch);
       for (i = 0; i < len; i += 4)
 	if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
@@ -1364,7 +1324,7 @@ sh_store_return_value_nofpu (struct type *type, struct regcache *regcache,
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST val;
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
 
   if (len <= 4)
     {
@@ -1386,7 +1346,7 @@ sh_store_return_value_fpu (struct type *type, struct regcache *regcache,
   struct gdbarch *gdbarch = regcache->arch ();
   if (sh_treat_as_flt_p (type))
     {
-      int len = TYPE_LENGTH (type);
+      int len = type->length ();
       int i, regnum = gdbarch_fp0_regnum (gdbarch);
       for (i = 0; i < len; i += 4)
 	if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
@@ -1492,8 +1452,7 @@ static int
 sh_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 			const struct reggroup *reggroup)
 {
-  if (gdbarch_register_name (gdbarch, regnum) == NULL
-      || *gdbarch_register_name (gdbarch, regnum) == '\0')
+  if (*gdbarch_register_name (gdbarch, regnum) == '\0')
     return 0;
 
   if (reggroup == float_reggroup
@@ -1554,7 +1513,7 @@ sh_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 static struct type *
 sh_littlebyte_bigword_type (struct gdbarch *gdbarch)
 {
-  sh_gdbarch_tdep *tdep = (sh_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  sh_gdbarch_tdep *tdep = gdbarch_tdep<sh_gdbarch_tdep> (gdbarch);
 
   if (tdep->sh_littlebyte_bigword_type == NULL)
     tdep->sh_littlebyte_bigword_type
@@ -1793,7 +1752,7 @@ sh_sh2a_register_sim_regno (struct gdbarch *gdbarch, int nr)
 static void
 sh_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 			  struct dwarf2_frame_state_reg *reg,
-			  struct frame_info *this_frame)
+			  frame_info_ptr this_frame)
 {
   /* Mark the PC as the destination for the return address.  */
   if (regnum == gdbarch_pc_regnum (gdbarch))
@@ -1863,7 +1822,7 @@ sh_alloc_frame_cache (void)
 }
 
 static struct sh_frame_cache *
-sh_frame_cache (struct frame_info *this_frame, void **this_cache)
+sh_frame_cache (frame_info_ptr this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct sh_frame_cache *cache;
@@ -1930,7 +1889,7 @@ sh_frame_cache (struct frame_info *this_frame, void **this_cache)
 }
 
 static struct value *
-sh_frame_prev_register (struct frame_info *this_frame,
+sh_frame_prev_register (frame_info_ptr this_frame,
 			void **this_cache, int regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -1955,7 +1914,7 @@ sh_frame_prev_register (struct frame_info *this_frame,
 }
 
 static void
-sh_frame_this_id (struct frame_info *this_frame, void **this_cache,
+sh_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 		  struct frame_id *this_id)
 {
   struct sh_frame_cache *cache = sh_frame_cache (this_frame, this_cache);
@@ -1978,7 +1937,7 @@ static const struct frame_unwind sh_frame_unwind = {
 };
 
 static CORE_ADDR
-sh_frame_base_address (struct frame_info *this_frame, void **this_cache)
+sh_frame_base_address (frame_info_ptr this_frame, void **this_cache)
 {
   struct sh_frame_cache *cache = sh_frame_cache (this_frame, this_cache);
 
@@ -1993,7 +1952,7 @@ static const struct frame_base sh_frame_base = {
 };
 
 static struct sh_frame_cache *
-sh_make_stub_cache (struct frame_info *this_frame)
+sh_make_stub_cache (frame_info_ptr this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct sh_frame_cache *cache;
@@ -2007,7 +1966,7 @@ sh_make_stub_cache (struct frame_info *this_frame)
 }
 
 static void
-sh_stub_this_id (struct frame_info *this_frame, void **this_cache,
+sh_stub_this_id (frame_info_ptr this_frame, void **this_cache,
 		 struct frame_id *this_id)
 {
   struct sh_frame_cache *cache;
@@ -2021,7 +1980,7 @@ sh_stub_this_id (struct frame_info *this_frame, void **this_cache,
 
 static int
 sh_stub_unwind_sniffer (const struct frame_unwind *self,
-			struct frame_info *this_frame,
+			frame_info_ptr this_frame,
 			void **this_prologue_cache)
 {
   CORE_ADDR addr_in_block;
@@ -2146,7 +2105,7 @@ sh_corefile_supply_regset (const struct regset *regset,
 			   int regnum, const void *regs, size_t len)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  sh_gdbarch_tdep *tdep = (sh_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  sh_gdbarch_tdep *tdep = gdbarch_tdep<sh_gdbarch_tdep> (gdbarch);
   const struct sh_corefile_regmap *regmap = (regset == &sh_corefile_gregset
 					     ? tdep->core_gregmap
 					     : tdep->core_fpregmap);
@@ -2172,7 +2131,7 @@ sh_corefile_collect_regset (const struct regset *regset,
 			    int regnum, void *regs, size_t len)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  sh_gdbarch_tdep *tdep = (sh_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  sh_gdbarch_tdep *tdep = gdbarch_tdep<sh_gdbarch_tdep> (gdbarch);
   const struct sh_corefile_regmap *regmap = (regset == &sh_corefile_gregset
 					     ? tdep->core_gregmap
 					     : tdep->core_fpregmap);
@@ -2210,7 +2169,7 @@ sh_iterate_over_regset_sections (struct gdbarch *gdbarch,
 				 void *cb_data,
 				 const struct regcache *regcache)
 {
-  sh_gdbarch_tdep *tdep = (sh_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  sh_gdbarch_tdep *tdep = gdbarch_tdep<sh_gdbarch_tdep> (gdbarch);
 
   if (tdep->core_gregmap != NULL)
     cb (".reg", tdep->sizeof_gregset, tdep->sizeof_gregset,

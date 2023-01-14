@@ -173,6 +173,9 @@ BFD_CFLAGS = -I$(BFD_DIR) -I$(BFD_SRC)
 ZLIB = @zlibdir@ -lz
 ZLIBINC = @zlibinc@
 
+ZSTD_CFLAGS = @ZSTD_CFLAGS@
+ZSTD_LIBS = @ZSTD_LIBS@
+
 # Where is the decnumber library?  Typically in ../libdecnumber.
 LIBDECNUMBER_DIR = ../libdecnumber
 LIBDECNUMBER = $(LIBDECNUMBER_DIR)/libdecnumber.a
@@ -464,6 +467,7 @@ SELFTESTS_SRCS = \
 	unittests/offset-type-selftests.c \
 	unittests/observable-selftests.c \
 	unittests/optional-selftests.c \
+	unittests/packed-selftests.c \
 	unittests/parallel-for-selftests.c \
 	unittests/parse-connection-spec-selftests.c \
 	unittests/path-join-selftests.c \
@@ -624,7 +628,7 @@ INTERNAL_CPPFLAGS = $(CPPFLAGS) @GUILE_CPPFLAGS@ @PYTHON_CPPFLAGS@ \
 INTERNAL_CFLAGS_BASE = \
 	$(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) $(ZLIBINC) \
-	$(BFD_CFLAGS) $(INCLUDE_CFLAGS) $(LIBDECNUMBER_CFLAGS) \
+	$(ZSTD_CFLAGS) $(BFD_CFLAGS) $(INCLUDE_CFLAGS) $(LIBDECNUMBER_CFLAGS) \
 	$(INTL_CFLAGS) $(INCGNU) $(INCSUPPORT) $(LIBBACKTRACE_INC) \
 	$(ENABLE_CFLAGS) $(INTERNAL_CPPFLAGS) $(SRCHIGH_CFLAGS) \
 	$(TOP_CFLAGS) $(PTHREAD_CFLAGS) $(DEBUGINFOD_CFLAGS)
@@ -646,7 +650,7 @@ INTERNAL_LDFLAGS = \
 # Libraries and corresponding dependencies for compiling gdb.
 # XM_CLIBS, defined in *config files, have host-dependent libs.
 # LIBIBERTY appears twice on purpose.
-CLIBS = $(SIM) $(READLINE) $(OPCODES) $(LIBCTF) $(BFD) $(ZLIB) \
+CLIBS = $(SIM) $(READLINE) $(OPCODES) $(LIBCTF) $(BFD) $(ZLIB) $(ZSTD_LIBS) \
         $(LIBSUPPORT) $(INTL) $(LIBIBERTY) $(LIBDECNUMBER) \
 	$(XM_CLIBS) $(GDBTKLIBS)  $(LIBBACKTRACE_LIB) \
 	@LIBS@ @GUILE_LIBS@ @PYTHON_LIBS@ \
@@ -1122,6 +1126,7 @@ COMMON_SFILES = \
 	memattr.c \
 	memory-map.c \
 	memrange.c \
+	memtag.c \
 	minidebug.c \
 	minsyms.c \
 	mipsread.c \
@@ -1150,7 +1155,6 @@ COMMON_SFILES = \
 	regcache.c \
 	regcache-dump.c \
 	reggroups.c \
-	registry.c \
 	remote.c \
 	remote-fileio.c \
 	remote-notif.c \
@@ -2297,6 +2301,7 @@ aclocal_m4_deps = \
 	../config/lcmessage.m4 \
 	../config/codeset.m4 \
 	../config/zlib.m4 \
+	../config/zstd.m4 \
 	../config/ax_pthread.m4
 
 $(srcdir)/aclocal.m4: @MAINTAINER_MODE_TRUE@ $(aclocal_m4_deps)

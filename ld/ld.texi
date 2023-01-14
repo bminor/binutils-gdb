@@ -2863,10 +2863,12 @@ but for most Linux based systems it will be @code{both}.
 @kindex --compress-debug-sections=zlib
 @kindex --compress-debug-sections=zlib-gnu
 @kindex --compress-debug-sections=zlib-gabi
+@kindex --compress-debug-sections=zstd
 @item --compress-debug-sections=none
 @itemx --compress-debug-sections=zlib
 @itemx --compress-debug-sections=zlib-gnu
 @itemx --compress-debug-sections=zlib-gabi
+@itemx --compress-debug-sections=zstd
 On ELF platforms, these options control how DWARF debug sections are
 compressed using zlib.
 
@@ -2879,6 +2881,9 @@ sets the SHF_COMPRESSED flag in the sections' headers.
 
 The @option{--compress-debug-sections=zlib} option is an alias for
 @option{--compress-debug-sections=zlib-gabi}.
+
+@option{--compress-debug-sections=zstd} compresses DWARF debug sections using
+zstd.
 
 Note that this option overrides any compression in input debug
 sections, so if a binary is linked with @option{--compress-debug-sections=none}

@@ -51,7 +51,9 @@
 #if !(defined(errno) || defined(_MSC_VER) && defined(_INC_ERRNO))
 extern int errno;
 #endif
-#if !defined (HAVE_DLFCN_H) && defined (HAVE_WINDOWS_H)
+#if defined (HAVE_DLFCN_H)
+#include <dlfcn.h>
+#elif defined (HAVE_WINDOWS_H)
 #include <windows.h>
 #endif
 

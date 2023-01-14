@@ -4663,14 +4663,9 @@ dot_rot (int type)
 	}
 
       if (!*drpp)
-	{
-	  *drpp = XOBNEW (&notes, struct dynreg);
-	  memset (*drpp, 0, sizeof (*dr));
-	}
+	*drpp = notes_calloc (1, sizeof (**drpp));
 
-      name = XOBNEWVEC (&notes, char, len + 1);
-      memcpy (name, start, len);
-      name[len] = '\0';
+      name = notes_memdup (start, len, len + 1);
 
       dr = *drpp;
       dr->name = name;
@@ -4682,7 +4677,6 @@ dot_rot (int type)
       if (str_hash_insert (md.dynreg_hash, name, dr, 0) != NULL)
 	{
 	  as_bad (_("Attempt to redefine register set `%s'"), name);
-	  obstack_free (&notes, name);
 	  goto err;
 	}
 
@@ -5007,7 +5001,7 @@ dot_pred_rel (int type)
 	    type = 'c';
 	  else if (strcmp (form, "imply") == 0)
 	    type = 'i';
-	  obstack_free (&notes, form);
+	  notes_free (form);
 	}
       else if (*input_line_pointer == '@')
 	{
@@ -7566,7 +7560,7 @@ ia64_target_format (void)
 }
 
 void
-ia64_end_of_source (void)
+ia64_md_finish (void)
 {
   /* terminate insn group upon reaching end of file:  */
   insn_group_break (1, 0, 0);
@@ -9960,11 +9954,8 @@ note_register_values (struct ia64_opcode *idesc)
 	  gr_values[regno].value = CURR_SLOT.opnd[1].X_add_number;
 	  gr_values[regno].path = md.path;
 	  if (md.debug_dv)
-	    {
-	      fprintf (stderr, "  Know gr%d = ", regno);
-	      fprintf_vma (stderr, gr_values[regno].value);
-	      fputs ("\n", stderr);
-	    }
+	    fprintf (stderr, "  Know gr%d = %" PRIx64 "\n",
+		     regno, gr_values[regno].value);
 	}
     }
   /* Look for dep.z imm insns.  */
@@ -9984,11 +9975,8 @@ note_register_values (struct ia64_opcode *idesc)
 	  gr_values[regno].value = value;
 	  gr_values[regno].path = md.path;
 	  if (md.debug_dv)
-	    {
-	      fprintf (stderr, "  Know gr%d = ", regno);
-	      fprintf_vma (stderr, gr_values[regno].value);
-	      fputs ("\n", stderr);
-	    }
+	    fprintf (stderr, "  Know gr%d = %" PRIx64 "\n",
+		     regno, gr_values[regno].value);
 	}
     }
   else
@@ -10202,12 +10190,9 @@ print_dependency (const char *action, int depind)
       if (regdeps[depind].specific && regdeps[depind].index >= 0)
 	fprintf (stderr, " (%d)", regdeps[depind].index);
       if (regdeps[depind].mem_offset.hint)
-	{
-	  fputs (" ", stderr);
-	  fprintf_vma (stderr, regdeps[depind].mem_offset.base);
-	  fputs ("+", stderr);
-	  fprintf_vma (stderr, regdeps[depind].mem_offset.offset);
-	}
+	fprintf (stderr, " %" PRIx64 "+%" PRIx64,
+		 regdeps[depind].mem_offset.base,
+		 regdeps[depind].mem_offset.offset);
       fprintf (stderr, "\n");
     }
 }
@@ -11781,9 +11766,7 @@ dot_alias (int section)
     }
 
   /* Make a copy of name string.  */
-  len = strlen (name) + 1;
-  obstack_grow (&notes, name, len);
-  name = obstack_finish (&notes);
+  name = notes_strdup (name);
 
   if (section)
     {
@@ -11806,8 +11789,7 @@ dot_alias (int section)
       if (strcmp (h->name, name))
 	as_bad (_("`%s' is already the alias of %s `%s'"),
 		alias, kind, h->name);
-      obstack_free (&notes, name);
-      obstack_free (&notes, alias);
+      notes_free (alias);
       goto out;
     }
 
@@ -11817,12 +11799,11 @@ dot_alias (int section)
     {
       if (strcmp (a, alias))
 	as_bad (_("%s `%s' already has an alias `%s'"), kind, name, a);
-      obstack_free (&notes, name);
-      obstack_free (&notes, alias);
+      notes_free (alias);
       goto out;
     }
 
-  h = XNEW (struct alias);
+  h = notes_alloc (sizeof (*h));
   h->file = as_where (&h->line);
   h->name = name;
 
@@ -11863,7 +11844,7 @@ do_alias (void **slot, void *arg ATTRIBUTE_UNUSED)
 void
 ia64_adjust_symtab (void)
 {
-  htab_traverse (alias_hash, do_alias, NULL);
+  htab_traverse_noresize (alias_hash, do_alias, NULL);
 }
 
 /* It renames the original section name to its alias.  */
@@ -11888,7 +11869,7 @@ do_secalias (void **slot, void *arg ATTRIBUTE_UNUSED)
 void
 ia64_frob_file (void)
 {
-  htab_traverse (secalias_hash, do_secalias, NULL);
+  htab_traverse_noresize (secalias_hash, do_secalias, NULL);
 }
 
 #ifdef TE_VMS

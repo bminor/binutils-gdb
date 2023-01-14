@@ -159,7 +159,7 @@ static const int arc_linux_core_reg_offsets[] = {
    Returns TRUE if this is a sigtramp frame.  */
 
 static bool
-arc_linux_is_sigtramp (struct frame_info *this_frame)
+arc_linux_is_sigtramp (frame_info_ptr this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR pc = get_frame_pc (this_frame);
@@ -257,7 +257,7 @@ arc_linux_is_sigtramp (struct frame_info *this_frame)
    etc) in GDB hardcode values.  */
 
 static CORE_ADDR
-arc_linux_sigcontext_addr (struct frame_info *this_frame)
+arc_linux_sigcontext_addr (frame_info_ptr this_frame)
 {
   const int ucontext_offset = 0x80;
   const int sigcontext_offset = 0x14;
@@ -411,7 +411,7 @@ static std::vector<CORE_ADDR>
 arc_linux_software_single_step (struct regcache *regcache)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  arc_gdbarch_tdep *tdep = (arc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arc_gdbarch_tdep *tdep = gdbarch_tdep<arc_gdbarch_tdep> (gdbarch);
   struct gdb_non_printing_memory_disassembler dis (gdbarch);
 
   /* Read current instruction.  */
@@ -694,7 +694,7 @@ arc_linux_core_read_description (struct gdbarch *gdbarch,
 static void
 arc_linux_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  arc_gdbarch_tdep *tdep = (arc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arc_gdbarch_tdep *tdep = gdbarch_tdep<arc_gdbarch_tdep> (gdbarch);
 
   arc_linux_debug_printf ("GNU/Linux OS/ABI initialization.");
 

@@ -34,6 +34,7 @@ AC_PROG_GREP
 AC_GNU_SOURCE
 AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_INSTALL
+PKG_PROG_PKG_CONFIG
 
 LT_INIT
 ACX_LARGEFILE
@@ -160,6 +161,15 @@ AC_ARG_ENABLE(compressed_debug_sections,
 [case ,"${enableval}", in
   ,yes, | ,all, | *,ld,*) ac_default_compressed_debug_sections=yes ;;
   ,no, | ,none,)  ac_default_compressed_debug_sections=no ;;
+esac])dnl
+
+# Select default compression algorithm.
+ac_default_compressed_debug_sections_algorithm=COMPRESS_DEBUG_GABI_ZLIB
+AC_ARG_ENABLE(default_compressed_debug_sections_algorithm,
+	      AS_HELP_STRING([--enable-default-compressed-debug-sections-algorithm={zlib,zstd}],
+	      [Default compression algorithm for --enable-compressed-debug-sections.]),
+[case "${enableval}" in
+   zstd) ac_default_compressed_debug_sections_algorithm=COMPRESS_DEBUG_ZSTD ;;
 esac])dnl
 
 # Decide setting DT_RUNPATH instead of DT_RPATH by default
@@ -296,24 +306,15 @@ AC_ARG_ENABLE([jansson],
   [enable_jansson=$enableval],
   [enable_jansson="no"])
 
-if test "x$enable_jansson" != "xno"; then
-  PKG_PROG_PKG_CONFIG
-  AS_IF([test -n "$PKG_CONFIG"],
+AS_IF([test "x$enable_jansson" != "xno"],
+  [PKG_CHECK_MODULES(JANSSON, [jansson],
     [
-      PKG_CHECK_MODULES(JANSSON, [jansson],
-	[
-	  AC_DEFINE(HAVE_JANSSON, 1, [The jansson library is to be used])
-	  AC_SUBST([JANSSON_CFLAGS])
-	  AC_SUBST([JANSSON_LIBS])
-	],
-	[
-	  AC_MSG_ERROR([Cannot find jansson library])
-	])
+      AC_DEFINE(HAVE_JANSSON, 1, [The jansson library is to be used])
+      AC_SUBST([JANSSON_CFLAGS])
+      AC_SUBST([JANSSON_LIBS])
     ],
-    [
-      AC_MSG_ERROR([Cannot find pkg-config])
-    ])
-fi
+    [AC_MSG_ERROR([Cannot find jansson library])])
+  ])
 
 AM_BINUTILS_WARNINGS
 
@@ -366,11 +367,11 @@ AC_SUBST(NATIVE_LIB_DIRS)
 AC_CHECK_HEADERS(fcntl.h elf-hints.h limits.h inttypes.h stdint.h \
 		 sys/file.h sys/mman.h sys/param.h sys/stat.h sys/time.h \
 		 sys/types.h unistd.h)
-AC_CHECK_FUNCS(close glob lseek mkstemp open realpath sbrk waitpid)
+AC_CHECK_FUNCS(close glob lseek mkstemp open realpath waitpid)
 
 BFD_BINARY_FOPEN
 
-AC_CHECK_DECLS([asprintf, environ, sbrk])
+AC_CHECK_DECLS([asprintf, environ])
 
 AC_FUNC_MMAP
 
@@ -386,9 +387,10 @@ if test $ld_cv_decl_getopt_unistd_h = yes; then
 	    [Is the prototype for getopt in <unistd.h> in the expected format?])
 fi
 
-# Link in zlib if we can.  This allows us to read and write
-# compressed CTF sections.
+# Link in zlib/zstd if we can.  This allows us to read and write
+# compressed debug sections.
 AM_ZLIB
+AC_ZSTD
 
 # When converting linker scripts into strings for use in emulation
 # files, use astring.sed if the compiler supports ANSI string
@@ -516,6 +518,9 @@ done
 if test x$ac_default_compressed_debug_sections = xyes ; then
   AC_DEFINE(DEFAULT_FLAG_COMPRESS_DEBUG, 1, [Define if you want compressed debug sections by default.])
 fi
+
+AC_DEFINE_UNQUOTED(DEFAULT_COMPRESSED_DEBUG_ALGORITHM, $ac_default_compressed_debug_sections_algorithm,
+		   [Default compression algorithm for --enable-compressed-debug-sections.])
 
 if test "${ac_default_new_dtags}" = unset; then
   ac_default_new_dtags=0

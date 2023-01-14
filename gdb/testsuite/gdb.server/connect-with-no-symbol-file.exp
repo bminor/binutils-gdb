@@ -75,9 +75,19 @@ proc connect_no_symbol_file { sysroot action } {
 
     # Check if GDB succeeded connecting to GDBserver by attempting to detach
     # from the process.
-    gdb_test "detach" \
-	".*Detaching from program: , process.*Ending remote debugging.*" \
-	"connection to GDBserver succeeded"
+    # Use an explicit fail clause to prevent the implicit clause matching
+    # "Ending remote debugging" from triggering, which would cause silent
+    # failure.
+    set ok 0
+    gdb_test_multiple "detach" "" {
+	-re "\r\nDetaching from \[^\r\n\]*" {
+	    set ok 1
+	    exp_continue
+	}
+	-re -wrap "" {
+	}
+    }
+    gdb_assert $ok "connection to GDBserver succeeded"
 }
 
 # Make sure we have the original symbol file in a safe place to copy from.

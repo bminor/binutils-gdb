@@ -220,7 +220,7 @@ cp_lookup_bare_symbol (const struct language_defn *langdef,
 	return {};
 
 
-      type = check_typedef (TYPE_TARGET_TYPE (lang_this.symbol->type ()));
+      type = check_typedef (lang_this.symbol->type ()->target_type ());
       /* If TYPE_NAME is NULL, abandon trying to find this symbol.
 	 This can happen for lambda functions compiled with clang++,
 	 which outputs no name for the container class.  */
@@ -780,12 +780,13 @@ cp_find_type_baseclass_by_name (struct type *parent_type, const char *name)
   for (i = 0; i < TYPE_N_BASECLASSES (parent_type); ++i)
     {
       struct type *type = check_typedef (TYPE_BASECLASS (parent_type, i));
-      const char *base_name = TYPE_BASECLASS_NAME (parent_type, i);
+      const char *tdef_name = TYPE_BASECLASS_NAME (parent_type, i);
+      const char *base_name = type->name ();
 
       if (base_name == NULL)
 	continue;
 
-      if (streq (base_name, name))
+      if (streq (tdef_name, name) || streq (base_name, name))
 	return type;
 
       type = cp_find_type_baseclass_by_name (type, name);

@@ -1,7 +1,32 @@
 -*- text -*-
 
+* gas now supports --compress-debug-sections=zstd to compress
+  debug sections with zstd.
+* Add --enable-default-compressed-debug-sections-algorithm={zlib,zstd}
+  that selects the default compression algorithm
+  for --enable-compressed-debug-sections.
+
+* Add support for various T-Head extensions (XTheadBa, XTheadBb, XTheadBs,
+  XTheadCmo, XTheadCondMov, XTheadFMemIdx, XTheadMemIdx, XTheadMemPair,
+  XTheadMac, and XTheadSync) from version 2.0 of the T-Head ISA manual, which
+  are implemented in the Allwinner D1.
+
+Changes in 2.39:
+
 * Remove (rudimentary) support for the x86-64 sub-architectures Intel L1OM and
   Intel K1OM.
+
+* Add support for the RISC-V Zicbop, Zicbom, and Zicboz extensions, version
+  1.0-fd39d01.
+
+* Add support for the RISC-V Zfh extension, version 1.0.
+
+* Add support for the Zhinx extension, version 1.0.0-rc.
+
+* Add support for the RISC-V H extension.
+
+* Add support for the RISC-V Zfhmin extension, version 1.0, and Zhinxmin
+  extension, version 1.0.0-rc.
 
 Changes in 2.38:
 
@@ -41,11 +66,25 @@ Changes in 2.38:
 
 * Add support for Intel AVX512_FP16 instructions.
 
+* Add support for the RISC-V scalar crypto extension, version 1.0.0.
+
+* Add support for the RISC-V vector extension, version 1.0.
+
+* Add support for the Z{f,d,q}inx extensions, version 1.0.0-rc.
+
+* Add support for the RISC-V svinval extension, version 1.0.
+
+* Add support for the RISC-V hypervisor extension, as defined by Privileged
+  Specification 1.12.
+
 Changes in 2.37:
 
 * arm-symbianelf support removed.
 
 * Add support for Realm Management Extension (RME) for AArch64.
+
+* Add support for the Zba, Zbb, Zbc, and Zbs subsets of the RISC-V
+  bit manipulation extension, version 0.93.
 
 Changes in 2.36:
 
@@ -103,6 +142,8 @@ Changes in 2.36:
   SHF_GNU_RETAIN specifies that the section should not be garbage
   collected by the linker.  It requires the GNU or FreeBSD ELF OSABIs.
 
+* Add support for the RISC-V Zihintpause extension.
+
 Changes in 2.35:
 
 * X86 NaCl target support is removed.
@@ -121,6 +162,11 @@ Changes in 2.35:
   version 5 .debug_line sections.
 
 * Add -mbig-obj support to i386 MingW targets.
+
+* Add support for the -mriscv-isa-version argument, to select the version of
+  the RISC-V ISA specification used when assembling.
+
+* Remove support for the RISC-V privileged specification, version 1.9.
 
 Changes in 2.34:
 
@@ -215,6 +261,8 @@ Changes in 2.31:
 
 * Add support for .nops directive.  It is currently supported only for
   x86 targets.
+
+* Add support for the .insn directive on RISC-V targets.
 
 Changes in 2.30:
 

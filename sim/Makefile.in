@@ -154,13 +154,14 @@ TESTS = testsuite/common/bits32m0$(EXEEXT) \
 @SIM_ENABLE_ARCH_m68hc11_TRUE@am__append_29 = $(m68hc11_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_mn10300_TRUE@am__append_30 = $(mn10300_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_mn10300_TRUE@am__append_31 = $(mn10300_BUILD_OUTPUTS)
-@SIM_ENABLE_ARCH_or1k_TRUE@am__append_32 = $(or1k_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_moxie_TRUE@am__append_32 = moxie/$(am__dirstamp)
 @SIM_ENABLE_ARCH_or1k_TRUE@am__append_33 = $(or1k_BUILD_OUTPUTS)
-@SIM_ENABLE_ARCH_sh_TRUE@am__append_34 = $(sh_BUILD_OUTPUTS)
-@SIM_ENABLE_ARCH_sh_TRUE@am__append_35 = sh/gencode
-@SIM_ENABLE_ARCH_sh_TRUE@am__append_36 = $(sh_BUILD_OUTPUTS)
-@SIM_ENABLE_ARCH_v850_TRUE@am__append_37 = $(v850_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_or1k_TRUE@am__append_34 = $(or1k_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_sh_TRUE@am__append_35 = $(sh_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_sh_TRUE@am__append_36 = sh/gencode
+@SIM_ENABLE_ARCH_sh_TRUE@am__append_37 = $(sh_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_v850_TRUE@am__append_38 = $(v850_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_v850_TRUE@am__append_39 = $(v850_BUILD_OUTPUTS)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
@@ -170,7 +171,8 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/../config/override.m4 \
 	$(top_srcdir)/../config/pkg.m4 \
 	$(top_srcdir)/../config/plugins.m4 \
-	$(top_srcdir)/../config/zlib.m4 $(top_srcdir)/../libtool.m4 \
+	$(top_srcdir)/../config/zlib.m4 \
+	$(top_srcdir)/../config/zstd.m4 $(top_srcdir)/../libtool.m4 \
 	$(top_srcdir)/../ltoptions.m4 $(top_srcdir)/../ltsugar.m4 \
 	$(top_srcdir)/../ltversion.m4 $(top_srcdir)/../lt~obsolete.m4 \
 	$(top_srcdir)/m4/sim_ac_option_alignment.m4 \
@@ -855,6 +857,8 @@ VERSION = @VERSION@
 WARN_CFLAGS = @WARN_CFLAGS@
 WERROR_CFLAGS = @WERROR_CFLAGS@
 XGETTEXT = @XGETTEXT@
+ZSTD_CFLAGS = @ZSTD_CFLAGS@
+ZSTD_LIBS = @ZSTD_LIBS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -932,13 +936,13 @@ CLEANFILES = common/version.c common/version.c-stamp \
 	testsuite/common/bits-gen testsuite/common/bits32m0.c \
 	testsuite/common/bits32m31.c testsuite/common/bits64m0.c \
 	testsuite/common/bits64m63.c
-DISTCLEANFILES = 
+DISTCLEANFILES = $(am__append_32)
 MOSTLYCLEANFILES = core $(am__append_5) site-sim-config.exp \
 	testrun.log testrun.sum $(am__append_7) $(am__append_10) \
 	$(am__append_12) $(am__append_15) $(am__append_17) \
 	$(am__append_19) $(am__append_21) $(am__append_24) \
 	$(am__append_26) $(am__append_29) $(am__append_31) \
-	$(am__append_33) $(am__append_36) $(am__append_38)
+	$(am__append_34) $(am__append_37) $(am__append_39)
 AM_CFLAGS = $(WERROR_CFLAGS) $(WARN_CFLAGS)
 AM_CPPFLAGS = -I$(srcroot)/include $(SIM_INLINE) -I$(srcdir)/common
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS) $(CFLAGS_FOR_BUILD)
@@ -947,8 +951,8 @@ SIM_ALL_RECURSIVE_DEPS = common/libcommon.a $(am__append_2) \
 	$(am__append_6) $(am__append_8) $(am__append_11) \
 	$(am__append_13) $(am__append_16) $(am__append_18) \
 	$(am__append_20) $(am__append_22) $(am__append_25) \
-	$(am__append_27) $(am__append_30) $(am__append_32) \
-	$(am__append_34) $(am__append_37)
+	$(am__append_27) $(am__append_30) $(am__append_33) \
+	$(am__append_35) $(am__append_38)
 common_libcommon_a_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
 	-DSIM_COMMON_BUILD \
@@ -2757,6 +2761,12 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_moxie_TRUE@	  echo "tree compiler tool (dtc) is missing.  Install the tool to "; \
 @SIM_ENABLE_ARCH_moxie_TRUE@	  echo "update the device tree blob."; \
 @SIM_ENABLE_ARCH_moxie_TRUE@	fi
+
+# Rule to create the .dirstamp file (on which moxie-gdb.dtb depends)
+# as automake fails to automatically create this rule for _DATA items.
+@SIM_ENABLE_ARCH_moxie_TRUE@moxie/$(am__dirstamp):
+@SIM_ENABLE_ARCH_moxie_TRUE@	@$(MKDIR_P) moxie
+@SIM_ENABLE_ARCH_moxie_TRUE@	@: >moxie/$(am__dirstamp)
 
 @SIM_ENABLE_ARCH_or1k_TRUE@or1k/mloop.c or1k/eng.h: or1k/stamp-mloop ; @true
 @SIM_ENABLE_ARCH_or1k_TRUE@or1k/stamp-mloop: $(srccom)/genmloop.sh or1k/mloop.in

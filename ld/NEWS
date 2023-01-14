@@ -1,5 +1,13 @@
 -*- text -*-
 
+* ld now supports zstd compressed debug sections.  The new option
+  --compress-debug-sections=zstd compresses debug sections with zstd.
+* Add --enable-default-compressed-debug-sections-algorithm={zlib,zstd}
+  that selects the default compression algorithm
+  for --enable-compressed-debug-sections.
+
+Changes in 2.39:
+
 * The ELF linker will now generate a warning message if the stack is made
   executable.  By default this warning is not issued if the user has
   specifically requested an executable stack via the "-z execstack"
@@ -25,10 +33,10 @@
   --enable-warn-rwx-segments=no
      will make --no-warn-rwx-segments enabled by default.
      
-  --enable-defaul-execstack=no
+  --enable-default-execstack=no
      will stop the creation of an executable stack simply because an input file
      is missing a .note.GNU-stack section, even on architectures where this
-     ehaviour is the default.
+     behaviour is the default.
 
 * TYPE=<type> is now supported in an output section description to set the
   section type value.

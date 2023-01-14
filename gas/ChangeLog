@@ -1,3 +1,91 @@
+2022-10-11  Nick Clifton  <nickc@redhat.com>
+
+	* symbols.c (S_GET_VALUE): If the unresolved symbol is the fake
+	label provide a more helpful error message to the user.
+	(S_GET_VALUE_WHERE): Like S_GET_VALUE, but includes a file/line
+	number for error reporting purposes.
+	* symbols.h (S_GET_VALUE_WHERE): Prototype.
+	* write.c (fixup_segment): Use S_GET_VALUE_WHERE.
+
+2022-09-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 29623
+	* as.c (show_usage): Document the --dump-config,
+	--gdwarf-cie-version, --hash-size, --multibyte-handling,
+	and --reduce-memory-overheads options.
+	* config/tc-i386.c (md_show_usage): Document the -O option.
+	* doc/as.texi: Document the --dump-config, --emulation,
+	--hash-size, and --reduce-memory-overheads options.
+
+2022-09-08  Nick Clifton  <nickc@redhat.com>
+
+	PR 29559
+	* dwarf2dbg.c (out_debug_info): Place DW_TAG_unspecified_type at
+	the end of the list of children, not at the start of the CU
+	information.
+	* testsuite/gas/elf/dwarf-3-func.d: Update expected output.
+	* testsuite/gas/elf/dwarf-5-func-global.d: Likewise.
+	* testsuite/gas/elf/dwarf-5-func-local.d: Likewise.
+	* testsuite/gas/elf/dwarf-5-func.d: Likewise.
+
+2022-08-31  Frederic Cambus  <fred@statdns.com>
+
+	* configure.tgt (aarch64*-*-openbsd*): Add target.
+
+2022-08-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 29494
+	* testsuite/gas/arm/pr29494.s: New test source file.
+	* testsuite/gas/arm/pr29494.d: New test driver.
+
+2022-08-25  Nick Clifton  <nickc@redhat.com>
+
+	PR 29517
+	* dwarf2dbg.c (GAS_ABBREV_COMP_UNIT): New defined constant.
+	(GAS_ABBREV_SUBPROG): New defined constant.
+	(GAS_ABBREV_NO_TYPE): New defined constant.
+	(out_debug_abbrev): Use the new defined constants when emitting
+	abbreviation numbers.  Generate an abbreviation for an unspecified
+	type.
+	(out_debug_info): Use the new defined constants when referring to
+	abbreviations.  Generate a use of the no_type abbreviation.
+	Reference the use when generating DIEs for functions.
+	* testsuite/gas/elf/dwarf-3-func.d: Update to allow for newly
+	extended output from the assembler.
+	* testsuite/gas/elf/dwarf-5-func-global.d: Likewise.
+	* testsuite/gas/elf/dwarf-5-func-local.d: Likewise.
+	* testsuite/gas/elf/dwarf-5-func.d: Likewise.
+
+2022-08-25  Nick Clifton  <nickc@redhat.com>
+
+	PR 29519
+	* config/tc-aarch64.c (s_unreq): Use find_end_of_line().
+	(s_aarch64_cpu): Likewise.
+	(s_aarch64_arch): Likewise.
+	(s_aarch64_arch_extension): Likewise.
+	* testsuite/gas/aarch64/pr29519.d: New test driver file.
+	* testsuite/gas/aarch64/pr29519.s: New test source file.
+
+2022-08-08  Tsukasa OI  <research_trasio@irq.a4lg.com>
+
+	* config/obj-macho.c (obj_mach_o_get_section_names): Wrap two
+	string literals within with gettext macro.
+
+2022-08-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 29447
+	* read.c (read_symbol_name): Pass 0 as the length parameter when
+	invoking mbstowc in order to check the validity of a wide string.
+
+2022-07-18  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* config/tc-arc.c (md_assembly): Update strspn string with the
+	missing ciphers.
+
+2022-07-08  Nick Clifton  <nickc@redhat.com>
+
+	* 2.39 branch created.
+
 2022-05-18  Victor Do Nascimento  <victor.donascimento@arm.com>
 
 	* config/tc-arm.c (parse_reg_list): Add handling of mixed register

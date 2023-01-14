@@ -81,10 +81,7 @@ static const char * const moxie_register_names[] = {
 static const char *
 moxie_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
-  if (reg_nr < 0)
-    return NULL;
-  if (reg_nr >= MOXIE_NUM_REGS)
-    return NULL;
+  gdb_static_assert (ARRAY_SIZE (moxie_register_names) == MOXIE_NUM_REGS);
   return moxie_register_names[reg_nr];
 }
 
@@ -111,7 +108,7 @@ moxie_store_return_value (struct type *type, struct regcache *regcache,
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR regval;
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
 
   /* Things always get returned in RET1_REGNUM, RET2_REGNUM.  */
   regval = extract_unsigned_integer (valbuf, len > 4 ? 4 : len, byte_order);
@@ -457,7 +454,7 @@ moxie_extract_return_value (struct type *type, struct regcache *regcache,
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   ULONGEST tmp;
 
   /* By using store_unsigned_integer we avoid having to do
@@ -481,7 +478,7 @@ moxie_return_value (struct gdbarch *gdbarch, struct value *function,
 		   struct type *valtype, struct regcache *regcache,
 		   gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  if (TYPE_LENGTH (valtype) > 8)
+  if (valtype->length () > 8)
     return RETURN_VALUE_STRUCT_CONVENTION;
   else
     {
@@ -516,7 +513,7 @@ moxie_alloc_frame_cache (void)
 /* Populate a moxie_frame_cache object for this_frame.  */
 
 static struct moxie_frame_cache *
-moxie_frame_cache (struct frame_info *this_frame, void **this_cache)
+moxie_frame_cache (frame_info_ptr this_frame, void **this_cache)
 {
   struct moxie_frame_cache *cache;
   CORE_ADDR current_pc;
@@ -553,7 +550,7 @@ moxie_frame_cache (struct frame_info *this_frame, void **this_cache)
    frame.  This will be used to create a new GDB frame struct.  */
 
 static void
-moxie_frame_this_id (struct frame_info *this_frame,
+moxie_frame_this_id (frame_info_ptr this_frame,
 		    void **this_prologue_cache, struct frame_id *this_id)
 {
   struct moxie_frame_cache *cache = moxie_frame_cache (this_frame,
@@ -569,7 +566,7 @@ moxie_frame_this_id (struct frame_info *this_frame,
 /* Get the value of register regnum in the previous stack frame.  */
 
 static struct value *
-moxie_frame_prev_register (struct frame_info *this_frame,
+moxie_frame_prev_register (frame_info_ptr this_frame,
 			  void **this_prologue_cache, int regnum)
 {
   struct moxie_frame_cache *cache = moxie_frame_cache (this_frame,
@@ -600,7 +597,7 @@ static const struct frame_unwind moxie_frame_unwind = {
 /* Return the base address of this_frame.  */
 
 static CORE_ADDR
-moxie_frame_base_address (struct frame_info *this_frame, void **this_cache)
+moxie_frame_base_address (frame_info_ptr this_frame, void **this_cache)
 {
   struct moxie_frame_cache *cache = moxie_frame_cache (this_frame,
 						       this_cache);
@@ -1108,5 +1105,5 @@ void _initialize_moxie_tdep ();
 void
 _initialize_moxie_tdep ()
 {
-  register_gdbarch_init (bfd_arch_moxie, moxie_gdbarch_init);
+  gdbarch_register (bfd_arch_moxie, moxie_gdbarch_init);
 }

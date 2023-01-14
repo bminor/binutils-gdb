@@ -2135,8 +2135,9 @@ Guile, true and false are represented using boolean constants, and
 @samp{auto} is represented using @code{#:auto}.
 
 @item PARAM_UINTEGER
-The value is an unsigned integer.  The value of 0 should be
-interpreted to mean ``unlimited''.
+The value is an unsigned integer.  The value of @code{#:unlimited}
+should be interpreted to mean ``unlimited'', and the value of @samp{0}
+is reserved and should not be used.
 
 @item PARAM_ZINTEGER
 The value is an integer.
@@ -2145,9 +2146,10 @@ The value is an integer.
 The value is an unsigned integer.
 
 @item PARAM_ZUINTEGER_UNLIMITED
-The value is an integer in the range @samp{[0, INT_MAX]}.
-A value of @samp{-1} means ``unlimited'', and other negative
-numbers are not allowed.
+The value is an integer in the range @samp{[0, INT_MAX]}.  The value
+of @code{#:unlimited} means ``unlimited'', the value of @samp{-1} is
+reserved and should not be used, and other negative numbers are not
+allowed.
 
 @item PARAM_STRING
 The value is a string.  When the user modifies the string, any escape

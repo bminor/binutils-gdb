@@ -47,7 +47,7 @@ struct debug_sym_fns_data
 
 /* We need to record a pointer to the real set of functions for each
    objfile.  */
-static const struct objfile_key<debug_sym_fns_data>
+static const registry<objfile>::key<debug_sym_fns_data>
   symfile_debug_objfile_data_key;
 
 /* If true all calls to the symfile functions are logged.  */

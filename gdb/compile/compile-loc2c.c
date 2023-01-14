@@ -633,7 +633,7 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
      offset by hand seemed too hackish.  */
   if (is_tls)
     {
-      struct frame_info *frame = get_selected_frame (NULL);
+      frame_info_ptr frame = get_selected_frame (NULL);
       struct value *val;
 
       if (frame == NULL)

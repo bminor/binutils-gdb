@@ -35,7 +35,7 @@ Approx time to complete from here: 2 hours ....
      in the gold directory - it has its own release numbering.
 
      Likewise for the ChangeLog files in: bfd, binutils, config, cpu,
-     elfcpp, gas, gold, gprof, gprofng, include, ld, libctf, libiberty, opcodes
+     elfcpp, gas, gold, gprof, include, ld, libctf, libiberty, opcodes
      and toplevel.
 
      Add a note of the name of the new branch to binutils/BRANCHES.
@@ -44,8 +44,8 @@ Approx time to complete from here: 2 hours ....
 
   4. Create the release branch using:
 
-	git branch binutils-2_39-branch
-        git push origin binutils-2_39-branch
+	git branch binutils-2_40-branch
+        git push origin binutils-2_40-branch
 
      If you get a message like:
      
@@ -55,7 +55,7 @@ Approx time to complete from here: 2 hours ....
 
   5. Make sure that the branch is there.  IE check out the branch sources:
   
-        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_39-branch 2.39
+        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_40-branch 2.40
 
      If you get a message about being in a "detached head" state, something
      has gone wrong...
@@ -83,18 +83,21 @@ Approx time to complete from here: 2 hours ....
         https://sourceware.org/bugzilla/editversions.cgi?product=binutils
 
   8. Update bfd/version.m4 on HEAD to indicate that is now a snapshot
-     of the next release.  Note if the release is going to be 2.39 then
-     the version number on the branch is set to 2.38.90 - ie almost, but
-     not quite at 2.39, and the version number on the mainline is set to
-     2.39.50 - ie half way to the next release after 2.39.
+     of the next release and the BRANCH to indicated that it is almost
+     ready for the release.
+
+     So if the release is going to be 2.40 then the version number on
+     the BRANCH should be set to 2.39.90 - ie almost, but not quite 2.40,
+     and the version number on the MAINLINE should be set to 2.40.50 -
+     ie half way to 2.41 release.
 
      So the branch bfd/version.m4 has:
      
-       m4_define([BFD_VERSION], [2.38.90])
+       m4_define([BFD_VERSION], [2.39.90])
        
      and the mainline has:
 
-       m4_define([BFD_VERSION], [2.39.50])
+       m4_define([BFD_VERSION], [2.40.50])
 
      Regenerate various files on both branch and HEAD by configuring
      with "--enable-maintainer-mode --enable-gold --enable-shared" and then building
@@ -118,12 +121,12 @@ Approx time to complete from here: 2 hours ....
 
      c. Build a test target using this tarball.
 
-           cp binutils-2.38.90.tar.xz /dev/shm
+           cp binutils-2.39.90.tar.xz /dev/shm
 	   pushd /dev/shm
-	   tar xvf binutils-2.38.90.tar.xz
+	   tar xvf binutils-2.39.90.tar.xz
 	   mkdir build
 	   cd build
-	   ../binutils-2.38.90/configure --quiet --enable-gold
+	   ../binutils-2.39.90/configure --quiet --enable-gold
 	   make
 	   popd
 
@@ -131,8 +134,8 @@ Approx time to complete from here: 2 hours ....
 
      d. Upload the pre-release snapshot to the sourceware FTP site:
 
-          scp binutils-2.38.90.tar.xz sourceware.org:~ftp/pub/binutils/snapshots
-          ssh sourceware.org sha256sum ~ftp/pub/binutils/snapshots/binutils-2.38.90.tar.xz
+          scp binutils-2.39.90.tar.xz sourceware.org:/var/ftp/pub/binutils/snapshots
+          ssh sourceware.org sha256sum ~ftp/pub/binutils/snapshots/binutils-2.39.90.tar.xz
 
      e. Clean up the source directory again.
 
@@ -145,11 +148,11 @@ Approx time to complete from here: 2 hours ....
 ------------------------------------------------------------------------
 Dear Translation Project
 
-  The 2.39 release branch has been created for the GNU Binutils project.
+  The 2.40 release branch has been created for the GNU Binutils project.
 
   A snapshot of the branch sources can be found here:
 
-    https://sourceware.org/pub/binutils/snapshots/binutils-2.38.90.tar.xz
+    https://sourceware.org/pub/binutils/snapshots/binutils-2.39.90.tar.xz
 
   We hope to make the official release of the sources on the <DATE>
   although that could change if there are important bugs that need to
@@ -204,23 +207,30 @@ When the time comes to actually make the release....
 
   21. a. Update the release number in bfd/version.m4 on the release
          branch to a whole new minor version number, without a point
-         value.  Eg "2.38.90" becomes "2.39".
-	 
+         value.  Eg "2.39.90" becomes "2.40".
+
       b. Change bfd/development.sh to set all values to "false".
-      
+
       c. Regenerate the configure and makefiles.  And *info* files.
 
+            make all-gas all-ld all-binutils all-gprof all-gold all-gprofng
+	    make info
+	    
       d. Create a ChangeLog from the git refs for all of the commits
          from when changelog entries were no longer required:
 
            gitlog-to-changelog --since=2021-07-03 > ChangeLog.git
+           git add ChangeLog.git
 
-        The gitlog-to-changelog script is part of the sources
-	of the "config" project.
+         The gitlog-to-changelog script is part of the sources
+	 of the "config" project.
 	
-      e.  Add ChangeLog entries for all of the updates and add a
-          "this-is-the-2.38-release" comment and commit.
+      e. Add ChangeLog entries for all of the updates and add a
+         "this-is-the-2.38-release" comment and commit.
 
+           git commit
+	   git push
+	   
   22. Check that your file creation mask will create the
       correct file permissions.  Eg:
 
@@ -235,55 +245,63 @@ When the time comes to actually make the release....
   23. Note - check to see if any new files have been added to the top
       level of the source directory, but which are not in the
       DEVO_SUPPORT variable in the src-release.sh script.  If they are
-      needed then add them.  NB/ Add the new ChangeLog.git file.
+      needed then add them.
 
       Create the release tarballs:
   
             ./src-release.sh -b -g -l -x binutils
 
+      OR ... for a more reproducible tarball:
+
+            ./src-release.sh -b -g -l -x -r `git log -1 --format=%cd --date=format:%F bfd/version.m4` binutils
+
   24. Check that the files in the tarballs have the correct
       permissions.
 
-           tar tvf binutils-2.39.tar.bz2 | grep -e "---"
+           tar tvf binutils-*.tar.bz2 | grep -e "---"
 
       Also check that the man files are not empty.  (cf PR 28144).
 
-           tar tvf binutils-2.39.tar.xz | grep -e "\.1"
+           tar tvf binutils-*.tar.xz | grep -e "\.1"
 
   25. Sanity check the release on x86_64-pc-linux-gnu by building and
       running the testsuites (gas, gold, binutils and ld).  Make the
-      source directory read-only before building.  Also test
-      "make install".  If necessary fix any problems.
+      source directory read-only before building.  (Note - the gprofng
+      sources need a writeable doc/ directory.  This is a bug that needs
+      to be fixed).
+      Also test "make install".
+      If necessary fix any problems.
 
         pushd /dev/shm
 	mkdir delme
 	cd delme
 	tar xvf <path-to-sources>/binutils-2.*.tar.lz
 	chmod -R -w binutils-2.*
+	chmod +w binutils-2.*/gprofng/doc
 	mkdir build
 	cd build
 	../binutils-2.*/configure --quiet --enable-gold --prefix=`pwd`/install --enable-plugins --enable-shared
 	make all-gas all-gold all-ld all-binutils all-gprof all-gprofng
 	make check-gas check-binutils check-ld check-gold
-        make install-gas install-gold install-ld install-binutils
+        make install-gas install-gold install-ld install-binutils install-gprofng
 
         # Needed for step 29...
         make html pdf
 
         popd
-	
+
   26. Tag the branch with the new release number:
 	[optional: add "-u XXXXX" to sign with a gpg key]
 	enter a tag message such as: "Official GNU Binutils 2.3x release"
 
-	    git tag -a binutils-2_38 -u DD9E3C4F      <=== Be careful to get the tag right
+	    git tag -a binutils-2_40 -u DD9E3C4F      <=== Be careful to get the tag right
 
         NB/ If you do sign the binaries make sure to use a key
 	that has been published with the FSF.
 
         Then push the release:
 	
-	    git push origin binutils-2_3x
+	    git push origin binutils-2_40
 
         If you get an error message along the lines of:
 	"Invalid revision range ..." you can ignore it.
@@ -305,7 +323,7 @@ When the time comes to actually make the release....
        sftp sourceware.org
          cd /sourceware/ftp/pub/binutils/releases
  	 put binutils-2.3*.tar.*
- 	 chmod 644 binutils-2.3x.tar.*
+ 	 chmod 644 binutils-2.3*.tar.*
 	 quit
 
       FIXME: Are the signatures (created by the gnupload script in step 27)
@@ -434,6 +452,12 @@ Cheers
         following new features:
 
           <extract info from the NEWS files>
+
+        For more information see:
+	
+          https://sourceware.org/git/gitweb.cgi?p=binutils-gdb.git;a=blob_plain;f=gas/NEWS;;hb=refs/tags/binutils-2_39
+          https://sourceware.org/git/gitweb.cgi?p=binutils-gdb.git;a=blob_plain;f=ld/NEWS;hb=refs/tags/binutils-2_39
+          https://sourceware.org/git/gitweb.cgi?p=binutils-gdb.git;a=blob_plain;f=binutils/NEWS;hb=refs/tags/binutils-2_39
 
         Our thanks go out to all of the binutils contributors, past and
         present, for helping to make this release possible.

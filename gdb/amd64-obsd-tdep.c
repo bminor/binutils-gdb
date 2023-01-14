@@ -45,7 +45,7 @@ static const int amd64obsd_page_size = 4096;
    routine.  */
 
 static int
-amd64obsd_sigtramp_p (struct frame_info *this_frame)
+amd64obsd_sigtramp_p (frame_info_ptr this_frame)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
   CORE_ADDR start_pc = (pc & ~(amd64obsd_page_size - 1));
@@ -98,7 +98,7 @@ amd64obsd_sigtramp_p (struct frame_info *this_frame)
    address of the associated sigcontext structure.  */
 
 static CORE_ADDR
-amd64obsd_sigcontext_addr (struct frame_info *this_frame)
+amd64obsd_sigcontext_addr (frame_info_ptr this_frame)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
   ULONGEST offset = (pc & (amd64obsd_page_size - 1));
@@ -315,7 +315,7 @@ amd64obsd_collect_uthread (const struct regcache *regcache,
 #define amd64obsd_tf_reg_offset amd64obsd_sc_reg_offset
 
 static struct trad_frame_cache *
-amd64obsd_trapframe_cache (struct frame_info *this_frame, void **this_cache)
+amd64obsd_trapframe_cache (frame_info_ptr this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -362,7 +362,7 @@ amd64obsd_trapframe_cache (struct frame_info *this_frame, void **this_cache)
 }
 
 static void
-amd64obsd_trapframe_this_id (struct frame_info *this_frame,
+amd64obsd_trapframe_this_id (frame_info_ptr this_frame,
 			     void **this_cache, struct frame_id *this_id)
 {
   struct trad_frame_cache *cache =
@@ -372,7 +372,7 @@ amd64obsd_trapframe_this_id (struct frame_info *this_frame,
 }
 
 static struct value *
-amd64obsd_trapframe_prev_register (struct frame_info *this_frame,
+amd64obsd_trapframe_prev_register (frame_info_ptr this_frame,
 				   void **this_cache, int regnum)
 {
   struct trad_frame_cache *cache =
@@ -383,7 +383,7 @@ amd64obsd_trapframe_prev_register (struct frame_info *this_frame,
 
 static int
 amd64obsd_trapframe_sniffer (const struct frame_unwind *self,
-			     struct frame_info *this_frame,
+			     frame_info_ptr this_frame,
 			     void **this_prologue_cache)
 {
   ULONGEST cs;
@@ -420,7 +420,7 @@ static const struct frame_unwind amd64obsd_trapframe_unwind =
 static void
 amd64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
 
   amd64_init_abi (info, gdbarch,
 		  amd64_target_description (X86_XSTATE_SSE_MASK, true));

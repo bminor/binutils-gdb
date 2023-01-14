@@ -452,9 +452,11 @@ maintenance_info_sections (const char *arg, int from_tty)
   for (objfile *ofile : current_program_space->objfiles ())
     {
       if (ofile->obfd == current_program_space->exec_bfd ())
-	maint_print_all_sections (_("Exec file: "), ofile->obfd, ofile, arg);
+	maint_print_all_sections (_("Exec file: "), ofile->obfd.get (),
+				  ofile, arg);
       else if (opts.all_objects)
-	maint_print_all_sections (_("Object file: "), ofile->obfd, ofile, arg);
+	maint_print_all_sections (_("Object file: "), ofile->obfd.get (),
+				  ofile, arg);
     }
 
   if (core_bfd)

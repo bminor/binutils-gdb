@@ -62,7 +62,7 @@ public:
   strata stratum () const override { return record_stratum; }
 
   void close () override;
-  void async (int) override;
+  void async (bool) override;
 
   void detach (inferior *inf, int from_tty) override
   { record_detach (this, inf, from_tty); }
@@ -456,7 +456,7 @@ record_btrace_target::close ()
 /* The async method of target record-btrace.  */
 
 void
-record_btrace_target::async (int enable)
+record_btrace_target::async (bool enable)
 {
   if (enable)
     mark_async_event_handler (record_btrace_async_inferior_event_handler);
@@ -1605,7 +1605,7 @@ struct btrace_frame_cache
   struct thread_info *tp;
 
   /* The frame info.  */
-  struct frame_info *frame;
+  frame_info *frame;
 
   /* The branch trace function segment.  */
   const struct btrace_function *bfun;
@@ -1642,13 +1642,13 @@ bfcache_eq (const void *arg1, const void *arg2)
 /* Create a new btrace frame cache.  */
 
 static struct btrace_frame_cache *
-bfcache_new (struct frame_info *frame)
+bfcache_new (frame_info_ptr frame)
 {
   struct btrace_frame_cache *cache;
   void **slot;
 
   cache = FRAME_OBSTACK_ZALLOC (struct btrace_frame_cache);
-  cache->frame = frame;
+  cache->frame = frame.get ();
 
   slot = htab_find_slot (bfcache, cache, INSERT);
   gdb_assert (*slot == NULL);
@@ -1660,13 +1660,13 @@ bfcache_new (struct frame_info *frame)
 /* Extract the branch trace function from a branch trace frame.  */
 
 static const struct btrace_function *
-btrace_get_frame_function (struct frame_info *frame)
+btrace_get_frame_function (frame_info_ptr frame)
 {
   const struct btrace_frame_cache *cache;
   struct btrace_frame_cache pattern;
   void **slot;
 
-  pattern.frame = frame;
+  pattern.frame = frame.get ();
 
   slot = htab_find_slot (bfcache, &pattern, NO_INSERT);
   if (slot == NULL)
@@ -1679,7 +1679,7 @@ btrace_get_frame_function (struct frame_info *frame)
 /* Implement stop_reason method for record_btrace_frame_unwind.  */
 
 static enum unwind_stop_reason
-record_btrace_frame_unwind_stop_reason (struct frame_info *this_frame,
+record_btrace_frame_unwind_stop_reason (frame_info_ptr this_frame,
 					void **this_cache)
 {
   const struct btrace_frame_cache *cache;
@@ -1698,7 +1698,7 @@ record_btrace_frame_unwind_stop_reason (struct frame_info *this_frame,
 /* Implement this_id method for record_btrace_frame_unwind.  */
 
 static void
-record_btrace_frame_this_id (struct frame_info *this_frame, void **this_cache,
+record_btrace_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 			     struct frame_id *this_id)
 {
   const struct btrace_frame_cache *cache;
@@ -1728,7 +1728,7 @@ record_btrace_frame_this_id (struct frame_info *this_frame, void **this_cache,
 /* Implement prev_register method for record_btrace_frame_unwind.  */
 
 static struct value *
-record_btrace_frame_prev_register (struct frame_info *this_frame,
+record_btrace_frame_prev_register (frame_info_ptr this_frame,
 				   void **this_cache,
 				   int regnum)
 {
@@ -1774,13 +1774,13 @@ record_btrace_frame_prev_register (struct frame_info *this_frame,
 
 static int
 record_btrace_frame_sniffer (const struct frame_unwind *self,
-			     struct frame_info *this_frame,
+			     frame_info_ptr this_frame,
 			     void **this_cache)
 {
   const struct btrace_function *bfun;
   struct btrace_frame_cache *cache;
   struct thread_info *tp;
-  struct frame_info *next;
+  frame_info_ptr next;
 
   /* THIS_FRAME does not contain a reference to its thread.  */
   tp = inferior_thread ();
@@ -1829,13 +1829,13 @@ record_btrace_frame_sniffer (const struct frame_unwind *self,
 
 static int
 record_btrace_tailcall_frame_sniffer (const struct frame_unwind *self,
-				      struct frame_info *this_frame,
+				      frame_info_ptr this_frame,
 				      void **this_cache)
 {
   const struct btrace_function *bfun, *callee;
   struct btrace_frame_cache *cache;
   struct btrace_call_iterator it;
-  struct frame_info *next;
+  frame_info_ptr next;
   struct thread_info *tinfo;
 
   next = get_next_frame (this_frame);
@@ -1868,7 +1868,7 @@ record_btrace_tailcall_frame_sniffer (const struct frame_unwind *self,
 }
 
 static void
-record_btrace_frame_dealloc_cache (struct frame_info *self, void *this_cache)
+record_btrace_frame_dealloc_cache (frame_info *self, void *this_cache)
 {
   struct btrace_frame_cache *cache;
   void **slot;
@@ -2033,10 +2033,8 @@ record_btrace_start_replaying (struct thread_info *tp)
       frame_id = get_thread_current_frame_id (tp);
 
       /* Check if we need to update any stepping-related frame id's.  */
-      upd_step_frame_id = frame_id_eq (frame_id,
-				       tp->control.step_frame_id);
-      upd_step_stack_frame_id = frame_id_eq (frame_id,
-					     tp->control.step_stack_frame_id);
+      upd_step_frame_id = (frame_id == tp->control.step_frame_id);
+      upd_step_stack_frame_id = (frame_id == tp->control.step_stack_frame_id);
 
       /* We start replaying at the end of the branch trace.  This corresponds
 	 to the current instruction.  */
@@ -2187,7 +2185,7 @@ record_btrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
   /* Async support.  */
   if (target_can_async_p ())
     {
-      target_async (1);
+      target_async (true);
       mark_async_event_handler (record_btrace_async_inferior_event_handler);
     }
 }

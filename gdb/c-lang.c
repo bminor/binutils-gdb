@@ -118,8 +118,8 @@ classify_type (struct type *elttype, struct gdbarch *gdbarch,
       /* Call for side effects.  */
       check_typedef (elttype);
 
-      if (TYPE_TARGET_TYPE (elttype))
-	elttype = TYPE_TARGET_TYPE (elttype);
+      if (elttype->target_type ())
+	elttype = elttype->target_type ();
       else
 	{
 	  /* Perhaps check_typedef did not update the target type.  In
@@ -144,8 +144,8 @@ classify_type (struct type *elttype, struct gdbarch *gdbarch,
    for printing characters and strings is language specific.  */
 
 void
-c_emit_char (int c, struct type *type,
-	     struct ui_file *stream, int quoter)
+language_defn::emitchar (int c, struct type *type,
+			 struct ui_file *stream, int quoter) const
 {
   const char *encoding;
 
@@ -190,10 +190,10 @@ language_defn::printchar (int c, struct type *type,
    characters, or if FORCE_ELLIPSES.  */
 
 void
-c_printstr (struct ui_file *stream, struct type *type, 
-	    const gdb_byte *string, unsigned int length, 
-	    const char *user_encoding, int force_ellipses,
-	    const struct value_print_options *options)
+language_defn::printstr (struct ui_file *stream, struct type *type,
+			 const gdb_byte *string, unsigned int length,
+			 const char *user_encoding, int force_ellipses,
+			 const struct value_print_options *options) const
 {
   c_string_type str_type;
   const char *type_encoding;
@@ -247,7 +247,7 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
   int err, width;
   unsigned int fetchlimit;
   struct type *type = check_typedef (value_type (value));
-  struct type *element_type = TYPE_TARGET_TYPE (type);
+  struct type *element_type = type->target_type ();
   int req_length = *length;
   enum bfd_endian byte_order
     = type_byte_order (type);
@@ -280,7 +280,7 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
   if (! c_textual_element_type (element_type, 0))
     goto error;
   classify_type (element_type, element_type->arch (), charset);
-  width = TYPE_LENGTH (element_type);
+  width = element_type->length ();
 
   /* If the string lives in GDB's memory instead of the inferior's,
      then we just need to copy it to BUFFER.  Also, since such strings
@@ -433,9 +433,9 @@ emit_numeric_character (struct type *type, unsigned long value,
 {
   gdb_byte *buffer;
 
-  buffer = (gdb_byte *) alloca (TYPE_LENGTH (type));
+  buffer = (gdb_byte *) alloca (type->length ());
   pack_long (buffer, type, value);
-  obstack_grow (output, buffer, TYPE_LENGTH (type));
+  obstack_grow (output, buffer, type->length ());
 }
 
 /* Convert an octal escape sequence.  TYPE is the target character
@@ -625,7 +625,7 @@ c_string_operation::evaluate (struct type *expect_type,
   if (expect_type && expect_type->code () == TYPE_CODE_ARRAY)
     {
       struct type *element_type
-	= check_typedef (TYPE_TARGET_TYPE (expect_type));
+	= check_typedef (expect_type->target_type ());
 
       if (element_type->code () == TYPE_CODE_INT
 	  || element_type->code () == TYPE_CODE_CHAR)
@@ -645,7 +645,7 @@ c_string_operation::evaluate (struct type *expect_type,
     {
       LONGEST value;
 
-      if (obstack_object_size (&output) != TYPE_LENGTH (type))
+      if (obstack_object_size (&output) != type->length ())
 	error (_("Could not convert character "
 		 "constant to target character set"));
       value = unpack_long (type, (gdb_byte *) obstack_base (&output));
@@ -656,19 +656,19 @@ c_string_operation::evaluate (struct type *expect_type,
       int i;
 
       /* Write the terminating character.  */
-      for (i = 0; i < TYPE_LENGTH (type); ++i)
+      for (i = 0; i < type->length (); ++i)
 	obstack_1grow (&output, 0);
 
       if (satisfy_expected)
 	{
 	  LONGEST low_bound, high_bound;
-	  int element_size = TYPE_LENGTH (type);
+	  int element_size = type->length ();
 
 	  if (!get_discrete_bounds (expect_type->index_type (),
 				    &low_bound, &high_bound))
 	    {
 	      low_bound = 0;
-	      high_bound = (TYPE_LENGTH (expect_type) / element_size) - 1;
+	      high_bound = (expect_type->length () / element_size) - 1;
 	    }
 	  if (obstack_object_size (&output) / element_size
 	      > (high_bound - low_bound + 1))
@@ -697,7 +697,7 @@ c_is_string_type_p (struct type *type)
   type = check_typedef (type);
   while (type->code () == TYPE_CODE_REF)
     {
-      type = TYPE_TARGET_TYPE (type);
+      type = type->target_type ();
       type = check_typedef (type);
     }
 
@@ -706,16 +706,16 @@ c_is_string_type_p (struct type *type)
     case TYPE_CODE_ARRAY:
       {
 	/* See if target type looks like a string.  */
-	struct type *array_target_type = TYPE_TARGET_TYPE (type);
-	return (TYPE_LENGTH (type) > 0
-		&& TYPE_LENGTH (array_target_type) > 0
+	struct type *array_target_type = type->target_type ();
+	return (type->length () > 0
+		&& array_target_type->length () > 0
 		&& c_textual_element_type (array_target_type, 0));
       }
     case TYPE_CODE_STRING:
       return true;
     case TYPE_CODE_PTR:
       {
-	struct type *element_type = TYPE_TARGET_TYPE (type);
+	struct type *element_type = type->target_type ();
 	return c_textual_element_type (element_type, 0);
       }
     default:
@@ -975,7 +975,7 @@ public:
 
   /* See language.h.  */
 
-  CORE_ADDR skip_trampoline (struct frame_info *fi,
+  CORE_ADDR skip_trampoline (frame_info_ptr fi,
 			     CORE_ADDR pc) const override
   {
     return cplus_skip_trampoline (fi, pc);

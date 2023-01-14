@@ -52,7 +52,21 @@ macro_start_file (buildsym_compunit *builder,
 		  const struct line_header *lh)
 {
   /* File name relative to the compilation directory of this source file.  */
-  std::string file_name = lh->file_file_name (file);
+  const file_entry *fe = lh->file_name_at (file);
+  std::string file_name;
+
+  if (fe != nullptr)
+    file_name = lh->file_file_name (*fe);
+  else
+    {
+      /* The compiler produced a bogus file number.  We can at least
+	 record the macro definitions made in the file, even if we
+	 won't be able to find the file by name.  */
+      complaint (_("bad file number in macro information (%d)"),
+		 file);
+
+      file_name = string_printf ("<bad macro file number %d>", file);
+    }
 
   if (! current_file)
     {

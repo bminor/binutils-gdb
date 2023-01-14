@@ -1613,7 +1613,7 @@ msp430_refsym (int arg ATTRIBUTE_UNUSED)
    This is only used for validating the attributes in the assembly file against
    the options gas has been invoked with.  If the attributes and options are
    compatible then we add the attributes to the assembly file in
-   msp430_md_end.  */
+   msp430_md_finish.  */
 static void
 msp430_object_attribute (int attr_type)
 {
@@ -5107,7 +5107,7 @@ msp430_insert_uleb128_fixes (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Called after all assembly has been done.  */
 void
-msp430_md_end (void)
+msp430_md_finish (void)
 {
   if (check_for_nop)
     {

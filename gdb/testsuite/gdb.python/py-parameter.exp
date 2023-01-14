@@ -126,6 +126,10 @@ proc_with_prefix test_boolean_parameter { } {
 	"The state of the Test Parameter is off.*" "show parameter off"
     gdb_test "python print (test_param.value)" "False" \
 	"test boolean parameter value is False"
+    gdb_test_no_output "python gdb.set_parameter('print test-param', True)" \
+	"set boolean parameter using set_parameter"
+    gdb_test "python print(gdb.parameter('print test-param'))" "True" \
+	"get boolean parameter using gdb.parameter"
     gdb_test "help show print test-param" \
 	[multi_line \
 	     "Show the state of the boolean test-param" \
@@ -342,9 +346,9 @@ proc_with_prefix test_integer_parameter { } {
 	    gdb_test "python test_param_$kind.value = -1" "RuntimeError: Range exceeded.*"
 	} elseif {$kind == "PARAM_ZUINTEGER_UNLIMITED"} {
 	    gdb_test_no_output "python test_param_$kind.value = -1" \
-		"check that PARAM_ZUINTEGER value can be set to -1"
+		"check that PARAM_ZUINTEGER_UNLIMITED value can be set to -1"
 	    gdb_test "python print(gdb.parameter('test-$kind'))" "-1" \
-		"check that PARAM_ZUINTEGER value is -1 after setting"
+		"check that PARAM_ZUINTEGER_UNLIMITED value is -1 after setting"
 	} else {
 	    error "invalid kind: $kind"
 	}

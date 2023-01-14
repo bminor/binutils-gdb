@@ -126,10 +126,10 @@ amd64_windows_passed_by_integer_register (struct type *type)
       case TYPE_CODE_STRUCT:
       case TYPE_CODE_UNION:
       case TYPE_CODE_COMPLEX:
-	return (TYPE_LENGTH (type) == 1
-		|| TYPE_LENGTH (type) == 2
-		|| TYPE_LENGTH (type) == 4
-		|| TYPE_LENGTH (type) == 8);
+	return (type->length () == 1
+		|| type->length () == 2
+		|| type->length () == 4
+		|| type->length () == 8);
 
       default:
 	return 0;
@@ -144,7 +144,7 @@ amd64_windows_passed_by_xmm_register (struct type *type)
 {
   return ((type->code () == TYPE_CODE_FLT
 	   || type->code () == TYPE_CODE_DECFLOAT)
-	  && (TYPE_LENGTH (type) == 4 || TYPE_LENGTH (type) == 8));
+	  && (type->length () == 4 || type->length () == 8));
 }
 
 /* Return non-zero iff an argument of the given TYPE should be passed
@@ -180,7 +180,7 @@ amd64_windows_adjust_args_passed_by_pointer (struct value **args,
       {
 	struct type *type = value_type (args[i]);
 	const gdb_byte *valbuf = value_contents (args[i]).data ();
-	const int len = TYPE_LENGTH (type);
+	const int len = type->length ();
 
 	/* Store a copy of that argument on the stack, aligned to
 	   a 16 bytes boundary, and then use the copy's address as
@@ -208,9 +208,9 @@ amd64_windows_store_arg_in_reg (struct regcache *regcache,
   const gdb_byte *valbuf = value_contents (arg).data ();
   gdb_byte buf[8];
 
-  gdb_assert (TYPE_LENGTH (type) <= 8);
+  gdb_assert (type->length () <= 8);
   memset (buf, 0, sizeof buf);
-  memcpy (buf, valbuf, std::min (TYPE_LENGTH (type), (ULONGEST) 8));
+  memcpy (buf, valbuf, std::min (type->length (), (ULONGEST) 8));
   regcache->cooked_write (regno, buf);
 }
 
@@ -252,7 +252,7 @@ amd64_windows_push_arguments (struct regcache *regcache, int nargs,
   for (i = 0; i < nargs; i++)
     {
       struct type *type = value_type (args[i]);
-      int len = TYPE_LENGTH (type);
+      int len = type->length ();
       int on_stack_p = 1;
 
       if (reg_idx < ARRAY_SIZE (amd64_windows_dummy_call_integer_regs))
@@ -297,8 +297,8 @@ amd64_windows_push_arguments (struct regcache *regcache, int nargs,
       struct type *type = value_type (stack_args[i]);
       const gdb_byte *valbuf = value_contents (stack_args[i]).data ();
 
-      write_memory (sp + element * 8, valbuf, TYPE_LENGTH (type));
-      element += ((TYPE_LENGTH (type) + 7) / 8);
+      write_memory (sp + element * 8, valbuf, type->length ());
+      element += ((type->length () + 7) / 8);
     }
 
   return sp;
@@ -357,7 +357,7 @@ amd64_windows_return_value (struct gdbarch *gdbarch, struct value *function,
 			    struct type *type, struct regcache *regcache,
 			    gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   int regnum = -1;
 
   /* See if our value is returned through a register.  If it is, then
@@ -373,7 +373,7 @@ amd64_windows_return_value (struct gdbarch *gdbarch, struct value *function,
 	/* __m128, __m128i and __m128d are returned via XMM0.  */
 	if (type->is_vector () && len == 16)
 	  {
-	    enum type_code code = TYPE_TARGET_TYPE (type)->code ();
+	    enum type_code code = type->target_type ()->code ();
 	    if (code == TYPE_CODE_INT || code == TYPE_CODE_FLT)
 	      {
 		regnum = AMD64_XMM0_REGNUM;
@@ -399,7 +399,7 @@ amd64_windows_return_value (struct gdbarch *gdbarch, struct value *function,
 	  ULONGEST addr;
 
 	  regcache_raw_read_unsigned (regcache, AMD64_RAX_REGNUM, &addr);
-	  read_memory (addr, readbuf, TYPE_LENGTH (type));
+	  read_memory (addr, readbuf, type->length ());
 	}
       return RETURN_VALUE_ABI_RETURNS_ADDRESS;
     }
@@ -513,7 +513,7 @@ pc_in_range (CORE_ADDR pc, const struct amd64_windows_frame_cache *cache)
    Return 1 if an epilogue sequence was recognized, 0 otherwise.  */
 
 static int
-amd64_windows_frame_decode_epilogue (struct frame_info *this_frame,
+amd64_windows_frame_decode_epilogue (frame_info_ptr this_frame,
 				     struct amd64_windows_frame_cache *cache)
 {
   /* According to MSDN an epilogue "must consist of either an add RSP,constant
@@ -693,7 +693,7 @@ amd64_windows_frame_decode_epilogue (struct frame_info *this_frame,
 /* Decode and execute unwind insns at UNWIND_INFO.  */
 
 static void
-amd64_windows_frame_decode_insns (struct frame_info *this_frame,
+amd64_windows_frame_decode_insns (frame_info_ptr this_frame,
 				  struct amd64_windows_frame_cache *cache,
 				  CORE_ADDR unwind_info)
 {
@@ -1073,7 +1073,7 @@ amd64_windows_find_unwind_info (struct gdbarch *gdbarch, CORE_ADDR pc,
    for THIS_FRAME.  */
 
 static struct amd64_windows_frame_cache *
-amd64_windows_frame_cache (struct frame_info *this_frame, void **this_cache)
+amd64_windows_frame_cache (frame_info_ptr this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -1118,7 +1118,7 @@ amd64_windows_frame_cache (struct frame_info *this_frame, void **this_cache)
    using the standard Windows x64 SEH info.  */
 
 static struct value *
-amd64_windows_frame_prev_register (struct frame_info *this_frame,
+amd64_windows_frame_prev_register (frame_info_ptr this_frame,
 				   void **this_cache, int regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -1164,7 +1164,7 @@ amd64_windows_frame_prev_register (struct frame_info *this_frame,
    the standard Windows x64 SEH info.  */
 
 static void
-amd64_windows_frame_this_id (struct frame_info *this_frame, void **this_cache,
+amd64_windows_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 		   struct frame_id *this_id)
 {
   struct amd64_windows_frame_cache *cache =
@@ -1230,7 +1230,7 @@ amd64_windows_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 /* Check Win64 DLL jmp trampolines and find jump destination.  */
 
 static CORE_ADDR
-amd64_windows_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
+amd64_windows_skip_trampoline_code (frame_info_ptr frame, CORE_ADDR pc)
 {
   CORE_ADDR destination = 0;
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -1277,7 +1277,7 @@ amd64_windows_auto_wide_charset (void)
 static void
 amd64_windows_init_abi_common (gdbarch_info info, struct gdbarch *gdbarch)
 {
-  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
 
   /* The dwarf2 unwinder (appended very early by i386_gdbarch_init) is
      preferred over the SEH one.  The reasons are:

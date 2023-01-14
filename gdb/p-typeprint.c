@@ -184,7 +184,7 @@ pascal_language::type_print_varspec_prefix (struct type *type,
     {
     case TYPE_CODE_PTR:
       gdb_printf (stream, "^");
-      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1,
+      type_print_varspec_prefix (type->target_type (), stream, 0, 1,
 					flags);
       break;			/* Pointer should be handled normally
 				   in pascal.  */
@@ -192,8 +192,8 @@ pascal_language::type_print_varspec_prefix (struct type *type,
     case TYPE_CODE_METHOD:
       if (passed_a_ptr)
 	gdb_printf (stream, "(");
-      if (TYPE_TARGET_TYPE (type) != NULL
-	  && TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_VOID)
+      if (type->target_type () != NULL
+	  && type->target_type ()->code () != TYPE_CODE_VOID)
 	{
 	  gdb_printf (stream, "function  ");
 	}
@@ -212,7 +212,7 @@ pascal_language::type_print_varspec_prefix (struct type *type,
       break;
 
     case TYPE_CODE_REF:
-      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1,
+      type_print_varspec_prefix (type->target_type (), stream, 0, 1,
 				 flags);
       gdb_printf (stream, "&");
       break;
@@ -221,8 +221,8 @@ pascal_language::type_print_varspec_prefix (struct type *type,
       if (passed_a_ptr)
 	gdb_printf (stream, "(");
 
-      if (TYPE_TARGET_TYPE (type) != NULL
-	  && TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_VOID)
+      if (type->target_type () != NULL
+	  && type->target_type ()->code () != TYPE_CODE_VOID)
 	{
 	  gdb_printf (stream, "function  ");
 	}
@@ -237,7 +237,7 @@ pascal_language::type_print_varspec_prefix (struct type *type,
       if (passed_a_ptr)
 	gdb_printf (stream, "(");
       gdb_printf (stream, "array ");
-      if (TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0
+      if (type->target_type ()->length () > 0
 	  && type->bounds ()->high.kind () != PROP_UNDEFINED)
 	gdb_printf (stream, "[%s..%s] ",
 		    plongest (type->bounds ()->low.const_val ()),
@@ -313,20 +313,20 @@ pascal_language::type_print_func_varspec_suffix  (struct type *type,
 						  int demangled_args,
 						  const struct type_print_options *flags) const
 {
-  if (TYPE_TARGET_TYPE (type) == NULL
-      || TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_VOID)
+  if (type->target_type () == NULL
+      || type->target_type ()->code () != TYPE_CODE_VOID)
     {
       gdb_printf (stream, " : ");
-      type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
+      type_print_varspec_prefix (type->target_type (),
 					stream, 0, 0, flags);
 
-      if (TYPE_TARGET_TYPE (type) == NULL)
+      if (type->target_type () == NULL)
 	type_print_unknown_return_type (stream);
       else
-	type_print_base (TYPE_TARGET_TYPE (type), stream, show, 0,
+	type_print_base (type->target_type (), stream, show, 0,
 				flags);
 
-      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
+      type_print_varspec_suffix (type->target_type (), stream, 0,
 				 passed_a_ptr, 0, flags);
     }
 }
@@ -365,7 +365,7 @@ pascal_language::type_print_varspec_suffix (struct type *type,
 
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
-      type_print_varspec_suffix (TYPE_TARGET_TYPE (type),
+      type_print_varspec_suffix (type->target_type (),
 				 stream, 0, 1, 0, flags);
       break;
 
@@ -428,7 +428,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 
   /* void pointer */
   if ((type->code () == TYPE_CODE_PTR)
-      && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_VOID))
+      && (type->target_type ()->code () == TYPE_CODE_VOID))
     {
       gdb_puts (type->name () ? type->name () : "pointer",
 		stream);
@@ -451,12 +451,12 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
     case TYPE_CODE_TYPEDEF:
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
-      type_print_base (TYPE_TARGET_TYPE (type), stream, show, level,
+      type_print_base (type->target_type (), stream, show, level,
 		       flags);
       break;
 
     case TYPE_CODE_ARRAY:
-      print_type (TYPE_TARGET_TYPE (type), NULL, stream, 0, 0, flags);
+      print_type (type->target_type (), NULL, stream, 0, 0, flags);
       break;
 
     case TYPE_CODE_FUNC:
@@ -636,7 +636,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 		  print_spaces (level + 4, stream);
 		  if (TYPE_FN_FIELD_STATIC_P (f, j))
 		    gdb_printf (stream, "static ");
-		  if (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)) == 0)
+		  if (TYPE_FN_FIELD_TYPE (f, j)->target_type () == 0)
 		    {
 		      /* Keep GDB from crashing here.  */
 		      gdb_printf (stream, "<undefined type> %s;\n",
@@ -652,8 +652,9 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 		    {
 		      gdb_printf (stream, "destructor  ");
 		    }
-		  else if (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)) != 0
-			   && TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE(f, j))->code () != TYPE_CODE_VOID)
+		  else if (TYPE_FN_FIELD_TYPE (f, j)->target_type () != 0
+			   && (TYPE_FN_FIELD_TYPE(f, j)->target_type ()->code ()
+			       != TYPE_CODE_VOID))
 		    {
 		      gdb_printf (stream, "function  ");
 		    }
@@ -665,11 +666,12 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 
 		  type_print_method_args (physname, method_name, stream);
 
-		  if (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)) != 0
-		      && TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE(f, j))->code () != TYPE_CODE_VOID)
+		  if (TYPE_FN_FIELD_TYPE (f, j)->target_type () != 0
+		      && (TYPE_FN_FIELD_TYPE(f, j)->target_type ()->code ()
+			  != TYPE_CODE_VOID))
 		    {
 		      gdb_puts (" : ", stream);
-		      type_print (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)),
+		      type_print (TYPE_FN_FIELD_TYPE (f, j)->target_type (),
 				  "", stream, -1);
 		    }
 		  if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
@@ -739,7 +741,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
       /* this probably does not work for enums.  */
     case TYPE_CODE_RANGE:
       {
-	struct type *target = TYPE_TARGET_TYPE (type);
+	struct type *target = type->target_type ();
 
 	print_type_scalar (target, type->bounds ()->low.const_val (), stream);
 	gdb_puts ("..", stream);

@@ -101,7 +101,7 @@ index_cache::store (dwarf2_per_objfile *per_objfile)
     return;
 
   /* Get build id of objfile.  */
-  const bfd_build_id *build_id = build_id_bfd_get (obj->obfd);
+  const bfd_build_id *build_id = build_id_bfd_get (obj->obfd.get ());
   if (build_id == nullptr)
     {
       index_cache_debug ("objfile %s has no build id",

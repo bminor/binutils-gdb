@@ -671,6 +671,7 @@ static void
 process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 {
   int i, j;
+  unsigned int ui;
   struct bfd_link_hash_entry *blhe;
   bfd *b;
   struct bfd_section *s;
@@ -715,6 +716,15 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 	      sym_hash->root.u.c.p->alignment_power = (unsigned) ac->alignment;
 	    }
 	  ac = ac->next;
+	}
+    }
+
+  if (pe_def_file->exclude_symbols)
+    {
+      for (ui = 0; ui < pe_def_file->num_exclude_symbols; ui++)
+	{
+	  pe_dll_add_excludes (pe_def_file->exclude_symbols[ui].symbol_name,
+			       EXCLUDESYMS);
 	}
     }
 
@@ -781,7 +791,7 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 
 		  if (auto_export (b, pe_def_file, sn))
 		    {
-		      int is_dup = 0;
+		      bool is_dup = false;
 		      def_file_export *p;
 
 		      p = def_file_add_export (pe_def_file, sn, 0, -1,
@@ -847,7 +857,7 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 
 	  if (strchr (pe_def_file->exports[i].name, '@'))
 	    {
-	      int is_dup = 1;
+	      bool is_dup = true;
 	      int lead_at = (*pe_def_file->exports[i].name == '@');
 	      char *tmp = xstrdup (pe_def_file->exports[i].name + lead_at);
 
@@ -1500,8 +1510,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
   int total_relocs = 0;
   int i;
   bfd_vma sec_page = (bfd_vma) -1;
-  bfd_vma page_ptr, page_count;
-  int bi;
+  bfd_vma page_ptr;
   bfd *b;
   struct bfd_section *s;
 
@@ -1515,8 +1524,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
   reloc_data = xmalloc (total_relocs * sizeof (reloc_data_type));
 
   total_relocs = 0;
-  bi = 0;
-  for (bi = 0, b = info->input_bfds; b; bi++, b = b->link.next)
+  for (b = info->input_bfds; b; b = b->link.next)
     {
       arelent **relocs;
       int relsize, nrelocs;
@@ -1711,7 +1719,6 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
   sec_page = (bfd_vma) -1;
   reloc_sz = 0;
   page_ptr = (bfd_vma) -1;
-  page_count = 0;
 
   for (i = 0; i < total_relocs; i++)
     {
@@ -1730,7 +1737,6 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 	  page_ptr = reloc_sz;
 	  reloc_sz += 8;
 	  sec_page = this_page;
-	  page_count = 0;
 	}
 
       bfd_put_16 (abfd, (rva & 0xfff) + (reloc_data[i].type << 12),
@@ -1743,7 +1749,6 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 	  reloc_sz += 2;
 	}
 
-      page_count++;
     }
 
   while (reloc_sz & 3)
@@ -1812,10 +1817,8 @@ pe_dll_generate_def_file (const char *pe_out_def_filename)
 	  quoteput (pe_def_file->name, out, 1);
 
 	  if (pe_data (link_info.output_bfd)->pe_opthdr.ImageBase)
-	    {
-	      fprintf (out, " BASE=0x");
-	      fprintf_vma (out, ((bfd_vma) pe_data (link_info.output_bfd)->pe_opthdr.ImageBase));
-	    }
+	    fprintf (out, " BASE=0x%" PRIx64,
+		     (uint64_t) pe_data (link_info.output_bfd)->pe_opthdr.ImageBase);
 	  fprintf (out, "\n");
 	}
 
@@ -3571,7 +3574,7 @@ pe_implied_import_dll (const char *filename)
 	 exported in buggy auto-import releases.  */
       if (! startswith (erva + name_rva, "__nm_"))
 	{
-	  int is_dup = 0;
+	  bool is_dup = false;
 	  /* is_data is true if the address is in the data, rdata or bss
 	     segment.  */
 	  is_data =

@@ -72,11 +72,6 @@ static bool debug_aix_thread;
 
 #define PD_TID(ptid)	(pd_active && ptid.tid () != 0)
 
-/* pthdb_user_t value that we pass to pthdb functions.  0 causes
-   PTHDB_BAD_USER errors, so use 1.  */
-
-#define PD_USER	1
-
 /* Success and failure values returned by pthdb callbacks.  */
 
 #define PDC_SUCCESS	PTHDB_SUCCESS
@@ -95,7 +90,7 @@ struct aix_thread_info : public private_thread_info
 static aix_thread_info *
 get_aix_thread_info (thread_info *thread)
 {
-  return static_cast<aix_thread_info *> (thread->priv.get ());
+  return gdb::checked_static_cast<aix_thread_info *> (thread->priv.get ());
 }
 
 /* Information about a thread of which libpthdebug is aware.  */
@@ -331,7 +326,7 @@ pid_to_prc (ptid_t *ptidp)
    the address of SYMBOLS[<i>].name.  */
 
 static int
-pdc_symbol_addrs (pthdb_user_t user, pthdb_symbol_t *symbols, int count)
+pdc_symbol_addrs (pthdb_user_t user_current_pid, pthdb_symbol_t *symbols, int count)
 {
   struct bound_minimal_symbol ms;
   int i;
@@ -339,8 +334,8 @@ pdc_symbol_addrs (pthdb_user_t user, pthdb_symbol_t *symbols, int count)
 
   if (debug_aix_thread)
     gdb_printf (gdb_stdlog,
-		"pdc_symbol_addrs (user = %ld, symbols = 0x%lx, count = %d)\n",
-		user, (long) symbols, count);
+		"pdc_symbol_addrs (user_current_pid = %ld, symbols = 0x%lx, count = %d)\n",
+		user_current_pid, (long) symbols, count);
 
   for (i = 0; i < count; i++)
     {
@@ -378,7 +373,7 @@ pdc_symbol_addrs (pthdb_user_t user, pthdb_symbol_t *symbols, int count)
    If successful return 0, else non-zero is returned.  */
 
 static int
-pdc_read_regs (pthdb_user_t user, 
+pdc_read_regs (pthdb_user_t user_current_pid,
 	       pthdb_tid_t tid,
 	       unsigned long long flags,
 	       pthdb_context_t *context)
@@ -450,7 +445,7 @@ pdc_read_regs (pthdb_user_t user,
    If successful return 0, else non-zero is returned.  */
 
 static int
-pdc_write_regs (pthdb_user_t user,
+pdc_write_regs (pthdb_user_t user_current_pid,
 		pthdb_tid_t tid,
 		unsigned long long flags,
 		pthdb_context_t *context)
@@ -500,17 +495,29 @@ pdc_write_regs (pthdb_user_t user,
 /* pthdb callback: read LEN bytes from process ADDR into BUF.  */
 
 static int
-pdc_read_data (pthdb_user_t user, void *buf, 
+pdc_read_data (pthdb_user_t user_current_pid, void *buf,
 	       pthdb_addr_t addr, size_t len)
 {
   int status, ret;
 
   if (debug_aix_thread)
     gdb_printf (gdb_stdlog,
-		"pdc_read_data (user = %ld, buf = 0x%lx, addr = %s, len = %ld)\n",
-		user, (long) buf, hex_string (addr), len);
+		"pdc_read_data (user_current_pid = %ld, buf = 0x%lx, addr = %s, len = %ld)\n",
+		user_current_pid, (long) buf, hex_string (addr), len);
 
-  status = target_read_memory (addr, (gdb_byte *) buf, len);
+  /* This is needed to eliminate the dependency of current thread
+     which is null so that thread reads the correct target memory.  */
+  {
+    scoped_restore_current_thread restore_current_thread;
+    /* Before the first inferior is added, we pass inferior_ptid.pid ()
+       from pd_enable () which is 0.  There is no need to switch threads
+       during first initialisation.  In the rest of the callbacks the
+       current thread needs to be correct.  */
+    if (user_current_pid != 0)
+      switch_to_thread (current_inferior ()->process_target (),
+			ptid_t (user_current_pid));
+    status = target_read_memory (addr, (gdb_byte *) buf, len);
+  }
   ret = status == 0 ? PDC_SUCCESS : PDC_FAILURE;
 
   if (debug_aix_thread)
@@ -522,15 +529,15 @@ pdc_read_data (pthdb_user_t user, void *buf,
 /* pthdb callback: write LEN bytes from BUF to process ADDR.  */
 
 static int
-pdc_write_data (pthdb_user_t user, void *buf, 
+pdc_write_data (pthdb_user_t user_current_pid, void *buf,
 		pthdb_addr_t addr, size_t len)
 {
   int status, ret;
 
   if (debug_aix_thread)
     gdb_printf (gdb_stdlog,
-		"pdc_write_data (user = %ld, buf = 0x%lx, addr = %s, len = %ld)\n",
-		user, (long) buf, hex_string (addr), len);
+		"pdc_write_data (user_current_pid = %ld, buf = 0x%lx, addr = %s, len = %ld)\n",
+		user_current_pid, (long) buf, hex_string (addr), len);
 
   status = target_write_memory (addr, (gdb_byte *) buf, len);
   ret = status == 0 ? PDC_SUCCESS : PDC_FAILURE;
@@ -545,12 +552,12 @@ pdc_write_data (pthdb_user_t user, void *buf,
    in BUFP.  */
 
 static int
-pdc_alloc (pthdb_user_t user, size_t len, void **bufp)
+pdc_alloc (pthdb_user_t user_current_pid, size_t len, void **bufp)
 {
   if (debug_aix_thread)
     gdb_printf (gdb_stdlog,
-		"pdc_alloc (user = %ld, len = %ld, bufp = 0x%lx)\n",
-		user, len, (long) bufp);
+		"pdc_alloc (user_current_pid = %ld, len = %ld, bufp = 0x%lx)\n",
+		user_current_pid, len, (long) bufp);
   *bufp = xmalloc (len);
   if (debug_aix_thread)
     gdb_printf (gdb_stdlog, 
@@ -567,12 +574,12 @@ pdc_alloc (pthdb_user_t user, size_t len, void **bufp)
    pointer to the result in BUFP.  */
 
 static int
-pdc_realloc (pthdb_user_t user, void *buf, size_t len, void **bufp)
+pdc_realloc (pthdb_user_t user_current_pid, void *buf, size_t len, void **bufp)
 {
   if (debug_aix_thread)
     gdb_printf (gdb_stdlog,
-		"pdc_realloc (user = %ld, buf = 0x%lx, len = %ld, bufp = 0x%lx)\n",
-		user, (long) buf, len, (long) bufp);
+		"pdc_realloc (user_current_pid = %ld, buf = 0x%lx, len = %ld, bufp = 0x%lx)\n",
+		user_current_pid, (long) buf, len, (long) bufp);
   *bufp = xrealloc (buf, len);
   if (debug_aix_thread)
     gdb_printf (gdb_stdlog, 
@@ -584,11 +591,11 @@ pdc_realloc (pthdb_user_t user, void *buf, size_t len, void **bufp)
    realloc callback.  */
 
 static int
-pdc_dealloc (pthdb_user_t user, void *buf)
+pdc_dealloc (pthdb_user_t user_current_pid, void *buf)
 {
   if (debug_aix_thread)
     gdb_printf (gdb_stdlog, 
-		"pdc_free (user = %ld, buf = 0x%lx)\n", user,
+		"pdc_free (user_current_pid = %ld, buf = 0x%lx)\n", user_current_pid,
 		(long) buf);
   xfree (buf);
   return PDC_SUCCESS;
@@ -701,14 +708,14 @@ gcmp (const void *t1v, const void *t2v)
    Return 0 if none found.  */
 
 static pthdb_tid_t
-get_signaled_thread (void)
+get_signaled_thread (int pid)
 {
   struct thrdsinfo64 thrinf;
   tid_t ktid = 0;
 
   while (1)
     {
-      if (getthrds (inferior_ptid.pid (), &thrinf,
+      if (getthrds (pid, &thrinf,
 		    sizeof (thrinf), &ktid, 1) != 1)
 	break;
 
@@ -734,9 +741,9 @@ get_signaled_thread (void)
        have difficulty with certain call patterns */
 
 static void
-sync_threadlists (void)
+sync_threadlists (int pid)
 {
-  int cmd, status, infpid;
+  int cmd, status;
   int pcount, psize, pi, gcount, gi;
   struct pd_thread *pbuf;
   struct thread_info **gbuf, **g, *thread;
@@ -790,8 +797,6 @@ sync_threadlists (void)
   qsort (gbuf, gcount, sizeof *gbuf, gcmp);
 
   /* Apply differences between the two arrays to GDB's thread list.  */
-
-  infpid = inferior_ptid.pid ();
   for (pi = gi = 0; pi < pcount || gi < gcount;)
     {
       if (pi == pcount)
@@ -808,7 +813,7 @@ sync_threadlists (void)
 	  process_stratum_target *proc_target
 	    = current_inferior ()->process_target ();
 	  thread = add_thread_with_info (proc_target,
-					 ptid_t (infpid, 0, pbuf[pi].pthid),
+					 ptid_t (pid, 0, pbuf[pi].pthid),
 					 priv);
 
 	  pi++;
@@ -818,7 +823,7 @@ sync_threadlists (void)
 	  ptid_t pptid, gptid;
 	  int cmp_result;
 
-	  pptid = ptid_t (infpid, 0, pbuf[pi].pthid);
+	  pptid = ptid_t (pid, 0, pbuf[pi].pthid);
 	  gptid = gbuf[gi]->ptid;
 	  pdtid = pbuf[pi].pdtid;
 	  tid = pbuf[pi].tid;
@@ -872,10 +877,11 @@ iter_tid (struct thread_info *thread, void *tidp)
 
 /* Synchronize libpthdebug's state with the inferior and with GDB,
    generate a composite process/thread <pid> for the current thread,
-   set inferior_ptid to <pid> if SET_INFPID, and return <pid>.  */
+   Return the ptid of the event thread if one can be found, else
+   return a pid-only ptid with PID.  */
 
 static ptid_t
-pd_update (int set_infpid)
+pd_update (int pid)
 {
   int status;
   ptid_t ptid;
@@ -883,48 +889,45 @@ pd_update (int set_infpid)
   struct thread_info *thread = NULL;
 
   if (!pd_active)
-    return inferior_ptid;
+    return ptid_t (pid);
 
   status = pthdb_session_update (pd_session);
   if (status != PTHDB_SUCCESS)
-    return inferior_ptid;
+    return ptid_t (pid);
 
-  sync_threadlists ();
+  sync_threadlists (pid);
 
   /* Define "current thread" as one that just received a trap signal.  */
 
-  tid = get_signaled_thread ();
+  tid = get_signaled_thread (pid);
   if (tid != 0)
     thread = iterate_over_threads (iter_tid, &tid);
   if (!thread)
-    ptid = inferior_ptid;
+    ptid = ptid_t (pid);
   else
-    {
-      ptid = thread->ptid;
-      if (set_infpid)
-	switch_to_thread (thread);
-    }
+    ptid = thread->ptid;
+
   return ptid;
 }
 
 /* Try to start debugging threads in the current process.
-   If successful and SET_INFPID, set inferior_ptid to reflect the
-   current thread.  */
+   If successful and there exists and we can find an event thread, return a ptid
+   for that thread.  Otherwise, return a ptid-only ptid using PID.  */
 
 static ptid_t
-pd_activate (int set_infpid)
+pd_activate (int pid)
 {
   int status;
 		
-  status = pthdb_session_init (PD_USER, arch64 ? PEM_64BIT : PEM_32BIT,
+  status = pthdb_session_init (pid, arch64 ? PEM_64BIT : PEM_32BIT,
 			       PTHDB_FLAG_REGS, &pd_callbacks, 
 			       &pd_session);
   if (status != PTHDB_SUCCESS)
     {
-      return inferior_ptid;
+      return ptid_t (pid);
     }
   pd_active = 1;
-  return pd_update (set_infpid);
+  return pd_update (pid);
 }
 
 /* Undo the effects of pd_activate().  */
@@ -959,7 +962,7 @@ pd_enable (void)
 
   /* Check whether the application is pthreaded.  */
   stub_name = NULL;
-  status = pthdb_session_pthreaded (PD_USER, PTHDB_FLAG_REGS,
+  status = pthdb_session_pthreaded (inferior_ptid.pid (), PTHDB_FLAG_REGS,
 				    &pd_callbacks, &stub_name);
   if ((status != PTHDB_SUCCESS
        && status != PTHDB_NOT_PTHREADED) || !stub_name)
@@ -980,7 +983,7 @@ pd_enable (void)
   /* If we're debugging a core file or an attached inferior, the
      pthread library may already have been initialized, so try to
      activate thread debugging.  */
-  pd_activate (1);
+  pd_activate (inferior_ptid.pid ());
 }
 
 /* Undo the effects of pd_enable().  */
@@ -1080,16 +1083,17 @@ aix_thread_target::wait (ptid_t ptid, struct target_waitstatus *status,
 			 target_wait_flags options)
 {
   {
-    scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
-
     pid_to_prc (&ptid);
 
-    inferior_ptid = ptid_t (inferior_ptid.pid ());
     ptid = beneath ()->wait (ptid, status, options);
   }
 
   if (ptid.pid () == -1)
     return ptid_t (-1);
+
+  /* The target beneath does not deal with threads, so it should only return
+     pid-only ptids.  */
+  gdb_assert (ptid.is_pid ());
 
   /* Check whether libpthdebug might be ready to be initialized.  */
   if (!pd_active && status->kind () == TARGET_WAITKIND_STOPPED
@@ -1102,10 +1106,10 @@ aix_thread_target::wait (ptid_t ptid, struct target_waitstatus *status,
 
       if (regcache_read_pc (regcache)
 	  - gdbarch_decr_pc_after_break (gdbarch) == pd_brk_addr)
-	return pd_activate (0);
+	return pd_activate (ptid.pid ());
     }
 
-  return pd_update (0);
+  return pd_update (ptid.pid ());
 }
 
 /* Record that the 64-bit general-purpose registers contain VALS.  */
@@ -1114,7 +1118,7 @@ static void
 supply_gprs64 (struct regcache *regcache, uint64_t *vals)
 {
   ppc_gdbarch_tdep *tdep
-    = (ppc_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+    = gdbarch_tdep<ppc_gdbarch_tdep> (regcache->arch ());
   int regno;
 
   for (regno = 0; regno < ppc_num_gprs; regno++)
@@ -1136,7 +1140,7 @@ static void
 supply_fprs (struct regcache *regcache, double *vals)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
   int regno;
 
   /* This function should never be called on architectures without
@@ -1154,7 +1158,7 @@ supply_fprs (struct regcache *regcache, double *vals)
 static int
 special_register_p (struct gdbarch *gdbarch, int regno)
 {
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
 
   return regno == gdbarch_pc_regnum (gdbarch)
       || regno == tdep->ppc_ps_regnum
@@ -1177,7 +1181,7 @@ supply_sprs64 (struct regcache *regcache,
 	       uint32_t fpscr)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
 
   regcache->raw_supply (gdbarch_pc_regnum (gdbarch), (char *) &iar);
   regcache->raw_supply (tdep->ppc_ps_regnum, (char *) &msr);
@@ -1199,7 +1203,7 @@ supply_sprs32 (struct regcache *regcache,
 	       uint32_t fpscr)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
 
   regcache->raw_supply (gdbarch_pc_regnum (gdbarch), (char *) &iar);
   regcache->raw_supply (tdep->ppc_ps_regnum, (char *) &msr);
@@ -1222,7 +1226,7 @@ static void
 fetch_regs_user_thread (struct regcache *regcache, pthdb_pthread_t pdtid)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
   int status, i;
   pthdb_context_t ctx;
 
@@ -1277,7 +1281,7 @@ fetch_regs_kernel_thread (struct regcache *regcache, int regno,
 			  pthdb_tid_t tid)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
   uint64_t gprs64[ppc_num_gprs];
   uint32_t gprs32[ppc_num_gprs];
   double fprs[ppc_num_fprs];
@@ -1380,7 +1384,7 @@ static void
 fill_gprs64 (const struct regcache *regcache, uint64_t *vals)
 {
   ppc_gdbarch_tdep *tdep
-    = (ppc_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+    = gdbarch_tdep<ppc_gdbarch_tdep> (regcache->arch ());
   int regno;
 
   for (regno = 0; regno < ppc_num_gprs; regno++)
@@ -1393,7 +1397,7 @@ static void
 fill_gprs32 (const struct regcache *regcache, uint32_t *vals)
 {
   ppc_gdbarch_tdep *tdep
-    = (ppc_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+    = gdbarch_tdep<ppc_gdbarch_tdep> (regcache->arch ());
   int regno;
 
   for (regno = 0; regno < ppc_num_gprs; regno++)
@@ -1407,7 +1411,7 @@ static void
 fill_fprs (const struct regcache *regcache, double *vals)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
   int regno;
 
   /* This function should never be called on architectures without
@@ -1431,7 +1435,7 @@ fill_sprs64 (const struct regcache *regcache,
 	     uint32_t *fpscr)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
 
   /* Verify that the size of the size of the IAR buffer is the
      same as the raw size of the PC (in the register cache).  If
@@ -1465,7 +1469,7 @@ fill_sprs32 (const struct regcache *regcache,
 	     uint32_t *fpscr)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
 
   /* Verify that the size of the size of the IAR buffer is the
      same as the raw size of the PC (in the register cache).  If
@@ -1502,7 +1506,7 @@ static void
 store_regs_user_thread (const struct regcache *regcache, pthdb_pthread_t pdtid)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
   int status, i;
   pthdb_context_t ctx;
   uint32_t int32;
@@ -1592,7 +1596,7 @@ store_regs_kernel_thread (const struct regcache *regcache, int regno,
 			  pthdb_tid_t tid)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
   uint64_t gprs64[ppc_num_gprs];
   uint32_t gprs32[ppc_num_gprs];
   double fprs[ppc_num_fprs];
@@ -1765,7 +1769,7 @@ aix_thread_target::pid_to_str (ptid_t ptid)
   if (!PD_TID (ptid))
     return beneath ()->pid_to_str (ptid);
 
-  return string_printf (_("Thread %ld"), ptid.tid ());
+  return string_printf (_("Thread %s"), pulongest (ptid.tid ()));
 }
 
 /* Return a printable representation of extra information about

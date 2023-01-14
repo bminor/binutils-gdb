@@ -43,30 +43,11 @@ static int highest_address_space_num;
 
 
 
-/* Keep a registry of per-program_space data-pointers required by other GDB
-   modules.  */
-
-DEFINE_REGISTRY (program_space, REGISTRY_ACCESS_FIELD)
-
-/* Keep a registry of per-address_space data-pointers required by other GDB
-   modules.  */
-
-DEFINE_REGISTRY (address_space, REGISTRY_ACCESS_FIELD)
-
-
-
 /* Create a new address space object, and add it to the list.  */
 
-struct address_space *
-new_address_space (void)
+address_space::address_space ()
+  : m_num (++highest_address_space_num)
 {
-  struct address_space *aspace;
-
-  aspace = XCNEW (struct address_space);
-  aspace->num = ++highest_address_space_num;
-  address_space_alloc_data (aspace);
-
-  return aspace;
 }
 
 /* Maybe create a new address space object, and add it to the list, or
@@ -84,20 +65,7 @@ maybe_new_address_space (void)
       return program_spaces[0]->aspace;
     }
 
-  return new_address_space ();
-}
-
-static void
-free_address_space (struct address_space *aspace)
-{
-  address_space_free_data (aspace);
-  xfree (aspace);
-}
-
-int
-address_space_num (struct address_space *aspace)
-{
-  return aspace->num;
+  return new address_space ();
 }
 
 /* Start counting over from scratch.  */
@@ -129,8 +97,6 @@ program_space::program_space (address_space *aspace_)
   : num (++last_program_space_num),
     aspace (aspace_)
 {
-  program_space_alloc_data (this);
-
   program_spaces.push_back (this);
 }
 
@@ -153,9 +119,7 @@ program_space::~program_space ()
      locations for this pspace which we're tearing down.  */
   clear_symtab_users (SYMFILE_DEFER_BP_RESET);
   if (!gdbarch_has_shared_address_space (target_gdbarch ()))
-    free_address_space (this->aspace);
-    /* Discard any data modules have associated with the PSPACE.  */
-  program_space_free_data (this);
+    delete this->aspace;
 }
 
 /* See progspace.h.  */
@@ -411,17 +375,17 @@ update_address_spaces (void)
 
   if (shared_aspace)
     {
-      struct address_space *aspace = new_address_space ();
+      struct address_space *aspace = new address_space ();
 
-      free_address_space (current_program_space->aspace);
+      delete current_program_space->aspace;
       for (struct program_space *pspace : program_spaces)
 	pspace->aspace = aspace;
     }
   else
     for (struct program_space *pspace : program_spaces)
       {
-	free_address_space (pspace->aspace);
-	pspace->aspace = new_address_space ();
+	delete pspace->aspace;
+	pspace->aspace = new address_space ();
       }
 
   for (inferior *inf : all_inferiors ())
@@ -459,5 +423,5 @@ initialize_progspace (void)
      modules have done that.  Do this before
      initialize_current_architecture, because that accesses the ebfd
      of current_program_space.  */
-  current_program_space = new program_space (new_address_space ());
+  current_program_space = new program_space (new address_space ());
 }

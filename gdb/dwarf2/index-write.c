@@ -519,10 +519,29 @@ public:
   enum class unit_kind { cu, tu };
 
   /* Insert one symbol.  */
-  void insert (int dwarf_tag, const char *name, int cu_index, bool is_static,
-	       unit_kind kind, enum language lang)
+  void insert (const cooked_index_entry *entry)
   {
-    if (lang == language_ada)
+    const auto it = m_cu_index_htab.find (entry->per_cu);
+    gdb_assert (it != m_cu_index_htab.cend ());
+    const char *name = entry->full_name (&m_string_obstack);
+
+    /* This is incorrect but it mirrors gdb's historical behavior; and
+       because the current .debug_names generation is also incorrect,
+       it seems better to follow what was done before, rather than
+       introduce a mismatch between the newer and older gdb.  */
+    dwarf_tag tag = entry->tag;
+    if (tag != DW_TAG_typedef && tag_is_type (tag))
+      tag = DW_TAG_structure_type;
+    else if (tag == DW_TAG_enumerator || tag == DW_TAG_constant)
+      tag = DW_TAG_variable;
+
+    int cu_index = it->second;
+    bool is_static = (entry->flags & IS_STATIC) != 0;
+    unit_kind kind = (entry->per_cu->is_debug_types
+		      ? unit_kind::tu
+		      : unit_kind::cu);
+
+    if (entry->per_cu->lang () == language_ada)
       {
 	/* We want to ensure that the Ada main function's name appears
 	   verbatim in the index.  However, this name will be of the
@@ -535,8 +554,7 @@ public:
 	      = m_name_to_value_set.emplace (c_str_view (name),
 					     std::set<symbol_value> ());
 	    std::set<symbol_value> &value_set = insertpair.first->second;
-	    value_set.emplace (symbol_value (dwarf_tag, cu_index, is_static,
-					     kind));
+	    value_set.emplace (symbol_value (tag, cu_index, is_static, kind));
 	  }
 
 	/* In order for the index to work when read back into gdb, it
@@ -562,28 +580,7 @@ public:
       = m_name_to_value_set.emplace (c_str_view (name),
 				     std::set<symbol_value> ());
     std::set<symbol_value> &value_set = insertpair.first->second;
-    value_set.emplace (symbol_value (dwarf_tag, cu_index, is_static, kind));
-  }
-
-  void insert (const cooked_index_entry *entry)
-  {
-    const auto it = m_cu_index_htab.find (entry->per_cu);
-    gdb_assert (it != m_cu_index_htab.cend ());
-    const char *name = entry->full_name (&m_string_obstack);
-
-    /* This is incorrect but it mirrors gdb's historical behavior; and
-       because the current .debug_names generation is also incorrect,
-       it seems better to follow what was done before, rather than
-       introduce a mismatch between the newer and older gdb.  */
-    dwarf_tag tag = entry->tag;
-    if (tag != DW_TAG_typedef && tag_is_type (tag))
-      tag = DW_TAG_structure_type;
-    else if (tag == DW_TAG_enumerator || tag == DW_TAG_constant)
-      tag = DW_TAG_variable;
-
-    insert (tag, name, it->second, (entry->flags & IS_STATIC) != 0,
-	    entry->per_cu->is_debug_types ? unit_kind::tu : unit_kind::cu,
-	    entry->per_cu->lang ());
+    value_set.emplace (symbol_value (tag, cu_index, is_static, kind));
   }
 
   /* Build all the tables.  All symbols must be already inserted.
@@ -765,7 +762,7 @@ private:
     /* Object constructor to be called for current DWARF2_PER_OBJFILE.
        All .debug_str section strings are automatically stored.  */
     debug_str_lookup (dwarf2_per_objfile *per_objfile)
-      : m_abfd (per_objfile->objfile->obfd),
+      : m_abfd (per_objfile->objfile->obfd.get ()),
 	m_per_objfile (per_objfile)
     {
       per_objfile->per_bfd->str.read (per_objfile->objfile);
@@ -1025,7 +1022,7 @@ private:
 static bool
 check_dwarf64_offsets (dwarf2_per_objfile *per_objfile)
 {
-  for (const auto &per_cu : per_objfile->per_bfd->all_comp_units)
+  for (const auto &per_cu : per_objfile->per_bfd->all_units)
     {
       if (to_underlying (per_cu->sect_off)
 	  >= (static_cast<uint64_t> (1) << 32))
@@ -1176,28 +1173,28 @@ write_gdbindex (dwarf2_per_objfile *per_objfile,
      in the index file).  This will later be needed to write the address
      table.  */
   cu_index_map cu_index_htab;
-  cu_index_htab.reserve (per_objfile->per_bfd->all_comp_units.size ());
+  cu_index_htab.reserve (per_objfile->per_bfd->all_units.size ());
 
   /* Store out the .debug_type CUs, if any.  */
   data_buf types_cu_list;
 
   /* The CU list is already sorted, so we don't need to do additional
      work here.  Also, the debug_types entries do not appear in
-     all_comp_units, but only in their own hash table.  */
+     all_units, but only in their own hash table.  */
 
   int counter = 0;
   int types_counter = 0;
-  for (int i = 0; i < per_objfile->per_bfd->all_comp_units.size (); ++i)
+  for (int i = 0; i < per_objfile->per_bfd->all_units.size (); ++i)
     {
       dwarf2_per_cu_data *per_cu
-	= per_objfile->per_bfd->all_comp_units[i].get ();
+	= per_objfile->per_bfd->all_units[i].get ();
 
       int &this_counter = per_cu->is_debug_types ? types_counter : counter;
 
       const auto insertpair = cu_index_htab.emplace (per_cu, this_counter);
       gdb_assert (insertpair.second);
 
-      /* The all_comp_units list contains CUs read from the objfile as well as
+      /* The all_units list contains CUs read from the objfile as well as
 	 from the eventual dwz file.  We need to place the entry in the
 	 corresponding index.  */
       data_buf &cu_list = (per_cu->is_debug_types
@@ -1214,7 +1211,7 @@ write_gdbindex (dwarf2_per_objfile *per_objfile,
 			       sig_type->signature);
 	}
       else
-	cu_list.append_uint (8, BFD_ENDIAN_LITTLE, per_cu->length);
+	cu_list.append_uint (8, BFD_ENDIAN_LITTLE, per_cu->length ());
 
       ++this_counter;
     }
@@ -1264,16 +1261,16 @@ write_debug_names (dwarf2_per_objfile *per_objfile,
 
   /* The CU list is already sorted, so we don't need to do additional
      work here.  Also, the debug_types entries do not appear in
-     all_comp_units, but only in their own hash table.  */
+     all_units, but only in their own hash table.  */
   data_buf cu_list;
   data_buf types_cu_list;
   debug_names nametable (per_objfile, dwarf5_is_dwarf64, dwarf5_byte_order);
   int counter = 0;
   int types_counter = 0;
-  for (int i = 0; i < per_objfile->per_bfd->all_comp_units.size (); ++i)
+  for (int i = 0; i < per_objfile->per_bfd->all_units.size (); ++i)
     {
       dwarf2_per_cu_data *per_cu
-	= per_objfile->per_bfd->all_comp_units[i].get ();
+	= per_objfile->per_bfd->all_units[i].get ();
 
       int &this_counter = per_cu->is_debug_types ? types_counter : counter;
       data_buf &this_list = per_cu->is_debug_types ? types_cu_list : cu_list;
@@ -1286,9 +1283,8 @@ write_debug_names (dwarf2_per_objfile *per_objfile,
     }
 
    /* Verify that all units are represented.  */
-  gdb_assert (counter == (per_objfile->per_bfd->all_comp_units.size ()
-			  - per_objfile->per_bfd->tu_stats.nr_tus));
-  gdb_assert (types_counter == per_objfile->per_bfd->tu_stats.nr_tus);
+  gdb_assert (counter == per_objfile->per_bfd->all_comp_units.size ());
+  gdb_assert (types_counter == per_objfile->per_bfd->all_type_units.size ());
 
   for (const cooked_index_entry *entry : table->all_entries ())
     nametable.insert (entry);

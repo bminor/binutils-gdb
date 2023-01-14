@@ -30,10 +30,14 @@ set gcc_compiled [is_c_compiler_gcc]
 standard_testfile whatis.c
 
 # Using `-gctf` generates full-fledged CTF debug information.
-set opts "additional_flags=-gctf -Wl,--export-dynamic"
+set opts {}
+lappend opts additional_flags=-gctf
+lappend opts ldflags=-Wl,--export-dynamic
+lappend opts ldflags=-Wl,--strip-debug
+lappend opts nowarning
 
 if { [prepare_for_testing "failed to prepare" ${testfile} \
-	  [list $srcfile] [list $opts nowarnings]] } {
+	  [list $srcfile] $opts] } {
     return 0
 }
 

@@ -52,7 +52,7 @@ set exec_opts [list debug shlib=${library1} shlib=${library2}]
 # invalid core file.
 
 if { [gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile} executable \
-		     [concat $exec_opts additional_flags=-Wl,-z,norelro]] != ""
+		     [concat $exec_opts ldflags=-Wl,-z,norelro]] != ""
      && [gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile} executable $exec_opts] != "" } {
     untested "failed to compile"
     return -1

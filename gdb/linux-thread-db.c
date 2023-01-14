@@ -317,7 +317,7 @@ struct thread_db_thread_info : public private_thread_info
 static thread_db_thread_info *
 get_thread_db_thread_info (thread_info *thread)
 {
-  return static_cast<thread_db_thread_info *> (thread->priv.get ());
+  return gdb::checked_static_cast<thread_db_thread_info *> (thread->priv.get ());
 }
 
 static const char *

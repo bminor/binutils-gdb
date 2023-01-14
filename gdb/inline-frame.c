@@ -150,7 +150,7 @@ clear_inline_frame_state (thread_info *thread)
 }
 
 static void
-inline_frame_this_id (struct frame_info *this_frame,
+inline_frame_this_id (frame_info_ptr this_frame,
 		      void **this_cache,
 		      struct frame_id *this_id)
 {
@@ -163,7 +163,7 @@ inline_frame_this_id (struct frame_info *this_frame,
      function, there must be previous frames, so this is safe - as
      long as we're careful not to create any cycles.  See related
      comments in get_prev_frame_always_1.  */
-  frame_info *prev_frame = get_prev_frame_always (this_frame);
+  frame_info_ptr prev_frame = get_prev_frame_always (this_frame);
   if (prev_frame == nullptr)
     error (_("failed to find previous frame when computing inline frame id"));
   *this_id = get_frame_id (prev_frame);
@@ -186,7 +186,7 @@ inline_frame_this_id (struct frame_info *this_frame,
 }
 
 static struct value *
-inline_frame_prev_register (struct frame_info *this_frame, void **this_cache,
+inline_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
 			    int regnum)
 {
   /* Use get_frame_register_value instead of
@@ -208,13 +208,13 @@ inline_frame_prev_register (struct frame_info *this_frame, void **this_cache,
 
 static int
 inline_frame_sniffer (const struct frame_unwind *self,
-		      struct frame_info *this_frame,
+		      frame_info_ptr this_frame,
 		      void **this_cache)
 {
   CORE_ADDR this_pc;
   const struct block *frame_block, *cur_block;
   int depth;
-  struct frame_info *next_frame;
+  frame_info_ptr next_frame;
   struct inline_state *state = find_inline_frame_state (inferior_thread ());
 
   this_pc = get_frame_address_in_block (this_frame);
@@ -441,9 +441,9 @@ inline_skipped_symbol (thread_info *thread)
    skip_inline_frames).  */
 
 int
-frame_inlined_callees (struct frame_info *this_frame)
+frame_inlined_callees (frame_info_ptr this_frame)
 {
-  struct frame_info *next_frame;
+  frame_info_ptr next_frame;
   int inline_count = 0;
 
   /* First count how many inlined functions at this PC have frames

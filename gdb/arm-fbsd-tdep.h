@@ -42,7 +42,17 @@ extern const struct regset arm_fbsd_vfpregset;
 #define	HWCAP_VFPv3		0x00002000
 #define	HWCAP_VFPD32		0x00080000
 
+/* Lookup a target description based on the AT_HWCAP value in the auxv data
+   AUXV.  */
+
 extern const struct target_desc *
-arm_fbsd_read_description_auxv (struct target_ops *target, bool tls);
+  arm_fbsd_read_description_auxv (const gdb::optional<gdb::byte_vector> &auxv,
+				  target_ops *target, gdbarch *gdbarch,
+				  bool tls);
+
+/* Same as the above, but read the auxv data from the current inferior.  */
+
+extern const struct target_desc *
+  arm_fbsd_read_description_auxv (bool tls);
 
 #endif /* ARM_FBSD_TDEP_H */

@@ -64,7 +64,7 @@ static const int i386obsd_sigreturn_offset[] = {
    routine.  */
 
 static int
-i386obsd_sigtramp_p (struct frame_info *this_frame)
+i386obsd_sigtramp_p (frame_info_ptr this_frame)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
   CORE_ADDR start_pc = (pc & ~(i386obsd_page_size - 1));
@@ -303,7 +303,7 @@ static int i386obsd_tf_reg_offset[] =
 };
 
 static struct trad_frame_cache *
-i386obsd_trapframe_cache (struct frame_info *this_frame, void **this_cache)
+i386obsd_trapframe_cache (frame_info_ptr this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -350,7 +350,7 @@ i386obsd_trapframe_cache (struct frame_info *this_frame, void **this_cache)
 }
 
 static void
-i386obsd_trapframe_this_id (struct frame_info *this_frame,
+i386obsd_trapframe_this_id (frame_info_ptr this_frame,
 			    void **this_cache, struct frame_id *this_id)
 {
   struct trad_frame_cache *cache =
@@ -360,7 +360,7 @@ i386obsd_trapframe_this_id (struct frame_info *this_frame,
 }
 
 static struct value *
-i386obsd_trapframe_prev_register (struct frame_info *this_frame,
+i386obsd_trapframe_prev_register (frame_info_ptr this_frame,
 				  void **this_cache, int regnum)
 {
   struct trad_frame_cache *cache =
@@ -371,7 +371,7 @@ i386obsd_trapframe_prev_register (struct frame_info *this_frame,
 
 static int
 i386obsd_trapframe_sniffer (const struct frame_unwind *self,
-			    struct frame_info *this_frame,
+			    frame_info_ptr this_frame,
 			    void **this_prologue_cache)
 {
   ULONGEST cs;
@@ -407,7 +407,7 @@ static const struct frame_unwind i386obsd_trapframe_unwind = {
 static void 
 i386obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
 
   /* Obviously OpenBSD is BSD-based.  */
   i386bsd_init_abi (info, gdbarch);

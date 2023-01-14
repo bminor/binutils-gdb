@@ -235,7 +235,7 @@ alphanbsd_pc_in_sigtramp (struct gdbarch *gdbarch,
 }
 
 static CORE_ADDR
-alphanbsd_sigcontext_addr (struct frame_info *frame)
+alphanbsd_sigcontext_addr (frame_info_ptr frame)
 {
   /* FIXME: This is not correct for all versions of NetBSD/alpha.
      We will probably need to disassemble the trampoline to figure
@@ -250,7 +250,7 @@ static void
 alphanbsd_init_abi (struct gdbarch_info info,
 		    struct gdbarch *gdbarch)
 {
-  alpha_gdbarch_tdep *tdep = (alpha_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  alpha_gdbarch_tdep *tdep = gdbarch_tdep<alpha_gdbarch_tdep> (gdbarch);
 
   /* Hook into the DWARF CFI frame unwinder.  */
   alpha_dwarf2_init_abi (info, gdbarch);

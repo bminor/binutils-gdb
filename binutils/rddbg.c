@@ -410,7 +410,7 @@ stab_context (void)
 	  else
 	    fprintf (stderr, "%-6d", stabp->type);
 	  fprintf (stderr, " %-6d ", stabp->desc);
-	  fprintf_vma (stderr, stabp->value);
+	  fprintf (stderr, "%08" PRIx64, (uint64_t) stabp->value);
 	  if (stabp->type != 0)
 	    fprintf (stderr, " %s", stabp->string);
 	  fprintf (stderr, "\n");

@@ -31,9 +31,8 @@
 void sim_io_printf_filtered
 (const char *msg, ...) ATTRIBUTE_PRINTF_1;
 
-void ATTRIBUTE_NORETURN error
-(const char *msg, ...);
-
+extern void error (const char *msg, ...)
+  ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
 
 /* External environment:
 

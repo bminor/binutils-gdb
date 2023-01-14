@@ -216,3 +216,31 @@ AC_DEFUN([GDB_AC_COMMON], [
     BFD_HAVE_SYS_PROCFS_TYPE(elf_fpregset_t)
   fi
 ])
+
+dnl Check that the provided value ($1) is either "yes" or "no".  If not,
+dnl emit an error message mentionning the configure option $2, and abort
+dnl the script.
+AC_DEFUN([GDB_CHECK_YES_NO_VAL],
+	 [
+	   case $1 in
+	     yes | no)
+	       ;;
+	     *)
+	       AC_MSG_ERROR([bad value $1 for $2])
+	       ;;
+	   esac
+	  ])
+
+dnl Check that the provided value ($1) is either "yes", "no" or "auto".  If not,
+dnl emit an error message mentionning the configure option $2, and abort
+dnl the script.
+AC_DEFUN([GDB_CHECK_YES_NO_AUTO_VAL],
+	 [
+	   case $1 in
+	     yes | no | auto)
+	       ;;
+	     *)
+	       AC_MSG_ERROR([bad value $1 for $2])
+	       ;;
+	   esac
+	  ])

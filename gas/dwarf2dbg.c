@@ -160,6 +160,10 @@
 #define TC_PARSE_CONS_RETURN_NONE BFD_RELOC_NONE
 #endif
 
+#define GAS_ABBREV_COMP_UNIT 1
+#define GAS_ABBREV_SUBPROG   2
+#define GAS_ABBREV_NO_TYPE   3
+
 struct line_entry
 {
   struct line_entry *next;
@@ -1568,15 +1572,15 @@ out_set_addr (symbolS *sym)
   emit_expr (&exp, sizeof_address);
 }
 
-static void scale_addr_delta (addressT *);
-
 static void
-scale_addr_delta (addressT *addr_delta)
+scale_addr_delta (int line_delta, addressT *addr_delta)
 {
   static int printed_this = 0;
   if (DWARF2_LINE_MIN_INSN_LENGTH > 1)
     {
-      if (*addr_delta % DWARF2_LINE_MIN_INSN_LENGTH != 0  && !printed_this)
+      /* Don't error on non-instruction bytes at end of section.  */
+      if (line_delta != INT_MAX
+	  && *addr_delta % DWARF2_LINE_MIN_INSN_LENGTH != 0  && !printed_this)
 	{
 	  as_bad("unaligned opcodes detected in executable segment");
 	  printed_this = 1;
@@ -1599,7 +1603,7 @@ size_inc_line_addr (int line_delta, addressT addr_delta)
   int len = 0;
 
   /* Scale the address delta by the minimum instruction length.  */
-  scale_addr_delta (&addr_delta);
+  scale_addr_delta (line_delta, &addr_delta);
 
   /* INT_MAX is a signal that this is actually a DW_LNE_end_sequence.
      We cannot use special opcodes here, since we want the end_sequence
@@ -1663,7 +1667,7 @@ emit_inc_line_addr (int line_delta, addressT addr_delta, char *p, int len)
   gas_assert ((offsetT) addr_delta >= 0);
 
   /* Scale the address delta by the minimum instruction length.  */
-  scale_addr_delta (&addr_delta);
+  scale_addr_delta (line_delta, &addr_delta);
 
   /* INT_MAX is a signal that this is actually a DW_LNE_end_sequence.
      We cannot use special opcodes here, since we want the end_sequence
@@ -2730,7 +2734,7 @@ out_debug_abbrev (segT abbrev_seg,
 
   subseg_set (abbrev_seg, 0);
 
-  out_uleb128 (1);
+  out_uleb128 (GAS_ABBREV_COMP_UNIT);
   out_uleb128 (DW_TAG_compile_unit);
   out_byte (have_efunc || have_lfunc ? DW_CHILDREN_yes : DW_CHILDREN_no);
   if (DWARF2_VERSION < 4)
@@ -2761,7 +2765,7 @@ out_debug_abbrev (segT abbrev_seg,
 
   if (have_efunc || have_lfunc)
     {
-      out_uleb128 (2);
+      out_uleb128 (GAS_ABBREV_SUBPROG);
       out_uleb128 (DW_TAG_subprogram);
       out_byte (DW_CHILDREN_no);
       out_abbrev (DW_AT_name, DW_FORM_strp);
@@ -2776,10 +2780,26 @@ out_debug_abbrev (segT abbrev_seg,
       else
 	/* Any non-zero value other than DW_FORM_flag will do.  */
 	*func_formP = DW_FORM_block;
+
+      /* PR 29517: Provide a return type for the function.  */
+      if (DWARF2_VERSION > 2)
+	out_abbrev (DW_AT_type, DW_FORM_ref_udata);
+
       out_abbrev (DW_AT_low_pc, DW_FORM_addr);
       out_abbrev (DW_AT_high_pc,
 		  DWARF2_VERSION < 4 ? DW_FORM_addr : DW_FORM_udata);
       out_abbrev (0, 0);
+
+      if (DWARF2_VERSION > 2)
+	{
+	  /* PR 29517: We do not actually know the return type of these
+	     functions, so provide an abbrev that uses DWARF's unspecified
+	     type.  */
+	  out_uleb128 (GAS_ABBREV_NO_TYPE);
+	  out_uleb128 (DW_TAG_unspecified_type);
+	  out_byte (DW_CHILDREN_no);
+	  out_abbrev (0, 0);
+	}
     }
 
   /* Terminate the abbreviations for this compilation unit.  */
@@ -2826,7 +2846,7 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT str_seg,
     }
 
   /* DW_TAG_compile_unit DIE abbrev */
-  out_uleb128 (1);
+  out_uleb128 (GAS_ABBREV_COMP_UNIT);
 
   /* DW_AT_stmt_list */
   TC_DWARF2_EMIT_OFFSET (section_symbol (line_seg),
@@ -2877,11 +2897,18 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT str_seg,
   if (func_form)
     {
       symbolS *symp;
+      symbolS *no_type_tag;
+
+      if (DWARF2_VERSION > 2)
+	no_type_tag = symbol_make (".Ldebug_no_type_tag");
+      else
+	no_type_tag = NULL;
 
       for (symp = symbol_rootP; symp; symp = symbol_next (symp))
 	{
 	  const char *name;
 	  size_t len;
+	  expressionS size = { .X_op = O_constant };
 
 	  /* Skip warning constructs (see above).  */
 	  if (symbol_get_bfdsym (symp)->flags & BSF_WARNING)
@@ -2895,6 +2922,18 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT str_seg,
 	  if (!S_IS_DEFINED (symp) || !S_IS_FUNCTION (symp))
 	    continue;
 
+#if defined (OBJ_ELF) /* || defined (OBJ_MAYBE_ELF) */
+	  size.X_add_number = S_GET_SIZE (symp);
+	  if (size.X_add_number == 0 && IS_ELF
+	      && symbol_get_obj (symp)->size != NULL)
+	    {
+	      size.X_op = O_add;
+	      size.X_op_symbol = make_expr_symbol (symbol_get_obj (symp)->size);
+	    }
+#endif
+	  if (size.X_op == O_constant && size.X_add_number == 0)
+	    continue;
+
 	  subseg_set (str_seg, 0);
 	  name_sym = symbol_temp_new_now_octets ();
 	  name = S_GET_NAME (symp);
@@ -2904,7 +2943,7 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT str_seg,
 	  subseg_set (info_seg, 0);
 
 	  /* DW_TAG_subprogram DIE abbrev */
-	  out_uleb128 (2);
+	  out_uleb128 (GAS_ABBREV_SUBPROG);
 
 	  /* DW_AT_name */
 	  TC_DWARF2_EMIT_OFFSET (name_sym, sizeof_offset);
@@ -2913,6 +2952,16 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT str_seg,
 	  if (func_form == DW_FORM_flag)
 	    out_byte (S_IS_EXTERNAL (symp));
 
+	  /* PR 29517: Let consumers know that we do not have
+	     return type information for this function.  */
+	  if (DWARF2_VERSION > 2)
+	    {
+	      exp.X_op = O_symbol;
+	      exp.X_add_symbol = no_type_tag;
+	      exp.X_add_number = 0;
+	      emit_leb128_expr (&exp, 0);
+	    }
+
 	  /* DW_AT_low_pc */
 	  exp.X_op = O_symbol;
 	  exp.X_add_symbol = symp;
@@ -2920,29 +2969,26 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT str_seg,
 	  emit_expr (&exp, sizeof_address);
 
 	  /* DW_AT_high_pc */
-	  exp.X_op = O_constant;
-#if defined (OBJ_ELF) /* || defined (OBJ_MAYBE_ELF) */
-	  exp.X_add_number = S_GET_SIZE (symp);
-	  if (exp.X_add_number == 0 && IS_ELF
-	      && symbol_get_obj (symp)->size != NULL)
-	    {
-	      exp.X_op = O_add;
-	      exp.X_op_symbol = make_expr_symbol (symbol_get_obj (symp)->size);
-	    }
-#else
-	  exp.X_add_number = 0;
-#endif
 	  if (DWARF2_VERSION < 4)
 	    {
-	      if (exp.X_op == O_constant)
-		exp.X_op = O_symbol;
-	      exp.X_add_symbol = symp;
-	      emit_expr (&exp, sizeof_address);
+	      if (size.X_op == O_constant)
+		size.X_op = O_symbol;
+	      size.X_add_symbol = symp;
+	      emit_expr (&size, sizeof_address);
 	    }
-	  else if (exp.X_op == O_constant)
-	    out_uleb128 (exp.X_add_number);
+	  else if (size.X_op == O_constant)
+	    out_uleb128 (size.X_add_number);
 	  else
-	    emit_leb128_expr (symbol_get_value_expression (exp.X_op_symbol), 0);
+	    emit_leb128_expr (symbol_get_value_expression (size.X_op_symbol), 0);
+	}
+
+      if (DWARF2_VERSION > 2)
+	{
+	  /* PR 29517: Generate a DIE for the unspecified type abbrev.
+	     We do it here because it cannot be part of the top level DIE.   */
+	  subseg_set (info_seg, 0);
+	  symbol_set_value_now (no_type_tag);
+	  out_uleb128 (GAS_ABBREV_NO_TYPE);
 	}
 
       /* End of children.  */

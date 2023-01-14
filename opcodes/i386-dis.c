@@ -119,6 +119,9 @@ static void DistinctDest_Fixup (instr_info *, int, int);
    buffers.  See oappend_insert_style for more details.  */
 #define STYLE_MARKER_CHAR '\002'
 
+/* The maximum operand buffer size.  */
+#define MAX_OPERAND_BUFFER_SIZE 128
+
 struct dis_private {
   /* Points to first byte not fetched.  */
   bfd_byte *max_fetched;
@@ -165,7 +168,7 @@ struct instr_info
      current instruction.  */
   int evex_used;
 
-  char obuf[100];
+  char obuf[MAX_OPERAND_BUFFER_SIZE];
   char *obufp;
   char *mnemonicendp;
   unsigned char *start_codep;
@@ -9264,31 +9267,40 @@ oappend_register (instr_info *ins, const char *s)
    STYLE is the default style to use in the fprintf_styled_func calls,
    however, FMT might include embedded style markers (see oappend_style),
    these embedded markers are not printed, but instead change the style
-   used in the next fprintf_styled_func call.
+   used in the next fprintf_styled_func call.  */
 
-   Return non-zero to indicate the print call was a success.  */
-
-static int ATTRIBUTE_PRINTF_3
+static void ATTRIBUTE_PRINTF_3
 i386_dis_printf (instr_info *ins, enum disassembler_style style,
 		 const char *fmt, ...)
 {
   va_list ap;
   enum disassembler_style curr_style = style;
-  char *start, *curr;
-  char staging_area[100];
-  int res;
+  const char *start, *curr;
+  char staging_area[40];
 
   va_start (ap, fmt);
-  res = vsnprintf (staging_area, sizeof (staging_area), fmt, ap);
-  va_end (ap);
+  /* In particular print_insn()'s processing of op_txt[] can hand rather long
+     strings here.  Bypass vsnprintf() in such cases to avoid capacity issues
+     with the staging area.  */
+  if (strcmp (fmt, "%s"))
+    {
+      int res = vsnprintf (staging_area, sizeof (staging_area), fmt, ap);
 
-  if (res < 0)
-    return res;
+      va_end (ap);
 
-  if ((size_t) res >= sizeof (staging_area))
-    abort ();
+      if (res < 0)
+	return;
 
-  start = curr = staging_area;
+      if ((size_t) res >= sizeof (staging_area))
+	abort ();
+
+      start = curr = staging_area;
+    }
+  else
+    {
+      start = curr = va_arg (ap, const char *);
+      va_end (ap);
+    }
 
   do
     {
@@ -9303,10 +9315,7 @@ i386_dis_printf (instr_info *ins, enum disassembler_style style,
 						     curr_style,
 						     "%.*s", len, start);
 	  if (n < 0)
-	    {
-	      res = n;
-	      break;
-	    }
+	    break;
 
 	  if (*curr == '\0')
 	    break;
@@ -9340,8 +9349,6 @@ i386_dis_printf (instr_info *ins, enum disassembler_style style,
 	++curr;
     }
   while (true);
-
-  return res;
 }
 
 static int
@@ -9377,7 +9384,7 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
     .last_seg_prefix = -1,
     .fwait_prefix = -1,
   };
-  char op_out[MAX_OPERANDS][100];
+  char op_out[MAX_OPERANDS][MAX_OPERAND_BUFFER_SIZE];
 
   priv.orig_sizeflag = AFLAG | DFLAG;
   if ((info->mach & bfd_mach_i386_i386) != 0)
@@ -10973,18 +10980,12 @@ print_operand_value (instr_info *ins, bfd_vma disp,
 		     enum disassembler_style style)
 {
   char tmp[30];
-  unsigned int i = 0;
 
   if (ins->address_mode == mode_64bit)
-    {
-      oappend_with_style (ins, "0x", style);
-      sprintf_vma (tmp, disp);
-      while (tmp[i] == '0' && tmp[i + 1])
-	++i;
-    }
+    sprintf (tmp, "0x%" PRIx64, (uint64_t) disp);
   else
     sprintf (tmp, "0x%x", (unsigned int) disp);
-  oappend_with_style (ins, tmp + i, style);
+  oappend_with_style (ins, tmp, style);
 }
 
 /* Like oappend, but called for immediate operands.  */
@@ -11004,7 +11005,6 @@ print_displacement (instr_info *ins, bfd_vma disp)
 {
   bfd_signed_vma val = disp;
   char tmp[30];
-  unsigned int i;
 
   if (val < 0)
     {
@@ -11033,14 +11033,8 @@ print_displacement (instr_info *ins, bfd_vma disp)
 	}
     }
 
-  oappend_with_style (ins, "0x", dis_style_address_offset);
-
-  sprintf_vma (tmp, (bfd_vma) val);
-  for (i = 0; tmp[i] == '0'; i++)
-    continue;
-  if (tmp[i] == '\0')
-    i--;
-  oappend_with_style (ins, tmp + i, dis_style_address_offset);
+  sprintf (tmp, "0x%" PRIx64, (int64_t) val);
+  oappend_with_style (ins, tmp, dis_style_address_offset);
 }
 
 static void

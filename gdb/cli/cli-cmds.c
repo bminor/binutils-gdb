@@ -76,7 +76,7 @@ static void filter_sals (std::vector<symtab_and_line> &);
 
 
 /* See cli-cmds.h. */
-unsigned int max_user_call_depth;
+unsigned int max_user_call_depth = 1024;
 
 /* Define all cmd_list_elements.  */
 
@@ -1466,7 +1466,7 @@ print_disassembly (struct gdbarch *gdbarch, const char *name,
 static void
 disassemble_current_function (gdb_disassembly_flags flags)
 {
-  struct frame_info *frame;
+  frame_info_ptr frame;
   struct gdbarch *gdbarch;
   CORE_ADDR low, high, pc;
   const char *name;
@@ -1508,6 +1508,9 @@ disassemble_current_function (gdb_disassembly_flags flags)
 
    A /r modifier will include raw instructions in hex with the assembly.
 
+   A /b modifier is similar to /r except the instruction bytes are printed
+   as separate bytes with no grouping, or endian switching.
+
    A /s modifier will include source code with the assembly, like /m, with
    two important differences:
    1) The output is still in pc address order.
@@ -1545,6 +1548,9 @@ disassemble_command (const char *arg, int from_tty)
 	      break;
 	    case 'r':
 	      flags |= DISASSEMBLY_RAW_INSN;
+	      break;
+	    case 'b':
+	      flags |= DISASSEMBLY_RAW_BYTES;
 	      break;
 	    case 's':
 	      flags |= DISASSEMBLY_SOURCE;
@@ -2103,12 +2109,6 @@ filter_sals (std::vector<symtab_and_line> &sals)
     { return cmp_symtabs (sala, salb) == 0; });
 
   sals.erase (from, sals.end ());
-}
-
-void
-init_cmd_lists (void)
-{
-  max_user_call_depth = 1024;
 }
 
 static void

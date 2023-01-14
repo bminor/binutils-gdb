@@ -146,7 +146,8 @@ make_a_section_from_file (bfd *abfd,
 
   /* Compress/decompress DWARF debug sections with names: .debug_* and
      .zdebug_*, after the section flags is set.  */
-  if ((flags & SEC_DEBUGGING)
+  if ((flags & SEC_DEBUGGING) != 0
+      && (flags & SEC_HAS_CONTENTS) != 0
       && strlen (name) > 7
       && ((name[1] == 'd' && name[6] == '_')
 	  || (strlen (name) > 8 && name[1] == 'z' && name[7] == '_')))
@@ -1058,7 +1059,8 @@ coff_write_symbol (bfd *abfd,
 	  /* Adjust auxent only if this isn't the filename
 	     auxiliary entry.  */
 	  if (native->u.syment.n_sclass == C_FILE
-	      && (native + j + 1)->u.auxent.x_file.x_ftype)
+	      && (native + j + 1)->u.auxent.x_file.x_ftype
+	      && (native + j + 1)->extrap)
 	    coff_write_auxent_fname (abfd, (char *) (native + j + 1)->extrap,
 				     &(native + j + 1)->u.auxent, strtab, hash);
 
@@ -1538,9 +1540,10 @@ build_debug_section (bfd *abfd, asection ** sect_return)
     return NULL;
 
   sec_size = sect->size;
-  debug_section = (char *) _bfd_alloc_and_read (abfd, sec_size, sec_size);
+  debug_section = (char *) _bfd_alloc_and_read (abfd, sec_size + 1, sec_size);
   if (debug_section == NULL)
     return NULL;
+  debug_section[sec_size] = 0;
 
   if (bfd_seek (abfd, position, SEEK_SET) != 0)
     return NULL;
@@ -3172,7 +3175,10 @@ _bfd_coff_close_and_cleanup (bfd *abfd)
 
       if (bfd_get_format (abfd) == bfd_object
 	  || bfd_get_format (abfd) == bfd_core)
-	_bfd_dwarf2_cleanup_debug_info (abfd, &tdata->dwarf2_find_line_info);
+	{
+	  _bfd_dwarf2_cleanup_debug_info (abfd, &tdata->dwarf2_find_line_info);
+	  _bfd_stab_cleanup (abfd, &tdata->line_info);
+	}
     }
   return _bfd_generic_close_and_cleanup (abfd);
 }

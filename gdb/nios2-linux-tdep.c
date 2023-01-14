@@ -134,7 +134,7 @@ nios2_iterate_over_regset_sections (struct gdbarch *gdbarch,
 
 static void
 nios2_linux_rt_sigreturn_init (const struct tramp_frame *self,
-			       struct frame_info *next_frame,
+			       frame_info_ptr next_frame,
 			       struct trad_frame_cache *this_cache,
 			       CORE_ADDR func)
 {
@@ -187,7 +187,7 @@ static struct tramp_frame nios2_r2_linux_rt_sigreturn_tramp_frame =
    instruction to be executed.  */
 
 static CORE_ADDR
-nios2_linux_syscall_next_pc (struct frame_info *frame,
+nios2_linux_syscall_next_pc (frame_info_ptr frame,
 			     const struct nios2_opcode *op)
 {
   CORE_ADDR pc = get_frame_pc (frame);
@@ -217,7 +217,7 @@ nios2_linux_is_kernel_helper (CORE_ADDR pc)
 static void
 nios2_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  nios2_gdbarch_tdep *tdep = (nios2_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  nios2_gdbarch_tdep *tdep = gdbarch_tdep<nios2_gdbarch_tdep> (gdbarch);
 
   linux_init_abi (info, gdbarch, 0);
 

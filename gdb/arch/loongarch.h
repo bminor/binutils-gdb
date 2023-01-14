@@ -22,6 +22,33 @@
 
 #include "gdbsupport/tdesc.h"
 
+/* Register numbers of various important registers.  */
+enum loongarch_regnum
+{
+  LOONGARCH_RA_REGNUM = 1,		/* Return Address.  */
+  LOONGARCH_SP_REGNUM = 3,		/* Stack Pointer.  */
+  LOONGARCH_A0_REGNUM = 4,		/* First Argument/Return Value.  */
+  LOONGARCH_A7_REGNUM = 11,		/* Seventh Argument/Syscall Number.  */
+  LOONGARCH_FP_REGNUM = 22,		/* Frame Pointer.  */
+  LOONGARCH_ORIG_A0_REGNUM = 32,	/* Syscall's original arg0.  */
+  LOONGARCH_PC_REGNUM = 33,		/* Program Counter.  */
+  LOONGARCH_BADV_REGNUM = 34,		/* Bad Vaddr for Addressing Exception.  */
+  LOONGARCH_LINUX_NUM_GREGSET = 45,	/* 32 GPR, ORIG_A0, PC, BADV, RESERVED 10.  */
+  LOONGARCH_ARG_REGNUM = 8,            /* r4-r11: general-purpose argument registers.
+					  f0-f7: floating-point argument registers.  */
+  LOONGARCH_FIRST_FP_REGNUM = LOONGARCH_LINUX_NUM_GREGSET,
+  LOONGARCH_LINUX_NUM_FPREGSET = 32,
+  LOONGARCH_FIRST_FCC_REGNUM = LOONGARCH_FIRST_FP_REGNUM + LOONGARCH_LINUX_NUM_FPREGSET,
+  LOONGARCH_LINUX_NUM_FCC = 8,
+  LOONGARCH_FCSR_REGNUM = LOONGARCH_FIRST_FCC_REGNUM + LOONGARCH_LINUX_NUM_FCC,
+};
+
+enum loongarch_fputype
+{
+  SINGLE_FLOAT = 1,
+  DOUBLE_FLOAT = 2,
+};
+
 /* The set of LoongArch architectural features that we track that impact how
    we configure the actual gdbarch instance.  We hold one of these in the
    gdbarch_tdep structure, and use it to distinguish between different
@@ -39,6 +66,11 @@ struct loongarch_gdbarch_features
      or 8 (loongarch64).  No other value is valid.  Initialise to the invalid
      0 value so we can spot if one of these is used uninitialised.  */
   int xlen = 0;
+
+  /* The type of floating-point.  This is either 1 (single float) or 2
+     (double float).  No other value is valid.  Initialise to the invalid
+     0 value so we can spot if one of these is used uninitialised.  */
+  int fputype = 0;
 
   /* Equality operator.  */
   bool operator== (const struct loongarch_gdbarch_features &rhs) const

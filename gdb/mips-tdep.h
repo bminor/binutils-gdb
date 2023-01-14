@@ -93,7 +93,7 @@ enum mips_fpu_type
 };
 
 /* MIPS specific per-architecture information.  */
-struct mips_gdbarch_tdep : gdbarch_tdep
+struct mips_gdbarch_tdep : gdbarch_tdep_base
 {
   /* from the elf header */
   int elf_flags = 0;
@@ -125,7 +125,7 @@ struct mips_gdbarch_tdep : gdbarch_tdep
 
   /* Return the expected next PC if FRAME is stopped at a syscall
      instruction.  */
-  CORE_ADDR (*syscall_next_pc) (struct frame_info *frame) = nullptr;
+  CORE_ADDR (*syscall_next_pc) (frame_info_ptr frame) = nullptr;
 };
 
 /* Register numbers of various important registers.  */

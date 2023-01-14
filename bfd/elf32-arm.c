@@ -20020,9 +20020,11 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
   data = plt->contents;
   if (data == NULL)
     {
-      if (!bfd_get_full_section_contents (abfd, (asection *) plt, &data) || data == NULL)
+      if (!bfd_get_full_section_contents (abfd, plt, &data)
+	  || data == NULL)
 	return -1;
-      bfd_cache_section_contents ((asection *) plt, data);
+      plt->contents = data;
+      plt->flags |= SEC_IN_MEMORY;
     }
 
   count = relplt->size / hdr->sh_entsize;

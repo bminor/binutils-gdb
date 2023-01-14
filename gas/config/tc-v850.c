@@ -3728,7 +3728,7 @@ v850_force_relocation (struct fix *fixP)
 
 /* Create a v850 note section.  */
 void
-v850_md_end (void)
+v850_md_finish (void)
 {
   segT note_sec;
   segT orig_seg = now_seg;

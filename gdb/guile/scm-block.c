@@ -76,7 +76,35 @@ static scm_t_bits block_syms_progress_smob_tag;
 /* The "next!" block syms iterator method.  */
 static SCM bkscm_next_symbol_x_proc;
 
-static const struct objfile_data *bkscm_objfile_data_key;
+/* This is called when an objfile is about to be freed.
+   Invalidate the block as further actions on the block would result
+   in bad data.  All access to b_smob->block should be gated by
+   checks to ensure the block is (still) valid.  */
+struct bkscm_deleter
+{
+  /* Helper function for bkscm_del_objfile_blocks to mark the block
+     as invalid.  */
+
+  static int
+  bkscm_mark_block_invalid (void **slot, void *info)
+  {
+    block_smob *b_smob = (block_smob *) *slot;
+
+    b_smob->block = NULL;
+    b_smob->objfile = NULL;
+    return 1;
+  }
+
+  void operator() (htab_t htab)
+  {
+    gdb_assert (htab != nullptr);
+    htab_traverse_noresize (htab, bkscm_mark_block_invalid, NULL);
+    htab_delete (htab);
+  }
+};
+
+static const registry<objfile>::key<htab, bkscm_deleter>
+     bkscm_objfile_data_key;
 
 /* Administrivia for block smobs.  */
 
@@ -108,13 +136,13 @@ bkscm_eq_block_smob (const void *ap, const void *bp)
 static htab_t
 bkscm_objfile_block_map (struct objfile *objfile)
 {
-  htab_t htab = (htab_t) objfile_data (objfile, bkscm_objfile_data_key);
+  htab_t htab = bkscm_objfile_data_key.get (objfile);
 
   if (htab == NULL)
     {
       htab = gdbscm_create_eqable_gsmob_ptr_map (bkscm_hash_block_smob,
 						 bkscm_eq_block_smob);
-      set_objfile_data (objfile, bkscm_objfile_data_key, htab);
+      bkscm_objfile_data_key.set (objfile, htab);
     }
 
   return htab;
@@ -326,35 +354,6 @@ bkscm_scm_to_block (SCM block_scm, int arg_pos, const char *func_name,
   return NULL;
 }
 
-/* Helper function for bkscm_del_objfile_blocks to mark the block
-   as invalid.  */
-
-static int
-bkscm_mark_block_invalid (void **slot, void *info)
-{
-  block_smob *b_smob = (block_smob *) *slot;
-
-  b_smob->block = NULL;
-  b_smob->objfile = NULL;
-  return 1;
-}
-
-/* This function is called when an objfile is about to be freed.
-   Invalidate the block as further actions on the block would result
-   in bad data.  All access to b_smob->block should be gated by
-   checks to ensure the block is (still) valid.  */
-
-static void
-bkscm_del_objfile_blocks (struct objfile *objfile, void *datum)
-{
-  htab_t htab = (htab_t) datum;
-
-  if (htab != NULL)
-    {
-      htab_traverse_noresize (htab, bkscm_mark_block_invalid, NULL);
-      htab_delete (htab);
-    }
-}
 
 /* Block methods.  */
 
@@ -799,14 +798,4 @@ gdbscm_initialize_blocks (void)
 				gdbscm_documentation_symbol,
 				gdbscm_scm_from_c_string ("\
 Internal function to assist the block symbols iterator."));
-}
-
-void _initialize_scm_block ();
-void
-_initialize_scm_block ()
-{
-  /* Register an objfile "free" callback so we can properly
-     invalidate blocks when an object file is about to be deleted.  */
-  bkscm_objfile_data_key
-    = register_objfile_data_with_cleanup (NULL, bkscm_del_objfile_blocks);
 }

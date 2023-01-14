@@ -20,26 +20,77 @@ import gdb
 
 try:
     from pygments import formatters, lexers, highlight
+    from pygments.token import Error, Comment, Text
+    from pygments.filters import TokenMergeFilter
+
+    _formatter = None
+
+    def get_formatter():
+        global _formatter
+        if _formatter is None:
+            _formatter = formatters.TerminalFormatter()
+        return _formatter
 
     def colorize(filename, contents):
         # Don't want any errors.
         try:
             lexer = lexers.get_lexer_for_filename(filename, stripnl=False)
-            formatter = formatters.TerminalFormatter()
+            formatter = get_formatter()
             return highlight(contents, lexer, formatter).encode(
                 gdb.host_charset(), "backslashreplace"
             )
         except:
             return None
 
+    class HandleNasmComments(TokenMergeFilter):
+        @staticmethod
+        def fix_comments(lexer, stream):
+            in_comment = False
+            for ttype, value in stream:
+                if ttype is Error and value == "#":
+                    in_comment = True
+                if in_comment:
+                    if ttype is Text and value == "\n":
+                        in_comment = False
+                    else:
+                        ttype = Comment.Single
+                yield ttype, value
+
+        def filter(self, lexer, stream):
+            f = HandleNasmComments.fix_comments
+            return super().filter(lexer, f(lexer, stream))
+
+    _asm_lexers = {}
+
+    def __get_asm_lexer(gdbarch):
+        lexer_type = "asm"
+        try:
+            # For an i386 based architecture, in 'intel' mode, use the nasm
+            # lexer.
+            flavor = gdb.parameter("disassembly-flavor")
+            if flavor == "intel" and gdbarch.name()[:4] == "i386":
+                lexer_type = "nasm"
+        except:
+            # If GDB is built without i386 support then attempting to fetch
+            # the 'disassembly-flavor' parameter will throw an error, which we
+            # ignore.
+            pass
+
+        global _asm_lexers
+        if lexer_type not in _asm_lexers:
+            _asm_lexers[lexer_type] = lexers.get_lexer_by_name(lexer_type)
+            _asm_lexers[lexer_type].add_filter(HandleNasmComments())
+            _asm_lexers[lexer_type].add_filter("raiseonerror")
+        return _asm_lexers[lexer_type]
+
     def colorize_disasm(content, gdbarch):
         # Don't want any errors.
         try:
-            lexer = lexers.get_lexer_by_name("asm")
-            formatter = formatters.TerminalFormatter()
+            lexer = __get_asm_lexer(gdbarch)
+            formatter = get_formatter()
             return highlight(content, lexer, formatter).rstrip().encode()
         except:
-            return None
+            return content
 
 except:
 

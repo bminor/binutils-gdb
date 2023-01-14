@@ -223,7 +223,7 @@ public:
   strata stratum () const override { return record_stratum; }
 
   void close () override;
-  void async (int) override;
+  void async (bool) override;
   ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
   bool stopped_by_watchpoint () override;
   bool stopped_data_address (CORE_ADDR *) override;
@@ -1017,7 +1017,7 @@ record_full_base_target::close ()
 /* "async" target method.  */
 
 void
-record_full_base_target::async (int enable)
+record_full_base_target::async (bool enable)
 {
   if (enable)
     mark_async_event_handler (record_full_async_inferior_event_token);

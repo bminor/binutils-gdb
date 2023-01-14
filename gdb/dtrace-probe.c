@@ -129,7 +129,7 @@ public:
 
   /* See probe.h.  */
   struct value *evaluate_argument (unsigned n,
-				   struct frame_info *frame) override;
+				   frame_info_ptr frame) override;
 
   /* See probe.h.  */
   void compile_to_ax (struct agent_expr *aexpr,
@@ -709,7 +709,7 @@ dtrace_probe::can_evaluate_arguments () const
 
 struct value *
 dtrace_probe::evaluate_argument (unsigned n,
-				 struct frame_info *frame)
+				 frame_info_ptr frame)
 {
   struct gdbarch *gdbarch = this->get_gdbarch ();
   struct dtrace_probe_arg *arg;
@@ -830,7 +830,7 @@ dtrace_static_probe_ops::get_probes
   (std::vector<std::unique_ptr<probe>> *probesp,
    struct objfile *objfile) const
 {
-  bfd *abfd = objfile->obfd;
+  bfd *abfd = objfile->obfd.get ();
   asection *sect = NULL;
 
   /* Do nothing in case this is a .debug file, instead of the objfile

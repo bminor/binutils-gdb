@@ -13460,7 +13460,6 @@ elf32_nds32_unify_relax_group (bfd *abfd, asection *asec)
   Elf_Internal_Rela *relocs = NULL;
   enum elf_nds32_reloc_type rtype;
   struct section_id_list_t *node = NULL;
-  int count = 0;
 
   do
     {
@@ -13499,8 +13498,6 @@ elf32_nds32_unify_relax_group (bfd *abfd, asection *asec)
 
 	  /* Change it.  */
 	  rel->r_addend += relax_group_ptr->bias;
-	  /* Debugging count.  */
-	  count++;
 	}
     }
   while (false);

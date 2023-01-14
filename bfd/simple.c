@@ -23,6 +23,7 @@
 #include "bfd.h"
 #include "libbfd.h"
 #include "bfdlink.h"
+#include "genlink.h"
 
 static void
 simple_dummy_add_to_set (struct bfd_link_info * info ATTRIBUTE_UNUSED,
@@ -209,7 +210,6 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   struct bfd_link_order link_order;
   struct bfd_link_callbacks callbacks;
   bfd_byte *contents, *data;
-  int storage_needed;
   struct saved_offsets saved_offsets;
   bfd *link_next;
 
@@ -218,10 +218,9 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   if ((abfd->flags & (HAS_RELOC | EXEC_P | DYNAMIC)) != HAS_RELOC
       || ! (sec->flags & SEC_RELOC))
     {
-      contents = outbuf;
-      if (!bfd_get_full_section_contents (abfd, sec, &contents))
+      if (!bfd_get_full_section_contents (abfd, sec, &outbuf))
 	return NULL;
-      return contents;
+      return outbuf;
     }
 
   /* In order to use bfd_get_relocated_section_contents, we need
@@ -259,16 +258,13 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   link_order.u.indirect.section = sec;
 
   data = NULL;
+  contents = NULL;
   if (outbuf == NULL)
     {
       bfd_size_type amt = sec->rawsize > sec->size ? sec->rawsize : sec->size;
       data = (bfd_byte *) bfd_malloc (amt);
       if (data == NULL)
-	{
-	  _bfd_generic_link_hash_table_free (abfd);
-	  abfd->link.next = link_next;
-	  return NULL;
-	}
+	goto out1;
       outbuf = data;
     }
 
@@ -276,37 +272,29 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   saved_offsets.sections = malloc (sizeof (*saved_offsets.sections)
 				   * saved_offsets.section_count);
   if (saved_offsets.sections == NULL)
-    {
-      free (data);
-      _bfd_generic_link_hash_table_free (abfd);
-      abfd->link.next = link_next;
-      return NULL;
-    }
+    goto out2;
   bfd_map_over_sections (abfd, simple_save_output_info, &saved_offsets);
 
   if (symbol_table == NULL)
     {
-      _bfd_generic_link_add_symbols (abfd, &link_info);
-
-      storage_needed = bfd_get_symtab_upper_bound (abfd);
-      symbol_table = (asymbol **) bfd_malloc (storage_needed);
-      bfd_canonicalize_symtab (abfd, symbol_table);
+      if (!bfd_generic_link_read_symbols (abfd))
+	goto out3;
+      symbol_table = _bfd_generic_link_get_symbols (abfd);
     }
-  else
-    storage_needed = 0;
 
   contents = bfd_get_relocated_section_contents (abfd,
 						 &link_info,
 						 &link_order,
 						 outbuf,
-						 0,
+						 false,
 						 symbol_table);
-  if (contents == NULL)
-    free (data);
-
+ out3:
   bfd_map_over_sections (abfd, simple_restore_output_info, &saved_offsets);
   free (saved_offsets.sections);
-
+ out2:
+  if (contents == NULL)
+    free (data);
+ out1:
   _bfd_generic_link_hash_table_free (abfd);
   abfd->link.next = link_next;
   return contents;

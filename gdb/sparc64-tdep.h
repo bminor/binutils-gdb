@@ -20,7 +20,7 @@
 #ifndef SPARC64_TDEP_H
 #define SPARC64_TDEP_H 1
 
-struct frame_info;
+class frame_info_ptr;
 struct gdbarch;
 struct regcache;
 struct sparc_gregmap;
@@ -131,7 +131,7 @@ extern const struct sparc_gregmap sparc64nbsd_gregmap;
 
 extern struct trad_frame_saved_reg *
   sparc64nbsd_sigcontext_saved_regs (CORE_ADDR sigcontext_addr,
-				     struct frame_info *next_frame);
+				     frame_info_ptr next_frame);
 
 extern const struct sparc_fpregmap sparc64_bsd_fpregmap;
 

@@ -35,6 +35,13 @@ extern int symbol_table_frozen;
    default.  */
 extern int symbols_case_sensitive;
 
+extern void *notes_alloc (size_t);
+extern void *notes_calloc (size_t, size_t);
+extern void *notes_memdup (const void *, size_t, size_t);
+extern char *notes_strdup (const char *);
+extern char *notes_concat (const char *, ...);
+extern void notes_free (void *);
+
 char * symbol_relc_make_expr  (expressionS *);
 char * symbol_relc_make_sym   (symbolS *);
 char * symbol_relc_make_value (offsetT);
@@ -60,6 +67,7 @@ symbolS *symbol_temp_make (void);
 symbolS *colon (const char *sym_name);
 void local_colon (int n);
 void symbol_begin (void);
+void symbol_end (void);
 void dot_symbol_init (void);
 void symbol_print_statistics (FILE *);
 void symbol_table_insert (symbolS * symbolP);
@@ -84,6 +92,7 @@ extern void copy_symbol_attributes (symbolS *, symbolS *);
 
 /* Get and set the values of symbols.  These used to be macros.  */
 extern valueT S_GET_VALUE (symbolS *);
+extern valueT S_GET_VALUE_WHERE (symbolS *, const char *, unsigned int);
 extern void S_SET_VALUE (symbolS *, valueT);
 
 extern int S_IS_FUNCTION (symbolS *);

@@ -536,8 +536,8 @@ struct loaded_script
 };
 
 /* Per-program-space data key.  */
-static const struct program_space_key<struct auto_load_pspace_info>
-  auto_load_pspace_data;
+static const registry<program_space>::key<auto_load_pspace_info>
+     auto_load_pspace_data;
 
 /* Get the current autoload data.  If none is found yet, add it now.  This
    function always returns a valid object.  */
@@ -858,7 +858,7 @@ auto_load_objfile_script (struct objfile *objfile,
     {
       unsigned long crc32;
       gdb::unique_xmalloc_ptr<char> debuglink
-	(bfd_get_debug_link_info (parent->obfd, &crc32));
+	(bfd_get_debug_link_info (parent->obfd.get (), &crc32));
 
       if (debuglink.get () != nullptr
 	  && strcmp (debuglink.get (), lbasename (realname.get ())) != 0)
@@ -1119,7 +1119,7 @@ source_section_scripts (struct objfile *objfile, const char *section_name,
 static void
 auto_load_section_scripts (struct objfile *objfile, const char *section_name)
 {
-  bfd *abfd = objfile->obfd;
+  bfd *abfd = objfile->obfd.get ();
   asection *scripts_sect;
   bfd_byte *data = NULL;
 

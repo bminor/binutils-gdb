@@ -97,7 +97,7 @@ static const struct regcache_map_entry arm_fbsd_vfpregmap[] =
 
 static void
 arm_fbsd_sigframe_init (const struct tramp_frame *self,
-			struct frame_info *this_frame,
+			frame_info_ptr this_frame,
 			struct trad_frame_cache *this_cache,
 			CORE_ADDR func)
 {
@@ -159,7 +159,7 @@ arm_fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 				       void *cb_data,
 				       const struct regcache *regcache)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   cb (".reg", ARM_FBSD_SIZEOF_GREGSET, ARM_FBSD_SIZEOF_GREGSET,
       &arm_fbsd_gregset, NULL, cb_data);
@@ -190,15 +190,17 @@ arm_fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 	&arm_fbsd_vfpregset, "VFP floating-point", cb_data);
 }
 
-/* Lookup a target description from a target's AT_HWCAP auxiliary
-   vector.  */
+/* See arm-fbsd-tdep.h.  */
 
 const struct target_desc *
-arm_fbsd_read_description_auxv (struct target_ops *target, bool tls)
+arm_fbsd_read_description_auxv (const gdb::optional<gdb::byte_vector> &auxv,
+				target_ops *target, gdbarch *gdbarch, bool tls)
 {
   CORE_ADDR arm_hwcap = 0;
 
-  if (target_auxv_search (target, AT_FREEBSD_HWCAP, &arm_hwcap) != 1)
+  if (!auxv.has_value ()
+      || target_auxv_search (*auxv, target, gdbarch, AT_FREEBSD_HWCAP,
+			     &arm_hwcap) != 1)
     return arm_read_description (ARM_FP_TYPE_NONE, tls);
 
   if (arm_hwcap & HWCAP_VFP)
@@ -215,6 +217,18 @@ arm_fbsd_read_description_auxv (struct target_ops *target, bool tls)
   return arm_read_description (ARM_FP_TYPE_NONE, tls);
 }
 
+/* See arm-fbsd-tdep.h.  */
+
+const struct target_desc *
+arm_fbsd_read_description_auxv (bool tls)
+{
+  gdb::optional<gdb::byte_vector> auxv = target_read_auxv ();
+  return arm_fbsd_read_description_auxv (auxv,
+					 current_inferior ()->top_target (),
+					 current_inferior ()->gdbarch,
+					 tls);
+}
+
 /* Implement the "core_read_description" gdbarch method.  */
 
 static const struct target_desc *
@@ -224,7 +238,8 @@ arm_fbsd_core_read_description (struct gdbarch *gdbarch,
 {
   asection *tls = bfd_get_section_by_name (abfd, ".reg-aarch-tls");
 
-  return arm_fbsd_read_description_auxv (target, tls != nullptr);
+  gdb::optional<gdb::byte_vector> auxv = target_read_auxv_raw (target);
+  return arm_fbsd_read_description_auxv (auxv, target, gdbarch, tls != nullptr);
 }
 
 /* Implement the get_thread_local_address gdbarch method.  */
@@ -233,7 +248,7 @@ static CORE_ADDR
 arm_fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
 				   CORE_ADDR lm_addr, CORE_ADDR offset)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
   struct regcache *regcache;
 
   regcache = get_thread_arch_regcache (current_inferior ()->process_target (),
@@ -256,7 +271,7 @@ arm_fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
 static void
 arm_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   /* Generic FreeBSD support.  */
   fbsd_init_abi (info, gdbarch);

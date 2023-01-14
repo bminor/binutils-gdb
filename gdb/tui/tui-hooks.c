@@ -62,9 +62,9 @@ static bool tui_refreshing_registers = false;
 /* Observer for the register_changed notification.  */
 
 static void
-tui_register_changed (struct frame_info *frame, int regno)
+tui_register_changed (frame_info_ptr frame, int regno)
 {
-  struct frame_info *fi;
+  frame_info_ptr fi;
 
   if (!tui_is_window_visible (DATA_WIN))
     return;
@@ -129,7 +129,7 @@ tui_refresh_frame_and_register_information ()
 
   if (from_stack && has_stack_frames ())
     {
-      struct frame_info *fi = get_selected_frame (NULL);
+      frame_info_ptr fi = get_selected_frame (NULL);
 
       /* Display the frame position (even if there is no symbols or
 	 the PC is not known).  */

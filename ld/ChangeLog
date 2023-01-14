@@ -1,3 +1,40 @@
+2022-08-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 29529
+	* testsuite/ld-x86-64/pr27587.err: Update expected output.
+
+2022-08-18  Ralf Habacker  <ralf.habacker@freenet.de>
+
+	PR 28362
+	* testsuite/ld-pe/pe-run2-def.exp: New file.
+
+2022-08-03  Alan Modra  <amodra@gmail.com>
+
+	PR 29389
+	* ldlang.h (lang_input_statement_struct): Add sort_key field.
+	* emultempl/pe.em (after_open): If multiple import libraries refer
+	to the same bfd, store their names in the sort_key field.
+	* emultempl/pep.em (after_open): Likewise.
+	* ldlang.c (sort_filename): New function.  Returns the filename to
+	be used when sorting input files.
+	(wild_sort): Use the sort_filename function.
+
+2022-07-29  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR ld/29411
+	* configure.tgt (ac_default_ld_warn_rwx_segments): Extend to all
+	sparc targets.  Expand comment.
+
+2022-07-26  Nick Clifton  <nickc@redhat.com>
+
+	PR 29411
+	* configure.tgt (ac_default_ld_warn_rwx_segments): Disable for
+	sparc-solaris configurations.
+
+2022-07-08  Nick Clifton  <nickc@redhat.com>
+
+	* 2.39 branch created.
+
 2022-06-27  Nick Clifton  <nickc@redhat.com>
 
 	PR 29263

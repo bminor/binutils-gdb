@@ -163,8 +163,8 @@ extern void mips_elf_final_processing (void);
 
 #endif
 
-extern void md_mips_end (void);
-#define md_end()	md_mips_end()
+extern void mips_md_finish (void);
+#define md_finish()	mips_md_finish()
 
 extern void mips_pop_insert (void);
 #define md_pop_insert()		mips_pop_insert()

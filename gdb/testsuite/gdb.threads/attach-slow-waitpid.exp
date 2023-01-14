@@ -71,13 +71,19 @@ with_test_prefix "compile test executable" {
 proc gdb_spawn_with_ld_preload {lib} {
     global env
 
-    save_vars { env(LD_PRELOAD) } {
+    save_vars { env(LD_PRELOAD) env(ASAN_OPTIONS) } {
 	if { ![info exists env(LD_PRELOAD) ]
 	     || $env(LD_PRELOAD) == "" } {
 	    set env(LD_PRELOAD) "$lib"
 	} else {
 	    append env(LD_PRELOAD) ":$lib"
 	}
+
+	# Prevent address sanitizer error:
+	# ASan runtime does not come first in initial library list; you should
+	# either link runtime to your application or manually preload it with
+	# LD_PRELOAD.
+	set_sanitizer_default ASAN_OPTIONS verify_asan_link_order 0
 
 	gdb_start
     }

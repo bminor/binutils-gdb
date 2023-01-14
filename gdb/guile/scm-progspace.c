@@ -52,7 +52,18 @@ static const char pspace_smob_name[] = "gdb:progspace";
 /* The tag Guile knows the pspace smob by.  */
 static scm_t_bits pspace_smob_tag;
 
-static const struct program_space_data *psscm_pspace_data_key;
+/* Progspace registry cleanup handler for when a progspace is deleted.  */
+struct psscm_deleter
+{
+  void operator() (pspace_smob *p_smob)
+  {
+    p_smob->pspace = NULL;
+    scm_gc_unprotect_object (p_smob->containing_scm);
+  }
+};
+
+static const registry<program_space>::key<pspace_smob, psscm_deleter>
+     psscm_pspace_data_key;
 
 /* Return the list of pretty-printers registered with P_SMOB.  */
 
@@ -111,27 +122,6 @@ psscm_make_pspace_smob (void)
   return p_scm;
 }
 
-/* Clear the progspace pointer in P_SMOB and unprotect the object from GC.  */
-
-static void
-psscm_release_pspace (pspace_smob *p_smob)
-{
-  p_smob->pspace = NULL;
-  scm_gc_unprotect_object (p_smob->containing_scm);
-}
-
-/* Progspace registry cleanup handler for when a progspace is deleted.  */
-
-static void
-psscm_handle_pspace_deleted (struct program_space *pspace, void *datum)
-{
-  pspace_smob *p_smob = (pspace_smob *) datum;
-
-  gdb_assert (p_smob->pspace == pspace);
-
-  psscm_release_pspace (p_smob);
-}
-
 /* Return non-zero if SCM is a <gdb:progspace> object.  */
 
 static int
@@ -157,7 +147,7 @@ psscm_pspace_smob_from_pspace (struct program_space *pspace)
 {
   pspace_smob *p_smob;
 
-  p_smob = (pspace_smob *) program_space_data (pspace, psscm_pspace_data_key);
+  p_smob = psscm_pspace_data_key.get (pspace);
   if (p_smob == NULL)
     {
       SCM p_scm = psscm_make_pspace_smob ();
@@ -165,7 +155,7 @@ psscm_pspace_smob_from_pspace (struct program_space *pspace)
       p_smob = (pspace_smob *) SCM_SMOB_DATA (p_scm);
       p_smob->pspace = pspace;
 
-      set_program_space_data (pspace, psscm_pspace_data_key, p_smob);
+      psscm_pspace_data_key.set (pspace, p_smob);
       scm_gc_protect_object (p_smob->containing_scm);
     }
 
@@ -417,13 +407,4 @@ gdbscm_initialize_pspaces (void)
   scm_set_smob_print (pspace_smob_tag, psscm_print_pspace_smob);
 
   gdbscm_define_functions (pspace_functions, 1);
-}
-
-void _initialize_scm_progspace ();
-void
-_initialize_scm_progspace ()
-{
-  psscm_pspace_data_key
-    = register_program_space_data_with_cleanup (NULL,
-						psscm_handle_pspace_deleted);
 }

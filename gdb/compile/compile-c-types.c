@@ -29,7 +29,7 @@
 static gcc_type
 convert_pointer (compile_c_instance *context, struct type *type)
 {
-  gcc_type target = context->convert_type (TYPE_TARGET_TYPE (type));
+  gcc_type target = context->convert_type (type->target_type ());
 
   return context->plugin ().build_pointer_type (target);
 }
@@ -42,7 +42,7 @@ convert_array (compile_c_instance *context, struct type *type)
   gcc_type element_type;
   struct type *range = type->index_type ();
 
-  element_type = context->convert_type (TYPE_TARGET_TYPE (type));
+  element_type = context->convert_type (type->target_type ());
 
   if (range->bounds ()->low.kind () != PROP_CONST)
     return context->plugin ().error (_("array type with non-constant"
@@ -110,7 +110,7 @@ convert_struct_or_union (compile_c_instance *context, struct type *type)
 
       field_type = context->convert_type (type->field (i).type ());
       if (bitsize == 0)
-	bitsize = 8 * TYPE_LENGTH (type->field (i).type ());
+	bitsize = 8 * type->field (i).type ()->length ();
       context->plugin ().build_add_field (result,
 					  type->field (i).name (),
 					  field_type,
@@ -118,7 +118,7 @@ convert_struct_or_union (compile_c_instance *context, struct type *type)
 					  type->field (i).loc_bitpos ());
     }
 
-  context->plugin ().finish_record_or_union (result, TYPE_LENGTH (type));
+  context->plugin ().finish_record_or_union (result, type->length ());
   return result;
 }
 
@@ -131,7 +131,7 @@ convert_enum (compile_c_instance *context, struct type *type)
   int i;
 
   int_type = context->plugin ().int_type_v0 (type->is_unsigned (),
-					     TYPE_LENGTH (type));
+					     type->length ());
 
   result = context->plugin ().build_enum_type (int_type);
   for (i = 0; i < type->num_fields (); ++i)
@@ -155,7 +155,7 @@ convert_func (compile_c_instance *context, struct type *type)
   struct gcc_type_array array;
   int is_varargs = type->has_varargs () || !type->is_prototyped ();
 
-  struct type *target_type = TYPE_TARGET_TYPE (type);
+  struct type *target_type = type->target_type ();
 
   /* Functions with no debug info have no return type.  Ideally we'd
      want to fallback to the type of the cast just before the
@@ -196,16 +196,16 @@ convert_int (compile_c_instance *context, struct type *type)
     {
       if (type->has_no_signedness ())
 	{
-	  gdb_assert (TYPE_LENGTH (type) == 1);
+	  gdb_assert (type->length () == 1);
 	  return context->plugin ().char_type ();
 	}
       return context->plugin ().int_type (type->is_unsigned (),
-					  TYPE_LENGTH (type),
+					  type->length (),
 					  type->name ());
     }
   else
     return context->plugin ().int_type_v0 (type->is_unsigned (),
-					   TYPE_LENGTH (type));
+					   type->length ());
 }
 
 /* Convert a floating-point type to its gcc representation.  */
@@ -214,10 +214,10 @@ static gcc_type
 convert_float (compile_c_instance *context, struct type *type)
 {
   if (context->plugin ().version () >= GCC_C_FE_VERSION_1)
-    return context->plugin ().float_type (TYPE_LENGTH (type),
+    return context->plugin ().float_type (type->length (),
 					  type->name ());
   else
-    return context->plugin ().float_type_v0 (TYPE_LENGTH (type));
+    return context->plugin ().float_type_v0 (type->length ());
 }
 
 /* Convert the 'void' type to its gcc representation.  */
@@ -263,7 +263,7 @@ convert_qualified (compile_c_instance *context, struct type *type)
 static gcc_type
 convert_complex (compile_c_instance *context, struct type *type)
 {
-  gcc_type base = context->convert_type (TYPE_TARGET_TYPE (type));
+  gcc_type base = context->convert_type (type->target_type ());
 
   return context->plugin ().build_complex_type (base);
 }

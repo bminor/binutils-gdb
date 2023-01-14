@@ -787,6 +787,12 @@ proc test_objdump_dotnet_assemblies {} {
 
     set test "dotnet-assemblies"
 
+    # If gentestdlls isn't available, skip instead of crashing below.
+    if ![file exists $base_dir/testsuite/gentestdlls] {
+	untested $test
+	return
+    }
+
     set got [binutils_run "$base_dir/testsuite/gentestdlls" "tmpdir pei-i386 pei-x86-64"]
     set want "wrote linux-pei-x86-64.dll"
     # The test program is hardcoded to generate valid dlls on any target

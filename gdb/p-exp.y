@@ -220,7 +220,7 @@ exp1	:	exp
 exp	:	exp '^'   %prec UNARY
 			{ pstate->wrap<unop_ind_operation> ();
 			  if (current_type)
-			    current_type = TYPE_TARGET_TYPE (current_type); }
+			    current_type = current_type->target_type (); }
 	;
 
 exp	:	'@' exp    %prec UNARY
@@ -260,7 +260,7 @@ exp	:	field_exp FIELDNAME
 			      while (current_type->code ()
 				     == TYPE_CODE_PTR)
 				current_type =
-				  TYPE_TARGET_TYPE (current_type);
+				  current_type->target_type ();
 			      current_type = lookup_struct_elt_type (
 				current_type, $2.ptr, 0);
 			    }
@@ -278,7 +278,7 @@ exp	:	field_exp name
 			      while (current_type->code ()
 				     == TYPE_CODE_PTR)
 				current_type =
-				  TYPE_TARGET_TYPE (current_type);
+				  current_type->target_type ();
 			      current_type = lookup_struct_elt_type (
 				current_type, $2.ptr, 0);
 			    }
@@ -321,7 +321,7 @@ exp	:	exp '['
 			{ pop_current_type ();
 			  pstate->wrap2<subscript_operation> ();
 			  if (current_type)
-			    current_type = TYPE_TARGET_TYPE (current_type); }
+			    current_type = current_type->target_type (); }
 	;
 
 exp	:	exp '('
@@ -337,7 +337,7 @@ exp	:	exp '('
 			    (pstate->pop (), std::move (args));
 			  pop_current_type ();
 			  if (current_type)
- 	  		    current_type = TYPE_TARGET_TYPE (current_type);
+			    current_type = current_type->target_type ();
 			}
 	;
 
@@ -353,7 +353,7 @@ exp	:	type '(' exp ')' %prec UNARY
 			    {
 			      /* Allow automatic dereference of classes.  */
 			      if ((current_type->code () == TYPE_CODE_PTR)
-				  && (TYPE_TARGET_TYPE (current_type)->code () == TYPE_CODE_STRUCT)
+				  && (current_type->target_type ()->code () == TYPE_CODE_STRUCT)
 				  && (($1)->code () == TYPE_CODE_STRUCT))
 				pstate->wrap<unop_ind_operation> ();
 			    }
@@ -553,7 +553,7 @@ exp	:	SIZEOF '(' type ')'	%prec UNARY
 			  $3 = check_typedef ($3);
 			  pstate->push_new<long_const_operation>
 			    (parse_type (pstate)->builtin_int,
-			     TYPE_LENGTH ($3)); }
+			     $3->length ()); }
 	;
 
 exp	:	SIZEOF  '(' exp ')'      %prec UNARY
@@ -598,7 +598,7 @@ exp	:	THIS
 			    {
 			      if (this_type->code () == TYPE_CODE_PTR)
 				{
-				  this_type = TYPE_TARGET_TYPE (this_type);
+				  this_type = this_type->target_type ();
 				  pstate->wrap<unop_ind_operation> ();
 				}
 			    }

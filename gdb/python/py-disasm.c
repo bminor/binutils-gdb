@@ -626,7 +626,7 @@ gdbpy_disassembler::print_address_func (bfd_vma addr,
 {
   gdbpy_disassembler *dis
     = static_cast<gdbpy_disassembler *> (info->application_data);
-  print_address (dis->arch (), addr, (struct ui_file *) info->stream);
+  print_address (dis->arch (), addr, dis->stream ());
 }
 
 /* constructor.  */

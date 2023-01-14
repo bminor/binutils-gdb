@@ -77,7 +77,7 @@ mips64obsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 
 static void
 mips64obsd_sigframe_init (const struct tramp_frame *self,
-			  struct frame_info *this_frame,
+			  frame_info_ptr this_frame,
 			  struct trad_frame_cache *cache,
 			  CORE_ADDR func)
 {

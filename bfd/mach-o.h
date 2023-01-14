@@ -729,6 +729,8 @@ bool bfd_mach_o_find_nearest_line (bfd *, asymbol **,
 					  asection *, bfd_vma,
 					  const char **, const char **,
 					  unsigned int *, unsigned int *);
+#define bfd_mach_o_find_nearest_line_with_alt \
+  _bfd_nosymbols_find_nearest_line_with_alt
 #define bfd_mach_o_find_line _bfd_nosymbols_find_line
 bool bfd_mach_o_close_and_cleanup (bfd *);
 bool bfd_mach_o_free_cached_info (bfd *);

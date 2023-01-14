@@ -55,7 +55,8 @@ enum ui_out_flag
   fix_multi_location_breakpoint_output = (1 << 1),
   /* This indicates that %pF should be disallowed in a printf format
      string.  */
-  disallow_ui_out_field = (1 << 2)
+  disallow_ui_out_field = (1 << 2),
+  fix_breakpoint_script_output = (1 << 3),
 };
 
 DEF_ENUM_FLAGS_TYPE (ui_out_flag, ui_out_flags);
@@ -427,15 +428,17 @@ private:
   struct ui_out *m_uiout;
 };
 
-/* On destruction, pop the last redirection by calling the uiout's
+/* On construction, redirect a uiout to a given stream.  On
+   destruction, pop the last redirection by calling the uiout's
    redirect method with a NULL parameter.  */
 class ui_out_redirect_pop
 {
 public:
 
-  ui_out_redirect_pop (ui_out *uiout)
+  ui_out_redirect_pop (ui_out *uiout, ui_file *stream)
     : m_uiout (uiout)
   {
+    m_uiout->redirect (stream);
   }
 
   ~ui_out_redirect_pop ()

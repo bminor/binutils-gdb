@@ -310,7 +310,7 @@ static const struct floatformat *floatformats_ia64_ext[2] =
 static struct type *
 ia64_ext_type (struct gdbarch *gdbarch)
 {
-  ia64_gdbarch_tdep *tdep = (ia64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ia64_gdbarch_tdep *tdep = gdbarch_tdep<ia64_gdbarch_tdep> (gdbarch);
 
   if (!tdep->ia64_ext_type)
     tdep->ia64_ext_type
@@ -1217,7 +1217,7 @@ ia64_convert_register_p (struct gdbarch *gdbarch, int regno, struct type *type)
 }
 
 static int
-ia64_register_to_value (struct frame_info *frame, int regnum,
+ia64_register_to_value (frame_info_ptr frame, int regnum,
 			struct type *valtype, gdb_byte *out,
 			int *optimizedp, int *unavailablep)
 {
@@ -1238,7 +1238,7 @@ ia64_register_to_value (struct frame_info *frame, int regnum,
 }
 
 static void
-ia64_value_to_register (struct frame_info *frame, int regnum,
+ia64_value_to_register (frame_info_ptr frame, int regnum,
 			 struct type *valtype, const gdb_byte *in)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -1358,7 +1358,7 @@ ia64_alloc_frame_cache (void)
 
 static CORE_ADDR
 examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc,
-		  struct frame_info *this_frame,
+		  frame_info_ptr this_frame,
 		  struct ia64_frame_cache *cache)
 {
   CORE_ADDR next_pc;
@@ -1839,7 +1839,7 @@ ia64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 /* Normal frames.  */
 
 static struct ia64_frame_cache *
-ia64_frame_cache (struct frame_info *this_frame, void **this_cache)
+ia64_frame_cache (frame_info_ptr this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -1884,7 +1884,7 @@ ia64_frame_cache (struct frame_info *this_frame, void **this_cache)
 }
 
 static void
-ia64_frame_this_id (struct frame_info *this_frame, void **this_cache,
+ia64_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 		    struct frame_id *this_id)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -1901,11 +1901,11 @@ ia64_frame_this_id (struct frame_info *this_frame, void **this_cache,
 		paddress (gdbarch, this_id->code_addr),
 		paddress (gdbarch, this_id->stack_addr),
 		paddress (gdbarch, cache->bsp),
-		host_address_to_string (this_frame));
+		host_address_to_string (this_frame.get ()));
 }
 
 static struct value *
-ia64_frame_prev_register (struct frame_info *this_frame, void **this_cache,
+ia64_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
 			  int regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -2173,11 +2173,11 @@ static const struct frame_unwind ia64_frame_unwind =
 /* Signal trampolines.  */
 
 static void
-ia64_sigtramp_frame_init_saved_regs (struct frame_info *this_frame,
+ia64_sigtramp_frame_init_saved_regs (frame_info_ptr this_frame,
 				     struct ia64_frame_cache *cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  ia64_gdbarch_tdep *tdep = (ia64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ia64_gdbarch_tdep *tdep = gdbarch_tdep<ia64_gdbarch_tdep> (gdbarch);
 
   if (tdep->sigcontext_register_address)
     {
@@ -2227,7 +2227,7 @@ ia64_sigtramp_frame_init_saved_regs (struct frame_info *this_frame,
 }
 
 static struct ia64_frame_cache *
-ia64_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
+ia64_sigtramp_frame_cache (frame_info_ptr this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -2258,7 +2258,7 @@ ia64_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
 }
 
 static void
-ia64_sigtramp_frame_this_id (struct frame_info *this_frame,
+ia64_sigtramp_frame_this_id (frame_info_ptr this_frame,
 			     void **this_cache, struct frame_id *this_id)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -2275,11 +2275,11 @@ ia64_sigtramp_frame_this_id (struct frame_info *this_frame,
 		paddress (gdbarch, this_id->code_addr),
 		paddress (gdbarch, this_id->stack_addr),
 		paddress (gdbarch, cache->bsp),
-		host_address_to_string (this_frame));
+		host_address_to_string (this_frame.get ()));
 }
 
 static struct value *
-ia64_sigtramp_frame_prev_register (struct frame_info *this_frame,
+ia64_sigtramp_frame_prev_register (frame_info_ptr this_frame,
 				   void **this_cache, int regnum)
 {
   struct ia64_frame_cache *cache =
@@ -2332,11 +2332,11 @@ ia64_sigtramp_frame_prev_register (struct frame_info *this_frame,
 
 static int
 ia64_sigtramp_frame_sniffer (const struct frame_unwind *self,
-			     struct frame_info *this_frame,
+			     frame_info_ptr this_frame,
 			     void **this_cache)
 {
   gdbarch *arch = get_frame_arch (this_frame);
-  ia64_gdbarch_tdep *tdep = (ia64_gdbarch_tdep *) gdbarch_tdep (arch);
+  ia64_gdbarch_tdep *tdep = gdbarch_tdep<ia64_gdbarch_tdep> (arch);
   if (tdep->pc_in_sigtramp)
     {
       CORE_ADDR pc = get_frame_pc (this_frame);
@@ -2362,7 +2362,7 @@ static const struct frame_unwind ia64_sigtramp_frame_unwind =
 
 
 static CORE_ADDR
-ia64_frame_base_address (struct frame_info *this_frame, void **this_cache)
+ia64_frame_base_address (frame_info_ptr this_frame, void **this_cache)
 {
   struct ia64_frame_cache *cache = ia64_frame_cache (this_frame, this_cache);
 
@@ -2483,9 +2483,9 @@ ia64_access_reg (unw_addr_space_t as, unw_regnum_t uw_regnum, unw_word_t *val,
 {
   int regnum = ia64_uw2gdb_regnum (uw_regnum);
   unw_word_t bsp, sof, cfm, psr, ip;
-  struct frame_info *this_frame = (struct frame_info *) arg;
+  struct frame_info *this_frame = (frame_info *) arg;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  ia64_gdbarch_tdep *tdep = (ia64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ia64_gdbarch_tdep *tdep = gdbarch_tdep<ia64_gdbarch_tdep> (gdbarch);
   
   /* We never call any libunwind routines that need to write registers.  */
   gdb_assert (!write);
@@ -2538,7 +2538,7 @@ ia64_access_fpreg (unw_addr_space_t as, unw_regnum_t uw_regnum,
 		   unw_fpreg_t *val, int write, void *arg)
 {
   int regnum = ia64_uw2gdb_regnum (uw_regnum);
-  struct frame_info *this_frame = (struct frame_info *) arg;
+  frame_info_ptr this_frame = (frame_info_ptr ) arg;
   
   /* We never call any libunwind routines that need to write registers.  */
   gdb_assert (!write);
@@ -2891,7 +2891,7 @@ ia64_get_dyn_info_list (unw_addr_space_t as,
 /* Frame interface functions for libunwind.  */
 
 static void
-ia64_libunwind_frame_this_id (struct frame_info *this_frame, void **this_cache,
+ia64_libunwind_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 			      struct frame_id *this_id)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -2901,7 +2901,7 @@ ia64_libunwind_frame_this_id (struct frame_info *this_frame, void **this_cache,
   CORE_ADDR bsp;
 
   libunwind_frame_this_id (this_frame, this_cache, &id);
-  if (frame_id_eq (id, outer_frame_id))
+  if (id == outer_frame_id)
     {
       (*this_id) = outer_frame_id;
       return;
@@ -2925,7 +2925,7 @@ ia64_libunwind_frame_this_id (struct frame_info *this_frame, void **this_cache,
 }
 
 static struct value *
-ia64_libunwind_frame_prev_register (struct frame_info *this_frame,
+ia64_libunwind_frame_prev_register (frame_info_ptr this_frame,
 				    void **this_cache, int regnum)
 {
   int reg = regnum;
@@ -2998,7 +2998,7 @@ ia64_libunwind_frame_prev_register (struct frame_info *this_frame,
 
 static int
 ia64_libunwind_frame_sniffer (const struct frame_unwind *self,
-			      struct frame_info *this_frame,
+			      frame_info_ptr this_frame,
 			      void **this_cache)
 {
   if (libunwind_is_initialized ()
@@ -3021,7 +3021,7 @@ static const struct frame_unwind ia64_libunwind_frame_unwind =
 };
 
 static void
-ia64_libunwind_sigtramp_frame_this_id (struct frame_info *this_frame,
+ia64_libunwind_sigtramp_frame_this_id (frame_info_ptr this_frame,
 				       void **this_cache,
 				       struct frame_id *this_id)
 {
@@ -3032,7 +3032,7 @@ ia64_libunwind_sigtramp_frame_this_id (struct frame_info *this_frame,
   struct frame_id id = outer_frame_id;
 
   libunwind_frame_this_id (this_frame, this_cache, &id);
-  if (frame_id_eq (id, outer_frame_id))
+  if (id == outer_frame_id)
     {
       (*this_id) = outer_frame_id;
       return;
@@ -3057,7 +3057,7 @@ ia64_libunwind_sigtramp_frame_this_id (struct frame_info *this_frame,
 }
 
 static struct value *
-ia64_libunwind_sigtramp_frame_prev_register (struct frame_info *this_frame,
+ia64_libunwind_sigtramp_frame_prev_register (frame_info_ptr this_frame,
 					     void **this_cache, int regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -3084,7 +3084,7 @@ ia64_libunwind_sigtramp_frame_prev_register (struct frame_info *this_frame,
 
 static int
 ia64_libunwind_sigtramp_frame_sniffer (const struct frame_unwind *self,
-				       struct frame_info *this_frame,
+				       frame_info_ptr this_frame,
 				       void **this_cache)
 {
   if (libunwind_is_initialized ())
@@ -3168,12 +3168,12 @@ ia64_use_struct_convention (struct type *type)
      case.  */
   float_elt_type = is_float_or_hfa_type (type);
   if (float_elt_type != NULL
-      && TYPE_LENGTH (type) / TYPE_LENGTH (float_elt_type) <= 8)
+      && type->length () / float_elt_type->length () <= 8)
     return 0;
 
   /* Other structs of length 32 or less are returned in r8-r11.
      Don't use the struct convention for those either.  */
-  return TYPE_LENGTH (type) > 32;
+  return type->length () > 32;
 }
 
 /* Return non-zero if TYPE is a structure or union type.  */
@@ -3198,18 +3198,18 @@ ia64_extract_return_value (struct type *type, struct regcache *regcache,
       gdb_byte from[IA64_FP_REGISTER_SIZE];
       int offset = 0;
       int regnum = IA64_FR8_REGNUM;
-      int n = TYPE_LENGTH (type) / TYPE_LENGTH (float_elt_type);
+      int n = type->length () / float_elt_type->length ();
 
       while (n-- > 0)
 	{
 	  regcache->cooked_read (regnum, from);
 	  target_float_convert (from, ia64_ext_type (gdbarch),
 				valbuf + offset, float_elt_type);
-	  offset += TYPE_LENGTH (float_elt_type);
+	  offset += float_elt_type->length ();
 	  regnum++;
 	}
     }
-  else if (!ia64_struct_type_p (type) && TYPE_LENGTH (type) < 8)
+  else if (!ia64_struct_type_p (type) && type->length () < 8)
     {
       /* This is an integral value, and its size is less than 8 bytes.
 	 These values are LSB-aligned, so extract the relevant bytes,
@@ -3222,16 +3222,16 @@ ia64_extract_return_value (struct type *type, struct regcache *regcache,
       ULONGEST val;
 
       regcache_cooked_read_unsigned (regcache, IA64_GR8_REGNUM, &val);
-      store_unsigned_integer (valbuf, TYPE_LENGTH (type), byte_order, val);
+      store_unsigned_integer (valbuf, type->length (), byte_order, val);
     }
   else
     {
       ULONGEST val;
       int offset = 0;
       int regnum = IA64_GR8_REGNUM;
-      int reglen = TYPE_LENGTH (register_type (gdbarch, IA64_GR8_REGNUM));
-      int n = TYPE_LENGTH (type) / reglen;
-      int m = TYPE_LENGTH (type) % reglen;
+      int reglen = register_type (gdbarch, IA64_GR8_REGNUM)->length ();
+      int n = type->length () / reglen;
+      int m = type->length () % reglen;
 
       while (n-- > 0)
 	{
@@ -3263,14 +3263,14 @@ ia64_store_return_value (struct type *type, struct regcache *regcache,
       gdb_byte to[IA64_FP_REGISTER_SIZE];
       int offset = 0;
       int regnum = IA64_FR8_REGNUM;
-      int n = TYPE_LENGTH (type) / TYPE_LENGTH (float_elt_type);
+      int n = type->length () / float_elt_type->length ();
 
       while (n-- > 0)
 	{
 	  target_float_convert (valbuf + offset, float_elt_type,
 				to, ia64_ext_type (gdbarch));
 	  regcache->cooked_write (regnum, to);
-	  offset += TYPE_LENGTH (float_elt_type);
+	  offset += float_elt_type->length ();
 	  regnum++;
 	}
     }
@@ -3278,9 +3278,9 @@ ia64_store_return_value (struct type *type, struct regcache *regcache,
     {
       int offset = 0;
       int regnum = IA64_GR8_REGNUM;
-      int reglen = TYPE_LENGTH (register_type (gdbarch, IA64_GR8_REGNUM));
-      int n = TYPE_LENGTH (type) / reglen;
-      int m = TYPE_LENGTH (type) % reglen;
+      int reglen = register_type (gdbarch, IA64_GR8_REGNUM)->length ();
+      int n = type->length () / reglen;
+      int m = type->length () % reglen;
 
       while (n-- > 0)
 	{
@@ -3332,7 +3332,7 @@ is_float_or_hfa_type_recurse (struct type *t, struct type **etp)
     {
     case TYPE_CODE_FLT:
       if (*etp)
-	return TYPE_LENGTH (*etp) == TYPE_LENGTH (t);
+	return (*etp)->length () == t->length ();
       else
 	{
 	  *etp = t;
@@ -3341,7 +3341,7 @@ is_float_or_hfa_type_recurse (struct type *t, struct type **etp)
       break;
     case TYPE_CODE_ARRAY:
       return
-	is_float_or_hfa_type_recurse (check_typedef (TYPE_TARGET_TYPE (t)),
+	is_float_or_hfa_type_recurse (check_typedef (t->target_type ()),
 				      etp);
       break;
     case TYPE_CODE_STRUCT:
@@ -3387,13 +3387,13 @@ slot_alignment_is_next_even (struct type *t)
     {
     case TYPE_CODE_INT:
     case TYPE_CODE_FLT:
-      if (TYPE_LENGTH (t) > 8)
+      if (t->length () > 8)
 	return 1;
       else
 	return 0;
     case TYPE_CODE_ARRAY:
       return
-	slot_alignment_is_next_even (check_typedef (TYPE_TARGET_TYPE (t)));
+	slot_alignment_is_next_even (check_typedef (t->target_type ()));
     case TYPE_CODE_STRUCT:
       {
 	int i;
@@ -3485,7 +3485,7 @@ ia64_find_global_pointer_from_dynamic_section (struct gdbarch *gdbarch,
 static CORE_ADDR
 ia64_find_global_pointer (struct gdbarch *gdbarch, CORE_ADDR faddr)
 {
-  ia64_gdbarch_tdep *tdep = (ia64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ia64_gdbarch_tdep *tdep = gdbarch_tdep<ia64_gdbarch_tdep> (gdbarch);
   CORE_ADDR addr = 0;
 
   if (tdep->find_global_pointer_from_solib)
@@ -3680,7 +3680,7 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      function_call_return_method return_method,
 		      CORE_ADDR struct_addr)
 {
-  ia64_gdbarch_tdep *tdep = (ia64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ia64_gdbarch_tdep *tdep = gdbarch_tdep<ia64_gdbarch_tdep> (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int argno;
   struct value *arg;
@@ -3699,7 +3699,7 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       arg = args[argno];
       type = check_typedef (value_type (arg));
-      len = TYPE_LENGTH (type);
+      len = type->length ();
 
       if ((nslots & 1) && slot_alignment_is_next_even (type))
 	nslots++;
@@ -3742,12 +3742,12 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       arg = args[argno];
       type = check_typedef (value_type (arg));
-      len = TYPE_LENGTH (type);
+      len = type->length ();
 
       /* Special handling for function parameters.  */
       if (len == 8
 	  && type->code () == TYPE_CODE_PTR
-	  && TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_FUNC)
+	  && type->target_type ()->code () == TYPE_CODE_FUNC)
 	{
 	  gdb_byte val_buf[8];
 	  ULONGEST faddr = extract_unsigned_integer
@@ -3817,7 +3817,7 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       if (float_elt_type != NULL)
 	{
 	  argoffset = 0;
-	  len = TYPE_LENGTH (type);
+	  len = type->length ();
 	  while (len > 0 && floatreg < IA64_FR16_REGNUM)
 	    {
 	      gdb_byte to[IA64_FP_REGISTER_SIZE];
@@ -3826,8 +3826,8 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 				    ia64_ext_type (gdbarch));
 	      regcache->cooked_write (floatreg, to);
 	      floatreg++;
-	      argoffset += TYPE_LENGTH (float_elt_type);
-	      len -= TYPE_LENGTH (float_elt_type);
+	      argoffset += float_elt_type->length ();
+	      len -= float_elt_type->length ();
 	    }
 	}
     }
@@ -3864,7 +3864,7 @@ static const struct ia64_infcall_ops ia64_infcall_ops =
 };
 
 static struct frame_id
-ia64_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
+ia64_dummy_id (struct gdbarch *gdbarch, frame_info_ptr this_frame)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[8];
@@ -3886,7 +3886,7 @@ ia64_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 }
 
 static CORE_ADDR 
-ia64_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
+ia64_unwind_pc (struct gdbarch *gdbarch, frame_info_ptr next_frame)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[8];
@@ -3911,7 +3911,7 @@ ia64_print_insn (bfd_vma memaddr, struct disassemble_info *info)
 /* The default "size_of_register_frame" gdbarch_tdep routine for ia64.  */
 
 static int
-ia64_size_of_register_frame (struct frame_info *this_frame, ULONGEST cfm)
+ia64_size_of_register_frame (frame_info_ptr this_frame, ULONGEST cfm)
 {
   return (cfm & 0x7f);
 }

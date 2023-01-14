@@ -503,7 +503,7 @@ typy_get_composite (struct type *type)
 
       if (!type->is_pointer_or_reference ())
 	break;
-      type = TYPE_TARGET_TYPE (type);
+      type = type->target_type ();
     }
 
   /* If this is not a struct, union, or enum type, raise TypeError
@@ -686,14 +686,14 @@ typy_target (PyObject *self, PyObject *args)
 {
   struct type *type = ((type_object *) self)->type;
 
-  if (!TYPE_TARGET_TYPE (type))
+  if (!type->target_type ())
     {
       PyErr_SetString (PyExc_RuntimeError,
 		       _("Type does not have a target."));
       return NULL;
     }
 
-  return type_to_type_object (TYPE_TARGET_TYPE (type));
+  return type_to_type_object (type->target_type ());
 }
 
 /* Return a const-qualified type variant.  */
@@ -771,7 +771,7 @@ typy_get_sizeof (PyObject *self, void *closure)
 
   if (size_varies)
     Py_RETURN_NONE;
-  return gdb_py_object_from_longest (TYPE_LENGTH (type)).release ();
+  return gdb_py_object_from_longest (type->length ()).release ();
 }
 
 /* Return the alignment of the type represented by SELF, in bytes.  */
@@ -1007,7 +1007,7 @@ typy_template_argument (PyObject *self, PyObject *args)
     {
       type = check_typedef (type);
       if (TYPE_IS_REFERENCE (type))
-	type = check_typedef (TYPE_TARGET_TYPE (type));
+	type = check_typedef (type->target_type ());
     }
   catch (const gdb_exception &except)
     {
@@ -1109,37 +1109,38 @@ typy_richcompare (PyObject *self, PyObject *other, int op)
 
 
 
-static const struct objfile_data *typy_objfile_data_key;
-
-static void
-save_objfile_types (struct objfile *objfile, void *datum)
+/* Deleter that saves types when an objfile is being destroyed.  */
+struct typy_deleter
 {
-  type_object *obj = (type_object *) datum;
+  void operator() (type_object *obj)
+  {
+    if (!gdb_python_initialized)
+      return;
 
-  if (!gdb_python_initialized)
-    return;
+    /* This prevents another thread from freeing the objects we're
+       operating on.  */
+    gdbpy_enter enter_py;
 
-  /* This prevents another thread from freeing the objects we're
-     operating on.  */
-  gdbpy_enter enter_py (objfile->arch ());
+    htab_up copied_types = create_copied_types_hash ();
 
-  htab_up copied_types = create_copied_types_hash (objfile);
+    while (obj)
+      {
+	type_object *next = obj->next;
 
-  while (obj)
-    {
-      type_object *next = obj->next;
+	htab_empty (copied_types.get ());
 
-      htab_empty (copied_types.get ());
+	obj->type = copy_type_recursive (obj->type, copied_types.get ());
 
-      obj->type = copy_type_recursive (objfile, obj->type,
-				       copied_types.get ());
+	obj->next = NULL;
+	obj->prev = NULL;
 
-      obj->next = NULL;
-      obj->prev = NULL;
+	obj = next;
+      }
+  }
+};
 
-      obj = next;
-    }
-}
+static const registry<objfile>::key<type_object, typy_deleter>
+     typy_objfile_data_key;
 
 static void
 set_type (type_object *obj, struct type *type)
@@ -1150,11 +1151,10 @@ set_type (type_object *obj, struct type *type)
     {
       struct objfile *objfile = type->objfile_owner ();
 
-      obj->next = ((type_object *)
-		   objfile_data (objfile, typy_objfile_data_key));
+      obj->next = typy_objfile_data_key.get (objfile);
       if (obj->next)
 	obj->next->prev = obj;
-      set_objfile_data (objfile, typy_objfile_data_key, obj);
+      typy_objfile_data_key.set (objfile, obj);
     }
   else
     obj->next = NULL;
@@ -1173,7 +1173,7 @@ typy_dealloc (PyObject *obj)
       struct objfile *objfile = type->type->objfile_owner ();
 
       if (objfile)
-	set_objfile_data (objfile, typy_objfile_data_key, type->next);
+	typy_objfile_data_key.set (objfile, type->next);
     }
   if (type->next)
     type->next->prev = type->prev;
@@ -1463,14 +1463,6 @@ gdbpy_lookup_type (PyObject *self, PyObject *args, PyObject *kw)
     return NULL;
 
   return type_to_type_object (type);
-}
-
-void _initialize_py_type ();
-void
-_initialize_py_type ()
-{
-  typy_objfile_data_key
-    = register_objfile_data_with_cleanup (save_objfile_types, NULL);
 }
 
 int

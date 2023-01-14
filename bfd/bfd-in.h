@@ -69,8 +69,6 @@ extern "C" {
 /* The word size of the default bfd target.  */
 #define BFD_DEFAULT_TARGET_SIZE @bfd_default_target_size@
 
-#define BFD_HOST_64BIT_LONG @BFD_HOST_64BIT_LONG@
-
 #include <inttypes.h>
 
 #if BFD_ARCH_SIZE >= 64
@@ -101,44 +99,26 @@ typedef struct bfd bfd;
 
 #ifdef BFD64
 
-typedef uint64_t bfd_vma;
-typedef int64_t bfd_signed_vma;
-typedef uint64_t bfd_size_type;
-typedef uint64_t symvalue;
-
-#if BFD_HOST_64BIT_LONG
-#define BFD_VMA_FMT "l"
-#elif defined (__MSVCRT__)
-#define BFD_VMA_FMT "I64"
-#else
-#define BFD_VMA_FMT "ll"
-#endif
-
-#ifndef fprintf_vma
-#define sprintf_vma(s,x) sprintf (s, "%016" BFD_VMA_FMT "x", x)
-#define fprintf_vma(f,x) fprintf (f, "%016" BFD_VMA_FMT "x", x)
-#endif
-
-#else /* not BFD64  */
-
 /* Represent a target address.  Also used as a generic unsigned type
    which is guaranteed to be big enough to hold any arithmetic types
    we need to deal with.  */
-typedef unsigned long bfd_vma;
+typedef uint64_t bfd_vma;
 
 /* A generic signed type which is guaranteed to be big enough to hold any
    arithmetic types we need to deal with.  Can be assumed to be compatible
    with bfd_vma in the same way that signed and unsigned ints are compatible
    (as parameters, in assignment, etc).  */
-typedef long bfd_signed_vma;
+typedef int64_t bfd_signed_vma;
 
+typedef uint64_t bfd_size_type;
+typedef uint64_t symvalue;
+
+#else /* not BFD64  */
+
+typedef unsigned long bfd_vma;
+typedef long bfd_signed_vma;
 typedef unsigned long symvalue;
 typedef unsigned long bfd_size_type;
-
-/* Print a bfd_vma x on stream s.  */
-#define BFD_VMA_FMT "l"
-#define fprintf_vma(s,x) fprintf (s, "%08" BFD_VMA_FMT "x", x)
-#define sprintf_vma(s,x) sprintf (s, "%08" BFD_VMA_FMT "x", x)
 
 #endif /* not BFD64  */
 
@@ -153,7 +133,6 @@ typedef @bfd_ufile_ptr@ ufile_ptr;
 extern void bfd_sprintf_vma (bfd *, char *, bfd_vma);
 extern void bfd_fprintf_vma (bfd *, void *, bfd_vma);
 
-#define printf_vma(x) fprintf_vma(stdout,x)
 #define bfd_printf_vma(abfd,x) bfd_fprintf_vma (abfd,stdout,x)
 
 typedef unsigned int flagword;	/* 32 bits of flags */
@@ -356,14 +335,23 @@ extern void bfd_hash_traverse
    this size.  */
 extern unsigned long bfd_hash_set_default_size (unsigned long);
 
-/* Types of compressed DWARF debug sections.  We currently support
-   zlib.  */
+/* Types of compressed DWARF debug sections.  */
 enum compressed_debug_section_type
 {
   COMPRESS_DEBUG_NONE = 0,
   COMPRESS_DEBUG = 1 << 0,
   COMPRESS_DEBUG_GNU_ZLIB = COMPRESS_DEBUG | 1 << 1,
-  COMPRESS_DEBUG_GABI_ZLIB = COMPRESS_DEBUG | 1 << 2
+  COMPRESS_DEBUG_GABI_ZLIB = COMPRESS_DEBUG | 1 << 2,
+  COMPRESS_DEBUG_ZSTD = COMPRESS_DEBUG | 1 << 3,
+  COMPRESS_UNKNOWN = 1 << 4
+};
+
+/* Tuple for compressed_debug_section_type and their name.  */
+
+struct compressed_type_tuple
+{
+  enum compressed_debug_section_type type;
+  const char *name;
 };
 
 /* This structure is used to keep track of stabs in sections
@@ -476,6 +464,12 @@ extern void bfd_free_window
   (bfd_window *);
 extern bool bfd_get_file_window
   (bfd *, file_ptr, bfd_size_type, bfd_window *, bool);
+
+
+extern enum compressed_debug_section_type bfd_get_compression_algorithm
+  (const char *);
+extern const char *bfd_get_compression_algorithm_name
+  (enum compressed_debug_section_type);
 
 /* Externally visible ELF routines.  */
 

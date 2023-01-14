@@ -76,6 +76,15 @@ AC_ARG_ENABLE(compressed_debug_sections,
   *)   ac_default_compressed_debug_sections=unset ;;
 esac])dnl
 
+# Select default compression algorithm.
+ac_default_compressed_debug_sections_algorithm=COMPRESS_DEBUG_GABI_ZLIB
+AC_ARG_ENABLE(default_compressed_debug_sections_algorithm,
+	      AS_HELP_STRING([--enable-default-compressed-debug-sections-algorithm={zlib,zstd}],
+	      [Default compression algorithm for --enable-compressed-debug-sections.]),
+[case "${enableval}" in
+   zstd) ac_default_compressed_debug_sections_algorithm=COMPRESS_DEBUG_ZSTD ;;
+esac])dnl
+
 # PR gas/19520
 # Decide if x86 assembler should generate relax relocations.
 ac_default_x86_relax_relocations=unset
@@ -755,6 +764,9 @@ if test x$ac_default_compressed_debug_sections = xyes ; then
   AC_DEFINE(DEFAULT_FLAG_COMPRESS_DEBUG, 1, [Define if you want compressed debug sections by default.])
 fi
 
+AC_DEFINE_UNQUOTED(DEFAULT_COMPRESSED_DEBUG_ALGORITHM, $ac_default_compressed_debug_sections_algorithm,
+		   [Default compression algorithm for --enable-compressed-debug-sections.])
+
 # Turn on all targets if possible
 if test ${all_targets} = "yes"; then
   case ${target_cpu_type} in
@@ -1004,8 +1016,9 @@ AC_CHECK_DECLS([asprintf, mempcpy, stpcpy])
 
 BFD_BINARY_FOPEN
 
-# Link in zlib if we can.  This allows us to write compressed debug sections.
+# Link in zlib/zstd if we can.  This allows us to write compressed debug sections.
 AM_ZLIB
+AC_ZSTD
 
 # Support for VMS timestamps via cross compile
 

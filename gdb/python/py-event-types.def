@@ -86,6 +86,11 @@ GDB_PY_DEFINE_EVENT_TYPE (new_objfile,
 			  "GDB new object file event object",
 			  event_object_type);
 
+GDB_PY_DEFINE_EVENT_TYPE (free_objfile,
+			  "FreeObjFileEvent",
+			  "GDB free object file event object",
+			  event_object_type);
+
 GDB_PY_DEFINE_EVENT_TYPE (clear_objfiles,
 			  "ClearObjFilesEvent",
 			  "GDB clear object files event object",

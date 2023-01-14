@@ -125,10 +125,10 @@ enum {
 #define TRACE_debug    (1 << TRACE_DEBUG_IDX)
 
 /* Return non-zero if tracing of idx is enabled (compiled in).  */
-#define WITH_TRACE_P(idx)	(WITH_TRACE & (1 << idx))
+#define WITH_TRACE_P(idx)	((WITH_TRACE & (1 << idx)) != 0)
 
 /* Preprocessor macros to simplify tests of WITH_TRACE.  */
-#define WITH_TRACE_ANY_P	(WITH_TRACE)
+#define WITH_TRACE_ANY_P	(WITH_TRACE != 0)
 #define WITH_TRACE_INSN_P	WITH_TRACE_P (TRACE_INSN_IDX)
 #define WITH_TRACE_DISASM_P	WITH_TRACE_P (TRACE_DISASM_IDX)
 #define WITH_TRACE_DECODE_P	WITH_TRACE_P (TRACE_DECODE_IDX)

@@ -107,7 +107,7 @@ hppabsd_find_global_pointer (struct gdbarch *gdbarch, struct value *function)
 static void
 hppabsd_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 			       struct dwarf2_frame_state_reg *reg,
-			       struct frame_info *this_frame)
+			       frame_info_ptr this_frame)
 {
   if (regnum == HPPA_PCOQ_HEAD_REGNUM)
     reg->how = DWARF2_FRAME_REG_RA;
@@ -118,7 +118,7 @@ hppabsd_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 void
 hppabsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  hppa_gdbarch_tdep *tdep = (hppa_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  hppa_gdbarch_tdep *tdep = gdbarch_tdep<hppa_gdbarch_tdep> (gdbarch);
 
   /* OpenBSD and NetBSD have a 64-bit 'long double'.  */
   set_gdbarch_long_double_bit (gdbarch, 64);

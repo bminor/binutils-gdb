@@ -167,7 +167,8 @@ static char * pep_dll_search_prefix = NULL;
 
 extern const char *output_filename;
 
-static int is_underscoring (void)
+static int
+is_underscoring (void)
 {
   int u = 0;
   if (pep_leading_underscore != -1)
@@ -181,6 +182,23 @@ static int is_underscoring (void)
   return pep_leading_underscore;
 }
 
+/* A case insensitive comparison, regardless of the host platform, used for
+   comparing file extensions.  */
+static int
+fileext_cmp (const char *s1, const char *s2)
+{
+  for (;;)
+    {
+      int c1 = TOLOWER (*s1++);
+      int c2 = *s2++; /* Assumed to be lower case from the caller.  */
+
+      if (c1 != c2)
+        return (c1 - c2);
+
+      if (c1 == '\0')
+        return 0;
+    }
+}
 
 static void
 gld${EMULATION_NAME}_before_parse (void)
@@ -1547,6 +1565,7 @@ gld${EMULATION_NAME}_after_open (void)
 		      {
 			struct bfd_symbol *s;
 			struct bfd_link_hash_entry * blhe;
+			bfd *other_bfd;
 			const char *other_bfd_filename;
 
 			s = (relocs[i]->sym_ptr_ptr)[0];
@@ -1563,20 +1582,25 @@ gld${EMULATION_NAME}_after_open (void)
 			    || blhe->type != bfd_link_hash_defined)
 			  continue;
 
+			other_bfd = blhe->u.def.section->owner;
+			if (other_bfd->my_archive == is->the_bfd->my_archive)
+			  continue;
+
 			other_bfd_filename
-			  = blhe->u.def.section->owner->my_archive
-			    ? bfd_get_filename (blhe->u.def.section->owner->my_archive)
-			    : bfd_get_filename (blhe->u.def.section->owner);
+			  = (other_bfd->my_archive
+			     ? bfd_get_filename (other_bfd->my_archive)
+			     : bfd_get_filename (other_bfd));
 
 			if (filename_cmp (bfd_get_filename
 					    (is->the_bfd->my_archive),
 					  other_bfd_filename) == 0)
 			  continue;
 
-			/* Rename this implib to match the other one.  */
-			if (!bfd_set_filename (is->the_bfd->my_archive,
-					       other_bfd_filename))
-			  einfo ("%F%P: %pB: %E\n", is->the_bfd);
+			/* Sort this implib to match the other one.  */
+			lang_input_statement_type *arch_is
+			  = bfd_usrdata (is->the_bfd->my_archive);
+			arch_is->sort_key = other_bfd_filename;
+			break;
 		      }
 
 		    free (relocs);
@@ -1589,10 +1613,6 @@ gld${EMULATION_NAME}_after_open (void)
   }
 
   {
-    int is_ms_arch = 0;
-    bfd *cur_arch = 0;
-    lang_input_statement_type *is2;
-    lang_input_statement_type *is3;
 
     /* Careful - this is a shell script.  Watch those dollar signs! */
     /* Microsoft import libraries have every member named the same,
@@ -1608,60 +1628,18 @@ gld${EMULATION_NAME}_after_open (void)
 	if (is->the_bfd->my_archive)
 	  {
 	    char *pnt;
-	    bfd *arch = is->the_bfd->my_archive;
 
-	    if (cur_arch != arch)
-	      {
-		cur_arch = arch;
-		is_ms_arch = 1;
-
-		for (is3 = is;
-		     is3 && is3->the_bfd->my_archive == arch;
-		     is3 = (lang_input_statement_type *) is3->next)
-		  {
-		    /* A MS dynamic import library can also contain static
-		       members, so look for the first element with a .dll
-		       extension, and use that for the remainder of the
-		       comparisons.  */
-		    pnt = strrchr (bfd_get_filename (is3->the_bfd), '.');
-		    if (pnt != NULL && filename_cmp (pnt, ".dll") == 0)
-		      break;
-		  }
-
-		if (is3 == NULL)
-		  is_ms_arch = 0;
-		else
-		  {
-		    /* OK, found one.  Now look to see if the remaining
-		       (dynamic import) members use the same name.  */
-		    for (is2 = is;
-			 is2 && is2->the_bfd->my_archive == arch;
-			 is2 = (lang_input_statement_type *) is2->next)
-		      {
-			/* Skip static members, ie anything with a .obj
-			   extension.  */
-			pnt = strrchr (bfd_get_filename (is2->the_bfd), '.');
-			if (pnt != NULL && filename_cmp (pnt, ".obj") == 0)
-			  continue;
-
-			if (filename_cmp (bfd_get_filename (is3->the_bfd),
-					  bfd_get_filename (is2->the_bfd)))
-			  {
-			    is_ms_arch = 0;
-			    break;
-			  }
-		      }
-		  }
-	      }
-
-	    /* This fragment might have come from an .obj file in a Microsoft
-	       import, and not an actual import record. If this is the case,
-	       then leave the filename alone.  */
+	    /* Microsoft import libraries may contain archive members for
+	       one or more DLLs, together with static object files.
+	       Inspect all members that are named *.dll - check whether
+	       they contain .idata sections. Do the renaming of all
+	       archive members that seem to be Microsoft style import
+	       objects.  */
 	    pnt = strrchr (bfd_get_filename (is->the_bfd), '.');
 
-	    if (is_ms_arch && (filename_cmp (pnt, ".dll") == 0))
+	    if (pnt != NULL && (fileext_cmp (pnt + 1, "dll") == 0))
 	      {
-		int idata2 = 0, reloc_count=0;
+		int idata2 = 0, reloc_count = 0, idata = 0;
 		asection *sec;
 		char *new_name, seq;
 
@@ -1669,8 +1647,16 @@ gld${EMULATION_NAME}_after_open (void)
 		  {
 		    if (strcmp (sec->name, ".idata\$2") == 0)
 		      idata2 = 1;
+		    if (strncmp (sec->name, ".idata\$", 6) == 0)
+		      idata = 1;
 		    reloc_count += sec->reloc_count;
 		  }
+
+		/* An archive member named .dll, but not having any .idata
+		   sections - apparently not a Microsoft import object
+		   after all: Skip renaming it.  */
+		if (!idata)
+		  continue;
 
 		if (idata2) /* .idata2 is the TOC */
 		  seq = 'a';
@@ -1683,10 +1669,7 @@ gld${EMULATION_NAME}_after_open (void)
 		  = xmalloc (strlen (bfd_get_filename (is->the_bfd)) + 3);
 		sprintf (new_name, "%s.%c",
 			 bfd_get_filename (is->the_bfd), seq);
-		is->filename = bfd_set_filename (is->the_bfd, new_name);
-		free (new_name);
-		if (!is->filename)
-		  einfo ("%F%P: %pB: %E\n", is->the_bfd);
+		is->sort_key = new_name;
 	      }
 	  }
       }
@@ -1722,9 +1705,9 @@ static bool
 gld${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry ATTRIBUTE_UNUSED)
 {
 #ifdef DLL_SUPPORT
-  const char *ext = entry->filename + strlen (entry->filename) - 4;
+  const char *ext = strrchr (entry->filename, '.');
 
-  if (filename_cmp (ext, ".def") == 0 || filename_cmp (ext, ".DEF") == 0)
+  if (ext != NULL && fileext_cmp (ext + 1, "def") == 0)
     {
       pep_def_file = def_file_parse (entry->filename, pep_def_file);
 

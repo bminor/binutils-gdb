@@ -132,8 +132,8 @@ public:
 
   /* Detect target architecture.  */
   const struct target_desc *read_description () override;
-  int auxv_parse (gdb_byte **readptr,
-		  gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+  int auxv_parse (const gdb_byte **readptr,
+		  const gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
     override;
 
   /* Override linux_nat_target low methods.  */
@@ -962,13 +962,13 @@ s390_target_wordsize (void)
 }
 
 int
-s390_linux_nat_target::auxv_parse (gdb_byte **readptr,
-				   gdb_byte *endptr, CORE_ADDR *typep,
+s390_linux_nat_target::auxv_parse (const gdb_byte **readptr,
+				   const gdb_byte *endptr, CORE_ADDR *typep,
 				   CORE_ADDR *valp)
 {
   int sizeof_auxv_field = s390_target_wordsize ();
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
-  gdb_byte *ptr = *readptr;
+  const gdb_byte *ptr = *readptr;
 
   if (endptr == ptr)
     return 0;
@@ -1002,7 +1002,7 @@ s390_linux_nat_target::read_description ()
      that mode, report s390 architecture with 64-bit GPRs.  */
 #ifdef __s390x__
   {
-    CORE_ADDR hwcap = linux_get_hwcap (current_inferior ()->top_target ());
+    CORE_ADDR hwcap = linux_get_hwcap ();
 
     have_regset_tdb = (hwcap & HWCAP_S390_TE)
       && check_regset (tid, NT_S390_TDB, s390_sizeof_tdbregset);

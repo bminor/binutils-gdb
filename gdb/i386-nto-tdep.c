@@ -77,7 +77,7 @@ static void
 i386nto_supply_gregset (struct regcache *regcache, char *gpregs)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
 
   gdb_assert (tdep->gregset_reg_offset == i386nto_gregset_reg_offset);
   i386_gregset.supply_regset (&i386_gregset, regcache, -1,
@@ -126,7 +126,7 @@ static int
 i386nto_register_area (struct gdbarch *gdbarch,
 		       int regno, int regset, unsigned *off)
 {
-  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
 
   *off = 0;
   if (regset == NTO_REG_GENERAL)
@@ -270,7 +270,7 @@ i386nto_regset_fill (const struct regcache *regcache, int regset, char *data)
    routine.  */
 
 static int
-i386nto_sigtramp_p (struct frame_info *this_frame)
+i386nto_sigtramp_p (frame_info_ptr this_frame)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
   const char *name;
@@ -283,7 +283,7 @@ i386nto_sigtramp_p (struct frame_info *this_frame)
    address of the associated sigcontext structure.  */
 
 static CORE_ADDR
-i386nto_sigcontext_addr (struct frame_info *this_frame)
+i386nto_sigcontext_addr (frame_info_ptr this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -315,7 +315,7 @@ init_i386nto_ops (void)
 static void
 i386nto_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
   static struct target_so_ops nto_svr4_so_ops;
 
   /* Deal with our strange signals.  */
@@ -361,7 +361,7 @@ i386nto_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
       nto_svr4_so_ops.in_dynsym_resolve_code
 	= nto_in_dynsym_resolve_code;
     }
-  set_solib_ops (gdbarch, &nto_svr4_so_ops);
+  set_gdbarch_so_ops (gdbarch, &nto_svr4_so_ops);
 
   set_gdbarch_wchar_bit (gdbarch, 32);
   set_gdbarch_wchar_signed (gdbarch, 0);

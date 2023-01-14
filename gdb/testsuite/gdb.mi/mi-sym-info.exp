@@ -38,7 +38,8 @@ mi_clean_restart $binfile
 mi_runto_main
 
 set qstr "\"\[^\"\]+\""
-set fun_re "\{line=\"$decimal\",name=${qstr},type=${qstr},description=${qstr}\}"
+set fun_re \
+    "\{(?:line=\"$decimal\",)?name=${qstr},type=${qstr},description=${qstr}\}"
 set type_re "\{(?:line=\"$decimal\",)*name=${qstr}\}"
 set sym_list "\\\[${fun_re}(?:,$fun_re)*\\\]"
 set type_sym_list "\\\[${type_re}(?:,$type_re)*\\\]"

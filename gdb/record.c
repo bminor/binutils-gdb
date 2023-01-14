@@ -494,6 +494,9 @@ get_insn_history_modifiers (const char **arg)
 	    case 'r':
 	      modifiers |= DISASSEMBLY_RAW_INSN;
 	      break;
+	    case 'b':
+	      modifiers |= DISASSEMBLY_RAW_BYTES;
+	      break;
 	    case 'f':
 	      modifiers |= DISASSEMBLY_OMIT_FNAME;
 	      break;

@@ -74,6 +74,11 @@ READELF=${READELF:-readelf}
 DWZ=${DWZ:-dwz}
 DWP=${DWP:-dwp}
 
+# shellcheck disable=SC2206 # Allow word splitting.
+STRIP_ARGS_STRIP_DEBUG=(${STRIP_ARGS_STRIP_DEBUG:---strip-debug})
+# shellcheck disable=SC2206 # Allow word splitting.
+STRIP_ARGS_KEEP_DEBUG=(${STRIP_ARGS_KEEP_DEBUG:---only-keep-debug})
+
 have_link=unknown
 next_is_output_file=no
 output_file=a.out
@@ -267,11 +272,11 @@ if [ "$want_gnu_debuglink" = true ]; then
     debug_file="$tmpdir"/$(basename "$output_file").debug
 
     # Create stripped and debug versions of output_file.
-    strip --strip-debug "${output_file}" \
+    strip "${STRIP_ARGS_STRIP_DEBUG[@]}" "${output_file}" \
 	  -o "${stripped_file}"
     rc=$?
     [ $rc != 0 ] && exit $rc
-    strip --only-keep-debug "${output_file}" \
+    strip "${STRIP_ARGS_KEEP_DEBUG[@]}" "${output_file}" \
 	  -o "${debug_file}"
     rc=$?
     [ $rc != 0 ] && exit $rc
@@ -285,7 +290,7 @@ if [ "$want_gnu_debuglink" = true ]; then
 
 	# Overwrite output_file with stripped version containing
 	# .gnu_debuglink to debug_file.
-	objcopy --add-gnu-debuglink="$link" "${stripped_file}" \
+	$OBJCOPY --add-gnu-debuglink="$link" "${stripped_file}" \
 		"${output_file}"
 	rc=$?
 	[ $rc != 0 ] && exit $rc

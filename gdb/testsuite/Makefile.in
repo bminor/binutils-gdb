@@ -203,17 +203,35 @@ expanded_tests := $(patsubst $(srcdir)/%,%,$(wildcard $(addprefix $(srcdir)/,$(T
 expanded_tests_or_none := $(or $(expanded_tests),no-matching-tests-found)
 endif
 
+# With check-single, if TESTS was expanded to "no-matching-tests-found" then
+# this will be passed to DejaGnu, resuling in an error.  With check-parallel
+# in the same situation, we avoid invoking DejaGnu, and instead just call
+# the check/no-matching-tests-found rule (which prints a helpful message).
+#
+# To get the same behaviour for check-single we decide here, based on how
+# TESTS expanded, whether check-single should redirect to do-check-single or
+# to check/no-matching-tests-found.
+ifeq ($(expanded_tests_or_none),no-matching-tests-found)
+CHECK_SINGLE_DEP=check/no-matching-tests-found
+else
+CHECK_SINGLE_DEP=do-check-single
+endif
+
 # Shorthand for running all the tests in a single directory.
 check-gdb.%:
 	$(MAKE) check TESTS="gdb.$*/*.exp"
 
-check-single:
-	-rm -f *core*
+do-check-single:
+	-rm -f *core* gdb.sum gdb.log
 	$(DO_RUNTEST) $(RUNTESTFLAGS) $(expanded_tests_or_none) $(TIMESTAMP); \
 	result=$$?; \
-	$(SHELL) $(srcdir)/lib/dg-add-core-file-count.sh; \
-	sed -n '/=== gdb Summary ===/,$$ p' gdb.sum; \
+	if test -e gdb.sum; then \
+	  $(SHELL) $(srcdir)/lib/dg-add-core-file-count.sh; \
+	  sed -n '/=== gdb Summary ===/,$$ p' gdb.sum; \
+	fi; \
 	exit $$result
+
+check-single: $(CHECK_SINGLE_DEP)
 
 check-single-racy:
 	-rm -rf cache racy_outputs temp
@@ -240,12 +258,14 @@ check-parallel:
 	-rm -rf cache outputs temp
 	$(MAKE) -k do-check-parallel; \
 	result=$$?; \
-	$(SHELL) $(srcdir)/../../contrib/dg-extract-results.sh \
-	  `find outputs -name gdb.sum -print` > gdb.sum; \
-	$(SHELL) $(srcdir)/../../contrib/dg-extract-results.sh -L \
-	  `find outputs -name gdb.log -print` > gdb.log; \
-	$(SHELL) $(srcdir)/lib/dg-add-core-file-count.sh; \
-	sed -n '/=== gdb Summary ===/,$$ p' gdb.sum; \
+	if test -d outputs; then \
+	  $(SHELL) $(srcdir)/../../contrib/dg-extract-results.sh \
+	    `find outputs -name gdb.sum -print` > gdb.sum; \
+	  $(SHELL) $(srcdir)/../../contrib/dg-extract-results.sh -L \
+	    `find outputs -name gdb.log -print` > gdb.log; \
+	  $(SHELL) $(srcdir)/lib/dg-add-core-file-count.sh; \
+	  sed -n '/=== gdb Summary ===/,$$ p' gdb.sum; \
+	fi; \
 	exit $$result
 
 check-parallel-racy:

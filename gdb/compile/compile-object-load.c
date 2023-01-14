@@ -469,7 +469,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
   gdb_ptr_type = check_typedef (gdb_ptr_type);
   if (gdb_ptr_type->code () != TYPE_CODE_PTR)
     error (_("Type of \"%s\" is not a pointer"), COMPILE_I_EXPR_PTR_TYPE);
-  gdb_type_from_ptr = check_typedef (TYPE_TARGET_TYPE (gdb_ptr_type));
+  gdb_type_from_ptr = check_typedef (gdb_ptr_type->target_type ());
 
   if (types_deeply_equal (gdb_type, gdb_type_from_ptr))
     {
@@ -489,7 +489,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
   switch (gdb_type_from_ptr->code ())
     {
     case TYPE_CODE_ARRAY:
-      gdb_type_from_ptr = TYPE_TARGET_TYPE (gdb_type_from_ptr);
+      gdb_type_from_ptr = gdb_type_from_ptr->target_type ();
       break;
     case TYPE_CODE_FUNC:
       break;
@@ -500,7 +500,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
 	     objfile_name (objfile));
     }
   if (!types_deeply_equal (gdb_type_from_ptr,
-			   TYPE_TARGET_TYPE (gdb_type)))
+			   gdb_type->target_type ()))
     error (_("Referenced types do not match for symbols \"%s\" and \"%s\" "
 	     "in compiled module \"%s\"."),
 	   COMPILE_I_EXPR_PTR_TYPE, COMPILE_I_EXPR_VAL,
@@ -530,7 +530,7 @@ get_regs_type (struct symbol *func_sym, struct objfile *objfile)
 	   regsp_type->code (), GCC_FE_WRAPPER_FUNCTION,
 	   objfile_name (objfile));
 
-  regs_type = check_typedef (TYPE_TARGET_TYPE (regsp_type));
+  regs_type = check_typedef (regsp_type->target_type ());
   if (regs_type->code () != TYPE_CODE_STRUCT)
     error (_("Invalid type code %d of dereferenced first parameter "
 	     "of function \"%s\" in compiled module \"%s\"."),
@@ -557,7 +557,7 @@ store_regs (struct type *regs_type, CORE_ADDR regs_base)
       ULONGEST reg_offset;
       struct type *reg_type
 	= check_typedef (regs_type->field (fieldno).type ());
-      ULONGEST reg_size = TYPE_LENGTH (reg_type);
+      ULONGEST reg_size = reg_type->length ();
       int regnum;
       struct value *regval;
       CORE_ADDR inferior_addr;
@@ -643,7 +643,7 @@ compile_object_load (const compile_file_names &file_names,
 
   /* SYMFILE_VERBOSE is not passed even if FROM_TTY, user is not interested in
      "Reading symbols from ..." message for automatically generated file.  */
-  objfile_up objfile_holder (symbol_file_add_from_bfd (abfd.get (),
+  objfile_up objfile_holder (symbol_file_add_from_bfd (abfd,
 						       filename.get (),
 						       0, NULL, 0, NULL));
   objfile = objfile_holder.get ();
@@ -685,7 +685,7 @@ compile_object_load (const compile_file_names &file_names,
 	     "module \"%s\"."),
 	   func_type->num_fields (), GCC_FE_WRAPPER_FUNCTION,
 	   objfile_name (objfile));
-  if (!types_deeply_equal (expect_return_type, TYPE_TARGET_TYPE (func_type)))
+  if (!types_deeply_equal (expect_return_type, func_type->target_type ()))
     error (_("Invalid return type of function \"%s\" in compiled "
 	     "module \"%s\"."),
 	   GCC_FE_WRAPPER_FUNCTION, objfile_name (objfile));
@@ -806,15 +806,15 @@ compile_object_load (const compile_file_names &file_names,
     {
       /* Use read-only non-executable memory protection.  */
       regs_addr = gdbarch_infcall_mmap (target_gdbarch (),
-					TYPE_LENGTH (regs_type),
+					regs_type->length (),
 					GDB_MMAP_PROT_READ);
       gdb_assert (regs_addr != 0);
-      setup_sections_data.munmap_list.add (regs_addr, TYPE_LENGTH (regs_type));
+      setup_sections_data.munmap_list.add (regs_addr, regs_type->length ());
       if (compile_debug)
 	gdb_printf (gdb_stdlog,
 		    "allocated %s bytes at %s for registers\n",
 		    paddress (target_gdbarch (),
-			      TYPE_LENGTH (regs_type)),
+			      regs_type->length ()),
 		    paddress (target_gdbarch (), regs_addr));
       store_regs (regs_type, regs_addr);
     }
@@ -827,17 +827,17 @@ compile_object_load (const compile_file_names &file_names,
 	return NULL;
       check_typedef (out_value_type);
       out_value_addr = gdbarch_infcall_mmap (target_gdbarch (),
-					     TYPE_LENGTH (out_value_type),
+					     out_value_type->length (),
 					     (GDB_MMAP_PROT_READ
 					      | GDB_MMAP_PROT_WRITE));
       gdb_assert (out_value_addr != 0);
       setup_sections_data.munmap_list.add (out_value_addr,
-					   TYPE_LENGTH (out_value_type));
+					   out_value_type->length ());
       if (compile_debug)
 	gdb_printf (gdb_stdlog,
 		    "allocated %s bytes at %s for printed value\n",
 		    paddress (target_gdbarch (),
-			      TYPE_LENGTH (out_value_type)),
+			      out_value_type->length ()),
 		    paddress (target_gdbarch (), out_value_addr));
     }
 

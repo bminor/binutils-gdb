@@ -4,7 +4,7 @@
 import sys
 import os
 import getopt
-from distutils import sysconfig
+import sysconfig
 
 valid_opts = ["prefix", "exec-prefix", "includes", "libs", "cflags", "ldflags", "help"]
 
@@ -49,15 +49,15 @@ def to_unix_path(path):
 
 for opt in opt_flags:
     if opt == "--prefix":
-        print(to_unix_path(sysconfig.PREFIX))
+        print(to_unix_path(os.path.normpath(sys.prefix)))
 
     elif opt == "--exec-prefix":
-        print(to_unix_path(sysconfig.EXEC_PREFIX))
+        print(to_unix_path(os.path.normpath(sys.exec_prefix)))
 
     elif opt in ("--includes", "--cflags"):
         flags = [
-            "-I" + sysconfig.get_python_inc(),
-            "-I" + sysconfig.get_python_inc(plat_specific=True),
+            "-I" + sysconfig.get_path("include"),
+            "-I" + sysconfig.get_path("platinclude"),
         ]
         if opt == "--cflags":
             flags.extend(getvar("CFLAGS").split())
@@ -76,7 +76,7 @@ for opt in opt_flags:
                 if getvar("LIBPL") is not None:
                     libs.insert(0, "-L" + getvar("LIBPL"))
                 elif os.name == "nt":
-                    libs.insert(0, "-L" + sysconfig.PREFIX + "/libs")
+                    libs.insert(0, "-L" + os.path.normpath(sys.prefix) + "/libs")
             if getvar("LINKFORSHARED") is not None:
                 libs.extend(getvar("LINKFORSHARED").split())
         print(to_unix_path(" ".join(libs)))

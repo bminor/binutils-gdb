@@ -58,12 +58,6 @@
 extern char *stpcpy (char *, const char *);
 #endif
 
-#ifdef HAVE_SBRK
-#if !HAVE_DECL_SBRK
-extern char *sbrk ();
-#endif
-#endif
-
 #if !HAVE_DECL_ENVIRON
 extern char **environ;
 #endif
@@ -125,14 +119,6 @@ extern char **environ;
 #define BUFSIZE 8192
 
 #include <limits.h>
-
-#if SIZEOF_LONG_LONG > SIZEOF_LONG
-/* We can't use any bfd types here since readelf may define BFD64 and
-   objdump may not.  */
-#define HOST_WIDEST_INT	long long
-#else
-#define HOST_WIDEST_INT long
-#endif
 
 #define POISON_BFD_BOOLEAN 1
 

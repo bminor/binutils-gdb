@@ -61,10 +61,6 @@
 #endif
 #endif
 
-#ifdef HAVE_DLFCN_H
-#include <dlfcn.h>
-#endif
-
 #ifndef O_RDONLY
 #define O_RDONLY 0
 #endif

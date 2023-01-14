@@ -66,7 +66,7 @@ const int i386_darwin_thread_state_num_regs =
    address of the associated sigcontext structure.  */
 
 static CORE_ADDR
-i386_darwin_sigcontext_addr (struct frame_info *this_frame)
+i386_darwin_sigcontext_addr (frame_info_ptr this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -99,7 +99,7 @@ i386_darwin_sigcontext_addr (struct frame_info *this_frame)
 
 int
 darwin_dwarf_signal_frame_p (struct gdbarch *gdbarch,
-			     struct frame_info *this_frame)
+			     frame_info_ptr this_frame)
 {
   return i386_sigtramp_p (this_frame);
 }
@@ -110,7 +110,7 @@ static int
 i386_m128_p (struct type *type)
 {
   return (type->code () == TYPE_CODE_ARRAY && type->is_vector ()
-	  && TYPE_LENGTH (type) == 16);
+	  && type->length () == 16);
 }
 
 /* Return the alignment for TYPE when passed as an argument.  */
@@ -125,7 +125,7 @@ i386_darwin_arg_type_alignment (struct type *type)
      7.  [...]  The caller aligns 128-bit vectors in the parameter area to
 	 16-byte boundaries.  */
   if (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
-    return TYPE_LENGTH (type);
+    return type->length ();
   /* 4.  The caller places all the fields of structures (or unions) with no
 	 vector elements in the parameter area.  These structures are 4-byte
 	 aligned.
@@ -156,7 +156,7 @@ i386_darwin_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			     function_call_return_method return_method,
 			     CORE_ADDR struct_addr)
 {
-  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[4];
   int i;
@@ -201,7 +201,7 @@ i386_darwin_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      if (write_pass)
 		write_memory (sp + args_space,
 			      value_contents_all (args[i]).data (),
-			      TYPE_LENGTH (arg_type));
+			      arg_type->length ());
 
 	      /* The System V ABI says that:
 		 
@@ -210,7 +210,7 @@ i386_darwin_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		 depending on the size of the argument."
 		 
 		 This makes sure the stack stays word-aligned.  */
-	      args_space += align_up (TYPE_LENGTH (arg_type), 4);
+	      args_space += align_up (arg_type->length (), 4);
 	    }
 	}
 
@@ -248,7 +248,7 @@ i386_darwin_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 static void
 i386_darwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
 
   /* We support the SSE registers.  */
   tdep->num_xmm_regs = I386_NUM_XREGS - 1;
@@ -271,7 +271,7 @@ i386_darwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      alignment.  */
   set_gdbarch_long_double_bit (gdbarch, 128);
 
-  set_solib_ops (gdbarch, &darwin_so_ops);
+  set_gdbarch_so_ops (gdbarch, &darwin_so_ops);
 }
 
 static enum gdb_osabi

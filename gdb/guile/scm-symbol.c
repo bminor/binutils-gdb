@@ -49,14 +49,43 @@ static SCM block_keyword;
 static SCM domain_keyword;
 static SCM frame_keyword;
 
-static const struct objfile_data *syscm_objfile_data_key;
-static struct gdbarch_data *syscm_gdbarch_data_key;
+/* This is called when an objfile is about to be freed.
+   Invalidate the symbol as further actions on the symbol would result
+   in bad data.  All access to s_smob->symbol should be gated by
+   syscm_get_valid_symbol_smob_arg_unsafe which will raise an exception on
+   invalid symbols.  */
+struct syscm_deleter
+{
+  /* Helper function for syscm_del_objfile_symbols to mark the symbol
+     as invalid.  */
+
+  static int
+  syscm_mark_symbol_invalid (void **slot, void *info)
+  {
+    symbol_smob *s_smob = (symbol_smob *) *slot;
+
+    s_smob->symbol = NULL;
+    return 1;
+  }
+
+  void operator() (htab_t htab)
+  {
+    gdb_assert (htab != nullptr);
+    htab_traverse_noresize (htab, syscm_mark_symbol_invalid, NULL);
+    htab_delete (htab);
+  }
+};
+
+static const registry<objfile>::key<htab, syscm_deleter>
+     syscm_objfile_data_key;
 
 struct syscm_gdbarch_data
 {
   /* Hash table to implement eqable gdbarch symbols.  */
   htab_t htab;
 };
+
+static const registry<gdbarch>::key<syscm_gdbarch_data> syscm_gdbarch_data_key;
 
 /* Administrivia for symbol smobs.  */
 
@@ -82,17 +111,6 @@ syscm_eq_symbol_smob (const void *ap, const void *bp)
 	  && a->symbol != NULL);
 }
 
-static void *
-syscm_init_arch_symbols (struct gdbarch *gdbarch)
-{
-  struct syscm_gdbarch_data *data
-    = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct syscm_gdbarch_data);
-
-  data->htab = gdbscm_create_eqable_gsmob_ptr_map (syscm_hash_symbol_smob,
-						   syscm_eq_symbol_smob);
-  return data;
-}
-
 /* Return the struct symbol pointer -> SCM mapping table.
    It is created if necessary.  */
 
@@ -105,20 +123,25 @@ syscm_get_symbol_map (struct symbol *symbol)
     {
       struct objfile *objfile = symbol->objfile ();
 
-      htab = (htab_t) objfile_data (objfile, syscm_objfile_data_key);
+      htab = syscm_objfile_data_key.get (objfile);
       if (htab == NULL)
 	{
 	  htab = gdbscm_create_eqable_gsmob_ptr_map (syscm_hash_symbol_smob,
 						     syscm_eq_symbol_smob);
-	  set_objfile_data (objfile, syscm_objfile_data_key, htab);
+	  syscm_objfile_data_key.set (objfile, htab);
 	}
     }
   else
     {
       struct gdbarch *gdbarch = symbol->arch ();
-      struct syscm_gdbarch_data *data
-	= (struct syscm_gdbarch_data *) gdbarch_data (gdbarch,
-						      syscm_gdbarch_data_key);
+      struct syscm_gdbarch_data *data = syscm_gdbarch_data_key.get (gdbarch);
+      if (data == nullptr)
+	{
+	  data = syscm_gdbarch_data_key.emplace (gdbarch);
+	  data->htab
+	    = gdbscm_create_eqable_gsmob_ptr_map (syscm_hash_symbol_smob,
+						  syscm_eq_symbol_smob);
+	}
 
       htab = data->htab;
     }
@@ -291,35 +314,6 @@ syscm_get_valid_symbol_arg_unsafe (SCM self, int arg_pos,
   return s_smob->symbol;
 }
 
-/* Helper function for syscm_del_objfile_symbols to mark the symbol
-   as invalid.  */
-
-static int
-syscm_mark_symbol_invalid (void **slot, void *info)
-{
-  symbol_smob *s_smob = (symbol_smob *) *slot;
-
-  s_smob->symbol = NULL;
-  return 1;
-}
-
-/* This function is called when an objfile is about to be freed.
-   Invalidate the symbol as further actions on the symbol would result
-   in bad data.  All access to s_smob->symbol should be gated by
-   syscm_get_valid_symbol_smob_arg_unsafe which will raise an exception on
-   invalid symbols.  */
-
-static void
-syscm_del_objfile_symbols (struct objfile *objfile, void *datum)
-{
-  htab_t htab = (htab_t) datum;
-
-  if (htab != NULL)
-    {
-      htab_traverse_noresize (htab, syscm_mark_symbol_invalid, NULL);
-      htab_delete (htab);
-    }
-}
 
 /* Symbol methods.  */
 
@@ -526,7 +520,6 @@ gdbscm_symbol_value (SCM self, SCM rest)
   int frame_pos = -1;
   SCM frame_scm = SCM_BOOL_F;
   frame_smob *f_smob = NULL;
-  struct frame_info *frame_info = NULL;
   struct value *value = NULL;
 
   gdbscm_parse_function_args (FUNC_NAME, SCM_ARG2, keywords, "#O",
@@ -543,9 +536,11 @@ gdbscm_symbol_value (SCM self, SCM rest)
   gdbscm_gdb_exception exc {};
   try
     {
+      frame_info_ptr frame_info;
+
       if (f_smob != NULL)
 	{
-	  frame_info = frscm_frame_smob_to_frame (f_smob);
+	  frame_info = frame_info_ptr (frscm_frame_smob_to_frame (f_smob));
 	  if (frame_info == NULL)
 	    error (_("Invalid frame"));
 	}
@@ -604,12 +599,11 @@ gdbscm_lookup_symbol (SCM name_scm, SCM rest)
     }
   else
     {
-      struct frame_info *selected_frame;
-
       gdbscm_gdb_exception exc {};
       try
 	{
-	  selected_frame = get_selected_frame (_("no frame selected"));
+	  frame_info_ptr selected_frame
+	    = get_selected_frame (_("no frame selected"));
 	  block = get_frame_block (selected_frame, NULL);
 	}
       catch (const gdb_exception &ex)
@@ -817,18 +811,4 @@ gdbscm_initialize_symbols (void)
   block_keyword = scm_from_latin1_keyword ("block");
   domain_keyword = scm_from_latin1_keyword ("domain");
   frame_keyword = scm_from_latin1_keyword ("frame");
-}
-
-void _initialize_scm_symbol ();
-void
-_initialize_scm_symbol ()
-{
-  /* Register an objfile "free" callback so we can properly
-     invalidate symbols when an object file is about to be deleted.  */
-  syscm_objfile_data_key
-    = register_objfile_data_with_cleanup (NULL, syscm_del_objfile_symbols);
-
-  /* Arch-specific symbol data.  */
-  syscm_gdbarch_data_key
-    = gdbarch_data_register_post_init (syscm_init_arch_symbols);
 }

@@ -363,15 +363,10 @@ zlibinc = @zlibinc@
 AUTOMAKE_OPTIONS = info-in-builddir foreign no-texinfo.tex
 info_TEXINFOS = gprofng.texi
 gprofng_TEXINFOS = fdl.texi
-BUILT_SOURCES = version.texi
-CLEANFILES = version.texi
 TEXINFO_TEX = .
 MAKEINFOHTML = $(MAKEINFO) --html --no-split
-#	@echo "@set UPDATED `date +"%-d %B %Y"`"   >> $@
-#	@echo "@set UPDATED-MONTH `date +"%B %Y"`" >> $@
 MAINTAINERCLEANFILES = gprofng.info
-all: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) all-am
+all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .dvi .ps
@@ -604,15 +599,13 @@ distdir: $(DISTFILES)
 	  top_distdir="$(top_distdir)" distdir="$(distdir)" \
 	  dist-info
 check-am: all-am
-check: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) check-am
+check: check-am
 all-am: Makefile $(INFO_DEPS)
 installdirs:
 	for dir in "$(DESTDIR)$(infodir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) install-am
+install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -634,7 +627,6 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -643,7 +635,6 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
 clean: clean-am
 
@@ -805,7 +796,7 @@ ps-am: $(PSS)
 uninstall-am: uninstall-dvi-am uninstall-html-am uninstall-info-am \
 	uninstall-pdf-am uninstall-ps-am
 
-.MAKE: all check install install-am install-strip
+.MAKE: install-am install-strip
 
 .PHONY: all all-am check check-am clean clean-aminfo clean-generic \
 	clean-libtool cscopelist-am ctags-am dist-info distclean \
@@ -825,12 +816,6 @@ uninstall-am: uninstall-dvi-am uninstall-html-am uninstall-info-am \
 
 .PRECIOUS: Makefile
 
-
-version.texi: 
-	@echo "@set EDITION 1.0"                    > $@
-	@echo "@set VERSION 1.0"                   >> $@
-	@echo "@set UPDATED 22 February 2022"      >> $@
-	@echo "@set UPDATED-MONTH February 2022"   >> $@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

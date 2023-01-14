@@ -51,7 +51,7 @@ static char default_nto_target[] = "";
 
 struct nto_target_ops current_nto_target;
 
-static const struct inferior_key<struct nto_inferior_data>
+static const registry<inferior>::key<struct nto_inferior_data>
   nto_inferior_data_reg;
 
 static char *

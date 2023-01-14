@@ -98,8 +98,8 @@ extern bool tc_start_label_without_colon (void);
 #define tc_frob_fake_label(S) arm_frob_label (S)
 
 #ifdef OBJ_ELF
-#define md_end arm_md_end
-extern void arm_md_end (void);
+#define md_finish arm_md_finish
+extern void arm_md_finish (void);
 bool arm_is_eabi (void);
 
 #define md_post_relax_hook		arm_md_post_relax ()

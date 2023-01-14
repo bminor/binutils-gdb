@@ -20,6 +20,7 @@
    MA 02110-1301, USA.  */
 
 #include "sysdep.h"
+#include "libiberty.h"
 #include "bfd.h"
 #include "libbfd.h"
 #include "fnmatch.h"
@@ -377,6 +378,7 @@ BFD_JUMP_TABLE macros.
 .  NAME##_bfd_is_target_special_symbol, \
 .  NAME##_get_lineno, \
 .  NAME##_find_nearest_line, \
+.  NAME##_find_nearest_line_with_alt, \
 .  NAME##_find_line, \
 .  NAME##_find_inliner_info, \
 .  NAME##_bfd_make_debug_symbol, \
@@ -407,6 +409,11 @@ BFD_JUMP_TABLE macros.
 .				   struct bfd_section *, bfd_vma,
 .				   const char **, const char **,
 .				   unsigned int *, unsigned int *);
+.  bool (*_bfd_find_nearest_line_with_alt) (bfd *, const char *,
+.					    struct bfd_symbol **,
+.					    struct bfd_section *, bfd_vma,
+.					    const char **, const char **,
+.					    unsigned int *, unsigned int *);
 .  bool (*_bfd_find_line) (bfd *, struct bfd_symbol **,
 .			   struct bfd_symbol *, const char **,
 .			   unsigned int *);
@@ -768,6 +775,7 @@ extern const bfd_target lm32_elf32_vec;
 extern const bfd_target lm32_elf32_fdpic_vec;
 extern const bfd_target loongarch_elf64_vec;
 extern const bfd_target loongarch_elf32_vec;
+extern const bfd_target loongarch64_pei_vec;
 extern const bfd_target m32c_elf32_vec;
 extern const bfd_target m32r_elf32_vec;
 extern const bfd_target m32r_elf32_le_vec;
@@ -833,6 +841,7 @@ extern const bfd_target nios2_elf32_le_vec;
 extern const bfd_target ns32k_aout_pc532mach_vec;
 extern const bfd_target ns32k_aout_pc532nbsd_vec;
 extern const bfd_target or1k_elf32_vec;
+extern const bfd_target pdb_vec;
 extern const bfd_target pdp11_aout_vec;
 extern const bfd_target pef_vec;
 extern const bfd_target pef_xlib_vec;
@@ -1214,6 +1223,8 @@ static const bfd_target * const _bfd_target_vector[] =
 
 	&or1k_elf32_vec,
 
+	&pdb_vec,
+
 	&pdp11_aout_vec,
 
 	&pef_vec,
@@ -1358,6 +1369,7 @@ static const bfd_target * const _bfd_target_vector[] =
 #ifdef BFD64
 	&loongarch_elf32_vec,
 	&loongarch_elf64_vec,
+	&loongarch64_pei_vec,
 #endif
 
 #endif /* not SELECT_VECS */
@@ -1443,7 +1455,10 @@ const bfd_target *const *const bfd_associated_vector = _bfd_associated_vector;
 /* When there is an ambiguous match, bfd_check_format_matches puts the
    names of the matching targets in an array.  This variable is the maximum
    number of entries that the array could possibly need.  */
-const size_t _bfd_target_vector_entries = sizeof (_bfd_target_vector)/sizeof (*_bfd_target_vector);
+const size_t _bfd_target_vector_entries = ARRAY_SIZE (_bfd_target_vector);
+
+/* A place to stash a warning from _bfd_check_format.  */
+static const char *per_xvec_warn[ARRAY_SIZE (_bfd_target_vector) + 1];
 
 /* This array maps configuration triplets onto BFD vectors.  */
 
@@ -1462,6 +1477,29 @@ static const struct targmatch bfd_target_match[] = {
 #include "targmatch.h"
   { NULL, NULL }
 };
+
+/*
+INTERNAL_FUNCTION
+	_bfd_per_xvec_warn
+
+SYNOPSIS
+	const char **_bfd_per_xvec_warn (const bfd_target *);
+
+DESCRIPTION
+	Return a location for the given target xvec to use for
+	warnings specific to that target.
+*/
+
+const char **
+_bfd_per_xvec_warn (const bfd_target *targ)
+{
+  size_t idx;
+
+  for (idx = 0; idx < ARRAY_SIZE (_bfd_target_vector); idx++)
+    if (_bfd_target_vector[idx] == targ)
+      break;
+  return per_xvec_warn + idx;
+}
 
 /* Find a target vector, given a name or configuration triplet.  */
 

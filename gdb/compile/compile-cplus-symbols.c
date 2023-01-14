@@ -138,7 +138,7 @@ convert_one_symbol (compile_cplus_instance *instance,
 	     by their name.  */
 	  {
 	    struct value *val;
-	    struct frame_info *frame = nullptr;
+	    frame_info_ptr frame = nullptr;
 
 	    if (symbol_read_needs_frame (sym.symbol))
 	      {

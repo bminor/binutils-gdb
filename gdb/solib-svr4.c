@@ -365,7 +365,7 @@ struct svr4_info
 };
 
 /* Per-program-space data key.  */
-static const struct program_space_key<svr4_info> solib_svr4_pspace_data;
+static const registry<program_space>::key<svr4_info> solib_svr4_pspace_data;
 
 /* Free the probes table.  */
 
@@ -428,14 +428,11 @@ read_program_header (int type, int *p_arch_size, CORE_ADDR *base_addr)
   int pt_phdr_p = 0;
 
   /* Get required auxv elements from target.  */
-  if (target_auxv_search (current_inferior ()->top_target (),
-			  AT_PHDR, &at_phdr) <= 0)
+  if (target_auxv_search (AT_PHDR, &at_phdr) <= 0)
     return {};
-  if (target_auxv_search (current_inferior ()->top_target (),
-			  AT_PHENT, &at_phent) <= 0)
+  if (target_auxv_search (AT_PHENT, &at_phent) <= 0)
     return {};
-  if (target_auxv_search (current_inferior ()->top_target (),
-			  AT_PHNUM, &at_phnum) <= 0)
+  if (target_auxv_search (AT_PHNUM, &at_phnum) <= 0)
     return {};
   if (!at_phdr || !at_phnum)
     return {};
@@ -571,9 +568,11 @@ find_program_interpreter (void)
 	int sect_size = bfd_section_size (interp_sect);
 
 	gdb::byte_vector buf (sect_size);
-	bfd_get_section_contents (current_program_space->exec_bfd (),
-				  interp_sect, buf.data (), 0, sect_size);
-	return buf;
+	bool res
+	  = bfd_get_section_contents (current_program_space->exec_bfd (),
+				      interp_sect, buf.data (), 0, sect_size);
+	if (res)
+	  return buf;
       }
    }
 
@@ -672,7 +671,7 @@ elf_locate_base (void)
     {
       struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
       gdb_byte *pbuf;
-      int pbuf_size = TYPE_LENGTH (ptr_type);
+      int pbuf_size = ptr_type->length ();
 
       pbuf = (gdb_byte *) alloca (pbuf_size);
       /* DT_MIPS_RLD_MAP contains a pointer to the address
@@ -692,7 +691,7 @@ elf_locate_base (void)
     {
       struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
       gdb_byte *pbuf;
-      int pbuf_size = TYPE_LENGTH (ptr_type);
+      int pbuf_size = ptr_type->length ();
 
       pbuf = (gdb_byte *) alloca (pbuf_size);
       /* DT_MIPS_RLD_MAP_REL contains an offset from the address of the
@@ -868,7 +867,7 @@ open_symbol_file_object (int from_tty)
   CORE_ADDR lm, l_name;
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
   struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
-  int l_name_size = TYPE_LENGTH (ptr_type);
+  int l_name_size = ptr_type->length ();
   gdb::byte_vector l_name_buf (l_name_size);
   struct svr4_info *info = get_svr4_info (current_program_space);
   symfile_add_flags add_flags = 0;
@@ -1645,7 +1644,7 @@ solib_event_probe_action (struct probe_and_action *pa)
 {
   enum probe_action action;
   unsigned probe_argc = 0;
-  struct frame_info *frame = get_current_frame ();
+  frame_info_ptr frame = get_current_frame ();
 
   action = pa->action;
   if (action == DO_NOTHING || action == PROBES_INTERFACE_FAILED)
@@ -1780,7 +1779,7 @@ svr4_handle_solib_event (void)
   enum probe_action action;
   struct value *val = NULL;
   CORE_ADDR pc, debug_base, lm = 0;
-  struct frame_info *frame = get_current_frame ();
+  frame_info_ptr frame = get_current_frame ();
 
   /* Do nothing if not using the probes interface.  */
   if (info->probes_table == NULL)
@@ -2170,7 +2169,7 @@ enable_break (struct svr4_info *info, int from_tty)
 	  bfd *tmp_bfd;
 	  CORE_ADDR load_addr;
 
-	  tmp_bfd = os->objfile->obfd;
+	  tmp_bfd = os->objfile->obfd.get ();
 	  load_addr = os->objfile->text_section_offset ();
 
 	  interp_sect = bfd_get_section_by_name (tmp_bfd, ".text");
@@ -2250,8 +2249,7 @@ enable_break (struct svr4_info *info, int from_tty)
       /* If we were not able to find the base address of the loader
 	 from our so_list, then try using the AT_BASE auxilliary entry.  */
       if (!load_addr_found)
-	if (target_auxv_search (current_inferior ()->top_target (),
-				AT_BASE, &load_addr) > 0)
+	if (target_auxv_search (AT_BASE, &load_addr) > 0)
 	  {
 	    int addr_bit = gdbarch_addr_bit (target_gdbarch ());
 
@@ -2479,8 +2477,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
   if ((bfd_get_file_flags (current_program_space->exec_bfd ()) & DYNAMIC) == 0)
     return 0;
 
-  if (target_auxv_search (current_inferior ()->top_target (),
-			  AT_ENTRY, &entry_point) <= 0)
+  if (target_auxv_search (AT_ENTRY, &entry_point) <= 0)
     return 0;
 
   exec_displacement
@@ -2995,24 +2992,23 @@ svr4_relocate_section_addresses (struct so_list *so,
 
 /* Architecture-specific operations.  */
 
-/* Per-architecture data key.  */
-static struct gdbarch_data *solib_svr4_data;
-
 struct solib_svr4_ops
 {
   /* Return a description of the layout of `struct link_map'.  */
-  struct link_map_offsets *(*fetch_link_map_offsets)(void);
+  struct link_map_offsets *(*fetch_link_map_offsets)(void) = nullptr;
 };
+
+/* Per-architecture data key.  */
+static const registry<gdbarch>::key<struct solib_svr4_ops> solib_svr4_data;
 
 /* Return a default for the architecture-specific operations.  */
 
-static void *
-solib_svr4_init (struct obstack *obstack)
+static struct solib_svr4_ops *
+get_ops (struct gdbarch *gdbarch)
 {
-  struct solib_svr4_ops *ops;
-
-  ops = OBSTACK_ZALLOC (obstack, struct solib_svr4_ops);
-  ops->fetch_link_map_offsets = NULL;
+  struct solib_svr4_ops *ops = solib_svr4_data.get (gdbarch);
+  if (ops == nullptr)
+    ops = solib_svr4_data.emplace (gdbarch);
   return ops;
 }
 
@@ -3023,12 +3019,11 @@ void
 set_solib_svr4_fetch_link_map_offsets (struct gdbarch *gdbarch,
 				       struct link_map_offsets *(*flmo) (void))
 {
-  struct solib_svr4_ops *ops
-    = (struct solib_svr4_ops *) gdbarch_data (gdbarch, solib_svr4_data);
+  struct solib_svr4_ops *ops = get_ops (gdbarch);
 
   ops->fetch_link_map_offsets = flmo;
 
-  set_solib_ops (gdbarch, &svr4_so_ops);
+  set_gdbarch_so_ops (gdbarch, &svr4_so_ops);
   set_gdbarch_iterate_over_objfiles_in_search_order
     (gdbarch, svr4_iterate_over_objfiles_in_search_order);
 }
@@ -3039,9 +3034,7 @@ set_solib_svr4_fetch_link_map_offsets (struct gdbarch *gdbarch,
 static struct link_map_offsets *
 svr4_fetch_link_map_offsets (void)
 {
-  struct solib_svr4_ops *ops
-    = (struct solib_svr4_ops *) gdbarch_data (target_gdbarch (),
-					      solib_svr4_data);
+  struct solib_svr4_ops *ops = get_ops (target_gdbarch ());
 
   gdb_assert (ops->fetch_link_map_offsets);
   return ops->fetch_link_map_offsets ();
@@ -3052,9 +3045,7 @@ svr4_fetch_link_map_offsets (void)
 static int
 svr4_have_link_map_offsets (void)
 {
-  struct solib_svr4_ops *ops
-    = (struct solib_svr4_ops *) gdbarch_data (target_gdbarch (),
-					      solib_svr4_data);
+  struct solib_svr4_ops *ops = get_ops (target_gdbarch ());
 
   return (ops->fetch_link_map_offsets != NULL);
 }
@@ -3127,8 +3118,6 @@ svr4_lp64_fetch_link_map_offsets (void)
 }
 
 
-struct target_so_ops svr4_so_ops;
-
 /* Search order for ELF DSOs linked with -Bsymbolic.  Those DSOs have a
    different rule for symbol lookup.  The lookup begins here in the DSO, not in
    the main executable.  */
@@ -3149,7 +3138,7 @@ svr4_iterate_over_objfiles_in_search_order
       if (current_objfile == current_program_space->symfile_object_file)
 	abfd = current_program_space->exec_bfd ();
       else
-	abfd = current_objfile->obfd;
+	abfd = current_objfile->obfd.get ();
 
       if (abfd != nullptr
 	  && gdb_bfd_scan_elf_dyntag (DT_SYMBOLIC, abfd, nullptr, nullptr) == 1)
@@ -3169,26 +3158,28 @@ svr4_iterate_over_objfiles_in_search_order
     }
 }
 
+const struct target_so_ops svr4_so_ops =
+{
+  svr4_relocate_section_addresses,
+  svr4_free_so,
+  svr4_clear_so,
+  svr4_clear_solib,
+  svr4_solib_create_inferior_hook,
+  svr4_current_sos,
+  open_symbol_file_object,
+  svr4_in_dynsym_resolve_code,
+  solib_bfd_open,
+  nullptr,
+  svr4_same,
+  svr4_keep_data_in_core,
+  svr4_update_solib_event_breakpoints,
+  svr4_handle_solib_event,
+};
+
 void _initialize_svr4_solib ();
 void
 _initialize_svr4_solib ()
 {
-  solib_svr4_data = gdbarch_data_register_pre_init (solib_svr4_init);
-
-  svr4_so_ops.relocate_section_addresses = svr4_relocate_section_addresses;
-  svr4_so_ops.free_so = svr4_free_so;
-  svr4_so_ops.clear_so = svr4_clear_so;
-  svr4_so_ops.clear_solib = svr4_clear_solib;
-  svr4_so_ops.solib_create_inferior_hook = svr4_solib_create_inferior_hook;
-  svr4_so_ops.current_sos = svr4_current_sos;
-  svr4_so_ops.open_symbol_file_object = open_symbol_file_object;
-  svr4_so_ops.in_dynsym_resolve_code = svr4_in_dynsym_resolve_code;
-  svr4_so_ops.bfd_open = solib_bfd_open;
-  svr4_so_ops.same = svr4_same;
-  svr4_so_ops.keep_data_in_core = svr4_keep_data_in_core;
-  svr4_so_ops.update_breakpoints = svr4_update_solib_event_breakpoints;
-  svr4_so_ops.handle_event = svr4_handle_solib_event;
-
   gdb::observers::free_objfile.attach (svr4_free_objfile_observer,
 				       "solib-svr4");
 }

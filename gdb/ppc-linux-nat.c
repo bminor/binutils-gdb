@@ -530,8 +530,8 @@ struct ppc_linux_nat_target final : public linux_nat_target
 
   const struct target_desc *read_description ()  override;
 
-  int auxv_parse (gdb_byte **readptr,
-		  gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+  int auxv_parse (const gdb_byte **readptr,
+		  const gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
     override;
 
   /* Override linux_nat_target low methods.  */
@@ -649,7 +649,7 @@ static int
 ppc_register_u_addr (struct gdbarch *gdbarch, int regno)
 {
   int u_addr = -1;
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
   /* NOTE: cagney/2003-11-25: This is the word size used by the ptrace
      interface, and not the wordsize of the program's ABI.  */
   int wordsize = sizeof (long);
@@ -802,7 +802,7 @@ static void
 fetch_spe_register (struct regcache *regcache, int tid, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
   struct gdb_evrregset_t evrregs;
 
   gdb_assert (sizeof (evrregs.evr[0])
@@ -911,7 +911,7 @@ static void
 fetch_register (struct regcache *regcache, int tid, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr = ppc_register_u_addr (gdbarch, regno);
   int bytes_transferred;
@@ -1156,7 +1156,7 @@ static void
 fetch_gp_regs (struct regcache *regcache, int tid)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
   int i;
 
   if (have_ptrace_getsetregs)
@@ -1208,7 +1208,7 @@ static void
 fetch_fp_regs (struct regcache *regcache, int tid)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
   int i;
 
   if (have_ptrace_getsetfpregs)
@@ -1226,7 +1226,7 @@ static void
 fetch_ppc_registers (struct regcache *regcache, int tid)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
 
   fetch_gp_regs (regcache, tid);
   if (tdep->ppc_fp0_regnum >= 0)
@@ -1425,7 +1425,7 @@ static void
 store_spe_register (const struct regcache *regcache, int tid, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
   struct gdb_evrregset_t evrregs;
 
   gdb_assert (sizeof (evrregs.evr[0])
@@ -1477,7 +1477,7 @@ static void
 store_register (const struct regcache *regcache, int tid, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr = ppc_register_u_addr (gdbarch, regno);
   int i;
@@ -1718,7 +1718,7 @@ static void
 store_gp_regs (const struct regcache *regcache, int tid, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
   int i;
 
   if (have_ptrace_getsetregs)
@@ -1780,7 +1780,7 @@ static void
 store_fp_regs (const struct regcache *regcache, int tid, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
   int i;
 
   if (have_ptrace_getsetfpregs)
@@ -1798,7 +1798,7 @@ static void
 store_ppc_registers (const struct regcache *regcache, int tid)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
  
   store_gp_regs (regcache, tid, -1);
   if (tdep->ppc_fp0_regnum >= 0)
@@ -1915,8 +1915,8 @@ fill_fpregset (const struct regcache *regcache,
 }
 
 int
-ppc_linux_nat_target::auxv_parse (gdb_byte **readptr,
-				  gdb_byte *endptr, CORE_ADDR *typep,
+ppc_linux_nat_target::auxv_parse (const gdb_byte **readptr,
+				  const gdb_byte *endptr, CORE_ADDR *typep,
 				  CORE_ADDR *valp)
 {
   int tid = inferior_ptid.lwp ();
@@ -1926,7 +1926,7 @@ ppc_linux_nat_target::auxv_parse (gdb_byte **readptr,
   int sizeof_auxv_field = ppc_linux_target_wordsize (tid);
 
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
-  gdb_byte *ptr = *readptr;
+  const gdb_byte *ptr = *readptr;
 
   if (endptr == ptr)
     return 0;
@@ -1965,8 +1965,8 @@ ppc_linux_nat_target::read_description ()
 
   features.wordsize = ppc_linux_target_wordsize (tid);
 
-  CORE_ADDR hwcap = linux_get_hwcap (current_inferior ()->top_target ());
-  CORE_ADDR hwcap2 = linux_get_hwcap2 (current_inferior ()->top_target ());
+  CORE_ADDR hwcap = linux_get_hwcap ();
+  CORE_ADDR hwcap2 = linux_get_hwcap2 ();
 
   if (have_ptrace_getsetvsxregs
       && (hwcap & PPC_FEATURE_HAS_VSX))
@@ -2123,8 +2123,7 @@ ppc_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 	 takes two hardware watchpoints though.  */
       if (len > 1
 	  && hwdebug_info.features & PPC_DEBUG_FEATURE_DATA_BP_RANGE
-	  && (linux_get_hwcap (current_inferior ()->top_target ())
-	      & PPC_FEATURE_BOOKE))
+	  && (linux_get_hwcap () & PPC_FEATURE_BOOKE))
 	return 2;
       /* Check if the processor provides DAWR interface.  */
       if (hwdebug_info.features & PPC_DEBUG_FEATURE_DATA_BP_DAWR)
@@ -2152,8 +2151,7 @@ ppc_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
     {
       gdb_assert (m_dreg_interface.debugreg_p ());
 
-      if (((linux_get_hwcap (current_inferior ()->top_target ())
-	    & PPC_FEATURE_BOOKE)
+      if (((linux_get_hwcap () & PPC_FEATURE_BOOKE)
 	   && (addr + len) > (addr & ~3) + 4)
 	  || (addr + len) > (addr & ~7) + 8)
 	return 0;
@@ -2519,7 +2517,7 @@ ppc_linux_nat_target::check_condition (CORE_ADDR watch_addr,
 
       /* DATA_VALUE is the constant in RIGHT_VAL, but actually has
 	 the same type as the memory region referenced by LEFT_VAL.  */
-      *len = TYPE_LENGTH (check_typedef (value_type (left_val)));
+      *len = check_typedef (value_type (left_val))->length ();
     }
   else if (num_accesses_left == 0 && num_accesses_right == 1
 	   && VALUE_LVAL (right_val) == lval_memory
@@ -2529,7 +2527,7 @@ ppc_linux_nat_target::check_condition (CORE_ADDR watch_addr,
 
       /* DATA_VALUE is the constant in LEFT_VAL, but actually has
 	 the same type as the memory region referenced by RIGHT_VAL.  */
-      *len = TYPE_LENGTH (check_typedef (value_type (right_val)));
+      *len = check_typedef (value_type (right_val))->length ();
     }
   else
     return 0;
@@ -2640,8 +2638,7 @@ ppc_linux_nat_target::insert_watchpoint (CORE_ADDR addr, int len,
       long wp_value;
       long read_mode, write_mode;
 
-      if (linux_get_hwcap (current_inferior ()->top_target ())
-	  & PPC_FEATURE_BOOKE)
+      if (linux_get_hwcap () & PPC_FEATURE_BOOKE)
 	{
 	  /* PowerPC 440 requires only the read/write flags to be passed
 	     to the kernel.  */
@@ -3014,11 +3011,9 @@ ppc_linux_nat_target::watchpoint_addr_within_range (CORE_ADDR addr,
   int mask;
 
   if (m_dreg_interface.hwdebug_p ()
-      && (linux_get_hwcap (current_inferior ()->top_target ())
-	  & PPC_FEATURE_BOOKE))
+      && (linux_get_hwcap () & PPC_FEATURE_BOOKE))
     return start <= addr && start + length >= addr;
-  else if (linux_get_hwcap (current_inferior ()->top_target ())
-	   & PPC_FEATURE_BOOKE)
+  else if (linux_get_hwcap () & PPC_FEATURE_BOOKE)
     mask = 3;
   else
     mask = 7;

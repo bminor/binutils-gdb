@@ -78,6 +78,8 @@ extern const struct powerpc_opcode prefix_opcodes[];
 extern const unsigned int prefix_num_opcodes;
 extern const struct powerpc_opcode vle_opcodes[];
 extern const unsigned int vle_num_opcodes;
+extern const struct powerpc_opcode lsp_opcodes[];
+extern const unsigned int lsp_num_opcodes;
 extern const struct powerpc_opcode spe2_opcodes[];
 extern const unsigned int spe2_num_opcodes;
 
@@ -237,6 +239,12 @@ extern const unsigned int spe2_num_opcodes;
 /* Opcode is only supported by power10 architecture.  */
 #define PPC_OPCODE_POWER10  0x400000000000ull
 
+/* Opcode is only supported by SVP64 extensions (LibreSOC architecture).  */
+#define PPC_OPCODE_SVP64    0x800000000000ull
+
+/* Opcode is only supported by 'future' architecture.  */
+#define PPC_OPCODE_FUTURE  0x1000000000000ull
+
 /* A macro to extract the major opcode from an instruction.  */
 #define PPC_OP(i) (((i) >> 26) & 0x3f)
 
@@ -248,6 +256,9 @@ extern const unsigned int spe2_num_opcodes;
 
 /* A macro to convert a VLE opcode to a VLE opcode segment.  */
 #define VLE_OP_TO_SEG(i) ((i) >> 1)
+
+/* Map LSP insn to lookup segment for disassembly.  */
+#define LSP_OP_TO_SEG(i) (((i) & 0x7ff) >> 6)
 
 /* A macro to extract the extended opcode from a SPE2 instruction.  */
 #define SPE2_XOP(i) ((i) & 0x7ff)
@@ -459,6 +470,11 @@ extern const unsigned int num_powerpc_operands;
 #define PPC_OPERAND_FSL (0x800000)
 #define PPC_OPERAND_FCR (0x1000000)
 #define PPC_OPERAND_UDI (0x2000000)
+
+/* Valid range of operand is 1..n rather than 0..n-1.
+   Before encoding, the operand value is decremented.
+   After decoding, the operand value is incremented.  */
+#define PPC_OPERAND_NONZERO (0x4000000)
 
 extern ppc_cpu_t ppc_parse_cpu (ppc_cpu_t, ppc_cpu_t *, const char *);
 

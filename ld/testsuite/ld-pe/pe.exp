@@ -124,3 +124,8 @@ set foreign_sym_test {
 # MCore rearranges symbol order.
 setup_xfail mcore-*-pe
 run_ld_link_tests $foreign_sym_test
+
+run_dump_test "exclude-symbols-embedded-i386"
+run_dump_test "exclude-symbols-embedded-x86_64"
+run_dump_test "exclude-symbols-def-i386"
+run_dump_test "exclude-symbols-def-x86_64"

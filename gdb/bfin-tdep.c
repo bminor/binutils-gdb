@@ -288,7 +288,7 @@ bfin_alloc_frame_cache (void)
 }
 
 static struct bfin_frame_cache *
-bfin_frame_cache (struct frame_info *this_frame, void **this_cache)
+bfin_frame_cache (frame_info_ptr this_frame, void **this_cache)
 {
   struct bfin_frame_cache *cache;
   int i;
@@ -340,7 +340,7 @@ bfin_frame_cache (struct frame_info *this_frame, void **this_cache)
 }
 
 static void
-bfin_frame_this_id (struct frame_info *this_frame,
+bfin_frame_this_id (frame_info_ptr this_frame,
 		    void **this_cache,
 		    struct frame_id *this_id)
 {
@@ -355,7 +355,7 @@ bfin_frame_this_id (struct frame_info *this_frame,
 }
 
 static struct value *
-bfin_frame_prev_register (struct frame_info *this_frame,
+bfin_frame_prev_register (frame_info_ptr this_frame,
 			  void **this_cache,
 			  int regnum)
 {
@@ -511,7 +511,7 @@ bfin_push_dummy_call (struct gdbarch *gdbarch,
     {
       struct type *value_type = value_enclosing_type (args[i]);
 
-      total_len += align_up (TYPE_LENGTH (value_type), 4);
+      total_len += align_up (value_type->length (), 4);
     }
 
   /* At least twelve bytes of stack space must be allocated for the function's
@@ -527,7 +527,7 @@ bfin_push_dummy_call (struct gdbarch *gdbarch,
     {
       struct type *value_type = value_enclosing_type (args[i]);
       struct type *arg_type = check_typedef (value_type);
-      int container_len = align_up (TYPE_LENGTH (arg_type), 4);
+      int container_len = align_up (arg_type->length (), 4);
 
       sp -= container_len;
       write_memory (sp, value_contents (args[i]).data (), container_len);
@@ -612,7 +612,7 @@ bfin_extract_return_value (struct type *type,
   struct gdbarch *gdbarch = regs->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   bfd_byte *valbuf = dst;
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   ULONGEST tmp;
   int regno = BFIN_R0_REGNUM;
 
@@ -641,7 +641,7 @@ bfin_store_return_value (struct type *type,
      registers starting with R0.  This will always be a multiple of
      the register size.  */
 
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   int regno = BFIN_R0_REGNUM;
 
   gdb_assert (len <= 8);
@@ -668,7 +668,7 @@ bfin_return_value (struct gdbarch *gdbarch,
 		   gdb_byte *readbuf,
 		   const gdb_byte *writebuf)
 {
-  if (TYPE_LENGTH (type) > 8)
+  if (type->length () > 8)
     return RETURN_VALUE_STRUCT_CONVENTION;
 
   if (readbuf)
@@ -726,7 +726,7 @@ bfin_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 }
 
 static CORE_ADDR
-bfin_frame_base_address (struct frame_info *this_frame, void **this_cache)
+bfin_frame_base_address (frame_info_ptr this_frame, void **this_cache)
 {
   struct bfin_frame_cache *cache = bfin_frame_cache (this_frame, this_cache);
 
@@ -734,7 +734,7 @@ bfin_frame_base_address (struct frame_info *this_frame, void **this_cache)
 }
 
 static CORE_ADDR
-bfin_frame_local_address (struct frame_info *this_frame, void **this_cache)
+bfin_frame_local_address (frame_info_ptr this_frame, void **this_cache)
 {
   struct bfin_frame_cache *cache = bfin_frame_cache (this_frame, this_cache);
 
@@ -742,7 +742,7 @@ bfin_frame_local_address (struct frame_info *this_frame, void **this_cache)
 }
 
 static CORE_ADDR
-bfin_frame_args_address (struct frame_info *this_frame, void **this_cache)
+bfin_frame_args_address (frame_info_ptr this_frame, void **this_cache)
 {
   struct bfin_frame_cache *cache = bfin_frame_cache (this_frame, this_cache);
 
@@ -766,7 +766,7 @@ bfin_frame_align (struct gdbarch *gdbarch, CORE_ADDR address)
 enum bfin_abi
 bfin_abi (struct gdbarch *gdbarch)
 {
-  bfin_gdbarch_tdep *tdep = (bfin_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  bfin_gdbarch_tdep *tdep = gdbarch_tdep<bfin_gdbarch_tdep> (gdbarch);
   return tdep->bfin_abi;
 }
 
@@ -792,7 +792,7 @@ bfin_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
       bfin_gdbarch_tdep *tdep
-	= (bfin_gdbarch_tdep *) gdbarch_tdep (arches->gdbarch);
+	= gdbarch_tdep<bfin_gdbarch_tdep> (arches->gdbarch);
 
       if (tdep->bfin_abi != abi)
 	continue;
@@ -842,5 +842,5 @@ void _initialize_bfin_tdep ();
 void
 _initialize_bfin_tdep ()
 {
-  register_gdbarch_init (bfd_arch_bfin, bfin_gdbarch_init);
+  gdbarch_register (bfd_arch_bfin, bfin_gdbarch_init);
 }

@@ -2159,21 +2159,23 @@ ELF ABI.  Note - if compression would actually make a section
 @itemx --compress-debug-sections=zlib
 @itemx --compress-debug-sections=zlib-gnu
 @itemx --compress-debug-sections=zlib-gabi
+@itemx --compress-debug-sections=zstd
 For ELF files, these options control how DWARF debug sections are
 compressed.  @option{--compress-debug-sections=none} is equivalent
 to @option{--decompress-debug-sections}.
 @option{--compress-debug-sections=zlib} and
 @option{--compress-debug-sections=zlib-gabi} are equivalent to
 @option{--compress-debug-sections}.
-@option{--compress-debug-sections=zlib-gnu} compresses DWARF debug
-sections using zlib.  The debug sections are renamed to begin with
-@samp{.zdebug} instead of @samp{.debug}.  Note - if compression would
-actually make a section @emph{larger}, then it is not compressed nor
-renamed.
+@option{--compress-debug-sections=zlib-gnu} compresses DWARF debug sections
+using the obsoleted zlib-gnu format.  The debug sections are renamed to begin
+with @samp{.zdebug}.
+@option{--compress-debug-sections=zstd} compresses DWARF debug
+sections using zstd.  Note - if compression would actually make a section
+@emph{larger}, then it is not compressed nor renamed.
 
 @item --decompress-debug-sections
-Decompress DWARF debug sections using zlib.  The original section
-names of the compressed sections are restored.
+Decompress DWARF debug sections.  For a @samp{.zdebug} section, the original
+name is restored.
 
 @item --elf-stt-common=yes
 @itemx --elf-stt-common=no
@@ -2630,7 +2632,7 @@ rather than @code{li}.  All of the @option{-m} arguments for
 @option{601}, @option{603}, @option{604}, @option{620}, @option{7400},
 @option{7410}, @option{7450}, @option{7455}, @option{750cl},
 @option{821}, @option{850}, @option{860}, @option{a2}, @option{booke},
-@option{booke32}, @option{cell}, @option{com}, @option{e200z4},
+@option{booke32}, @option{cell}, @option{com}, @option{e200z2}, @option{e200z4},
 @option{e300}, @option{e500}, @option{e500mc}, @option{e500mc64},
 @option{e500x2}, @option{e5500}, @option{e6500}, @option{efs},
 @option{power4}, @option{power5}, @option{power6}, @option{power7},
@@ -2638,12 +2640,13 @@ rather than @code{li}.  All of the @option{-m} arguments for
 @option{ppc32}, @option{ppc64}, @option{ppc64bridge}, @option{ppcps},
 @option{pwr}, @option{pwr2}, @option{pwr4}, @option{pwr5}, @option{pwr5x},
 @option{pwr6}, @option{pwr7}, @option{pwr8}, @option{pwr9}, @option{pwr10},
-@option{pwrx}, @option{titan}, and @option{vle}.
+@option{pwrx}, @option{titan}, @option{vle}, and @option{future}.
 @option{32} and @option{64} modify the default or a prior CPU
 selection, disabling and enabling 64-bit insns respectively.  In
-addition, @option{altivec}, @option{any}, @option{htm}, @option{vsx},
-and @option{spe} add capabilities to a previous @emph{or later} CPU
-selection.  @option{any} will disassemble any opcode known to
+addition, @option{altivec}, @option{any}, @option{lsp}, @option{htm},
+@option{vsx}, @option{spe} and  @option{spe2} add capabilities to a
+previous @emph{or later} CPU selection.
+@option{any} will disassemble any opcode known to
 binutils, but in cases where an opcode has two different meanings or
 different arguments, you may not see the disassembly you expect.
 If you disassemble without giving a CPU selection, a default will be
@@ -2827,6 +2830,9 @@ colors, but these might not work on all terminals.
 If it is necessary to disable the @option{--disassembler-color} option
 after it has previously been enabled then use
 @option{--disassembler-color=off}.
+
+If this option is not specified then the default is to enable color
+output if displaying to a terminal, but not otherwise.
 
 @item -W[lLiaprmfFsoORtUuTgAckK]
 @itemx --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]
@@ -3112,6 +3118,7 @@ size [@option{-A}|@option{-B}|@option{-G}|@option{--format=}@var{compatibility}]
      [@option{--common}]
      [@option{-t}|@option{--totals}]
      [@option{--target=}@var{bfdname}] [@option{-V}|@option{--version}]
+     [@option{-f}]
      [@var{objfile}@dots{}]
 @c man end
 @end smallexample
@@ -3198,6 +3205,9 @@ Total         388688
 @end smallexample
 
 @item --help
+@itemx -h
+@itemx -H
+@item -?
 Show a summary of acceptable arguments and options.
 
 @item -d
@@ -3229,9 +3239,15 @@ Specify that the object-code format for @var{objfile} is
 automatically recognize many formats.
 @xref{Target Selection}, for more information.
 
+@item -v
 @item -V
 @itemx --version
 Display the version number of @command{size}.
+
+@item -f
+Ignored.  This option is used by other versions of the @command{size}
+program, but it is not supported by the GNU Binutils version.
+
 @end table
 
 @c man end
@@ -4507,6 +4523,7 @@ dlltool [@option{-d}|@option{--input-def} @var{def-file-name}]
         [@option{-v}|@option{--verbose}]
         [@option{-h}|@option{--help}] [@option{-V}|@option{--version}]
         [@option{--no-leading-underscore}] [@option{--leading-underscore}]
+        [@option{--deterministic-libraries}] [@option{--non-deterministic-libraries}]
         [object-file @dots{}]
 @c man end
 @end smallexample
@@ -4625,6 +4642,14 @@ Specifies the name of the library file to be created by dlltool.
 @item -y @var{filename}
 @itemx --output-delaylib @var{filename}
 Specifies the name of the delay-import library file to be created by dlltool.
+
+@item --deterministic-libraries
+@itemx --non-deterministic-libraries
+When creating output libraries in response to either the
+@option{--output-lib} or @option{--output-delaylib} options either use
+the value of zero for any timestamps, user ids and group ids created
+(@option{--deterministic-libraries}) or the actual timestamps, user
+ids and group ids (@option{--non-deterministic-libraries}).
 
 @item --export-all-symbols
 Treat all global and weak defined symbols found in the input object

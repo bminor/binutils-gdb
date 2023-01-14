@@ -4406,7 +4406,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  shlink = elf_elfsections (abfd)[elfsec]->sh_link;
 
 	  for (extdyn = dynbuf;
-	       extdyn <= dynbuf + s->size - bed->s->sizeof_dyn;
+	       (size_t) (dynbuf + s->size - extdyn) >= bed->s->sizeof_dyn;
 	       extdyn += bed->s->sizeof_dyn)
 	    {
 	      Elf_Internal_Dyn dyn;
@@ -8219,9 +8219,9 @@ bfd_elf_get_bfd_needed_list (bfd *abfd,
   extdynsize = get_elf_backend_data (abfd)->s->sizeof_dyn;
   swap_dyn_in = get_elf_backend_data (abfd)->s->swap_dyn_in;
 
-  extdyn = dynbuf;
-  extdynend = extdyn + s->size;
-  for (; extdyn < extdynend; extdyn += extdynsize)
+  for (extdyn = dynbuf, extdynend = dynbuf + s->size;
+       (size_t) (extdynend - extdyn) >= extdynsize;
+       extdyn += extdynsize)
     {
       Elf_Internal_Dyn dyn;
 
@@ -12413,8 +12413,10 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		      && elf_symtab_shndx_list (sec->owner) != NULL)
 		    max_sym_shndx_count = sym_count;
 
-		  if (esdo->this_hdr.sh_type == SHT_REL
-		      || esdo->this_hdr.sh_type == SHT_RELA)
+		  esdi = elf_section_data (sec);
+
+		  if (esdi->this_hdr.sh_type == SHT_REL
+		      || esdi->this_hdr.sh_type == SHT_RELA)
 		    /* Some backends use reloc_count in relocation sections
 		       to count particular types of relocs.  Of course,
 		       reloc sections themselves can't have relocations.  */
@@ -12431,8 +12433,6 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		    }
 		  else if (bed->elf_backend_count_relocs)
 		    reloc_count = (*bed->elf_backend_count_relocs) (info, sec);
-
-		  esdi = elf_section_data (sec);
 
 		  if ((sec->flags & SEC_RELOC) != 0)
 		    {

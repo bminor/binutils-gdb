@@ -24,7 +24,7 @@
 
 check()
 {
-    if ! egrep -q "$2" "$1"
+    if ! $EGREP -q "$2" "$1"
     then
 	echo "Did not find expected symbol in $1:"
 	echo "   $2"

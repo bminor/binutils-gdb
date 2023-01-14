@@ -268,7 +268,7 @@ __collector_ext_profile_handler (siginfo_t *info, ucontext_t *context)
       /* assume this case is rare, and accept overhead of creating dummy_uc */
       TprintfT (0, "collector_profile_handler: ERROR: got NULL context!\n");
       context = &uctxmem;
-      getcontext (context);     /* initialize dummy context */
+      CALL_UTIL (getcontext) (context);     /* initialize dummy context */
       SETFUNCTIONCONTEXT (context, &__collector_lost_profile_context);
     }
   ClockPacket pckt;

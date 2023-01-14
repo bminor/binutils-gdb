@@ -79,7 +79,7 @@ static void
 s390_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
 
   regcache_cooked_write_unsigned (regcache, tdep->pc_regnum, pc);
 
@@ -269,7 +269,7 @@ s390_iterate_over_regset_sections (struct gdbarch *gdbarch,
 				   void *cb_data,
 				   const struct regcache *regcache)
 {
-  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
   const int gregset_size = (tdep->abi == ABI_LINUX_S390 ?
 			    s390_sizeof_gregset : s390x_sizeof_gregset);
 
@@ -332,7 +332,8 @@ s390_core_read_description (struct gdbarch *gdbarch,
 			    struct target_ops *target, bfd *abfd)
 {
   asection *section = bfd_get_section_by_name (abfd, ".reg");
-  CORE_ADDR hwcap = linux_get_hwcap (target);
+  gdb::optional<gdb::byte_vector> auxv = target_read_auxv_raw (target);
+  CORE_ADDR hwcap = linux_get_hwcap (auxv, target, gdbarch);
   bool high_gprs, v1, v2, te, vx, gs;
 
   if (!section)
@@ -386,11 +387,11 @@ struct s390_sigtramp_unwind_cache {
    s390_sigtramp_frame_unwind.  */
 
 static struct s390_sigtramp_unwind_cache *
-s390_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
+s390_sigtramp_frame_unwind_cache (frame_info_ptr this_frame,
 				  void **this_prologue_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct s390_sigtramp_unwind_cache *info;
@@ -496,7 +497,7 @@ s390_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
 /* Implement this_id frame_unwind method for s390_sigtramp_frame_unwind.  */
 
 static void
-s390_sigtramp_frame_this_id (struct frame_info *this_frame,
+s390_sigtramp_frame_this_id (frame_info_ptr this_frame,
 			     void **this_prologue_cache,
 			     struct frame_id *this_id)
 {
@@ -508,7 +509,7 @@ s390_sigtramp_frame_this_id (struct frame_info *this_frame,
 /* Implement prev_register frame_unwind method for sigtramp frames.  */
 
 static struct value *
-s390_sigtramp_frame_prev_register (struct frame_info *this_frame,
+s390_sigtramp_frame_prev_register (frame_info_ptr this_frame,
 				   void **this_prologue_cache, int regnum)
 {
   struct s390_sigtramp_unwind_cache *info
@@ -520,7 +521,7 @@ s390_sigtramp_frame_prev_register (struct frame_info *this_frame,
 
 static int
 s390_sigtramp_frame_sniffer (const struct frame_unwind *self,
-			     struct frame_info *this_frame,
+			     frame_info_ptr this_frame,
 			     void **this_prologue_cache)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
@@ -561,7 +562,7 @@ s390_linux_get_syscall_number (struct gdbarch *gdbarch,
 			       thread_info *thread)
 {
   struct regcache *regs = get_thread_regcache (thread);
-  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST pc;
   ULONGEST svc_number = -1;
@@ -594,7 +595,7 @@ static int
 s390_all_but_pc_registers_record (struct regcache *regcache)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
   int i;
 
   for (i = 0; i < 16; i++)
@@ -787,6 +788,8 @@ s390_canonicalize_syscall (int syscall, enum s390_abi_kind abi)
 	/* ioprio_set .. epoll_pwait */
 	else if (syscall >= 282 && syscall <= 312)
 	  ret = syscall + 7;
+	else if (syscall == 349)
+	  ret = gdb_sys_getrandom;
 	else
 	  ret = gdb_sys_no_syscall;
 
@@ -802,7 +805,7 @@ static int
 s390_linux_syscall_record (struct regcache *regcache, LONGEST syscall_native)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
   int ret;
   enum gdb_syscall syscall_gdb;
 
@@ -853,7 +856,7 @@ static int
 s390_linux_record_signal (struct gdbarch *gdbarch, struct regcache *regcache,
 			  enum gdb_signal signal)
 {
-  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
   /* There are two kinds of signal frames on s390. rt_sigframe is always
      the larger one, so don't even bother with sigframe.  */
   const int sizeof_rt_sigframe = (tdep->abi == ABI_LINUX_ZSERIES ?
@@ -1117,7 +1120,7 @@ s390_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
 static void
 s390_linux_init_abi_any (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
 
   tdep->s390_syscall_record = s390_linux_syscall_record;
 
@@ -1152,7 +1155,7 @@ s390_linux_init_abi_any (struct gdbarch_info info, struct gdbarch *gdbarch)
 static void
 s390_linux_init_abi_31 (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
 
   tdep->abi = ABI_LINUX_S390;
 
@@ -1168,7 +1171,7 @@ s390_linux_init_abi_31 (struct gdbarch_info info, struct gdbarch *gdbarch)
 static void
 s390_linux_init_abi_64 (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
 
   tdep->abi = ABI_LINUX_ZSERIES;
 

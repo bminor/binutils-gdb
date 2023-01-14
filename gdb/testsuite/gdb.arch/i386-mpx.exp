@@ -132,5 +132,5 @@ after a failure on allocating an entry"
 # Going to test the python extension for lenght.
 if { [skip_python_tests] } { continue }
 # Verify if size is right
-set test_string ".*\\\: size 17.*"
+set test_string ".*\\\: size 0x11.*"
 gdb_test "print /x \$bnd0 = {0x10, 0x20}" "$test_string" "verify size for bnd0"

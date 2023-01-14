@@ -79,6 +79,17 @@ gdb_test_multiple "interpreter-exec mi3 \"-break-insert main\"" "" {
     }
 }
 
+set test "define hello command"
+set commands "interpreter-exec mi3 \"-data-evaluate-expression 23\""
+gdb_test_multiple "define hello" "$test" {
+    -re "Type commands for definition of \"hello\".\r\nEnd with a line saying just \"end\".\r\n>$" {
+	pass "$test"
+    }
+}
+gdb_test "$commands\nend" "" "finish defining hello command"
+
+gdb_test "hello" [string_to_regexp "^done,value=\"23\""]
+
 if ![runto_main] then {
   return -1
 }

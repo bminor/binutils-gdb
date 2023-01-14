@@ -23,6 +23,7 @@
 #include "buildsym.h"
 #include "dwarf2/comp-unit-head.h"
 #include "gdbsupport/gdb_optional.h"
+#include "language.h"
 
 /* Type used for delaying computation of method physnames.
    See comments for compute_delayed_physnames.  */
@@ -104,6 +105,12 @@ struct dwarf2_cu
 
   /* The language we are debugging.  */
   const struct language_defn *language_defn = nullptr;
+
+  enum language lang () const
+  {
+    gdb_assert (language_defn != language_def (language_unknown));
+    return language_defn->la_language;
+  }
 
   const char *producer = nullptr;
 

@@ -24,13 +24,13 @@
 
 match()
 {
-  if ! egrep "$1" "$2" >/dev/null 2>&1; then
+  if ! $EGREP "$1" "$2" >/dev/null 2>&1; then
     echo 1>&2 "could not find '$1' in $2"
     exit 1
   fi
 }
 
 match '[0-9a-f]*:.*bnd jmp \*0x[0-9a-f]*\(%rip\) *# [0-9a-f]* <_GLOBAL_OFFSET_TABLE_\+0x18>' bnd_ifunc_1.stdout
-APLT_ADDR=$(egrep '[0-9a-f]*:.*bnd jmp \*0x[0-9a-f]*\(%rip\) *# [0-9a-f]* <_GLOBAL_OFFSET_TABLE_\+0x18>' bnd_ifunc_1.stdout |
+APLT_ADDR=$($EGREP '[0-9a-f]*:.*bnd jmp \*0x[0-9a-f]*\(%rip\) *# [0-9a-f]* <_GLOBAL_OFFSET_TABLE_\+0x18>' bnd_ifunc_1.stdout |
   sed -e 's/ *\([0-9a-f]*\):.*/\1/')
 match "bnd call $APLT_ADDR" bnd_ifunc_1.stdout

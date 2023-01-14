@@ -2265,11 +2265,20 @@ one or more aliases, @value{GDBN} will display a first line with
 the command name and all its aliases separated by commas.
 This first line will be followed by the full definition of all aliases
 having default arguments.
+When asking the help for an alias, the documentation for the aliased
+command is shown.
+
+A user-defined alias can optionally be documented using the
+@code{document} command (@pxref{Define, document}).  @value{GDBN} then
+considers this alias as different from the aliased command: this alias
+is not listed in the aliased command help output, and asking help for
+this alias will show the documentation provided for the alias instead of
+the documentation of the aliased command.
 
 @kindex apropos
 @item apropos [-v] @var{regexp}
 The @code{apropos} command searches through all of the @value{GDBN}
-commands, and their documentation, for the regular expression specified in
+commands and aliases, and their documentation, for the regular expression specified in
 @var{args}.  It prints out all matches found.  The optional flag  @samp{-v},
 which stands for @samp{verbose}, indicates to output the full documentation
 of the matching commands and highlight the parts of the documentation
@@ -6939,19 +6948,33 @@ locking the OS scheduler to allow only a single thread to run.
 @cindex scheduler locking mode
 @cindex lock scheduler
 Set the scheduler locking mode.  It applies to normal execution,
-record mode, and replay mode.  If it is @code{off}, then there is no
-locking and any thread may run at any time.  If @code{on}, then only
-the current thread may run when the inferior is resumed.  The
-@code{step} mode optimizes for single-stepping; it prevents other
-threads from preempting the current thread while you are stepping, so
-that the focus of debugging does not change unexpectedly.  Other
-threads never get a chance to run when you step, and they are
-completely free to run when you use commands like @samp{continue},
-@samp{until}, or @samp{finish}.  However, unless another thread hits a
-breakpoint during its timeslice, @value{GDBN} does not change the
-current thread away from the thread that you are debugging.  The
-@code{replay} mode behaves like @code{off} in record mode and like
-@code{on} in replay mode.
+record mode, and replay mode.  @var{mode} can be one of
+the following:
+
+@table @code
+@item off
+There is no locking and any thread may run at any time.
+
+@item on
+Only the current thread may run when the inferior is resumed.
+
+@item step
+Behaves like @code{on} when stepping, and @code{off} otherwise.
+Threads other than the current never get a chance to run when you
+step, and they are completely free to run when you use commands like
+@samp{continue}, @samp{until}, or @samp{finish}.
+
+This mode optimizes for single-stepping; it prevents other threads
+from preempting the current thread while you are stepping, so that the
+focus of debugging does not change unexpectedly.  However, unless
+another thread hits a breakpoint during its timeslice, @value{GDBN}
+does not change the current thread away from the thread that you are
+debugging.
+
+@item replay
+Behaves like @code{on} in replay mode, and @code{off} in either record
+mode or during normal execution.  This is the default mode.
+@end table
 
 @item show scheduler-locking
 Display the current scheduler locking mode.
@@ -7922,7 +7945,10 @@ are printed in execution order.
 
 It can also print mixed source+disassembly if you specify the the
 @code{/m} or @code{/s} modifier, and print the raw instructions in hex
-as well as in symbolic form by specifying the @code{/r} modifier.
+as well as in symbolic form by specifying the @code{/r} or @code{/b}
+modifier.  The behaviour of the @code{/m}, @code{/s}, @code{/r}, and
+@code{/b} modifiers are the same as for the @kbd{disassemble} command
+(@pxref{disassemble,,@kbd{disassemble}}).
 
 The current position marker is printed for the instruction at the
 current program counter value.  This instruction can appear multiple
@@ -9836,6 +9862,7 @@ After @code{info line}, using @code{info line} again without
 specifying a location will display information about the next source
 line.
 
+@anchor{disassemble}
 @table @code
 @kindex disassemble
 @cindex assembly instructions
@@ -9846,16 +9873,17 @@ line.
 @itemx disassemble /m
 @itemx disassemble /s
 @itemx disassemble /r
+@itemx disassemble /b
 This specialized command dumps a range of memory as machine
 instructions.  It can also print mixed source+disassembly by specifying
-the @code{/m} or @code{/s} modifier and print the raw instructions in hex
-as well as in symbolic form by specifying the @code{/r} modifier.
-The default memory range is the function surrounding the
+the @code{/m} or @code{/s} modifier and print the raw instructions in
+hex as well as in symbolic form by specifying the @code{/r} or @code{/b}
+modifier.  The default memory range is the function surrounding the
 program counter of the selected frame.  A single argument to this
 command is a program counter value; @value{GDBN} dumps the function
-surrounding this value.  When two arguments are given, they should
-be separated by a comma, possibly surrounded by whitespace.  The
-arguments specify a range of addresses to dump, in one of two forms:
+surrounding this value.  When two arguments are given, they should be
+separated by a comma, possibly surrounded by whitespace.  The arguments
+specify a range of addresses to dump, in one of two forms:
 
 @table @code
 @item @var{start},@var{end}
@@ -9890,6 +9918,35 @@ Dump of assembler code from 0x32c4 to 0x32e4:
    0x32d8 <main+224>:      addil -0x800,dp
    0x32dc <main+228>:      ldo 0x588(r1),r26
    0x32e0 <main+232>:      ldil 0x3000,r31
+End of assembler dump.
+@end smallexample
+
+The following two examples are for RISC-V, and demonstrates the
+difference between the @code{/r} and @code{/b} modifiers.  First with
+@code{/b}, the bytes of the instruction are printed, in hex, in memory
+order:
+
+@smallexample
+(@value{GDBP}) disassemble /b 0x00010150,0x0001015c
+Dump of assembler code from 0x10150 to 0x1015c:
+   0x00010150 <call_me+4>:      22 dc                 	sw	s0,56(sp)
+   0x00010152 <call_me+6>:      80 00                 	addi	s0,sp,64
+   0x00010154 <call_me+8>:      23 26 a4 fe           	sw	a0,-20(s0)
+   0x00010158 <call_me+12>:     23 24 b4 fe           	sw	a1,-24(s0)
+End of assembler dump.
+@end smallexample
+
+In contrast, with @code{/r} the bytes of the instruction are displayed
+in the instruction order, for RISC-V this means that the bytes have been
+swapped to little-endian order:
+
+@smallexample
+(@value{GDBP}) disassemble /r 0x00010150,0x0001015c
+Dump of assembler code from 0x10150 to 0x1015c:
+   0x00010150 <call_me+4>:      dc22              	sw	s0,56(sp)
+   0x00010152 <call_me+6>:      0080              	addi	s0,sp,64
+   0x00010154 <call_me+8>:      fea42623        	sw	a0,-20(s0)
+   0x00010158 <call_me+12>:     feb42423        	sw	a1,-24(s0)
 End of assembler dump.
 @end smallexample
 
@@ -25751,6 +25808,25 @@ options that can be controlled at runtime and emulates the @code{prctl}
 option @code{PR_SET_TAGGED_ADDR_CTRL}.  For further information, see the
 documentation in the Linux kernel.
 
+@value{GDBN} supports dumping memory tag data to core files through the
+@command{gcore} command and reading memory tag data from core files generated
+by the @command{gcore} command or the Linux kernel.
+
+When a process uses memory-mapped pages protected by memory tags (for
+example, AArch64 MTE), this additional information will be recorded in
+the core file in the event of a crash or if @value{GDBN} generates a core file
+from the current process state.
+
+The memory tag data will be used so developers can display the memory
+tags from a particular memory region (using the @samp{m} modifier to the
+@command{x} command, using the @command{print} command or using the various
+@command{memory-tag} subcommands.
+
+In the case of a crash, @value{GDBN} will attempt to retrieve the memory tag
+information automatically from the core file, and will show one of the above
+messages depending on whether the synchronous or asynchronous mode is selected.
+@xref{Memory Tagging}. @xref{Memory}.
+
 @node i386
 @subsection x86 Architecture-specific Issues
 
@@ -26526,6 +26602,7 @@ then it will be used.
 @item show style sources
 Show the current state of source code styling.
 
+@anchor{style_disassembler_enabled}
 @item set style disassembler enabled @samp{on|off}
 Enable or disable disassembler styling.  This affects whether
 disassembler output, such as the output of the @code{disassemble}
@@ -26533,13 +26610,32 @@ command, is styled.  Disassembler styling only works if styling in
 general is enabled (with @code{set style enabled on}), and if a source
 highlighting library is available to @value{GDBN}.
 
-To highlight disassembler output, @value{GDBN} must be compiled with
-Python support, and the Python Pygments package must be available.  If
-these requirements are not met then @value{GDBN} will not highlight
-disassembler output, even when this option is @samp{on}.
+The two source highlighting libraries that @value{GDBN} could use to
+style disassembler output are; @value{GDBN}'s builtin disassembler, or
+the Python Pygments package.
+
+@value{GDBN}'s first choice will be to use the builtin disassembler
+for styling, this usually provides better results, being able to style
+different types of instruction operands differently.  However, the
+builtin disassembler is not able to style all architectures.
+
+For architectures that the builtin disassembler is unable to style,
+@value{GDBN} will fall back to use the Python Pygments package where
+possible.  In order to use the Python Pygments package, @value{GDBN}
+must be built with Python support, and the Pygments package must be
+installed.
+
+If neither of these options are available then @value{GDBN} will
+produce unstyled disassembler output, even when this setting is
+@samp{on}.
+
+To discover if the current architecture supports styling using the
+builtin disassembler library see @ref{maint_libopcodes_styling,,@kbd{maint
+show libopcodes-styling enabled}}.
 
 @item show style disassembler enabled
 Show the current state of disassembler styling.
+
 @end table
 
 Subcommands of @code{set style} control specific forms of styling.
@@ -26584,6 +26680,11 @@ Control the styling of function names.  These are managed with the
 @code{set style function} family of commands.  By default, this
 style's foreground color is yellow.
 
+This style is also used for symbol names in styled disassembler output
+if @value{GDBN} is using its builtin disassembler library for styling
+(@pxref{style_disassembler_enabled,,@kbd{set style disassembler
+enabled}}).
+
 @item variable
 Control the styling of variable names.  These are managed with the
 @code{set style variable} family of commands.  By default, this style's
@@ -26593,6 +26694,11 @@ foreground color is cyan.
 Control the styling of addresses.  These are managed with the
 @code{set style address} family of commands.  By default, this style's
 foreground color is blue.
+
+This style is also used for addresses in styled disassembler output
+if @value{GDBN} is using its builtin disassembler library for styling
+(@pxref{style_disassembler_enabled,,@kbd{set style disassembler
+enabled}}).
 
 @item version
 Control the styling of @value{GDBN}'s version number text.  By
@@ -26641,6 +26747,47 @@ general styling to @value{GDBN}.  @xref{TUI Configuration}.
 @item tui-active-border
 Control the styling of the active TUI border; that is, the TUI window
 that has the focus.
+
+@item disassembler comment
+Control the styling of comments in the disassembler output.  These are
+managed with the @code{set style disassembler comment} family of
+commands.  This style is only used when @value{GDBN} is styling using
+its builtin disassembler library
+(@pxref{style_disassembler_enabled,,@kbd{set style disassembler
+enabled}}).  By default, this style's intensity is dim, and its
+foreground color is white.
+
+@item disassembler immediate
+Control the styling of numeric operands in the disassembler output.
+These are managed with the @code{set style disassembler immediate}
+family of commands.  This style is not used for instruction operands
+that represent addresses, in that case the @samp{disassembler address}
+style is used.  This style is only used when @value{GDBN} is styling
+using its builtin disassembler library.  By default, this style's
+foreground color is blue.
+
+@item disassembler address
+Control the styling of address operands in the disassembler output.
+This is an alias for the @samp{address} style.
+
+@item disassembler symbol
+Control the styling of symbol names in the disassembler output.  This
+is an alias for the @samp{function} style.
+
+@item disassembler mnemonic
+Control the styling of instruction mnemonics in the disassembler
+output.  These are managed with the @code{set style disassembler
+mnemonic} family of commands.  This style is also used for assembler
+directives, e.g.@: @code{.byte}, @code{.word}, etc.  This style is
+only used when @value{GDBN} is styling using its builtin disassembler
+library.  By default, this style's foreground color is green.
+
+@item disassembler register
+Control the styling of register operands in the disassembler output.
+These are managed with the @code{set style disassembler register}
+family of commands.  This style is only used when @value{GDBN} is
+styling using its builtin disassembler library.  By default, this style's
+foreground color is red.
 
 @end table
 
@@ -27440,6 +27587,13 @@ for implementing operations such as single-stepping the inferior.
 @item show debug infrun
 Displays the current state of @value{GDBN} inferior debugging.
 
+@item set debug infcall
+@cindex inferior function call debugging info
+Turns on or off display of debugging info related to inferior function
+calls made by @value{GDBN}.
+@item show debug infcall
+Displays the current state of @value{GDBN} inferior function call debugging.
+
 @item set debug jit
 @cindex just-in-time compilation, debugging messages
 Turn on or off debugging messages from JIT debug support.
@@ -27862,6 +28016,13 @@ After the @code{document} command is finished, @code{help} on command
 You may use the @code{document} command again to change the
 documentation of a command.  Redefining the command with @code{define}
 does not change the documentation.
+
+It is also possible to document user-defined aliases.  The alias documentation
+will then be used by the @code{help} and @code{apropos} commands
+instead of the documentation of the aliased command.
+Documenting a user-defined alias is particularly useful when defining
+an alias as a set of nested @code{with} commands
+(@pxref{Command aliases default args}).
 
 @kindex define-prefix
 @item define-prefix @var{commandname}
@@ -28536,6 +28697,14 @@ using the temporary values of the settings and the arguments explicitly given
 by the user.
 For more information about the @code{with} command usage,
 see @ref{Command Settings}.
+
+By default, asking the help for an alias shows the documentation of
+the aliased command.  When the alias is a set of nested commands, @code{help}
+of an alias shows the documentation of the first command.  This help
+is not particularly useful for an alias such as @code{pp10}.
+For such an alias, it is useful to give a specific documentation
+using the @code{document} command (@pxref{Define, document}).
+
 
 @c Python docs live in a separate file.
 @include python.texi
@@ -29749,6 +29918,10 @@ may repeat zero or more times.
 may repeat one or more times.
 
 @item
+@code{( @var{group} )} means that @var{group} inside the parentheses
+occurs exactly once.
+
+@item
 @code{"@var{string}"} means a literal @var{string}.
 @end itemize
 
@@ -30368,6 +30541,21 @@ The multiple locations are now placed in a @code{locations} field, whose value
 is a list.
 @end itemize
 
+@item
+@center 4
+@tab
+@center 13.1
+@tab
+
+@itemize
+@item
+The syntax of the "script" field in breakpoint output has changed in the
+responses to the @code{-break-insert} and @code{-break-info} commands, as
+well as the @code{=breakpoint-created} and @code{=breakpoint-modified}
+events.  The previous output was syntactically invalid.  The new output is
+a list.
+@end itemize
+
 @end multitable
 
 If your front end cannot yet migrate to a more recent version of the
@@ -30378,8 +30566,13 @@ available in those recent MI versions, using the following commands:
 
 @item -fix-multi-location-breakpoint-output
 Use the output for multi-location breakpoints which was introduced by
-MI 3, even when using MI versions 2 or 1.  This command has no
+MI 3, even when using MI versions below 3.  This command has no
 effect when using MI version 3 or later.
+
+@item -fix-breakpoint-script-output
+Use the output for the breakpoint "script" field which was introduced by
+MI 4, even when using MI versions below 4.  This command has no effect when
+using MI version 4 or later.
 
 @end table
 
@@ -31543,14 +31736,14 @@ The corresponding @value{GDBN} command is @samp{dprintf}.
 4^done,bkpt=@{number="1",type="dprintf",disp="keep",enabled="y",
 addr="0x000000000040061b",func="foo",file="mi-dprintf.c",
 fullname="mi-dprintf.c",line="25",thread-groups=["i1"],
-times="0",script=@{"printf \"At foo entry\\n\"","continue"@},
+times="0",script=["printf \"At foo entry\\n\"","continue"],
 original-location="foo"@}
 (gdb)
 5-dprintf-insert 26 "arg=%d, g=%d\n" arg g
 5^done,bkpt=@{number="2",type="dprintf",disp="keep",enabled="y",
 addr="0x000000000040062a",func="foo",file="mi-dprintf.c",
 fullname="mi-dprintf.c",line="26",thread-groups=["i1"],
-times="0",script=@{"printf \"arg=%d, g=%d\\n\", arg, g","continue"@},
+times="0",script=["printf \"arg=%d, g=%d\\n\", arg, g","continue"],
 original-location="mi-dprintf.c:26"@}
 (gdb)
 @end smallexample
@@ -34398,10 +34591,12 @@ For details about what an addressable memory unit is,
 
 @smallexample
  -data-disassemble
-    [ -s @var{start-addr} -e @var{end-addr} ]
-  | [ -a @var{addr} ]
-  | [ -f @var{filename} -l @var{linenum} [ -n @var{lines} ] ]
-  -- @var{mode}
+  ( -s @var{start-addr} -e @var{end-addr}
+  | -a @var{addr}
+  | -f @var{filename} -l @var{linenum} [ -n @var{lines} ] )
+  [ --opcodes @var{opcodes-mode} ]
+  [ --source ]
+  [ -- @var{mode} ]
 @end smallexample
 
 @noindent
@@ -34430,31 +34625,71 @@ specified.  If @var{end-addr} is specified as a non-zero value, and
 displayed; if @var{lines} is higher than the number of lines between
 @var{start-addr} and @var{end-addr}, only the lines up to @var{end-addr}
 are displayed.
-@item @var{mode}
-is one of:
-@itemize @bullet
-@item 0 disassembly only
-@item 1 mixed source and disassembly (deprecated)
-@item 2 disassembly with raw opcodes
-@item 3 mixed source and disassembly with raw opcodes (deprecated)
-@item 4 mixed source and disassembly
-@item 5 mixed source and disassembly with raw opcodes
-@end itemize
+@item @var{opcodes-mode}
+can only be used with @var{mode} 0, and should be one of the following:
+@table @samp
+@item none
+no opcode information will be included in the result.
 
+@item bytes
+opcodes will be included in the result, the opcodes will be formatted
+as for @kbd{disassemble /b}.
+
+@item display
+opcodes will be included in the result, the opcodes will be formatted
+as for @kbd{disassemble /r}.
+@end table
+@item @var{mode}
+the use of @var{mode} is deprecated in favour of using the
+@code{--opcodes} and @code{--source} options.  When no @var{mode} is
+given, @var{mode} 0 will be assumed.  However, the @var{mode} is still
+available for backward compatibility.  The @var{mode} should be one of:
+@table @samp
+@item 0
+@emph{disassembly only}, this is the default mode if no mode is
+specified.
+
+@item 1
+@emph{mixed source and disassembly (deprecated)}, it is not possible
+to recreate this mode using @code{--opcodes} and @code{--source}
+options.
+
+@item 2
+@emph{disassembly with raw opcodes}, this mode is equivalent to using
+@var{mode} 0 and passing @code{--opcodes bytes} to the command.
+
+@item 3
+@emph{mixed source and disassembly with raw opcodes (deprecated)}, it
+is not possible to recreate this mode using @code{--opcodes} and
+@code{--source} options.
+
+@item 4
+@emph{mixed source and disassembly}, this mode is equivalent to using
+@var{mode} 0 and passing @code{--source} to the command.
+
+@item 5
+@emph{mixed source and disassembly with raw opcodes}, this mode is
+equivalent to using @var{mode} 0 and passing @code{--opcodes bytes}
+and @code{--source} to the command.
+@end table
 Modes 1 and 3 are deprecated.  The output is ``source centric''
 which hasn't proved useful in practice.
 @xref{Machine Code}, for a discussion of the difference between
 @code{/m} and @code{/s} output of the @code{disassemble} command.
 @end table
 
+The @code{--source} can only be used with @var{mode} 0.  Passing this
+option will include the source code in the disassembly result as if
+@var{mode} 4 or 5 had been used.
+
 @subsubheading Result
 
 The result of the @code{-data-disassemble} command will be a list named
-@samp{asm_insns}, the contents of this list depend on the @var{mode}
-used with the @code{-data-disassemble} command.
+@samp{asm_insns}, the contents of this list depend on the options used
+with the @code{-data-disassemble} command.
 
-For modes 0 and 2 the @samp{asm_insns} list contains tuples with the
-following fields:
+For modes 0 and 2, and when the @code{--source} option is not used, the
+@samp{asm_insns} list contains tuples with the following fields:
 
 @table @code
 @item address
@@ -34470,15 +34705,28 @@ The decimal offset in bytes from the start of @samp{func-name}.
 The text disassembly for this @samp{address}.
 
 @item opcodes
-This field is only present for modes 2, 3 and 5.  This contains the
-raw opcode bytes for the @samp{inst} field.  The bytes are formatted
-as single bytes, in hex, in ascending address order, with a single
-space between each byte.
+This field is only present for modes 2, 3 and 5, or when the
+@code{--opcodes} option @samp{bytes} or @samp{display} is used.  This
+contains the raw opcode bytes for the @samp{inst} field.
 
+When the @samp{--opcodes} option is not passed to
+@code{-data-disassemble}, or the @samp{bytes} value is passed to
+@samp{--opcodes}, then the bytes are formatted as a series of single
+bytes, in hex, in ascending address order, with a single space between
+each byte.  This format is equivalent to the @samp{/b} option being
+used with the @kbd{disassemble} command
+(@pxref{disassemble,,@kbd{disassemble}}).
+
+When @samp{--opcodes} is passed the value @samp{display} then the bytes
+are formatted in the natural instruction display order.  This means
+multiple bytes can be grouped together, and the bytes might be
+byte-swapped.  This format is equivalent to the @samp{/r} option being
+used with the @kbd{disassemble} command.
 @end table
 
-For modes 1, 3, 4 and 5 the @samp{asm_insns} list contains tuples named
-@samp{src_and_asm_line}, each of which has the following fields:
+For modes 1, 3, 4 and 5, or when the @code{--source} option is used, the
+@samp{asm_insns} list contains tuples named @samp{src_and_asm_line},
+each of which has the following fields:
 
 @table @code
 @item line
@@ -40018,6 +40266,23 @@ The program being debugged stopped while in a function called from GDB.
 
 Takes an optional file parameter.
 
+@kindex maint print frame-id
+@item maint print frame-id
+@itemx maint print frame-id @var{level}
+Print @value{GDBN}'s internal frame-id for the frame at relative
+@var{level}, or for the currently selected frame when @var{level} is
+not given.
+
+If used, @var{level} should be an integer, as displayed in the
+@command{backtrace} output.
+
+@smallexample
+(@value{GDBP}) maint print frame-id
+frame-id for frame #0: @{stack=0x7fffffffac70,code=0x0000000000401106,!special@}
+(@value{GDBP}) maint print frame-id 2
+frame-id for frame #2: @{stack=0x7fffffffac90,code=0x000000000040111c,!special@}
+@end smallexample
+
 @kindex maint print registers
 @kindex maint print raw-registers
 @kindex maint print cooked-registers
@@ -40415,6 +40680,29 @@ This option is useful for debugging @value{GDBN}'s use of the Pygments
 library when @value{GDBN} is linked against the GNU Source Highlight
 library.
 
+@anchor{maint_libopcodes_styling}
+@kindex maint set libopcodes-styling enabled
+@kindex maint show libopcodes-styling enabled
+@item maint set libopcodes-styling enabled @r{[}on|off@r{]}
+@itemx maint show libopcodes-styling enabled
+Control whether @value{GDBN} should use its builtin disassembler
+(@file{libopcodes}) to style disassembler output (@pxref{Output
+Styling}).  The builtin disassembler does not support styling for all
+architectures.
+
+When this option is @samp{off} the builtin disassembler will not be
+used for styling, @value{GDBN} will fall back to using the Python
+Pygments package if possible.
+
+Trying to set this option @samp{on} for an architecture that the
+builtin disassembler is unable to style will give an error, otherwise,
+the builtin disassembler will be used to style disassembler output.
+
+This option is @samp{on} by default for supported architectures.
+
+This option is useful for debugging @value{GDBN}'s use of the Pygments
+library when @value{GDBN} is built for an architecture that supports
+styling with the builtin disassembler
 @kindex maint space
 @cindex memory used by commands
 @item maint space @var{value}
@@ -41578,7 +41866,7 @@ series of bytes in target byte order, with each byte given by a
 two-digit hex number.
 
 @item
-If @var{n} is @samp{thread}, then @var{r} is the @var{thread-id} of
+If @var{n} is @samp{thread}, then @var{r} is the thread ID of
 the stopped thread, as specified in @ref{thread-id syntax}.
 
 @item
@@ -41655,11 +41943,10 @@ apply.
 
 @cindex fork events, remote reply
 @item fork
-The packet indicates that @code{fork} was called, and @var{r}
-is the thread ID of the new child process.  Refer to
-@ref{thread-id syntax} for the format of the @var{thread-id}
-field.  This packet is only applicable to targets that support
-fork events.
+The packet indicates that @code{fork} was called, and @var{r} is the
+thread ID of the new child process, as specified in @ref{thread-id
+syntax}.  This packet is only applicable to targets that support fork
+events.
 
 This packet should not be sent by default; older @value{GDBN} versions
 did not support it.  @value{GDBN} requests it, by supplying an
@@ -41669,11 +41956,10 @@ indicating support.
 
 @cindex vfork events, remote reply
 @item vfork
-The packet indicates that @code{vfork} was called, and @var{r}
-is the thread ID of the new child process. Refer to
-@ref{thread-id syntax} for the format of the @var{thread-id}
-field.  This packet is only applicable to targets that support
-vfork events.
+The packet indicates that @code{vfork} was called, and @var{r} is the
+thread ID of the new child process, as specified in @ref{thread-id
+syntax}.  This packet is only applicable to targets that support vfork
+events.
 
 This packet should not be sent by default; older @value{GDBN} versions
 did not support it.  @value{GDBN} requests it, by supplying an
@@ -47067,6 +47353,10 @@ The @samp{org.gnu.gdb.loongarch.base} feature is required for LoongArch
 targets.  It should contain the registers @samp{r0} through @samp{r31},
 @samp{pc}, and @samp{badv}.  Either the architectural names (@samp{r0},
 @samp{r1}, etc) can be used, or the ABI names (@samp{zero}, @samp{ra}, etc).
+
+The @samp{org.gnu.gdb.loongarch.fpu} feature is optional.  If present,
+it should contain registers @samp{f0} through @samp{f31}, @samp{fcc},
+and @samp{fcsr}.
 
 @node MicroBlaze Features
 @subsection MicroBlaze Features

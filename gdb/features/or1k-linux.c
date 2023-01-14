@@ -5,7 +5,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 
-struct target_desc *tdesc_or1k_linux;
+const struct target_desc *tdesc_or1k_linux;
 static void
 initialize_tdesc_or1k_linux (void)
 {

@@ -48,7 +48,7 @@ struct trad_core_struct
 
 /* forward declarations */
 
-const bfd_target *ptrace_unix_core_file_p (bfd *abfd);
+bfd_cleanup ptrace_unix_core_file_p (bfd *abfd);
 char * ptrace_unix_core_file_failing_command (bfd *abfd);
 int ptrace_unix_core_file_failing_signal (bfd *abfd);
 #define ptrace_unix_core_file_matches_executable_p generic_core_file_matches_executable_p

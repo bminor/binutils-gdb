@@ -134,6 +134,22 @@ run_cc_link_tests [list \
 	{{readelf {--dyn-syms -W} pr28158.rd} {nm -D pr28158.nd}} \
 	"pr28158" \
     ] \
+    [list \
+	"Build pr29377.o" \
+	"-r -nostdlib -Wl,-z,noexecstack" \
+	"" \
+	{pr29377a.c indirect-extern-access.S} \
+	{} \
+	"pr29377.o" \
+    ] \
+    [list \
+	"Build pr29377" \
+	"$NOPIE_LDFLAGS tmpdir/pr29377.o" \
+	"-fPIC" \
+	{pr29377b.c} \
+	{} \
+	"pr29377" \
+    ] \
 ]
 
 run_ld_link_exec_tests [list \

@@ -972,16 +972,18 @@ fixup_segment (fixS *fixP, segT this_segment)
       if (fixP->fx_subsy != NULL)
 	{
 	  segT sub_symbol_segment;
+
 	  resolve_symbol_value (fixP->fx_subsy);
 	  sub_symbol_segment = S_GET_SEGMENT (fixP->fx_subsy);
+
 	  if (fixP->fx_addsy != NULL
 	      && sub_symbol_segment == add_symbol_segment
 	      && !S_FORCE_RELOC (fixP->fx_addsy, 0)
 	      && !S_FORCE_RELOC (fixP->fx_subsy, 0)
 	      && !TC_FORCE_RELOCATION_SUB_SAME (fixP, add_symbol_segment))
 	    {
-	      add_number += S_GET_VALUE (fixP->fx_addsy);
-	      add_number -= S_GET_VALUE (fixP->fx_subsy);
+	      add_number += S_GET_VALUE_WHERE (fixP->fx_addsy, fixP->fx_file, fixP->fx_line);
+	      add_number -= S_GET_VALUE_WHERE (fixP->fx_subsy, fixP->fx_file, fixP->fx_line);
 	      fixP->fx_offset = add_number;
 	      fixP->fx_addsy = NULL;
 	      fixP->fx_subsy = NULL;
@@ -994,7 +996,7 @@ fixup_segment (fixS *fixP, segT this_segment)
 		   && !S_FORCE_RELOC (fixP->fx_subsy, 0)
 		   && !TC_FORCE_RELOCATION_SUB_ABS (fixP, add_symbol_segment))
 	    {
-	      add_number -= S_GET_VALUE (fixP->fx_subsy);
+	      add_number -= S_GET_VALUE_WHERE (fixP->fx_subsy, fixP->fx_file, fixP->fx_line);
 	      fixP->fx_offset = add_number;
 	      fixP->fx_subsy = NULL;
 	    }
@@ -1002,7 +1004,7 @@ fixup_segment (fixS *fixP, segT this_segment)
 		   && !S_FORCE_RELOC (fixP->fx_subsy, 0)
 		   && !TC_FORCE_RELOCATION_SUB_LOCAL (fixP, add_symbol_segment))
 	    {
-	      add_number -= S_GET_VALUE (fixP->fx_subsy);
+	      add_number -= S_GET_VALUE_WHERE (fixP->fx_subsy, fixP->fx_file, fixP->fx_line);
 	      fixP->fx_offset = (add_number + fixP->fx_dot_value
 				 + fixP->fx_dot_frag->fr_address);
 
@@ -1035,7 +1037,7 @@ fixup_segment (fixS *fixP, segT this_segment)
 	  else if (sub_symbol_segment != undefined_section
 		   && ! bfd_is_com_section (sub_symbol_segment)
 		   && MD_APPLY_SYM_VALUE (fixP))
-	    add_number -= S_GET_VALUE (fixP->fx_subsy);
+	    add_number -= S_GET_VALUE_WHERE (fixP->fx_subsy, fixP->fx_file, fixP->fx_line);
 	}
 
       if (fixP->fx_addsy)
@@ -1047,7 +1049,7 @@ fixup_segment (fixS *fixP, segT this_segment)
 	      /* This fixup was made when the symbol's segment was
 		 SEG_UNKNOWN, but it is now in the local segment.
 		 So we know how to do the address without relocation.  */
-	      add_number += S_GET_VALUE (fixP->fx_addsy);
+	      add_number += S_GET_VALUE_WHERE (fixP->fx_addsy, fixP->fx_file, fixP->fx_line);
 	      fixP->fx_offset = add_number;
 	      if (fixP->fx_pcrel)
 		add_number -= MD_PCREL_FROM_SECTION (fixP, this_segment);
@@ -1058,14 +1060,14 @@ fixup_segment (fixS *fixP, segT this_segment)
 		   && !S_FORCE_RELOC (fixP->fx_addsy, 0)
 		   && !TC_FORCE_RELOCATION_ABS (fixP))
 	    {
-	      add_number += S_GET_VALUE (fixP->fx_addsy);
+	      add_number += S_GET_VALUE_WHERE (fixP->fx_addsy, fixP->fx_file, fixP->fx_line);
 	      fixP->fx_offset = add_number;
 	      fixP->fx_addsy = NULL;
 	    }
 	  else if (add_symbol_segment != undefined_section
 		   && ! bfd_is_com_section (add_symbol_segment)
 		   && MD_APPLY_SYM_VALUE (fixP))
-	    add_number += S_GET_VALUE (fixP->fx_addsy);
+	    add_number += S_GET_VALUE_WHERE (fixP->fx_addsy, fixP->fx_file, fixP->fx_line);
 	}
 
       if (fixP->fx_pcrel)
@@ -1413,7 +1415,7 @@ write_relocs (bfd *abfd ATTRIBUTE_UNUSED, asection *sec,
 }
 
 static int
-compress_frag (struct z_stream_s *strm, const char *contents, int in_size,
+compress_frag (bool use_zstd, void *ctx, const char *contents, int in_size,
 	       fragS **last_newf, struct obstack *ob)
 {
   int out_size;
@@ -1442,10 +1444,10 @@ compress_frag (struct z_stream_s *strm, const char *contents, int in_size,
 	as_fatal (_("can't extend frag"));
       next_out = obstack_next_free (ob);
       obstack_blank_fast (ob, avail_out);
-      out_size = compress_data (strm, &contents, &in_size,
-				&next_out, &avail_out);
+      out_size = compress_data (use_zstd, ctx, &contents, &in_size, &next_out,
+				&avail_out);
       if (out_size < 0)
-        return -1;
+	return -1;
 
       f->fr_fix += out_size;
       total_out_size += out_size;
@@ -1471,10 +1473,9 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   const char *section_name;
   char *compressed_name;
   char *header;
-  struct z_stream_s *strm;
   int x;
   flagword flags = bfd_section_flags (sec);
-  unsigned int header_size, compression_header_size;
+  unsigned int header_size;
 
   if (seginfo == NULL
       || sec->size < 32
@@ -1482,24 +1483,20 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
     return;
 
   section_name = bfd_section_name (sec);
-  if (!startswith (section_name, ".debug_"))
+  if (!startswith (section_name, ".debug_")
+      && !startswith (section_name, ".gnu.debuglto_.debug_")
+      && !startswith (section_name, ".gnu.linkonce.wi."))
     return;
 
-  strm = compress_init ();
-  if (strm == NULL)
+  bool use_zstd = abfd->flags & BFD_COMPRESS_ZSTD;
+  void *ctx = compress_init (use_zstd);
+  if (ctx == NULL)
     return;
 
-  if (flag_compress_debug == COMPRESS_DEBUG_GABI_ZLIB)
-    {
-      compression_header_size
-	= bfd_get_compression_header_size (stdoutput, NULL);
-      header_size = compression_header_size;
-    }
+  if (flag_compress_debug == COMPRESS_DEBUG_GNU_ZLIB)
+    header_size = 12;
   else
-    {
-      compression_header_size = 0;
-      header_size = 12;
-    }
+    header_size = bfd_get_compression_header_size (stdoutput, NULL);
 
   /* Create a new frag to contain the compression header.  */
   first_newf = frag_alloc (ob);
@@ -1531,7 +1528,7 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
       gas_assert (f->fr_type == rs_fill);
       if (f->fr_fix)
 	{
-	  out_size = compress_frag (strm, f->fr_literal, f->fr_fix,
+	  out_size = compress_frag (use_zstd, ctx, f->fr_literal, f->fr_fix,
 				    &last_newf, ob);
 	  if (out_size < 0)
 	    return;
@@ -1545,8 +1542,8 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 	{
 	  while (count--)
 	    {
-	      out_size = compress_frag (strm, fill_literal, (int) fill_size,
-				        &last_newf, ob);
+	      out_size = compress_frag (use_zstd, ctx, fill_literal,
+					(int)fill_size, &last_newf, ob);
 	      if (out_size < 0)
 		return;
 	      compressed_size += out_size;
@@ -1579,7 +1576,7 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 	as_fatal (_("can't extend frag"));
       next_out = obstack_next_free (ob);
       obstack_blank_fast (ob, avail_out);
-      x = compress_finish (strm, &next_out, &avail_out, &out_size);
+      x = compress_finish (use_zstd, ctx, &next_out, &avail_out, &out_size);
       if (x < 0)
 	return;
 
@@ -1607,7 +1604,8 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   bfd_update_compression_header (abfd, (bfd_byte *) header, sec);
   x = bfd_set_section_size (sec, compressed_size);
   gas_assert (x);
-  if (!compression_header_size)
+  if (flag_compress_debug == COMPRESS_DEBUG_GNU_ZLIB
+      && section_name[1] == 'd')
     {
       compressed_name = concat (".z", section_name + 1, (char *) NULL);
       bfd_rename_section (sec, compressed_name);
@@ -2540,6 +2538,8 @@ write_object_file (void)
     {
       if (flag_compress_debug == COMPRESS_DEBUG_GABI_ZLIB)
 	stdoutput->flags |= BFD_COMPRESS | BFD_COMPRESS_GABI;
+      else if (flag_compress_debug == COMPRESS_DEBUG_ZSTD)
+	stdoutput->flags |= BFD_COMPRESS | BFD_COMPRESS_GABI | BFD_COMPRESS_ZSTD;
       else
 	stdoutput->flags |= BFD_COMPRESS;
       bfd_map_over_sections (stdoutput, compress_debug, (char *) 0);
@@ -3211,9 +3211,7 @@ void
 print_fixup (fixS *fixp)
 {
   indent_level = 1;
-  fprintf (stderr, "fix ");
-  fprintf_vma (stderr, (bfd_vma) (uintptr_t) fixp);
-  fprintf (stderr, " %s:%d",fixp->fx_file, fixp->fx_line);
+  fprintf (stderr, "fix %p %s:%d", fixp, fixp->fx_file, fixp->fx_line);
   if (fixp->fx_pcrel)
     fprintf (stderr, " pcrel");
   if (fixp->fx_pcrel_adjust)
@@ -3222,12 +3220,10 @@ print_fixup (fixS *fixp)
     fprintf (stderr, " tcbit");
   if (fixp->fx_done)
     fprintf (stderr, " done");
-  fprintf (stderr, "\n    size=%d frag=", fixp->fx_size);
-  fprintf_vma (stderr, (bfd_vma) (uintptr_t) fixp->fx_frag);
-  fprintf (stderr, " where=%ld offset=%lx addnumber=%lx",
-	   (long) fixp->fx_where,
-	   (unsigned long) fixp->fx_offset,
-	   (unsigned long) fixp->fx_addnumber);
+  fprintf (stderr, "\n    size=%d frag=%p", fixp->fx_size, fixp->fx_frag);
+  fprintf (stderr, " where=%ld offset=%" PRIx64 " addnumber=%" PRIx64,
+	   fixp->fx_where, (uint64_t) fixp->fx_offset,
+	   (uint64_t) fixp->fx_addnumber);
   fprintf (stderr, "\n    %s (%d)", bfd_get_reloc_code_name (fixp->fx_r_type),
 	   fixp->fx_r_type);
   if (fixp->fx_addsy)

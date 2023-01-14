@@ -30,9 +30,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ucontext.h>
 #include <sys/param.h>
-#include <sys/signal.h>
 #include <sys/syscall.h>
 #include <time.h>
 #include <signal.h>
@@ -575,7 +573,9 @@ collector_timer_create (timer_t * ptimerid)
   sigev.sigev_notify = SIGEV_THREAD_ID | SIGEV_SIGNAL;
   sigev.sigev_signo = SIGPROF;
   sigev.sigev_value.sival_ptr = ptimerid;
+#if !defined(__MUSL_LIBC)
   sigev._sigev_un._tid = __collector_gettid ();
+#endif
   if (CALL_REAL (timer_create)(CLOCK_THREAD_CPUTIME_ID, &sigev, ptimerid) == -1)
     {
       TprintfT (DBG_LT2, "collector_timer_settime() failed! errno=%d\n", errno);
@@ -818,7 +818,7 @@ static int
 __collector_timer_create_symver (int(real_timer_create) (), clockid_t clockid, struct sigevent *sevp,
 				 timer_t *timerid);
 
-SYMVER_ATTRIBUTE (__collector_timer_create_2_3_3, timer_create@@GLIBC_2.3.3)
+SYMVER_ATTRIBUTE (__collector_timer_create_2_3_3, timer_create@GLIBC_2.3.3)
 int
 __collector_timer_create_2_3_3 (clockid_t clockid, struct sigevent *sevp,
 				timer_t *timerid)
@@ -1078,7 +1078,7 @@ __collector_pthread_create_symver (int(real_pthread_create) (),
 				   void *(*func)(void*),
 				   void *arg);
 
-SYMVER_ATTRIBUTE (__collector_pthread_create_2_1, pthread_create@@GLIBC_2.1)
+SYMVER_ATTRIBUTE (__collector_pthread_create_2_1, pthread_create@GLIBC_2.1)
 int
 __collector_pthread_create_2_1 (pthread_t *thread,
 				const pthread_attr_t *attr,

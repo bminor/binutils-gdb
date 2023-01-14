@@ -80,6 +80,11 @@ foreach test_data {{SEGV "Segmentation fault"} \
 	set saw_bt_end false
 	set internal_error_msg_count 0
 
+	# Get the GDB core into the output directory, so that it
+	# doesn't count as unexpected core in gdb.sum.
+	gdb_test "cd [file dirname $binfile]" "Working directory .*" \
+	    "cd to test directory"
+
 	# Send the fatal signal to GDB.
 	remote_exec host "kill -${sig} ${testpid}"
 

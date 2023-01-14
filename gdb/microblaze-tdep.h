@@ -23,7 +23,7 @@
 #include "gdbarch.h"
 
 /* Microblaze architecture-specific information.  */
-struct microblaze_gdbarch_tdep : gdbarch_tdep
+struct microblaze_gdbarch_tdep : gdbarch_tdep_base
 {
 };
 

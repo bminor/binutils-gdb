@@ -24,6 +24,7 @@
 
 #include "../features/loongarch/base32.c"
 #include "../features/loongarch/base64.c"
+#include "../features/loongarch/fpu.c"
 
 #ifndef GDBSERVER
 #define STATIC_IN_GDB static
@@ -44,6 +45,11 @@ loongarch_create_target_description (const struct loongarch_gdbarch_features fea
   else if (features.xlen == 8)
     arch_name.append ("64");
 
+  if (features.fputype == SINGLE_FLOAT)
+    arch_name.append ("f");
+  else if (features.fputype == DOUBLE_FLOAT)
+    arch_name.append ("d");
+
   set_tdesc_architecture (tdesc.get (), arch_name.c_str ());
 
   long regnum = 0;
@@ -53,6 +59,9 @@ loongarch_create_target_description (const struct loongarch_gdbarch_features fea
     regnum = create_feature_loongarch_base32 (tdesc.get (), regnum);
   else if (features.xlen == 8)
     regnum = create_feature_loongarch_base64 (tdesc.get (), regnum);
+
+  /* For now we only support creating single float and double float.  */
+  regnum = create_feature_loongarch_fpu (tdesc.get (), regnum);
 
   return tdesc;
 }

@@ -94,7 +94,7 @@ static enum debug_info_type xt_saved_debug_type = DEBUG_NONE;
 /* Some functions are only valid in the front end.  This variable
    allows us to assert that we haven't crossed over into the
    back end.  */
-static bool past_xtensa_end = false;
+static bool past_xtensa_md_finish = false;
 
 /* Flags for properties of the last instruction in a segment.  */
 #define FLAG_IS_A0_WRITER	0x1
@@ -1189,9 +1189,9 @@ const pseudo_typeS md_pseudo_table[] =
 static bool
 use_transform (void)
 {
-  /* After md_end, you should be checking frag by frag, rather
+  /* After md_finish, you should be checking frag by frag, rather
      than state directives.  */
-  gas_assert (!past_xtensa_end);
+  gas_assert (!past_xtensa_md_finish);
   return directive_state[directive_transform];
 }
 
@@ -1199,10 +1199,10 @@ use_transform (void)
 static bool
 do_align_targets (void)
 {
-  /* Do not use this function after md_end; just look at align_targets
+  /* Do not use this function after md_finish; just look at align_targets
      instead.  There is no target-align directive, so alignment is either
      enabled for all frags or not done at all.  */
-  gas_assert (!past_xtensa_end);
+  gas_assert (!past_xtensa_md_finish);
   return align_targets && use_transform ();
 }
 
@@ -4980,7 +4980,7 @@ xtensa_set_frag_assembly_state (fragS *fragP)
     fragP->tc_frag_data.is_no_density = true;
 
   /* This function is called from subsegs_finish, which is called
-     after xtensa_end, so we can't use "use_transform" or
+     after xtensa_md_finish, so we can't use "use_transform" or
      "use_schedule" here.  */
   if (!directive_state[directive_transform])
     fragP->tc_frag_data.is_no_transform = true;
@@ -6600,7 +6600,7 @@ find_vinsn_conflicts (vliw_insn *vinsn)
   int branches = 0;
   xtensa_isa isa = xtensa_default_isa;
 
-  gas_assert (!past_xtensa_end);
+  gas_assert (!past_xtensa_md_finish);
 
   for (i = 0 ; i < vinsn->num_slots; i++)
     {
@@ -7369,7 +7369,7 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
 }
 
 
-/* xtensa_end and helper functions.  */
+/* xtensa_md_finish and helper functions.  */
 
 static void xtensa_cleanup_align_frags (void);
 static void xtensa_fix_target_frags (void);
@@ -7384,12 +7384,12 @@ static void xtensa_sanity_check (void);
 static void xtensa_add_config_info (void);
 
 void
-xtensa_end (void)
+xtensa_md_finish (void)
 {
   directive_balance ();
   xtensa_flush_pending_output ();
 
-  past_xtensa_end = true;
+  past_xtensa_md_finish = true;
 
   xtensa_move_literals ();
 
@@ -7927,7 +7927,7 @@ xtensa_maybe_create_literal_pool_frag (bool create, bool only_if_needed)
     {
       if (only_if_needed)
 	{
-	  if (past_xtensa_end || !use_transform() ||
+	  if (past_xtensa_md_finish || !use_transform() ||
 	      frag_now->tc_frag_data.is_no_transform)
 	    {
 	      return;

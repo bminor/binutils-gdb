@@ -56,21 +56,12 @@ gdb_test "step" "solib_main .arg=10000. at.*${libfile}.c:${decimal}.* HERE .*" \
 
 # Verify that we can step within the shlib call.
 #
-gdb_test "next" "${decimal}\[ \t\]*\}.* STEP .*" "step in solib call"
+gdb_test "next" "${decimal}\[ \t\]*return ans;.* STEP .*" "step in solib call"
 
 # Verify that we can step out of the shlib call, and back out into
 # the caller.
 #
-gdb_test_multiple "next" "step out of solib call" {
-    -re "0x\[0-9a-f\]*\[ \t\]*9\[ \t\]*.*$gdb_prompt $" {
-	gdb_test "next" \
-	    "main .. at.*so-impl-ld.c:22.*" \
-	    "step out of solib call"
-    }
-    -re "main .. at.*so-impl-ld.c:22.*$gdb_prompt $" {
-	pass "step out of solib call"
-    }
-}
+gdb_step_until ".*main .. at.*return 0;.*" "step out of solib call"
 
 gdb_exit
 return 0

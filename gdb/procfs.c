@@ -1522,7 +1522,7 @@ procfs_address_to_host_pointer (CORE_ADDR addr)
   struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
   void *ptr;
 
-  gdb_assert (sizeof (ptr) == TYPE_LENGTH (ptr_type));
+  gdb_assert (sizeof (ptr) == ptr_type->length ());
   gdbarch_address_to_pointer (target_gdbarch (), ptr_type,
 			      (gdb_byte *) &ptr, addr);
   return ptr;
@@ -3020,7 +3020,7 @@ procfs_target::can_use_hw_breakpoint (enum bptype type, int cnt, int othertype)
      different.  */
   struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
 
-  if (sizeof (void *) != TYPE_LENGTH (ptr_type))
+  if (sizeof (void *) != ptr_type->length ())
     return 0;
 
   /* Other tests here???  */

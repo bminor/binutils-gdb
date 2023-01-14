@@ -151,8 +151,6 @@ extern unsigned int max_user_call_depth;
 
 /* Exported to gdb/top.c */
 
-void init_cmd_lists (void);
-
 int is_complete_command (struct cmd_list_element *cmd);
 
 /* Exported to gdb/main.c */

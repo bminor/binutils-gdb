@@ -37,20 +37,14 @@ static inline unsigned int riscv_insn_length (insn_t insn)
     return 6;
   if ((insn & 0x7f) == 0x3f) /* 64-bit instructions.  */
     return 8;
+  /* 80- ... 176-bit instructions.  */
+  if ((insn & 0x7f) == 0x7f && (insn & 0x7000) != 0x7000)
+    return 10 + ((insn >> 11) & 0xe);
+  /* Maximum value returned by this function.  */
+#define RISCV_MAX_INSN_LEN 22
   /* Longer instructions not supported at the moment.  */
   return 2;
 }
-
-static const char * const riscv_rm[8] =
-{
-  "rne", "rtz", "rdn", "rup", "rmm", 0, 0, "dyn"
-};
-
-static const char * const riscv_pred_succ[16] =
-{
-  0,   "w",  "r",  "rw",  "o",  "ow",  "or",  "orw",
-  "i", "iw", "ir", "irw", "io", "iow", "ior", "iorw"
-};
 
 #define RVC_JUMP_BITS 11
 #define RVC_JUMP_REACH ((1ULL << RVC_JUMP_BITS) * RISCV_JUMP_ALIGN)
@@ -60,6 +54,7 @@ static const char * const riscv_pred_succ[16] =
 
 #define RV_X(x, s, n)  (((x) >> (s)) & ((1 << (n)) - 1))
 #define RV_IMM_SIGN(x) (-(((x) >> 31) & 1))
+#define RV_X_SIGNED(x, s, n) (RV_X(x, s, n) | ((-(RV_X(x, (s + n - 1), 1))) << (n)))
 
 #define EXTRACT_ITYPE_IMM(x) \
   (RV_X(x, 20, 12) | (RV_IMM_SIGN(x) << 12))
@@ -347,6 +342,22 @@ static const char * const riscv_pred_succ[16] =
 #define EXTRACT_OPERAND(FIELD, INSN) \
   EXTRACT_BITS ((INSN), OP_MASK_##FIELD, OP_SH_##FIELD)
 
+/* Extract an unsigned immediate operand on position s with n bits.  */
+#define EXTRACT_U_IMM(n, s, l) \
+  RV_X (l, s, n)
+
+/* Extract an signed immediate operand on position s with n bits.  */
+#define EXTRACT_S_IMM(n, s, l) \
+  RV_X_SIGNED (l, s, n)
+
+/* Validate that unsigned n-bit immediate is within bounds.  */
+#define VALIDATE_U_IMM(v, n) \
+  ((unsigned long) v < (1UL << n))
+
+/* Validate that signed n-bit immediate is within bounds.  */
+#define VALIDATE_S_IMM(v, n) \
+  (v < (long) (1UL << (n-1)) && v >= -(offsetT) (1UL << (n-1)))
+
 /* The maximal number of subset can be required.  */
 #define MAX_SUBSET_NUM 4
 
@@ -367,13 +378,16 @@ enum riscv_insn_class
   INSN_CLASS_ZICSR,
   INSN_CLASS_ZIFENCEI,
   INSN_CLASS_ZIHINTPAUSE,
-  INSN_CLASS_F_OR_ZFINX,
-  INSN_CLASS_D_OR_ZDINX,
-  INSN_CLASS_Q_OR_ZQINX,
-  INSN_CLASS_ZFH,
-  INSN_CLASS_ZFH_OR_ZHINX,
-  INSN_CLASS_D_AND_ZFH_INX,
-  INSN_CLASS_Q_AND_ZFH_INX,
+  INSN_CLASS_ZMMUL,
+  INSN_CLASS_ZAWRS,
+  INSN_CLASS_F_INX,
+  INSN_CLASS_D_INX,
+  INSN_CLASS_Q_INX,
+  INSN_CLASS_ZFH_INX,
+  INSN_CLASS_ZFHMIN,
+  INSN_CLASS_ZFHMIN_INX,
+  INSN_CLASS_ZFHMIN_AND_D_INX,
+  INSN_CLASS_ZFHMIN_AND_Q_INX,
   INSN_CLASS_ZBA,
   INSN_CLASS_ZBB,
   INSN_CLASS_ZBC,
@@ -396,6 +410,16 @@ enum riscv_insn_class
   INSN_CLASS_ZICBOP,
   INSN_CLASS_ZICBOZ,
   INSN_CLASS_H,
+  INSN_CLASS_XTHEADBA,
+  INSN_CLASS_XTHEADBB,
+  INSN_CLASS_XTHEADBS,
+  INSN_CLASS_XTHEADCMO,
+  INSN_CLASS_XTHEADCONDMOV,
+  INSN_CLASS_XTHEADFMEMIDX,
+  INSN_CLASS_XTHEADMAC,
+  INSN_CLASS_XTHEADMEMIDX,
+  INSN_CLASS_XTHEADMEMPAIR,
+  INSN_CLASS_XTHEADSYNC,
 };
 
 /* This structure holds information for a particular instruction.  */
@@ -520,6 +544,8 @@ extern const char * const riscv_gpr_names_numeric[NGPR];
 extern const char * const riscv_gpr_names_abi[NGPR];
 extern const char * const riscv_fpr_names_numeric[NFPR];
 extern const char * const riscv_fpr_names_abi[NFPR];
+extern const char * const riscv_rm[8];
+extern const char * const riscv_pred_succ[16];
 extern const char * const riscv_vecr_names_numeric[NVECR];
 extern const char * const riscv_vecm_names_numeric[NVECM];
 extern const char * const riscv_vsew[8];

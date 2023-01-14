@@ -785,8 +785,6 @@ static const struct pd_reg pre_defined_registers[] =
   { "xer", 1, PPC_OPERAND_SPR }
 };
 
-#define REG_NAME_CNT	(sizeof (pre_defined_registers) / sizeof (struct pd_reg))
-
 /* Given NAME, find the register number associated with that name, return
    the integer value associated with the given name or -1 on failure.  */
 
@@ -815,76 +813,43 @@ reg_name_search (const struct pd_reg *regs, int regcount, const char *name)
   return NULL;
 }
 
-/*
- * Summary of register_name.
- *
- * in:	Input_line_pointer points to 1st char of operand.
- *
- * out:	A expressionS.
- *      The operand may have been a register: in this case, X_op == O_register,
- *      X_add_number is set to the register number, and truth is returned.
- *	Input_line_pointer->(next non-blank) char after operand, or is in its
- *      original state.
- */
+/* Called for a non-symbol, non-number operand.  Handles %reg.  */
 
-static bool
-register_name (expressionS *expressionP)
+void
+md_operand (expressionS *expressionP)
 {
   const struct pd_reg *reg;
   char *name;
   char *start;
   char c;
 
-  /* Find the spelling of the operand.  */
-  start = name = input_line_pointer;
-  if (name[0] == '%' && ISALPHA (name[1]))
-    name = ++input_line_pointer;
+  if (input_line_pointer[0] != '%' || !ISALPHA (input_line_pointer[1]))
+    return;
 
-  else if (!reg_names_p || !ISALPHA (name[0]))
-    return false;
+  start = input_line_pointer;
+  ++input_line_pointer;
 
   c = get_symbol_name (&name);
-  reg = reg_name_search (pre_defined_registers, REG_NAME_CNT, name);
-
-  /* Put back the delimiting char.  */
+  reg = reg_name_search (pre_defined_registers,
+			 ARRAY_SIZE (pre_defined_registers), name);
   *input_line_pointer = c;
 
-  /* Look to see if it's in the register table.  */
   if (reg != NULL)
     {
       expressionP->X_op = O_register;
       expressionP->X_add_number = reg->value;
       expressionP->X_md = reg->flags;
-
-      /* Make the rest nice.  */
-      expressionP->X_add_symbol = NULL;
-      expressionP->X_op_symbol = NULL;
-      return true;
     }
-
-  /* Reset the line as if we had not done anything.  */
-  input_line_pointer = start;
-  return false;
+  else
+    input_line_pointer = start;
 }
-
-/* This function is called for each symbol seen in an expression.  It
-   handles the special parsing which PowerPC assemblers are supposed
-   to use for condition codes.  */
 
 /* Whether to do the special parsing.  */
 static bool cr_operand;
 
-/* Names to recognize in a condition code.  This table is sorted.  */
-static const struct pd_reg cr_names[] =
+/* Extra names to recognise in a condition code.  This table is sorted.  */
+static const struct pd_reg cr_cond[] =
 {
-  { "cr0", 0, PPC_OPERAND_CR_REG },
-  { "cr1", 1, PPC_OPERAND_CR_REG },
-  { "cr2", 2, PPC_OPERAND_CR_REG },
-  { "cr3", 3, PPC_OPERAND_CR_REG },
-  { "cr4", 4, PPC_OPERAND_CR_REG },
-  { "cr5", 5, PPC_OPERAND_CR_REG },
-  { "cr6", 6, PPC_OPERAND_CR_REG },
-  { "cr7", 7, PPC_OPERAND_CR_REG },
   { "eq", 2, PPC_OPERAND_CR_BIT },
   { "gt", 1, PPC_OPERAND_CR_BIT },
   { "lt", 0, PPC_OPERAND_CR_BIT },
@@ -892,29 +857,58 @@ static const struct pd_reg cr_names[] =
   { "un", 3, PPC_OPERAND_CR_BIT }
 };
 
-/* Parsing function.  This returns non-zero if it recognized an
-   expression.  */
+/* This function is called for each symbol seen in an expression.  It
+   handles the special parsing which PowerPC assemblers are supposed
+   to use for condition codes, and recognises other registers when
+   -mregnames.  */
 
-int
-ppc_parse_name (const char *name, expressionS *exp)
+void
+ppc_parse_name (const char *name, expressionS *exp, enum expr_mode mode)
 {
-  const struct pd_reg *reg;
+  const struct pd_reg *reg = NULL;
 
-  if (! cr_operand)
-    return 0;
+  if (cr_operand)
+    reg = reg_name_search (cr_cond, ARRAY_SIZE (cr_cond), name);
+  if (reg == NULL && (cr_operand || reg_names_p))
+    reg = reg_name_search (pre_defined_registers,
+			   ARRAY_SIZE (pre_defined_registers), name);
+  if (reg != NULL)
+    {
+      exp->X_op = O_register;
+      exp->X_add_number = reg->value;
+      exp->X_md = reg->flags;
+      return;
+    }
 
-  if (*name == '%')
-    ++name;
-  reg = reg_name_search (cr_names, sizeof cr_names / sizeof cr_names[0],
-			 name);
-  if (reg == NULL)
-    return 0;
+  /* The following replaces code in expr.c operand() after the
+     md_parse_name call.  There is too much difference between targets
+     in the way X_md is used to move this code into expr.c.  If you
+     do, you'll get failures on x86 due to uninitialised X_md fields,
+     failures on alpha and other targets due to creating register
+     symbols as O_constant rather than O_register, and failures on arc
+     and others due to expecting expr() to leave X_md alone.  */
+  symbolS *sym = symbol_find_or_make (name);
 
-  exp->X_op = O_register;
-  exp->X_add_number = reg->value;
-  exp->X_md = reg->flags;
-
-  return 1;
+  /* If we have an absolute symbol or a reg, then we know its value
+     now.  Copy the symbol value expression to propagate X_md.  */
+  bool done = false;
+  if (mode != expr_defer
+      && !S_FORCE_RELOC (sym, 0))
+    {
+      segT segment = S_GET_SEGMENT (sym);
+      if (segment == absolute_section || segment == reg_section)
+	{
+	  resolve_symbol_value (sym);
+	  *exp = *symbol_get_value_expression (sym);
+	  done = true;
+	}
+    }
+  if (!done)
+    {
+      exp->X_op = O_symbol;
+      exp->X_add_symbol = sym;
+      exp->X_add_number = 0;
+    }
 }
 
 /* Propagate X_md and check register expressions.  This is to support
@@ -975,6 +969,10 @@ ppc_optimize_expr (expressionS *left, operatorT op, expressionS *right)
 
 /* Whether to target xcoff64/elf64.  */
 static unsigned int ppc_obj64 = BFD_DEFAULT_TARGET_SIZE == 64;
+
+/* A separate obstack for use by ppc_hash, so that we can quickly
+   throw away hash table memory .  */
+struct obstack insn_obstack;
 
 /* Opcode hash table.  */
 static htab_t ppc_hash;
@@ -1384,6 +1382,10 @@ PowerPC options:\n"));
   fprintf (stream, _("\
 -mpower10, -mpwr10      generate code for Power10 architecture\n"));
   fprintf (stream, _("\
+-mlibresoc              generate code for Libre-SOC architecture\n"));
+  fprintf (stream, _("\
+-mfuture                generate code for 'future' architecture\n"));
+  fprintf (stream, _("\
 -mcell                  generate code for Cell Broadband Engine architecture\n"));
   fprintf (stream, _("\
 -mcom                   generate code for Power/PowerPC common instructions\n"));
@@ -1613,6 +1615,15 @@ insn_validate (const struct powerpc_opcode *op)
   return false;
 }
 
+static void *
+insn_calloc (size_t n, size_t size)
+{
+  size_t amt = n * size;
+  void *ret = obstack_alloc (&insn_obstack, amt);
+  memset (ret, 0, amt);
+  return ret;
+}
+
 /* Insert opcodes into hash tables.  Called at startup and for
    .machine pseudo.  */
 
@@ -1624,10 +1635,16 @@ ppc_setup_opcodes (void)
   bool bad_insn = false;
 
   if (ppc_hash != NULL)
-    htab_delete (ppc_hash);
+    {
+      htab_delete (ppc_hash);
+      _obstack_free (&insn_obstack, NULL);
+    }
+
+  obstack_begin (&insn_obstack, chunksize);
 
   /* Insert the opcodes into a hash table.  */
-  ppc_hash = str_htab_create ();
+  ppc_hash = htab_create_alloc (5000, hash_string_tuple, eq_string_tuple,
+				NULL, insn_calloc, NULL);
 
   if (ENABLE_CHECKING)
     {
@@ -1642,8 +1659,13 @@ ppc_setup_opcodes (void)
       for (i = 0; i < num_powerpc_operands; ++i)
 	{
 	  uint64_t mask = powerpc_operands[i].bitm;
+	  unsigned long flags = powerpc_operands[i].flags;
 	  uint64_t right_bit;
 	  unsigned int j;
+
+	  if ((flags & PPC_OPERAND_PLUS1) != 0
+	       && (flags & PPC_OPERAND_NONZERO) != 0)
+	    as_bad ("mutually exclusive operand flags");
 
 	  right_bit = mask & -mask;
 	  mask += right_bit;
@@ -1672,10 +1694,12 @@ ppc_setup_opcodes (void)
 	  unsigned int new_opcode = PPC_OP (op[0].opcode);
 
 #ifdef PRINT_OPCODE_TABLE
-	  printf ("%-14s\t#%04u\tmajor op: 0x%x\top: 0x%llx\tmask: 0x%llx\tflags: 0x%llx\n",
+	  printf ("%-14s\t#%04u\tmajor op: 0x%x\top: 0x%llx"
+		  "\tmask: 0x%llx\tflags: 0x%llx\n",
 		  op->name, (unsigned int) (op - powerpc_opcodes),
 		  new_opcode, (unsigned long long) op->opcode,
-		  (unsigned long long) op->mask, (unsigned long long) op->flags);
+		  (unsigned long long) op->mask,
+		  (unsigned long long) op->flags);
 #endif
 
 	  /* The major opcodes had better be sorted.  Code in the disassembler
@@ -1723,10 +1747,12 @@ ppc_setup_opcodes (void)
 	  unsigned int new_opcode = PPC_PREFIX_SEG (op[0].opcode);
 
 #ifdef PRINT_OPCODE_TABLE
-	  printf ("%-14s\t#%04u\tmajor op/2: 0x%x\top: 0x%llx\tmask: 0x%llx\tflags: 0x%llx\n",
+	  printf ("%-14s\t#%04u\tmajor op/2: 0x%x\top: 0x%llx"
+		  "\tmask: 0x%llx\tflags: 0x%llx\n",
 		  op->name, (unsigned int) (op - prefix_opcodes),
 		  new_opcode, (unsigned long long) op->opcode,
-		  (unsigned long long) op->mask, (unsigned long long) op->flags);
+		  (unsigned long long) op->mask,
+		  (unsigned long long) op->flags);
 #endif
 
 	  /* The major opcodes had better be sorted.  Code in the disassembler
@@ -1753,82 +1779,86 @@ ppc_setup_opcodes (void)
     for (op = prefix_opcodes; op < op_end; op++)
       str_hash_insert (ppc_hash, op->name, op, 0);
 
-  op_end = vle_opcodes + vle_num_opcodes;
-  for (op = vle_opcodes; op < op_end; op++)
+  if ((ppc_cpu & (PPC_OPCODE_VLE | PPC_OPCODE_ANY)) != 0)
     {
-      if (ENABLE_CHECKING)
+      unsigned int prev_seg = 0;
+      unsigned int seg;
+
+      op_end = vle_opcodes + vle_num_opcodes;
+      for (op = vle_opcodes; op < op_end; op++)
 	{
-	  unsigned new_seg = VLE_OP_TO_SEG (VLE_OP (op[0].opcode, op[0].mask));
+	  if (ENABLE_CHECKING)
+	    {
+	      seg = VLE_OP_TO_SEG (VLE_OP (op[0].opcode, op[0].mask));
 
 #ifdef PRINT_OPCODE_TABLE
-	  printf ("%-14s\t#%04u\tmajor op: 0x%x\top: 0x%llx\tmask: 0x%llx\tflags: 0x%llx\n",
-		  op->name, (unsigned int) (op - vle_opcodes),
-		  (unsigned int) new_seg, (unsigned long long) op->opcode,
-		  (unsigned long long) op->mask, (unsigned long long) op->flags);
+	      printf ("%-14s\t#%04u\tmajor op: 0x%x\top: 0x%llx"
+		      "\tmask: 0x%llx\tflags: 0x%llx\n",
+		      op->name, (unsigned int) (op - vle_opcodes),
+		      (unsigned int) seg, (unsigned long long) op->opcode,
+		      (unsigned long long) op->mask,
+		      (unsigned long long) op->flags);
 #endif
 
-	  /* The major opcodes had better be sorted.  Code in the disassembler
-	     assumes the insns are sorted according to major opcode.  */
-	  if (op != vle_opcodes
-	      && new_seg < VLE_OP_TO_SEG (VLE_OP (op[-1].opcode, op[-1].mask)))
-	    {
-	      as_bad (_("major opcode is not sorted for %s"), op->name);
-	      bad_insn = true;
+	      if (seg < prev_seg)
+		{
+		  as_bad (_("major opcode is not sorted for %s"), op->name);
+		  bad_insn = true;
+		}
+	      prev_seg = seg;
+	      bad_insn |= insn_validate (op);
 	    }
 
-	  bad_insn |= insn_validate (op);
+	  str_hash_insert (ppc_hash, op->name, op, 0);
 	}
+    }
 
-      if ((ppc_cpu & op->flags) != 0
-	  && !(ppc_cpu & op->deprecated)
-	  && str_hash_insert (ppc_hash, op->name, op, 0) != NULL)
+  /* LSP instructions */
+  if ((ppc_cpu & (PPC_OPCODE_LSP | PPC_OPCODE_ANY)) != 0)
+    {
+      unsigned int prev_seg = 0;
+      unsigned int seg;
+      op_end = lsp_opcodes + lsp_num_opcodes;
+      for (op = lsp_opcodes; op < op_end; op++)
 	{
-	  as_bad (_("duplicate %s"), op->name);
-	  bad_insn = true;
+	  if (ENABLE_CHECKING)
+	    {
+	      seg = LSP_OP_TO_SEG (op->opcode);
+	      if (seg < prev_seg)
+		{
+		  as_bad (_("opcode is not sorted for %s"), op->name);
+		  bad_insn = true;
+		}
+	      prev_seg = seg;
+	      bad_insn |= insn_validate (op);
+	    }
+
+	  str_hash_insert (ppc_hash, op->name, op, 0);
 	}
     }
 
   /* SPE2 instructions */
-  if ((ppc_cpu & PPC_OPCODE_SPE2) == PPC_OPCODE_SPE2)
+  if ((ppc_cpu & (PPC_OPCODE_SPE2 | PPC_OPCODE_ANY)) != 0)
     {
+      unsigned int prev_seg = 0;
+      unsigned int seg;
       op_end = spe2_opcodes + spe2_num_opcodes;
       for (op = spe2_opcodes; op < op_end; op++)
 	{
 	  if (ENABLE_CHECKING)
 	    {
-	      if (op != spe2_opcodes)
+	      seg = VLE_OP_TO_SEG (VLE_OP (op[0].opcode, op[0].mask));
+	      if (seg < prev_seg)
 		{
-		unsigned old_seg, new_seg;
-
-		old_seg = VLE_OP (op[-1].opcode, op[-1].mask);
-		old_seg = VLE_OP_TO_SEG (old_seg);
-		new_seg = VLE_OP (op[0].opcode, op[0].mask);
-		new_seg = VLE_OP_TO_SEG (new_seg);
-
-		/* The major opcodes had better be sorted.  Code in the
-		    disassembler assumes the insns are sorted according to
-		    major opcode.  */
-		if (new_seg < old_seg)
-		  {
 		  as_bad (_("major opcode is not sorted for %s"), op->name);
 		  bad_insn = true;
-		  }
 		}
-
+	      prev_seg = seg;
 	      bad_insn |= insn_validate (op);
 	    }
 
-	  if ((ppc_cpu & op->flags) != 0
-	      && !(ppc_cpu & op->deprecated)
-	      && str_hash_insert (ppc_hash, op->name, op, 0) != NULL)
-	    {
-	      as_bad (_("duplicate %s"), op->name);
-	      bad_insn = true;
-	    }
+	  str_hash_insert (ppc_hash, op->name, op, 0);
 	}
-
-      for (op = spe2_opcodes; op < op_end; op++)
-	str_hash_insert (ppc_hash, op->name, op, 0);
     }
 
   if (bad_insn)
@@ -1873,6 +1903,17 @@ md_begin (void)
   ppc_init_xcoff_section (&ppc_xcoff_data_section, data_section);
   ppc_init_xcoff_section (&ppc_xcoff_bss_section, bss_section);
 #endif
+}
+
+void
+ppc_md_end (void)
+{
+  if (ppc_hash)
+    {
+      htab_delete (ppc_hash);
+      _obstack_free (&insn_obstack, NULL);
+    }
+  ppc_hash = NULL;
 }
 
 void
@@ -1966,6 +2007,11 @@ ppc_insert_operand (uint64_t insn,
       max = (max >> 1) & -right;
       min = ~max & -right;
     }
+  else if ((operand->flags & PPC_OPERAND_NONZERO) != 0)
+    {
+      ++min;
+      ++max;
+    }
 
   if ((operand->flags & PPC_OPERAND_PLUS1) != 0)
     max++;
@@ -2016,10 +2062,15 @@ ppc_insert_operand (uint64_t insn,
       if (errmsg != (const char *) NULL)
 	as_bad_where (file, line, "%s", errmsg);
     }
-  else if (operand->shift >= 0)
-    insn |= (val & operand->bitm) << operand->shift;
   else
-    insn |= (val & operand->bitm) >> -operand->shift;
+    {
+      if ((operand->flags & PPC_OPERAND_NONZERO) != 0)
+	--val;
+      if (operand->shift >= 0)
+	insn |= (val & operand->bitm) << operand->shift;
+      else
+	insn |= (val & operand->bitm) >> -operand->shift;
+    }
 
   return insn;
 }
@@ -2534,7 +2585,7 @@ ppc_elf_gnu_attribute (int ignored ATTRIBUTE_UNUSED)
 
 /* Set ABI version in output file.  */
 void
-ppc_elf_end (void)
+ppc_elf_md_finish (void)
 {
   if (ppc_obj64 && ppc_abiversion != 0)
     {
@@ -3407,25 +3458,10 @@ md_assemble (char *str)
       /* Gather the operand.  */
       hold = input_line_pointer;
       input_line_pointer = str;
-
-      if ((reg_names_p
-	   && (((operand->flags & PPC_OPERAND_CR_BIT) != 0)
-	       || ((operand->flags & PPC_OPERAND_CR_REG) != 0)))
-	  || !register_name (&ex))
-	{
-	  char save_lex = lex_type['%'];
-
-	  if (((operand->flags & PPC_OPERAND_CR_REG) != 0)
-	      || (operand->flags & PPC_OPERAND_CR_BIT) != 0)
-	    {
-	      cr_operand = true;
-	      lex_type['%'] |= LEX_BEGIN_NAME;
-	    }
-	  expression (&ex);
-	  cr_operand = false;
-	  lex_type['%'] = save_lex;
-	}
-
+      cr_operand = ((operand->flags & PPC_OPERAND_CR_BIT) != 0
+		    || (operand->flags & PPC_OPERAND_CR_REG) != 0);
+      expression (&ex);
+      cr_operand = false;
       str = input_line_pointer;
       input_line_pointer = hold;
 
@@ -3983,7 +4019,7 @@ md_assemble (char *str)
          be set for VLE-only instructions or for VLE-only processors,
          however it'll remain clear for dual-mode instructions on
          dual-mode and, more importantly, standard-mode processors.  */
-      if ((ppc_cpu & opcode->flags) == PPC_OPCODE_VLE)
+      if (ppc_cpu & opcode->flags & PPC_OPCODE_VLE)
 	{
 	  ppc_apuinfo_section_add (PPC_APUINFO_VLE, 1);
 	  if (elf_section_data (now_seg) != NULL)
@@ -4231,6 +4267,7 @@ static void ppc_GNU_visibility (int visibility) {
       if ((name = read_symbol_name ()) == NULL)
 	break;
       symbolP = symbol_find_or_make (name);
+      free (name);
       coffsym = coffsymbol (symbol_get_bfdsym (symbolP));
 
       coffsym->native->u.syment.n_type &= ~SYM_V_MASK;
@@ -4837,6 +4874,7 @@ ppc_extern (int ignore ATTRIBUTE_UNUSED)
     return;
 
   sym = symbol_find_or_make (name);
+  free (name);
 
   if (*input_line_pointer == ',')
     {
@@ -4872,6 +4910,7 @@ ppc_globl (int ignore ATTRIBUTE_UNUSED)
     return;
 
   sym = symbol_find_or_make (name);
+  free (name);
   S_SET_EXTERNAL (sym);
 
   if (*input_line_pointer == ',')
@@ -4908,6 +4947,7 @@ ppc_weak (int ignore ATTRIBUTE_UNUSED)
     return;
 
   sym = symbol_find_or_make (name);
+  free (name);
   S_SET_WEAK (sym);
 
   if (*input_line_pointer == ',')
@@ -5662,7 +5702,7 @@ ppc_vbyte (int dummy ATTRIBUTE_UNUSED)
 }
 
 void
-ppc_xcoff_end (void)
+ppc_xcoff_md_finish (void)
 {
   int i;
 
@@ -6647,8 +6687,6 @@ ppc_force_relocation (fixS *fix)
 int
 ppc_force_relocation (fixS *fix)
 {
-  /* Branch prediction relocations must force a relocation, as must
-     the vtable description relocs.  */
   switch (fix->fx_r_type)
     {
     case BFD_RELOC_PPC_B16_BRTAKEN:
@@ -6657,6 +6695,60 @@ ppc_force_relocation (fixS *fix)
     case BFD_RELOC_PPC_BA16_BRNTAKEN:
     case BFD_RELOC_24_PLT_PCREL:
     case BFD_RELOC_PPC64_TOC:
+    case BFD_RELOC_16_GOTOFF:
+    case BFD_RELOC_LO16_GOTOFF:
+    case BFD_RELOC_HI16_GOTOFF:
+    case BFD_RELOC_HI16_S_GOTOFF:
+    case BFD_RELOC_LO16_PLTOFF:
+    case BFD_RELOC_HI16_PLTOFF:
+    case BFD_RELOC_HI16_S_PLTOFF:
+    case BFD_RELOC_GPREL16:
+    case BFD_RELOC_16_BASEREL:
+    case BFD_RELOC_LO16_BASEREL:
+    case BFD_RELOC_HI16_BASEREL:
+    case BFD_RELOC_HI16_S_BASEREL:
+    case BFD_RELOC_PPC_TOC16:
+    case BFD_RELOC_PPC64_TOC16_LO:
+    case BFD_RELOC_PPC64_TOC16_HI:
+    case BFD_RELOC_PPC64_TOC16_HA:
+    case BFD_RELOC_PPC64_PLTGOT16:
+    case BFD_RELOC_PPC64_PLTGOT16_LO:
+    case BFD_RELOC_PPC64_PLTGOT16_HI:
+    case BFD_RELOC_PPC64_PLTGOT16_HA:
+    case BFD_RELOC_PPC64_GOT16_DS:
+    case BFD_RELOC_PPC64_GOT16_LO_DS:
+    case BFD_RELOC_PPC64_PLT16_LO_DS:
+    case BFD_RELOC_PPC64_SECTOFF_DS:
+    case BFD_RELOC_PPC64_SECTOFF_LO_DS:
+    case BFD_RELOC_PPC64_TOC16_DS:
+    case BFD_RELOC_PPC64_TOC16_LO_DS:
+    case BFD_RELOC_PPC64_PLTGOT16_DS:
+    case BFD_RELOC_PPC64_PLTGOT16_LO_DS:
+    case BFD_RELOC_PPC_EMB_NADDR16:
+    case BFD_RELOC_PPC_EMB_NADDR16_LO:
+    case BFD_RELOC_PPC_EMB_NADDR16_HI:
+    case BFD_RELOC_PPC_EMB_NADDR16_HA:
+    case BFD_RELOC_PPC_EMB_SDAI16:
+    case BFD_RELOC_PPC_EMB_SDA2I16:
+    case BFD_RELOC_PPC_EMB_SDA2REL:
+    case BFD_RELOC_PPC_EMB_SDA21:
+    case BFD_RELOC_PPC_EMB_MRKREF:
+    case BFD_RELOC_PPC_EMB_RELSEC16:
+    case BFD_RELOC_PPC_EMB_RELST_LO:
+    case BFD_RELOC_PPC_EMB_RELST_HI:
+    case BFD_RELOC_PPC_EMB_RELST_HA:
+    case BFD_RELOC_PPC_EMB_BIT_FLD:
+    case BFD_RELOC_PPC_EMB_RELSDA:
+    case BFD_RELOC_PPC_VLE_SDA21:
+    case BFD_RELOC_PPC_VLE_SDA21_LO:
+    case BFD_RELOC_PPC_VLE_SDAREL_LO16A:
+    case BFD_RELOC_PPC_VLE_SDAREL_LO16D:
+    case BFD_RELOC_PPC_VLE_SDAREL_HI16A:
+    case BFD_RELOC_PPC_VLE_SDAREL_HI16D:
+    case BFD_RELOC_PPC_VLE_SDAREL_HA16A:
+    case BFD_RELOC_PPC_VLE_SDAREL_HA16D:
+    case BFD_RELOC_PPC64_PLT_PCREL34:
+    case BFD_RELOC_PPC64_GOT_PCREL34:
       return 1;
     case BFD_RELOC_PPC_B26:
     case BFD_RELOC_PPC_BA26:

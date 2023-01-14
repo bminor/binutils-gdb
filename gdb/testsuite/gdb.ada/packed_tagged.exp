@@ -28,11 +28,11 @@ foreach_with_prefix scenario {all minimal} {
 	lappend flags additional_flags=-fgnat-encodings=$scenario
     }
 
-    if {[gdb_compile_ada "${srcfile}" "${binfile}" executable $flags] != ""} {
+    if {[gdb_compile_ada "${srcfile}" "${binfile}-${scenario}" executable $flags] != ""} {
 	return -1
     }
 
-    clean_restart ${testfile}
+    clean_restart ${testfile}-${scenario}
 
     set bp_location [gdb_get_line_number "STOP" ${testdir}/comp_bug.adb]
     runto "comp_bug.adb:$bp_location"

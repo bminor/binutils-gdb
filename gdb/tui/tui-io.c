@@ -45,6 +45,7 @@
 #include "gdb_curses.h"
 #include <map>
 #include "pager.h"
+#include "gdbsupport/gdb-checked-static-cast.h"
 
 /* This redefines CTRL if it is not already defined, so it must come
    after terminal state releated include files like <term.h> and
@@ -832,15 +833,14 @@ tui_setup_io (int mode)
       tui_old_stdout = gdb_stdout;
       tui_old_stderr = gdb_stderr;
       tui_old_stdlog = gdb_stdlog;
-      tui_old_uiout = dynamic_cast<cli_ui_out *> (current_uiout);
-      gdb_assert (tui_old_uiout != nullptr);
+      tui_old_uiout = gdb::checked_static_cast<cli_ui_out *> (current_uiout);
 
       /* Reconfigure gdb output.  */
       gdb_stdout = tui_stdout;
       gdb_stderr = tui_stderr;
       gdb_stdlog = tui_stdlog;
-      gdb_stdtarg = gdb_stderr;	/* for moment */
-      gdb_stdtargerr = gdb_stderr;	/* for moment */
+      gdb_stdtarg = gdb_stderr;
+      gdb_stdtargerr = gdb_stderr;
       current_uiout = tui_out;
 
       /* Save tty for SIGCONT.  */
@@ -852,8 +852,8 @@ tui_setup_io (int mode)
       gdb_stdout = tui_old_stdout;
       gdb_stderr = tui_old_stderr;
       gdb_stdlog = tui_old_stdlog;
-      gdb_stdtarg = gdb_stderr;	/* for moment */
-      gdb_stdtargerr = gdb_stderr;	/* for moment */
+      gdb_stdtarg = gdb_stderr;
+      gdb_stdtargerr = gdb_stderr;
       current_uiout = tui_old_uiout;
 
       /* Restore readline.  */
@@ -904,13 +904,13 @@ tui_initialize_io (void)
 #endif
 
   /* Create tui output streams.  */
-  tui_stdout = new pager_file (new tui_file (stdout));
-  tui_stderr = new tui_file (stderr);
+  tui_stdout = new pager_file (new tui_file (stdout, true));
+  tui_stderr = new tui_file (stderr, false);
   tui_stdlog = new timestamped_file (tui_stderr);
-  tui_out = tui_out_new (tui_stdout);
+  tui_out = new tui_ui_out (tui_stdout);
 
   /* Create the default UI.  */
-  tui_old_uiout = cli_out_new (gdb_stdout);
+  tui_old_uiout = new cli_ui_out (gdb_stdout);
 
 #ifdef TUI_USE_PIPE_FOR_READLINE
   /* Temporary solution for readline writing to stdout: redirect

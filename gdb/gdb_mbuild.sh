@@ -171,7 +171,7 @@ fail ()
 	if test "${keepgoing}" != ""
 	then
 	    #exit 1
-	    continue
+	    return 1
 	else
 	    kill $$
 	    exit 1

@@ -206,7 +206,7 @@ set_tracepoint_num (int num)
    the traceframe context (line, function, file).  */
 
 static void
-set_traceframe_context (struct frame_info *trace_frame)
+set_traceframe_context (frame_info_ptr trace_frame)
 {
   CORE_ADDR trace_pc;
   struct symbol *traceframe_fun;
@@ -687,7 +687,7 @@ validate_actionline (const char *line, struct breakpoint *b)
 		{
 		  symbol *sym;
 		  expr::var_value_operation *vvop
-		    = (dynamic_cast<expr::var_value_operation *>
+		    = (gdb::checked_static_cast<expr::var_value_operation *>
 		       (exp->op.get ()));
 		  sym = vvop->get_symbol ();
 
@@ -922,7 +922,7 @@ collection_list::collect_symbol (struct symbol *sym,
   bfd_signed_vma offset;
   int treat_as_expr = 0;
 
-  len = TYPE_LENGTH (check_typedef (sym->type ()));
+  len = check_typedef (sym->type ())->length ();
   switch (sym->aclass ())
     {
     default:
@@ -1357,7 +1357,7 @@ encode_actions_1 (struct command_line *action,
 		    case OP_REGISTER:
 		      {
 			expr::register_operation *regop
-			  = (dynamic_cast<expr::register_operation *>
+			  = (gdb::checked_static_cast<expr::register_operation *>
 			     (exp->op.get ()));
 			const char *name = regop->get_name ();
 
@@ -1380,14 +1380,14 @@ encode_actions_1 (struct command_line *action,
 			tempval = evaluate_expression (exp.get ());
 			addr = value_address (tempval);
 			expr::unop_memval_operation *memop
-			  = (dynamic_cast<expr::unop_memval_operation *>
+			  = (gdb::checked_static_cast<expr::unop_memval_operation *>
 			     (exp->op.get ()));
 			struct type *type = memop->get_type ();
 			/* Initialize the TYPE_LENGTH if it is a typedef.  */
 			check_typedef (type);
 			collect->add_memrange (target_gdbarch (),
 					       memrange_absolute, addr,
-					       TYPE_LENGTH (type),
+					       type->length (),
 					       tloc->address);
 			collect->append_exp (std::string (exp_start,
 							  action_exp));
@@ -1397,7 +1397,7 @@ encode_actions_1 (struct command_line *action,
 		    case OP_VAR_VALUE:
 		      {
 			expr::var_value_operation *vvo
-			  = (dynamic_cast<expr::var_value_operation *>
+			  = (gdb::checked_static_cast<expr::var_value_operation *>
 			     (exp->op.get ()));
 			struct symbol *sym = vvo->get_symbol ();
 			const char *name = sym->natural_name ();
@@ -2190,8 +2190,7 @@ tfind_1 (enum trace_find_type type, int num,
 	 function and it's arguments) -- otherwise we'll just show the
 	 new source line.  */
 
-      if (frame_id_eq (old_frame_id,
-		       get_frame_id (get_current_frame ())))
+      if (old_frame_id == get_frame_id (get_current_frame ()))
 	print_what = SRC_LINE;
       else
 	print_what = SRC_AND_LOC;
@@ -2532,7 +2531,7 @@ info_scope_command (const char *args_in, int from_tty)
 		case LOC_CONST_BYTES:
 		  gdb_printf ("constant bytes: ");
 		  if (sym->type ())
-		    for (j = 0; j < TYPE_LENGTH (sym->type ()); j++)
+		    for (j = 0; j < sym->type ()->length (); j++)
 		      gdb_printf (" %02x", (unsigned) sym->value_bytes ()[j]);
 		  break;
 		case LOC_STATIC:
@@ -2612,7 +2611,7 @@ info_scope_command (const char *args_in, int from_tty)
 	    {
 	      struct type *t = check_typedef (sym->type ());
 
-	      gdb_printf (", length %s.\n", pulongest (TYPE_LENGTH (t)));
+	      gdb_printf (", length %s.\n", pulongest (t->length ()));
 	    }
 	}
       if (block->function ())

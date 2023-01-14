@@ -55,7 +55,20 @@ struct objfile_object
 extern PyTypeObject objfile_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("objfile_object");
 
-static const struct objfile_data *objfpy_objfile_data_key;
+/* Clear the OBJFILE pointer in an Objfile object and remove the
+   reference.  */
+struct objfpy_deleter
+{
+  void operator() (objfile_object *obj)
+  {
+    gdbpy_enter enter_py;
+    gdbpy_ref<objfile_object> object (obj);
+    object->objfile = nullptr;
+  }
+};
+
+static const registry<objfile>::key<objfile_object, objfpy_deleter>
+     objfpy_objfile_data_key;
 
 /* Require that OBJF be a valid objfile.  */
 #define OBJFPY_REQUIRE_VALID(obj)				\
@@ -101,6 +114,18 @@ objfpy_get_username (PyObject *self, void *closure)
   Py_RETURN_NONE;
 }
 
+/* Get the 'is_file' attribute.  */
+
+static PyObject *
+objfpy_get_is_file (PyObject *o, void *ignore)
+{
+  objfile_object *self = (objfile_object *) o;
+
+  if (self->objfile != nullptr)
+    return PyBool_FromLong ((self->objfile->flags & OBJF_NOT_FILENAME) == 0);
+  Py_RETURN_NONE;
+}
+
 /* If SELF is a separate debug-info file, return the "backlink" field.
    Otherwise return None.  */
 
@@ -132,7 +157,7 @@ objfpy_get_build_id (PyObject *self, void *closure)
 
   try
     {
-      build_id = build_id_bfd_get (objfile->obfd);
+      build_id = build_id_bfd_get (objfile->obfd.get ());
     }
   catch (const gdb_exception &except)
     {
@@ -423,7 +448,7 @@ objfpy_add_separate_debug_file (PyObject *self, PyObject *args, PyObject *kw)
     {
       gdb_bfd_ref_ptr abfd (symfile_bfd_open (file_name));
 
-      symbol_file_add_separate (abfd.get (), file_name, 0, obj->objfile);
+      symbol_file_add_separate (abfd, file_name, 0, obj->objfile);
     }
   catch (const gdb_exception &except)
     {
@@ -600,7 +625,7 @@ objfpy_lookup_objfile_by_build_id (const char *build_id)
       /* Don't return separate debug files.  */
       if (objfile->separate_debug_objfile_backlink != NULL)
 	continue;
-      obfd_build_id = build_id_bfd_get (objfile->obfd);
+      obfd_build_id = build_id_bfd_get (objfile->obfd.get ());
       if (obfd_build_id == NULL)
 	continue;
       if (objfpy_build_id_matches (obfd_build_id, build_id))
@@ -656,16 +681,6 @@ gdbpy_lookup_objfile (PyObject *self, PyObject *args, PyObject *kw)
 
 
 
-/* Clear the OBJFILE pointer in an Objfile object and remove the
-   reference.  */
-static void
-py_free_objfile (struct objfile *objfile, void *datum)
-{
-  gdbpy_enter enter_py (objfile->arch ());
-  gdbpy_ref<objfile_object> object ((objfile_object *) datum);
-  object->objfile = NULL;
-}
-
 /* Return a new reference to the Python object of type Objfile
    representing OBJFILE.  If the object has already been created,
    return it.  Otherwise, create it.  Return NULL and set the Python
@@ -675,7 +690,7 @@ gdbpy_ref<>
 objfile_to_objfile_object (struct objfile *objfile)
 {
   PyObject *result
-    = ((PyObject *) objfile_data (objfile, objfpy_objfile_data_key));
+    = (PyObject *) objfpy_objfile_data_key.get (objfile);
   if (result == NULL)
     {
       gdbpy_ref<objfile_object> object
@@ -686,19 +701,11 @@ objfile_to_objfile_object (struct objfile *objfile)
 	return NULL;
 
       object->objfile = objfile;
-      set_objfile_data (objfile, objfpy_objfile_data_key, object.get ());
+      objfpy_objfile_data_key.set (objfile, object.get ());
       result = (PyObject *) object.release ();
     }
 
   return gdbpy_ref<>::new_reference (result);
-}
-
-void _initialize_py_objfile ();
-void
-_initialize_py_objfile ()
-{
-  objfpy_objfile_data_key
-    = register_objfile_data_with_cleanup (NULL, py_free_objfile);
 }
 
 int
@@ -762,6 +769,8 @@ static gdb_PyGetSetDef objfile_getset[] =
     "Type printers.", NULL },
   { "xmethods", objfpy_get_xmethods, NULL,
     "Debug methods.", NULL },
+  { "is_file", objfpy_get_is_file, nullptr,
+    "Whether this objfile came from a file.", nullptr },
   { NULL }
 };
 

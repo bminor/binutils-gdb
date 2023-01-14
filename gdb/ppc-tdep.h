@@ -23,7 +23,7 @@
 #include "gdbarch.h"
 
 struct gdbarch;
-struct frame_info;
+class frame_info_ptr;
 struct value;
 struct regcache;
 struct type;
@@ -205,7 +205,7 @@ enum powerpc_long_double_abi
   POWERPC_LONG_DOUBLE_LAST
 };
 
-struct ppc_gdbarch_tdep : gdbarch_tdep
+struct ppc_gdbarch_tdep : gdbarch_tdep_base
   {
     int wordsize = 0;		/* Size in bytes of fixed-point word.  */
     int soft_float = 0;		/* Avoid FP registers for arguments?  */
@@ -420,7 +420,7 @@ struct ppc_insn_pattern
   int optional;                 /* If non-zero, this insn may be absent.  */
 };
 
-extern int ppc_insns_match_pattern (struct frame_info *frame, CORE_ADDR pc,
+extern int ppc_insns_match_pattern (frame_info_ptr frame, CORE_ADDR pc,
 				    const struct ppc_insn_pattern *pattern,
 				    unsigned int *insns);
 extern CORE_ADDR ppc_insn_d_field (unsigned int insn);

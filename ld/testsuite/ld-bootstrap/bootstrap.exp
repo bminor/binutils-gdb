@@ -29,6 +29,12 @@ if ![isnative] {
     return
 }
 
+# Skip if OFILES aren't provided, it can happen when lauching
+# the testsuites outside the build directory.
+if {![info exists OFILES]} {
+    return
+}
+
 # Skip for -fprofile-generate=.
 catch "exec $nm $plug_opt $OFILES" exec_output
 send_log "foo: $exec_output"
@@ -153,6 +159,10 @@ foreach flags $test_flags {
 	set extralibs "$extralibs -L../zlib -lz"
     } else {
 	set extralibs "$extralibs -lz"
+    }
+
+    if { [lindex [remote_exec build grep "-q \"HAVE_ZSTD 1\" config.h" ] 0] == 0 } then {
+	set extralibs "$extralibs -lzstd"
     }
 
     # Check if the system's jansson library is used. If so, the object files will

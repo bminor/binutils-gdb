@@ -11,7 +11,7 @@ Hex dump of section '\.rodata':
 
 Raw dump of debug contents of section \.debug_line:
 
-  Offset:                      0x0
+  Offset:                      (0x)?0
   Length:                      [0-9]*
   DWARF Version:               3
   Prologue Length:             [0-9]*
@@ -42,9 +42,9 @@ Raw dump of debug contents of section \.debug_line:
   1	0	0	0	dwarf2-5\.c
 
  Line Number Statements:
-  \[0x.*\]  Extended opcode 2: set Address to 0x0
+  \[0x.*\]  Extended opcode 2: set Address to (0x)?0
   \[0x.*\]  Copy
-  \[0x.*\]  Special opcode [0-9]*: advance Address by 0 to 0x0 and Line by 1 to 2 \(view 1\)
+  \[0x.*\]  Special opcode [0-9]*: advance Address by 0 to (0x)?0 and Line by 1 to 2 \(view 1\)
   \[0x.*\]  Special opcode [0-9]*: advance Address by 8 to 0x8 and Line by 1 to 3
   \[0x.*\]  Special opcode [0-9]*: advance Address by 0 to 0x8 and Line by 1 to 4 \(view 1\)
   \[0x.*\]  Special opcode [0-9]*: advance Address by 0 to 0x8 and Line by 1 to 5 \(view 2\)

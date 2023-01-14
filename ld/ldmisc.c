@@ -47,7 +47,7 @@
  %H like %C but in addition emit section+offset
  %P print program name
  %V hex bfd_vma
- %W hex bfd_vma with 0x with no leading zeros taking up 8 spaces
+ %W hex bfd_vma with 0x with no leading zeros taking up 10 spaces
  %X no object output, fail return
  %d integer, like printf
  %ld long, like printf
@@ -241,51 +241,36 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bool is_warning)
 	    case 'V':
 	      /* hex bfd_vma */
 	      {
-		bfd_vma value = args[arg_no].v;
+		char buf[32];
+		bfd_vma value;
+
+		value = args[arg_no].v;
 		++arg_count;
-		fprintf_vma (fp, value);
+		bfd_sprintf_vma (link_info.output_bfd, buf, value);
+		fprintf (fp, "%s", buf);
 	      }
 	      break;
 
 	    case 'v':
 	      /* hex bfd_vma, no leading zeros */
 	      {
-		char buf[100];
-		char *p = buf;
-		bfd_vma value = args[arg_no].v;
+		uint64_t value = args[arg_no].v;
 		++arg_count;
-		sprintf_vma (p, value);
-		while (*p == '0')
-		  p++;
-		if (!*p)
-		  p--;
-		fputs (p, fp);
+		fprintf (fp, "%" PRIx64, value);
 	      }
 	      break;
 
 	    case 'W':
 	      /* hex bfd_vma with 0x with no leading zeroes taking up
-		 8 spaces.  */
+		 10 spaces (including the 0x).  */
 	      {
-		char buf[100];
-		bfd_vma value;
-		char *p;
-		int len;
+		char buf[32];
+		uint64_t value;
 
 		value = args[arg_no].v;
 		++arg_count;
-		sprintf_vma (buf, value);
-		for (p = buf; *p == '0'; ++p)
-		  ;
-		if (*p == '\0')
-		  --p;
-		len = strlen (p);
-		while (len < 8)
-		  {
-		    putc (' ', fp);
-		    ++len;
-		  }
-		fprintf (fp, "0x%s", p);
+		sprintf (buf, "0x%" PRIx64, value);
+		fprintf (fp, "%10s", buf);
 	      }
 	      break;
 
@@ -665,9 +650,9 @@ lfinfo (FILE *file, const char *fmt, ...)
 /* Functions to print the link map.  */
 
 void
-print_space (void)
+print_spaces (int count)
 {
-  fprintf (config.map_file, " ");
+  fprintf (config.map_file, "%*s", count, "");
 }
 
 void

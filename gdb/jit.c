@@ -52,12 +52,6 @@ static const char jit_descriptor_name[] = "__jit_debug_descriptor";
 static void jit_inferior_created_hook (inferior *inf);
 static void jit_inferior_exit_hook (struct inferior *inf);
 
-/* An unwinder is registered for every gdbarch.  This key is used to
-   remember if the unwinder has been registered for a particular
-   gdbarch.  */
-
-static struct gdbarch_data *jit_gdbarch_data;
-
 /* True if we want to see trace of jit level stuff.  */
 
 static bool jit_debug = false;
@@ -271,7 +265,7 @@ jit_read_descriptor (gdbarch *gdbarch,
 
   /* Figure out how big the descriptor is on the remote and how to read it.  */
   ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
-  ptr_size = TYPE_LENGTH (ptr_type);
+  ptr_size = ptr_type->length ();
   desc_size = 8 + 2 * ptr_size;  /* Two 32-bit ints and two pointers.  */
   desc_buf = (gdb_byte *) alloca (desc_size);
 
@@ -311,7 +305,7 @@ jit_read_code_entry (struct gdbarch *gdbarch,
 
   /* Figure out how big the entry is on the remote and how to read it.  */
   ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
-  ptr_size = TYPE_LENGTH (ptr_type);
+  ptr_size = ptr_type->length ();
 
   /* Figure out where the uint64_t value will be.  */
   align_bytes = type_align (builtin_type (gdbarch)->builtin_uint64);
@@ -798,7 +792,7 @@ JITed symbol file is not an object file, ignoring it.\n"));
       }
 
   /* This call does not take ownership of SAI.  */
-  objfile = symbol_file_add_from_bfd (nbfd.get (),
+  objfile = symbol_file_add_from_bfd (nbfd,
 				      bfd_get_filename (nbfd.get ()), 0,
 				      &sai,
 				      OBJF_SHARED | OBJF_NOT_FILENAME, NULL);
@@ -936,7 +930,7 @@ struct jit_unwind_private
   std::unique_ptr<detached_regcache> regcache;
 
   /* The frame being unwound.  */
-  struct frame_info *this_frame;
+  frame_info_ptr this_frame;
 };
 
 /* Sets the value of a particular register in this frame.  */
@@ -997,7 +991,7 @@ jit_unwind_reg_get_impl (struct gdb_unwind_callbacks *cb, int regnum)
    saved register value.  */
 
 static void
-jit_dealloc_cache (struct frame_info *this_frame, void *cache)
+jit_dealloc_cache (frame_info *this_frame, void *cache)
 {
   struct jit_unwind_private *priv_data = (struct jit_unwind_private *) cache;
   delete priv_data;
@@ -1013,7 +1007,7 @@ jit_dealloc_cache (struct frame_info *this_frame, void *cache)
 
 static int
 jit_frame_sniffer (const struct frame_unwind *self,
-		   struct frame_info *this_frame, void **cache)
+		   frame_info_ptr this_frame, void **cache)
 {
   struct jit_unwind_private *priv_data;
   struct gdb_unwind_callbacks callbacks;
@@ -1048,7 +1042,7 @@ jit_frame_sniffer (const struct frame_unwind *self,
 
   jit_debug_printf ("Could not unwind frame using JIT reader.");
 
-  jit_dealloc_cache (this_frame, *cache);
+  jit_dealloc_cache (this_frame.get (), *cache);
   *cache = NULL;
 
   return 0;
@@ -1059,7 +1053,7 @@ jit_frame_sniffer (const struct frame_unwind *self,
    the loaded plugin.  */
 
 static void
-jit_frame_this_id (struct frame_info *this_frame, void **cache,
+jit_frame_this_id (frame_info_ptr this_frame, void **cache,
 		   struct frame_id *this_id)
 {
   struct jit_unwind_private priv;
@@ -1088,7 +1082,7 @@ jit_frame_this_id (struct frame_info *this_frame, void **cache,
    the register from the cache.  */
 
 static struct value *
-jit_frame_prev_register (struct frame_info *this_frame, void **cache, int reg)
+jit_frame_prev_register (frame_info_ptr this_frame, void **cache, int reg)
 {
   struct jit_unwind_private *priv = (struct jit_unwind_private *) *cache;
   struct gdbarch *gdbarch;
@@ -1127,19 +1121,25 @@ static const struct frame_unwind jit_frame_unwind =
 
 struct jit_gdbarch_data_type
 {
-  /* Has the (pseudo) unwinder been prepended? */
-  int unwinder_registered;
+  /* Has the (pseudo) unwinder been pretended? */
+  int unwinder_registered = 0;
 };
+
+/* An unwinder is registered for every gdbarch.  This key is used to
+   remember if the unwinder has been registered for a particular
+   gdbarch.  */
+
+static const registry<gdbarch>::key<jit_gdbarch_data_type> jit_gdbarch_data;
 
 /* Check GDBARCH and prepend the pseudo JIT unwinder if needed.  */
 
 static void
 jit_prepend_unwinder (struct gdbarch *gdbarch)
 {
-  struct jit_gdbarch_data_type *data;
+  struct jit_gdbarch_data_type *data = jit_gdbarch_data.get (gdbarch);
+  if (data == nullptr)
+    data = jit_gdbarch_data.emplace (gdbarch);
 
-  data
-    = (struct jit_gdbarch_data_type *) gdbarch_data (gdbarch, jit_gdbarch_data);
   if (!data->unwinder_registered)
     {
       frame_unwind_prepend_unwinder (gdbarch, &jit_frame_unwind);
@@ -1285,20 +1285,6 @@ jit_event_handler (gdbarch *gdbarch, objfile *jiter)
     }
 }
 
-/* Initialize the jit_gdbarch_data slot with an instance of struct
-   jit_gdbarch_data_type */
-
-static void *
-jit_gdbarch_data_init (struct obstack *obstack)
-{
-  struct jit_gdbarch_data_type *data =
-    XOBNEW (obstack, struct jit_gdbarch_data_type);
-
-  data->unwinder_registered = 0;
-
-  return data;
-}
-
 void _initialize_jit ();
 void
 _initialize_jit ()
@@ -1322,7 +1308,6 @@ _initialize_jit ()
   gdb::observers::inferior_exit.attach (jit_inferior_exit_hook, "jit");
   gdb::observers::breakpoint_deleted.attach (jit_breakpoint_deleted, "jit");
 
-  jit_gdbarch_data = gdbarch_data_register_pre_init (jit_gdbarch_data_init);
   if (is_dl_available ())
     {
       struct cmd_list_element *c;

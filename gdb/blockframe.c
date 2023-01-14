@@ -52,7 +52,7 @@
    slot instruction.  */
 
 const struct block *
-get_frame_block (struct frame_info *frame, CORE_ADDR *addr_in_block)
+get_frame_block (frame_info_ptr frame, CORE_ADDR *addr_in_block)
 {
   CORE_ADDR pc;
   const struct block *bl;
@@ -115,7 +115,7 @@ get_pc_function_start (CORE_ADDR pc)
 /* Return the symbol for the function executing in frame FRAME.  */
 
 struct symbol *
-get_frame_function (struct frame_info *frame)
+get_frame_function (frame_info_ptr frame)
 {
   const struct block *bl = get_frame_block (frame, 0);
 
@@ -440,14 +440,14 @@ find_gnu_ifunc_target_type (CORE_ADDR resolver_funaddr)
     {
       /* Get the return type of the resolver.  */
       struct type *resolver_ret_type
-	= check_typedef (TYPE_TARGET_TYPE (resolver_type));
+	= check_typedef (resolver_type->target_type ());
 
       /* If we found a pointer to function, then the resolved type
 	 is the type of the pointed-to function.  */
       if (resolver_ret_type->code () == TYPE_CODE_PTR)
 	{
 	  struct type *resolved_type
-	    = TYPE_TARGET_TYPE (resolver_ret_type);
+	    = resolver_ret_type->target_type ();
 	  if (check_typedef (resolved_type)->code () == TYPE_CODE_FUNC)
 	    return resolved_type;
 	}
@@ -460,13 +460,13 @@ find_gnu_ifunc_target_type (CORE_ADDR resolver_funaddr)
    at least as old as the selected frame. Return NULL if there is no
    such frame.  If BLOCK is NULL, just return NULL.  */
 
-struct frame_info *
+frame_info_ptr
 block_innermost_frame (const struct block *block)
 {
   if (block == NULL)
     return NULL;
 
-  frame_info *frame = get_selected_frame ();
+  frame_info_ptr frame = get_selected_frame ();
   while (frame != NULL)
     {
       const struct block *frame_block = get_frame_block (frame, NULL);

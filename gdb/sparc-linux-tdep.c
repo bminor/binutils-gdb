@@ -42,7 +42,7 @@
 /* Signal trampoline support.  */
 
 static void sparc32_linux_sigframe_init (const struct tramp_frame *self,
-					 struct frame_info *this_frame,
+					 frame_info_ptr this_frame,
 					 struct trad_frame_cache *this_cache,
 					 CORE_ADDR func);
 
@@ -117,7 +117,7 @@ enum
 
 static void
 sparc32_linux_sigframe_init (const struct tramp_frame *self,
-			     struct frame_info *this_frame,
+			     frame_info_ptr this_frame,
 			     struct trad_frame_cache *this_cache,
 			     CORE_ADDR func)
 {
@@ -159,7 +159,7 @@ sparc32_linux_sigframe_init (const struct tramp_frame *self,
    address.  */
 
 static CORE_ADDR
-sparc32_linux_step_trap (struct frame_info *frame, unsigned long insn)
+sparc32_linux_step_trap (frame_info_ptr frame, unsigned long insn)
 {
   if (insn == 0x91d02010)
     {
@@ -254,7 +254,7 @@ static void
 sparc_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   gdbarch *arch = regcache->arch ();
-  sparc_gdbarch_tdep *tdep = (sparc_gdbarch_tdep *) gdbarch_tdep (arch);
+  sparc_gdbarch_tdep *tdep = gdbarch_tdep<sparc_gdbarch_tdep> (arch);
   ULONGEST psr;
 
   regcache_cooked_write_unsigned (regcache, tdep->pc_regnum, pc);
@@ -421,7 +421,7 @@ static const struct regset sparc32_linux_fpregset =
 static void
 sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  sparc_gdbarch_tdep *tdep = (sparc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  sparc_gdbarch_tdep *tdep = gdbarch_tdep<sparc_gdbarch_tdep> (gdbarch);
 
   linux_init_abi (info, gdbarch, 0);
 

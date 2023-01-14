@@ -74,6 +74,7 @@ mips-dsp-expedite = r29,pc
 mips64-expedite = r29,pc
 mips64-dsp-expedite = r29,pc
 nios2-linux-expedite = sp,pc
+or1k-expedite = r1,npc
 powerpc-expedite = r1,pc
 s390-linux32-expedite = r14,r15,pswa
 s390-linux32v1-expedite = r14,r15,pswa
@@ -108,6 +109,7 @@ XMLTOC = \
 	nds32.xml \
 	nios2.xml \
 	or1k.xml \
+	or1k-linux.xml \
 	rs6000/powerpc-32.xml \
 	rs6000/powerpc-32l.xml \
 	rs6000/powerpc-403.xml \
@@ -164,6 +166,8 @@ XMLTOC = \
 	s390x-vx-linux64.xml \
 	s390-gs-linux64.xml \
 	s390x-gs-linux64.xml \
+	sparc/sparc32-solaris.xml \
+	sparc/sparc64-solaris.xml \
 	z80.xml
 
 TDESC_CFILES = $(patsubst %.xml,%.c,$(XMLTOC))
@@ -209,10 +213,12 @@ FEATURE_XMLFILES = aarch64-core.xml \
 	arm/arm-m-profile-mve.xml \
 	arm/arm-m-system.xml \
 	arm/arm-m-profile-with-fpa.xml \
+	arm/arm-secext.xml \
 	arm/arm-tls.xml \
 	arm/arm-vfpv2.xml \
 	arm/arm-vfpv3.xml \
 	arm/xscale-iwmmxt.xml \
+	cskyv2-linux.xml \
 	i386/32bit-core.xml \
 	i386/32bit-sse.xml \
 	i386/32bit-linux.xml \
@@ -231,6 +237,7 @@ FEATURE_XMLFILES = aarch64-core.xml \
 	i386/x32-core.xml \
 	loongarch/base32.xml \
 	loongarch/base64.xml \
+	loongarch/fpu.xml \
 	riscv/rv32e-xregs.xml \
 	riscv/32bit-cpu.xml \
 	riscv/32bit-fpu.xml \

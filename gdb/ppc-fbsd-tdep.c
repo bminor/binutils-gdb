@@ -126,7 +126,7 @@ ppcfbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 				      void *cb_data,
 				      const struct regcache *regcache)
 {
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
 
   if (tdep->wordsize == 4)
     cb (".reg", 148, 148, &ppc32_fbsd_gregset, NULL, cb_data);
@@ -150,7 +150,7 @@ static const int ppcfbsd_sigreturn_offset[] = {
 
 static int
 ppcfbsd_sigtramp_frame_sniffer (const struct frame_unwind *self,
-				struct frame_info *this_frame,
+				frame_info_ptr this_frame,
 				void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -197,10 +197,10 @@ ppcfbsd_sigtramp_frame_sniffer (const struct frame_unwind *self,
 }
 
 static struct trad_frame_cache *
-ppcfbsd_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
+ppcfbsd_sigtramp_frame_cache (frame_info_ptr this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
   struct trad_frame_cache *cache;
   CORE_ADDR addr, base, func;
   gdb_byte buf[PPC_INSN_SIZE];
@@ -243,7 +243,7 @@ ppcfbsd_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
 }
 
 static void
-ppcfbsd_sigtramp_frame_this_id (struct frame_info *this_frame,
+ppcfbsd_sigtramp_frame_this_id (frame_info_ptr this_frame,
 				void **this_cache, struct frame_id *this_id)
 {
   struct trad_frame_cache *cache =
@@ -253,7 +253,7 @@ ppcfbsd_sigtramp_frame_this_id (struct frame_info *this_frame,
 }
 
 static struct value *
-ppcfbsd_sigtramp_frame_prev_register (struct frame_info *this_frame,
+ppcfbsd_sigtramp_frame_prev_register (frame_info_ptr this_frame,
 				      void **this_cache, int regnum)
 {
   struct trad_frame_cache *cache =
@@ -287,7 +287,7 @@ static CORE_ADDR
 ppcfbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
 				  CORE_ADDR lm_addr, CORE_ADDR offset)
 {
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
   struct regcache *regcache;
   int tp_offset, tp_regnum;
 
@@ -319,7 +319,7 @@ ppcfbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
 static void
 ppcfbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
 
   /* Generic FreeBSD support. */
   fbsd_init_abi (info, gdbarch);

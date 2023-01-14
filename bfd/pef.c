@@ -41,6 +41,7 @@
 #define bfd_pef_bfd_is_target_special_symbol        _bfd_bool_bfd_asymbol_false
 #define bfd_pef_get_lineno			    _bfd_nosymbols_get_lineno
 #define bfd_pef_find_nearest_line		    _bfd_nosymbols_find_nearest_line
+#define bfd_pef_find_nearest_line_with_alt	    _bfd_nosymbols_find_nearest_line_with_alt
 #define bfd_pef_find_line			    _bfd_nosymbols_find_line
 #define bfd_pef_find_inliner_info		    _bfd_nosymbols_find_inliner_info
 #define bfd_pef_get_symbol_version_string	    _bfd_nosymbols_get_symbol_version_string

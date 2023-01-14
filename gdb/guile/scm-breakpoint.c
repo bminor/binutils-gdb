@@ -999,10 +999,10 @@ gdbscm_breakpoint_commands (SCM self)
 
   string_file buf;
 
-  current_uiout->redirect (&buf);
   gdbscm_gdb_exception exc {};
   try
     {
+      ui_out_redirect_pop redir (current_uiout, &buf);
       print_command_lines (current_uiout, breakpoint_commands (bp), 0);
     }
   catch (const gdb_exception &except)
@@ -1010,7 +1010,6 @@ gdbscm_breakpoint_commands (SCM self)
       exc = unpack (except);
     }
 
-  current_uiout->redirect (NULL);
   GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   result = gdbscm_scm_from_c_string (buf.c_str ());
 

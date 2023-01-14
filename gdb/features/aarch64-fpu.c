@@ -126,8 +126,11 @@ create_feature_aarch64_fpu (struct target_desc *result, long regnum)
   tdesc_add_flag (type_with_fields, 10, "OFE");
   tdesc_add_flag (type_with_fields, 11, "UFE");
   tdesc_add_flag (type_with_fields, 12, "IXE");
+  tdesc_add_flag (type_with_fields, 13, "EBF");
   tdesc_add_flag (type_with_fields, 15, "IDE");
+  tdesc_add_bitfield (type_with_fields, "Len", 16, 18);
   tdesc_add_flag (type_with_fields, 19, "FZ16");
+  tdesc_add_bitfield (type_with_fields, "Stride", 20, 21);
   tdesc_add_bitfield (type_with_fields, "RMode", 22, 23);
   tdesc_add_flag (type_with_fields, 24, "FZ");
   tdesc_add_flag (type_with_fields, 25, "DN");

@@ -90,7 +90,7 @@ static int i386_windows_gregset_reg_offset[] =
 #define I386_WINDOWS_SIZEOF_GREGSET 716
 
 static CORE_ADDR
-i386_windows_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
+i386_windows_skip_trampoline_code (frame_info_ptr frame, CORE_ADDR pc)
 {
   return i386_pe_skip_trampoline_code (frame, pc, NULL);
 }
@@ -116,7 +116,7 @@ i386_windows_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   struct type *type = check_typedef (value_type (function));
   if (type->code () == TYPE_CODE_PTR)
-    type = check_typedef (TYPE_TARGET_TYPE (type));
+    type = check_typedef (type->target_type ());
 
   /* read_subroutine_type sets for non-static member functions the
      artificial flag of the first parameter ('this' pointer).  */
@@ -136,7 +136,7 @@ i386_windows_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 static void
 i386_windows_init_abi_common (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
 
   set_gdbarch_skip_trampoline_code (gdbarch, i386_windows_skip_trampoline_code);
 

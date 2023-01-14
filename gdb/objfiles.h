@@ -401,7 +401,7 @@ struct objfile
 private:
 
   /* The only way to create an objfile is to call objfile::make.  */
-  objfile (bfd *, const char *, objfile_flags);
+  objfile (gdb_bfd_ref_ptr, const char *, objfile_flags);
 
 public:
 
@@ -414,8 +414,8 @@ public:
   ~objfile ();
 
   /* Create an objfile.  */
-  static objfile *make (bfd *bfd_, const char *name_, objfile_flags flags_,
-			objfile *parent = nullptr);
+  static objfile *make (gdb_bfd_ref_ptr bfd_, const char *name_,
+			objfile_flags flags_, objfile *parent = nullptr);
 
   /* Remove an objfile from the current program space, and free
      it.  */
@@ -597,7 +597,7 @@ public:
        section.  */
     gdb_assert (section->owner == nullptr || section->owner == this->obfd);
 
-    int idx = gdb_bfd_section_index (this->obfd, section);
+    int idx = gdb_bfd_section_index (this->obfd.get (), section);
     return this->section_offsets[idx];
   }
 
@@ -608,7 +608,7 @@ public:
        section.  */
     gdb_assert (section->owner == nullptr || section->owner == this->obfd);
 
-    int idx = gdb_bfd_section_index (this->obfd, section);
+    int idx = gdb_bfd_section_index (this->obfd.get (), section);
     this->section_offsets[idx] = offset;
   }
 
@@ -651,12 +651,17 @@ public:
   /* The object file's BFD.  Can be null if the objfile contains only
      minimal symbols, e.g. the run time common symbols for SunOS4.  */
 
-  bfd *obfd;
+  gdb_bfd_ref_ptr obfd;
 
-  /* The per-BFD data.  Note that this is treated specially if OBFD
-     is NULL.  */
+  /* The per-BFD data.  */
 
   struct objfile_per_bfd_storage *per_bfd = nullptr;
+
+  /* In some cases, the per_bfd object is owned by this objfile and
+     not by the BFD itself.  In this situation, this holds the owning
+     pointer.  */
+
+  std::unique_ptr<objfile_per_bfd_storage> per_bfd_storage;
 
   /* The modification timestamp of the object file, as of the last time
      we read its symbols.  */
@@ -666,7 +671,7 @@ public:
   /* Obstack to hold objects that should be freed when we load a new symbol
      table from this object file.  */
 
-  struct obstack objfile_obstack {};
+  auto_obstack objfile_obstack;
 
   /* Structure which keeps track of functions that manipulate objfile's
      of the same type as this objfile.  I.e. the function to read partial
@@ -682,7 +687,7 @@ public:
 
   /* Per objfile data-pointers required by other GDB modules.  */
 
-  REGISTRY_FIELDS {};
+  registry<objfile> registry_fields;
 
   /* Set of relocation offsets to apply to each section.
      The table is indexed by the_bfd_section->index, thus it is generally
@@ -899,10 +904,6 @@ in_plt_section (CORE_ADDR pc)
   return (pc_in_section (pc, ".plt")
 	  || pc_in_section (pc, ".plt.sec"));
 }
-
-/* Keep a registry of per-objfile data-pointers required by other GDB
-   modules.  */
-DECLARE_REGISTRY(objfile);
 
 /* In normal use, the section map will be rebuilt by find_pc_section
    if objfiles have been added, removed or relocated since it was last

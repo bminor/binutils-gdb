@@ -25,7 +25,7 @@ set -e
 
 check()
 {
-    number_of_occurrence=`egrep "$2" ./$1 -o | wc -l`
+    number_of_occurrence=`$EGREP "$2" ./$1 -o | wc -l`
     if [ $number_of_occurrence != $3 ]
     then
 	echo "$1: \"$2\" $3: Failed"

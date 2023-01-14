@@ -96,10 +96,7 @@ static const char *const ft32_register_names[] =
 static const char *
 ft32_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
-  if (reg_nr < 0)
-    return NULL;
-  if (reg_nr >= FT32_NUM_REGS)
-    return NULL;
+  gdb_static_assert (ARRAY_SIZE (ft32_register_names) == FT32_NUM_REGS);
   return ft32_register_names[reg_nr];
 }
 
@@ -110,7 +107,7 @@ ft32_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
   if (reg_nr == FT32_PC_REGNUM)
     {
-      ft32_gdbarch_tdep *tdep = (ft32_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+      ft32_gdbarch_tdep *tdep = gdbarch_tdep<ft32_gdbarch_tdep> (gdbarch);
       return tdep->pc_type;
     }
   else if (reg_nr == FT32_SP_REGNUM || reg_nr == FT32_FP_REGNUM)
@@ -129,7 +126,7 @@ ft32_store_return_value (struct type *type, struct regcache *regcache,
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR regval;
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
 
   /* Things always get returned in RET1_REGNUM, RET2_REGNUM.  */
   regval = extract_unsigned_integer (valbuf, len > 4 ? 4 : len, byte_order);
@@ -331,7 +328,7 @@ ft32_pointer_to_address (struct gdbarch *gdbarch,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR addr
-    = extract_unsigned_integer (buf, TYPE_LENGTH (type), byte_order);
+    = extract_unsigned_integer (buf, type->length (), byte_order);
 
   if (TYPE_ADDRESS_CLASS_1 (type))
     return addr;
@@ -397,7 +394,7 @@ ft32_extract_return_value (struct type *type, struct regcache *regcache,
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   bfd_byte *valbuf = dst;
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   ULONGEST tmp;
 
   /* By using store_unsigned_integer we avoid having to do
@@ -421,7 +418,7 @@ ft32_return_value (struct gdbarch *gdbarch, struct value *function,
 		   struct type *valtype, struct regcache *regcache,
 		   gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  if (TYPE_LENGTH (valtype) > 8)
+  if (valtype->length () > 8)
     return RETURN_VALUE_STRUCT_CONVENTION;
   else
     {
@@ -452,7 +449,7 @@ ft32_alloc_frame_cache (void)
 /* Populate a ft32_frame_cache object for this_frame.  */
 
 static struct ft32_frame_cache *
-ft32_frame_cache (struct frame_info *this_frame, void **this_cache)
+ft32_frame_cache (frame_info_ptr this_frame, void **this_cache)
 {
   struct ft32_frame_cache *cache;
   CORE_ADDR current_pc;
@@ -492,7 +489,7 @@ ft32_frame_cache (struct frame_info *this_frame, void **this_cache)
    frame.  This will be used to create a new GDB frame struct.  */
 
 static void
-ft32_frame_this_id (struct frame_info *this_frame,
+ft32_frame_this_id (frame_info_ptr this_frame,
 		    void **this_prologue_cache, struct frame_id *this_id)
 {
   struct ft32_frame_cache *cache = ft32_frame_cache (this_frame,
@@ -508,7 +505,7 @@ ft32_frame_this_id (struct frame_info *this_frame,
 /* Get the value of register regnum in the previous stack frame.  */
 
 static struct value *
-ft32_frame_prev_register (struct frame_info *this_frame,
+ft32_frame_prev_register (frame_info_ptr this_frame,
 			  void **this_prologue_cache, int regnum)
 {
   struct ft32_frame_cache *cache = ft32_frame_cache (this_frame,
@@ -540,7 +537,7 @@ static const struct frame_unwind ft32_frame_unwind =
 /* Return the base address of this_frame.  */
 
 static CORE_ADDR
-ft32_frame_base_address (struct frame_info *this_frame, void **this_cache)
+ft32_frame_base_address (frame_info_ptr this_frame, void **this_cache)
 {
   struct ft32_frame_cache *cache = ft32_frame_cache (this_frame,
 						     this_cache);
@@ -625,5 +622,5 @@ void _initialize_ft32_tdep ();
 void
 _initialize_ft32_tdep ()
 {
-  register_gdbarch_init (bfd_arch_ft32, ft32_gdbarch_init);
+  gdbarch_register (bfd_arch_ft32, ft32_gdbarch_init);
 }

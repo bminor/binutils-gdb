@@ -6466,7 +6466,7 @@ int
 Experiment::copy_file_to_archive (const char *name, const char *aname, int hide_msg)
 {
   errno = 0;
-  int fd_w = open64 (aname, O_WRONLY | O_CREAT | O_EXCL, 0644);
+  int fd_w = ::open64 (aname, O_WRONLY | O_CREAT | O_EXCL, 0644);
   if (fd_w == -1)
     {
       if (errno == EEXIST)
@@ -6484,7 +6484,7 @@ Experiment::copy_file_to_archive (const char *name, const char *aname, int hide_
       return 1;
     }
 
-  int fd_r = open64 (name, O_RDONLY);
+  int fd_r = ::open64 (name, O_RDONLY);
   if (fd_r == -1)
     {
       fprintf (stderr, GTXT ("er_archive: unable to open `%s': %s\n"),

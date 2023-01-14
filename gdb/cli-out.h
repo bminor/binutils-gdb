@@ -27,7 +27,7 @@ class cli_ui_out : public ui_out
 {
 public:
 
-  explicit cli_ui_out (ui_file *stream, ui_out_flags flags);
+  explicit cli_ui_out (ui_file *stream, ui_out_flags flags = ui_source_list);
   virtual ~cli_ui_out ();
 
   ui_file *set_stream (ui_file *stream);
@@ -112,8 +112,6 @@ private:
   /* Stack of progress meters.  */
   std::vector<cli_progress_info> m_meters;
 };
-
-extern cli_ui_out *cli_out_new (struct ui_file *stream);
 
 extern void cli_display_match_list (char **matches, int len, int max);
 

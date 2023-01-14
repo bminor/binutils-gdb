@@ -84,7 +84,7 @@
 #define RECORD_Q_XGETQUOTA	(('3' << 8) + 3)
 
 #define OUTPUT_REG(val, num)      phex_nz ((val), \
-    TYPE_LENGTH (gdbarch_register_type (regcache->arch (), (num))))
+    gdbarch_register_type (regcache->arch (), (num))->length ())
 
 /* Record a memory area of length LEN pointed to by register
    REGNUM.  */
@@ -353,6 +353,12 @@ record_linux_system_call (enum gdb_syscall syscall,
     case gdb_sys_pipe:
     case gdb_sys_pipe2:
       if (record_mem_at_reg (regcache, tdep->arg1, tdep->size_int * 2))
+	return -1;
+      break;
+
+    case gdb_sys_getrandom:
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_mem_at_reg (regcache, tdep->arg1, tmpulongest))
 	return -1;
       break;
 

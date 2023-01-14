@@ -150,7 +150,7 @@ sparc64obsd_pc_in_sigtramp (CORE_ADDR pc, const char *name)
 }
 
 static struct sparc_frame_cache *
-sparc64obsd_frame_cache (struct frame_info *this_frame, void **this_cache)
+sparc64obsd_frame_cache (frame_info_ptr this_frame, void **this_cache)
 {
   struct sparc_frame_cache *cache;
   CORE_ADDR addr;
@@ -186,7 +186,7 @@ sparc64obsd_frame_cache (struct frame_info *this_frame, void **this_cache)
 }
 
 static void
-sparc64obsd_frame_this_id (struct frame_info *this_frame, void **this_cache,
+sparc64obsd_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 			   struct frame_id *this_id)
 {
   struct sparc_frame_cache *cache =
@@ -196,7 +196,7 @@ sparc64obsd_frame_this_id (struct frame_info *this_frame, void **this_cache,
 }
 
 static struct value *
-sparc64obsd_frame_prev_register (struct frame_info *this_frame,
+sparc64obsd_frame_prev_register (frame_info_ptr this_frame,
 				 void **this_cache, int regnum)
 {
   struct sparc_frame_cache *cache =
@@ -207,7 +207,7 @@ sparc64obsd_frame_prev_register (struct frame_info *this_frame,
 
 static int
 sparc64obsd_sigtramp_frame_sniffer (const struct frame_unwind *self,
-				    struct frame_info *this_frame,
+				    frame_info_ptr this_frame,
 				    void **this_cache)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
@@ -234,7 +234,7 @@ static const struct frame_unwind sparc64obsd_frame_unwind =
 /* Kernel debugging support.  */
 
 static struct sparc_frame_cache *
-sparc64obsd_trapframe_cache (struct frame_info *this_frame, void **this_cache)
+sparc64obsd_trapframe_cache (frame_info_ptr this_frame, void **this_cache)
 {
   struct sparc_frame_cache *cache;
   CORE_ADDR sp, trapframe_addr;
@@ -263,7 +263,7 @@ sparc64obsd_trapframe_cache (struct frame_info *this_frame, void **this_cache)
 }
 
 static void
-sparc64obsd_trapframe_this_id (struct frame_info *this_frame,
+sparc64obsd_trapframe_this_id (frame_info_ptr this_frame,
 			       void **this_cache, struct frame_id *this_id)
 {
   struct sparc_frame_cache *cache =
@@ -273,7 +273,7 @@ sparc64obsd_trapframe_this_id (struct frame_info *this_frame,
 }
 
 static struct value *
-sparc64obsd_trapframe_prev_register (struct frame_info *this_frame,
+sparc64obsd_trapframe_prev_register (frame_info_ptr this_frame,
 				     void **this_cache, int regnum)
 {
   struct sparc_frame_cache *cache =
@@ -284,7 +284,7 @@ sparc64obsd_trapframe_prev_register (struct frame_info *this_frame,
 
 static int
 sparc64obsd_trapframe_sniffer (const struct frame_unwind *self,
-			       struct frame_info *this_frame,
+			       frame_info_ptr this_frame,
 			       void **this_cache)
 {
   CORE_ADDR pc;
@@ -423,7 +423,7 @@ static const struct regset sparc64obsd_fpregset =
 static void
 sparc64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  sparc_gdbarch_tdep *tdep = (sparc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  sparc_gdbarch_tdep *tdep = gdbarch_tdep<sparc_gdbarch_tdep> (gdbarch);
 
   tdep->gregset = &sparc64obsd_gregset;
   tdep->sizeof_gregset = 288;

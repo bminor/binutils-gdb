@@ -521,10 +521,6 @@ enum
 #define PrefixHLELock		5 /* Okay with a LOCK prefix.  */
 #define PrefixHLEAny		6 /* Okay with or without a LOCK prefix.  */
   PrefixOk,
-  /* Convert to DWORD */
-  ToDword,
-  /* Convert to QWORD */
-  ToQword,
   /* Address prefix changes register operand */
   AddrPrefixOpReg,
   /* opcode is a prefix */
@@ -740,8 +736,6 @@ typedef struct i386_opcode_modifier
   unsigned int regkludge:1;
   unsigned int implicit1stxmm0:1;
   unsigned int prefixok:3;
-  unsigned int todword:1;
-  unsigned int toqword:1;
   unsigned int addrprefixopreg:1;
   unsigned int isprefix:1;
   unsigned int immext:1;
@@ -915,6 +909,11 @@ typedef struct insn_template
   /* instruction name sans width suffix ("mov" for movl insns) */
   char *name;
 
+  /* Bitfield arrangement is such that individual fields can be easily
+     extracted (in native builds at least) - either by at most a masking
+     operation (base_opcode, operands), or by just a (signed) right shift
+     (extension_opcode).  Please try to maintain this property.  */
+
   /* base_opcode is the fundamental opcode byte without optional
      prefix(es).  */
   unsigned int base_opcode:16;
@@ -923,8 +922,17 @@ typedef struct insn_template
 			       unset if Regmem --> Reg. */
 #define Opcode_FloatR	0x8 /* Bit to swap src/dest for float insns. */
 #define Opcode_FloatD 0x400 /* Direction bit for float insns. */
-#define Opcode_SIMD_FloatD 0x1 /* Direction bit for SIMD fp insns. */
+#define Opcode_ExtD	0x1 /* Direction bit for extended opcode space insns. */
 #define Opcode_SIMD_IntD 0x10 /* Direction bit for SIMD int insns. */
+/* The next value is arbitrary, as long as it's non-zero and distinct
+   from all other values above.  */
+#define Opcode_VexW	0xf /* Operand order controlled by VEX.W. */
+
+  /* how many operands */
+  unsigned int operands:3;
+
+  /* spare bits */
+  unsigned int :4;
 
 /* (Fake) base opcode value for pseudo prefixes.  */
 #define PSEUDO_PREFIX 0
@@ -948,9 +956,6 @@ typedef struct insn_template
 #define Prefix_EVEX		7	/* {evex} */
 #define Prefix_REX		8	/* {rex} */
 #define Prefix_NoOptimize	9	/* {nooptimize} */
-
-  /* how many operands */
-  unsigned int operands:3;
 
   /* the bits in opcode_modifier are used to generate the final opcode from
      the base_opcode.  These bits also are used to detect alternate forms of

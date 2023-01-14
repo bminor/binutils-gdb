@@ -410,7 +410,7 @@ static gcc_type
 compile_cplus_convert_reference (compile_cplus_instance *instance,
 				 struct type *type)
 {
-  gcc_type target = instance->convert_type (TYPE_TARGET_TYPE (type));
+  gcc_type target = instance->convert_type (type->target_type ());
 
   enum gcc_cp_ref_qualifiers quals = GCC_CP_REF_QUAL_NONE;
   switch (type->code ())
@@ -442,7 +442,7 @@ static gcc_type
 compile_cplus_convert_pointer (compile_cplus_instance *instance,
 			       struct type *type)
 {
-  gcc_type target = instance->convert_type (TYPE_TARGET_TYPE (type));
+  gcc_type target = instance->convert_type (type->target_type ());
 
   return instance->convert_pointer_base (target);
 }
@@ -454,7 +454,7 @@ compile_cplus_convert_array (compile_cplus_instance *instance,
 			     struct type *type)
 {
   struct type *range = type->index_type ();
-  gcc_type element_type = instance->convert_type (TYPE_TARGET_TYPE (type));
+  gcc_type element_type = instance->convert_type (type->target_type ());
 
   if (range->bounds ()->low.kind () != PROP_CONST)
     {
@@ -648,7 +648,7 @@ compile_cplus_convert_struct_or_union_members
 	    | get_field_access_flag (type, i);
 
 	  if (bitsize == 0)
-	    bitsize = 8 * TYPE_LENGTH (type->field (i).type ());
+	    bitsize = 8 * type->field (i).type ()->length ();
 
 	  instance->plugin ().build_field
 	    (field_name, field_type, field_flags, bitsize,
@@ -697,7 +697,7 @@ compile_cplus_convert_memberptr (compile_cplus_instance *instance,
 
   gcc_type class_type = instance->convert_type (containing_class);
   gcc_type member_type
-    = instance->convert_type (TYPE_TARGET_TYPE (type));
+    = instance->convert_type (type->target_type ());
 
   return instance->plugin ().build_pointer_to_member_type
     (class_type, member_type);
@@ -891,7 +891,7 @@ compile_cplus_convert_struct_or_union (compile_cplus_instance *instance,
   compile_cplus_convert_struct_or_union_members (instance, type, result);
 
   /* All finished.  */
-  instance->plugin ().finish_class_type (name.get (), TYPE_LENGTH (type));
+  instance->plugin ().finish_class_type (name.get (), type->length ());
 
   /* Pop all scopes.  */
   instance->leave_scope ();
@@ -926,7 +926,7 @@ compile_cplus_convert_enum (compile_cplus_instance *instance, struct type *type,
 
   gcc_type int_type
     = instance->plugin ().get_int_type (type->is_unsigned (),
-					TYPE_LENGTH (type), nullptr);
+					type->length (), nullptr);
   gcc_type result
     = instance->plugin ().start_enum_type (name.get (), int_type,
 					   GCC_CP_SYMBOL_ENUM | nested_access
@@ -961,7 +961,7 @@ compile_cplus_convert_func (compile_cplus_instance *instance,
 			    struct type *type, bool strip_artificial)
 {
   int is_varargs = type->has_varargs ();
-  struct type *target_type = TYPE_TARGET_TYPE (type);
+  struct type *target_type = type->target_type ();
 
   /* Functions with no debug info have no return type.  Ideally we'd
      want to fallback to the type of the cast just before the
@@ -1012,12 +1012,12 @@ compile_cplus_convert_int (compile_cplus_instance *instance, struct type *type)
 {
   if (type->has_no_signedness ())
     {
-      gdb_assert (TYPE_LENGTH (type) == 1);
+      gdb_assert (type->length () == 1);
       return instance->plugin ().get_char_type ();
     }
 
   return instance->plugin ().get_int_type
-    (type->is_unsigned (), TYPE_LENGTH (type), type->name ());
+    (type->is_unsigned (), type->length (), type->name ());
 }
 
 /* Convert a floating-point type to its gcc representation.  */
@@ -1027,7 +1027,7 @@ compile_cplus_convert_float (compile_cplus_instance *instance,
 			     struct type *type)
 {
   return instance->plugin ().get_float_type
-    (TYPE_LENGTH (type), type->name ());
+    (type->length (), type->name ());
 }
 
 /* Convert the 'void' type to its gcc representation.  */
@@ -1086,7 +1086,7 @@ static gcc_type
 compile_cplus_convert_complex (compile_cplus_instance *instance,
 			       struct type *type)
 {
-  gcc_type base = instance->convert_type (TYPE_TARGET_TYPE (type));
+  gcc_type base = instance->convert_type (type->target_type ());
 
   return instance->plugin ().build_complex_type (base);
 }

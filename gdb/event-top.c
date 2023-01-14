@@ -186,6 +186,22 @@ gdb_rl_callback_read_char_wrapper_noexcept () noexcept
   TRY_SJLJ
     {
       rl_callback_read_char ();
+#if RL_VERSION_MAJOR >= 8
+      /* It can happen that readline (while in rl_callback_read_char)
+	 received a signal, but didn't handle it yet.  Make sure it's handled
+	 now.  If we don't do that we run into two related problems:
+	 - we have to wait for another event triggering
+	   rl_callback_read_char before the signal is handled
+	 - there's no guarantee that the signal will be processed before the
+	   event.  */
+      while (rl_pending_signal () != 0)
+	/* Do this in a while loop, in case rl_check_signals also leaves a
+	   pending signal.  I'm not sure if that's possible, but it seems
+	   better to handle the scenario than to assert.  */
+	rl_check_signals ();
+#else
+      /* Unfortunately, rl_check_signals is not available.  */
+#endif
       if (after_char_processing_hook)
 	(*after_char_processing_hook) ();
     }
@@ -481,7 +497,7 @@ get_command_line_buffer (void)
    instead of calling gdb_readline_no_editing_callback, give gdb a
    chance to detect errors and do something.  */
 
-void
+static void
 stdin_event_handler (int error, gdb_client_data client_data)
 {
   struct ui *ui = (struct ui *) client_data;
@@ -491,7 +507,7 @@ stdin_event_handler (int error, gdb_client_data client_data)
       /* Switch to the main UI, so diagnostics always go there.  */
       current_ui = main_ui;
 
-      delete_file_handler (ui->input_fd);
+      ui->unregister_file_handler ();
       if (main_ui == ui)
 	{
 	  /* If stdin died, we may as well kill gdb.  */
@@ -531,18 +547,20 @@ stdin_event_handler (int error, gdb_client_data client_data)
 /* See top.h.  */
 
 void
-ui_register_input_event_handler (struct ui *ui)
+ui::register_file_handler ()
 {
-  add_file_handler (ui->input_fd, stdin_event_handler, ui,
-		    string_printf ("ui-%d", ui->num), true);
+  if (input_fd != -1)
+    add_file_handler (input_fd, stdin_event_handler, this,
+		      string_printf ("ui-%d", num), true);
 }
 
 /* See top.h.  */
 
 void
-ui_unregister_input_event_handler (struct ui *ui)
+ui::unregister_file_handler ()
 {
-  delete_file_handler (ui->input_fd);
+  if (input_fd != -1)
+    delete_file_handler (input_fd);
 }
 
 /* Re-enable stdin after the end of an execution command in
@@ -557,7 +575,7 @@ async_enable_stdin (void)
   if (ui->prompt_state == PROMPT_BLOCKED)
     {
       target_terminal::ours ();
-      ui_register_input_event_handler (ui);
+      ui->register_file_handler ();
       ui->prompt_state = PROMPT_NEEDED;
     }
 }
@@ -571,7 +589,7 @@ async_disable_stdin (void)
   struct ui *ui = current_ui;
 
   ui->prompt_state = PROMPT_BLOCKED;
-  delete_file_handler (ui->input_fd);
+  ui->unregister_file_handler ();
 }
 
 
@@ -687,7 +705,7 @@ handle_line_of_input (struct buffer *cmd_line_buffer,
     }
 
   /* Do history expansion if that is wished.  */
-  if (history_expansion_p && from_tty && input_interactive_p (current_ui))
+  if (history_expansion_p && from_tty && current_ui->input_interactive_p ())
     {
       char *cmd_expansion;
       int expanded;
@@ -729,7 +747,7 @@ handle_line_of_input (struct buffer *cmd_line_buffer,
      and then later fetch it from the value history and remove the
      '#'.  The kill ring is probably better, but some people are in
      the habit of commenting things out.  */
-  if (*cmd != '\0' && from_tty && input_interactive_p (current_ui))
+  if (*cmd != '\0' && from_tty && current_ui->input_interactive_p ())
     gdb_add_history (cmd);
 
   /* Save into global buffer if appropriate.  */
@@ -1328,21 +1346,12 @@ gdb_setup_readline (int editing)
 {
   struct ui *ui = current_ui;
 
-  /* This function is a noop for the sync case.  The assumption is
-     that the sync setup is ALL done in gdb_init, and we would only
-     mess it up here.  The sync stuff should really go away over
-     time.  */
-  if (!batch_silent)
-    gdb_stdout = new pager_file (new stdio_file (ui->outstream));
-  gdb_stderr = new stderr_file (ui->errstream);
-  gdb_stdlog = new timestamped_file (gdb_stderr);
-  gdb_stdtarg = gdb_stderr; /* for moment */
-  gdb_stdtargerr = gdb_stderr; /* for moment */
-
   /* If the input stream is connected to a terminal, turn on editing.
      However, that is only allowed on the main UI, as we can only have
-     one instance of readline.  */
-  if (ISATTY (ui->instream) && editing && ui == main_ui)
+     one instance of readline.  Also, INSTREAM might be nullptr when
+     executing a user-defined command.  */
+  if (ui->instream != nullptr && ISATTY (ui->instream)
+      && editing && ui == main_ui)
     {
       /* Tell gdb that we will be using the readline library.  This
 	 could be overwritten by a command in .gdbinit like 'set
@@ -1366,7 +1375,7 @@ gdb_setup_readline (int editing)
      Another source is going to be the target program (inferior), but
      that must be registered only when it actually exists (I.e. after
      we say 'run' or after we connect to a remote target.  */
-  ui_register_input_event_handler (ui);
+  ui->register_file_handler ();
 }
 
 /* Disable command input through the standard CLI channels.  Used in
@@ -1378,22 +1387,9 @@ gdb_disable_readline (void)
 {
   struct ui *ui = current_ui;
 
-  /* FIXME - It is too heavyweight to delete and remake these every
-     time you run an interpreter that needs readline.  It is probably
-     better to have the interpreters cache these, which in turn means
-     that this needs to be moved into interpreter specific code.  */
-
-#if 0
-  ui_file_delete (gdb_stdout);
-  ui_file_delete (gdb_stderr);
-  gdb_stdlog = NULL;
-  gdb_stdtarg = NULL;
-  gdb_stdtargerr = NULL;
-#endif
-
   if (ui->command_editing)
     gdb_rl_callback_handler_remove ();
-  delete_file_handler (ui->input_fd);
+  ui->unregister_file_handler ();
 }
 
 scoped_segv_handler_restore::scoped_segv_handler_restore (segv_handler_t new_handler)

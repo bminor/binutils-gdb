@@ -641,7 +641,12 @@ proc copy_setup { } {
     global test_prog
     global host_triplet
 
-    set res [build_wrapper testglue.o]
+    if {[target_info exists needs_status_wrapper] && \
+	    [target_info needs_status_wrapper] != "0"} {
+	set res [build_wrapper testglue.o]
+    } else {
+	set res ""
+    }
     set flags { debug }
 
     if { [istarget *-*-uclinux*] && ![istarget tic6x-*-*] && ![istarget arm*-*-uclinuxfdpiceabi] } {

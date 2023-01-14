@@ -1595,7 +1595,7 @@ xcoff64_ppc_relocate_section (bfd *output_bfd,
 
 	    default:
 	      _bfd_error_handler
-		(_("%pB: relocation (%d) at (0x%" BFD_VMA_FMT "x) has wrong"
+		(_("%pB: relocation (%d) at (0x%" PRIx64 ") has wrong"
 		   " r_rsize (0x%x)\n"),
 		 input_bfd, rel->r_type, rel->r_vaddr, rel->r_size);
 	      return false;
@@ -2667,6 +2667,7 @@ const bfd_target rs6000_xcoff64_vec =
     coff_bfd_is_target_special_symbol,
     coff_get_lineno,
     coff_find_nearest_line,
+    coff_find_nearest_line_with_alt,
     coff_find_line,
     coff_find_inliner_info,
     coff_bfd_make_debug_symbol,
@@ -2939,6 +2940,7 @@ const bfd_target rs6000_xcoff64_aix_vec =
     coff_bfd_is_target_special_symbol,
     coff_get_lineno,
     coff_find_nearest_line,
+    coff_find_nearest_line_with_alt,
     coff_find_line,
     coff_find_inliner_info,
     coff_bfd_make_debug_symbol,

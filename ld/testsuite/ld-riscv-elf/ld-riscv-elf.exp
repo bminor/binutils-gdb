@@ -210,12 +210,10 @@ if [istarget "riscv*-*-*"] {
 				    "gp-test-${abi}"]]
     }
 
-    run_ld_link_tests {
-	{ "Link non-pic code into a shared library (setup)"
-	    "-shared" "" "" {lib-nopic-01a.s}
-	    {} "lib-nopic-01a.so" }
-    }
-    run_dump_test "lib-nopic-01b"
+    run_dump_test "shared-lib-nopic-01"
+    run_dump_test "shared-lib-nopic-02"
+    run_dump_test "shared-lib-nopic-03"
+    run_dump_test "shared-lib-nopic-04"
 
     # IFUNC testcases.
     # Check IFUNC by single type relocs.

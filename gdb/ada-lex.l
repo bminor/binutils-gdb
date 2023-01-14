@@ -455,7 +455,7 @@ processInt (struct parser_state *par_state, const char *base0,
 
       yylval.typed_val_float.type = fp_type;
       result.write (gdb::make_array_view (yylval.typed_val_float.val,
-					  TYPE_LENGTH (fp_type)),
+					  fp_type->length ()),
 		    type_byte_order (fp_type),
 		    true);
 
@@ -498,8 +498,8 @@ processInt (struct parser_state *par_state, const char *base0,
     yylval.typed_val.type = type_long_long (par_state);
   else if (fits_in_type (1, value, long_long_bits, false))
     {
-      /* Note: Interprets ULLONG_MAX as -1.  */
-      yylval.typed_val.type = type_long_long (par_state);
+      yylval.typed_val.type
+	= builtin_type (par_state->gdbarch ())->builtin_unsigned_long_long;
       /* See unsigned long case above.  */
       if (value & LONGEST_SIGN)
 	yylval.typed_val.val =

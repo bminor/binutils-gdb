@@ -51,7 +51,7 @@ if {[gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${asmfile2}" assembly {}] !=
 # STABS compilation is intentional as it tests the STABS lookup where is no
 # partial_symtab->psymtabs_addrmap supported for that CU (Compilation Unit) in
 # a file containing psymtabs_addrmap-supporting DWARF CUs.
-if {[gdb_compile "${srcdir}/${subdir}/${srcfile3}" "${objfile3}" object {additional_flags=-gstabs}] != "" } {
+if {[gdb_compile "${srcdir}/${subdir}/${srcfile3}" "${objfile3}" object {additional_flags=-gstabs quiet}] != "" } {
     return -1
 }
 

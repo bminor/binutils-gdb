@@ -369,12 +369,6 @@ as_internal_value_out_of_range (const char *prefix,
 				bool bad)
 {
   const char * err;
-  /* These buffer sizes are excessive, but better to be safe than sorry.
-     Note - these buffers are used in order to make the error message
-     string translateable.  */
-  char val_buf [128];
-  char min_buf [128];
-  char max_buf [128];
 
   if (prefix == NULL)
     prefix = "";
@@ -386,16 +380,14 @@ as_internal_value_out_of_range (const char *prefix,
       if (max <= 1)
 	abort ();
 
-      sprintf (val_buf, "%" BFD_VMA_FMT "d", val);
-      sprintf (min_buf, "%" BFD_VMA_FMT "d", right);
-
       /* xgettext:c-format  */
-      err = _("%s out of domain (%s is not a multiple of %s)");
+      err = _("%s out of domain (%" PRId64
+	      " is not a multiple of %" PRId64 ")");
 
       if (bad)
-	as_bad_where (file, line, err, prefix, val_buf, min_buf);
+	as_bad_where (file, line, err, prefix, (int64_t) val, (int64_t) right);
       else
-	as_warn_where (file, line, err, prefix, val_buf, min_buf);
+	as_warn_where (file, line, err, prefix, (int64_t) val, (int64_t) right);
     }
   else if (   val < HEX_MAX_THRESHOLD
 	   && min < HEX_MAX_THRESHOLD
@@ -404,31 +396,29 @@ as_internal_value_out_of_range (const char *prefix,
 	   && min > HEX_MIN_THRESHOLD
 	   && max > HEX_MIN_THRESHOLD)
     {
-      sprintf (val_buf, "%" BFD_VMA_FMT "d", val);
-      sprintf (min_buf, "%" BFD_VMA_FMT "d", min);
-      sprintf (max_buf, "%" BFD_VMA_FMT "d", max);
-
       /* xgettext:c-format.  */
-      err = _("%s out of range (%s is not between %s and %s)");
+      err = _("%s out of range (%" PRId64
+	      " is not between %" PRId64 " and %" PRId64 ")");
 
       if (bad)
-	as_bad_where (file, line, err, prefix, val_buf, min_buf, max_buf);
+	as_bad_where (file, line, err, prefix,
+		      (int64_t) val, (int64_t) min, (int64_t) max);
       else
-	as_warn_where (file, line, err, prefix, val_buf, min_buf, max_buf);
+	as_warn_where (file, line, err, prefix,
+		       (int64_t) val, (int64_t) min, (int64_t) max);
     }
   else
     {
-      sprintf_vma (val_buf, (bfd_vma) val);
-      sprintf_vma (min_buf, (bfd_vma) min);
-      sprintf_vma (max_buf, (bfd_vma) max);
-
       /* xgettext:c-format.  */
-      err = _("%s out of range (0x%s is not between 0x%s and 0x%s)");
+      err = _("%s out of range (0x%" PRIx64
+	      " is not between 0x%" PRIx64 " and 0x%" PRIx64 ")");
 
       if (bad)
-	as_bad_where (file, line, err, prefix, val_buf, min_buf, max_buf);
+	as_bad_where (file, line, err, prefix,
+		      (int64_t) val, (int64_t) min, (int64_t) max);
       else
-	as_warn_where (file, line, err, prefix, val_buf, min_buf, max_buf);
+	as_warn_where (file, line, err, prefix,
+		       (int64_t) val, (int64_t) min, (int64_t) max);
     }
 }
 

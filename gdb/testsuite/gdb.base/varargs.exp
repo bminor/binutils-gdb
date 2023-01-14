@@ -103,4 +103,6 @@ if [support_complex_tests] {
     set test "print find_max_long_double_real(4, ldc1, ldc2, ldc3, ldc4)"
     gdb_test $test ".*= 4 \\+ 4i"
 
+    set test "print find_max_struct_long_double_real(4, sldc1, sldc2, sldc3, sldc4)"
+    gdb_test $test ".*= 4 \\+ 4i"
 }

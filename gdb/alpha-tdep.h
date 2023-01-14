@@ -70,7 +70,7 @@ struct regcache;
 #define ALPHA_NUM_ARG_REGS   6
 
 /* Target-dependent structure in gdbarch.  */
-struct alpha_gdbarch_tdep : gdbarch_tdep
+struct alpha_gdbarch_tdep : gdbarch_tdep_base
 {
   CORE_ADDR vm_min_address = 0;	/* Used by alpha_heuristic_proc_start.  */
 
@@ -81,7 +81,7 @@ struct alpha_gdbarch_tdep : gdbarch_tdep
 
   /* Translate a signal handler stack base address into the address of
      the sigcontext structure for that signal handler.  */
-  CORE_ADDR (*sigcontext_addr) (struct frame_info *) = nullptr;
+  CORE_ADDR (*sigcontext_addr) (frame_info_ptr ) = nullptr;
 
   /* Does the PC fall in a signal trampoline.  */
   /* NOTE: cagney/2004-04-30: Do not copy/clone this code.  Instead

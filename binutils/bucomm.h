@@ -39,6 +39,8 @@ void fatal (const char *, ...) ATTRIBUTE_PRINTF_1 ATTRIBUTE_NORETURN;
 
 void non_fatal (const char *, ...) ATTRIBUTE_PRINTF_1;
 
+void *bfd_xalloc (bfd *, size_t);
+
 void set_default_bfd_target (void);
 
 void list_matching_formats (char **);

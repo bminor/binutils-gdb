@@ -30,38 +30,24 @@ switch $pltf {
     #   dir      cflags         gprofflags       Others
     set table {
       {"jsynprog" "-g -Wall"        "-p on -j on"}
-      {"mttest"   ""                ""}
-      {"mttest"   "-g -Wall"        "-p on"}
       {"mttest"   "-g -O0"          "-p on"}
-      {"mttest"   "-g -O"           "-p on"}
-      {"mttest"   "-g -O"           "-h on"}
-      {"mttest"   "-g -O"           "-h on"}
-      {"mttest"   "-g -O"           "-p on -h on"}
-      {"synprog"  ""                ""}
-      {"synprog"  "-g"              "-p on"}
+      {"mttest"   "-g -O0"          "-p on -h on"}
       {"synprog"  "-g -O0"          "-p on"}
-      {"synprog"  "-g -O"           "-p on"}
-      {"synprog"  "-g"              "-p on -h on"}
-      {"synprog"  "-g -O0"          "-p on -h on"}
-      {"synprog"  "-g -O"           "-p on -h on"}
+      {"synprog"  "-g -O0"           "-p on -h on"}
     }
   }
   aarch64 {
     set table {
       {"jsynprog" "-g -Wall"        "-p on -j on"}
-      {"mttest"   ""                ""}
-      {"mttest"   "-g -Wall"        "-p on"}
       {"mttest"   "-g -O0"          "-p on"}
-      {"mttest"   "-g -O"           "-p on"}
-      {"synprog"  ""                ""}
-      {"synprog"  "-g"              "-p on"}
-      {"synprog"  "-g -O"           "-p on"}
+      {"synprog"  "-g -O0"          "-p on"}
     }
   }
   default {
     # Columns in the table represent:
     #   dir      cflags         gprofflags       Others
     set table {
+      {"jsynprog" ""              ""}
       {"mttest"   ""              ""}
       {"synprog"  ""              ""}
     }

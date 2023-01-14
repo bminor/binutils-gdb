@@ -20,6 +20,7 @@
 * RISC-V-Modifiers::      RISC-V Assembler Modifiers
 * RISC-V-Formats::        RISC-V Instruction Formats
 * RISC-V-ATTRIBUTE::      RISC-V Object Attribute
+* RISC-V-CustomExts::     RISC-V Custom (Vendor-Defined) Extensions
 @end menu
 
 @node RISC-V-Options
@@ -690,5 +691,67 @@ memory accesses, and 1 for files that do allow unaligned memory accesses.
 Tag_RISCV_priv_spec contains the major/minor/revision version information of
 the privileged specification.  It will report errors if object files of
 different privileged specification versions are merged.
+
+@end table
+
+@node RISC-V-CustomExts
+@section RISC-V Custom (Vendor-Defined) Extensions
+@cindex custom (vendor-defined) extensions, RISC-V
+@cindex RISC-V custom (vendor-defined) extensions
+
+The following table lists the custom (vendor-defined) RISC-V
+extensions supported and provides the location of their
+publicly-released documentation:
+
+@table @r
+@item XTheadBa
+The XTheadBa extension provides instructions for address calculations.
+
+It is documented in @url{https://github.com/T-head-Semi/thead-extension-spec/releases/download/2.0.0/xthead-2022-09-05-2.0.0.pdf}.
+
+@item XTheadBb
+The XTheadBb extension provides instructions for basic bit-manipulation
+
+It is documented in @url{https://github.com/T-head-Semi/thead-extension-spec/releases/download/2.0.0/xthead-2022-09-05-2.0.0.pdf}.
+
+@item XTheadBs
+The XTheadBs extension provides single-bit instructions.
+
+It is documented in @url{https://github.com/T-head-Semi/thead-extension-spec/releases/download/2.0.0/xthead-2022-09-05-2.0.0.pdf}.
+
+@item XTheadCmo
+The XTheadCmo extension provides instructions for cache management.
+
+It is documented in @url{https://github.com/T-head-Semi/thead-extension-spec/releases/download/2.0.0/xthead-2022-09-05-2.0.0.pdf}.
+
+@item XTheadCondMov
+The XTheadCondMov extension provides instructions for conditional moves.
+
+It is documented in @url{https://github.com/T-head-Semi/thead-extension-spec/releases/download/2.0.0/xthead-2022-09-05-2.0.0.pdf}.
+
+@item XTheadFMemIdx
+The XTheadFMemIdx extension provides floating-point memory operations.
+
+It is documented in @url{https://github.com/T-head-Semi/thead-extension-spec/releases/download/2.0.0/xthead-2022-09-05-2.0.0.pdf}.
+
+@item XTheadMac
+The XTheadMac extension provides multiply-accumulate instructions.
+
+It is documented in @url{https://github.com/T-head-Semi/thead-extension-spec/releases/download/2.0.0/xthead-2022-09-05-2.0.0.pdf}.
+
+@item XTheadMemIdx
+The XTheadMemIdx extension provides GPR memory operations.
+
+It is documented in @url{https://github.com/T-head-Semi/thead-extension-spec/releases/download/2.0.0/xthead-2022-09-05-2.0.0.pdf}.
+
+@item XTheadMemPair
+The XTheadMemPair extension provides two-GP-register memory operations.
+
+It is documented in @url{https://github.com/T-head-Semi/thead-extension-spec/releases/download/2.0.0/xthead-2022-09-05-2.0.0.pdf}.
+
+@item XTheadSync
+The XTheadSync extension provides instructions for multi-processor synchronization.
+
+It is documented in @url{https://github.com/T-head-Semi/thead-extension-spec/releases/download/2.0.0/xthead-2022-09-05-2.0.0.pdf}.
 
 @end table

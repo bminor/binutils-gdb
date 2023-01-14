@@ -28,11 +28,11 @@ foreach_with_prefix scenario {none all minimal} {
 	lappend flags additional_flags=-fgnat-encodings=$scenario
     }
 
-    if {[gdb_compile_ada "${srcfile}" "${binfile}" executable $flags] != "" } {
+    if {[gdb_compile_ada "${srcfile}" "${binfile}-${scenario}" executable $flags] != "" } {
 	return -1
     }
 
-    mi_clean_restart $binfile
+    mi_clean_restart $binfile-$scenario
 
     if {[mi_runto_main] < 0} {
 	return 0

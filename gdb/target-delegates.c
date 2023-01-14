@@ -101,7 +101,7 @@ struct dummy_target : public target_ops
   bool attach_no_wait () override;
   bool can_async_p () override;
   bool is_async_p () override;
-  void async (int arg0) override;
+  void async (bool arg0) override;
   int async_wait_fd () override;
   bool has_pending_events () override;
   void thread_events (int arg0) override;
@@ -119,7 +119,7 @@ struct dummy_target : public target_ops
   void flash_done () override;
   const struct target_desc *read_description () override;
   ptid_t get_ada_task_ptid (long arg0, ULONGEST arg1) override;
-  int auxv_parse (gdb_byte **arg0, gdb_byte *arg1, CORE_ADDR *arg2, CORE_ADDR *arg3) override;
+  int auxv_parse (const gdb_byte **arg0, const gdb_byte *arg1, CORE_ADDR *arg2, CORE_ADDR *arg3) override;
   int search_memory (CORE_ADDR arg0, ULONGEST arg1, const gdb_byte *arg2, ULONGEST arg3, CORE_ADDR *arg4) override;
   bool can_execute_reverse () override;
   enum exec_direction_kind execution_direction () override;
@@ -275,7 +275,7 @@ struct debug_target : public target_ops
   bool attach_no_wait () override;
   bool can_async_p () override;
   bool is_async_p () override;
-  void async (int arg0) override;
+  void async (bool arg0) override;
   int async_wait_fd () override;
   bool has_pending_events () override;
   void thread_events (int arg0) override;
@@ -293,7 +293,7 @@ struct debug_target : public target_ops
   void flash_done () override;
   const struct target_desc *read_description () override;
   ptid_t get_ada_task_ptid (long arg0, ULONGEST arg1) override;
-  int auxv_parse (gdb_byte **arg0, gdb_byte *arg1, CORE_ADDR *arg2, CORE_ADDR *arg3) override;
+  int auxv_parse (const gdb_byte **arg0, const gdb_byte *arg1, CORE_ADDR *arg2, CORE_ADDR *arg3) override;
   int search_memory (CORE_ADDR arg0, ULONGEST arg1, const gdb_byte *arg2, ULONGEST arg3, CORE_ADDR *arg4) override;
   bool can_execute_reverse () override;
   enum exec_direction_kind execution_direction () override;
@@ -2156,24 +2156,24 @@ debug_target::is_async_p ()
 }
 
 void
-target_ops::async (int arg0)
+target_ops::async (bool arg0)
 {
   this->beneath ()->async (arg0);
 }
 
 void
-dummy_target::async (int arg0)
+dummy_target::async (bool arg0)
 {
   tcomplain ();
 }
 
 void
-debug_target::async (int arg0)
+debug_target::async (bool arg0)
 {
   gdb_printf (gdb_stdlog, "-> %s->async (...)\n", this->beneath ()->shortname ());
   this->beneath ()->async (arg0);
   gdb_printf (gdb_stdlog, "<- %s->async (", this->beneath ()->shortname ());
-  target_debug_print_int (arg0);
+  target_debug_print_bool (arg0);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -2623,27 +2623,27 @@ debug_target::get_ada_task_ptid (long arg0, ULONGEST arg1)
 }
 
 int
-target_ops::auxv_parse (gdb_byte **arg0, gdb_byte *arg1, CORE_ADDR *arg2, CORE_ADDR *arg3)
+target_ops::auxv_parse (const gdb_byte **arg0, const gdb_byte *arg1, CORE_ADDR *arg2, CORE_ADDR *arg3)
 {
   return this->beneath ()->auxv_parse (arg0, arg1, arg2, arg3);
 }
 
 int
-dummy_target::auxv_parse (gdb_byte **arg0, gdb_byte *arg1, CORE_ADDR *arg2, CORE_ADDR *arg3)
+dummy_target::auxv_parse (const gdb_byte **arg0, const gdb_byte *arg1, CORE_ADDR *arg2, CORE_ADDR *arg3)
 {
   return default_auxv_parse (this, arg0, arg1, arg2, arg3);
 }
 
 int
-debug_target::auxv_parse (gdb_byte **arg0, gdb_byte *arg1, CORE_ADDR *arg2, CORE_ADDR *arg3)
+debug_target::auxv_parse (const gdb_byte **arg0, const gdb_byte *arg1, CORE_ADDR *arg2, CORE_ADDR *arg3)
 {
   int result;
   gdb_printf (gdb_stdlog, "-> %s->auxv_parse (...)\n", this->beneath ()->shortname ());
   result = this->beneath ()->auxv_parse (arg0, arg1, arg2, arg3);
   gdb_printf (gdb_stdlog, "<- %s->auxv_parse (", this->beneath ()->shortname ());
-  target_debug_print_gdb_byte_pp (arg0);
+  target_debug_print_const_gdb_byte_pp (arg0);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_gdb_byte_p (arg1);
+  target_debug_print_const_gdb_byte_p (arg1);
   gdb_puts (", ", gdb_stdlog);
   target_debug_print_CORE_ADDR_p (arg2);
   gdb_puts (", ", gdb_stdlog);

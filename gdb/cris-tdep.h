@@ -26,7 +26,7 @@
 #include "gdbarch.h"
 
 /* CRIS architecture specific information.  */
-struct cris_gdbarch_tdep : gdbarch_tdep
+struct cris_gdbarch_tdep : gdbarch_tdep_base
 {
   unsigned int cris_version = 0;
   const char *cris_mode = nullptr;

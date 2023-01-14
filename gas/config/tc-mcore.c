@@ -1615,7 +1615,7 @@ md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 }
 
 void
-md_mcore_end (void)
+mcore_md_finish (void)
 {
   dump_literals (0);
   subseg_set (text_section, 0);

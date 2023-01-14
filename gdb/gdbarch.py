@@ -49,6 +49,11 @@ class _Component:
             setattr(self, key, kwargs[key])
         components.append(self)
 
+        # It doesn't make sense to have a check of the result value
+        # for a function or method with void return type.
+        if self.type == "void" and self.result_checks:
+            raise Exception("can't have result checks with a void return type")
+
     def get_predicate(self):
         "Return the expression used for validity checking."
         assert self.predicate and not isinstance(self.invalid, str)
@@ -112,6 +117,8 @@ class Function(_Component):
         postdefault=None,
         invalid=None,
         printer=None,
+        param_checks=None,
+        result_checks=None,
     ):
         super().__init__(
             comment=comment,
@@ -123,6 +130,8 @@ class Function(_Component):
             invalid=invalid,
             printer=printer,
             params=params,
+            param_checks=param_checks,
+            result_checks=result_checks,
         )
 
     def ftype(self):
@@ -257,29 +266,31 @@ with open("gdbarch.c", "w") as f:
     print("struct gdbarch", file=f)
     print("{", file=f)
     print("  /* Has this architecture been fully initialized?  */", file=f)
-    print("  int initialized_p;", file=f)
+    print("  bool initialized_p = false;", file=f)
     print(file=f)
     print("  /* An obstack bound to the lifetime of the architecture.  */", file=f)
-    print("  struct obstack *obstack;", file=f)
+    print("  auto_obstack obstack;", file=f)
+    print("  /* Registry.  */", file=f)
+    print("  registry<gdbarch> registry_fields;", file=f)
     print(file=f)
     print("  /* basic architectural information.  */", file=f)
     for c in filter(info, components):
         print(f"  {c.type} {c.name};", file=f)
     print(file=f)
     print("  /* target specific vector.  */", file=f)
-    print("  struct gdbarch_tdep *tdep;", file=f)
-    print("  gdbarch_dump_tdep_ftype *dump_tdep;", file=f)
+    print("  struct gdbarch_tdep_base *tdep = nullptr;", file=f)
+    print("  gdbarch_dump_tdep_ftype *dump_tdep = nullptr;", file=f)
     print(file=f)
     print("  /* per-architecture data-pointers.  */", file=f)
-    print("  unsigned nr_data;", file=f)
-    print("  void **data;", file=f)
+    print("  unsigned nr_data = 0;", file=f)
+    print("  void **data = nullptr;", file=f)
     print(file=f)
     for c in filter(not_info, components):
         if isinstance(c, Value):
-            print(f"  {c.type} {c.name};", file=f)
+            print(f"  {c.type} {c.name} = 0;", file=f)
         else:
             assert isinstance(c, Function)
-            print(f"  gdbarch_{c.name}_ftype *{c.name};", file=f)
+            print(f"  gdbarch_{c.name}_ftype *{c.name} = nullptr;", file=f)
     print("};", file=f)
     print(file=f)
     #
@@ -290,21 +301,11 @@ with open("gdbarch.c", "w") as f:
     print(file=f)
     print("struct gdbarch *", file=f)
     print("gdbarch_alloc (const struct gdbarch_info *info,", file=f)
-    print("	       struct gdbarch_tdep *tdep)", file=f)
+    print("	       struct gdbarch_tdep_base *tdep)", file=f)
     print("{", file=f)
     print("  struct gdbarch *gdbarch;", file=f)
     print("", file=f)
-    print(
-        "  /* Create an obstack for allocating all the per-architecture memory,", file=f
-    )
-    print("     then use that to allocate the architecture vector.  */", file=f)
-    print("  struct obstack *obstack = XNEW (struct obstack);", file=f)
-    print("  obstack_init (obstack);", file=f)
-    print("  gdbarch = XOBNEW (obstack, struct gdbarch);", file=f)
-    print("  memset (gdbarch, 0, sizeof (*gdbarch));", file=f)
-    print("  gdbarch->obstack = obstack;", file=f)
-    print(file=f)
-    print("  alloc_gdbarch_data (gdbarch);", file=f)
+    print("  gdbarch = new struct gdbarch;", file=f)
     print(file=f)
     print("  gdbarch->tdep = tdep;", file=f)
     print(file=f)
@@ -452,6 +453,9 @@ with open("gdbarch.c", "w") as f:
                     f"  /* Do not check predicate: {c.get_predicate()}, allow call.  */",
                     file=f,
                 )
+            if c.param_checks:
+                for rule in c.param_checks:
+                    print(f"  gdb_assert ({rule});", file=f)
             print("  if (gdbarch_debug >= 2)", file=f)
             print(
                 f"""    gdb_printf (gdb_stdlog, "gdbarch_{c.name} called\\n");""",
@@ -459,8 +463,15 @@ with open("gdbarch.c", "w") as f:
             )
             print("  ", file=f, end="")
             if c.type != "void":
-                print("return ", file=f, end="")
+                if c.result_checks:
+                    print("auto result = ", file=f, end="")
+                else:
+                    print("return ", file=f, end="")
             print(f"gdbarch->{c.name} ({c.actuals()});", file=f)
+            if c.type != "void" and c.result_checks:
+                for rule in c.result_checks:
+                    print(f"  gdb_assert ({rule});", file=f)
+                print("  return result;", file=f)
             print("}", file=f)
             print(file=f)
             print("void", file=f)

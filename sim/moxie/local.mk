@@ -30,3 +30,10 @@ dtb_DATA = %D%/moxie-gdb.dtb
 	  echo "tree compiler tool (dtc) is missing.  Install the tool to "; \
 	  echo "update the device tree blob."; \
 	fi
+
+# Rule to create the .dirstamp file (on which moxie-gdb.dtb depends)
+# as automake fails to automatically create this rule for _DATA items.
+%D%/$(am__dirstamp):
+	@$(MKDIR_P) %D%
+	@: >%D%/$(am__dirstamp)
+DISTCLEANFILES += %D%/$(am__dirstamp)

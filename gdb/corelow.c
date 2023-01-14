@@ -52,6 +52,7 @@
 #include <unordered_set>
 #include "gdbcmd.h"
 #include "xml-tdesc.h"
+#include "memtag.h"
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
@@ -101,6 +102,13 @@ public:
 
   bool info_proc (const char *, enum info_proc_what) override;
 
+  bool supports_memory_tagging () override;
+
+  /* Core file implementation of fetch_memtags.  Fetch the memory tags from
+     core file notes.  */
+  bool fetch_memtags (CORE_ADDR address, size_t len,
+		      gdb::byte_vector &tags, int type) override;
+
   /* A few helpers.  */
 
   /* Getter, see variable definition.  */
@@ -121,6 +129,9 @@ public:
   void info_proc_mappings (struct gdbarch *gdbarch);
 
 private: /* per-core data */
+
+  /* Get rid of the core inferior.  */
+  void clear_core ();
 
   /* The core's section table.  Note that these target sections are
      *not* mapped in the current address spaces' set of target
@@ -308,10 +319,8 @@ core_target::build_file_mappings ()
 /* An arbitrary identifier for the core inferior.  */
 #define CORELOW_PID 1
 
-/* Close the core target.  */
-
 void
-core_target::close ()
+core_target::clear_core ()
 {
   if (core_bfd)
     {
@@ -325,6 +334,14 @@ core_target::close ()
 
       current_program_space->cbfd.reset (nullptr);
     }
+}
+
+/* Close the core target.  */
+
+void
+core_target::close ()
+{
+  clear_core ();
 
   /* Core targets are heap-allocated (see core_target_open), so here
      we delete ourselves.  */
@@ -631,9 +648,15 @@ core_target_open (const char *arg, int from_tty)
 void
 core_target::detach (inferior *inf, int from_tty)
 {
-  /* Note that 'this' is dangling after this call.  unpush_target
-     closes the target, and our close implementation deletes
-     'this'.  */
+  /* Get rid of the core.  Don't rely on core_target::close doing it,
+     because target_detach may be called with core_target's refcount > 1,
+     meaning core_target::close may not be called yet by the
+     unpush_target call below.  */
+  clear_core ();
+
+  /* Note that 'this' may be dangling after this call.  unpush_target
+     closes the target if the refcount reaches 0, and our close
+     implementation deletes 'this'.  */
   inf->unpush_target (this);
 
   /* Clear the register cache and the frame cache.  */
@@ -1160,6 +1183,60 @@ core_target::info_proc (const char *args, enum info_proc_what request)
     gdbarch_core_info_proc (gdbarch, args, request);
 
   return true;
+}
+
+/* Implementation of the "supports_memory_tagging" target_ops method.  */
+
+bool
+core_target::supports_memory_tagging ()
+{
+  /* Look for memory tag sections.  If they exist, that means this core file
+     supports memory tagging.  */
+
+  return (bfd_get_section_by_name (core_bfd, "memtag") != nullptr);
+}
+
+/* Implementation of the "fetch_memtags" target_ops method.  */
+
+bool
+core_target::fetch_memtags (CORE_ADDR address, size_t len,
+			    gdb::byte_vector &tags, int type)
+{
+  struct gdbarch *gdbarch = target_gdbarch ();
+
+  /* Make sure we have a way to decode the memory tag notes.  */
+  if (!gdbarch_decode_memtag_section_p (gdbarch))
+    error (_("gdbarch_decode_memtag_section not implemented for this "
+	     "architecture."));
+
+  memtag_section_info info;
+  info.memtag_section = nullptr;
+
+  while (get_next_core_memtag_section (core_bfd, info.memtag_section,
+				       address, info))
+  {
+    size_t adjusted_length
+      = (address + len < info.end_address) ? len : (info.end_address - address);
+
+    /* Decode the memory tag note and return the tags.  */
+    gdb::byte_vector tags_read
+      = gdbarch_decode_memtag_section (gdbarch, info.memtag_section, type,
+				       address, adjusted_length);
+
+    /* Transfer over the tags that have been read.  */
+    tags.insert (tags.end (), tags_read.begin (), tags_read.end ());
+
+    /* ADDRESS + LEN may cross the boundaries of a particular memory tag
+       segment.  Check if we need to fetch tags from a different section.  */
+    if (!tags_read.empty () && (address + len) < info.end_address)
+      return true;
+
+    /* There are more tags to fetch.  Update ADDRESS and LEN.  */
+    len -= (info.end_address - address);
+    address = info.end_address;
+  }
+
+  return false;
 }
 
 /* Get a pointer to the current core target.  If not connected to a

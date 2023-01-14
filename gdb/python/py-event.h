@@ -55,7 +55,7 @@ enum inferior_call_kind
 
 extern int emit_inferior_call_event (inferior_call_kind kind,
 				     ptid_t thread, CORE_ADDR addr);
-extern int emit_register_changed_event (struct frame_info *frame,
+extern int emit_register_changed_event (frame_info_ptr frame,
 					int regnum);
 extern int emit_memory_changed_event (CORE_ADDR addr, ssize_t len);
 extern int evpy_emit_event (PyObject *event,
@@ -74,6 +74,7 @@ extern gdbpy_ref<> create_thread_event_object (PyTypeObject *py_type,
 					       PyObject *thread);
 
 extern int emit_new_objfile_event (struct objfile *objfile);
+extern int emit_free_objfile_event (struct objfile *objfile);
 extern int emit_clear_objfiles_event (void);
 
 extern void evpy_dealloc (PyObject *self);

@@ -229,13 +229,10 @@ get_debugseg_name (segT seg, const char *base_name)
   const char * dollar;
   const char * dot;
 
-  if (!seg)
-    return concat (base_name, NULL);
-
-  name = bfd_section_name (seg);
-
-  if (name == NULL || *name == 0)
-    return concat (base_name, NULL);
+  if (!seg
+      || (name = bfd_section_name (seg)) == NULL
+      || *name == 0)
+    return notes_strdup (base_name);
 	
   dollar = strchr (name, '$');
   dot = strchr (name + 1, '.');
@@ -244,7 +241,7 @@ get_debugseg_name (segT seg, const char *base_name)
     {
       if (!strcmp (base_name, ".eh_frame_entry")
 	  && strcmp (name, ".text") != 0)
-	return concat (base_name, ".", name, NULL);
+	return notes_concat (base_name, ".", name, NULL);
 
       name = "";
     }
@@ -257,7 +254,7 @@ get_debugseg_name (segT seg, const char *base_name)
   else
     name = dollar;
 
-  return concat (base_name, name, NULL);
+  return notes_concat (base_name, name, NULL);
 }
 
 /* Allocate a dwcfi_seg_list structure.  */
@@ -267,8 +264,7 @@ alloc_debugseg_item (segT seg, int subseg, char *name)
 {
   struct dwcfi_seg_list *r;
 
-  r = (struct dwcfi_seg_list *)
-    xmalloc (sizeof (struct dwcfi_seg_list) + strlen (name));
+  r = notes_alloc (sizeof (*r) + strlen (name));
   r->seg = seg;
   r->subseg = subseg;
   r->seg_name = name;
@@ -351,7 +347,7 @@ dwcfi_hash_find_or_make (segT cseg, const char *base_name, int flags)
       str_hash_insert (dwcfi_hash, item->seg_name, item, 0);
     }
   else
-    free (name);
+    notes_free (name);
 
   return item;
 }
@@ -2542,6 +2538,8 @@ cfi_finish (void)
 	for (fde = all_fde_data; fde ; fde = fde->next)
 	  SET_HANDLED (fde, 0);
     }
+  if (dwcfi_hash)
+    htab_delete (dwcfi_hash);
 }
 
 #else /* TARGET_USE_CFIPOP */

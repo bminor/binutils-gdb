@@ -25,12 +25,58 @@ if {$tool == ""} {
     exit 2
 }
 
+# Execute BODY, if COND wrapped in proc WRAP.
+# Instead of writing the verbose and repetitive:
+#   if { $cond } {
+#     wrap $body
+#   } else {
+#     $body
+#   }
+# we can use instead:
+#   cond_wrap $cond wrap $body
+
+proc cond_wrap { cond wrap body } {
+    if { $cond } {
+	$wrap {
+	    uplevel 1 $body
+	}
+    } else {
+	uplevel 1 $body
+    }
+}
+
+# Add VAR_ID=VAL to ENV_VAR, unless ENV_VAR already contains a VAR_ID setting.
+
+proc set_sanitizer_default { env_var var_id val } {
+    global env
+
+    if { ![info exists env($env_var) ]
+	 || $env($env_var) == "" } {
+	# Set var_id (env_var non-existing / empty case).
+	append env($env_var) $var_id=$val
+	return
+    }
+
+    if { [regexp $var_id= $env($env_var)] } {
+	# Don't set var_id.  It's already set by the user, leave as is.
+	# Note that we could probably get the same result by unconditionally
+	# prepending it, but this way is less likely to cause confusion.
+	return
+    }
+
+    # Set var_id (env_var not empty case).
+    append env($env_var) : $var_id=$val
+}
+
+set_sanitizer_default TSAN_OPTIONS suppressions \
+    $srcdir/../tsan-suppressions.txt
+
 # If GDB is built with ASAN (and because there are leaks), it will output a
 # leak report when exiting as well as exit with a non-zero (failure) status.
 # This can affect tests that are sensitive to what GDB prints on stderr or its
 # exit status.  Add `detect_leaks=0` to the ASAN_OPTIONS environment variable
 # (which will affect any spawned sub-process) to avoid this.
-append ::env(ASAN_OPTIONS) ",detect_leaks=0"
+set_sanitizer_default ASAN_OPTIONS detect_leaks 0
 
 # List of procs to run in gdb_finish.
 set gdb_finish_hooks [list]
@@ -835,9 +881,18 @@ proc gdb_internal_error_resync {} {
 }
 
 # Fill in the default prompt if PROMPT_REGEXP is empty.
-proc fill_in_default_prompt {prompt_regexp} {
+#
+# If WITH_ANCHOR is true and the default prompt is used, append a `$` at the end
+# of the regexp, to anchor the match at the end of the buffer.
+proc fill_in_default_prompt {prompt_regexp with_anchor} {
     if { "$prompt_regexp" == "" } {
-	return "$::gdb_prompt $"
+	set prompt "$::gdb_prompt "
+
+	if { $with_anchor } {
+	    append prompt "$"
+	}
+
+	return $prompt
     }
     return $prompt_regexp
 }
@@ -967,14 +1022,18 @@ proc gdb_test_multiple { command message args } {
 	error "Too few arguments to gdb_test_multiple"
     }
 
-    set prompt_regexp [fill_in_default_prompt $prompt_regexp]
+    set prompt_regexp [fill_in_default_prompt $prompt_regexp true]
 
     if { $message == "" } {
 	set message $command
     }
 
     if [string match "*\[\r\n\]" $command] {
-	error "Invalid trailing newline in \"$message\" test"
+	error "Invalid trailing newline in \"$command\" command"
+    }
+
+    if [string match "*\[\003\004\]" $command] {
+	error "Invalid trailing control code in \"$command\" command"
     }
 
     if [string match "*\[\r\n\]*" $message] {
@@ -1339,6 +1398,10 @@ proc gdb_test_multiline { name args } {
 #
 # -prompt PROMPT_REGEXP specifies a regexp matching the expected prompt
 #   after the command output.  If empty, defaults to "$gdb_prompt $".
+# -no-prompt-anchor specifies that if the default prompt regexp is used, it
+#   should not be anchored at the end of the buffer.  This means that the
+#   pattern can match even if there is stuff output after the prompt.  Does not
+#   have any effect if -prompt is specified.
 # -lbl specifies that line-by-line matching will be used.
 # -nopass specifies that a PASS should not be issued.
 #
@@ -1353,6 +1416,7 @@ proc gdb_test { args } {
 
     parse_args {
 	{prompt ""}
+	{no-prompt-anchor}
 	{lbl}
 	{nopass}
     }
@@ -1368,7 +1432,7 @@ proc gdb_test { args } {
 	set message $command
     }
 
-    set prompt [fill_in_default_prompt $prompt]
+    set prompt [fill_in_default_prompt $prompt [expr !${no-prompt-anchor}]]
 
     set saw_question 0
 
@@ -1445,24 +1509,25 @@ if { [tcl_version_at_least 8 5] == 0 } {
 # gdb_test_no_output [-prompt PROMPT_REGEXP] [-nopass] COMMAND [MESSAGE]
 # Send a command to GDB and verify that this command generated no output.
 #
-# See gdb_test for a description of the -prompt, -nopass, COMMAND, and
-# MESSAGE parameters.
+# See gdb_test for a description of the -prompt, -no-prompt-anchor, -nopass,
+# COMMAND, and MESSAGE parameters.
 
 proc gdb_test_no_output { args } {
     global gdb_prompt
 
     parse_args {
-	{prompt_re ""}
+	{prompt ""}
+	{no-prompt-anchor}
 	{nopass}
     }
 
     lassign $args command message
 
-    set prompt_re [fill_in_default_prompt $prompt_re]
+    set prompt [fill_in_default_prompt $prompt [expr !${no-prompt-anchor}]]
 
     set command_regex [string_to_regexp $command]
-    gdb_test_multiple $command $message -prompt $prompt_re {
-	-re "^$command_regex\r\n$prompt_re" {
+    gdb_test_multiple $command $message -prompt $prompt {
+	-re "^$command_regex\r\n$prompt" {
 	    if {!$nopass} {
 		pass $gdb_test_name
 	    }
@@ -4458,9 +4523,13 @@ proc gdb_compile {source dest type options} {
 	&& [lsearch -exact $options rust] == -1
 	&& [lsearch -exact $options ada] == -1
 	&& [lsearch -exact $options f90] == -1
-	&& [lsearch -exact $options go] == -1
-	&& [test_compiler_info "clang-*"]} {
-	lappend new_options "additional_flags=-Wno-unknown-warning-option"
+	&& [lsearch -exact $options go] == -1} {
+	if {[test_compiler_info "clang-*"] || [test_compiler_info "icx-*"]} {
+	    lappend new_options "additional_flags=-Wno-unknown-warning-option"
+	} elseif {[test_compiler_info "icc-*"]} {
+	    # This is the equivalent for the icc compiler.
+	    lappend new_options "additional_flags=-diag-disable=10148"
+	}
     }
 
     # Treating .c input files as C++ is deprecated in Clang, so
@@ -4520,7 +4589,7 @@ proc gdb_compile {source dest type options} {
                 set shlib_found 1
 		if { ([istarget "*-*-mingw*"]
 		      || [istarget *-*-cygwin*]) } {
-		    lappend new_options "additional_flags=-Wl,--enable-auto-import"
+		    lappend new_options "ldflags=-Wl,--enable-auto-import"
 		}
 		if { [test_compiler_info "gcc-*"] || [test_compiler_info "clang-*"] } {
 		    # Undo debian's change in the default.
@@ -4714,7 +4783,10 @@ proc gdb_compile {source dest type options} {
 	}
     }
 
-    set result [target_compile $source $dest $type $options]
+    cond_wrap [expr $pie != -1 || $nopie != -1] \
+	with_PIE_multilib_flags_filtered {
+	set result [target_compile $source $dest $type $options]
+    }
 
     # Prune uninteresting compiler (and linker) output.
     regsub "Creating library file: \[^\r\n\]*\[\r\n\]+" $result "" result
@@ -4884,7 +4956,7 @@ proc gdb_compile_shlib_1 {sources dest options} {
 	    } else {
 		set name ${dest}
 	    }
-	    lappend link_options "additional_flags=-Wl,--out-implib,${name}.a"
+	    lappend link_options "ldflags=-Wl,--out-implib,${name}.a"
 	} else {
 	    # Set the soname of the library.  This causes the linker on ELF
 	    # systems to create the DT_NEEDED entry in the executable referring
@@ -4896,7 +4968,7 @@ proc gdb_compile_shlib_1 {sources dest options} {
 	    # rpath=$ORIGIN value when building the executable, so that it's
 	    # able to find the library in its own directory.
 	    set destbase [file tail $dest]
-	    lappend link_options "additional_flags=-Wl,-soname,$destbase"
+	    lappend link_options "ldflags=-Wl,-soname,$destbase"
 	}
     }
     if {[gdb_compile "${objects}" "${dest}" executable $link_options] != ""} {
@@ -4914,20 +4986,17 @@ proc gdb_compile_shlib_1 {sources dest options} {
     return ""
 }
 
-# Build a shared library from SOURCES.  Ignore target boards PIE-related
-# multilib_flags.
+# Ignore FLAGS in target board multilib_flags while executing BODY.
 
-proc gdb_compile_shlib {sources dest options} {
+proc with_multilib_flags_filtered { flags body } {
     global board
 
-    # Ignore PIE-related setting in multilib_flags.
+    # Ignore flags in multilib_flags.
     set board [target_info name]
     set multilib_flags_orig [board_info $board multilib_flags]
     set multilib_flags ""
     foreach op $multilib_flags_orig {
-	if { $op == "-pie" || $op == "-no-pie" \
-		 || $op == "-fPIE" || $op == "-fno-PIE"} {
-	} else {
+	if { [lsearch -exact $flags $op] == -1 } {
 	    append multilib_flags " $op"
 	}
     }
@@ -4935,6 +5004,24 @@ proc gdb_compile_shlib {sources dest options} {
     save_target_board_info { multilib_flags } {
 	unset_board_info multilib_flags
 	set_board_info multilib_flags "$multilib_flags"
+	set result [uplevel 1 $body]
+    }
+
+    return $result
+}
+
+# Ignore PIE-related flags in target board multilib_flags while executing BODY.
+
+proc with_PIE_multilib_flags_filtered { body } {
+    set pie_flags [list "-pie" "-no-pie" "-fPIE" "-fno-PIE"]
+    return [uplevel 1 [list with_multilib_flags_filtered $pie_flags $body]]
+}
+
+# Build a shared library from SOURCES.  Ignore target boards PIE-related
+# multilib_flags.
+
+proc gdb_compile_shlib {sources dest options} {
+    with_PIE_multilib_flags_filtered {
 	set result [gdb_compile_shlib_1 $sources $dest $options]
     }
 
@@ -5542,10 +5629,14 @@ proc gdb_remote_download {dest fromfile {tofile {}}} {
 
     if {[is_remote $dest]} {
 	# When the DEST is remote, we simply send the file to DEST.
-	global cleanfiles
+	global cleanfiles_target cleanfiles_host
 
 	set destname [remote_download $dest $fromfile $tofile]
-	lappend cleanfiles $destname
+	if { $dest == "target" } {
+	    lappend cleanfiles_target $destname
+	} elseif { $dest == "host" } {
+	    lappend cleanfiles_host $destname
+	}
 
 	return $destname
     } else {
@@ -5584,7 +5675,8 @@ proc gdb_load_shlib { file } {
 	# We could set this even when not testing remotely, but a user
 	# generally won't set it unless necessary.  In order to make the tests
 	# more like the real-life scenarios, we don't set it for local testing.
-	gdb_test "set solib-search-path [file dirname $file]" "" ""
+	gdb_test "set solib-search-path [file dirname $file]" "" \
+	    "set solib-search-path for [file tail $file]"
     }
 
     return $dest
@@ -5691,7 +5783,8 @@ proc default_gdb_init { test_file_name } {
     global gdb_wrapper_initialized
     global gdb_wrapper_target
     global gdb_test_file_name
-    global cleanfiles
+    global cleanfiles_target
+    global cleanfiles_host
     global pf_prefix
     
     # Reset the timeout value to the default.  This way, any testcase
@@ -5807,7 +5900,8 @@ proc default_gdb_init { test_file_name } {
     global gdb_instances
     set gdb_instances 0
 
-    set cleanfiles {}
+    set cleanfiles_target {}
+    set cleanfiles_host {}
 
     set gdb_test_file_name [file rootname [file tail $test_file_name]]
 
@@ -6119,7 +6213,8 @@ proc gdb_init { args } {
 proc gdb_finish { } {
     global gdbserver_reconnect_p
     global gdb_prompt
-    global cleanfiles
+    global cleanfiles_target
+    global cleanfiles_host
     global known_globals
 
     if { [info procs ::gdb_tcl_unknown] != "" } {
@@ -6131,9 +6226,13 @@ proc gdb_finish { } {
     # Exit first, so that the files are no longer in use.
     gdb_exit
 
-    if { [llength $cleanfiles] > 0 } {
-	eval remote_file target delete $cleanfiles
-	set cleanfiles {}
+    if { [llength $cleanfiles_target] > 0 } {
+	eval remote_file target delete $cleanfiles_target
+	set cleanfiles_target {}
+    }
+    if { [llength $cleanfiles_host] > 0 } {
+	eval remote_file host delete $cleanfiles_host
+	set cleanfiles_host {}
     }
 
     # Unblock write access to the banned variables.  Dejagnu typically
@@ -7827,12 +7926,35 @@ proc capture_command_output { command prefix } {
     global gdb_prompt
     global expect_out
 
+    set test "capture_command_output for $command"
+
     set output_string ""
-    gdb_test_multiple "$command" "capture_command_output for $command" {
-	-re "[string_to_regexp ${command}]\[\r\n\]+${prefix}(.*)\[\r\n\]+$gdb_prompt $" {
-	    set output_string $expect_out(1,string)
+    gdb_test_multiple $command $test {
+	-re "^(\[^\r\n\]+\r\n)" {
+	    if { ![string equal $output_string ""] } {
+		set output_string [join [list $output_string $expect_out(1,string)] ""]
+	    } else {
+		set output_string $expect_out(1,string)
+	    }
+	    exp_continue
+	}
+
+	-re "^$gdb_prompt $" {
 	}
     }
+
+    # Strip the command.
+    set command_re [string_to_regexp ${command}]
+    set output_string [regsub ^$command_re\r\n $output_string ""]
+
+    # Strip the prefix.
+    if { $prefix != "" } {
+	set output_string [regsub ^$prefix $output_string ""]
+    }
+
+    # Strip a trailing newline.
+    set output_string [regsub "\r\n$" $output_string ""]
+
     return $output_string
 }
 
@@ -7857,6 +7979,12 @@ proc multi_line { args } {
 
 proc multi_line_input { args } {
     return [join $args "\n"]
+}
+
+# Return how many newlines there are in the given string.
+
+proc count_newlines { string } {
+    return [regexp -all "\n" $string]
 }
 
 # Return the version of the DejaGnu framework.
@@ -8084,6 +8212,28 @@ proc cmp_file_string { file str msg } {
 	pass "$msg"
     } else {
 	fail "$msg"
+    }
+}
+
+# Compare FILE1 and FILE2 as binary files.  Return 0 if the files are
+# equal, otherwise, return non-zero.
+
+proc cmp_binary_files { file1 file2 } {
+    set fd1 [open $file1]
+    fconfigure $fd1 -translation binary
+    set fd2 [open $file2]
+    fconfigure $fd2 -translation binary
+
+    set blk_size 1024
+    while {true} {
+	set blk1 [read $fd1 $blk_size]
+	set blk2 [read $fd2 $blk_size]
+	set diff [string compare $blk1 $blk2]
+	if {$diff != 0 || [eof $fd1] || [eof $fd2]} {
+	    close $fd1
+	    close $fd2
+	    return $diff
+	}
     }
 }
 
@@ -8435,7 +8585,7 @@ gdb_caching_proc have_fuse_ld_gold {
 # Return 1 if linker supports -Ttext-segment, otherwise return 0.
 gdb_caching_proc linker_supports_Ttext_segment_flag {
     set me "linker_supports_Ttext_segment_flag"
-    set flags additional_flags="-Wl,-Ttext-segment=0x7000000"
+    set flags ldflags="-Wl,-Ttext-segment=0x7000000"
     set src { int main() { return 0; } }
     return [gdb_simple_compile $me $src executable $flags]
 }
@@ -8443,7 +8593,7 @@ gdb_caching_proc linker_supports_Ttext_segment_flag {
 # Return 1 if linker supports -Ttext, otherwise return 0.
 gdb_caching_proc linker_supports_Ttext_flag {
     set me "linker_supports_Ttext_flag"
-    set flags additional_flags="-Wl,-Ttext=0x7000000"
+    set flags ldflags="-Wl,-Ttext=0x7000000"
     set src { int main() { return 0; } }
     return [gdb_simple_compile $me $src executable $flags]
 }
@@ -8451,7 +8601,7 @@ gdb_caching_proc linker_supports_Ttext_flag {
 # Return 1 if linker supports --image-base, otherwise 0.
 gdb_caching_proc linker_supports_image_base_flag {
     set me "linker_supports_image_base_flag"
-    set flags additional_flags="-Wl,--image-base=0x7000000"
+    set flags ldflags="-Wl,--image-base=0x7000000"
     set src { int main() { return 0; } }
     return [gdb_simple_compile $me $src executable $flags]
 }
@@ -8570,7 +8720,7 @@ gdb_caching_proc have_mpx {
     set status [lindex $result 0]
     set output [lindex $result 1]
     set status [expr ($status == 0) \
-		    && ![regexp "^No MPX support\r\n" $output]]
+		    && ![regexp "^No MPX support\r?\n" $output]]
 
     remote_file build delete $obj
 
@@ -8804,6 +8954,68 @@ gdb_caching_proc arm_cc_for_target {
     }
 
     return ""
+}
+
+# Step until the pattern REGEXP is found.  Step at most
+# MAX_STEPS times, but stop stepping once REGEXP is found.
+#
+# If REGEXP is found then a single pass is emitted, otherwise, after
+# MAX_STEPS steps, a single fail is emitted.
+#
+# TEST_NAME is the name used in the pass/fail calls.
+
+proc gdb_step_until { regexp {test_name ""} {max_steps 10} } {
+    if { $test_name == "" } {
+	set test_name "stepping until regexp"
+    }
+
+    set count 0
+    gdb_test_multiple "step" "$test_name" {
+	-re "$regexp\r\n$::gdb_prompt $" {
+	    pass $test_name
+	}
+	-re ".*$::gdb_prompt $" {
+	    if {$count < $max_steps} {
+		incr count
+		send_gdb "step\n"
+		exp_continue
+	    } else {
+		fail $test_name
+	    }
+	}
+    }
+}
+
+# Check if the compiler emits epilogue information associated
+# with the closing brace or with the last statement line.
+#
+# This proc restarts GDB
+#
+# Returns True if it is associated with the closing brace,
+# False if it is the last statement
+gdb_caching_proc have_epilogue_line_info {
+
+    set main {
+	int
+	main ()
+	{
+	    return 0;
+	}
+    }
+    if {![gdb_simple_compile "simple_program" $main]} {
+	 return False
+    }
+
+    clean_restart $obj
+
+    gdb_test_multiple "info line 6" "epilogue test" {
+	-re -wrap ".*starts at address.*and ends at.*" {
+	    return True
+	}
+	-re -wrap ".*" {
+	    return False
+	}
+    }
 }
 
 # Always load compatibility stuff.

@@ -28,7 +28,7 @@
 void
 dicos_init_abi (struct gdbarch *gdbarch)
 {
-  set_solib_ops (gdbarch, &solib_target_so_ops);
+  set_gdbarch_so_ops (gdbarch, &solib_target_so_ops);
 
   /* Every process, although has its own address space, sees the same
      list of shared libraries.  There's no "main executable" in DICOS,

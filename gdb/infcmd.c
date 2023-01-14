@@ -749,7 +749,7 @@ set_step_frame (thread_info *tp)
      inferior_ptid value.  */
   gdb_assert (inferior_ptid == tp->ptid);
 
-  frame_info *frame = get_current_frame ();
+  frame_info_ptr frame = get_current_frame ();
 
   symtab_and_line sal = find_frame_sal (frame);
   set_step_info (tp, frame, sal);
@@ -939,7 +939,7 @@ prepare_one_step (thread_info *tp, struct step_command_fsm *sm)
 
   if (sm->count > 0)
     {
-      struct frame_info *frame = get_current_frame ();
+      frame_info_ptr frame = get_current_frame ();
 
       set_step_frame (tp);
 
@@ -1320,7 +1320,7 @@ until_next_fsm::do_async_reply_reason ()
 static void
 until_next_command (int from_tty)
 {
-  struct frame_info *frame;
+  frame_info_ptr frame;
   CORE_ADDR pc;
   struct symbol *func;
   struct symtab_and_line sal;
@@ -1466,7 +1466,7 @@ get_return_value (struct symbol *func_symbol, struct value *function)
   struct value *value;
 
   struct type *value_type
-    = check_typedef (TYPE_TARGET_TYPE (func_symbol->type ()));
+    = check_typedef (func_symbol->type ()->target_type ());
   gdb_assert (value_type->code () != TYPE_CODE_VOID);
 
   if (is_nocall_function (check_typedef (::value_type (function))))
@@ -1626,7 +1626,7 @@ finish_command_fsm::should_stop (struct thread_info *tp)
       /* We're done.  */
       set_finished ();
 
-      rv->type = TYPE_TARGET_TYPE (function->type ());
+      rv->type = function->type ()->target_type ();
       if (rv->type == NULL)
 	internal_error (__FILE__, __LINE__,
 			_("finish_command: function has no target type"));
@@ -1711,7 +1711,7 @@ finish_backward (struct finish_command_fsm *sm)
 
   if (sal.pc != pc)
     {
-      struct frame_info *frame = get_selected_frame (NULL);
+      frame_info_ptr frame = get_selected_frame (NULL);
       struct gdbarch *gdbarch = get_frame_arch (frame);
 
       /* Set a step-resume at the function's entry point.  Once that's
@@ -1737,7 +1737,7 @@ finish_backward (struct finish_command_fsm *sm)
    frame that called the function we're about to step out of.  */
 
 static void
-finish_forward (struct finish_command_fsm *sm, struct frame_info *frame)
+finish_forward (struct finish_command_fsm *sm, frame_info_ptr frame)
 {
   struct frame_id frame_id = get_frame_id (frame);
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -1764,10 +1764,10 @@ finish_forward (struct finish_command_fsm *sm, struct frame_info *frame)
 
 /* Skip frames for "finish".  */
 
-static struct frame_info *
-skip_finish_frames (struct frame_info *frame)
+static frame_info_ptr
+skip_finish_frames (frame_info_ptr frame)
 {
-  struct frame_info *start;
+  frame_info_ptr start;
 
   do
     {
@@ -1792,7 +1792,7 @@ skip_finish_frames (struct frame_info *frame)
 static void
 finish_command (const char *arg, int from_tty)
 {
-  struct frame_info *frame;
+  frame_info_ptr frame;
   int async_exec;
   struct finish_command_fsm *sm;
   struct thread_info *tp;
@@ -1814,6 +1814,7 @@ finish_command (const char *arg, int from_tty)
   frame = get_prev_frame (get_selected_frame (_("No selected frame.")));
   if (frame == 0)
     error (_("\"finish\" not meaningful in the outermost frame."));
+  frame.prepare_reinflate ();
 
   clear_proceed_status (0);
 
@@ -1872,6 +1873,7 @@ finish_command (const char *arg, int from_tty)
 
       print_stack_frame (get_selected_frame (NULL), 1, LOCATION, 0);
     }
+  frame.reinflate ();
 
   if (execution_direction == EXEC_REVERSE)
     finish_backward (sm);
@@ -2151,7 +2153,7 @@ default_print_one_register_info (struct ui_file *file,
 	{
 	  pad_to_column (format_stream, value_column_2);
 	  format_stream.puts ("(raw ");
-	  print_hex_chars (&format_stream, valaddr, TYPE_LENGTH (regtype),
+	  print_hex_chars (&format_stream, valaddr, regtype->length (),
 			   byte_order, true);
 	  format_stream.putc (')');
 	}
@@ -2193,7 +2195,7 @@ default_print_one_register_info (struct ui_file *file,
 void
 default_print_registers_info (struct gdbarch *gdbarch,
 			      struct ui_file *file,
-			      struct frame_info *frame,
+			      frame_info_ptr frame,
 			      int regnum, int print_all)
 {
   int i;
@@ -2224,8 +2226,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
 
       /* If the register name is empty, it is undefined for this
 	 processor, so don't display anything.  */
-      if (gdbarch_register_name (gdbarch, i) == NULL
-	  || *(gdbarch_register_name (gdbarch, i)) == '\0')
+      if (*(gdbarch_register_name (gdbarch, i)) == '\0')
 	continue;
 
       default_print_one_register_info (file,
@@ -2237,7 +2238,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
 void
 registers_info (const char *addr_exp, int fpregs)
 {
-  struct frame_info *frame;
+  frame_info_ptr frame;
   struct gdbarch *gdbarch;
 
   if (!target_has_registers ())
@@ -2354,7 +2355,7 @@ info_registers_command (const char *addr_exp, int from_tty)
 
 static void
 print_vector_info (struct ui_file *file,
-		   struct frame_info *frame, const char *args)
+		   frame_info_ptr frame, const char *args)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
 
@@ -2605,7 +2606,7 @@ attach_command (const char *args, int from_tty)
 
   /* Enable async mode if it is supported by the target.  */
   if (target_can_async_p ())
-    target_async (1);
+    target_async (true);
 
   /* Set up the "saved terminal modes" of the inferior
      based on what modes we are starting it with.  */
@@ -2887,7 +2888,7 @@ interrupt_command (const char *args, int from_tty)
 
 void
 default_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
-			  struct frame_info *frame, const char *args)
+			  frame_info_ptr frame, const char *args)
 {
   int regnum;
   int printed_something = 0;
@@ -2908,7 +2909,7 @@ default_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 static void
 info_float_command (const char *args, int from_tty)
 {
-  struct frame_info *frame;
+  frame_info_ptr frame;
 
   if (!target_has_registers ())
     error (_("The program has no registers now."));

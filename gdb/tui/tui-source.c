@@ -140,7 +140,7 @@ tui_source_window::do_scroll_vertical (int num_to_scroll)
 
       if (cursal.symtab == NULL)
 	{
-	  struct frame_info *fi = get_selected_frame (NULL);
+	  frame_info_ptr fi = get_selected_frame (NULL);
 	  s = find_pc_line_symtab (get_frame_pc (fi));
 	  arch = get_frame_arch (fi);
 	}
@@ -191,7 +191,7 @@ tui_source_window::line_is_displayed (int line) const
 }
 
 void
-tui_source_window::maybe_update (struct frame_info *fi, symtab_and_line sal)
+tui_source_window::maybe_update (frame_info_ptr fi, symtab_and_line sal)
 {
   int start_line = (sal.line - ((height - 2) / 2)) + 1;
   if (start_line <= 0)

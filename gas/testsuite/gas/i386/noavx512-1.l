@@ -1,14 +1,14 @@
 .*: Assembler messages:
-.*:25: Error: .*unsupported instruction.*
+.*:25: Error: .*operand size mismatch.*
 .*:26: Error: .*unsupported masking.*
 .*:27: Error: .*unsupported masking.*
-.*:47: Error: .*unsupported instruction.*
+.*:47: Error: .*operand size mismatch.*
 .*:48: Error: .*unsupported masking.*
 .*:49: Error: .*unsupported masking.*
 .*:50: Error: .*not supported.*
 .*:51: Error: .*not supported.*
 .*:52: Error: .*not supported.*
-.*:69: Error: .*unsupported instruction.*
+.*:69: Error: .*operand size mismatch.*
 .*:70: Error: .*unsupported masking.*
 .*:71: Error: .*unsupported masking.*
 .*:72: Error: .*not supported.*
@@ -17,7 +17,7 @@
 .*:75: Error: .*not supported.*
 .*:76: Error: .*not supported.*
 .*:77: Error: .*not supported.*
-.*:91: Error: .*unsupported instruction.*
+.*:91: Error: .*operand size mismatch.*
 .*:92: Error: .*unsupported masking.*
 .*:93: Error: .*unsupported masking.*
 .*:94: Error: .*not supported.*
@@ -27,7 +27,7 @@
 .*:98: Error: .*not supported.*
 .*:99: Error: .*not supported.*
 .*:100: Error: .*not supported.*
-.*:113: Error: .*unsupported instruction.*
+.*:113: Error: .*operand size mismatch.*
 .*:114: Error: .*unsupported masking.*
 .*:115: Error: .*unsupported masking.*
 .*:116: Error: .*not supported.*
@@ -40,7 +40,7 @@
 .*:126: Error: .*not supported.*
 .*:127: Error: .*not supported.*
 .*:128: Error: .*not supported.*
-.*:135: Error: .*unsupported instruction.*
+.*:135: Error: .*operand size mismatch.*
 .*:136: Error: .*unsupported masking.*
 .*:137: Error: .*unsupported masking.*
 .*:138: Error: .*not supported.*
@@ -54,7 +54,7 @@
 .*:149: Error: .*not supported.*
 .*:150: Error: .*not supported.*
 .*:151: Error: .*not supported.*
-.*:157: Error: .*unsupported instruction.*
+.*:157: Error: .*operand size mismatch.*
 .*:158: Error: .*unsupported masking.*
 .*:159: Error: .*unsupported masking.*
 .*:160: Error: .*not supported.*

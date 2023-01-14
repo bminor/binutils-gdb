@@ -202,14 +202,14 @@ private:
   /* The get operations have m_instantiated as a precondition.  */
   T &get () noexcept
   {
-#if defined(_GLIBCXX_DEBUG)
+#if defined(_GLIBCXX_DEBUG) && __cplusplus >= 201402L
     gdb_assert (this->has_value ());
 #endif
     return m_item;
   }
   constexpr const T &get () const noexcept
   {
-#if defined(_GLIBCXX_DEBUG)
+#if defined(_GLIBCXX_DEBUG) && __cplusplus >= 201402L
     gdb_assert (this->has_value ());
 #endif
     return m_item;

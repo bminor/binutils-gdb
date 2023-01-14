@@ -21,17 +21,7 @@ AUTOMAKE_OPTIONS = info-in-builddir foreign no-texinfo.tex
 
 info_TEXINFOS       = gprofng.texi
 gprofng_TEXINFOS    = fdl.texi
-BUILT_SOURCES       = version.texi
-CLEANFILES          = version.texi
 TEXINFO_TEX         = .
 MAKEINFOHTML        = $(MAKEINFO) --html --no-split
-
-version.texi: 
-	@echo "@set EDITION 1.0"                    > $@
-	@echo "@set VERSION 1.0"                   >> $@
-	@echo "@set UPDATED 22 February 2022"      >> $@
-	@echo "@set UPDATED-MONTH February 2022"   >> $@
-#	@echo "@set UPDATED `date +"%-d %B %Y"`"   >> $@
-#	@echo "@set UPDATED-MONTH `date +"%B %Y"`" >> $@
 
 MAINTAINERCLEANFILES = gprofng.info

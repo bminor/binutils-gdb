@@ -60,6 +60,9 @@ if {![runto_main]} {
 set pc_val [get_integer_valueof "\$pc" 0]
 gdb_py_test_silent_cmd "python blk = gdb.current_progspace ().block_for_pc (${pc_val})" \
     "get block for the current \$pc" 1
+gdb_py_test_silent_cmd \
+    "python blk = gdb.current_progspace ().block_for_pc (gdb.Value(${pc_val}))" \
+    "get block for the current \$pc as value" 1
 gdb_test "python print (blk.start <= ${pc_val})" "True" \
     "block start is before \$pc"
 gdb_test "python print (blk.end >= ${pc_val})" "True" \

@@ -23,11 +23,14 @@ AUTOMAKE_OPTIONS = dejagnu foreign
 if BUILD_COLLECTOR
     COLLECTOR_SUBDIRS = libcollector
 endif
+if BUILD_MAN
+    DOC_SUBDIR = doc
+endif
 if BUILD_SRC
-    SRC_SUBDIRS = src gp-display-html doc
+    SRC_SUBDIRS = src gp-display-html $(DOC_SUBDIR)
 endif
 SUBDIRS = $(COLLECTOR_SUBDIRS) $(SRC_SUBDIRS)
-DIST_SUBDIRS = libcollector src gp-display-html doc
+DIST_SUBDIRS = libcollector src gp-display-html $(DOC_SUBDIR)
 
 # Setup the testing framework, if you have one
 EXPECT = expect

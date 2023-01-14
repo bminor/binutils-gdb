@@ -757,9 +757,15 @@ namespace eval Term {
     # clean_restart.
     proc clean_restart {rows cols {executable {}}} {
 	global env stty_init
-	save_vars {env(TERM) stty_init} {
+	save_vars {env(TERM) stty_init ::GDBFLAGS} {
 	    setenv TERM ansi
 	    _setup $rows $cols
+
+	    # Make GDB not print the directory names.  Use this setting to
+	    # remove the differences in test runs due to varying directory
+	    # names.
+	    append ::GDBFLAGS " -ex \"set filename-display basename\""
+
 	    if {$executable == ""} {
 		::clean_restart
 	    } else {

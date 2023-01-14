@@ -111,9 +111,6 @@ int flag_use_elf_stt_common = DEFAULT_GENERATE_ELF_STT_COMMON;
 bool flag_generate_build_notes = DEFAULT_GENERATE_BUILD_NOTES;
 #endif
 
-/* Keep the output file.  */
-static int keep_it = 0;
-
 segT reg_section;
 segT expr_section;
 segT text_section;
@@ -124,16 +121,6 @@ segT bss_section;
 static char *listing_filename = NULL;
 
 static struct defsym_list *defsyms;
-
-#ifdef HAVE_ITBL_CPU
-/* Keep a record of the itbl files we read in.  */
-struct itbl_file_list
-{
-  struct itbl_file_list *next;
-  char *name;
-};
-static struct itbl_file_list *itbl_files;
-#endif
 
 static long start_time;
 
@@ -239,7 +226,7 @@ print_version_id (void)
 
 #ifdef DEFAULT_FLAG_COMPRESS_DEBUG
 enum compressed_debug_section_type flag_compress_debug
-  = COMPRESS_DEBUG_GABI_ZLIB;
+  = DEFAULT_COMPRESSED_DEBUG_ALGORITHM;
 #endif
 
 static void
@@ -263,23 +250,20 @@ Options:\n\
 
   fprintf (stream, _("\
   --alternate             initially turn on alternate macro syntax\n"));
-#ifdef DEFAULT_FLAG_COMPRESS_DEBUG
   fprintf (stream, _("\
-  --compress-debug-sections[={none|zlib|zlib-gnu|zlib-gabi}]\n\
-                          compress DWARF debug sections using zlib [default]\n"));
+  --compress-debug-sections[={none|zlib|zlib-gnu|zlib-gabi|zstd}]\n\
+                          compress DWARF debug sections\n")),
+  fprintf (stream, _("\
+		            Default: %s\n"),
+	   bfd_get_compression_algorithm_name (flag_compress_debug));
+
   fprintf (stream, _("\
   --nocompress-debug-sections\n\
                           don't compress DWARF debug sections\n"));
-#else
-  fprintf (stream, _("\
-  --compress-debug-sections[={none|zlib|zlib-gnu|zlib-gabi}]\n\
-                          compress DWARF debug sections using zlib\n"));
-  fprintf (stream, _("\
-  --nocompress-debug-sections\n\
-                          don't compress DWARF debug sections [default]\n"));
-#endif
   fprintf (stream, _("\
   -D                      produce assembler debugging messages\n"));
+  fprintf (stream, _("\
+  --dump-config           display how the assembler is configured and then exit\n"));
   fprintf (stream, _("\
   --debug-prefix-map OLD=NEW\n\
                           map OLD to NEW in debug information\n"));
@@ -291,7 +275,7 @@ Options:\n\
     const char *def_em;
 
     fprintf (stream, "\
-  --em=[");
+  --emulation=[");
     for (i = 0; i < n_emulations - 1; i++)
       fprintf (stream, "%s | ", emulations[i]->name);
     fprintf (stream, "%s]\n", emulations[i]->name);
@@ -344,7 +328,13 @@ Options:\n\
   fprintf (stream, _("\
   --gdwarf-<N>            generate DWARF<N> debugging information. 2 <= <N> <= 5\n"));
   fprintf (stream, _("\
+  --gdwarf-cie-version=<N> generate version 1, 3 or 4 DWARF CIEs\n"));
+  fprintf (stream, _("\
   --gdwarf-sections       generate per-function section names for DWARF line information\n"));
+  fprintf (stream, _("\
+  --hash-size=<N>         ignored\n"));
+  fprintf (stream, _("\
+  --help                  show all assembler options\n"));
   fprintf (stream, _("\
   --target-help           show target specific options\n"));
   fprintf (stream, _("\
@@ -360,6 +350,9 @@ Options:\n\
   fprintf (stream, _("\
   --MD FILE               write dependency information in FILE (default none)\n"));
   fprintf (stream, _("\
+  --multibyte-handling=<method>\n\
+                          what to do with multibyte characters encountered in the input\n"));
+  fprintf (stream, _("\
   -nocpp                  ignored\n"));
   fprintf (stream, _("\
   -no-pad-sections        do not pad the end of sections to alignment boundaries\n"));
@@ -367,6 +360,8 @@ Options:\n\
   -o OBJFILE              name the object-file output OBJFILE (default a.out)\n"));
   fprintf (stream, _("\
   -R                      fold data section into text section\n"));
+  fprintf (stream, _("\
+  --reduce-memory-overheads ignored\n"));
   fprintf (stream, _("\
   --statistics            print various measured statistics from execution\n"));
   fprintf (stream, _("\
@@ -601,7 +596,7 @@ parse_args (int * pargc, char *** pargv)
   old_argv = *pargv;
 
   /* Initialize a new argv that contains no options.  */
-  new_argv = XNEWVEC (char *, old_argc + 1);
+  new_argv = notes_alloc (sizeof (char *) * (old_argc + 1));
   new_argv[0] = old_argv[0];
   new_argc = 1;
   new_argv[new_argc] = NULL;
@@ -741,15 +736,13 @@ This program has absolutely no warranty.\n"));
 	  if (optarg)
 	    {
 #if defined OBJ_ELF || defined OBJ_MAYBE_ELF
-	      if (strcasecmp (optarg, "none") == 0)
-		flag_compress_debug = COMPRESS_DEBUG_NONE;
-	      else if (strcasecmp (optarg, "zlib") == 0)
-		flag_compress_debug = COMPRESS_DEBUG_GABI_ZLIB;
-	      else if (strcasecmp (optarg, "zlib-gnu") == 0)
-		flag_compress_debug = COMPRESS_DEBUG_GNU_ZLIB;
-	      else if (strcasecmp (optarg, "zlib-gabi") == 0)
-		flag_compress_debug = COMPRESS_DEBUG_GABI_ZLIB;
-	      else
+	      flag_compress_debug = bfd_get_compression_algorithm (optarg);
+#ifndef HAVE_ZSTD
+	      if (flag_compress_debug == COMPRESS_DEBUG_ZSTD)
+		  as_fatal (_ ("--compress-debug-sections=zstd: gas is not "
+			       "built with zstd support"));
+#endif
+	      if (flag_compress_debug == COMPRESS_UNKNOWN)
 		as_fatal (_("Invalid --compress-debug-sections option: `%s'"),
 			  optarg);
 #else
@@ -794,27 +787,19 @@ This program has absolutely no warranty.\n"));
 	  {
 	    /* optarg is the name of the file containing the instruction
 	       formats, opcodes, register names, etc.  */
-	    struct itbl_file_list *n;
-
 	    if (optarg == NULL)
 	      {
 		as_warn (_("no file name following -t option"));
 		break;
 	      }
 
-	    n = XNEW (struct itbl_file_list);
-	    n->next = itbl_files;
-	    n->name = optarg;
-	    itbl_files = n;
-
 	    /* Parse the file and add the new instructions to our internal
 	       table.  If multiple instruction tables are specified, the
 	       information from this table gets appended onto the existing
 	       internal table.  */
-	    itbl_files->name = xstrdup (optarg);
-	    if (itbl_parse (itbl_files->name) != 0)
+	    if (itbl_parse (optarg) != 0)
 	      as_fatal (_("failed to read instruction table %s\n"),
-			itbl_files->name);
+			optarg);
 	  }
 	  break;
 #endif
@@ -1017,7 +1002,7 @@ This program has absolutely no warranty.\n"));
  	case OPTION_AL:
 	  listing |= LISTING_LISTING;
 	  if (optarg)
-	    listing_filename = xstrdup (optarg);
+	    listing_filename = notes_strdup (optarg);
 	  break;
 
  	case OPTION_ALTERNATE:
@@ -1071,7 +1056,7 @@ This program has absolutely no warranty.\n"));
 		      listing |= LISTING_SYMBOLS;
 		      break;
 		    case '=':
-		      listing_filename = xstrdup (optarg + 1);
+		      listing_filename = notes_strdup (optarg + 1);
 		      optarg += strlen (listing_filename);
 		      break;
 		    default:
@@ -1097,14 +1082,14 @@ This program has absolutely no warranty.\n"));
 
 	case 'I':
 	  {			/* Include file directory.  */
-	    char *temp = xstrdup (optarg);
+	    char *temp = notes_strdup (optarg);
 
 	    add_include_dir (temp);
 	    break;
 	  }
 
 	case 'o':
-	  out_file_name = xstrdup (optarg);
+	  out_file_name = notes_strdup (optarg);
 	  break;
 
 	case 'w':
@@ -1153,14 +1138,6 @@ dump_statistics (void)
 #ifdef obj_print_statistics
   obj_print_statistics (stderr);
 #endif
-}
-
-static void
-close_output_file (void)
-{
-  output_file_close (out_file_name);
-  if (!keep_it)
-    unlink_if_ordinary (out_file_name);
 }
 
 /* The interface between the macro code and gas expression handling.  */
@@ -1260,7 +1237,12 @@ perform_an_assembly_pass (int argc, char ** argv)
   if (!saw_a_file)
     read_a_source_file ("");
 }
-
+
+static void
+free_notes (void)
+{
+  _obstack_free (&notes, NULL);
+}
 
 int
 main (int argc, char ** argv)
@@ -1308,6 +1290,9 @@ main (int argc, char ** argv)
 #ifdef USE_EMULATIONS
   select_emulation_mode (argc, argv);
 #endif
+
+  obstack_begin (&notes, chunksize);
+  xatexit (free_notes);
 
   PROGRESS (1);
   /* Call parse_args before any of the init/begin functions
@@ -1361,7 +1346,7 @@ main (int argc, char ** argv)
   expr_begin ();
 
   /* It has to be called after dump_statistics ().  */
-  xatexit (close_output_file);
+  xatexit (output_file_close);
 
   if (flag_print_statistics)
     xatexit (dump_statistics);
@@ -1419,8 +1404,8 @@ main (int argc, char ** argv)
 
   cond_finish_check (-1);
 
-#ifdef md_end
-  md_end ();
+#ifdef md_finish
+  md_finish ();
 #endif
 
 #if defined OBJ_ELF || defined OBJ_MAYBE_ELF

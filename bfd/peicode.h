@@ -231,7 +231,7 @@ coff_swap_scnhdr_in (bfd * abfd, void * ext, void * in)
     {
       scnhdr_int->s_vaddr += pe_data (abfd)->pe_opthdr.ImageBase;
       /* Do not cut upper 32-bits for 64-bit vma.  */
-#if !defined(COFF_WITH_pex64) && !defined(COFF_WITH_peAArch64)
+#if !defined(COFF_WITH_pex64) && !defined(COFF_WITH_peAArch64) && !defined(COFF_WITH_peLoongArch64)
       scnhdr_int->s_vaddr &= 0xffffffff;
 #endif
     }
@@ -763,6 +763,17 @@ static const jump_table jtab[] =
     16, 12
   },
 #endif
+
+#ifdef LOONGARCH64MAGIC
+/* We don't currently support jumping to DLLs, so if
+   someone does try emit a runtime trap.  Through BREAK 0.  */
+  { LOONGARCH64MAGIC,
+    { 0x00, 0x00, 0x2a, 0x00 },
+    4, 0
+  },
+
+#endif
+
   { 0, { 0 }, 0, 0 }
 };
 
@@ -920,7 +931,7 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
 	/* See PR 20907 for a reproducer.  */
 	goto error_return;
 
-#if defined(COFF_WITH_pex64) || defined(COFF_WITH_peAArch64)
+#if defined(COFF_WITH_pex64) || defined(COFF_WITH_peAArch64) || defined(COFF_WITH_peLoongArch64)
       ((unsigned int *) id4->contents)[0] = ordinal;
       ((unsigned int *) id4->contents)[1] = 0x80000000;
       ((unsigned int *) id5->contents)[0] = ordinal;
@@ -1222,6 +1233,12 @@ pe_ILF_object_p (bfd * abfd)
 #endif
       break;
 
+    case IMAGE_FILE_MACHINE_LOONGARCH64:
+#ifdef LOONGARCH64MAGIC
+      magic = LOONGARCH64MAGIC;
+#endif
+      break;
+
     case IMAGE_FILE_MACHINE_THUMB:
 #ifdef THUMBPEMAGIC
       {
@@ -1502,18 +1519,40 @@ pe_bfd_object_p (bfd * abfd)
       if (amt > opt_hdr_size)
 	memset (opthdr + opt_hdr_size, 0, amt - opt_hdr_size);
 
-      bfd_set_error (bfd_error_no_error);
-      bfd_coff_swap_aouthdr_in (abfd, opthdr, & internal_a);
-      if (bfd_get_error () != bfd_error_no_error)
-	return NULL;
-    }
+      bfd_coff_swap_aouthdr_in (abfd, opthdr, &internal_a);
 
+      struct internal_extra_pe_aouthdr *a = &internal_a.pe;
+      if ((a->SectionAlignment & -a->SectionAlignment) != a->SectionAlignment
+	  || a->SectionAlignment >= 0x80000000)
+	{
+	  const char **warn = _bfd_per_xvec_warn (abfd->xvec);
+	  *warn = _("%pB: adjusting invalid SectionAlignment");
+	  a->SectionAlignment &= -a->SectionAlignment;
+	  if (a->SectionAlignment >= 0x80000000)
+	    a->SectionAlignment = 0x40000000;
+	}
+
+      if ((a->FileAlignment & -a->FileAlignment) != a->FileAlignment
+	  || a->FileAlignment > a->SectionAlignment)
+	{
+	  const char **warn = _bfd_per_xvec_warn (abfd->xvec);
+	  *warn = _("%pB: adjusting invalid FileAlignment");
+	  a->FileAlignment &= -a->FileAlignment;
+	  if (a->FileAlignment > a->SectionAlignment)
+	    a->FileAlignment = a->SectionAlignment;
+	}
+
+      if (a->NumberOfRvaAndSizes > IMAGE_NUMBEROF_DIRECTORY_ENTRIES)
+	{
+	  const char **warn = _bfd_per_xvec_warn (abfd->xvec);
+	  *warn = _("%pB: invalid NumberOfRvaAndSizes");
+	}
+    }
 
   result = coff_real_object_p (abfd, internal_f.f_nscns, &internal_f,
 			       (opt_hdr_size != 0
 				? &internal_a
 				: (struct internal_aouthdr *) NULL));
-
 
   if (result)
     {

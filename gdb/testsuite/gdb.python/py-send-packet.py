@@ -114,10 +114,12 @@ def check_global_var(expected_val):
     if val != expected_val:
         raise gdb.GdbError("global_var is 0x%x, expected 0x%x" % (val, expected_val))
 
+
 # Return a bytes object representing an 'X' packet header with
 # address ADDR.
-def xpacket_header (addr):
-    return ("X%x,4:" % addr).encode('ascii')
+def xpacket_header(addr):
+    return ("X%x,4:" % addr).encode("ascii")
+
 
 # Set the 'X' packet to the remote target to set a global variable.
 # Checks that we can send byte values.

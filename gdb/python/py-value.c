@@ -158,7 +158,7 @@ convert_buffer_and_type_to_value (PyObject *obj, struct type *type)
       return nullptr;
     }
 
-  if (TYPE_LENGTH (type) > py_buf.len)
+  if (type->length () > py_buf.len)
     {
       PyErr_SetString (PyExc_ValueError,
 		       _("Size of type is larger than that of buffer object."));
@@ -422,7 +422,7 @@ valpy_get_dynamic_type (PyObject *self, void *closure)
       type = check_typedef (type);
 
       if (type->is_pointer_or_reference ()
-	  && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_STRUCT))
+	  && (type->target_type ()->code () == TYPE_CODE_STRUCT))
 	{
 	  struct value *target;
 	  int was_pointer = type->code () == TYPE_CODE_PTR;
@@ -525,7 +525,7 @@ valpy_lazy_string (PyObject *self, PyObject *args, PyObject *kw)
 	      length = array_length;
 	    else if (array_length == -1)
 	      {
-		type = lookup_array_range_type (TYPE_TARGET_TYPE (realtype),
+		type = lookup_array_range_type (realtype->target_type (),
 						0, length - 1);
 	      }
 	    else if (length != array_length)
@@ -534,7 +534,7 @@ valpy_lazy_string (PyObject *self, PyObject *args, PyObject *kw)
 		   specified length.  */
 		if (length > array_length)
 		  error (_("Length is larger than array size."));
-		type = lookup_array_range_type (TYPE_TARGET_TYPE (realtype),
+		type = lookup_array_range_type (realtype->target_type (),
 						low_bound,
 						low_bound + length - 1);
 	      }
@@ -597,7 +597,7 @@ valpy_string (PyObject *self, PyObject *args, PyObject *kw)
 
   encoding = (user_encoding && *user_encoding) ? user_encoding : la_encoding;
   return PyUnicode_Decode ((const char *) buffer.get (),
-			   length * TYPE_LENGTH (char_type),
+			   length * char_type->length (),
 			   encoding, errors);
 }
 
@@ -641,6 +641,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
       "address",		/* See set print address on|off.  */
       "styling",		/* Should we apply styling.  */
       "nibbles",		/* See set print nibbles on|off.  */
+      "summary",		/* Summary mode for non-scalars.  */
       /* C++ options.  */
       "deref_refs",		/* No corresponding setting.  */
       "actual_objects",		/* See set print object on|off.  */
@@ -673,7 +674,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
     }
 
   struct value_print_options opts;
-  get_user_print_options (&opts);
+  gdbpy_get_print_options (&opts);
   opts.deref_ref = 0;
 
   /* We need objects for booleans as the "p" flag for bools is new in
@@ -690,10 +691,11 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
   PyObject *deref_refs_obj = NULL;
   PyObject *actual_objects_obj = NULL;
   PyObject *static_members_obj = NULL;
+  PyObject *summary_obj = NULL;
   char *format = NULL;
   if (!gdb_PyArg_ParseTupleAndKeywords (args,
 					kw,
-					"|O!O!O!O!O!O!O!O!O!O!O!O!IIIs",
+					"|O!O!O!O!O!O!O!O!O!O!O!O!O!IIIs",
 					keywords,
 					&PyBool_Type, &raw_obj,
 					&PyBool_Type, &pretty_arrays_obj,
@@ -704,6 +706,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
 					&PyBool_Type, &address_obj,
 					&PyBool_Type, &styling_obj,
 					&PyBool_Type, &nibbles_obj,
+					&PyBool_Type, &summary_obj,
 					&PyBool_Type, &deref_refs_obj,
 					&PyBool_Type, &actual_objects_obj,
 					&PyBool_Type, &static_members_obj,
@@ -736,6 +739,8 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
     return NULL;
   if (!copy_py_bool_obj (&opts.static_field_print, static_members_obj))
     return NULL;
+  if (!copy_py_bool_obj (&opts.summary, summary_obj))
+    return nullptr;
 
   /* Numeric arguments for which 0 means unlimited (which we represent as
      UINT_MAX).  Note that the max-depth numeric argument uses -1 as
@@ -881,7 +886,7 @@ value_has_field (struct value *v, PyObject *field)
       val_type = value_type (v);
       val_type = check_typedef (val_type);
       if (val_type->is_pointer_or_reference ())
-	val_type = check_typedef (TYPE_TARGET_TYPE (val_type));
+	val_type = check_typedef (val_type->target_type ());
 
       type_code = val_type->code ();
       if ((type_code == TYPE_CODE_STRUCT || type_code == TYPE_CODE_UNION)
@@ -1163,7 +1168,7 @@ valpy_str (PyObject *self)
 {
   struct value_print_options opts;
 
-  get_user_print_options (&opts);
+  gdbpy_get_print_options (&opts);
   opts.deref_ref = 0;
 
   string_file stb;
@@ -1269,7 +1274,7 @@ enum valpy_opcode
 
 /* If TYPE is a reference, return the target; otherwise return TYPE.  */
 #define STRIP_REFERENCE(TYPE) \
-  (TYPE_IS_REFERENCE (TYPE) ? (TYPE_TARGET_TYPE (TYPE)) : (TYPE))
+  (TYPE_IS_REFERENCE (TYPE) ? ((TYPE)->target_type ()) : (TYPE))
 
 /* Helper for valpy_binop.  Returns a value object which is the result
    of applying the operation specified by OPCODE to the given
