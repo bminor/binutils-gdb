@@ -6370,101 +6370,41 @@ lang_size_segment (seg_align_type *seg)
 static bfd_vma
 lang_size_relro_segment_1 (seg_align_type *seg)
 {
-  bfd_vma relro_end, desired_relro_base;
-  asection *sec, *relro_sec = NULL;
-  unsigned int max_alignment_power = 0;
-  bool seen_reloc_section = false;
-  bool desired_relro_base_reduced = false;
+  bfd_vma relro_end, desired_end;
+  asection *sec;
 
   /* Compute the expected PT_GNU_RELRO/PT_LOAD segment end.  */
   relro_end = ((seg->relro_end + seg->pagesize - 1)
 	       & ~(seg->pagesize - 1));
 
   /* Adjust by the offset arg of XXX_SEGMENT_RELRO_END.  */
-  desired_relro_base = relro_end - seg->relro_offset;
+  desired_end = relro_end - seg->relro_offset;
 
-  /* For sections in the relro segment.  */
+  /* For sections in the relro segment..  */
   for (sec = link_info.output_bfd->section_last; sec; sec = sec->prev)
-    if ((sec->flags & SEC_ALLOC) != 0)
+    if ((sec->flags & SEC_ALLOC) != 0
+	&& sec->vma >= seg->base
+	&& sec->vma < seg->relro_end - seg->relro_offset)
       {
-	/* Record the maximum alignment for all sections starting from
-	   the relro segment.  */
-	if (sec->alignment_power > max_alignment_power)
-	  max_alignment_power = sec->alignment_power;
+	/* Where do we want to put this section so that it ends as
+	   desired?  */
+	bfd_vma start, end, bump;
 
-	if (sec->vma >= seg->base
-	    && sec->vma < seg->relro_end - seg->relro_offset)
-	  {
-	    /* Where do we want to put the relro section so that the
-	       relro segment ends on the page bounary?  */
-	    bfd_vma start, end, bump;
-
-	    end = start = sec->vma;
-	    if (!IS_TBSS (sec))
-	      end += TO_ADDR (sec->size);
-	    bump = desired_relro_base - end;
-	    /* We'd like to increase START by BUMP, but we must heed
-	       alignment so the increase might be less than optimum.  */
-	    start += bump;
-	    start &= ~(((bfd_vma) 1 << sec->alignment_power) - 1);
-	    /* This is now the desired end for the previous section.  */
-	    desired_relro_base = start;
-	    relro_sec = sec;
-	    seen_reloc_section = true;
-	  }
-	else if (seen_reloc_section)
-	  {
-	    /* Stop searching if we see a non-relro section after seeing
-	       relro sections.  */
-	    break;
-	  }
+	end = start = sec->vma;
+	if (!IS_TBSS (sec))
+	  end += TO_ADDR (sec->size);
+	bump = desired_end - end;
+	/* We'd like to increase START by BUMP, but we must heed
+	   alignment so the increase might be less than optimum.  */
+	start += bump;
+	start &= ~(((bfd_vma) 1 << sec->alignment_power) - 1);
+	/* This is now the desired end for the previous section.  */
+	desired_end = start;
       }
 
-  if (relro_sec != NULL
-      && seg->maxpagesize >= (1U << max_alignment_power))
-    {
-      asection *prev_sec;
-      bfd_vma prev_sec_end_plus_1_page;
-
-       /* Find the first preceding load section.  */
-      for (prev_sec = relro_sec->prev;
-	   prev_sec != NULL;
-	   prev_sec = prev_sec->prev)
-	if ((prev_sec->flags & SEC_ALLOC) != 0)
-	  break;
-
-      prev_sec_end_plus_1_page = (prev_sec->vma + prev_sec->size
-				  + seg->maxpagesize);
-      if (prev_sec_end_plus_1_page < desired_relro_base)
-	{
-	  bfd_vma aligned_relro_base;
-
-	  desired_relro_base_reduced = true;
-
-	  /* Don't add the 1-page gap before the relro segment.  Align
-	     the relro segment first.  */
-	  aligned_relro_base = (desired_relro_base
-				 & ~(seg->maxpagesize - 1));
-	  if (prev_sec_end_plus_1_page < aligned_relro_base)
-	    {
-	      /* Subtract the maximum page size if therer is still a
-		 1-page gap.  */
-	      desired_relro_base -= seg->maxpagesize;
-	      relro_end -= seg->maxpagesize;
-	    }
-	  else
-	    {
-	      /* Align the relro segment.  */
-	      desired_relro_base = aligned_relro_base;
-	      relro_end &= ~(seg->maxpagesize - 1);
-	    }
-	}
-    }
-
   seg->phase = exp_seg_relro_adjust;
-  ASSERT (desired_relro_base_reduced
-	  || desired_relro_base >= seg->base);
-  seg->base = desired_relro_base;
+  ASSERT (desired_end >= seg->base);
+  seg->base = desired_end;
   return relro_end;
 }
 

@@ -5883,7 +5883,7 @@ linux_process_target::supports_multi_process ()
 bool
 linux_process_target::supports_fork_events ()
 {
-  return linux_supports_tracefork ();
+  return true;
 }
 
 /* Check if vfork events are supported.  */
@@ -5891,7 +5891,7 @@ linux_process_target::supports_fork_events ()
 bool
 linux_process_target::supports_vfork_events ()
 {
-  return linux_supports_tracefork ();
+  return true;
 }
 
 /* Check if exec events are supported.  */
@@ -5899,7 +5899,7 @@ linux_process_target::supports_vfork_events ()
 bool
 linux_process_target::supports_exec_events ()
 {
-  return linux_supports_traceexec ();
+  return true;
 }
 
 /* Target hook for 'handle_new_gdb_connection'.  Causes a reset of the
@@ -6098,8 +6098,7 @@ linux_process_target::read_loadmap (const char *annex, CORE_ADDR offset,
 bool
 linux_process_target::supports_catch_syscall ()
 {
-  return (low_supports_catch_syscall ()
-	  && linux_supports_tracesysgood ());
+  return low_supports_catch_syscall ();
 }
 
 bool

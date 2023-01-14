@@ -95,12 +95,21 @@ struct jiter_objfile_data
 
 struct jited_objfile_data
 {
-  jited_objfile_data (CORE_ADDR addr)
-    : addr (addr)
+  jited_objfile_data (CORE_ADDR addr, CORE_ADDR symfile_addr,
+		      ULONGEST symfile_size)
+    : addr (addr),
+      symfile_addr (symfile_addr),
+      symfile_size (symfile_size)
   {}
 
   /* Address of struct jit_code_entry for this objfile.  */
   CORE_ADDR addr;
+
+  /* Value of jit_code_entry->symfile_addr for this objfile.  */
+  CORE_ADDR symfile_addr;
+
+  /* Value of jit_code_entry->symfile_size for this objfile.  */
+  ULONGEST symfile_size;
 };
 
 /* Re-establish the jit breakpoint(s).  */

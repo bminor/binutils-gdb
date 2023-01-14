@@ -84,6 +84,10 @@ tui_on_normal_stop (struct bpstat *bs, int print_frame)
   if (!print_frame)
     return;
 
+  /* This event is suppressed.  */
+  if (cli_suppress_notification.normal_stop)
+    return;
+
   SWITCH_THRU_ALL_UIS ()
     {
       struct interp *interp = top_level_interpreter ();

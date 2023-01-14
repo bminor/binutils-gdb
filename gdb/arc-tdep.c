@@ -1306,19 +1306,13 @@ arc_is_in_prologue (struct gdbarch *gdbarch, const struct arc_instruction &insn,
   return false;
 }
 
-/* Copy of gdb_buffered_insn_length_fprintf from disasm.c.  */
-
-static int ATTRIBUTE_PRINTF (2, 3)
-arc_fprintf_disasm (void *stream, const char *format, ...)
-{
-  return 0;
-}
+/* See arc-tdep.h.  */
 
 struct disassemble_info
 arc_disassemble_info (struct gdbarch *gdbarch)
 {
   struct disassemble_info di;
-  init_disassemble_info (&di, &null_stream, arc_fprintf_disasm);
+  init_disassemble_info_for_no_printing (&di);
   di.arch = gdbarch_bfd_arch_info (gdbarch)->arch;
   di.mach = gdbarch_bfd_arch_info (gdbarch)->mach;
   di.endian = gdbarch_byte_order (gdbarch);

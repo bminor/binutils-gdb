@@ -271,7 +271,7 @@ struct cmd_list_element
      cli_suppress_notification', which will be set to true in cmd_func
      when this command is being executed.  It will be set back to false
      when the command has been executed.  */
-  int *suppress_notification = nullptr;
+  bool *suppress_notification = nullptr;
 
 private:
   /* Local state (context) for this command.  This can be anything.  */

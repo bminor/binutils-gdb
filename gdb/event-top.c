@@ -796,22 +796,25 @@ gdb_readline_no_editing_callback (gdb_client_data client_data)
   int c;
   char *result;
   struct buffer line_buffer;
-  static int done_once = 0;
   struct ui *ui = current_ui;
 
   buffer_init (&line_buffer);
+
+  FILE *stream = ui->instream != nullptr ? ui->instream : ui->stdin_stream;
+  gdb_assert (stream != nullptr);
 
   /* Unbuffer the input stream, so that, later on, the calls to fgetc
      fetch only one char at the time from the stream.  The fgetc's will
      get up to the first newline, but there may be more chars in the
      stream after '\n'.  If we buffer the input and fgetc drains the
      stream, getting stuff beyond the newline as well, a select, done
-     afterwards will not trigger.  */
-  if (!done_once && !ISATTY (ui->instream))
-    {
-      setbuf (ui->instream, NULL);
-      done_once = 1;
-    }
+     afterwards will not trigger.
+
+     This unbuffering was, at one point, not applied if the input stream
+     was a tty, however, the buffering can cause problems, even for a tty,
+     in some cases.  Please ensure that any changes in this area run the MI
+     tests with the FORCE_SEPARATE_MI_TTY=1 flag being passed.  */
+  setbuf (stream, NULL);
 
   /* We still need the while loop here, even though it would seem
      obvious to invoke gdb_readline_no_editing_callback at every
@@ -825,7 +828,7 @@ gdb_readline_no_editing_callback (gdb_client_data client_data)
     {
       /* Read from stdin if we are executing a user defined command.
 	 This is the right thing for prompt_for_continue, at least.  */
-      c = fgetc (ui->instream != NULL ? ui->instream : ui->stdin_stream);
+      c = fgetc (stream);
 
       if (c == EOF)
 	{

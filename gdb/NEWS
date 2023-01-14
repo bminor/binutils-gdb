@@ -81,6 +81,14 @@ maint show gnu-source-highlight enabled
   styling to a particular source file, then the Python Pygments
   library will be used instead.
 
+set suppress-cli-notifications (on|off)
+show suppress-cli-notifications
+  This controls whether printing the notifications is suppressed for CLI.
+  CLI notifications occur when you change the selected context
+  (i.e., the current inferior, thread and/or the frame), or when
+  the program being debugged stops (e.g., because of hitting a
+  breakpoint, completing source-stepping, an interrupt, etc.).
+
 * Changed commands
 
 maint packet
@@ -105,6 +113,10 @@ show debug lin-lwp
 info win
   This command now includes information about the width of the tui
   windows in its output.
+
+* New targets
+
+GNU/Linux/LoongArch    loongarch*-*-linux*
 
 * Python API
 
@@ -159,6 +171,13 @@ info win
   ** New gdb.with_parameter(NAME, VALUE).  This returns a context
      manager that temporarily sets the gdb parameter NAME to VALUE,
      then resets it when the context is exited.
+
+  ** The gdb.Value.format_string method now takes a 'styling'
+     argument, which is a boolean.  When true, the returned string can
+     include escape sequences to apply styling.  The styling will only
+     be present if styling is otherwise turned on in GDB (see 'help
+     set styling').  When false, which is the default if the argument
+     is not given, then no styling is applied to the returned string.
 
 * New features in the GDB remote stub, GDBserver
 

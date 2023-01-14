@@ -4355,7 +4355,7 @@ You may not subtract arguments from different sections.
 @item <=
 @dfn{Is Less Than Or Equal To}
 
-The comparison operators can be used as infix operators.  A true results has a
+The comparison operators can be used as infix operators.  A true result has a
 value of -1 whereas a false result has a value of 0.   Note, these operators
 perform signed comparisons.
 @end table

@@ -10830,8 +10830,10 @@ until_break_command (const char *arg, int from_tty, int anywhere)
       breakpoints.emplace_back (std::move (location_breakpoint));
     }
 
-  tp->thread_fsm = new until_break_fsm (command_interp (), tp->global_num,
-					std::move (breakpoints));
+  tp->set_thread_fsm
+    (std::unique_ptr<thread_fsm>
+     (new until_break_fsm (command_interp (), tp->global_num,
+			   std::move (breakpoints))));
 
   if (lj_deleter)
     lj_deleter->release ();

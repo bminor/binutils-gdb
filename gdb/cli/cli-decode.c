@@ -255,7 +255,7 @@ struct cmd_list_element *
 add_cmd_suppress_notification (const char *name, enum command_class theclass,
 			       cmd_simple_func_ftype *fun, const char *doc,
 			       struct cmd_list_element **list,
-			       int *suppress_notification)
+			       bool *suppress_notification)
 {
   struct cmd_list_element *element;
 
@@ -453,7 +453,7 @@ add_prefix_cmd_suppress_notification
 		cmd_simple_func_ftype *fun,
 		const char *doc, struct cmd_list_element **subcommands,
 		int allow_unknown, struct cmd_list_element **list,
-		int *suppress_notification)
+		bool *suppress_notification)
 {
   struct cmd_list_element *element
     = add_prefix_cmd (name, theclass, fun, doc, subcommands,
@@ -1329,7 +1329,7 @@ add_com_alias (const char *name, cmd_list_element *target,
 struct cmd_list_element *
 add_com_suppress_notification (const char *name, enum command_class theclass,
 			       cmd_simple_func_ftype *fun, const char *doc,
-			       int *suppress_notification)
+			       bool *suppress_notification)
 {
   return add_cmd_suppress_notification (name, theclass, fun, doc,
 					&cmdlist, suppress_notification);
@@ -2506,10 +2506,10 @@ cmd_func (struct cmd_list_element *cmd, const char *args, int from_tty)
 {
   if (!cmd->is_command_class_help ())
     {
-      gdb::optional<scoped_restore_tmpl<int>> restore_suppress;
+      gdb::optional<scoped_restore_tmpl<bool>> restore_suppress;
 
       if (cmd->suppress_notification != NULL)
-	restore_suppress.emplace (cmd->suppress_notification, 1);
+	restore_suppress.emplace (cmd->suppress_notification, true);
 
       cmd->func (args, from_tty, cmd);
     }

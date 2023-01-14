@@ -68,10 +68,7 @@ cli_interp::~cli_interp ()
 }
 
 /* Suppress notification struct.  */
-struct cli_suppress_notification cli_suppress_notification =
-  {
-    0   /* user_selected_context_changed */
-  };
+struct cli_suppress_notification cli_suppress_notification;
 
 /* Returns the INTERP's data cast as cli_interp if INTERP is a CLI,
    and returns NULL otherwise.  */
@@ -111,9 +108,9 @@ should_print_stop_to_console (struct interp *console_interp,
 {
   if ((bpstat_what (tp->control.stop_bpstat).main_action
        == BPSTAT_WHAT_STOP_NOISY)
-      || tp->thread_fsm == NULL
-      || tp->thread_fsm->command_interp == console_interp
-      || !tp->thread_fsm->finished_p ())
+      || tp->thread_fsm () == nullptr
+      || tp->thread_fsm ()->command_interp == console_interp
+      || !tp->thread_fsm ()->finished_p ())
     return 1;
   return 0;
 }
@@ -128,6 +125,10 @@ static void
 cli_on_normal_stop (struct bpstat *bs, int print_frame)
 {
   if (!print_frame)
+    return;
+
+  /* This event is suppressed.  */
+  if (cli_suppress_notification.normal_stop)
     return;
 
   SWITCH_THRU_ALL_UIS ()

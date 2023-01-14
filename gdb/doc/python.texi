@@ -1079,6 +1079,16 @@ A string containing a single character representing the format to use for
 the returned string.  For instance, @code{'x'} is equivalent to using the
 @value{GDBN} command @code{print} with the @code{/x} option and formats
 the value as a hexadecimal number.
+
+@item styling
+@code{True} if @value{GDBN} should apply styling to the returned
+string.  When styling is applied, the returned string might contain
+ANSI terminal escape sequences.  Escape sequences will only be
+included if styling is turned on, see @ref{Output Styling}.
+Additionally, @value{GDBN} only styles some value contents, so not
+every output string will contain escape sequences.
+
+When @code{False}, which is the default, no output styling is applied.
 @end table
 @end defun
 

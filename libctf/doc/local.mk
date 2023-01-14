@@ -20,7 +20,6 @@
 if BUILD_INFO
 
 info_TEXINFOS += %D%/ctf-spec.texi
-libctf_TEXINFOS = $(info_TEXINFOS)
 
 AM_MAKEINFOFLAGS = --no-split
 

@@ -192,6 +192,11 @@ static const char *const script_ext_enums[] = {
 
 static const char *script_ext_mode = script_ext_soft;
 
+
+/* User-controllable flag to suppress event notification on CLI.  */
+
+static bool user_wants_cli_suppress_notification = false;
+
 /* Utility used everywhere when at least one argument is needed and
    none is supplied.  */
 
@@ -2136,6 +2141,28 @@ show_max_user_call_depth (struct ui_file *file, int from_tty,
 		    value);
 }
 
+/* Implement 'show suppress-cli-notifications'.  */
+
+static void
+show_suppress_cli_notifications (ui_file *file, int from_tty,
+				 cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Suppression of printing CLI notifications "
+			    "is %s.\n"), value);
+}
+
+/* Implement 'set suppress-cli-notifications'.  */
+
+static void
+set_suppress_cli_notifications (const char *args, int from_tty,
+				cmd_list_element *c)
+{
+  cli_suppress_notification.user_selected_context
+    = user_wants_cli_suppress_notification;
+  cli_suppress_notification.normal_stop
+    = user_wants_cli_suppress_notification;
+}
+
 /* Returns the cmd_list_element in SHOWLIST corresponding to the first
    argument of ARGV, which must contain one single value.
    Throws an error if no value provided, or value not correct.
@@ -2733,6 +2760,18 @@ Make \"wLapPeu\" an alias of 2 nested \"with\":\n\
 	       alias_help.c_str ());
 
   set_cmd_completer_handle_brkchars (c, alias_command_completer);
+
+  add_setshow_boolean_cmd ("suppress-cli-notifications", no_class,
+			   &user_wants_cli_suppress_notification,
+			   _("\
+Set whether printing notifications on CLI is suppressed."), _("\
+Show whether printing notifications on CLI is suppressed."), _("\
+When on, printing notifications (such as inferior/thread switch)\n\
+on CLI is suppressed."),
+			   set_suppress_cli_notifications,
+			   show_suppress_cli_notifications,
+			   &setlist,
+			   &showlist);
 
   const char *source_help_text = xstrprintf (_("\
 Read commands from a file named FILE.\n\

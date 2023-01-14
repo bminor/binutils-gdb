@@ -891,14 +891,21 @@ gdb_insn_length (struct gdbarch *gdbarch, CORE_ADDR addr)
   return gdb_print_insn (gdbarch, addr, &null_stream, NULL);
 }
 
-/* fprintf-function for gdb_buffered_insn_length.  This function is a
-   nop, we don't want to print anything, we just want to compute the
-   length of the insn.  */
+/* An fprintf-function for use by the disassembler when we know we don't
+   want to print anything.  Always returns success.  */
 
 static int ATTRIBUTE_PRINTF (2, 3)
-gdb_buffered_insn_length_fprintf (void *stream, const char *format, ...)
+gdb_disasm_null_printf (void *stream, const char *format, ...)
 {
   return 0;
+}
+
+/* See disasm.h.  */
+
+void
+init_disassemble_info_for_no_printing (struct disassemble_info *dinfo)
+{
+  init_disassemble_info (dinfo, nullptr, gdb_disasm_null_printf);
 }
 
 /* Initialize a struct disassemble_info for gdb_buffered_insn_length.
@@ -912,7 +919,7 @@ gdb_buffered_insn_length_init_dis (struct gdbarch *gdbarch,
 				   CORE_ADDR addr,
 				   std::string *disassembler_options_holder)
 {
-  init_disassemble_info (di, NULL, gdb_buffered_insn_length_fprintf);
+  init_disassemble_info_for_no_printing (di);
 
   /* init_disassemble_info installs buffer_read_memory, etc.
      so we don't need to do that here.

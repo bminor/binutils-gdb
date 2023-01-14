@@ -57,12 +57,12 @@ Disassembly of section .plt:
 Disassembly of section .plt.got:
 
 0+1c0 <func@plt>:
- +[a-f0-9]+:	ff 25 72 01 20 00    	jmp    \*0x200172\(%rip\)        # 200338 <func>
+ +[a-f0-9]+:	ff 25 32 0e 20 00    	jmp    \*0x200e32\(%rip\)        # 200ff8 <func>
  +[a-f0-9]+:	66 90                	xchg   %ax,%ax
 
 Disassembly of section .text:
 
 0+1c8 <foo>:
  +[a-f0-9]+:	e8 f3 ff ff ff       	call   1c0 <func@plt>
- +[a-f0-9]+:	48 8b 05 64 01 20 00 	mov    0x200164\(%rip\),%rax        # 200338 <func>
+ +[a-f0-9]+:	48 8b 05 24 0e 20 00 	mov    0x200e24\(%rip\),%rax        # 200ff8 <func>
 #pass
