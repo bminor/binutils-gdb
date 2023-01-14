@@ -206,6 +206,7 @@ struct file_entry
 {
   const char *   filename;
   unsigned int   dir;
+  bfd_boolean    auto_assigned;
   unsigned char  md5[NUM_MD5_BYTES];
 };
 
@@ -620,6 +621,36 @@ get_directory_table_entry (const char *  dirname,
   return d;  
 }
 
+static bfd_boolean
+assign_file_to_slot (unsigned long i, const char *file, unsigned int dir, bfd_boolean auto_assign)
+{
+  if (i >= files_allocated)
+    {
+      unsigned int old = files_allocated;
+
+      files_allocated = i + 32;
+      /* Catch wraparound.  */
+      if (files_allocated <= old)
+	{
+	  as_bad (_("file number %lu is too big"), (unsigned long) i);
+	  return FALSE;
+	}
+
+      files = XRESIZEVEC (struct file_entry, files, files_allocated);
+      memset (files + old, 0, (i + 32 - old) * sizeof (struct file_entry));
+    }
+
+  files[i].filename = file;
+  files[i].dir = dir;
+  files[i].auto_assigned = auto_assign;
+  memset (files[i].md5, 0, NUM_MD5_BYTES);
+
+  if (files_in_use < i + 1)
+    files_in_use = i + 1;
+
+  return TRUE;
+}
+
 /* Get a .debug_line file number for PATHNAME.  If there is a
    directory component to PATHNAME, then this will be stored
    in the directory table, if it is not already present.
@@ -663,7 +694,7 @@ allocate_filenum (const char * pathname)
 
   dir = get_directory_table_entry (pathname, dir_len, FALSE);
 
-  /* Do not use slot-0.  That is specificailly reserved for use by
+  /* Do not use slot-0.  That is specifically reserved for use by
      the '.file 0 "name"' directive.  */
   for (i = 1; i < files_in_use; ++i)
     if (files[i].dir == dir
@@ -675,28 +706,9 @@ allocate_filenum (const char * pathname)
 	return i;
       }
 
-  if (i >= files_allocated)
-    {
-      unsigned int old = files_allocated;
+  if (!assign_file_to_slot (i, file, dir, TRUE))
+    return -1;
 
-      files_allocated = i + 32;
-      /* Catch wraparound.  */
-      if (files_allocated <= old)
-	{
-	  as_bad (_("file number %lu is too big"), (unsigned long) i);
-	  return -1;
-	}
-
-      files = XRESIZEVEC (struct file_entry, files, files_allocated);
-      memset (files + old, 0, (i + 32 - old) * sizeof (struct file_entry));
-    }
-
-  files[i].filename = file;
-  files[i].dir = dir;
-  memset (files[i].md5, 0, NUM_MD5_BYTES);
-
-  if (files_in_use < i + 1)
-    files_in_use = i + 1;  
   last_used = i;
   last_used_dir_len = dir_len;
 
@@ -769,15 +781,30 @@ allocate_filename_to_slot (const char *  dirname,
 	}
 
     fail:
-      as_bad (_("file table slot %u is already occupied by a different file (%s%s%s vs %s%s%s)"),
-	      num,
-	      dir == NULL ? "" : dir,
-	      dir == NULL ? "" : "/",
-	      files[num].filename,
-	      dirname == NULL ? "" : dirname,
-	      dirname == NULL ? "" : "/",
-	      filename);
-      return FALSE;
+      /* If NUM was previously allocated automatically then
+	 choose another slot for it, so that we can reuse NUM.  */
+      if (files[num].auto_assigned)
+	{
+	  /* Find an unused slot.  */
+	  for (i = 1; i < files_in_use; ++i)
+	    if (files[i].filename == NULL)
+	      break;
+	  if (! assign_file_to_slot (i, files[num].filename, files[num].dir, TRUE))
+	    return FALSE;
+	  files[num].filename = NULL;
+	}
+      else
+	{
+	  as_bad (_("file table slot %u is already occupied by a different file (%s%s%s vs %s%s%s)"),
+		  num,
+		  dir == NULL ? "" : dir,
+		  dir == NULL ? "" : "/",
+		  files[num].filename,
+		  dirname == NULL ? "" : dirname,
+		  dirname == NULL ? "" : "/",
+		  filename);
+	  return FALSE;
+	}
     }
 
   if (dirname == NULL)
@@ -795,24 +822,9 @@ allocate_filename_to_slot (const char *  dirname,
   d = get_directory_table_entry (dirname, dirlen, num == 0);
   i = num;
 
-  if (i >= files_allocated)
-    {
-      unsigned int old = files_allocated;
+  if (! assign_file_to_slot (i, file, d, FALSE))
+    return FALSE;
 
-      files_allocated = i + 32;
-      /* Catch wraparound.  */
-      if (files_allocated <= old)
-	{
-	  as_bad (_("file number %lu is too big"), (unsigned long) i);
-	  return FALSE;
-	}
-
-      files = XRESIZEVEC (struct file_entry, files, files_allocated);
-      memset (files + old, 0, (i + 32 - old) * sizeof (struct file_entry));
-    }
-
-  files[i].filename = file;
-  files[i].dir = d;
   if (with_md5)
     {
       if (target_big_endian)
@@ -862,9 +874,6 @@ allocate_filename_to_slot (const char *  dirname,
     }
   else
     memset (files[i].md5, 0, NUM_MD5_BYTES);
-
-  if (files_in_use < i + 1)
-    files_in_use = i + 1;
 
   return TRUE;
 }

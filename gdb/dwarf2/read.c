@@ -10318,7 +10318,8 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
   if (!die_needs_namespace (die, cu))
     return dwarf2_compute_name (name, die, cu, 1);
 
-  mangled = dw2_linkage_name (die, cu);
+  if (cu->language != language_rust)
+    mangled = dw2_linkage_name (die, cu);
 
   /* DW_AT_linkage_name is missing in some cases - depend on what GDB
      has computed.  */
@@ -15765,7 +15766,8 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
      these DIEs are identified by the fact that they have no byte_size
      attribute, and a declaration attribute.  */
   if (dwarf2_attr (die, DW_AT_byte_size, cu) != NULL
-      || !die_is_declaration (die, cu))
+      || !die_is_declaration (die, cu)
+      || dwarf2_attr (die, DW_AT_signature, cu) != NULL)
     {
       struct symbol *sym = new_symbol (die, type, cu);
 

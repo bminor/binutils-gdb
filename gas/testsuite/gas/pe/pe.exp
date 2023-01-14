@@ -55,7 +55,6 @@ if ([istarget "x86_64-*-mingw*"]) then {
 # Big obj
 
 
-if ([istarget "x86_64-*-mingw*"]) then {
-        # Currently only supported on x86_64
+if ([istarget "*-*-mingw*"]) then {
 	run_dump_test "big-obj"
 }

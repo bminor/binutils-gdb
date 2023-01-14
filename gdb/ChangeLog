@@ -1,3 +1,51 @@
+2020-04-28  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2/read.c (process_structure_scope): Add symbol for struct decl
+	with DW_AT_signature.
+
+2020-04-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* configure.ac: Remove check for fs_base/gs_base in
+	user_regs_struct.
+	* configure: Re-generate.
+	* config.in: Re-generate.
+	* amd64-nat.c (amd64_native_gregset_reg_offset): Adjust.
+	* amd64-linux-nat.c (amd64_linux_nat_target::fetch_registers,
+	amd64_linux_nat_target::store_registers, ps_get_thread_area, ): Adjust.
+
+2020-04-27  Luis Machado  <luis.machado@linaro.org>
+
+	* dwarf2/frame-tailcall.c (dwarf2_tailcall_sniffer_first): Handle
+	problematic inline frame unwinding situation.
+	* frame.c (frame_id_computed_p): New function.
+	* frame.h (frame_id_computed_p): New prototype.
+
+2020-04-26  Tom Tromey  <tom@tromey.com>
+
+	* command.h (enum command_class) <class_pseudo>: Remove.
+
+2020-04-26  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* cli/cli-decode.c (lookup_cmd_composition): Fix comments
+	and whitespace.
+
+2020-04-25  Kamil Rytarowski  <n54@gmx.com>
+
+       * inf-ptrace.c (inf_ptrace_target::wait): Remove
+       `PT_GET_PROCESS_STATE' block.
+
+2020-04-24  Tom Tromey  <tom@tromey.com>
+
+	* symtab.h (symbol_get_demangled_name): Don't declare.
+	* symtab.c (symbol_get_demangled_name): Remove.
+	(general_symbol_info::natural_name)
+	(general_symbol_info::demangled_name): Update.
+
+2020-04-24  Tom Tromey  <tom@tromey.com>
+
+	PR rust/25025:
+	* dwarf2/read.c (dwarf2_physname): Do not demangle for Rust.
+
 2020-04-24  Tom Tromey  <tom@tromey.com>
 
 	PR symtab/12707:

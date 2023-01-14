@@ -1,3 +1,7 @@
+2020-04-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common-defs.h: Include cstdlib.h.
+
 2020-04-20  Tom Tromey  <tromey@adacore.com>
 
 	* scoped_mmap.h (scoped_mmap): Mark move constructor as noexcept.

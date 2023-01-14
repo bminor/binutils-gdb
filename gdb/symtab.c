@@ -690,21 +690,6 @@ general_symbol_info::set_demangled_name (const char *name,
     language_specific.demangled_name = name;
 }
 
-/* Return the demangled name of GSYMBOL.  */
-
-const char *
-symbol_get_demangled_name (const struct general_symbol_info *gsymbol)
-{
-  if (gsymbol->language () == language_ada)
-    {
-      if (!gsymbol->ada_mangled)
-	return NULL;
-      /* Fall through.  */
-    }
-
-  return gsymbol->language_specific.demangled_name;
-}
-
 
 /* Initialize the language dependent portion of a symbol
    depending upon the language for the symbol.  */
@@ -976,8 +961,8 @@ general_symbol_info::natural_name () const
     case language_objc:
     case language_fortran:
     case language_rust:
-      if (symbol_get_demangled_name (this) != NULL)
-	return symbol_get_demangled_name (this);
+      if (language_specific.demangled_name != nullptr)
+	return language_specific.demangled_name;
       break;
     case language_ada:
       return ada_decode_symbol (this);
@@ -1002,7 +987,7 @@ general_symbol_info::demangled_name () const
     case language_objc:
     case language_fortran:
     case language_rust:
-      dem_name = symbol_get_demangled_name (this);
+      dem_name = language_specific.demangled_name;
       break;
     case language_ada:
       dem_name = ada_decode_symbol (this);

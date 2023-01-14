@@ -84,7 +84,12 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+
+/* Include both cstdlib and stdlib.h to ensure we have standard functions
+   defined both in the std:: namespace and in the global namespace.  */
+#include <cstdlib>
 #include <stdlib.h>
+
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>

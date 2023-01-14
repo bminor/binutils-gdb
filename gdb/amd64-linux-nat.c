@@ -259,30 +259,6 @@ amd64_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 
 	  amd64_supply_fxsave (regcache, -1, &fpregs);
 	}
-#ifndef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
-      {
-	/* PTRACE_ARCH_PRCTL is obsolete since 2.6.25, where the
-	   fs_base and gs_base fields of user_regs_struct can be
-	   used directly.  */
-	unsigned long base;
-
-	if (regnum == -1 || regnum == AMD64_FSBASE_REGNUM)
-	  {
-	    if (ptrace (PTRACE_ARCH_PRCTL, tid, &base, ARCH_GET_FS) < 0)
-	      perror_with_name (_("Couldn't get segment register fs_base"));
-
-	    regcache->raw_supply (AMD64_FSBASE_REGNUM, &base);
-	  }
-
-	if (regnum == -1 || regnum == AMD64_GSBASE_REGNUM)
-	  {
-	    if (ptrace (PTRACE_ARCH_PRCTL, tid, &base, ARCH_GET_GS) < 0)
-	      perror_with_name (_("Couldn't get segment register gs_base"));
-
-	    regcache->raw_supply (AMD64_GSBASE_REGNUM, &base);
-	  }
-      }
-#endif
     }
 }
 
@@ -348,30 +324,6 @@ amd64_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
 	  if (ptrace (PTRACE_SETFPREGS, tid, 0, (long) &fpregs) < 0)
 	    perror_with_name (_("Couldn't write floating point status"));
 	}
-
-#ifndef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
-      {
-	/* PTRACE_ARCH_PRCTL is obsolete since 2.6.25, where the
-	   fs_base and gs_base fields of user_regs_struct can be
-	   used directly.  */
-	void *base;
-
-	if (regnum == -1 || regnum == AMD64_FSBASE_REGNUM)
-	  {
-	    regcache->raw_collect (AMD64_FSBASE_REGNUM, &base);
-
-	    if (ptrace (PTRACE_ARCH_PRCTL, tid, base, ARCH_SET_FS) < 0)
-	      perror_with_name (_("Couldn't write segment register fs_base"));
-	  }
-	if (regnum == -1 || regnum == AMD64_GSBASE_REGNUM)
-	  {
-
-	    regcache->raw_collect (AMD64_GSBASE_REGNUM, &base);
-	    if (ptrace (PTRACE_ARCH_PRCTL, tid, base, ARCH_SET_GS) < 0)
-	      perror_with_name (_("Couldn't write segment register gs_base"));
-	  }
-      }
-#endif
     }
 }
 
@@ -408,11 +360,7 @@ ps_get_thread_area (struct ps_prochandle *ph,
       switch (idx)
 	{
 	case FS:
-#ifdef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
 	    {
-	      /* PTRACE_ARCH_PRCTL is obsolete since 2.6.25, where the
-		 fs_base and gs_base fields of user_regs_struct can be
-		 used directly.  */
 	      unsigned long fs;
 	      errno = 0;
 	      fs = ptrace (PTRACE_PEEKUSER, lwpid,
@@ -423,12 +371,10 @@ ps_get_thread_area (struct ps_prochandle *ph,
 		  return PS_OK;
 		}
 	    }
-#endif
-	  if (ptrace (PTRACE_ARCH_PRCTL, lwpid, base, ARCH_GET_FS) == 0)
-	    return PS_OK;
+
 	  break;
+
 	case GS:
-#ifdef HAVE_STRUCT_USER_REGS_STRUCT_GS_BASE
 	    {
 	      unsigned long gs;
 	      errno = 0;
@@ -440,10 +386,8 @@ ps_get_thread_area (struct ps_prochandle *ph,
 		  return PS_OK;
 		}
 	    }
-#endif
-	  if (ptrace (PTRACE_ARCH_PRCTL, lwpid, base, ARCH_GET_GS) == 0)
-	    return PS_OK;
 	  break;
+
 	default:                   /* Should not happen.  */
 	  return PS_BADADDR;
 	}

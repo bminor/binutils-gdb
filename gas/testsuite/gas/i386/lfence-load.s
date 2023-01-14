@@ -4,6 +4,26 @@ _start:
 	lgdt (%ebp)
 	vmptrld (%ebp)
 	vmclear (%ebp)
+	invpcid (%ebp), %edx
+	invlpg (%ebp)
+	clflush (%ebp)
+	clflushopt (%ebp)
+	clwb (%ebp)
+	cldemote (%ebp)
+	bndmk (%ebp), %bnd1
+	bndcl (%ebp), %bnd1
+	bndcu (%ebp), %bnd1
+	bndcn (%ebp), %bnd1
+	bndstx %bnd1, (%ebp)
+	bndldx (%ebp), %bnd1
+	prefetcht0 (%ebp)
+	prefetcht1 (%ebp)
+	prefetcht2 (%ebp)
+	prefetchw (%ebp)
+	pop %ds
+	popf
+	popa
+	xlatb (%ebx)
 	fsts (%ebp)
 	flds (%ebp)
 	fistl (%ebp)

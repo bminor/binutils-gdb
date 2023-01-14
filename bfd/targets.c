@@ -742,6 +742,7 @@ extern const bfd_target i386_elf32_vxworks_vec;
 extern const bfd_target i386_mach_o_vec;
 extern const bfd_target i386_msdos_vec;
 extern const bfd_target i386_pe_vec;
+extern const bfd_target i386_pe_big_vec;
 extern const bfd_target i386_pei_vec;
 extern const bfd_target iamcu_elf32_vec;
 extern const bfd_target ia64_elf32_be_vec;
@@ -926,7 +927,7 @@ extern const bfd_target x86_64_elf64_nacl_vec;
 extern const bfd_target x86_64_elf64_sol2_vec;
 extern const bfd_target x86_64_mach_o_vec;
 extern const bfd_target x86_64_pe_vec;
-extern const bfd_target x86_64_pe_be_vec;
+extern const bfd_target x86_64_pe_big_vec;
 extern const bfd_target x86_64_pei_vec;
 extern const bfd_target xc16x_elf32_vec;
 extern const bfd_target xgate_elf32_vec;
@@ -1091,6 +1092,7 @@ static const bfd_target * const _bfd_target_vector[] =
 	&i386_mach_o_vec,
 	&i386_msdos_vec,
 	&i386_pe_vec,
+	&i386_pe_big_vec,
 	&i386_pei_vec,
 
 	&iamcu_elf32_vec,
@@ -1343,7 +1345,7 @@ static const bfd_target * const _bfd_target_vector[] =
 	&x86_64_elf64_sol2_vec,
 	&x86_64_mach_o_vec,
 	&x86_64_pe_vec,
-	&x86_64_pe_be_vec,
+	&x86_64_pe_big_vec,
 	&x86_64_pei_vec,
 #endif
 

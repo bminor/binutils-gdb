@@ -41,7 +41,7 @@ enum command_class
   no_class = -1, class_run = 0, class_vars, class_stack, class_files,
   class_support, class_info, class_breakpoint, class_trace,
   class_alias, class_bookmark, class_obscure, class_maintenance,
-  class_pseudo, class_tui, class_user, class_xdb,
+  class_tui, class_user, class_xdb,
   no_set_class	/* Used for "show" commands that have no corresponding
 		   "set" command.  */
 };

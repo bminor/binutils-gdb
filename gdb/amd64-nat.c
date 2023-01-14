@@ -68,13 +68,6 @@ amd64_native_gregset_reg_offset (struct gdbarch *gdbarch, int regnum)
   if (regnum >= num_regs)
     return -1;
 
-  /* Kernels that predate Linux 2.6.25 don't provide access to
-     these segment registers in user_regs_struct.   */
-#ifndef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
-  if (regnum == AMD64_FSBASE_REGNUM || regnum == AMD64_GSBASE_REGNUM)
-    return -1;
-#endif
-
   return reg_offset[regnum];
 }
 

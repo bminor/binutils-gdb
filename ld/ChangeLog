@@ -1,3 +1,7 @@
+2020-04-27  Tamar Christina  <tamar.christina@arm.com>
+
+	* pe-dll.c (pe_detail_list):  Add pe-bigobj-i386.
+
 2020-04-22  Max Filippov  <jcmvbkbc@gmail.com>
 
 	PR ld/25861
