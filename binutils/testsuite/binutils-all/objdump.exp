@@ -1,4 +1,4 @@
-#   Copyright (C) 1993-2022 Free Software Foundation, Inc.
+#   Copyright (C) 1993-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -375,6 +375,32 @@ if { [is_elf_format] } then {
     }
 }
 
+proc test_objdump_d_show_all_symbols { testfile dumpfile } {
+    global OBJDUMP
+    global OBJDUMPFLAGS
+
+    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -d --show-all-symbols $testfile"]
+
+    set want "${dumpfile}.*:.*00+0 <text_symbol>"
+    if ![regexp $want $got] then {
+	fail "objdump -d --show-all-symbols $testfile: Missing 'text_symbol'"
+	return
+    }
+
+    set want "${dumpfile}.*:.*00+0 <static_text_symbol>"
+    if ![regexp $want $got] then {
+	fail "objdump -d --show-all-symbols $testfile: Missing 'static_text_symbol'"
+	return
+    }
+
+    pass "objdump -d --show-all-symbols $testfile"
+}
+
+# The AIX and ECOFF assemblers default to makeing symbols local, not global.
+# So they do not show up in this test.
+setup_xfail "*-*-*aix*"
+setup_xfail "*-*-*ecoff"
+test_objdump_d_show_all_symbols $testfile $testfile
 
 # Test objdump -s
 

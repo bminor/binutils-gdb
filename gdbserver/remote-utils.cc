@@ -1,5 +1,5 @@
 /* Remote utility routines for the remote server for GDB.
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -296,8 +296,7 @@ remote_prepare (const char *name)
       ((struct sockaddr_in6 *) iter->ai_addr)->sin6_addr = in6addr_any;
       break;
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("Invalid 'ai_family' %d\n"), iter->ai_family);
+      internal_error (_("Invalid 'ai_family' %d\n"), iter->ai_family);
     }
 
   if (bind (listen_desc, iter->ai_addr, iter->ai_addrlen) != 0)

@@ -1,5 +1,5 @@
 /* Read dbx symbol tables and convert to internal format, for GDB.
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -48,6 +48,7 @@
 #include "complaints.h"
 #include "cp-abi.h"
 #include "cp-support.h"
+#include "c-lang.h"
 #include "psympriv.h"
 #include "block.h"
 #include "aout/aout64.h"
@@ -1444,6 +1445,18 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 					     new_name.get ());
 		}
 	    }
+	  else if (psymtab_language == language_c)
+	    {
+	      std::string name (namestring, p - namestring);
+	      gdb::unique_xmalloc_ptr<char> new_name
+		= c_canonicalize_name (name.c_str ());
+	      if (new_name != nullptr)
+		{
+		  sym_len = strlen (new_name.get ());
+		  sym_name = obstack_strdup (&objfile->objfile_obstack,
+					     new_name.get ());
+		}
+	    }
 
 	  if (sym_len == 0)
 	    {
@@ -2711,8 +2724,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 	  case N_ROSYM:
 	    goto case_N_ROSYM;
 	  default:
-	    internal_error (__FILE__, __LINE__,
-			    _("failed internal consistency check"));
+	    internal_error (_("failed internal consistency check"));
 	  }
       }
 

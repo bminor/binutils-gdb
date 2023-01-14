@@ -1,4 +1,4 @@
-@c Copyright (C) 2008--2022 Free Software Foundation, Inc.
+@c Copyright (C) 2008--2023 Free Software Foundation, Inc.
 @c Permission is granted to copy, distribute and/or modify this document
 @c under the terms of the GNU Free Documentation License, Version 1.3 or
 @c any later version published by the Free Software Foundation; with the
@@ -196,7 +196,7 @@ optional arguments while skipping others.  Example:
 * Pretty Printing API::         Pretty-printing values.
 * Selecting Pretty-Printers::   How GDB chooses a pretty-printer.
 * Writing a Pretty-Printer::    Writing a Pretty-Printer.
-* Type Printing API::		Pretty-printing types.
+* Type Printing API::           Pretty-printing types.
 * Frame Filter API::            Filtering Frames.
 * Frame Decorator API::         Decorating Frames.
 * Writing a Frame Filter::      Writing a Frame Filter.
@@ -225,7 +225,7 @@ optional arguments while skipping others.  Example:
 * Lazy Strings In Python::      Python representation of lazy strings.
 * Architectures In Python::     Python representation of architectures.
 * Registers In Python::         Python representation of registers.
-* Connections In Python::	Python representation of connections.
+* Connections In Python::       Python representation of connections.
 * TUI Windows In Python::       Implementing new TUI windows.
 * Disassembly In Python::       Instruction Disassembly In Python
 @end menu
@@ -1642,6 +1642,19 @@ A decimal floating point type.
 @item gdb.TYPE_CODE_INTERNAL_FUNCTION
 A function internal to @value{GDBN}.  This is the type used to represent
 convenience functions.
+
+@vindex TYPE_CODE_XMETHOD
+@item gdb.TYPE_CODE_XMETHOD
+A method internal to @value{GDBN}.  This is the type used to represent
+xmethods (@pxref{Writing an Xmethod}).
+
+@vindex TYPE_CODE_FIXED_POINT
+@item gdb.TYPE_CODE_FIXED_POINT
+A fixed-point number.
+
+@vindex TYPE_CODE_NAMESPACE
+@item gdb.TYPE_CODE_NAMESPACE
+A Fortran namelist.
 @end vtable
 
 Further support for types is provided in the @code{gdb.types}
@@ -2861,21 +2874,21 @@ class MyUnwinder(Unwinder):
 
 @end smallexample
 
-@subheading Registering a Unwinder
+@subheading Registering an Unwinder
 
-An object file, a program space, and the @value{GDBN} proper can have
-unwinders registered with it.
+Object files and program spaces can have unwinders registered with
+them.  In addition, you can also register unwinders globally.
 
-The @code{gdb.unwinders} module provides the function to register a
+The @code{gdb.unwinders} module provides the function to register an
 unwinder:
 
 @defun gdb.unwinder.register_unwinder (locus, unwinder, replace=False)
-@var{locus} is specifies an object file or a program space to which
-@var{unwinder} is added.  Passing @code{None} or @code{gdb} adds
-@var{unwinder} to the @value{GDBN}'s global unwinder list.  The newly
-added @var{unwinder} will be called before any other unwinder from the
+@var{locus} specifies to which unwinder list to prepend the
+@var{unwinder}.  It can be either an object file, a program space, or
+@code{None}, in which case the unwinder is registered globally.  The
+newly added @var{unwinder} will be called before any other unwinder from the
 same locus.  Two unwinders in the same locus cannot have the same
-name.  An attempt to add a unwinder with already existing name raises
+name.  An attempt to add an unwinder with an already existing name raises
 an exception unless @var{replace} is @code{True}, in which case the
 old unwinder is deleted.
 @end defun
@@ -3174,7 +3187,7 @@ MyClass obj(5);
 
 @noindent
 then, after loading the Python script defining the xmethod matchers
-and workers into @code{GDBN}, invoking the method @code{geta} or using
+and workers into @value{GDBN}, invoking the method @code{geta} or using
 the operator @code{+} on @code{obj} will invoke the xmethods
 defined above:
 
@@ -6812,7 +6825,7 @@ bytes it has available, in this case @code{builtin_disassemble} will
 not itself raise a @code{MemoryError}.
 
 Any other exception type raised in @code{read_memory} will propagate
-back and be available re-raised by @code{builtin_disassemble}.
+back and be re-raised by @code{builtin_disassemble}.
 @end defun
 @end deftp
 

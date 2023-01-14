@@ -229,14 +229,15 @@ AC_DEFUN([GDB_AC_CHECK_BFD], [
   OLD_CFLAGS=$CFLAGS
   OLD_LDFLAGS=$LDFLAGS
   OLD_LIBS=$LIBS
+  OLD_CC=$CC
   # Put the old CFLAGS/LDFLAGS last, in case the user's (C|LD)FLAGS
   # points somewhere with bfd, with -I/foo/lib and -L/foo/lib.  We
   # always want our bfd.
   CFLAGS="-I${srcdir}/../include -I../bfd -I${srcdir}/../bfd $CFLAGS"
-  ZLIBDIR=`echo $zlibdir | sed 's,\$(top_builddir)/,,g'`
-  LDFLAGS="-L../bfd -L../libiberty $ZLIBDIR $LDFLAGS"
+  LDFLAGS="-L../bfd -L../libiberty"
   intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
-  LIBS="-lbfd -liberty -lz $ZSTD_LIBS $intl $LIBS"
+  LIBS="-lbfd -liberty $intl $LIBS"
+  CC="./libtool --quiet --mode=link $CC"
   AC_CACHE_CHECK(
     [$1],
     [$2],
@@ -252,6 +253,7 @@ AC_DEFUN([GDB_AC_CHECK_BFD], [
        [[$2]=no]
      )]
   )
+  CC=$OLD_CC
   CFLAGS=$OLD_CFLAGS
   LDFLAGS=$OLD_LDFLAGS
   LIBS=$OLD_LIBS])

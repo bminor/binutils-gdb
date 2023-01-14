@@ -1,5 +1,5 @@
 # Makefile fragment for common parts of all simulators.
-# Copyright 1997-2022 Free Software Foundation, Inc.
+# Copyright 1997-2023 Free Software Foundation, Inc.
 # Contributed by Cygnus Support.
 
 # This program is free software; you can redistribute it and/or modify
@@ -43,11 +43,13 @@ srcsim = $(srcdir)/..
 @SIM_COMMON_BUILD_FALSE@config.status = config.status
 @SIM_COMMON_BUILD_TRUE@config.status = ../config.status
 
+# Settings from top-level configure.
+include ../arch-subdir.mk
+
 include $(srcroot)/gdb/silent-rules.mk
 
 ifeq ($(V),0)
 ECHO_STAMP = @echo "  GEN   "
-ECHO_IGEN  = @echo "  IGEN   $(<F)";
 else
 ECHO_STAMP = @:
 endif
@@ -55,24 +57,6 @@ endif
 # Helper code from gnulib.
 GNULIB_PARENT_DIR = ../..
 include $(GNULIB_PARENT_DIR)/gnulib/Makefile.gnulib.inc
-
-# Settings from top-level configure.
-include ../arch-subdir.mk
-
-prefix = @prefix@
-exec_prefix = @exec_prefix@
-
-bindir = @bindir@
-
-libdir = @libdir@
-tooldir = $(libdir)/$(target_alias)
-
-datadir = @datadir@
-datarootdir = @datarootdir@
-mandir = @mandir@
-man1dir = $(mandir)/man1
-infodir = @infodir@
-includedir = @includedir@
 
 # This can be referenced by the gettext configuration code.
 top_builddir = ..
@@ -94,104 +78,23 @@ COMPILE.post = -c -o $@
 COMPILE = $(ECHO_CC) $(COMPILE.pre) $(ALL_CFLAGS) $(COMPILE.post)
 POSTCOMPILE = @true
 
-# igen leaks memory, and therefore makes AddressSanitizer unhappy.  Disable
-# leak detection while running it.
-IGEN = ../igen/igen$(EXEEXT)
-IGEN_RUN = ASAN_OPTIONS=detect_leaks=0 $(IGEN)
-
 # Each simulator's Makefile.in defines one or more of these variables
 # to override our settings as necessary.  There is no need to define these
 # in the simulator's Makefile.in if one is using the default value.  In fact
 # it's preferable not to.
 
-# List of object files, less common parts.
-SIM_OBJS =
-# List of extra dependencies.
-# Generally this consists of simulator specific files included by sim-main.h.
-SIM_EXTRA_DEPS =
 # List of flags to always pass to $(CC).
 SIM_EXTRA_CFLAGS =
-# List of extra libraries to link with.
-SIM_EXTRA_LIBS =
-# List of main object files for `run'.
-SIM_RUN_OBJS = nrun.o
-# Dependency of `install' to install any extra files.
-SIM_EXTRA_INSTALL =
 # Dependency of `clean' to clean any extra files.
 SIM_EXTRA_CLEAN =
-# Likewise `distclean'
-SIM_EXTRA_DISTCLEAN =
 
 # Every time a new general purpose source file was added every target's
-# Makefile.in needed to be updated to include the file in SIM_OBJS.
+# Makefile.in needed to be updated to include the file.
 # This doesn't scale.
 # This variable specifies all the generic stuff common to the newer simulators.
 # Things like sim-reason.o can't go here as the cpu may provide its own
 # (though hopefully in time that won't be so).  Things like sim-bits.o can go
 # here.  Some files are used by all simulators (e.g. callback.o).
-# Those files are specified in LIB_OBJS below.
-
-SIM_COMMON_HW_OBJS = \
-	hw-alloc.o \
-	hw-base.o \
-	hw-device.o \
-	hw-events.o \
-	hw-handles.o \
-	hw-instances.o \
-	hw-ports.o \
-	hw-properties.o \
-	hw-tree.o \
-	sim-hw.o \
-
-SIM_NEW_COMMON_OBJS = \
-	sim-arange.o \
-	sim-bits.o \
-	sim-close.o \
-	sim-command.o \
-	sim-config.o \
-	sim-core.o \
-	sim-cpu.o \
-	sim-endian.o \
-	sim-engine.o \
-	sim-events.o \
-	sim-fpu.o \
-	sim-hload.o \
-	sim-hrw.o \
-	sim-io.o \
-	sim-info.o \
-	sim-memopt.o \
-	sim-model.o \
-	sim-module.o \
-	sim-options.o \
-	sim-profile.o \
-	sim-reason.o \
-	sim-reg.o \
-	sim-signal.o \
-	sim-stop.o \
-	sim-syscall.o \
-	sim-trace.o \
-	sim-utils.o \
-	sim-watch.o \
-	\
-	$(SIM_HW_OBJS) \
-
-# cgen-sim.h and the headers it includes
-CGEN_SIM_DEPS = \
-	$(srccom)/cgen-sim.h \
-	$(srccom)/cgen-defs.h \
-	$(srccom)/cgen-scache.h \
-	$(srccom)/cgen-fpu.h \
-	$(srccom)/cgen-par.h \
-	$(srccom)/cgen-cpu.h \
-	$(srccom)/cgen-trace.h \
-	cpuall.h
-
-# Add this to SIM_EXTRA_DEPS.
-CGEN_INCLUDE_DEPS = \
-	$(CGEN_SIM_DEPS) \
-	$(srccom)/cgen-engine.h \
-	$(srccom)/cgen-types.h \
-	$(srcdir)/../../include/opcode/cgen.h
 
 ## End COMMON_PRE_CONFIG_FRAG
 
@@ -204,160 +107,30 @@ CONFIG_CFLAGS = \
 	$(SIM_HW_CFLAGS) \
 	$(SIM_INLINE) \
 	$(SIM_WARN_CFLAGS) \
-	$(SIM_WERROR_CFLAGS) \
-	$(SIM_HARDWARE)
-CSEARCH = -I. -I$(srcdir) -I../common -I$(srccom) \
-  -I../../include -I$(srcroot)/include \
-  -I../../bfd -I$(srcroot)/bfd \
-  -I../../opcodes -I$(srcroot)/opcodes \
-  -I../.. \
-  $(INTL_CFLAGS)
+	$(SIM_WERROR_CFLAGS)
+CSEARCH = -I. -I$(srcdir) -I$(srccom) \
+  -I$(srcroot)/include \
+  -I../../bfd \
+  -I$(srcroot) \
+  -I../..
 ALL_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH) $(INCGNU) $(SIM_EXTRA_CFLAGS) $(CFLAGS)
 BUILD_CFLAGS = $(CFLAGS_FOR_BUILD) $(CSEARCH)
 
 COMMON_DEP_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH) $(SIM_EXTRA_CFLAGS)
 
-SIM_HW_DEVICES = cfi core pal glue $(SIM_EXTRA_HW_DEVICES)
-
-ZLIB = $(zlibdir) -lz
 LIBIBERTY_LIB = ../../libiberty/libiberty.a
-BFD_LIB = ../../bfd/libbfd.a
-OPCODES_LIB = ../../opcodes/libopcodes.a
-CONFIG_LIBS = $(COMMON_LIBS) @LIBS@ $(ZLIB) $(ZSTD_LIBS)
-LIBDEPS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL_DEP) $(LIBIBERTY_LIB)
-EXTRA_LIBS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL) $(LIBIBERTY_LIB) \
-	$(CONFIG_LIBS) $(SIM_EXTRA_LIBS) $(LIBDL) $(LIBGNU) $(LIBGNU_EXTRA_LIBS)
-
-COMMON_OBJS_NAMES = \
-	callback.o \
-	portability.o \
-	sim-load.o \
-	syscall.o \
-	target-newlib-errno.o \
-	target-newlib-open.o \
-	target-newlib-signal.o \
-	target-newlib-syscall.o \
-	version.o
-COMMON_OBJS = $(COMMON_OBJS_NAMES:%=../common/common_libcommon_a-%)
-
-LIB_OBJS = modules.o $(COMMON_OBJS) $(SIM_OBJS)
+BFD_LIB = ../../bfd/libbfd.la
+OPCODES_LIB = ../../opcodes/libopcodes.la
+LIBDEPS = $(BFD_LIB) $(OPCODES_LIB) $(LIBIBERTY_LIB)
+EXTRA_LIBS = $(BFD_LIB) $(OPCODES_LIB) $(LIBIBERTY_LIB) \
+	$(COMMON_LIBS) $(LIBGNU) $(LIBGNU_EXTRA_LIBS)
 
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS) $(LDFLAGS_FOR_BUILD) -o $@
 
 RUNTESTFLAGS =
 
-callback_h = $(srcroot)/include/sim/callback.h
-remote_sim_h = $(srcroot)/include/sim/sim.h
-
-all: libsim.a run$(EXEEXT)
-
-libsim.a: $(LIB_OBJS)
-	$(SILENCE) rm -f libsim.a
-	$(ECHO_AR) $(AR) $(AR_FLAGS) libsim.a $(LIB_OBJS)
-	$(ECHO_RANLIB) $(RANLIB) libsim.a
-
-run$(EXEEXT): $(SIM_RUN_OBJS) libsim.a $(LIBDEPS)
-	$(ECHO_CCLD) $(CC) $(ALL_CFLAGS) $(LDFLAGS) -o run$(EXEEXT) \
-	  $(SIM_RUN_OBJS) libsim.a $(EXTRA_LIBS)
-
-#
-# Rules for building sim-* components.  Triggered by listing the corresponding
-# .o file in the list of simulator targets.
-#
-
-sim_main_headers = \
-	sim-main.h \
-	$(sim-assert_h) \
-	$(sim-base_h) \
-	$(sim-cpu_h) \
-	$(sim-engine_h) \
-	$(sim-events_h) \
-	$(sim-memopt_h) \
-	$(sim-model_h) \
-	$(sim-module_h) \
-	$(sim-profile_h) \
-	$(sim-trace_h) \
-	$(sim-watch_h) \
-	$(sim-basics_h) \
-	$(SIM_EXTRA_DEPS)
-
-# Exported version of sim_main_headers.
-SIM_MAIN_DEPS = \
-	$(sim_main_headers)
-
-sim-alu_h = $(srccom)/sim-alu.h
-sim-arange_h = $(srccom)/sim-arange.h
-sim-assert_h = $(srccom)/sim-assert.h
-sim-base_h = $(srccom)/sim-base.h \
-		$(sim-module_h) \
-		$(sim-trace_h) \
-		$(sim-core_h) \
-		$(sim-events_h) \
-		$(sim-profile_h) \
-		$(sim-model_h) \
-		$(sim-io_h) \
-		$(sim-engine_h) \
-		$(sim-watch_h) \
-		$(sim-memopt_h) \
-		$(sim-cpu_h)
-sim-basics_h = $(srccom)/sim-basics.h \
-		$(sim-config_h) \
-		$(callback_h) \
-		$(sim-inline_h) \
-		$(sim-types_h) \
-		$(sim-bits_h) \
-		$(sim-endian_h) \
-		$(sim-signal_h) \
-		$(sim-arange_h) \
-		$(sim-utils_h)
-sim-bits_h = $(srccom)/sim-bits.h \
-		$(srccom)/sim-bits.c
-sim-config_h = $(srccom)/sim-config.h
-sim-core_h = $(srccom)/sim-core.h
-sim-cpu_h = $(srccom)/sim-cpu.h
-sim-endian_h = $(srccom)/sim-endian.h \
-		$(srccom)/sim-endian.c
-sim-engine_h = $(srccom)/sim-engine.h
-sim-events_h = $(srccom)/sim-events.h
-sim-fpu_h = $(srccom)/sim-fpu.h
-sim-hw_h = $(srccom)/sim-hw.h
-sim-inline_h = $(srccom)/sim-inline.h
-sim-io_h = $(srccom)/sim-io.h
-sim-memopt_h = $(srccom)/sim-memopt.h
-sim-model_h = $(srccom)/sim-model.h
-sim-module_h = $(srccom)/sim-module.h
-sim-n-bits_h = $(srccom)/sim-n-bits.h
-sim-n-core_h = $(srccom)/sim-n-core.h
-sim-n-endian_h = $(srccom)/sim-n-endian.h
-sim-options_h = $(srccom)/sim-options.h
-sim-profile_h = $(srccom)/sim-profile.h
-sim-signal_h = $(srccom)/sim-signal.h
-sim-trace_h = $(srccom)/sim-trace.h
-sim-types_h = $(srccom)/sim-types.h
-sim-utils_h = $(srccom)/sim-utils.h
-sim-watch_h = $(srccom)/sim-watch.h
-
-hw-alloc_h = $(srccom)/hw-alloc.h
-hw-base_h = $(srccom)/hw-base.h
-hw-device_h = $(srccom)/hw-device.h
-hw-events_h = $(srccom)/hw-events.h
-hw-handles_h = $(srccom)/hw-handles.h
-hw-instances_h = $(srccom)/hw-instances.h
-hw-ports_h = $(srccom)/hw-ports.h
-hw-properties_h = $(srccom)/hw-properties.h
-hw-tree_h = $(srccom)/hw-tree.h
-
-hw_main_headers = \
-	$(srccom)/hw-main.h \
-	$(hw-alloc_h) \
-	$(hw-base_h) \
-	$(hw-device_h) \
-	$(hw-events_h) \
-	$(hw-instances_h) \
-	$(hw-handles_h) \
-	$(hw-ports_h) \
-	$(hw-properties_h) \
+all:
 
 #
 # Dependency tracking.  Most of this is conditional on GNU Make being
@@ -381,93 +154,11 @@ override COMPILE.pre = source='$<' object='$@' libtool=no \
 override POSTCOMPILE =
 endif
 
-all_object_files = $(LIB_OBJS) $(SIM_RUN_OBJS)
-generated_files = \
-	$(SIM_EXTRA_DEPS) \
-	hw-config.h \
-	modules.c
-
-# Ensure that generated files are created early.  Use order-only
-# dependencies if available.  They require GNU make 3.80 or newer,
-# and the .VARIABLES variable was introduced at the same time.
-ifdef .VARIABLES
-$(all_object_files): | $(generated_files)
-else
-$(all_object_files) : $(generated_files)
-endif
-
-# Dependencies.
--include $(patsubst %.o, $(DEPDIR)/%.Po, $(all_object_files))
-
-# FIXME This is one very simple-minded way of generating the file hw-config.h
-hw-config.h: stamp-hw ; @true
-stamp-hw: Makefile.in $(srccom)/Make-common.in $(config.status) Makefile
-	$(ECHO_STAMP) hw-config.h
-	$(SILENCE) ( \
-	sim_hw="$(SIM_HW_DEVICES)" ; \
-	echo "/* generated by Makefile */" ; \
-	printf "extern const struct hw_descriptor dv_%s_descriptor[];\n" $$sim_hw ; \
-	echo "const struct hw_descriptor * const hw_descriptors[] = {" ; \
-	printf "  dv_%s_descriptor,\n" $$sim_hw ; \
-	echo "  NULL," ; \
-	echo "};" \
-	) > tmp-hw.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-hw.h hw-config.h
-	$(SILENCE) touch $@
-
-test-hw-events: $(srccom)/hw-events.c libsim.a
-	$(CC) $(ALL_CFLAGS) -DMAIN -o test-hw-events$(EXEEXT) \
-		$(srccom)/hw-events.c libsim.a $(EXTRA_LIBS)
-
-# See sim_pre_argv_init and sim_module_install in sim-module.c for more details.
-modules.c: stamp-modules ; @true
-stamp-modules: Makefile $(SIM_OBJS:.o=.c)
-	$(ECHO_STAMP) modules.c
-	$(SILENCE) LANG=C ; export LANG ; \
-	LC_ALL=C ; export LC_ALL ; \
-	sed -n -e '/^sim_install_/{s/^\(sim_install_[a-z_0-9A-Z]*\).*/\1/;p}' $^ | sort >$@.l-tmp
-	@set -e; (\
-	echo '/* Do not modify this file.  */'; \
-	echo '/* It is created automatically by the Makefile.  */'; \
-	echo '#include "libiberty.h"'; \
-	echo '#include "sim-module.h"'; \
-	sed -e 's:\(.*\):extern MODULE_INIT_FN \1;:' $@.l-tmp; \
-	echo 'MODULE_INSTALL_FN * const sim_modules_detected[] = {'; \
-	sed -e 's:\(.*\):  \1,:' $@.l-tmp; \
-	echo '};'; \
-	echo 'const int sim_modules_detected_len = ARRAY_SIZE (sim_modules_detected);'; \
-	) >$@.tmp
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change $@.tmp modules.c
-	$(SILENCE) rm -f $@.l-tmp $@.tmp
-	$(SILENCE) touch $@
-
-# CGEN support.
-
-# For use in Makefile.in for cpu-specific files.
-CGEN_MAIN_CPU_DEPS = \
-	$(SIM_MAIN_DEPS) \
-	$(srccom)/cgen-ops.h \
-	$(srccom)/cgen-mem.h
-
 # Support targets.
 
-install: install-common $(SIM_EXTRA_INSTALL)
-
-install-common: installdirs
-	a=`basename "$$(pwd)"`; \
-	n=`echo run | sed '$(program_transform_name)'`; \
-	[ "$(SIM_PRIMARY_TARGET)" = "$$a" ] || n="$$n-$$a"; \
-	$(INSTALL_PROGRAM) run$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
-	n=`echo sim | sed '$(program_transform_name)'`; \
-	a=`basename "$$(pwd)"`; \
-	[ "$(SIM_PRIMARY_TARGET)" = "$$a" ] || n="$$n-$$a"; \
-	n="lib$$n.a"; \
-	$(INSTALL_DATA) libsim.a $(DESTDIR)$(libdir)/$$n ; \
-	( cd $(DESTDIR)$(libdir) ; $(RANLIB) $$n )
-
+install:
 installdirs:
-	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(bindir)
-	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(libdir)
+uninstall:
 
 check:
 
@@ -496,15 +187,10 @@ TAGS: force
 		*.[ch] ../common/*.[ch]
 
 mostlyclean clean: $(SIM_EXTRA_CLEAN)
-	rm -f *.[oa] *~ core \
-		run$(EXEEXT) libsim.a \
-		hw-config.h stamp-hw \
-		modules.c stamp-modules \
-		tmp-mloop.hin tmp-mloop.h tmp-mloop.cin tmp-mloop.c
+	rm -f *.[oa] *~ core
 
-distclean maintainer-clean realclean: clean $(SIM_EXTRA_DISTCLEAN)
-	rm -f TAGS
-	rm -f Makefile config.cache config.log config.status
+distclean maintainer-clean realclean: clean
+	rm -f TAGS Makefile
 
 .c.o:
 	$(COMPILE) $<
@@ -520,73 +206,5 @@ Makefile: Makefile.in $(srccom)/Make-common.in $(config.status)
 
 @SIM_COMMON_BUILD_FALSE@config.status: configure
 @SIM_COMMON_BUILD_FALSE@	$(ECHO_GEN) $(SHELL) ./config.status --recheck
-
-
-# CGEN support
-
-GUILE = `if [ -f ../../guile/libguile/guile ]; then echo ../../guile/libguile/guile; else echo guile ; fi`
-CGEN = "$(GUILE) -l $(CGENDIR)/guile.scm -s"
-CGENFLAGS = -v
-CGEN_CPU_DIR = $(CGENDIR)/cpu
-
-# Most ports use the files here instead of cgen/cpu.
-CPU_DIR = $(srcroot)/cpu
-
-CGEN_READ_SCM = $(CGENDIR)/sim.scm
-CGEN_ARCH_SCM = $(CGENDIR)/sim-arch.scm
-CGEN_CPU_SCM = $(CGENDIR)/sim-cpu.scm $(CGENDIR)/sim-model.scm
-CGEN_DECODE_SCM = $(CGENDIR)/sim-decode.scm
-CGEN_DESC_SCM = $(CGENDIR)/desc.scm $(CGENDIR)/desc-cpu.scm
-
-# Various choices for which cpu specific files to generate.
-# These are passed to cgen.sh in the "extrafiles" argument.
-CGEN_CPU_EXTR = /extr/
-CGEN_CPU_READ = /read/
-CGEN_CPU_WRITE = /write/
-CGEN_CPU_SEM = /sem/
-CGEN_CPU_SEMSW = /semsw/
-
-CGEN_FLAGS_TO_PASS = \
-	CGEN='$(CGEN)' \
-	CGENFLAGS="$(CGENFLAGS)"
-
-# We store the generated files in the source directory until we decide to
-# ship a Scheme interpreter with gdb/binutils.  Maybe we never will.
-
-cgen-arch: force
-	$(SHELL) $(srccom)/cgen.sh arch $(srcdir) \
-		$(CGEN) $(CGENDIR) "$(CGENFLAGS)" \
-		$(arch) "$(FLAGS)" ignored "$(isa)" $(mach) ignored \
-		$(archfile) ignored
-
-cgen-cpu: force
-	$(SHELL) $(srccom)/cgen.sh cpu $(srcdir) \
-		$(CGEN) $(CGENDIR) "$(CGENFLAGS)" \
-		$(arch) "$(FLAGS)" $(cpu) "$(isa)" $(mach) "$(SUFFIX)" \
-		$(archfile) "$(EXTRAFILES)"
-
-cgen-defs: force
-	$(SHELL) $(srccom)/cgen.sh defs $(srcdir) \
-		$(CGEN) $(CGENDIR) "$(CGENFLAGS)" \
-		$(arch) "$(FLAGS)" $(cpu) "$(isa)" $(mach) "$(SUFFIX)" \
-		$(archfile) ignored
-
-cgen-decode: force
-	$(SHELL) $(srccom)/cgen.sh decode $(srcdir) \
-		$(CGEN) $(CGENDIR) "$(CGENFLAGS)" \
-		$(arch) "$(FLAGS)" $(cpu) "$(isa)" $(mach) "$(SUFFIX)" \
-		$(archfile) "$(EXTRAFILES)"
-
-cgen-cpu-decode: force
-	$(SHELL) $(srccom)/cgen.sh cpu-decode $(srcdir) \
-		$(CGEN) $(CGENDIR) "$(CGENFLAGS)" \
-		$(arch) "$(FLAGS)" $(cpu) "$(isa)" $(mach) "$(SUFFIX)" \
-		$(archfile) "$(EXTRAFILES)"
-
-cgen-desc: force
-	$(SHELL) $(srccom)/cgen.sh desc $(srcdir) \
-		$(CGEN) $(CGENDIR) "$(CGENFLAGS)" \
-		$(arch) "$(FLAGS)" $(cpu) "$(isa)" $(mach) "$(SUFFIX)" \
-		$(archfile) ignored $(opcfile)
 
 ## End COMMON_POST_CONFIG_FRAG

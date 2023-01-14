@@ -1,5 +1,5 @@
 /* BFD support for the ARM processor
-   Copyright (C) 1994-2022 Free Software Foundation, Inc.
+   Copyright (C) 1994-2023 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -170,6 +170,7 @@ processors[] =
   { bfd_mach_arm_7,	  "cortex-r7"	    },
   { bfd_mach_arm_7,	  "cortex-r8"	    },
   { bfd_mach_arm_8,	  "cortex-x1"	    },
+  { bfd_mach_arm_8,	  "cortex-x1c"	    },
   { bfd_mach_arm_4T,	  "ep9312"	    },
   { bfd_mach_arm_8,	  "exynos-m1"	    },
   { bfd_mach_arm_4,	  "fa526"	    },
@@ -208,6 +209,15 @@ scan (const struct bfd_arch_info *info, const char *string)
   /* First test for an exact match.  */
   if (strcasecmp (string, info->printable_name) == 0)
     return true;
+
+  /* If there is a prefix of "arm:" then skip it.  */
+  const char * colon;
+  if ((colon = strchr (string, ':')) != NULL)
+    {
+      if (strncasecmp (string, "arm", colon - string) != 0)
+	return false;
+      string = colon + 1;
+    }
 
   /* Next check for a processor name instead of an Architecture name.  */
   for (i = sizeof (processors) / sizeof (processors[0]); i--;)

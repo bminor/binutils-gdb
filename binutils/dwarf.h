@@ -1,5 +1,5 @@
 /* dwarf.h - DWARF support header file
-   Copyright (C) 2005-2022 Free Software Foundation, Inc.
+   Copyright (C) 2005-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -144,7 +144,7 @@ struct dwarf_section
   enum dwarf_section_display_enum  abbrev_sec;
   /* Used by clients to help them implement the reloc_at callback.  */
   void *                           reloc_info;
-  unsigned long                    num_relocs;
+  uint64_t                         num_relocs;
 };
 
 /* A structure containing the name of a debug section
@@ -256,10 +256,10 @@ extern void dwarf_select_sections_all (void);
 
 extern unsigned int * find_cu_tu_set (void *, unsigned int);
 
-extern void * cmalloc (size_t, size_t);
-extern void * xcalloc2 (size_t, size_t);
-extern void * xcmalloc (size_t, size_t);
-extern void * xcrealloc (void *, size_t, size_t);
+extern void * cmalloc (uint64_t, size_t);
+extern void * xcalloc2 (uint64_t, size_t);
+extern void * xcmalloc (uint64_t, size_t);
+extern void * xcrealloc (void *, uint64_t, size_t);
 
 /* A callback into the client.  Returns TRUE if there is a
    relocation against the given debug section at the given

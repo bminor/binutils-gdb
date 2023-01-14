@@ -1,4 +1,4 @@
-#   Copyright (C) 1993-2022 Free Software Foundation, Inc.
+#   Copyright (C) 1993-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -44,9 +44,7 @@ if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o]} then {
 
     # This test does not work correctly on ECOFF targets, because ECOFF
     # stores most symbols twice, which messes up the nm output.
-    setup_xfail "alpha*-*-osf*"
-    setup_xfail "mips*-*-ultrix*" "mips*-*-ecoff*" "mips*-*-irix4*"
-    setup_xfail "mips*-*-riscos*" "mips*-*-sysv3*"
+    setup_xfail "alpha*-*-*ecoff" "alpha*-*-osf*"
 
     # This test does not work correctly on XCOFF targets, because XCOFF
     # does not enter static symbols in the symbol table.
@@ -104,9 +102,7 @@ if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o]} then {
 
     # This test does not work correctly on ECOFF targets, because ECOFF
     # stores most symbols twice, which messes up the nm output.
-    setup_xfail "alpha*-*-osf*"
-    setup_xfail "mips*-*-ultrix*" "mips*-*-ecoff*" "mips*-*-irix4*"
-    setup_xfail "mips*-*-riscos*" "mips*-*-sysv3*"
+    setup_xfail "alpha*-*-*ecoff" "alpha*-*-osf*"
 
     # This test does not work correctly on XCOFF targets, because XCOFF
     # does not enter static symbols in the symbol table.
@@ -180,12 +176,6 @@ if {![binutils_assemble $srcdir/$subdir/$nm_1_src tmpdir/nm-1.o]} then {
     } else {
 	set tempfile tmpdir/nm-1.o
     }
-
-    # This test does not work correctly on ECOFF targets, because ECOFF
-    # stores most symbols twice, which messes up the nm output.
-    setup_xfail "alpha*-*-osf*"
-    setup_xfail "mips*-*-ultrix*" "mips*-*-ecoff*" "mips*-*-irix4*"
-    setup_xfail "mips*-*-riscos*" "mips*-*-sysv3*"
 
     set got [binutils_run $NM "$NMFLAGS --size-sort $tempfile"]
 

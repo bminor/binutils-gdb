@@ -1,6 +1,6 @@
 /* Support for printing C values for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -476,7 +476,7 @@ c_value_print (struct value *val, struct ui_file *stream,
   LONGEST top;
   struct value_print_options opts = *options;
 
-  opts.deref_ref = 1;
+  opts.deref_ref = true;
 
   /* If it is a pointer, indicate what it points to.
 

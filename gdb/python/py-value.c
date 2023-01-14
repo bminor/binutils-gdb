@@ -1,6 +1,6 @@
 /* Python interface to values.
 
-   Copyright (C) 2008-2022 Free Software Foundation, Inc.
+   Copyright (C) 2008-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -675,7 +675,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
 
   struct value_print_options opts;
   gdbpy_get_print_options (&opts);
-  opts.deref_ref = 0;
+  opts.deref_ref = false;
 
   /* We need objects for booleans as the "p" flag for bools is new in
      Python 3.3.  */
@@ -1169,7 +1169,7 @@ valpy_str (PyObject *self)
   struct value_print_options opts;
 
   gdbpy_get_print_options (&opts);
-  opts.deref_ref = 0;
+  opts.deref_ref = false;
 
   string_file stb;
 

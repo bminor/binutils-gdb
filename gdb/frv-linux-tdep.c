@@ -1,7 +1,7 @@
 /* Target-dependent code for GNU/Linux running on the Fujitsu FR-V,
    for GDB.
 
-   Copyright (C) 2004-2022 Free Software Foundation, Inc.
+   Copyright (C) 2004-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -215,7 +215,7 @@ frv_linux_sigcontext_reg_addr (frame_info_ptr this_frame, int regno,
 	  sc_addr += 24;
 	}
       else
-	internal_error (__FILE__, __LINE__, _("not a signal trampoline"));
+	internal_error (_("not a signal trampoline"));
 
       if (sc_addr_cache_ptr)
 	*sc_addr_cache_ptr = sc_addr;

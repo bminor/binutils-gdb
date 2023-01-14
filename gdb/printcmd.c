@@ -1,6 +1,6 @@
 /* Print values for GNU debugger GDB.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1028,8 +1028,7 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
 	size = 'h';
       else
 	/* Bad value for gdbarch_ptr_bit.  */
-	internal_error (__FILE__, __LINE__,
-			_("failed internal consistency check"));
+	internal_error (_("failed internal consistency check"));
     }
 
   if (size == 'b')
@@ -1501,7 +1500,7 @@ set_command (const char *exp, int from_tty)
 {
   expression_up expr = parse_expression (exp);
 
-  switch (expr->op->opcode ())
+  switch (expr->first_opcode ())
     {
     case UNOP_PREINCREMENT:
     case UNOP_POSTINCREMENT:
@@ -2361,7 +2360,7 @@ clear_dangling_display_expressions (struct objfile *objfile)
 	}
 
       if (bl_objf == objfile
-	  || (d->exp != NULL && exp_uses_objfile (d->exp.get (), objfile)))
+	  || (d->exp != nullptr && d->exp->uses_objfile (objfile)))
 	{
 	  d->exp.reset ();
 	  d->block = NULL;
@@ -2401,7 +2400,7 @@ print_variable_and_value (const char *name, struct symbol *var,
 	 a block to it.  */
       val = read_var_value (var, NULL, frame);
       get_user_print_options (&opts);
-      opts.deref_ref = 1;
+      opts.deref_ref = true;
       common_val_print_checked (val, stream, indent, &opts, current_language);
 
       /* common_val_print invalidates FRAME when a pretty printer calls inferior
@@ -2872,8 +2871,7 @@ ui_printf (const char *arg, struct ui_file *stream)
 	    DIAGNOSTIC_POP
 	    break;
 	  default:
-	    internal_error (__FILE__, __LINE__,
-			    _("failed internal consistency check"));
+	    internal_error (_("failed internal consistency check"));
 	  }
 	/* Maybe advance to the next argument.  */
 	if (piece.argclass != literal_piece)

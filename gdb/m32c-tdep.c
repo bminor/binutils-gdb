@@ -1,6 +1,6 @@
 /* Renesas M32C target-dependent code for GDB, the GNU debugger.
 
-   Copyright (C) 2004-2022 Free Software Foundation, Inc.
+   Copyright (C) 2004-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "gdb/sim-m32c.h"
+#include "sim/sim-m32c.h"
 #include "gdbtypes.h"
 #include "regcache.h"
 #include "arch-utils.h"
@@ -2558,8 +2558,7 @@ m32c_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc,
   m32c_gdbarch_tdep *tdep = gdbarch_tdep<m32c_gdbarch_tdep> (gdbarch);
   
   if (!find_pc_partial_function (pc, &name, &func_addr, &func_end))
-    internal_error (__FILE__, __LINE__,
-		    _("No virtual frame pointer available"));
+    internal_error (_("No virtual frame pointer available"));
 
   m32c_analyze_prologue (gdbarch, func_addr, pc, &p);
   switch (p.kind)
@@ -2579,8 +2578,7 @@ m32c_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc,
     }
   /* Sanity check */
   if (*frame_regnum > gdbarch_num_regs (gdbarch))
-    internal_error (__FILE__, __LINE__,
-		    _("No virtual frame pointer available"));
+    internal_error (_("No virtual frame pointer available"));
 }
 
 
@@ -2589,7 +2587,6 @@ m32c_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc,
 static struct gdbarch *
 m32c_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   unsigned long mach = info.bfd_arch_info->mach;
 
   /* Find a candidate among the list of architectures we've created
@@ -2599,8 +2596,8 @@ m32c_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     return arches->gdbarch;
 
-  m32c_gdbarch_tdep *tdep = new m32c_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new m32c_gdbarch_tdep));
 
   /* Essential types.  */
   make_types (gdbarch);

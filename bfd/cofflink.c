@@ -1,5 +1,5 @@
 /* COFF specific linker code.
-   Copyright (C) 1994-2022 Free Software Foundation, Inc.
+   Copyright (C) 1994-2023 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1168,7 +1168,7 @@ _bfd_coff_final_link (bfd *abfd,
 static char *
 dores_com (char *ptr, bfd *output_bfd, int heap)
 {
-  if (coff_data(output_bfd)->pe)
+  if (obj_pe (output_bfd))
     {
       int val = strtoul (ptr, &ptr, 0);
 
@@ -1400,7 +1400,7 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *flaginfo, bfd *input_bfd)
   output_index = syment_base;
   outsym = flaginfo->outsyms;
 
-  if (coff_data (output_bfd)->pe
+  if (obj_pe (output_bfd)
       && ! process_embedded_commands (output_bfd, flaginfo->info, input_bfd))
     return false;
 
@@ -2961,8 +2961,10 @@ _bfd_coff_generic_relocate_section (bfd *output_bfd,
 	      sec = sections[symndx];
 
 	      /* PR 19623: Relocations against symbols in
-		 the absolute sections should ignored.  */
-	      if (bfd_is_abs_section (sec))
+		 the absolute sections should ignored.
+		 PR 29807: Also ignore relocs against file symbols or
+		 other such nonsense in fuzzed objects.  */
+	      if (sec == NULL || bfd_is_abs_section (sec))
 		continue;
 
 	      val = (sec->output_section->vma
@@ -3055,7 +3057,7 @@ _bfd_coff_generic_relocate_section (bfd *output_bfd,
 			   - input_section->vma
 			   + input_section->output_offset
 			   + input_section->output_section->vma);
-	      if (coff_data (output_bfd)->pe)
+	      if (obj_pe (output_bfd))
 		addr -= pe_data(output_bfd)->pe_opthdr.ImageBase;
 	      if (fwrite (&addr, 1, sizeof (bfd_vma), (FILE *) info->base_file)
 		  != sizeof (bfd_vma))

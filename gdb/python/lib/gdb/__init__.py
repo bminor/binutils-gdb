@@ -1,4 +1,4 @@
-# Copyright (C) 2010-2022 Free Software Foundation, Inc.
+# Copyright (C) 2010-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -235,9 +235,12 @@ def find_pc_line(pc):
 
 def set_parameter(name, value):
     """Set the GDB parameter NAME to VALUE."""
-    # Handle the specific case of booleans here, because gdb.parameter
-    # can return them, but they can't be passed to 'set' this way.
-    if isinstance(value, bool):
+    # Handle the specific cases of None and booleans here, because
+    # gdb.parameter can return them, but they can't be passed to 'set'
+    # this way.
+    if value is None:
+        value = "unlimited"
+    elif isinstance(value, bool):
         if value:
             value = "on"
         else:

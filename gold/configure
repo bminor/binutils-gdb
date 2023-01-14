@@ -633,9 +633,6 @@ HAVE_PUBNAMES_FALSE
 HAVE_PUBNAMES_TRUE
 JANSSON_LIBS
 JANSSON_CFLAGS
-PKG_CONFIG_LIBDIR
-PKG_CONFIG_PATH
-PKG_CONFIG
 THREADS_FALSE
 THREADS_TRUE
 PTHREAD_CFLAGS
@@ -643,6 +640,13 @@ PTHREAD_LIBS
 PTHREAD_CC
 ax_pthread_config
 SED
+HAVE_ZSTD_FALSE
+HAVE_ZSTD_TRUE
+ZSTD_LIBS
+ZSTD_CFLAGS
+PKG_CONFIG_LIBDIR
+PKG_CONFIG_PATH
+PKG_CONFIG
 zlibinc
 zlibdir
 LIBOBJS
@@ -855,6 +859,7 @@ enable_build_warnings
 with_gold_ldflags
 with_gold_ldadd
 with_system_zlib
+with_zstd
 enable_threads
 enable_jansson
 enable_maintainer_mode
@@ -876,6 +881,8 @@ YFLAGS
 PKG_CONFIG
 PKG_CONFIG_PATH
 PKG_CONFIG_LIBDIR
+ZSTD_CFLAGS
+ZSTD_LIBS
 JANSSON_CFLAGS
 JANSSON_LIBS
 CXXCPP'
@@ -1527,6 +1534,8 @@ Optional Packages:
   --with-gold-ldflags=FLAGS  additional link flags for gold
   --with-gold-ldadd=LIBS     additional libraries for gold
   --with-system-zlib      use installed libz
+  --with-zstd             support zstd compressed debug sections
+                          (default=auto)
 
 Some influential environment variables:
   CC          C compiler command
@@ -1550,6 +1559,8 @@ Some influential environment variables:
               directories to add to pkg-config's search path
   PKG_CONFIG_LIBDIR
               path overriding pkg-config's built-in search path
+  ZSTD_CFLAGS C compiler flags for ZSTD, overriding pkg-config
+  ZSTD_LIBS   linker flags for ZSTD, overriding pkg-config
   JANSSON_CFLAGS
               C compiler flags for JANSSON, overriding pkg-config
   JANSSON_LIBS
@@ -8217,7 +8228,7 @@ esac
 
 fi
 
-# Link in zlib if we can.  This allows us to write compressed sections.
+# Link in zlib/zstd if we can.  This allows us to write compressed sections.
 
   # Use the system's zlib library.
   zlibdir="-L\$(top_builddir)/../zlib"
@@ -8234,6 +8245,255 @@ fi
 
 
 
+
+
+
+
+
+
+
+
+if test "x$ac_cv_env_PKG_CONFIG_set" != "xset"; then
+	if test -n "$ac_tool_prefix"; then
+  # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
+set dummy ${ac_tool_prefix}pkg-config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_PKG_CONFIG+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $PKG_CONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PKG_CONFIG="$PKG_CONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_PKG_CONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+PKG_CONFIG=$ac_cv_path_PKG_CONFIG
+if test -n "$PKG_CONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PKG_CONFIG" >&5
+$as_echo "$PKG_CONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+fi
+if test -z "$ac_cv_path_PKG_CONFIG"; then
+  ac_pt_PKG_CONFIG=$PKG_CONFIG
+  # Extract the first word of "pkg-config", so it can be a program name with args.
+set dummy pkg-config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_ac_pt_PKG_CONFIG+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $ac_pt_PKG_CONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_ac_pt_PKG_CONFIG="$ac_pt_PKG_CONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_ac_pt_PKG_CONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+ac_pt_PKG_CONFIG=$ac_cv_path_ac_pt_PKG_CONFIG
+if test -n "$ac_pt_PKG_CONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_pt_PKG_CONFIG" >&5
+$as_echo "$ac_pt_PKG_CONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+  if test "x$ac_pt_PKG_CONFIG" = x; then
+    PKG_CONFIG=""
+  else
+    case $cross_compiling:$ac_tool_warned in
+yes:)
+{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: using cross tools not prefixed with host triplet" >&5
+$as_echo "$as_me: WARNING: using cross tools not prefixed with host triplet" >&2;}
+ac_tool_warned=yes ;;
+esac
+    PKG_CONFIG=$ac_pt_PKG_CONFIG
+  fi
+else
+  PKG_CONFIG="$ac_cv_path_PKG_CONFIG"
+fi
+
+fi
+if test -n "$PKG_CONFIG"; then
+	_pkg_min_version=0.9.0
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking pkg-config is at least version $_pkg_min_version" >&5
+$as_echo_n "checking pkg-config is at least version $_pkg_min_version... " >&6; }
+	if $PKG_CONFIG --atleast-pkgconfig-version $_pkg_min_version; then
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	else
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+		PKG_CONFIG=""
+	fi
+fi
+
+
+# Check whether --with-zstd was given.
+if test "${with_zstd+set}" = set; then :
+  withval=$with_zstd;
+else
+  with_zstd=auto
+fi
+
+
+if test "$with_zstd" != no; then :
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libzstd >= 1.4.0" >&5
+$as_echo_n "checking for libzstd >= 1.4.0... " >&6; }
+
+if test -n "$ZSTD_CFLAGS"; then
+    pkg_cv_ZSTD_CFLAGS="$ZSTD_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libzstd >= 1.4.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libzstd >= 1.4.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_ZSTD_CFLAGS=`$PKG_CONFIG --cflags "libzstd >= 1.4.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$ZSTD_LIBS"; then
+    pkg_cv_ZSTD_LIBS="$ZSTD_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libzstd >= 1.4.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libzstd >= 1.4.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_ZSTD_LIBS=`$PKG_CONFIG --libs "libzstd >= 1.4.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+if test $pkg_failed = no; then
+  pkg_save_LDFLAGS="$LDFLAGS"
+  LDFLAGS="$LDFLAGS $pkg_cv_ZSTD_LIBS"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+
+else
+  pkg_failed=yes
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$pkg_save_LDFLAGS
+fi
+
+
+
+if test $pkg_failed = yes; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        ZSTD_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libzstd >= 1.4.0" 2>&1`
+        else
+	        ZSTD_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libzstd >= 1.4.0" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$ZSTD_PKG_ERRORS" >&5
+
+
+    if test "$with_zstd" = yes; then
+      as_fn_error $? "--with-zstd was given, but pkgconfig/libzstd.pc is not found" "$LINENO" 5
+    fi
+
+elif test $pkg_failed = untried; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+    if test "$with_zstd" = yes; then
+      as_fn_error $? "--with-zstd was given, but pkgconfig/libzstd.pc is not found" "$LINENO" 5
+    fi
+
+else
+	ZSTD_CFLAGS=$pkg_cv_ZSTD_CFLAGS
+	ZSTD_LIBS=$pkg_cv_ZSTD_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+
+$as_echo "#define HAVE_ZSTD 1" >>confdefs.h
+
+
+fi
+
+fi
+
+ if test "$pkg_cv_ZSTD_LIBS" != ""; then
+  HAVE_ZSTD_TRUE=
+  HAVE_ZSTD_FALSE='#'
+else
+  HAVE_ZSTD_TRUE='#'
+  HAVE_ZSTD_FALSE=
+fi
 
 
 # Check whether --enable-threads was given.
@@ -10867,6 +11127,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${IFUNC_STATIC_TRUE}" && test -z "${IFUNC_STATIC_FALSE}"; then
   as_fn_error $? "conditional \"IFUNC_STATIC\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_ZSTD_TRUE}" && test -z "${HAVE_ZSTD_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_ZSTD\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${THREADS_TRUE}" && test -z "${THREADS_FALSE}"; then

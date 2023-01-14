@@ -1,4 +1,4 @@
-# Copyright 2012-2022 Free Software Foundation, Inc.
+# Copyright 2012-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -276,6 +276,19 @@ proc jit_reader_test {} {
 	gdb_test "python print(any(\[x.is_file for x in gdb.objfiles()\]))" \
 	    "True" \
 	    "at least one file-based objfile"
+    }
+
+    with_test_prefix "test dwarf unwinder" {
+	# Check that the DWARF unwinder does not crash in presence of
+	# JIT objfiles.
+	gdb_test "up"
+	gdb_breakpoint "*function_add" temporary
+	gdb_test "cont" ".*Temporary breakpoint ${any} in jit_function_add .*"
+	gdb_test "bt" \
+	    [multi_line \
+		 "#0 ${any} in jit_function_add ${any}" \
+		 "#1 ${any} in main ${any}" \
+		]
     }
 }
 

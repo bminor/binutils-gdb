@@ -1,5 +1,5 @@
 # Expect script for simple PE tests that require the just-built binutils only.
-#   Copyright (C) 2004-2022 Free Software Foundation, Inc.
+#   Copyright (C) 2004-2023 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -73,6 +73,19 @@ if {[istarget i*86-*-cygwin*]
 	{"TLS directory entry" "" "" "" "tlssec.s"
 	 {{objdump -p tlssec32.d}} "tlssec.dll"}
       }
+    }
+
+    run_ld_link_tests $pe_tests
+}
+
+if {[istarget "aarch64-*-pe*"] || [istarget "aarch64-*-mingw*"]} {
+    run_dump_test "pe-aarch64"
+
+    set pe_tests {
+      {"aarch64" "--image-base 0x1000" "" "" {aarch64a.s aarch64b.s}
+	{{objdump -dr aarch64.d}} "aarch64.x"}
+      {".secrel32" "--disable-reloc-section" "" "" {secrel1.s secrel2.s}
+	{{objdump -s secrel_64.d}} "secrel.x"}
     }
 
     run_ld_link_tests $pe_tests

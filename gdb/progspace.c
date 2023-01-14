@@ -1,6 +1,6 @@
 /* Program and address space management, for GDB, the GNU debugger.
 
-   Copyright (C) 2009-2022 Free Software Foundation, Inc.
+   Copyright (C) 2009-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -251,11 +251,18 @@ print_program_space (struct ui_out *uiout, int requested)
 {
   int count = 0;
 
+  /* Start with a minimum width of 17 for the executable name column.  */
+  size_t longest_exec_name = 17;
+
   /* Compute number of pspaces we will print.  */
   for (struct program_space *pspace : program_spaces)
     {
       if (requested != -1 && pspace->num != requested)
 	continue;
+
+      if (pspace->exec_filename != nullptr)
+	longest_exec_name = std::max (strlen (pspace->exec_filename.get ()),
+				      longest_exec_name);
 
       ++count;
     }
@@ -263,10 +270,11 @@ print_program_space (struct ui_out *uiout, int requested)
   /* There should always be at least one.  */
   gdb_assert (count > 0);
 
-  ui_out_emit_table table_emitter (uiout, 3, count, "pspaces");
+  ui_out_emit_table table_emitter (uiout, 4, count, "pspaces");
   uiout->table_header (1, ui_left, "current", "");
   uiout->table_header (4, ui_left, "id", "Id");
-  uiout->table_header (17, ui_left, "exec", "Executable");
+  uiout->table_header (longest_exec_name, ui_left, "exec", "Executable");
+  uiout->table_header (17, ui_left, "core", "Core File");
   uiout->table_body ();
 
   for (struct program_space *pspace : program_spaces)
@@ -290,6 +298,12 @@ print_program_space (struct ui_out *uiout, int requested)
 			     file_name_style.style ());
       else
 	uiout->field_skip ("exec");
+
+      if (pspace->cbfd != nullptr)
+	uiout->field_string ("core", bfd_get_filename (pspace->cbfd.get ()),
+			     file_name_style.style ());
+      else
+	uiout->field_skip ("core");
 
       /* Print extra info that doesn't really fit in tabular form.
 	 Currently, we print the list of inferiors bound to a pspace.

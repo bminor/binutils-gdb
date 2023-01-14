@@ -1,4 +1,4 @@
-# Copyright 2013-2022 Free Software Foundation, Inc.
+# Copyright 2013-2023 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ if { [skip_ada_tests] } { return -1 }
 standard_ada_testfile foo
 
 set have_xfail 0
-if { [is_aarch64_target] } then {
+if {[is_aarch64_target]} {
     if { [gcc_major_version] <= 8 } {
        set have_xfail 1
     }

@@ -1,5 +1,5 @@
 /* subsegs.c - subsegments -
-   Copyright (C) 1987-2022 Free Software Foundation, Inc.
+   Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -50,6 +50,8 @@ subsegs_end (struct obstack **obs)
   for (; *obs; obs++)
     _obstack_free (*obs, NULL);
   _obstack_free (&frchains, NULL);
+  bfd_set_section_userdata (bfd_abs_section_ptr, NULL);
+  bfd_set_section_userdata (bfd_und_section_ptr, NULL);
 }
 
 static void

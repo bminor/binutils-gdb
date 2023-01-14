@@ -1,6 +1,6 @@
 /* The IGEN simulator generator for GDB, the GNU Debugger.
 
-   Copyright 2002-2022 Free Software Foundation, Inc.
+   Copyright 2002-2023 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney.
 
@@ -50,7 +50,7 @@ static const name_map cache_type_map[] = {
 
 
 cache_entry *
-load_cache_table (char *file_name)
+load_cache_table (const char *file_name)
 {
   cache_entry *cache = NULL;
   cache_entry **last = &cache;

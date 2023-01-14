@@ -1,6 +1,6 @@
 // aarch64.cc -- aarch64 target support for gold.
 
-// Copyright (C) 2014-2022 Free Software Foundation, Inc.
+// Copyright (C) 2014-2023 Free Software Foundation, Inc.
 // Written by Jing Yu <jingyu@google.com> and Han Shen <shenhan@google.com>.
 
 // This file is part of gold.
@@ -1182,7 +1182,8 @@ class Reloc_stub : public Stub_base<size, big_endian>
   aarch64_valid_for_adrp_p(AArch64_address location, AArch64_address dest)
   {
     typedef AArch64_relocate_functions<size, big_endian> Reloc;
-    int64_t adrp_imm = (Reloc::Page(dest) - Reloc::Page(location)) >> 12;
+    int64_t adrp_imm = Reloc::Page (dest) - Reloc::Page (location);
+    adrp_imm = adrp_imm < 0 ? ~(~adrp_imm >> 12) : adrp_imm >> 12;
     return adrp_imm >= MIN_ADRP_IMM && adrp_imm <= MAX_ADRP_IMM;
   }
 

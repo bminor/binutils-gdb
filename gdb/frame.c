@@ -1,6 +1,6 @@
 /* Cache and manage frames for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,6 +19,7 @@
 
 #include "defs.h"
 #include "frame.h"
+#include "frame-info.h"
 #include "target.h"
 #include "value.h"
 #include "inferior.h"	/* for inferior_ptid */
@@ -55,9 +56,6 @@ static frame_info *sentinel_frame;
 
 /* Number of calls to reinit_frame_cache.  */
 static unsigned int frame_cache_generation = 0;
-
-/* See frame-info.h.  */
-intrusive_list<frame_info_ptr> frame_info_ptr::frame_list;
 
 /* See frame.h.  */
 
@@ -298,7 +296,7 @@ frame_stash_add (frame_info *frame)
    given frame ID.  If found, return that frame.  Otherwise return
    NULL.  */
 
-static frame_info_ptr 
+static frame_info_ptr
 frame_stash_find (struct frame_id id)
 {
   struct frame_info dummy;
@@ -505,7 +503,7 @@ frame_info::to_string () const
    Return FRAME if FRAME is a non-artificial frame.
    Return NULL if FRAME is the start of an artificial-only chain.  */
 
-static frame_info_ptr 
+static frame_info_ptr
 skip_artificial_frames (frame_info_ptr frame)
 {
   /* Note we use get_prev_frame_always, and not get_prev_frame.  The
@@ -526,7 +524,7 @@ skip_artificial_frames (frame_info_ptr frame)
   return frame;
 }
 
-frame_info_ptr 
+frame_info_ptr
 skip_unwritable_frames (frame_info_ptr frame)
 {
   while (gdbarch_code_of_frame_writable (get_frame_arch (frame), frame) == 0)
@@ -541,7 +539,7 @@ skip_unwritable_frames (frame_info_ptr frame)
 
 /* See frame.h.  */
 
-frame_info_ptr 
+frame_info_ptr
 skip_tailcall_frames (frame_info_ptr frame)
 {
   while (get_frame_type (frame) == TAILCALL_FRAME)
@@ -866,7 +864,7 @@ frame_id_inner (struct gdbarch *gdbarch, struct frame_id l, struct frame_id r)
   return inner;
 }
 
-frame_info_ptr 
+frame_info_ptr
 frame_find_by_id (struct frame_id id)
 {
   frame_info_ptr frame, prev_frame;
@@ -988,8 +986,7 @@ frame_unwind_pc (frame_info_ptr this_frame)
   else if (this_frame->prev_pc.status == CC_NOT_SAVED)
     throw_error (OPTIMIZED_OUT_ERROR, _("PC not saved"));
   else
-    internal_error (__FILE__, __LINE__,
-		    "unexpected prev_pc status: %d",
+    internal_error ("unexpected prev_pc status: %d",
 		    (int) this_frame->prev_pc.status);
 }
 
@@ -1169,7 +1166,12 @@ frame_register_unwind (frame_info_ptr next_frame, int regnum,
   release_value (value);
 }
 
-void
+/* Get the value of the register that belongs to this FRAME.  This
+   function is a wrapper to the call sequence ``frame_register_unwind
+   (get_next_frame (FRAME))''.  As per frame_register_unwind(), if
+   VALUEP is NULL, the registers value is not fetched/computed.  */
+
+static void
 frame_register (frame_info_ptr frame, int regnum,
 		int *optimizedp, int *unavailablep, enum lval_type *lvalp,
 		CORE_ADDR *addrp, int *realnump, gdb_byte *bufferp)
@@ -1609,7 +1611,7 @@ frame_obstack_zalloc (unsigned long size)
 
 static frame_info_ptr get_prev_frame_always_1 (frame_info_ptr this_frame);
 
-frame_info_ptr 
+frame_info_ptr
 get_current_frame (void)
 {
   frame_info_ptr current_frame;
@@ -1708,9 +1710,13 @@ restore_selected_frame (frame_id frame_id, int frame_level)
   selected_frame = nullptr;
 }
 
-/* See frame.h.  */
+/* Lookup the frame_info object for the selected frame FRAME_ID /
+   FRAME_LEVEL and cache the result.
 
-void
+   If FRAME_LEVEL > 0 and the originally selected frame isn't found,
+   warn and select the innermost (current) frame.  */
+
+static void
 lookup_selected_frame (struct frame_id a_frame_id, int frame_level)
 {
   frame_info_ptr frame = NULL;
@@ -1803,7 +1809,7 @@ has_stack_frames ()
 
 /* See frame.h.  */
 
-frame_info_ptr 
+frame_info_ptr
 get_selected_frame (const char *message)
 {
   if (selected_frame == NULL)
@@ -1822,7 +1828,7 @@ get_selected_frame (const char *message)
    the inferior does not have a frame; in that case it will return
    NULL instead of calling error().  */
 
-frame_info_ptr 
+frame_info_ptr
 deprecated_safe_get_selected_frame (void)
 {
   if (!has_stack_frames ())
@@ -1830,11 +1836,23 @@ deprecated_safe_get_selected_frame (void)
   return get_selected_frame (NULL);
 }
 
-/* Select frame FI (or NULL - to invalidate the selected frame).  */
+/* Invalidate the selected frame.  */
+
+static void
+invalidate_selected_frame ()
+{
+  selected_frame = nullptr;
+  selected_frame_level = -1;
+  selected_frame_id = null_frame_id;
+}
+
+/* See frame.h.  */
 
 void
 select_frame (frame_info_ptr fi)
 {
+  gdb_assert (fi != nullptr);
+
   selected_frame = fi;
   selected_frame_level = frame_relative_level (fi);
   if (selected_frame_level == 0)
@@ -1896,10 +1914,10 @@ select_frame (frame_info_ptr fi)
 	  struct compunit_symtab *cust = find_pc_compunit_symtab (pc);
 
 	  if (cust != NULL
-	      && compunit_language (cust) != current_language->la_language
-	      && compunit_language (cust) != language_unknown
+	      && cust->language () != current_language->la_language
+	      && cust->language () != language_unknown
 	      && language_mode == language_mode_auto)
-	    set_language (compunit_language (cust));
+	    set_language (cust->language ());
 	}
     }
 }
@@ -1907,7 +1925,7 @@ select_frame (frame_info_ptr fi)
 /* Create an arbitrary (i.e. address specified by user) or innermost frame.
    Always returns a non-NULL value.  */
 
-frame_info_ptr 
+frame_info_ptr
 create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 {
   frame_info *fi;
@@ -1946,7 +1964,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
    innermost frame).  Be careful to not fall off the bottom of the
    frame chain and onto the sentinel frame.  */
 
-frame_info_ptr 
+frame_info_ptr
 get_next_frame (frame_info_ptr this_frame)
 {
   if (this_frame->level > 0)
@@ -1959,7 +1977,7 @@ get_next_frame (frame_info_ptr this_frame)
    innermost (i.e. current) frame, return the sentinel frame.  Thus,
    unlike get_next_frame(), NULL will never be returned.  */
 
-frame_info_ptr 
+frame_info_ptr
 get_next_frame_sentinel_okay (frame_info_ptr this_frame)
 {
   gdb_assert (this_frame != NULL);
@@ -2006,7 +2024,7 @@ reinit_frame_cache (void)
     annotate_frames_invalid ();
 
   sentinel_frame = NULL;		/* Invalidate cache */
-  select_frame (NULL);
+  invalidate_selected_frame ();
   frame_stash_invalidate ();
 
   for (frame_info_ptr &iter : frame_info_ptr::frame_list)
@@ -2063,7 +2081,7 @@ frame_register_unwind_location (frame_info_ptr this_frame, int regnum,
    then the frame_id of the inline frame, calculated based off the frame_id
    of the previous frame, should also be a duplicate.  */
 
-static frame_info_ptr 
+static frame_info_ptr
 get_prev_frame_maybe_check_cycle (frame_info_ptr this_frame)
 {
   frame_info_ptr prev_frame = get_prev_frame_raw (this_frame);
@@ -2151,7 +2169,7 @@ get_prev_frame_maybe_check_cycle (frame_info_ptr this_frame)
    TRY_CATCH block.  Return the frame that called THIS_FRAME or NULL if
    there is no such frame.  This may throw an exception.  */
 
-static frame_info_ptr 
+static frame_info_ptr
 get_prev_frame_always_1 (frame_info_ptr this_frame)
 {
   FRAME_SCOPED_DEBUG_ENTER_EXIT;
@@ -2307,7 +2325,7 @@ get_prev_frame_always_1 (frame_info_ptr this_frame)
    Unlike get_prev_frame, this function always tries to unwind the
    frame.  */
 
-frame_info_ptr 
+frame_info_ptr
 get_prev_frame_always (frame_info_ptr this_frame)
 {
   frame_info_ptr prev_frame = NULL;
@@ -2347,7 +2365,7 @@ get_prev_frame_always (frame_info_ptr this_frame)
 /* Construct a new "struct frame_info" and link it previous to
    this_frame.  */
 
-static frame_info_ptr 
+static frame_info_ptr
 get_prev_frame_raw (frame_info_ptr this_frame)
 {
   frame_info *prev_frame;
@@ -2472,7 +2490,7 @@ inside_entry_func (frame_info_ptr this_frame)
    This function should not contain target-dependent tests, such as
    checking whether the program-counter is zero.  */
 
-frame_info_ptr 
+frame_info_ptr
 get_prev_frame (frame_info_ptr this_frame)
 {
   FRAME_SCOPED_DEBUG_ENTER_EXIT;
@@ -2965,7 +2983,7 @@ get_frame_language (frame_info_ptr frame)
       struct compunit_symtab *cust = find_pc_compunit_symtab (pc);
 
       if (cust != NULL)
-	return compunit_language (cust);
+	return cust->language ();
     }
 
   return language_unknown;
@@ -3008,8 +3026,7 @@ unwind_stop_reason_to_string (enum unwind_stop_reason reason)
 #undef SET
 
     default:
-      internal_error (__FILE__, __LINE__,
-		      "Invalid frame stop reason");
+      internal_error ("Invalid frame stop reason");
     }
 }
 
@@ -3041,8 +3058,7 @@ frame_stop_reason_symbol_string (enum unwind_stop_reason reason)
 #undef SET
 
     default:
-      internal_error (__FILE__, __LINE__,
-		      "Invalid frame stop reason");
+      internal_error ("Invalid frame stop reason");
     }
 }
 

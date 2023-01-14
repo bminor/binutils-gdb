@@ -1,5 +1,5 @@
 \input texinfo @c                               -*-Texinfo-*-
-@c  Copyright (C) 1991-2022 Free Software Foundation, Inc.
+@c  Copyright (C) 1991-2023 Free Software Foundation, Inc.
 @c UPDATE!!  On future updates--
 @c   (1)   check for new machine-dep cmdline options in
 @c         md_parse_option definitions in config/tc-*.c
@@ -100,7 +100,7 @@
 This file documents the GNU Assembler "@value{AS}".
 
 @c man begin COPYRIGHT
-Copyright @copyright{} 1991-2022 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2023 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -149,7 +149,7 @@ done.
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991-2022 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2023 Free Software Foundation, Inc.
 
       Permission is granted to copy, distribute and/or modify this document
       under the terms of the GNU Free Documentation License, Version 1.3
@@ -240,6 +240,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{--gdwarf-<N>}] [@b{--gdwarf-sections}]
  [@b{--gdwarf-cie-version}=@var{VERSION}]
  [@b{--generate-missing-build-notes=[no|yes]}]
+ [@b{--gsframe}]
  [@b{--hash-size}=@var{N}]
  [@b{--help}] [@b{--target-help}]
  [@b{-I} @var{dir}]
@@ -847,6 +848,11 @@ These options control whether the ELF assembler should generate GNU Build
 attribute notes if none are present in the input sources.
 The default can be controlled by the @option{--enable-generate-build-notes}
 configure option.
+
+@item --gsframe
+@itemx --gsframe
+Create @var{.sframe} section from CFI directives.
+
 @end ifset
 
 @item --hash-size @var{N}
@@ -4877,11 +4883,15 @@ Each expression is assembled into the next byte.
 @subsection @code{.cfi_sections @var{section_list}}
 @cindex @code{cfi_sections} directive
 @code{.cfi_sections} may be used to specify whether CFI directives
-should emit @code{.eh_frame} section and/or @code{.debug_frame} section.
-If @var{section_list} is @code{.eh_frame}, @code{.eh_frame} is emitted,
-if @var{section_list} is @code{.debug_frame}, @code{.debug_frame} is emitted.
-To emit both use @code{.eh_frame, .debug_frame}.  The default if this
-directive is not used is @code{.cfi_sections .eh_frame}.
+should emit @code{.eh_frame} section, @code{.debug_frame} section and/or
+@code{.sframe} section.  If @var{section_list} contains @code{.eh_frame},
+@code{.eh_frame} is emitted, if @var{section_list} contains
+@code{.debug_frame}, @code{.debug_frame} is emitted, and finally, if
+@var{section_list} contains @code{.sframe}, @code{.sframe} is emitted.
+To emit multiple sections, specify them together in a list.  For example, to
+emit both @code{.eh_frame} and @code{.debug_frame}, use
+@code{.eh_frame, .debug_frame}.  The default if this directive is not used
+is @code{.cfi_sections .eh_frame}.
 
 On targets that support compact unwinding tables these can be generated
 by specifying @code{.eh_frame_entry} instead of @code{.eh_frame}.

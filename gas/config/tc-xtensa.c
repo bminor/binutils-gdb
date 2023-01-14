@@ -1,5 +1,5 @@
 /* tc-xtensa.c -- Assemble Xtensa instructions.
-   Copyright (C) 2003-2022 Free Software Foundation, Inc.
+   Copyright (C) 2003-2023 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -27,21 +27,8 @@
 #include "xtensa-relax.h"
 #include "dwarf2dbg.h"
 #include "xtensa-istack.h"
-#include "xtensa-config.h"
+#include "xtensa-dynconfig.h"
 #include "elf/xtensa.h"
-
-/* Provide default values for new configuration settings.  */
-#ifndef XTHAL_ABI_WINDOWED
-#define XTHAL_ABI_WINDOWED 0
-#endif
-
-#ifndef XTHAL_ABI_CALL0
-#define XTHAL_ABI_CALL0 1
-#endif
-
-#ifndef XTENSA_MARCH_EARLIEST
-#define XTENSA_MARCH_EARLIEST 0
-#endif
 
 #ifndef uint32
 #define uint32 unsigned int
@@ -8616,6 +8603,7 @@ unrelaxed_frag_max_size (fragS *fragP)
     case rs_leb128:
     case rs_cfa:
     case rs_dwarf2dbg:
+    case rs_sframe:
       /* No further adjustments needed.  */
       break;
     case rs_machine_dependent:

@@ -1,6 +1,6 @@
 /* Work with executable files, for GDB. 
 
-   Copyright (C) 1988-2022 Free Software Foundation, Inc.
+   Copyright (C) 1988-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -123,8 +123,7 @@ set_exec_file_mismatch_command (const char *ignore,
 	  return;
 	}
       if (mode == exec_file_mismatch_off)
-	internal_error (__FILE__, __LINE__,
-			_("Unrecognized exec-file-mismatch setting: \"%s\""),
+	internal_error (_("Unrecognized exec-file-mismatch setting: \"%s\""),
 			exec_file_mismatch);
     }
 }

@@ -1,4 +1,4 @@
-# Copyright 2021-2022 Free Software Foundation, Inc.
+# Copyright 2021-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ gdb_exit
 # The main test.  This is called by the self-test framework once GDB
 # has been started on a copy of itself.
 proc test_python_helper {} {
-    global py_helper_script decimal hex gdb_prompt
+    global py_helper_script decimal hex gdb_prompt bkptno_numopt_re
     global inferior_spawn_id
 
     # Source the python helper script.  This script registers the
@@ -93,6 +93,12 @@ proc test_python_helper {} {
     # here.
     gdb_test_multiple "continue" "start inner gdb" {
 	-i "$inferior_spawn_id"
+	-re "received signal SIGSEGV.* in GC_.*$outer_prompt_re" {
+	    # Some versions of the GC used by Guile cause a SEGV
+	    # during stack probing.  Ignore this and carry on.
+	    send_gdb "continue\n"
+	    exp_continue
+	}
 	-re "\r\n$gdb_prompt $" {
 	    pass $gdb_test_name
 	}
@@ -190,7 +196,7 @@ proc test_python_helper {} {
     # Send a command to the inner GDB, this should result in the outer
     # GDB stopping at the value_print breakpoint again.
     send_inferior "ptype global_c\n"
-    gdb_test -prompt $outer_prompt_re "" "Breakpoint $decimal, c_print_type.*" "hit breakpoint in outer gdb again"
+    gdb_test -prompt $outer_prompt_re "" "Breakpoint $bkptno_numopt_re, c_print_type.*" "hit breakpoint in outer gdb again"
 
     set answer [multi_line \
 		    "$decimal = " \

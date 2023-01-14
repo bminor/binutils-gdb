@@ -133,7 +133,7 @@ build_tools="build-texinfo build-flex build-bison build-m4 build-fixincludes"
 
 # these libraries are used by various programs built for the host environment
 #f
-host_libs="intl libiberty opcodes bfd readline tcl tk itcl libgui zlib libbacktrace libcpp libcody libdecnumber gmp mpfr mpc isl libiconv libctf"
+host_libs="intl libiberty opcodes bfd readline tcl tk itcl libgui zlib libbacktrace libcpp libcody libdecnumber gmp mpfr mpc isl libiconv libctf libsframe"
 
 # these tools are built for the host environment
 # Note, the powerpc-eabi build depends on sim occurring before gdb in order to
@@ -246,6 +246,12 @@ AC_ARG_WITH(system-zlib,
 if test x$with_system_zlib = xyes ; then
   use_included_zlib=no
   noconfigdirs="$noconfigdirs zlib"
+fi
+
+# Don't compile the bundled readline/libreadline.a if --with-system-readline
+# is provided.
+if test x$with_system_readline = xyes ; then
+  noconfigdirs="$noconfigdirs readline"
 fi
 
 AC_ARG_WITH(zstd,
@@ -1572,7 +1578,22 @@ AC_SUBST(PGO_BUILD_LTO_CFLAGS)
 _LT_CHECK_OBJDIR
 
 # Check for GMP, MPFR and MPC
-gmplibs="-lmpc -lmpfr -lgmp"
+require_gmp=no
+require_mpc=no
+if test -d ${srcdir}/gcc ; then
+  require_gmp=yes
+  require_mpc=yes
+fi
+if test -d ${srcdir}/gdb ; then
+  if test "x$enable_gdb" != xno; then
+   require_gmp=yes
+  fi
+fi
+
+gmplibs="-lmpfr -lgmp"
+if test x"$require_mpc" = "xyes" ; then
+  gmplibs="-lmpc $gmplibs"
+fi
 gmpinc=
 have_gmp=no
 
@@ -1687,7 +1708,7 @@ if test "x$with_gmp$with_gmp_include$with_gmp_lib" = x && test -d ${srcdir}/gmp;
   have_gmp=yes
 fi
 
-if test -d ${srcdir}/gcc && test "x$have_gmp" = xno; then
+if test "x$require_gmp" = xyes && test "x$have_gmp" = xno; then
   have_gmp=yes
   saved_CFLAGS="$CFLAGS"
   CFLAGS="$CFLAGS $gmpinc"
@@ -1727,7 +1748,7 @@ if test -d ${srcdir}/gcc && test "x$have_gmp" = xno; then
   fi
 
   # Check for the MPC header version.
-  if test x"$have_gmp" = xyes ; then
+  if test "x$require_mpc" = xyes && test x"$have_gmp" = xyes ; then
     # Check for the recommended and required versions of MPC.
     AC_MSG_CHECKING([for the correct version of mpc.h])
     AC_TRY_COMPILE([#include <mpc.h>],[
@@ -1746,11 +1767,10 @@ if test -d ${srcdir}/gcc && test "x$have_gmp" = xno; then
   if test x"$have_gmp" = xyes; then
     saved_LIBS="$LIBS"
     LIBS="$LIBS $gmplibs"
-    AC_MSG_CHECKING([for the correct version of the gmp/mpfr/mpc libraries])
-    AC_TRY_LINK([#include <mpc.h>],[
+    AC_MSG_CHECKING([for the correct version of the gmp/mpfr libraries])
+    AC_TRY_LINK([#include <mpfr.h>],[
     mpfr_t n;
     mpfr_t x;
-    mpc_t c;
     int t;
     mpfr_init (n);
     mpfr_init (x);
@@ -1759,6 +1779,17 @@ if test -d ${srcdir}/gcc && test "x$have_gmp" = xno; then
     mpfr_subnormalize (x, t, MPFR_RNDN);
     mpfr_clear(n);
     mpfr_clear(x);
+    ], [AC_MSG_RESULT([yes])], [AC_MSG_RESULT([no]); have_gmp=no])
+    LIBS="$saved_LIBS"
+  fi
+
+  # Now check the MPC library
+  if test "x$require_mpc" = xyes && test x"$have_gmp" = xyes; then
+    saved_LIBS="$LIBS"
+    LIBS="$LIBS $gmplibs"
+    AC_MSG_CHECKING([for the correct version of the mpc libraries])
+    AC_TRY_LINK([#include <mpc.h>],[
+    mpc_t c;
     mpc_init2 (c, 53);
     mpc_set_ui_ui (c, 1, 1, MPC_RNDNN);
     mpc_cosh (c, c, MPC_RNDNN);
@@ -1774,7 +1805,8 @@ if test -d ${srcdir}/gcc && test "x$have_gmp" = xno; then
 # The library versions listed in the error message below should match
 # the HARD-minimums enforced above.
   if test x$have_gmp != xyes; then
-    AC_MSG_ERROR([Building GCC requires GMP 4.2+, MPFR 3.1.0+ and MPC 0.8.0+.
+    if test -d ${srcdir}/gcc ; then
+      AC_MSG_ERROR([Building GCC requires GMP 4.2+, MPFR 3.1.0+ and MPC 0.8.0+.
 Try the --with-gmp, --with-mpfr and/or --with-mpc options to specify
 their locations.  Source code for these libraries can be found at
 their respective hosting sites as well as at
@@ -1783,6 +1815,13 @@ http://gcc.gnu.org/install/prerequisites.html for additional info.  If
 you obtained GMP, MPFR and/or MPC from a vendor distribution package,
 make sure that you have installed both the libraries and the header
 files.  They may be located in separate packages.])
+    else
+      AC_MSG_ERROR([Building GDB requires GMP 4.2+, and MPFR 3.1.0+.
+Try the --with-gmp and/or --with-mpfr options to specify
+their locations.  If you obtained GMP and/or MPFR from a vendor
+distribution package, make sure that you have installed both the libraries
+and the header files.  They may be located in separate packages.])
+    fi
   fi
 fi
 

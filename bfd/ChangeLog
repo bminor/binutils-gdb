@@ -1,3 +1,71 @@
+2023-01-11  Nick Clifton  <nickc@redhat.com>
+
+	PR 29988
+	* dwarf2.c (read_indexed_address): Fix check for an out of range
+	offset.
+
+2023-01-06  Nick Clifton  <nickc@redhat.com>
+
+	* po/ru.po: Updated Russian translation.
+
+2023-01-03  Himal  <himalr@proton.me>
+
+	PR 29947
+	* bfdio.c (_bfd_real_fopen): Do not add a prefix to the Windows'
+	nul device filename.
+
+2023-01-03  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French trabslation.
+	* po/uk.po: Updated Ukrainian trabslation.
+
+2022-12-31  Nick Clifton  <nickc@redhat.com>
+
+	* 2.40 branch created.
+
+2022-12-23  Nick Clifton  <nickc@redhat.com>
+
+	PR 29936
+	* dwarf2.c (concat_filename): Fix check for a directory index off
+	the end of the directory table.
+
+2022-12-21  Nick Clifton  <nickc@redhat.com>
+
+	* po/ro.po: Updated Romanian translation.
+
+2022-12-06  Nick Clifton  <nickc@redhat.com>
+
+	PR 29852
+	* elf32-arm.c (cmse_scan): Check for NULL entries in the
+	sym_hashes array.
+	(elf32_arm_gc_mark_extra_sections): Likewise.
+
+2022-12-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 29848
+	* vms-alpha.c (parse_module): Fix potential out of bounds memory
+	access.
+
+2022-12-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 25202
+	* bfd.c (VerilogDataEndianness): New variable.
+	(verilog_write_record): Use VerilogDataEndianness, if set, to
+	choose the endianness of the output.
+	(verilog_write_section): Adjust the address by the data width.
+
+2022-11-21  Nick Clifton  <nickc@redhat.com>
+
+	PR 29764
+	* cpu-arm.c (scan): Accept machine names prefixed with "arm:".
+	* cpu-aarch64.c (scan): Accept machine names prefixed with "aarch64:".
+
+2022-10-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 29699
+	* elf.c (_bfd_elf_slurp_version_tables): Fail if the sh_info field
+	of the section header is zero.
+
 2022-09-09  Nick Clifton  <nickc@redhat.com>
 
 	PR 29532
@@ -2505,7 +2573,7 @@
 
 For older changes see ChangeLog-2020
 
-Copyright (C) 2021-2022 Free Software Foundation, Inc.
+Copyright (C) 2021-2023 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

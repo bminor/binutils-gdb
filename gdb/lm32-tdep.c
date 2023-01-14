@@ -1,7 +1,7 @@
 /* Target-dependent code for Lattice Mico32 processor, for GDB.
    Contributed by Jon Beniston <jon@beniston.com>
 
-   Copyright (C) 2009-2022 Free Software Foundation, Inc.
+   Copyright (C) 2009-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,7 +27,7 @@
 #include "symfile.h"
 #include "remote.h"
 #include "gdbcore.h"
-#include "gdb/sim-lm32.h"
+#include "sim/sim-lm32.h"
 #include "arch-utils.h"
 #include "regcache.h"
 #include "trad-frame.h"
@@ -479,16 +479,14 @@ lm32_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 static struct gdbarch *
 lm32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
-
   /* If there is already a candidate, use it.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
   if (arches != NULL)
     return arches->gdbarch;
 
   /* None found, create a new architecture from the information provided.  */
-  lm32_gdbarch_tdep *tdep = new lm32_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new lm32_gdbarch_tdep));
 
   /* Type sizes.  */
   set_gdbarch_short_bit (gdbarch, 16);

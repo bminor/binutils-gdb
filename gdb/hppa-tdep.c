@@ -1,6 +1,6 @@
 /* Target-dependent code for the HP PA-RISC architecture.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -2509,37 +2509,6 @@ hppa_unwind_pc (struct gdbarch *gdbarch, frame_info_ptr next_frame)
   return pc & ~0x3;
 }
 
-/* Return the minimal symbol whose name is NAME and stub type is STUB_TYPE.
-   Return NULL if no such symbol was found.  */
-
-struct bound_minimal_symbol
-hppa_lookup_stub_minimal_symbol (const char *name,
-				 enum unwind_stub_types stub_type)
-{
-  struct bound_minimal_symbol result;
-
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
-      for (minimal_symbol *msym : objfile->msymbols ())
-	{
-	  if (strcmp (msym->linkage_name (), name) == 0)
-	    {
-	      struct unwind_table_entry *u;
-
-	      u = find_unwind_entry (msym->value_longest ());
-	      if (u != NULL && u->stub_unwind.stub_type == stub_type)
-		{
-		  result.objfile = objfile;
-		  result.minsym = msym;
-		  return result;
-		}
-	    }
-	}
-    }
-
-  return result;
-}
-
 static void
 unwind_command (const char *exp, int from_tty)
 {
@@ -3013,16 +2982,15 @@ hppa_skip_trampoline_code (frame_info_ptr frame, CORE_ADDR pc)
 static struct gdbarch *
 hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
-
   /* find a candidate among the list of pre-declared architectures.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
   if (arches != NULL)
     return (arches->gdbarch);
 
   /* If none found, then allocate and initialize one.  */
-  hppa_gdbarch_tdep *tdep = new hppa_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new hppa_gdbarch_tdep));
+  hppa_gdbarch_tdep *tdep = gdbarch_tdep<hppa_gdbarch_tdep> (gdbarch);
 
   /* Determine from the bfd_arch_info structure if we are dealing with
      a 32 or 64 bits architecture.  If the bfd_arch_info is not available,
@@ -3059,7 +3027,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					   hppa64_cannot_fetch_register);
 	break;
       default:
-	internal_error (__FILE__, __LINE__, _("Unsupported address size: %d"),
+	internal_error (_("Unsupported address size: %d"),
 			tdep->bytes_per_address);
     }
 
@@ -3108,7 +3076,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_frame_align (gdbarch, hppa64_frame_align);
       break;
     default:
-      internal_error (__FILE__, __LINE__, _("bad switch"));
+      internal_error (_("bad switch"));
     }
       
   /* Struct return methods.  */
@@ -3121,7 +3089,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_return_value (gdbarch, hppa64_return_value);
       break;
     default:
-      internal_error (__FILE__, __LINE__, _("bad switch"));
+      internal_error (_("bad switch"));
     }
       
   set_gdbarch_breakpoint_kind_from_pc (gdbarch, hppa_breakpoint::kind_from_pc);

@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl
-dnl   Copyright (C) 2012-2022 Free Software Foundation, Inc.
+dnl   Copyright (C) 2012-2023 Free Software Foundation, Inc.
 dnl
 dnl This file is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -109,6 +109,21 @@ AC_DEFINE_UNQUOTED(DEFAULT_FOR_FOLLOW_LINKS, $default_for_follow_links,
 		   [Have readelf and objdump follow debug links by default])
 
 
+
+
+AC_ARG_ENABLE(colored-disassembly,
+[AS_HELP_STRING([--enable-colored-disassembly],
+	[Have objdump use colors in its disassembly by default])], [
+if test "${enableval}" = no; then
+  default_for_colored_disassembly=0
+else
+  default_for_colored_disassembly=1
+fi], [default_for_colored_disassembly=0])
+
+AC_DEFINE_UNQUOTED(DEFAULT_FOR_COLORED_DISASSEMBLY, $default_for_colored_disassembly,
+		   [Have objdump use colors in its disassembly by default])
+
+
 AC_DEBUGINFOD
 
 GCC_ENABLE([libctf], [yes], [], [Handle .ctf type-info sections])
@@ -183,7 +198,7 @@ AC_CHECK_HEADERS(fcntl.h inttypes.h stdint.h sys/file.h \
 		 sys/stat.h sys/time.h sys/types.h unistd.h)
 AC_HEADER_SYS_WAIT
 AC_FUNC_MMAP
-AC_CHECK_FUNCS(getc_unlocked mkdtemp mkstemp utimensat utimes)
+AC_CHECK_FUNCS(fseeko fseeko64 getc_unlocked mkdtemp mkstemp utimensat utimes)
 
 AC_MSG_CHECKING([for mbstate_t])
 AC_TRY_COMPILE([#include <wchar.h>],
@@ -340,6 +355,16 @@ do
 	esac
 
 	case $targ in
+	aarch64-*-mingw*)
+	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
+	  if test -z "$DLLTOOL_DEFAULT"; then
+	    DLLTOOL_DEFAULT="-DDLLTOOL_DEFAULT_AARCH64"
+	  fi
+	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_AARCH64"
+	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
+	  BUILD_WINDMC='$(WINDMC_PROG)$(EXEEXT)'
+	  BUILD_DLLWRAP='$(DLLWRAP_PROG)$(EXEEXT)'
+	  ;;
 	arm-wince-pe* | arm-*-wince | arm*-*-cegcc* | arm*-*-mingw32ce*)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
 	  if test -z "$DLLTOOL_DEFAULT"; then
@@ -415,15 +440,6 @@ changequote([,])dnl
 	  ;;
 	spu-*-*)
 	  BUILD_MISC="${BUILD_MISC} "'bin2c$(EXEEXT_FOR_BUILD)'
-	  ;;
-	mips*-*-pe)
-  	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
-	  if test -z "$DLLTOOL_DEFAULT"; then
-	    DLLTOOL_DEFAULT="-DDLLTOOL_DEFAULT_MIPS"
-	  fi
-	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_MIPS"
-	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
-	  BUILD_WINDMC='$(WINDMC_PROG)$(EXEEXT)'
 	  ;;
 	mcore-*-pe)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'

@@ -1,5 +1,5 @@
 \input texinfo
-@c  Copyright (C) 1991-2022 Free Software Foundation, Inc.
+@c  Copyright (C) 1991-2023 Free Software Foundation, Inc.
 @setfilename internals.info
 @node Top
 @top Assembler Internals
@@ -1557,7 +1557,7 @@ information.
 @item md_emit_single_noop_insn
 @itemx md_single_noop_insn
 These macro facilitate the @var{.nop} directive.  If defined the
-@var{md_emit_single_noop_insn) macro provides code to insert a single no-op
+@var{md_emit_single_noop_insn} macro provides code to insert a single no-op
 instruction into the output stream.  If this involves calling @var{md_assemble}
 with a fixed string then the alternative macro @var{md_single_noop_insn} can be
 defined, specifying the string to pass.  If neither of these macros are defined
@@ -1581,6 +1581,10 @@ If defined, GAS will check this macro before performing any optimizations on
 the DWARF call frame debug information that is emitted.  Targets which
 implement link time relaxation may need to define this macro and set it to zero
 if it is possible to change the size of a function's prologue.
+
+@item TARGET_MULTIPLE_EH_FRAME_SECTIONS
+If defined, GAS will create multiple .eh_frame.* sections according to
+the name of owner's function sections.
 @end table
 
 @node Object format backend
@@ -1890,7 +1894,6 @@ This section describes basic internal functions used by GAS.
 
 @menu
 * Warning and error messages::  Warning and error messages
-* Hash tables::                 Hash tables
 @end menu
 
 @node Warning and error messages

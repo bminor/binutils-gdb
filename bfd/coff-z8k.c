@@ -1,5 +1,5 @@
 /* BFD back-end for Zilog Z800n COFF binaries.
-   Copyright (C) 1992-2022 Free Software Foundation, Inc.
+   Copyright (C) 1992-2023 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    Written by Steve Chamberlain, <sac@cygnus.com>.
 
@@ -177,7 +177,7 @@ reloc_processing (arelent *relent,
   relent->address = reloc->r_vaddr;
   rtype2howto (relent, reloc);
 
-  if (reloc->r_symndx == -1)
+  if (reloc->r_symndx == -1 || symbols == NULL)
     relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
   else if (reloc->r_symndx >= 0 && reloc->r_symndx < obj_conv_table_size (abfd))
     relent->sym_ptr_ptr = symbols + obj_convert (abfd)[reloc->r_symndx];

@@ -1,6 +1,6 @@
 /* Target-dependent code for the Motorola 68000 series.
 
-   Copyright (C) 1990-2022 Free Software Foundation, Inc.
+   Copyright (C) 1990-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -312,8 +312,7 @@ m68k_extract_return_value (struct type *type, struct regcache *regcache,
       regcache->raw_read (M68K_D1_REGNUM, valbuf + (len - 4));
     }
   else
-    internal_error (__FILE__, __LINE__,
-		    _("Cannot extract return value of %d bytes long."), len);
+    internal_error (_("Cannot extract return value of %d bytes long."), len);
 }
 
 static void
@@ -359,8 +358,7 @@ m68k_store_return_value (struct type *type, struct regcache *regcache,
       regcache->raw_write (M68K_D1_REGNUM, valbuf + (len - 4));
     }
   else
-    internal_error (__FILE__, __LINE__,
-		    _("Cannot store return value of %d bytes long."), len);
+    internal_error (_("Cannot store return value of %d bytes long."), len);
 }
 
 static void
@@ -1060,8 +1058,7 @@ m68k_get_longjmp_target (frame_info_ptr frame, CORE_ADDR *pc)
 
   if (tdep->jb_pc < 0)
     {
-      internal_error (__FILE__, __LINE__,
-		      _("m68k_get_longjmp_target: not implemented"));
+      internal_error (_("m68k_get_longjmp_target: not implemented"));
       return 0;
     }
 
@@ -1134,7 +1131,6 @@ m68k_embedded_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 static struct gdbarch *
 m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   struct gdbarch_list *best_arch;
   tdesc_arch_data_up tdesc_data;
   int i;
@@ -1251,8 +1247,10 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (best_arch != NULL)
     return best_arch->gdbarch;
 
-  m68k_gdbarch_tdep *tdep = new m68k_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new m68k_gdbarch_tdep));
+  m68k_gdbarch_tdep *tdep = gdbarch_tdep<m68k_gdbarch_tdep> (gdbarch);
+
   tdep->fpregs_present = has_fp;
   tdep->float_return = float_return;
   tdep->flavour = flavour;

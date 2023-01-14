@@ -1,4 +1,4 @@
-# Copyright 2020-2022 Free Software Foundation, Inc.
+# Copyright 2020-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 standard_testfile
 
 # Set compiler flags.
-if {[istarget "powerpc*"]} then {
+if {[istarget "powerpc*"]} {
     # PowerPC generates a Traceback Table, as defined in the PPC64 ABI,
     # following each function by default.  The Traceback Table information is
     # typically interpreted by the disassembler as data represented with
@@ -73,7 +73,7 @@ if { $address == -1 } {
 
 clean_restart ${binfile}
 
-gdb_breakpoint "*$address" message
+gdb_assert [gdb_breakpoint "*$address" no-message] "set breakpoint on address"
 
 # The assert did not reproduce when running to main, and continuing to the
 # breakpoint, so instead, run to the breakpoint.

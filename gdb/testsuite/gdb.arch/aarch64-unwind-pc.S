@@ -1,4 +1,4 @@
-/* Copyright 2022 Free Software Foundation, Inc.
+/* Copyright 2022-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -46,3 +46,4 @@ test_func:
         mov     x30, 0x1234
         ret     x0
         .cfi_endproc
+	.section	.note.GNU-stack,"",@progbits

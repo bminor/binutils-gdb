@@ -1,5 +1,5 @@
 /* CRIS base simulator support code
-   Copyright (C) 2004-2022 Free Software Foundation, Inc.
+   Copyright (C) 2004-2023 Free Software Foundation, Inc.
    Contributed by Axis Communications.
 
 This file is part of the GNU simulators.
@@ -78,8 +78,8 @@ MY (f_break_handler) (SIM_CPU *cpu, USI breaknum, USI pc)
    Note the contents of BUF are in target byte order.  */
 
 int
-MY (f_fetch_register) (SIM_CPU *current_cpu, int rn,
-		      unsigned char *buf, int len ATTRIBUTE_UNUSED)
+MY (f_fetch_register) (SIM_CPU *current_cpu, int rn, void *buf,
+		      int len ATTRIBUTE_UNUSED)
 {
   SETTSI (buf, XCONCAT3(crisv,BASENUM,f_h_gr_get) (current_cpu, rn));
   return -1;
@@ -89,8 +89,8 @@ MY (f_fetch_register) (SIM_CPU *current_cpu, int rn,
    Note the contents of BUF are in target byte order.  */
 
 int
-MY (f_store_register) (SIM_CPU *current_cpu, int rn,
-		      unsigned char *buf, int len ATTRIBUTE_UNUSED)
+MY (f_store_register) (SIM_CPU *current_cpu, int rn, const void *buf,
+		      int len ATTRIBUTE_UNUSED)
 {
   XCONCAT3(crisv,BASENUM,f_h_gr_set) (current_cpu, rn, GETTSI (buf));
   return -1;
@@ -251,14 +251,13 @@ MY (set_target_thread_data) (SIM_CPU *current_cpu, USI val)
 static void *
 MY (make_thread_cpu_data) (SIM_CPU *current_cpu, void *context)
 {
-  void *info = xmalloc (current_cpu->thread_cpu_data_size);
+  struct cris_sim_cpu *cris_cpu = CRIS_SIM_CPU (current_cpu);
+  void *info = xmalloc (cris_cpu->thread_cpu_data_size);
 
   if (context != NULL)
-    memcpy (info,
-	    context,
-	    current_cpu->thread_cpu_data_size);
+    memcpy (info, context, cris_cpu->thread_cpu_data_size);
   else
-    memset (info, 0, current_cpu->thread_cpu_data_size),abort();
+    memset (info, 0, cris_cpu->thread_cpu_data_size),abort();
   return info;
 }
 
@@ -267,11 +266,13 @@ MY (make_thread_cpu_data) (SIM_CPU *current_cpu, void *context)
 void
 MY (f_specific_init) (SIM_CPU *current_cpu)
 {
-  current_cpu->make_thread_cpu_data = MY (make_thread_cpu_data);
-  current_cpu->thread_cpu_data_size = sizeof (current_cpu->cpu_data);
-  current_cpu->set_target_thread_data = MY (set_target_thread_data);
+  struct cris_sim_cpu *cris_cpu = CRIS_SIM_CPU (current_cpu);
+
+  cris_cpu->make_thread_cpu_data = MY (make_thread_cpu_data);
+  cris_cpu->thread_cpu_data_size = sizeof (cris_cpu->cpu_data);
+  cris_cpu->set_target_thread_data = MY (set_target_thread_data);
 #if WITH_HW
-  current_cpu->deliver_interrupt = MY (deliver_interrupt);
+  cris_cpu->deliver_interrupt = MY (deliver_interrupt);
 #endif
 }
 

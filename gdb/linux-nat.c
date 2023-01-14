@@ -1,6 +1,6 @@
 /* GNU/Linux native-dependent code common to multiple platforms.
 
-   Copyright (C) 2001-2022 Free Software Foundation, Inc.
+   Copyright (C) 2001-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -372,6 +372,7 @@ linux_init_ptrace_procfs (pid_t pid, int attached)
   linux_enable_event_reporting (pid, options);
   linux_ptrace_init_warnings ();
   linux_proc_init_warnings ();
+  proc_mem_file_is_writable ();
 }
 
 linux_nat_target::~linux_nat_target ()
@@ -1116,8 +1117,7 @@ linux_nat_target::attach (const char *args, int from_tty)
 		 gdb_signal_to_string (signo));
 	}
 
-      internal_error (__FILE__, __LINE__,
-		      _("unexpected status %d for PID %ld"),
+      internal_error (_("unexpected status %d for PID %ld"),
 		      status, (long) ptid.lwp ());
     }
 
@@ -1844,11 +1844,9 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 	  if (ret == -1)
 	    perror_with_name (_("waiting for new child"));
 	  else if (ret != new_pid)
-	    internal_error (__FILE__, __LINE__,
-			    _("wait returned unexpected PID %d"), ret);
+	    internal_error (_("wait returned unexpected PID %d"), ret);
 	  else if (!WIFSTOPPED (status))
-	    internal_error (__FILE__, __LINE__,
-			    _("wait returned unexpected status 0x%x"), status);
+	    internal_error (_("wait returned unexpected status 0x%x"), status);
 	}
 
       ptid_t child_ptid (new_pid, new_pid);
@@ -1915,7 +1913,6 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 	    {
 	      /* The process is not using thread_db.  Add the LWP to
 		 GDB's list.  */
-	      target_post_attach (new_lp->ptid.lwp ());
 	      add_thread (linux_target, new_lp->ptid);
 	    }
 
@@ -1989,8 +1986,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 	return 0;
     }
 
-  internal_error (__FILE__, __LINE__,
-		  _("unknown ptrace event %d"), event);
+  internal_error (_("unknown ptrace event %d"), event);
 }
 
 /* Suspend waiting for a signal.  We're mostly interested in
@@ -3611,28 +3607,21 @@ siginfo_fixup (siginfo_t *siginfo, gdb_byte *inf_siginfo, int direction)
 }
 
 static enum target_xfer_status
-linux_xfer_siginfo (enum target_object object,
+linux_xfer_siginfo (ptid_t ptid, enum target_object object,
 		    const char *annex, gdb_byte *readbuf,
 		    const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
 		    ULONGEST *xfered_len)
 {
-  int pid;
   siginfo_t siginfo;
   gdb_byte inf_siginfo[sizeof (siginfo_t)];
 
   gdb_assert (object == TARGET_OBJECT_SIGNAL_INFO);
   gdb_assert (readbuf || writebuf);
 
-  pid = inferior_ptid.lwp ();
-  if (pid == 0)
-    pid = inferior_ptid.pid ();
-
   if (offset > sizeof (siginfo))
     return TARGET_XFER_E_IO;
 
-  errno = 0;
-  ptrace (PTRACE_GETSIGINFO, pid, (PTRACE_TYPE_ARG3) 0, &siginfo);
-  if (errno != 0)
+  if (!linux_nat_get_siginfo (ptid, &siginfo))
     return TARGET_XFER_E_IO;
 
   /* When GDB is built as a 64-bit application, ptrace writes into
@@ -3655,6 +3644,7 @@ linux_xfer_siginfo (enum target_object object,
       /* Convert back to ptrace layout before flushing it out.  */
       siginfo_fixup (&siginfo, inf_siginfo, 1);
 
+      int pid = get_ptrace_pid (ptid);
       errno = 0;
       ptrace (PTRACE_SETSIGINFO, pid, (PTRACE_TYPE_ARG3) 0, &siginfo);
       if (errno != 0)
@@ -3672,8 +3662,9 @@ linux_nat_xfer_osdata (enum target_object object,
 		       ULONGEST *xfered_len);
 
 static enum target_xfer_status
-linux_proc_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
-				ULONGEST offset, LONGEST len, ULONGEST *xfered_len);
+linux_proc_xfer_memory_partial (int pid, gdb_byte *readbuf,
+				const gdb_byte *writebuf, ULONGEST offset,
+				LONGEST len, ULONGEST *xfered_len);
 
 enum target_xfer_status
 linux_nat_target::xfer_partial (enum target_object object,
@@ -3682,7 +3673,7 @@ linux_nat_target::xfer_partial (enum target_object object,
 				ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
   if (object == TARGET_OBJECT_SIGNAL_INFO)
-    return linux_xfer_siginfo (object, annex, readbuf, writebuf,
+    return linux_xfer_siginfo (inferior_ptid, object, annex, readbuf, writebuf,
 			       offset, len, xfered_len);
 
   /* The target is connected but no live inferior is selected.  Pass
@@ -3718,8 +3709,9 @@ linux_nat_target::xfer_partial (enum target_object object,
 	 space, while the core was trying to write to the pre-exec
 	 address space.  */
       if (proc_mem_file_is_writable ())
-	return linux_proc_xfer_memory_partial (readbuf, writebuf,
-					       offset, len, xfered_len);
+	return linux_proc_xfer_memory_partial (inferior_ptid.pid (), readbuf,
+					       writebuf, offset, len,
+					       xfered_len);
     }
 
   return inf_ptrace_target::xfer_partial (object, annex, readbuf, writebuf,
@@ -3946,12 +3938,10 @@ linux_proc_xfer_memory_partial_fd (int fd, int pid,
    threads.  */
 
 static enum target_xfer_status
-linux_proc_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
-				ULONGEST offset, LONGEST len,
-				ULONGEST *xfered_len)
+linux_proc_xfer_memory_partial (int pid, gdb_byte *readbuf,
+				const gdb_byte *writebuf, ULONGEST offset,
+				LONGEST len, ULONGEST *xfered_len)
 {
-  int pid = inferior_ptid.pid ();
-
   auto iter = proc_mem_file_map.find (pid);
   if (iter == proc_mem_file_map.end ())
     return TARGET_XFER_EOF;
@@ -3966,7 +3956,11 @@ linux_proc_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
    return true if so.  It wasn't writable before Linux 2.6.39, but
    there's no way to know whether the feature was backported to older
    kernels.  So we check to see if it works.  The result is cached,
-   and this is garanteed to be called once early at startup.  */
+   and this is garanteed to be called once early during inferior
+   startup, so that any warning is printed out consistently between
+   GDB invocations.  Note we don't call it during GDB startup instead
+   though, because then we might warn with e.g. just "gdb --version"
+   on sandboxed systems.  See PR gdb/29907.  */
 
 static bool
 proc_mem_file_is_writable ()
@@ -4231,7 +4225,7 @@ linux_nat_target::async (bool enable)
   if (enable)
     {
       if (!async_file_open ())
-	internal_error (__FILE__, __LINE__, "creating event pipe failed.");
+	internal_error ("creating event pipe failed.");
 
       add_file_handler (async_wait_fd (), handle_target_event, NULL,
 			"linux-nat");
@@ -4448,23 +4442,11 @@ linux_nat_target::linux_nat_target ()
 
 /* See linux-nat.h.  */
 
-int
+bool
 linux_nat_get_siginfo (ptid_t ptid, siginfo_t *siginfo)
 {
-  int pid;
-
-  pid = ptid.lwp ();
-  if (pid == 0)
-    pid = ptid.pid ();
-
-  errno = 0;
-  ptrace (PTRACE_GETSIGINFO, pid, (PTRACE_TYPE_ARG3) 0, siginfo);
-  if (errno != 0)
-    {
-      memset (siginfo, 0, sizeof (*siginfo));
-      return 0;
-    }
-  return 1;
+  int pid = get_ptrace_pid (ptid);
+  return ptrace (PTRACE_GETSIGINFO, pid, (PTRACE_TYPE_ARG3) 0, siginfo) == 0;
 }
 
 /* See nat/linux-nat.h.  */
@@ -4513,8 +4495,6 @@ Enables printf debugging output."),
   sigemptyset (&blocked_mask);
 
   lwp_lwpid_htab_create ();
-
-  proc_mem_file_is_writable ();
 }
 
 

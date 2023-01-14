@@ -1,7 +1,7 @@
 /* Functions that provide the mechanism to parse a syscall XML file
    and get its values.
 
-   Copyright (C) 2009-2022 Free Software Foundation, Inc.
+   Copyright (C) 2009-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -254,8 +254,7 @@ syscall_start_syscall (struct gdb_xml_parser *parser,
       else if (strcmp (attr.name, "groups") == 0)
 	groups = (char *) attr.value.get ();
       else
-	internal_error (__FILE__, __LINE__,
-			_("Unknown attribute name '%s'."), attr.name);
+	internal_error (_("Unknown attribute name '%s'."), attr.name);
     }
 
   gdb_assert (name);

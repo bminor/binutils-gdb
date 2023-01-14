@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux i386.
 
-   Copyright (C) 1999-2022 Free Software Foundation, Inc.
+   Copyright (C) 1999-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -527,8 +527,7 @@ i386_linux_nat_target::fetch_registers (struct regcache *regcache, int regno)
       return;
     }
 
-  internal_error (__FILE__, __LINE__,
-		  _("Got request for bad register number %d."), regno);
+  internal_error (_("Got request for bad register number %d."), regno);
 }
 
 /* Store register REGNO back into the child process.  If REGNO is -1,
@@ -592,8 +591,7 @@ i386_linux_nat_target::store_registers (struct regcache *regcache, int regno)
       return;
     }
 
-  internal_error (__FILE__, __LINE__,
-		  _("Got request to store bad register number %d."), regno);
+  internal_error (_("Got request to store bad register number %d."), regno);
 }
 
 

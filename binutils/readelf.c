@@ -1,5 +1,5 @@
 /* readelf.c -- display contents of an ELF format file
-   Copyright (C) 1998-2022 Free Software Foundation, Inc.
+   Copyright (C) 1998-2023 Free Software Foundation, Inc.
 
    Originally developed by Eric Youngdale <eric@andante.jic.com>
    Modifications by Nick Clifton <nickc@redhat.com>
@@ -44,6 +44,9 @@
 #include <assert.h>
 #include <time.h>
 #include <zlib.h>
+#ifdef HAVE_ZSTD
+#include <zstd.h>
+#endif
 #include <wchar.h>
 
 #if defined HAVE_MSGPACK
@@ -60,6 +63,7 @@
 #include "demanguse.h"
 #include "dwarf.h"
 #include "ctf-api.h"
+#include "sframe-api.h"
 #include "demangle.h"
 
 #include "elf/common.h"
@@ -187,6 +191,7 @@ typedef struct elf_section_list
 #define STRING_DUMP     (1 << 3)	/* The -p command line switch.  */
 #define RELOC_DUMP      (1 << 4)	/* The -R command line switch.  */
 #define CTF_DUMP	(1 << 5)	/* The --ctf command line switch.  */
+#define SFRAME_DUMP	(1 << 6)	/* The --sframe command line switch.  */
 
 typedef unsigned char dump_type;
 
@@ -230,6 +235,7 @@ static bool do_version = false;
 static bool do_histogram = false;
 static bool do_debugging = false;
 static bool do_ctf = false;
+static bool do_sframe = false;
 static bool do_arch = false;
 static bool do_notes = false;
 static bool do_archive_index = false;
@@ -266,27 +272,27 @@ typedef struct filedata
   FILE *               handle;
   uint64_t             file_size;
   Elf_Internal_Ehdr    file_header;
-  unsigned long        archive_file_offset;
-  unsigned long        archive_file_size;
+  uint64_t             archive_file_offset;
+  uint64_t             archive_file_size;
   /* Everything below this point is cleared out by free_filedata.  */
   Elf_Internal_Shdr *  section_headers;
   Elf_Internal_Phdr *  program_headers;
   char *               string_table;
-  unsigned long        string_table_length;
-  unsigned long        dynamic_addr;
+  uint64_t             string_table_length;
+  uint64_t             dynamic_addr;
   uint64_t             dynamic_size;
-  size_t               dynamic_nent;
+  uint64_t             dynamic_nent;
   Elf_Internal_Dyn *   dynamic_section;
   Elf_Internal_Shdr *  dynamic_strtab_section;
   char *               dynamic_strings;
-  unsigned long        dynamic_strings_length;
+  uint64_t             dynamic_strings_length;
   Elf_Internal_Shdr *  dynamic_symtab_section;
-  unsigned long        num_dynamic_syms;
+  uint64_t             num_dynamic_syms;
   Elf_Internal_Sym *   dynamic_symbols;
-  uint64_t              version_info[16];
+  uint64_t             version_info[16];
   unsigned int         dynamic_syminfo_nent;
   Elf_Internal_Syminfo * dynamic_syminfo;
-  unsigned long        dynamic_syminfo_offset;
+  uint64_t             dynamic_syminfo_offset;
   uint64_t             nbuckets;
   uint64_t             nchains;
   uint64_t *           buckets;
@@ -359,8 +365,38 @@ enum versioned_symbol_info
   symbol_public
 };
 
+static int
+fseek64 (FILE *stream, int64_t offset, int whence)
+{
+#if defined (HAVE_FSEEKO64)
+  off64_t o = offset;
+  if (o != offset)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+  return fseeko64 (stream, o, whence);
+#elif defined (HAVE_FSEEKO)
+  off_t o = offset;
+  if (o != offset)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+  return fseeko (stream, o, whence);
+#else
+  long o = offset;
+  if (o != offset)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+  return fseek (stream, o, whence);
+#endif
+}
+
 static const char * get_symbol_version_string
-  (Filedata *, bool, const char *, unsigned long, unsigned,
+  (Filedata *, bool, const char *, size_t, unsigned,
    Elf_Internal_Sym *, enum versioned_symbol_info *, unsigned short *);
 
 #define UNKNOWN -1
@@ -437,7 +473,7 @@ get_dynamic_name (const Filedata *filedata, size_t offset)
 static void *
 get_data (void *var,
 	  Filedata *filedata,
-	  unsigned long offset,
+	  uint64_t offset,
 	  uint64_t size,
 	  uint64_t nmemb,
 	  const char *reason)
@@ -476,11 +512,11 @@ get_data (void *var,
       return NULL;
     }
 
-  if (fseek (filedata->handle, filedata->archive_file_offset + offset,
-	     SEEK_SET))
+  if (fseek64 (filedata->handle, filedata->archive_file_offset + offset,
+	       SEEK_SET))
     {
       if (reason)
-	error (_("Unable to seek to 0x%lx for %s\n"),
+	error (_("Unable to seek to %#" PRIx64 " for %s\n"),
 	       filedata->archive_file_offset + offset, reason);
       return NULL;
     }
@@ -883,7 +919,7 @@ printable_section_name (Filedata * filedata, const Elf_Internal_Shdr * sec)
 }
 
 static const char *
-printable_section_name_from_index (Filedata * filedata, unsigned long ndx)
+printable_section_name_from_index (Filedata *filedata, size_t ndx)
 {
   if (ndx >= filedata->file_header.e_shnum)
     return _("<corrupt>");
@@ -1126,14 +1162,14 @@ guess_is_rela (unsigned int e_machine)
    responsibility to free the allocated buffer.  */
 
 static bool
-slurp_rela_relocs (Filedata *            filedata,
-		   unsigned long         rel_offset,
-		   unsigned long         rel_size,
-		   Elf_Internal_Rela **  relasp,
-		   unsigned long *       nrelasp)
+slurp_rela_relocs (Filedata *filedata,
+		   uint64_t rel_offset,
+		   uint64_t rel_size,
+		   Elf_Internal_Rela **relasp,
+		   uint64_t *nrelasp)
 {
   Elf_Internal_Rela * relas;
-  size_t nrelas;
+  uint64_t nrelas;
   unsigned int i;
 
   if (is_32bit_elf)
@@ -1226,14 +1262,14 @@ slurp_rela_relocs (Filedata *            filedata,
    responsibility to free the allocated buffer.  */
 
 static bool
-slurp_rel_relocs (Filedata *            filedata,
-		  unsigned long         rel_offset,
-		  unsigned long         rel_size,
-		  Elf_Internal_Rela **  relsp,
-		  unsigned long *       nrelsp)
+slurp_rel_relocs (Filedata *filedata,
+		  uint64_t rel_offset,
+		  uint64_t rel_size,
+		  Elf_Internal_Rela **relsp,
+		  uint64_t *nrelsp)
 {
   Elf_Internal_Rela * rels;
-  size_t nrels;
+  uint64_t nrels;
   unsigned int i;
 
   if (is_32bit_elf)
@@ -1318,11 +1354,11 @@ slurp_rel_relocs (Filedata *            filedata,
 }
 
 static bool
-slurp_relr_relocs (Filedata * filedata,
-		   unsigned long relr_offset,
-		   unsigned long relr_size,
-		   uint64_t ** relrsp,
-		   unsigned long * nrelrsp)
+slurp_relr_relocs (Filedata *filedata,
+		   uint64_t relr_offset,
+		   uint64_t relr_size,
+		   uint64_t **relrsp,
+		   uint64_t *nrelrsp)
 {
   void *relrs;
   size_t size = 0, nentries, i;
@@ -1432,17 +1468,17 @@ uses_msp430x_relocs (Filedata * filedata)
    offset.  */
 
 static bool
-dump_relocations (Filedata *          filedata,
-		  unsigned long       rel_offset,
-		  unsigned long       rel_size,
-		  Elf_Internal_Sym *  symtab,
-		  unsigned long       nsyms,
-		  char *              strtab,
-		  unsigned long       strtablen,
-		  relocation_type     rel_type,
-		  bool                is_dynsym)
+dump_relocations (Filedata *filedata,
+		  uint64_t rel_offset,
+		  uint64_t rel_size,
+		  Elf_Internal_Sym *symtab,
+		  uint64_t nsyms,
+		  char *strtab,
+		  uint64_t strtablen,
+		  relocation_type rel_type,
+		  bool is_dynsym)
 {
-  unsigned long i;
+  size_t i;
   Elf_Internal_Rela * rels;
   bool res = true;
 
@@ -1469,7 +1505,8 @@ dump_relocations (Filedata *          filedata,
 			      &rel_size))
 	return false;
 
-      printf (ngettext ("  %lu offset\n", "  %lu offsets\n", rel_size),
+      printf (ngettext ("  %" PRIu64 " offset\n",
+			"  %" PRIu64 " offsets\n", rel_size),
 	      rel_size);
       for (i = 0; i < rel_size; i++)
 	printf (format, relrs[i]);
@@ -1908,8 +1945,8 @@ dump_relocations (Filedata *          filedata,
 	  else
 	    {
 	      putchar (' ');
-	      printf (_("<unknown addend: %lx>"),
-		      (unsigned long) rels[i].r_addend);
+	      printf (_("<unknown addend: %" PRIx64 ">"),
+		      rels[i].r_addend);
 	      res = false;
 	    }
 	}
@@ -2062,7 +2099,7 @@ dump_relocations (Filedata *          filedata,
       if (filedata->file_header.e_machine == EM_SPARCV9
 	  && rtype != NULL
 	  && streq (rtype, "R_SPARC_OLO10"))
-	printf (" + %lx", (unsigned long) ELF64_R_TYPE_DATA (inf));
+	printf (" + %" PRIx64, ELF64_R_TYPE_DATA (inf));
 
       putchar ('\n');
 
@@ -2588,7 +2625,7 @@ static bool get_dynamic_section (Filedata *);
 static void
 locate_dynamic_section (Filedata *filedata)
 {
-  unsigned long dynamic_addr = 0;
+  uint64_t dynamic_addr = 0;
   uint64_t dynamic_size = 0;
 
   if (filedata->file_header.e_phnum != 0
@@ -4601,6 +4638,7 @@ get_segment_type (Filedata * filedata, unsigned long p_type)
     case PT_GNU_STACK:	return "GNU_STACK";
     case PT_GNU_RELRO:  return "GNU_RELRO";
     case PT_GNU_PROPERTY: return "GNU_PROPERTY";
+    case PT_GNU_SFRAME: return "GNU_SFRAME";
 
     case PT_OPENBSD_RANDOMIZE: return "OPENBSD_RANDOMIZE";
     case PT_OPENBSD_WXNEEDED: return "OPENBSD_WXNEEDED";
@@ -5067,6 +5105,7 @@ enum long_option_values
   OPTION_CTF_PARENT,
   OPTION_CTF_SYMBOLS,
   OPTION_CTF_STRINGS,
+  OPTION_SFRAME_DUMP,
   OPTION_WITH_SYMBOL_VERSIONS,
   OPTION_RECURSE_LIMIT,
   OPTION_NO_RECURSE_LIMIT,
@@ -5129,6 +5168,7 @@ static struct option options[] =
   {"ctf-strings",      required_argument, 0, OPTION_CTF_STRINGS},
   {"ctf-parent",       required_argument, 0, OPTION_CTF_PARENT},
 #endif
+  {"sframe",	       optional_argument, 0, OPTION_SFRAME_DUMP},
   {"sym-base",	       optional_argument, 0, OPTION_SYM_BASE},
 
   {0,		       no_argument, 0, 0}
@@ -5269,6 +5309,8 @@ usage (FILE * stream)
   --ctf-strings=<number|name>\n\
                          Use section <number|name> as the CTF external strtab\n"));
 #endif
+  fprintf (stream, _("\
+  --sframe[=NAME]        Display SFrame info from section NAME, (default '.sframe')\n"));
 
 #ifdef SUPPORT_DISASSEMBLY
   fprintf (stream, _("\
@@ -5541,6 +5583,19 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 	case OPTION_CTF_PARENT:
 	  free (dump_ctf_parent_name);
 	  dump_ctf_parent_name = strdup (optarg);
+	  break;
+	case OPTION_SFRAME_DUMP:
+	  do_sframe = true;
+	  /* Providing section name is optional.  request_dump (), however,
+	     thrives on non NULL optarg.  Handle it explicitly here.  */
+	  if (optarg != NULL)
+	    request_dump (dumpdata, SFRAME_DUMP);
+	  else
+	    {
+	      do_dump = true;
+	      const char *sframe_sec_name = strdup (".sframe");
+	      request_dump_byname (sframe_sec_name, SFRAME_DUMP);
+	    }
 	  break;
 	case OPTION_DYN_SYMS:
 	  do_dyn_syms = true;
@@ -6072,7 +6127,7 @@ process_program_headers (Filedata * filedata)
 	}
     }
 
-  unsigned long dynamic_addr = 0;
+  uint64_t dynamic_addr = 0;
   uint64_t dynamic_size = 0;
   for (i = 0, segment = filedata->program_headers;
        i < filedata->file_header.e_phnum;
@@ -6259,9 +6314,9 @@ the .dynamic section is not the same as the dynamic segment\n"));
 	  if (segment->p_offset >= filedata->file_size
 	      || segment->p_filesz > filedata->file_size - segment->p_offset
 	      || segment->p_filesz - 1 >= (size_t) -2
-	      || fseek (filedata->handle,
-			filedata->archive_file_offset + (long) segment->p_offset,
-			SEEK_SET))
+	      || fseek64 (filedata->handle,
+			  filedata->archive_file_offset + segment->p_offset,
+			  SEEK_SET))
 	    error (_("Unable to find program interpreter name\n"));
 	  else
 	    {
@@ -6320,7 +6375,7 @@ the .dynamic section is not the same as the dynamic segment\n"));
 
 /* Find the file offset corresponding to VMA by using the program headers.  */
 
-static long
+static int64_t
 offset_from_vma (Filedata * filedata, uint64_t vma, uint64_t size)
 {
   Elf_Internal_Phdr * seg;
@@ -6343,9 +6398,9 @@ offset_from_vma (Filedata * filedata, uint64_t vma, uint64_t size)
 	return vma - seg->p_vaddr + seg->p_offset;
     }
 
-  warn (_("Virtual address 0x%lx not located in any PT_LOAD segment.\n"),
-	(unsigned long) vma);
-  return (long) vma;
+  warn (_("Virtual address %#" PRIx64
+	  " not located in any PT_LOAD segment.\n"), vma);
+  return vma;
 }
 
 
@@ -6506,11 +6561,11 @@ get_section_headers (Filedata *filedata, bool probe)
 }
 
 static Elf_Internal_Sym *
-get_32bit_elf_symbols (Filedata *           filedata,
-		       Elf_Internal_Shdr *  section,
-		       unsigned long *      num_syms_return)
+get_32bit_elf_symbols (Filedata *filedata,
+		       Elf_Internal_Shdr *section,
+		       uint64_t *num_syms_return)
 {
-  unsigned long number = 0;
+  uint64_t number = 0;
   Elf32_External_Sym * esyms = NULL;
   Elf_External_Sym_Shndx * shndx = NULL;
   Elf_Internal_Sym * isyms = NULL;
@@ -6528,17 +6583,17 @@ get_32bit_elf_symbols (Filedata *           filedata,
   /* Run some sanity checks first.  */
   if (section->sh_entsize == 0 || section->sh_entsize > section->sh_size)
     {
-      error (_("Section %s has an invalid sh_entsize of 0x%lx\n"),
+      error (_("Section %s has an invalid sh_entsize of %#" PRIx64 "\n"),
 	     printable_section_name (filedata, section),
-	     (unsigned long) section->sh_entsize);
+	     section->sh_entsize);
       goto exit_point;
     }
 
   if (section->sh_size > filedata->file_size)
     {
-      error (_("Section %s has an invalid sh_size of 0x%lx\n"),
+      error (_("Section %s has an invalid sh_size of %#" PRIx64 "\n"),
 	     printable_section_name (filedata, section),
-	     (unsigned long) section->sh_size);
+	     section->sh_size);
       goto exit_point;
     }
 
@@ -6546,10 +6601,11 @@ get_32bit_elf_symbols (Filedata *           filedata,
 
   if (number * sizeof (Elf32_External_Sym) > section->sh_size + 1)
     {
-      error (_("Size (0x%lx) of section %s is not a multiple of its sh_entsize (0x%lx)\n"),
-	     (unsigned long) section->sh_size,
+      error (_("Size (%#" PRIx64 ") of section %s "
+	       "is not a multiple of its sh_entsize (%#" PRIx64 ")\n"),
+	     section->sh_size,
 	     printable_section_name (filedata, section),
-	     (unsigned long) section->sh_entsize);
+	     section->sh_entsize);
       goto exit_point;
     }
 
@@ -6561,7 +6617,7 @@ get_32bit_elf_symbols (Filedata *           filedata,
   shndx = NULL;
   for (entry = filedata->symtab_shndx_list; entry != NULL; entry = entry->next)
     {
-      if (entry->hdr->sh_link != (unsigned long) (section - filedata->section_headers))
+      if (entry->hdr->sh_link != (size_t) (section - filedata->section_headers))
 	continue;
 
       if (shndx != NULL)
@@ -6580,10 +6636,10 @@ get_32bit_elf_symbols (Filedata *           filedata,
       /* PR17531: file: heap-buffer-overflow */
       if (entry->hdr->sh_size / sizeof (Elf_External_Sym_Shndx) < number)
 	{
-	  error (_("Index section %s has an sh_size of 0x%lx - expected 0x%lx\n"),
+	  error (_("Index section %s has an sh_size of %#" PRIx64 " - expected %#" PRIx64 "\n"),
 		 printable_section_name (filedata, entry->hdr),
-		 (unsigned long) entry->hdr->sh_size,
-		 (unsigned long) section->sh_size);
+		 entry->hdr->sh_size,
+		 section->sh_size);
 	  goto exit_point;
 	}
     }
@@ -6592,8 +6648,7 @@ get_32bit_elf_symbols (Filedata *           filedata,
 
   if (isyms == NULL)
     {
-      error (_("Out of memory reading %lu symbols\n"),
-	     (unsigned long) number);
+      error (_("Out of memory reading %" PRIu64 " symbols\n"), number);
       goto exit_point;
     }
 
@@ -6623,11 +6678,11 @@ get_32bit_elf_symbols (Filedata *           filedata,
 }
 
 static Elf_Internal_Sym *
-get_64bit_elf_symbols (Filedata *           filedata,
-		       Elf_Internal_Shdr *  section,
-		       unsigned long *      num_syms_return)
+get_64bit_elf_symbols (Filedata *filedata,
+		       Elf_Internal_Shdr *section,
+		       uint64_t *num_syms_return)
 {
-  unsigned long number = 0;
+  uint64_t number = 0;
   Elf64_External_Sym * esyms = NULL;
   Elf_External_Sym_Shndx * shndx = NULL;
   Elf_Internal_Sym * isyms = NULL;
@@ -6645,17 +6700,17 @@ get_64bit_elf_symbols (Filedata *           filedata,
   /* Run some sanity checks first.  */
   if (section->sh_entsize == 0 || section->sh_entsize > section->sh_size)
     {
-      error (_("Section %s has an invalid sh_entsize of 0x%lx\n"),
+      error (_("Section %s has an invalid sh_entsize of %#" PRIx64 "\n"),
 	     printable_section_name (filedata, section),
-	     (unsigned long) section->sh_entsize);
+	     section->sh_entsize);
       goto exit_point;
     }
 
   if (section->sh_size > filedata->file_size)
     {
-      error (_("Section %s has an invalid sh_size of 0x%lx\n"),
+      error (_("Section %s has an invalid sh_size of %#" PRIx64 "\n"),
 	     printable_section_name (filedata, section),
-	     (unsigned long) section->sh_size);
+	     section->sh_size);
       goto exit_point;
     }
 
@@ -6663,10 +6718,11 @@ get_64bit_elf_symbols (Filedata *           filedata,
 
   if (number * sizeof (Elf64_External_Sym) > section->sh_size + 1)
     {
-      error (_("Size (0x%lx) of section %s is not a multiple of its sh_entsize (0x%lx)\n"),
-	     (unsigned long) section->sh_size,
+      error (_("Size (%#" PRIx64 ") of section %s "
+	       "is not a multiple of its sh_entsize (%#" PRIx64 ")\n"),
+	     section->sh_size,
 	     printable_section_name (filedata, section),
-	     (unsigned long) section->sh_entsize);
+	     section->sh_entsize);
       goto exit_point;
     }
 
@@ -6678,7 +6734,7 @@ get_64bit_elf_symbols (Filedata *           filedata,
   shndx = NULL;
   for (entry = filedata->symtab_shndx_list; entry != NULL; entry = entry->next)
     {
-      if (entry->hdr->sh_link != (unsigned long) (section - filedata->section_headers))
+      if (entry->hdr->sh_link != (size_t) (section - filedata->section_headers))
 	continue;
 
       if (shndx != NULL)
@@ -6697,10 +6753,10 @@ get_64bit_elf_symbols (Filedata *           filedata,
       /* PR17531: file: heap-buffer-overflow */
       if (entry->hdr->sh_size / sizeof (Elf_External_Sym_Shndx) < number)
 	{
-	  error (_("Index section %s has an sh_size of 0x%lx - expected 0x%lx\n"),
+	  error (_("Index section %s has an sh_size of %#" PRIx64 " - expected %#" PRIx64 "\n"),
 		 printable_section_name (filedata, entry->hdr),
-		 (unsigned long) entry->hdr->sh_size,
-		 (unsigned long) section->sh_size);
+		 entry->hdr->sh_size,
+		 section->sh_size);
 	  goto exit_point;
 	}
     }
@@ -6709,8 +6765,7 @@ get_64bit_elf_symbols (Filedata *           filedata,
 
   if (isyms == NULL)
     {
-      error (_("Out of memory reading %lu symbols\n"),
-	     (unsigned long) number);
+      error (_("Out of memory reading %" PRIu64 " symbols\n"), number);
       goto exit_point;
     }
 
@@ -6744,7 +6799,7 @@ get_64bit_elf_symbols (Filedata *           filedata,
 static Elf_Internal_Sym *
 get_elf_symbols (Filedata *filedata,
 		 Elf_Internal_Shdr *section,
-		 unsigned long *num_syms_return)
+		 uint64_t *num_syms_return)
 {
   if (is_32bit_elf)
     return get_32bit_elf_symbols (filedata, section, num_syms_return);
@@ -7129,12 +7184,12 @@ process_section_headers (Filedata * filedata)
 	printf (_("In linked file '%s': "), filedata->file_name);
       if (! filedata->is_separate || process_links)
 	printf (ngettext ("There is %d section header, "
-			  "starting at offset 0x%lx:\n",
+			  "starting at offset %#" PRIx64 ":\n",
 			  "There are %d section headers, "
-			  "starting at offset 0x%lx:\n",
+			  "starting at offset %#" PRIx64 ":\n",
 			  filedata->file_header.e_shnum),
 		filedata->file_header.e_shnum,
-		(unsigned long) filedata->file_header.e_shoff);
+		filedata->file_header.e_shoff);
     }
 
   if (!get_section_headers (filedata, false))
@@ -7748,9 +7803,9 @@ process_section_headers (Filedata * filedata)
 		    printf (_("       [<corrupt>]\n"));
 		  else
 		    {
-		      if (chdr.ch_type == ELFCOMPRESS_ZLIB)
+		      if (chdr.ch_type == ch_compress_zlib)
 			printf ("       ZLIB, ");
-		      else if (chdr.ch_type == ELFCOMPRESS_ZSTD)
+		      else if (chdr.ch_type == ch_compress_zstd)
 			printf ("       ZSTD, ");
 		      else
 			printf (_("       [<unknown>: 0x%x], "),
@@ -7800,8 +7855,8 @@ process_section_headers (Filedata * filedata)
 
 static bool
 get_symtab (Filedata *filedata, Elf_Internal_Shdr *symsec,
-	    Elf_Internal_Sym **symtab, unsigned long *nsyms,
-	    char **strtab, unsigned long *strtablen)
+	    Elf_Internal_Sym **symtab, uint64_t *nsyms,
+	    char **strtab, uint64_t *strtablen)
 {
   *strtab = NULL;
   *strtablen = 0;
@@ -7868,7 +7923,7 @@ process_section_groups (Filedata * filedata)
   Elf_Internal_Shdr * symtab_sec;
   Elf_Internal_Shdr * strtab_sec;
   Elf_Internal_Sym * symtab;
-  unsigned long num_syms;
+  uint64_t num_syms;
   char * strtab;
   size_t strtab_size;
 
@@ -7934,8 +7989,7 @@ process_section_groups (Filedata * filedata)
 
   if (filedata->section_groups == NULL)
     {
-      error (_("Out of memory reading %lu groups\n"),
-	     (unsigned long) filedata->group_count);
+      error (_("Out of memory reading %zu groups\n"), filedata->group_count);
       return false;
     }
 
@@ -8038,10 +8092,11 @@ process_section_groups (Filedata * filedata)
 	  /* PR 17531: file: loop.  */
 	  if (section->sh_entsize > section->sh_size)
 	    {
-	      error (_("Section %s has sh_entsize (0x%lx) which is larger than its size (0x%lx)\n"),
+	      error (_("Section %s has sh_entsize (%#" PRIx64 ")"
+		       " which is larger than its size (%#" PRIx64 ")\n"),
 		     printable_section_name (filedata, section),
-		     (unsigned long) section->sh_entsize,
-		     (unsigned long) section->sh_size);
+		     section->sh_entsize,
+		     section->sh_size);
 	      continue;
 	    }
 
@@ -8172,7 +8227,7 @@ dump_ia64_vms_dynamic_fixups (Filedata *                  filedata,
 			      unsigned int                strtab_sz)
 {
   Elf64_External_VMS_IMAGE_FIXUP * imfs;
-  long i;
+  size_t i;
   const char * lib_name;
 
   imfs = get_data (NULL, filedata,
@@ -8186,17 +8241,18 @@ dump_ia64_vms_dynamic_fixups (Filedata *                  filedata,
     lib_name = strtab + fixup->needed;
   else
     {
-      warn (_("corrupt library name index of 0x%lx found in dynamic entry"),
-            (unsigned long) fixup->needed);
+      warn (_("corrupt library name index of %#" PRIx64
+	      " found in dynamic entry"), fixup->needed);
       lib_name = "???";
     }
 
-  printf (_("\nImage fixups for needed library #%d: %s - ident: %lx\n"),
-	  (int) fixup->fixup_needed, lib_name, (long) fixup->needed_ident);
+  printf (_("\nImage fixups for needed library #%" PRId64
+	    ": %s - ident: %" PRIx64 "\n"),
+	  fixup->fixup_needed, lib_name, fixup->needed_ident);
   printf
     (_("Seg Offset           Type                             SymVec DataType\n"));
 
-  for (i = 0; i < (long) fixup->fixup_rela_cnt; i++)
+  for (i = 0; i < (size_t) fixup->fixup_rela_cnt; i++)
     {
       unsigned int type;
       const char *rtype;
@@ -8223,7 +8279,7 @@ static bool
 dump_ia64_vms_dynamic_relocs (Filedata * filedata, struct ia64_vms_dynimgrela *imgrela)
 {
   Elf64_External_VMS_IMAGE_RELA *imrs;
-  long i;
+  size_t i;
 
   imrs = get_data (NULL, filedata,
 		   filedata->dynamic_addr + imgrela->img_rela_off,
@@ -8236,7 +8292,7 @@ dump_ia64_vms_dynamic_relocs (Filedata * filedata, struct ia64_vms_dynimgrela *i
   printf
     (_("Seg Offset   Type                            Addend            Seg Sym Off\n"));
 
-  for (i = 0; i < (long) imgrela->img_rela_cnt; i++)
+  for (i = 0; i < (size_t) imgrela->img_rela_cnt; i++)
     {
       unsigned int type;
       const char *rtype;
@@ -8350,8 +8406,8 @@ static struct
 static bool
 process_relocs (Filedata * filedata)
 {
-  unsigned long rel_size;
-  unsigned long rel_offset;
+  uint64_t rel_size;
+  uint64_t rel_offset;
 
   if (!do_reloc)
     return true;
@@ -8393,11 +8449,13 @@ process_relocs (Filedata * filedata)
 	    {
 	      if (filedata->is_separate)
 		printf
-		  (_("\nIn linked file '%s' section '%s' at offset 0x%lx contains %ld bytes:\n"),
+		  (_("\nIn linked file '%s' section '%s' at offset %#" PRIx64
+		     " contains %" PRId64 " bytes:\n"),
 		   filedata->file_name, name, rel_offset, rel_size);
 	      else
 		printf
-		  (_("\n'%s' relocation section at offset 0x%lx contains %ld bytes:\n"),
+		  (_("\n'%s' relocation section at offset %#" PRIx64
+		     " contains %" PRId64 " bytes:\n"),
 		   name, rel_offset, rel_size);
 
 	      dump_relocations (filedata,
@@ -8427,7 +8485,7 @@ process_relocs (Filedata * filedata)
   else
     {
       Elf_Internal_Shdr * section;
-      unsigned long i;
+      size_t i;
       bool found = false;
 
       for (i = 0, section = filedata->section_headers;
@@ -8445,7 +8503,7 @@ process_relocs (Filedata * filedata)
 	  if (rel_size)
 	    {
 	      relocation_type rel_type;
-	      unsigned long num_rela;
+	      uint64_t num_rela;
 
 	      if (filedata->is_separate)
 		printf (_("\nIn linked file '%s' relocation section "),
@@ -8459,8 +8517,10 @@ process_relocs (Filedata * filedata)
 		printf ("'%s'", printable_section_name (filedata, section));
 
 	      num_rela = rel_size / section->sh_entsize;
-	      printf (ngettext (" at offset 0x%lx contains %lu entry:\n",
-				" at offset 0x%lx contains %lu entries:\n",
+	      printf (ngettext (" at offset %#" PRIx64
+				" contains %" PRIu64 " entry:\n",
+				" at offset %#" PRIx64
+				" contains %" PRId64 " entries:\n",
 				num_rela),
 		      rel_offset, num_rela);
 
@@ -8470,11 +8530,11 @@ process_relocs (Filedata * filedata)
 	      if (section->sh_link != 0
 		  && section->sh_link < filedata->file_header.e_shnum)
 		{
-		  Elf_Internal_Shdr * symsec;
-		  Elf_Internal_Sym *  symtab;
-		  unsigned long nsyms;
-		  unsigned long strtablen = 0;
-		  char * strtab = NULL;
+		  Elf_Internal_Shdr *symsec;
+		  Elf_Internal_Sym *symtab;
+		  uint64_t nsyms;
+		  uint64_t strtablen = 0;
+		  char *strtab = NULL;
 
 		  symsec = filedata->section_headers + section->sh_link;
 		  if (symsec->sh_type != SHT_SYMTAB
@@ -8545,14 +8605,14 @@ struct absaddr
    name, if found, and the offset from the symbol to ADDR.  */
 
 static void
-find_symbol_for_address (Filedata *          filedata,
-			 Elf_Internal_Sym *  symtab,
-			 unsigned long       nsyms,
-			 const char *        strtab,
-			 unsigned long       strtab_size,
-			 struct absaddr      addr,
-			 const char **       symname,
-			 uint64_t *          offset)
+find_symbol_for_address (Filedata *filedata,
+			 Elf_Internal_Sym *symtab,
+			 uint64_t nsyms,
+			 const char *strtab,
+			 uint64_t strtab_size,
+			 struct absaddr addr,
+			 const char **symname,
+			 uint64_t *offset)
 {
   uint64_t dist = 0x100000;
   Elf_Internal_Sym * sym;
@@ -8625,24 +8685,24 @@ struct ia64_unw_table_entry
 struct ia64_unw_aux_info
 {
   struct ia64_unw_table_entry * table;		/* Unwind table.  */
-  unsigned long                 table_len;	/* Length of unwind table.  */
+  uint64_t                      table_len;	/* Length of unwind table.  */
   unsigned char *               info;		/* Unwind info.  */
-  unsigned long                 info_size;	/* Size of unwind info.  */
+  uint64_t                      info_size;	/* Size of unwind info.  */
   uint64_t                      info_addr;	/* Starting address of unwind info.  */
   uint64_t                      seg_base;	/* Starting address of segment.  */
   Elf_Internal_Sym *            symtab;		/* The symbol table.  */
-  unsigned long                 nsyms;		/* Number of symbols.  */
+  uint64_t                      nsyms;		/* Number of symbols.  */
   Elf_Internal_Sym *            funtab;		/* Sorted table of STT_FUNC symbols.  */
-  unsigned long                 nfuns;		/* Number of entries in funtab.  */
+  uint64_t                      nfuns;		/* Number of entries in funtab.  */
   char *                        strtab;		/* The string table.  */
-  unsigned long                 strtab_size;	/* Size of string table.  */
+  uint64_t                      strtab_size;	/* Size of string table.  */
 };
 
 static bool
 dump_ia64_unwind (Filedata * filedata, struct ia64_unw_aux_info * aux)
 {
   struct ia64_unw_table_entry * tp;
-  unsigned long j, nfuns;
+  size_t j, nfuns;
   int in_body;
   bool res = true;
 
@@ -8672,15 +8732,15 @@ dump_ia64_unwind (Filedata * filedata, struct ia64_unw_aux_info * aux)
 	  fputs (procname, stdout);
 
 	  if (offset)
-	    printf ("+%lx", (unsigned long) offset);
+	    printf ("+%" PRIx64, offset);
 	}
 
       fputs (">: [", stdout);
       print_vma (tp->start.offset, PREFIX_HEX);
       fputc ('-', stdout);
       print_vma (tp->end.offset, PREFIX_HEX);
-      printf ("], info at +0x%lx\n",
-	      (unsigned long) (tp->info.offset - aux->seg_base));
+      printf ("], info at +0x%" PRIx64 "\n",
+	      tp->info.offset - aux->seg_base);
 
       /* PR 17531: file: 86232b32.  */
       if (aux->info == NULL)
@@ -8691,8 +8751,8 @@ dump_ia64_unwind (Filedata * filedata, struct ia64_unw_aux_info * aux)
 	{
 	  if (tp->info.section >= filedata->file_header.e_shnum)
 	    {
-	      warn (_("Invalid section %u in table entry %ld\n"),
-		    tp->info.section, (long) (tp - aux->table));
+	      warn (_("Invalid section %u in table entry %td\n"),
+		    tp->info.section, tp - aux->table);
 	      res = false;
 	      continue;
 	    }
@@ -8703,8 +8763,8 @@ dump_ia64_unwind (Filedata * filedata, struct ia64_unw_aux_info * aux)
       if (offset >= aux->info_size
 	  || aux->info_size - offset < 8)
 	{
-	  warn (_("Invalid offset %lx in table entry %ld\n"),
-		(long) tp->info.offset, (long) (tp - aux->table));
+	  warn (_("Invalid offset %" PRIx64 " in table entry %td\n"),
+		tp->info.offset, tp - aux->table);
 	  res = false;
 	  continue;
 	}
@@ -8744,7 +8804,7 @@ slurp_ia64_unwind_table (Filedata *                  filedata,
 			 struct ia64_unw_aux_info *  aux,
 			 Elf_Internal_Shdr *         sec)
 {
-  unsigned long size, nrelas, i;
+  uint64_t size, nrelas, i;
   Elf_Internal_Phdr * seg;
   struct ia64_unw_table_entry * tep;
   Elf_Internal_Shdr * relsec;
@@ -8850,7 +8910,8 @@ slurp_ia64_unwind_table (Filedata *                  filedata,
 	  /* PR 17531: file: 5bc8d9bf.  */
 	  if (i >= aux->table_len)
 	    {
-	      warn (_("Skipping reloc with overlarge offset: %lx\n"), i);
+	      warn (_("Skipping reloc with overlarge offset: %#" PRIx64 "\n"),
+		    i);
 	      continue;
 	    }
 
@@ -8893,7 +8954,7 @@ ia64_process_unwind (Filedata * filedata)
 {
   Elf_Internal_Shdr * sec;
   Elf_Internal_Shdr * unwsec = NULL;
-  unsigned long i, unwcount = 0, unwstart = 0;
+  uint64_t i, unwcount = 0, unwstart = 0;
   struct ia64_unw_aux_info aux;
   bool res = true;
 
@@ -9028,9 +9089,9 @@ ia64_process_unwind (Filedata * filedata)
 	  else
 	    printf ("'%s'", printable_section_name (filedata, unwsec));
 
-	  printf (_(" at offset 0x%lx contains %lu entries:\n"),
-		  (unsigned long) unwsec->sh_offset,
-		  (unsigned long) (unwsec->sh_size / (3 * eh_addr_size)));
+	  printf (_(" at offset %#" PRIx64 " contains %" PRIu64 " entries:\n"),
+		  unwsec->sh_offset,
+		  unwsec->sh_size / (3 * eh_addr_size));
 
 	  if (slurp_ia64_unwind_table (filedata, & aux, unwsec)
 	      && aux.table_len > 0)
@@ -9089,21 +9150,21 @@ struct hppa_unw_table_entry
 struct hppa_unw_aux_info
 {
   struct hppa_unw_table_entry *  table;		/* Unwind table.  */
-  unsigned long                  table_len;	/* Length of unwind table.  */
+  uint64_t                       table_len;	/* Length of unwind table.  */
   uint64_t                       seg_base;	/* Starting address of segment.  */
   Elf_Internal_Sym *             symtab;	/* The symbol table.  */
-  unsigned long                  nsyms;		/* Number of symbols.  */
+  uint64_t                       nsyms;		/* Number of symbols.  */
   Elf_Internal_Sym *             funtab;	/* Sorted table of STT_FUNC symbols.  */
-  unsigned long                  nfuns;		/* Number of entries in funtab.  */
+  uint64_t                       nfuns;		/* Number of entries in funtab.  */
   char *                         strtab;	/* The string table.  */
-  unsigned long                  strtab_size;	/* Size of string table.  */
+  uint64_t                       strtab_size;	/* Size of string table.  */
 };
 
 static bool
 dump_hppa_unwind (Filedata * filedata, struct hppa_unw_aux_info * aux)
 {
   struct hppa_unw_table_entry * tp;
-  unsigned long j, nfuns;
+  uint64_t j, nfuns;
   bool res = true;
 
   aux->funtab = xmalloc (aux->nsyms * sizeof (Elf_Internal_Sym));
@@ -9129,7 +9190,7 @@ dump_hppa_unwind (Filedata * filedata, struct hppa_unw_aux_info * aux)
 	  fputs (procname, stdout);
 
 	  if (offset)
-	    printf ("+%lx", (unsigned long) offset);
+	    printf ("+%" PRIx64, offset);
 	}
 
       fputs (">: [", stdout);
@@ -9183,7 +9244,7 @@ slurp_hppa_unwind_table (Filedata *                  filedata,
 			 struct hppa_unw_aux_info *  aux,
 			 Elf_Internal_Shdr *         sec)
 {
-  unsigned long size, unw_ent_size, nentries, nrelas, i;
+  uint64_t size, unw_ent_size, nentries, nrelas, i;
   Elf_Internal_Phdr * seg;
   struct hppa_unw_table_entry * tep;
   Elf_Internal_Shdr * relsec;
@@ -9318,7 +9379,8 @@ slurp_hppa_unwind_table (Filedata *                  filedata,
 	  i = rp->r_offset / unw_ent_size;
 	  if (i >= aux->table_len)
 	    {
-	      warn (_("Skipping reloc with overlarge offset: %lx\n"), i);
+	      warn (_("Skipping reloc with overlarge offset: %#" PRIx64 "\n"),
+		    i);
 	      continue;
 	    }
 
@@ -9358,7 +9420,7 @@ hppa_process_unwind (Filedata * filedata)
   struct hppa_unw_aux_info aux;
   Elf_Internal_Shdr * unwsec = NULL;
   Elf_Internal_Shdr * sec;
-  unsigned long i;
+  size_t i;
   bool res = true;
 
   if (filedata->string_table == NULL)
@@ -9395,15 +9457,15 @@ hppa_process_unwind (Filedata * filedata)
       if (section_name_valid (filedata, sec)
 	  && streq (section_name (filedata, sec), ".PARISC.unwind"))
 	{
-	  unsigned long num_unwind = sec->sh_size / 16;
+	  uint64_t num_unwind = sec->sh_size / 16;
 
-	  printf (ngettext ("\nUnwind section '%s' at offset 0x%lx "
-			    "contains %lu entry:\n",
-			    "\nUnwind section '%s' at offset 0x%lx "
-			    "contains %lu entries:\n",
+	  printf (ngettext ("\nUnwind section '%s' at offset %#" PRIx64 " "
+			    "contains %" PRIu64 " entry:\n",
+			    "\nUnwind section '%s' at offset %#" PRIx64 " "
+			    "contains %" PRIu64 " entries:\n",
 			    num_unwind),
 		  printable_section_name (filedata, sec),
-		  (unsigned long) sec->sh_offset,
+		  sec->sh_offset,
 		  num_unwind);
 
           if (! slurp_hppa_unwind_table (filedata, &aux, sec))
@@ -9431,7 +9493,7 @@ struct arm_section
   unsigned char *      data;		/* The unwind data.  */
   Elf_Internal_Shdr *  sec;		/* The cached unwind section header.  */
   Elf_Internal_Rela *  rela;		/* The cached relocations for this section.  */
-  unsigned long        nrelas;		/* The number of relocations.  */
+  uint64_t             nrelas;		/* The number of relocations.  */
   unsigned int         rel_type;	/* REL or RELA ?  */
   Elf_Internal_Rela *  next_rela;	/* Cyclic pointer to the next reloc to process.  */
 };
@@ -9440,11 +9502,11 @@ struct arm_unw_aux_info
 {
   Filedata *          filedata;		/* The file containing the unwind sections.  */
   Elf_Internal_Sym *  symtab;		/* The file's symbol table.  */
-  unsigned long       nsyms;		/* Number of symbols.  */
+  uint64_t            nsyms;		/* Number of symbols.  */
   Elf_Internal_Sym *  funtab;		/* Sorted table of STT_FUNC symbols.  */
-  unsigned long       nfuns;		/* Number of these symbols.  */
+  uint64_t            nfuns;		/* Number of these symbols.  */
   char *              strtab;		/* The file's string table.  */
-  unsigned long       strtab_size;	/* Size of string table.  */
+  uint64_t            strtab_size;	/* Size of string table.  */
 };
 
 static const char *
@@ -9471,7 +9533,7 @@ arm_print_vma_and_name (Filedata *                 filedata,
       fputs (procname, stdout);
 
       if (sym_offset)
-	printf ("+0x%lx", (unsigned long) sym_offset);
+	printf ("+0x%" PRIx64, sym_offset);
       fputc ('>', stdout);
     }
 
@@ -9602,8 +9664,8 @@ get_unwind_section_word (Filedata *                 filedata,
 
       if (rp->r_offset & 3)
 	{
-	  warn (_("Skipping unexpected relocation at offset 0x%lx\n"),
-		(unsigned long) rp->r_offset);
+	  warn (_("Skipping unexpected relocation at offset %#" PRIx64 "\n"),
+		rp->r_offset);
 	  continue;
 	}
 
@@ -9632,8 +9694,9 @@ get_unwind_section_word (Filedata *                 filedata,
       /* PR 17531 file: 027-1241568-0.004.  */
       if (ELF32_R_SYM (rp->r_info) >= aux->nsyms)
 	{
-	  error (_("Bad symbol index in unwind relocation (%lu > %lu)\n"),
-		 (unsigned long) ELF32_R_SYM (rp->r_info), aux->nsyms);
+	  error (_("Bad symbol index in unwind relocation "
+		   "(%" PRIu64 " > %" PRIu64 ")\n"),
+		 ELF32_R_SYM (rp->r_info), aux->nsyms);
 	  break;
 	}
 
@@ -9876,7 +9939,7 @@ decode_arm_unwind_bytecode (Filedata *                 filedata,
 	{
 	  unsigned char buf[9];
 	  unsigned int i, len;
-	  unsigned long offset;
+	  uint64_t offset;
 
 	  for (i = 0; i < sizeof (buf); i++)
 	    {
@@ -9894,7 +9957,7 @@ decode_arm_unwind_bytecode (Filedata *                 filedata,
 	      offset = read_leb128 (buf, buf + i + 1, false, &len, NULL);
 	      assert (len == i + 1);
 	      offset = offset * 4 + 0x204;
-	      printf ("vsp = vsp + %ld", offset);
+	      printf ("vsp = vsp + %" PRId64, offset);
 	    }
 	}
       else if (op == 0xb3 || op == 0xc8 || op == 0xc9)
@@ -9913,6 +9976,8 @@ decode_arm_unwind_bytecode (Filedata *                 filedata,
 	}
       else if (op == 0xb4)
 	printf (_("     pop {ra_auth_code}"));
+      else if (op == 0xb5)
+	printf (_("     vsp as modifier for PAC validation"));
       else if ((op & 0xf8) == 0xb8 || (op & 0xf8) == 0xd0)
 	{
 	  unsigned int count = op & 0x07;
@@ -10097,7 +10162,7 @@ decode_tic6x_unwind_bytecode (Filedata *                 filedata,
 	{
 	  unsigned char buf[9];
 	  unsigned int i, len;
-	  unsigned long offset;
+	  uint64_t offset;
 
 	  for (i = 0; i < sizeof (buf); i++)
 	    {
@@ -10115,7 +10180,7 @@ decode_tic6x_unwind_bytecode (Filedata *                 filedata,
 	  offset = read_leb128 (buf, buf + i + 1, false, &len, NULL);
 	  assert (len == i + 1);
 	  offset = offset * 8 + 0x408;
-	  printf (_("sp = sp + %ld"), offset);
+	  printf (_("sp = sp + %" PRId64), offset);
 	}
       else if ((op & 0xf0) == 0xe0)
 	{
@@ -10326,7 +10391,7 @@ dump_arm_unwind (Filedata *                 filedata,
 {
   struct arm_section exidx_arm_sec, extab_arm_sec;
   unsigned int i, exidx_len;
-  unsigned long j, nfuns;
+  uint64_t j, nfuns;
   bool res = true;
 
   memset (&exidx_arm_sec, 0, sizeof (exidx_arm_sec));
@@ -10403,8 +10468,8 @@ dump_arm_unwind (Filedata *                 filedata,
 	      /* PR 18879 */
 	      if (table_offset > table_sec->sh_size)
 		{
-		  warn (_("Unwind entry contains corrupt offset (0x%lx) into section %s\n"),
-			(unsigned long) table_offset,
+		  warn (_("Unwind entry contains corrupt offset (%#" PRIx64 ") into section %s\n"),
+			table_offset,
 			printable_section_name (filedata, table_sec));
 		  res = false;
 		  continue;
@@ -10419,8 +10484,8 @@ dump_arm_unwind (Filedata *                 filedata,
 
 	  if (table_sec == NULL)
 	    {
-	      warn (_("Could not locate .ARM.extab section containing 0x%lx.\n"),
-		    (unsigned long) table);
+	      warn (_("Could not locate .ARM.extab section containing %#" PRIx64 ".\n"),
+		    table);
 	      res = false;
 	      continue;
 	    }
@@ -10448,7 +10513,7 @@ arm_process_unwind (Filedata * filedata)
   struct arm_unw_aux_info aux;
   Elf_Internal_Shdr *unwsec = NULL;
   Elf_Internal_Shdr *sec;
-  unsigned long i;
+  size_t i;
   unsigned int sec_type;
   bool res = true;
 
@@ -10501,14 +10566,14 @@ arm_process_unwind (Filedata * filedata)
       {
 	if (sec->sh_type == sec_type)
 	  {
-	    unsigned long num_unwind = sec->sh_size / (2 * eh_addr_size);
-	    printf (ngettext ("\nUnwind section '%s' at offset 0x%lx "
-			      "contains %lu entry:\n",
-			      "\nUnwind section '%s' at offset 0x%lx "
-			      "contains %lu entries:\n",
+	    uint64_t num_unwind = sec->sh_size / (2 * eh_addr_size);
+	    printf (ngettext ("\nUnwind section '%s' at offset %#" PRIx64 " "
+			      "contains %" PRIu64 " entry:\n",
+			      "\nUnwind section '%s' at offset %#" PRIx64 " "
+			      "contains %" PRIu64 " entries:\n",
 			      num_unwind),
 		    printable_section_name (filedata, sec),
-		    (unsigned long) sec->sh_offset,
+		    sec->sh_offset,
 		    num_unwind);
 
 	    if (! dump_arm_unwind (filedata, &aux, sec))
@@ -10668,7 +10733,7 @@ dynamic_section_parisc_val (Elf_Internal_Dyn * entry)
       {
 	static struct
 	{
-	  long int bit;
+	  unsigned int bit;
 	  const char * str;
 	}
 	flags[] =
@@ -10837,8 +10902,8 @@ get_32bit_dynamic_section (Filedata * filedata)
     = (Elf_Internal_Dyn *) cmalloc (filedata->dynamic_nent, sizeof (* entry));
   if (filedata->dynamic_section == NULL)
     {
-      error (_("Out of memory allocating space for %lu dynamic entries\n"),
-	     (unsigned long) filedata->dynamic_nent);
+      error (_("Out of memory allocating space for %" PRIu64 " dynamic entries\n"),
+	     filedata->dynamic_nent);
       free (edyn);
       return false;
     }
@@ -10888,8 +10953,8 @@ get_64bit_dynamic_section (Filedata * filedata)
     = (Elf_Internal_Dyn *) cmalloc (filedata->dynamic_nent, sizeof (* entry));
   if (filedata->dynamic_section == NULL)
     {
-      error (_("Out of memory allocating space for %lu dynamic entries\n"),
-	     (unsigned long) filedata->dynamic_nent);
+      error (_("Out of memory allocating space for %" PRIu64 " dynamic entries\n"),
+	     filedata->dynamic_nent);
       free (edyn);
       return false;
     }
@@ -11010,10 +11075,10 @@ get_dynamic_data (Filedata * filedata, uint64_t number, unsigned int ent_size)
   return i_data;
 }
 
-static unsigned long
+static uint64_t
 get_num_dynamic_syms (Filedata * filedata)
 {
-  unsigned long num_of_syms = 0;
+  uint64_t num_of_syms = 0;
 
   if (!do_histogram && (!do_using_dynamic || do_dyn_syms))
     return num_of_syms;
@@ -11030,11 +11095,12 @@ get_num_dynamic_syms (Filedata * filedata)
 	  && filedata->file_header.e_ident[EI_CLASS] == ELFCLASS64)
 	hash_ent_size = 8;
 
-      if (fseek (filedata->handle,
-		 (filedata->archive_file_offset
-		  + offset_from_vma (filedata, filedata->dynamic_info[DT_HASH],
-				     sizeof nb + sizeof nc)),
-		 SEEK_SET))
+      if (fseek64 (filedata->handle,
+		   (filedata->archive_file_offset
+		    + offset_from_vma (filedata,
+				       filedata->dynamic_info[DT_HASH],
+				       sizeof nb + sizeof nc)),
+		   SEEK_SET))
 	{
 	  error (_("Unable to seek to start of dynamic information\n"));
 	  goto no_hash;
@@ -11081,14 +11147,14 @@ get_num_dynamic_syms (Filedata * filedata)
       unsigned char nb[16];
       uint64_t i, maxchain = 0xffffffff, bitmaskwords;
       uint64_t buckets_vma;
-      unsigned long hn;
+      uint64_t hn;
 
-      if (fseek (filedata->handle,
-		 (filedata->archive_file_offset
-		  + offset_from_vma (filedata,
-				     filedata->dynamic_info_DT_GNU_HASH,
-				     sizeof nb)),
-		 SEEK_SET))
+      if (fseek64 (filedata->handle,
+		   (filedata->archive_file_offset
+		    + offset_from_vma (filedata,
+				       filedata->dynamic_info_DT_GNU_HASH,
+				       sizeof nb)),
+		   SEEK_SET))
 	{
 	  error (_("Unable to seek to start of dynamic information\n"));
 	  goto no_gnu_hash;
@@ -11109,10 +11175,10 @@ get_num_dynamic_syms (Filedata * filedata)
       else
 	buckets_vma += bitmaskwords * 8;
 
-      if (fseek (filedata->handle,
-		 (filedata->archive_file_offset
-		  + offset_from_vma (filedata, buckets_vma, 4)),
-		 SEEK_SET))
+      if (fseek64 (filedata->handle,
+		   (filedata->archive_file_offset
+		    + offset_from_vma (filedata, buckets_vma, 4)),
+		   SEEK_SET))
 	{
 	  error (_("Unable to seek to start of dynamic information\n"));
 	  goto no_gnu_hash;
@@ -11139,13 +11205,13 @@ get_num_dynamic_syms (Filedata * filedata)
 
       maxchain -= filedata->gnusymidx;
 
-      if (fseek (filedata->handle,
-		 (filedata->archive_file_offset
-		  + offset_from_vma (filedata,
-				     buckets_vma + 4 * (filedata->ngnubuckets
-							+ maxchain),
-				      4)),
-		 SEEK_SET))
+      if (fseek64 (filedata->handle,
+		   (filedata->archive_file_offset
+		    + offset_from_vma (filedata,
+				       buckets_vma + 4 * (filedata->ngnubuckets
+							  + maxchain),
+				       4)),
+		   SEEK_SET))
 	{
 	  error (_("Unable to seek to start of dynamic information\n"));
 	  goto no_gnu_hash;
@@ -11166,12 +11232,12 @@ get_num_dynamic_syms (Filedata * filedata)
 	}
       while ((byte_get (nb, 4) & 1) == 0);
 
-      if (fseek (filedata->handle,
-		 (filedata->archive_file_offset
-		  + offset_from_vma (filedata, (buckets_vma
-						+ 4 * filedata->ngnubuckets),
-				     4)),
-		 SEEK_SET))
+      if (fseek64 (filedata->handle,
+		   (filedata->archive_file_offset
+		    + offset_from_vma (filedata, (buckets_vma
+						  + 4 * filedata->ngnubuckets),
+				       4)),
+		   SEEK_SET))
 	{
 	  error (_("Unable to seek to start of dynamic information\n"));
 	  goto no_gnu_hash;
@@ -11185,12 +11251,12 @@ get_num_dynamic_syms (Filedata * filedata)
 
       if (filedata->dynamic_info_DT_MIPS_XHASH)
 	{
-	  if (fseek (filedata->handle,
-		     (filedata->archive_file_offset
-		      + offset_from_vma (filedata, (buckets_vma
-						    + 4 * (filedata->ngnubuckets
-							   + maxchain)), 4)),
-		     SEEK_SET))
+	  if (fseek64 (filedata->handle,
+		       (filedata->archive_file_offset
+			+ offset_from_vma (filedata, (buckets_vma
+						      + 4 * (filedata->ngnubuckets
+							     + maxchain)), 4)),
+		       SEEK_SET))
 	    {
 	      error (_("Unable to seek to start of dynamic information\n"));
 	      goto no_gnu_hash;
@@ -11270,7 +11336,7 @@ process_dynamic_section (Filedata * filedata)
   /* Find the appropriate symbol table.  */
   if (filedata->dynamic_symbols == NULL || do_histogram)
     {
-      unsigned long num_of_syms;
+      uint64_t num_of_syms;
 
       for (entry = filedata->dynamic_section;
 	   entry < filedata->dynamic_section + filedata->dynamic_nent;
@@ -11378,7 +11444,7 @@ the .dynsym section doesn't match the DT_SYMTAB and DT_SYMENT tags\n"));
 	if (filedata->dynamic_info[DT_STRTAB]
 	    && filedata->dynamic_info[DT_STRSZ])
 	  {
-	    unsigned long offset;
+	    uint64_t offset;
 	    uint64_t str_tab_len = filedata->dynamic_info[DT_STRSZ];
 
 	    offset = offset_from_vma (filedata,
@@ -11410,7 +11476,7 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
   /* And find the syminfo section if available.  */
   if (filedata->dynamic_syminfo == NULL)
     {
-      unsigned long syminsz = 0;
+      uint64_t syminsz = 0;
 
       for (entry = filedata->dynamic_section;
 	   entry < filedata->dynamic_section + filedata->dynamic_nent;
@@ -11454,9 +11520,9 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 	  filedata->dynamic_syminfo = (Elf_Internal_Syminfo *) malloc (syminsz);
 	  if (filedata->dynamic_syminfo == NULL)
 	    {
-	      error (_("Out of memory allocating %lu bytes "
-		       "for dynamic symbol info\n"),
-		     (unsigned long) syminsz);
+	      error (_("Out of memory allocating %" PRIu64
+		       " bytes for dynamic symbol info\n"),
+		     syminsz);
 	      return false;
 	    }
 
@@ -11478,18 +11544,18 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
   if (do_dynamic && filedata->dynamic_addr)
     {
       if (filedata->is_separate)
-	printf (ngettext ("\nIn linked file '%s' the dynamic section at offset 0x%lx contains %lu entry:\n",
-			  "\nIn linked file '%s' the dynamic section at offset 0x%lx contains %lu entries:\n",
-			  (unsigned long) filedata->dynamic_nent),
+	printf (ngettext ("\nIn linked file '%s' the dynamic section at offset %#" PRIx64 " contains %" PRIu64 " entry:\n",
+			  "\nIn linked file '%s' the dynamic section at offset %#" PRIx64 " contains %" PRIu64 " entries:\n",
+			  filedata->dynamic_nent),
 		filedata->file_name,
 		filedata->dynamic_addr,
-		(unsigned long) filedata->dynamic_nent);
+		filedata->dynamic_nent);
       else
-	printf (ngettext ("\nDynamic section at offset 0x%lx contains %lu entry:\n",
-			  "\nDynamic section at offset 0x%lx contains %lu entries:\n",
-			  (unsigned long) filedata->dynamic_nent),
+	printf (ngettext ("\nDynamic section at offset %#" PRIx64 " contains %" PRIu64 " entry:\n",
+			  "\nDynamic section at offset %#" PRIx64 " contains %" PRIu64 " entries:\n",
+			  filedata->dynamic_nent),
 		filedata->dynamic_addr,
-		(unsigned long) filedata->dynamic_nent);
+		filedata->dynamic_nent);
     }
   if (do_dynamic)
     printf (_("  Tag        Type                         Name/Value\n"));
@@ -11567,7 +11633,7 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 		printf (_(" None\n"));
 	      else
 		{
-		  unsigned long int val = entry->d_un.d_val;
+		  uint64_t val = entry->d_un.d_val;
 
 		  if (val & DTF_1_PARINIT)
 		    {
@@ -11580,7 +11646,7 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 		      val ^= DTF_1_CONFEXP;
 		    }
 		  if (val != 0)
-		    printf (" %lx", val);
+		    printf (" %" PRIx64, val);
 		  puts ("");
 		}
 	    }
@@ -11595,7 +11661,7 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 		printf (_(" None\n"));
 	      else
 		{
-		  unsigned long int val = entry->d_un.d_val;
+		  uint64_t val = entry->d_un.d_val;
 
 		  if (val & DF_P1_LAZYLOAD)
 		    {
@@ -11608,7 +11674,7 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 		      val ^= DF_P1_GROUPPERM;
 		    }
 		  if (val != 0)
-		    printf (" %lx", val);
+		    printf (" %" PRIx64, val);
 		  puts ("");
 		}
 	    }
@@ -11622,7 +11688,7 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 		printf (_(" None\n"));
 	      else
 		{
-		  unsigned long int val = entry->d_un.d_val;
+		  uint64_t val = entry->d_un.d_val;
 
 		  if (val & DF_1_NOW)
 		    {
@@ -11780,7 +11846,7 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 		      val ^= DF_1_NOCOMMON;
 		    }
 		  if (val != 0)
-		    printf (" %lx", val);
+		    printf (" %" PRIx64, val);
 		  puts ("");
 		}
 	    }
@@ -11935,8 +12001,8 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 	      tmp = gmtime (&atime);
 	      /* PR 17533 file: 041-1244816-0.004.  */
 	      if (tmp == NULL)
-		printf (_("<corrupt time val: %lx"),
-			(unsigned long) atime);
+		printf (_("<corrupt time val: %" PRIx64),
+			(uint64_t) atime);
 	      else
 		printf ("%04u-%02u-%02uT%02u:%02u:%02u\n",
 			tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
@@ -11962,7 +12028,7 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 		printf (_(" None\n"));
 	      else
 		{
-		  unsigned long int val = entry->d_un.d_val;
+		  uint64_t val = entry->d_un.d_val;
 
 		  if (val & DF_GNU_1_UNIQUE)
 		    {
@@ -11970,7 +12036,7 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 		      val ^= DF_GNU_1_UNIQUE;
 		    }
 		  if (val != 0)
-		    printf (" %lx", val);
+		    printf (" %" PRIx64, val);
 		  puts ("");
 		}
 	    }
@@ -12071,8 +12137,8 @@ process_version_sections (Filedata * filedata)
 	case SHT_GNU_verdef:
 	  {
 	    Elf_External_Verdef * edefs;
-	    unsigned long idx;
-	    unsigned long cnt;
+	    size_t idx;
+	    size_t cnt;
 	    char * endbuf;
 
 	    found = true;
@@ -12094,8 +12160,8 @@ process_version_sections (Filedata * filedata)
 		      section->sh_info);
 
 	    printf (_(" Addr: 0x%016" PRIx64), section->sh_addr);
-	    printf (_("  Offset: %#08lx  Link: %u (%s)\n"),
-		    (unsigned long) section->sh_offset, section->sh_link,
+	    printf (_("  Offset: 0x%08" PRIx64 "  Link: %u (%s)\n"),
+		    section->sh_offset, section->sh_link,
 		    printable_section_name_from_index (filedata, section->sh_link));
 
 	    edefs = (Elf_External_Verdef *)
@@ -12112,7 +12178,7 @@ process_version_sections (Filedata * filedata)
 		Elf_Internal_Verdef ent;
 		Elf_External_Verdaux * eaux;
 		Elf_Internal_Verdaux aux;
-		unsigned long isum;
+		size_t isum;
 		int j;
 
 		vstart = ((char *) edefs) + idx;
@@ -12129,7 +12195,7 @@ process_version_sections (Filedata * filedata)
 		ent.vd_aux     = BYTE_GET (edef->vd_aux);
 		ent.vd_next    = BYTE_GET (edef->vd_next);
 
-		printf (_("  %#06lx: Rev: %d  Flags: %s"),
+		printf (_("  %#06zx: Rev: %d  Flags: %s"),
 			idx, ent.vd_version, get_ver_flags (ent.vd_flags));
 
 		printf (_("  Index: %d  Cnt: %d  "),
@@ -12181,11 +12247,11 @@ process_version_sections (Filedata * filedata)
 		    aux.vda_next = BYTE_GET (eaux->vda_next);
 
 		    if (valid_dynamic_name (filedata, aux.vda_name))
-		      printf (_("  %#06lx: Parent %d: %s\n"),
+		      printf (_("  %#06zx: Parent %d: %s\n"),
 			      isum, j,
 			      get_dynamic_name (filedata, aux.vda_name));
 		    else
-		      printf (_("  %#06lx: Parent %d, name index: %ld\n"),
+		      printf (_("  %#06zx: Parent %d, name index: %ld\n"),
 			      isum, j, aux.vda_name);
 		  }
 
@@ -12217,8 +12283,8 @@ process_version_sections (Filedata * filedata)
 	case SHT_GNU_verneed:
 	  {
 	    Elf_External_Verneed * eneed;
-	    unsigned long idx;
-	    unsigned long cnt;
+	    size_t idx;
+	    size_t cnt;
 	    char * endbuf;
 
 	    found = true;
@@ -12240,8 +12306,8 @@ process_version_sections (Filedata * filedata)
 		      section->sh_info);
 
 	    printf (_(" Addr: 0x%016" PRIx64), section->sh_addr);
-	    printf (_("  Offset: %#08lx  Link: %u (%s)\n"),
-		    (unsigned long) section->sh_offset, section->sh_link,
+	    printf (_("  Offset: 0x%08" PRIx64 "  Link: %u (%s)\n"),
+		    section->sh_offset, section->sh_link,
 		    printable_section_name_from_index (filedata, section->sh_link));
 
 	    eneed = (Elf_External_Verneed *) get_data (NULL, filedata,
@@ -12256,7 +12322,7 @@ process_version_sections (Filedata * filedata)
 	      {
 		Elf_External_Verneed * entry;
 		Elf_Internal_Verneed ent;
-		unsigned long isum;
+		size_t isum;
 		int j;
 		char * vstart;
 
@@ -12272,7 +12338,7 @@ process_version_sections (Filedata * filedata)
 		ent.vn_aux     = BYTE_GET (entry->vn_aux);
 		ent.vn_next    = BYTE_GET (entry->vn_next);
 
-		printf (_("  %#06lx: Version: %d"), idx, ent.vn_version);
+		printf (_("  %#06zx: Version: %d"), idx, ent.vn_version);
 
 		if (valid_dynamic_name (filedata, ent.vn_file))
 		  printf (_("  File: %s"),
@@ -12303,10 +12369,10 @@ process_version_sections (Filedata * filedata)
 		    aux.vna_next  = BYTE_GET (eaux->vna_next);
 
 		    if (valid_dynamic_name (filedata, aux.vna_name))
-		      printf (_("  %#06lx:   Name: %s"),
+		      printf (_("  %#06zx:   Name: %s"),
 			      isum, get_dynamic_name (filedata, aux.vna_name));
 		    else
-		      printf (_("  %#06lx:   Name index: %lx"),
+		      printf (_("  %#06zx:   Name index: %lx"),
 			      isum, aux.vna_name);
 
 		    printf (_("  Flags: %s  Version: %d\n"),
@@ -12352,15 +12418,15 @@ process_version_sections (Filedata * filedata)
 	case SHT_GNU_versym:
 	  {
 	    Elf_Internal_Shdr * link_section;
-	    size_t total;
+	    uint64_t total;
 	    unsigned int cnt;
 	    unsigned char * edata;
 	    unsigned short * data;
 	    char * strtab;
 	    Elf_Internal_Sym * symbols;
 	    Elf_Internal_Shdr * string_sec;
-	    unsigned long num_syms;
-	    long off;
+	    uint64_t num_syms;
+	    uint64_t off;
 
 	    if (section->sh_link >= filedata->file_header.e_shnum)
 	      break;
@@ -12389,24 +12455,24 @@ process_version_sections (Filedata * filedata)
 	      }
 
 	    if (filedata->is_separate)
-	      printf (ngettext ("\nIn linked file '%s' the version symbols section '%s' contains %lu entry:\n",
-				"\nIn linked file '%s' the version symbols section '%s' contains %lu entries:\n",
+	      printf (ngettext ("\nIn linked file '%s' the version symbols section '%s' contains %" PRIu64 " entry:\n",
+				"\nIn linked file '%s' the version symbols section '%s' contains %" PRIu64 " entries:\n",
 				total),
 		      filedata->file_name,
 		      printable_section_name (filedata, section),
-		      (unsigned long) total);
+		      total);
 	    else
 	      printf (ngettext ("\nVersion symbols section '%s' "
-				"contains %lu entry:\n",
+				"contains %" PRIu64 " entry:\n",
 				"\nVersion symbols section '%s' "
-				"contains %lu entries:\n",
+				"contains %" PRIu64 " entries:\n",
 				total),
 		      printable_section_name (filedata, section),
-		      (unsigned long) total);
+		      total);
 
 	    printf (_(" Addr: 0x%016" PRIx64), section->sh_addr);
-	    printf (_("  Offset: %#08lx  Link: %u (%s)\n"),
-		    (unsigned long) section->sh_offset, section->sh_link,
+	    printf (_("  Offset: 0x%08" PRIx64 "  Link: %u (%s)\n"),
+		    section->sh_offset, section->sh_link,
 		    printable_section_name (filedata, link_section));
 
 	    off = offset_from_vma (filedata,
@@ -12455,7 +12521,7 @@ process_version_sections (Filedata * filedata)
 
 		      /* If this index value is greater than the size of the symbols
 		         array, break to avoid an out-of-bounds read.  */
-		      if ((unsigned long)(cnt + j) >= num_syms)
+		      if (cnt + j >= num_syms)
 		        {
 		          warn (_("invalid index into symbol array\n"));
 		          break;
@@ -12465,7 +12531,7 @@ process_version_sections (Filedata * filedata)
 		      if (filedata->version_info[DT_VERSIONTAGIDX (DT_VERNEED)])
 			{
 			  Elf_Internal_Verneed ivn;
-			  unsigned long offset;
+			  uint64_t offset;
 
 			  offset = offset_from_vma
 			    (filedata,
@@ -12477,7 +12543,7 @@ process_version_sections (Filedata * filedata)
 			      Elf_Internal_Vernaux ivna;
 			      Elf_External_Verneed evn;
 			      Elf_External_Vernaux evna;
-			      unsigned long a_off;
+			      uint64_t a_off;
 
 			      if (get_data (&evn, filedata, offset, sizeof (evn), 1,
 					    _("version need")) == NULL)
@@ -12528,7 +12594,7 @@ process_version_sections (Filedata * filedata)
 			{
 			  Elf_Internal_Verdef ivd;
 			  Elf_External_Verdef evd;
-			  unsigned long offset;
+			  uint64_t offset;
 
 			  offset = offset_from_vma
 			    (filedata,
@@ -12960,18 +13026,18 @@ get_symbol_index_type (Filedata * filedata, unsigned int type)
 }
 
 static const char *
-get_symbol_version_string (Filedata *                   filedata,
-			   bool                         is_dynsym,
-			   const char *                 strtab,
-			   unsigned long int            strtab_size,
-			   unsigned int                 si,
-			   Elf_Internal_Sym *           psym,
-			   enum versioned_symbol_info * sym_info,
-			   unsigned short *             vna_other)
+get_symbol_version_string (Filedata *filedata,
+			   bool is_dynsym,
+			   const char *strtab,
+			   size_t strtab_size,
+			   unsigned int si,
+			   Elf_Internal_Sym *psym,
+			   enum versioned_symbol_info *sym_info,
+			   unsigned short *vna_other)
 {
   unsigned char data[2];
   unsigned short vers_data;
-  unsigned long offset;
+  uint64_t offset;
   unsigned short max_vd_ndx;
 
   if (!is_dynsym
@@ -13010,7 +13076,7 @@ get_symbol_version_string (Filedata *                   filedata,
       Elf_Internal_Verdef ivd;
       Elf_Internal_Verdaux ivda;
       Elf_External_Verdaux evda;
-      unsigned long off;
+      uint64_t off;
 
       off = offset_from_vma (filedata,
 			     filedata->version_info[DT_VERSIONTAGIDX (DT_VERDEF)],
@@ -13074,7 +13140,7 @@ get_symbol_version_string (Filedata *                   filedata,
 				sizeof evn);
       do
 	{
-	  unsigned long vna_off;
+	  uint64_t vna_off;
 
 	  if (get_data (&evn, filedata, offset, sizeof (evn), 1,
 			_("version need")) == NULL)
@@ -13156,7 +13222,7 @@ print_dynamic_symbol_size (uint64_t vma, int base)
 }
 
 static void
-print_dynamic_symbol (Filedata *filedata, unsigned long si,
+print_dynamic_symbol (Filedata *filedata, uint64_t si,
 		      Elf_Internal_Sym *symtab,
 		      Elf_Internal_Shdr *section,
 		      char *strtab, size_t strtab_size)
@@ -13168,7 +13234,7 @@ print_dynamic_symbol (Filedata *filedata, unsigned long si,
   const char * sstr;
   Elf_Internal_Sym *psym = symtab + si;
 
-  printf ("%6ld: ", si);
+  printf ("%6" PRId64 ": ", si);
   print_vma (psym->st_value, LONG_HEX);
   putchar (' ');
   print_dynamic_symbol_size (psym->st_size, sym_base);
@@ -13249,7 +13315,7 @@ print_dynamic_symbol (Filedata *filedata, unsigned long si,
       /* Solaris binaries have been found to violate this requirement as
 	 well.  Not sure if this is a bug or an ABI requirement.  */
       && filedata->file_header.e_ident[EI_OSABI] != ELFOSABI_SOLARIS)
-    warn (_("local symbol %lu found at index >= %s's sh_info value of %u\n"),
+    warn (_("local symbol %" PRIu64 " found at index >= %s's sh_info value of %u\n"),
 	  si, printable_section_name (filedata, section), section->sh_info);
 }
 
@@ -13333,9 +13399,9 @@ display_lto_symtab (Filedata *           filedata,
 
   if (section->sh_size > filedata->file_size)
     {
-      error (_("Section %s has an invalid sh_size of 0x%lx\n"),
+      error (_("Section %s has an invalid sh_size of %#" PRIx64 "\n"),
 	     printable_section_name (filedata, section),
-	     (unsigned long) section->sh_size);
+	     section->sh_size);
       return false;
     }
 
@@ -13529,20 +13595,24 @@ process_symbol_table (Filedata * filedata)
       && filedata->dynamic_strings != NULL
       && filedata->dynamic_symbols != NULL)
     {
-      unsigned long si;
+      uint64_t si;
 
       if (filedata->is_separate)
 	{
-	  printf (ngettext ("\nIn linked file '%s' the dynamic symbol table contains %lu entry:\n",
-			    "\nIn linked file '%s' the dynamic symbol table contains %lu entries:\n",
+	  printf (ngettext ("\nIn linked file '%s' the dynamic symbol table"
+			    " contains %" PRIu64 " entry:\n",
+			    "\nIn linked file '%s' the dynamic symbol table"
+			    " contains %" PRIu64 " entries:\n",
 			    filedata->num_dynamic_syms),
 		  filedata->file_name,
 		  filedata->num_dynamic_syms);
 	}
       else
 	{
-	  printf (ngettext ("\nSymbol table for image contains %lu entry:\n",
-			    "\nSymbol table for image contains %lu entries:\n",
+	  printf (ngettext ("\nSymbol table for image contains %" PRIu64
+			    " entry:\n",
+			    "\nSymbol table for image contains %" PRIu64
+			    " entries:\n",
 			    filedata->num_dynamic_syms),
 		  filedata->num_dynamic_syms);
 	}
@@ -13566,9 +13636,9 @@ process_symbol_table (Filedata * filedata)
 	   i++, section++)
 	{
 	  char * strtab = NULL;
-	  unsigned long int strtab_size = 0;
+	  uint64_t strtab_size = 0;
 	  Elf_Internal_Sym * symtab;
-	  unsigned long si, num_syms;
+	  uint64_t si, num_syms;
 
 	  if ((section->sh_type != SHT_SYMTAB
 	       && section->sh_type != SHT_DYNSYM)
@@ -13586,15 +13656,19 @@ process_symbol_table (Filedata * filedata)
 	  num_syms = section->sh_size / section->sh_entsize;
 
 	  if (filedata->is_separate)
-	    printf (ngettext ("\nIn linked file '%s' symbol section '%s' contains %lu entry:\n",
-			      "\nIn linked file '%s' symbol section '%s' contains %lu entries:\n",
+	    printf (ngettext ("\nIn linked file '%s' symbol section '%s'"
+			      " contains %" PRIu64 " entry:\n",
+			      "\nIn linked file '%s' symbol section '%s'"
+			      " contains %" PRIu64 " entries:\n",
 			      num_syms),
 		    filedata->file_name,
 		    printable_section_name (filedata, section),
 		    num_syms);
 	  else
-	    printf (ngettext ("\nSymbol table '%s' contains %lu entry:\n",
-			      "\nSymbol table '%s' contains %lu entries:\n",
+	    printf (ngettext ("\nSymbol table '%s' contains %" PRIu64
+			      " entry:\n",
+			      "\nSymbol table '%s' contains %" PRIu64
+			      " entries:\n",
 			      num_syms),
 		    printable_section_name (filedata, section),
 		    num_syms);
@@ -13640,24 +13714,23 @@ process_symbol_table (Filedata * filedata)
 
   if (do_histogram && filedata->buckets != NULL)
     {
-      unsigned long * lengths;
-      unsigned long * counts;
-      unsigned long hn;
+      uint64_t *lengths;
+      uint64_t *counts;
+      uint64_t hn;
       uint64_t si;
-      unsigned long maxlength = 0;
-      unsigned long nzero_counts = 0;
-      unsigned long nsyms = 0;
+      uint64_t maxlength = 0;
+      uint64_t nzero_counts = 0;
+      uint64_t nsyms = 0;
       char *visited;
 
       printf (ngettext ("\nHistogram for bucket list length "
-			"(total of %lu bucket):\n",
+			"(total of %" PRIu64 " bucket):\n",
 			"\nHistogram for bucket list length "
-			"(total of %lu buckets):\n",
-			(unsigned long) filedata->nbuckets),
-	      (unsigned long) filedata->nbuckets);
+			"(total of %" PRIu64 " buckets):\n",
+			filedata->nbuckets),
+	      filedata->nbuckets);
 
-      lengths = (unsigned long *) calloc (filedata->nbuckets,
-					  sizeof (*lengths));
+      lengths = calloc (filedata->nbuckets, sizeof (*lengths));
       if (lengths == NULL)
 	{
 	  error (_("Out of memory allocating space for histogram buckets\n"));
@@ -13684,7 +13757,7 @@ process_symbol_table (Filedata * filedata)
 	}
       free (visited);
 
-      counts = (unsigned long *) calloc (maxlength + 1, sizeof (*counts));
+      counts = calloc (maxlength + 1, sizeof (*counts));
       if (counts == NULL)
 	{
 	  free (lengths);
@@ -13697,13 +13770,13 @@ process_symbol_table (Filedata * filedata)
 
       if (filedata->nbuckets > 0)
 	{
-	  unsigned long i;
-	  printf ("      0  %-10lu (%5.1f%%)\n",
+	  uint64_t i;
+	  printf ("      0  %-10" PRIu64 " (%5.1f%%)\n",
 		  counts[0], (counts[0] * 100.0) / filedata->nbuckets);
 	  for (i = 1; i <= maxlength; ++i)
 	    {
 	      nzero_counts += counts[i] * i;
-	      printf ("%7lu  %-10lu (%5.1f%%)    %5.1f%%\n",
+	      printf ("%7" PRIu64 "  %-10" PRIu64 " (%5.1f%%)    %5.1f%%\n",
 		      i, counts[i], (counts[i] * 100.0) / filedata->nbuckets,
 		      (nzero_counts * 100.0) / nsyms);
 	    }
@@ -13721,23 +13794,22 @@ process_symbol_table (Filedata * filedata)
 
   if (do_histogram && filedata->gnubuckets != NULL)
     {
-      unsigned long * lengths;
-      unsigned long * counts;
-      unsigned long hn;
-      unsigned long maxlength = 0;
-      unsigned long nzero_counts = 0;
-      unsigned long nsyms = 0;
+      uint64_t *lengths;
+      uint64_t *counts;
+      uint64_t hn;
+      uint64_t maxlength = 0;
+      uint64_t nzero_counts = 0;
+      uint64_t nsyms = 0;
 
       printf (ngettext ("\nHistogram for `%s' bucket list length "
-			"(total of %lu bucket):\n",
+			"(total of %" PRIu64 " bucket):\n",
 			"\nHistogram for `%s' bucket list length "
-			"(total of %lu buckets):\n",
-			(unsigned long) filedata->ngnubuckets),
+			"(total of %" PRIu64 " buckets):\n",
+			filedata->ngnubuckets),
 	      GNU_HASH_SECTION_NAME (filedata),
-	      (unsigned long) filedata->ngnubuckets);
+	      filedata->ngnubuckets);
 
-      lengths = (unsigned long *) calloc (filedata->ngnubuckets,
-					  sizeof (*lengths));
+      lengths = calloc (filedata->ngnubuckets, sizeof (*lengths));
       if (lengths == NULL)
 	{
 	  error (_("Out of memory allocating space for gnu histogram buckets\n"));
@@ -13763,7 +13835,7 @@ process_symbol_table (Filedata * filedata)
 	    nsyms += length;
 	  }
 
-      counts = (unsigned long *) calloc (maxlength + 1, sizeof (*counts));
+      counts = calloc (maxlength + 1, sizeof (*counts));
       if (counts == NULL)
 	{
 	  free (lengths);
@@ -13776,13 +13848,13 @@ process_symbol_table (Filedata * filedata)
 
       if (filedata->ngnubuckets > 0)
 	{
-	  unsigned long j;
-	  printf ("      0  %-10lu (%5.1f%%)\n",
+	  uint64_t j;
+	  printf ("      0  %-10" PRIu64 " (%5.1f%%)\n",
 		  counts[0], (counts[0] * 100.0) / filedata->ngnubuckets);
 	  for (j = 1; j <= maxlength; ++j)
 	    {
 	      nzero_counts += counts[j] * j;
-	      printf ("%7lu  %-10lu (%5.1f%%)    %5.1f%%\n",
+	      printf ("%7" PRIu64 "  %-10" PRIu64 " (%5.1f%%)    %5.1f%%\n",
 		      j, counts[j], (counts[j] * 100.0) / filedata->ngnubuckets,
 		      (nzero_counts * 100.0) / nsyms);
 	    }
@@ -13833,17 +13905,17 @@ process_syminfo (Filedata * filedata)
     return false;
 
   if (filedata->is_separate)
-    printf (ngettext ("\nIn linked file '%s: the dynamic info segment at offset 0x%lx contains %d entry:\n",
-		      "\nIn linked file '%s: the dynamic info segment at offset 0x%lx contains %d entries:\n",
+    printf (ngettext ("\nIn linked file '%s: the dynamic info segment at offset %#" PRIx64 " contains %d entry:\n",
+		      "\nIn linked file '%s: the dynamic info segment at offset %#" PRIx64 " contains %d entries:\n",
 		      filedata->dynamic_syminfo_nent),
 	    filedata->file_name,
 	    filedata->dynamic_syminfo_offset,
 	    filedata->dynamic_syminfo_nent);
   else
-    printf (ngettext ("\nDynamic info segment at offset 0x%lx "
-		      "contains %d entry:\n",
-		      "\nDynamic info segment at offset 0x%lx "
-		      "contains %d entries:\n",
+    printf (ngettext ("\nDynamic info segment at offset %#" PRIx64
+		      " contains %d entry:\n",
+		      "\nDynamic info segment at offset %#" PRIx64
+		      " contains %d entries:\n",
 		      filedata->dynamic_syminfo_nent),
 	    filedata->dynamic_syminfo_offset,
 	    filedata->dynamic_syminfo_nent);
@@ -13917,15 +13989,15 @@ process_syminfo (Filedata * filedata)
    discarded.  */
 
 static bool
-target_specific_reloc_handling (Filedata *           filedata,
-				Elf_Internal_Rela *  reloc,
-				unsigned char *      start,
-				unsigned char *      end,
-				Elf_Internal_Sym *   symtab,
-				unsigned long        num_syms)
+target_specific_reloc_handling (Filedata *filedata,
+				Elf_Internal_Rela *reloc,
+				unsigned char *start,
+				unsigned char *end,
+				Elf_Internal_Sym *symtab,
+				uint64_t num_syms)
 {
   unsigned int reloc_type = 0;
-  unsigned long sym_index = 0;
+  uint64_t sym_index = 0;
 
   if (reloc)
     {
@@ -13957,8 +14029,8 @@ target_specific_reloc_handling (Filedata *           filedata,
 	  case 23: /* R_MSP430X_GNU_SUB_ULEB128 */
 	    /* PR 21139.  */
 	    if (sym_index >= num_syms)
-	      error (_("MSP430 SYM_DIFF reloc contains invalid symbol index %lu\n"),
-		     sym_index);
+	      error (_("MSP430 SYM_DIFF reloc contains invalid symbol index"
+		       " %" PRIu64 "\n"), sym_index);
 	    else
 	      saved_sym = symtab + sym_index;
 	    return true;
@@ -14004,11 +14076,12 @@ target_specific_reloc_handling (Filedata *           filedata,
 		  }
 
 		if (leb_ret != 0 || reloc_size == 0 || reloc_size > 8)
-		  error (_("MSP430 ULEB128 field at 0x%lx contains invalid "
-			   "ULEB128 value\n"),
-			 (long) reloc->r_offset);
+		  error (_("MSP430 ULEB128 field at %#" PRIx64
+			   " contains invalid ULEB128 value\n"),
+			 reloc->r_offset);
 		else if (sym_index >= num_syms)
-		  error (_("MSP430 reloc contains invalid symbol index %lu\n"),
+		  error (_("MSP430 reloc contains invalid symbol index "
+			   "%" PRIu64 "\n"),
 			 sym_index);
 		else
 		  {
@@ -14019,8 +14092,9 @@ target_specific_reloc_handling (Filedata *           filedata,
 		      byte_put (start + reloc->r_offset, value, reloc_size);
 		    else
 		      /* PR 21137 */
-		      error (_("MSP430 sym diff reloc contains invalid offset: 0x%lx\n"),
-			     (long) reloc->r_offset);
+		      error (_("MSP430 sym diff reloc contains invalid offset: "
+			       "%#" PRIx64 "\n"),
+			     reloc->r_offset);
 		  }
 
 		saved_sym = NULL;
@@ -14053,7 +14127,8 @@ target_specific_reloc_handling (Filedata *           filedata,
 	    return true;
 	  case 33: /* R_MN10300_SYM_DIFF */
 	    if (sym_index >= num_syms)
-	      error (_("MN10300_SYM_DIFF reloc contains invalid symbol index %lu\n"),
+	      error (_("MN10300_SYM_DIFF reloc contains invalid symbol index "
+		       "%" PRIu64 "\n"),
 		     sym_index);
 	    else
 	      saved_sym = symtab + sym_index;
@@ -14067,7 +14142,8 @@ target_specific_reloc_handling (Filedata *           filedata,
 		uint64_t value;
 
 		if (sym_index >= num_syms)
-		  error (_("MN10300 reloc contains invalid symbol index %lu\n"),
+		  error (_("MN10300 reloc contains invalid symbol index "
+			   "%" PRIu64 "\n"),
 			 sym_index);
 		else
 		  {
@@ -14077,8 +14153,9 @@ target_specific_reloc_handling (Filedata *           filedata,
 		    if (IN_RANGE (start, end, start + reloc->r_offset, reloc_size))
 		      byte_put (start + reloc->r_offset, value, reloc_size);
 		    else
-		      error (_("MN10300 sym diff reloc contains invalid offset: 0x%lx\n"),
-			     (long) reloc->r_offset);
+		      error (_("MN10300 sym diff reloc contains invalid offset:"
+			       " %#" PRIx64 "\n"),
+			     reloc->r_offset);
 		  }
 
 		saved_sym = NULL;
@@ -14110,8 +14187,8 @@ target_specific_reloc_handling (Filedata *           filedata,
 	  case 0x80: /* R_RL78_SYM.  */
 	    saved_sym1 = saved_sym2;
 	    if (sym_index >= num_syms)
-	      error (_("RL78_SYM reloc contains invalid symbol index %lu\n"),
-		     sym_index);
+	      error (_("RL78_SYM reloc contains invalid symbol index "
+		       "%" PRIu64 "\n"), sym_index);
 	    else
 	      {
 		saved_sym2 = symtab[sym_index].st_value;
@@ -14129,8 +14206,9 @@ target_specific_reloc_handling (Filedata *           filedata,
 	    if (IN_RANGE (start, end, start + reloc->r_offset, 4))
 	      byte_put (start + reloc->r_offset, value, 4);
 	    else
-	      error (_("RL78 sym diff reloc contains invalid offset: 0x%lx\n"),
-		     (long) reloc->r_offset);
+	      error (_("RL78 sym diff reloc contains invalid offset: "
+		       "%#" PRIx64 "\n"),
+		     reloc->r_offset);
 	    value = 0;
 	    return true;
 
@@ -14138,8 +14216,9 @@ target_specific_reloc_handling (Filedata *           filedata,
 	    if (IN_RANGE (start, end, start + reloc->r_offset, 2))
 	      byte_put (start + reloc->r_offset, value, 2);
 	    else
-	      error (_("RL78 sym diff reloc contains invalid offset: 0x%lx\n"),
-		     (long) reloc->r_offset);
+	      error (_("RL78 sym diff reloc contains invalid offset: "
+		       "%#" PRIx64 "\n"),
+		     reloc->r_offset);
 	    value = 0;
 	    return true;
 
@@ -14908,7 +14987,7 @@ apply_relocations (Filedata *filedata,
 		   unsigned char *start,
 		   size_t size,
 		   void **relocs_return,
-		   unsigned long *num_relocs_return)
+		   uint64_t *num_relocs_return)
 {
   Elf_Internal_Shdr * relsec;
   unsigned char * end = start + size;
@@ -14929,12 +15008,12 @@ apply_relocations (Filedata *filedata,
        ++relsec)
     {
       bool is_rela;
-      unsigned long num_relocs;
+      uint64_t num_relocs;
       Elf_Internal_Rela * relocs;
       Elf_Internal_Rela * rp;
       Elf_Internal_Shdr * symsec;
       Elf_Internal_Sym * symtab;
-      unsigned long num_syms;
+      uint64_t num_syms;
       Elf_Internal_Sym * sym;
 
       if ((relsec->sh_type != SHT_RELA && relsec->sh_type != SHT_REL)
@@ -14978,7 +15057,7 @@ apply_relocations (Filedata *filedata,
 	  bool reloc_inplace = false;
 	  bool reloc_subtract = false;
 	  unsigned char *rloc;
-	  unsigned long sym_index;
+	  uint64_t sym_index;
 
 	  reloc_type = get_reloc_type (filedata, rp->r_info);
 
@@ -15047,16 +15126,18 @@ apply_relocations (Filedata *filedata,
 	  rloc = start + rp->r_offset;
 	  if (!IN_RANGE (start, end, rloc, reloc_size))
 	    {
-	      warn (_("skipping invalid relocation offset 0x%lx in section %s\n"),
-		    (unsigned long) rp->r_offset,
+	      warn (_("skipping invalid relocation offset %#" PRIx64
+		      " in section %s\n"),
+		    rp->r_offset,
 		    printable_section_name (filedata, section));
 	      continue;
 	    }
 
-	  sym_index = (unsigned long) get_reloc_symindex (rp->r_info);
+	  sym_index = get_reloc_symindex (rp->r_info);
 	  if (sym_index >= num_syms)
 	    {
-	      warn (_("skipping invalid relocation symbol index 0x%lx in section %s\n"),
+	      warn (_("skipping invalid relocation symbol index %#" PRIx64
+		      " in section %s\n"),
 		    sym_index, printable_section_name (filedata, section));
 	      continue;
 	    }
@@ -15079,10 +15160,10 @@ apply_relocations (Filedata *filedata,
 	      && ELF_ST_TYPE (sym->st_info) != STT_COMMON
 	      && ELF_ST_TYPE (sym->st_info) > STT_SECTION)
 	    {
-	      warn (_("skipping unexpected symbol type %s in section %s relocation %ld\n"),
+	      warn (_("skipping unexpected symbol type %s in section %s relocation %tu\n"),
 		    get_symbol_type (filedata, ELF_ST_TYPE (sym->st_info)),
 		    printable_section_name (filedata, relsec),
-		    (long int)(rp - relocs));
+		    rp - relocs);
 	      continue;
 	    }
 
@@ -15183,48 +15264,56 @@ get_section_contents (Elf_Internal_Shdr * section, Filedata * filedata)
                              _("section contents"));
 }
 
-/* Uncompresses a section that was compressed using zlib, in place.  */
+/* Uncompresses a section that was compressed using zlib/zstd, in place.  */
 
 static bool
-uncompress_section_contents (unsigned char **buffer,
-			     uint64_t uncompressed_size,
-			     uint64_t *size)
+uncompress_section_contents (bool is_zstd, unsigned char **buffer,
+			     uint64_t uncompressed_size, uint64_t *size)
 {
   uint64_t compressed_size = *size;
   unsigned char *compressed_buffer = *buffer;
-  unsigned char *uncompressed_buffer;
+  unsigned char *uncompressed_buffer = xmalloc (uncompressed_size);
   z_stream strm;
   int rc;
 
-  /* It is possible the section consists of several compressed
-     buffers concatenated together, so we uncompress in a loop.  */
-  /* PR 18313: The state field in the z_stream structure is supposed
-     to be invisible to the user (ie us), but some compilers will
-     still complain about it being used without initialisation.  So
-     we first zero the entire z_stream structure and then set the fields
-     that we need.  */
-  memset (& strm, 0, sizeof strm);
-  strm.avail_in = compressed_size;
-  strm.next_in = (Bytef *) compressed_buffer;
-  strm.avail_out = uncompressed_size;
-  uncompressed_buffer = (unsigned char *) xmalloc (uncompressed_size);
-
-  rc = inflateInit (& strm);
-  while (strm.avail_in > 0)
+  if (is_zstd)
     {
-      if (rc != Z_OK)
-        break;
-      strm.next_out = ((Bytef *) uncompressed_buffer
-                       + (uncompressed_size - strm.avail_out));
-      rc = inflate (&strm, Z_FINISH);
-      if (rc != Z_STREAM_END)
-        break;
-      rc = inflateReset (& strm);
+#ifdef HAVE_ZSTD
+      size_t ret = ZSTD_decompress (uncompressed_buffer, uncompressed_size,
+				    compressed_buffer, compressed_size);
+      if (ZSTD_isError (ret))
+	goto fail;
+#endif
     }
-  if (inflateEnd (& strm) != Z_OK
-      || rc != Z_OK
-      || strm.avail_out != 0)
-    goto fail;
+  else
+    {
+      /* It is possible the section consists of several compressed
+	 buffers concatenated together, so we uncompress in a loop.  */
+      /* PR 18313: The state field in the z_stream structure is supposed
+	 to be invisible to the user (ie us), but some compilers will
+	 still complain about it being used without initialisation.  So
+	 we first zero the entire z_stream structure and then set the fields
+	 that we need.  */
+      memset (&strm, 0, sizeof strm);
+      strm.avail_in = compressed_size;
+      strm.next_in = (Bytef *)compressed_buffer;
+      strm.avail_out = uncompressed_size;
+
+      rc = inflateInit (&strm);
+      while (strm.avail_in > 0)
+	{
+	  if (rc != Z_OK)
+	    break;
+	  strm.next_out = ((Bytef *)uncompressed_buffer
+			   + (uncompressed_size - strm.avail_out));
+	  rc = inflate (&strm, Z_FINISH);
+	  if (rc != Z_STREAM_END)
+	    break;
+	  rc = inflateReset (&strm);
+	}
+      if (inflateEnd (&strm) != Z_OK || rc != Z_OK || strm.avail_out != 0)
+	goto fail;
+    }
 
   *buffer = uncompressed_buffer;
   *size = uncompressed_size;
@@ -15267,6 +15356,7 @@ dump_section_as_strings (Elf_Internal_Shdr * section, Filedata * filedata)
     {
       uint64_t new_size = num_bytes;
       uint64_t uncompressed_size = 0;
+      bool is_zstd = false;
 
       if ((section->sh_flags & SHF_COMPRESSED) != 0)
 	{
@@ -15279,7 +15369,13 @@ dump_section_as_strings (Elf_Internal_Shdr * section, Filedata * filedata)
 	       by get_compression_header.  */
 	    goto error_out;
 
-	  if (chdr.ch_type != ELFCOMPRESS_ZLIB)
+	  if (chdr.ch_type == ch_compress_zlib)
+	    ;
+#ifdef HAVE_ZSTD
+	  else if (chdr.ch_type == ch_compress_zstd)
+	    is_zstd = true;
+#endif
+	  else
 	    {
 	      warn (_("section '%s' has unsupported compress type: %d\n"),
 		    printable_section_name (filedata, section), chdr.ch_type);
@@ -15308,8 +15404,8 @@ dump_section_as_strings (Elf_Internal_Shdr * section, Filedata * filedata)
 
       if (uncompressed_size)
 	{
-	  if (uncompress_section_contents (& start,
-					   uncompressed_size, & new_size))
+	  if (uncompress_section_contents (is_zstd, &start, uncompressed_size,
+					   &new_size))
 	    num_bytes = new_size;
 	  else
 	    {
@@ -15371,7 +15467,7 @@ dump_section_as_strings (Elf_Internal_Shdr * section, Filedata * filedata)
 	    }
 	  else
 	    {
-	      printf ("  [%6lx]  ", (unsigned long) (data - start));
+	      printf ("  [%6tx]  ", data - start);
 	    }
 
 	  if (maxlen > 0)
@@ -15483,6 +15579,7 @@ dump_section_as_bytes (Elf_Internal_Shdr *section,
     {
       uint64_t new_size = section_size;
       uint64_t uncompressed_size = 0;
+      bool is_zstd = false;
 
       if ((section->sh_flags & SHF_COMPRESSED) != 0)
 	{
@@ -15495,7 +15592,13 @@ dump_section_as_bytes (Elf_Internal_Shdr *section,
 	       by get_compression_header.  */
 	    goto error_out;
 
-	  if (chdr.ch_type != ELFCOMPRESS_ZLIB)
+	  if (chdr.ch_type == ch_compress_zlib)
+	    ;
+#ifdef HAVE_ZSTD
+	  else if (chdr.ch_type == ch_compress_zstd)
+	    is_zstd = true;
+#endif
+	  else
 	    {
 	      warn (_("section '%s' has unsupported compress type: %d\n"),
 		    printable_section_name (filedata, section), chdr.ch_type);
@@ -15524,8 +15627,8 @@ dump_section_as_bytes (Elf_Internal_Shdr *section,
 
       if (uncompressed_size)
 	{
-	  if (uncompress_section_contents (& start, uncompressed_size,
-					   & new_size))
+	  if (uncompress_section_contents (is_zstd, &start, uncompressed_size,
+					   &new_size))
 	    {
 	      section_size = new_size;
 	    }
@@ -15581,7 +15684,7 @@ dump_section_as_bytes (Elf_Internal_Shdr *section,
 
       lbytes = (bytes > 16 ? 16 : bytes);
 
-      printf ("  0x%8.8lx ", (unsigned long) addr);
+      printf ("  0x%8.8" PRIx64 " ", addr);
 
       for (j = 0; j < 16; j++)
 	{
@@ -15832,6 +15935,44 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
 #endif
 
 static bool
+dump_section_as_sframe (Elf_Internal_Shdr * section, Filedata * filedata)
+{
+  void *		  data = NULL;
+  sframe_decoder_ctx	  *sfd_ctx = NULL;
+  const char *print_name = printable_section_name (filedata, section);
+
+  bool ret = true;
+  size_t sf_size;
+  int err = 0;
+
+  if (strcmp (print_name, "") == 0)
+    {
+      error (_("Section name must be provided \n"));
+      ret = false;
+      return ret;
+    }
+
+  data = get_section_contents (section, filedata);
+  sf_size = section->sh_size;
+  /* Decode the contents of the section.  */
+  sfd_ctx = sframe_decode ((const char*)data, sf_size, &err);
+  if (!sfd_ctx)
+    {
+      ret = false;
+      error (_("SFrame decode failure: %s\n"), sframe_errmsg (err));
+      goto fail;
+    }
+
+  printf (_("Contents of the SFrame section %s:"), print_name);
+  /* Dump the contents as text.  */
+  dump_sframe (sfd_ctx, section->sh_addr);
+
+ fail:
+  free (data);
+  return ret;
+}
+
+static bool
 load_specific_debug_section (enum dwarf_section_display_enum  debug,
 			     const Elf_Internal_Shdr *        sec,
 			     void *                           data)
@@ -15861,6 +16002,7 @@ load_specific_debug_section (enum dwarf_section_display_enum  debug,
       unsigned char *start = section->start;
       uint64_t size = sec->sh_size;
       uint64_t uncompressed_size = 0;
+      bool is_zstd = false;
 
       if ((sec->sh_flags & SHF_COMPRESSED) != 0)
 	{
@@ -15882,7 +16024,13 @@ load_specific_debug_section (enum dwarf_section_display_enum  debug,
 	       by get_compression_header.  */
 	    return false;
 
-	  if (chdr.ch_type != ELFCOMPRESS_ZLIB)
+	  if (chdr.ch_type == ch_compress_zlib)
+	    ;
+#ifdef HAVE_ZSTD
+	  else if (chdr.ch_type == ch_compress_zstd)
+	    is_zstd = true;
+#endif
+	  else
 	    {
 	      warn (_("section '%s' has unsupported compress type: %d\n"),
 		    section->name, chdr.ch_type);
@@ -15911,7 +16059,7 @@ load_specific_debug_section (enum dwarf_section_display_enum  debug,
 
       if (uncompressed_size)
 	{
-	  if (uncompress_section_contents (&start, uncompressed_size,
+	  if (uncompress_section_contents (is_zstd, &start, uncompressed_size,
 					   &size))
 	    {
 	      /* Free the compressed buffer, update the section buffer
@@ -15955,7 +16103,7 @@ get_build_id (void * data)
 {
   Filedata * filedata = (Filedata *) data;
   Elf_Internal_Shdr * shdr;
-  unsigned long i;
+  size_t i;
 
   /* Iterate through notes to find note.gnu.build-id.
      FIXME: Only the first note in any note section is examined.  */
@@ -16062,7 +16210,7 @@ malformed note encountered in section %s whilst scanning for build-id note\n"),
           && startswith (inote.namedata, "GNU")
           && inote.type == NT_GNU_BUILD_ID)
         {
-          unsigned long j;
+          size_t j;
           char * build_id;
 
           build_id = malloc (inote.descsz * 2 + 1);
@@ -16330,6 +16478,11 @@ process_section_contents (Filedata * filedata)
 	    res = false;
 	}
 #endif
+      if (dump & SFRAME_DUMP)
+	{
+	  if (! dump_section_as_sframe (section, filedata))
+	    res = false;
+	}
     }
 
   if (! filedata->is_separate)
@@ -16388,7 +16541,7 @@ display_tag_value (signed int tag,
 		   unsigned char * p,
 		   const unsigned char * const end)
 {
-  unsigned long val;
+  uint64_t val;
 
   if (tag > 0)
     printf ("  Tag_unknown_%d: ", tag);
@@ -16418,7 +16571,7 @@ display_tag_value (signed int tag,
   else
     {
       READ_ULEB (val, p, end);
-      printf ("%ld (0x%lx)\n", val, val);
+      printf ("%" PRId64 " (0x%" PRIx64 ")\n", val, val);
     }
 
   assert (p <= end);
@@ -17550,7 +17703,7 @@ display_tic6x_attribute (unsigned char * p,
 static void
 display_raw_attribute (unsigned char * p, unsigned char const * const end)
 {
-  unsigned long addr = 0;
+  uint64_t addr = 0;
   size_t bytes = end - p;
 
   assert (end >= p);
@@ -17560,7 +17713,7 @@ display_raw_attribute (unsigned char * p, unsigned char const * const end)
       int k;
       int lbytes = (bytes > 16 ? 16 : bytes);
 
-      printf ("  0x%8.8lx ", addr);
+      printf ("  0x%8.8" PRIx64 " ", addr);
 
       for (j = 0; j < 16; j++)
 	{
@@ -17594,10 +17747,10 @@ display_raw_attribute (unsigned char * p, unsigned char const * const end)
 
 static unsigned char *
 display_msp430_attribute (unsigned char * p,
-			   const unsigned char * const end)
+			  const unsigned char * const end)
 {
-  unsigned int val;
-  unsigned int tag;
+  uint64_t val;
+  uint64_t tag;
 
   READ_ULEB (tag, p, end);
 
@@ -17611,7 +17764,7 @@ display_msp430_attribute (unsigned char * p,
 	case 0: printf (_("None\n")); break;
 	case 1: printf (_("MSP430\n")); break;
 	case 2: printf (_("MSP430X\n")); break;
-	default: printf ("??? (%d)\n", val); break;
+	default: printf ("??? (%" PRId64 ")\n", val); break;
 	}
       break;
 
@@ -17623,7 +17776,7 @@ display_msp430_attribute (unsigned char * p,
 	case 0: printf (_("None\n")); break;
 	case 1: printf (_("Small\n")); break;
 	case 2: printf (_("Large\n")); break;
-	default: printf ("??? (%d)\n", val); break;
+	default: printf ("??? (%" PRId64 ")\n", val); break;
 	}
       break;
 
@@ -17636,12 +17789,12 @@ display_msp430_attribute (unsigned char * p,
 	case 1: printf (_("Small\n")); break;
 	case 2: printf (_("Large\n")); break;
 	case 3: printf (_("Restricted Large\n")); break;
-	default: printf ("??? (%d)\n", val); break;
+	default: printf ("??? (%" PRId64 ")\n", val); break;
 	}
       break;
 
     default:
-      printf (_("  <unknown tag %d>: "), tag);
+      printf (_("  <unknown tag %" PRId64 ">: "), tag);
 
       if (tag & 1)
 	{
@@ -17663,7 +17816,7 @@ display_msp430_attribute (unsigned char * p,
       else
 	{
 	  READ_ULEB (val, p, end);
-	  printf ("%d (0x%x)\n", val, val);
+	  printf ("%" PRId64 " (0x%" PRIx64 ")\n", val, val);
 	}
       break;
    }
@@ -17679,7 +17832,7 @@ display_msp430_gnu_attribute (unsigned char * p,
 {
   if (tag == Tag_GNU_MSP430_Data_Region)
     {
-      unsigned int val;
+      uint64_t val;
 
       printf ("  Tag_GNU_MSP430_Data_Region: ");
       READ_ULEB (val, p, end);
@@ -17693,7 +17846,7 @@ display_msp430_gnu_attribute (unsigned char * p,
 	  printf (_("Lower Region Only\n"));
 	  break;
 	default:
-	  printf ("??? (%u)\n", val);
+	  printf ("??? (%" PRIu64 ")\n", val);
 	}
       return p;
     }
@@ -17721,8 +17874,8 @@ static unsigned char *
 display_riscv_attribute (unsigned char *p,
 			 const unsigned char * const end)
 {
-  unsigned int val;
-  unsigned int tag;
+  uint64_t val;
+  uint64_t tag;
   struct riscv_attr_tag_t *attr = NULL;
   unsigned i;
 
@@ -17749,7 +17902,7 @@ display_riscv_attribute (unsigned char *p,
     case Tag_RISCV_priv_spec_minor:
     case Tag_RISCV_priv_spec_revision:
       READ_ULEB (val, p, end);
-      printf (_("%u\n"), val);
+      printf ("%" PRIu64 "\n", val);
       break;
     case Tag_RISCV_unaligned_access:
       READ_ULEB (val, p, end);
@@ -17765,7 +17918,7 @@ display_riscv_attribute (unsigned char *p,
       break;
     case Tag_RISCV_stack_align:
       READ_ULEB (val, p, end);
-      printf (_("%u-bytes\n"), val);
+      printf (_("%" PRIu64 "-bytes\n"), val);
       break;
     case Tag_RISCV_arch:
       p = display_tag_value (-1, p, end);
@@ -17781,8 +17934,8 @@ static unsigned char *
 display_csky_attribute (unsigned char * p,
 			const unsigned char * const end)
 {
-  unsigned int tag;
-  unsigned int val;
+  uint64_t tag;
+  uint64_t val;
   READ_ULEB (tag, p, end);
 
   if (tag >= Tag_CSKY_MAX)
@@ -17818,7 +17971,7 @@ display_csky_attribute (unsigned char * p,
     case Tag_CSKY_VDSP_VERSION:
       printf ("  Tag_CSKY_VDSP_VERSION:\t");
       READ_ULEB (val, p, end);
-      printf ("VDSP Version %d\n", val);
+      printf ("VDSP Version %" PRId64 "\n", val);
       break;
 
     case Tag_CSKY_FPU_VERSION:
@@ -18511,10 +18664,10 @@ process_mips_specific (Filedata * filedata)
 					      _("liblist section data"));
       if (elib)
 	{
-	  printf (ngettext ("\nSection '.liblist' contains %lu entry:\n",
-			    "\nSection '.liblist' contains %lu entries:\n",
-			    (unsigned long) liblistno),
-		  (unsigned long) liblistno);
+	  printf (ngettext ("\nSection '.liblist' contains %zu entry:\n",
+			    "\nSection '.liblist' contains %zu entries:\n",
+			    liblistno),
+		  liblistno);
 	  fputs (_("     Library              Time Stamp          Checksum   Version Flags\n"),
 		 stdout);
 
@@ -18537,7 +18690,7 @@ process_mips_specific (Filedata * filedata)
 			tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
 			tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
 
-	      printf ("%3lu: ", (unsigned long) cnt);
+	      printf ("%3zu: ", cnt);
 	      if (valid_dynamic_name (filedata, liblist.l_name))
 		print_symbol (20, get_dynamic_name (filedata, liblist.l_name));
 	      else
@@ -18849,8 +19002,8 @@ process_mips_specific (Filedata * filedata)
 	 if we are sure that the cmalloc will fail.  */
       if (conflictsno > filedata->file_size / sizeof (* iconf))
 	{
-	  error (_("Overlarge number of conflicts detected: %lx\n"),
-		 (long) conflictsno);
+	  error (_("Overlarge number of conflicts detected: %zx\n"),
+		 conflictsno);
 	  return false;
 	}
 
@@ -18898,15 +19051,15 @@ process_mips_specific (Filedata * filedata)
 	  free (econf64);
 	}
 
-      printf (ngettext ("\nSection '.conflict' contains %lu entry:\n",
-			"\nSection '.conflict' contains %lu entries:\n",
-			(unsigned long) conflictsno),
-	      (unsigned long) conflictsno);
+      printf (ngettext ("\nSection '.conflict' contains %zu entry:\n",
+			"\nSection '.conflict' contains %zu entries:\n",
+			conflictsno),
+	      conflictsno);
       puts (_("  Num:    Index       Value  Name"));
 
       for (cnt = 0; cnt < conflictsno; ++cnt)
 	{
-	  printf ("%5lu: %8lu  ", (unsigned long) cnt, iconf[cnt]);
+	  printf ("%5zu: %8lu  ", cnt, iconf[cnt]);
 
 	  if (iconf[cnt] >= filedata->num_dynamic_syms)
 	    printf (_("<corrupt symbol index>"));
@@ -18943,8 +19096,9 @@ process_mips_specific (Filedata * filedata)
       /* PR binutils/17533 file: 012-111227-0.004  */
       if (symtabno < gotsym)
 	{
-	  error (_("The GOT symbol offset (%lu) is greater than the symbol table size (%lu)\n"),
-		 (unsigned long) gotsym, (unsigned long) symtabno);
+	  error (_("The GOT symbol offset (%" PRIu64
+		   ") is greater than the symbol table size (%" PRIu64 ")\n"),
+		 gotsym, symtabno);
 	  return false;
 	}
 
@@ -18952,7 +19106,7 @@ process_mips_specific (Filedata * filedata)
       /* PR 17531: file: 54c91a34.  */
       if (global_end < local_end)
 	{
-	  error (_("Too many GOT symbols: %lu\n"), (unsigned long) symtabno);
+	  error (_("Too many GOT symbols: %" PRIu64 "\n"), symtabno);
 	  return false;
 	}
 
@@ -19049,8 +19203,8 @@ process_mips_specific (Filedata * filedata)
 		    printf (_("<corrupt: %14ld>"), psym->st_name);
 		}
 	      else
-		printf (_("<symbol index %lu exceeds number of dynamic symbols>"),
-			(unsigned long) i);
+		printf (_("<symbol index %zu exceeds number of dynamic symbols>"),
+			i);
 
 	      printf ("\n");
 	      if (ent == (uint64_t) -1)
@@ -19066,8 +19220,8 @@ process_mips_specific (Filedata * filedata)
   if (mips_pltgot != 0 && jmprel != 0 && pltrel != 0 && pltrelsz != 0)
     {
       uint64_t ent, end;
-      size_t offset, rel_offset;
-      unsigned long count, i;
+      uint64_t offset, rel_offset;
+      uint64_t count, i;
       unsigned char * data;
       int addr_size, sym_width;
       Elf_Internal_Rela * rels;
@@ -19115,13 +19269,13 @@ process_mips_specific (Filedata * filedata)
       sym_width = (is_32bit_elf ? 80 : 160) - 17 - addr_size * 6 - 1;
       for (i = 0; i < count; i++)
 	{
-	  unsigned long idx = get_reloc_symindex (rels[i].r_info);
+	  uint64_t idx = get_reloc_symindex (rels[i].r_info);
 
 	  ent = print_mips_pltgot_entry (data, mips_pltgot, ent);
 	  printf (" ");
 
 	  if (idx >= filedata->num_dynamic_syms)
-	    printf (_("<corrupt symbol index: %lu>"), idx);
+	    printf (_("<corrupt symbol index: %" PRIu64 ">"), idx);
 	  else
 	    {
 	      Elf_Internal_Sym * psym = filedata->dynamic_symbols + idx;
@@ -19196,7 +19350,7 @@ process_gnu_liblist (Filedata * filedata)
   char * strtab;
   size_t strtab_size;
   size_t cnt;
-  unsigned long num_liblist;
+  uint64_t num_liblist;
   unsigned i;
   bool res = true;
 
@@ -19238,8 +19392,10 @@ process_gnu_liblist (Filedata * filedata)
 	  strtab_size = string_sec->sh_size;
 
 	  num_liblist = section->sh_size / sizeof (Elf32_External_Lib);
-	  printf (ngettext ("\nLibrary list section '%s' contains %lu entries:\n",
-			    "\nLibrary list section '%s' contains %lu entries:\n",
+	  printf (ngettext ("\nLibrary list section '%s' contains %" PRIu64
+			    " entries:\n",
+			    "\nLibrary list section '%s' contains %" PRIu64
+			    " entries:\n",
 			    num_liblist),
 		  printable_section_name (filedata, section),
 		  num_liblist);
@@ -19266,7 +19422,7 @@ process_gnu_liblist (Filedata * filedata)
 			tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
 			tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
 
-	      printf ("%3lu: ", (unsigned long) cnt);
+	      printf ("%3zu: ", cnt);
 	      if (do_wide)
 		printf ("%-20s", liblist.l_name < strtab_size
 			? strtab + liblist.l_name : _("<corrupt>"));
@@ -19391,6 +19547,10 @@ get_note_type (Filedata * filedata, unsigned e_type)
 	return _("NT_ARM_PACG_KEYS (ARM pointer authentication generic keys)");
       case NT_ARM_TAGGED_ADDR_CTRL:
 	return _("NT_ARM_TAGGED_ADDR_CTRL (AArch tagged address control)");
+      case NT_ARM_SSVE:
+	return _("NT_ARM_SSVE (AArch64 streaming SVE registers)");
+      case NT_ARM_ZA:
+	return _("NT_ARM_ZA (AArch64 SME ZA register)");
       case NT_ARM_PAC_ENABLED_KEYS:
 	return _("NT_ARM_PAC_ENABLED_KEYS (AArch64 pointer authentication enabled keys)");
       case NT_ARC_V2:
@@ -20103,7 +20263,7 @@ print_gnu_property_note (Filedata * filedata, Elf_Internal_Note * pnote)
 	      if (datasz != size)
 		printf (_("<corrupt length: %#x> "), datasz);
 	      else
-		printf ("%#lx", (unsigned long) byte_get (ptr, size));
+		printf ("%#" PRIx64, byte_get (ptr, size));
 	      goto next;
 
 	    case GNU_PROPERTY_NO_COPY_ON_PROTECTED:
@@ -20181,7 +20341,7 @@ print_gnu_note (Filedata * filedata, Elf_Internal_Note *pnote)
     {
     case NT_GNU_BUILD_ID:
       {
-	unsigned long i;
+	size_t i;
 
 	printf (_("    Build ID: "));
 	for (i = 0; i < pnote->descsz; ++i)
@@ -20192,7 +20352,7 @@ print_gnu_note (Filedata * filedata, Elf_Internal_Note *pnote)
 
     case NT_GNU_ABI_TAG:
       {
-	unsigned long os, major, minor, subminor;
+	unsigned int os, major, minor, subminor;
 	const char *osname;
 
 	/* PR 17531: file: 030-599401-0.004.  */
@@ -20235,14 +20395,14 @@ print_gnu_note (Filedata * filedata, Elf_Internal_Note *pnote)
 	    break;
 	  }
 
-	printf (_("    OS: %s, ABI: %ld.%ld.%ld\n"), osname,
+	printf (_("    OS: %s, ABI: %d.%d.%d\n"), osname,
 		major, minor, subminor);
       }
       break;
 
     case NT_GNU_GOLD_VERSION:
       {
-	unsigned long i;
+	size_t i;
 
 	printf (_("    Version: "));
 	for (i = 0; i < pnote->descsz && pnote->descdata[i] != '\0'; ++i)
@@ -20253,7 +20413,7 @@ print_gnu_note (Filedata * filedata, Elf_Internal_Note *pnote)
 
     case NT_GNU_HWCAP:
       {
-	unsigned long num_entries, mask;
+	unsigned int num_entries, mask;
 
 	/* Hardware capabilities information.  Word 0 is the number of entries.
 	   Word 1 is a bitmask of enabled entries.  The rest of the descriptor
@@ -20268,7 +20428,7 @@ print_gnu_note (Filedata * filedata, Elf_Internal_Note *pnote)
 	  }
 	num_entries = byte_get ((unsigned char *) pnote->descdata, 4);
 	mask = byte_get ((unsigned char *) pnote->descdata + 4, 4);
-	printf (_("num entries: %ld, enabled mask: %lx\n"), num_entries, mask);
+	printf (_("num entries: %d, enabled mask: %x\n"), num_entries, mask);
 	/* FIXME: Add code to display the entries... */
       }
       break;
@@ -20282,7 +20442,7 @@ print_gnu_note (Filedata * filedata, Elf_Internal_Note *pnote)
 	 created by get_gnu_elf_note_type(), so all that we need to do is to
 	 display the data.  */
       {
-	unsigned long i;
+	size_t i;
 
 	printf (_("    Description data: "));
 	for (i = 0; i < pnote->descsz; ++i)
@@ -20584,7 +20744,7 @@ static bool
 print_stapsdt_note (Elf_Internal_Note *pnote)
 {
   size_t len, maxlen;
-  unsigned long addr_size = is_32bit_elf ? 4 : 8;
+  size_t addr_size = is_32bit_elf ? 4 : 8;
   char *data = pnote->descdata;
   char *data_end = pnote->descdata + pnote->descsz;
   uint64_t pc, base_addr, semaphore;
@@ -20712,9 +20872,9 @@ get_ia64_vms_note_type (unsigned e_type)
 static bool
 print_ia64_vms_note (Elf_Internal_Note * pnote)
 {
-  int maxlen = pnote->descsz;
+  unsigned int maxlen = pnote->descsz;
 
-  if (maxlen < 2 || (unsigned long) maxlen != pnote->descsz)
+  if (maxlen < 2 || maxlen != pnote->descsz)
     goto desc_size_fail;
 
   switch (pnote->type)
@@ -20723,7 +20883,7 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
       if (maxlen <= 36)
 	goto desc_size_fail;
 
-      int l = (int) strnlen (pnote->descdata + 34, maxlen - 34);
+      size_t l = strnlen (pnote->descdata + 34, maxlen - 34);
 
       printf (_("    Creation date  : %.17s\n"), pnote->descdata);
       printf (_("    Last patch date: %.17s\n"), pnote->descdata + 17);
@@ -20824,9 +20984,9 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
 struct build_attr_cache {
   Filedata *filedata;
   char *strtab;
-  unsigned long strtablen;
+  uint64_t strtablen;
   Elf_Internal_Sym *symtab;
-  unsigned long nsyms;
+  uint64_t nsyms;
 } ba_cache;
 
 /* Find the symbol associated with a build attribute that is attached
@@ -20836,7 +20996,7 @@ struct build_attr_cache {
 
 static Elf_Internal_Sym *
 get_symbol_for_build_attribute (Filedata *filedata,
-				unsigned long offset,
+				uint64_t offset,
 				bool is_open_attr,
 				const char **pname)
 {
@@ -20950,7 +21110,7 @@ get_symbol_for_build_attribute (Filedata *filedata,
 /* Returns true iff addr1 and addr2 are in the same section.  */
 
 static bool
-same_section (Filedata * filedata, unsigned long addr1, unsigned long addr2)
+same_section (Filedata * filedata, uint64_t addr1, uint64_t addr2)
 {
   Elf_Internal_Shdr * a1;
   Elf_Internal_Shdr * a2;
@@ -20965,15 +21125,15 @@ static bool
 print_gnu_build_attribute_description (Elf_Internal_Note *  pnote,
 				       Filedata *           filedata)
 {
-  static unsigned long global_offset = 0;
-  static unsigned long global_end = 0;
-  static unsigned long func_offset = 0;
-  static unsigned long func_end = 0;
+  static uint64_t global_offset = 0;
+  static uint64_t global_end = 0;
+  static uint64_t func_offset = 0;
+  static uint64_t func_end = 0;
 
   Elf_Internal_Sym *sym;
   const char *name;
-  unsigned long start;
-  unsigned long end;
+  uint64_t start;
+  uint64_t end;
   bool is_open_attr = pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN;
 
   switch (pnote->descsz)
@@ -20984,17 +21144,20 @@ print_gnu_build_attribute_description (Elf_Internal_Note *  pnote,
       if (is_open_attr)
 	{
 	  if (global_end > global_offset)
-	    printf (_("    Applies to region from %#lx to %#lx\n"),
-		    global_offset, global_end);
+	    printf (_("    Applies to region from %#" PRIx64
+		      " to %#" PRIx64 "\n"), global_offset, global_end);
 	  else
-	    printf (_("    Applies to region from %#lx\n"), global_offset);
+	    printf (_("    Applies to region from %#" PRIx64
+		      "\n"), global_offset);
 	}
       else
 	{
 	  if (func_end > func_offset)
-	    printf (_("    Applies to region from %#lx to %#lx\n"), func_offset, func_end);
+	    printf (_("    Applies to region from %#" PRIx64
+		      " to %#" PRIx64 "\n"), func_offset, func_end);
 	  else
-	    printf (_("    Applies to region from %#lx\n"), func_offset);
+	    printf (_("    Applies to region from %#" PRIx64
+		      "\n"), func_offset);
 	}
       return true;
 
@@ -21041,26 +21204,27 @@ print_gnu_build_attribute_description (Elf_Internal_Note *  pnote,
 	     increasing address, but we should find the all of the notes
 	     for one section in the same place.  */
 	  && same_section (filedata, start, global_end))
-	warn (_("Gap in build notes detected from %#lx to %#lx\n"),
+	warn (_("Gap in build notes detected from %#" PRIx64
+		" to %#" PRIx64 "\n"),
 	      global_end + 1, start - 1);
 
-      printf (_("    Applies to region from %#lx"), start);
+      printf (_("    Applies to region from %#" PRIx64), start);
       global_offset = start;
 
       if (end)
 	{
-	  printf (_(" to %#lx"), end);
+	  printf (_(" to %#" PRIx64), end);
 	  global_end = end;
 	}
     }
   else
     {
-      printf (_("    Applies to region from %#lx"), start);
+      printf (_("    Applies to region from %#" PRIx64), start);
       func_offset = start;
 
       if (end)
 	{
-	  printf (_(" to %#lx"), end);
+	  printf (_(" to %#" PRIx64), end);
 	  func_end = end;
 	}
     }
@@ -21202,11 +21366,11 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
   if (strchr (expected_types, name_type) == NULL)
     warn (_("attribute does not have an expected type (%c)\n"), name_type);
 
-  if ((unsigned long)(name - pnote->namedata) > pnote->namesz)
+  if ((size_t) (name - pnote->namedata) > pnote->namesz)
     {
-      error (_("corrupt name field: namesz: %lu but parsing gets to %ld\n"),
-	     (unsigned long) pnote->namesz,
-	     (long) (name - pnote->namedata));
+      error (_("corrupt name field: namesz: %lu but parsing gets to %td\n"),
+	     pnote->namesz,
+	     name - pnote->namedata);
       return false;
     }
 
@@ -21217,10 +21381,10 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
     {
     case GNU_BUILD_ATTRIBUTE_TYPE_NUMERIC:
       {
-	unsigned int        bytes;
-	unsigned long long  val = 0;
-	unsigned int        shift = 0;
-	char *              decoded = NULL;
+	unsigned int bytes;
+	uint64_t val = 0;
+	unsigned int shift = 0;
+	char *decoded = NULL;
 
 	bytes = pnote->namesz - (name - pnote->namedata);
 	if (bytes > 0)
@@ -21240,7 +21404,7 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
 
 	while (bytes --)
 	  {
-	    unsigned long long byte = *name++ & 0xff;
+	    uint64_t byte = *name++ & 0xff;
 
 	    val |= byte << shift;
 	    shift += 8;
@@ -21288,9 +21452,9 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
 	else
 	  {
 	    if (do_wide)
-	      left -= printf ("0x%llx", val);
+	      left -= printf ("0x%" PRIx64, val);
 	    else
-	      left -= printf ("0x%-.*llx", left, val);
+	      left -= printf ("0x%-.*" PRIx64, left, val);
 	  }
       }
       break;
@@ -21318,7 +21482,7 @@ print_note_contents_hex (Elf_Internal_Note *pnote)
 {
   if (pnote->descsz)
     {
-      unsigned long i;
+      size_t i;
 
       printf (_("   description data: "));
       for (i = 0; i < pnote->descsz; i++)
@@ -21630,8 +21794,9 @@ process_notes_at (Filedata *           filedata,
   if (section)
     printf (_("Displaying notes found in: %s\n"), printable_section_name (filedata, section));
   else
-    printf (_("Displaying notes found at file offset 0x%08lx with length 0x%08lx:\n"),
-	    (unsigned long) offset, (unsigned long) length);
+    printf (_("Displaying notes found at file offset 0x%08" PRIx64
+	      " with length 0x%08" PRIx64 ":\n"),
+	    offset, length);
 
   /* NB: Some note sections may have alignment value of 0 or 1.  gABI
      specifies that notes should be aligned to 4 bytes in 32-bit
@@ -21642,8 +21807,8 @@ process_notes_at (Filedata *           filedata,
     align = 4;
   else if (align != 4 && align != 8)
     {
-      warn (_("Corrupt note: alignment %ld, expecting 4 or 8\n"),
-	    (long) align);
+      warn (_("Corrupt note: alignment %" PRId64 ", expecting 4 or 8\n"),
+	    align);
       free (pnotes);
       return false;
     }
@@ -21666,12 +21831,12 @@ process_notes_at (Filedata *           filedata,
 	  min_notesz = offsetof (Elf_External_Note, name);
 	  if (data_remaining < min_notesz)
 	    {
-	      warn (ngettext ("Corrupt note: only %ld byte remains, "
+	      warn (ngettext ("Corrupt note: only %zd byte remains, "
 			      "not enough for a full note\n",
-			      "Corrupt note: only %ld bytes remain, "
+			      "Corrupt note: only %zd bytes remain, "
 			      "not enough for a full note\n",
 			      data_remaining),
-		    (long) data_remaining);
+		    data_remaining);
 	      break;
 	    }
 	  data_remaining -= min_notesz;
@@ -21695,12 +21860,12 @@ process_notes_at (Filedata *           filedata,
 	  min_notesz = offsetof (Elf64_External_VMS_Note, name);
 	  if (data_remaining < min_notesz)
 	    {
-	      warn (ngettext ("Corrupt note: only %ld byte remains, "
+	      warn (ngettext ("Corrupt note: only %zd byte remains, "
 			      "not enough for a full note\n",
-			      "Corrupt note: only %ld bytes remain, "
+			      "Corrupt note: only %zd bytes remain, "
 			      "not enough for a full note\n",
 			      data_remaining),
-		    (long) data_remaining);
+		    data_remaining);
 	      break;
 	    }
 	  data_remaining -= min_notesz;
@@ -21723,9 +21888,9 @@ process_notes_at (Filedata *           filedata,
 	  || ((size_t) (next - inote.descdata)
 	      > data_remaining - (size_t) (inote.descdata - inote.namedata)))
 	{
-	  warn (_("note with invalid namesz and/or descsz found at offset 0x%lx\n"),
-		(unsigned long) ((char *) external - (char *) pnotes));
-	  warn (_(" type: 0x%lx, namesize: 0x%08lx, descsize: 0x%08lx, alignment: %u\n"),
+	  warn (_("note with invalid namesz and/or descsz found at offset %#tx\n"),
+		(char *) external - (char *) pnotes);
+	  warn (_(" type: %#lx, namesize: %#lx, descsize: %#lx, alignment: %u\n"),
 		inote.type, inote.namesz, inote.descsz, (int) align);
 	  break;
 	}
@@ -21808,8 +21973,9 @@ process_v850_notes (Filedata * filedata, uint64_t offset, uint64_t length)
   external = pnotes;
   end = (char*) pnotes + length;
 
-  printf (_("\nDisplaying contents of Renesas V850 notes section at offset 0x%lx with length 0x%lx:\n"),
-	  (unsigned long) offset, (unsigned long) length);
+  printf (_("\nDisplaying contents of Renesas V850 notes section at offset"
+	    " %#" PRIx64 " with length %#" PRIx64 ":\n"),
+	  offset, length);
 
   while ((char *) external + sizeof (Elf_External_Note) < end)
     {
@@ -21835,9 +22001,9 @@ process_v850_notes (Filedata * filedata, uint64_t offset, uint64_t length)
       if (   ((char *) next > end)
 	  || ((char *) next <  (char *) pnotes))
 	{
-	  warn (_("corrupt descsz found in note at offset 0x%lx\n"),
-		(unsigned long) ((char *) external - (char *) pnotes));
-	  warn (_(" type: 0x%lx, namesize: 0x%lx, descsize: 0x%lx\n"),
+	  warn (_("corrupt descsz found in note at offset %#tx\n"),
+		(char *) external - (char *) pnotes);
+	  warn (_(" type: %#lx, namesize: %#lx, descsize: %#lx\n"),
 		inote.type, inote.namesz, inote.descsz);
 	  break;
 	}
@@ -21848,9 +22014,9 @@ process_v850_notes (Filedata * filedata, uint64_t offset, uint64_t length)
       if (   inote.namedata + inote.namesz > end
 	  || inote.namedata + inote.namesz < inote.namedata)
         {
-          warn (_("corrupt namesz found in note at offset 0x%lx\n"),
-                (unsigned long) ((char *) external - (char *) pnotes));
-          warn (_(" type: 0x%lx, namesize: 0x%lx, descsize: 0x%lx\n"),
+          warn (_("corrupt namesz found in note at offset %#zx\n"),
+                (char *) external - (char *) pnotes);
+          warn (_(" type: %#lx, namesize: %#lx, descsize: %#lx\n"),
                 inote.type, inote.namesz, inote.descsz);
           break;
         }
@@ -21860,7 +22026,7 @@ process_v850_notes (Filedata * filedata, uint64_t offset, uint64_t length)
       if (! print_v850_note (& inote))
 	{
 	  res = false;
-	  printf ("<corrupt sizes: namesz: %lx, descsz: %lx>\n",
+	  printf ("<corrupt sizes: namesz: %#lx, descsz: %#lx>\n",
 		  inote.namesz, inote.descsz);
 	}
     }
@@ -21874,7 +22040,7 @@ static bool
 process_note_sections (Filedata * filedata)
 {
   Elf_Internal_Shdr *section;
-  unsigned long i;
+  size_t i;
   unsigned int n = 0;
   bool res = true;
 
@@ -22443,12 +22609,12 @@ process_archive (Filedata * filedata, bool is_thin_archive)
 	       filedata->file_name);
       else
 	{
-	  unsigned long i, l;
-	  unsigned long current_pos;
+	  uint64_t i, l;
+	  uint64_t current_pos;
 
-	  printf (_("Index of archive %s: (%lu entries, 0x%lx bytes "
-		    "in the symbol table)\n"),
-		  filedata->file_name, (unsigned long) arch.index_num,
+	  printf (_("Index of archive %s: (%" PRIu64 " entries,"
+		    " %#" PRIx64 " bytes in the symbol table)\n"),
+		  filedata->file_name, arch.index_num,
 		  arch.sym_size);
 
 	  current_pos = ftell (filedata->handle);
@@ -22501,10 +22667,10 @@ process_archive (Filedata * filedata, bool is_thin_archive)
 
 	  if (l < arch.sym_size)
 	    {
-	      error (ngettext ("%s: %ld byte remains in the symbol table, "
+	      error (ngettext ("%s: %" PRId64 " byte remains in the symbol table, "
 			       "but without corresponding entries in "
 			       "the index table\n",
-			       "%s: %ld bytes remain in the symbol table, "
+			       "%s: %" PRId64 " bytes remain in the symbol table, "
 			       "but without corresponding entries in "
 			       "the index table\n",
 			       arch.sym_size - l),
@@ -22512,7 +22678,7 @@ process_archive (Filedata * filedata, bool is_thin_archive)
 	      ret = false;
 	    }
 
-	  if (fseek (filedata->handle, current_pos, SEEK_SET) != 0)
+	  if (fseek64 (filedata->handle, current_pos, SEEK_SET) != 0)
 	    {
 	      error (_("%s: failed to seek back to start of object files "
 		       "in the archive\n"),
@@ -22539,7 +22705,7 @@ process_archive (Filedata * filedata, bool is_thin_archive)
       char * qualified_name;
 
       /* Read the next archive header.  */
-      if (fseek (filedata->handle, arch.next_arhdr_offset, SEEK_SET) != 0)
+      if (fseek64 (filedata->handle, arch.next_arhdr_offset, SEEK_SET) != 0)
 	{
 	  error (_("%s: failed to seek to next archive header\n"),
 		 arch.file_name);
@@ -22649,8 +22815,8 @@ process_archive (Filedata * filedata, bool is_thin_archive)
 
 	  /* The nested archive file will have been opened and setup by
 	     get_archive_member_name.  */
-	  if (fseek (nested_arch.file, filedata->archive_file_offset,
-		     SEEK_SET) != 0)
+	  if (fseek64 (nested_arch.file, filedata->archive_file_offset,
+		       SEEK_SET) != 0)
 	    {
 	      error (_("%s: failed to seek to archive member.\n"),
 		     nested_arch.file_name);

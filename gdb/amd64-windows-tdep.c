@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2022 Free Software Foundation, Inc.
+/* Copyright (C) 2009-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -355,7 +355,7 @@ amd64_windows_push_dummy_call
 static enum return_value_convention
 amd64_windows_return_value (struct gdbarch *gdbarch, struct value *function,
 			    struct type *type, struct regcache *regcache,
-			    gdb_byte *readbuf, const gdb_byte *writebuf)
+			    struct value **read_value, const gdb_byte *writebuf)
 {
   int len = type->length ();
   int regnum = -1;
@@ -394,20 +394,24 @@ amd64_windows_return_value (struct gdbarch *gdbarch, struct value *function,
   if (regnum < 0)
     {
       /* RAX contains the address where the return value has been stored.  */
-      if (readbuf)
+      if (read_value != nullptr)
 	{
 	  ULONGEST addr;
 
 	  regcache_raw_read_unsigned (regcache, AMD64_RAX_REGNUM, &addr);
-	  read_memory (addr, readbuf, type->length ());
+	  *read_value = value_at_non_lval (type, addr);
 	}
       return RETURN_VALUE_ABI_RETURNS_ADDRESS;
     }
   else
     {
       /* Extract the return value from the register where it was stored.  */
-      if (readbuf)
-	regcache->raw_read_part (regnum, 0, len, readbuf);
+      if (read_value != nullptr)
+	{
+	  *read_value = allocate_value (type);
+	  regcache->raw_read_part (regnum, 0, len,
+				   value_contents_raw (*read_value).data ());
+	}
       if (writebuf)
 	regcache->raw_write_part (regnum, 0, len, writebuf);
       return RETURN_VALUE_REGISTER_CONVENTION;
@@ -1297,7 +1301,7 @@ amd64_windows_init_abi_common (gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Function calls.  */
   set_gdbarch_push_dummy_call (gdbarch, amd64_windows_push_dummy_call);
-  set_gdbarch_return_value (gdbarch, amd64_windows_return_value);
+  set_gdbarch_return_value_as_value (gdbarch, amd64_windows_return_value);
   set_gdbarch_skip_main_prologue (gdbarch, amd64_skip_main_prologue);
   set_gdbarch_skip_trampoline_code (gdbarch,
 				    amd64_windows_skip_trampoline_code);

@@ -1,4 +1,4 @@
-# Copyright (C) 2021 Free Software Foundation, Inc.
+# Copyright (C) 2021-2023 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -24,6 +24,13 @@ if {[info exists env(LC_ALL)]} {
 set env(LC_ALL) "C"
 
 set pltf [exec uname -i]
+
+# Native testing only for now.
+if { ![istarget $pltf-*-*]
+     && (![string match i?86 $pltf] || ![istarget i?86-*-*]) } then {
+    return
+}
+
 switch $pltf {
   x86_64 {
     # Columns in the table represent:
@@ -54,6 +61,7 @@ switch $pltf {
   }
 }
 
+global JDK_INC
 global GPROFNG_BROKEN_JAVAC
 
 foreach line $table {
@@ -63,7 +71,8 @@ foreach line $table {
 
   verbose [file rootname $line]
   verbose running display test $line
-  if { $GPROFNG_BROKEN_JAVAC == "yes" && $dir == "jsynprog" } {
+  if { $dir == "jsynprog"
+       && ($JDK_INC == "" || $GPROFNG_BROKEN_JAVAC == "yes") } {
     unsupported $dir
   } else {
     run_display_test $dir $cflags $gprofflags

@@ -1,5 +1,5 @@
 /* Low level interface to ptrace, for GDB when running under Unix.
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -113,9 +113,9 @@ static struct terminal_info *get_inflow_inferior_data (struct inferior *);
    we save our handlers in these two variables and set SIGINT and SIGQUIT
    to SIG_IGN.  */
 
-static sighandler_t sigint_ours;
+static gdb::optional<sighandler_t> sigint_ours;
 #ifdef SIGQUIT
-static sighandler_t sigquit_ours;
+static gdb::optional<sighandler_t> sigquit_ours;
 #endif
 
 /* The name of the tty (from the `tty' command) that we're giving to
@@ -212,10 +212,9 @@ gdb_save_tty_state (void)
     }
 }
 
-/* Try to determine whether TTY is GDB's input terminal.  Returns
-   TRIBOOL_UNKNOWN if we can't tell.  */
+/* See inferior.h.  */
 
-static tribool
+tribool
 is_gdb_terminal (const char *tty)
 {
   struct stat gdb_tty;
@@ -234,26 +233,6 @@ is_gdb_terminal (const char *tty)
 	   && gdb_tty.st_ino == other_tty.st_ino)
 	  ? TRIBOOL_TRUE
 	  : TRIBOOL_FALSE);
-}
-
-/* Helper for sharing_input_terminal.  Try to determine whether
-   inferior INF is using the same TTY for input as GDB is.  Returns
-   TRIBOOL_UNKNOWN if we can't tell.  */
-
-static tribool
-sharing_input_terminal_1 (inferior *inf)
-{
-  /* Using host-dependent code here is fine, because the
-     child_terminal_foo functions are meant to be used by child/native
-     targets.  */
-#if defined (__linux__) || defined (__sun__)
-  char buf[100];
-
-  xsnprintf (buf, sizeof (buf), "/proc/%d/fd/0", inf->pid);
-  return is_gdb_terminal (buf);
-#else
-  return TRIBOOL_UNKNOWN;
-#endif
 }
 
 /* Return true if the inferior is using the same TTY for input as GDB
@@ -287,7 +266,7 @@ sharing_input_terminal (inferior *inf)
 {
   terminal_info *tinfo = get_inflow_inferior_data (inf);
 
-  tribool res = sharing_input_terminal_1 (inf);
+  tribool res = sharing_input_terminal (inf->pid);
 
   if (res == TRIBOOL_UNKNOWN)
     {
@@ -353,7 +332,7 @@ child_terminal_inferior (struct target_ops *self)
 
       if (!job_control)
 	{
-	  sigint_ours = signal (SIGINT, SIG_IGN);
+	  sigint_ours = install_sigint_handler (SIG_IGN);
 #ifdef SIGQUIT
 	  sigquit_ours = signal (SIGQUIT, SIG_IGN);
 #endif
@@ -501,9 +480,13 @@ child_terminal_ours_1 (target_terminal_state desired_state)
 
       if (!job_control && desired_state == target_terminal_state::is_ours)
 	{
-	  signal (SIGINT, sigint_ours);
+	  if (sigint_ours.has_value ())
+	    install_sigint_handler (*sigint_ours);
+	  sigint_ours.reset ();
 #ifdef SIGQUIT
-	  signal (SIGQUIT, sigquit_ours);
+	  if (sigquit_ours.has_value ())
+	    signal (SIGQUIT, *sigquit_ours);
+	  sigquit_ours.reset ();
 #endif
 	}
 
@@ -886,7 +869,7 @@ set_sigint_trap (void)
 
   if (inf->attach_flag || !tinfo->run_terminal.empty ())
     {
-      osig = signal (SIGINT, pass_signal);
+      osig = install_sigint_handler (pass_signal);
       osig_set = 1;
     }
   else
@@ -898,7 +881,7 @@ clear_sigint_trap (void)
 {
   if (osig_set)
     {
-      signal (SIGINT, osig);
+      install_sigint_handler (osig);
       osig_set = 0;
     }
 }

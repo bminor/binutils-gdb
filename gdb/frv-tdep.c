@@ -1,6 +1,6 @@
 /* Target-dependent code for the Fujitsu FR-V, for GDB, the GNU Debugger.
 
-   Copyright (C) 2002-2022 Free Software Foundation, Inc.
+   Copyright (C) 2002-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,7 +28,7 @@
 #include "trad-frame.h"
 #include "dis-asm.h"
 #include "sim-regno.h"
-#include "gdb/sim-frv.h"
+#include "sim/sim-frv.h"
 #include "opcodes/frv-desc.h"	/* for the H_SPR_... enums */
 #include "symtab.h"
 #include "elf-bfd.h"
@@ -89,6 +89,8 @@ struct frv_gdbarch_tdep : gdbarch_tdep_base
   const char **register_names = nullptr;
 };
 
+using frv_gdbarch_tdep_up = std::unique_ptr<frv_gdbarch_tdep>;
+
 /* Return the FR-V ABI associated with GDBARCH.  */
 enum frv_abi
 frv_abi (struct gdbarch *gdbarch)
@@ -130,12 +132,12 @@ frv_fdpic_loadmap_addresses (struct gdbarch *gdbarch, CORE_ADDR *interp_addr,
 
 /* Allocate a new variant structure, and set up default values for all
    the fields.  */
-static frv_gdbarch_tdep *
-new_variant (void)
+static frv_gdbarch_tdep_up
+new_variant ()
 {
   int r;
 
-  frv_gdbarch_tdep *var = new frv_gdbarch_tdep;
+  frv_gdbarch_tdep_up var (new frv_gdbarch_tdep);
 
   var->frv_abi = FRV_ABI_EABI;
   var->num_gprs = 64;
@@ -410,7 +412,7 @@ frv_register_sim_regno (struct gdbarch *gdbarch, int reg)
 	return SIM_FRV_SPR0_REGNUM + spr_reg_offset;
     }
 
-  internal_error (__FILE__, __LINE__, _("Bad register number %d"), reg);
+  internal_error (_("Bad register number %d"), reg);
 }
 
 constexpr gdb_byte frv_break_insn[] = {0xc0, 0x70, 0x00, 0x01};
@@ -1122,8 +1124,7 @@ frv_extract_return_value (struct type *type, struct regcache *regcache,
       store_unsigned_integer ((bfd_byte *) valbuf + 4, 4, byte_order, regval);
     }
   else
-    internal_error (__FILE__, __LINE__,
-		    _("Illegal return value length: %d"), len);
+    internal_error (_("Illegal return value length: %d"), len);
 }
 
 static CORE_ADDR
@@ -1328,8 +1329,7 @@ frv_store_return_value (struct type *type, struct regcache *regcache,
       regcache->cooked_write (9, (bfd_byte *) valbuf + 4);
     }
   else
-    internal_error (__FILE__, __LINE__,
-		    _("Don't know how to return a %d-byte value."), len);
+    internal_error (_("Don't know how to return a %d-byte value."), len);
 }
 
 static enum return_value_convention
@@ -1429,7 +1429,6 @@ static const struct frame_base frv_frame_base = {
 static struct gdbarch *
 frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   int elf_flags = 0;
 
   /* Check to see if we've already built an appropriate architecture
@@ -1439,7 +1438,9 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return arches->gdbarch;
 
   /* Select the right tdep structure for this variant.  */
-  frv_gdbarch_tdep *var = new_variant ();
+  gdbarch *gdbarch = gdbarch_alloc (&info, new_variant ());
+  frv_gdbarch_tdep *var = gdbarch_tdep<frv_gdbarch_tdep> (gdbarch);
+
   switch (info.bfd_arch_info->mach)
     {
     case bfd_mach_frv:
@@ -1472,8 +1473,6 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   if (elf_flags & EF_FRV_CPU_FR450)
     set_variant_scratch_registers (var);
-
-  gdbarch = gdbarch_alloc (&info, var);
 
   set_gdbarch_short_bit (gdbarch, 16);
   set_gdbarch_int_bit (gdbarch, 32);

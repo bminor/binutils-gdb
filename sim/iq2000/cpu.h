@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2022 Free Software Foundation, Inc.
+Copyright 1996-2023 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -61,7 +61,7 @@ CPU (h_gr[(index)]) = (x);\
 }\
 ;} while (0)
   } hardware;
-#define CPU_CGEN_HW(cpu) (& (cpu)->cpu_data.hardware)
+#define CPU_CGEN_HW(cpu) (& IQ2000_SIM_CPU (cpu)->cpu_data.hardware)
 } IQ2000BF_CPU_DATA;
 
 /* Cover fns for register access.  */

@@ -1,6 +1,6 @@
 // options.h -- handle command line options for gold  -*- C++ -*-
 
-// Copyright (C) 2006-2022 Free Software Foundation, Inc.
+// Copyright (C) 2006-2023 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -770,8 +770,8 @@ class General_options
 
   DEFINE_enum(compress_debug_sections, options::TWO_DASHES, '\0', "none",
 	      N_("Compress .debug_* sections in the output file"),
-	      ("[none,zlib,zlib-gnu,zlib-gabi]"), false,
-	      {"none", "zlib", "zlib-gnu", "zlib-gabi"});
+	      ("[none,zlib,zlib-gnu,zlib-gabi,zstd]"), false,
+	      {"none", "zlib", "zlib-gnu", "zlib-gabi", "zstd"});
 
   DEFINE_bool(copy_dt_needed_entries, options::TWO_DASHES, '\0', false,
 	      N_("Not supported"),
@@ -1460,9 +1460,6 @@ class General_options
 
   // The -z options.
 
-  DEFINE_bool(bndplt, options::DASH_Z, '\0', false,
-	      N_("(x86-64 only) Generate a BND PLT for Intel MPX"),
-	      N_("Generate a regular PLT"));
   DEFINE_bool(combreloc, options::DASH_Z, '\0', true,
 	      N_("Sort dynamic relocs"),
 	      N_("Do not sort dynamic relocs"));

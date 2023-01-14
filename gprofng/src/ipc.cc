@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Free Software Foundation, Inc.
+/* Copyright (C) 2021-2023 Free Software Foundation, Inc.
    Contributed by Oracle.
 
    This file is part of GNU Binutils.
@@ -69,16 +69,16 @@ bool2str (bool v)
   return v ? "true" : "false";
 }
 
-inline char*
-str2str (String v)
+inline const char*
+str2str (const char* v)
 {
-  return (char*) (v ? v : "NULL");
+  return v ? v : "NULL";
 }
 
-inline char*
-str2s (String v)
+inline const char*
+str2s (const char* v)
 {
-  return (char*) (v ? v : "");
+  return v ? v : "";
 }
 
 inline DbeView *

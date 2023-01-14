@@ -1,5 +1,5 @@
 /* Helper routines for C++ support in GDB.
-   Copyright (C) 2003-2022 Free Software Foundation, Inc.
+   Copyright (C) 2003-2023 Free Software Foundation, Inc.
 
    Contributed by David Carlton and by Kealia, Inc.
 
@@ -32,6 +32,7 @@
 #include "buildsym.h"
 #include "language.h"
 #include "namespace.h"
+#include <map>
 #include <string>
 
 static struct block_symbol
@@ -93,10 +94,12 @@ cp_scan_for_anonymous_namespaces (struct buildsym_compunit *compunit,
 	      /* We've found a component of the name that's an
 		 anonymous namespace.  So add symbols in it to the
 		 namespace given by the previous component if there is
-		 one, or to the global namespace if there isn't.  */
+		 one, or to the global namespace if there isn't.
+		 The declared line of this using directive can be set
+		 to 0, this way it is always considered valid.  */
 	      std::vector<const char *> excludes;
 	      add_using_directive (compunit->get_local_using_directives (),
-				   dest, src, NULL, NULL, excludes,
+				   dest, src, NULL, NULL, excludes, 0,
 				   1, &objfile->objfile_obstack);
 	    }
 	  /* The "+ 2" is for the "::".  */
@@ -342,7 +345,10 @@ cp_lookup_symbol_in_namespace (const char *the_namespace, const char *name,
   return sym;
 }
 
-/* Search for NAME by applying all import statements belonging to
+/* This version of the function is internal, use the wrapper unless
+   the list of ambiguous symbols is needed.
+
+   Search for NAME by applying all import statements belonging to
    BLOCK which are applicable in SCOPE.  If DECLARATION_ONLY the
    search is restricted to using declarations.
    Example:
@@ -370,38 +376,53 @@ cp_lookup_symbol_in_namespace (const char *the_namespace, const char *name,
    SEARCH_SCOPE_FIRST is an internal implementation detail: Callers must
    pass 0 for it.  Internally we pass 1 when recursing.  */
 
-static struct block_symbol
+static void
 cp_lookup_symbol_via_imports (const char *scope,
 			      const char *name,
 			      const struct block *block,
 			      const domain_enum domain,
 			      const int search_scope_first,
 			      const int declaration_only,
-			      const int search_parents)
+			      const int search_parents,
+			      std::map<std::string,
+				       struct block_symbol>& found_symbols)
 {
   struct using_direct *current;
   struct block_symbol sym = {};
   int len;
   int directive_match;
 
+  /* All the symbols we found will be kept in this relational map between
+     the mangled name and the block_symbol found.  We do this so that GDB
+     won't incorrectly report an ambiguous symbol for finding the same
+     thing twice.  */
+
   /* First, try to find the symbol in the given namespace if requested.  */
   if (search_scope_first)
-    sym = cp_lookup_symbol_in_namespace (scope, name,
-					 block, domain, 1);
+    {
+      sym = cp_lookup_symbol_in_namespace (scope, name,
+					   block, domain, 1);
+      if (sym.symbol != nullptr)
+	found_symbols[sym.symbol->m_name] = sym;
+    }
 
-  if (sym.symbol != NULL)
-    return sym;
+  /* Due to a GCC bug, we need to know the boundaries of the current block
+     to know if a certain using directive is valid.  */
+  symtab_and_line boundary_sal = find_pc_line (block->end () - 1, 0);
 
   /* Go through the using directives.  If any of them add new names to
      the namespace we're searching in, see if we can find a match by
      applying them.  */
-
   for (current = block_using (block);
        current != NULL;
        current = current->next)
     {
       const char **excludep;
 
+      /* If the using directive was below the place we are stopped at,
+	 do not use this directive.  */
+      if (!current->valid_line (boundary_sal.line))
+	continue;
       len = strlen (current->import_dest);
       directive_match = (search_parents
 			 ? (startswith (scope, current->import_dest)
@@ -437,7 +458,7 @@ cp_lookup_symbol_via_imports (const char *scope,
 	  if (declaration_only || sym.symbol != NULL || current->declaration)
 	    {
 	      if (sym.symbol != NULL)
-		return sym;
+		found_symbols[sym.symbol->m_name] = sym;
 
 	      continue;
 	    }
@@ -458,23 +479,57 @@ cp_lookup_symbol_via_imports (const char *scope,
 	      sym = cp_lookup_symbol_in_namespace (scope,
 						   current->import_src,
 						   block, domain, 1);
+	      found_symbols[sym.symbol->m_name] = sym;
 	    }
 	  else if (current->alias == NULL)
 	    {
 	      /* If this import statement creates no alias, pass
 		 current->inner as NAMESPACE to direct the search
 		 towards the imported namespace.  */
-	      sym = cp_lookup_symbol_via_imports (current->import_src,
-						  name, block,
-						  domain, 1, 0, 0);
+	      cp_lookup_symbol_via_imports (current->import_src, name,
+					    block, domain, 1, 0, 0,
+					    found_symbols);
 	    }
 
-	  if (sym.symbol != NULL)
-	    return sym;
 	}
     }
+}
 
-  return {};
+/* Wrapper for the actual cp_lookup_symbol_via_imports.  This wrapper sets
+   search_scope_first correctly and handles errors if needed.  */
+static struct block_symbol
+cp_lookup_symbol_via_imports (const char *scope,
+			      const char *name,
+			      const struct block *block,
+			      const domain_enum domain,
+			      const int declaration_only,
+			      const int search_parents)
+{
+  std::map<std::string, struct block_symbol> found_symbols;
+
+  cp_lookup_symbol_via_imports(scope, name, block, domain, 0,
+			       declaration_only, search_parents,
+			       found_symbols);
+
+  if (found_symbols.size () > 1)
+    {
+      auto itr = found_symbols.cbegin ();
+      std::string error_str = "Reference to \"";
+      error_str += name;
+      error_str += "\" is ambiguous, possibilities are: ";
+      error_str += itr->second.symbol->print_name ();
+      for (itr++; itr != found_symbols.end (); itr++)
+	{
+	  error_str += " and ";
+	  error_str += itr->second.symbol->print_name ();
+	}
+      error (_("%s"), error_str.c_str ());
+    }
+
+  if (found_symbols.size() == 1)
+    return found_symbols.cbegin ()->second;
+  else
+    return {};
 }
 
 /* Helper function that searches an array of symbols for one named NAME.  */
@@ -494,9 +549,10 @@ search_symbol_list (const char *name, int num,
   return NULL;
 }
 
-/* Like cp_lookup_symbol_via_imports, but if BLOCK is a function, it
-   searches through the template parameters of the function and the
-   function's type.  */
+/* Search for symbols whose name match NAME in the given SCOPE.
+   if BLOCK is a function, we'll search first through the template
+   parameters and function type. Afterwards (or if BLOCK is not a function)
+   search through imported directives using cp_lookup_symbol_via_imports.  */
 
 struct block_symbol
 cp_lookup_symbol_imports_or_template (const char *scope,
@@ -505,16 +561,10 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 				      const domain_enum domain)
 {
   struct symbol *function = block->function ();
-  struct block_symbol result;
 
-  if (symbol_lookup_debug)
-    {
-      gdb_printf (gdb_stdlog,
-		  "cp_lookup_symbol_imports_or_template"
-		  " (%s, %s, %s, %s)\n",
-		  scope, name, host_address_to_string (block),
-		  domain_name (domain));
-    }
+  symbol_lookup_debug_printf
+    ("cp_lookup_symbol_imports_or_template (%s, %s, %s, %s)",
+     scope, name, host_address_to_string (block), domain_name (domain));
 
   if (function != NULL && function->language () == language_cplus)
     {
@@ -529,13 +579,9 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 
 	  if (sym != NULL)
 	    {
-	      if (symbol_lookup_debug)
-		{
-		  gdb_printf (gdb_stdlog,
-			      "cp_lookup_symbol_imports_or_template"
-			      " (...) = %s\n",
-			      host_address_to_string (sym));
-		}
+	      symbol_lookup_debug_printf
+		("cp_lookup_symbol_imports_or_template (...) = %s",
+		 host_address_to_string (sym));
 	      return (struct block_symbol) {sym, block};
 	    }
 	}
@@ -574,27 +620,20 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 				      TYPE_TEMPLATE_ARGUMENTS (context));
 	      if (sym != NULL)
 		{
-		  if (symbol_lookup_debug)
-		    {
-		      gdb_printf
-			(gdb_stdlog,
-			 "cp_lookup_symbol_imports_or_template (...) = %s\n",
-			 host_address_to_string (sym));
-		    }
+		  symbol_lookup_debug_printf
+		    ("cp_lookup_symbol_imports_or_template (...) = %s",
+		     host_address_to_string (sym));
 		  return (struct block_symbol) {sym, parent};
 		}
 	    }
 	}
     }
 
-  result = cp_lookup_symbol_via_imports (scope, name, block, domain, 0, 1, 1);
-  if (symbol_lookup_debug)
-    {
-      gdb_printf (gdb_stdlog,
-		  "cp_lookup_symbol_imports_or_template (...) = %s\n",
-		  result.symbol != NULL
+  struct block_symbol result
+    = cp_lookup_symbol_via_imports (scope, name, block, domain, 1, 1);
+  symbol_lookup_debug_printf ("cp_lookup_symbol_imports_or_template (...) = %s\n",
+		  result.symbol != nullptr
 		  ? host_address_to_string (result.symbol) : "NULL");
-    }
   return result;
 }
 
@@ -611,8 +650,8 @@ cp_lookup_symbol_via_all_imports (const char *scope, const char *name,
 
   while (block != NULL)
     {
-      sym = cp_lookup_symbol_via_imports (scope, name, block, domain, 0, 0, 1);
-      if (sym.symbol)
+      sym = cp_lookup_symbol_via_imports (scope, name, block, domain, 0, 1);
+      if (sym.symbol != nullptr)
 	return sym;
 
       block = block->superblock ();
@@ -634,13 +673,9 @@ cp_lookup_symbol_namespace (const char *scope,
 {
   struct block_symbol sym;
 
-  if (symbol_lookup_debug)
-    {
-      gdb_printf (gdb_stdlog,
-		  "cp_lookup_symbol_namespace (%s, %s, %s, %s)\n",
-		  scope, name, host_address_to_string (block),
-		  domain_name (domain));
-    }
+  symbol_lookup_debug_printf ("cp_lookup_symbol_namespace (%s, %s, %s, %s)",
+			      scope, name, host_address_to_string (block),
+			      domain_name (domain));
 
   /* First, try to find the symbol in the given namespace.  */
   sym = cp_lookup_symbol_in_namespace (scope, name, block, domain, 1);
@@ -649,13 +684,9 @@ cp_lookup_symbol_namespace (const char *scope,
   if (sym.symbol == NULL)
     sym = cp_lookup_symbol_via_all_imports (scope, name, block, domain);
 
-  if (symbol_lookup_debug)
-    {
-      gdb_printf (gdb_stdlog,
-		  "cp_lookup_symbol_namespace (...) = %s\n",
-		  sym.symbol != NULL
-		  ? host_address_to_string (sym.symbol) : "NULL");
-    }
+  symbol_lookup_debug_printf ("cp_lookup_symbol_namespace (...) = %s",
+			      sym.symbol != NULL
+			      ? host_address_to_string (sym.symbol) : "NULL");
   return sym;
 }
 
@@ -740,14 +771,9 @@ cp_lookup_symbol_nonlocal (const struct language_defn *langdef,
   struct block_symbol sym;
   const char *scope = block_scope (block);
 
-  if (symbol_lookup_debug)
-    {
-      gdb_printf (gdb_stdlog,
-		  "cp_lookup_symbol_non_local"
-		  " (%s, %s (scope %s), %s)\n",
-		  name, host_address_to_string (block), scope,
-		  domain_name (domain));
-    }
+  symbol_lookup_debug_printf
+    ("cp_lookup_symbol_non_local (%s, %s (scope %s), %s)",
+     name, host_address_to_string (block), scope, domain_name (domain));
 
   /* First, try to find the symbol in the given namespace, and all
      containing namespaces.  */
@@ -757,14 +783,10 @@ cp_lookup_symbol_nonlocal (const struct language_defn *langdef,
   if (sym.symbol == NULL)
     sym = cp_lookup_symbol_via_all_imports (scope, name, block, domain);
 
-  if (symbol_lookup_debug)
-    {
-      gdb_printf (gdb_stdlog,
-		  "cp_lookup_symbol_nonlocal (...) = %s\n",
-		  (sym.symbol != NULL
-		   ? host_address_to_string (sym.symbol)
-		   : "NULL"));
-    }
+  symbol_lookup_debug_printf ("cp_lookup_symbol_nonlocal (...) = %s",
+			      (sym.symbol != NULL
+			       ? host_address_to_string (sym.symbol)
+			       : "NULL"));
   return sym;
 }
 
@@ -921,11 +943,10 @@ cp_lookup_nested_symbol (struct type *parent_type,
     {
       const char *type_name = saved_parent_type->name ();
 
-      gdb_printf (gdb_stdlog,
-		  "cp_lookup_nested_symbol (%s, %s, %s, %s)\n",
-		  type_name != NULL ? type_name : "unnamed",
-		  nested_name, host_address_to_string (block),
-		  domain_name (domain));
+      symbol_lookup_debug_printf ("cp_lookup_nested_symbol (%s, %s, %s, %s)",
+				  type_name != NULL ? type_name : "unnamed",
+				  nested_name, host_address_to_string (block),
+				  domain_name (domain));
     }
 
   switch (parent_type->code ())
@@ -955,30 +976,21 @@ cp_lookup_nested_symbol (struct type *parent_type,
 					 concatenated_name, block, domain,
 					 1, is_in_anonymous);
 
-	if (symbol_lookup_debug)
-	  {
-	    gdb_printf (gdb_stdlog,
-			"cp_lookup_nested_symbol (...) = %s\n",
-			(sym.symbol != NULL
-			 ? host_address_to_string (sym.symbol)
-			 : "NULL"));
-	  }
+	symbol_lookup_debug_printf ("cp_lookup_nested_symbol (...) = %s",
+				    (sym.symbol != NULL
+				     ? host_address_to_string (sym.symbol)
+				     : "NULL"));
 	return sym;
       }
 
     case TYPE_CODE_FUNC:
     case TYPE_CODE_METHOD:
-      if (symbol_lookup_debug)
-	{
-	  gdb_printf (gdb_stdlog,
-		      "cp_lookup_nested_symbol (...) = NULL"
-		      " (func/method)\n");
-	}
+      symbol_lookup_debug_printf
+	("cp_lookup_nested_symbol (...) = NULL (func/method)");
       return {};
 
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("cp_lookup_nested_symbol called "
+      internal_error (_("cp_lookup_nested_symbol called "
 			"on a non-aggregate type."));
     }
 }

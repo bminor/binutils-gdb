@@ -1,6 +1,6 @@
 /* C language support definitions for GDB, the GNU debugger.
 
-   Copyright (C) 1992-2022 Free Software Foundation, Inc.
+   Copyright (C) 1992-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -166,5 +166,10 @@ extern std::string cplus_compute_program (compile_instance *inst,
 					  struct gdbarch *gdbarch,
 					  const struct block *expr_block,
 					  CORE_ADDR expr_pc);
+
+/* Return the canonical form of the C symbol NAME.  If NAME is already
+   canonical, return nullptr.  */
+
+extern gdb::unique_xmalloc_ptr<char> c_canonicalize_name (const char *name);
 
 #endif /* !defined (C_LANG_H) */

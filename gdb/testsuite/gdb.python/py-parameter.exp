@@ -1,4 +1,4 @@
-# Copyright (C) 2010-2022 Free Software Foundation, Inc.
+# Copyright (C) 2010-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,6 +23,14 @@ clean_restart
 
 # Skip all tests if Python scripting is not enabled.
 if { [skip_python_tests] } { continue }
+
+proc py_param_test_maybe_no_output { command pattern args } {
+    if [string length $pattern] {
+	gdb_test $command $pattern $args
+    } else {
+	gdb_test_no_output $command $args
+    }
+}
 
 proc_with_prefix test_directories { } {
     # We use "." here instead of ":" so that this works on win32 too.
@@ -325,8 +333,89 @@ proc_with_prefix test_deprecated_api_parameter { } {
 	"test general help"
 }
 
+proc_with_prefix test_gdb_parameter { } {
+    foreach_with_prefix param {
+	"listsize"
+	"print elements"
+	"max-completions"
+    } {
+	clean_restart
+
+	set param_range_error ".*gdb.error: integer -1 out of range.*"
+	switch -- $param {
+	    "listsize" {
+		set param_get_zero None
+		set param_get_minus_one -1
+		set param_get_none None
+		set param_get_unlimited None
+		set param_set_minus_one ""
+	    }
+	    "print elements" {
+		set param_get_zero None
+		set param_get_minus_one None
+		set param_get_none None
+		set param_get_unlimited None
+		set param_set_minus_one $param_range_error
+	    }
+	    "max-completions" {
+		set param_get_zero 0
+		set param_get_minus_one -1
+		set param_get_none -1
+		set param_get_unlimited -1
+		set param_set_minus_one ""
+	    }
+	    default {
+		error "invalid param: $param"
+	    }
+	}
+
+	gdb_test_no_output "python gdb.set_parameter('$param', 1)" \
+	    "test set to 1"
+
+	gdb_test "python print(gdb.parameter('$param'))" \
+	    1 "test value of 1"
+
+	gdb_test_no_output "python gdb.set_parameter('$param', 0)" \
+	    "test set to 0"
+
+	gdb_test "python print(gdb.parameter('$param'))" \
+	    $param_get_zero "test value of 0"
+
+	py_param_test_maybe_no_output \
+	    "python gdb.set_parameter('$param', -1)" \
+	    $param_set_minus_one "test set to -1"
+
+	gdb_test "python print(gdb.parameter('$param'))" \
+	    $param_get_minus_one "test value of -1"
+
+	gdb_test_no_output "python gdb.set_parameter('$param', None)" \
+	    "test set to None"
+
+	gdb_test "python print(gdb.parameter('$param'))" \
+	    $param_get_none "test value of None"
+
+	gdb_test_no_output "python gdb.set_parameter('$param', 'unlimited')" \
+	    "test set to 'unlimited'"
+
+	gdb_test "python print(gdb.parameter('$param'))" \
+	    $param_get_unlimited "test value of 'unlimited'"
+    }
+
+    clean_restart
+
+    # This caused a gdb crash.
+    gdb_test "python print(gdb.parameter('endian'))" "auto" \
+	"print endian parameter"
+}
+
 proc_with_prefix test_integer_parameter { } {
-    foreach_with_prefix kind {PARAM_ZUINTEGER PARAM_ZUINTEGER_UNLIMITED} {
+    foreach_with_prefix kind {
+	PARAM_UINTEGER
+	PARAM_INTEGER
+	PARAM_ZINTEGER
+	PARAM_ZUINTEGER
+	PARAM_ZUINTEGER_UNLIMITED
+    } {
 	clean_restart
 
 	gdb_test_multiline "create parameter" \
@@ -338,20 +427,106 @@ proc_with_prefix test_integer_parameter { } {
 	    "test_param_$kind = TestNodocParam ('test-$kind')" "" \
 	    "end"
 
-	gdb_test "python print(gdb.parameter('test-$kind'))" "0"
-
-	gdb_test "python test_param_$kind.value = -5" "RuntimeError: Range exceeded.*"
-
-	if {$kind == "PARAM_ZUINTEGER"} {
-	    gdb_test "python test_param_$kind.value = -1" "RuntimeError: Range exceeded.*"
-	} elseif {$kind == "PARAM_ZUINTEGER_UNLIMITED"} {
-	    gdb_test_no_output "python test_param_$kind.value = -1" \
-		"check that PARAM_ZUINTEGER_UNLIMITED value can be set to -1"
-	    gdb_test "python print(gdb.parameter('test-$kind'))" "-1" \
-		"check that PARAM_ZUINTEGER_UNLIMITED value is -1 after setting"
-	} else {
-	    error "invalid kind: $kind"
+	set param_range_error "RuntimeError: Range exceeded.*"
+	set param_integer_error "RuntimeError: The value must be integer.*"
+	switch -- $kind {
+	    PARAM_UINTEGER {
+		set param_get_zero None
+		set param_get_minus_one None
+		set param_get_minus_five 1
+		set param_get_none None
+		set param_set_minus_one $param_range_error
+		set param_set_minus_five $param_range_error
+		set param_set_none ""
+	    }
+	    PARAM_INTEGER {
+		set param_get_zero None
+		set param_get_minus_one -1
+		set param_get_minus_five -5
+		set param_get_none None
+		set param_set_minus_one -1
+		set param_set_minus_five -5
+		set param_set_none ""
+	    }
+	    PARAM_ZINTEGER {
+		set param_get_zero 0
+		set param_get_minus_one -1
+		set param_get_minus_five -5
+		set param_get_none 5
+		set param_set_minus_one ""
+		set param_set_minus_five ""
+		set param_set_none $param_integer_error
+	    }
+	    PARAM_ZUINTEGER {
+		set param_get_zero 0
+		set param_get_minus_one 0
+		set param_get_minus_five 1
+		set param_get_none 5
+		set param_set_minus_one $param_range_error
+		set param_set_minus_five $param_range_error
+		set param_set_none $param_integer_error
+	    }
+	    PARAM_ZUINTEGER_UNLIMITED {
+		set param_get_zero 0
+		set param_get_minus_one -1
+		set param_get_minus_five 1
+		set param_get_none -1
+		set param_set_minus_one ""
+		set param_set_minus_five $param_range_error
+		set param_set_none ""
+	    }
+	    default {
+		error "invalid kind: $kind"
+	    }
 	}
+
+	gdb_test "python print(test_param_$kind.value)" \
+	    $param_get_zero "test default value"
+
+	gdb_test "python print(gdb.parameter('test-$kind'))" \
+	    $param_get_zero "test default value via gdb.parameter"
+
+	py_param_test_maybe_no_output "python test_param_$kind.value = -1" \
+	    $param_set_minus_one "test set to -1"
+
+	gdb_test "python print(test_param_$kind.value)" \
+	    $param_get_minus_one "test value of -1"
+
+	gdb_test "python print(gdb.parameter('test-$kind'))" \
+	    $param_get_minus_one "test value of -1 via gdb.parameter"
+
+	gdb_test_no_output "python test_param_$kind.value = 1" "test set to 1"
+
+	gdb_test "python print(test_param_$kind.value)" 1 "test value of 1"
+
+	gdb_test "python print(gdb.parameter('test-$kind'))" \
+	    1 "test value of 1 via gdb.parameter"
+
+	py_param_test_maybe_no_output "python test_param_$kind.value = -5" \
+	    $param_set_minus_five "test set to -5"
+
+	gdb_test "python print(gdb.parameter('test-$kind'))" \
+	    $param_get_minus_five "test value of -5 via gdb.parameter"
+
+	gdb_test_no_output "python test_param_$kind.value = 5" "test set to 5"
+
+	gdb_test "python print(gdb.parameter('test-$kind'))" \
+	    5 "test value of 5 via gdb.parameter"
+
+	py_param_test_maybe_no_output "python test_param_$kind.value = None" \
+	    $param_set_none "test set to None"
+
+	gdb_test "python print(test_param_$kind.value)" \
+	    $param_get_none "test value of None"
+
+	gdb_test "python print(gdb.parameter('test-$kind'))" \
+	    $param_get_none "test value of None via gdb.parameter"
+
+	gdb_test_no_output "python test_param_$kind.value = 0" \
+	    "test set to 0"
+
+	gdb_test "python print(gdb.parameter('test-$kind'))" \
+	    $param_get_zero "test value of 0 via gdb.parameter"
     }
 }
 
@@ -395,10 +570,9 @@ test_file_parameter
 test_undocumented_parameter
 test_really_undocumented_parameter
 test_deprecated_api_parameter
+test_gdb_parameter
 test_integer_parameter
 test_throwing_parameter
 test_language
 
-# This caused a gdb crash.
-gdb_test "python print(gdb.parameter('endian'))" "auto" \
-    "print endian parameter"
+rename py_param_test_maybe_no_output ""

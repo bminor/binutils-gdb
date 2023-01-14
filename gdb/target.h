@@ -1,6 +1,6 @@
 /* Interface between GDB and target environments, including files and processes
 
-   Copyright (C) 1990-2022 Free Software Foundation, Inc.
+   Copyright (C) 1990-2023 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.  Written by John Gilmore.
 
@@ -1337,9 +1337,6 @@ struct target_ops_deleter
 /* A unique pointer for target_ops.  */
 typedef std::unique_ptr<target_ops, target_ops_deleter> target_ops_up;
 
-/* Decref a target and close if, if there are no references left.  */
-extern void decref_target (target_ops *t);
-
 /* A policy class to interface gdb::ref_ptr with target_ops.  */
 
 struct target_ops_ref_policy
@@ -1349,10 +1346,9 @@ struct target_ops_ref_policy
     t->incref ();
   }
 
-  static void decref (target_ops *t)
-  {
-    decref_target (t);
-  }
+  /* Decrement the reference count on T, and, if the reference count
+     reaches zero, close the target.  */
+  static void decref (target_ops *t);
 };
 
 /* A gdb::ref_ptr pointer to a target_ops.  */
@@ -1389,7 +1385,7 @@ public:
   { return at (t->stratum ()) == t; }
 
   /* Return the target at STRATUM.  */
-  target_ops *at (strata stratum) const { return m_stack[stratum]; }
+  target_ops *at (strata stratum) const { return m_stack[stratum].get (); }
 
   /* Return the target at the top of the stack.  */
   target_ops *top () const { return at (m_top); }
@@ -1404,7 +1400,7 @@ private:
   /* The stack, represented as an array, with one slot per stratum.
      If no target is pushed at some stratum, the corresponding slot is
      null.  */
-  target_ops *m_stack[(int) debug_stratum + 1] {};
+  std::array<target_ops_ref, (int) debug_stratum + 1> m_stack;
 };
 
 /* Return the dummy target.  */
@@ -2392,17 +2388,6 @@ typedef std::unique_ptr<struct target_ops, target_unpusher> target_unpush_up;
 extern void target_pre_inferior (int);
 
 extern void target_preopen (int);
-
-/* Does whatever cleanup is required to get rid of all pushed targets.  */
-extern void pop_all_targets (void);
-
-/* Like pop_all_targets, but pops only targets whose stratum is at or
-   above STRATUM.  */
-extern void pop_all_targets_at_and_above (enum strata stratum);
-
-/* Like pop_all_targets, but pops only targets whose stratum is
-   strictly above ABOVE_STRATUM.  */
-extern void pop_all_targets_above (enum strata above_stratum);
 
 extern CORE_ADDR target_translate_tls_address (struct objfile *objfile,
 					       CORE_ADDR offset);

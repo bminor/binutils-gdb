@@ -1,7 +1,7 @@
 /* GNU/Linux/AArch64 specific low level interface, for the remote server for
    GDB.
 
-   Copyright (C) 2009-2022 Free Software Foundation, Inc.
+   Copyright (C) 2009-2023 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GDB.
@@ -292,9 +292,16 @@ aarch64_store_mteregset (struct regcache *regcache, const void *buf)
 static void
 aarch64_fill_tlsregset (struct regcache *regcache, void *buf)
 {
+  gdb_byte *tls_buf = (gdb_byte *) buf;
   int tls_regnum  = find_regno (regcache->tdesc, "tpidr");
 
-  collect_register (regcache, tls_regnum, buf);
+  collect_register (regcache, tls_regnum, tls_buf);
+
+  /* Read TPIDR2, if it exists.  */
+  gdb::optional<int> regnum = find_regno_no_throw (regcache->tdesc, "tpidr2");
+
+  if (regnum.has_value ())
+    collect_register (regcache, *regnum, tls_buf + sizeof (uint64_t));
 }
 
 /* Store TLS register to regcache.  */
@@ -302,9 +309,16 @@ aarch64_fill_tlsregset (struct regcache *regcache, void *buf)
 static void
 aarch64_store_tlsregset (struct regcache *regcache, const void *buf)
 {
+  gdb_byte *tls_buf = (gdb_byte *) buf;
   int tls_regnum  = find_regno (regcache->tdesc, "tpidr");
 
-  supply_register (regcache, tls_regnum, buf);
+  supply_register (regcache, tls_regnum, tls_buf);
+
+  /* Write TPIDR2, if it exists.  */
+  gdb::optional<int> regnum = find_regno_no_throw (regcache->tdesc, "tpidr2");
+
+  if (regnum.has_value ())
+    supply_register (regcache, *regnum, tls_buf + sizeof (uint64_t));
 }
 
 bool
@@ -508,21 +522,30 @@ aarch64_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
   return ret;
 }
 
-/* Return the address only having significant bits.  This is used to ignore
-   the top byte (TBI).  */
-
 static CORE_ADDR
-address_significant (CORE_ADDR addr)
+aarch64_remove_non_address_bits (CORE_ADDR pointer)
 {
-  /* Clear insignificant bits of a target address and sign extend resulting
-     address.  */
-  int addr_bit = 56;
+  /* By default, we assume TBI and discard the top 8 bits plus the
+     VA range select bit (55).  */
+  CORE_ADDR mask = AARCH64_TOP_BITS_MASK;
 
-  CORE_ADDR sign = (CORE_ADDR) 1 << (addr_bit - 1);
-  addr &= ((CORE_ADDR) 1 << addr_bit) - 1;
-  addr = (addr ^ sign) - sign;
+  /* Check if PAC is available for this target.  */
+  if (tdesc_contains_feature (current_process ()->tdesc,
+			      "org.gnu.gdb.aarch64.pauth"))
+    {
+      /* Fetch the PAC masks.  These masks are per-process, so we can just
+	 fetch data from whatever thread we have at the moment.
 
-  return addr;
+	 Also, we have both a code mask and a data mask.  For now they are the
+	 same, but this may change in the future.  */
+
+      struct regcache *regs = get_thread_regcache (current_thread, 1);
+      CORE_ADDR dmask = regcache_raw_get_unsigned_by_name (regs, "pauth_dmask");
+      CORE_ADDR cmask = regcache_raw_get_unsigned_by_name (regs, "pauth_cmask");
+      mask |= aarch64_mask_from_pac_registers (cmask, dmask);
+    }
+
+  return aarch64_remove_top_bits (pointer, mask);
 }
 
 /* Implementation of linux target ops method "low_stopped_data_address".  */
@@ -549,7 +572,7 @@ aarch64_target::low_stopped_data_address ()
      hardware watchpoint hit.  The stopped data addresses coming from the
      kernel can potentially be tagged addresses.  */
   const CORE_ADDR addr_trap
-    = address_significant ((CORE_ADDR) siginfo.si_addr);
+    = aarch64_remove_non_address_bits ((CORE_ADDR) siginfo.si_addr);
 
   /* Check if the address matches any watched address.  */
   state = aarch64_get_debug_reg_state (pid_of (current_thread));
@@ -795,8 +818,8 @@ aarch64_adjust_register_sets (const struct aarch64_features &features)
 	    regset->size = AARCH64_LINUX_SIZEOF_MTE;
 	  break;
 	case NT_ARM_TLS:
-	  if (features.tls)
-	    regset->size = AARCH64_TLS_REGS_SIZE;
+	  if (features.tls > 0)
+	    regset->size = AARCH64_TLS_REGISTER_SIZE * features.tls;
 	  break;
 	default:
 	  gdb_assert_not_reached ("Unknown register set found.");
@@ -829,7 +852,7 @@ aarch64_target::low_arch_setup ()
       features.pauth = linux_get_hwcap (8) & AARCH64_HWCAP_PACA;
       /* A-profile MTE is 64-bit only.  */
       features.mte = linux_get_hwcap2 (8) & HWCAP2_MTE;
-      features.tls = true;
+      features.tls = aarch64_tls_register_count (tid);
 
       current_process ()->tdesc = aarch64_linux_read_description (features);
 

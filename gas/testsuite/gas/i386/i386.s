@@ -66,3 +66,27 @@ movzx eax, byte ptr [eax]
 movzx eax, word ptr [eax]
 
 movnti dword ptr [eax], eax
+
+	.att_syntax
+	lar    %dx,%dx
+	lar    %dx,%edx
+	lar    %edx,%edx
+	lar    (%edx),%dx
+	lar    (%edx),%edx
+	lsl    %dx,%dx
+	lsl    %dx,%edx
+	lsl    %edx,%edx
+	lsl    (%edx),%dx
+	lsl    (%edx),%edx
+
+	.intel_syntax noprefix
+	lar    dx,dx
+	lar    edx,dx
+	lar    edx,edx
+	lar    dx,WORD PTR [edx]
+	lar    edx,WORD PTR [edx]
+	lsl    dx,dx
+	lsl    edx,dx
+	lsl    edx,edx
+	lsl    dx,WORD PTR [edx]
+	lsl    edx,WORD PTR [edx]

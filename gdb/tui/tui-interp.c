@@ -1,6 +1,6 @@
 /* TUI Interpreter definitions for GDB, the GNU debugger.
 
-   Copyright (C) 2003-2022 Free Software Foundation, Inc.
+   Copyright (C) 2003-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -152,7 +152,7 @@ tui_interp::interp_ui_out ()
 gdb_exception
 tui_interp::exec (const char *command_str)
 {
-  internal_error (__FILE__, __LINE__, _("tui_exec called"));
+  internal_error (_("tui_exec called"));
 }
 
 

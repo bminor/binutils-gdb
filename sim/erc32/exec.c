@@ -1,6 +1,6 @@
 /* This file is part of SIS (SPARC instruction simulator)
 
-   Copyright (C) 1995-2022 Free Software Foundation, Inc.
+   Copyright (C) 1995-2023 Free Software Foundation, Inc.
    Contributed by Jiri Gaisler, European Space Agency
 
    This program is free software; you can redistribute it and/or modify
@@ -1345,7 +1345,7 @@ dispatch_instruction(struct pstate *sregs)
 	    if (mexc) {
 		sregs->trap = TRAP_DEXC;
 	    } else {
-		sregs->fs[rd] = *((float32 *) & data);
+		memcpy (&sregs->fs[rd], &data, sizeof (sregs->fs[rd]));
 	    }
 	    break;
 	case LDDF:
@@ -1373,11 +1373,12 @@ dispatch_instruction(struct pstate *sregs)
 	    } else {
 		rd &= 0x1E;
 		sregs->flrd = rd;
-		sregs->fs[rd] = *((float32 *) & ddata[0]);
+		memcpy (&sregs->fs[rd], &ddata[0], sizeof (sregs->fs[rd]));
 #ifdef STAT
 		sregs->nload++;	/* Double load counts twice */
 #endif
-		sregs->fs[rd + 1] = *((float32 *) & ddata[1]);
+		memcpy (&sregs->fs[rd + 1], &ddata[1],
+			sizeof (sregs->fs[rd + 1]));
 		sregs->ltime = ebase.simtime + sregs->icnt + FLSTHOLD +
 			       sregs->hold + sregs->fhold;
 	    }

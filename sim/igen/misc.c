@@ -1,6 +1,6 @@
 /* The IGEN simulator generator for GDB, the GNU Debugger.
 
-   Copyright 2002-2022 Free Software Foundation, Inc.
+   Copyright 2002-2023 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney.
 
@@ -34,7 +34,7 @@
    trailing '\n' */
 
 void
-error (const line_ref *line, char *msg, ...)
+error (const line_ref *line, const char *msg, ...)
 {
   va_list ap;
   if (line != NULL)
@@ -46,7 +46,7 @@ error (const line_ref *line, char *msg, ...)
 }
 
 void
-warning (const line_ref *line, char *msg, ...)
+warning (const line_ref *line, const char *msg, ...)
 {
   va_list ap;
   if (line != NULL)
@@ -57,7 +57,7 @@ warning (const line_ref *line, char *msg, ...)
 }
 
 void
-notify (const line_ref *line, char *msg, ...)
+notify (const line_ref *line, const char *msg, ...)
 {
   va_list ap;
   if (line != NULL)
@@ -246,7 +246,7 @@ name2i (const char *names, const name_map * map)
   if (curr->i >= 0)
     return curr->i;
   else
-    error (NULL, "%s contains no valid names", names);
+    error (NULL, "%s contains no valid names\n", names);
   return 0;
 }
 

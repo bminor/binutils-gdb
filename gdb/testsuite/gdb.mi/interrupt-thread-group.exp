@@ -1,4 +1,4 @@
-# Copyright 2021-2022 Free Software Foundation, Inc.
+# Copyright 2021-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ if { $use_second_inferior } {
 	"\\^running.*" \
 	"run inferior 2"
 
-    mi_expect_stop "breakpoint-hit" "all_threads_started" ".*" ".*" ".*" {"" "disp=\"keep\""} \
+    mi_expect_stop "breakpoint-hit" "all_threads_started" ".*" ".*" ".*" {"" "disp=\"keep\"" "locno=\"[0-9]+\""} \
 	"inferior i2 stops at all_threads_started"
 
     mi_send_resuming_command "exec-continue --thread-group i2" \

@@ -1,6 +1,6 @@
 # Expect script for linker support of size relocations.
 #
-#   Copyright (C) 2013-2022 Free Software Foundation, Inc.
+#   Copyright (C) 2013-2023 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -30,6 +30,12 @@ if {!(([istarget "i?86-*-*"]
 	  || [istarget "*-*-linux*"]
 	  || [istarget "*-*-gnu*"])) } {
     verbose "Size relocations tests not run - no target support"
+    return
+}
+
+# Skip when -shared is not supported
+if { ![check_shared_lib_support] } {
+    verbose "Size relocation tests not run - shared support disabled"
     return
 }
 
@@ -274,7 +280,7 @@ run_ld_link_exec_tests [list \
     ] \
     [list \
 	"Run size-8" \
-	"$NOPIE_LDFLAGS -Wl,--no-as-needed,--hash-styl=gnu,-z,notext \
+	"$NOPIE_LDFLAGS -Wl,--no-as-needed,--hash-style=gnu,-z,notext \
 	 tmpdir/libsize-8.so" \
 	"" \
 	{size-8a.c} \

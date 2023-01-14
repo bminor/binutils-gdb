@@ -1,6 +1,6 @@
 /* Serial interface for local (hardwired) serial ports on Un*x like systems
 
-   Copyright (C) 1992-2022 Free Software Foundation, Inc.
+   Copyright (C) 1992-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -447,8 +447,7 @@ hardwire_setparity (struct serial *scb, int parity)
       newparity = PARENB;
       break;
     default:
-      internal_warning (__FILE__, __LINE__,
-			"Incorrect parity value: %d", parity);
+      internal_warning ("Incorrect parity value: %d", parity);
       return -1;
     }
 

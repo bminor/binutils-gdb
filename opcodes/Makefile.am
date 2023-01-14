@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 #
-#   Copyright (C) 2012-2022 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2023 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -64,9 +64,7 @@ HFILES = \
 	epiphany-desc.h epiphany-opc.h \
 	fr30-desc.h fr30-opc.h \
 	frv-desc.h frv-opc.h \
-	i386-init.h \
 	i386-opc.h \
-	i386-tbl.h \
 	ia64-asmtab.h \
 	ia64-opc.h \
 	ip2k-desc.h ip2k-opc.h \
@@ -162,7 +160,6 @@ TARGET32_LIBOPCODES_CFILES = \
 	h8300-dis.c \
 	hppa-dis.c \
 	i386-dis.c \
-	i386-opc.c \
 	ip2k-asm.c \
 	ip2k-desc.c \
 	ip2k-dis.c \
@@ -562,10 +559,9 @@ $(srcdir)/i386%tbl.h $(srcdir)/i386%init.h: @MAINT@ i386-gen$(EXEEXT_FOR_BUILD) 
 		< $(srcdir)/i386-opc.tbl \
 		| ./i386-gen$(EXEEXT_FOR_BUILD) --srcdir $(srcdir)
 
-i386-opc.lo: $(srcdir)/i386-tbl.h
-# While not really a dependency, specify i386-init.h here as well to make sure
-# it is generated even if i386-tbl.h is present and up-to-date.
-i386-opc.lo: $(srcdir)/i386-init.h
+# While not really dependencies, specify i386-{init,tbl}.h here as well to
+# make sure they are re-generated as necessary.
+i386-dis.lo: $(srcdir)/i386-tbl.h $(srcdir)/i386-init.h
 
 ia64-gen$(EXEEXT_FOR_BUILD): ia64-gen.o $(BUILD_LIB_DEPS)
 	$(AM_V_CCLD)$(LINK_FOR_BUILD) ia64-gen.o $(BUILD_LIBS)

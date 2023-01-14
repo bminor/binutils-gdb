@@ -1,6 +1,6 @@
 /* Disassemble support for GDB.
 
-   Copyright (C) 2000-2022 Free Software Foundation, Inc.
+   Copyright (C) 2000-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -191,7 +191,7 @@ line_has_code_p (htab_t table, struct symtab *symtab, int line)
 int
 gdb_disassembler_memory_reader::dis_asm_read_memory
   (bfd_vma memaddr, gdb_byte *myaddr, unsigned int len,
-   struct disassemble_info *info)
+   struct disassemble_info *info) noexcept
 {
   return target_read_code (memaddr, myaddr, len);
 }
@@ -199,8 +199,8 @@ gdb_disassembler_memory_reader::dis_asm_read_memory
 /* Wrapper of memory_error.  */
 
 void
-gdb_disassembler::dis_asm_memory_error (int err, bfd_vma memaddr,
-					struct disassemble_info *info)
+gdb_disassembler::dis_asm_memory_error
+  (int err, bfd_vma memaddr, struct disassemble_info *info) noexcept
 {
   gdb_disassembler *self
     = static_cast<gdb_disassembler *>(info->application_data);
@@ -211,8 +211,8 @@ gdb_disassembler::dis_asm_memory_error (int err, bfd_vma memaddr,
 /* Wrapper of print_address.  */
 
 void
-gdb_disassembler::dis_asm_print_address (bfd_vma addr,
-					 struct disassemble_info *info)
+gdb_disassembler::dis_asm_print_address
+  (bfd_vma addr, struct disassemble_info *info) noexcept
 {
   gdb_disassembler *self
     = static_cast<gdb_disassembler *>(info->application_data);
@@ -256,7 +256,7 @@ gdb_printing_disassembler::stream_from_gdb_disassemble_info (void *dis_info)
 
 int
 gdb_printing_disassembler::fprintf_func (void *dis_info,
-					 const char *format, ...)
+					 const char *format, ...) noexcept
 {
   ui_file *stream = stream_from_gdb_disassemble_info (dis_info);
 
@@ -272,9 +272,9 @@ gdb_printing_disassembler::fprintf_func (void *dis_info,
 /* See disasm.h.  */
 
 int
-gdb_printing_disassembler::fprintf_styled_func (void *dis_info,
-						enum disassembler_style style,
-						const char *format, ...)
+gdb_printing_disassembler::fprintf_styled_func
+  (void *dis_info, enum disassembler_style style,
+   const char *format, ...) noexcept
 {
   ui_file *stream = stream_from_gdb_disassemble_info (dis_info);
   gdb_printing_disassembler *dis = (gdb_printing_disassembler *) dis_info;
@@ -445,7 +445,7 @@ gdb_pretty_print_disassembler::pretty_print_insn (const struct disasm_insn *insn
 	size = m_di.print_insn (pc);
 	gdb_assert (size > 0);
       }
-    catch (const gdb_exception &ex)
+    catch (const gdb_exception &)
       {
 	/* An exception was thrown while disassembling the instruction.
 	   However, the disassembler might still have written something
@@ -454,7 +454,7 @@ gdb_pretty_print_disassembler::pretty_print_insn (const struct disasm_insn *insn
 	   object destructor as the write itself might throw an exception
 	   if the pager kicks in, and the user selects quit.  */
 	write_out_insn_buffer ();
-	throw ex;
+	throw;
       }
 
     if ((flags & (DISASSEMBLY_RAW_INSN | DISASSEMBLY_RAW_BYTES)) != 0)
@@ -1220,8 +1220,8 @@ gdb_insn_length (struct gdbarch *gdbarch, CORE_ADDR addr)
 /* See disasm.h.  */
 
 int
-gdb_non_printing_disassembler::null_fprintf_func (void *stream,
-						  const char *format, ...)
+gdb_non_printing_disassembler::null_fprintf_func
+  (void *stream, const char *format, ...) noexcept
 {
   return 0;
 }
@@ -1230,7 +1230,8 @@ gdb_non_printing_disassembler::null_fprintf_func (void *stream,
 
 int
 gdb_non_printing_disassembler::null_fprintf_styled_func
-  (void *stream, enum disassembler_style style, const char *format, ...)
+  (void *stream, enum disassembler_style style,
+   const char *format, ...) noexcept
 {
   return 0;
 }

@@ -1,5 +1,5 @@
 /* LoongArch-specific support for NN-bit ELF.
-   Copyright (C) 2021-2022 Free Software Foundation, Inc.
+   Copyright (C) 2021-2023 Free Software Foundation, Inc.
    Contributed by Loongson Ltd.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -2890,7 +2890,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      /* The offset must always be a multiple of the word size.
 		 So, we can use the least significant bit to record
 		 whether we have already processed this entry.  */
-	      if (local_got_offsets[r_symndx] == 0)
+	      if ((local_got_offsets[r_symndx] & 1) == 0)
 		{
 		  if (is_pic)
 		    {

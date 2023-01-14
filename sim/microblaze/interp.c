@@ -1,5 +1,5 @@
 /* Simulator for Xilinx MicroBlaze processor
-   Copyright 2009-2022 Free Software Foundation, Inc.
+   Copyright 2009-2023 Free Software Foundation, Inc.
 
    This file is part of GDB, the GNU debugger.
 
@@ -33,12 +33,13 @@
 #include "sim-signal.h"
 #include "sim-syscall.h"
 
-#include "microblaze-dis.h"
+#include "microblaze-sim.h"
+#include "opcodes/microblaze-dis.h"
 
 #define target_big_endian (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 
 static unsigned long
-microblaze_extract_unsigned_integer (unsigned char *addr, int len)
+microblaze_extract_unsigned_integer (const unsigned char *addr, int len)
 {
   unsigned long retval;
   unsigned char *p;
@@ -321,7 +322,7 @@ sim_engine_run (SIM_DESC sd,
 }
 
 static int
-microblaze_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+microblaze_reg_store (SIM_CPU *cpu, int rn, const void *memory, int length)
 {
   if (rn < NUM_REGS + NUM_SPECIAL && rn >= 0)
     {
@@ -343,7 +344,7 @@ microblaze_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 }
 
 static int
-microblaze_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+microblaze_reg_fetch (SIM_CPU *cpu, int rn, void *memory, int length)
 {
   long ival;
 
@@ -382,13 +383,13 @@ sim_info (SIM_DESC sd, int verbose)
 static sim_cia
 microblaze_pc_get (sim_cpu *cpu)
 {
-  return cpu->microblaze_cpu.spregs[0];
+  return MICROBLAZE_SIM_CPU (cpu)->spregs[0];
 }
 
 static void
 microblaze_pc_set (sim_cpu *cpu, sim_cia pc)
 {
-  cpu->microblaze_cpu.spregs[0] = pc;
+  MICROBLAZE_SIM_CPU (cpu)->spregs[0] = pc;
 }
 
 static void
@@ -409,7 +410,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
+  if (sim_cpu_alloc_all_extra (sd, 0, sizeof (struct microblaze_regset))
+      != SIM_RC_OK)
     {
       free_state (sd);
       return 0;

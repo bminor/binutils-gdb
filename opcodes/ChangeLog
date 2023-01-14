@@ -1,3 +1,23 @@
+2023-01-03  Nick Clifton  <nickc@redhat.com>
+
+	* po/de.po: Updated German translation.
+	* po/ro.po: Updated Romainian translation.
+	* po/uk.po: Updated Ukrainian translation.
+
+2022-12-31  Nick Clifton  <nickc@redhat.com>
+
+	* 2.40 branch created.
+
+2022-11-22  Shahab Vahedi  <shahab@synopsys.com>
+
+	* arc-regs.h: Change isa_config address to 0xc1.
+	isa_config exists for ARC700 and ARCV2 and not ARCALL.
+
+2022-10-31  Yoshinori Sato  <ysato@users.sourceforge.jp>
+
+	* rx-decode.opc: Switch arguments of the MVTACGU insn.
+	* rx-decode.c: Regenerate.
+
 2022-09-22  Yoshinori Sato  <ysato@users.sourceforge.jp>
 
 	* sh-dis.c (print_insn_sh): Enforce bit7 of LDC Rm,Rn_BANK and STC
@@ -1318,7 +1338,7 @@
 
 For older changes see ChangeLog-2020
 
-Copyright (C) 2021-2022 Free Software Foundation, Inc.
+Copyright (C) 2021-2023 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

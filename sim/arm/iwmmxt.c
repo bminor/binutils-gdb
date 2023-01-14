@@ -1,5 +1,5 @@
 /*  iwmmxt.c -- Intel(r) Wireless MMX(tm) technology co-processor interface.
-    Copyright (C) 2002-2022 Free Software Foundation, Inc.
+    Copyright (C) 2002-2023 Free Software Foundation, Inc.
     Contributed by matthew green (mrg@redhat.com).
 
     This program is free software; you can redistribute it and/or modify
@@ -3723,7 +3723,7 @@ Fetch_Iwmmxt_Register (unsigned int regnum, unsigned char * memory)
 }
 
 int
-Store_Iwmmxt_Register (unsigned int regnum, unsigned char * memory)
+Store_Iwmmxt_Register (unsigned int regnum, const unsigned char * memory)
 {
   if (regnum >= 16)
     {

@@ -1,6 +1,6 @@
 /* User visible, per-frame registers, for GDB, the GNU debugger.
 
-   Copyright (C) 2002-2022 Free Software Foundation, Inc.
+   Copyright (C) 2002-2023 Free Software Foundation, Inc.
 
    Contributed by Red Hat.
 
@@ -44,7 +44,7 @@ struct user_reg
   /* Avoid the "read" symbol name as it conflicts with a preprocessor symbol
      in the NetBSD header for Stack Smashing Protection, that wraps the read(2)
      syscall.  */
-  struct value *(*xread) (frame_info_ptr  frame, const void *baton);
+  struct value *(*xread) (frame_info_ptr frame, const void *baton);
   const void *baton;
   struct user_reg *next;
 };

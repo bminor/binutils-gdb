@@ -1,5 +1,5 @@
 /* simple.c -- BFD simple client routines
-   Copyright (C) 2002-2022 Free Software Foundation, Inc.
+   Copyright (C) 2002-2023 Free Software Foundation, Inc.
    Contributed by MontaVista Software, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -209,7 +209,7 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   struct bfd_link_info link_info;
   struct bfd_link_order link_order;
   struct bfd_link_callbacks callbacks;
-  bfd_byte *contents, *data;
+  bfd_byte *contents;
   struct saved_offsets saved_offsets;
   bfd *link_next;
 
@@ -257,28 +257,19 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   link_order.size = sec->size;
   link_order.u.indirect.section = sec;
 
-  data = NULL;
   contents = NULL;
-  if (outbuf == NULL)
-    {
-      bfd_size_type amt = sec->rawsize > sec->size ? sec->rawsize : sec->size;
-      data = (bfd_byte *) bfd_malloc (amt);
-      if (data == NULL)
-	goto out1;
-      outbuf = data;
-    }
 
   saved_offsets.section_count = abfd->section_count;
   saved_offsets.sections = malloc (sizeof (*saved_offsets.sections)
 				   * saved_offsets.section_count);
   if (saved_offsets.sections == NULL)
-    goto out2;
+    goto out1;
   bfd_map_over_sections (abfd, simple_save_output_info, &saved_offsets);
 
   if (symbol_table == NULL)
     {
       if (!bfd_generic_link_read_symbols (abfd))
-	goto out3;
+	goto out2;
       symbol_table = _bfd_generic_link_get_symbols (abfd);
     }
 
@@ -288,12 +279,9 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
 						 outbuf,
 						 false,
 						 symbol_table);
- out3:
+ out2:
   bfd_map_over_sections (abfd, simple_restore_output_info, &saved_offsets);
   free (saved_offsets.sections);
- out2:
-  if (contents == NULL)
-    free (data);
  out1:
   _bfd_generic_link_hash_table_free (abfd);
   abfd->link.next = link_next;

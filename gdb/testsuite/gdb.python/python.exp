@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2022 Free Software Foundation, Inc.
+# Copyright (C) 2008-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -217,7 +217,7 @@ clean_restart ${testfile}
 
 # The following tests require execution.
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 
@@ -431,7 +431,7 @@ clean_restart ${testfile}
 
 # The following tests require execution.
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 
@@ -486,7 +486,7 @@ clean_restart ${testfile}
 
 # The following tests require execution.
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 

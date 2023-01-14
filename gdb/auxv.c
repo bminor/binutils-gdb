@@ -1,6 +1,6 @@
 /* Auxiliary vector support for GDB, the GNU debugger.
 
-   Copyright (C) 2004-2022 Free Software Foundation, Inc.
+   Copyright (C) 2004-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -234,7 +234,7 @@ memory_xfer_auxv (struct target_ops *ops,
       this function only when attaching to a process.
       */
 
-  if (current_inferior ()->attach_flag != 0)
+  if (current_inferior ()->attach_flag)
     {
       enum target_xfer_status ret;
 

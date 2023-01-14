@@ -1,5 +1,5 @@
 /* frv simulator support code
-   Copyright (C) 1998-2022 Free Software Foundation, Inc.
+   Copyright (C) 1998-2023 Free Software Foundation, Inc.
    Contributed by Red Hat.
 
 This file is part of the GNU simulators.
@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "cgen-engine.h"
 #include "cgen-par.h"
 #include "bfd.h"
-#include "gdb/sim-frv.h"
+#include "sim/sim-frv.h"
 #include <math.h>
 #include <stdlib.h>
 
@@ -40,7 +40,7 @@ int frvbf_write_next_vliw_addr_to_LR;
 
 /* The contents of BUF are in target byte order.  */
 int
-frvbf_fetch_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len)
+frvbf_fetch_register (SIM_CPU *current_cpu, int rn, void *buf, int len)
 {
   if (SIM_FRV_GR0_REGNUM <= rn && rn <= SIM_FRV_GR63_REGNUM)
     {
@@ -89,7 +89,7 @@ frvbf_fetch_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len)
 /* The contents of BUF are in target byte order.  */
 
 int
-frvbf_store_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len)
+frvbf_store_register (SIM_CPU *current_cpu, int rn, const void *buf, int len)
 {
   if (SIM_FRV_GR0_REGNUM <= rn && rn <= SIM_FRV_GR63_REGNUM)
     {

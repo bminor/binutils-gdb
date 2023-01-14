@@ -1,5 +1,5 @@
 # Support routines for LD testsuite.
-#   Copyright (C) 1994-2022 Free Software Foundation, Inc.
+#   Copyright (C) 1994-2023 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -690,6 +690,7 @@ proc run_ld_link_exec_tests { ldtests args } {
     global errcnt
     global exec_output
     global board_cflags
+    global board_ldflags
     global STATIC_LDFLAGS
 
     # When using GCC as the linker driver, we need to specify board cflags when
@@ -700,6 +701,12 @@ proc run_ld_link_exec_tests { ldtests args } {
 	set board_cflags " [board_info [target_info name] cflags]"
     } else {
 	set board_cflags ""
+    }
+
+    if [board_info [target_info name] exists ldflags] {
+	set board_ldflags " [board_info [target_info name] ldflags]"
+    } else {
+	set board_ldflags ""
     }
 
     foreach testitem $ldtests {
@@ -777,11 +784,11 @@ proc run_ld_link_exec_tests { ldtests args } {
 	    continue;
 	} else {
 	    if { [string match "" $STATIC_LDFLAGS] \
-		 && [regexp -- ".* \[-\]+static .*" " $board_cflags $ld_options $objfiles $ld_after "] } {
+		 && [regexp -- ".* \[-\]+static .*" " $board_cflags $board_ldflags $ld_options $objfiles $ld_after "] } {
 		untested $testname
 		continue
 	    }
-	    if ![$link_proc $link_cmd $binfile "$board_cflags -L$srcdir/$subdir $ld_options $objfiles $ld_after"] {
+	    if ![$link_proc $link_cmd $binfile "$board_cflags $board_ldflags -L$srcdir/$subdir $ld_options $objfiles $ld_after"] {
 		set failed 1
 	    }
 	}
@@ -858,12 +865,19 @@ proc run_cc_link_tests { ldtests } {
     global ar
     global exec_output
     global board_cflags
+    global board_ldflags
     global STATIC_LDFLAGS
 
     if [board_info [target_info name] exists cflags] {
 	set board_cflags " [board_info [target_info name] cflags]"
     } else {
 	set board_cflags ""
+    }
+
+    if [board_info [target_info name] exists ldflags] {
+	set board_ldflags " [board_info [target_info name] ldflags]"
+    } else {
+	set board_ldflags ""
     }
 
     foreach testitem $ldtests {
@@ -968,11 +982,11 @@ proc run_cc_link_tests { ldtests } {
 	    }
 	} else {
 	    if { [string match "" $STATIC_LDFLAGS] \
-		 && [regexp -- ".* \[-\]+static .*" " $board_cflags $ldflags $objfiles "] } {
+		 && [regexp -- ".* \[-\]+static .*" " $board_cflags $board_ldflags $ldflags $objfiles "] } {
 		untested $testname
 		continue
 	    }
-	    ld_link $cc_cmd $binfile "$board_cflags -L$srcdir/$subdir $ldflags $objfiles"
+	    ld_link $cc_cmd $binfile "$board_cflags $board_ldflags -L$srcdir/$subdir $ldflags $objfiles"
 	    set ld_output "$exec_output"
 
 	    if { $check_ld(source) == "regexp" } then {
@@ -1671,6 +1685,51 @@ proc skip_ctf_tests { } {
     }
 
     if [check_ctf_available] {
+	return 0
+    }
+
+    return 1
+}
+
+# Check if the assembler supports SFrame.
+
+proc check_as_sframe { } {
+    global check_as_sframe_result
+    global as
+    if [info exists check_as_sframe_result] {
+	return $check_as_sframe_result
+    }
+
+    # SFrame generation needs CFI support
+    if { ![check_as_cfi] } {
+	set check_as_sframe_result 0;
+	return 0
+    }
+
+    set as_file "tmpdir/check_as_sframe.s"
+    set as_fh [open $as_file w 0666]
+    puts $as_fh "# Generated file. DO NOT EDIT"
+    puts $as_fh "\t.cfi_sections \".sframe\""
+    puts $as_fh "\t.cfi_startproc"
+    puts $as_fh "\t.cfi_endproc"
+    close $as_fh
+    remote_download host $as_file
+    verbose -log "Checking SFrame:"
+    set success [ld_assemble $as $as_file "/dev/null"]
+    #remote_file host delete $as_file
+    set check_as_sframe_result $success
+    return $success
+}
+
+proc skip_sframe_tests { } {
+# FIXME TODO
+#    global enable_libsframe
+#
+#    if {$enable_libsframe eq "no"} {
+#	return 1
+#    }
+
+    if [check_as_sframe] {
 	return 0
     }
 

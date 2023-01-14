@@ -1,6 +1,6 @@
 /* Target-dependent code for BPF.
 
-   Copyright (C) 2020-2022 Free Software Foundation, Inc.
+   Copyright (C) 2020-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -321,8 +321,8 @@ bpf_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return arches->gdbarch;
 
   /* Allocate space for the new architecture.  */
-  bpf_gdbarch_tdep *tdep = new bpf_gdbarch_tdep;
-  struct gdbarch *gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new bpf_gdbarch_tdep));
 
   /* Information about registers, etc.  */
   set_gdbarch_num_regs (gdbarch, BPF_NUM_REGS);

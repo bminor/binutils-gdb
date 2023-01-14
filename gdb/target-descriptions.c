@@ -1,6 +1,6 @@
 /* Target description support for GDB.
 
-   Copyright (C) 2006-2022 Free Software Foundation, Inc.
+   Copyright (C) 2006-2023 Free Software Foundation, Inc.
 
    Contributed by CodeSourcery.
 
@@ -148,8 +148,7 @@ make_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *ttype)
 	  return;
 	}
 
-      internal_error (__FILE__, __LINE__,
-		      "Type \"%s\" has an unknown kind %d",
+      internal_error ("Type \"%s\" has an unknown kind %d",
 		      e->name.c_str (), e->kind);
     }
 
@@ -187,8 +186,7 @@ make_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *ttype)
 	  return;
 	}
 
-      internal_error (__FILE__, __LINE__,
-		      "Type \"%s\" has an unknown kind %d",
+      internal_error ("Type \"%s\" has an unknown kind %d",
 		      e->name.c_str (), e->kind);
     }
 
@@ -601,8 +599,7 @@ target_clear_description (void)
 
   gdbarch_info info;
   if (!gdbarch_update_p (info))
-    internal_error (__FILE__, __LINE__,
-		    _("Could not remove target-supplied description"));
+    internal_error (_("Could not remove target-supplied description"));
 }
 
 /* Return the global current target description.  This should only be
@@ -982,8 +979,7 @@ tdesc_register_type (struct gdbarch *gdbarch, int regno)
 	}
 
       if (arch_reg->type == NULL)
-	internal_error (__FILE__, __LINE__,
-			"Register \"%s\" has an unknown type \"%s\"",
+	internal_error ("Register \"%s\" has an unknown type \"%s\"",
 			reg->name.c_str (), reg->type.c_str ());
     }
 
@@ -1227,8 +1223,7 @@ tdesc_add_compatible (struct target_desc *target_desc,
 
   for (const tdesc_compatible_info_up &compat : target_desc->compatible)
     if (compat->arch () == compatible)
-      internal_error (__FILE__, __LINE__,
-		      _("Attempted to add duplicate "
+      internal_error (_("Attempted to add duplicate "
 			"compatible architecture \"%s\""),
 		      compatible->printable_name);
 
@@ -1244,8 +1239,7 @@ set_tdesc_property (struct target_desc *target_desc,
   gdb_assert (key != NULL && value != NULL);
 
   if (tdesc_property (target_desc, key) != NULL)
-    internal_error (__FILE__, __LINE__,
-		    _("Attempted to add duplicate property \"%s\""), key);
+    internal_error (_("Attempted to add duplicate property \"%s\""), key);
 
   target_desc->properties.emplace_back (key, value);
 }

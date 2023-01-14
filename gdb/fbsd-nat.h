@@ -1,6 +1,6 @@
 /* Native-dependent code for FreeBSD.
 
-   Copyright (C) 2004-2022 Free Software Foundation, Inc.
+   Copyright (C) 2004-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -133,7 +133,8 @@ private:
   /* Helper routines for use in fetch_registers and store_registers in
      subclasses.  These routines fetch and store a single set of
      registers described by REGSET.  The REGSET's 'regmap' field must
-     point to an array of 'struct regcache_map_entry'.
+     point to an array of 'struct regcache_map_entry'.  The valid
+     register numbers in the register map are relative to REGBASE.
 
      FETCH_OP is a ptrace operation to fetch the set of registers from
      a native thread.  STORE_OP is a ptrace operation to store the set
@@ -143,24 +144,27 @@ private:
      and SIZE is the size of the storage.
 
      Returns true if the register set was transferred due to a
-     matching REGNUM.*/
+     matching REGNUM.  */
 
   bool fetch_register_set (struct regcache *regcache, int regnum, int fetch_op,
-			   const struct regset *regset, void *regs, size_t size);
+			   const struct regset *regset, int regbase, void *regs,
+			   size_t size);
 
   bool store_register_set (struct regcache *regcache, int regnum, int fetch_op,
 			   int store_op, const struct regset *regset,
-			   void *regs, size_t size);
+			   int regbase, void *regs, size_t size);
 
   /* Helper routines which use PT_GETREGSET and PT_SETREGSET for the
      specified NOTE instead of regset-specific fetch and store
      ops.  */
 
   bool fetch_regset (struct regcache *regcache, int regnum, int note,
-		     const struct regset *regset, void *regs, size_t size);
+		     const struct regset *regset, int regbase, void *regs,
+		     size_t size);
 
   bool store_regset (struct regcache *regcache, int regnum, int note,
-		     const struct regset *regset, void *regs, size_t size);
+		     const struct regset *regset, int regbase, void *regs,
+		     size_t size);
 
 protected:
   /* Wrapper versions of the above helpers which accept a register set
@@ -168,20 +172,21 @@ protected:
 
   template <class Regset>
   bool fetch_register_set (struct regcache *regcache, int regnum, int fetch_op,
-			   const struct regset *regset)
+			   const struct regset *regset, int regbase = 0)
   {
     Regset regs;
-    return fetch_register_set (regcache, regnum, fetch_op, regset, &regs,
-			       sizeof (regs));
+    return fetch_register_set (regcache, regnum, fetch_op, regset, regbase,
+			       &regs, sizeof (regs));
   }
 
   template <class Regset>
   bool store_register_set (struct regcache *regcache, int regnum, int fetch_op,
-			   int store_op, const struct regset *regset)
+			   int store_op, const struct regset *regset,
+			   int regbase = 0)
   {
     Regset regs;
     return store_register_set (regcache, regnum, fetch_op, store_op, regset,
-			       &regs, sizeof (regs));
+			       regbase, &regs, sizeof (regs));
   }
 
   /* Helper routine for use in read_description in subclasses.  This
@@ -197,18 +202,20 @@ protected:
 
   template <class Regset>
   bool fetch_regset (struct regcache *regcache, int regnum, int note,
-		     const struct regset *regset)
+		     const struct regset *regset, int regbase = 0)
   {
     Regset regs;
-    return fetch_regset (regcache, regnum, note, regset, &regs, sizeof (regs));
+    return fetch_regset (regcache, regnum, note, regset, regbase, &regs,
+			 sizeof (regs));
   }
 
   template <class Regset>
   bool store_regset (struct regcache *regcache, int regnum, int note,
-		     const struct regset *regset)
+		     const struct regset *regset, int regbase = 0)
   {
     Regset regs;
-    return store_regset (regcache, regnum, note, regset, &regs, sizeof (regs));
+    return store_regset (regcache, regnum, note, regset, regbase, &regs,
+			 sizeof (regs));
   }
 };
 

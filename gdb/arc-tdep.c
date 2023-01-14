@@ -1,6 +1,6 @@
 /* Target dependent code for ARC architecture, for GDB.
 
-   Copyright 2005-2022 Free Software Foundation, Inc.
+   Copyright 2005-2023 Free Software Foundation, Inc.
    Contributed by Synopsys Inc.
 
    This file is part of GDB.
@@ -1947,8 +1947,7 @@ mach_type_to_arc_isa (const unsigned long mach)
     case bfd_mach_arc_arcv2:
       return ARC_ISA_ARCV2;
     default:
-	internal_error (__FILE__, __LINE__,
-			_("unknown machine id %lu"), mach);
+	internal_error (_("unknown machine id %lu"), mach);
     }
 }
 
@@ -1973,8 +1972,7 @@ arc_arch_features_create (const bfd *abfd, const unsigned long mach)
       else if (eclass == ELFCLASS64)
 	reg_size = 8;
       else
-	internal_error (__FILE__, __LINE__,
-			_("unknown ELF header class %d"), eclass);
+	internal_error (_("unknown ELF header class %d"), eclass);
     }
 
   /* MACH from a bfd_arch_info struct is used here.  It should be a safe
@@ -2258,11 +2256,11 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Allocate the ARC-private target-dependent information structure, and the
      GDB target-independent information structure.  */
-  std::unique_ptr<arc_gdbarch_tdep> tdep_holder (new arc_gdbarch_tdep);
-  arc_gdbarch_tdep *tdep = tdep_holder.get ();
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new arc_gdbarch_tdep));
+  arc_gdbarch_tdep *tdep = gdbarch_tdep<arc_gdbarch_tdep> (gdbarch);
   tdep->jb_pc = -1; /* No longjmp support by default.  */
   tdep->has_hw_loops = arc_check_for_hw_loops (tdesc, tdesc_data.get ());
-  struct gdbarch *gdbarch = gdbarch_alloc (&info, tdep_holder.release ());
 
   /* Data types.  */
   set_gdbarch_short_bit (gdbarch, 16);

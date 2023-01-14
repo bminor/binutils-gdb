@@ -1,6 +1,6 @@
 /* Linux-dependent part of branch trace support for GDB, and GDBserver.
 
-   Copyright (C) 2013-2022 Free Software Foundation, Inc.
+   Copyright (C) 2013-2023 Free Software Foundation, Inc.
 
    Contributed by Intel Corp. <markus.t.metzger@intel.com>
 
@@ -84,9 +84,11 @@ btrace_this_cpu (void)
 	      cpu.vendor = CV_INTEL;
 
 	      cpu.family = (cpuid >> 8) & 0xf;
-	      cpu.model = (cpuid >> 4) & 0xf;
+	      if (cpu.family == 0xf)
+		cpu.family += (cpuid >> 20) & 0xff;
 
-	      if (cpu.family == 0x6)
+	      cpu.model = (cpuid >> 4) & 0xf;
+	      if ((cpu.family == 0x6) || ((cpu.family & 0xf) == 0xf))
 		cpu.model += (cpuid >> 12) & 0xf0;
 	    }
 	}
@@ -912,7 +914,7 @@ linux_read_pt (struct btrace_data_pt *btrace,
       return BTRACE_ERR_NONE;
     }
 
-  internal_error (__FILE__, __LINE__, _("Unknown btrace read type."));
+  internal_error (_("Unknown btrace read type."));
 }
 
 /* See linux-btrace.h.  */
@@ -943,7 +945,7 @@ linux_read_btrace (struct btrace_data *btrace,
       return linux_read_pt (&btrace->variant.pt, tinfo, type);
     }
 
-  internal_error (__FILE__, __LINE__, _("Unkown branch trace format."));
+  internal_error (_("Unkown branch trace format."));
 }
 
 /* See linux-btrace.h.  */

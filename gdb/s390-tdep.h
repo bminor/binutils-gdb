@@ -1,6 +1,6 @@
 /* Target-dependent code for s390.
 
-   Copyright (C) 2003-2022 Free Software Foundation, Inc.
+   Copyright (C) 2003-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -66,6 +66,8 @@ struct s390_gdbarch_tdep : gdbarch_tdep_base
   int (*s390_syscall_record) (struct regcache *regcache, LONGEST svc_number)
     = nullptr;
 };
+
+using s390_gdbarch_tdep_up = std::unique_ptr<s390_gdbarch_tdep>;
 
 /* Decoding S/390 instructions.  */
 

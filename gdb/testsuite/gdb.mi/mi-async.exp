@@ -1,4 +1,4 @@
-# Copyright 2008-2022 Free Software Foundation, Inc.
+# Copyright 2008-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 # mi_run_cmd, it ignores whatever target the rest of GDB testsuite is
 # using, and always tries to run natively.  So, don't do anything unless
 # we're actually testing native.
-if { !([isnative] && [istarget *-linux*]) } then {
+if {!([isnative] && [istarget *-linux*])} {
   return
 }
 

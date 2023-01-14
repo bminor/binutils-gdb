@@ -1,6 +1,6 @@
 /* Exception (throw catch) mechanism, for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -97,7 +97,7 @@ print_exception (struct ui_file *file, const struct gdb_exception &e)
       annotate_error ();
       break;
     default:
-      internal_error (__FILE__, __LINE__, _("Bad switch."));
+      internal_error (_("Bad switch."));
     }
 }
 

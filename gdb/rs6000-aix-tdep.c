@@ -1,6 +1,6 @@
 /* Native support code for PPC AIX, for GDB the GNU debugger.
 
-   Copyright (C) 2006-2022 Free Software Foundation, Inc.
+   Copyright (C) 2006-2023 Free Software Foundation, Inc.
 
    Free Software Foundation, Inc.
 
@@ -400,7 +400,15 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  gdb_byte word[PPC_MAX_REGISTER_SIZE];
 
 	  memset (word, 0, reg_size);
-	  memcpy (word, value_contents (arg).data (), len);
+	  if (type->code () == TYPE_CODE_INT
+	     || type->code () == TYPE_CODE_ENUM
+	     || type->code () == TYPE_CODE_BOOL
+	     || type->code () == TYPE_CODE_CHAR)
+	    /* Sign or zero extend the "int" into a "word".  */
+	    store_unsigned_integer (word, reg_size, byte_order,
+				    unpack_long (type, value_contents (arg).data ()));
+	  else
+	    memcpy (word, value_contents (arg).data (), len);
 	  regcache->cooked_write (tdep->ppc_gp0_regnum + 3 +ii, word);
 	}
       ++argno;

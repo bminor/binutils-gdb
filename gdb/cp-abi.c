@@ -1,6 +1,6 @@
 /* Generic code for supporting multiple C++ ABI's
 
-   Copyright (C) 2001-2022 Free Software Foundation, Inc.
+   Copyright (C) 2001-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -251,8 +251,7 @@ int
 register_cp_abi (struct cp_abi_ops *abi)
 {
   if (num_cp_abis == CP_ABI_MAX)
-    internal_error (__FILE__, __LINE__,
-		    _("Too many C++ ABIs, please increase "
+    internal_error (_("Too many C++ ABIs, please increase "
 		      "CP_ABI_MAX in cp-abi.c"));
 
   cp_abis[num_cp_abis++] = abi;
@@ -268,8 +267,7 @@ set_cp_abi_as_auto_default (const char *short_name)
   struct cp_abi_ops *abi = find_cp_abi (short_name);
 
   if (abi == NULL)
-    internal_error (__FILE__, __LINE__,
-		    _("Cannot find C++ ABI \"%s\" to set it as auto default."),
+    internal_error (_("Cannot find C++ ABI \"%s\" to set it as auto default."),
 		    short_name);
 
   xfree ((char *) auto_cp_abi.longname);

@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Free Software Foundation, Inc.
+/* Copyright (C) 2021-2023 Free Software Foundation, Inc.
    Contributed by Oracle.
 
    This file is part of GNU Binutils.
@@ -52,7 +52,7 @@ int x2M = 2000000;
 int x8M = 8000000;
 
 /* define a macro that burns CPU time */
-#define burncpu(nn) \ 
+#define burncpu(nn) \
         x = 0; \
         for (j = 0; j < (nn * x8M); j++) { \
                  x = x + 1; \

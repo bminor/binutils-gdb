@@ -67,7 +67,7 @@ remote-stdio-gdbserver.exp
 # [is_remote host] == 1 && [is_remote target] == 0.
 # Note: need to pass the board with --host_board instead of --target_board.
 local-remote-host-notty.exp
-	Run gdb on remote host.
+	Run gdb on remote host in pseudo-terminal with "set editing off".
 local-remote-host.exp
 	Run gdb on remote host in pseudo-terminal.
 

@@ -1,5 +1,5 @@
 /* MI Command Set - varobj commands.
-   Copyright (C) 2000-2022 Free Software Foundation, Inc.
+   Copyright (C) 2000-2023 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions (a Red Hat company).
 
@@ -390,15 +390,7 @@ mi_cmd_var_list_children (const char *command, char **argv, int argc)
 
   if (from < to)
     {
-      /* For historical reasons this might emit a list or a tuple, so
-	 we construct one or the other.  */
-      gdb::optional<ui_out_emit_tuple> tuple_emitter;
-      gdb::optional<ui_out_emit_list> list_emitter;
-
-      if (mi_version (uiout) == 1)
-	tuple_emitter.emplace (uiout, "children");
-      else
-	list_emitter.emplace (uiout, "children");
+      ui_out_emit_list list_emitter (uiout, "children");
       for (int ix = from; ix < to && ix < children.size (); ix++)
 	{
 	  ui_out_emit_tuple child_emitter (uiout, "child");
@@ -633,15 +625,7 @@ mi_cmd_var_update (const char *command, char **argv, int argc)
   else
     print_values = PRINT_NO_VALUES;
 
-  /* For historical reasons this might emit a list or a tuple, so we
-     construct one or the other.  */
-  gdb::optional<ui_out_emit_tuple> tuple_emitter;
-  gdb::optional<ui_out_emit_list> list_emitter;
-
-  if (mi_version (uiout) <= 1)
-    tuple_emitter.emplace (uiout, "changelist");
-  else
-    list_emitter.emplace (uiout, "changelist");
+  ui_out_emit_list list_emitter (uiout, "changelist");
 
   /* Check if the parameter is a "*", which means that we want to
      update all variables.  */
@@ -680,9 +664,7 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
     {
       int from, to;
 
-      gdb::optional<ui_out_emit_tuple> tuple_emitter;
-      if (mi_version (uiout) > 1)
-	tuple_emitter.emplace (uiout, nullptr);
+      ui_out_emit_tuple tuple_emitter (uiout, nullptr);
       uiout->field_string ("name", varobj_get_objname (r.varobj));
 
       switch (r.status)

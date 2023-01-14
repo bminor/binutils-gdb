@@ -1,5 +1,5 @@
 /* BFD support for handling relocation entries.
-   Copyright (C) 1990-2022 Free Software Foundation, Inc.
+   Copyright (C) 1990-2023 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -8532,6 +8532,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
     return NULL;
 
   /* Read in the section.  */
+  bfd_byte *orig_data = data;
   if (!bfd_get_full_section_contents (input_bfd, input_section, &data))
     return NULL;
 
@@ -8543,7 +8544,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 
   reloc_vector = (arelent **) bfd_malloc (reloc_size);
   if (reloc_vector == NULL)
-    return NULL;
+    goto error_return;
 
   reloc_count = bfd_canonicalize_reloc (input_bfd,
 					input_section,
@@ -8680,6 +8681,8 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 
  error_return:
   free (reloc_vector);
+  if (orig_data == NULL)
+    free (data);
   return NULL;
 }
 
@@ -8706,6 +8709,10 @@ _bfd_generic_set_reloc (bfd *abfd ATTRIBUTE_UNUSED,
 {
   section->orelocation = relptr;
   section->reloc_count = count;
+  if (count != 0)
+    section->flags |= SEC_RELOC;
+  else
+    section->flags &= ~SEC_RELOC;
 }
 
 /*

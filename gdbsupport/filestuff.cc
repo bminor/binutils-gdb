@@ -1,5 +1,5 @@
 /* Low-level file-handling.
-   Copyright (C) 2012-2022 Free Software Foundation, Inc.
+   Copyright (C) 2012-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -500,4 +500,41 @@ mkdir_recursive (const char *dir)
       *component_end = saved_char;
       component_start = component_end;
     }
+}
+
+/* See gdbsupport/filestuff.h.  */
+
+gdb::optional<std::string>
+read_text_file_to_string (const char *path)
+{
+  gdb_file_up file = gdb_fopen_cloexec (path, "r");
+  if (file == nullptr)
+    return {};
+
+  std::string res;
+  for (;;)
+    {
+      std::string::size_type start_size = res.size ();
+      constexpr int chunk_size = 1024;
+
+      /* Resize to accomodate CHUNK_SIZE bytes.  */
+      res.resize (start_size + chunk_size);
+
+      int n = fread (&res[start_size], 1, chunk_size, file.get ());
+      if (n == chunk_size)
+	continue;
+
+      gdb_assert (n < chunk_size);
+
+      /* Less than CHUNK means EOF or error.  If it's an error, return
+         no value.  */
+      if (ferror (file.get ()))
+	return {};
+
+      /* Resize the string according to the data we read.  */
+      res.resize (start_size + n);
+      break;
+    }
+
+  return res;
 }

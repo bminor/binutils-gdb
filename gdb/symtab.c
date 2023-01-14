@@ -1,6 +1,6 @@
 /* Symbol table lookup for the GNU debugger, GDB.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -405,12 +405,12 @@ compunit_symtab::primary_filetab () const
 /* See symtab.h.  */
 
 enum language
-compunit_language (const struct compunit_symtab *cust)
+compunit_symtab::language () const
 {
-  struct symtab *symtab = cust->primary_filetab ();
+  struct symtab *symtab = primary_filetab ();
 
-/* The language of the compunit symtab is the language of its primary
-   source file.  */
+  /* The language of the compunit symtab is the language of its
+     primary source file.  */
   return symtab->language ();
 }
 
@@ -812,7 +812,7 @@ hash_demangled_name_entry (const void *data)
   const struct demangled_name_entry *e
     = (const struct demangled_name_entry *) data;
 
-  return fast_hash (e->mangled.data (), e->mangled.length ());
+  return gdb::string_view_hash () (e->mangled);
 }
 
 /* Equality function for the demangled name hash.  */
@@ -1424,13 +1424,11 @@ symbol_cache_lookup (struct symbol_cache *cache,
 
   if (eq_symbol_entry (slot, objfile_context, name, domain))
     {
-      if (symbol_lookup_debug)
-	gdb_printf (gdb_stdlog,
-		    "%s block symbol cache hit%s for %s, %s\n",
-		    block == GLOBAL_BLOCK ? "Global" : "Static",
-		    slot->state == SYMBOL_SLOT_NOT_FOUND
-		    ? " (not found)" : "",
-		    name, domain_name (domain));
+      symbol_lookup_debug_printf ("%s block symbol cache hit%s for %s, %s",
+				  block == GLOBAL_BLOCK ? "Global" : "Static",
+				  slot->state == SYMBOL_SLOT_NOT_FOUND
+				  ? " (not found)" : "", name,
+				  domain_name (domain));
       ++bsc->hits;
       if (slot->state == SYMBOL_SLOT_NOT_FOUND)
 	return SYMBOL_LOOKUP_FAILED;
@@ -1439,13 +1437,9 @@ symbol_cache_lookup (struct symbol_cache *cache,
 
   /* Symbol is not present in the cache.  */
 
-  if (symbol_lookup_debug)
-    {
-      gdb_printf (gdb_stdlog,
-		  "%s block symbol cache miss for %s, %s\n",
-		  block == GLOBAL_BLOCK ? "Global" : "Static",
-		  name, domain_name (domain));
-    }
+  symbol_lookup_debug_printf ("%s block symbol cache miss for %s, %s",
+			      block == GLOBAL_BLOCK ? "Global" : "Static",
+			      name, domain_name (domain));
   ++bsc->misses;
   return {};
 }
@@ -1956,6 +1950,8 @@ lookup_symbol_in_language (const char *name, const struct block *block,
 			   const domain_enum domain, enum language lang,
 			   struct field_of_this_result *is_a_field_of_this)
 {
+  SYMBOL_LOOKUP_SCOPED_DEBUG_ENTER_EXIT;
+
   demangle_result_storage storage;
   const char *modified_name = demangle_for_lookup (name, lang, storage);
 
@@ -1996,15 +1992,9 @@ lookup_language_this (const struct language_defn *lang,
   if (lang->name_of_this () == NULL || block == NULL)
     return {};
 
-  if (symbol_lookup_debug > 1)
-    {
-      struct objfile *objfile = block_objfile (block);
-
-      gdb_printf (gdb_stdlog,
-		  "lookup_language_this (%s, %s (objfile %s))",
-		  lang->name (), host_address_to_string (block),
-		  objfile_debug_name (objfile));
-    }
+  symbol_lookup_debug_printf_v ("lookup_language_this (%s, %s (objfile %s))",
+				lang->name (), host_address_to_string (block),
+				objfile_debug_name (block_objfile (block)));
 
   while (block)
     {
@@ -2015,13 +2005,10 @@ lookup_language_this (const struct language_defn *lang,
 				 VAR_DOMAIN);
       if (sym != NULL)
 	{
-	  if (symbol_lookup_debug > 1)
-	    {
-	      gdb_printf (gdb_stdlog, " = %s (%s, block %s)\n",
-			  sym->print_name (),
-			  host_address_to_string (sym),
-			  host_address_to_string (block));
-	    }
+	  symbol_lookup_debug_printf_v
+	    ("lookup_language_this (...) = %s (%s, block %s)",
+	     sym->print_name (), host_address_to_string (sym),
+	     host_address_to_string (block));
 	  return (struct block_symbol) {sym, block};
 	}
       if (block->function ())
@@ -2029,8 +2016,7 @@ lookup_language_this (const struct language_defn *lang,
       block = block->superblock ();
     }
 
-  if (symbol_lookup_debug > 1)
-    gdb_printf (gdb_stdlog, " = NULL\n");
+  symbol_lookup_debug_printf_v ("lookup_language_this (...) = NULL");
   return {};
 }
 
@@ -2088,6 +2074,8 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
 		   const domain_enum domain, enum language language,
 		   struct field_of_this_result *is_a_field_of_this)
 {
+  SYMBOL_LOOKUP_SCOPED_DEBUG_ENTER_EXIT;
+
   struct block_symbol result;
   const struct language_defn *langdef;
 
@@ -2096,12 +2084,13 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
       struct objfile *objfile = (block == nullptr
 				 ? nullptr : block_objfile (block));
 
-      gdb_printf (gdb_stdlog,
-		  "lookup_symbol_aux (%s, %s (objfile %s), %s, %s)\n",
-		  name, host_address_to_string (block),
-		  objfile != NULL
-		  ? objfile_debug_name (objfile) : "NULL",
-		  domain_name (domain), language_str (language));
+      symbol_lookup_debug_printf
+	("demangled symbol name = \"%s\", block @ %s (objfile %s)",
+	 name, host_address_to_string (block),
+	 objfile != NULL ? objfile_debug_name (objfile) : "NULL");
+      symbol_lookup_debug_printf
+	("domain name = \"%s\", language = \"%s\")",
+	 domain_name (domain), language_str (language));
     }
 
   /* Make sure we do something sensible with is_a_field_of_this, since
@@ -2117,11 +2106,9 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
   result = lookup_local_symbol (name, match_type, block, domain, language);
   if (result.symbol != NULL)
     {
-      if (symbol_lookup_debug)
-	{
-	  gdb_printf (gdb_stdlog, "lookup_symbol_aux (...) = %s\n",
-		      host_address_to_string (result.symbol));
-	}
+      symbol_lookup_debug_printf
+	("found symbol @ %s (using lookup_local_symbol)",
+	 host_address_to_string (result.symbol));
       return result;
     }
 
@@ -2154,11 +2141,7 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
 
 	  if (check_field (t, name, is_a_field_of_this))
 	    {
-	      if (symbol_lookup_debug)
-		{
-		  gdb_printf (gdb_stdlog,
-			      "lookup_symbol_aux (...) = NULL\n");
-		}
+	      symbol_lookup_debug_printf ("no symbol found");
 	      return {};
 	    }
 	}
@@ -2170,11 +2153,9 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
   result = langdef->lookup_symbol_nonlocal (name, block, domain);
   if (result.symbol != NULL)
     {
-      if (symbol_lookup_debug)
-	{
-	  gdb_printf (gdb_stdlog, "lookup_symbol_aux (...) = %s\n",
-		      host_address_to_string (result.symbol));
-	}
+      symbol_lookup_debug_printf
+	("found symbol @ %s (using language lookup_symbol_nonlocal)",
+	 host_address_to_string (result.symbol));
       return result;
     }
 
@@ -2182,13 +2163,9 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
      but more useful than an error.  */
 
   result = lookup_static_symbol (name, domain);
-  if (symbol_lookup_debug)
-    {
-      gdb_printf (gdb_stdlog, "lookup_symbol_aux (...) = %s\n",
-		  result.symbol != NULL
-		  ? host_address_to_string (result.symbol)
-		  : "NULL");
-    }
+  symbol_lookup_debug_printf
+    ("found symbol @ %s (using lookup_static_symbol)",
+     result.symbol != NULL ? host_address_to_string (result.symbol) : "NULL");
   return result;
 }
 
@@ -2246,31 +2223,27 @@ lookup_symbol_in_block (const char *name, symbol_name_match_type match_type,
 {
   struct symbol *sym;
 
-  if (symbol_lookup_debug > 1)
+  if (symbol_lookup_debug)
     {
-      struct objfile *objfile = (block == nullptr
-				 ? nullptr : block_objfile (block));
+      struct objfile *objfile
+	= block == nullptr ? nullptr : block_objfile (block);
 
-      gdb_printf (gdb_stdlog,
-		  "lookup_symbol_in_block (%s, %s (objfile %s), %s)",
-		  name, host_address_to_string (block),
-		  objfile_debug_name (objfile),
-		  domain_name (domain));
+      symbol_lookup_debug_printf_v
+	("lookup_symbol_in_block (%s, %s (objfile %s), %s)",
+	 name, host_address_to_string (block),
+	 objfile != nullptr ? objfile_debug_name (objfile) : "NULL",
+	 domain_name (domain));
     }
 
   sym = block_lookup_symbol (block, name, match_type, domain);
   if (sym)
     {
-      if (symbol_lookup_debug > 1)
-	{
-	  gdb_printf (gdb_stdlog, " = %s\n",
-		      host_address_to_string (sym));
-	}
+      symbol_lookup_debug_printf_v ("lookup_symbol_in_block (...) = %s",
+				    host_address_to_string (sym));
       return fixup_symbol_section (sym, NULL);
     }
 
-  if (symbol_lookup_debug > 1)
-    gdb_printf (gdb_stdlog, " = NULL\n");
+  symbol_lookup_debug_printf_v ("lookup_symbol_in_block (...) = NULL");
   return NULL;
 }
 
@@ -2308,15 +2281,11 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
 {
   gdb_assert (block_index == GLOBAL_BLOCK || block_index == STATIC_BLOCK);
 
-  if (symbol_lookup_debug > 1)
-    {
-      gdb_printf (gdb_stdlog,
-		  "lookup_symbol_in_objfile_symtabs (%s, %s, %s, %s)",
-		  objfile_debug_name (objfile),
-		  block_index == GLOBAL_BLOCK
-		  ? "GLOBAL_BLOCK" : "STATIC_BLOCK",
-		  name, domain_name (domain));
-    }
+  symbol_lookup_debug_printf_v
+    ("lookup_symbol_in_objfile_symtabs (%s, %s, %s, %s)",
+     objfile_debug_name (objfile),
+     block_index == GLOBAL_BLOCK ? "GLOBAL_BLOCK" : "STATIC_BLOCK",
+     name, domain_name (domain));
 
   struct block_symbol other;
   other.symbol = NULL;
@@ -2352,18 +2321,16 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
 
   if (other.symbol != NULL)
     {
-      if (symbol_lookup_debug > 1)
-	{
-	  gdb_printf (gdb_stdlog, " = %s (block %s)\n",
-		      host_address_to_string (other.symbol),
-		      host_address_to_string (other.block));
-	}
+      symbol_lookup_debug_printf_v
+	("lookup_symbol_in_objfile_symtabs (...) = %s (block %s)",
+	 host_address_to_string (other.symbol),
+	 host_address_to_string (other.block));
       other.symbol = fixup_symbol_section (other.symbol, objfile);
       return other;
     }
 
-  if (symbol_lookup_debug > 1)
-    gdb_printf (gdb_stdlog, " = NULL\n");
+  symbol_lookup_debug_printf_v
+    ("lookup_symbol_in_objfile_symtabs (...) = NULL");
   return {};
 }
 
@@ -2438,24 +2405,17 @@ lookup_symbol_via_quick_fns (struct objfile *objfile,
   const struct block *block;
   struct block_symbol result;
 
-  if (symbol_lookup_debug > 1)
-    {
-      gdb_printf (gdb_stdlog,
-		  "lookup_symbol_via_quick_fns (%s, %s, %s, %s)\n",
-		  objfile_debug_name (objfile),
-		  block_index == GLOBAL_BLOCK
-		  ? "GLOBAL_BLOCK" : "STATIC_BLOCK",
-		  name, domain_name (domain));
-    }
+  symbol_lookup_debug_printf_v
+    ("lookup_symbol_via_quick_fns (%s, %s, %s, %s)",
+     objfile_debug_name (objfile),
+     block_index == GLOBAL_BLOCK ? "GLOBAL_BLOCK" : "STATIC_BLOCK",
+     name, domain_name (domain));
 
   cust = objfile->lookup_symbol (block_index, name, domain);
   if (cust == NULL)
     {
-      if (symbol_lookup_debug > 1)
-	{
-	  gdb_printf (gdb_stdlog,
-		      "lookup_symbol_via_quick_fns (...) = NULL\n");
-	}
+      symbol_lookup_debug_printf_v
+	("lookup_symbol_via_quick_fns (...) = NULL");
       return {};
     }
 
@@ -2466,13 +2426,10 @@ lookup_symbol_via_quick_fns (struct objfile *objfile,
   if (result.symbol == NULL)
     error_in_psymtab_expansion (block_index, name, cust);
 
-  if (symbol_lookup_debug > 1)
-    {
-      gdb_printf (gdb_stdlog,
-		  "lookup_symbol_via_quick_fns (...) = %s (block %s)\n",
-		  host_address_to_string (result.symbol),
-		  host_address_to_string (block));
-    }
+  symbol_lookup_debug_printf_v
+    ("lookup_symbol_via_quick_fns (...) = %s (block %s)",
+     host_address_to_string (result.symbol),
+     host_address_to_string (block));
 
   result.symbol = fixup_symbol_section (result.symbol, objfile);
   result.block = block;
@@ -2538,24 +2495,19 @@ lookup_symbol_in_static_block (const char *name,
       struct objfile *objfile = (block == nullptr
 				 ? nullptr : block_objfile (block));
 
-      gdb_printf (gdb_stdlog,
-		  "lookup_symbol_in_static_block (%s, %s (objfile %s),"
-		  " %s)\n",
-		  name,
-		  host_address_to_string (block),
-		  objfile_debug_name (objfile),
-		  domain_name (domain));
+      symbol_lookup_debug_printf
+	("lookup_symbol_in_static_block (%s, %s (objfile %s), %s)",
+	 name, host_address_to_string (block),
+	 objfile != nullptr ? objfile_debug_name (objfile) : "NULL",
+	 domain_name (domain));
     }
 
   sym = lookup_symbol_in_block (name,
 				symbol_name_match_type::FULL,
 				static_block, domain);
-  if (symbol_lookup_debug)
-    {
-      gdb_printf (gdb_stdlog,
-		  "lookup_symbol_in_static_block (...) = %s\n",
-		  sym != NULL ? host_address_to_string (sym) : "NULL");
-    }
+  symbol_lookup_debug_printf ("lookup_symbol_in_static_block (...) = %s",
+			      sym != NULL
+			      ? host_address_to_string (sym) : "NULL");
   return (struct block_symbol) {sym, static_block};
 }
 
@@ -2572,59 +2524,31 @@ lookup_symbol_in_objfile (struct objfile *objfile, enum block_enum block_index,
 
   gdb_assert (block_index == GLOBAL_BLOCK || block_index == STATIC_BLOCK);
 
-  if (symbol_lookup_debug)
-    {
-      gdb_printf (gdb_stdlog,
-		  "lookup_symbol_in_objfile (%s, %s, %s, %s)\n",
-		  objfile_debug_name (objfile),
-		  block_index == GLOBAL_BLOCK
-		  ? "GLOBAL_BLOCK" : "STATIC_BLOCK",
-		  name, domain_name (domain));
-    }
+  symbol_lookup_debug_printf ("lookup_symbol_in_objfile (%s, %s, %s, %s)",
+			      objfile_debug_name (objfile),
+			      block_index == GLOBAL_BLOCK
+			      ? "GLOBAL_BLOCK" : "STATIC_BLOCK",
+			      name, domain_name (domain));
 
   result = lookup_symbol_in_objfile_symtabs (objfile, block_index,
 					     name, domain);
   if (result.symbol != NULL)
     {
-      if (symbol_lookup_debug)
-	{
-	  gdb_printf (gdb_stdlog,
-		      "lookup_symbol_in_objfile (...) = %s"
-		      " (in symtabs)\n",
-		      host_address_to_string (result.symbol));
-	}
+      symbol_lookup_debug_printf
+	("lookup_symbol_in_objfile (...) = %s (in symtabs)",
+	 host_address_to_string (result.symbol));
       return result;
     }
 
   result = lookup_symbol_via_quick_fns (objfile, block_index,
 					name, domain);
-  if (symbol_lookup_debug)
-    {
-      gdb_printf (gdb_stdlog,
-		  "lookup_symbol_in_objfile (...) = %s%s\n",
-		  result.symbol != NULL
-		  ? host_address_to_string (result.symbol)
-		  : "NULL",
-		  result.symbol != NULL ? " (via quick fns)" : "");
-    }
+  symbol_lookup_debug_printf ("lookup_symbol_in_objfile (...) = %s%s",
+			      result.symbol != NULL
+			      ? host_address_to_string (result.symbol)
+			      : "NULL",
+			      result.symbol != NULL ? " (via quick fns)"
+			      : "");
   return result;
-}
-
-/* Find the language for partial symbol with NAME.  */
-
-static enum language
-find_quick_global_symbol_language (const char *name, const domain_enum domain)
-{
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
-      bool symbol_found_p;
-      enum language lang
-	= objfile->lookup_global_symbol_language (name, domain, &symbol_found_p);
-      if (symbol_found_p)
-	return lang;
-    }
-
-  return language_unknown;
 }
 
 /* This function contains the common code of lookup_{global,static}_symbol.
@@ -3228,8 +3152,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	       should occur, we'd like to know about it, so error out,
 	       fatally.  */
 	    if (mfunsym.value_address () == pc)
-	      internal_error (__FILE__, __LINE__,
-		_("Infinite recursion detected in find_pc_sect_line;"
+	      internal_error (_("Infinite recursion detected in find_pc_sect_line;"
 		  "please file a bug report"));
 
 	    return find_pc_line (mfunsym.value_address (), 0);
@@ -4669,12 +4592,8 @@ treg_matches_sym_type_name (const compiled_regex &treg,
   struct type *sym_type;
   std::string printed_sym_type_name;
 
-  if (symbol_lookup_debug > 1)
-    {
-      gdb_printf (gdb_stdlog,
-		  "treg_matches_sym_type_name\n     sym %s\n",
-		  sym->natural_name ());
-    }
+  symbol_lookup_debug_printf_v ("treg_matches_sym_type_name, sym %s",
+				sym->natural_name ());
 
   sym_type = sym->type ();
   if (sym_type == NULL)
@@ -4686,14 +4605,8 @@ treg_matches_sym_type_name (const compiled_regex &treg,
     printed_sym_type_name = type_to_string (sym_type);
   }
 
-
-  if (symbol_lookup_debug > 1)
-    {
-      gdb_printf (gdb_stdlog,
-		  "     sym_type_name %s\n",
-		  printed_sym_type_name.c_str ());
-    }
-
+  symbol_lookup_debug_printf_v ("sym_type_name %s",
+				printed_sym_type_name.c_str ());
 
   if (printed_sym_type_name.empty ())
     return false;
@@ -4946,6 +4859,7 @@ global_symbol_searcher::search () const
   if (m_symbol_name_regexp != NULL)
     {
       const char *symbol_name_regexp = m_symbol_name_regexp;
+      std::string symbol_name_regexp_holder;
 
       /* Make sure spacing is right for C++ operators.
 	 This is just a courtesy to make the matching less sensitive
@@ -4974,10 +4888,9 @@ global_symbol_searcher::search () const
 	  /* If wrong number of spaces, fix it.  */
 	  if (fix >= 0)
 	    {
-	      char *tmp = (char *) alloca (8 + fix + strlen (opname) + 1);
-
-	      sprintf (tmp, "operator%.*s%s", fix, " ", opname);
-	      symbol_name_regexp = tmp;
+	      symbol_name_regexp_holder
+		= string_printf ("operator%.*s%s", fix, " ", opname);
+	      symbol_name_regexp = symbol_name_regexp_holder.c_str ();
 	    }
 	}
 
@@ -6367,13 +6280,25 @@ find_main_name (void)
      Fallback to "main".  */
 
   /* Try to find language for main in psymtabs.  */
-  enum language lang
-    = find_quick_global_symbol_language ("main", VAR_DOMAIN);
-  if (lang != language_unknown)
-    {
-      set_main_name ("main", lang);
-      return;
-    }
+  bool symbol_found_p = false;
+  gdbarch_iterate_over_objfiles_in_search_order
+    (target_gdbarch (),
+     [&symbol_found_p] (objfile *obj)
+       {
+	 language lang
+	   = obj->lookup_global_symbol_language ("main", VAR_DOMAIN,
+						 &symbol_found_p);
+	 if (symbol_found_p)
+	   {
+	     set_main_name ("main", lang);
+	     return 1;
+	   }
+
+	 return 0;
+       }, nullptr);
+
+  if (symbol_found_p)
+    return;
 
   set_main_name ("main", language_unknown);
 }

@@ -1,5 +1,5 @@
 /* ELF executable support for BFD.
-   Copyright (C) 1991-2022 Free Software Foundation, Inc.
+   Copyright (C) 1991-2023 Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
@@ -326,8 +326,8 @@ elf_swap_shdr_in (bfd *abfd,
 	      || dst->sh_size > filesize - dst->sh_offset)
 	  && !abfd->read_only)
 	{
-	  const char **warn = _bfd_per_xvec_warn (abfd->xvec);
-	  *warn = _("warning: %pB has a section extending past end of file");
+	  _bfd_error_handler (_("warning: %pB has a section "
+				"extending past end of file"), abfd);
 	  abfd->read_only = 1;
 	}
     }
@@ -773,8 +773,8 @@ elf_object_p (bfd *abfd)
 	  i_ehdrp->e_shstrndx = SHN_UNDEF;
 	  if (!abfd->read_only)
 	    {
-	      const char **warn = _bfd_per_xvec_warn (abfd->xvec);
-	      *warn = _("warning: %pB has a corrupt string table index");
+	      _bfd_error_handler
+		(_("warning: %pB has a corrupt string table index"), abfd);
 	      abfd->read_only = 1;
 	    }
 	}
@@ -821,9 +821,8 @@ elf_object_p (bfd *abfd)
 	      i_phdr->p_align &= -i_phdr->p_align;
 	      if (!abfd->read_only)
 		{
-		  const char **warn = _bfd_per_xvec_warn (abfd->xvec);
-		  *warn = _("warning: %pB has a program header "
-			    "with invalid alignment");
+		  _bfd_error_handler (_("warning: %pB has a program header "
+					"with invalid alignment"), abfd);
 		  abfd->read_only = 1;
 		}
 	    }

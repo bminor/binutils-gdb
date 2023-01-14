@@ -1,4 +1,4 @@
-dnl Copyright (C) 1997-2022 Free Software Foundation, Inc.
+dnl Copyright (C) 1997-2023 Free Software Foundation, Inc.
 dnl
 dnl This program is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -32,18 +32,21 @@ if test "x$cross_compiling" = "xno"; then
   : "${CC_FOR_BUILD:=\$(CC)}"
   : "${RANLIB_FOR_BUILD:=\$(RANLIB)}"
   : "${CFLAGS_FOR_BUILD:=\$(CFLAGS)}"
+  : "${CPPFLAGS_FOR_BUILD:=\$(CPPFLAGS)}"
   : "${LDFLAGS_FOR_BUILD:=\$(LDFLAGS)}"
 else
   : "${AR_FOR_BUILD:=ar}"
   : "${CC_FOR_BUILD:=gcc}"
   : "${RANLIB_FOR_BUILD:=ranlib}"
   : "${CFLAGS_FOR_BUILD:=-g -O}"
+  : "${CPPFLAGS_FOR_BUILD:=}"
   : "${LDLFAGS_FOR_BUILD:=}"
 fi
 AC_SUBST(AR_FOR_BUILD)
 AC_SUBST(CC_FOR_BUILD)
 AC_SUBST(RANLIB_FOR_BUILD)
 AC_SUBST(CFLAGS_FOR_BUILD)
+AC_SUBST(CPPFLAGS_FOR_BUILD)
 AC_SUBST(LDFLAGS_FOR_BUILD)
 
 AC_SUBST(CFLAGS)

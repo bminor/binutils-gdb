@@ -1,5 +1,5 @@
 /* tc-m68hc11.c -- Assembler code for the Motorola 68HC11 & 68HC12.
-   Copyright (C) 1999-2022 Free Software Foundation, Inc.
+   Copyright (C) 1999-2023 Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@nerim.fr)
    XGATE and S12X added by James Murray (jsm@jsm-net.demon.co.uk)
 
@@ -3892,17 +3892,17 @@ m68hc11_relax_frag (segT seg ATTRIBUTE_UNUSED, fragS *fragP,
       if (fragP->fr_symbol == NULL
 	  || S_GET_SEGMENT (fragP->fr_symbol) != absolute_section)
 	as_fatal (_("internal inconsistency problem in %s: fr_symbol %lx"),
-		  __FUNCTION__, (long) fragP->fr_symbol);
+		  __func__, (long) fragP->fr_symbol);
       symbolP = fragP->fr_symbol;
       if (symbol_resolved_p (symbolP))
 	as_fatal (_("internal inconsistency problem in %s: resolved symbol"),
-		  __FUNCTION__);
+		  __func__);
       aim = S_GET_VALUE (symbolP);
       break;
 
     default:
       as_fatal (_("internal inconsistency problem in %s: fr_subtype %d"),
-		  __FUNCTION__, fragP->fr_subtype);
+		  __func__, fragP->fr_subtype);
     }
 
   /* The rest is stolen from relax_frag.  There's no obvious way to

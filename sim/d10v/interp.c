@@ -11,12 +11,14 @@
 #include "sim-options.h"
 #include "sim-signal.h"
 
-#include "gdb/sim-d10v.h"
+#include "sim/sim-d10v.h"
 #include "gdb/signals.h"
 
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+
+#include "d10v-sim.h"
 
 #include "target-newlib-syscall.h"
 
@@ -664,9 +666,9 @@ map_memory (SIM_DESC sd, SIM_CPU *cpu, unsigned phys_addr)
 
 static int
 xfer_mem (SIM_DESC sd,
-	  SIM_ADDR virt,
+	  address_word virt,
 	  unsigned char *buffer,
-	  int size,
+	  uint64_t size,
 	  int write_p)
 {
   uint8_t *memory;
@@ -705,8 +707,8 @@ xfer_mem (SIM_DESC sd,
 }
 
 
-int
-sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
+uint64_t
+sim_write (SIM_DESC sd, uint64_t addr, const void *buffer, uint64_t size)
 {
   /* FIXME: this should be performing a virtual transfer */
   /* FIXME: We cast the const away, but it's safe because xfer_mem only reads
@@ -714,8 +716,8 @@ sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
   return xfer_mem (sd, addr, (void *) buffer, size, 1);
 }
 
-int
-sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
+uint64_t
+sim_read (SIM_DESC sd, uint64_t addr, void *buffer, uint64_t size)
 {
   /* FIXME: this should be performing a virtual transfer */
   return xfer_mem (sd, addr, buffer, size, 0);
@@ -743,8 +745,8 @@ free_state (SIM_DESC sd)
   sim_state_free (sd);
 }
 
-static int d10v_reg_fetch (SIM_CPU *, int, unsigned char *, int);
-static int d10v_reg_store (SIM_CPU *, int, unsigned char *, int);
+static int d10v_reg_fetch (SIM_CPU *, int, void *, int);
+static int d10v_reg_store (SIM_CPU *, int, const void *, int);
 
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *cb,
@@ -763,7 +765,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   cb->syscall_map = cb_d10v_syscall_map;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
+  if (sim_cpu_alloc_all (sd, 0) != SIM_RC_OK)
     {
       free_state (sd);
       return 0;
@@ -1209,7 +1211,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 }
 
 static int
-d10v_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+d10v_reg_fetch (SIM_CPU *cpu, int rn, void *memory, int length)
 {
   SIM_DESC sd = CPU_STATE (cpu);
   int size;
@@ -1293,7 +1295,7 @@ d10v_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 }
  
 static int
-d10v_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+d10v_reg_store (SIM_CPU *cpu, int rn, const void *memory, int length)
 {
   SIM_DESC sd = CPU_STATE (cpu);
   int size;

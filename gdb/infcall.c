@@ -1,6 +1,6 @@
 /* Perform an inferior function call, for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -476,19 +476,13 @@ get_call_return_value (struct call_return_meta_info *ri)
 	  push_thread_stack_temporary (thr, retval);
 	}
       else
-	{
-	  retval = allocate_value (ri->value_type);
-	  read_value_memory (retval, 0, 1, ri->struct_addr,
-			     value_contents_raw (retval).data (),
-			     ri->value_type->length ());
-	}
+	retval = value_at_non_lval (ri->value_type, ri->struct_addr);
     }
   else
     {
-      retval = allocate_value (ri->value_type);
-      gdbarch_return_value (ri->gdbarch, ri->function, ri->value_type,
-			    get_current_regcache (),
-			    value_contents_raw (retval).data (), NULL);
+      gdbarch_return_value_as_value (ri->gdbarch, ri->function, ri->value_type,
+				     get_current_regcache (),
+				     &retval, NULL);
       if (stack_temporaries && class_or_union_p (ri->value_type))
 	{
 	  /* Values of class type returned in registers are copied onto
@@ -848,6 +842,7 @@ call_function_by_hand_dummy (struct value *function,
   bool stack_temporaries = thread_stack_temporaries_enabled_p (call_thread.get ());
 
   frame = get_current_frame ();
+  frame.prepare_reinflate ();
   gdbarch = get_frame_arch (frame);
 
   if (!gdbarch_push_dummy_call_p (gdbarch))
@@ -862,6 +857,8 @@ call_function_by_hand_dummy (struct value *function,
     error (_("Cannot call the function '%s' which does not follow the "
 	     "target calling convention."),
 	   get_function_name (funaddr, name_buf, sizeof (name_buf)));
+
+  frame.reinflate ();
 
   if (values_type == NULL || values_type->is_stub ())
     values_type = default_return_type;
@@ -1061,7 +1058,7 @@ call_function_by_hand_dummy (struct value *function,
 	break;
       }
     default:
-      internal_error (__FILE__, __LINE__, _("bad switch"));
+      internal_error (_("bad switch"));
     }
 
   /* Coerce the arguments and handle pass-by-reference.

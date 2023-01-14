@@ -1,6 +1,6 @@
 /* Manages interpreters for GDB, the GNU debugger.
 
-   Copyright (C) 2000-2022 Free Software Foundation, Inc.
+   Copyright (C) 2000-2023 Free Software Foundation, Inc.
 
    Written by Jim Ingham <jingham@apple.com> of Apple Computer, Inc.
 
@@ -115,8 +115,7 @@ interp_factory_register (const char *name, interp_factory_func func)
   for (const interp_factory &f : interpreter_factories)
     if (strcmp (f.name, name) == 0)
       {
-	internal_error (__FILE__, __LINE__,
-			_("interpreter factory already registered: \"%s\"\n"),
+	internal_error (_("interpreter factory already registered: \"%s\"\n"),
 			name);
       }
 
@@ -171,11 +170,16 @@ interp_set (struct interp *interp, bool top_level)
   if (interpreter_p != interp->name ())
     interpreter_p = interp->name ();
 
+  bool warn_about_mi1 = false;
+
   /* Run the init proc.  */
   if (!interp->inited)
     {
       interp->init (top_level);
       interp->inited = true;
+
+      if (streq (interp->name (), "mi1"))
+	warn_about_mi1 = true;
     }
 
   /* Do this only after the interpreter is initialized.  */
@@ -185,6 +189,11 @@ interp_set (struct interp *interp, bool top_level)
   clear_interpreter_hooks ();
 
   interp->resume ();
+
+  if (warn_about_mi1)
+    warning (_("MI version 1 is deprecated in GDB 13 and "
+	       "will be removed in GDB 14.  Please upgrade "
+	       "to a newer version of MI."));
 }
 
 /* Look up the interpreter for NAME.  If no such interpreter exists,

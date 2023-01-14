@@ -1,6 +1,6 @@
 /* This file is part of SIS (SPARC instruction simulator)
 
-   Copyright (C) 1995-2022 Free Software Foundation, Inc.
+   Copyright (C) 1995-2023 Free Software Foundation, Inc.
    Contributed by Jiri Gaisler, European Space Agency
 
    This program is free software; you can redistribute it and/or modify
@@ -298,7 +298,7 @@ disp_reg(struct pstate *sregs, char *reg)
 #ifdef ERRINJ
 
 void
-errinj()
+errinj (int32_t arg ATTRIBUTE_UNUSED)
 {
     int	err;
 
@@ -322,7 +322,7 @@ errinj()
 }
 
 void
-errinjstart()
+errinjstart (void)
 {
     if (errper) event(errinj, 0, (random()%errper));
 }
@@ -825,7 +825,7 @@ dis_mem(uint32_t addr, uint32_t len, struct disassemble_info *info)
 /* Add event to event queue */
 
 void
-event(void (*cfunc) (), int32_t arg, uint64_t delta)
+event(void (*cfunc) (int32_t), int32_t arg, uint64_t delta)
 {
     struct evcell  *ev1, *evins;
 
@@ -855,7 +855,7 @@ event(void (*cfunc) (), int32_t arg, uint64_t delta)
 
 #if 0	/* apparently not used */
 void
-stop_event()
+stop_event(void)
 {
 }
 #endif
@@ -874,7 +874,7 @@ init_event(void)
 }
 
 void
-set_int(int32_t level, void (*callback) (), int32_t arg)
+set_int(int32_t level, void (*callback) (int32_t), int32_t arg)
 {
     irqarr[level & 0x0f].callback = callback;
     irqarr[level & 0x0f].arg = arg;
@@ -887,8 +887,8 @@ advance_time(struct pstate *sregs)
 {
 
     struct evcell  *evrem;
-    void            (*cfunc) ();
-    uint32_t          arg;
+    void            (*cfunc) (int32_t);
+    int32_t           arg;
     uint64_t          endtime;
 
 #ifdef STAT
@@ -926,7 +926,7 @@ int
 wait_for_irq(void)
 {
     struct evcell  *evrem;
-    void            (*cfunc) ();
+    void            (*cfunc) (int32_t);
     int32_t           arg;
     uint64_t          endtime;
 

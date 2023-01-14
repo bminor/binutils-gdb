@@ -1,5 +1,5 @@
 /* ELF support for BFD.
-   Copyright (C) 1991-2022 Free Software Foundation, Inc.
+   Copyright (C) 1991-2023 Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
@@ -489,6 +489,7 @@
 #define PT_GNU_STACK	(PT_LOOS + 0x474e551) /* Stack flags */
 #define PT_GNU_RELRO	(PT_LOOS + 0x474e552) /* Read-only after relocation */
 #define PT_GNU_PROPERTY	(PT_LOOS + 0x474e553) /* GNU property */
+#define PT_GNU_SFRAME	(PT_LOOS + 0x474e554) /* SFrame unwind information */
 
 /* OpenBSD segment types.  */
 #define PT_OPENBSD_RANDOMIZE (PT_LOOS + 0x5a3dbe6)  /* Fill with random data.  */
@@ -695,6 +696,10 @@
 #define NT_ARM_PAC_ENABLED_KEYS	0x40a	/* AArch64 pointer authentication
 					   enabled keys (prctl()) */
 					/*   note name must be "LINUX".  */
+#define NT_ARM_SSVE     0x40b        	/* AArch64 SME streaming SVE registers.  */
+					/*   Note: name must be "LINUX".  */
+#define NT_ARM_ZA       0x40c           /* AArch64 SME ZA register.  */
+					/*   Note: name must be "LINUX".  */
 #define NT_ARC_V2	0x600		/* ARC HS accumulator/extra registers.  */
 					/*   note name must be "LINUX".  */
 #define NT_LARCH_CPUCFG 0xa00		/* LoongArch CPU config registers */

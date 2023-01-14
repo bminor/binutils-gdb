@@ -760,11 +760,7 @@ do_unix_mkdir(os_emul_data *emul,
   if (WITH_TRACE && ppc_trace[trace_os_emul])
     printf_filtered ("0x%lx [%s], 0%3o", (long)path_addr, path, mode);
 
-#ifdef USE_WIN32API
-  status = mkdir(path);
-#else
   status = mkdir(path, mode);
-#endif
   emul_write_status(processor, status, errno);
 }
 #endif

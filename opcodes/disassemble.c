@@ -1,5 +1,5 @@
 /* Select disassembly routine for specified architecture.
-   Copyright (C) 1994-2022 Free Software Foundation, Inc.
+   Copyright (C) 1994-2023 Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
 
@@ -622,6 +622,7 @@ disassemble_init_for_target (struct disassemble_info * info)
     case bfd_arch_arm:
       info->symbol_is_valid = arm_symbol_is_valid;
       info->disassembler_needs_relocs = true;
+      info->created_styled_output = true;
       break;
 #endif
 #ifdef ARCH_avr
@@ -660,6 +661,11 @@ disassemble_init_for_target (struct disassemble_info * info)
 #ifdef ARCH_metag
     case bfd_arch_metag:
       info->disassembler_needs_relocs = true;
+      break;
+#endif
+#ifdef ARCH_mips
+    case bfd_arch_mips:
+      info->created_styled_output = true;
       break;
 #endif
 #ifdef ARCH_m32c

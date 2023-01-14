@@ -1,5 +1,5 @@
 /* MI Command Set - stack commands.
-   Copyright (C) 2000-2022 Free Software Foundation, Inc.
+   Copyright (C) 2000-2023 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -545,7 +545,7 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 	      struct value_print_options opts;
 
 	      get_no_prettyformat_print_options (&opts);
-	      opts.deref_ref = 1;
+	      opts.deref_ref = true;
 	      common_val_print (arg->val, &stb, 0, &opts,
 				language_def (arg->sym->language ()));
 	    }
@@ -591,8 +591,7 @@ list_args_or_locals (const frame_print_options &fp_opts,
       name_of_result = "variables";
       break;
     default:
-      internal_error (__FILE__, __LINE__,
-		      "unexpected what_to_list: %d", (int) what);
+      internal_error ("unexpected what_to_list: %d", (int) what);
     }
 
   ui_out_emit_list list_emitter (uiout, name_of_result);

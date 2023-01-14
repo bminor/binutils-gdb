@@ -1,6 +1,6 @@
 /* "Quick" symbol functions
 
-   Copyright (C) 2021-2022 Free Software Foundation, Inc.
+   Copyright (C) 2021-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -211,13 +211,6 @@ struct quick_symbol_functions
        (struct objfile *objfile,
 	gdb::function_view<symbol_filename_ftype> fun,
 	bool need_fullname) = 0;
-
-  /* This is called when the objfile is relocated.  It can be used to
-     clean up any internal caches.  */
-  virtual void relocated ()
-  {
-    /* Do nothing.  */
-  }
 
   /* Return true if this class can lazily read the symbols.  This may
      only return true if there are in fact symbols to be read, because

@@ -1,4 +1,4 @@
-# Copyright (C) 2011-2022 Free Software Foundation, Inc.
+# Copyright (C) 2011-2023 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ with_test_prefix "normal conditions" {
     clean_restart ${testfile}
     gdb_load_shlib ${lib_sl}
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
 
@@ -102,7 +102,7 @@ with_test_prefix "no debug symbol" {
 	"import python scripts"
     set cond_line [gdb_get_line_number "Condition Break."]
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
 
@@ -129,7 +129,7 @@ with_test_prefix "function returned by longjump" {
     gdb_test "source $python_file" "Python script imported.*" \
 	"import python scripts"
 
-    if ![runto call_longjmp_1] then {
+    if {![runto call_longjmp_1]} {
 	return
     }
 
@@ -157,7 +157,7 @@ with_test_prefix "finish in dummy frame" {
 	"import python scripts"
 
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
 
@@ -184,7 +184,7 @@ with_test_prefix "finish in normal frame" {
     gdb_test "source $python_file" "Python script imported.*" \
 	"import python scripts"
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
 
@@ -213,7 +213,7 @@ with_test_prefix "explicit inferior function call" {
     gdb_test "source $python_file" "Python script imported.*" \
 	"import python scripts"
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
 
@@ -240,7 +240,7 @@ with_test_prefix "explicit inferior function call" {
 #
 
 with_test_prefix "inferior exit" {
-    if ![runto "test_exec_exit"] then {
+    if {![runto "test_exec_exit"]} {
 	return 0
     }
 
@@ -254,7 +254,7 @@ with_test_prefix "inferior exit" {
 #
 
 with_test_prefix "inferior exec" {
-    if ![runto "test_exec_exit"] then {
+    if {![runto "test_exec_exit"]} {
 	return 0
     }
 

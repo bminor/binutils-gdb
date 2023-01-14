@@ -1,5 +1,5 @@
 /* C preprocessor macro expansion for GDB.
-   Copyright (C) 2002-2022 Free Software Foundation, Inc.
+   Copyright (C) 2002-2023 Free Software Foundation, Inc.
    Contributed by Red Hat, Inc.
 
    This file is part of GDB.
@@ -632,8 +632,7 @@ append_tokens_without_splicing (growable_macro_buffer *dest,
 
   /* As far as I know, there's no case where inserting a space isn't
      enough to prevent a splice.  */
-  internal_error (__FILE__, __LINE__,
-		  _("unable to avoid splicing tokens during macro expansion"));
+  internal_error (_("unable to avoid splicing tokens during macro expansion"));
 }
 
 /* Stringify an argument, and insert it into DEST.  ARG is the text to
@@ -1311,7 +1310,7 @@ expand (const char *id,
       return 1;
     }
   else
-    internal_error (__FILE__, __LINE__, _("bad macro definition kind"));
+    internal_error (_("bad macro definition kind"));
 }
 
 

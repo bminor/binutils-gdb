@@ -1,5 +1,5 @@
 /* Main simulator entry points specific to the eBPF.
-   Copyright (C) 2020-2022 Free Software Foundation, Inc.
+   Copyright (C) 2020-2023 Free Software Foundation, Inc.
 
    This file is part of GDB, the GNU debugger.
 
@@ -132,7 +132,7 @@ sim_open (SIM_OPEN_KIND kind,
   STATE_MACHS (sd) = bpf_sim_machs;
   STATE_MODEL_NAME (sd) = "bpf-def";
 
-  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
+  if (sim_cpu_alloc_all_extra (sd, 0, sizeof (struct bpf_sim_cpu)) != SIM_RC_OK)
     goto error;
 
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
@@ -195,7 +195,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 {
   SIM_CPU *current_cpu = STATE_CPU (sd, 0);
   host_callback *cb = STATE_CALLBACK (sd);
-  SIM_ADDR addr;
+  bfd_vma addr;
 
   /* Determine the start address.
 

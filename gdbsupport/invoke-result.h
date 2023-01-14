@@ -1,6 +1,6 @@
 /* Compatibility wrapper around std::result_of and std::invoke_result.
 
-   Copyright (C) 2022 Free Software Foundation, Inc.
+   Copyright (C) 2022-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

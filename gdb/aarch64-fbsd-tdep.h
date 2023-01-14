@@ -1,6 +1,6 @@
 /* FreeBSD/aarch64 target support, prototypes.
 
-   Copyright (C) 2017-2022 Free Software Foundation, Inc.
+   Copyright (C) 2017-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -37,5 +37,6 @@
 
 extern const struct regset aarch64_fbsd_gregset;
 extern const struct regset aarch64_fbsd_fpregset;
+extern const struct regset aarch64_fbsd_tls_regset;
 
 #endif /* AARCH64_FBSD_TDEP_H */

@@ -1,6 +1,6 @@
 /* Linux namespaces(7) support.
 
-   Copyright (C) 2015-2022 Free Software Foundation, Inc.
+   Copyright (C) 2015-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -734,8 +734,7 @@ mnsh_maybe_mourn_peer (void)
 	  if (errno == ECHILD)
 	    warning (_("mount namespace helper vanished?"));
 	  else
-	    internal_warning (__FILE__, __LINE__,
-			      _("unhandled error %d"), errno);
+	    internal_warning (_("unhandled error %d"), errno);
 	}
       else if (pid == helper->pid)
 	{
@@ -746,12 +745,10 @@ mnsh_maybe_mourn_peer (void)
 	    warning (_("mount namespace helper killed by signal %d"),
 		     WTERMSIG (status));
 	  else
-	    internal_warning (__FILE__, __LINE__,
-			      _("unhandled status %d"), status);
+	    internal_warning (_("unhandled status %d"), status);
 	}
       else
-	internal_warning (__FILE__, __LINE__,
-			  _("unknown pid %d"), pid);
+	internal_warning (_("unknown pid %d"), pid);
 
       /* Something unrecoverable happened.  */
       helper->pid = -1;

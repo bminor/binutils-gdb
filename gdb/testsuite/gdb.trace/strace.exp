@@ -1,4 +1,4 @@
-# Copyright 2011-2022 Free Software Foundation, Inc.
+# Copyright 2011-2023 Free Software Foundation, Inc.
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
@@ -370,7 +370,7 @@ gdb_load_shlib $libipa
 if ![runto_main] {
     return -1
 }
-if { ![gdb_target_supports_trace] } then {
+if {![gdb_target_supports_trace]} {
     # At this point, the socket file has been created.  We must make sure it is
     # removed when we return here.  GDB detaches inferior so that the socket
     # file can be removed.  Note that GDB simply kill inferior doesn't remove

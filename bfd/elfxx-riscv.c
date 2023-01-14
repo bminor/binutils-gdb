@@ -1,5 +1,5 @@
 /* RISC-V-specific support for ELF.
-   Copyright (C) 2011-2022 Free Software Foundation, Inc.
+   Copyright (C) 2011-2023 Free Software Foundation, Inc.
 
    Contributed by Andrew Waterman (andrew@sifive.com).
    Based on TILE-Gx and MIPS targets.
@@ -994,6 +994,10 @@ riscv_elf_add_sub_reloc (bfd *abfd,
       relocation = old_value + relocation;
       break;
     case R_RISCV_SUB6:
+      relocation = (old_value & ~howto->dst_mask)
+		   | (((old_value & howto->dst_mask) - relocation)
+		      & howto->dst_mask);
+      break;
     case R_RISCV_SUB8:
     case R_RISCV_SUB16:
     case R_RISCV_SUB32:
@@ -1097,9 +1101,12 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zks", "zbkx",	check_implicit_always},
   {"zks", "zksed",	check_implicit_always},
   {"zks", "zksh",	check_implicit_always},
+  {"smaia", "ssaia",		check_implicit_always},
+  {"smstateen", "ssstateen",	check_implicit_always},
   {"smepmp", "zicsr",		check_implicit_always},
-  {"smstateen", "zicsr",	check_implicit_always},
+  {"ssaia", "zicsr",		check_implicit_always},
   {"sscofpmf", "zicsr",		check_implicit_always},
+  {"ssstateen", "zicsr",	check_implicit_always},
   {"sstc", "zicsr",		check_implicit_always},
   {NULL, NULL, NULL}
 };
@@ -1216,9 +1223,12 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
 
 static struct riscv_supported_ext riscv_supported_std_s_ext[] =
 {
+  {"smaia",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"smepmp",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"smstateen",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"ssaia",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"sscofpmf",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"ssstateen",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"sstc",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"svinval",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"svnapot",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
@@ -1239,6 +1249,8 @@ static struct riscv_supported_ext riscv_supported_vendor_x_ext[] =
   {"xtheadcmo",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xtheadcondmov",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xtheadfmemidx",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
+  {"xtheadfmv",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
+  {"xtheadint",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xtheadmac",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xtheadmemidx",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xtheadmempair",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
@@ -1263,7 +1275,7 @@ enum riscv_prefix_ext_class
   RV_ISA_CLASS_S,
   RV_ISA_CLASS_ZXM,
   RV_ISA_CLASS_X,
-  RV_ISA_CLASS_UNKNOWN
+  RV_ISA_CLASS_SINGLE
 };
 
 /* Record the strings of the prefixed extensions, and their corresponding
@@ -1284,7 +1296,7 @@ static const struct riscv_parse_prefix_config parse_config[] =
   {RV_ISA_CLASS_Z, "z"},
   {RV_ISA_CLASS_S, "s"},
   {RV_ISA_CLASS_X, "x"},
-  {RV_ISA_CLASS_UNKNOWN, NULL}
+  {RV_ISA_CLASS_SINGLE, NULL}
 };
 
 /* Get the prefixed name class for the extensions, the class also
@@ -1294,14 +1306,14 @@ static enum riscv_prefix_ext_class
 riscv_get_prefix_class (const char *arch)
 {
   int i = 0;
-  while (parse_config[i].class != RV_ISA_CLASS_UNKNOWN)
+  while (parse_config[i].class != RV_ISA_CLASS_SINGLE)
     {
       if (strncmp (arch, parse_config[i].prefix,
 		   strlen (parse_config[i].prefix)) == 0)
 	return parse_config[i].class;
       i++;
     }
-  return RV_ISA_CLASS_UNKNOWN;
+  return RV_ISA_CLASS_SINGLE;
 }
 
 /* Check KNOWN_EXTS to see if the EXT is supported.  */
@@ -1393,9 +1405,9 @@ riscv_compare_subsets (const char *subset1, const char *subset2)
   enum riscv_prefix_ext_class class1 = riscv_get_prefix_class (subset1);
   enum riscv_prefix_ext_class class2 = riscv_get_prefix_class (subset2);
 
-  if (class1 != RV_ISA_CLASS_UNKNOWN)
+  if (class1 != RV_ISA_CLASS_SINGLE)
     order1 = - (int) class1;
-  if (class2 != RV_ISA_CLASS_UNKNOWN)
+  if (class2 != RV_ISA_CLASS_SINGLE)
     order2 = - (int) class2;
 
   if (order1 == order2)
@@ -1583,6 +1595,12 @@ riscv_release_subset_list (riscv_subset_list_t *subset_list)
     }
 
   subset_list->tail = NULL;
+
+  if (subset_list->arch_str != NULL)
+    {
+      free ((void*) subset_list->arch_str);
+      subset_list->arch_str = NULL;
+    }
 }
 
 /* Parsing extension version.
@@ -1641,7 +1659,7 @@ riscv_parsing_subset_version (const char *p,
   return p;
 }
 
-/* Parsing function for standard extensions.
+/* Parsing function for both standard and prefixed extensions.
 
    Return Value:
      Points to the end of extensions.
@@ -1652,9 +1670,9 @@ riscv_parsing_subset_version (const char *p,
      `p`: Curent parsing position.  */
 
 static const char *
-riscv_parse_std_ext (riscv_parse_subset_t *rps,
-		     const char *arch,
-		     const char *p)
+riscv_parse_extensions (riscv_parse_subset_t *rps,
+			const char *arch,
+			const char *p)
 {
   /* First letter must start with i, e or g.  */
   if (*p != 'e' && *p != 'i' && *p != 'g')
@@ -1665,132 +1683,70 @@ riscv_parse_std_ext (riscv_parse_subset_t *rps,
       return NULL;
     }
 
-  while (p != NULL && *p != '\0')
-    {
-      /* Stop when we parsed the known prefix class.  */
-      enum riscv_prefix_ext_class class = riscv_get_prefix_class (p);
-      if (class != RV_ISA_CLASS_UNKNOWN)
-	break;
-
-      if (*p == '_')
-	{
-	  p++;
-	  continue;
-	}
-
-      bool implicit = false;
-      int major = RISCV_UNKNOWN_VERSION;
-      int minor = RISCV_UNKNOWN_VERSION;
-      char subset[2] = {0, 0};
-
-      subset[0] = *p;
-
-      /* Check if the standard extension is supported.  */
-      if (riscv_ext_order[(subset[0] - 'a')] == 0)
-	{
-	  rps->error_handler
-	    (_("%s: unknown standard ISA extension `%c'"),
-	     arch, subset[0]);
-	  return NULL;
-	}
-
-      /* Checking canonical order.  */
-      if (rps->subset_list->tail != NULL
-	  && riscv_compare_subsets (rps->subset_list->tail->name, subset) > 0)
-	{
-	  rps->error_handler
-	    (_("%s: standard ISA extension `%c' is not "
-	       "in canonical order"), arch, subset[0]);
-	  return NULL;
-	}
-
-      p = riscv_parsing_subset_version (++p, &major, &minor);
-      /* Added g as an implicit extension.  */
-      if (subset[0] == 'g')
-	{
-	  implicit = true;
-	  major = RISCV_UNKNOWN_VERSION;
-	  minor = RISCV_UNKNOWN_VERSION;
-	}
-      riscv_parse_add_subset (rps, subset, major, minor, implicit);
-    }
-
-  return p;
-}
-
-/* Parsing function for prefixed extensions.
-
-   Return Value:
-     Points to the end of extension.
-
-   Arguments:
-     `rps`: Hooks and status for parsing extensions.
-     `arch`: Full ISA string.
-     `p`: Curent parsing position.  */
-
-static const char *
-riscv_parse_prefixed_ext (riscv_parse_subset_t *rps,
-			  const char *arch,
-			  const char *p)
-{
-  int major_version;
-  int minor_version;
-  enum riscv_prefix_ext_class class;
-
-  while (*p)
+  while (*p != '\0')
     {
       if (*p == '_')
 	{
 	  p++;
 	  continue;
-	}
-
-      class = riscv_get_prefix_class (p);
-      if (class == RV_ISA_CLASS_UNKNOWN)
-	{
-	  rps->error_handler
-	    (_("%s: unknown prefix class for the ISA extension `%s'"),
-	     arch, p);
-	  return NULL;
 	}
 
       char *subset = xstrdup (p);
-      char *q = subset;
+      char *q = subset;	/* Start of version.  */
       const char *end_of_version;
+      bool implicit = false;
 
-      /* Extract the whole prefixed extension by '_'.  */
-      while (*++q != '\0' && *q != '_')
-	;
-      /* Look forward to the first letter which is not <major>p<minor>.  */
-      bool find_any_version = false;
-      bool find_minor_version = false;
-      while (1)
+      enum riscv_prefix_ext_class class = riscv_get_prefix_class (p);
+      if (class == RV_ISA_CLASS_SINGLE)
 	{
-	  q--;
-	  if (ISDIGIT (*q))
-	    find_any_version = true;
-	  else if (find_any_version
-		   && !find_minor_version
-		   && *q == 'p'
-		   && ISDIGIT (*(q - 1)))
-	    find_minor_version = true;
-	  else
-	    break;
+	  if (riscv_ext_order[(*subset - 'a')] == 0)
+	    {
+	      rps->error_handler
+		(_("%s: unknown standard ISA extension or prefix class `%c'"),
+		 arch, *subset);
+	      free (subset);
+	      return NULL;
+	    }
+	  q++;
 	}
-      q++;
-
-      /* Check if the end of extension is 'p' or not.  If yes, then
-	 the second letter from the end cannot be number.  */
-      if (*(q - 1) == 'p' && ISDIGIT (*(q - 2)))
+      else
 	{
-	  *q = '\0';
-	  rps->error_handler
-	    (_("%s: invalid prefixed ISA extension `%s' ends with <number>p"),
-	     arch, subset);
-	  free (subset);
-	  return NULL;
+	  /* Extract the whole prefixed extension by '_'.  */
+	  while (*++q != '\0' && *q != '_')
+	    ;
+	  /* Look forward to the first letter which is not <major>p<minor>.  */
+	  bool find_any_version = false;
+	  bool find_minor_version = false;
+	  while (1)
+	    {
+	      q--;
+	      if (ISDIGIT (*q))
+		find_any_version = true;
+	      else if (find_any_version
+		       && !find_minor_version
+		       && *q == 'p'
+		       && ISDIGIT (*(q - 1)))
+	      find_minor_version = true;
+	      else
+		break;
+	    }
+	  q++;
+
+	  /* Check if the end of extension is 'p' or not.  If yes, then
+	     the second letter from the end cannot be number.  */
+	  if (*(q - 1) == 'p' && ISDIGIT (*(q - 2)))
+	    {
+	      *q = '\0';
+	      rps->error_handler
+		(_("%s: invalid prefixed ISA extension `%s' ends with <number>p"),
+		 arch, subset);
+	      free (subset);
+	      return NULL;
+	    }
 	}
 
+      int major_version = RISCV_UNKNOWN_VERSION;
+      int minor_version = RISCV_UNKNOWN_VERSION;
       end_of_version =
 	riscv_parsing_subset_version (q, &major_version, &minor_version);
       *q = '\0';
@@ -1800,8 +1756,9 @@ riscv_parse_prefixed_ext (riscv_parse_subset_t *rps,
 	  return NULL;
 	}
 
-      /* Check that the extension name is well-formed.  */
-      if (rps->check_unknown_prefixed_ext
+      /* Check if the prefixed extension name is well-formed.  */
+      if (class != RV_ISA_CLASS_SINGLE
+	  && rps->check_unknown_prefixed_ext
 	  && !riscv_recognized_prefixed_ext (subset))
 	{
 	  rps->error_handler
@@ -1811,13 +1768,22 @@ riscv_parse_prefixed_ext (riscv_parse_subset_t *rps,
 	  return NULL;
 	}
 
+      /* Added g as an implicit extension.  */
+      if (class == RV_ISA_CLASS_SINGLE
+	  && strcmp (subset, "g") == 0)
+	{
+	  implicit = true;
+	  major_version = RISCV_UNKNOWN_VERSION;
+	  minor_version = RISCV_UNKNOWN_VERSION;
+	}
       riscv_parse_add_subset (rps, subset,
 			      major_version,
-			      minor_version, false);
+			      minor_version, implicit);
       p += end_of_version - subset;
       free (subset);
 
-      if (*p != '\0' && *p != '_')
+      if (class != RV_ISA_CLASS_SINGLE
+	  && *p != '\0' && *p != '_')
 	{
 	  rps->error_handler
 	    (_("%s: prefixed ISA extension must separate with _"),
@@ -1868,13 +1834,6 @@ riscv_parse_check_conflicts (riscv_parse_subset_t *rps)
       && xlen < 64)
     {
       rps->error_handler (_("rv%d does not support the `q' extension"), xlen);
-      no_conflict = false;
-    }
-  if (riscv_lookup_subset (rps->subset_list, "e", &subset)
-      && riscv_lookup_subset (rps->subset_list, "f", &subset))
-    {
-      rps->error_handler
-        (_("rv32e does not support the `f' extension"));
       no_conflict = false;
     }
   if (riscv_lookup_subset (rps->subset_list, "zfinx", &subset)
@@ -1997,16 +1956,8 @@ riscv_parse_subset (riscv_parse_subset_t *rps,
       return false;
     }
 
-  /* Parsing standard extension.  */
-  p = riscv_parse_std_ext (rps, arch, p);
-
-  if (p == NULL)
-    return false;
-
-  /* Parse prefixed extensions.  */
-  p = riscv_parse_prefixed_ext (rps, arch, p);
-
-  if (p == NULL)
+  /* Parse single standard and prefixed extensions.  */
+  if (riscv_parse_extensions (rps, arch, p) == NULL)
     return false;
 
   /* Finally add implicit extensions according to the current
@@ -2138,6 +2089,7 @@ riscv_copy_subset_list (riscv_subset_list_t *subset_list)
 {
   riscv_subset_list_t *new = xmalloc (sizeof *new);
   new->head = riscv_copy_subset (new, subset_list->head);
+  new->arch_str = strdup (subset_list->arch_str);
   return new;
 }
 
@@ -2419,6 +2371,10 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "xtheadcondmov");
     case INSN_CLASS_XTHEADFMEMIDX:
       return riscv_subset_supports (rps, "xtheadfmemidx");
+    case INSN_CLASS_XTHEADFMV:
+      return riscv_subset_supports (rps, "xtheadfmv");
+    case INSN_CLASS_XTHEADINT:
+      return riscv_subset_supports (rps, "xtheadint");
     case INSN_CLASS_XTHEADMAC:
       return riscv_subset_supports (rps, "xtheadmac");
     case INSN_CLASS_XTHEADMEMIDX:
@@ -2573,6 +2529,10 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "xtheadcondmov";
     case INSN_CLASS_XTHEADFMEMIDX:
       return "xtheadfmemidx";
+    case INSN_CLASS_XTHEADFMV:
+      return "xtheadfmv";
+    case INSN_CLASS_XTHEADINT:
+      return "xtheadint";
     case INSN_CLASS_XTHEADMAC:
       return "xtheadmac";
     case INSN_CLASS_XTHEADMEMIDX:

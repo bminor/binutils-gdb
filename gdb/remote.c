@@ -1,6 +1,6 @@
 /* Remote target communications for serial-line targets in custom GDB protocol
 
-   Copyright (C) 1988-2022 Free Software Foundation, Inc.
+   Copyright (C) 1988-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1593,8 +1593,7 @@ show_interrupt_sequence (struct ui_file *file, int from_tty,
 		  "the remote target to interrupt the execution "
 		  "of Linux kernel.\n"));
   else
-    internal_error (__FILE__, __LINE__,
-		    _("Invalid value for interrupt_sequence_mode: %s."),
+    internal_error (_("Invalid value for interrupt_sequence_mode: %s."),
 		    interrupt_sequence_mode);
 }
 
@@ -2028,8 +2027,7 @@ packet_ok (const char *buf, struct packet_config *config)
 
   if (config->detect != AUTO_BOOLEAN_TRUE
       && config->support == PACKET_DISABLE)
-    internal_error (__FILE__, __LINE__,
-		    _("packet_ok: attempt to use a disabled packet"));
+    internal_error (_("packet_ok: attempt to use a disabled packet"));
 
   result = packet_check_result (buf);
   switch (result)
@@ -2286,7 +2284,7 @@ show_remote_protocol_packet_cmd (struct ui_file *file, int from_tty,
 	  return;
 	}
     }
-  internal_error (__FILE__, __LINE__, _("Could not find config for %s"),
+  internal_error (_("Could not find config for %s"),
 		  c->name);
 }
 
@@ -4041,8 +4039,7 @@ remote_target::extra_thread_info (thread_info *tp)
   struct gdb_ext_thread_info threadinfo;
 
   if (rs->remote_desc == 0)		/* paranoia */
-    internal_error (__FILE__, __LINE__,
-		    _("remote_threads_extra_info"));
+    internal_error (_("remote_threads_extra_info"));
 
   if (tp->ptid == magic_null_ptid
       || (tp->ptid.pid () != 0 && tp->ptid.lwp () == 0))
@@ -4401,8 +4398,7 @@ remote_target::send_interrupt_sequence ()
       remote_serial_write ("g", 1);
     }
   else
-    internal_error (__FILE__, __LINE__,
-		    _("Invalid value for interrupt_sequence_mode: %s."),
+    internal_error (_("Invalid value for interrupt_sequence_mode: %s."),
 		    interrupt_sequence_mode);
 }
 
@@ -4629,7 +4625,7 @@ remote_target::process_initial_stop_replies (int from_tty)
      registers/memory.  */
   for (inferior *inf : all_non_exited_inferiors (this))
     {
-      inf->needs_setup = 1;
+      inf->needs_setup = true;
 
       if (non_stop)
 	{
@@ -4706,7 +4702,7 @@ remote_target::process_initial_stop_replies (int from_tty)
     }
 }
 
-/* Mark a remote_target as marking (by setting the starting_up flag within
+/* Mark a remote_target as starting (by setting the starting_up flag within
    its remote_state) for the lifetime of this object.  The reference count
    on the remote target is temporarily incremented, to prevent the target
    being deleted under our feet.  */
@@ -4716,26 +4712,32 @@ struct scoped_mark_target_starting
   /* Constructor, TARGET is the target to be marked as starting, its
      reference count will be incremented.  */
   scoped_mark_target_starting (remote_target *target)
-    : m_remote_target (target)
-  {
-    m_remote_target->incref ();
-    remote_state *rs = m_remote_target->get_remote_state ();
-    rs->starting_up = true;
-  }
-
-  /* Destructor, mark the target being worked on as no longer starting, and
-     decrement the reference count.  */
-  ~scoped_mark_target_starting ()
-  {
-    remote_state *rs = m_remote_target->get_remote_state ();
-    rs->starting_up = false;
-    decref_target (m_remote_target);
-  }
+    : m_remote_target (remote_target_ref::new_reference (target)),
+      m_restore_starting_up (set_starting_up_flag (target))
+  { /* Nothing.  */ }
 
 private:
 
-  /* The target on which we are operating.  */
-  remote_target *m_remote_target;
+  /* Helper function, set the starting_up flag on TARGET and return an
+     object which, when it goes out of scope, will restore the previous
+     value of the starting_up flag.  */
+  static scoped_restore_tmpl<bool>
+  set_starting_up_flag (remote_target *target)
+  {
+    remote_state *rs = target->get_remote_state ();
+    gdb_assert (!rs->starting_up);
+    return make_scoped_restore (&rs->starting_up, true);
+  }
+
+  /* A gdb::ref_ptr pointer to a remote_target.  */
+  using remote_target_ref = gdb::ref_ptr<remote_target, target_ops_ref_policy>;
+
+  /* A reference to the target on which we are operating.  */
+  remote_target_ref m_remote_target;
+
+  /* An object which restores the previous value of the starting_up flag
+     when it goes out of scope.  */
+  scoped_restore_tmpl<bool> m_restore_starting_up;
 };
 
 /* Helper for remote_target::start_remote, start the remote connection and
@@ -5715,7 +5717,7 @@ remote_unpush_target (remote_target *target)
   for (inferior *inf : all_inferiors (target))
     {
       switch_to_inferior_no_thread (inf);
-      pop_all_targets_at_and_above (process_stratum);
+      inf->pop_all_targets_at_and_above (process_stratum);
       generic_mourn_inferior ();
     }
 
@@ -8538,8 +8540,7 @@ remote_target::process_g_packet (struct regcache *regcache)
     {
       if (p[0] == 0 || p[1] == 0)
 	/* This shouldn't happen - we adjusted sizeof_g_packet above.  */
-	internal_error (__FILE__, __LINE__,
-			_("unexpected end of 'g' packet reply"));
+	internal_error (_("unexpected end of 'g' packet reply"));
 
       if (p[0] == 'x' && p[1] == 'x')
 	regs[i] = 0;		/* 'x' */
@@ -8557,8 +8558,7 @@ remote_target::process_g_packet (struct regcache *regcache)
 	{
 	  if ((r->offset + reg_size) * 2 > strlen (rs->buf.data ()))
 	    /* This shouldn't happen - we adjusted in_g_packet above.  */
-	    internal_error (__FILE__, __LINE__,
-			    _("unexpected end of 'g' packet reply"));
+	    internal_error (_("unexpected end of 'g' packet reply"));
 	  else if (rs->buf[r->offset * 2] == 'x')
 	    {
 	      gdb_assert (r->offset * 2 < strlen (rs->buf.data ()));
@@ -8713,7 +8713,7 @@ remote_target::store_register_using_P (const struct regcache *regcache,
     case PACKET_UNKNOWN:
       return 0;
     default:
-      internal_error (__FILE__, __LINE__, _("Bad result from packet_ok"));
+      internal_error (_("Bad result from packet_ok"));
     }
 }
 
@@ -8985,8 +8985,7 @@ remote_target::remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
   int payload_length_bytes;
 
   if (packet_format != 'X' && packet_format != 'M')
-    internal_error (__FILE__, __LINE__,
-		    _("remote_write_bytes_aux: bad packet format"));
+    internal_error (_("remote_write_bytes_aux: bad packet format"));
 
   if (len_units == 0)
     return TARGET_XFER_EOF;
@@ -9035,8 +9034,7 @@ remote_target::remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
     }
 
   if (todo_units <= 0)
-    internal_error (__FILE__, __LINE__,
-		    _("minimum packet size too small to write data"));
+    internal_error (_("minimum packet size too small to write data"));
 
   /* If we already need another packet, then try to align the end
      of this packet to a useful boundary.  */
@@ -9151,10 +9149,9 @@ remote_target::remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr,
       packet_format = "M";
       break;
     case PACKET_SUPPORT_UNKNOWN:
-      internal_error (__FILE__, __LINE__,
-		      _("remote_write_bytes: bad internal state"));
+      internal_error (_("remote_write_bytes: bad internal state"));
     default:
-      internal_error (__FILE__, __LINE__, _("bad switch"));
+      internal_error (_("bad switch"));
     }
 
   return remote_write_bytes_aux (packet_format,
@@ -9352,7 +9349,7 @@ remote_target::remote_send_printf (const char *format, ...)
   va_end (ap);
 
   if (size >= max_size)
-    internal_error (__FILE__, __LINE__, _("Too long remote packet."));
+    internal_error (_("Too long remote packet."));
 
   if (putpkt (rs->buf) < 0)
     error (_("Communication problem with target."));
@@ -10172,7 +10169,7 @@ remote_target::remote_vkill (int pid)
     case PACKET_UNKNOWN:
       return -1;
     default:
-      internal_error (__FILE__, __LINE__, _("Bad result from packet_ok"));
+      internal_error (_("Bad result from packet_ok"));
     }
 }
 
@@ -10666,8 +10663,7 @@ watchpoint_to_Z_packet (int type)
       return Z_PACKET_ACCESS_WP;
       break;
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("hw_bp_to_z: bad watchpoint type %d"), type);
+      internal_error (_("hw_bp_to_z: bad watchpoint type %d"), type);
     }
 }
 
@@ -10706,8 +10702,7 @@ remote_target::insert_watchpoint (CORE_ADDR addr, int len,
     case PACKET_OK:
       return 0;
     }
-  internal_error (__FILE__, __LINE__,
-		  _("remote_insert_watchpoint: reached end of function"));
+  internal_error (_("remote_insert_watchpoint: reached end of function"));
 }
 
 bool
@@ -10753,8 +10748,7 @@ remote_target::remove_watchpoint (CORE_ADDR addr, int len,
     case PACKET_OK:
       return 0;
     }
-  internal_error (__FILE__, __LINE__,
-		  _("remote_remove_watchpoint: reached end of function"));
+  internal_error (_("remote_remove_watchpoint: reached end of function"));
 }
 
 
@@ -10923,8 +10917,7 @@ remote_target::insert_hw_breakpoint (struct gdbarch *gdbarch,
     case PACKET_OK:
       return 0;
     }
-  internal_error (__FILE__, __LINE__,
-		  _("remote_insert_hw_breakpoint: reached end of function"));
+  internal_error (_("remote_insert_hw_breakpoint: reached end of function"));
 }
 
 
@@ -10964,8 +10957,7 @@ remote_target::remove_hw_breakpoint (struct gdbarch *gdbarch,
     case PACKET_OK:
       return 0;
     }
-  internal_error (__FILE__, __LINE__,
-		  _("remote_remove_hw_breakpoint: reached end of function"));
+  internal_error (_("remote_remove_hw_breakpoint: reached end of function"));
 }
 
 /* Verify memory using the "qCRC:" request.  */
@@ -12017,8 +12009,7 @@ register_remote_g_packet_guess (struct gdbarch *gdbarch, int bytes,
 
   for (const remote_g_packet_guess &guess : data->guesses)
     if (guess.bytes == bytes)
-      internal_error (__FILE__, __LINE__,
-		      _("Duplicate g packet description added for size %d"),
+      internal_error (_("Duplicate g packet description added for size %d"),
 		      bytes);
 
   data->guesses.emplace_back (bytes, tdesc);
@@ -13181,9 +13172,7 @@ remote_target::download_tracepoint (struct bp_location *loc)
 	  else
 	    /* If it passed validation at definition but fails now,
 	       something is very wrong.  */
-	    internal_error (__FILE__, __LINE__,
-			    _("Fast tracepoint not "
-			      "valid during download"));
+	    internal_error (_("Fast tracepoint not valid during download"));
 	}
       else
 	/* Fast tracepoints are functionally identical to regular
@@ -14265,8 +14254,7 @@ remote_target::read_btrace (struct btrace_data *btrace,
       annex = "delta";
       break;
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("Bad branch tracing read type: %u."),
+      internal_error (_("Bad branch tracing read type: %u."),
 		      (unsigned int) type);
     }
 
@@ -14317,8 +14305,7 @@ remote_target::pid_to_exec_file (int pid)
 
   inferior *inf = find_inferior_pid (this, pid);
   if (inf == NULL)
-    internal_error (__FILE__, __LINE__,
-		    _("not currently attached to process %d"), pid);
+    internal_error (_("not currently attached to process %d"), pid);
 
   if (!inf->fake_pid_p)
     {

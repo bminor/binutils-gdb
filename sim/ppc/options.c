@@ -110,17 +110,10 @@ INLINE_OPTIONS\
 (void)
 print_options (void)
 {
-#if defined(_GNUC_) && defined(__VERSION__)
-  printf_filtered ("Compiled by GCC %s on %s %s\n", __VERSION__, __DATE__, __TIME__);
-#else
-  printf_filtered ("Compiled on %s %s\n", __DATE__, __TIME__);
-#endif
-
   printf_filtered ("HOST_BYTE_ORDER          = %s\n", options_byte_order (HOST_BYTE_ORDER));
   printf_filtered ("WITH_TARGET_BYTE_ORDER   = %s\n", options_byte_order (WITH_TARGET_BYTE_ORDER));
   printf_filtered ("WITH_XOR_ENDIAN          = %d\n", WITH_XOR_ENDIAN);
   printf_filtered ("WITH_SMP                 = %d\n", WITH_SMP);
-  printf_filtered ("WITH_HOST_WORD_BITSIZE   = %d\n", WITH_HOST_WORD_BITSIZE);
   printf_filtered ("WITH_TARGET_WORD_BITSIZE = %d\n", WITH_TARGET_WORD_BITSIZE);
   printf_filtered ("WITH_ENVIRONMENT         = %s\n", options_env(WITH_ENVIRONMENT));
   printf_filtered ("WITH_EVENTS              = %d\n", WITH_EVENTS);
@@ -162,10 +155,6 @@ print_options (void)
   printf_filtered ("IGEN_FLAGS               = %s\n", IGEN_FLAGS);
 #endif
 
-#ifdef DGEN_FLAGS
-  printf_filtered ("DGEN_FLAGS               = %s\n", DGEN_FLAGS);
-#endif
-
   {
     static const char *const defines[] = {
 #ifdef __GNUC__
@@ -204,10 +193,6 @@ print_options (void)
 
 #ifdef HAVE_TERMIO_STRUCTURE
       "HAVE_TERMIO_STRUCTURE",
-#endif
-
-#ifdef HAVE_DEVZERO
-      "HAVE_DEVZERO",
 #endif
     };
 

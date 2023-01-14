@@ -1,5 +1,5 @@
 /* GDB routines for manipulating the minimal symbol tables.
-   Copyright (C) 1992-2022 Free Software Foundation, Inc.
+   Copyright (C) 1992-2023 Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
    This file is part of GDB.
@@ -385,13 +385,9 @@ lookup_minimal_symbol (const char *name, const char *sfile,
       if (objf == NULL || objf == objfile
 	  || objf == objfile->separate_debug_objfile_backlink)
 	{
-	  if (symbol_lookup_debug)
-	    {
-	      gdb_printf (gdb_stdlog,
-			  "lookup_minimal_symbol (%s, %s, %s)\n",
-			  name, sfile != NULL ? sfile : "NULL",
-			  objfile_debug_name (objfile));
-	    }
+	  symbol_lookup_debug_printf ("lookup_minimal_symbol (%s, %s, %s)",
+				      name, sfile != NULL ? sfile : "NULL",
+				      objfile_debug_name (objfile));
 
 	  /* Do two passes: the first over the ordinary hash table,
 	     and the second over the demangled hash table.  */
@@ -438,9 +434,9 @@ lookup_minimal_symbol (const char *name, const char *sfile,
 	{
 	  minimal_symbol *minsym = found.external_symbol.minsym;
 
-	  gdb_printf (gdb_stdlog,
-		      "lookup_minimal_symbol (...) = %s (external)\n",
-		      host_address_to_string (minsym));
+	  symbol_lookup_debug_printf
+	    ("lookup_minimal_symbol (...) = %s (external)",
+	     host_address_to_string (minsym));
 	}
       return found.external_symbol;
     }
@@ -452,9 +448,9 @@ lookup_minimal_symbol (const char *name, const char *sfile,
 	{
 	  minimal_symbol *minsym = found.file_symbol.minsym;
 
-	  gdb_printf (gdb_stdlog,
-		      "lookup_minimal_symbol (...) = %s (file-local)\n",
-		      host_address_to_string (minsym));
+	  symbol_lookup_debug_printf
+	    ("lookup_minimal_symbol (...) = %s (file-local)",
+	     host_address_to_string (minsym));
 	}
       return found.file_symbol;
     }
@@ -466,17 +462,16 @@ lookup_minimal_symbol (const char *name, const char *sfile,
 	{
 	  minimal_symbol *minsym = found.trampoline_symbol.minsym;
 
-	  gdb_printf (gdb_stdlog,
-		      "lookup_minimal_symbol (...) = %s (trampoline)\n",
-		      host_address_to_string (minsym));
+	  symbol_lookup_debug_printf
+	    ("lookup_minimal_symbol (...) = %s (trampoline)",
+	     host_address_to_string (minsym));
 	}
 
       return found.trampoline_symbol;
     }
 
   /* Not found.  */
-  if (symbol_lookup_debug)
-    gdb_printf (gdb_stdlog, "lookup_minimal_symbol (...) = NULL\n");
+  symbol_lookup_debug_printf ("lookup_minimal_symbol (...) = NULL");
   return {};
 }
 
@@ -1021,8 +1016,7 @@ stub_gnu_ifunc_resolve_name (const char *function_name,
 static void
 stub_gnu_ifunc_resolver_stop (code_breakpoint *b)
 {
-  internal_error (__FILE__, __LINE__,
-		  _("elf_gnu_ifunc_resolver_stop cannot be reached."));
+  internal_error (_("elf_gnu_ifunc_resolver_stop cannot be reached."));
 }
 
 /* See elf_gnu_ifunc_resolver_return_stop for its real implementation.  */
@@ -1030,8 +1024,7 @@ stub_gnu_ifunc_resolver_stop (code_breakpoint *b)
 static void
 stub_gnu_ifunc_resolver_return_stop (code_breakpoint *b)
 {
-  internal_error (__FILE__, __LINE__,
-		  _("elf_gnu_ifunc_resolver_return_stop cannot be reached."));
+  internal_error (_("elf_gnu_ifunc_resolver_return_stop cannot be reached."));
 }
 
 /* See elf_gnu_ifunc_fns for its real implementation.  */

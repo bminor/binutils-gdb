@@ -1,5 +1,5 @@
 # Expect script for various ELF tests.
-#   Copyright (C) 2006-2022 Free Software Foundation, Inc.
+#   Copyright (C) 2006-2023 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -1656,7 +1656,7 @@ proc mix_pic_and_non_pic {xfails cflags ldflags exe} {
     }
 }
 
-mix_pic_and_non_pic [list "arm*-*-*" "aarch64*-*-*"] "" "" "pr19719"
+mix_pic_and_non_pic [list "arm*-*-*"] "" "" "pr19719"
 mix_pic_and_non_pic [] "-fPIE" "-pie" "pr19719pie"
 
 set AFLAGS_PIE ""

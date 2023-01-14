@@ -1,5 +1,5 @@
 /* MIPS ELF specific backend routines.
-   Copyright (C) 2002-2022 Free Software Foundation, Inc.
+   Copyright (C) 2002-2023 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -22,7 +22,16 @@
 #include "elf/internal.h"
 #include "elf/mips.h"
 
+enum reloc_check
+{
+  check_std,
+  check_inplace,
+  check_shuffle
+};
+
 extern bool _bfd_mips_elf_mkobject
+  (bfd *);
+extern bool _bfd_mips_elf_close_and_cleanup
   (bfd *);
 extern bool _bfd_mips_elf_new_section_hook
   (bfd *, asection *);
@@ -129,6 +138,8 @@ extern void _bfd_mips_elf_reloc_unshuffle
   (bfd *, int, bool, bfd_byte *);
 extern void _bfd_mips_elf_reloc_shuffle
   (bfd *, int, bool, bfd_byte *);
+extern bool _bfd_mips_reloc_offset_in_range
+  (bfd *, asection *, arelent *, enum reloc_check);
 extern bfd_reloc_status_type _bfd_mips_elf_gprel16_with_gp
   (bfd *, asymbol *, arelent *, asection *, bool, void *, bfd_vma);
 extern bfd_reloc_status_type _bfd_mips_elf32_gprel16_reloc

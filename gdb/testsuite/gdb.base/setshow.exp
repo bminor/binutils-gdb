@@ -1,4 +1,4 @@
-# Copyright 1992-2022 Free Software Foundation, Inc.
+# Copyright 1992-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ proc_with_prefix test_setshow_annotate {} {
     # Start with a fresh gdb
     clean_restart $::binfile
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return
     }
 
@@ -80,7 +80,7 @@ proc_with_prefix test_setshow_annotate {} {
 proc_with_prefix test_setshow_args {} {
     clean_restart $::binfile
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return
     }
 

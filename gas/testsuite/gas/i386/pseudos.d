@@ -18,15 +18,15 @@ Disassembly of section .text:
  +[a-f0-9]+:	c4 e1 78 28 10       	vmovaps \(%eax\),%xmm2
  +[a-f0-9]+:	c5 f8 28 10          	vmovaps \(%eax\),%xmm2
  +[a-f0-9]+:	c5 f8 28 10          	vmovaps \(%eax\),%xmm2
- +[a-f0-9]+:	62 f1 7c 08 28 10    	vmovaps \(%eax\),%xmm2
+ +[a-f0-9]+:	62 f1 7c 08 28 10    	\{evex\} vmovaps \(%eax\),%xmm2
  +[a-f0-9]+:	c5 f8 28 90 00 00 00 00 	vmovaps 0x0\(%eax\),%xmm2
- +[a-f0-9]+:	62 f1 7c 08 28 50 00 	vmovaps 0x0\(%eax\),%xmm2
- +[a-f0-9]+:	62 f1 7c 08 28 90 00 00 00 00 	vmovaps 0x0\(%eax\),%xmm2
+ +[a-f0-9]+:	62 f1 7c 08 28 50 00 	\{evex\} vmovaps 0x0\(%eax\),%xmm2
+ +[a-f0-9]+:	62 f1 7c 08 28 90 00 00 00 00 	\{evex\} vmovaps 0x0\(%eax\),%xmm2
  +[a-f0-9]+:	c5 f8 28 90 80 00 00 00 	vmovaps 0x80\(%eax\),%xmm2
  +[a-f0-9]+:	c5 f8 28 90 80 00 00 00 	vmovaps 0x80\(%eax\),%xmm2
- +[a-f0-9]+:	62 f1 7c 08 28 50 08 	vmovaps 0x80\(%eax\),%xmm2
- +[a-f0-9]+:	67 62 f1 7c 08 28 97 80 00 	vmovaps 0x80\(%bx\),%xmm2
- +[a-f0-9]+:	62 f1 7c 08 28 90 80 00 00 00 	vmovaps 0x80\(%eax\),%xmm2
+ +[a-f0-9]+:	62 f1 7c 08 28 50 08 	\{evex\} vmovaps 0x80\(%eax\),%xmm2
+ +[a-f0-9]+:	67 62 f1 7c 08 28 97 80 00 	\{evex\} vmovaps 0x80\(%bx\),%xmm2
+ +[a-f0-9]+:	62 f1 7c 08 28 90 80 00 00 00 	\{evex\} vmovaps 0x80\(%eax\),%xmm2
  +[a-f0-9]+:	89 c8                	mov    %ecx,%eax
  +[a-f0-9]+:	8b c1                	mov    %ecx,%eax
  +[a-f0-9]+:	89 c8                	mov    %ecx,%eax
@@ -267,18 +267,18 @@ Disassembly of section .text:
  +[a-f0-9]+:	c5 fa 7e f8          	vmovq  %xmm0,%xmm7
  +[a-f0-9]+:	c5 fa 7e f8          	vmovq  %xmm0,%xmm7
  +[a-f0-9]+:	c5 f9 d6 c7          	vmovq  %xmm0,%xmm7
- +[a-f0-9]+:	62 f1 fe 08 7e f8    	vmovq  %xmm0,%xmm7
- +[a-f0-9]+:	62 f1 fe 08 7e f8    	vmovq  %xmm0,%xmm7
- +[a-f0-9]+:	62 f1 fd 08 d6 c7    	vmovq  %xmm0,%xmm7
+ +[a-f0-9]+:	62 f1 fe 08 7e f8    	\{evex\} vmovq %xmm0,%xmm7
+ +[a-f0-9]+:	62 f1 fe 08 7e f8    	\{evex\} vmovq %xmm0,%xmm7
+ +[a-f0-9]+:	62 f1 fd 08 d6 c7    	\{evex\} vmovq %xmm0,%xmm7
  +[a-f0-9]+:	66 0f c5 f8 00       	pextrw \$0x0,%xmm0,%edi
  +[a-f0-9]+:	66 0f c5 f8 00       	pextrw \$0x0,%xmm0,%edi
  +[a-f0-9]+:	66 0f 3a 15 c7 00    	pextrw \$0x0,%xmm0,%edi
  +[a-f0-9]+:	c5 f9 c5 f8 00       	vpextrw \$0x0,%xmm0,%edi
  +[a-f0-9]+:	c5 f9 c5 f8 00       	vpextrw \$0x0,%xmm0,%edi
  +[a-f0-9]+:	c4 e3 79 15 c7 00    	vpextrw \$0x0,%xmm0,%edi
- +[a-f0-9]+:	62 f1 7d 08 c5 f8 00 	vpextrw \$0x0,%xmm0,%edi
- +[a-f0-9]+:	62 f1 7d 08 c5 f8 00 	vpextrw \$0x0,%xmm0,%edi
- +[a-f0-9]+:	62 f3 7d 08 15 c7 00 	vpextrw \$0x0,%xmm0,%edi
+ +[a-f0-9]+:	62 f1 7d 08 c5 f8 00 	\{evex\} vpextrw \$0x0,%xmm0,%edi
+ +[a-f0-9]+:	62 f1 7d 08 c5 f8 00 	\{evex\} vpextrw \$0x0,%xmm0,%edi
+ +[a-f0-9]+:	62 f3 7d 08 15 c7 00 	\{evex\} vpextrw \$0x0,%xmm0,%edi
  +[a-f0-9]+:	66 0f 1a c3          	bndmov %bnd3,%bnd0
  +[a-f0-9]+:	66 0f 1a c3          	bndmov %bnd3,%bnd0
  +[a-f0-9]+:	66 0f 1b d8          	bndmov %bnd3,%bnd0
@@ -318,15 +318,15 @@ Disassembly of section .text:
  +[a-f0-9]+:	c4 e1 78 28 10       	vmovaps \(%eax\),%xmm2
  +[a-f0-9]+:	c5 f8 28 10          	vmovaps \(%eax\),%xmm2
  +[a-f0-9]+:	c5 f8 28 10          	vmovaps \(%eax\),%xmm2
- +[a-f0-9]+:	62 f1 7c 08 28 10    	vmovaps \(%eax\),%xmm2
+ +[a-f0-9]+:	62 f1 7c 08 28 10    	\{evex\} vmovaps \(%eax\),%xmm2
  +[a-f0-9]+:	c5 f8 28 90 00 00 00 00 	vmovaps 0x0\(%eax\),%xmm2
- +[a-f0-9]+:	62 f1 7c 08 28 50 00 	vmovaps 0x0\(%eax\),%xmm2
- +[a-f0-9]+:	62 f1 7c 08 28 90 00 00 00 00 	vmovaps 0x0\(%eax\),%xmm2
+ +[a-f0-9]+:	62 f1 7c 08 28 50 00 	\{evex\} vmovaps 0x0\(%eax\),%xmm2
+ +[a-f0-9]+:	62 f1 7c 08 28 90 00 00 00 00 	\{evex\} vmovaps 0x0\(%eax\),%xmm2
  +[a-f0-9]+:	c5 f8 28 90 80 00 00 00 	vmovaps 0x80\(%eax\),%xmm2
  +[a-f0-9]+:	c5 f8 28 90 80 00 00 00 	vmovaps 0x80\(%eax\),%xmm2
- +[a-f0-9]+:	62 f1 7c 08 28 50 08 	vmovaps 0x80\(%eax\),%xmm2
- +[a-f0-9]+:	67 62 f1 7c 08 28 97 80 00 	vmovaps 0x80\(%bx\),%xmm2
- +[a-f0-9]+:	62 f1 7c 08 28 90 80 00 00 00 	vmovaps 0x80\(%eax\),%xmm2
+ +[a-f0-9]+:	62 f1 7c 08 28 50 08 	\{evex\} vmovaps 0x80\(%eax\),%xmm2
+ +[a-f0-9]+:	67 62 f1 7c 08 28 97 80 00 	\{evex\} vmovaps 0x80\(%bx\),%xmm2
+ +[a-f0-9]+:	62 f1 7c 08 28 90 80 00 00 00 	\{evex\} vmovaps 0x80\(%eax\),%xmm2
  +[a-f0-9]+:	89 c8                	mov    %ecx,%eax
  +[a-f0-9]+:	8b c1                	mov    %ecx,%eax
  +[a-f0-9]+:	89 c8                	mov    %ecx,%eax

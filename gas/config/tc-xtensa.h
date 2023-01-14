@@ -1,5 +1,5 @@
 /* tc-xtensa.h -- Header file for tc-xtensa.c.
-   Copyright (C) 2003-2022 Free Software Foundation, Inc.
+   Copyright (C) 2003-2023 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -28,7 +28,7 @@ struct fix;
 #endif
 
 #include "xtensa-isa.h"
-#include "xtensa-config.h"
+#include "xtensa-dynconfig.h"
 
 #define TARGET_BYTES_BIG_ENDIAN 0
 

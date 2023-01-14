@@ -1,4 +1,4 @@
-# Copyright 2011-2022 Free Software Foundation, Inc.
+# Copyright 2011-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -139,7 +139,7 @@ proc_with_prefix gdb_fast_trace_speed_test { } {
 	}
 
     # If the fast tracepoint couldn't be set, don't bother with the run.
-    if { $run_ftrace == 1 } then {
+    if {$run_ftrace == 1} {
 
 	# Begin the test.
 	run_trace_experiment
@@ -160,7 +160,7 @@ gdb_load_shlib $ipalib
 
 runto_main
 
-if { ![gdb_target_supports_trace] } then {
+if {![gdb_target_supports_trace]} {
     unsupported "current target does not support trace"
     return 1
 }

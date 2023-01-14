@@ -1,6 +1,6 @@
 /* Target-dependent code for the NDS32 architecture, for GDB.
 
-   Copyright (C) 2013-2022 Free Software Foundation, Inc.
+   Copyright (C) 2013-2023 Free Software Foundation, Inc.
    Contributed by Andes Technology Corporation.
 
    This file is part of GDB.
@@ -1518,8 +1518,7 @@ nds32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  break;
 		default:
 		  /* Long double?  */
-		  internal_error (__FILE__, __LINE__,
-				  "Do not know how to handle %d-byte double.\n",
+		  internal_error ("Do not know how to handle %d-byte double.\n",
 				  len);
 		  break;
 		}
@@ -1664,8 +1663,7 @@ nds32_extract_return_value (struct gdbarch *gdbarch, struct type *type,
       else if (len == 8)
 	regcache->cooked_read (NDS32_FD0_REGNUM, valbuf);
       else
-	internal_error (__FILE__, __LINE__,
-			_("Cannot extract return value of %d bytes "
+	internal_error (_("Cannot extract return value of %d bytes "
 			  "long floating-point."), len);
     }
   else
@@ -1754,8 +1752,7 @@ nds32_store_return_value (struct gdbarch *gdbarch, struct type *type,
       else if (len == 8)
 	regcache->cooked_write (NDS32_FD0_REGNUM, valbuf);
       else
-	internal_error (__FILE__, __LINE__,
-			_("Cannot store return value of %d bytes "
+	internal_error (_("Cannot store return value of %d bytes "
 			  "long floating-point."), len);
     }
   else
@@ -1943,7 +1940,6 @@ nds32_validate_tdesc_p (const struct target_desc *tdesc,
 static struct gdbarch *
 nds32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   struct gdbarch_list *best_arch;
   tdesc_arch_data_up tdesc_data;
   const struct target_desc *tdesc = info.target_desc;
@@ -1984,13 +1980,14 @@ nds32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return NULL;
 
   /* Allocate space for the new architecture.  */
-  nds32_gdbarch_tdep *tdep = new nds32_gdbarch_tdep;
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new nds32_gdbarch_tdep));
+  nds32_gdbarch_tdep *tdep = gdbarch_tdep<nds32_gdbarch_tdep> (gdbarch);
+
   tdep->fpu_freg = fpu_freg;
   tdep->use_pseudo_fsrs = use_pseudo_fsrs;
   tdep->fs0_regnum = -1;
   tdep->elf_abi = elf_abi;
-
-  gdbarch = gdbarch_alloc (&info, tdep);
 
   set_gdbarch_wchar_bit (gdbarch, 16);
   set_gdbarch_wchar_signed (gdbarch, 0);

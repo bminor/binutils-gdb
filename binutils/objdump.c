@@ -1,5 +1,5 @@
 /* objdump.c -- dump information about an object file.
-   Copyright (C) 1990-2022 Free Software Foundation, Inc.
+   Copyright (C) 1990-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -58,6 +58,7 @@
 #include "demanguse.h"
 #include "dwarf.h"
 #include "ctf-api.h"
+#include "sframe-api.h"
 #include "getopt.h"
 #include "safe-ctype.h"
 #include "dis-asm.h"
@@ -108,6 +109,8 @@ static int dump_stab_section_info;	/* --stabs */
 static int dump_ctf_section_info;       /* --ctf */
 static char *dump_ctf_section_name;
 static char *dump_ctf_parent_name;	/* --ctf-parent */
+static int dump_sframe_section_info;	/* --sframe */
+static char *dump_sframe_section_name;
 static int do_demangle;			/* -C, --demangle */
 static bool disassemble;		/* -d */
 static bool disassemble_all;		/* -D */
@@ -134,6 +137,7 @@ static bool visualize_jumps = false;	/* --visualize-jumps.  */
 static bool color_output = false;	/* --visualize-jumps=color.  */
 static bool extended_color_output = false; /* --visualize-jumps=extended-color.  */
 static int process_links = false;       /* --process-links.  */
+static int show_all_symbols;            /* --show-all-symbols.  */
 
 static enum color_selection
   {
@@ -141,7 +145,12 @@ static enum color_selection
     on,   				/* --disassembler-color=color.  */
     off, 				/* --disassembler-color=off.  */
     extended				/* --disassembler-color=extended-color.  */
-  } disassembler_color = on_if_terminal_output;
+  } disassembler_color =
+#if DEFAULT_FOR_COLORED_DISASSEMBLY
+  on_if_terminal_output;
+#else
+  off;
+#endif
 
 static int dump_any_debugging;
 static int demangle_flags = DMGL_ANSI | DMGL_PARAMS;
@@ -317,6 +326,8 @@ usage (FILE *stream, int status)
       --ctf[=SECTION]      Display CTF info from SECTION, (default `.ctf')\n"));
 #endif
   fprintf (stream, _("\
+      --sframe[=SECTION]   Display SFrame info from SECTION, (default '.sframe')\n"));
+  fprintf (stream, _("\
   -t, --syms               Display the contents of the symbol table(s)\n"));
   fprintf (stream, _("\
   -T, --dynamic-syms       Display the contents of the dynamic symbol table\n"));
@@ -389,6 +400,8 @@ usage (FILE *stream, int status)
       fprintf (stream, _("\
       --adjust-vma=OFFSET        Add OFFSET to all displayed section addresses\n"));
       fprintf (stream, _("\
+      --show-all-symbols         When disassembling, display all symbols at a given address\n"));
+      fprintf (stream, _("\
       --special-syms             Include special symbols in symbol dumps\n"));
       fprintf (stream, _("\
       --inlines                  Print all inlines for source line (with -l)\n"));
@@ -414,13 +427,22 @@ usage (FILE *stream, int status)
       --visualize-jumps=extended-color\n\
                                  Use extended 8-bit color codes\n"));
       fprintf (stream, _("\
-      --visualize-jumps=off      Disable jump visualization\n\n"));
+      --visualize-jumps=off      Disable jump visualization\n"));
+#if DEFAULT_FOR_COLORED_DISASSEMBLY
       fprintf (stream, _("\
-      --disassembler-color=off   Disable disassembler color output.\n\n"));
+      --disassembler-color=off       Disable disassembler color output.\n"));
       fprintf (stream, _("\
-      --disassembler-color=color Use basic colors in disassembler output.\n\n"));
+      --disassembler-color=terminal  Enable disassembler color output if displaying on a terminal. (default)\n"));
+#else
       fprintf (stream, _("\
-      --disassembler-color=extended-color Use 8-bit colors in disassembler output.\n\n"));
+      --disassembler-color=off       Disable disassembler color output. (default)\n"));
+      fprintf (stream, _("\
+      --disassembler-color=terminal  Enable disassembler color output if displaying on a terminal.\n"));
+#endif
+      fprintf (stream, _("\
+      --disassembler-color=on        Enable disassembler color output.\n"));
+      fprintf (stream, _("\
+      --disassembler-color=extended  Use 8-bit colors in disassembler output.\n\n"));
 
       list_supported_targets (program_name, stream);
       list_supported_architectures (program_name, stream);
@@ -462,6 +484,7 @@ enum option_values
     OPTION_CTF,
     OPTION_CTF_PARENT,
 #endif
+    OPTION_SFRAME,
     OPTION_VISUALIZE_JUMPS,
     OPTION_DISASSEMBLER_COLOR
   };
@@ -516,6 +539,8 @@ static struct option long_options[]=
   {"reloc", no_argument, NULL, 'r'},
   {"section", required_argument, NULL, 'j'},
   {"section-headers", no_argument, NULL, 'h'},
+  {"sframe", optional_argument, NULL, OPTION_SFRAME},
+  {"show-all-symbols", no_argument, &show_all_symbols, 1},
   {"show-raw-insn", no_argument, &show_raw_insn, 1},
   {"source", no_argument, NULL, 'S'},
   {"source-comment", optional_argument, NULL, OPTION_SOURCE_COMMENT},
@@ -1201,20 +1226,17 @@ compare_symbols (const void *ap, const void *bp)
 	return 1;
     }
 
-  if (bfd_get_flavour (bfd_asymbol_bfd (a)) == bfd_target_elf_flavour
+  /* Sort larger size ELF symbols before smaller.  See PR20337.  */
+  bfd_vma asz = 0;
+  if ((a->flags & (BSF_SECTION_SYM | BSF_SYNTHETIC)) == 0
+      && bfd_get_flavour (bfd_asymbol_bfd (a)) == bfd_target_elf_flavour)
+    asz = ((elf_symbol_type *) a)->internal_elf_sym.st_size;
+  bfd_vma bsz = 0;
+  if ((b->flags & (BSF_SECTION_SYM | BSF_SYNTHETIC)) == 0
       && bfd_get_flavour (bfd_asymbol_bfd (b)) == bfd_target_elf_flavour)
-    {
-      bfd_vma asz, bsz;
-
-      asz = 0;
-      if ((a->flags & (BSF_SECTION_SYM | BSF_SYNTHETIC)) == 0)
-	asz = ((elf_symbol_type *) a)->internal_elf_sym.st_size;
-      bsz = 0;
-      if ((b->flags & (BSF_SECTION_SYM | BSF_SYNTHETIC)) == 0)
-	bsz = ((elf_symbol_type *) b)->internal_elf_sym.st_size;
-      if (asz != bsz)
-	return asz > bsz ? -1 : 1;
-    }
+    bsz = ((elf_symbol_type *) b)->internal_elf_sym.st_size;
+  if (asz != bsz)
+    return asz > bsz ? -1 : 1;
 
   /* Symbols that start with '.' might be section names, so sort them
      after symbols that don't start with '.'.  */
@@ -1879,17 +1901,19 @@ slurp_file (const char *   fn,
 #if HAVE_LIBDEBUGINFOD
   if (fd < 0 && use_debuginfod && fn[0] == '/' && abfd != NULL)
     {
-      unsigned char * build_id;
-      debuginfod_client * client;
+      unsigned char *build_id = get_build_id (abfd);
 
-      client = debuginfod_begin ();
-      if (client == NULL)
-	return NULL;
+      if (build_id)
+	{
+	  debuginfod_client *client = debuginfod_begin ();
 
-      build_id = get_build_id (abfd);
-      fd = debuginfod_find_source (client, build_id, 0, fn, NULL);
-      free (build_id);
-      debuginfod_end (client);
+	  if (client)
+	    {
+	      fd = debuginfod_find_source (client, build_id, 0, fn, NULL);
+	      debuginfod_end (client);
+	    }
+	  free (build_id);
+	}
     }
 #endif
 
@@ -3922,6 +3946,24 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 	  objdump_print_addr_with_sym (abfd, section, sym, addr,
 				       pinfo, false);
 	  pinfo->fprintf_func (pinfo->stream, ":\n");
+
+	  if (sym != NULL && show_all_symbols)
+	    {
+	      for (++place; place < sorted_symcount; place++)
+		{
+		  sym = sorted_syms[place];
+		  
+		  if (bfd_asymbol_value (sym) != addr)
+		    break;
+		  if (! pinfo->symbol_is_valid (sym, pinfo))
+		    continue;
+		  if (strcmp (bfd_section_name (sym->section), bfd_section_name (section)) != 0)
+		    break;
+
+		  objdump_print_addr_with_sym (abfd, section, sym, addr, pinfo, false);
+		  pinfo->fprintf_func (pinfo->stream, ":\n");
+		}
+	    }	   
 	}
 
       if (sym != NULL && bfd_asymbol_value (sym) > addr)
@@ -4183,13 +4225,15 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
   section->size = bfd_section_size (sec);
   /* PR 24360: On 32-bit hosts sizeof (size_t) < sizeof (bfd_size_type). */
   alloced = amt = section->size + 1;
-  if (alloced != amt || alloced == 0)
+  if (alloced != amt
+      || alloced == 0
+      || (bfd_get_size (abfd) != 0 && alloced >= bfd_get_size (abfd)))
     {
       section->start = NULL;
       free_debug_section (debug);
-      printf (_("\nSection '%s' has an invalid size: %#llx.\n"),
+      printf (_("\nSection '%s' has an invalid size: %#" PRIx64 ".\n"),
 	      sanitize_string (section->name),
-	      (unsigned long long) section->size);
+	      section->size);
       return false;
     }
 
@@ -4210,13 +4254,13 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 
 	  if (reloc_size > 0)
 	    {
-	      unsigned long reloc_count;
+	      long reloc_count;
 	      arelent **relocs;
 
 	      relocs = (arelent **) xmalloc (reloc_size);
 
-	      reloc_count = bfd_canonicalize_reloc (abfd, sec, relocs, NULL);
-	      if (reloc_count == 0)
+	      reloc_count = bfd_canonicalize_reloc (abfd, sec, relocs, syms);
+	      if (reloc_count <= 0)
 		free (relocs);
 	      else
 		{
@@ -4798,6 +4842,72 @@ static void
 dump_ctf (bfd *abfd ATTRIBUTE_UNUSED, const char *sect_name ATTRIBUTE_UNUSED,
 	  const char *parent_name ATTRIBUTE_UNUSED) {}
 #endif
+
+static bfd_byte*
+read_section_sframe (bfd *abfd, const char *sect_name, bfd_size_type *size_ptr,
+		     bfd_vma *sframe_vma)
+{
+  asection *sframe_sect;
+  bfd_byte *contents;
+
+  sframe_sect = bfd_get_section_by_name (abfd, sect_name);
+  if (sframe_sect == NULL)
+    {
+      printf (_("No %s section present\n\n"),
+	      sanitize_string (sect_name));
+      return NULL;
+    }
+
+  if (!bfd_malloc_and_get_section (abfd, sframe_sect, &contents))
+    {
+      non_fatal (_("reading %s section of %s failed: %s"),
+		 sect_name, bfd_get_filename (abfd),
+		 bfd_errmsg (bfd_get_error ()));
+      exit_status = 1;
+      free (contents);
+      return NULL;
+    }
+
+  *size_ptr = bfd_section_size (sframe_sect);
+  *sframe_vma = bfd_section_vma (sframe_sect);
+
+  return contents;
+}
+
+static void
+dump_section_sframe (bfd *abfd ATTRIBUTE_UNUSED,
+		     const char * sect_name)
+{
+  sframe_decoder_ctx *sfd_ctx = NULL;
+  bfd_size_type sf_size;
+  bfd_byte *sframe_data = NULL;
+  bfd_vma sf_vma;
+  int err = 0;
+
+  if (sect_name == NULL)
+    sect_name = ".sframe";
+
+  sframe_data = read_section_sframe (abfd, sect_name, &sf_size, &sf_vma);
+
+  if (sframe_data == NULL)
+    bfd_fatal (bfd_get_filename (abfd));
+
+  /* Decode the contents of the section.  */
+  sfd_ctx = sframe_decode ((const char*)sframe_data, sf_size, &err);
+  if (!sfd_ctx)
+    {
+      free (sframe_data);
+      bfd_fatal (bfd_get_filename (abfd));
+    }
+
+  printf (_("Contents of the SFrame section %s:"),
+	  sanitize_string (sect_name));
+  /* Dump the contents as text.  */
+  dump_sframe (sfd_ctx, sf_vma);
+
+  free (sframe_data);
+  sframe_decoder_free (&sfd_ctx);
+}
 
 
 static void
@@ -5552,6 +5662,8 @@ dump_bfd (bfd *abfd, bool is_mainfile)
     {
       if (dump_ctf_section_info)
 	dump_ctf (abfd, dump_ctf_section_name, dump_ctf_parent_name);
+      if (dump_sframe_section_info)
+	dump_section_sframe (abfd, dump_sframe_section_name);
       if (dump_stab_section_info)
 	dump_stabs (abfd);
       if (dump_reloc_info && ! disassemble)
@@ -5888,9 +6000,15 @@ main (int argc, char **argv)
 	case OPTION_DISASSEMBLER_COLOR:
 	  if (streq (optarg, "off"))
 	    disassembler_color = off;
-	  else if (streq (optarg, "color"))
+	  else if (streq (optarg, "terminal"))
+	    disassembler_color = on_if_terminal_output;
+	  else if (streq (optarg, "color")
+		   || streq (optarg, "colour")
+		   || streq (optarg, "on")) 
 	    disassembler_color = on;
-	  else if (streq (optarg, "extended-color"))
+	  else if (streq (optarg, "extended")
+		   || streq (optarg, "extended-color")
+		   || streq (optarg, "extended-colour"))
 	    disassembler_color = extended;
 	  else
 	    nonfatal (_("unrecognized argument to --disassembler-color"));
@@ -6049,6 +6167,12 @@ main (int argc, char **argv)
 	  dump_ctf_parent_name = xstrdup (optarg);
 	  break;
 #endif
+	case OPTION_SFRAME:
+	  dump_sframe_section_info = true;
+	  if (optarg)
+	    dump_sframe_section_name = xstrdup (optarg);
+	  seenflag = true;
+	  break;
 	case 'G':
 	  dump_stab_section_info = true;
 	  seenflag = true;

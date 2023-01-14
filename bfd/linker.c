@@ -1,5 +1,5 @@
 /* linker.c -- BFD linker routines
-   Copyright (C) 1993-2022 Free Software Foundation, Inc.
+   Copyright (C) 1993-2023 Free Software Foundation, Inc.
    Written by Steve Chamberlain and Ian Lance Taylor, Cygnus Support
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -2551,9 +2551,8 @@ default_indirect_link_order (bfd *output_bfd,
 {
   asection *input_section;
   bfd *input_bfd;
-  bfd_byte *contents = NULL;
+  bfd_byte *alloced = NULL;
   bfd_byte *new_contents;
-  bfd_size_type sec_size;
   file_ptr loc;
 
   BFD_ASSERT ((output_section->flags & SEC_HAS_CONTENTS) != 0);
@@ -2654,16 +2653,11 @@ default_indirect_link_order (bfd *output_bfd,
   else
     {
       /* Get and relocate the section contents.  */
-      sec_size = (input_section->rawsize > input_section->size
-		  ? input_section->rawsize
-		  : input_section->size);
-      contents = (bfd_byte *) bfd_malloc (sec_size);
-      if (contents == NULL && sec_size != 0)
-	goto error_return;
       new_contents = (bfd_get_relocated_section_contents
-		      (output_bfd, info, link_order, contents,
+		      (output_bfd, info, link_order, NULL,
 		       bfd_link_relocatable (info),
 		       _bfd_generic_link_get_symbols (input_bfd)));
+      alloced = new_contents;
       if (!new_contents)
 	goto error_return;
     }
@@ -2675,11 +2669,11 @@ default_indirect_link_order (bfd *output_bfd,
 				  new_contents, loc, input_section->size))
     goto error_return;
 
-  free (contents);
+  free (alloced);
   return true;
 
  error_return:
-  free (contents);
+  free (alloced);
   return false;
 }
 

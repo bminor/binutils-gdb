@@ -1,5 +1,5 @@
 /* YACC parser for Ada expressions, for GDB.
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1659,8 +1659,7 @@ write_var_or_type (struct parser_state *par_state,
 	      write_selectors (par_state, encoded_name + tail_index);
 	      return NULL;
 	    default:
-	      internal_error (__FILE__, __LINE__,
-			      _("impossible value from ada_parse_renaming"));
+	      internal_error (_("impossible value from ada_parse_renaming"));
 	    }
 
 	  if (type_sym != NULL)
@@ -1698,8 +1697,12 @@ write_var_or_type (struct parser_state *par_state,
 	    }
 	  else if (syms.empty ())
 	    {
+	      struct objfile *objfile = nullptr;
+	      if (block != nullptr)
+		objfile = block_objfile (block);
+
 	      struct bound_minimal_symbol msym
-		= ada_lookup_simple_minsym (decoded_name.c_str ());
+		= ada_lookup_simple_minsym (decoded_name.c_str (), objfile);
 	      if (msym.minsym != NULL)
 		{
 		  par_state->push_new<ada_var_msym_value_operation> (msym);

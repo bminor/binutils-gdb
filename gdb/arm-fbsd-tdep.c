@@ -1,6 +1,6 @@
 /* Target-dependent code for FreeBSD/arm.
 
-   Copyright (C) 2017-2022 Free Software Foundation, Inc.
+   Copyright (C) 2017-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -49,6 +49,14 @@ static const struct regcache_map_entry arm_fbsd_vfpregmap[] =
   {
     { 32, ARM_D0_REGNUM, 8 }, /* d0 ... d31 */
     { 1, ARM_FPSCR_REGNUM, 4 },
+    { 0 }
+  };
+
+/* Register numbers are relative to tdep->tls_regnum.  */
+
+static const struct regcache_map_entry arm_fbsd_tls_regmap[] =
+  {
+    { 1, 0, 4 },	/* tpidruro  */
     { 0 }
   };
 
@@ -151,6 +159,34 @@ const struct regset arm_fbsd_vfpregset =
     regcache_supply_regset, regcache_collect_regset
   };
 
+static void
+arm_fbsd_supply_tls_regset (const struct regset *regset,
+			    struct regcache *regcache,
+			    int regnum, const void *buf, size_t size)
+{
+  struct gdbarch *gdbarch = regcache->arch ();
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
+
+  regcache->supply_regset (regset, tdep->tls_regnum, regnum, buf, size);
+}
+
+static void
+arm_fbsd_collect_tls_regset (const struct regset *regset,
+			     const struct regcache *regcache,
+			     int regnum, void *buf, size_t size)
+{
+  struct gdbarch *gdbarch = regcache->arch ();
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
+
+  regcache->collect_regset (regset, tdep->tls_regnum, regnum, buf, size);
+}
+
+const struct regset arm_fbsd_tls_regset =
+  {
+    arm_fbsd_tls_regmap,
+    arm_fbsd_supply_tls_regset, arm_fbsd_collect_tls_regset
+  };
+
 /* Implement the "iterate_over_regset_sections" gdbarch method.  */
 
 static void
@@ -165,22 +201,8 @@ arm_fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
       &arm_fbsd_gregset, NULL, cb_data);
 
   if (tdep->tls_regnum > 0)
-    {
-      const struct regcache_map_entry arm_fbsd_tlsregmap[] =
-	{
-	  { 1, tdep->tls_regnum, 4 },
-	  { 0 }
-	};
-
-      const struct regset arm_fbsd_tlsregset =
-	{
-	  arm_fbsd_tlsregmap,
-	  regcache_supply_regset, regcache_collect_regset
-	};
-
-      cb (".reg-aarch-tls", ARM_FBSD_SIZEOF_TLSREGSET, ARM_FBSD_SIZEOF_TLSREGSET,
-	  &arm_fbsd_tlsregset, NULL, cb_data);
-    }
+    cb (".reg-aarch-tls", ARM_FBSD_SIZEOF_TLSREGSET, ARM_FBSD_SIZEOF_TLSREGSET,
+	&arm_fbsd_tls_regset, NULL, cb_data);
 
   /* While FreeBSD/arm cores do contain a NT_FPREGSET / ".reg2"
      register set, it is not populated with register values by the

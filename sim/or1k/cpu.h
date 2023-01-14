@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996-2022 Free Software Foundation, Inc.
+Copyright (C) 1996-2023 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -72,7 +72,7 @@ SET_H_SPR ((((index)) + (ORSI (SLLSI (SPR_GROUP_SYS, 11), SPR_INDEX_SYS_GPR0))),
 #define GET_H_ROFF1() CPU (h_roff1)
 #define SET_H_ROFF1(x) (CPU (h_roff1) = (x))
   } hardware;
-#define CPU_CGEN_HW(cpu) (& (cpu)->cpu_data.hardware)
+#define CPU_CGEN_HW(cpu) (& OR1K_SIM_CPU (cpu)->cpu_data.hardware)
 } OR1K32BF_CPU_DATA;
 
 /* Virtual regs.  */

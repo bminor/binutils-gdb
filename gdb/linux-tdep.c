@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux, architecture independent.
 
-   Copyright (C) 2009-2022 Free Software Foundation, Inc.
+   Copyright (C) 2009-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1695,7 +1695,10 @@ struct linux_make_mappings_data
 static linux_find_memory_region_ftype linux_make_mappings_callback;
 
 /* A callback for linux_find_memory_regions_full that updates the
-   mappings data for linux_make_mappings_corefile_notes.  */
+   mappings data for linux_make_mappings_corefile_notes.
+
+   MEMORY_TAGGED is true if the memory region contains memory tags, false
+   otherwise.  */
 
 static int
 linux_make_mappings_callback (ULONGEST vaddr, ULONGEST size,
@@ -2826,6 +2829,7 @@ linux_ilp32_fetch_link_map_offsets ()
       lmo.r_map_offset = 4;
       lmo.r_brk_offset = 8;
       lmo.r_ldsomap_offset = -1;
+      lmo.r_next_offset = 20;
 
       /* Everything we need is in the first 20 bytes.  */
       lmo.link_map_size = 20;
@@ -2854,6 +2858,7 @@ linux_lp64_fetch_link_map_offsets ()
       lmo.r_map_offset = 8;
       lmo.r_brk_offset = 16;
       lmo.r_ldsomap_offset = -1;
+      lmo.r_next_offset = 40;
 
       /* Everything we need is in the first 40 bytes.  */
       lmo.link_map_size = 40;

@@ -1,5 +1,5 @@
 /* tc-ppc.c -- Assemble for the PowerPC or POWER (RS/6000)
-   Copyright (C) 1994-2022 Free Software Foundation, Inc.
+   Copyright (C) 1994-2023 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -352,6 +352,16 @@ static const struct pd_reg pre_defined_registers[] =
   { "dar", 19, PPC_OPERAND_SPR },
   { "dec", 22, PPC_OPERAND_SPR },
   { "dsisr", 18, PPC_OPERAND_SPR },
+
+  /* Dense Math Registers.  */
+  { "dm0", 0, PPC_OPERAND_DMR },
+  { "dm1", 1, PPC_OPERAND_DMR },
+  { "dm2", 2, PPC_OPERAND_DMR },
+  { "dm3", 3, PPC_OPERAND_DMR },
+  { "dm4", 4, PPC_OPERAND_DMR },
+  { "dm5", 5, PPC_OPERAND_DMR },
+  { "dm6", 6, PPC_OPERAND_DMR },
+  { "dm7", 7, PPC_OPERAND_DMR },
 
   /* Floating point registers */
   { "f.0", 0, PPC_OPERAND_FPR },
@@ -3475,7 +3485,8 @@ md_assemble (char *str)
 	       & ~operand->flags
 	       & (PPC_OPERAND_GPR | PPC_OPERAND_FPR | PPC_OPERAND_VR
 		  | PPC_OPERAND_VSR | PPC_OPERAND_CR_BIT | PPC_OPERAND_CR_REG
-		  | PPC_OPERAND_SPR | PPC_OPERAND_GQR | PPC_OPERAND_ACC)) != 0
+		  | PPC_OPERAND_SPR | PPC_OPERAND_GQR | PPC_OPERAND_ACC
+		  | PPC_OPERAND_DMR)) != 0
 	      && !((ex.X_md & PPC_OPERAND_GPR) != 0
 		   && ex.X_add_number != 0
 		   && (operand->flags & PPC_OPERAND_GPR_0) != 0))
@@ -4054,8 +4065,7 @@ md_assemble (char *str)
   insn_length = 4;
   if ((ppc_cpu & PPC_OPCODE_VLE) != 0 && PPC_OP_SE_VLE (insn))
     insn_length = 2;
-  else if ((opcode->flags & PPC_OPCODE_POWER10) != 0
-	   && PPC_PREFIX_P (insn))
+  else if (PPC_PREFIX_P (insn))
     {
       struct insn_label_list *l;
 

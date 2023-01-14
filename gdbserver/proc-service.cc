@@ -1,5 +1,5 @@
 /* libthread_db helper functions for the remote server for GDB.
-   Copyright (C) 2002-2022 Free Software Foundation, Inc.
+   Copyright (C) 2002-2023 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
 
@@ -158,5 +158,5 @@ ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, const prfpregset_t *fpregs
 pid_t
 ps_getpid (gdb_ps_prochandle_t ph)
 {
-  return pid_of (current_thread);
+  return current_process ()->pid;
 }

@@ -1,6 +1,6 @@
 /* DWARF 2 debugging format support for GDB.
 
-   Copyright (C) 1994-2022 Free Software Foundation, Inc.
+   Copyright (C) 1994-2023 Free Software Foundation, Inc.
 
    Adapted by Gary Funck (gary@intrepid.com), Intrepid Technology,
    Inc.  with support from Florida State University (under contract
@@ -44,7 +44,7 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
   const char *filename = section->get_file_name ();
   bfd *abfd = section->get_bfd_owner ();
 
-  cu_header->length = read_initial_length (abfd, info_ptr, &bytes_read);
+  cu_header->set_length (read_initial_length (abfd, info_ptr, &bytes_read));
   cu_header->initial_length_size = bytes_read;
   cu_header->offset_size = (bytes_read == 4) ? 4 : 8;
   info_ptr += bytes_read;
@@ -65,8 +65,7 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
 	cu_header->unit_type = DW_UT_type;
 	break;
       default:
-	internal_error (__FILE__, __LINE__,
-			_("read_comp_unit_head: invalid section_kind"));
+	internal_error (_("read_comp_unit_head: invalid section_kind"));
       }
   else
     {
@@ -113,8 +112,7 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
     }
   signed_addr = bfd_get_sign_extend_vma (abfd);
   if (signed_addr < 0)
-    internal_error (__FILE__, __LINE__,
-		    _("read_comp_unit_head: dwarf from non elf file"));
+    internal_error (_("read_comp_unit_head: dwarf from non elf file"));
   cu_header->signed_addr_p = signed_addr;
 
   bool header_has_signature = section_kind == rcuh_kind::TYPE
@@ -164,11 +162,11 @@ error_check_comp_unit_head (dwarf2_per_objfile *per_objfile,
 
   /* Cast to ULONGEST to use 64-bit arithmetic when possible to
      avoid potential 32-bit overflow.  */
-  if (((ULONGEST) header->sect_off + header->get_length ())
+  if (((ULONGEST) header->sect_off + header->get_length_with_initial ())
       > section->size)
     error (_("Dwarf Error: bad length (0x%x) in compilation unit header "
 	   "(offset %s + 0) [in module %s]"),
-	   header->length, sect_offset_str (header->sect_off),
+	   header->get_length_without_initial (), sect_offset_str (header->sect_off),
 	   filename);
 }
 
@@ -215,8 +213,7 @@ comp_unit_head::read_address (bfd *abfd, const gdb_byte *buf,
 	  retval = bfd_get_signed_64 (abfd, buf);
 	  break;
 	default:
-	  internal_error (__FILE__, __LINE__,
-			  _("read_address: bad switch, signed [in module %s]"),
+	  internal_error (_("read_address: bad switch, signed [in module %s]"),
 			  bfd_get_filename (abfd));
 	}
     }
@@ -234,8 +231,7 @@ comp_unit_head::read_address (bfd *abfd, const gdb_byte *buf,
 	  retval = bfd_get_64 (abfd, buf);
 	  break;
 	default:
-	  internal_error (__FILE__, __LINE__,
-			  _("read_address: bad switch, "
+	  internal_error (_("read_address: bad switch, "
 			    "unsigned [in module %s]"),
 			  bfd_get_filename (abfd));
 	}

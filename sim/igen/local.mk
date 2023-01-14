@@ -1,6 +1,6 @@
 ## The IGEN simulator generator for GDB, the GNU Debugger.
 ##
-## Copyright 2002-2022 Free Software Foundation, Inc.
+## Copyright 2002-2023 Free Software Foundation, Inc.
 ##
 ## Contributed by Andrew Cagney.
 ##
@@ -22,7 +22,7 @@
 # igen leaks memory, and therefore makes AddressSanitizer unhappy.  Disable
 # leak detection while running it.
 IGEN = %D%/igen$(EXEEXT)
-IGEN_RUN = ASAN_OPTIONS=detect_leaks=0 $(IGEN)
+IGEN_RUN = ASAN_OPTIONS=detect_leaks=0 $(IGEN) $(IGEN_FLAGS_SMP)
 
 ## This makes sure igen is available before building the arch-subdirs which
 ## need to run the igen tool.

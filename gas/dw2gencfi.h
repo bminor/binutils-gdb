@@ -1,5 +1,5 @@
 /* dw2gencfi.h - Support for generating Dwarf2 CFI information.
-   Copyright (C) 2003-2022 Free Software Foundation, Inc.
+   Copyright (C) 2003-2023 Free Software Foundation, Inc.
    Contributed by Michal Ludvig <mludvig@suse.cz>
 
    This file is part of GAS, the GNU Assembler.
@@ -66,7 +66,12 @@ extern void cfi_add_CFA_restore_state (void);
 #define SUPPORT_COMPACT_EH 0
 #endif
 
-#define MULTIPLE_FRAME_SECTIONS (SUPPORT_FRAME_LINKONCE || SUPPORT_COMPACT_EH)
+#ifndef TARGET_MULTIPLE_EH_FRAME_SECTIONS
+#define TARGET_MULTIPLE_EH_FRAME_SECTIONS 0
+#endif
+
+#define MULTIPLE_FRAME_SECTIONS (SUPPORT_FRAME_LINKONCE || SUPPORT_COMPACT_EH \
+				 || TARGET_MULTIPLE_EH_FRAME_SECTIONS)
 
 struct cfi_insn_data
 {
@@ -200,5 +205,6 @@ extern struct fde_entry *all_fde_data;
 #define CFI_EMIT_debug_frame            (1 << 1)
 #define CFI_EMIT_target                 (1 << 2)
 #define CFI_EMIT_eh_frame_compact       (1 << 3)
+#define CFI_EMIT_sframe                 (1 << 4)
 
 #endif /* DW2GENCFI_H */

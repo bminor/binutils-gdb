@@ -1,4 +1,4 @@
-# Copyright 1999-2022 Free Software Foundation, Inc.
+# Copyright 1999-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ load_lib gdb-utils.exp
 # The variable mi_gdb_prompt is a regexp which matches the gdb mi prompt.
 # Set it if it is not already set.
 global mi_gdb_prompt
-if ![info exists mi_gdb_prompt] then {
+if {![info exists mi_gdb_prompt]} {
     set mi_gdb_prompt "\[(\]gdb\[)\] \r\n"
 }
 
@@ -83,7 +83,7 @@ proc mi_uncatched_gdb_exit {} {
 		exp_continue
 	    }
 	    -re "DOSEXIT code" { }
-	    default { }
+	    -re "\r\n999\\^exit\r\n" { }
 	}
     }
 
@@ -238,8 +238,6 @@ proc default_mi_gdb_start { { flags {} } } {
 	return [mi_gdb_start_separate_mi_tty $flags]
     }
 
-    set inferior_pty no-tty
-
     # Set the default value, it may be overriden later by specific testfile.
     set use_gdb_stub [target_info exists use_gdb_stub]
 
@@ -264,27 +262,7 @@ proc default_mi_gdb_start { { flags {} } } {
 
     gdb_expect {
 	-re "~\"GNU.*\r\n~\".*$mi_gdb_prompt$" {
-	    # We have a new format mi startup prompt.  If we are
-	    # running mi1, then this is an error as we should be
-	    # using the old-style prompt.
-	    if { $MIFLAGS == "-i=mi1" } {
-		perror "(mi startup) Got unexpected new mi prompt."
-		remote_close host
-		unset gdb_spawn_id
-		return -1
-	    }
-	    verbose "GDB initialized."
-	}
-	-re "\[^~\].*$mi_gdb_prompt$" {
-	    # We have an old format mi startup prompt.  If we are
-	    # not running mi1, then this is an error as we should be
-	    # using the new-style prompt.
-	    if { $MIFLAGS != "-i=mi1" } {
-		perror "(mi startup) Got unexpected old mi prompt."
-		remote_close host
-		unset gdb_spawn_id
-		return -1
-	    }
+	    # We have a new format mi startup prompt.
 	    verbose "GDB initialized."
 	}
 	-re ".*unrecognized option.*for a complete list of options." {
@@ -399,27 +377,11 @@ proc mi_gdb_reinitialize_dir { subdir } {
 	return ""
     }
 
-    if { $MIFLAGS == "-i=mi1" } {
-      send_gdb "104-environment-directory\n"
-      gdb_expect 60 {
-	-re ".*Reinitialize source path to empty.*y or n. " {
-	    warning "Got confirmation prompt for dir reinitialization."
-	    send_gdb "y\n"
-	    gdb_expect 60 {
-		-re "$mi_gdb_prompt$" {}
-		timeout {error "Dir reinitialization failed (timeout)"}
-	    }
-	}
+    send_gdb "104-environment-directory -r\n"
+    gdb_expect 60 {
+	-re "104\\\^done,source-path=.*\r\n$mi_gdb_prompt$" {}
 	-re "$mi_gdb_prompt$" {}
-	  timeout {error "Dir reinitialization failed (timeout)"}
-      }
-    } else {
-	send_gdb "104-environment-directory -r\n"
-	gdb_expect 60 {
-	    -re "104\\\^done,source-path=.*\r\n$mi_gdb_prompt$" {}
-	    -re "$mi_gdb_prompt$" {}
-	    timeout {error "Dir reinitialization failed (timeout)"}
-      }
+	timeout {error "Dir reinitialization failed (timeout)"}
     }
 
     send_gdb "105-environment-directory $subdir\n"
@@ -671,32 +633,12 @@ proc mi_gdb_load { arg } {
     return 0
 }
 
-# Return 1 if symbols were read in using -readnow.  Otherwise, return 0.
-# Based on readnow from lib/gdb.exp.
+# Return true if symbols were read in using -readnow.  Otherwise,
+# return false.
 
 proc mi_readnow { args } {
-    global mi_gdb_prompt
-
-    if { [llength $args] == 1 } {
-	set re [lindex $args 0]
-    } else {
-	set re ""
-    }
-
-    set readnow_p 0
-    set cmd "maint print objfiles $re"
-    send_gdb "$cmd\n"
-    gdb_expect {
-	-re ".gdb_index: faked for ..readnow.." {
-	    # Record that we've seen the above pattern.
-	    set readnow_p 1
-	    exp_continue
-	}
-	-re "\\^done\r\n$mi_gdb_prompt$" {
-	}
-    }
-
-    return $readnow_p
+    # Just defer to gdb.exp.
+    return [readnow]
 }
 
 # mi_gdb_test COMMAND [PATTERN [MESSAGE [IPATTERN]]] -- send a command to gdb;
@@ -727,19 +669,19 @@ proc mi_gdb_test { args } {
     global inferior_exited_re async
     upvar timeout timeout
 
-    if { [llength $args] >= 1 } then {
+    if {[llength $args] >= 1} {
 	set command [lindex $args 0]
     } else {
 	error "Not enough arguments in mi_gdb_test"
     }
 
-    if { [llength $args] >= 2 } then {
+    if {[llength $args] >= 2} {
 	set pattern [lindex $args 1]
     } else {
 	set pattern ".*"
     }
 
-    if { [llength $args] >= 3 } then {
+    if {[llength $args] >= 3} {
 	set message [lindex $args 2]
     } else {
 	set message $command
@@ -760,7 +702,7 @@ proc mi_gdb_test { args } {
 	error "Too many arguments in mi_gdb_test"
     }
 
-    if $verbose>2 then {
+    if {$verbose > 2} {
 	send_user "Sending \"$command\" to gdb\n"
 	send_user "Looking to match \"$pattern\"\n"
 	send_user "Message is \"$message\"\n"
@@ -819,7 +761,7 @@ proc mi_gdb_test { args } {
 	     return -1
 	 }
 	 -re "Ending remote debugging.*$mi_gdb_prompt\[ \]*$" {
-	    if ![isnative] then {
+	    if {![isnative]} {
 		warning "Can`t communicate to remote target."
 	    }
 	    gdb_exit
@@ -839,7 +781,7 @@ proc mi_gdb_test { args } {
 	    # match a single mi output command.  If a second GDB/MI output 
 	    # response is sent, it will be in the buffer for the next 
 	    # time mi_gdb_test is called.
-	    if ![string match "" $message] then {
+	    if {![string match "" $message]} {
 		pass "$message"
 	    }
 	    set result 0
@@ -859,7 +801,7 @@ proc mi_gdb_test { args } {
 	    set result 1
 	}
 	 -re "$inferior_exited_re with code \[0-9\]+.*$mi_gdb_prompt\[ \]*$" {
-	    if ![string match "" $message] then {
+	    if {![string match "" $message]} {
 		set errmsg "$message (the program exited)"
 	    } else {
 		set errmsg "$command (the program exited)"
@@ -868,7 +810,7 @@ proc mi_gdb_test { args } {
 	    return -1
 	}
 	 -re "The program is not being run.*$mi_gdb_prompt\[ \]*$" {
-	    if ![string match "" $message] then {
+	    if {![string match "" $message]} {
 		set errmsg "$message (the program is no longer running)"
 	    } else {
 		set errmsg "$command (the program is no longer running)"
@@ -877,7 +819,7 @@ proc mi_gdb_test { args } {
 	    return -1
 	}
 	 -re ".*$mi_gdb_prompt\[ \]*$" {
-	    if ![string match "" $message] then {
+	    if {![string match "" $message]} {
 		fail "$message (unexpected output)"
 	    }
 	    set result 1
@@ -899,7 +841,7 @@ proc mi_gdb_test { args } {
 	     fail "$message"
 	}
 	timeout	{
-	    if ![string match "" $message] then {
+	    if {![string match "" $message]} {
 		fail "$message (timeout)"
 	    }
 	    set result 1
@@ -1208,11 +1150,11 @@ proc mi_detect_async {} {
 # filename of a file without debug info.  ARGS should not include [] the
 # list of argument is enclosed in, and other regular expressions should
 # not include quotes.
-# If EXTRA is a list of one element, it's the regular expression
+# EXTRA can be a list of one, two or three elements.
+# The first element is the regular expression
 # for output expected right after *stopped, and before GDB prompt.
-# If EXTRA is a list of two elements, the first element is for
-# output right after *stopped, and the second element is output
-# right after reason field.  The regex after reason should not include
+# The third element is the regular expression for the locno
+# right after bkptno field.  The locno regex should not include
 # the comma separating it from the following fields.
 #
 # When we fail to match output at all, -1 is returned.  If FILE does
@@ -1237,7 +1179,14 @@ proc mi_expect_stop { reason func args file line extra test } {
 
     set after_stopped ""
     set after_reason ""
-    if { [llength $extra] == 2 } {
+    set locno ""
+    if { [llength $extra] == 3 } {
+	set after_stopped [lindex $extra 0]
+	set after_reason [lindex $extra 1]
+	set after_reason "${after_reason},"
+	set locno [lindex $extra 2]
+	set locno "${locno},"
+    } elseif { [llength $extra] == 2 } {
 	set after_stopped [lindex $extra 0]
 	set after_reason [lindex $extra 1]
 	set after_reason "${after_reason},"
@@ -1311,10 +1260,12 @@ proc mi_expect_stop { reason func args file line extra test } {
     set ebn ""
     if { $reason == "breakpoint-hit" } {
 	set bn {bkptno="[0-9]+",}
+	set bn "${bn}${locno}"
     } elseif { $reason == "solib-event" } {
 	set bn ".*"
     } elseif { $reason == "exception-caught" } {
 	set ebn {bkptno="[0-9]+",}
+	set ebn "${ebn}${locno}"
 	set bn ".*"
 	set reason "breakpoint-hit"
     }
@@ -1328,6 +1279,7 @@ proc mi_expect_stop { reason func args file line extra test } {
     set a $after_reason
 
     verbose -log "mi_expect_stop: expecting: \\*stopped,${ebn}${r}${a}${bn}frame=\{addr=\"$hex\",func=\"$func\",args=$args,(?:file=\"$any$file\",fullname=\"${fullname_syntax}$file\",line=\"$line\",arch=\"$any\"|from=\"$file\")\}$after_stopped,thread-id=\"$decimal\",stopped-threads=$any\r\n($thread_selected_re|$breakpoint_re)*$prompt_re"
+
     gdb_expect {
 	-re "\\*stopped,${ebn}${r}${a}${bn}frame=\{addr=\"$hex\",func=\"$func\",args=$args,(?:file=\"$any$file\",fullname=\"${fullname_syntax}$file\",line=\"($line)\",arch=\"$any\"|from=\"$file\")\}$after_stopped,thread-id=\"$decimal\",stopped-threads=$any\r\n($thread_selected_re|$breakpoint_re)*$prompt_re" {
 	    pass "$test"
@@ -1422,33 +1374,6 @@ proc mi_finish_to { func args file line result ret test } {
 
 proc mi_continue_to {func} {
     mi_runto_helper $func "continue"
-}
-
-proc mi0_execute_to { cmd reason func args file line extra test } {
-    mi_execute_to_helper "$cmd" "$reason" "$func" "\{$args\}" \
-	"$file" "$line" "$extra" "$test"
-}
-
-proc mi0_next_to { func args file line test } {
-    mi0_execute_to "exec-next" "end-stepping-range" "$func" "$args" \
-	"$file" "$line" "" "$test"
-}
-
-proc mi0_step_to { func args file line test } {
-    mi0_execute_to "exec-step" "end-stepping-range" "$func" "$args" \
-	"$file" "$line" "" "$test"
-}
-
-proc mi0_finish_to { func args file line result ret test } {
-    mi0_execute_to "exec-finish" "function-finished" "$func" "$args" \
-	"$file" "$line" \
-	",gdb-result-var=\"$result\",return-value=\"$ret\"" \
-	"$test"
-}
-
-proc mi0_continue_to { bkptno func args file line test } {
-    mi0_execute_to "exec-continue" "breakpoint-hit\",bkptno=\"$bkptno" \
-	"$func" "$args" "$file" "$line" "" "$test"
 }
 
 # Creates a breakpoint and checks the reported fields are as expected.
@@ -1742,7 +1667,7 @@ proc mi_prepare_inline_tests { filename } {
 
     set mi_autotest_source $filename
 
-    if { ! [regexp "^/" "$filename"] } then {
+    if {![regexp "^/" "$filename"]} {
 	set filename "$srcdir/$subdir/$filename"
     }
 
@@ -2849,7 +2774,7 @@ proc mi_get_valueof { fmt exp default {test ""} } {
     }
 
     set val ${default}
-    gdb_test_multiple "print${fmt} ${exp}" "$test" {
+    gdb_test_multiple "print${fmt} ${exp}" "$test" -prompt "$::mi_gdb_prompt$" {
 	-re "~\"\\$\[0-9\]* = (\[^\r\n\]*)\\\\n\"\r\n\\^done\r\n$mi_gdb_prompt$" {
 	    set val $expect_out(1,string)
 	    pass "$test"

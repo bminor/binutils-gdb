@@ -1,6 +1,6 @@
 /* simulator.c -- Interface for the AArch64 simulator.
 
-   Copyright (C) 2015-2022 Free Software Foundation, Inc.
+   Copyright (C) 2015-2023 Free Software Foundation, Inc.
 
    Contributed by Red Hat.
 
@@ -30,6 +30,7 @@
 #include <time.h>
 #include <limits.h>
 
+#include "aarch64-sim.h"
 #include "simulator.h"
 #include "cpustate.h"
 #include "memory.h"
@@ -82,22 +83,6 @@
 	HALT_NYI;							\
     }									\
   while (0)
-
-/* Helper functions used by expandLogicalImmediate.  */
-
-/* for i = 1, ... N result<i-1> = 1 other bits are zero  */
-static inline uint64_t
-ones (int N)
-{
-  return (N == 64 ? (uint64_t)-1UL : ((1UL << N) - 1));
-}
-
-/* result<0> to val<N>  */
-static inline uint64_t
-pickbit (uint64_t val, int N)
-{
-  return pickbits64 (val, N, N);
-}
 
 static uint64_t
 expand_logical_immediate (uint32_t S, uint32_t R, uint32_t N)
@@ -5410,6 +5395,7 @@ do_vec_ADDP (sim_cpu *cpu)
      instr[9,5]   = Vn
      instr[4,0]   = V dest.  */
 
+  struct aarch64_sim_cpu *aarch64_cpu = AARCH64_SIM_CPU (cpu);
   FRegister copy_vn;
   FRegister copy_vm;
   unsigned full = INSTR (30, 30);
@@ -5424,8 +5410,8 @@ do_vec_ADDP (sim_cpu *cpu)
   NYI_assert (15, 10, 0x2F);
 
   /* Make copies of the source registers in case vd == vn/vm.  */
-  copy_vn = cpu->fr[vn];
-  copy_vm = cpu->fr[vm];
+  copy_vn = aarch64_cpu->fr[vn];
+  copy_vm = aarch64_cpu->fr[vm];
 
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   switch (size)

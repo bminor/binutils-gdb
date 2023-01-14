@@ -1,6 +1,6 @@
 /* The IGEN simulator generator for GDB, the GNU Debugger.
 
-   Copyright 2002-2022 Free Software Foundation, Inc.
+   Copyright 2002-2023 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney.
 
@@ -36,11 +36,7 @@ enum
 #include <stdlib.h>
 #include <string.h>
 
-#if !defined (__attribute__) && (!defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 7))
-#define __attribute__(arg)
-#endif
-
-
+#include "ansidecl.h"
 
 #include "filter_host.h"
 
@@ -52,9 +48,10 @@ struct _line_ref
 };
 
 /* Error appends a new line, warning and notify do not */
-typedef void error_func (const line_ref *line, char *msg, ...);
+typedef void error_func (const line_ref *line, const char *msg, ...)
+  ATTRIBUTE_PRINTF (2, 3);
 
-extern error_func error;
+extern ATTRIBUTE_NORETURN error_func error;
 extern error_func warning;
 extern error_func notify;
 
@@ -64,7 +61,7 @@ do { \
   line_ref line; \
   line.file_name = filter_filename (__FILE__); \
   line.line_nr = __LINE__; \
-  error (&line, EXPRESSION); \
+  error (&line, EXPRESSION "\n"); \
 } while (0)
 
 #define ASSERT(EXPRESSION) \
@@ -73,7 +70,7 @@ do { \
     line_ref line; \
     line.file_name = filter_filename (__FILE__); \
     line.line_nr = __LINE__; \
-    error(&line, "assertion failed - %s\n", #EXPRESSION); \
+    error (&line, "assertion failed - %s\n", #EXPRESSION); \
   } \
 } while (0)
 

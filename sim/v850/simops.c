@@ -3,7 +3,7 @@
 
 #include "sim-main.h"
 #include "sim-signal.h"
-#include "v850_sim.h"
+#include "v850-sim.h"
 #include "simops.h"
 
 #include <sys/types.h>
@@ -39,7 +39,7 @@ int type2_regs[16] = { 3, 2, 1, 0, 27, 26, 25, 24, 31, 30, 29, 28, 23, 22, 20, 2
    that order in a push/pop instruction.  */
 int type3_regs[15] = { 2, 1, 0, 27, 26, 25, 24, 31, 30, 29, 28, 23, 22, 20, 21};
 
-#ifdef DEBUG
+#if WITH_TRACE_ANY_P
 #ifndef SIZE_INSTRUCTION
 #define SIZE_INSTRUCTION 18
 #endif
@@ -47,6 +47,9 @@ int type3_regs[15] = { 2, 1, 0, 27, 26, 25, 24, 31, 30, 29, 28, 23, 22, 20, 21};
 #ifndef SIZE_VALUES
 #define SIZE_VALUES 11
 #endif
+
+/* TODO: This file largely assumes a single CPU.  */
+#define CPU STATE_CPU (sd, 0)
 
 
 uint32_t   trace_values[3];
@@ -398,7 +401,7 @@ fetch_str (SIM_DESC sd, address_word addr)
     nr++;
 
   buf = NZALLOC (char, nr + 1);
-  sim_read (simulator, addr, (unsigned char *) buf, nr);
+  sim_read (simulator, addr, buf, nr);
 
   return buf;
 }
@@ -1692,7 +1695,7 @@ OP_10007E0 (void)
 	  {
 	    char *buf = zalloc (PARM3);
 	    RETVAL = sim_io_read (simulator, PARM1, buf, PARM3);
-	    sim_write (simulator, PARM2, (unsigned char *) buf, PARM3);
+	    sim_write (simulator, PARM2, buf, PARM3);
 	    free (buf);
 	    if ((int) RETVAL < 0)
 	      RETERR = sim_io_get_errno (simulator);
@@ -1702,7 +1705,7 @@ OP_10007E0 (void)
 	case TARGET_NEWLIB_V850_SYS_write:
 	  {
 	    char *buf = zalloc (PARM3);
-	    sim_read (simulator, PARM2, (unsigned char *) buf, PARM3);
+	    sim_read (simulator, PARM2, buf, PARM3);
 	    if (PARM1 == 1)
 	      RETVAL = sim_io_write_stdout (simulator, buf, PARM3);
 	    else
@@ -3387,7 +3390,7 @@ v850_satsub (SIM_DESC sd, unsigned int op0, unsigned int op1, unsigned int *op2p
 
 uint32_t
 load_data_mem (SIM_DESC  sd,
-	       SIM_ADDR  addr,
+	       address_word  addr,
 	       int       len)
 {
   uint32_t data;
@@ -3414,7 +3417,7 @@ load_data_mem (SIM_DESC  sd,
 
 void
 store_data_mem (SIM_DESC    sd,
-		SIM_ADDR    addr,
+		address_word    addr,
 		int         len,
 		uint32_t  data)
 {

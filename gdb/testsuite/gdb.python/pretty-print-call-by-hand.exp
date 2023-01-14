@@ -1,4 +1,4 @@
-# Copyright (C) 2022 Free Software Foundation, Inc.
+# Copyright (C) 2022-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ proc start_test { breakpoint_comment } {
 
     clean_restart ${binfile}
 
-    if { ![runto_main] } then {
+    if {![runto_main]} {
 	untested "couldn't run to breakpoint"
 	return -1
     }
@@ -66,7 +66,7 @@ proc start_test { breakpoint_comment } {
 
 # Start by testing the "run" command, it can't leverage start_test
 with_test_prefix "run to frame" {
-    if { ![runto_main] } then {
+    if {![runto_main]} {
 	untested "couldn't run to main"
     }
 
@@ -98,6 +98,14 @@ with_test_prefix "frame print" {
 	"backtrace test"
     }
 }
+
+# Test the "info frame" command
+with_test_prefix "info frame" {
+    if { [start_test "TAG: first frame"] == 0 } {
+	gdb_test "info frame" "mytype is $hex \"hello world\".*"
+    }
+}
+
 # Testing the down command.
 with_test_prefix "frame movement down" {
     if { [start_test "TAG: first frame"] == 0 } {

@@ -1,6 +1,6 @@
 /* Blackfin Memory Management Unit (MMU) model.
 
-   Copyright (C) 2010-2022 Free Software Foundation, Inc.
+   Copyright (C) 2010-2023 Free Software Foundation, Inc.
    Contributed by Analog Devices, Inc.
 
    This file is part of simulators.
@@ -157,9 +157,9 @@ bfin_mmu_io_write_buffer (struct hw *me, const void *source,
 	    hw_abort (me, "DTEST_COMMAND bits undefined");
 
 	  if (value & TEST_WRITE)
-	    sim_write (hw_system (me), addr, (void *)mmu->dtest_data, 8);
+	    sim_write (hw_system (me), addr, mmu->dtest_data, 8);
 	  else
-	    sim_read (hw_system (me), addr, (void *)mmu->dtest_data, 8);
+	    sim_read (hw_system (me), addr, mmu->dtest_data, 8);
 	}
       break;
     default:

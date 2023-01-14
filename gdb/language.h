@@ -1,6 +1,6 @@
 /* Source-language-related definitions for GDB.
 
-   Copyright (C) 1991-2022 Free Software Foundation, Inc.
+   Copyright (C) 1991-2023 Free Software Foundation, Inc.
 
    Contributed by the Department of Computer Science at the State University
    of New York at Buffalo.
@@ -451,6 +451,13 @@ struct language_defn
     return nullptr;
   }
 
+  /* Return true if this class' implementation of print_type can
+     handle the /o modifier.  */
+  virtual bool can_print_type_offsets () const
+  {
+    return false;
+  }
+
   /* Print TYPE to STREAM using syntax appropriate for this language.
      LEVEL is the depth to indent lines by.  VARSTRING, if not NULL or the
      empty string, is the name of a variable and TYPE should be printed in
@@ -782,7 +789,7 @@ extern const char *language_str (enum language);
 
 /* Check for a language-specific trampoline.  */
 
-extern CORE_ADDR skip_language_trampoline (frame_info_ptr , CORE_ADDR pc);
+extern CORE_ADDR skip_language_trampoline (frame_info_ptr, CORE_ADDR pc);
 
 /* Return demangled language symbol, or NULL.  */
 extern gdb::unique_xmalloc_ptr<char> language_demangle

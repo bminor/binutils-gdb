@@ -15,7 +15,7 @@
 @SET_MAKE@
 
 #
-#   Copyright (C) 2021 Free Software Foundation, Inc.
+#   Copyright (C) 2021-2023 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -938,6 +938,7 @@ uninstall-am:
 @TCL_TRY_TRUE@	runtest=$(RUNTEST); \
 @TCL_TRY_TRUE@	if $(SHELL) -c "$$runtest --version" > /dev/null 2>&1; then \
 @TCL_TRY_TRUE@	  $$runtest --tool $(DEJATOOL) --srcdir $${srcroot}/testsuite \
+@TCL_TRY_TRUE@		JDK_INC="$(jdk_inc)" \
 @TCL_TRY_TRUE@		GPROFNG_BROKEN_JAVAC="$(GPROFNG_BROKEN_JAVAC)" \
 @TCL_TRY_TRUE@		MAKE="$(MAKE)" CC="$(CC)" CFLAGS="$(CFLAGS) $(PTHREAD_CFLAGS)" \
 @TCL_TRY_TRUE@		LDFLAGS="$(LDFLAGS)" LIBS="$(PTHREAD_LIBS) $(LIBS)" \

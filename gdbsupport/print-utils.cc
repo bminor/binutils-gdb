@@ -1,6 +1,6 @@
 /* Cell-based print utility routines for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -73,8 +73,7 @@ decimal2str (const char *sign, ULONGEST addr, int width)
 		 temp[2], temp[1], temp[0]);
       break;
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("failed internal consistency check"));
+      internal_error (_("failed internal consistency check"));
     }
 
   return str;
@@ -116,8 +115,7 @@ octal2str (ULONGEST addr, int width)
 		 temp[2], temp[1], temp[0]);
       break;
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("failed internal consistency check"));
+      internal_error (_("failed internal consistency check"));
     }
 
   return str;
@@ -246,7 +244,7 @@ hex_string_custom (LONGEST num, int width)
   if (hex_len > width)
     width = hex_len;
   if (width + 2 >= PRINT_CELL_SIZE)
-    internal_error (__FILE__, __LINE__, _("\
+    internal_error (_("\
 hex_string_custom: insufficient space to store result"));
 
   strcpy (result_end - width - 2, "0x");
@@ -296,8 +294,7 @@ int_string (LONGEST val, int radix, int is_signed, int width,
 	  return result + 1;
       }
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("failed internal consistency check"));
+      internal_error (_("failed internal consistency check"));
     }
 }
 

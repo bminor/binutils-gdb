@@ -1,5 +1,5 @@
 /* macro.c - macro support for gas
-   Copyright (C) 1994-2022 Free Software Foundation, Inc.
+   Copyright (C) 1994-2023 Free Software Foundation, Inc.
 
    Written by Steve and Judy Chamberlain of Cygnus Support,
       sac@cygnus.com
@@ -120,8 +120,7 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
   size_t from_len;
   size_t to_len = strlen (to);
   int depth = 1;
-  size_t line_start = ptr->len;
-  size_t more = get_line (ptr);
+  size_t line_start, more;
 
   if (to_len == 4 && strcasecmp (to, "ENDR") == 0)
     {
@@ -131,24 +130,24 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
   else
     from_len = strlen (from);
 
-  /* Except for macros record the present source position, such that
-     diagnostics and debug info will be properly associated with the
-     respective original lines, rather than with the line of the ending
-     directive (TO).  */
-  if (from == NULL || strcasecmp (from, "MACRO") != 0)
-    {
-      unsigned int line;
-      char *linefile;
+  /* Record the present source position, such that diagnostics and debug info
+     can be properly associated with the respective original lines, rather
+     than with the line of the ending directive (TO).  */
+  {
+    unsigned int line;
+    char *linefile;
 
-      as_where (&line);
-      if (!flag_m68k_mri)
-	linefile = xasprintf ("\t.linefile %u .\n", line);
-      else
-	linefile = xasprintf ("\tlinefile %u .\n", line);
-      sb_add_buffer (ptr, linefile, strlen (linefile));
-      xfree (linefile);
-    }
+    as_where_top (&line);
+    if (!flag_m68k_mri)
+      linefile = xasprintf ("\t.linefile %u .", line + 1);
+    else
+      linefile = xasprintf ("\tlinefile %u .", line + 1);
+    sb_add_string (ptr, linefile);
+    xfree (linefile);
+  }
 
+  line_start = ptr->len;
+  more = get_line (ptr);
   while (more)
     {
       /* Try to find the first pseudo op on the line.  */
@@ -249,14 +248,8 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
 	    }
 
 	  /* PR gas/16908
-	     Apply and discard .linefile directives that appear within
-	     the macro.  For long macros, one might want to report the
-	     line number information associated with the lines within
-	     the macro definition, but we would need more infrastructure
-	     to make that happen correctly (e.g. resetting the line
-	     number when expanding the macro), and since for short
-	     macros we clearly prefer reporting the point of expansion
-	     anyway, there's not an obviously better fix here.  */
+	     Apply .linefile directives that appear within the macro, alongside
+	     keeping them for later expansion of the macro.  */
 	  if (from != NULL && strcasecmp (from, "MACRO") == 0
 	      && len >= 8 && strncasecmp (ptr->ptr + i, "linefile", 8) == 0)
 	    {
@@ -267,7 +260,6 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
 	      s_linefile (0);
 	      restore_ilp ();
 	      ptr->ptr[ptr->len] = saved_eol_char;
-	      ptr->len = line_start;
 	    }
 	}
 

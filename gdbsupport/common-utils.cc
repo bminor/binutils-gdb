@@ -1,6 +1,6 @@
 /* Shared general utility routines for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -54,7 +54,7 @@ xstrvprintf (const char *format, va_list ap)
      status (the printed length) with a non-NULL buffer should never
      happen, but just to be sure.  */
   if (ret == NULL || status < 0)
-    internal_error (__FILE__, __LINE__, _("vasprintf call failed"));
+    internal_error (_("vasprintf call failed"));
   return gdb::unique_xmalloc_ptr<char> (ret);
 }
 

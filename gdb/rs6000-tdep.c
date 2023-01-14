@@ -1,6 +1,6 @@
 /* Target-dependent code for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -35,7 +35,7 @@
 #include "osabi.h"
 #include "infcall.h"
 #include "sim-regno.h"
-#include "gdb/sim-ppc.h"
+#include "sim/sim-ppc.h"
 #include "reggroups.h"
 #include "dwarf2/frame.h"
 #include "target-descriptions.h"
@@ -2628,8 +2628,7 @@ rs6000_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
     /* POWER7 Extended FP pseudo-registers.  */
     return builtin_type (gdbarch)->builtin_double;
   else
-    internal_error (__FILE__, __LINE__,
-		    _("rs6000_pseudo_register_type: "
+    internal_error (_("rs6000_pseudo_register_type: "
 		      "called on unexpected register '%s' (%d)"),
 		    gdbarch_register_name (gdbarch, regnum), regnum);
 }
@@ -3104,8 +3103,7 @@ rs6000_pseudo_register_read (struct gdbarch *gdbarch,
 	   || IS_CEFP_PSEUDOREG (tdep, reg_nr))
     return efp_pseudo_register_read (gdbarch, regcache, reg_nr, buffer);
   else
-    internal_error (__FILE__, __LINE__,
-		    _("rs6000_pseudo_register_read: "
+    internal_error (_("rs6000_pseudo_register_read: "
 		    "called on unexpected register '%s' (%d)"),
 		    gdbarch_register_name (gdbarch, reg_nr), reg_nr);
 }
@@ -3134,8 +3132,7 @@ rs6000_pseudo_register_write (struct gdbarch *gdbarch,
 	   || IS_CEFP_PSEUDOREG (tdep, reg_nr))
     efp_pseudo_register_write (gdbarch, regcache, reg_nr, buffer);
   else
-    internal_error (__FILE__, __LINE__,
-		    _("rs6000_pseudo_register_write: "
+    internal_error (_("rs6000_pseudo_register_write: "
 		    "called on unexpected register '%s' (%d)"),
 		    gdbarch_register_name (gdbarch, reg_nr), reg_nr);
 }
@@ -3276,8 +3273,7 @@ rs6000_ax_pseudo_register_collect (struct gdbarch *gdbarch,
       efp_ax_pseudo_register_collect (gdbarch, ax, reg_nr);
     }
   else
-    internal_error (__FILE__, __LINE__,
-		    _("rs6000_pseudo_register_collect: "
+    internal_error (_("rs6000_pseudo_register_collect: "
 		    "called on unexpected register '%s' (%d)"),
 		    gdbarch_register_name (gdbarch, reg_nr), reg_nr);
   return 0;
@@ -5539,6 +5535,10 @@ ppc_process_record_op59 (struct gdbarch *gdbarch, struct regcache *regcache,
   int ext = PPC_EXTOP (insn);
   int at = PPC_FIELD (insn, 6, 3);
 
+  /* Note the mnemonics for the pmxvf64ger* instructions were officially
+     changed to pmdmxvf64ger*.  The old mnemonics are still supported as
+     extended mnemonics.  */
+
   switch (ext & 0x1f)
     {
     case 18:		/* Floating Divide */
@@ -5607,7 +5607,8 @@ ppc_process_record_op59 (struct gdbarch *gdbarch, struct regcache *regcache,
     case 218:	/* VSX Vector 32-bit Floating-Point GER Negative multiply,
 		   Negative accumulate, xvf32gernn */
 
-    case 59:	/* VSX Vector 64-bit Floating-Point GER, pmxvf64ger */
+    case 59:	/* VSX Vector 64-bit Floating-Point GER, pmdmxvf64ger
+		   (pmxvf64ger)  */
     case 58:	/* VSX Vector 64-bit Floating-Point GER Positive multiply,
 		   Positive accumulate, xvf64gerpp */
     case 186:	/* VSX Vector 64-bit Floating-Point GER Positive multiply,
@@ -5615,7 +5616,7 @@ ppc_process_record_op59 (struct gdbarch *gdbarch, struct regcache *regcache,
     case 122:	/* VSX Vector 64-bit Floating-Point GER Negative multiply,
 		   Positive accumulate, xvf64gernp */
     case 250:	/* VSX Vector 64-bit Floating-Point GER Negative multiply,
-		   Negative accumulate, pmxvf64gernn */
+		   Negative accumulate, pmdmxvf64gernn (pmxvf64gernn)  */
 
     case 51:	/* VSX Vector bfloat16 GER, xvbf16ger2 */
     case 50:	/* VSX Vector bfloat16 GER Positive multiply,
@@ -6490,98 +6491,106 @@ ppc_process_record_prefix_op59_XX3 (struct gdbarch *gdbarch,
   int at = PPC_FIELD (insn_suffix, 6, 3);
   ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
 
+  /* Note, the mnemonics for the pmxvf16ger*, pmxvf32ger*,pmxvf64ger*,
+     pmxvi4ger8*, pmxvi8ger4* pmxvi16ger2* instructions were officially
+     changed to pmdmxbf16ger*, pmdmxvf32ger*, pmdmxvf64ger*, pmdmxvi4ger8*,
+     pmdmxvi8ger4*, pmdmxvi16ger* respectively.  The old mnemonics are still
+     supported by the assembler as extended mnemonics.  The disassembler
+     generates the new mnemonics.  */
   if (type == 3)
     {
       if (ST4 == 9)
 	switch (opcode)
 	  {
 	  case 35:	/* Prefixed Masked VSX Vector 4-bit Signed Integer GER
-			   MMIRR, pmxvi4ger8 */
+			   MMIRR, pmdmxvi4ger8 (pmxvi4ger8) */
 	  case 34:	/* Prefixed Masked VSX Vector 4-bit Signed Integer GER
-			   MMIRR, pmxvi4ger8pp */
+			   MMIRR, pmdmxvi4ger8pp (pmxvi4ger8pp) */
 
 	  case 99:	/* Prefixed Masked VSX Vector 8-bit Signed/Unsigned
 			   Integer GER with Saturate Positive multiply,
 			   Positive accumulate, xvi8ger4spp */
 
 	  case 3:	/* Prefixed Masked VSX Vector 8-bit Signed/Unsigned
-			   Integer GER MMIRR, pmxvi8ger4 */
+			   Integer GER MMIRR, pmdmxvi8ger4 (pmxvi8ger4)  */
 	  case 2:	/* Prefixed Masked VSX Vector 8-bit Signed/Unsigned
 			   Integer GER Positive multiply, Positive accumulate
-			   MMIRR, pmxvi8ger4pp */
+			   MMIRR, pmdmxvi8ger4pp (pmxvi8ger4pp)  */
 
 	  case 75:	/* Prefixed Masked VSX Vector 16-bit Signed Integer
-			   GER MMIRR, pmxvi16ger2 */
+			   GER MMIRR, pmdmxvi16ger2 (pmxvi16ger2)  */
 	  case 107:	/* Prefixed Masked VSX Vector 16-bit Signed Integer
 			   GER  Positive multiply, Positive accumulate,
-			   pmxvi16ger2pp */
+			   pmdmxvi16ger2pp (pmxvi16ger2pp)  */
 
 	  case 43:	/* Prefixed Masked VSX Vector 16-bit Signed Integer
-			   GER with Saturation MMIRR, pmxvi16ger2s */
+			   GER with Saturation MMIRR, pmdmxvi16ger2s
+			   (pmxvi16ger2s)  */
 	  case 42:	/* Prefixed Masked VSX Vector 16-bit Signed Integer
 			   GER with Saturation Positive multiply, Positive
-			   accumulate MMIRR, pmxvi16ger2spp */
+			   accumulate MMIRR, pmdmxvi16ger2spp (pmxvi16ger2spp)
+			*/
 	    ppc_record_ACC_fpscr (regcache, tdep, at, false);
 	    return 0;
 
 	  case 19:	/* Prefixed Masked VSX Vector 16-bit Floating-Point
-			   GER MMIRR, pmxvf16ger2 */
+			   GER MMIRR, pmdmxvf16ger2 (pmxvf16ger2)  */
 	  case 18:	/* Prefixed Masked VSX Vector 16-bit Floating-Point
 			   GER Positive multiply, Positive accumulate MMIRR,
-			   pmxvf16ger2pp */
+			   pmdmxvf16ger2pp (pmxvf16ger2pp)  */
 	  case 146:	/* Prefixed Masked VSX Vector 16-bit Floating-Point
 			   GER Positive multiply, Negative accumulate MMIRR,
-			   pmxvf16ger2pn */
+			   pmdmxvf16ger2pn (pmxvf16ger2pn)  */
 	  case 82:	/* Prefixed Masked VSX Vector 16-bit Floating-Point
 			   GER Negative multiply, Positive accumulate MMIRR,
-			   pmxvf16ger2np */
+			   pmdmxvf16ger2np (pmxvf16ger2np)  */
 	  case 210:	/* Prefixed Masked VSX Vector 16-bit Floating-Point
 			   GER Negative multiply, Negative accumulate MMIRR,
-			   pmxvf16ger2nn */
+			   pmdmxvf16ger2nn (pmxvf16ger2nn)  */
 
 	  case 27:	/* Prefixed Masked VSX Vector 32-bit Floating-Point
-			   GER MMIRR, pmxvf32ger */
+			   GER MMIRR, pmdmxvf32ger (pmxvf32ger)  */
 	  case 26:	/* Prefixed Masked VSX Vector 32-bit Floating-Point
 			   GER Positive multiply, Positive accumulate MMIRR,
-			   pmxvf32gerpp */
+			   pmdmxvf32gerpp (pmxvf32gerpp)  */
 	  case 154:	/* Prefixed Masked VSX Vector 32-bit Floating-Point
 			   GER Positive multiply, Negative accumulate MMIRR,
-			   pmxvf32gerpn */
+			   pmdmxvf32gerpn (pmxvf32gerpn)  */
 	  case 90:	/* Prefixed Masked VSX Vector 32-bit Floating-Point
 			   GER Negative multiply, Positive accumulate MMIRR,
-			   pmxvf32gernp */
+			   pmdmxvf32gernp (pmxvf32gernp )*/
 	  case 218:	/* Prefixed Masked VSX Vector 32-bit Floating-Point
 			   GER Negative multiply, Negative accumulate MMIRR,
-			   pmxvf32gernn */
+			   pmdmxvf32gernn (pmxvf32gernn)  */
 
 	  case 59:	/* Prefixed Masked VSX Vector 64-bit Floating-Point
-			   GER MMIRR, pmxvf64ger */
+			   GER MMIRR, pmdmxvf64ger (pmxvf64ger)  */
 	  case 58:	/* Floating-Point GER Positive multiply, Positive
-			   accumulate MMIRR, pmxvf64gerpp */
+			   accumulate MMIRR, pmdmxvf64gerpp (pmxvf64gerpp)  */
 	  case 186:	/* Prefixed Masked VSX Vector 64-bit Floating-Point
 			   GER Positive multiply, Negative accumulate MMIRR,
-			   pmxvf64gerpn */
+			   pmdmxvf64gerpn (pmxvf64gerpn)  */
 	  case 122:	/* Prefixed Masked VSX Vector 64-bit Floating-Point
 			   GER Negative multiply, Positive accumulate MMIRR,
-			   pmxvf64gernp */
+			   pmdmxvf64gernp (pmxvf64gernp)  */
 	  case 250:	/* Prefixed Masked VSX Vector 64-bit Floating-Point
 			   GER Negative multiply, Negative accumulate MMIRR,
-			   pmxvf64gernn */
+			   pmdmxvf64gernn (pmxvf64gernn)  */
 
 	  case 51:	/* Prefixed Masked VSX Vector bfloat16 GER MMIRR,
-			   pmxvbf16ger2 */
+			   pmdmxvbf16ger2 (pmxvbf16ger2)  */
 	  case 50:	/* Prefixed Masked VSX Vector bfloat16 GER Positive
 			   multiply, Positive accumulate MMIRR,
-			   pmxvbf16ger2pp */
+			   pmdmxvbf16ger2pp (pmxvbf16ger2pp)  */
 	  case 178:	/* Prefixed Masked VSX Vector bfloat16 GER Positive
 			   multiply, Negative accumulate MMIRR,
-			   pmxvbf16ger2pn */
+			   pmdmxvbf16ger2pn (pmxvbf16ger2pn)  */
 	  case 114:	/* Prefixed Masked VSX Vector bfloat16 GER Negative
 			   multiply, Positive accumulate MMIRR,
-			   pmxvbf16ger2np */
+			   pmdmxvbf16ger2np (pmxvbf16ger2np)  */
 	  case 242:	/* Prefixed Masked VSX Vector bfloat16 GER Negative
 			   multiply, Negative accumulate MMIRR,
-			   pmxvbf16ger2nn */
+			   pmdmxvbf16ger2nn (pmxvbf16ger2nn)  */
 	    ppc_record_ACC_fpscr (regcache, tdep, at, true);
 	    return 0;
 	  }
@@ -7462,7 +7471,6 @@ rs6000_program_breakpoint_here_p (gdbarch *gdbarch, CORE_ADDR address)
 static struct gdbarch *
 rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   int wordsize, from_xcoff_exec, from_elf_exec;
   enum bfd_architecture arch;
   unsigned long mach;
@@ -8170,14 +8178,15 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        - "set arch"		trust blindly
        - GDB startup		useless but harmless */
 
-  ppc_gdbarch_tdep *tdep = new ppc_gdbarch_tdep;
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new ppc_gdbarch_tdep));
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
+
   tdep->wordsize = wordsize;
   tdep->elf_abi = elf_abi;
   tdep->soft_float = soft_float;
   tdep->long_double_abi = long_double_abi;
   tdep->vector_abi = vector_abi;
-
-  gdbarch = gdbarch_alloc (&info, tdep);
 
   tdep->ppc_gp0_regnum = PPC_R0_REGNUM;
   tdep->ppc_toc_regnum = PPC_R0_REGNUM + 2;
@@ -8234,7 +8243,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_ps_regnum (gdbarch, tdep->ppc_ps_regnum);
 
   if (wordsize == 8)
-    set_gdbarch_return_value (gdbarch, ppc64_sysv_abi_return_value);
+    {
+      set_gdbarch_return_value (gdbarch, ppc64_sysv_abi_return_value);
+      set_gdbarch_get_return_buf_addr (gdbarch,
+				       ppc64_sysv_get_return_buf_addr);
+    }
   else
     set_gdbarch_return_value (gdbarch, ppc_sysv_abi_return_value);
 
@@ -8467,7 +8480,7 @@ powerpc_set_soft_float (const char *args, int from_tty,
 
   /* Update the architecture.  */
   if (!gdbarch_update_p (info))
-    internal_error (__FILE__, __LINE__, _("could not update architecture"));
+    internal_error (_("could not update architecture"));
 }
 
 static void
@@ -8487,13 +8500,13 @@ powerpc_set_vector_abi (const char *args, int from_tty,
       }
 
   if (vector_abi == POWERPC_VEC_LAST)
-    internal_error (__FILE__, __LINE__, _("Invalid vector ABI accepted: %s."),
+    internal_error (_("Invalid vector ABI accepted: %s."),
 		    powerpc_vector_abi_string);
 
   /* Update the architecture.  */
   gdbarch_info info;
   if (!gdbarch_update_p (info))
-    internal_error (__FILE__, __LINE__, _("could not update architecture"));
+    internal_error (_("could not update architecture"));
 }
 
 /* Show the current setting of the exact watchpoints flag.  */

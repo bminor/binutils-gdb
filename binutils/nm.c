@@ -1,5 +1,5 @@
 /* nm.c -- Describe symbol table of a rel file.
-   Copyright (C) 1991-2022 Free Software Foundation, Inc.
+   Copyright (C) 1991-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -141,7 +141,7 @@ enum formats
 
 #define FORMAT_DEFAULT FORMAT_BSD
 
-static struct output_fns formats[FORMAT_MAX] =
+static const struct output_fns formats[FORMAT_MAX] =
 {
   {print_object_filename_bsd,
    print_archive_filename_bsd,
@@ -167,7 +167,7 @@ static struct output_fns formats[FORMAT_MAX] =
 
 
 /* The output format to use.  */
-static struct output_fns *format = &formats[FORMAT_DEFAULT];
+static const struct output_fns *format = &formats[FORMAT_DEFAULT];
 static unsigned int print_format = FORMAT_DEFAULT;
 static const char *print_format_string = NULL;
 

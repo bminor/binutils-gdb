@@ -7,7 +7,7 @@ else
 fi
 fragment <<EOF
 /* This file is part of GLD, the Gnu Linker.
-   Copyright (C) 1995-2022 Free Software Foundation, Inc.
+   Copyright (C) 1995-2023 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -379,7 +379,7 @@ gld${EMULATION_NAME}_after_open (void)
   /* Pass the wacky PE command line options into the output bfd.
      FIXME: This should be done via a function, rather than by
      including an internal BFD header.  */
-  if (!coff_data(link_info.output_bfd)->pe)
+  if (!obj_pe (link_info.output_bfd))
     {
       einfo (_("%F%P: PE operations on non PE file\n"));
     }

@@ -1,5 +1,5 @@
 /* Internal interfaces for the GNU/Linux specific target code for gdbserver.
-   Copyright (C) 2002-2022 Free Software Foundation, Inc.
+   Copyright (C) 2002-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -275,6 +275,8 @@ public:
   bool supports_agent () override;
 
 #ifdef HAVE_LINUX_BTRACE
+  bool supports_btrace () override;
+
   btrace_target_info *enable_btrace (thread_info *tp,
 				     const btrace_config *conf) override;
 

@@ -1,6 +1,6 @@
 /* Target-dependent code for SPARC.
 
-   Copyright (C) 2003-2022 Free Software Foundation, Inc.
+   Copyright (C) 2003-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -484,8 +484,7 @@ sparc32_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum >= SPARC32_D0_REGNUM && regnum <= SPARC32_D30_REGNUM)
     return builtin_type (gdbarch)->builtin_double;
 
-  internal_error (__FILE__, __LINE__,
-		  _("sparc32_pseudo_register_type: bad register number %d"),
+  internal_error (_("sparc32_pseudo_register_type: bad register number %d"),
 		  regnum);
 }
 
@@ -1497,7 +1496,7 @@ sparc32_store_return_value (struct type *type, struct regcache *regcache,
 static enum return_value_convention
 sparc32_return_value (struct gdbarch *gdbarch, struct value *function,
 		      struct type *type, struct regcache *regcache,
-		      gdb_byte *readbuf, const gdb_byte *writebuf)
+		      struct value **read_value, const gdb_byte *writebuf)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
@@ -1513,11 +1512,11 @@ sparc32_return_value (struct gdbarch *gdbarch, struct value *function,
       ULONGEST sp;
       CORE_ADDR addr;
 
-      if (readbuf)
+      if (read_value != nullptr)
 	{
 	  regcache_cooked_read_unsigned (regcache, SPARC_SP_REGNUM, &sp);
 	  addr = read_memory_unsigned_integer (sp + 64, 4, byte_order);
-	  read_memory (addr, readbuf, type->length ());
+	  *read_value = value_at_non_lval (type, addr);
 	}
       if (writebuf)
 	{
@@ -1529,8 +1528,12 @@ sparc32_return_value (struct gdbarch *gdbarch, struct value *function,
       return RETURN_VALUE_ABI_PRESERVES_ADDRESS;
     }
 
-  if (readbuf)
-    sparc32_extract_return_value (type, regcache, readbuf);
+  if (read_value != nullptr)
+    {
+      *read_value = allocate_value (type);
+      gdb_byte *readbuf = value_contents_raw (*read_value).data ();
+      sparc32_extract_return_value (type, regcache, readbuf);
+    }
   if (writebuf)
     sparc32_store_return_value (type, regcache, writebuf);
 
@@ -1808,7 +1811,6 @@ static struct gdbarch *
 sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   const struct target_desc *tdesc = info.target_desc;
-  struct gdbarch *gdbarch;
   int valid_p = 1;
 
   /* If there is already a candidate, use it.  */
@@ -1817,8 +1819,9 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return arches->gdbarch;
 
   /* Allocate space for the new architecture.  */
-  sparc_gdbarch_tdep *tdep = new sparc_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new sparc_gdbarch_tdep));
+  sparc_gdbarch_tdep *tdep = gdbarch_tdep<sparc_gdbarch_tdep> (gdbarch);
 
   tdep->pc_regnum = SPARC32_PC_REGNUM;
   tdep->npc_regnum = SPARC32_NPC_REGNUM;
@@ -1854,7 +1857,7 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_dummy_code (gdbarch, sparc32_push_dummy_code);
   set_gdbarch_push_dummy_call (gdbarch, sparc32_push_dummy_call);
 
-  set_gdbarch_return_value (gdbarch, sparc32_return_value);
+  set_gdbarch_return_value_as_value (gdbarch, sparc32_return_value);
   set_gdbarch_stabs_argument_has_addr
     (gdbarch, sparc32_stabs_argument_has_addr);
 

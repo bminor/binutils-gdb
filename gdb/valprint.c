@@ -1,6 +1,6 @@
 /* Print values for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -100,26 +100,26 @@ static void val_print_type_code_flags (struct type *type,
 struct value_print_options user_print_options =
 {
   Val_prettyformat_default,	/* prettyformat */
-  0,				/* prettyformat_arrays */
-  0,				/* prettyformat_structs */
-  0,				/* vtblprint */
-  1,				/* unionprint */
-  1,				/* addressprint */
+  false,			/* prettyformat_arrays */
+  false,			/* prettyformat_structs */
+  false,			/* vtblprint */
+  true,				/* unionprint */
+  true,				/* addressprint */
   false,			/* nibblesprint */
-  0,				/* objectprint */
+  false,			/* objectprint */
   PRINT_MAX_DEFAULT,		/* print_max */
   10,				/* repeat_count_threshold */
   0,				/* output_format */
   0,				/* format */
-  1,				/* memory_tag_violations */
-  0,				/* stop_print_at_null */
-  0,				/* print_array_indexes */
-  0,				/* deref_ref */
-  1,				/* static_field_print */
-  1,				/* pascal_static_field_print */
-  0,				/* raw */
-  0,				/* summary */
-  1,				/* symbol_print */
+  true,				/* memory_tag_violations */
+  false,			/* stop_print_at_null */
+  false,			/* print_array_indexes */
+  false,			/* deref_ref */
+  true,				/* static_field_print */
+  true,				/* pascal_static_field_print */
+  false,			/* raw */
+  false,			/* summary */
+  true,				/* symbol_print */
   PRINT_MAX_DEPTH_DEFAULT,	/* max_depth */
 };
 
@@ -879,7 +879,7 @@ generic_value_print_memberptr
       cp_print_class_member (valaddr, type, stream, "&");
     }
   else
-    generic_value_print (val, stream, recurse, options, decorations);
+    value_print_scalar_formatted (val, options, 0, stream);
 }
 
 /* See valprint.h.  */
@@ -1272,7 +1272,7 @@ value_print_scalar_formatted (struct value *val,
     {
       struct value_print_options opts = *options;
       opts.format = 0;
-      opts.deref_ref = 0;
+      opts.deref_ref = false;
       common_val_print (val, stream, 0, &opts, current_language);
       return;
     }
@@ -1338,8 +1338,7 @@ print_longest (struct ui_file *stream, int format, int use_c_format,
     case 'o':
       val = int_string (val_long, 8, 0, 0, use_c_format); break;
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("failed internal consistency check"));
+      internal_error (_("failed internal consistency check"));
     } 
   gdb_puts (val, stream);
 }
@@ -1928,7 +1927,6 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
   unsigned int things_printed = 0;
   unsigned len;
   struct type *elttype, *index_type;
-  unsigned eltlen;
   /* Position of the array element we are examining to see
      whether it is repeated.  */
   unsigned int rep1;
@@ -1939,7 +1937,9 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
   struct type *type = check_typedef (value_type (val));
 
   elttype = type->target_type ();
-  eltlen = type_length_units (check_typedef (elttype));
+  unsigned bit_stride = type->bit_stride ();
+  if (bit_stride == 0)
+    bit_stride = 8 * check_typedef (elttype)->length ();
   index_type = type->index_type ();
   if (index_type->code () == TYPE_CODE_RANGE)
     index_type = index_type->target_type ();
@@ -1988,23 +1988,28 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
       maybe_print_array_index (index_type, i + low_bound,
 			       stream, options);
 
+      struct value *element = value_from_component_bitsize (val, elttype,
+							    bit_stride * i,
+							    bit_stride);
       rep1 = i + 1;
       reps = 1;
       /* Only check for reps if repeat_count_threshold is not set to
 	 UINT_MAX (unlimited).  */
       if (options->repeat_count_threshold < UINT_MAX)
 	{
-	  while (rep1 < len
-		 && value_contents_eq (val, i * eltlen,
-				       val, rep1 * eltlen,
-				       eltlen))
+	  while (rep1 < len)
 	    {
+	      struct value *rep_elt
+		= value_from_component_bitsize (val, elttype,
+						rep1 * bit_stride,
+						bit_stride);
+	      if (!value_contents_eq (element, rep_elt))
+		break;
 	      ++reps;
 	      ++rep1;
 	    }
 	}
 
-      struct value *element = value_from_component (val, elttype, eltlen * i);
       common_val_print (element, stream, recurse + 1, options,
 			current_language);
 

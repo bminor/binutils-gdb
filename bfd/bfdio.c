@@ -1,6 +1,6 @@
 /* Low-level I/O routines for BFDs.
 
-   Copyright (C) 1990-2022 Free Software Foundation, Inc.
+   Copyright (C) 1990-2023 Free Software Foundation, Inc.
 
    Written by Cygnus Support.
 
@@ -29,11 +29,6 @@
 #if defined (_WIN32)
 #include <windows.h>
 #include <locale.h>
-#endif
-
-#if defined(__MINGW64_VERSION_MAJOR) && __MINGW64_VERSION_MAJOR < 9
-/* This prototype was added to locale.h in version 9.0 of MinGW-w64.  */
-_CRTIMP unsigned int __cdecl ___lc_codepage_func(void);
 #endif
 
 #ifndef S_IXUSR
@@ -127,7 +122,11 @@ _bfd_real_fopen (const char *filename, const char *modes)
    const wchar_t  prefix[] = L"\\\\?\\";
    const size_t   partPathLen = strlen (filename) + 1;
 #ifdef __MINGW32__
-   const unsigned int cp = ___lc_codepage_func();
+#if !HAVE_DECL____LC_CODEPAGE_FUNC
+/* This prototype was added to locale.h in version 9.0 of MinGW-w64.  */
+   _CRTIMP unsigned int __cdecl ___lc_codepage_func (void);
+#endif
+   const unsigned int cp = ___lc_codepage_func ();
 #else
    const unsigned int cp = CP_UTF8;
 #endif
@@ -155,6 +154,11 @@ _bfd_real_fopen (const char *filename, const char *modes)
    wcscpy (fullPath, prefix);
 
    int        prefixLen = sizeof(prefix) / sizeof(wchar_t);
+
+   /* Do not add a prefix to the null device.  */
+   if (stricmp (filename, "nul") == 0)
+    prefixLen = 1;
+
    wchar_t *  fullPathOffset = fullPath + prefixLen - 1;
 
    GetFullPathNameW (partPath, fullPathWSize, fullPathOffset, lpFilePart);

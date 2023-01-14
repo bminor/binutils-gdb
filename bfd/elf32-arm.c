@@ -1,5 +1,5 @@
 /* 32-bit ELF support for ARM
-   Copyright (C) 1998-2022 Free Software Foundation, Inc.
+   Copyright (C) 1998-2023 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -5053,7 +5053,7 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
      section.  The user should fix his linker script.  */
   if (stub_entry->target_section->output_section == NULL
       && info->non_contiguous_regions)
-    info->callbacks->einfo (_("%F%P: Could not assign '%pA' to an output section. "
+    info->callbacks->einfo (_("%F%P: Could not assign `%pA' to an output section. "
 			      "Retry without --enable-non-contiguous-regions.\n"),
 			    stub_entry->target_section);
 
@@ -6008,6 +6008,9 @@ cmse_scan (bfd *input_bfd, struct elf32_arm_link_hash_table *htab,
       else
 	{
 	  cmse_hash = elf32_arm_hash_entry (sym_hashes[i - ext_start]);
+	  if (cmse_hash == NULL)
+	    continue;
+
 	  sym_name = (char *) cmse_hash->root.root.root.string;
 	  if (!startswith (sym_name, CMSE_PREFIX))
 	    continue;
@@ -15987,6 +15990,8 @@ elf32_arm_gc_mark_extra_sections (struct bfd_link_info *info,
 	      for (i = ext_start; i < sym_count; i++)
 		{
 		  cmse_hash = elf32_arm_hash_entry (sym_hashes[i - ext_start]);
+		  if (cmse_hash == NULL)
+		    continue;
 
 		  /* Assume it is a special symbol.  If not, cmse_scan will
 		     warn about it and user can do something about it.  */
@@ -17686,6 +17691,35 @@ elf32_arm_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
 			    const asection *rel_sec ATTRIBUTE_UNUSED,
 			    const Elf_Internal_Rela *rela)
 {
+  struct elf32_arm_link_hash_table *htab = elf32_arm_hash_table (info);
+
+  if (htab->root.dynsym != NULL
+      && htab->root.dynsym->contents != NULL)
+    {
+      /* Check relocation against STT_GNU_IFUNC symbol if there are
+	 dynamic symbols.  */
+      bfd *abfd = info->output_bfd;
+      const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+      unsigned long r_symndx = ELF32_R_SYM (rela->r_info);
+      if (r_symndx != STN_UNDEF)
+	{
+	  Elf_Internal_Sym sym;
+	  if (!bed->s->swap_symbol_in (abfd,
+				       (htab->root.dynsym->contents
+					+ r_symndx * bed->s->sizeof_sym),
+				       0, &sym))
+	    {
+	      /* xgettext:c-format */
+	      _bfd_error_handler (_("%pB symbol number %lu references"
+				    " nonexistent SHT_SYMTAB_SHNDX section"),
+				  abfd, r_symndx);
+	      /* Ideally an error class should be returned here.  */
+	    }
+	  else if (ELF_ST_TYPE (sym.st_info) == STT_GNU_IFUNC)
+	    return reloc_class_ifunc;
+	}
+    }
+
   switch ((int) ELF32_R_TYPE (rela->r_info))
     {
     case R_ARM_RELATIVE:
@@ -18109,6 +18143,11 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
   bfd_vma offset;
   bfd_size_type size;
   bfd *input_bfd;
+
+  if (info->strip == strip_all
+      && !info->emitrelocations
+      && !bfd_link_relocatable (info))
+    return true;
 
   htab = elf32_arm_hash_table (info);
   if (htab == NULL)
@@ -20251,11 +20290,7 @@ elf32_arm_backend_symbol_processing (bfd *abfd, asymbol *sym)
 #define ELF_ARCH			bfd_arch_arm
 #define ELF_TARGET_ID			ARM_ELF_DATA
 #define ELF_MACHINE_CODE		EM_ARM
-#ifdef __QNXTARGET__
 #define ELF_MAXPAGESIZE			0x1000
-#else
-#define ELF_MAXPAGESIZE			0x10000
-#endif
 #define ELF_COMMONPAGESIZE		0x1000
 
 #define bfd_elf32_mkobject			elf32_arm_mkobject

@@ -1,5 +1,5 @@
 /* Target operations for the remote server for GDB.
-   Copyright (C) 2002-2022 Free Software Foundation, Inc.
+   Copyright (C) 2002-2023 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
 
@@ -387,6 +387,9 @@ public:
 
   /* Return true if target supports debugging agent.  */
   virtual bool supports_agent ();
+
+  /* Return true if target supports btrace.  */
+  virtual bool supports_btrace ();
 
   /* Enable branch tracing for TP based on CONF and allocate a branch trace
      target information struct for reading and for disabling branch trace.  */

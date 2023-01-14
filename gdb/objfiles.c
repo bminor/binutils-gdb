@@ -1,6 +1,6 @@
 /* GDB routines for manipulating objfiles.
 
-   Copyright (C) 1992-2022 Free Software Foundation, Inc.
+   Copyright (C) 1992-2023 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -666,10 +666,6 @@ objfile_relocate1 (struct objfile *objfile,
 	  }
       }
   }
-
-  /* Notify the quick symbol object.  */
-  for (const auto &iter : objfile->qf)
-    iter->relocated ();
 
   /* Relocate isolated symbols.  */
   {

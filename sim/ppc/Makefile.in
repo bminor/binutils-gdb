@@ -37,10 +37,6 @@ include ../arch-subdir.mk
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 
-bindir = @bindir@
-libdir = @libdir@
-tooldir = $(libdir)/$(target_alias)
-
 datarootdir = @datarootdir@
 datadir = @datadir@
 mandir = @mandir@
@@ -74,7 +70,7 @@ FLOAT_CFLAGS = @sim_float@
 MONITOR_CFLAGS = @sim_monitor@
 MODEL_CFLAGS = @sim_model@ @sim_default_model@ @sim_model_issue@
 TERMIO_CFLAGS = @sim_termio@
-DEVZERO_CFLAGS = @sim_devzero@
+SWITCH_CFLAGS = @sim_switch@
 CONFIG_CFLAGS = \
   $(SMP_CFLAGS) \
   $(XOR_ENDIAN_CFLAGS) \
@@ -85,10 +81,10 @@ CONFIG_CFLAGS = \
   $(MONITOR_CFLAGS) \
   $(MODEL_CFLAGS) \
   $(TERMIO_CFLAGS) \
-  $(DEVZERO_CFLAGS)
+  $(SWITCH_CFLAGS)
 SIM_FPU_CFLAGS = -DHAVE_COMMON_FPU -I../common -I${srcdir}/../common
 
-STD_CFLAGS	= $(CFLAGS) $(WERROR_CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(WARN_CFLAGS) $(INCLUDES) $(INCGNU) $(INTL_CFLAGS) $(SIM_FPU_CFLAGS)
+STD_CFLAGS	= $(CFLAGS) $(WERROR_CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(WARN_CFLAGS) $(INCLUDES) $(INCGNU) $(SIM_FPU_CFLAGS)
 NOWARN_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(INCLUDES) $(SIM_FPU_CFLAGS)
 BUILD_CFLAGS	= $(CFLAGS_FOR_BUILD) $(INCLUDES) $(WARN_CFLAGS)
 
@@ -105,7 +101,6 @@ IGEN_FILTER = @sim_filter@
 IGEN_ICACHE = @sim_icache@
 IGEN_SMP = @sim_igen_smp@
 IGEN_LINE_NR = @sim_line_nr@
-DGEN_FLAGS = @sim_switch@
 
 IGEN_FLAGS = \
 	$(IGEN_DECODE_MECHANISM) \
@@ -116,11 +111,10 @@ IGEN_FLAGS = \
 	$(IGEN_SMP) \
 	$(IGEN_LINE_NR)
 
-# igen/dgen leak memory, and therefore makes AddressSanitizer unhappy.  Disable
-# leak detection while running them.
+# igen leaks memory, and therefore makes AddressSanitizer unhappy.  Disable
+# leak detection while running it.
 
 IGEN = ASAN_OPTIONS=detect_leaks=0 ./igen
-DGEN = ASAN_OPTIONS=detect_leaks=0 ./dgen
 
 .NOEXPORT:
 MAKEOVERRIDES=
@@ -132,13 +126,12 @@ GDB_INCLUDES	= -I../../gdb -I$(srcdir)/../../gdb  -I$(srcdir)/../../gdb/config
 INCLUDES	= -I. -I$(srcdir) $(LIB_INCLUDES) $(BFD_INCLUDES) $(GDB_INCLUDES) -I../..
 
 LIBIBERTY_LIB	= ../../libiberty/libiberty.a
-BFD_LIB		= ../../bfd/libbfd.a
-ZLIB		= $(zlibdir) -lz
+BFD_LIB		= ../../bfd/libbfd.la
 
 
 TARGETLIB	= libsim.a
 
-all:	run$(EXEEXT) $(TARGETLIB) $(GDB_OBJ)
+all:	main.o $(TARGETLIB) $(GDB_OBJ)
 
 .c.o:
 	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) $<
@@ -149,7 +142,7 @@ ANSIDECL_H = $(srcroot)/include/ansidecl.h
 BFD_H = ../../bfd/bfd.h
 GDB_CALLBACK_H = $(srcroot)/include/sim/callback.h
 GDB_REMOTE_SIM_H = $(srcroot)/include/sim/sim.h
-GDB_SIM_PPC_H = $(srcroot)/include/gdb/sim-ppc.h
+GDB_SIM_PPC_H = $(srcroot)/include/sim/sim-ppc.h
 COMMON_SIM_BASE_H = $(srcroot)/sim/common/sim-base.h
 COMMON_SIM_BASICS_H = $(srcroot)/sim/common/sim-basics.h
 COMMON_SIM_FPU_H = $(srcroot)/sim/common/sim-fpu.h
@@ -421,7 +414,6 @@ BUILT_SRC_WO_CONFIG = \
 	idecode.h idecode.c \
 	semantics.h semantics.c \
 	itable.h itable.c \
-	spreg.h spreg.c \
 	model.h model.c \
 	support.h support.c \
 	pk.h \
@@ -471,7 +463,7 @@ COMMON_OBJS_NAMES = \
 	target-newlib-signal.o \
 	target-newlib-syscall.o \
 	version.o
-COMMON_OBJS = $(COMMON_OBJS_NAMES:%=../common/common_libcommon_a-%)
+COMMON_OBJS = $(COMMON_OBJS_NAMES:%=../common/%)
 
 # NOTE: semantics, idecode and psim put last so smaller files are compiled
 #       first
@@ -517,18 +509,11 @@ GDB_OBJ = gdb-sim.o sim_calls.o
 HW_SRC = @sim_hw_src@
 HW_OBJ = @sim_hw_obj@
 
-PACKAGE_SRC = @sim_pk_src@
-PACKAGE_OBJ = @sim_pk_obj@
+PACKAGE_SRC = pk_disklabel.c
+PACKAGE_OBJ = $(PACKAGE_SRC:.c=.o)
 
 
-psim$(EXEEXT): $(TARGETLIB) main.o $(LIBIBERTY_LIB) $(BFD_LIB) $(LIBINTL_DEP)
-	$(ECHO_CCLD) $(CC) $(CFLAGS) $(LDFLAGS) -o psim$(EXEEXT) main.o $(TARGETLIB) $(BFD_LIB) $(ZLIB) $(ZSTD_LIBS) $(LIBINTL) $(LIBIBERTY_LIB) $(LIBS)
-
-run$(EXEEXT): psim$(EXEEXT)
-	$(SILENCE) rm -f $@
-	$(ECHO_GEN) ln $< $@ 2>/dev/null || $(LN_S) $< $@ 2>/dev/null || cp -p $< $@
-
-$(TARGETLIB): tmp-igen tmp-dgen tmp-hw tmp-pk tmp-defines $(LIB_OBJ) $(GDB_OBJ)
+$(TARGETLIB): tmp-igen tmp-hw tmp-defines $(LIB_OBJ) $(GDB_OBJ)
 	$(ECHO_AR) $(AR) $(AR_FLAGS) $(TARGETLIB) $(LIB_OBJ) $(GDB_OBJ)
 	$(ECHO_RANLIB) $(RANLIB) $(TARGETLIB)
 
@@ -600,7 +585,7 @@ sim-fpu.o: $(srcdir)/../common/sim-fpu.c $(CONFIG_H)
 
 # Rebuild options whenever something changes so the date/time is up to date.
 options.o: options.c $(CPU_H) $(OPTIONS_H) $(DEFINES_H) $(BASICS_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) $(BUILT_SRC) config.status Makefile
-	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) '-DOPCODE_RULES="@sim_opcode@"' '-DIGEN_FLAGS="$(IGEN_FLAGS)"' '-DDGEN_FLAGS="$(DGEN_FLAGS)"' $(srcdir)/options.c
+	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) '-DOPCODE_RULES="@sim_opcode@"' '-DIGEN_FLAGS="$(IGEN_FLAGS)"' $(srcdir)/options.c
 
 defines.h: tmp-defines; @true
 tmp-defines: config.h Makefile
@@ -612,54 +597,29 @@ tmp-defines: config.h Makefile
 # Rules to create the built c source code files
 #
 
-tmp-dgen: dgen ppc-spr-table $(srcroot)/move-if-change
-	$(ECHO_GEN) $(DGEN) $(DGEN_FLAGS) \
-		-r $(srcdir)/ppc-spr-table \
-		-n spreg.h -hp tmp-spreg.h \
-		-n spreg.c -p  tmp-spreg.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-spreg.h spreg.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-spreg.c spreg.c
-	$(SILENCE) touch $@
-
-tmp-igen: igen $(srcdir)/ppc-instructions $(srcdir)/altivec.igen $(srcdir)/e500.igen $(IGEN_OPCODE_RULES) $(srcroot)/move-if-change tmp-ld-decode tmp-ld-cache tmp-ld-insn tmp-filter
+tmp-igen: igen $(srcdir)/powerpc.igen $(srcdir)/altivec.igen $(srcdir)/e500.igen $(IGEN_OPCODE_RULES) $(srcroot)/move-if-change
 	$(ECHO_GEN) $(IGEN) $(IGEN_FLAGS) \
 		-o $(srcdir)/$(IGEN_OPCODE_RULES) \
-		-I $(srcdir) -i $(srcdir)/ppc-instructions \
-		-n icache.h    -hc tmp-icache.h \
-		-n icache.c    -c  tmp-icache.c \
-		-n semantics.h -hs tmp-semantics.h \
-		-n semantics.c -s  tmp-semantics.c \
-		-n idecode.h   -hd tmp-idecode.h \
-		-n idecode.c   -d  tmp-idecode.c \
-		-n itable.h    -ht tmp-itable.h \
-		-n itable.c    -t  tmp-itable.c \
-		-n model.h     -hm tmp-model.h \
-		-n model.c     -m  tmp-model.c \
-		-n support.h   -hf tmp-support.h \
-		-n support.c   -f  tmp-support.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-icache.h icache.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-icache.c icache.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-idecode.h idecode.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-idecode.c idecode.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-semantics.h semantics.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-semantics.c semantics.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-itable.h itable.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-itable.c itable.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-model.h model.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-model.c model.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-support.h support.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-support.c support.c
+		-I $(srcdir) -i $(srcdir)/powerpc.igen \
+		-n icache.h    -hc icache.h \
+		-n icache.c    -c  icache.c \
+		-n semantics.h -hs semantics.h \
+		-n semantics.c -s  semantics.c \
+		-n idecode.h   -hd idecode.h \
+		-n idecode.c   -d  idecode.c \
+		-n itable.h    -ht itable.h \
+		-n itable.c    -t  itable.c \
+		-n model.h     -hm model.h \
+		-n model.c     -m  model.c \
+		-n support.h   -hf support.h \
+		-n support.c   -f  support.c
 	$(SILENCE) touch $@
 
 # NOTE: Some versions of make don't handle files created as side-effects
 # uncomment the below if that is the case.
 
-$(TARGETLIB): tmp-igen tmp-dgen
+$(TARGETLIB): tmp-igen
 itable.h itable.c icache.h icache.c idecode.h idecode.c semantics.h semantics.c model.h model.c support.h support.c: tmp-igen
-spreg.h spreg.c: tmp-dgen
-
-dgen: dgen.o table.o lf.o misc.o filter_host.o
-	$(ECHO_CCLD) $(LINK_FOR_BUILD) dgen.o table.o lf.o misc.o filter_host.o
 
 igen: igen.o table.o lf.o misc.o filter_host.o ld-decode.o ld-cache.o filter.o ld-insn.o gen-model.o gen-itable.o gen-icache.o gen-semantics.o gen-idecode.o gen-support.o
 	$(ECHO_CCLD) $(LINK_FOR_BUILD) igen.o table.o lf.o misc.o filter_host.o ld-decode.o ld-cache.o filter.o ld-insn.o gen-model.o gen-itable.o gen-icache.o gen-semantics.o gen-idecode.o gen-support.o
@@ -713,9 +673,6 @@ gen-idecode.o: gen-idecode.c $(MISC_H) $(LF_H) $(TABLE_H) $(FILTER_H) $(LD_DECOD
 
 gen-support.o: gen-support.c $(MISC_H) $(LF_H) $(TABLE_H) $(FILTER_H) $(LD_DECODE_H) $(LD_CACHE_H) $(LD_INSN_H) $(IGEN_H) $(GEN_SEMANTICS_H) $(GEN_SUPPORT_H)
 	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/gen-support.c
-
-dgen.o: dgen.c $(CONFIG_H) $(MISC_H) $(LF_H) $(TABLE_H)
-	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/dgen.c
 
 igen.o: igen.c $(MISC_H) $(LF_H) $(TABLE_H) $(CONFIG_H) $(FILTER_H) $(LD_CACHE_H) $(LD_DECODE_H) $(LD_INSN_H) $(IGEN_H) $(GEN_MODEL_H) $(GEN_ICACHE_H) $(GEN_ITABLE_H) $(GEN_IDECODE_H) $(GEN_SEMANTICS_H) $(GEN_SUPPORT_H)
 	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/igen.c
@@ -782,10 +739,12 @@ hw_vm.o: hw_vm.c $(DEVICE_TABLE_H) $(CPU_H)
 
 
 # real packages
-pk.h: tmp-pk; @true
-tmp-pk: Makefile $(PACKAGE_SRC) $(srcroot)/move-if-change
+$(srcdir)/pk.h: $(MAINT) tmp-pk
+	@true
+tmp-pk: $(srcdir)/Makefile.in $(PACKAGE_SRC) $(srcroot)/move-if-change
 	$(ECHO_GEN)# The first for loop is to remove duplicates.
-	$(SILENCE) f=""; \
+	$(SILENCE) echo "/* Generated file by Makefile.in; do not edit.  */" > tmp-pk.h; \
+	f=""; \
 	for i in $(PACKAGE_SRC) ; do \
 	  case " $$f " in \
 	    *" $$i "*) ;; \
@@ -796,8 +755,8 @@ tmp-pk: Makefile $(PACKAGE_SRC) $(srcroot)/move-if-change
 	| sed -e 's/^.*pk_\(.*\)\.c/\1/' \
 		-e 's/^/extern package_create_instance_callback pk_/' \
 		-e 's/$$/_create_instance;/' \
-		> tmp-pk.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-pk.h pk.h
+		>> tmp-pk.h
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-pk.h $(srcdir)/pk.h
 	$(SILENCE) touch $@
 
 pk_disklabel.o: pk_disklabel.c $(DEVICE_TABLE_H) $(PK_H)
@@ -811,7 +770,7 @@ TAGS: $(BUILT_SRC)
 	etags $(srcdir)/*.h $(srcdir)/*.c $(BUILT_SRC)
 
 clean mostlyclean:
-	rm -f tmp-* *.[oasi] core psim$(EXEEXT) run$(EXEEXT) igen dgen $(BUILT_SRC_WO_CONFIG)
+	rm -f tmp-* *.[oasi] core igen $(BUILT_SRC_WO_CONFIG)
 
 distclean realclean: clean
 	rm -f TAGS Makefile config.cache config.status config.h defines.h stamp-h config.log
@@ -843,18 +802,6 @@ pdf:
 clean-pdf:
 install-pdf:
 
-install: installdirs
-	a=`basename "$$(pwd)"`; \
-	n=`echo run | sed '$(program_transform_name)'`; \
-	[ "$(SIM_PRIMARY_TARGET)" = "$$a" ] || n="$$n-$$a"; \
-	$(INSTALL_PROGRAM) run$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
-
-install-strip: installdirs
-	a=`basename "$$(pwd)"`; \
-	n=`echo run | sed '$(program_transform_name)'`; \
-	[ "$(SIM_PRIMARY_TARGET)" = "$$a" ] || n="$$n-$$a"; \
-	$(INSTALL_PROGRAM) run$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
-	$(STRIP) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
-
+install:
 installdirs:
-	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(bindir)
+uninstall:

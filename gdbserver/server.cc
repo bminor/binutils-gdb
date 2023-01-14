@@ -1,5 +1,5 @@
 /* Main code for remote server for GDB.
-   Copyright (C) 1989-2022 Free Software Foundation, Inc.
+   Copyright (C) 1989-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -2475,7 +2475,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       if (target_supports_agent ())
 	strcat (own_buf, ";QAgent+");
 
-      supported_btrace_packets (own_buf);
+      if (the_target->supports_btrace ())
+	supported_btrace_packets (own_buf);
 
       if (target_supports_stopped_by_sw_breakpoint ())
 	strcat (own_buf, ";swbreak+");
@@ -3412,7 +3413,7 @@ static void
 gdbserver_version (void)
 {
   printf ("GNU gdbserver %s%s\n"
-	  "Copyright (C) 2022 Free Software Foundation, Inc.\n"
+	  "Copyright (C) 2023 Free Software Foundation, Inc.\n"
 	  "gdbserver is free software, covered by the "
 	  "GNU General Public License.\n"
 	  "This gdbserver was configured as \"%s\"\n",

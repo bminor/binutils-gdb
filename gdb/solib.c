@@ -1,6 +1,6 @@
 /* Handle shared libraries for GDB, the GNU Debugger.
 
-   Copyright (C) 1990-2022 Free Software Foundation, Inc.
+   Copyright (C) 1990-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -55,13 +55,9 @@
 #include "cli/cli-style.h"
 #include "solib-target.h"
 
-/* Architecture-specific operations.  */
+/* See solib.h.  */
 
-
-
-/* external data declarations */
-
-/* Local function prototypes */
+bool debug_solib;
 
 /* If non-empty, this is a search path for loading non-absolute shared library
    symbol files.  This takes precedence over the environment variables PATH
@@ -1808,4 +1804,12 @@ PATH and LD_LIBRARY_PATH."),
 				     reload_shared_libraries,
 				     show_solib_search_path,
 				     &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("solib", class_maintenance,
+			   &debug_solib, _("\
+Set solib debugging."), _("\
+Show solib debugging."), _("\
+When true, solib-related debugging output is enabled."),
+			    nullptr, nullptr,
+			    &setdebuglist, &showdebuglist);
 }

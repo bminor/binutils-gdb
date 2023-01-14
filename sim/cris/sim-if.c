@@ -1,5 +1,5 @@
 /* Main simulator entry points specific to the CRIS.
-   Copyright (C) 2004-2022 Free Software Foundation, Inc.
+   Copyright (C) 2004-2023 Free Software Foundation, Inc.
    Contributed by Axis Communications.
 
 This file is part of the GNU simulators.
@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "libiberty.h"
 #include "bfd.h"
-#include "elf-bfd.h"
+#include "bfd/elf-bfd.h"
 
 #include "sim/callback.h"
 #include "sim-main.h"
@@ -485,8 +485,8 @@ aux_ent_entry (struct bfd *ebfd)
 /* Helper for cris_handle_interpreter: like sim_write, but load at
    interp_load_addr offset.  */
 
-static int
-cris_write_interp (SIM_DESC sd, SIM_ADDR mem, const unsigned char *buf, int length)
+static uint64_t
+cris_write_interp (SIM_DESC sd, uint64_t mem, const void *buf, uint64_t length)
 {
   return sim_write (sd, mem + interp_load_addr, buf, length);
 }
@@ -670,7 +670,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
   current_target_byte_order = BFD_ENDIAN_LITTLE;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
+  if (sim_cpu_alloc_all_extra (sd, 0, sizeof (struct cris_sim_cpu))
+      != SIM_RC_OK)
     {
       free_state (sd);
       return 0;
@@ -926,6 +927,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
     for (i = 0; i < MAX_NR_PROCESSORS; ++i)
       {
 	SIM_CPU *cpu = STATE_CPU (sd, i);
+	struct cris_sim_cpu *cris_cpu = CRIS_SIM_CPU (cpu);
+
 	CPU_CPU_DESC (cpu) = cd;
 	CPU_DISASSEMBLER (cpu) = cris_disassemble_insn;
 
@@ -933,23 +936,23 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 	CPU_CRIS_MISC_PROFILE (cpu)->flags = STATE_TRACE_FLAGS (sd)[0];
 
 	/* Set SP to the stack we allocated above.  */
-	(* CPU_REG_STORE (cpu)) (cpu, H_GR_SP, (unsigned char *) sp_init, 4);
+	(* CPU_REG_STORE (cpu)) (cpu, H_GR_SP, (const unsigned char *) sp_init, 4);
 
 	/* Set the simulator environment data.  */
-	cpu->highest_mmapped_page = NULL;
-	cpu->endmem = endmem;
-	cpu->endbrk = endbrk;
-	cpu->stack_low = stack_low;
-	cpu->syscalls = 0;
-	cpu->m1threads = 0;
-	cpu->threadno = 0;
-	cpu->max_threadid = 0;
-	cpu->thread_data = NULL;
-	memset (cpu->sighandler, 0, sizeof (cpu->sighandler));
-	cpu->make_thread_cpu_data = NULL;
-	cpu->thread_cpu_data_size = 0;
+	cris_cpu->highest_mmapped_page = NULL;
+	cris_cpu->endmem = endmem;
+	cris_cpu->endbrk = endbrk;
+	cris_cpu->stack_low = stack_low;
+	cris_cpu->syscalls = 0;
+	cris_cpu->m1threads = 0;
+	cris_cpu->threadno = 0;
+	cris_cpu->max_threadid = 0;
+	cris_cpu->thread_data = NULL;
+	memset (cris_cpu->sighandler, 0, sizeof (cris_cpu->sighandler));
+	cris_cpu->make_thread_cpu_data = NULL;
+	cris_cpu->thread_cpu_data_size = 0;
 #if WITH_HW
-	cpu->deliver_interrupt = NULL;
+	cris_cpu->deliver_interrupt = NULL;
 #endif
       }
 #if WITH_HW
@@ -971,10 +974,10 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 {
   SIM_CPU *current_cpu = STATE_CPU (sd, 0);
   host_callback *cb = STATE_CALLBACK (sd);
-  SIM_ADDR addr;
+  bfd_vma addr;
 
   if (sd != NULL)
-    addr = cris_start_address != (SIM_ADDR) -1
+    addr = cris_start_address != (USI) -1
       ? cris_start_address
       : (interp_start_addr != 0
 	 ? interp_start_addr

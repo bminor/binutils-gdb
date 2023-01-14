@@ -151,9 +151,9 @@ Disassembly of section .text:
  *[a-f0-9]+:	66 f7 00 34 12       	testw  \$0x1234,\(%eax\)
  *[a-f0-9]+:	66 f7 00 78 56       	testw  \$0x5678,\(%eax\)
  *[a-f0-9]+:	c5 fb 2a 00          	vcvtsi2sd \(%eax\),%xmm0,%xmm0
- *[a-f0-9]+:	62 f1 7f 08 2a 00    	vcvtsi2sd \(%eax\),%xmm0,%xmm0
+ *[a-f0-9]+:	62 f1 7f 08 2a 00    	\{evex\} vcvtsi2sd \(%eax\),%xmm0,%xmm0
  *[a-f0-9]+:	c5 fa 2a 00          	vcvtsi2ss \(%eax\),%xmm0,%xmm0
- *[a-f0-9]+:	62 f1 7e 08 2a 00    	vcvtsi2ss \(%eax\),%xmm0,%xmm0
+ *[a-f0-9]+:	62 f1 7e 08 2a 00    	\{evex\} vcvtsi2ss \(%eax\),%xmm0,%xmm0
  *[a-f0-9]+:	62 f1 7f 08 7b 00    	vcvtusi2sd \(%eax\),%xmm0,%xmm0
  *[a-f0-9]+:	62 f1 7e 08 7b 00    	vcvtusi2ss \(%eax\),%xmm0,%xmm0
  *[a-f0-9]+:	66 83 30 01          	xorw   \$0x1,\(%eax\)

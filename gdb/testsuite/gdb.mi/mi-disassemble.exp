@@ -1,4 +1,4 @@
-# Copyright 1999-2022 Free Software Foundation, Inc.
+# Copyright 1999-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -269,7 +269,7 @@ proc test_disassembly_opcode_format {} {
     # then disassemble using the MI command.
     set longest_insn_bytes ""
     set longest_insn_addr ""
-    gdb_test_multiple "disassemble /b main" "" {
+    gdb_test_multiple "disassemble /b main" "" -prompt "$::mi_gdb_prompt$" {
 	-re "^disassemble /b main\r\n" {
 	    exp_continue
 	}

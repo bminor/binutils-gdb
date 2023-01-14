@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Free Software Foundation, Inc.
+# Copyright (C) 2021-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} "debug"] } 
 # Skip all tests if Python scripting is not enabled.
 if { [skip_python_tests] } { continue }
 
-if ![runto_main] then {
+if {![runto_main]} {
     fail "can't run to main"
     return 0
 }
@@ -66,9 +66,10 @@ proc py_remove_all_disassemblers {} {
 #
 # Each different disassembler tests some different feature of the
 # Python disassembler API.
+set nop "(nop|nop\t0)"
 set unknown_error_pattern "unknown disassembler error \\(error = -1\\)"
 set addr_pattern "\r\n=> ${curr_pc_pattern} <\[^>\]+>:\\s+"
-set base_pattern "${addr_pattern}nop"
+set base_pattern "${addr_pattern}${nop}"
 set test_plans \
     [list \
 	 [list "" "${base_pattern}\r\n.*"] \
@@ -87,9 +88,9 @@ set test_plans \
 	 [list "ReadMemoryMemoryErrorDisassembler" "${addr_pattern}Cannot access memory at address ${curr_pc_pattern}"] \
 	 [list "ReadMemoryGdbErrorDisassembler" "${addr_pattern}read_memory raised GdbError\r\n${unknown_error_pattern}"] \
 	 [list "ReadMemoryRuntimeErrorDisassembler" "${addr_pattern}Python Exception <class 'RuntimeError'>: read_memory raised RuntimeError\r\n\r\n${unknown_error_pattern}"] \
-	 [list "ReadMemoryCaughtMemoryErrorDisassembler" "${addr_pattern}nop\r\n.*"] \
-	 [list "ReadMemoryCaughtGdbErrorDisassembler" "${addr_pattern}nop\r\n.*"] \
-	 [list "ReadMemoryCaughtRuntimeErrorDisassembler" "${addr_pattern}nop\r\n.*"] \
+	 [list "ReadMemoryCaughtMemoryErrorDisassembler" "${addr_pattern}${nop}\r\n.*"] \
+	 [list "ReadMemoryCaughtGdbErrorDisassembler" "${addr_pattern}${nop}\r\n.*"] \
+	 [list "ReadMemoryCaughtRuntimeErrorDisassembler" "${addr_pattern}${nop}\r\n.*"] \
 	 [list "MemorySourceNotABufferDisassembler" "${addr_pattern}Python Exception <class 'TypeError'>: Result from read_memory is not a buffer\r\n\r\n${unknown_error_pattern}"] \
 	 [list "MemorySourceBufferTooLongDisassembler" "${addr_pattern}Python Exception <class 'ValueError'>: Buffer returned from read_memory is sized $decimal instead of the expected $decimal\r\n\r\n${unknown_error_pattern}"] \
 	 [list "ResultOfWrongType" "${addr_pattern}Python Exception <class 'TypeError'>: Result is not a DisassemblerResult.\r\n.*"] \

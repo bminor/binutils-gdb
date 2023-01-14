@@ -1,4 +1,4 @@
-# Copyright 1988-2022 Free Software Foundation, Inc.
+# Copyright 1988-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -100,14 +100,14 @@ proc do_test {dir options} {
 
     setup_xfail_on_long_vs_int
     # AIX xlc gets this wrong and unsigned long right.  Go figure.
-    if {!$gcc_compiled} then {setup_xfail "rs6000-*-aix*"}
+    if {!$gcc_compiled} {setup_xfail "rs6000-*-aix*"}
     gdb_test "whatis v_long" \
 	"type = (long|long int)" \
 	"whatis long"
 
     setup_xfail_on_long_vs_int
     # AIX xlc gets this wrong and unsigned long right.  Go figure.
-    if {!$gcc_compiled} then {setup_xfail "rs6000-*-aix*"}
+    if {!$gcc_compiled} {setup_xfail "rs6000-*-aix*"}
     gdb_test "whatis v_signed_long" \
 	"type = (signed |)(long|long int)" \
 	"whatis signed long"
@@ -475,7 +475,7 @@ proc do_test {dir options} {
 	}
 
 	# Sun /bin/cc calls this a function returning double.
-	if {!$gcc_compiled} then {setup_xfail "*-sun-sunos4*"}
+	if {!$gcc_compiled} {setup_xfail "*-sun-sunos4*"}
 	gdb_test "whatis v_float_func" \
 	    "type = float \\($void\\)" \
 	    "whatis float function"

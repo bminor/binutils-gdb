@@ -1,6 +1,6 @@
 /* Support routines for manipulating internal types for GDB.
 
-   Copyright (C) 1992-2022 Free Software Foundation, Inc.
+   Copyright (C) 1992-2023 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -958,7 +958,13 @@ create_range_type (struct type *result_type, struct type *index_type,
 
   if (index_type->code () == TYPE_CODE_FIXED_POINT)
     result_type->set_is_unsigned (index_type->is_unsigned ());
-  /* Note that the signed-ness of a range type can't simply be copied
+  else if (index_type->is_unsigned ())
+    {
+      /* If the underlying type is unsigned, then the range
+	 necessarily is.  */
+      result_type->set_is_unsigned (true);
+    }
+  /* Otherwise, the signed-ness of a range type can't simply be copied
      from the underlying type.  Consider a case where the underlying
      type is 'int', but the range type can hold 0..65535, and where
      the range is further specified to fit into 16 bits.  In this
@@ -966,13 +972,15 @@ create_range_type (struct type *result_type, struct type *index_type,
      range values will cause an unwanted sign extension.  So, we have
      some heuristics here instead.  */
   else if (low_bound->kind () == PROP_CONST && low_bound->const_val () >= 0)
-    result_type->set_is_unsigned (true);
-  /* Ada allows the declaration of range types whose upper bound is
-     less than the lower bound, so checking the lower bound is not
-     enough.  Make sure we do not mark a range type whose upper bound
-     is negative as unsigned.  */
-  if (high_bound->kind () == PROP_CONST && high_bound->const_val () < 0)
-    result_type->set_is_unsigned (false);
+    {
+      result_type->set_is_unsigned (true);
+      /* Ada allows the declaration of range types whose upper bound is
+	 less than the lower bound, so checking the lower bound is not
+	 enough.  Make sure we do not mark a range type whose upper bound
+	 is negative as unsigned.  */
+      if (high_bound->kind () == PROP_CONST && high_bound->const_val () < 0)
+	result_type->set_is_unsigned (false);
+    }
 
   result_type->set_endianity_is_not_default
     (index_type->endianity_is_not_default ());
@@ -1319,6 +1327,7 @@ update_static_array_size (struct type *type)
 	 wrong size when trying to find elements of the outer
 	 array.  */
       if (element_type->code () == TYPE_CODE_ARRAY
+	  && (stride != 0 || element_type->is_multi_dimensional ())
 	  && element_type->length () != 0
 	  && TYPE_FIELD_BITSIZE (element_type, 0) != 0
 	  && get_array_bounds (element_type, &low_bound, &high_bound)
@@ -1720,15 +1729,9 @@ lookup_unsigned_typename (const struct language_defn *language,
 struct type *
 lookup_signed_typename (const struct language_defn *language, const char *name)
 {
-  struct type *t;
-  char *uns = (char *) alloca (strlen (name) + 8);
-
-  strcpy (uns, "signed ");
-  strcpy (uns + 7, name);
-  t = lookup_typename (language, uns, NULL, 1);
-  /* If we don't find "signed FOO" just try again with plain "FOO".  */
-  if (t != NULL)
-    return t;
+  /* In C and C++, "char" and "signed char" are distinct types.  */
+  if (streq (name, "char"))
+    name = "signed char";
   return lookup_typename (language, name, NULL, 0);
 }
 
@@ -4034,8 +4037,8 @@ type_byte_order (const struct type *type)
 bool
 is_nocall_function (const struct type *type)
 {
-  gdb_assert (type->code () == TYPE_CODE_FUNC
-	      || type->code () == TYPE_CODE_METHOD);
+  if (type->code () != TYPE_CODE_FUNC && type->code () != TYPE_CODE_METHOD)
+    return false;
 
   return TYPE_CALLING_CONVENTION (type) == DW_CC_nocall;
 }
@@ -4400,7 +4403,7 @@ check_types_equal (struct type *type1, struct type *type2,
 	      }
 	      break;
 	    default:
-	      internal_error (__FILE__, __LINE__, _("Unsupported field kind "
+	      internal_error (_("Unsupported field kind "
 						    "%d by check_types_equal"),
 			      field1->loc_kind ());
 	    }
@@ -5704,8 +5707,7 @@ copy_type_recursive (struct type *type, htab_t copied_types)
 		(type->field (i).loc_dwarf_block ());
               break;
 	    default:
-	      internal_error (__FILE__, __LINE__,
-			      _("Unexpected type field location kind: %d"),
+	      internal_error (_("Unexpected type field location kind: %d"),
 			      type->field (i).loc_kind ());
 	    }
 	}

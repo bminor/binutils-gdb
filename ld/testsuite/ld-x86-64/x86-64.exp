@@ -1,5 +1,5 @@
 # Expect script for ld-x86_64 tests
-#   Copyright (C) 2002-2022 Free Software Foundation, Inc.
+#   Copyright (C) 2002-2023 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -506,6 +506,11 @@ run_dump_test "dt-relr-1a-x32"
 run_dump_test "dt-relr-1b"
 run_dump_test "dt-relr-1b-x32"
 
+if { ![skip_sframe_tests] } {
+    run_dump_test "sframe-simple-1"
+    run_dump_test "sframe-plt-1"
+}
+
 if ![istarget "x86_64-*-linux*"] {
     return
 }
@@ -723,6 +728,7 @@ run_dump_test "pr27016a"
 run_dump_test "pr27016b"
 run_dump_test "report-reloc-1"
 run_dump_test "report-reloc-1-x32"
+run_dump_test "pr29820"
 
 proc undefined_weak {cflags ldflags} {
     set testname "Undefined weak symbol"
@@ -1996,138 +2002,9 @@ if { [isnative] && [check_compiler_available] } {
 	]
     }
 
-    if { [istarget "x86_64-*-linux*"] \
-	 && ![istarget "x86_64-*-linux*-gnux32"]} {
-
-	run_cc_link_tests [list \
-	    [list \
-		"Build plt-main with -z bndplt" \
-		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -Wl,-z,bndplt \
-		 -Wl,-z,noseparate-code,-z,max-page-size=0x200000" \
-		"-Wa,-mx86-used-note=yes $NOCF_PROTECTION_CFLAGS" \
-		{ plt-main5.c } \
-		{{objdump {-drw} plt-main-bnd.dd}} \
-		"plt-main-bnd" \
-	    ] \
-	    [list \
-		"Build plt-main with PIE and -z bndplt" \
-		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -pie \
-		 -Wl,-z,bndplt,-z,noseparate-code \
-		 -Wl,-z,max-page-size=0x200000" \
-		"-fPIC -Wa,-mx86-used-note=yes $NOCF_PROTECTION_CFLAGS" \
-		{ plt-main5.c } \
-		{{objdump {-drw} plt-main-bnd.dd}} \
-		"plt-main-pie-bnd" \
-	    ] \
-	    [list \
-		"Build plt-main with -z bndplt -z now" \
-		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -Wl,-z,bndplt \
-		 -Wl,-z,now,-z,noseparate-code,-z,max-page-size=0x200000" \
-		"-Wa,-mx86-used-note=yes $NOCF_PROTECTION_CFLAGS" \
-		{ plt-main5.c } \
-		{{readelf {-SW} plt-main-bnd-now.rd} {objdump {-drw} plt-main-bnd.dd}} \
-		"plt-main-bnd-now" \
-	    ] \
-	    [list \
-		"Build plt-main with PIE and -z bndplt -z now" \
-		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -pie \
-		 -Wl,-z,bndplt,-z,now,-z,noseparate-code \
-		 -Wl,-z,max-page-size=0x200000" \
-		"-fPIC -Wa,-mx86-used-note=yes $NOCF_PROTECTION_CFLAGS" \
-		{ plt-main5.c } \
-		{{readelf {-SW} plt-main-bnd-now.rd} {objdump {-drw} plt-main-bnd.dd}} \
-		"plt-main-pie-bnd-now" \
-	    ] \
-	]
-
-	run_ld_link_exec_tests [list \
-	    [list \
-		"Run plt-main with -z bndplt" \
-		"-Wl,--no-as-needed,-z,bndplt tmpdir/plt-main1.o \
-		 tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
-		"-Wa,-mx86-used-note=yes" \
-		{ plt-main5.c } \
-		"plt-main-bnd" \
-		"plt-main.out" \
-	    ] \
-	    [list \
-		"Run plt-main with PIE and -z bndplt" \
-		"-Wl,--no-as-needed,-z,bndplt -pie tmpdir/plt-main1.o \
-		 tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
-		"-Wa,-mx86-used-note=yes" \
-		{ plt-main5.c } \
-		"plt-main-pie-bnd" \
-		"plt-main.out" \
-		"-fPIC" \
-	    ] \
-	    [list \
-		"Run plt-main with -z bndplt -z now" \
-		"-Wl,--no-as-needed,-z,bndplt,-z,now tmpdir/plt-main1.o \
-		 tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
-		"-Wa,-mx86-used-note=yes" \
-		{ plt-main5.c } \
-		"plt-main-bnd-now" \
-		"plt-main.out" \
-	    ] \
-	    [list \
-		"Run plt-main with PIE and -z bndplt -z now" \
-		"-Wl,--no-as-needed,-z,bndplt,-z,now -pie tmpdir/plt-main1.o \
-		 tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
-		"-Wa,-mx86-used-note=yes" \
-		{ plt-main5.c } \
-		"plt-main-pie-bnd-now" \
-		"plt-main.out" \
-		"-fPIC" \
-	    ] \
-	    [list \
-		"Run pr20800" \
-		"-Wl,-z,now -pie" \
-		"-Wa,-mx86-used-note=yes" \
-		{ pr20800a.S pr20800b.S } \
-		"pr20800" \
-		"pass.out" \
-	    ] \
-	]
-	if { [check_ifunc_attribute_available] } {
-	    run_ld_link_exec_tests [list \
-		[list \
-		    "Run pr21481a" \
-		    "$NOPIE_LDFLAGS -Wl,-z,bndplt" \
-		    "-Wa,-mx86-used-note=yes" \
-		    { pr21481a.c pr21481b.S } \
-		    "pr21481a" \
-		    "pass.out" \
-		     "$NOPIE_CFLAGS" \
-		] \
-		[list \
-		    "Run pr21481b" \
-		    "$NOPIE_LDFLAGS -Wl,-z,bndplt,-z,now" \
-		    "-Wa,-mx86-used-note=yes" \
-		    { pr21481a.c pr21481b.S } \
-		    "pr21481b" \
-		    "pass.out" \
-		    "$NOPIE_CFLAGS" \
-		] \
-	    ]
-	}
-    }
-
     if { [istarget "x86_64-*-linux*"] } {
-	if { [istarget "x86_64-*-linux*-gnux32"] } {
-	    set pltdump {{objdump {-drw} plt-main-ibt-x32.dd}}
-	    set pltsecdump {{readelf {-SW} plt-main-ibt-now.rd} {objdump {-drw} plt-main-ibt-x32.dd}}
-	} else {
-	    set pltdump {{objdump {-drw} plt-main-ibt.dd}}
-	    set pltsecdump {{readelf {-SW} plt-main-ibt-now.rd} {objdump {-drw} plt-main-ibt.dd}}
-	}
+	set pltdump {{objdump {-drw} plt-main-ibt.dd}}
+	set pltsecdump {{readelf {-SW} plt-main-ibt-now.rd} {objdump {-drw} plt-main-ibt.dd}}
 	run_cc_link_tests [list \
 	    [list \
 		"Build plt-main with -z ibtplt" \
@@ -2330,14 +2207,8 @@ run_dump_test "pltgot-1"
 run_dump_test "pltgot-2"
 run_dump_test "pr20830a"
 run_dump_test "pr20830b"
-run_dump_test "pr21038a"
-run_dump_test "pr21038b"
-run_dump_test "pr21038c"
 run_dump_test "pr20830a-now"
 run_dump_test "pr20830b-now"
-run_dump_test "pr21038a-now"
-run_dump_test "pr21038b-now"
-run_dump_test "pr21038c-now"
 run_dump_test "ibt-plt-1"
 run_dump_test "ibt-plt-1-x32"
 run_dump_test "ibt-plt-2a"

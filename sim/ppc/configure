@@ -621,7 +621,6 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
-sim_devzero
 sim_termio
 sim_model_issue
 sim_default_model
@@ -634,8 +633,6 @@ sim_bitsize
 sim_igen_smp
 sim_smp
 sim_xor_endian
-sim_pk_obj
-sim_pk_src
 sim_hw_obj
 sim_hw_src
 sim_icache
@@ -649,6 +646,18 @@ sim_line_nr
 EGREP
 GREP
 CPP
+target_os
+target_vendor
+target_cpu
+target
+host_os
+host_vendor
+host_cpu
+host
+build_os
+build_vendor
+build_cpu
+build
 OBJEXT
 EXEEXT
 ac_ct_CC
@@ -707,7 +716,6 @@ enable_sim_duplicate
 enable_sim_filter
 enable_sim_float
 enable_sim_hardware
-enable_sim_hostbitsize
 enable_sim_icache
 enable_sim_jump
 enable_sim_line_nr
@@ -715,7 +723,6 @@ enable_sim_model
 enable_sim_model_issue
 enable_sim_monitor
 enable_sim_opcode
-enable_sim_packages
 enable_sim_smp
 enable_sim_switch
 enable_sim_timebase
@@ -1326,6 +1333,11 @@ Fine tuning of the installation directories:
 _ACEOF
 
   cat <<\_ACEOF
+
+System types:
+  --build=BUILD     configure for building on BUILD [guessed]
+  --host=HOST       cross-compile to build programs to run on HOST [BUILD]
+  --target=TARGET   configure for building compilers for TARGET [HOST]
 _ACEOF
 fi
 
@@ -1344,7 +1356,6 @@ Optional Features:
   --enable-sim-filter=rule		Specify filter rules.
   --enable-sim-float			Specify whether the target has hard, soft, altivec or e500 floating point.
   --enable-sim-hardware=list		Specify the hardware to be included in the build.
-  --enable-sim-hostbitsize=32|64	Specify host bitsize (32 or 64).
   --enable-sim-icache=size		Specify instruction-decode cache size and type.
   --enable-sim-jump		Jump between semantic code (instead of call/return).
   --enable-sim-line-nr=opts		Generate extra CPP code that references source rather than generated code
@@ -1352,7 +1363,6 @@ Optional Features:
   --enable-sim-model-issue		Specify whether to simulate model specific actions
   --enable-sim-monitor=mon		Specify whether to enable monitoring events.
   --enable-sim-opcode=which		Override default opcode lookup.
-  --enable-sim-packages=list		Specify the packages to be included in the build.
   --enable-sim-smp=n			Specify number of processors to configure for.
   --enable-sim-switch			Use a switch instead of a table for instruction call.
   --enable-sim-timebase			Specify whether the PPC timebase is supported.
@@ -2915,6 +2925,118 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
+# Make sure we can run config.sub.
+$SHELL "$ac_aux_dir/config.sub" sun4 >/dev/null 2>&1 ||
+  as_fn_error $? "cannot run $SHELL $ac_aux_dir/config.sub" "$LINENO" 5
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking build system type" >&5
+$as_echo_n "checking build system type... " >&6; }
+if ${ac_cv_build+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_build_alias=$build_alias
+test "x$ac_build_alias" = x &&
+  ac_build_alias=`$SHELL "$ac_aux_dir/config.guess"`
+test "x$ac_build_alias" = x &&
+  as_fn_error $? "cannot guess build type; you must specify one" "$LINENO" 5
+ac_cv_build=`$SHELL "$ac_aux_dir/config.sub" $ac_build_alias` ||
+  as_fn_error $? "$SHELL $ac_aux_dir/config.sub $ac_build_alias failed" "$LINENO" 5
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_build" >&5
+$as_echo "$ac_cv_build" >&6; }
+case $ac_cv_build in
+*-*-*) ;;
+*) as_fn_error $? "invalid value of canonical build" "$LINENO" 5;;
+esac
+build=$ac_cv_build
+ac_save_IFS=$IFS; IFS='-'
+set x $ac_cv_build
+shift
+build_cpu=$1
+build_vendor=$2
+shift; shift
+# Remember, the first character of IFS is used to create $*,
+# except with old shells:
+build_os=$*
+IFS=$ac_save_IFS
+case $build_os in *\ *) build_os=`echo "$build_os" | sed 's/ /-/g'`;; esac
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking host system type" >&5
+$as_echo_n "checking host system type... " >&6; }
+if ${ac_cv_host+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test "x$host_alias" = x; then
+  ac_cv_host=$ac_cv_build
+else
+  ac_cv_host=`$SHELL "$ac_aux_dir/config.sub" $host_alias` ||
+    as_fn_error $? "$SHELL $ac_aux_dir/config.sub $host_alias failed" "$LINENO" 5
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_host" >&5
+$as_echo "$ac_cv_host" >&6; }
+case $ac_cv_host in
+*-*-*) ;;
+*) as_fn_error $? "invalid value of canonical host" "$LINENO" 5;;
+esac
+host=$ac_cv_host
+ac_save_IFS=$IFS; IFS='-'
+set x $ac_cv_host
+shift
+host_cpu=$1
+host_vendor=$2
+shift; shift
+# Remember, the first character of IFS is used to create $*,
+# except with old shells:
+host_os=$*
+IFS=$ac_save_IFS
+case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking target system type" >&5
+$as_echo_n "checking target system type... " >&6; }
+if ${ac_cv_target+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test "x$target_alias" = x; then
+  ac_cv_target=$ac_cv_host
+else
+  ac_cv_target=`$SHELL "$ac_aux_dir/config.sub" $target_alias` ||
+    as_fn_error $? "$SHELL $ac_aux_dir/config.sub $target_alias failed" "$LINENO" 5
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_target" >&5
+$as_echo "$ac_cv_target" >&6; }
+case $ac_cv_target in
+*-*-*) ;;
+*) as_fn_error $? "invalid value of canonical target" "$LINENO" 5;;
+esac
+target=$ac_cv_target
+ac_save_IFS=$IFS; IFS='-'
+set x $ac_cv_target
+shift
+target_cpu=$1
+target_vendor=$2
+shift; shift
+# Remember, the first character of IFS is used to create $*,
+# except with old shells:
+target_os=$*
+IFS=$ac_save_IFS
+case $target_os in *\ *) target_os=`echo "$target_os" | sed 's/ /-/g'`;; esac
+
+
+# The aliases save the names the user supplied, while $host etc.
+# will get canonicalized.
+test -n "$target_alias" &&
+  test "$program_prefix$program_suffix$program_transform_name" = \
+    NONENONEs,x,x, &&
+  program_prefix=${target_alias}-
+
+
 # Check whether --enable-sim-bitsize was given.
 if test "${enable_sim_bitsize+set}" = set; then :
   enableval=$enable_sim_bitsize; case "${enableval}" in
@@ -3221,19 +3343,6 @@ if test x"$silent" != x"yes"; then
 fi
 fi
 
-# Check whether --enable-sim-hostbitsize was given.
-if test "${enable_sim_hostbitsize+set}" = set; then :
-  enableval=$enable_sim_hostbitsize; case "${enableval}" in
-  32|64) sim_hostbitsize="-DWITH_HOST_WORD_BITSIZE=$enableval";;
-  *)	 as_fn_error $? "\"--enable-sim-hostbitsize was given $enableval.  Expected 32 or 64\"" "$LINENO" 5; sim_hostbitsize="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_hostbitsize" != x""; then
-  echo "Setting hostbitsize flags = $sim_hostbitsize" 6>&1
-fi
-else
-  sim_hostbitsize=""
-fi
-
 
 # Check whether --enable-sim-icache was given.
 if test "${enable_sim_icache+set}" = set; then :
@@ -3368,31 +3477,6 @@ fi
 fi
 
 
-# Check whether --enable-sim-packages was given.
-if test "${enable_sim_packages+set}" = set; then :
-  enableval=$enable_sim_packages; packages=disklabel
-case "${enableval}" in
-  yes)	;;
-  no)	as_fn_error $? "\"List of packages must be specified for --enable-sim-packages\"" "$LINENO" 5; packages="";;
-  ,*)   packages="${packages}${enableval}";;
-  *,)   packages="${enableval}${packages}";;
-  *)	packages="${enableval}"'';;
-esac
-sim_pk_src=`echo $packages | sed -e 's/,/.c pk_/g' -e 's/^/pk_/' -e 's/$/.c/'`
-sim_pk_obj=`echo $sim_pk_src | sed -e 's/\.c/.o/g'`
-if test x"$silent" != x"yes" && test x"$packages" != x""; then
-  echo "Setting packages to $sim_pk_src, $sim_pk_obj"
-fi
-else
-  packages=disklabel
-sim_pk_src=`echo $packages | sed -e 's/,/.c pk_/g' -e 's/^/pk_/' -e 's/$/.c/'`
-sim_pk_obj=`echo $sim_pk_src | sed -e 's/\.c/.o/g'`
-if test x"$silent" != x"yes"; then
-  echo "Setting packages to $sim_pk_src, $sim_pk_obj"
-fi
-fi
-
-
 # Check whether --enable-sim-smp was given.
 if test "${enable_sim_smp+set}" = set; then :
   enableval=$enable_sim_smp; case "${enableval}" in
@@ -3414,7 +3498,7 @@ fi
 # Check whether --enable-sim-switch was given.
 if test "${enable_sim_switch+set}" = set; then :
   enableval=$enable_sim_switch; case "${enableval}" in
-  yes)	sim_switch="-s";;
+  yes)	sim_switch="-DWITH_SPREG_SWITCH_TABLE";;
   no)	sim_switch="";;
   *)	as_fn_error $? "\"--enable-sim-switch does not take a value\"" "$LINENO" 5; sim_switch="";;
 esac
@@ -3458,14 +3542,6 @@ else
   sim_xor_endian=""
 fi
 
-
-case ${host} in
-  *mingw32*)
-
-$as_echo "#define USE_WIN32API 1" >>confdefs.h
-
-    ;;
-esac
 
 ac_config_headers="$ac_config_headers config.h:config.in"
 
@@ -4072,53 +4148,6 @@ _ACEOF
 fi
 
 
-sim_devzero=""
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for /dev/zero" >&5
-$as_echo_n "checking for /dev/zero... " >&6; }
-if ${ac_cv_devzero+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test "$cross_compiling" = yes; then :
-  ac_cv_devzero=no
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <fcntl.h>
-main () {
-  char buf[2048];
-  int i;
-  int fd = open ("/dev/zero", O_RDONLY);
-  if (fd < 0)
-    return 1;
-  for (i = 0; i < sizeof (buf); i++)
-    buf[i] = 1;
-  if (read (fd, buf, sizeof (buf)) != sizeof (buf))
-    return 1;
-  for (i = 0; i < sizeof (buf); i++)
-    if (buf[i])
-      return 1;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-  ac_cv_devzero=yes
-else
-  ac_cv_devzero=no
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-fi
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_devzero" >&5
-$as_echo "$ac_cv_devzero" >&6; }
-if test $ac_cv_devzero = yes; then
-  sim_devzero="-DHAVE_DEVZERO"
-else
-  sim_devzero=""
-fi
-
 # Since we run commands on the build system, we have to create a
 # separate config header for the build system if build != host.
 if test x$host = x$build; then
@@ -4150,9 +4179,6 @@ else
   cd ..
   rm -rf $tempdir
 fi
-
-
-
 
 
 

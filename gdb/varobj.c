@@ -1,6 +1,6 @@
 /* Implementation of the GDB variable objects API.
 
-   Copyright (C) 1999-2022 Free Software Foundation, Inc.
+   Copyright (C) 1999-2023 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -2144,7 +2144,7 @@ varobj_formatted_print_options (struct value_print_options *opts,
 				enum varobj_display_formats format)
 {
   get_formatted_print_options (opts, format_code[(int) format]);
-  opts->deref_ref = 0;
+  opts->deref_ref = false;
   opts->raw = !pretty_printing;
 }
 
@@ -2412,8 +2412,7 @@ varobj_invalidate_if_uses_objfile (struct objfile *objfile)
 	    }
 	}
 
-      if (var->root->exp != nullptr
-	  && exp_uses_objfile (var->root->exp.get (), objfile))
+      if (var->root->exp != nullptr && var->root->exp->uses_objfile (objfile))
 	{
 	  /* The varobj's current expression references the objfile.  For
 	     globals and floating, it is possible that when we try to

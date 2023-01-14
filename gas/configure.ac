@@ -3,7 +3,7 @@ dnl
 dnl And be careful when changing it!  If you must add tests with square
 dnl brackets, be sure changequote invocations surround it.
 dnl
-dnl   Copyright (C) 2012-2022 Free Software Foundation, Inc.
+dnl   Copyright (C) 2012-2023 Free Software Foundation, Inc.
 dnl
 dnl This file is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -246,8 +246,7 @@ for this_target in $target $canon_targets ; do
     generic_target=${cpu_type}-${target_vendor}-${target_os}
     case ${generic_target} in
       i386-*-msdosdjgpp* \
-      | i386-*-go32* \
-      | i386-go32-rtems*)
+      | i386-*-go32*)
 	AC_DEFINE(STRICTCOFF, 1, [Using strict COFF?])
 	;;
 
@@ -420,7 +419,7 @@ changequote([,])dnl
 
     # Do we need the opcodes library?
     case ${cpu_type} in
-      vax | tic30)
+      vax | tic30 | i386 | arm)
 	;;
 
       *)

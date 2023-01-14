@@ -1,6 +1,6 @@
 /* YACC parser for C++ names, for GDB.
 
-   Copyright (C) 2003-2022 Free Software Foundation, Inc.
+   Copyright (C) 2003-2023 Free Software Foundation, Inc.
 
    Parts of the lexer are based on c-exp.y from GDB.
 
@@ -346,7 +346,12 @@ static void yyerror (cpname_state *, const char *);
 %%
 
 result		:	start
-			{ state->global_result = $1; }
+			{
+			  state->global_result = $1;
+
+			  /* Avoid warning about "yynerrs" being unused.  */
+			  (void) yynerrs;
+			}
 		;
 
 start		:	type

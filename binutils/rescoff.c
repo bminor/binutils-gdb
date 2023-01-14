@@ -1,5 +1,5 @@
 /* rescoff.c -- read and write resources in Windows COFF files.
-   Copyright (C) 1997-2022 Free Software Foundation, Inc.
+   Copyright (C) 1997-2023 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
    Rewritten by Kai Tietz, Onevision.
 
@@ -463,6 +463,9 @@ write_coff_file (const char *filename, const char *target,
 #elif defined DLLTOOL_ARM
   if (! bfd_set_arch_mach (abfd, bfd_arch_arm, 0))
     bfd_fatal ("bfd_set_arch_mach(arm)");
+#elif defined DLLTOOL_AARCH64
+  if (! bfd_set_arch_mach (abfd, bfd_arch_aarch64, 0))
+    bfd_fatal ("bfd_set_arch_mach(aarch64)");
 #else
   /* FIXME: This is obviously i386 specific.  */
   if (! bfd_set_arch_mach (abfd, bfd_arch_i386, 0))

@@ -1,5 +1,5 @@
 /* BFD back-end for PDP-11 a.out binaries.
-   Copyright (C) 2001-2022 Free Software Foundation, Inc.
+   Copyright (C) 2001-2023 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -280,9 +280,9 @@ static bool separate_i_d = false;
 reloc_howto_type howto_table_pdp11[] =
 {
   /* type	       rs size bsz  pcrel bitpos ovrf			  sf name     part_inpl readmask  setmask    pcdone */
-HOWTO( 0,	       0,  2,  16,  false, 0, complain_overflow_signed,0,"16",	true, 0x0000ffff,0x0000ffff, false),
-HOWTO( 1,	       0,  2,  16,  true,  0, complain_overflow_signed,0,"DISP16",	true, 0x0000ffff,0x0000ffff, false),
-HOWTO( 2,	       0,  4,  32,  false, 0, complain_overflow_signed,0,"32",	true, 0x0000ffff,0x0000ffff, false),
+HOWTO( 0,	       0,  2,  16,  false, 0, complain_overflow_dont,0,"16",	true, 0x0000ffff,0x0000ffff, false),
+HOWTO( 1,	       0,  2,  16,  true,  0, complain_overflow_dont,0,"DISP16",	true, 0x0000ffff,0x0000ffff, false),
+HOWTO( 2,	       0,  4,  32,  false, 0, complain_overflow_dont,0,"32",	true, 0x0000ffff,0x0000ffff, false),
 };
 
 #define TABLE_SIZE(TABLE)	(sizeof(TABLE)/sizeof(TABLE[0]))
@@ -1861,8 +1861,10 @@ pdp11_aout_swap_reloc_out (bfd *abfd, arelent *g, bfd_byte *natptr)
   if (r_extern)								\
     {									\
       /* Undefined symbol.  */						\
-      if (r_index < bfd_get_symcount (abfd))				\
+      if (symbols != NULL && r_index < bfd_get_symcount (abfd))		\
 	cache_ptr->sym_ptr_ptr = symbols + r_index;			\
+      else								\
+	cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;	\
       cache_ptr->addend = ad;						\
     }									\
   else									\
@@ -2125,13 +2127,7 @@ NAME (aout, canonicalize_reloc) (bfd *abfd,
 long
 NAME (aout, get_reloc_upper_bound) (bfd *abfd, sec_ptr asect)
 {
-  bfd_size_type count;
-
-  if (bfd_get_format (abfd) != bfd_object)
-    {
-      bfd_set_error (bfd_error_invalid_operation);
-      return -1;
-    }
+  size_t count, raw;
 
   if (asect->flags & SEC_CONSTRUCTOR)
     count = asect->reloc_count;
@@ -2147,10 +2143,20 @@ NAME (aout, get_reloc_upper_bound) (bfd *abfd, sec_ptr asect)
       return -1;
     }
 
-  if (count >= LONG_MAX / sizeof (arelent *))
+  if (count >= LONG_MAX / sizeof (arelent *)
+      || _bfd_mul_overflow (count, obj_reloc_entry_size (abfd), &raw))
     {
       bfd_set_error (bfd_error_file_too_big);
       return -1;
+    }
+  if (!bfd_write_p (abfd))
+    {
+      ufile_ptr filesize = bfd_get_file_size (abfd);
+      if (filesize != 0 && raw > filesize)
+	{
+	  bfd_set_error (bfd_error_file_truncated);
+	  return -1;
+	}
     }
   return (count + 1) * sizeof (arelent *);
 }

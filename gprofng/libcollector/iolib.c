@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Free Software Foundation, Inc.
+/* Copyright (C) 2021-2023 Free Software Foundation, Inc.
    Contributed by Oracle.
 
    This file is part of GNU Binutils.
@@ -148,7 +148,7 @@ __collector_create_handle (char *descp)
     init ();
 
   /* set up header for file, file name, etc. */
-  if (__collector_exp_dir_name == NULL)
+  if (*__collector_exp_dir_name == 0)
     {
       __collector_log_write ("<event kind=\"%s\" id=\"%d\">__collector_exp_dir_name==NULL</event>\n",
 			     SP_JCMD_CERROR, COL_ERROR_EXPOPEN);

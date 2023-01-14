@@ -3,7 +3,7 @@
 
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998-2022 Free Software Foundation, Inc.
+   Copyright (C) 1998-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -331,8 +331,8 @@ typedef CORE_ADDR (gdbarch_push_dummy_call_ftype) (struct gdbarch *gdbarch, stru
 extern CORE_ADDR gdbarch_push_dummy_call (struct gdbarch *gdbarch, struct value *function, struct regcache *regcache, CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp, function_call_return_method return_method, CORE_ADDR struct_addr);
 extern void set_gdbarch_push_dummy_call (struct gdbarch *gdbarch, gdbarch_push_dummy_call_ftype *push_dummy_call);
 
-extern int gdbarch_call_dummy_location (struct gdbarch *gdbarch);
-extern void set_gdbarch_call_dummy_location (struct gdbarch *gdbarch, int call_dummy_location);
+extern enum call_dummy_location_type gdbarch_call_dummy_location (struct gdbarch *gdbarch);
+extern void set_gdbarch_call_dummy_location (struct gdbarch *gdbarch, enum call_dummy_location_type call_dummy_location);
 
 extern bool gdbarch_push_dummy_code_p (struct gdbarch *gdbarch);
 
@@ -433,13 +433,40 @@ extern void set_gdbarch_integer_to_address (struct gdbarch *gdbarch, gdbarch_int
    If WRITEBUF is not NULL, it contains a return value which will be
    stored into the appropriate register.  This can be used when we want
    to force the value returned by a function (see the "return" command
-   for instance). */
+   for instance).
 
-extern bool gdbarch_return_value_p (struct gdbarch *gdbarch);
+   NOTE: it is better to implement return_value_as_value instead, as that
+   method can properly handle variably-sized types. */
 
 typedef enum return_value_convention (gdbarch_return_value_ftype) (struct gdbarch *gdbarch, struct value *function, struct type *valtype, struct regcache *regcache, gdb_byte *readbuf, const gdb_byte *writebuf);
-extern enum return_value_convention gdbarch_return_value (struct gdbarch *gdbarch, struct value *function, struct type *valtype, struct regcache *regcache, gdb_byte *readbuf, const gdb_byte *writebuf);
 extern void set_gdbarch_return_value (struct gdbarch *gdbarch, gdbarch_return_value_ftype *return_value);
+
+/* Return the return-value convention that will be used by FUNCTION
+   to return a value of type VALTYPE.  FUNCTION may be NULL in which
+   case the return convention is computed based only on VALTYPE.
+
+   If READ_VALUE is not NULL, extract the return value and save it in
+   this pointer.
+
+   If WRITEBUF is not NULL, it contains a return value which will be
+   stored into the appropriate register.  This can be used when we want
+   to force the value returned by a function (see the "return" command
+   for instance). */
+
+typedef enum return_value_convention (gdbarch_return_value_as_value_ftype) (struct gdbarch *gdbarch, struct value *function, struct type *valtype, struct regcache *regcache, struct value **read_value, const gdb_byte *writebuf);
+extern enum return_value_convention gdbarch_return_value_as_value (struct gdbarch *gdbarch, struct value *function, struct type *valtype, struct regcache *regcache, struct value **read_value, const gdb_byte *writebuf);
+extern void set_gdbarch_return_value_as_value (struct gdbarch *gdbarch, gdbarch_return_value_as_value_ftype *return_value_as_value);
+
+/* Return the address at which the value being returned from
+   the current function will be stored.  This routine is only
+   called if the current function uses the the "struct return
+   convention".
+
+   May return 0 when unable to determine that address. */
+
+typedef CORE_ADDR (gdbarch_get_return_buf_addr_ftype) (struct type *val_type, frame_info_ptr cur_frame);
+extern CORE_ADDR gdbarch_get_return_buf_addr (struct gdbarch *gdbarch, struct type *val_type, frame_info_ptr cur_frame);
+extern void set_gdbarch_get_return_buf_addr (struct gdbarch *gdbarch, gdbarch_get_return_buf_addr_ftype *get_return_buf_addr);
 
 /* Return true if the return value of function is stored in the first hidden
    parameter.  In theory, this feature should be language-dependent, specified
@@ -615,13 +642,20 @@ typedef CORE_ADDR (gdbarch_addr_bits_remove_ftype) (struct gdbarch *gdbarch, COR
 extern CORE_ADDR gdbarch_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern void set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch, gdbarch_addr_bits_remove_ftype *addr_bits_remove);
 
-/* On some machines, not all bits of an address word are significant.
-   For example, on AArch64, the top bits of an address known as the "tag"
-   are ignored by the kernel, the hardware, etc. and can be regarded as
-   additional data associated with the address. */
+/* On some architectures, not all bits of a pointer are significant.
+   On AArch64, for example, the top bits of a pointer may carry a "tag", which
+   can be ignored by the kernel and the hardware.  The "tag" can be regarded as
+   additional data associated with the pointer, but it is not part of the address.
 
-extern int gdbarch_significant_addr_bit (struct gdbarch *gdbarch);
-extern void set_gdbarch_significant_addr_bit (struct gdbarch *gdbarch, int significant_addr_bit);
+   Given a pointer for the architecture, this hook removes all the
+   non-significant bits and sign-extends things as needed.  It gets used to remove
+   non-address bits from data pointers (for example, removing the AArch64 MTE tag
+   bits from a pointer) and from code pointers (removing the AArch64 PAC signature
+   from a pointer containing the return address). */
+
+typedef CORE_ADDR (gdbarch_remove_non_address_bits_ftype) (struct gdbarch *gdbarch, CORE_ADDR pointer);
+extern CORE_ADDR gdbarch_remove_non_address_bits (struct gdbarch *gdbarch, CORE_ADDR pointer);
+extern void set_gdbarch_remove_non_address_bits (struct gdbarch *gdbarch, gdbarch_remove_non_address_bits_ftype *remove_non_address_bits);
 
 /* Return a string representation of the memory tag TAG. */
 

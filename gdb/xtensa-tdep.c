@@ -1,6 +1,6 @@
 /* Target-dependent code for the Xtensa port of GDB, the GNU debugger.
 
-   Copyright (C) 2003-2022 Free Software Foundation, Inc.
+   Copyright (C) 2003-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -322,7 +322,7 @@ xtensa_register_type (struct gdbarch *gdbarch, int regnum)
       return reg->ctype;
     }
 
-  internal_error (__FILE__, __LINE__, _("invalid register number %d"), regnum);
+  internal_error (_("invalid register number %d"), regnum);
   return 0;
 }
 
@@ -615,8 +615,7 @@ xtensa_pseudo_register_read (struct gdbarch *gdbarch,
       return regcache->raw_read (regnum, buffer);
     }
   else
-    internal_error (__FILE__, __LINE__,
-		    _("invalid register number %d"), regnum);
+    internal_error (_("invalid register number %d"), regnum);
 }
 
 
@@ -704,8 +703,7 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
       regcache->raw_write (regnum, buffer);
     }
   else
-    internal_error (__FILE__, __LINE__,
-		    _("invalid register number %d"), regnum);
+    internal_error (_("invalid register number %d"), regnum);
 }
 
 static const reggroup *xtensa_ar_reggroup;
@@ -1551,8 +1549,7 @@ xtensa_extract_return_value (struct type *type,
 
       /* On Xtensa, we can return up to 4 words (or 2 for call12).  */
       if (len > (callsize > 8 ? 8 : 16))
-	internal_error (__FILE__, __LINE__,
-			_("cannot extract return value of %d bytes long"),
+	internal_error (_("cannot extract return value of %d bytes long"),
 			len);
 
       /* Get the register offset of the return
@@ -1607,8 +1604,7 @@ xtensa_store_return_value (struct type *type,
       callsize = extract_call_winsize (gdbarch, pc);
 
       if (len > (callsize > 8 ? 8 : 16))
-	internal_error (__FILE__, __LINE__,
-			_("unimplemented for this length: %s"),
+	internal_error (_("unimplemented for this length: %s"),
 			pulongest (type->length ()));
       areg = arreg_number (gdbarch,
 			   tdep->a0_base + 2 + callsize, wb);
@@ -3067,8 +3063,7 @@ xtensa_verify_config (struct gdbarch *gdbarch)
     log.printf (_("\n\ta0_base: No Ax registers"));
 
   if (!log.empty ())
-    internal_error (__FILE__, __LINE__,
-		    _("the following are invalid: %s"), log.c_str ());
+    internal_error (_("the following are invalid: %s"), log.c_str ());
 }
 
 
@@ -3150,13 +3145,11 @@ xtensa_derive_tdep (xtensa_gdbarch_tdep *tdep)
 
 /* Module "constructor" function.  */
 
-extern xtensa_gdbarch_tdep xtensa_tdep;
+extern xtensa_register_t xtensa_rmap[];
 
 static struct gdbarch *
 xtensa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
-
   DEBUGTRACE ("gdbarch_init()\n");
 
   if (!xtensa_default_isa)
@@ -3165,8 +3158,10 @@ xtensa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* We have to set the byte order before we call gdbarch_alloc.  */
   info.byte_order = XCHAL_HAVE_BE ? BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE;
 
-  xtensa_gdbarch_tdep *tdep = &xtensa_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info,
+		     gdbarch_tdep_up (new xtensa_gdbarch_tdep (xtensa_rmap)));
+  xtensa_gdbarch_tdep *tdep = gdbarch_tdep<xtensa_gdbarch_tdep> (gdbarch);
   xtensa_derive_tdep (tdep);
 
   /* Verify our configuration.  */

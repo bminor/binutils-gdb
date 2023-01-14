@@ -1,5 +1,5 @@
 /* Generic ECOFF (Extended-COFF) routines.
-   Copyright (C) 1990-2022 Free Software Foundation, Inc.
+   Copyright (C) 1990-2023 Free Software Foundation, Inc.
    Original version by Per Bothner.
    Full support added by Ian Lance Taylor, ian@cygnus.com.
 
@@ -107,6 +107,21 @@ _bfd_ecoff_mkobject_hook (bfd *abfd, void * filehdr, void * aouthdr)
      information is written out.  */
 
   return (void *) ecoff;
+}
+
+bool
+_bfd_ecoff_close_and_cleanup (bfd *abfd)
+{
+  struct ecoff_tdata *tdata = ecoff_data (abfd);
+
+  if (tdata != NULL && bfd_get_format (abfd) == bfd_object)
+    while (tdata->mips_refhi_list != NULL)
+      {
+	struct mips_hi *ref = tdata->mips_refhi_list;
+	tdata->mips_refhi_list = ref->next;
+	free (ref);
+      }
+  return _bfd_generic_close_and_cleanup (abfd);
 }
 
 /* Initialize a new section.  */
@@ -1612,7 +1627,8 @@ ecoff_slurp_reloc_table (bfd *abfd,
       if (intern.r_extern)
 	{
 	  /* r_symndx is an index into the external symbols.  */
-	  if (intern.r_symndx >= 0
+	  if (symbols != NULL
+	      && intern.r_symndx >= 0
 	      && (intern.r_symndx
 		  < (ecoff_data (abfd)->debug_info.symbolic_header.iextMax)))
 	    rptr->sym_ptr_ptr = symbols + intern.r_symndx;

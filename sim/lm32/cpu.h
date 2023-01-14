@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2022 Free Software Foundation, Inc.
+Copyright 1996-2023 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -54,7 +54,7 @@ typedef struct {
 #define GET_H_CSR(a1) CPU (h_csr)[a1]
 #define SET_H_CSR(a1, x) (CPU (h_csr)[a1] = (x))
   } hardware;
-#define CPU_CGEN_HW(cpu) (& (cpu)->cpu_data.hardware)
+#define CPU_CGEN_HW(cpu) (& LM32_SIM_CPU (cpu)->cpu_data.hardware)
 } LM32BF_CPU_DATA;
 
 /* Cover fns for register access.  */
@@ -162,6 +162,17 @@ struct argbuf {
 struct scache {
   struct argbuf argbuf;
 };
+
+/* From traps.c.  */
+extern USI lm32bf_b_insn (SIM_CPU * current_cpu, USI r0, USI f_r0);
+extern USI lm32bf_divu_insn (SIM_CPU * current_cpu, IADDR pc, USI r0, USI r1, USI r2);
+extern USI lm32bf_modu_insn (SIM_CPU * current_cpu, IADDR pc, USI r0, USI r1, USI r2);
+extern void lm32bf_wcsr_insn (SIM_CPU * current_cpu, USI f_csr, USI r1);
+extern USI lm32bf_break_insn (SIM_CPU * current_cpu, IADDR pc);
+extern USI lm32bf_scall_insn (SIM_CPU * current_cpu, IADDR pc);
+
+/* From user.c.  */
+extern UINT lm32bf_user_insn (SIM_CPU * current_cpu, INT r0, INT r1, UINT imm);
 
 /* Macros to simplify extraction, reading and semantic code.
    These define and assign the local vars that contain the insn's fields.  */

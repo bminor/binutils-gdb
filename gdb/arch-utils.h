@@ -1,6 +1,6 @@
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998-2022 Free Software Foundation, Inc.
+   Copyright (C) 1998-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -131,6 +131,10 @@ extern gdbarch_virtual_frame_pointer_ftype legacy_virtual_frame_pointer;
 extern const struct floatformat **
   default_floatformat_for_type (struct gdbarch *gdbarch,
 				const char *name, int len);
+
+/* Default implementation of gdbarch_remove_non_address_bits.  */
+CORE_ADDR default_remove_non_address_bits (struct gdbarch *gdbarch,
+					   CORE_ADDR pointer);
 
 /* Default implementation of gdbarch_memtag_to_string.  */
 extern std::string default_memtag_to_string (struct gdbarch *gdbarch,
@@ -300,4 +304,14 @@ extern void default_read_core_file_mappings
    struct bfd *cbfd,
    read_core_file_mappings_pre_loop_ftype pre_loop_cb,
    read_core_file_mappings_loop_ftype loop_cb);
+
+/* Default implementation of gdbarch default_get_return_buf_addr method.  */
+extern CORE_ADDR default_get_return_buf_addr (struct type *val_typegdbarch,
+					      frame_info_ptr cur_frame);
+
+extern enum return_value_convention default_gdbarch_return_value
+     (struct gdbarch *gdbarch, struct value *function, struct type *valtype,
+      struct regcache *regcache, struct value **read_value,
+      const gdb_byte *writebuf);
+
 #endif /* ARCH_UTILS_H */

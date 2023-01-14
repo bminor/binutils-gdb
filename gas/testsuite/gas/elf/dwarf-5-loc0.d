@@ -7,10 +7,10 @@
 
 Contents of the \.debug_line section:
 
-CU: \./foo\.c:
+CU: .*/gas/testsuite/foo\.c:
 File name +Line number +Starting address +View +Stmt
 
-\./foo.c:\[\+\+\]
+.*/gas/testsuite/foo.c:
 foo\.c +1 +0x8 +x
 foo\.c +2 +0x10 +x
 foo\.c +- +0x10

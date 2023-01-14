@@ -1,5 +1,5 @@
 /* gencode.c -- Motorola 68HC11 & 68HC12 Emulator Generator
-   Copyright 1999-2022 Free Software Foundation, Inc.
+   Copyright 1999-2023 Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@nerim.fr)
 
 This file is part of GDB, GAS, and the GNU binutils.
@@ -2048,7 +2048,7 @@ gen_interpreter (FILE *fp)
 
   /* Generate header of interpretor.  */
   print (fp, col, "/* File generated automatically by gencode. */\n");
-  print (fp, col, "#include \"sim-main.h\"\n\n");
+  print (fp, col, "#include \"m68hc11-sim.h\"\n\n");
 
   if (cpu_type & cpu6811)
     {

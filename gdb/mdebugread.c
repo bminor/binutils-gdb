@@ -1,6 +1,6 @@
 /* Read a symbol table in ECOFF format (Third-Eye).
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    Original version contributed by Alessandro Forin (af@cs.cmu.edu) at
    CMU.  Major work by Per Bothner, John Gilmore and Ian Lance Taylor
@@ -4623,7 +4623,7 @@ new_symtab (const char *name, int maxlines, struct objfile *objfile)
   symtab = allocate_symtab (cust, name);
 
   symtab->set_linetable (new_linetable (maxlines));
-  lang = compunit_language (cust);
+  lang = cust->language ();
 
   /* All symtabs must have at least two blocks.  */
   bv = new_bvect (2);

@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2022 Free Software Foundation, Inc.
+Copyright 1996-2023 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -158,7 +158,7 @@ frvbf_h_spr_set_handler (current_cpu, (index), (x));\
 #define GET_H_CCCR(a1) CPU (h_cccr)[a1]
 #define SET_H_CCCR(a1, x) (CPU (h_cccr)[a1] = (x))
   } hardware;
-#define CPU_CGEN_HW(cpu) (& (cpu)->cpu_data.hardware)
+#define CPU_CGEN_HW(cpu) (& FRV_SIM_CPU (cpu)->cpu_data.hardware)
 } FRVBF_CPU_DATA;
 
 /* Virtual regs.  */

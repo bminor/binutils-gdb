@@ -1,5 +1,5 @@
 /* Data structures associated with breakpoints in GDB.
-   Copyright (C) 1992-2022 Free Software Foundation, Inc.
+   Copyright (C) 1992-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -664,7 +664,8 @@ struct breakpoint
 			      const target_waitstatus &ws);
 
   /* Check internal conditions of the breakpoint referred to by BS.
-     If we should not stop for this breakpoint, set BS->stop to 0.  */
+     If we should not stop for this breakpoint, set BS->stop to
+     false.  */
   virtual void check_status (struct bpstat *bs)
   {
     /* Always stop.  */
@@ -897,6 +898,10 @@ protected:
        (location_spec *locspec,
 	struct program_space *search_pspace,
 	int *found);
+
+  /* Helper for breakpoint and tracepoint breakpoint->mention
+     callbacks.  */
+  void say_where () const;
 };
 
 /* An instance of this type is used to represent a watchpoint,
@@ -1241,6 +1246,20 @@ extern enum print_stop_action bpstat_print (bpstat *bs, target_waitkind kind);
    Return 1 otherwise.  */
 extern int bpstat_num (bpstat **, int *);
 
+/* If BS indicates a breakpoint and this breakpoint has several code locations,
+   return the location number of BS, otherwise return 0.  */
+
+extern int bpstat_locno (const bpstat *bs);
+
+/* Print BS breakpoint number optionally followed by a . and breakpoint locno.
+
+   For a breakpoint with only one code location, outputs the signed field
+   "bkptno" breakpoint number of BS (as returned by bpstat_num).
+   If BS has several code locations, outputs a '.' character followed by
+   the signed field "locno" (as returned by bpstat_locno).  */
+
+extern void print_num_locno (const bpstat *bs, struct ui_out *);
+
 /* Perform actions associated with the stopped inferior.  Actually, we
    just use this for breakpoint commands.  Perhaps other actions will
    go here later, but this is executed at a late time (from the
@@ -1312,11 +1331,11 @@ struct bpstat
     /* Old value associated with a watchpoint.  */
     value_ref_ptr old_val;
 
-    /* Nonzero if this breakpoint tells us to print the frame.  */
-    char print;
+    /* True if this breakpoint tells us to print the frame.  */
+    bool print;
 
-    /* Nonzero if this breakpoint tells us to stop.  */
-    char stop;
+    /* True if this breakpoint tells us to stop.  */
+    bool stop;
 
     /* Tell bpstat_print and print_bp_stop_message how to print stuff
        associated with this element of the bpstat chain.  */

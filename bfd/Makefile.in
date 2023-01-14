@@ -15,7 +15,7 @@
 @SET_MAKE@
 
 #
-#   Copyright (C) 2012-2022 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2023 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -186,10 +186,9 @@ LTLIBRARIES = $(bfdlib_LTLIBRARIES) $(noinst_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 am__objects_1 = archive.lo archures.lo bfd.lo bfdio.lo bfdwin.lo \
 	cache.lo coff-bfd.lo compress.lo corefile.lo elf-properties.lo \
-	format.lo hash.lo init.lo libbfd.lo linker.lo merge.lo \
-	opncls.lo reloc.lo section.lo simple.lo stab-syms.lo stabs.lo \
-	syms.lo targets.lo binary.lo ihex.lo srec.lo tekhex.lo \
-	verilog.lo
+	format.lo hash.lo libbfd.lo linker.lo merge.lo opncls.lo \
+	reloc.lo section.lo simple.lo stab-syms.lo stabs.lo syms.lo \
+	targets.lo binary.lo ihex.lo srec.lo tekhex.lo verilog.lo
 am_libbfd_la_OBJECTS = $(am__objects_1)
 libbfd_la_OBJECTS = $(am_libbfd_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -546,7 +545,7 @@ BFD_H = bfd.h
 BFD32_LIBS = \
 	archive.lo archures.lo bfd.lo bfdio.lo bfdwin.lo cache.lo \
 	coff-bfd.lo compress.lo corefile.lo elf-properties.lo format.lo \
-	hash.lo init.lo libbfd.lo linker.lo merge.lo opncls.lo reloc.lo \
+	hash.lo libbfd.lo linker.lo merge.lo opncls.lo reloc.lo \
 	section.lo simple.lo stab-syms.lo stabs.lo syms.lo targets.lo \
 	binary.lo ihex.lo srec.lo tekhex.lo verilog.lo
 
@@ -554,7 +553,7 @@ BFD64_LIBS = archive64.lo
 BFD32_LIBS_CFILES = \
 	archive.c archures.c bfd.c bfdio.c bfdwin.c cache.c coff-bfd.c \
 	compress.c corefile.c elf-properties.c format.c hash.c \
-	init.c libbfd.c linker.c merge.c opncls.c reloc.c \
+	libbfd.c linker.c merge.c opncls.c reloc.c \
 	section.c simple.c stab-syms.c stabs.c syms.c targets.c \
 	binary.c ihex.c srec.c tekhex.c verilog.c
 
@@ -755,6 +754,7 @@ BFD32_BACKENDS = \
 	ecofflink.lo \
 	elf-attrs.lo \
 	elf-eh-frame.lo \
+	elf-sframe.lo \
 	elf-ifunc.lo \
 	elf-m10200.lo \
 	elf-m10300.lo \
@@ -861,6 +861,7 @@ BFD32_BACKENDS = \
 	wasm-module.lo \
 	xcofflink.lo \
 	xsym.lo \
+	xtensa-dynconfig.lo \
 	xtensa-isa.lo \
 	xtensa-modules.lo
 
@@ -888,6 +889,7 @@ BFD32_BACKENDS_CFILES = \
 	ecofflink.c \
 	elf-attrs.c \
 	elf-eh-frame.c \
+	elf-sframe.c \
 	elf-ifunc.c \
 	elf-m10200.c \
 	elf-m10300.c \
@@ -993,6 +995,7 @@ BFD32_BACKENDS_CFILES = \
 	wasm-module.c \
 	xcofflink.c \
 	xsym.c \
+	xtensa-dynconfig.c \
 	xtensa-isa.c \
 	xtensa-modules.c
 
@@ -1048,6 +1051,7 @@ BFD64_BACKENDS = \
 	pe-loongarch64igen.lo \
 	pe-x86_64.lo \
 	pei-aarch64.lo \
+	pe-aarch64.lo \
 	pei-ia64.lo \
 	pei-loongarch64.lo \
 	pei-x86_64.lo \
@@ -1089,6 +1093,7 @@ BFD64_BACKENDS_CFILES = \
 	mach-o-aarch64.c \
 	mach-o-x86-64.c \
 	mmo.c \
+	pe-aarch64.c \
 	pe-x86_64.c \
 	pei-aarch64.c \
 	pei-ia64.c \
@@ -1097,7 +1102,6 @@ BFD64_BACKENDS_CFILES = \
 	vms-alpha.c
 
 OPTIONAL_BACKENDS = \
-	aix386-core.lo \
 	cisco-core.lo \
 	hpux-core.lo \
 	irix-core.lo \
@@ -1105,11 +1109,9 @@ OPTIONAL_BACKENDS = \
 	netbsd-core.lo \
 	osf-core.lo \
 	rs6000-core.lo \
-	sco5-core.lo \
 	trad-core.lo
 
 OPTIONAL_BACKENDS_CFILES = \
-	aix386-core.c \
 	cisco-core.c \
 	hpux-core.c \
 	irix-core.c \
@@ -1117,7 +1119,6 @@ OPTIONAL_BACKENDS_CFILES = \
 	netbsd-core.c \
 	osf-core.c \
 	rs6000-core.c \
-	sco5-core.c \
 	trad-core.c
 
 
@@ -1205,8 +1206,8 @@ OFILES = $(BFD_BACKENDS) $(BFD_MACHINES) @COREFILE@ @bfd64_libs@
 # dependency tracking fragments are picked up in the Makefile.
 libbfd_la_SOURCES = $(BFD32_LIBS_CFILES)
 EXTRA_libbfd_la_SOURCES = $(CFILES)
-libbfd_la_DEPENDENCIES = $(OFILES) ofiles
-libbfd_la_LIBADD = `cat ofiles` @SHARED_LIBADD@ $(LIBDL) $(ZLIB) $(ZSTD_LIBS)
+libbfd_la_DEPENDENCIES = $(OFILES) ofiles ../libsframe/libsframe.la
+libbfd_la_LIBADD = `cat ofiles` @SHARED_LIBADD@ $(LIBDL) $(ZLIB) $(ZSTD_LIBS) ../libsframe/libsframe.la
 
 # libtool will build .libs/libbfd.a.  We create libbfd.a in the build
 # directory so that we don't have to convert all the programs that use
@@ -1214,14 +1215,14 @@ libbfd_la_LIBADD = `cat ofiles` @SHARED_LIBADD@ $(LIBDL) $(ZLIB) $(ZSTD_LIBS)
 # everything else starts using libtool.  FIXME.
 noinst_LIBRARIES = libbfd.a
 libbfd_a_SOURCES = 
-BFD_H_FILES = bfd-in.h init.c opncls.c libbfd.c \
+BFD_H_FILES = bfd-in.h opncls.c libbfd.c \
 	bfdio.c bfdwin.c section.c archures.c reloc.c \
 	syms.c bfd.c archive.c corefile.c targets.c format.c \
 	linker.c simple.c compress.c
 
 BFD64_H_FILES = archive64.c
-LIBBFD_H_FILES = libbfd-in.h libbfd.c bfdio.c bfdwin.c \
-	cache.c reloc.c targets.c archures.c linker.c
+LIBBFD_H_FILES = libbfd-in.h libbfd.c bfd.c bfdio.c bfdwin.c \
+	cache.c reloc.c section.c targets.c archures.c linker.c
 
 LIBCOFF_H_FILES = libcoff-in.h coffcode.h
 
@@ -1261,7 +1262,6 @@ DOCFILES = \
 	doc/elf.texi \
 	doc/format.texi \
 	doc/hash.texi \
-	doc/init.texi \
 	doc/libbfd.texi \
 	doc/linker.texi \
 	doc/mmo.texi \
@@ -1294,13 +1294,12 @@ SRCPROT = $(srcdir)/archive.c $(srcdir)/archures.c \
 	$(srcdir)/bfdio.c $(srcdir)/bfdwin.c \
 	$(srcdir)/opncls.c $(srcdir)/reloc.c \
 	$(srcdir)/section.c $(srcdir)/syms.c \
-	$(srcdir)/targets.c $(srcdir)/init.c
+	$(srcdir)/targets.c
 
 SRCIPROT = $(srcdir)/cache.c $(srcdir)/libbfd.c \
 	$(srcdir)/bfdio.c $(srcdir)/bfdwin.c \
 	$(srcdir)/reloc.c $(srcdir)/cpu-h8300.c \
-	$(srcdir)/cpu-i960.c $(srcdir)/archures.c \
-	$(srcdir)/init.c
+	$(srcdir)/archures.c
 
 TEXIDIR = $(srcdir)/../texinfo/fsf
 info_TEXINFOS = doc/bfd.texi
@@ -1445,7 +1444,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aix386-core.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aix5ppc-core.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aout-cris.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aout-ns32k.Plo@am__quote@
@@ -1572,6 +1570,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf-m10300.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf-nacl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf-properties.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf-sframe.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf-strtab.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf-vxworks.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf.Plo@am__quote@
@@ -1680,7 +1679,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/i386lynx.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/i386msdos.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ihex.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/init.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/irix-core.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbfd.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/linker.Plo@am__quote@
@@ -1699,6 +1697,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pc532-mach.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pdb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pdp11.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pe-aarch64.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pe-aarch64igen.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pe-arm-wince.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pe-arm.Plo@am__quote@
@@ -1725,7 +1724,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reloc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reloc16.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rs6000-core.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sco5-core.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/section.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/som.Plo@am__quote@
@@ -1745,6 +1743,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wasm-module.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcofflink.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xsym.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xtensa-dynconfig.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xtensa-isa.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xtensa-modules.Plo@am__quote@
 

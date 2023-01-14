@@ -1,5 +1,5 @@
 /* Support for the generic parts of PE/PEI; the common executable parts.
-   Copyright (C) 1995-2022 Free Software Foundation, Inc.
+   Copyright (C) 1995-2023 Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1122,7 +1122,8 @@ _bfd_XXi_swap_debugdir_out (bfd * abfd, void * inp, void * extp)
 }
 
 CODEVIEW_INFO *
-_bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length, CODEVIEW_INFO *cvinfo)
+_bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length, CODEVIEW_INFO *cvinfo,
+				char **pdb)
 {
   char buffer[256+1];
   bfd_size_type nread;
@@ -1162,6 +1163,9 @@ _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length
       cvinfo->SignatureLength = CV_INFO_SIGNATURE_LENGTH;
       /* cvinfo->PdbFileName = cvinfo70->PdbFileName;  */
 
+      if (pdb)
+	*pdb = xstrdup (cvinfo70->PdbFileName);
+
       return cvinfo;
     }
   else if ((cvinfo->CVSignature == CVINFO_PDB20_CVSIGNATURE)
@@ -1173,6 +1177,9 @@ _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length
       cvinfo->SignatureLength = 4;
       /* cvinfo->PdbFileName = cvinfo20->PdbFileName;  */
 
+      if (pdb)
+	*pdb = xstrdup (cvinfo20->PdbFileName);
+
       return cvinfo;
     }
 
@@ -1180,9 +1187,11 @@ _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length
 }
 
 unsigned int
-_bfd_XXi_write_codeview_record (bfd * abfd, file_ptr where, CODEVIEW_INFO *cvinfo)
+_bfd_XXi_write_codeview_record (bfd * abfd, file_ptr where, CODEVIEW_INFO *cvinfo,
+				const char *pdb)
 {
-  const bfd_size_type size = sizeof (CV_INFO_PDB70) + 1;
+  size_t pdb_len = pdb ? strlen (pdb) : 0;
+  const bfd_size_type size = sizeof (CV_INFO_PDB70) + pdb_len + 1;
   bfd_size_type written;
   CV_INFO_PDB70 *cvinfo70;
   char * buffer;
@@ -1205,7 +1214,11 @@ _bfd_XXi_write_codeview_record (bfd * abfd, file_ptr where, CODEVIEW_INFO *cvinf
   memcpy (&(cvinfo70->Signature[8]), &(cvinfo->Signature[8]), 8);
 
   H_PUT_32 (abfd, cvinfo->Age, cvinfo70->Age);
-  cvinfo70->PdbFileName[0] = '\0';
+
+  if (pdb == NULL)
+    cvinfo70->PdbFileName[0] = '\0';
+  else
+    memcpy (cvinfo70->PdbFileName, pdb, pdb_len + 1);
 
   written = bfd_bwrite (buffer, size, abfd);
 
@@ -1233,6 +1246,24 @@ static char * dir_names[IMAGE_NUMBEROF_DIRECTORY_ENTRIES] =
   N_("CLR Runtime Header"),
   N_("Reserved")
 };
+
+static bool
+get_contents_sanity_check (bfd *abfd, asection *section,
+			   bfd_size_type dataoff, bfd_size_type datasize)
+{
+  if ((section->flags & SEC_HAS_CONTENTS) == 0)
+    return false;
+  if (dataoff > section->size
+      || datasize > section->size - dataoff)
+    return false;
+  ufile_ptr filesize = bfd_get_file_size (abfd);
+  if (filesize != 0
+      && ((ufile_ptr) section->filepos > filesize
+	  || dataoff > filesize - section->filepos
+	  || datasize > filesize - section->filepos - dataoff))
+    return false;
+  return true;
+}
 
 static bool
 pe_print_idata (bfd * abfd, void * vfile)
@@ -1400,6 +1431,9 @@ pe_print_idata (bfd * abfd, void * vfile)
 		{
 		  ft_idx = first_thunk - (ft_section->vma - extra->ImageBase);
 		  ft_datasize = ft_section->size - ft_idx;
+		  if (!get_contents_sanity_check (abfd, ft_section,
+						  ft_idx, ft_datasize))
+		    continue;
 		  ft_data = (bfd_byte *) bfd_malloc (ft_datasize);
 		  if (ft_data == NULL)
 		    continue;
@@ -1569,24 +1603,9 @@ pe_print_edata (bfd * abfd, void * vfile)
 		   _("\nThere is an export table, but the section containing it could not be found\n"));
 	  return true;
 	}
-      else if (!(section->flags & SEC_HAS_CONTENTS))
-	{
-	  fprintf (file,
-		   _("\nThere is an export table in %s, but that section has no contents\n"),
-		   section->name);
-	  return true;
-	}
 
       dataoff = addr - section->vma;
       datasize = extra->DataDirectory[PE_EXPORT_TABLE].Size;
-      if (dataoff > section->size
-	  || datasize > section->size - dataoff)
-	{
-	  fprintf (file,
-		   _("\nThere is an export table in %s, but it does not fit into that section\n"),
-		   section->name);
-	  return true;
-	}
     }
 
   /* PR 17512: Handle corrupt PE binaries.  */
@@ -1596,6 +1615,14 @@ pe_print_edata (bfd * abfd, void * vfile)
 	       /* xgettext:c-format */
 	       _("\nThere is an export table in %s, but it is too small (%d)\n"),
 	       section->name, (int) datasize);
+      return true;
+    }
+
+  if (!get_contents_sanity_check (abfd, section, dataoff, datasize))
+    {
+      fprintf (file,
+	       _("\nThere is an export table in %s, but contents cannot be read\n"),
+	       section->name);
       return true;
     }
 
@@ -1609,7 +1636,10 @@ pe_print_edata (bfd * abfd, void * vfile)
 
   if (! bfd_get_section_contents (abfd, section, data,
 				  (file_ptr) dataoff, datasize))
-    return false;
+    {
+      free (data);
+      return false;
+    }
 
   /* Go get Export Directory Table.  */
   edt.export_flags   = bfd_get_32 (abfd, data +	 0);
@@ -2013,6 +2043,8 @@ _bfd_XX_print_ce_compressed_pdata (bfd * abfd, void * vfile)
     }
 
   start = 0;
+  if (stop > datasize)
+    stop = datasize;
 
   for (i = start; i < stop; i += onaline)
     {
@@ -2603,22 +2635,25 @@ pe_print_debugdata (bfd * abfd, void * vfile)
 	     We need to use a 32-bit aligned buffer
 	     to safely read in a codeview record.  */
 	  char buffer[256 + 1] ATTRIBUTE_ALIGNED_ALIGNOF (CODEVIEW_INFO);
+	  char *pdb;
 
 	  CODEVIEW_INFO *cvinfo = (CODEVIEW_INFO *) buffer;
 
 	  /* The debug entry doesn't have to have to be in a section,
 	     in which case AddressOfRawData is 0, so always use PointerToRawData.  */
 	  if (!_bfd_XXi_slurp_codeview_record (abfd, (file_ptr) idd.PointerToRawData,
-					       idd.SizeOfData, cvinfo))
+					       idd.SizeOfData, cvinfo, &pdb))
 	    continue;
 
 	  for (j = 0; j < cvinfo->SignatureLength; j++)
 	    sprintf (&signature[j*2], "%02x", cvinfo->Signature[j] & 0xff);
 
 	  /* xgettext:c-format */
-	  fprintf (file, _("(format %c%c%c%c signature %s age %ld)\n"),
+	  fprintf (file, _("(format %c%c%c%c signature %s age %ld pdb %s)\n"),
 		   buffer[0], buffer[1], buffer[2], buffer[3],
-		   signature, cvinfo->Age);
+		   signature, cvinfo->Age, pdb[0] ? pdb : "(none)");
+
+	  free (pdb);
 	}
     }
 
@@ -3315,7 +3350,7 @@ rsrc_parse_entry (bfd *abfd,
   if (HighBitSet (val))
     {
       entry->is_dir = true;
-      entry->value.directory = bfd_malloc (sizeof * entry->value.directory);
+      entry->value.directory = bfd_malloc (sizeof (*entry->value.directory));
       if (entry->value.directory == NULL)
 	return dataend;
 
@@ -3326,12 +3361,12 @@ rsrc_parse_entry (bfd *abfd,
     }
 
   entry->is_dir = false;
-  entry->value.leaf = bfd_malloc (sizeof * entry->value.leaf);
+  entry->value.leaf = bfd_malloc (sizeof (*entry->value.leaf));
   if (entry->value.leaf == NULL)
     return dataend;
 
   data = datastart + val;
-  if (data < datastart || data >= dataend)
+  if (data < datastart || data + 12 > dataend)
     return dataend;
 
   addr = bfd_get_32 (abfd, data);
@@ -3339,6 +3374,8 @@ rsrc_parse_entry (bfd *abfd,
   entry->value.leaf->codepage = bfd_get_32 (abfd, data + 8);
   /* FIXME: We assume that the reserved field (data + 12) is OK.  */
 
+  if (size > dataend - datastart - (addr - rva_bias))
+    return dataend;
   entry->value.leaf->data = bfd_malloc (size);
   if (entry->value.leaf->data == NULL)
     return dataend;
@@ -3367,7 +3404,7 @@ rsrc_parse_entries (bfd *abfd,
       return highest_data;
     }
 
-  entry = bfd_malloc (sizeof * entry);
+  entry = bfd_malloc (sizeof (*entry));
   if (entry == NULL)
     return dataend;
 
@@ -3386,7 +3423,7 @@ rsrc_parse_entries (bfd *abfd,
 
       if (i)
 	{
-	  entry->next_entry = bfd_malloc (sizeof * entry);
+	  entry->next_entry = bfd_malloc (sizeof (*entry));
 	  entry = entry->next_entry;
 	  if (entry == NULL)
 	    return dataend;
@@ -4174,13 +4211,7 @@ rsrc_process_section (bfd * abfd,
 
   rva_bias = sec->vma - pe->pe_opthdr.ImageBase;
 
-  data = bfd_malloc (size);
-  if (data == NULL)
-    return;
-
-  datastart = data;
-
-  if (! bfd_get_section_contents (abfd, sec, data, 0, size))
+  if (! bfd_malloc_and_get_section (abfd, sec, &datastart))
     goto end;
 
   /* Step zero: Scan the input bfds looking for .rsrc sections and record
@@ -4192,7 +4223,8 @@ rsrc_process_section (bfd * abfd,
      at the end of a variable amount.  (It does not appear to be based upon
      the section alignment or the file alignment).  We need to skip any
      padding bytes when parsing the input .rsrc sections.  */
-  rsrc_sizes = bfd_malloc (max_num_input_rsrc * sizeof * rsrc_sizes);
+  data = datastart;
+  rsrc_sizes = bfd_malloc (max_num_input_rsrc * sizeof (*rsrc_sizes));
   if (rsrc_sizes == NULL)
     goto end;
 
@@ -4209,7 +4241,7 @@ rsrc_process_section (bfd * abfd,
 	    {
 	      max_num_input_rsrc += 10;
 	      rsrc_sizes = bfd_realloc (rsrc_sizes, max_num_input_rsrc
-					* sizeof * rsrc_sizes);
+					* sizeof (*rsrc_sizes));
 	      if (rsrc_sizes == NULL)
 		goto end;
 	    }
@@ -4262,7 +4294,7 @@ rsrc_process_section (bfd * abfd,
   data = datastart;
   rva_bias = sec->vma - pe->pe_opthdr.ImageBase;
 
-  type_tables = bfd_malloc (num_resource_sets * sizeof * type_tables);
+  type_tables = bfd_malloc (num_resource_sets * sizeof (*type_tables));
   if (type_tables == NULL)
     goto end;
 
@@ -4535,21 +4567,15 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
     if (sec)
       {
 	bfd_size_type x = sec->rawsize;
-	bfd_byte *tmp_data = NULL;
+	bfd_byte *tmp_data;
 
-	if (x)
-	  tmp_data = bfd_malloc (x);
-
-	if (tmp_data != NULL)
+	if (bfd_malloc_and_get_section (abfd, sec, &tmp_data))
 	  {
-	    if (bfd_get_section_contents (abfd, sec, tmp_data, 0, x))
-	      {
-		qsort (tmp_data,
-		       (size_t) (x / 12),
-		       12, sort_x64_pdata);
-		bfd_set_section_contents (pfinfo->output_bfd, sec,
-					  tmp_data, 0, x);
-	      }
+	    qsort (tmp_data,
+		   (size_t) (x / 12),
+		   12, sort_x64_pdata);
+	    bfd_set_section_contents (pfinfo->output_bfd, sec,
+				      tmp_data, 0, x);
 	    free (tmp_data);
 	  }
 	else

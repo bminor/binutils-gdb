@@ -1,5 +1,5 @@
 /* aarch64-opc.c -- AArch64 opcode support.
-   Copyright (C) 2009-2022 Free Software Foundation, Inc.
+   Copyright (C) 2009-2023 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of the GNU opcodes library.
@@ -342,6 +342,7 @@ const aarch64_field fields[] =
     { 12,  2 }, /* SM3: Indexed element SM3 2 bits index immediate.  */
     { 22,  1 }, /* sz: 1-bit element size select.  */
     { 10,  2 }, /* CRm_dsb_nxs: 2-bit imm. encoded in CRm<3:2>.  */
+    { 10,  8 }, /* CSSC_imm8.  */
 };
 
 enum aarch64_operand_class
@@ -958,19 +959,19 @@ aarch64_find_best_match (const aarch64_inst *inst,
 	dump_match_qualifiers (inst->operands, qualifiers);
 #endif
 
-      /* Most opcodes has much fewer patterns in the list.
-	 First NIL qualifier indicates the end in the list.   */
-      if (empty_qualifier_sequence_p (qualifiers))
+      /* The first entry should be taken literally, even if it's an empty
+	 qualifier sequence.  (This matters for strict testing.)  In other
+	 positions an empty sequence acts as a terminator.  */
+      if (i > 0 && empty_qualifier_sequence_p (qualifiers))
 	{
-	  DEBUG_TRACE_IF (i == 0, "SUCCEED: empty qualifier list");
-	  if (i)
-	    found = 0;
+	  found = 0;
 	  break;
 	}
 
       for (j = 0; j < num_opnds && j <= stop_at; ++j, ++qualifiers)
 	{
-	  if (inst->operands[j].qualifier == AARCH64_OPND_QLF_NIL)
+	  if (inst->operands[j].qualifier == AARCH64_OPND_QLF_NIL
+	      && !(inst->opcode->flags & F_STRICT))
 	    {
 	      /* Either the operand does not have qualifier, or the qualifier
 		 for the operand needs to be deduced from the qualifier
@@ -1038,7 +1039,7 @@ aarch64_find_best_match (const aarch64_inst *inst,
 static int
 match_operands_qualifier (aarch64_inst *inst, bool update_p)
 {
-  int i, nops;
+  int i;
   aarch64_opnd_qualifier_seq_t qualifiers;
 
   if (!aarch64_find_best_match (inst, inst->opcode->qualifiers_list, -1,
@@ -1046,15 +1047,6 @@ match_operands_qualifier (aarch64_inst *inst, bool update_p)
     {
       DEBUG_TRACE ("matching FAIL");
       return 0;
-    }
-
-  if (inst->opcode->flags & F_STRICT)
-    {
-      /* Require an exact qualifier match, even for NIL qualifiers.  */
-      nops = aarch64_num_of_operands (inst->opcode);
-      for (i = 0; i < nops; ++i)
-	if (inst->operands[i].qualifier != qualifiers[i])
-	  return false;
     }
 
   /* Update the qualifiers.  */
@@ -2185,6 +2177,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SVE_UIMM7:
 	case AARCH64_OPND_SVE_UIMM8:
 	case AARCH64_OPND_SVE_UIMM8_53:
+	case AARCH64_OPND_CSSC_UIMM8:
 	  size = get_operand_fields_width (get_operand_from_code (type));
 	  assert (size < 32);
 	  if (!value_fit_unsigned_field_p (opnd->imm.value, size))
@@ -2215,6 +2208,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SVE_SIMM5B:
 	case AARCH64_OPND_SVE_SIMM6:
 	case AARCH64_OPND_SVE_SIMM8:
+	case AARCH64_OPND_CSSC_SIMM8:
 	  size = get_operand_fields_width (get_operand_from_code (type));
 	  assert (size < 32);
 	  if (!value_fit_signed_field_p (opnd->imm.value, size))
@@ -3629,6 +3623,8 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_IMM_ROT1:
     case AARCH64_OPND_SVE_IMM_ROT2:
     case AARCH64_OPND_SVE_IMM_ROT3:
+    case AARCH64_OPND_CSSC_SIMM8:
+    case AARCH64_OPND_CSSC_UIMM8:
       snprintf (buf, size, "%s",
 		style_imm (styler, "#%" PRIi64, opnd->imm.value));
       break;

@@ -1,6 +1,6 @@
 /* Top level stuff for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -305,10 +305,8 @@ ui::ui (FILE *instream_, FILE *outstream_, FILE *errstream_)
     m_gdb_stdout (new pager_file (new stdio_file (outstream))),
     m_gdb_stdin (new stdio_file (instream)),
     m_gdb_stderr (new stderr_file (errstream)),
-    m_gdb_stdlog (m_gdb_stderr)
+    m_gdb_stdlog (new timestamped_file (m_gdb_stderr))
 {
-  buffer_init (&line_buffer);
-
   unbuffer_stream (instream_);
 
   if (ui_list == NULL)
@@ -343,8 +341,6 @@ ui::~ui ()
   delete m_gdb_stdin;
   delete m_gdb_stdout;
   delete m_gdb_stderr;
-
-  buffer_free (&line_buffer);
 }
 
 /* Open file named NAME for read/write, making sure not to make it the
@@ -452,11 +448,11 @@ read_command_file (FILE *stream)
 
   while (ui->instream != NULL && !feof (ui->instream))
     {
-      const char *command;
-
       /* Get a command-line.  This calls the readline package.  */
-      command = command_line_input (NULL, NULL);
-      if (command == NULL)
+      std::string command_buffer;
+      const char *command
+	= command_line_input (command_buffer, nullptr, nullptr);
+      if (command == nullptr)
 	break;
       command_handler (command);
     }
@@ -693,8 +689,14 @@ execute_command (const char *p, int from_tty)
 
       maybe_wait_sync_command_done (was_sync);
 
-      /* If this command has been post-hooked, run the hook last.  */
-      execute_cmd_post_hook (c);
+      /* If this command has been post-hooked, run the hook last.
+	 We need to lookup the command again since during its execution,
+	 a command may redefine itself.  In this case, C pointer
+	 becomes invalid so we need to look it up again.  */
+      const char *cmd2 = cmd_start;
+      c = lookup_cmd (&cmd2, cmdlist, "", nullptr, 1, 1);
+      if (c != nullptr)
+	execute_cmd_post_hook (c);
 
       if (repeat_arguments != NULL && cmd_start == saved_command_line)
 	{
@@ -1323,23 +1325,23 @@ gdb_safe_append_history (void)
     }
 }
 
-/* Read one line from the command input stream `instream' into a local
-   static buffer.  The buffer is made bigger as necessary.  Returns
-   the address of the start of the line.
+/* Read one line from the command input stream `instream'.
 
-   NULL is returned for end of file.
+   CMD_LINE_BUFFER is a buffer that the function may use to store the result, if
+   it needs to be dynamically-allocated.  Otherwise, it is unused.string
+
+   Return nullptr for end of file.
 
    This routine either uses fancy command line editing or simple input
    as the user has requested.  */
 
 const char *
-command_line_input (const char *prompt_arg, const char *annotation_suffix)
+command_line_input (std::string &cmd_line_buffer, const char *prompt_arg,
+		    const char *annotation_suffix)
 {
-  static struct buffer cmd_line_buffer;
-  static int cmd_line_buffer_initialized;
   struct ui *ui = current_ui;
   const char *prompt = prompt_arg;
-  char *cmd;
+  const char *cmd;
   int from_tty = ui->instream == ui->stdin_stream;
 
   /* The annotation suffix must be non-NULL.  */
@@ -1363,15 +1365,6 @@ command_line_input (const char *prompt_arg, const char *annotation_suffix)
 
       prompt = local_prompt;
     }
-
-  if (!cmd_line_buffer_initialized)
-    {
-      buffer_init (&cmd_line_buffer);
-      cmd_line_buffer_initialized = 1;
-    }
-
-  /* Starting a new command line.  */
-  cmd_line_buffer.used_size = 0;
 
 #ifdef SIGTSTP
   if (job_control)
@@ -1412,7 +1405,7 @@ command_line_input (const char *prompt_arg, const char *annotation_suffix)
 	  rl.reset (gdb_readline_no_editing (prompt));
 	}
 
-      cmd = handle_line_of_input (&cmd_line_buffer, rl.get (),
+      cmd = handle_line_of_input (cmd_line_buffer, rl.get (),
 				  0, annotation_suffix);
       if (cmd == (char *) EOF)
 	{
@@ -1451,7 +1444,7 @@ print_gdb_version (struct ui_file *stream, bool interactive)
   /* Second line is a copyright notice.  */
 
   gdb_printf (stream,
-	      "Copyright (C) 2022 Free Software Foundation, Inc.\n");
+	      "Copyright (C) 2023 Free Software Foundation, Inc.\n");
 
   /* Following the copyright is a brief statement that the program is
      free software, that users are free to copy and change it on
@@ -1588,15 +1581,6 @@ This GDB was configured as follows:\n\
 "));
 #endif
 
-#if HAVE_LIBMPFR
-  gdb_printf (stream, _("\
-	     --with-mpfr\n\
-"));
-#else
-  gdb_printf (stream, _("\
-	     --without-mpfr\n\
-"));
-#endif
 #if HAVE_LIBXXHASH
   gdb_printf (stream, _("\
 	     --with-xxhash\n\
@@ -1845,10 +1829,9 @@ quit_force (int *exit_arg, int from_tty)
      them all out.  */
   for (inferior *inf : all_inferiors ())
     {
-      switch_to_inferior_no_thread (inf);
       try
 	{
-	  pop_all_targets ();
+	  inf->pop_all_targets ();
 	}
       catch (const gdb_exception &ex)
 	{

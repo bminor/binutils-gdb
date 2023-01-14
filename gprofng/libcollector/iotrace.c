@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Free Software Foundation, Inc.
+/* Copyright (C) 2021-2023 Free Software Foundation, Inc.
    Contributed by Oracle.
 
    This file is part of GNU Binutils.
@@ -2713,10 +2713,15 @@ fprintf (FILE *stream, const char *format, ...)
   if (NULL_PTR (vfprintf))
     init_io_intf ();
   if (CHCK_REENTRANCE (guard) || stream == NULL)
-    return CALL_REAL (vfprintf)(stream, format, ap);
+    {
+      ret = CALL_REAL (vfprintf)(stream, format, ap);
+      va_end (ap);
+      return ret;
+    }
   PUSH_REENTRANCE (guard);
   hrtime_t reqt = gethrtime ();
   ret = CALL_REAL (vfprintf)(stream, format, ap);
+  va_end (ap);
   if (RECHCK_REENTRANCE (guard))
     {
       POP_REENTRANCE (guard);

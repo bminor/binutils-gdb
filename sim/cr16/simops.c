@@ -1,5 +1,5 @@
 /* Simulation code for the CR16 processor.
-   Copyright (C) 2008-2022 Free Software Foundation, Inc.
+   Copyright (C) 2008-2023 Free Software Foundation, Inc.
    Contributed by M Ranga Swami Reddy <MR.Swami.Reddy@nsc.com>
 
    This file is part of GDB, the GNU debugger.
@@ -31,10 +31,14 @@
 #include <time.h>
 #include <sys/time.h>
 
+#include "bfd.h"
+
 #include "sim-main.h"
 #include "sim-signal.h"
 #include "simops.h"
 #include "target-newlib-syscall.h"
+
+#include "cr16-sim.h"
 
 #ifdef HAVE_UTIME_H
 #include <utime.h>

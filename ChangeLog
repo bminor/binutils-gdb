@@ -1,3 +1,7 @@
+2022-12-31  Nick Clifton  <nickc@redhat.com>
+
+	* 2.40 binutils branch created.
+
 2022-10-10  Nick Clifton  <nickc@redhat.com>
 
 	* src-release.sh: Add "-r <date>" option to create reproducible

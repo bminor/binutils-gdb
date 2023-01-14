@@ -1,6 +1,6 @@
 /* Target dependent code for GDB on TI C6x systems.
 
-   Copyright (C) 2010-2022 Free Software Foundation, Inc.
+   Copyright (C) 2010-2023 Free Software Foundation, Inc.
    Contributed by Andrew Jenner <andrew@codesourcery.com>
    Contributed by Yao Qi <yao@codesourcery.com>
 
@@ -845,7 +845,7 @@ tic6x_arg_type_alignment (struct type *type)
 	    return 16;
 	}
       else
-	internal_error (__FILE__, __LINE__, _("unexpected length %d of type"),
+	internal_error (_("unexpected length %d of type"),
 			len);
     }
 }
@@ -1063,13 +1063,11 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 		}
 	      else
-		internal_error (__FILE__, __LINE__,
-				_("unexpected type %d of arg %d"),
+		internal_error (_("unexpected type %d of arg %d"),
 				typecode, argnum);
 	    }
 	  else
-	    internal_error (__FILE__, __LINE__,
-			    _("unexpected length %d of arg %d"), len, argnum);
+	    internal_error (_("unexpected length %d of arg %d"), len, argnum);
 
 	  addr = sp + stack_offset;
 	  write_memory (addr, val, len);
@@ -1138,7 +1136,6 @@ tic6x_return_in_first_hidden_param_p (struct gdbarch *gdbarch,
 static struct gdbarch *
 tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   tdesc_arch_data_up tdesc_data;
   const struct target_desc *tdesc = info.target_desc;
   int has_gp = 0;
@@ -1223,10 +1220,11 @@ tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	return arches->gdbarch;
     }
 
-  tic6x_gdbarch_tdep *tdep = new tic6x_gdbarch_tdep;
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new tic6x_gdbarch_tdep));
+  tic6x_gdbarch_tdep *tdep = gdbarch_tdep<tic6x_gdbarch_tdep> (gdbarch);
 
   tdep->has_gp = has_gp;
-  gdbarch = gdbarch_alloc (&info, tdep);
 
   /* Data type sizes.  */
   set_gdbarch_ptr_bit (gdbarch, 32);

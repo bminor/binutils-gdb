@@ -1,4 +1,4 @@
-/* Copyright 2019-2022 Free Software Foundation, Inc.
+/* Copyright 2019-2023 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -60,3 +60,4 @@ func:
 	addi    sp,sp,16
 	jr      ra
 	.size   func, .-func
+	.section	.note.GNU-stack,"",@progbits

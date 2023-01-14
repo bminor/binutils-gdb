@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl
-dnl   Copyright (C) 2021 Free Software Foundation, Inc.
+dnl   Copyright (C) 2021-2023 Free Software Foundation, Inc.
 dnl
 dnl This file is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -142,7 +142,7 @@ class Simple{
   }
 }
 EOF
-      if AC_TRY_COMMAND($JAVAC configtest.java &AS_MESSAGE_LOG_FD 2>&1); then
+      if AC_TRY_COMMAND($JAVAC configtest.java >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD); then
 	GPROFNG_BROKEN_JAVAC=no
       else
 	GPROFNG_BROKEN_JAVAC=yes

@@ -1,4 +1,4 @@
-# Copyright 2004-2022 Free Software Foundation, Inc.
+# Copyright 2004-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,8 +32,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 proc test_breakpoint {name} {
     # Restart the program every time, so that a single failure doesn't
     # lead to a cascade.
-    if ![runto_main] then {
-	perror "couldn't run to main when testing ${name}"
+    if {![runto_main]} {
 	return -code continue
     } else {
 	gdb_breakpoint "${name}"

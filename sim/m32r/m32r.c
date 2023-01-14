@@ -1,5 +1,5 @@
 /* m32r simulator support code
-   Copyright (C) 1996-2022 Free Software Foundation, Inc.
+   Copyright (C) 1996-2023 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
    This file is part of GDB, the GNU debugger.
@@ -27,6 +27,8 @@
 #include "cgen-mem.h"
 #include "cgen-ops.h"
 #include <stdlib.h>
+
+#include "m32r-sim.h"
 
 /* Return the size of REGNO in bytes.  */
 
@@ -58,7 +60,7 @@ m32r_decode_gdb_ctrl_regnum (int gdb_regnum)
 /* The contents of BUF are in target byte order.  */
 
 int
-m32rbf_fetch_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len)
+m32rbf_fetch_register (SIM_CPU *current_cpu, int rn, void *buf, int len)
 {
   int size = m32rbf_register_size (rn);
   if (len != size)
@@ -98,7 +100,7 @@ m32rbf_fetch_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len
 /* The contents of BUF are in target byte order.  */
 
 int
-m32rbf_store_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len)
+m32rbf_store_register (SIM_CPU *current_cpu, int rn, const void *buf, int len)
 {
   int size = m32rbf_register_size (rn);
   if (len != size)

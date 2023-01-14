@@ -1,6 +1,6 @@
 /* Target-dependent code for FT32.
 
-   Copyright (C) 2009-2022 Free Software Foundation, Inc.
+   Copyright (C) 2009-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -40,7 +40,7 @@
 #include "opcode/ft32.h"
 
 #include "ft32-tdep.h"
-#include "gdb/sim-ft32.h"
+#include "sim/sim-ft32.h"
 #include <algorithm>
 
 #define RAM_BIAS  0x800000  /* Bias added to RAM addresses.  */
@@ -558,7 +558,6 @@ static const struct frame_base ft32_frame_base =
 static struct gdbarch *
 ft32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   struct type *void_type;
   struct type *func_void_type;
 
@@ -568,8 +567,9 @@ ft32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return arches->gdbarch;
 
   /* Allocate space for the new architecture.  */
-  ft32_gdbarch_tdep *tdep = new ft32_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new ft32_gdbarch_tdep));
+  ft32_gdbarch_tdep *tdep = gdbarch_tdep<ft32_gdbarch_tdep> (gdbarch);
 
   /* Create a type for PC.  We can't use builtin types here, as they may not
      be defined.  */

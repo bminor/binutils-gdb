@@ -1,4 +1,4 @@
-# Copyright 2021-2022 Free Software Foundation, Inc.
+# Copyright 2021-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -43,3 +43,4 @@ mydata:
 	.long 0xabbbcbdb	# <<- loaded into                vs7
 	.long 0xacbcccdc	# <<-
 
+	.section	.note.GNU-stack,"",@progbits

@@ -1,5 +1,5 @@
 /* BFD back-end for i386 a.out binaries under LynxOS.
-   Copyright (C) 1990-2022 Free Software Foundation, Inc.
+   Copyright (C) 1990-2023 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -283,8 +283,10 @@ NAME(lynx,swap_ext_reloc_out) (bfd *abfd,
   if (r_extern)								\
     {									\
       /* undefined symbol */						\
-      if (r_index < bfd_get_symcount (abfd))				\
+      if (symbols != NULL && r_index < bfd_get_symcount (abfd))		\
 	cache_ptr->sym_ptr_ptr = symbols + r_index;			\
+      else								\
+	cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;	\
       cache_ptr->addend = ad;						\
     }									\
   else									\

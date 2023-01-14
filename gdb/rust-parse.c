@@ -1,6 +1,6 @@
 /* Rust expression parsing for GDB, the GNU debugger.
 
-   Copyright (C) 2016-2022 Free Software Foundation, Inc.
+   Copyright (C) 2016-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1344,6 +1344,8 @@ rust_parser::parse_binop (bool required)
   OPERATION (ANDAND, 2, logical_and_operation)	\
   OPERATION (OROR, 1, logical_or_operation)
 
+#define ASSIGN_PREC 0
+
   operation_up start = parse_atom (required);
   if (start == nullptr)
     {
@@ -1376,7 +1378,7 @@ rust_parser::parse_binop (bool required)
 	  compound_assign_op = current_opcode;
 	  /* FALLTHROUGH */
 	case '=':
-	  precedence = 0;
+	  precedence = ASSIGN_PREC;
 	  lex ();
 	  break;
 
@@ -1398,7 +1400,11 @@ rust_parser::parse_binop (bool required)
 	  break;
         }
 
-      while (precedence < operator_stack.back ().precedence
+      /* Make sure that assignments are right-associative while other
+	 operations are left-associative.  */
+      while ((precedence == ASSIGN_PREC
+	      ? precedence < operator_stack.back ().precedence
+	      : precedence <= operator_stack.back ().precedence)
 	     && operator_stack.size () > 1)
 	{
 	  rustop_item rhs = std::move (operator_stack.back ());

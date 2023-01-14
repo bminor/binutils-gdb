@@ -1,4 +1,4 @@
-# Copyright 1992-2022 Free Software Foundation, Inc.
+# Copyright 1992-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 # Are we on a target board?  As of 2004-02-12, GDB didn't have a
 # mechanism that would let it efficiently access a remote corefile.
 
-if ![isnative] then {
+if {![isnative]} {
     untested "remote system"
     return
 }
@@ -55,7 +55,7 @@ gdb_test_no_output "set width 0"
 # Get the core into the output directory.
 set_inferior_cwd_to_output_dir
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 set print_core_line [gdb_get_line_number "Dump core"]

@@ -1,5 +1,5 @@
 /* dw2gencfi.c - Support for generating Dwarf2 CFI information.
-   Copyright (C) 2003-2022 Free Software Foundation, Inc.
+   Copyright (C) 2003-2023 Free Software Foundation, Inc.
    Contributed by Michal Ludvig <mludvig@suse.cz>
 
    This file is part of GAS, the GNU Assembler.
@@ -23,6 +23,7 @@
 #include "dw2gencfi.h"
 #include "subsegs.h"
 #include "dwarf2dbg.h"
+#include "gen-sframe.h"
 
 #ifdef TARGET_USE_CFIPOP
 
@@ -75,7 +76,8 @@
 # define tc_cfi_endproc(fde) ((void) (fde))
 #endif
 
-#define EH_FRAME_LINKONCE (SUPPORT_FRAME_LINKONCE || compact_eh)
+#define EH_FRAME_LINKONCE (SUPPORT_FRAME_LINKONCE || compact_eh \
+			   || TARGET_MULTIPLE_EH_FRAME_SECTIONS)
 
 #ifndef DWARF2_FORMAT
 #define DWARF2_FORMAT(SEC) dwarf2_format_32bit
@@ -99,6 +101,11 @@
 
 #ifndef tc_cfi_reloc_for_encoding
 #define tc_cfi_reloc_for_encoding(e) BFD_RELOC_NONE
+#endif
+
+/* Targets which support SFrame format will define this and return true.  */
+#ifndef support_sframe_p
+# define support_sframe_p() false
 #endif
 
 /* Private segment collection list.  */
@@ -275,6 +282,9 @@ static segT
 is_now_linkonce_segment (void)
 {
   if (compact_eh)
+    return now_seg;
+
+  if (TARGET_MULTIPLE_EH_FRAME_SECTIONS)
     return now_seg;
 
   if ((bfd_section_flags (now_seg)
@@ -1231,6 +1241,8 @@ dot_cfi_sections (int ignored ATTRIBUTE_UNUSED)
 	else if (strcmp (name, tc_cfi_section_name) == 0)
 	  sections |= CFI_EMIT_target;
 #endif
+	else if (startswith (name, ".sframe"))
+	    sections |= CFI_EMIT_sframe;
 	else
 	  {
 	    *input_line_pointer = c;
@@ -1333,14 +1345,33 @@ static segT
 get_cfi_seg (segT cseg, const char *base, flagword flags, int align)
 {
   /* Exclude .debug_frame sections for Compact EH.  */
-  if (SUPPORT_FRAME_LINKONCE || ((flags & SEC_DEBUGGING) == 0 && compact_eh))
+  if (SUPPORT_FRAME_LINKONCE || ((flags & SEC_DEBUGGING) == 0 && compact_eh)
+      || ((flags & SEC_DEBUGGING) == 0 && TARGET_MULTIPLE_EH_FRAME_SECTIONS))
     {
+      segT iseg = cseg;
       struct dwcfi_seg_list *l;
 
       l = dwcfi_hash_find_or_make (cseg, base, flags);
 
       cseg = l->seg;
       subseg_set (cseg, l->subseg);
+
+      if (TARGET_MULTIPLE_EH_FRAME_SECTIONS
+	  && (flags & DWARF2_EH_FRAME_READ_ONLY))
+	{
+	  const frchainS *ifrch = seg_info (iseg)->frchainP;
+	  const frchainS *frch = seg_info (cseg)->frchainP;
+	  expressionS exp;
+
+	  exp.X_op = O_symbol;
+	  exp.X_add_symbol = (symbolS *) local_symbol_make (cseg->name, cseg, frch->frch_root, 0);
+	  exp.X_add_number = 0;
+	  subseg_set (iseg, ifrch->frch_subseg);
+	  fix_new_exp (ifrch->frch_root, 0, 0, &exp, 0, BFD_RELOC_NONE);
+
+	  /* Restore the original segment info.  */
+	  subseg_set (cseg, l->subseg);
+	}
     }
   else
     {
@@ -2469,6 +2500,28 @@ cfi_finish (void)
 #endif /* SUPPORT_COMPACT_EH */
 
       flag_traditional_format = save_flag_traditional_format;
+    }
+
+  cfi_sections_set = true;
+  /* Generate SFrame section if the user specifies:
+	- the command line option to gas, or
+	- .sframe in the .cfi_sections directive.  */
+  if (flag_gen_sframe || (all_cfi_sections & CFI_EMIT_sframe) != 0)
+    {
+      if (support_sframe_p ())
+	{
+	  segT sframe_seg;
+	  int alignment = ffs (DWARF2_ADDR_SIZE (stdoutput)) - 1;
+
+	  if (!SUPPORT_FRAME_LINKONCE)
+	    sframe_seg = get_cfi_seg (NULL, ".sframe",
+					 (SEC_ALLOC | SEC_LOAD | SEC_DATA
+					  | DWARF2_EH_FRAME_READ_ONLY),
+					 alignment);
+	  output_sframe (sframe_seg);
+	}
+      else
+	as_bad (_(".sframe not supported for target"));
     }
 
   cfi_sections_set = true;

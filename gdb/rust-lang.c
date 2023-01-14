@@ -1,6 +1,6 @@
 /* Rust language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 2016-2022 Free Software Foundation, Inc.
+   Copyright (C) 2016-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -398,7 +398,7 @@ rust_language::val_print_struct
     gdb_puts ("{", stream);
 
   opts = *options;
-  opts.deref_ref = 0;
+  opts.deref_ref = false;
 
   first_field = 1;
   for (i = 0; i < type->num_fields (); ++i)
@@ -452,7 +452,7 @@ rust_language::print_enum (struct value *val, struct ui_file *stream,
   struct value_print_options opts = *options;
   struct type *type = check_typedef (value_type (val));
 
-  opts.deref_ref = 0;
+  opts.deref_ref = false;
 
   gdb_assert (rust_enum_p (type));
   gdb::array_view<const gdb_byte> view
@@ -524,7 +524,7 @@ rust_language::value_print_inner
 	 const struct value_print_options *options) const
 {
   struct value_print_options opts = *options;
-  opts.deref_ref = 1;
+  opts.deref_ref = true;
 
   if (opts.prettyformat == Val_prettyformat_default)
     opts.prettyformat = (opts.prettyformat_structs

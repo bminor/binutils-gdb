@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2022 Free Software Foundation, Inc.
+Copyright 1996-2023 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -119,7 +119,7 @@ CPU (h_sr_v10[(index)]) = (x);\
 #define GET_H_PREFIXREG_PRE_V32() CPU (h_prefixreg_pre_v32)
 #define SET_H_PREFIXREG_PRE_V32(x) (CPU (h_prefixreg_pre_v32) = (x))
   } hardware;
-#define CPU_CGEN_HW(cpu) (& (cpu)->cpu_data.hardware)
+#define CPU_CGEN_HW(cpu) (& CRIS_SIM_CPU (cpu)->cpu_data.hardware)
 } CRISV10F_CPU_DATA;
 
 /* Virtual regs.  */

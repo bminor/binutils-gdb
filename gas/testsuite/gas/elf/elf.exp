@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2022 Free Software Foundation, Inc.
+# Copyright (C) 2012-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -308,6 +308,8 @@ if { [is_elf_format] } then {
     run_dump_test "dwarf-5-cu" $dump_opts
     run_dump_test "dwarf-5-nop-for-line-table" $dump_opts
     run_dump_test "dwarf-5-irp" $dump_opts
+    run_dump_test "dwarf-5-macro" $dump_opts
+    run_dump_test "dwarf-5-macro-include" $dump_opts
     run_dump_test "dwarf-3-func" $dump_opts
     run_dump_test "dwarf-5-func" $dump_opts
     run_dump_test "dwarf-5-func-global" $dump_opts

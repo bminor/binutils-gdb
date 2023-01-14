@@ -1,6 +1,6 @@
 /* Support for GDB maintenance commands.
 
-   Copyright (C) 1992-2022 Free Software Foundation, Inc.
+   Copyright (C) 1992-2023 Free Software Foundation, Inc.
 
    Written by Fred Fish at Cygnus Support.
 
@@ -76,7 +76,7 @@ maintenance_dump_me (const char *args, int from_tty)
 static void
 maintenance_internal_error (const char *args, int from_tty)
 {
-  internal_error (__FILE__, __LINE__, "%s", (args == NULL ? "" : args));
+  internal_error ("%s", (args == NULL ? "" : args));
 }
 
 /* Stimulate the internal error mechanism that GDB uses when an
@@ -87,7 +87,7 @@ maintenance_internal_error (const char *args, int from_tty)
 static void
 maintenance_internal_warning (const char *args, int from_tty)
 {
-  internal_warning (__FILE__, __LINE__, "%s", (args == NULL ? "" : args));
+  internal_warning ("%s", (args == NULL ? "" : args));
 }
 
 /* Stimulate the internal error mechanism that GDB uses when an

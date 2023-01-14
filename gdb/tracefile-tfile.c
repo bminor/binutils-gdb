@@ -1,6 +1,6 @@
 /* Trace file TFILE format support in GDB.
 
-   Copyright (C) 1997-2022 Free Software Foundation, Inc.
+   Copyright (C) 1997-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -752,7 +752,7 @@ tfile_target::trace_find (enum trace_find_type type, int num,
 		    found = 1;
 		  break;
 		default:
-		  internal_error (__FILE__, __LINE__, _("unknown tfind type"));
+		  internal_error (_("unknown tfind type"));
 		}
 	    }
 	}

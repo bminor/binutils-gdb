@@ -1,6 +1,6 @@
 /* GDB parameters implemented in Guile.
 
-   Copyright (C) 2008-2022 Free Software Foundation, Inc.
+   Copyright (C) 2008-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -742,7 +742,7 @@ pascm_set_param_value_x (param_smob *p_smob,
       if (var.type () == var_uinteger
 	  || var.type () == var_zuinteger_unlimited)
 	{
-	  SCM_ASSERT_TYPE (gdbscm_is_bool (value)
+	  SCM_ASSERT_TYPE (scm_is_integer (value)
 			   || scm_is_eq (value, unlimited_keyword),
 			   value, arg_pos, func_name,
 			   _("integer or #:unlimited"));

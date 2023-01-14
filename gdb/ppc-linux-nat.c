@@ -1,6 +1,6 @@
 /* PPC GNU/Linux native support.
 
-   Copyright (C) 1988-2022 Free Software Foundation, Inc.
+   Copyright (C) 1988-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1113,8 +1113,7 @@ fetch_register (struct regcache *regcache, int tid, int regno)
       regcache->raw_supply (regno, buf + padding);
     }
   else 
-    internal_error (__FILE__, __LINE__,
-		    _("fetch_register: unexpected byte order: %d"),
+    internal_error (_("fetch_register: unexpected byte order: %d"),
 		    gdbarch_byte_order (gdbarch));
 }
 

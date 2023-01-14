@@ -1,6 +1,6 @@
 /* Target-dependent code for NetBSD/arm.
 
-   Copyright (C) 2002-2022 Free Software Foundation, Inc.
+   Copyright (C) 2002-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -131,8 +131,7 @@ arm_netbsd_init_abi_common (struct gdbarch_info info,
       break;
 
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("arm_gdbarch_init: bad byte order for float format"));
+      internal_error (_("arm_gdbarch_init: bad byte order for float format"));
     }
 
   tdep->jb_pc = ARM_NBSD_JB_PC;

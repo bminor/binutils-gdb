@@ -1,6 +1,6 @@
 /* Error reporting facilities.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,7 +19,7 @@
 
 #include "common-defs.h"
 #include "errors.h"
-#ifdef USE_WIN32API
+#if defined (USE_WIN32API) || defined(__CYGWIN__)
 #include <windows.h>
 #endif /* USE_WIN32API */
 
@@ -50,7 +50,7 @@ error (const char *fmt, ...)
 /* See gdbsupport/errors.h.  */
 
 void
-internal_error (const char *file, int line, const char *fmt, ...)
+internal_error_loc (const char *file, int line, const char *fmt, ...)
 {
   va_list ap;
 
@@ -62,7 +62,7 @@ internal_error (const char *file, int line, const char *fmt, ...)
 /* See gdbsupport/errors.h.  */
 
 void
-internal_warning (const char *file, int line, const char *fmt, ...)
+internal_warning_loc (const char *file, int line, const char *fmt, ...)
 {
   va_list ap;
 
@@ -71,7 +71,7 @@ internal_warning (const char *file, int line, const char *fmt, ...)
   va_end (ap);
 }
 
-#ifdef USE_WIN32API
+#if defined (USE_WIN32API) || defined(__CYGWIN__)
 
 /* See errors.h.  */
 

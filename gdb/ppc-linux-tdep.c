@@ -1,6 +1,6 @@
 /* Target-dependent code for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -249,8 +249,15 @@ ppc_linux_memory_remove_breakpoint (struct gdbarch *gdbarch,
 static enum return_value_convention
 ppc_linux_return_value (struct gdbarch *gdbarch, struct value *function,
 			struct type *valtype, struct regcache *regcache,
-			gdb_byte *readbuf, const gdb_byte *writebuf)
+			struct value **read_value, const gdb_byte *writebuf)
 {  
+  gdb_byte *readbuf = nullptr;
+  if (read_value != nullptr)
+    {
+      *read_value = allocate_value (valtype);
+      readbuf = value_contents_raw (*read_value).data ();
+    }
+
   if ((valtype->code () == TYPE_CODE_STRUCT
        || valtype->code () == TYPE_CODE_UNION)
       && !((valtype->length () == 16 || valtype->length () == 8)
@@ -1400,6 +1407,8 @@ ppc_canonicalize_syscall (int syscall, int wordsize)
       else
 	result = gdb_sys_fstatat64;
     }
+  else if (syscall == 317)
+    result = gdb_sys_pipe2;
   else if (syscall == 336)
     result = gdb_sys_recv;
   else if (syscall == 337)
@@ -1630,6 +1639,11 @@ ppc_linux_core_read_description (struct gdbarch *gdbarch,
 static void
 ppc_elfv2_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
 {
+  if ((sym->flags & BSF_SYNTHETIC) != 0)
+    /* ELFv2 synthetic symbols (the PLT stubs and the __glink_PLTresolve
+       trampoline) do not have a local entry point.  */
+    return;
+
   elf_symbol_type *elf_sym = (elf_symbol_type *)sym;
 
   /* If the symbol is marked as having a local entry point, set a target
@@ -1888,7 +1902,7 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
       record_tdep->size_time_t = 4;
     }
   else
-    internal_error (__FILE__, __LINE__, _("unexpected wordsize"));
+    internal_error (_("unexpected wordsize"));
 
   /* These values are the second argument of system call "sys_fcntl"
      and "sys_fcntl64".  They are obtained from Linux Kernel source.  */
@@ -2095,7 +2109,8 @@ ppc_linux_init_abi (struct gdbarch_info info,
 	 (well ignoring vectors that is).  When this was corrected, it
 	 wasn't fixed for GNU/Linux native platform.  Use the
 	 PowerOpen struct convention.  */
-      set_gdbarch_return_value (gdbarch, ppc_linux_return_value);
+      set_gdbarch_return_value_as_value (gdbarch, ppc_linux_return_value);
+      set_gdbarch_return_value (gdbarch, nullptr);
 
       set_gdbarch_memory_remove_breakpoint (gdbarch,
 					    ppc_linux_memory_remove_breakpoint);

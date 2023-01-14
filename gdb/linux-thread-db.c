@@ -1,6 +1,6 @@
 /* libthread_db assisted debugging support, generic parts.
 
-   Copyright (C) 1999-2022 Free Software Foundation, Inc.
+   Copyright (C) 1999-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1617,8 +1617,6 @@ void
 thread_db_target::update_thread_list ()
 {
   struct thread_db_info *info;
-
-  prune_threads ();
 
   for (inferior *inf : all_inferiors ())
     {

@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 #
-#   Copyright (C) 2012-2022 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2023 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -54,8 +54,8 @@ DEBUGINFOD_LIBS = @DEBUGINFOD_LIBS@
 WARN_CFLAGS = @WARN_CFLAGS@
 WARN_CFLAGS_FOR_BUILD = @WARN_CFLAGS_FOR_BUILD@
 NO_WERROR = @NO_WERROR@
-AM_CFLAGS = $(WARN_CFLAGS) $(ZLIBINC)
-AM_CFLAGS_FOR_BUILD = $(WARN_CFLAGS_FOR_BUILD) $(ZLIBINC)
+AM_CFLAGS = $(WARN_CFLAGS) $(ZLIBINC) $(ZSTD_CFLAGS)
+AM_CFLAGS_FOR_BUILD = $(WARN_CFLAGS_FOR_BUILD) $(ZLIBINC) $(ZSTD_CFLAGS)
 LIBICONV = @LIBICONV@
 
 # these two are almost the same program
@@ -176,6 +176,8 @@ LIBCTF =
 LIBCTF_NOBFD =
 endif
 
+LIBSFRAME = ../libsframe/libsframe.la
+
 LIBIBERTY = ../libiberty/libiberty.a
 
 POTFILES = $(CFILES) $(DEBUG_SRCS) $(HFILES)
@@ -226,7 +228,7 @@ installcheck-local:
 # which depends on libintl, since we don't know whether LIBINTL_DEP will be
 # non-empty until configure time.  Ugh!
 size_DEPENDENCIES =      $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
-objdump_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB) $(OPCODES) $(LIBCTF) $(OBJDUMP_PRIVATE_OFILES)
+objdump_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB) $(OPCODES) $(LIBCTF) $(OBJDUMP_PRIVATE_OFILES) $(LIBSFRAME)
 nm_new_DEPENDENCIES =    $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
 ar_DEPENDENCIES =        $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
 strings_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
@@ -241,7 +243,7 @@ dlltool_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
 windres_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
 windmc_DEPENDENCIES =    $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
 addr2line_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
-readelf_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY) $(LIBCTF_NOBFD)
+readelf_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY) $(LIBCTF_NOBFD) $(LIBSFRAME)
 elfedit_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY)
 dllwrap_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY)
 bfdtest1_DEPENDENCIES =  $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
@@ -256,7 +258,7 @@ objcopy_SOURCES = objcopy.c not-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 strings_SOURCES = strings.c $(BULIBS)
 
 readelf_SOURCES = readelf.c version.c unwind-ia64.c dwarf.c demanguse.c $(ELFLIBS)
-readelf_LDADD   = $(LIBCTF_NOBFD) $(LIBINTL) $(LIBIBERTY) $(ZLIB) $(DEBUGINFOD_LIBS) $(MSGPACK_LIBS)
+readelf_LDADD   = $(LIBCTF_NOBFD) $(LIBINTL) $(LIBIBERTY) $(ZLIB) $(ZSTD_LIBS) $(DEBUGINFOD_LIBS) $(MSGPACK_LIBS) $(LIBSFRAME)
 
 elfedit_SOURCES = elfedit.c version.c $(ELFLIBS)
 elfedit_LDADD = $(LIBINTL) $(LIBIBERTY)
@@ -267,7 +269,7 @@ nm_new_SOURCES = nm.c demanguse.c $(BULIBS)
 
 objdump_SOURCES = objdump.c dwarf.c prdbg.c demanguse.c $(DEBUG_SRCS) $(BULIBS) $(ELFLIBS)
 EXTRA_objdump_SOURCES = od-xcoff.c
-objdump_LDADD = $(OBJDUMP_PRIVATE_OFILES) $(OPCODES) $(LIBCTF) $(BFDLIB) $(LIBIBERTY) $(LIBINTL) $(DEBUGINFOD_LIBS)
+objdump_LDADD = $(OBJDUMP_PRIVATE_OFILES) $(OPCODES) $(LIBCTF) $(BFDLIB) $(LIBIBERTY) $(LIBINTL) $(DEBUGINFOD_LIBS) $(LIBSFRAME)
 
 objdump.@OBJEXT@:objdump.c
 if am__fastdepCC

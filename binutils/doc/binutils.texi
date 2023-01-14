@@ -10,7 +10,7 @@
 
 @copying
 @c man begin COPYRIGHT
-Copyright @copyright{} 1991-2022 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2023 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -2262,6 +2262,7 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{-wE}|@option{--dwarf=do-not-use-debuginfod}]
         [@option{-L}|@option{--process-links}]
         [@option{--ctf=}@var{section}]
+        [@option{--sframe=}@var{section}]
         [@option{-G}|@option{--stabs}]
         [@option{-t}|@option{--syms}]
         [@option{-T}|@option{--dynamic-syms}]
@@ -2273,6 +2274,7 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{--prefix-addresses}]
         [@option{--[no-]show-raw-insn}]
         [@option{--adjust-vma=}@var{offset}]
+        [@option{--show-all-symbols}]
         [@option{--dwarf-depth=@var{n}}]
         [@option{--dwarf-start=@var{n}}]
         [@option{--ctf-parent=}@var{section}]
@@ -2282,7 +2284,7 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{--prefix-strip=}@var{level}]
         [@option{--insn-width=}@var{width}]
         [@option{--visualize-jumps[=color|=extended-color|=off]}
-        [@option{--disassembler-color=[color|extended-color|off]}
+        [@option{--disassembler-color=[off|terminal|on|extended]}
         [@option{-U} @var{method}] [@option{--unicode=}@var{method}]
         [@option{-V}|@option{--version}]
         [@option{-H}|@option{--help}]
@@ -2524,6 +2526,12 @@ Specify the architecture to use when disassembling object files.  This
 can be useful when disassembling object files which do not describe
 architecture information, such as S-records.  You can list the available
 architectures with the @option{-i} option.
+
+For most architectures it is possible to supply an architecture
+name and a machine name, separated by a colon.  For example
+@samp{foo:bar} would refer to the @samp{bar} machine type in the
+@samp{foo} architecture.  This can be helpful if objdump has been
+configured to support multiple architectures.
 
 If the target is an ARM architecture then this switch has an
 additional effect.  It restricts the disassembly to only those
@@ -2777,6 +2785,10 @@ non-empty sections are displayed.
 Display source code intermixed with disassembly, if possible.  Implies
 @option{-d}.
 
+@item --show-all-symbols
+When disassembling, show all the symbols that match a given address,
+not just the first one.
+
 @item --source-comment[=@var{txt}]
 @cindex source disassembly
 @cindex disassembly, with source
@@ -2821,18 +2833,26 @@ If it is necessary to disable the @option{visualize-jumps} option
 after it has previously been enabled then use
 @option{visualize-jumps=off}.
 
-@item --disassembler-color=[color|extended-color|off]
-Apply syntax highlighting to the disassembler output.  The
-@option{color} argument adds color using simple terminal colors.
-Alternatively the @option{extended-color} argument will use 8bit
-colors, but these might not work on all terminals.
+@item --disassembler-color=off
+@itemx --disassembler-color=terminal
+@itemx --disassembler-color=on|color|colour
+@itemx --disassembler-color=extened|extended-color|extened-colour
+Enables or disables the use of colored syntax highlighting in
+disassembly output.  The default behaviour is determined via a
+configure time option.  Note, not all architectures support colored
+syntax highlighting, and depending upon the terminal used, colored
+output may not actually be legible.
 
-If it is necessary to disable the @option{--disassembler-color} option
-after it has previously been enabled then use
-@option{--disassembler-color=off}.
+The @option{on} argument adds colors using simple terminal colors.
 
-If this option is not specified then the default is to enable color
-output if displaying to a terminal, but not otherwise.
+The @option{terminal} argument does the same, but only if the output
+device is a terminal.
+
+The @option{extended-color} argument is similar to the @option{on}
+argument, but it uses 8-bit colors.  These may not work on all
+terminals.
+
+The @option{off} argument disables colored disassembly.
 
 @item -W[lLiaprmfFsoORtUuTgAckK]
 @itemx --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]
@@ -2842,6 +2862,8 @@ output if displaying to a terminal, but not otherwise.
 Enable additional checks for consistency of Dwarf information.
 
 @include ctf.options.texi
+
+@include sframe.options.texi
 
 @item -G
 @itemx --stabs
@@ -3364,7 +3386,7 @@ octal, @samp{x} for hexadecimal, or @samp{d} for decimal.
 @itemx --encoding=@var{encoding}
 Select the character encoding of the strings that are to be found.
 Possible values for @var{encoding} are: @samp{s} = single-7-bit-byte
-characters (ASCII, ISO 8859, etc., default), @samp{S} =
+characters (default), @samp{S} =
 single-8-bit-byte characters, @samp{b} = 16-bit bigendian, @samp{l} =
 16-bit littleendian, @samp{B} = 32-bit bigendian, @samp{L} = 32-bit
 littleendian.  Useful for finding wide character strings. (@samp{l}
@@ -4940,6 +4962,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{--ctf-parent=}@var{section}]
         [@option{--ctf-symbols=}@var{section}]
         [@option{--ctf-strings=}@var{section}]
+        [@option{--sframe=}@var{section}]
         [@option{-I}|@option{--histogram}]
         [@option{-v}|@option{--version}]
         [@option{-W}|@option{--wide}]

@@ -1,6 +1,6 @@
 /* Convert symbols from GDB to GCC
 
-   Copyright (C) 2014-2022 Free Software Foundation, Inc.
+   Copyright (C) 2014-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -115,7 +115,7 @@ convert_one_symbol (compile_c_instance *context,
 		 sym.symbol->print_name ());
 
 	case LOC_UNDEF:
-	  internal_error (__FILE__, __LINE__, _("LOC_UNDEF found for \"%s\"."),
+	  internal_error (_("LOC_UNDEF found for \"%s\"."),
 			  sym.symbol->print_name ());
 
 	case LOC_COMMON_BLOCK:

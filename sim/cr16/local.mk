@@ -1,6 +1,6 @@
 ## See sim/Makefile.am
 ##
-## Copyright (C) 2008-2022 Free Software Foundation, Inc.
+## Copyright (C) 2008-2023 Free Software Foundation, Inc.
 ## Contributed by M Ranga Swami Reddy <MR.Swami.Reddy@nsc.com>
 ##
 ## This program is free software; you can redistribute it and/or modify
@@ -16,13 +16,40 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+%C%_libsim_a_SOURCES =
+%C%_libsim_a_LIBADD = \
+	$(common_libcommon_a_OBJECTS) \
+	$(patsubst %,%D%/%,$(SIM_NEW_COMMON_OBJS)) \
+	$(patsubst %,%D%/dv-%.o,$(SIM_HW_DEVICES)) \
+	%D%/interp.o \
+	%D%/modules.o \
+	%D%/sim-resume.o \
+	%D%/simops.o \
+	%D%/table.o
+$(%C%_libsim_a_OBJECTS) $(%C%_libsim_a_LIBADD): %D%/hw-config.h
+
+noinst_LIBRARIES += %D%/libsim.a
+
+%D%/%.o: common/%.c ; $(SIM_COMPILE)
+-@am__include@ %D%/$(DEPDIR)/*.Po
+
+%C%_run_SOURCES =
+%C%_run_LDADD = \
+	%D%/nrun.o \
+	%D%/libsim.a \
+	$(SIM_COMMON_LIBS)
+
+noinst_PROGRAMS += %D%/run
+
+## List all generated headers to help Automake dependency tracking.
+BUILT_SOURCES += %D%/simops.h
 %C%_BUILD_OUTPUTS = \
 	%D%/gencode$(EXEEXT) \
-	%D%/simops.h \
 	%D%/table.c
 
 ## This makes sure build tools are available before building the arch-subdirs.
 SIM_ALL_RECURSIVE_DEPS += $(%C%_BUILD_OUTPUTS)
+%D%/modules.c: | $(%C%_BUILD_OUTPUTS)
 
 %C%_gencode_SOURCES = %D%/gencode.c
 %C%_gencode_LDADD = %D%/cr16-opc.o

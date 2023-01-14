@@ -1,6 +1,6 @@
 /* GNU/Linux/x86-64 specific low level interface, for the remote server
    for GDB.
-   Copyright (C) 2002-2022 Free Software Foundation, Inc.
+   Copyright (C) 2002-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -271,13 +271,12 @@ static /*const*/ int i386_regmap[] =
 
 #ifdef __x86_64__
 
-/* Returns true if the current inferior belongs to a x86-64 process,
-   per the tdesc.  */
+/* Returns true if THREAD belongs to a x86-64 process, per the tdesc.  */
 
 static int
-is_64bit_tdesc (void)
+is_64bit_tdesc (thread_info *thread)
 {
-  struct regcache *regcache = get_thread_regcache (current_thread, 0);
+  struct regcache *regcache = get_thread_regcache (thread, 0);
 
   return register_size (regcache->tdesc, 0) == 8;
 }
@@ -292,7 +291,9 @@ ps_get_thread_area (struct ps_prochandle *ph,
 		    lwpid_t lwpid, int idx, void **base)
 {
 #ifdef __x86_64__
-  int use_64bit = is_64bit_tdesc ();
+  lwp_info *lwp = find_lwp_pid (ptid_t (lwpid));
+  gdb_assert (lwp != nullptr);
+  int use_64bit = is_64bit_tdesc (get_lwp_thread (lwp));
 
   if (use_64bit)
     {
@@ -334,8 +335,10 @@ ps_get_thread_area (struct ps_prochandle *ph,
 int
 x86_target::low_get_thread_area (int lwpid, CORE_ADDR *addr)
 {
+  lwp_info *lwp = find_lwp_pid (ptid_t (lwpid));
+  gdb_assert (lwp != nullptr);
 #ifdef __x86_64__
-  int use_64bit = is_64bit_tdesc ();
+  int use_64bit = is_64bit_tdesc (get_lwp_thread (lwp));
 
   if (use_64bit)
     {
@@ -351,7 +354,6 @@ x86_target::low_get_thread_area (int lwpid, CORE_ADDR *addr)
 #endif
 
   {
-    struct lwp_info *lwp = find_lwp_pid (ptid_t (lwpid));
     struct thread_info *thr = get_lwp_thread (lwp);
     struct regcache *regcache = get_thread_regcache (thr, 1);
     unsigned int desc[4];
@@ -379,7 +381,7 @@ bool
 x86_target::low_cannot_store_register (int regno)
 {
 #ifdef __x86_64__
-  if (is_64bit_tdesc ())
+  if (is_64bit_tdesc (current_thread))
     return false;
 #endif
 
@@ -390,7 +392,7 @@ bool
 x86_target::low_cannot_fetch_register (int regno)
 {
 #ifdef __x86_64__
-  if (is_64bit_tdesc ())
+  if (is_64bit_tdesc (current_thread))
     return false;
 #endif
 
@@ -815,7 +817,7 @@ x86_target::low_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
   int is_elf64 = linux_pid_exe_is_elf_64_file (tid, &machine);
 
   /* Is the inferior 32-bit?  If so, then fixup the siginfo object.  */
-  if (!is_64bit_tdesc ())
+  if (!is_64bit_tdesc (current_thread))
       return amd64_linux_siginfo_fixup_common (ptrace, inf, direction,
 					       FIXUP_32);
   /* No fixup for native x32 GDB.  */
@@ -1078,7 +1080,7 @@ const regs_info *
 x86_target::get_regs_info ()
 {
 #ifdef __x86_64__
-  if (is_64bit_tdesc ())
+  if (is_64bit_tdesc (current_thread))
     return &amd64_linux_regs_info;
   else
 #endif
@@ -1553,7 +1555,7 @@ x86_target::install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
 					      char *err)
 {
 #ifdef __x86_64__
-  if (is_64bit_tdesc ())
+  if (is_64bit_tdesc (current_thread))
     return amd64_install_fast_tracepoint_jump_pad (tpoint, tpaddr,
 						   collector, lockaddr,
 						   orig_size, jump_entry,
@@ -1587,7 +1589,7 @@ x86_target::get_min_fast_tracepoint_insn_len ()
 #ifdef __x86_64__
   /*  On x86-64, 5-byte jump instructions with a 4-byte offset are always
       used for fast tracepoints.  */
-  if (is_64bit_tdesc ())
+  if (is_64bit_tdesc (current_thread))
     return 5;
 #endif
 
@@ -2931,7 +2933,7 @@ emit_ops *
 x86_target::emit_ops ()
 {
 #ifdef __x86_64__
-  if (is_64bit_tdesc ())
+  if (is_64bit_tdesc (current_thread))
     return &amd64_emit_ops;
   else
 #endif

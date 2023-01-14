@@ -1,4 +1,4 @@
-# Copyright 2009-2022 Free Software Foundation, Inc.
+# Copyright 2009-2023 Free Software Foundation, Inc.
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
@@ -85,7 +85,7 @@ foreach libsepdebug {NO IN SEP} { with_test_prefix "$libsepdebug" {
 
     clean_restart $executable
 
-    if ![runto_main] then {
+    if {![runto_main]} {
       return 0
     }
 

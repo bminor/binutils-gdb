@@ -1,6 +1,6 @@
 /* Low-level child interface to ptrace.
 
-   Copyright (C) 1988-2022 Free Software Foundation, Inc.
+   Copyright (C) 1988-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -163,7 +163,7 @@ inf_ptrace_target::attach (const char *args, int from_tty)
 #endif
 
   inferior_appeared (inf, pid);
-  inf->attach_flag = 1;
+  inf->attach_flag = true;
 
   /* Always add a main thread.  If some target extends the ptrace
      target, it should decorate the ptid later with more info.  */

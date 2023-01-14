@@ -1,4 +1,4 @@
-# Copyright 1992-2022 Free Software Foundation, Inc.
+# Copyright 1992-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -160,7 +160,7 @@ proc bitfield_signedness {} {
     }
 
     set test "most negative signed bitfield values"
-    if $has_signed_bitfields then {
+    if {$has_signed_bitfields} {
         gdb_test "print flags" "u1 = 0, u2 = 0, u3 = 0, s1 = -16384, s2 = -4294967296, s3 = -32768.*" $test
     } else {
 	unsupported $test
@@ -169,7 +169,7 @@ proc bitfield_signedness {} {
     continue_test break4 "#2"
 
     set test "signed bitfields containing -1"
-    if $has_signed_bitfields then {
+    if {$has_signed_bitfields} {
 	gdb_test "print flags" "u1 = 0, u2 = 0, u3 = 0, s1 = -1, s2 = -1, s3 = -1.*" $test
     } else {
 	unsupported $test
@@ -212,7 +212,7 @@ proc bitfield_set {} {
     gdb_test "print flags" "u1 = 0, u2 = 4294967296, u3 = 0, s1 = 0, s2 = 2147483648, s3 = 0.*" "long long bitfield values after set"
 
     set test "set long long signed bitfield negative"
-    if $has_signed_bitfields then {
+    if {$has_signed_bitfields} {
 	gdb_test_multiple "print flags.s2 = -1" $test {
 	    -re "warning: Value does not fit.*$gdb_prompt $" {
 		fail "$test"
@@ -226,7 +226,7 @@ proc bitfield_set {} {
     }
 
     set test  "long long bitfield values after set negative"
-    if $has_signed_bitfields then {
+    if {$has_signed_bitfields} {
 	gdb_test "print flags" "u1 = 0, u2 = 4294967296, u3 = 0, s1 = 0, s2 = -1, s3 = 0.*" $test
     } else {
 	unsupported $test

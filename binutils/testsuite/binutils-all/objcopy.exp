@@ -1,4 +1,4 @@
-#   Copyright (C) 1994-2022 Free Software Foundation, Inc.
+#   Copyright (C) 1994-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -130,7 +130,7 @@ setup_xfail "hppa*-*-*"
 setup_xfail "sh-*-coff*"
 setup_xfail "tic54x-*-*"
 clear_xfail "hppa*64*-*-hpux*" "hppa*-*-linux*" "hppa*-*-lites*"
-clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-rtems*" "hppa*-*-*elf*"
+clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-*elf*"
 objcopy_test "simple copy" bintest.s object "" ""
 
 # Test verilog data width
@@ -155,13 +155,13 @@ proc objcopy_test_verilog {testname} {
     }
 
     set got [binutils_run $OBJCOPY "-O verilog --verilog-data-width 0 $binfile $verilog-0.hex"]
-    if ![regexp "verilog data width must be at least 1 byte" $got] then {
+    if ![regexp "error: verilog data width must be 1, 2, 4, 8 or 16" $got] then {
 	fail "objcopy ($testname 0) {$got}"
     } else {
 	pass "objcopy ($testname 0)"
     }
 
-    foreach width {1 2 4 8} {
+    foreach width {1 2} {
 	set got [binutils_run $OBJCOPY "-O verilog --verilog-data-width $width $binfile $verilog-$width.hex"]
 	if ![string equal "" $got] then {
 	    fail "objcopy ($testname $width)"
@@ -172,6 +172,40 @@ proc objcopy_test_verilog {testname} {
 	} else {
 	    fail "objcopy ($testname $width)"
 	}
+    }
+
+    # 16-bit little-endian targets fail the following tests because the
+    # verilog backend does not convert from 16-bits to 32-bits before it
+    # converts from internal format to little endian format.
+    if { [istarget tic54*-*-*] || [istarget pdp11-*-*] } {
+	untested "verilog width-4 and width-8 tests"
+	return
+    }
+    
+    foreach width {4 8} {
+	set got [binutils_run $OBJCOPY "-O verilog --verilog-data-width $width $binfile $verilog-$width.hex"]
+	if ![string equal "" $got] then {
+	    fail "objcopy ($testname $width)"
+	}
+        send_log "regexp_diff $verilog-$width.hex $srcdir/$subdir/verilog-$width.hex\n"
+	if {! [regexp_diff "$verilog-$width.hex" "$srcdir/$subdir/verilog-$width.hex"]} {
+	    pass "objcopy ($testname $width)"
+	} else {
+	    fail "objcopy ($testname $width)"
+	}
+    }
+
+    # Test generating endian correct output.    
+    set testname "objcopy (verilog output endian-ness == input endian-ness)"
+    set got [binutils_run $OBJCOPY "-O verilog --verilog-data-width 4 $binfile $verilog-I4.hex"]
+    if ![string equal "" $got] then {
+	fail $testname
+    }
+    send_log "regexp_diff $verilog-I4.hex $srcdir/$subdir/verilog-I4.hex\n"
+    if {! [regexp_diff "$verilog-I4.hex" "$srcdir/$subdir/verilog-I4.hex"]} {
+	pass $testname 
+    } else {
+	fail $testname 
     }
 }
 
@@ -618,8 +652,7 @@ proc strip_test_with_saving_a_symbol { } {
 
     set exec_output [binutils_run $NM "$NMFLAGS $objfile"]
     set exec_output [prune_warnings $exec_output]
-    if {![regexp {^([0-9a-fA-F]+)?[ ]+[TD] main} $exec_output] \
-         && ![regexp {^([0-9a-fA-F]+)?[ ]+T _main} $exec_output]} {
+    if {![regexp {^([0-9a-fA-F]+)?[ ]+[TtDd] _?main} $exec_output]} {
 	fail $test
 	return
     }
@@ -868,8 +901,7 @@ proc strip_executable_with_saving_a_symbol { prog flags test1 test2 } {
 	regsub "^\[0-9a-fA-F\]+\[ \]+T Main\[\n\r\]+" $exec_output "" exec_output
     }
 
-    if {![regexp {^([0-9a-fA-F]+)?[ ]+[TD] main} $exec_output] \
-         && ![regexp {^([0-9a-fA-F]+)?[ ]+[TD] _main} $exec_output]} {
+    if {![regexp {^([0-9a-fA-F]+)?[ ]+[TtDd] _?main} $exec_output]} {
 	fail $test1
 	return
     }
@@ -1188,7 +1220,7 @@ if [is_elf_format] {
     setup_xfail "sh-*-coff*"
     setup_xfail "tic54x-*-*"
     clear_xfail "hppa*64*-*-hpux*" "hppa*-*-linux*" "hppa*-*-lites*"
-    clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-rtems*" "hppa*-*-*elf*"
+    clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-*elf*"
     objcopy_test "ELF unknown section type" unknown.s object "" ""
 
     objcopy_test_readelf "ELF group 1" group.s
@@ -1432,7 +1464,7 @@ setup_xfail "hppa*-*-*"
 setup_xfail "sh-*-coff*"
 setup_xfail "spu-*-*"
 clear_xfail "hppa*64*-*-hpux*" "hppa*-*-linux*" "hppa*-*-lites*"
-clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-rtems*" "hppa*-*-*elf*"
+clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-*elf*"
 if { [istarget pdp11-*-*] } {
     set src "pr25662-pdp11.s"
 } else {
@@ -1448,3 +1480,5 @@ if { [istarget *-*-cygwin] || [istarget *-*-mingw*] } {
 if { ![is_xcoff_format] } {
     objcopy_test "pr25662" $src executable "" $ldflags
 }
+
+run_dump_test "rename-section-01"

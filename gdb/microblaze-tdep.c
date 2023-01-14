@@ -1,6 +1,6 @@
 /* Target-dependent code for Xilinx MicroBlaze.
 
-   Copyright (C) 2009-2022 Free Software Foundation, Inc.
+   Copyright (C) 2009-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -533,8 +533,7 @@ microblaze_extract_return_value (struct type *type, struct regcache *regcache,
 	memcpy (valbuf, buf, type->length ());
 	return;
       default:
-	internal_error (__FILE__, __LINE__, 
-			_("Unsupported return value size requested"));
+	internal_error (_("Unsupported return value size requested"));
     }
 }
 
@@ -638,7 +637,6 @@ microblaze_register_g_packet_guesses (struct gdbarch *gdbarch)
 static struct gdbarch *
 microblaze_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   tdesc_arch_data_up tdesc_data;
   const struct target_desc *tdesc = info.target_desc;
 
@@ -684,8 +682,8 @@ microblaze_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   /* Allocate space for the new architecture.  */
-  microblaze_gdbarch_tdep *tdep = new microblaze_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new microblaze_gdbarch_tdep));
 
   set_gdbarch_long_double_bit (gdbarch, 128);
 

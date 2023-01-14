@@ -1,5 +1,5 @@
 /* Generic BFD support for file formats.
-   Copyright (C) 1990-2022 Free Software Foundation, Inc.
+   Copyright (C) 1990-2023 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -203,10 +203,36 @@ bfd_preserve_finish (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_preserve *preserve)
 }
 
 static void
-clear_warnmsg (const bfd_target *targ)
+print_warnmsg (struct per_xvec_message **list)
 {
-  const char **warn = _bfd_per_xvec_warn (targ);
-  *warn = NULL;
+  fflush (stdout);
+  fprintf (stderr, "%s: ", _bfd_get_error_program_name ());
+
+  for (struct per_xvec_message *warn = *list; warn; warn = warn->next)
+    {
+      fputs (warn->message, stderr);
+      fputc ('\n', stderr);
+    }
+  fflush (stderr);
+}
+
+static void
+clear_warnmsg (struct per_xvec_message **list)
+{
+  struct per_xvec_message *warn = *list;
+  while (warn)
+    {
+      struct per_xvec_message *next = warn->next;
+      free (warn);
+      warn = next;
+    }
+  *list = NULL;
+}
+
+static void
+null_error_handler (const char *fmt ATTRIBUTE_UNUSED,
+		    va_list ap ATTRIBUTE_UNUSED)
+{
 }
 
 /*
@@ -244,6 +270,8 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
   unsigned int initial_section_id = _bfd_section_id;
   struct bfd_preserve preserve, preserve_match;
   bfd_cleanup cleanup = NULL;
+  bfd_error_handler_type orig_error_handler;
+  static int in_check_format;
 
   if (matching != NULL)
     *matching = NULL;
@@ -272,6 +300,14 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
   abfd->format = format;
   save_targ = abfd->xvec;
 
+  /* Don't report errors on recursive calls checking the first element
+     of an archive.  */
+  if (in_check_format)
+    orig_error_handler = bfd_set_error_handler (null_error_handler);
+  else
+    orig_error_handler = _bfd_set_error_handler_caching (abfd);
+  ++in_check_format;
+
   preserve_match.marker = NULL;
   if (!bfd_preserve_save (abfd, &preserve, NULL))
     goto err_ret;
@@ -282,7 +318,6 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)	/* rewind! */
 	goto err_ret;
 
-      clear_warnmsg (abfd->xvec);
       cleanup = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
 
       if (cleanup)
@@ -349,7 +384,6 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
 	goto err_ret;
 
-      clear_warnmsg (abfd->xvec);
       cleanup = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
       if (cleanup)
 	{
@@ -514,13 +548,15 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       if (preserve_match.marker != NULL)
 	bfd_preserve_finish (abfd, &preserve_match);
       bfd_preserve_finish (abfd, &preserve);
+      bfd_set_error_handler (orig_error_handler);
 
-      if (!abfd->my_archive)
-	{
-	  const char **warn = _bfd_per_xvec_warn (abfd->xvec);
-	  if (*warn)
-	    _bfd_error_handler (*warn, abfd);
-	}
+      struct per_xvec_message **list = _bfd_per_xvec_warn (abfd->xvec, 0);
+      if (*list)
+	print_warnmsg (list);
+      list = _bfd_per_xvec_warn (NULL, 0);
+      for (size_t i = 0; i < _bfd_target_vector_entries + 1; i++)
+	clear_warnmsg (list++);
+      --in_check_format;
 
       /* File position has moved, BTW.  */
       return true;
@@ -536,10 +572,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       abfd->xvec = save_targ;
       abfd->format = bfd_unknown;
       free (matching_vector);
-      if (preserve_match.marker != NULL)
-	bfd_preserve_finish (abfd, &preserve_match);
-      bfd_preserve_restore (abfd, &preserve);
-      return false;
+      goto out;
     }
 
   /* Restore original target type and format.  */
@@ -563,9 +596,31 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
     free (matching_vector);
   if (cleanup)
     cleanup (abfd);
+ out:
   if (preserve_match.marker != NULL)
     bfd_preserve_finish (abfd, &preserve_match);
   bfd_preserve_restore (abfd, &preserve);
+  bfd_set_error_handler (orig_error_handler);
+  struct per_xvec_message **list = _bfd_per_xvec_warn (NULL, 0);
+  struct per_xvec_message **one = NULL;
+  for (size_t i = 0; i < _bfd_target_vector_entries + 1; i++)
+    {
+      if (list[i])
+	{
+	  if (!one)
+	    one = list + i;
+	  else
+	    {
+	      one = NULL;
+	      break;
+	    }
+	}
+    }
+  if (one)
+    print_warnmsg (one);
+  for (size_t i = 0; i < _bfd_target_vector_entries + 1; i++)
+    clear_warnmsg (list++);
+  --in_check_format;
   return false;
 }
 

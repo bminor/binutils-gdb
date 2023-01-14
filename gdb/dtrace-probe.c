@@ -1,6 +1,6 @@
 /* DTrace probe support for GDB.
 
-   Copyright (C) 2014-2022 Free Software Foundation, Inc.
+   Copyright (C) 2014-2023 Free Software Foundation, Inc.
 
    Contributed by Oracle, Inc.
 
@@ -655,8 +655,7 @@ dtrace_probe::get_arg_by_number (unsigned n, struct gdbarch *gdbarch)
     this->build_arg_exprs (gdbarch);
 
   if (n > m_args.size ())
-    internal_error (__FILE__, __LINE__,
-		    _("Probe '%s' has %d arguments, but GDB is requesting\n"
+    internal_error (_("Probe '%s' has %d arguments, but GDB is requesting\n"
 		      "argument %u.  This should not happen.  Please\n"
 		      "report this bug."),
 		    this->get_name ().c_str (),

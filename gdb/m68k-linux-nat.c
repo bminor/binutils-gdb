@@ -1,6 +1,6 @@
 /* Motorola m68k native support for GNU/Linux.
 
-   Copyright (C) 1996-2022 Free Software Foundation, Inc.
+   Copyright (C) 1996-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -445,8 +445,7 @@ m68k_linux_nat_target::fetch_registers (struct regcache *regcache, int regno)
       return;
     }
 
-  internal_error (__FILE__, __LINE__,
-		  _("Got request for bad register number %d."), regno);
+  internal_error (_("Got request for bad register number %d."), regno);
 }
 
 /* Store register REGNO back into the child process.  If REGNO is -1,
@@ -489,8 +488,7 @@ m68k_linux_nat_target::store_registers (struct regcache *regcache, int regno)
       return;
     }
 
-  internal_error (__FILE__, __LINE__,
-		  _("Got request to store bad register number %d."), regno);
+  internal_error (_("Got request to store bad register number %d."), regno);
 }
 
 

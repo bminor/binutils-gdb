@@ -120,7 +120,7 @@ dump_decode_rule(decode_table *rule,
     dumpf(indent, " (special_mask 0x%x)\n", rule->special_mask);
     dumpf(indent, " (special_value 0x%x)\n", rule->special_value);
     dumpf(indent, " (special_constant 0x%x)\n", rule->special_constant);
-    dumpf(indent, " (next 0x%x)\n", rule->next);
+    dumpf(indent, " (next %p)\n", rule->next);
   }
   dumpf(indent, " )\n");
 }

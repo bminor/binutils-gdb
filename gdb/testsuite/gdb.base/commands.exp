@@ -1,4 +1,4 @@
-#   Copyright 1988-2022 Free Software Foundation, Inc.
+#   Copyright 1988-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,6 +16,14 @@
 #
 # test special commands (if, while, etc)
 #
+
+# The skip_hw_watchpoint_tests checks if watchpoints are supported by the
+# processor.  On PowerPC, the check runs a small test program under gdb
+# to determine if the Power processor supports HW watchpoints.  The check
+# must be done before starting the test so as to not disrupt the execution
+# of the actual test.
+
+set skip_hw_watchpoint_tests_p [skip_hw_watchpoint_tests]
 
 standard_testfile
 
@@ -542,9 +550,10 @@ proc_with_prefix user_defined_command_manyargs_test {} {
 
 proc_with_prefix watchpoint_command_test {} {
     global gdb_prompt
+    global skip_hw_watchpoint_tests_p
 
     # Disable hardware watchpoints if necessary.
-    if [target_info exists gdb,no_hardware_watchpoints] {
+    if {$skip_hw_watchpoint_tests_p} {
 	gdb_test_no_output "set can-use-hw-watchpoints 0" ""
     }
 
@@ -705,8 +714,6 @@ maintenance deprecate set qqq_aaa"
     gdb_test "set qqq_aaa" \
 	"Warning: 'set qqq_aaa', an alias for the command 'set xxx_yyy', is deprecated\\.\r\n.*No alternative known\\..*" \
 	"deprecated alias with prefix give a warning"
-
-    file delete $file1
 }
 
 # Test that the help for a command does not show deprecated aliases.
@@ -839,7 +846,7 @@ proc_with_prefix stray_arg0_test { } {
 
 # Test that GDB is able to source a file with an indented comment.
 proc_with_prefix source_file_with_indented_comment {} {
-    set file1 [standard_output_file file1]
+    set file1 [standard_output_file source_file_with_indented_comment]
 
     set fd [open "$file1" w]
     puts $fd \
@@ -855,9 +862,9 @@ echo Done!\n}
 # Test that GDB can handle arguments when sourcing files recursively.
 # If the arguments are overwritten with ####### then the test has failed.
 proc_with_prefix recursive_source_test {} {
-    set file1 [standard_output_file file1]
-    set file2 [standard_output_file file2]
-    set file3 [standard_output_file file3]
+    set file1 [standard_output_file recursive_source_1]
+    set file2 [standard_output_file recursive_source_2]
+    set file3 [standard_output_file recursive_source_3]
 
     set fd [open "$file1" w]
     puts $fd \
@@ -883,10 +890,6 @@ end"
     gdb_test "source $file1" \
 	"1: <<<qwerty>>>\[\r\n]+in file3\[\r\n]+2: <<<qwerty>>>" \
 	"source file"
-
-    file delete $file1
-    file delete $file2
-    file delete $file3
 }
 
 proc gdb_test_no_prompt { command result msg } {

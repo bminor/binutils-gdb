@@ -1,5 +1,5 @@
 /* listing.c - maintain assembly listings
-   Copyright (C) 1991-2022 Free Software Foundation, Inc.
+   Copyright (C) 1991-2023 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1247,18 +1247,7 @@ listing_listing (char *name ATTRIBUTE_UNUSED)
 	  if (current_hll_file && list->hll_line && (listing & LISTING_HLL))
 	    print_source (current_hll_file, list, width);
 
-	  if (list->line_contents)
-	    {
-	      if (!((listing & LISTING_NODEBUG)
-		    && debugging_pseudo (list, list->line_contents)))
-		print_lines (list,
-			     list->file->linenum == 0 ? list->line : list->file->linenum,
-			     list->line_contents, calc_hex (list));
-
-	      free (list->line_contents);
-	      list->line_contents = NULL;
-	    }
-	  else
+	  if (!list->line_contents || list->file->linenum)
 	    {
 	      while (list->file->linenum < list_line
 		     && !list->file->at_end)
@@ -1276,6 +1265,17 @@ listing_listing (char *name ATTRIBUTE_UNUSED)
 			&& debugging_pseudo (list, p)))
 		    print_lines (list, list->file->linenum, p, address);
 		}
+	    }
+
+	  if (list->line_contents)
+	    {
+	      if (!((listing & LISTING_NODEBUG)
+		    && debugging_pseudo (list, list->line_contents)))
+		print_lines (list, list->line, list->line_contents,
+			     calc_hex (list));
+
+	      free (list->line_contents);
+	      list->line_contents = NULL;
 	    }
 
 	  if (list->edict == EDICT_EJECT)

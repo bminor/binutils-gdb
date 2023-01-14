@@ -1,6 +1,6 @@
 # This testcase is part of GDB, the GNU debugger.
 
-# Copyright 1996-2022 Free Software Foundation, Inc.
+# Copyright 1996-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -70,7 +70,7 @@ proc start_structs_test { types } {
     gdb_test_no_output "set print elements 300"
 
     # Advance to main
-    if { ![runto_main] } then {
+    if {![runto_main]} {
 	return
     }
 

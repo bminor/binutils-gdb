@@ -1,4 +1,4 @@
-/* Copyright 2014-2022 Free Software Foundation, Inc.
+/* Copyright 2014-2023 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -149,3 +149,4 @@ LELTP:
         .uleb128 0x1
         .byte   0x1
 LELT:
+	.section	.note.GNU-stack,"",@progbits

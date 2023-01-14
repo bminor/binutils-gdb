@@ -1,6 +1,6 @@
 /* Native-dependent code for FreeBSD.
 
-   Copyright (C) 2002-2022 Free Software Foundation, Inc.
+   Copyright (C) 2002-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -983,7 +983,7 @@ fbsd_nat_target::async (bool enable)
   if (enable)
     {
       if (!async_file_open ())
-	internal_error (__FILE__, __LINE__, "failed to create event pipe.");
+	internal_error ("failed to create event pipe.");
 
       add_file_handler (async_wait_fd (), handle_target_event, NULL, "fbsd-nat");
 
@@ -1732,19 +1732,20 @@ fbsd_nat_target::supports_disable_randomization ()
 bool
 fbsd_nat_target::fetch_register_set (struct regcache *regcache, int regnum,
 				     int fetch_op, const struct regset *regset,
-				     void *regs, size_t size)
+				     int regbase, void *regs, size_t size)
 {
   const struct regcache_map_entry *map
     = (const struct regcache_map_entry *) regset->regmap;
   pid_t pid = get_ptrace_pid (regcache->ptid ());
 
-  if (regnum == -1 || regcache_map_supplies (map, regnum, regcache->arch(),
-					     size))
+  if (regnum == -1
+      || (regnum >= regbase && regcache_map_supplies (map, regnum - regbase,
+						      regcache->arch(), size)))
     {
       if (ptrace (fetch_op, pid, (PTRACE_TYPE_ARG3) regs, 0) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
-      regcache->supply_regset (regset, regnum, regs, size);
+      regset->supply_regset (regset, regcache, regnum, regs, size);
       return true;
     }
   return false;
@@ -1755,20 +1756,21 @@ fbsd_nat_target::fetch_register_set (struct regcache *regcache, int regnum,
 bool
 fbsd_nat_target::store_register_set (struct regcache *regcache, int regnum,
 				     int fetch_op, int store_op,
-				     const struct regset *regset, void *regs,
-				     size_t size)
+				     const struct regset *regset, int regbase,
+				     void *regs, size_t size)
 {
   const struct regcache_map_entry *map
     = (const struct regcache_map_entry *) regset->regmap;
   pid_t pid = get_ptrace_pid (regcache->ptid ());
 
-  if (regnum == -1 || regcache_map_supplies (map, regnum, regcache->arch(),
-					     size))
+  if (regnum == -1
+      || (regnum >= regbase && regcache_map_supplies (map, regnum - regbase,
+						      regcache->arch(), size)))
     {
       if (ptrace (fetch_op, pid, (PTRACE_TYPE_ARG3) regs, 0) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
-      regcache->collect_regset (regset, regnum, regs, size);
+      regset->collect_regset (regset, regcache, regnum, regs, size);
 
       if (ptrace (store_op, pid, (PTRACE_TYPE_ARG3) regs, 0) == -1)
 	perror_with_name (_("Couldn't write registers"));
@@ -1796,15 +1798,16 @@ fbsd_nat_target::have_regset (ptid_t ptid, int note)
 
 bool
 fbsd_nat_target::fetch_regset (struct regcache *regcache, int regnum, int note,
-			       const struct regset *regset, void *regs,
-			       size_t size)
+			       const struct regset *regset, int regbase,
+			       void *regs, size_t size)
 {
   const struct regcache_map_entry *map
     = (const struct regcache_map_entry *) regset->regmap;
   pid_t pid = get_ptrace_pid (regcache->ptid ());
 
-  if (regnum == -1 || regcache_map_supplies (map, regnum, regcache->arch(),
-					     size))
+  if (regnum == -1
+      || (regnum >= regbase && regcache_map_supplies (map, regnum - regbase,
+						      regcache->arch(), size)))
     {
       struct iovec iov;
 
@@ -1813,7 +1816,7 @@ fbsd_nat_target::fetch_regset (struct regcache *regcache, int regnum, int note,
       if (ptrace (PT_GETREGSET, pid, (PTRACE_TYPE_ARG3) &iov, note) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
-      regcache->supply_regset (regset, regnum, regs, size);
+      regset->supply_regset (regset, regcache, regnum, regs, size);
       return true;
     }
   return false;
@@ -1821,15 +1824,16 @@ fbsd_nat_target::fetch_regset (struct regcache *regcache, int regnum, int note,
 
 bool
 fbsd_nat_target::store_regset (struct regcache *regcache, int regnum, int note,
-			       const struct regset *regset, void *regs,
-			       size_t size)
+			       const struct regset *regset, int regbase,
+			       void *regs, size_t size)
 {
   const struct regcache_map_entry *map
     = (const struct regcache_map_entry *) regset->regmap;
   pid_t pid = get_ptrace_pid (regcache->ptid ());
 
-  if (regnum == -1 || regcache_map_supplies (map, regnum, regcache->arch(),
-					     size))
+  if (regnum == -1
+      || (regnum >= regbase && regcache_map_supplies (map, regnum - regbase,
+						      regcache->arch(), size)))
     {
       struct iovec iov;
 
@@ -1838,7 +1842,7 @@ fbsd_nat_target::store_regset (struct regcache *regcache, int regnum, int note,
       if (ptrace (PT_GETREGSET, pid, (PTRACE_TYPE_ARG3) &iov, note) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
-      regcache->collect_regset (regset, regnum, regs, size);
+      regset->collect_regset (regset, regcache, regnum, regs, size);
 
       if (ptrace (PT_SETREGSET, pid, (PTRACE_TYPE_ARG3) &iov, note) == -1)
 	perror_with_name (_("Couldn't write registers"));

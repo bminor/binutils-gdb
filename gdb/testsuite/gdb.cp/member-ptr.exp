@@ -1,4 +1,4 @@
-# Copyright 1998-2022 Free Software Foundation, Inc.
+# Copyright 1998-2023 Free Software Foundation, Inc.
 
 # This file is part of the gdb testsuite
 
@@ -30,8 +30,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
     return -1
 }
 
-if ![runto_main] then {
-    perror "couldn't run to breakpoint"
+if {![runto_main]} {
     return
 }
 
@@ -628,3 +627,7 @@ gdb_test "print null_pmi = 0" "$vhn = NULL"
 gdb_test "print null_pmf" "$vhn = NULL"
 gdb_test "print null_pmf = &A::foo" "$vhn = \\(int \\(A::\\*\\)\\(A \\*( const)?, int\\)\\) $hex <A::foo ?\\(int\\)>"
 gdb_test "print null_pmf = 0" "$vhn = NULL"
+
+# Print with a format, bypassing the direct call to the scalar
+# printer.  See PR c++/29243.
+gdb_test "print/x contain" " = {member = $hex}"

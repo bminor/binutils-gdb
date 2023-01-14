@@ -1,4 +1,4 @@
-/* Copyright (C) 2013-2022 Free Software Foundation, Inc.
+/* Copyright (C) 2013-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -17,6 +17,7 @@
 
 #include "defs.h"
 #include "solib-aix.h"
+#include "solib.h"
 #include "solist.h"
 #include "inferior.h"
 #include "gdb_bfd.h"
@@ -27,15 +28,6 @@
 #include "observable.h"
 #include "gdbcmd.h"
 #include "gdbsupport/scope-exit.h"
-
-/* Variable controlling the output of the debugging traces for
-   this module.  */
-static bool solib_aix_debug;
-
-/* Print an "aix-solib" debug statement.  */
-
-#define solib_aix_debug_printf(fmt, ...) \
-  debug_prefixed_printf_cond (solib_aix_debug, "aix-solib",fmt, ##__VA_ARGS__)
 
 /* Our private data in struct so_list.  */
 
@@ -257,8 +249,8 @@ solib_aix_get_library_list (struct inferior *inf, const char *warning_msg)
       return data->library_list;
     }
 
-  solib_aix_debug_printf ("TARGET_OBJECT_LIBRARIES_AIX = %s",
-			  library_document->data ());
+  solib_debug_printf ("TARGET_OBJECT_LIBRARIES_AIX = %s",
+		      library_document->data ());
 
   data->library_list = solib_aix_parse_libraries (library_document->data ());
   if (!data->library_list.has_value () && warning_msg != NULL)
@@ -379,7 +371,7 @@ solib_aix_free_so (struct so_list *so)
 {
   lm_info_aix *li = (lm_info_aix *) so->lm_info;
 
-  solib_aix_debug_printf ("%s", so->so_name);
+  solib_debug_printf ("%s", so->so_name);
 
   delete li;
 }
@@ -688,8 +680,8 @@ solib_aix_get_toc_value (CORE_ADDR pc)
 
   result = data_osect->addr () + xcoff_get_toc_offset (pc_osect->objfile);
 
-  solib_aix_debug_printf ("pc=%s -> %s", core_addr_to_string (pc),
-			  core_addr_to_string (result));
+  solib_debug_printf ("pc=%s -> %s", core_addr_to_string (pc),
+		      core_addr_to_string (result));
 
   return result;
 }
@@ -706,15 +698,6 @@ solib_aix_normal_stop_observer (struct bpstat *unused_1, int unused_2)
      again.  This means that the list of shared libraries may have
      evolved.  Reset our cached value.  */
   data->library_list.reset ();
-}
-
-/* Implements the "show debug aix-solib" command.  */
-
-static void
-show_solib_aix_debug (struct ui_file *file, int from_tty,
-		      struct cmd_list_element *c, const char *value)
-{
-  gdb_printf (file, _("solib-aix debugging is %s.\n"), value);
 }
 
 /* The target_so_ops for AIX targets.  */
@@ -737,14 +720,4 @@ _initialize_solib_aix ()
 {
   gdb::observers::normal_stop.attach (solib_aix_normal_stop_observer,
 				      "solib-aix");
-
-  /* Debug this file's internals.  */
-  add_setshow_boolean_cmd ("aix-solib", class_maintenance,
-			   &solib_aix_debug, _("\
-Control the debugging traces for the solib-aix module."), _("\
-Show whether solib-aix debugging traces are enabled."), _("\
-When on, solib-aix debugging traces are enabled."),
-			    NULL,
-			    show_solib_aix_debug,
-			    &setdebuglist, &showdebuglist);
 }

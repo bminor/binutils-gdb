@@ -1,6 +1,6 @@
 /* DWARF 2 debugging format support for GDB.
 
-   Copyright (C) 1994-2022 Free Software Foundation, Inc.
+   Copyright (C) 1994-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -206,7 +206,7 @@ public:
 
      Don't access this field directly, use the get_header method instead.  It
      should be private, but we can't make it private at the moment.  */
-  mutable comp_unit_head m_header {};
+  mutable comp_unit_head m_header;
 
   /* The file and directory for this CU.  This is cached so that we
      don't need to re-examine the DWO in some situations.  This may be
@@ -760,5 +760,8 @@ extern void dwarf2_get_section_info (struct objfile *,
                                      enum dwarf2_section_enum,
 				     asection **, const gdb_byte **,
 				     bfd_size_type *);
+
+/* Return true if the producer of the inferior is clang.  */
+extern bool producer_is_clang (struct dwarf2_cu *cu);
 
 #endif /* DWARF2READ_H */

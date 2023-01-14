@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2022 Free Software Foundation, Inc.
+# Copyright (C) 2012-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -278,10 +278,8 @@ if {    ![istarget *c30*-*-*]
      && ![istarget ft32-*-*]
      && ![istarget h8300*-*-*]
      && ![istarget hppa*-*-*] } then {
-    # The vax fails because VMS can apparently actually handle this
-    # case in relocs, so gas doesn't handle it itself.
     # msp430, mn10[23]00 and riscv emit two relocs to handle the difference of two symbols.
-    setup_xfail "am3*-*-*" "mn10200-*-*" "mn10300*-*-*" "msp430*-*-*" "riscv*-*-*" "vax*-*-vms*"
+    setup_xfail "am3*-*-*" "mn10200-*-*" "mn10300*-*-*" "msp430*-*-*" "riscv*-*-*"
     do_930509a
 }
 
@@ -323,11 +321,9 @@ switch -glob $target_triplet {
 # We omit the ARM toolchains because they define locals to
 #  start with '.', which eliminates .eos, .text etc from the output.
 # Omit c54x, since .tag and .def mean something different on that target
-if {   ([istarget *-*-coff*] && ![istarget arm*-*-coff] && ![istarget *c4x*-*-coff] && ![istarget *c54x*-*-coff]) \
+if {   ([istarget *-*-coff*] && ![istarget *c4x*-*-coff] && ![istarget *c54x*-*-coff]) \
      ||([istarget *-*-pe*] && ![istarget arm*-*-pe*]) \
      || [istarget i*86-*-aix*] \
-     || [istarget i*86-*-sco*] \
-     || [istarget i*86-*-isc*] \
      || [istarget i*86-*-go32*] \
      || [istarget i*86-*-cygwin*] \
      || [istarget x86_64-*-mingw*] \

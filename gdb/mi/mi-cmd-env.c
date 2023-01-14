@@ -1,5 +1,5 @@
 /* MI Command Set - environment commands.
-   Copyright (C) 2002-2022 Free Software Foundation, Inc.
+   Copyright (C) 2002-2023 Free Software Foundation, Inc.
 
    Contributed by Red Hat Inc.
 
@@ -65,14 +65,6 @@ mi_cmd_env_pwd (const char *command, char **argv, int argc)
   if (argc > 0)
     error (_("-environment-pwd: No arguments allowed"));
 	  
-  if (mi_version (uiout) < 2)
-    {
-      env_execute_cli_command ("pwd", NULL);
-      return;
-    }
-     
-  /* Otherwise the mi level is 2 or higher.  */
-
   gdb::unique_xmalloc_ptr<char> cwd (getcwd (NULL, 0));
   if (cwd == NULL)
     error (_("-environment-pwd: error finding name of working directory: %s"),
@@ -126,14 +118,6 @@ mi_cmd_env_path (const char *command, char **argv, int argc)
 
   dont_repeat ();
 
-  if (mi_version (uiout) < 2)
-    {
-      for (i = argc - 1; i >= 0; --i)
-	env_execute_cli_command ("path", argv[i]);
-      return;
-    }
-
-  /* Otherwise the mi level is 2 or higher.  */
   while (1)
     {
       int opt = mi_getopt ("-environment-path", argc, argv, opts,
@@ -199,14 +183,6 @@ mi_cmd_env_dir (const char *command, char **argv, int argc)
 
   dont_repeat ();
 
-  if (mi_version (uiout) < 2)
-    {
-      for (i = argc - 1; i >= 0; --i)
-	env_execute_cli_command ("dir", argv[i]);
-      return;
-    }
-
-  /* Otherwise mi level is 2 or higher.  */
   while (1)
     {
       int opt = mi_getopt ("-environment-directory", argc, argv, opts,

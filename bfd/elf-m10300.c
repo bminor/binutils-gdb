@@ -1,5 +1,5 @@
 /* Matsushita 10300 specific support for 32-bit ELF
-   Copyright (C) 1996-2022 Free Software Foundation, Inc.
+   Copyright (C) 1996-2023 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -4431,6 +4431,13 @@ mn10300_elf_get_relocated_section_contents (bfd *output_bfd,
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
 
+  bfd_byte *orig_data = data;
+  if (data == NULL)
+    {
+      data = bfd_malloc (input_section->size);
+      if (data == NULL)
+	return NULL;
+    }
   memcpy (data, elf_section_data (input_section)->this_hdr.contents,
 	  (size_t) input_section->size);
 
@@ -4500,6 +4507,8 @@ mn10300_elf_get_relocated_section_contents (bfd *output_bfd,
     free (isymbuf);
   if (internal_relocs != elf_section_data (input_section)->relocs)
     free (internal_relocs);
+  if (orig_data == NULL)
+    free (data);
   return NULL;
 }
 

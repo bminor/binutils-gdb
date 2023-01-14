@@ -1,6 +1,6 @@
 // elfcpp.h -- main header file for elfcpp    -*- C++ -*-
 
-// Copyright (C) 2006-2022 Free Software Foundation, Inc.
+// Copyright (C) 2006-2023 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of elfcpp.
@@ -465,6 +465,7 @@ enum SHF
 enum
 {
   ELFCOMPRESS_ZLIB = 1,
+  ELFCOMPRESS_ZSTD = 2,
   ELFCOMPRESS_LOOS = 0x60000000,
   ELFCOMPRESS_HIOS = 0x6fffffff,
   ELFCOMPRESS_LOPROC = 0x70000000,

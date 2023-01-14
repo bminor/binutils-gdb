@@ -1,6 +1,6 @@
 /* Branch trace support for GDB, the GNU debugger.
 
-   Copyright (C) 2013-2022 Free Software Foundation, Inc.
+   Copyright (C) 2013-2023 Free Software Foundation, Inc.
 
    Contributed by Intel Corp. <markus.t.metzger@intel.com>
 
@@ -548,7 +548,7 @@ record_btrace_print_conf (const struct btrace_config *conf)
       return;
     }
 
-  internal_error (__FILE__, __LINE__, _("Unknown branch trace format."));
+  internal_error (_("Unknown branch trace format."));
 }
 
 /* The info_record method of target record-btrace.  */
@@ -2439,7 +2439,7 @@ record_btrace_step_thread (struct thread_info *tp)
   switch (flags)
     {
     default:
-      internal_error (__FILE__, __LINE__, _("invalid stepping type."));
+      internal_error (_("invalid stepping type."));
 
     case BTHR_STOP:
       return btrace_step_stopped_on_request ();

@@ -1,5 +1,5 @@
 /* BFD back-end for ALPHA Extended-Coff files.
-   Copyright (C) 1993-2022 Free Software Foundation, Inc.
+   Copyright (C) 1993-2023 Free Software Foundation, Inc.
    Modified from coff-mips.c by Steve Chamberlain <sac@cygnus.com> and
    Ian Lance Taylor <ian@cygnus.com>.
 
@@ -745,6 +745,7 @@ alpha_ecoff_get_relocated_section_contents (bfd *abfd,
   if (reloc_size < 0)
     return NULL;
 
+  bfd_byte *orig_data = data;
   if (!bfd_get_full_section_contents (input_bfd, input_section, &data))
     return NULL;
 
@@ -756,7 +757,7 @@ alpha_ecoff_get_relocated_section_contents (bfd *abfd,
 
   reloc_vector = (arelent **) bfd_malloc (reloc_size);
   if (reloc_vector == NULL)
-    return NULL;
+    goto error_return;
 
   reloc_count = bfd_canonicalize_reloc (input_bfd, input_section,
 					reloc_vector, symbols);
@@ -1138,6 +1139,8 @@ alpha_ecoff_get_relocated_section_contents (bfd *abfd,
 
  error_return:
   free (reloc_vector);
+  if (orig_data == NULL)
+    free (data);
   return NULL;
 }
 

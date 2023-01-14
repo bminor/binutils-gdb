@@ -1,6 +1,6 @@
 /* Target-dependent code for Renesas M32R, for GDB.
 
-   Copyright (C) 1996-2022 Free Software Foundation, Inc.
+   Copyright (C) 1996-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -861,16 +861,14 @@ static gdbarch_init_ftype m32r_gdbarch_init;
 static struct gdbarch *
 m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
-
   /* If there is already a candidate, use it.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
   if (arches != NULL)
     return arches->gdbarch;
 
   /* Allocate space for the new architecture.  */
-  m32r_gdbarch_tdep *tdep = new m32r_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new m32r_gdbarch_tdep));
 
   set_gdbarch_wchar_bit (gdbarch, 16);
   set_gdbarch_wchar_signed (gdbarch, 0);

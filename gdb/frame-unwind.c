@@ -1,6 +1,6 @@
 /* Definitions for frame unwinder, for GDB, the GNU debugger.
 
-   Copyright (C) 2003-2022 Free Software Foundation, Inc.
+   Copyright (C) 2003-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -207,7 +207,7 @@ frame_unwind_find_by_frame (frame_info_ptr this_frame, void **this_cache)
     if (frame_unwind_try_unwinder (this_frame, this_cache, entry->unwinder))
       return;
 
-  internal_error (__FILE__, __LINE__, _("frame_unwind_find_by_frame failed"));
+  internal_error (_("frame_unwind_find_by_frame failed"));
 }
 
 /* A default frame sniffer which always accepts the frame.  Used by

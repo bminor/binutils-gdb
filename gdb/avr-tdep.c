@@ -1,6 +1,6 @@
 /* Target-dependent code for Atmel AVR, for GDB.
 
-   Copyright (C) 1996-2022 Free Software Foundation, Inc.
+   Copyright (C) 1996-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -405,7 +405,7 @@ avr_pseudo_register_read (struct gdbarch *gdbarch, readable_regcache *regcache,
       store_unsigned_integer (buf, 4, gdbarch_byte_order (gdbarch), val);
       return status;
     default:
-      internal_error (__FILE__, __LINE__, _("invalid regnum"));
+      internal_error (_("invalid regnum"));
     }
 }
 
@@ -423,7 +423,7 @@ avr_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       regcache_raw_write_unsigned (regcache, AVR_PC_REGNUM, val);
       break;
     default:
-      internal_error (__FILE__, __LINE__, _("invalid regnum"));
+      internal_error (_("invalid regnum"));
     }
 }
 
@@ -1426,7 +1426,6 @@ avr_address_class_name_to_type_flags (struct gdbarch *gdbarch,
 static struct gdbarch *
 avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   struct gdbarch_list *best_arch;
   int call_length;
 
@@ -1466,8 +1465,9 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   /* None found, create a new architecture from the information provided.  */
-  avr_gdbarch_tdep *tdep = new avr_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new avr_gdbarch_tdep));
+  avr_gdbarch_tdep *tdep = gdbarch_tdep<avr_gdbarch_tdep> (gdbarch);
   
   tdep->call_length = call_length;
 

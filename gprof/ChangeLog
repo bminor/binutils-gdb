@@ -1,3 +1,27 @@
+2023-01-09  Nick Clifton  <nickc@redhat.com>
+
+	* po/eo.po: Updated Esperanto translation.
+
+2023-01-05  Nick Clifton  <nickc@redhat.com>
+
+	* po/bg.po: Updated Bulgarian translation.
+	* po/ru.po: Updated Russian translation.
+
+2023-01-03  Nick Clifton  <nickc@redhat.com>
+
+	* po/de.po: Updated German translation.
+	* po/ro.po: Updated Romainian translation.
+	* po/sv.po: Updated Swedish translation.
+	* po/uk.po: Updated Ukrainian translation.
+
+2022-12-31  Nick Clifton  <nickc@redhat.com>
+
+	* 2.40 branch created.
+
+2022-10-21  Nick Clifton  <nickc@redhat.com>
+
+	* po/hu.po: Updated Hungarian translation.
+
 2022-09-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 29627
@@ -142,7 +166,7 @@
 
 For older changes see ChangeLog-2020
 
-Copyright (C) 2021-2022 Free Software Foundation, Inc.
+Copyright (C) 2021-2023 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

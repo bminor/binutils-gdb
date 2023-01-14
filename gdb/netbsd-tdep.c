@@ -1,6 +1,6 @@
 /* Common target-dependent code for NetBSD systems.
 
-   Copyright (C) 2002-2022 Free Software Foundation, Inc.
+   Copyright (C) 2002-2023 Free Software Foundation, Inc.
 
    Contributed by Wasabi Systems, Inc.
   
@@ -601,7 +601,7 @@ nbsd_get_syscall_number (struct gdbarch *gdbarch, thread_info *thread)
      However, system call catching requires this function to be
      set.  */
 
-  internal_error (__FILE__, __LINE__, _("nbsd_get_sycall_number called"));
+  internal_error (_("nbsd_get_sycall_number called"));
 }
 
 /* See netbsd-tdep.h.  */

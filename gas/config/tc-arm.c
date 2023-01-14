@@ -1,5 +1,5 @@
 /* tc-arm.c -- Assemble for the ARM
-   Copyright (C) 1994-2022 Free Software Foundation, Inc.
+   Copyright (C) 1994-2023 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
 	Cirrus coprocessor mods by Aldy Hernandez (aldyh@redhat.com)
@@ -4929,6 +4929,22 @@ s_arm_unwind_pad (int ignored ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
+/* Parse an unwind_pacspval directive.  */
+
+static void
+s_arm_unwind_pacspval (int ignored ATTRIBUTE_UNUSED)
+{
+  valueT op;
+
+  if (!unwind.proc_start)
+    as_bad (MISSING_FNSTART);
+
+  demand_empty_rest_of_line ();
+
+  op = 0xb5;
+  add_unwind_opcode (op, 1);
+}
+
 /* Parse an unwind_setfp directive.  */
 
 static void
@@ -5205,6 +5221,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "vsave",		s_arm_unwind_save,	1 },
   { "movsp",		s_arm_unwind_movsp,	0 },
   { "pad",		s_arm_unwind_pad,	0 },
+  { "pacspval",		s_arm_unwind_pacspval,	0 },
   { "setfp",		s_arm_unwind_setfp,	0 },
   { "unwind_raw",	s_arm_unwind_raw,	0 },
   { "eabi_attribute",	s_arm_eabi_attribute,	0 },
@@ -31744,6 +31761,9 @@ static const struct arm_cpu_option_table arm_cpus[] =
 	       ARM_ARCH_NONE,
 	       FPU_NONE),
   ARM_CPU_OPT ("cortex-x1",   "Cortex-X1",	       ARM_ARCH_V8_2A,
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST | ARM_EXT2_SB),
+	       FPU_ARCH_DOTPROD_NEON_VFP_ARMV8),
+  ARM_CPU_OPT ("cortex-x1c",   "Cortex-X1C",	       ARM_ARCH_V8_2A,
 	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST | ARM_EXT2_SB),
 	       FPU_ARCH_DOTPROD_NEON_VFP_ARMV8),
   ARM_CPU_OPT ("exynos-m1",	  "Samsung Exynos M1", ARM_ARCH_V8A,

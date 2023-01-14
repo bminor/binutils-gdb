@@ -30,13 +30,15 @@ How to perform a release.
 
 Approx time to complete from here: 2 hours ....
 
+  2.5 If you have not built from the sources recently then now is the
+      time to check that they still work...
+
   3. When branch day arrives add markers for the upcoming release to
      the NEWS files in gas, ld, and binutils.  No need to update NEWS
      in the gold directory - it has its own release numbering.
 
      Likewise for the ChangeLog files in: bfd, binutils, config, cpu,
-     elfcpp, gas, gold, gprof, include, ld, libctf, libiberty, opcodes
-     and toplevel.
+     elfcpp, gas, gold, gprof, include, ld, libctf, opcodes and toplevel.
 
      Add a note of the name of the new branch to binutils/BRANCHES.
 
@@ -44,8 +46,8 @@ Approx time to complete from here: 2 hours ....
 
   4. Create the release branch using:
 
-	git branch binutils-2_40-branch
-        git push origin binutils-2_40-branch
+	git branch binutils-2_41-branch
+        git push origin binutils-2_41-branch
 
      If you get a message like:
      
@@ -55,7 +57,7 @@ Approx time to complete from here: 2 hours ....
 
   5. Make sure that the branch is there.  IE check out the branch sources:
   
-        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_40-branch 2.40
+        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_41-branch 2.41
 
      If you get a message about being in a "detached head" state, something
      has gone wrong...
@@ -77,27 +79,27 @@ Approx time to complete from here: 2 hours ....
      ask Joel Brobecker <brobecker AT adacore DOT com>.
 
   7. Rename the current HEAD version entry in Bugzilla, and create a
-     new one.  E.g. rename "2.38 (HEAD)" to 2.38, and create
-     "2.39 (HEAD)":
+     new one.  E.g. rename "2.41 (HEAD)" to 2.41, and create
+     "2.42 (HEAD)":
      
         https://sourceware.org/bugzilla/editversions.cgi?product=binutils
 
   8. Update bfd/version.m4 on HEAD to indicate that is now a snapshot
-     of the next release and the BRANCH to indicated that it is almost
+     of the next release and the BRANCH to indicate that it is almost
      ready for the release.
 
-     So if the release is going to be 2.40 then the version number on
-     the BRANCH should be set to 2.39.90 - ie almost, but not quite 2.40,
-     and the version number on the MAINLINE should be set to 2.40.50 -
-     ie half way to 2.41 release.
+     So if the release is going to be 2.41 then the version number on
+     the BRANCH should be set to 2.40.90 - ie almost, but not quite 2.41,
+     and the version number on the MAINLINE should be set to 2.41.50 -
+     ie half way to 2.42 release.
 
      So the branch bfd/version.m4 has:
      
-       m4_define([BFD_VERSION], [2.39.90])
+       m4_define([BFD_VERSION], [2.40.90])
        
      and the mainline has:
 
-       m4_define([BFD_VERSION], [2.40.50])
+       m4_define([BFD_VERSION], [2.41.50])
 
      Regenerate various files on both branch and HEAD by configuring
      with "--enable-maintainer-mode --enable-gold --enable-shared" and then building
@@ -119,14 +121,31 @@ Approx time to complete from here: 2 hours ....
 
           ./src-release.sh -x binutils
 
+        FIXME: Not sure if the following steps are needed...
+	
+	Add a .dirstamp file to the gas/doc subdirectory:
+
+          touch -d <today's date> binutils-2.<release>/gas/doc/.dirstamp
+          tar rvf binutils-<release>.tar binutils-<release>/gas/doc/.ditstamp
+          rm binutils-<release>.tar.xz
+          xz -9 binutils-<release>.tar
+
+          eg:
+	    touch -d 2023-06-01 binutils-2.40.90/gas/doc/.dirstamp
+	    tar rvf binutils-2.40.90.tar binutils-2.40.90/gas/doc/.ditstamp
+            rm binutils-2.40.90.tar.xz
+            xz -9 binutils-2.40.90.tar
+	    
+	 ...END OF FIXME   
+
      c. Build a test target using this tarball.
 
-           cp binutils-2.39.90.tar.xz /dev/shm
+           cp binutils-2.40.90.tar.xz /dev/shm
 	   pushd /dev/shm
-	   tar xvf binutils-2.39.90.tar.xz
+	   tar xvf binutils-2.40.90.tar.xz
 	   mkdir build
 	   cd build
-	   ../binutils-2.39.90/configure --quiet --enable-gold
+	   ../binutils-2.40.90/configure --quiet --enable-gold
 	   make
 	   popd
 
@@ -134,8 +153,8 @@ Approx time to complete from here: 2 hours ....
 
      d. Upload the pre-release snapshot to the sourceware FTP site:
 
-          scp binutils-2.39.90.tar.xz sourceware.org:/var/ftp/pub/binutils/snapshots
-          ssh sourceware.org sha256sum ~ftp/pub/binutils/snapshots/binutils-2.39.90.tar.xz
+          scp binutils-2.40.90.tar.xz sourceware.org:/var/ftp/pub/binutils/snapshots
+          ssh sourceware.org sha256sum ~ftp/pub/binutils/snapshots/binutils-2.40.90.tar.xz
 
      e. Clean up the source directory again.
 
@@ -365,6 +384,7 @@ When the time comes to actually make the release....
 	 cd ..
 	 put as.html
 	 put as.pdf
+	 
 	 cd bfd
 	 lcd ../../bfd/doc/bfd
 	 put *
@@ -372,6 +392,7 @@ When the time comes to actually make the release....
 	 lcd ..
 	 put bfd.html
 	 put bfd.pdf
+	 
 	 cd binutils
 	 lcd ../../binutils/binutils      <=== NB/ Path not like others
 	 put *
@@ -379,6 +400,7 @@ When the time comes to actually make the release....
 	 lcd ../doc
 	 put binutils.html
 	 put binutils.pdf
+	 
 	 cd gprof
 	 lcd ../../gprof/doc/gprof
 	 put *
@@ -386,6 +408,7 @@ When the time comes to actually make the release....
 	 lcd ../..
 	 put gprof.html
 	 put gprof.pdf
+	 
 	 cd ld
 	 lcd ../ld/doc/ld
 	 put *
@@ -393,6 +416,10 @@ When the time comes to actually make the release....
 	 lcd ../..
 	 put ld.html
 	 put ld.pdf
+	 
+	 lcd ../../gprofng/doc
+	 put gprofng.html
+	 put gprofng.pdf
 	 
       Edit the top level binutils index.html file to change the links
       to point to the new documentation.
@@ -611,7 +638,7 @@ Hi Everyone,
 
        https://sourceware.org/bugzilla/editmilestones.cgi?product=binutils
 
-Copyright (C) 2017-2022 Free Software Foundation, Inc.
+Copyright (C) 2017-2023 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

@@ -1,6 +1,6 @@
 # Expect script for linker support of STB_GNU_UNIQUE symbols
 #
-#   Copyright (C) 2009-2022 Free Software Foundation, Inc.
+#   Copyright (C) 2009-2023 Free Software Foundation, Inc.
 #   Contributed by Red Hat.
 #
 # This file is part of the GNU Binutils.
@@ -122,8 +122,14 @@ if [board_info [target_info name] exists cflags] {
   set board_cflags ""
 }
 
+if [board_info [target_info name] exists ldflags] {
+    set board_ldflags " [board_info [target_info name] ldflags]"
+} else {
+    set board_ldflags ""
+}
+
 # Create executable containing unique symbol.
-if ![ld_link "$CC_FOR_TARGET $NOPIE_LDFLAGS $board_cflags" "tmpdir/unique_prog" "tmpdir/unique.o"] {
+if ![ld_link "$CC_FOR_TARGET $NOPIE_LDFLAGS $board_cflags $board_ldflags" "tmpdir/unique_prog" "tmpdir/unique.o"] {
     fail "Could not link a unique executable"
     set fails [expr $fails + 1]
 }

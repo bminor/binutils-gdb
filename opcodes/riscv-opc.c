@@ -1,5 +1,5 @@
 /* RISC-V opcode list
-   Copyright (C) 2011-2022 Free Software Foundation, Inc.
+   Copyright (C) 2011-2023 Free Software Foundation, Inc.
 
    Contributed by Andrew Waterman (andrew@sifive.com).
    Based on MIPS target.
@@ -1922,14 +1922,22 @@ const struct riscv_opcode riscv_opcodes[] =
 {"th.mvnez",         0, INSN_CLASS_XTHEADCONDMOV, "d,s,t", MATCH_TH_MVNEZ, MASK_TH_MVNEZ, match_opcode, 0},
 
 /* Vendor-specific (T-Head) XTheadFMemIdx instructions.  */
-{"th.flrd",    0, INSN_CLASS_XTHEADFMEMIDX, "d,s,t,Xu2@25", MATCH_TH_FLRD,  MASK_TH_FLRD,  match_opcode, 0},
-{"th.flrw",    0, INSN_CLASS_XTHEADFMEMIDX, "d,s,t,Xu2@25", MATCH_TH_FLRW,  MASK_TH_FLRW,  match_opcode, 0},
-{"th.flurd",   0, INSN_CLASS_XTHEADFMEMIDX, "d,s,t,Xu2@25", MATCH_TH_FLURD, MASK_TH_FLURD, match_opcode, 0},
-{"th.flurw",   0, INSN_CLASS_XTHEADFMEMIDX, "d,s,t,Xu2@25", MATCH_TH_FLURW, MASK_TH_FLURW, match_opcode, 0},
-{"th.fsrd",    0, INSN_CLASS_XTHEADFMEMIDX, "d,s,t,Xu2@25", MATCH_TH_FSRD,  MASK_TH_FSRD,  match_opcode, 0},
-{"th.fsrw",    0, INSN_CLASS_XTHEADFMEMIDX, "d,s,t,Xu2@25", MATCH_TH_FSRW,  MASK_TH_FSRW,  match_opcode, 0},
-{"th.fsurd",   0, INSN_CLASS_XTHEADFMEMIDX, "d,s,t,Xu2@25", MATCH_TH_FSURD, MASK_TH_FSURD, match_opcode, 0},
-{"th.fsurw",   0, INSN_CLASS_XTHEADFMEMIDX, "d,s,t,Xu2@25", MATCH_TH_FSURW, MASK_TH_FSURW, match_opcode, 0},
+{"th.flrd",    0, INSN_CLASS_XTHEADFMEMIDX, "D,s,t,Xu2@25", MATCH_TH_FLRD,  MASK_TH_FLRD,  match_opcode, 0},
+{"th.flrw",    0, INSN_CLASS_XTHEADFMEMIDX, "D,s,t,Xu2@25", MATCH_TH_FLRW,  MASK_TH_FLRW,  match_opcode, 0},
+{"th.flurd",   0, INSN_CLASS_XTHEADFMEMIDX, "D,s,t,Xu2@25", MATCH_TH_FLURD, MASK_TH_FLURD, match_opcode, 0},
+{"th.flurw",   0, INSN_CLASS_XTHEADFMEMIDX, "D,s,t,Xu2@25", MATCH_TH_FLURW, MASK_TH_FLURW, match_opcode, 0},
+{"th.fsrd",    0, INSN_CLASS_XTHEADFMEMIDX, "D,s,t,Xu2@25", MATCH_TH_FSRD,  MASK_TH_FSRD,  match_opcode, 0},
+{"th.fsrw",    0, INSN_CLASS_XTHEADFMEMIDX, "D,s,t,Xu2@25", MATCH_TH_FSRW,  MASK_TH_FSRW,  match_opcode, 0},
+{"th.fsurd",   0, INSN_CLASS_XTHEADFMEMIDX, "D,s,t,Xu2@25", MATCH_TH_FSURD, MASK_TH_FSURD, match_opcode, 0},
+{"th.fsurw",   0, INSN_CLASS_XTHEADFMEMIDX, "D,s,t,Xu2@25", MATCH_TH_FSURW, MASK_TH_FSURW, match_opcode, 0},
+
+/* Vendor-specific (T-Head) XTheadFmv instructions.  */
+{"th.fmv.hw.x", 32, INSN_CLASS_XTHEADFMV, "d,S", MATCH_TH_FMV_HW_X,  MASK_TH_FMV_HW_X,  match_opcode, 0},
+{"th.fmv.x.hw", 32, INSN_CLASS_XTHEADFMV, "d,S", MATCH_TH_FMV_X_HW,  MASK_TH_FMV_X_HW,  match_opcode, 0},
+
+/* Vendor-specific (T-Head) XTheadInt instructions.  */
+{"th.ipop",  0, INSN_CLASS_XTHEADINT, "", MATCH_TH_IPOP,  MASK_TH_IPOP,  match_opcode, 0},
+{"th.ipush", 0, INSN_CLASS_XTHEADINT, "", MATCH_TH_IPUSH, MASK_TH_IPUSH, match_opcode, 0},
 
 /* Vendor-specific (T-Head) XTheadMemIdx instructions.  */
 {"th.ldia",  64, INSN_CLASS_XTHEADMEMIDX, "d,(s),Xs5@20,Xu2@25", MATCH_TH_LDIA,  MASK_TH_LDIA,  match_th_load_inc, 0},

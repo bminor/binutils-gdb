@@ -1,4 +1,4 @@
-# Copyright 2002-2022 Free Software Foundation, Inc.
+# Copyright 2002-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ set objfile  $binfile.o
 set corefile $binfile.test
 set core0file ${binfile}0.test
 
-if [istarget "*-*-linux"] then {
+if {[istarget "*-*-linux"]} {
     set target_cflags "-D_MIT_POSIX_THREADS"
 } else {
     set target_cflags ""
@@ -55,7 +55,7 @@ set nl "\[\r\n\]+"
 
 set timeout 30
 
-if { ! [ runto_main ] } then {
+if {![runto_main]} {
     return -1
 }
 
@@ -106,7 +106,7 @@ foreach symbol {__stack_user stack_used} {
 }
 
 if {"$core0file" != ""} {
-    gdb_test "gcore $core0file" "Saved corefile .*" "save a zeroed-threads corefile"
+    gdb_gcore_cmd $core0file "save a zeroed-threads corefile"
 }
 
 

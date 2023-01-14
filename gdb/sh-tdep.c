@@ -1,6 +1,6 @@
 /* Target-dependent code for Renesas Super-H, for GDB.
 
-   Copyright (C) 1993-2022 Free Software Foundation, Inc.
+   Copyright (C) 1993-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -49,7 +49,7 @@
 #include "elf/sh.h"
 #include "dwarf2.h"
 /* registers numbers shared with the simulator.  */
-#include "gdb/sim-sh.h"
+#include "sim/sim-sh.h"
 #include <algorithm>
 
 /* List of "set sh ..." and "show sh ..." commands.  */
@@ -2195,8 +2195,6 @@ sh_return_in_first_hidden_param_p (struct gdbarch *gdbarch,
 static struct gdbarch *
 sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
-
   /* If there is already a candidate, use it.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
   if (arches != NULL)
@@ -2204,8 +2202,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* None found, create a new architecture from the information
      provided.  */
-  sh_gdbarch_tdep *tdep = new sh_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new sh_gdbarch_tdep));
 
   set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_int_bit (gdbarch, 4 * TARGET_CHAR_BIT);

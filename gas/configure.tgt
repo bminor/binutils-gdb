@@ -1,6 +1,6 @@
 # gas target specific configuration file.  This is a -*- sh -*- file.
 #
-#   Copyright (C) 2012-2022 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2023 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -135,7 +135,7 @@ case ${generic_target} in
     esac ;;
   aarch64*-*-netbsd*)			fmt=elf em=nbsd;;
   aarch64*-*-openbsd*)			fmt=elf;;
-
+  aarch64*-*-pe* | aarch64*-*-mingw*)	fmt=coff em=pepaarch64 ;;
   alpha-*-*vms*)			fmt=evax ;;
   alpha-*-osf*)				fmt=ecoff ;;
   alpha-*-linux*ecoff*)			fmt=ecoff ;;
@@ -291,7 +291,6 @@ case ${generic_target} in
   m68hc12-*-* | m6812-*-*)		fmt=elf ;;
 
   m68k-*-elf*)				fmt=elf ;;
-  m68k-*-sysv4*)			fmt=elf em=svr4 ;;
   m68k-*-linux-*)			fmt=elf em=linux ;;
   m68k-*-uclinux*)			fmt=elf em=uclinux ;;
   m68k-*-gnu*)				fmt=elf ;;

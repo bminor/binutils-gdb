@@ -9,12 +9,18 @@
 [^:]*:17: Error: bad element type for instruction -- `vldrb.s64 q0,\[r0,q1\]'
 [^:]*:18: Warning: instruction is UNPREDICTABLE with PC operand
 [^:]*:19: Error: destination register and offset register may not be the same -- `vldrb.u32 q0,\[r0,q0\]'
-[^:]*:20: Warning: instruction is UNPREDICTABLE in an IT block
-[^:]*:20: Warning: instruction is UNPREDICTABLE in an IT block
-[^:]*:20: Warning: instruction is UNPREDICTABLE in an IT block
-[^:]*:20: Warning: instruction is UNPREDICTABLE in an IT block
-[^:]*:20: Warning: instruction is UNPREDICTABLE in an IT block
-[^:]*:20: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:4: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:20: *Info: macro .*
+[^:]*:4: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:20: *Info: macro .*
+[^:]*:4: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:20: *Info: macro .*
+[^:]*:4: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:20: *Info: macro .*
+[^:]*:4: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:20: *Info: macro .*
+[^:]*:4: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:20: *Info: macro .*
 [^:]*:22: Error: syntax error -- `vldrbeq.u32 q0,\[r0,q1\]'
 [^:]*:23: Error: syntax error -- `vldrbeq.u32 q0,\[r0,q1\]'
 [^:]*:25: Error: syntax error -- `vldrbeq.u32 q0,\[r0,q1\]'
@@ -27,12 +33,18 @@
 [^:]*:34: Error: bad element type for instruction -- `vldrh.s64 q0,\[r0,q1\]'
 [^:]*:35: Warning: instruction is UNPREDICTABLE with PC operand
 [^:]*:36: Error: destination register and offset register may not be the same -- `vldrh.u32 q0,\[r0,q0\]'
-[^:]*:37: Warning: instruction is UNPREDICTABLE in an IT block
-[^:]*:37: Warning: instruction is UNPREDICTABLE in an IT block
-[^:]*:37: Warning: instruction is UNPREDICTABLE in an IT block
-[^:]*:37: Warning: instruction is UNPREDICTABLE in an IT block
-[^:]*:37: Warning: instruction is UNPREDICTABLE in an IT block
-[^:]*:37: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:4: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:37: *Info: macro .*
+[^:]*:4: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:37: *Info: macro .*
+[^:]*:4: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:37: *Info: macro .*
+[^:]*:4: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:37: *Info: macro .*
+[^:]*:4: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:37: *Info: macro .*
+[^:]*:4: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:37: *Info: macro .*
 [^:]*:39: Error: syntax error -- `vldrheq.u32 q0,\[r0,q1\]'
 [^:]*:40: Error: syntax error -- `vldrheq.u32 q0,\[r0,q1\]'
 [^:]*:42: Error: syntax error -- `vldrheq.u32 q0,\[r0,q1\]'
@@ -43,12 +55,18 @@
 [^:]*:49: Error: bad element type for instruction -- `vldrw.s64 q0,\[r0,q1\]'
 [^:]*:50: Warning: instruction is UNPREDICTABLE with PC operand
 [^:]*:51: Error: destination register and offset register may not be the same -- `vldrw.u32 q0,\[r0,q0\]'
-[^:]*:52: Warning: instruction is UNPREDICTABLE in an IT block
-[^:]*:52: Warning: instruction is UNPREDICTABLE in an IT block
-[^:]*:52: Warning: instruction is UNPREDICTABLE in an IT block
-[^:]*:52: Warning: instruction is UNPREDICTABLE in an IT block
-[^:]*:52: Warning: instruction is UNPREDICTABLE in an IT block
-[^:]*:52: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:4: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:52: *Info: macro .*
+[^:]*:4: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:52: *Info: macro .*
+[^:]*:4: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:52: *Info: macro .*
+[^:]*:4: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:52: *Info: macro .*
+[^:]*:4: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:52: *Info: macro .*
+[^:]*:4: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:52: *Info: macro .*
 [^:]*:54: Error: syntax error -- `vldrweq.u32 q0,\[r0,q1\]'
 [^:]*:55: Error: syntax error -- `vldrweq.u32 q0,\[r0,q1\]'
 [^:]*:57: Error: syntax error -- `vldrweq.u32 q0,\[r0,q1\]'
@@ -67,12 +85,18 @@
 [^:]*:79: Error: bad element type for instruction -- `vldrd.u32 q0,\[r0,q1\]'
 [^:]*:80: Error: bad element type for instruction -- `vldrd.s32 q0,\[r0,q1\]'
 [^:]*:81: Error: bad element type for instruction -- `vldrd.f32 q0,\[r0,q1\]'
-[^:]*:82: Warning: instruction is UNPREDICTABLE in an IT block
-[^:]*:82: Warning: instruction is UNPREDICTABLE in an IT block
-[^:]*:82: Warning: instruction is UNPREDICTABLE in an IT block
-[^:]*:82: Warning: instruction is UNPREDICTABLE in an IT block
-[^:]*:82: Warning: instruction is UNPREDICTABLE in an IT block
-[^:]*:82: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:65: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:82: *Info: macro .*
+[^:]*:65: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:82: *Info: macro .*
+[^:]*:65: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:82: *Info: macro .*
+[^:]*:65: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:82: *Info: macro .*
+[^:]*:65: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:82: *Info: macro .*
+[^:]*:65: Warning: instruction is UNPREDICTABLE in an IT block
+[^:]*:82: *Info: macro .*
 [^:]*:84: Error: syntax error -- `vldrdeq.u64 q0,\[r0,q1\]'
 [^:]*:85: Error: syntax error -- `vldrdeq.u64 q0,\[r0,q1\]'
 [^:]*:87: Error: syntax error -- `vldrdeq.u64 q0,\[r0,q1\]'

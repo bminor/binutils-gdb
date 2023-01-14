@@ -1,6 +1,6 @@
 /* Solaris threads debugging interface.
 
-   Copyright (C) 1996-2022 Free Software Foundation, Inc.
+   Copyright (C) 1996-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -413,8 +413,8 @@ sol_thread_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
       if (ptid.pid () == -2)		/* Inactive thread.  */
 	error (_("This version of Solaris can't start inactive threads."));
       if (info_verbose && ptid.pid () == -1)
-	warning (_("Specified thread %ld seems to have terminated"),
-		 save_ptid.tid ());
+	warning (_("Specified thread %s seems to have terminated"),
+		 pulongest (save_ptid.tid ()));
     }
 
   beneath ()->resume (ptid, step, signo);
@@ -435,8 +435,8 @@ sol_thread_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
       if (ptid.pid () == -2)		/* Inactive thread.  */
 	error (_("This version of Solaris can't start inactive threads."));
       if (info_verbose && ptid.pid () == -1)
-	warning (_("Specified thread %ld seems to have terminated"),
-		 ptid_for_warning.tid ());
+	warning (_("Specified thread %s seems to have terminated"),
+		 pulongest (ptid_for_warning.tid ()));
     }
 
   ptid_t rtnval = beneath ()->wait (ptid, ourstatus, options);
@@ -973,14 +973,14 @@ sol_thread_target::pid_to_str (ptid_t ptid)
       lwp = thread_to_lwp (ptid, -2);
 
       if (lwp.pid () == -1)
-	return string_printf ("Thread %ld (defunct)",
-			      ptid.tid ());
+	return string_printf ("Thread %s (defunct)",
+			      pulongest (ptid.tid ()));
       else if (lwp.pid () != -2)
-	return string_printf ("Thread %ld (LWP %ld)",
-			      ptid.tid (), lwp.lwp ());
+	return string_printf ("Thread %s (LWP %ld)",
+			      pulongest (ptid.tid ()), lwp.lwp ());
       else
-	return string_printf ("Thread %ld        ",
-			      ptid.tid ());
+	return string_printf ("Thread %s          ",
+			      pulongest (ptid.tid ()));
     }
   else if (ptid.lwp () != 0)
     return string_printf ("LWP    %ld        ", ptid.lwp ());

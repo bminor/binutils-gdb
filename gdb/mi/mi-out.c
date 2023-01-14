@@ -1,6 +1,6 @@
 /* MI Command Set - output generating routines.
 
-   Copyright (C) 2000-2022 Free Software Foundation, Inc.
+   Copyright (C) 2000-2023 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions (a Red Hat company).
 
@@ -225,7 +225,7 @@ mi_ui_out::open (const char *name, ui_out_type type)
       break;
 
     default:
-      internal_error (__FILE__, __LINE__, _("bad switch"));
+      internal_error (_("bad switch"));
     }
 }
 
@@ -245,7 +245,7 @@ mi_ui_out::close (ui_out_type type)
       break;
 
     default:
-      internal_error (__FILE__, __LINE__, _("bad switch"));
+      internal_error (_("bad switch"));
     }
 
   m_suppress_field_separator = false;
@@ -257,6 +257,38 @@ mi_ui_out::main_stream ()
   gdb_assert (m_streams.size () == 1);
 
   return (string_file *) m_streams.back ();
+}
+
+/* Initialize a progress update to be displayed with
+   mi_ui_out::do_progress_notify.  */
+
+void
+mi_ui_out::do_progress_start ()
+{
+  m_progress_info.emplace_back ();
+}
+
+/* Indicate that a task described by MSG is in progress.  */
+
+void
+mi_ui_out::do_progress_notify (const std::string &msg, const char *unit,
+			       double cur, double total)
+{
+  mi_progress_info &info (m_progress_info.back ());
+
+  if (info.state == progress_update::START)
+    {
+      gdb_printf ("%s...\n", msg.c_str ());
+      info.state = progress_update::WORKING;
+    }
+}
+
+/* Remove the most recent progress update from the progress_info stack.  */
+
+void
+mi_ui_out::do_progress_end ()
+{
+  m_progress_info.pop_back ();
 }
 
 /* Clear the buffer.  */
@@ -315,9 +347,6 @@ mi_out_new (const char *mi_version)
 
   if (streq (mi_version, INTERP_MI2))
     return new mi_ui_out (2);
-
-  if (streq (mi_version, INTERP_MI1))
-    return new mi_ui_out (1);
 
   return nullptr;
 }

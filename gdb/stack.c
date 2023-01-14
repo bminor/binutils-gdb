@@ -1,6 +1,6 @@
 /* Print and select stack frames for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -479,7 +479,7 @@ print_frame_arg (const frame_print_options &fp_opts,
 		language = current_language;
 
 	      get_no_prettyformat_print_options (&vp_opts);
-	      vp_opts.deref_ref = 1;
+	      vp_opts.deref_ref = true;
 	      vp_opts.raw = fp_opts.print_raw_frame_arguments;
 
 	      /* True in "summary" mode, false otherwise.  */
@@ -996,8 +996,7 @@ print_frame_info_to_print_what (const char *print_frame_info)
     if (print_frame_info == print_frame_info_choices[i])
       return print_frame_info_print_what[i];
 
-  internal_error (__FILE__, __LINE__,
-		  "Unexpected print frame-info value `%s'.",
+  internal_error ("Unexpected print frame-info value `%s'.",
 		  print_frame_info);
 }
 
@@ -1047,6 +1046,8 @@ print_frame_info (const frame_print_options &fp_opts,
   int source_print;
   int location_print;
   struct ui_out *uiout = current_uiout;
+
+  frame.prepare_reinflate ();
 
   if (!current_uiout->is_mi_like_p ()
       && fp_opts.print_frame_info != print_frame_info_auto)
@@ -1680,8 +1681,12 @@ info_frame_command_core (frame_info_ptr fi, bool selected_frame_p)
 	    else
 	      gdb_printf (" %d args: ", numargs);
 	  }
+
+	fi.prepare_reinflate ();
 	print_frame_args (user_frame_print_options,
 			  func, fi, numargs, gdb_stdout);
+	fi.reinflate ();
+
 	gdb_puts ("\n");
       }
   }
@@ -2079,20 +2084,7 @@ backtrace_command_1 (const frame_print_options &fp_opts,
 
 	  print_frame_info (fp_opts, fi, 1, LOCATION, 1, 0);
 	  if ((flags & PRINT_LOCALS) != 0)
-	    {
-	      struct frame_id frame_id = get_frame_id (fi);
-
-	      print_frame_local_vars (fi, false, NULL, NULL, 1, gdb_stdout);
-
-	      /* print_frame_local_vars invalidates FI.  */
-	      fi = frame_find_by_id (frame_id);
-	      if (fi == NULL)
-		{
-		  trailing = NULL;
-		  warning (_("Unable to restore previously selected frame."));
-		  break;
-		}
-	    }
+	    print_frame_local_vars (fi, false, NULL, NULL, 1, gdb_stdout);
 
 	  /* Save the last frame to check for error conditions.  */
 	  fi.reinflate ();
@@ -2148,17 +2140,17 @@ parse_backtrace_qualifiers (const char *arg,
       if (this_arg.empty ())
 	return arg;
 
-      if (subset_compare (this_arg.c_str (), "no-filters"))
+      if (startswith ("no-filters", this_arg))
 	{
 	  if (bt_cmd_opts != nullptr)
 	    bt_cmd_opts->no_filters = true;
 	}
-      else if (subset_compare (this_arg.c_str (), "full"))
+      else if (startswith ("full", this_arg))
 	{
 	  if (bt_cmd_opts != nullptr)
 	    bt_cmd_opts->full = true;
 	}
-      else if (subset_compare (this_arg.c_str (), "hide"))
+      else if (startswith ("hide", this_arg))
 	{
 	  if (bt_cmd_opts != nullptr)
 	    bt_cmd_opts->hide = true;
@@ -2846,9 +2838,10 @@ return_command (const char *retval_exp, int from_tty)
 
       gdb_assert (rv_conv != RETURN_VALUE_STRUCT_CONVENTION
 		  && rv_conv != RETURN_VALUE_ABI_RETURNS_ADDRESS);
-      gdbarch_return_value (cache_arch, function, return_type,
-			    get_current_regcache (), NULL /*read*/,
-			    value_contents (return_value).data () /*write*/);
+      gdbarch_return_value_as_value
+	(cache_arch, function, return_type,
+	 get_current_regcache (), NULL /*read*/,
+	 value_contents (return_value).data () /*write*/);
     }
 
   /* If we are at the end of a call dummy now, pop the dummy frame

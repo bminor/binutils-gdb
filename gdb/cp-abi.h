@@ -3,7 +3,7 @@
 
    Contributed by Daniel Berlin <dberlin@redhat.com>
 
-   Copyright (C) 2001-2022 Free Software Foundation, Inc.
+   Copyright (C) 2001-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -247,7 +247,7 @@ struct cp_abi_ops
   struct type *(*get_typeid_type) (struct gdbarch *gdbarch);
   struct type *(*get_type_from_type_info) (struct value *value);
   std::string (*get_typename_from_type_info) (struct value *value);
-  CORE_ADDR (*skip_trampoline) (frame_info_ptr , CORE_ADDR);
+  CORE_ADDR (*skip_trampoline) (frame_info_ptr, CORE_ADDR);
   struct language_pass_by_ref_info (*pass_by_reference) (struct type *type);
 };
 

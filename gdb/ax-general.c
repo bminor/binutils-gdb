@@ -1,5 +1,5 @@
 /* Functions for manipulating expressions designed to be executed on the agent
-   Copyright (C) 1998-2022 Free Software Foundation, Inc.
+   Copyright (C) 1998-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -309,8 +309,7 @@ ax_tsv (struct agent_expr *x, enum agent_op op, int num)
 {
   /* Make sure the tsv number is in range.  */
   if (num < 0 || num > 0xffff)
-    internal_error (__FILE__, __LINE__, 
-		    _("ax-general.c (ax_tsv): variable "
+    internal_error (_("ax-general.c (ax_tsv): variable "
 		      "number is %d, out of range"), num);
 
   grow_expr (x, 3);
@@ -332,8 +331,7 @@ ax_string (struct agent_expr *x, const char *str, int slen)
 
   /* Make sure the string length is reasonable.  */
   if (slen < 0 || slen > 0xffff)
-    internal_error (__FILE__, __LINE__, 
-		    _("ax-general.c (ax_string): string "
+    internal_error (_("ax-general.c (ax_string): string "
 		      "length is %d, out of allowed range"), slen);
 
   grow_expr (x, 2 + slen + 1);

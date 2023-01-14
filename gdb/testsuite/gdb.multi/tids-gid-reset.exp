@@ -1,4 +1,4 @@
-# Copyright 2015-2022 Free Software Foundation, Inc.
+# Copyright 2015-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ with_test_prefix "single-inferior" {
     with_test_prefix "before restart" {
 	clean_restart ${testfile}
 
-	if { ![runto_main] } then {
+	if {![runto_main]} {
 	    return -1
 	}
 
@@ -40,7 +40,7 @@ with_test_prefix "single-inferior" {
 
     with_test_prefix "restart" {
 	gdb_continue_to_end
-	if { ![runto_main] } then {
+	if {![runto_main]} {
 	    return -1
 	}
     }
@@ -66,7 +66,7 @@ with_test_prefix "multi-inferior" {
     gdb_test "inferior 2" "Switching to inferior 2 .*" "switch to inferior 2"
     gdb_load ${binfile}
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return
     }
 
@@ -82,7 +82,7 @@ with_test_prefix "multi-inferior" {
 
     with_test_prefix "restart" {
 	gdb_continue_to_end
-	if { ![runto_main] } then {
+	if {![runto_main]} {
 	    return -1
 	}
     }

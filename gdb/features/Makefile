@@ -1,4 +1,4 @@
-# Copyright (C) 2007-2022 Free Software Foundation, Inc.
+# Copyright (C) 2007-2023 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -202,7 +202,6 @@ FEATURE_XMLFILES = aarch64-core.xml \
 	aarch64-fpu.xml \
 	aarch64-pauth.xml \
 	aarch64-mte.xml \
-	aarch64-tls.xml \
 	arc/v1-core.xml \
 	arc/v1-aux.xml \
 	arc/v2-core.xml \

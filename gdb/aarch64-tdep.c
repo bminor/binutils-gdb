@@ -1,6 +1,6 @@
 /* Common target dependent code for GDB on AArch64 systems.
 
-   Copyright (C) 2009-2022 Free Software Foundation, Inc.
+   Copyright (C) 2009-2023 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GDB.
@@ -1278,8 +1278,7 @@ aarch64_dwarf2_prev_register (frame_info_ptr this_frame,
       return frame_unwind_got_constant (this_frame, regnum, lr);
 
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("Unexpected register %d"), regnum);
+      internal_error (_("Unexpected register %d"), regnum);
     }
 }
 
@@ -2335,6 +2334,9 @@ aarch64_return_in_memory (struct gdbarch *gdbarch, struct type *type)
   int elements;
   struct type *fundamental_type;
 
+  if (TYPE_HAS_DYNAMIC_LENGTH (type))
+    return 1;
+
   if (aapcs_is_vfp_call_or_return_candidate (type, &elements,
 					     &fundamental_type))
     {
@@ -2447,9 +2449,8 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 static enum return_value_convention
 aarch64_return_value (struct gdbarch *gdbarch, struct value *func_value,
 		      struct type *valtype, struct regcache *regcache,
-		      gdb_byte *readbuf, const gdb_byte *writebuf)
+		      struct value **read_value, const gdb_byte *writebuf)
 {
-
   if (valtype->code () == TYPE_CODE_STRUCT
       || valtype->code () == TYPE_CODE_UNION
       || valtype->code () == TYPE_CODE_ARRAY)
@@ -2465,12 +2466,12 @@ aarch64_return_value (struct gdbarch *gdbarch, struct value *func_value,
 
 	  aarch64_debug_printf ("return value in memory");
 
-	  if (readbuf)
+	  if (read_value != nullptr)
 	    {
 	      CORE_ADDR addr;
 
 	      regcache->cooked_read (AARCH64_STRUCT_RETURN_REGNUM, &addr);
-	      read_memory (addr, readbuf, valtype->length ());
+	      *read_value = value_at_non_lval (valtype, addr);
 	    }
 
 	  return RETURN_VALUE_ABI_RETURNS_ADDRESS;
@@ -2480,8 +2481,12 @@ aarch64_return_value (struct gdbarch *gdbarch, struct value *func_value,
   if (writebuf)
     aarch64_store_return_value (valtype, regcache, writebuf);
 
-  if (readbuf)
-    aarch64_extract_return_value (valtype, regcache, readbuf);
+  if (read_value)
+    {
+      *read_value = allocate_value (valtype);
+      aarch64_extract_return_value (valtype, regcache,
+				    value_contents_raw (*read_value).data ());
+    }
 
   aarch64_debug_printf ("return value in registers");
 
@@ -2663,8 +2668,7 @@ aarch64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
   if (tdep->has_pauth () && regnum == tdep->ra_sign_state_regnum)
     return "";
 
-  internal_error (__FILE__, __LINE__,
-		  _("aarch64_pseudo_register_name: bad register number %d"),
+  internal_error (_("aarch64_pseudo_register_name: bad register number %d"),
 		  p_regnum);
 }
 
@@ -2703,8 +2707,7 @@ aarch64_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
   if (tdep->has_pauth () && regnum == tdep->ra_sign_state_regnum)
     return builtin_type (gdbarch)->builtin_uint64;
 
-  internal_error (__FILE__, __LINE__,
-		  _("aarch64_pseudo_register_type: bad register number %d"),
+  internal_error (_("aarch64_pseudo_register_type: bad register number %d"),
 		  p_regnum);
 }
 
@@ -2943,8 +2946,18 @@ aarch64_software_single_step (struct regcache *regcache)
   CORE_ADDR breaks[2] = { CORE_ADDR_MAX, CORE_ADDR_MAX };
   CORE_ADDR loc = pc;
   CORE_ADDR closing_insn = 0;
-  uint32_t insn = read_memory_unsigned_integer (loc, insn_size,
-						byte_order_for_code);
+
+  ULONGEST insn_from_memory;
+  if (!safe_read_memory_unsigned_integer (loc, insn_size,
+					  byte_order_for_code,
+					  &insn_from_memory))
+  {
+    /* Assume we don't have a atomic sequence, as we couldn't read the
+       instruction in this location.  */
+    return {};
+  }
+
+  uint32_t insn = insn_from_memory;
   int index;
   int insn_count;
   int bc_insn_count = 0; /* Conditional branch instruction count.  */
@@ -2961,9 +2974,17 @@ aarch64_software_single_step (struct regcache *regcache)
   for (insn_count = 0; insn_count < atomic_sequence_length; ++insn_count)
     {
       loc += insn_size;
-      insn = read_memory_unsigned_integer (loc, insn_size,
-					   byte_order_for_code);
 
+      if (!safe_read_memory_unsigned_integer (loc, insn_size,
+					      byte_order_for_code,
+					      &insn_from_memory))
+      {
+	/* Assume we don't have a atomic sequence, as we couldn't read the
+	   instruction in this location.  */
+	return {};
+      }
+
+      insn = insn_from_memory;
       if (aarch64_decode_insn (insn, &inst, 1, NULL) != 0)
 	return {};
       /* Check if the instruction is a conditional branch.  */
@@ -3262,9 +3283,15 @@ aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
 				  struct regcache *regs)
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
-  uint32_t insn = read_memory_unsigned_integer (from, 4, byte_order_for_code);
   struct aarch64_displaced_step_data dsd;
   aarch64_inst inst;
+  ULONGEST insn_from_memory;
+
+  if (!safe_read_memory_unsigned_integer (from, 4, byte_order_for_code,
+					  &insn_from_memory))
+    return nullptr;
+
+  uint32_t insn = insn_from_memory;
 
   if (aarch64_decode_insn (insn, &inst, 1, NULL) != 0)
     return NULL;
@@ -3444,8 +3471,18 @@ aarch64_features_from_target_desc (const struct target_desc *tdesc)
       = (tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.pauth") != nullptr);
   features.mte
       = (tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.mte") != nullptr);
-  features.tls
-      = (tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.tls") != nullptr);
+
+  const struct tdesc_feature *tls_feature
+    = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.tls");
+
+  if (tls_feature != nullptr)
+    {
+      /* We have TLS registers.  Find out how many.  */
+      if (tdesc_unnumbered_register (tls_feature, "tpidr2"))
+	features.tls = 2;
+      else
+	features.tls = 1;
+    }
 
   return features;
 }
@@ -3475,7 +3512,13 @@ aarch64_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
     return 0;
 
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
-  uint32_t insn = read_memory_unsigned_integer (pc, 4, byte_order_for_code);
+
+  ULONGEST insn_from_memory;
+  if (!safe_read_memory_unsigned_integer (pc, 4, byte_order_for_code,
+					  &insn_from_memory))
+    return 0;
+
+  uint32_t insn = insn_from_memory;
 
   aarch64_inst inst;
   if (aarch64_decode_insn (insn, &inst, 1, nullptr) != 0)
@@ -3499,11 +3542,11 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   bool valid_p = true;
   int i, num_regs = 0, num_pseudo_regs = 0;
   int first_pauth_regnum = -1, ra_sign_state_offset = -1;
-  int first_mte_regnum = -1, tls_regnum = -1;
+  int first_mte_regnum = -1, first_tls_regnum = -1;
   uint64_t vq = aarch64_get_tdesc_vq (info.target_desc);
 
   if (vq > AARCH64_MAX_SVE_VQ)
-    internal_error (__FILE__, __LINE__, _("VQ out of bounds: %s (max %d)"),
+    internal_error (_("VQ out of bounds: %s (max %d)"),
 		    pulongest (vq), AARCH64_MAX_SVE_VQ);
 
   /* If there is already a candidate, use it.  */
@@ -3587,15 +3630,38 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   /* Add the TLS register.  */
+  int tls_register_count = 0;
   if (feature_tls != nullptr)
     {
-      tls_regnum = num_regs;
-      /* Validate the descriptor provides the mandatory TLS register
-	 and allocate its number.  */
-      valid_p = tdesc_numbered_register (feature_tls, tdesc_data.get (),
-					 tls_regnum, "tpidr");
+      first_tls_regnum = num_regs;
 
-      num_regs++;
+      /* Look for the TLS registers.  tpidr is required, but tpidr2 is
+	 optional.  */
+      valid_p
+	= tdesc_numbered_register (feature_tls, tdesc_data.get (),
+				   first_tls_regnum, "tpidr");
+
+      if (valid_p)
+	{
+	  tls_register_count++;
+
+	  bool has_tpidr2
+	    = tdesc_numbered_register (feature_tls, tdesc_data.get (),
+				       first_tls_regnum + tls_register_count,
+				       "tpidr2");
+
+	  /* Figure out how many TLS registers we have.  */
+	  if (has_tpidr2)
+	    tls_register_count++;
+
+	  num_regs += tls_register_count;
+	}
+      else
+	{
+	  warning (_("Provided TLS register feature doesn't contain "
+		     "required tpidr register."));
+	  return nullptr;
+	}
     }
 
   /* Add the pauth registers.  */
@@ -3637,8 +3703,9 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* AArch64 code is always little-endian.  */
   info.byte_order_for_code = BFD_ENDIAN_LITTLE;
 
-  aarch64_gdbarch_tdep *tdep = new aarch64_gdbarch_tdep;
-  struct gdbarch *gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new aarch64_gdbarch_tdep));
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
 
   /* This should be low enough for everything.  */
   tdep->lowest_pc = 0x20;
@@ -3648,7 +3715,8 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->pauth_reg_base = first_pauth_regnum;
   tdep->ra_sign_state_regnum = -1;
   tdep->mte_reg_base = first_mte_regnum;
-  tdep->tls_regnum = tls_regnum;
+  tdep->tls_regnum_base = first_tls_regnum;
+  tdep->tls_register_count = tls_register_count;
 
   set_gdbarch_push_dummy_call (gdbarch, aarch64_push_dummy_call);
   set_gdbarch_frame_align (gdbarch, aarch64_frame_align);
@@ -3704,7 +3772,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, aarch64_dwarf_reg_to_regnum);
 
   /* Returning results.  */
-  set_gdbarch_return_value (gdbarch, aarch64_return_value);
+  set_gdbarch_return_value_as_value (gdbarch, aarch64_return_value);
 
   /* Disassembly.  */
   set_gdbarch_print_insn (gdbarch, aarch64_gdb_print_insn);
@@ -3780,7 +3848,7 @@ aarch64_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   if (tdep == NULL)
     return;
 
-  gdb_printf (file, _("aarch64_dump_tdep: Lowest pc = 0x%s"),
+  gdb_printf (file, _("aarch64_dump_tdep: Lowest pc = 0x%s\n"),
 	      paddress (gdbarch, tdep->lowest_pc));
 }
 

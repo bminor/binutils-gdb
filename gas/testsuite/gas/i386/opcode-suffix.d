@@ -593,6 +593,10 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	0f 4b 90 90 90 90 90 	cmovnpl -0x6f6f6f70\(%eax\),%edx
 [ 	]*[a-f0-9]+:	66 0f 4a 90 90 90 90 90 	cmovpw -0x6f6f6f70\(%eax\),%dx
 [ 	]*[a-f0-9]+:	66 0f 4b 90 90 90 90 90 	cmovnpw -0x6f6f6f70\(%eax\),%dx
+[ 	]*[a-f0-9]+:	df 28                	fildll \(%eax\)
+[ 	]*[a-f0-9]+:	df 28                	fildll \(%eax\)
+[ 	]*[a-f0-9]+:	df 38                	fistpll \(%eax\)
+[ 	]*[a-f0-9]+:	df 38                	fistpll \(%eax\)
  +[a-f0-9]+:	82 c3 01             	addb   \$0x1,%bl
  +[a-f0-9]+:	82 f3 01             	xorb   \$0x1,%bl
  +[a-f0-9]+:	82 d3 01             	adcb   \$0x1,%bl
@@ -601,5 +605,5 @@ Disassembly of section .text:
  +[a-f0-9]+:	82 eb 01             	subb   \$0x1,%bl
  +[a-f0-9]+:	82 f3 01             	xorb   \$0x1,%bl
  +[a-f0-9]+:	82 fb 01             	cmpb   \$0x1,%bl
- +[a-f0-9]+:	62 f3 7d 08 15 e8 ab 	vpextrw \$0xab,%xmm5,%eax
+ +[a-f0-9]+:	62 f3 7d 08 15 e8 ab 	\{evex\} vpextrw \$0xab,%xmm5,%eax
 #pass

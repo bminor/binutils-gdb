@@ -1,5 +1,5 @@
 /* Target operations for the remote server for GDB.
-   Copyright (C) 2002-2022 Free Software Foundation, Inc.
+   Copyright (C) 2002-2023 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
 
@@ -690,6 +690,12 @@ process_stratum_target::qxfer_libraries_svr4 (const char *annex,
 
 bool
 process_stratum_target::supports_agent ()
+{
+  return false;
+}
+
+bool
+process_stratum_target::supports_btrace ()
 {
   return false;
 }

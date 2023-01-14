@@ -1,5 +1,5 @@
 /* GDB-friendly replacement for <assert.h>.
-   Copyright (C) 2000-2022 Free Software Foundation, Inc.
+   Copyright (C) 2000-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -38,14 +38,14 @@
 /* This prints an "Assertion failed" message, asking the user if they
    want to continue, dump core, or just exit.  */
 #define gdb_assert_fail(assertion, file, line, function)                      \
-  internal_error (file, line, _("%s: Assertion `%s' failed."),                \
-		  function, assertion)
+  internal_error_loc (file, line, _("%s: Assertion `%s' failed."),                \
+		      function, assertion)
 
 /* The canonical form of gdb_assert (0).
    MESSAGE is a string to include in the error message.  */
 
 #define gdb_assert_not_reached(message, ...) \
-  internal_error (__FILE__, __LINE__, _("%s: " message), __func__, \
-		  ##__VA_ARGS__)
+  internal_error_loc (__FILE__, __LINE__, _("%s: " message), __func__, \
+		      ##__VA_ARGS__)
 
 #endif /* COMMON_GDB_ASSERT_H */

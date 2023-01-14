@@ -1,3 +1,12 @@
+2023-01-03  Luis Machado  <luis.machado@arm.com>
+
+	* elf/common.h (NT_ARM_SSVE): Define.
+	(NT_ARM_ZA): Define.
+
+2022-12-31  Nick Clifton  <nickc@redhat.com>
+
+	* 2.40 branch created.
+
 2022-10-03  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 
 	* diagnostics.h (DIAGNOSTIC_IGNORE_SELF_MOVE): Define for GCC 13+.
@@ -465,7 +474,7 @@
 
 For older changes see ChangeLog-2020
 
-Copyright (C) 2021-2022 Free Software Foundation, Inc.
+Copyright (C) 2021-2023 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

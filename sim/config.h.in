@@ -6,10 +6,6 @@
 /* Sim debug setting */
 #undef DEBUG
 
-/* Define to 1 if translation of program messages to the user's native
-   language is requested. */
-#undef ENABLE_NLS
-
 /* Define to the type of elements in the array set by `getgroups'. Usually
    this is either `int' or `gid_t'. */
 #undef GETGROUPS_T
@@ -124,18 +120,6 @@
 /* Define to 1 if you have the `kill' function. */
 #undef HAVE_KILL
 
-/* Define to 1 if you have the `dl' library (-ldl). */
-#undef HAVE_LIBDL
-
-/* Define to 1 if you have the `m' library (-lm). */
-#undef HAVE_LIBM
-
-/* Define to 1 if you have the `nsl' library (-lnsl). */
-#undef HAVE_LIBNSL
-
-/* Define to 1 if you have the `socket' library (-lsocket). */
-#undef HAVE_LIBSOCKET
-
 /* Define to 1 if you have the `link' function. */
 #undef HAVE_LINK
 
@@ -151,8 +135,14 @@
 /* Define to 1 if you have the `lseek' function. */
 #undef HAVE_LSEEK
 
+/* Define to 1 if you have the `lstat' function. */
+#undef HAVE_LSTAT
+
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
+
+/* Define to 1 if you have the `mkdir' function. */
+#undef HAVE_MKDIR
 
 /* Define to 1 if you have the `mmap' function. */
 #undef HAVE_MMAP
@@ -383,12 +373,6 @@
 /* Define to 1 if you have the <utime.h> header file. */
 #undef HAVE_UTIME_H
 
-/* Define to 1 if you have the <windows.h> header file. */
-#undef HAVE_WINDOWS_H
-
-/* Define to 1 if zstd is enabled. */
-#undef HAVE_ZSTD
-
 /* Define to 1 if the system has the type `__int128'. */
 #undef HAVE___INT128
 
@@ -483,6 +467,9 @@
 
 /* Sim cache szie */
 #undef WITH_SCACHE
+
+/* Sim SMP settings */
+#undef WITH_SMP
 
 /* How to route I/O */
 #undef WITH_STDIO

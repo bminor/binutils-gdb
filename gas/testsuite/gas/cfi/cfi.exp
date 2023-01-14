@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2022 Free Software Foundation, Inc.
+# Copyright (C) 2012-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -94,7 +94,7 @@ if  { [istarget "i*86-*-*"] || [istarget "x86_64-*-*"] } then {
     }
 
 } elseif [istarget "sh*-*"] then {
-    if { [istarget "*-pe" ] || [istarget "*-rtemscoff*"] } then {
+    if { [istarget "*-pe" ] } then {
 	return
     }
     run_dump_test "cfi-sh-1"

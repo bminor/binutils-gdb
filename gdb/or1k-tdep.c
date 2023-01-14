@@ -1,5 +1,5 @@
 /* Target-dependent code for the 32-bit OpenRISC 1000, for the GDB.
-   Copyright (C) 2008-2022 Free Software Foundation, Inc.
+   Copyright (C) 2008-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1142,7 +1142,6 @@ static const struct frame_unwind or1k_frame_unwind = {
 static struct gdbarch *
 or1k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   const struct bfd_arch_info *binfo;
   tdesc_arch_data_up tdesc_data;
   const struct target_desc *tdesc = info.target_desc;
@@ -1157,10 +1156,12 @@ or1k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      actually know which target we are talking to, but put in some defaults
      for now.  */
   binfo = info.bfd_arch_info;
-  or1k_gdbarch_tdep *tdep = new or1k_gdbarch_tdep;
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new or1k_gdbarch_tdep));
+  or1k_gdbarch_tdep *tdep = gdbarch_tdep<or1k_gdbarch_tdep> (gdbarch);
+
   tdep->bytes_per_word = binfo->bits_per_word / binfo->bits_per_byte;
   tdep->bytes_per_address = binfo->bits_per_address / binfo->bits_per_byte;
-  gdbarch = gdbarch_alloc (&info, tdep);
 
   /* Target data types */
   set_gdbarch_short_bit (gdbarch, 16);

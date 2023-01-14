@@ -1,6 +1,6 @@
 /* Everything about catch/throw catchpoints, for GDB.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -172,7 +172,7 @@ exception_catchpoint::check_status (struct bpstat *bs)
   std::string type_name;
 
   this->breakpoint::check_status (bs);
-  if (bs->stop == 0)
+  if (!bs->stop)
     return;
 
   if (self->pattern == NULL)
@@ -200,7 +200,7 @@ exception_catchpoint::check_status (struct bpstat *bs)
   if (name != nullptr)
     {
       if (self->pattern->exec (name, 0, NULL, 0) != 0)
-	bs->stop = 0;
+	bs->stop = false;
     }
 }
 
@@ -254,7 +254,7 @@ exception_catchpoint::print_it (const bpstat *bs) const
   bp_temp = disposition == disp_del;
   uiout->text (bp_temp ? "Temporary catchpoint "
 		       : "Catchpoint ");
-  uiout->field_signed ("bkptno", number);
+  print_num_locno (bs, uiout);
   uiout->text ((kind == EX_EVENT_THROW ? " (exception thrown), "
 		: (kind == EX_EVENT_CATCH ? " (exception caught), "
 		   : " (exception rethrown), ")));

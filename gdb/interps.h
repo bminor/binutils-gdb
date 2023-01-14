@@ -1,6 +1,6 @@
 /* Manages interpreters for GDB, the GNU debugger.
 
-   Copyright (C) 2000-2022 Free Software Foundation, Inc.
+   Copyright (C) 2000-2023 Free Software Foundation, Inc.
 
    Written by Jim Ingham <jingham@apple.com> of Apple Computer, Inc.
 
@@ -175,7 +175,6 @@ extern void interpreter_completer (struct cmd_list_element *ignore,
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"
-#define INTERP_MI1             "mi1"
 #define INTERP_MI2             "mi2"
 #define INTERP_MI3             "mi3"
 #define INTERP_MI4             "mi4"

@@ -1,6 +1,6 @@
 /* Parser for linespec for the GNU debugger, GDB.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1501,7 +1501,9 @@ decode_line_2 (struct linespec_state *self,
     {
       prompt = "> ";
     }
-  args = command_line_input (prompt, "overload-choice");
+
+  std::string buffer;
+  args = command_line_input (buffer, prompt, "overload-choice");
 
   if (args == 0 || *args == 0)
     error_no_arg (_("one or more choice numbers"));
@@ -2281,13 +2283,13 @@ convert_linespec_to_sals (struct linespec_state *state, linespec *ls)
 	/* Make sure we have a filename for canonicalization.  */
 	if (ls->explicit_loc.source_filename == NULL)
 	  {
-	    const char *fullname = symtab_to_fullname (state->default_symtab);
+	    const char *filename = state->default_symtab->filename;
 
 	    /* It may be more appropriate to keep DEFAULT_SYMTAB in its symtab
 	       form so that displaying SOURCE_FILENAME can follow the current
 	       FILENAME_DISPLAY_STRING setting.  But as it is used only rarely
 	       it has been kept for code simplicity only in absolute form.  */
-	    ls->explicit_loc.source_filename = xstrdup (fullname);
+	    ls->explicit_loc.source_filename = xstrdup (filename);
 	  }
     }
   else
@@ -4127,7 +4129,7 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
 	      struct minimal_symbol *msymbol,
 	      std::vector<symtab_and_line> *result)
 {
-  bool want_start_sal;
+  bool want_start_sal = false;
 
   CORE_ADDR func_addr;
   bool is_function = msymbol_is_function (objfile, msymbol, &func_addr);

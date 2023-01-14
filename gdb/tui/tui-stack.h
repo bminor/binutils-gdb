@@ -1,6 +1,6 @@
 /* TUI display locator.
 
-   Copyright (C) 1998-2022 Free Software Foundation, Inc.
+   Copyright (C) 1998-2023 Free Software Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -79,6 +79,6 @@ private:
 };
 
 extern void tui_show_locator_content (void);
-extern bool tui_show_frame_info (frame_info_ptr );
+extern bool tui_show_frame_info (frame_info_ptr);
 
 #endif /* TUI_TUI_STACK_H */

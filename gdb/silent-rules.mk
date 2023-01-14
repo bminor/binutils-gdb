@@ -18,4 +18,6 @@ ECHO_LEX  =   @echo "  LEX    $@";
 ECHO_AR =     @echo "  AR     $@";
 ECHO_RANLIB = @echo "  RANLIB $@";
 SILENCE = @
+# Silence libtool.
+SILENT_FLAG = --silent
 endif

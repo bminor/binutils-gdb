@@ -1,5 +1,5 @@
 /* bfdlink.h -- header file for BFD link routines
-   Copyright (C) 1993-2022 Free Software Foundation, Inc.
+   Copyright (C) 1993-2023 Free Software Foundation, Inc.
    Written by Steve Chamberlain and Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -561,9 +561,6 @@ struct bfd_link_info
 
   /* Separator between archive and filename in linker script filespecs.  */
   char path_separator;
-
-  /* Compress DWARF debug sections.  */
-  enum compressed_debug_section_type compress_debug;
 
   /* Default stack size.  Zero means default (often zero itself), -1
      means explicitly zero-sized.  */

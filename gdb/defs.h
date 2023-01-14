@@ -1,7 +1,7 @@
 /* *INDENT-OFF* */ /* ATTRIBUTE_PRINTF confuses indent, avoid running it
 		      for now.  */
 /* Basic, host-specific, and target-specific definitions for GDB.
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -316,7 +316,8 @@ typedef void initialize_file_ftype (void);
 
 extern char *gdb_readline_wrapper (const char *);
 
-extern const char *command_line_input (const char *, const char *);
+extern const char *command_line_input (std::string &cmd_line_buffer,
+				       const char *, const char *);
 
 extern void print_prompt (void);
 
@@ -340,8 +341,12 @@ extern const char *pc_prefix (CORE_ADDR);
 /* * Process memory area starting at ADDR with length SIZE.  Area is
    readable iff READ is non-zero, writable if WRITE is non-zero,
    executable if EXEC is non-zero.  Area is possibly changed against
-   its original file based copy if MODIFIED is non-zero.  DATA is
-   passed without changes from a caller.  */
+   its original file based copy if MODIFIED is non-zero.
+
+   MEMORY_TAGGED is true if the memory region contains memory tags, false
+   otherwise.
+
+   DATA is passed without changes from a caller.  */
 
 typedef int (*find_memory_region_ftype) (CORE_ADDR addr, unsigned long size,
 					 int read, int write, int exec,

@@ -1,6 +1,6 @@
 /* Target-dependent code for the IA-64 for GDB, the GNU debugger.
 
-   Copyright (C) 1999-2022 Free Software Foundation, Inc.
+   Copyright (C) 1999-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -713,8 +713,7 @@ ia64_memory_insert_breakpoint (struct gdbarch *gdbarch,
      a single instance by update_global_location_list.  */
   instr_breakpoint = slotN_contents (bundle, slotnum);
   if (instr_breakpoint == IA64_BREAKPOINT)
-    internal_error (__FILE__, __LINE__,
-		    _("Address %s already contains a breakpoint."),
+    internal_error (_("Address %s already contains a breakpoint."),
 		    paddress (gdbarch, bp_tgt->placed_address));
   replace_slotN_contents (bundle, IA64_BREAKPOINT, slotnum);
 
@@ -2538,7 +2537,7 @@ ia64_access_fpreg (unw_addr_space_t as, unw_regnum_t uw_regnum,
 		   unw_fpreg_t *val, int write, void *arg)
 {
   int regnum = ia64_uw2gdb_regnum (uw_regnum);
-  frame_info_ptr this_frame = (frame_info_ptr ) arg;
+  frame_info_ptr this_frame = (frame_info_ptr) arg;
   
   /* We never call any libunwind routines that need to write registers.  */
   gdb_assert (!write);
@@ -3919,15 +3918,14 @@ ia64_size_of_register_frame (frame_info_ptr this_frame, ULONGEST cfm)
 static struct gdbarch *
 ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
-
   /* If there is already a candidate, use it.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
   if (arches != NULL)
     return arches->gdbarch;
 
-  ia64_gdbarch_tdep *tdep = new ia64_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new ia64_gdbarch_tdep));
+  ia64_gdbarch_tdep *tdep = gdbarch_tdep<ia64_gdbarch_tdep> (gdbarch);
 
   tdep->size_of_register_frame = ia64_size_of_register_frame;
 

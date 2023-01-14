@@ -879,7 +879,7 @@ do_fstat(os_emul_data *emul,
 {
   int fd = cpu_registers(processor)->gpr[arg0];
   unsigned_word stat_buf_addr = cpu_registers(processor)->gpr[arg0+1];
-  struct stat buf;
+  struct stat buf = {};
   int status;
 #ifdef SYS_fstat
   SYS(fstat);

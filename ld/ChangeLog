@@ -1,3 +1,80 @@
+2023-01-06  Nick Clifton  <nickc@redhat.com>
+
+	* po/bg.po: Updated Bulgarian translation.
+
+2023-01-05  Nick Clifton  <nickc@redhat.com>
+
+	* configure.tgt: Add arm64pe as an extra emulation for aarch64pe.
+	* Makefile.am (ALL_64_EMULATION_SOURCES): Add earm64pe.c
+	* emultempl/pep.em: Add suppport for arm64pe emulation.
+	* Makefile.in: Regenerate.
+	* po/BLD-POTFILES.in: Regenerate.
+	* po/ld.pot: Regenerate.
+
+2023-01-05  Andreas K. Huettel  <dilfridge@gentoo.org>
+
+	* testsuite/ld-elf/shared.exp: un-xfail the PR19710 test for the
+	AArch64 architecture.
+
+2023-01-04  Andreas K. Huettel  <dilfridge@gentoo.org>
+
+	PR 29843
+	* testsuite/ld-aarch64/bti-plt-5.d: Relax regxps slightly to allow
+	for differences in build environments.
+	* testsuite/ld-aarch64/tls-relax-gdesc-le-now.d: Likewise.
+
+2023-01-03  Nick Clifton  <nickc@redhat.com>
+
+	* po/uk.po: Updated Ukrainian translation.
+
+2022-12-31  Nick Clifton  <nickc@redhat.com>
+
+	* 2.40 branch created.
+
+2022-12-21  Nick Clifton  <nickc@redhat.com>
+
+	PR 29900
+	* scripttempl/pe.sc: Keep the .drectve section when performing a
+	relocateable link.
+	* scripttempl/pep.sc: Likewise.
+
+2022-12-08  Nick Clifton  <nickc@redhat.com>
+
+	PR 29861
+	* ld.texi (Output Section Type): Note that setting the output
+	section type only works if the section contains untyped data.
+
+2022-12-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 29849
+	* ldlang.c (spec_match): Check that there is sufficient length in
+	the target name to match the spec's prefix.
+
+2022-11-03  Nick Clifton  <nickc@redhat.com>
+
+	PR 29748
+	* configure.tgt (ac_default_ld_warn_rwx_segments): Set to 0 for
+	the V850.
+
+2022-11-03  Nick Clifton  <nickc@redhat.com>
+
+	PR 29741
+	* scripttempl/avr.sc (__DATA_REGION_ORIGIN__): Define.  If a value
+	has not been provided on the command line then use DATA_ORIGIN.
+	(MEMORY): Use __DATA_REGION_ORIGIN__ as the start of the data region.
+
+2022-10-21  Nick Clifton  <nickc@redhat.com>
+
+	PR 29654
+	* ld.h (struct ld_config_type): Add no_warnings field.
+	* ldlex.h (enum option_values): Add OPTION_NO_WARNINGS.
+	* lexsup.c (ld_options): Add --no-warnings.
+	(parse_args): Add support for -w and --no-warnings.
+	* ldmisc.c (vfinfo): Return early if the message is a warning and
+	-w has been enabled.
+	* ld.texi (options): Document new command line option.
+	* NEWS: Mention the new feature.
+
 2022-08-30  Nick Clifton  <nickc@redhat.com>
 
 	PR 29529
@@ -1939,7 +2016,7 @@
 
 For older changes see ChangeLog-2020
 
-Copyright (C) 2021-2022 Free Software Foundation, Inc.
+Copyright (C) 2021-2023 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

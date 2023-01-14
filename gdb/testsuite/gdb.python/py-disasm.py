@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Free Software Foundation, Inc.
+# Copyright (C) 2021-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,6 +23,10 @@ from gdb.disassembler import Disassembler, DisassemblerResult
 # A global, holds the program-counter address at which we should
 # perform the extra disassembly that this script provides.
 current_pc = None
+
+
+def is_nop(s):
+    return s == "nop" or s == "nop\t0"
 
 
 # Remove all currently registered disassemblers.
@@ -581,7 +585,7 @@ class AnalyzingDisassembler(Disassembler):
         result = gdb.disassembler.builtin_disassemble(info)
 
         # Record some informaiton about the first 'nop' instruction we find.
-        if self._nop_index is None and result.string == "nop":
+        if self._nop_index is None and is_nop(result.string):
             self._nop_index = len(self._pass_1_length)
             # The offset in the following read_memory call defaults to 0.
             self._nop_bytes = info.read_memory(result.length)
@@ -616,7 +620,7 @@ class AnalyzingDisassembler(Disassembler):
             if (
                 idx > 0
                 and idx != nop_idx
-                and self._pass_1_insn[idx] != "nop"
+                and not is_nop(self._pass_1_insn[idx])
                 and self._pass_1_length[idx] > self._pass_1_length[nop_idx]
                 and self._pass_1_length[idx] % self._pass_1_length[nop_idx] == 0
             ):
@@ -631,7 +635,7 @@ class AnalyzingDisassembler(Disassembler):
                 if (
                     idx > 0
                     and idx != nop_idx
-                    and self._pass_1_insn[idx] != "nop"
+                    and not is_nop(self._pass_1_insn[idx])
                     and self._pass_1_length[idx] == self._pass_1_length[nop_idx]
                 ):
                     replace_idx = idx
@@ -654,7 +658,8 @@ class AnalyzingDisassembler(Disassembler):
         # identified above with a series of 'nop' instructions.
         self._check = list(self._pass_1_insn)
         nop_count = int(self._pass_1_length[replace_idx] / self._pass_1_length[nop_idx])
-        nops = ["nop"] * nop_count
+        nop_insn = self._pass_1_insn[nop_idx]
+        nops = [nop_insn] * nop_count
         self._check[replace_idx : (replace_idx + 1)] = nops
 
     def check(self):

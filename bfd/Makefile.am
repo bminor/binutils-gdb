@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 #
-#   Copyright (C) 2012-2022 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2023 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ BFD_H = bfd.h
 BFD32_LIBS = \
 	archive.lo archures.lo bfd.lo bfdio.lo bfdwin.lo cache.lo \
 	coff-bfd.lo compress.lo corefile.lo elf-properties.lo format.lo \
-	hash.lo init.lo libbfd.lo linker.lo merge.lo opncls.lo reloc.lo \
+	hash.lo libbfd.lo linker.lo merge.lo opncls.lo reloc.lo \
 	section.lo simple.lo stab-syms.lo stabs.lo syms.lo targets.lo \
 	binary.lo ihex.lo srec.lo tekhex.lo verilog.lo
 
@@ -86,7 +86,7 @@ BFD64_LIBS = archive64.lo
 BFD32_LIBS_CFILES = \
 	archive.c archures.c bfd.c bfdio.c bfdwin.c cache.c coff-bfd.c \
 	compress.c corefile.c elf-properties.c format.c hash.c \
-	init.c libbfd.c linker.c merge.c opncls.c reloc.c \
+	libbfd.c linker.c merge.c opncls.c reloc.c \
 	section.c simple.c stab-syms.c stabs.c syms.c targets.c \
 	binary.c ihex.c srec.c tekhex.c verilog.c
 
@@ -286,6 +286,7 @@ BFD32_BACKENDS = \
 	ecofflink.lo \
 	elf-attrs.lo \
 	elf-eh-frame.lo \
+	elf-sframe.lo \
 	elf-ifunc.lo \
 	elf-m10200.lo \
 	elf-m10300.lo \
@@ -392,6 +393,7 @@ BFD32_BACKENDS = \
 	wasm-module.lo \
 	xcofflink.lo \
 	xsym.lo \
+	xtensa-dynconfig.lo \
 	xtensa-isa.lo \
 	xtensa-modules.lo
 
@@ -419,6 +421,7 @@ BFD32_BACKENDS_CFILES = \
 	ecofflink.c \
 	elf-attrs.c \
 	elf-eh-frame.c \
+	elf-sframe.c \
 	elf-ifunc.c \
 	elf-m10200.c \
 	elf-m10300.c \
@@ -524,6 +527,7 @@ BFD32_BACKENDS_CFILES = \
 	wasm-module.c \
 	xcofflink.c \
 	xsym.c \
+	xtensa-dynconfig.c \
 	xtensa-isa.c \
 	xtensa-modules.c
 
@@ -578,6 +582,7 @@ BFD64_BACKENDS = \
 	pe-loongarch64igen.lo \
 	pe-x86_64.lo \
 	pei-aarch64.lo \
+	pe-aarch64.lo \
 	pei-ia64.lo \
 	pei-loongarch64.lo \
 	pei-x86_64.lo \
@@ -619,6 +624,7 @@ BFD64_BACKENDS_CFILES = \
 	mach-o-aarch64.c \
 	mach-o-x86-64.c \
 	mmo.c \
+	pe-aarch64.c \
 	pe-x86_64.c \
 	pei-aarch64.c \
 	pei-ia64.c \
@@ -627,7 +633,6 @@ BFD64_BACKENDS_CFILES = \
 	vms-alpha.c
 
 OPTIONAL_BACKENDS = \
-	aix386-core.lo \
 	cisco-core.lo \
 	hpux-core.lo \
 	irix-core.lo \
@@ -635,11 +640,9 @@ OPTIONAL_BACKENDS = \
 	netbsd-core.lo \
 	osf-core.lo \
 	rs6000-core.lo \
-	sco5-core.lo \
 	trad-core.lo
 
 OPTIONAL_BACKENDS_CFILES = \
-	aix386-core.c \
 	cisco-core.c \
 	hpux-core.c \
 	irix-core.c \
@@ -647,7 +650,6 @@ OPTIONAL_BACKENDS_CFILES = \
 	netbsd-core.c \
 	osf-core.c \
 	rs6000-core.c \
-	sco5-core.c \
 	trad-core.c
 
 # Reconfigure if config.bfd or configure.host changes.
@@ -775,8 +777,8 @@ ofiles: stamp-ofiles ; @true
 # dependency tracking fragments are picked up in the Makefile.
 libbfd_la_SOURCES = $(BFD32_LIBS_CFILES)
 EXTRA_libbfd_la_SOURCES = $(CFILES)
-libbfd_la_DEPENDENCIES = $(OFILES) ofiles
-libbfd_la_LIBADD = `cat ofiles` @SHARED_LIBADD@ $(LIBDL) $(ZLIB) $(ZSTD_LIBS)
+libbfd_la_DEPENDENCIES = $(OFILES) ofiles ../libsframe/libsframe.la
+libbfd_la_LIBADD = `cat ofiles` @SHARED_LIBADD@ $(LIBDL) $(ZLIB) $(ZSTD_LIBS) ../libsframe/libsframe.la
 libbfd_la_LDFLAGS += -release `cat libtool-soversion` @SHARED_LDFLAGS@
 
 # libtool will build .libs/libbfd.a.  We create libbfd.a in the build
@@ -921,13 +923,13 @@ stmp-bfd-h: bfd-in3.h
 	rm -f bfd-tmp.h
 	touch stmp-bfd-h
 
-BFD_H_FILES = bfd-in.h init.c opncls.c libbfd.c \
+BFD_H_FILES = bfd-in.h opncls.c libbfd.c \
 	bfdio.c bfdwin.c section.c archures.c reloc.c \
 	syms.c bfd.c archive.c corefile.c targets.c format.c \
 	linker.c simple.c compress.c
 BFD64_H_FILES = archive64.c
-LIBBFD_H_FILES = libbfd-in.h libbfd.c bfdio.c bfdwin.c \
-	cache.c reloc.c targets.c archures.c linker.c
+LIBBFD_H_FILES = libbfd-in.h libbfd.c bfd.c bfdio.c bfdwin.c \
+	cache.c reloc.c section.c targets.c archures.c linker.c
 LIBCOFF_H_FILES = libcoff-in.h coffcode.h
 
 headers: stmp-bin2-h stmp-lbfd-h stmp-lcoff-h

@@ -1,6 +1,6 @@
 /* main.c --- main function for stand-alone RL78 simulator.
 
-   Copyright (C) 2011-2022 Free Software Foundation, Inc.
+   Copyright (C) 2011-2023 Free Software Foundation, Inc.
    Contributed by Red Hat, Inc.
 
    This file is part of the GNU simulators.
@@ -64,10 +64,12 @@ main (int argc, char **argv)
   int save_trace;
   bfd *prog;
   int rc;
+  static const struct option longopts[] = { { 0 } };
 
   xmalloc_set_program_name (argv[0]);
 
-  while ((o = getopt (argc, argv, "tvdr:D:M:")) != -1)
+  while ((o = getopt_long (argc, argv, "tvdr:D:M:", longopts, NULL))
+	 != -1)
     {
       switch (o)
 	{

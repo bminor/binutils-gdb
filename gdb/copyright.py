@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# Copyright (C) 2011-2022 Free Software Foundation, Inc.
+# Copyright (C) 2011-2023 Free Software Foundation, Inc.
 #
 # This file is part of GDB.
 #
@@ -22,7 +22,7 @@
 This script updates the list of years in the copyright notices in
 most files maintained by the GDB project.
 
-Usage: cd src/gdb && python copyright.py
+Usage: cd src/gdb && ./copyright.py
 
 Always review the output of this script before committing it!
 A useful command to review the output is:
@@ -30,12 +30,14 @@ A useful command to review the output is:
 This removes the bulk of the changes which are most likely to be correct.
 """
 
+import argparse
 import datetime
 import locale
 import os
 import os.path
 import subprocess
 import sys
+from typing import List, Optional
 
 
 def get_update_list():
@@ -146,28 +148,34 @@ def may_have_copyright_notice(filename):
     # so just open the file as a byte stream. We only need to search
     # for a pattern that should be the same regardless of encoding,
     # so that should be good enough.
-    fd = open(filename, "rb")
-
-    lineno = 1
-    for line in fd:
-        if b"Copyright" in line:
-            return True
-        lineno += 1
-        if lineno > 50:
-            return False
+    with open(filename, "rb") as fd:
+        for lineno, line in enumerate(fd, start=1):
+            if b"Copyright" in line:
+                return True
+            if lineno > MAX_LINES:
+                break
     return False
 
 
-def main():
+def get_parser() -> argparse.ArgumentParser:
+    """Get a command line parser."""
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    return parser
+
+
+def main(argv: List[str]) -> Optional[int]:
     """The main subprogram."""
+    parser = get_parser()
+    _ = parser.parse_args(argv)
     root_dir = os.path.dirname(os.getcwd())
     os.chdir(root_dir)
 
     if not (
         os.path.isdir("gdb") and os.path.isfile("gnulib/import/extra/update-copyright")
     ):
-        print("Error: This script must be called from the gdb directory.")
-        sys.exit(1)
+        sys.exit("Error: This script must be called from the gdb directory.")
 
     update_list = get_update_list()
     update_files(update_list)
@@ -357,7 +365,7 @@ NOT_FSF_LIST = (
     "sim/ppc/hw_trace.c",
     "sim/ppc/emul_netbsd.h",
     "sim/ppc/psim.c",
-    "sim/ppc/ppc-instructions",
+    "sim/ppc/powerpc.igen",
     "sim/ppc/tree.h",
     "sim/ppc/README",
     "sim/ppc/gen-icache.h",
@@ -416,4 +424,4 @@ NOT_FSF_LIST = (
 )
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main(sys.argv[1:]))

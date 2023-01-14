@@ -1,4 +1,4 @@
-# Copyright (C) 1998-2022 Free Software Foundation, Inc.
+# Copyright (C) 1998-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,7 +39,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 # set it up at a breakpoint so we can play with the variable values
 #
 if {![runto_main]} {
-    perror "couldn't run to breakpoint"
     return
 }
 
@@ -380,7 +379,7 @@ gdb_test "info break" $bptable "breakpoint info (after setting on all)"
 
 # Run through each breakpoint.
 proc continue_to_bp_overloaded {bpnumber might_fail line argtype argument} {
-    global gdb_prompt hex decimal srcfile
+    global gdb_prompt hex decimal srcfile bkptno_num_re
 
     if {$argument == ""} {
         set actuals ""
@@ -398,11 +397,11 @@ proc continue_to_bp_overloaded {bpnumber might_fail line argtype argument} {
     }
 
     gdb_test_multiple "continue" "continue to bp overloaded : $argtype" {
-        -re "Continuing.\r\n\r\nBreakpoint $bpnumber, foo::overload1arg \\(this=${hex}(, )?$actuals\\) at .*$srcfile:$line\r\n$decimal\[\t \]+{ $body }.*$gdb_prompt $" {
+        -re "Continuing.\r\n\r\nBreakpoint $bkptno_num_re, foo::overload1arg \\(this=${hex}(, )?$actuals\\) at .*$srcfile:$line\r\n$decimal\[\t \]+{ $body }.*$gdb_prompt $" {
             pass "continue to bp overloaded : $argtype"
         }
 
-        -re "Continuing.\r\n\r\nBreakpoint $bpnumber, foo::overload1arg \\(this=${hex}, arg=.*\\) at .*$srcfile:$line\r\n$decimal\[\t \]+{ $body }.*$gdb_prompt $" {
+        -re "Continuing.\r\n\r\nBreakpoint $bkptno_num_re, foo::overload1arg \\(this=${hex}, arg=.*\\) at .*$srcfile:$line\r\n$decimal\[\t \]+{ $body }.*$gdb_prompt $" {
             if $might_kfail {
                 kfail "c++/8130" "continue to bp overloaded : $argtype"
             } else {

@@ -1,6 +1,6 @@
 /* Everything about load/unload catchpoints, for GDB.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -134,7 +134,7 @@ solib_catchpoint::check_status (struct bpstat *bs)
 	}
     }
 
-  bs->stop = 0;
+  bs->stop = false;
   bs->print_it = print_it_noop;
 }
 

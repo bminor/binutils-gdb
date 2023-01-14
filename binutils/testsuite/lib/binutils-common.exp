@@ -1,4 +1,4 @@
-# Copyright (C) 1993-2022 Free Software Foundation, Inc.
+# Copyright (C) 1993-2023 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -50,7 +50,6 @@ proc is_elf_format {} {
 	 && ![istarget *-*-rtems*]
 	 && ![istarget *-*-solaris2*]
 	 && ![istarget *-*-sysv4*]
-	 && ![istarget *-*-unixware*]
 	 && ![istarget *-*-wasm32*]
 	 && ![istarget avr-*-*]
 	 && ![istarget hppa*64*-*-hpux*]
@@ -63,8 +62,7 @@ proc is_elf_format {} {
 	return 0
     }
 
-    if { [istarget *-*-linux*ecoff*]
-	 || [istarget *-*-rtemscoff*] } {
+    if { [istarget *-*-linux*ecoff*] } {
 	return 0
     }
 
@@ -401,7 +399,7 @@ proc supports_noinit_section {} {
     #
     # arc-*-* is not included here, since it only supports .noinit with the
     # non-default arcv2elf emulation.
-    if {[istarget "arm-*-*"]
+    if { ([istarget "arm-*-*"] && ![istarget "arm*-linux-*"])
 	  || [istarget "avr-*-*"]
 	  || [istarget "msp430-*-*"]
 	  || [istarget "pru-*-*"] } {
@@ -420,7 +418,7 @@ proc supports_persistent_section {} {
 
     # Targets that set HAVE_PERSISTENT=yes in their emulparams script utilizing
     # elf.sc, or explicitly define a .persistent section in their linker script.
-    if { [istarget "arm-*-*"]
+    if { ([istarget "arm-*-*"] && ![istarget "arm*-linux-*"])
 	  || [istarget "msp430-*-*"] } {
 	return 1;
     }

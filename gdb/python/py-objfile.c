@@ -1,6 +1,6 @@
 /* Python interface to objfiles.
 
-   Copyright (C) 2008-2022 Free Software Foundation, Inc.
+   Copyright (C) 2008-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,6 +24,7 @@
 #include "language.h"
 #include "build-id.h"
 #include "symtab.h"
+#include "python.h"
 
 struct objfile_object
 {
@@ -584,57 +585,6 @@ objfpy_build_id_matches (const struct bfd_build_id *build_id,
   return 1;
 }
 
-/* Subroutine of gdbpy_lookup_objfile to simplify it.
-   Look up an objfile by its file name.  */
-
-static struct objfile *
-objfpy_lookup_objfile_by_name (const char *name)
-{
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
-      const char *filename;
-
-      if ((objfile->flags & OBJF_NOT_FILENAME) != 0)
-	continue;
-      /* Don't return separate debug files.  */
-      if (objfile->separate_debug_objfile_backlink != NULL)
-	continue;
-
-      filename = objfile_filename (objfile);
-      if (filename != NULL && compare_filenames_for_search (filename, name))
-	return objfile;
-      if (compare_filenames_for_search (objfile->original_name, name))
-	return objfile;
-    }
-
-  return NULL;
-}
-
-/* Subroutine of gdbpy_lookup_objfile to simplify it.
-   Look up an objfile by its build id.  */
-
-static struct objfile *
-objfpy_lookup_objfile_by_build_id (const char *build_id)
-{
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
-      const struct bfd_build_id *obfd_build_id;
-
-      if (objfile->obfd == NULL)
-	continue;
-      /* Don't return separate debug files.  */
-      if (objfile->separate_debug_objfile_backlink != NULL)
-	continue;
-      obfd_build_id = build_id_bfd_get (objfile->obfd.get ());
-      if (obfd_build_id == NULL)
-	continue;
-      if (objfpy_build_id_matches (obfd_build_id, build_id))
-	return objfile;
-    }
-
-  return NULL;
-}
-
 /* Implementation of gdb.lookup_objfile.  */
 
 PyObject *
@@ -644,7 +594,6 @@ gdbpy_lookup_objfile (PyObject *self, PyObject *args, PyObject *kw)
   const char *name;
   PyObject *by_build_id_obj = NULL;
   int by_build_id;
-  struct objfile *objfile;
 
   if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "s|O!", keywords,
 					&name, &PyBool_Type, &by_build_id_obj))
@@ -660,17 +609,64 @@ gdbpy_lookup_objfile (PyObject *self, PyObject *args, PyObject *kw)
       by_build_id = cmp;
     }
 
-  if (by_build_id)
+  if (by_build_id && !objfpy_build_id_ok (name))
     {
-      if (!objfpy_build_id_ok (name))
-	{
-	  PyErr_SetString (PyExc_TypeError, _("Not a valid build id."));
-	  return NULL;
-	}
-      objfile = objfpy_lookup_objfile_by_build_id (name);
+      PyErr_SetString (PyExc_TypeError, _("Not a valid build id."));
+      return NULL;
     }
+
+  struct objfile *objfile = nullptr;
+  if (by_build_id)
+    gdbarch_iterate_over_objfiles_in_search_order
+      (target_gdbarch (),
+       [&objfile, name] (struct objfile *obj)
+	 {
+	   /* Don't return separate debug files.  */
+	   if (obj->separate_debug_objfile_backlink != nullptr)
+	     return 0;
+
+	   bfd *obfd = obj->obfd.get ();
+	   if (obfd == nullptr)
+	     return 0;
+
+	   const bfd_build_id *obfd_build_id = build_id_bfd_get (obfd);
+	   if (obfd_build_id == nullptr)
+	     return 0;
+
+	   if (!objfpy_build_id_matches (obfd_build_id, name))
+	     return 0;
+
+	   objfile = obj;
+	   return 1;
+	 }, gdbpy_current_objfile);
   else
-    objfile = objfpy_lookup_objfile_by_name (name);
+    gdbarch_iterate_over_objfiles_in_search_order
+      (target_gdbarch (),
+       [&objfile, name] (struct objfile *obj)
+	 {
+	   /* Don't return separate debug files.  */
+	   if (obj->separate_debug_objfile_backlink != nullptr)
+	     return 0;
+
+	   if ((obj->flags & OBJF_NOT_FILENAME) != 0)
+	     return 0;
+
+	   const char *filename = objfile_filename (obj);
+	   if (filename != NULL
+	       && compare_filenames_for_search (filename, name))
+	     {
+	       objfile = obj;
+	       return 1;
+	     }
+
+	   if (compare_filenames_for_search (obj->original_name, name))
+	     {
+	       objfile = obj;
+	       return 1;
+	     }
+
+	   return 0;
+	 }, gdbpy_current_objfile);
 
   if (objfile != NULL)
     return objfile_to_objfile_object (objfile).release ();

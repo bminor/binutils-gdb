@@ -1,6 +1,6 @@
 /* GNU/Linux on ARM target support.
 
-   Copyright (C) 1999-2022 Free Software Foundation, Inc.
+   Copyright (C) 1999-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1759,8 +1759,7 @@ arm_linux_init_abi (struct gdbarch_info info,
       break;
     default:
       internal_error
-	(__FILE__, __LINE__,
-	 _("arm_linux_init_abi: Floating point model not supported"));
+	(_("arm_linux_init_abi: Floating point model not supported"));
       break;
     }
   tdep->jb_elt_size = ARM_LINUX_JB_ELEMENT_SIZE;

@@ -1,4 +1,4 @@
-#   Copyright 1988-2022 Free Software Foundation, Inc.
+#   Copyright 1988-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -184,7 +184,7 @@ gdb_expect {
     }
     -re "exec-file.*A program is being debugged already.  Kill it. .y or n.*$" {
 	send_gdb "n\n"
-	if $verbose>1 then {
+	if {$verbose > 1} {
 	    send_user "\tDidn't kill program being debugged\n"
 	}
 	gdb_expect -re "$gdb_prompt $" { }
@@ -208,7 +208,7 @@ gdb_expect {
 	    { pass "file" }
     -re ".*A program is being debugged already.  Kill it. .y or n.*$" {
 	send_gdb "n\n"
-	if $verbose>1 then {
+	if {$verbose > 1} {
 	    send_user "\t\tDidn't kill program being debugged\n"
 	}
 	gdb_expect -re "$gdb_prompt $" { }
@@ -584,6 +584,7 @@ set show_conv_list \
 	{$_thread = 0} \
 	{$_gthread = 0} \
 	{$_inferior = 1} \
+	{$_inferior_thread_count = 0} \
 	{$_exception = <error: No frame selected>} \
 	{$_probe_argc = <error: No frame selected>} \
 	{$_probe_arg0 = <error: No frame selected>} \
@@ -605,7 +606,7 @@ set show_conv_list \
 	{$_gdb_maint_setting = <internal function _gdb_maint_setting>} \
 	{$_gdb_setting_str = <internal function _gdb_setting_str>} \
 	{$_gdb_setting = <internal function _gdb_setting>} \
-	{$_gdb_major = 13} \
+	{$_gdb_major = 14} \
 	{$_gdb_minor = 1} \
 	{$_shell_exitsignal = void} \
 	{$_shell_exitcode = 0} \
@@ -747,7 +748,7 @@ gdb_expect {
     -re "No core file specified..*$gdb_prompt $" { pass "target core" }
     -re ".*A program is being debugged already.  Kill it. .y or n.*$" {
 	send_gdb "n\n"
-	if $verbose>1 then {
+	if {$verbose > 1} {
 	    send_user "\t\tDidn't kill program being debugged\n"
 	}
 	gdb_expect -re "$gdb_prompt $" { }
@@ -765,7 +766,7 @@ gdb_expect {
 			{ pass "target exec" }
 	-re ".*A program is being debugged already.  Kill it. .y or n.*$" {
 	    send_gdb "n\n"
-	    if $verbose>1 then {
+	    if {$verbose > 1} {
 		send_user "\t\tDidn't kill program being debugged\n"
 	    }
 	    gdb_expect -re "$gdb_prompt $" { }
@@ -782,7 +783,7 @@ gdb_expect {
 	{ pass "target remote" }
     -re ".*A program is being debugged already.  Kill it. .y or n.*$" {
 	send_gdb "n\n"
-	if $verbose>1 then {
+	if {$verbose > 1} {
 	    send_user "\t\tDidn't kill program being debugged\n"
 	}
 	gdb_expect -re "$gdb_prompt $" { }

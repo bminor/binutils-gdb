@@ -1,4 +1,4 @@
-# Copyright 2010-2022 Free Software Foundation, Inc.
+# Copyright 2010-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,8 +25,8 @@ if ![istarget *-linux*] {
 
 # In remote mode we cannot use the 'set args' command, and this
 # test requires it.
-if { [target_info exists gdb_protocol] } then {
-    if { [target_info gdb_protocol] == "remote" } then {
+if {[target_info exists gdb_protocol]} {
+    if {[target_info gdb_protocol] == "remote"} {
 	return
     }
 }

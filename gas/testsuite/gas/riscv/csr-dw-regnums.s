@@ -1,6 +1,8 @@
 # Check that CFI directives can accept all of the CSR names (including
 # aliases).  The results for this test also ensures that the DWARF
 # register numbers for the CSRs shouldn't change.
+# The register numbers are specified to be CSR-ID + 4096 (see psABI spec).
+# The CFI offsets in this file are CSR-ID x 4.
 
 	.text
 	.global _start
@@ -307,6 +309,18 @@ _start:
 	.cfi_offset vstval, 2316
 	.cfi_offset vsip, 2320
 	.cfi_offset vsatp, 2560
+	# Smaia extension
+	.cfi_offset miselect, 3392
+	.cfi_offset mireg, 3396
+	.cfi_offset mtopei, 3440
+	.cfi_offset mtopi, 16064
+	.cfi_offset mvien, 3104
+	.cfi_offset mvip, 3108
+	.cfi_offset midelegh, 3148
+	.cfi_offset mieh, 3152
+	.cfi_offset mvienh, 3168
+	.cfi_offset mviph, 3172
+	.cfi_offset miph, 3408
 	# Smstateen extension
 	.cfi_offset mstateen0, 3120
 	.cfi_offset mstateen1, 3124
@@ -328,6 +342,28 @@ _start:
 	.cfi_offset hstateen1h, 6260
 	.cfi_offset hstateen2h, 6264
 	.cfi_offset hstateen3h, 6268
+	# Ssaia extension
+	.cfi_offset siselect, 1344
+	.cfi_offset sireg, 1348
+	.cfi_offset stopei, 1392
+	.cfi_offset stopi, 14016
+	.cfi_offset sieh, 1104
+	.cfi_offset siph, 1360
+	.cfi_offset hvien, 6176
+	.cfi_offset hvictl, 6180
+	.cfi_offset hviprio1, 6424
+	.cfi_offset hviprio2, 6428
+	.cfi_offset vsiselect, 2368
+	.cfi_offset vsireg, 2372
+	.cfi_offset vstopei, 2416
+	.cfi_offset vstopi, 15040
+	.cfi_offset hidelegh, 6220
+	.cfi_offset hvienh, 6240
+	.cfi_offset hviph, 6484
+	.cfi_offset hviprio1h, 6488
+	.cfi_offset hviprio2h, 6492
+	.cfi_offset vsieh, 2128
+	.cfi_offset vsiph, 2384
 	# Sscofpmf extension
 	.cfi_offset scountovf, 13952
 	.cfi_offset mhpmevent3h, 7308

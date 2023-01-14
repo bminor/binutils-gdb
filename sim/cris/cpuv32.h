@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2022 Free Software Foundation, Inc.
+Copyright 1996-2023 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -226,7 +226,7 @@ crisv32f_single_step_enabled (current_cpu);\
 }\
 ;} while (0)
   } hardware;
-#define CPU_CGEN_HW(cpu) (& (cpu)->cpu_data.hardware)
+#define CPU_CGEN_HW(cpu) (& CRIS_SIM_CPU (cpu)->cpu_data.hardware)
 } CRISV32F_CPU_DATA;
 
 /* Virtual regs.  */

@@ -1,15 +1,43 @@
 -*- text -*-
 
+Changes in 2.40:
+
+* Add support for Intel RAO-INT instructions.
+
+* Add support for Intel AVX-NE-CONVERT instructions.
+
+* Add support for Intel MSRLIST instructions.
+
+* Add support for Intel WRMSRNS instructions.
+
+* Add support for Intel CMPccXADD instructions.
+
+* Add support for Intel AVX-VNNI-INT8 instructions.
+
+* Add support for Intel AVX-IFMA instructions.
+
+* Add support for Intel PREFETCHI instructions.
+
+* Add support for Intel AMX-FP16 instructions.
+
 * gas now supports --compress-debug-sections=zstd to compress
   debug sections with zstd.
+
 * Add --enable-default-compressed-debug-sections-algorithm={zlib,zstd}
   that selects the default compression algorithm
   for --enable-compressed-debug-sections.
 
 * Add support for various T-Head extensions (XTheadBa, XTheadBb, XTheadBs,
-  XTheadCmo, XTheadCondMov, XTheadFMemIdx, XTheadMemIdx, XTheadMemPair,
-  XTheadMac, and XTheadSync) from version 2.0 of the T-Head ISA manual, which
-  are implemented in the Allwinner D1.
+  XTheadCmo, XTheadCondMov, XTheadFMemIdx, XTheadFmv, XTheadInt, XTheadMemIdx,
+  XTheadMemPair, XTheadMac, and XTheadSync) from version 2.0 of the T-Head
+  ISA manual, which are implemented in the Allwinner D1.
+
+* Add support for the RISC-V Zawrs extension, version 1.0-rc4.
+
+* Add support for Cortex-X1C for Arm.
+
+* New command line option --gsframe to generate SFrame unwind information
+  on x86_64 and aarch64 targets.
 
 Changes in 2.39:
 
@@ -984,7 +1012,7 @@ Changes in 1.93.01:
   of new CPUs and formats, lots of bugs fixed.
 
 
-Copyright (C) 2012-2022 Free Software Foundation, Inc.
+Copyright (C) 2012-2023 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

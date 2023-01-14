@@ -1,4 +1,4 @@
-# Copyright 1999-2022 Free Software Foundation, Inc.
+# Copyright 1999-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -61,8 +61,7 @@ gdb_test "print rrat\[2\]" ".$decimal = 2" "print value of rrat\[2\]"
 gdb_test "print rrat\[3\]" ".$decimal = 3" "print value of rrat\[3\]"
 
 
-if {![runto 'f']} then {
-    perror "couldn't run to f"
+if {![runto 'f']} {
     return
 }
 

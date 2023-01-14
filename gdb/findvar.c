@@ -1,6 +1,6 @@
 /* Find a variable's value in memory, for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -152,11 +152,7 @@ extract_long_unsigned_integer (const gdb_byte *addr, int orig_len,
 CORE_ADDR
 extract_typed_address (const gdb_byte *buf, struct type *type)
 {
-  if (!type->is_pointer_or_reference ())
-    internal_error (__FILE__, __LINE__,
-		    _("extract_typed_address: "
-		    "type is not a pointer or reference"));
-
+  gdb_assert (type->is_pointer_or_reference ());
   return gdbarch_pointer_to_address (type->arch (), type, buf);
 }
 
@@ -205,11 +201,7 @@ template void store_integer (gdb_byte *addr, int len,
 void
 store_typed_address (gdb_byte *buf, struct type *type, CORE_ADDR addr)
 {
-  if (!type->is_pointer_or_reference ())
-    internal_error (__FILE__, __LINE__,
-		    _("store_typed_address: "
-		    "type is not a pointer or reference"));
-
+  gdb_assert (type->is_pointer_or_reference ());
   gdbarch_address_to_pointer (type->arch (), type, buf, addr);
 }
 
@@ -601,20 +593,32 @@ language_defn::read_var_value (struct symbol *var,
       return v;
 
     case LOC_LABEL:
-      /* Put the constant back in target format.  */
-      v = allocate_value (type);
-      if (overlay_debugging)
-	{
-	  struct objfile *var_objfile = var->objfile ();
-	  addr = symbol_overlayed_address (var->value_address (),
-					   var->obj_section (var_objfile));
-	  store_typed_address (value_contents_raw (v).data (), type, addr);
-	}
-      else
-	store_typed_address (value_contents_raw (v).data (), type,
-			      var->value_address ());
-      VALUE_LVAL (v) = not_lval;
-      return v;
+      {
+	/* Put the constant back in target format.  */
+	if (overlay_debugging)
+	  {
+	    struct objfile *var_objfile = var->objfile ();
+	    addr = symbol_overlayed_address (var->value_address (),
+					     var->obj_section (var_objfile));
+	  }
+	else
+	  addr = var->value_address ();
+
+	/* First convert the CORE_ADDR to a function pointer type, this
+	   ensures the gdbarch knows what type of pointer we are
+	   manipulating when value_from_pointer is called.  */
+	type = builtin_type (var->arch ())->builtin_func_ptr;
+	v = value_from_pointer (type, addr);
+
+	/* But we want to present the value as 'void *', so cast it to the
+	   required type now, this will not change the values bit
+	   representation.  */
+	struct type *void_ptr_type
+	  = builtin_type (var->arch ())->builtin_data_ptr;
+	v = value_cast_pointers (void_ptr_type, v, 0);
+	VALUE_LVAL (v) = not_lval;
+	return v;
+      }
 
     case LOC_CONST_BYTES:
       if (is_dynamic_type (type))

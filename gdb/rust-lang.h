@@ -1,6 +1,6 @@
 /* Rust language support definitions for GDB, the GNU debugger.
 
-   Copyright (C) 2016-2022 Free Software Foundation, Inc.
+   Copyright (C) 2016-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -107,6 +107,13 @@ public:
 
   /* See language.h.  */
 
+  bool can_print_type_offsets () const override
+  {
+    return true;
+  }
+
+  /* See language.h.  */
+
   void print_type (struct type *type, const char *varstring,
 		   struct ui_file *stream, int show, int level,
 		   const struct type_print_options *flags) const override;
@@ -141,14 +148,10 @@ public:
   {
     struct block_symbol result = {};
 
-    if (symbol_lookup_debug)
-      {
-	gdb_printf (gdb_stdlog,
-		    "rust_lookup_symbol_non_local"
-		    " (%s, %s (scope %s), %s)\n",
-		    name, host_address_to_string (block),
-		    block_scope (block), domain_name (domain));
-      }
+    symbol_lookup_debug_printf
+      ("rust_lookup_symbol_non_local (%s, %s (scope %s), %s)",
+       name, host_address_to_string (block), block_scope (block),
+       domain_name (domain));
 
     /* Look up bare names in the block's scope.  */
     std::string scopedname;

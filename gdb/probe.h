@@ -1,6 +1,6 @@
 /* Generic SDT probe support for GDB.
 
-   Copyright (C) 2012-2022 Free Software Foundation, Inc.
+   Copyright (C) 2012-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -304,4 +304,9 @@ extern struct cmd_list_element **info_probes_cmdlist_get (void);
 extern struct value *probe_safe_evaluate_at_pc (frame_info_ptr frame,
 						unsigned n);
 
+/* Return true if the PROVIDER/NAME probe from OBJFILE_NAME needs to be
+   ignored.  */
+
+bool ignore_probe_p (const char *provider, const char *name,
+		     const char *objfile_name, const char *TYPE);
 #endif /* !defined (PROBE_H) */

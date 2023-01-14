@@ -1,5 +1,5 @@
 /* run front end support for arm
-   Copyright (C) 1995-2022 Free Software Foundation, Inc.
+   Copyright (C) 1995-2023 Free Software Foundation, Inc.
 
    This file is part of ARM SIM.
 
@@ -36,11 +36,12 @@
 #include "armemu.h"
 #include "dbg_rdi.h"
 #include "ansidecl.h"
-#include "gdb/sim-arm.h"
+#include "sim/sim-arm.h"
 #include "gdb/signals.h"
 #include "libiberty.h"
 #include "iwmmxt.h"
 #include "maverick.h"
+#include "arm-sim.h"
 
 /* TODO: This should get pulled from the SIM_DESC.  */
 host_callback *sim_callback;
@@ -150,34 +151,36 @@ ARMul_ConsolePrint (ARMul_State * state,
     }
 }
 
-int
+uint64_t
 sim_write (SIM_DESC sd ATTRIBUTE_UNUSED,
-	   SIM_ADDR addr,
-	   const unsigned char * buffer,
-	   int size)
+	   uint64_t addr,
+	   const void * buffer,
+	   uint64_t size)
 {
-  int i;
+  uint64_t i;
+  const unsigned char * data = buffer;
 
   init ();
 
   for (i = 0; i < size; i++)
-    ARMul_SafeWriteByte (state, addr + i, buffer[i]);
+    ARMul_SafeWriteByte (state, addr + i, data[i]);
 
   return size;
 }
 
-int
+uint64_t
 sim_read (SIM_DESC sd ATTRIBUTE_UNUSED,
-	  SIM_ADDR addr,
-	  unsigned char * buffer,
-	  int size)
+	  uint64_t addr,
+	  void * buffer,
+	  uint64_t size)
 {
-  int i;
+  uint64_t i;
+  unsigned char * data = buffer;
 
   init ();
 
   for (i = 0; i < size; i++)
-    buffer[i] = ARMul_SafeReadByte (state, addr + i);
+    data[i] = ARMul_SafeReadByte (state, addr + i);
 
   return size;
 }
@@ -395,7 +398,7 @@ sim_create_inferior (SIM_DESC sd ATTRIBUTE_UNUSED,
 }
 
 static int
-frommem (struct ARMul_State *state, unsigned char *memory)
+frommem (struct ARMul_State *state, const unsigned char *memory)
 {
   if (state->bigendSig == HIGH)
     return (memory[0] << 24) | (memory[1] << 16)
@@ -427,7 +430,7 @@ tomem (struct ARMul_State *state,
 }
 
 static int
-arm_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+arm_reg_store (SIM_CPU *cpu, int rn, const void *buf, int length)
 {
   init ();
 
@@ -458,11 +461,11 @@ arm_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
     case SIM_ARM_FP6_REGNUM:
     case SIM_ARM_FP7_REGNUM:
     case SIM_ARM_FPS_REGNUM:
-      ARMul_SetReg (state, state->Mode, rn, frommem (state, memory));
+      ARMul_SetReg (state, state->Mode, rn, frommem (state, buf));
       break;
 
     case SIM_ARM_PS_REGNUM:
-      state->Cpsr = frommem (state, memory);
+      state->Cpsr = frommem (state, buf);
       ARMul_CPSRAltered (state);
       break;
 
@@ -483,11 +486,11 @@ arm_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
     case SIM_ARM_MAVERIC_COP0R14_REGNUM:
     case SIM_ARM_MAVERIC_COP0R15_REGNUM:
       memcpy (& DSPregs [rn - SIM_ARM_MAVERIC_COP0R0_REGNUM],
-	      memory, sizeof (struct maverick_regs));
+	      buf, sizeof (struct maverick_regs));
       return sizeof (struct maverick_regs);
 
     case SIM_ARM_MAVERIC_DSPSC_REGNUM:
-      memcpy (&DSPsc, memory, sizeof DSPsc);
+      memcpy (&DSPsc, buf, sizeof DSPsc);
       return sizeof DSPsc;
 
     case SIM_ARM_IWMMXT_COP0R0_REGNUM:
@@ -522,7 +525,7 @@ arm_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
     case SIM_ARM_IWMMXT_COP1R13_REGNUM:
     case SIM_ARM_IWMMXT_COP1R14_REGNUM:
     case SIM_ARM_IWMMXT_COP1R15_REGNUM:
-      return Store_Iwmmxt_Register (rn - SIM_ARM_IWMMXT_COP0R0_REGNUM, memory);
+      return Store_Iwmmxt_Register (rn - SIM_ARM_IWMMXT_COP0R0_REGNUM, buf);
 
     default:
       return 0;
@@ -532,8 +535,9 @@ arm_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 }
 
 static int
-arm_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+arm_reg_fetch (SIM_CPU *cpu, int rn, void *buf, int length)
 {
+  unsigned char *memory = buf;
   ARMword regval;
   int len = length;
 
@@ -818,7 +822,7 @@ sim_open (SIM_OPEN_KIND kind,
   current_alignment = STRICT_ALIGNMENT;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
+  if (sim_cpu_alloc_all (sd, 0) != SIM_RC_OK)
     {
       free_state (sd);
       return 0;

@@ -1,6 +1,6 @@
 /* Gdb/Python header for private use by Python module.
 
-   Copyright (C) 2008-2022 Free Software Foundation, Inc.
+   Copyright (C) 2008-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -289,6 +289,18 @@ extern PyTypeObject frame_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("frame_object");
 extern PyTypeObject thread_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("thread_object");
+
+/* Ensure that breakpoint_object_type is initialized and return true.  If
+   breakpoint_object_type can't be initialized then set a suitable Python
+   error and return false.
+
+   This function needs to be called from any gdbpy_initialize_* function
+   that wants to reference breakpoint_object_type.  After all the
+   gdbpy_initialize_* functions have been called then breakpoint_object_type
+   is guaranteed to have been initialized, and this function does not need
+   calling before referencing breakpoint_object_type.  */
+
+extern bool gdbpy_breakpoint_init_breakpoint_type ();
 
 struct gdbpy_breakpoint_object
 {

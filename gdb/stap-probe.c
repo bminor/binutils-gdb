@@ -1,6 +1,6 @@
 /* SystemTap probe support for GDB.
 
-   Copyright (C) 2012-2022 Free Software Foundation, Inc.
+   Copyright (C) 2012-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -185,15 +185,13 @@ public:
 
     gdb_assert (m_have_parsed_args);
     if (m_parsed_args.empty ())
-      internal_error (__FILE__, __LINE__,
-		      _("Probe '%s' apparently does not have arguments, but \n"
+      internal_error (_("Probe '%s' apparently does not have arguments, but \n"
 			"GDB is requesting its argument number %u anyway.  "
 			"This should not happen.  Please report this bug."),
 		      this->get_name ().c_str (), n);
 
     if (n > m_parsed_args.size ())
-      internal_error (__FILE__, __LINE__,
-		      _("Probe '%s' has %d arguments, but GDB is requesting\n"
+      internal_error (_("Probe '%s' has %d arguments, but GDB is requesting\n"
 			"argument %u.  This should not happen.  Please\n"
 			"report this bug."),
 		      this->get_name ().c_str (),
@@ -811,8 +809,7 @@ stap_parse_register_operand (struct stap_parse_info *p)
 						newregname.size ());
 
 	  if (regnum == -1)
-	    internal_error (__FILE__, __LINE__,
-			    _("Invalid register name '%s' after replacing it"
+	    internal_error (_("Invalid register name '%s' after replacing it"
 			      " (previous name was '%s')"),
 			    newregname.c_str (), regname.c_str ());
 
@@ -1331,7 +1328,7 @@ stap_probe::parse_arguments (struct gdbarch *gdbarch)
       expression_up expr = stap_parse_argument (&cur, atype, gdbarch);
 
       if (stap_expression_debug)
-	dump_prefix_expression (expr.get (), gdb_stdlog);
+	expr->dump (gdb_stdlog);
 
       m_parsed_args.emplace_back (bitness, atype, std::move (expr));
 
@@ -1621,6 +1618,9 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
 	 it.  So we return.  */
       return;
     }
+
+  if (ignore_probe_p (provider, name, objfile_name (objfile), "SystemTap"))
+    return;
 
   stap_probe *ret = new stap_probe (std::string (name), std::string (provider),
 				    address, gdbarch, sem_addr, probe_args);

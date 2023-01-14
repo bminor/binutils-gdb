@@ -149,25 +149,25 @@ check_PROGRAMS += object_unittest
 object_unittest_SOURCES = object_unittest.cc
 object_unittest_LDFLAGS = $(THREADFLAGS)
 object_unittest_LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
-	$(THREADLIBS) $(LIBDL) $(ZLIB) $(JANSSON_LIBS)
+	$(THREADLIBS) $(LIBDL) $(ZLIB) $(ZSTD_LIBS) $(JANSSON_LIBS)
 
 check_PROGRAMS += binary_unittest
 binary_unittest_SOURCES = binary_unittest.cc
 binary_unittest_LDFLAGS = $(THREADFLAGS)
 binary_unittest_LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
-	$(THREADLIBS) $(LIBDL) $(ZLIB) $(JANSSON_LIBS)
+	$(THREADLIBS) $(LIBDL) $(ZLIB) $(ZSTD_LIBS) $(JANSSON_LIBS)
 
 check_PROGRAMS += leb128_unittest
 leb128_unittest_SOURCES = leb128_unittest.cc
 leb128_unittest_LDFLAGS = $(THREADFLAGS)
 leb128_unittest_LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
-	$(THREADLIBS) $(LIBDL) $(ZLIB) $(JANSSON_LIBS)
+	$(THREADLIBS) $(LIBDL) $(ZLIB) $(ZSTD_LIBS) $(JANSSON_LIBS)
 
 check_PROGRAMS += overflow_unittest
 overflow_unittest_SOURCES = overflow_unittest.cc
 overflow_unittest_LDFLAGS = $(THREADFLAGS)
 overflow_unittest_LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
-	$(THREADLIBS) $(LIBDL) $(ZLIB) $(JANSSON_LIBS)
+	$(THREADLIBS) $(LIBDL) $(ZLIB) $(ZSTD_LIBS) $(JANSSON_LIBS)
 overflow_unittest.o: overflow_unittest.cc
 	$(CXXCOMPILE) -O3 -c -o $@ $<
 
@@ -1766,6 +1766,13 @@ flagstest_compress_debug_sections_gabi.cmp: flagstest_compress_debug_sections_ga
 		flagstest_compress_debug_sections_none.stdout > $@.tmp
 	mv -f $@.tmp $@
 
+if HAVE_ZSTD
+check_PROGRAMS += flagstest_compress_debug_sections_zstd
+flagstest_compress_debug_sections_zstd: flagstest_debug.o gcctestdir/ld
+	$(CXXLINK) -o $@ $< -Wl,--compress-debug-sections=zstd
+	test -s $@
+endif
+
 # The specialfile output has a tricky case when we also compress debug
 # sections, because it requires output-file resizing.
 check_PROGRAMS += flagstest_o_specialfile_and_compress_debug_sections
@@ -3120,6 +3127,17 @@ gdb_index_test_2_gabi: gdb_index_test_cdebug_gabi.o gcctestdir/ld
 	$(CXXLINK) -Wl,--gdb-index $<
 gdb_index_test_2_gabi.stdout: gdb_index_test_2_gabi
 	$(TEST_READELF) --debug-dump=gdb_index $< > $@
+if HAVE_ZSTD
+check_SCRIPTS += gdb_index_test_2_zstd.sh
+check_DATA += gdb_index_test_2_zstd.stdout
+MOSTLYCLEANFILES += gdb_index_test_2_zstd.stdout gdb_index_test_2_zstd
+gdb_index_test_cdebug_zstd.o: gdb_index_test.cc
+	$(CXXCOMPILE) -O0 -g -Wa,--compress-debug-sections=zstd -c -o $@ $<
+gdb_index_test_2_zstd: gdb_index_test_cdebug_zstd.o gcctestdir/ld
+	$(CXXLINK) -Wl,--gdb-index $<
+gdb_index_test_2_zstd.stdout: gdb_index_test_2_zstd
+	$(TEST_READELF) --debug-dump=gdb_index $< > $@
+endif
 
 # Another simple C test (DW_AT_high_pc encoding) for --gdb-index.
 check_SCRIPTS += gdb_index_test_3.sh
@@ -3325,18 +3343,6 @@ incremental_comdat_test_1: incr_comdat_test_1.o incr_comdat_test_2_v1.o incr_com
 endif DEFAULT_TARGET_X86_64
 
 if DEFAULT_TARGET_X86_64
-check_PROGRAMS += exception_x86_64_bnd_test
-exception_x86_64_bnd_test_SOURCES = exception_test_main.cc
-exception_x86_64_bnd_test_DEPENDENCIES = gcctestdir/ld exception_x86_64_bnd_1.o exception_x86_64_bnd_2.o
-exception_x86_64_bnd_test_LDFLAGS = $(exception_test_LDFLAGS) -Wl,-z,bndplt
-exception_x86_64_bnd_test_LDADD = exception_x86_64_bnd_1.o exception_x86_64_bnd_2.o
-exception_x86_64_bnd_1.o: exception_test_1.cc gcctestdir/as
-	$(CXXCOMPILE) -c -fpic -Wa,-madd-bnd-prefix -o $@ $<
-exception_x86_64_bnd_2.o: exception_test_2.cc gcctestdir/as
-	$(CXXCOMPILE) -c -Wa,-madd-bnd-prefix -o $@ $<
-endif DEFAULT_TARGET_X86_64
-
-if DEFAULT_TARGET_X86_64
 check_SCRIPTS += gnu_property_test.sh
 check_DATA += gnu_property_test.stdout
 MOSTLYCLEANFILES += gnu_property_test
@@ -3471,33 +3477,6 @@ split_x86_64_r.stdout: split_x86_64_1.o split_x86_64_n.o ../ld-new
 	../ld-new -r split_x86_64_1.o split_x86_64_n.o -o split_x86_64_r > $@ 2>&1 || exit 0
 MOSTLYCLEANFILES += split_x86_64_1 split_x86_64_2 split_x86_64_3 \
 	split_x86_64_4 split_x86_64_r
-
-check_SCRIPTS += bnd_plt_1.sh
-check_DATA += bnd_plt_1.stdout
-bnd_plt_1.o: bnd_plt_1.s
-	$(TEST_AS) --64 -o $@ $<
-bnd_plt_1.so: bnd_plt_1.o ../ld-new
-	../ld-new -shared -z bndplt bnd_plt_1.o -o $@
-bnd_plt_1.stdout: bnd_plt_1.so
-	$(TEST_OBJDUMP) -dw $< > $@
-
-check_SCRIPTS += bnd_ifunc_1.sh
-check_DATA += bnd_ifunc_1.stdout
-bnd_ifunc_1.o: bnd_ifunc_1.s
-	$(TEST_AS) --64 -madd-bnd-prefix -o $@ $<
-bnd_ifunc_1.so: bnd_ifunc_1.o ../ld-new
-	../ld-new -shared -z bndplt bnd_ifunc_1.o -o $@
-bnd_ifunc_1.stdout: bnd_ifunc_1.so
-	$(TEST_OBJDUMP) -dw $< > $@
-
-check_SCRIPTS += bnd_ifunc_2.sh
-check_DATA += bnd_ifunc_2.stdout
-bnd_ifunc_2.o: bnd_ifunc_2.s
-	$(TEST_AS) --64 -madd-bnd-prefix -o $@ $<
-bnd_ifunc_2.so: bnd_ifunc_2.o ../ld-new
-	../ld-new -shared -z bndplt bnd_ifunc_2.o -o $@
-bnd_ifunc_2.stdout: bnd_ifunc_2.so
-	$(TEST_OBJDUMP) -dw $< > $@
 
 endif DEFAULT_TARGET_X86_64
 

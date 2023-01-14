@@ -1,4 +1,4 @@
-# Copyright 2020-2022 Free Software Foundation, Inc.
+# Copyright 2020-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -140,11 +140,11 @@ with_test_prefix "scenario 1" {
     gdb_run_cmd
 
     # Check our conditional breakpoints.
-    gdb_test "" ".*Breakpoint \[0-9\]+, A::func .*" \
+    gdb_test "" ".*Breakpoint $bkptno_num_re, A::func .*" \
 	"run until A::func"
     gdb_test "print a" " = 10"
 
-    gdb_test "continue" "Continuing.*Breakpoint \[0-9\]+, C::func .*" \
+    gdb_test "continue" "Continuing.*Breakpoint $bkptno_num_re, C::func .*" \
 	"run until C::func"
     gdb_test "print c" " = 30"
 
@@ -208,11 +208,11 @@ with_test_prefix "scenario 2" {
     gdb_run_cmd
 
     # Check that we hit enabled locations only.
-    gdb_test "" ".*Breakpoint \[0-9\]+, A::func .*" \
+    gdb_test "" ".*Breakpoint $bkptno_num_re, A::func .*" \
 	"run until A::func"
     gdb_test "print a" " = 10"
 
-    gdb_test "continue" "Continuing.*Breakpoint \[0-9\]+, C::func .*" \
+    gdb_test "continue" "Continuing.*Breakpoint $bkptno_num_re, C::func .*" \
 	"run until C::func"
     gdb_test "print c" " = 30"
 

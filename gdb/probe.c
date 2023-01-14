@@ -1,6 +1,6 @@
 /* Generic static probe support for GDB.
 
-   Copyright (C) 2012-2022 Free Software Foundation, Inc.
+   Copyright (C) 2012-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -617,7 +617,7 @@ enable_probes_command (const char *arg, int from_tty)
 {
   std::string provider, probe_name, objname;
 
-  parse_probe_linespec ((const char *) arg, &provider, &probe_name, &objname);
+  parse_probe_linespec (arg, &provider, &probe_name, &objname);
 
   std::vector<bound_probe> probes
     = collect_probes (objname, provider, probe_name, &any_static_probe_ops);
@@ -652,7 +652,7 @@ disable_probes_command (const char *arg, int from_tty)
 {
   std::string provider, probe_name, objname;
 
-  parse_probe_linespec ((const char *) arg, &provider, &probe_name, &objname);
+  parse_probe_linespec (arg, &provider, &probe_name, &objname);
 
   std::vector<bound_probe> probes
     = collect_probes (objname, provider, probe_name, &any_static_probe_ops);
@@ -678,6 +678,109 @@ disable_probes_command (const char *arg, int from_tty)
 				probe.prob->get_provider ().c_str (),
 				probe.prob->get_name ().c_str ());
     }
+}
+
+static bool ignore_probes_p = false;
+static bool ignore_probes_idx = 0;
+static bool ignore_probes_verbose_p;
+static gdb::optional<compiled_regex> ignore_probes_prov_pat[2];
+static gdb::optional<compiled_regex> ignore_probes_name_pat[2];
+static gdb::optional<compiled_regex> ignore_probes_obj_pat[2];
+
+/* See comments in probe.h.  */
+
+bool
+ignore_probe_p (const char *provider, const char *name,
+		const char *objfile_name, const char *type)
+{
+  if (!ignore_probes_p)
+    return false;
+
+  gdb::optional<compiled_regex> &re_prov
+    = ignore_probes_prov_pat[ignore_probes_idx];
+  gdb::optional<compiled_regex> &re_name
+    = ignore_probes_name_pat[ignore_probes_idx];
+  gdb::optional<compiled_regex> &re_obj
+    = ignore_probes_obj_pat[ignore_probes_idx];
+
+  bool res
+    = ((!re_prov
+	|| re_prov->exec (provider, 0, NULL, 0) == 0)
+       && (!re_name
+	   || re_name->exec (name, 0, NULL, 0) == 0)
+       && (!re_obj
+	   || re_obj->exec (objfile_name, 0, NULL, 0) == 0));
+
+  if (res && ignore_probes_verbose_p)
+    gdb_printf (gdb_stdlog, _("Ignoring %s probe %s %s in %s.\n"),
+		type, provider, name, objfile_name);
+
+  return res;
+}
+
+/* Implementation of the `maintenance ignore-probes' command.  */
+
+static void
+ignore_probes_command (const char *arg, int from_tty)
+{
+  std::string ignore_provider, ignore_probe_name, ignore_objname;
+
+  bool verbose_p = false;
+  if (arg != nullptr)
+    {
+      const char *idx = arg;
+      std::string s = extract_arg (&idx);
+
+      if (strcmp (s.c_str (), "-reset") == 0)
+	{
+	  if (*idx != '\0')
+	    error (_("-reset: no arguments allowed"));
+
+	  ignore_probes_p = false;
+	  gdb_printf (gdb_stdout, _("ignore-probes filter has been reset\n"));
+	  return;
+	}
+
+      if (strcmp (s.c_str (), "-verbose") == 0
+	  || strcmp (s.c_str (), "-v") == 0)
+	{
+	  verbose_p = true;
+	  arg = idx;
+	}
+    }
+
+  parse_probe_linespec (arg, &ignore_provider, &ignore_probe_name,
+			&ignore_objname);
+
+  /* Parse the regular expressions, making sure that the old regular
+     expressions are still valid if an exception is throw.  */
+  int new_ignore_probes_idx = 1 - ignore_probes_idx;
+  gdb::optional<compiled_regex> &re_prov
+    = ignore_probes_prov_pat[new_ignore_probes_idx];
+  gdb::optional<compiled_regex> &re_name
+    = ignore_probes_name_pat[new_ignore_probes_idx];
+  gdb::optional<compiled_regex> &re_obj
+    = ignore_probes_obj_pat[new_ignore_probes_idx];
+  re_prov.reset ();
+  re_name.reset ();
+  re_obj.reset ();
+  if (!ignore_provider.empty ())
+    re_prov.emplace (ignore_provider.c_str (), REG_NOSUB,
+		     _("Invalid provider regexp"));
+  if (!ignore_probe_name.empty ())
+    re_name.emplace (ignore_probe_name.c_str (), REG_NOSUB,
+		     _("Invalid probe regexp"));
+  if (!ignore_objname.empty ())
+    re_obj.emplace (ignore_objname.c_str (), REG_NOSUB,
+		    _("Invalid object file regexp"));
+  ignore_probes_idx = new_ignore_probes_idx;
+
+  ignore_probes_p = true;
+  ignore_probes_verbose_p = verbose_p;
+  gdb_printf (gdb_stdout, _("ignore-probes filter has been set to:\n"));
+  gdb_printf (gdb_stdout, _("PROVIDER: '%s'\n"), ignore_provider.c_str ());
+  gdb_printf (gdb_stdout, _("PROBE_NAME: '%s'\n"), ignore_probe_name.c_str ());
+  gdb_printf (gdb_stdout, _("OBJNAME: '%s'\n"), ignore_objname.c_str ());
 }
 
 /* See comments in probe.h.  */
@@ -931,4 +1034,16 @@ If you do not specify any argument then the command will disable\n\
 all defined probes."),
 	   &disablelist);
 
+  add_cmd ("ignore-probes", class_maintenance, ignore_probes_command, _("\
+Ignore probes.\n\
+Usage: maintenance ignore-probes [-v|-verbose] [PROVIDER [NAME [OBJECT]]]\n\
+       maintenance ignore-probes -reset\n\
+Each argument is a regular expression, used to select probes.\n\
+PROVIDER matches probe provider names.\n\
+NAME matches the probe names.\n\
+OBJECT matches the executable or shared library name.\n\
+If you do not specify any argument then the command will ignore\n\
+all defined probes.  To reset the ignore-probes filter, use the -reset form.\n\
+Only supported for SystemTap probes."),
+	   &maintenancelist);
 }

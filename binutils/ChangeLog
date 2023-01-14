@@ -1,7 +1,92 @@
+2023-01-09  Nick Clifton  <nickc@redhat.com>
+
+	* po/bg.po: Updated Bulgarian translation.
+	* po/ro.po: Updated Romainian translation.
+
+2023-01-05  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: Remove Stephen Casner as the PDP11 maintainer.
+
+2023-01-03  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+	* po/uk.po: Updated Ukrainian translation.
+
+2023-01-03  Luis Machado  <luis.machado@arm.com>
+
+	* readelf.c (get_note_type): Add support for NT_ARM_SSVE and
+	NT_ARM_ZA note types.
+
+2022-12-31  Nick Clifton  <nickc@redhat.com>
+
+	* 2.40 branch created.
+
+2022-12-31  Nick Clifton  <nickc@redhat.com>
+
+	* po/ro.po: Updated Romanian translation.
+
+2022-12-21  Nick Clifton  <nickc@redhat.com>
+
+	PR  29924
+	* objdump.c (load_specific_debug_section): Check for excessively
+	large sections.
+
+2022-12-19  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf-mode.el (dwarf-do-refresh): Avoid compiler warning.
+
+2022-12-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 29914
+	* dwarf.c (fetch_indexed_value): Fail if the section is not big
+	enough to contain a header size field.
+	(display_debug_addr): Fail if the computed address size is too big
+	or too small.
+
+2022-12-16  Nick Clifton  <nickc@redhat.com>
+
+	PR 29908
+	* dwarf.c (display_debug_addr): Check for corrupt header lengths.
+
+2022-12-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 25202
+	* objcopy.c (copy_object): Set VerilogDataEndianness to the
+	endianness of the input file.
+	(copy_main): Verifiy the value set by the --verilog-data-width
+	option.
+	* testsuite/binutils-all/objcopy.exp: Add tests of the new behaviour.
+	* testsuite/binutils-all/verilog-I4.hex: New file.
+
+2022-11-21  Nick Clifton  <nickc@redhat.com>
+
+	PR 29764
+	* doc/binutils.texi (objdump): Note that the -m option supports
+	the <architecture>:<machine> syntax.
+
+2022-11-04  Nick Clifton  <nickc@redhat.com>
+
+	* README-how-to-make-a-release: Add instructions for uploading the
+	gprofng documentation.
+
+2022-10-31  Nick Clifton  <nickc@redhat.com>
+
+	PR 29457
+	* configure.ac: Add --enable-colored-disassembly.
+	* objdump.c: Add --disassembler-color=terminal.
+	* doc/binutils.texi (objdump): Document the new option.
+	* NEWS: Mention new feature.
+	* config.in: Regenerate in.
+	* configure: Regenerate.
+
+2022-10-19  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: Add section on patches, copyright and DCO.
+
 2022-10-12  Nick Clifton  <nickc@redhat.com>
 
 	PR 29665
-	* objcopy.c (copy_object): Use the input filename when 
+	* objcopy.c (copy_object): Use the input filename when
 	reporting that a .gnu_debuglink section already exists.
 
 2022-10-03  Nick Clifton  <nickc@redhat.com>
@@ -1955,7 +2040,7 @@
 
 For older changes see ChangeLog-2020
 
-Copyright (C) 2021-2022 Free Software Foundation, Inc.
+Copyright (C) 2021-2023 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

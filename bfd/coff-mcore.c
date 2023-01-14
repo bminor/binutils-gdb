@@ -1,5 +1,5 @@
 /* BFD back-end for Motorola MCore COFF/PE
-   Copyright (C) 1999-2022 Free Software Foundation, Inc.
+   Copyright (C) 1999-2023 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -220,7 +220,7 @@ mcore_emit_base_file_entry (struct bfd_link_info *info,
 		 + input_section->output_offset
 		 + input_section->output_section->vma;
 
-  if (coff_data (output_bfd)->pe)
+  if (obj_pe (output_bfd))
      addr -= pe_data (output_bfd)->pe_opthdr.ImageBase;
 
   if (fwrite (&addr, sizeof (addr), 1, (FILE *) info->base_file) == 1)

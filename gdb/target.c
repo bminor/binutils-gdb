@@ -1,6 +1,6 @@
 /* Select target systems and architectures at runtime for GDB.
 
-   Copyright (C) 1990-2022 Free Software Foundation, Inc.
+   Copyright (C) 1990-2023 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -867,8 +867,7 @@ add_target (const target_info &t, target_open_ftype *func,
 
   auto &func_slot = target_factories[&t];
   if (func_slot != nullptr)
-    internal_error (__FILE__, __LINE__,
-		    _("target already added (\"%s\")."), t.shortname);
+    internal_error (_("target already added (\"%s\")."), t.shortname);
   func_slot = func;
 
   if (targetlist == NULL)
@@ -908,6 +907,15 @@ add_deprecated_target_alias (const target_info &tinfo, const char *alias)
 void
 target_kill (void)
 {
+
+  /* If the commit_resume_state of the to-be-killed-inferior's process stratum
+     is true, and this inferior is the last live inferior with resumed threads
+     of that target, then we want to leave commit_resume_state to false, as the
+     target won't have any resumed threads anymore.  We achieve this with
+     this scoped_disable_commit_resumed.  On construction, it will set the flag
+     to false.  On destruction, it will only set it to true if there are resumed
+     threads left.  */
+  scoped_disable_commit_resumed disable ("killing");
   current_inferior ()->top_target ()->kill ();
 }
 
@@ -1158,7 +1166,7 @@ to_execution_direction must be implemented for reverse async");
 /* See target.h.  */
 
 void
-decref_target (target_ops *t)
+target_ops_ref_policy::decref (target_ops *t)
 {
   t->decref ();
   if (t->refcount () == 0)
@@ -1174,23 +1182,28 @@ decref_target (target_ops *t)
 void
 target_stack::push (target_ops *t)
 {
-  t->incref ();
+  /* We must create a new reference first.  It is possible that T is
+     already pushed on this target stack, in which case we will first
+     unpush it below, before re-pushing it.  If we don't increment the
+     reference count now, then when we unpush it, we might end up deleting
+     T, which is not good.  */
+  auto ref = target_ops_ref::new_reference (t);
 
   strata stratum = t->stratum ();
 
-  if (stratum == process_stratum)
-    connection_list_add (as_process_stratum_target (t));
-
   /* If there's already a target at this stratum, remove it.  */
 
-  if (m_stack[stratum] != NULL)
-    unpush (m_stack[stratum]);
+  if (m_stack[stratum].get () != nullptr)
+    unpush (m_stack[stratum].get ());
 
   /* Now add the new one.  */
-  m_stack[stratum] = t;
+  m_stack[stratum] = std::move (ref);
 
   if (m_top < stratum)
     m_top = stratum;
+
+  if (stratum == process_stratum)
+    connection_list_add (as_process_stratum_target (t));
 }
 
 /* See target.h.  */
@@ -1203,8 +1216,7 @@ target_stack::unpush (target_ops *t)
   strata stratum = t->stratum ();
 
   if (stratum == dummy_stratum)
-    internal_error (__FILE__, __LINE__,
-		    _("Attempt to unpush the dummy target"));
+    internal_error (_("Attempt to unpush the dummy target"));
 
   /* Look for the specified target.  Note that a target can only occur
      once in the target stack.  */
@@ -1216,60 +1228,21 @@ target_stack::unpush (target_ops *t)
       return false;
     }
 
-  /* Unchain the target.  */
-  m_stack[stratum] = NULL;
-
   if (m_top == stratum)
     m_top = this->find_beneath (t)->stratum ();
 
-  /* Finally close the target, if there are no inferiors
-     referencing this target still.  Note we do this after unchaining,
-     so any target method calls from within the target_close
-     implementation don't end up in T anymore.  Do leave the target
-     open if we have are other inferiors referencing this target
-     still.  */
-  decref_target (t);
+  /* Move the target reference off the target stack, this sets the pointer
+     held in m_stack to nullptr, and places the reference in ref.  When
+     ref goes out of scope its reference count will be decremented, which
+     might cause the target to close.
+
+     We have to do it this way, and not just set the value in m_stack to
+     nullptr directly, because doing so would decrement the reference
+     count first, which might close the target, and closing the target
+     does a check that the target is not on any inferiors target_stack.  */
+  auto ref = std::move (m_stack[stratum]);
 
   return true;
-}
-
-/* Unpush TARGET and assert that it worked.  */
-
-static void
-unpush_target_and_assert (struct target_ops *target)
-{
-  if (!current_inferior ()->unpush_target (target))
-    {
-      gdb_printf (gdb_stderr,
-		  "pop_all_targets couldn't find target %s\n",
-		  target->shortname ());
-      internal_error (__FILE__, __LINE__,
-		      _("failed internal consistency check"));
-    }
-}
-
-void
-pop_all_targets_above (enum strata above_stratum)
-{
-  while ((int) (current_inferior ()->top_target ()->stratum ())
-	 > (int) above_stratum)
-    unpush_target_and_assert (current_inferior ()->top_target ());
-}
-
-/* See target.h.  */
-
-void
-pop_all_targets_at_and_above (enum strata stratum)
-{
-  while ((int) (current_inferior ()->top_target ()->stratum ())
-	 >= (int) stratum)
-    unpush_target_and_assert (current_inferior ()->top_target ());
-}
-
-void
-pop_all_targets (void)
-{
-  pop_all_targets_above (dummy_stratum);
 }
 
 void
@@ -1644,7 +1617,7 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
   if (len == 0)
     return TARGET_XFER_EOF;
 
-  memaddr = address_significant (target_gdbarch (), memaddr);
+  memaddr = gdbarch_remove_non_address_bits (target_gdbarch (), memaddr);
 
   /* Fill in READBUF with breakpoint shadows, or WRITEBUF with
      breakpoint insns, thus hiding out from higher layers whether
@@ -2492,7 +2465,7 @@ target_pre_inferior (int from_tty)
 
   /* attach_flag may be set if the previous process associated with
      the inferior was attached to.  */
-  current_inferior ()->attach_flag = 0;
+  current_inferior ()->attach_flag = false;
 
   current_inferior ()->highest_thread_num = 0;
 
@@ -2528,7 +2501,7 @@ target_preopen (int from_tty)
      it doesn't (which seems like a win for UDI), remove it now.  */
   /* Leave the exec target, though.  The user may be switching from a
      live process to a core of the same program.  */
-  pop_all_targets_above (file_stratum);
+  current_inferior ()->pop_all_targets_above (file_stratum);
 
   target_pre_inferior (from_tty);
 }
@@ -2538,6 +2511,9 @@ target_preopen (int from_tty)
 void
 target_detach (inferior *inf, int from_tty)
 {
+  /* Thread's don't need to be resumed until the end of this function.  */
+  scoped_disable_commit_resumed disable_commit_resumed ("detaching");
+
   /* After we have detached, we will clear the register cache for this inferior
      by calling registers_changed_ptid.  We must save the pid_ptid before
      detaching, as the target detach method will clear inf->pid.  */
@@ -2568,6 +2544,8 @@ target_detach (inferior *inf, int from_tty)
      inferior_ptid matches save_pid_ptid, but in our case, it does not
      call it, as inferior_ptid has been reset.  */
   reinit_frame_cache ();
+
+  disable_commit_resumed.reset_and_commit ();
 }
 
 void
@@ -2713,8 +2691,7 @@ default_follow_fork (struct target_ops *self, inferior *child_inf,
 		     bool follow_child, bool detach_fork)
 {
   /* Some target returned a fork event, but did not know how to follow it.  */
-  internal_error (__FILE__, __LINE__,
-		  _("could not find a target to follow fork"));
+  internal_error (_("could not find a target to follow fork"));
 }
 
 /* See target.h.  */
@@ -2753,8 +2730,7 @@ target_follow_exec (inferior *follow_inf, ptid_t ptid,
 static void
 default_mourn_inferior (struct target_ops *self)
 {
-  internal_error (__FILE__, __LINE__,
-		  _("could not find a target to follow mourn inferior"));
+  internal_error (_("could not find a target to follow mourn inferior"));
 }
 
 void
@@ -2849,7 +2825,7 @@ target_require_runnable (void)
   /* This function is only called if the target is running.  In that
      case there should have been a process_stratum target and it
      should either know how to create inferiors, or not...  */
-  internal_error (__FILE__, __LINE__, _("No targets found"));
+  internal_error (_("No targets found"));
 }
 
 /* Whether GDB is allowed to fall back to the default run target for
@@ -2877,8 +2853,7 @@ void
 set_native_target (target_ops *target)
 {
   if (the_native_target != NULL)
-    internal_error (__FILE__, __LINE__,
-		    _("native target already set (\"%s\")."),
+    internal_error (_("native target already set (\"%s\")."),
 		    the_native_target->longname ());
 
   the_native_target = target;
@@ -3604,8 +3579,8 @@ target_stack::find_beneath (const target_ops *t) const
 {
   /* Look for a non-empty slot at stratum levels beneath T's.  */
   for (int stratum = t->stratum () - 1; stratum >= 0; --stratum)
-    if (m_stack[stratum] != NULL)
-      return m_stack[stratum];
+    if (m_stack[stratum].get () != NULL)
+      return m_stack[stratum].get ();
 
   return NULL;
 }

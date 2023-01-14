@@ -1,5 +1,5 @@
 \input texinfo      @c -*-texinfo-*-
-@c Copyright (C) 1988--2022 Free Software Foundation, Inc.
+@c Copyright (C) 1988--2023 Free Software Foundation, Inc.
 @c
 @c %**start of header
 @c makeinfo ignores cmds prev to setfilename, so its arg cannot make use
@@ -50,7 +50,7 @@
 
 @copying
 @c man begin COPYRIGHT
-Copyright @copyright{} 1988-2022 Free Software Foundation, Inc.
+Copyright @copyright{} 1988-2023 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -120,7 +120,7 @@ This is the @value{EDITION} Edition, for @value{GDBN}
 @end ifset
 Version @value{GDBVN}.
 
-Copyright (C) 1988-2022 Free Software Foundation, Inc.
+Copyright (C) 1988-2023 Free Software Foundation, Inc.
 
 This edition of the GDB manual is dedicated to the memory of Fred
 Fish.  Fred was a long-standing contributor to GDB and to Free
@@ -154,7 +154,7 @@ software in general.  We will miss him.
 * Configurations::              Configuration-specific information
 * Controlling GDB::             Controlling @value{GDBN}
 * Extending GDB::               Extending @value{GDBN}
-* Interpreters::		Command Interpreters
+* Interpreters::                Command Interpreters
 * TUI::                         @value{GDBN} Text User Interface
 * Emacs::                       Using @value{GDBN} under @sc{gnu} Emacs
 * GDB/MI::                      @value{GDBN}'s Machine Interface.
@@ -174,24 +174,24 @@ software in general.  We will miss him.
 @end ifclear
 * In Memoriam::                 In Memoriam
 * Formatting Documentation::    How to format and print @value{GDBN} documentation
-* Installing GDB::              Installing GDB
+* Installing GDB::              Installing @value{GDBN}
 * Maintenance Commands::        Maintenance Commands
 * Remote Protocol::             GDB Remote Serial Protocol
-* Agent Expressions::           The GDB Agent Expression Mechanism
+* Agent Expressions::           The @value{GDBN} Agent Expression Mechanism
 * Target Descriptions::         How targets can describe themselves to
                                 @value{GDBN}
 * Operating System Information:: Getting additional information from
                                  the operating system
-* Trace File Format::		GDB trace file format
+* Trace File Format::		@value{GDBN} trace file format
 * Index Section Format::        .gdb_index section format
 * Debuginfod::                  Download debugging resources with @code{debuginfod}
-* Man Pages::			Manual pages
-* Copying::			GNU General Public License says
-                                how you can copy and share GDB
+* Man Pages::                   Manual pages
+* Copying::                     GNU General Public License says
+                                how you can copy and share @value{GDBN}
 * GNU Free Documentation License::  The license for this documentation
 * Concept Index::               Index of @value{GDBN} concepts
 * Command and Variable Index::  Index of @value{GDBN} commands, variables,
-                                  functions, and Python data types
+                                functions, and Python data types
 @end menu
 
 @end ifnottex
@@ -1661,7 +1661,7 @@ the @var{command} from the @var{shell_command}.
 Example:
 @smallexample
 @group
-(gdb) p var
+(@value{GDBP}) p var
 $1 = @{
   black = 144,
   red = 233,
@@ -1671,13 +1671,13 @@ $1 = @{
 @}
 @end group
 @group
-(gdb) pipe p var|wc
+(@value{GDBP}) pipe p var|wc
       7      19      80
-(gdb) |p var|wc -l
+(@value{GDBP}) |p var|wc -l
 7
 @end group
 @group
-(gdb) p /x var
+(@value{GDBP}) p /x var
 $4 = @{
   black = 0x90,
   red = 0xe9,
@@ -1685,15 +1685,15 @@ $4 = @{
   blue = 0x262,
   white = 0x3db
 @}
-(gdb) ||grep red
+(@value{GDBP}) ||grep red
   red => 0xe9,
 @end group
 @group
-(gdb) | -d ! echo this contains a | char\n ! sed -e 's/|/PIPE/'
+(@value{GDBP}) | -d ! echo this contains a | char\n ! sed -e 's/|/PIPE/'
 this contains a PIPE char
-(gdb) | -d xxx echo this contains a | char!\n xxx sed -e 's/|/PIPE/'
+(@value{GDBP}) | -d xxx echo this contains a | char!\n xxx sed -e 's/|/PIPE/'
 this contains a PIPE char!
-(gdb)
+(@value{GDBP})
 @end group
 @end smallexample
 @end table
@@ -1822,8 +1822,8 @@ The settings can also be changed interactively during the debugging
 session.  For example, to change the limit of array elements to print,
 you can do the following:
 @smallexample
-(@value{GDBN}) set print elements 10
-(@value{GDBN}) print some_array
+(@value{GDBP}) set print elements 10
+(@value{GDBP}) print some_array
 $1 = @{0, 10, 20, 30, 40, 50, 60, 70, 80, 90...@}
 @end smallexample
 
@@ -1839,7 +1839,7 @@ allow overriding relevant global print settings as set by @code{set
 print} subcommands.  @xref{print options}.  The example above could be
 rewritten as:
 @smallexample
-(@value{GDBN}) print -elements 10 -- some_array
+(@value{GDBP}) print -elements 10 -- some_array
 $1 = @{0, 10, 20, 30, 40, 50, 60, 70, 80, 90...@}
 @end smallexample
 
@@ -1869,14 +1869,14 @@ free-form arguments, such as expressions or filenames.
 
 For example, the command
 @smallexample
-(@value{GDBN}) with print array on -- print some_array
+(@value{GDBP}) with print array on -- print some_array
 @end smallexample
 @noindent
 is equivalent to the following 3 commands:
 @smallexample
-(@value{GDBN}) set print array on
-(@value{GDBN}) print some_array
-(@value{GDBN}) set print array off
+(@value{GDBP}) set print array on
+(@value{GDBP}) print some_array
+(@value{GDBP}) set print array off
 @end smallexample
 
 The @code{with} command is particularly useful when you want to
@@ -1884,7 +1884,7 @@ override a setting while running user-defined commands, or commands
 defined in Python or Guile.  @xref{Extending GDB,, Extending GDB}.
 
 @smallexample
-(@value{GDBN}) with print pretty on -- my_complex_command
+(@value{GDBP}) with print pretty on -- my_complex_command
 @end smallexample
 
 To change several settings for the same command, you can nest
@@ -3465,6 +3465,10 @@ the program space number assigned by @value{GDBN}
 the name of the executable loaded into the program space, with e.g.,
 the @code{file} command.
 
+@item
+the name of the core file loaded into the program space, with e.g.,
+the @code{core-file} command.
+
 @end enumerate
 
 @noindent
@@ -3477,7 +3481,7 @@ example, the list of inferiors bound to the program space.
 
 @smallexample
 (@value{GDBP}) maint info program-spaces
-  Id   Executable
+  Id   Executable        Core File
 * 1    hello
   2    goodbye
         Bound inferiors: ID 1 (process 21561)
@@ -3491,7 +3495,7 @@ the parent and child processes of a @code{vfork} call.  For example,
 
 @smallexample
 (@value{GDBP}) maint info program-spaces
-  Id   Executable
+  Id   Executable        Core File
 * 1    vfork-test
         Bound inferiors: ID 2 (process 18050), ID 1 (process 18045)
 @end smallexample
@@ -3642,8 +3646,15 @@ The debugger convenience variables @samp{$_thread} and
 @samp{$_gthread} contain, respectively, the per-inferior thread number
 and the global thread number of the current thread.  You may find this
 useful in writing breakpoint conditional expressions, command scripts,
-and so forth.  @xref{Convenience Vars,, Convenience Variables}, for
-general information on convenience variables.
+and so forth.  The convenience variable @samp{$_inferior_thread_count}
+contains the number of live threads in the current inferior.
+@xref{Convenience Vars,, Convenience Variables}, for general
+information on convenience variables.
+
+When running in non-stop mode (@pxref{Non-Stop Mode}), where new
+threads can be created, and existing threads exit, at any time,
+@samp{$_inferior_thread_count} could return a different value each
+time it is evaluated.
 
 If @value{GDBN} detects the program is multi-threaded, it augments the
 usual message about stopping at a breakpoint with the ID and name of
@@ -3853,9 +3864,9 @@ this command also allows you to identify a thread by its target
 is the LWP id.
 
 @smallexample
-(@value{GDBN}) thread find 26688
+(@value{GDBP}) thread find 26688
 Thread 4 has target id 'Thread 0x41e02940 (LWP 26688)'
-(@value{GDBN}) info thread 4
+(@value{GDBP}) info thread 4
   Id   Target Id         Frame 
   4    Thread 0x41e02940 (LWP 26688) 0x00000031ca6cd372 in select ()
 @end smallexample
@@ -4087,7 +4098,7 @@ For example:
 
 @smallexample
 (@value{GDBP}) info inferiors
-(gdb) info inferior
+(@value{GDBP}) info inferior
   Id   Description   Executable
 * 1    <null>        prog1
 (@value{GDBP}) run
@@ -4368,9 +4379,75 @@ are operated on.
 @cindex latest breakpoint
 Breakpoints are set with the @code{break} command (abbreviated
 @code{b}).  The debugger convenience variable @samp{$bpnum} records the
-number of the breakpoint you've set most recently; see @ref{Convenience
-Vars,, Convenience Variables}, for a discussion of what you can do with
-convenience variables.
+number of the breakpoint you've set most recently:
+@smallexample
+(gdb) b main
+Breakpoint 1 at 0x11c6: file zeoes.c, line 24.
+(gdb) p $bpnum
+$1 = 1
+@end smallexample
+
+A breakpoint may be mapped to multiple code locations for example with
+inlined functions, Ada generics, C@t{++} templates or overloaded function names.
+@value{GDBN} then indicates the number of code locations in the breakpoint
+command output:
+@smallexample
+(gdb) b some_func
+Breakpoint 2 at 0x1179: some_func. (3 locations)
+(gdb) p $bpnum
+$2 = 2
+(gdb)
+@end smallexample
+
+@vindex $_hit_bpnum@r{, convenience variable}
+@vindex $_hit_locno@r{, convenience variable}
+When your program stops on a breakpoint, the convenience variables
+@samp{$_hit_bpnum} and @samp{$_hit_locno} are respectively set to the number of
+the encountered breakpoint and the number of the breakpoint's code location:
+@smallexample
+Thread 1 "zeoes" hit Breakpoint 2.1, some_func () at zeoes.c:8
+8	  printf("some func\n");
+(gdb) p $_hit_bpnum
+$5 = 2
+(gdb) p $_hit_locno
+$6 = 1
+(gdb)
+@end smallexample
+
+Note that @samp{$_hit_bpnum} and @samp{$bpnum} are not equivalent:
+@samp{$_hit_bpnum} is set to the breakpoint number @b{last hit}, while
+@samp{$bpnum} is set to the breakpoint number @b{last set}.
+
+
+If the encountered breakpoint has only one code location, @samp{$_hit_locno}
+is set to 1:
+@smallexample
+Breakpoint 1, main (argc=1, argv=0x7fffffffe018) at zeoes.c:24
+24	  if (argc > 1)
+(gdb) p $_hit_bpnum
+$3 = 1
+(gdb) p $_hit_locno
+$4 = 1
+(gdb)
+@end smallexample
+
+The @samp{$_hit_bpnum} and @samp{$_hit_locno} variables can typically be used
+in a breakpoint command list.
+(@pxref{Break Commands, ,Breakpoint Command Lists}).  For example, as
+part of the breakpoint command list, you can disable completely the
+encountered breakpoint using @kbd{disable $_hit_bpnum} or disable the
+specific encountered breakpoint location using
+@kbd{disable $_hit_bpnum.$_hit_locno}.
+If a breakpoint has only one location, @samp{$_hit_locno} is set to 1
+and the commands @kbd{disable $_hit_bpnum} and
+@kbd{disable $_hit_bpnum.$_hit_locno} both disable the breakpoint.
+
+You can also define aliases to easily disable the last hit location or
+last hit breakpoint:
+@smallexample
+(gdb) alias lld = disable $_hit_bpnum.$_hit_locno
+(gdb) alias lbd = disable $_hit_bpnum
+@end smallexample
 
 @table @code
 @item break @var{locspec}
@@ -5769,6 +5846,14 @@ Expressions}).
 Pressing @key{RET} as a means of repeating the last @value{GDBN} command is
 disabled within a @var{command-list}.
 
+Inside a command list, you can use the command
+@kbd{disable $_hit_bpnum} to disable the encountered breakpoint.
+
+If your breakpoint has several code locations, the command
+@kbd{disable $_hit_bpnum.$_hit_locno} will disable the specific breakpoint
+code location encountered.  If the breakpoint has only one location,
+this command will disable the encountered breakpoint.
+
 You can use breakpoint commands to start your program up again.  Simply
 use the @code{continue} command, or @code{step}, or any other command
 that resumes execution.
@@ -5895,16 +5980,16 @@ that is a standard I/O stream assigned to the variable @code{mylog},
 you could do the following:
 
 @example
-(gdb) set dprintf-style call
-(gdb) set dprintf-function fprintf
-(gdb) set dprintf-channel mylog
-(gdb) dprintf 25,"at line 25, glob=%d\n",glob
+(@value{GDBP}) set dprintf-style call
+(@value{GDBP}) set dprintf-function fprintf
+(@value{GDBP}) set dprintf-channel mylog
+(@value{GDBP}) dprintf 25,"at line 25, glob=%d\n",glob
 Dprintf 1 at 0x123456: file main.c, line 25.
-(gdb) info break
+(@value{GDBP}) info break
 1       dprintf        keep y   0x00123456 in main at main.c:25
         call (void) fprintf (mylog,"at line 25, glob=%d\n",glob)
         continue
-(gdb)
+(@value{GDBP})
 @end example
 
 Note that the @code{info break} displays the dynamic printf commands
@@ -6029,6 +6114,7 @@ disabled, but @code{SystemTap} probes cannot be disabled.
 You can enable (or disable) one or more probes using the following
 commands, with optional arguments:
 
+@anchor{enable probes}
 @table @code
 @kindex enable probes
 @item enable probes @r{[}@var{provider} @r{[}@var{name} @r{[}@var{objfile}@r{]}@r{]}@r{]}
@@ -6506,7 +6592,7 @@ Functions in files matching @var{file-glob-pattern} will be skipped
 over when stepping.
 
 @smallexample
-(gdb) skip -gfi utils/*.c
+(@value{GDBP}) skip -gfi utils/*.c
 @end smallexample
 
 @item -function @var{linespec}
@@ -6528,14 +6614,14 @@ the template arguments are.  Specifying the function to be skipped as a
 regular expression makes this easier.
 
 @smallexample
-(gdb) skip -rfu ^std::(allocator|basic_string)<.*>::~?\1 *\(
+(@value{GDBP}) skip -rfu ^std::(allocator|basic_string)<.*>::~?\1 *\(
 @end smallexample
 
 If you want to skip every templated C@t{++} constructor and destructor
 in the @code{std} namespace you can do:
 
 @smallexample
-(gdb) skip -rfu ^std::([a-zA-z0-9_]+)<.*>::~?\1 *\(
+(@value{GDBP}) skip -rfu ^std::([a-zA-z0-9_]+)<.*>::~?\1 *\(
 @end smallexample
 @end table
 
@@ -6560,7 +6646,7 @@ After running this command, any function whose source lives in @var{filename}
 will be skipped over when stepping.
 
 @smallexample
-(gdb) skip file boring.c
+(@value{GDBP}) skip file boring.c
 File boring.c will be skipped when stepping.
 @end smallexample
 
@@ -6895,11 +6981,11 @@ or while being stepped), all other threads in the program are also stopped by
 you examine the stopped thread in the debugger.
 
 @menu
-* All-Stop Mode::		All threads stop when GDB takes control
-* Non-Stop Mode::		Other threads continue to execute
-* Background Execution::	Running your program asynchronously
-* Thread-Specific Breakpoints::	Controlling breakpoints
-* Interrupted System Calls::	GDB may interfere with system calls
+* All-Stop Mode::               All threads stop when GDB takes control
+* Non-Stop Mode::               Other threads continue to execute
+* Background Execution::        Running your program asynchronously
+* Thread-Specific Breakpoints:: Controlling breakpoints
+* Interrupted System Calls::    GDB may interfere with system calls
 * Observer Mode::               GDB does not alter program behavior
 @end menu
 
@@ -7806,13 +7892,13 @@ often suffices to specify an older processor that @value{GDBN}
 supports.
 
 @smallexample
-(gdb) info record
+(@value{GDBP}) info record
 Active record target: record-btrace
 Recording format: Intel Processor Trace.
 Buffer size: 16kB.
 Failed to configure the Intel Processor Trace decoder: unknown cpu.
-(gdb) set record btrace cpu intel:6/158
-(gdb) info record
+(@value{GDBP}) set record btrace cpu intel:6/158
+(@value{GDBP}) info record
 Active record target: record-btrace
 Recording format: Intel Processor Trace.
 Buffer size: 16kB.
@@ -8471,7 +8557,7 @@ Select the frame with stack address @var{stack-address}.  The
 @command{info frame}, for example:
 
 @smallexample
-(gdb) info frame
+(@value{GDBP}) info frame
 Stack level 1, frame at 0x7fffffffda30:
  rip = 0x40066d in b (amd64-entry-value.cc:59); saved rip 0x4004c5
  tail call frame, caller of frame at 0x7fffffffda30
@@ -8771,18 +8857,18 @@ variable @code{j} can only be successfully printed in the outermost
 
 @smallexample
 @group
-(gdb) frame apply all p j
+(@value{GDBP}) frame apply all p j
 #0  some_function (i=5) at fun.c:4
 No symbol "j" in current context.
-(gdb) frame apply all -c p j
+(@value{GDBP}) frame apply all -c p j
 #0  some_function (i=5) at fun.c:4
 No symbol "j" in current context.
 #1  0x565555fb in main (argc=1, argv=0xffffd2c4) at fun.c:11
 $1 = 5
-(gdb) frame apply all -s p j
+(@value{GDBP}) frame apply all -s p j
 #1  0x565555fb in main (argc=1, argv=0xffffd2c4) at fun.c:11
 $2 = 5
-(gdb)
+(@value{GDBP})
 @end group
 @end smallexample
 
@@ -8791,22 +8877,22 @@ information before the command output:
 
 @smallexample
 @group
-(gdb) frame apply all p $sp
+(@value{GDBP}) frame apply all p $sp
 #0  some_function (i=5) at fun.c:4
 $4 = (void *) 0xffffd1e0
 #1  0x565555fb in main (argc=1, argv=0xffffd2c4) at fun.c:11
 $5 = (void *) 0xffffd1f0
-(gdb)
+(@value{GDBP})
 @end group
 @end smallexample
 
 If the flag @code{-q} is given, no frame information is printed:
 @smallexample
 @group
-(gdb) frame apply all -q p $sp
+(@value{GDBP}) frame apply all -q p $sp
 $12 = (void *) 0xffffd1e0
 $13 = (void *) 0xffffd1f0
-(gdb)
+(@value{GDBP})
 @end group
 @end smallexample
 
@@ -8878,7 +8964,7 @@ filter and is used when @code{all} is not the option for
 Example:
 
 @smallexample
-(gdb) info frame-filter
+(@value{GDBP}) info frame-filter
 
 global frame-filters:
   Priority  Enabled  Name
@@ -8893,8 +8979,8 @@ objfile /build/test frame-filters:
   Priority  Enabled  Name
   999       Yes      BuildProgramFilter
 
-(gdb) disable frame-filter /build/test BuildProgramFilter
-(gdb) info frame-filter
+(@value{GDBP}) disable frame-filter /build/test BuildProgramFilter
+(@value{GDBP}) info frame-filter
 
 global frame-filters:
   Priority  Enabled  Name
@@ -8909,8 +8995,8 @@ objfile /build/test frame-filters:
   Priority  Enabled  Name
   999       No       BuildProgramFilter
 
-(gdb) enable frame-filter global PrimaryFunctionFilter
-(gdb) info frame-filter
+(@value{GDBP}) enable frame-filter global PrimaryFunctionFilter
+(@value{GDBP}) info frame-filter
 
 global frame-filters:
   Priority  Enabled  Name
@@ -8945,7 +9031,7 @@ dictionary resides.
 Example:
 
 @smallexample
-(gdb) info frame-filter
+(@value{GDBP}) info frame-filter
 
 global frame-filters:
   Priority  Enabled  Name
@@ -8960,8 +9046,8 @@ objfile /build/test frame-filters:
   Priority  Enabled  Name
   999       No       BuildProgramFilter
 
-(gdb) set frame-filter priority global Reverse 50
-(gdb) info frame-filter
+(@value{GDBP}) set frame-filter priority global Reverse 50
+(@value{GDBP}) info frame-filter
 
 global frame-filters:
   Priority  Enabled  Name
@@ -9000,7 +9086,7 @@ prefer to use Emacs facilities to view source; see @ref{Emacs, ,Using
 * Search::                      Searching source files
 * Source Path::                 Specifying source directories
 * Machine Code::                Source and machine code
-* Disable Reading Source::	Disable Reading Source Code
+* Disable Reading Source::      Disable Reading Source Code
 @end menu
 
 @node List
@@ -10070,7 +10156,7 @@ End of assembler dump.
 Here is another example showing raw instructions in hex for AMD x86-64,
 
 @smallexample
-(gdb) disas /r 0x400281,+10
+(@value{GDBP}) disas /r 0x400281,+10
 Dump of assembler code from 0x400281 to 0x40028b:
    0x0000000000400281:  38 36  cmp    %dh,(%rsi)
    0x0000000000400283:  2d 36 34 2e 73 sub    $0x732e3436,%eax
@@ -10381,7 +10467,7 @@ then, the value of the variable @code{cs} can be explored using the
 @code{explore} command as follows.
 
 @smallexample
-(gdb) explore cs
+(@value{GDBP}) explore cs
 The value of `cs' is a struct/class of type `struct ComplexStruct' with
 the following fields:
 
@@ -10444,7 +10530,7 @@ same example as above, your can explore the type
 @code{struct ComplexStruct} to the @code{explore} command.
 
 @smallexample
-(gdb) explore struct ComplexStruct
+(@value{GDBP}) explore struct ComplexStruct
 @end smallexample
 
 @noindent
@@ -10852,11 +10938,11 @@ to @ref{set print entry-values}.
 @smallexample
 Breakpoint 1, d (i=30) at gdb.base/entry-value.c:29
 29	  i++;
-(gdb) next
+(@value{GDBP}) next
 30	  e (i);
-(gdb) print i
+(@value{GDBP}) print i
 $1 = 31
-(gdb) print i@@entry
+(@value{GDBP}) print i@@entry
 $2 = 30
 @end smallexample
 
@@ -10874,9 +10960,9 @@ signed char var1[] = "A";
 
 You get during debugging
 @smallexample
-(gdb) print var0
+(@value{GDBP}) print var0
 $1 = "A"
-(gdb) print var1
+(@value{GDBP}) print var1
 $2 = @{65 'A', 0 '\0'@}
 @end smallexample
 
@@ -11927,12 +12013,12 @@ either increase the print max-depth, or they can print the elements of
 the structure that are visible, for example
 
 @smallexample
-(gdb) set print max-depth 2
-(gdb) p var
+(@value{GDBP}) set print max-depth 2
+(@value{GDBP}) p var
 $1 = @{d = @{c = @{...@}@}@}
-(gdb) p var.d
+(@value{GDBP}) p var.d
 $2 = @{c = @{b = @{...@}@}@}
-(gdb) p var.d.c
+(@value{GDBP}) p var.d.c
 $3 = @{b = @{a = 3@}@}
 @end smallexample
 
@@ -12655,6 +12741,9 @@ The thread number of the current thread.  @xref{thread numbers}.
 @item $_gthread
 The global number of the current thread.  @xref{global thread numbers}.
 
+@item $_inferior_thread_count
+The number of live threads in the current inferior.  @xref{Threads}.
+
 @item $_gdb_major
 @itemx $_gdb_minor
 @vindex $_gdb_major@r{, convenience variable}
@@ -12884,7 +12973,7 @@ The default is 1.
 Example:
 
 @smallexample
-(gdb) backtrace
+(@value{GDBP}) backtrace
 #0  bottom_func ()
     at testsuite/gdb.python/py-caller-is.c:21
 #1  0x00000000004005a0 in middle_func ()
@@ -12893,9 +12982,9 @@ Example:
     at testsuite/gdb.python/py-caller-is.c:33
 #3  0x00000000004005b6 in main ()
     at testsuite/gdb.python/py-caller-is.c:39
-(gdb) print $_caller_is ("middle_func")
+(@value{GDBP}) print $_caller_is ("middle_func")
 $1 = 1
-(gdb) print $_caller_is ("top_func", 2)
+(@value{GDBP}) print $_caller_is ("top_func", 2)
 $1 = 1
 @end smallexample
 
@@ -12945,7 +13034,7 @@ enumeration value.  For example, assuming the variable @var{node} is of
 an enumerated type:
 
 @smallexample
-(gdb) printf "Visiting node of type %s\n", $_as_string(node)
+(@value{GDBP}) printf "Visiting node of type %s\n", $_as_string(node)
 Visiting node of type NODE_INTEGER
 @end smallexample
 
@@ -14015,26 +14104,26 @@ hello ()
 you get during debugging:
 
 @smallexample
-(gdb) find &hello[0], +sizeof(hello), "hello"
+(@value{GDBP}) find &hello[0], +sizeof(hello), "hello"
 0x804956d <hello.1620+6>
 1 pattern found
-(gdb) find &hello[0], +sizeof(hello), 'h', 'e', 'l', 'l', 'o'
+(@value{GDBP}) find &hello[0], +sizeof(hello), 'h', 'e', 'l', 'l', 'o'
 0x8049567 <hello.1620>
 0x804956d <hello.1620+6>
 2 patterns found.
-(gdb) find &hello[0], +sizeof(hello), @{char[5]@}"hello"
+(@value{GDBP}) find &hello[0], +sizeof(hello), @{char[5]@}"hello"
 0x8049567 <hello.1620>
 0x804956d <hello.1620+6>
 2 patterns found.
-(gdb) find /b1 &hello[0], +sizeof(hello), 'h', 0x65, 'l'
+(@value{GDBP}) find /b1 &hello[0], +sizeof(hello), 'h', 0x65, 'l'
 0x8049567 <hello.1620>
 1 pattern found
-(gdb) find &mixed, +sizeof(mixed), (char) 'c', (short) 0x1234, (int) 0x87654321
+(@value{GDBP}) find &mixed, +sizeof(mixed), (char) 'c', (short) 0x1234, (int) 0x87654321
 0x8049560 <mixed.1625>
 1 pattern found
-(gdb) print $numfound
+(@value{GDBP}) print $numfound
 $1 = 1
-(gdb) print $_
+(@value{GDBP}) print $_
 $2 = (void *) 0x8049560
 @end smallexample
 
@@ -14199,9 +14288,9 @@ this information.
 kind by text @code{tail call frame} such as in this sample @value{GDBN} output:
 
 @smallexample
-(gdb) x/i $pc - 2
+(@value{GDBP}) x/i $pc - 2
    0x40066b <b(int, double)+11>: jmp 0x400640 <c(int, double)>
-(gdb) info frame
+(@value{GDBP}) info frame
 Stack level 1, frame at 0x7fffffffda30:
  rip = 0x40066d in b (amd64-entry-value.cc:59); saved rip 0x4004c5
  tail call frame, caller of frame at 0x7fffffffda30
@@ -14248,7 +14337,7 @@ Breakpoint 1, DW_OP_entry_value resolving cannot find
 DW_TAG_call_site 0x40039a in main
 a () at t.c:3
 3	static void __attribute__((noinline, noclone)) a (void) @{ x++; @}
-(gdb) bt
+(@value{GDBP}) bt
 #0  a () at t.c:3
 #1  0x000000000040039a in main () at t.c:5
 @end smallexample
@@ -14269,7 +14358,7 @@ int main (void) @{ a (); return 0; @}
 tailcall: initial: 0x4004d2(a) 0x4004ce(b) 0x4004b2(c) 0x4004a2(d)
 tailcall: compare: 0x4004d2(a) 0x4004cc(b) 0x400492(e)
 tailcall: reduced: 0x4004d2(a) |
-(gdb) bt
+(@value{GDBP}) bt
 #0  f () at t.c:2
 #1  0x00000000004004d2 in a () at t.c:8
 #2  0x0000000000400395 in main () at t.c:9
@@ -14319,7 +14408,7 @@ static void __attribute__((noinline, noclone)) a (int i)
 @{ if (i) b (i - 1); else c (0); @}
 int main (void) @{ a (5); return 0; @}
 
-(gdb) bt
+(@value{GDBP}) bt
 #0  c (i=i@@entry=0) at t.c:2
 #1  0x0000000000400428 in a (DW_OP_entry_value resolving has found
 function "a" at 0x400420 can call itself via tail calls
@@ -17182,9 +17271,9 @@ You can set a breakpoint on such functions simply as if they had no
 tag.  For example:
 
 @smallexample
-(gdb) b function(int)
+(@value{GDBP}) b function(int)
 Breakpoint 2 at 0x40060d: file main.cc, line 10.
-(gdb) info breakpoints
+(@value{GDBP}) info breakpoints
 Num     Type           Disp Enb Address    What
 1       breakpoint     keep y   0x0040060d in function[abi:cxx11](int)
                                            at main.cc:10
@@ -17261,8 +17350,8 @@ func main () @{
 When stopped inside @code{main} either of these work:
 
 @example
-(gdb) p myglob
-(gdb) p main.myglob
+(@value{GDBP}) p myglob
+(@value{GDBP}) p main.myglob
 @end example
 
 @cindex builtin Go types
@@ -18858,7 +18947,7 @@ terminated themselves.
 @item Child Activation Wait
 The task is waiting for created tasks to complete activation.
 
-@item Accept Statement
+@item Accept or Select Term
 The task is waiting on an accept or selective wait statement.
 
 @item Waiting on entry call
@@ -18881,8 +18970,20 @@ waiting on a terminate Phase.
 The task is sleeping waiting for tasks on terminate alternatives to
 finish terminating.
 
+@item Asynchronous Hold
+The task has been held by @code{Ada.Asynchronous_Task_Control.Hold_Task}.
+
+@item Activating
+The task has been created and is being made runnable.
+
+@item Selective Wait
+The task is waiting in a selective wait statement.
+
 @item Accepting RV with @var{taskno}
 The task is accepting a rendez-vous with the task @var{taskno}.
+
+@item Waiting on RV with @var{taskno}
+The task is waiting for a rendez-vous with the task @var{taskno}.
 @end table
 
 @item Name
@@ -21040,11 +21141,11 @@ Therefore, if you cast a variable to a type defined in the
 need to resolve the type can be achieved.
 
 @smallexample
-(gdb) compile code static struct a @{ int a; @} v = @{ 42 @}; argv = &v;
-(gdb) compile code printf ("%d\n", ((struct a *) argv)->a);
+(@value{GDBP}) compile code static struct a @{ int a; @} v = @{ 42 @}; argv = &v;
+(@value{GDBP}) compile code printf ("%d\n", ((struct a *) argv)->a);
 gdb command line:1:36: error: dereferencing pointer to incomplete type ‘struct a’
 Compilation failed.
-(gdb) compile code struct a @{ int a; @}; printf ("%d\n", ((struct a *) argv)->a);
+(@value{GDBP}) compile code struct a @{ int a; @}; printf ("%d\n", ((struct a *) argv)->a);
 42
 @end smallexample
 
@@ -21330,14 +21431,14 @@ file to remove can be identified by its @var{filename} or by an @var{address}
 that lies within the boundaries of this symbol file in memory.  Example:
 
 @smallexample
-(gdb) add-symbol-file /home/user/gdb/mylib.so 0x7ffff7ff9480
+(@value{GDBP}) add-symbol-file /home/user/gdb/mylib.so 0x7ffff7ff9480
 add symbol table from file "/home/user/gdb/mylib.so" at
     .text_addr = 0x7ffff7ff9480
 (y or n) y
 Reading symbols from /home/user/gdb/mylib.so...
-(gdb) remove-symbol-file -a 0x7ffff7ff9480
+(@value{GDBP}) remove-symbol-file -a 0x7ffff7ff9480
 Remove symbol table from file "/home/user/gdb/mylib.so"? (y or n) y
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -22754,7 +22855,7 @@ configuration of @value{GDBN}; use @code{help target} to list them.
 @menu
 * Connecting::                  Connecting to a remote target
 * File Transfer::               Sending files to a remote system
-* Server::	                Using the gdbserver program
+* Server::                      Using the gdbserver program
 * Remote Configuration::        Remote configuration
 * Remote Stub::                 Implementing a remote stub
 @end menu
@@ -23220,7 +23321,7 @@ The @code{stdio} connection is useful when starting @code{gdbserver}
 with ssh:
 
 @smallexample
-(gdb) target remote | ssh -T hostname gdbserver - hello
+(@value{GDBP}) target remote | ssh -T hostname gdbserver - hello
 @end smallexample
 
 The @samp{-T} option to ssh is provided because we don't need a remote pty,
@@ -24330,13 +24431,13 @@ This section describes details specific to particular native
 configurations.
 
 @menu
-* BSD libkvm Interface::	Debugging BSD kernel memory images
+* BSD libkvm Interface::        Debugging BSD kernel memory images
 * Process Information::         Process information
 * DJGPP Native::                Features specific to the DJGPP port
-* Cygwin Native::		Features specific to the Cygwin port
+* Cygwin Native::               Features specific to the Cygwin port
 * Hurd Native::                 Features specific to @sc{gnu} Hurd
-* Darwin::			Features specific to Darwin
-* FreeBSD::			Features specific to FreeBSD
+* Darwin::                      Features specific to Darwin
+* FreeBSD::                     Features specific to FreeBSD
 @end menu
 
 @node BSD libkvm Interface
@@ -24454,7 +24555,7 @@ This example shows the open file descriptors for a process using a
 tty for standard input and output as well as two network sockets:
 
 @smallexample
-(gdb) info proc files 22136
+(@value{GDBP}) info proc files 22136
 process 22136
 Open files:
 
@@ -25278,7 +25379,7 @@ acceptable commands.
 * ARM::                         ARM
 * BPF::                         eBPF
 * M68K::                        Motorola M68K
-* MicroBlaze::			Xilinx MicroBlaze
+* MicroBlaze::                  Xilinx MicroBlaze
 * MIPS Embedded::               MIPS Embedded
 * OpenRISC 1000::               OpenRISC 1000 (or1k)
 * PowerPC Embedded::            PowerPC Embedded
@@ -26279,7 +26380,7 @@ is displayed.
 For example:
 
 @smallexample
-set extended-prompt Current working directory: \w (gdb)
+set extended-prompt Current working directory: \w (@value{GDBP})
 @end smallexample
 
 Note that when an extended-prompt is set, it takes control of the
@@ -26601,6 +26702,15 @@ then it will be used.
 
 @item show style sources
 Show the current state of source code styling.
+
+@item set style tui-current-position @samp{on|off}
+Enable or disable styling of the source and assembly code highlighted
+by the TUI's current position indicator.  The default is @samp{off}.
+@xref{TUI, ,@value{GDBN} Text User Interface}.
+
+@item show style tui-current-position
+Show whether the source and assembly code highlighted by the TUI's
+current position indicator is styled.
 
 @anchor{style_disassembler_enabled}
 @item set style disassembler enabled @samp{on|off}
@@ -26992,7 +27102,7 @@ Show whether auto-loading of each specific @samp{auto-load} file(s) is enabled
 or disabled.
 
 @smallexample
-(gdb) show auto-load
+(@value{GDBP}) show auto-load
 gdb-scripts:  Auto-loading of canned sequences of commands scripts is on.
 libthread-db:  Auto-loading of inferior specific libthread_db is on.
 local-gdbinit:  Auto-loading of .gdbinit script from current directory
@@ -27011,7 +27121,7 @@ Print whether each specific @samp{auto-load} file(s) have been auto-loaded or
 not.
 
 @smallexample
-(gdb) info auto-load
+(@value{GDBP}) info auto-load
 gdb-scripts:
 Loaded  Script
 Yes     /home/user/gdb/gdb-gdb.gdb
@@ -27292,8 +27402,8 @@ For example the list of directories from which it is safe to auto-load files
 may not be too obvious while setting it up.
 
 @smallexample
-(gdb) set debug auto-load on
-(gdb) file ~/src/t/true
+(@value{GDBP}) set debug auto-load on
+(@value{GDBP}) file ~/src/t/true
 auto-load: Loading canned sequences of commands script "/tmp/true-gdb.gdb"
            for objfile "/tmp/true".
 auto-load: Updating directories of "/usr:/opt".
@@ -27450,13 +27560,6 @@ ARM AArch64.
 Turns on or off display of gdbarch debugging info.  The default is off
 @item show debug arch
 Displays the current state of displaying gdbarch debugging info.
-
-@item set debug aix-solib
-@cindex AIX shared library debugging
-Control display of debugging messages from the AIX shared library
-support module.  The default is off.
-@item show debug aix-solib
-Show the current state of displaying AIX shared library debugging messages.
 
 @item set debug aix-thread
 @cindex AIX threads
@@ -27691,12 +27794,11 @@ default is off.
 Displays the current state of displaying @value{GDBN} serial debugging
 info.
 
-@item set debug solib-frv
-@cindex FR-V shared-library debugging
-Turn on or off debugging messages for FR-V shared-library code.
-@item show debug solib-frv
-Display the current state of FR-V shared-library code debugging
-messages.
+@item set debug solib
+Turns on or off display of debugging messages related to shared libraries.
+The default is off.
+@item show debug solib
+Show the current state of solib debugging messages.
 
 @item set debug symbol-lookup
 @cindex symbol lookup
@@ -28038,30 +28140,30 @@ prefix command, the subcommands of the redefined command are kept
 
 Example:
 @example
-(gdb) define-prefix abc
-(gdb) define-prefix abc def
-(gdb) define abc def
+(@value{GDBP}) define-prefix abc
+(@value{GDBP}) define-prefix abc def
+(@value{GDBP}) define abc def
 Type commands for definition of "abc def".
 End with a line saying just "end".
 >echo command initial def\n
 >end
-(gdb) define abc def ghi
+(@value{GDBP}) define abc def ghi
 Type commands for definition of "abc def ghi".
 End with a line saying just "end".
 >echo command ghi\n
 >end
-(gdb) define abc def
+(@value{GDBP}) define abc def
 Keeping subcommands of prefix command "def".
 Redefine command "def"? (y or n) y
 Type commands for definition of "abc def".
 End with a line saying just "end".
 >echo command def\n
 >end
-(gdb) abc def ghi
+(@value{GDBP}) abc def ghi
 command ghi
-(gdb) abc def
+(@value{GDBP}) abc def
 command def
-(gdb)
+(@value{GDBP})
 @end example
 
 @kindex dont-repeat
@@ -28569,7 +28671,7 @@ the @samp{disassemble} command and you wanted an even shorter version
 named @samp{di}.  The following will accomplish this.
 
 @smallexample
-(gdb) alias -a di = disas
+(@value{GDBP}) alias -a di = disas
 @end smallexample
 
 Note that aliases are different from user-defined commands.  With a
@@ -28583,10 +28685,10 @@ This is to show that you can make an abbreviation of any part
 of a command.
 
 @smallexample
-(gdb) alias -a set print elms = set print elements
-(gdb) alias -a show print elms = show print elements
-(gdb) set p elms 200
-(gdb) show p elms
+(@value{GDBP}) alias -a set print elms = set print elements
+(@value{GDBP}) alias -a show print elms = show print elements
+(@value{GDBP}) set p elms 200
+(@value{GDBP}) show p elms
 Limit on string chars or array elements to print is 200.
 @end smallexample
 
@@ -28598,7 +28700,7 @@ Unambiguously abbreviated commands are allowed in @var{command} and
 @var{alias}, just as they are normally.
 
 @smallexample
-(gdb) alias -a set pr elms = set p ele
+(@value{GDBP}) alias -a set pr elms = set p ele
 @end smallexample
 
 Finally, here is an example showing the creation of a one word
@@ -28606,12 +28708,12 @@ alias for a more complex command.
 This creates alias @samp{spe} of the command @samp{set print elements}.
 
 @smallexample
-(gdb) alias spe = set print elements
-(gdb) spe 20
+(@value{GDBP}) alias spe = set print elements
+(@value{GDBP}) spe 20
 @end smallexample
 
 @menu
-* Command aliases default args::	Default arguments for aliases
+* Command aliases default args::        Default arguments for aliases
 @end menu
 
 @node Command aliases default args
@@ -28740,9 +28842,9 @@ Note that loading of this script file also requires accordingly configured
 @code{auto-load safe-path} (@pxref{Auto-loading safe path}).
 
 @menu
-* objfile-gdbdotext file::		The @file{@var{objfile}-gdb.@var{ext}} file
-* dotdebug_gdb_scripts section::	The @code{.debug_gdb_scripts} section
-* Which flavor to choose?::		Choosing between these approaches
+* objfile-gdbdotext file::              The @file{@var{objfile}-gdb.@var{ext}} file
+* dotdebug_gdb_scripts section::        The @code{.debug_gdb_scripts} section
+* Which flavor to choose?::             Choosing between these approaches
 @end menu
 
 @node objfile-gdbdotext file
@@ -29034,6 +29136,15 @@ The traditional console or command-line interpreter.  This is the most often
 used interpreter with @value{GDBN}. With no interpreter specified at runtime,
 @value{GDBN} will use this interpreter.
 
+@item dap
+@cindex DAP
+@cindex Debugger Adapter Protocol
+When @value{GDBN} has been built with Python support, it also supports
+the Debugger Adapter Protocol.  This protocol can be used by a
+debugger GUI or an IDE to communicate with @value{GDBN}.  This
+protocol is documented at
+@url{https://microsoft.github.io/debug-adapter-protocol/}.
+
 @item mi
 @cindex mi interpreter
 The newest @sc{gdb/mi} interface (currently @code{mi3}).  Used primarily
@@ -29048,10 +29159,6 @@ The @sc{gdb/mi} interface introduced in @value{GDBN} 9.1.
 @item mi2
 @cindex mi2 interpreter
 The @sc{gdb/mi} interface introduced in @value{GDBN} 6.0.
-
-@item mi1
-@cindex mi1 interpreter
-The @sc{gdb/mi} interface introduced in @value{GDBN} 5.1.
 
 @end table
 
@@ -29163,8 +29270,12 @@ This window shows the processor registers.  Registers are highlighted
 when their values change.
 @end table
 
-The source and assembly windows show the current program position
-by highlighting the current line and marking it with a @samp{>} marker.
+The source and assembly windows show the current program position by
+highlighting the current line and marking it with a @samp{>} marker.
+By default, source and assembly code styling is disabled for the
+highlighted text, but you can enable it with the @code{set style
+tui-current-position on} command.  @xref{Output Styling}.
+
 Breakpoints are indicated with two markers.  The first marker
 indicates the breakpoint type:
 
@@ -30749,6 +30860,8 @@ The inferior returned from a system call.  This is reported when
 @item exec
 The inferior called @code{exec}.  This is reported when @code{catch exec}
 (@pxref{Set Catchpoints}) has been used.
+@item no-history
+There isn't enough history recorded to continue reverse execution.
 @end table
 
 The @var{id} field identifies the global thread ID of the thread
@@ -32805,6 +32918,20 @@ line="13",arch="i386:x86_64"@}
 (gdb)
 @end smallexample
 
+For a @samp{breakpoint-hit} stopped reason, when the breakpoint
+encountered has multiple locations, the field @samp{bkptno} is
+followed by the field @samp{locno}.
+
+@smallexample
+-exec-continue
+^running
+(gdb)
+@@Hello world
+*stopped,reason="breakpoint-hit",disp="keep",bkptno="2",locno="3",frame=@{
+func="foo",args=[],file="hello.c",fullname="/home/foo/bar/hello.c",
+line="13",arch="i386:x86_64"@}
+(gdb)
+@end smallexample
 
 @subheading The @code{-exec-finish} Command
 @findex -exec-finish
@@ -39202,7 +39329,8 @@ make program.  Other variants of @code{make} will not work.
 This library may be included with your operating system distribution;
 if it is not, you can get the latest version from
 @url{https://gmplib.org/}. If GMP is installed at an unusual path,
-you can use the @option{--with-libgmp-prefix} option to specify
+you can use the @option{--with-gmp} option or options
+@option{--with-gmp-include} and @option{--with-gmp-lib} to specify
 its location.
 
 @end table
@@ -39284,18 +39412,18 @@ automatically.  If it is installed in an unusual path, you can use the
 
 @item MPFR
 @anchor{MPFR}
-@value{GDBN} can use the GNU MPFR multiple-precision floating-point
+@value{GDBN} now uses the GNU MPFR multiple-precision floating-point
 library.  This library may be included with your operating system
 distribution; if it is not, you can get the latest version from
 @url{http://www.mpfr.org}.  The @file{configure} script will search
 for this library in several standard locations; if it is installed
-in an unusual path, you can use the @option{--with-libmpfr-prefix}
-option to specify its location.
+in an unusual path, you can use the @option{--with-mpfr} option or options
+@option{--with-mpfr-include} and @option{--with-mpfr-lib} to specify
+its location.
 
 GNU MPFR is used to emulate target floating-point arithmetic during
 expression evaluation when the target uses different floating-point
-formats than the host.  If GNU MPFR it is not available, @value{GDBN}
-will fall back to using host floating-point arithmetic.
+formats than the host.
 
 @item Python
 @value{GDBN} can be scripted using Python language.  @xref{Python}.
@@ -40416,6 +40544,14 @@ that symbol is described.  The type chain produced by this command is
 a recursive definition of the data type as stored in @value{GDBN}'s
 data structures, including its flags and contained types.
 
+@kindex maint print record-instruction
+@item maint print record-instruction
+@itemx maint print record-instruction @var{N}
+print how GDB recorded a given instruction.  If @var{n} is not positive
+number, it prints the values stored by the inferior before the @var{n}-th previous
+instruction was exectued.  If @var{n} is positive, print the values after the @var{n}-th
+following instruction is executed.  If @var{n} is not given, 0 is assumed.
+
 @kindex maint selftest
 @cindex self tests
 @item maint selftest @r{[}-verbose@r{]} @r{[}@var{filter}@r{]}
@@ -40454,7 +40590,7 @@ always see the disassembly form.
 Here is an example of the resulting disassembly:
 
 @smallexample
-(gdb) info addr argc
+(@value{GDBP}) info addr argc
 Symbol "argc" is a complex DWARF expression:
      1: DW_OP_fbreg 0
 @end smallexample
@@ -40781,6 +40917,27 @@ Like the @code{with} command, but works with @code{maintenance set}
 variables.  This is used by the testsuite to exercise the @code{with}
 command's infrastructure.
 
+@kindex maint ignore-probes
+@item maint ignore-probes [@var{-v}|@var{-verbose}] [@var{provider} [@var{name} [@var{objfile}]]]
+@itemx maint ignore-probes @var{-reset}
+Set or reset the ignore-probes filter.  The @var{provider}, @var{name}
+and @var{objfile} arguments are as in @code{enable probes} and
+@code{disable probes} (@pxref{enable probes}).  Only supported for
+SystemTap probes.
+
+Here's an example of using @code{maint ignore-probes}:
+@smallexample
+(gdb) maint ignore-probes -verbose libc ^longjmp$
+ignore-probes filter has been set to:
+PROVIDER: 'libc'
+PROBE_NAME: '^longjmp$'
+OBJNAME: ''
+(gdb) start
+<... more output ...>
+Ignoring SystemTap probe libc longjmp in /lib64/libc.so.6.^M
+Ignoring SystemTap probe libc longjmp in /lib64/libc.so.6.^M
+Ignoring SystemTap probe libc longjmp in /lib64/libc.so.6.^M
+@end smallexample
 @end table
 
 The following command is useful for non-interactive invocations of
@@ -43706,6 +43863,12 @@ specified by the @samp{start} argument.  If unset or zero then
 the remote stub will expect that no @samp{struct link_map}
 exists prior to the starting point.
 
+@item lmid=@var{lmid}
+A hexadecimal number specifying a namespace identifier.  This is
+currently only used together with @samp{start} to provide the
+namespace identifier back to @value{GDBN} in the response.
+@value{GDBN} will only provide values that were previously reported to
+it.  If unset, the response will include @samp{lmid="0x0"}.
 @end table
 
 Arguments that are not understood by the remote stub will be silently
@@ -46244,6 +46407,11 @@ memory address.  It is a displacement of absolute memory address against
 address the file was prelinked to during the library load.
 @item
 @code{l_ld}, which is memory address of the @code{PT_DYNAMIC} segment
+@item
+@code{lmid}, which is an identifier for a linker namespace, such as
+the memory address of the @code{r_debug} object that contains this
+namespace's load map or the namespace identifier returned by
+@code{dlinfo (3)}.
 @end itemize
 
 Additionally the single @code{main-lm} attribute specifies address of
@@ -46259,9 +46427,9 @@ looks like this:
 @smallexample
 <library-list-svr4 version="1.0" main-lm="0xe4f8f8">
   <library name="/lib/ld-linux.so.2" lm="0xe4f51c" l_addr="0xe2d000"
-           l_ld="0xe4eefc"/>
+           l_ld="0xe4eefc" lmid="0xfffe0"/>
   <library name="/lib/libc.so.6" lm="0xe4fbe8" l_addr="0x154000"
-           l_ld="0x152350"/>
+           l_ld="0x152350" lmid="0xfffe0"/>
 </library-list-svr>
 @end smallexample
 
@@ -46277,6 +46445,7 @@ The format of an SVR4 library list is described by this DTD:
 <!ATTLIST library            lm      CDATA   #REQUIRED>
 <!ATTLIST library            l_addr  CDATA   #REQUIRED>
 <!ATTLIST library            l_ld    CDATA   #REQUIRED>
+<!ATTLIST library            lmid    CDATA   #IMPLIED>
 @end smallexample
 
 @node Memory Map Format
@@ -46903,7 +47072,7 @@ defining them with @samp{flags}:
 One can fetch individual fields like in @samp{C}.
 
 @smallexample
-(gdb) print $my_struct_reg.field3
+(@value{GDBP}) print $my_struct_reg.field3
 $1 = 42
 @end smallexample
 
@@ -47067,7 +47236,7 @@ Given that description, a value of 3 for the @samp{flags} register
 would be printed as:
 
 @smallexample
-(gdb) info register flags
+(@value{GDBP}) info register flags
 flags 0x3 [ X LEVEL=high ]
 @end smallexample
 
@@ -48103,7 +48272,7 @@ with @code{elfutils}, starting with version 0.178.  See
 regarding @code{debuginfod}.
 
 @menu
-* Debuginfod Settings::		Configuring debuginfod with @value{GDBN}
+* Debuginfod Settings::         Configuring debuginfod with @value{GDBN}
 @end menu
 
 @node Debuginfod Settings
@@ -48607,10 +48776,10 @@ descriptor.  For example:
 @smallexample
 @ifset man
 @c @file would wrap it as F</dev/ttyb>.
-(gdb) target remote /dev/ttyb
+(@value{GDBP}) target remote /dev/ttyb
 @end ifset
 @ifclear man
-(gdb) target remote @file{/dev/ttyb}
+(@value{GDBP}) target remote @file{/dev/ttyb}
 @end ifclear
 @end smallexample
 
@@ -48618,7 +48787,7 @@ descriptor.  For example:
 communicates with the server via serial line @file{/dev/ttyb}, and:
 
 @smallexample
-(gdb) target remote the-target:2345
+(@value{GDBP}) target remote the-target:2345
 @end smallexample
 
 @noindent
@@ -48640,7 +48809,7 @@ the @value{GDBN} manual in node @code{Inferiors Connections and Programs}
 In such case use the @code{extended-remote} @value{GDBN} command variant:
 
 @smallexample
-(gdb) target extended-remote the-target:2345
+(@value{GDBP}) target extended-remote the-target:2345
 @end smallexample
 
 The @command{gdbserver} option @option{--multi} may or may not be used in such

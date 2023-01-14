@@ -1,6 +1,6 @@
 /* This file is part of SIS (SPARC instruction simulator)
 
-   Copyright (C) 1995-2022 Free Software Foundation, Inc.
+   Copyright (C) 1995-2023 Free Software Foundation, Inc.
    Contributed by Jiri Gaisler, European Space Agency
 
    This program is free software; you can redistribute it and/or modify
@@ -310,8 +310,9 @@ sim_create_inferior(SIM_DESC sd, bfd *abfd, char * const *argv,
 }
 
 int
-sim_store_register(SIM_DESC sd, int regno, unsigned char *value, int length)
+sim_store_register(SIM_DESC sd, int regno, const void *buf, int length)
 {
+    const unsigned char *value = buf;
     int regval;
 
     regval = (value[0] << 24) | (value[1] << 16)
@@ -322,30 +323,32 @@ sim_store_register(SIM_DESC sd, int regno, unsigned char *value, int length)
 
 
 int
-sim_fetch_register(SIM_DESC sd, int regno, unsigned char *buf, int length)
+sim_fetch_register(SIM_DESC sd, int regno, void *buf, int length)
 {
     get_regi(&sregs, regno, buf);
     return -1;
 }
 
-int
-sim_write (SIM_DESC sd, SIM_ADDR mem, const unsigned char *buf, int length)
+uint64_t
+sim_write (SIM_DESC sd, uint64_t mem, const void *buffer, uint64_t length)
 {
     int i, len;
+    const unsigned char *data = buffer;
 
     for (i = 0; i < length; i++) {
-	sis_memory_write ((mem + i) ^ EBT, &buf[i], 1);
+	sis_memory_write ((mem + i) ^ EBT, &data[i], 1);
     }
     return length;
 }
 
-int
-sim_read (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
+uint64_t
+sim_read (SIM_DESC sd, uint64_t mem, void *buffer, uint64_t length)
 {
     int i, len;
+    unsigned char *data = buffer;
 
     for (i = 0; i < length; i++) {
-	sis_memory_read ((mem + i) ^ EBT, &buf[i], 1);
+	sis_memory_read ((mem + i) ^ EBT, &data[i], 1);
     }
     return length;
 }

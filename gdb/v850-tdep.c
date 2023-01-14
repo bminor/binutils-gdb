@@ -1,6 +1,6 @@
 /* Target-dependent code for the NEC V850 for GDB, the GNU debugger.
 
-   Copyright (C) 1996-2022 Free Software Foundation, Inc.
+   Copyright (C) 1996-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1348,7 +1348,6 @@ static const struct frame_base v850_frame_base = {
 static struct gdbarch *
 v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   int e_flags, e_machine;
 
   /* Extract the elf_flags if available.  */
@@ -1380,7 +1379,10 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       return arches->gdbarch;
     }
 
-  v850_gdbarch_tdep *tdep = new v850_gdbarch_tdep;
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new v850_gdbarch_tdep));
+  v850_gdbarch_tdep *tdep = gdbarch_tdep<v850_gdbarch_tdep> (gdbarch);
+
   tdep->e_flags = e_flags;
   tdep->e_machine = e_machine;
 
@@ -1395,7 +1397,6 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   tdep->eight_byte_align = (tdep->e_flags & EF_RH850_DATA_ALIGN8) ? 1 : 0;
-  gdbarch = gdbarch_alloc (&info, tdep);
 
   switch (info.bfd_arch_info->mach)
     {

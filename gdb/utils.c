@@ -1,6 +1,6 @@
 /* General utility routines for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -412,7 +412,7 @@ internal_vproblem (struct internal_problem *problem,
   else if (problem->should_quit == internal_problem_no)
     quit_p = 0;
   else
-    internal_error (__FILE__, __LINE__, _("bad switch"));
+    internal_error (_("bad switch"));
 
   gdb_puts (_("\nThis is a bug, please report it."), gdb_stderr);
   if (REPORT_BUGS_TO[0])
@@ -442,7 +442,7 @@ internal_vproblem (struct internal_problem *problem,
   else if (problem->should_dump_core == internal_problem_no)
     dump_core_p = 0;
   else
-    internal_error (__FILE__, __LINE__, _("bad switch"));
+    internal_error (_("bad switch"));
 
   if (quit_p)
     {
@@ -714,13 +714,12 @@ malloc_failure (long size)
 {
   if (size > 0)
     {
-      internal_error (__FILE__, __LINE__,
-		      _("virtual memory exhausted: can't allocate %ld bytes."),
+      internal_error (_("virtual memory exhausted: can't allocate %ld bytes."),
 		      size);
     }
   else
     {
-      internal_error (__FILE__, __LINE__, _("virtual memory exhausted."));
+      internal_error (_("virtual memory exhausted."));
     }
 }
 
@@ -3100,35 +3099,7 @@ strcmp_iw_ordered (const char *string1, const char *string2)
     }
 }
 
-/* See utils.h.  */
-
-bool
-streq (const char *lhs, const char *rhs)
-{
-  return !strcmp (lhs, rhs);
-}
-
 
-
-/*
-   ** subset_compare()
-   **    Answer whether string_to_compare is a full or partial match to
-   **    template_string.  The partial match must be in sequence starting
-   **    at index 0.
- */
-int
-subset_compare (const char *string_to_compare, const char *template_string)
-{
-  int match;
-
-  if (template_string != NULL && string_to_compare != NULL
-      && strlen (string_to_compare) <= strlen (template_string))
-    match =
-      (startswith (template_string, string_to_compare));
-  else
-    match = 0;
-  return match;
-}
 
 static void
 show_debug_timestamp (struct ui_file *file, int from_tty,
@@ -3138,28 +3109,6 @@ show_debug_timestamp (struct ui_file *file, int from_tty,
 	      value);
 }
 
-
-/* See utils.h.  */
-
-CORE_ADDR
-address_significant (gdbarch *gdbarch, CORE_ADDR addr)
-{
-  /* Clear insignificant bits of a target address and sign extend resulting
-     address, avoiding shifts larger or equal than the width of a CORE_ADDR.
-     The local variable ADDR_BIT stops the compiler reporting a shift overflow
-     when it won't occur.  Skip updating of target address if current target
-     has not set gdbarch significant_addr_bit.  */
-  int addr_bit = gdbarch_significant_addr_bit (gdbarch);
-
-  if (addr_bit && (addr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT)))
-    {
-      CORE_ADDR sign = (CORE_ADDR) 1 << (addr_bit - 1);
-      addr &= ((CORE_ADDR) 1 << addr_bit) - 1;
-      addr = (addr ^ sign) - sign;
-    }
-
-  return addr;
-}
 
 const char *
 paddress (struct gdbarch *gdbarch, CORE_ADDR addr)

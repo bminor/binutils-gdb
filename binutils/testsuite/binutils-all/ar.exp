@@ -1,4 +1,4 @@
-#   Copyright (C) 1995-2022 Free Software Foundation, Inc.
+#   Copyright (C) 1995-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -623,7 +623,8 @@ proc empty_archive { } {
 
     # This commmand used to fail with: "Malformed archive".
     set got [binutils_run $AR "-t $archive"]
-    if ![string match "empty" $got] {
+    if ![string match "empty
+" $got] {
 	fail $testname
 	return
     }
@@ -764,7 +765,8 @@ proc test_add_dependencies { } {
     }
 
     set got [binutils_run $AR "-t $archive"]
-    if ![string match "*bintest.${obj}__.LIBDEP*" $got] {
+    if ![string match "*bintest.${obj}
+__.LIBDEP*" $got] {
 	fail $testname
 	return
     }

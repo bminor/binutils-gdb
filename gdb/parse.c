@@ -1,6 +1,6 @@
 /* Parse expressions for GDB.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    Modified from expread.y by the Department of Computer Science at the
    State University of New York at Buffalo, 1991.
@@ -527,7 +527,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
   result->op->set_outermost ();
 
   if (expressiondebug)
-    dump_prefix_expression (result.get (), gdb_stdlog);
+    result->dump (gdb_stdlog);
 
   if (completer != nullptr)
     *completer = std::move (ps.m_completion_state);
@@ -665,18 +665,6 @@ parser_fprintf (FILE *x, const char *y, ...)
       gdb_vprintf (gdb_stderr, y, args);
     }
   va_end (args);
-}
-
-/* Return rue if EXP uses OBJFILE (and will become dangling when
-   OBJFILE is unloaded), otherwise return false.  OBJFILE must not be
-   a separate debug info file.  */
-
-bool
-exp_uses_objfile (struct expression *exp, struct objfile *objfile)
-{
-  gdb_assert (objfile->separate_debug_objfile_backlink == NULL);
-
-  return exp->op->uses_objfile (objfile);
 }
 
 void _initialize_parse ();

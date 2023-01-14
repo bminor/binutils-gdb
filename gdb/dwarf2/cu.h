@@ -1,6 +1,6 @@
 /* DWARF CU data structure
 
-   Copyright (C) 2021-2022 Free Software Foundation, Inc.
+   Copyright (C) 2021-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -98,7 +98,7 @@ struct dwarf2_cu
   void add_dependence (struct dwarf2_per_cu_data *ref_per_cu);
 
   /* The header of the compilation unit.  */
-  struct comp_unit_head header {};
+  struct comp_unit_head header;
 
   /* Base address of this compilation unit.  */
   gdb::optional<CORE_ADDR> base_address;
@@ -264,6 +264,7 @@ public:
   bool producer_is_icc : 1;
   bool producer_is_icc_lt_14 : 1;
   bool producer_is_codewarrior : 1;
+  bool producer_is_clang : 1;
 
   /* When true, the file that we're processing is known to have
      debugging info for C++ namespaces.  GCC 3.3.x did not produce
@@ -276,8 +277,6 @@ public:
      we think are interesting.  It gets set if we look for a DIE in the
      hash table and don't find it.  */
   bool load_all_dies : 1;
-
-  struct partial_die_info *find_partial_die (sect_offset sect_off);
 
   /* Get the buildsym_compunit for this CU.  */
   buildsym_compunit *get_builder ();

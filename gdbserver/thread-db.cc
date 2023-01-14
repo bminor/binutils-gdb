@@ -1,5 +1,5 @@
 /* Thread management interface, for the remote server for GDB.
-   Copyright (C) 2002-2022 Free Software Foundation, Inc.
+   Copyright (C) 2002-2023 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
 
@@ -155,30 +155,35 @@ thread_db_state_str (td_thr_state_e state)
 }
 #endif
 
-/* Get thread info about PTID, accessing memory via the current
-   thread.  */
+/* Get thread info about PTID.  */
 
 static int
 find_one_thread (ptid_t ptid)
 {
-  td_thrhandle_t th;
-  td_thrinfo_t ti;
-  td_err_e err;
-  struct lwp_info *lwp;
-  struct thread_db *thread_db = current_process ()->priv->thread_db;
-  int lwpid = ptid.lwp ();
-
   thread_info *thread = find_thread_ptid (ptid);
-  lwp = get_thread_lwp (thread);
+  lwp_info *lwp = get_thread_lwp (thread);
   if (lwp->thread_known)
     return 1;
 
-  /* Get information about this thread.  */
-  err = thread_db->td_ta_map_lwp2thr_p (thread_db->thread_agent, lwpid, &th);
+  /* Get information about this thread.  libthread_db will need to read some
+     memory, which will be done on the current process, so make PTID's process
+     the current one.  */
+  process_info *proc = find_process_pid (ptid.pid ());
+  gdb_assert (proc != nullptr);
+
+  scoped_restore_current_thread restore_thread;
+  switch_to_process (proc);
+
+  thread_db *thread_db = proc->priv->thread_db;
+  td_thrhandle_t th;
+  int lwpid = ptid.lwp ();
+  td_err_e err = thread_db->td_ta_map_lwp2thr_p (thread_db->thread_agent, lwpid,
+						 &th);
   if (err != TD_OK)
     error ("Cannot get thread handle for LWP %d: %s",
 	   lwpid, thread_db_err_str (err));
 
+  td_thrinfo_t ti;
   err = thread_db->td_thr_get_info_p (&th, &ti);
   if (err != TD_OK)
     error ("Cannot get thread info for LWP %d: %s",

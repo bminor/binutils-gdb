@@ -1,4 +1,4 @@
-# Copyright 2011-2022 Free Software Foundation, Inc.
+# Copyright 2011-2023 Free Software Foundation, Inc.
 #
 # Contributed by Red Hat, originally written by Keith Seitz.
 #
@@ -65,7 +65,6 @@ gdb_test_multiple $test $test {
 }
 
 if {![runto_main]} {
-    perror "couldn't run to breakpoint"
     return
 }
 

@@ -1,4 +1,4 @@
-#   Copyright 1998-2022 Free Software Foundation, Inc.
+#   Copyright 1998-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -44,8 +44,7 @@ gdb_test_no_output "set print address off"
 gdb_test_no_output "set width 0"
 
 
-if ![runto_main] then {
-    perror "couldn't run to breakpoint"
+if {![runto_main]} {
     return
 }
 
@@ -432,7 +431,7 @@ if {!$skip_float_test && \
     # On 32-bit SPARC, some of the args are passed by ref, others by
     # value, and GDB gets confused and says "Invalid cast" because it
     # thinks it has to cast the structure into a pointer to structure.
-    if { [test_debug_format "stabs"] } then {
+    if {[test_debug_format "stabs"]} {
 	setup_kfail "gdb/1539" "sparc-*-*"
     }
 

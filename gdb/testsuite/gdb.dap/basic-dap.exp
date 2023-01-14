@@ -1,0 +1,151 @@
+# Copyright 2022 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Basic DAP test.
+
+load_lib dap-support.exp
+
+standard_testfile
+
+if {[build_executable ${testfile}.exp $testfile] == -1} {
+    return
+}
+
+if {[dap_launch $testfile] == ""} {
+    return
+}
+
+set obj [dap_check_request_and_response "set breakpoint on two functions" \
+	     setFunctionBreakpoints \
+	     {o breakpoints [a [o name [s function_breakpoint_here]] \
+				 [o name [s do_not_stop_here]]]}]
+set fn_bpno [dap_get_breakpoint_number $obj]
+
+# This also tests that the previous do_not_stop_here breakpoint is
+# cleared.
+set obj [dap_check_request_and_response "set breakpoint on function" \
+	     setFunctionBreakpoints \
+	     {o breakpoints [a [o name [s function_breakpoint_here]]]}]
+set fn_bpno [dap_get_breakpoint_number $obj]
+
+set obj [dap_check_request_and_response "set breakpoint with invalid filename" \
+	     setBreakpoints \
+	     [format {o source [o path [s nosuchfilename.c]] breakpoints [a [o line [i 29]]]}]]
+
+set line [gdb_get_line_number "BREAK"]
+set obj [dap_check_request_and_response "set breakpoint by line number" \
+	     setBreakpoints \
+	     [format {o source [o path [%s]] breakpoints [a [o line [i %d]]]} \
+		  [list s $srcfile] $line]]
+set line_bpno [dap_get_breakpoint_number $obj]
+
+# Check the new breakpoint event.
+set ok 0
+foreach event [lindex $obj 1] {
+    set d [namespace eval ton::2dict $event]
+    if {[dict get $d type] != "event"
+	|| [dict get $d event] != "breakpoint"} {
+	continue
+    }
+    if {[dict get $d body reason] == "new"
+	&& [dict get $d body breakpoint verified] == "true"} {
+	set ok 1
+	pass "check new breakpoint event"
+	break
+    }
+}
+if {!$ok} {
+    fail "check new breakpoint event"
+}
+
+set obj [dap_check_request_and_response "reset breakpoint by line number" \
+	     setBreakpoints \
+	     [format {o source [o path [%s]] breakpoints [a [o line [i %d]]]} \
+		  [list s $srcfile] $line]]
+set new_line_bpno [dap_get_breakpoint_number $obj]
+
+if {$new_line_bpno == $line_bpno} {
+    pass "re-setting kept same breakpoint number"
+} else {
+    fail "re-setting kept same breakpoint number"
+}
+
+# This uses "&address_breakpoint_here" as the address -- this is a
+# hack because we know how this is implemented under the hood.
+set obj [dap_check_request_and_response "set breakpoint by address" \
+	     setInstructionBreakpoints \
+	     {o breakpoints [a [o instructionReference [s &address_breakpoint_here]]]}]
+set insn_bpno [dap_get_breakpoint_number $obj]
+
+set d [namespace eval ton::2dict [lindex $obj 0]]
+set bplist [dict get $d body breakpoints]
+set insn_pc [dict get [lindex $bplist 0] instructionReference]
+
+dap_check_request_and_response "start inferior" configurationDone
+dap_read_event "inferior started" thread "body reason" started
+
+dap_read_event "stopped at function breakpoint" stopped \
+    "body reason" breakpoint \
+    "body hitBreakpointIds" $fn_bpno
+
+set obj [dap_check_request_and_response "evaluate global in function" \
+	     evaluate {o expression [s global_variable]}]
+dap_match_values "global value in function" [lindex $obj 0] \
+    "body result" 23
+
+dap_check_request_and_response step stepIn {o threadId [i 1]}
+dap_read_event "stopped after step" stopped "body reason" step
+
+set obj [dap_check_request_and_response "evaluate global second time" \
+	     evaluate {o expression [s global_variable]}]
+dap_match_values "global value after step" [lindex $obj 0] \
+    "body result" 24
+
+dap_check_request_and_response "continue to address" continue
+dap_read_event "stopped at address breakpoint" stopped \
+    "body reason" breakpoint \
+    "body hitBreakpointIds" $insn_bpno
+
+dap_check_request_and_response "continue to line" continue
+dap_read_event "stopped at line breakpoint" stopped \
+    "body reason" breakpoint \
+    "body hitBreakpointIds" $line_bpno
+
+set obj [dap_check_request_and_response "evaluate global in main" \
+	     evaluate {o expression [s global_variable]}]
+dap_match_values "global value in main" [lindex $obj 0] \
+    "body result" 25
+
+set obj [dap_request_and_response "evaluate non-existing variable" \
+	     evaluate {o expression [s nosuchvariable]}]
+set d [namespace eval ton::2dict [lindex $obj 0]]
+if {[dict get $d success] == "false"} {
+    pass "result of invalid request"
+} else {
+    fail "result of invalid request"
+}
+
+set obj [dap_check_request_and_response "disassemble one instruction" \
+	     disassemble \
+	     [format {o memoryReference [s %s] instructionCount [i 1]} \
+		  $insn_pc]]
+set d [namespace eval ton::2dict [lindex $obj 0]]
+if {[dict exists $d body instructions]} {
+    pass "instructions in disassemble output"
+} else {
+    fail "instructions in disassemble output"
+}
+
+dap_shutdown

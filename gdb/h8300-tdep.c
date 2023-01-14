@@ -1,6 +1,6 @@
 /* Target-machine dependent code for Renesas H8/300, for GDB.
 
-   Copyright (C) 1988-2022 Free Software Foundation, Inc.
+   Copyright (C) 1988-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1117,8 +1117,7 @@ static struct type *
 h8300_register_type (struct gdbarch *gdbarch, int regno)
 {
   if (regno < 0 || regno >= gdbarch_num_cooked_regs (gdbarch))
-    internal_error (__FILE__, __LINE__,
-		    _("h8300_register_type: illegal register number %d"),
+    internal_error (_("h8300_register_type: illegal register number %d"),
 		    regno);
   else
     {

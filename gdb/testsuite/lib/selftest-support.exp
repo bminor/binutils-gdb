@@ -1,4 +1,4 @@
-# Copyright 2003-2022 Free Software Foundation, Inc.
+# Copyright 2003-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,12 +21,12 @@ proc find_gdb { arg } {
     # If the arg directly specifies an existing executable file, then
     # simply use it.
 
-    if [file executable $arg] then {
+    if {[file executable $arg]} {
 	return $arg
     }
 
     set result [which $arg]
-    if [string match "/" [ string range $result 0 0 ]] then {
+    if {[string match "/" [ string range $result 0 0 ]]} {
 	return $result
     }
 
@@ -54,11 +54,11 @@ proc selftest_setup { executable function } {
 
     set result [gdb_load $executable]
 
-    if { $result != 0 } then {
+    if {$result != 0} {
 	return -1
     }
 
-    if { $gdb_file_cmd_debug_info != "debug" } then {
+    if {$gdb_file_cmd_debug_info != "debug"} {
 	untested "no debug information, skipping testcase."
 	return -2
     }
@@ -139,7 +139,7 @@ proc do_self_tests {function body} {
     # duration of the test.
     with_timeout_factor 10 {
 	set result [selftest_setup $file $function]
-	if {$result == 0} then {
+	if {$result == 0} {
 	    set result [uplevel $body]
 	}
     }
@@ -147,7 +147,7 @@ proc do_self_tests {function body} {
     gdb_exit
     catch "remote_file host delete $file"
 
-    if {$result == -1} then {
+    if {$result == -1} {
 	warning "Couldn't test self"
     }
 }

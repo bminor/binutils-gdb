@@ -1,6 +1,6 @@
 /* Process record and replay target for GDB, the GNU debugger.
 
-   Copyright (C) 2013-2022 Free Software Foundation, Inc.
+   Copyright (C) 2013-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -39,6 +39,7 @@
 #include "gdbsupport/gdb_unlinker.h"
 #include "gdbsupport/byte-vector.h"
 #include "async-event.h"
+#include "valprint.h"
 
 #include <signal.h>
 
@@ -2764,6 +2765,90 @@ set_record_full_insn_max_num (const char *args, int from_tty,
     }
 }
 
+/* Implement the 'maintenance print record-instruction' command.  */
+
+static void
+maintenance_print_record_instruction (const char *args, int from_tty)
+{
+  struct record_full_entry *to_print = record_full_list;
+
+  if (args != nullptr)
+    {
+      int offset = value_as_long (parse_and_eval (args));
+      if (offset > 0)
+	{
+	  /* Move forward OFFSET instructions.  We know we found the
+	     end of an instruction when to_print->type is record_full_end.  */
+	  while (to_print->next != nullptr && offset > 0)
+	    {
+	      to_print = to_print->next;
+	      if (to_print->type == record_full_end)
+		offset--;
+	    }
+	  if (offset != 0)
+	    error (_("Not enough recorded history"));
+	}
+      else
+	{
+	  while (to_print->prev != nullptr && offset < 0)
+	    {
+	      to_print = to_print->prev;
+	      if (to_print->type == record_full_end)
+		offset++;
+	    }
+	  if (offset != 0)
+	    error (_("Not enough recorded history"));
+	}
+    }
+  gdb_assert (to_print != nullptr);
+
+  /* Go back to the start of the instruction.  */
+  while (to_print->prev != nullptr && to_print->prev->type != record_full_end)
+    to_print = to_print->prev;
+
+  /* if we're in the first record, there are no actual instructions
+     recorded.  Warn the user and leave.  */
+  if (to_print == &record_full_first)
+    error (_("Not enough recorded history"));
+
+  while (to_print->type != record_full_end)
+    {
+      switch (to_print->type)
+	{
+	  case record_full_reg:
+	    {
+	      type *regtype = gdbarch_register_type (target_gdbarch (),
+						     to_print->u.reg.num);
+	      value *val
+		  = value_from_contents (regtype,
+					 record_full_get_loc (to_print));
+	      gdb_printf ("Register %s changed: ",
+			  gdbarch_register_name (target_gdbarch (),
+						 to_print->u.reg.num));
+	      struct value_print_options opts;
+	      get_user_print_options (&opts);
+	      opts.raw = true;
+	      value_print (val, gdb_stdout, &opts);
+	      gdb_printf ("\n");
+	      break;
+	    }
+	  case record_full_mem:
+	    {
+	      gdb_byte *b = record_full_get_loc (to_print);
+	      gdb_printf ("%d bytes of memory at address %s changed from:",
+			  to_print->u.mem.len,
+			  print_core_address (target_gdbarch (),
+					      to_print->u.mem.addr));
+	      for (int i = 0; i < to_print->u.mem.len; i++)
+		gdb_printf (" %02x", b[i]);
+	      gdb_printf ("\n");
+	      break;
+	    }
+	}
+      to_print = to_print->next;
+    }
+}
+
 void _initialize_record_full ();
 void
 _initialize_record_full ()
@@ -2868,4 +2953,14 @@ When ON, query if PREC cannot record memory change of next instruction."),
   c = add_alias_cmd ("memory-query", record_full_memory_query_cmds.show,
 		     no_class, 1,&show_record_cmdlist);
   deprecate_cmd (c, "show record full memory-query");
+
+  add_cmd ("record-instruction", class_maintenance,
+	   maintenance_print_record_instruction,
+	   _("\
+Print a recorded instruction.\n\
+If no argument is provided, print the last instruction recorded.\n\
+If a negative argument is given, prints how the nth previous \
+instruction will be undone.\n\
+If a positive argument is given, prints \
+how the nth following instruction will be redone."), &maintenanceprintlist);
 }

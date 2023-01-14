@@ -1,6 +1,6 @@
 /* TUI window generic functions.
 
-   Copyright (C) 1998-2022 Free Software Foundation, Inc.
+   Copyright (C) 1998-2023 Free Software Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -218,6 +218,30 @@ show_tui_border_kind (struct ui_file *file,
 	      value);
 }
 
+/* Implementation of the "set/show style tui-current-position" commands.  */
+
+bool style_tui_current_position = false;
+
+static void
+show_style_tui_current_position (ui_file *file,
+				 int from_tty,
+				 cmd_list_element *c,
+				 const char *value)
+{
+  gdb_printf (file, _("\
+Styling the text highlighted by the TUI's current position indicator is %s.\n"),
+		    value);
+}
+
+static void
+set_style_tui_current_position (const char *ignore, int from_tty,
+				cmd_list_element *c)
+{
+  if (TUI_SRC_WIN != nullptr)
+    TUI_SRC_WIN->refill ();
+  if (TUI_DISASM_WIN != nullptr)
+    TUI_DISASM_WIN->refill ();
+}
 
 /* Tui internal configuration variables.  These variables are updated
    by tui_update_variables to reflect the tui configuration
@@ -687,9 +711,9 @@ tui_set_focus_command (const char *arg, int from_tty)
 
   struct tui_win_info *win_info = NULL;
 
-  if (subset_compare (arg, "next"))
+  if (startswith ("next", arg))
     win_info = tui_next_win (tui_win_with_focus ());
-  else if (subset_compare (arg, "prev"))
+  else if (startswith ("prev", arg))
     win_info = tui_prev_win (tui_win_with_focus ());
   else
     win_info = tui_partial_win_by_name (arg);
@@ -1194,6 +1218,19 @@ in a compact form.  The compact form puts the source closer to\n\
 the line numbers and uses less horizontal space."),
 			   tui_set_compact_source, tui_show_compact_source,
 			   &tui_setlist, &tui_showlist);
+
+  add_setshow_boolean_cmd ("tui-current-position", class_maintenance,
+			   &style_tui_current_position, _("\
+Set whether to style text highlighted by the TUI's current position indicator."),
+			   _("\
+Show whether to style text highlighted by the TUI's current position indicator."),
+			   _("\
+When enabled, the source and assembly code highlighted by the TUI's current\n\
+position indicator is styled."),
+			   set_style_tui_current_position,
+			   show_style_tui_current_position,
+			   &style_set_list,
+			   &style_show_list);
 
   tui_border_style.changed.attach (tui_rehighlight_all, "tui-win");
   tui_active_border_style.changed.attach (tui_rehighlight_all, "tui-win");

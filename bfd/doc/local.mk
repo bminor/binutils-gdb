@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 ##
-##   Copyright (C) 2012-2022 Free Software Foundation, Inc.
+##   Copyright (C) 2012-2023 Free Software Foundation, Inc.
 ##
 ## This file is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -32,7 +32,6 @@ DOCFILES = \
 	%D%/elf.texi \
 	%D%/format.texi \
 	%D%/hash.texi \
-	%D%/init.texi \
 	%D%/libbfd.texi \
 	%D%/linker.texi \
 	%D%/mmo.texi \
@@ -64,13 +63,12 @@ SRCPROT = $(srcdir)/archive.c $(srcdir)/archures.c \
 	$(srcdir)/bfdio.c $(srcdir)/bfdwin.c \
 	$(srcdir)/opncls.c $(srcdir)/reloc.c \
 	$(srcdir)/section.c $(srcdir)/syms.c \
-	$(srcdir)/targets.c $(srcdir)/init.c
+	$(srcdir)/targets.c
 
 SRCIPROT = $(srcdir)/cache.c $(srcdir)/libbfd.c \
 	$(srcdir)/bfdio.c $(srcdir)/bfdwin.c \
 	$(srcdir)/reloc.c $(srcdir)/cpu-h8300.c \
-	$(srcdir)/cpu-i960.c $(srcdir)/archures.c \
-	$(srcdir)/init.c
+	$(srcdir)/archures.c
 
 TEXIDIR = $(srcdir)/../texinfo/fsf
 

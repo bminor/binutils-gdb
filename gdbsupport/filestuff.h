@@ -1,5 +1,5 @@
 /* Low-level file-handling.
-   Copyright (C) 2012-2022 Free Software Foundation, Inc.
+   Copyright (C) 2012-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -128,5 +128,9 @@ extern bool is_regular_file (const char *name, int *errno_ptr);
    Returns false on failure and sets errno.  */
 
 extern bool mkdir_recursive (const char *dir);
+
+/* Read the entire content of file PATH into an std::string.  */
+
+extern gdb::optional<std::string> read_text_file_to_string (const char *path);
 
 #endif /* COMMON_FILESTUFF_H */

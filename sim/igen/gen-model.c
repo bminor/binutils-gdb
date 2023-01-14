@@ -1,6 +1,6 @@
 /* The IGEN simulator generator for GDB, the GNU Debugger.
 
-   Copyright 2002-2022 Free Software Foundation, Inc.
+   Copyright 2002-2023 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney.
 
@@ -33,14 +33,14 @@
 
 
 void
-gen_model_h (lf *file, insn_table *table)
+gen_model_h (lf *file, const insn_table *table)
 {
   lf_print__this_file_is_empty (file, "suffering bit rot");
 }
 
 
 void
-gen_model_c (lf *file, insn_table *table)
+gen_model_c (lf *file, const insn_table *table)
 {
   lf_print__this_file_is_empty (file, "suffering bit rot");
 }

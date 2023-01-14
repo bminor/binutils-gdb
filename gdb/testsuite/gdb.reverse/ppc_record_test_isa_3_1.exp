@@ -1,4 +1,4 @@
-# Copyright 2008-2022 Free Software Foundation, Inc.
+# Copyright 2008-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,19 +37,19 @@ standard_testfile
 set gen_src record_test_isa_3_1.c
 set executable record_test_isa_3_1
 
-if {![istarget "powerpc*"] || [skip_power_isa_3_1_tests] } then  {
+if {![istarget "powerpc*"] || [skip_power_isa_3_1_tests]}  {
     verbose "Skipping PowerPC ISA 3.1 instruction record_test."
     return
 }
 
 set options [list additional_flags=-mcpu=power10 debug]
-if {[build_executable "failed to prepare" $executable $srcfile $options] == -1} then {
+if {[build_executable "failed to prepare" $executable $srcfile $options] == -1} {
     return -1
 }
 
 clean_restart $executable
 
-if ![runto_main] then {
+if {![runto_main]} {
     untested "could not run to main"
     return
 }
@@ -123,6 +123,11 @@ gdb_test_no_output "record" "start recording test2"
 ##       xvf16ger2pn  - ACC[5], vs[20] to vs[23]
 ##       pmxvi8ger4   - ACC[6], vs[21] to vs[27]
 ##       pmxvf32gerpp - ACC[7], vs[28] to vs[31] and fpscr
+
+## Note the names for pmxvi8ger4 and pmxvf32gerpp have been officially
+## changed to pmdmxvi8ger4 and pmdmxvf32gerpp respectively.  The older
+## names are still supported by the assembler as extended mnemonics.  The
+## older names are used in this test for backward compatibility.
 
 set stop3 [gdb_get_line_number "stop 3"]
 set stop4 [gdb_get_line_number "stop 4"]

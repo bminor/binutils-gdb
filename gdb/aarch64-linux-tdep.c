@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux AArch64.
 
-   Copyright (C) 2009-2022 Free Software Foundation, Inc.
+   Copyright (C) 2009-2023 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GDB.
@@ -754,22 +754,30 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 	  "MTE registers", cb_data);
     }
 
+  /* Handle the TLS registers.  */
   if (tdep->has_tls ())
     {
+      gdb_assert (tdep->tls_regnum_base != -1);
+      gdb_assert (tdep->tls_register_count > 0);
+
+      int sizeof_tls_regset
+	= AARCH64_TLS_REGISTER_SIZE * tdep->tls_register_count;
+
       const struct regcache_map_entry tls_regmap[] =
 	{
-	  { 1, tdep->tls_regnum, 8 },
+	  { tdep->tls_register_count, tdep->tls_regnum_base,
+	    AARCH64_TLS_REGISTER_SIZE },
 	  { 0 }
 	};
 
       const struct regset aarch64_linux_tls_regset =
 	{
-	  tls_regmap, regcache_supply_regset, regcache_collect_regset
+	  tls_regmap, regcache_supply_regset, regcache_collect_regset,
+	  REGSET_VARIABLE_SIZE
 	};
 
-      cb (".reg-aarch-tls", AARCH64_LINUX_SIZEOF_TLSREGSET,
-	  AARCH64_LINUX_SIZEOF_TLSREGSET, &aarch64_linux_tls_regset,
-	  "TLS register", cb_data);
+      cb (".reg-aarch-tls", sizeof_tls_regset, sizeof_tls_regset,
+	  &aarch64_linux_tls_regset, "TLS register", cb_data);
     }
 }
 
@@ -779,7 +787,6 @@ static const struct target_desc *
 aarch64_linux_core_read_description (struct gdbarch *gdbarch,
 				     struct target_ops *target, bfd *abfd)
 {
-  asection *tls = bfd_get_section_by_name (abfd, ".reg-aarch-tls");
   gdb::optional<gdb::byte_vector> auxv = target_read_auxv_raw (target);
   CORE_ADDR hwcap = linux_get_hwcap (auxv, target, gdbarch);
   CORE_ADDR hwcap2 = linux_get_hwcap2 (auxv, target, gdbarch);
@@ -788,7 +795,16 @@ aarch64_linux_core_read_description (struct gdbarch *gdbarch,
   features.vq = aarch64_linux_core_read_vq (gdbarch, abfd);
   features.pauth = hwcap & AARCH64_HWCAP_PACA;
   features.mte = hwcap2 & HWCAP2_MTE;
-  features.tls = tls != nullptr;
+
+  /* Handle the TLS section.  */
+  asection *tls = bfd_get_section_by_name (abfd, ".reg-aarch-tls");
+  if (tls != nullptr)
+    {
+      size_t size = bfd_section_size (tls);
+      /* Convert the size to the number of actual registers, by
+	 dividing by 8.  */
+      features.tls = size / AARCH64_TLS_REGISTER_SIZE;
+    }
 
   return aarch64_read_description (features);
 }
@@ -1593,7 +1609,7 @@ aarch64_linux_tagged_address_p (struct gdbarch *gdbarch, struct value *address)
   CORE_ADDR addr = value_as_address (address);
 
   /* Remove the top byte for the memory range check.  */
-  addr = address_significant (gdbarch, addr);
+  addr = gdbarch_remove_non_address_bits (gdbarch, addr);
 
   /* Check if the page that contains ADDRESS is mapped with PROT_MTE.  */
   if (!linux_address_in_memtag_page (addr))
@@ -1619,7 +1635,7 @@ aarch64_linux_memtag_matches_p (struct gdbarch *gdbarch,
 
   /* Fetch the allocation tag for ADDRESS.  */
   gdb::optional<CORE_ADDR> atag
-    = aarch64_mte_get_atag (address_significant (gdbarch, addr));
+    = aarch64_mte_get_atag (gdbarch_remove_non_address_bits (gdbarch, addr));
 
   if (!atag.has_value ())
     return true;
@@ -1658,7 +1674,7 @@ aarch64_linux_set_memtags (struct gdbarch *gdbarch, struct value *address,
   else
     {
       /* Remove the top byte.  */
-      addr = address_significant (gdbarch, addr);
+      addr = gdbarch_remove_non_address_bits (gdbarch, addr);
 
       /* Make sure we are dealing with a tagged address to begin with.  */
       if (!aarch64_linux_tagged_address_p (gdbarch, address))
@@ -1715,7 +1731,7 @@ aarch64_linux_get_memtag (struct gdbarch *gdbarch, struct value *address,
 	return nullptr;
 
       /* Remove the top byte.  */
-      addr = address_significant (gdbarch, addr);
+      addr = gdbarch_remove_non_address_bits (gdbarch, addr);
       gdb::optional<CORE_ADDR> atag = aarch64_mte_get_atag (addr);
 
       if (!atag.has_value ())
@@ -1789,7 +1805,8 @@ aarch64_linux_report_signal_info (struct gdbarch *gdbarch,
       uiout->text ("\n");
 
       gdb::optional<CORE_ADDR> atag
-	= aarch64_mte_get_atag (address_significant (gdbarch, fault_addr));
+	= aarch64_mte_get_atag (gdbarch_remove_non_address_bits (gdbarch,
+								 fault_addr));
       gdb_byte ltag = aarch64_mte_get_ltag (fault_addr);
 
       if (!atag.has_value ())
@@ -1963,6 +1980,40 @@ aarch64_linux_decode_memtag_section (struct gdbarch *gdbarch,
   return tags;
 }
 
+/* AArch64 implementation of the remove_non_address_bits gdbarch hook.  Remove
+   non address bits from a pointer value.  */
+
+static CORE_ADDR
+aarch64_remove_non_address_bits (struct gdbarch *gdbarch, CORE_ADDR pointer)
+{
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+  /* By default, we assume TBI and discard the top 8 bits plus the VA range
+     select bit (55).  */
+  CORE_ADDR mask = AARCH64_TOP_BITS_MASK;
+
+  if (tdep->has_pauth ())
+    {
+      /* Fetch the PAC masks.  These masks are per-process, so we can just
+	 fetch data from whatever thread we have at the moment.
+
+	 Also, we have both a code mask and a data mask.  For now they are the
+	 same, but this may change in the future.  */
+      struct regcache *regs = get_current_regcache ();
+      CORE_ADDR cmask, dmask;
+
+      if (regs->cooked_read (tdep->pauth_reg_base, &dmask) != REG_VALID)
+	dmask = mask;
+
+      if (regs->cooked_read (tdep->pauth_reg_base + 1, &cmask) != REG_VALID)
+	cmask = mask;
+
+      mask |= aarch64_mask_from_pac_registers (cmask, dmask);
+    }
+
+  return aarch64_remove_top_bits (pointer, mask);
+}
+
 static void
 aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -2018,7 +2069,8 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* The top byte of a user space address known as the "tag",
      is ignored by the kernel and can be regarded as additional
      data associated with the address.  */
-  set_gdbarch_significant_addr_bit (gdbarch, 56);
+  set_gdbarch_remove_non_address_bits (gdbarch,
+				       aarch64_remove_non_address_bits);
 
   /* MTE-specific settings and hooks.  */
   if (tdep->has_mte ())

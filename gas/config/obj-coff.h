@@ -1,5 +1,5 @@
 /* coff object file format
-   Copyright (C) 1989-2022 Free Software Foundation, Inc.
+   Copyright (C) 1989-2023 Free Software Foundation, Inc.
 
    This file is part of GAS.
 
@@ -38,6 +38,10 @@
 #ifndef TARGET_FORMAT
 #define TARGET_FORMAT "coff-arm"
 #endif
+#endif
+
+#ifdef TC_AARCH64
+#include "coff/aarch64.h"
 #endif
 
 #ifdef TC_PPC

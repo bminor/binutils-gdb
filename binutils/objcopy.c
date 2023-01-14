@@ -1,5 +1,5 @@
 /* objcopy.c -- copy object file from input to output, optionally massaging it.
-   Copyright (C) 1991-2022 Free Software Foundation, Inc.
+   Copyright (C) 1991-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -545,6 +545,11 @@ extern bool _bfd_srec_forceS3;
    This variable is declared in bfd/verilog.c and can be modified by
    the --verilog-data-width parameter.  */
 extern unsigned int VerilogDataWidth;
+
+/* Endianness of data for verilog output.
+   This variable is declared in bfd/verilog.c and is set in the
+   copy_object() function.  */
+extern enum bfd_endian VerilogDataEndianness;
 
 /* Forward declarations.  */
 static void setup_section (bfd *, asection *, void *);
@@ -2605,6 +2610,19 @@ check_new_section_flags (flagword flags, bfd * abfd, const char * secname)
   return flags;
 }
 
+static void
+set_long_section_mode (bfd *output_bfd, bfd *input_bfd, enum long_section_name_handling style)
+{
+  /* This is only relevant to Coff targets.  */
+  if (bfd_get_flavour (output_bfd) == bfd_target_coff_flavour)
+    {
+      if (style == KEEP
+	  && bfd_get_flavour (input_bfd) == bfd_target_coff_flavour)
+	style = bfd_coff_long_section_names (input_bfd) ? ENABLE : DISABLE;
+      bfd_coff_set_long_section_names (output_bfd, style != DISABLE);
+    }
+}
+
 /* Copy object file IBFD onto OBFD.
    Returns TRUE upon success, FALSE otherwise.  */
 
@@ -2654,6 +2672,15 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 		 bfd_get_archive_filename (ibfd));
       return false;
     }
+
+  /* This is a no-op on non-Coff targets.  */
+  set_long_section_mode (obfd, ibfd, long_section_names);
+
+  /* Set the Verilog output endianness based upon the input file's
+     endianness.  We may not be producing verilog format output,
+     but testing this just adds extra code this is not really
+     necessary.  */
+  VerilogDataEndianness = ibfd->xvec->byteorder;
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
     {
@@ -3317,9 +3344,13 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 
   /* This has to happen before section positions are set.  */
   bfd_map_over_sections (ibfd, copy_relocations_in_section, obfd);
+  if (status != 0)
+    return false;
 
   /* This has to happen after the symbol table has been set.  */
   bfd_map_over_sections (ibfd, copy_section, obfd);
+  if (status != 0)
+    return false;
 
   if (add_sections != NULL)
     {
@@ -3532,7 +3563,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
   bfd **ptr = &obfd->archive_head;
   bfd *this_element;
   char *dir;
-  const char *filename;
+  char *filename;
 
   /* PR 24281: It is not clear what should happen when copying a thin archive.
      One part is straight forward - if the output archive is in a different
@@ -3670,23 +3701,17 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	  if (del && bfd_get_arch (this_element) == bfd_arch_unknown)
 	    /* Try again as an unknown object file.  */
 	    ok_object = false;
-	  else if (!bfd_close (output_bfd))
-	    {
-	      bfd_nonfatal_message (output_name, NULL, NULL, NULL);
-	      /* Error in new object file. Don't change archive.  */
-	      status = 1;
-	    }
 	}
 
       if (!ok_object)
+	del = !copy_unknown_object (this_element, output_bfd);
+
+      if (!(ok_object && !del && !status
+	    ? bfd_close : bfd_close_all_done) (output_bfd))
 	{
-	  del = !copy_unknown_object (this_element, output_bfd);
-	  if (!bfd_close_all_done (output_bfd))
-	    {
-	      bfd_nonfatal_message (output_name, NULL, NULL, NULL);
-	      /* Error in new object file. Don't change archive.  */
-	      status = 1;
-	    }
+	  bfd_nonfatal_message (output_name, NULL, NULL, NULL);
+	  /* Error in new object file. Don't change archive.  */
+	  status = 1;
 	}
 
       if (del)
@@ -3716,19 +3741,21 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
     }
   *ptr = NULL;
 
-  filename = bfd_get_filename (obfd);
-  if (!bfd_close (obfd))
+  filename = xstrdup (bfd_get_filename (obfd));
+  if (!(status == 0 ? bfd_close : bfd_close_all_done) (obfd))
     {
       status = 1;
       bfd_nonfatal_message (filename, NULL, NULL, NULL);
     }
+  free (filename);
 
-  filename = bfd_get_filename (ibfd);
+  filename = xstrdup (bfd_get_filename (ibfd));
   if (!bfd_close (ibfd))
     {
       status = 1;
       bfd_nonfatal_message (filename, NULL, NULL, NULL);
     }
+  free (filename);
 
  cleanup_and_exit:
   /* Delete all the files that we opened.  */
@@ -3744,6 +3771,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	    bfd_close (l->obfd);
 	    unlink (l->name);
 	  }
+	free ((char *) l->name);
 	next = l->next;
 	free (l);
       }
@@ -3751,19 +3779,6 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 
   rmdir (dir);
   free (dir);
-}
-
-static void
-set_long_section_mode (bfd *output_bfd, bfd *input_bfd, enum long_section_name_handling style)
-{
-  /* This is only relevant to Coff targets.  */
-  if (bfd_get_flavour (output_bfd) == bfd_target_coff_flavour)
-    {
-      if (style == KEEP
-	  && bfd_get_flavour (input_bfd) == bfd_target_coff_flavour)
-	style = bfd_coff_long_section_names (input_bfd) ? ENABLE : DISABLE;
-      bfd_coff_set_long_section_names (output_bfd, style != DISABLE);
-    }
 }
 
 /* The top-level control.  */
@@ -3799,15 +3814,17 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
 
   switch (do_debug_sections)
     {
+    case compress_gnu_zlib:
+      ibfd->flags |= BFD_COMPRESS;
+      break;
     case compress:
     case compress_zlib:
-    case compress_gnu_zlib:
+      /* The above two cases ought to just set BFD_COMPRESS for non-ELF
+	 but we can't tell whether a file is ELF or not until after
+	 bfd_check_format_matches.  FIXME maybe: decide compression
+	 style in BFD after bfd_check_format_matches.  */
     case compress_gabi_zlib:
-      ibfd->flags |= BFD_COMPRESS;
-      /* Don't check if input is ELF here since this information is
-	 only available after bfd_check_format_matches is called.  */
-      if (do_debug_sections != compress_gnu_zlib)
-	ibfd->flags |= BFD_COMPRESS_GABI;
+      ibfd->flags |= BFD_COMPRESS | BFD_COMPRESS_GABI;
       break;
     case compress_zstd:
       ibfd->flags |= BFD_COMPRESS | BFD_COMPRESS_GABI | BFD_COMPRESS_ZSTD;
@@ -3871,9 +3888,6 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
 	  gnu_debuglink_filename = NULL;
 	}
 
-      /* This is a no-op on non-Coff targets.  */
-      set_long_section_mode (obfd, ibfd, long_section_names);
-
       copy_archive (ibfd, obfd, output_target, force_output_target, input_arch);
     }
   else if (bfd_check_format_matches (ibfd, bfd_object, &obj_matching))
@@ -3898,9 +3912,6 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
  	  status = 1;
  	  return;
  	}
-
-      /* This is a no-op on non-Coff targets.  */
-      set_long_section_mode (obfd, ibfd, long_section_names);
 
       if (! copy_object (ibfd, obfd, input_arch))
 	status = 1;
@@ -4113,6 +4124,13 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
       flags &= ~clr;
     }
 
+  if (!bfd_convert_section_setup (ibfd, isection, obfd, &name, &size))
+    {
+      osection = NULL;
+      err = _("failed to create output section");
+      goto loser;
+    }
+
   osection = bfd_make_section_anyway_with_flags (obfd, name, flags);
 
   if (osection == NULL)
@@ -4121,8 +4139,6 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
       goto loser;
     }
 
-  size = bfd_section_size (isection);
-  size = bfd_convert_section_size (ibfd, isection, obfd, size);
   if (copy_byte >= 0)
     size = (size + interleave - 1) / interleave * copy_width;
   else if (extract_symbol)
@@ -4337,10 +4353,7 @@ copy_relocations_in_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
     }
 
   if (relsize == 0)
-    {
-      bfd_set_reloc (obfd, osection, NULL, 0);
-      osection->flags &= ~SEC_RELOC;
-    }
+    bfd_set_reloc (obfd, osection, NULL, 0);
   else
     {
       if (isection->orelocation != NULL)
@@ -4383,8 +4396,6 @@ copy_relocations_in_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	}
 
       bfd_set_reloc (obfd, osection, relcount == 0 ? NULL : relpp, relcount);
-      if (relcount == 0)
-	osection->flags &= ~SEC_RELOC;
     }
 }
 
@@ -4418,6 +4429,7 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	  || !bfd_convert_section_contents (ibfd, isection, obfd,
 					    &memhunk, &size))
 	{
+	  bfd_set_section_size (osection, 0);
 	  status = 1;
 	  bfd_nonfatal_message (NULL, ibfd, isection, NULL);
 	  free (memhunk);
@@ -5857,8 +5869,18 @@ copy_main (int argc, char *argv[])
 
 	case OPTION_VERILOG_DATA_WIDTH:
 	  VerilogDataWidth = parse_vma (optarg, "--verilog-data-width");
-	  if (VerilogDataWidth < 1)
-	    fatal (_("verilog data width must be at least 1 byte"));
+	  switch (VerilogDataWidth)
+	    {
+	    case 1:
+	    case 2:
+	    case 4:
+	    case 8:
+	    case 16: /* We do not support widths > 16 because the verilog
+			data is handled internally in 16 byte wide packets.  */
+	      break;
+	    default:
+	      fatal (_("error: verilog data width must be 1, 2, 4, 8 or 16"));
+	    }
 	  break;
 
 	case 0:

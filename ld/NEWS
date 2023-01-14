@@ -1,10 +1,19 @@
 -*- text -*-
 
+Changes in 2.40:
+
+* The linker has a new command line option to suppress the generation of any
+  warning or error messages.  This can be useful when there is a need to create
+  a known non-working binary.  The option is -w or --no-warnings.
+
 * ld now supports zstd compressed debug sections.  The new option
   --compress-debug-sections=zstd compresses debug sections with zstd.
+
 * Add --enable-default-compressed-debug-sections-algorithm={zlib,zstd}
   that selects the default compression algorithm
   for --enable-compressed-debug-sections.
+
+* Remove support for -z bndplt (MPX prefix instructions).
 
 Changes in 2.39:
 
@@ -937,7 +946,7 @@ Changes in version 2.1:
   other utilities should work on Risc/Ultrix and Irix.
 
 
-Copyright (C) 2012-2022 Free Software Foundation, Inc.
+Copyright (C) 2012-2023 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

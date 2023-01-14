@@ -1,6 +1,6 @@
 /* Cache and manage the values of registers for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1185,7 +1185,7 @@ regcache::transfer_regset_register (struct regcache *out_regcache, int regnum,
 /* See regcache.h.  */
 
 void
-regcache::transfer_regset (const struct regset *regset,
+regcache::transfer_regset (const struct regset *regset, int regbase,
 			   struct regcache *out_regcache,
 			   int regnum, const gdb_byte *in_buf,
 			   gdb_byte *out_buf, size_t size) const
@@ -1199,6 +1199,9 @@ regcache::transfer_regset (const struct regset *regset,
     {
       int regno = map->regno;
       int slot_size = map->size;
+
+      if (regno != REGCACHE_MAP_SKIP)
+	regno += regbase;
 
       if (slot_size == 0 && regno != REGCACHE_MAP_SKIP)
 	slot_size = m_descr->sizeof_register[regno];
@@ -1243,11 +1246,14 @@ regcache_supply_regset (const struct regset *regset,
   regcache->supply_regset (regset, regnum, (const gdb_byte *) buf, size);
 }
 
+/* See regcache.h.  */
+
 void
-regcache::supply_regset (const struct regset *regset,
+regcache::supply_regset (const struct regset *regset, int regbase,
 			 int regnum, const void *buf, size_t size)
 {
-  transfer_regset (regset, this, regnum, (const gdb_byte *) buf, nullptr, size);
+  transfer_regset (regset, regbase, this, regnum, (const gdb_byte *) buf,
+		   nullptr, size);
 }
 
 /* Collect register REGNUM from REGCACHE to BUF, using the register
@@ -1262,14 +1268,15 @@ regcache_collect_regset (const struct regset *regset,
   regcache->collect_regset (regset, regnum, (gdb_byte *) buf, size);
 }
 
+/* See regcache.h  */
+
 void
-regcache::collect_regset (const struct regset *regset,
+regcache::collect_regset (const struct regset *regset, int regbase,
 			 int regnum, void *buf, size_t size) const
 {
-  transfer_regset (regset, nullptr, regnum, nullptr, (gdb_byte *) buf, size);
+  transfer_regset (regset, regbase, nullptr, regnum, nullptr, (gdb_byte *) buf,
+		   size);
 }
-
-/* See regcache.h  */
 
 bool
 regcache_map_supplies (const struct regcache_map_entry *map, int regnum,
@@ -1335,8 +1342,7 @@ regcache_read_pc (struct regcache *regcache)
       pc_val = gdbarch_addr_bits_remove (gdbarch, raw_val);
     }
   else
-    internal_error (__FILE__, __LINE__,
-		    _("regcache_read_pc: Unable to find PC"));
+    internal_error (_("regcache_read_pc: Unable to find PC"));
   return pc_val;
 }
 
@@ -1369,8 +1375,7 @@ regcache_write_pc (struct regcache *regcache, CORE_ADDR pc)
     regcache_cooked_write_unsigned (regcache,
 				    gdbarch_pc_regnum (gdbarch), pc);
   else
-    internal_error (__FILE__, __LINE__,
-		    _("regcache_write_pc: Unable to update PC"));
+    internal_error (_("regcache_write_pc: Unable to update PC"));
 
   /* Writing the PC (for instance, from "load") invalidates the
      current frame.  */

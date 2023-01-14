@@ -1,4 +1,4 @@
-# Copyright 1992-2022 Free Software Foundation, Inc.
+# Copyright 1992-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ proc initialize {} {
     }
 
 
-    if [gdb_test "info break" "1\[ \]*breakpoint.*marker1.*\r\n2\[ \]*breakpoint.*marker2.*" "info break in watchpoint.exp" ] { 
+    if [gdb_test "info break" "1\[ \]*breakpoint.*marker1.*\r\n2\[ \]*breakpoint.*marker2.*" "info break" ] {
       return 0
     }
 
@@ -272,7 +272,7 @@ proc test_disabling_watchpoints {} {
 proc test_stepping {} {
     global gdb_prompt
 
-    if [runto marker1] then {
+    if {[runto marker1]} {
 	gdb_test "watch ival2" ".*\[Ww\]atchpoint \[0-9\]*: ival2"
 
 	# Well, let's not be too mundane.  It should be a *bit* of a challenge
@@ -312,7 +312,7 @@ proc test_stepping {} {
 	    default { fail "back at main from marker1 (timeout)" ; return }
 	}
 
-	gdb_test "next" "for \\(count = 0.*" "next to `for' in watchpoint.exp"
+	gdb_test "next" "for \\(count = 0.*" "next to `for'"
 
 	# Now test that "until" works.  It's a bit tricky to test
 	# "until", because compilers don't always arrange the code
@@ -351,7 +351,7 @@ proc test_watchpoint_triggered_in_syscall {} {
     set x 0
     set y 0
     set testname "watch buffer passed to read syscall"
-    if [runto marker2] then {
+    if {[runto marker2]} {
 	gdb_test "watch buf\[0\]" ".*\[Ww\]atchpoint \[0-9\]*: buf\\\[0\\\]"
 	gdb_test "watch buf\[1\]" ".*\[Ww\]atchpoint \[0-9\]*: buf\\\[1\\\]"
 	gdb_test "watch buf\[2\]" ".*\[Ww\]atchpoint \[0-9\]*: buf\\\[2\\\]"
@@ -409,7 +409,7 @@ proc test_watchpoint_triggered_in_syscall {} {
 	}
 
 	# Did we find what we were looking for?  If not, flunk it.
-	if [expr $x==$y] then { pass $testname } else { fail "$testname (only triggered $x watchpoints, expected $y)"}
+	if {[expr $x==$y]} { pass $testname } else { fail "$testname (only triggered $x watchpoints, expected $y)"}
 
 	# Continue until we hit the finishing marker function.
 	# Make sure we hit no more watchpoints.
@@ -431,7 +431,7 @@ proc test_watchpoint_triggered_in_syscall {} {
 proc test_complex_watchpoint {} {
     global gdb_prompt
 
-    if [runto marker4] then {
+    if {[runto marker4]} {
 	gdb_test "watch ptr1->val" ".*\[Ww\]atchpoint \[0-9\]*: ptr1->val"
 	gdb_test "break marker5" ".*Breakpoint.*"
 
@@ -559,7 +559,7 @@ proc test_watchpoint_and_breakpoint {} {
     # This is a test for PR breakpoints/7143, which involves setting a
     # watchpoint right after you've reached a breakpoint.
 
-    if [runto func3] then {
+    if {[runto func3]} {
 	gdb_breakpoint [gdb_get_line_number "second x assignment"]
 	gdb_continue_to_breakpoint "second x assignment"
 	gdb_test "watch x" ".*atchpoint \[0-9\]+: x"
@@ -730,7 +730,7 @@ proc test_inaccessible_watchpoint {} {
     # This is a test for watchpoints on currently inaccessible (but later
     # valid) memory.
 
-    if [runto func4] then {
+    if {[runto func4]} {
 	# Make sure we only allow memory access errors.
 	set msg "watchpoint refused to insert on nonexistent struct member"
 	gdb_test_multiple "watch struct1.nosuchmember" $msg {
@@ -811,7 +811,7 @@ proc test_no_hw_watchpoints {} {
     # (This proves rather little on kernels that don't support
     # fast watchpoints, but still...)
     #
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return
     }
 
@@ -936,7 +936,7 @@ proc do_tests {} {
 	    "disable fast watches, 1"
     }
 
-    if [initialize] then {
+    if {[initialize]} {
 
 	test_simple_watchpoint
 
@@ -960,7 +960,7 @@ proc do_tests {} {
     # elsewhere.
     # On sparc-sun-sunos4.1.3, GDB was running all the way to the marker4 
     # breakpoint before stopping for the watchpoint.  I don't know why.
-    if {[istarget "hppa*-*-*"]} then {
+    if {[istarget "hppa*-*-*"]} {
 	test_watchpoint_triggered_in_syscall
     }
 

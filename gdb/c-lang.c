@@ -1,6 +1,6 @@
 /* C language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 1992-2022 Free Software Foundation, Inc.
+   Copyright (C) 1992-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -64,7 +64,7 @@ charset_for_string_type (c_string_type str_type, struct gdbarch *gdbarch)
       else
 	return "UTF-32LE";
     }
-  internal_error (__FILE__, __LINE__, _("unhandled c_string_type"));
+  internal_error (_("unhandled c_string_type"));
 }
 
 /* Classify ELTTYPE according to what kind of character it is.  Return
@@ -613,7 +613,7 @@ c_string_operation::evaluate (struct type *expect_type,
       type = lookup_typename (exp->language_defn, "char32_t", NULL, 0);
       break;
     default:
-      internal_error (__FILE__, __LINE__, _("unhandled c_string_type"));
+      internal_error (_("unhandled c_string_type"));
     }
 
   /* Ensure TYPE_LENGTH is valid for TYPE.  */
@@ -727,6 +727,20 @@ c_is_string_type_p (struct type *type)
 
 
 
+/* See c-lang.h.  */
+
+gdb::unique_xmalloc_ptr<char>
+c_canonicalize_name (const char *name)
+{
+  if (strchr (name, ' ') != nullptr
+      || streq (name, "signed")
+      || streq (name, "unsigned"))
+    return cp_canonicalize_string (name);
+  return nullptr;
+}
+
+
+
 void
 c_language_arch_info (struct gdbarch *gdbarch,
 		      struct language_arch_info *lai)
@@ -812,6 +826,13 @@ public:
 			       CORE_ADDR expr_pc) const override
   {
     return c_compute_program (inst, input, gdbarch, expr_block, expr_pc);
+  }
+
+  /* See language.h.  */
+
+  bool can_print_type_offsets () const override
+  {
+    return true;
   }
 
   /* See language.h.  */
@@ -966,6 +987,13 @@ public:
 
   /* See language.h.  */
 
+  bool can_print_type_offsets () const override
+  {
+    return true;
+  }
+
+  /* See language.h.  */
+
   void print_type (struct type *type, const char *varstring,
 		   struct ui_file *stream, int show, int level,
 		   const struct type_print_options *flags) const override
@@ -1066,6 +1094,13 @@ public:
 
   /* See language.h.  */
 
+  bool can_print_type_offsets () const override
+  {
+    return true;
+  }
+
+  /* See language.h.  */
+
   void print_type (struct type *type, const char *varstring,
 		   struct ui_file *stream, int show, int level,
 		   const struct type_print_options *flags) const override
@@ -1114,6 +1149,13 @@ public:
 			   struct language_arch_info *lai) const override
   {
     c_language_arch_info (gdbarch, lai);
+  }
+
+  /* See language.h.  */
+
+  bool can_print_type_offsets () const override
+  {
+    return true;
   }
 
   /* See language.h.  */

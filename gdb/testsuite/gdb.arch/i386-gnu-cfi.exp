@@ -1,4 +1,4 @@
-# Copyright 2007-2022 Free Software Foundation, Inc.
+# Copyright 2007-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 # Test i386 unwinder.
 
 
-if { ![is_x86_like_target] } then {
+if {![is_x86_like_target]} {
     verbose "Skipping i386 unwinder tests."
     return
 }
@@ -86,7 +86,7 @@ gdb_test "frame $gate_n" \
 gdb_test_multiple "info frame" "existence of the CFI inserted register" {
     -re "Stack level $gate_n, frame at (0x\[0-9a-f\]+):.*Saved registers:.* ecx at (0x\[0-9a-f\]+),.*" {
 	pass "existence of the CFI inserted register"
-	if { [string compare $expect_out(1,string) $expect_out(2,string)] } then {
+	if {[string compare $expect_out(1,string) $expect_out(2,string)]} {
 	    fail "value of the CFI inserted register"
 	} else {
 	    pass "value of the CFI inserted register"

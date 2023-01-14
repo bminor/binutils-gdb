@@ -592,6 +592,11 @@ foo:
  cmovpe  0x90909090(%eax),%dx
  cmovpo 0x90909090(%eax),%dx
 
+ fildq  (%eax)
+ fildll (%eax)
+ fistpq (%eax)
+ fistpll (%eax)
+
 	.byte 0x82, 0xc3, 0x01
 	.byte 0x82, 0xf3, 0x01
 	.byte 0x82, 0xd3, 0x01

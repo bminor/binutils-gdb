@@ -1,5 +1,5 @@
 /* Event loop machinery for GDB, the GNU debugger.
-   Copyright (C) 1999-2022 Free Software Foundation, Inc.
+   Copyright (C) 1999-2023 Free Software Foundation, Inc.
    Written by Elena Zannoni <ezannoni@cygnus.com> of Cygnus Solutions.
 
    This file is part of GDB.
@@ -221,8 +221,7 @@ gdb_do_one_event (int mstimeout)
 	  res = check_async_event_handlers ();
 	  break;
 	default:
-	  internal_error (__FILE__, __LINE__,
-			  "unexpected event_source_head %d",
+	  internal_error ("unexpected event_source_head %d",
 			  event_source_head);
 	}
 

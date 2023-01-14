@@ -1,5 +1,5 @@
 /* BFD back-end for National Semiconductor's CR16 ELF
-   Copyright (C) 2007-2022 Free Software Foundation, Inc.
+   Copyright (C) 2007-2023 Free Software Foundation, Inc.
    Written by M R Swami Reddy.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1481,6 +1481,13 @@ elf32_cr16_get_relocated_section_contents (bfd *output_bfd,
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
 
+  bfd_byte *orig_data = data;
+  if (data == NULL)
+    {
+      data = bfd_malloc (input_section->size);
+      if (data == NULL)
+	return NULL;
+    }
   memcpy (data, elf_section_data (input_section)->this_hdr.contents,
 	  (size_t) input_section->size);
 
@@ -1551,6 +1558,8 @@ elf32_cr16_get_relocated_section_contents (bfd *output_bfd,
     free (isymbuf);
   if (elf_section_data (input_section)->relocs != internal_relocs)
     free (internal_relocs);
+  if (orig_data == NULL)
+    free (data);
   return NULL;
 }
 

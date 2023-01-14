@@ -1,6 +1,6 @@
 /* Support routines for decoding "stabs" debugging information format.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -736,11 +736,13 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
       if (sym->language () == language_cplus)
 	{
-	  char *name = (char *) alloca (p - string + 1);
-
-	  memcpy (name, string, p - string);
-	  name[p - string] = '\0';
-	  new_name = cp_canonicalize_string (name);
+	  std::string name (string, p - string);
+	  new_name = cp_canonicalize_string (name.c_str ());
+	}
+      else if (sym->language () == language_c)
+	{
+	  std::string name (string, p - string);
+	  new_name = c_canonicalize_name (name.c_str ());
 	}
       if (new_name != nullptr)
 	sym->compute_and_set_names (new_name.get (), true, objfile->per_bfd);
@@ -1592,12 +1594,18 @@ again:
 	  type_name = NULL;
 	  if (get_current_subfile ()->language == language_cplus)
 	    {
-	      char *name = (char *) alloca (p - *pp + 1);
-
-	      memcpy (name, *pp, p - *pp);
-	      name[p - *pp] = '\0';
-
-	      gdb::unique_xmalloc_ptr<char> new_name = cp_canonicalize_string (name);
+	      std::string name (*pp, p - *pp);
+	      gdb::unique_xmalloc_ptr<char> new_name
+		= cp_canonicalize_string (name.c_str ());
+	      if (new_name != nullptr)
+		type_name = obstack_strdup (&objfile->objfile_obstack,
+					    new_name.get ());
+	    }
+	  else if (get_current_subfile ()->language == language_c)
+	    {
+	      std::string name (*pp, p - *pp);
+	      gdb::unique_xmalloc_ptr<char> new_name
+		= c_canonicalize_name (name.c_str ());
 	      if (new_name != nullptr)
 		type_name = obstack_strdup (&objfile->objfile_obstack,
 					    new_name.get ());

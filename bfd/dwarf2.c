@@ -1,5 +1,5 @@
 /* DWARF 2 support.
-   Copyright (C) 1994-2022 Free Software Foundation, Inc.
+   Copyright (C) 1994-2023 Free Software Foundation, Inc.
 
    Adapted from gdb/dwarf2read.c by Gavin Koch of Cygnus Solutions
    (gavin@cygnus.com).
@@ -690,7 +690,6 @@ read_section (bfd *abfd,
     {
       bfd_size_type amt;
       asection *msec;
-      ufile_ptr filesize;
 
       msec = bfd_get_section_by_name (abfd, section_name);
       if (msec == NULL)
@@ -706,20 +705,22 @@ read_section (bfd *abfd,
 	  return false;
 	}
 
-      amt = bfd_get_section_limit_octets (abfd, msec);
-      filesize = bfd_get_file_size (abfd);
-      /* PR 28834: A compressed debug section could well decompress to a size
-	 larger than the file, so we choose an arbitrary modifier of 10x in
-	 the test below.  If this ever turns out to be insufficient, it can
-	 be changed by a future update.  */
-      if (amt >= filesize * 10)
+      if ((msec->flags & SEC_HAS_CONTENTS) == 0)
 	{
-	  /* PR 26946 */
-	  _bfd_error_handler (_("DWARF error: section %s is larger than 10x its filesize! (0x%lx vs 0x%lx)"),
-			      section_name, (long) amt, (long) filesize);
-	  bfd_set_error (bfd_error_bad_value);
+	  _bfd_error_handler (_("DWARF error: section %s has no contents"),
+			      section_name);
+	  bfd_set_error (bfd_error_no_contents);
 	  return false;
 	}
+
+      if (_bfd_section_size_insane (abfd, msec))
+	{
+	  /* PR 26946 */
+	  _bfd_error_handler (_("DWARF error: section %s is too big"),
+			      section_name);
+	  return false;
+	}
+      amt = bfd_get_section_limit_octets (abfd, msec);
       *section_size = amt;
       /* Paranoia - alloc one extra so that we can make sure a string
 	 section is NUL terminated.  */
@@ -1419,7 +1420,7 @@ read_indexed_address (uint64_t idx, struct comp_unit *unit)
   offset += unit->dwarf_addr_offset;
   if (offset < unit->dwarf_addr_offset
       || offset > file->dwarf_addr_size
-      || file->dwarf_addr_size - offset < unit->offset_size)
+      || file->dwarf_addr_size - offset < unit->addr_size)
     return 0;
 
   info_ptr = file->dwarf_addr_buffer + offset;
@@ -2051,18 +2052,16 @@ concat_filename (struct line_info_table *table, unsigned int file)
       char *subdir_name = NULL;
       char *name;
       size_t len;
+      unsigned int dir = table->files[file].dir;
 
-      if (table->files[file].dir
-	  /* PR 17512: file: 0317e960.  */
-	  && table->files[file].dir <= table->num_dirs
-	  /* PR 17512: file: 7f3d2e4b.  */
-	  && table->dirs != NULL)
-	{
-	  if (table->use_dir_and_file_0)
-	    subdir_name = table->dirs[table->files[file].dir];
-	  else
-	    subdir_name = table->dirs[table->files[file].dir - 1];
-	}
+      if (!table->use_dir_and_file_0)
+	--dir;
+      /* Wrapping from 0 to -1u above gives the intended result with
+	 the test below of leaving subdir_name NULL for pre-DWARF5 dir
+	 of 0.  */
+      /* PR 17512: file: 0317e960, file: 7f3d2e4b.  */
+      if (dir < table->num_dirs)
+	subdir_name = table->dirs[dir];
 
       if (!subdir_name || !IS_ABSOLUTE_PATH (subdir_name))
 	dir_name = table->comp_dir;
@@ -3448,7 +3447,6 @@ find_abstract_instance (struct comp_unit *unit,
   struct abbrev_info *abbrev;
   uint64_t die_ref = attr_ptr->u.val;
   struct attribute attr;
-  const char *name = NULL;
 
   if (recur_count == 100)
     {
@@ -3609,9 +3607,9 @@ find_abstract_instance (struct comp_unit *unit,
 		case DW_AT_name:
 		  /* Prefer DW_AT_MIPS_linkage_name or DW_AT_linkage_name
 		     over DW_AT_name.  */
-		  if (name == NULL && is_str_form (&attr))
+		  if (*pname == NULL && is_str_form (&attr))
 		    {
-		      name = attr.u.str;
+		      *pname = attr.u.str;
 		      if (mangle_style (unit->lang) == 0)
 			*is_linkage = true;
 		    }
@@ -3619,7 +3617,7 @@ find_abstract_instance (struct comp_unit *unit,
 		case DW_AT_specification:
 		  if (is_int_form (&attr)
 		      && !find_abstract_instance (unit, &attr, recur_count + 1,
-						  &name, is_linkage,
+						  pname, is_linkage,
 						  filename_ptr, linenumber_ptr))
 		    return false;
 		  break;
@@ -3629,7 +3627,7 @@ find_abstract_instance (struct comp_unit *unit,
 		     non-string forms into these attributes.  */
 		  if (is_str_form (&attr))
 		    {
-		      name = attr.u.str;
+		      *pname = attr.u.str;
 		      *is_linkage = true;
 		    }
 		  break;
@@ -3637,8 +3635,11 @@ find_abstract_instance (struct comp_unit *unit,
 		  if (!comp_unit_maybe_decode_line_info (unit))
 		    return false;
 		  if (is_int_form (&attr))
-		    *filename_ptr = concat_filename (unit->line_table,
-						     attr.u.val);
+		    {
+		      free (*filename_ptr);
+		      *filename_ptr = concat_filename (unit->line_table,
+						       attr.u.val);
+		    }
 		  break;
 		case DW_AT_decl_line:
 		  if (is_int_form (&attr))
@@ -3650,7 +3651,6 @@ find_abstract_instance (struct comp_unit *unit,
 	    }
 	}
     }
-  *pname = name;
   return true;
 }
 
@@ -4146,8 +4146,11 @@ scan_unit_for_symbols (struct comp_unit *unit)
 
 		case DW_AT_decl_file:
 		  if (is_int_form (&attr))
-		    func->file = concat_filename (unit->line_table,
-						  attr.u.val);
+		    {
+		      free (func->file);
+		      func->file = concat_filename (unit->line_table,
+						    attr.u.val);
+		    }
 		  break;
 
 		case DW_AT_decl_line:
@@ -4189,8 +4192,11 @@ scan_unit_for_symbols (struct comp_unit *unit)
 
 		case DW_AT_decl_file:
 		  if (is_int_form (&attr))
-		    var->file = concat_filename (unit->line_table,
-						 attr.u.val);
+		    {
+		      free (var->file);
+		      var->file = concat_filename (unit->line_table,
+						   attr.u.val);
+		    }
 		  break;
 
 		case DW_AT_decl_line:
@@ -4838,16 +4844,19 @@ find_debug_info (bfd *abfd, const struct dwarf_debug_section *debug_sections,
     {
       look = debug_sections[debug_info].uncompressed_name;
       msec = bfd_get_section_by_name (abfd, look);
-      if (msec != NULL)
+      /* Testing SEC_HAS_CONTENTS is an anti-fuzzer measure.  Of
+	 course debug sections always have contents.  */
+      if (msec != NULL && (msec->flags & SEC_HAS_CONTENTS) != 0)
 	return msec;
 
       look = debug_sections[debug_info].compressed_name;
       msec = bfd_get_section_by_name (abfd, look);
-      if (msec != NULL)
+      if (msec != NULL && (msec->flags & SEC_HAS_CONTENTS) != 0)
         return msec;
 
       for (msec = abfd->sections; msec != NULL; msec = msec->next)
-	if (startswith (msec->name, GNU_LINKONCE_INFO))
+	if ((msec->flags & SEC_HAS_CONTENTS) != 0
+	    && startswith (msec->name, GNU_LINKONCE_INFO))
 	  return msec;
 
       return NULL;
@@ -4855,6 +4864,9 @@ find_debug_info (bfd *abfd, const struct dwarf_debug_section *debug_sections,
 
   for (msec = after_sec->next; msec != NULL; msec = msec->next)
     {
+      if ((msec->flags & SEC_HAS_CONTENTS) == 0)
+	continue;
+
       look = debug_sections[debug_info].uncompressed_name;
       if (strcmp (msec->name, look) == 0)
 	return msec;
@@ -5396,6 +5408,7 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
       stash = (struct dwarf2_debug *) bfd_zalloc (abfd, amt);
       if (! stash)
 	return false;
+      *pinfo = stash;
     }
   stash->orig_bfd = abfd;
   stash->debug_sections = debug_sections;
@@ -5420,8 +5433,6 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
   stash->alt.trie_root = alloc_trie_leaf (abfd);
   if (!stash->alt.trie_root)
     return false;
-
-  *pinfo = stash;
 
   if (debug_bfd == NULL)
     debug_bfd = abfd;
@@ -5496,9 +5507,10 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
 	   msec;
 	   msec = find_debug_info (debug_bfd, debug_sections, msec))
 	{
+	  if (_bfd_section_size_insane (debug_bfd, msec))
+	    return false;
 	  /* Catch PR25070 testcase overflowing size calculation here.  */
-	  if (total_size + msec->size < total_size
-	      || total_size + msec->size < msec->size)
+	  if (total_size + msec->size < total_size)
 	    {
 	      bfd_set_error (bfd_error_no_memory);
 	      return false;

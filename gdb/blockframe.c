@@ -1,7 +1,7 @@
 /* Get info from stack frames; convert between frames, blocks,
    functions and pc values.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -410,8 +410,7 @@ find_function_entry_range_from_pc (CORE_ADDR pc, const char **name,
 
       /* It's an internal error if we exit the above loop without finding
 	 the range.  */
-      internal_error (__FILE__, __LINE__,
-		      _("Entry block not found in find_function_entry_range_from_pc"));
+      internal_error (_("Entry block not found in find_function_entry_range_from_pc"));
     }
 
   return status;

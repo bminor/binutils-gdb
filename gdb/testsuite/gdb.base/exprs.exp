@@ -1,4 +1,4 @@
-#   Copyright 1988-2022 Free Software Foundation, Inc.
+#   Copyright 1988-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,8 +32,7 @@ clean_restart ${binfile}
 # set it up at a breakpoint so we can play with the variable values
 #
 
-if ![runto_main] then {
-    perror "couldn't run to breakpoint"
+if {![runto_main]} {
     return
 }
 
@@ -272,3 +271,7 @@ gdb_test "print & (void) v_char" "value not located in memory."
 # Regression test for "&&".
 gdb_test "print null_t_struct && null_t_struct->v_int_member == 0" \
     " = 0"
+
+# Regression test for unusual function-call parse that caused a crash.
+gdb_test "print v_short++(97)" \
+    "cast the call to its declared return type"

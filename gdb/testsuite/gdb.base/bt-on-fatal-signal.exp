@@ -1,4 +1,4 @@
-# Copyright 2021-2022 Free Software Foundation, Inc.
+# Copyright 2021-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile]} {
 
 # Check we can run to main.  If this works this time then we just
 # assume that it will work later on (when we repeatedly restart GDB).
-if ![runto_main] then {
+if {![runto_main]} {
     return -1
 }
 
@@ -62,7 +62,10 @@ foreach test_data {{SEGV "Segmentation fault"} \
     with_test_prefix ${sig} {
 
 	# Restart GDB.
-	clean_restart $binfile
+	save_vars { GDB } {
+	    set GDB [gdb_no_core]
+	    clean_restart $binfile
+	}
 
 	# Capture the pid of GDB.
 	set testpid [spawn_id_get_pid $gdb_spawn_id]

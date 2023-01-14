@@ -1,5 +1,5 @@
 /* Object file "section" support for the BFD library.
-   Copyright (C) 1990-2022 Free Software Foundation, Inc.
+   Copyright (C) 1990-2023 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -336,9 +336,8 @@ CODE_FRAGMENT
 .     executables or shared objects. This is for COFF only.  *}
 .#define SEC_COFF_SHARED             0x8000000
 .
-.  {* This section should be compressed.  This is for ELF linker
-.     internal use only.  *}
-.#define SEC_ELF_COMPRESS            0x8000000
+.  {* Indicate that section has the purecode flag set.  *}
+.#define SEC_ELF_PURECODE            0x8000000
 .
 .  {* When a section with this flag is being linked, then if the size of
 .     the input section is less than a page, it should not cross a page
@@ -346,10 +345,6 @@ CODE_FRAGMENT
 .     it should be aligned on a page boundary.  This is for TI
 .     TMS320C54X only.  *}
 .#define SEC_TIC54X_BLOCK           0x10000000
-.
-.  {* This section should be renamed.  This is for ELF linker
-.     internal use only.  *}
-.#define SEC_ELF_RENAME             0x10000000
 .
 .  {* Conditionally link this section; do not link if there are no
 .     references found to any symbol in the section.  This is for TI
@@ -367,9 +362,6 @@ CODE_FRAGMENT
 .  {* Indicate that section has the no read flag set. This happens
 .     when memory read flag isn't set. *}
 .#define SEC_COFF_NOREAD            0x40000000
-.
-.  {* Indicate that section has the purecode flag set.  *}
-.#define SEC_ELF_PURECODE           0x80000000
 .
 .  {*  End of section flags.  *}
 .
@@ -409,6 +401,7 @@ CODE_FRAGMENT
 .#define SEC_INFO_TYPE_JUST_SYMS 4
 .#define SEC_INFO_TYPE_TARGET    5
 .#define SEC_INFO_TYPE_EH_FRAME_ENTRY 6
+.#define SEC_INFO_TYPE_SFRAME  7
 .
 .  {* Nonzero if this section uses RELA relocations, rather than REL.  *}
 .  unsigned int use_rela_p:1;
@@ -1557,10 +1550,7 @@ bfd_get_section_contents (bfd *abfd,
       return true;
     }
 
-  if (abfd->direction != write_direction && section->rawsize != 0)
-    sz = section->rawsize;
-  else
-    sz = section->size;
+  sz = bfd_get_section_limit_octets (abfd, section);
   if ((bfd_size_type) offset > sz
       || count > sz - offset
       || count != (size_t) count)
@@ -1702,4 +1692,70 @@ _bfd_nowrite_set_section_contents (bfd *abfd,
 				   bfd_size_type count ATTRIBUTE_UNUSED)
 {
   return _bfd_bool_bfd_false_error (abfd);
+}
+
+/*
+INTERNAL_FUNCTION
+	_bfd_section_size_insane
+
+SYNOPSIS
+	bool _bfd_section_size_insane (bfd *abfd, asection *sec);
+
+DESCRIPTION
+	Returns true if the given section has a size that indicates
+	it cannot be read from file.  Return false if the size is OK
+	*or* this function can't say one way or the other.
+
+*/
+
+bool
+_bfd_section_size_insane (bfd *abfd, asection *sec)
+{
+  bfd_size_type size = bfd_get_section_limit_octets (abfd, sec);
+  if (size == 0)
+    return false;
+
+  if ((bfd_section_flags (sec) & SEC_IN_MEMORY) != 0
+      /* PR 24753: Linker created sections can be larger than
+	 the file size, eg if they are being used to hold stubs.  */
+      || (bfd_section_flags (sec) & SEC_LINKER_CREATED) != 0
+      /* PR 24753: Sections which have no content should also be
+	 excluded as they contain no size on disk.  */
+      || (bfd_section_flags (sec) & SEC_HAS_CONTENTS) == 0
+      /* The MMO file format supports its own special compression
+	 technique, but it uses COMPRESS_SECTION_NONE when loading
+	 a section's contents.  */
+      || bfd_get_flavour (abfd) == bfd_target_mmo_flavour)
+    return false;
+
+  ufile_ptr filesize = bfd_get_file_size (abfd);
+  if (filesize == 0)
+    return false;
+
+  if (sec->compress_status == DECOMPRESS_SECTION_ZSTD
+      || sec->compress_status == DECOMPRESS_SECTION_ZLIB)
+    {
+      /* PR26946, PR28834: Sanity check compress header uncompressed
+	 size against the original file size, and check that the
+	 compressed section can be read from file.  We choose an
+	 arbitrary uncompressed size of 10x the file size, rather than
+	 a compress ratio.  The reason being that compiling
+	 "int aaa..a;" with "a" repeated enough times can result in
+	 compression ratios without limit for .debug_str, whereas such
+	 a file will usually also have the enormous symbol
+	 uncompressed in .symtab.  */
+     if (size / 10 > filesize)
+       {
+	 bfd_set_error (bfd_error_bad_value);
+	 return true;
+       }
+     size = sec->compressed_size;
+    }
+
+  if ((ufile_ptr) sec->filepos > filesize || size > filesize - sec->filepos)
+    {
+      bfd_set_error (bfd_error_file_truncated);
+      return true;
+    }
+  return false;
 }

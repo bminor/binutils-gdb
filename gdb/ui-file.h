@@ -1,5 +1,5 @@
 /* UI_FILE - a generic STDIO like output stream.
-   Copyright (C) 1999-2022 Free Software Foundation, Inc.
+   Copyright (C) 1999-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -329,9 +329,9 @@ public:
 class tee_file : public ui_file
 {
 public:
-  /* Create a file which writes to both ONE and TWO.  ONE will remain
-     open when this object is destroyed; but TWO will be closed.  */
-  tee_file (ui_file *one, ui_file_up &&two);
+  /* Create a file which writes to both ONE and TWO.  Ownership of
+     both files is up to the user.  */
+  tee_file (ui_file *one, ui_file *two);
   ~tee_file () override;
 
   void write (const char *buf, long length_buf) override;
@@ -364,7 +364,7 @@ public:
 private:
   /* The two underlying ui_files.  */
   ui_file *m_one;
-  ui_file_up m_two;
+  ui_file *m_two;
 };
 
 /* A ui_file implementation that filters out terminal escape

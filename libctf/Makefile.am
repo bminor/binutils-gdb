@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 #
-#   Copyright (C) 2019-2022 Free Software Foundation, Inc.
+#   Copyright (C) 2019-2023 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -72,7 +72,6 @@ EXPECT = expect
 RUNTEST = runtest
 RUNTESTFLAGS =
 
-if TCL_TRY
 CC_FOR_TARGET = ` \
   if [ -f $$r/../gcc/xgcc ] ; then \
     if [ -f $$r/../newlib/Makefile ] ; then \
@@ -105,6 +104,7 @@ check-DEJAGNU: site.exp development.exp
 development.exp: $(BFDDIR)/development.sh
 	$(AM_V_GEN)$(EGREP) "(development|experimental)=" $(BFDDIR)/development.sh  \
 	  | $(AWK) -F= '{ print "set " $$1 " " $$2 }' > $@
+	echo "set have_tcl_try @HAVE_TCL_TRY@" >> $@
 
 # development.sh is used to determine -Werror default.
 CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/development.sh
@@ -112,6 +112,5 @@ CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/development.sh
 EXTRA_DEJAGNU_SITE_CONFIG = development.exp
 
 DISTCLEANFILES += site.exp development.exp
-endif
 
 include doc/local.mk

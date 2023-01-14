@@ -1,5 +1,5 @@
 /* 8 and 16 bit COFF relocation functions, for BFD.
-   Copyright (C) 1990-2022 Free Software Foundation, Inc.
+   Copyright (C) 1990-2023 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -251,11 +251,11 @@ bfd_coff_reloc16_get_relocated_section_contents
   /* Get enough memory to hold the stuff.  */
   bfd *input_bfd = link_order->u.indirect.section->owner;
   asection *input_section = link_order->u.indirect.section;
-  long reloc_size = bfd_get_reloc_upper_bound (input_bfd, input_section);
+  long reloc_size;
   arelent **reloc_vector;
   long reloc_count;
-  bfd_size_type sz;
 
+  reloc_size = bfd_get_reloc_upper_bound (input_bfd, input_section);
   if (reloc_size < 0)
     return NULL;
 
@@ -267,23 +267,26 @@ bfd_coff_reloc16_get_relocated_section_contents
 						       symbols);
 
   /* Read in the section.  */
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (!bfd_get_section_contents (input_bfd, input_section, data, 0, sz))
+  bfd_byte *orig_data = data;
+  if (!bfd_get_full_section_contents (input_bfd, input_section, &data))
     return NULL;
 
-  reloc_vector = (arelent **) bfd_malloc ((bfd_size_type) reloc_size);
-  if (!reloc_vector && reloc_size != 0)
+  if (data == NULL)
     return NULL;
+
+  if (reloc_size == 0)
+    return data;
+
+  reloc_vector = (arelent **) bfd_malloc (reloc_size);
+  if (reloc_vector == NULL)
+    goto error_return;
 
   reloc_count = bfd_canonicalize_reloc (input_bfd,
 					input_section,
 					reloc_vector,
 					symbols);
   if (reloc_count < 0)
-    {
-      free (reloc_vector);
-      return NULL;
-    }
+    goto error_return;
 
   if (reloc_count > 0)
     {
@@ -324,6 +327,12 @@ bfd_coff_reloc16_get_relocated_section_contents
 	    }
 	}
     }
-  free ((char *) reloc_vector);
+  free (reloc_vector);
   return data;
+
+ error_return:
+  free (reloc_vector);
+  if (orig_data == NULL)
+    free (data);
+  return NULL;
 }

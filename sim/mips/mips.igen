@@ -1450,7 +1450,7 @@
   else if ((fs & 0x1) == 0)
     GPR[rt] = SET64HI (FGR[fs+1]) | FGR[fs];
   else
-    GPR[rt] = SET64HI (0xDEADC0DE) | 0xBAD0BAD0;
+    Unpredictable ();
   TRACE_ALU_RESULT (GPR[rt]);
 }
 
@@ -5782,7 +5782,7 @@
   else if ((FS & 0x1) == 0)
     v = SET64HI (FGR[FS+1]) | FGR[FS];
   else
-    v = SET64HI (0xDEADC0DE) | 0xBAD0BAD0;
+    Unpredictable ();
   PENDING_FILL (RT, v);
   TRACE_ALU_RESULT (v);
 }

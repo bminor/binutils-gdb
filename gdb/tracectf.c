@@ -1,6 +1,6 @@
 /* CTF format support.
 
-   Copyright (C) 2012-2022 Free Software Foundation, Inc.
+   Copyright (C) 2012-2023 Free Software Foundation, Inc.
    Contributed by Hui Zhu <hui_zhu@mentor.com>
    Contributed by Yao Qi <yao@codesourcery.com>
 
@@ -1622,7 +1622,7 @@ ctf_target::trace_find (enum trace_find_type type, int num,
 			found = 1;
 		      break;
 		    default:
-		      internal_error (__FILE__, __LINE__, _("unknown tfind type"));
+		      internal_error (_("unknown tfind type"));
 		    }
 		}
 	    }

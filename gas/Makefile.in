@@ -15,7 +15,7 @@
 @SET_MAKE@
 
 #
-#   Copyright (C) 2012-2022 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2023 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@
 #
 
 #
-#   Copyright (C) 2012-2022 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2023 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -162,15 +162,17 @@ CONFIG_CLEAN_FILES = gdb.ini .gdbinit po/Makefile.in
 CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
 am__objects_1 = app.$(OBJEXT) as.$(OBJEXT) atof-generic.$(OBJEXT) \
-	compress-debug.$(OBJEXT) cond.$(OBJEXT) depend.$(OBJEXT) \
-	dwarf2dbg.$(OBJEXT) dw2gencfi.$(OBJEXT) ecoff.$(OBJEXT) \
-	ehopt.$(OBJEXT) expr.$(OBJEXT) flonum-copy.$(OBJEXT) \
-	flonum-konst.$(OBJEXT) flonum-mult.$(OBJEXT) frags.$(OBJEXT) \
+	codeview.$(OBJEXT) compress-debug.$(OBJEXT) cond.$(OBJEXT) \
+	depend.$(OBJEXT) dwarf2dbg.$(OBJEXT) dw2gencfi.$(OBJEXT) \
+	ecoff.$(OBJEXT) ehopt.$(OBJEXT) expr.$(OBJEXT) \
+	flonum-copy.$(OBJEXT) flonum-konst.$(OBJEXT) \
+	flonum-mult.$(OBJEXT) frags.$(OBJEXT) gen-sframe.$(OBJEXT) \
 	hash.$(OBJEXT) input-file.$(OBJEXT) input-scrub.$(OBJEXT) \
 	listing.$(OBJEXT) literal.$(OBJEXT) macro.$(OBJEXT) \
 	messages.$(OBJEXT) output-file.$(OBJEXT) read.$(OBJEXT) \
-	remap.$(OBJEXT) sb.$(OBJEXT) stabs.$(OBJEXT) subsegs.$(OBJEXT) \
-	symbols.$(OBJEXT) write.$(OBJEXT)
+	remap.$(OBJEXT) sb.$(OBJEXT) sframe-opt.$(OBJEXT) \
+	stabs.$(OBJEXT) subsegs.$(OBJEXT) symbols.$(OBJEXT) \
+	write.$(OBJEXT)
 am_as_new_OBJECTS = $(am__objects_1)
 am__dirstamp = $(am__leading_dot)dirstamp
 as_new_OBJECTS = $(am_as_new_OBJECTS)
@@ -554,6 +556,7 @@ GAS_CFILES = \
 	app.c \
 	as.c \
 	atof-generic.c \
+	codeview.c \
 	compress-debug.c \
 	cond.c \
 	depend.c \
@@ -566,6 +569,7 @@ GAS_CFILES = \
 	flonum-konst.c \
 	flonum-mult.c \
 	frags.c \
+	gen-sframe.c \
 	hash.c \
 	input-file.c \
 	input-scrub.c \
@@ -577,6 +581,7 @@ GAS_CFILES = \
 	read.c \
 	remap.c \
 	sb.c \
+	sframe-opt.c \
 	stabs.c \
 	subsegs.c \
 	symbols.c \
@@ -589,6 +594,7 @@ HFILES = \
 	bignum.h \
 	bit_fix.h \
 	cgen.h \
+	codeview.h \
 	compress-debug.h \
 	dwarf2dbg.h \
 	dw2gencfi.h \
@@ -598,6 +604,7 @@ HFILES = \
 	expr.h \
 	flonum.h \
 	frags.h \
+	gen-sframe.h \
 	hash.h \
 	input-file.h \
 	itbl-lex.h \
@@ -821,7 +828,6 @@ TARG_ENV_HFILES = \
 	config/te-pc532mach.h \
 	config/te-pe.h \
 	config/te-solaris.h \
-	config/te-svr4.h \
 	config/te-tmips.h \
 	config/te-vxworks.h \
 	config/te-wince-pe.h
@@ -898,6 +904,10 @@ EXTRA_as_new_SOURCES = $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 EXPECT = expect
 RUNTEST = runtest
 RUNTESTFLAGS = 
+i386_tbl_deps = $(srcdir)/../opcodes/i386-opc.tbl \
+	$(srcdir)/../opcodes/i386-reg.tbl \
+	$(srcdir)/../opcodes/i386-gen.c $(srcdir)/../opcodes/i386-opc.h
+
 itbl_test_SOURCES = itbl-parse.y itbl-lex.l
 itbl_test_LDADD = itbl-tops.@OBJEXT@ itbl-test.@OBJEXT@ $(GASLIBS) @LEXLIB@
 
@@ -1290,6 +1300,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/as.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/atof-generic.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cgen.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/codeview.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compress-debug.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cond.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/depend.Po@am__quote@
@@ -1302,6 +1313,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flonum-konst.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flonum-mult.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/frags.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen-sframe.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hash.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/input-file.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/input-scrub.Po@am__quote@
@@ -1316,6 +1328,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/read.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/remap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sframe-opt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stabs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/subsegs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/symbols.Po@am__quote@
@@ -2054,6 +2067,13 @@ check-DEJAGNU: site.exp
 development.exp: $(BFDDIR)/development.sh
 	$(EGREP) "(development|experimental)=" $(BFDDIR)/development.sh  \
 	  | $(AWK) -F= '{ print "set " $$1 " " $$2 }' > $@
+
+config/tc-i386.o: $(srcdir)/../opcodes/i386-init.h $(srcdir)/../opcodes/i386-tbl.h
+
+$(srcdir)/../opcodes/i386%init.h $(srcdir)/../opcodes/i386%tbl.h: @MAINT@ $(i386_tbl_deps)
+	@echo '"$@" is outdated wrt "$?"' >&2
+	@echo 'Please rebuild from the top level or in $(CURDIR)/../opcodes/' >&2
+	@false
 config/m68k-parse.c: $(srcdir)/config/m68k-parse.y
 	$(SHELL) $(YLWRAP) $(srcdir)/config/m68k-parse.y y.tab.c $@ -- $(YACCCOMPILE)
 config/m68k-parse.h: config/m68k-parse.c

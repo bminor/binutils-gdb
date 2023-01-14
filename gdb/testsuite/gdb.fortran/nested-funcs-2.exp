@@ -1,4 +1,4 @@
-# Copyright 2019-2022 Free Software Foundation, Inc.
+# Copyright 2019-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -108,8 +108,7 @@ proc do_bp_tests {with_src_prefix_p with_nest_prefix_p} {
     }
 
     # Break on a contained function and run to it.
-    if {![runto ${src_prefix}[gdb_get_line_number "pre_init"]]} then {
-	perror "couldn't run to breakpoint pre_init"
+    if {![runto ${src_prefix}[gdb_get_line_number "pre_init"]]} {
 	return
     }
 

@@ -1,6 +1,6 @@
 /* Target-dependent code for s390.
 
-   Copyright (C) 2001-2022 Free Software Foundation, Inc.
+   Copyright (C) 2001-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -557,7 +557,7 @@ s390_displaced_step_fixup (struct gdbarch *gdbarch,
       regcache_write_pc (regs, from + insnlen);
       /* Recompute output address in R1.  */
       regcache_cooked_write_unsigned (regs, S390_R0_REGNUM + r1,
-				      amode | (from + i2 * 2));
+				      from + i2 * 2);
     }
 
   /* If we executed a breakpoint instruction, point PC right back at it.  */
@@ -1276,7 +1276,7 @@ s390_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
       return full_name[regnum - tdep->v0_full_regnum];
     }
 
-  internal_error (__FILE__, __LINE__, _("invalid regnum"));
+  internal_error (_("invalid regnum"));
 }
 
 /* Implement pseudo_register_type tdesc method.  */
@@ -1299,7 +1299,7 @@ s390_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum_is_vxr_full (tdep, regnum))
     return tdesc_register_type (gdbarch, S390_V16_REGNUM);
 
-  internal_error (__FILE__, __LINE__, _("invalid regnum"));
+  internal_error (_("invalid regnum"));
 }
 
 /* Implement pseudo_register_read gdbarch method.  */
@@ -1374,7 +1374,7 @@ s390_pseudo_register_read (struct gdbarch *gdbarch, readable_regcache *regcache,
       return status;
     }
 
-  internal_error (__FILE__, __LINE__, _("invalid regnum"));
+  internal_error (_("invalid regnum"));
 }
 
 /* Implement pseudo_register_write gdbarch method.  */
@@ -1431,7 +1431,7 @@ s390_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       return;
     }
 
-  internal_error (__FILE__, __LINE__, _("invalid regnum"));
+  internal_error (_("invalid regnum"));
 }
 
 /* Register groups.  */
@@ -1493,7 +1493,7 @@ s390_ax_pseudo_register_collect (struct gdbarch *gdbarch,
     }
   else
     {
-      internal_error (__FILE__, __LINE__, _("invalid regnum"));
+      internal_error (_("invalid regnum"));
     }
   return 0;
 }
@@ -1539,7 +1539,7 @@ s390_ax_pseudo_register_push_stack (struct gdbarch *gdbarch,
     }
   else
     {
-      internal_error (__FILE__, __LINE__, _("invalid regnum"));
+      internal_error (_("invalid regnum"));
     }
   return 0;
 }
@@ -2061,7 +2061,7 @@ s390_register_return_value (struct gdbarch *gdbarch, struct type *type,
 	}
     }
   else
-    internal_error (__FILE__, __LINE__, _("invalid return type"));
+    internal_error (_("invalid return type"));
 }
 
 /* Implement the 'return_value' gdbarch method.  */
@@ -6983,13 +6983,12 @@ s390_tdesc_valid (s390_gdbarch_tdep *tdep,
   return true;
 }
 
-/* Allocate and initialize new gdbarch_tdep.  Caller is responsible to free
-   memory after use.  */
+/* Allocate and initialize new gdbarch_tdep.  */
 
-static s390_gdbarch_tdep *
+static s390_gdbarch_tdep_up
 s390_gdbarch_tdep_alloc ()
 {
-  s390_gdbarch_tdep *tdep = new s390_gdbarch_tdep;
+  s390_gdbarch_tdep_up tdep (new s390_gdbarch_tdep);
 
   tdep->tdesc = NULL;
 
@@ -7026,8 +7025,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   static const char *const stap_register_indirection_suffixes[] = { ")",
 								    NULL };
 
-  s390_gdbarch_tdep *tdep = s390_gdbarch_tdep_alloc ();
-  struct gdbarch *gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch = gdbarch_alloc (&info, s390_gdbarch_tdep_alloc ());
+  s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
   tdesc_arch_data_up tdesc_data = tdesc_data_alloc ();
   info.tdesc_data = tdesc_data.get ();
 
@@ -7156,7 +7155,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Check any target description for validity.  */
   if (!s390_tdesc_valid (tdep, tdesc_data.get ()))
     {
-      delete tdep;
       gdbarch_free (gdbarch);
       return NULL;
     }
@@ -7189,7 +7187,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       if (tmp->vector_abi != tdep->vector_abi)
 	continue;
 
-      delete tdep;
       gdbarch_free (gdbarch);
       return arches->gdbarch;
     }

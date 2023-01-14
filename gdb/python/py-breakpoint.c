@@ -1,6 +1,6 @@
 /* Python interface to breakpoints
 
-   Copyright (C) 2008-2022 Free Software Foundation, Inc.
+   Copyright (C) 2008-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -582,7 +582,7 @@ bppy_set_commands (PyObject *self, PyObject *newvalue, void *closure)
       bool first = true;
       char *save_ptr = nullptr;
       auto reader
-	= [&] ()
+	= [&] (std::string &buffer)
 	  {
 	    const char *result = strtok_r (first ? commands.get () : nullptr,
 					   "\n", &save_ptr);
@@ -938,16 +938,14 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 	  }
 	case bp_watchpoint:
 	  {
-	    gdb::unique_xmalloc_ptr<char>
-	      copy_holder (xstrdup (skip_spaces (spec)));
-	    char *copy = copy_holder.get ();
+	    spec = skip_spaces (spec);
 
 	    if (access_type == hw_write)
-	      watch_command_wrapper (copy, 0, internal_bp);
+	      watch_command_wrapper (spec, 0, internal_bp);
 	    else if (access_type == hw_access)
-	      awatch_command_wrapper (copy, 0, internal_bp);
+	      awatch_command_wrapper (spec, 0, internal_bp);
 	    else if (access_type == hw_read)
-	      rwatch_command_wrapper (copy, 0, internal_bp);
+	      rwatch_command_wrapper (spec, 0, internal_bp);
 	    else
 	      error(_("Cannot understand watchpoint access type."));
 	    break;
@@ -987,6 +985,26 @@ build_bp_list (struct breakpoint *b, PyObject *list)
     return true;
 
   return PyList_Append (list, bp) == 0;
+}
+
+/* See python-internal.h.  */
+
+bool
+gdbpy_breakpoint_init_breakpoint_type ()
+{
+  if (breakpoint_object_type.tp_new == nullptr)
+    {
+      breakpoint_object_type.tp_new = PyType_GenericNew;
+      if (PyType_Ready (&breakpoint_object_type) < 0)
+	{
+	  /* Reset tp_new back to nullptr so future calls to this function
+	     will try calling PyType_Ready again.  */
+	  breakpoint_object_type.tp_new = nullptr;
+	  return false;
+	}
+    }
+
+  return true;
 }
 
 /* Static function to return a tuple holding all breakpoints.  */
@@ -1216,8 +1234,7 @@ gdbpy_initialize_breakpoints (void)
 {
   int i;
 
-  breakpoint_object_type.tp_new = PyType_GenericNew;
-  if (PyType_Ready (&breakpoint_object_type) < 0)
+  if (!gdbpy_breakpoint_init_breakpoint_type ())
     return -1;
 
   if (gdb_pymodule_addobject (gdb_module, "Breakpoint",

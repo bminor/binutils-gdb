@@ -1,5 +1,5 @@
 /* MIPS-specific support for 64-bit ELF
-   Copyright (C) 1996-2022 Free Software Foundation, Inc.
+   Copyright (C) 1996-2023 Free Software Foundation, Inc.
    Ian Lance Taylor, Cygnus Support
    Linker support added by Mark Mitchell, CodeSourcery, LLC.
    <mark@codesourcery.com>
@@ -3580,7 +3580,8 @@ mips_elf64_gprel32_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   relocation += symbol->section->output_section->vma;
   relocation += symbol->section->output_offset;
 
-  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
+  if (!_bfd_mips_reloc_offset_in_range (abfd, input_section, reloc_entry,
+					check_inplace))
     return bfd_reloc_outofrange;
 
   /* Set val to the offset into the section or symbol.  */
@@ -3660,6 +3661,10 @@ mips16_gprel_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 			     &gp);
   if (ret != bfd_reloc_ok)
     return ret;
+
+  if (!_bfd_mips_reloc_offset_in_range (abfd, input_section, reloc_entry,
+					check_shuffle))
+    return bfd_reloc_outofrange;
 
   location = (bfd_byte *) data + reloc_entry->address;
   _bfd_mips_elf_reloc_unshuffle (abfd, reloc_entry->howto->type, false,
@@ -4810,6 +4815,7 @@ const struct elf_size_info mips_elf64_size_info =
 
 #define bfd_elf64_get_dynamic_reloc_upper_bound mips_elf64_get_dynamic_reloc_upper_bound
 #define bfd_elf64_mkobject		_bfd_mips_elf_mkobject
+#define bfd_elf64_close_and_cleanup	_bfd_mips_elf_close_and_cleanup
 
 /* The SGI style (n)64 NewABI.  */
 #define TARGET_LITTLE_SYM		mips_elf64_le_vec

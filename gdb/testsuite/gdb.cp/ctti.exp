@@ -1,4 +1,4 @@
-# Copyright 1998-2022 Free Software Foundation, Inc.
+# Copyright 1998-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,8 +30,7 @@ if {[prepare_for_testing "failed to prepare" $testfile \
     return -1
 }
 
-if ![runto_main] then {
-    perror "couldn't run to breakpoint"
+if {![runto_main]} {
     return
 }
 
@@ -45,7 +44,7 @@ gdb_test "print i" "\\$\[0-9\]+ = 4"
 # TODO: this needs more work before actually deploying it.
 # So bail out here.
 
-if { [ test_compiler_info gcc-*] } then { return }
+if {[test_compiler_info gcc-*]} { return }
 
 gdb_test_multiple "print add<int>(2,2)" "print add<int>(2,2)" {
     -re "\\$\[0-9\]+ = 4\r\n$gdb_prompt $" {

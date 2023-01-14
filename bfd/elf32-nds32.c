@@ -1,5 +1,5 @@
 /* NDS32-specific support for 32-bit ELF.
-   Copyright (C) 2012-2022 Free Software Foundation, Inc.
+   Copyright (C) 2012-2023 Free Software Foundation, Inc.
    Contributed by Andes Technology Corporation.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -13100,6 +13100,7 @@ nds32_elf_get_relocated_section_contents (bfd *abfd,
     return NULL;
 
   /* Read in the section.  */
+  bfd_byte *orig_data = data;
   if (!nds32_get_section_contents (input_bfd, input_section, &data, false))
     return NULL;
 
@@ -13108,7 +13109,7 @@ nds32_elf_get_relocated_section_contents (bfd *abfd,
 
   reloc_vector = (arelent **) bfd_malloc (reloc_size);
   if (reloc_vector == NULL)
-    return NULL;
+    goto error_return;
 
   reloc_count = bfd_canonicalize_reloc (input_bfd, input_section,
 					reloc_vector, symbols);
@@ -13202,6 +13203,8 @@ nds32_elf_get_relocated_section_contents (bfd *abfd,
 
  error_return:
   free (reloc_vector);
+  if (orig_data == NULL)
+    free (data);
   return NULL;
 }
 

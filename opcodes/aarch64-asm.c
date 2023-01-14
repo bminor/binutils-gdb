@@ -1,5 +1,5 @@
 /* aarch64-asm.c -- AArch64 assembler support.
-   Copyright (C) 2012-2022 Free Software Foundation, Inc.
+   Copyright (C) 2012-2023 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of the GNU opcodes library.
@@ -1891,7 +1891,8 @@ aarch64_encode_variant_using_iclass (struct aarch64_inst *inst)
       break;
 
     case sve_size_hsd:
-      insert_field (FLD_size, &inst->value, aarch64_get_variant (inst) + 1, 0);
+      /* MOD 3 For `OP_SVE_Vv_HSD`.  */
+      insert_field (FLD_size, &inst->value, aarch64_get_variant (inst) % 3 + 1, 0);
       break;
 
     case sve_size_bh:

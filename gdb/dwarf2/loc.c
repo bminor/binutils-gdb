@@ -1,6 +1,6 @@
 /* DWARF 2 location expression support for GDB.
 
-   Copyright (C) 2003-2022 Free Software Foundation, Inc.
+   Copyright (C) 2003-2023 Free Software Foundation, Inc.
 
    Contributed by Daniel Jacobowitz, MontaVista Software, Inc.
 
@@ -739,7 +739,7 @@ call_site_target::iterate_over_addresses
       break;
 
     default:
-      internal_error (__FILE__, __LINE__, _("invalid call site target kind"));
+      internal_error (_("invalid call site target kind"));
     }
 }
 
@@ -1325,14 +1325,8 @@ static const struct lval_funcs entry_data_value_funcs =
   entry_data_value_free_closure
 };
 
-/* Read parameter of TYPE at (callee) FRAME's function entry.  KIND and KIND_U
-   are used to match DW_AT_location at the caller's
-   DW_TAG_call_site_parameter.
-
-   Function always returns non-NULL value.  It throws NO_ENTRY_VALUE_ERROR if it
-   cannot resolve the parameter for any reason.  */
-
-static struct value *
+/* See dwarf2/loc.h.  */
+struct value *
 value_of_dwarf_reg_entry (struct type *type, frame_info_ptr frame,
 			  enum call_site_parameter_kind kind,
 			  union call_site_parameter_u kind_u)
@@ -1646,6 +1640,11 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 {
   if (prop == NULL)
     return false;
+
+  /* Evaluating a property should not change the current language.
+     Without this here this could happen if the code below selects a
+     frame.  */
+  scoped_restore_current_language save_language;
 
   if (frame == NULL && has_stack_frames ())
     frame = get_selected_frame (NULL);
@@ -3035,7 +3034,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
     {
       int targ = offsets[dw_labels[i]];
       if (targ == -1)
-	internal_error (__FILE__, __LINE__, _("invalid label"));
+	internal_error (_("invalid label"));
       ax_label (expr, patches[i], targ);
     }
 }

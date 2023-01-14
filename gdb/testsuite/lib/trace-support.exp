@@ -1,4 +1,4 @@
-# Copyright (C) 1998-2022 Free Software Foundation, Inc.
+# Copyright (C) 1998-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -208,7 +208,7 @@ proc gdb_trace_setactions_command { actions_command testname tracepoint args } {
     if { $testname != "" } {
 	$passfail $testname
     }
-    if { $passfail == "pass" } then { 
+    if {$passfail == "pass"} {
 	return 0
     } else {
 	return 1
@@ -265,7 +265,7 @@ proc gdb_tfind_test { testname tfind_arg exp_res args } {
 	-re "$gdb_prompt $" { }
     }
     $passfail "$testname"
-    if { $passfail == "pass" } then { 
+    if {$passfail == "pass"} {
 	return 0
     } else {
 	return 1
@@ -395,7 +395,7 @@ proc generate_tracefile { binfile } {
 
 	clean_restart $binfile
 
-	if ![runto_main] then {
+	if {![runto_main]} {
 	    return 0
 	}
 	gdb_continue_to_end "" continue 1

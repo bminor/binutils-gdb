@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2022 Free Software Foundation, Inc.
+Copyright 1996-2023 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -87,7 +87,7 @@ m32rbf_h_psw_set_handler (current_cpu, (x));\
 #define GET_H_LOCK() CPU (h_lock)
 #define SET_H_LOCK(x) (CPU (h_lock) = (x))
   } hardware;
-#define CPU_CGEN_HW(cpu) (& (cpu)->cpu_data.hardware)
+#define CPU_CGEN_HW(cpu) (& M32R_SIM_CPU (cpu)->cpu_data.hardware)
 } M32RBF_CPU_DATA;
 
 /* Cover fns for register access.  */

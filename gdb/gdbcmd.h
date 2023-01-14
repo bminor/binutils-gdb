@@ -6,7 +6,7 @@
    fnasser@redhat.com    */
 
 /* Header file for GDB-specific command-line stuff.
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -64,5 +64,9 @@ extern void print_command_line (struct command_line *, unsigned int,
 				struct ui_file *);
 extern void print_command_lines (struct ui_out *,
 				 struct command_line *, unsigned int);
+
+/* Chains containing all defined "set/show style" subcommands.  */
+extern struct cmd_list_element *style_set_list;
+extern struct cmd_list_element *style_show_list;
 
 #endif /* !defined (GDBCMD_H) */

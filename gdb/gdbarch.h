@@ -1,6 +1,6 @@
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998-2022 Free Software Foundation, Inc.
+   Copyright (C) 1998-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -68,6 +68,8 @@ struct gdbarch_tdep_base
 {
   virtual ~gdbarch_tdep_base() = default;
 };
+
+using gdbarch_tdep_up = std::unique_ptr<gdbarch_tdep_base>;
 
 /* The architecture associated with the inferior through the
    connection to the target.
@@ -148,6 +150,13 @@ using read_core_file_mappings_loop_ftype =
 			   ULONGEST file_ofs,
 			   const char *filename,
 			   const bfd_build_id *build_id)>;
+
+/* Possible values for gdbarch_call_dummy_location.  */
+enum call_dummy_location_type
+{
+  ON_STACK,
+  AT_ENTRY_POINT,
+};
 
 #include "gdbarch-gen.h"
 
@@ -285,7 +294,8 @@ extern struct gdbarch_list *gdbarch_list_lookup_by_info (struct gdbarch_list *ar
    parameters.  set_gdbarch_*() functions are called to complete the
    initialization of the object.  */
 
-extern struct gdbarch *gdbarch_alloc (const struct gdbarch_info *info, struct gdbarch_tdep_base *tdep);
+extern struct gdbarch *gdbarch_alloc (const struct gdbarch_info *info,
+				      gdbarch_tdep_up tdep);
 
 
 /* Helper function.  Free a partially-constructed ``struct gdbarch''.

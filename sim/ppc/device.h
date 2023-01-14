@@ -729,7 +729,7 @@ EXTERN_DEVICE\
 (void) device_error
 (device *me,
  const char *fmt,
- ...) ATTRIBUTE_PRINTF_2;
+ ...) ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF_2;
 
 INLINE_DEVICE\
 (int) device_trace

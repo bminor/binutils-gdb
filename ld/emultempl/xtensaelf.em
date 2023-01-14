@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright (C) 2003-2022 Free Software Foundation, Inc.
+#   Copyright (C) 2003-2023 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -24,7 +24,7 @@
 #
 fragment <<EOF
 
-#include <xtensa-config.h>
+#include <xtensa-dynconfig.h>
 #include "../bfd/elf-bfd.h"
 #include "elf/xtensa.h"
 #include "bfd.h"
@@ -32,14 +32,6 @@ fragment <<EOF
 /* Provide default values for new configuration settings.  */
 #ifndef XTHAL_ABI_UNDEFINED
 #define XTHAL_ABI_UNDEFINED -1
-#endif
-
-#ifndef XTHAL_ABI_WINDOWED
-#define XTHAL_ABI_WINDOWED 0
-#endif
-
-#ifndef XTHAL_ABI_CALL0
-#define XTHAL_ABI_CALL0 1
 #endif
 
 static void xtensa_wild_group_interleave (lang_statement_union_type *);

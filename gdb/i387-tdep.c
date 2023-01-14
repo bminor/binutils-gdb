@@ -1,6 +1,6 @@
 /* Intel 387 floating point stuff.
 
-   Copyright (C) 1988-2022 Free Software Foundation, Inc.
+   Copyright (C) 1988-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1410,7 +1410,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	   || regnum == I387_MXCSR_REGNUM (tdep))
     regclass = x87_ctrl_or_mxcsr;
   else
-    internal_error (__FILE__, __LINE__, _("invalid i387 regnum %d"), regnum);
+    internal_error (_("invalid i387 regnum %d"), regnum);
 
   if (gcore)
     {
@@ -1683,8 +1683,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
       switch (regclass)
 	{
 	default:
-	  internal_error (__FILE__, __LINE__,
-			  _("invalid i387 regclass"));
+	  internal_error (_("invalid i387 regclass"));
 
 	case pkeys:
 	  /* This is a PKEYS register.  */

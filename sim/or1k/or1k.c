@@ -1,5 +1,5 @@
 /* OpenRISC simulator support code
-   Copyright (C) 2017-2022 Free Software Foundation, Inc.
+   Copyright (C) 2017-2023 Free Software Foundation, Inc.
 
    This file is part of GDB, the GNU debugger.
 
@@ -31,8 +31,7 @@
 #include <string.h>
 
 int
-or1k32bf_fetch_register (sim_cpu *current_cpu, int rn, unsigned char *buf,
-			 int len)
+or1k32bf_fetch_register (sim_cpu *current_cpu, int rn, void *buf, int len)
 {
   if (rn < 32)
     SETTWI (buf, GET_H_GPR (rn));
@@ -55,8 +54,7 @@ or1k32bf_fetch_register (sim_cpu *current_cpu, int rn, unsigned char *buf,
 }
 
 int
-or1k32bf_store_register (sim_cpu *current_cpu, int rn, unsigned char *buf,
-			 int len)
+or1k32bf_store_register (sim_cpu *current_cpu, int rn, const void *buf, int len)
 {
   if (rn < 32)
     SET_H_GPR (rn, GETTWI (buf));
@@ -106,32 +104,40 @@ USI
 or1k32bf_h_spr_get_raw (sim_cpu *current_cpu, USI addr)
 {
   SIM_DESC sd = CPU_STATE (current_cpu);
+  struct or1k_sim_cpu *or1k_cpu = OR1K_SIM_CPU (current_cpu);
+
   SIM_ASSERT (addr < NUM_SPR);
-  return current_cpu->spr[addr];
+  return or1k_cpu->spr[addr];
 }
 
 void
 or1k32bf_h_spr_set_raw (sim_cpu *current_cpu, USI addr, USI val)
 {
   SIM_DESC sd = CPU_STATE (current_cpu);
+  struct or1k_sim_cpu *or1k_cpu = OR1K_SIM_CPU (current_cpu);
+
   SIM_ASSERT (addr < NUM_SPR);
-  current_cpu->spr[addr] = val;
+  or1k_cpu->spr[addr] = val;
 }
 
 USI
 or1k32bf_h_spr_field_get_raw (sim_cpu *current_cpu, USI addr, int msb, int lsb)
 {
   SIM_DESC sd = CPU_STATE (current_cpu);
+  struct or1k_sim_cpu *or1k_cpu = OR1K_SIM_CPU (current_cpu);
+
   SIM_ASSERT (addr < NUM_SPR);
-  return LSEXTRACTED (current_cpu->spr[addr], msb, lsb);
+  return LSEXTRACTED (or1k_cpu->spr[addr], msb, lsb);
 }
 
 void
 or1k32bf_h_spr_field_set_raw (sim_cpu *current_cpu, USI addr, int msb, int lsb,
 			      USI val)
 {
-  current_cpu->spr[addr] &= ~LSMASK32 (msb, lsb);
-  current_cpu->spr[addr] |= LSINSERTED (val, msb, lsb);
+  struct or1k_sim_cpu *or1k_cpu = OR1K_SIM_CPU (current_cpu);
+
+  or1k_cpu->spr[addr] &= ~LSMASK32 (msb, lsb);
+  or1k_cpu->spr[addr] |= LSINSERTED (val, msb, lsb);
 }
 
 /* Initialize a sim cpu object.  */
@@ -139,6 +145,8 @@ void
 or1k_cpu_init (SIM_DESC sd, sim_cpu *current_cpu, const USI or1k_vr,
 	       const USI or1k_upr, const USI or1k_cpucfgr)
 {
+  struct or1k_sim_cpu *or1k_cpu = OR1K_SIM_CPU (current_cpu);
+
   /* Set the configuration registers passed from the user.  */
   SET_H_SYS_VR (or1k_vr);
   SET_H_SYS_UPR (or1k_upr);
@@ -155,8 +163,8 @@ or1k_cpu_init (SIM_DESC sd, sim_cpu *current_cpu, const USI or1k_vr,
     } while (0)
 
   /* Set flags indicating if we are in a delay slot or not.  */
-  current_cpu->next_delay_slot = 0;
-  current_cpu->delay_slot = 0;
+  or1k_cpu->next_delay_slot = 0;
+  or1k_cpu->delay_slot = 0;
 
   /* Verify any user passed fields and warn on configurations we don't
      support.  */
@@ -204,11 +212,12 @@ void
 or1k32bf_insn_before (sim_cpu *current_cpu, SEM_PC vpc, const IDESC *idesc)
 {
   SIM_DESC sd = CPU_STATE (current_cpu);
+  struct or1k_sim_cpu *or1k_cpu = OR1K_SIM_CPU (current_cpu);
 
-  current_cpu->delay_slot = current_cpu->next_delay_slot;
-  current_cpu->next_delay_slot = 0;
+  or1k_cpu->delay_slot = or1k_cpu->next_delay_slot;
+  or1k_cpu->next_delay_slot = 0;
 
-  if (current_cpu->delay_slot &&
+  if (or1k_cpu->delay_slot &&
       CGEN_ATTR_BOOLS (CGEN_INSN_ATTRS ((idesc)->idata)) &
       CGEN_ATTR_MASK (CGEN_INSN_NOT_IN_DELAY_SLOT))
     {
@@ -228,6 +237,7 @@ void
 or1k32bf_insn_after (sim_cpu *current_cpu, SEM_PC vpc, const IDESC *idesc)
 {
   SIM_DESC sd = CPU_STATE (current_cpu);
+  struct or1k_sim_cpu *or1k_cpu = OR1K_SIM_CPU (current_cpu);
   USI ppc;
 
 #ifdef WITH_SCACHE
@@ -242,8 +252,8 @@ or1k32bf_insn_after (sim_cpu *current_cpu, SEM_PC vpc, const IDESC *idesc)
       CGEN_ATTR_BOOLS (CGEN_INSN_ATTRS ((idesc)->idata)) &
       CGEN_ATTR_MASK (CGEN_INSN_DELAYED_CTI))
     {
-      SIM_ASSERT (!current_cpu->delay_slot);
-      current_cpu->next_delay_slot = 1;
+      SIM_ASSERT (!or1k_cpu->delay_slot);
+      or1k_cpu->next_delay_slot = 1;
     }
 }
 

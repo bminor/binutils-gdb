@@ -1,5 +1,5 @@
 /* A range adapter that wraps begin / end iterators.
-   Copyright (C) 2021-2022 Free Software Foundation, Inc.
+   Copyright (C) 2021-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -52,6 +52,10 @@ struct iterator_range
 
   IteratorType end () const
   { return m_end; }
+
+  /* The number of items in this iterator_range.  */
+  std::size_t size () const
+  { return std::distance (m_begin, m_end); }
 
 private:
   IteratorType m_begin, m_end;

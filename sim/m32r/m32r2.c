@@ -1,5 +1,5 @@
 /* m32r2 simulator support code
-   Copyright (C) 1997-2022 Free Software Foundation, Inc.
+   Copyright (C) 1997-2023 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
    This file is part of GDB, the GNU debugger.
@@ -27,10 +27,12 @@
 #include "cgen-mem.h"
 #include "cgen-ops.h"
 
+#include "m32r-sim.h"
+
 /* The contents of BUF are in target byte order.  */
 
 int
-m32r2f_fetch_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len)
+m32r2f_fetch_register (SIM_CPU *current_cpu, int rn, void *buf, int len)
 {
   return m32rbf_fetch_register (current_cpu, rn, buf, len);
 }
@@ -38,7 +40,7 @@ m32r2f_fetch_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len
 /* The contents of BUF are in target byte order.  */
 
 int
-m32r2f_store_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len)
+m32r2f_store_register (SIM_CPU *current_cpu, int rn, const void *buf, int len)
 {
   return m32rbf_store_register (current_cpu, rn, buf, len);
 }

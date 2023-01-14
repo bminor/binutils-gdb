@@ -1,4 +1,4 @@
-# Copyright 1997-2022 Free Software Foundation, Inc.
+# Copyright 1997-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -453,7 +453,7 @@ proc_with_prefix do_command_attach_tests {} {
     global gdb_prompt
     global binfile
 
-    if ![isnative] then {
+    if {![isnative]} {
 	unsupported "command attach test"
 	return 0
     }

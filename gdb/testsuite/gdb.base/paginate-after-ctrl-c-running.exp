@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2022 Free Software Foundation, Inc.
+# Copyright (C) 2014-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ proc test_ctrlc_while_target_running_does_not_paginate {} {
     with_test_prefix "ctrlc target running" {
 	clean_restart $binfile
 
-	if ![runto_main] then {
+	if {![runto_main]} {
 	    return 0
 	}
 

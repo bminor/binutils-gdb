@@ -1,5 +1,5 @@
 /* MIPS-specific support for 32-bit ELF
-   Copyright (C) 1993-2022 Free Software Foundation, Inc.
+   Copyright (C) 1993-2023 Free Software Foundation, Inc.
 
    Most of the information added by Ian Lance Taylor, Cygnus Support,
    <ian@cygnus.com>.
@@ -3411,7 +3411,8 @@ gprel32_with_gp (bfd *abfd, asymbol *symbol, arelent *reloc_entry,
   relocation += symbol->section->output_section->vma;
   relocation += symbol->section->output_offset;
 
-  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
+  if (!bfd_reloc_offset_in_range (reloc_entry->howto, abfd, input_section,
+				  reloc_entry->address))
     return bfd_reloc_outofrange;
 
   if (reloc_entry->howto->src_mask == 0)
@@ -3490,6 +3491,10 @@ mips16_gprel_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 			   &gp);
   if (ret != bfd_reloc_ok)
     return ret;
+
+  if (!_bfd_mips_reloc_offset_in_range (abfd, input_section, reloc_entry,
+					check_shuffle))
+    return bfd_reloc_outofrange;
 
   location = (bfd_byte *) data + reloc_entry->address;
   _bfd_mips_elf_reloc_unshuffle (abfd, reloc_entry->howto->type, false,
@@ -4192,6 +4197,7 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #define bfd_elf32_bfd_print_private_bfd_data \
 					_bfd_mips_elf_print_private_bfd_data
 #define bfd_elf32_mkobject		mips_elf_n32_mkobject
+#define bfd_elf32_close_and_cleanup	_bfd_mips_elf_close_and_cleanup
 
 /* Support for SGI-ish mips targets using n32 ABI.  */
 

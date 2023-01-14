@@ -1,5 +1,5 @@
 dnl Autoconf configure script for GDB, the GNU debugger.
-dnl Copyright (C) 1995-2022 Free Software Foundation, Inc.
+dnl Copyright (C) 1995-2023 Free Software Foundation, Inc.
 dnl
 dnl This file is part of GDB.
 dnl
@@ -19,7 +19,7 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl Process this file with autoconf to produce a configure script.
 
 AC_INIT
-AC_CONFIG_MACRO_DIRS([../config])
+AC_CONFIG_MACRO_DIRS([.. ../config])
 AC_CONFIG_SRCDIR([main.c])
 AC_CONFIG_HEADERS(config.h:config.in, [echo > stamp-h])
 AM_MAINTAINER_MODE
@@ -45,6 +45,13 @@ AC_CANONICAL_TARGET
 ACX_NONCANONICAL_TARGET
 
 AC_ARG_PROGRAM
+
+# We require libtool to link with the in-tree libtool libraries
+# the proper way.
+LT_INIT
+# ... and we need it soon, since it is used by some of the
+# link tests in the configure script.
+LT_OUTPUT
 
 # We require a C++11 compiler.  Check if one is available, and if
 # necessary, set CXX_DIALECT to some -std=xxx switch.
@@ -649,35 +656,8 @@ else
   fi
 fi
 
-# Verify that we have a usable GMP library.
-AC_LIB_HAVE_LINKFLAGS([gmp], [], [#include <gmp.h>],
-                      [mpz_t n;
-                       mpz_init (n);])
-if test "$HAVE_LIBGMP" != yes; then
-  AC_MSG_ERROR([GMP is missing or unusable])
-fi
-
-AC_ARG_WITH(mpfr,
-  AS_HELP_STRING([--with-mpfr], [include MPFR support (auto/yes/no)]),
-  [], [with_mpfr=auto])
-AC_MSG_CHECKING([whether to use MPFR])
-AC_MSG_RESULT([$with_mpfr])
-
-if test "${with_mpfr}" = no; then
-  AC_MSG_WARN([MPFR support disabled; some features may be unavailable.])
-  HAVE_LIBMPFR=no
-else
-  AC_LIB_HAVE_LINKFLAGS([mpfr], [gmp], [#include <mpfr.h>],
-			[mpfr_exp_t exp; mpfr_t x;
-			 mpfr_frexp (&exp, x, x, MPFR_RNDN);])
-  if test "$HAVE_LIBMPFR" != yes; then
-    if test "$with_mpfr" = yes; then
-      AC_MSG_ERROR([MPFR is missing or unusable])
-    else
-      AC_MSG_WARN([MPFR is missing or unusable; some features may be unavailable.])
-    fi
-  fi
-fi
+AC_ARG_VAR(GMPLIBS,[How to link GMP])
+AC_ARG_VAR(GMPINC,[How to find GMP include files])
 
 # --------------------- #
 # Check for libpython.  #
@@ -2092,7 +2072,7 @@ AC_ARG_ENABLE([libbacktrace],
 
 if test "${enable_libbacktrace}" = "yes"; then
   LIBBACKTRACE_INC="-I$srcdir/../libbacktrace/ -I../libbacktrace/"
-  LIBBACKTRACE_LIB=../libbacktrace/.libs/libbacktrace.a
+  LIBBACKTRACE_LIB=../libbacktrace/libbacktrace.la
   AC_DEFINE(HAVE_LIBBACKTRACE, 1, [Define if libbacktrace is being used.])
 else
   LIBBACKTRACE_INC=
@@ -2145,21 +2125,11 @@ else
   fi
 fi
 
-# Check for xxhash
-AC_ARG_WITH(xxhash,
-  AS_HELP_STRING([--with-xxhash], [use libxxhash for hashing (faster) (auto/yes/no)]),
-  [], [with_xxhash=auto])
-
 GCC_ENABLE([libctf], [yes], [], [Handle .ctf type-info sections])
-if test x${enable_static} = xno; then
-  LIBCTF="-Wl,--rpath,../libctf/.libs ../libctf/.libs/libctf.so"
-  CTF_DEPS="../libctf/.libs/libctf.so"
-else
-  LIBCTF="../libctf/.libs/libctf.a"
-  CTF_DEPS="$LIBCTF"
-fi
 if test "${enable_libctf}" = yes; then
   AC_DEFINE(ENABLE_LIBCTF, 1, [Handle .ctf type-info sections])
+  LIBCTF="../libctf/libctf.la"
+  CTF_DEPS="../libctf/libctf.la"
 else
   LIBCTF=
   CTF_DEPS=
@@ -2169,24 +2139,6 @@ AC_SUBST(CTF_DEPS)
 
 # If nativefile (NAT_FILE) is not set in configure.nat, we link to an
 # empty version.
-
-if test "x$with_xxhash" != "xno"; then
-  AC_LIB_HAVE_LINKFLAGS([xxhash], [],
-			[#include <xxhash.h>],
-			[XXH32("foo", 3, 0);
-			])
-  if test "$HAVE_LIBXXHASH" != yes; then
-    if test "$with_xxhash" = yes; then
-      AC_MSG_ERROR([xxhash is missing or unusable])
-    fi
-  fi
-  if test "x$with_xxhash" = "xauto"; then
-    with_xxhash="$HAVE_LIBXXHASH"
-  fi
-fi
-
-AC_MSG_CHECKING([whether to use xxhash])
-AC_MSG_RESULT([$with_xxhash])
 
 NM_H=
 rm -f nm.h

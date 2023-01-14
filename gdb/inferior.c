@@ -1,6 +1,6 @@
 /* Multi-process control for GDB, the GNU debugger.
 
-   Copyright (C) 2008-2022 Free Software Foundation, Inc.
+   Copyright (C) 2008-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -33,6 +33,7 @@
 #include "cli/cli-utils.h"
 #include "arch-utils.h"
 #include "target-descriptions.h"
+#include "target-connection.h"
 #include "readline/tilde.h"
 #include "progspace-and-thread.h"
 #include "gdbsupport/buildargv.h"
@@ -70,6 +71,15 @@ inferior::~inferior ()
 {
   inferior *inf = this;
 
+  /* Before the inferior is deleted, all target_ops should be popped from
+     the target stack, this leaves just the dummy_target behind.  If this
+     is not done, then any target left in the target stack will be left
+     with an artificially high reference count.  As the dummy_target is
+     still on the target stack then we are about to loose a reference to
+     that target, leaving its reference count artificially high.  However,
+     this is not critical as the dummy_target is a singleton.  */
+  gdb_assert (m_target_stack.top ()->stratum () == dummy_stratum);
+
   m_continuations.clear ();
   target_desc_info_free (inf->tdesc_info);
 }
@@ -101,6 +111,48 @@ inferior::unpush_target (struct target_ops *t)
     }
 
   return m_target_stack.unpush (t);
+}
+
+/* See inferior.h.  */
+
+void
+inferior::unpush_target_and_assert (struct target_ops *target)
+{
+  gdb_assert (current_inferior () == this);
+
+  if (!unpush_target (target))
+    internal_error ("pop_all_targets couldn't find target %s\n",
+		    target->shortname ());
+}
+
+/* See inferior.h.  */
+
+void
+inferior::pop_all_targets_above (enum strata stratum)
+{
+  /* Unpushing a target might cause it to close.  Some targets currently
+     rely on the current_inferior being set for their ::close method, so we
+     temporarily switch inferior now.  */
+  scoped_restore_current_pspace_and_thread restore_pspace_and_thread;
+  switch_to_inferior_no_thread (this);
+
+  while (top_target ()->stratum () > stratum)
+    unpush_target_and_assert (top_target ());
+}
+
+/* See inferior.h.  */
+
+void
+inferior::pop_all_targets_at_and_above (enum strata stratum)
+{
+  /* Unpushing a target might cause it to close.  Some targets currently
+     rely on the current_inferior being set for their ::close method, so we
+     temporarily switch inferior now.  */
+  scoped_restore_current_pspace_and_thread restore_pspace_and_thread;
+  switch_to_inferior_no_thread (this);
+
+  while (top_target ()->stratum () >= stratum)
+    unpush_target_and_assert (top_target ());
 }
 
 void
@@ -191,6 +243,12 @@ delete_inferior (struct inferior *inf)
 
   gdb::observers::inferior_removed.notify (inf);
 
+  /* Pop all targets now, this ensures that inferior::unpush is called
+     correctly.  As pop_all_targets ends up making a temporary switch to
+     inferior INF then we need to make this call before we delete the
+     program space, which we do below.  */
+  inf->pop_all_targets ();
+
   /* If this program space is rendered useless, remove it. */
   if (inf->pspace->empty ())
     delete inf->pspace;
@@ -223,7 +281,7 @@ exit_inferior_1 (struct inferior *inf, int silent)
       inf->vfork_child = NULL;
     }
 
-  inf->pending_detach = 0;
+  inf->pending_detach = false;
   /* Reset it.  */
   inf->control = inferior_control_state (NO_STOP_QUIETLY);
 
@@ -270,7 +328,7 @@ inferior_appeared (struct inferior *inf, int pid)
     init_thread_list ();
 
   inf->pid = pid;
-  inf->has_exit_code = 0;
+  inf->has_exit_code = false;
   inf->exit_code = 0;
 
   gdb::observers::inferior_appeared.notify (inf);
@@ -425,21 +483,12 @@ static std::string
 uiout_field_connection (process_stratum_target *proc_target)
 {
   if (proc_target == NULL)
-    {
-      return {};
-    }
-  else if (proc_target->connection_string () != NULL)
-    {
-      return string_printf ("%d (%s %s)",
-			    proc_target->connection_number,
-			    proc_target->shortname (),
-			    proc_target->connection_string ());
-    }
+    return {};
   else
     {
-      return string_printf ("%d (%s)",
-			    proc_target->connection_number,
-			    proc_target->shortname ());
+      std::string conn_str = make_target_connection_string (proc_target);
+      return string_printf ("%d (%s)", proc_target->connection_number,
+			    conn_str.c_str ());
     }
 }
 
@@ -766,17 +815,10 @@ switch_to_inferior_and_push_target (inferior *new_inf,
   if (!no_connection && proc_target != NULL)
     {
       new_inf->push_target (proc_target);
-      if (proc_target->connection_string () != NULL)
-	gdb_printf (_("Added inferior %d on connection %d (%s %s)\n"),
-		    new_inf->num,
-		    proc_target->connection_number,
-		    proc_target->shortname (),
-		    proc_target->connection_string ());
-      else
-	gdb_printf (_("Added inferior %d on connection %d (%s)\n"),
-		    new_inf->num,
-		    proc_target->connection_number,
-		    proc_target->shortname ());
+      gdb_printf (_("Added inferior %d on connection %d (%s)\n"),
+		  new_inf->num,
+		  proc_target->connection_number,
+		  make_target_connection_string (proc_target).c_str ());
     }
   else
     gdb_printf (_("Added inferior %d\n"), new_inf->num);

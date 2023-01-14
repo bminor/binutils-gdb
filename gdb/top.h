@@ -1,6 +1,6 @@
 /* Top level stuff for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -68,7 +68,7 @@ struct ui
 
   /* The UI's command line buffer.  This is to used to accumulate
      input until we have a whole command line.  */
-  struct buffer line_buffer;
+  std::string line_buffer;
 
   /* The callback used by the event loop whenever an event is detected
      on the UI's input file descriptor.  This function incrementally
@@ -289,9 +289,9 @@ extern void show_commands (const char *args, int from_tty);
 
 extern void set_verbose (const char *, int, struct cmd_list_element *);
 
-extern char *handle_line_of_input (struct buffer *cmd_line_buffer,
-				   const char *rl, int repeat,
-				   const char *annotation_suffix);
+extern const char *handle_line_of_input (std::string &cmd_line_buffer,
+					 const char *rl, int repeat,
+					 const char *annotation_suffix);
 
 /* Call at startup to see if the user has requested that gdb start up
    quietly.  */

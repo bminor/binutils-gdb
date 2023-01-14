@@ -1,6 +1,6 @@
 /* load.c --- loading object files into the RX simulator.
 
-Copyright (C) 2005-2022 Free Software Foundation, Inc.
+Copyright (C) 2005-2023 Free Software Foundation, Inc.
 Contributed by Red Hat, Inc.
 
 This file is part of the GNU simulators.
@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "cpu.h"
 #include "mem.h"
 #include "load.h"
-#include "elf-bfd.h"
+#include "bfd/elf-bfd.h"
 
 /* Helper function for invoking a GDB-specified printf.  */
 static void

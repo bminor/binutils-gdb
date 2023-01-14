@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2014-2022 Free Software Foundation, Inc.
+   Copyright 2014-2023 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -384,3 +384,4 @@ func:
 	.long  0xffd7048e    /* mffscrni f30,0             */
 	.long  0xffd71c8e    /* mffscrni f30,3             */
 	.long  0xfff8048e    /* mffsl   f31                */
+	.section	.note.GNU-stack,"",@progbits

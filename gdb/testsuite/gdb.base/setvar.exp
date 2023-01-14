@@ -1,6 +1,6 @@
 # This testcase is part of GDB, the GNU debugger.
 
-# Copyright 1988-2022 Free Software Foundation, Inc.
+# Copyright 1988-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,8 +35,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
 #
 gdb_test_no_output "set print sevenbit-strings" 
 
-if ![runto_main] then {
-    perror "couldn't run to breakpoint"
+if {![runto_main]} {
     return
 }
 
@@ -389,7 +388,7 @@ set timeout $prev_timeout
 # Test printing of enumeration bitfields.
 # GNU C supports them, some other compilers don't.
 
-if {[is_c_compiler_gcc]} then {
+if {[is_c_compiler_gcc]} {
     gdb_test "print sef.field=sm1" ".*.\[0-9\]* = sm1"
     gdb_test "print sef.field" ".*.\[0-9\]* = sm1" "print sef.field (sm1)"
     gdb_test "print sef.field=s1" ".*.\[0-9\]* = s1"

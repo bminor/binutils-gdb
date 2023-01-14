@@ -5,6 +5,10 @@ AC_CONFIG_MACRO_DIRS([../.. ../../config])
 AC_PROG_INSTALL
 AC_PROG_CC
 
+dnl The sim shouldn't be checking $target and changing behavior.  But it is,
+dnl and until we clean that up, we need to expand --target for use below.
+AC_CANONICAL_SYSTEM
+
 AC_ARG_ENABLE(sim-bitsize,
 [  --enable-sim-bitsize=n		Specify target bitsize (32 or 64).],
 [case "${enableval}" in
@@ -210,16 +214,6 @@ if test x"$silent" != x"yes"; then
   echo "Setting hardware to $sim_hw_src, $sim_hw_obj"
 fi])dnl
 
-AC_ARG_ENABLE(sim-hostbitsize,
-[  --enable-sim-hostbitsize=32|64	Specify host bitsize (32 or 64).],
-[case "${enableval}" in
-  32|64) sim_hostbitsize="-DWITH_HOST_WORD_BITSIZE=$enableval";;
-  *)	 AC_MSG_ERROR("--enable-sim-hostbitsize was given $enableval.  Expected 32 or 64"); sim_hostbitsize="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_hostbitsize" != x""; then
-  echo "Setting hostbitsize flags = $sim_hostbitsize" 6>&1
-fi],[sim_hostbitsize=""])dnl
-
 
 AC_ARG_ENABLE(sim-icache,
 [  --enable-sim-icache=size		Specify instruction-decode cache size and type.],
@@ -333,28 +327,6 @@ if test x"$silent" != x"yes"; then
 fi])dnl
 
 
-AC_ARG_ENABLE(sim-packages,
-[  --enable-sim-packages=list		Specify the packages to be included in the build.],
-[packages=disklabel
-case "${enableval}" in
-  yes)	;;
-  no)	AC_MSG_ERROR("List of packages must be specified for --enable-sim-packages"); packages="";;
-  ,*)   packages="${packages}${enableval}";;
-  *,)   packages="${enableval}${packages}";;
-  *)	packages="${enableval}"'';;
-esac
-sim_pk_src=`echo $packages | sed -e 's/,/.c pk_/g' -e 's/^/pk_/' -e 's/$/.c/'`
-sim_pk_obj=`echo $sim_pk_src | sed -e 's/\.c/.o/g'`
-if test x"$silent" != x"yes" && test x"$packages" != x""; then
-  echo "Setting packages to $sim_pk_src, $sim_pk_obj"
-fi],[packages=disklabel
-sim_pk_src=`echo $packages | sed -e 's/,/.c pk_/g' -e 's/^/pk_/' -e 's/$/.c/'`
-sim_pk_obj=`echo $sim_pk_src | sed -e 's/\.c/.o/g'`
-if test x"$silent" != x"yes"; then
-  echo "Setting packages to $sim_pk_src, $sim_pk_obj"
-fi])dnl
-
-
 AC_ARG_ENABLE(sim-smp,
 [  --enable-sim-smp=n			Specify number of processors to configure for.],
 [case "${enableval}" in
@@ -373,7 +345,7 @@ fi])dnl
 AC_ARG_ENABLE(sim-switch,
 [  --enable-sim-switch			Use a switch instead of a table for instruction call.],
 [case "${enableval}" in
-  yes)	sim_switch="-s";;
+  yes)	sim_switch="-DWITH_SPREG_SWITCH_TABLE";;
   no)	sim_switch="";;
   *)	AC_MSG_ERROR("--enable-sim-switch does not take a value"); sim_switch="";;
 esac
@@ -408,16 +380,6 @@ if test x"$silent" != x"yes" && test x"$sim_xor_endian" != x""; then
   echo "Setting xor-endian flag = $sim_xor_endian" 6>&1
 fi],[sim_xor_endian=""])dnl
 
-
-case ${host} in
-  *mingw32*)
-    AC_DEFINE(USE_WIN32API, 1,
-              [Define if we should use the Windows API, instead of the 
-	       POSIX API.  On Windows, we use the Windows API when 
-	       building for MinGW, but the POSIX API when building 
-	       for Cygwin.])
-    ;;
-esac	    
 
 AC_CONFIG_HEADER(config.h:config.in)
 
@@ -518,33 +480,6 @@ fi
 
 AC_CHECK_TYPES(long long)
 
-dnl Figure out if /dev/zero exists or not
-sim_devzero=""
-AC_MSG_CHECKING(for /dev/zero)
-AC_CACHE_VAL(ac_cv_devzero,
-[AC_TRY_RUN([#include <fcntl.h>
-main () {
-  char buf[2048];
-  int i;
-  int fd = open ("/dev/zero", O_RDONLY);
-  if (fd < 0)
-    return 1;
-  for (i = 0; i < sizeof (buf); i++)
-    buf[i] = 1;
-  if (read (fd, buf, sizeof (buf)) != sizeof (buf))
-    return 1;
-  for (i = 0; i < sizeof (buf); i++)
-    if (buf[i])
-      return 1;
-  return 0;
-}],[ac_cv_devzero=yes],[ac_cv_devzero=no],[ac_cv_devzero=no])])
-AC_MSG_RESULT($ac_cv_devzero)
-if test $ac_cv_devzero = yes; then
-  sim_devzero="-DHAVE_DEVZERO"
-else
-  sim_devzero=""
-fi
-
 # Since we run commands on the build system, we have to create a
 # separate config header for the build system if build != host.
 if test x$host = x$build; then
@@ -586,8 +521,6 @@ AC_SUBST(sim_filter)
 AC_SUBST(sim_icache)
 AC_SUBST(sim_hw_src)
 AC_SUBST(sim_hw_obj)
-AC_SUBST(sim_pk_src)
-AC_SUBST(sim_pk_obj)
 AC_SUBST(sim_xor_endian)
 AC_SUBST(sim_smp)
 AC_SUBST(sim_igen_smp)
@@ -600,7 +533,6 @@ AC_SUBST(sim_model)
 AC_SUBST(sim_default_model)
 AC_SUBST(sim_model_issue)
 AC_SUBST(sim_termio)
-AC_SUBST(sim_devzero)
 
 AC_OUTPUT(Makefile,
 [case x$CONFIG_HEADERS in xconfig.h:config.in) echo > stamp-h ;; esac])

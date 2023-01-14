@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Free Software Foundation, Inc.
+/* Copyright (C) 2021-2023 Free Software Foundation, Inc.
    Contributed by Oracle.
 
    This file is part of GNU Binutils.
@@ -137,7 +137,7 @@ atomic_swap (volatile int * p, int v)
 int
 __collector_mutex_lock (collector_mutex_t *lock_var)
 {
-  volatile unsigned int i; /* xxxx volatile may not be honored on amd64 -x04 */
+  volatile unsigned int i = 0; /* xxxx volatile may not be honored on amd64 -x04 */
 
   if (!(*lock_var) && !atomic_swap (lock_var, 1))
     return 0;

@@ -1,6 +1,6 @@
 /* Declarations for error-reporting facilities.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -48,12 +48,17 @@ extern void verror (const char *fmt, va_list args)
    functions do not return.  An error message is constructed using
    a printf- or vprintf-style argument list.  FILE and LINE
    indicate the file and line number where the programming error
-   was detected.  The function "internal_verror" must be provided
+   was detected.  Most client code should call the internal_error
+   wrapper macro instead, which expands the source location
+   automatically.  The function "internal_verror" must be provided
    by the client.  */
 
-extern void internal_error (const char *file, int line,
-			    const char *fmt, ...)
+extern void internal_error_loc (const char *file, int line,
+				const char *fmt, ...)
      ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (3, 4);
+
+#define internal_error(fmt, ...)				\
+  internal_error_loc (__FILE__, __LINE__, fmt, ##__VA_ARGS__)
 
 extern void internal_verror (const char *file, int line,
 			     const char *fmt, va_list args)
@@ -66,9 +71,12 @@ extern void internal_verror (const char *file, int line,
    argument list.  The function "internal_vwarning" must be provided
    by the client.  */
 
-extern void internal_warning (const char *file, int line,
-			      const char *fmt, ...)
+extern void internal_warning_loc (const char *file, int line,
+				  const char *fmt, ...)
      ATTRIBUTE_PRINTF (3, 4);
+
+#define internal_warning(fmt, ...)				\
+  internal_warning_loc (__FILE__, __LINE__, fmt, ##__VA_ARGS__)
 
 extern void internal_vwarning (const char *file, int line,
 			       const char *fmt, va_list args)
@@ -91,7 +99,7 @@ extern void malloc_failure (long size) ATTRIBUTE_NORETURN;
 
 extern void flush_streams ();
 
-#ifdef USE_WIN32API
+#if defined(USE_WIN32API) || defined(__CYGWIN__)
 
 /* Map the Windows error number in ERROR to a locale-dependent error
    message string and return a pointer to it.  Typically, the values

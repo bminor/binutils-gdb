@@ -1,5 +1,5 @@
 /* Disassemble support for GDB.
-   Copyright (C) 2002-2022 Free Software Foundation, Inc.
+   Copyright (C) 2002-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,6 +26,12 @@ struct gdbarch;
 struct ui_out;
 struct ui_file;
 
+#if __cplusplus >= 201703L
+#define LIBOPCODE_CALLBACK_NOEXCEPT noexcept
+#else
+#define LIBOPCODE_CALLBACK_NOEXCEPT
+#endif
+
 /* A wrapper around a disassemble_info and a gdbarch.  This is the core
    set of data that all disassembler sub-classes will need.  This class
    doesn't actually implement the disassembling process, that is something
@@ -51,12 +57,28 @@ struct gdb_disassemble_info
 
 protected:
 
-  /* Types for the function callbacks within m_di.  */
-  using read_memory_ftype = decltype (disassemble_info::read_memory_func);
-  using memory_error_ftype = decltype (disassemble_info::memory_error_func);
-  using print_address_ftype = decltype (disassemble_info::print_address_func);
-  using fprintf_ftype = decltype (disassemble_info::fprintf_func);
-  using fprintf_styled_ftype = decltype (disassemble_info::fprintf_styled_func);
+  /* Types for the function callbacks within m_di.  The actual function
+     signatures here are taken from include/dis-asm.h.  The noexcept macro
+     expands to 'noexcept' for C++17 and later, otherwise, it expands to
+     nothing.  This is because including noexcept was ignored for function
+     types before C++17, but both GCC and Clang warn that the noexcept
+     will become relevant when you switch to C++17, and this warning
+     causes the build to fail.  */
+  using read_memory_ftype
+    = int (*) (bfd_vma, bfd_byte *, unsigned int, struct disassemble_info *)
+	LIBOPCODE_CALLBACK_NOEXCEPT;
+  using memory_error_ftype
+    = void (*) (int, bfd_vma, struct disassemble_info *)
+	LIBOPCODE_CALLBACK_NOEXCEPT;
+  using print_address_ftype
+    = void (*) (bfd_vma, struct disassemble_info *)
+	LIBOPCODE_CALLBACK_NOEXCEPT;
+  using fprintf_ftype
+    = int (*) (void *, const char *, ...)
+	LIBOPCODE_CALLBACK_NOEXCEPT;
+  using fprintf_styled_ftype
+    = int (*) (void *, enum disassembler_style, const char *, ...)
+	LIBOPCODE_CALLBACK_NOEXCEPT;
 
   /* Constructor, many fields in m_di are initialized from GDBARCH.  The
      remaining arguments are function callbacks that are written into m_di.
@@ -127,7 +149,7 @@ protected:
   /* Callback used as the disassemble_info's fprintf_func callback.  The
      DIS_INFO pointer is a pointer to a gdb_printing_disassembler object.
      Content is written to the m_stream extracted from DIS_INFO.  */
-  static int fprintf_func (void *dis_info, const char *format, ...)
+  static int fprintf_func (void *dis_info, const char *format, ...) noexcept
     ATTRIBUTE_PRINTF(2,3);
 
   /* Callback used as the disassemble_info's fprintf_styled_func callback.
@@ -135,7 +157,7 @@ protected:
      object.  Content is written to the m_stream extracted from DIS_INFO.  */
   static int fprintf_styled_func (void *dis_info,
 				  enum disassembler_style style,
-				  const char *format, ...)
+				  const char *format, ...) noexcept
     ATTRIBUTE_PRINTF(3,4);
 
   /* Return true if the disassembler is considered inside a comment, false
@@ -187,14 +209,14 @@ private:
 
   /* Callback used as the disassemble_info's fprintf_func callback, this
      doesn't write anything to STREAM, but just returns 0.  */
-  static int null_fprintf_func (void *stream, const char *format, ...)
+  static int null_fprintf_func (void *stream, const char *format, ...) noexcept
     ATTRIBUTE_PRINTF(2,3);
 
   /* Callback used as the disassemble_info's fprintf_styled_func callback,
      , this doesn't write anything to STREAM, but just returns 0.  */
   static int null_fprintf_styled_func (void *stream,
 				       enum disassembler_style style,
-				       const char *format, ...)
+				       const char *format, ...) noexcept
     ATTRIBUTE_PRINTF(3,4);
 };
 
@@ -208,7 +230,7 @@ struct gdb_disassembler_memory_reader
   /* Implements the read_memory_func disassemble_info callback.  */
   static int dis_asm_read_memory (bfd_vma memaddr, gdb_byte *myaddr,
 				  unsigned int len,
-				  struct disassemble_info *info);
+				  struct disassemble_info *info) noexcept;
 };
 
 /* A non-printing disassemble_info management class.  The disassemble_info
@@ -281,9 +303,9 @@ private:
   static bool use_ext_lang_colorization_p;
 
   static void dis_asm_memory_error (int err, bfd_vma memaddr,
-				    struct disassemble_info *info);
+				    struct disassemble_info *info) noexcept;
   static void dis_asm_print_address (bfd_vma addr,
-				     struct disassemble_info *info);
+				     struct disassemble_info *info) noexcept;
 
   /* Return true if we should use the extension language to apply
      disassembler styling.  This requires disassembler styling to be on

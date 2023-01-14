@@ -1,6 +1,6 @@
 # Expect control script for GAS testsuite PE object-format-specific tests.
 
-# Copyright (C) 2009-2022 Free Software Foundation, Inc.
+# Copyright (C) 2009-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -50,6 +50,12 @@ if ([istarget "x86_64-*-mingw*"]) then {
 	run_dump_test "peseh-x64-4"
 	run_dump_test "peseh-x64-5"
 	run_dump_test "peseh-x64-6"
+}
+
+
+# This test is only for AArch64
+if {[istarget "aarch64-*-pe*"] || [istarget "aarch64-*-mingw*"]} {
+	run_dump_test "pe-aarch64"
 }
 
 # Big obj

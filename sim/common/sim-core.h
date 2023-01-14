@@ -1,6 +1,6 @@
 /* The common simulator framework for GDB, the GNU Debugger.
 
-   Copyright 2002-2022 Free Software Foundation, Inc.
+   Copyright 2002-2023 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney and Red Hat.
 
@@ -23,6 +23,7 @@
 #ifndef SIM_CORE_H
 #define SIM_CORE_H
 
+#include "symcat.h"
 
 /* core signals (error conditions)
    Define SIM_CORE_SIGNAL to catch these signals - see sim-core.c for

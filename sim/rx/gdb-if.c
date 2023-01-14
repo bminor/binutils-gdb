@@ -1,6 +1,6 @@
 /* gdb-if.c -- sim interface to GDB.
 
-Copyright (C) 2008-2022 Free Software Foundation, Inc.
+Copyright (C) 2008-2023 Free Software Foundation, Inc.
 Contributed by Red Hat, Inc.
 
 This file is part of the GNU simulators.
@@ -29,11 +29,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <stdlib.h>
 
 #include "ansidecl.h"
+#include "bfd.h"
 #include "libiberty.h"
 #include "sim/callback.h"
 #include "sim/sim.h"
 #include "gdb/signals.h"
-#include "gdb/sim-rx.h"
+#include "sim/sim-rx.h"
 
 #include "cpu.h"
 #include "mem.h"
@@ -225,10 +226,11 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
   return SIM_RC_OK;
 }
 
-int
-sim_read (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
+uint64_t
+sim_read (SIM_DESC sd, uint64_t mem, void *buffer, uint64_t length)
 {
   int i;
+  unsigned char *data = buffer;
 
   check_desc (sd);
 
@@ -241,7 +243,7 @@ sim_read (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
     {
       bfd_vma addr = mem + i;
       int do_swap = addr_in_swap_list (addr);
-      buf[i] = mem_get_qi (addr ^ (do_swap ? 3 : 0));
+      data[i] = mem_get_qi (addr ^ (do_swap ? 3 : 0));
 
       if (execution_error_get_last_error () != SIM_ERR_NONE)
 	return i;
@@ -250,10 +252,11 @@ sim_read (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
   return length;
 }
 
-int
-sim_write (SIM_DESC sd, SIM_ADDR mem, const unsigned char *buf, int length)
+uint64_t
+sim_write (SIM_DESC sd, uint64_t mem, const void *buffer, uint64_t length)
 {
   int i;
+  const unsigned char *data = buffer;
 
   check_desc (sd);
 
@@ -263,7 +266,7 @@ sim_write (SIM_DESC sd, SIM_ADDR mem, const unsigned char *buf, int length)
     {
       bfd_vma addr = mem + i;
       int do_swap = addr_in_swap_list (addr);
-      mem_put_qi (addr ^ (do_swap ? 3 : 0), buf[i]);
+      mem_put_qi (addr ^ (do_swap ? 3 : 0), data[i]);
 
       if (execution_error_get_last_error () != SIM_ERR_NONE)
 	return i;
@@ -274,7 +277,7 @@ sim_write (SIM_DESC sd, SIM_ADDR mem, const unsigned char *buf, int length)
 
 /* Read the LENGTH bytes at BUF as an little-endian value.  */
 static DI
-get_le (unsigned char *buf, int length)
+get_le (const unsigned char *buf, int length)
 {
   DI acc = 0;
   while (--length >= 0)
@@ -285,7 +288,7 @@ get_le (unsigned char *buf, int length)
 
 /* Read the LENGTH bytes at BUF as a big-endian value.  */
 static DI
-get_be (unsigned char *buf, int length)
+get_be (const unsigned char *buf, int length)
 {
   DI acc = 0;
   while (length-- > 0)
@@ -420,7 +423,7 @@ reg_size (enum sim_rx_regnum regno)
 }
 
 int
-sim_fetch_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
+sim_fetch_register (SIM_DESC sd, int regno, void *buf, int length)
 {
   size_t size;
   DI val;
@@ -530,7 +533,7 @@ sim_fetch_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
 }
 
 int
-sim_store_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
+sim_store_register (SIM_DESC sd, int regno, const void *buf, int length)
 {
   size_t size;
   DI val;

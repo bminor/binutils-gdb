@@ -1,6 +1,6 @@
 /* C/C++ language support for compilation.
 
-   Copyright (C) 2014-2022 Free Software Foundation, Inc.
+   Copyright (C) 2014-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -53,7 +53,7 @@ c_get_mode_for_size (int size)
       mode = "DI";
       break;
     default:
-      internal_error (__FILE__, __LINE__, _("Invalid GCC mode size %d."), size);
+      internal_error (_("Invalid GCC mode size %d."), size);
     }
 
   return mode;

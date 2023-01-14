@@ -1,5 +1,5 @@
 /* OpenCL language support for GDB, the GNU debugger.
-   Copyright (C) 2010-2022 Free Software Foundation, Inc.
+   Copyright (C) 2010-2023 Free Software Foundation, Inc.
 
    Contributed by Ken Werner <ken.werner@de.ibm.com>.
 
@@ -949,6 +949,13 @@ public:
 
     /* Specifies the return type of logical and relational operations.  */
     lai->set_bool_type (int_type, "int");
+  }
+
+  /* See language.h.  */
+
+  bool can_print_type_offsets () const override
+  {
+    return true;
   }
 
   /* See language.h.  */

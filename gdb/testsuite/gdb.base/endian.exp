@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2022 Free Software Foundation, Inc.
+# Copyright (C) 2018-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ if { [gdb_test_multiple "show endian" "$test" {
 
 # Now check that the automatic endianness is updated
 # according to the executable selected.
-gdb_unload
+gdb_unload "unload 1"
 gdb_test "set endian big" "$en_set big endian\\." \
     "override target endianness big"
 gdb_test "set endian auto" "$en_auto \\\(currently big endian\\\)\\." \
@@ -69,7 +69,7 @@ gdb_file_cmd $binfile
 gdb_test "show endian" "$en_auto \\\(currently $endian endian\\\)\\." \
     "previously big default executable endianness"
 
-gdb_unload
+gdb_unload "unload 2"
 gdb_test "show endian" "$en_auto \\\(currently $endian endian\\\)\\." \
     "previously big default no executable endianness"
 gdb_test "set endian little" "$en_set little endian\\." \
@@ -81,6 +81,6 @@ gdb_file_cmd $binfile
 gdb_test "show endian" "$en_auto \\\(currently $endian endian\\\)\\." \
     "previously little default executable endianness"
 
-gdb_unload
+gdb_unload "unload 3"
 gdb_test "show endian" "$en_auto \\\(currently $endian endian\\\)\\." \
     "previously little default no executable endianness"

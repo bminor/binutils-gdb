@@ -1,6 +1,6 @@
 /* Shared general utility routines for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,6 +26,12 @@
 #include "gdbsupport/gdb_unique_ptr.h"
 #include "poison.h"
 #include "gdb_string_view.h"
+
+#if defined HAVE_LIBXXHASH
+#  include <xxhash.h>
+#else
+#  include "hashtab.h"
+#endif
 
 /* xmalloc(), xrealloc() and xcalloc() have already been declared in
    "libiberty.h". */
@@ -91,6 +97,22 @@ startswith (gdb::string_view string, gdb::string_view pattern)
 {
   return (string.length () >= pattern.length ()
 	  && strncmp (string.data (), pattern.data (), pattern.length ()) == 0);
+}
+
+/* Return true if the strings are equal.  */
+
+static inline bool
+streq (const char *lhs, const char *rhs)
+{
+  return strcmp (lhs, rhs) == 0;
+}
+
+/* Compare C strings for std::sort.  */
+
+static inline bool
+compare_cstrings (const char *str1, const char *str2)
+{
+  return strcmp (str1, str2) < 0;
 }
 
 ULONGEST strtoulst (const char *num, const char **trailer, int base);
@@ -171,5 +193,37 @@ extern int hex2bin (const char *hex, gdb_byte *bin, int count);
 
 /* Like the above, but return a gdb::byte_vector.  */
 gdb::byte_vector hex2bin (const char *hex);
+
+/* A fast hashing function.  This can be used to hash data in a fast way
+   when the length is known.  If no fast hashing library is available, falls
+   back to iterative_hash from libiberty.  START_VALUE can be set to
+   continue hashing from a previous value.  */
+
+static inline unsigned int
+fast_hash (const void *ptr, size_t len, unsigned int start_value = 0)
+{
+#if defined HAVE_LIBXXHASH
+  return XXH64 (ptr, len, start_value);
+#else
+  return iterative_hash (ptr, len, start_value);
+#endif
+}
+
+namespace gdb
+{
+
+/* Hash type for gdb::string_view.
+
+   Even after we switch to C++17 and dump our string_view implementation, we
+   might want to keep this hash implementation if it's faster than std::hash
+   for std::string_view.  */
+
+struct string_view_hash
+{
+  std::size_t operator() (gdb::string_view view) const
+  {  return fast_hash (view.data (), view.length ()); }
+};
+
+} /* namespace gdb */
 
 #endif /* COMMON_COMMON_UTILS_H */

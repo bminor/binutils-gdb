@@ -55,13 +55,15 @@
 #include "bfd.h"
 #include "sim/callback.h"
 #include "sim/sim.h"
-#include "gdb/sim-sh.h"
+#include "sim/sim-sh.h"
 
 #include "sim-main.h"
 #include "sim-base.h"
 #include "sim-options.h"
 
 #include "target-newlib-syscall.h"
+
+#include "sh-sim.h"
 
 #include <math.h>
 
@@ -1049,7 +1051,7 @@ trap (SIM_DESC sd, int i, int *regs, unsigned char *insn_ptr,
 	      {
 		/* Include the termination byte.  */
 		int i = strlen (prog_argv[regs[5]]) + 1;
-		regs[0] = sim_write (0, regs[6], (void *) prog_argv[regs[5]], i);
+		regs[0] = sim_write (0, regs[6], prog_argv[regs[5]], i);
 	      }
 	    else
 	      regs[0] = -1;
@@ -1401,7 +1403,7 @@ fsca_s (int in, double (*f) (double))
   lower = result - error;
   frac = frexp (lower, &exp);
   lower = ldexp (ceil (ldexp (frac, 24)), exp - 24);
-  return abs (upper - result) >= abs (lower - result) ? upper : lower;
+  return fabs (upper - result) >= fabs (lower - result) ? upper : lower;
 }
 
 static float
@@ -1491,8 +1493,6 @@ get_loop_bounds (int rs, int re, unsigned char *memory, unsigned char *mem_end,
 
   return loop;
 }
-
-static void ppi_insn ();
 
 #include "ppi.c"
 
@@ -1875,30 +1875,32 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   signal (SIGFPE, prev_fpe);
 }
 
-int
-sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
+uint64_t
+sim_write (SIM_DESC sd, uint64_t addr, const void *buffer, uint64_t size)
 {
   int i;
+  const unsigned char *data = buffer;
 
   init_pointers ();
 
   for (i = 0; i < size; i++)
     {
-      saved_state.asregs.memory[(MMASKB & (addr + i)) ^ endianb] = buffer[i];
+      saved_state.asregs.memory[(MMASKB & (addr + i)) ^ endianb] = data[i];
     }
   return size;
 }
 
-int
-sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
+uint64_t
+sim_read (SIM_DESC sd, uint64_t addr, void *buffer, uint64_t size)
 {
   int i;
+  unsigned char *data = buffer;
 
   init_pointers ();
 
   for (i = 0; i < size; i++)
     {
-      buffer[i] = saved_state.asregs.memory[(MMASKB & (addr + i)) ^ endianb];
+      data[i] = saved_state.asregs.memory[(MMASKB & (addr + i)) ^ endianb];
     }
   return size;
 }
@@ -1913,7 +1915,7 @@ enum {
 };
 
 static int
-sh_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+sh_reg_store (SIM_CPU *cpu, int rn, const void *memory, int length)
 {
   unsigned val;
 
@@ -2086,7 +2088,7 @@ sh_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 }
 
 static int
-sh_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+sh_reg_fetch (SIM_CPU *cpu, int rn, void *memory, int length)
 {
   int val;
 
@@ -2348,7 +2350,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   cb->syscall_map = cb_sh_syscall_map;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
+  if (sim_cpu_alloc_all (sd, 0) != SIM_RC_OK)
     {
       free_state (sd);
       return 0;

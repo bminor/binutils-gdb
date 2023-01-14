@@ -1,5 +1,5 @@
 /* BFD back-end for TMS320C54X coff binaries.
-   Copyright (C) 1999-2022 Free Software Foundation, Inc.
+   Copyright (C) 1999-2023 Free Software Foundation, Inc.
    Contributed by Timothy Wall (twall@cygnus.com)
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -357,7 +357,7 @@ tic54x_reloc_processing (arelent *relent,
 
   relent->address = reloc->r_vaddr;
 
-  if (reloc->r_symndx != -1)
+  if (reloc->r_symndx != -1 && symbols != NULL)
     {
       if (reloc->r_symndx < 0 || reloc->r_symndx >= obj_conv_table_size (abfd))
 	{

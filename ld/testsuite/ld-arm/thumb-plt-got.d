@@ -1,6 +1,6 @@
 #source: thumb-plt.s
 #name: Thumb only PLT and GOT LSB Symbol
-#ld: -shared -e0
+#ld: -shared -e0 -z max-page-size=0x10000
 #readelf: -rx .got
 #skip: *-*-pe *-*-wince *-*-vxworks armeb-*-* *-*-gnueabihf
 

@@ -88,13 +88,13 @@ static void
 dump_cache_rule(cache_table* rule,
 		int indent)
 {
-  dumpf(indent, "((cache_table*)0x%x\n", rule);
+  dumpf(indent, "((cache_table*)%p\n", rule);
   dumpf(indent, " (type %s)\n", i2name(rule->type, cache_type_map));
   dumpf(indent, " (field_name \"%s\")\n", rule->field_name);
   dumpf(indent, " (derived_name \"%s\")\n", rule->derived_name);
   dumpf(indent, " (type-def \"%s\")\n", rule->type_def);
   dumpf(indent, " (expression \"%s\")\n", rule->expression);
-  dumpf(indent, " (next 0x%x)\n", rule->next);
+  dumpf(indent, " (next %p)\n", rule->next);
   dumpf(indent, " )\n");
 }
 

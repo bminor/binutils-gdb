@@ -1,6 +1,6 @@
 # Dynamic architecture support for GDB, the GNU debugger.
 
-# Copyright (C) 1998-2022 Free Software Foundation, Inc.
+# Copyright (C) 1998-2023 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -113,6 +113,9 @@
 # 'result' can be used to reference the result of the function/method
 # implementation.  The 'result_checks' can only be used if the 'type'
 # of this Function/Method is not 'void'.
+#
+# * "implement" - optional, a boolean.  If True (the default), a
+# wrapper function for this function will be emitted.
 
 Info(
     type="const struct bfd_arch_info *",
@@ -151,7 +154,7 @@ Number of bits in a short or unsigned short for the target machine.
     invalid=False,
 )
 
-Value(
+int_bit = Value(
     comment="""
 Number of bits in an int or unsigned int for the target machine.
 """,
@@ -161,7 +164,7 @@ Number of bits in an int or unsigned int for the target machine.
     invalid=False,
 )
 
-Value(
+long_bit = Value(
     comment="""
 Number of bits in a long or unsigned long for the target machine.
 """,
@@ -178,7 +181,7 @@ machine.
 """,
     type="int",
     name="long_long_bit",
-    predefault="2*gdbarch->long_bit",
+    predefault="2*" + long_bit.predefault,
     invalid=False,
 )
 
@@ -201,7 +204,7 @@ Value(
     name="bfloat16_format",
     postdefault="floatformats_bfloat16",
     invalid=True,
-    printer="pformat (gdbarch->bfloat16_format)",
+    printer="pformat (gdbarch, gdbarch->bfloat16_format)",
 )
 
 Value(
@@ -216,7 +219,7 @@ Value(
     name="half_format",
     postdefault="floatformats_ieee_half",
     invalid=True,
-    printer="pformat (gdbarch->half_format)",
+    printer="pformat (gdbarch, gdbarch->half_format)",
 )
 
 Value(
@@ -231,7 +234,7 @@ Value(
     name="float_format",
     postdefault="floatformats_ieee_single",
     invalid=True,
-    printer="pformat (gdbarch->float_format)",
+    printer="pformat (gdbarch, gdbarch->float_format)",
 )
 
 Value(
@@ -246,7 +249,7 @@ Value(
     name="double_format",
     postdefault="floatformats_ieee_double",
     invalid=True,
-    printer="pformat (gdbarch->double_format)",
+    printer="pformat (gdbarch, gdbarch->double_format)",
 )
 
 Value(
@@ -261,7 +264,7 @@ Value(
     name="long_double_format",
     postdefault="floatformats_ieee_double",
     invalid=True,
-    printer="pformat (gdbarch->long_double_format)",
+    printer="pformat (gdbarch, gdbarch->long_double_format)",
 )
 
 Value(
@@ -314,7 +317,7 @@ ptr_bit is the size of a pointer on the target
 """,
     type="int",
     name="ptr_bit",
-    predefault="gdbarch->int_bit",
+    predefault=int_bit.predefault,
     invalid=False,
 )
 
@@ -613,7 +616,7 @@ frame.
 """,
     type="struct frame_id",
     name="dummy_id",
-    params=[("frame_info_ptr ", "this_frame")],
+    params=[("frame_info_ptr", "this_frame")],
     predefault="default_dummy_id",
     invalid=False,
 )
@@ -647,7 +650,7 @@ Method(
 )
 
 Value(
-    type="int",
+    type="enum call_dummy_location_type",
     name="call_dummy_location",
     predefault="AT_ENTRY_POINT",
     invalid=False,
@@ -676,7 +679,7 @@ Return true if the code of FRAME is writable.
 """,
     type="int",
     name="code_of_frame_writable",
-    params=[("frame_info_ptr ", "frame")],
+    params=[("frame_info_ptr", "frame")],
     predefault="default_code_of_frame_writable",
     invalid=False,
 )
@@ -686,7 +689,7 @@ Method(
     name="print_registers_info",
     params=[
         ("struct ui_file *", "file"),
-        ("frame_info_ptr ", "frame"),
+        ("frame_info_ptr", "frame"),
         ("int", "regnum"),
         ("int", "all"),
     ],
@@ -699,7 +702,7 @@ Method(
     name="print_float_info",
     params=[
         ("struct ui_file *", "file"),
-        ("frame_info_ptr ", "frame"),
+        ("frame_info_ptr", "frame"),
         ("const char *", "args"),
     ],
     predefault="default_print_float_info",
@@ -711,7 +714,7 @@ Method(
     name="print_vector_info",
     params=[
         ("struct ui_file *", "file"),
-        ("frame_info_ptr ", "frame"),
+        ("frame_info_ptr", "frame"),
         ("const char *", "args"),
     ],
     predicate=True,
@@ -755,7 +758,7 @@ FRAME corresponds to the longjmp frame.
 """,
     type="int",
     name="get_longjmp_target",
-    params=[("frame_info_ptr ", "frame"), ("CORE_ADDR *", "pc")],
+    params=[("frame_info_ptr", "frame"), ("CORE_ADDR *", "pc")],
     predicate=True,
     invalid=True,
 )
@@ -778,7 +781,7 @@ Function(
     type="int",
     name="register_to_value",
     params=[
-        ("frame_info_ptr ", "frame"),
+        ("frame_info_ptr", "frame"),
         ("int", "regnum"),
         ("struct type *", "type"),
         ("gdb_byte *", "buf"),
@@ -792,7 +795,7 @@ Function(
     type="void",
     name="value_to_register",
     params=[
-        ("frame_info_ptr ", "frame"),
+        ("frame_info_ptr", "frame"),
         ("int", "regnum"),
         ("struct type *", "type"),
         ("const gdb_byte *", "buf"),
@@ -854,6 +857,9 @@ If WRITEBUF is not NULL, it contains a return value which will be
 stored into the appropriate register.  This can be used when we want
 to force the value returned by a function (see the "return" command
 for instance).
+
+NOTE: it is better to implement return_value_as_value instead, as that
+method can properly handle variably-sized types.
 """,
     type="enum return_value_convention",
     name="return_value",
@@ -864,8 +870,55 @@ for instance).
         ("gdb_byte *", "readbuf"),
         ("const gdb_byte *", "writebuf"),
     ],
-    predicate=True,
-    invalid=True,
+    invalid=False,
+    # We don't want to accidentally introduce calls to this, as gdb
+    # should only ever call return_value_new (see below).
+    implement=False,
+)
+
+Method(
+    comment="""
+Return the return-value convention that will be used by FUNCTION
+to return a value of type VALTYPE.  FUNCTION may be NULL in which
+case the return convention is computed based only on VALTYPE.
+
+If READ_VALUE is not NULL, extract the return value and save it in
+this pointer.
+
+If WRITEBUF is not NULL, it contains a return value which will be
+stored into the appropriate register.  This can be used when we want
+to force the value returned by a function (see the "return" command
+for instance).
+""",
+    type="enum return_value_convention",
+    name="return_value_as_value",
+    params=[
+        ("struct value *", "function"),
+        ("struct type *", "valtype"),
+        ("struct regcache *", "regcache"),
+        ("struct value **", "read_value"),
+        ("const gdb_byte *", "writebuf"),
+    ],
+    predefault="default_gdbarch_return_value",
+    # If we're using the default, then the other method must be set;
+    # but if we aren't using the default here then the other method
+    # must not be set.
+    invalid="(gdbarch->return_value_as_value == default_gdbarch_return_value) == (gdbarch->return_value == nullptr)",
+)
+
+Function(
+    comment="""
+Return the address at which the value being returned from
+the current function will be stored.  This routine is only
+called if the current function uses the the "struct return
+convention".
+
+May return 0 when unable to determine that address.""",
+    type="CORE_ADDR",
+    name="get_return_buf_addr",
+    params=[("struct type *", "val_type"), ("frame_info_ptr", "cur_frame")],
+    predefault="default_get_return_buf_addr",
+    invalid=False,
 )
 
 Method(
@@ -1065,7 +1118,7 @@ Value(
 Method(
     type="CORE_ADDR",
     name="unwind_pc",
-    params=[("frame_info_ptr ", "next_frame")],
+    params=[("frame_info_ptr", "next_frame")],
     predefault="default_unwind_pc",
     invalid=False,
 )
@@ -1073,7 +1126,7 @@ Method(
 Method(
     type="CORE_ADDR",
     name="unwind_sp",
-    params=[("frame_info_ptr ", "next_frame")],
+    params=[("frame_info_ptr", "next_frame")],
     predefault="default_unwind_sp",
     invalid=False,
 )
@@ -1085,7 +1138,7 @@ frame-base.  Enable frame-base before frame-unwind.
 """,
     type="int",
     name="frame_num_args",
-    params=[("frame_info_ptr ", "frame")],
+    params=[("frame_info_ptr", "frame")],
     predicate=True,
     invalid=True,
 )
@@ -1139,15 +1192,23 @@ possible it should be in TARGET_READ_PC instead).
     invalid=False,
 )
 
-Value(
+Method(
     comment="""
-On some machines, not all bits of an address word are significant.
-For example, on AArch64, the top bits of an address known as the "tag"
-are ignored by the kernel, the hardware, etc. and can be regarded as
-additional data associated with the address.
+On some architectures, not all bits of a pointer are significant.
+On AArch64, for example, the top bits of a pointer may carry a "tag", which
+can be ignored by the kernel and the hardware.  The "tag" can be regarded as
+additional data associated with the pointer, but it is not part of the address.
+
+Given a pointer for the architecture, this hook removes all the
+non-significant bits and sign-extends things as needed.  It gets used to remove
+non-address bits from data pointers (for example, removing the AArch64 MTE tag
+bits from a pointer) and from code pointers (removing the AArch64 PAC signature
+from a pointer containing the return address).
 """,
-    type="int",
-    name="significant_addr_bit",
+    type="CORE_ADDR",
+    name="remove_non_address_bits",
+    params=[("CORE_ADDR", "pointer")],
+    predefault="default_remove_non_address_bits",
     invalid=False,
 )
 
@@ -1260,7 +1321,7 @@ further single-step is needed before the instruction finishes.
 """,
     type="int",
     name="single_step_through_delay",
-    params=[("frame_info_ptr ", "frame")],
+    params=[("frame_info_ptr", "frame")],
     predicate=True,
     invalid=True,
 )
@@ -1280,7 +1341,7 @@ disassembler.  Perhaps objdump can handle it?
 Function(
     type="CORE_ADDR",
     name="skip_trampoline_code",
-    params=[("frame_info_ptr ", "frame"), ("CORE_ADDR", "pc")],
+    params=[("frame_info_ptr", "frame"), ("CORE_ADDR", "pc")],
     predefault="generic_skip_trampoline_code",
     invalid=False,
 )
@@ -1503,7 +1564,7 @@ Fetch the pointer to the ith function argument.
     type="CORE_ADDR",
     name="fetch_pointer_argument",
     params=[
-        ("frame_info_ptr ", "frame"),
+        ("frame_info_ptr", "frame"),
         ("int", "argi"),
         ("struct type *", "type"),
     ],
@@ -2664,7 +2725,7 @@ Return a string containing any flags for the given PC in the given FRAME.
 """,
     type="std::string",
     name="get_pc_address_flags",
-    params=[("frame_info_ptr ", "frame"), ("CORE_ADDR", "pc")],
+    params=[("frame_info_ptr", "frame"), ("CORE_ADDR", "pc")],
     predefault="default_get_pc_address_flags",
     invalid=False,
 )

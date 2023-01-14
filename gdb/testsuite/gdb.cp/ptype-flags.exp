@@ -1,4 +1,4 @@
-# Copyright 2012-2022 Free Software Foundation, Inc.
+# Copyright 2012-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,9 +25,14 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
     return -1
 }
 
-if ![runto_main] then {
-    perror "couldn't run to breakpoint"
+if {![runto_main]} {
     return
+}
+
+if {[test_compiler_info {clang-*-*} c++]} {
+    set using_clang true
+} else {
+    set using_clang false
 }
 
 gdb_test_no_output "set language c++" ""
@@ -35,6 +40,7 @@ gdb_test_no_output "set width 0" ""
 
 proc do_check_holder {name {flags ""} {show_typedefs 1} {show_methods 1}
 		      {raw 0}} {
+    global using_clang
 
     set contents {
 	{ base "public Base<T>" }
@@ -49,6 +55,11 @@ proc do_check_holder {name {flags ""} {show_typedefs 1} {show_methods 1}
     }
 
     if {$show_typedefs} {
+	# Clang does not add accessibility information for typedefs:
+	# https://github.com/llvm/llvm-project/issues/57608
+	if {$using_clang} {
+	    setup_xfail "clang 57608" *-*-*
+	}
 	lappend contents { typedef public "typedef Simple<Simple<T> > Z;" }
     }
 

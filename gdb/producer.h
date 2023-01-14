@@ -1,6 +1,6 @@
 /* Producer string parsers for GDB.
 
-   Copyright (C) 2012-2022 Free Software Foundation, Inc.
+   Copyright (C) 2012-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -40,5 +40,9 @@ extern bool producer_is_icc (const char *producer, int *major, int *minor);
 /* Returns true if the given PRODUCER string is LLVM (clang/flang) or
    false otherwise.*/
 extern bool producer_is_llvm (const char *producer);
+
+/* Returns true if the given PRODUCER string is clang, false otherwise.
+   Sets MAJOR and MINOR accordingly, if not NULL.  */
+extern bool producer_is_clang (const char *producer, int *major, int *minor);
 
 #endif

@@ -1,6 +1,6 @@
 /* Target-dependent code for UltraSPARC.
 
-   Copyright (C) 2003-2022 Free Software Foundation, Inc.
+   Copyright (C) 2003-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -847,8 +847,7 @@ sparc64_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum >= SPARC64_Q0_REGNUM && regnum <= SPARC64_Q60_REGNUM)
     return builtin_type (gdbarch)->builtin_long_double;
 
-  internal_error (__FILE__, __LINE__,
-		  _("sparc64_pseudo_register_type: bad register number %d"),
+  internal_error (_("sparc64_pseudo_register_type: bad register number %d"),
 		  regnum);
 }
 
@@ -889,7 +888,7 @@ sparc64_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum >= gdbarch_num_regs (gdbarch))
     return sparc64_pseudo_register_type (gdbarch, regnum);
 
-  internal_error (__FILE__, __LINE__, _("invalid regnum"));
+  internal_error (_("invalid regnum"));
 }
 
 static enum register_status
@@ -1836,6 +1835,7 @@ sparc64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_push_dummy_call (gdbarch, sparc64_push_dummy_call);
 
   set_gdbarch_return_value (gdbarch, sparc64_return_value);
+  set_gdbarch_return_value_as_value (gdbarch, default_gdbarch_return_value);
   set_gdbarch_stabs_argument_has_addr
     (gdbarch, default_stabs_argument_has_addr);
 

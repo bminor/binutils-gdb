@@ -1,4 +1,4 @@
-# Copyright 2020-2022 Free Software Foundation, Inc.
+# Copyright 2020-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -80,7 +80,7 @@ proc test_re_run {re_run_inf} {
 
     # Run the steady inferior to a breakpoint, and let it stay stopped
     # there.
-    if ![runto all_started] then {
+    if {![runto all_started]} {
 	return 0
     }
 

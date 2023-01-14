@@ -1,5 +1,5 @@
 /* Support for the generic parts of PE/PEI, for BFD.
-   Copyright (C) 1995-2022 Free Software Foundation, Inc.
+   Copyright (C) 1995-2023 Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -191,6 +191,8 @@ coff_swap_filehdr_in (bfd * abfd, void * src, void * dst)
 
 #ifdef COFF_IMAGE_WITH_PE
 # define coff_swap_filehdr_out _bfd_XXi_only_swap_filehdr_out
+#elif defined COFF_WITH_peAArch64
+# define coff_swap_filehdr_out _bfd_XX_only_swap_filehdr_out
 #elif defined COFF_WITH_pex64
 # define coff_swap_filehdr_out _bfd_pex64_only_swap_filehdr_out
 #elif defined COFF_WITH_pep
@@ -290,6 +292,10 @@ pe_mkobject (bfd * abfd)
   pe->dos_message[15] = 0x0;
 
   memset (& pe->pe_opthdr, 0, sizeof pe->pe_opthdr);
+
+  bfd_coff_long_section_names (abfd)
+    = coff_backend_info (abfd)->_bfd_coff_long_section_names;
+
   return true;
 }
 
@@ -438,7 +444,7 @@ pe_bfd_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 #define SIZEOF_IDATA2		(5 * 4)
 
 /* For PEx64 idata4 & 5 have thumb size of 8 bytes.  */
-#ifdef COFF_WITH_pex64
+#if defined(COFF_WITH_pex64) || defined(COFF_WITH_peAArch64)
 #define SIZEOF_IDATA4		(2 * 4)
 #define SIZEOF_IDATA5		(2 * 4)
 #else
@@ -1084,7 +1090,7 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
   if (bfd_coff_mkobject_hook (abfd, (void *) & internal_f, NULL) == NULL)
     goto error_return;
 
-  coff_data (abfd)->pe = 1;
+  obj_pe (abfd) = true;
 #ifdef THUMBPEMAGIC
   if (vars.magic == THUMBPEMAGIC)
     /* Stop some linker warnings about thumb code not supporting interworking.  */
@@ -1400,7 +1406,7 @@ pe_bfd_read_buildid (bfd *abfd)
 	  */
 	  if (_bfd_XXi_slurp_codeview_record (abfd,
 					      (file_ptr) idd.PointerToRawData,
-					      idd.SizeOfData, cvinfo))
+					      idd.SizeOfData, cvinfo, NULL))
 	    {
 	      struct bfd_build_id* build_id = bfd_alloc (abfd,
 			 sizeof (struct bfd_build_id) + cvinfo->SignatureLength);
@@ -1525,8 +1531,8 @@ pe_bfd_object_p (bfd * abfd)
       if ((a->SectionAlignment & -a->SectionAlignment) != a->SectionAlignment
 	  || a->SectionAlignment >= 0x80000000)
 	{
-	  const char **warn = _bfd_per_xvec_warn (abfd->xvec);
-	  *warn = _("%pB: adjusting invalid SectionAlignment");
+	  _bfd_error_handler (_("%pB: adjusting invalid SectionAlignment"),
+				abfd);
 	  a->SectionAlignment &= -a->SectionAlignment;
 	  if (a->SectionAlignment >= 0x80000000)
 	    a->SectionAlignment = 0x40000000;
@@ -1535,18 +1541,15 @@ pe_bfd_object_p (bfd * abfd)
       if ((a->FileAlignment & -a->FileAlignment) != a->FileAlignment
 	  || a->FileAlignment > a->SectionAlignment)
 	{
-	  const char **warn = _bfd_per_xvec_warn (abfd->xvec);
-	  *warn = _("%pB: adjusting invalid FileAlignment");
+	  _bfd_error_handler (_("%pB: adjusting invalid FileAlignment"),
+			      abfd);
 	  a->FileAlignment &= -a->FileAlignment;
 	  if (a->FileAlignment > a->SectionAlignment)
 	    a->FileAlignment = a->SectionAlignment;
 	}
 
       if (a->NumberOfRvaAndSizes > IMAGE_NUMBEROF_DIRECTORY_ENTRIES)
-	{
-	  const char **warn = _bfd_per_xvec_warn (abfd->xvec);
-	  *warn = _("%pB: invalid NumberOfRvaAndSizes");
-	}
+	_bfd_error_handler (_("%pB: invalid NumberOfRvaAndSizes"), abfd);
     }
 
   result = coff_real_object_p (abfd, internal_f.f_nscns, &internal_f,

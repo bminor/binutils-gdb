@@ -1,4 +1,4 @@
-# Copyright (C) 2010-2022 Free Software Foundation, Inc.
+# Copyright (C) 2010-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -104,7 +104,7 @@ gdb_test "python print (gdb.lookup_static_symbol ('nonexistent') is None)" \
 gdb_test "python print (gdb.lookup_static_symbol ('qq') is None)" \
     "True" "lookup_static_symbol for global var"
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 
@@ -212,7 +212,7 @@ gdb_test "python print (gdb.lookup_global_symbol ('(anonymous namespace)::anon')
 gdb_test "python print (gdb.lookup_static_symbol ('(anonymous namespace)::anon').value ())" \
     "10" "print value of anon"
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 
@@ -240,7 +240,7 @@ gdb_test "python print (cplusfunc.addr_class == gdb.SYMBOL_LOC_BLOCK)" "True" "t
 # test as it unloads the object file in GDB.
 # Start with a fresh gdb.
 clean_restart ${binfile}
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 

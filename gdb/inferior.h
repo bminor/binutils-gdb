@@ -1,7 +1,7 @@
 /* Variables that describe the inferior process running under GDB:
    Where it is, why it stopped, and how to step it.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -167,6 +167,27 @@ extern void default_print_float_info (struct gdbarch *gdbarch,
 				      frame_info_ptr frame,
 				      const char *args);
 
+/* Try to determine whether TTY is GDB's input terminal.  Returns
+   TRIBOOL_UNKNOWN if we can't tell.  */
+
+extern tribool is_gdb_terminal (const char *tty);
+
+/* Helper for sharing_input_terminal.  Try to determine whether pid
+   PID is using the same TTY for input as GDB is.  Returns
+   TRIBOOL_UNKNOWN if we can't tell.  */
+
+extern tribool sharing_input_terminal (int pid);
+
+/* The type of the function that is called when SIGINT is handled.  */
+
+typedef void c_c_handler_ftype (int);
+
+/* Install a new SIGINT handler in a host-dependent way.  The previous
+   handler is returned.  It is fine to pass SIG_IGN for FN, but not
+   SIG_DFL.  */
+
+extern c_c_handler_ftype *install_sigint_handler (c_c_handler_ftype *fn);
+
 extern void child_terminal_info (struct target_ops *self, const char *, int);
 
 extern void child_terminal_ours (struct target_ops *self);
@@ -282,9 +303,6 @@ enum stop_kind
   };
 
 
-/* Possible values for gdbarch_call_dummy_location.  */
-#define ON_STACK 1
-#define AT_ENTRY_POINT 4
 
 /* Base class for target-specific inferior data.  */
 
@@ -379,6 +397,22 @@ public:
   /* Return the target at the top of this inferior's target stack.  */
   target_ops *top_target ()
   { return m_target_stack.top (); }
+
+  /* Unpush all targets except the dummy target from m_target_stack.  As
+     targets are removed from m_target_stack their reference count is
+     decremented, which may cause a target to close.  */
+  void pop_all_targets ()
+  { pop_all_targets_above (dummy_stratum); }
+
+  /* Unpush all targets above STRATUM from m_target_stack.  As targets are
+     removed from m_target_stack their reference count is decremented,
+     which may cause a target to close.  */
+  void pop_all_targets_above (enum strata stratum);
+
+  /* Unpush all targets at and above STRATUM from m_target_stack.  As
+     targets are removed from m_target_stack their reference count is
+     decremented, which may cause a target to close.  */
+  void pop_all_targets_at_and_above (enum strata stratum);
 
   /* Return the target at process_stratum level in this inferior's
      target stack.  */
@@ -598,6 +632,10 @@ public:
   registry<inferior> registry_fields;
 
 private:
+
+  /* Unpush TARGET and assert that it worked.  */
+  void unpush_target_and_assert (struct target_ops *target);
+
   /* The inferior's target stack.  */
   target_stack m_target_stack;
 

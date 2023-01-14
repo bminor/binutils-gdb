@@ -143,6 +143,9 @@
 /* Define if you have the ipt library. */
 #undef HAVE_LIBIPT
 
+/* Define if you have the xxhash library. */
+#undef HAVE_LIBXXHASH
+
 /* Define if the target supports branch tracing. */
 #undef HAVE_LINUX_BTRACE
 

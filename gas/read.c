@@ -1,5 +1,5 @@
 /* read.c - read a source file -
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -38,6 +38,7 @@
 #include "obstack.h"
 #include "ecoff.h"
 #include "dw2gencfi.h"
+#include "codeview.h"
 #include "wchar.h"
 
 #include <limits.h>
@@ -867,7 +868,10 @@ read_a_source_file (const char *name)
 		  /* Find the end of the current expanded macro line.  */
 		  s = find_end_of_line (input_line_pointer, flag_m68k_mri);
 
-		  if (s != last_eol)
+		  if (s != last_eol
+		      && !startswith (input_line_pointer,
+				      !flag_m68k_mri ? " .linefile "
+						     : " linefile "))
 		    {
 		      char *copy;
 		      size_t len;
@@ -5964,6 +5968,9 @@ generate_lineno_debug (void)
 	 has changed.  However, since there is additional backend
 	 support that is required (calling dwarf2_emit_insn), we
 	 let dwarf2dbg.c call as_where on its own.  */
+      break;
+    case DEBUG_CODEVIEW:
+      codeview_generate_asm_lineno ();
       break;
     }
 }

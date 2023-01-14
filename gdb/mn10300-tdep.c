@@ -1,6 +1,6 @@
 /* Target-dependent code for the Matsushita MN10300 for GDB, the GNU debugger.
 
-   Copyright (C) 1996-2022 Free Software Foundation, Inc.
+   Copyright (C) 1996-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -124,7 +124,7 @@ mn10300_type_align (struct type *type)
       return mn10300_type_align (check_typedef (type));
 
     default:
-      internal_error (__FILE__, __LINE__, _("bad switch"));
+      internal_error (_("bad switch"));
     }
 }
 
@@ -190,8 +190,7 @@ mn10300_store_return_value (struct gdbarch *gdbarch, struct type *type,
       regcache->raw_write_part (reg + 1, 0, len - regsz, valbuf + regsz);
     }
   else
-    internal_error (__FILE__, __LINE__,
-		    _("Cannot store return value %d bytes long."), len);
+    internal_error (_("Cannot store return value %d bytes long."), len);
 }
 
 static void
@@ -223,8 +222,7 @@ mn10300_extract_return_value (struct gdbarch *gdbarch, struct type *type,
       memcpy ((char *) valbuf + regsz, buf, len - regsz);
     }
   else
-    internal_error (__FILE__, __LINE__,
-		    _("Cannot extract return value %d bytes long."), len);
+    internal_error (_("Cannot extract return value %d bytes long."), len);
 }
 
 /* Determine, for architecture GDBARCH, how a return value of TYPE
@@ -1334,15 +1332,15 @@ static struct gdbarch *
 mn10300_gdbarch_init (struct gdbarch_info info,
 		      struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   int num_regs;
 
   arches = gdbarch_list_lookup_by_info (arches, &info);
   if (arches != NULL)
     return arches->gdbarch;
 
-  mn10300_gdbarch_tdep *tdep = new mn10300_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new mn10300_gdbarch_tdep));
+  mn10300_gdbarch_tdep *tdep = gdbarch_tdep<mn10300_gdbarch_tdep> (gdbarch);
 
   switch (info.bfd_arch_info->mach)
     {
@@ -1364,8 +1362,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_fp0_regnum (gdbarch, 32);
       break;
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("mn10300_gdbarch_init: Unknown mn10300 variant"));
+      internal_error (_("mn10300_gdbarch_init: Unknown mn10300 variant"));
       break;
     }
 

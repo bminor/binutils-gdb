@@ -1,5 +1,5 @@
 /* Simulator for the moxie processor
-   Copyright (C) 2008-2022 Free Software Foundation, Inc.
+   Copyright (C) 2008-2023 Free Software Foundation, Inc.
    Contributed by Anthony Green
 
 This file is part of GDB, the GNU debugger.
@@ -37,8 +37,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-signal.h"
 #include "target-newlib-syscall.h"
 
-typedef int word;
-typedef unsigned int uword;
+#include "moxie-sim.h"
 
 /* Extract the signed 10-bit offset from a 16-bit branch
    instruction.  */
@@ -57,7 +56,7 @@ typedef unsigned int uword;
      + (sim_core_read_aligned_1 (scpu, cia, read_map, addr+1))) << 16) >> 16)
 
 static unsigned long
-moxie_extract_unsigned_integer (unsigned char *addr, int len)
+moxie_extract_unsigned_integer (const unsigned char *addr, int len)
 {
   unsigned long retval;
   unsigned char * p;
@@ -115,9 +114,9 @@ static const char *reg_names[16] =
 /* TODO: This should be moved to sim-main.h:_sim_cpu.  */
 struct moxie_regset
 {
-  word		  regs[NUM_MOXIE_REGS + 1]; /* primary registers */
-  word		  sregs[256];             /* special registers */
-  word            cc;                   /* the condition code reg */
+  int32_t	     regs[NUM_MOXIE_REGS + 1]; /* primary registers */
+  int32_t	     sregs[256];           /* special registers */
+  int32_t	     cc;                   /* the condition code reg */
   unsigned long long insts;                /* instruction counter */
 };
 
@@ -127,11 +126,11 @@ struct moxie_regset
 #define CC_GTU 1<<3
 #define CC_LTU 1<<4
 
-/* TODO: This should be moved to sim-main.h:_sim_cpu.  */
+/* TODO: This should be moved to sim-main.h:moxie_sim_cpu.  */
 union
 {
   struct moxie_regset asregs;
-  word asints [1];		/* but accessed larger... */
+  int32_t asints [1];		/* but accessed larger... */
 } cpu;
 
 static void
@@ -153,7 +152,7 @@ set_initial_gprs (void)
 /* Write a 1 byte value to memory.  */
 
 static INLINE void
-wbat (sim_cpu *scpu, word pc, word x, word v)
+wbat (sim_cpu *scpu, int32_t pc, int32_t x, int32_t v)
 {
   address_word cia = CPU_PC_GET (scpu);
   
@@ -163,7 +162,7 @@ wbat (sim_cpu *scpu, word pc, word x, word v)
 /* Write a 2 byte value to memory.  */
 
 static INLINE void
-wsat (sim_cpu *scpu, word pc, word x, word v)
+wsat (sim_cpu *scpu, int32_t pc, int32_t x, int32_t v)
 {
   address_word cia = CPU_PC_GET (scpu);
   
@@ -173,7 +172,7 @@ wsat (sim_cpu *scpu, word pc, word x, word v)
 /* Write a 4 byte value to memory.  */
 
 static INLINE void
-wlat (sim_cpu *scpu, word pc, word x, word v)
+wlat (sim_cpu *scpu, int32_t pc, int32_t x, int32_t v)
 {
   address_word cia = CPU_PC_GET (scpu);
 	
@@ -183,7 +182,7 @@ wlat (sim_cpu *scpu, word pc, word x, word v)
 /* Read 2 bytes from memory.  */
 
 static INLINE int
-rsat (sim_cpu *scpu, word pc, word x)
+rsat (sim_cpu *scpu, int32_t pc, int32_t x)
 {
   address_word cia = CPU_PC_GET (scpu);
   
@@ -193,7 +192,7 @@ rsat (sim_cpu *scpu, word pc, word x)
 /* Read 1 byte from memory.  */
 
 static INLINE int
-rbat (sim_cpu *scpu, word pc, word x)
+rbat (sim_cpu *scpu, int32_t pc, int32_t x)
 {
   address_word cia = CPU_PC_GET (scpu);
   
@@ -203,7 +202,7 @@ rbat (sim_cpu *scpu, word pc, word x)
 /* Read 4 bytes from memory.  */
 
 static INLINE int
-rlat (sim_cpu *scpu, word pc, word x)
+rlat (sim_cpu *scpu, int32_t pc, int32_t x)
 {
   address_word cia = CPU_PC_GET (scpu);
   
@@ -249,7 +248,7 @@ sim_engine_run (SIM_DESC sd,
 		int nr_cpus, /* ignore  */
 		int siggnal) /* ignore  */
 {
-  word pc, opc;
+  int32_t pc, opc;
   unsigned short inst;
   sim_cpu *scpu = STATE_CPU (sd, 0); /* FIXME */
   address_word cia = CPU_PC_GET (scpu);
@@ -1132,7 +1131,7 @@ sim_engine_run (SIM_DESC sd,
 }
 
 static int
-moxie_reg_store (SIM_CPU *scpu, int rn, unsigned char *memory, int length)
+moxie_reg_store (SIM_CPU *scpu, int rn, const void *memory, int length)
 {
   if (rn < NUM_MOXIE_REGS && rn >= 0)
     {
@@ -1152,7 +1151,7 @@ moxie_reg_store (SIM_CPU *scpu, int rn, unsigned char *memory, int length)
 }
 
 static int
-moxie_reg_fetch (SIM_CPU *scpu, int rn, unsigned char *memory, int length)
+moxie_reg_fetch (SIM_CPU *scpu, int rn, void *memory, int length)
 {
   if (rn < NUM_MOXIE_REGS && rn >= 0)
     {
@@ -1173,13 +1172,13 @@ moxie_reg_fetch (SIM_CPU *scpu, int rn, unsigned char *memory, int length)
 static sim_cia
 moxie_pc_get (sim_cpu *cpu)
 {
-  return cpu->registers[PCIDX];
+  return MOXIE_SIM_CPU (cpu)->registers[PCIDX];
 }
 
 static void
 moxie_pc_set (sim_cpu *cpu, sim_cia pc)
 {
-  cpu->registers[PCIDX] = pc;
+  MOXIE_SIM_CPU (cpu)->registers[PCIDX] = pc;
 }
 
 static void
@@ -1203,7 +1202,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   current_target_byte_order = BFD_ENDIAN_BIG;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
+  if (sim_cpu_alloc_all_extra (sd, 0, sizeof (struct moxie_sim_cpu))
+      != SIM_RC_OK)
     {
       free_state (sd);
       return 0;

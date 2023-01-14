@@ -1,6 +1,6 @@
 /* Symbol table definitions for GDB.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1069,7 +1069,7 @@ struct symbol_computed_ops
      FRAME may be zero.  */
 
   struct value *(*read_variable) (struct symbol * symbol,
-				  frame_info_ptr  frame);
+				  frame_info_ptr frame);
 
   /* Read variable SYMBOL like read_variable at (callee) FRAME's function
      entry.  SYMBOL should be a function parameter, otherwise
@@ -1840,6 +1840,9 @@ struct compunit_symtab
   /* Find call_site info for PC.  */
   call_site *find_call_site (CORE_ADDR pc) const;
 
+  /* Return the language of this compunit_symtab.  */
+  enum language language () const;
+
   /* Unordered chain of all compunit symtabs of this objfile.  */
   struct compunit_symtab *next;
 
@@ -1919,10 +1922,6 @@ struct compunit_symtab
 };
 
 using compunit_symtab_range = next_range<compunit_symtab>;
-
-/* Return the language of CUST.  */
-
-extern enum language compunit_language (const struct compunit_symtab *cust);
 
 /* Return true if this symtab is the "main" symtab of its compunit_symtab.  */
 
@@ -2254,7 +2253,7 @@ struct gnu_ifunc_fns
 
 extern const struct gnu_ifunc_fns *gnu_ifunc_fns_p;
 
-extern CORE_ADDR find_solib_trampoline_target (frame_info_ptr , CORE_ADDR);
+extern CORE_ADDR find_solib_trampoline_target (frame_info_ptr, CORE_ADDR);
 
 struct symtab_and_line
 {
@@ -2625,6 +2624,39 @@ extern unsigned int symtab_create_debug;
   debug_prefixed_printf_cond (symtab_create_debug >= 2, "symtab-create", fmt, ##__VA_ARGS__)
 
 extern unsigned int symbol_lookup_debug;
+
+/* Return true if symbol-lookup debug is turned on at all.  */
+
+static inline bool
+symbol_lookup_debug_enabled ()
+{
+  return symbol_lookup_debug > 0;
+}
+
+/* Return true if symbol-lookup debug is turned to verbose mode.  */
+
+static inline bool
+symbol_lookup_debug_enabled_v ()
+{
+  return symbol_lookup_debug > 1;
+}
+
+/* Print a "symbol-lookup" debug statement if symbol_lookup_debug is >= 1.  */
+
+#define symbol_lookup_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (symbol_lookup_debug_enabled (),	\
+			      "symbol-lookup", fmt, ##__VA_ARGS__)
+
+/* Print a "symbol-lookup" debug statement if symbol_lookup_debug is >= 2.  */
+
+#define symbol_lookup_debug_printf_v(fmt, ...) \
+  debug_prefixed_printf_cond (symbol_lookup_debug_enabled_v (), \
+			      "symbol-lookup", fmt, ##__VA_ARGS__)
+
+/* Print "symbol-lookup" enter/exit debug statements.  */
+
+#define SYMBOL_LOOKUP_SCOPED_DEBUG_ENTER_EXIT \
+  scoped_debug_enter_exit (symbol_lookup_debug_enabled, "symbol-lookup")
 
 extern bool basenames_may_differ;
 

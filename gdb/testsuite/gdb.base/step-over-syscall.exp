@@ -1,6 +1,6 @@
 # This testcase is part of GDB, the GNU debugger.
 
-# Copyright 2011-2022 Free Software Foundation, Inc.
+# Copyright 2011-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -115,7 +115,7 @@ proc setup { syscall } {
 
     clean_restart $testfile
 
-    if { ![runto_main] } then {
+    if {![runto_main]} {
 	return -1
     }
 
@@ -368,12 +368,12 @@ proc break_cond_on_syscall { syscall follow_fork detach_on_fork } {
 		if { $detach_on_fork == "off" } {
 		    gdb_test "inferior 1"
 		    gdb_test "break marker" "Breakpoint.*at.*"
-		    gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, marker \\(\\) at.*" \
+		    gdb_test "continue" "Continuing\\..*Breakpoint $::bkptno_numopt_re, marker \\(\\) at.*" \
 			"continue to marker"
 		}
 	    } else {
 		gdb_test "break marker" "Breakpoint.*at.* file .*${testfile}.c, line.*"
-		gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, marker \\(\\) at.*" \
+		gdb_test "continue" "Continuing\\..*Breakpoint $::bkptno_numopt_re, marker \\(\\) at.*" \
 		    "continue to marker"
 	    }
 	}
@@ -386,7 +386,7 @@ step_over_syscall "clone"
 
 set testfile "step-over-fork"
 clean_restart $testfile
-if { ![runto_main] } then {
+if {![runto_main]} {
     return -1
 }
 

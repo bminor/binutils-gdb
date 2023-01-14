@@ -1,7 +1,7 @@
 /* Target-dependent code for PowerPC systems using the SVR4 ABI
    for GDB, the GNU debugger.
 
-   Copyright (C) 2000-2022 Free Software Foundation, Inc.
+   Copyright (C) 2000-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,6 +28,7 @@
 #include "objfiles.h"
 #include "infcall.h"
 #include "dwarf2.h"
+#include "dwarf2/loc.h"
 #include "target-float.h"
 #include <algorithm>
 
@@ -654,7 +655,7 @@ get_decimal_float_return_value (struct gdbarch *gdbarch, struct type *valtype,
     }
   else
     /* Can't happen.  */
-    internal_error (__FILE__, __LINE__, _("Unknown decimal float size."));
+    internal_error (_("Unknown decimal float size."));
 
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
@@ -2099,6 +2100,10 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
 
+  if (!language_pass_by_reference (valtype).trivially_copyable
+      && valtype->code () == TYPE_CODE_STRUCT)
+    return RETURN_VALUE_STRUCT_CONVENTION;
+
   /* In the ELFv2 ABI, aggregate types of up to 16 bytes are
      returned in registers r3:r4.  */
   if (tdep->elf_abi == POWERPC_ELF_V2
@@ -2152,3 +2157,44 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
   return RETURN_VALUE_STRUCT_CONVENTION;
 }
 
+CORE_ADDR
+ppc64_sysv_get_return_buf_addr (struct type *val_type,
+				frame_info_ptr cur_frame)
+{
+  /* The PowerPC ABI specifies aggregates that are not returned by value
+     are returned in a storage buffer provided by the caller.  The
+     address of the storage buffer is provided as a hidden first input
+     argument in register r3.  The PowerPC ABI does not guarantee that
+     register r3 will not be changed while executing the function.  Hence, it
+     cannot be assumed that r3 will still contain the address of the storage
+     buffer when execution reaches the end of the function.
+
+     This function attempts to determine the value of r3 on entry to the
+     function using the DW_OP_entry_value DWARF entries.  This requires
+     compiling the user program with -fvar-tracking to resolve the
+     DW_TAG_call_sites in the binary file.  */
+
+  union call_site_parameter_u kind_u;
+  enum call_site_parameter_kind kind;
+  CORE_ADDR return_val = 0;
+
+  kind_u.dwarf_reg = 3;  /* First passed arg/return value is in r3.  */
+  kind = CALL_SITE_PARAMETER_DWARF_REG;
+
+  /* val_type is the type of the return value.  Need the pointer type
+     to the return value.  */
+  val_type = lookup_pointer_type (val_type);
+
+  try
+    {
+      return_val = value_as_address (value_of_dwarf_reg_entry (val_type,
+							       cur_frame,
+							       kind, kind_u));
+    }
+  catch (const gdb_exception_error &e)
+    {
+      warning ("Cannot determine the function return value.\n"
+	       "Try compiling with -fvar-tracking.");
+    }
+  return return_val;
+}

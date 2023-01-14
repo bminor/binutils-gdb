@@ -1,5 +1,5 @@
 /* eBPF simulator support code
-   Copyright (C) 2020-2022 Free Software Foundation, Inc.
+   Copyright (C) 2020-2023 Free Software Foundation, Inc.
 
    This file is part of GDB, the GNU debugger.
 
@@ -45,7 +45,7 @@ IDESC *bpf_idesc_be;
 int
 bpfbf_fetch_register (SIM_CPU *current_cpu,
                       int rn,
-                      unsigned char *buf,
+                      void *buf,
                       int len)
 {
   if (rn == 11)
@@ -61,7 +61,7 @@ bpfbf_fetch_register (SIM_CPU *current_cpu,
 int
 bpfbf_store_register (SIM_CPU *current_cpu,
                       int rn,
-                      unsigned char *buf,
+                      const void *buf,
                       int len)
 {
   if (rn == 11)

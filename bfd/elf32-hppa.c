@@ -1,5 +1,5 @@
 /* BFD back-end for HP PA-RISC ELF files.
-   Copyright (C) 1990-2022 Free Software Foundation, Inc.
+   Copyright (C) 1990-2023 Free Software Foundation, Inc.
 
    Original code by
 	Center for Software Science
@@ -729,7 +729,7 @@ hppa_build_one_stub (struct bfd_hash_entry *bh, void *in_arg)
 	 section.  The user should fix his linker script.  */
       if (hsh->target_section->output_section == NULL
 	  && info->non_contiguous_regions)
-	info->callbacks->einfo (_("%F%P: Could not assign '%pA' to an output "
+	info->callbacks->einfo (_("%F%P: Could not assign `%pA' to an output "
 				  "section. Retry without "
 				  "--enable-non-contiguous-regions.\n"),
 				hsh->target_section);
@@ -758,7 +758,7 @@ hppa_build_one_stub (struct bfd_hash_entry *bh, void *in_arg)
 	 section.  The user should fix his linker script.  */
       if (hsh->target_section->output_section == NULL
 	  && info->non_contiguous_regions)
-	info->callbacks->einfo (_("%F%P: Could not assign %pA to an output "
+	info->callbacks->einfo (_("%F%P: Could not assign `%pA' to an output "
 				  "section. Retry without "
 				  "--enable-non-contiguous-regions.\n"),
 				hsh->target_section);
@@ -839,7 +839,7 @@ hppa_build_one_stub (struct bfd_hash_entry *bh, void *in_arg)
 	 section.  The user should fix his linker script.  */
       if (hsh->target_section->output_section == NULL
 	  && info->non_contiguous_regions)
-	info->callbacks->einfo (_("%F%P: Could not assign %pA to an output "
+	info->callbacks->einfo (_("%F%P: Could not assign `%pA' to an output "
 				  "section. Retry without "
 				  "--enable-non-contiguous-regions.\n"),
 				hsh->target_section);

@@ -1,5 +1,5 @@
 /* Parse options for the GNU linker.
-   Copyright (C) 1991-2022 Free Software Foundation, Inc.
+   Copyright (C) 1991-2023 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -380,6 +380,9 @@ static const struct ld_option ld_options[] =
     '\0', NULL, N_("Use less memory and more disk I/O"), TWO_DASHES },
   { {"no-undefined", no_argument, NULL, OPTION_NO_UNDEFINED},
     '\0', NULL, N_("Do not allow unresolved references in object files"),
+    TWO_DASHES },
+  { {"no-warnings", no_argument, NULL, OPTION_NO_WARNINGS},
+    'w', NULL, N_("Do not display any warning or error messages"),
     TWO_DASHES },
   { {"allow-shlib-undefined", no_argument, NULL, OPTION_ALLOW_SHLIB_UNDEFINED},
     '\0', NULL, N_("Allow unresolved references in shared libraries"),
@@ -1554,6 +1557,11 @@ parse_args (unsigned argc, char **argv)
 	case OPTION_NO_WARN_FATAL:
 	  config.fatal_warnings = false;
 	  break;
+	case OPTION_NO_WARNINGS:
+	case 'w':
+	  config.no_warnings = true;
+	  config.fatal_warnings = false;
+	  break;
 	case OPTION_WARN_MULTIPLE_GP:
 	  config.warn_multiple_gp = true;
 	  break;
@@ -2155,7 +2163,7 @@ elf_static_list_options (FILE *file)
 			      Compress DWARF debug sections\n"));
   fprintf (file, _("\
                                 Default: %s\n"),
-	   bfd_get_compression_algorithm_name (link_info.compress_debug));
+	   bfd_get_compression_algorithm_name (config.compress_debug));
   fprintf (file, _("\
   -z common-page-size=SIZE    Set common page size to SIZE\n"));
   fprintf (file, _("\

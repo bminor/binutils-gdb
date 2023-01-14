@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Free Software Foundation, Inc.
+/* Copyright (C) 2021-2023 Free Software Foundation, Inc.
    Contributed by Oracle.
 
    This file is part of GNU Binutils.
@@ -222,7 +222,7 @@ static Cmdtable cmd_lst[] = {   // list of commands
   // like quit, but deletes all data loaded
 
   { HHELP, "xhelp", NULL, NULL, 0, &desc[HHELP]},
-  { WHOAMI, "-whoami", NULL, NULL, 0, &desc[WHOAMI]},
+  { WHOAMI, "whoami", NULL, NULL, 0, NULL},
 
   // these are not recognized at this point
   { LOADOBJECT, "segments", "pmap", NULL, 0, &desc[LOADOBJECT]},

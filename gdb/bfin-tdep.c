@@ -1,6 +1,6 @@
 /* Target-dependent code for Analog Devices Blackfin processor, for GDB.
 
-   Copyright (C) 2005-2022 Free Software Foundation, Inc.
+   Copyright (C) 2005-2023 Free Software Foundation, Inc.
 
    Contributed by Analog Devices, Inc.
 
@@ -30,7 +30,7 @@
 #include "trad-frame.h"
 #include "dis-asm.h"
 #include "sim-regno.h"
-#include "gdb/sim-bfin.h"
+#include "sim/sim-bfin.h"
 #include "dwarf2/frame.h"
 #include "symtab.h"
 #include "elf-bfd.h"
@@ -696,8 +696,7 @@ bfin_pseudo_register_read (struct gdbarch *gdbarch, readable_regcache *regcache,
   enum register_status status;
 
   if (regnum != BFIN_CC_REGNUM)
-    internal_error (__FILE__, __LINE__,
-		    _("invalid register number %d"), regnum);
+    internal_error (_("invalid register number %d"), regnum);
 
   /* Extract the CC bit from the ASTAT register.  */
   status = regcache->raw_read (BFIN_ASTAT_REGNUM, buf);
@@ -716,8 +715,7 @@ bfin_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
   gdb_byte buf[BFIN_MAX_REGISTER_SIZE];
 
   if (regnum != BFIN_CC_REGNUM)
-    internal_error (__FILE__, __LINE__,
-		    _("invalid register number %d"), regnum);
+    internal_error (_("invalid register number %d"), regnum);
 
   /* Overlay the CC bit in the ASTAT register.  */
   regcache->raw_read (BFIN_ASTAT_REGNUM, buf);
@@ -780,7 +778,6 @@ bfin_abi (struct gdbarch *gdbarch)
 static struct gdbarch *
 bfin_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   enum bfin_abi abi;
 
   abi = BFIN_ABI_FLAT;
@@ -800,8 +797,9 @@ bfin_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       return arches->gdbarch;
     }
 
-  bfin_gdbarch_tdep *tdep = new bfin_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new bfin_gdbarch_tdep));
+  bfin_gdbarch_tdep *tdep = gdbarch_tdep<bfin_gdbarch_tdep> (gdbarch);
 
   tdep->bfin_abi = abi;
 

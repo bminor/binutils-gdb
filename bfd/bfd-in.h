@@ -1,6 +1,6 @@
 /* Main header file for the bfd library -- portable access to object files.
 
-   Copyright (C) 1990-2022 Free Software Foundation, Inc.
+   Copyright (C) 1990-2023 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -335,25 +335,6 @@ extern void bfd_hash_traverse
    this size.  */
 extern unsigned long bfd_hash_set_default_size (unsigned long);
 
-/* Types of compressed DWARF debug sections.  */
-enum compressed_debug_section_type
-{
-  COMPRESS_DEBUG_NONE = 0,
-  COMPRESS_DEBUG = 1 << 0,
-  COMPRESS_DEBUG_GNU_ZLIB = COMPRESS_DEBUG | 1 << 1,
-  COMPRESS_DEBUG_GABI_ZLIB = COMPRESS_DEBUG | 1 << 2,
-  COMPRESS_DEBUG_ZSTD = COMPRESS_DEBUG | 1 << 3,
-  COMPRESS_UNKNOWN = 1 << 4
-};
-
-/* Tuple for compressed_debug_section_type and their name.  */
-
-struct compressed_type_tuple
-{
-  enum compressed_debug_section_type type;
-  const char *name;
-};
-
 /* This structure is used to keep track of stabs in sections
    information while linking.  */
 
@@ -384,10 +365,10 @@ extern int bfd_stat (bfd *, struct stat *);
 /* Deprecated old routines.  */
 #if __GNUC__
 #define bfd_read(BUF, ELTSIZE, NITEMS, ABFD)				\
-  (_bfd_warn_deprecated ("bfd_read", __FILE__, __LINE__, __FUNCTION__),	\
+  (_bfd_warn_deprecated ("bfd_read", __FILE__, __LINE__, __func__),	\
    bfd_bread ((BUF), (ELTSIZE) * (NITEMS), (ABFD)))
 #define bfd_write(BUF, ELTSIZE, NITEMS, ABFD)				\
-  (_bfd_warn_deprecated ("bfd_write", __FILE__, __LINE__, __FUNCTION__), \
+  (_bfd_warn_deprecated ("bfd_write", __FILE__, __LINE__, __func__),	\
    bfd_bwrite ((BUF), (ELTSIZE) * (NITEMS), (ABFD)))
 #else
 #define bfd_read(BUF, ELTSIZE, NITEMS, ABFD)				\
@@ -464,12 +445,6 @@ extern void bfd_free_window
   (bfd_window *);
 extern bool bfd_get_file_window
   (bfd *, file_ptr, bfd_size_type, bfd_window *, bool);
-
-
-extern enum compressed_debug_section_type bfd_get_compression_algorithm
-  (const char *);
-extern const char *bfd_get_compression_algorithm_name
-  (enum compressed_debug_section_type);
 
 /* Externally visible ELF routines.  */
 

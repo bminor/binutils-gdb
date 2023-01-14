@@ -1,4 +1,4 @@
-/* Copyright (C) 2017-2022 Free Software Foundation, Inc.
+/* Copyright (C) 2017-2023 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -77,6 +77,9 @@
   DIAGNOSTIC_ERROR ("-Wswitch")
 
 #elif defined (__GNUC__) /* GCC */
+
+# define DIAGNOSTIC_IGNORE_DEPRECATED_DECLARATIONS \
+  DIAGNOSTIC_IGNORE ("-Wdeprecated-declarations")
 
 # if __GNUC__ >= 7
 #  define DIAGNOSTIC_IGNORE_DEPRECATED_REGISTER \

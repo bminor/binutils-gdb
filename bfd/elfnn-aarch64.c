@@ -1,5 +1,5 @@
 /* AArch64-specific support for NN-bit ELF.
-   Copyright (C) 2009-2022 Free Software Foundation, Inc.
+   Copyright (C) 2009-2023 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -3264,7 +3264,7 @@ aarch64_build_one_stub (struct bfd_hash_entry *gen_entry,
      section.  The user should fix his linker script.  */
   if (stub_entry->target_section->output_section == NULL
       && info->non_contiguous_regions)
-    info->callbacks->einfo (_("%F%P: Could not assign '%pA' to an output section. "
+    info->callbacks->einfo (_("%F%P: Could not assign `%pA' to an output section. "
 			      "Retry without "
 			      "--enable-non-contiguous-regions.\n"),
 			    stub_entry->target_section);
@@ -5539,7 +5539,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	    /* xgettext:c-format */
 	    (_("%pB: relocation %s against STT_GNU_IFUNC "
 	       "symbol `%s' isn't handled by %s"), input_bfd,
-	     howto->name, name, __FUNCTION__);
+	     howto->name, name, __func__);
 	  bfd_set_error (bfd_error_bad_value);
 	  return bfd_reloc_notsupported;
 
@@ -8475,6 +8475,11 @@ elfNN_aarch64_output_arch_local_syms (bfd *output_bfd,
 {
   output_arch_syminfo osi;
   struct elf_aarch64_link_hash_table *htab;
+
+  if (info->strip == strip_all
+      && !info->emitrelocations
+      && !bfd_link_relocatable (info))
+    return true;
 
   htab = elf_aarch64_hash_table (info);
 

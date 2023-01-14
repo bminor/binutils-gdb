@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Free Software Foundation, Inc.
+/* Copyright (C) 2021-2023 Free Software Foundation, Inc.
    Contributed by Oracle.
 
    This file is part of GNU Binutils.
@@ -832,7 +832,7 @@ linetrace_ext_fork_epilogue (const char *variant, const pid_t ret, char * n_line
 
 	  const char *params = CALL_UTIL (getenv)(SP_COLLECTOR_PARAMS);
 	  int ret;
-	  if (new_exp_name == NULL)
+	  if (*new_exp_name == 0)
 	    TprintfT (DBG_LT0, "linetrace_ext_fork_epilogue: ERROR: getenv(%s) undefined -- new expt aborted!\n",
 		      SP_COLLECTOR_EXPNAME);
 	  else if (params == NULL)

@@ -1,6 +1,6 @@
 /* Target-dependent code for the Z80.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1081,7 +1081,6 @@ z80_frame_unwind =
 static struct gdbarch *
 z80_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   struct gdbarch_list *best_arch;
   tdesc_arch_data_up tdesc_data;
   unsigned long mach = info.bfd_arch_info->mach;
@@ -1123,8 +1122,9 @@ z80_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   /* None found, create a new architecture from the information provided.  */
-  z80_gdbarch_tdep *tdep = new z80_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new z80_gdbarch_tdep));
+  z80_gdbarch_tdep *tdep = gdbarch_tdep<z80_gdbarch_tdep> (gdbarch);
 
   if (mach == bfd_mach_ez80_adl)
     {

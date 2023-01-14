@@ -1,6 +1,6 @@
 /* Support for printing Ada values for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -209,7 +209,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 	{
 	  struct value_print_options opts = *options;
 
-	  opts.deref_ref = 0;
+	  opts.deref_ref = false;
 	  common_val_print (v0, stream, recurse + 1, &opts, current_language);
 	  annotate_elt_rep (i - i0);
 	  gdb_printf (stream, _(" %p[<repeats %u times>%p]"),
@@ -222,7 +222,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 	  int j;
 	  struct value_print_options opts = *options;
 
-	  opts.deref_ref = 0;
+	  opts.deref_ref = false;
 	  for (j = i0; j < i; j += 1)
 	    {
 	      if (j > i0)
@@ -658,7 +658,7 @@ print_field_values (struct value *value, struct value *outer_value,
 		     bit_pos % HOST_CHAR_BIT,
 		     bit_size, type->field (i).type ());
 	      opts = *options;
-	      opts.deref_ref = 0;
+	      opts.deref_ref = false;
 	      common_val_print (v, stream, recurse + 1, &opts, language);
 	    }
 	}
@@ -666,7 +666,7 @@ print_field_values (struct value *value, struct value *outer_value,
 	{
 	  struct value_print_options opts = *options;
 
-	  opts.deref_ref = 0;
+	  opts.deref_ref = false;
 
 	  struct value *v = value_field (value, i);
 	  common_val_print (v, stream, recurse + 1, &opts, language);
@@ -1127,6 +1127,6 @@ ada_value_print (struct value *val0, struct ui_file *stream,
     }
 
   opts = *options;
-  opts.deref_ref = 1;
+  opts.deref_ref = true;
   common_val_print (val, stream, 0, &opts, current_language);
 }

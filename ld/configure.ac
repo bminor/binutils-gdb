@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script
 dnl
-dnl   Copyright (C) 2012-2022 Free Software Foundation, Inc.
+dnl   Copyright (C) 2012-2023 Free Software Foundation, Inc.
 dnl
 dnl This file is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -628,15 +628,18 @@ AC_SUBST(EMULATION_LIBPATH)
 if test x${enable_static} = xno; then
   TESTBFDLIB="-Wl,--rpath,../bfd/.libs ../bfd/.libs/libbfd.so"
   TESTCTFLIB="-Wl,--rpath,../libctf/.libs ../libctf/.libs/libctf.so"
+  TESTSFRAMELIB="-Wl,--rpath,../libsframe/.libs ../libsframe/.libs/libsframe.so"
 else
   TESTBFDLIB="../bfd/.libs/libbfd.a"
   TESTCTFLIB="../libctf/.libs/libctf.a"
+  TESTSFRAMELIB="../libsframe/.libs/libsframe.a"
 fi
 if test "${enable_libctf}" = no; then
     TESTCTFLIB=
 fi
 AC_SUBST(TESTBFDLIB)
 AC_SUBST(TESTCTFLIB)
+AC_SUBST(TESTSFRAMELIB)
 
 target_vendor=${target_vendor=$host_vendor}
 case "$target_vendor" in

@@ -1,5 +1,5 @@
 /* as.c - GAS main program.
-   Copyright (C) 1987-2022 Free Software Foundation, Inc.
+   Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -42,6 +42,7 @@
 #include "macro.h"
 #include "dwarf2dbg.h"
 #include "dw2gencfi.h"
+#include "codeview.h"
 #include "bfdver.h"
 #include "write.h"
 
@@ -315,6 +316,8 @@ Options:\n\
 #endif
   fprintf (stream, _("\
                           generate GNU Build notes if none are present in the input\n"));
+  fprintf (stream, _("\
+  --gsframe               generate SFrame unwind info\n"));
 #endif /* OBJ_ELF */
 
   fprintf (stream, _("\
@@ -331,6 +334,10 @@ Options:\n\
   --gdwarf-cie-version=<N> generate version 1, 3 or 4 DWARF CIEs\n"));
   fprintf (stream, _("\
   --gdwarf-sections       generate per-function section names for DWARF line information\n"));
+#if defined (TE_PE) && defined (O_secrel)
+  fprintf (stream, _("\
+  --gcodeview             generate CodeView debugging information\n"));
+#endif
   fprintf (stream, _("\
   --hash-size=<N>         ignored\n"));
   fprintf (stream, _("\
@@ -481,6 +488,7 @@ parse_args (int * pargc, char *** pargv)
       OPTION_GDWARF_5,
       OPTION_GDWARF_SECTIONS, /* = STD_BASE + 20 */
       OPTION_GDWARF_CIE_VERSION,
+      OPTION_GCODEVIEW,
       OPTION_STRIP_LOCAL_ABSOLUTE,
       OPTION_TRADITIONAL_FORMAT,
       OPTION_WARN,
@@ -499,7 +507,8 @@ parse_args (int * pargc, char *** pargv)
       OPTION_COMPRESS_DEBUG,
       OPTION_NOCOMPRESS_DEBUG,
       OPTION_NO_PAD_SECTIONS,
-      OPTION_MULTIBYTE_HANDLING  /* = STD_BASE + 40 */
+      OPTION_MULTIBYTE_HANDLING,  /* = STD_BASE + 40 */
+      OPTION_SFRAME
     /* When you add options here, check that they do
        not collide with OPTION_MD_BASE.  See as.h.  */
     };
@@ -530,6 +539,7 @@ parse_args (int * pargc, char *** pargv)
     ,{"elf-stt-common", required_argument, NULL, OPTION_ELF_STT_COMMON}
     ,{"sectname-subst", no_argument, NULL, OPTION_SECTNAME_SUBST}
     ,{"generate-missing-build-notes", required_argument, NULL, OPTION_ELF_BUILD_NOTES}
+    ,{"gsframe", no_argument, NULL, OPTION_SFRAME}
 #endif
     ,{"fatal-warnings", no_argument, NULL, OPTION_WARN_FATAL}
     ,{"gdwarf-2", no_argument, NULL, OPTION_GDWARF_2}
@@ -541,6 +551,9 @@ parse_args (int * pargc, char *** pargv)
     ,{"gdwarf2", no_argument, NULL, OPTION_GDWARF_2}
     ,{"gdwarf-sections", no_argument, NULL, OPTION_GDWARF_SECTIONS}
     ,{"gdwarf-cie-version", required_argument, NULL, OPTION_GDWARF_CIE_VERSION}
+#if defined (TE_PE) && defined (O_secrel)
+    ,{"gcodeview", no_argument, NULL, OPTION_GCODEVIEW}
+#endif
     ,{"gen-debug", no_argument, NULL, 'g'}
     ,{"gstabs", no_argument, NULL, OPTION_GSTABS}
     ,{"gstabs+", no_argument, NULL, OPTION_GSTABS_PLUS}
@@ -696,7 +709,7 @@ parse_args (int * pargc, char *** pargv)
 	case OPTION_VERSION:
 	  /* This output is intended to follow the GNU standards document.  */
 	  printf (_("GNU assembler %s\n"), BFD_VERSION_STRING);
-	  printf (_("Copyright (C) 2022 Free Software Foundation, Inc.\n"));
+	  printf (_("Copyright (C) 2023 Free Software Foundation, Inc.\n"));
 	  printf (_("\
 This program is free software; you may redistribute it under the terms of\n\
 the GNU General Public License version 3 or later.\n\
@@ -866,6 +879,12 @@ This program has absolutely no warranty.\n"));
 	  flag_dwarf_sections = true;
 	  break;
 
+#if defined (TE_PE) && defined (O_secrel)
+	case OPTION_GCODEVIEW:
+	  debug_type = DEBUG_CODEVIEW;
+	  break;
+#endif
+
         case OPTION_GDWARF_CIE_VERSION:
 	  flag_dwarf_cie_version = atoi (optarg);
           /* The available CIE versions are 1 (DWARF 2), 3 (DWARF 3), and 4
@@ -991,6 +1010,10 @@ This program has absolutely no warranty.\n"));
 	  else
 	    as_fatal (_("Invalid --generate-missing-build-notes option: `%s'"),
 		      optarg);
+	  break;
+
+	case OPTION_SFRAME:
+	  flag_gen_sframe = 1;
 	  break;
 
 #endif /* OBJ_ELF */
@@ -1420,6 +1443,8 @@ main (int argc, char ** argv)
 
     }
 #endif
+
+  codeview_finish ();
 
   /* If we've been collecting dwarf2 .debug_line info, either for
      assembly debugging or on behalf of the compiler, emit it now.  */

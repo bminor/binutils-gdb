@@ -1,4 +1,4 @@
-# Copyright 2014-2022 Free Software Foundation, Inc.
+# Copyright 2014-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -99,4 +99,51 @@ proc gdb_get_bp_addr { num } {
 	}
     }
     return ""
+}
+
+# Compare the version numbers in L1 to those in L2 using OP, and return
+# 1 if the comparison is true.
+
+proc version_compare { l1 op l2 } {
+    set len [llength $l1]
+    if { $len != [llength $l2] } {
+	error "l2 not the same length as l1"
+    }
+
+    switch -exact $op {
+	"=="    -
+	"<"     {}
+	"<="    { return [expr [version_compare $l1 < $l2] \
+			      || [version_compare $l1 == $l2]]}
+	default { error "unsupported op: $op" }
+    }
+
+    # Handle ops < and ==.
+    set idx 0
+    foreach v1 $l1 {
+	set v2 [lindex $l2 $idx]
+	incr idx
+	set last [expr $len == $idx]
+
+	set cmp [expr $v1 $op $v2]
+	if { $op == "==" } {
+	    if { $cmp } {
+		continue
+	    } else {
+		return 0
+	    }
+	} else {
+	    # $op == "<".
+	    if { $cmp } {
+		return 1
+	    } else {
+		if { !$last && $v1 == $v2 } {
+		    continue
+		}
+		return 0
+	    }
+	}
+    }
+
+    return 1
 }

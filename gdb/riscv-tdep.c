@@ -1,6 +1,6 @@
 /* Target-dependent code for the RISC-V architecture, for GDB.
 
-   Copyright (C) 2018-2022 Free Software Foundation, Inc.
+   Copyright (C) 2018-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1146,7 +1146,7 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
       enum bfd_endian byte_order = type_byte_order (regtype);
 
       get_user_print_options (&opts);
-      opts.deref_ref = 1;
+      opts.deref_ref = true;
 
       common_val_print (val, file, 0, &opts, current_language);
 
@@ -1165,7 +1165,7 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 
       /* Print the register in hex.  */
       get_formatted_print_options (&opts, 'x');
-      opts.deref_ref = 1;
+      opts.deref_ref = true;
       common_val_print (val, file, 0, &opts, current_language);
 
       if (print_raw_format)
@@ -1298,7 +1298,7 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 	      if (regtype->is_vector () == 0)
 		{
 		  get_user_print_options (&opts);
-		  opts.deref_ref = 1;
+		  opts.deref_ref = true;
 		  gdb_printf (file, "\t");
 		  common_val_print (val, file, 0, &opts, current_language);
 		}
@@ -2492,7 +2492,8 @@ static void
 riscv_call_arg_scalar_int (struct riscv_arg_info *ainfo,
 			   struct riscv_call_info *cinfo)
 {
-  if (ainfo->length > (2 * cinfo->xlen))
+  if (TYPE_HAS_DYNAMIC_LENGTH (ainfo->type)
+      || ainfo->length > (2 * cinfo->xlen))
     {
       /* Argument is going to be passed by reference.  */
       ainfo->argloc[0].loc_type
@@ -2910,8 +2911,12 @@ riscv_arg_location (struct gdbarch *gdbarch,
       break;
 
     case TYPE_CODE_STRUCT:
-      riscv_call_arg_struct (ainfo, cinfo);
-      break;
+      if (!TYPE_HAS_DYNAMIC_LENGTH (ainfo->type))
+	{
+	  riscv_call_arg_struct (ainfo, cinfo);
+	  break;
+	}
+      /* FALLTHROUGH */
 
     default:
       riscv_call_arg_scalar_int (ainfo, cinfo);
@@ -3221,7 +3226,7 @@ riscv_return_value (struct gdbarch  *gdbarch,
 		    struct value *function,
 		    struct type *type,
 		    struct regcache *regcache,
-		    gdb_byte *readbuf,
+		    struct value **read_value,
 		    const gdb_byte *writebuf)
 {
   struct riscv_call_info call_info (gdbarch);
@@ -3239,15 +3244,15 @@ riscv_return_value (struct gdbarch  *gdbarch,
       gdb_printf (gdb_stdlog, "\n");
     }
 
-  if (readbuf != nullptr || writebuf != nullptr)
+  if (read_value != nullptr || writebuf != nullptr)
     {
       unsigned int arg_len;
       struct value *abi_val;
-      gdb_byte *old_readbuf = nullptr;
+      gdb_byte *readbuf = nullptr;
       int regnum;
 
       /* We only do one thing at a time.  */
-      gdb_assert (readbuf == nullptr || writebuf == nullptr);
+      gdb_assert (read_value == nullptr || writebuf == nullptr);
 
       /* In some cases the argument is not returned as the declared type,
 	 and we need to cast to or from the ABI type in order to
@@ -3288,7 +3293,6 @@ riscv_return_value (struct gdbarch  *gdbarch,
       else
 	{
 	  abi_val = allocate_value (info.type);
-	  old_readbuf = readbuf;
 	  readbuf = value_contents_raw (abi_val).data ();
 	}
       arg_len = info.type->length ();
@@ -3368,8 +3372,17 @@ riscv_return_value (struct gdbarch  *gdbarch,
 
 	    regcache_cooked_read_unsigned (regcache, RISCV_A0_REGNUM,
 					   &addr);
-	    if (readbuf != nullptr)
-	      read_memory (addr, readbuf, info.length);
+	    if (read_value != nullptr)
+	      {
+		abi_val = value_at_non_lval (type, addr);
+		/* Also reset the expected type, so that the cast
+		   later on is a no-op.  If the cast is not a no-op,
+		   and if the return type is variably-sized, then the
+		   type of ABI_VAL will differ from ARG_TYPE due to
+		   dynamic type resolution, and so will most likely
+		   fail.  */
+		arg_type = value_type (abi_val);
+	      }
 	    if (writebuf != nullptr)
 	      write_memory (addr, writebuf, info.length);
 	  }
@@ -3384,10 +3397,8 @@ riscv_return_value (struct gdbarch  *gdbarch,
       /* This completes the cast from abi type back to the declared type
 	 in the case that we are reading from the machine.  See the
 	 comment at the head of this block for more details.  */
-      if (readbuf != nullptr)
+      if (read_value != nullptr)
 	{
-	  struct value *arg_val;
-
 	  if (is_fixed_point_type (arg_type))
 	    {
 	      /* Convert abi_val to the actual return type, but
@@ -3398,15 +3409,13 @@ riscv_return_value (struct gdbarch  *gdbarch,
 	      unscaled.read (value_contents (abi_val),
 			     type_byte_order (info.type),
 			     info.type->is_unsigned ());
-	      arg_val = allocate_value (arg_type);
-	      unscaled.write (value_contents_raw (arg_val),
+	      *read_value = allocate_value (arg_type);
+	      unscaled.write (value_contents_raw (*read_value),
 			      type_byte_order (arg_type),
 			      arg_type->is_unsigned ());
 	    }
 	  else
-	    arg_val = value_cast (arg_type, abi_val);
-	  memcpy (old_readbuf, value_contents_raw (arg_val).data (),
-		  arg_type->length ());
+	    *read_value = value_cast (arg_type, abi_val);
 	}
     }
 
@@ -3567,8 +3576,7 @@ riscv_features_from_bfd (const bfd *abfd)
       else if (eclass == ELFCLASS64)
 	features.xlen = 8;
       else
-	internal_error (__FILE__, __LINE__,
-			_("unknown ELF header class %d"), eclass);
+	internal_error (_("unknown ELF header class %d"), eclass);
 
       if (e_flags & EF_RISCV_FLOAT_ABI_DOUBLE)
 	features.flen = 8;
@@ -3624,10 +3632,10 @@ riscv_add_reggroups (struct gdbarch *gdbarch)
 static int
 riscv_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
-  if (reg < RISCV_DWARF_REGNUM_X31)
+  if (reg <= RISCV_DWARF_REGNUM_X31)
     return RISCV_ZERO_REGNUM + (reg - RISCV_DWARF_REGNUM_X0);
 
-  else if (reg < RISCV_DWARF_REGNUM_F31)
+  else if (reg <= RISCV_DWARF_REGNUM_F31)
     return RISCV_FIRST_FP_REGNUM + (reg - RISCV_DWARF_REGNUM_F0);
 
   else if (reg >= RISCV_DWARF_FIRST_CSR && reg <= RISCV_DWARF_LAST_CSR)
@@ -3784,7 +3792,6 @@ static struct gdbarch *
 riscv_gdbarch_init (struct gdbarch_info info,
 		    struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   struct riscv_gdbarch_features features;
   const struct target_desc *tdesc = info.target_desc;
 
@@ -3870,8 +3877,10 @@ riscv_gdbarch_init (struct gdbarch_info info,
     return arches->gdbarch;
 
   /* None found, so create a new architecture from the information provided.  */
-  riscv_gdbarch_tdep *tdep = new riscv_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new riscv_gdbarch_tdep));
+  riscv_gdbarch_tdep *tdep = gdbarch_tdep<riscv_gdbarch_tdep> (gdbarch);
+
   tdep->isa_features = features;
   tdep->abi_features = abi_features;
 
@@ -3889,7 +3898,7 @@ riscv_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_type_align (gdbarch, riscv_type_align);
 
   /* Information about the target architecture.  */
-  set_gdbarch_return_value (gdbarch, riscv_return_value);
+  set_gdbarch_return_value_as_value (gdbarch, riscv_return_value);
   set_gdbarch_breakpoint_kind_from_pc (gdbarch, riscv_breakpoint_kind_from_pc);
   set_gdbarch_sw_breakpoint_from_kind (gdbarch, riscv_sw_breakpoint_from_kind);
   set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);

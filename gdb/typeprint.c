@@ -1,6 +1,6 @@
 /* Language independent support for printing types for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -478,9 +478,7 @@ whatis_exp (const char *exp, int show)
 		    /* Filter out languages which don't implement the
 		       feature.  */
 		    if (show > 0
-			&& (current_language->la_language == language_c
-			    || current_language->la_language == language_cplus
-			    || current_language->la_language == language_rust))
+			&& current_language->can_print_type_offsets ())
 		      {
 			flags.print_offsets = 1;
 			flags.print_typedefs = 0;
@@ -539,6 +537,12 @@ whatis_exp (const char *exp, int show)
     {
       val = access_value_history (0);
       type = value_type (val);
+    }
+
+  if (flags.print_offsets && is_dynamic_type (type))
+    {
+      warning (_("ptype/o does not work with dynamic types; disabling '/o'"));
+      flags.print_offsets = 0;
     }
 
   get_user_print_options (&opts);

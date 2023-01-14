@@ -1,6 +1,6 @@
 /* Target-dependent code for the ALPHA architecture, for GDB, the GNU Debugger.
 
-   Copyright (C) 1993-2022 Free Software Foundation, Inc.
+   Copyright (C) 1993-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -494,8 +494,7 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 	  break;
 
 	default:
-	  internal_error (__FILE__, __LINE__,
-			  _("unknown floating point width"));
+	  internal_error (_("unknown floating point width"));
 	}
       break;
 
@@ -518,8 +517,7 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 	  break;
 
 	default:
-	  internal_error (__FILE__, __LINE__,
-			  _("unknown floating point width"));
+	  internal_error (_("unknown floating point width"));
 	}
       break;
 
@@ -563,8 +561,7 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
 	  error (_("Cannot set a 128-bit long double return value."));
 
 	default:
-	  internal_error (__FILE__, __LINE__,
-			  _("unknown floating point width"));
+	  internal_error (_("unknown floating point width"));
 	}
       break;
 
@@ -588,8 +585,7 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
 	  error (_("Cannot set a 128-bit long double return value."));
 
 	default:
-	  internal_error (__FILE__, __LINE__,
-			  _("unknown floating point width"));
+	  internal_error (_("unknown floating point width"));
 	}
       break;
 
@@ -1723,15 +1719,14 @@ alpha_software_single_step (struct regcache *regcache)
 static struct gdbarch *
 alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
-
   /* Find a candidate among extant architectures.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
   if (arches != NULL)
     return arches->gdbarch;
 
-  alpha_gdbarch_tdep *tdep = new alpha_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new alpha_gdbarch_tdep));
+  alpha_gdbarch_tdep *tdep = gdbarch_tdep<alpha_gdbarch_tdep> (gdbarch);
 
   /* Lowest text address.  This is used by heuristic_proc_start()
      to decide when to stop looking.  */

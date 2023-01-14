@@ -1,4 +1,4 @@
-#   Copyright (C) 1999-2022 Free Software Foundation, Inc.
+#   Copyright (C) 1999-2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -596,6 +596,18 @@ if ![is_remote host] {
 	untested "bzip2 -dc ($testname)"
     } else {
 	readelf_test {--debug-dump=macro -wN} $tempfile pr26112.r
+    }
+
+    set test $srcdir/$subdir/pr26160.dwp.bz2
+    # We need to strip the ".bz2", but can leave the dirname.
+    set t $subdir/[file tail $test]
+    set testname [file rootname $t]
+    verbose $testname
+    set tempfile tmpdir/pr26160.dwp
+    if {[catch "system \"bzip2 -dc $test > $tempfile\""] != 0} {
+	untested "bzip2 -dc ($testname)"
+    } else {
+	readelf_test {-wi} $tempfile pr26160.r
     }
 }
 

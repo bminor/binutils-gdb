@@ -1,6 +1,6 @@
 /* Low level packing and unpacking of values for GDB, the GNU Debugger.
 
-   Copyright (C) 1986-2022 Free Software Foundation, Inc.
+   Copyright (C) 1986-2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -916,6 +916,17 @@ value_contents_eq (const struct value *val1, LONGEST offset1,
 				 length * TARGET_CHAR_BIT);
 }
 
+/* See value.h.  */
+
+bool
+value_contents_eq (const struct value *val1, const struct value *val2)
+{
+  ULONGEST len1 = check_typedef (value_enclosing_type (val1))->length ();
+  ULONGEST len2 = check_typedef (value_enclosing_type (val2))->length ();
+  if (len1 != len2)
+    return false;
+  return value_contents_eq (val1, 0, val2, 0, len1);
+}
 
 /* The value-history records all the values printed by print commands
    during this session.  */
@@ -1363,6 +1374,43 @@ value_contents_copy_raw (struct value *dst, LONGEST dst_offset,
   dst_bit_offset = dst_offset * unit_size * HOST_CHAR_BIT;
   bit_length = length * unit_size * HOST_CHAR_BIT;
 
+  value_ranges_copy_adjusted (dst, dst_bit_offset,
+			      src, src_bit_offset,
+			      bit_length);
+}
+
+/* A helper for value_from_component_bitsize that copies bits from SRC
+   to DEST.  */
+
+static void
+value_contents_copy_raw_bitwise (struct value *dst, LONGEST dst_bit_offset,
+				 struct value *src, LONGEST src_bit_offset,
+				 LONGEST bit_length)
+{
+  /* A lazy DST would make that this copy operation useless, since as
+     soon as DST's contents were un-lazied (by a later value_contents
+     call, say), the contents would be overwritten.  A lazy SRC would
+     mean we'd be copying garbage.  */
+  gdb_assert (!dst->lazy && !src->lazy);
+
+  /* The overwritten DST range gets unavailability ORed in, not
+     replaced.  Make sure to remember to implement replacing if it
+     turns out actually necessary.  */
+  LONGEST dst_offset = dst_bit_offset / TARGET_CHAR_BIT;
+  LONGEST length = bit_length / TARGET_CHAR_BIT;
+  gdb_assert (value_bytes_available (dst, dst_offset, length));
+  gdb_assert (!value_bits_any_optimized_out (dst, dst_bit_offset,
+					     bit_length));
+
+  /* Copy the data.  */
+  gdb::array_view<gdb_byte> dst_contents = value_contents_all_raw (dst);
+  gdb::array_view<const gdb_byte> src_contents = value_contents_all_raw (src);
+  copy_bitwise (dst_contents.data (), dst_bit_offset,
+		src_contents.data (), src_bit_offset,
+		bit_length,
+		type_byte_order (value_type (src)) == BFD_ENDIAN_BIG);
+
+  /* Copy the meta-data.  */
   value_ranges_copy_adjusted (dst, dst_bit_offset,
 			      src, src_bit_offset,
 			      bit_length);
@@ -2254,7 +2302,7 @@ value_of_internalvar (struct gdbarch *gdbarch, struct internalvar *var)
       break;
 
     default:
-      internal_error (__FILE__, __LINE__, _("bad kind"));
+      internal_error (_("bad kind"));
     }
 
   /* Change the VALUE_LVAL to lval_internalvar so that future operations
@@ -2348,7 +2396,7 @@ set_internalvar_component (struct internalvar *var,
 
     default:
       /* We can never get a component of any other kind.  */
-      internal_error (__FILE__, __LINE__, _("set_internalvar_component"));
+      internal_error (_("set_internalvar_component"));
     }
 }
 
@@ -3774,6 +3822,37 @@ value_from_component (struct value *whole, struct type *type, LONGEST offset)
   return v;
 }
 
+/* See value.h.  */
+
+struct value *
+value_from_component_bitsize (struct value *whole, struct type *type,
+			      LONGEST bit_offset, LONGEST bit_length)
+{
+  gdb_assert (!value_lazy (whole));
+
+  /* Preserve lvalue-ness if possible.  This is needed to avoid
+     array-printing failures (including crashes) when printing Ada
+     arrays in programs compiled with -fgnat-encodings=all.  */
+  if ((bit_offset % TARGET_CHAR_BIT) == 0
+      && (bit_length % TARGET_CHAR_BIT) == 0
+      && bit_length == TARGET_CHAR_BIT * type->length ())
+    return value_from_component (whole, type, bit_offset / TARGET_CHAR_BIT);
+
+  struct value *v = allocate_value (type);
+
+  LONGEST dst_offset = TARGET_CHAR_BIT * value_embedded_offset (v);
+  if (is_scalar_type (type) && type_byte_order (type) == BFD_ENDIAN_BIG)
+    dst_offset += TARGET_CHAR_BIT * type->length () - bit_length;
+
+  value_contents_copy_raw_bitwise (v, dst_offset,
+				   whole,
+				   TARGET_CHAR_BIT
+				   * value_embedded_offset (whole)
+				   + bit_offset,
+				   bit_length);
+  return v;
+}
+
 struct value *
 coerce_ref_if_computed (const struct value *arg)
 {
@@ -3878,8 +3957,8 @@ struct_return_convention (struct gdbarch *gdbarch,
     error (_("Function return type unknown."));
 
   /* Probe the architecture for the return-value convention.  */
-  return gdbarch_return_value (gdbarch, function, value_type,
-			       NULL, NULL, NULL);
+  return gdbarch_return_value_as_value (gdbarch, function, value_type,
+					NULL, NULL, NULL);
 }
 
 /* Return true if the function returning the specified type is using
@@ -4005,8 +4084,7 @@ value_fetch_lazy_register (struct value *val)
       if (VALUE_LVAL (new_val) == lval_register
 	  && value_lazy (new_val)
 	  && VALUE_NEXT_FRAME_ID (new_val) == next_frame_id)
-	internal_error (__FILE__, __LINE__,
-			_("infinite loop while fetching a register"));
+	internal_error (_("infinite loop while fetching a register"));
     }
 
   /* If it's still lazy (for instance, a saved register on the
@@ -4104,7 +4182,7 @@ value_fetch_lazy (struct value *val)
 	   && value_computed_funcs (val)->read != NULL)
     value_computed_funcs (val)->read (val);
   else
-    internal_error (__FILE__, __LINE__, _("Unexpected lazy value type."));
+    internal_error (_("Unexpected lazy value type."));
 
   set_value_lazy (val, 0);
 }

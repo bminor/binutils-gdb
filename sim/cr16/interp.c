@@ -1,5 +1,5 @@
 /* Simulation code for the CR16 processor.
-   Copyright (C) 2008-2022 Free Software Foundation, Inc.
+   Copyright (C) 2008-2023 Free Software Foundation, Inc.
    Contributed by M Ranga Swami Reddy <MR.Swami.Reddy@nsc.com>
 
    This file is part of GDB, the GNU debugger.
@@ -32,11 +32,13 @@
 #include "sim-options.h"
 #include "sim-signal.h"
 
-#include "gdb/sim-cr16.h"
+#include "sim/sim-cr16.h"
 #include "gdb/signals.h"
 #include "opcode/cr16.h"
 
 #include "target-newlib-syscall.h"
+
+#include "cr16-sim.h"
 
 struct _state State;
 
@@ -385,8 +387,8 @@ free_state (SIM_DESC sd)
   sim_state_free (sd);
 }
 
-static int cr16_reg_fetch (SIM_CPU *, int, unsigned char *, int);
-static int cr16_reg_store (SIM_CPU *, int, unsigned char *, int);
+static int cr16_reg_fetch (SIM_CPU *, int, void *, int);
+static int cr16_reg_store (SIM_CPU *, int, const void *, int);
 
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *cb,
@@ -405,7 +407,7 @@ sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *cb,
   cb->syscall_map = cb_cr16_syscall_map;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
+  if (sim_cpu_alloc_all (sd, 0) != SIM_RC_OK)
     {
       free_state (sd);
       return 0;
@@ -690,7 +692,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 }
 
 static uint32_t
-cr16_extract_unsigned_integer (unsigned char *addr, int len)
+cr16_extract_unsigned_integer (const unsigned char *addr, int len)
 {
   uint32_t retval;
   unsigned char * p;
@@ -720,7 +722,7 @@ cr16_store_unsigned_integer (unsigned char *addr, int len, uint32_t val)
 }
 
 static int
-cr16_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+cr16_reg_fetch (SIM_CPU *cpu, int rn, void *memory, int length)
 {
   int size;
   switch ((enum sim_cr16_regs) rn)
@@ -769,7 +771,7 @@ cr16_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 }
 
 static int
-cr16_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+cr16_reg_store (SIM_CPU *cpu, int rn, const void *memory, int length)
 {
   SIM_DESC sd = CPU_STATE (cpu);
   int size;
