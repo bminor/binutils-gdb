@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2022-12-31 12:19+0000\n"
+"POT-Creation-Date: 2023-01-14 13:36+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -9524,7 +9524,7 @@ msgstr[1] ""
 #, c-format
 msgid ""
 "\n"
-"Dynamic section at offset %#<PRIx64> contains %<PRId64> entry:\n"
+"Dynamic section at offset %#<PRIx64> contains %<PRIu64> entry:\n"
 msgid_plural ""
 "\n"
 "Dynamic section at offset %#<PRIx64> contains %<PRIu64> entries:\n"
@@ -13141,7 +13141,7 @@ msgstr ""
 
 #: version.c:34
 #, c-format
-msgid "Copyright (C) 2022 Free Software Foundation, Inc.\n"
+msgid "Copyright (C) 2023 Free Software Foundation, Inc.\n"
 msgstr ""
 
 #: version.c:35

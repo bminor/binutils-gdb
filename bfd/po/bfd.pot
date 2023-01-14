@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2022-12-31 12:18+0000\n"
+"POT-Creation-Date: 2023-01-14 13:14+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1085,7 +1085,7 @@ msgstr ""
 msgid "%pB: invalid string offset %u >= %<PRIu64> for section `%s'"
 msgstr ""
 
-#: elf.c:515 elfnn-aarch64.c:8120 elfnn-loongarch.c:3919
+#: elf.c:515 elf32-arm.c:17713 elfnn-aarch64.c:8120 elfnn-loongarch.c:3919
 #, c-format
 msgid "%pB symbol number %lu references nonexistent SHT_SYMTAB_SHNDX section"
 msgstr ""
@@ -2155,97 +2155,97 @@ msgstr ""
 msgid "could not find section %s"
 msgstr ""
 
-#: elf32-arm.c:18308
+#: elf32-arm.c:18337
 #, c-format
 msgid "%pB: Number of symbols in input file has increased from %lu to %u\n"
 msgstr ""
 
-#: elf32-arm.c:18572
+#: elf32-arm.c:18601
 #, c-format
 msgid "%pB: error: Cortex-A8 erratum stub is allocated in unsafe location"
 msgstr ""
 
 #. There's not much we can do apart from complain if this
 #. happens.
-#: elf32-arm.c:18599
+#: elf32-arm.c:18628
 #, c-format
 msgid "%pB: error: Cortex-A8 erratum stub out of range (input file too large)"
 msgstr ""
 
-#: elf32-arm.c:19426 elf32-arm.c:19448
+#: elf32-arm.c:19455 elf32-arm.c:19477
 #, c-format
 msgid "%pB: error: VFP11 veneer out of range"
 msgstr ""
 
-#: elf32-arm.c:19499
+#: elf32-arm.c:19528
 #, c-format
 msgid ""
 "%pB(%#<PRIx64>): error: cannot create STM32L4XX veneer; jump out of range by "
 "%<PRId64> bytes; cannot encode branch instruction"
 msgstr ""
 
-#: elf32-arm.c:19538
+#: elf32-arm.c:19567
 #, c-format
 msgid "%pB: error: cannot create STM32L4XX veneer"
 msgstr ""
 
-#: elf32-arm.c:20622
+#: elf32-arm.c:20647
 #, c-format
 msgid "error: %pB is already in final BE8 format"
 msgstr ""
 
-#: elf32-arm.c:20698
+#: elf32-arm.c:20723
 #, c-format
 msgid ""
 "error: source object %pB has EABI version %d, but target %pB has EABI "
 "version %d"
 msgstr ""
 
-#: elf32-arm.c:20713
+#: elf32-arm.c:20738
 #, c-format
 msgid "error: %pB is compiled for APCS-%d, whereas target %pB uses APCS-%d"
 msgstr ""
 
-#: elf32-arm.c:20723
+#: elf32-arm.c:20748
 #, c-format
 msgid ""
 "error: %pB passes floats in float registers, whereas %pB passes them in "
 "integer registers"
 msgstr ""
 
-#: elf32-arm.c:20727
+#: elf32-arm.c:20752
 #, c-format
 msgid ""
 "error: %pB passes floats in integer registers, whereas %pB passes them in "
 "float registers"
 msgstr ""
 
-#: elf32-arm.c:20737 elf32-arm.c:20741 elf32-arm.c:20751
+#: elf32-arm.c:20762 elf32-arm.c:20766 elf32-arm.c:20776
 #, c-format
 msgid "error: %pB uses %s instructions, whereas %pB does not"
 msgstr ""
 
-#: elf32-arm.c:20755
+#: elf32-arm.c:20780
 #, c-format
 msgid "error: %pB does not use %s instructions, whereas %pB does"
 msgstr ""
 
-#: elf32-arm.c:20774
+#: elf32-arm.c:20799
 #, c-format
 msgid "error: %pB uses software FP, whereas %pB uses hardware FP"
 msgstr ""
 
-#: elf32-arm.c:20778
+#: elf32-arm.c:20803
 #, c-format
 msgid "error: %pB uses hardware FP, whereas %pB uses software FP"
 msgstr ""
 
-#: elf32-arm.c:20792
+#: elf32-arm.c:20817
 #, c-format
 msgid "warning: %pB supports interworking, whereas %pB does not"
 msgstr ""
 
-#: elf32-arm.c:20798
+#: elf32-arm.c:20823
 #, c-format
 msgid "warning: %pB does not support interworking, whereas %pB does"
 msgstr ""
