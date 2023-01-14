@@ -1648,7 +1648,9 @@ recognized names are @samp{alloc}, @samp{contents}, @samp{load},
 @samp{contents} flag for a section which does not have contents, but it
 is not meaningful to clear the @samp{contents} flag of a section which
 does have contents--just remove the section instead.  Not all flags are
-meaningful for all object file formats.
+meaningful for all object file formats.  In particular the
+@samp{share} flag is only meaningful for COFF format files and not for
+ELF format files.
 
 @item --set-section-alignment @var{sectionpattern}=@var{align}
 Set the alignment for any sections matching @var{sectionpattern}.
@@ -1704,7 +1706,8 @@ Rename a section from @var{oldname} to @var{newname}, optionally
 changing the section's flags to @var{flags} in the process.  This has
 the advantage over using a linker script to perform the rename in that
 the output stays as an object file and does not become a linked
-executable.
+executable.  This option accepts the same set of flags as the
+@option{--sect-section-flags} option.
 
 This option is particularly helpful when the input format is binary,
 since this will always create a section called .data.  If for example,

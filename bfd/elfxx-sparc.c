@@ -4139,7 +4139,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 
       if (r == bfd_reloc_continue)
 	{
-do_relocation:
+	do_relocation:
 	  r = _bfd_final_link_relocate (howto, input_bfd, input_section,
 					contents, rel->r_offset,
 					relocation, rel->r_addend);

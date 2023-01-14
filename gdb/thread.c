@@ -1563,6 +1563,14 @@ thr_try_catch_cmd (thread_info *thr, const char *cmd, int from_tty,
 		   const qcs_flags &flags)
 {
   switch_to_thread (thr);
+
+  /* The thread header is computed before running the command since
+     the command can change the inferior, which is not permitted
+     by thread_target_id_str.  */
+  std::string thr_header =
+    string_printf (_("\nThread %s (%s):\n"), print_thread_id (thr),
+		   thread_target_id_str (thr).c_str ());
+
   try
     {
       std::string cmd_result = execute_command_to_string
@@ -1570,9 +1578,7 @@ thr_try_catch_cmd (thread_info *thr, const char *cmd, int from_tty,
       if (!flags.silent || cmd_result.length () > 0)
 	{
 	  if (!flags.quiet)
-	    printf_filtered (_("\nThread %s (%s):\n"),
-			     print_thread_id (thr),
-			     target_pid_to_str (inferior_ptid).c_str ());
+	    printf_filtered ("%s", thr_header.c_str ());
 	  printf_filtered ("%s", cmd_result.c_str ());
 	}
     }
@@ -1581,9 +1587,7 @@ thr_try_catch_cmd (thread_info *thr, const char *cmd, int from_tty,
       if (!flags.silent)
 	{
 	  if (!flags.quiet)
-	    printf_filtered (_("\nThread %s (%s):\n"),
-			     print_thread_id (thr),
-			     target_pid_to_str (inferior_ptid).c_str ());
+	    printf_filtered ("%s", thr_header.c_str ());
 	  if (flags.cont)
 	    printf_filtered ("%s\n", ex.what ());
 	  else

@@ -1,3 +1,275 @@
+2020-03-25  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_archive): Prevent endless loop.
+
+2020-03-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25708
+	* nm.c (print_symname): Replace _bfd_elf_get_symbol_version_name
+	with bfd_get_symbol_version_string.
+	(print_symbo): Pass TRUE to bfd_get_symbol_version_string.
+	* objdump.c (objdump_print_symname): Likewise.
+
+2020-03-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25708
+	* nm.c (SYM_NAME): Removed.
+	(print_symname): Add a pointer to struct extended_symbol_info
+	argument.  Call _bfd_elf_get_symbol_version_name to get symbol
+	version.
+	(print_symdef_entry): Pass NULL to print_symname.
+	(print_symbol_info_bsd): Update call to print_symname.
+	(print_symbol_info_sysv): Likewise.
+	(print_symbol_info_posix): Likewise.
+
+2020-03-24  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_mips_specific): Free iconf on error path.
+
+2020-03-23  Nick Clifton  <nickc@redhat.com>
+
+	PR 25714
+	* wrstabs.c (stab_pop_type): Replace assertion with error return.
+	* write_stabs_in_sections_debugging_info: Likewise.
+	* stab_enum_type: Likewise.
+	* stab_modify_type: Likewise.
+	* stab_struct_field: Likewise.
+	* stab_end_struct_type: Likewise.
+	* stab_start_class_type: Likewise.
+	* stab_class_static_member: Likewise.
+	* stab_class_baseclass: Likewise.
+	* stab_class_start_method: Likewise.
+	* stab_class_method_var: Likewise.
+	* stab_class_end_method: Likewise.
+	* stab_end_class_type: Likewise.
+	* stab_typedef_type: Likewise.
+	* stab_start_function: Likewise.
+	* stab_end_block: Likewise.
+	* stab_lineno: Likewise.
+
+2020-03-20  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_compression_header): Add ATTRIBUTE_WARN_UNUSED_RESULT.
+	(process_section_headers): Check the return value from
+	get_compression_header.
+	(dump_section_as_strings): Likewise.
+	(dump_section_as_bytes): Likewise.
+	(load_specific_debug_section): Likewise.
+
+2020-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ar.c (main): Update bfd_plugin_set_program_name call.
+	* nm.c (main): Likewise.
+
+2020-03-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 25676
+	* testsuite/binutils-all/dw4.s: New test source file.
+	* testsuite/binutils-all/nm.exp: Run the new test.
+
+2020-03-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (process_symbol_table): Use unsigned long for si.
+
+2020-03-19  Alan Modra  <amodra@gmail.com>
+
+	* elfcomm.c: Don't include bfd.h or bucomm.h.
+	(program_name): Declare.
+	(process_archive_index_and_symbols): Replace bfd_boolean with int,
+	and substitute FALSE and TRUE.
+	(setup_archive, setup_nested_archive): Likewise.
+	* elfcomm.h: Likewise.
+
+2020-03-19  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_archive): Always return via path freeing
+	memory.  Formatting.
+
+2020-03-19  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_netbsd_elf_note): Validate descsz before
+	accessing descdata.  Formatting.
+
+2020-03-19  Alan Modra  <amodra@gmail.com>
+
+	* elfcomm.c (setup_archive): Make file_size an off_t.  Comment.
+	* elfcomm.h (setup_archive): Update prototype.
+
+2020-03-16  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (get_symbols): New function.
+	(process_relocs, ia64_process_unwind, hppa_process_unwind),
+	(arm_process_unwind, get_symbol_for_build_attribute): Use it.
+
+2020-03-16  Alan Modra  <amodra@gmail.com>
+
+	* unwind-ia64.c (unw_decode_uleb128): Prevent overlarge shifts.
+	Detect shift overflows and check that terminating byte is found.
+	Print an error on a bad uleb128.
+
+2020-03-14  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_file): Clean ba_cache.
+
+2020-03-14  Alan Modra  <amodra@gmail.com>
+
+	* elfcomm.h (setup_archive): Update prototype.
+	* elfcomm.c (setup_archive): Add file_size parameter and sanity
+	check longnames_size.
+	(setup_nested_archive): Get file size and pass to setup_archive.
+	* elfedit.c (process_archive): Likewise.
+	* readelf.c (process_archive): Pass filedata->file_size to
+	setup_archive.
+
+2020-03-14  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (dump_section_as_strings): Free memory on error exit.
+	(dump_section_as_bytes, process_notes_at): Likewise.
+	(get_build_id): Free enote.
+
+2020-03-13  Kamil Rytarowski  <n54@gmx.com>
+
+	* readelf.c (get_netbsd_elfcore_note_type): Add support for
+	NT_NETBSDCORE_LWPSTATUS notes.
+
+2020-03-13  Alan Modra  <amodra@gmail.com>
+
+	* elfcomm.c (get_archive_member_name): Always return malloc'd
+	string or NULL.
+	* elfedit.c (process_archive): Tidy memory on all return paths.
+	* readelf.c (process_archive): Likewise.
+	(process_symbol_table): Likewise.
+	(ba_cache): New, replacing ..
+	(get_symbol_for_build_attribute): ..static vars here.  Free
+	strtab and symtab before loading new ones.  Reject symtab without
+	valid strtab in loop, breaking out of loop on valid symtab.
+	(process_file): Free ba_cache symtab and strtab here, resetting
+	ba_cache.
+
+2020-03-12  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_section_headers): Don't just set
+	filedata->section_headers NULL, free it first.  Similarly for
+	dynamic_symbols, dynamic_strings, dynamic_syminfo and
+	symtab_shndx_list.  Zero associated counts too.
+	(process_object): Free symtab_shndx_list.
+	(process_file): Free various allocated filedata tables.
+
+2020-03-11  Nick Clifton  <nickc@redhat.com>
+
+	PR 25611
+	PR 25614
+	* dwarf.h (DWARF2_Internal_LineInfo): Add li_address_size and
+	li_segment_size fields.
+	* dwarf.c (read_debug_line_header): Record the address size and
+	segment selector size values (if present) in the lineinfo
+	structure.
+	(display_formatted_table): Warn if the format count is empty but
+	the table itself is not empty.
+	Display the format count and entry count at the start of the table
+	dump.
+	(display_debug_lines_raw): Display the address size and segement
+	selector size fields, if present.
+	* testsuite/binutils-all/dw5.W: Update expected output.
+
+2020-03-11  Alan Modra  <amodra@gmail.com>
+
+	PR 25651
+	* objcopy.c (copy_object): Test "gaps" not gap_fill_set or
+	pad_to_set on second block of code dealing with padding.
+	Replace "c" with "num_sec" and don't recalculate number of
+	sections on second block.  Size arrays using sizeof (element)
+	rather than sizeof (element type).
+
+2020-03-10  Alan Modra  <amodra@gmail.com>
+
+	* objdump.c (disassemble_section): Don't call qsort unless
+	sym count is at least two.
+	(disassemble_data): Don't call memcpy with NULL src.
+
+2020-03-09  Alan Modra  <amodra@gmail.com>
+
+	PR 25645
+	* readelf.c (dump_ia64_vms_dynamic_fixups): Pass size and nmemb
+	to get_data rather than multiplying.
+	(dump_ia64_vms_dynamic_relocs): Likewise.
+	(process_version_sections): Correct order of size and nmemb args
+	in get_data call.
+	(process_mips_specific): Likewise.
+
+2020-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (get_dynamic_data): Replace "memory chekers" with
+	"memory checkers" in comments.
+
+2020-03-06  Simon Marchi  <simon.marchi@efficios.com>
+
+	PR 25491
+	* doc/Makefile.am: Rename MOSTLYCLEANFILES to MAINTAINERCLEANFILES.
+	* doc/Makefile.in: Re-generate.
+
+2020-03-06  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (check_new_section_flags): New function.  Reject the
+	SEC_COFF_SHARED flag if the target is not a COFF binary.
+	(copy_object): Call check_new_section_flags.
+	(setup_section): Likewise.
+	* doc/binutils.texi (objcopy): Add a note that the 'share' section
+	flag cannot be applied to ELF binaries.
+
+2020-03-06  Alan Modra  <amodra@gmail.com>
+
+	PR 25637
+	* objcopy.c (filter_symbols): Correct rem_leading_char logic.
+
+2020-03-05  Alan Modra  <amodra@gmail.com>
+
+	PR 25629
+	* objcopy.c (filter_symbols): Don't segfault on NULL
+	prefix_symbols_string.
+
+2020-03-04  Christian Eggers  <ceggers@gmx.de>
+
+	* objcopy.c (copy_object): Convert from bytes to octets for
+	--gap-fill and --pad-to.
+
+2020-03-03  Nick Clifton  <nickc@redhat.com>
+
+	PR 25625
+	* prdbg.c (pr_tag_type): Remove call to abort.
+
+2020-03-02  Aaron Merey  <amerey@redhat.com>
+
+	* binutils/testsuite/binutils-all/debuginfod.exp: Improve port
+	selection.
+
+2020-03-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 25543
+	* readelf.c (dump_section_as_strings): Display new-line characters
+	as \n and then insert a line break.
+	* testsuite/binutils-all/pr25543.s: New test.
+	* testsuite/binutils-all/pr25543.d: Test driver.
+	* testsuite/binutils-all/readelf.exp: Run the new test.
+
+2020-02-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 25526
+	* readelf.c (process_ia64_vms_dynamic_relocs): Check to see if
+	get_data is unable to load the string table.
+
+2020-02-26  Alan Modra  <amodra@gmail.com>
+
+	* elfedit.c: Indent labels correctly.
+	* readelf.c: Likewise.
+	* resres.c: Likewise.
+
+2020-02-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25584
+	* ar.c (main): Pass 0 to bfd_plugin_set_program_name.
+	* nm.c (main): Pass 1 to bfd_plugin_set_program_name.
+
 2020-02-24  Nick Clifton  <nickc@redhat.com>
 
 	PR 25499

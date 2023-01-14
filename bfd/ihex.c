@@ -487,7 +487,7 @@ ihex_scan (bfd *abfd)
 
 /* Try to recognize an Intel Hex file.  */
 
-static const bfd_target *
+static bfd_cleanup
 ihex_object_p (bfd *abfd)
 {
   void * tdata_save;
@@ -538,7 +538,7 @@ ihex_object_p (bfd *abfd)
       return NULL;
     }
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 }
 
 /* Read the contents of a section in an Intel Hex file.  */
@@ -811,16 +811,15 @@ ihex_write_object_contents (bfd *abfd)
 	  if (count > CHUNK)
 	    now = CHUNK;
 
-	  if (where > segbase + extbase + 0xffff)
+	  if (where < extbase
+	      || where - extbase < segbase
+	      || where - extbase - segbase > 0xffff)
 	    {
 	      bfd_byte addr[2];
 
 	      /* We need a new base address.  */
-	      if (where <= 0xfffff)
+	      if (extbase == 0 && where <= 0xfffff)
 		{
-		  /* The addresses should be sorted.  */
-		  BFD_ASSERT (extbase == 0);
-
 		  segbase = where & 0xf0000;
 		  addr[0] = (bfd_byte)(segbase >> 12) & 0xff;
 		  addr[1] = (bfd_byte)(segbase >> 4) & 0xff;

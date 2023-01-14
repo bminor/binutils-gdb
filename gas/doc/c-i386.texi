@@ -251,6 +251,7 @@ accept various extension mnemonics.  For example,
 @code{cldemote},
 @code{rdpru},
 @code{mcommit},
+@code{sev_es},
 @code{lwp},
 @code{fma4},
 @code{xop},
@@ -462,6 +463,49 @@ on an instruction.  It is equivalent to
 @option{-malign-branch=jcc+fused+jmp}
 @option{-malign-branch-prefix-size=5}.
 The default doesn't align branches.
+
+@cindex @samp{-mlfence-after-load=} option, i386
+@cindex @samp{-mlfence-after-load=} option, x86-64
+@item -mlfence-after-load=@var{no}
+@itemx -mlfence-after-load=@var{yes}
+These options control whether the assembler should generate lfence
+after load instructions.  @option{-mlfence-after-load=@var{yes}} will
+generate lfence.  @option{-mlfence-after-load=@var{no}} will not generate
+lfence, which is the default.
+
+@cindex @samp{-mlfence-before-indirect-branch=} option, i386
+@cindex @samp{-mlfence-before-indirect-branch=} option, x86-64
+@item -mlfence-before-indirect-branch=@var{none}
+@item -mlfence-before-indirect-branch=@var{all}
+@item -mlfence-before-indirect-branch=@var{register}
+@itemx -mlfence-before-indirect-branch=@var{memory}
+These options control whether the assembler should generate lfence
+after indirect near branch instructions.
+@option{-mlfence-before-indirect-branch=@var{all}} will generate lfence
+after indirect near branch via register and issue a warning before
+indirect near branch via memory.
+@option{-mlfence-before-indirect-branch=@var{register}} will generate
+lfence after indirect near branch via register.
+@option{-mlfence-before-indirect-branch=@var{memory}} will issue a
+warning before indirect near branch via memory.
+@option{-mlfence-before-indirect-branch=@var{none}} will not generate
+lfence nor issue warning, which is the default.  Note that lfence won't
+be generated before indirect near branch via register with
+@option{-mlfence-after-load=@var{yes}} since lfence will be generated
+after loading branch target register.
+
+@cindex @samp{-mlfence-before-ret=} option, i386
+@cindex @samp{-mlfence-before-ret=} option, x86-64
+@item -mlfence-before-ret=@var{none}
+@item -mlfence-before-ret=@var{or}
+@itemx -mlfence-before-ret=@var{not}
+These options control whether the assembler should generate lfence
+before ret.  @option{-mlfence-before-ret=@var{or}} will generate
+generate or instruction with lfence.
+@option{-mlfence-before-ret=@var{not}} will generate not instruction
+with lfence.
+@option{-mlfence-before-ret=@var{none}} will not generate lfence,
+which is the default.
 
 @cindex @samp{-mx86-used-note=} option, i386
 @cindex @samp{-mx86-used-note=} option, x86-64
@@ -1454,7 +1498,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme}
 @item @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop} @tab @samp{.cx16}
 @item @samp{.padlock} @tab @samp{.clzero} @tab @samp{.mwaitx} @tab @samp{.rdpru}
-@item @samp{.mcommit}
+@item @samp{.mcommit} @tab @samp{.sev_es}
 @end multitable
 
 Apart from the warning, there are only two other effects on

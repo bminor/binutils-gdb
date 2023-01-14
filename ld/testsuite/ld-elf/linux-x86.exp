@@ -19,11 +19,36 @@
 # MA 02110-1301, USA.
 #
 
+# Linux/x86 tests.
+if { ![istarget "i?86-*-linux*"] \
+       && ![istarget "x86_64-*-linux*"] \
+       && ![istarget "amd64-*-linux*"] } {
+    return
+}
+
+run_ld_link_tests [list \
+    [list \
+	"Build pr24920.so" \
+	"-shared" \
+	"" \
+	"" \
+	{dummy.s} \
+	{} \
+	"pr24920.so" \
+    ] \
+    [list \
+	"Build pr24920" \
+	"-static " \
+	"-Bdynamic tmpdir/pr24920.so" \
+	"" \
+	{start.s} \
+	{{ld pr24920.err}} \
+	"pr24920" \
+    ] \
+]
+
 # Test very simple native Linux/x86 programs with linux-x86.S.
-if { ![isnative] || ![check_compiler_available] \
-     || (![istarget "i?86-*-linux*"] \
-         && ![istarget "x86_64-*-linux*"] \
-         && ![istarget "amd64-*-linux*"]) } {
+if { ![isnative] || ![check_compiler_available] } {
     return
 }
 

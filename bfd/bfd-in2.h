@@ -1192,6 +1192,10 @@ typedef struct bfd_section
     struct bfd_section *s;
     const char *linked_to_symbol_name;
   } map_head, map_tail;
+ /* Points to the output section this section is already assigned to, if any.
+    This is used when support for non-contiguous memory regions is enabled.  */
+ struct bfd_section *already_assigned;
+
 } asection;
 
 /* Relax table contains information about instructions which can
@@ -1342,38 +1346,39 @@ discarded_section (const asection *sec)
   /* name, id,  section_id, index, next, prev, flags, user_set_vma, */ \
   {  NAME, IDX, 0,          0,     NULL, NULL, FLAGS, 0,               \
                                                                        \
-  /* linker_mark, linker_has_input, gc_mark, decompress_status,    */  \
+  /* linker_mark, linker_has_input, gc_mark, decompress_status,     */ \
      0,           0,                1,       0,                        \
                                                                        \
-  /* segment_mark, sec_info_type, use_rela_p,                      */  \
+  /* segment_mark, sec_info_type, use_rela_p,                       */ \
      0,            0,             0,                                   \
                                                                        \
-  /* sec_flg0, sec_flg1, sec_flg2, sec_flg3, sec_flg4, sec_flg5,   */  \
+  /* sec_flg0, sec_flg1, sec_flg2, sec_flg3, sec_flg4, sec_flg5,    */ \
      0,        0,        0,        0,        0,        0,              \
                                                                        \
-  /* vma, lma, size, rawsize, compressed_size, relax, relax_count, */  \
+  /* vma, lma, size, rawsize, compressed_size, relax, relax_count,  */ \
      0,   0,   0,    0,       0,               0,     0,               \
                                                                        \
-  /* output_offset, output_section, alignment_power,               */  \
+  /* output_offset, output_section, alignment_power,                */ \
      0,             &SEC,           0,                                 \
                                                                        \
-  /* relocation, orelocation, reloc_count, filepos, rel_filepos,   */  \
+  /* relocation, orelocation, reloc_count, filepos, rel_filepos,    */ \
      NULL,       NULL,        0,           0,       0,                 \
                                                                        \
-  /* line_filepos, userdata, contents, lineno, lineno_count,       */  \
+  /* line_filepos, userdata, contents, lineno, lineno_count,        */ \
      0,            NULL,     NULL,     NULL,   0,                      \
                                                                        \
   /* entsize, kept_section, moving_line_filepos,                    */ \
-     0,       NULL,          0,                                        \
+     0,       NULL,         0,                                         \
                                                                        \
-  /* target_index, used_by_bfd, constructor_chain, owner,          */  \
+  /* target_index, used_by_bfd, constructor_chain, owner,           */ \
      0,            NULL,        NULL,              NULL,               \
                                                                        \
-  /* symbol,                    symbol_ptr_ptr,                    */  \
+  /* symbol,                    symbol_ptr_ptr,                     */ \
      (struct bfd_symbol *) SYM, &SEC.symbol,                           \
                                                                        \
-  /* map_head, map_tail                                            */  \
-     { NULL }, { NULL }                                                \
+  /* map_head, map_tail, already_assigned                           */ \
+     { NULL }, { NULL }, NULL                                          \
+                                                                       \
     }
 
 /* We use a macro to initialize the static asymbol structures because
@@ -7121,7 +7126,8 @@ bfd_boolean bfd_set_private_flags (bfd *abfd, flagword flags);
        BFD_SEND (abfd, _bfd_debug_info_accumulate, (abfd, section))
 
 #define bfd_stat_arch_elt(abfd, stat) \
-       BFD_SEND (abfd, _bfd_stat_arch_elt,(abfd, stat))
+       BFD_SEND (abfd->my_archive ? abfd->my_archive : abfd, \
+                 _bfd_stat_arch_elt, (abfd, stat))
 
 #define bfd_update_armap_timestamp(abfd) \
        BFD_SEND (abfd, _bfd_update_armap_timestamp, (abfd))
@@ -7294,6 +7300,8 @@ typedef struct bfd_link_info _bfd_link_info;
 /* Forward declaration.  */
 typedef struct flag_info flag_info;
 
+typedef void (*bfd_cleanup) (bfd *);
+
 typedef struct bfd_target
 {
   /* Identifies the kind of target, e.g., SunOS4, Ultrix, etc.  */
@@ -7358,9 +7366,9 @@ typedef struct bfd_target
   /* Format dependent routines: these are vectors of entry points
      within the target vector structure, one for each format to check.  */
 
-  /* Check the format of a file being read.  Return a <<bfd_target *>> or zero.  */
-  const struct bfd_target *
-              (*_bfd_check_format[bfd_type_end]) (bfd *);
+  /* Check the format of a file being read.  Return a <<bfd_cleanup>> on
+     success or zero on failure.  */
+  bfd_cleanup (*_bfd_check_format[bfd_type_end]) (bfd *);
 
   /* Set the format of a file being written.  */
   bfd_boolean (*_bfd_set_format[bfd_type_end]) (bfd *);
@@ -7506,9 +7514,10 @@ typedef struct bfd_target
 #define bfd_get_symbol_info(b,p,e) \
        BFD_SEND (b, _bfd_get_symbol_info, (b,p,e))
   const char *(*_bfd_get_symbol_version_string) (bfd *, struct bfd_symbol *,
+                                                 bfd_boolean,
                                                  bfd_boolean *);
-#define bfd_get_symbol_version_string(b,s,h) \
-       BFD_SEND (b, _bfd_get_symbol_version_string, (b,s,h))
+#define bfd_get_symbol_version_string(b,s,p,h) \
+       BFD_SEND (b, _bfd_get_symbol_version_string, (b,s,p,h))
   bfd_boolean (*_bfd_is_local_label_name) (bfd *, const char *);
   bfd_boolean (*_bfd_is_target_special_symbol) (bfd *, asymbol *);
   alent *     (*_get_lineno) (bfd *, struct bfd_symbol *);

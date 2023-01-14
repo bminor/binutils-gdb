@@ -30,7 +30,7 @@ if {![Term::prepare_for_tui]} {
 }
 
 # This puts us into TUI mode, and should display the ASM window.
-Term::command "layout asm"
+Term::command_no_prompt_prefix "layout asm"
 Term::check_box_contents "check asm box contents" 0 0 80 15 "<main>"
 
 # Scroll the ASM window down using the down arrow key.  In an ideal

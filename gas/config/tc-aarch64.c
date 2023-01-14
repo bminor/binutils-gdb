@@ -883,7 +883,7 @@ parse_vector_type_for_operand (aarch64_reg_type reg_type,
       return FALSE;
     }
 
-elt_size:
+ elt_size:
   switch (TOLOWER (*ptr))
     {
     case 'b':
@@ -2424,7 +2424,7 @@ parse_aarch64_imm_float (char **ccp, int *immed, bfd_boolean dp_p,
   *ccp = str;
   return TRUE;
 
-invalid_fp:
+ invalid_fp:
   set_fatal_syntax_error (_("invalid floating-point constant"));
   return FALSE;
 }
@@ -5216,7 +5216,7 @@ vectype_to_qualifier (const struct vector_type_el *vectype)
       return offset;
     }
 
-vectype_conversion_fail:
+ vectype_conversion_fail:
   first_error (_("bad vector arrangement type"));
   return AARCH64_OPND_QLF_NIL;
 }
@@ -6652,7 +6652,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SYSREG_TLBI:
 	  inst.base.operands[i].sysins_op =
 	    parse_sys_ins_reg (&str, aarch64_sys_regs_tlbi_hsh);
-sys_reg_ins:
+	sys_reg_ins:
 	  if (inst.base.operands[i].sysins_op == NULL)
 	    {
 	      set_fatal_syntax_error ( _("unknown or missing operation name"));
@@ -6707,7 +6707,7 @@ sys_reg_ins:
       inst.base.operands[i].present = 1;
       continue;
 
-failure:
+    failure:
       /* The parse routine should already have set the error, but in case
 	 not, set a default one here.  */
       if (! error_p ())
@@ -6773,7 +6773,7 @@ failure:
 	(_("unexpected characters following instruction"));
     }
 
-parse_operands_return:
+ parse_operands_return:
 
   if (error_p ())
     {
@@ -8263,7 +8263,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
       break;
     }
 
-apply_fix_return:
+ apply_fix_return:
   /* Free the allocated the struct aarch64_inst.
      N.B. currently there are very limited number of fix-up types actually use
      this field, so the impact on the performance should be minimal .  */

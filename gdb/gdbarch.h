@@ -40,6 +40,7 @@
 #include "dis-asm.h"
 #include "gdb_obstack.h"
 #include "infrun.h"
+#include "osabi.h"
 
 struct floatformat;
 struct ui_file;

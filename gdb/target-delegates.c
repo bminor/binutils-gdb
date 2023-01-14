@@ -56,7 +56,7 @@ struct dummy_target : public target_ops
   int remove_fork_catchpoint (int arg0) override;
   int insert_vfork_catchpoint (int arg0) override;
   int remove_vfork_catchpoint (int arg0) override;
-  int follow_fork (int arg0, int arg1) override;
+  bool follow_fork (bool arg0, bool arg1) override;
   int insert_exec_catchpoint (int arg0) override;
   int remove_exec_catchpoint (int arg0) override;
   void follow_exec (struct inferior *arg0, const char *arg1) override;
@@ -225,7 +225,7 @@ struct debug_target : public target_ops
   int remove_fork_catchpoint (int arg0) override;
   int insert_vfork_catchpoint (int arg0) override;
   int remove_vfork_catchpoint (int arg0) override;
-  int follow_fork (int arg0, int arg1) override;
+  bool follow_fork (bool arg0, bool arg1) override;
   int insert_exec_catchpoint (int arg0) override;
   int remove_exec_catchpoint (int arg0) override;
   void follow_exec (struct inferior *arg0, const char *arg1) override;
@@ -1506,30 +1506,30 @@ debug_target::remove_vfork_catchpoint (int arg0)
   return result;
 }
 
-int
-target_ops::follow_fork (int arg0, int arg1)
+bool
+target_ops::follow_fork (bool arg0, bool arg1)
 {
   return this->beneath ()->follow_fork (arg0, arg1);
 }
 
-int
-dummy_target::follow_fork (int arg0, int arg1)
+bool
+dummy_target::follow_fork (bool arg0, bool arg1)
 {
   return default_follow_fork (this, arg0, arg1);
 }
 
-int
-debug_target::follow_fork (int arg0, int arg1)
+bool
+debug_target::follow_fork (bool arg0, bool arg1)
 {
-  int result;
+  bool result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->follow_fork (...)\n", this->beneath ()->shortname ());
   result = this->beneath ()->follow_fork (arg0, arg1);
   fprintf_unfiltered (gdb_stdlog, "<- %s->follow_fork (", this->beneath ()->shortname ());
-  target_debug_print_int (arg0);
+  target_debug_print_bool (arg0);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg1);
+  target_debug_print_bool (arg1);
   fputs_unfiltered (") = ", gdb_stdlog);
-  target_debug_print_int (result);
+  target_debug_print_bool (result);
   fputs_unfiltered ("\n", gdb_stdlog);
   return result;
 }

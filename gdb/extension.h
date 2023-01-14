@@ -283,10 +283,8 @@ extern char *apply_ext_lang_type_printers (struct ext_lang_type_printers *,
 					   struct type *);
 
 extern int apply_ext_lang_val_pretty_printer
-  (struct type *type,
-   LONGEST embedded_offset, CORE_ADDR address,
-   struct ui_file *stream, int recurse,
-   struct value *val, const struct value_print_options *options,
+  (struct value *value, struct ui_file *stream, int recurse,
+   const struct value_print_options *options,
    const struct language_defn *language);
 
 extern enum ext_lang_bt_status apply_ext_lang_frame_filter

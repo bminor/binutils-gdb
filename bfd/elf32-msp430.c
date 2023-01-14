@@ -2493,7 +2493,7 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 
   return TRUE;
 
-error_return:
+ error_return:
   if (isymbuf != NULL && symtab_hdr->contents != (unsigned char *) isymbuf)
     free (isymbuf);
   if (contents != NULL

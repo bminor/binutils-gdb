@@ -136,7 +136,8 @@ mem_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
 /* Open a BFD from the target's memory.  */
 
 static gdb_bfd_ref_ptr
-bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size, char *target)
+bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size,
+			     const char *target)
 {
   struct target_buffer *buffer = XNEW (struct target_buffer);
 
@@ -578,6 +579,7 @@ jit_symtab_line_mapping_add_impl (struct gdb_symbol_callbacks *cb,
     {
       stab->linetable->item[i].pc = (CORE_ADDR) map[i].pc;
       stab->linetable->item[i].line = map[i].line;
+      stab->linetable->item[i].is_stmt = 1;
     }
 }
 

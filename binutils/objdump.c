@@ -1031,7 +1031,8 @@ objdump_print_symname (bfd *abfd, struct disassemble_info *inf,
     }
 
   if ((sym->flags & (BSF_SECTION_SYM | BSF_SYNTHETIC)) == 0)
-    version_string = bfd_get_symbol_version_string (abfd, sym, &hidden);
+    version_string = bfd_get_symbol_version_string (abfd, sym, TRUE,
+						    &hidden);
 
   if (bfd_is_und_section (bfd_asymbol_section (sym)))
     hidden = TRUE;
@@ -3109,7 +3110,8 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 
   /* Sort the symbols into value and section order.  */
   compare_section = section;
-  qsort (sorted_syms, sorted_symcount, sizeof (asymbol *), compare_symbols);
+  if (sorted_symcount > 1)
+    qsort (sorted_syms, sorted_symcount, sizeof (asymbol *), compare_symbols);
 
   /* Skip over the relocs belonging to addresses below the
      start address.  */
@@ -3376,10 +3378,13 @@ disassemble_data (bfd *abfd)
   sorted_symcount = symcount ? symcount : dynsymcount;
   sorted_syms = (asymbol **) xmalloc ((sorted_symcount + synthcount)
                                       * sizeof (asymbol *));
-  memcpy (sorted_syms, symcount ? syms : dynsyms,
-	  sorted_symcount * sizeof (asymbol *));
+  if (sorted_symcount != 0)
+    {
+      memcpy (sorted_syms, symcount ? syms : dynsyms,
+	      sorted_symcount * sizeof (asymbol *));
 
-  sorted_symcount = remove_useless_symbols (sorted_syms, sorted_symcount);
+      sorted_symcount = remove_useless_symbols (sorted_syms, sorted_symcount);
+    }
 
   for (i = 0; i < synthcount; ++i)
     {

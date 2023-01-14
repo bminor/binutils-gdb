@@ -1,3 +1,259 @@
+2020-03-26  Alan Modra  <amodra@gmail.com>
+
+	* disassemble.h (opcodes_assert): Declare.
+	(OPCODES_ASSERT): Define.
+	* disassemble.c: Don't include assert.h.  Include opintl.h.
+	(opcodes_assert): New function.
+	* h8300-dis.c (bfd_h8_disassemble_init): Use OPCODES_ASSERT.
+	(bfd_h8_disassemble): Reduce size of data array.  Correctly
+	calculate maxlen.  Omit insn decoding when insn length exceeds
+	maxlen.  Exit from nibble loop when looking for E, before
+	accessing next data byte.  Move processing of E outside loop.
+	Replace tests of maxlen in loop with assertions.
+
+2020-03-26  Alan Modra  <amodra@gmail.com>
+
+	* arc-dis.c (find_format): Init needs_limm.  Simplify use of limm.
+
+2020-03-25  Alan Modra  <amodra@gmail.com>
+
+	* z80-dis.c (suffix): Init mybuf.
+
+2020-03-22  Alan Modra  <amodra@gmail.com>
+
+	* h8300-dis.c (bfd_h8_disassemble): Limit data[] access to that
+	successflly read from section.
+
+2020-03-22  Alan Modra  <amodra@gmail.com>
+
+	* arc-dis.c (find_format): Use ISO C string concatenation rather
+	than line continuation within a string.  Don't access needs_limm
+	before testing opcode != NULL.
+
+2020-03-22  Alan Modra  <amodra@gmail.com>
+
+	* ns32k-dis.c (print_insn_arg): Update comment.
+	(print_insn_ns32k): Reduce size of index_offset array, and
+	initialize, passing -1 to print_insn_arg for args that are not
+	an index.  Don't exit arg loop early.  Abort on bad arg number.
+
+2020-03-22  Alan Modra  <amodra@gmail.com>
+
+	* s12z-dis.c (abstract_read_memory): Don't print error on EOI.
+	* s12z-opc.c: Formatting.
+	(operands_f): Return an int.
+	(opr_n_bytes_p1): Return -1 on reaching buffer memory limit.
+	(opr_n_bytes2, bfextins_n_bytes, mul_n_bytes, bm_n_bytes),
+	(shift_n_bytes, mov_imm_opr_n_bytes, loop_prim_n_bytes),
+	(exg_sex_discrim): Likewise.
+	(create_immediate_operand, create_bitfield_operand),
+	(create_register_operand_with_size, create_register_all_operand),
+	(create_register_all16_operand, create_simple_memory_operand),
+	(create_memory_operand, create_memory_auto_operand): Don't
+	segfault on malloc failure.
+	(z_ext24_decode): Return an int status, negative on fail, zero
+	on success.
+	(x_imm1, imm1_decode, trap_decode, z_opr_decode, z_opr_decode2),
+	(imm1234, reg_s_imm, reg_s_opr, z_imm1234_8base, z_imm1234_0base),
+	(z_tfr, z_reg, reg_xy, lea_reg_xys_opr, lea_reg_xys, rel_15_7),
+	(decode_rel_15_7, cmp_xy, sub_d6_x_y, sub_d6_y_x),
+	(ld_18bit_decode, mul_decode, bm_decode, bm_rel_decode),
+	(mov_imm_opr, ld_18bit_decode, exg_sex_decode),
+	(loop_primitive_decode, shift_decode, psh_pul_decode),
+	(bit_field_decode): Similarly.
+	(z_decode_signed_value, decode_signed_value): Similarly.  Add arg
+	to return value, update callers.
+	(x_opr_decode_with_size): Check all reads, returning NULL on fail.
+	Don't segfault on NULL operand.
+	(decode_operation): Return OP_INVALID on first fail.
+	(decode_s12z): Check all reads, returning -1 on fail.
+
+2020-03-20  Alan Modra  <amodra@gmail.com>
+
+	* metag-dis.c (print_insn_metag): Don't ignore status from
+	read_memory_func.
+
+2020-03-20  Alan Modra  <amodra@gmail.com>
+
+	* nds32-dis.c (print_insn_nds32): Remove unnecessary casts.
+	Initialize parts of buffer not written when handling a possible
+	2-byte insn at end of section.  Don't attempt decoding of such
+	an insn by the 4-byte machinery.
+
+2020-03-20  Alan Modra  <amodra@gmail.com>
+
+	* ppc-dis.c (print_insn_powerpc): Only clear needed bytes of
+	partially filled buffer.  Prevent lookup of 4-byte insns when
+	only VLE 2-byte insns are possible due to section size.  Print
+	".word" rather than ".long" for 2-byte leftovers.
+
+2020-03-17  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25641
+	* z80-dis.c: Fix disassembling ED+A4/AC/B4/BC opcodes.
+
+2020-03-13  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (X86_64_0D): Rename to ...
+	(X86_64_0E): ... this.
+
+2020-03-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am ($(srcdir)/i386-init.h): Also pass -P to $(CPP).
+	* Makefile.in: Regenerated.
+
+2020-03-09  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (avx_irel): New. Use is for AVX512 vpcmp*
+	3-operand pseudos.
+	* i386-tbl.h: Re-generate.
+
+2020-03-09  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (xop_elem, xop_irel, xop_sign): New. Use them for XOP vpcom*,
+	vprot*, vpsha*, and vpshl*.
+	* i386-tbl.h: Re-generate.
+
+2020-03-09  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (avx_frel): New. Use it for AVX/AVX512 vcmpps,
+	vcmpss, vcmppd, and vcmpsd 3-operand pseudo-ops.
+	* i386-tbl.h: Re-generate.
+
+2020-03-09  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (set_bitfield): Ignore zero-length field names.
+	* i386-opc.tbl (sse_frel): New. Use it for SSE/SSE2 cmpps,
+	cmpss, cmppd, and cmpsd 2-operand pseudo-ops.
+	* i386-tbl.h: Re-generate.
+
+2020-03-09  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (struct template_arg, struct template_instance,
+	struct template_param, struct template, templates,
+	parse_template, expand_templates): New.
+	(process_i386_opcodes): Various local variables moved to
+	expand_templates. Call parse_template and expand_templates.
+	* i386-opc.tbl (cc): New. Use it for Jcc, SETcc, and CMOVcc.
+	* i386-tbl.h: Re-generate.
+
+2020-03-06  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (vcvtdq2pd, vcvtps2pd, vcvtudq2pd, vcvtps2ph,
+	vcvtps2qq, vcvtps2uqq, vcvttps2qq, vcvttps2uqq): Fold separate
+	register and memory source templates. Replace VexW= by VexW*
+	where applicable.
+	* i386-tbl.h: Re-generate.
+
+2020-03-06  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl: Drop IgnoreSize from various SIMD insns. Replace
+	VexW= by VexW* and VexVVVV=1 by just VexVVVV where applicable.
+	* i386-tbl.h: Re-generate.
+
+2020-03-06  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (fildll, fistpll, fisttpll): Add ATTSyntax.
+	* i386-tbl.h: Re-generate.
+
+2020-03-06  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (movq): Drop NoRex64 from XMM/XMM SSE2AVX variants.
+	(movmskps, pextrw, pinsrw, pmovmskb, movmskpd, extractps,
+	pextrb, pinsrb, roundsd): Drop NoRex64 and where applicable use
+	VexW0 on SSE2AVX variants.
+	(vmovq): Drop NoRex64 from XMM/XMM variants.
+	(vextractps, vmovmskpd, vmovmskps, vpextrb, vpextrw, vpinsrb,
+	vpinsrw, vpmovmskb, vroundsd, vpmovmskb): Drop NoRex64 and where
+	applicable use VexW0.
+	* i386-tbl.h: Re-generate.
+
+2020-03-06  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (opcode_modifiers): Remove Rex64 field.
+	* i386-opc.h (Rex64): Delete.
+	(struct i386_opcode_modifier): Remove rex64 field.
+	* i386-opc.tbl (crc32): Drop Rex64.
+	Replace Rex64 with Size64 everywhere else.
+	* i386-tbl.h: Re-generate.
+
+2020-03-06  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (OP_E_memory): Exclude recording of used address
+	prefix for "bnd" modes only in 64-bit mode. Don't decode 16-bit
+	addressed memory operands for MPX insns.
+
+2020-03-06  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (movmskps, mwait, vmread, vmwrite, invept,
+	invvpid, invpcid, rdfsbase, rdgsbase, wrfsbase, wrgsbase, adcx,
+	adox, mwaitx, rdpid, movdiri): Add IgnoreSize.
+	(ptwrite): Split into non-64-bit and 64-bit forms.
+	* i386-tbl.h: Re-generate.
+
+2020-03-06  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (tpause, umwait): Add IgnoreSize. Add 3-operand
+	template.
+	* i386-tbl.h: Re-generate.
+
+2020-03-04  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (PREFIX_0F01_REG_3_RM_1): New.
+	(prefix_table): Move vmmcall here. Add vmgexit.
+	(rm_table): Replace vmmcall entry by prefix_table[] escape.
+	* i386-gen.c (cpu_flag_init): Add CPU_SEV_ES_FLAGS entry.
+	(cpu_flags): Add CpuSEV_ES entry.
+	* i386-opc.h (CpuSEV_ES): New.
+	(union i386_cpu_flags): Add cpusev_es field.
+	* i386-opc.tbl (vmgexit): New.
+	* i386-init.h, i386-tbl.h: Re-generate.
+
+2020-03-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (opcode_modifiers): Replace IgnoreSize/DefaultSize
+	with MnemonicSize.
+	* i386-opc.h (IGNORESIZE): New.
+	(DEFAULTSIZE): Likewise.
+	(IgnoreSize): Removed.
+	(DefaultSize): Likewise.
+	(MnemonicSize): New.
+	(i386_opcode_modifier): Replace ignoresize/defaultsize with
+	mnemonicsize.
+	* i386-opc.tbl (IgnoreSize): New.
+	(DefaultSize): Likewise.
+	* i386-tbl.h: Regenerated.
+
+2020-03-03  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25627
+	* z80-dis.c: Fix disassembly of LD IY,(HL) and D (HL),IX
+	instructions.
+
+2020-03-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/25622
+	* i386-opc.tbl: Add IgnoreSize to cvtsi2sd, cvtsi2ss, vcvtsi2sd,
+	vcvtsi2ss, vcvtusi2sd and vcvtusi2ss for AT&T syntax.
+	* i386-tbl.h: Regenerated.
+
+2020-02-26  Alan Modra  <amodra@gmail.com>
+
+	* aarch64-asm.c: Indent labels correctly.
+	* aarch64-dis.c: Likewise.
+	* aarch64-gen.c: Likewise.
+	* aarch64-opc.c: Likewise.
+	* alpha-dis.c: Likewise.
+	* i386-dis.c: Likewise.
+	* nds32-asm.c: Likewise.
+	* nfp-dis.c: Likewise.
+	* visium-dis.c: Likewise.
+
+2020-02-25  Claudiu Zissulescu <claziss@gmail.com>
+
+	* arc-regs.h (int_vector_base): Make it available for all ARC
+	CPUs.
+
 2020-02-20  Nelson Chu  <nelson.chu@sifive.com>
 
 	* riscv-dis.c (print_insn_args): Updated since the DECLARE_CSR is

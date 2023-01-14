@@ -33,12 +33,14 @@ type_stack::insert (enum type_pieces tp)
 
   gdb_assert (tp == tp_pointer || tp == tp_reference
 	      || tp == tp_rvalue_reference || tp == tp_const
-	      || tp == tp_volatile);
+	      || tp == tp_volatile || tp == tp_restrict
+	      || tp == tp_atomic);
 
   /* If there is anything on the stack (we know it will be a
      tp_pointer), insert the qualifier above it.  Otherwise, simply
      push this on the top of the stack.  */
-  if (!m_elements.empty () && (tp == tp_const || tp == tp_volatile))
+  if (!m_elements.empty () && (tp == tp_const || tp == tp_volatile
+			       || tp == tp_restrict))
     slot = 1;
   else
     slot = 0;
@@ -88,6 +90,12 @@ type_stack::follow_type_instance_flags ()
       case tp_volatile:
 	flags |= TYPE_INSTANCE_FLAG_VOLATILE;
 	break;
+      case tp_atomic:
+	flags |= TYPE_INSTANCE_FLAG_ATOMIC;
+	break;
+      case tp_restrict:
+	flags |= TYPE_INSTANCE_FLAG_RESTRICT;
+	break;
       default:
 	gdb_assert_not_reached ("unrecognized tp_ value in follow_types");
       }
@@ -102,6 +110,8 @@ type_stack::follow_types (struct type *follow_type)
   int make_const = 0;
   int make_volatile = 0;
   int make_addr_space = 0;
+  bool make_restrict = false;
+  bool make_atomic = false;
   int array_size;
 
   while (!done)
@@ -109,19 +119,7 @@ type_stack::follow_types (struct type *follow_type)
       {
       case tp_end:
 	done = 1;
-	if (make_const)
-	  follow_type = make_cv_type (make_const, 
-				      TYPE_VOLATILE (follow_type), 
-				      follow_type, 0);
-	if (make_volatile)
-	  follow_type = make_cv_type (TYPE_CONST (follow_type), 
-				      make_volatile, 
-				      follow_type, 0);
-	if (make_addr_space)
-	  follow_type = make_type_with_address_space (follow_type, 
-						      make_addr_space);
-	make_const = make_volatile = 0;
-	make_addr_space = 0;
+	goto process_qualifiers;
 	break;
       case tp_const:
 	make_const = 1;
@@ -132,41 +130,39 @@ type_stack::follow_types (struct type *follow_type)
       case tp_space_identifier:
 	make_addr_space = pop_int ();
 	break;
+      case tp_atomic:
+	make_atomic = true;
+	break;
+      case tp_restrict:
+	make_restrict = true;
+	break;
       case tp_pointer:
 	follow_type = lookup_pointer_type (follow_type);
+	goto process_qualifiers;
+      case tp_reference:
+	follow_type = lookup_lvalue_reference_type (follow_type);
+	goto process_qualifiers;
+      case tp_rvalue_reference:
+	follow_type = lookup_rvalue_reference_type (follow_type);
+      process_qualifiers:
 	if (make_const)
-	  follow_type = make_cv_type (make_const, 
-				      TYPE_VOLATILE (follow_type), 
+	  follow_type = make_cv_type (make_const,
+				      TYPE_VOLATILE (follow_type),
 				      follow_type, 0);
 	if (make_volatile)
-	  follow_type = make_cv_type (TYPE_CONST (follow_type), 
-				      make_volatile, 
+	  follow_type = make_cv_type (TYPE_CONST (follow_type),
+				      make_volatile,
 				      follow_type, 0);
 	if (make_addr_space)
-	  follow_type = make_type_with_address_space (follow_type, 
+	  follow_type = make_type_with_address_space (follow_type,
 						      make_addr_space);
+	if (make_restrict)
+	  follow_type = make_restrict_type (follow_type);
+	if (make_atomic)
+	  follow_type = make_atomic_type (follow_type);
 	make_const = make_volatile = 0;
 	make_addr_space = 0;
-	break;
-      case tp_reference:
-	 follow_type = lookup_lvalue_reference_type (follow_type);
-	 goto process_reference;
-	case tp_rvalue_reference:
-	 follow_type = lookup_rvalue_reference_type (follow_type);
-	process_reference:
-	 if (make_const)
-	   follow_type = make_cv_type (make_const,
-				       TYPE_VOLATILE (follow_type),
-				       follow_type, 0);
-	 if (make_volatile)
-	   follow_type = make_cv_type (TYPE_CONST (follow_type),
-				       make_volatile,
-				       follow_type, 0);
-	 if (make_addr_space)
-	   follow_type = make_type_with_address_space (follow_type,
-						       make_addr_space);
-	make_const = make_volatile = 0;
-	make_addr_space = 0;
+	make_restrict = make_atomic = false;
 	break;
       case tp_array:
 	array_size = pop_int ();

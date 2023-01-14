@@ -212,7 +212,7 @@ s390_elf_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
       return TRUE;
     }
 
-keep:
+ keep:
   /* Without checking h->plt.refcount here we allocate a PLT slot.
      When setting plt.refcount in check_relocs it might not have been
      known that this will be an IFUNC symol.  */

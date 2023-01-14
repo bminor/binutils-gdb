@@ -25,8 +25,6 @@ noreg:
 	cmps	%es:(%rdi), (%rsi)
 	crc32	(%rax), %eax
 	crc32	(%rax), %rax
-	cvtsi2sd (%rax), %xmm0
-	cvtsi2ss (%rax), %xmm0
 	dec	(%rax)
 	div	(%rax)
 	fadd	(%rax)
@@ -148,12 +146,6 @@ noreg:
 	test	$0x89, (%rax)
 	test	$0x1234, (%rax)
 	test	$0x12345678, (%rax)
-	vcvtsi2sd (%rax), %xmm0, %xmm0
-	vcvtsi2sd (%rax), %xmm0, %xmm31
-	vcvtsi2ss (%rax), %xmm0, %xmm0
-	vcvtsi2ss (%rax), %xmm0, %xmm31
-	vcvtusi2sd (%rax), %xmm0, %xmm0
-	vcvtusi2ss (%rax), %xmm0, %xmm0
 	xor	$1, (%rax)
 	xor	$0x89, (%rax)
 	xor	$0x1234, (%rax)

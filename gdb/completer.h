@@ -326,6 +326,10 @@ public:
      LIST.  */
   void add_completions (completion_list &&list);
 
+  /* Remove completion matching NAME from the completion list, does nothing
+     if NAME is not already in the completion list.  */
+  void remove_completion (const char *name);
+
   /* Set the quote char to be appended after a unique completion is
      added to the input line.  Set to '\0' to clear.  See
      m_quote_char's description.  */
@@ -389,7 +393,7 @@ public:
 
   /* True if we have any completion match recorded.  */
   bool have_completions () const
-  { return !m_entries_vec.empty (); }
+  { return htab_elements (m_entries_hash) > 0; }
 
   /* Discard the current completion match list and the current
      LCD.  */
@@ -403,6 +407,9 @@ public:
 
 private:
 
+  /* The type that we place into the m_entries_hash hash table.  */
+  class completion_hash_entry;
+
   /* Add the completion NAME to the list of generated completions if
      it is not there already.  If false is returned, too many
      completions were found.  */
@@ -410,18 +417,15 @@ private:
 			     completion_match_for_lcd *match_for_lcd,
 			     const char *text, const char *word);
 
-  /* Given a new match, recompute the lowest common denominator (LCD)
-     to hand over to readline.  Normally readline computes this itself
-     based on the whole set of completion matches.  However, some
-     completers want to override readline, in order to be able to
-     provide a LCD that is not really a prefix of the matches, but the
-     lowest common denominator of some relevant substring of each
-     match.  E.g., "b push_ba" completes to
-     "std::vector<..>::push_back", "std::string::push_back", etc., and
-     in this case we want the lowest common denominator to be
-     "push_back" instead of "std::".  */
-  void recompute_lowest_common_denominator
-    (gdb::unique_xmalloc_ptr<char> &&new_match);
+  /* Ensure that the lowest common denominator held in the member variable
+     M_LOWEST_COMMON_DENOMINATOR is valid.  This method must be called if
+     there is any chance that new completions have been added to the
+     tracker before the lowest common denominator is read.  */
+  void recompute_lowest_common_denominator ();
+
+  /* Callback used from recompute_lowest_common_denominator, called for
+     every entry in m_entries_hash.  */
+  void recompute_lcd_visitor (completion_hash_entry *entry);
 
   /* Completion match outputs returned by the symbol name matching
      routines (see symbol_name_matcher_ftype).  These results are only
@@ -430,16 +434,13 @@ private:
      symbol name matching routines.  */
   completion_match_result m_completion_match_result;
 
-  /* The completion matches found so far, in a vector.  */
-  completion_list m_entries_vec;
-
   /* The completion matches found so far, in a hash table, for
      duplicate elimination as entries are added.  Otherwise the user
      is left scratching his/her head: readline and complete_command
      will remove duplicates, and if removal of duplicates there brings
      the total under max_completions the user may think gdb quit
      searching too early.  */
-  htab_t m_entries_hash;
+  htab_t m_entries_hash = NULL;
 
   /* If non-zero, then this is the quote char that needs to be
      appended after completion (iff we have a unique completion).  We
@@ -483,6 +484,16 @@ private:
      "function()", instead of showing all the possible
      completions.  */
   bool m_lowest_common_denominator_unique = false;
+
+  /* True if the value in M_LOWEST_COMMON_DENOMINATOR is correct.  This is
+     set to true each time RECOMPUTE_LOWEST_COMMON_DENOMINATOR is called,
+     and reset to false whenever a new completion is added.  */
+  bool m_lowest_common_denominator_valid = false;
+
+  /* To avoid calls to xrealloc in RECOMPUTE_LOWEST_COMMON_DENOMINATOR, we
+     track the maximum possible size of the lowest common denominator,
+     which we know as each completion is added.  */
+  size_t m_lowest_common_denominator_max_length = 0;
 };
 
 /* Return a string to hand off to readline as a completion match

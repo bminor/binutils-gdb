@@ -863,7 +863,7 @@ vms_get_remaining_object_record (bfd *abfd, unsigned int read_so_far)
   if (to_read > PRIV (recrd.buf_size))
     {
       PRIV (recrd.buf)
-	= (unsigned char *) bfd_realloc (PRIV (recrd.buf), to_read);
+	= (unsigned char *) bfd_realloc_or_free (PRIV (recrd.buf), to_read);
       if (PRIV (recrd.buf) == NULL)
 	return 0;
       PRIV (recrd.buf_size) = to_read;
@@ -1126,7 +1126,7 @@ add_symbol_entry (bfd *abfd, struct vms_symbol_entry *sym)
       else
 	{
 	  PRIV (max_sym_count) *= 2;
-	  PRIV (syms) = bfd_realloc
+	  PRIV (syms) = bfd_realloc_or_free
 	    (PRIV (syms),
 	     (PRIV (max_sym_count) * sizeof (struct vms_symbol_entry *)));
 	}
@@ -1548,40 +1548,62 @@ image_inc_ptr (bfd *abfd, bfd_vma offset)
 
 /* Save current DST location counter under specified index.  */
 
-static void
+static bfd_boolean
 dst_define_location (bfd *abfd, unsigned int loc)
 {
   vms_debug2 ((4, "dst_define_location (%d)\n", (int)loc));
 
+  if (loc > 1 << 24)
+    {
+      /* 16M entries ought to be plenty.  */
+      bfd_set_error (bfd_error_bad_value);
+      _bfd_error_handler (_("dst_define_location %u too large"), loc);
+      return FALSE;
+    }
+
   /* Grow the ptr offset table if necessary.  */
   if (loc + 1 > PRIV (dst_ptr_offsets_count))
     {
-      PRIV (dst_ptr_offsets) = bfd_realloc (PRIV (dst_ptr_offsets),
-					   (loc + 1) * sizeof (unsigned int));
+      PRIV (dst_ptr_offsets)
+	= bfd_realloc_or_free (PRIV (dst_ptr_offsets),
+			       (loc + 1) * sizeof (unsigned int));
+      if (PRIV (dst_ptr_offsets) == NULL)
+	return FALSE;
       PRIV (dst_ptr_offsets_count) = loc + 1;
     }
 
   PRIV (dst_ptr_offsets)[loc] = PRIV (image_offset);
+  return TRUE;
 }
 
 /* Restore saved DST location counter from specified index.  */
 
-static void
+static bfd_boolean
 dst_restore_location (bfd *abfd, unsigned int loc)
 {
   vms_debug2 ((4, "dst_restore_location (%d)\n", (int)loc));
 
-  PRIV (image_offset) = PRIV (dst_ptr_offsets)[loc];
+  if (loc < PRIV (dst_ptr_offsets_count))
+    {
+      PRIV (image_offset) = PRIV (dst_ptr_offsets)[loc];
+      return TRUE;
+    }
+  return FALSE;
 }
 
 /* Retrieve saved DST location counter from specified index.  */
 
-static unsigned int
-dst_retrieve_location (bfd *abfd, unsigned int loc)
+static bfd_boolean
+dst_retrieve_location (bfd *abfd, bfd_vma *loc)
 {
-  vms_debug2 ((4, "dst_retrieve_location (%d)\n", (int)loc));
+  vms_debug2 ((4, "dst_retrieve_location (%d)\n", (int) *loc));
 
-  return PRIV (dst_ptr_offsets)[loc];
+  if (*loc < PRIV (dst_ptr_offsets_count))
+    {
+      *loc = PRIV (dst_ptr_offsets)[*loc];
+      return TRUE;
+    }
+  return FALSE;
 }
 
 /* Write multiple bytes to section image.  */
@@ -2311,7 +2333,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	    return FALSE;
 	  if (rel1 != RELC_NONE)
 	    goto bad_context;
-	  dst_define_location (abfd, op1);
+	  if (!dst_define_location (abfd, op1))
+	    return FALSE;
 	  break;
 
 	  /* Set location: pop index, restore location counter from index
@@ -2321,7 +2344,12 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	    return FALSE;
 	  if (rel1 != RELC_NONE)
 	    goto bad_context;
-	  dst_restore_location (abfd, op1);
+	  if (!dst_restore_location (abfd, op1))
+	    {
+	      bfd_set_error (bfd_error_bad_value);
+	      _bfd_error_handler (_("invalid %s"), "ETIR__C_CTL_STLOC");
+	      return FALSE;
+	    }
 	  break;
 
 	  /* Stack defined location: pop index, push location counter from index
@@ -2331,8 +2359,13 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	    return FALSE;
 	  if (rel1 != RELC_NONE)
 	    goto bad_context;
-	  if (!_bfd_vms_push (abfd, dst_retrieve_location (abfd, op1),
-			      RELC_NONE))
+	  if (!dst_retrieve_location (abfd, &op1))
+	    {
+	      bfd_set_error (bfd_error_bad_value);
+	      _bfd_error_handler (_("invalid %s"), "ETIR__C_CTL_STKDL");
+	      return FALSE;
+	    }
+	  if (!_bfd_vms_push (abfd, op1, RELC_NONE))
 	    return FALSE;
 	  break;
 
@@ -2609,7 +2642,7 @@ _bfd_vms_slurp_eeom (bfd *abfd)
 static bfd_boolean
 _bfd_vms_slurp_object_records (bfd * abfd)
 {
-  bfd_boolean err;
+  bfd_boolean ok;
   int type;
 
   do
@@ -2626,27 +2659,27 @@ _bfd_vms_slurp_object_records (bfd * abfd)
       switch (type)
 	{
 	case EOBJ__C_EMH:
-	  err = _bfd_vms_slurp_ehdr (abfd);
+	  ok = _bfd_vms_slurp_ehdr (abfd);
 	  break;
 	case EOBJ__C_EEOM:
-	  err = _bfd_vms_slurp_eeom (abfd);
+	  ok = _bfd_vms_slurp_eeom (abfd);
 	  break;
 	case EOBJ__C_EGSD:
-	  err = _bfd_vms_slurp_egsd (abfd);
+	  ok = _bfd_vms_slurp_egsd (abfd);
 	  break;
 	case EOBJ__C_ETIR:
-	  err = TRUE; /* _bfd_vms_slurp_etir (abfd); */
+	  ok = TRUE; /* _bfd_vms_slurp_etir (abfd); */
 	  break;
 	case EOBJ__C_EDBG:
-	  err = _bfd_vms_slurp_edbg (abfd);
+	  ok = _bfd_vms_slurp_edbg (abfd);
 	  break;
 	case EOBJ__C_ETBT:
-	  err = _bfd_vms_slurp_etbt (abfd);
+	  ok = _bfd_vms_slurp_etbt (abfd);
 	  break;
 	default:
-	  err = FALSE;
+	  ok = FALSE;
 	}
-      if (!err)
+      if (!ok)
 	{
 	  vms_debug2 ((2, "slurp type %d failed\n", type));
 	  return FALSE;
@@ -2702,7 +2735,7 @@ alpha_vms_free_private (bfd *abfd)
 /* Check the format for a file being read.
    Return a (bfd_target *) if it's an object file or zero if not.  */
 
-static const struct bfd_target *
+static bfd_cleanup
 alpha_vms_object_p (bfd *abfd)
 {
   void *tdata_save = abfd->tdata.any;
@@ -2719,7 +2752,7 @@ alpha_vms_object_p (bfd *abfd)
     }
 
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET))
-    goto err_wrong_format;
+    goto error_ret;
 
   /* The first challenge with VMS is to discover the kind of the file.
 
@@ -2738,27 +2771,17 @@ alpha_vms_object_p (bfd *abfd)
      2 bytes size repeated) and 12 bytes for images (4 bytes major id,
      4 bytes minor id, 4 bytes length).  */
   test_len = 12;
-
-  /* Size the main buffer.  */
-  buf = (unsigned char *) bfd_malloc (test_len);
+  buf = _bfd_malloc_and_read (abfd, test_len, test_len);
   if (buf == NULL)
     goto error_ret;
   PRIV (recrd.buf) = buf;
   PRIV (recrd.buf_size) = test_len;
-
-  /* Initialize the record pointer.  */
   PRIV (recrd.rec) = buf;
-
-  if (bfd_bread (buf, test_len, abfd) != test_len)
-    goto err_wrong_format;
 
   /* Is it an image?  */
   if ((bfd_getl32 (buf) == EIHD__K_MAJORID)
       && (bfd_getl32 (buf + 4) == EIHD__K_MINORID))
     {
-      unsigned int to_read;
-      unsigned int read_so_far;
-      unsigned int remaining;
       unsigned int eisd_offset, eihs_offset;
 
       /* Extract the header size.  */
@@ -2768,44 +2791,25 @@ alpha_vms_object_p (bfd *abfd)
       if (PRIV (recrd.rec_size) == 0)
 	PRIV (recrd.rec_size) = sizeof (struct vms_eihd);
 
-      if (PRIV (recrd.rec_size) > PRIV (recrd.buf_size))
-	{
-	  buf = bfd_realloc_or_free (buf, PRIV (recrd.rec_size));
-
-	  if (buf == NULL)
-	    {
-	      PRIV (recrd.buf) = NULL;
-	      goto error_ret;
-	    }
-	  PRIV (recrd.buf) = buf;
-	  PRIV (recrd.buf_size) = PRIV (recrd.rec_size);
-	}
-
       /* PR 21813: Check for a truncated record.  */
-      if (PRIV (recrd.rec_size < test_len))
-	goto error_ret;
-      /* Read the remaining record.  */
-      remaining = PRIV (recrd.rec_size) - test_len;
-      to_read = MIN (VMS_BLOCK_SIZE - test_len, remaining);
-      read_so_far = test_len;
-
-      while (remaining > 0)
-	{
-	  if (bfd_bread (buf + read_so_far, to_read, abfd) != to_read)
-	    goto err_wrong_format;
-
-	  read_so_far += to_read;
-	  remaining -= to_read;
-
-	  to_read = MIN (VMS_BLOCK_SIZE, remaining);
-	}
-
-      /* Reset the record pointer.  */
-      PRIV (recrd.rec) = buf;
-
       /* PR 17512: file: 7d7c57c2.  */
       if (PRIV (recrd.rec_size) < sizeof (struct vms_eihd))
+	goto err_wrong_format;
+
+      if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET))
 	goto error_ret;
+
+      free (PRIV (recrd.buf));
+      PRIV (recrd.buf) = NULL;
+      buf = _bfd_malloc_and_read (abfd, PRIV (recrd.rec_size),
+				  PRIV (recrd.rec_size));
+      if (buf == NULL)
+	goto error_ret;
+
+      PRIV (recrd.buf) = buf;
+      PRIV (recrd.buf_size) = PRIV (recrd.rec_size);
+      PRIV (recrd.rec) = buf;
+
       vms_debug2 ((2, "file type is image\n"));
 
       if (!_bfd_vms_slurp_eihd (abfd, &eisd_offset, &eihs_offset))
@@ -2850,7 +2854,7 @@ alpha_vms_object_p (bfd *abfd)
   if (! bfd_default_set_arch_mach (abfd, bfd_arch_alpha, 0))
     goto err_wrong_format;
 
-  return abfd->xvec;
+  return alpha_vms_free_private;
 
  err_wrong_format:
   bfd_set_error (bfd_error_wrong_format);
@@ -2979,7 +2983,7 @@ vector_grow1 (struct vector_type *vec, size_t elsz)
 	      bfd_set_error (bfd_error_file_too_big);
 	      return NULL;
 	    }
-	  vec->els = bfd_realloc (vec->els, amt);
+	  vec->els = bfd_realloc_or_free (vec->els, amt);
 	}
     }
   if (vec->els == NULL)
@@ -4284,7 +4288,7 @@ new_module (bfd *abfd)
 
 /* Parse debug info for a module and internalize it.  */
 
-static void
+static bfd_boolean
 parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 	      int length)
 {
@@ -4396,9 +4400,11 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 		      {
 			module->file_table_count *= 2;
 			module->file_table
-			  = bfd_realloc (module->file_table,
-					 module->file_table_count
-					   * sizeof (struct fileinfo));
+			  = bfd_realloc_or_free (module->file_table,
+						 module->file_table_count
+						 * sizeof (struct fileinfo));
+			if (module->file_table == NULL)
+			  return FALSE;
 		      }
 
 		    module->file_table [fileid].name = filename;
@@ -4720,6 +4726,7 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
      because parsing can be either performed at module creation
      or deferred until debug info is consumed.  */
   SET_MODULE_PARSED (module);
+  return TRUE;
 }
 
 /* Build the list of modules for the specified BFD.  */
@@ -4797,7 +4804,8 @@ build_module_list (bfd *abfd)
 	return NULL;
 
       module = new_module (abfd);
-      parse_module (abfd, module, PRIV (dst_section)->contents, -1);
+      if (!parse_module (abfd, module, PRIV (dst_section)->contents, -1))
+	return NULL;
       list = module;
     }
 
@@ -4831,8 +4839,10 @@ module_find_nearest_line (bfd *abfd, struct module *module, bfd_vma addr,
 	  return FALSE;
 	}
 
-      parse_module (abfd, module, buffer, size);
+      ret = parse_module (abfd, module, buffer, size);
       free (buffer);
+      if (!ret)
+	return ret;
     }
 
   /* Find out the function (if any) that contains the address.  */
@@ -5306,8 +5316,10 @@ alpha_vms_slurp_relocs (bfd *abfd)
 		else
 		  {
 		    vms_sec->reloc_max *= 2;
-		    sec->relocation = bfd_realloc
+		    sec->relocation = bfd_realloc_or_free
 		      (sec->relocation, vms_sec->reloc_max * sizeof (arelent));
+		    if (sec->relocation == NULL)
+		      return FALSE;
 		  }
 	      }
 	    reloc = &sec->relocation[sec->reloc_count];

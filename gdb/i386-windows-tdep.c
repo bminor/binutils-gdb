@@ -1,4 +1,5 @@
-/* Target-dependent code for Cygwin running on i386's, for GDB.
+/* Target-dependent code for Windows (including Cygwin) running on i386's,
+   for GDB.
 
    Copyright (C) 2003-2020 Free Software Foundation, Inc.
 
@@ -188,25 +189,25 @@ i386_windows_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
 }
 
 static CORE_ADDR
-i386_cygwin_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
+i386_windows_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
   return i386_pe_skip_trampoline_code (frame, pc, NULL);
 }
 
 static const char *
-i386_cygwin_auto_wide_charset (void)
+i386_windows_auto_wide_charset (void)
 {
   return "UTF-16";
 }
 
 static void
-i386_cygwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+i386_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   windows_init_abi (info, gdbarch);
 
-  set_gdbarch_skip_trampoline_code (gdbarch, i386_cygwin_skip_trampoline_code);
+  set_gdbarch_skip_trampoline_code (gdbarch, i386_windows_skip_trampoline_code);
 
   set_gdbarch_skip_main_prologue (gdbarch, i386_skip_main_prologue);
 
@@ -223,23 +224,34 @@ i386_cygwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, windows_core_xfer_shared_libraries);
   set_gdbarch_core_pid_to_str (gdbarch, i386_windows_core_pid_to_str);
 
-  set_gdbarch_auto_wide_charset (gdbarch, i386_cygwin_auto_wide_charset);
+  set_gdbarch_auto_wide_charset (gdbarch, i386_windows_auto_wide_charset);
 }
 
-static enum gdb_osabi
-i386_cygwin_osabi_sniffer (bfd *abfd)
+static gdb_osabi
+i386_windows_osabi_sniffer (bfd *abfd)
 {
   const char *target_name = bfd_get_target (abfd);
 
-  if (strcmp (target_name, "pei-i386") == 0)
+  if (!streq (target_name, "pei-i386"))
+    return GDB_OSABI_UNKNOWN;
+
+  if (is_linked_with_cygwin_dll (abfd))
     return GDB_OSABI_CYGWIN;
+
+  return GDB_OSABI_WINDOWS;
+}
+
+static enum gdb_osabi
+i386_cygwin_core_osabi_sniffer (bfd *abfd)
+{
+  const char *target_name = bfd_get_target (abfd);
 
   /* Cygwin uses elf core dumps.  Do not claim all ELF executables,
      check whether there is a .reg section of proper size.  */
   if (strcmp (target_name, "elf32-i386") == 0)
     {
       asection *section = bfd_get_section_by_name (abfd, ".reg");
-      if (section
+      if (section != nullptr
 	  && bfd_section_size (section) == I386_WINDOWS_SIZEOF_GREGSET)
 	return GDB_OSABI_CYGWIN;
     }
@@ -247,17 +259,20 @@ i386_cygwin_osabi_sniffer (bfd *abfd)
   return GDB_OSABI_UNKNOWN;
 }
 
-void _initialize_i386_cygwin_tdep ();
+void _initialize_i386_windows_tdep ();
 void
-_initialize_i386_cygwin_tdep ()
+_initialize_i386_windows_tdep ()
 {
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_coff_flavour,
-                                  i386_cygwin_osabi_sniffer);
+                                  i386_windows_osabi_sniffer);
 
   /* Cygwin uses elf core dumps.  */
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_elf_flavour,
-                                  i386_cygwin_osabi_sniffer);
+                                  i386_cygwin_core_osabi_sniffer);
 
+  /* The Windows and Cygwin OS ABIs are currently equivalent on i386.  */
+  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_WINDOWS,
+                          i386_windows_init_abi);
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_CYGWIN,
-                          i386_cygwin_init_abi);
+                          i386_windows_init_abi);
 }

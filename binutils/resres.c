@@ -619,7 +619,7 @@ skip_null_resource (windres_bfd *wrbfd, rc_uint_type *off, rc_uint_type omax)
 
   return;
 
-skip_err:
+ skip_err:
   fprintf (stderr, "%s: %s: Not a valid WIN32 resource file\n", program_name,
 	   filename);
   xexit (1);

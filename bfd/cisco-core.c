@@ -80,7 +80,7 @@ struct cisco_core_struct
 /* Examine the file for a crash info struct at the offset given by
    CRASH_INFO_LOC.  */
 
-static const bfd_target *
+static bfd_cleanup
 cisco_core_file_validate (bfd *abfd, int crash_info_loc)
 {
   char buf[4];
@@ -274,7 +274,7 @@ cisco_core_file_validate (bfd *abfd, int crash_info_loc)
   nread = statbuf.st_size - asect->filepos;
   asect->size = (nread < 1024) ? nread : 1024;
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 
   /* Get here if we have already started filling out the BFD
      and there is an error of some kind.  */
@@ -286,19 +286,19 @@ cisco_core_file_validate (bfd *abfd, int crash_info_loc)
   return NULL;
 }
 
-static const bfd_target *
+static bfd_cleanup
 cisco_core_file_p (bfd *abfd)
 {
   int *crash_info_locp;
-  const bfd_target *target = NULL;
+  bfd_cleanup cleanup = NULL;
 
   for (crash_info_locp = crash_info_locs;
-       *crash_info_locp != -1  &&  target == NULL;
+       *crash_info_locp != -1 && cleanup == NULL;
        crash_info_locp++)
     {
-      target = cisco_core_file_validate (abfd, *crash_info_locp);
+      cleanup = cisco_core_file_validate (abfd, *crash_info_locp);
     }
-  return (target);
+  return cleanup;
 }
 
 static char *

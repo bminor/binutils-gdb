@@ -3856,9 +3856,7 @@ value_slice (struct value *array, int lowbound, int length)
 
 /* Create a value for a FORTRAN complex number.  Currently most of the
    time values are coerced to COMPLEX*16 (i.e. a complex number
-   composed of 2 doubles.  This really should be a smarter routine
-   that figures out precision intelligently as opposed to assuming
-   doubles.  FIXME: fmb  */
+   composed of 2 doubles.  */
 
 struct value *
 value_literal_complex (struct value *arg1, 

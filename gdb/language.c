@@ -792,14 +792,12 @@ unk_lang_print_type (struct type *type, const char *varstring,
 }
 
 static void
-unk_lang_val_print (struct type *type,
-		    int embedded_offset, CORE_ADDR address,
-		    struct ui_file *stream, int recurse,
-		    struct value *val,
-		    const struct value_print_options *options)
+unk_lang_value_print_inner (struct value *val,
+			    struct ui_file *stream, int recurse,
+			    const struct value_print_options *options)
 {
   error (_("internal error - unimplemented "
-	   "function unk_lang_val_print called."));
+	   "function unk_lang_value_print_inner called."));
 }
 
 static void
@@ -859,7 +857,7 @@ const struct language_defn unknown_language_defn =
   unk_lang_emit_char,
   unk_lang_print_type,		/* Print a type using appropriate syntax */
   default_print_typedef,	/* Print a typedef using appropriate syntax */
-  unk_lang_val_print,		/* Print a value using appropriate syntax */
+  unk_lang_value_print_inner,	/* la_value_print_inner */
   unk_lang_value_print,		/* Print a top-level value */
   default_read_var_value,	/* la_read_var_value */
   unk_lang_trampoline,		/* Language specific skip_trampoline */
@@ -910,7 +908,7 @@ const struct language_defn auto_language_defn =
   unk_lang_emit_char,
   unk_lang_print_type,		/* Print a type using appropriate syntax */
   default_print_typedef,	/* Print a typedef using appropriate syntax */
-  unk_lang_val_print,		/* Print a value using appropriate syntax */
+  unk_lang_value_print_inner,	/* la_value_print_inner */
   unk_lang_value_print,		/* Print a top-level value */
   default_read_var_value,	/* la_read_var_value */
   unk_lang_trampoline,		/* Language specific skip_trampoline */

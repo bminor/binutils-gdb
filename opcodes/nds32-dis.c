@@ -985,7 +985,7 @@ print_insn_nds32 (bfd_vma pc, disassemble_info *info)
   int is_data = FALSE;
   bfd_boolean found = FALSE;
   struct nds32_private_data *private_data;
-  unsigned int size = 16;
+  unsigned int size;
   enum map_type mapping_type = MAP_CODE;
 
   if (info->private_data == NULL)
@@ -1063,6 +1063,7 @@ print_insn_nds32 (bfd_vma pc, disassemble_info *info)
 
       /* Fix corner case: there is no next mapping symbol,
 	 let mapping type decides size */
+      size = 16;
       if (last_symbol_index + 1 >= info->symtab_size)
 	{
 	  if (mapping_type == MAP_DATA0)
@@ -1096,7 +1097,7 @@ print_insn_nds32 (bfd_vma pc, disassemble_info *info)
 	size = (pc & 1) ? 1 : 2;
 
       /* Read bytes from BFD.  */
-      info->read_memory_func (pc, (bfd_byte *) buf_data, size, info);
+      info->read_memory_func (pc, buf_data, size, info);
       given = 0;
       given1 = 0;
       /* Start assembling data.  */
@@ -1153,16 +1154,20 @@ print_insn_nds32 (bfd_vma pc, disassemble_info *info)
       return size;
     }
 
-  status = info->read_memory_func (pc, (bfd_byte *) buf, 4, info);
+  size = 4;
+  status = info->read_memory_func (pc, buf, 4, info);
   if (status)
     {
       /* For the last 16-bit instruction.  */
-      status = info->read_memory_func (pc, (bfd_byte *) buf, 2, info);
+      size = 2;
+      status = info->read_memory_func (pc, buf, 2, info);
       if (status)
 	{
-	  (*info->memory_error_func)(status, pc, info);
+	  (*info->memory_error_func) (status, pc, info);
 	  return -1;
 	}
+      buf[2] = 0;
+      buf[3] = 0;
     }
 
   insn = bfd_getb32 (buf);
@@ -1174,11 +1179,12 @@ print_insn_nds32 (bfd_vma pc, disassemble_info *info)
     }
 
   /* 32-bit instructions.  */
+  if (size == 4)
+    print_insn32 (pc, info, insn, NDS32_PARSE_INSN32);
   else
-    {
-      print_insn32 (pc, info, insn, NDS32_PARSE_INSN32);
-      return 4;
-    }
+    info->fprintf_func (info->stream,
+			_("insufficient data to decode instruction"));
+  return 4;
 }
 
 /* Ignore disassembling unnecessary name.  */

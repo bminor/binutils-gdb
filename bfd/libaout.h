@@ -475,8 +475,8 @@ extern bfd_boolean NAME (aout, squirt_out_relocs)
 extern bfd_boolean NAME (aout, make_sections)
   (bfd *);
 
-extern const bfd_target * NAME (aout, some_aout_object_p)
-  (bfd *, struct internal_exec *, const bfd_target *(*) (bfd *));
+extern bfd_cleanup NAME (aout, some_aout_object_p)
+  (bfd *, struct internal_exec *, bfd_cleanup (*) (bfd *));
 
 extern bfd_boolean NAME (aout, mkobject)
   (bfd *);

@@ -497,7 +497,7 @@ elf_file_p (Elf_External_Ehdr *x_ehdrp)
    any side effects in ABFD, or any data it points to (like tdata), if the
    file does not match the target vector.  */
 
-const bfd_target *
+bfd_cleanup
 elf_object_p (bfd *abfd)
 {
   Elf_External_Ehdr x_ehdr;	/* Elf file header, external form */
@@ -853,7 +853,7 @@ elf_object_p (bfd *abfd)
 	    s->flags |= SEC_DEBUGGING;
 	}
     }
-  return target;
+  return _bfd_no_cleanup;
 
  got_wrong_format_error:
   bfd_set_error (bfd_error_wrong_format);
@@ -869,6 +869,7 @@ elf_object_p (bfd *abfd)
 void
 elf_write_relocs (bfd *abfd, asection *sec, void *data)
 {
+  const struct elf_backend_data * const bed = get_elf_backend_data (abfd);
   bfd_boolean *failedp = (bfd_boolean *) data;
   Elf_Internal_Shdr *rela_hdr;
   bfd_vma addr_offset;
@@ -984,6 +985,12 @@ elf_write_relocs (bfd *abfd, asection *sec, void *data)
       src_rela.r_info = ELF_R_INFO (n, ptr->howto->type);
       src_rela.r_addend = ptr->addend;
       (*swap_out) (abfd, &src_rela, dst_rela);
+    }
+
+  if (!bed->write_secondary_relocs (abfd, sec))
+    {
+      *failedp = TRUE;
+      return;
     }
 }
 
@@ -1292,7 +1299,10 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 		{
 		  /* This symbol is in a section for which we did not
 		     create a BFD section.  Just use bfd_abs_section,
-		     although it is wrong.  FIXME.  */
+		     although it is wrong.  FIXME.  Note - there is
+		     code in elf.c:swap_out_syms that calls
+		     symbol_section_index() in the elf backend for
+		     cases like this.  */
 		  sym->symbol.section = bfd_abs_section_ptr;
 		}
 	    }
@@ -1398,7 +1408,7 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
     free (isymbuf);
   return symcount;
 
-error_return:
+ error_return:
   if (xverbuf != NULL)
     free (xverbuf);
   if (isymbuf != NULL && hdr->contents != (unsigned char *) isymbuf)
@@ -1517,6 +1527,7 @@ elf_slurp_reloc_table (bfd *abfd,
 		       asymbol **symbols,
 		       bfd_boolean dynamic)
 {
+  const struct elf_backend_data * const bed = get_elf_backend_data (abfd);
   struct bfd_elf_section_data * const d = elf_section_data (asect);
   Elf_Internal_Shdr *rel_hdr;
   Elf_Internal_Shdr *rel_hdr2;
@@ -1584,6 +1595,9 @@ elf_slurp_reloc_table (bfd *abfd,
 					      symbols, dynamic))
     return FALSE;
 
+  if (!bed->slurp_secondary_relocs (abfd, asect, symbols))
+    return FALSE;
+
   asect->relocation = relents;
   return TRUE;
 }
@@ -1648,10 +1662,11 @@ elf_debug_file (Elf_Internal_Ehdr *ehdrp)
 bfd *
 NAME(_bfd_elf,bfd_from_remote_memory)
   (bfd *templ,
-   bfd_vma ehdr_vma,
-   bfd_size_type size,
-   bfd_vma *loadbasep,
+   bfd_vma ehdr_vma    /* Bytes.  */,
+   bfd_size_type size  /* Octets.  */,
+   bfd_vma *loadbasep  /* Bytes.  */,
    int (*target_read_memory) (bfd_vma, bfd_byte *, bfd_size_type))
+                          /* (Bytes  ,           , octets       ).  */
 {
   Elf_External_Ehdr x_ehdr;	/* Elf file header, external form */
   Elf_Internal_Ehdr i_ehdr;	/* Elf file header, internal form */
@@ -1664,9 +1679,10 @@ NAME(_bfd_elf,bfd_from_remote_memory)
   unsigned int i;
   bfd_vma high_offset;
   bfd_vma shdr_end;
-  bfd_vma loadbase;
+  bfd_vma loadbase;  /* Bytes.  */
   char *filename;
   size_t amt;
+  unsigned int opb = bfd_octets_per_byte (templ, NULL);
 
   /* Read in the ELF header in external format.  */
   err = target_read_memory (ehdr_vma, (bfd_byte *) &x_ehdr, sizeof x_ehdr);
@@ -1764,17 +1780,17 @@ NAME(_bfd_elf,bfd_from_remote_memory)
 	     header sits, then we can figure out the loadbase.  */
 	  if (first_phdr == NULL)
 	    {
-	      bfd_vma p_offset = i_phdrs[i].p_offset;
-	      bfd_vma p_vaddr = i_phdrs[i].p_vaddr;
+	      bfd_vma p_offset = i_phdrs[i].p_offset;  /* Octets.  */
+	      bfd_vma p_vaddr = i_phdrs[i].p_vaddr;    /* Octets.  */
 
 	      if (i_phdrs[i].p_align > 1)
 		{
-		  p_offset &= -i_phdrs[i].p_align;
-		  p_vaddr &= -i_phdrs[i].p_align;
+		  p_offset &= -(i_phdrs[i].p_align * opb);
+		  p_vaddr &= -(i_phdrs[i].p_align * opb);
 		}
 	      if (p_offset == 0)
 		{
-		  loadbase = ehdr_vma - p_vaddr;
+		  loadbase = ehdr_vma - p_vaddr / opb;
 		  first_phdr = &i_phdrs[i];
 		}
 	    }
@@ -1830,9 +1846,9 @@ NAME(_bfd_elf,bfd_from_remote_memory)
   for (i = 0; i < i_ehdr.e_phnum; ++i)
     if (i_phdrs[i].p_type == PT_LOAD)
       {
-	bfd_vma start = i_phdrs[i].p_offset;
-	bfd_vma end = start + i_phdrs[i].p_filesz;
-	bfd_vma vaddr = i_phdrs[i].p_vaddr;
+	bfd_vma start = i_phdrs[i].p_offset;         /* Octets.  */
+	bfd_vma end = start + i_phdrs[i].p_filesz;   /* Octets.  */
+	bfd_vma vaddr = i_phdrs[i].p_vaddr;          /* Octets.  */
 
 	/* Extend the beginning of the first pt_load to cover file
 	   header and program headers, if we proved earlier that its
@@ -1845,7 +1861,7 @@ NAME(_bfd_elf,bfd_from_remote_memory)
 	/* Extend the end of the last pt_load to cover section headers.  */
 	if (last_phdr == &i_phdrs[i])
 	  end = high_offset;
-	err = target_read_memory (loadbase + vaddr,
+	err = target_read_memory (loadbase + vaddr / opb,
 				  contents + start, end - start);
 	if (err)
 	  {

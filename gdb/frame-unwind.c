@@ -27,6 +27,7 @@
 #include "gdb_obstack.h"
 #include "target.h"
 #include "gdbarch.h"
+#include "dwarf2/frame-tailcall.h"
 
 static struct gdbarch_data *frame_unwind_data;
 
@@ -43,6 +44,18 @@ struct frame_unwind_table
   struct frame_unwind_table_entry **osabi_head;
 };
 
+/* A helper function to add an unwinder to a list.  LINK says where to
+   install the new unwinder.  The new link is returned.  */
+
+static struct frame_unwind_table_entry **
+add_unwinder (struct obstack *obstack, const struct frame_unwind *unwinder,
+	      struct frame_unwind_table_entry **link)
+{
+  *link = OBSTACK_ZALLOC (obstack, struct frame_unwind_table_entry);
+  (*link)->unwinder = unwinder;
+  return &(*link)->next;
+}
+
 static void *
 frame_unwind_init (struct obstack *obstack)
 {
@@ -51,13 +64,21 @@ frame_unwind_init (struct obstack *obstack)
 
   /* Start the table out with a few default sniffers.  OSABI code
      can't override this.  */
-  table->list = OBSTACK_ZALLOC (obstack, struct frame_unwind_table_entry);
-  table->list->unwinder = &dummy_frame_unwind;
-  table->list->next = OBSTACK_ZALLOC (obstack,
-				      struct frame_unwind_table_entry);
-  table->list->next->unwinder = &inline_frame_unwind;
+  struct frame_unwind_table_entry **link = &table->list;
+
+  link = add_unwinder (obstack, &dummy_frame_unwind, link);
+  /* The DWARF tailcall sniffer must come before the inline sniffer.
+     Otherwise, we can end up in a situation where a DWARF frame finds
+     tailcall information, but then the inline sniffer claims a frame
+     before the tailcall sniffer, resulting in confusion.  This is
+     safe to do always because the tailcall sniffer can only ever be
+     activated if the newer frame was created using the DWARF
+     unwinder, and it also found tailcall information.  */
+  link = add_unwinder (obstack, &dwarf2_tailcall_frame_unwind, link);
+  link = add_unwinder (obstack, &inline_frame_unwind, link);
+
   /* The insertion point for OSABI sniffers.  */
-  table->osabi_head = &table->list->next->next;
+  table->osabi_head = link;
   return table;
 }
 

@@ -456,7 +456,7 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
    values.  Return non-zero if the field is an encoding of
    discriminant values, as in a standard variant record, and 0 if the
    field is not so encoded (as happens with single-component variants
-   in types annotated with pragma Unchecked_Variant).  */
+   in types annotated with pragma Unchecked_Union).  */
 
 static int
 print_choices (struct type *type, int field_num, struct ui_file *stream,

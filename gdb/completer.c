@@ -45,6 +45,60 @@
 
 #include "completer.h"
 
+/* See completer.h.  */
+
+class completion_tracker::completion_hash_entry
+{
+public:
+  /* Constructor.  */
+  completion_hash_entry (gdb::unique_xmalloc_ptr<char> name,
+			 gdb::unique_xmalloc_ptr<char> lcd)
+    : m_name (std::move (name)),
+      m_lcd (std::move (lcd))
+  {
+    /* Nothing.  */
+  }
+
+  /* Returns a pointer to the lowest common denominator string.  This
+     string will only be valid while this hash entry is still valid as the
+     string continues to be owned by this hash entry and will be released
+     when this entry is deleted.  */
+  char *get_lcd () const
+  {
+    return m_lcd.get ();
+  }
+
+  /* Get, and release the name field from this hash entry.  This can only
+     be called once, after which the name field is no longer valid.  This
+     should be used to pass ownership of the name to someone else.  */
+  char *release_name ()
+  {
+    return m_name.release ();
+  }
+
+  /* Return true of the name in this hash entry is STR.  */
+  bool is_name_eq (const char *str) const
+  {
+    return strcmp (m_name.get (), str) == 0;
+  }
+
+  /* A static function that can be passed to the htab hash system to be
+     used as a callback that deletes an item from the hash.  */
+  static void deleter (void *arg)
+  {
+    completion_hash_entry *entry = (completion_hash_entry *) arg;
+    delete entry;
+  }
+
+private:
+
+  /* The symbol name stored in this hash entry.  */
+  gdb::unique_xmalloc_ptr<char> m_name;
+
+  /* The lowest common denominator string computed for this hash entry.  */
+  gdb::unique_xmalloc_ptr<char> m_lcd;
+};
+
 /* Misc state that needs to be tracked across several different
    readline completer entry point calls, all related to a single
    completion invocation.  */
@@ -407,6 +461,7 @@ advance_to_filename_complete_word_point (completion_tracker &tracker,
 bool
 completion_tracker::completes_to_completion_word (const char *word)
 {
+  recompute_lowest_common_denominator ();
   if (m_lowest_common_denominator_unique)
     {
       const char *lcd = m_lowest_common_denominator;
@@ -1512,9 +1567,7 @@ int max_completions = 200;
 
 completion_tracker::completion_tracker ()
 {
-  m_entries_hash = htab_create_alloc (INITIAL_COMPLETION_HTAB_SIZE,
-				      htab_hash_string, streq_hash,
-				      NULL, xcalloc, xfree);
+  discard_completions ();
 }
 
 /* See completer.h.  */
@@ -1526,13 +1579,33 @@ completion_tracker::discard_completions ()
   m_lowest_common_denominator = NULL;
 
   m_lowest_common_denominator_unique = false;
+  m_lowest_common_denominator_valid = false;
 
-  m_entries_vec.clear ();
+  /* A null check here allows this function to be used from the
+     constructor.  */
+  if (m_entries_hash != NULL)
+    htab_delete (m_entries_hash);
 
-  htab_delete (m_entries_hash);
+  /* A callback used by the hash table to compare new entries with existing
+     entries.  We can't use the standard streq_hash function here as the
+     key to our hash is just a single string, while the values we store in
+     the hash are a struct containing multiple strings.  */
+  static auto entry_eq_func
+    = [] (const void *first, const void *second) -> int
+      {
+	/* The FIRST argument is the entry already in the hash table, and
+	   the SECOND argument is the new item being inserted.  */
+	const completion_hash_entry *entry
+	  = (const completion_hash_entry *) first;
+	const char *name_str = (const char *) second;
+
+	return entry->is_name_eq (name_str);
+      };
+
   m_entries_hash = htab_create_alloc (INITIAL_COMPLETION_HTAB_SIZE,
-				      htab_hash_string, streq_hash,
-				      NULL, xcalloc, xfree);
+				      htab_hash_string, entry_eq_func,
+				      completion_hash_entry::deleter,
+				      xcalloc, xfree);
 }
 
 /* See completer.h.  */
@@ -1559,7 +1632,8 @@ completion_tracker::maybe_add_completion
   if (htab_elements (m_entries_hash) >= max_completions)
     return false;
 
-  slot = htab_find_slot (m_entries_hash, name.get (), INSERT);
+  hashval_t hash = htab_hash_string (name.get ());
+  slot = htab_find_slot_with_hash (m_entries_hash, name.get (), hash, INSERT);
   if (*slot == HTAB_EMPTY_ENTRY)
     {
       const char *match_for_lcd_str = NULL;
@@ -1573,10 +1647,12 @@ completion_tracker::maybe_add_completion
       gdb::unique_xmalloc_ptr<char> lcd
 	= make_completion_match_str (match_for_lcd_str, text, word);
 
-      recompute_lowest_common_denominator (std::move (lcd));
+      size_t lcd_len = strlen (lcd.get ());
+      *slot = new completion_hash_entry (std::move (name), std::move (lcd));
 
-      *slot = name.get ();
-      m_entries_vec.push_back (std::move (name));
+      m_lowest_common_denominator_valid = false;
+      m_lowest_common_denominator_max_length
+	= std::max (m_lowest_common_denominator_max_length, lcd_len);
     }
 
   return true;
@@ -1600,6 +1676,20 @@ completion_tracker::add_completions (completion_list &&list)
 {
   for (auto &candidate : list)
     add_completion (std::move (candidate));
+}
+
+/* See completer.h.  */
+
+void
+completion_tracker::remove_completion (const char *name)
+{
+  hashval_t hash = htab_hash_string (name);
+  if (htab_find_slot_with_hash (m_entries_hash, name, hash, NO_INSERT)
+      != NULL)
+    {
+      htab_remove_elt_with_hash (m_entries_hash, name, hash);
+      m_lowest_common_denominator_valid = false;
+    }
 }
 
 /* Helper for the make_completion_match_str overloads.  Returns NULL
@@ -1982,23 +2072,23 @@ completion_find_completion_word (completion_tracker &tracker, const char *text,
 /* See completer.h.  */
 
 void
-completion_tracker::recompute_lowest_common_denominator
-  (gdb::unique_xmalloc_ptr<char> &&new_match_up)
+completion_tracker::recompute_lcd_visitor (completion_hash_entry *entry)
 {
-  if (m_lowest_common_denominator == NULL)
+  if (!m_lowest_common_denominator_valid)
     {
-      /* We don't have a lowest common denominator yet, so simply take
-	 the whole NEW_MATCH_UP as being it.  */
-      m_lowest_common_denominator = new_match_up.release ();
+      /* This is the first lowest common denominator that we are
+	 considering, just copy it in.  */
+      strcpy (m_lowest_common_denominator, entry->get_lcd ());
       m_lowest_common_denominator_unique = true;
+      m_lowest_common_denominator_valid = true;
     }
   else
     {
-      /* Find the common denominator between the currently-known
-	 lowest common denominator and NEW_MATCH_UP.  That becomes the
-	 new lowest common denominator.  */
+      /* Find the common denominator between the currently-known lowest
+	 common denominator and NEW_MATCH_UP.  That becomes the new lowest
+	 common denominator.  */
       size_t i;
-      const char *new_match = new_match_up.get ();
+      const char *new_match = entry->get_lcd ();
 
       for (i = 0;
 	   (new_match[i] != '\0'
@@ -2011,6 +2101,35 @@ completion_tracker::recompute_lowest_common_denominator
 	  m_lowest_common_denominator_unique = false;
 	}
     }
+}
+
+/* See completer.h.  */
+
+void
+completion_tracker::recompute_lowest_common_denominator ()
+{
+  /* We've already done this.  */
+  if (m_lowest_common_denominator_valid)
+    return;
+
+  /* Resize the storage to ensure we have enough space, the plus one gives
+     us space for the trailing null terminator we will include.  */
+  m_lowest_common_denominator
+    = (char *) xrealloc (m_lowest_common_denominator,
+			 m_lowest_common_denominator_max_length + 1);
+
+  /* Callback used to visit each entry in the m_entries_hash.  */
+  auto visitor_func
+    = [] (void **slot, void *info) -> int
+      {
+	completion_tracker *obj = (completion_tracker *) info;
+	completion_hash_entry *entry = (completion_hash_entry *) *slot;
+	obj->recompute_lcd_visitor (entry);
+	return 1;
+      };
+
+  htab_traverse (m_entries_hash, visitor_func, this);
+  m_lowest_common_denominator_valid = true;
 }
 
 /* See completer.h.  */
@@ -2092,16 +2211,17 @@ completion_result
 completion_tracker::build_completion_result (const char *text,
 					     int start, int end)
 {
-  completion_list &list = m_entries_vec;	/* The completions.  */
+  size_t element_count = htab_elements (m_entries_hash);
 
-  if (list.empty ())
+  if (element_count == 0)
     return {};
 
   /* +1 for the LCD, and +1 for NULL termination.  */
-  char **match_list = XNEWVEC (char *, 1 + list.size () + 1);
+  char **match_list = XNEWVEC (char *, 1 + element_count + 1);
 
   /* Build replacement word, based on the LCD.  */
 
+  recompute_lowest_common_denominator ();
   match_list[0]
     = expand_preserving_ws (text, end - start,
 			    m_lowest_common_denominator);
@@ -2128,13 +2248,40 @@ completion_tracker::build_completion_result (const char *text,
     }
   else
     {
-      int ix;
+      /* State object used while building the completion list.  */
+      struct list_builder
+      {
+	list_builder (char **ml)
+	  : match_list (ml),
+	    index (1)
+	{ /* Nothing.  */ }
 
-      for (ix = 0; ix < list.size (); ++ix)
-	match_list[ix + 1] = list[ix].release ();
-      match_list[ix + 1] = NULL;
+	/* The list we are filling.  */
+	char **match_list;
 
-      return completion_result (match_list, list.size (), false);
+	/* The next index in the list to write to.  */
+	int index;
+      };
+      list_builder builder (match_list);
+
+      /* Visit each entry in m_entries_hash and add it to the completion
+	 list, updating the builder state object.  */
+      auto func
+	= [] (void **slot, void *info) -> int
+	  {
+	    completion_hash_entry *entry = (completion_hash_entry *) *slot;
+	    list_builder *state = (list_builder *) info;
+
+	    state->match_list[state->index] = entry->release_name ();
+	    state->index++;
+	    return 1;
+	  };
+
+      /* Build the completion list and add a null at the end.  */
+      htab_traverse_noresize (m_entries_hash, func, &builder);
+      match_list[builder.index] = NULL;
+
+      return completion_result (match_list, builder.index - 1, false);
     }
 }
 

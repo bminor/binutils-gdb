@@ -4280,7 +4280,7 @@ gdb.events.clear_objfiles.connect(clear_objfiles_handler)
 gdb.events.new_objfile.connect(new_objfile_handler)
 end
 (gdb) file /tmp/hello
-Reading symbols from /tmp/hello...done.
+Reading symbols from /tmp/hello...
 Computing the answer to the ultimate question ...
 (gdb) python print gdb.current_progspace().expensive_computation
 42
@@ -4419,7 +4419,7 @@ def new_objfile_handler(event):
 gdb.events.new_objfile.connect(new_objfile_handler)
 end
 (gdb) file ./hello
-Reading symbols from ./hello...done.
+Reading symbols from ./hello...
 (gdb) python print gdb.objfiles()[0].time_loaded
 2014-10-09 11:41:36.770345
 @end smallexample

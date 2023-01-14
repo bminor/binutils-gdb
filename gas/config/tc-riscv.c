@@ -1308,6 +1308,7 @@ static const struct percent_op_match percent_op_utype[] =
 {
   {"%tprel_hi", BFD_RELOC_RISCV_TPREL_HI20},
   {"%pcrel_hi", BFD_RELOC_RISCV_PCREL_HI20},
+  {"%got_pcrel_hi", BFD_RELOC_RISCV_GOT_HI20},
   {"%tls_ie_pcrel_hi", BFD_RELOC_RISCV_TLS_GOT_HI20},
   {"%tls_gd_pcrel_hi", BFD_RELOC_RISCV_TLS_GD_HI20},
   {"%hi", BFD_RELOC_RISCV_HI20},
@@ -1676,7 +1677,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      || imm_expr->X_add_number >= 64)
 		    break;
 		  ip->insn_opcode |= ENCODE_RVC_IMM (imm_expr->X_add_number);
-rvc_imm_done:
+		rvc_imm_done:
 		  s = expr_end;
 		  imm_expr->X_op = O_absent;
 		  continue;
@@ -1804,7 +1805,7 @@ rvc_imm_done:
 		  p = percent_op_utype;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p))
 		    break;
-rvc_lui:
+		rvc_lui:
 		  if (imm_expr->X_op != O_constant
 		      || imm_expr->X_add_number <= 0
 		      || imm_expr->X_add_number >= RISCV_BIGIMM_REACH
@@ -2114,10 +2115,10 @@ rvc_lui:
 	      goto alu_op;
 	    case '0': /* AMO "displacement," which must be zero.  */
 	      p = percent_op_null;
-load_store:
+	    load_store:
 	      if (riscv_handle_implicit_zero_offset (imm_expr, s))
 		continue;
-alu_op:
+	    alu_op:
 	      /* If this value won't fit into a 16 bit offset, then go
 		 find a macro that will generate the 32 bit offset
 		 code pattern.  */
@@ -2136,7 +2137,7 @@ alu_op:
 	      continue;
 
 	    case 'p':		/* PC-relative offset.  */
-branch:
+	    branch:
 	      *imm_reloc = BFD_RELOC_12_PCREL;
 	      my_getExpression (imm_expr, s);
 	      s = expr_end;
@@ -2160,7 +2161,7 @@ branch:
 	      continue;
 
 	    case 'a':		/* 20-bit PC-relative offset.  */
-jump:
+	    jump:
 	      my_getExpression (imm_expr, s);
 	      s = expr_end;
 	      *imm_reloc = BFD_RELOC_RISCV_JMP;
@@ -2290,7 +2291,7 @@ jump:
       insn_with_csr = FALSE;
     }
 
-out:
+ out:
   /* Restore the character we might have clobbered above.  */
   if (save_c)
     *(argsStart - 1) = save_c;
@@ -3142,7 +3143,7 @@ md_convert_frag_branch (fragS *fragp)
       md_number_to_chars ((char *) buf, insn, 4);
       buf += 4;
 
-jump:
+    jump:
       /* Jump to the target.  */
       fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
 			  4, &exp, FALSE, BFD_RELOC_RISCV_JMP);
@@ -3162,7 +3163,7 @@ jump:
       abort ();
     }
 
-done:
+ done:
   fixp->fx_file = fragp->fr_file;
   fixp->fx_line = fragp->fr_line;
 

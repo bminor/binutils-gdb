@@ -959,6 +959,7 @@ enum
 enum
 {
   PREFIX_90 = 0,
+  PREFIX_0F01_REG_3_RM_1,
   PREFIX_0F01_REG_5_MOD_0,
   PREFIX_0F01_REG_5_MOD_3_RM_0,
   PREFIX_0F01_REG_5_MOD_3_RM_2,
@@ -1740,7 +1741,7 @@ enum
 {
   X86_64_06 = 0,
   X86_64_07,
-  X86_64_0D,
+  X86_64_0E,
   X86_64_16,
   X86_64_17,
   X86_64_1E,
@@ -2378,7 +2379,7 @@ static const struct dis386 dis386[] = {
   { "orS",		{ Gv, EvS }, 0 },
   { "orB",		{ AL, Ib }, 0 },
   { "orS",		{ eAX, Iv }, 0 },
-  { X86_64_TABLE (X86_64_0D) },
+  { X86_64_TABLE (X86_64_0E) },
   { Bad_Opcode },	/* 0x0f extended opcode escape */
   /* 10 */
   { "adcB",		{ Ebh1, Gb }, 0 },
@@ -3625,6 +3626,14 @@ static const struct dis386 prefix_table[][4] = {
     { "pause", { XX }, 0 },
     { "xchgS", { { NOP_Fixup1, eAX_reg }, { NOP_Fixup2, eAX_reg } }, 0 },
     { NULL, { { NULL, 0 } }, PREFIX_IGNORED }
+  },
+
+  /* PREFIX_0F01_REG_3_MOD_1 */
+  {
+    { "vmmcall",	{ Skip_MODRM }, 0 },
+    { "vmgexit",	{ Skip_MODRM }, 0 },
+    { Bad_Opcode },
+    { "vmgexit",	{ Skip_MODRM }, 0 },
   },
 
   /* PREFIX_0F01_REG_5_MOD_0 */
@@ -6806,7 +6815,7 @@ static const struct dis386 x86_64_table[][2] = {
     { "popP", { es }, 0 },
   },
 
-  /* X86_64_0D */
+  /* X86_64_0E */
   {
     { "pushP", { cs }, 0 },
   },
@@ -11018,7 +11027,7 @@ static const struct dis386 rm_table[][8] = {
   {
     /* RM_0F01_REG_3 */
     { "vmrun",		{ Skip_MODRM }, 0 },
-    { "vmmcall",	{ Skip_MODRM }, 0 },
+    { PREFIX_TABLE (PREFIX_0F01_REG_3_RM_1) },
     { "vmload",		{ Skip_MODRM }, 0 },
     { "vmsave",		{ Skip_MODRM }, 0 },
     { "stgi",		{ Skip_MODRM }, 0 },
@@ -12791,7 +12800,7 @@ putop (const char *in_template, int sizeflag)
 	case 'B':
 	  if (l == 0 && len == 1)
 	    {
-case_B:
+	    case_B:
 	      if (intel_syntax)
 		break;
 	      if (sizeflag & SUFFIX_ALWAYS)
@@ -12956,7 +12965,7 @@ case_B:
 	      SAVE_LAST (*p);
 	      break;
 	    }
-case_L:
+	case_L:
 	  if (intel_syntax)
 	    break;
 	  if (sizeflag & SUFFIX_ALWAYS)
@@ -13005,7 +13014,7 @@ case_L:
 	case 'P':
 	  if (l == 0 && len == 1)
 	    {
-case_P:
+	    case_P:
 	      if (intel_syntax)
 		{
 		  if ((rex & REX_W) == 0
@@ -13075,7 +13084,7 @@ case_P:
 	case 'Q':
 	  if (l == 0 && len == 1)
 	    {
-case_Q:
+	    case_Q:
 	      if (intel_syntax && !alt)
 		break;
 	      USED_REX (REX_W);
@@ -13166,7 +13175,7 @@ case_Q:
 	case 'S':
 	  if (l == 0 && len == 1)
 	    {
-case_S:
+	    case_S:
 	      if (intel_syntax)
 		break;
 	      if (sizeflag & SUFFIX_ALWAYS)
@@ -14263,10 +14272,11 @@ OP_E_memory (int bytemode, int sizeflag)
 	  }
 
       if ((havebase || haveindex || needindex || needaddr32 || riprel)
-	  && (bytemode != v_bnd_mode)
-	  && (bytemode != v_bndmk_mode)
-	  && (bytemode != bnd_mode)
-	  && (bytemode != bnd_swap_mode))
+	  && (address_mode != mode_64bit
+	      || ((bytemode != v_bnd_mode)
+		  && (bytemode != v_bndmk_mode)
+		  && (bytemode != bnd_mode)
+		  && (bytemode != bnd_swap_mode))))
 	used_prefixes |= PREFIX_ADDR;
 
       if (havedisp || (intel_syntax && riprel))
@@ -14346,6 +14356,14 @@ OP_E_memory (int bytemode, int sizeflag)
 	      oappend (scratchbuf);
 	    }
 	}
+    }
+  else if (bytemode == v_bnd_mode
+	   || bytemode == v_bndmk_mode
+	   || bytemode == bnd_mode
+	   || bytemode == bnd_swap_mode)
+    {
+      oappend ("(bad)");
+      return;
     }
   else
     {
@@ -15864,7 +15882,7 @@ CRC32_Fixup (int bytemode, int sizeflag)
   mnemonicendp = p;
   *p = '\0';
 
-skip:
+ skip:
   if (modrm.mod == 3)
     {
       int add;
@@ -16587,7 +16605,7 @@ MOVBE_Fixup (int bytemode, int sizeflag)
   mnemonicendp = p;
   *p = '\0';
 
-skip:
+ skip:
   OP_M (bytemode, sizeflag);
 }
 
@@ -16624,7 +16642,7 @@ MOVSXD_Fixup (int bytemode, int sizeflag)
       break;
     }
 
-skip:
+ skip:
   mnemonicendp = p;
   *p = '\0';
   OP_E (bytemode, sizeflag);

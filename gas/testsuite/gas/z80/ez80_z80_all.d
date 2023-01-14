@@ -147,12 +147,12 @@ Disassembly of section .text:
 \s+124:\s+ed 8c\s+ind2
 \s+126:\s+ed 92\s+inimr
 \s+128:\s+ed 93\s+otimr
-\s+12a:\s+ed 94\s+oti2r
+\s+12a:\s+ed 94\s+ini2r
 \s+12c:\s+ed 9a\s+indmr
 \s+12e:\s+ed 9b\s+otdmr
-\s+130:\s+ed 9c\s+otd2r
-\s+132:\s+ed a4\s+ini2
-\s+134:\s+ed ac\s+ind2
+\s+130:\s+ed 9c\s+ind2r
+\s+132:\s+ed a4\s+outi2
+\s+134:\s+ed ac\s+outd2
 \s+136:\s+ed b4\s+oti2r
 \s+138:\s+ed bc\s+otd2r
 \s+13a:\s+ed c2\s+inirx
@@ -955,3 +955,13 @@ Disassembly of section .text:
 \s+793:\s+ab\s+xor a,e
 \s+794:\s+ac\s+xor a,h
 \s+795:\s+ad\s+xor a,l
+\s+796:\s+ed 07\s+ld bc,\(hl\)
+\s+798:\s+ed 17\s+ld de,\(hl\)
+\s+79a:\s+ed 27\s+ld hl,\(hl\)
+\s+79c:\s+ed 37\s+ld ix,\(hl\)
+\s+79e:\s+ed 31\s+ld iy,\(hl\)
+\s+7a0:\s+ed 0f\s+ld \(hl\),bc
+\s+7a2:\s+ed 1f\s+ld \(hl\),de
+\s+7a4:\s+ed 2f\s+ld \(hl\),hl
+\s+7a6:\s+ed 3f\s+ld \(hl\),ix
+\s+7a8:\s+ed 3e\s+ld \(hl\),iy

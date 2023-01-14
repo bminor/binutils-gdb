@@ -245,13 +245,16 @@ _bfd_elf_strtab_save (struct elf_strtab_hash *tab)
 void
 _bfd_elf_strtab_restore (struct elf_strtab_hash *tab, void *buf)
 {
-  size_t idx, curr_size = tab->size;
+  size_t idx, curr_size = tab->size, save_size;
   struct strtab_save *save = (struct strtab_save *) buf;
 
   BFD_ASSERT (tab->sec_size == 0);
-  BFD_ASSERT (save->size <= curr_size);
-  tab->size = save->size;
-  for (idx = 1; idx < save->size; ++idx)
+  save_size = 1;
+  if (save != NULL)
+    save_size = save->size;
+  BFD_ASSERT (save_size <= curr_size);
+  tab->size = save_size;
+  for (idx = 1; idx < save_size; ++idx)
     tab->array[idx]->refcount = save->refcount[idx];
 
   for (; idx < curr_size; ++idx)
@@ -439,7 +442,7 @@ _bfd_elf_strtab_finalize (struct elf_strtab_hash *tab)
 	}
     }
 
-alloc_failure:
+ alloc_failure:
   if (array)
     free (array);
 

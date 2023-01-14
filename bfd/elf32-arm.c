@@ -5064,6 +5064,14 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
   stub_entry = (struct elf32_arm_stub_hash_entry *) gen_entry;
   info = (struct bfd_link_info *) in_arg;
 
+  /* Fail if the target section could not be assigned to an output
+     section.  The user should fix his linker script.  */
+  if (stub_entry->target_section->output_section == NULL
+      && info->non_contiguous_regions)
+    info->callbacks->einfo (_("%F%P: Could not assign '%pA' to an output section. "
+			      "Retry without --enable-non-contiguous-regions.\n"),
+			    stub_entry->target_section);
+
   globals = elf32_arm_hash_table (info);
   if (globals == NULL)
     return FALSE;
@@ -6415,7 +6423,7 @@ set_cmse_veneer_addr_from_implib (struct bfd_link_info *info,
       ret = FALSE;
     }
 
-free_sym_buf:
+ free_sym_buf:
   free (sympp);
   return ret;
 }
@@ -7991,7 +7999,7 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 
   return TRUE;
 
-error_return:
+ error_return:
   if (contents != NULL
       && elf_section_data (sec)->this_hdr.contents != contents)
     free (contents);
@@ -8607,7 +8615,7 @@ bfd_elf32_arm_vfp11_erratum_scan (bfd *abfd, struct bfd_link_info *link_info)
 
   return TRUE;
 
-error_return:
+ error_return:
   if (contents != NULL
       && elf_section_data (sec)->this_hdr.contents != contents)
     free (contents);
@@ -9044,7 +9052,7 @@ bfd_elf32_arm_stm32l4xx_erratum_scan (bfd *abfd,
 
   return TRUE;
 
-error_return:
+ error_return:
   if (contents != NULL
       && elf_section_data (sec)->this_hdr.contents != contents)
     free (contents);
@@ -20230,10 +20238,10 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
 }
 
 static bfd_boolean
-elf32_arm_section_flags (flagword *flags, const Elf_Internal_Shdr * hdr)
+elf32_arm_section_flags (const Elf_Internal_Shdr *hdr)
 {
   if (hdr->sh_flags & SHF_ARM_PURECODE)
-    *flags |= SEC_ELF_PURECODE;
+    hdr->bfd_section->flags |= SEC_ELF_PURECODE;
   return TRUE;
 }
 

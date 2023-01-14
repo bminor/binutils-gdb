@@ -103,4 +103,10 @@ extern int print_insn_z8002		(bfd_vma, disassemble_info *);
 
 extern disassembler_ftype csky_get_disassembler (bfd *);
 extern disassembler_ftype rl78_get_disassembler (bfd *);
+
+extern void ATTRIBUTE_NORETURN opcodes_assert (const char *, int);
+
+#define OPCODES_ASSERT(x) \
+  do { if (!(x)) opcodes_assert (__FILE__, __LINE__); } while (0)
+
 #endif /* DISASSEMBLE_H */

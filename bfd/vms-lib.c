@@ -242,13 +242,20 @@ vms_write_block (bfd *abfd, unsigned int vbn, void *blk)
    If the entry is indirect, recurse.  */
 
 static bfd_boolean
-vms_traverse_index (bfd *abfd, unsigned int vbn, struct carsym_mem *cs)
+vms_traverse_index (bfd *abfd, unsigned int vbn, struct carsym_mem *cs,
+		    unsigned int recur_count)
 {
   struct vms_indexdef indexdef;
   file_ptr off;
   unsigned char *p;
   unsigned char *endp;
   unsigned int n;
+
+  if (recur_count == 100)
+    {
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
 
   /* Read the index block.  */
   BFD_ASSERT (sizeof (indexdef) == VMS_BLOCK_SIZE);
@@ -307,7 +314,7 @@ vms_traverse_index (bfd *abfd, unsigned int vbn, struct carsym_mem *cs)
       if (idx_off == RFADEF__C_INDEX)
 	{
 	  /* Indirect entry.  Recurse.  */
-	  if (!vms_traverse_index (abfd, idx_vbn, cs))
+	  if (!vms_traverse_index (abfd, idx_vbn, cs, recur_count + 1))
 	    return FALSE;
 	}
       else
@@ -416,6 +423,7 @@ vms_lib_read_index (bfd *abfd, int idx, unsigned int *nbrel)
   unsigned int vbn;
   ufile_ptr filesize;
   size_t amt;
+  struct carsym *csbuf;
   struct carsym_mem csm;
 
   /* Read index desription.  */
@@ -447,20 +455,20 @@ vms_lib_read_index (bfd *abfd, int idx, unsigned int *nbrel)
     csm.max = csm.limit;
   if (_bfd_mul_overflow (csm.max, sizeof (struct carsym), &amt))
     return NULL;
-  csm.idx = bfd_alloc (abfd, amt);
+  csm.idx = csbuf = bfd_alloc (abfd, amt);
   if (csm.idx == NULL)
     return NULL;
 
   /* Note: if the index is empty, there is no block to traverse.  */
   vbn = bfd_getl32 (idd.vbn);
-  if (vbn != 0 && !vms_traverse_index (abfd, vbn, &csm))
+  if (vbn != 0 && !vms_traverse_index (abfd, vbn, &csm, 0))
     {
-      if (csm.realloced && csm.idx != NULL)
+      if (csm.realloced)
 	free (csm.idx);
 
       /* Note: in case of error, we can free what was allocated on the
 	 BFD's objalloc.  */
-      bfd_release (abfd, csm.idx);
+      bfd_release (abfd, csbuf);
       return NULL;
     }
 
@@ -468,7 +476,6 @@ vms_lib_read_index (bfd *abfd, int idx, unsigned int *nbrel)
     {
       /* There are more entries than the first estimate.  Allocate on
 	 the BFD's objalloc.  */
-      struct carsym *csbuf;
       csbuf = bfd_alloc (abfd, csm.nbr * sizeof (struct carsym));
       if (csbuf == NULL)
 	return NULL;
@@ -482,7 +489,7 @@ vms_lib_read_index (bfd *abfd, int idx, unsigned int *nbrel)
 
 /* Standard function.  */
 
-static const bfd_target *
+static bfd_cleanup
 _bfd_vms_lib_archive_p (bfd *abfd, enum vms_lib_kind kind)
 {
   struct vms_lhd lhd;
@@ -623,12 +630,16 @@ _bfd_vms_lib_archive_p (bfd *abfd, enum vms_lib_kind kind)
 
 	  if (sbm_off > reclen
 	      || reclen - sbm_off < sizeof (struct vms_dcxsbm))
-	    goto err;
+	    {
+	    err_free_buf:
+	      free (buf);
+	      goto err;
+	    }
 	  sbm = (struct vms_dcxsbm *) (buf + sbm_off);
 	  sbm_sz = bfd_getl16 (sbm->size);
 	  sbm_off += sbm_sz;
 	  if (sbm_off > reclen)
-	    goto err;
+	    goto err_free_buf;
 
 	  sbmdesc->min_char = sbm->min_char;
 	  BFD_ASSERT (sbmdesc->min_char == 0);
@@ -638,25 +649,25 @@ _bfd_vms_lib_archive_p (bfd *abfd, enum vms_lib_kind kind)
 	  if (sbm_sz < sizeof (struct vms_dcxsbm) + l + sbm_len
 	      || (tdata->nbr_dcxsbm > 1
 		  && sbm_sz < sizeof (struct vms_dcxsbm) + l + 3 * sbm_len))
-	    goto err;
+	    goto err_free_buf;
 	  sbmdesc->flags = (unsigned char *)bfd_alloc (abfd, l);
 	  off = bfd_getl16 (sbm->flags);
 	  if (off > sbm_sz
 	      || sbm_sz - off < l)
-	    goto err;
+	    goto err_free_buf;
 	  memcpy (sbmdesc->flags, (bfd_byte *) sbm + off, l);
 	  sbmdesc->nodes = (unsigned char *)bfd_alloc (abfd, 2 * sbm_len);
 	  off = bfd_getl16 (sbm->nodes);
 	  if (off > sbm_sz
 	      || sbm_sz - off < 2 * sbm_len)
-	    goto err;
+	    goto err_free_buf;
 	  memcpy (sbmdesc->nodes, (bfd_byte *) sbm + off, 2 * sbm_len);
 	  off = bfd_getl16 (sbm->next);
 	  if (off != 0)
 	    {
 	      if (off > sbm_sz
 		  || sbm_sz - off < 2 * sbm_len)
-		goto err;
+		goto err_free_buf;
 	      /* Read the 'next' array.  */
 	      sbmdesc->next = (unsigned short *) bfd_alloc (abfd, 2 * sbm_len);
 	      buf1 = (bfd_byte *) sbm + off;
@@ -682,7 +693,7 @@ _bfd_vms_lib_archive_p (bfd *abfd, enum vms_lib_kind kind)
   if (tdata->type == LBR__C_TYP_ESHSTB || tdata->type == LBR__C_TYP_ISHSTB)
     abfd->is_thin_archive = TRUE;
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 
  err:
   bfd_release (abfd, tdata);
@@ -692,7 +703,7 @@ _bfd_vms_lib_archive_p (bfd *abfd, enum vms_lib_kind kind)
 
 /* Standard function for alpha libraries.  */
 
-const bfd_target *
+bfd_cleanup
 _bfd_vms_lib_alpha_archive_p (bfd *abfd)
 {
   return _bfd_vms_lib_archive_p (abfd, vms_lib_alpha);
@@ -700,7 +711,7 @@ _bfd_vms_lib_alpha_archive_p (bfd *abfd)
 
 /* Standard function for ia64 libraries.  */
 
-const bfd_target *
+bfd_cleanup
 _bfd_vms_lib_ia64_archive_p (bfd *abfd)
 {
   return _bfd_vms_lib_archive_p (abfd, vms_lib_ia64);
@@ -708,7 +719,7 @@ _bfd_vms_lib_ia64_archive_p (bfd *abfd)
 
 /* Standard function for text libraries.  */
 
-static const bfd_target *
+static bfd_cleanup
 _bfd_vms_lib_txt_archive_p (bfd *abfd)
 {
   return _bfd_vms_lib_archive_p (abfd, vms_lib_txt);

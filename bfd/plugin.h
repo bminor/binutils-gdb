@@ -27,15 +27,12 @@ void bfd_plugin_set_plugin (const char *);
 bfd_boolean bfd_plugin_target_p (const bfd_target *);
 bfd_boolean bfd_plugin_specified_p (void);
 bfd_boolean bfd_link_plugin_object_p (bfd *);
-void register_ld_plugin_object_p (const bfd_target *(*object_p) (bfd *));
+void register_ld_plugin_object_p (bfd_cleanup (*object_p) (bfd *));
 
 typedef struct plugin_data_struct
 {
   int nsyms;
   const struct ld_plugin_symbol *syms;
-  bfd *real_bfd;
-  long real_nsyms;
-  asymbol **real_syms;
 }
 plugin_data_struct;
 

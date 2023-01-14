@@ -27,6 +27,7 @@
 #include "gdbsupport/pathstuff.h"
 #include "dwarf2/index-write.h"
 #include "dwarf2/read.h"
+#include "dwarf2/dwz.h"
 #include "objfiles.h"
 #include "gdbsupport/selftest.h"
 #include <string>

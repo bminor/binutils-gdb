@@ -23,10 +23,11 @@ cx1a p0, r16, #0
 cx1 p0, r13, #0
 cx1a p0, r13, #0
 
-ittt ne
+itttt ne
 cx1 p0, r0, #0
 cx1ne p0, r0, #0
-cx1ane p0, r0, #0
+cx1a p0, r0, #0
+cx1aeq p0, r0, #0
 
 cx1 p1, r0, #0
 cx1a p1, r0, #0
@@ -73,10 +74,11 @@ cx1da p0, r9, r10, #0
 cx1d p0, r13, r14, #0
 cx1da p0, r13, r14, #0
 
-ittt ne
+itttt ne
 cx1d p0, r0, r1, #0
+cx1da p0, r0, r1, #0
 cx1dne p0, r0, r1, #0
-cx1dane p0, r0, r1, #0
+cx1daeq p0, r0, r1, #0
 
 cx1d p1, r0, r1, #0
 cx1da p1, r0, r1, #0
@@ -122,10 +124,11 @@ cx2a p0, r13, r0, #0
 cx2 p0, r0, r13, #0
 cx2a p0, r0, r13, #0
 
-ittt ne
+itttt ne
 cx2 p0, r0, r0, #0
+cx2a p0, r0, r0, #0
 cx2ne p0, r0, r0, #0
-cx2ane p0, r0, r0, #0
+cx2aeq p0, r0, r0, #0
 
 cx2 p1, r0, r0, #0
 cx2a p1, r0, r0, #0
@@ -184,10 +187,11 @@ cx2da p0, r0, r1, r13, #0
 cx2d p0, r0, r1, r15, #0
 cx2da p0, r0, r1, r15, #0
 
-ittt ne
+itttt ne
 cx2d p0, r0, r1, r0, #0
+cx2da p0, r0, r1, r0, #0
 cx2dne p0, r0, r1, r0, #0
-cx2dane p0, r0, r1, r0, #0
+cx2daeq p0, r0, r1, r0, #0
 
 cx2d p1, r0, r1, r0, #0
 cx2da p1, r0, r1, r0, #0
@@ -240,10 +244,11 @@ cx3a p0, r0, r13, r0, #0
 cx3 p0, r0, r0, r13, #0
 cx3a p0, r0, r0, r13, #0
 
-ittt ne
+itttt ne
 cx3 p0, r0, r0, r0, #0
+cx3a p0, r0, r0, r0, #0
 cx3ne p0, r0, r0, r0, #0
-cx3ane p0, r0, r0, r0, #0
+cx3aeq p0, r0, r0, r0, #0
 
 cx3 p1, r0, r0, r0, #0
 cx3a p1, r0, r0, r0, #0
@@ -317,10 +322,11 @@ cx3da p0, r0, r1, r15, r0, #0
 cx3d p0, r0, r1, r0, r15, #0
 cx3da p0, r0, r1, r0, r15, #0
 
-ittt ne
+itttt ne
 cx3d p0, r0, r1, r0, r0, #0
+cx3da p0, r0, r1, r0, r0, #0
 cx3dne p0, r0, r1, r0, r0, #0
-cx3dane p0, r0, r1, r0, r0, #0
+cx3daeq p0, r0, r1, r0, r0, #0
 
 cx3d p1, r0, r1, r0, r0, #0
 cx3da p1, r0, r1, r0, r0, #0

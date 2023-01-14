@@ -5569,14 +5569,16 @@ s3_s_change_sec (int sec)
     {
     case 'r':
       seg = subseg_new (s3_RDATA_SECTION_NAME, (subsegT) get_absolute_expression ());
-      bfd_set_section_flags (seg, (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_RELOC | SEC_DATA));
+      bfd_set_section_flags (seg, (SEC_ALLOC | SEC_LOAD | SEC_READONLY
+				   | SEC_RELOC | SEC_DATA));
       if (strcmp (TARGET_OS, "elf") != 0)
         record_alignment (seg, 4);
       demand_empty_rest_of_line ();
       break;
     case 's':
       seg = subseg_new (".sdata", (subsegT) get_absolute_expression ());
-      bfd_set_section_flags (seg, SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA);
+      bfd_set_section_flags (seg, (SEC_ALLOC | SEC_LOAD | SEC_RELOC
+				   | SEC_DATA | SEC_SMALL_DATA));
       if (strcmp (TARGET_OS, "elf") != 0)
         record_alignment (seg, 4);
       demand_empty_rest_of_line ();
@@ -5685,17 +5687,10 @@ s3_s_score_ent (int aent)
   if (ISDIGIT (*input_line_pointer) || *input_line_pointer == '-')
     s3_get_number ();
 
-#ifdef BFD_ASSEMBLER
   if ((bfd_section_flags (now_seg) & SEC_CODE) != 0)
     maybe_text = 1;
   else
     maybe_text = 0;
-#else
-  if (now_seg != data_section && now_seg != bss_section)
-    maybe_text = 1;
-  else
-    maybe_text = 0;
-#endif
   if (!maybe_text)
     as_warn (_(".ent or .aent not in text section."));
   if (!aent && s3_cur_proc_ptr)
@@ -5794,17 +5789,10 @@ s3_s_score_end (int x ATTRIBUTE_UNUSED)
   else
     p = NULL;
 
-#ifdef BFD_ASSEMBLER
   if ((bfd_section_flags (now_seg) & SEC_CODE) != 0)
     maybe_text = 1;
   else
     maybe_text = 0;
-#else
-  if (now_seg != data_section && now_seg != bss_section)
-    maybe_text = 1;
-  else
-    maybe_text = 0;
-#endif
 
   if (!maybe_text)
     as_warn (_(".end not in text section"));
@@ -6132,11 +6120,9 @@ s3_s_score_lcomm (int bytes_p)
 	{
 	  bss_seg = subseg_new (".sbss", 1);
 	  seg_info (bss_seg)->bss = 1;
-#ifdef BFD_ASSEMBLER
-	  if (!bfd_set_section_flags (bss_seg, SEC_ALLOC))
+	  if (!bfd_set_section_flags (bss_seg, SEC_ALLOC | SEC_SMALL_DATA))
 	    as_warn (_("error setting flags for \".sbss\": %s"),
 		     bfd_errmsg (bfd_get_error ()));
-#endif
 	}
     }
 #endif
@@ -6215,12 +6201,8 @@ s3_s_score_lcomm (int bytes_p)
 
   if (
 #if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT))
-#ifdef BFD_ASSEMBLER
       (OUTPUT_FLAVOR != bfd_target_aout_flavour
        || (S_GET_OTHER (symbolP) == 0 && S_GET_DESC (symbolP) == 0)) &&
-#else
-      (S_GET_OTHER (symbolP) == 0 && S_GET_DESC (symbolP) == 0) &&
-#endif
 #endif
       (S_GET_SEGMENT (symbolP) == bss_seg || (!S_IS_DEFINED (symbolP) && S_GET_VALUE (symbolP) == 0)))
     {

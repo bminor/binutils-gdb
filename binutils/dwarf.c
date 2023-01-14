@@ -3622,7 +3622,6 @@ read_debug_line_header (struct dwarf_section * section,
 {
   unsigned char *hdrptr;
   unsigned int initial_length_size;
-  unsigned char address_size, segment_selector_size;
 
   /* Extract information from the Line Number Program Header.
      (section 6.2.4 in the Dwarf3 doc).  */
@@ -3679,15 +3678,15 @@ read_debug_line_header (struct dwarf_section * section,
 
   if (linfo->li_version >= 5)
     {
-      SAFE_BYTE_GET_AND_INC (address_size, hdrptr, 1, end);
+      SAFE_BYTE_GET_AND_INC (linfo->li_address_size, hdrptr, 1, end);
 
-      SAFE_BYTE_GET_AND_INC (segment_selector_size, hdrptr, 1, end);
-      if (segment_selector_size != 0)
+      SAFE_BYTE_GET_AND_INC (linfo->li_segment_size, hdrptr, 1, end);
+      if (linfo->li_segment_size != 0)
 	{
 	  warn (_("The %s section contains "
 		  "unsupported segment selector size: %d.\n"),
-		section->name, segment_selector_size);
-	  return 0;
+		section->name, linfo->li_segment_size);
+	  return NULL;
 	}
     }
 
@@ -3737,7 +3736,8 @@ display_formatted_table (unsigned char *                   data,
   unsigned char *format_start, format_count, *format, formati;
   dwarf_vma data_count, datai;
   unsigned int namepass, last_entry = 0;
-
+  const char * table_name = is_dir ? N_("Directory Table") : N_("File Name Table");
+  
   SAFE_BYTE_GET_AND_INC (format_count, data, 1, end);
   format_start = data;
   for (formati = 0; formati < format_count; formati++)
@@ -3746,10 +3746,7 @@ display_formatted_table (unsigned char *                   data,
       SKIP_ULEB (data, end);
       if (data == end)
 	{
-	  if (is_dir)
-	    warn (_("Corrupt directory format table entry\n"));
-	  else
-	    warn (_("Corrupt file name format table entry\n"));
+	  warn (_("%s: Corrupt format description entry\n"), table_name);
 	  return data;
 	}
     }
@@ -3757,28 +3754,25 @@ display_formatted_table (unsigned char *                   data,
   READ_ULEB (data_count, data, end);
   if (data == end)
     {
-      if (is_dir)
-	warn (_("Corrupt directory list\n"));
-      else
-	warn (_("Corrupt file name list\n"));
+      warn (_("%s: Corrupt entry count\n"), table_name);
       return data;
     }
 
   if (data_count == 0)
     {
-      if (is_dir)
-	printf (_("\n The Directory Table is empty.\n"));
-      else
-	printf (_("\n The File Name Table is empty.\n"));
+      printf (_("\n The %s is empty.\n"), table_name);
       return data;
     }
+  else if (format_count == 0)
+    {
+      warn (_("%s: format count is zero, but the table is not empty\n"),
+	    table_name);
+      return end;
+    }
 
-  if (is_dir)
-    printf (_("\n The Directory Table (offset 0x%lx):\n"),
-	    (long) (data - start));
-  else
-    printf (_("\n The File Name Table (offset 0x%lx):\n"),
-	    (long) (data - start));
+  printf (_("\n The %s (offset 0x%lx, lines %s, columns %u):\n"),
+	  table_name, (long) (data - start), dwarf_vmatoa ("u", data_count),
+	  format_count);
 
   printf (_("  Entry"));
   /* Delay displaying name as the last entry for better screen layout.  */ 
@@ -3806,7 +3800,7 @@ display_formatted_table (unsigned char *                   data,
 		printf (_("\tSize"));
 		break;
 	      case DW_LNCT_MD5:
-		printf (_("\tMD5"));
+		printf (_("\tMD5\t\t\t"));
 		break;
 	      default:
 		printf (_("\t(Unknown format content type %s)"),
@@ -3840,12 +3834,10 @@ display_formatted_table (unsigned char *                   data,
 						  section, NULL, '\t', -1);
 	    }
 	}
-      if (data == end)
+
+      if (data == end && (datai < data_count - 1))
 	{
-	  if (is_dir)
-	    warn (_("Corrupt directory entries list\n"));
-	  else
-	    warn (_("Corrupt file name entries list\n"));
+	  warn (_("\n%s: Corrupt entries list\n"), table_name);
 	  return data;
 	}
       putchar ('\n');
@@ -3909,6 +3901,11 @@ display_debug_lines_raw (struct dwarf_section *  section,
 	  printf (_("  Offset:                      0x%lx\n"), (long)(data - start));
 	  printf (_("  Length:                      %ld\n"), (long) linfo.li_length);
 	  printf (_("  DWARF Version:               %d\n"), linfo.li_version);
+	  if (linfo.li_version >= 5)
+	    {
+	      printf (_("  Address size (bytes):        %d\n"), linfo.li_address_size);
+	      printf (_("  Segment selector (bytes):    %d\n"), linfo.li_segment_size);
+	    }
 	  printf (_("  Prologue Length:             %d\n"), (int) linfo.li_prologue_length);
 	  printf (_("  Minimum Instruction Length:  %d\n"), linfo.li_min_insn_length);
 	  if (linfo.li_version >= 4)

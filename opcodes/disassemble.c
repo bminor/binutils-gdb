@@ -21,7 +21,7 @@
 #include "sysdep.h"
 #include "disassemble.h"
 #include "safe-ctype.h"
-#include <assert.h>
+#include "opintl.h"
 
 #ifdef ARCH_all
 #define ARCH_aarch64
@@ -831,4 +831,12 @@ disassembler_options_cmp (const char *s1, const char *s2)
   while (c1 == c2);
 
   return c1 - c2;
+}
+
+void
+opcodes_assert (const char *file, int line)
+{
+  opcodes_error_handler (_("assertion fail %s:%d"), file, line);
+  opcodes_error_handler (_("Please report this bug"));
+  abort ();
 }

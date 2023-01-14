@@ -238,7 +238,7 @@ update_gnu_property (const char *file_name, FILE *file)
 	  }
       }
 
-out:
+ out:
   if (ret != 0)
     error (_("%s: Invalid PT_NOTE segment\n"), file_name);
 
@@ -541,6 +541,7 @@ process_archive (const char * file_name, FILE * file,
   struct archive_info nested_arch;
   size_t got;
   int ret;
+  struct stat statbuf;
 
   /* The ARCH structure is used to hold information about this archive.  */
   arch.file_name = NULL;
@@ -558,7 +559,9 @@ process_archive (const char * file_name, FILE * file,
   nested_arch.sym_table = NULL;
   nested_arch.longnames = NULL;
 
-  if (setup_archive (&arch, file_name, file, is_thin_archive, FALSE) != 0)
+  if (fstat (fileno (file), &statbuf) < 0
+      || setup_archive (&arch, file_name, file, statbuf.st_size,
+			is_thin_archive, FALSE) != 0)
     {
       ret = 1;
       goto out;
@@ -616,6 +619,7 @@ process_archive (const char * file_name, FILE * file,
       if (qualified_name == NULL)
 	{
 	  error (_("%s: bad archive file name\n"), file_name);
+	  free (name);
 	  ret = 1;
 	  break;
 	}
@@ -626,8 +630,10 @@ process_archive (const char * file_name, FILE * file,
           FILE *member_file;
           char *member_file_name = adjust_relative_path (file_name,
 							 name, namelen);
+	  free (name);
           if (member_file_name == NULL)
             {
+	      free (qualified_name);
               ret = 1;
               break;
             }
@@ -638,6 +644,7 @@ process_archive (const char * file_name, FILE * file,
               error (_("Input file '%s' is not readable\n"),
 			 member_file_name);
               free (member_file_name);
+	      free (qualified_name);
               ret = 1;
               break;
             }
@@ -648,9 +655,12 @@ process_archive (const char * file_name, FILE * file,
 
           fclose (member_file);
           free (member_file_name);
+	  free (qualified_name);
         }
       else if (is_thin_archive)
         {
+	  free (name);
+
           /* This is a proxy for a member of a nested archive.  */
           archive_file_offset = arch.nested_member_origin + sizeof arch.arhdr;
 
@@ -661,6 +671,7 @@ process_archive (const char * file_name, FILE * file,
             {
               error (_("%s: failed to seek to archive member\n"),
 			 nested_arch.file_name);
+	      free (qualified_name);
               ret = 1;
               break;
             }
@@ -669,6 +680,7 @@ process_archive (const char * file_name, FILE * file,
         }
       else
         {
+	  free (name);
           archive_file_offset = arch.next_arhdr_offset;
           arch.next_arhdr_offset += archive_file_size;
 

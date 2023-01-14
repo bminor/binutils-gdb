@@ -66,9 +66,6 @@ static void default_rcmd (struct target_ops *, const char *, struct ui_file *);
 static ptid_t default_get_ada_task_ptid (struct target_ops *self,
 					 long lwp, long tid);
 
-static int default_follow_fork (struct target_ops *self, int follow_child,
-				int detach_fork);
-
 static void default_mourn_inferior (struct target_ops *self);
 
 static int default_search_memory (struct target_ops *ops,
@@ -2165,9 +2162,9 @@ target_program_signals (gdb::array_view<const unsigned char> program_signals)
   current_top_target ()->program_signals (program_signals);
 }
 
-static int
-default_follow_fork (struct target_ops *self, int follow_child,
-		     int detach_fork)
+static bool
+default_follow_fork (struct target_ops *self, bool follow_child,
+		     bool detach_fork)
 {
   /* Some target returned a fork event, but did not know how to follow it.  */
   internal_error (__FILE__, __LINE__,
@@ -2177,8 +2174,8 @@ default_follow_fork (struct target_ops *self, int follow_child,
 /* Look through the list of possible targets for a target that can
    follow forks.  */
 
-int
-target_follow_fork (int follow_child, int detach_fork)
+bool
+target_follow_fork (bool follow_child, bool detach_fork)
 {
   return current_top_target ()->follow_fork (follow_child, detach_fork);
 }

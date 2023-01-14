@@ -5109,7 +5109,7 @@ verify_constraints (const struct aarch64_inst *inst,
 	    }
 	}
 
-done:
+    done:
       /* Add the new instruction to the sequence.  */
       memcpy (insn_sequence->current_insns + insn_sequence->next_insn++,
 	      inst, sizeof (aarch64_inst));

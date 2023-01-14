@@ -33,4 +33,10 @@ extern void windows_xfer_shared_library (const char* so_name,
 
 extern void windows_init_abi (struct gdbarch_info info,
 			      struct gdbarch *gdbarch);
+
+/* Return true if the Portable Executable behind ABFD uses the Cygwin dll
+   (cygwin1.dll).  */
+
+extern bool is_linked_with_cygwin_dll (bfd *abfd);
+
 #endif

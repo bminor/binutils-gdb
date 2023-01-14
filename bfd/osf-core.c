@@ -70,7 +70,7 @@ make_bfd_asection (bfd *abfd,
   return asect;
 }
 
-static const bfd_target *
+static bfd_cleanup
 osf_core_core_file_p (bfd *abfd)
 {
   int val;
@@ -138,7 +138,7 @@ osf_core_core_file_p (bfd *abfd)
 
   /* OK, we believe you.  You're a core file (sure, sure).  */
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 
  fail:
   bfd_release (abfd, core_hdr (abfd));

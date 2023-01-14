@@ -1261,3 +1261,10 @@ set arm_unwind_tests {
      "unwind-mix"}
 }
 run_ld_link_tests $arm_unwind_tests
+
+run_dump_test "non-contiguous-arm"
+run_dump_test "non-contiguous-arm2"
+run_dump_test "non-contiguous-arm3"
+run_dump_test "non-contiguous-arm4"
+run_dump_test "non-contiguous-arm5"
+run_dump_test "non-contiguous-arm6"

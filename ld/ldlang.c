@@ -131,9 +131,12 @@ struct lang_nocrossrefs *nocrossref_list;
 struct asneeded_minfo **asneeded_list_tail;
 static ctf_file_t *ctf_output;
 
- /* Functions that traverse the linker script and might evaluate
-    DEFINED() need to increment this at the start of the traversal.  */
+/* Functions that traverse the linker script and might evaluate
+   DEFINED() need to increment this at the start of the traversal.  */
 int lang_statement_iteration = 0;
+
+/* Count times through one_lang_size_sections_pass after mark phase.  */
+static int lang_sizing_iteration = 0;
 
 /* Return TRUE if the PATTERN argument is a wildcard pattern.
    Although backslashes are treated specially if a pattern contains
@@ -489,7 +492,7 @@ compare_section (sort_type sort, asection *asec, asection *bsec)
       /* Fall through.  */
 
     case by_name:
-sort_by_name:
+    sort_by_name:
       ret = strcmp (bfd_section_name (asec), bfd_section_name (bsec));
       break;
 
@@ -2537,6 +2540,11 @@ lang_add_section (lang_statement_list_type *ptr,
 	  /* This prevents future calls from assigning this section.  */
 	  section->output_section = bfd_abs_section_ptr;
 	}
+      else if (link_info.non_contiguous_regions_warnings)
+	einfo (_("%P:%pS: warning: --enable-non-contiguous-regions makes "
+		 "section `%pA' from '%pB' match /DISCARD/ clause.\n"),
+	       NULL, section, section->owner);
+
       return;
     }
 
@@ -2550,7 +2558,33 @@ lang_add_section (lang_statement_list_type *ptr,
     }
 
   if (section->output_section != NULL)
-    return;
+    {
+      if (!link_info.non_contiguous_regions)
+	return;
+
+      /* SECTION has already been handled in a special way
+	 (eg. LINK_ONCE): skip it.  */
+      if (bfd_is_abs_section (section->output_section))
+	return;
+
+      /* Already assigned to the same output section, do not process
+	 it again, to avoid creating loops between duplicate sections
+	 later.  */
+      if (section->output_section == output->bfd_section)
+	return;
+
+      if (link_info.non_contiguous_regions_warnings && output->bfd_section)
+	einfo (_("%P:%pS: warning: --enable-non-contiguous-regions may "
+		 "change behaviour for section `%pA' from '%pB' (assigned to "
+		 "%pA, but additional match: %pA)\n"),
+	       NULL, section, section->owner, section->output_section,
+	       output->bfd_section);
+
+      /* SECTION has already been assigned to an output section, but
+	 the user allows it to be mapped to another one in case it
+	 overflows. We'll later update the actual output section in
+	 size_input_section as appropriate.  */
+    }
 
   /* We don't copy the SEC_NEVER_LOAD flag from an input section
      to an output section, because we want to be able to include a
@@ -4194,6 +4228,12 @@ process_insert_statements (lang_statement_union_type **start)
 	  lang_statement_union_type **ptr;
 	  lang_statement_union_type *first;
 
+	  if (link_info.non_contiguous_regions)
+	    {
+	      einfo (_("warning: INSERT statement in linker script is "
+		       "incompatible with --enable-non-contiguous-regions.\n"));
+	    }
+
 	  where = lang_output_section_find (i->where);
 	  if (where != NULL && i->is_before)
 	    {
@@ -5116,11 +5156,27 @@ size_input_section
   (lang_statement_union_type **this_ptr,
    lang_output_section_statement_type *output_section_statement,
    fill_type *fill,
+   bfd_boolean *removed,
    bfd_vma dot)
 {
   lang_input_section_type *is = &((*this_ptr)->input_section);
   asection *i = is->section;
   asection *o = output_section_statement->bfd_section;
+  *removed = 0;
+
+  if (link_info.non_contiguous_regions)
+    {
+      /* If the input section I has already been successfully assigned
+	 to an output section other than O, don't bother with it and
+	 let the caller remove it from the list.  Keep processing in
+	 case we have already handled O, because the repeated passes
+	 have reinitialized its size.  */
+      if (i->already_assigned && i->already_assigned != o)
+	{
+	  *removed = 1;
+	  return dot;
+	}
+    }
 
   if (i->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
     i->output_offset = i->vma - o->vma;
@@ -5152,6 +5208,36 @@ size_input_section
 	  dot += alignment_needed;
 	}
 
+      if (link_info.non_contiguous_regions)
+	{
+	  /* If I would overflow O, let the caller remove I from the
+	     list.  */
+	  if (output_section_statement->region)
+	    {
+	      bfd_vma end = output_section_statement->region->origin
+		+ output_section_statement->region->length;
+
+	      if (dot + TO_ADDR (i->size) > end)
+		{
+		  if (i->flags & SEC_LINKER_CREATED)
+		    einfo (_("%F%P: Output section '%s' not large enough for the "
+			     "linker-created stubs section '%s'.\n"),
+			   i->output_section->name, i->name);
+
+		  if (i->rawsize && i->rawsize != i->size)
+		    einfo (_("%F%P: Relaxation not supported with "
+			     "--enable-non-contiguous-regions (section '%s' "
+			     "would overflow '%s' after it changed size).\n"),
+			   i->name, i->output_section->name);
+
+		  *removed = 1;
+		  dot = end;
+		  i->output_section = NULL;
+		  return dot;
+		}
+	    }
+	}
+
       /* Remember where in the output section this input section goes.  */
       i->output_offset = dot - o->vma;
 
@@ -5159,6 +5245,14 @@ size_input_section
       dot += TO_ADDR (i->size);
       if (!(o->flags & SEC_FIXED_SIZE))
 	o->size = TO_SIZE (dot - o->vma);
+
+      if (link_info.non_contiguous_regions)
+	{
+	  /* Record that I was successfully assigned to O, and update
+	     its actual output section too.  */
+	  i->already_assigned = o;
+	  i->output_section = o;
+	}
     }
 
   return dot;
@@ -5445,10 +5539,14 @@ lang_size_sections_1
    bfd_boolean check_regions)
 {
   lang_statement_union_type *s;
+  lang_statement_union_type *prev_s = NULL;
+  bfd_boolean removed_prev_s = FALSE;
 
   /* Size up the sections from their constituent parts.  */
-  for (s = *prev; s != NULL; s = s->header.next)
+  for (s = *prev; s != NULL; prev_s = s, s = s->header.next)
     {
+      bfd_boolean removed=FALSE;
+
       switch (s->header.type)
 	{
 	case lang_output_section_statement_enum:
@@ -5554,7 +5652,7 @@ lang_size_sections_1
 			&& (strcmp (lang_memory_region_list->name_list.name,
 				    DEFAULT_MEMORY_REGION) != 0
 			    || lang_memory_region_list->next != NULL)
-			&& expld.phase != lang_mark_phase_enum)
+			&& lang_sizing_iteration == 1)
 		      {
 			/* By default this is an error rather than just a
 			   warning because if we allocate the section to the
@@ -5586,19 +5684,27 @@ lang_size_sections_1
 		if (section_alignment > 0)
 		  {
 		    bfd_vma savedot = newdot;
-		    newdot = align_power (newdot, section_alignment);
+		    bfd_vma diff = 0;
 
+		    newdot = align_power (newdot, section_alignment);
 		    dotdelta = newdot - savedot;
-		    if (dotdelta != 0
+
+		    if (lang_sizing_iteration == 1)
+		      diff = dotdelta;
+		    else if (lang_sizing_iteration > 1)
+		      {
+			/* Only report adjustments that would change
+			   alignment from what we have already reported.  */
+			diff = newdot - os->bfd_section->vma;
+			if (!(diff & (((bfd_vma) 1 << section_alignment) - 1)))
+			  diff = 0;
+		      }
+		    if (diff != 0
 			&& (config.warn_section_align
-			    || os->addr_tree != NULL)
-			&& expld.phase != lang_mark_phase_enum)
-		      einfo (ngettext ("%P: warning: changing start of "
-				       "section %s by %lu byte\n",
-				       "%P: warning: changing start of "
-				       "section %s by %lu bytes\n",
-				       (unsigned long) dotdelta),
-			     os->name, (unsigned long) dotdelta);
+			    || os->addr_tree != NULL))
+		      einfo (_("%P: warning: "
+			       "start of section %s changed by %ld\n"),
+			     os->name, (long) diff);
 		  }
 
 		bfd_set_section_vma (os->bfd_section, newdot);
@@ -5874,7 +5980,7 @@ lang_size_sections_1
 		  *relax = TRUE;
 	      }
 	    dot = size_input_section (prev, output_section_statement,
-				      fill, dot);
+				      fill, &removed, dot);
 	  }
 	  break;
 
@@ -5979,7 +6085,43 @@ lang_size_sections_1
 	  FAIL ();
 	  break;
 	}
-      prev = &s->header.next;
+
+      /* If an input section doesn't fit in the current output
+	 section, remove it from the list.  Handle the case where we
+	 have to remove an input_section statement here: there is a
+	 special case to remove the first element of the list.  */
+      if (link_info.non_contiguous_regions && removed)
+	{
+	  /* If we removed the first element during the previous
+	     iteration, override the loop assignment of prev_s.  */
+	  if (removed_prev_s)
+	      prev_s = NULL;
+
+	  if (prev_s)
+	    {
+	      /* If there was a real previous input section, just skip
+		 the current one.  */
+	      prev_s->header.next=s->header.next;
+	      s = prev_s;
+	      removed_prev_s = FALSE;
+	    }
+	  else
+	    {
+	      /* Remove the first input section of the list.  */
+	      *prev = s->header.next;
+	      removed_prev_s = TRUE;
+	    }
+
+	  /* Move to next element, unless we removed the head of the
+	     list.  */
+	  if (!removed_prev_s)
+	    prev = &s->header.next;
+	}
+      else
+	{
+	  prev = &s->header.next;
+	  removed_prev_s = FALSE;
+	}
     }
   return dot;
 }
@@ -6036,6 +6178,8 @@ void
 one_lang_size_sections_pass (bfd_boolean *relax, bfd_boolean check_regions)
 {
   lang_statement_iteration++;
+  if (expld.phase != lang_mark_phase_enum)
+    lang_sizing_iteration++;
   lang_size_sections_1 (&statement_list.head, abs_output_section,
 			0, 0, relax, check_regions);
 }

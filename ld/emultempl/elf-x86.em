@@ -22,6 +22,7 @@
 #
 fragment <<EOF
 
+#include "ldlex.h"
 #include "elf-linker-x86.h"
 
 static struct elf_linker_x86_params params;

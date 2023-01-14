@@ -83,7 +83,7 @@ elf_core_file_matches_executable_p (bfd *core_bfd, bfd *exec_bfd)
     that allow standard bfd access to the general registers (.reg) and the
     floating point registers (.reg2).  */
 
-const bfd_target *
+bfd_cleanup
 elf_core_file_p (bfd *abfd)
 {
   Elf_External_Ehdr x_ehdr;	/* Elf file header, external form.  */
@@ -314,11 +314,11 @@ elf_core_file_p (bfd *abfd)
 
   /* Save the entry point from the ELF header.  */
   abfd->start_address = i_ehdrp->e_entry;
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 
-wrong:
+ wrong:
   bfd_set_error (bfd_error_wrong_format);
-fail:
+ fail:
   return NULL;
 }
 
@@ -419,8 +419,8 @@ NAME(_bfd_elf, core_find_build_id)
      build-id was found.  */
   goto fail;
 
-wrong:
+ wrong:
   bfd_set_error (bfd_error_wrong_format);
-fail:
+ fail:
   return FALSE;
 }

@@ -120,9 +120,7 @@ enum type_code
     TYPE_CODE_FUNC,		/**< Function type */
     TYPE_CODE_INT,		/**< Integer type */
 
-    /* * Floating type.  This is *NOT* a complex type.  Beware, there
-       are parts of GDB which bogusly assume that TYPE_CODE_FLT can
-       mean complex.  */
+    /* * Floating type.  This is *NOT* a complex type.  */
     TYPE_CODE_FLT,
 
     /* * Void type.  The length field specifies the length (probably

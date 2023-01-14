@@ -55,7 +55,7 @@ int ptrace_unix_core_file_failing_signal (bfd *abfd);
 #define ptrace_unix_core_file_pid _bfd_nocore_core_file_pid
 static void swap_abort (void);
 
-const bfd_target *
+bfd_cleanup
 ptrace_unix_core_file_p (bfd *abfd)
 {
   int val;
@@ -124,7 +124,7 @@ ptrace_unix_core_file_p (bfd *abfd)
   core_datasec (abfd)->alignment_power = 2;
   core_regsec (abfd)->alignment_power = 2;
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 
  fail:
   bfd_release (abfd, abfd->tdata.any);

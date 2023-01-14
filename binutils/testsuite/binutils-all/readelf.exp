@@ -349,6 +349,7 @@ readelf_wi_test
 readelf_compressed_wa_test
 
 readelf_dump_test
+run_dump_test "pr25543"
 
 # PR 13482 - Check for off-by-one errors when dumping .note sections.
 if {![binutils_assemble $srcdir/$subdir/version.s tmpdir/version.o]} then {

@@ -75,6 +75,8 @@ abs_top_srcdir = @abs_top_srcdir@
 abs_srcdir = @abs_srcdir@
 VPATH = @srcdir@
 
+top_builddir = .
+
 include $(srcdir)/../gdb/silent-rules.mk
 
 # Note that these are overridden by GNU make-specific code below if
@@ -100,6 +102,9 @@ INCLUDE_DEP = $$(INCLUDE_DIR)
 LIBIBERTY_BUILDDIR = ../libiberty
 LIBIBERTY = $(LIBIBERTY_BUILDDIR)/libiberty.a
 
+GDBSUPPORT_BUILDDIR = ../gdbsupport
+GDBSUPPORT = $(GDBSUPPORT_BUILDDIR)/libgdbsupport.a
+
 # Where is ust?  These will be empty if ust was not available.
 ustlibs = @ustlibs@
 ustinc = @ustinc@
@@ -108,6 +113,11 @@ ustinc = @ustinc@
 GNULIB_BUILDDIR = ../gnulib
 LIBGNU = $(GNULIB_BUILDDIR)/import/libgnu.a
 INCGNU = -I$(srcdir)/../gnulib/import -I$(GNULIB_BUILDDIR)/import
+
+# Where is the INTL library?  Typically in ../intl.
+INTL = @LIBINTL@
+INTL_DEPS = @LIBINTL_DEP@
+INTL_CFLAGS = @INCINTL@
 
 INCSUPPORT = -I$(srcdir)/.. -I..
 
@@ -122,7 +132,8 @@ INCSUPPORT = -I$(srcdir)/.. -I..
 #
 INCLUDE_CFLAGS = -I. -I${srcdir} \
 	-I$(srcdir)/../gdb/regformats -I$(srcdir)/.. -I$(INCLUDE_DIR) \
-	-I$(srcdir)/../gdb $(INCGNU) $(INCSUPPORT)
+	-I$(srcdir)/../gdb $(INCGNU) $(INCSUPPORT) \
+	$(INTL_CFLAGS)
 
 # M{H,T}_CFLAGS, if defined, has host- and target-dependent CFLAGS
 # from the config/ directory.
@@ -143,6 +154,8 @@ CPPFLAGS = @CPPFLAGS@
 
 PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
 PTHREAD_LIBS = @PTHREAD_LIBS@
+
+WIN32APILIBS = @WIN32APILIBS@
 
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
 INTERNAL_CFLAGS_BASE = ${CXXFLAGS} ${GLOBAL_CFLAGS} \
@@ -205,32 +218,6 @@ SFILES = \
 	$(srcdir)/../gdb/arch/arm-linux.c \
 	$(srcdir)/../gdb/arch/ppc-linux-common.c \
 	$(srcdir)/../gdb/arch/riscv.c \
-	$(srcdir)/../gdbsupport/btrace-common.cc \
-	$(srcdir)/../gdbsupport/buffer.cc \
-	$(srcdir)/../gdbsupport/cleanups.cc \
-	$(srcdir)/../gdbsupport/common-debug.cc \
-	$(srcdir)/../gdbsupport/common-exceptions.cc \
-	$(srcdir)/../gdbsupport/common-inferior.cc \
-	$(srcdir)/../gdbsupport/common-regcache.cc \
-	$(srcdir)/../gdbsupport/common-utils.cc \
-	$(srcdir)/../gdbsupport/errors.cc \
-	$(srcdir)/../gdbsupport/environ.cc \
-	$(srcdir)/../gdbsupport/fileio.cc \
-	$(srcdir)/../gdbsupport/filestuff.cc \
-	$(srcdir)/../gdbsupport/job-control.cc \
-	$(srcdir)/../gdbsupport/gdb-dlfcn.cc \
-	$(srcdir)/../gdbsupport/gdb_tilde_expand.cc \
-	$(srcdir)/../gdbsupport/gdb_vecs.cc \
-	$(srcdir)/../gdbsupport/gdb_wait.cc \
-	$(srcdir)/../gdbsupport/netstuff.cc \
-	$(srcdir)/../gdbsupport/new-op.cc \
-	$(srcdir)/../gdbsupport/pathstuff.cc \
-	$(srcdir)/../gdbsupport/print-utils.cc \
-	$(srcdir)/../gdbsupport/ptid.cc \
-	$(srcdir)/../gdbsupport/rsp-low.cc \
-	$(srcdir)/../gdbsupport/safe-strerror.cc \
-	$(srcdir)/../gdbsupport/tdesc.cc \
-	$(srcdir)/../gdbsupport/xml-utils.cc \
 	$(srcdir)/../gdb/nat/aarch64-sve-linux-ptrace.c \
 	$(srcdir)/../gdb/nat/linux-btrace.c \
 	$(srcdir)/../gdb/nat/linux-namespaces.c \
@@ -252,36 +239,6 @@ TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS}
 OBS = \
 	alloc.o \
 	ax.o \
-	gdbsupport/agent.o \
-	gdbsupport/btrace-common.o \
-	gdbsupport/buffer.o \
-	gdbsupport/cleanups.o \
-	gdbsupport/common-debug.o \
-	gdbsupport/common-exceptions.o \
-	gdbsupport/common-inferior.o \
-	gdbsupport/job-control.o \
-	gdbsupport/common-regcache.o \
-	gdbsupport/common-utils.o \
-	gdbsupport/errors.o \
-	gdbsupport/environ.o \
-	gdbsupport/fileio.o \
-	gdbsupport/filestuff.o \
-	gdbsupport/format.o \
-	gdbsupport/gdb-dlfcn.o \
-	gdbsupport/gdb_tilde_expand.o \
-	gdbsupport/gdb_vecs.o \
-	gdbsupport/gdb_wait.o \
-	gdbsupport/netstuff.o \
-	gdbsupport/new-op.o \
-	gdbsupport/pathstuff.o \
-	gdbsupport/print-utils.o \
-	gdbsupport/ptid.o \
-	gdbsupport/rsp-low.o \
-	gdbsupport/safe-strerror.o \
-	gdbsupport/signals.o \
-	gdbsupport/signals-state-save-restore.o \
-	gdbsupport/tdesc.o \
-	gdbsupport/xml-utils.o \
 	debug.o \
 	dll.o \
 	event-loop.o \
@@ -304,14 +261,6 @@ OBS = \
 	$(XML_BUILTIN)
 
 GDBREPLAY_OBS = \
-	gdbsupport/cleanups.o \
-	gdbsupport/common-exceptions.o \
-	gdbsupport/common-utils.o \
-	gdbsupport/rsp-low.o \
-	gdbsupport/errors.o \
-	gdbsupport/netstuff.o \
-	gdbsupport/print-utils.o \
-	gdbsupport/safe-strerror.o \
 	gdbreplay.o \
 	utils.o \
 	version.o
@@ -403,17 +352,21 @@ html:
 install-html:
 clean-info:
 
-gdbserver$(EXEEXT): $(sort $(OBS)) ${CDEPS} $(LIBGNU) $(LIBIBERTY)
+gdbserver$(EXEEXT): $(sort $(OBS)) ${CDEPS} $(LIBGNU) $(LIBIBERTY) \
+		$(INTL_DEPS) $(GDBSUPPORT)
 	$(SILENCE) rm -f gdbserver$(EXEEXT)
 	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) \
-		-o gdbserver$(EXEEXT) $(OBS) $(LIBGNU) $(LIBIBERTY) \
-		$(GDBSERVER_LIBS) $(XM_CLIBS)
+		-o gdbserver$(EXEEXT) $(OBS) $(GDBSUPPORT) $(LIBGNU) \
+		$(LIBIBERTY) $(INTL) $(GDBSERVER_LIBS) $(XM_CLIBS) \
+		$(WIN32APILIBS)
 
-gdbreplay$(EXEEXT): $(sort $(GDBREPLAY_OBS)) $(LIBGNU) $(LIBIBERTY)
+gdbreplay$(EXEEXT): $(sort $(GDBREPLAY_OBS)) $(LIBGNU) $(LIBIBERTY) \
+		$(INTL_DEPS) $(GDBSUPPORT)
 	$(SILENCE) rm -f gdbreplay$(EXEEXT)
 	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) \
-		-o gdbreplay$(EXEEXT) $(GDBREPLAY_OBS) $(XM_CLIBS) $(LIBGNU) \
-		$(LIBIBERTY)
+		-o gdbreplay$(EXEEXT) $(GDBREPLAY_OBS) $(XM_CLIBS) \
+		$(GDBSUPPORT) $(LIBGNU) $(LIBIBERTY) $(INTL) \
+		$(WIN32APILIBS)
 
 IPA_OBJS = \
 	alloc-ipa.o \
@@ -449,7 +402,6 @@ TAGS:	${TAGFILES}
 	     if [ x$$i != xyzzy ]; then \
 	       echo ${srcdir}/$$i | sed -e 's/\.o$$/\.cc/' \
 		 -e 's,/\(arch\|nat\|target\)/,/../\1/,' \
-		 -e 's,/\(gdbsupport\)/,/../../\1/,'; \
 	     fi; \
 	   done` \
 	  ${TAGFILES}
@@ -583,10 +535,6 @@ gdbsupport/%-ipa.o: ../gdbsupport/%.cc
 
 arch/%.o: ../gdb/arch/%.c
 	$(COMPILE) -x c++ $<
-	$(POSTCOMPILE)
-
-gdbsupport/%.o: ../gdbsupport/%.cc
-	$(COMPILE) $<
 	$(POSTCOMPILE)
 
 %.o: %-generated.cc

@@ -1,3 +1,730 @@
+2020-03-26  Nick Clifton  <nickc@redhat.com>
+
+	* cofflink.c (bfd_coff_get_internal_extra_pe_aouthdr): Delete.
+	* libbfd-in.h (bfd_coff_get_internal_extra_pe_aouthdr): Remove
+	prototype.
+	* libbfd.h: Regenerate.
+
+2020-03-26  Alan Modra  <amodra@gmail.com>
+
+	* i386msdos.c (msdos_object_p): Catch -1 return from bfd_bread.
+
+2020-03-26  Alan Modra  <amodra@gmail.com>
+
+	* vms-alpha.c (dst_define_location): Limit size of dst_ptr_offsets
+	array.
+	(_bfd_vms_slurp_object_records): Rename "err" to "ok".
+
+2020-03-25  Nick Clifton  <nickc@redhat.com>
+
+	* cofflink.c (bfd_coff_get_internal_extra_pe_aouthdr): New
+	function.
+	* libbfd-in.h (bfd_coff_get_internal_extra_pe_aouthdr): Prototype.
+	* libbfd.h: Regenerate.
+
+2020-03-25  Shahab Vahedi  <shahab@synopsys.com>
+
+	* elf32-arc.c (PRINT_DEBUG_RELOC_INFO_BEFORE): Use the
+	correct field name in the output string.
+
+2020-03-25  Alan Modra  <amodra@gmail.com>
+
+	PR 25662
+	* elf.c (assign_file_positions_for_load_sections): Adjust offset
+	for SHT_NOBITS section if first in segment.
+
+2020-03-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25708
+	* elf-bfd.h (_bfd_elf_get_symbol_version_name): Renamed to ...
+	(_bfd_elf_get_symbol_version_string): This.
+	* elf.c (_bfd_elf_get_symbol_version_name): Renamed to ...
+	(_bfd_elf_get_symbol_version_string): This.
+	(bfd_elf_print_symbol): Pass TRUE to
+	_bfd_elf_get_symbol_version_string.
+	* libbfd-in.h (_bfd_nosymbols_get_symbol_version_string): Add a
+	bfd_boolean argument.
+	* syms.c (_bfd_nosymbols_get_symbol_version_string): Likewise.
+	* targets.c  (_bfd_get_symbol_version_string): Likewise.
+	(bfd_get_symbol_version_string): Likewise.
+	* bfd-in2.h: Regenerated.
+
+2020-03-24  Nick Clifton  <nickc@redhat.com>
+	    Jaydeep Chauhan  <jaydeepchauhan1494@gmail.com>
+
+	PR 25713
+	* bfdio.c (_bfd_real_fopen): Add code to handle long filenames on
+	Win32 systems.
+
+2020-03-24  Nick Clifton  <nickc@redhat.com>
+
+	PR 25681
+	* elf.c (_bfd_elf_map_sections_to_segments): When looking for a
+	segment to use for PT_GNU_RELRO, ignore empty sections in a
+	segment's current list.
+
+2020-03-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25717
+	* elf-bfd.h (elf_obj_tdata): Change num_group to unsigned int.
+
+2020-03-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25708
+	* elf-bfd.h (_bfd_elf_get_symbol_version_name): New.
+	* elf.c (_bfd_elf_get_symbol_version_name): New function.  Based
+	on the previous _bfd_elf_get_symbol_version_string.
+	(_bfd_elf_get_symbol_version_string): Use it.
+
+2020-03-24  Alan Modra  <amodra@gmail.com>
+
+	* archive.c (_bfd_generic_read_ar_hdr_mag): Sanity check extended
+	name size.  Use bfd_malloc rather than bfd_zmalloc, clearing just
+	struct areltdata.
+
+2020-03-23  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* elflink.c (_bfd_elf_tls_setup): Mention .tdata in comment.
+
+2020-03-23  Alan Modra  <amodra@gmail.com>
+
+	* ecoff.c (_bfd_ecoff_slurp_armap): Sanity check parsed_size and
+	symbol count.  Allocate an extra byte to ensure name strings
+	are terminated.  Sanity check name offsets.  Release memory on
+	error return.
+
+2020-03-23  Alan Modra  <amodra@gmail.com>
+
+	* i386msdos.c (msdos_object_p): Don't access e_lfanew when that
+	field hasn't been read.  Remove unnecessary casts.
+
+2020-03-22  Alan Modra  <amodra@gmail.com>
+
+	* coff64-rs6000.c (xcoff64_slurp_armap): Ensure size is large
+	enough to read number of symbols.
+
+2020-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac (HAVE_EXECUTABLE_SUFFIX): Removed.
+	(EXECUTABLE_SUFFIX): Likewise.
+	* config.in: Regenerated.
+	* configure: Likewise.
+	* plugin.c (bfd_plugin_close_and_cleanup): Defined as
+	_bfd_generic_close_and_cleanup.
+	(plugin_list_entry): Remove resolution_file, resolution_option,
+	real_bfd, real_nsyms, real_syms, lto_nsyms, lto_syms, gcc,
+	lto_wrapper, gcc_env and initialized,
+	(need_lto_wrapper_p): Removed.
+	(get_lto_wrapper): Likewise.
+	(setup_lto_wrapper_env): Likewise.
+	(register_all_symbols_read): Likewise.
+	(egister_cleanup): Likewise.
+	(get_symbols): Likewise.
+	(add_input_file): Likewise.
+	(bfd_plugin_set_program_name): Remove need_lto_wrapper.
+	(add_symbols): Updated.
+	(try_claim): Likewise.
+	(try_load_plugin): Likewise.
+	(bfd_plugin_canonicalize_symtab): Likewise.
+	* plugin.h (bfd_plugin_set_program_name): Remove int argument.
+	(plugin_data_struct): Remove real_bfd, real_nsyms and real_syms.
+
+2020-03-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25640
+	* plugin.c (plugin_list_entry): Add has_symbol_type.
+	(add_symbols_v2): New function.
+	(bfd_plugin_open_input): Don't invoke LTO wrapper if LTO plugin
+	provides symbol type.
+	(try_load_plugin): Add LDPT_ADD_SYMBOLS_V2.
+	(bfd_plugin_canonicalize_symtab): Use LTO plugin symbol type if
+	available.
+
+2020-03-20  Alan Modra  <amodra@gmail.com>
+
+	* coff-rs6000.c (_bfd_xcoff_slurp_armap): Ensure size is large
+	enough to read number of symbols.
+
+2020-03-20  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (_bfd_elf_setup_sections): Don't test known non-NULL
+	backend functions for NULL before calling.
+	(copy_special_section_fields, _bfd_elf_copy_private_bfd_data),
+	(bfd_section_from_shdr, assign_section_numbers): Likewise.
+	* elfcode.h (elf_write_relocs, elf_slurp_reloc_table): Likewise.
+	* elfnn-ia64.c (ignore_errors): New function.
+	(elf_backend_link_order_error_handler): Redefine as ignore_errors.
+
+2020-03-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 25676
+	* dwarf2.c (struct varinfo): Add unit_offset field to record the
+	location of the varinfo in the unit's debug info data.  Change the
+	type of the stack field to a boolean.
+	(lookup_var_by_offset): New function.  Returns the varinfo
+	structure for the variable described at the given offset in the
+	unit's debug info.
+	(scan_unit_for_symbols): Add support for variables which have the
+	DW_AT_specification attribute.
+
+2020-03-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 25699
+	* elf.c (bfd_elf_set_group_contents): Replace assertion with an
+	error return.
+
+2020-03-19  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* elfxx-riscv.c (riscv_parse_subset): Don't use C99.
+
+2020-03-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 25673
+	* elf.c (_bfd_elf_write_secondary_reloc_section): Fix illegal
+	memory access when processing a corrupt secondary reloc section.
+
+2020-03-18  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	* elf32-arm.c (arm_build_one_stub): Emit a fatal error message
+	instead of calling abort.
+	* elf32-csky.c (csky_build_one_stub): Likewise.
+	* elf32-hppa.c (hppa_build_one_stub): Likewise.
+	* elf32-m68hc11.c (m68hc11_elf_build_one_stub): Likewise.
+	* elf32-m68hc12.c (m68hc12_elf_build_one_stub): Likewise.
+	* elf32-metag.c (metag_build_one_stub): Likewise.
+	* elf32-nios2.c (nios2_build_one_stub): Likewise.
+	* elf64-ppc.c (ppc_build_one_stub): Likewise.
+	(ppc_size_one_stub): Likewise.
+	* elfnn-aarch64.c (aarch64_build_one_stub): Likewise.
+
+2020-03-17  Nick Clifton  <nickc@redhat.com>
+
+	PR 25688
+	* elf.c (_bfd_elf_copy_special_section_fields): Replace assertions
+	with error messages.
+
+2020-03-17  Nick Clifton  <nickc@redhat.com>
+
+	PR 25687
+	* elf.c (_bfd_elf_slurp_secondary_reloc_section): Remove redundant
+	free.  Add free on another failure path.
+
+2020-03-16  Alan Modra  <amodra@gmail.com>
+
+	PR 25675
+	* elf.c (elf_sort_segments): Don't call bfd_octets_per_byte unless
+	we have a non-zero section count.  Do lma comparison in octets.
+
+2020-03-16  Alan Modra  <amodra@gmail.com>
+
+	* vms-alpha.c (dst_restore_location): Validate index into
+	dst_ptr_offsets array before accessing.  Return status.
+	(dst_retrieve_location): Similarly, making "loc" parameter a
+	pointer to return value.
+	(_bfd_vms_slurp_etir): Update calls to above functions.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
+	* configure.ac: Include netbsd-core.lo for all NetBSD arm and mips
+	targets.
+	* configure: Regenerated.
+
+2020-03-14  Alan Modra  <amodra@gmail.com>
+
+	* section.c (BFD_FAKE_SECTIONS): Formatting.
+	* bfd-in2.h: Regenerate.
+
+2020-03-13  Kamil Rytarowski  <n54@gmx.com>
+
+	* elf.c (elfcore_grok_netbsd_note): Add support for
+	NT_NETBSDCORE_LWPSTATUS notes.
+
+2020-03-13  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	* bfd-in2.h: Regenerate.
+	* section.c (asection): Add already_assigned field.
+	(BFD_FAKE_SECTION): Add default initializer for it.
+	* ecoff.c (bfd_debug_section): Initialize already_assigned field.
+	* elf32-arm.c (arm_build_one_stub): Add support for
+	non_contiguous_regions.
+	* elf32-csky.c (csky_build_one_stub): Likewise.
+	* elf32-hppa.c (hppa_build_one_stub): Likewise.
+	* elf32-m68hc11.c (m68hc11_elf_build_one_stub): Likewise.
+	* elf32-m68hc12.c (m68hc12_elf_build_one_stub): Likewise.
+	* elf32-metag.c (metag_build_one_stub): Likewise.
+	* elf32-nios2.c (nios2_build_one_stub): Likewise.
+	* elf64-ppc.c (ppc_build_one_stub): Likewise.
+	(ppc_size_one_stub): Likewise.
+	* elfnn-aarch64.c (aarch64_build_one_stub): Likewise.
+	* elflink.c (elf_link_input_bfd): Likewise.
+
+2020-03-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/24920
+	* elf-linker-x86.h (elf_linker_x86_params): Add
+	static_before_all_inputs and has_dynamic_linker.
+	* elfxx-x86.c (_bfd_x86_elf_link_setup_gnu_properties): Report
+	dynamic input objects if -static is passed at command-line
+	before all input files without --dynamic-linker unless
+	--no-dynamic-linker is used.
+
+2020-03-13  Kamil Rytarowski  <n54@gmx.com>
+
+	* elf.c (elfcore_grok_netbsd_note): Add support for aarch64.
+
+2020-03-13  Christian Eggers  <ceggers@gmx.de>
+
+	* bfd.c (bfd_record_phdr): New local "opb".  Fix assignment of
+	"p_paddr" from "at".
+	* elfcode.h (bfd_from_remote_memory): Add units to several
+	parameters.  New local "opb".  Fix usage of p_align.  Fix
+	calculation of "localbase" from "ehdr_vma" and "p_vaddr".  Fix
+	call of target_read_memory.
+	* elflink.c (elf_fixup_link_order): Fix scope of "s" local.  Fix
+	calculation of "offset" and "output_offset".
+	(bfd_elf_final_link): New local "opb".  Fix calculation of "size"
+	from "offset" and fix calculation of "end" from "vma+size".  Fix
+	comparison between "sh_addr" and "vma"/"output_offset".
+	(bfd_elf_discard_info): Fix calculation of "eh_alignment".
+	* elf-bfd.h (struct elf_link_hash_table): Add unit to tls_size
+	member.
+	* elf.c (_bfd_elf_map_sections_to_segments): Add unit (bytes/
+	octets) to "wrap_to2 and "phdr_size" locals.  Fix calculation of
+	"wrap_to" value.  Add unit (bytes) to phdr_lma variable.  Fix
+	assignment of p_paddr from phdr_lma.  Fix comparison between
+	"lma+size" and "next->lma".
+	(elf_sort_segments): Fix assignment from p_paddr to lma.
+	(assign_file_positions_for_load_sections): Add unit (bytes) to
+	local "align".  Fix calculation of local "off_adjust".  Fix
+	calculation of local "filehdr_vaddr".
+	(assign_file_positions_for_non_load_sections): New local "opb".
+	Fix calculation of "end" from "p_size". Fix comparison between
+	"vma+SECTION_SIZE" and "start".  Fix calculation of "p_memsz"
+	from "end" and "p_vaddr".
+	(rewrite_elf_program_header): Fix comparison between p_vaddr and
+	vma.  Fix assignment to p_paddr from lma.  Fix comparison between
+	p_paddr and lma.  Fix assignment to p_paddr from lma.
+	* merge.c (sec_merge_emit): New local "opb". Convert
+	"alignment_power" to octets.
+	(_bfd_add_merge_section): New locals "alignment_power" and
+	"opb".  Fix comparison between "alignment_power" and
+	"sizeof(align)".
+	(_bfd_merge_sections): New local "opb".  Divide size by opb
+	before checking align mask.
+
+2020-03-13  Christian Eggers  <ceggers@gmx.de>
+
+	* elf.c (_bfd_elf_make_section_from_shdr): Introduce new temp
+	opb.  Divide Elf_Internal_Shdr::sh_addr by opb when setting
+	section LMA/VMA.
+	(_bfd_elf_make_section_from_phdr): Similarly.
+	(elf_fake_sections): Fix calculation of
+	Elf_Internal_shdr::sh_addr from section VMA.
+	(_bfd_elf_map_sections_to_segments): Fix mixup between octets
+	and bytes.
+	(assign_file_positions_for_load_sections): Fix calculations of
+	Elf_Internal_shdr::p_vaddr and p_paddr from section LMA/VMA.  Fix
+	comparison between program header address and section LMA.
+	(assign_file_positions_for_non_load_sections): Likewise.
+	(rewrite_elf_program_header): Likewise.  Introduce new temp opb.
+	(IS_CONTAINED_BY_VMA): Add parameter opb.
+	(IS_CONTAINED_BY_LMA,IS_SECTION_IN_INPUT_SEGMENT,
+	INCLUDE_SECTION_IN_SEGMENT): Likewise.
+	(copy_elf_program_header): Update call to ELF_SECTION_IN_SEGMENT.
+	Fix calculations of p_addr_valid and p_vaddr_offset.
+	* elflink.c (elf_link_add_object_symbols): Multiply section VMA
+	with octets per byte when comparing against p_vaddr.
+
+2020-03-11  Alan Modra  <amodra@gmail.com>
+
+	* som.c (setup_sections): Sanity check subspace.name.
+
+2020-03-11  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_inline_plt): Do increment rel in for loop.
+
+2020-03-10  Alan Modra  <amodra@gmail.com>
+
+	PR 25648
+	* ihex.c (ihex_write_object_contents): Don't assume ordering of
+	addresses here.
+
+2020-03-09  Alan Modra  <amodra@gmail.com>
+
+	* wasm-module.c (wasm_scan): Sanity check file name length
+	before allocating memory.  Move common section setup code.  Do
+	without bfd_tell to calculate section size.
+
+2020-03-06  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (_bfd_elf_set_section_contents): Replace call to abort
+	with error messages and failure return values.
+
+2020-03-05  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* elf32-xtensa.c (shrink_dynamic_reloc_sections): Shrink dynamic
+	relocation sections for any removed reference to a dynamic symbol.
+
+2020-03-05  Nick Clifton  <nickc@redhat.com>
+
+	* elf-bfd.h (struct elf_backend_data): Add new fields:
+	init_secondary_reloc_section, slurp_secondary_reloc_section,
+	write_secondary_reloc_section.
+	(_bfd_elf_init_secondary_reloc_section): Prototype.
+	(_bfd_elf_slurp_secondary_reloc_section): Prototype.
+	(_bfd_elf_write_secondary_reloc_section): Prototype.
+	* elf.c ( bfd_section_from_shdr): Invoke the new
+	init_secondary_reloc_section backend function, if defined, when a
+	second reloc section is encountered.
+	(swap_out_syms): Invoke the new symbol_section_index function, if
+	defined, when computing the section index of an OS/PROC specific
+	symbol.
+	(_bfd_elf_init_secondary_reloc_section): New function.
+	(_bfd_elf_slurp_secondary_reloc_section): New function.
+	(_bfd_elf_write_secondary_reloc_section): New function.
+	(_bfd_elf_copy_special_section_fields): New function.
+	* elfcode.h (elf_write_relocs): Invoke the new
+	write_secondary_relocs function, if defined, in order to emit
+	secondary relocs.
+	(elf_slurp_reloc_table): Invoke the new slurp_secondary_relocs
+	function, if defined, in order to read in secondary relocs.
+	* elfxx-target.h (elf_backend_copy_special_section_fields):
+	Provide a non-NULL default definition.
+	(elf_backend_init_secondary_reloc_section): Likewise.
+	(elf_backend_slurp_secondary_reloc_section): Likewise.
+	(elf_backend_write_secondary_reloc_section): Likewise.
+	(struct elf_backend_data elfNN_bed): Add initialisers for the new
+	fields.
+        * configure.ac (score_elf32_[bl]e_vec): Add elf64.lo
+        * configure: Regenerate.
+
+2020-03-05  Alan Modra  <amodra@gmail.com>
+
+	* archive64.c (_bfd_archive_64_bit_slurp_armap): Check parsed_size
+	against file size before allocating memory.  Use bfd_alloc rather
+	than bfd_zalloc for carsym/strings memory.
+
+2020-03-04  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (elf_fake_sections): Ensure sh_addralign is such that
+	sh_addr mod sh_addalign is zero.
+
+2020-03-04  Alan Modra  <amodra@gmail.com>
+
+	* format.c (bfd_check_format_matches): Call cleanup on error exit.
+
+2020-03-03  Alan Modra  <amodra@gmail.com>
+
+	* format.c (struct bfd_preserve): Add cleanup field.
+	(bfd_preserve_save): Add cleanup param and save.
+	(bfd_preserve_restore): Return cleanup.
+	(bfd_preserve_finish): Call the cleanup for the discarded match.
+	(bfd_check_format_matches): Pass cleanup to bfd_preserve_save,
+	and clear when preserving a match.  Restore cleanup too when
+	restoring that match.
+
+2020-03-02  Alan Modra  <amodra@gmail.com>
+
+	* cisco-core.c (cisco_core_file_p): Return bfd_cleanup.
+	* hpux-core.c (hpux_core_core_file_p): Update prototype.
+	* sco5-core.c (sco5_core_file_p): Return bfd_cleanup.
+	(core_sco5_vec): Correct initialisers.
+
+2020-03-02  Alan Modra  <amodra@gmail.com>
+
+	* aix386-core.c (aix386_core_file_p): Return bfd_cleanup.
+	* aix5ppc-core.c (xcoff64_core_p): Likewise.
+	* cisco-core.c (cisco_core_file_validate): Likewise.
+	* hppabsd-core.c (hppabsd_core_core_file_p): Likewise.
+	* hpux-core.c (hpux_core_core_file_p): Likewise.
+	* irix-core.c (irix_core_core_file_p): Likewise.
+	* lynx-core.c (lynx_core_file_p): Likewise.
+	* netbsd-core.c (netbsd_core_file_p): Likewise.
+	* osf-core.c (osf_core_core_file_p): Likewise.
+	* ptrace-core.c (ptrace_unix_core_file_p): Likewise.
+	* sco5-core.c (sco5_core_file_p): Likewise.
+
+2020-03-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* trad-core.c (trad_unix_core_file_p): Return bfd_cleanup.
+
+2020-03-02  Alan Modra  <amodra@gmail.com>
+
+	* targets.c (bfd_cleanup): New typedef.
+	(struct bfd <_bfd_check_format>): Return a bfd_cleanup.
+	* libbfd-in.h (_bfd_no_cleanup): Define.
+	* format.c (bfd_reinit): Add cleanup parameter, call it.
+	(bfd_check_format_matches): Set cleanup from _bfd_check_format
+	call and pass to bfd_reinit.  Delete temp, use abfd->xvec instead.
+	* aout-target.h (callback, object_p): Return bfd_cleanup.
+	* aout-tic30.c (tic30_aout_callback, tic30_aout_object_p): Likewise.
+	* archive.c (bfd_generic_archive_p): Likewise.
+	* binary.c (binary_object_p): Likewise.
+	* coff-alpha.c (alpha_ecoff_object_p): Likewise.
+	* coff-ia64.c (ia64coff_object_p): Likewise.
+	* coff-rs6000.c (_bfd_xcoff_archive_p, rs6000coff_core_p): Likewise.
+	* coff-sh.c (coff_small_object_p): Likewise.
+	* coff-stgo32.c (go32_check_format): Likewise.
+	* coff64-rs6000.c (xcoff64_archive_p, rs6000coff_core_p),
+	(xcoff64_core_p): Likewise.
+	* coffgen.c (coff_real_object_p, coff_object_p): Likewise.
+	* elf-bfd.h (bfd_elf32_object_p, bfd_elf32_core_file_p),
+	(bfd_elf64_object_p, bfd_elf64_core_file_p): Likewise.
+	* elfcode.h (elf_object_p): Likewise.
+	* elfcore.h (elf_core_file_p): Likewise.
+	* i386msdos.c (msdos_object_p): Likewise.
+	* ihex.c (ihex_object_p): Likewise.
+	* libaout.h (some_aout_object_p): Likewise.
+	* libbfd-in.h (bfd_generic_archive_p, _bfd_dummy_target),
+	(_bfd_vms_lib_alpha_archive_p, _bfd_vms_lib_ia64_archive_p): Likewise.
+	* libbfd.c (_bfd_dummy_target): Likewise.
+	* libcoff-in.h (coff_object_p): Likewise.
+	* mach-o-aarch64.c (bfd_mach_o_arm64_object_p),
+	(bfd_mach_o_arm64_core_p): Likewise.
+	* mach-o-arm.c (bfd_mach_o_arm_object_p),
+	(bfd_mach_o_arm_core_p): Likewise.
+	* mach-o-i386.c (bfd_mach_o_i386_object_p),
+	(bfd_mach_o_i386_core_p): Likewise.
+	* mach-o-x86-64.c (bfd_mach_o_x86_64_object_p),
+	(bfd_mach_o_x86_64_core_p): Likewise.
+	* mach-o.c (bfd_mach_o_header_p, bfd_mach_o_gen_object_p),
+	(bfd_mach_o_gen_core_p, bfd_mach_o_fat_archive_p): Likewise.
+	* mach-o.h (bfd_mach_o_object_p, bfd_mach_o_core_p),
+	(bfd_mach_o_fat_archive_p, bfd_mach_o_header_p): Likewise.
+	* mmo.c (mmo_object_p): Likewise.
+	* pef.c (bfd_pef_object_p, bfd_pef_xlib_object_p): Likewise.
+	* peicode.h (coff_real_object_p, pe_ILF_object_p),
+	(pe_bfd_object_p): Likewise.
+	* plugin.c (ld_plugin_object_p, bfd_plugin_object_p): Likewise.
+	* ppcboot.c (ppcboot_object_p): Likewise.
+	* rs6000-core.c (rs6000coff_core_p): Likewise.
+	* som.c (som_object_setup, som_object_p): Likewise.
+	* srec.c (srec_object_p, symbolsrec_object_p): Likewise.
+	* tekhex.c (tekhex_object_p): Likewise.
+	* vms-alpha.c (alpha_vms_object_p): Likewise.
+	* vms-lib.c (_bfd_vms_lib_archive_p, _bfd_vms_lib_alpha_archive_p),
+	(_bfd_vms_lib_ia64_archive_p, _bfd_vms_lib_txt_archive_p): Likewise.
+	* wasm-module.c (wasm_object_p): Likewise.
+	* xsym.c (bfd_sym_object_p): Likewise.
+	* xsym.h (bfd_sym_object_p): Likewise.
+	* aoutx.h (some_aout_object_p): Likewise, and callback parameter
+	return type.
+	* pdp11.c (some_aout_object_p): Likewise.
+	* plugin.c (register_ld_plugin_object_p): Update object_p
+	parameter type.
+	* plugin.h (register_ld_plugin_object_p): Likewise.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* libcoff.h: Regenerate.
+
+2020-03-02  Alan Modra  <amodra@gmail.com>
+
+	* coff-alpha.c (alpha_ecoff_le_vec): Add SEC_SMALL_DATA to
+	applicable section flags.
+	* coff-mips.c (mips_ecoff_le_vec, mips_ecoff_be_vec): Likewise.
+	(mips_ecoff_bele_vec): Likewise.
+	* coffcode.h (sec_to_styp_flags): Set SEC_SMALL_DATA for .sdata
+	and .sbss sections.
+	* ecoff.c (_bfd_ecoff_new_section_hook): Likewise.
+	(_bfd_ecoff_styp_to_sec_flags): Likewise.
+
+2020-03-02  Alan Modra  <amodra@gmail.com>
+
+	* elf32-m32r.c (m32r_elf_section_flags): New function.
+	(elf_backend_section_flags): Define.
+	* elf32-nds32.c (nds32_elf_section_flags): New function.
+	(elf_backend_section_flags): Define.
+	* elf32-ppc.c (ppc_elf_section_from_shdr): Set SEC_SMALL_DATA for
+	.sbss and .sdata sections.
+	* elf32-v850.c (v850_elf_section_from_shdr): Set SEC_SMALL_DATA
+	for SHF_V850_GPREL sections.
+	* elf64-alpha.c (elf64_alpha_section_from_shdr): Delete outdated
+	FIXME.
+	* elf64-hppa.c (elf64_hppa_section_from_shdr): Set SEC_SMALL_DATA
+	for SHF_PARISC_SHORT sections.
+	* elf64-ppc.c (ppc64_elf_section_flags): New function.
+	(elf_backend_section_flags): Define.
+	* elfxx-mips.c (_bfd_mips_elf_section_from_shdr): Set SEC_SMALL_DATA
+	for SHF_MIPS_GPREL sections.  Delete FIXME.
+
+2020-03-02  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (elf_backend_section_flags): Remove flagword* param.
+	* elf.c (_bfd_elf_make_section_from_shdr): Set section flags before
+	calling elf_backend_section_flags with adjusted params.  Use
+	newsect->flags past that point.
+	(_bfd_elf_new_section_hook): Always set sh_type and sh_flags for
+	special sections.
+	(_bfd_elf_init_private_section_data): Allow normal sh_type sections
+	to have their type overridden, and all sh_flags but processor and
+	os specific.
+	* elf32-arm.c (elf32_arm_section_flags): Adjust for changed params.
+	* elf32-mep.c (mep_elf_section_flags): Likewise.
+	* elf32-nios2.c (nios2_elf32_section_flags): Likewise.
+	* elf64-alpha.c (elf64_alpha_section_flags): Likewise.
+	* elf64-ia64-vms.c (elf64_ia64_section_flags): Likewise.
+	* elfnn-ia64.c (elfNN_ia64_section_flags): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_size_stubs): Exclude the linker
+	stub BFD and non-aarch64 input files when scanning for stubs.
+
+2020-03-02  Alan Modra  <amodra@gmail.com>
+
+	* coff-alpha.c (alpha_ecoff_get_elt_at_filepos): Provide an upper
+	limit to decompressed element size.
+
+2020-03-02  Alan Modra  <amodra@gmail.com>
+
+	* vms-lib.c (vms_traverse_index): Add recur_count param and
+	update calls.  Fail on excessive recursion.
+
+2020-03-02  Alan Modra  <amodra@gmail.com>
+
+	* vms-alpha.c (vms_get_remaining_object_record): Use
+	bfd_realloc_or_free rather than bfd_realloc.
+	(add_symbol_entry, vector_grow1, alpha_vms_slurp_relocs): Likewise.
+	(dst_define_location, parse_module): Likewise, and check realloc
+	return status before using memory.  Return status from function
+	adjusting all callers.
+
+2020-02-28  Alan Modra  <amodra@gmail.com>
+
+	* vms-lib.c (_bfd_vms_lib_archive_p): Free memory on error paths.
+
+2020-02-28  Alan Modra  <amodra@gmail.com>
+
+	* vms-alpha.c (alpha_vms_object_p): Use _bfd_malloc_and_read.
+	Remove duplicate undersize check.
+
+2020-02-27  Alan Modra  <amodra@gmail.com>
+
+	PR 24511
+	* mmo.c (mmo_scan): Set SEC_DATA for .data.
+
+2020-02-27  Alan Modra  <amodra@gmail.com>
+
+	PR 24511
+	* syms.c (stt): Trim off all but 'e', 'i' and 'p' entries.
+	(coff_section_type): Adjust comment.
+	(decode_section_type): Likewise.  Call coff_section_type before
+	decode_section_type.
+	(bfd_decode_symclass): Use 'c' for common sections other than
+	the standard one.
+
+2020-02-27  Alan Modra  <amodra@gmail.com>
+
+	* coff-rs6000.c (_bfd_xcoff_read_ar_hdr): Put all data in one
+	malloc'd block.
+
+2020-02-27  Alan Modra  <amodra@gmail.com>
+
+	* bfd.c (bfd_stat_arch_elt): Use vector of containing archive,
+	if file is an archive element.
+	* bfd-in2.h: Regenerate.
+
+2020-02-26  Alan Modra  <amodra@gmail.com>
+
+	* archive.c (do_slurp_bsd_armap): Increase minimum parsed_size, and
+	bfd_set_error on failing test.  Don't bother changing bfd_error on
+	file read error.  Check symdef_count is multiple of BSD_SYMDEF_SIZE.
+	Check sym name is within string buffer.  Use size_t for some vars.
+	(do_slurp_coff_armap): Use size_t for some variables, fix size of
+	int_buf.  Don't change bfd_error on file read error.  Use
+	_bfd_mul_overflow when calculating carsym buffer size.  Reorder
+	calculations to catch overflows before they occur.  malloc and
+	free raw armap rather than using bfd_alloc.  Read raw armap before
+	allocating carsym+strings buffer.
+	(_bfd_slurp_extended_name_table): Localize variables.  Check
+	name size against file size.
+
+2020-02-26  Alan Modra  <amodra@gmail.com>
+
+	* vms-lib.c (vms_lib_read_index): Release correct buffer.
+
+2020-02-26  Alan Modra  <amodra@gmail.com>
+
+	* elf32-rx.c (rx_elf_relocate_section): Use bfd_malloc rather than
+	malloc.  Check for NULL return from bfd_malloc.
+	(rx_table_find, rx_table_map): Likewise.
+	(rx_set_section_contents): Check bfd_alloc return.
+	(rx_dump_symtab): Don't alloc internal_syms or external_syms.
+
+2020-02-26  Alan Modra  <amodra@gmail.com>
+
+	* aoutx.h: Indent labels correctly.  Format error strings.
+	* archive.c: Likewise.
+	* archive64.c: Likewise.
+	* coff-arm.c: Likewise.
+	* coff-rs6000.c: Likewise.
+	* coff-stgo32.c: Likewise.
+	* cpu-arm.c: Likewise.
+	* dwarf2.c: Likewise.
+	* elf-ifunc.c: Likewise.
+	* elf-properties.c: Likewise.
+	* elf-s390-common.c: Likewise.
+	* elf-strtab.c: Likewise.
+	* elf.c: Likewise.
+	* elf32-arm.c: Likewise.
+	* elf32-bfin.c: Likewise.
+	* elf32-cr16.c: Likewise.
+	* elf32-csky.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-msp430.c: Likewise.
+	* elf32-nds32.c: Likewise.
+	* elf32-nios2.c: Likewise.
+	* elf32-pru.c: Likewise.
+	* elf32-xtensa.c: Likewise.
+	* elf64-ia64-vms.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elfcode.h: Likewise.
+	* elfcore.h: Likewise.
+	* elflink.c: Likewise.
+	* elfnn-aarch64.c: Likewise.
+	* elfnn-ia64.c: Likewise.
+	* elfnn-riscv.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* elfxx-sparc.c: Likewise.
+	* elfxx-x86.c: Likewise.
+	* i386lynx.c: Likewise.
+	* merge.c: Likewise.
+	* pdp11.c: Likewise.
+	* plugin.c: Likewise.
+	* reloc.c: Likewise.
+
+2020-02-26  Alan Modra  <amodra@gmail.com>
+
+	PR 25593
+	* elf-bfd.h (struct elf_link_hash_table): Rename "loaded" to
+	"dyn_loaded".
+	(bfd_elf_add_dt_needed_tag): Declare.
+	* elf-strtab.c (_bfd_elf_strtab_restore): Handle NULL buf.
+	* elflink.c (bfd_elf_add_dt_needed_tag): Make global and rename
+	from elf_add_dt_needed_tag.  Remove soname and doit param.
+	(elf_link_add_object_symbols): Don't use elf_add_dt_needed_tag
+	to see whether as-needed lib is already loaded, use dyn_loaded
+	list instead.  When saving and restoring around as-needed lib
+	handle possibility that dynstr has not been initialised.  Don't
+	add DT_NEEDED tags here.  Limit dyn_loaded list to dynamic libs.
+	Mark libs loaded via DT_NEEDED entries of other libs with
+	DYN_NO_NEEDED if they should not be mentioned in DT_NEEDED of
+	the output.
+	(elf_link_check_versioned_symbol): Remove now unneccesary
+	DYNAMIC check when traversing dyn_loaded list.
+
+2020-02-26  Alan Modra  <amodra@gmail.com>
+
+	* bfdio.c (bfd_get_file_size): Ignore bogus archive element sizes.
+
+2020-02-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25584
+	* plugin.c (need_lto_wrapper_p): New.
+	(bfd_plugin_set_program_name): Add an int argument to set
+	need_lto_wrapper_p.
+	(get_lto_wrapper): Return FALSE if need_lto_wrapper_p isn't
+	set.
+	* plugin.h (bfd_plugin_set_program_name): Add an int argument.
+
 2020-02-24  Alan Modra  <amodra@gmail.com>
 
 	* vms-lib.c (_bfd_vms_lib_archive_p): Correct overflow checks.

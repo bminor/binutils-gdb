@@ -635,10 +635,10 @@ struct elf_link_hash_table
 
   /* Cached first output tls section and size of PT_TLS segment.  */
   asection *tls_sec;
-  bfd_size_type tls_size;
+  bfd_size_type tls_size;  /* Bytes.  */
 
-  /* A linked list of BFD's loaded in the link.  */
-  struct elf_link_loaded_list *loaded;
+  /* A linked list of dynamic BFD's loaded in the link.  */
+  struct elf_link_loaded_list *dyn_loaded;
 
   /* Short-cuts to get to dynamic linker sections.  */
   asection *sgot;
@@ -955,7 +955,7 @@ struct elf_backend_data
   /* A function to convert machine dependent ELF section header flags to
      BFD internal section header flags.  */
   bfd_boolean (*elf_backend_section_flags)
-    (flagword *, const Elf_Internal_Shdr *);
+    (const Elf_Internal_Shdr *);
 
   /* A function that returns a struct containing ELF section flags and
      type for the given BFD section.   */
@@ -1509,6 +1509,16 @@ struct elf_backend_data
      emitted symbol.  If not defined, the value is left unchanged.  */
   unsigned int (*symbol_section_index) (bfd *, elf_symbol_type *);
   
+  /* Called when a section has extra reloc sections.  */
+  bfd_boolean (*init_secondary_reloc_section) (bfd *, Elf_Internal_Shdr *,
+					       const char *, unsigned int);
+
+  /* Called when after loading the normal relocs for a section.  */
+  bfd_boolean (*slurp_secondary_relocs) (bfd *, asection *, asymbol **);
+
+  /* Called after writing the normal relocs for a section.  */
+  bfd_boolean (*write_secondary_relocs) (bfd *, asection *);
+
   /* This is non-zero if static TLS segments require a special alignment.  */
   unsigned static_tls_alignment;
 
@@ -1943,7 +1953,7 @@ struct elf_obj_tdata
   struct sdt_note *sdt_note_head;
 
   Elf_Internal_Shdr **group_sect_ptr;
-  int num_group;
+  unsigned int num_group;
 
   /* Index into group_sect_ptr, updated by setup_group when finding a
      section's group.  Used to optimize subsequent group searches.  */
@@ -2067,7 +2077,7 @@ extern bfd_boolean _bfd_elf_copy_private_bfd_data
 extern bfd_boolean _bfd_elf_print_private_bfd_data
   (bfd *, void *);
 const char * _bfd_elf_get_symbol_version_string
-  (bfd *, asymbol *, bfd_boolean *);
+  (bfd *, asymbol *, bfd_boolean, bfd_boolean *);
 extern void bfd_elf_print_symbol
   (bfd *, void *, asymbol *, bfd_print_symbol_type);
 
@@ -2400,9 +2410,9 @@ extern bfd_boolean _bfd_elf_init_file_header (bfd *, struct bfd_link_info *);
 
 extern bfd_boolean _bfd_elf_final_write_processing (bfd *);
 
-extern const bfd_target *bfd_elf32_object_p
+extern bfd_cleanup bfd_elf32_object_p
   (bfd *);
-extern const bfd_target *bfd_elf32_core_file_p
+extern bfd_cleanup bfd_elf32_core_file_p
   (bfd *);
 extern char *bfd_elf32_core_file_failing_command
   (bfd *);
@@ -2448,9 +2458,9 @@ extern void bfd_elf32_write_relocs
 extern bfd_boolean bfd_elf32_slurp_reloc_table
   (bfd *, asection *, asymbol **, bfd_boolean);
 
-extern const bfd_target *bfd_elf64_object_p
+extern bfd_cleanup bfd_elf64_object_p
   (bfd *);
-extern const bfd_target *bfd_elf64_core_file_p
+extern bfd_cleanup bfd_elf64_core_file_p
   (bfd *);
 extern char *bfd_elf64_core_file_failing_command
   (bfd *);
@@ -2510,6 +2520,8 @@ extern bfd_boolean bfd_elf_link_add_symbols
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_add_dynamic_entry
   (struct bfd_link_info *, bfd_vma, bfd_vma);
+extern int bfd_elf_add_dt_needed_tag
+  (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_link_check_relocs
   (bfd *, struct bfd_link_info *);
 
@@ -2835,6 +2847,19 @@ extern bfd_vma elf32_r_info (bfd_vma, bfd_vma);
 extern bfd_vma elf32_r_sym (bfd_vma);
 
 extern bfd_boolean is_debuginfo_file (bfd *);
+
+
+extern bfd_boolean _bfd_elf_init_secondary_reloc_section
+  (bfd *, Elf_Internal_Shdr *, const char *, unsigned int);
+extern bfd_boolean _bfd_elf_slurp_secondary_reloc_section
+  (bfd *, asection *, asymbol **);
+extern bfd_boolean _bfd_elf_copy_special_section_fields
+  (const bfd *, bfd *, const Elf_Internal_Shdr *, Elf_Internal_Shdr *);
+extern bfd_boolean _bfd_elf_write_secondary_reloc_section
+  (bfd *, asection *);
+extern unsigned int _bfd_elf_symbol_section_index
+  (bfd *, elf_symbol_type *);
+
 
 /* Large common section.  */
 extern asection _bfd_elf_large_com_section;

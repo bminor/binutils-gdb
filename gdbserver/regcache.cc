@@ -198,7 +198,7 @@ regcache_cpy (struct regcache *dst, struct regcache *src)
 
 /* Return a reference to the description of register N.  */
 
-static const struct reg &
+static const struct gdb::reg &
 find_register_by_number (const struct target_desc *tdesc, int n)
 {
   return tdesc->reg_defs[n];

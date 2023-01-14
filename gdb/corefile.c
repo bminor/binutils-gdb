@@ -415,7 +415,7 @@ write_memory_signed_integer (CORE_ADDR addr, int len,
 
 /* The current default bfd target.  Points to storage allocated for
    gnutarget_string.  */
-char *gnutarget;
+const char *gnutarget;
 
 /* Same thing, except it is "auto" not NULL for the default case.  */
 static char *gnutarget_string;

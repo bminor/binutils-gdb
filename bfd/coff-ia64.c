@@ -67,7 +67,7 @@ in_reloc_p (bfd * abfd ATTRIBUTE_UNUSED,
 
 #include "coffcode.h"
 
-static const bfd_target *
+static bfd_cleanup
 ia64coff_object_p (bfd *abfd)
 {
 #ifdef COFF_IMAGE_WITH_PE

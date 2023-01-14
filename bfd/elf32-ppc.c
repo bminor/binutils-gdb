@@ -1332,15 +1332,21 @@ ppc_elf_section_from_shdr (bfd *abfd,
     return FALSE;
 
   newsect = hdr->bfd_section;
-  flags = bfd_section_flags (newsect);
+  flags = 0;
   if (hdr->sh_flags & SHF_EXCLUDE)
     flags |= SEC_EXCLUDE;
 
   if (hdr->sh_type == SHT_ORDERED)
     flags |= SEC_SORT_ENTRIES;
 
-  bfd_set_section_flags (newsect, flags);
-  return TRUE;
+  if (strncmp (name, ".PPC.EMB", 8) == 0)
+    name += 8;
+  if (strncmp (name, ".sbss", 5) == 0
+      || strncmp (name, ".sdata", 6) == 0)
+    flags |= SEC_SMALL_DATA;
+
+  return (flags == 0
+	  || bfd_set_section_flags (newsect, newsect->flags | flags));
 }
 
 /* Set up any other section flags and such that may be necessary.  */

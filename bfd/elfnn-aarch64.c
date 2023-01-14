@@ -3278,7 +3278,7 @@ _bfd_aarch64_add_stub_entry_after (const char *stub_name,
 
 static bfd_boolean
 aarch64_build_one_stub (struct bfd_hash_entry *gen_entry,
-			void *in_arg ATTRIBUTE_UNUSED)
+			void *in_arg)
 {
   struct elf_aarch64_stub_hash_entry *stub_entry;
   asection *stub_sec;
@@ -3291,9 +3291,21 @@ aarch64_build_one_stub (struct bfd_hash_entry *gen_entry,
   unsigned int template_size;
   const uint32_t *template;
   unsigned int i;
+  struct bfd_link_info *info;
 
   /* Massage our args to the form they really have.  */
   stub_entry = (struct elf_aarch64_stub_hash_entry *) gen_entry;
+
+  info = (struct bfd_link_info *) in_arg;
+
+  /* Fail if the target section could not be assigned to an output
+     section.  The user should fix his linker script.  */
+  if (stub_entry->target_section->output_section == NULL
+      && info->non_contiguous_regions)
+    info->callbacks->einfo (_("%F%P: Could not assign '%pA' to an output section. "
+			      "Retry without "
+			      "--enable-non-contiguous-regions.\n"),
+			    stub_entry->target_section);
 
   stub_sec = stub_entry->stub_sec;
 
@@ -4313,9 +4325,15 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
 
       for (input_bfd = info->input_bfds;
 	   input_bfd != NULL; input_bfd = input_bfd->link.next)
-	if (!_bfd_aarch64_erratum_835769_scan (input_bfd, info,
-					       &num_erratum_835769_fixes))
-	  return FALSE;
+	{
+	  if (!is_aarch64_elf (input_bfd)
+	      || (input_bfd->flags & BFD_LINKER_CREATED) != 0)
+	    continue;
+
+	  if (!_bfd_aarch64_erratum_835769_scan (input_bfd, info,
+						 &num_erratum_835769_fixes))
+	    return FALSE;
+	}
 
       _bfd_aarch64_resize_stubs (htab);
       (*htab->layout_sections_again) ();
@@ -4330,6 +4348,10 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
 	   input_bfd = input_bfd->link.next)
 	{
 	  asection *section;
+
+	  if (!is_aarch64_elf (input_bfd)
+	      || (input_bfd->flags & BFD_LINKER_CREATED) != 0)
+	    continue;
 
 	  for (section = input_bfd->sections;
 	       section != NULL;
@@ -4352,6 +4374,10 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
 	  Elf_Internal_Shdr *symtab_hdr;
 	  asection *section;
 	  Elf_Internal_Sym *local_syms = NULL;
+
+	  if (!is_aarch64_elf (input_bfd)
+	      || (input_bfd->flags & BFD_LINKER_CREATED) != 0)
+	    continue;
 
 	  /* We'll need the symbol table in a second.  */
 	  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
@@ -4615,7 +4641,7 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
 
   return TRUE;
 
-error_ret_free_local:
+ error_ret_free_local:
   return FALSE;
 }
 
@@ -5507,7 +5533,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       switch (bfd_r_type)
 	{
 	default:
-bad_ifunc_reloc:
+	bad_ifunc_reloc:
 	  if (h->root.root.string)
 	    name = h->root.root.string;
 	  else
@@ -9482,7 +9508,7 @@ elfNN_aarch64_finish_dynamic_symbol (bfd *output_bfd,
 	}
       else
 	{
-do_glob_dat:
+	do_glob_dat:
 	  BFD_ASSERT ((h->got.offset & 1) == 0);
 	  bfd_put_NN (output_bfd, (bfd_vma) 0,
 		      htab->root.sgot->contents + h->got.offset);

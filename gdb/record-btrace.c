@@ -718,7 +718,16 @@ btrace_find_line_range (CORE_ADDR pc)
   range = btrace_mk_line_range (symtab, 0, 0);
   for (i = 0; i < nlines - 1; i++)
     {
-      if ((lines[i].pc == pc) && (lines[i].line != 0))
+      /* The test of is_stmt here was added when the is_stmt field was
+	 introduced to the 'struct linetable_entry' structure.  This
+	 ensured that this loop maintained the same behaviour as before we
+	 introduced is_stmt.  That said, it might be that we would be
+	 better off not checking is_stmt here, this would lead to us
+	 possibly adding more line numbers to the range.  At the time this
+	 change was made I was unsure how to test this so chose to go with
+	 maintaining the existing experience.  */
+      if ((lines[i].pc == pc) && (lines[i].line != 0)
+	  && (lines[i].is_stmt == 1))
 	range = btrace_line_range_add (range, lines[i].line);
     }
 

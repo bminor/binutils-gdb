@@ -2,6 +2,7 @@
 #ld: -shared --version-script pr21389.map -soname=pr21389.so
 #objdump: -p
 #target: *-*-linux* *-*-gnu* arm*-*-uclinuxfdpiceabi
+#xfail: h8300-*-*
 
 #...
 Version definitions:

@@ -302,7 +302,7 @@ ldfile_try_open_bfd (const char *attempt,
 	    }
 	}
     }
-success:
+ success:
 #ifdef ENABLE_PLUGINS
   /* If plugins are active, they get first chance to claim
      any successfully-opened input file.  We skip archives

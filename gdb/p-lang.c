@@ -447,7 +447,7 @@ extern const struct language_defn pascal_language_defn =
   pascal_emit_char,		/* Print a single char */
   pascal_print_type,		/* Print a type using appropriate syntax */
   pascal_print_typedef,		/* Print a typedef using appropriate syntax */
-  pascal_val_print,		/* Print a value using appropriate syntax */
+  pascal_value_print_inner,	/* la_value_print_inner */
   pascal_value_print,		/* Print a top-level value */
   default_read_var_value,	/* la_read_var_value */
   NULL,				/* Language specific skip_trampoline */

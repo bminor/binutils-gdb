@@ -1,3 +1,11 @@
+2020-03-12  Kamil Rytarowski  <n54@gmx.com>
+
+	* emul_netbsd.c (netbsd_signal_names): Sync with NetBSD 9.99.49.
+
+2020-03-12  Kamil Rytarowski  <n54@gmx.com>
+
+	* emul_netbsd.c (netbsd_error_names): Sync with NetBSD 9.99.49.
+
 2019-12-19  Tom Tromey  <tromey@adacore.com>
 
 	PR build/24572:

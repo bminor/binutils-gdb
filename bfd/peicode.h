@@ -122,7 +122,7 @@ typedef struct
 pe_ILF_vars;
 #endif /* COFF_IMAGE_WITH_PE */
 
-const bfd_target *coff_real_object_p
+bfd_cleanup coff_real_object_p
   (bfd *, unsigned, struct internal_filehdr *, struct internal_aouthdr *);
 
 #ifndef NO_COFF_RELOCS
@@ -1142,7 +1142,7 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
 /* We have detected a Image Library Format archive element.
    Decode the element and return the appropriate target.  */
 
-static const bfd_target *
+static bfd_cleanup
 pe_ILF_object_p (bfd * abfd)
 {
   bfd_byte	  buffer[14];
@@ -1300,7 +1300,7 @@ pe_ILF_object_p (bfd * abfd)
       return NULL;
     }
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 }
 
 static void
@@ -1394,7 +1394,7 @@ pe_bfd_read_buildid (bfd *abfd)
   free (data);
 }
 
-static const bfd_target *
+static bfd_cleanup
 pe_bfd_object_p (bfd * abfd)
 {
   bfd_byte buffer[6];
@@ -1404,7 +1404,7 @@ pe_bfd_object_p (bfd * abfd)
   struct internal_aouthdr internal_a;
   bfd_size_type opt_hdr_size;
   file_ptr offset;
-  const bfd_target *result;
+  bfd_cleanup result;
 
   /* Detect if this a Microsoft Import Library Format element.  */
   /* First read the beginning of the header.  */

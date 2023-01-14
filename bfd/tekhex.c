@@ -600,7 +600,7 @@ tekhex_mkobject (bfd *abfd)
 /* Return TRUE if the file looks like it's in TekHex format. Just look
    for a percent sign and some hex digits.  */
 
-static const bfd_target *
+static bfd_cleanup
 tekhex_object_p (bfd *abfd)
 {
   char b[4];
@@ -619,7 +619,7 @@ tekhex_object_p (bfd *abfd)
   if (!pass_over (abfd, first_phase))
     return NULL;
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 }
 
 static void

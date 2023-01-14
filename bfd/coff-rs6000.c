@@ -38,7 +38,7 @@ extern bfd_boolean _bfd_xcoff_is_local_label_name (bfd *, const char *);
 extern reloc_howto_type *_bfd_xcoff_reloc_type_lookup
   (bfd *, bfd_reloc_code_real_type);
 extern bfd_boolean _bfd_xcoff_slurp_armap (bfd *);
-extern const bfd_target *_bfd_xcoff_archive_p (bfd *);
+extern bfd_cleanup _bfd_xcoff_archive_p (bfd *);
 extern void * _bfd_xcoff_read_ar_hdr (bfd *);
 extern bfd *_bfd_xcoff_openr_next_archived_file (bfd *, bfd *);
 extern int _bfd_xcoff_stat_arch_elt (bfd *, struct stat *);
@@ -77,7 +77,7 @@ void xcoff_rtype2howto (arelent *, struct internal_reloc *);
 #define coff_mkobject _bfd_xcoff_mkobject
 #define coff_bfd_is_local_label_name _bfd_xcoff_is_local_label_name
 #ifdef AIX_CORE
-extern const bfd_target * rs6000coff_core_p (bfd *abfd);
+extern bfd_cleanup rs6000coff_core_p (bfd *abfd);
 extern bfd_boolean rs6000coff_core_file_matches_executable_p
   (bfd *cbfd, bfd *ebfd);
 extern char *rs6000coff_core_file_failing_command (bfd *abfd);
@@ -652,7 +652,7 @@ _bfd_xcoff_swap_aux_out (bfd *abfd, void * inp, int type, int in_class,
 		ext->x_sym.x_misc.x_lnsz.x_size);
     }
 
-end:
+ end:
   return bfd_coff_auxesz (abfd);
 }
 
@@ -1260,9 +1260,9 @@ _bfd_xcoff_slurp_armap (bfd *abfd)
 	return FALSE;
 
       GET_VALUE_IN_FIELD (sz, hdr.size, 10);
-      if (sz == (bfd_size_type) -1)
+      if (sz + 1 < 5)
 	{
-	  bfd_set_error (bfd_error_no_memory);
+	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
 
@@ -1322,9 +1322,9 @@ _bfd_xcoff_slurp_armap (bfd *abfd)
 	return FALSE;
 
       GET_VALUE_IN_FIELD (sz, hdr.size, 10);
-      if (sz == (bfd_size_type) -1)
+      if (sz + 1 < 9)
 	{
-	  bfd_set_error (bfd_error_no_memory);
+	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
 
@@ -1380,7 +1380,7 @@ _bfd_xcoff_slurp_armap (bfd *abfd)
 
 /* See if this is an XCOFF archive.  */
 
-const bfd_target *
+bfd_cleanup
 _bfd_xcoff_archive_p (bfd *abfd)
 {
   struct artdata *tdata_hold;
@@ -1481,7 +1481,7 @@ _bfd_xcoff_archive_p (bfd *abfd)
       return NULL;
     }
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 }
 
 /* Read the archive header in an XCOFF archive.  */
@@ -1491,32 +1491,23 @@ _bfd_xcoff_read_ar_hdr (bfd *abfd)
 {
   bfd_size_type namlen;
   struct areltdata *ret;
-  bfd_size_type amt = sizeof (struct areltdata);
-
-  ret = (struct areltdata *) bfd_zmalloc (amt);
-  if (ret == NULL)
-    return NULL;
+  bfd_size_type amt;
 
   if (! xcoff_big_format_p (abfd))
     {
       struct xcoff_ar_hdr hdr;
       struct xcoff_ar_hdr *hdrp;
 
-      if (bfd_bread (&hdr, (bfd_size_type) SIZEOF_AR_HDR, abfd)
-	  != SIZEOF_AR_HDR)
-	{
-	  free (ret);
-	  return NULL;
-	}
+      if (bfd_bread (&hdr, SIZEOF_AR_HDR, abfd) != SIZEOF_AR_HDR)
+	return NULL;
 
       GET_VALUE_IN_FIELD (namlen, hdr.namlen, 10);
-      amt = SIZEOF_AR_HDR + namlen + 1;
-      hdrp = (struct xcoff_ar_hdr *) bfd_alloc (abfd, amt);
-      if (hdrp == NULL)
-	{
-	  free (ret);
-	  return NULL;
-	}
+      amt = sizeof (struct areltdata) + SIZEOF_AR_HDR + namlen + 1;
+      ret = (struct areltdata *) bfd_malloc (amt);
+      if (ret == NULL)
+	return ret;
+
+      hdrp = (struct xcoff_ar_hdr *) (ret + 1);
       memcpy (hdrp, &hdr, SIZEOF_AR_HDR);
       if (bfd_bread ((char *) hdrp + SIZEOF_AR_HDR, namlen, abfd) != namlen)
 	{
@@ -1534,21 +1525,16 @@ _bfd_xcoff_read_ar_hdr (bfd *abfd)
       struct xcoff_ar_hdr_big hdr;
       struct xcoff_ar_hdr_big *hdrp;
 
-      if (bfd_bread (&hdr, (bfd_size_type) SIZEOF_AR_HDR_BIG, abfd)
-	  != SIZEOF_AR_HDR_BIG)
-	{
-	  free (ret);
-	  return NULL;
-	}
+      if (bfd_bread (&hdr, SIZEOF_AR_HDR_BIG, abfd) != SIZEOF_AR_HDR_BIG)
+	return NULL;
 
       GET_VALUE_IN_FIELD (namlen, hdr.namlen, 10);
-      amt = SIZEOF_AR_HDR_BIG + namlen + 1;
-      hdrp = (struct xcoff_ar_hdr_big *) bfd_alloc (abfd, amt);
-      if (hdrp == NULL)
-	{
-	  free (ret);
-	  return NULL;
-	}
+      amt = sizeof (struct areltdata) + SIZEOF_AR_HDR_BIG + namlen + 1;
+      ret = (struct areltdata *) bfd_malloc (amt);
+      if (ret == NULL)
+	return ret;
+
+      hdrp = (struct xcoff_ar_hdr_big *) (ret + 1);
       memcpy (hdrp, &hdr, SIZEOF_AR_HDR_BIG);
       if (bfd_bread ((char *) hdrp + SIZEOF_AR_HDR_BIG, namlen, abfd) != namlen)
 	{

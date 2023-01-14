@@ -15,8 +15,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 proc sid_start {} {
-    global verbose
-
     set port [lindex [split [target_info netport] ":"] 1]
 
     # Set a default endianness

@@ -700,7 +700,8 @@ fold_name (etree_type *tree)
 	  /* Don't find the real header size if only marking sections;
 	     The bfd function may cache incorrect data.  */
 	  if (expld.phase != lang_mark_phase_enum)
-	    hdr_size = bfd_sizeof_headers (link_info.output_bfd, &link_info);
+	    hdr_size = (bfd_sizeof_headers (link_info.output_bfd, &link_info)
+			/ bfd_octets_per_byte (link_info.output_bfd, NULL));
 	  new_number (hdr_size);
 	}
       break;

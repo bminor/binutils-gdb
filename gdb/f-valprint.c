@@ -156,10 +156,7 @@ f77_print_array_1 (int nss, int ndimensions, struct type *type,
 	{
 	  struct value *elt = value_subscript ((struct value *)val, i);
 
-	  val_print (value_type (elt),
-		     value_embedded_offset (elt),
-		     value_address (elt), stream, recurse,
-		     elt, options, current_language);
+	  common_val_print (elt, stream, recurse, options, current_language);
 
 	  if (i != upperbound)
 	    fprintf_filtered (stream, ", ");
@@ -211,38 +208,35 @@ static const struct generic_val_print_decorations f_decorations =
   "}"
 };
 
-/* See val_print for a description of the various parameters of this
-   function; they are identical.  */
+/* See f-lang.h.  */
 
 void
-f_val_print (struct type *type, int embedded_offset,
-	     CORE_ADDR address, struct ui_file *stream, int recurse,
-	     struct value *original_value,
-	     const struct value_print_options *options)
+f_value_print_innner (struct value *val, struct ui_file *stream, int recurse,
+		      const struct value_print_options *options)
 {
+  struct type *type = check_typedef (value_type (val));
   struct gdbarch *gdbarch = get_type_arch (type);
   int printed_field = 0; /* Number of fields printed.  */
   struct type *elttype;
   CORE_ADDR addr;
   int index;
-  const gdb_byte *valaddr =value_contents_for_printing (original_value);
+  const gdb_byte *valaddr = value_contents_for_printing (val);
+  const CORE_ADDR address = value_address (val);
 
-  type = check_typedef (type);
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_STRING:
       f77_get_dynamic_length_of_aggregate (type);
       LA_PRINT_STRING (stream, builtin_type (gdbarch)->builtin_char,
-		       valaddr + embedded_offset,
-		       TYPE_LENGTH (type), NULL, 0, options);
+		       valaddr, TYPE_LENGTH (type), NULL, 0, options);
       break;
 
     case TYPE_CODE_ARRAY:
       if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_CHAR)
 	{
 	  fprintf_filtered (stream, "(");
-	  f77_print_array (type, valaddr, embedded_offset,
-			   address, stream, recurse, original_value, options);
+	  f77_print_array (type, valaddr, 0,
+			   address, stream, recurse, val, options);
 	  fprintf_filtered (stream, ")");
 	}
       else
@@ -250,8 +244,7 @@ f_val_print (struct type *type, int embedded_offset,
 	  struct type *ch_type = TYPE_TARGET_TYPE (type);
 
 	  f77_get_dynamic_length_of_aggregate (type);
-	  LA_PRINT_STRING (stream, ch_type,
-			   valaddr + embedded_offset,
+	  LA_PRINT_STRING (stream, ch_type, valaddr,
 			   TYPE_LENGTH (type) / TYPE_LENGTH (ch_type),
 			   NULL, 0, options);
 	}
@@ -260,15 +253,14 @@ f_val_print (struct type *type, int embedded_offset,
     case TYPE_CODE_PTR:
       if (options->format && options->format != 's')
 	{
-	  val_print_scalar_formatted (type, embedded_offset,
-				      original_value, options, 0, stream);
+	  value_print_scalar_formatted (val, options, 0, stream);
 	  break;
 	}
       else
 	{
 	  int want_space = 0;
 
-	  addr = unpack_pointer (type, valaddr + embedded_offset);
+	  addr = unpack_pointer (type, valaddr);
 	  elttype = check_typedef (TYPE_TARGET_TYPE (type));
 
 	  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
@@ -310,12 +302,10 @@ f_val_print (struct type *type, int embedded_offset,
 
 	  opts.format = (options->format ? options->format
 			 : options->output_format);
-	  val_print_scalar_formatted (type, embedded_offset,
-				      original_value, &opts, 0, stream);
+	  value_print_scalar_formatted (val, &opts, 0, stream);
 	}
       else
-	val_print_scalar_formatted (type, embedded_offset,
-				    original_value, options, 0, stream);
+	value_print_scalar_formatted (val, options, 0, stream);
       break;
 
     case TYPE_CODE_STRUCT:
@@ -325,8 +315,7 @@ f_val_print (struct type *type, int embedded_offset,
       fprintf_filtered (stream, "( ");
       for (index = 0; index < TYPE_NFIELDS (type); index++)
         {
-	  struct value *field = value_field
-	    ((struct value *)original_value, index);
+	  struct value *field = value_field (val, index);
 
 	  struct type *field_type = check_typedef (TYPE_FIELD_TYPE (type, index));
 
@@ -346,16 +335,35 @@ f_val_print (struct type *type, int embedded_offset,
 		  fputs_filtered (" = ", stream);
 		}
 
-	      val_print (value_type (field),
-			 value_embedded_offset (field),
-			 value_address (field), stream, recurse + 1,
-			 field, options, current_language);
+	      common_val_print (field, stream, recurse + 1,
+				options, current_language);
 
 	      ++printed_field;
 	    }
 	 }
       fprintf_filtered (stream, " )");
       break;     
+
+    case TYPE_CODE_BOOL:
+      if (options->format || options->output_format)
+	{
+	  struct value_print_options opts = *options;
+	  opts.format = (options->format ? options->format
+			 : options->output_format);
+	  value_print_scalar_formatted (val, &opts, 0, stream);
+	}
+      else
+	{
+	  LONGEST longval = value_as_long (val);
+	  /* The Fortran standard doesn't specify how logical types are
+	     represented.  Different compilers use different non zero
+	     values to represent logical true.  */
+	  if (longval == 0)
+	    fputs_filtered (f_decorations.false_name, stream);
+	  else
+	    fputs_filtered (f_decorations.true_name, stream);
+	}
+      break;
 
     case TYPE_CODE_REF:
     case TYPE_CODE_FUNC:
@@ -366,12 +374,9 @@ f_val_print (struct type *type, int embedded_offset,
     case TYPE_CODE_RANGE:
     case TYPE_CODE_UNDEF:
     case TYPE_CODE_COMPLEX:
-    case TYPE_CODE_BOOL:
     case TYPE_CODE_CHAR:
     default:
-      generic_val_print (type, embedded_offset, address,
-			 stream, recurse, original_value, options,
-			 &f_decorations);
+      generic_value_print (val, stream, recurse, options, &f_decorations);
       break;
     }
 }

@@ -159,7 +159,6 @@ proc gdb_version { } {
 #
 
 proc gdb_unload {} {
-    global verbose
     global GDB
     global gdb_prompt
     send_gdb "file\n"
@@ -699,20 +698,22 @@ proc gdb_internal_error_resync {} {
 }
 
 
-# gdb_test_multiple COMMAND MESSAGE EXPECT_ARGUMENTS PROMPT_REGEXP
+# gdb_test_multiple COMMAND MESSAGE [ -promp PROMPT_REGEXP] [ -lbl ]
+#                   EXPECT_ARGUMENTS
 # Send a command to gdb; test the result.
 #
 # COMMAND is the command to execute, send to GDB with send_gdb.  If
 #   this is the null string no command is sent.
 # MESSAGE is a message to be printed with the built-in failure patterns
 #   if one of them matches.  If MESSAGE is empty COMMAND will be used.
+# -prompt PROMPT_REGEXP specifies a regexp matching the expected prompt
+#   after the command output.  If empty, defaults to "$gdb_prompt $".
+# -lbl specifies that line-by-line matching will be used.
 # EXPECT_ARGUMENTS will be fed to expect in addition to the standard
 #   patterns.  Pattern elements will be evaluated in the caller's
 #   context; action elements will be executed in the caller's context.
 #   Unlike patterns for gdb_test, these patterns should generally include
 #   the final newline and prompt.
-# PROMPT_REGEXP is a regexp matching the expected prompt after the command
-#   output.  If empty, defaults to "$gdb_prompt $"
 #
 # Returns:
 #    1 if the test failed, according to a built-in failure pattern
@@ -792,7 +793,7 @@ proc gdb_internal_error_resync {} {
 #	}
 #    }
 #
-proc gdb_test_multiple { command message user_code { prompt_regexp "" } } {
+proc gdb_test_multiple { command message args } {
     global verbose use_gdb_stub
     global gdb_prompt pagination_prompt
     global GDB
@@ -801,6 +802,26 @@ proc gdb_test_multiple { command message user_code { prompt_regexp "" } } {
     upvar timeout timeout
     upvar expect_out expect_out
     global any_spawn_id
+
+    set line_by_line 0
+    set prompt_regexp ""
+    for {set i 0} {$i < [llength $args]} {incr i} {
+	set arg [lindex $args $i]
+	if { $arg  == "-prompt" } {
+	    incr i
+	    set prompt_regexp [lindex $args $i]
+	} elseif { $arg == "-lbl" } {
+	    set line_by_line 1
+	} else {
+	    set user_code $arg
+	    break
+	}
+    }
+    if { [expr $i + 1] < [llength $args] } {
+	error "Too many arguments to gdb_test_multiple"
+    } elseif { ![info exists user_code] } {
+	error "Too few arguments to gdb_test_multiple"
+    }
 
     if { "$prompt_regexp" == "" } {
 	set prompt_regexp "$gdb_prompt $"
@@ -1068,6 +1089,14 @@ proc gdb_test_multiple { command message user_code { prompt_regexp "" } } {
 	    }
 	    return -1
 	}
+    }
+
+    if {$line_by_line} {
+       append code {
+           -re "\r\n\[^\r\n\]*(?=\r\n)" {
+               exp_continue
+           }
+       }
     }
 
     # Now patterns that apply to any spawn id specified.
@@ -1617,7 +1646,6 @@ proc gdb_reinitialize_dir { subdir } {
 proc default_gdb_exit {} {
     global GDB
     global INTERNAL_GDBFLAGS GDBFLAGS
-    global verbose
     global gdb_spawn_id inferior_spawn_id
     global inotify_log_file
 
@@ -1683,7 +1711,6 @@ proc default_gdb_exit {} {
 
 proc gdb_file_cmd { arg } {
     global gdb_prompt
-    global verbose
     global GDB
     global last_loaded_file
 
@@ -1999,22 +2026,24 @@ proc skip_rust_tests {} {
 proc skip_python_tests_prompt { prompt_regexp } {
     global gdb_py_is_py3k
 
-    gdb_test_multiple "python print ('test')" "verify python support" {
-	-re "not supported.*$prompt_regexp" {
-	    unsupported "Python support is disabled."
-	    return 1
+    gdb_test_multiple "python print ('test')" "verify python support" \
+	-prompt "$prompt_regexp" {
+	    -re "not supported.*$prompt_regexp" {
+		unsupported "Python support is disabled."
+		return 1
+	    }
+	    -re "$prompt_regexp" {}
 	}
-	-re "$prompt_regexp" {}
-    } "$prompt_regexp"
 
-    gdb_test_multiple "python print (sys.version_info\[0\])" "check if python 3" {
-	-re "3.*$prompt_regexp" {
-            set gdb_py_is_py3k 1
-        }
-	-re ".*$prompt_regexp" {
-            set gdb_py_is_py3k 0
-        }
-    } "$prompt_regexp"
+    gdb_test_multiple "python print (sys.version_info\[0\])" "check if python 3" \
+	-prompt "$prompt_regexp" {
+	    -re "3.*$prompt_regexp" {
+		set gdb_py_is_py3k 1
+	    }
+	    -re ".*$prompt_regexp" {
+		set gdb_py_is_py3k 0
+	    }
+	}
 
     return 0
 }
@@ -3268,13 +3297,14 @@ proc skip_unwinder_tests {} {
 
 proc skip_libstdcxx_probe_tests_prompt { prompt_regexp } {
     set supported 0
-    gdb_test_multiple "info probe" "check for stap probe in libstdc++" {
-	-re ".*libstdcxx.*catch.*\r\n$prompt_regexp" {
-	    set supported 1
+    gdb_test_multiple "info probe" "check for stap probe in libstdc++" \
+	-prompt "$prompt_regexp" {
+	    -re ".*libstdcxx.*catch.*\r\n$prompt_regexp" {
+		set supported 1
+	    }
+	    -re "\r\n$prompt_regexp" {
+	    }
 	}
-	-re "\r\n$prompt_regexp" {
-	}
-    } "$prompt_regexp"
     set skip [expr !$supported]
     return $skip
 }
@@ -3314,15 +3344,16 @@ proc skip_compile_feature_tests {} {
 
 proc gdb_is_target_1 { target_name target_stack_regexp prompt_regexp } {
     set test "probe for target ${target_name}"
-    gdb_test_multiple "maint print target-stack" $test {
-	-re "${target_stack_regexp}${prompt_regexp}" {
-	    pass $test
-	    return 1
+    gdb_test_multiple "maint print target-stack" $test \
+	-prompt "$prompt_regexp" {
+	    -re "${target_stack_regexp}${prompt_regexp}" {
+		pass $test
+		return 1
+	    }
+	    -re "$prompt_regexp" {
+		pass $test
+	    }
 	}
-	-re "$prompt_regexp" {
-	    pass $test
-	}
-    } "$prompt_regexp"
     return 0
 }
 
@@ -4617,7 +4648,7 @@ proc gdb_core_cmd { core test } {
 	    fail "$test (bad file format)"
 	    return -1
 	}
-	-re ": No such file or directory.*\r\n$gdb_prompt $" {
+	-re -wrap "[string_to_regexp $core]: No such file or directory.*" {
 	    fail "$test (file not found)"
 	    return -1
 	}
@@ -4868,7 +4899,7 @@ proc standard_output_file {basename} {
     file mkdir $dir
     # If running on MinGW, replace /c/foo with c:/foo
     if { [ishost *-*-mingw*] } {
-        set dir [regsub {^/([a-z])/} $dir {\1:/}]
+        set dir [exec sh -c "cd ${dir} && pwd -W"]
     }
     return [file join $dir $basename]
 }
@@ -4896,6 +4927,51 @@ proc standard_temp_file {basename} {
     set dir [make_gdb_parallel_path temp [pid]]
     file mkdir $dir
     return [file join $dir $basename]
+}
+
+# Rename file A to file B, if B does not already exists.  Otherwise, leave B
+# as is and delete A.  Return 1 if rename happened.
+
+proc tentative_rename { a b } {
+    global errorInfo errorCode
+    set code [catch {file rename -- $a $b} result]
+    if { $code == 1 && [lindex $errorCode 0] == "POSIX" \
+	     && [lindex $errorCode 1] == "EEXIST" } {
+	file delete $a
+	return 0
+    }
+    if {$code == 1} {
+	return -code error -errorinfo $errorInfo -errorcode $errorCode $result
+    } elseif {$code > 1} {
+	return -code $code $result
+    }
+    return 1
+}
+
+# Create a file with name FILENAME and contents TXT in the cache directory.
+# If EXECUTABLE, mark the new file for execution.
+
+proc cached_file { filename txt {executable 0}} {
+    set filename [make_gdb_parallel_path cache $filename]
+
+    if { [file exists $filename] } {
+	return $filename
+    }
+
+    set dir [file dirname $filename]
+    file mkdir $dir
+
+    set tmp_filename $filename.[pid]
+    set fd [open $tmp_filename w]
+    puts $fd $txt
+    close $fd
+
+    if { $executable } {
+	exec chmod +x $tmp_filename
+    }
+    tentative_rename $tmp_filename $filename
+
+    return $filename
 }
 
 # Set 'testfile', 'srcfile', and 'binfile'.
@@ -5066,6 +5142,12 @@ proc gdb_init { test_file_name } {
     # tests.
     setenv TERM "dumb"
 
+    # Ensure that GDBHISTFILE and GDBHISTSIZE are removed from the
+    # environment, we don't want these modifications to the history
+    # settings.
+    unset -nocomplain ::env(GDBHISTFILE)
+    unset -nocomplain ::env(GDBHISTSIZE)
+
     # Initialize GDB's pty with a fixed size, to make sure we avoid pagination
     # during startup.  See "man expect" for details about stty_init.
     global stty_init
@@ -5131,7 +5213,6 @@ set debug_format "unknown"
 
 proc get_debug_format { } {
     global gdb_prompt
-    global verbose
     global expect_out
     global debug_format
 
@@ -6092,6 +6173,30 @@ proc get_valueof { fmt exp default {test ""} } {
     return ${val}
 }
 
+# Retrieve the value of local var EXP in the inferior.  DEFAULT is used as
+# fallback if print fails.  TEST is the test message to use.  It can be
+# omitted, in which case a test message is built from EXP.
+
+proc get_local_valueof { exp default {test ""} } {
+    global gdb_prompt
+
+    if {$test == "" } {
+	set test "get local valueof \"${exp}\""
+    }
+
+    set val ${default}
+    gdb_test_multiple "info locals ${exp}" "$test" {
+	-re "$exp = (\[^\r\n\]*)\[\r\n\]*$gdb_prompt $" {
+	    set val $expect_out(1,string)
+	    pass "$test"
+	}
+	timeout {
+	    fail "$test (timeout)"
+	}
+    }
+    return ${val}
+}
+
 # Retrieve the value of EXP in the inferior, as a signed decimal value
 # (using "print /d").  DEFAULT is used as fallback if print fails.
 # TEST is the test message to use.  It can be omitted, in which case
@@ -6864,6 +6969,17 @@ gdb_caching_proc skip_ctf_tests {
 	    return 0;
 	}
     } executable "additional_flags=-gt"]
+}
+
+# Return 1 if compiler supports -gstatement-frontiers.  Otherwise,
+# return 0.
+
+gdb_caching_proc supports_statement_frontiers {
+    return [gdb_can_simple_compile supports_statement_frontiers {
+	int main () {
+	    return 0;
+	}
+    } executable "additional_flags=-gstatement-frontiers"]
 }
 
 # Always load compatibility stuff.

@@ -86,7 +86,7 @@ struct som_external_aux_id
 #define COPYRIGHT_AUX_ID 9
 
 /* Aux id flags.  */
-#define SOM_AUX_ID_MANDATORY	(1 << 31)
+#define SOM_AUX_ID_MANDATORY	(1u << 31)
 #define SOM_AUX_ID_COPY		(1 << 30)
 #define SOM_AUX_ID_APPEND	(1 << 29)
 #define SOM_AUX_ID_IGNORE	(1 << 28)
@@ -134,7 +134,7 @@ struct som_external_space_dictionary_record
   unsigned char init_pointer_quantity[4];
 };
 
-#define SOM_SPACE_IS_LOADABLE		(1 << 31)
+#define SOM_SPACE_IS_LOADABLE		(1u << 31)
 #define SOM_SPACE_IS_DEFINED		(1 << 30)
 #define SOM_SPACE_IS_PRIVATE		(1 << 29)
 #define SOM_SPACE_HAS_INTERMEDIATE_CODE (1 << 28)
@@ -195,7 +195,7 @@ struct som_external_symbol_dictionary_record
 };
 
 /* Flags fields.  */
-#define SOM_SYMBOL_HIDDEN (1 << 31)
+#define SOM_SYMBOL_HIDDEN (1u << 31)
 #define SOM_SYMBOL_SECONDARY_DEF (1 << 30)
 #define SOM_SYMBOL_TYPE_SH 24
 #define SOM_SYMBOL_TYPE_MASK 0x3f
@@ -214,7 +214,7 @@ struct som_external_symbol_dictionary_record
 #define SOM_SYMBOL_ARG_RELOC_MASK 0x3ff
 
 /* Info fields.  */
-#define SOM_SYMBOL_HAS_LONG_RETURN (1 << 31)
+#define SOM_SYMBOL_HAS_LONG_RETURN (1u << 31)
 #define SOM_SYMBOL_NO_RELOCATION (1 << 30)
 #define SOM_SYMBOL_IS_COMDAT (1 << 29)
 #define SOM_SYMBOL_SYMBOL_INFO_SH 0

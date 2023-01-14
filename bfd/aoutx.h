@@ -452,13 +452,13 @@ DESCRIPTION
 	handle any last-minute setup.
 */
 
-const bfd_target *
+bfd_cleanup
 NAME (aout, some_aout_object_p) (bfd *abfd,
 				 struct internal_exec *execp,
-				 const bfd_target *(*callback_to_real_object_p) (bfd *))
+				 bfd_cleanup (*callback_to_real_object_p) (bfd *))
 {
   struct aout_data_struct *rawptr, *oldrawptr;
-  const bfd_target *result;
+  bfd_cleanup result;
   size_t amt = sizeof (* rawptr);
 
   rawptr = (struct aout_data_struct *) bfd_zalloc (abfd, amt);
@@ -591,7 +591,7 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
   adata (abfd)->segment_size = SEGMENT_SIZE;
   adata (abfd)->exec_bytes_size = EXEC_BYTES_SIZE;
 
-  return abfd->xvec;
+  return _bfd_no_cleanup
 
   /* The architecture is encoded in various ways in various a.out variants,
      or is not encoded at all in some of them.  The relocation size depends
@@ -1901,7 +1901,7 @@ NAME (aout, write_syms) (bfd *abfd)
 
   return TRUE;
 
-error_return:
+ error_return:
   _bfd_stringtab_free (strtab);
   return FALSE;
 }
@@ -2381,8 +2381,8 @@ NAME (aout, squirt_out_relocs) (bfd *abfd, asection *section)
 	      || (*generic)->sym_ptr_ptr == NULL)
 	    {
 	      bfd_set_error (bfd_error_invalid_operation);
-	      _bfd_error_handler (_("\
-%pB: attempt to write out unknown reloc type"), abfd);
+	      _bfd_error_handler (_("%pB: attempt to write out "
+				    "unknown reloc type"), abfd);
 	      return FALSE;
 	    }
 	  MY_swap_ext_reloc_out (abfd, *generic,
@@ -2399,8 +2399,8 @@ NAME (aout, squirt_out_relocs) (bfd *abfd, asection *section)
 	      || (*generic)->sym_ptr_ptr == NULL)
 	    {
 	      bfd_set_error (bfd_error_invalid_operation);
-	      _bfd_error_handler (_("\
-%pB: attempt to write out unknown reloc type"), abfd);
+	      _bfd_error_handler (_("%pB: attempt to write out "
+				    "unknown reloc type"), abfd);
 	      return FALSE;
 	    }
 	  MY_swap_std_reloc_out (abfd, *generic,

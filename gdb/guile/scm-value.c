@@ -261,6 +261,24 @@ vlscm_scm_from_value (struct value *value)
   return v_scm;
 }
 
+/* Create a new <gdb:value> object that encapsulates VALUE.
+   The value is not released from the all_values chain.  */
+
+SCM
+vlscm_scm_from_value_no_release (struct value *value)
+{
+  /* N.B. It's important to not cause any side-effects until we know the
+     conversion worked.  */
+  SCM v_scm = vlscm_make_value_smob ();
+  value_smob *v_smob = (value_smob *) SCM_SMOB_DATA (v_scm);
+
+  value_incref (value);
+  v_smob->value = value;
+  vlscm_remember_scheme_value (v_smob);
+
+  return v_scm;
+}
+
 /* Returns the <gdb:value> object in SELF.
    Throws an exception if SELF is not a <gdb:value> object.  */
 

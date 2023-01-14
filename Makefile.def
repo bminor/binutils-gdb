@@ -412,6 +412,7 @@ dependencies = { module=all-gdb; on=all-libctf; };
 
 // Host modules specific to gdbserver.
 dependencies = { module=configure-gdbserver; on=all-gnulib; };
+dependencies = { module=all-gdbserver; on=all-gdbsupport; };
 dependencies = { module=all-gdbserver; on=all-gnulib; };
 dependencies = { module=all-gdbserver; on=all-libiberty; };
 
@@ -421,10 +422,10 @@ dependencies = { module=all-libgui; on=all-tcl; };
 dependencies = { module=all-libgui; on=all-tk; };
 dependencies = { module=all-libgui; on=all-itcl; };
 
-dependencies = { module=configure-gdbsupport; on=configure-bfd; };
 dependencies = { module=configure-gdbsupport; on=configure-gnulib; };
-dependencies = { module=all-gdbsupport; on=all-bfd; };
+dependencies = { module=configure-gdbsupport; on=configure-intl; };
 dependencies = { module=all-gdbsupport; on=all-gnulib; };
+dependencies = { module=all-gdbsupport; on=all-intl; };
 
 // Host modules specific to binutils.
 dependencies = { module=configure-bfd; on=configure-libiberty; hard=true; };

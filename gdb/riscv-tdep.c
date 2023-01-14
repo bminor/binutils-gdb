@@ -694,9 +694,7 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
       get_user_print_options (&opts);
       opts.deref_ref = 1;
 
-      val_print (regtype,
-		 value_embedded_offset (val), 0,
-		 file, 0, val, &opts, current_language);
+      common_val_print (val, file, 0, &opts, current_language);
 
       if (print_raw_format)
 	{
@@ -713,9 +711,7 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
       /* Print the register in hex.  */
       get_formatted_print_options (&opts, 'x');
       opts.deref_ref = 1;
-      val_print (regtype,
-		 value_embedded_offset (val), 0,
-		 file, 0, val, &opts, current_language);
+      common_val_print (val, file, 0, &opts, current_language);
 
       if (print_raw_format)
 	{
@@ -849,9 +845,7 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 		  get_user_print_options (&opts);
 		  opts.deref_ref = 1;
 		  fprintf_filtered (file, "\t");
-		  val_print (regtype,
-			     value_embedded_offset (val), 0,
-			     file, 0, val, &opts, current_language);
+		  common_val_print (val, file, 0, &opts, current_language);
 		}
 	    }
 	}
@@ -1733,8 +1727,9 @@ struct riscv_arg_info
        will go.  */
     int c_length;
 
-    /* The offset within CONTENTS for this part of the argument.  Will
-       always be 0 for the first part.  For the second part of the
+    /* The offset within CONTENTS for this part of the argument.  This can
+       be non-zero even for the first part (the first field of a struct can
+       have a non-zero offset due to padding).  For the second part of the
        argument, this might be the C_LENGTH value of the first part,
        however, if we are passing a structure in two registers, and there's
        is padding between the first and second field, then this offset
@@ -2423,6 +2418,26 @@ riscv_print_arg_location (ui_file *stream, struct gdbarch *gdbarch,
     }
 }
 
+/* Wrapper around REGCACHE->cooked_write.  Places the LEN bytes of DATA
+   into a buffer that is at least as big as the register REGNUM, padding
+   out the DATA with either 0x00, or 0xff.  For floating point registers
+   0xff is used, for everyone else 0x00 is used.  */
+
+static void
+riscv_regcache_cooked_write (int regnum, const gdb_byte *data, int len,
+			     struct regcache *regcache, int flen)
+{
+  gdb_byte tmp [sizeof (ULONGEST)];
+
+  /* FP values in FP registers must be NaN-boxed.  */
+  if (riscv_is_fp_regno_p (regnum) && len < flen)
+    memset (tmp, -1, sizeof (tmp));
+  else
+    memset (tmp, 0, sizeof (tmp));
+  memcpy (tmp, data, len);
+  regcache->cooked_write (regnum, tmp);
+}
+
 /* Implement the push dummy call gdbarch callback.  */
 
 static CORE_ADDR
@@ -2532,18 +2547,13 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 	{
 	case riscv_arg_info::location::in_reg:
 	  {
-	    gdb_byte tmp [sizeof (ULONGEST)];
-
 	    gdb_assert (info->argloc[0].c_length <= info->length);
-	    /* FP values in FP registers must be NaN-boxed.  */
-	    if (riscv_is_fp_regno_p (info->argloc[0].loc_data.regno)
-		&& info->argloc[0].c_length < call_info.flen)
-	      memset (tmp, -1, sizeof (tmp));
-	    else
-	      memset (tmp, 0, sizeof (tmp));
-	    memcpy (tmp, (info->contents + info->argloc[0].c_offset),
-		    info->argloc[0].c_length);
-	    regcache->cooked_write (info->argloc[0].loc_data.regno, tmp);
+
+	    riscv_regcache_cooked_write (info->argloc[0].loc_data.regno,
+					 (info->contents
+					  + info->argloc[0].c_offset),
+					 info->argloc[0].c_length,
+					 regcache, call_info.flen);
 	    second_arg_length =
 	      (((info->argloc[0].c_length + info->argloc[0].c_offset) < info->length)
 	       ? info->argloc[1].c_length : 0);
@@ -2575,19 +2585,13 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 	    {
 	    case riscv_arg_info::location::in_reg:
 	      {
-		gdb_byte tmp [sizeof (ULONGEST)];
-
 		gdb_assert ((riscv_is_fp_regno_p (info->argloc[1].loc_data.regno)
 			     && second_arg_length <= call_info.flen)
 			    || second_arg_length <= call_info.xlen);
-		/* FP values in FP registers must be NaN-boxed.  */
-		if (riscv_is_fp_regno_p (info->argloc[1].loc_data.regno)
-		    && second_arg_length < call_info.flen)
-		  memset (tmp, -1, sizeof (tmp));
-		else
-		  memset (tmp, 0, sizeof (tmp));
-		memcpy (tmp, second_arg_data, second_arg_length);
-		regcache->cooked_write (info->argloc[1].loc_data.regno, tmp);
+		riscv_regcache_cooked_write (info->argloc[1].loc_data.regno,
+					     second_arg_data,
+					     second_arg_length,
+					     regcache, call_info.flen);
 	      }
 	      break;
 
@@ -2707,9 +2711,9 @@ riscv_return_value (struct gdbarch  *gdbarch,
 	      if (writebuf)
 		{
 		  const gdb_byte *ptr = writebuf + info.argloc[0].c_offset;
-		  regcache->cooked_write_part (regnum, 0,
+		  riscv_regcache_cooked_write (regnum, ptr,
 					       info.argloc[0].c_length,
-					       ptr);
+					       regcache, call_info.flen);
 		}
 
 	      /* A return value in register can have a second part in a
@@ -2736,10 +2740,11 @@ riscv_return_value (struct gdbarch  *gdbarch,
 
 		      if (writebuf)
 			{
-			  writebuf += info.argloc[1].c_offset;
-			  regcache->cooked_write_part (regnum, 0,
-						       info.argloc[1].c_length,
-						       writebuf);
+			  const gdb_byte *ptr
+			    = writebuf + info.argloc[1].c_offset;
+			  riscv_regcache_cooked_write
+			    (regnum, ptr, info.argloc[1].c_length,
+			     regcache, call_info.flen);
 			}
 		      break;
 

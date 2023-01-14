@@ -717,10 +717,10 @@ mep_elf_object_p (bfd * abfd)
 }
 
 static bfd_boolean
-mep_elf_section_flags (flagword * flags, const Elf_Internal_Shdr * hdr)
+mep_elf_section_flags (const Elf_Internal_Shdr *hdr)
 {
   if (hdr->sh_flags & SHF_MEP_VLIW)
-    * flags |= SEC_MEP_VLIW;
+    hdr->bfd_section->flags |= SEC_MEP_VLIW;
   return TRUE;
 }
 

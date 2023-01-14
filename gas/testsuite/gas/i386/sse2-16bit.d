@@ -164,4 +164,23 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	66 0f fb c1          	psubq  %xmm1,%xmm0
 [ 	]*[a-f0-9]+:	67 66 0f fb 00       	psubq  \(%eax\),%xmm0
 [ 	]*[a-f0-9]+:	0f 58 2f             	addps  \(%bx\),%xmm5
+[ 	]*[a-f0-9]+:	f3 0f 2a d9          	cvtsi2ss %ecx,%xmm3
+[ 	]*[a-f0-9]+:	f3 0f 2d cb          	cvtss2si %xmm3,%ecx
+[ 	]*[a-f0-9]+:	f3 0f 2c cb          	cvttss2si %xmm3,%ecx
+[ 	]*[a-f0-9]+:	66 0f 3a 17 ca 00    	extractps \$0x0,%xmm1,%edx
+[ 	]*[a-f0-9]+:	0f 50 ca             	movmskps %xmm2,%ecx
+[ 	]*[a-f0-9]+:	66 0f 3a 14 ca 00    	pextrb \$0x0,%xmm1,%edx
+[ 	]*[a-f0-9]+:	66 0f 3a 16 ca 00    	pextrd \$0x0,%xmm1,%edx
+[ 	]*[a-f0-9]+:	0f c5 d1 00          	pextrw \$0x0,%mm1,%edx
+[ 	]*[a-f0-9]+:	66 0f c5 d1 00       	pextrw \$0x0,%xmm1,%edx
+[ 	]*[a-f0-9]+:	66 0f 3a 20 d1 00    	pinsrb \$0x0,%ecx,%xmm2
+[ 	]*[a-f0-9]+:	66 0f 3a 22 d1 00    	pinsrd \$0x0,%ecx,%xmm2
+[ 	]*[a-f0-9]+:	0f c4 d1 00          	pinsrw \$0x0,%ecx,%mm2
+[ 	]*[a-f0-9]+:	66 0f c4 d1 00       	pinsrw \$0x0,%ecx,%xmm2
+[ 	]*[a-f0-9]+:	66 0f d7 d3          	pmovmskb %xmm3,%edx
+[ 	]*[a-f0-9]+:	f3 0f 2a 05          	cvtsi2ssl? \(%di\),%xmm0
+[ 	]*[a-f0-9]+:	66 0f 3a 17 0d 00    	extractps \$0x0,%xmm1,\(%di\)
+[ 	]*[a-f0-9]+:	66 0f 3a 21 05 00    	insertps \$0x0,\(%di\),%xmm0
+[ 	]*[a-f0-9]+:	66 0f 3a 16 0d 00    	pextrd \$0x0,%xmm1,\(%di\)
+[ 	]*[a-f0-9]+:	66 0f 3a 22 05 00    	pinsrd \$0x0,\(%di\),%xmm0
 #pass

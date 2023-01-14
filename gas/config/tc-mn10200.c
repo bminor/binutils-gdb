@@ -1103,7 +1103,7 @@ md_assemble (char *str)
 	      break;
 	    }
 
-keep_going:
+	keep_going:
 	  str = input_line_pointer;
 	  input_line_pointer = hold;
 

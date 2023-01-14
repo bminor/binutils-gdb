@@ -19,8 +19,6 @@
 
 #include "defs.h"
 #include "disasm.h"
-
-#if GDB_SELF_TEST
 #include "gdbsupport/selftest.h"
 #include "selftest-arch.h"
 #include "gdbarch.h"
@@ -208,16 +206,13 @@ memory_error_test (struct gdbarch *gdbarch)
 }
 
 } // namespace selftests
-#endif /* GDB_SELF_TEST */
 
 void _initialize_disasm_selftests ();
 void
 _initialize_disasm_selftests ()
 {
-#if GDB_SELF_TEST
   selftests::register_test_foreach_arch ("print_one_insn",
 					 selftests::print_one_insn_test);
   selftests::register_test_foreach_arch ("memory_error",
 					 selftests::memory_error_test);
-#endif
 }

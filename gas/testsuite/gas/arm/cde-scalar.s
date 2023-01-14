@@ -37,7 +37,7 @@ cx1a p0, APSR_nzcv, #0
 cx1a p0, r9, #0
 
 it ne
-cx1a p0, r0, #0
+cx1ane p0, r0, #0
 
 # cx1d{a} encoding of following form:
 # 111a111000iiiiiidddd0pppi1iiiiii
@@ -65,7 +65,7 @@ cx1da p7, r0, r1, #0
 cx1da p0, r10, r11, #0
 
 it ne
-cx1da p0, r0, r1, #0
+cx1dane p0, r0, r1, #0
 
 
 # cx2{a} Has arguments of the following form:
@@ -100,7 +100,7 @@ cx2a p0, r0, APSR_nzcv, #0
 cx2a p0, r0, r9, #0
 
 it ne
-cx2a p0, r0, r0, #0
+cx2ane p0, r0, r0, #0
 
 # cx2d{a} encoding has following form:
 # 111a111001iinnnndddd0pppi1iiiiii
@@ -168,7 +168,7 @@ cx3a p0, r0, r0, APSR_nzcv, #0
 cx3a p0, r0, r0, r9, #0
 
 it ne
-cx3a p0, r0, r0, r0, #0
+cx3ane p0, r0, r0, r0, #0
 
 # cx3d{a} encoding has following form:
 # 111a11101iiinnnnmmmm0pppi1iidddd

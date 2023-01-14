@@ -28,9 +28,11 @@ program derived_type_member_stride
     type(mixed_cartesian), dimension(10), target :: mixed_cloud
     integer(kind=8), dimension(:), pointer :: point_dimension => null()
     integer(kind=8), dimension(:), pointer :: point_mixed_dimension => null()
+    type(cartesian), dimension(:), pointer :: cloud_slice => null()
     cloud(:)%x = 1
     cloud(:)%y = 2
     cloud(:)%z = 3
+    cloud_slice => cloud(3:2:-2)
     point_dimension => cloud(1:9)%y
     mixed_cloud(:)%x = 1
     mixed_cloud(:)%y = 2

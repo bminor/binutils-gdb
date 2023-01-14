@@ -81,11 +81,10 @@ extern void c_print_typedef (struct type *,
 			     struct symbol *,
 			     struct ui_file *);
 
-extern void c_val_print (struct type *,
-			 int, CORE_ADDR,
-			 struct ui_file *, int,
-			 struct value *,
-			 const struct value_print_options *);
+/* Implement la_value_print_inner for the C family of languages.  */
+
+extern void c_value_print_inner (struct value *, struct ui_file *, int,
+				 const struct value_print_options *);
 
 extern void c_value_print (struct value *, struct ui_file *,
 			   const struct value_print_options *);
@@ -130,19 +129,10 @@ extern void c_type_print_base (struct type *, struct ui_file *,
 extern void cp_print_class_member (const gdb_byte *, struct type *,
 				   struct ui_file *, const char *);
 
-extern void cp_print_value_fields (struct type *, struct type *,
-				   LONGEST, CORE_ADDR,
+extern void cp_print_value_fields (struct value *,
 				   struct ui_file *, int,
-				   struct value *,
 				   const struct value_print_options *,
 				   struct type **, int);
-
-extern void cp_print_value_fields_rtti (struct type *,
-					const gdb_byte *, LONGEST, CORE_ADDR,
-					struct ui_file *, int,
-					struct value *,
-					const struct value_print_options *,
-					struct type **, int);
 
 /* gcc-2.6 or later (when using -fvtable-thunks)
    emits a unique named type for a vtable entry.

@@ -157,12 +157,6 @@ AM_MAINTAINER_MODE
 AM_CONDITIONAL(GENINSRC_NEVER, false)
 AM_INSTALL_LIBBFD
 AC_EXEEXT
-if test -n "$EXEEXT"; then
-  AC_DEFINE(HAVE_EXECUTABLE_SUFFIX, 1,
-	    [Does the platform use an executable suffix?])
-fi
-AC_DEFINE_UNQUOTED(EXECUTABLE_SUFFIX, "${EXEEXT}",
-		   [Suffix used for executables, if any.])
 
 host64=false
 target64=false
@@ -619,8 +613,8 @@ do
     rx_elf32_linux_le_vec)	 tb="$tb elf32-rx.lo elf32.lo $elf" ;;
     s390_elf32_vec)		 tb="$tb elf32-s390.lo elf32.lo $elf" ;;
     s390_elf64_vec)		 tb="$tb elf64-s390.lo elf64.lo $elf"; target_size=64 ;;
-    score_elf32_be_vec)		 tb="$tb elf32-score.lo elf32-score7.lo elf32.lo $elf"; want64=true; target_size=64 ;;
-    score_elf32_le_vec)		 tb="$tb elf32-score.lo elf32-score7.lo elf32.lo $elf"; want64=true; target_size=64 ;;
+    score_elf32_be_vec)		 tb="$tb elf32-score.lo elf32-score7.lo elf32.lo elf64.lo $elf"; want64=true; target_size=64 ;;
+    score_elf32_le_vec)		 tb="$tb elf32-score.lo elf32-score7.lo elf32.lo elf64.lo $elf"; want64=true; target_size=64 ;;
     sh_coff_vec)		 tb="$tb coff-sh.lo $coff" ;;
     sh_coff_le_vec)		 tb="$tb coff-sh.lo $coff" ;;
     sh_coff_small_vec)		 tb="$tb coff-sh.lo $coff" ;;
@@ -842,7 +836,7 @@ if test "${target}" = "${host}"; then
 	;;
   arm-*-freebsd* | arm-*-kfreebsd*-gnu)
 	COREFILE='' ;;
-  arm-*-netbsd* | arm-*-openbsd*)
+  arm*-*-netbsd* | arm-*-openbsd*)
 	COREFILE=netbsd-core.lo
 	;;
   arm-*-riscix)		COREFILE=trad-core.lo ;;
@@ -927,7 +921,7 @@ changequote(,)dnl
   i[3-7]86-*-isc*)	COREFILE=trad-core.lo ;;
   i[3-7]86-*-aix*)	COREFILE=aix386-core.lo ;;
 changequote([,])dnl
-  mips-*-netbsd* | mips*-*-openbsd*)
+  mips*-*-netbsd* | mips*-*-openbsd*)
 	COREFILE=netbsd-core.lo
 	;;
   mips-sgi-irix4*)	COREFILE=irix-core.lo ;;

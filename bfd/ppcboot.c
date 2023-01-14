@@ -130,7 +130,7 @@ ppcboot_set_arch_mach (bfd *abfd,
    was not defaulted.  That is, it must be explicitly specified as
    being ppcboot.  */
 
-static const bfd_target *
+static bfd_cleanup
 ppcboot_object_p (bfd *abfd)
 {
   struct stat statbuf;
@@ -207,7 +207,7 @@ ppcboot_object_p (bfd *abfd)
   memcpy (&tdata->header, &hdr, sizeof (ppcboot_hdr_t));
 
   ppcboot_set_arch_mach (abfd, bfd_arch_powerpc, 0L);
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 }
 
 #define ppcboot_close_and_cleanup _bfd_generic_close_and_cleanup

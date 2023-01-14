@@ -2396,7 +2396,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
     }
 
   ret = riscv_resolve_pcrel_lo_relocs (&pcrel_relocs);
-out:
+ out:
   riscv_free_pcrel_relocs (&pcrel_relocs);
   return ret;
 }
@@ -3245,7 +3245,7 @@ _bfd_riscv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 
   return TRUE;
 
-fail:
+ fail:
   bfd_set_error (bfd_error_bad_value);
   return FALSE;
 }
@@ -4219,7 +4219,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 
   ret = TRUE;
 
-fail:
+ fail:
   if (relocs != data->relocs)
     free (relocs);
   riscv_free_pcgp_relocs(&pcgp_relocs, abfd, sec);

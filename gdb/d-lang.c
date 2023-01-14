@@ -224,7 +224,7 @@ extern const struct language_defn d_language_defn =
   c_print_type,			/* Print a type using appropriate syntax.  */
   c_print_typedef,		/* Print a typedef using appropriate
 				   syntax.  */
-  d_val_print,			/* Print a value using appropriate syntax.  */
+  d_value_print_inner,		/* la_value_print_inner */
   c_value_print,		/* Print a top-level value.  */
   default_read_var_value,	/* la_read_var_value */
   NULL,				/* Language specific skip_trampoline.  */

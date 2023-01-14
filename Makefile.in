@@ -51977,6 +51977,7 @@ all-gdb: maybe-all-build-bison
 all-gdb: maybe-all-sim
 all-gdb: maybe-all-libtermcap
 configure-gdbserver: maybe-all-gnulib
+all-gdbserver: maybe-all-gdbsupport
 all-gdbserver: maybe-all-gnulib
 configure-libgui: maybe-configure-tcl
 configure-libgui: maybe-configure-tk
@@ -52454,8 +52455,8 @@ all-gdb: maybe-all-opcodes
 all-gdb: maybe-all-libdecnumber
 all-gdb: maybe-all-libctf
 all-gdbserver: maybe-all-libiberty
-configure-gdbsupport: maybe-configure-bfd
-all-gdbsupport: maybe-all-bfd
+configure-gdbsupport: maybe-configure-intl
+all-gdbsupport: maybe-all-intl
 configure-gprof: maybe-configure-intl
 all-gprof: maybe-all-libiberty
 all-gprof: maybe-all-bfd

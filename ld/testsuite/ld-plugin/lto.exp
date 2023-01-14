@@ -234,12 +234,17 @@ set lto_link_tests [list \
   [list "Build pr24406-2b.o" \
    "" "-O2 -fno-lto" \
    {pr24406-2b.c}] \
-  [list "pr25355.o" \
-   "" \
-   "-flto -fno-common $lto_no_fat" \
-   {pr25355.c} \
-   [list [list "nm" "$plug_opt" "pr25355.d"]]] \
 ]
+
+if { [at_least_gcc_version 10 0] } {
+    set lto_link_tests [concat $lto_link_tests [list \
+	[list "pr25355.o" \
+	 "" \
+	 "-flto -fno-common $lto_no_fat" \
+	 {pr25355.c} \
+	 [list [list "nm" "$plug_opt" "pr25355.d"]]] \
+    ]]
+}
 
 if { [at_least_gcc_version 4 7] } {
     set lto_link_tests [concat $lto_link_tests [list \
@@ -342,6 +347,42 @@ set lto_link_elf_tests [list \
   [list "PR ld/24486" \
    "-O2 -flto tmpdir/pr24486a.o tmpdir/pr24486c.so -Wl,--as-needed tmpdir/pr24486b.so" "" \
    {dummy.c} {} "pr24486.exe"] \
+  [list "Build pr25593a-1.o" \
+   "$plug_opt" "-flto -O2" \
+   {pr25593a-1.c} {} "" "c"] \
+  [list "Build pr25593a-2.o" \
+   "" "-O2" \
+   {pr25593a-2.c} {} "" "c"] \
+  [list "Build pr25593b.o" \
+   "" "-O2" \
+   {pr25593b.c} {} "" "c"] \
+  [list "Build pr25593c.so" \
+   "-shared" "-O2 -fpic" \
+   {pr25593c.c} {} "pr25593c.so" "c"] \
+  [list "Build pr25593d.so" \
+   "-shared" "-O2 -fpic" \
+   {pr25593d.c} {} "pr25593d.so" "c"] \
+  [list "Build pr25593e.so" \
+   "-shared" "-O2 -fpic" \
+   {pr25593e.c} {} "pr25593e.so" "c"] \
+  [list "PR ld/r25593 (LTO)" \
+   "-O2 -flto -Wl,--as-needed tmpdir/pr25593a-1.o tmpdir/pr25593b.o \
+    tmpdir/pr25593c.so tmpdir/pr25593d.so tmpdir/pr25593e.so" "" \
+   {dummy.c} {{readelf {-d --wide} pr25593.d}} "pr25593a.exe"] \
+  [list "PR ld/r25593" \
+   "-O2 -flto -Wl,--as-needed tmpdir/pr25593a-2.o tmpdir/pr25593b.o \
+    tmpdir/pr25593c.so tmpdir/pr25593d.so tmpdir/pr25593e.so" "" \
+   {dummy.c} {{readelf {-d --wide} pr25593.d}} "pr25593b.exe"] \
+  [list "Build pr25618a.o" \
+   "$plug_opt" "-O2 -flto -fpic" \
+   {pr25618a.cc} {} "" "c++"] \
+  [list "Build pr25618.a" \
+   "$plug_opt" "-O2 -flto -fpic" \
+   {pr25618b.cc} {} "pr25618.a" "c++"] \
+  [list "Build pr25618.so" \
+   "-shared -Wl,--exclude-libs,ALL tmpdir/pr25618a.o tmpdir/pr25618.a" \
+   "-fpic" \
+   {dummy.c} {{readelf {--dyn-syms --wide} pr25618.d}} "pr25618.so" "c++"] \
 ]
 
 # PR 14918 checks that libgcc is not spuriously included in a shared link of

@@ -201,7 +201,7 @@ _bfd_elf_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
       return TRUE;
     }
 
-keep:
+ keep:
   bed = get_elf_backend_data (info->output_bfd);
   if (bed->rela_plts_and_copies_p)
     sizeof_reloc = bed->s->sizeof_rela;

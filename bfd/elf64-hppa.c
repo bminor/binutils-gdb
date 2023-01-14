@@ -383,7 +383,9 @@ elf64_hppa_section_from_shdr (bfd *abfd,
   if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
     return FALSE;
 
-  return TRUE;
+  return ((hdr->sh_flags & SHF_PARISC_SHORT) == 0
+	  || bfd_set_section_flags (hdr->bfd_section,
+				    hdr->bfd_section->flags | SEC_SMALL_DATA));
 }
 
 /* SEC is a section containing relocs for an input BFD when linking; return

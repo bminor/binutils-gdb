@@ -197,7 +197,7 @@ elf32_csky_add_stub_section (const char *stub_sec_name,
   if (hook_in_stub (&info, &os->children.head))
     return stub_sec;
 
-err_ret:
+ err_ret:
   einfo (_("%X%P: can not make stub section: %E\n"));
   return NULL;
 }

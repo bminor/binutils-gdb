@@ -128,18 +128,22 @@ extern void maybe_print_array_index (struct type *index_type, LONGEST index,
                                      struct ui_file *stream,
 				     const struct value_print_options *);
 
-extern void val_print_array_elements (struct type *, LONGEST,
-				      CORE_ADDR, struct ui_file *, int,
-				      struct value *,
-				      const struct value_print_options *,
-				      unsigned int);
 
-extern void val_print_scalar_formatted (struct type *,
-					LONGEST,
-					struct value *,
+/* Print elements of an array.  */
+
+extern void value_print_array_elements (struct value *, struct ui_file *, int,
 					const struct value_print_options *,
-					int,
-					struct ui_file *);
+					unsigned int);
+
+/* Print a scalar according to OPTIONS and SIZE on STREAM.  Format 'i'
+   is not supported at this level.
+
+   This is how the elements of an array or structure are printed
+   with a format.  */
+
+extern void value_print_scalar_formatted
+  (struct value *val, const struct value_print_options *options,
+   int size, struct ui_file *stream);
 
 extern void print_binary_chars (struct ui_file *, const gdb_byte *,
 				unsigned int, enum bfd_endian, bool);
@@ -204,12 +208,16 @@ struct generic_val_print_decorations
 };
 
 
-extern void generic_val_print (struct type *type,
-			       int embedded_offset, CORE_ADDR address,
-			       struct ui_file *stream, int recurse,
-			       struct value *original_value,
-			       const struct value_print_options *options,
-			       const struct generic_val_print_decorations *);
+/* Print a value in a generic way.  VAL is the value, STREAM is where
+   to print it, RECURSE is the recursion depth, OPTIONS describe how
+   the printing should be done, and D is the language-specific
+   decorations object.  Note that structs and unions cannot be printed
+   by this function.  */
+
+extern void generic_value_print (struct value *val, struct ui_file *stream,
+				 int recurse,
+				 const struct value_print_options *options,
+				 const struct generic_val_print_decorations *d);
 
 extern void generic_emit_char (int c, struct type *type, struct ui_file *stream,
 			       int quoter, const char *encoding);
@@ -281,5 +289,13 @@ extern int build_address_symbolic (struct gdbarch *,
 extern bool val_print_check_max_depth (struct ui_file *stream, int recurse,
 				       const struct value_print_options *opts,
 				       const struct language_defn *language);
+
+/* Like common_val_print, but call value_check_printable first.  */
+
+extern void common_val_print_checked
+  (struct value *val,
+   struct ui_file *stream, int recurse,
+   const struct value_print_options *options,
+   const struct language_defn *language);
 
 #endif

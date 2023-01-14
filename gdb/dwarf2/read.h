@@ -323,6 +323,12 @@ struct dwarf2_per_cu_data
      dummy CUs (a CU header, but nothing else).  */
   struct dwarf2_cu *cu;
 
+  /* The unit type of this CU.  */
+  enum dwarf_unit_type unit_type;
+
+  /* The language of this CU.  */
+  enum language lang;
+
   /* The corresponding dwarf2_per_objfile.  */
   struct dwarf2_per_objfile *dwarf2_per_objfile;
 
@@ -485,43 +491,59 @@ struct signatured_type
   struct dwo_unit *dwo_unit;
 };
 
-/* This represents a '.dwz' file.  */
-
-struct dwz_file
-{
-  dwz_file (gdb_bfd_ref_ptr &&bfd)
-    : dwz_bfd (std::move (bfd))
-  {
-  }
-
-  const char *filename () const
-  {
-    return bfd_get_filename (this->dwz_bfd.get ());
-  }
-
-  /* A dwz file can only contain a few sections.  */
-  struct dwarf2_section_info abbrev {};
-  struct dwarf2_section_info info {};
-  struct dwarf2_section_info str {};
-  struct dwarf2_section_info line {};
-  struct dwarf2_section_info macro {};
-  struct dwarf2_section_info gdb_index {};
-  struct dwarf2_section_info debug_names {};
-
-  /* The dwz's BFD.  */
-  gdb_bfd_ref_ptr dwz_bfd;
-
-  /* If we loaded the index from an external file, this contains the
-     resources associated to the open file, memory mapping, etc.  */
-  std::unique_ptr<index_cache_resource> index_cache_res;
-};
-
 /* Open the separate '.dwz' debug file, if needed.  Return NULL if
    there is no .gnu_debugaltlink section in the file.  Error if there
    is such a section but the file cannot be found.  */
 
 extern struct dwz_file *dwarf2_get_dwz_file
     (struct dwarf2_per_objfile *dwarf2_per_objfile);
+
+/* Return the type of the DIE at DIE_OFFSET in the CU named by
+   PER_CU.  */
+
+struct type *dwarf2_get_die_type (cu_offset die_offset,
+				  struct dwarf2_per_cu_data *per_cu);
+
+/* Given an index in .debug_addr, fetch the value.
+   NOTE: This can be called during dwarf expression evaluation,
+   long after the debug information has been read, and thus per_cu->cu
+   may no longer exist.  */
+
+CORE_ADDR dwarf2_read_addr_index (dwarf2_per_cu_data *per_cu,
+				  unsigned int addr_index);
+
+/* Return DWARF block referenced by DW_AT_location of DIE at SECT_OFF at PER_CU.
+   Returned value is intended for DW_OP_call*.  Returned
+   dwarf2_locexpr_baton->data has lifetime of
+   PER_CU->DWARF2_PER_OBJFILE->OBJFILE.  */
+
+struct dwarf2_locexpr_baton dwarf2_fetch_die_loc_sect_off
+  (sect_offset sect_off, dwarf2_per_cu_data *per_cu,
+   CORE_ADDR (*get_frame_pc) (void *baton),
+   void *baton, bool resolve_abstract_p = false);
+
+/* Like dwarf2_fetch_die_loc_sect_off, but take a CU
+   offset.  */
+
+struct dwarf2_locexpr_baton dwarf2_fetch_die_loc_cu_off
+  (cu_offset offset_in_cu, dwarf2_per_cu_data *per_cu,
+   CORE_ADDR (*get_frame_pc) (void *baton),
+   void *baton);
+
+/* If the DIE at SECT_OFF in PER_CU has a DW_AT_const_value, return a
+   pointer to the constant bytes and set LEN to the length of the
+   data.  If memory is needed, allocate it on OBSTACK.  If the DIE
+   does not have a DW_AT_const_value, return NULL.  */
+
+extern const gdb_byte *dwarf2_fetch_constant_bytes
+  (sect_offset sect_off, dwarf2_per_cu_data *per_cu, obstack *obstack,
+   LONGEST *len);
+
+/* Return the type of the die at SECT_OFF in PER_CU.  Return NULL if no
+   valid type for this die is found.  */
+
+struct type *dwarf2_fetch_die_type_sect_off
+  (sect_offset sect_off, dwarf2_per_cu_data *per_cu);
 
 /* When non-zero, dump line number entries as they are read in.  */
 extern unsigned int dwarf_line_debug;

@@ -247,6 +247,8 @@ enum
   CpuRDPRU,
   /* MCOMMIT instruction required */
   CpuMCOMMIT,
+  /* SEV-ES instruction(s) required */
+  CpuSEV_ES,
   /* 64bit support required  */
   Cpu64,
   /* Not supported in the 64bit mode  */
@@ -378,6 +380,7 @@ typedef union i386_cpu_flags
       unsigned int cpuenqcmd:1;
       unsigned int cpurdpru:1;
       unsigned int cpumcommit:1;
+      unsigned int cpusev_es:1;
       unsigned int cpu64:1;
       unsigned int cpuno64:1;
 #ifdef CpuUnused
@@ -427,9 +430,10 @@ enum
   CheckRegSize,
   /* instruction ignores operand size prefix and in Intel mode ignores
      mnemonic size suffix check.  */
-  IgnoreSize,
+#define IGNORESIZE	1
   /* default insn size depends on mode */
-  DefaultSize,
+#define DEFAULTSIZE	2
+  MnemonicSize,
   /* any memory size */
   Anysize,
   /* b suffix on instruction illegal */
@@ -492,8 +496,6 @@ enum
   ImmExt,
   /* instruction don't need Rex64 prefix.  */
   NoRex64,
-  /* instruction require Rex64 prefix.  */
-  Rex64,
   /* deprecated fp insn, gets a warning */
   Ugh,
   /* insn has VEX prefix:
@@ -661,8 +663,7 @@ typedef struct i386_opcode_modifier
   unsigned int floatr:1;
   unsigned int size:2;
   unsigned int checkregsize:1;
-  unsigned int ignoresize:1;
-  unsigned int defaultsize:1;
+  unsigned int mnemonicsize:2;
   unsigned int anysize:1;
   unsigned int no_bsuf:1;
   unsigned int no_wsuf:1;
@@ -686,7 +687,6 @@ typedef struct i386_opcode_modifier
   unsigned int isprefix:1;
   unsigned int immext:1;
   unsigned int norex64:1;
-  unsigned int rex64:1;
   unsigned int ugh:1;
   unsigned int vex:2;
   unsigned int vexvvvv:2;

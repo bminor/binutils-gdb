@@ -175,7 +175,7 @@ static bfd_boolean plugin_notice (struct bfd_link_info *,
 				  struct bfd_link_hash_entry *,
 				  bfd *, asection *, bfd_vma, flagword);
 
-static const bfd_target * plugin_object_p (bfd *);
+static bfd_cleanup plugin_object_p (bfd *);
 
 #if !defined (HAVE_DLFCN_H) && defined (HAVE_WINDOWS_H)
 
@@ -336,7 +336,7 @@ plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
 	    return abfd;
 	}
     }
-report_error:
+ report_error:
   einfo (_("%F%P: could not create dummy IR bfd: %E\n"));
   return NULL;
 }
@@ -1164,7 +1164,12 @@ plugin_strdup (bfd *abfd, const char *str)
   return copy;
 }
 
-static const bfd_target *
+static void
+plugin_cleanup (bfd *abfd ATTRIBUTE_UNUSED)
+{
+}
+
+static bfd_cleanup
 plugin_object_p (bfd *ibfd)
 {
   int claimed;
@@ -1179,7 +1184,7 @@ plugin_object_p (bfd *ibfd)
   if (ibfd->plugin_format != bfd_plugin_unknown)
     {
       if (ibfd->plugin_format == bfd_plugin_yes)
-	return ibfd->plugin_dummy_bfd->xvec;
+	return plugin_cleanup;
       else
 	return NULL;
     }
@@ -1239,7 +1244,8 @@ plugin_object_p (bfd *ibfd)
       ibfd->plugin_format = bfd_plugin_yes;
       ibfd->plugin_dummy_bfd = abfd;
       bfd_make_readable (abfd);
-      return abfd->xvec;
+      abfd->no_export = ibfd->no_export;
+      return plugin_cleanup;
     }
   else
     {

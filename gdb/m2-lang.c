@@ -393,7 +393,7 @@ extern const struct language_defn m2_language_defn =
   m2_emit_char,			/* Function to print a single character */
   m2_print_type,		/* Print a type using appropriate syntax */
   m2_print_typedef,		/* Print a typedef using appropriate syntax */
-  m2_val_print,			/* Print a value using appropriate syntax */
+  m2_value_print_inner,		/* la_value_print_inner */
   c_value_print,		/* Print a top-level value */
   default_read_var_value,	/* la_read_var_value */
   NULL,				/* Language specific skip_trampoline */

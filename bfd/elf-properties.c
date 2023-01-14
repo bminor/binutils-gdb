@@ -86,7 +86,7 @@ _bfd_elf_parse_gnu_properties (bfd *abfd, Elf_Internal_Note *note)
 
   if (note->descsz < 8 || (note->descsz % align_size) != 0)
     {
-bad_size:
+    bad_size:
       _bfd_error_handler
 	(_("warning: %pB: corrupt GNU_PROPERTY_TYPE (%ld) size: %#lx"),
 	 abfd, note->type, note->descsz);
@@ -186,7 +186,7 @@ bad_size:
 	(_("warning: %pB: unsupported GNU_PROPERTY_TYPE (%ld) type: 0x%x"),
 	 abfd, note->type, type);
 
-next:
+    next:
       ptr += (datasz + (align_size - 1)) & ~ (align_size - 1);
     }
 

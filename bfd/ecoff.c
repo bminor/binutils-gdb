@@ -78,8 +78,10 @@ static asection bfd_debug_section =
      NULL,
   /* symbol_ptr_ptr,						   */
      NULL,
-  /* map_head, map_tail						   */
-     { NULL }, { NULL }
+  /* map_head, map_tail,					   */
+     { NULL }, { NULL },
+  /* already_assigned 						   */
+     NULL,
 };
 
 /* Create an ECOFF object.  */
@@ -156,14 +158,14 @@ _bfd_ecoff_new_section_hook (bfd *abfd, asection *section)
     { _INIT,   SEC_ALLOC | SEC_CODE | SEC_LOAD },
     { _FINI,   SEC_ALLOC | SEC_CODE | SEC_LOAD },
     { _DATA,   SEC_ALLOC | SEC_DATA | SEC_LOAD },
-    { _SDATA,  SEC_ALLOC | SEC_DATA | SEC_LOAD },
+    { _SDATA,  SEC_ALLOC | SEC_DATA | SEC_LOAD | SEC_SMALL_DATA },
     { _RDATA,  SEC_ALLOC | SEC_DATA | SEC_LOAD | SEC_READONLY},
-    { _LIT8,   SEC_ALLOC | SEC_DATA | SEC_LOAD | SEC_READONLY},
-    { _LIT4,   SEC_ALLOC | SEC_DATA | SEC_LOAD | SEC_READONLY},
+    { _LIT8,   SEC_ALLOC | SEC_DATA | SEC_LOAD | SEC_READONLY | SEC_SMALL_DATA},
+    { _LIT4,   SEC_ALLOC | SEC_DATA | SEC_LOAD | SEC_READONLY | SEC_SMALL_DATA},
     { _RCONST, SEC_ALLOC | SEC_DATA | SEC_LOAD | SEC_READONLY},
     { _PDATA,  SEC_ALLOC | SEC_DATA | SEC_LOAD | SEC_READONLY},
     { _BSS,    SEC_ALLOC},
-    { _SBSS,   SEC_ALLOC},
+    { _SBSS,   SEC_ALLOC | SEC_SMALL_DATA},
     /* An Irix 4 shared libary.  */
     { _LIB,    SEC_COFF_SHARED_LIBRARY}
   };
@@ -412,16 +414,19 @@ _bfd_ecoff_styp_to_sec_flags (bfd *abfd ATTRIBUTE_UNUSED,
 	  || styp_flags == STYP_PDATA
 	  || styp_flags == STYP_RCONST)
 	sec_flags |= SEC_READONLY;
+      if (styp_flags & STYP_SDATA)
+	sec_flags |= SEC_SMALL_DATA;
     }
-  else if ((styp_flags & STYP_BSS)
-	   || (styp_flags & STYP_SBSS))
+  else if (styp_flags & STYP_SBSS)
+    sec_flags |= SEC_ALLOC | SEC_SMALL_DATA;
+  else if (styp_flags & STYP_BSS)
     sec_flags |= SEC_ALLOC;
   else if ((styp_flags & STYP_INFO) || styp_flags == STYP_COMMENT)
     sec_flags |= SEC_NEVER_LOAD;
   else if ((styp_flags & STYP_LITA)
 	   || (styp_flags & STYP_LIT8)
 	   || (styp_flags & STYP_LIT4))
-    sec_flags |= SEC_DATA | SEC_LOAD | SEC_ALLOC | SEC_READONLY;
+    sec_flags |= SEC_DATA |SEC_SMALL_DATA | SEC_LOAD | SEC_ALLOC | SEC_READONLY;
   else if (styp_flags & STYP_ECOFF_LIB)
     sec_flags |= SEC_COFF_SHARED_LIBRARY;
   else
@@ -2878,7 +2883,7 @@ _bfd_ecoff_slurp_armap (bfd *abfd)
   char nextname[17];
   unsigned int i;
   struct areltdata *mapdata;
-  bfd_size_type parsed_size;
+  bfd_size_type parsed_size, stringsize;
   char *raw_armap;
   struct artdata *ardata;
   unsigned int count;
@@ -2890,9 +2895,9 @@ _bfd_ecoff_slurp_armap (bfd *abfd)
   /* Get the name of the first element.  */
   i = bfd_bread ((void *) nextname, (bfd_size_type) 16, abfd);
   if (i == 0)
-      return TRUE;
+    return TRUE;
   if (i != 16)
-      return FALSE;
+    return FALSE;
 
   if (bfd_seek (abfd, (file_ptr) -16, SEEK_CUR) != 0)
     return FALSE;
@@ -2937,17 +2942,22 @@ _bfd_ecoff_slurp_armap (bfd *abfd)
   parsed_size = mapdata->parsed_size;
   free (mapdata);
 
-  raw_armap = (char *) _bfd_alloc_and_read (abfd, parsed_size, parsed_size);
-  if (raw_armap == NULL)
+  if (parsed_size + 1 < 9)
     {
-      if (bfd_get_error () != bfd_error_system_call)
-	bfd_set_error (bfd_error_malformed_archive);
+      bfd_set_error (bfd_error_malformed_archive);
       return FALSE;
     }
+
+  raw_armap = (char *) _bfd_alloc_and_read (abfd, parsed_size + 1, parsed_size);
+  if (raw_armap == NULL)
+    return FALSE;
+  raw_armap[parsed_size] = 0;
 
   ardata->tdata = (void *) raw_armap;
 
   count = H_GET_32 (abfd, raw_armap);
+  if ((parsed_size - 8) / 8 < count)
+    goto error_malformed;
 
   ardata->symdef_count = 0;
   ardata->cache = NULL;
@@ -2955,6 +2965,7 @@ _bfd_ecoff_slurp_armap (bfd *abfd)
   /* This code used to overlay the symdefs over the raw archive data,
      but that doesn't work on a 64 bit host.  */
   stringbase = raw_armap + count * 8 + 8;
+  stringsize = parsed_size - (count * 8 + 8);
 
 #ifdef CHECK_ARMAP_HASH
   {
@@ -3002,7 +3013,7 @@ _bfd_ecoff_slurp_armap (bfd *abfd)
   amt *= sizeof (carsym);
   symdef_ptr = (carsym *) bfd_alloc (abfd, amt);
   if (!symdef_ptr)
-    return FALSE;
+    goto error_exit;
 
   ardata->symdefs = symdef_ptr;
 
@@ -3015,6 +3026,8 @@ _bfd_ecoff_slurp_armap (bfd *abfd)
       if (file_offset == 0)
 	continue;
       name_offset = H_GET_32 (abfd, raw_ptr);
+      if (name_offset > stringsize)
+	goto error_malformed;
       symdef_ptr->name = stringbase + name_offset;
       symdef_ptr->file_offset = file_offset;
       ++symdef_ptr;
@@ -3023,10 +3036,17 @@ _bfd_ecoff_slurp_armap (bfd *abfd)
   ardata->first_file_filepos = bfd_tell (abfd);
   /* Pad to an even boundary.  */
   ardata->first_file_filepos += ardata->first_file_filepos % 2;
-
   abfd->has_armap = TRUE;
-
   return TRUE;
+
+ error_malformed:
+  bfd_set_error (bfd_error_malformed_archive);
+ error_exit:
+  ardata->symdef_count = 0;
+  ardata->symdefs = NULL;
+  ardata->tdata = NULL;
+  bfd_release (abfd, raw_armap);
+  return FALSE;
 }
 
 /* Write out an armap.  */

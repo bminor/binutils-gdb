@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add command-line options --enable-non-contiguous-regions and
+  --enable-non-contiguous-regions-warnings.
+
 Changes in 2.34:
 
 * The ld check for "PHDR segment not covered by LOAD segment" is more

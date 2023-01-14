@@ -501,6 +501,14 @@ struct bfd_link_info
   /* TRUE if "-Map map" is passed to linker.  */
   unsigned int has_map_file : 1;
 
+  /* TRUE if "--enable-non-contiguous-regions" is passed to the
+     linker.  */
+  unsigned int non_contiguous_regions : 1;
+
+  /* TRUE if "--enable-non-contiguous-regions-warnings" is passed to
+     the linker.  */
+  unsigned int non_contiguous_regions_warnings : 1;
+
   /* Char that may appear as the first char of a symbol, but should be
      skipped (like symbol_leading_char) when looking up symbols in
      wrap_hash.  Used by PowerPC Linux for 'dot' symbols.  */
@@ -801,9 +809,9 @@ struct bfd_link_order
   struct bfd_link_order *next;
   /* Type of link_order.  */
   enum bfd_link_order_type type;
-  /* Offset within output section.  */
+  /* Offset within output section in bytes.  */
   bfd_vma offset;
-  /* Size within output section.  */
+  /* Size within output section in octets.  */
   bfd_size_type size;
   /* Type specific information.  */
   union

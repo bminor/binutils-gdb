@@ -7839,7 +7839,7 @@ compute_text_actions (bfd *abfd,
     print_action_list (stderr, &relax_info->action_list);
 #endif
 
-error_return:
+ error_return:
   release_contents (sec, contents);
   release_internal_relocs (sec, internal_relocs);
   if (prop_table)
@@ -8844,7 +8844,7 @@ compute_removed_literals (bfd *abfd,
   print_action_list (stderr, &relax_info->action_list);
 #endif /* DEBUG */
 
-error_return:
+ error_return:
   if (prop_table)
     free (prop_table);
   free_section_cache (&target_sec_cache);
@@ -10148,10 +10148,9 @@ shrink_dynamic_reloc_sections (struct bfd_link_info *info,
 
   if ((r_type == R_XTENSA_32 || r_type == R_XTENSA_PLT)
       && (input_section->flags & SEC_ALLOC) != 0
-      && (dynamic_symbol || bfd_link_pic (info))
-      && (!h || h->root.type != bfd_link_hash_undefweak
-	  || (dynamic_symbol
-	      && (bfd_link_dll (info) || info->export_dynamic))))
+      && (dynamic_symbol
+	  || (bfd_link_pic (info)
+	      && (!h || h->root.type != bfd_link_hash_undefweak))))
     {
       asection *srel;
       bfd_boolean is_plt = FALSE;

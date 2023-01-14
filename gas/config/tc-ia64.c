@@ -11845,7 +11845,7 @@ dot_alias (int section)
     {
       as_fatal (_("inserting \"%s\" into %s name hash table failed: %s"),
 		alias, kind, error_string);
-out:
+    out:
       obstack_free (&notes, name);
       obstack_free (&notes, alias);
     }

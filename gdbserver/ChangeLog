@@ -1,3 +1,72 @@
+2020-03-20  Simon Marchi  <simon.marchi@efficios.com>
+
+	* config.in: Re-generate.
+	* configure: Re-generate.
+
+2020-03-17  Kamil Rytarowski  <n54@gmx.com>
+
+	* regcache.cc (find_register_by_number): Update.
+	* tdesc.cc (init_target_desc): Likewise.
+	* tdesc.h (target_desc::reg_defs): Likewise.
+
+2020-03-12  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+	* configure.ac (GDBSERVER_DEPFILES): Remove srv_selftest_objs.
+	(WIN32APILIBS): New subst.
+	* Makefile.in (SFILES, OBS, TAGS, GDBREPLAY_OBS): Remove
+	gdbsupport files.
+	(gdbsupport/%.o): Remove target.
+	(GDBSUPPORT_BUILDDIR, GDBSUPPORT): New variables.
+	(gdbserver$(EXEEXT), gdbreplay$(EXEEXT)): Add GDBSUPPORT.
+	(WIN32APILIBS): New variable.
+	(gdbserver$(EXEEXT)): Add WIN32APILIBS.
+	(gdbreplay$(EXEEXT)): Likewise.
+
+2020-03-12  Tom Tromey  <tom@tromey.com>
+
+	* config.in, configure: Rebuild.
+	* configure.ac: Call ZW_GNU_GETTEXT_SISTER_DIR.
+	* acinclude.m4: Include gettext-sister.m4.
+	* Makefile.in (top_builddir, INTL, INTL_DEPS, INTL_CFLAGS): New
+	variables.
+	(INCLUDE_CFLAGS): Add INTL_CFLAGS.
+	(gdbserver$(EXEEXT), gdbreplay$(EXEEXT)): Use INTL_DEPS, INTL.
+
+2020-03-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* acinclude.m4: Update path to selftest.m4.
+
+2020-03-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* configure.ac: Don't source bfd/development.sh, move
+	GDB_AC_COMMON higher.
+	* configure: Re-generate.
+
+2020-03-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* configure: Re-generate.
+
+2020-03-11  Simon Marchi  <simon.marchi@efficios.com>
+
+	* configure: Re-generate.
+
+2020-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* .dir-locals.el: New file.
+
+2020-03-05  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* .gitattributes: New file.
+
+2020-03-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* remote-utils.cc (prepare_resume_reply): Add ability to convert T
+	reply into an S reply.
+	* server.cc (disable_packet_T): New global.
+	(captured_main): Set new global when appropriate.
+	* server.h (disable_packet_T): Declare.
+
 2020-02-21  Tom Tromey  <tom@tromey.com>
 
 	* Makefile.in (mostlyclean): New target.

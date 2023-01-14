@@ -8474,7 +8474,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
   free (reloc_vector);
   return data;
 
-error_return:
+ error_return:
   free (reloc_vector);
   return NULL;
 }

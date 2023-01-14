@@ -2490,6 +2490,17 @@ nios2_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg ATTRIBUTE_U
     = (struct elf32_nios2_stub_hash_entry *) gen_entry;
   asection *stub_sec = hsh->stub_sec;
   bfd_vma sym_value;
+  struct bfd_link_info *info;
+
+  info = (struct bfd_link_info *) in_arg;
+
+  /* Fail if the target section could not be assigned to an output
+     section.  The user should fix his linker script.  */
+  if (hsh->target_section->output_section == NULL
+      && info->non_contiguous_regions)
+    info->callbacks->einfo (_("%F%P: Could not assign '%pA' to an output section. "
+			      "Retry without --enable-non-contiguous-regions.\n"),
+			    hsh->target_section);
 
   /* Make a note of the offset within the stubs for this entry.  */
   hsh->stub_offset = stub_sec->size;
@@ -3062,7 +3073,7 @@ nios2_elf_assign_gp (bfd *output_bfd, bfd_vma *pgp, struct bfd_link_info *info)
 
   h = bfd_hash_lookup (&info->hash->table, "_gp", FALSE, FALSE);
   lh = (struct bfd_link_hash_entry *) h;
-lookup:
+ lookup:
   if (lh)
     {
       switch (lh->type)
@@ -4539,10 +4550,10 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 /* Implement elf-backend_section_flags:
    Convert NIOS2 specific section flags to bfd internal section flags.  */
 static bfd_boolean
-nios2_elf32_section_flags (flagword *flags, const Elf_Internal_Shdr *hdr)
+nios2_elf32_section_flags (const Elf_Internal_Shdr *hdr)
 {
   if (hdr->sh_flags & SHF_NIOS2_GPREL)
-    *flags |= SEC_SMALL_DATA;
+    hdr->bfd_section->flags |= SEC_SMALL_DATA;
 
   return TRUE;
 }

@@ -25,7 +25,7 @@
 #
 
 # Exclude non-ELF targets.
-if { ![is_elf_format] } {
+if { ![is_elf_format] || ![check_shared_lib_support] } {
     return
 }
 

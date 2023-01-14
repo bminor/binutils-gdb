@@ -18,6 +18,9 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 dnl Invoke configury needed by the files in 'common'.
 AC_DEFUN([GDB_AC_COMMON], [
+  # Set the 'development' global.
+  . $srcdir/../bfd/development.sh
+
   AC_HEADER_STDC
   AC_FUNC_ALLOCA
 

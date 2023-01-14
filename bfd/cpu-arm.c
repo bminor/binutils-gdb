@@ -300,8 +300,8 @@ bfd_arm_merge_machines (bfd *ibfd, bfd *obfd)
 	       || out == bfd_mach_arm_iWMMXt2))
     {
       /* xgettext: c-format */
-      _bfd_error_handler (_("\
-error: %pB is compiled for the EP9312, whereas %pB is compiled for XScale"),
+      _bfd_error_handler (_("error: %pB is compiled for the EP9312, "
+			    "whereas %pB is compiled for XScale"),
 			  ibfd, obfd);
       bfd_set_error (bfd_error_wrong_format);
       return FALSE;
@@ -312,8 +312,8 @@ error: %pB is compiled for the EP9312, whereas %pB is compiled for XScale"),
 	       || in == bfd_mach_arm_iWMMXt2))
     {
       /* xgettext: c-format */
-      _bfd_error_handler (_("\
-error: %pB is compiled for the EP9312, whereas %pB is compiled for XScale"),
+      _bfd_error_handler (_("error: %pB is compiled for the EP9312, "
+			    "whereas %pB is compiled for XScale"),
 			  obfd, ibfd);
       bfd_set_error (bfd_error_wrong_format);
       return FALSE;

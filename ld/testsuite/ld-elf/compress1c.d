@@ -3,6 +3,7 @@
 #ld: -shared
 #readelf: -S --wide
 #target: *-*-linux* *-*-gnu* arm*-*-uclinuxfdpiceabi
+#xfail: h8300-*-*
 
 #failif
 #...

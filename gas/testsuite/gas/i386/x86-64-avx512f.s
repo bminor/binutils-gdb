@@ -2953,7 +2953,7 @@ _start:
 	vextracti64x4	$0xab, %zmm29, %ymm30{%k7}{z}	 # AVX512F
 	vextracti64x4	$123, %zmm29, %ymm30{%k7}	 # AVX512F
 
-	vextractps	$0xab, %xmm29, %rax	 # AVX512F
+	vextractps	$0xab, %xmm29, %eax	 # AVX512F
 	vextractps	$123, %xmm29, %rax	 # AVX512F
 	vextractps	$123, %xmm29, %r8	 # AVX512F
 	vextractps	$123, %xmm29, (%rcx)	 # AVX512F
@@ -10611,7 +10611,7 @@ _start:
 	vextracti64x4	ymm30{k7}{z}, zmm29, 0xab	 # AVX512F
 	vextracti64x4	ymm30{k7}, zmm29, 123	 # AVX512F
 
-	vextractps	rax, xmm29, 0xab	 # AVX512F
+	vextractps	eax, xmm29, 0xab	 # AVX512F
 	vextractps	rax, xmm29, 123	 # AVX512F
 	vextractps	r8, xmm29, 123	 # AVX512F
 	vextractps	DWORD PTR [rcx], xmm29, 123	 # AVX512F

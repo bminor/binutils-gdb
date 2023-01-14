@@ -34,6 +34,11 @@
 #include "solib.h"
 #include "solib-target.h"
 #include "gdbcore.h"
+#include "coff/internal.h"
+#include "libcoff.h"
+#include "solist.h"
+
+#define CYGWIN_DLL_NAME "cygwin1.dll"
 
 /* Windows signal numbers differ between MinGW flavors and between
    those and Cygwin.  The below enumeration was gleaned from the
@@ -812,6 +817,54 @@ windows_get_siginfo_type (struct gdbarch *gdbarch)
   return siginfo_type;
 }
 
+/* Implement the "solib_create_inferior_hook" target_so_ops method.  */
+
+static void
+windows_solib_create_inferior_hook (int from_tty)
+{
+  CORE_ADDR exec_base = 0;
+
+  /* Find base address of main executable in
+     TIB->process_environment_block->image_base_address.  */
+  struct gdbarch *gdbarch = target_gdbarch ();
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int ptr_bytes;
+  int peb_offset;  /* Offset of process_environment_block in TIB.  */
+  int base_offset; /* Offset of image_base_address in PEB.  */
+  if (gdbarch_ptr_bit (gdbarch) == 32)
+    {
+      ptr_bytes = 4;
+      peb_offset = 48;
+      base_offset = 8;
+    }
+  else
+    {
+      ptr_bytes = 8;
+      peb_offset = 96;
+      base_offset = 16;
+    }
+  CORE_ADDR tlb;
+  gdb_byte buf[8];
+  if (target_has_execution
+      && target_get_tib_address (inferior_ptid, &tlb)
+      && !target_read_memory (tlb + peb_offset, buf, ptr_bytes))
+    {
+      CORE_ADDR peb = extract_unsigned_integer (buf, ptr_bytes, byte_order);
+      if (!target_read_memory (peb + base_offset, buf, ptr_bytes))
+	exec_base = extract_unsigned_integer (buf, ptr_bytes, byte_order);
+    }
+
+  /* Rebase executable if the base address changed because of ASLR.  */
+  if (symfile_objfile != nullptr && exec_base != 0)
+    {
+      CORE_ADDR vmaddr = pe_data (exec_bfd)->pe_opthdr.ImageBase;
+      if (vmaddr != exec_base)
+	objfile_rebase (symfile_objfile, exec_base - vmaddr);
+    }
+}
+
+static struct target_so_ops windows_so_ops;
+
 /* To be called from the various GDB_OSABI_CYGWIN handlers for the
    various Windows architectures and machine types.  */
 
@@ -830,7 +883,10 @@ windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_gdb_signal_to_target (gdbarch, windows_gdb_signal_to_target);
 
-  set_solib_ops (gdbarch, &solib_target_so_ops);
+  windows_so_ops = solib_target_so_ops;
+  windows_so_ops.solib_create_inferior_hook
+    = windows_solib_create_inferior_hook;
+  set_solib_ops (gdbarch, &windows_so_ops);
 
   set_gdbarch_get_siginfo_type (gdbarch, windows_get_siginfo_type);
 }
@@ -843,6 +899,103 @@ static const struct internalvar_funcs tlb_funcs =
   NULL,
   NULL
 };
+
+/* Layout of an element of a PE's Import Directory Table.  Based on:
+
+     https://docs.microsoft.com/en-us/windows/win32/debug/pe-format#import-directory-table
+ */
+
+struct pe_import_directory_entry
+{
+  uint32_t import_lookup_table_rva;
+  uint32_t timestamp;
+  uint32_t forwarder_chain;
+  uint32_t name_rva;
+  uint32_t import_address_table_rva;
+};
+
+gdb_static_assert (sizeof (pe_import_directory_entry) == 20);
+
+/* See windows-tdep.h.  */
+
+bool
+is_linked_with_cygwin_dll (bfd *abfd)
+{
+  /* The list of DLLs a PE is linked to is in the .idata section.  See:
+
+     https://docs.microsoft.com/en-us/windows/win32/debug/pe-format#the-idata-section
+   */
+  asection *idata_section = bfd_get_section_by_name (abfd, ".idata");
+  if (idata_section == nullptr)
+    return false;
+
+  /* Find the virtual address of the .idata section.  We must subtract this
+     from the RVAs (relative virtual addresses) to obtain an offset in the
+     section. */
+  bfd_vma idata_addr =
+    pe_data (abfd)->pe_opthdr.DataDirectory[PE_IMPORT_TABLE].VirtualAddress;
+
+  /* Map the section's data.  */
+  bfd_size_type idata_size;
+  const gdb_byte *const idata_contents
+    = gdb_bfd_map_section (idata_section, &idata_size);
+  if (idata_contents == nullptr)
+    {
+      warning (_("Failed to get content of .idata section."));
+      return false;
+    }
+
+  const gdb_byte *iter = idata_contents;
+  const gdb_byte *end = idata_contents + idata_size;
+  const pe_import_directory_entry null_dir_entry = { 0 };
+
+  /* Iterate through all directory entries.  */
+  while (true)
+    {
+      /* Is there enough space left in the section for another entry?  */
+      if (iter + sizeof (pe_import_directory_entry) > end)
+	{
+	  warning (_("Failed to parse .idata section: unexpected end of "
+		     ".idata section."));
+	  break;
+	}
+
+      pe_import_directory_entry *dir_entry = (pe_import_directory_entry *) iter;
+
+      /* Is it the end of list marker?  */
+      if (memcmp (dir_entry, &null_dir_entry,
+		  sizeof (pe_import_directory_entry)) == 0)
+	break;
+
+      bfd_vma name_addr = dir_entry->name_rva;
+
+      /* If the name's virtual address is smaller than the section's virtual
+         address, there's a problem.  */
+      if (name_addr < idata_addr
+	  || name_addr >= (idata_addr + idata_size))
+	{
+	  warning (_("\
+Failed to parse .idata section: name's virtual address (0x%" BFD_VMA_FMT "x) \
+is outside .idata section's range [0x%" BFD_VMA_FMT "x, 0x%" BFD_VMA_FMT "x[."),
+		   name_addr, idata_addr, idata_addr + idata_size);
+	  break;
+	}
+
+      const gdb_byte *name = &idata_contents[name_addr - idata_addr];
+
+      /* Make sure we don't overshoot the end of the section with the streq.  */
+      if (name + sizeof(CYGWIN_DLL_NAME) > end)
+	continue;
+
+      /* Finally, check if this is the dll name we are looking for.  */
+      if (streq ((const char *) name, CYGWIN_DLL_NAME))
+	return true;
+
+      iter += sizeof(pe_import_directory_entry);
+    }
+
+    return false;
+}
 
 void _initialize_windows_tdep ();
 void

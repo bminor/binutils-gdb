@@ -26,7 +26,6 @@ if {[build_executable $testfile.exp $testfile \
 # start gdb -- start gdb running, default procedure
 #
 proc dbx_gdb_start { } {
-    global verbose
     global GDB
     global INTERNAL_GDBFLAGS GDBFLAGS
     global prompt
@@ -153,7 +152,6 @@ set old_gdb_file_cmd_args [info args gdb_file_cmd]
 set old_gdb_file_cmd_body [info body gdb_file_cmd]
 
 proc gdb_file_cmd {arg} {
-    global verbose
     global loadpath
     global loadfile
     global GDB

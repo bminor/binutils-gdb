@@ -4,6 +4,7 @@
 #readelf: -r -x .data.rel.ro
 #warning: -z dynamic-undefined-weak ignored
 #target: *-*-linux* *-*-gnu* *-*-nacl* arm*-*-uclinuxfdpiceabi
+#xfail: h8300-*-*
 
 There are no relocations in this file.
 

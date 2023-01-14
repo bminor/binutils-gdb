@@ -1224,6 +1224,10 @@ ld_build_required_section_dependence (lang_statement_union_type *s)
     {
       lang_statement_union_type *l = iter_stack_current (&stack);
 
+      if (l == NULL && link_info.non_contiguous_regions)
+	einfo (_("%F%P: Relaxation not supported with "
+		 "--enable-non-contiguous-regions.\n"));
+
       if (l->header.type == lang_input_section_enum)
 	{
 	  lang_input_section_type *input;

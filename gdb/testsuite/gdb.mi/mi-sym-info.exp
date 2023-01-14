@@ -15,6 +15,13 @@
 
 # Test -symbol-info-functions, -symbol-info-variables, and
 # -symbol-info-types.
+#
+# These tests can generate large amounts of output, which can cause gdb to be
+# slow in two different ways:
+# - it takes long before the command starts producing output
+# - it takes long to print all the output
+# We can prevent timeouts due to the latter using exp_continue, but for
+# the former that doesn't work.  There we use with_timeout_factor instead.
 
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
@@ -51,61 +58,175 @@ set type_syms \
 
 # Fetch all functions, variables and types without any non-debug
 # symbols.
-mi_gdb_test "111-symbol-info-functions" \
-    "111\\^done,${debug_only_syms}" \
-    "List all functions from debug information only"
+set testname "List all functions from debug information only"
+set cmd "111-symbol-info-functions"
+set state 0
+gdb_test_multiple $cmd $testname -prompt "${mi_gdb_prompt}$" {
+    -re "111\\^done,symbols=\{debug=\\\[${symtab_re}" {
+	if { $state == 0 } { incr state }
+	exp_continue
+    }
+    -re ",${symtab_re}" {
+	exp_continue
+    }
+    -re "\\\]\}\r\n${mi_gdb_prompt}$" {
+	if { $state == 1 } {
+	    pass $gdb_test_name
+	} else {
+	    fail $gdb_test_name
+	}
+    }
+}
 
-mi_gdb_test "112-symbol-info-variables" \
-    "112\\^done,${debug_only_syms}" \
-    "List all variables from debug information only"
+set testname "List all variables from debug information only"
+set cmd "112-symbol-info-variables"
+set state 0
+gdb_test_multiple $cmd $testname -prompt "${mi_gdb_prompt}$" {
+    -re "112\\^done,symbols=\{debug=\\\[${symtab_re}" {
+	if { $state == 0 } { incr state }
+	exp_continue
+    }
+    -re ",${symtab_re}" {
+	exp_continue
+    }
+    -re "\\\]\}\r\n${mi_gdb_prompt}$" {
+	if { $state == 1 } {
+	    pass $gdb_test_name
+	} else {
+	    fail $gdb_test_name
+	}
+    }
+}
 
-mi_gdb_test "113-symbol-info-types" \
-    "113\\^done,${type_syms}" \
-    "List all types"
+set testname "List all types"
+set cmd "113-symbol-info-types"
+set state 0
+gdb_test_multiple $cmd $testname -prompt "${mi_gdb_prompt}$" {
+    -re "113\\^done,symbols=\{debug=\\\[${symtab_type_re}" {
+	if { $state == 0 } { incr state }
+	exp_continue
+    }
+    -re ",${symtab_type_re}" {
+	exp_continue
+    }
+    -re "\\\]\}\r\n${mi_gdb_prompt}$" {
+	if { $state == 1 } {
+	    pass $gdb_test_name
+	} else {
+	    fail $gdb_test_name
+	}
+    }
+}
 
 # Fetch functions and variables but also grab the non-debug symbols
 # (from the symbol table).  There's often so much output output from
 # this command that we overflow expect's buffers, avoid this by
 # fetching the output piece by piece.
 set testname "List all functions"
-gdb_test_multiple "114-symbol-info-functions --include-nondebug" ${testname} {
-    -re "114\\^done,symbols=\{debug=\\\[${symtab_re}(?:,${symtab_re})*\\\],nondebug=\\\[" {
+set cmd "114-symbol-info-functions --include-nondebug"
+set state 0
+gdb_test_multiple $cmd ${testname} -prompt "${mi_gdb_prompt}$" {
+    -re "114\\^done,symbols=\{" {
+	if { $state == 0 } { set state 1 }
 	exp_continue
     }
-
+    -re "debug=\\\[${symtab_re}" {
+	if { $state == 1 } { set state 2 }
+	exp_continue
+    }
+    -re ",${symtab_re}" {
+	exp_continue
+    }
+    -re "\\\],nondebug=\\\[" {
+	if { $state == 2 } { set state 3 }
+	exp_continue
+    }
     -re "\{address=${qstr},name=${qstr}\}," {
 	exp_continue
     }
-
     -re "\{address=${qstr},name=${qstr}\}\\\]\}\r\n${mi_gdb_prompt}$" {
-	pass ${testname}
+	if { $state == 3 } {
+	    pass $gdb_test_name
+	} else {
+	    fail $gdb_test_name
+	}
     }
 }
 
-set testname "List all variables"
-gdb_test_multiple "115-symbol-info-variables --include-nondebug" ${testname} {
-    -re "115\\^done,symbols=\{debug=\\\[${symtab_re}(?:,${symtab_re})*\\\],nondebug=\\\[" {
-	verbose -log "Got the first part of the input"
-	exp_continue
+with_timeout_factor 2 {
+    set testname "List all variables"
+    set cmd "115-symbol-info-variables --include-nondebug"
+    set state 0
+    gdb_test_multiple $cmd ${testname} -prompt "${mi_gdb_prompt}$" {
+	-re "115\\^done,symbols=\{" {
+	    if { $state == 0 } { set state 1 }
+	    exp_continue
+	}
+	-re "debug=\\\[${symtab_re}" {
+	    if { $state == 1 } { set state 2 }
+	    exp_continue
+	}
+	-re ",${symtab_re}" {
+	    exp_continue
+	}
+	-re "\\\],nondebug=\\\[" {
+	    if { $state == 2 } { set state 3 }
+	    exp_continue
+	}
+	-re "\{address=${qstr},name=${qstr}\}," {
+	    exp_continue
+	}
+	-re "\{address=${qstr},name=${qstr}\}\\\]\}\r\n${mi_gdb_prompt}$" {
+	    if { $state == 3 } {
+		pass $gdb_test_name
+	    } else {
+		fail $gdb_test_name
+	    }
+	}
     }
+}
 
-    -re "\{address=${qstr},name=${qstr}\}," {
-	exp_continue
-    }
-
-    -re "\{address=${qstr},name=${qstr}\}\\\]\}\r\n${mi_gdb_prompt}$" {
-	pass ${testname}
+with_timeout_factor 2 {
+    set testname "List all variables"
+    set cmd "115-symbol-info-variables --include-nondebug"
+    set state 0
+    gdb_test_multiple $cmd ${testname} -prompt "${mi_gdb_prompt}$" {
+	-re "115\\^done,symbols=\{" {
+	    if { $state == 0 } { incr state }
+	    exp_continue
+	}
+	-re "debug=\\\[${symtab_re}" {
+	    if { $state == 1 } { incr state }
+	    exp_continue
+	}
+	-re ",${symtab_re}" {
+	    exp_continue
+	}
+	-re "\\\],nondebug=\\\[" {
+	    if { $state == 2 } { incr state }
+	    exp_continue
+	}
+	-re "\{address=${qstr},name=${qstr}\}," {
+	    exp_continue
+	}
+	-re "\{address=${qstr},name=${qstr}\}\\\]\}\r\n${mi_gdb_prompt}$" {
+	    if { $state == 3 } {
+		pass $gdb_test_name
+	    } else {
+		fail $gdb_test_name
+	    }
+	}
     }
 }
 
 # Filter functions by name and type.
 set lineno [gdb_get_line_number "f3 (another_int_t arg)" ${srcfile2}]
-mi_gdb_test "116-symbol-info-functions --name f3" \
+mi_gdb_test "116-symbol-info-functions --name ^f3$" \
     "116\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]+$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"39\",name=\"f3\",type=\"int \\(another_int_t\\)\",description=\"int f3\\(another_int_t\\);\"\}\\\]\}\\\]\}" \
     "List all functions matching pattern f3"
 
 set lineno [gdb_get_line_number "f4 (int *arg)" ${srcfile}]
-mi_gdb_test "117-symbol-info-functions --type void" \
+mi_gdb_test "117-symbol-info-functions --type void --name ^f4$" \
     "117\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]+$srcfile\",fullname=\"\[^\"\]+$srcfile\",symbols=\\\[\{line=\"36\",name=\"f4\",type=\"void \\(int \\*\\)\",description=\"void f4\\(int \\*\\);\"\}\\\]\}\\\]\}" \
     "List all functions matching type void"
 
@@ -117,7 +238,7 @@ mi_gdb_test "118-symbol-info-variables --name global_f2" \
 
 set lineno1 [gdb_get_line_number "static float global_f1;" ${srcfile}]
 set lineno2 [gdb_get_line_number "static float global_f1;" ${srcfile2}]
-mi_gdb_test "119-symbol-info-variables --type float" \
+mi_gdb_test "119-symbol-info-variables --type float --name ^global_" \
     "119\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]+$srcfile\",fullname=\"\[^\"\]+$srcfile\",symbols=\\\[\{line=\"25\",name=\"global_f1\",type=\"float\",description=\"static float global_f1;\"\}\\\]\},\{filename=\"\[^\"\]+$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"19\",name=\"global_f1\",type=\"float\",description=\"static float global_f1;\"\}\\\]\}\\\]\}" \
     "List all variables matching type float"
 
@@ -133,18 +254,21 @@ mi_gdb_test "121-symbol-info-functions --max-results 0" \
     "121\\^done,symbols=\{\}" \
     "-symbol-info-functions --max-results 0"
 
-mi_gdb_test "122-symbol-info-functions --max-results 1" \
+mi_gdb_test "122-symbol-info-functions --max-results 1 --name ^\[^_\]" \
     "122\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]+$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"39\",name=\"f3\",type=\"int \\(another_int_t\\)\",description=\"int f3\\(another_int_t\\);\"\}\\\]\}\\\]\}" \
     "-symbol-info-functions --max-results 1"
 
-mi_gdb_test "123-symbol-info-functions --max-results 2" \
+mi_gdb_test "123-symbol-info-functions --max-results 2 --name ^\[^_\]" \
     "123\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]+$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"33\",name=\"f2\",type=\"float \\(another_float_t\\)\",description=\"float f2\\(another_float_t\\);\"\},\{line=\"39\",name=\"f3\",type=\"int \\(another_int_t\\)\",description=\"int f3\\(another_int_t\\);\"\}\\\]\}\\\]\}" \
     "-symbol-info-functions --max-results 2"
 
-mi_gdb_test "124-symbol-info-variables --max-results 3" \
+mi_gdb_test "124-symbol-info-variables --max-results 3 --name ^\[^_\]" \
     "124\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]+$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"21\",name=\"global_f2\",type=\"int\",description=\"int global_f2;\"\},\{line=\"20\",name=\"global_i2\",type=\"int\",description=\"int global_i2;\"\},\{line=\"19\",name=\"global_f1\",type=\"float\",description=\"static float global_f1;\"\}\\\]\}\\\]\}" \
-    "-symbol-info-variables --max-results 3"
 
-mi_gdb_test "125-symbol-info-types --max-results 4" \
-    "125\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]+$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"24\",name=\"another_float_t\"\},\{line=\"23\",name=\"another_int_t\"\},\{name=\"float\"\},\{name=\"int\"\}\\\]\}\\\]\}" \
+set s1 "\{line=\"44\",name=\"another_char_t\"\}"
+set s2 "\{line=\"24\",name=\"another_float_t\"\}"
+set s3 "\{line=\"23\",name=\"another_int_t\"\}"
+set s4 "\{line=\"45\",name=\"another_short_t\"\}"
+mi_gdb_test "125-symbol-info-types --max-results 4 --name another_" \
+    "125\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]+$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[$s1,$s2,$s3,$s4\\\]\}\\\]\}" \
     "-symbol-info-types --max-results 4"

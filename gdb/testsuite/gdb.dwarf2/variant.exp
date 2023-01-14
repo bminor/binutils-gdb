@@ -91,6 +91,7 @@ Dwarf::assemble $asm_file {
 		    discr_1_label: member {
 			{type :$uinteger_label}
 			{data_member_location 0 data1}
+			{artificial 1 DW_FORM_flag_present}
 		    }
 
 		    variant {
@@ -123,6 +124,7 @@ Dwarf::assemble $asm_file {
 		    discr_2_label: member {
 			{type :$uinteger_label}
 			{data_member_location 0 data1}
+			{artificial 1 DW_FORM_flag_present}
 		    }
 
 		    variant {
@@ -172,6 +174,7 @@ Dwarf::assemble $asm_file {
 		    discr_3_label: member {
 			{type :$int8_label}
 			{data_member_location 0 data1}
+			{artificial 1 DW_FORM_flag_present}
 		    }
 
 		    variant {

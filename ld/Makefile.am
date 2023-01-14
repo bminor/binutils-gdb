@@ -312,6 +312,7 @@ ALL_EMULATION_SOURCES = \
 	ehppalinux.c \
 	ehppanbsd.c \
 	ehppaobsd.c \
+	ei386aout.c \
 	ei386beos.c \
 	ei386bsd.c \
 	ei386go32.c \
@@ -800,6 +801,7 @@ $(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES): $(GEN_DEPENDS)
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ehppalinux.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ehppanbsd.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ehppaobsd.Pc@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ei386aout.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ei386beos.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ei386bsd.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ei386go32.Pc@am__quote@

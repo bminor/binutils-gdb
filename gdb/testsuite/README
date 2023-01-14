@@ -197,7 +197,7 @@ a .gdbinit.  For example:
 
 GDB_PARALLEL
 
-To use parallel testing mode without using the the Makefile, set
+To use parallel testing mode without using the Makefile, set
 GDB_PARALLEL on the runtest command line to "yes".  Before starting
 the tests, you must ensure that the directories cache, outputs, and
 temp in the test suite build directory are either empty or have been

@@ -37,11 +37,8 @@ if ![runto MAIN__] then {
 set int_type [fortran_int4]
 
 # Test 'info variables' can find module variables.
-gdb_test "info variables -n" \
+set mod_re \
     [multi_line \
-	 "All defined variables:" \
-	 "" \
-	 "File .*$srcfile:" \
 	 "18:\[ \t\]+${int_type} mod1::var_const;" \
 	 "17:\[ \t\]+${int_type} mod1::var_i;" \
 	 "23:\[ \t\]+${int_type} mod2::var_i;" \
@@ -53,11 +50,33 @@ gdb_test "info variables -n" \
 	 "33:\[ \t\]+${int_type} modmany::var_c;" \
 	 "33:\[ \t\]+${int_type} modmany::var_i;" \
 	 "37:\[ \t\]+${int_type} moduse::var_x;" \
-	 "37:\[ \t\]+${int_type} moduse::var_y;(" \
-	 "" \
-	 "File .*:(" \
-	 "$decimal:.*)+)*"]
+	 "37:\[ \t\]+${int_type} moduse::var_y;"]
 
+set state 0
+gdb_test_multiple "info variables -n" "" {
+    -re "\r\nAll defined variables:" {
+	if { $state == 0 } { set state 1 }
+	exp_continue
+    }
+    -re "\r\n\r\nFile .*[string_to_regexp $srcfile]:" {
+	if { $state == 1 } { set state 2 }
+	exp_continue
+    }
+    -re $mod_re	{
+	if { $state == 2 } { set state 3 }
+	exp_continue
+    }
+    -re "\r\n\r\nFile \[^\r\n\]*:" {
+	exp_continue
+    }
+    -re -wrap "" {
+	if { $state == 3} {
+	    pass $gdb_test_name
+	} else {
+	    fail $gdb_test_name
+	}
+    }
+}
 
 # Do not use simple single-letter names as GDB would pick up for expectedly
 # nonexisting symbols some static variables from system libraries debuginfos.

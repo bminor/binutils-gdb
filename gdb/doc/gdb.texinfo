@@ -20360,7 +20360,7 @@ that lies within the boundaries of this symbol file in memory.  Example:
 add symbol table from file "/home/user/gdb/mylib.so" at
     .text_addr = 0x7ffff7ff9480
 (y or n) y
-Reading symbols from /home/user/gdb/mylib.so...done.
+Reading symbols from /home/user/gdb/mylib.so...
 (gdb) remove-symbol-file -a 0x7ffff7ff9480
 Remove symbol table from file "/home/user/gdb/mylib.so"? (y or n) y
 (gdb)
@@ -20568,7 +20568,7 @@ when any of shared library events happen.  The best way to do this is
 to use @code{catch load} and @code{catch unload} (@pxref{Set
 Catchpoints}).
 
-@value{GDBN} also supports the the @code{set stop-on-solib-events}
+@value{GDBN} also supports the @code{set stop-on-solib-events}
 command for this.  This command exists for historical reasons.  It is
 less useful than setting a catchpoint, because it does not allow for
 conditions or commands as a catchpoint does.
@@ -25306,7 +25306,7 @@ history.
 @cindex history file
 @kindex set history filename
 @cindex @env{GDBHISTFILE}, environment variable
-@item set history filename @var{fname}
+@item set history filename @r{[}@var{fname}@r{]}
 Set the name of the @value{GDBN} command history file to @var{fname}.
 This is the file where @value{GDBN} reads an initial command history
 list, and where it writes the command history from this session when it
@@ -25316,15 +25316,29 @@ to the value of the environment variable @code{GDBHISTFILE}, or to
 @file{./.gdb_history} (@file{./_gdb_history} on MS-DOS) if this variable
 is not set.
 
+The @code{GDBHISTFILE} environment variable is read after processing
+any @value{GDBN} initialization files (@pxref{Startup}) and after
+processing any commands passed using command line options (for
+example, @code{-ex}).
+
+If the @var{fname} argument is not given, or if the @code{GDBHISTFILE}
+is the empty string then @value{GDBN} will neither try to load an
+existing history file, nor will it try to save the history on exit.
+
 @cindex save command history
 @kindex set history save
 @item set history save
 @itemx set history save on
 Record command history in a file, whose name may be specified with the
-@code{set history filename} command.  By default, this option is disabled.
+@code{set history filename} command.  By default, this option is
+disabled.  The command history will be recorded when @value{GDBN}
+exits.  If @code{set history filename} is set to the empty string then
+history saving is disabled, even when @code{set history save} is
+@code{on}.
 
 @item set history save off
-Stop recording command history in a file.
+Don't record the command history into the file specified by @code{set
+history filename} when @value{GDBN} exits.
 
 @cindex history size
 @kindex set history size
@@ -25337,6 +25351,11 @@ to 256 if this variable is not set.  Non-numeric values of @env{GDBHISTSIZE}
 are ignored.  If @var{size} is @code{unlimited} or if @env{GDBHISTSIZE} is
 either a negative number or the empty string, then the number of commands
 @value{GDBN} keeps in the history list is unlimited.
+
+The @code{GDBHISTSIZE} environment variable is read after processing
+any @value{GDBN} initialization files (@pxref{Startup}) and after
+processing any commands passed using command line options (for
+example, @code{-ex}).
 
 @cindex remove duplicate history
 @kindex set history remove-duplicates
@@ -25961,7 +25980,7 @@ get loaded:
 
 @smallexample
 $ ./gdb -q ./gdb
-Reading symbols from /home/user/gdb/gdb...done.
+Reading symbols from /home/user/gdb/gdb...
 warning: File "/home/user/gdb/gdb-gdb.gdb" auto-loading has been
          declined by your `auto-load safe-path' set
          to "$debugdir:$datadir/auto-load".
@@ -28961,7 +28980,7 @@ recommended that front ends request a specific version of MI when launching
 @value{GDBN} (e.g. @code{--interpreter=mi2}) to make sure they get an
 interpreter with the MI version they expect.
 
-The following table gives a summary of the the released versions of the MI
+The following table gives a summary of the released versions of the MI
 interface: the version number, the version of GDB in which it first appeared
 and the breaking changes compared to the previous version.
 
@@ -29139,7 +29158,7 @@ The following is the list of possible async records:
 
 @item *running,thread-id="@var{thread}"
 The target is now running.  The @var{thread} field can be the global
-thread ID of the the thread that is now running, and it can be
+thread ID of the thread that is now running, and it can be
 @samp{all} if all threads are running.  The frontend should assume
 that no interaction with a running thread is possible after this
 notification is produced.  The frontend should not assume that this
@@ -37847,6 +37866,14 @@ supported).
 @item --with-curses
 Use the curses library instead of the termcap library, for text-mode
 terminal operations.
+
+@item --with-debuginfod
+Build @value{GDBN} with libdebuginfod, the debuginfod client library.
+Used to automatically fetch source files and separate debug files from
+debuginfod servers using the associated executable's build ID. Enabled
+by default if libdebuginfod is installed and found at configure time.
+debuginfod is packaged with elfutils, starting with version 0.178. You
+can get the latest version from `https://sourceware.org/elfutils/'.
 
 @item --with-libunwind-ia64
 Use the libunwind library for unwinding function call stack on ia64

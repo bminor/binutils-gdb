@@ -6373,10 +6373,7 @@ mips_print_register (struct ui_file *file, struct frame_info *frame,
     fprintf_filtered (file, ": ");
 
   get_formatted_print_options (&opts, 'x');
-  val_print_scalar_formatted (value_type (val),
-			      value_embedded_offset (val),
-			      val,
-			      &opts, 0, file);
+  value_print_scalar_formatted (val, &opts, 0, file);
 }
 
 /* Print IEEE exception condition bits in FLAGS.  */

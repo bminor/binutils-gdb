@@ -637,6 +637,25 @@ WERROR_CFLAGS
 WARN_CFLAGS
 ustinc
 ustlibs
+CCDEPMODE
+CONFIG_SRC_SUBDIR
+CATOBJEXT
+GENCAT
+INSTOBJEXT
+DATADIRNAME
+CATALOGS
+POSUB
+GMSGFMT
+XGETTEXT
+INCINTL
+LIBINTL_DEP
+LIBINTL
+USE_NLS
+DEPDIR
+am__leading_dot
+host_noncanonical
+target_noncanonical
+WIN32APILIBS
 LTLIBIPT
 LIBIPT
 HAVE_LIBIPT
@@ -646,12 +665,6 @@ PTHREAD_CC
 ax_pthread_config
 SED
 ALLOCA
-CCDEPMODE
-CONFIG_SRC_SUBDIR
-DEPDIR
-am__leading_dot
-host_noncanonical
-target_noncanonical
 CXX_DIALECT
 HAVE_CXX11
 RANLIB
@@ -733,12 +746,12 @@ ac_user_opts='
 enable_option_checking
 enable_maintainer_mode
 enable_largefile
-enable_unit_tests
 with_intel_pt
 with_gnu_ld
 enable_rpath
 with_libipt_prefix
 with_libipt_type
+enable_unit_tests
 with_ust
 with_ust_include
 with_ust_lib
@@ -1383,9 +1396,9 @@ Optional Features:
                           enable make rules and dependencies not useful (and
                           sometimes confusing) to the casual installer
   --disable-largefile     omit support for large files
+  --disable-rpath         do not hardcode runtime library paths
   --enable-unit-tests     Enable the inclusion of unit tests when compiling
                           GDB
-  --disable-rpath         do not hardcode runtime library paths
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings if gcc is used
   --enable-gdb-build-warnings
@@ -6073,428 +6086,6 @@ $as_echo "#define STDC_HEADERS 1" >>confdefs.h
 fi
 
 
-# Set the 'development' global.
-. $srcdir/../bfd/development.sh
-
-
-# Check whether we will enable the inclusion of unit tests when
-# compiling GDB.
-#
-# The default value of this option changes depending whether we're on
-# development mode (in which case it's "true") or not (in which case
-# it's "false").
-# Check whether --enable-unit-tests was given.
-if test "${enable_unit_tests+set}" = set; then :
-  enableval=$enable_unit_tests; case "${enableval}" in
-  yes)  enable_unittests=true  ;;
-  no)   enable_unittests=false ;;
-  *)    as_fn_error $? "bad value ${enableval} for --{enable,disable}-unit-tests option" "$LINENO" 5 ;;
-esac
-else
-  enable_unittests=$development
-fi
-
-
-if $enable_unittests; then
-
-$as_echo "#define GDB_SELF_TEST 1" >>confdefs.h
-
-
-  srv_selftest_objs="gdbsupport/selftest.o"
-
-fi
-
-
- case ${build_alias} in
-  "") build_noncanonical=${build} ;;
-  *) build_noncanonical=${build_alias} ;;
-esac
-
- case ${host_alias} in
-  "") host_noncanonical=${build_noncanonical} ;;
-  *) host_noncanonical=${host_alias} ;;
-esac
-
- case ${target_alias} in
-  "") target_noncanonical=${host_noncanonical} ;;
-  *) target_noncanonical=${target_alias} ;;
-esac
-
-
-
-
-
-
-# Dependency checking.
-rm -rf .tst 2>/dev/null
-mkdir .tst 2>/dev/null
-if test -d .tst; then
-  am__leading_dot=.
-else
-  am__leading_dot=_
-fi
-rmdir .tst 2>/dev/null
-
-DEPDIR="${am__leading_dot}deps"
-
-ac_config_commands="$ac_config_commands depdir"
-
-
-
-# Create sub-directories for objects and dependencies.
-CONFIG_SRC_SUBDIR="arch gdbsupport nat target"
-
-
-ac_config_commands="$ac_config_commands gdbdepdir"
-
-
-depcc="$CC"   am_compiler_list=
-
-am_depcomp=$ac_aux_dir/depcomp
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking dependency style of $depcc" >&5
-$as_echo_n "checking dependency style of $depcc... " >&6; }
-if ${am_cv_CC_dependencies_compiler_type+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -f "$am_depcomp"; then
-  # We make a subdir and do the tests there.  Otherwise we can end up
-  # making bogus files that we don't know about and never remove.  For
-  # instance it was reported that on HP-UX the gcc test will end up
-  # making a dummy file named `D' -- because `-MD' means `put the output
-  # in D'.
-  mkdir conftest.dir
-  # Copy depcomp to subdir because otherwise we won't find it if we're
-  # using a relative directory.
-  cp "$am_depcomp" conftest.dir
-  cd conftest.dir
-  # We will build objects and dependencies in a subdirectory because
-  # it helps to detect inapplicable dependency modes.  For instance
-  # both Tru64's cc and ICC support -MD to output dependencies as a
-  # side effect of compilation, but ICC will put the dependencies in
-  # the current directory while Tru64 will put them in the object
-  # directory.
-  mkdir sub
-
-  am_cv_CC_dependencies_compiler_type=none
-  if test "$am_compiler_list" = ""; then
-     am_compiler_list=`sed -n 's/^\([a-zA-Z0-9]*\))$/\1/p' < ./depcomp`
-  fi
-  for depmode in $am_compiler_list; do
-    if test $depmode = none; then break; fi
-
-    $as_echo "$as_me:$LINENO: trying $depmode" >&5
-    # Setup a source with many dependencies, because some compilers
-    # like to wrap large dependency lists on column 80 (with \), and
-    # we should not choose a depcomp mode which is confused by this.
-    #
-    # We need to recreate these files for each test, as the compiler may
-    # overwrite some of them when testing with obscure command lines.
-    # This happens at least with the AIX C compiler.
-    : > sub/conftest.c
-    for i in 1 2 3 4 5 6; do
-      echo '#include "conftst'$i'.h"' >> sub/conftest.c
-      # Using `: > sub/conftst$i.h' creates only sub/conftst1.h with
-      # Solaris 8's {/usr,}/bin/sh.
-      touch sub/conftst$i.h
-    done
-    echo "include sub/conftest.Po" > confmf
-
-    # We check with `-c' and `-o' for the sake of the "dashmstdout"
-    # mode.  It turns out that the SunPro C++ compiler does not properly
-    # handle `-M -o', and we need to detect this.
-    depcmd="depmode=$depmode \
-       source=sub/conftest.c object=sub/conftest.${OBJEXT-o} \
-       depfile=sub/conftest.Po tmpdepfile=sub/conftest.TPo \
-       $SHELL ./depcomp $depcc -c -o sub/conftest.${OBJEXT-o} sub/conftest.c"
-    echo "| $depcmd" | sed -e 's/  */ /g' >&5
-    if env $depcmd > conftest.err 2>&1 &&
-       grep sub/conftst6.h sub/conftest.Po >>conftest.err 2>&1 &&
-       grep sub/conftest.${OBJEXT-o} sub/conftest.Po >>conftest.err 2>&1 &&
-       ${MAKE-make} -s -f confmf >>conftest.err 2>&1; then
-      # icc doesn't choke on unknown options, it will just issue warnings
-      # or remarks (even with -Werror).  So we grep stderr for any message
-      # that says an option was ignored or not supported.
-      # When given -MP, icc 7.0 and 7.1 complain thusly:
-      #   icc: Command line warning: ignoring option '-M'; no argument required
-      # The diagnosis changed in icc 8.0:
-      #   icc: Command line remark: option '-MP' not supported
-      if (grep 'ignoring option' conftest.err ||
-          grep 'not supported' conftest.err) >/dev/null 2>&1; then :; else
-        am_cv_CC_dependencies_compiler_type=$depmode
-	$as_echo "$as_me:$LINENO: success" >&5
-        break
-      fi
-    fi
-    $as_echo "$as_me:$LINENO: failure, diagnostics are:" >&5
-    sed -e 's/^/| /' < conftest.err >&5
-  done
-
-  cd ..
-  rm -rf conftest.dir
-else
-  am_cv_CC_dependencies_compiler_type=none
-fi
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $am_cv_CC_dependencies_compiler_type" >&5
-$as_echo "$am_cv_CC_dependencies_compiler_type" >&6; }
-if test x${am_cv_CC_dependencies_compiler_type-none} = xnone
-then as_fn_error $? "no usable dependency style found" "$LINENO" 5
-else CCDEPMODE=depmode=$am_cv_CC_dependencies_compiler_type
-
-fi
-
-
-for ac_header in termios.h sys/reg.h string.h 		 sys/procfs.h linux/elf.h 		 fcntl.h signal.h sys/file.h 		 sys/ioctl.h netinet/in.h sys/socket.h netdb.h 		 netinet/tcp.h arpa/inet.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-
-done
-
-ac_fn_c_check_type "$LINENO" "pid_t" "ac_cv_type_pid_t" "$ac_includes_default"
-if test "x$ac_cv_type_pid_t" = xyes; then :
-
-else
-
-cat >>confdefs.h <<_ACEOF
-#define pid_t int
-_ACEOF
-
-fi
-
-for ac_header in vfork.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "vfork.h" "ac_cv_header_vfork_h" "$ac_includes_default"
-if test "x$ac_cv_header_vfork_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_VFORK_H 1
-_ACEOF
-
-fi
-
-done
-
-for ac_func in fork vfork
-do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-done
-
-if test "x$ac_cv_func_fork" = xyes; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for working fork" >&5
-$as_echo_n "checking for working fork... " >&6; }
-if ${ac_cv_func_fork_works+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test "$cross_compiling" = yes; then :
-  ac_cv_func_fork_works=cross
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$ac_includes_default
-int
-main ()
-{
-
-	  /* By Ruediger Kuhlmann. */
-	  return fork () < 0;
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-  ac_cv_func_fork_works=yes
-else
-  ac_cv_func_fork_works=no
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_func_fork_works" >&5
-$as_echo "$ac_cv_func_fork_works" >&6; }
-
-else
-  ac_cv_func_fork_works=$ac_cv_func_fork
-fi
-if test "x$ac_cv_func_fork_works" = xcross; then
-  case $host in
-    *-*-amigaos* | *-*-msdosdjgpp*)
-      # Override, as these systems have only a dummy fork() stub
-      ac_cv_func_fork_works=no
-      ;;
-    *)
-      ac_cv_func_fork_works=yes
-      ;;
-  esac
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: result $ac_cv_func_fork_works guessed because of cross compilation" >&5
-$as_echo "$as_me: WARNING: result $ac_cv_func_fork_works guessed because of cross compilation" >&2;}
-fi
-ac_cv_func_vfork_works=$ac_cv_func_vfork
-if test "x$ac_cv_func_vfork" = xyes; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for working vfork" >&5
-$as_echo_n "checking for working vfork... " >&6; }
-if ${ac_cv_func_vfork_works+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test "$cross_compiling" = yes; then :
-  ac_cv_func_vfork_works=cross
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-/* Thanks to Paul Eggert for this test.  */
-$ac_includes_default
-#include <sys/wait.h>
-#ifdef HAVE_VFORK_H
-# include <vfork.h>
-#endif
-/* On some sparc systems, changes by the child to local and incoming
-   argument registers are propagated back to the parent.  The compiler
-   is told about this with #include <vfork.h>, but some compilers
-   (e.g. gcc -O) don't grok <vfork.h>.  Test for this by using a
-   static variable whose address is put into a register that is
-   clobbered by the vfork.  */
-static void
-#ifdef __cplusplus
-sparc_address_test (int arg)
-# else
-sparc_address_test (arg) int arg;
-#endif
-{
-  static pid_t child;
-  if (!child) {
-    child = vfork ();
-    if (child < 0) {
-      perror ("vfork");
-      _exit(2);
-    }
-    if (!child) {
-      arg = getpid();
-      write(-1, "", 0);
-      _exit (arg);
-    }
-  }
-}
-
-int
-main ()
-{
-  pid_t parent = getpid ();
-  pid_t child;
-
-  sparc_address_test (0);
-
-  child = vfork ();
-
-  if (child == 0) {
-    /* Here is another test for sparc vfork register problems.  This
-       test uses lots of local variables, at least as many local
-       variables as main has allocated so far including compiler
-       temporaries.  4 locals are enough for gcc 1.40.3 on a Solaris
-       4.1.3 sparc, but we use 8 to be safe.  A buggy compiler should
-       reuse the register of parent for one of the local variables,
-       since it will think that parent can't possibly be used any more
-       in this routine.  Assigning to the local variable will thus
-       munge parent in the parent process.  */
-    pid_t
-      p = getpid(), p1 = getpid(), p2 = getpid(), p3 = getpid(),
-      p4 = getpid(), p5 = getpid(), p6 = getpid(), p7 = getpid();
-    /* Convince the compiler that p..p7 are live; otherwise, it might
-       use the same hardware register for all 8 local variables.  */
-    if (p != p1 || p != p2 || p != p3 || p != p4
-	|| p != p5 || p != p6 || p != p7)
-      _exit(1);
-
-    /* On some systems (e.g. IRIX 3.3), vfork doesn't separate parent
-       from child file descriptors.  If the child closes a descriptor
-       before it execs or exits, this munges the parent's descriptor
-       as well.  Test for this by closing stdout in the child.  */
-    _exit(close(fileno(stdout)) != 0);
-  } else {
-    int status;
-    struct stat st;
-
-    while (wait(&status) != child)
-      ;
-    return (
-	 /* Was there some problem with vforking?  */
-	 child < 0
-
-	 /* Did the child fail?  (This shouldn't happen.)  */
-	 || status
-
-	 /* Did the vfork/compiler bug occur?  */
-	 || parent != getpid()
-
-	 /* Did the file descriptor bug occur?  */
-	 || fstat(fileno(stdout), &st) != 0
-	 );
-  }
-}
-_ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-  ac_cv_func_vfork_works=yes
-else
-  ac_cv_func_vfork_works=no
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_func_vfork_works" >&5
-$as_echo "$ac_cv_func_vfork_works" >&6; }
-
-fi;
-if test "x$ac_cv_func_fork_works" = xcross; then
-  ac_cv_func_vfork_works=$ac_cv_func_vfork
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: result $ac_cv_func_vfork_works guessed because of cross compilation" >&5
-$as_echo "$as_me: WARNING: result $ac_cv_func_vfork_works guessed because of cross compilation" >&2;}
-fi
-
-if test "x$ac_cv_func_vfork_works" = xyes; then
-
-$as_echo "#define HAVE_WORKING_VFORK 1" >>confdefs.h
-
-else
-
-$as_echo "#define vfork fork" >>confdefs.h
-
-fi
-if test "x$ac_cv_func_fork_works" = xyes; then
-
-$as_echo "#define HAVE_WORKING_FORK 1" >>confdefs.h
-
-fi
-
-for ac_func in pread pwrite pread64
-do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-done
-
-
 ac_fn_c_check_type "$LINENO" "size_t" "ac_cv_type_size_t" "$ac_includes_default"
 if test "x$ac_cv_type_size_t" = xyes; then :
 
@@ -6528,6 +6119,17 @@ done
 
 
 
+
+ac_fn_c_check_type "$LINENO" "pid_t" "ac_cv_type_pid_t" "$ac_includes_default"
+if test "x$ac_cv_type_pid_t" = xyes; then :
+
+else
+
+cat >>confdefs.h <<_ACEOF
+#define pid_t int
+_ACEOF
+
+fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for a sed that does not truncate output" >&5
 $as_echo_n "checking for a sed that does not truncate output... " >&6; }
@@ -6756,6 +6358,9 @@ else
 fi
 
 
+
+  # Set the 'development' global.
+  . $srcdir/../bfd/development.sh
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ANSI C header files" >&5
 $as_echo_n "checking for ANSI C header files... " >&6; }
@@ -9296,6 +8901,491 @@ $as_echo "$bfd_cv_have_sys_procfs_type_elf_fpregset_t" >&6; }
 
   fi
 
+# This is set by GDB_AC_COMMON.
+
+
+
+# Check whether we will enable the inclusion of unit tests when
+# compiling GDB.
+#
+# The default value of this option changes depending whether we're on
+# development mode (in which case it's "true") or not (in which case
+# it's "false").  The $development variable is set by the GDB_AC_COMMON
+# macro, which must therefore be used before GDB_AC_SELFTEST.
+
+if test "x$development" != xtrue && test "x$development" != xfalse; then :
+  as_fn_error $? "Invalid value for \$development, got \"$development\", expecting \"true\" or \"false\"." "$LINENO" 5
+fi
+
+# Check whether --enable-unit-tests was given.
+if test "${enable_unit_tests+set}" = set; then :
+  enableval=$enable_unit_tests; case "${enableval}" in
+  yes)  enable_unittests=true  ;;
+  no)   enable_unittests=false ;;
+  *)    as_fn_error $? "bad value ${enableval} for --{enable,disable}-unit-tests option" "$LINENO" 5 ;;
+esac
+else
+  enable_unittests=$development
+fi
+
+
+if $enable_unittests; then
+
+$as_echo "#define GDB_SELF_TEST 1" >>confdefs.h
+
+
+fi
+
+
+ case ${build_alias} in
+  "") build_noncanonical=${build} ;;
+  *) build_noncanonical=${build_alias} ;;
+esac
+
+ case ${host_alias} in
+  "") host_noncanonical=${build_noncanonical} ;;
+  *) host_noncanonical=${host_alias} ;;
+esac
+
+ case ${target_alias} in
+  "") target_noncanonical=${host_noncanonical} ;;
+  *) target_noncanonical=${target_alias} ;;
+esac
+
+
+
+
+
+
+# Dependency checking.
+rm -rf .tst 2>/dev/null
+mkdir .tst 2>/dev/null
+if test -d .tst; then
+  am__leading_dot=.
+else
+  am__leading_dot=_
+fi
+rmdir .tst 2>/dev/null
+
+DEPDIR="${am__leading_dot}deps"
+
+ac_config_commands="$ac_config_commands depdir"
+
+
+
+# If we haven't got the data from the intl directory,
+# assume NLS is disabled.
+USE_NLS=no
+LIBINTL=
+LIBINTL_DEP=
+INCINTL=
+XGETTEXT=
+GMSGFMT=
+POSUB=
+
+if test -f  ../intl/config.intl; then
+  .  ../intl/config.intl
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether NLS is requested" >&5
+$as_echo_n "checking whether NLS is requested... " >&6; }
+if test x"$USE_NLS" != xyes; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define ENABLE_NLS 1" >>confdefs.h
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for catalogs to be installed" >&5
+$as_echo_n "checking for catalogs to be installed... " >&6; }
+  # Look for .po and .gmo files in the source directory.
+  CATALOGS=
+  XLINGUAS=
+  for cat in $srcdir/po/*.gmo $srcdir/po/*.po; do
+    # If there aren't any .gmo files the shell will give us the
+    # literal string "../path/to/srcdir/po/*.gmo" which has to be
+    # weeded out.
+    case "$cat" in *\**)
+      continue;;
+    esac
+    # The quadruple backslash is collapsed to a double backslash
+    # by the backticks, then collapsed again by the double quotes,
+    # leaving us with one backslash in the sed expression (right
+    # before the dot that mustn't act as a wildcard).
+    cat=`echo $cat | sed -e "s!$srcdir/po/!!" -e "s!\\\\.po!.gmo!"`
+    lang=`echo $cat | sed -e "s!\\\\.gmo!!"`
+    # The user is allowed to set LINGUAS to a list of languages to
+    # install catalogs for.  If it's empty that means "all of them."
+    if test "x$LINGUAS" = x; then
+      CATALOGS="$CATALOGS $cat"
+      XLINGUAS="$XLINGUAS $lang"
+    else
+      case "$LINGUAS" in *$lang*)
+        CATALOGS="$CATALOGS $cat"
+        XLINGUAS="$XLINGUAS $lang"
+        ;;
+      esac
+    fi
+  done
+  LINGUAS="$XLINGUAS"
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $LINGUAS" >&5
+$as_echo "$LINGUAS" >&6; }
+
+
+    DATADIRNAME=share
+
+  INSTOBJEXT=.mo
+
+  GENCAT=gencat
+
+  CATOBJEXT=.gmo
+
+fi
+
+# Create sub-directories for objects and dependencies.
+CONFIG_SRC_SUBDIR="arch gdbsupport nat target"
+
+
+ac_config_commands="$ac_config_commands gdbdepdir"
+
+
+depcc="$CC"   am_compiler_list=
+
+am_depcomp=$ac_aux_dir/depcomp
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking dependency style of $depcc" >&5
+$as_echo_n "checking dependency style of $depcc... " >&6; }
+if ${am_cv_CC_dependencies_compiler_type+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -f "$am_depcomp"; then
+  # We make a subdir and do the tests there.  Otherwise we can end up
+  # making bogus files that we don't know about and never remove.  For
+  # instance it was reported that on HP-UX the gcc test will end up
+  # making a dummy file named `D' -- because `-MD' means `put the output
+  # in D'.
+  mkdir conftest.dir
+  # Copy depcomp to subdir because otherwise we won't find it if we're
+  # using a relative directory.
+  cp "$am_depcomp" conftest.dir
+  cd conftest.dir
+  # We will build objects and dependencies in a subdirectory because
+  # it helps to detect inapplicable dependency modes.  For instance
+  # both Tru64's cc and ICC support -MD to output dependencies as a
+  # side effect of compilation, but ICC will put the dependencies in
+  # the current directory while Tru64 will put them in the object
+  # directory.
+  mkdir sub
+
+  am_cv_CC_dependencies_compiler_type=none
+  if test "$am_compiler_list" = ""; then
+     am_compiler_list=`sed -n 's/^\([a-zA-Z0-9]*\))$/\1/p' < ./depcomp`
+  fi
+  for depmode in $am_compiler_list; do
+    if test $depmode = none; then break; fi
+
+    $as_echo "$as_me:$LINENO: trying $depmode" >&5
+    # Setup a source with many dependencies, because some compilers
+    # like to wrap large dependency lists on column 80 (with \), and
+    # we should not choose a depcomp mode which is confused by this.
+    #
+    # We need to recreate these files for each test, as the compiler may
+    # overwrite some of them when testing with obscure command lines.
+    # This happens at least with the AIX C compiler.
+    : > sub/conftest.c
+    for i in 1 2 3 4 5 6; do
+      echo '#include "conftst'$i'.h"' >> sub/conftest.c
+      # Using `: > sub/conftst$i.h' creates only sub/conftst1.h with
+      # Solaris 8's {/usr,}/bin/sh.
+      touch sub/conftst$i.h
+    done
+    echo "include sub/conftest.Po" > confmf
+
+    # We check with `-c' and `-o' for the sake of the "dashmstdout"
+    # mode.  It turns out that the SunPro C++ compiler does not properly
+    # handle `-M -o', and we need to detect this.
+    depcmd="depmode=$depmode \
+       source=sub/conftest.c object=sub/conftest.${OBJEXT-o} \
+       depfile=sub/conftest.Po tmpdepfile=sub/conftest.TPo \
+       $SHELL ./depcomp $depcc -c -o sub/conftest.${OBJEXT-o} sub/conftest.c"
+    echo "| $depcmd" | sed -e 's/  */ /g' >&5
+    if env $depcmd > conftest.err 2>&1 &&
+       grep sub/conftst6.h sub/conftest.Po >>conftest.err 2>&1 &&
+       grep sub/conftest.${OBJEXT-o} sub/conftest.Po >>conftest.err 2>&1 &&
+       ${MAKE-make} -s -f confmf >>conftest.err 2>&1; then
+      # icc doesn't choke on unknown options, it will just issue warnings
+      # or remarks (even with -Werror).  So we grep stderr for any message
+      # that says an option was ignored or not supported.
+      # When given -MP, icc 7.0 and 7.1 complain thusly:
+      #   icc: Command line warning: ignoring option '-M'; no argument required
+      # The diagnosis changed in icc 8.0:
+      #   icc: Command line remark: option '-MP' not supported
+      if (grep 'ignoring option' conftest.err ||
+          grep 'not supported' conftest.err) >/dev/null 2>&1; then :; else
+        am_cv_CC_dependencies_compiler_type=$depmode
+	$as_echo "$as_me:$LINENO: success" >&5
+        break
+      fi
+    fi
+    $as_echo "$as_me:$LINENO: failure, diagnostics are:" >&5
+    sed -e 's/^/| /' < conftest.err >&5
+  done
+
+  cd ..
+  rm -rf conftest.dir
+else
+  am_cv_CC_dependencies_compiler_type=none
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $am_cv_CC_dependencies_compiler_type" >&5
+$as_echo "$am_cv_CC_dependencies_compiler_type" >&6; }
+if test x${am_cv_CC_dependencies_compiler_type-none} = xnone
+then as_fn_error $? "no usable dependency style found" "$LINENO" 5
+else CCDEPMODE=depmode=$am_cv_CC_dependencies_compiler_type
+
+fi
+
+
+for ac_header in termios.h sys/reg.h string.h 		 sys/procfs.h linux/elf.h 		 fcntl.h signal.h sys/file.h 		 sys/ioctl.h netinet/in.h sys/socket.h netdb.h 		 netinet/tcp.h arpa/inet.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in vfork.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "vfork.h" "ac_cv_header_vfork_h" "$ac_includes_default"
+if test "x$ac_cv_header_vfork_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_VFORK_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_func in fork vfork
+do :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+done
+
+if test "x$ac_cv_func_fork" = xyes; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for working fork" >&5
+$as_echo_n "checking for working fork... " >&6; }
+if ${ac_cv_func_fork_works+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test "$cross_compiling" = yes; then :
+  ac_cv_func_fork_works=cross
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$ac_includes_default
+int
+main ()
+{
+
+	  /* By Ruediger Kuhlmann. */
+	  return fork () < 0;
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  ac_cv_func_fork_works=yes
+else
+  ac_cv_func_fork_works=no
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_func_fork_works" >&5
+$as_echo "$ac_cv_func_fork_works" >&6; }
+
+else
+  ac_cv_func_fork_works=$ac_cv_func_fork
+fi
+if test "x$ac_cv_func_fork_works" = xcross; then
+  case $host in
+    *-*-amigaos* | *-*-msdosdjgpp*)
+      # Override, as these systems have only a dummy fork() stub
+      ac_cv_func_fork_works=no
+      ;;
+    *)
+      ac_cv_func_fork_works=yes
+      ;;
+  esac
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: result $ac_cv_func_fork_works guessed because of cross compilation" >&5
+$as_echo "$as_me: WARNING: result $ac_cv_func_fork_works guessed because of cross compilation" >&2;}
+fi
+ac_cv_func_vfork_works=$ac_cv_func_vfork
+if test "x$ac_cv_func_vfork" = xyes; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for working vfork" >&5
+$as_echo_n "checking for working vfork... " >&6; }
+if ${ac_cv_func_vfork_works+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test "$cross_compiling" = yes; then :
+  ac_cv_func_vfork_works=cross
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+/* Thanks to Paul Eggert for this test.  */
+$ac_includes_default
+#include <sys/wait.h>
+#ifdef HAVE_VFORK_H
+# include <vfork.h>
+#endif
+/* On some sparc systems, changes by the child to local and incoming
+   argument registers are propagated back to the parent.  The compiler
+   is told about this with #include <vfork.h>, but some compilers
+   (e.g. gcc -O) don't grok <vfork.h>.  Test for this by using a
+   static variable whose address is put into a register that is
+   clobbered by the vfork.  */
+static void
+#ifdef __cplusplus
+sparc_address_test (int arg)
+# else
+sparc_address_test (arg) int arg;
+#endif
+{
+  static pid_t child;
+  if (!child) {
+    child = vfork ();
+    if (child < 0) {
+      perror ("vfork");
+      _exit(2);
+    }
+    if (!child) {
+      arg = getpid();
+      write(-1, "", 0);
+      _exit (arg);
+    }
+  }
+}
+
+int
+main ()
+{
+  pid_t parent = getpid ();
+  pid_t child;
+
+  sparc_address_test (0);
+
+  child = vfork ();
+
+  if (child == 0) {
+    /* Here is another test for sparc vfork register problems.  This
+       test uses lots of local variables, at least as many local
+       variables as main has allocated so far including compiler
+       temporaries.  4 locals are enough for gcc 1.40.3 on a Solaris
+       4.1.3 sparc, but we use 8 to be safe.  A buggy compiler should
+       reuse the register of parent for one of the local variables,
+       since it will think that parent can't possibly be used any more
+       in this routine.  Assigning to the local variable will thus
+       munge parent in the parent process.  */
+    pid_t
+      p = getpid(), p1 = getpid(), p2 = getpid(), p3 = getpid(),
+      p4 = getpid(), p5 = getpid(), p6 = getpid(), p7 = getpid();
+    /* Convince the compiler that p..p7 are live; otherwise, it might
+       use the same hardware register for all 8 local variables.  */
+    if (p != p1 || p != p2 || p != p3 || p != p4
+	|| p != p5 || p != p6 || p != p7)
+      _exit(1);
+
+    /* On some systems (e.g. IRIX 3.3), vfork doesn't separate parent
+       from child file descriptors.  If the child closes a descriptor
+       before it execs or exits, this munges the parent's descriptor
+       as well.  Test for this by closing stdout in the child.  */
+    _exit(close(fileno(stdout)) != 0);
+  } else {
+    int status;
+    struct stat st;
+
+    while (wait(&status) != child)
+      ;
+    return (
+	 /* Was there some problem with vforking?  */
+	 child < 0
+
+	 /* Did the child fail?  (This shouldn't happen.)  */
+	 || status
+
+	 /* Did the vfork/compiler bug occur?  */
+	 || parent != getpid()
+
+	 /* Did the file descriptor bug occur?  */
+	 || fstat(fileno(stdout), &st) != 0
+	 );
+  }
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  ac_cv_func_vfork_works=yes
+else
+  ac_cv_func_vfork_works=no
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_func_vfork_works" >&5
+$as_echo "$ac_cv_func_vfork_works" >&6; }
+
+fi;
+if test "x$ac_cv_func_fork_works" = xcross; then
+  ac_cv_func_vfork_works=$ac_cv_func_vfork
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: result $ac_cv_func_vfork_works guessed because of cross compilation" >&5
+$as_echo "$as_me: WARNING: result $ac_cv_func_vfork_works guessed because of cross compilation" >&2;}
+fi
+
+if test "x$ac_cv_func_vfork_works" = xyes; then
+
+$as_echo "#define HAVE_WORKING_VFORK 1" >>confdefs.h
+
+else
+
+$as_echo "#define vfork fork" >>confdefs.h
+
+fi
+if test "x$ac_cv_func_fork_works" = xyes; then
+
+$as_echo "#define HAVE_WORKING_FORK 1" >>confdefs.h
+
+fi
+
+for ac_func in pread pwrite pread64
+do :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+done
+
 
 # Check the return and argument types of ptrace.
 
@@ -9323,26 +9413,6 @@ gdb_ptrace_headers='
 # include <unistd.h>
 #endif
 '
-# There is no point in checking if we don't have a prototype.
-ac_fn_c_check_decl "$LINENO" "ptrace" "ac_cv_have_decl_ptrace" "$gdb_ptrace_headers
-"
-if test "x$ac_cv_have_decl_ptrace" = xyes; then :
-  ac_have_decl=1
-else
-  ac_have_decl=0
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL_PTRACE $ac_have_decl
-_ACEOF
-if test $ac_have_decl = 1; then :
-
-else
-
-  : ${gdb_cv_func_ptrace_ret='int'}
-  : ${gdb_cv_func_ptrace_args='int,int,long,long'}
-
-fi
 
 # Check return type.  Varargs (used on GNU/Linux) conflict with the
 # empty argument list, so check for that explicitly.
@@ -9616,6 +9686,7 @@ build_warnings="-Wall -Wpointer-arith \
 -Wdeprecated-copy-dtor \
 -Wredundant-move \
 -Wmissing-declarations \
+-Wmissing-prototypes \
 -Wstrict-null-sentinel \
 "
 
@@ -10543,7 +10614,7 @@ $as_echo "#define USE_XML 1" >>confdefs.h
   done
 fi
 
-GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_hostio_err_objs $srv_thread_depfiles $srv_selftest_objs"
+GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_hostio_err_objs $srv_thread_depfiles"
 GDBSERVER_LIBS="$srv_libs"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the target supports __sync_*_compare_and_swap" >&5

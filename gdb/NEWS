@@ -3,6 +3,20 @@
 
 *** Changes since GDB 9
 
+* GDB now supports debuginfod, an HTTP server for distributing ELF/DWARF
+  debugging information as well as source code.
+
+  When built with debuginfod, GDB can automatically query debuginfod
+  servers for the separate debug files and source code of the executable
+  being debugged.
+
+  To build GDB with debuginfod, pass --with-debuginfod to configure (this
+  requires libdebuginfod, the debuginfod client library).
+
+  debuginfod is distributed with elfutils, starting with version 0.178.
+
+  You can get the latest version from https://sourceware.org/elfutils.
+
 * New features in the GDB remote stub, GDBserver
 
   ** GDBserver is now supported on RISC-V GNU/Linux.
@@ -18,6 +32,15 @@
   and will display the EXCEPTION_RECORD of the last handled exception.
 
 * TUI windows can now be arranged horizontally.
+
+* The command history filename can now be set to the empty string
+  either using 'set history filename' or by setting 'GDBHISTFILE=' in
+  the environment.  The effect of setting this filename to the empty
+  string is that GDB will not try to load any previous command
+  history.
+
+* On Windows targets, it is now possible to debug 32-bit programs with a
+  64-bit GDB.
 
 * New commands
 
@@ -2396,7 +2419,7 @@ show code-cache
 * Newly installed $prefix/bin/gcore acts as a shell interface for the
   GDB command gcore.
 
-* GDB now implements the the C++ 'typeid' operator.
+* GDB now implements the C++ 'typeid' operator.
 
 * The new convenience variable $_exception holds the exception being
   thrown or caught at an exception-related catchpoint.
@@ -5180,7 +5203,7 @@ The new infrastructure making possible the implementation of key new
 features including 32x64 (e.g., 64-bit amd64 GDB debugging a 32-bit
 i386 application).
 
-GDB 6.3 will be the last release to include the the registers[]
+GDB 6.3 will be the last release to include the registers[]
 compatibility module that allowed out-of-date configurations to
 continue to work.  This change directly impacts the following
 configurations:
@@ -6611,7 +6634,7 @@ Remote targets now use a data cache to speed up communication with the
 remote side.  The data cache could lead to incorrect results because
 it doesn't know about volatile variables, thus making it impossible to
 debug targets which use memory mapped I/O devices. `set remotecache
-off' turns the the data cache off.
+off' turns the data cache off.
 
 * Remote targets may have threads
 

@@ -1,3 +1,1400 @@
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.h (struct dwz_file): Move to dwz.h.
+	* dwarf2/read.c: Add include.
+	* dwarf2/index-write.c: Add include.
+	* dwarf2/index-cache.c: Add include.
+	* dwarf2/dwz.h: New file.
+
+2020-03-25  Tom Tromey  <tom@tromey.com>
+
+	* compile/compile-object-load.c (get_out_value_type): Mention
+	correct symbol name in error message.
+
+2020-03-25  Hannes Domani  <ssbssa@yahoo.de>
+
+	* windows-nat.c (windows_add_all_dlls): Fix system dll paths.
+
+2020-03-25  Tom de Vries  <tdevries@suse.de>
+
+	* symtab.h (is_main_symtab_of_compunit_symtab): New function.
+	* symmisc.c (dump_symtab_1): Print user and includes fields.
+	(maintenance_info_symtabs): Same.
+
+2020-03-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR gdb/25534
+	* riscv-tdep.c (riscv_arg_info::c_offset): Update comment.
+	(riscv_regcache_cooked_write): New function.
+	(riscv_push_dummy_call): Use new function.
+	(riscv_return_value): Likewise.
+
+2020-03-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* fbsd-nat.c (fbsd_nat_target::follow_fork): Change bool to int.
+	* fbsd-nat.h (class fbsd_nat_target) <follow_fork>: Likewise.
+	* inf-ptrace.c (inf_ptrace_target::follow_fork): Likewise.
+	* inf-ptrace.h (struct inf_ptrace_target) <follow_fork>: Likewise.
+	* infrun.c (follow_fork): Likewise.
+	(follow_fork_inferior): Likewise.
+	* linux-nat.c (linux_nat_target::follow_fork): Likewise.
+	* linux-nat.h (class linux_nat_target): Likewise.
+	* remote.c (class remote_target) <follow_fork>: Likewise.
+	(remote_target::follow_fork): Likewise.
+	* target-delegates.c: Re-generate.
+	* target.c (default_follow_fork): Likewise.
+	(target_follow_fork): Likewise.
+	* target.h (struct target_ops) <follow_fork>: Likewise.
+	(target_follow_fork): Likewise.
+
+2020-03-24  Tom de Vries  <tdevries@suse.de>
+
+	* psymtab.c (maintenance_info_psymtabs): Print user field.
+
+2020-03-20  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/loc.h (dwarf2_evaluate_property): Make "addr_stack"
+	const.
+	* dwarf2/loc.c (dwarf2_evaluate_property): Make "addr_stack"
+	const.
+
+2020-03-20  Simon Marchi  <simon.marchi@efficios.com>
+
+	* ptrace.m4: Don't check for ptrace declaration.
+	* config.in: Re-generate.
+	* configure: Re-generate.
+	* nat/gdb_ptrace.h: Don't declare ptrace if HAVE_DECL_PTRACE is
+	not defined.
+
+2020-03-20  Kamil Rytarowski  <n54@gmx.com>
+
+	* amd64-bsd-nat.c (gdb_ptrace): Change return type from `int' to
+	`PTRACE_TYPE_RET'.
+	* i386-bsd-nat.c (gdb_ptrace): Likewise.
+	* sparc-nat.c (gdb_ptrace): Likewise.
+	* x86-bsd-nat.c (gdb_ptrace): Likewise.
+
+2020-03-20  Tom Tromey  <tromey@adacore.com>
+
+	* c-exp.y (lex_one_token): Fix assert.
+
+2020-03-20  Tom Tromey  <tromey@adacore.com>
+
+	* ada-tasks.c (read_atcb): Use smaller length in strncpy call.
+	* linux-tdep.c (linux_fill_prpsinfo): Use smaller length in
+	strncpy call.
+
+2020-03-20  Tom Tromey  <tromey@adacore.com>
+
+	* symmisc.c (maintenance_print_one_line_table): Use ui_out.
+
+2020-03-20  Tom Tromey  <tromey@adacore.com>
+
+	* ada-valprint.c (print_variant_part): Remove parameters; switch
+	to value-based API.
+	(print_field_values): Likewise.
+	(ada_val_print_struct_union): Likewise.
+	(ada_value_print_1): Update.
+
+2020-03-20  Kamil Rytarowski  <n54@gmx.com>
+
+	* ppc-nbsd-nat.c (ppc_nbsd_nat_target): Inherit from
+	nbsd_nat_target instead of inf_ptrace_target.
+	* ppc-nbsd-nat.c: Include "nbsd-nat.h", as we are now using
+	nbsd_nat_target.
+
+2020-03-20  Kamil Rytarowski  <n54@gmx.com>
+
+	* hppa-nbsd-nat.c (fetch_registers): New variable lwp and pass
+	it to the ptrace call.
+	* (store_registers): Likewise.
+
+2020-03-20  Kamil Rytarowski  <n54@gmx.com>
+
+	* ppc-nbsd-nat.c (fetch_registers): New variable lwp and pass
+	it to the ptrace call.
+	* (store_registers): Likewise.
+
+2020-03-19  Luis Machado  <luis.machado@linaro.org>
+
+	* nat/aarch64-sve-linux-ptrace.c (aarch64_sve_set_vq): If vg is not
+	valid, fetch vg value from ptrace.
+
+2020-03-19  Kamil Rytarowski  <n54@gmx.com>
+	* inf-ptrace.h: Disable get_ptrace_pid on NetBSD.
+	* inf-ptrace.c: Likewise.
+	* (gdb_ptrace): Add.
+	* (inf_ptrace_target::resume): Update.
+	* (inf_ptrace_target::xfer_partial): Likewise.
+	* (inf_ptrace_peek_poke): Change argument `pid' to `ptid'.
+	* (inf_ptrace_peek_poke): Update.
+
+2020-03-19  Kamil Rytarowski  <n54@gmx.com>
+
+	* x86-bsd-nat.c (gdb_ptrace): New.
+	* (x86bsd_dr_set): Add new argument `ptid'.
+	* (x86bsd_dr_get, x86bsd_dr_set, x86bsd_dr_set_control,
+	x86bsd_dr_set_addr): Update.
+
+2020-03-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* remote.c (remote_target::process_stop_reply): Handle events for
+	all threads differently.
+
+2020-03-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* completer.c (completion_tracker::remove_completion): Define new
+	function.
+	* completer.h (completion_tracker::remove_completion): Declare new
+	function.
+	* symtab.c (completion_list_add_symbol): Remove aliasing msymbols
+	when adding a C++ function symbol.
+
+2020-03-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* completer.c (completion_tracker::completion_hash_entry): Define
+	new class.
+	(advance_to_filename_complete_word_point): Call
+	recompute_lowest_common_denominator.
+	(completion_tracker::completion_tracker): Call discard_completions
+	to setup the hash table.
+	(completion_tracker::discard_completions): Allow for being called
+	from the constructor, pass new equal function, and element deleter
+	when constructing the hash table.  Initialise new class member
+	variables.
+	(completion_tracker::maybe_add_completion): Remove use of
+	m_entries_vec, and store more information into m_entries_hash.
+	(completion_tracker::recompute_lcd_visitor): New function, most
+	content taken from...
+	(completion_tracker::recompute_lowest_common_denominator):
+	...here, this now just visits each item in the hash calling the
+	above visitor.
+	(completion_tracker::build_completion_result): Remove use of
+	m_entries_vec, call recompute_lowest_common_denominator.
+	* completer.h (completion_tracker::have_completions): Remove use
+	of m_entries_vec.
+	(completion_tracker::completion_hash_entry): Declare new class.
+	(completion_tracker::recompute_lowest_common_denominator): Change
+	function signature.
+	(completion_tracker::recompute_lcd_visitor): Declare new function.
+	(completion_tracker::m_entries_vec): Delete.
+	(completion_tracker::m_entries_hash): Initialize to NULL.
+	(completion_tracker::m_lowest_common_denominator_valid): New
+	member variable.
+	(completion_tracker::m_lowest_common_denominator_max_length): New
+	member variable.
+
+2020-03-17  Kamil Rytarowski  <n54@gmx.com>
+
+	* regformats/regdef.h: Put reg in gdb namespace.
+
+2020-03-17  Kamil Rytarowski  <n54@gmx.com>
+
+	* i386-bsd-nat.c (gdb_ptrace): New.
+	* (i386bsd_fetch_inferior_registers,
+	i386bsd_store_inferior_registers) Switch from pid_t to ptid_t.
+	* (i386bsd_fetch_inferior_registers,
+	i386bsd_store_inferior_registers) Use gdb_ptrace.
+
+2020-03-17  Kamil Rytarowski  <n54@gmx.com>
+
+	* amd64-bsd-nat.c (gdb_ptrace): New.
+	* (amd64bsd_fetch_inferior_registers,
+	amd64bsd_store_inferior_registers) Switch from pid_t to ptid_t.
+	* (amd64bsd_fetch_inferior_registers,
+	amd64bsd_store_inferior_registers) Use gdb_ptrace.
+
+2020-03-17  Kamil Rytarowski  <n54@gmx.com>
+
+	* user-regs.c (user_reg::read): Rename to...
+	(user_reg::xread): ...this.
+	* (append_user_reg): Rename argument `read' to `xread'.
+	* (user_reg_add_builtin): Likewise.
+	* (user_reg_add): Likewise.
+	* (value_of_user_reg): Likewise.
+
+2020-03-17  Kamil Rytarowski  <n54@gmx.com>
+
+	* sparc-nat.c (gdb_ptrace): New.
+	* sparc-nat.c (sparc_fetch_inferior_registers)
+	(sparc_store_inferior_registers) Remove obsolete comment.
+	* sparc-nat.c (sparc_fetch_inferior_registers)
+	(sparc_store_inferior_registers) Switch from pid_t to ptid_t.
+	* sparc-nat.c (sparc_fetch_inferior_registers)
+	(sparc_store_inferior_registers) Use gdb_ptrace.
+
+2020-03-17  Kamil Rytarowski  <n54@gmx.com>
+
+	* sh-nbsd-nat.c (fetch_registers): New variable lwp and pass
+	it to the ptrace call.
+	* sh-nbsd-nat.c (store_registers): Likewise.
+
+2020-03-17  Kamil Rytarowski  <n54@gmx.com>
+
+	* sh-nbsd-nat.c (sh_nbsd_nat_target): Inherit from
+	nbsd_nat_target instead of inf_ptrace_target.
+	* sh-nbsd-nat.c: Include "nbsd-nat.h", as we are now using
+	nbsd_nat_target.
+
+2020-03-17  Kamil Rytarowski  <n54@gmx.com>
+
+	* amd64-bsd-nat.c: Include amd64-bsd-nat.h".
+
+2020-03-17  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-nat.c: Include <sys/types.h>, <sys/ptrace.h> and
+	<sys/sysctl.h>.
+	* nbsd-nat.c (nbsd_nat_target::pid_to_exec_file): Rewrite.
+
+2020-03-17  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/23710
+	* dwarf2/read.h (struct dwarf2_per_cu_data): Add unit_type and lang
+	fields.
+	* dwarf2/read.c (process_psymtab_comp_unit): Initialize unit_type and lang
+	fields.
+	(process_imported_unit_die): Skip import of c++ CUs.
+
+2020-03-16  Tom Tromey  <tom@tromey.com>
+
+	* p-valprint.c (pascal_object_print_value): Initialize
+	base_value.
+
+2020-03-16  Anton Kolesov  <anton.kolesov@synopsys.com>
+	    Shahab Vahedi  <shahab@synopsys.com>
+
+	* Makefile.in: Add arch/arc.o
+	* configure.tgt: Likewise.
+	* arc-tdep.c (arc_tdesc_init): Use arc_read_description.
+	(_initialize_arc_tdep): Don't initialize old target descriptions.
+        (arc_read_description): New function to cache target descriptions.
+	* arc-tdep.h (arc_read_description): Add proto type.
+	* arch/arc.c: New file.
+	* arch/arc.h: Likewise.
+	* features/Makefile: Replace old target descriptions with new.
+	* features/arc-arcompact.c: Remove.
+	* features/arc-arcompact.xml: Likewise.
+	* features/arc-v2.c: Likewise
+	* features/arc-v2.xml: Likewise
+	* features/arc/aux-arcompact.xml: New file.
+	* features/arc/aux-v2.xml: Likewise.
+	* features/arc/core-arcompact.xml: Likewise.
+	* features/arc/core-v2.xml: Likewise.
+	* features/arc/aux-arcompact.c: Generate.
+	* features/arc/aux-v2.c: Likewise.
+	* features/arc/core-arcompact.c: Likewise.
+	* features/arc/core-v2.c: Likewise.
+	* target-descriptions (maint_print_c_tdesc_cmd): Support ARC features.
+
+2020-03-16  Tom Tromey  <tromey@adacore.com>
+
+	PR gdb/25663:
+	* dwarf2/read.c (dwarf2_name): Strip leading namespaces after
+	putting value into bcache.
+
+2020-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	PR gdb/21500
+	* amd64-windows-tdep.c (amd64_windows_init_abi): Rename
+	to...
+	(amd64_windows_init_abi_common): ... this.  Don't set size of
+	long type.
+	(amd64_windows_init_abi): New function.
+	(amd64_cygwin_init_abi): New function.
+	(_initialize_amd64_windows_tdep): Use amd64_cygwin_init_abi for
+	the Cygwin OS ABI.
+	* i386-windows-tdep.c (_initialize_i386_windows_tdep): Clarify
+	comment.
+
+2020-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* windows-tdep.h (is_linked_with_cygwin_dll): New declaration.
+	* windows-tdep.c (CYGWIN_DLL_NAME): New.
+	(pe_import_directory_entry): New struct type.
+	(is_linked_with_cygwin_dll): New function.
+	* amd64-windows-tdep.c (amd64_windows_osabi_sniffer): Select
+	GDB_OSABI_CYGWIN if the BFD is linked with the Cygwin DLL.
+	* i386-windows-tdep.c (i386_windows_osabi_sniffer): Likewise.
+
+2020-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* i386-windows-tdep.c: Mass-rename "cygwin" to "windows", except
+	i386_cygwin_core_osabi_sniffer.
+
+2020-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* i386-cygwin-tdep.c: Rename to...
+	* i386-windows-tdep.c: ... this.
+	* Makefile.in (ALL_TARGET_OBS): Rename i386-cygwin-tdep.c to
+	i386-windows-tdep.c.
+	* configure.tgt: Likewise.
+
+2020-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* osabi.h (enum gdb_osabi): Add GDB_OSABI_WINDOWS.
+	* osabi.c (gdb_osabi_names): Add "Windows".
+	* i386-cygwin-tdep.c (i386_cygwin_osabi_sniffer): Return
+	GDB_OSABI_WINDOWS when the binary's target is "pei-i386".
+	(i386_cygwin_core_osabi_sniffer): New function, extracted from
+	i386_cygwin_osabi_sniffer.
+	(_initialize_i386_cygwin_tdep): Register OS ABI
+	GDB_OSABI_WINDOWS for i386.
+	* amd64-windows-tdep.c (amd64_windows_osabi_sniffer): Return
+	GDB_OSABI_WINDOWS when the binary's target is "pei-x86-64".
+	(_initialize_amd64_windows_tdep): Register OS ABI GDB_OSABI_WINDOWS
+	for x86-64.
+	* configure.tgt: Use GDB_OSABI_WINDOWS as the default OS ABI
+	when the target matches '*-*-mingw*'.
+
+2020-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* defs.h (enum gdb_osabi): Move to...
+	* osabi.h (enum gdb_osabi): ... here.
+	* gdbarch.sh: Include osabi.h in gdbarch.h.
+	* gdbarch.h: Re-generate.
+
+2020-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* amd64-windows-tdep.c (amd64_windows_osabi_sniffer): New
+	function.
+	(_initialize_amd64_windows_tdep): Register osabi sniffer.
+
+2020-03-14  Tom Tromey  <tom@tromey.com>
+
+	* c-typeprint.c (cp_type_print_method_args): Print "__restrict__"
+	for C++.
+	(c_type_print_modifier): Likewise.  Add "language" parameter.
+	(c_type_print_varspec_prefix, c_type_print_base_struct_union)
+	(c_type_print_base_1): Update.
+	* type-stack.h (enum type_pieces) <tp_atomic, tp_restrict>: New
+	constants.
+	* type-stack.c (type_stack::insert): Handle tp_atomic and
+	tp_restrict.
+	(type_stack::follow_type_instance_flags): Likewise.
+	(type_stack::follow_types): Likewise.  Merge type-following code.
+	* c-exp.y (RESTRICT, ATOMIC): New tokens.
+	(space_identifier, cv_with_space_id)
+	(const_or_volatile_or_space_identifier_noopt)
+	(const_or_volatile_or_space_identifier): Remove.
+	(single_qualifier, qualifier_seq_noopt, qualifier_seq): New
+	rules.
+	(ptr_operator, typebase): Update.
+	(enum token_flag) <FLAG_C>: New constant.
+	(ident_tokens): Add "restrict", "__restrict__", "__restrict", and
+	"_Atomic".
+	(lex_one_token): Handle FLAG_C.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
+	* m68k-bsd-nat.c (fetch_registers): New variable lwp and pass
+	it to the ptrace call.
+	* m68k-bsd-nat.c (store_registers): Likewise.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
+	* m68k-bsd-nat.c (m68kbsd_supply_gregset): Change type of regs to
+	gdb_byte *.
+	* m68k-bsd-nat.c (m68kbsd_supply_fpregset): Likewise.
+	* m68k-bsd-nat.c (m68kbsd_collect_gregset): Likewise.
+	* m68k-bsd-nat.c (m68kbsd_supply_pcb): Cast &tmp to gdb_byte *.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
+	* m68k-bsd-nat.c (m68k_bsd_nat_target): Inherit from
+	nbsd_nat_target instead of inf_ptrace_target.
+	* m68k-bsd-nat.c: Include "nbsd-nat.h", as we are now using
+	nbsd_nat_target.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
+	* m68k-bsd-nat.c: Define _KERNTYPES to get the declaration of
+	register_t.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
+	* alpha-bsd-nat.c (fetch_registers): New variable lwp and pass
+	it to the ptrace call.
+	* alpha-bsd-nat.c (store_registers): Likewise.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
+	* alpha-bsd-nat.c: Remove <sys/procfs.h> and "gregset.h" from
+	includes.
+	* alpha-bsd-nat.c (gregset_t, fpregset_t): Remove.
+	* alpha-bsd-nat.c (supply_gregset, fill_gregset, supply_fpregset,
+	fill_fpregset): Likewise.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
+	* alpha-bsd-nat.c (alpha_netbsd_nat_target): Inherit from
+	nbsd_nat_target instead of inf_ptrace_target.
+	* alpha-bsd-nat.c: Include "nbsd-nat.h", as we are now using
+	nbsd_nat_target.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
+	* alpha-bsd-nat.c: Define _KERNTYPES to get the declaration of
+	register_t.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
+	* arm-nbsd-nat.c (fetch_register): New variable lwp and pass
+	it to the ptrace call.
+	* arm-nbsd-nat.c (fetch_fp_register): Likewise.
+	* arm-nbsd-nat.c (fetch_fp_regs): Likewise.
+	* arm-nbsd-nat.c (store_register): Likewise.
+	* arm-nbsd-nat.c (store_regs): Likewise.
+	* arm-nbsd-nat.c (store_fp_register): Likewise.
+	* arm-nbsd-nat.c (store_fp_regs): Likewise.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
+	* arm-nbsd-nat.c (arm_netbsd_nat_target): Inherit from
+	nbsd_nat_target instead of inf_ptrace_target.
+	* arm-nbsd-nat.c: Include "nbsd-nat.h", as we are now using
+	nbsd_nat_target.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
+	* x86-bsd-nat.c (x86bsd_dr_get): New variable lwp and pass
+	it to the ptrace call.
+	* x86-bsd-nat.c (x86bsd_dr_set): Likewise.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
+	* vax-bsd-nat.c (vaxbsd_supply_gregset): New variable lwp and pass
+	it to the ptrace call.
+	* vax-bsd-nat.c (vaxbsd_collect_gregset): Likewise.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
+	* vax-bsd-nat.c (vaxbsd_supply_gregset): Cast gregs to const
+	gdb_byte *.
+	* vax-bsd-nat.c (vaxbsd_collect_gregset): Cast gregs to void *.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
+	* vax-bsd-nat.c (vax_bsd_nat_target): Inherit from nbsd_nat_target
+	instead of inf_ptrace_target.
+	* vax-bsd-nat.c: Include "nbsd-nat.h", as we are now using
+	nbsd_nat_target.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
+	* mips-nbsd-nat.c: Define _KERNTYPES to get the declaration of
+	register_t.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
+	* ppc-nbsd-nat.c: Define _KERNTYPES to get the declaration of
+	register_t.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
+	* vax-bsd-nat.c: Define _KERNTYPES to get the declaration of
+	register_t.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* value.h (val_print): Don't declare.
+	* valprint.h (val_print_array_elements)
+	(val_print_scalar_formatted, generic_val_print): Don't declare.
+	* valprint.c (generic_val_print_array): Take a struct value.
+	(generic_val_print_ptr, generic_val_print_memberptr)
+	(generic_val_print_bool, generic_val_print_int)
+	(generic_val_print_char, generic_val_print_complex)
+	(generic_val_print): Remove.
+	(generic_value_print): Update.
+	(do_val_print): Remove unused parameters.  Don't call
+	la_val_print.
+	(val_print): Remove.
+	(common_val_print): Update.  Don't call value_check_printable.
+	(val_print_scalar_formatted, val_print_array_elements): Remove.
+	* rust-lang.c (rust_val_print): Remove.
+	(rust_language_defn): Update.
+	* p-valprint.c (pascal_val_print): Remove.
+	(pascal_value_print_inner): Update.
+	(pascal_object_print_val_fields, pascal_object_print_val):
+	Remove.
+	(pascal_object_print_static_field): Update.
+	* p-lang.h (pascal_val_print): Don't declare.
+	* p-lang.c (pascal_language_defn): Update.
+	* opencl-lang.c (opencl_language_defn): Update.
+	* objc-lang.c (objc_language_defn): Update.
+	* m2-valprint.c (m2_print_unbounded_array, m2_val_print): Remove.
+	* m2-lang.h (m2_val_print): Don't declare.
+	* m2-lang.c (m2_language_defn): Update.
+	* language.h (struct language_defn) <la_val_print>: Remove.
+	* language.c (unk_lang_value_print_inner): Rename.  Change
+	argument types.
+	(unknown_language_defn, auto_language_defn): Update.
+	* go-valprint.c (go_val_print): Remove.
+	* go-lang.h (go_val_print): Don't declare.
+	* go-lang.c (go_language_defn): Update.
+	* f-valprint.c (f_val_print): Remove.
+	* f-lang.h (f_value_print): Don't declare.
+	* f-lang.c (f_language_defn): Update.
+	* d-valprint.c (d_val_print): Remove.
+	* d-lang.h (d_value_print): Don't declare.
+	* d-lang.c (d_language_defn): Update.
+	* cp-valprint.c (cp_print_value_fields)
+	(cp_print_value_fields_rtti, cp_print_value): Remove.
+	(cp_print_static_field): Update.
+	* c-valprint.c (c_val_print_array, c_val_print_ptr)
+	(c_val_print_struct, c_val_print_union, c_val_print_int)
+	(c_val_print_memberptr, c_val_print): Remove.
+	* c-lang.h (c_val_print_array, cp_print_value_fields)
+	(cp_print_value_fields_rtti): Don't declare.
+	* c-lang.c (c_language_defn, cplus_language_defn)
+	(asm_language_defn, minimal_language_defn): Update.
+	* ada-valprint.c (ada_val_print_ptr, ada_val_print_num): Remove.
+	(ada_val_print_enum): Take a struct value.
+	(ada_val_print_flt, ada_val_print_array, ada_val_print_1)
+	(ada_val_print): Remove.
+	(ada_value_print_1): Update.
+	(printable_val_type): Remove.
+	* ada-lang.h (ada_val_print): Don't declare.
+	* ada-lang.c (ada_language_defn): Update.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (do_val_print): Update.
+	* python/python-internal.h (gdbpy_apply_val_pretty_printer): Take
+	a struct value.
+	(value_to_value_object_no_release): Declare.
+	* python/py-value.c (value_to_value_object_no_release): New
+	function.
+	* python/py-prettyprint.c (gdbpy_apply_val_pretty_printer): Take a
+	struct value.
+	* guile/scm-value.c (vlscm_scm_from_value_no_release): New
+	function.
+	* guile/scm-pretty-print.c (gdbscm_apply_val_pretty_printer): Take
+	a struct value.
+	* guile/guile-internal.h (vlscm_scm_from_value_no_release):
+	Declare.
+	(gdbscm_apply_val_pretty_printer): Take a struct value.
+	* extension.h (apply_ext_lang_val_pretty_printer): Take a struct
+	value.
+	* extension.c (apply_ext_lang_val_pretty_printer): Take a struct
+	value.
+	* extension-priv.h (struct extension_language_ops)
+	<apply_val_pretty_printer>: Take a struct value.
+	* cp-valprint.c (cp_print_value): Create a struct value.
+	(cp_print_value): Update.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* ada-valprint.c (print_field_values): Call common_val_print.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* ada-valprint.c (val_print_packed_array_elements): Remove
+	bitoffset and val parameters.  Call common_val_print.
+	(ada_val_print_string): Remove offset, address, and original_value
+	parameters.
+	(ada_val_print_array): Update.
+	(ada_value_print_array): New function.
+	(ada_value_print_1): Call it.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* ada-valprint.c (ada_value_print): Use common_val_print.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* ada-valprint.c (ada_val_print_ref): Use common_val_print.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* ada-valprint.c (ada_value_print_num): New function.
+	(ada_value_print_1): Use it.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* ada-valprint.c (ada_value_print_1) <TYPE_CODE_FLT>: Rewrite.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* ada-valprint.c (ada_value_print_ptr): New function.
+	(ada_value_print_1): Use it.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* ada-valprint.c (ada_val_print_gnat_array): Take a struct value;
+	call common_val_print.
+	(ada_val_print_1): Update.
+	(ada_value_print_1): New function.
+	(ada_value_print_inner): Rewrite.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* cp-valprint.c (cp_print_value_fields): Update.
+	(cp_print_value): New function.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* m2-valprint.c (m2_value_print_inner): Use
+	cp_print_value_fields.
+	* cp-valprint.c	(cp_print_value_fields): New function.
+	* c-valprint.c (c_value_print_struct): New function.
+	(c_value_print_inner): Use c_value_print_struct.
+	* c-lang.h (cp_print_value_fields): Declare.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* c-valprint.c (c_value_print_array): New function.
+	(c_value_print_inner): Use it.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* c-valprint.c (c_value_print_memberptr): New function.
+	(c_value_print_inner): Use it.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* c-valprint.c (c_value_print_int): New function.
+	(c_value_print_inner): Use it.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* c-valprint.c (c_value_print_ptr): New function.
+	(c_value_print_inner): Use it.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* c-valprint.c (c_value_print_inner): Rewrite.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (generic_value_print_complex): New function.
+	(generic_value_print): Use it.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (generic_val_print_float): Don't call
+	val_print_scalar_formatted.
+	(generic_val_print, generic_value_print): Update.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (generic_value_print_char): New function
+	(generic_value_print): Use it.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (generic_value_print_int): New function.
+	(generic_value_print): Use it.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (generic_value_print_bool): New function.
+	(generic_value_print): Use it.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (generic_val_print_func): Simplify.
+	(generic_val_print, generic_value_print): Update.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (generic_val_print_flags): Remove.
+	(generic_val_print, generic_value_print): Update.
+	(val_print_type_code_flags): Add original_value parameter.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (generic_val_print): Update.
+	(generic_value_print): Update.
+	* valprint.c (generic_val_print_enum): Don't call
+	val_print_scalar_formatted.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (generic_value_print): Call generic_value_print_ptr.
+	* valprint.c (generic_value_print_ptr): New function.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (generic_value_print): Rewrite.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* p-valprint.c (pascal_object_print_value_fields)
+	(pascal_object_print_value): New functions.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* p-valprint.c (pascal_value_print_inner): Rewrite.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* f-valprint.c (f_value_print_innner): Rewrite.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* m2-valprint.c (m2_print_unbounded_array): New overload.
+	(m2_print_unbounded_array): Update.
+	(m2_print_array_contents): Take a struct value.
+	(m2_value_print_inner): Rewrite.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* d-valprint.c (dynamic_array_type): Call d_value_print_inner.
+	(d_value_print_inner): New function.
+	* d-lang.h (d_value_print_inner): Declare.
+	* d-lang.c (d_language_defn): Use d_value_print_inner.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* go-valprint.c (go_value_print_inner): New function.
+	* go-lang.h (go_value_print_inner): Declare.
+	* go-lang.c (go_language_defn): Use go_value_print_inner.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* rust-lang.c (val_print_struct, rust_print_enum): Use the value
+	API.
+	(rust_val_print): Rewrite.
+	(rust_value_print_inner): New function, from rust_val_print.
+	(rust_language_defn): Use rust_value_print_inner.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* ada-valprint.c (ada_value_print_inner): New function.
+	* ada-lang.h (ada_value_print_inner): Declare.
+	* ada-lang.c (ada_language_defn): Use ada_value_print_inner.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* f-valprint.c (f_value_print_innner): New function.
+	* f-lang.h (f_value_print_innner): Declare.
+	* f-lang.c (f_language_defn): Use f_value_print_innner.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* p-valprint.c (pascal_value_print_inner): New function.
+	* p-lang.h (pascal_value_print_inner): Declare.
+	* p-lang.c (pascal_language_defn): Use pascal_value_print_inner.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* m2-valprint.c (m2_value_print_inner): New function.
+	* m2-lang.h (m2_value_print_inner): Declare.
+	* m2-lang.c (m2_language_defn): Use m2_value_print_inner.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* opencl-lang.c (opencl_language_defn): Use c_value_print_inner.
+	* objc-lang.c (objc_language_defn): Use c_value_print_inner.
+	* c-valprint.c (c_value_print_inner): New function.
+	* c-lang.h (c_value_print_inner): Declare.
+	* c-lang.c (c_language_defn, cplus_language_defn)
+	(asm_language_defn, minimal_language_defn): Use
+	c_value_print_inner.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* p-valprint.c (pascal_object_print_value_fields): Now static.
+	* p-lang.h (pascal_object_print_value_fields): Don't declare.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* c-valprint.c (c_val_print_array): Simplify.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (value_print_array_elements): New function.
+	* valprint.h (value_print_array_elements): Declare.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* printcmd.c (print_formatted): Use value_print_scalar_formatted.
+	* mips-tdep.c (mips_print_register): Use
+	value_print_scalar_formatted.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* valprint.h (value_print_scalar_formatted): Declare.
+	* valprint.c (value_print_scalar_formatted): New function.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* valprint.h (generic_value_print): Declare.
+	* valprint.c (generic_value_print): New function.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (do_val_print): Call la_value_print_inner, if
+	available.
+	* rust-lang.c (rust_language_defn): Update.
+	* p-lang.c (pascal_language_defn): Update.
+	* opencl-lang.c (opencl_language_defn): Update.
+	* objc-lang.c (objc_language_defn): Update.
+	* m2-lang.c (m2_language_defn): Update.
+	* language.h (struct language_defn) <la_value_print_inner>: New
+	member.
+	* language.c (unknown_language_defn, auto_language_defn): Update.
+	* go-lang.c (go_language_defn): Update.
+	* f-lang.c (f_language_defn): Update.
+	* d-lang.c (d_language_defn): Update.
+	* c-lang.c (c_language_defn, cplus_language_defn)
+	(asm_language_defn, minimal_language_defn): Update.
+	* ada-lang.c (ada_language_defn): Update.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* c-valprint.c (c_value_print): Use common_val_print.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* cp-valprint.c (cp_print_static_field): Use common_val_print.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* f-valprint.c (f77_print_array_1, f_val_print): Use
+	common_val_print.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* riscv-tdep.c (riscv_print_one_register_info): Use
+	common_val_print.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* mi/mi-main.c (output_register): Use common_val_print.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* infcmd.c (default_print_one_register_info): Use
+	common_val_print.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* valprint.h (common_val_print_checked): Declare.
+	* valprint.c (common_val_print_checked): New function.
+	* stack.c (print_frame_arg): Use common_val_print_checked.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (do_val_print): New function, from val_print.
+	(val_print): Use do_val_print.
+	(common_val_print): Use do_val_print.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (value_print): Use scoped_value_mark.
+
+2020-03-13  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25646
+	* psymtab.c (partial_symtab::partial_symtab): Don't set
+	globals_offset and statics_offset.  Push element onto
+	current_global_psymbols and current_static_psymbols stacks.
+	(concat): New function.
+	(end_psymtab_common): Set globals_offset and statics_offset.  Pop
+	element from current_global_psymbols and current_static_psymbols
+	stacks.  Concat popped elements to global_psymbols and
+	static_symbols.
+	(add_psymbol_to_list): Use current_global_psymbols and
+	current_static_psymbols stacks.
+	* psymtab.h (class psymtab_storage): Add current_global_psymbols and
+	current_static_psymbols fields.
+
+2020-03-12  Christian Biesinger  <cbiesinger@google.com>
+
+	* corelow.c (sniff_core_bfd): Remove.
+	(class core_target) <m_core_vec>: Remove.
+	(core_target::core_target): Update.
+	(core_file_fns): Remove.
+	(deprecated_add_core_fns): Remove.
+	(default_core_sniffer): Remove.
+	(sniff_core_bfd): Remove.
+	(default_check_format): Remove.
+	(gdb_check_format): Remove.
+	(core_target_open): Update.
+	(core_target::get_core_register_section): Update.
+	(get_core_registers_cb): Update.
+	(core_target::fetch_registers): Update.
+	* gdbcore.h (struct core_fns): Remove.
+	(deprecated_add_core_fns): Remove.
+	(default_core_sniffer): Remove.
+	(default_check_format): Remove.
+
+2020-03-12  Tom Tromey  <tom@tromey.com>
+
+	* arm-tdep.c (struct arm_mapping_symbol) <value>: Now a
+	CORE_ADDR.
+	(struct arm_exidx_entry) <addr>: Now a CORE_ADDR.
+
+2020-03-12  Tom Tromey  <tom@tromey.com>
+
+	* remote.c (remote_target::download_tracepoint)
+	(remote_target::enable_tracepoint)
+	(remote_target::disable_tracepoint): Use phex, not sprintf_vma.
+	* breakpoint.c (print_recreate_masked_watchpoint): Use phex, not
+	sprintf_vma.
+
+2020-03-12  Tom Tromey  <tom@tromey.com>
+
+	* symfile-mem.c: Update CORE_ADDR size assert.
+
+2020-03-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* selftest.m4: Move to gdbsupport/.
+	* acinclude.m4: Update path to selftest.m4.
+
+2020-03-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Rename to...
+	(SELFTESTS_SRCS): ... this.  Add disasm-selftests.c,
+	gdbarch-selfselftests.c and selftest-arch.c.
+	(SUBDIR_UNITTESTS_OBS): Rename to...
+	(SELFTESTS_OBS): ... this.
+	(COMMON_SFILES): Remove disasm-selftests.c and
+	gdbarch-selftests.c.
+	* configure.ac: Don't add selftest-arch.{c,o} to
+	CONFIG_{SRCS,OBS}.
+	* disasm-selftests.c, gdbarch-selftests.c: Remove GDB_SELF_TEST
+	preprocessor conditions.
+
+2020-03-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* configure.ac: Don't source bfd/development.sh.
+	* selftest.m4: Modify comment.
+	* configure: Re-generate.
+
+2020-03-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* selftest.m4 (GDB_AC_SELFTEST): Error out if $development is
+	not "true" or "false".
+	* configure: Re-generate.
+
+2020-03-12  Christian Biesinger  <cbiesinger@google.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Add new arm-nbsd-tdep.h file.
+	* arm-nbsd-nat.c (arm_supply_gregset): Moved to arm-nbsd-tdep and
+	renamed to arm_nbsd_supply_gregset.
+	(fetch_register): Update to call arm_nbsd_supply_gregset.
+	(fetch_regs): Remove in favor of fetch_register with a -1 regno.
+	(arm_netbsd_nat_target::fetch_registers): Update.
+	(fetch_elfcore_registers): Removed.
+	(_initialize_arm_netbsd_nat): Removed call to deprecated_add_core_fns.
+	* arm-nbsd-tdep.c (struct arm_nbsd_reg): New struct.
+	(arm_nbsd_supply_gregset): Moved from arm-nbsd-nat.c and updated to
+	not require NetBSD system headers.
+	(arm_nbsd_regset): New struct.
+	(arm_nbsd_iterate_over_regset_sections): New function.
+	(arm_netbsd_init_abi_common): Updated to call
+	set_gdbarch_iterate_over_regset_sections.
+	* arm-nbsd-tdep.h: New file.
+
+2020-03-11  Kevin Buettner  <kevinb@redhat.com>
+
+	* symtab.c (find_pc_sect_line): Add check which prevents infinite
+	recursion.
+	
+2020-03-11  Simon Marchi  <simon.marchi@efficios.com>
+
+	* configure: Re-generate.
+
+2020-03-11  Tom Tromey  <tromey@adacore.com>
+
+	* ada-typeprint.c (print_choices): Fix comment.
+
+2020-03-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* buildsyms.c (buildsym_compunit::record_line): Avoid accessing
+	previous item in the list, when the list has no items.
+
+2020-03-11  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2/loc.c (dwarf2_evaluate_property): Handle NULL frame in
+	PROP_LOCLIST handling code.
+
+2020-03-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* buildsym-legacy.c (record_line): Pass extra parameter to
+	record_line.
+	* buildsym.c (buildsym_compunit::record_line): Take an extra
+	parameter, reduce duplication in the line table, and record the
+	is_stmt flag in the line table.
+	* buildsym.h (buildsym_compunit::record_line): Add extra
+	parameter.
+	* disasm.c (do_mixed_source_and_assembly_deprecated): Ignore
+	non-statement lines.
+	* dwarf2/read.c (dwarf_record_line_1): Add extra parameter, pass
+	this to the symtab builder.
+	(dwarf_finish_line): Pass extra parameter to dwarf_record_line_1.
+	(lnp_state_machine::record_line): Pass a suitable is_stmt flag
+	through to dwarf_record_line_1.
+	* infrun.c (process_event_stop_test): When stepping, don't stop at
+	a non-statement instruction, and only refresh the step info when
+	we land in the middle of a line's range.  Also add an extra
+	comment.
+	* jit.c (jit_symtab_line_mapping_add_impl): Initialise is_stmt
+	field.
+	* record-btrace.c (btrace_find_line_range): Only record lines
+	marked as is-statement.
+	* stack.c (frame_show_address): Show the frame address if we are
+	in a non-statement sal.
+	* symmisc.c (dump_symtab_1): Print the is_stmt flag.
+	(maintenance_print_one_line_table): Print a header for the is_stmt
+	column, and include is_stmt information in the output.
+	* symtab.c (find_pc_sect_line): Find lines marked as statements in
+	preference to non-statements.
+	(find_pcs_for_symtab_line): Prefer is-statement entries.
+	(find_line_common): Likewise.
+	* symtab.h (struct linetable_entry): Add is_stmt field.
+	(struct symtab_and_line): Likewise.
+	* xcoffread.c (arrange_linetable): Initialise is_stmt field when
+	arranging the line table.
+
+2020-03-07  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2/read.c (read_typedef): Treat anonymous typedef as forwarder
+	DIE.
+
+2020-03-07  Tom Tromey  <tom@tromey.com>
+
+	* valops.c (value_literal_complex): Remove obsolete comment.
+	* gdbtypes.h (enum type_code) <TYPE_CODE_FLT>: Remove obsolete
+	comment.
+
+2020-03-06  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* infrun.h: Forward-declare thread_info.
+	(set_step_info): Add thread_info parameter, add doc.
+	* infrun.c (set_step_info): Add thread_info parameter, move doc
+	to header.
+	* infrun.c (process_event_stop_test): Pass thread to
+	set_step_info call.
+	* infcmd.c (set_step_frame): Add thread_info pointer, pass it to
+	set_step_info.
+	(prepare_one_step): Add thread_info parameter, pass it to
+	set_step_frame and prepare_one_step (recursive) call.
+	(step_1): Pass thread to prepare_one_step call.
+	(step_command_fsm::should_stop): Pass thread to
+	prepare_one_step.
+	(until_next_fsm): Pass thread to set_step_frame call.
+	(finish_command): Pass thread to set_step_info call.
+
+2020-03-06  Hannes Domani  <ssbssa@yahoo.de>
+
+	* windows-tdep.c (windows_solib_create_inferior_hook):
+	Check if inferior is running.
+
+2020-03-06  Tom de Vries  <tdevries@suse.de>
+
+	* NEWS: Fix "the the".
+	* ctfread.c: Same.
+
+2020-03-06  Tom de Vries  <tdevries@suse.de>
+
+	* psymtab.c (psymtab_to_symtab): Don't print "done.".
+
+2020-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* .dir-locals.el: Add a comment referencing the other copies of
+	this file.
+
+2020-03-05  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-tdep.c (fbsd_make_corefile_notes): Use std::string for
+	psargs.
+
+2020-03-05  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* .gitattributes: New file.
+
+2020-03-04  Tom Tromey  <tom@tromey.com>
+
+	* symmisc.c (print_symbol_bcache_statistics)
+	(print_objfile_statistics): Update.
+	* symfile.c (allocate_symtab): Use intern.
+	* psymtab.c (partial_symtab::partial_symtab): Use intern.
+	* objfiles.h (struct objfile_per_bfd_storage) <filename_cache,
+	macro_cache>: Remove.
+	<string_cache>: New member.
+	(struct objfile) <intern>: New methods.
+	* elfread.c (elf_symtab_read): Use intern.
+	* dwarf2/read.c (fixup_go_packaging): Intern package name.
+	(dwarf2_compute_name, dwarf2_physname)
+	(create_dwo_unit_in_dwp_v1, create_dwo_unit_in_dwp_v2): Intern
+	names.
+	(guess_partial_die_structure_name): Update.
+	(partial_die_info::fixup): Intern name.
+	(dwarf2_canonicalize_name): Change parameter to objfile.  Intern
+	name.
+	(dwarf2_name): Intern name.  Update.
+	* buildsym.c (buildsym_compunit::get_macro_table): Use
+	string_cache.
+
+2020-03-04  Tom Tromey  <tom@tromey.com>
+
+	* jit.c (bfd_open_from_target_memory): Make "target" const.
+	* corefile.c (gnutarget): Now const.
+	* gdbcore.h (gnutarget): Now const.
+
+2020-03-04  Hannes Domani  <ssbssa@yahoo.de>
+
+	* NEWS: Mention support for WOW64 processes.
+	* amd64-windows-nat.c (amd64_mappings): Rename and remove static.
+	(amd64_windows_segment_register_p): Remove static.
+	(_initialize_amd64_windows_nat): Update.
+	* configure.nat <windows> (NATDEPFILES): Add i386-windows-nat.o.
+	* i386-windows-nat.c (context_offset): Update.
+	(i386_mappings): Rename and remove static.
+	(i386_windows_segment_register_p): Remove static.
+	(_initialize_i386_windows_nat): Update.
+	* windows-nat.c (STATUS_WX86_BREAKPOINT): New macro.
+	(STATUS_WX86_SINGLE_STEP): New macro.
+	(EnumProcessModulesEx): New macro.
+	(Wow64SuspendThread): New macro.
+	(Wow64GetThreadContext): New macro.
+	(Wow64SetThreadContext): New macro.
+	(Wow64GetThreadSelectorEntry): New macro.
+	(windows_set_context_register_offsets): Add static.
+	(windows_set_segment_register_p): Likewise.
+	(windows_add_thread): Adapt for WOW64 processes.
+	(windows_fetch_one_register): Likewise.
+	(windows_nat_target::fetch_registers): Likewise.
+	(windows_store_one_register): Likewise.
+	(display_selector): Likewise.
+	(display_selectors): Likewise.
+	(handle_exception): Likewise.
+	(windows_continue): Likewise.
+	(windows_nat_target::resume): Likewise.
+	(windows_add_all_dlls): Likewise.
+	(do_initial_windows_stuff): Likewise.
+	(windows_nat_target::attach): Likewise.
+	(windows_get_exec_module_filename): Likewise.
+	(windows_nat_target::create_inferior): Likewise.
+	(windows_xfer_siginfo): Likewise.
+	(_initialize_loadable): Initialize Wow64SuspendThread,
+	Wow64GetThreadContext, Wow64SetThreadContext,
+	Wow64GetThreadSelectorEntry and EnumProcessModulesEx.
+	* windows-nat.h (windows_set_context_register_offsets):
+	Remove declaration.
+	(windows_set_segment_register_p): Likewise.
+	(i386_windows_segment_register_p): Add declaration.
+	(amd64_windows_segment_register_p): Likewise.
+
+2020-03-04  Luis Machado  <luis.machado@linaro.org>
+
+	Revert aa66aac47b4dd38f9524ddb5546c08cc09930d37 due to regressions
+	in "info registers" for AArch64/ARM.
+
+	The change caused "info registers" to not print GPR's.
+
+	gdb/ChangeLog:
+
+	2020-02-01  Shahab Vahedi  <shahab@synopsys.com>
+
+	* target-descriptions.c (tdesc_register_in_reggroup_p): Return 0
+	when reg->group is empty and reggroup is not.
+
+2020-03-03  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/frame.c (struct dwarf2_frame_cache)
+	<checked_tailcall_bottom, entry_cfa_sp_offset,
+	entry_cfa_sp_offset_p>: Remove members.
+	(dwarf2_frame_cache): Call dwarf2_tailcall_sniffer_first.
+	(dwarf2_frame_prev_register): Don't call
+	dwarf2_tailcall_sniffer_first.
+	(dwarf2_append_unwinders): Don't append tailcall unwinder.
+	* frame-unwind.c (add_unwinder): New fuction.
+	(frame_unwind_init): Use it.  Add tailcall unwinder.
+
+2020-03-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Alok Kumar Sharma  <AlokKumar.Sharma@amd.com>
+
+	* f-valprint.c (f_val_print): Handle TYPE_CODE_BOOL, any non-zero
+	value should be printed as true.
+
+2020-03-03  Hannes Domani  <ssbssa@yahoo.de>
+
+	* windows-tdep.c (windows_solib_create_inferior_hook): New function.
+	(windows_init_abi): Set and use windows_so_ops.
+
+2020-03-03  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* printcmd.c (print_c_string): Check also for TYPE_CODE_PTR
+	when verifying if dealing with a convenience variable.
+
+2020-03-03  Luis Machado  <luis.machado@linaro.org>
+
+	* auxv.c (default_print_auxv_entry): Add new AUXV entries.
+
+2020-03-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* infrun.c (gdbarch_supports_displaced_stepping): New.
+	(use_displaced_stepping): Break up conditions in smaller pieces.
+	Use gdbarch_supports_displaced_stepping.
+	(displaced_step_prepare_throw): Use
+	gdbarch_supports_displaced_stepping.
+
+2020-03-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* NEWS: Mention new behaviour of the history filename.
+	* top.c (write_history_p): Add comment.
+	(show_write_history_p): Add header comment, give a different
+	message when history writing is on, but the history filename is
+	empty.
+	(history_filename): Add comment.
+	(history_filename_empty): New function.
+	(show_history_filename): Add header comment, give a different
+	message when the filename is empty.
+	(init_history): Compare history_filename against nullptr, and only
+	read history if the filename is not empty.
+	(set_history_filename): Add header comment, and only make
+	non-empty filenames absolute.
+	(init_main): Make the filename argument to 'set history filename'
+	optional.
+
+2020-03-02  Christian Biesinger  <cbiesinger@google.com>
+
+	* arm-nbsd-nat.c (arm_supply_fparegset): Rename to...
+	(arm_supply_vfpregset): ...this, and update to use VFP registers.
+	(fetch_fp_register): Update.
+	(fetch_fp_regs): Update.
+	(store_fp_register): Update.
+	(store_fp_regs): Update.
+	(arm_netbsd_nat_target::read_description): New function.
+	(fetch_elfcore_registers): Update.
+
+2020-03-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* remote.c (remote_target::remote_parse_stop_reply): Don't use the
+	general_thread if the stop reply is missing a thread-id.
+	(remote_target::process_stop_reply): Use the first non-exited
+	thread if the target didn't pass a thread-id.
+	* infrun.c (do_target_wait): Move call to
+	switch_to_inferior_no_thread to ....
+	(do_target_wait_1): ... here.
+
+2020-02-29  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* debuginfod-support.c: Include defs.h first.
+
+2020-02-28  Tom de Vries  <tdevries@suse.de>
+
+	* symfile.c (set_initial_language): Use default language for lookup.
+
+2020-02-28  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (cutu_reader::init_tu_and_read_dwo_dies): Remove
+	reader variable, pass `this` to read_cutu_die_from_dwo.
+
+2020-02-27  Aaron Merey  <amerey@redhat.com>
+
+	* source.c (open_source_file): Check for nullptr when computing
+	srcpath.
+
+2020-02-27  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/read.c (struct field_info) <nfields>: Now a method, not a
+	member.
+	(dwarf2_add_field): Don't update nfields.
+	(dwarf2_attach_fields_to_type, process_structure_scope): Update.
+
+2020-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdbtypes.c (create_array_type_with_stride): Use std::abs not
+	abs.
+
+2020-02-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (struct dwarf2_include_psymtab): New.
+	(dwarf2_create_include_psymtab): Use dwarf2_include_psymtab.
+	(dwarf2_psymtab::expand_psymtab, dwarf2_psymtab::readin_p)
+	(dwarf2_psymtab::get_compunit_symtab): Remove null checks for
+	per_cu_data.
+
+2020-02-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/index-write.c (psym_index_map): Change type.
+	(add_address_entry_worker, write_one_signatured_type)
+	(recursively_count_psymbols, recursively_write_psymbols)
+	(class debug_names, psyms_seen_size, write_gdbindex)
+	(write_debug_names): Use partial_symtab, not dwarf2_psymtab.
+
+2020-02-26  Aaron Merey  <amerey@redhat.com>
+
+	* Makefile.in: Handle optional debuginfod support.
+	* NEWS: Update.
+	* README: Add --with-debuginfod summary.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* configure.ac: Handle optional debuginfod support.
+	* debuginfod-support.c: debuginfod helper functions.
+	* debuginfod-support.h: Ditto.
+	* doc/gdb.texinfo: Add --with-debuginfod to configure options
+	summary.
+	* dwarf2/read.c (dwarf2_get_dwz_file): Query debuginfod servers
+	when a dwz file cannot be found.
+	* elfread.c (elf_symfile_read): Query debuginfod servers when a
+	debuginfo file cannot be found.
+	* source.c (open_source_file): Query debuginfod servers when a
+	source file cannot be found.
+	* top.c (print_gdb_configuration): Include
+	--{with,without}-debuginfod in the output.
+
+2020-02-26  Jérémie Galarneau  <jeremie.galarneau@efficios.com>
+
+	* thread.c (thr_try_catch_cmd): Print thread name.
+
+2020-02-26  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/loc.h (dwarf2_fetch_die_loc_sect_off,
+	dwarf2_fetch_die_loc_cu_off, dwarf2_fetch_constant_bytes,
+	dwarf2_fetch_die_type_sect_off): Move to...
+	* dwarf2/read.h (dwarf2_fetch_die_loc_sect_off,
+	dwarf2_fetch_die_loc_cu_off, dwarf2_fetch_constant_bytes,
+	dwarf2_fetch_die_type_sect_off): ... here.
+	* dwarf2/read.c (dwarf2_fetch_die_loc_sect_off,
+	dwarf2_fetch_die_loc_cu_off, dwarf2_fetch_constant_bytes,
+	dwarf2_fetch_die_type_sect_off): Move doc to header file.
+
+2020-02-26  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/25603
+	* symfile.c (set_initial_language): Exit-early if
+	language_mode == language_mode_manual.
+
+2020-02-25  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/loc.h (dwarf2_read_addr_index): Move...
+	* dwarf2/read.h (dwarf2_read_addr_index): ... here.
+	* dwarf2/read.c (dwarf2_read_addr_index): Move doc to header.
+
+2020-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdbtypes.c (create_array_type_with_stride): Handle negative
+	array strides.
+	* valarith.c (value_subscripted_rvalue): Likewise.
+
+2020-02-25  Luis Machado  <luis.machado@linaro.org>
+
+	* aarch64-tdep.c (aarch64_vnv_type): Fix comment typo.
+
+2020-02-25  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* loc.h (dwarf2_get_die_type): Move to...
+	* read.h (dwarf2_get_die_type): ... here.
+	* read.c (dwarf2_get_die_type): Move doc to header.
+
+2020-02-25  Joel Brobecker  <brobecker@adacore.com>
+
+	* copypright.py (EXCLUDE_LIST): Add 'gnulib/config.in' and
+	'gnulib/Makefile.in' to the list.
+
+2020-02-24  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.h (struct type_unit_unshareable) <num_symtabs>:
+	Remove.
+	* dwarf2/read.c (dwarf2_cu::setup_type_unit_groups): Use
+	XOBNEWVEC.
+
 2020-02-24  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/read.h (struct dwarf2_per_cu_data) <type_unit_group_p>:

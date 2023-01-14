@@ -2230,7 +2230,7 @@ bfd_sym_scan (bfd *abfd, bfd_sym_version version, bfd_sym_data_struct *mdata)
   return 0;
 }
 
-const bfd_target *
+bfd_cleanup
 bfd_sym_object_p (bfd *abfd)
 {
   bfd_sym_version version = -1;
@@ -2247,7 +2247,7 @@ bfd_sym_object_p (bfd *abfd)
   if (bfd_sym_scan (abfd, version, mdata) != 0)
     goto wrong;
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 
  wrong:
   bfd_set_error (bfd_error_wrong_format);

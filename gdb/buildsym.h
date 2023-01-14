@@ -187,7 +187,8 @@ struct buildsym_compunit
 
   const char *pop_subfile ();
 
-  void record_line (struct subfile *subfile, int line, CORE_ADDR pc);
+  void record_line (struct subfile *subfile, int line, CORE_ADDR pc,
+		    bool is_stmt);
 
   struct compunit_symtab *get_compunit_symtab ()
   {

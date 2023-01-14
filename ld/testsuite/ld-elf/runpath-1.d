@@ -2,6 +2,7 @@
 #readelf: -d -W
 #ld: -shared -rpath . --enable-new-dtags
 #target: *-*-linux* *-*-gnu* arm*-*-uclinuxfdpiceabi
+#xfail: h8300-*-*
 
 #failif
 #...

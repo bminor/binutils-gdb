@@ -509,7 +509,7 @@ static int i386_intel_simplify (expressionS *e)
 
       /* FALLTHROUGH */
     default:
-fallthrough:
+    fallthrough:
       if (e->X_add_symbol
 	  && !i386_intel_simplify_symbol (e->X_add_symbol))
 	return 0;

@@ -36,10 +36,11 @@ extern void f_print_typedef (struct type *type, struct symbol *new_symbol,
 extern void f_print_type (struct type *, const char *, struct ui_file *, int,
 			  int, const struct type_print_options *);
 
-extern void f_val_print (struct type *, int, CORE_ADDR,
-			 struct ui_file *, int,
-			 struct value *,
-			 const struct value_print_options *);
+/* Implement la_value_print_inner for Fortran.  */
+
+extern void f_value_print_innner (struct value *val, struct ui_file *stream,
+				  int recurse,
+				  const struct value_print_options *options);
 
 /* Language-specific data structures */
 

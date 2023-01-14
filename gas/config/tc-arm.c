@@ -506,8 +506,6 @@ enum pred_instruction_type
    MVE_OUTSIDE_PRED_INSN , /* Instruction to indicate a MVE instruction without
 			      a predication code.  */
    MVE_UNPREDICABLE_INSN,  /* MVE instruction that is non-predicable.  */
-   NEUTRAL_IT_NO_VPT_INSN, /* Instruction that can be either inside or outside
-			      an IT block, but must not be in a VPT block.  */
 };
 
 /* The maximum number of operands we need.  */
@@ -730,7 +728,7 @@ const char * const reg_expected_msgs[] =
   [REG_TYPE_MMXWCG] = N_("iWMMXt scalar register expected"),
   [REG_TYPE_XSCALE] = N_("XScale accumulator register expected"),
   [REG_TYPE_MQ]	    = N_("MVE vector register expected"),
-  [REG_TYPE_RNB]    = N_("")
+  [REG_TYPE_RNB]    = ""
 };
 
 /* Some well known registers that we refer to directly elsewhere.  */
@@ -4648,7 +4646,7 @@ s_arm_unwind_save_mmxwr (void)
     }
 
   return;
-error:
+ error:
   ignore_rest_of_line ();
 }
 
@@ -4716,7 +4714,7 @@ s_arm_unwind_save_mmxwcg (void)
   op = 0xc700 | mask;
   add_unwind_opcode (op, 2);
   return;
-error:
+ error:
   ignore_rest_of_line ();
 }
 
@@ -5091,7 +5089,7 @@ set_fp16_format (int dummy ATTRIBUTE_UNUSED)
 	as_warn (_("float16 format cannot be set more than once, ignoring."));
     }
 
-cleanup:
+ cleanup:
   *input_line_pointer = saved_char;
   ignore_rest_of_line ();
 }
@@ -6368,7 +6366,7 @@ parse_psr (char **str, bfd_boolean lhs)
     goto unsupported_psr;
 
   p += 4;
-check_suffix:
+ check_suffix:
   if (*p == '_')
     {
       /* A suffix follows.  */
@@ -7074,6 +7072,8 @@ enum operand_parse_code
   OP_RNDMQ,     /* Neon double precision (0..31) or MVE vector register.  */
   OP_RNDMQR,    /* Neon double precision (0..31), MVE vector or ARM register.
 		 */
+  OP_RNSDMQR,    /* Neon single or double precision, MVE vector or ARM register.
+		 */
   OP_RNQ,	/* Neon quad precision register */
   OP_RNQMQ,	/* Neon quad or MVE vector register.  */
   OP_RVSD,	/* VFP single or double precision register */
@@ -7226,6 +7226,8 @@ enum operand_parse_code
   OP_oRNDQ,      /* Optional Neon double or quad precision register */
   OP_oRNSDQ,	 /* Optional single, double or quad precision vector register */
   OP_oRNSDQMQ,	 /* Optional single, double or quad register or MVE vector
+		    register.  */
+  OP_oRNSDMQ,	 /* Optional single, double register or MVE vector
 		    register.  */
   OP_oSHll,	 /* LSL immediate */
   OP_oSHar,	 /* ASR immediate */
@@ -7423,6 +7425,10 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_RVS:   po_reg_or_fail (REG_TYPE_VFS);	  break;
 	case OP_RVD:   po_reg_or_fail (REG_TYPE_VFD);	  break;
 	case OP_oRND:
+	case OP_RNSDMQR:
+	  po_reg_or_goto (REG_TYPE_VFS, try_rndmqr);
+	  break;
+	try_rndmqr:
 	case OP_RNDMQR:
 	  po_reg_or_goto (REG_TYPE_RN, try_rndmq);
 	  break;
@@ -7488,6 +7494,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_RVSD_COND:
 	  po_reg_or_goto (REG_TYPE_VFSD, try_cond);
 	  break;
+	case OP_oRNSDMQ:
 	case OP_RNSDMQ:
 	  po_reg_or_goto (REG_TYPE_NSD, try_mq2);
 	  break;
@@ -18307,7 +18314,7 @@ do_mve_vmull (void)
 
   return;
 
-neon_vmul:
+ neon_vmul:
   inst.instruction = N_MNEM_vmul;
   inst.cond = 0xb;
   if (thumb_mode)
@@ -19601,7 +19608,7 @@ neon_mixed_length (struct neon_type_el et, unsigned size)
 static void
 do_neon_dyadic_long (void)
 {
-  enum neon_shape rs = neon_select_shape (NS_QDD, NS_QQQ, NS_QQR, NS_NULL);
+  enum neon_shape rs = neon_select_shape (NS_QDD, NS_HHH, NS_FFF, NS_DDD, NS_NULL);
   if (rs == NS_QDD)
     {
       if (vfp_or_neon_is_neon (NEON_CHECK_ARCH | NEON_CHECK_CC) == FAIL)
@@ -19707,7 +19714,7 @@ neon_scalar_for_fmac_fp16_long (unsigned scalar, unsigned quad_p)
 	      | ((elno & 0x1) << 3));
     }
 
-bad_scalar:
+ bad_scalar:
   first_error (_("scalar out of range for multiply instruction"));
   return 0;
 }
@@ -21674,15 +21681,13 @@ cde_handle_coproc (void)
 static void
 cxn_handle_predication (bfd_boolean is_accum)
 {
-  /* This function essentially checks for a suffix, not whether the instruction
-     is inside an IT block or not.
-     The CX* instructions should never have a conditional suffix -- this is not
-     mentioned in the syntax.  */
-  if (conditional_insn ())
+  if (is_accum && conditional_insn ())
+    set_pred_insn_type (INSIDE_IT_INSN);
+  else if (conditional_insn ())
+  /* conditional_insn essentially checks for a suffix, not whether the
+     instruction is inside an IT block or not.
+     The non-accumulator versions should not have suffixes.  */
     inst.error = BAD_SYNTAX;
-  /* Here we ensure that if the current element  */
-  else if (is_accum)
-    set_pred_insn_type (NEUTRAL_IT_NO_VPT_INSN);
   else
     set_pred_insn_type (OUTSIDE_PRED_INSN);
 }
@@ -22980,7 +22985,6 @@ handle_pred_state (void)
 	    gas_assert (0);
 	case IF_INSIDE_IT_LAST_INSN:
 	case NEUTRAL_IT_INSN:
-	case NEUTRAL_IT_NO_VPT_INSN:
 	  break;
 
 	case VPT_INSN:
@@ -23044,12 +23048,6 @@ handle_pred_state (void)
 	    close_automatic_it_block ();
 	  break;
 
-	case NEUTRAL_IT_NO_VPT_INSN:
-	  if (now_pred.type == VECTOR_PRED)
-	    {
-	      inst.error = BAD_NO_VPT;
-	      break;
-	    }
 	  /* Fallthrough.  */
 	case NEUTRAL_IT_INSN:
 	  now_pred.block_length++;
@@ -23234,13 +23232,6 @@ handle_pred_state (void)
 	      }
 	    break;
 
-	  case NEUTRAL_IT_NO_VPT_INSN:
-	    if (now_pred.type == VECTOR_PRED)
-	      {
-		inst.error = BAD_NO_VPT;
-		break;
-	      }
-	    /* Fallthrough.  */
 	  case NEUTRAL_IT_INSN:
 	    /* The BKPT instruction is unconditional even in a IT or VPT
 	       block.  */
@@ -26560,8 +26551,8 @@ static const struct asm_opcode insns[] =
 #define ARM_VARIANT & fpu_neon_ext_v1
  mnUF(vabd,      _vabd,		  3, (RNDQMQ, oRNDQMQ, RNDQMQ), neon_dyadic_if_su),
  mnUF(vabdl,     _vabdl,	  3, (RNQMQ, RNDMQ, RNDMQ),   neon_dyadic_long),
- mnUF(vaddl,     _vaddl,	  3, (RNQMQ, RNDMQ, RNDMQR),  neon_dyadic_long),
- mnUF(vsubl,     _vsubl,	  3, (RNQMQ, RNDMQ, RNDMQR),  neon_dyadic_long),
+ mnUF(vaddl,     _vaddl,	  3, (RNSDQMQ, oRNSDMQ, RNSDMQR),  neon_dyadic_long),
+ mnUF(vsubl,     _vsubl,	  3, (RNSDQMQ, oRNSDMQ, RNSDMQR),  neon_dyadic_long),
  mnUF(vand,      _vand,		  3, (RNDQMQ, oRNDQMQ, RNDQMQ_Ibig), neon_logic),
  mnUF(vbic,      _vbic,		  3, (RNDQMQ, oRNDQMQ, RNDQMQ_Ibig), neon_logic),
  mnUF(vorr,      _vorr,		  3, (RNDQMQ, oRNDQMQ, RNDQMQ_Ibig), neon_logic),
@@ -29308,6 +29299,9 @@ md_apply_fix (fixS *	fixP,
 			  (((unsigned long) fixP->fx_frag->fr_address
 			    + (unsigned long) fixP->fx_where) & ~3)
 			  + (unsigned long) value);
+	  else if (get_recorded_alignment (seg) < 2)
+	    as_warn_where (fixP->fx_file, fixP->fx_line,
+			   _("section does not have enough alignment to ensure safe PC-relative loads"));
 
 	  if (value & ~0x3fc)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
@@ -32888,7 +32882,7 @@ get_aeabi_cpu_arch_from_fset (const arm_feature_set *arch_ext_fset,
   if (p_ver_ret == NULL)
     return -1;
 
-found:
+ found:
   /* Tag_CPU_arch_profile.  */
   if (ARM_CPU_HAS_FEATURE (p_ver_ret->flags, arm_ext_v7a)
       || ARM_CPU_HAS_FEATURE (p_ver_ret->flags, arm_ext_v8)

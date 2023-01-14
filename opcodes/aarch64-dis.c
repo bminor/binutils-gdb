@@ -2972,7 +2972,7 @@ aarch64_opcode_decode (const aarch64_opcode *opcode, const aarch64_insn code,
       DEBUG_TRACE ("constraint matching FAIL");
     }
 
-decode_fail:
+ decode_fail:
   return FALSE;
 }
 

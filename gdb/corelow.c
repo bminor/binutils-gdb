@@ -50,9 +50,6 @@
 #define O_LARGEFILE 0
 #endif
 
-static core_fns *sniff_core_bfd (gdbarch *core_gdbarch,
-				 bfd *abfd);
-
 /* The core file target.  */
 
 static const target_info core_target_info = {
@@ -111,7 +108,6 @@ public:
 				  const struct regset *regset,
 				  const char *name,
 				  int section_min_size,
-				  int which,
 				  const char *human_name,
 				  bool required);
 
@@ -125,10 +121,6 @@ private: /* per-core data */
      targets.  */
   target_section_table m_core_section_table {};
 
-  /* The core_fns for a core file handler that is prepared to read the
-     core file currently open on core_bfd.  */
-  core_fns *m_core_vec = NULL;
-
   /* FIXME: kettenis/20031023: Eventually this field should
      disappear.  */
   struct gdbarch *m_core_gdbarch = NULL;
@@ -138,8 +130,10 @@ core_target::core_target ()
 {
   m_core_gdbarch = gdbarch_from_bfd (core_bfd);
 
-  /* Find a suitable core file handler to munch on core_bfd */
-  m_core_vec = sniff_core_bfd (m_core_gdbarch, core_bfd);
+  if (!m_core_gdbarch
+      || !gdbarch_iterate_over_regset_sections_p (m_core_gdbarch))
+    error (_("\"%s\": Core file format not supported"),
+	   bfd_get_filename (core_bfd));
 
   /* Find the data section */
   if (build_section_table (core_bfd,
@@ -154,106 +148,10 @@ core_target::~core_target ()
   xfree (m_core_section_table.sections);
 }
 
-/* List of all available core_fns.  On gdb startup, each core file
-   register reader calls deprecated_add_core_fns() to register
-   information on each core format it is prepared to read.  */
-
-static struct core_fns *core_file_fns = NULL;
-
-static int gdb_check_format (bfd *);
-
 static void add_to_thread_list (bfd *, asection *, void *);
 
 /* An arbitrary identifier for the core inferior.  */
 #define CORELOW_PID 1
-
-/* Link a new core_fns into the global core_file_fns list.  Called on
-   gdb startup by the _initialize routine in each core file register
-   reader, to register information about each format the reader is
-   prepared to handle.  */
-
-void
-deprecated_add_core_fns (struct core_fns *cf)
-{
-  cf->next = core_file_fns;
-  core_file_fns = cf;
-}
-
-/* The default function that core file handlers can use to examine a
-   core file BFD and decide whether or not to accept the job of
-   reading the core file.  */
-
-int
-default_core_sniffer (struct core_fns *our_fns, bfd *abfd)
-{
-  int result;
-
-  result = (bfd_get_flavour (abfd) == our_fns -> core_flavour);
-  return (result);
-}
-
-/* Walk through the list of core functions to find a set that can
-   handle the core file open on ABFD.  Returns pointer to set that is
-   selected.  */
-
-static struct core_fns *
-sniff_core_bfd (struct gdbarch *core_gdbarch, bfd *abfd)
-{
-  struct core_fns *cf;
-  struct core_fns *yummy = NULL;
-  int matches = 0;
-
-  /* Don't sniff if we have support for register sets in
-     CORE_GDBARCH.  */
-  if (core_gdbarch && gdbarch_iterate_over_regset_sections_p (core_gdbarch))
-    return NULL;
-
-  for (cf = core_file_fns; cf != NULL; cf = cf->next)
-    {
-      if (cf->core_sniffer (cf, abfd))
-	{
-	  yummy = cf;
-	  matches++;
-	}
-    }
-  if (matches > 1)
-    {
-      warning (_("\"%s\": ambiguous core format, %d handlers match"),
-	       bfd_get_filename (abfd), matches);
-    }
-  else if (matches == 0)
-    error (_("\"%s\": no core file handler recognizes format"),
-	   bfd_get_filename (abfd));
-
-  return (yummy);
-}
-
-/* The default is to reject every core file format we see.  Either
-   BFD has to recognize it, or we have to provide a function in the
-   core file handler that recognizes it.  */
-
-int
-default_check_format (bfd *abfd)
-{
-  return (0);
-}
-
-/* Attempt to recognize core file formats that BFD rejects.  */
-
-static int
-gdb_check_format (bfd *abfd)
-{
-  struct core_fns *cf;
-
-  for (cf = core_file_fns; cf != NULL; cf = cf->next)
-    {
-      if (cf->check_format (abfd))
-	{
-	  return (1);
-	}
-    }
-  return (0);
-}
 
 /* Close the core target.  */
 
@@ -413,8 +311,7 @@ core_target_open (const char *arg, int from_tty)
   if (temp_bfd == NULL)
     perror_with_name (filename.get ());
 
-  if (!bfd_check_format (temp_bfd.get (), bfd_core)
-      && !gdb_check_format (temp_bfd.get ()))
+  if (!bfd_check_format (temp_bfd.get (), bfd_core))
     {
       /* Do it after the err msg */
       /* FIXME: should be checking for errors from bfd_close (for one
@@ -568,8 +465,7 @@ core_target::detach (inferior *inf, int from_tty)
 }
 
 /* Try to retrieve registers from a section in core_bfd, and supply
-   them to m_core_vec->core_read_registers, as the register set
-   numbered WHICH.
+   them to REGSET.
 
    If ptid's lwp member is zero, do the single-threaded
    thing: look for a section named NAME.  If ptid's lwp
@@ -588,14 +484,14 @@ core_target::get_core_register_section (struct regcache *regcache,
 					const struct regset *regset,
 					const char *name,
 					int section_min_size,
-					int which,
 					const char *human_name,
 					bool required)
 {
+  gdb_assert (regset != nullptr);
+
   struct bfd_section *section;
   bfd_size_type size;
-  bool variable_size_section = (regset != NULL
-				&& regset->flags & REGSET_VARIABLE_SIZE);
+  bool variable_size_section = (regset->flags & REGSET_VARIABLE_SIZE);
 
   thread_section_name section_name (name, regcache->ptid ());
 
@@ -630,15 +526,7 @@ core_target::get_core_register_section (struct regcache *regcache,
       return;
     }
 
-  if (regset != NULL)
-    {
-      regset->supply_regset (regset, regcache, -1, contents.data (), size);
-      return;
-    }
-
-  gdb_assert (m_core_vec != nullptr);
-  m_core_vec->core_read_registers (regcache, contents.data (), size, which,
-				   (CORE_ADDR) bfd_section_vma (section));
+  regset->supply_regset (regset, regcache, -1, contents.data (), size);
 }
 
 /* Data passed to gdbarch_iterate_over_regset_sections's callback.  */
@@ -656,10 +544,11 @@ get_core_registers_cb (const char *sect_name, int supply_size, int collect_size,
 		       const struct regset *regset,
 		       const char *human_name, void *cb_data)
 {
+  gdb_assert (regset != nullptr);
+
   auto *data = (get_core_registers_cb_data *) cb_data;
   bool required = false;
-  bool variable_size_section = (regset != NULL
-				&& regset->flags & REGSET_VARIABLE_SIZE);
+  bool variable_size_section = (regset->flags & REGSET_VARIABLE_SIZE);
 
   if (!variable_size_section)
     gdb_assert (supply_size == collect_size);
@@ -676,11 +565,8 @@ get_core_registers_cb (const char *sect_name, int supply_size, int collect_size,
 	human_name = "floating-point";
     }
 
-  /* The 'which' parameter is only used when no regset is provided.
-     Thus we just set it to -1. */
   data->target->get_core_register_section (data->regcache, regset, sect_name,
-					   supply_size, -1, human_name,
-					   required);
+					   supply_size, human_name, required);
 }
 
 /* Get the registers out of a core file.  This is the machine-
@@ -693,36 +579,22 @@ get_core_registers_cb (const char *sect_name, int supply_size, int collect_size,
 void
 core_target::fetch_registers (struct regcache *regcache, int regno)
 {
-  int i;
-  struct gdbarch *gdbarch;
-
   if (!(m_core_gdbarch != nullptr
-	&& gdbarch_iterate_over_regset_sections_p (m_core_gdbarch))
-      && (m_core_vec == NULL || m_core_vec->core_read_registers == NULL))
+	&& gdbarch_iterate_over_regset_sections_p (m_core_gdbarch)))
     {
       fprintf_filtered (gdb_stderr,
 		     "Can't fetch registers from this type of core file\n");
       return;
     }
 
-  gdbarch = regcache->arch ();
-  if (gdbarch_iterate_over_regset_sections_p (gdbarch))
-    {
-      get_core_registers_cb_data data = { this, regcache };
-      gdbarch_iterate_over_regset_sections (gdbarch,
-					    get_core_registers_cb,
-					    (void *) &data, NULL);
-    }
-  else
-    {
-      get_core_register_section (regcache, NULL,
-				 ".reg", 0, 0, "general-purpose", 1);
-      get_core_register_section (regcache, NULL,
-				 ".reg2", 0, 2, "floating-point", 0);
-    }
+  struct gdbarch *gdbarch = regcache->arch ();
+  get_core_registers_cb_data data = { this, regcache };
+  gdbarch_iterate_over_regset_sections (gdbarch,
+					get_core_registers_cb,
+					(void *) &data, NULL);
 
   /* Mark all registers not found in the core as unavailable.  */
-  for (i = 0; i < gdbarch_num_regs (regcache->arch ()); i++)
+  for (int i = 0; i < gdbarch_num_regs (regcache->arch ()); i++)
     if (regcache->get_register_status (i) == REG_UNKNOWN)
       regcache->raw_supply (i, NULL);
 }

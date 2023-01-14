@@ -32,9 +32,12 @@ m4_include(../gdb/ptrace.m4)
 m4_include(../gdb/ax_cxx_compile_stdcxx.m4)
 
 dnl For GDB_AC_SELFTEST.
-m4_include(../gdb/selftest.m4)
+m4_include(../gdbsupport/selftest.m4)
 
 m4_include([../config/ax_pthread.m4])
+
+dnl For ZW_GNU_GETTEXT_SISTER_DIR.
+m4_include(../config/gettext-sister.m4)
 
 dnl Check for existence of a type $1 in libthread_db.h
 dnl Based on BFD_HAVE_SYS_PROCFS_TYPE in bfd/bfd.m4.

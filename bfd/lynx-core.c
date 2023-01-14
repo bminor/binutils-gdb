@@ -85,7 +85,7 @@ make_bfd_asection (bfd *abfd,
   return asect;
 }
 
-const bfd_target *
+bfd_cleanup
 lynx_core_file_p (bfd *abfd)
 {
   int secnum;
@@ -191,7 +191,7 @@ lynx_core_file_p (bfd *abfd)
 	goto fail;
     }
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 
  fail:
   bfd_release (abfd, core_hdr (abfd));

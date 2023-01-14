@@ -11,6 +11,10 @@
 /* Define to 1 if using `alloca.c'. */
 #undef C_ALLOCA
 
+/* Define to 1 if translation of program messages to the user's native
+   language is requested. */
+#undef ENABLE_NLS
+
 /* Define if self-testing features should be enabled */
 #undef GDB_SELF_TEST
 
@@ -45,10 +49,6 @@
 /* Define to 1 if you have the declaration of `perror', and to 0 if you don't.
    */
 #undef HAVE_DECL_PERROR
-
-/* Define to 1 if you have the declaration of `ptrace', and to 0 if you don't.
-   */
-#undef HAVE_DECL_PTRACE
 
 /* Define to 1 if you have the declaration of `snprintf', and to 0 if you
    don't. */

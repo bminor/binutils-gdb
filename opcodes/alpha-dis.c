@@ -146,7 +146,7 @@ print_insn_alpha (bfd_vma memaddr, struct disassemble_info *info)
 
   return 4;
 
-found:
+ found:
   (*info->fprintf_func) (info->stream, "%s", opcode->name);
   if (opcode->operands[0] != 0)
     (*info->fprintf_func) (info->stream, "\t");

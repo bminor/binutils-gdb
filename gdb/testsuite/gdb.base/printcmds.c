@@ -72,6 +72,9 @@ int int4dim[1][2][3][2] = {{{{0,1},{2,3},{4,5}},{{6,7},{8,9},{10,11}}}};
 
 char *teststring = (char*)"teststring contents";
 
+typedef char *charptr;
+charptr teststring2 = "more contents";
+
 /* Test printing of a struct containing character arrays. */
 
 struct some_arrays {

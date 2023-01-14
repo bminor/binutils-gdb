@@ -3,7 +3,7 @@
 #ld: -shared -z max-page-size=0x200000 -z noseparate-code
 #readelf: -l --wide
 #target: *-*-linux* *-*-gnu* *-*-nacl* arm*-*-uclinuxfdpiceabi
-#xfail: hppa*-*-*
+#xfail: h8300-*-* hppa*-*-*
 # hppa fails due to PR 12376.
 
 #...

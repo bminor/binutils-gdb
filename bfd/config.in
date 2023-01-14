@@ -18,9 +18,6 @@
    language is requested. */
 #undef ENABLE_NLS
 
-/* Suffix used for executables, if any. */
-#undef EXECUTABLE_SUFFIX
-
 /* Define to 1 if you have the <alloca.h> header file. */
 #undef HAVE_ALLOCA_H
 
@@ -97,9 +94,6 @@
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
-
-/* Does the platform use an executable suffix? */
-#undef HAVE_EXECUTABLE_SUFFIX
 
 /* Define to 1 if you have the `fcntl' function. */
 #undef HAVE_FCNTL

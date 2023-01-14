@@ -858,7 +858,7 @@ frv_tomcat_analyze_vliw_chains (void)
 
   vliw1 = vliw_chain_top;
 
-workaround_top:
+ workaround_top:
 
   FRV_SET_VLIW_WINDOW (vliw1, vliw2, vliw3);
 

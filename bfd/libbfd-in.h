@@ -141,7 +141,7 @@ extern bfd_boolean _bfd_generic_mkarchive
   (bfd *) ATTRIBUTE_HIDDEN;
 extern char *_bfd_append_relative_path
   (bfd *, char *) ATTRIBUTE_HIDDEN;
-extern const bfd_target *bfd_generic_archive_p
+extern bfd_cleanup bfd_generic_archive_p
   (bfd *) ATTRIBUTE_HIDDEN;
 extern bfd_boolean bfd_slurp_armap
   (bfd *) ATTRIBUTE_HIDDEN;
@@ -227,8 +227,9 @@ extern void _bfd_void_bfd_asection
 
 extern bfd *_bfd_new_bfd_contained_in
   (bfd *) ATTRIBUTE_HIDDEN;
-extern const bfd_target *_bfd_dummy_target
+extern bfd_cleanup _bfd_dummy_target
   (bfd *) ATTRIBUTE_HIDDEN;
+#define _bfd_no_cleanup _bfd_void_bfd
 
 extern void bfd_dont_truncate_arname
   (bfd *, const char *, char *) ATTRIBUTE_HIDDEN;
@@ -425,9 +426,9 @@ extern symindex _bfd_vms_lib_find_symbol
   (bfd *, const char *) ATTRIBUTE_HIDDEN;
 extern bfd *_bfd_vms_lib_get_imagelib_file
   (bfd *) ATTRIBUTE_HIDDEN;
-extern const bfd_target *_bfd_vms_lib_alpha_archive_p
+extern bfd_cleanup _bfd_vms_lib_alpha_archive_p
   (bfd *) ATTRIBUTE_HIDDEN;
-extern const bfd_target *_bfd_vms_lib_ia64_archive_p
+extern bfd_cleanup _bfd_vms_lib_ia64_archive_p
   (bfd *) ATTRIBUTE_HIDDEN;
 extern bfd_boolean _bfd_vms_lib_alpha_mkarchive
   (bfd *) ATTRIBUTE_HIDDEN;
@@ -446,7 +447,7 @@ extern void _bfd_nosymbols_print_symbol
 extern void _bfd_nosymbols_get_symbol_info
   (bfd *, asymbol *, symbol_info *) ATTRIBUTE_HIDDEN;
 extern const char * _bfd_nosymbols_get_symbol_version_string
-  (bfd *, asymbol *, bfd_boolean *) ATTRIBUTE_HIDDEN;
+  (bfd *, asymbol *, bfd_boolean, bfd_boolean *) ATTRIBUTE_HIDDEN;
 extern bfd_boolean _bfd_nosymbols_bfd_is_local_label_name
   (bfd *, const char *) ATTRIBUTE_HIDDEN;
 #define _bfd_nosymbols_bfd_is_target_special_symbol _bfd_bool_bfd_asymbol_false

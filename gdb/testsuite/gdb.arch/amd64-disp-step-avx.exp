@@ -92,9 +92,15 @@ proc disp_step_func { func } {
     set value "0xdeadbeefd3adb33f"
     set_regs $value
 
+    # Turn "debug displaced" on to make sure a displaced step is actually
+    # executed, not an inline step.
+    gdb_test_no_output "set debug displaced on"
+
     gdb_test "continue" \
-	"Continuing.*Breakpoint.*, ${test_end_label} ().*" \
+	"Continuing.*displaced: displaced pc to.*Breakpoint.*, ${test_end_label} ().*" \
 	"continue to ${test_end_label}"
+
+    gdb_test_no_output "set debug displaced off"
 
     verify_regs $value
 }

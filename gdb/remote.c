@@ -674,7 +674,7 @@ public:
 
   const struct btrace_config *btrace_conf (const struct btrace_target_info *) override;
   bool augmented_libraries_svr4_read () override;
-  int follow_fork (int, int) override;
+  bool follow_fork (bool, bool) override;
   void follow_exec (struct inferior *, const char *) override;
   int insert_fork_catchpoint (int) override;
   int remove_fork_catchpoint (int) override;
@@ -5766,8 +5766,8 @@ extended_remote_target::detach (inferior *inf, int from_tty)
    it is named remote_follow_fork in anticipation of using it for the
    remote target as well.  */
 
-int
-remote_target::follow_fork (int follow_child, int detach_fork)
+bool
+remote_target::follow_fork (bool follow_child, bool detach_fork)
 {
   struct remote_state *rs = get_remote_state ();
   enum target_waitkind kind = inferior_thread ()->pending_follow.kind;
@@ -5793,7 +5793,8 @@ remote_target::follow_fork (int follow_child, int detach_fork)
 	  remote_detach_pid (child_pid);
 	}
     }
-  return 0;
+
+  return false;
 }
 
 /* Target follow-exec function for remote targets.  Save EXECD_PATHNAME
@@ -7402,18 +7403,14 @@ Packet: '%s'\n"),
 		     reported expedited registers.  */
 		  if (event->ptid == null_ptid)
 		    {
+		      /* If there is no thread-id information then leave
+			 the event->ptid as null_ptid.  Later in
+			 process_stop_reply we will pick a suitable
+			 thread.  */
 		      const char *thr = strstr (p1 + 1, ";thread:");
 		      if (thr != NULL)
 			event->ptid = read_ptid (thr + strlen (";thread:"),
 						 NULL);
-		      else
-			{
-			  /* Either the current thread hasn't changed,
-			     or the inferior is not multi-threaded.
-			     The event must be for the thread we last
-			     set as (or learned as being) current.  */
-			  event->ptid = event->rs->general_thread;
-			}
 		    }
 
 		  if (rsa == NULL)
@@ -7668,10 +7665,61 @@ remote_target::process_stop_reply (struct stop_reply *stop_reply,
   *status = stop_reply->ws;
   ptid = stop_reply->ptid;
 
-  /* If no thread/process was reported by the stub, assume the current
-     inferior.  */
+  /* If no thread/process was reported by the stub then use the first
+     non-exited thread in the current target.  */
   if (ptid == null_ptid)
-    ptid = inferior_ptid;
+    {
+      /* Some stop events apply to all threads in an inferior, while others
+	 only apply to a single thread.  */
+      bool is_stop_for_all_threads
+	= (status->kind == TARGET_WAITKIND_EXITED
+	   || status->kind == TARGET_WAITKIND_SIGNALLED);
+
+      for (thread_info *thr : all_non_exited_threads (this))
+	{
+	  if (ptid != null_ptid
+	      && (!is_stop_for_all_threads
+		  || ptid.pid () != thr->ptid.pid ()))
+	    {
+	      static bool warned = false;
+
+	      if (!warned)
+		{
+		  /* If you are seeing this warning then the remote target
+		     has stopped without specifying a thread-id, but the
+		     target does have multiple threads (or inferiors), and
+		     so GDB is having to guess which thread stopped.
+
+		     Examples of what might cause this are the target
+		     sending and 'S' stop packet, or a 'T' stop packet and
+		     not including a thread-id.
+
+		     Additionally, the target might send a 'W' or 'X
+		     packet without including a process-id, when the target
+		     has multiple running inferiors.  */
+		  if (is_stop_for_all_threads)
+		    warning (_("multi-inferior target stopped without "
+			       "sending a process-id, using first "
+			       "non-exited inferior"));
+		  else
+		    warning (_("multi-threaded target stopped without "
+			       "sending a thread-id, using first "
+			       "non-exited thread"));
+		  warned = true;
+		}
+	      break;
+	    }
+
+	  /* If this is a stop for all threads then don't use a particular
+	     threads ptid, instead create a new ptid where only the pid
+	     field is set.  */
+	  if (is_stop_for_all_threads)
+	    ptid = ptid_t (thr->ptid.pid ());
+	  else
+	    ptid = thr->ptid;
+	}
+      gdb_assert (ptid != null_ptid);
+    }
 
   if (status->kind != TARGET_WAITKIND_EXITED
       && status->kind != TARGET_WAITKIND_SIGNALLED
@@ -12814,7 +12862,7 @@ remote_target::download_tracepoint (struct bp_location *loc)
   encode_actions_rsp (loc, &tdp_actions, &stepping_actions);
 
   tpaddr = loc->address;
-  sprintf_vma (addrbuf, tpaddr);
+  strcpy (addrbuf, phex (tpaddr, sizeof (CORE_ADDR)));
   ret = snprintf (buf.data (), buf.size (), "QTDP:%x:%s:%c:%lx:%x",
 		  b->number, addrbuf, /* address */
 		  (b->enable_state == bp_enabled ? 'E' : 'D'),
@@ -13076,11 +13124,10 @@ void
 remote_target::enable_tracepoint (struct bp_location *location)
 {
   struct remote_state *rs = get_remote_state ();
-  char addr_buf[40];
 
-  sprintf_vma (addr_buf, location->address);
   xsnprintf (rs->buf.data (), get_remote_packet_size (), "QTEnable:%x:%s",
-	     location->owner->number, addr_buf);
+	     location->owner->number,
+	     phex (location->address, sizeof (CORE_ADDR)));
   putpkt (rs->buf);
   remote_get_noisy_reply ();
   if (rs->buf[0] == '\0')
@@ -13093,11 +13140,10 @@ void
 remote_target::disable_tracepoint (struct bp_location *location)
 {
   struct remote_state *rs = get_remote_state ();
-  char addr_buf[40];
 
-  sprintf_vma (addr_buf, location->address);
   xsnprintf (rs->buf.data (), get_remote_packet_size (), "QTDisable:%x:%s",
-	     location->owner->number, addr_buf);
+	     location->owner->number,
+	     phex (location->address, sizeof (CORE_ADDR)));
   putpkt (rs->buf);
   remote_get_noisy_reply ();
   if (rs->buf[0] == '\0')

@@ -58,7 +58,7 @@ static void c_type_print_varspec_prefix (struct type *,
 /* Print "const", "volatile", or address space modifiers.  */
 static void c_type_print_modifier (struct type *,
 				   struct ui_file *,
-				   int, int);
+				   int, int, enum language);
 
 static void c_type_print_base_1 (struct type *type, struct ui_file *stream,
 				 int show, int level, enum language language,
@@ -337,7 +337,9 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
 	fprintf_filtered (stream, " volatile");
 
       if (TYPE_RESTRICT (domain))
-	fprintf_filtered (stream, " restrict");
+	fprintf_filtered (stream, (language == language_cplus
+				   ? " __restrict__"
+				   : " restrict"));
 
       if (TYPE_ATOMIC (domain))
 	fprintf_filtered (stream, " _Atomic");
@@ -383,7 +385,7 @@ c_type_print_varspec_prefix (struct type *type,
 				   stream, show, 1, 1, language, flags,
 				   podata);
       fprintf_filtered (stream, "*");
-      c_type_print_modifier (type, stream, 1, need_post_space);
+      c_type_print_modifier (type, stream, 1, need_post_space, language);
       break;
 
     case TYPE_CODE_MEMBERPTR:
@@ -420,7 +422,7 @@ c_type_print_varspec_prefix (struct type *type,
 				   stream, show, 1, 0, language, flags,
 				   podata);
       fprintf_filtered (stream, TYPE_CODE(type) == TYPE_CODE_REF ? "&" : "&&");
-      c_type_print_modifier (type, stream, 1, need_post_space);
+      c_type_print_modifier (type, stream, 1, need_post_space, language);
       break;
 
     case TYPE_CODE_METHOD:
@@ -481,7 +483,8 @@ c_type_print_varspec_prefix (struct type *type,
 
 static void
 c_type_print_modifier (struct type *type, struct ui_file *stream,
-		       int need_pre_space, int need_post_space)
+		       int need_pre_space, int need_post_space,
+		       enum language language)
 {
   int did_print_modifier = 0;
   const char *address_space_id;
@@ -509,7 +512,9 @@ c_type_print_modifier (struct type *type, struct ui_file *stream,
     {
       if (did_print_modifier || need_pre_space)
 	fprintf_filtered (stream, " ");
-      fprintf_filtered (stream, "restrict");
+      fprintf_filtered (stream, (language == language_cplus
+				 ? "__restrict__"
+				 : "restrict"));
       did_print_modifier = 1;
     }
 
@@ -1050,7 +1055,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
       hash_holder.reset (local_flags.local_typedefs);
     }
 
-  c_type_print_modifier (type, stream, 0, 1);
+  c_type_print_modifier (type, stream, 0, 1, language);
   if (TYPE_CODE (type) == TYPE_CODE_UNION)
     fprintf_filtered (stream, "union ");
   else if (TYPE_DECLARED_CLASS (type))
@@ -1477,7 +1482,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
   if (show <= 0
       && TYPE_NAME (type) != NULL)
     {
-      c_type_print_modifier (type, stream, 0, 1);
+      c_type_print_modifier (type, stream, 0, 1, language);
 
       /* If we have "typedef struct foo {. . .} bar;" do we want to
 	 print it as "struct foo" or as "bar"?  Pick the latter for
@@ -1542,7 +1547,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
       break;
 
     case TYPE_CODE_ENUM:
-      c_type_print_modifier (type, stream, 0, 1);
+      c_type_print_modifier (type, stream, 0, 1, language);
       fprintf_filtered (stream, "enum ");
       if (TYPE_DECLARED_CLASS (type))
 	fprintf_filtered (stream, "class ");
@@ -1615,7 +1620,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 
 	local_flags.local_typedefs = NULL;
 
-	c_type_print_modifier (type, stream, 0, 1);
+	c_type_print_modifier (type, stream, 0, 1, language);
 	fprintf_filtered (stream, "flag ");
 	print_name_maybe_canonical (TYPE_NAME (type), flags, stream);
 	if (show > 0)
@@ -1689,7 +1694,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
          type name, then complain.  */
       if (TYPE_NAME (type) != NULL)
 	{
-	  c_type_print_modifier (type, stream, 0, 1);
+	  c_type_print_modifier (type, stream, 0, 1, language);
 	  print_name_maybe_canonical (TYPE_NAME (type), flags, stream);
 	}
       else

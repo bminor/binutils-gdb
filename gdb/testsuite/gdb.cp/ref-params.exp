@@ -24,7 +24,7 @@ if { [skip_cplus_tests] } { continue }
 
 standard_testfile .cc
 
-if {[build_executable $testfile.exp $testfile $srcfile {debug c++}] == 1} {
+if {[build_executable $testfile.exp $testfile $srcfile {debug c++}] == -1} {
     return -1
 }
 

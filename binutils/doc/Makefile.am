@@ -162,7 +162,7 @@ cxxfilt.man:	$(binutils_TEXI)
 		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
 	rm -f $(DEMANGLER_NAME).pod
 
-MOSTLYCLEANFILES     = $(man_MANS) binutils.info cxxfilt.man
+MAINTAINERCLEANFILES = $(man_MANS) binutils.info cxxfilt.man
 
 $(DEMANGLER_NAME).1: cxxfilt.man Makefile
 	if test -f cxxfilt.man; then \

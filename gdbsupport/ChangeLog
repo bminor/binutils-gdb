@@ -1,3 +1,63 @@
+2020-03-20  Simon Marchi  <simon.marchi@efficios.com>
+
+	* config.in: Re-generate.
+	* configure: Re-generate.
+
+2020-03-17  Kamil Rytarowski  <n54@gmx.com>
+
+	* common-defs.h: Include alloca.h if HAVE_ALLOCA_H is defined.
+
+2020-03-12  Tom Tromey  <tom@tromey.com>
+
+	* common-types.h: Remove GDBSERVER code.
+	(gdb_byte, CORE_ADDR, LONGEST, ULONGEST): Redefine.
+	* common-defs.h: Remove GDBSERVER code.
+
+2020-03-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* selftest.m4: Moved from gdb/.
+	* acinclude.m4: Update path to selftest.m4.
+
+2020-03-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* configure.ac: Don't source bfd/development.sh.
+	* common.m4: Source bfd/development.sh.
+	* configure: Re-generate.
+
+2020-03-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* configure: Re-generate.
+
+2020-03-11  Simon Marchi  <simon.marchi@efficios.com>
+
+	* configure: Re-generate.
+	* warning.m4: Enable -Wmissing-prototypes.
+
+2020-03-08  Tom Tromey  <tom@tromey.com>
+
+	* gdb_binary_search.h: Fix two typos.
+
+2020-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* .dir-locals.el: New file.
+
+2020-03-05  Vyacheslav Petrishchev  <vyachemail@gmail.com>
+
+	* configure.ac: Added call development.sh.
+	* configure: Regenerate.
+
+2020-03-05  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* .gitattributes: New file.
+
+2020-03-03  Simon Marchi  <simon.marchi@efficios.com>
+
+	* Makefile.in: Re-generate.
+
+2020-02-28  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb-dlfcn.h (gdb_dlopen): Update comment.
+
 2020-02-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* configure: Regenerate.

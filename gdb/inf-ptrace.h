@@ -44,7 +44,7 @@ struct inf_ptrace_target : public inf_child_target
   void create_inferior (const char *, const std::string &,
 			char **, int) override;
 #ifdef PT_GET_PROCESS_STATE
-  int follow_fork (int, int) override;
+  bool follow_fork (bool, bool) override;
 
   int insert_fork_catchpoint (int) override;
 
@@ -78,9 +78,14 @@ protected:
   void detach_success (inferior *inf);
 };
 
+#ifndef __NetBSD__
 /* Return which PID to pass to ptrace in order to observe/control the
-   tracee identified by PTID.  */
+   tracee identified by PTID.
+
+   Unlike most other Operating Systems, NetBSD tracks both pid and lwp
+   and avoids this function.  */
 
 extern pid_t get_ptrace_pid (ptid_t);
+#endif
 
 #endif

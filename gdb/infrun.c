@@ -73,10 +73,6 @@ static void sig_print_info (enum gdb_signal);
 
 static void sig_print_header (void);
 
-static int follow_fork (void);
-
-static int follow_fork_inferior (int follow_child, int detach_fork);
-
 static void follow_inferior_reset_breakpoints (void);
 
 static int currently_stepping (struct thread_info *tp);
@@ -411,8 +407,8 @@ show_follow_fork_mode_string (struct ui_file *file, int from_tty,
    the fork parent.  At return inferior_ptid is the ptid of the
    followed inferior.  */
 
-static int
-follow_fork_inferior (int follow_child, int detach_fork)
+static bool
+follow_fork_inferior (bool follow_child, bool detach_fork)
 {
   int has_vforked;
   ptid_t parent_ptid, child_ptid;
@@ -669,11 +665,11 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
    if the inferior should be resumed; false, if the target for some
    reason decided it's best not to resume.  */
 
-static int
-follow_fork (void)
+static bool
+follow_fork ()
 {
-  int follow_child = (follow_fork_mode_string == follow_fork_mode_child);
-  int should_resume = 1;
+  bool follow_child = (follow_fork_mode_string == follow_fork_mode_child);
+  bool should_resume = true;
   struct thread_info *tp;
 
   /* Copy user stepping state to the new inferior thread.  FIXME: the
@@ -714,7 +710,7 @@ follow_fork (void)
 	     happened.  */
 	  thread_info *wait_thread = find_thread_ptid (wait_target, wait_ptid);
 	  switch_to_thread (wait_thread);
-	  should_resume = 0;
+	  should_resume = false;
 	}
     }
 
@@ -1556,8 +1552,7 @@ infrun_inferior_exit (struct inferior *inf)
    doesn't support it, GDB will instead use the traditional
    hold-and-step approach.  If AUTO (which is the default), GDB will
    decide which technique to use to step over breakpoints depending on
-   which of all-stop or non-stop mode is active --- displaced stepping
-   in non-stop mode; hold-and-step in all-stop mode.  */
+   whether the target works in a non-stop way (see use_displaced_stepping).  */
 
 static enum auto_boolean can_use_displaced_stepping = AUTO_BOOLEAN_AUTO;
 
@@ -1577,23 +1572,53 @@ show_can_use_displaced_stepping (struct ui_file *file, int from_tty,
 			"to step over breakpoints is %s.\n"), value);
 }
 
+/* Return true if the gdbarch implements the required methods to use
+   displaced stepping.  */
+
+static bool
+gdbarch_supports_displaced_stepping (gdbarch *arch)
+{
+  /* Only check for the presence of step_copy_insn.  Other required methods
+     are checked by the gdbarch validation.  */
+  return gdbarch_displaced_step_copy_insn_p (arch);
+}
+
 /* Return non-zero if displaced stepping can/should be used to step
    over breakpoints of thread TP.  */
 
-static int
-use_displaced_stepping (struct thread_info *tp)
+static bool
+use_displaced_stepping (thread_info *tp)
 {
-  struct regcache *regcache = get_thread_regcache (tp);
-  struct gdbarch *gdbarch = regcache->arch ();
+  /* If the user disabled it explicitly, don't use displaced stepping.  */
+  if (can_use_displaced_stepping == AUTO_BOOLEAN_FALSE)
+    return false;
+
+  /* If "auto", only use displaced stepping if the target operates in a non-stop
+     way.  */
+  if (can_use_displaced_stepping == AUTO_BOOLEAN_AUTO
+      && !target_is_non_stop_p ())
+    return false;
+
+  gdbarch *gdbarch = get_thread_regcache (tp)->arch ();
+
+  /* If the architecture doesn't implement displaced stepping, don't use
+     it.  */
+  if (!gdbarch_supports_displaced_stepping (gdbarch))
+    return false;
+
+  /* If recording, don't use displaced stepping.  */
+  if (find_record_target () != nullptr)
+    return false;
+
   displaced_step_inferior_state *displaced_state
     = get_displaced_stepping_state (tp->inf);
 
-  return (((can_use_displaced_stepping == AUTO_BOOLEAN_AUTO
-	    && target_is_non_stop_p ())
-	   || can_use_displaced_stepping == AUTO_BOOLEAN_TRUE)
-	  && gdbarch_displaced_step_copy_insn_p (gdbarch)
-	  && find_record_target () == NULL
-	  && !displaced_state->failed_before);
+  /* If displaced stepping failed before for this inferior, don't bother trying
+     again.  */
+  if (displaced_state->failed_before)
+    return false;
+
+  return true;
 }
 
 /* Simple function wrapper around displaced_step_inferior_state::reset.  */
@@ -1650,7 +1675,7 @@ displaced_step_prepare_throw (thread_info *tp)
 
   /* We should never reach this function if the architecture does not
      support displaced stepping.  */
-  gdb_assert (gdbarch_displaced_step_copy_insn_p (gdbarch));
+  gdb_assert (gdbarch_supports_displaced_stepping (gdbarch));
 
   /* Nor if the thread isn't meant to step over a breakpoint.  */
   gdb_assert (tp->control.trap_expected);
@@ -3456,6 +3481,12 @@ do_target_wait_1 (inferior *inf, ptid_t ptid,
   ptid_t event_ptid;
   struct thread_info *tp;
 
+  /* We know that we are looking for an event in the target of inferior
+     INF, but we don't know which thread the event might come from.  As
+     such we want to make sure that INFERIOR_PTID is reset so that none of
+     the wait code relies on it - doing so is always a mistake.  */
+  switch_to_inferior_no_thread (inf);
+
   /* First check if there is a resumed thread with a wait status
      pending.  */
   if (ptid == minus_one_ptid || ptid.is_pid ())
@@ -3651,8 +3682,6 @@ do_target_wait (ptid_t wait_ptid, execution_control_state *ecs, int options)
 
   auto do_wait = [&] (inferior *inf)
   {
-    switch_to_inferior_no_thread (inf);
-
     ecs->ptid = do_target_wait_1 (inf, wait_ptid, &ecs->ws, options);
     ecs->target = inf->process_target ();
     return (ecs->ws.kind != TARGET_WAITKIND_IGNORE);
@@ -4069,11 +4098,15 @@ fetch_inferior_event (void *client_data)
     printf_unfiltered (_("completed.\n"));
 }
 
-/* Record the frame and location we're currently stepping through.  */
+/* See infrun.h.  */
+
 void
-set_step_info (struct frame_info *frame, struct symtab_and_line sal)
+set_step_info (thread_info *tp, struct frame_info *frame,
+	       struct symtab_and_line sal)
 {
-  struct thread_info *tp = inferior_thread ();
+  /* This can be removed once this function no longer implicitly relies on the
+     inferior_ptid value.  */
+  gdb_assert (inferior_ptid == tp->ptid);
 
   tp->control.step_frame_id = get_frame_id (frame);
   tp->control.step_stack_frame_id = get_stack_frame_id (frame);
@@ -5391,8 +5424,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	 watchpoints, for example, always appear in the bpstat.  */
       if (!bpstat_causes_stop (ecs->event_thread->control.stop_bpstat))
 	{
-	  int should_resume;
-	  int follow_child
+	  bool follow_child
 	    = (follow_fork_mode_string == follow_fork_mode_child);
 
 	  ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
@@ -5400,7 +5432,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	  process_stratum_target *targ
 	    = ecs->event_thread->inf->process_target ();
 
-	  should_resume = follow_fork ();
+	  bool should_resume = follow_fork ();
 
 	  /* Note that one of these may be an invalid pointer,
 	     depending on detach_fork.  */
@@ -7008,6 +7040,10 @@ process_event_stop_test (struct execution_control_state *ecs)
 	}
     }
 
+  /* This always returns the sal for the inner-most frame when we are in a
+     stack of inlined frames, even if GDB actually believes that it is in a
+     more outer frame.  This is checked for below by calls to
+     inline_skipped_frames.  */
   stop_pc_sal = find_pc_line (ecs->event_thread->suspend.stop_pc, 0);
 
   /* NOTE: tausq/2004-05-24: This if block used to be done before all
@@ -7142,19 +7178,36 @@ process_event_stop_test (struct execution_control_state *ecs)
       return;
     }
 
+  bool refresh_step_info = true;
   if ((ecs->event_thread->suspend.stop_pc == stop_pc_sal.pc)
       && (ecs->event_thread->current_line != stop_pc_sal.line
  	  || ecs->event_thread->current_symtab != stop_pc_sal.symtab))
     {
-      /* We are at the start of a different line.  So stop.  Note that
-         we don't stop if we step into the middle of a different line.
-         That is said to make things like for (;;) statements work
-         better.  */
-      if (debug_infrun)
-	 fprintf_unfiltered (gdb_stdlog,
-			     "infrun: stepped to a different line\n");
-      end_stepping_range (ecs);
-      return;
+      if (stop_pc_sal.is_stmt)
+	{
+	  /* We are at the start of a different line.  So stop.  Note that
+	     we don't stop if we step into the middle of a different line.
+	     That is said to make things like for (;;) statements work
+	     better.  */
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: stepped to a different line\n");
+	  end_stepping_range (ecs);
+	  return;
+	}
+      else if (frame_id_eq (get_frame_id (get_current_frame ()),
+			    ecs->event_thread->control.step_frame_id))
+	{
+	  /* We are at the start of a different line, however, this line is
+	     not marked as a statement, and we have not changed frame.  We
+	     ignore this line table entry, and continue stepping forward,
+	     looking for a better place to stop.  */
+	  refresh_step_info = false;
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: stepped to a different line, but "
+				"it's not the start of a statement\n");
+	}
     }
 
   /* We aren't done stepping.
@@ -7162,12 +7215,20 @@ process_event_stop_test (struct execution_control_state *ecs)
      Optimize by setting the stepping range to the line.
      (We might not be in the original line, but if we entered a
      new line in mid-statement, we continue stepping.  This makes
-     things like for(;;) statements work better.)  */
+     things like for(;;) statements work better.)
+
+     If we entered a SAL that indicates a non-statement line table entry,
+     then we update the stepping range, but we don't update the step info,
+     which includes things like the line number we are stepping away from.
+     This means we will stop when we find a line table entry that is marked
+     as is-statement, even if it matches the non-statement one we just
+     stepped into.   */
 
   ecs->event_thread->control.step_range_start = stop_pc_sal.pc;
   ecs->event_thread->control.step_range_end = stop_pc_sal.end;
   ecs->event_thread->control.may_range_step = 1;
-  set_step_info (frame, stop_pc_sal);
+  if (refresh_step_info)
+    set_step_info (ecs->event_thread, frame, stop_pc_sal);
 
   if (debug_infrun)
      fprintf_unfiltered (gdb_stdlog, "infrun: keep going\n");

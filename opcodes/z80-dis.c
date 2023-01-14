@@ -401,24 +401,6 @@ cism (struct buffer *buf, disassemble_info * info, const char *txt ATTRIBUTE_UNU
 }
 
 static int
-cis2 (struct buffer *buf, disassemble_info * info, const char *txt ATTRIBUTE_UNUSED)
-{
-  static char * opar[] = { "in", "out" };
-  char * op;
-  char c;
-
-  c = buf->data[1];
-  op = ((0x14 & c) == 0x14) ? "ot" : (opar[c & 1]);
-  info->fprintf_func (info->stream,
-                      "%s%c2%s",
-                      op,
-                      (c & 0x08) ? 'd' : 'i',
-                      (c & 0x10) ? "r" : "");
-  buf->n_used = 2;
-  return buf->n_used;
-}
-
-static int
 dump (struct buffer *buf, disassemble_info * info, const char *txt)
 {
   int i;
@@ -436,6 +418,7 @@ struct tab_elt opc_ed[] =
 {
   { 0x30, 0xFF, prt, "mul d,e", INSS_Z80N },
   { 0x31, 0xFF, prt, "add hl,a", INSS_Z80N },
+  { 0x31, 0xFF, prt, "ld iy,(hl)", INSS_EZ80 },
   { 0x30, 0xFE, dump, "xx", INSS_ALL }, /* do not move this line */
   { 0x00, 0xC7, prt_r_n, "in0 %s,(0x%%02x)", INSS_Z180|INSS_EZ80 },
   { 0x01, 0xC7, prt_r_n, "out0 (0x%%02x),%s", INSS_Z180|INSS_EZ80 },
@@ -446,6 +429,7 @@ struct tab_elt opc_ed[] =
   { 0x04, 0xC7, prt_r, "tst %s", INSS_Z180},
   { 0x04, 0xC7, prt_r, "tst a,%s", INSS_EZ80 },
   { 0x07, 0xFF, prt, "ld bc,(hl)", INSS_EZ80 },
+  { 0x3F, 0xFF, prt, "ld (hl),ix", INSS_EZ80 },
   { 0x0F, 0xCF, prt_rr, "ld (hl),", INSS_EZ80 },
   { 0x17, 0xFF, prt, "ld de,(hl)", INSS_EZ80 },
   { 0x23, 0xFF, prt, "swapnib", INSS_Z80N },
@@ -462,10 +446,8 @@ struct tab_elt opc_ed[] =
   { 0x34, 0xFF, prt_nn, "add hl,0x%04x", INSS_Z80N },
   { 0x35, 0xFF, prt_nn, "add de,0x%04x", INSS_Z80N },
   { 0x36, 0xFF, prt_nn, "add bc,0x%04x", INSS_Z80N },
-  { 0x36, 0xFF, prt, "ld iy,(hl)", INSS_EZ80 },
   { 0x37, 0xFF, prt, "ld ix,(hl)", INSS_EZ80 },
   { 0x3E, 0xFF, prt, "ld (hl),iy", INSS_EZ80 },
-  { 0x3F, 0xFF, prt, "ld (hl),ix", INSS_EZ80 },
   { 0x70, 0xFF, prt, "in f,(c)", INSS_Z80 | INSS_R800 | INSS_Z80N },
   { 0x70, 0xFF, dump, "xx", INSS_ALL },
   { 0x40, 0xC7, prt_r, "in %s,(bc)", INSS_EZ80 },
@@ -504,21 +486,28 @@ struct tab_elt opc_ed[] =
   { 0x7D, 0xFF, prt, "stmix", INSS_EZ80 },
   { 0x7E, 0xFF, prt, "rsmix", INSS_EZ80 },
   { 0x82, 0xE6, cism, "", INSS_Z180|INSS_EZ80 },
-  { 0x84, 0xC7, cis2, "", INSS_EZ80 },
+  { 0x84, 0xFF, prt, "ini2", INSS_EZ80 },
   { 0x8A, 0xFF, prt_n_n, "push 0x%02x%%02x", INSS_Z80N },
+  { 0x8C, 0xFF, prt, "ind2", INSS_EZ80 },
   { 0x90, 0xFF, prt, "outinb", INSS_Z80N },
   { 0x91, 0xFF, prt_n_n, "nextreg 0x%02x,0x%%02x", INSS_Z80N },
   { 0x92, 0xFF, prt_n, "nextreg 0x%02x,a", INSS_Z80N },
   { 0x93, 0xFF, prt, "pixeldn", INSS_Z80N },
+  { 0x94, 0xFF, prt, "ini2r", INSS_EZ80 },
   { 0x94, 0xFF, prt, "pixelad", INSS_Z80N },
   { 0x95, 0xFF, prt, "setae", INSS_Z80N },
   { 0x98, 0xFF, prt, "jp (c)", INSS_Z80N },
+  { 0x9c, 0xFF, prt, "ind2r", INSS_EZ80 },
   { 0xA0, 0xE4, cis, "", INSS_ALL },
+  { 0xA4, 0xFF, prt, "outi2", INSS_EZ80 },
   { 0xA4, 0xFF, prt, "ldix", INSS_Z80N },
+  { 0xAC, 0xFF, prt, "outd2", INSS_EZ80 },
   { 0xAC, 0xFF, prt, "lddx", INSS_Z80N },
   { 0xA5, 0xFF, prt, "ldws", INSS_Z80N },
+  { 0xB4, 0xFF, prt, "oti2r", INSS_EZ80 },
   { 0xB4, 0xFF, prt, "ldirx", INSS_Z80N },
   { 0xB7, 0xFF, prt, "ldpirx", INSS_Z80N },
+  { 0xBC, 0xFF, prt, "otd2r", INSS_EZ80 },
   { 0xBC, 0xFF, prt, "lddrx", INSS_Z80N },
   { 0xC2, 0xFF, prt, "inirx", INSS_EZ80 },
   { 0xC3, 0xFF, prt, "otirx", INSS_EZ80 },
@@ -815,6 +804,7 @@ suffix (struct buffer *buf, disassemble_info *info, const char *txt)
   old_stream = info->stream;
   info->fprintf_func = (fprintf_ftype) &sprintf;
   info->stream = mybuf;
+  mybuf[0] = 0;
   buf->base++;
   if (print_insn_z80_buf (buf, info) >= 0)
     buf->n_used++;

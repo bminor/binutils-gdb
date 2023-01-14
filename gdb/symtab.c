@@ -3158,7 +3158,17 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	  ;
 	/* fall through */
 	else
-	  return find_pc_line (BMSYMBOL_VALUE_ADDRESS (mfunsym), 0);
+	  {
+	    /* Detect an obvious case of infinite recursion.  If this
+	       should occur, we'd like to know about it, so error out,
+	       fatally.  */
+	    if (BMSYMBOL_VALUE_ADDRESS (mfunsym) == pc)
+	      internal_error (__FILE__, __LINE__,
+	        _("Infinite recursion detected in find_pc_sect_line;"
+		  "please file a bug report"));
+
+	    return find_pc_line (BMSYMBOL_VALUE_ADDRESS (mfunsym), 0);
+	  }
       }
 
   symtab_and_line val;
@@ -3236,6 +3246,23 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	  best = prev;
 	  best_symtab = iter_s;
 
+	  /* If during the binary search we land on a non-statement entry,
+	     scan backward through entries at the same address to see if
+	     there is an entry marked as is-statement.  In theory this
+	     duplication should have been removed from the line table
+	     during construction, this is just a double check.  If the line
+	     table has had the duplication removed then this should be
+	     pretty cheap.  */
+	  if (!best->is_stmt)
+	    {
+	      struct linetable_entry *tmp = best;
+	      while (tmp > first && (tmp - 1)->pc == tmp->pc
+		     && (tmp - 1)->line != 0 && !tmp->is_stmt)
+		--tmp;
+	      if (tmp->is_stmt)
+		best = tmp;
+	    }
+
 	  /* Discard BEST_END if it's before the PC of the current BEST.  */
 	  if (best_end <= best->pc)
 	    best_end = 0;
@@ -3266,6 +3293,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
     }
   else
     {
+      val.is_stmt = best->is_stmt;
       val.symtab = best_symtab;
       val.line = best->line;
       val.pc = best->pc;
@@ -3434,7 +3462,8 @@ find_pcs_for_symtab_line (struct symtab *symtab, int line,
 	{
 	  struct linetable_entry *item = &SYMTAB_LINETABLE (symtab)->item[idx];
 
-	  if (*best_item == NULL || item->line < (*best_item)->line)
+	  if (*best_item == NULL
+	      || (item->line < (*best_item)->line && item->is_stmt))
 	    *best_item = item;
 
 	  break;
@@ -3544,6 +3573,10 @@ find_line_common (struct linetable *l, int lineno,
   for (i = start; i < len; i++)
     {
       struct linetable_entry *item = &(l->item[i]);
+
+      /* Ignore non-statements.  */
+      if (!item->is_stmt)
+	continue;
 
       if (item->line == lineno)
 	{
@@ -5263,6 +5296,27 @@ completion_list_add_symbol (completion_tracker &tracker,
   completion_list_add_name (tracker, sym->language (),
 			    sym->natural_name (),
 			    lookup_name, text, word);
+
+  /* C++ function symbols include the parameters within both the msymbol
+     name and the symbol name.  The problem is that the msymbol name will
+     describe the parameters in the most basic way, with typedefs stripped
+     out, while the symbol name will represent the types as they appear in
+     the program.  This means we will see duplicate entries in the
+     completion tracker.  The following converts the symbol name back to
+     the msymbol name and removes the msymbol name from the completion
+     tracker.  */
+  if (sym->language () == language_cplus
+      && SYMBOL_DOMAIN (sym) == VAR_DOMAIN
+      && SYMBOL_CLASS (sym) == LOC_BLOCK)
+    {
+      /* The call to canonicalize returns the empty string if the input
+	 string is already in canonical form, thanks to this we don't
+	 remove the symbol we just added above.  */
+      std::string str
+	= cp_canonicalize_string_no_typedefs (sym->natural_name ());
+      if (!str.empty ())
+	tracker.remove_completion (str.c_str ());
+    }
 }
 
 /* completion_list_add_name wrapper for struct minimal_symbol.  */

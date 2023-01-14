@@ -1136,9 +1136,7 @@ elf64_alpha_info_to_howto (bfd *abfd, arelent *cache_ptr,
 
 /* Handle an Alpha specific section when reading an object file.  This
    is called when bfd_section_from_shdr finds a section with an unknown
-   type.
-   FIXME: We need to handle the SHF_ALPHA_GPREL flag, but I'm not sure
-   how to.  */
+   type.  */
 
 static bfd_boolean
 elf64_alpha_section_from_shdr (bfd *abfd,
@@ -1180,10 +1178,10 @@ elf64_alpha_section_from_shdr (bfd *abfd,
 /* Convert Alpha specific section flags to bfd internal section flags.  */
 
 static bfd_boolean
-elf64_alpha_section_flags (flagword *flags, const Elf_Internal_Shdr *hdr)
+elf64_alpha_section_flags (const Elf_Internal_Shdr *hdr)
 {
   if (hdr->sh_flags & SHF_ALPHA_GPREL)
-    *flags |= SEC_SMALL_DATA;
+    hdr->bfd_section->flags |= SEC_SMALL_DATA;
 
   return TRUE;
 }

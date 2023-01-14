@@ -64,13 +64,6 @@
 #endif
 #endif
 
-#ifdef TC_M68K
-#include "coff/m68k.h"
-#ifndef TARGET_FORMAT
-#define TARGET_FORMAT "coff-m68k"
-#endif
-#endif
-
 #ifdef TC_Z80
 #include "coff/z80.h"
 #define TARGET_FORMAT "coff-z80"
@@ -99,13 +92,6 @@
    : (sh_small ? "coff-sh-small" : "coff-sh"))
 
 #endif
-#endif
-
-#ifdef TC_MIPS
-#define COFF_WITH_PE
-#include "coff/mipspe.h"
-#undef  TARGET_FORMAT
-#define TARGET_FORMAT "pe-mips"
 #endif
 
 #ifdef TC_TIC30

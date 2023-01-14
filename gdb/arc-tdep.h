@@ -23,6 +23,7 @@
 
 /* Need disassemble_info.  */
 #include "dis-asm.h"
+#include "arch/arc.h"
 
 /* To simplify GDB code this enum assumes that internal regnums should be same
    as architectural register numbers, i.e. PCL regnum is 63.  This allows to
@@ -162,5 +163,8 @@ CORE_ADDR arc_insn_get_branch_target (const struct arc_instruction &insn);
    instruction length with LIMM".  */
 
 CORE_ADDR arc_insn_get_linear_next_pc (const struct arc_instruction &insn);
+
+/* Get the correct ARC target description for the given system type.  */
+const target_desc *arc_read_description (arc_sys_type sys_type);
 
 #endif /* ARC_TDEP_H */

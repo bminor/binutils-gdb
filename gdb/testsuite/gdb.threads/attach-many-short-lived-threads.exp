@@ -108,12 +108,18 @@ proc test {} {
 	    sleep 1
 
 	    set test "no new threads"
-	    gdb_test_multiple "info threads" $test {
-		-re "New .*$gdb_prompt $" {
-		    fail $test
+	    set status 1
+	    gdb_test_multiple "info threads" $test -lbl {
+		-re "\r\n\[^\r\n\]*New " {
+		    set status 0
+		    exp_continue
 		}
-		-re "$gdb_prompt $" {
-		    pass $test
+		-re -wrap "" {
+		    if { $status == 1 } {
+			pass $gdb_test_name
+		    } else {
+			fail $gdb_test_name
+		    }
 		}
 	    }
 

@@ -429,7 +429,7 @@ AM_MAKEINFOFLAGS = -I "$(srcdir)" -I "$(top_srcdir)/../libiberty" \
 TEXI2DVI = texi2dvi -I "$(srcdir)" -I "$(top_srcdir)/../libiberty" \
 		    -I "$(top_srcdir)/../bfd/doc" -I ../../bfd/doc
 
-MOSTLYCLEANFILES = $(man_MANS) binutils.info cxxfilt.man
+MAINTAINERCLEANFILES = $(man_MANS) binutils.info cxxfilt.man
 all: all-am
 
 .SUFFIXES:
@@ -712,7 +712,6 @@ install-strip:
 	    "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'" install; \
 	fi
 mostlyclean-generic:
-	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
 
 clean-generic:
 
@@ -723,6 +722,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
 clean: clean-am
 
 clean-am: clean-aminfo clean-generic clean-libtool mostlyclean-am

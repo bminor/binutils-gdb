@@ -351,6 +351,10 @@ rust_printstr (struct ui_file *stream, struct type *type,
 
 
 
+static void rust_value_print_inner (struct value *val, struct ui_file *stream,
+				    int recurse,
+				    const struct value_print_options *options);
+
 /* Helper function to print a string slice.  */
 
 static void
@@ -369,13 +373,12 @@ rust_val_print_str (struct ui_file *stream, struct value *val,
 /* rust_val_print helper for structs and untagged unions.  */
 
 static void
-val_print_struct (struct type *type, int embedded_offset,
-		  CORE_ADDR address, struct ui_file *stream,
-		  int recurse, struct value *val,
+val_print_struct (struct value *val, struct ui_file *stream, int recurse,
 		  const struct value_print_options *options)
 {
   int i;
   int first_field;
+  struct type *type = check_typedef (value_type (val));
 
   if (rust_slice_type_p (type) && strcmp (TYPE_NAME (type), "&str") == 0)
     {
@@ -386,7 +389,7 @@ val_print_struct (struct type *type, int embedded_offset,
 	 However, RUST_VAL_PRINT_STR looks up the fields of the string
 	 inside VAL, assuming that VAL is the string.
 	 So, recreate VAL as a value representing just the string.  */
-      val = value_at_lazy (type, value_address (val) + embedded_offset);
+      val = value_at_lazy (type, value_address (val));
       rust_val_print_str (stream, val, options);
       return;
     }
@@ -441,11 +444,8 @@ val_print_struct (struct type *type, int embedded_offset,
 	  fputs_filtered (": ", stream);
         }
 
-      val_print (TYPE_FIELD_TYPE (type, i),
-		 embedded_offset + TYPE_FIELD_BITPOS (type, i) / 8,
-		 address,
-		 stream, recurse + 1, val, &opts,
-		 current_language);
+      rust_value_print_inner (value_field (val, i), stream, recurse + 1,
+			      &opts);
     }
 
   if (options->prettyformat)
@@ -463,12 +463,11 @@ val_print_struct (struct type *type, int embedded_offset,
 /* rust_val_print helper for discriminated unions (Rust enums).  */
 
 static void
-rust_print_enum (struct type *type, int embedded_offset,
-		 CORE_ADDR address, struct ui_file *stream,
-		 int recurse, struct value *val,
+rust_print_enum (struct value *val, struct ui_file *stream, int recurse,
 		 const struct value_print_options *options)
 {
   struct value_print_options opts = *options;
+  struct type *type = check_typedef (value_type (val));
 
   opts.deref_ref = 0;
 
@@ -482,9 +481,7 @@ rust_print_enum (struct type *type, int embedded_offset,
     }
 
   const gdb_byte *valaddr = value_contents_for_printing (val);
-  struct field *variant_field = rust_enum_variant (type,
-						   valaddr + embedded_offset);
-  embedded_offset += FIELD_BITPOS (*variant_field) / 8;
+  struct field *variant_field = rust_enum_variant (type, valaddr);
   struct type *variant_type = FIELD_TYPE (*variant_field);
 
   int nfields = TYPE_NFIELDS (variant_type);
@@ -508,6 +505,10 @@ rust_print_enum (struct type *type, int embedded_offset,
       fprintf_filtered (stream, "{");
     }
 
+  struct value *union_value = value_field (val, 0);
+  int fieldno = (variant_field - &TYPE_FIELD (value_type (union_value), 0));
+  val = value_field (union_value, fieldno);
+
   bool first_field = true;
   for (int j = 0; j < TYPE_NFIELDS (variant_type); j++)
     {
@@ -520,12 +521,8 @@ rust_print_enum (struct type *type, int embedded_offset,
 			  styled_string (variable_name_style.style (),
 					 TYPE_FIELD_NAME (variant_type, j)));
 
-      val_print (TYPE_FIELD_TYPE (variant_type, j),
-		 (embedded_offset
-		  + TYPE_FIELD_BITPOS (variant_type, j) / 8),
-		 address,
-		 stream, recurse + 1, val, &opts,
-		 current_language);
+      rust_value_print_inner (value_field (val, j), stream, recurse + 1,
+			      &opts);
     }
 
   if (is_tuple)
@@ -548,17 +545,20 @@ static const struct generic_val_print_decorations rust_decorations =
   "]"
 };
 
-/* la_val_print implementation for Rust.  */
-
+/* la_value_print_inner implementation for Rust.  */
 static void
-rust_val_print (struct type *type, int embedded_offset,
-		CORE_ADDR address, struct ui_file *stream, int recurse,
-		struct value *val,
-		const struct value_print_options *options)
+rust_value_print_inner (struct value *val, struct ui_file *stream,
+			int recurse,
+			const struct value_print_options *options)
 {
-  const gdb_byte *valaddr = value_contents_for_printing (val);
+  struct value_print_options opts = *options;
+  opts.deref_ref = 1;
 
-  type = check_typedef (type);
+  if (opts.prettyformat == Val_prettyformat_default)
+    opts.prettyformat = (opts.prettyformat_structs
+			 ? Val_prettyformat : Val_no_prettyformat);
+
+  struct type *type = check_typedef (value_type (val));
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_PTR:
@@ -568,34 +568,32 @@ rust_val_print (struct type *type, int embedded_offset,
 	if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_ARRAY
 	    && rust_u8_type_p (TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (type)))
 	    && get_array_bounds (TYPE_TARGET_TYPE (type), &low_bound,
-				 &high_bound)) {
-	  /* We have a pointer to a byte string, so just print
-	     that.  */
-	  struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
-	  CORE_ADDR addr;
-	  struct gdbarch *arch = get_type_arch (type);
-	  int unit_size = gdbarch_addressable_memory_unit_size (arch);
+				 &high_bound))
+	  {
+	    /* We have a pointer to a byte string, so just print
+	       that.  */
+	    struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
+	    CORE_ADDR addr = value_as_address (val);
+	    struct gdbarch *arch = get_type_arch (type);
 
-	  addr = unpack_pointer (type, valaddr + embedded_offset * unit_size);
-	  if (options->addressprint)
-	    {
-	      fputs_filtered (paddress (arch, addr), stream);
-	      fputs_filtered (" ", stream);
-	    }
+	    if (opts.addressprint)
+	      {
+		fputs_filtered (paddress (arch, addr), stream);
+		fputs_filtered (" ", stream);
+	      }
 
-	  fputs_filtered ("b", stream);
-	  val_print_string (TYPE_TARGET_TYPE (elttype), "ASCII", addr,
-			    high_bound - low_bound + 1, stream,
-			    options);
-	  break;
-	}
+	    fputs_filtered ("b", stream);
+	    val_print_string (TYPE_TARGET_TYPE (elttype), "ASCII", addr,
+			      high_bound - low_bound + 1, stream,
+			      &opts);
+	    break;
+	  }
       }
-      /* Fall through.  */
+      goto generic_print;
 
     case TYPE_CODE_METHODPTR:
     case TYPE_CODE_MEMBERPTR:
-      c_val_print (type, embedded_offset, address, stream,
-		   recurse, val, options);
+      c_value_print_inner (val, stream, recurse, &opts);
       break;
 
     case TYPE_CODE_INT:
@@ -610,8 +608,6 @@ rust_val_print (struct type *type, int embedded_offset,
 
     case TYPE_CODE_STRING:
       {
-	struct gdbarch *arch = get_type_arch (type);
-	int unit_size = gdbarch_addressable_memory_unit_size (arch);
 	LONGEST low_bound, high_bound;
 
 	if (!get_array_bounds (type, &low_bound, &high_bound))
@@ -622,8 +618,8 @@ rust_val_print (struct type *type, int embedded_offset,
 	   encoding.  */
 	fputs_filtered ("b", stream);
 	rust_printstr (stream, TYPE_TARGET_TYPE (type),
-		       valaddr + embedded_offset * unit_size,
-		       high_bound - low_bound + 1, "ASCII", 0, options);
+		       value_contents_for_printing (val),
+		       high_bound - low_bound + 1, "ASCII", 0, &opts);
       }
       break;
 
@@ -645,24 +641,20 @@ rust_val_print (struct type *type, int embedded_offset,
 	 for printing a union is same as that for a struct, the only
 	 difference is that the input type will have overlapping
 	 fields.  */
-      val_print_struct (type, embedded_offset, address, stream,
-			recurse, val, options);
+      val_print_struct (val, stream, recurse, &opts);
       break;
 
     case TYPE_CODE_STRUCT:
       if (rust_enum_p (type))
-	rust_print_enum (type, embedded_offset, address, stream,
-			 recurse, val, options);
+	rust_print_enum (val, stream, recurse, &opts);
       else
-	val_print_struct (type, embedded_offset, address, stream,
-			  recurse, val, options);
+	val_print_struct (val, stream, recurse, &opts);
       break;
 
     default:
     generic_print:
       /* Nothing special yet.  */
-      generic_val_print (type, embedded_offset, address, stream,
-			 recurse, val, options, &rust_decorations);
+      generic_value_print (val, stream, recurse, &opts, &rust_decorations);
     }
 }
 
@@ -2153,7 +2145,7 @@ extern const struct language_defn rust_language_defn =
   rust_emitchar,		/* Print a single char */
   rust_print_type,		/* Print a type using appropriate syntax */
   rust_print_typedef,		/* Print a typedef using appropriate syntax */
-  rust_val_print,		/* Print a value using appropriate syntax */
+  rust_value_print_inner,	/* la_value_print_inner */
   c_value_print,		/* Print a top-level value */
   default_read_var_value,	/* la_read_var_value */
   NULL,				/* Language specific skip_trampoline */

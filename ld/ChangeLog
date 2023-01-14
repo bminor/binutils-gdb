@@ -1,3 +1,286 @@
+2020-03-25  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/compress1c.d: xfail h8300.
+	* testsuite/ld-elf/compressed1c.d: Likewise.
+	* testsuite/ld-elf/compressed1e.d: Likewise.
+	* testsuite/ld-elf/dynamic1.d: Likewise.
+	* testsuite/ld-elf/dynsym1.d: Likewise.
+	* testsuite/ld-elf/ehdr_start-shared.d: Likewise.
+	* testsuite/ld-elf/exclude3b.d: Likewise.
+	* testsuite/ld-elf/export-class.exp: Don't run without -shared support.
+	* testsuite/ld-elf/global1.d: xfail h8300.
+	* testsuite/ld-elf/hash.d: Likewise.
+	* testsuite/ld-elf/loadaddr1.d: Likewise.
+	* testsuite/ld-elf/loadaddr2.d: Likewise.
+	* testsuite/ld-elf/local1.d: Likewise.
+	* testsuite/ld-elf/mbind1b.d: Likewise.
+	* testsuite/ld-elf/mbind1c.d: Likewise.
+	* testsuite/ld-elf/now-1.d: Likewise.
+	* testsuite/ld-elf/now-2.d: Likewise.
+	* testsuite/ld-elf/now-3.d: Likewise.
+	* testsuite/ld-elf/now-4.d: Likewise.
+	* testsuite/ld-elf/pie.d: Likewise.
+	* testsuite/ld-elf/pr12975.d: Likewise.
+	* testsuite/ld-elf/pr13177.d: Likewise.
+	* testsuite/ld-elf/pr13195.d: Likewise.
+	* testsuite/ld-elf/pr16322.d: Likewise.
+	* testsuite/ld-elf/pr16498a.d: Likewise.
+	* testsuite/ld-elf/pr16498b.d: Likewise.
+	* testsuite/ld-elf/pr17615.d: Likewise.
+	* testsuite/ld-elf/pr19162.d: Likewise.
+	* testsuite/ld-elf/pr19539.d: Likewise.
+	* testsuite/ld-elf/pr19617a.d: Likewise.
+	* testsuite/ld-elf/pr19698.d: Likewise.
+	* testsuite/ld-elf/pr20513c.d: Likewise.
+	* testsuite/ld-elf/pr20513d.d: Likewise.
+	* testsuite/ld-elf/pr21389a.d: Likewise.
+	* testsuite/ld-elf/pr21389b.d: Likewise.
+	* testsuite/ld-elf/pr21389c.d: Likewise.
+	* testsuite/ld-elf/pr21562a.d: Likewise.
+	* testsuite/ld-elf/pr21562b.d: Likewise.
+	* testsuite/ld-elf/pr21562c.d: Likewise.
+	* testsuite/ld-elf/pr21562d.d: Likewise.
+	* testsuite/ld-elf/pr21562e.d: Likewise.
+	* testsuite/ld-elf/pr21562f.d: Likewise.
+	* testsuite/ld-elf/pr21562g.d: Likewise.
+	* testsuite/ld-elf/pr21562h.d: Likewise.
+	* testsuite/ld-elf/pr21562i.d: Likewise.
+	* testsuite/ld-elf/pr21562j.d: Likewise.
+	* testsuite/ld-elf/pr21562k.d: Likewise.
+	* testsuite/ld-elf/pr21562l.d: Likewise.
+	* testsuite/ld-elf/pr21562m.d: Likewise.
+	* testsuite/ld-elf/pr21562n.d: Likewise.
+	* testsuite/ld-elf/pr21903a.d: Likewise.
+	* testsuite/ld-elf/pr21903b.d: Likewise.
+	* testsuite/ld-elf/pr21903d.d: Likewise.
+	* testsuite/ld-elf/pr22269a.d: Likewise.
+	* testsuite/ld-elf/pr22269b.d: Likewise.
+	* testsuite/ld-elf/pr22393-1a.d: Likewise.
+	* testsuite/ld-elf/pr22393-1b.d: Likewise.
+	* testsuite/ld-elf/pr22393-1c.d: Likewise.
+	* testsuite/ld-elf/pr22393-1d.d: Likewise.
+	* testsuite/ld-elf/pr22393-1e.d: Likewise.
+	* testsuite/ld-elf/pr22393-1f.d: Likewise.
+	* testsuite/ld-elf/pr22423.d: Likewise.
+	* testsuite/ld-elf/pr22450.d: xfail avr, crx, h8300, ip2k, m68hc11,
+	and xc16x.
+	* testsuite/ld-elf/pr23658-1c.d: xfail h8300.
+	* testsuite/ld-elf/pr25708.d: xfail h8300 and hppa64.
+	* testsuite/ld-elf/rpath-1.d: xfail h8300.
+	* testsuite/ld-elf/rpath-2.d: Likewise.
+	* testsuite/ld-elf/runpath-1.d: Likewise.
+	* testsuite/ld-elf/runpath-2.d: Likewise.
+	* testsuite/ld-elf/sizeofb.d: Likewise.
+	* testsuite/ld-elf/startofb.d: Likewise.
+	* testsuite/ld-elf/strtab.d: Likewise.
+	* testsuite/ld-elf/textaddr1.d: Likewise.
+	* testsuite/ld-elf/textaddr2.d: Likewise.
+	* testsuite/ld-elf/textaddr4.d: Likewise.
+	* testsuite/ld-elf/textaddr5.d: Likewise.
+	* testsuite/ld-elf/textaddr6.d: Likewise.
+	* testsuite/ld-elf/unknown2.d: Likewise.
+	* testsuite/ld-undefined/entry-3.d: Likewise.
+	* testsuite/ld-undefined/entry-4.d: Likewise.
+	* testsuite/ld-h8300/h8300.exp: Pass appropriate ld -m option.
+	* testsuite/ld-h8300/gcsection.d: Remove ld -m option and relax
+	file format match.
+	* testsuite/ld-h8300/relax-2.d: Likewise.
+	* testsuite/ld-h8300/relax-3.d: Likewise.
+	* testsuite/ld-h8300/relax-4.d: Likewise.
+	* testsuite/ld-h8300/relax-5.d: Likewise.
+	* testsuite/ld-h8300/relax-6.d: Likewise.
+	* testsuite/ld-h8300/relax-7.d: Likewise.
+	* testsuite/ld-h8300/relax.d: Relax file format match.
+
+2020-03-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25708
+	* testsuite/ld-elf/pr25708.d: New file.
+
+2020-03-23  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (ALL_EMULATION_SOURCES): Reinstate ei386aout.c.
+	Include ei386aout dep file.
+	* Makefile.in: Regenerate.
+	* po/BLD-POTFILES.in: Regenerate.
+
+2020-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-plugin/lto.exp (lto_link_tests): Run PR ld/25355
+	test only for GCC 10 or newer.
+
+2020-03-20  Alan Modra  <amodra@gmail.com>
+
+	* testplug.c (parse_symdefstr): Use %hhi to read sym->def, and
+	clear new fields.
+	* testplug2.c (parse_symdefstr): Likewise.
+	* testplug3.c (parse_symdefstr): Likewise.
+	* testplug4.c (parse_symdefstr): Likewise.
+
+2020-03-18  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	* testsuite/ld-arm/non-contiguous-arm4.d: Fix expected output.
+	* testsuite/ld-powerpc/non-contiguous-powerpc.d: Likewise.
+
+2020-03-18  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	* emultempl/xtensaelf.em: Emit a fatal error message
+	instead of calling abort.
+	* ldlang.c: Likewise.
+
+2020-03-14  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/non-contiguous.d: Don't xfail generic ELF
+	targets.  Don't skip xtensa, xfail instead.
+
+2020-03-13  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	* ldlang.c (lang_add_section): Add support for
+	non_contiguous_regions.
+	(size_input_section): Likewise.
+	(lang_size_sections_1): Likewise.
+	(process_insert_statements): Likewise.
+	* ldlex.h (option_values): Add OPTION_NON_CONTIGUOUS_REGIONS and
+	OPTION_NON_CONTIGUOUS_REGIONS_WARNINGS.
+	* lexsup.c (ld_options): Add entries for
+	--enable-non-contiguous-regions and
+	--enable-non-contiguous-regions-warnings.
+	(parse_args): Handle it.
+	* NEWS: Add --enable-non-contiguous-regions and
+	--enable-non-contiguous-regions-warnings.
+	* ld.texi: Add --enable-non-contiguous-regions and
+	--enable-non-contiguous-regions-warnings documentation.
+	* emultempl/armelf.em (elf32_arm_add_stub_section): Add
+	SEC_LINKER_CREATED flag.
+	* emultempl/xtensaelf.em (ld_build_required_section_dependence):
+	Emit an error when --enable-non-contiguous-regions is used.
+	* testsuite/ld-elf/non-contiguous.d: New.
+	* testsuite/ld-elf/non-contiguous.ld: New.
+	* testsuite/ld-elf/non-contiguous.s: New.
+	* testsuite/ld-arm/arm-elf.exp: Run the new tests.
+	* testsuite/ld-arm/arm-elf/non-contiguous-arm.s: New.
+	* testsuite/ld-arm/arm-elf/non-contiguous-arm.d: New.
+	* testsuite/ld-arm/arm-elf/non-contiguous-arm.ld: New.
+	* testsuite/ld-arm/arm-elf/non-contiguous-arm2.d: New.
+	* testsuite/ld-arm/arm-elf/non-contiguous-arm3.ld: New.
+	* testsuite/ld-arm/arm-elf/non-contiguous-arm3.d: New.
+	* testsuite/ld-arm/arm-elf/non-contiguous-arm3.ld: New.
+	* testsuite/ld-arm/arm-elf/non-contiguous-arm4.d: New.
+	* testsuite/ld-arm/arm-elf/non-contiguous-arm4.ld: New.
+	* testsuite/ld-arm/arm-elf/non-contiguous-arm5.d: New.
+	* testsuite/ld-arm/arm-elf/non-contiguous-arm5.ld: New.
+	* testsuite/ld-arm/arm-elf/non-contiguous-arm6.d: New.
+	* testsuite/ld-arm/arm-elf/non-contiguous-arm6.ld: New.
+	* testsuite/ld-powerpc/powerpc.exp: Run new tests.
+	* testsuite/ld-powerpc/non-contiguous-powerpc.d: New.
+	* testsuite/ld-powerpc/non-contiguous-powerpc.ld: New.
+	* testsuite/ld-powerpc/non-contiguous-powerpc.sd: New.
+	* testsuite/ld-powerpc/non-contiguous-powerpc64.d: New.
+
+2020-03-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/24920
+	* emulparams/elf32_x86_64.sh: Use static.sh.
+	* emulparams/elf_i386.sh: Likewise.
+	* emulparams/elf_x86_64.sh: Likewise.
+	* emulparams/static.sh: New file.
+	* emultempl/elf-x86.em: Include "ldlex.h".
+	* testsuite/ld-elf/pr24920.err: New file.
+	* testsuite/ld-elf/linux-x86.exp: Run ld/24920 tests.
+
+2020-03-13  Christian Eggers  <ceggers@gmx.de>
+
+	* ldexp.c (fold_name): Return SIZEOF_HEADERS in bytes.
+
+2020-03-11  Alan Modra  <amodra@gmail.com>
+
+	* ldelf.c (elf_orphan_compatible): Return false when two sections
+	have differing SHF_MASKPROC or SHF_MASKOS flags.
+
+2020-03-05  Alan Modra  <amodra@gmail.com>
+
+	PR 25570
+	* ldlang.c (lang_size_sections_1): Don't report changes on
+	second and subsequent iterations that make no change in
+	alignment from that already reported.
+
+2020-03-05  Alan Modra  <amodra@gmail.com>
+
+	PR 25570
+	* ldlang.c (lang_sizing_iteration): New static var.
+	(lang_size_sections_1): Warn about no memory region only on first
+	iteration.  Warn about changing start address on first iteration
+	then any delta from that on subsequent iterations.  Report a signed
+	delta.
+	(one_lang_size_sections_pass): Increment lang_sizing_iteration.
+
+2020-03-03  Nick Clifton  <nickc@redhat.com>
+
+	PR 25588
+	* ld.texi (Options): Update the description of the --rpath-link
+	option.
+
+2020-03-02  Alan Modra  <amodra@gmail.com>
+
+	* plugin.c (plugin_object_p): Return a bfd_cleanup.
+	(plugin_cleanup): New function.
+
+2020-03-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/25618
+	* plugin.c (plugin_object_p): Copy the no_export field to the IR
+	dummy object.
+	* testsuite/ld-plugin/lto.exp (lto_link_elf_tests): Add
+	PR ld/25618 tests.
+	* testsuite/ld-plugin/pr25618.d: New file.
+	* testsuite/ld-plugin/pr25618a.cc: Likewise.
+	* testsuite/ld-plugin/pr25618a.h: Likewise.
+	* testsuite/ld-plugin/pr25618b.cc: Likewise.
+	* testsuite/ld-plugin/pr25618b.h: Likewise.
+
+2020-02-27  Alan Modra  <amodra@gmail.com>
+
+	PR 24511
+	* testsuite/ld-mmix/b-fixo2.d: Adjust for .data change.
+	* testsuite/ld-mmix/sec-2.d: Likewise.
+	* testsuite/ld-mmix/sec-3.d: Likewise.
+	* testsuite/ld-mmix/sec-4.d: Likewise.
+	* testsuite/ld-mmix/spec802.d: Likewise.
+	* testsuite/ld-mmix/spec803.d: Likewise.
+	* testsuite/ld-mmix/spec804.d: Likewise.
+	* testsuite/ld-mmix/spec805.d: Likewise.
+	* testsuite/ld-mmix/spec806.d: Likewise.
+	* testsuite/ld-mmix/spec807.d: Likewise.
+	* testsuite/ld-mmix/spec808.d: Likewise.
+
+2020-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/25593
+	* testsuite/ld-plugin/lto.exp: Run PR ld/25593 tests.
+	* testsuite/ld-plugin/pr25593.d: New file.
+	* testsuite/ld-plugin/pr25593a-1.c: Likewise.
+	* testsuite/ld-plugin/pr25593a-2.c: Likewise.
+	* testsuite/ld-plugin/pr25593b.c: Likewise.
+	* testsuite/ld-plugin/pr25593c.c: Likewise.
+	* testsuite/ld-plugin/pr25593d.c: Likewise.
+	* testsuite/ld-plugin/pr25593e.c: Likewise.
+
+2020-02-26  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/cskyelf.em: Indent labels correctly.
+	* ldfile.c: Likewise.
+	* ldlang.c: Likewise.
+	* plugin.c: Likewise.
+
+2020-02-26  Alan Modra  <amodra@gmail.com>
+
+	PR 25593
+	* ldelf.c (ldelf_try_needed): Add DT_NEEDED lib to input_bfds.
+	(ldelf_after_open): Save state of input_bfds list before loading
+	DT_NEEDED libs.  Traverse input_bfds list adding DT_NEEDED tags.
+	Restore input_bfds list.
+	* testsuite/ld-cris/gotplt1.d: Adjust for changed .dynstr order.
+
 2020-02-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Update French translation.

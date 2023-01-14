@@ -17,6 +17,7 @@
 @menu
 * RISC-V-Options::        RISC-V Options
 * RISC-V-Directives::     RISC-V Directives
+* RISC-V-Modifiers::      RISC-V Assembler Modifiers
 * RISC-V-Formats::        RISC-V Instruction Formats
 * RISC-V-ATTRIBUTE::      RISC-V Object Attribute
 @end menu
@@ -207,8 +208,134 @@ The @var{tag} is either an attribute number, or one of the following:
 
 @end table
 
+@node RISC-V-Modifiers
+@section RISC-V Assembler Modifiers
+
+The RISC-V assembler supports following modifiers for relocatable addresses
+used in RISC-V instruction operands.  However, we also support some pseudo
+instructions that are easier to use than these modifiers.
+
+@table @code
+@item %lo(@var{symbol})
+The low 12 bits of absolute address for @var{symbol}.
+
+@item %hi(@var{symbol})
+The high 20 bits of absolute address for @var{symbol}.  This is usually
+used with the %lo modifier to represent a 32-bit absolute address.
+
+@smallexample
+	lui        a0, %hi(@var{symbol})     // R_RISCV_HI20
+	addi       a0, a0, %lo(@var{symbol}) // R_RISCV_LO12_I
+
+	lui        a0, %hi(@var{symbol})     // R_RISCV_HI20
+	load/store a0, %lo(@var{symbol})(a0) // R_RISCV_LO12_I/S
+@end smallexample
+
+@item %pcrel_lo(@var{label})
+The low 12 bits of relative address between pc and @var{symbol}.
+The @var{symbol} is related to the high part instruction which is marked
+by @var{label}.
+
+@item %pcrel_hi(@var{symbol})
+The high 20 bits of relative address between pc and @var{symbol}.
+This is usually used with the %pcrel_lo modifier to represent a +/-2GB
+pc-relative range.
+
+@smallexample
+@var{label}:
+	auipc      a0, %pcrel_hi(@var{symbol})    // R_RISCV_PCREL_HI20
+	addi       a0, a0, %pcrel_lo(@var{label}) // R_RISCV_PCREL_LO12_I
+
+@var{label}:
+	auipc      a0, %pcrel_hi(@var{symbol})    // R_RISCV_PCREL_HI20
+	load/store a0, %pcrel_lo(@var{label})(a0) // R_RISCV_PCREL_LO12_I/S
+@end smallexample
+
+Or you can use the pseudo lla/lw/sw/... instruction to do this.
+
+@smallexample
+	lla  a0, @var{symbol}
+@end smallexample
+
+@item %got_pcrel_hi(@var{symbol})
+The high 20 bits of relative address between pc and the GOT entry of
+@var{symbol}.  This is usually used with the %pcrel_lo modifier to access
+the GOT entry.
+
+@smallexample
+@var{label}:
+	auipc      a0, %got_pcrel_hi(@var{symbol}) // R_RISCV_GOT_HI20
+	addi       a0, a0, %pcrel_lo(@var{label})  // R_RISCV_PCREL_LO12_I
+
+@var{label}:
+	auipc      a0, %got_pcrel_hi(@var{symbol}) // R_RISCV_GOT_HI20
+	load/store a0, %pcrel_lo(@var{label})(a0)  // R_RISCV_PCREL_LO12_I/S
+@end smallexample
+
+Also, the pseudo la instruction with PIC has similar behavior.
+
+@item %tprel_add(@var{symbol})
+This is used purely to associate the R_RISCV_TPREL_ADD relocation for
+TLS relaxation.  This one is only valid as the fourth operand to the normally
+3 operand add instruction.
+
+@item %tprel_lo(@var{symbol})
+The low 12 bits of relative address between tp and @var{symbol}.
+
+@item %tprel_hi(@var{symbol})
+The high 20 bits of relative address between tp and @var{symbol}.  This is
+usually used with the %tprel_lo and %tprel_add modifiers to access the thread
+local variable @var{symbol} in TLS Local Exec.
+
+@smallexample
+	lui        a5, %tprel_hi(@var{symbol})          // R_RISCV_TPREL_HI20
+	add        a5, a5, tp, %tprel_add(@var{symbol}) // R_RISCV_TPREL_ADD
+	load/store t0, %tprel_lo(@var{symbol})(a5)      // R_RISCV_TPREL_LO12_I/S
+@end smallexample
+
+@item %tls_ie_pcrel_hi(@var{symbol})
+The high 20 bits of relative address between pc and GOT entry.  It is
+usually used with the %pcrel_lo modifier to access the thread local
+variable @var{symbol} in TLS Initial Exec.
+
+@smallexample
+	la.tls.ie  a5, @var{symbol}
+	add        a5, a5, tp
+	load/store t0, 0(a5)
+@end smallexample
+
+The pseudo la.tls.ie instruction can be expended to
+
+@smallexample
+@var{label}:
+	auipc a5, %tls_ie_pcrel_hi(@var{symbol}) // R_RISCV_TLS_GOT_HI20
+	load  a5, %pcrel_lo(@var{label})(a5)     // R_RISCV_PCREL_LO12_I
+@end smallexample
+
+@item %tls_gd_pcrel_hi(@var{symbol})
+The high 20 bits of relative address between pc and GOT entry.  It is
+usually used with the %pcrel_lo modifier to access the thread local variable
+@var{symbol} in TLS Global Dynamic.
+
+@smallexample
+	la.tls.gd  a0, @var{symbol}
+	call       __tls_get_addr@@plt
+	mv         a5, a0
+	load/store t0, 0(a5)
+@end smallexample
+
+The pseudo la.tls.gd instruction can be expended to
+
+@smallexample
+@var{label}:
+	auipc a0, %tls_gd_pcrel_hi(@var{symbol}) // R_RISCV_TLS_GD_HI20
+	addi  a0, a0, %pcrel_lo(@var{label})     // R_RISCV_PCREL_LO12_I
+@end smallexample
+
+@end table
+
 @node RISC-V-Formats
-@section Instruction Formats
+@section RISC-V Instruction Formats
 @cindex instruction formats, risc-v
 @cindex RISC-V instruction formats
 

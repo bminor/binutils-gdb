@@ -725,14 +725,14 @@ fbsd_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
   if (get_exec_file (0))
     {
       const char *fname = lbasename (get_exec_file (0));
-      char *psargs = xstrdup (fname);
+      std::string psargs = fname;
 
-      if (get_inferior_args ())
-	psargs = reconcat (psargs, psargs, " ", get_inferior_args (),
-			   (char *) NULL);
+      const char *infargs = get_inferior_args ();
+      if (infargs != NULL)
+	psargs = psargs + " " + infargs;
 
       note_data = elfcore_write_prpsinfo (obfd, note_data, note_size,
-					  fname, psargs);
+					  fname, psargs.c_str ());
     }
 
   /* Thread register information.  */

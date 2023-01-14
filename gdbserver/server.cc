@@ -130,6 +130,7 @@ bool disable_packet_vCont;
 bool disable_packet_Tthread;
 bool disable_packet_qC;
 bool disable_packet_qfThreadInfo;
+bool disable_packet_T;
 
 static unsigned char *mem_buf;
 
@@ -3649,6 +3650,8 @@ captured_main (int argc, char *argv[])
 		disable_packet_qC = true;
 	      else if (strcmp ("qfThreadInfo", tok) == 0)
 		disable_packet_qfThreadInfo = true;
+	      else if (strcmp ("T", tok) == 0)
+		disable_packet_T = true;
 	      else if (strcmp ("threads", tok) == 0)
 		{
 		  disable_packet_vCont = true;

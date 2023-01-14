@@ -646,7 +646,7 @@ srec_scan (bfd *abfd)
 
 /* Check whether an existing file is an S-record file.  */
 
-static const bfd_target *
+static bfd_cleanup
 srec_object_p (bfd *abfd)
 {
   void * tdata_save;
@@ -676,12 +676,12 @@ srec_object_p (bfd *abfd)
   if (abfd->symcount > 0)
     abfd->flags |= HAS_SYMS;
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 }
 
 /* Check whether an existing file is an S-record file with symbols.  */
 
-static const bfd_target *
+static bfd_cleanup
 symbolsrec_object_p (bfd *abfd)
 {
   void * tdata_save;
@@ -711,7 +711,7 @@ symbolsrec_object_p (bfd *abfd)
   if (abfd->symcount > 0)
     abfd->flags |= HAS_SYMS;
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 }
 
 /* Read in the contents of a section in an S-record file.  */

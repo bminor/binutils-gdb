@@ -49,6 +49,12 @@ struct elf_linker_x86_params
   /* TRUE if generate a 1-byte NOP as suffix for x86 call instruction.  */
   unsigned int call_nop_as_suffix : 1;
 
+  /* TRUE if -static is passed at command-line before all input files.  */
+  unsigned int static_before_all_inputs : 1;
+
+  /* TRUE if --dynamic-linker is passed at command-line.  */
+  unsigned int has_dynamic_linker : 1;
+
   /* Report missing IBT and SHSTK properties.  */
   enum elf_x86_cet_report cet_report;
 

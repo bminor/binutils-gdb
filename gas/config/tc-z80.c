@@ -155,7 +155,7 @@ struct match_info
 static const struct match_info
 match_cpu_table [] =
 {
-  {"z80",     INS_Z80, 0, 0, "Zilog Z80 (+infc+xyhl)" },
+  {"z80",     INS_Z80, 0, 0, "Zilog Z80" },
   {"ez80",    INS_EZ80, 0, 0, "Zilog eZ80" },
   {"gbz80",   INS_GBZ80, INS_UNDOC|INS_UNPORT, 0, "GameBoy Z80" },
   {"r800",    INS_R800, INS_UNPORT, 0, "Ascii R800" },
@@ -428,6 +428,7 @@ struct reg_entry
 {
   const char* name;
   int number;
+  int isa;
 };
 #define R_STACKABLE (0x80)
 #define R_ARITH     (0x40)
@@ -457,28 +458,28 @@ struct reg_entry
 
 static const struct reg_entry regtable[] =
 {
-  {"a",  REG_A },
-  {"af", REG_AF },
-  {"b",  REG_B },
-  {"bc", REG_BC },
-  {"c",  REG_C },
-  {"d",  REG_D },
-  {"de", REG_DE },
-  {"e",  REG_E },
-  {"f",  REG_F },
-  {"h",  REG_H },
-  {"hl", REG_HL },
-  {"i",  REG_I },
-  {"ix", REG_IX },
-  {"ixh",REG_H | R_IX },
-  {"ixl",REG_L | R_IX },
-  {"iy", REG_IY },
-  {"iyh",REG_H | R_IY },
-  {"iyl",REG_L | R_IY },
-  {"l",  REG_L },
-  {"mb", REG_MB },
-  {"r",  REG_R },
-  {"sp", REG_SP },
+  {"a",   REG_A,        INS_ALL },
+  {"af",  REG_AF,       INS_ALL },
+  {"b",   REG_B,        INS_ALL },
+  {"bc",  REG_BC,       INS_ALL },
+  {"c",   REG_C,        INS_ALL },
+  {"d",   REG_D,        INS_ALL },
+  {"de",  REG_DE,       INS_ALL },
+  {"e",   REG_E,        INS_ALL },
+  {"f",   REG_F,        INS_IN_F_C | INS_Z80N | INS_R800 },
+  {"h",   REG_H,        INS_ALL },
+  {"hl",  REG_HL,       INS_ALL },
+  {"i",   REG_I,        INS_NOT_GBZ80 },
+  {"ix",  REG_IX,       INS_NOT_GBZ80 },
+  {"ixh", REG_H | R_IX, INS_IDX_HALF | INS_EZ80 | INS_R800 | INS_Z80N },
+  {"ixl", REG_L | R_IX, INS_IDX_HALF | INS_EZ80 | INS_R800 | INS_Z80N },
+  {"iy",  REG_IY,       INS_NOT_GBZ80 },
+  {"iyh", REG_H | R_IY, INS_IDX_HALF | INS_EZ80 | INS_R800 | INS_Z80N },
+  {"iyl", REG_L | R_IY, INS_IDX_HALF | INS_EZ80 | INS_R800 | INS_Z80N },
+  {"l",   REG_L,        INS_ALL },
+  {"mb",  REG_MB,       INS_EZ80 },
+  {"r",   REG_R,        INS_NOT_GBZ80 },
+  {"sp",  REG_SP,       INS_ALL },
 } ;
 
 #define BUFLEN 8 /* Large enough for any keyword.  */
@@ -499,6 +500,8 @@ md_begin (void)
   reg.X_add_symbol = reg.X_op_symbol = 0;
   for ( i = 0 ; i < ARRAY_SIZE ( regtable ) ; ++i )
     {
+      if (regtable[i].isa && !(regtable[i].isa & ins_ok))
+	continue;
       reg.X_add_number = regtable[i].number;
       k = strlen ( regtable[i].name );
       buf[k] = 0;
@@ -615,7 +618,7 @@ z80_start_line_hook (void)
 	  break;
 	}
     }
-  /* Check for <label>[:] [.](EQU|DEFL) <value>.  */
+  /* Check for <label>[:] =|([.](EQU|DEFL)) <value>.  */
   if (is_name_beginner (*input_line_pointer))
     {
       char *name;
@@ -625,20 +628,9 @@ z80_start_line_hook (void)
       line_start = input_line_pointer;
       if (ignore_input ())
 	return 0;
-
       c = get_symbol_name (&name);
       rest = input_line_pointer + 1;
-
-      if (ISSPACE (c) && colonless_labels)
-        {
-          if (c == '\n')
-            {
-              bump_line_counters ();
-              LISTING_NEWLINE ();
-            }
-          c = ':';
-        }
-      if (*rest == ':')
+      if (c == ':' && *rest == ':')
         {
           /* remove second colon if SDCC compatibility enabled */
           if (sdcc_compat)
@@ -646,15 +638,20 @@ z80_start_line_hook (void)
           ++rest;
         }
       rest = (char*)skip_space (rest);
-      if (*rest == '.')
-	++rest;
-      if (strncasecmp (rest, "EQU", 3) == 0)
-	len = 3;
-      else if (strncasecmp (rest, "DEFL", 4) == 0)
-	len = 4;
+      if (*rest == '=')
+	len = (rest[1] == '=') ? 2 : 1;
       else
-	len = 0;
-      if (len && (!ISALPHA (rest[len])))
+	{
+	  if (*rest == '.')
+	    ++rest;
+	  if (strncasecmp (rest, "EQU", 3) == 0)
+	    len = 3;
+	  else if (strncasecmp (rest, "DEFL", 4) == 0)
+	    len = 4;
+	  else
+	    len = 0;
+	}
+      if (len && (len <= 2 || !ISALPHA (rest[len])))
 	{
 	  /* Handle assignment here.  */
 	  if (line_start[-1] == '\n')
@@ -664,7 +661,17 @@ z80_start_line_hook (void)
 	    }
 	  input_line_pointer = rest + len - 1;
 	  /* Allow redefining with "DEFL" (len == 4), but not with "EQU".  */
-	  equals (name, len == 4);
+	  switch (len)
+	    {
+	    case 1: /* label = expr */
+	    case 4: /* label DEFL expr */
+	      equals (name, 1);
+	      break;
+	    case 2: /* label == expr */
+	    case 3: /* label EQU expr */
+	      equals (name, 0);
+	      break;
+	    }
 	  return 1;
 	}
       else
@@ -825,19 +832,35 @@ is_indir (const char *s)
 }
 
 /* Check whether a symbol involves a register.  */
-static int
+static bfd_boolean
 contains_register (symbolS *sym)
 {
   if (sym)
     {
-      expressionS * ex = symbol_get_value_expression(sym);
+      expressionS * ex = symbol_get_value_expression (sym);
 
-      return (O_register == ex->X_op)
-	|| (ex->X_add_symbol && contains_register(ex->X_add_symbol))
-	|| (ex->X_op_symbol && contains_register(ex->X_op_symbol));
+      switch (ex->X_op)
+	{
+	case O_register:
+	  return TRUE;
+
+	case O_add:
+	case O_subtract:
+	  if (ex->X_op_symbol && contains_register (ex->X_op_symbol))
+	    return TRUE;
+	  /* Fall through.  */
+	case O_uminus:
+	case O_symbol:
+	  if (ex->X_add_symbol && contains_register (ex->X_add_symbol))
+	    return TRUE;
+	  break;
+
+	default:
+	  break;
+	}
     }
 
-  return 0;
+  return FALSE;
 }
 
 /* Parse general expression, not looking for indexed addressing.  */
@@ -995,20 +1018,20 @@ parse_exp (const char *s, expressionS *op)
 /* Condition codes, including some synonyms provided by HiTech zas.  */
 static const struct reg_entry cc_tab[] =
 {
-  { "age", 6 << 3 },
-  { "alt", 7 << 3 },
-  { "c",   3 << 3 },
-  { "di",  4 << 3 },
-  { "ei",  5 << 3 },
-  { "lge", 2 << 3 },
-  { "llt", 3 << 3 },
-  { "m",   7 << 3 },
-  { "nc",  2 << 3 },
-  { "nz",  0 << 3 },
-  { "p",   6 << 3 },
-  { "pe",  5 << 3 },
-  { "po",  4 << 3 },
-  { "z",   1 << 3 },
+  { "age", 6 << 3, INS_ALL },
+  { "alt", 7 << 3, INS_ALL },
+  { "c",   3 << 3, INS_ALL },
+  { "di",  4 << 3, INS_ALL },
+  { "ei",  5 << 3, INS_ALL },
+  { "lge", 2 << 3, INS_ALL },
+  { "llt", 3 << 3, INS_ALL },
+  { "m",   7 << 3, INS_ALL },
+  { "nc",  2 << 3, INS_ALL },
+  { "nz",  0 << 3, INS_ALL },
+  { "p",   6 << 3, INS_ALL },
+  { "pe",  5 << 3, INS_ALL },
+  { "po",  4 << 3, INS_ALL },
+  { "z",   1 << 3, INS_ALL },
 } ;
 
 /* Parse condition code.  */
@@ -1168,7 +1191,7 @@ emit_byte (expressionS * val, bfd_reloc_code_real_type r_type)
     }
   p = frag_more (1);
   *p = val->X_add_number;
-  if ( contains_register (val->X_add_symbol) || contains_register (val->X_op_symbol) )
+  if (contains_register (val->X_add_symbol) || contains_register (val->X_op_symbol))
     {
       ill_op ();
     }
@@ -1188,7 +1211,7 @@ emit_byte (expressionS * val, bfd_reloc_code_real_type r_type)
     }
   else
     {
-      /* For symbols only, constants are stored at begin of function */
+      /* For symbols only, constants are stored at begin of function.  */
       fix_new_exp (frag_now, p - frag_now->fr_literal, 1, val,
 		   (r_type == BFD_RELOC_8_PCREL) ? TRUE : FALSE, r_type);
     }
@@ -2585,8 +2608,8 @@ emit_ld_rr_m (expressionS *dst, expressionS *src)
         case REG_BC: opcode = 0x07; break;
         case REG_DE: opcode = 0x17; break;
         case REG_HL: opcode = 0x27; break;
-	case REG_IX: opcode = (!prefix || prefix == 0xDD) ? 0x37 : 0x31; break;
-	case REG_IY: opcode = prefix ? ((prefix == 0xDD) ? 0x31 : 0x37) : 0x36; break;
+	case REG_IX: opcode = (prefix == 0xED || prefix == 0xDD) ? 0x37 : 0x31; break;
+	case REG_IY: opcode = (prefix == 0xED || prefix == 0xDD) ? 0x31 : 0x37; break;
         default:
           ill_op ();
         }
@@ -3437,6 +3460,8 @@ const pseudo_typeS md_pseudo_table[] =
   { "dw", z80_cons, 2},
   { "psect", psect, 0}, /* TODO: Translate attributes.  */
   { "set", 0, 0}, 		/* Real instruction on z80.  */
+  { "xdef", s_globl, 0},	/* Synonym for .GLOBAL */
+  { "xref", s_ignore, 0},	/* Synonym for .EXTERN */
   { NULL, 0, 0 }
 } ;
 
@@ -3622,7 +3647,7 @@ md_assemble (char *str)
 		      "first unrecognized character is `%c'"), *p);
 	}
     }
-end:
+ end:
   input_line_pointer = old_ptr;
 }
 
@@ -3793,6 +3818,12 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED , fixS *fixp)
     reloc->address = fixp->fx_offset;
 
   return reloc;
+}
+
+int
+z80_tc_labels_without_colon (void)
+{
+  return colonless_labels;
 }
 
 int

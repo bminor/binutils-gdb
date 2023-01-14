@@ -1088,7 +1088,7 @@ md_assemble (char * str)
 
       if (* op_end == ',')
 	{
-	  op_end = parse_imm (op_end + 1, & reg, 1, 1 << 31);
+	  op_end = parse_imm (op_end + 1, & reg, 1, 1u << 31);
 	  /* Further restrict the immediate to a power of two.  */
 	  if ((reg & (reg - 1)) == 0)
 	    reg = mylog2 (reg);
@@ -1144,7 +1144,7 @@ md_assemble (char * str)
 
       if (* op_end == ',')
 	{
-	  op_end = parse_imm (op_end + 1, & reg, 1, 1 << 31);
+	  op_end = parse_imm (op_end + 1, & reg, 1, 1u << 31);
 
 	  /* Further restrict the immediate to a power of two.  */
 	  if ((reg & (reg - 1)) == 0)

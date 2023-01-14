@@ -321,10 +321,7 @@ print_formatted (struct value *val, int size,
   else
     /* User specified format, so don't look to the type to tell us
        what to do.  */
-    val_print_scalar_formatted (type,
-				value_embedded_offset (val),
-				val,
-				options, size, stream);
+    value_print_scalar_formatted (val, options, size, stream);
 }
 
 /* Return builtin floating point type of same length as TYPE.
@@ -2260,7 +2257,8 @@ printf_c_string (struct ui_file *stream, const char *format,
 {
   const gdb_byte *str;
 
-  if (VALUE_LVAL (value) == lval_internalvar
+  if (TYPE_CODE (value_type (value)) != TYPE_CODE_PTR
+      && VALUE_LVAL (value) == lval_internalvar
       && c_is_string_type_p (value_type (value)))
     {
       size_t len = TYPE_LENGTH (value_type (value));

@@ -125,6 +125,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_finish_dynamic_sections   ppc64_elf_finish_dynamic_sections
 #define elf_backend_link_output_symbol_hook   ppc64_elf_output_symbol_hook
 #define elf_backend_special_sections	      ppc64_elf_special_sections
+#define elf_backend_section_flags	      ppc64_elf_section_flags
 #define elf_backend_merge_symbol_attribute    ppc64_elf_merge_symbol_attribute
 #define elf_backend_merge_symbol	      ppc64_elf_merge_symbol
 #define elf_backend_get_reloc_section	      bfd_get_section_by_name
@@ -2009,6 +2010,18 @@ ppc64_elf_new_section_hook (bfd *abfd, asection *sec)
     }
 
   return _bfd_elf_new_section_hook (abfd, sec);
+}
+
+static bfd_boolean
+ppc64_elf_section_flags (const Elf_Internal_Shdr *hdr)
+{
+  const char *name = hdr->bfd_section->name;
+
+  if (strncmp (name, ".sbss", 5) == 0
+      || strncmp (name, ".sdata", 6) == 0)
+    hdr->bfd_section->flags |= SEC_SMALL_DATA;
+
+  return TRUE;
 }
 
 static struct _opd_sec_data *
@@ -7608,7 +7621,7 @@ ppc64_elf_inline_plt (struct bfd_link_info *info)
 	      return FALSE;
 
 	    relend = relstart + sec->reloc_count;
-	    for (rel = relstart; rel < relend; )
+	    for (rel = relstart; rel < relend; rel++)
 	      {
 		enum elf_ppc64_reloc_type r_type;
 		unsigned long r_symndx;
@@ -11349,6 +11362,25 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   stub_entry = (struct ppc_stub_hash_entry *) gen_entry;
   info = in_arg;
 
+  /* Fail if the target section could not be assigned to an output
+     section.  The user should fix his linker script.  */
+  if (stub_entry->target_section != NULL
+      && stub_entry->target_section->output_section == NULL
+      && info->non_contiguous_regions)
+    info->callbacks->einfo (_("%F%P: Could not assign '%pA' to an output section. "
+			      "Retry without --enable-non-contiguous-regions.\n"),
+			    stub_entry->target_section);
+
+  /* Same for the group.  */
+  if (stub_entry->group->stub_sec != NULL
+      && stub_entry->group->stub_sec->output_section == NULL
+      && info->non_contiguous_regions)
+    info->callbacks->einfo (_("%F%P: Could not assign group %pA target %pA to an "
+			      "output section. Retry without "
+			      "--enable-non-contiguous-regions.\n"),
+			    stub_entry->group->stub_sec,
+			    stub_entry->target_section);
+
   htab = ppc_hash_table (info);
   if (htab == NULL)
     return FALSE;
@@ -11873,6 +11905,25 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   htab = ppc_hash_table (info);
   if (htab == NULL)
     return FALSE;
+
+  /* Fail if the target section could not be assigned to an output
+     section.  The user should fix his linker script.  */
+  if (stub_entry->target_section != NULL
+      && stub_entry->target_section->output_section == NULL
+      && info->non_contiguous_regions)
+    info->callbacks->einfo (_("%F%P: Could not assign %pA to an output section. "
+			      "Retry without --enable-non-contiguous-regions.\n"),
+			    stub_entry->target_section);
+
+  /* Same for the group.  */
+  if (stub_entry->group->stub_sec != NULL
+      && stub_entry->group->stub_sec->output_section == NULL
+      && info->non_contiguous_regions)
+    info->callbacks->einfo (_("%F%P: Could not assign group %pA target %pA to an "
+			      "output section. Retry without "
+			      "--enable-non-contiguous-regions.\n"),
+			    stub_entry->group->stub_sec,
+			    stub_entry->target_section);
 
   /* Make a note of the offset within the stubs for this entry.  */
   stub_entry->stub_offset = stub_entry->group->stub_sec->size;
