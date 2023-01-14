@@ -111,6 +111,7 @@ output_file_close (void)
   md_end ();
 #endif
   macro_end ();
+  expr_end ();
   read_end ();
   symbol_end ();
   subsegs_end (obs);

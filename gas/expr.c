@@ -130,12 +130,12 @@ expr_symbol_where (symbolS *sym, const char **pfile, unsigned int *pline)
 
 /* Look up a previously used .startof. / .sizeof. symbol, or make a fresh
    one.  */
+static symbolS **seen[2];
+static unsigned int nr_seen[2];
 
 static symbolS *
 symbol_lookup_or_make (const char *name, bool start)
 {
-  static symbolS **seen[2];
-  static unsigned int nr_seen[2];
   char *buf = concat (start ? ".startof." : ".sizeof.", name, NULL);
   symbolS *symbolP;
   unsigned int i;
@@ -1596,6 +1596,17 @@ expr_begin (void)
     e.X_op = O_max;
     gas_assert (e.X_op == O_max);
   }
+
+  memset (seen, 0, sizeof seen);
+  memset (nr_seen, 0, sizeof nr_seen);
+  expr_symbol_lines = NULL;
+}
+
+void
+expr_end (void)
+{
+  for (size_t i = 0; i < ARRAY_SIZE (seen); i++)
+    free (seen[i]);
 }
 
 /* Return the encoding for the operator at INPUT_LINE_POINTER, and

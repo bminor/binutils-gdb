@@ -445,7 +445,7 @@ static bool explicit_attr = false;
 /* Indicate CSR or priv instructions are explicitly used.  */
 static bool explicit_priv_attr = false;
 
-static char *expr_end;
+static char *expr_parse_end;
 
 /* Macros for encoding relaxation state for RVC branches and far jumps.  */
 #define RELAX_BRANCH_ENCODE(uncond, rvc, length)	\
@@ -914,7 +914,7 @@ opcode_name_lookup (char **s)
     *s = e;
 
   *e = save_c;
-  expr_end = e;
+  expr_parse_end = e;
 
   return o;
 }
@@ -2212,7 +2212,7 @@ my_getExpression (expressionS *ep, char *str)
   save_in = input_line_pointer;
   input_line_pointer = str;
   expression (ep);
-  expr_end = input_line_pointer;
+  expr_parse_end = input_line_pointer;
   input_line_pointer = save_in;
 }
 
@@ -2220,7 +2220,8 @@ my_getExpression (expressionS *ep, char *str)
    expression in *EP and the relocation, if any, in RELOC.
    Return the number of relocation operators used (0 or 1).
 
-   On exit, EXPR_END points to the first character after the expression.  */
+   On exit, EXPR_PARSE_END points to the first character after the
+   expression.  */
 
 static size_t
 my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
@@ -2238,7 +2239,7 @@ my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
     {
       ep->X_op = O_register;
       ep->X_add_number = regno;
-      expr_end = str;
+      expr_parse_end = str;
       return 0;
     }
 
@@ -2265,7 +2266,7 @@ my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
 	 && parse_relocation (&str, reloc, percent_op));
 
   my_getExpression (ep, crux);
-  str = expr_end;
+  str = expr_parse_end;
 
   /* Match every open bracket.  */
   while (crux_depth > 0 && (*str == ')' || *str == ' ' || *str == '\t'))
@@ -2275,7 +2276,7 @@ my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
   if (crux_depth > 0)
     as_bad ("unclosed '('");
 
-  expr_end = str;
+  expr_parse_end = str;
 
   return reloc_index;
 }
@@ -2299,7 +2300,8 @@ my_getOpcodeExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
 }
 
 /* Parse string STR as a vsetvli operand.  Store the expression in *EP.
-   On exit, EXPR_END points to the first character after the expression.  */
+   On exit, EXPR_PARSE_END points to the first character after the
+   expression.  */
 
 static void
 my_getVsetvliExpression (expressionS *ep, char *str)
@@ -2349,12 +2351,12 @@ my_getVsetvliExpression (expressionS *ep, char *str)
 			 | (vsew_value << OP_SH_VSEW)
 			 | (vta_value << OP_SH_VTA)
 			 | (vma_value << OP_SH_VMA);
-      expr_end = str;
+      expr_parse_end = str;
     }
   else
     {
       my_getExpression (ep, str);
-      str = expr_end;
+      str = expr_parse_end;
     }
 }
 
@@ -2613,7 +2615,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    break;
 		  ip->insn_opcode |= ENCODE_CITYPE_IMM (imm_expr->X_add_number);
 		rvc_imm_done:
-		  asarg = expr_end;
+		  asarg = expr_parse_end;
 		  imm_expr->X_op = O_absent;
 		  continue;
 		case '5':
@@ -2795,7 +2797,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			  }
 			INSERT_OPERAND (CFUNCT6, *ip, imm_expr->X_add_number);
 			imm_expr->X_op = O_absent;
-			asarg = expr_end;
+			asarg = expr_parse_end;
 			continue;
 
 		      case '4':
@@ -2810,7 +2812,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			  }
 			INSERT_OPERAND (CFUNCT4, *ip, imm_expr->X_add_number);
 			imm_expr->X_op = O_absent;
-			asarg = expr_end;
+			asarg = expr_parse_end;
 			continue;
 
 		      case '3':
@@ -2825,7 +2827,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			  }
 			INSERT_OPERAND (CFUNCT3, *ip, imm_expr->X_add_number);
 			imm_expr->X_op = O_absent;
-			asarg = expr_end;
+			asarg = expr_parse_end;
 			continue;
 
 		      case '2':
@@ -2840,7 +2842,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			  }
 			INSERT_OPERAND (CFUNCT2, *ip, imm_expr->X_add_number);
 			imm_expr->X_op = O_absent;
-			asarg = expr_end;
+			asarg = expr_parse_end;
 			continue;
 
 		      default:
@@ -2932,7 +2934,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		  ip->insn_opcode
 		    |= ENCODE_RVV_VB_IMM (imm_expr->X_add_number);
 		  imm_expr->X_op = O_absent;
-		  asarg = expr_end;
+		  asarg = expr_parse_end;
 		  continue;
 
 		case 'c': /* vtypei for vsetvli */
@@ -2944,7 +2946,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		  ip->insn_opcode
 		    |= ENCODE_RVV_VC_IMM (imm_expr->X_add_number);
 		  imm_expr->X_op = O_absent;
-		  asarg = expr_end;
+		  asarg = expr_parse_end;
 		  continue;
 
 		case 'i': /* vector arith signed immediate */
@@ -2956,7 +2958,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			      "value must be -16...15"));
 		  INSERT_OPERAND (VIMM, *ip, imm_expr->X_add_number);
 		  imm_expr->X_op = O_absent;
-		  asarg = expr_end;
+		  asarg = expr_parse_end;
 		  continue;
 
 		case 'j': /* vector arith unsigned immediate */
@@ -2968,7 +2970,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			      "value must be 0...31"));
 		  INSERT_OPERAND (VIMM, *ip, imm_expr->X_add_number);
 		  imm_expr->X_op = O_absent;
-		  asarg = expr_end;
+		  asarg = expr_parse_end;
 		  continue;
 
 		case 'k': /* vector arith signed immediate, minus 1 */
@@ -2980,7 +2982,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			      "value must be -15...16"));
 		  INSERT_OPERAND (VIMM, *ip, imm_expr->X_add_number - 1);
 		  imm_expr->X_op = O_absent;
-		  asarg = expr_end;
+		  asarg = expr_parse_end;
 		  continue;
 
 		case 'm': /* optional vector mask */
@@ -3041,7 +3043,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			imm_expr->X_add_number);
 	      INSERT_OPERAND (SHAMTW, *ip, imm_expr->X_add_number);
 	      imm_expr->X_op = O_absent;
-	      asarg = expr_end;
+	      asarg = expr_parse_end;
 	      continue;
 
 	    case '>': /* Shift amount, 0 - (XLEN-1).  */
@@ -3052,7 +3054,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			imm_expr->X_add_number);
 	      INSERT_OPERAND (SHAMT, *ip, imm_expr->X_add_number);
 	      imm_expr->X_op = O_absent;
-	      asarg = expr_end;
+	      asarg = expr_parse_end;
 	      continue;
 
 	    case 'Z': /* CSRRxI immediate.  */
@@ -3063,7 +3065,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			imm_expr->X_add_number);
 	      INSERT_OPERAND (RS1, *ip, imm_expr->X_add_number);
 	      imm_expr->X_op = O_absent;
-	      asarg = expr_end;
+	      asarg = expr_parse_end;
 	      continue;
 
 	    case 'E': /* Control register.  */
@@ -3080,7 +3082,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			    imm_expr->X_add_number);
 		  INSERT_OPERAND (CSR, *ip, imm_expr->X_add_number);
 		  imm_expr->X_op = O_absent;
-		  asarg = expr_end;
+		  asarg = expr_parse_end;
 		}
 	      continue;
 
@@ -3177,7 +3179,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		  && imm_expr->X_op != O_constant)
 		break;
 	      normalize_constant_expr (imm_expr);
-	      asarg = expr_end;
+	      asarg = expr_parse_end;
 	      continue;
 
 	    case 'A':
@@ -3187,7 +3189,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	      if (imm_expr->X_op != O_symbol)
 	        break;
 	      *imm_reloc = BFD_RELOC_32;
-	      asarg = expr_end;
+	      asarg = expr_parse_end;
 	      continue;
 
 	    case 'B':
@@ -3198,7 +3200,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	        break;
 	      if (imm_expr->X_op == O_symbol)
 	        *imm_reloc = BFD_RELOC_32;
-	      asarg = expr_end;
+	      asarg = expr_parse_end;
 	      continue;
 
 	    case 'j': /* Sign-extended immediate.  */
@@ -3238,14 +3240,14 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      || imm_expr->X_add_number < -(signed)RISCV_IMM_REACH/2)
 		    break;
 		}
-	      asarg = expr_end;
+	      asarg = expr_parse_end;
 	      continue;
 
 	    case 'p': /* PC-relative offset.  */
 	    branch:
 	      *imm_reloc = BFD_RELOC_12_PCREL;
 	      my_getExpression (imm_expr, asarg);
-	      asarg = expr_end;
+	      asarg = expr_parse_end;
 	      continue;
 
 	    case 'u': /* Upper 20 bits.  */
@@ -3262,7 +3264,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		  *imm_reloc = BFD_RELOC_RISCV_HI20;
 		  imm_expr->X_add_number <<= RISCV_IMM_BITS;
 		}
-	      asarg = expr_end;
+	      asarg = expr_parse_end;
 	      continue;
 
 	    case 'a': /* 20-bit PC-relative offset.  */
@@ -3279,13 +3281,13 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		}
 	    jump:
 	      my_getExpression (imm_expr, asarg);
-	      asarg = expr_end;
+	      asarg = expr_parse_end;
 	      *imm_reloc = BFD_RELOC_RISCV_JMP;
 	      continue;
 
 	    case 'c':
 	      my_getExpression (imm_expr, asarg);
-	      asarg = expr_end;
+	      asarg = expr_parse_end;
 	      if (strcmp (asarg, "@plt") == 0)
 		asarg += 4;
 	      *imm_reloc = BFD_RELOC_RISCV_CALL_PLT;
@@ -3308,7 +3310,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    }
 		  INSERT_OPERAND (OP, *ip, imm_expr->X_add_number);
 		  imm_expr->X_op = O_absent;
-		  asarg = expr_end;
+		  asarg = expr_parse_end;
 		  continue;
 
 		case '2':
@@ -3323,7 +3325,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    }
 		  INSERT_OPERAND (OP2, *ip, imm_expr->X_add_number);
 		  imm_expr->X_op = O_absent;
-		  asarg = expr_end;
+		  asarg = expr_parse_end;
 		  continue;
 
 		default:
@@ -3346,7 +3348,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    }
 		  INSERT_OPERAND (FUNCT7, *ip, imm_expr->X_add_number);
 		  imm_expr->X_op = O_absent;
-		  asarg = expr_end;
+		  asarg = expr_parse_end;
 		  continue;
 
 		case '3':
@@ -3361,7 +3363,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    }
 		  INSERT_OPERAND (FUNCT3, *ip, imm_expr->X_add_number);
 		  imm_expr->X_op = O_absent;
-		  asarg = expr_end;
+		  asarg = expr_parse_end;
 		  continue;
 
 		case '2':
@@ -3376,7 +3378,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    }
 		  INSERT_OPERAND (FUNCT2, *ip, imm_expr->X_add_number);
 		  imm_expr->X_op = O_absent;
-		  asarg = expr_end;
+		  asarg = expr_parse_end;
 		  continue;
 
 		default:
@@ -3392,7 +3394,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		       (unsigned long)imm_expr->X_add_number);
 	      INSERT_OPERAND(BS, *ip, imm_expr->X_add_number);
 	      imm_expr->X_op = O_absent;
-	      asarg = expr_end;
+	      asarg = expr_parse_end;
 	      continue;
 
 	    case 'Y': /* rnum immediate */
@@ -3403,7 +3405,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		       (unsigned long)imm_expr->X_add_number);
 	      INSERT_OPERAND(RNUM, *ip, imm_expr->X_add_number);
 	      imm_expr->X_op = O_absent;
-	      asarg = expr_end;
+	      asarg = expr_parse_end;
 	      continue;
 
 	    case 'z':
@@ -3411,7 +3413,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		  || imm_expr->X_op != O_constant
 		  || imm_expr->X_add_number != 0)
 		break;
-	      asarg = expr_end;
+	      asarg = expr_parse_end;
 	      imm_expr->X_op = O_absent;
 	      continue;
 
@@ -3429,7 +3431,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		ENCODE_STYPE_IMM ((unsigned) (imm_expr->X_add_number) &
 				  ~ 0x1fU);
 	      imm_expr->X_op = O_absent;
-	      asarg = expr_end;
+	      asarg = expr_parse_end;
 	      continue;
 
 	    case 'X': /* Integer immediate.  */
@@ -3476,7 +3478,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			}
 		      INSERT_IMM (n, s, *ip, imm_expr->X_add_number);
 		      imm_expr->X_op = O_absent;
-		      asarg = expr_end;
+		      asarg = expr_parse_end;
 		      continue;
 		    default:
 		      goto unknown_riscv_ip_operand;

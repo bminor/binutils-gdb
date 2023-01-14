@@ -2038,7 +2038,7 @@ mips_mark_labels (void)
     mips_compressed_mark_labels ();
 }
 
-static char *expr_end;
+static char *expr_parse_end;
 
 /* An expression in a macro instruction.  This is set by mips_ip and
    mips16_ip and when populated is always an O_constant.  */
@@ -3303,7 +3303,7 @@ mips_parse_argument_token (char *s, char float_format)
 		  set_insn_error (0, _("vector element must be constant"));
 		  return 0;
 		}
-	      s = expr_end;
+	      s = expr_parse_end;
 	      token.u.index = element.X_add_number;
 	      mips_add_token (&token, OT_INTEGER_INDEX);
 	    }
@@ -3344,7 +3344,7 @@ mips_parse_argument_token (char *s, char float_format)
   token.u.integer.relocs[1] = BFD_RELOC_UNUSED;
   token.u.integer.relocs[2] = BFD_RELOC_UNUSED;
   my_getSmallExpression (&token.u.integer.value, token.u.integer.relocs, s);
-  s = expr_end;
+  s = expr_parse_end;
   mips_add_token (&token, OT_INTEGER);
   return s;
 }
@@ -14655,7 +14655,8 @@ parse_relocation (char **str, bfd_reloc_code_real_type *reloc)
    expression in *EP and the relocations in the array starting
    at RELOC.  Return the number of relocation operators used.
 
-   On exit, EXPR_END points to the first character after the expression.  */
+   On exit, EXPR_PARSE_END points to the first character after the
+   expression.  */
 
 static size_t
 my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
@@ -14689,7 +14690,7 @@ my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
 	 && parse_relocation (&str, &reversed_reloc[reloc_index]));
 
   my_getExpression (ep, crux);
-  str = expr_end;
+  str = expr_parse_end;
 
   /* Match every open bracket.  */
   while (crux_depth > 0 && (*str == ')' || *str == ' ' || *str == '\t'))
@@ -14699,7 +14700,7 @@ my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
   if (crux_depth > 0)
     as_bad (_("unclosed '('"));
 
-  expr_end = str;
+  expr_parse_end = str;
 
   for (i = 0; i < reloc_index; i++)
     reloc[i] = reversed_reloc[reloc_index - 1 - i];
@@ -14715,7 +14716,7 @@ my_getExpression (expressionS *ep, char *str)
   save_in = input_line_pointer;
   input_line_pointer = str;
   expression (ep);
-  expr_end = input_line_pointer;
+  expr_parse_end = input_line_pointer;
   input_line_pointer = save_in;
 }
 

@@ -1201,7 +1201,7 @@ BSR (bfd_vma val, int amount)
 }
 
 /* For communication between sparc_ip and get_expression.  */
-static char *expr_end;
+static char *expr_parse_end;
 
 /* Values for `special_case'.
    Instructions that require weird handling because they're longer than
@@ -2741,7 +2741,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		    *s1 = '\0';
 		    (void) get_expression (s);
 		    *s1 = ')';
-		    if (expr_end != s1)
+		    if (expr_parse_end != s1)
 		      {
 			as_bad (_("Expression inside %%%s could not be parsed"), op_arg);
 			return special_case;
@@ -2794,7 +2794,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		    (void) get_expression (s);
 		    if (op_arg)
 		      *s = ')';
-		    s = expr_end;
+		    s = expr_parse_end;
 		  }
 
 		if (op_arg)
@@ -3373,11 +3373,11 @@ get_expression (char *str)
       && seg != undefined_section)
     {
       the_insn.error = _("bad segment");
-      expr_end = input_line_pointer;
+      expr_parse_end = input_line_pointer;
       input_line_pointer = save_in;
       return 1;
     }
-  expr_end = input_line_pointer;
+  expr_parse_end = input_line_pointer;
   input_line_pointer = save_in;
   return 0;
 }
