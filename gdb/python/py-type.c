@@ -998,7 +998,7 @@ typy_template_argument (PyObject *self, PyObject *args)
 
   sym = TYPE_TEMPLATE_ARGUMENT (type, argno);
   if (sym->aclass () == LOC_TYPEDEF)
-    return type_to_type_object (SYMBOL_TYPE (sym));
+    return type_to_type_object (sym->type ());
   else if (sym->aclass () == LOC_OPTIMIZED_OUT)
     {
       PyErr_Format (PyExc_RuntimeError,

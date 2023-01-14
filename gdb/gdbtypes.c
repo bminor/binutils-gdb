@@ -1691,7 +1691,7 @@ lookup_typename (const struct language_defn *language,
   sym = lookup_symbol_in_language (name, block, VAR_DOMAIN,
 				   language->la_language, NULL).symbol;
   if (sym != NULL && sym->aclass () == LOC_TYPEDEF)
-    return SYMBOL_TYPE (sym);
+    return sym->type ();
 
   if (noerr)
     return NULL;
@@ -1738,12 +1738,12 @@ lookup_struct (const char *name, const struct block *block)
     {
       error (_("No struct type named %s."), name);
     }
-  if (SYMBOL_TYPE (sym)->code () != TYPE_CODE_STRUCT)
+  if (sym->type ()->code () != TYPE_CODE_STRUCT)
     {
       error (_("This context has class, union or enum %s, not a struct."),
 	     name);
     }
-  return (SYMBOL_TYPE (sym));
+  return (sym->type ());
 }
 
 /* Lookup a union type named "union NAME",
@@ -1760,7 +1760,7 @@ lookup_union (const char *name, const struct block *block)
   if (sym == NULL)
     error (_("No union type named %s."), name);
 
-  t = SYMBOL_TYPE (sym);
+  t = sym->type ();
 
   if (t->code () == TYPE_CODE_UNION)
     return t;
@@ -1783,12 +1783,12 @@ lookup_enum (const char *name, const struct block *block)
     {
       error (_("No enum type named %s."), name);
     }
-  if (SYMBOL_TYPE (sym)->code () != TYPE_CODE_ENUM)
+  if (sym->type ()->code () != TYPE_CODE_ENUM)
     {
       error (_("This context has class, struct or union %s, not an enum."), 
 	     name);
     }
-  return (SYMBOL_TYPE (sym));
+  return (sym->type ());
 }
 
 /* Lookup a template type named "template NAME<TYPE>",
@@ -1813,12 +1813,12 @@ lookup_template_type (const char *name, struct type *type,
     {
       error (_("No template type named %s."), name);
     }
-  if (SYMBOL_TYPE (sym)->code () != TYPE_CODE_STRUCT)
+  if (sym->type ()->code () != TYPE_CODE_STRUCT)
     {
       error (_("This context has class, union or enum %s, not a struct."),
 	     name);
     }
-  return (SYMBOL_TYPE (sym));
+  return (sym->type ());
 }
 
 /* See gdbtypes.h.  */
@@ -2906,7 +2906,7 @@ check_typedef (struct type *type)
 	    }
 	  sym = lookup_symbol (name, 0, STRUCT_DOMAIN, 0).symbol;
 	  if (sym)
-	    TYPE_TARGET_TYPE (type) = SYMBOL_TYPE (sym);
+	    TYPE_TARGET_TYPE (type) = sym->type ();
 	  else					/* TYPE_CODE_UNDEF */
 	    TYPE_TARGET_TYPE (type) = alloc_type_arch (type->arch ());
 	}
@@ -3000,11 +3000,11 @@ check_typedef (struct type *type)
 	  /* Same as above for opaque types, we can replace the stub
 	     with the complete type only if they are in the same
 	     objfile.  */
-	  if (SYMBOL_TYPE (sym)->objfile_owner () == type->objfile_owner ())
-	    type = make_qualified_type (SYMBOL_TYPE (sym),
+	  if (sym->type ()->objfile_owner () == type->objfile_owner ())
+	    type = make_qualified_type (sym->type (),
 					type->instance_flags (), type);
 	  else
-	    type = SYMBOL_TYPE (sym);
+	    type = sym->type ();
 	}
     }
 

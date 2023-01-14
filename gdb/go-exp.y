@@ -1339,7 +1339,7 @@ package_name_p (const char *name, const struct block *block)
 
   if (sym
       && sym->aclass () == LOC_TYPEDEF
-      && SYMBOL_TYPE (sym)->code () == TYPE_CODE_MODULE)
+      && sym->type ()->code () == TYPE_CODE_MODULE)
     return 1;
 
   return 0;

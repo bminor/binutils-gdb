@@ -674,7 +674,7 @@ read_frame_arg (const frame_print_options &fp_opts,
 	  || (fp_opts.print_entry_values == print_entry_values_preferred
 	      && (!val || value_optimized_out (val))))
 	{
-	  entryval = allocate_optimized_out_value (SYMBOL_TYPE (sym));
+	  entryval = allocate_optimized_out_value (sym->type ());
 	  entryval_error = NULL;
 	}
     }
@@ -779,7 +779,7 @@ print_frame_args (const frame_print_options &fp_opts,
 	    case LOC_REF_ARG:
 	      {
 		long current_offset = SYMBOL_VALUE (sym);
-		int arg_size = TYPE_LENGTH (SYMBOL_TYPE (sym));
+		int arg_size = TYPE_LENGTH (sym->type ());
 
 		/* Compute address of next argument by adding the size of
 		   this argument and rounding to an int boundary.  */
@@ -2762,7 +2762,7 @@ return_command (const char *retval_exp, int from_tty)
       /* Cast return value to the return type of the function.  Should
 	 the cast fail, this call throws an error.  */
       if (thisfun != NULL)
-	return_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (thisfun));
+	return_type = TYPE_TARGET_TYPE (thisfun->type ());
       if (return_type == NULL)
 	{
 	  if (retval_expr->first_opcode () != UNOP_CAST
@@ -2818,7 +2818,7 @@ return_command (const char *retval_exp, int from_tty)
 			   query_prefix);
       else
 	{
-	  if (TYPE_NO_RETURN (thisfun->type))
+	  if (TYPE_NO_RETURN (thisfun->type ()))
 	    warning (_("Function does not return normally to caller."));
 	  confirmed = query (_("%sMake %s return now? "), query_prefix,
 			     thisfun->print_name ());

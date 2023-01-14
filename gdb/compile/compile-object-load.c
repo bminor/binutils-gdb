@@ -458,7 +458,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
   if (block_loop == nblocks)
     error (_("No \"%s\" symbol found"), COMPILE_I_EXPR_VAL);
 
-  gdb_type = SYMBOL_TYPE (gdb_val_sym);
+  gdb_type = gdb_val_sym->type ();
   gdb_type = check_typedef (gdb_type);
 
   gdb_ptr_type_sym = block_lookup_symbol (block, COMPILE_I_EXPR_PTR_TYPE,
@@ -466,7 +466,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
 					  VAR_DOMAIN);
   if (gdb_ptr_type_sym == NULL)
     error (_("No \"%s\" symbol found"), COMPILE_I_EXPR_PTR_TYPE);
-  gdb_ptr_type = SYMBOL_TYPE (gdb_ptr_type_sym);
+  gdb_ptr_type = gdb_ptr_type_sym->type ();
   gdb_ptr_type = check_typedef (gdb_ptr_type);
   if (gdb_ptr_type->code () != TYPE_CODE_PTR)
     error (_("Type of \"%s\" is not a pointer"), COMPILE_I_EXPR_PTR_TYPE);
@@ -517,7 +517,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
 static struct type *
 get_regs_type (struct symbol *func_sym, struct objfile *objfile)
 {
-  struct type *func_type = SYMBOL_TYPE (func_sym);
+  struct type *func_type = func_sym->type ();
   struct type *regsp_type, *regs_type;
 
   /* No register parameter present.  */
@@ -656,7 +656,7 @@ compile_object_load (const compile_file_names &file_names,
   if (func_sym == NULL)
     error (_("Cannot find function \"%s\" in compiled module \"%s\"."),
 	   GCC_FE_WRAPPER_FUNCTION, objfile_name (objfile));
-  func_type = SYMBOL_TYPE (func_sym);
+  func_type = func_sym->type ();
   if (func_type->code () != TYPE_CODE_FUNC)
     error (_("Invalid type code %d of function \"%s\" in compiled "
 	     "module \"%s\"."),

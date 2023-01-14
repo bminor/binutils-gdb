@@ -8918,7 +8918,7 @@ fixup_go_packaging (struct dwarf2_cu *cu)
 	 e.g., "main" finds the "main" module and not C's main().  */
       sym->set_domain (STRUCT_DOMAIN);
       sym->set_aclass_index (LOC_TYPEDEF);
-      SYMBOL_TYPE (sym) = type;
+      sym->set_type (type);
 
       add_symbol_to_list (sym, cu->get_builder ()->get_global_symbols ());
     }
@@ -21712,7 +21712,6 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
   name = dwarf2_name (die, cu);
   if (name)
     {
-      struct die_info *line_file_die = die;
       int suppress_add = 0;
 
       if (space)
@@ -21749,9 +21748,10 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
       sym->set_domain (VAR_DOMAIN);
       sym->set_aclass_index (LOC_OPTIMIZED_OUT);
       if (type != NULL)
-	SYMBOL_TYPE (sym) = type;
+	sym->set_type (type);
       else
-	SYMBOL_TYPE (sym) = die_type (die, cu);
+	sym->set_type (die_type (die, cu));
+      struct die_info *line_file_die = die;
       if (die->tag == DW_TAG_formal_parameter && die->parent && die->parent->tag == DW_TAG_GNU_formal_parameter_pack)
 	line_file_die = die->parent;
       attr = dwarf2_attr (line_file_die,
@@ -21795,7 +21795,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	    }
 	  else
 	    sym->set_aclass_index (LOC_OPTIMIZED_OUT);
-	  SYMBOL_TYPE (sym) = objfile_type (objfile)->builtin_core_addr;
+	  sym->set_type (objfile_type (objfile)->builtin_core_addr);
 	  sym->set_domain (LABEL_DOMAIN);
 	  add_symbol_to_list (sym, cu->list_in_scope);
 	  break;
@@ -21837,8 +21837,8 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  /* Compilation with minimal debug info may result in
 	     variables with missing type entries.  Change the
 	     misleading `void' type to something sensible.  */
-	  if (SYMBOL_TYPE (sym)->code () == TYPE_CODE_VOID)
-	    SYMBOL_TYPE (sym) = objfile_type (objfile)->builtin_int;
+	  if (sym->type ()->code () == TYPE_CODE_VOID)
+	    sym->set_type (objfile_type (objfile)->builtin_int);
 
 	  attr = dwarf2_attr (die, DW_AT_const_value, cu);
 	  /* In the case of DW_TAG_member, we should only be called for
@@ -22027,8 +22027,8 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		    /* The symbol's name is already allocated along
 		       with this objfile, so we don't need to
 		       duplicate it for the type.  */
-		    if (SYMBOL_TYPE (sym)->name () == 0)
-		      SYMBOL_TYPE (sym)->set_name (sym->search_name ());
+		    if (sym->type ()->name () == 0)
+		      sym->type ()->set_name (sym->search_name ());
 		  }
 	      }
 	  }
@@ -22263,7 +22263,7 @@ dwarf2_const_value (const struct attribute *attr, struct symbol *sym,
   const gdb_byte *bytes;
   struct dwarf2_locexpr_baton *baton;
 
-  dwarf2_const_value_attr (attr, SYMBOL_TYPE (sym),
+  dwarf2_const_value_attr (attr, sym->type (),
 			   sym->print_name (),
 			   &objfile->objfile_obstack, cu,
 			   &value, &bytes, &baton);

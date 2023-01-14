@@ -434,12 +434,12 @@ patch_block_stabs (struct pending *symbols, struct pending_stabs *stabs,
 		  /* I don't think the linker does this with functions,
 		     so as far as I know this is never executed.
 		     But it doesn't hurt to check.  */
-		  SYMBOL_TYPE (sym) =
-		    lookup_function_type (read_type (&pp, objfile));
+		  sym->set_type
+		    (lookup_function_type (read_type (&pp, objfile)));
 		}
 	      else
 		{
-		  SYMBOL_TYPE (sym) = read_type (&pp, objfile);
+		  sym->set_type (read_type (&pp, objfile));
 		}
 	      add_symbol_to_list (sym, get_global_symbols ());
 	    }
@@ -448,12 +448,12 @@ patch_block_stabs (struct pending *symbols, struct pending_stabs *stabs,
 	      pp += 2;
 	      if (*(pp - 1) == 'F' || *(pp - 1) == 'f')
 		{
-		  SYMBOL_TYPE (sym) =
-		    lookup_function_type (read_type (&pp, objfile));
+		  sym->set_type
+		    (lookup_function_type (read_type (&pp, objfile)));
 		}
 	      else
 		{
-		  SYMBOL_TYPE (sym) = read_type (&pp, objfile);
+		  sym->set_type (read_type (&pp, objfile));
 		}
 	    }
 	}
@@ -784,7 +784,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       if (*p != '=')
 	{
 	  sym->set_aclass_index (LOC_CONST);
-	  SYMBOL_TYPE (sym) = error_type (&p, objfile);
+	  sym->set_type (error_type (&p, objfile));
 	  sym->set_domain (VAR_DOMAIN);
 	  add_symbol_to_list (sym, get_file_symbols ());
 	  return sym;
@@ -804,7 +804,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
 	    target_float_from_string (dbl_valu, dbl_type, std::string (p));
 
-	    SYMBOL_TYPE (sym) = dbl_type;
+	    sym->set_type (dbl_type);
 	    SYMBOL_VALUE_BYTES (sym) = dbl_valu;
 	    sym->set_aclass_index (LOC_CONST_BYTES);
 	  }
@@ -818,7 +818,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	       types; other languages probably should have at least
 	       unsigned as well as signed constants.  */
 
-	    SYMBOL_TYPE (sym) = objfile_type (objfile)->builtin_long;
+	    sym->set_type (objfile_type (objfile)->builtin_long);
 	    SYMBOL_VALUE (sym) = atoi (p);
 	    sym->set_aclass_index (LOC_CONST);
 	  }
@@ -826,7 +826,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
 	case 'c':
 	  {
-	    SYMBOL_TYPE (sym) = objfile_type (objfile)->builtin_char;
+	    sym->set_type (objfile_type (objfile)->builtin_char);
 	    SYMBOL_VALUE (sym) = atoi (p);
 	    sym->set_aclass_index (LOC_CONST);
 	  }
@@ -843,7 +843,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	    if (quote != '\'' && quote != '"')
 	      {
 		sym->set_aclass_index (LOC_CONST);
-		SYMBOL_TYPE (sym) = error_type (&p, objfile);
+		sym->set_type (error_type (&p, objfile));
 		sym->set_domain (VAR_DOMAIN);
 		add_symbol_to_list (sym, get_file_symbols ());
 		return sym;
@@ -868,7 +868,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	    if (*p != quote)
 	      {
 		sym->set_aclass_index (LOC_CONST);
-		SYMBOL_TYPE (sym) = error_type (&p, objfile);
+		sym->set_type (error_type (&p, objfile));
 		sym->set_domain (VAR_DOMAIN);
 		add_symbol_to_list (sym, get_file_symbols ());
 		return sym;
@@ -880,9 +880,9 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	      = create_static_range_type (NULL,
 					  objfile_type (objfile)->builtin_int,
 					  0, ind);
-	    SYMBOL_TYPE (sym) = create_array_type (NULL,
-				  objfile_type (objfile)->builtin_char,
-				  range_type);
+	    sym->set_type
+	      (create_array_type (NULL, objfile_type (objfile)->builtin_char,
+				  range_type));
 	    string_value
 	      = (gdb_byte *) obstack_alloc (&objfile->objfile_obstack, ind + 1);
 	    memcpy (string_value, string_local, ind + 1);
@@ -900,11 +900,11 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	     (where type 6 is defined by "blobs:t6=eblob1:0,blob2:1,;").  */
 	  {
 	    sym->set_aclass_index (LOC_CONST);
-	    SYMBOL_TYPE (sym) = read_type (&p, objfile);
+	    sym->set_type (read_type (&p, objfile));
 
 	    if (*p != ',')
 	      {
-		SYMBOL_TYPE (sym) = error_type (&p, objfile);
+		sym->set_type (error_type (&p, objfile));
 		break;
 	      }
 	    ++p;
@@ -921,7 +921,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	default:
 	  {
 	    sym->set_aclass_index (LOC_CONST);
-	    SYMBOL_TYPE (sym) = error_type (&p, objfile);
+	    sym->set_type (error_type (&p, objfile));
 	  }
 	}
       sym->set_domain (VAR_DOMAIN);
@@ -930,7 +930,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
     case 'C':
       /* The name of a caught exception.  */
-      SYMBOL_TYPE (sym) = read_type (&p, objfile);
+      sym->set_type (read_type (&p, objfile));
       sym->set_aclass_index (LOC_LABEL);
       sym->set_domain (VAR_DOMAIN);
       SET_SYMBOL_VALUE_ADDRESS (sym, valu);
@@ -939,7 +939,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
     case 'f':
       /* A static function definition.  */
-      SYMBOL_TYPE (sym) = read_type (&p, objfile);
+      sym->set_type (read_type (&p, objfile));
       sym->set_aclass_index (LOC_BLOCK);
       sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_file_symbols ());
@@ -949,8 +949,8 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       /* Function result types are described as the result type in stabs.
 	 We need to convert this to the function-returning-type-X type
 	 in GDB.  E.g. "int" is converted to "function returning int".  */
-      if (SYMBOL_TYPE (sym)->code () != TYPE_CODE_FUNC)
-	SYMBOL_TYPE (sym) = lookup_function_type (SYMBOL_TYPE (sym));
+      if (sym->type ()->code () != TYPE_CODE_FUNC)
+	sym->set_type (lookup_function_type (sym->type ()));
 
       /* All functions in C++ have prototypes.  Stabs does not offer an
 	 explicit way to identify prototyped or unprototyped functions,
@@ -958,7 +958,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	 than the "declared-as" type for unprototyped functions, so
 	 we treat all functions as if they were prototyped.  This is used
 	 primarily for promotion when calling the function from GDB.  */
-      SYMBOL_TYPE (sym)->set_is_prototyped (true);
+      sym->type ()->set_is_prototyped (true);
 
       /* fall into process_prototype_types.  */
 
@@ -966,7 +966,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       /* Sun acc puts declared types of arguments here.  */
       if (*p == ';')
 	{
-	  struct type *ftype = SYMBOL_TYPE (sym);
+	  struct type *ftype = sym->type ();
 	  int nsemi = 0;
 	  int nparams = 0;
 	  const char *p1 = p;
@@ -1011,7 +1011,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
     case 'F':
       /* A global function definition.  */
-      SYMBOL_TYPE (sym) = read_type (&p, objfile);
+      sym->set_type (read_type (&p, objfile));
       sym->set_aclass_index (LOC_BLOCK);
       sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_global_symbols ());
@@ -1022,7 +1022,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	 value is not correct.  It is necessary to search for the
 	 corresponding linker definition to find the value.
 	 These definitions appear at the end of the namelist.  */
-      SYMBOL_TYPE (sym) = read_type (&p, objfile);
+      sym->set_type (read_type (&p, objfile));
       sym->set_aclass_index (LOC_STATIC);
       sym->set_domain (VAR_DOMAIN);
       /* Don't add symbol references to global_sym_chain.
@@ -1043,7 +1043,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	 Dbx data never actually contains 'l'.  */
     case 's':
     case 'l':
-      SYMBOL_TYPE (sym) = read_type (&p, objfile);
+      sym->set_type (read_type (&p, objfile));
       sym->set_aclass_index (LOC_LOCAL);
       SYMBOL_VALUE (sym) = valu;
       sym->set_domain (VAR_DOMAIN);
@@ -1057,12 +1057,12 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	   Translate it into a pointer-to-function type.  */
 	{
 	  p++;
-	  SYMBOL_TYPE (sym)
-	    = lookup_pointer_type
-	    (lookup_function_type (read_type (&p, objfile)));
+	  sym->set_type
+	    (lookup_pointer_type
+	       (lookup_function_type (read_type (&p, objfile))));
 	}
       else
-	SYMBOL_TYPE (sym) = read_type (&p, objfile);
+	sym->set_type (read_type (&p, objfile));
 
       sym->set_aclass_index (LOC_ARG);
       SYMBOL_VALUE (sym) = valu;
@@ -1086,12 +1086,12 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	{
 	  /* If PCC says a parameter is a short or a char, it is
 	     really an int.  */
-	  if (TYPE_LENGTH (SYMBOL_TYPE (sym))
+	  if (TYPE_LENGTH (sym->type ())
 	      < gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT
-	      && SYMBOL_TYPE (sym)->code () == TYPE_CODE_INT)
+	      && sym->type ()->code () == TYPE_CODE_INT)
 	    {
-	      SYMBOL_TYPE (sym) =
-		(SYMBOL_TYPE (sym)->is_unsigned ()
+	      sym->set_type
+		(sym->type ()->is_unsigned ()
 		 ? objfile_type (objfile)->builtin_unsigned_int
 		 : objfile_type (objfile)->builtin_int);
 	    }
@@ -1105,14 +1105,14 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	 with this extra information.  FIXME, it ought to.  */
       if (type == N_FUN)
 	{
-	  SYMBOL_TYPE (sym) = read_type (&p, objfile);
+	  sym->set_type (read_type (&p, objfile));
 	  goto process_prototype_types;
 	}
       /*FALLTHROUGH */
 
     case 'R':
       /* Parameter which is in a register.  */
-      SYMBOL_TYPE (sym) = read_type (&p, objfile);
+      sym->set_type (read_type (&p, objfile));
       sym->set_aclass_index (stab_register_index);
       sym->set_is_argument (1);
       SYMBOL_VALUE (sym) = valu;
@@ -1122,7 +1122,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
     case 'r':
       /* Register variable (either global or local).  */
-      SYMBOL_TYPE (sym) = read_type (&p, objfile);
+      sym->set_type (read_type (&p, objfile));
       sym->set_aclass_index (stab_register_index);
       SYMBOL_VALUE (sym) = valu;
       sym->set_domain (VAR_DOMAIN);
@@ -1150,7 +1150,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	  struct pending *local_symbols = *get_local_symbols ();
 	  if (local_symbols
 	      && local_symbols->nsyms > 0
-	      && gdbarch_stabs_argument_has_addr (gdbarch, SYMBOL_TYPE (sym)))
+	      && gdbarch_stabs_argument_has_addr (gdbarch, sym->type ()))
 	    {
 	      struct symbol *prev_sym;
 
@@ -1163,7 +1163,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 		  prev_sym->set_aclass_index (stab_register_index);
 		  /* Use the type from the LOC_REGISTER; that is the type
 		     that is actually in that register.  */
-		  SYMBOL_TYPE (prev_sym) = SYMBOL_TYPE (sym);
+		  prev_sym->set_type (sym->type ());
 		  SYMBOL_VALUE (prev_sym) = SYMBOL_VALUE (sym);
 		  sym = prev_sym;
 		  break;
@@ -1177,7 +1177,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
     case 'S':
       /* Static symbol at top level of file.  */
-      SYMBOL_TYPE (sym) = read_type (&p, objfile);
+      sym->set_type (read_type (&p, objfile));
       sym->set_aclass_index (LOC_STATIC);
       SET_SYMBOL_VALUE_ADDRESS (sym, valu);
       sym->set_domain (VAR_DOMAIN);
@@ -1202,7 +1202,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       synonym = (sym->language () == language_ada && p[-2] != 'T');
 
       /* Typedef */
-      SYMBOL_TYPE (sym) = read_type (&p, objfile);
+      sym->set_type (read_type (&p, objfile));
 
       /* For a nameless type, we don't want a create a symbol, thus we
 	 did not use `sym'.  Return without further processing.  */
@@ -1216,24 +1216,24 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	 a base type which did not have its name defined when the
 	 derived class was output.  We fill in the derived class's
 	 base part member's name here in that case.  */
-      if (SYMBOL_TYPE (sym)->name () != NULL)
-	if ((SYMBOL_TYPE (sym)->code () == TYPE_CODE_STRUCT
-	     || SYMBOL_TYPE (sym)->code () == TYPE_CODE_UNION)
-	    && TYPE_N_BASECLASSES (SYMBOL_TYPE (sym)))
+      if (sym->type ()->name () != NULL)
+	if ((sym->type ()->code () == TYPE_CODE_STRUCT
+	     || sym->type ()->code () == TYPE_CODE_UNION)
+	    && TYPE_N_BASECLASSES (sym->type ()))
 	  {
 	    int j;
 
-	    for (j = TYPE_N_BASECLASSES (SYMBOL_TYPE (sym)) - 1; j >= 0; j--)
-	      if (TYPE_BASECLASS_NAME (SYMBOL_TYPE (sym), j) == 0)
-		SYMBOL_TYPE (sym)->field (j).set_name
-		  (TYPE_BASECLASS (SYMBOL_TYPE (sym), j)->name ());
+	    for (j = TYPE_N_BASECLASSES (sym->type ()) - 1; j >= 0; j--)
+	      if (TYPE_BASECLASS_NAME (sym->type (), j) == 0)
+		sym->type ()->field (j).set_name
+		  (TYPE_BASECLASS (sym->type (), j)->name ());
 	  }
 
-      if (SYMBOL_TYPE (sym)->name () == NULL)
+      if (sym->type ()->name () == NULL)
 	{
-	  if ((SYMBOL_TYPE (sym)->code () == TYPE_CODE_PTR
+	  if ((sym->type ()->code () == TYPE_CODE_PTR
 	       && strcmp (sym->linkage_name (), vtbl_ptr_name))
-	      || SYMBOL_TYPE (sym)->code () == TYPE_CODE_FUNC)
+	      || sym->type ()->code () == TYPE_CODE_FUNC)
 	    {
 	      /* If we are giving a name to a type such as "pointer to
 		 foo" or "function returning foo", we better not set
@@ -1272,10 +1272,10 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
 	      /* Pascal accepts names for pointer types.  */
 	      if (get_current_subfile ()->language == language_pascal)
-		SYMBOL_TYPE (sym)->set_name (sym->linkage_name ());
+		sym->type ()->set_name (sym->linkage_name ());
 	    }
 	  else
-	    SYMBOL_TYPE (sym)->set_name (sym->linkage_name ());
+	    sym->type ()->set_name (sym->linkage_name ());
 	}
 
       add_symbol_to_list (sym, get_file_symbols ());
@@ -1289,8 +1289,8 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	  struct_sym->set_aclass_index (LOC_TYPEDEF);
 	  SYMBOL_VALUE (struct_sym) = valu;
 	  struct_sym->set_domain (STRUCT_DOMAIN);
-	  if (SYMBOL_TYPE (sym)->name () == 0)
-	    SYMBOL_TYPE (sym)->set_name
+	  if (sym->type ()->name () == 0)
+	    sym->type ()->set_name
 	      (obconcat (&objfile->objfile_obstack, sym->linkage_name (),
 			 (char *) NULL));
 	  add_symbol_to_list (struct_sym, get_file_symbols ());
@@ -1306,7 +1306,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       if (synonym)
 	p++;
 
-      SYMBOL_TYPE (sym) = read_type (&p, objfile);
+      sym->set_type (read_type (&p, objfile));
  
       /* For a nameless type, we don't want a create a symbol, thus we
 	 did not use `sym'.  Return without further processing.  */
@@ -1316,8 +1316,8 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       sym->set_aclass_index (LOC_TYPEDEF);
       SYMBOL_VALUE (sym) = valu;
       sym->set_domain (STRUCT_DOMAIN);
-      if (SYMBOL_TYPE (sym)->name () == 0)
-	SYMBOL_TYPE (sym)->set_name
+      if (sym->type ()->name () == 0)
+	sym->type ()->set_name
 	  (obconcat (&objfile->objfile_obstack, sym->linkage_name (),
 		     (char *) NULL));
       add_symbol_to_list (sym, get_file_symbols ());
@@ -1331,8 +1331,8 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	  typedef_sym->set_aclass_index (LOC_TYPEDEF);
 	  SYMBOL_VALUE (typedef_sym) = valu;
 	  typedef_sym->set_domain (VAR_DOMAIN);
-	  if (SYMBOL_TYPE (sym)->name () == 0)
-	    SYMBOL_TYPE (sym)->set_name
+	  if (sym->type ()->name () == 0)
+	    sym->type ()->set_name
 	      (obconcat (&objfile->objfile_obstack, sym->linkage_name (),
 			 (char *) NULL));
 	  add_symbol_to_list (typedef_sym, get_file_symbols ());
@@ -1341,7 +1341,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
     case 'V':
       /* Static symbol of local scope.  */
-      SYMBOL_TYPE (sym) = read_type (&p, objfile);
+      sym->set_type (read_type (&p, objfile));
       sym->set_aclass_index (LOC_STATIC);
       SET_SYMBOL_VALUE_ADDRESS (sym, valu);
       sym->set_domain (VAR_DOMAIN);
@@ -1350,7 +1350,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
     case 'v':
       /* Reference parameter */
-      SYMBOL_TYPE (sym) = read_type (&p, objfile);
+      sym->set_type (read_type (&p, objfile));
       sym->set_aclass_index (LOC_REF_ARG);
       sym->set_is_argument (1);
       SYMBOL_VALUE (sym) = valu;
@@ -1360,7 +1360,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
     case 'a':
       /* Reference parameter which is in a register.  */
-      SYMBOL_TYPE (sym) = read_type (&p, objfile);
+      sym->set_type (read_type (&p, objfile));
       sym->set_aclass_index (stab_regparm_index);
       sym->set_is_argument (1);
       SYMBOL_VALUE (sym) = valu;
@@ -1373,7 +1373,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	 Sun claims ("dbx and dbxtool interfaces", 2nd ed)
 	 that Pascal uses it too, but when I tried it Pascal used
 	 "x:3" (local symbol) instead.  */
-      SYMBOL_TYPE (sym) = read_type (&p, objfile);
+      sym->set_type (read_type (&p, objfile));
       sym->set_aclass_index (LOC_LOCAL);
       SYMBOL_VALUE (sym) = valu;
       sym->set_domain (VAR_DOMAIN);
@@ -1381,7 +1381,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       break;
 
     default:
-      SYMBOL_TYPE (sym) = error_type (&p, objfile);
+      sym->set_type (error_type (&p, objfile));
       sym->set_aclass_index (LOC_CONST);
       SYMBOL_VALUE (sym) = 0;
       sym->set_domain (VAR_DOMAIN);
@@ -1393,7 +1393,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
      of by value, i.e. they will pass the address of a structure (in a
      register or on the stack) instead of the structure itself.  */
 
-  if (gdbarch_stabs_argument_has_addr (gdbarch, SYMBOL_TYPE (sym))
+  if (gdbarch_stabs_argument_has_addr (gdbarch, sym->type ())
       && sym->is_argument ())
     {
       /* We have to convert LOC_REGISTER to LOC_REGPARM_ADDR (for
@@ -1630,11 +1630,11 @@ again:
 
 	      if (sym->aclass () == LOC_TYPEDEF
 		  && sym->domain () == STRUCT_DOMAIN
-		  && (SYMBOL_TYPE (sym)->code () == code)
+		  && (sym->type ()->code () == code)
 		  && strcmp (sym->linkage_name (), type_name) == 0)
 		{
 		  obstack_free (&objfile->objfile_obstack, type_name);
-		  type = SYMBOL_TYPE (sym);
+		  type = sym->type ();
 		  if (typenums[0] != -1)
 		    *dbx_lookup_type (typenums, objfile) = type;
 		  return type;
@@ -3635,7 +3635,7 @@ read_enum_type (const char **pp, struct type *type,
 	{
 	  struct symbol *xsym = syms->symbol[j];
 
-	  SYMBOL_TYPE (xsym) = type;
+	  xsym->set_type (type);
 	  type->field (n).set_name (xsym->linkage_name ());
 	  type->field (n).set_loc_enumval (SYMBOL_VALUE (xsym));
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
@@ -4281,7 +4281,7 @@ common_block_end (struct objfile *objfile)
     for (j = common_block_i; j < common_block->nsyms; j++)
       add_symbol_to_list (common_block->symbol[j], &newobj);
 
-  SYMBOL_TYPE (sym) = (struct type *) newobj;
+  sym->set_type ((struct type *) newobj);
 
   /* Should we be putting local_symbols back to what it was?
      Does it matter?  */
@@ -4299,7 +4299,7 @@ common_block_end (struct objfile *objfile)
 static void
 fix_common_block (struct symbol *sym, CORE_ADDR valu)
 {
-  struct pending *next = (struct pending *) SYMBOL_TYPE (sym);
+  struct pending *next = (struct pending *) sym->type ();
 
   for (; next; next = next->next)
     {
@@ -4468,11 +4468,11 @@ cleanup_undefined_types_1 (void)
 
 			if (sym->aclass () == LOC_TYPEDEF
 			    && sym->domain () == STRUCT_DOMAIN
-			    && (SYMBOL_TYPE (sym)->code () == (*type)->code ())
+			    && (sym->type ()->code () == (*type)->code ())
 			    && ((*type)->instance_flags ()
-				== SYMBOL_TYPE (sym)->instance_flags ())
+				== sym->type ()->instance_flags ())
 			    && strcmp (sym->linkage_name (), type_name) == 0)
-			  replace_type (*type, SYMBOL_TYPE (sym));
+			  replace_type (*type, sym->type ());
 		      }
 		  }
 	      }

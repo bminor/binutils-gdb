@@ -220,7 +220,7 @@ cp_lookup_bare_symbol (const struct language_defn *langdef,
 	return {};
 
 
-      type = check_typedef (TYPE_TARGET_TYPE (SYMBOL_TYPE (lang_this.symbol)));
+      type = check_typedef (TYPE_TARGET_TYPE (lang_this.symbol->type ()));
       /* If TYPE_NAME is NULL, abandon trying to find this symbol.
 	 This can happen for lambda functions compiled with clang++,
 	 which outputs no name for the container class.  */
@@ -274,7 +274,7 @@ cp_search_static_and_baseclasses (const char *name,
   if (scope_sym.symbol == NULL)
     return {};
 
-  struct type *scope_type = SYMBOL_TYPE (scope_sym.symbol);
+  struct type *scope_type = scope_sym.symbol->type ();
 
   /* If the scope is a function/method, then look up NESTED as a local
      static variable.  E.g., "print 'function()::static_var'".  */

@@ -249,7 +249,7 @@ buildsym_compunit::finish_block_internal
 
   if (symbol)
     {
-      struct type *ftype = SYMBOL_TYPE (symbol);
+      struct type *ftype = symbol->type ();
       struct mdict_iterator miter;
       SYMBOL_BLOCK_VALUE (symbol) = block;
       BLOCK_FUNCTION (block) = symbol;
@@ -286,7 +286,7 @@ buildsym_compunit::finish_block_internal
 
 		  if (sym->is_argument ())
 		    {
-		      ftype->field (iparams).set_type (SYMBOL_TYPE (sym));
+		      ftype->field (iparams).set_type (sym->type ());
 		      TYPE_FIELD_ARTIFICIAL (ftype, iparams) = 0;
 		      iparams++;
 		    }

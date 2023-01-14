@@ -857,7 +857,7 @@ block_find_symbol (const struct block *block, const char *name,
 int
 block_find_non_opaque_type (struct symbol *sym, void *data)
 {
-  return !TYPE_IS_OPAQUE (SYMBOL_TYPE (sym));
+  return !TYPE_IS_OPAQUE (sym->type ());
 }
 
 /* See block.h.  */
@@ -867,7 +867,7 @@ block_find_non_opaque_type_preferred (struct symbol *sym, void *data)
 {
   struct symbol **best = (struct symbol **) data;
 
-  if (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
+  if (!TYPE_IS_OPAQUE (sym->type ()))
     return 1;
   *best = sym;
   return 0;

@@ -210,7 +210,7 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
 
 	  if (wsym)
 	    {
-	      wtype = SYMBOL_TYPE (wsym);
+	      wtype = wsym->type ();
 	    }
 	  else
 	    {

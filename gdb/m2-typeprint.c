@@ -163,8 +163,8 @@ m2_language::print_typedef (struct type *type, struct symbol *new_symbol,
 {
   type = check_typedef (type);
   fprintf_filtered (stream, "TYPE ");
-  if (!SYMBOL_TYPE (new_symbol)->name ()
-      || strcmp ((SYMBOL_TYPE (new_symbol))->name (),
+  if (!new_symbol->type ()->name ()
+      || strcmp ((new_symbol->type ())->name (),
 		 new_symbol->linkage_name ()) != 0)
     fprintf_filtered (stream, "%s = ", new_symbol->print_name ());
   else

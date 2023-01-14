@@ -72,13 +72,13 @@ sympy_get_type (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  if (SYMBOL_TYPE (symbol) == NULL)
+  if (symbol->type () == NULL)
     {
       Py_INCREF (Py_None);
       return Py_None;
     }
 
-  return type_to_type_object (SYMBOL_TYPE (symbol));
+  return type_to_type_object (symbol->type ());
 }
 
 static PyObject *

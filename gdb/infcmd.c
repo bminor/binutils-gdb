@@ -1567,7 +1567,7 @@ finish_command_fsm::should_stop (struct thread_info *tp)
       /* We're done.  */
       set_finished ();
 
-      rv->type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
+      rv->type = TYPE_TARGET_TYPE (function->type ());
       if (rv->type == NULL)
 	internal_error (__FILE__, __LINE__,
 			_("finish_command: function has no target type"));
@@ -1803,7 +1803,7 @@ finish_command (const char *arg, int from_tty)
 	printf_filtered (_("Run back to call of "));
       else
 	{
-	  if (sm->function != NULL && TYPE_NO_RETURN (sm->function->type)
+	  if (sm->function != NULL && TYPE_NO_RETURN (sm->function->type ())
 	      && !query (_("warning: Function %s does not return normally.\n"
 			   "Try to finish anyway? "),
 			 sm->function->print_name ()))

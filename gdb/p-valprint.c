@@ -255,7 +255,7 @@ pascal_language::value_print_inner (struct value *val,
 
 	      if (wsym)
 		{
-		  wtype = SYMBOL_TYPE (wsym);
+		  wtype = wsym->type ();
 		}
 	      else
 		{

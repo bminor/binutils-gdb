@@ -1343,7 +1343,7 @@ classify_name (struct parser_state *par_state, const struct block *block)
   sym = lookup_symbol (copy.c_str (), block, VAR_DOMAIN, &is_a_field_of_this);
   if (sym.symbol && sym.symbol->aclass () == LOC_TYPEDEF)
     {
-      yylval.tsym.type = SYMBOL_TYPE (sym.symbol);
+      yylval.tsym.type = sym.symbol->type ();
       return TYPENAME;
     }
   else if (sym.symbol == NULL)
@@ -1355,7 +1355,7 @@ classify_name (struct parser_state *par_state, const struct block *block)
 
       if (sym.symbol != NULL)
 	{
-	  yylval.tsym.type = SYMBOL_TYPE (sym.symbol);
+	  yylval.tsym.type = sym.symbol->type ();
 	  return TYPENAME;
 	}
 
@@ -1390,7 +1390,7 @@ classify_inner_name (struct parser_state *par_state,
 
   if (yylval.ssym.sym.symbol->aclass () == LOC_TYPEDEF)
     {
-      yylval.tsym.type = SYMBOL_TYPE (yylval.ssym.sym.symbol);
+      yylval.tsym.type = yylval.ssym.sym.symbol->type ();
       return TYPENAME;
     }
 

@@ -510,7 +510,7 @@ static void
 gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
 {
   /* Dereference any typedefs.  */
-  value->type = check_typedef (SYMBOL_TYPE (var));
+  value->type = check_typedef (var->type ());
   value->optimized_out = 0;
 
   if (SYMBOL_COMPUTED_OPS (var) != NULL)

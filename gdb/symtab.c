@@ -2130,7 +2130,7 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
 
       if (result.symbol)
 	{
-	  struct type *t = result.symbol->type;
+	  struct type *t = result.symbol->type ();
 
 	  /* I'm not really sure that type of this can ever
 	     be typedefed; just be safe.  */
@@ -2806,8 +2806,8 @@ basic_lookup_transparent_type_quick (struct objfile *objfile,
 			   block_find_non_opaque_type, NULL);
   if (sym == NULL)
     error_in_psymtab_expansion (block_index, name, cust);
-  gdb_assert (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)));
-  return SYMBOL_TYPE (sym);
+  gdb_assert (!TYPE_IS_OPAQUE (sym->type ()));
+  return sym->type ();
 }
 
 /* Subroutine of basic_lookup_transparent_type to simplify it.
@@ -2831,8 +2831,8 @@ basic_lookup_transparent_type_1 (struct objfile *objfile,
 			       block_find_non_opaque_type, NULL);
       if (sym != NULL)
 	{
-	  gdb_assert (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)));
-	  return SYMBOL_TYPE (sym);
+	  gdb_assert (!TYPE_IS_OPAQUE (sym->type ()));
+	  return sym->type ();
 	}
     }
 
@@ -4657,7 +4657,7 @@ treg_matches_sym_type_name (const compiled_regex &treg,
 			  sym->natural_name ());
     }
 
-  sym_type = SYMBOL_TYPE (sym);
+  sym_type = sym->type ();
   if (sym_type == NULL)
     return false;
 
@@ -4836,7 +4836,7 @@ global_symbol_searcher::add_matching_symbols
 			      members.  We only want to skip enums
 			      here.  */
 			   && !(sym->aclass () == LOC_CONST
-				&& (SYMBOL_TYPE (sym)->code ()
+				&& (sym->type ()->code ()
 				    == TYPE_CODE_ENUM))
 			   && (!treg.has_value ()
 			       || treg_matches_sym_type_name (*treg, sym)))
@@ -5042,10 +5042,10 @@ symbol_to_info_string (struct symbol *sym, int block,
 	 For the struct printing case below, things are worse, we force
 	 printing of the ";" in this function, which is going to be wrong
 	 for languages that don't require a ";" between statements.  */
-      if (SYMBOL_TYPE (sym)->code () == TYPE_CODE_TYPEDEF)
-	typedef_print (SYMBOL_TYPE (sym), sym, &tmp_stream);
+      if (sym->type ()->code () == TYPE_CODE_TYPEDEF)
+	typedef_print (sym->type (), sym, &tmp_stream);
       else
-	type_print (SYMBOL_TYPE (sym), "", &tmp_stream, -1);
+	type_print (sym->type (), "", &tmp_stream, -1);
       str += tmp_stream.string ();
     }
   /* variable, func, or typedef-that-is-c++-class.  */
@@ -5055,7 +5055,7 @@ symbol_to_info_string (struct symbol *sym, int block,
     {
       string_file tmp_stream;
 
-      type_print (SYMBOL_TYPE (sym),
+      type_print (sym->type (),
 		  (sym->aclass () == LOC_TYPEDEF
 		   ? "" : sym->print_name ()),
 		  &tmp_stream, 0);
@@ -5673,7 +5673,7 @@ completion_list_add_fields (completion_tracker &tracker,
 {
   if (sym->aclass () == LOC_TYPEDEF)
     {
-      struct type *t = SYMBOL_TYPE (sym);
+      struct type *t = sym->type ();
       enum type_code c = t->code ();
       int j;
 
@@ -5691,7 +5691,7 @@ completion_list_add_fields (completion_tracker &tracker,
 bool
 symbol_is_function_or_method (symbol *sym)
 {
-  switch (SYMBOL_TYPE (sym)->code ())
+  switch (sym->type ()->code ())
     {
     case TYPE_CODE_FUNC:
     case TYPE_CODE_METHOD:
@@ -5789,7 +5789,7 @@ add_symtab_completions (struct compunit_symtab *cust,
 
 	  if (code == TYPE_CODE_UNDEF
 	      || (sym->domain () == STRUCT_DOMAIN
-		  && SYMBOL_TYPE (sym)->code () == code))
+		  && sym->type ()->code () == code))
 	    completion_list_add_symbol (tracker, sym,
 					lookup_name,
 					text, word);
@@ -5942,7 +5942,7 @@ default_collect_symbol_completion_matches_break_on
 					    sym_text, word);
 	      }
 	    else if (sym->domain () == STRUCT_DOMAIN
-		     && SYMBOL_TYPE (sym)->code () == code)
+		     && sym->type ()->code () == code)
 	      completion_list_add_symbol (tracker, sym, lookup_name,
 					  sym_text, word);
 	  }

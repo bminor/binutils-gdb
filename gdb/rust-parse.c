@@ -458,7 +458,7 @@ rust_parser::rust_lookup_type (const char *name)
   if (result.symbol != NULL)
     {
       update_innermost_block (result);
-      return SYMBOL_TYPE (result.symbol);
+      return result.symbol->type ();
     }
 
   type = lookup_typename (language (), name, NULL, 1);
@@ -1218,7 +1218,7 @@ rust_parser::name_to_operation (const std::string &name)
   if (sym.symbol != nullptr)
     {
       gdb_assert (sym.symbol->aclass () == LOC_TYPEDEF);
-      type = SYMBOL_TYPE (sym.symbol);
+      type = sym.symbol->type ();
     }
   if (type == nullptr)
     type = rust_lookup_type (name.c_str ());

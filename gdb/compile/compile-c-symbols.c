@@ -65,7 +65,7 @@ convert_one_symbol (compile_c_instance *context,
   if (sym.symbol->aclass () == LOC_LABEL)
     sym_type = 0;
   else
-    sym_type = context->convert_type (SYMBOL_TYPE (sym.symbol));
+    sym_type = context->convert_type (sym.symbol->type ());
 
   if (sym.symbol->domain () == STRUCT_DOMAIN)
     {
@@ -94,12 +94,12 @@ convert_one_symbol (compile_c_instance *context,
 	case LOC_BLOCK:
 	  kind = GCC_C_SYMBOL_FUNCTION;
 	  addr = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym.symbol));
-	  if (is_global && SYMBOL_TYPE (sym.symbol)->is_gnu_ifunc ())
+	  if (is_global && sym.symbol->type ()->is_gnu_ifunc ())
 	    addr = gnu_ifunc_resolve_addr (target_gdbarch (), addr);
 	  break;
 
 	case LOC_CONST:
-	  if (SYMBOL_TYPE (sym.symbol)->code () == TYPE_CODE_ENUM)
+	  if (sym.symbol->type ()->code () == TYPE_CODE_ENUM)
 	    {
 	      /* Already handled by convert_enum.  */
 	      return;
@@ -405,7 +405,7 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 				"gcc_symbol_address \"%s\": full symbol\n",
 				identifier);
 	  result = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym));
-	  if (SYMBOL_TYPE (sym)->is_gnu_ifunc ())
+	  if (sym->type ()->is_gnu_ifunc ())
 	    result = gnu_ifunc_resolve_addr (target_gdbarch (), result);
 	  found = 1;
 	}
@@ -548,14 +548,14 @@ generate_c_for_for_one_variable (compile_instance *compiler,
 
   try
     {
-      if (is_dynamic_type (SYMBOL_TYPE (sym)))
+      if (is_dynamic_type (sym->type ()))
 	{
 	  /* We need to emit to a temporary buffer in case an error
 	     occurs in the middle.  */
 	  string_file local_file;
 
 	  generate_vla_size (compiler, &local_file, gdbarch, registers_used, pc,
-			     SYMBOL_TYPE (sym), sym);
+			     sym->type (), sym);
 
 	  stream->write (local_file.c_str (), local_file.size ());
 	}

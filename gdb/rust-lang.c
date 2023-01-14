@@ -1511,7 +1511,7 @@ rust_structop::evaluate_funcall (struct type *expect_type,
   if (sym.symbol == NULL)
     error (_("Could not find function named '%s'"), name.c_str ());
 
-  struct type *fn_type = SYMBOL_TYPE (sym.symbol);
+  struct type *fn_type = sym.symbol->type ();
   if (fn_type->num_fields () == 0)
     error (_("Function '%s' takes no arguments"), name.c_str ());
 

@@ -134,7 +134,7 @@ compile_object_run (compile_module_up &&module)
 
   try
     {
-      struct type *func_type = SYMBOL_TYPE (func_sym);
+      struct type *func_type = func_sym->type ();
       int current_arg = 0;
       struct value **vargs;
 

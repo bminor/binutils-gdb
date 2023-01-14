@@ -130,7 +130,7 @@ d_lookup_symbol (const struct language_defn *langdef,
 	  if (lang_this.symbol == NULL)
 	    return {};
 
-	  type = check_typedef (TYPE_TARGET_TYPE (SYMBOL_TYPE (lang_this.symbol)));
+	  type = check_typedef (TYPE_TARGET_TYPE (lang_this.symbol->type ()));
 	  classname = type->name ();
 	  nested = name;
 	}
@@ -151,7 +151,7 @@ d_lookup_symbol (const struct language_defn *langdef,
 	return {};
 
       /* Look for a symbol named NESTED in this class.  */
-      sym = d_lookup_nested_symbol (SYMBOL_TYPE (class_sym.symbol),
+      sym = d_lookup_nested_symbol (class_sym.symbol->type (),
 				    nested.c_str (), block);
     }
 

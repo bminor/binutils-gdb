@@ -1489,7 +1489,7 @@ yylex (void)
 				domain, NULL);
 	if (result.symbol && result.symbol->aclass () == LOC_TYPEDEF)
 	  {
-	    yylval.tsym.type = SYMBOL_TYPE (result.symbol);
+	    yylval.tsym.type = result.symbol->type ();
 	    return TYPENAME;
 	  }
 
