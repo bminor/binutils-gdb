@@ -1,5 +1,10 @@
 2020-04-24  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (add_partial_symbol): Do not call
+	compute_and_set_names.
+
+2020-04-24  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (add_partial_symbol): Use new add_psymbol_to_list
 	overload.
 

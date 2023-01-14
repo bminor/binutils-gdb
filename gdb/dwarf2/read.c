@@ -8376,9 +8376,9 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 
   if (where.has_value ())
     {
-      psymbol.ginfo.compute_and_set_names (actual_name,
-					   built_actual_name != nullptr,
-					   objfile->per_bfd);
+      if (built_actual_name != nullptr)
+	actual_name = objfile->intern (actual_name);
+      psymbol.ginfo.set_linkage_name (actual_name);
       add_psymbol_to_list (psymbol, *where, objfile);
     }
 }
