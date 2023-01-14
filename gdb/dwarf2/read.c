@@ -8219,6 +8219,15 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
   if (actual_name == NULL)
     actual_name = pdi->name;
 
+  partial_symbol psymbol;
+  memset (&psymbol, 0, sizeof (psymbol));
+  psymbol.ginfo.set_language (cu->language, &objfile->objfile_obstack);
+  psymbol.ginfo.section = -1;
+
+  /* The code below indicates that the psymbol should be installed by
+     setting this.  */
+  gdb::optional<psymbol_placement> where;
+
   switch (pdi->tag)
     {
     case DW_TAG_inlined_subroutine:
@@ -8235,34 +8244,25 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
              But in Ada and Fortran, we want to be able to access nested
              procedures globally.  So all Ada and Fortran subprograms are
              stored in the global scope.  */
-	  add_psymbol_to_list (actual_name,
-			       built_actual_name != NULL,
-			       VAR_DOMAIN, LOC_BLOCK,
-			       SECT_OFF_TEXT (objfile),
-			       psymbol_placement::GLOBAL,
-			       addr,
-			       cu->language, objfile);
+	  where = psymbol_placement::GLOBAL;
 	}
       else
-	{
-	  add_psymbol_to_list (actual_name,
-			       built_actual_name != NULL,
-			       VAR_DOMAIN, LOC_BLOCK,
-			       SECT_OFF_TEXT (objfile),
-			       psymbol_placement::STATIC,
-			       addr, cu->language, objfile);
-	}
+	where = psymbol_placement::STATIC;
+
+      psymbol.domain = VAR_DOMAIN;
+      psymbol.aclass = LOC_BLOCK;
+      psymbol.ginfo.section = SECT_OFF_TEXT (objfile);
+      psymbol.ginfo.value.address = addr;
 
       if (pdi->main_subprogram && actual_name != NULL)
 	set_objfile_main_name (objfile, actual_name, cu->language);
       break;
     case DW_TAG_constant:
-      add_psymbol_to_list (actual_name,
-			   built_actual_name != NULL, VAR_DOMAIN, LOC_STATIC,
-			   -1, (pdi->is_external
-				? psymbol_placement::GLOBAL
-				: psymbol_placement::STATIC),
-			   0, cu->language, objfile);
+      psymbol.domain = VAR_DOMAIN;
+      psymbol.aclass = LOC_STATIC;
+      where = (pdi->is_external
+	       ? psymbol_placement::GLOBAL
+	       : psymbol_placement::STATIC);
       break;
     case DW_TAG_variable:
       if (pdi->d.locdesc)
@@ -8293,12 +8293,13 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	     table building.  */
 
 	  if (pdi->d.locdesc || pdi->has_type)
-	    add_psymbol_to_list (actual_name,
-				 built_actual_name != NULL,
-				 VAR_DOMAIN, LOC_STATIC,
-				 SECT_OFF_TEXT (objfile),
-				 psymbol_placement::GLOBAL,
-				 addr, cu->language, objfile);
+	    {
+	      psymbol.domain = VAR_DOMAIN;
+	      psymbol.aclass = LOC_STATIC;
+	      psymbol.ginfo.section = SECT_OFF_TEXT (objfile);
+	      psymbol.ginfo.value.address = addr;
+	      where = psymbol_placement::GLOBAL;
+	    }
 	}
       else
 	{
@@ -8309,42 +8310,37 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	  if (!has_loc && !pdi->has_const_value)
 	    return;
 
-	  add_psymbol_to_list (actual_name,
-			       built_actual_name != NULL,
-			       VAR_DOMAIN, LOC_STATIC,
-			       SECT_OFF_TEXT (objfile),
-			       psymbol_placement::STATIC,
-			       has_loc ? addr : 0,
-			       cu->language, objfile);
+	  psymbol.domain = VAR_DOMAIN;
+	  psymbol.aclass = LOC_STATIC;
+	  psymbol.ginfo.section = SECT_OFF_TEXT (objfile);
+	  if (has_loc)
+	    psymbol.ginfo.value.address = addr;
+	  where = psymbol_placement::STATIC;
 	}
       break;
     case DW_TAG_typedef:
     case DW_TAG_base_type:
     case DW_TAG_subrange_type:
-      add_psymbol_to_list (actual_name,
-			   built_actual_name != NULL,
-			   VAR_DOMAIN, LOC_TYPEDEF, -1,
-			   psymbol_placement::STATIC,
-			   0, cu->language, objfile);
+      psymbol.domain = VAR_DOMAIN;
+      psymbol.aclass = LOC_TYPEDEF;
+      where = psymbol_placement::STATIC;
       break;
     case DW_TAG_imported_declaration:
     case DW_TAG_namespace:
-      add_psymbol_to_list (actual_name,
-			   built_actual_name != NULL,
-			   VAR_DOMAIN, LOC_TYPEDEF, -1,
-			   psymbol_placement::GLOBAL,
-			   0, cu->language, objfile);
+      psymbol.domain = VAR_DOMAIN;
+      psymbol.aclass = LOC_TYPEDEF;
+      where = psymbol_placement::GLOBAL;
       break;
     case DW_TAG_module:
       /* With Fortran 77 there might be a "BLOCK DATA" module
          available without any name.  If so, we skip the module as it
          doesn't bring any value.  */
       if (actual_name != nullptr)
-	add_psymbol_to_list (actual_name,
-			     built_actual_name != NULL,
-			     MODULE_DOMAIN, LOC_TYPEDEF, -1,
-			     psymbol_placement::GLOBAL,
-			     0, cu->language, objfile);
+	{
+	  psymbol.domain = MODULE_DOMAIN;
+	  psymbol.aclass = LOC_TYPEDEF;
+	  where = psymbol_placement::GLOBAL;
+	}
       break;
     case DW_TAG_class_type:
     case DW_TAG_interface_type:
@@ -8361,26 +8357,29 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 
       /* NOTE: carlton/2003-10-07: See comment in new_symbol about
 	 static vs. global.  */
-      add_psymbol_to_list (actual_name,
-			   built_actual_name != NULL,
-			   STRUCT_DOMAIN, LOC_TYPEDEF, -1,
-			   cu->language == language_cplus
-			   ? psymbol_placement::GLOBAL
-			   : psymbol_placement::STATIC,
-			   0, cu->language, objfile);
-
+      psymbol.domain = STRUCT_DOMAIN;
+      psymbol.aclass = LOC_TYPEDEF;
+      where = (cu->language == language_cplus
+	       ? psymbol_placement::GLOBAL
+	       : psymbol_placement::STATIC);
       break;
     case DW_TAG_enumerator:
-      add_psymbol_to_list (actual_name,
-			   built_actual_name != NULL,
-			   VAR_DOMAIN, LOC_CONST, -1,
-			   cu->language == language_cplus
-			   ? psymbol_placement::GLOBAL
-			   : psymbol_placement::STATIC,
-			   0, cu->language, objfile);
+      psymbol.domain = VAR_DOMAIN;
+      psymbol.aclass = LOC_CONST;
+      where = (cu->language == language_cplus
+	       ? psymbol_placement::GLOBAL
+	       : psymbol_placement::STATIC);
       break;
     default:
       break;
+    }
+
+  if (where.has_value ())
+    {
+      psymbol.ginfo.compute_and_set_names (actual_name,
+					   built_actual_name != nullptr,
+					   objfile->per_bfd);
+      add_psymbol_to_list (psymbol, *where, objfile);
     }
 }
 
@@ -10032,6 +10031,12 @@ dw2_linkage_name (struct die_info *die, struct dwarf2_cu *cu)
   if (linkage_name == NULL)
     linkage_name = dwarf2_string_attr (die, DW_AT_MIPS_linkage_name, cu);
 
+  /* rustc emits invalid values for DW_AT_linkage_name.  Ignore these.
+     See https://github.com/rust-lang/rust/issues/32925.  */
+  if (cu->language == language_rust && linkage_name != NULL
+      && strchr (linkage_name, '{') != NULL)
+    linkage_name = NULL;
+
   return linkage_name;
 }
 
@@ -10307,12 +10312,6 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
     return dwarf2_compute_name (name, die, cu, 1);
 
   mangled = dw2_linkage_name (die, cu);
-
-  /* rustc emits invalid values for DW_AT_linkage_name.  Ignore these.
-     See https://github.com/rust-lang/rust/issues/32925.  */
-  if (cu->language == language_rust && mangled != NULL
-      && strchr (mangled, '{') != NULL)
-    mangled = NULL;
 
   /* DW_AT_linkage_name is missing in some cases - depend on what GDB
      has computed.  */
@@ -18328,7 +18327,12 @@ partial_die_info::read (const struct die_reader_specs *reader,
 	  /* Note that both forms of linkage name might appear.  We
 	     assume they will be the same, and we only store the last
 	     one we see.  */
-	  linkage_name = DW_STRING (&attr);
+	  linkage_name = attr.value_as_string ();
+	  /* rustc emits invalid values for DW_AT_linkage_name.  Ignore these.
+	     See https://github.com/rust-lang/rust/issues/32925.  */
+	  if (cu->language == language_rust && linkage_name != NULL
+	      && strchr (linkage_name, '{') != NULL)
+	    linkage_name = NULL;
 	  break;
 	case DW_AT_low_pc:
 	  has_low_pc_attr = 1;
@@ -19508,17 +19512,8 @@ dwarf2_string_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *c
 
   if (attr != NULL)
     {
-      if (attr->form == DW_FORM_strp || attr->form == DW_FORM_line_strp
-	  || attr->form == DW_FORM_string
-	  || attr->form == DW_FORM_strx
-	  || attr->form == DW_FORM_strx1
-	  || attr->form == DW_FORM_strx2
-	  || attr->form == DW_FORM_strx3
-	  || attr->form == DW_FORM_strx4
-	  || attr->form == DW_FORM_GNU_str_index
-	  || attr->form == DW_FORM_GNU_strp_alt)
-	str = DW_STRING (attr);
-      else
+      str = attr->value_as_string ();
+      if (str == nullptr)
         complaint (_("string type expected for attribute %s for "
 		     "DIE at %s in module %s"),
 		   dwarf_attr_name (name), sect_offset_str (die->sect_off),
@@ -20598,9 +20593,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	 between gfortran, iFort etc.  */
       if (cu->language == language_fortran
           && symbol_get_demangled_name (sym) == NULL)
-	symbol_set_demangled_name (sym,
-				   dwarf2_full_name (name, die, cu),
-	                           NULL);
+	sym->set_demangled_name (dwarf2_full_name (name, die, cu), NULL);
 
       /* Default assumptions.
          Use the passed type or decode it from the die.  */

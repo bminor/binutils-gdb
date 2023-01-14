@@ -1,3 +1,35 @@
+2020-04-24  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/dw2-bad-mips-linkage-name.exp: Set language of CU to
+	C++.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/frame_arg_lang.exp: Run with multiple -fgnat-encodings
+	values.
+	* gdb.ada/funcall_ref.exp: Run with multiple -fgnat-encodings
+	values.  Update test for minimal encodings.
+	* gdb.ada/lang_switch.exp: Update test for minimal encodings.
+	* gdb.ada/var_rec_arr.exp: Run with multiple -fgnat-encodings
+	values.  Update test for minimal encodings.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
+	PR python/23662:
+	* gdb.ada/variant.exp: Add Python checks.
+	* gdb.rust/simple.exp: Add dynamic type checks.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/mi_var_array.exp: Try all -fgnat-encodings settings.
+	Make array type matching more lax.
+	* gdb.ada/mi_var_union.exp: Try all -fgnat-encodings settings.
+	* gdb.ada/mi_variant.exp: New file.
+	* gdb.ada/mi_variant/pck.ads: New file.
+	* gdb.ada/mi_variant/pkg.adb: New file.
+	* gdb.ada/packed_tagged.exp: Try all -fgnat-encodings settings.
+	* gdb.ada/unchecked_union.exp: Try all -fgnat-encodings settings.
+
 2020-04-24  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/variant.exp: Add dynamic field offset tests.

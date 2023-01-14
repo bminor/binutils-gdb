@@ -1,3 +1,63 @@
+2020-04-24  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (add_partial_symbol): Use new add_psymbol_to_list
+	overload.
+
+2020-04-24  Tom Tromey  <tom@tromey.com>
+
+	* psymtab.c (add_psymbol_to_bcache): Simplify calling convention.
+	(add_psymbol_to_list): New overload.  Make old overload call new
+	one.
+	* psympriv.h (add_psymbol_to_list): New overload.
+
+2020-04-24  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (partial_die_info::read) <case
+	DW_AT_linkage_name>: Use value_as_string.
+	(dwarf2_string_attr): Use value_as_string.
+	* dwarf2/attribute.h (struct attribute) <value_as_string>: Declare
+	method.
+	* dwarf2/attribute.c (attribute::value_as_string): New method.
+
+2020-04-24  Tom Tromey  <tom@tromey.com>
+
+	* symtab.c (general_symbol_info::natural_name)
+	(general_symbol_info::demangled_name): Check for language_rust.
+
+2020-04-24  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (dw2_linkage_name): Move Rust "{" hack here...
+	(dwarf2_physname): ... from here.
+	(partial_die_info::read): Add Rust "{" hack.
+
+2020-04-24  Tom Tromey  <tom@tromey.com>
+
+	* symtab.h (struct general_symbol_info) <set_demangled_name>: New
+	method.
+	(symbol_set_demangled_name): Don't declare.
+	* symtab.c (general_symbol_info::set_demangled_name): Rename from
+	symbol_set_demangled_name.
+	(general_symbol_info::set_language)
+	(general_symbol_info::compute_and_set_names): Update.
+	* minsyms.c (minimal_symbol_reader::install): Update.
+	* dwarf2/read.c (new_symbol): Update.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
+	PR python/23662:
+	* python/py-type.c (convert_field): Handle
+	FIELD_LOC_KIND_DWARF_BLOCK.
+	(typy_get_sizeof): Handle TYPE_HAS_DYNAMIC_LENGTH.
+	(typy_get_dynamic): Nw function.
+	(type_object_getset): Add "dynamic".
+	* NEWS: Add entry.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
+	* ada-typeprint.c (print_choices, print_variant_part)
+	(print_record_field_types_dynamic): New functions.
+	(print_record_field_types): Use print_record_field_types_dynamic.
+
 2020-04-24  Tom Tromey  <tromey@adacore.com>
 
 	* dwarf2/read.c (handle_data_member_location): New overload.

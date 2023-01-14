@@ -424,6 +424,14 @@ extern void add_psymbol_to_list (gdb::string_view name,
 				 enum language language,
 				 struct objfile *objfile);
 
+/* Add a symbol to the partial symbol table of OBJFILE.  The psymbol
+   must be fully constructed, and the names must be set and intern'd
+   as appropriate.  */
+
+extern void add_psymbol_to_list (const partial_symbol &psym,
+				 psymbol_placement where,
+				 struct objfile *objfile);
+
 /* Initialize storage for partial symbols.  If partial symbol storage
    has already been initialized, this does nothing.  TOTAL_SYMBOLS is
    an estimate of how many symbols there will be.  */

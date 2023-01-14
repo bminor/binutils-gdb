@@ -19,15 +19,6 @@ load_lib "ada.exp"
 
 standard_ada_testfile unchecked_union
 
-if {[gdb_compile_ada "${srcfile}" "${binfile}" executable {debug}] != ""} {
-  return -1
-}
-
-clean_restart ${testfile}
-
-set bp_location [gdb_get_line_number "BREAK" ${testdir}/unchecked_union.adb]
-runto "unchecked_union.adb:$bp_location"
-
 proc multi_line_string {str} {
     set result {}
     foreach line [split $str \n] {
@@ -54,5 +45,21 @@ set pair_string {    case ? is
 }
 set pair_full "type = record\n${inner_string}${pair_string}end record"
 
-gdb_test "ptype Pair" [multi_line_string $pair_full]
-gdb_test "ptype Inner" [multi_line_string $inner_full]
+foreach_with_prefix scenario {none all minimal} {
+    set flags {debug}
+    if {$scenario != "none"} {
+	lappend flags additional_flags=-fgnat-encodings=$scenario
+    }
+
+    if {[gdb_compile_ada "${srcfile}" "${binfile}" executable $flags] != ""} {
+	return -1
+    }
+
+    clean_restart ${testfile}
+
+    set bp_location [gdb_get_line_number "BREAK" ${testdir}/unchecked_union.adb]
+    runto "unchecked_union.adb:$bp_location"
+
+    gdb_test "ptype Pair" [multi_line_string $pair_full]
+    gdb_test "ptype Inner" [multi_line_string $inner_full]
+}

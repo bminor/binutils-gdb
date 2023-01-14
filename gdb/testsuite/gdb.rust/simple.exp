@@ -364,3 +364,13 @@ if {[skip_python_tests]} {
 }
 
 gdb_test "python print(gdb.lookup_type('simple::HiBob'))" "simple::HiBob"
+
+gdb_test_no_output "python e = gdb.parse_and_eval('e')" \
+    "get value of e for python"
+gdb_test "python print(len(e.type.fields()))" "2"
+gdb_test "python print(e.type.fields()\[0\].artificial)" "True"
+gdb_test "python print(e.type.fields()\[1\].name)" "Two"
+
+gdb_test "python print(e.type.dynamic)" "False"
+gdb_test "python print(gdb.lookup_type('simple::MoreComplicated').dynamic)" \
+    "True"

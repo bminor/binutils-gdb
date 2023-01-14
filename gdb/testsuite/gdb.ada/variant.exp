@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 load_lib "ada.exp"
+load_lib "gdb-python.exp"
 
 standard_ada_testfile pkg
 
@@ -43,4 +44,13 @@ foreach_with_prefix scenario {none all minimal} {
 	" = \\(one => 3, two => 0, str => \"zzz\", onevalue => 33, str2 => \"\"\\)"
     gdb_test "print nav3" \
 	" = \\(one => 3, two => 7, str => \"zzz\", onevalue => 33, str2 => \"qqqqqqq\", twovalue => 88\\)"
+
+    # This is only supported for the DWARF encoding.
+    if {$scenario == "minimal" && ![skip_python_tests]} {
+	gdb_test_no_output \
+	    "python t = gdb.lookup_type('nested_and_variable')" \
+	    "fetch type for python"
+	gdb_test "python print(t.dynamic)" "True"
+	gdb_test "python print(t\['onevalue'\].bitpos)" "None"
+    }
 }
