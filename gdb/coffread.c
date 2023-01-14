@@ -1490,8 +1490,8 @@ patch_opaque_types (struct symtab *s)
 	 Remove syms from the chain when their types are stored,
 	 but search the whole chain, as there may be several syms
 	 from different files with the same name.  */
-      if (SYMBOL_CLASS (real_sym) == LOC_TYPEDEF
-	  && SYMBOL_DOMAIN (real_sym) == VAR_DOMAIN
+      if (real_sym->aclass () == LOC_TYPEDEF
+	  && real_sym->domain () == VAR_DOMAIN
 	  && SYMBOL_TYPE (real_sym)->code () == TYPE_CODE_PTR
 	  && TYPE_LENGTH (TYPE_TARGET_TYPE (SYMBOL_TYPE (real_sym))) != 0)
 	{
@@ -1565,7 +1565,7 @@ process_coff_symbol (struct coff_symbol *cs,
 
   /* default assumptions */
   SYMBOL_VALUE (sym) = cs->c_value;
-  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+  sym->set_domain (VAR_DOMAIN);
   sym->set_section_index (cs_to_section (cs, objfile));
 
   if (ISFCN (cs->c_type))
@@ -1640,20 +1640,20 @@ process_coff_symbol (struct coff_symbol *cs,
 
 	case C_ARG:
 	  sym->set_aclass_index (LOC_ARG);
-	  SYMBOL_IS_ARGUMENT (sym) = 1;
+	  sym->set_is_argument (1);
 	  add_symbol_to_list (sym, get_local_symbols ());
 	  break;
 
 	case C_REGPARM:
 	  sym->set_aclass_index (coff_register_index);
-	  SYMBOL_IS_ARGUMENT (sym) = 1;
+	  sym->set_is_argument (1);
 	  SYMBOL_VALUE (sym) = cs->c_value;
 	  add_symbol_to_list (sym, get_local_symbols ());
 	  break;
 
 	case C_TPDEF:
 	  sym->set_aclass_index (LOC_TYPEDEF);
-	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+	  sym->set_domain (VAR_DOMAIN);
 
 	  /* If type has no name, give it one.  */
 	  if (SYMBOL_TYPE (sym)->name () == 0)
@@ -1708,7 +1708,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	case C_UNTAG:
 	case C_ENTAG:
 	  sym->set_aclass_index (LOC_TYPEDEF);
-	  SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
+	  sym->set_domain (STRUCT_DOMAIN);
 
 	  /* Some compilers try to be helpful by inventing "fake"
 	     names for anonymous enums, structures, and unions, like
@@ -2099,7 +2099,7 @@ coff_read_enum_type (int index, int length, int lastsym,
 	  name = obstack_strdup (&objfile->objfile_obstack, name);
 	  sym->set_linkage_name (name);
 	  sym->set_aclass_index (LOC_CONST);
-	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+	  sym->set_domain (VAR_DOMAIN);
 	  SYMBOL_VALUE (sym) = ms->c_value;
 	  add_symbol_to_list (sym, symlist);
 	  nsyms++;

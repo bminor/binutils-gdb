@@ -502,13 +502,13 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 {
   struct obj_section *section;
 
-  if (SYMBOL_OBJFILE_OWNED (symbol))
+  if (symbol->is_objfile_owned ())
     section = symbol->obj_section (symbol_objfile (symbol));
   else
     section = NULL;
 
   print_spaces_filtered (depth, outfile);
-  if (SYMBOL_DOMAIN (symbol) == LABEL_DOMAIN)
+  if (symbol->domain () == LABEL_DOMAIN)
     {
       fprintf_filtered (outfile, "label %s at ", symbol->print_name ());
       fputs_filtered (paddress (gdbarch, SYMBOL_VALUE_ADDRESS (symbol)),
@@ -521,7 +521,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
       return;
     }
 
-  if (SYMBOL_DOMAIN (symbol) == STRUCT_DOMAIN)
+  if (symbol->domain () == STRUCT_DOMAIN)
     {
       if (SYMBOL_TYPE (symbol)->name ())
 	{
@@ -543,7 +543,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
     }
   else
     {
-      if (SYMBOL_CLASS (symbol) == LOC_TYPEDEF)
+      if (symbol->aclass () == LOC_TYPEDEF)
 	fprintf_filtered (outfile, "typedef ");
       if (SYMBOL_TYPE (symbol))
 	{
@@ -558,7 +558,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
       else
 	fprintf_filtered (outfile, "%s ", symbol->print_name ());
 
-      switch (SYMBOL_CLASS (symbol))
+      switch (symbol->aclass ())
 	{
 	case LOC_CONST:
 	  fprintf_filtered (outfile, "const %s (%s)",
@@ -589,7 +589,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 	  break;
 
 	case LOC_REGISTER:
-	  if (SYMBOL_IS_ARGUMENT (symbol))
+	  if (symbol->is_argument ())
 	    fprintf_filtered (outfile, "parameter register %s",
 			      plongest (SYMBOL_VALUE (symbol)));
 	  else
@@ -654,7 +654,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 
 	default:
 	  fprintf_filtered (outfile, "botched symbol class %x",
-			    SYMBOL_CLASS (symbol));
+			    symbol->aclass ());
 	  break;
 	}
     }

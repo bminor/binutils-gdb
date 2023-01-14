@@ -1105,17 +1105,19 @@ enum symbol_subclass_kind
   SYMBOL_RUST_VTABLE
 };
 
+extern const struct symbol_impl *symbol_impls;
+
 /* This structure is space critical.  See space comments at the top.  */
 
 struct symbol : public general_symbol_info, public allocate_on_obstack
 {
   symbol ()
     /* Class-initialization of bitfields is only allowed in C++20.  */
-    : domain (UNDEF_DOMAIN),
+    : m_domain (UNDEF_DOMAIN),
       m_aclass_index (0),
-      is_objfile_owned (1),
-      is_argument (0),
-      is_inlined (0),
+      m_is_objfile_owned (1),
+      m_is_argument (0),
+      m_is_inlined (0),
       maybe_copied (0),
       subclass (SYMBOL_NONE),
       artificial (false)
@@ -1146,6 +1148,56 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
     m_aclass_index = aclass_index;
   }
 
+  const symbol_impl &impl () const
+  {
+    return symbol_impls[this->aclass_index ()];
+  }
+
+  address_class aclass () const
+  {
+    return this->impl ().aclass;
+  }
+
+  domain_enum domain () const
+  {
+    return m_domain;
+  }
+
+  void set_domain (domain_enum domain)
+  {
+    m_domain = domain;
+  }
+
+  bool is_objfile_owned () const
+  {
+    return m_is_objfile_owned;
+  }
+
+  void set_is_objfile_owned (bool is_objfile_owned)
+  {
+    m_is_objfile_owned = is_objfile_owned;
+  }
+
+  bool is_argument () const
+  {
+    return m_is_argument;
+  }
+
+  void set_is_argument (bool is_argument)
+  {
+    m_is_argument = is_argument;
+  }
+
+  bool is_inlined () const
+  {
+    return m_is_inlined;
+  }
+
+  void set_is_inlined (bool is_inlined)
+  {
+    m_is_inlined = is_inlined;
+  }
+
   /* Data type of value */
 
   struct type *type = nullptr;
@@ -1166,7 +1218,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
 
   /* Domain code.  */
 
-  ENUM_BITFIELD(domain_enum_tag) domain : SYMBOL_DOMAIN_BITS;
+  ENUM_BITFIELD(domain_enum_tag) m_domain : SYMBOL_DOMAIN_BITS;
 
   /* Address class.  This holds an index into the 'symbol_impls'
      table.  The actual enum address_class value is stored there,
@@ -1177,14 +1229,14 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
   /* If non-zero then symbol is objfile-owned, use owner.symtab.
        Otherwise symbol is arch-owned, use owner.arch.  */
 
-  unsigned int is_objfile_owned : 1;
+  unsigned int m_is_objfile_owned : 1;
 
   /* Whether this is an argument.  */
 
-  unsigned is_argument : 1;
+  unsigned m_is_argument : 1;
 
   /* Whether this is an inlined function (class LOC_BLOCK only).  */
-  unsigned is_inlined : 1;
+  unsigned m_is_inlined : 1;
 
   /* For LOC_STATIC only, if this is set, then the symbol might be
      subject to copy relocation.  In this case, a minimal symbol
@@ -1245,24 +1297,16 @@ struct block_symbol
   const struct block *block;
 };
 
-extern const struct symbol_impl *symbol_impls;
-
 /* Note: There is no accessor macro for symbol.owner because it is
    "private".  */
 
-#define SYMBOL_DOMAIN(symbol)	(symbol)->domain
-#define SYMBOL_IMPL(symbol)		(symbol_impls[(symbol)->aclass_index ()])
-#define SYMBOL_CLASS(symbol)		(SYMBOL_IMPL (symbol).aclass)
-#define SYMBOL_OBJFILE_OWNED(symbol)	((symbol)->is_objfile_owned)
-#define SYMBOL_IS_ARGUMENT(symbol)	(symbol)->is_argument
-#define SYMBOL_INLINED(symbol)		(symbol)->is_inlined
 #define SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION(symbol) \
   (((symbol)->subclass) == SYMBOL_TEMPLATE)
 #define SYMBOL_TYPE(symbol)		(symbol)->type
 #define SYMBOL_LINE(symbol)		(symbol)->line
-#define SYMBOL_COMPUTED_OPS(symbol)	(SYMBOL_IMPL (symbol).ops_computed)
-#define SYMBOL_BLOCK_OPS(symbol)	(SYMBOL_IMPL (symbol).ops_block)
-#define SYMBOL_REGISTER_OPS(symbol)	(SYMBOL_IMPL (symbol).ops_register)
+#define SYMBOL_COMPUTED_OPS(symbol)	((symbol)->impl ().ops_computed)
+#define SYMBOL_BLOCK_OPS(symbol)	((symbol)->impl ().ops_block)
+#define SYMBOL_REGISTER_OPS(symbol)	((symbol)->impl ().ops_register)
 #define SYMBOL_LOCATION_BATON(symbol)   (symbol)->aux_value
 
 extern int register_symbol_computed_impl (enum address_class,

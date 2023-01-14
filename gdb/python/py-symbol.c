@@ -88,7 +88,7 @@ sympy_get_symtab (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  if (!SYMBOL_OBJFILE_OWNED (symbol))
+  if (!symbol->is_objfile_owned ())
     Py_RETURN_NONE;
 
   return symtab_to_symtab_object (symbol_symtab (symbol));
@@ -131,7 +131,7 @@ sympy_get_addr_class (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  return gdb_py_object_from_longest (SYMBOL_CLASS (symbol)).release ();
+  return gdb_py_object_from_longest (symbol->aclass ()).release ();
 }
 
 static PyObject *
@@ -141,7 +141,7 @@ sympy_is_argument (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  return PyBool_FromLong (SYMBOL_IS_ARGUMENT (symbol));
+  return PyBool_FromLong (symbol->is_argument ());
 }
 
 static PyObject *
@@ -152,7 +152,7 @@ sympy_is_constant (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  theclass = SYMBOL_CLASS (symbol);
+  theclass = symbol->aclass ();
 
   return PyBool_FromLong (theclass == LOC_CONST || theclass == LOC_CONST_BYTES);
 }
@@ -165,7 +165,7 @@ sympy_is_function (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  theclass = SYMBOL_CLASS (symbol);
+  theclass = symbol->aclass ();
 
   return PyBool_FromLong (theclass == LOC_BLOCK);
 }
@@ -178,9 +178,9 @@ sympy_is_variable (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  theclass = SYMBOL_CLASS (symbol);
+  theclass = symbol->aclass ();
 
-  return PyBool_FromLong (!SYMBOL_IS_ARGUMENT (symbol)
+  return PyBool_FromLong (!symbol->is_argument ()
 			  && (theclass == LOC_LOCAL || theclass == LOC_REGISTER
 			      || theclass == LOC_STATIC || theclass == LOC_COMPUTED
 			      || theclass == LOC_OPTIMIZED_OUT));
@@ -260,7 +260,7 @@ sympy_value (PyObject *self, PyObject *args)
     }
 
   SYMPY_REQUIRE_VALID (self, symbol);
-  if (SYMBOL_CLASS (symbol) == LOC_TYPEDEF)
+  if (symbol->aclass () == LOC_TYPEDEF)
     {
       PyErr_SetString (PyExc_TypeError, "cannot get the value of a typedef");
       return NULL;
@@ -302,7 +302,7 @@ set_symbol (symbol_object *obj, struct symbol *symbol)
 {
   obj->symbol = symbol;
   obj->prev = NULL;
-  if (SYMBOL_OBJFILE_OWNED (symbol)
+  if (symbol->is_objfile_owned ()
       && symbol_symtab (symbol) != NULL)
     {
       struct objfile *objfile = symbol_objfile (symbol);
@@ -348,7 +348,7 @@ sympy_dealloc (PyObject *obj)
   if (sym_obj->prev)
     sym_obj->prev->next = sym_obj->next;
   else if (sym_obj->symbol != NULL
-	   && SYMBOL_OBJFILE_OWNED (sym_obj->symbol)
+	   && sym_obj->symbol->is_objfile_owned ()
 	   && symbol_symtab (sym_obj->symbol) != NULL)
     {
       set_objfile_data (symbol_objfile (sym_obj->symbol),

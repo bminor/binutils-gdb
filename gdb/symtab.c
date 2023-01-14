@@ -1229,7 +1229,7 @@ eq_symbol_entry (const struct symbol_cache_slot *slot,
   else
     {
       slot_name = slot->value.found.symbol->search_name ();
-      slot_domain = SYMBOL_DOMAIN (slot->value.found.symbol);
+      slot_domain = slot->value.found.symbol->domain ();
     }
 
   /* NULL names match.  */
@@ -1582,7 +1582,7 @@ symbol_cache_dump (const struct symbol_cache *cache)
 		printf_filtered ("  [%4u] = %s, %s %s\n", i,
 				 host_address_to_string (context),
 				 found->print_name (),
-				 domain_name (SYMBOL_DOMAIN (found)));
+				 domain_name (found->domain ()));
 		break;
 	      }
 	    }
@@ -1789,7 +1789,7 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
   if (!sym)
     return NULL;
 
-  if (!SYMBOL_OBJFILE_OWNED (sym))
+  if (!sym->is_objfile_owned ())
     return sym;
 
   /* We either have an OBJFILE, or we can get at it from the sym's
@@ -1805,7 +1805,7 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
   /* We should have an objfile by now.  */
   gdb_assert (objfile);
 
-  switch (SYMBOL_CLASS (sym))
+  switch (sym->aclass ())
     {
     case LOC_STATIC:
     case LOC_LABEL:
@@ -2329,7 +2329,7 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
 	  break;
 	}
       if (symbol_matches_domain (result.symbol->language (),
-				 SYMBOL_DOMAIN (result.symbol), domain))
+				 result.symbol->domain (), domain))
 	{
 	  struct symbol *better
 	    = better_symbol (other.symbol, result.symbol, domain);
@@ -2906,7 +2906,7 @@ iterate_over_symbols (const struct block *block,
 
   ALL_BLOCK_SYMBOLS_WITH_NAME (block, name, iter, sym)
     {
-      if (symbol_matches_domain (sym->language (), SYMBOL_DOMAIN (sym), domain))
+      if (symbol_matches_domain (sym->language (), sym->domain (), domain))
 	{
 	  struct block_symbol block_sym = {sym, block};
 
@@ -3086,7 +3086,7 @@ find_symbol_at_address (CORE_ADDR address)
 
 	  ALL_BLOCK_SYMBOLS (b, iter, sym)
 	    {
-	      if (SYMBOL_CLASS (sym) == LOC_STATIC
+	      if (sym->aclass () == LOC_STATIC
 		  && SYMBOL_VALUE_ADDRESS (sym) == addr)
 		return sym;
 	    }
@@ -4119,7 +4119,7 @@ find_function_alias_target (bound_minimal_symbol msymbol)
 
   symbol *sym = find_pc_function (func_addr);
   if (sym != NULL
-      && SYMBOL_CLASS (sym) == LOC_BLOCK
+      && sym->aclass () == LOC_BLOCK
       && BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym)) == func_addr)
     return sym;
 
@@ -4828,28 +4828,28 @@ global_symbol_searcher::add_matching_symbols
 		       || preg->exec (sym->natural_name (), 0,
 				      NULL, 0) == 0)
 		      && ((kind == VARIABLES_DOMAIN
-			   && SYMBOL_CLASS (sym) != LOC_TYPEDEF
-			   && SYMBOL_CLASS (sym) != LOC_UNRESOLVED
-			   && SYMBOL_CLASS (sym) != LOC_BLOCK
+			   && sym->aclass () != LOC_TYPEDEF
+			   && sym->aclass () != LOC_UNRESOLVED
+			   && sym->aclass () != LOC_BLOCK
 			   /* LOC_CONST can be used for more than
 			      just enums, e.g., c++ static const
 			      members.  We only want to skip enums
 			      here.  */
-			   && !(SYMBOL_CLASS (sym) == LOC_CONST
+			   && !(sym->aclass () == LOC_CONST
 				&& (SYMBOL_TYPE (sym)->code ()
 				    == TYPE_CODE_ENUM))
 			   && (!treg.has_value ()
 			       || treg_matches_sym_type_name (*treg, sym)))
 			  || (kind == FUNCTIONS_DOMAIN
-			      && SYMBOL_CLASS (sym) == LOC_BLOCK
+			      && sym->aclass () == LOC_BLOCK
 			      && (!treg.has_value ()
 				  || treg_matches_sym_type_name (*treg,
 								 sym)))
 			  || (kind == TYPES_DOMAIN
-			      && SYMBOL_CLASS (sym) == LOC_TYPEDEF
-			      && SYMBOL_DOMAIN (sym) != MODULE_DOMAIN)
+			      && sym->aclass () == LOC_TYPEDEF
+			      && sym->domain () != MODULE_DOMAIN)
 			  || (kind == MODULES_DOMAIN
-			      && SYMBOL_DOMAIN (sym) == MODULE_DOMAIN
+			      && sym->domain () == MODULE_DOMAIN
 			      && SYMBOL_LINE (sym) != 0))))
 		{
 		  if (result_set->size () < m_max_search_results)
@@ -5030,7 +5030,7 @@ symbol_to_info_string (struct symbol *sym, int block,
 
   /* Typedef that is not a C++ class.  */
   if (kind == TYPES_DOMAIN
-      && SYMBOL_DOMAIN (sym) != STRUCT_DOMAIN)
+      && sym->domain () != STRUCT_DOMAIN)
     {
       string_file tmp_stream;
 
@@ -5051,12 +5051,12 @@ symbol_to_info_string (struct symbol *sym, int block,
   /* variable, func, or typedef-that-is-c++-class.  */
   else if (kind < TYPES_DOMAIN
 	   || (kind == TYPES_DOMAIN
-	       && SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN))
+	       && sym->domain () == STRUCT_DOMAIN))
     {
       string_file tmp_stream;
 
       type_print (SYMBOL_TYPE (sym),
-		  (SYMBOL_CLASS (sym) == LOC_TYPEDEF
+		  (sym->aclass () == LOC_TYPEDEF
 		   ? "" : sym->print_name ()),
 		  &tmp_stream, 0);
 
@@ -5525,8 +5525,8 @@ completion_list_add_symbol (completion_tracker &tracker,
      the msymbol name and removes the msymbol name from the completion
      tracker.  */
   if (sym->language () == language_cplus
-      && SYMBOL_DOMAIN (sym) == VAR_DOMAIN
-      && SYMBOL_CLASS (sym) == LOC_BLOCK)
+      && sym->domain () == VAR_DOMAIN
+      && sym->aclass () == LOC_BLOCK)
     {
       /* The call to canonicalize returns the empty string if the input
 	 string is already in canonical form, thanks to this we don't
@@ -5671,7 +5671,7 @@ completion_list_add_fields (completion_tracker &tracker,
 			    const lookup_name_info &lookup_name,
 			    const char *text, const char *word)
 {
-  if (SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+  if (sym->aclass () == LOC_TYPEDEF)
     {
       struct type *t = SYMBOL_TYPE (sym);
       enum type_code c = t->code ();
@@ -5723,7 +5723,7 @@ symbol_is_function_or_method (minimal_symbol *msymbol)
 bound_minimal_symbol
 find_gnu_ifunc (const symbol *sym)
 {
-  if (SYMBOL_CLASS (sym) != LOC_BLOCK)
+  if (sym->aclass () != LOC_BLOCK)
     return {};
 
   lookup_name_info lookup_name (sym->search_name (),
@@ -5788,7 +5788,7 @@ add_symtab_completions (struct compunit_symtab *cust,
 	    continue;
 
 	  if (code == TYPE_CODE_UNDEF
-	      || (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
+	      || (sym->domain () == STRUCT_DOMAIN
 		  && SYMBOL_TYPE (sym)->code () == code))
 	    completion_list_add_symbol (tracker, sym,
 					lookup_name,
@@ -5941,7 +5941,7 @@ default_collect_symbol_completion_matches_break_on
 		completion_list_add_fields (tracker, sym, lookup_name,
 					    sym_text, word);
 	      }
-	    else if (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
+	    else if (sym->domain () == STRUCT_DOMAIN
 		     && SYMBOL_TYPE (sym)->code () == code)
 	      completion_list_add_symbol (tracker, sym, lookup_name,
 					  sym_text, word);
@@ -6534,7 +6534,7 @@ initialize_ordinary_address_classes (void)
 struct objfile *
 symbol_objfile (const struct symbol *symbol)
 {
-  gdb_assert (SYMBOL_OBJFILE_OWNED (symbol));
+  gdb_assert (symbol->is_objfile_owned ());
   return symbol->owner.symtab->objfile ();
 }
 
@@ -6543,7 +6543,7 @@ symbol_objfile (const struct symbol *symbol)
 struct gdbarch *
 symbol_arch (const struct symbol *symbol)
 {
-  if (!SYMBOL_OBJFILE_OWNED (symbol))
+  if (!symbol->is_objfile_owned ())
     return symbol->owner.arch;
   return symbol->owner.symtab->objfile ()->arch ();
 }
@@ -6553,7 +6553,7 @@ symbol_arch (const struct symbol *symbol)
 struct symtab *
 symbol_symtab (const struct symbol *symbol)
 {
-  gdb_assert (SYMBOL_OBJFILE_OWNED (symbol));
+  gdb_assert (symbol->is_objfile_owned ());
   return symbol->owner.symtab;
 }
 
@@ -6562,7 +6562,7 @@ symbol_symtab (const struct symbol *symbol)
 void
 symbol_set_symtab (struct symbol *symbol, struct symtab *symtab)
 {
-  gdb_assert (SYMBOL_OBJFILE_OWNED (symbol));
+  gdb_assert (symbol->is_objfile_owned ());
   symbol->owner.symtab = symtab;
 }
 
@@ -6572,7 +6572,7 @@ CORE_ADDR
 get_symbol_address (const struct symbol *sym)
 {
   gdb_assert (sym->maybe_copied);
-  gdb_assert (SYMBOL_CLASS (sym) == LOC_STATIC);
+  gdb_assert (sym->aclass () == LOC_STATIC);
 
   const char *linkage_name = sym->linkage_name ();
 

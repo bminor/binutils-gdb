@@ -53,12 +53,12 @@ convert_one_symbol (compile_cplus_instance *instance,
 
   instance->error_symbol_once (sym.symbol);
 
-  if (SYMBOL_CLASS (sym.symbol) == LOC_LABEL)
+  if (sym.symbol->aclass () == LOC_LABEL)
     sym_type = 0;
   else
     sym_type = instance->convert_type (SYMBOL_TYPE (sym.symbol));
 
-  if (SYMBOL_DOMAIN (sym.symbol) == STRUCT_DOMAIN)
+  if (sym.symbol->domain () == STRUCT_DOMAIN)
     {
       /* Nothing to do.  */
     }
@@ -70,7 +70,7 @@ convert_one_symbol (compile_cplus_instance *instance,
       std::string name;
       gdb::unique_xmalloc_ptr<char> symbol_name;
 
-      switch (SYMBOL_CLASS (sym.symbol))
+      switch (sym.symbol->aclass ())
 	{
 	case LOC_TYPEDEF:
 	  if (SYMBOL_TYPE (sym.symbol)->code () == TYPE_CODE_TYPEDEF)
@@ -374,7 +374,7 @@ gcc_cplus_convert_symbol (void *datum,
 	    {
 	      found = true;
 	      convert_symbol_sym (instance, identifier, it,
-				  SYMBOL_DOMAIN (it.symbol));
+				  it.symbol->domain ());
 	    }
 	}
 
@@ -435,7 +435,7 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
       struct symbol *sym
 	= lookup_symbol (identifier, nullptr, VAR_DOMAIN, nullptr).symbol;
 
-      if (sym != nullptr && SYMBOL_CLASS (sym) == LOC_BLOCK)
+      if (sym != nullptr && sym->aclass () == LOC_BLOCK)
 	{
 	  if (compile_debug)
 	    fprintf_unfiltered (gdb_stdlog,

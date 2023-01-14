@@ -483,7 +483,7 @@ msymbol_is_micromips (struct minimal_symbol *msym)
 static void
 mips_make_symbol_special (struct symbol *sym, struct objfile *objfile)
 {
-  if (SYMBOL_CLASS (sym) == LOC_BLOCK)
+  if (sym->aclass () == LOC_BLOCK)
     {
       /* We are in symbol reading so it is OK to cast away constness.  */
       struct block *block = (struct block *) SYMBOL_BLOCK_VALUE (sym);

@@ -1686,7 +1686,7 @@ info_address_command (const char *exp, int from_tty)
   puts_filtered (sym->print_name ());
   printf_filtered ("\" is ");
   val = SYMBOL_VALUE (sym);
-  if (SYMBOL_OBJFILE_OWNED (sym))
+  if (sym->is_objfile_owned ())
     section = sym->obj_section (symbol_objfile (sym));
   else
     section = NULL;
@@ -1700,7 +1700,7 @@ info_address_command (const char *exp, int from_tty)
       return;
     }
 
-  switch (SYMBOL_CLASS (sym))
+  switch (sym->aclass ())
     {
     case LOC_CONST:
     case LOC_CONST_BYTES:
@@ -1735,7 +1735,7 @@ info_address_command (const char *exp, int from_tty)
 	 in that objfile.  */
       regno = SYMBOL_REGISTER_OPS (sym)->register_number (sym, gdbarch);
 
-      if (SYMBOL_IS_ARGUMENT (sym))
+      if (sym->is_argument ())
 	printf_filtered (_("an argument in register %s"),
 			 gdbarch_register_name (gdbarch, regno));
       else

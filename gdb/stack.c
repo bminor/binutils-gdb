@@ -763,7 +763,7 @@ print_frame_args (const frame_print_options &fp_opts,
 	  /* Keep track of the highest stack argument offset seen, and
 	     skip over any kinds of symbols we don't care about.  */
 
-	  if (!SYMBOL_IS_ARGUMENT (sym))
+	  if (!sym->is_argument ())
 	    continue;
 
 	  if (!print_names)
@@ -773,7 +773,7 @@ print_frame_args (const frame_print_options &fp_opts,
 	      break;
 	    }
 
-	  switch (SYMBOL_CLASS (sym))
+	  switch (sym->aclass ())
 	    {
 	    case LOC_ARG:
 	    case LOC_REF_ARG:
@@ -828,8 +828,8 @@ print_frame_args (const frame_print_options &fp_opts,
 	      nsym = lookup_symbol_search_name (sym->search_name (),
 						b, VAR_DOMAIN).symbol;
 	      gdb_assert (nsym != NULL);
-	      if (SYMBOL_CLASS (nsym) == LOC_REGISTER
-		  && !SYMBOL_IS_ARGUMENT (nsym))
+	      if (nsym->aclass () == LOC_REGISTER
+		  && !nsym->is_argument ())
 		{
 		  /* There is a LOC_ARG/LOC_REGISTER pair.  This means
 		     that it was passed on the stack and loaded into a
@@ -2248,7 +2248,7 @@ iterate_over_block_locals (const struct block *b,
 
   ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
-      switch (SYMBOL_CLASS (sym))
+      switch (sym->aclass ())
 	{
 	case LOC_CONST:
 	case LOC_LOCAL:
@@ -2256,9 +2256,9 @@ iterate_over_block_locals (const struct block *b,
 	case LOC_STATIC:
 	case LOC_COMPUTED:
 	case LOC_OPTIMIZED_OUT:
-	  if (SYMBOL_IS_ARGUMENT (sym))
+	  if (sym->is_argument ())
 	    break;
-	  if (SYMBOL_DOMAIN (sym) == COMMON_BLOCK_DOMAIN)
+	  if (sym->domain () == COMMON_BLOCK_DOMAIN)
 	    break;
 	  (*cb) (sym->print_name (), sym, cb_data);
 	  break;
@@ -2503,7 +2503,7 @@ iterate_over_block_arg_vars (const struct block *b,
   ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
       /* Don't worry about things which aren't arguments.  */
-      if (SYMBOL_IS_ARGUMENT (sym))
+      if (sym->is_argument ())
 	{
 	  /* We have to look up the symbol because arguments can have
 	     two entries (one a parameter, one a local) and the one we

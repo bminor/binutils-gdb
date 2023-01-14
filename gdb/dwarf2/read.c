@@ -8879,7 +8879,7 @@ fixup_go_packaging (struct dwarf2_cu *cu)
 	  struct symbol *sym = list->symbol[i];
 
 	  if (sym->language () == language_go
-	      && SYMBOL_CLASS (sym) == LOC_BLOCK)
+	      && sym->aclass () == LOC_BLOCK)
 	    {
 	      gdb::unique_xmalloc_ptr<char> this_package_name
 		(go_symbol_package_name (sym));
@@ -8916,7 +8916,7 @@ fixup_go_packaging (struct dwarf2_cu *cu)
       sym->compute_and_set_names (saved_package_name, false, objfile->per_bfd);
       /* This is not VAR_DOMAIN because we want a way to ensure a lookup of,
 	 e.g., "main" finds the "main" module and not C's main().  */
-      SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
+      sym->set_domain (STRUCT_DOMAIN);
       sym->set_aclass_index (LOC_TYPEDEF);
       SYMBOL_TYPE (sym) = type;
 
@@ -21746,7 +21746,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 
       /* Default assumptions.
 	 Use the passed type or decode it from the die.  */
-      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+      sym->set_domain (VAR_DOMAIN);
       sym->set_aclass_index (LOC_OPTIMIZED_OUT);
       if (type != NULL)
 	SYMBOL_TYPE (sym) = type;
@@ -21796,7 +21796,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  else
 	    sym->set_aclass_index (LOC_OPTIMIZED_OUT);
 	  SYMBOL_TYPE (sym) = objfile_type (objfile)->builtin_core_addr;
-	  SYMBOL_DOMAIN (sym) = LABEL_DOMAIN;
+	  sym->set_domain (LABEL_DOMAIN);
 	  add_symbol_to_list (sym, cu->list_in_scope);
 	  break;
 	case DW_TAG_subprogram:
@@ -21825,7 +21825,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  /* SYMBOL_BLOCK_VALUE (sym) will be filled in later by
 	     finish_block.  */
 	  sym->set_aclass_index (LOC_BLOCK);
-	  SYMBOL_INLINED (sym) = 1;
+	  sym->set_is_inlined (1);
 	  list_to_add = cu->list_in_scope;
 	  break;
 	case DW_TAG_template_value_param:
@@ -21875,7 +21875,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		  && die->parent->tag == DW_TAG_common_block)
 		attr2 = NULL;
 
-	      if (SYMBOL_CLASS (sym) == LOC_STATIC
+	      if (sym->aclass () == LOC_STATIC
 		  && SYMBOL_VALUE_ADDRESS (sym) == 0
 		  && !per_objfile->per_bfd->has_section_at_zero)
 		{
@@ -21886,7 +21886,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		}
 	      else if (attr2 != nullptr && attr2->as_boolean ())
 		{
-		  if (SYMBOL_CLASS (sym) == LOC_STATIC
+		  if (sym->aclass () == LOC_STATIC
 		      && (objfile->flags & OBJF_MAINLINE) == 0
 		      && per_objfile->per_bfd->can_copy)
 		    {
@@ -21949,7 +21949,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	      else if (!die_is_declaration (die, cu))
 		{
 		  /* Use the default LOC_OPTIMIZED_OUT class.  */
-		  gdb_assert (SYMBOL_CLASS (sym) == LOC_OPTIMIZED_OUT);
+		  gdb_assert (sym->aclass () == LOC_OPTIMIZED_OUT);
 		  if (!suppress_add)
 		    list_to_add = cu->list_in_scope;
 		}
@@ -21965,7 +21965,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	    struct context_stack *curr
 	      = cu->get_builder ()->get_current_context_stack ();
 	    if (curr != nullptr && curr->name != nullptr)
-	      SYMBOL_IS_ARGUMENT (sym) = 1;
+	      sym->set_is_argument (1);
 	    attr = dwarf2_attr (die, DW_AT_location, cu);
 	    if (attr != nullptr)
 	      {
@@ -21997,7 +21997,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	case DW_TAG_set_type:
 	case DW_TAG_enumeration_type:
 	  sym->set_aclass_index (LOC_TYPEDEF);
-	  SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
+	  sym->set_domain (STRUCT_DOMAIN);
 
 	  {
 	    /* NOTE: carlton/2003-11-10: C++ class symbols shouldn't
@@ -22035,14 +22035,14 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  break;
 	case DW_TAG_typedef:
 	  sym->set_aclass_index (LOC_TYPEDEF);
-	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+	  sym->set_domain (VAR_DOMAIN);
 	  list_to_add = cu->list_in_scope;
 	  break;
 	case DW_TAG_array_type:
 	case DW_TAG_base_type:
 	case DW_TAG_subrange_type:
 	  sym->set_aclass_index (LOC_TYPEDEF);
-	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+	  sym->set_domain (VAR_DOMAIN);
 	  list_to_add = cu->list_in_scope;
 	  break;
 	case DW_TAG_enumerator:
@@ -22069,12 +22069,12 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  break;
 	case DW_TAG_module:
 	  sym->set_aclass_index (LOC_TYPEDEF);
-	  SYMBOL_DOMAIN (sym) = MODULE_DOMAIN;
+	  sym->set_domain (MODULE_DOMAIN);
 	  list_to_add = cu->get_builder ()->get_global_symbols ();
 	  break;
 	case DW_TAG_common_block:
 	  sym->set_aclass_index (LOC_COMMON_BLOCK);
-	  SYMBOL_DOMAIN (sym) = COMMON_BLOCK_DOMAIN;
+	  sym->set_domain (COMMON_BLOCK_DOMAIN);
 	  add_symbol_to_list (sym, cu->list_in_scope);
 	  break;
 	default:

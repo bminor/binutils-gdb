@@ -358,7 +358,7 @@ symbol_read_needs (struct symbol *sym)
   if (SYMBOL_COMPUTED_OPS (sym) != NULL)
     return SYMBOL_COMPUTED_OPS (sym)->get_symbol_read_needs (sym);
 
-  switch (SYMBOL_CLASS (sym))
+  switch (sym->aclass ())
     {
       /* All cases listed explicitly so that gcc -Wall will detect it if
 	 we failed to consider one.  */
@@ -616,7 +616,7 @@ language_defn::read_var_value (struct symbol *var,
   if (SYMBOL_COMPUTED_OPS (var) != NULL)
     return SYMBOL_COMPUTED_OPS (var)->read_variable (var, frame);
 
-  switch (SYMBOL_CLASS (var))
+  switch (var->aclass ())
     {
     case LOC_CONST:
       if (is_dynamic_type (type))
@@ -718,7 +718,7 @@ language_defn::read_var_value (struct symbol *var,
 		      ->register_number (var, get_frame_arch (frame));
 	struct value *regval;
 
-	if (SYMBOL_CLASS (var) == LOC_REGPARM_ADDR)
+	if (var->aclass () == LOC_REGPARM_ADDR)
 	  {
 	    regval = value_from_register (lookup_pointer_type (type),
 					  regno,

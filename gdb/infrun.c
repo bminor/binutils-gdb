@@ -7935,7 +7935,7 @@ check_exception_resume (struct execution_control_state *ecs,
       b = SYMBOL_BLOCK_VALUE (func);
       ALL_BLOCK_SYMBOLS (b, iter, sym)
 	{
-	  if (!SYMBOL_IS_ARGUMENT (sym))
+	  if (!sym->is_argument ())
 	    continue;
 
 	  if (argno == 0)

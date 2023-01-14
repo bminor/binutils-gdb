@@ -883,7 +883,7 @@ c_type_print_template_args (const struct type_print_options *flags,
     {
       struct symbol *sym = TYPE_TEMPLATE_ARGUMENT (type, i);
 
-      if (SYMBOL_CLASS (sym) != LOC_TYPEDEF)
+      if (sym->aclass () != LOC_TYPEDEF)
 	continue;
 
       if (first)

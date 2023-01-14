@@ -1501,7 +1501,7 @@ cp_lookup_rtti_type (const char *name, const struct block *block)
       return NULL;
     }
 
-  if (SYMBOL_CLASS (rtti_sym) != LOC_TYPEDEF)
+  if (rtti_sym->aclass () != LOC_TYPEDEF)
     {
       warning (_("RTTI symbol for class '%s' is not a type"), name);
       return NULL;
