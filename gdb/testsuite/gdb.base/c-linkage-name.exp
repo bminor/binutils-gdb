@@ -46,8 +46,8 @@ if { $readnow } {
     # Try to print MUNDANE, but using its linkage name.
 
     gdb_test "print symada__cS" \
-	"'symada__cS' has unknown type; cast it to its declared type" \
-	$test
+	" = {a = 100829103}" \
+	"print symada__cS before partial symtab expansion"
 }
 
 # Force the symbols to be expanded for the unit that contains

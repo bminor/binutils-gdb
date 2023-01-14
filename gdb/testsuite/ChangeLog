@@ -1,5 +1,15 @@
 2020-04-24  Tom Tromey  <tom@tromey.com>
 
+	PR symtab/12707:
+	* gdb.python/py-symbol.exp: Update expected results for
+	linkage_name test.
+	* gdb.cp/print-demangle.exp: New file.
+	* gdb.base/c-linkage-name.exp: Fix test.
+	* gdb.guile/scm-symbol.exp: Update expected results for
+	linkage_name test.
+
+2020-04-24  Tom Tromey  <tom@tromey.com>
+
 	* gdb.dwarf2/dw2-namespaceless-anonymous.S: Remove.
 	* gdb.dwarf2/dw2-namespaceless-anonymous.c: New file.
 	* gdb.dwarf2/dw2-namespaceless-anonymous.exp: Use DWARF

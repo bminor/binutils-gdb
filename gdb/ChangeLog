@@ -1,5 +1,14 @@
 2020-04-24  Tom Tromey  <tom@tromey.com>
 
+	PR symtab/12707:
+	* dwarf2/read.c (add_partial_symbol): Use the linkage name if it
+	exists.
+	(new_symbol): Likewise.
+	* compile/compile-object-load.c (get_out_value_type): Use
+	symbol_matches_search_name.
+
+2020-04-24  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (add_partial_symbol): Do not call
 	compute_and_set_names.
 

@@ -211,7 +211,7 @@ gdb_test "python print (cplusfunc.is_function)" \
 
 gdb_test "python print (cplusfunc.name)" "SimpleClass::valueofi().*" "test method.name"
 gdb_test "python print (cplusfunc.print_name)" "SimpleClass::valueofi().*" "test method.print_name"
-gdb_test "python print (cplusfunc.linkage_name)" "SimpleClass::valueofi().*" "test method.linkage_name"
+gdb_test "python print (cplusfunc.linkage_name)" "_ZN11SimpleClass8valueofiEv.*" "test method.linkage_name"
 gdb_test "python print (cplusfunc.addr_class == gdb.SYMBOL_LOC_BLOCK)" "True" "test method.addr_class"
 
 # Test is_valid when the objfile is unloaded.  This must be the last

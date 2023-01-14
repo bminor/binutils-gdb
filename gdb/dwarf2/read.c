@@ -8378,7 +8378,14 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
     {
       if (built_actual_name != nullptr)
 	actual_name = objfile->intern (actual_name);
-      psymbol.ginfo.set_linkage_name (actual_name);
+      if (pdi->linkage_name == nullptr || cu->language == language_ada)
+	psymbol.ginfo.set_linkage_name (actual_name);
+      else
+	{
+	  psymbol.ginfo.set_demangled_name (actual_name,
+					    &objfile->objfile_obstack);
+	  psymbol.ginfo.set_linkage_name (pdi->linkage_name);
+	}
       add_psymbol_to_list (psymbol, *where, objfile);
     }
 }
@@ -20574,7 +20581,6 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
   name = dwarf2_name (die, cu);
   if (name)
     {
-      const char *linkagename;
       struct die_info *line_file_die = die;
       int suppress_add = 0;
 
@@ -20586,14 +20592,21 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 
       /* Cache this symbol's name and the name's demangled form (if any).  */
       sym->set_language (cu->language, &objfile->objfile_obstack);
-      linkagename = dwarf2_physname (name, die, cu);
-      sym->compute_and_set_names (linkagename, false, objfile->per_bfd);
-
       /* Fortran does not have mangling standard and the mangling does differ
 	 between gfortran, iFort etc.  */
-      if (cu->language == language_fortran
-          && symbol_get_demangled_name (sym) == NULL)
-	sym->set_demangled_name (dwarf2_full_name (name, die, cu), NULL);
+      const char *physname
+	= (cu->language == language_fortran
+	   ? dwarf2_full_name (name, die, cu)
+	   : dwarf2_physname (name, die, cu));
+      const char *linkagename = dw2_linkage_name (die, cu);
+
+      if (linkagename == nullptr || cu->language == language_ada)
+	sym->set_linkage_name (physname);
+      else
+	{
+	  sym->set_demangled_name (physname, &objfile->objfile_obstack);
+	  sym->set_linkage_name (linkagename);
+	}
 
       /* Default assumptions.
          Use the passed type or decode it from the die.  */
