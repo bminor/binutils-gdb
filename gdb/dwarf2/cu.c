@@ -1,6 +1,6 @@
 /* DWARF CU data structure
 
-   Copyright (C) 2021 Free Software Foundation, Inc.
+   Copyright (C) 2021-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -32,6 +32,7 @@ dwarf2_cu::dwarf2_cu (dwarf2_per_cu_data *per_cu,
     checked_producer (false),
     producer_is_gxx_lt_4_6 (false),
     producer_is_gcc_lt_4_3 (false),
+    producer_is_gcc_11 (false),
     producer_is_icc (false),
     producer_is_icc_lt_14 (false),
     producer_is_codewarrior (false),
@@ -46,7 +47,7 @@ struct type *
 dwarf2_cu::addr_sized_int_type (bool unsigned_p) const
 {
   int addr_size = this->per_cu->addr_size ();
-  return this->per_objfile->int_type (addr_size, unsigned_p);
+  return objfile_int_type (this->per_objfile->objfile, addr_size, unsigned_p);
 }
 
 /* Start a symtab for DWARF.  NAME, COMP_DIR, LOW_PC are passed to the
@@ -64,7 +65,18 @@ dwarf2_cu::start_symtab (const char *name, const char *comp_dir,
 
   list_in_scope = get_builder ()->get_file_symbols ();
 
-  get_builder ()->record_debugformat ("DWARF 2");
+  /* DWARF versions are restricted to [2, 5], thanks to the check in
+     read_comp_unit_head.  */
+  gdb_assert (this->header.version >= 2 && this->header.version <= 5);
+  static const char *debugformat_strings[] = {
+    "DWARF 2",
+    "DWARF 3",
+    "DWARF 4",
+    "DWARF 5",
+  };
+  const char *debugformat = debugformat_strings[this->header.version - 2];
+
+  get_builder ()->record_debugformat (debugformat);
   get_builder ()->record_producer (producer);
 
   processing_has_namespace_info = false;

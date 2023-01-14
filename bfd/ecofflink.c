@@ -1,5 +1,5 @@
 /* Routines to link ECOFF debugging information.
-   Copyright (C) 1993-2021 Free Software Foundation, Inc.
+   Copyright (C) 1993-2022 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support, <ian@cygnus.com>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -2402,9 +2402,6 @@ _bfd_ecoff_locate_line (bfd *abfd,
 static bool
 ecoff_collect_shuffle (struct shuffle *l, bfd_byte *buff)
 {
-  unsigned long total;
-
-  total = 0;
   for (; l != (struct shuffle *) NULL; l = l->next)
     {
       if (! l->filep)
@@ -2416,7 +2413,6 @@ ecoff_collect_shuffle (struct shuffle *l, bfd_byte *buff)
 		  != l->size))
 	    return false;
 	}
-      total += l->size;
       buff += l->size;
     }
 
@@ -2451,13 +2447,11 @@ _bfd_ecoff_get_accumulated_ss (void * handle, bfd_byte *buff)
 {
   struct accumulate *ainfo = (struct accumulate *) handle;
   struct string_hash_entry *sh;
-  unsigned long total;
 
   /* The string table is written out from the hash table if this is a
      final link.  */
   BFD_ASSERT (ainfo->ss == (struct shuffle *) NULL);
   *buff++ = '\0';
-  total = 1;
   BFD_ASSERT (ainfo->ss_hash == NULL || ainfo->ss_hash->val == 1);
   for (sh = ainfo->ss_hash;
        sh != (struct string_hash_entry *) NULL;
@@ -2467,7 +2461,6 @@ _bfd_ecoff_get_accumulated_ss (void * handle, bfd_byte *buff)
 
       len = strlen (sh->root.string);
       memcpy (buff, sh->root.string, len + 1);
-      total += len + 1;
       buff += len + 1;
     }
 

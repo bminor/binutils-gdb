@@ -1,6 +1,6 @@
 /* Target-dependent code for s390.
 
-   Copyright (C) 2003-2021 Free Software Foundation, Inc.
+   Copyright (C) 2003-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,6 +21,7 @@
 #define S390_TDEP_H
 
 #include "prologue-value.h"
+#include "gdbarch.h"
 
 enum s390_abi_kind
 {
@@ -37,32 +38,33 @@ enum s390_vector_abi_kind
 
 /* The tdep structure.  */
 
-struct gdbarch_tdep
+struct s390_gdbarch_tdep : gdbarch_tdep
 {
   /* Target description.  */
-  const struct target_desc *tdesc;
+  const struct target_desc *tdesc = nullptr;
 
   /* ABI version.  */
-  enum s390_abi_kind abi;
+  enum s390_abi_kind abi {};
 
   /* Vector ABI.  */
-  enum s390_vector_abi_kind vector_abi;
+  enum s390_vector_abi_kind vector_abi {};
 
   /* Pseudo register numbers.  */
-  int gpr_full_regnum;
-  int pc_regnum;
-  int cc_regnum;
-  int v0_full_regnum;
+  int gpr_full_regnum = 0;
+  int pc_regnum = 0;
+  int cc_regnum = 0;
+  int v0_full_regnum = 0;
 
-  bool have_upper;
-  bool have_linux_v1;
-  bool have_linux_v2;
-  bool have_tdb;
-  bool have_vx;
-  bool have_gs;
+  bool have_upper = 0;
+  bool have_linux_v1 = 0;
+  bool have_linux_v2 = 0;
+  bool have_tdb = 0;
+  bool have_vx = 0;
+  bool have_gs = 0;
 
   /* Hook to record OS specific systemcall.  */
-  int (*s390_syscall_record) (struct regcache *regcache, LONGEST svc_number);
+  int (*s390_syscall_record) (struct regcache *regcache, LONGEST svc_number)
+    = nullptr;
 };
 
 /* Decoding S/390 instructions.  */

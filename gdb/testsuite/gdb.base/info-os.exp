@@ -1,4 +1,4 @@
-# Copyright 2011-2021 Free Software Foundation, Inc.
+# Copyright 2011-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,12 +29,10 @@ if [gdb_skip_xml_test] then {
 
 # Compile test program.
 if { [prepare_for_testing "failed to prepare" $testfile $srcfile {debug pthreads}] } {
-    fail "cannot compile test program"
     return -1
 }
 
 if ![runto_main] then {
-    fail "cannot run to main"
     return -1
 }
 
@@ -125,17 +123,16 @@ proc expect_multiline { command expect test } {
     global gdb_prompt
 
     # Do not duplicate FAILs from gdb_test_multiple.
-    set pass 0
-    set fail 0
+    set found 0
+    set ok 0
     gdb_test_multiple $command $test {
 	-re "^$expect *\r\n" {
-	    pass $test
-	    set pass 1
+	    set found 1
 	    exp_continue
 	}
 	-re "^$gdb_prompt $" {
-	    if !$pass {
-		set fail 1
+	    if $found {
+		set ok 1
 	    }
 	    # Exit the loop.
 	}
@@ -144,9 +141,7 @@ proc expect_multiline { command expect test } {
 	    exp_continue
 	}
     }
-    if $fail {
-	fail $test
-    }
+    gdb_assert { $ok } $test
 }
 
 # Test output of the 'info os' commands against the expected results.

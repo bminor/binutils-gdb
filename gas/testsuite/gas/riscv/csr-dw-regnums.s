@@ -220,16 +220,6 @@ _start:
 	.cfi_offset mhpmevent30, 3320
 	.cfi_offset mhpmevent31, 3324
 	# dropped
-	.cfi_offset hstatus, 2048
-	.cfi_offset hedeleg, 2056
-	.cfi_offset hideleg, 2060
-	.cfi_offset hie, 2064
-	.cfi_offset htvec, 2068
-	.cfi_offset hscratch, 2304
-	.cfi_offset hepc, 2308
-	.cfi_offset hcause, 2312
-	.cfi_offset hbadaddr, 2316
-	.cfi_offset hip, 2320
 	.cfi_offset mbase, 3584
 	.cfi_offset mbound, 3588
 	.cfi_offset mibase, 3592

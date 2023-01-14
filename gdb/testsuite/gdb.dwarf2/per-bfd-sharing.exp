@@ -1,4 +1,4 @@
-#   Copyright 2020-2021 Free Software Foundation, Inc.
+#   Copyright 2020-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ with_test_prefix "populate index cache" {
 
     gdb_test_no_output "set index-cache directory $cache_dir" \
 	"set index-cache directory"
-    gdb_test_no_output "set index-cache on"
+    gdb_test_no_output "set index-cache enabled on"
     gdb_test "file $binfile" "Reading symbols from .*" "file"
 }
 
@@ -56,9 +56,9 @@ proc load_binary { method } {
     if { $method == "standard" } {
 	gdb_test "file $binfile" "Reading symbols from .*" "file"
     } elseif { $method == "index" } {
-	gdb_test_no_output "set index-cache on"
+	gdb_test_no_output "set index-cache enabled on"
 	gdb_test "file $binfile" "Reading symbols from .*" "file index"
-	gdb_test_no_output "set index-cache off"
+	gdb_test_no_output "set index-cache enabled off"
     } elseif { $method == "readnow" } {
 	gdb_test "file -readnow $binfile" \
 	    "Reading symbols from .*Expanding full symbols from .*" \

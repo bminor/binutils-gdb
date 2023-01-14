@@ -1,3 +1,84 @@
+2022-01-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/ro.po: Updated Romanian translation.
+	* po/uk.po: Updated Ukranian translation.
+
+2022-01-22  Nick Clifton  <nickc@redhat.com>
+
+	* configure: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
+2022-01-22  Nick Clifton  <nickc@redhat.com>
+
+	* 2.38 release branch created.
+
+2022-01-17  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.in: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
+2021-12-02  Marcus Nilsson  <brainbomb@gmail.com>
+
+	* avr-dis.c (avr_operand); Pass in disassemble_info and fill
+	in insn_type on branching instructions.
+
+2021-11-25  Andrew Burgess  <aburgess@redhat.com>
+	    Simon Cook  <simon.cook@embecosm.com>
+
+	* riscv-dis.c (enum riscv_option_arg_t): New enum typedef.
+	(riscv_options): New static global.
+	(disassembler_options_riscv): New function.
+	(print_riscv_disassembler_options): Rewrite to use
+	disassembler_options_riscv.
+
+2021-11-25  Nick Clifton  <nickc@redhat.com>
+
+	PR 28614
+	* aarch64-asm.c: Replace assert(0) with real code.
+	* aarch64-dis.c: Likewise.
+	* aarch64-opc.c: Likewise.
+
+2021-11-25  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po; Updated French translation.
+
+2021-10-27  Maciej W. Rozycki  <macro@embecosm.com>
+
+	* Makefile.am: Remove obsolete comment.
+	* configure.ac: Refer `libbfd.la' to link shared BFD library
+	except for Cygwin.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
+2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
+
+	* configure: Regenerate.
+
+2021-09-25  Peter Bergner  <bergner@linux.ibm.com>
+
+	* ppc-opc.c (powerpc_opcodes) <mfppr, mfppr32, mtppr, mtppr32>: Enable
+	on POWER5 and later.
+
+2021-09-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-dis.c (riscv_disassemble_insn): Print a .%dbyte opcode
+	before an unknown instruction, '%d' is replaced with the
+	instruction length.
+
+2021-09-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 28292
+	* v850-opc.c (D16): Use BFD_RELOC_V850_LO16_SPLIT_OFFSET in place
+	of BFD_RELOC_16.
+
+2021-08-17  Shahab Vahedi <shahab@synopsys.com>
+
+	* arc-regs.h (DEF): Fix the register numbers.
+
+2021-08-10  Nick Clifton  <nickc@redhat.com>
+
+	* po/sr.po: Updated Serbian translation.
+
 2021-07-26  Chenghua Xu  <xuchenghua@loongson.cn>
 
 	* mips-dis.c (mips_arch_choices): Correct gs264e bfd_mach.
@@ -1172,7 +1253,7 @@
 
 For older changes see ChangeLog-2020
 
-Copyright (C) 2021 Free Software Foundation, Inc.
+Copyright (C) 2021-2022 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

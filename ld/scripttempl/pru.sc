@@ -151,11 +151,10 @@ SECTIONS
     ${RELOCATING+ PROVIDE (_data_end = .) ; }
   } ${RELOCATING+ > dmem }
 
-  .resource_table ${RELOCATING-0} :
+  /* Linux remoteproc loader requires the resource_table section
+     start address to be aligned to 8 bytes.  */
+  .resource_table ${RELOCATING-0} ${RELOCATING+ ALIGN(8)} :
   {
-    /* Linux remoteproc loader requires the resource table address
-       to be aligned to 8 bytes.  */
-    ${RELOCATING+. = ALIGN(8);}
     KEEP (*(.resource_table))
   } ${RELOCATING+ > dmem}
 
@@ -183,6 +182,12 @@ SECTIONS
        for MEMORY overflow checking during link time.  */}
     ${RELOCATING+ . += __STACK_SIZE ; }
   } ${RELOCATING+ > dmem}
+
+  /* Remoteproc loader in Linux kernel 5.10 and later reads this section
+     to setup the PRUSS interrupt controller.  The interrupt map section
+     is never referenced from PRU firmware, so there is no need to
+     place it in the target dmem memory.  */
+  .pru_irq_map 0 : { *(.pru_irq_map) }
 
   /* Stabs debugging sections.  */
   .stab 0 : { *(.stab) }

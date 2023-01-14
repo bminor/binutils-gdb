@@ -1,6 +1,6 @@
 /* TUI window generic functions.
 
-   Copyright (C) 1998-2021 Free Software Foundation, Inc.
+   Copyright (C) 1998-2022 Free Software Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -714,9 +714,10 @@ tui_all_windows_info (const char *arg, int from_tty)
   struct tui_win_info *win_with_focus = tui_win_with_focus ();
   struct ui_out *uiout = current_uiout;
 
-  ui_out_emit_table table_emitter (uiout, 3, -1, "tui-windows");
+  ui_out_emit_table table_emitter (uiout, 4, -1, "tui-windows");
   uiout->table_header (10, ui_left, "name", "Name");
   uiout->table_header (5, ui_right, "lines", "Lines");
+  uiout->table_header (7, ui_right, "columns", "Columns");
   uiout->table_header (10, ui_left, "focus", "Focus");
   uiout->table_body ();
 
@@ -727,6 +728,7 @@ tui_all_windows_info (const char *arg, int from_tty)
 
 	uiout->field_string ("name", win_info->name ());
 	uiout->field_signed ("lines", win_info->height);
+	uiout->field_signed ("columns", win_info->width);
 	if (win_with_focus == win_info)
 	  uiout->field_string ("focus", _("(has focus)"));
 	else
@@ -790,7 +792,7 @@ static void
 tui_show_tab_width (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (gdb_stdout, _("TUI tab width is %s spaces.\n"), value);
+  fprintf_filtered (file, _("TUI tab width is %s spaces.\n"), value);
 
 }
 
@@ -814,7 +816,7 @@ static void
 tui_show_compact_source (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
-  printf_filtered (_("TUI source window compactness is %s.\n"), value);
+  fprintf_filtered (file, _("TUI source window compactness is %s.\n"), value);
 }
 
 /* Set the tab width of the specified window.  */
@@ -987,12 +989,11 @@ _initialize_tui_win ()
 
   /* Define the classes of commands.
      They will appear in the help list in the reverse of this order.  */
-  add_basic_prefix_cmd ("tui", class_tui,
-			_("TUI configuration variables."),
-			&tui_setlist, 0 /* allow-unknown */, &setlist);
-  add_show_prefix_cmd ("tui", class_tui,
-		       _("TUI configuration variables."),
-		       &tui_showlist, 0 /* allow-unknown */, &showlist);
+  add_setshow_prefix_cmd ("tui", class_tui,
+			  _("TUI configuration variables."),
+			  _("TUI configuration variables."),
+			  &tui_setlist, &tui_showlist,
+			  &setlist, &showlist);
 
   add_com ("refresh", class_tui, tui_refresh_all_command,
 	   _("Refresh the terminal display."));

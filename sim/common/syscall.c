@@ -1,5 +1,5 @@
 /* Remote target system call support.
-   Copyright 1997-2021 Free Software Foundation, Inc.
+   Copyright 1997-2022 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions.
 
    This file is part of GDB.
@@ -26,22 +26,23 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
-#include "ansidecl.h"
-#include "libiberty.h"
+#include <errno.h>
+#include <fcntl.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include <errno.h>
-#include <fcntl.h>
-#include <time.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+
+#include "ansidecl.h"
+#include "libiberty.h"
+
 #include "sim/callback.h"
-#include "targ-vals.h"
 
 #ifndef ENOSYS
 #define ENOSYS EINVAL
@@ -142,16 +143,54 @@ cb_syscall (host_callback *cb, CB_SYSCALL *sc)
 
   switch (cb_target_to_host_syscall (cb, sc->func))
     {
-#if 0 /* FIXME: wip */
+    case CB_SYS_argc:
+      result = countargv (cb->argv);
+      break;
+
+    case CB_SYS_argnlen:
+      {
+	if (sc->arg1 >= 0 && sc->arg1 < countargv (cb->argv))
+	  result = strlen (cb->argv[sc->arg1]);
+	else
+	  {
+	    result = -1;
+	    errcode = EINVAL;
+	  }
+      }
+      break;
+
+    case CB_SYS_argn:
+      {
+	if (sc->arg1 >= 0 && sc->arg1 < countargv (cb->argv))
+	  {
+	    const char *argn = cb->argv[sc->arg1];
+	    int len = strlen (argn);
+	    int written = sc->write_mem (cb, sc, sc->arg2, argn, len + 1);
+
+	    if (written == len + 1)
+	      result = sc->arg2;
+	    else
+	      {
+		result = -1;
+		errcode = EINVAL;
+	      }
+	  }
+	else
+	  {
+	    result = -1;
+	    errcode = EINVAL;
+	  }
+      }
+      break;
+
     case CB_SYS_argvlen :
       {
 	/* Compute how much space is required to store the argv,envp
 	   strings so that the program can allocate the space and then
 	   call SYS_argv to fetch the values.  */
-	int addr_size = cb->addr_size;
-	int argc,envc,arglen,envlen;
-	const char **argv = cb->init_argv;
-	const char **envp = cb->init_envp;
+	int argc, envc, arglen, envlen;
+	char **argv = cb->argv;
+	char **envp = cb->envp;
 
 	argc = arglen = 0;
 	if (argv)
@@ -165,7 +204,7 @@ cb_syscall (host_callback *cb, CB_SYSCALL *sc)
 	    for ( ; envp[envc]; ++envc)
 	      envlen += strlen (envp[envc]) + 1;
 	  }
-	result = arglen + envlen;
+	result = arglen + 1 + envlen + 1;
 	break;
       }
 
@@ -175,63 +214,73 @@ cb_syscall (host_callback *cb, CB_SYSCALL *sc)
 	TADDR tbuf = sc->arg1;
 	/* Buffer size.  */
 	int bufsize = sc->arg2;
+	int written = 0;
 	/* Q is the target address of where all the strings go.  */
 	TADDR q;
-	int word_size = cb->word_size;
-	int i,argc,envc,len;
-	const char **argv = cb->init_argv;
-	const char **envp = cb->init_envp;
+	int i, argc, envc, len, ret;
+	char **argv = cb->argv;
+	char **envp = cb->envp;
+
+	result = -1;
 
 	argc = 0;
 	if (argv)
 	  {
 	    for ( ; argv[argc]; ++argc)
 	      {
-		int len = strlen (argv[argc]);
-		int written = (*sc->write_mem) (cb, sc, tbuf, argv[argc], len + 1);
-		if (written != len)
-		  {
-		    result = -1;
-		    errcode = EINVAL;
-		    goto FinishSyscall;
-		  }
-		tbuf = len + 1;
+		len = strlen (argv[argc]) + 1;
+		if (written + len > bufsize)
+		  goto efault;
+
+		ret = (*sc->write_mem) (cb, sc, tbuf + written, argv[argc],
+					len);
+		if (ret != len)
+		  goto einval;
+
+		written += ret;
 	      }
 	  }
-	if ((*sc->write_mem) (cb, sc, tbuf, "", 1) != 1)
-	  {
-	    result = -1;
-	    errcode = EINVAL;
-	    goto FinishSyscall;
-	  }
-	tbuf++;
+	/* Double NUL bytes indicates end of strings.  */
+	if (written >= bufsize)
+	  goto efault;
+	if ((*sc->write_mem) (cb, sc, tbuf + written, "", 1) != 1)
+	  goto einval;
+	++written;
+
 	envc = 0;
 	if (envp)
 	  {
 	    for ( ; envp[envc]; ++envc)
 	      {
-		int len = strlen (envp[envc]);
-		int written = (*sc->write_mem) (cb, sc, tbuf, envp[envc], len + 1);
-		if (written != len)
-		  {
-		    result = -1;
-		    errcode = EINVAL;
-		    goto FinishSyscall;
-		  }
-		tbuf = len + 1;
+		len = strlen (envp[envc]) + 1;
+		if (written + len > bufsize)
+		  goto efault;
+
+		ret = (*sc->write_mem) (cb, sc, tbuf + written, envp[envc],
+					len);
+		if (ret != len)
+		  goto einval;
+		written += ret;
 	      }
 	  }
-	if ((*sc->write_mem) (cb, sc, tbuf, "", 1) != 1)
-	  {
-	    result = -1;
-	    errcode = EINVAL;
-	    goto FinishSyscall;
-	  }
+	/* Double NUL bytes indicates end of strings.  */
+	if (written >= bufsize)
+	  goto efault;
+	if ((*sc->write_mem) (cb, sc, tbuf + written, "", 1) != 1)
+	  goto einval;
+
 	result = argc;
 	sc->result2 = envc;
 	break;
+
+ efault:
+	errcode = EFAULT;
+	goto FinishSyscall;
+
+ einval:
+	errcode = EINVAL;
+	goto FinishSyscall;
       }
-#endif /* wip */
 
     case CB_SYS_exit :
       /* Caller must catch and handle; see sim_syscall as an example.  */

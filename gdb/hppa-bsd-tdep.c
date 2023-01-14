@@ -1,6 +1,6 @@
 /* Target-dependent code for HP PA-RISC BSD's.
 
-   Copyright (C) 2004-2021 Free Software Foundation, Inc.
+   Copyright (C) 2004-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -75,7 +75,7 @@ hppabsd_find_global_pointer (struct gdbarch *gdbarch, struct value *function)
 	      if (target_read_memory (addr, buf, sizeof buf) != 0)
 		break;
 
-	      tag = extract_signed_integer (buf, sizeof buf, byte_order);
+	      tag = extract_signed_integer (buf, byte_order);
 	      if (tag == DT_PLTGOT)
 		{
 		  CORE_ADDR pltgot;
@@ -118,7 +118,7 @@ hppabsd_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 void
 hppabsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  hppa_gdbarch_tdep *tdep = (hppa_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   /* OpenBSD and NetBSD have a 64-bit 'long double'.  */
   set_gdbarch_long_double_bit (gdbarch, 64);

@@ -1,6 +1,5 @@
 /*
-#notarget: cris*-*-elf
-#dynamic:
+#progos: linux
 #xerror:
 #output: *: could not load ELF interpreter `*' for program `*'\n
  */

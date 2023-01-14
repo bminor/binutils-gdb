@@ -1,5 +1,5 @@
 /* IBM RS/6000 "XCOFF" file definitions for BFD.
-   Copyright (C) 1990-2021 Free Software Foundation, Inc.
+   Copyright (C) 1990-2022 Free Software Foundation, Inc.
    Written by Mimi Phuong-Thao Vo of IBM
    and John Gilmore of Cygnus Support.
 
@@ -176,6 +176,7 @@ union external_auxent {
       } x_n;
     } x_n;
     char x_ftype[1];
+    char x_resv[3];
   } x_file;
 
   struct {

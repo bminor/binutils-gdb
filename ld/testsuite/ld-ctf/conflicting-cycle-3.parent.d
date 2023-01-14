@@ -5,7 +5,7 @@
 #source: B-2.c
 #source: C.c
 #source: C-2.c
-#objdump: --ctf=.ctf
+#objdump: --ctf
 #ld: -shared
 #name: Conflicting cycle 3
 

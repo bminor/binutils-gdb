@@ -1,5 +1,5 @@
 /* ARC Auxiliary register definitions
-   Copyright (C) 2015-2021 Free Software Foundation, Inc.
+   Copyright (C) 2015-2022 Free Software Foundation, Inc.
 
    Contributed by Claudiu Zissulescu (claziss@synopsys.com)
 
@@ -346,8 +346,8 @@ DEF (0x452, ARC_OPCODE_ARC600,  NONE, dvfs_performance)
 DEF (0x453, ARC_OPCODE_ARC600,  NONE, pwr_ctrl)
 DEF (0x460, ARC_OPCODE_ARCv2HS, NONE, tlbpd0)
 DEF (0x461, ARC_OPCODE_ARCv2HS, NONE, tlbpd1)
-DEF (0x463, ARC_OPCODE_ARCv2HS, NONE, tlbindex)
-DEF (0x464, ARC_OPCODE_ARCv2HS, NONE, tlbcommand)
+DEF (0x464, ARC_OPCODE_ARCv2HS, NONE, tlbindex)
+DEF (0x465, ARC_OPCODE_ARCv2HS, NONE, tlbcommand)
 DEF (0x468, ARC_OPCODE_ARCv2HS, NONE, pid)
 DEF (0x46c, ARC_OPCODE_ARCv2HS, NONE, scratch_data0)
 DEF (0x500, ARC_OPCODE_ARC700,  NONE, aux_vlc_buf_idx)

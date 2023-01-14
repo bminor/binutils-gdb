@@ -1,6 +1,6 @@
 /* The common simulator framework for GDB, the GNU Debugger.
 
-   Copyright 2002-2021 Free Software Foundation, Inc.
+   Copyright 2002-2022 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney and Red Hat.
 
@@ -31,9 +31,9 @@
 /* Basic host dependant mess - hopefully <stdio.h> + <stdarg.h> will
    bring potential conflicts out in the open */
 
+#include <setjmp.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <setjmp.h>
 
 
 #ifndef min
@@ -111,7 +111,6 @@ typedef enum {
 
 /* Basic definitions - ordered so that nothing calls what comes after it.  */
 
-#include "ansidecl.h"
 #include "sim/sim.h"
 
 #include "sim-config.h"

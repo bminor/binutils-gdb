@@ -2,7 +2,7 @@
 // Description: Multi-issue Illegal Combinations
 # mach: bfin
 # sim: --environment operating
-# xfail: "missing a few checks; hardware doesnt seem to match PRM?" bfin-*
+# xfail: "missing a few checks; hardware doesnt seem to match PRM?" *-*
 
 #include "test.h"
 .include "testutils.inc"

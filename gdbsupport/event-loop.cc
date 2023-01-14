@@ -1,5 +1,5 @@
 /* Event loop machinery for GDB, the GNU debugger.
-   Copyright (C) 1999-2021 Free Software Foundation, Inc.
+   Copyright (C) 1999-2022 Free Software Foundation, Inc.
    Written by Elena Zannoni <ezannoni@cygnus.com> of Cygnus Solutions.
 
    This file is part of GDB.
@@ -65,8 +65,8 @@ struct file_handler
   /* Argument to pass to proc.  */
   gdb_client_data client_data;
 
-  /* User-friendly name of this handler.  Heap-allocated, owned by this.*/
-  std::string *name;
+  /* User-friendly name of this handler.  */
+  std::string name;
 
   /* If set, this file descriptor is used for a user interface.  */
   bool is_ui;
@@ -315,7 +315,7 @@ create_file_handler (int fd, int mask, handler_func * proc,
      change the data associated with it.  */
   if (file_ptr == NULL)
     {
-      file_ptr = XNEW (file_handler);
+      file_ptr = new file_handler;
       file_ptr->fd = fd;
       file_ptr->ready_mask = 0;
       file_ptr->next_file = gdb_notifier.first_file_handler;
@@ -366,7 +366,7 @@ create_file_handler (int fd, int mask, handler_func * proc,
   file_ptr->proc = proc;
   file_ptr->client_data = client_data;
   file_ptr->mask = mask;
-  file_ptr->name = new std::string (std::move (name));
+  file_ptr->name = std::move (name);
   file_ptr->is_ui = is_ui;
 }
 
@@ -500,8 +500,7 @@ delete_file_handler (int fd)
       prev_ptr->next_file = file_ptr->next_file;
     }
 
-  delete file_ptr->name;
-  xfree (file_ptr);
+  delete file_ptr;
 }
 
 /* Handle the given event by calling the procedure associated to the
@@ -571,7 +570,7 @@ handle_file_event (file_handler *file_ptr, int ready_mask)
 	    {
 	      event_loop_ui_debug_printf (file_ptr->is_ui,
 					  "invoking fd file handler `%s`",
-					  file_ptr->name->c_str ());
+					  file_ptr->name.c_str ());
 	      file_ptr->proc (file_ptr->error, file_ptr->client_data);
 	    }
 	}

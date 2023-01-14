@@ -1,4 +1,4 @@
-# Copyright 2012-2021 Free Software Foundation, Inc.
+# Copyright 2012-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -190,7 +190,6 @@ set options [list debug nowarnings]
 gdb_compile ${objfiles} ${binfile} executable ${options}
 clean_restart ${testname}
 if ![runto_main] then {
-    fail "running test program, MIPS16 thunk tests aborted"
     return
 }
 

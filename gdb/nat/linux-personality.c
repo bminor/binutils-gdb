@@ -1,6 +1,6 @@
 /* Disable address space randomization based on inferior personality.
 
-   Copyright (C) 2008-2021 Free Software Foundation, Inc.
+   Copyright (C) 2008-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,6 +21,10 @@
 #include "nat/linux-personality.h"
 
 #include <sys/personality.h>
+
+# if !HAVE_DECL_ADDR_NO_RANDOMIZE
+#  define ADDR_NO_RANDOMIZE 0x0040000
+# endif /* ! HAVE_DECL_ADDR_NO_RANDOMIZE */
 
 /* See comment on nat/linux-personality.h.  */
 

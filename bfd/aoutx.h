@@ -1,5 +1,5 @@
 /* BFD semi-generic back-end for a.out binaries.
-   Copyright (C) 1990-2021 Free Software Foundation, Inc.
+   Copyright (C) 1990-2022 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1353,8 +1353,6 @@ aout_get_external_symbols (bfd *abfd)
 
 	  if (stringsize >= BYTES_IN_WORD)
 	    {
-	      /* Keep the string count in the buffer for convenience
-		 when indexing with e_strx.  */
 	      amt = stringsize - BYTES_IN_WORD;
 	      if (bfd_bread (strings + BYTES_IN_WORD, amt, abfd) != amt)
 		{
@@ -1364,7 +1362,8 @@ aout_get_external_symbols (bfd *abfd)
 	    }
 	}
       /* Ensure that a zero index yields an empty string.  */
-      memset (strings, 0, BYTES_IN_WORD);
+      if (stringsize >= BYTES_IN_WORD)
+	memset (strings, 0, BYTES_IN_WORD);
 
       /* Ensure that the string buffer is NUL terminated.  */
       strings[stringsize] = 0;
@@ -2130,7 +2129,8 @@ NAME (aout, swap_ext_reloc_out) (bfd *abfd,
   if (r_extern)								\
     {									\
       /* Undefined symbol.  */						\
-      cache_ptr->sym_ptr_ptr = symbols + r_index;			\
+      if (r_index < bfd_get_symcount (abfd))				\
+	cache_ptr->sym_ptr_ptr = symbols + r_index;			\
       cache_ptr->addend = ad;						\
     }									\
    else									\
@@ -3964,7 +3964,7 @@ aout_link_reloc_link_order (struct aout_final_link_info *flaginfo,
 
 /* Get the section corresponding to a reloc index.  */
 
-static INLINE asection *
+static inline asection *
 aout_reloc_index_to_section (bfd *abfd, int indx)
 {
   switch (indx & N_TYPE)
@@ -4021,7 +4021,7 @@ aout_link_input_section_std (struct aout_final_link_info *flaginfo,
   for (; rel < rel_end; rel++)
     {
       bfd_vma r_addr;
-      int r_index;
+      unsigned int r_index;
       int r_extern;
       int r_pcrel;
       int r_baserel = 0;
@@ -4133,7 +4133,7 @@ aout_link_input_section_std (struct aout_final_link_info *flaginfo,
 		     map.  */
 		  r_index = symbol_map[r_index];
 
-		  if (r_index == -1)
+		  if (r_index == -1u)
 		    {
 		      if (h != NULL)
 			{
@@ -4369,7 +4369,7 @@ aout_link_input_section_ext (struct aout_final_link_info *flaginfo,
   for (; rel < rel_end; rel++)
     {
       bfd_vma r_addr;
-      int r_index;
+      unsigned int r_index;
       int r_extern;
       unsigned int r_type;
       bfd_vma r_addend;
@@ -4469,7 +4469,7 @@ aout_link_input_section_ext (struct aout_final_link_info *flaginfo,
 		     map.  */
 		  r_index = symbol_map[r_index];
 
-		  if (r_index == -1)
+		  if (r_index == -1u)
 		    {
 		      if (h != NULL)
 			{

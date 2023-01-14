@@ -1,6 +1,6 @@
 /* Target-dependent code for the NEC V850 for GDB, the GNU debugger.
 
-   Copyright (C) 1996-2021 Free Software Foundation, Inc.
+   Copyright (C) 1996-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -32,6 +32,7 @@
 #include "osabi.h"
 #include "elf-bfd.h"
 #include "elf/v850.h"
+#include "gdbarch.h"
 
 enum
   {
@@ -264,15 +265,15 @@ enum v850_abi
 
 /* Architecture specific data.  */
 
-struct gdbarch_tdep
+struct v850_gdbarch_tdep : gdbarch_tdep
 {
   /* Fields from the ELF header.  */
-  int e_flags;
-  int e_machine;
+  int e_flags = 0;
+  int e_machine = 0;
 
   /* Which ABI are we using?  */
-  enum v850_abi abi;
-  int eight_byte_align;
+  enum v850_abi abi {};
+  int eight_byte_align = 0;
 };
 
 struct v850_frame_cache
@@ -510,8 +511,9 @@ v850_use_struct_convention (struct gdbarch *gdbarch, struct type *type)
 {
   int i;
   struct type *fld_type, *tgt_type;
+  v850_gdbarch_tdep *tdep = (v850_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
-  if (gdbarch_tdep (gdbarch)->abi == V850_ABI_RH850)
+  if (tdep->abi == V850_ABI_RH850)
     {
       if (v850_type_is_scalar (type) && TYPE_LENGTH(type) <= 8)
 	return 0;
@@ -1021,8 +1023,9 @@ v850_push_dummy_call (struct gdbarch *gdbarch,
   int argnum;
   int arg_space = 0;
   int stack_offset;
+  v850_gdbarch_tdep *tdep = (v850_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
-  if (gdbarch_tdep (gdbarch)->abi == V850_ABI_RH850)
+  if (tdep->abi == V850_ABI_RH850)
     stack_offset = 0;
   else
     {
@@ -1054,7 +1057,7 @@ v850_push_dummy_call (struct gdbarch *gdbarch,
       gdb_byte valbuf[v850_reg_size];
 
       if (!v850_type_is_scalar (value_type (*args))
-	 && gdbarch_tdep (gdbarch)->abi == V850_ABI_GCC
+	  && tdep->abi == V850_ABI_GCC
 	  && TYPE_LENGTH (value_type (*args)) > E_MAX_RETTYPE_SIZE_IN_REGS)
 	{
 	  store_unsigned_integer (valbuf, 4, byte_order,
@@ -1065,10 +1068,10 @@ v850_push_dummy_call (struct gdbarch *gdbarch,
       else
 	{
 	  len = TYPE_LENGTH (value_type (*args));
-	  val = (gdb_byte *) value_contents (*args);
+	  val = (gdb_byte *) value_contents (*args).data ();
 	}
 
-      if (gdbarch_tdep (gdbarch)->eight_byte_align
+      if (tdep->eight_byte_align
 	  && v850_eight_byte_align_p (value_type (*args)))
 	{
 	  if (argreg <= E_ARGLAST_REGNUM && (argreg & 1))
@@ -1348,7 +1351,6 @@ static struct gdbarch *
 v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
-  struct gdbarch_tdep *tdep;
   int e_flags, e_machine;
 
   /* Extract the elf_flags if available.  */
@@ -1371,13 +1373,16 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
-      if (gdbarch_tdep (arches->gdbarch)->e_flags != e_flags
-	  || gdbarch_tdep (arches->gdbarch)->e_machine != e_machine)
+      v850_gdbarch_tdep *tdep
+	= (v850_gdbarch_tdep *) gdbarch_tdep (arches->gdbarch);
+
+      if (tdep->e_flags != e_flags || tdep->e_machine != e_machine)
 	continue;
 
       return arches->gdbarch;
     }
-  tdep = XCNEW (struct gdbarch_tdep);
+
+  v850_gdbarch_tdep *tdep = new v850_gdbarch_tdep;
   tdep->e_flags = e_flags;
   tdep->e_machine = e_machine;
 

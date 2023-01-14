@@ -50,8 +50,9 @@ NR == 1,/^[ 	]*15\. Disclaimer of Warranty\.[ 	]*$/	{
 END	{
 	  print "}";
 	  print "";
+	  print "void _initialize_copying ();"
 	  print "void"
-	  print "_initialize_copying (void)";
+	  print "_initialize_copying ()";
 	  print "{";
 	  print "  add_cmd (\"copying\", no_set_class, show_copying_command,";
 	  print "	   _(\"Conditions for redistributing copies of GDB.\"),";

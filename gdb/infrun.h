@@ -1,4 +1,4 @@
-/* Copyright (C) 1986-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -133,7 +133,7 @@ extern void get_last_target_status (process_stratum_target **target,
 
 /* Set the cached copy of the last target/ptid/waitstatus.  */
 extern void set_last_target_status (process_stratum_target *target, ptid_t ptid,
-				    struct target_waitstatus status);
+				    const target_waitstatus &status);
 
 /* Clear the cached copy of the last ptid/waitstatus returned by
    target_wait().  */
@@ -209,7 +209,7 @@ extern void print_stop_event (struct ui_out *uiout, bool displays = true);
 /* Pretty print the results of target_wait, for debugging purposes.  */
 
 extern void print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
-				       const struct target_waitstatus *ws);
+				       const struct target_waitstatus &ws);
 
 extern int signal_stop_state (int);
 

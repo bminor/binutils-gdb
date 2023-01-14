@@ -1,4 +1,4 @@
-#   Copyright 1988-2021 Free Software Foundation, Inc.
+#   Copyright 1988-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -237,10 +237,12 @@ test_expr "print \"x\" \"y\" \"z\"" "\\$\[0-9\]* = \"xyz\""
 
 # Enum formatting tests.
 test_expr "print red" "\\$\[0-9\]* = red"
-gdb_test "set output-radix 8" ".*"
-test_expr "print red" "\\$\[0-9\]* = red"
-test_expr "print/d red" "\\$\[0-9\]* = 0"
-gdb_test "set output-radix 10" ".*"
+with_test_prefix "output-radix 8" {
+    gdb_test "set output-radix 8" ".*"
+    test_expr "print red" "\\$\[0-9\]* = red"
+    test_expr "print/d red" "\\$\[0-9\]* = 0"
+    gdb_test "set output-radix 10" ".*"
+}
 
 # Pre-/post in-/decrement tests.
 gdb_test "set variable v_int = 1" ""

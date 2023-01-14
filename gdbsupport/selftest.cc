@@ -1,5 +1,5 @@
 /* GDB self-testing.
-   Copyright (C) 2016-2021 Free Software Foundation, Inc.
+   Copyright (C) 2016-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,6 +21,7 @@
 #include "common-debug.h"
 #include "selftest.h"
 #include <map>
+#include <functional>
 
 namespace selftests
 {
@@ -28,54 +29,44 @@ namespace selftests
    the order of tests stable and easily looking up whether a test name
    exists.  */
 
-static std::map<std::string, std::unique_ptr<selftest>> tests;
-
-/* A selftest that calls the test function without arguments.  */
-
-struct simple_selftest : public selftest
-{
-  simple_selftest (self_test_function *function_)
-  : function (function_)
-  {}
-
-  void operator() () const override
-  {
-    function ();
-  }
-
-  self_test_function *function;
-};
+static std::map<std::string, std::function<void(void)>> tests;
 
 /* See selftest.h.  */
 
 void
-register_test (const std::string &name, selftest *test)
+register_test (const std::string &name,
+	       std::function<void(void)> function)
 {
   /* Check that no test with this name already exist.  */
   gdb_assert (tests.find (name) == tests.end ());
 
-  tests[name] = std::unique_ptr<selftest> (test);
+  tests[name] = function;
 }
 
 /* See selftest.h.  */
 
-void
-register_test (const std::string &name, self_test_function *function)
+static bool run_verbose_ = false;
+
+/* See selftest.h.  */
+
+bool
+run_verbose ()
 {
-  register_test (name, new simple_selftest (function));
+  return run_verbose_;
 }
 
 /* See selftest.h.  */
 
 void
-run_tests (gdb::array_view<const char *const> filters)
+run_tests (gdb::array_view<const char *const> filters, bool verbose)
 {
   int ran = 0, failed = 0;
+  run_verbose_ = verbose;
 
   for (const auto &pair : tests)
     {
       const std::string &name = pair.first;
-      const std::unique_ptr<selftest> &test = pair.second;
+      const auto &test = pair.second;
       bool run = false;
 
       if (filters.empty ())
@@ -96,7 +87,7 @@ run_tests (gdb::array_view<const char *const> filters)
 	{
 	  debug_printf (_("Running selftest %s.\n"), name.c_str ());
 	  ++ran;
-	  (*test) ();
+	  test ();
 	}
       catch (const gdb_exception_error &ex)
 	{

@@ -1,6 +1,6 @@
 /* Blackfin General Purpose Timers (GPtimer) model
 
-   Copyright (C) 2010-2021 Free Software Foundation, Inc.
+   Copyright (C) 2010-2022 Free Software Foundation, Inc.
    Contributed by Analog Devices, Inc.
 
    This file is part of simulators.
@@ -72,7 +72,7 @@ bfin_gptimer_io_write_buffer (struct hw *me, const void *source, int space,
     value = dv_load_2 (source);
 
   mmr_off = addr - gptimer->base;
-  valuep = (void *)((unsigned long)gptimer + mmr_base() + mmr_off);
+  valuep = (void *)((uintptr_t)gptimer + mmr_base() + mmr_off);
   value16p = valuep;
   value32p = valuep;
 
@@ -115,7 +115,7 @@ bfin_gptimer_io_read_buffer (struct hw *me, void *dest, int space,
     return 0;
 
   mmr_off = addr - gptimer->base;
-  valuep = (void *)((unsigned long)gptimer + mmr_base() + mmr_off);
+  valuep = (void *)((uintptr_t)gptimer + mmr_base() + mmr_off);
   value16p = valuep;
   value32p = valuep;
 

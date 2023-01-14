@@ -1,6 +1,6 @@
 /* Support for GDB maintenance commands.
 
-   Copyright (C) 1992-2021 Free Software Foundation, Inc.
+   Copyright (C) 1992-2022 Free Software Foundation, Inc.
 
    Written by Fred Fish at Cygnus Support.
 
@@ -116,7 +116,7 @@ static void
 maintenance_time_display (const char *args, int from_tty)
 {
   if (args == NULL || *args == '\0')
-    printf_unfiltered (_("\"maintenance time\" takes a numeric argument.\n"));
+    printf_filtered (_("\"maintenance time\" takes a numeric argument.\n"));
   else
     set_per_command_time (strtol (args, NULL, 10));
 }
@@ -125,7 +125,7 @@ static void
 maintenance_space_display (const char *args, int from_tty)
 {
   if (args == NULL || *args == '\0')
-    printf_unfiltered ("\"maintenance space\" takes a numeric argument.\n");
+    printf_filtered ("\"maintenance space\" takes a numeric argument.\n");
   else
     set_per_command_space (strtol (args, NULL, 10));
 }
@@ -329,7 +329,7 @@ print_objfile_section_info (bfd *abfd, struct obj_section *asect,
    from ABFD.  It might be that no such wrapper exists (for example debug
    sections don't have such wrappers) in which case nullptr is returned.  */
 
-static obj_section *
+obj_section *
 maint_obj_section_from_bfd_section (bfd *abfd,
 				    asection *asection,
 				    objfile *ofile)
@@ -364,9 +364,9 @@ maint_print_all_sections (const char *header, bfd *abfd, objfile *objfile,
 			  const char *arg)
 {
   puts_filtered (header);
-  wrap_here ("        ");
+  gdb_stdout->wrap_here (8);
   printf_filtered ("`%s', ", bfd_get_filename (abfd));
-  wrap_here ("        ");
+  gdb_stdout->wrap_here (8);
   printf_filtered (_("file type %s.\n"), bfd_get_target (abfd));
 
   int section_count = gdb_bfd_count_sections (abfd);
@@ -632,7 +632,7 @@ maintenance_deprecate (const char *args, int from_tty)
 {
   if (args == NULL || *args == '\0')
     {
-      printf_unfiltered (_("\"maintenance deprecate\" takes an argument,\n\
+      printf_filtered (_("\"maintenance deprecate\" takes an argument,\n\
 the command you want to deprecate, and optionally the replacement command\n\
 enclosed in quotes.\n"));
     }
@@ -646,7 +646,7 @@ maintenance_undeprecate (const char *args, int from_tty)
 {
   if (args == NULL || *args == '\0')
     {
-      printf_unfiltered (_("\"maintenance undeprecate\" takes an argument, \n\
+      printf_filtered (_("\"maintenance undeprecate\" takes an argument, \n\
 the command you want to undeprecate.\n"));
     }
 
@@ -866,6 +866,30 @@ maintenance_set_worker_threads (const char *args, int from_tty,
   update_thread_pool_size ();
 }
 
+static void
+maintenance_show_worker_threads (struct ui_file *file, int from_tty,
+				 struct cmd_list_element *c,
+				 const char *value)
+{
+#if CXX_STD_THREAD
+  if (n_worker_threads == -1)
+    {
+      fprintf_filtered (file, _("The number of worker threads GDB "
+				"can use is unlimited (currently %zu).\n"),
+			gdb::thread_pool::g_thread_pool->thread_count ());
+      return;
+    }
+#endif
+
+  int report_threads = 0;
+#if CXX_STD_THREAD
+  report_threads = n_worker_threads;
+#endif
+  fprintf_filtered (file, _("The number of worker threads GDB "
+			    "can use is %d.\n"),
+		    report_threads);
+}
+
 
 /* If true, display time usage both at startup and for each command.  */
 
@@ -922,9 +946,9 @@ count_symtabs_and_blocks (int *nr_symtabs_ptr, int *nr_compunit_symtabs_ptr,
 	  for (compunit_symtab *cu : o->compunits ())
 	    {
 	      ++nr_compunit_symtabs;
-	      nr_blocks += BLOCKVECTOR_NBLOCKS (COMPUNIT_BLOCKVECTOR (cu));
-	      nr_symtabs += std::distance (compunit_filetabs (cu).begin (),
-					   compunit_filetabs (cu).end ());
+	      nr_blocks += BLOCKVECTOR_NBLOCKS (cu->blockvector ());
+	      nr_symtabs += std::distance (cu->filetabs ().begin (),
+					   cu->filetabs ().end ());
 	    }
 	}
     }
@@ -966,11 +990,12 @@ scoped_command_stats::~scoped_command_stats ()
       /* Subtract time spend in prompt_for_continue from walltime.  */
       wall_time -= get_prompt_for_continue_wait_time ();
 
-      printf_unfiltered (!m_msg_type
-			 ? _("Startup time: %.6f (cpu), %.6f (wall)\n")
-			 : _("Command execution time: %.6f (cpu), %.6f (wall)\n"),
-			 duration<double> (cmd_time).count (),
-			 duration<double> (wall_time).count ());
+      fprintf_unfiltered (gdb_stdlog,
+			  !m_msg_type
+			  ? _("Startup time: %.6f (cpu), %.6f (wall)\n")
+			  : _("Command execution time: %.6f (cpu), %.6f (wall)\n"),
+			  duration<double> (cmd_time).count (),
+			  duration<double> (wall_time).count ());
     }
 
   if (m_space_enabled && per_command_space)
@@ -981,12 +1006,13 @@ scoped_command_stats::~scoped_command_stats ()
       long space_now = lim - lim_at_start;
       long space_diff = space_now - m_start_space;
 
-      printf_unfiltered (!m_msg_type
-			 ? _("Space used: %ld (%s%ld during startup)\n")
-			 : _("Space used: %ld (%s%ld for this command)\n"),
-			 space_now,
-			 (space_diff >= 0 ? "+" : ""),
-			 space_diff);
+      fprintf_unfiltered (gdb_stdlog,
+			  !m_msg_type
+			  ? _("Space used: %ld (%s%ld during startup)\n")
+			  : _("Space used: %ld (%s%ld for this command)\n"),
+			  space_now,
+			  (space_diff >= 0 ? "+" : ""),
+			  space_diff);
 #endif
     }
 
@@ -995,16 +1021,17 @@ scoped_command_stats::~scoped_command_stats ()
       int nr_symtabs, nr_compunit_symtabs, nr_blocks;
 
       count_symtabs_and_blocks (&nr_symtabs, &nr_compunit_symtabs, &nr_blocks);
-      printf_unfiltered (_("#symtabs: %d (+%d),"
-			   " #compunits: %d (+%d),"
-			   " #blocks: %d (+%d)\n"),
-			 nr_symtabs,
-			 nr_symtabs - m_start_nr_symtabs,
-			 nr_compunit_symtabs,
-			 (nr_compunit_symtabs
-			  - m_start_nr_compunit_symtabs),
-			 nr_blocks,
-			 nr_blocks - m_start_nr_blocks);
+      fprintf_unfiltered (gdb_stdlog,
+			  _("#symtabs: %d (+%d),"
+			    " #compunits: %d (+%d),"
+			    " #blocks: %d (+%d)\n"),
+			  nr_symtabs,
+			  nr_symtabs - m_start_nr_symtabs,
+			  nr_compunit_symtabs,
+			  (nr_compunit_symtabs
+			   - m_start_nr_compunit_symtabs),
+			  nr_blocks,
+			  nr_blocks - m_start_nr_blocks);
     }
 }
 
@@ -1071,7 +1098,7 @@ scoped_command_stats::print_time (const char *msg)
   char out[100];
   strftime (out, sizeof (out), "%F %H:%M:%S", &tm);
 
-  printf_unfiltered ("%s.%03d - %s\n", out, (int) millis, msg);
+  fprintf_unfiltered (gdb_stdlog, "%s.%03d - %s\n", out, (int) millis, msg);
 }
 
 /* Handle unknown "mt set per-command" arguments.
@@ -1088,14 +1115,41 @@ set_per_command_cmd (const char *args, int from_tty)
     error (_("Bad value for 'mt set per-command no'."));
 
   for (list = per_command_setlist; list != NULL; list = list->next)
-    if (list->var_type == var_boolean)
+    if (list->var->type () == var_boolean)
       {
 	gdb_assert (list->type == set_cmd);
 	do_set_command (args, from_tty, list);
       }
 }
 
-
+/* Options affecting the "maintenance selftest" command.  */
+
+struct maintenance_selftest_options
+{
+  bool verbose = false;
+} user_maintenance_selftest_options;
+
+static const gdb::option::option_def maintenance_selftest_option_defs[] = {
+  gdb::option::boolean_option_def<maintenance_selftest_options> {
+    "verbose",
+    [] (maintenance_selftest_options *opt) { return &opt->verbose; },
+    nullptr,
+    N_("Set whether selftests run in verbose mode."),
+    N_("Show whether selftests run in verbose mode."),
+    N_("\
+When on, selftests may print verbose information."),
+  },
+};
+
+/* Make option groups for the "maintenance selftest" command.  */
+
+static std::array<gdb::option::option_def_group, 1>
+make_maintenance_selftest_option_group (maintenance_selftest_options *opts)
+{
+  return {{
+    {{maintenance_selftest_option_defs}, opts},
+  }};
+}
 
 /* The "maintenance selftest" command.  */
 
@@ -1103,11 +1157,38 @@ static void
 maintenance_selftest (const char *args, int from_tty)
 {
 #if GDB_SELF_TEST
-  gdb_argv argv (args);
-  selftests::run_tests (argv.as_array_view ());
+  maintenance_selftest_options opts = user_maintenance_selftest_options;
+  auto grp = make_maintenance_selftest_option_group (&opts);
+  gdb::option::process_options
+    (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, grp);
+  const gdb_argv argv (args);
+  selftests::run_tests (argv.as_array_view (), opts.verbose);
 #else
   printf_filtered (_("\
 Selftests have been disabled for this build.\n"));
+#endif
+}
+
+/* Completer for the "maintenance selftest" command.  */
+
+static void
+maintenance_selftest_completer (cmd_list_element *cmd,
+				completion_tracker &tracker,
+				const char *text,
+				const char *word)
+{
+  auto grp = make_maintenance_selftest_option_group (nullptr);
+
+  if (gdb::option::complete_options
+	(tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, grp))
+    return;
+
+#if GDB_SELF_TEST
+  selftests::for_each_selftest ([&tracker, text] (const std::string &name)
+    {
+      if (startswith (name.c_str (), text))
+	tracker.add_completion (make_unique_xstrdup (name.c_str ()));
+    });
 #endif
 }
 
@@ -1344,12 +1425,15 @@ This is used by the testsuite to check the command deprecator.\n\
 You probably shouldn't use this."),
 	   &maintenancelist);
 
-  add_cmd ("selftest", class_maintenance, maintenance_selftest, _("\
+  cmd_list_element *maintenance_selftest_cmd
+    = add_cmd ("selftest", class_maintenance, maintenance_selftest, _("\
 Run gdb's unit tests.\n\
 Usage: maintenance selftest [FILTER]\n\
 This will run any unit tests that were built in to gdb.\n\
 If a filter is given, only the tests with that value in their name will ran."),
-	   &maintenancelist);
+	       &maintenancelist);
+  set_cmd_completer_handle_brkchars (maintenance_selftest_cmd,
+				     maintenance_selftest_completer);
 
   add_cmd ("selftests", class_maintenance, maintenance_info_selftests,
 	 _("List the registered selftests."), &maintenanceinfolist);
@@ -1371,9 +1455,27 @@ Set the number of worker threads GDB can use."), _("\
 Show the number of worker threads GDB can use."), _("\
 GDB may use multiple threads to speed up certain CPU-intensive operations,\n\
 such as demangling symbol names."),
-				       maintenance_set_worker_threads, NULL,
+				       maintenance_set_worker_threads,
+				       maintenance_show_worker_threads,
 				       &maintenance_set_cmdlist,
 				       &maintenance_show_cmdlist);
+
+  /* Add the "maint set/show selftest" commands.  */
+  static cmd_list_element *set_selftest_cmdlist = nullptr;
+  static cmd_list_element *show_selftest_cmdlist = nullptr;
+
+  add_setshow_prefix_cmd ("selftest", class_maintenance,
+			  _("Self tests-related settings."),
+			  _("Self tests-related settings."),
+			  &set_selftest_cmdlist, &show_selftest_cmdlist,
+			  &maintenance_set_cmdlist, &maintenance_show_cmdlist);
+
+  /* Add setting commands matching "maintenance selftest" options.  */
+  gdb::option::add_setshow_cmds_for_options (class_maintenance,
+					     &user_maintenance_selftest_options,
+					     maintenance_selftest_option_defs,
+					     &set_selftest_cmdlist,
+					     &show_selftest_cmdlist);
 
   update_thread_pool_size ();
 }

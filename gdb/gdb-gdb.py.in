@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2021 Free Software Foundation, Inc.
+# Copyright (C) 2009-2022 Free Software Foundation, Inc.
 #
 # This file is part of GDB.
 #
@@ -153,8 +153,8 @@ class StructMainTypePrettyPrinter:
         """Return an image of the loc component inside the given field
         gdb.Value.
         """
-        loc_val = field_val["loc"]
-        loc_kind = str(field_val["loc_kind"])
+        loc_val = field_val["m_loc"]
+        loc_kind = str(field_val["m_loc_kind"])
         if loc_kind == "FIELD_LOC_KIND_BITPOS":
             return "bitpos = %d" % loc_val["bitpos"]
         elif loc_kind == "FIELD_LOC_KIND_ENUMVAL":
@@ -166,7 +166,7 @@ class StructMainTypePrettyPrinter:
         elif loc_kind == "FIELD_LOC_KIND_DWARF_BLOCK":
             return "dwarf_block = %s" % loc_val["dwarf_block"]
         else:
-            return "loc = ??? (unsupported loc_kind value)"
+            return "m_loc = ??? (unsupported m_loc_kind value)"
 
     def struct_field_img(self, fieldno):
         """Return an image of the main_type field number FIELDNO."""
@@ -175,9 +175,9 @@ class StructMainTypePrettyPrinter:
         if f["artificial"]:
             label += " (artificial)"
         fields = []
-        fields.append("name = %s" % f["name"])
-        fields.append("type = %s" % f["m_type"])
-        fields.append("loc_kind = %s" % f["loc_kind"])
+        fields.append("m_name = %s" % f["m_name"])
+        fields.append("m_type = %s" % f["m_type"])
+        fields.append("m_loc_kind = %s" % f["m_loc_kind"])
         fields.append("bitsize = %d" % f["bitsize"])
         fields.append(self.struct_field_location_img(f))
         return label + "\n" + "  {" + ",\n   ".join(fields) + "}"
@@ -241,9 +241,14 @@ class StructMainTypePrettyPrinter:
                 "scaling_factor: <opaque> (call __gmpz_dump with "
                 " _mp_num and _mp_den fields if needed)"
             )
+        elif type_specific_kind == "TYPE_SPECIFIC_INT":
+            img = "int_stuff = { bit_size = %d, bit_offset = %d }" % (
+                type_specific["int_stuff"]["bit_size"],
+                type_specific["int_stuff"]["bit_offset"],
+            )
         else:
             img = (
-                "type_specific = ??? (unknown type_secific_kind: %s)"
+                "type_specific = ??? (unknown type_specific_kind: %s)"
                 % type_specific_kind
             )
         return img

@@ -1,7 +1,7 @@
 #as:
 #source: data-func-1.c
 #source: data-func-2.c
-#objdump: --ctf=.ctf
+#objdump: --ctf
 #ld: -shared -s
 #name: Conflicted data syms, partially indexed, stripped
 

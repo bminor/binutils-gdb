@@ -1,6 +1,6 @@
 /* GDB-specific functions for operating on agent expressions.
 
-   Copyright (C) 1998-2021 Free Software Foundation, Inc.
+   Copyright (C) 1998-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -609,7 +609,7 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
       break;
 
     case LOC_COMPUTED:
-      gdb_assert_not_reached (_("LOC_COMPUTED variable missing a method"));
+      gdb_assert_not_reached ("LOC_COMPUTED variable missing a method");
 
     case LOC_OPTIMIZED_OUT:
       /* Flag this, but don't say anything; leave it up to callers to
@@ -961,7 +961,7 @@ static void
 gen_ptradd (struct agent_expr *ax, struct axs_value *value,
 	    struct axs_value *value1, struct axs_value *value2)
 {
-  gdb_assert (pointer_type (value1->type));
+  gdb_assert (value1->type->is_pointer_or_reference ());
   gdb_assert (value2->type->code () == TYPE_CODE_INT);
 
   gen_scale (ax, aop_mul, value1->type);
@@ -977,7 +977,7 @@ static void
 gen_ptrsub (struct agent_expr *ax, struct axs_value *value,
 	    struct axs_value *value1, struct axs_value *value2)
 {
-  gdb_assert (pointer_type (value1->type));
+  gdb_assert (value1->type->is_pointer_or_reference ());
   gdb_assert (value2->type->code () == TYPE_CODE_INT);
 
   gen_scale (ax, aop_mul, value1->type);
@@ -994,8 +994,8 @@ gen_ptrdiff (struct agent_expr *ax, struct axs_value *value,
 	     struct axs_value *value1, struct axs_value *value2,
 	     struct type *result_type)
 {
-  gdb_assert (pointer_type (value1->type));
-  gdb_assert (pointer_type (value2->type));
+  gdb_assert (value1->type->is_pointer_or_reference ());
+  gdb_assert (value2->type->is_pointer_or_reference ());
 
   if (TYPE_LENGTH (TYPE_TARGET_TYPE (value1->type))
       != TYPE_LENGTH (TYPE_TARGET_TYPE (value2->type)))
@@ -1014,7 +1014,7 @@ gen_equal (struct agent_expr *ax, struct axs_value *value,
 	   struct axs_value *value1, struct axs_value *value2,
 	   struct type *result_type)
 {
-  if (pointer_type (value1->type) || pointer_type (value2->type))
+  if (value1->type->is_pointer_or_reference () || value2->type->is_pointer_or_reference ())
     ax_simple (ax, aop_equal);
   else
     gen_binop (ax, value, value1, value2,
@@ -1028,7 +1028,7 @@ gen_less (struct agent_expr *ax, struct axs_value *value,
 	  struct axs_value *value1, struct axs_value *value2,
 	  struct type *result_type)
 {
-  if (pointer_type (value1->type) || pointer_type (value2->type))
+  if (value1->type->is_pointer_or_reference () || value2->type->is_pointer_or_reference ())
     ax_simple (ax, aop_less_unsigned);
   else
     gen_binop (ax, value, value1, value2,
@@ -1095,7 +1095,7 @@ gen_deref (struct axs_value *value)
 {
   /* The caller should check the type, because several operators use
      this, and we don't know what error message to generate.  */
-  if (!pointer_type (value->type))
+  if (!value->type->is_pointer_or_reference ())
     internal_error (__FILE__, __LINE__,
 		    _("gen_deref: expected a pointer"));
 
@@ -1310,14 +1310,14 @@ gen_primitive_field (struct agent_expr *ax, struct axs_value *value,
   if (TYPE_FIELD_PACKED (type, fieldno))
     gen_bitfield_ref (ax, value, type->field (fieldno).type (),
 		      (offset * TARGET_CHAR_BIT
-		       + TYPE_FIELD_BITPOS (type, fieldno)),
+		       + type->field (fieldno).loc_bitpos ()),
 		      (offset * TARGET_CHAR_BIT
-		       + TYPE_FIELD_BITPOS (type, fieldno)
+		       + type->field (fieldno).loc_bitpos ()
 		       + TYPE_FIELD_BITSIZE (type, fieldno)));
   else
     {
       gen_offset (ax, offset
-		  + TYPE_FIELD_BITPOS (type, fieldno) / TARGET_CHAR_BIT);
+		  + type->field (fieldno).loc_bitpos () / TARGET_CHAR_BIT);
       value->kind = axs_lvalue_memory;
       value->type = type->field (fieldno).type ();
     }
@@ -1337,7 +1337,7 @@ gen_struct_ref_recursive (struct agent_expr *ax, struct axs_value *value,
 
   for (i = type->num_fields () - 1; i >= nbases; i--)
     {
-      const char *this_name = TYPE_FIELD_NAME (type, i);
+      const char *this_name = type->field (i).name ();
 
       if (this_name)
 	{
@@ -1401,7 +1401,7 @@ gen_struct_ref (struct agent_expr *ax, struct axs_value *value,
   /* Follow pointers until we reach a non-pointer.  These aren't the C
      semantics, but they're what the normal GDB evaluator does, so we
      should at least be consistent.  */
-  while (pointer_type (value->type))
+  while (value->type->is_pointer_or_reference ())
     {
       require_rvalue (ax, value);
       gen_deref (value);
@@ -1438,16 +1438,16 @@ static void
 gen_static_field (struct agent_expr *ax, struct axs_value *value,
 		  struct type *type, int fieldno)
 {
-  if (TYPE_FIELD_LOC_KIND (type, fieldno) == FIELD_LOC_KIND_PHYSADDR)
+  if (type->field (fieldno).loc_kind () == FIELD_LOC_KIND_PHYSADDR)
     {
-      ax_const_l (ax, TYPE_FIELD_STATIC_PHYSADDR (type, fieldno));
+      ax_const_l (ax, type->field (fieldno).loc_physaddr ());
       value->kind = axs_lvalue_memory;
       value->type = type->field (fieldno).type ();
       value->optimized_out = 0;
     }
   else
     {
-      const char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (type, fieldno);
+      const char *phys_name = type->field (fieldno).loc_physname ();
       struct symbol *sym = lookup_symbol (phys_name, 0, VAR_DOMAIN, 0).symbol;
 
       if (sym)
@@ -1481,7 +1481,7 @@ gen_struct_elt_for_reference (struct agent_expr *ax, struct axs_value *value,
 
   for (i = t->num_fields () - 1; i >= TYPE_N_BASECLASSES (t); i--)
     {
-      const char *t_field_name = TYPE_FIELD_NAME (t, i);
+      const char *t_field_name = t->field (i).name ();
 
       if (t_field_name && strcmp (t_field_name, fieldname) == 0)
 	{
@@ -2070,13 +2070,13 @@ gen_expr_binop_rest (struct expression *exp,
     {
     case BINOP_ADD:
       if (value1->type->code () == TYPE_CODE_INT
-	  && pointer_type (value2->type))
+	  && value2->type->is_pointer_or_reference ())
 	{
 	  /* Swap the values and proceed normally.  */
 	  ax_simple (ax, aop_swap);
 	  gen_ptradd (ax, value, value2, value1);
 	}
-      else if (pointer_type (value1->type)
+      else if (value1->type->is_pointer_or_reference ()
 	       && value2->type->code () == TYPE_CODE_INT)
 	gen_ptradd (ax, value, value1, value2);
       else
@@ -2084,11 +2084,11 @@ gen_expr_binop_rest (struct expression *exp,
 		   aop_add, aop_add, 1, "addition");
       break;
     case BINOP_SUB:
-      if (pointer_type (value1->type)
+      if (value1->type->is_pointer_or_reference ()
 	  && value2->type->code () == TYPE_CODE_INT)
 	gen_ptrsub (ax,value, value1, value2);
-      else if (pointer_type (value1->type)
-	       && pointer_type (value2->type))
+      else if (value1->type->is_pointer_or_reference ()
+	       && value2->type->is_pointer_or_reference ())
 	/* FIXME --- result type should be ptrdiff_t */
 	gen_ptrdiff (ax, value, value1, value2,
 		     builtin_type (ax->gdbarch)->builtin_long);
@@ -2285,7 +2285,7 @@ gen_expr_unop (struct expression *exp,
     case UNOP_IND:
       lhs->generate_ax (exp, ax, value);
       gen_usual_unary (ax, value);
-      if (!pointer_type (value->type))
+      if (!value->type->is_pointer_or_reference ())
 	error (_("Argument of unary `*' is not a pointer."));
       gen_deref (value);
       break;
@@ -2491,7 +2491,7 @@ agent_eval_command_one (const char *exp, int eval, CORE_ADDR pc)
 }
 
 static void
-agent_command_1 (const char *exp, int eval)
+maint_agent_command_1 (const char *exp, int eval)
 {
   /* We don't deal with overlay debugging at the moment.  We need to
      think more carefully about this.  If you copy this code into
@@ -2529,9 +2529,9 @@ agent_command_1 (const char *exp, int eval)
 }
 
 static void
-agent_command (const char *exp, int from_tty)
+maint_agent_command (const char *exp, int from_tty)
 {
-  agent_command_1 (exp, 0);
+  maint_agent_command_1 (exp, 0);
 }
 
 /* Parse the given expression, compile it into an agent expression
@@ -2539,9 +2539,9 @@ agent_command (const char *exp, int from_tty)
    expression.  */
 
 static void
-agent_eval_command (const char *exp, int from_tty)
+maint_agent_eval_command (const char *exp, int from_tty)
 {
-  agent_command_1 (exp, 1);
+  maint_agent_command_1 (exp, 1);
 }
 
 /* Parse the given expression, compile it into an agent expression
@@ -2620,7 +2620,7 @@ void _initialize_ax_gdb ();
 void
 _initialize_ax_gdb ()
 {
-  add_cmd ("agent", class_maintenance, agent_command,
+  add_cmd ("agent", class_maintenance, maint_agent_command,
 	   _("\
 Translate an expression into remote agent bytecode for tracing.\n\
 Usage: maint agent [-at LOCATION,] EXPRESSION\n\
@@ -2628,7 +2628,7 @@ If -at is given, generate remote agent bytecode for this location.\n\
 If not, generate remote agent bytecode for current frame pc address."),
 	   &maintenancelist);
 
-  add_cmd ("agent-eval", class_maintenance, agent_eval_command,
+  add_cmd ("agent-eval", class_maintenance, maint_agent_eval_command,
 	   _("\
 Translate an expression into remote agent bytecode for evaluation.\n\
 Usage: maint agent-eval [-at LOCATION,] EXPRESSION\n\

@@ -1,6 +1,6 @@
 /* Module support.
 
-   Copyright 1996-2021 Free Software Foundation, Inc.
+   Copyright 1996-2022 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -22,14 +22,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <stdlib.h>
+
+#include "libiberty.h"
+
 #include "sim-main.h"
 #include "sim-io.h"
 #include "sim-options.h"
 #include "sim-assert.h"
-
-#include "libiberty.h"
-
-#include <stdlib.h>
 
 /* List of all early/core modules.
    TODO: Should trim this list by converting to sim_install_* framework.  */

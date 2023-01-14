@@ -1,6 +1,6 @@
 #as:
 #source: slice.c
-#objdump: --ctf=.ctf
+#objdump: --ctf
 #ld: -shared --ctf-variables
 #name: Slice
 

@@ -1,5 +1,5 @@
 /* Generic target-file-type support for the BFD library.
-   Copyright (C) 1990-2021 Free Software Foundation, Inc.
+   Copyright (C) 1990-2022 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -679,6 +679,7 @@ extern const bfd_target aarch64_elf64_be_cloudabi_vec;
 extern const bfd_target aarch64_elf64_le_vec;
 extern const bfd_target aarch64_elf64_le_cloudabi_vec;
 extern const bfd_target aarch64_mach_o_vec;
+extern const bfd_target aarch64_pei_vec;
 extern const bfd_target alpha_ecoff_le_vec;
 extern const bfd_target alpha_elf64_vec;
 extern const bfd_target alpha_elf64_fbsd_vec;
@@ -768,6 +769,8 @@ extern const bfd_target l1om_elf64_vec;
 extern const bfd_target l1om_elf64_fbsd_vec;
 extern const bfd_target lm32_elf32_vec;
 extern const bfd_target lm32_elf32_fdpic_vec;
+extern const bfd_target loongarch_elf64_vec;
+extern const bfd_target loongarch_elf32_vec;
 extern const bfd_target m32c_elf32_vec;
 extern const bfd_target m32r_elf32_vec;
 extern const bfd_target m32r_elf32_le_vec;
@@ -991,6 +994,7 @@ static const bfd_target * const _bfd_target_vector[] =
 	&aarch64_elf64_le_vec,
 	&aarch64_elf64_le_cloudabi_vec,
 	&aarch64_mach_o_vec,
+	&aarch64_pei_vec,
 #endif
 
 #ifdef BFD64
@@ -1359,6 +1363,12 @@ static const bfd_target * const _bfd_target_vector[] =
 	&z80_elf32_vec,
 
 	&z8k_coff_vec,
+
+#ifdef BFD64
+	&loongarch_elf32_vec,
+	&loongarch_elf64_vec,
+#endif
+
 #endif /* not SELECT_VECS */
 
 /* Always support S-records, for convenience.  */

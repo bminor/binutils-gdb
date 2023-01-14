@@ -1,4 +1,4 @@
-# Copyright 1992-2021 Free Software Foundation, Inc.
+# Copyright 1992-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -278,23 +278,9 @@ do_tests
 
 # More tests for different kinds of template parameters,
 # templates with partial specializations, nested templates, etc.
-# These have been tested only with HP aCC.  They probably won't
-# work with other compilers because of differences in mangling
-# schemes. 
-# Added by Satish Pai <pai@apollo.hp.com> 1997-09-25 
-# As of 2000-06-03, C++ support has been improved to the point that g++ can
-# pass all of theses, excluding what appears to be one that exposes a stabs bug. - djb
 
-# I don't know how HP could be passing these tests without this. They
-# weren't breakpointing past a point where the below expressions were
-# initialized in the actual source. - djb
-
-gdb_test "b 770" \
-    "Breakpoint .* at .*, line 770."
-
-gdb_test "c" \
-    "Continuing.*Breakpoint .*" \
-    "continue to line 770"
+gdb_breakpoint [gdb_get_line_number "Final breakpoint"]
+gdb_continue_to_breakpoint "Final breakpoint"
 
 gdb_test "print fint" \
    "\\$\[0-9\]* = \\{x = 0, t = 0\\}"
@@ -560,6 +546,42 @@ gdb_test_multiple "ptype/r siip" "ptype siip" {
 	pass "ptype siip"
     }
 }
+
+# Check cv qualifiers and substitute parameters.
+
+if {[test_compiler_info {clang-*}]} {
+	setup_kfail "llvm/52262 " "*-*-*"
+}
+gdb_test "ptype cfoo" [multi_line \
+"type = (class |)Cfoo<double> \\\[with DataT = double\\\] \\{" \
+  "\[ \t\]*public:" \
+    "\[ \t\]*DataT me0;" \
+    "\[ \t\]*const DataT me1;" \
+    "\[ \t\]*const myfloat me2;" \
+    "\[ \t\]*const int me3;" \
+    "" \
+  "\[ \t\]*private:" \
+    "\[ \t\]*typedef float myfloat;" \
+"\\}" \
+] "print type of cfoo"
+
+# Check cv qualifiers and do not substitute.
+
+if {[test_compiler_info {clang-*}]} {
+	setup_kfail "llvm/52262 " "*-*-*"
+}
+gdb_test "ptype/r cfoo" [multi_line \
+"type = (class |)Cfoo<double> \\{" \
+  "\[ \t\]*public:" \
+    "\[ \t\]*double me0;" \
+    "\[ \t\]*const double me1;" \
+    "\[ \t\]*const Cfoo<double>::myfloat me2;" \
+    "\[ \t\]*const int me3;" \
+    "" \
+  "\[ \t\]*private:" \
+    "\[ \t\]*typedef float myfloat;" \
+"\\}" \
+] "print raw type of cfoo"
 
 # pt Garply<int>
 

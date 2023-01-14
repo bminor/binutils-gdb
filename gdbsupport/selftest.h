@@ -1,5 +1,5 @@
 /* GDB self-testing.
-   Copyright (C) 2016-2021 Free Software Foundation, Inc.
+   Copyright (C) 2016-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,31 +20,22 @@
 #define COMMON_SELFTEST_H
 
 #include "gdbsupport/array-view.h"
+#include "gdbsupport/function-view.h"
 
 /* A test is just a function that does some checks and throws an
    exception if something has gone wrong.  */
 
-typedef void self_test_function (void);
-
 namespace selftests
 {
 
-/* Interface for the various kinds of selftests.  */
+/* True if selftest should run verbosely.  */
 
-struct selftest
-{
-  virtual ~selftest () = default;
-  virtual void operator() () const = 0;
-};
-
-/* Register a new self-test.  */
-
-extern void register_test (const std::string &name, selftest *test);
+extern bool run_verbose ();
 
 /* Register a new self-test.  */
 
 extern void register_test (const std::string &name,
-			   self_test_function *function);
+			   std::function<void(void)> function);
 
 /* Run all the self tests.  This print a message describing the number
    of test and the number of failures.
@@ -52,12 +43,14 @@ extern void register_test (const std::string &name,
    If FILTERS is not empty, only run tests with names containing one of the
    element of FILTERS.  */
 
-extern void run_tests (gdb::array_view<const char *const> filters);
+extern void run_tests (gdb::array_view<const char *const> filters,
+		       bool verbose = false);
 
 /* Reset GDB or GDBserver's internal state.  */
 extern void reset ();
 
-typedef void for_each_selftest_ftype (const std::string &name);
+using for_each_selftest_ftype
+  = gdb::function_view<void(const std::string &name)>;
 
 /* Call FUNC for each registered selftest.  */
 

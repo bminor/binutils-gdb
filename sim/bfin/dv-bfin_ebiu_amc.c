@@ -1,7 +1,7 @@
 /* Blackfin External Bus Interface Unit (EBIU) Asynchronous Memory Controller
    (AMC) model.
 
-   Copyright (C) 2010-2021 Free Software Foundation, Inc.
+   Copyright (C) 2010-2022 Free Software Foundation, Inc.
    Contributed by Analog Devices, Inc.
 
    This file is part of simulators.
@@ -331,7 +331,7 @@ bfin_ebiu_amc_io_read_buffer (struct hw *me, void *dest, int space,
     return 0;
 
   mmr_off = addr - amc->base;
-  valuep = (void *)((unsigned long)amc + mmr_base() + mmr_off);
+  valuep = (void *)((uintptr_t)amc + mmr_base() + mmr_off);
 
   HW_TRACE_READ ();
 

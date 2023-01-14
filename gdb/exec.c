@@ -1,6 +1,6 @@
 /* Work with executable files, for GDB. 
 
-   Copyright (C) 1988-2021 Free Software Foundation, Inc.
+   Copyright (C) 1988-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -49,6 +49,7 @@
 #include <algorithm>
 #include "gdbsupport/pathstuff.h"
 #include "cli/cli-style.h"
+#include "gdbsupport/buildargv.h"
 
 void (*deprecated_file_changed_hook) (const char *);
 
@@ -102,7 +103,7 @@ static void
 show_exec_file_mismatch_command (struct ui_file *file, int from_tty,
 				 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (gdb_stdout,
+  fprintf_filtered (file,
 		    _("exec-file-mismatch handling is currently \"%s\".\n"),
 		    exec_file_mismatch_names[exec_file_mismatch_mode]);
 }
@@ -378,7 +379,7 @@ exec_file_attach (const char *filename, int from_tty)
   if (!filename)
     {
       if (from_tty)
-	printf_unfiltered (_("No executable file now.\n"));
+	printf_filtered (_("No executable file now.\n"));
 
       set_gdbarch_from_file (NULL);
     }
@@ -453,9 +454,8 @@ exec_file_attach (const char *filename, int from_tty)
 
       if (!current_program_space->exec_bfd ())
 	{
-	  error (_("\"%ps\": could not open as an executable file: %s."),
-		 styled_string (file_name_style.style (), scratch_pathname),
-		 bfd_errmsg (bfd_get_error ()));
+	  error (_("\"%s\": could not open as an executable file: %s."),
+		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
 	}
 
       /* gdb_realpath_keepfile resolves symlinks on the local
@@ -475,8 +475,7 @@ exec_file_attach (const char *filename, int from_tty)
 	  /* Make sure to close exec_bfd, or else "run" might try to use
 	     it.  */
 	  current_program_space->exec_close ();
-	  error (_("\"%ps\": not in executable format: %s"),
-		 styled_string (file_name_style.style (), scratch_pathname),
+	  error (_("\"%s\": not in executable format: %s"), scratch_pathname,
 		 gdb_bfd_errmsg (bfd_get_error (), matching).c_str ());
 	}
 
@@ -910,7 +909,7 @@ print_section_info (const target_section_table *t, bfd *abfd)
   printf_filtered ("\t`%ps', ",
 		   styled_string (file_name_style.style (),
 				  bfd_get_filename (abfd)));
-  wrap_here ("        ");
+  gdb_stdout->wrap_here (8);
   printf_filtered (_("file type %s.\n"), bfd_get_target (abfd));
   if (abfd == current_program_space->exec_bfd ())
     {

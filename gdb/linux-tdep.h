@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux, architecture independent.
 
-   Copyright (C) 2009-2021 Free Software Foundation, Inc.
+   Copyright (C) 2009-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -97,5 +97,10 @@ extern CORE_ADDR linux_get_hwcap (struct target_ops *target);
 /* Fetch the AT_HWCAP2 entry from the auxv vector for the given TARGET.  On
    error, 0 is returned.  */
 extern CORE_ADDR linux_get_hwcap2 (struct target_ops *target);
+
+/* Fetch (and possibly build) an appropriate `struct link_map_offsets'
+   for ILP32 and LP64 Linux systems.  */
+extern struct link_map_offsets *linux_ilp32_fetch_link_map_offsets ();
+extern struct link_map_offsets *linux_lp64_fetch_link_map_offsets ();
 
 #endif /* linux-tdep.h */

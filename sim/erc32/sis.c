@@ -1,6 +1,6 @@
 /* This file is part of SIS (SPARC instruction simulator)
 
-   Copyright (C) 1995-2021 Free Software Foundation, Inc.
+   Copyright (C) 1995-2022 Free Software Foundation, Inc.
    Contributed by Jiri Gaisler, European Space Agency
 
    This program is free software; you can redistribute it and/or modify
@@ -60,14 +60,14 @@ extern int      sparclite;
 extern int      dumbio;
 extern char     uart_dev1[];
 extern char     uart_dev2[];
-extern uint32   last_load_addr;
+extern uint32_t   last_load_addr;
 
 #ifdef ERA
 extern int era;
 #endif
 
 int
-run_sim(struct pstate *sregs, uint64 icount, int dis)
+run_sim(struct pstate *sregs, uint64_t icount, int dis)
 {
     int             irq, mexc, deb;
 

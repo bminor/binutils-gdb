@@ -1,4 +1,4 @@
-# Copyright (C) 2005-2021 Free Software Foundation, Inc.
+# Copyright (C) 2005-2022 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,9 +15,7 @@
 
 # Miscellaneous CRIS simulator testcases testing syscall sequences.
 
-if ![istarget cris*-*-*] {
-    return
-}
+sim_init
 
 set CFLAGS_FOR_TARGET "-O2"
 if [istarget cris-*-*] {
@@ -26,15 +24,14 @@ if [istarget cris-*-*] {
     set mach "crisv32"
 }
 
-if [istarget cris*-*-elf] {
+if [istarget *] {
     append CFLAGS_FOR_TARGET " -sim"
 }
 
 # Using target_compile, since it is less noisy,
-if { [target_compile $srcdir/$subdir/hello.c compilercheck.x \
-	  "executable" "" ] == "" } {
-    set has_cc 1
-
+global global_cc_works
+global global_cc_os
+if { $global_cc_works == 1 } {
     # Now check if we can link a program dynamically, and where
     # libc.so is located.  If it is, we provide a sym link to the
     # directory (which must end in /lib) in [pwd], so /lib/ld.so.1 is
@@ -42,8 +39,9 @@ if { [target_compile $srcdir/$subdir/hello.c compilercheck.x \
     # replacing the board ldflags like below as we don't care about
     # detrimental effects on the executable from the specs and
     # -static in the board ldflags, we just add -Bdynamic.
+    global objdir
     if [regexp "(.*/lib)/libc.so" \
-	    [target_compile $srcdir/$subdir/hello.c compilercheck.x \
+	    [target_compile $srcdir/lib/compilercheck.c $objdir/compilercheck.x \
 		 "executable" \
 		 "ldflags=-print-file-name=libc.so -Wl,-Bdynamic"] \
 	    xxx libcsodir]  {
@@ -51,9 +49,7 @@ if { [target_compile $srcdir/$subdir/hello.c compilercheck.x \
 	verbose -log "Creating link to $libcsodir in [pwd]"
 	file link lib $libcsodir
     }
-} {
-    verbose -log "Can't execute C compiler"
-    set has_cc 0
+    file delete $objdir/compilercheck.x
 }
 
 # Like istarget, except take a list of targets as a string.
@@ -68,6 +64,7 @@ proc anytarget { targets } {
     return 0
 }
 
+global sim_path
 foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
     set orig_ldflags ""
 
@@ -88,9 +85,14 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
     }
 
     # Note absence of CC in results, but don't make a big fuss over it.
-    if { $has_cc == 0 } {
+    if { $global_cc_works == 0 } {
 	untested $testname
 	continue
+    }
+
+    if ![file exists $sim_path] {
+	untested $testname
+	return 0
     }
 
     # Clear default options
@@ -98,16 +100,14 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
     set opts(sim) ""
     set opts(output) ""
     set opts(progoptions) ""
+    set opts(progos) ""
     set opts(timeout) ""
     set opts(mach) ""
     set opts(xerror) "no"
-    set opts(dest) "$testname.x"
-    set opts(simenv) ""
     set opts(kfail) ""
     set opts(xfail) ""
     set opts(target) ""
     set opts(notarget) ""
-    set opts(dynamic) ""
 
     # Clear any machine specific options specified in a previous test case
     if [info exists opts(sim,$mach)] {
@@ -124,12 +124,6 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
 	    return
 	}
 
-	# Replace specific substitutions:
-	# @exedir@ is where the test-program is located.
-	regsub -all "@exedir@" $opt_val "[pwd]" opt_val
-	# @srcdir@ is where the source of the test-program is located.
-	regsub -all "@srcdir@" $opt_val "$srcdir/$subdir" opt_val
-
 	# Multiple of these options concatenate, they don't override.
 	if { $opt_name == "output" || $opt_name == "progoptions" } {
 	    set opt_val "$opts($opt_name)$opt_val"
@@ -142,16 +136,6 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
 	    if { $opts($opt_name) != "" } {
 		set opt_val "$opts($opt_name) $opt_val"
 	    }
-	}
-
-	if { $opt_name == "dynamic" \
-		 && [info exists board_info([target_info name],ldflags)] } {
-	    # Weed out -static from ldflags, but keep the original in
-	    # $orig_ldflags.
-	    set orig_ldflags $board_info([target_info name],ldflags)
-	    set ldflags " $orig_ldflags "
-	    regsub -all " -static " $ldflags " " ldflags
-	    set board_info([target_info name],ldflags) $ldflags
 	}
 
 	foreach m $opt_machs {
@@ -178,6 +162,11 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
 	continue
     }
 
+    if { $opts(progos) != "" && $opts(progos) != $global_cc_os } {
+	untested $testname
+	continue
+    }
+
     # If no machine specific options, default to the general version.
     if ![info exists opts(sim,$mach)] {
 	set opts(sim,$mach) $opts(sim)
@@ -188,8 +177,7 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
 
     verbose -log "Compiling $src with $opts(cc)"
 
-    set dest "$opts(dest)"
-    if { [sim_compile $src $dest "executable" "$opts(cc)" ] != "" } {
+    if { [target_compile $src "$objdir/$testname.x" "executable" "$opts(cc)" ] != "" } {
 	unresolved $testname
 	continue
     }
@@ -212,8 +200,8 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
 	eval setup_kfail $opts(kfail)
     }
 
-    set result [sim_run $dest "$opts(sim,$mach)" "$opts(progoptions)" \
-	"" "$opts(simenv)"]
+    set result [sim_run "$objdir/$testname.x" "$opts(sim,$mach)" "$opts(progoptions)" \
+	"" ""]
     set return_code [lindex $result 0]
     set output [lindex $result 1]
 

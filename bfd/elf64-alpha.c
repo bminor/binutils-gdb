@@ -1,5 +1,5 @@
 /* Alpha specific support for 64-bit ELF
-   Copyright (C) 1996-2021 Free Software Foundation, Inc.
+   Copyright (C) 1996-2022 Free Software Foundation, Inc.
    Contributed by Richard Henderson <rth@tamu.edu>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -3191,7 +3191,8 @@ elf64_alpha_relax_with_lituse (struct alpha_relax_info *info,
     }
 
   /* Can't relax dynamic symbols.  */
-  if (alpha_elf_dynamic_symbol_p (&info->h->root, info->link_info))
+  if (info->h != NULL
+      && alpha_elf_dynamic_symbol_p (&info->h->root, info->link_info))
     return true;
 
   changed_contents = info->changed_contents;

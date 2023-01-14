@@ -1,4 +1,4 @@
-#   Copyright (C) 1995-2021 Free Software Foundation, Inc.
+#   Copyright (C) 1995-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -309,11 +309,13 @@ proc thin_archive_with_nested { bfdtests } {
     if [is_remote host] {
 	set archive artest.a
 	set archive2 artest2.a
+	set archive3 artest3.a
 	set objfile [remote_download host tmpdir/bintest.${obj}]
 	remote_file host delete $archive
     } else {
 	set archive tmpdir/artest.a
 	set archive2 tmpdir/artest2.a
+	set archive3 tmpdir/artest3.a
 	set objfile tmpdir/bintest.${obj}
     }
 
@@ -333,6 +335,14 @@ proc thin_archive_with_nested { bfdtests } {
 	return
     }
 
+    remote_file build delete tmpdir/artest3.a
+
+    set got [binutils_run $AR "rc --thin $archive3 ${archive}"]
+    if ![string match "" $got] {
+	fail $testname
+	return
+    }
+
     foreach bfdtest $bfdtests {
 	set exec_output [binutils_run "$base_dir/$bfdtest" "$archive"]
 	if ![string match "" $exec_output] {
@@ -342,6 +352,13 @@ proc thin_archive_with_nested { bfdtests } {
 	}
 
 	set exec_output [binutils_run "$base_dir/$bfdtest" "$archive2"]
+	if ![string match "" $exec_output] {
+	    verbose -log $exec_output
+	    fail "$testname ($bfdtest)"
+	    return
+	}
+
+	set exec_output [binutils_run "$base_dir/$bfdtest" "$archive3"]
 	if ![string match "" $exec_output] {
 	    verbose -log $exec_output
 	    fail "$testname ($bfdtest)"

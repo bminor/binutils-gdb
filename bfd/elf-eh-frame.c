@@ -1,5 +1,5 @@
 /* .eh_frame section optimization.
-   Copyright (C) 2001-2021 Free Software Foundation, Inc.
+   Copyright (C) 2001-2022 Free Software Foundation, Inc.
    Written by Jakub Jelinek <jakub@redhat.com>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -282,7 +282,7 @@ cie_compute_hash (struct cie *c)
 /* Return the number of extra bytes that we'll be inserting into
    ENTRY's augmentation string.  */
 
-static INLINE unsigned int
+static inline unsigned int
 extra_augmentation_string_bytes (struct eh_cie_fde *entry)
 {
   unsigned int size = 0;
@@ -298,7 +298,7 @@ extra_augmentation_string_bytes (struct eh_cie_fde *entry)
 
 /* Likewise ENTRY's augmentation data.  */
 
-static INLINE unsigned int
+static inline unsigned int
 extra_augmentation_data_bytes (struct eh_cie_fde *entry)
 {
   unsigned int size = 0;
@@ -1440,25 +1440,27 @@ static int
 adjust_eh_frame_local_symbols (const asection *sec,
 			       struct elf_reloc_cookie *cookie)
 {
-  unsigned int shndx;
-  Elf_Internal_Sym *sym;
-  Elf_Internal_Sym *end_sym;
   int adjusted = 0;
 
-  shndx = elf_section_data (sec)->this_idx;
-  end_sym = cookie->locsyms + cookie->locsymcount;
-  for (sym = cookie->locsyms + 1; sym < end_sym; ++sym)
-    if (sym->st_info <= ELF_ST_INFO (STB_LOCAL, STT_OBJECT)
-	&& sym->st_shndx == shndx)
-      {
-	bfd_signed_vma delta = offset_adjust (sym->st_value, sec);
+  if (cookie->locsymcount > 1)
+    {
+      unsigned int shndx = elf_section_data (sec)->this_idx;
+      Elf_Internal_Sym *end_sym = cookie->locsyms + cookie->locsymcount;
+      Elf_Internal_Sym *sym;
 
-	if (delta != 0)
+      for (sym = cookie->locsyms + 1; sym < end_sym; ++sym)
+	if (sym->st_info <= ELF_ST_INFO (STB_LOCAL, STT_OBJECT)
+	    && sym->st_shndx == shndx)
 	  {
-	    adjusted = 1;
-	    sym->st_value += delta;
+	    bfd_signed_vma delta = offset_adjust (sym->st_value, sec);
+
+	    if (delta != 0)
+	      {
+		adjusted = 1;
+		sym->st_value += delta;
+	      }
 	  }
-      }
+    }
   return adjusted;
 }
 
@@ -1610,7 +1612,7 @@ _bfd_elf_discard_section_eh_frame
    input sections.  It finalizes the size of .eh_frame_hdr section.  */
 
 bool
-_bfd_elf_discard_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
+_bfd_elf_discard_section_eh_frame_hdr (struct bfd_link_info *info)
 {
   struct elf_link_hash_table *htab;
   struct eh_frame_hdr_info *hdr_info;
@@ -1642,7 +1644,6 @@ _bfd_elf_discard_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
 	sec->size += 4 + hdr_info->u.dwarf.fde_count * 8;
     }
 
-  elf_eh_frame_hdr (abfd) = sec;
   return true;
 }
 

@@ -1,5 +1,5 @@
 /* dlltool.c -- tool to generate stuff for PE style DLLs
-   Copyright (C) 1995-2021 Free Software Foundation, Inc.
+   Copyright (C) 1995-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -348,7 +348,7 @@ typedef struct iheadt
 static iheadtype *import_list = NULL;
 static char *as_name = NULL;
 static char * as_flags = "";
-static char *tmp_prefix;
+static char *tmp_prefix = NULL;
 static int no_idata4;
 static int no_idata5;
 static char *exp_name;
@@ -990,13 +990,11 @@ static int d_nforwards = 0;	/* Number of forwarded exports.  */
 static int d_is_dll;
 static int d_is_exe;
 
-int
+void
 yyerror (const char * err ATTRIBUTE_UNUSED)
 {
   /* xgettext:c-format */
   non_fatal (_("Syntax error in def file %s:%d"), def_file, linenumber);
-
-  return 0;
 }
 
 void
@@ -3932,9 +3930,6 @@ main (int ac, char **av)
 	}
     }
 
-  if (!tmp_prefix)
-    tmp_prefix = prefix_encode ("d", getpid ());
-
   for (i = 0; mtable[i].type; i++)
     if (strcmp (mtable[i].type, mname) == 0)
       break;
@@ -3992,6 +3987,23 @@ main (int ac, char **av)
 	firstarg = av[optind];
       scan_obj_file (av[optind]);
       optind++;
+    }
+
+  if (tmp_prefix == NULL)
+    {
+      /* If possible use a deterministic prefix.  */
+      if (dll_name)
+        {
+          tmp_prefix = xmalloc (strlen (dll_name) + 2);
+          sprintf (tmp_prefix, "%s_", dll_name);
+          for (i = 0; tmp_prefix[i]; i++)
+            if (!ISALNUM (tmp_prefix[i]))
+              tmp_prefix[i] = '_';
+        }
+      else
+        {
+          tmp_prefix = prefix_encode ("d", getpid ());
+        }
     }
 
   mangle_defs ();

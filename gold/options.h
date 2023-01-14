@@ -1,6 +1,6 @@
 // options.h -- handle command line options for gold  -*- C++ -*-
 
-// Copyright (C) 2006-2021 Free Software Foundation, Inc.
+// Copyright (C) 2006-2022 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -611,7 +611,7 @@ class Search_directory
   // We need a default constructor because we put this in a
   // std::vector.
   Search_directory()
-    : name_(NULL), put_in_sysroot_(false), is_in_sysroot_(false)
+    : name_(), put_in_sysroot_(false), is_in_sysroot_(false)
   { }
 
   // This is the usual constructor.

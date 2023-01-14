@@ -1,4 +1,4 @@
-# Copyright 2017-2021 Free Software Foundation, Inc.
+# Copyright 2017-2022 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -86,7 +86,6 @@ if { [gdb_compile_shlib ${srcfile_lib2} ${binfile_lib2} $lib2_flags] != ""
 clean_restart $testfile
 
 if { ![runto_main] } {
-    fail "can't run to main"
     return
 }
 

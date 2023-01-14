@@ -1,4 +1,4 @@
-# Copyright 2014-2021 Free Software Foundation, Inc.
+# Copyright 2014-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,7 +28,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug}]} {
 # Inferior 1 stops at f1.
 
 if ![runto f1] then {
-    fail "can't run to f1"
     return 0
 }
 
@@ -42,7 +41,6 @@ delete_breakpoints
 # Inferior 2 stops at f2.
 
 if ![runto f2] then {
-    fail "can't run to f2"
     return 0
 }
 

@@ -1,5 +1,5 @@
 dnl Autoconf configure script for GDB, the GNU debugger.
-dnl Copyright (C) 1995-2021 Free Software Foundation, Inc.
+dnl Copyright (C) 1995-2022 Free Software Foundation, Inc.
 dnl
 dnl This file is part of GDB.
 dnl
@@ -165,14 +165,7 @@ AS_HELP_STRING([--enable-targets=TARGETS], [alternative target configurations]),
   *)        enable_targets=$enableval ;;
 esac])
 
-# Check whether to enable 64-bit support on 32-bit hosts
-AC_ARG_ENABLE(64-bit-bfd,
-AS_HELP_STRING([--enable-64-bit-bfd], [64-bit support (on hosts with narrower word sizes)]),
-[case "${enableval}" in
-  yes)  want64=true  ;;
-  no)   want64=false ;;
-  *)    AC_MSG_ERROR(bad value ${enableval} for 64-bit-bfd option) ;;
-esac],[want64=false])dnl
+BFD_64_BIT
 
 # Provide defaults for some variables set by the per-host and per-target
 # configuration.
@@ -221,7 +214,7 @@ do
     done
 
     # Check whether this target needs 64-bit CORE_ADDR
-    if test x${want64} = xfalse; then
+    if test x${enable_64_bit_bfd} = xno; then
       . ${srcdir}/../bfd/config.bfd
     fi
 
@@ -234,23 +227,7 @@ do
 done
 
 if test x${all_targets} = xtrue; then
-
-  # We want all 64-bit targets if we either:
-  #  - run on a 64-bit host  or
-  #  - already require 64-bit support for some other target  or
-  #  - the --enable-64-bit-bfd option was supplied
-  # Otherwise we only support all 32-bit targets.
-  #
-  # NOTE: This test must be in sync with the corresponding
-  #       tests in BFD!
-
-  if test x${want64} = xfalse; then
-    AC_CHECK_SIZEOF(long)
-    if test "x${ac_cv_sizeof_long}" = "x8"; then
-      want64=true
-    fi
-  fi
-  if test x${want64} = xtrue; then
+  if test x${enable_64_bit_bfd} = xyes; then
     TARGET_OBS='$(ALL_TARGET_OBS) $(ALL_64_TARGET_OBS)'
   else
     TARGET_OBS='$(ALL_TARGET_OBS)'
@@ -596,6 +573,10 @@ AC_ARG_WITH([system-readline],
                   [use installed readline library])])
 
 if test "$with_system_readline" = yes; then
+  AC_CHECK_HEADERS(readline/readline.h, [readline_h=yes], [readline_h=no])
+  if test "$readline_h" = "no"; then
+    AC_MSG_ERROR([readline development packages are probably missing])
+  fi
   AC_CACHE_CHECK(
     [whether system readline is new enough],
     [gdb_cv_readline_ok],
@@ -1248,11 +1229,48 @@ either use --disable-source-highlight or dnl
           ;;
       esac
 
-      SRCHIGH_CFLAGS=`${pkg_config_prog_path} --cflags source-highlight`
-      SRCHIGH_LIBS=`${pkg_config_prog_path} --libs source-highlight`
-      AC_DEFINE([HAVE_SOURCE_HIGHLIGHT], 1,
-                [Define to 1 if the source-highlight library is available])
-      AC_MSG_RESULT([yes])
+      srchigh_pkg_cflags=`${pkg_config_prog_path} --cflags source-highlight`
+      srchigh_pkg_libs=`${pkg_config_prog_path} --libs source-highlight`
+
+      # Now that we have found a source-highlight library, check if we can use
+      # it.  In particular, we're trying to detect the situation that the
+      # library is using the new libstdc++ library abi ( see
+      # https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html )
+      # while the compiler being used to compile gdb is using the old abi.
+      # Such a situation will result in an undefined reference to
+      # srchilite::SourceHighlight::SourceHighlight(std::string const&).
+      # This situation can occur for instance when using a source highlight
+      # library compiled with g++ 7.5.0 while building gdb with g++ 4.8.5.
+      AC_LANG_PUSH(C++)
+      save_CFLAGS="$CFLAGS"
+      save_LDFLAGS="$LDFLAGS"
+      CFLAGS="$CFLAGS $srchigh_pkg_cflags"
+      LDFLAGS="$LDFLAGS $srchigh_pkg_libs"
+      AC_LINK_IFELSE(
+        [AC_LANG_PROGRAM(
+          [#include <srchilite/sourcehighlight.h>],
+          [std::string outlang = "esc.outlang";
+           new srchilite::SourceHighlight (outlang);]
+        )],
+        [have_usable_source_highlight=yes],
+        [have_usable_source_highlight=no]
+      )
+      CFLAGS="$save_CFLAGS"
+      LDFLAGS="$save_LDFLAGS"
+      AC_LANG_POP(C++)
+
+      if test "${have_usable_source_highlight}" = "yes"; then
+        AC_DEFINE([HAVE_SOURCE_HIGHLIGHT], 1,
+                  [Define to 1 if the source-highlight library is available])
+        AC_MSG_RESULT([yes])
+        SRCHIGH_CFLAGS="$srchigh_pkg_cflags"
+        SRCHIGH_LIBS="$srchigh_pkg_libs"
+      else
+        AC_MSG_RESULT([no])
+        if test "${enable_source_highlight}" = "yes"; then
+          AC_MSG_ERROR([source-highlight in your system could not be used])
+        fi
+      fi
     else
       AC_MSG_RESULT([no])
       if test "${enable_source_highlight}" = "yes"; then
@@ -1291,6 +1309,7 @@ AC_CHECK_HEADERS(term.h, [], [],
 
 AC_CHECK_HEADERS([sys/socket.h])
 AC_CHECK_HEADERS([ws2tcpip.h])
+AC_CHECK_HEADERS([execinfo.h])
 
 # ------------------------- #
 # Checks for declarations.  #
@@ -1512,27 +1531,6 @@ if test "$gdb_cv_c_long_long" != yes; then
   AC_MSG_ERROR([Compiler must support long long for GDB.])
 fi
 
-# Check if the compiler and runtime support printing long longs.
-
-AC_CACHE_CHECK([for long long support in printf],
-               gdb_cv_printf_has_long_long,
-               [AC_RUN_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
-[[char buf[32];
-  long long l = 0;
-  l = (l << 16) + 0x0123;
-  l = (l << 16) + 0x4567;
-  l = (l << 16) + 0x89ab;
-  l = (l << 16) + 0xcdef;
-  sprintf (buf, "0x%016llx", l);
-  return (strcmp ("0x0123456789abcdef", buf));]])],
-                              gdb_cv_printf_has_long_long=yes,
-                              gdb_cv_printf_has_long_long=no,
-                              gdb_cv_printf_has_long_long=no)])
-if test "$gdb_cv_printf_has_long_long" = yes; then
-  AC_DEFINE(PRINTF_HAS_LONG_LONG, 1,
-            [Define to 1 if the "%ll" format works to print long longs.])
-fi
-
 # Check if the compiler and runtime support printing decfloats.
 
 AC_CACHE_CHECK([for decfloat support in printf],
@@ -1682,6 +1680,27 @@ fi
 AC_SUBST(RDYNAMIC)
 AC_MSG_RESULT($found)
 
+AC_CACHE_CHECK(
+  [whether execinfo.h backtrace is available],
+  gdb_cv_execinfo_backtrace,
+  [AC_LINK_IFELSE(
+     [AC_LANG_PROGRAM(
+        [
+         #include <execinfo.h>
+        ],
+        [
+         int f;
+         void *b[[2]];
+         f = backtrace (b, 2);
+         backtrace_symbols_fd (b, f, 2);
+        ])],
+   [gdb_cv_execinfo_backtrace=yes],
+   [gdb_cv_execinfo_backtrace=no])])
+if test "$gdb_cv_execinfo_backtrace" = yes; then
+  AC_DEFINE(HAVE_EXECINFO_BACKTRACE, 1,
+            [Define to 1 if execinfo.h backtrace functions are available.])
+fi
+
 dnl For certain native configurations, we need to check whether thread
 dnl support can be built in or not.
 dnl
@@ -1814,6 +1833,7 @@ GDB_AC_WITH_DIR(SYSTEM_GDBINIT_DIR, system-gdbinit-dir,
     [automatically load system-wide gdbinit files from this directory],
     [])
 
+AM_GDB_COMPILER_TYPE
 AM_GDB_WARNINGS
 AM_GDB_UBSAN
 
@@ -2108,6 +2128,29 @@ if test x"${gdb_osabi}" != x ; then
     AC_DEFINE_UNQUOTED(GDB_OSABI_DEFAULT, $gdb_osabi,
 		       [Define to the default OS ABI for this configuration.])
 fi
+
+# Setup possible use of libbacktrace.
+AC_ARG_ENABLE([libbacktrace],
+[AS_HELP_STRING([--enable-libbacktrace],
+                [use libbacktrace to write a backtrace after a fatal signal.])],
+[case "${enableval}" in
+  yes)  enable_libbacktrace=yes ;;
+  no)   enable_libbacktrace=no  ;;
+  *)    AC_MSG_ERROR(bad value ${enableval} for --enable-libbacktrace option) ;;
+esac],
+enable_libbacktrace=yes)
+
+if test "${enable_libbacktrace}" == "yes"; then
+  LIBBACKTRACE_INC="-I$srcdir/../libbacktrace/ -I../libbacktrace/"
+  LIBBACKTRACE_LIB=../libbacktrace/.libs/libbacktrace.a
+  AC_DEFINE(HAVE_LIBBACKTRACE, 1, [Define if libbacktrace is being used.])
+else
+  LIBBACKTRACE_INC=
+  LIBBACKTRACE_LIB=
+fi
+
+AC_SUBST(LIBBACKTRACE_INC)
+AC_SUBST(LIBBACKTRACE_LIB)
 
 # Check for babeltrace and babeltrace-ctf
 AC_ARG_WITH(babeltrace,

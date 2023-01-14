@@ -1,5 +1,5 @@
 /* Darwin support for GDB, the GNU debugger.
-   Copyright (C) 1997-2021 Free Software Foundation, Inc.
+   Copyright (C) 1997-2022 Free Software Foundation, Inc.
 
    Contributed by Apple Computer, Inc.
 
@@ -156,7 +156,7 @@ i386_darwin_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			     function_call_return_method return_method,
 			     CORE_ADDR struct_addr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[4];
   int i;
@@ -189,7 +189,7 @@ i386_darwin_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    {
 	      if (write_pass)
 		{
-		  const gdb_byte *val = value_contents_all (args[i]);
+		  const gdb_byte *val = value_contents_all (args[i]).data ();
 		  regcache->raw_write (I387_MM0_REGNUM(tdep) + num_m128, val);
 		}
 	      num_m128++;
@@ -200,7 +200,7 @@ i386_darwin_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 				     i386_darwin_arg_type_alignment (arg_type));
 	      if (write_pass)
 		write_memory (sp + args_space,
-			      value_contents_all (args[i]),
+			      value_contents_all (args[i]).data (),
 			      TYPE_LENGTH (arg_type));
 
 	      /* The System V ABI says that:
@@ -248,7 +248,7 @@ i386_darwin_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 static void
 i386_darwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   /* We support the SSE registers.  */
   tdep->num_xmm_regs = I386_NUM_XREGS - 1;

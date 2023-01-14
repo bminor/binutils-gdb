@@ -1,6 +1,8 @@
 # m68hc11 simulator testsuite
 
-if [istarget m68hc11-*] {
+sim_init
+
+if [istarget *] {
     # all machines
     set all_machs "m68hc11"
 

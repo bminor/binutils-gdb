@@ -1,6 +1,6 @@
 /* tc-avr.c -- Assembler code for the ATMEL AVR
 
-   Copyright (C) 1999-2021 Free Software Foundation, Inc.
+   Copyright (C) 1999-2022 Free Software Foundation, Inc.
    Contributed by Denis Chertykov <denisc@overta.ru>
 
    This file is part of GAS, the GNU Assembler.
@@ -157,7 +157,9 @@ static struct avr_opcodes_s *avr_gccisr_opcode;
 
 const char comment_chars[] = ";";
 const char line_comment_chars[] = "#";
-const char line_separator_chars[] = "$";
+
+const char *avr_line_separator_chars = "$";
+static const char *avr_line_separator_chars_no_dollar = "";
 
 const char *md_shortopts = "m:";
 struct mcu_type_s
@@ -565,7 +567,8 @@ enum options
   OPTION_ISA_RMW,
   OPTION_LINK_RELAX,
   OPTION_NO_LINK_RELAX,
-  OPTION_HAVE_GCCISR
+  OPTION_HAVE_GCCISR,
+  OPTION_NO_DOLLAR_LINE_SEPARATOR,
 };
 
 struct option md_longopts[] =
@@ -578,6 +581,7 @@ struct option md_longopts[] =
   { "mlink-relax",  no_argument, NULL, OPTION_LINK_RELAX  },
   { "mno-link-relax",  no_argument, NULL, OPTION_NO_LINK_RELAX  },
   { "mgcc-isr",     no_argument, NULL, OPTION_HAVE_GCCISR },
+  { "mno-dollar-line-separator", no_argument, NULL, OPTION_NO_DOLLAR_LINE_SEPARATOR },
   { NULL, no_argument, NULL, 0 }
 };
 
@@ -687,6 +691,8 @@ md_show_usage (FILE *stream)
 	"  -mlink-relax     generate relocations for linker relaxation (default)\n"
 	"  -mno-link-relax  don't generate relocations for linker relaxation.\n"
 	"  -mgcc-isr        accept the __gcc_isr pseudo-instruction.\n"
+	"  -mno-dollar-line-separator\n"
+        "                   do not treat the $ character as a line separator.\n"
         ));
   show_mcu_list (stream);
 }
@@ -755,6 +761,10 @@ md_parse_option (int c, const char *arg)
       return 1;
     case OPTION_HAVE_GCCISR:
       avr_opt.have_gccisr = 1;
+      return 1;
+    case OPTION_NO_DOLLAR_LINE_SEPARATOR:
+      avr_line_separator_chars = avr_line_separator_chars_no_dollar;
+      lex_type['$'] = LEX_NAME | LEX_BEGIN_NAME;
       return 1;
     }
 
@@ -2809,4 +2819,30 @@ avr_pre_output_hook (void)
 {
   if (avr_opt.have_gccisr)
     bfd_map_over_sections (stdoutput, avr_check_gccisr_done, NULL);
+}
+
+/* Return false if the fixup in fixp should be left alone and not
+   adjusted.  */
+
+bool
+avr_fix_adjustable (struct fix *fixp)
+{
+  if (! linkrelax || fixp->fx_addsy == NULL)
+    return true;
+
+  /* Do not adjust relocations involving symbols in code sections,
+     because it breaks linker relaxations.  This could be fixed in the
+     linker, but this fix is simpler, and it pretty much only affects
+     object size a little bit.  */
+  if (S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_CODE)
+    return false;
+
+  /* Likewise, do not adjust symbols that won't be merged, or debug
+     symbols, because they too break relaxation.  We do want to adjust
+     other mergeable symbols, like .rodata, because code relaxations
+     need section-relative symbols to properly relax them.  */
+  if (! (S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_MERGE))
+    return false;
+
+  return true;
 }

@@ -1,5 +1,5 @@
 # Expect script for ld-powerpc tests
-#   Copyright (C) 2002-2021 Free Software Foundation, Inc.
+#   Copyright (C) 2002-2022 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -354,6 +354,26 @@ set ppc64elftests {
     {"startstop" "-shared -melf64ppc --hash-style=sysv --gc-sections -z start-stop-gc" ""
 	"-a64 -mpower10" {startstop.s}
 	{{objdump -d startstop.d} {readelf {-rW} startstop.r}} "startstop.so"}
+    {"abs-static" "-melf64ppc -static --defsym a=1 --defsym 'HIDDEN(b=2)' --defsym c=0x123456789abcdef0" ""
+	"-a64" {abs-reloc.s}
+	{{objdump {-sdr} abs-static.d}
+	 {readelf {-rW} abs-static.r}} "abs-static"}
+    {"abs-pie" "-melf64ppc -pie --hash-style=sysv --defsym a=1 --defsym 'HIDDEN(b=2)' --defsym c=0x123456789abcdef0" ""
+	"-a64" {abs-reloc.s}
+	{{objdump {-sdr} abs-pie.d}
+	 {readelf {-rW} abs-pie.r}} "abs-pie"}
+    {"abs-shared" "-melf64ppc -shared --hash-style=sysv --defsym a=1 --defsym 'HIDDEN(b=2)' --defsym c=0x123456789abcdef0" ""
+	"-a64" {abs-reloc.s}
+	{{objdump {-sdr} abs-shared.d}
+	 {readelf {-rW} abs-shared.r}} "abs-shared"}
+    {"abs-pie-relr" "-melf64ppc -pie --hash-style=sysv -z pack-relative-relocs --defsym a=1 --defsym 'HIDDEN(b=2)' --defsym c=0x123456789abcdef0" ""
+	"-a64" {abs-reloc.s}
+	{{objdump {-sdr} abs-pie-relr.d}
+	 {readelf {-rW} abs-pie-relr.r}} "abs-pie-relr"}
+    {"abs-shared-relr" "-melf64ppc -shared --hash-style=sysv -z pack-relative-relocs --defsym a=1 --defsym 'HIDDEN(b=2)' --defsym c=0x123456789abcdef0" ""
+	"-a64" {abs-reloc.s}
+	{{objdump {-sdr} abs-shared-relr.d}
+	 {readelf {-rW} abs-shared-relr.r}} "abs-shared-relr"}
 }
 
 set ppceabitests {
@@ -445,6 +465,8 @@ if [ supports_ppc64 ] then {
     run_dump_test "tlsie"
     run_dump_test "non-contiguous-powerpc64"
     run_dump_test "tprel"
+    run_dump_test "pr28827-1"
+    run_dump_test "pr28827-2"
 }
 
 run_dump_test "localgot"

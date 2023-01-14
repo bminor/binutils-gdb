@@ -31,12 +31,12 @@ main (int argc, char *argv[])
      ld -r link.  */
 
   if ((foo_type = ctf_lookup_variable (fp, "foo")) == CTF_ERR)
-    printf ("Cannot look up foo\n", ctf_errmsg (ctf_errno (fp)));
+    printf ("Cannot look up foo: %s\n", ctf_errmsg (ctf_errno (fp)));
   else
     printf ("foo is of type %lx\n", foo_type);
 
   if ((bar_type = ctf_lookup_variable (fp, "bar")) == CTF_ERR)
-    printf ("Cannot look up bar\n", ctf_errmsg (ctf_errno (fp)));
+    printf ("Cannot look up bar: %s\n", ctf_errmsg (ctf_errno (fp)));
   else
     printf ("bar is of type %lx\n", bar_type);
 

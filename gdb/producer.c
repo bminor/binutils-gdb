@@ -1,6 +1,6 @@
 /* Producer string parsers for GDB.
 
-   Copyright (C) 2012-2021 Free Software Foundation, Inc.
+   Copyright (C) 2012-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "producer.h"
 #include "gdbsupport/selftest.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 
 /* See producer.h.  */
 

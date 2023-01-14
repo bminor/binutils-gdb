@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2021 Free Software Foundation, Inc.
+# Copyright (C) 2008-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -218,7 +218,6 @@ clean_restart ${testfile}
 # The following tests require execution.
 
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 
@@ -433,7 +432,6 @@ clean_restart ${testfile}
 # The following tests require execution.
 
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 
@@ -489,19 +487,33 @@ clean_restart ${testfile}
 # The following tests require execution.
 
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 
 runto [gdb_get_line_number "Break at func2 call site."]
 
 gdb_py_test_silent_cmd "python line = gdb.selected_frame().find_sal().line" "Get line number of func2 call site" 1
+
+gdb_py_test_silent_cmd "python pc_call = gdb.selected_frame().pc()" \
+    "Get pc of func2 call site" 1
+
 gdb_test "python print (gdb.find_pc_line(gdb.selected_frame().pc()).line == line)" "True" "test find_pc_line at func2 call site"
 
 gdb_py_test_silent_cmd "step" "Step into func2" 1
 gdb_py_test_silent_cmd "up" "Step out of func2" 1
 
-gdb_test "python print (gdb.find_pc_line(gdb.selected_frame().pc()).line > line)" "True" "test find_pc_line with resume address"
+# The point of the following test is to see if gdb has advanced past the
+# location where the branch to a function was made.
+set test_name "test find_pc_line with resume address"
+
+gdb_py_test_silent_cmd "python pc_rtn = gdb.selected_frame().pc()" \
+    "Get pc at func2 return site" 1
+
+gdb_test "python print (pc_rtn > pc_call)" "True" \
+    "test resume address greater then call address"
+
+gdb_test "python print (gdb.find_pc_line(pc_rtn).line >= line)" "True" \
+    "test find_pc_line with resume address"
 
 gdb_test_no_output "set variable \$cvar1 = 23" "set convenience variable"
 gdb_test "python print(gdb.convenience_variable('cvar1'))" "23"
@@ -527,15 +539,25 @@ gdb_test "print \$cvar3" "= void" \
 # "show commands".
 gdb_test "python gdb.execute(\"show commands\")" "$decimal  print \\\$cvar3.*"
 
-# Test that the from_tty argument to gdb.execute is effective. If
-# False, the user is not prompted for decisions such as restarting the
-# program, and "yes" is assumed. If True, the user is prompted.
-gdb_test "python gdb.execute('starti', from_tty=False)" \
-    "Program stopped.*" \
-    "starti via gdb.execute, not from tty"
-gdb_test_multiple "python gdb.execute('starti', from_tty=True)" \
-    "starti via gdb.execute, from tty" {
-    -re {The program being debugged has been started already\.\r\nStart it from the beginning\? \(y or n\) $} {
-	gdb_test "y" "Starting program:.*" "starti via interactive input"
+# Check if starti command is supported.
+if { [use_gdb_stub] == 0 } {
+    # Test that the from_tty argument to gdb.execute is effective. If
+    # False, the user is not prompted for decisions such as restarting the
+    # program, and "yes" is assumed. If True, the user is prompted.
+    # Case 1, from_tty=False.
+    gdb_test "python gdb.execute('starti', from_tty=False)" \
+	"Program stopped.*" \
+	"starti via gdb.execute, not from tty"
+
+    # Case 2, from_tty=True.
+    set test "starti via gdb.execute, from tty"
+    set question \
+	[multi_line \
+	     {The program being debugged has been started already\.} \
+	     {Start it from the beginning\? \(y or n\) $}]
+    gdb_test_multiple "python gdb.execute('starti', from_tty=True)" $test {
+	-re $question {
+	    gdb_test "y" "Starting program:.*" $gdb_test_name
+	}
     }
 }

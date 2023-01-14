@@ -1,6 +1,6 @@
 /* Symbol table lookup for the GNU debugger, GDB.
 
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,7 +27,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdbcmd.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include "expression.h"
 #include "language.h"
 #include "demangle.h"
@@ -47,7 +47,7 @@
 #include "hashtab.h"
 #include "typeprint.h"
 
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "block.h"
 #include "dictionary.h"
 
@@ -331,13 +331,79 @@ search_domain_name (enum search_domain e)
 
 /* See symtab.h.  */
 
-struct symtab *
-compunit_primary_filetab (const struct compunit_symtab *cust)
+program_space *
+symtab::pspace () const
 {
-  gdb_assert (COMPUNIT_FILETABS (cust) != NULL);
+  return this->objfile ()->pspace;
+}
+
+/* See symtab.h.  */
+
+call_site *
+compunit_symtab::find_call_site (CORE_ADDR pc) const
+{
+  if (m_call_site_htab == nullptr)
+    return nullptr;
+
+  CORE_ADDR delta
+    = this->objfile ()->section_offsets[this->block_line_section ()];
+  CORE_ADDR unrelocated_pc = pc - delta;
+
+  struct call_site call_site_local (unrelocated_pc, nullptr, nullptr);
+  void **slot
+    = htab_find_slot (m_call_site_htab, &call_site_local, NO_INSERT);
+  if (slot == nullptr)
+    return nullptr;
+
+  return (call_site *) *slot;
+}
+
+/* See symtab.h.  */
+
+void
+compunit_symtab::set_call_site_htab (htab_t call_site_htab)
+{
+  gdb_assert (m_call_site_htab == nullptr);
+  m_call_site_htab = call_site_htab;
+}
+
+/* See symtab.h.  */
+
+void
+compunit_symtab::set_primary_filetab (symtab *primary_filetab)
+{
+  symtab *prev_filetab = nullptr;
+
+  /* Move PRIMARY_FILETAB to the head of the filetab list.  */
+  for (symtab *filetab : this->filetabs ())
+    {
+      if (filetab == primary_filetab)
+	{
+	  if (prev_filetab != nullptr)
+	    {
+	      prev_filetab->next = primary_filetab->next;
+	      primary_filetab->next = m_filetabs;
+	      m_filetabs = primary_filetab;
+	    }
+
+	  break;
+	}
+
+      prev_filetab = filetab;
+    }
+
+  gdb_assert (primary_filetab == m_filetabs);
+}
+
+/* See symtab.h.  */
+
+struct symtab *
+compunit_symtab::primary_filetab () const
+{
+  gdb_assert (m_filetabs != nullptr);
 
   /* The primary file symtab is the first one in the list.  */
-  return COMPUNIT_FILETABS (cust);
+  return m_filetabs;
 }
 
 /* See symtab.h.  */
@@ -345,11 +411,11 @@ compunit_primary_filetab (const struct compunit_symtab *cust)
 enum language
 compunit_language (const struct compunit_symtab *cust)
 {
-  struct symtab *symtab = compunit_primary_filetab (cust);
+  struct symtab *symtab = cust->primary_filetab ();
 
 /* The language of the compunit symtab is the language of its primary
    source file.  */
-  return SYMTAB_LANGUAGE (symtab);
+  return symtab->language ();
 }
 
 /* See symtab.h.  */
@@ -475,7 +541,7 @@ iterate_over_some_symtabs (const char *name,
 
   for (cust = first; cust != NULL && cust != after_last; cust = cust->next)
     {
-      for (symtab *s : compunit_filetabs (cust))
+      for (symtab *s : cust->filetabs ())
 	{
 	  if (compare_filenames_for_search (s->filename, name))
 	    {
@@ -791,11 +857,11 @@ create_demangled_names_hash (struct objfile_per_bfd_storage *per_bfd)
 
 /* See symtab.h  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 symbol_find_demangled_name (struct general_symbol_info *gsymbol,
 			    const char *mangled)
 {
-  char *demangled = NULL;
+  gdb::unique_xmalloc_ptr<char> demangled;
   int i;
 
   if (gsymbol->language () == language_unknown)
@@ -901,8 +967,8 @@ general_symbol_info::compute_and_set_names (gdb::string_view linkage_name,
 	linkage_name_copy = linkage_name;
 
       if (demangled_name.get () == nullptr)
-	 demangled_name.reset
-	   (symbol_find_demangled_name (this, linkage_name_copy.data ()));
+	 demangled_name
+	   = symbol_find_demangled_name (this, linkage_name_copy.data ());
 
       /* Suppose we have demangled_name==NULL, copy_name==0, and
 	 linkage_name_copy==linkage_name.  In this case, we already have the
@@ -1198,7 +1264,7 @@ eq_symbol_entry (const struct symbol_cache_slot *slot,
 	  struct symbol *sym = slot->value.found.symbol;
 	  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
 
-	  if (!SYMBOL_MATCHES_SEARCH_NAME (sym, lookup_name))
+	  if (!symbol_matches_search_name (sym, lookup_name))
 	    return 0;
 
 	  if (!symbol_matches_domain (sym->language (), slot_domain, domain))
@@ -1828,9 +1894,10 @@ demangle_for_lookup (const char *name, enum language lang,
      lookup, so we can always binary search.  */
   if (lang == language_cplus)
     {
-      char *demangled_name = gdb_demangle (name, DMGL_ANSI | DMGL_PARAMS);
+      gdb::unique_xmalloc_ptr<char> demangled_name
+	= gdb_demangle (name, DMGL_ANSI | DMGL_PARAMS);
       if (demangled_name != NULL)
-	return storage.set_malloc_ptr (demangled_name);
+	return storage.set_malloc_ptr (std::move (demangled_name));
 
       /* If we were given a non-mangled name, canonicalize it
 	 according to the language (so far only for C++).  */
@@ -1840,16 +1907,16 @@ demangle_for_lookup (const char *name, enum language lang,
     }
   else if (lang == language_d)
     {
-      char *demangled_name = d_demangle (name, 0);
+      gdb::unique_xmalloc_ptr<char> demangled_name = d_demangle (name, 0);
       if (demangled_name != NULL)
-	return storage.set_malloc_ptr (demangled_name);
+	return storage.set_malloc_ptr (std::move (demangled_name));
     }
   else if (lang == language_go)
     {
-      char *demangled_name
+      gdb::unique_xmalloc_ptr<char> demangled_name
 	= language_def (language_go)->demangle_symbol (name, 0);
       if (demangled_name != NULL)
-	return storage.set_malloc_ptr (demangled_name);
+	return storage.set_malloc_ptr (std::move (demangled_name));
     }
 
   return name;
@@ -1973,7 +2040,7 @@ check_field (struct type *type, const char *name,
 
   for (i = type->num_fields () - 1; i >= TYPE_N_BASECLASSES (type); i--)
     {
-      const char *t_field_name = TYPE_FIELD_NAME (type, i);
+      const char *t_field_name = type->field (i).name ();
 
       if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
 	{
@@ -2068,7 +2135,7 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
 	  /* I'm not really sure that type of this can ever
 	     be typedefed; just be safe.  */
 	  t = check_typedef (t);
-	  if (t->code () == TYPE_CODE_PTR || TYPE_IS_REFERENCE (t))
+	  if (t->is_pointer_or_reference ())
 	    t = TYPE_TARGET_TYPE (t);
 
 	  if (t->code () != TYPE_CODE_STRUCT
@@ -2250,7 +2317,7 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
       const struct block *block;
       struct block_symbol result;
 
-      bv = COMPUNIT_BLOCKVECTOR (cust);
+      bv = cust->blockvector ();
       block = BLOCKVECTOR_BLOCK (bv, block_index);
       result.symbol = block_lookup_symbol_primary (block, name, domain);
       result.block = block;
@@ -2345,7 +2412,7 @@ Internal: %s symbol `%s' found in %s psymtab but not in symtab.\n\
 (if a template, try specifying an instantiation: %s<type>)."),
 	 block_index == GLOBAL_BLOCK ? "global" : "static",
 	 name,
-	 symtab_to_filename_for_display (compunit_primary_filetab (cust)),
+	 symtab_to_filename_for_display (cust->primary_filetab ()),
 	 name, name);
 }
 
@@ -2383,7 +2450,7 @@ lookup_symbol_via_quick_fns (struct objfile *objfile,
       return {};
     }
 
-  bv = COMPUNIT_BLOCKVECTOR (cust);
+  bv = cust->blockvector ();
   block = BLOCKVECTOR_BLOCK (bv, block_index);
   result.symbol = block_lookup_symbol (block, name,
 				       symbol_name_match_type::FULL, domain);
@@ -2733,7 +2800,7 @@ basic_lookup_transparent_type_quick (struct objfile *objfile,
   if (cust == NULL)
     return NULL;
 
-  bv = COMPUNIT_BLOCKVECTOR (cust);
+  bv = cust->blockvector ();
   block = BLOCKVECTOR_BLOCK (bv, block_index);
   sym = block_find_symbol (block, name, STRUCT_DOMAIN,
 			   block_find_non_opaque_type, NULL);
@@ -2758,7 +2825,7 @@ basic_lookup_transparent_type_1 (struct objfile *objfile,
 
   for (compunit_symtab *cust : objfile->compunits ())
     {
-      bv = COMPUNIT_BLOCKVECTOR (cust);
+      bv = cust->blockvector ();
       block = BLOCKVECTOR_BLOCK (bv, block_index);
       sym = block_find_symbol (block, name, STRUCT_DOMAIN,
 			       block_find_non_opaque_type, NULL);
@@ -2903,7 +2970,7 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
     {
       for (compunit_symtab *cust : obj_file->compunits ())
 	{
-	  const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (cust);
+	  const struct blockvector *bv = cust->blockvector ();
 	  const struct block *global_block
 	    = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 	  CORE_ADDR start = BLOCK_START (global_block);
@@ -3009,7 +3076,7 @@ find_symbol_at_address (CORE_ADDR address)
      ADDR.  */
   auto search_symtab = [] (compunit_symtab *symtab, CORE_ADDR addr) -> symbol *
     {
-      const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (symtab);
+      const struct blockvector *bv = symtab->blockvector ();
 
       for (int i = GLOBAL_BLOCK; i <= STATIC_BLOCK; ++i)
 	{
@@ -3217,16 +3284,16 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
       return val;
     }
 
-  bv = COMPUNIT_BLOCKVECTOR (cust);
+  bv = cust->blockvector ();
 
   /* Look at all the symtabs that share this blockvector.
      They all have the same apriori range, that we found was right;
      but they have different line tables.  */
 
-  for (symtab *iter_s : compunit_filetabs (cust))
+  for (symtab *iter_s : cust->filetabs ())
     {
       /* Find the best line in this symtab.  */
-      l = SYMTAB_LINETABLE (iter_s);
+      l = iter_s->linetable ();
       if (!l)
 	continue;
       len = l->nitems;
@@ -3395,7 +3462,7 @@ find_line_symtab (struct symtab *sym_tab, int line,
   struct symtab *best_symtab;
 
   /* First try looking it up in the given symtab.  */
-  best_linetable = SYMTAB_LINETABLE (sym_tab);
+  best_linetable = sym_tab->linetable ();
   best_symtab = sym_tab;
   best_index = find_line_common (best_linetable, line, &exact, 0);
   if (best_index < 0 || !exact)
@@ -3424,7 +3491,7 @@ find_line_symtab (struct symtab *sym_tab, int line,
 	{
 	  for (compunit_symtab *cu : objfile->compunits ())
 	    {
-	      for (symtab *s : compunit_filetabs (cu))
+	      for (symtab *s : cu->filetabs ())
 		{
 		  struct linetable *l;
 		  int ind;
@@ -3434,7 +3501,7 @@ find_line_symtab (struct symtab *sym_tab, int line,
 		  if (FILENAME_CMP (symtab_to_fullname (sym_tab),
 				    symtab_to_fullname (s)) != 0)
 		    continue;	
-		  l = SYMTAB_LINETABLE (s);
+		  l = s->linetable ();
 		  ind = find_line_common (l, line, &exact, 0);
 		  if (ind >= 0)
 		    {
@@ -3486,14 +3553,14 @@ find_pcs_for_symtab_line (struct symtab *symtab, int line,
       int was_exact;
       int idx;
 
-      idx = find_line_common (SYMTAB_LINETABLE (symtab), line, &was_exact,
+      idx = find_line_common (symtab->linetable (), line, &was_exact,
 			      start);
       if (idx < 0)
 	break;
 
       if (!was_exact)
 	{
-	  struct linetable_entry *item = &SYMTAB_LINETABLE (symtab)->item[idx];
+	  struct linetable_entry *item = &symtab->linetable ()->item[idx];
 
 	  if (*best_item == NULL
 	      || (item->line < (*best_item)->line && item->is_stmt))
@@ -3502,7 +3569,7 @@ find_pcs_for_symtab_line (struct symtab *symtab, int line,
 	  break;
 	}
 
-      result.push_back (SYMTAB_LINETABLE (symtab)->item[idx].pc);
+      result.push_back (symtab->linetable ()->item[idx].pc);
       start = idx + 1;
     }
 
@@ -3527,7 +3594,7 @@ find_line_pc (struct symtab *symtab, int line, CORE_ADDR *pc)
   symtab = find_line_symtab (symtab, line, &ind, NULL);
   if (symtab != NULL)
     {
-      l = SYMTAB_LINETABLE (symtab);
+      l = symtab->linetable ();
       *pc = l->item[ind].pc;
       return true;
     }
@@ -3650,10 +3717,10 @@ find_function_start_sal_1 (CORE_ADDR func_addr, obj_section *section,
   symtab_and_line sal = find_pc_sect_line (func_addr, section, 0);
 
   if (funfirstline && sal.symtab != NULL
-      && (COMPUNIT_LOCATIONS_VALID (SYMTAB_COMPUNIT (sal.symtab))
-	  || SYMTAB_LANGUAGE (sal.symtab) == language_asm))
+      && (sal.symtab->compunit ()->locations_valid ()
+	  || sal.symtab->language () == language_asm))
     {
-      struct gdbarch *gdbarch = SYMTAB_OBJFILE (sal.symtab)->arch ();
+      struct gdbarch *gdbarch = sal.symtab->objfile ()->arch ();
 
       sal.pc = func_addr;
       if (gdbarch_skip_entrypoint_p (gdbarch))
@@ -3724,7 +3791,7 @@ skip_prologue_using_lineinfo (CORE_ADDR func_addr, struct symtab *symtab)
   int i;
 
   /* Give up if this symbol has no lineinfo table.  */
-  l = SYMTAB_LINETABLE (symtab);
+  l = symtab->linetable ();
   if (l == NULL)
     return func_addr;
 
@@ -3781,7 +3848,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
      is likely to be the wrong choice.  */
   if (sal->symtab != nullptr
       && sal->explicit_line
-      && SYMTAB_LANGUAGE (sal->symtab) == language_asm)
+      && sal->symtab->language () == language_asm)
     return;
 
   scoped_restore_current_pspace_and_thread restore_pspace_thread;
@@ -3826,7 +3893,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
      have proven the CU (Compilation Unit) supports it.  sal->SYMTAB does not
      have to be set by the caller so we use SYM instead.  */
   if (sym != NULL
-      && COMPUNIT_LOCATIONS_VALID (SYMTAB_COMPUNIT (symbol_symtab (sym))))
+      && symbol_symtab (sym)->compunit ()->locations_valid ())
     force_skip = 0;
 
   saved_pc = pc;
@@ -3964,9 +4031,9 @@ skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
 	 The GNU assembler emits separate line notes for each instruction
 	 in a multi-instruction macro, but compilers generally will not
 	 do this.  */
-      if (prologue_sal.symtab->language != language_asm)
+      if (prologue_sal.symtab->language () != language_asm)
 	{
-	  struct linetable *linetable = SYMTAB_LINETABLE (prologue_sal.symtab);
+	  struct linetable *linetable = prologue_sal.symtab->linetable ();
 	  int idx = 0;
 
 	  /* Skip any earlier lines, and any end-of-sequence marker
@@ -4349,7 +4416,7 @@ output_source_filename_data::output (const char *disp_name,
     m_uiout->text (", ");
   m_first = false;
 
-  wrap_here ("");
+  m_uiout->wrap_hint (0);
   if (m_uiout->is_mi_like_p ())
     {
       m_uiout->field_string ("file", disp_name, file_name_style.style ());
@@ -4472,7 +4539,7 @@ info_sources_worker (struct ui_out *uiout,
 
       for (compunit_symtab *cu : objfile->compunits ())
 	{
-	  for (symtab *s : compunit_filetabs (cu))
+	  for (symtab *s : cu->filetabs ())
 	    {
 	      const char *file = symtab_to_filename_for_display (s);
 	      const char *fullname = symtab_to_fullname (s);
@@ -4647,11 +4714,16 @@ global_symbol_searcher::expand_symtabs
   enum search_domain kind = m_kind;
   bool found_msymbol = false;
 
+  auto do_file_match = [&] (const char *filename, bool basenames)
+    {
+      return file_matches (filename, filenames, basenames);
+    };
+  gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher = nullptr;
+  if (!filenames.empty ())
+    file_matcher = do_file_match;
+
   objfile->expand_symtabs_matching
-    ([&] (const char *filename, bool basenames)
-     {
-       return file_matches (filename, filenames, basenames);
-     },
+    (file_matcher,
      &lookup_name_info::match_any (),
      [&] (const char *symname)
      {
@@ -4729,7 +4801,7 @@ global_symbol_searcher::add_matching_symbols
   /* Add matching symbols (if not already present).  */
   for (compunit_symtab *cust : objfile->compunits ())
     {
-      const struct blockvector *bv  = COMPUNIT_BLOCKVECTOR (cust);
+      const struct blockvector *bv  = cust->blockvector ();
 
       for (block_enum block : { GLOBAL_BLOCK, STATIC_BLOCK })
 	{
@@ -5146,12 +5218,7 @@ struct info_vars_funcs_options
 {
   bool quiet = false;
   bool exclude_minsyms = false;
-  char *type_regexp = nullptr;
-
-  ~info_vars_funcs_options ()
-  {
-    xfree (type_regexp);
-  }
+  std::string type_regexp;
 };
 
 /* The options used by the 'info variables' and 'info functions'
@@ -5174,8 +5241,7 @@ static const gdb::option::option_def info_vars_funcs_options_defs[] = {
 
   gdb::option::string_option_def<info_vars_funcs_options> {
     "t",
-    [] (info_vars_funcs_options *opt) { return &opt->type_regexp;
-  },
+    [] (info_vars_funcs_options *opt) { return &opt->type_regexp; },
     nullptr, /* show_cmd_cb */
     nullptr /* set_doc */
   }
@@ -5219,8 +5285,10 @@ info_variables_command (const char *args, int from_tty)
   if (args != nullptr && *args == '\0')
     args = nullptr;
 
-  symtab_symbol_info (opts.quiet, opts.exclude_minsyms, args, VARIABLES_DOMAIN,
-		      opts.type_regexp, from_tty);
+  symtab_symbol_info
+    (opts.quiet, opts.exclude_minsyms, args, VARIABLES_DOMAIN,
+     opts.type_regexp.empty () ? nullptr : opts.type_regexp.c_str (),
+     from_tty);
 }
 
 /* Implement the 'info functions' command.  */
@@ -5236,8 +5304,10 @@ info_functions_command (const char *args, int from_tty)
   if (args != nullptr && *args == '\0')
     args = nullptr;
 
-  symtab_symbol_info (opts.quiet, opts.exclude_minsyms, args,
-		      FUNCTIONS_DOMAIN, opts.type_regexp, from_tty);
+  symtab_symbol_info
+    (opts.quiet, opts.exclude_minsyms, args, FUNCTIONS_DOMAIN,
+     opts.type_regexp.empty () ? nullptr : opts.type_regexp.c_str (),
+     from_tty);
 }
 
 /* Holds the -q option for the 'info types' command.  */
@@ -5609,9 +5679,9 @@ completion_list_add_fields (completion_tracker &tracker,
 
       if (c == TYPE_CODE_UNION || c == TYPE_CODE_STRUCT)
 	for (j = TYPE_N_BASECLASSES (t); j < t->num_fields (); j++)
-	  if (TYPE_FIELD_NAME (t, j))
+	  if (t->field (j).name ())
 	    completion_list_add_name (tracker, sym->language (),
-				      TYPE_FIELD_NAME (t, j),
+				      t->field (j).name (),
 				      lookup_name, text, word);
     }
 }
@@ -5711,7 +5781,7 @@ add_symtab_completions (struct compunit_symtab *cust,
   for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)
     {
       QUIT;
-      b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), i);
+      b = BLOCKVECTOR_BLOCK (cust->blockvector (), i);
       ALL_BLOCK_SYMBOLS (b, iter, sym)
 	{
 	  if (completion_skip_symbol (mode, sym))
@@ -6033,7 +6103,7 @@ collect_file_symbol_completion_matches (completion_tracker &tracker,
      for symbols which match.  */
   iterate_over_symtabs (srcfile, [&] (symtab *s)
     {
-      add_symtab_completions (SYMTAB_COMPUNIT (s),
+      add_symtab_completions (s->compunit (),
 			      tracker, mode, lookup_name,
 			      sym_text, word, TYPE_CODE_UNDEF);
       return false;
@@ -6128,7 +6198,7 @@ make_source_files_completion_list (const char *text, const char *word)
     {
       for (compunit_symtab *cu : objfile->compunits ())
 	{
-	  for (symtab *s : compunit_filetabs (cu))
+	  for (symtab *s : cu->filetabs ())
 	    {
 	      if (not_interesting_fname (s->filename))
 		continue;
@@ -6341,13 +6411,12 @@ producer_is_realview (const char *producer)
     "ARM/Thumb C/C++ Compiler, RVCT",
     "ARM C/C++ Compiler, RVCT"
   };
-  int i;
 
   if (producer == NULL)
     return false;
 
-  for (i = 0; i < ARRAY_SIZE (arm_idents); i++)
-    if (startswith (producer, arm_idents[i]))
+  for (const char *ident : arm_idents)
+    if (startswith (producer, ident))
       return true;
 
   return false;
@@ -6466,7 +6535,7 @@ struct objfile *
 symbol_objfile (const struct symbol *symbol)
 {
   gdb_assert (SYMBOL_OBJFILE_OWNED (symbol));
-  return SYMTAB_OBJFILE (symbol->owner.symtab);
+  return symbol->owner.symtab->objfile ();
 }
 
 /* See symtab.h.  */
@@ -6476,7 +6545,7 @@ symbol_arch (const struct symbol *symbol)
 {
   if (!SYMBOL_OBJFILE_OWNED (symbol))
     return symbol->owner.arch;
-  return SYMTAB_OBJFILE (symbol->owner.symtab)->arch ();
+  return symbol->owner.symtab->objfile ()->arch ();
 }
 
 /* See symtab.h.  */
@@ -6749,14 +6818,8 @@ info_module_subcommand (bool quiet, const char *module_regexp,
 struct info_modules_var_func_options
 {
   bool quiet = false;
-  char *type_regexp = nullptr;
-  char *module_regexp = nullptr;
-
-  ~info_modules_var_func_options ()
-  {
-    xfree (type_regexp);
-    xfree (module_regexp);
-  }
+  std::string type_regexp;
+  std::string module_regexp;
 };
 
 /* The options used by 'info module variables' and 'info module functions'
@@ -6806,8 +6869,11 @@ info_module_functions_command (const char *args, int from_tty)
   if (args != nullptr && *args == '\0')
     args = nullptr;
 
-  info_module_subcommand (opts.quiet, opts.module_regexp, args,
-			  opts.type_regexp, FUNCTIONS_DOMAIN);
+  info_module_subcommand
+    (opts.quiet,
+     opts.module_regexp.empty () ? nullptr : opts.module_regexp.c_str (), args,
+     opts.type_regexp.empty () ? nullptr : opts.type_regexp.c_str (),
+     FUNCTIONS_DOMAIN);
 }
 
 /* Implements the 'info module variables' command.  */
@@ -6822,8 +6888,11 @@ info_module_variables_command (const char *args, int from_tty)
   if (args != nullptr && *args == '\0')
     args = nullptr;
 
-  info_module_subcommand (opts.quiet, opts.module_regexp, args,
-			  opts.type_regexp, VARIABLES_DOMAIN);
+  info_module_subcommand
+    (opts.quiet,
+     opts.module_regexp.empty () ? nullptr : opts.module_regexp.c_str (), args,
+     opts.type_regexp.empty () ? nullptr : opts.type_regexp.c_str (),
+     VARIABLES_DOMAIN);
 }
 
 /* Command completer for 'info module ...' sub-commands.  */

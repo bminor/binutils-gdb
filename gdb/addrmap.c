@@ -1,6 +1,6 @@
 /* addrmap.c --- implementation of address map data structure.
 
-   Copyright (C) 2007-2021 Free Software Foundation, Inc.
+   Copyright (C) 2007-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #include "splay-tree.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "addrmap.h"
 #include "gdbsupport/selftest.h"
 
@@ -588,6 +588,41 @@ addrmap_create_mutable (struct obstack *obstack)
 					     map);
 
   return (struct addrmap *) map;
+}
+
+/* See addrmap.h.  */
+
+void
+addrmap_dump (struct addrmap *map, struct ui_file *outfile, void *payload)
+{
+  /* True if the previously printed addrmap entry was for PAYLOAD.
+     If so, we want to print the next one as well (since the next
+     addrmap entry defines the end of the range).  */
+  bool previous_matched = false;
+
+  auto callback = [&] (CORE_ADDR start_addr, void *obj)
+  {
+    QUIT;
+
+    bool matches = payload == nullptr || payload == obj;
+    const char *addr_str = nullptr;
+    if (matches)
+      addr_str = host_address_to_string (obj);
+    else if (previous_matched)
+      addr_str = "<ends here>";
+
+    if (matches || previous_matched)
+      fprintf_filtered (outfile, "  %s%s %s\n",
+			payload != nullptr ? "  " : "",
+			core_addr_to_string (start_addr),
+			addr_str);
+
+    previous_matched = matches;
+
+    return 0;
+  };
+
+  addrmap_foreach (map, callback);
 }
 
 #if GDB_SELF_TEST

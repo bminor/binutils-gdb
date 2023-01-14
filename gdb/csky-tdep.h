@@ -1,6 +1,6 @@
 /* Target-dependent code for the CSKY architecture, for GDB.
 
-   Copyright (C) 2010-2021 Free Software Foundation, Inc.
+   Copyright (C) 2010-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,6 +20,8 @@
 #ifndef CSKY_TDEP_H
 #define CSKY_TDEP_H
 
+#include "gdbarch.h"
+
 /* How to interpret the contents of the link register.  */
 enum lr_type_t
 {
@@ -29,7 +31,7 @@ enum lr_type_t
 };
 
 /* Target-dependent structure in gdbarch.  */
-struct gdbarch_tdep
+struct csky_gdbarch_tdep : gdbarch_tdep
 {
   /* This is Unused.  */
 };

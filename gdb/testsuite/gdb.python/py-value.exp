@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2021 Free Software Foundation, Inc.
+# Copyright (C) 2008-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -51,6 +51,7 @@ proc test_value_creation {} {
 
   gdb_py_test_silent_cmd "python i = gdb.Value (True)" "create boolean value" 1
   gdb_py_test_silent_cmd "python i = gdb.Value (5)" "create integer value" 1
+  gdb_py_test_silent_cmd "python i = gdb.Value (3,None)" "create integer value, with None type" 1
   if { $gdb_py_is_py3k == 0 } {
     gdb_py_test_silent_cmd "python i = gdb.Value (5L)" "create long value" 1
   }
@@ -75,6 +76,18 @@ proc test_value_creation {} {
 
   # Test address attribute is None in a non-addressable value
   gdb_test "python print ('result = %s' % i.address)" "= None" "test address attribute in non-addressable value"
+}
+
+# Check that we can call gdb.Value.__init__ to change a value.
+proc test_value_reinit {} {
+    gdb_py_test_silent_cmd "python v = gdb.Value (3)" \
+	"create initial integer value" 1
+    gdb_test "python print(v)" "3" \
+	"check initial value contents"
+    gdb_py_test_silent_cmd "python v.__init__(5)" \
+	"call gdb.Value.__init__ manually" 1
+    gdb_test "python print(v)" "5" \
+	"check new value contents"
 }
 
 proc test_value_numeric_ops {} {
@@ -531,10 +544,14 @@ proc test_float_conversion {} {
     gdb_test "python print(float(gdb.Value(0)))" "0\\.0"
 }
 
-proc test_value_from_buffer {} {
-  global gdb_prompt
-  global gdb_py_is_py3k
-
+# Setup some Python variables:
+#   tp      : a gdb.Type for 'int',
+#   size_a  : the size of array 'a' from the inferior,
+#   size_a0 : the size of array element 'a[0] from the inferior,
+#   addr    : the address of 'a[0]' from the inferior,
+#   b       : a buffer containing the full contents of array 'a' from the
+#             inferior.
+proc prepare_type_and_buffer {} {
   gdb_py_test_silent_cmd "python tp=gdb.lookup_type('int')" "look up int type" 0
   gdb_py_test_silent_cmd "python size_a=gdb.parse_and_eval('sizeof(a)')" \
                          "find size of a" 0
@@ -543,7 +560,14 @@ proc test_value_from_buffer {} {
   gdb_py_test_silent_cmd "python addr=gdb.parse_and_eval('&a')" \
                          "find address of a" 0
   gdb_py_test_silent_cmd "python b=gdb.selected_inferior().read_memory(addr,size_a)" \
-                         "read buffer from memory" 1
+                         "read buffer from memory" 0
+}
+
+proc test_value_from_buffer {} {
+  global gdb_prompt
+  global gdb_py_is_py3k
+
+  prepare_type_and_buffer
   gdb_test "python v=gdb.Value(b,tp); print(v)" "1" \
             "construct value from buffer"
   gdb_test "python v=gdb.Value(b\[size_a0:\],tp); print(v)" "2" \
@@ -575,6 +599,65 @@ proc test_value_from_buffer {} {
 	   "attempt to construct value with string as type"
 }
 
+# Test the gdb.add_history API.
+proc test_add_to_history {} {
+    # Add a gdb.Value to the value history list.
+    gdb_test_no_output "python idx = gdb.add_history(gdb.Value(42))" \
+	"add value 42 to the history list"
+    gdb_test "python print (\"$%d = %s\" % (idx, gdb.history (idx)))" \
+	" = 42" "print value 42 from the history list"
+    set idx [get_python_valueof "idx" "**DEFAULT**" "get idx for value 42"]
+    gdb_test "print \$${idx}" " = 42"
+
+    # Add something to the history list that can be converted into a
+    # gdb.Value.
+    gdb_test_no_output "python idx = gdb.add_history(84)" \
+	"add value to 84 to the history list"
+    gdb_test "python print (\"$%d = %s\" % (idx, gdb.history (idx)))" \
+	" = 84" "print value 84 from the history list"
+    set idx [get_python_valueof "idx" "**DEFAULT**" "get idx for value 84"]
+    gdb_test "print \$${idx}" " = 84"
+
+    # Try adding something that can't be converted to a gdb.Value,
+    # this should give an error.
+    gdb_test "python idx = gdb.add_history(gdb.GdbError(\"an error\"))" \
+	"TypeError: Could not convert Python object: .*"
+}
+
+# Check we can create sub-classes of gdb.Value.
+proc test_value_sub_classes {} {
+    prepare_type_and_buffer
+
+    gdb_test_multiline "Create sub-class of gdb.Value" \
+	"python" "" \
+	"class MyValue(gdb.Value):" "" \
+	"  def __init__(self,val,type=None):" "" \
+	"    gdb.Value.__init__(self,val,type)" "" \
+	"    print(\"In MyValue.__init__\")" "" \
+	"end"
+
+    gdb_test "python obj = MyValue (123)" "In MyValue.__init__" \
+	"create instance of MyValue"
+    gdb_test "python print(obj)" "123" \
+	"check printing of MyValue"
+
+    gdb_test "python obj = MyValue(b\[size_a0:\],tp)" "In MyValue.__init__" \
+	"convert 2nd elem of buffer to a MyValue"
+    gdb_test "python print(obj)" "2" \
+	"check printing of MyValue when initiaized with a type"
+}
+
+# Test the history count.  This must be the first thing called after
+# starting GDB as it depends on there being nothing in the value
+# history.
+proc test_history_count {} {
+    for { set i 0 } { $i < 5 } { incr i } {
+	gdb_test "python print('history count is %d' % gdb.history_count())" \
+	    "history count is $i" "history count is $i"
+	gdb_test "print $i" " = $i"
+    }
+}
+
 # Build C version of executable.  C++ is built later.
 if { [build_inferior "${binfile}" "c"] < 0 } {
     return -1
@@ -586,7 +669,9 @@ clean_restart ${binfile}
 # Skip all tests if Python scripting is not enabled.
 if { [skip_python_tests] } { continue }
 
+test_history_count
 test_value_creation
+test_value_reinit
 test_value_numeric_ops
 test_value_boolean
 test_value_compare
@@ -594,16 +679,17 @@ test_objfiles
 test_parse_and_eval
 test_value_hash
 test_float_conversion
+test_add_to_history
 
 # The following tests require execution.
 
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 
 test_value_in_inferior
 test_value_from_buffer
+test_value_sub_classes
 test_inferior_function_call
 test_value_after_death
 

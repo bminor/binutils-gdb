@@ -1,5 +1,5 @@
 /* Check that closing a pipe with a nonempty buffer works.
-#notarget: cris*-*-elf
+#progos: linux
 #output: got: a\ngot: b\nexit: 0\n
 */
 

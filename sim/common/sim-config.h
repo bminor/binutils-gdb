@@ -1,6 +1,6 @@
 /* The common simulator framework for GDB, the GNU Debugger.
 
-   Copyright 2002-2021 Free Software Foundation, Inc.
+   Copyright 2002-2022 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney and Red Hat.
 
@@ -23,6 +23,9 @@
 #ifndef SIM_CONFIG_H
 #define SIM_CONFIG_H
 
+#ifdef SIM_COMMON_BUILD
+#error "This header is unusable in common builds due to reliance on SIM_AC_OPTION_BITSIZE"
+#endif
 
 /* Host dependant:
 

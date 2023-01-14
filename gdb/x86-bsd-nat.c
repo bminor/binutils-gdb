@@ -1,6 +1,6 @@
 /* Native-dependent code for X86 BSD's.
 
-   Copyright (C) 2003-2021 Free Software Foundation, Inc.
+   Copyright (C) 2003-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -32,10 +32,6 @@
 #include "x86-bsd-nat.h"
 #include "inf-ptrace.h"
 
-
-#ifdef PT_GETXSTATE_INFO
-size_t x86bsd_xsave_len;
-#endif
 
 /* Support for debug registers.  */
 

@@ -95,6 +95,8 @@ responsibility among the other maintainers.
   ix86 PE/COFF	   Dave Korn <dave.korn.cygwin@gmail.com>
   ix86 INTEL MODE  Jan Beulich <jbeulich@novell.com>
   LM32             Jon Beniston <jon@beniston.com>
+  LoongArch	   Chenghua Xu <xuchenghua@loongson.cn>
+  LoongArch	   Zhensong Liu <liuzhensong@loongson.cn>
   M32R             Doug Evans <dje@sebabeach.org>
   M68HC11 M68HC12  Stephane Carrez <Stephane.Carrez@gmail.com>
   M68HC11 M68HC12  Sean Keys <skeys@ipdatasys.com>
@@ -124,7 +126,7 @@ responsibility among the other maintainers.
   PPC vector ext   Aldy Hernandez <aldyh@redhat.com>
   RISC-V	   Palmer Dabbelt <palmer@dabbelt.com>
   RISC-V	   Andrew Waterman <andrew@sifive.com>
-  RISC-V	   Jim Wilson <jimw@sifive.com>
+  RISC-V	   Jim Wilson <jim.wilson.gcc@gmail.com>
   RISC-V	   Nelson Chu <nelson.chu@sifive.com>
   RX               Nick Clifton <nickc@redhat.com>
   S12Z		   John Darrington <john@darrington.wattle.id.au>
@@ -302,7 +304,7 @@ Having selected the branch name, create the branch as follows:
 Please do not commit any patches to a branch you did not create
 without the explicit permission of the person who created the branch.
 
-Copyright (C) 2012-2021 Free Software Foundation, Inc.
+Copyright (C) 2012-2022 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

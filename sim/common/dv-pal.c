@@ -1,6 +1,6 @@
 /* The common simulator framework for GDB, the GNU Debugger.
 
-   Copyright 2002-2021 Free Software Foundation, Inc.
+   Copyright 2002-2022 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney and Red Hat.
 
@@ -22,6 +22,12 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <stdlib.h>
+#include <string.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #include "sim-main.h"
 #include "hw-main.h"
 #include "sim-io.h"
@@ -29,12 +35,6 @@
 /* NOTE: pal is naughty and grubs around looking at things outside of
    its immediate domain */
 #include "hw-tree.h"
-
-#include <string.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#include <stdlib.h>
 
 /* DEVICE
 
@@ -181,8 +181,8 @@ typedef struct _hw_pal_console_buffer {
 
 typedef struct _hw_pal_counter {
   struct hw_event *handler;
-  signed64 start;
-  unsigned32 delta;
+  int64_t start;
+  uint32_t delta;
   int periodic_p;
 } hw_pal_counter;
 
@@ -237,10 +237,10 @@ do_counter_read (struct hw *me,
 		 hw_pal_device *pal,
 		 const char *reg,
 		 hw_pal_counter *counter,
-		 unsigned32 *word,
+		 uint32_t *word,
 		 unsigned nr_bytes)
 {
-  unsigned32 val;
+  uint32_t val;
   if (nr_bytes != 4)
     hw_abort (me, "%s - bad read size must be 4 bytes", reg);
   val = counter->delta;
@@ -253,10 +253,10 @@ do_counter_value (struct hw *me,
 		  hw_pal_device *pal,
 		  const char *reg,
 		  hw_pal_counter *counter,
-		  unsigned32 *word,
+		  uint32_t *word,
 		  unsigned nr_bytes)
 {
-  unsigned32 val;
+  uint32_t val;
   if (nr_bytes != 4)
     hw_abort (me, "%s - bad read size must be 4 bytes", reg);
   if (counter->delta != 0)
@@ -273,7 +273,7 @@ do_counter_write (struct hw *me,
 		  hw_pal_device *pal,
 		  const char *reg,
 		  hw_pal_counter *counter,
-		  const unsigned32 *word,
+		  const uint32_t *word,
 		  unsigned nr_bytes)
 {
   if (nr_bytes != 4)

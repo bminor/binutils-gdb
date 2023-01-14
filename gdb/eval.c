@@ -1,6 +1,6 @@
 /* Evaluate expressions for GDB.
 
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -36,7 +36,7 @@
 #include "regcache.h"
 #include "user-regs.h"
 #include "valprint.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "objfiles.h"
 #include "typeprint.h"
 #include <ctype.h>
@@ -281,7 +281,7 @@ binop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
     return;
 
   if (is_fixed_point_type (type1) || is_fixed_point_type (type2))
-        return;
+    return;
 
   if (type1->code () == TYPE_CODE_DECFLOAT
       || type2->code () == TYPE_CODE_DECFLOAT)
@@ -1596,12 +1596,10 @@ eval_op_ind (struct type *expect_type, struct expression *exp,
 	 There is a risk that this dereference will have side-effects
 	 in the inferior, but being able to print accurate type
 	 information seems worth the risk. */
-      if ((type->code () != TYPE_CODE_PTR
-	   && !TYPE_IS_REFERENCE (type))
+      if (!type->is_pointer_or_reference ()
 	  || !is_dynamic_type (TYPE_TARGET_TYPE (type)))
 	{
-	  if (type->code () == TYPE_CODE_PTR
-	      || TYPE_IS_REFERENCE (type)
+	  if (type->is_pointer_or_reference ()
 	      /* In C you can dereference an array to get the 1st elt.  */
 	      || type->code () == TYPE_CODE_ARRAY)
 	    return value_zero (TYPE_TARGET_TYPE (type),
@@ -2206,7 +2204,7 @@ logical_and_operation::evaluate (struct type *expect_type,
     }
   else
     {
-      int tem = value_logical_not (arg1);
+      bool tem = value_logical_not (arg1);
       if (!tem)
 	{
 	  arg2 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
@@ -2235,7 +2233,7 @@ logical_or_operation::evaluate (struct type *expect_type,
     }
   else
     {
-      int tem = value_logical_not (arg1);
+      bool tem = value_logical_not (arg1);
       if (tem)
 	{
 	  arg2 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
@@ -2300,7 +2298,7 @@ array_operation::evaluate_struct_tuple (struct value *struct_val,
 	error (_("too many initializers"));
       field_type = struct_type->field (fieldno).type ();
       if (field_type->code () == TYPE_CODE_UNION
-	  && TYPE_FIELD_NAME (struct_type, fieldno)[0] == '0')
+	  && struct_type->field (fieldno).name ()[0] == '0')
 	error (_("don't know which variant you want to set"));
 
       /* Here, struct_type is the type of the inner struct,
@@ -2323,13 +2321,13 @@ array_operation::evaluate_struct_tuple (struct value *struct_val,
 	val = value_cast (field_type, val);
 
       bitsize = TYPE_FIELD_BITSIZE (struct_type, fieldno);
-      bitpos = TYPE_FIELD_BITPOS (struct_type, fieldno);
-      addr = value_contents_writeable (struct_val) + bitpos / 8;
+      bitpos = struct_type->field (fieldno).loc_bitpos ();
+      addr = value_contents_writeable (struct_val).data () + bitpos / 8;
       if (bitsize)
 	modify_field (struct_type, addr,
 		      value_as_long (val), bitpos % 8, bitsize);
       else
-	memcpy (addr, value_contents (val),
+	memcpy (addr, value_contents (val).data (),
 		TYPE_LENGTH (value_type (val)));
 
     }
@@ -2353,7 +2351,7 @@ array_operation::evaluate (struct type *expect_type,
     {
       struct value *rec = allocate_value (expect_type);
 
-      memset (value_contents_raw (rec), '\0', TYPE_LENGTH (type));
+      memset (value_contents_raw (rec).data (), '\0', TYPE_LENGTH (type));
       return evaluate_struct_tuple (rec, exp, noside, nargs);
     }
 
@@ -2372,7 +2370,7 @@ array_operation::evaluate (struct type *expect_type,
 	  high_bound = (TYPE_LENGTH (type) / element_size) - 1;
 	}
       index = low_bound;
-      memset (value_contents_raw (array), 0, TYPE_LENGTH (expect_type));
+      memset (value_contents_raw (array).data (), 0, TYPE_LENGTH (expect_type));
       for (tem = nargs; --nargs >= 0;)
 	{
 	  struct value *element;
@@ -2384,9 +2382,9 @@ array_operation::evaluate (struct type *expect_type,
 	  if (index > high_bound)
 	    /* To avoid memory corruption.  */
 	    error (_("Too many array elements"));
-	  memcpy (value_contents_raw (array)
+	  memcpy (value_contents_raw (array).data ()
 		  + (index - low_bound) * element_size,
-		  value_contents (element),
+		  value_contents (element).data (),
 		  element_size);
 	  index++;
 	}
@@ -2397,7 +2395,7 @@ array_operation::evaluate (struct type *expect_type,
       && type->code () == TYPE_CODE_SET)
     {
       struct value *set = allocate_value (expect_type);
-      gdb_byte *valaddr = value_contents_raw (set);
+      gdb_byte *valaddr = value_contents_raw (set).data ();
       struct type *element_type = type->index_type ();
       struct type *check_type = element_type;
       LONGEST low_bound, high_bound;
@@ -2706,8 +2704,7 @@ unop_ind_base_operation::evaluate_for_sizeof (struct expression *exp,
   value *val = std::get<0> (m_storage)->evaluate (nullptr, exp,
 						  EVAL_AVOID_SIDE_EFFECTS);
   struct type *type = check_typedef (value_type (val));
-  if (type->code () != TYPE_CODE_PTR
-      && !TYPE_IS_REFERENCE (type)
+  if (!type->is_pointer_or_reference ()
       && type->code () != TYPE_CODE_ARRAY)
     error (_("Attempt to take contents of a non-pointer value."));
   type = TYPE_TARGET_TYPE (type);

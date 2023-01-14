@@ -1,5 +1,5 @@
 /* Support for the generic parts of most COFF variants, for BFD.
-   Copyright (C) 1990-2021 Free Software Foundation, Inc.
+   Copyright (C) 1990-2022 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -326,6 +326,10 @@ CODE_FRAGMENT
 .
 . {* Selector for the union above.  *}
 . bool is_sym;
+.
+. {* An extra pointer which can used by format based on COFF (like XCOFF)
+.    to provide extra information to their backend.  *}
+. void *extrap;
 .} combined_entry_type;
 .
 .
@@ -1948,7 +1952,7 @@ coff_set_alignment_hook (bfd * abfd ATTRIBUTE_UNUSED,
       if (bfd_bread (& dst, relsz, abfd) != relsz)
 	return;
 
-      coff_swap_reloc_in (abfd, &dst, &n);
+      bfd_coff_swap_reloc_in (abfd, &dst, &n);
       if (bfd_seek (abfd, oldpos, 0) != 0)
 	return;
       if (n.r_vaddr < 0x10000)
@@ -2019,7 +2023,7 @@ coff_set_alignment_hook (bfd * abfd, asection * section, void * scnhdr)
       if (bfd_bread (& dst, relsz, abfd) != relsz)
 	return;
 
-      coff_swap_reloc_in (abfd, &dst, &n);
+      bfd_coff_swap_reloc_in (abfd, &dst, &n);
       if (bfd_seek (abfd, oldpos, 0) != 0)
 	return;
       section->reloc_count = hdr->s_nreloc = n.r_vaddr - 1;
@@ -2219,6 +2223,12 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
 	    case F_ARM_5:  machine = bfd_mach_arm_XScale;  break;
 	    }
 	}
+      break;
+#endif
+#ifdef AARCH64MAGIC
+    case AARCH64MAGIC:
+      arch = bfd_arch_aarch64;
+      machine = internal_f->f_flags & F_AARCH64_ARCHITECTURE_MASK;
       break;
 #endif
 #ifdef Z80MAGIC
@@ -2774,6 +2784,12 @@ coff_set_flags (bfd * abfd,
 	    }
 	}
       TICOFF_TARGET_MACHINE_SET (flagsp, bfd_get_mach (abfd));
+      return true;
+#endif
+
+#ifdef AARCH64MAGIC
+    case bfd_arch_aarch64:
+      * magicp = AARCH64MAGIC;
       return true;
 #endif
 
@@ -3872,7 +3888,7 @@ coff_write_object_contents (bfd * abfd)
     internal_f.f_flags |= IMAGE_FILE_LARGE_ADDRESS_AWARE;
 #endif
 
-#ifndef COFF_WITH_pex64
+#if !defined(COFF_WITH_pex64) && !defined(COFF_WITH_peAArch64)
 #ifdef COFF_WITH_PE
   internal_f.f_flags |= IMAGE_FILE_32BIT_MACHINE;
 #else
@@ -3917,6 +3933,11 @@ coff_write_object_contents (bfd * abfd)
 #endif
 
 #if defined(ARM)
+#define __A_MAGIC_SET__
+    internal_a.magic = ZMAGIC;
+#endif
+
+#if defined(AARCH64)
 #define __A_MAGIC_SET__
     internal_a.magic = ZMAGIC;
 #endif
@@ -3973,8 +3994,13 @@ coff_write_object_contents (bfd * abfd)
 #endif
   }
 
+#ifdef RS6000COFF_C
+  /* XCOFF 32bit needs this to have new behaviour for n_type field.  */
+  internal_a.vstamp = 2;
+#else
   /* FIXME: Does anybody ever set this to another value?  */
   internal_a.vstamp = 0;
+#endif
 
   /* Now should write relocs, strings, syms.  */
   obj_sym_filepos (abfd) = sym_base;
@@ -4049,7 +4075,7 @@ coff_write_object_contents (bfd * abfd)
       bfd_vma toc;
       asection *loader_sec;
 
-      internal_a.vstamp = 1;
+      internal_a.vstamp = 2;
 
       internal_a.o_snentry = xcoff_data (abfd)->snentry;
       if (internal_a.o_snentry == 0)
@@ -4294,7 +4320,7 @@ buy_and_read (bfd *abfd, file_ptr where,
     }
   if (bfd_seek (abfd, where, SEEK_SET) != 0)
     return NULL;
-  return _bfd_alloc_and_read (abfd, amt, amt);
+  return _bfd_malloc_and_read (abfd, amt, amt);
 }
 
 /*
@@ -4358,23 +4384,6 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 
   BFD_ASSERT (asect->lineno == NULL);
 
-  if (asect->lineno_count > asect->size)
-    {
-      _bfd_error_handler
-	(_("%pB: warning: line number count (%#lx) exceeds section size (%#lx)"),
-	 abfd, (unsigned long) asect->lineno_count, (unsigned long) asect->size);
-      return false;
-    }
-
-  if (_bfd_mul_overflow (asect->lineno_count + 1, sizeof (alent), &amt))
-    {
-      bfd_set_error (bfd_error_file_too_big);
-      return false;
-    }
-  lineno_cache = (alent *) bfd_alloc (abfd, amt);
-  if (lineno_cache == NULL)
-    return false;
-
   native_lineno = (LINENO *) buy_and_read (abfd, asect->line_filepos,
 					   asect->lineno_count,
 					   bfd_coff_linesz (abfd));
@@ -4382,7 +4391,19 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
     {
       _bfd_error_handler
 	(_("%pB: warning: line number table read failed"), abfd);
-      bfd_release (abfd, lineno_cache);
+      return false;
+    }
+
+  if (_bfd_mul_overflow (asect->lineno_count + 1, sizeof (alent), &amt))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      free (native_lineno);
+      return false;
+    }
+  lineno_cache = (alent *) bfd_alloc (abfd, amt);
+  if (lineno_cache == NULL)
+    {
+      free (native_lineno);
       return false;
     }
 
@@ -4475,7 +4496,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 
   asect->lineno_count = cache_ptr - lineno_cache;
   memset (cache_ptr, 0, sizeof (*cache_ptr));
-  bfd_release (abfd, native_lineno);
+  free (native_lineno);
 
   /* On some systems (eg AIX5.3) the lineno table may not be sorted.  */
   if (!ordered)
@@ -4810,8 +4831,8 @@ coff_slurp_symbol_table (bfd * abfd)
 	      /* The value is actually a symbol index.  Save a pointer
 		 to the symbol instead of the index.  FIXME: This
 		 should use a union.  */
-	      src->u.syment.n_value =
-		(long) (intptr_t) (native_symbols + src->u.syment.n_value);
+	      src->u.syment.n_value
+		= (bfd_hostptr_t) (native_symbols + src->u.syment.n_value);
 	      dst->symbol.value = src->u.syment.n_value;
 	      src->fix_value = 1;
 	      break;
@@ -5075,7 +5096,7 @@ SUBSUBSECTION
 static bool
 coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
 {
-  RELOC *native_relocs;
+  bfd_byte *native_relocs;
   arelent *reloc_cache;
   arelent *cache_ptr;
   unsigned int idx;
@@ -5090,31 +5111,37 @@ coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
   if (!coff_slurp_symbol_table (abfd))
     return false;
 
-  native_relocs = (RELOC *) buy_and_read (abfd, asect->rel_filepos,
-					  asect->reloc_count,
-					  bfd_coff_relsz (abfd));
+  native_relocs = (bfd_byte *) buy_and_read (abfd, asect->rel_filepos,
+					     asect->reloc_count,
+					     bfd_coff_relsz (abfd));
+  if (native_relocs == NULL)
+    return false;
+
   if (_bfd_mul_overflow (asect->reloc_count, sizeof (arelent), &amt))
     {
       bfd_set_error (bfd_error_file_too_big);
       return false;
     }
   reloc_cache = (arelent *) bfd_alloc (abfd, amt);
-  if (reloc_cache == NULL || native_relocs == NULL)
-    return false;
+  if (reloc_cache == NULL)
+    {
+      free (native_relocs);
+      return false;
+    }
 
   for (idx = 0; idx < asect->reloc_count; idx++)
     {
       struct internal_reloc dst;
-      struct external_reloc *src;
+      void *src;
 #ifndef RELOC_PROCESSING
       asymbol *ptr;
 #endif
 
       cache_ptr = reloc_cache + idx;
-      src = native_relocs + idx;
+      src = native_relocs + idx * (size_t) bfd_coff_relsz (abfd);
 
       dst.r_offset = 0;
-      coff_swap_reloc_in (abfd, src, &dst);
+      bfd_coff_swap_reloc_in (abfd, src, &dst);
 
 #ifdef RELOC_PROCESSING
       RELOC_PROCESSING (cache_ptr, &dst, symbols, abfd, asect);
@@ -5170,10 +5197,12 @@ coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
 	    (_("%pB: illegal relocation type %d at address %#" PRIx64),
 	     abfd, dst.r_type, (uint64_t) dst.r_vaddr);
 	  bfd_set_error (bfd_error_bad_value);
+	  free (native_relocs);
 	  return false;
 	}
     }
 
+  free (native_relocs);
   asect->relocation = reloc_cache;
   return true;
 }
@@ -5441,7 +5470,7 @@ static bfd_coff_backend_data ticoff0_swap_table =
 {
   coff_SWAP_aux_in, coff_SWAP_sym_in, coff_SWAP_lineno_in,
   coff_SWAP_aux_out, coff_SWAP_sym_out,
-  coff_SWAP_lineno_out, coff_SWAP_reloc_out,
+  coff_SWAP_lineno_out, coff_swap_reloc_v0_out,
   coff_SWAP_filehdr_out, coff_SWAP_aouthdr_out,
   coff_SWAP_scnhdr_out,
   FILHSZ_V0, AOUTSZ, SCNHSZ_V01, SYMESZ, AUXESZ, RELSZ_V0, LINESZ, FILNMLEN,
@@ -5464,7 +5493,7 @@ static bfd_coff_backend_data ticoff0_swap_table =
 #endif
   32768,
   coff_SWAP_filehdr_in, coff_SWAP_aouthdr_in, coff_SWAP_scnhdr_in,
-  coff_SWAP_reloc_in, ticoff0_bad_format_hook, coff_set_arch_mach_hook,
+  coff_swap_reloc_v0_in, ticoff0_bad_format_hook, coff_set_arch_mach_hook,
   coff_mkobject_hook, styp_to_sec_flags, coff_set_alignment_hook,
   coff_slurp_symbol_table, symname_in_debug_hook, coff_pointerize_aux_hook,
   coff_print_aux, coff_reloc16_extra_cases, coff_reloc16_estimate,
@@ -5660,11 +5689,11 @@ coff_bigobj_swap_aux_in (bfd *abfd,
       if (numaux > 1)
 	{
 	  if (indx == 0)
-	    memcpy (in->x_file.x_fname, ext->File.Name,
+	    memcpy (in->x_file.x_n.x_fname, ext->File.Name,
 		    numaux * sizeof (AUXENT_BIGOBJ));
 	}
       else
-	memcpy (in->x_file.x_fname, ext->File.Name, sizeof (ext->File.Name));
+	memcpy (in->x_file.x_n.x_fname, ext->File.Name, sizeof (ext->File.Name));
       break;
 
     case C_STAT:
@@ -5709,7 +5738,7 @@ coff_bigobj_swap_aux_out (bfd * abfd,
   switch (in_class)
     {
     case C_FILE:
-      memcpy (ext->File.Name, in->x_file.x_fname, sizeof (ext->File.Name));
+      memcpy (ext->File.Name, in->x_file.x_n.x_fname, sizeof (ext->File.Name));
 
       return AUXESZ;
 

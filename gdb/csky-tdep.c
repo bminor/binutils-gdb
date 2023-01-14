@@ -1,6 +1,6 @@
 /* Target-dependent code for the CSKY architecture, for GDB.
 
-   Copyright (C) 2010-2021 Free Software Foundation, Inc.
+   Copyright (C) 2010-2022 Free Software Foundation, Inc.
 
    Contributed by C-SKY Microsystems and Mentor Graphics.
 
@@ -235,9 +235,6 @@ static const char * const csky_register_names[] =
 static const char *
 csky_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
-  if (tdesc_has_registers (gdbarch_target_desc (gdbarch)))
-    return tdesc_register_name (gdbarch, reg_nr);
-
   if (reg_nr < 0)
     return NULL;
 
@@ -332,7 +329,6 @@ csky_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int argnum;
   int argreg = CSKY_ABI_A0_REGNUM;
   int last_arg_regnum = CSKY_ABI_LAST_ARG_REGNUM;
-  int need_dummy_stack = 0;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   std::vector<stack_item> stack_items;
 
@@ -365,7 +361,7 @@ csky_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       arg_type = check_typedef (value_type (args[argnum]));
       len = TYPE_LENGTH (arg_type);
-      val = value_contents (args[argnum]);
+      val = value_contents (args[argnum]).data ();
 
       /* Copy the argument to argument registers or the dummy stack.
 	 Large arguments are split between registers and stack.
@@ -402,7 +398,6 @@ csky_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		{
 		  /* The argument should be pushed onto the dummy stack.  */
 		  stack_items.emplace_back (4, val);
-		  need_dummy_stack += 4;
 		}
 	      len -= partial_len;
 	      val += partial_len;
@@ -805,21 +800,18 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 	  else if (CSKY_32_IS_PUSH (insn))
 	    {
 	      /* Push for 32_bit.  */
-	      int offset = 0;
 	      if (CSKY_32_IS_PUSH_R29 (insn))
 		{
 		  stacksize += 4;
 		  register_offsets[29] = stacksize;
 		  if (csky_debug)
 		    print_savedreg_msg (29, register_offsets, false);
-		  offset += 4;
 		}
 	      if (CSKY_32_PUSH_LIST2 (insn))
 		{
 		  int num = CSKY_32_PUSH_LIST2 (insn);
 		  int tmp = 0;
 		  stacksize += num * 4;
-		  offset += num * 4;
 		  if (csky_debug)
 		    {
 		      fprintf_unfiltered (gdb_stdlog,
@@ -845,14 +837,12 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		  register_offsets[15] = stacksize;
 		  if (csky_debug)
 		    print_savedreg_msg (15, register_offsets, false);
-		  offset += 4;
 		}
 	      if (CSKY_32_PUSH_LIST1 (insn))
 		{
 		  int num = CSKY_32_PUSH_LIST1 (insn);
 		  int tmp = 0;
 		  stacksize += num * 4;
-		  offset += num * 4;
 		  if (csky_debug)
 		    {
 		      fprintf_unfiltered (gdb_stdlog,
@@ -2167,7 +2157,6 @@ static struct gdbarch *
 csky_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
-  struct gdbarch_tdep *tdep;
 
   /* Find a candidate among the list of pre-declared architectures.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
@@ -2176,7 +2165,7 @@ csky_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* None found, create a new architecture from the information
      provided.  */
-  tdep = XCNEW (struct gdbarch_tdep);
+  csky_gdbarch_tdep *tdep = new csky_gdbarch_tdep;
   gdbarch = gdbarch_alloc (&info, tdep);
 
   /* Target data types.  */

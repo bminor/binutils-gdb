@@ -1,4 +1,4 @@
-# Copyright 2019-2021 Free Software Foundation, Inc.
+# Copyright 2019-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ namespace eval Term {
     variable _resize_count
 
     proc _log { what } {
-	verbose -log "+++ $what"
+	verbose "+++ $what"
     }
 
     # Call BODY, then log WHAT along with the original and new cursor position.
@@ -595,6 +595,7 @@ namespace eval Term {
 	    } else {
 		::clean_restart $executable
 	    }
+	    ::gdb_test_no_output "set pagination off"
 	}
     }
 
@@ -754,11 +755,11 @@ namespace eval Term {
 
     # Check for a box at the given coordinates.
     proc check_box {test_name x y width height} {
+	dump_box $x $y $width $height
 	set why [_check_box $x $y $width $height]
 	if {$why == ""} {
 	    pass $test_name
 	} else {
-	    dump_screen
 	    fail "$test_name ($why)"
 	}
     }
@@ -766,10 +767,30 @@ namespace eval Term {
     # Check whether the text contents of the terminal match the
     # regular expression.  Note that text styling is not considered.
     proc check_contents {test_name regexp} {
+	dump_screen
 	set contents [get_all_lines]
-	if {![gdb_assert {[regexp -- $regexp $contents]} $test_name]} {
-	    dump_screen
+	gdb_assert {[regexp -- $regexp $contents]} $test_name
+    }
+
+    # Get the region of the screen described by X, Y, WIDTH,
+    # and HEIGHT, and separate the lines using SEP.
+    proc get_region { x y width height sep } {
+	variable _chars
+
+	# Grab the contents of the box, join each line together
+	# using $sep.
+	set result ""
+	for {set yy $y} {$yy < [expr {$y + $height}]} {incr yy} {
+	    if {$yy > $y} {
+		# Add the end of line sequence only if this isn't the
+		# first line.
+		append result $sep
+	    }
+	    for {set xx $x} {$xx < [expr {$x + $width}]} {incr xx} {
+		append result [lindex $_chars($xx,$yy) 0]
+	    }
 	}
+	return $result
     }
 
     # Check that the region of the screen described by X, Y, WIDTH,
@@ -779,24 +800,12 @@ namespace eval Term {
     # choice for boxes with a border).
     proc check_region_contents { test_name x y width height regexp } {
 	variable _chars
+	dump_box $x $y $width $height
 
 	# Now grab the contents of the box, join each line together
 	# with a '\r\n' sequence and match against REGEXP.
-	set result ""
-	for {set yy $y} {$yy < [expr {$y + $height}]} {incr yy} {
-	    if {$yy > $y} {
-		# Add the end of line sequence only if this isn't the
-		# first line.
-		append result "\r\n"
-	    }
-	    for {set xx $x} {$xx < [expr {$x + $width}]} {incr xx} {
-		append result [lindex $_chars($xx,$yy) 0]
-	    }
-	}
-
-	if {![gdb_assert {[regexp -- $regexp $result]} $test_name]} {
-	    dump_screen
-	}
+	set result [get_region $x $y $width $height "\r\n"]
+	gdb_assert {[regexp -- $regexp $result]} $test_name
     }
 
     # Check the contents of a box on the screen.  This is a little
@@ -808,9 +817,9 @@ namespace eval Term {
     proc check_box_contents {test_name x y width height regexp} {
 	variable _chars
 
+	dump_box $x $y $width $height
 	set why [_check_box $x $y $width $height]
 	if {$why != ""} {
-	    dump_screen
 	    fail "$test_name (box check: $why)"
 	    return
 	}
@@ -828,6 +837,20 @@ namespace eval Term {
 	for {set y 0} {$y < $_rows} {incr y} {
 	    set fmt [format %5d $y]
 	    verbose -log "$fmt [get_line $y]"
+	}
+    }
+
+    # A debugging function to dump a box from the current screen, with line
+    # numbers.
+    proc dump_box { x y width height } {
+	verbose -log "Box Dump ($width x $height) @ ($x, $y):"
+	set region [get_region $x $y $width $height "\n"]
+	set lines [split $region "\n"]
+	set nr $y
+	foreach line $lines {
+	    set fmt [format %5d $nr]
+	    verbose -log "$fmt $line"
+	    incr nr
 	}
     }
 

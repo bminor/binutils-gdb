@@ -1,4 +1,4 @@
-# Copyright 2021 Free Software Foundation, Inc.
+# Copyright 2021-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -78,17 +78,17 @@ foreach_with_prefix is_64 {false true} {
 	    }
 	}
 
-	loclists -is-64 $is_64 {
+	loclists {is-64 $is_64} {
 	    # This table is unused, but exists so that the used table is not at
 	    # the beginning of the section.
-	    table {
+	    table {} {
 		list_ {
 		    start_end 0x1000 0x2000 { DW_OP_addr 0x100000 }
 		}
 	    }
 
 	    # The lists in this table are accessed by index (DW_FORM_rnglistx).
-	    table -post-header-label cu_table {
+	    table {post-header-label cu_table} {
 		# This list is unused, but exists to offset the next ones.
 		list_ {
 		    start_end 0x1000 0x2000 { DW_OP_addr 0x100000 }
@@ -96,6 +96,9 @@ foreach_with_prefix is_64 {false true} {
 
 		# For variable foo.
 		list_ {
+		    # This should not affect the following addresses.
+		    base_address 0xffff
+
 		    # When in func1.
 		    start_end $func1_addr "$func1_addr + $func1_len" {
 			DW_OP_constu 0x123456
@@ -118,7 +121,6 @@ foreach_with_prefix is_64 {false true} {
     }
 
     if { ![runto_main] } {
-	fail "can't run to main"
 	return
     }
 

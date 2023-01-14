@@ -1,5 +1,5 @@
 /* tc-i386.c -- Assemble code for the Intel 80386
-   Copyright (C) 1989-2021 Free Software Foundation, Inc.
+   Copyright (C) 1989-2022 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -478,6 +478,7 @@ const char extra_symbol_chars[] = "*%-([{}"
 #if ((defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF))	\
      && !defined (TE_GNU)				\
      && !defined (TE_LINUX)				\
+     && !defined (TE_Haiku)				\
      && !defined (TE_FreeBSD)				\
      && !defined (TE_DragonFly)				\
      && !defined (TE_NetBSD))
@@ -512,7 +513,7 @@ const char EXP_CHARS[] = "eE";
 /* Chars that mean this number is a floating point constant
    As in 0f12.456
    or    0d1.2345e12.  */
-const char FLT_CHARS[] = "fFdDxX";
+const char FLT_CHARS[] = "fFdDxXhHbB";
 
 /* Tables for lexical analysis.  */
 static char mnemonic_chars[256];
@@ -798,6 +799,9 @@ static unsigned int no_cond_jump_promotion = 0;
 
 /* Encode SSE instructions with VEX prefix.  */
 static unsigned int sse2avx;
+
+/* Encode aligned vector move as unaligned vector move.  */
+static unsigned int use_unaligned_vector_move;
 
 /* Encode scalar AVX instructions with specific vector length.  */
 static enum
@@ -1356,6 +1360,8 @@ const pseudo_typeS md_pseudo_table[] =
   {"ffloat", float_cons, 'f'},
   {"dfloat", float_cons, 'd'},
   {"tfloat", float_cons, 'x'},
+  {"hfloat", float_cons, 'h'},
+  {"bfloat16", float_cons, 'b'},
   {"value", cons, 2},
   {"slong", signed_cons, 4},
   {"noopt", s_ignore, 0},
@@ -4070,6 +4076,32 @@ check_hle (void)
     }
 }
 
+/* Encode aligned vector move as unaligned vector move.  */
+
+static void
+encode_with_unaligned_vector_move (void)
+{
+  switch (i.tm.base_opcode)
+    {
+    case 0x28:	/* Load instructions.  */
+    case 0x29:	/* Store instructions.  */
+      /* movaps/movapd/vmovaps/vmovapd.  */
+      if (i.tm.opcode_modifier.opcodespace == SPACE_0F
+	  && i.tm.opcode_modifier.opcodeprefix <= PREFIX_0X66)
+	i.tm.base_opcode = 0x10 | (i.tm.base_opcode & 1);
+      break;
+    case 0x6f:	/* Load instructions.  */
+    case 0x7f:	/* Store instructions.  */
+      /* movdqa/vmovdqa/vmovdqa64/vmovdqa32. */
+      if (i.tm.opcode_modifier.opcodespace == SPACE_0F
+	  && i.tm.opcode_modifier.opcodeprefix == PREFIX_0X66)
+	i.tm.opcode_modifier.opcodeprefix = PREFIX_0XF3;
+      break;
+    default:
+      break;
+    }
+}
+
 /* Try the shortest encoding by shortening operand size.  */
 
 static void
@@ -4954,23 +4986,27 @@ md_assemble (char *line)
     return;
 
   if (sse_check != check_none
-      && !i.tm.opcode_modifier.noavx
-      && !i.tm.cpu_flags.bitfield.cpuavx
-      && !i.tm.cpu_flags.bitfield.cpuavx512f
-      && (i.tm.cpu_flags.bitfield.cpusse
-	  || i.tm.cpu_flags.bitfield.cpusse2
-	  || i.tm.cpu_flags.bitfield.cpusse3
-	  || i.tm.cpu_flags.bitfield.cpussse3
-	  || i.tm.cpu_flags.bitfield.cpusse4_1
-	  || i.tm.cpu_flags.bitfield.cpusse4_2
-	  || i.tm.cpu_flags.bitfield.cpupclmul
-	  || i.tm.cpu_flags.bitfield.cpuaes
-	  || i.tm.cpu_flags.bitfield.cpusha
-	  || i.tm.cpu_flags.bitfield.cpugfni))
+      /* The opcode space check isn't strictly needed; it's there only to
+	 bypass the logic below when easily possible.  */
+      && t->opcode_modifier.opcodespace >= SPACE_0F
+      && t->opcode_modifier.opcodespace <= SPACE_0F3A
+      && !i.tm.cpu_flags.bitfield.cpusse4a
+      && !is_any_vex_encoding (t))
     {
-      (sse_check == check_warning
-       ? as_warn
-       : as_bad) (_("SSE instruction `%s' is used"), i.tm.name);
+      bool simd = false;
+
+      for (j = 0; j < t->operands; ++j)
+	{
+	  if (t->operand_types[j].bitfield.class == RegMMX)
+	    break;
+	  if (t->operand_types[j].bitfield.class == RegSIMD)
+	    simd = true;
+	}
+
+      if (j >= t->operands && simd)
+	(sse_check == check_warning
+	 ? as_warn
+	 : as_bad) (_("SSE instruction `%s' is used"), i.tm.name);
     }
 
   if (i.tm.opcode_modifier.fwait)
@@ -5052,6 +5088,9 @@ md_assemble (char *line)
 
   if (optimize && !i.no_optimize && i.tm.opcode_modifier.optimize)
     optimize_encoding ();
+
+  if (use_unaligned_vector_move)
+    encode_with_unaligned_vector_move ();
 
   if (!process_suffix ())
     return;
@@ -6292,7 +6331,7 @@ check_VecOperands (const insn_template *t)
 	i.memshift = t->opcode_modifier.disp8memshift;
       else
 	{
-	  const i386_operand_type *type = NULL;
+	  const i386_operand_type *type = NULL, *fallback = NULL;
 
 	  i.memshift = 0;
 	  for (op = 0; op < i.operands; op++)
@@ -6306,6 +6345,8 @@ check_VecOperands (const insn_template *t)
 		  type = &t->operand_types[op];
 		else if (!i.types[op].bitfield.unspecified)
 		  type = &i.types[op];
+		else /* Ambiguities get resolved elsewhere.  */
+		  fallback = &t->operand_types[op];
 	      }
 	    else if (i.types[op].bitfield.class == RegSIMD
 		     && t->opcode_modifier.evex != EVEXLIG)
@@ -6318,6 +6359,8 @@ check_VecOperands (const insn_template *t)
 		  i.memshift = 4;
 	      }
 
+	  if (!type && !i.memshift)
+	    type = fallback;
 	  if (type)
 	    {
 	      if (type->bitfield.zmmword)
@@ -6604,11 +6647,25 @@ match_template (char mnem_suffix)
 	    }
 	}
 
-      /* Force 0x8b encoding for "mov foo@GOT, %eax".  */
-      if (i.reloc[0] == BFD_RELOC_386_GOT32
-	  && t->base_opcode == 0xa0
-	  && t->opcode_modifier.opcodespace == SPACE_BASE)
-	continue;
+      switch (i.reloc[0])
+	{
+	case BFD_RELOC_386_GOT32:
+	  /* Force 0x8b encoding for "mov foo@GOT, %eax".  */
+	  if (t->base_opcode == 0xa0
+	      && t->opcode_modifier.opcodespace == SPACE_BASE)
+	    continue;
+	  break;
+	case BFD_RELOC_386_TLS_GOTIE:
+	case BFD_RELOC_386_TLS_LE_32:
+	case BFD_RELOC_X86_64_GOTTPOFF:
+	case BFD_RELOC_X86_64_TLSLD:
+	  /* Don't allow KMOV in TLS code sequences.  */
+	  if (t->opcode_modifier.vex)
+	    continue;
+	  break;
+	default:
+	  break;
+	}
 
       /* We check register size if needed.  */
       if (t->opcode_modifier.checkregsize)
@@ -8804,6 +8861,8 @@ output_branch (void)
       off = 0;
     }
 
+  frag_now->tc_frag_data.code64 = flag_code == CODE_64BIT;
+
   /* 1 possible extra opcode + 4 byte displacement go in var part.
      Pass reloc in fr_var.  */
   frag_var (rs_machine_dependent, 5, i.reloc[0], subtype, sym, off, p);
@@ -8932,8 +8991,8 @@ output_jump (void)
     }
 
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-  if (size == 4
-      && jump_reloc == NO_RELOC
+  if (flag_code == CODE_64BIT && size == 4
+      && jump_reloc == NO_RELOC && i.op[0].disps->X_add_number == 0
       && need_plt32_p (i.op[0].disps->X_add_symbol))
     jump_reloc = BFD_RELOC_X86_64_PLT32;
 #endif
@@ -9583,7 +9642,12 @@ output_insn (void)
 	{
 	  /* Encode lfence, mfence, and sfence as
 	     f0 83 04 24 00   lock addl $0x0, (%{re}sp).  */
-	  if (now_seg != absolute_section)
+	  if (flag_code == CODE_16BIT)
+	    as_bad (_("Cannot convert `%s' in 16-bit mode"), i.tm.name);
+	  else if (omit_lock_prefix)
+	    as_bad (_("Cannot convert `%s' with `-momit-lock-prefix=yes' in effect"),
+		    i.tm.name);
+	  else if (now_seg != absolute_section)
 	    {
 	      offsetT val = 0x240483f0ULL;
 
@@ -12236,7 +12300,8 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
       else if (size == 2)
 	reloc_type = BFD_RELOC_16_PCREL;
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-      else if (need_plt32_p (fragP->fr_symbol))
+      else if (fragP->tc_frag_data.code64 && fragP->fr_offset == 0
+	       && need_plt32_p (fragP->fr_symbol))
 	reloc_type = BFD_RELOC_X86_64_PLT32;
 #endif
       else
@@ -13057,6 +13122,7 @@ const char *md_shortopts = "qnO::";
 #define OPTION_MLFENCE_AFTER_LOAD (OPTION_MD_BASE + 31)
 #define OPTION_MLFENCE_BEFORE_INDIRECT_BRANCH (OPTION_MD_BASE + 32)
 #define OPTION_MLFENCE_BEFORE_RET (OPTION_MD_BASE + 33)
+#define OPTION_MUSE_UNALIGNED_VECTOR_MOVE (OPTION_MD_BASE + 34)
 
 struct option md_longopts[] =
 {
@@ -13078,6 +13144,7 @@ struct option md_longopts[] =
   {"mindex-reg", no_argument, NULL, OPTION_MINDEX_REG},
   {"mnaked-reg", no_argument, NULL, OPTION_MNAKED_REG},
   {"msse2avx", no_argument, NULL, OPTION_MSSE2AVX},
+  {"muse-unaligned-vector-move", no_argument, NULL, OPTION_MUSE_UNALIGNED_VECTOR_MOVE},
   {"msse-check", required_argument, NULL, OPTION_MSSE_CHECK},
   {"moperand-check", required_argument, NULL, OPTION_MOPERAND_CHECK},
   {"mavxscalar", required_argument, NULL, OPTION_MAVXSCALAR},
@@ -13376,6 +13443,10 @@ md_parse_option (int c, const char *arg)
 
     case OPTION_MSSE2AVX:
       sse2avx = 1;
+      break;
+
+    case OPTION_MUSE_UNALIGNED_VECTOR_MOVE:
+      use_unaligned_vector_move = 1;
       break;
 
     case OPTION_MSSE_CHECK:
@@ -13792,6 +13863,9 @@ md_show_usage (FILE *stream)
   show_arch (stream, 0, 0);
   fprintf (stream, _("\
   -msse2avx               encode SSE instructions with VEX prefix\n"));
+  fprintf (stream, _("\
+  -muse-unaligned-vector-move\n\
+                          encode aligned vector move as unaligned vector move\n"));
   fprintf (stream, _("\
   -msse-check=[none|error|warning] (default: warning)\n\
                           check SSE instructions\n"));

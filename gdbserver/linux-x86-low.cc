@@ -1,6 +1,6 @@
 /* GNU/Linux/x86-64 specific low level interface, for the remote server
    for GDB.
-   Copyright (C) 2002-2021 Free Software Foundation, Inc.
+   Copyright (C) 2002-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -991,7 +991,7 @@ x86_linux_read_description (void)
 void
 x86_target::update_xmltarget ()
 {
-  struct thread_info *saved_thread = current_thread;
+  scoped_restore_current_thread restore_thread;
 
   /* Before changing the register cache's internal layout, flush the
      contents of the current valid caches back to the threads, and
@@ -1002,12 +1002,10 @@ x86_target::update_xmltarget ()
     int pid = proc->pid;
 
     /* Look up any thread of this process.  */
-    current_thread = find_any_thread_of_pid (pid);
+    switch_to_thread (find_any_thread_of_pid (pid));
 
     low_arch_setup ();
   });
-
-  current_thread = saved_thread;
 }
 
 /* Process qSupported query, "xmlRegisters=".  Update the buffer size for
@@ -1630,9 +1628,8 @@ add_insns (unsigned char *start, int len)
 {
   CORE_ADDR buildaddr = current_insn_ptr;
 
-  if (debug_threads)
-    debug_printf ("Adding %d bytes of insn at %s\n",
-		  len, paddress (buildaddr));
+  threads_debug_printf ("Adding %d bytes of insn at %s",
+			len, paddress (buildaddr));
 
   append_insns (&buildaddr, len, start);
   current_insn_ptr = buildaddr;

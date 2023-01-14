@@ -1,6 +1,6 @@
 /* Blackfin Core Event Controller (CEC) model.
 
-   Copyright (C) 2010-2021 Free Software Foundation, Inc.
+   Copyright (C) 2010-2022 Free Software Foundation, Inc.
    Contributed by Analog Devices, Inc.
 
    This file is part of simulators.
@@ -131,7 +131,7 @@ bfin_cec_io_read_buffer (struct hw *me, void *dest,
     return 0;
 
   mmr_off = addr - cec->base;
-  valuep = (void *)((unsigned long)cec + mmr_base() + mmr_off);
+  valuep = (void *)((uintptr_t)cec + mmr_base() + mmr_off);
 
   HW_TRACE_READ ();
 

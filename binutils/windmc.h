@@ -1,5 +1,5 @@
 /* windmc.h -- header file for windmc program.
-   Copyright (C) 2007-2021 Free Software Foundation, Inc.
+   Copyright (C) 2007-2022 Free Software Foundation, Inc.
    Written by Kai Tietz, Onevision.
 
    This file is part of GNU Binutils.
@@ -80,7 +80,7 @@ mc_node_lang *mc_add_node_lang (mc_node *, const mc_keyword *, rc_uint_type);
 mc_node *mc_add_node (void);
 
 /* Standard yacc/flex stuff.  */
-int yyerror (const char *, ...);
+void yyerror (const char *);
 int yylex (void);
 int yyparse (void);
 

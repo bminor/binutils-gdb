@@ -1,5 +1,5 @@
 /* Annotation routines for GDB.
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -448,12 +448,12 @@ annotate_source_line (struct symtab *s, int line, int mid_statement,
 	return false;
 
       annotate_source (s->fullname, line, (int) (*offsets)[line - 1],
-		       mid_statement, SYMTAB_OBJFILE (s)->arch (),
+		       mid_statement, s->objfile ()->arch (),
 		       pc);
 
       /* Update the current symtab and line.  */
       symtab_and_line sal;
-      sal.pspace = SYMTAB_PSPACE (s);
+      sal.pspace = s->pspace ();
       sal.symtab = s;
       sal.line = line;
       set_current_source_symtab_and_line (sal);

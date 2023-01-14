@@ -1,6 +1,6 @@
 /* Python interface to inferiors.
 
-   Copyright (C) 2009-2021 Free Software Foundation, Inc.
+   Copyright (C) 2009-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -62,18 +62,6 @@ extern PyTypeObject inferior_object_type
 
 static const struct inferior_data *infpy_inf_data_key;
 
-struct membuf_object {
-  PyObject_HEAD
-  void *buffer;
-
-  /* These are kept just for mbpy_str.  */
-  CORE_ADDR addr;
-  CORE_ADDR length;
-};
-
-extern PyTypeObject membuf_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("membuf_object");
-
 /* Require that INFERIOR be a valid inferior ID.  */
 #define INFPY_REQUIRE_VALID(Inferior)				\
   do {								\
@@ -86,7 +74,7 @@ extern PyTypeObject membuf_object_type
   } while (0)
 
 static void
-python_on_normal_stop (struct bpstats *bs, int print_frame)
+python_on_normal_stop (struct bpstat *bs, int print_frame)
 {
   enum gdb_signal stop_signal;
 
@@ -98,7 +86,7 @@ python_on_normal_stop (struct bpstats *bs, int print_frame)
 
   stop_signal = inferior_thread ()->stop_signal ();
 
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
 
   if (emit_stop_event (bs, stop_signal) < 0)
     gdbpy_print_stack ();
@@ -110,7 +98,7 @@ python_on_resume (ptid_t ptid)
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (target_gdbarch (), current_language);
+  gdbpy_enter enter_py (target_gdbarch ());
 
   if (emit_continue_event (ptid) < 0)
     gdbpy_print_stack ();
@@ -122,7 +110,7 @@ python_on_resume (ptid_t ptid)
 static void
 python_on_inferior_call_pre (ptid_t thread, CORE_ADDR address)
 {
-  gdbpy_enter enter_py (target_gdbarch (), current_language);
+  gdbpy_enter enter_py (target_gdbarch ());
 
   if (emit_inferior_call_event (INFERIOR_CALL_PRE, thread, address) < 0)
     gdbpy_print_stack ();
@@ -134,7 +122,7 @@ python_on_inferior_call_pre (ptid_t thread, CORE_ADDR address)
 static void
 python_on_inferior_call_post (ptid_t thread, CORE_ADDR address)
 {
-  gdbpy_enter enter_py (target_gdbarch (), current_language);
+  gdbpy_enter enter_py (target_gdbarch ());
 
   if (emit_inferior_call_event (INFERIOR_CALL_POST, thread, address) < 0)
     gdbpy_print_stack ();
@@ -147,7 +135,7 @@ python_on_inferior_call_post (ptid_t thread, CORE_ADDR address)
 static void
 python_on_memory_change (struct inferior *inferior, CORE_ADDR addr, ssize_t len, const bfd_byte *data)
 {
-  gdbpy_enter enter_py (target_gdbarch (), current_language);
+  gdbpy_enter enter_py (target_gdbarch ());
 
   if (emit_memory_changed_event (addr, len) < 0)
     gdbpy_print_stack ();
@@ -160,7 +148,7 @@ python_on_memory_change (struct inferior *inferior, CORE_ADDR addr, ssize_t len,
 static void
 python_on_register_change (struct frame_info *frame, int regnum)
 {
-  gdbpy_enter enter_py (target_gdbarch (), current_language);
+  gdbpy_enter enter_py (target_gdbarch ());
 
   if (emit_register_changed_event (frame, regnum) < 0)
     gdbpy_print_stack ();
@@ -174,7 +162,7 @@ python_inferior_exit (struct inferior *inf)
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (target_gdbarch (), current_language);
+  gdbpy_enter enter_py (target_gdbarch ());
 
   if (inf->has_exit_code)
     exit_code = &inf->exit_code;
@@ -195,8 +183,7 @@ python_new_objfile (struct objfile *objfile)
 
   gdbpy_enter enter_py (objfile != NULL
 			? objfile->arch ()
-			: target_gdbarch (),
-			current_language);
+			: target_gdbarch ());
 
   if (objfile == NULL)
     {
@@ -249,7 +236,7 @@ python_new_inferior (struct inferior *inf)
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (python_gdbarch, python_language);
+  gdbpy_enter enter_py;
 
   if (evregpy_no_listeners_p (gdb_py_events.new_inferior))
     return;
@@ -277,7 +264,7 @@ python_inferior_deleted (struct inferior *inf)
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (python_gdbarch, python_language);
+  gdbpy_enter enter_py;
 
   if (evregpy_no_listeners_p (gdb_py_events.inferior_deleted))
     return;
@@ -324,7 +311,7 @@ add_thread_object (struct thread_info *tp)
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (python_gdbarch, python_language);
+  gdbpy_enter enter_py;
 
   gdbpy_ref<thread_object> thread_obj = create_thread_object (tp);
   if (thread_obj == NULL)
@@ -345,7 +332,8 @@ add_thread_object (struct thread_info *tp)
     return;
 
   gdbpy_ref<> event = create_thread_event_object (&new_thread_event_object_type,
-						  (PyObject *) inf_obj);
+						  (PyObject *)
+						  entry->thread_obj.get ());
   if (event == NULL
       || evpy_emit_event (event.get (), gdb_py_events.new_thread) < 0)
     gdbpy_print_stack ();
@@ -359,7 +347,7 @@ delete_thread_object (struct thread_info *tp, int ignore)
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (python_gdbarch, python_language);
+  gdbpy_enter enter_py;
 
   gdbpy_ref<inferior_object> inf_obj = inferior_to_inferior_object (tp->inf);
   if (inf_obj == NULL)
@@ -425,6 +413,20 @@ infpy_get_num (PyObject *self, void *closure)
   INFPY_REQUIRE_VALID (inf);
 
   return gdb_py_object_from_longest (inf->inferior->num).release ();
+}
+
+/* Return the gdb.TargetConnection object for this inferior, or None if a
+   connection does not exist.  */
+
+static PyObject *
+infpy_get_connection (PyObject *self, void *closure)
+{
+  inferior_object *inf = (inferior_object *) self;
+
+  INFPY_REQUIRE_VALID (inf);
+
+  process_stratum_target *target = inf->inferior->process_target ();
+  return target_to_connection_object (target).release ();
 }
 
 /* Return the connection number of the given inferior, or None if a
@@ -514,7 +516,7 @@ infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
 {
   CORE_ADDR addr, length;
   gdb::unique_xmalloc_ptr<gdb_byte> buffer;
-  PyObject *addr_obj, *length_obj, *result;
+  PyObject *addr_obj, *length_obj;
   static const char *keywords[] = { "address", "length", NULL };
 
   if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "OO", keywords,
@@ -536,23 +538,8 @@ infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  gdbpy_ref<membuf_object> membuf_obj (PyObject_New (membuf_object,
-						     &membuf_object_type));
-  if (membuf_obj == NULL)
-    return NULL;
 
-  membuf_obj->buffer = buffer.release ();
-  membuf_obj->addr = addr;
-  membuf_obj->length = length;
-
-#ifdef IS_PY3K
-  result = PyMemoryView_FromObject ((PyObject *) membuf_obj.get ());
-#else
-  result = PyBuffer_FromReadWriteObject ((PyObject *) membuf_obj.get (), 0,
-					 Py_END_OF_BUFFER);
-#endif
-
-  return result;
+  return gdbpy_buffer_to_membuf (std::move (buffer), addr, length);
 }
 
 /* Implementation of Inferior.write_memory (address, buffer [, length]).
@@ -601,93 +588,6 @@ infpy_write_memory (PyObject *self, PyObject *args, PyObject *kw)
 
   Py_RETURN_NONE;
 }
-
-/* Destructor of Membuf objects.  */
-static void
-mbpy_dealloc (PyObject *self)
-{
-  xfree (((membuf_object *) self)->buffer);
-  Py_TYPE (self)->tp_free (self);
-}
-
-/* Return a description of the Membuf object.  */
-static PyObject *
-mbpy_str (PyObject *self)
-{
-  membuf_object *membuf_obj = (membuf_object *) self;
-
-  return PyString_FromFormat (_("Memory buffer for address %s, \
-which is %s bytes long."),
-			      paddress (python_gdbarch, membuf_obj->addr),
-			      pulongest (membuf_obj->length));
-}
-
-#ifdef IS_PY3K
-
-static int
-get_buffer (PyObject *self, Py_buffer *buf, int flags)
-{
-  membuf_object *membuf_obj = (membuf_object *) self;
-  int ret;
-
-  ret = PyBuffer_FillInfo (buf, self, membuf_obj->buffer,
-			   membuf_obj->length, 0,
-			   PyBUF_CONTIG);
-
-  /* Despite the documentation saying this field is a "const char *",
-     in Python 3.4 at least, it's really a "char *".  */
-  buf->format = (char *) "c";
-
-  return ret;
-}
-
-#else
-
-static Py_ssize_t
-get_read_buffer (PyObject *self, Py_ssize_t segment, void **ptrptr)
-{
-  membuf_object *membuf_obj = (membuf_object *) self;
-
-  if (segment)
-    {
-      PyErr_SetString (PyExc_SystemError,
-		       _("The memory buffer supports only one segment."));
-      return -1;
-    }
-
-  *ptrptr = membuf_obj->buffer;
-
-  return membuf_obj->length;
-}
-
-static Py_ssize_t
-get_write_buffer (PyObject *self, Py_ssize_t segment, void **ptrptr)
-{
-  return get_read_buffer (self, segment, ptrptr);
-}
-
-static Py_ssize_t
-get_seg_count (PyObject *self, Py_ssize_t *lenp)
-{
-  if (lenp)
-    *lenp = ((membuf_object *) self)->length;
-
-  return 1;
-}
-
-static Py_ssize_t
-get_char_buffer (PyObject *self, Py_ssize_t segment, char **ptrptr)
-{
-  void *ptr = NULL;
-  Py_ssize_t ret;
-
-  ret = get_read_buffer (self, segment, &ptr);
-  *ptrptr = (char *) ptr;
-
-  return ret;
-}
-
-#endif	/* IS_PY3K */
 
 /* Implementation of
    gdb.search_memory (address, length, pattern).  ADDRESS is the
@@ -803,7 +703,7 @@ infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
   else if (gdbpy_is_value_object (handle_obj))
     {
       struct value *val = value_object_to_value (handle_obj);
-      bytes = value_contents_all (val);
+      bytes = value_contents_all (val).data ();
       bytes_len = TYPE_LENGTH (value_type (val));
     }
   else
@@ -864,12 +764,20 @@ static void
 infpy_dealloc (PyObject *obj)
 {
   inferior_object *inf_obj = (inferior_object *) obj;
-  struct inferior *inf = inf_obj->inferior;
 
-  if (! inf)
-    return;
+  /* The inferior itself holds a reference to this Python object, which
+     will keep the reference count of this object above zero until GDB
+     deletes the inferior and py_free_inferior is called.
 
-  set_inferior_data (inf, infpy_inf_data_key, NULL);
+     Once py_free_inferior has been called then the link between this
+     Python object and the inferior is set to nullptr, and then the
+     reference count on this Python object is decremented.
+
+     The result of all this is that the link between this Python object and
+     the inferior should always have been set to nullptr before this
+     function is called.  */
+  gdb_assert (inf_obj->inferior == nullptr);
+
   Py_TYPE (obj)->tp_free (obj);
 }
 
@@ -883,7 +791,7 @@ py_free_inferior (struct inferior *inf, void *datum)
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (python_gdbarch, python_language);
+  gdbpy_enter enter_py;
   gdbpy_ref<inferior_object> inf_obj ((inferior_object *) datum);
 
   inf_obj->inferior = NULL;
@@ -949,17 +857,14 @@ gdbpy_initialize_inferior (void)
   gdb::observers::inferior_removed.attach (python_inferior_deleted,
 					   "py-inferior");
 
-  membuf_object_type.tp_new = PyType_GenericNew;
-  if (PyType_Ready (&membuf_object_type) < 0)
-    return -1;
-
-  return gdb_pymodule_addobject (gdb_module, "Membuf",
-				 (PyObject *) &membuf_object_type);
+  return 0;
 }
 
 static gdb_PyGetSetDef inferior_object_getset[] =
 {
   { "num", infpy_get_num, NULL, "ID of inferior, as assigned by GDB.", NULL },
+  { "connection", infpy_get_connection, NULL,
+    "The gdb.TargetConnection for this inferior.", NULL },
   { "connection_num", infpy_get_connection_num, NULL,
     "ID of inferior's connection, as assigned by GDB.", NULL },
   { "pid", infpy_get_pid, NULL, "PID of inferior, as assigned by the OS.",
@@ -1026,7 +931,7 @@ PyTypeObject inferior_object_type =
   0,				  /* tp_getattro */
   0,				  /* tp_setattro */
   0,				  /* tp_as_buffer */
-  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_ITER,  /* tp_flags */
+  Py_TPFLAGS_DEFAULT,		  /* tp_flags */
   "GDB inferior object",	  /* tp_doc */
   0,				  /* tp_traverse */
   0,				  /* tp_clear */
@@ -1044,61 +949,4 @@ PyTypeObject inferior_object_type =
   0,				  /* tp_dictoffset */
   0,				  /* tp_init */
   0				  /* tp_alloc */
-};
-
-#ifdef IS_PY3K
-
-static PyBufferProcs buffer_procs =
-{
-  get_buffer
-};
-
-#else
-
-static PyBufferProcs buffer_procs = {
-  get_read_buffer,
-  get_write_buffer,
-  get_seg_count,
-  get_char_buffer
-};
-#endif	/* IS_PY3K */
-
-PyTypeObject membuf_object_type = {
-  PyVarObject_HEAD_INIT (NULL, 0)
-  "gdb.Membuf",			  /*tp_name*/
-  sizeof (membuf_object),	  /*tp_basicsize*/
-  0,				  /*tp_itemsize*/
-  mbpy_dealloc,			  /*tp_dealloc*/
-  0,				  /*tp_print*/
-  0,				  /*tp_getattr*/
-  0,				  /*tp_setattr*/
-  0,				  /*tp_compare*/
-  0,				  /*tp_repr*/
-  0,				  /*tp_as_number*/
-  0,				  /*tp_as_sequence*/
-  0,				  /*tp_as_mapping*/
-  0,				  /*tp_hash */
-  0,				  /*tp_call*/
-  mbpy_str,			  /*tp_str*/
-  0,				  /*tp_getattro*/
-  0,				  /*tp_setattro*/
-  &buffer_procs,		  /*tp_as_buffer*/
-  Py_TPFLAGS_DEFAULT,		  /*tp_flags*/
-  "GDB memory buffer object", 	  /*tp_doc*/
-  0,				  /* tp_traverse */
-  0,				  /* tp_clear */
-  0,				  /* tp_richcompare */
-  0,				  /* tp_weaklistoffset */
-  0,				  /* tp_iter */
-  0,				  /* tp_iternext */
-  0,				  /* tp_methods */
-  0,				  /* tp_members */
-  0,				  /* tp_getset */
-  0,				  /* tp_base */
-  0,				  /* tp_dict */
-  0,				  /* tp_descr_get */
-  0,				  /* tp_descr_set */
-  0,				  /* tp_dictoffset */
-  0,				  /* tp_init */
-  0,				  /* tp_alloc */
 };

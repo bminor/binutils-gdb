@@ -8,10 +8,8 @@ main (int argc, char *argv[])
   ctf_dict_t *fp;
   ctf_archive_t *ctf;
   ctf_dict_t *dyn;
-  ctf_next_t *i = NULL;
   ctf_id_t type;
   ctf_id_t newtype;
-  const char *memb;
   ctf_membinfo_t mi;
   const char *membs[] = { "bar", "baz", "foo", NULL };
   const char **walk;

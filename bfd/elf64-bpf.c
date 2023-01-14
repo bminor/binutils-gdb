@@ -1,5 +1,5 @@
 /* Linux bpf specific support for 64-bit ELF
-   Copyright (C) 2019-2021 Free Software Foundation, Inc.
+   Copyright (C) 2019-2022 Free Software Foundation, Inc.
    Contributed by Oracle Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -608,15 +608,16 @@ bpf_elf_generic_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   bfd_byte *where;
 
   /* Sanity check that the address is in range.  */
+  bfd_size_type end = bfd_get_section_limit_octets (abfd, input_section);
+  bfd_size_type reloc_size;
   if (reloc_entry->howto->type == R_BPF_INSN_64)
-    {
-      bfd_size_type end = bfd_get_section_limit_octets (abfd, input_section);
-      if (reloc_entry->address > end
-	  || end - reloc_entry->address < 16)
-	return bfd_reloc_outofrange;
-    }
-  else if (!bfd_reloc_offset_in_range (reloc_entry->howto, abfd, input_section,
-				       reloc_entry->address))
+    reloc_size = 16;
+  else
+    reloc_size = (reloc_entry->howto->bitsize
+		  + reloc_entry->howto->bitpos) / 8;
+
+  if (reloc_entry->address > end
+      || end - reloc_entry->address < reloc_size)
     return bfd_reloc_outofrange;
 
   /*  Get the symbol value.  */

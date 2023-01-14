@@ -1,5 +1,5 @@
 /* AArch64-specific support for NN-bit ELF.
-   Copyright (C) 2009-2021 Free Software Foundation, Inc.
+   Copyright (C) 2009-2022 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -9762,11 +9762,13 @@ get_plt_type (bfd *abfd)
   aarch64_plt_type ret = PLT_NORMAL;
   bfd_byte *contents, *extdyn, *extdynend;
   asection *sec = bfd_get_section_by_name (abfd, ".dynamic");
-  if (!sec || !bfd_malloc_and_get_section (abfd, sec, &contents))
+  if (!sec
+      || sec->size < sizeof (ElfNN_External_Dyn)
+      || !bfd_malloc_and_get_section (abfd, sec, &contents))
     return ret;
   extdyn = contents;
-  extdynend = contents + sec->size;
-  for (; extdyn < extdynend; extdyn += sizeof (ElfNN_External_Dyn))
+  extdynend = contents + sec->size - sizeof (ElfNN_External_Dyn);
+  for (; extdyn <= extdynend; extdyn += sizeof (ElfNN_External_Dyn))
     {
       Elf_Internal_Dyn dyn;
       bfd_elfNN_swap_dyn_in (abfd, extdyn, &dyn);
@@ -9963,7 +9965,6 @@ const struct elf_size_info elfNN_aarch64_size_info =
 #define ELF_ARCH			bfd_arch_aarch64
 #define ELF_MACHINE_CODE		EM_AARCH64
 #define ELF_MAXPAGESIZE			0x10000
-#define ELF_MINPAGESIZE			0x1000
 #define ELF_COMMONPAGESIZE		0x1000
 
 #define bfd_elfNN_close_and_cleanup		\

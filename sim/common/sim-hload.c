@@ -1,5 +1,5 @@
 /* Generic load for hardware simulator models.
-   Copyright (C) 1997-2021 Free Software Foundation, Inc.
+   Copyright (C) 1997-2022 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -20,8 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This must come before any other includes.  */
 #include "defs.h"
 
-#include "sim-main.h"
 #include "bfd.h"
+
+#include "sim-main.h"
 #include "sim-utils.h"
 #include "sim-assert.h"
 

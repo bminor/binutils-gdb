@@ -732,6 +732,9 @@ GNULIB_NANOSLEEP
 GNULIB_LOCALTIME
 GNULIB_MKTIME
 GNULIB_CTIME
+NEXT_AS_FIRST_DIRECTIVE_SYS_WAIT_H
+NEXT_SYS_WAIT_H
+GNULIB_WAITPID
 HAVE_SYS_UIO_H
 NEXT_AS_FIRST_DIRECTIVE_SYS_UIO_H
 NEXT_SYS_UIO_H
@@ -976,28 +979,6 @@ GL_GENERATE_LIMITS_H_TRUE
 LIMITS_H
 NEXT_AS_FIRST_DIRECTIVE_LIMITS_H
 NEXT_LIMITS_H
-HAVE_SYS_SOCKET_H
-NEXT_AS_FIRST_DIRECTIVE_SYS_SOCKET_H
-NEXT_SYS_SOCKET_H
-HAVE_ACCEPT4
-HAVE_SA_FAMILY_T
-HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY
-HAVE_STRUCT_SOCKADDR_STORAGE
-GNULIB_ACCEPT4
-GNULIB_SHUTDOWN
-GNULIB_SETSOCKOPT
-GNULIB_SENDTO
-GNULIB_RECVFROM
-GNULIB_SEND
-GNULIB_RECV
-GNULIB_LISTEN
-GNULIB_GETSOCKOPT
-GNULIB_GETSOCKNAME
-GNULIB_GETPEERNAME
-GNULIB_BIND
-GNULIB_ACCEPT
-GNULIB_CONNECT
-GNULIB_SOCKET
 INET_NTOP_LIB
 LIB_HARD_LOCALE
 LIB_SETLOCALE_NULL
@@ -1537,184 +1518,8 @@ GNULIB_CLOSEDIR
 GNULIB_REWINDDIR
 GNULIB_READDIR
 GNULIB_OPENDIR
-HAVE_WINSOCK2_H
 HAVE_MSVC_INVALID_PARAMETER_HANDLER
 LIB_CLOCK_GETTIME
-UNISTD_H_HAVE_WINSOCK2_H_AND_USE_SOCKETS
-UNISTD_H_HAVE_WINSOCK2_H
-UNISTD_H_HAVE_SYS_RANDOM_H
-REPLACE_WRITE
-REPLACE_USLEEP
-REPLACE_UNLINKAT
-REPLACE_UNLINK
-REPLACE_TTYNAME_R
-REPLACE_TRUNCATE
-REPLACE_SYMLINKAT
-REPLACE_SYMLINK
-REPLACE_SLEEP
-REPLACE_RMDIR
-REPLACE_READLINKAT
-REPLACE_READLINK
-REPLACE_READ
-REPLACE_PWRITE
-REPLACE_PREAD
-REPLACE_LSEEK
-REPLACE_LINKAT
-REPLACE_LINK
-REPLACE_LCHOWN
-REPLACE_ISATTY
-REPLACE_GETPASS
-REPLACE_GETPAGESIZE
-REPLACE_GETGROUPS
-REPLACE_GETLOGIN_R
-REPLACE_GETDTABLESIZE
-REPLACE_GETDOMAINNAME
-REPLACE_GETCWD
-REPLACE_FTRUNCATE
-REPLACE_FCHOWNAT
-REPLACE_FACCESSAT
-REPLACE_EXECVPE
-REPLACE_EXECVP
-REPLACE_EXECVE
-REPLACE_EXECV
-REPLACE_EXECLP
-REPLACE_EXECLE
-REPLACE_EXECL
-REPLACE_DUP2
-REPLACE_DUP
-REPLACE_CLOSE
-REPLACE_CHOWN
-REPLACE_ACCESS
-HAVE_SYS_PARAM_H
-HAVE_OS_H
-HAVE_DECL_TTYNAME_R
-HAVE_DECL_TRUNCATE
-HAVE_DECL_SETHOSTNAME
-HAVE_DECL_GETUSERSHELL
-HAVE_DECL_GETPAGESIZE
-HAVE_DECL_GETLOGIN_R
-HAVE_DECL_GETLOGIN
-HAVE_DECL_GETDOMAINNAME
-HAVE_DECL_FDATASYNC
-HAVE_DECL_FCHDIR
-HAVE_DECL_EXECVPE
-HAVE_DECL_ENVIRON
-HAVE_USLEEP
-HAVE_UNLINKAT
-HAVE_SYMLINKAT
-HAVE_SYMLINK
-HAVE_SLEEP
-HAVE_SETHOSTNAME
-HAVE_READLINKAT
-HAVE_READLINK
-HAVE_PWRITE
-HAVE_PREAD
-HAVE_PIPE2
-HAVE_PIPE
-HAVE_LINKAT
-HAVE_LINK
-HAVE_LCHOWN
-HAVE_GROUP_MEMBER
-HAVE_GETPASS
-HAVE_GETPAGESIZE
-HAVE_GETLOGIN
-HAVE_GETHOSTNAME
-HAVE_GETGROUPS
-HAVE_GETENTROPY
-HAVE_GETDTABLESIZE
-HAVE_FTRUNCATE
-HAVE_FSYNC
-HAVE_FDATASYNC
-HAVE_FCHOWNAT
-HAVE_FCHDIR
-HAVE_FACCESSAT
-HAVE_EXECVPE
-HAVE_EUIDACCESS
-HAVE_DUP3
-HAVE_COPY_FILE_RANGE
-HAVE_CHOWN
-GNULIB_MDA_WRITE
-GNULIB_MDA_UNLINK
-GNULIB_MDA_SWAB
-GNULIB_MDA_RMDIR
-GNULIB_MDA_READ
-GNULIB_MDA_LSEEK
-GNULIB_MDA_ISATTY
-GNULIB_MDA_GETPID
-GNULIB_MDA_GETCWD
-GNULIB_MDA_EXECVPE
-GNULIB_MDA_EXECVP
-GNULIB_MDA_EXECVE
-GNULIB_MDA_EXECV
-GNULIB_MDA_EXECLP
-GNULIB_MDA_EXECLE
-GNULIB_MDA_EXECL
-GNULIB_MDA_DUP2
-GNULIB_MDA_DUP
-GNULIB_MDA_CLOSE
-GNULIB_MDA_CHDIR
-GNULIB_MDA_ACCESS
-GNULIB_WRITE
-GNULIB_USLEEP
-GNULIB_UNLINKAT
-GNULIB_UNLINK
-GNULIB_UNISTD_H_SIGPIPE
-GNULIB_UNISTD_H_NONBLOCKING
-GNULIB_TTYNAME_R
-GNULIB_TRUNCATE
-GNULIB_SYMLINKAT
-GNULIB_SYMLINK
-GNULIB_SLEEP
-GNULIB_SETHOSTNAME
-GNULIB_RMDIR
-GNULIB_READLINKAT
-GNULIB_READLINK
-GNULIB_READ
-GNULIB_PWRITE
-GNULIB_PREAD
-GNULIB_PIPE2
-GNULIB_PIPE
-GNULIB_LSEEK
-GNULIB_LINKAT
-GNULIB_LINK
-GNULIB_LCHOWN
-GNULIB_ISATTY
-GNULIB_GROUP_MEMBER
-GNULIB_GETUSERSHELL
-GNULIB_GETPASS
-GNULIB_GETPAGESIZE
-GNULIB_GETOPT_POSIX
-GNULIB_GETLOGIN_R
-GNULIB_GETLOGIN
-GNULIB_GETHOSTNAME
-GNULIB_GETGROUPS
-GNULIB_GETENTROPY
-GNULIB_GETDTABLESIZE
-GNULIB_GETDOMAINNAME
-GNULIB_GETCWD
-GNULIB_FTRUNCATE
-GNULIB_FSYNC
-GNULIB_FDATASYNC
-GNULIB_FCHOWNAT
-GNULIB_FCHDIR
-GNULIB_FACCESSAT
-GNULIB_EXECVPE
-GNULIB_EXECVP
-GNULIB_EXECVE
-GNULIB_EXECV
-GNULIB_EXECLP
-GNULIB_EXECLE
-GNULIB_EXECL
-GNULIB_EUIDACCESS
-GNULIB_ENVIRON
-GNULIB_DUP3
-GNULIB_DUP2
-GNULIB_DUP
-GNULIB_COPY_FILE_RANGE
-GNULIB_CLOSE
-GNULIB_CHOWN
-GNULIB_CHDIR
-GNULIB_ACCESS
 REPLACE_WCTOMB
 REPLACE_UNSETENV
 REPLACE_STRTOLD
@@ -1924,14 +1729,9 @@ GNULIB_MBSINIT
 GNULIB_WCTOB
 GNULIB_BTOWC
 MKDIR_P
-HAVE_WS2TCPIP_H
 HAVE_FEATURES_H
 NEXT_AS_FIRST_DIRECTIVE_ARPA_INET_H
 NEXT_ARPA_INET_H
-PRAGMA_COLUMNS
-PRAGMA_SYSTEM_HEADER
-INCLUDE_NEXT_AS_FIRST_DIRECTIVE
-INCLUDE_NEXT
 HAVE_ARPA_INET_H
 REPLACE_INET_PTON
 REPLACE_INET_NTOP
@@ -1944,6 +1744,209 @@ GL_GENERATE_ALLOCA_H_FALSE
 GL_GENERATE_ALLOCA_H_TRUE
 ALLOCA_H
 ALLOCA
+HAVE_WINSOCK2_H
+UNISTD_H_HAVE_WINSOCK2_H_AND_USE_SOCKETS
+UNISTD_H_HAVE_WINSOCK2_H
+UNISTD_H_HAVE_SYS_RANDOM_H
+REPLACE_WRITE
+REPLACE_USLEEP
+REPLACE_UNLINKAT
+REPLACE_UNLINK
+REPLACE_TTYNAME_R
+REPLACE_TRUNCATE
+REPLACE_SYMLINKAT
+REPLACE_SYMLINK
+REPLACE_SLEEP
+REPLACE_RMDIR
+REPLACE_READLINKAT
+REPLACE_READLINK
+REPLACE_READ
+REPLACE_PWRITE
+REPLACE_PREAD
+REPLACE_LSEEK
+REPLACE_LINKAT
+REPLACE_LINK
+REPLACE_LCHOWN
+REPLACE_ISATTY
+REPLACE_GETPASS
+REPLACE_GETPAGESIZE
+REPLACE_GETGROUPS
+REPLACE_GETLOGIN_R
+REPLACE_GETDTABLESIZE
+REPLACE_GETDOMAINNAME
+REPLACE_GETCWD
+REPLACE_FTRUNCATE
+REPLACE_FCHOWNAT
+REPLACE_FACCESSAT
+REPLACE_EXECVPE
+REPLACE_EXECVP
+REPLACE_EXECVE
+REPLACE_EXECV
+REPLACE_EXECLP
+REPLACE_EXECLE
+REPLACE_EXECL
+REPLACE_DUP2
+REPLACE_DUP
+REPLACE_CLOSE
+REPLACE_CHOWN
+REPLACE_ACCESS
+HAVE_SYS_PARAM_H
+HAVE_OS_H
+HAVE_DECL_TTYNAME_R
+HAVE_DECL_TRUNCATE
+HAVE_DECL_SETHOSTNAME
+HAVE_DECL_GETUSERSHELL
+HAVE_DECL_GETPAGESIZE
+HAVE_DECL_GETLOGIN_R
+HAVE_DECL_GETLOGIN
+HAVE_DECL_GETDOMAINNAME
+HAVE_DECL_FDATASYNC
+HAVE_DECL_FCHDIR
+HAVE_DECL_EXECVPE
+HAVE_DECL_ENVIRON
+HAVE_USLEEP
+HAVE_UNLINKAT
+HAVE_SYMLINKAT
+HAVE_SYMLINK
+HAVE_SLEEP
+HAVE_SETHOSTNAME
+HAVE_READLINKAT
+HAVE_READLINK
+HAVE_PWRITE
+HAVE_PREAD
+HAVE_PIPE2
+HAVE_PIPE
+HAVE_LINKAT
+HAVE_LINK
+HAVE_LCHOWN
+HAVE_GROUP_MEMBER
+HAVE_GETPASS
+HAVE_GETPAGESIZE
+HAVE_GETLOGIN
+HAVE_GETHOSTNAME
+HAVE_GETGROUPS
+HAVE_GETENTROPY
+HAVE_GETDTABLESIZE
+HAVE_FTRUNCATE
+HAVE_FSYNC
+HAVE_FDATASYNC
+HAVE_FCHOWNAT
+HAVE_FCHDIR
+HAVE_FACCESSAT
+HAVE_EXECVPE
+HAVE_EUIDACCESS
+HAVE_DUP3
+HAVE_COPY_FILE_RANGE
+HAVE_CHOWN
+GNULIB_MDA_WRITE
+GNULIB_MDA_UNLINK
+GNULIB_MDA_SWAB
+GNULIB_MDA_RMDIR
+GNULIB_MDA_READ
+GNULIB_MDA_LSEEK
+GNULIB_MDA_ISATTY
+GNULIB_MDA_GETPID
+GNULIB_MDA_GETCWD
+GNULIB_MDA_EXECVPE
+GNULIB_MDA_EXECVP
+GNULIB_MDA_EXECVE
+GNULIB_MDA_EXECV
+GNULIB_MDA_EXECLP
+GNULIB_MDA_EXECLE
+GNULIB_MDA_EXECL
+GNULIB_MDA_DUP2
+GNULIB_MDA_DUP
+GNULIB_MDA_CLOSE
+GNULIB_MDA_CHDIR
+GNULIB_MDA_ACCESS
+GNULIB_WRITE
+GNULIB_USLEEP
+GNULIB_UNLINKAT
+GNULIB_UNLINK
+GNULIB_UNISTD_H_SIGPIPE
+GNULIB_UNISTD_H_NONBLOCKING
+GNULIB_TTYNAME_R
+GNULIB_TRUNCATE
+GNULIB_SYMLINKAT
+GNULIB_SYMLINK
+GNULIB_SLEEP
+GNULIB_SETHOSTNAME
+GNULIB_RMDIR
+GNULIB_READLINKAT
+GNULIB_READLINK
+GNULIB_READ
+GNULIB_PWRITE
+GNULIB_PREAD
+GNULIB_PIPE2
+GNULIB_PIPE
+GNULIB_LSEEK
+GNULIB_LINKAT
+GNULIB_LINK
+GNULIB_LCHOWN
+GNULIB_ISATTY
+GNULIB_GROUP_MEMBER
+GNULIB_GETUSERSHELL
+GNULIB_GETPASS
+GNULIB_GETPAGESIZE
+GNULIB_GETOPT_POSIX
+GNULIB_GETLOGIN_R
+GNULIB_GETLOGIN
+GNULIB_GETHOSTNAME
+GNULIB_GETGROUPS
+GNULIB_GETENTROPY
+GNULIB_GETDTABLESIZE
+GNULIB_GETDOMAINNAME
+GNULIB_GETCWD
+GNULIB_FTRUNCATE
+GNULIB_FSYNC
+GNULIB_FDATASYNC
+GNULIB_FCHOWNAT
+GNULIB_FCHDIR
+GNULIB_FACCESSAT
+GNULIB_EXECVPE
+GNULIB_EXECVP
+GNULIB_EXECVE
+GNULIB_EXECV
+GNULIB_EXECLP
+GNULIB_EXECLE
+GNULIB_EXECL
+GNULIB_EUIDACCESS
+GNULIB_ENVIRON
+GNULIB_DUP3
+GNULIB_DUP2
+GNULIB_DUP
+GNULIB_COPY_FILE_RANGE
+GNULIB_CLOSE
+GNULIB_CHOWN
+GNULIB_CHDIR
+GNULIB_ACCESS
+HAVE_WS2TCPIP_H
+HAVE_SYS_SOCKET_H
+NEXT_AS_FIRST_DIRECTIVE_SYS_SOCKET_H
+NEXT_SYS_SOCKET_H
+PRAGMA_COLUMNS
+PRAGMA_SYSTEM_HEADER
+INCLUDE_NEXT_AS_FIRST_DIRECTIVE
+INCLUDE_NEXT
+HAVE_ACCEPT4
+HAVE_SA_FAMILY_T
+HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY
+HAVE_STRUCT_SOCKADDR_STORAGE
+GNULIB_ACCEPT4
+GNULIB_SHUTDOWN
+GNULIB_SETSOCKOPT
+GNULIB_SENDTO
+GNULIB_RECVFROM
+GNULIB_SEND
+GNULIB_RECV
+GNULIB_LISTEN
+GNULIB_GETSOCKOPT
+GNULIB_GETSOCKNAME
+GNULIB_GETPEERNAME
+GNULIB_BIND
+GNULIB_ACCEPT
+GNULIB_CONNECT
+GNULIB_SOCKET
 GL_COND_LIBTOOL_FALSE
 GL_COND_LIBTOOL_TRUE
 RANLIB
@@ -2953,11 +2956,10 @@ fi
 
 } # ac_fn_c_try_link
 
-# ac_fn_c_check_type LINENO TYPE VAR INCLUDES
-# -------------------------------------------
-# Tests whether TYPE exists after having included INCLUDES, setting cache
-# variable VAR accordingly.
-ac_fn_c_check_type ()
+# ac_fn_c_check_func LINENO FUNC VAR
+# ----------------------------------
+# Tests whether FUNC exists, setting the cache variable VAR accordingly
+ac_fn_c_check_func ()
 {
   as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
@@ -2965,47 +2967,61 @@ $as_echo_n "checking for $2... " >&6; }
 if eval \${$3+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  eval "$3=no"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-$4
-int
-main ()
-{
-if (sizeof ($2))
-	 return 0;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$4
-int
-main ()
-{
-if (sizeof (($2)))
-	    return 0;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
+/* Define $2 to an innocuous variant, in case <limits.h> declares $2.
+   For example, HP-UX 11i <limits.h> declares gettimeofday.  */
+#define $2 innocuous_$2
 
-else
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char $2 (); below.
+    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
+    <limits.h> exists even on freestanding compilers.  */
+
+#ifdef __STDC__
+# include <limits.h>
+#else
+# include <assert.h>
+#endif
+
+#undef $2
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char $2 ();
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined __stub_$2 || defined __stub___$2
+choke me
+#endif
+
+int
+main ()
+{
+return $2 ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
   eval "$3=yes"
+else
+  eval "$3=no"
 fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
 fi
 eval ac_res=\$$3
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
   eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
 
-} # ac_fn_c_check_type
+} # ac_fn_c_check_func
 
 # ac_fn_c_check_header_mongrel LINENO HEADER VAR INCLUDES
 # -------------------------------------------------------
@@ -3094,10 +3110,11 @@ fi
 
 } # ac_fn_c_check_header_mongrel
 
-# ac_fn_c_check_func LINENO FUNC VAR
-# ----------------------------------
-# Tests whether FUNC exists, setting the cache variable VAR accordingly
-ac_fn_c_check_func ()
+# ac_fn_c_check_type LINENO TYPE VAR INCLUDES
+# -------------------------------------------
+# Tests whether TYPE exists after having included INCLUDES, setting cache
+# variable VAR accordingly.
+ac_fn_c_check_type ()
 {
   as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
@@ -3105,61 +3122,104 @@ $as_echo_n "checking for $2... " >&6; }
 if eval \${$3+:} false; then :
   $as_echo_n "(cached) " >&6
 else
+  eval "$3=no"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-/* Define $2 to an innocuous variant, in case <limits.h> declares $2.
-   For example, HP-UX 11i <limits.h> declares gettimeofday.  */
-#define $2 innocuous_$2
-
-/* System header to define __stub macros and hopefully few prototypes,
-    which can conflict with char $2 (); below.
-    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
-    <limits.h> exists even on freestanding compilers.  */
-
-#ifdef __STDC__
-# include <limits.h>
-#else
-# include <assert.h>
-#endif
-
-#undef $2
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char $2 ();
-/* The GNU C library defines this for functions which it implements
-    to always fail with ENOSYS.  Some functions are actually named
-    something starting with __ and the normal name is an alias.  */
-#if defined __stub_$2 || defined __stub___$2
-choke me
-#endif
-
+$4
 int
 main ()
 {
-return $2 ();
+if (sizeof ($2))
+	 return 0;
   ;
   return 0;
 }
 _ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  eval "$3=yes"
+if ac_fn_c_try_compile "$LINENO"; then :
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$4
+int
+main ()
+{
+if (sizeof (($2)))
+	    return 0;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+
 else
-  eval "$3=no"
+  eval "$3=yes"
 fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 eval ac_res=\$$3
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
   eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
 
-} # ac_fn_c_check_func
+} # ac_fn_c_check_type
+
+# ac_fn_c_check_member LINENO AGGR MEMBER VAR INCLUDES
+# ----------------------------------------------------
+# Tries to find if the field MEMBER exists in type AGGR, after including
+# INCLUDES, setting cache variable VAR accordingly.
+ac_fn_c_check_member ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2.$3" >&5
+$as_echo_n "checking for $2.$3... " >&6; }
+if eval \${$4+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$5
+int
+main ()
+{
+static $2 ac_aggr;
+if (ac_aggr.$3)
+return 0;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  eval "$4=yes"
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$5
+int
+main ()
+{
+static $2 ac_aggr;
+if (sizeof ac_aggr.$3)
+return 0;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  eval "$4=yes"
+else
+  eval "$4=no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+eval ac_res=\$$4
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+
+} # ac_fn_c_check_member
 
 # ac_fn_c_check_decl LINENO SYMBOL VAR INCLUDES
 # ---------------------------------------------
@@ -3394,63 +3454,6 @@ rm -f conftest.val
   as_fn_set_status $ac_retval
 
 } # ac_fn_c_compute_int
-
-# ac_fn_c_check_member LINENO AGGR MEMBER VAR INCLUDES
-# ----------------------------------------------------
-# Tries to find if the field MEMBER exists in type AGGR, after including
-# INCLUDES, setting cache variable VAR accordingly.
-ac_fn_c_check_member ()
-{
-  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2.$3" >&5
-$as_echo_n "checking for $2.$3... " >&6; }
-if eval \${$4+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$5
-int
-main ()
-{
-static $2 ac_aggr;
-if (ac_aggr.$3)
-return 0;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  eval "$4=yes"
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$5
-int
-main ()
-{
-static $2 ac_aggr;
-if (sizeof ac_aggr.$3)
-return 0;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  eval "$4=yes"
-else
-  eval "$4=no"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-eval ac_res=\$$4
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
-
-} # ac_fn_c_check_member
 cat >config.log <<_ACEOF
 This file contains any messages produced by compilers while
 running configure, to aid debugging if configure makes a mistake.
@@ -3737,9 +3740,9 @@ fi
 
 as_fn_append ac_header_list " wchar.h"
 as_fn_append ac_header_list " minix/config.h"
+as_fn_append ac_header_list " sys/socket.h"
 as_fn_append ac_header_list " arpa/inet.h"
 as_fn_append ac_header_list " features.h"
-as_fn_append ac_header_list " sys/socket.h"
 as_fn_append ac_func_list " btowc"
 as_fn_append ac_func_list " canonicalize_file_name"
 as_fn_append ac_func_list " faccessat"
@@ -3802,6 +3805,7 @@ as_fn_append ac_func_list " snprintf"
 as_fn_append ac_header_list " strings.h"
 as_fn_append ac_header_list " sys/random.h"
 as_fn_append ac_header_list " sys/uio.h"
+as_fn_append ac_header_list " sys/wait.h"
 as_fn_append ac_func_list " localtime_r"
 as_fn_append ac_header_list " crtdefs.h"
 as_fn_append ac_func_list " iswcntrl"
@@ -6696,6 +6700,7 @@ fi
 
 
   # Code from module absolute-header:
+  # Code from module accept:
   # Code from module alloca:
   # Code from module alloca-opt:
   # Code from module arpa_inet:
@@ -6703,6 +6708,7 @@ fi
   # Code from module at-internal:
   # Code from module attribute:
   # Code from module basename-lgpl:
+  # Code from module bind:
   # Code from module btowc:
   # Code from module builtin-expect:
   # Code from module c99:
@@ -6714,6 +6720,7 @@ fi
   # Code from module cloexec:
   # Code from module close:
   # Code from module closedir:
+  # Code from module connect:
   # Code from module count-one-bits:
   # Code from module ctype:
   # Code from module d-ino:
@@ -6781,6 +6788,7 @@ fi
 
   # Code from module libc-config:
   # Code from module limits-h:
+  # Code from module listen:
   # Code from module localcharset:
   # Code from module locale:
   # Code from module lock:
@@ -6827,11 +6835,13 @@ fi
   # Code from module select:
   # Code from module setenv:
   # Code from module setlocale-null:
+  # Code from module setsockopt:
   # Code from module signal-h:
   # Code from module snippet/_Noreturn:
   # Code from module snippet/arg-nonnull:
   # Code from module snippet/c++defs:
   # Code from module snippet/warn-on-use:
+  # Code from module socket:
   # Code from module socketlib:
   # Code from module sockets:
   # Code from module socklen:
@@ -6865,6 +6875,7 @@ fi
   # Code from module sys_time:
   # Code from module sys_types:
   # Code from module sys_uio:
+  # Code from module sys_wait:
   # Code from module tempname:
   # Code from module threadlib:
 
@@ -6951,6 +6962,683 @@ fi
   fi
           LIBC_FATAL_STDERR_=1
   export LIBC_FATAL_STDERR_
+
+
+
+  GNULIB_SOCKET=0;
+  GNULIB_CONNECT=0;
+  GNULIB_ACCEPT=0;
+  GNULIB_BIND=0;
+  GNULIB_GETPEERNAME=0;
+  GNULIB_GETSOCKNAME=0;
+  GNULIB_GETSOCKOPT=0;
+  GNULIB_LISTEN=0;
+  GNULIB_RECV=0;
+  GNULIB_SEND=0;
+  GNULIB_RECVFROM=0;
+  GNULIB_SENDTO=0;
+  GNULIB_SETSOCKOPT=0;
+  GNULIB_SHUTDOWN=0;
+  GNULIB_ACCEPT4=0;
+  HAVE_STRUCT_SOCKADDR_STORAGE=1;
+  HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY=1;
+
+  HAVE_SA_FAMILY_T=1;
+  HAVE_ACCEPT4=1;
+
+
+
+
+   if test $ac_cv_header_sys_socket_h = no; then
+                         for ac_header in ws2tcpip.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "ws2tcpip.h" "ac_cv_header_ws2tcpip_h" "$ac_includes_default"
+if test "x$ac_cv_header_ws2tcpip_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_WS2TCPIP_H 1
+_ACEOF
+
+fi
+
+done
+
+   fi
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the preprocessor supports include_next" >&5
+$as_echo_n "checking whether the preprocessor supports include_next... " >&6; }
+if ${gl_cv_have_include_next+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  rm -rf conftestd1a conftestd1b conftestd2
+     mkdir conftestd1a conftestd1b conftestd2
+                                                  cat <<EOF > conftestd1a/conftest.h
+#define DEFINED_IN_CONFTESTD1
+#include_next <conftest.h>
+#ifdef DEFINED_IN_CONFTESTD2
+int foo;
+#else
+#error "include_next doesn't work"
+#endif
+EOF
+     cat <<EOF > conftestd1b/conftest.h
+#define DEFINED_IN_CONFTESTD1
+#include <stdio.h>
+#include_next <conftest.h>
+#ifdef DEFINED_IN_CONFTESTD2
+int foo;
+#else
+#error "include_next doesn't work"
+#endif
+EOF
+     cat <<EOF > conftestd2/conftest.h
+#ifndef DEFINED_IN_CONFTESTD1
+#error "include_next test doesn't work"
+#endif
+#define DEFINED_IN_CONFTESTD2
+EOF
+     gl_save_CPPFLAGS="$CPPFLAGS"
+     CPPFLAGS="$gl_save_CPPFLAGS -Iconftestd1b -Iconftestd2"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <conftest.h>
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_have_include_next=yes
+else
+  CPPFLAGS="$gl_save_CPPFLAGS -Iconftestd1a -Iconftestd2"
+        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <conftest.h>
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_have_include_next=buggy
+else
+  gl_cv_have_include_next=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+     CPPFLAGS="$gl_save_CPPFLAGS"
+     rm -rf conftestd1a conftestd1b conftestd2
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_have_include_next" >&5
+$as_echo "$gl_cv_have_include_next" >&6; }
+  PRAGMA_SYSTEM_HEADER=
+  if test $gl_cv_have_include_next = yes; then
+    INCLUDE_NEXT=include_next
+    INCLUDE_NEXT_AS_FIRST_DIRECTIVE=include_next
+    if test -n "$GCC"; then
+      PRAGMA_SYSTEM_HEADER='#pragma GCC system_header'
+    fi
+  else
+    if test $gl_cv_have_include_next = buggy; then
+      INCLUDE_NEXT=include
+      INCLUDE_NEXT_AS_FIRST_DIRECTIVE=include_next
+    else
+      INCLUDE_NEXT=include
+      INCLUDE_NEXT_AS_FIRST_DIRECTIVE=include
+    fi
+  fi
+
+
+
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether source code line length is unlimited" >&5
+$as_echo_n "checking whether source code line length is unlimited... " >&6; }
+if ${gl_cv_source_line_length_unlimited+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#ifdef __TANDEM
+choke me
+#endif
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "choke me" >/dev/null 2>&1; then :
+  gl_cv_source_line_length_unlimited=no
+else
+  gl_cv_source_line_length_unlimited=yes
+fi
+rm -f conftest*
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_source_line_length_unlimited" >&5
+$as_echo "$gl_cv_source_line_length_unlimited" >&6; }
+  if test $gl_cv_source_line_length_unlimited = no; then
+    PRAGMA_COLUMNS="#pragma COLUMNS 10000"
+  else
+    PRAGMA_COLUMNS=
+  fi
+
+
+
+  GNULIB_ACCESS=0;
+  GNULIB_CHDIR=0;
+  GNULIB_CHOWN=0;
+  GNULIB_CLOSE=0;
+  GNULIB_COPY_FILE_RANGE=0;
+  GNULIB_DUP=0;
+  GNULIB_DUP2=0;
+  GNULIB_DUP3=0;
+  GNULIB_ENVIRON=0;
+  GNULIB_EUIDACCESS=0;
+  GNULIB_EXECL=0;
+  GNULIB_EXECLE=0;
+  GNULIB_EXECLP=0;
+  GNULIB_EXECV=0;
+  GNULIB_EXECVE=0;
+  GNULIB_EXECVP=0;
+  GNULIB_EXECVPE=0;
+  GNULIB_FACCESSAT=0;
+  GNULIB_FCHDIR=0;
+  GNULIB_FCHOWNAT=0;
+  GNULIB_FDATASYNC=0;
+  GNULIB_FSYNC=0;
+  GNULIB_FTRUNCATE=0;
+  GNULIB_GETCWD=0;
+  GNULIB_GETDOMAINNAME=0;
+  GNULIB_GETDTABLESIZE=0;
+  GNULIB_GETENTROPY=0;
+  GNULIB_GETGROUPS=0;
+  GNULIB_GETHOSTNAME=0;
+  GNULIB_GETLOGIN=0;
+  GNULIB_GETLOGIN_R=0;
+  GNULIB_GETOPT_POSIX=0;
+  GNULIB_GETPAGESIZE=0;
+  GNULIB_GETPASS=0;
+  GNULIB_GETUSERSHELL=0;
+  GNULIB_GROUP_MEMBER=0;
+  GNULIB_ISATTY=0;
+  GNULIB_LCHOWN=0;
+  GNULIB_LINK=0;
+  GNULIB_LINKAT=0;
+  GNULIB_LSEEK=0;
+  GNULIB_PIPE=0;
+  GNULIB_PIPE2=0;
+  GNULIB_PREAD=0;
+  GNULIB_PWRITE=0;
+  GNULIB_READ=0;
+  GNULIB_READLINK=0;
+  GNULIB_READLINKAT=0;
+  GNULIB_RMDIR=0;
+  GNULIB_SETHOSTNAME=0;
+  GNULIB_SLEEP=0;
+  GNULIB_SYMLINK=0;
+  GNULIB_SYMLINKAT=0;
+  GNULIB_TRUNCATE=0;
+  GNULIB_TTYNAME_R=0;
+  GNULIB_UNISTD_H_NONBLOCKING=0;
+  GNULIB_UNISTD_H_SIGPIPE=0;
+  GNULIB_UNLINK=0;
+  GNULIB_UNLINKAT=0;
+  GNULIB_USLEEP=0;
+  GNULIB_WRITE=0;
+    GNULIB_MDA_ACCESS=1;
+  GNULIB_MDA_CHDIR=1;
+  GNULIB_MDA_CLOSE=1;
+  GNULIB_MDA_DUP=1;
+  GNULIB_MDA_DUP2=1;
+  GNULIB_MDA_EXECL=1;
+  GNULIB_MDA_EXECLE=1;
+  GNULIB_MDA_EXECLP=1;
+  GNULIB_MDA_EXECV=1;
+  GNULIB_MDA_EXECVE=1;
+  GNULIB_MDA_EXECVP=1;
+  GNULIB_MDA_EXECVPE=1;
+  GNULIB_MDA_GETCWD=1;
+  GNULIB_MDA_GETPID=1;
+  GNULIB_MDA_ISATTY=1;
+  GNULIB_MDA_LSEEK=1;
+  GNULIB_MDA_READ=1;
+  GNULIB_MDA_RMDIR=1;
+  GNULIB_MDA_SWAB=1;
+  GNULIB_MDA_UNLINK=1;
+  GNULIB_MDA_WRITE=1;
+    HAVE_CHOWN=1;
+  HAVE_COPY_FILE_RANGE=1;
+  HAVE_DUP3=1;
+  HAVE_EUIDACCESS=1;
+  HAVE_EXECVPE=1;
+  HAVE_FACCESSAT=1;
+  HAVE_FCHDIR=1;
+  HAVE_FCHOWNAT=1;
+  HAVE_FDATASYNC=1;
+  HAVE_FSYNC=1;
+  HAVE_FTRUNCATE=1;
+  HAVE_GETDTABLESIZE=1;
+  HAVE_GETENTROPY=1;
+  HAVE_GETGROUPS=1;
+  HAVE_GETHOSTNAME=1;
+  HAVE_GETLOGIN=1;
+  HAVE_GETPAGESIZE=1;
+  HAVE_GETPASS=1;
+  HAVE_GROUP_MEMBER=1;
+  HAVE_LCHOWN=1;
+  HAVE_LINK=1;
+  HAVE_LINKAT=1;
+  HAVE_PIPE=1;
+  HAVE_PIPE2=1;
+  HAVE_PREAD=1;
+  HAVE_PWRITE=1;
+  HAVE_READLINK=1;
+  HAVE_READLINKAT=1;
+  HAVE_SETHOSTNAME=1;
+  HAVE_SLEEP=1;
+  HAVE_SYMLINK=1;
+  HAVE_SYMLINKAT=1;
+  HAVE_UNLINKAT=1;
+  HAVE_USLEEP=1;
+  HAVE_DECL_ENVIRON=1;
+  HAVE_DECL_EXECVPE=1;
+  HAVE_DECL_FCHDIR=1;
+  HAVE_DECL_FDATASYNC=1;
+  HAVE_DECL_GETDOMAINNAME=1;
+  HAVE_DECL_GETLOGIN=1;
+  HAVE_DECL_GETLOGIN_R=1;
+  HAVE_DECL_GETPAGESIZE=1;
+  HAVE_DECL_GETUSERSHELL=1;
+  HAVE_DECL_SETHOSTNAME=1;
+  HAVE_DECL_TRUNCATE=1;
+  HAVE_DECL_TTYNAME_R=1;
+  HAVE_OS_H=0;
+  HAVE_SYS_PARAM_H=0;
+  REPLACE_ACCESS=0;
+  REPLACE_CHOWN=0;
+  REPLACE_CLOSE=0;
+  REPLACE_DUP=0;
+  REPLACE_DUP2=0;
+  REPLACE_EXECL=0;
+  REPLACE_EXECLE=0;
+  REPLACE_EXECLP=0;
+  REPLACE_EXECV=0;
+  REPLACE_EXECVE=0;
+  REPLACE_EXECVP=0;
+  REPLACE_EXECVPE=0;
+  REPLACE_FACCESSAT=0;
+  REPLACE_FCHOWNAT=0;
+  REPLACE_FTRUNCATE=0;
+  REPLACE_GETCWD=0;
+  REPLACE_GETDOMAINNAME=0;
+  REPLACE_GETDTABLESIZE=0;
+  REPLACE_GETLOGIN_R=0;
+  REPLACE_GETGROUPS=0;
+  REPLACE_GETPAGESIZE=0;
+  REPLACE_GETPASS=0;
+  REPLACE_ISATTY=0;
+  REPLACE_LCHOWN=0;
+  REPLACE_LINK=0;
+  REPLACE_LINKAT=0;
+  REPLACE_LSEEK=0;
+  REPLACE_PREAD=0;
+  REPLACE_PWRITE=0;
+  REPLACE_READ=0;
+  REPLACE_READLINK=0;
+  REPLACE_READLINKAT=0;
+  REPLACE_RMDIR=0;
+  REPLACE_SLEEP=0;
+  REPLACE_SYMLINK=0;
+  REPLACE_SYMLINKAT=0;
+  REPLACE_TRUNCATE=0;
+  REPLACE_TTYNAME_R=0;
+  REPLACE_UNLINK=0;
+  REPLACE_UNLINKAT=0;
+  REPLACE_USLEEP=0;
+  REPLACE_WRITE=0;
+  UNISTD_H_HAVE_SYS_RANDOM_H=0;
+  UNISTD_H_HAVE_WINSOCK2_H=0;
+  UNISTD_H_HAVE_WINSOCK2_H_AND_USE_SOCKETS=0;
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for C/C++ restrict keyword" >&5
+$as_echo_n "checking for C/C++ restrict keyword... " >&6; }
+if ${ac_cv_c_restrict+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_cv_c_restrict=no
+   # Put '__restrict__' first, to avoid problems with glibc and non-GCC; see:
+   # https://lists.gnu.org/archive/html/bug-autoconf/2016-02/msg00006.html
+   # Put 'restrict' last, because C++ lacks it.
+   for ac_kw in __restrict__ __restrict _Restrict restrict; do
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+typedef int *int_ptr;
+           int foo (int_ptr $ac_kw ip) { return ip[0]; }
+           int bar (int [$ac_kw]); /* Catch GCC bug 14050.  */
+           int bar (int ip[$ac_kw]) { return ip[0]; }
+
+int
+main ()
+{
+int s[1];
+           int *$ac_kw t = s;
+           t[0] = 0;
+           return foo (t) + bar (t);
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ac_cv_c_restrict=$ac_kw
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+     test "$ac_cv_c_restrict" != no && break
+   done
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_c_restrict" >&5
+$as_echo "$ac_cv_c_restrict" >&6; }
+
+ case $ac_cv_c_restrict in
+   restrict) ;;
+   no) $as_echo "#define restrict /**/" >>confdefs.h
+ ;;
+   *)  cat >>confdefs.h <<_ACEOF
+#define restrict $ac_cv_c_restrict
+_ACEOF
+ ;;
+ esac
+
+
+
+
+
+        case "$host_os" in
+    osf*)
+
+$as_echo "#define _POSIX_PII_SOCKET 1" >>confdefs.h
+
+      ;;
+  esac
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether <sys/socket.h> is self-contained" >&5
+$as_echo_n "checking whether <sys/socket.h> is self-contained... " >&6; }
+if ${gl_cv_header_sys_socket_h_selfcontained+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/socket.h>
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_header_sys_socket_h_selfcontained=yes
+else
+  gl_cv_header_sys_socket_h_selfcontained=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_header_sys_socket_h_selfcontained" >&5
+$as_echo "$gl_cv_header_sys_socket_h_selfcontained" >&6; }
+  if test $gl_cv_header_sys_socket_h_selfcontained = yes; then
+            for ac_func in shutdown
+do :
+  ac_fn_c_check_func "$LINENO" "shutdown" "ac_cv_func_shutdown"
+if test "x$ac_cv_func_shutdown" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SHUTDOWN 1
+_ACEOF
+
+fi
+done
+
+    if test $ac_cv_func_shutdown = yes; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether <sys/socket.h> defines the SHUT_* macros" >&5
+$as_echo_n "checking whether <sys/socket.h> defines the SHUT_* macros... " >&6; }
+if ${gl_cv_header_sys_socket_h_shut+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+          cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/socket.h>
+int
+main ()
+{
+int a[] = { SHUT_RD, SHUT_WR, SHUT_RDWR };
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_header_sys_socket_h_shut=yes
+else
+  gl_cv_header_sys_socket_h_shut=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_header_sys_socket_h_shut" >&5
+$as_echo "$gl_cv_header_sys_socket_h_shut" >&6; }
+      if test $gl_cv_header_sys_socket_h_shut = no; then
+        SYS_SOCKET_H='sys/socket.h'
+      fi
+    fi
+  fi
+  # We need to check for ws2tcpip.h now.
+
+
+
+
+
+
+
+
+
+
+
+     if test $gl_cv_have_include_next = yes; then
+       gl_cv_next_sys_socket_h='<'sys/socket.h'>'
+     else
+       { $as_echo "$as_me:${as_lineno-$LINENO}: checking absolute name of <sys/socket.h>" >&5
+$as_echo_n "checking absolute name of <sys/socket.h>... " >&6; }
+if ${gl_cv_next_sys_socket_h+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+             if test $ac_cv_header_sys_socket_h = yes; then
+
+
+
+
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/socket.h>
+_ACEOF
+                case "$host_os" in
+    aix*) gl_absname_cpp="$ac_cpp -C" ;;
+    *)    gl_absname_cpp="$ac_cpp" ;;
+  esac
+
+  case "$host_os" in
+    mingw*)
+                                          gl_dirsep_regex='[/\\]'
+      ;;
+    *)
+      gl_dirsep_regex='\/'
+      ;;
+  esac
+      gl_make_literal_regex_sed='s,[]$^\\.*/[],\\&,g'
+  gl_header_literal_regex=`echo 'sys/socket.h' \
+                           | sed -e "$gl_make_literal_regex_sed"`
+  gl_absolute_header_sed="/${gl_dirsep_regex}${gl_header_literal_regex}/"'{
+      s/.*"\(.*'"${gl_dirsep_regex}${gl_header_literal_regex}"'\)".*/\1/
+      s|^/[^/]|//&|
+      p
+      q
+    }'
+
+        gl_cv_absolute_sys_socket_h=`(eval "$gl_absname_cpp conftest.$ac_ext") 2>&5 |
+  sed -n "$gl_absolute_header_sed"`
+
+           gl_header=$gl_cv_absolute_sys_socket_h
+           gl_cv_next_sys_socket_h='"'$gl_header'"'
+          else
+               gl_cv_next_sys_socket_h='<'sys/socket.h'>'
+             fi
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_next_sys_socket_h" >&5
+$as_echo "$gl_cv_next_sys_socket_h" >&6; }
+     fi
+     NEXT_SYS_SOCKET_H=$gl_cv_next_sys_socket_h
+
+     if test $gl_cv_have_include_next = yes || test $gl_cv_have_include_next = buggy; then
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include_next'
+       gl_next_as_first_directive='<'sys/socket.h'>'
+     else
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include'
+       gl_next_as_first_directive=$gl_cv_next_sys_socket_h
+     fi
+     NEXT_AS_FIRST_DIRECTIVE_SYS_SOCKET_H=$gl_next_as_first_directive
+
+
+
+
+  if test $ac_cv_header_sys_socket_h = yes; then
+    HAVE_SYS_SOCKET_H=1
+  else
+    HAVE_SYS_SOCKET_H=0
+  fi
+
+
+
+  if test $ac_cv_header_sys_socket_h = yes; then
+    HAVE_WS2TCPIP_H=0
+  else
+    if test $ac_cv_header_ws2tcpip_h = yes; then
+      HAVE_WS2TCPIP_H=1
+    else
+      HAVE_WS2TCPIP_H=0
+    fi
+  fi
+
+
+
+  ac_fn_c_check_type "$LINENO" "struct sockaddr_storage" "ac_cv_type_struct_sockaddr_storage" "
+  /* sys/types.h is not needed according to POSIX, but the
+     sys/socket.h in i386-unknown-freebsd4.10 and
+     powerpc-apple-darwin5.5 required it. */
+#include <sys/types.h>
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
+#endif
+
+"
+if test "x$ac_cv_type_struct_sockaddr_storage" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_SOCKADDR_STORAGE 1
+_ACEOF
+
+
+fi
+ac_fn_c_check_type "$LINENO" "sa_family_t" "ac_cv_type_sa_family_t" "
+  /* sys/types.h is not needed according to POSIX, but the
+     sys/socket.h in i386-unknown-freebsd4.10 and
+     powerpc-apple-darwin5.5 required it. */
+#include <sys/types.h>
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
+#endif
+
+"
+if test "x$ac_cv_type_sa_family_t" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_SA_FAMILY_T 1
+_ACEOF
+
+
+fi
+
+  if test $ac_cv_type_struct_sockaddr_storage = no; then
+    HAVE_STRUCT_SOCKADDR_STORAGE=0
+  fi
+  if test $ac_cv_type_sa_family_t = no; then
+    HAVE_SA_FAMILY_T=0
+  fi
+  if test $ac_cv_type_struct_sockaddr_storage != no; then
+    ac_fn_c_check_member "$LINENO" "struct sockaddr_storage" "ss_family" "ac_cv_member_struct_sockaddr_storage_ss_family" "#include <sys/types.h>
+       #ifdef HAVE_SYS_SOCKET_H
+       #include <sys/socket.h>
+       #endif
+       #ifdef HAVE_WS2TCPIP_H
+       #include <ws2tcpip.h>
+       #endif
+
+"
+if test "x$ac_cv_member_struct_sockaddr_storage_ss_family" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY 1
+_ACEOF
+
+
+else
+  HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY=0
+fi
+
+  fi
+  if test $HAVE_STRUCT_SOCKADDR_STORAGE = 0 || test $HAVE_SA_FAMILY_T = 0 \
+     || test $HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY = 0; then
+    SYS_SOCKET_H='sys/socket.h'
+  fi
+
+
+
+
+  if test $ac_cv_header_sys_socket_h != yes; then
+                    for ac_header in winsock2.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "winsock2.h" "ac_cv_header_winsock2_h" "$ac_includes_default"
+if test "x$ac_cv_header_winsock2_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_WINSOCK2_H 1
+_ACEOF
+
+fi
+
+done
+
+  fi
+  if test "$ac_cv_header_winsock2_h" = yes; then
+    HAVE_WINSOCK2_H=1
+    UNISTD_H_HAVE_WINSOCK2_H=1
+    SYS_IOCTL_H_HAVE_WINSOCK2_H=1
+  else
+    HAVE_WINSOCK2_H=0
+  fi
+
+
+
+
+
+
+
 
 
 ac_fn_c_check_type "$LINENO" "size_t" "ac_cv_type_size_t" "$ac_includes_default"
@@ -7125,121 +7813,6 @@ fi
 
 
 
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the preprocessor supports include_next" >&5
-$as_echo_n "checking whether the preprocessor supports include_next... " >&6; }
-if ${gl_cv_have_include_next+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  rm -rf conftestd1a conftestd1b conftestd2
-     mkdir conftestd1a conftestd1b conftestd2
-                                                  cat <<EOF > conftestd1a/conftest.h
-#define DEFINED_IN_CONFTESTD1
-#include_next <conftest.h>
-#ifdef DEFINED_IN_CONFTESTD2
-int foo;
-#else
-#error "include_next doesn't work"
-#endif
-EOF
-     cat <<EOF > conftestd1b/conftest.h
-#define DEFINED_IN_CONFTESTD1
-#include <stdio.h>
-#include_next <conftest.h>
-#ifdef DEFINED_IN_CONFTESTD2
-int foo;
-#else
-#error "include_next doesn't work"
-#endif
-EOF
-     cat <<EOF > conftestd2/conftest.h
-#ifndef DEFINED_IN_CONFTESTD1
-#error "include_next test doesn't work"
-#endif
-#define DEFINED_IN_CONFTESTD2
-EOF
-     gl_save_CPPFLAGS="$CPPFLAGS"
-     CPPFLAGS="$gl_save_CPPFLAGS -Iconftestd1b -Iconftestd2"
-     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <conftest.h>
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  gl_cv_have_include_next=yes
-else
-  CPPFLAGS="$gl_save_CPPFLAGS -Iconftestd1a -Iconftestd2"
-        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <conftest.h>
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  gl_cv_have_include_next=buggy
-else
-  gl_cv_have_include_next=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-     CPPFLAGS="$gl_save_CPPFLAGS"
-     rm -rf conftestd1a conftestd1b conftestd2
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_have_include_next" >&5
-$as_echo "$gl_cv_have_include_next" >&6; }
-  PRAGMA_SYSTEM_HEADER=
-  if test $gl_cv_have_include_next = yes; then
-    INCLUDE_NEXT=include_next
-    INCLUDE_NEXT_AS_FIRST_DIRECTIVE=include_next
-    if test -n "$GCC"; then
-      PRAGMA_SYSTEM_HEADER='#pragma GCC system_header'
-    fi
-  else
-    if test $gl_cv_have_include_next = buggy; then
-      INCLUDE_NEXT=include
-      INCLUDE_NEXT_AS_FIRST_DIRECTIVE=include_next
-    else
-      INCLUDE_NEXT=include
-      INCLUDE_NEXT_AS_FIRST_DIRECTIVE=include
-    fi
-  fi
-
-
-
-
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether source code line length is unlimited" >&5
-$as_echo_n "checking whether source code line length is unlimited... " >&6; }
-if ${gl_cv_source_line_length_unlimited+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#ifdef __TANDEM
-choke me
-#endif
-
-_ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "choke me" >/dev/null 2>&1; then :
-  gl_cv_source_line_length_unlimited=no
-else
-  gl_cv_source_line_length_unlimited=yes
-fi
-rm -f conftest*
-
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_source_line_length_unlimited" >&5
-$as_echo "$gl_cv_source_line_length_unlimited" >&6; }
-  if test $gl_cv_source_line_length_unlimited = no; then
-    PRAGMA_COLUMNS="#pragma COLUMNS 10000"
-  else
-    PRAGMA_COLUMNS=
-  fi
-
-
-
-
 
 
   if test $ac_cv_header_features_h = yes; then
@@ -7248,24 +7821,6 @@ $as_echo "$gl_cv_source_line_length_unlimited" >&6; }
     HAVE_FEATURES_H=0
   fi
 
-
-
-
-
-   if test $ac_cv_header_sys_socket_h = no; then
-                         for ac_header in ws2tcpip.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "ws2tcpip.h" "ac_cv_header_ws2tcpip_h" "$ac_includes_default"
-if test "x$ac_cv_header_ws2tcpip_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_WS2TCPIP_H 1
-_ACEOF
-
-fi
-
-done
-
-   fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for a thread-safe mkdir -p" >&5
 $as_echo_n "checking for a thread-safe mkdir -p... " >&6; }
@@ -8126,184 +8681,6 @@ done
 
 
 
-
-
-
-  GNULIB_ACCESS=0;
-  GNULIB_CHDIR=0;
-  GNULIB_CHOWN=0;
-  GNULIB_CLOSE=0;
-  GNULIB_COPY_FILE_RANGE=0;
-  GNULIB_DUP=0;
-  GNULIB_DUP2=0;
-  GNULIB_DUP3=0;
-  GNULIB_ENVIRON=0;
-  GNULIB_EUIDACCESS=0;
-  GNULIB_EXECL=0;
-  GNULIB_EXECLE=0;
-  GNULIB_EXECLP=0;
-  GNULIB_EXECV=0;
-  GNULIB_EXECVE=0;
-  GNULIB_EXECVP=0;
-  GNULIB_EXECVPE=0;
-  GNULIB_FACCESSAT=0;
-  GNULIB_FCHDIR=0;
-  GNULIB_FCHOWNAT=0;
-  GNULIB_FDATASYNC=0;
-  GNULIB_FSYNC=0;
-  GNULIB_FTRUNCATE=0;
-  GNULIB_GETCWD=0;
-  GNULIB_GETDOMAINNAME=0;
-  GNULIB_GETDTABLESIZE=0;
-  GNULIB_GETENTROPY=0;
-  GNULIB_GETGROUPS=0;
-  GNULIB_GETHOSTNAME=0;
-  GNULIB_GETLOGIN=0;
-  GNULIB_GETLOGIN_R=0;
-  GNULIB_GETOPT_POSIX=0;
-  GNULIB_GETPAGESIZE=0;
-  GNULIB_GETPASS=0;
-  GNULIB_GETUSERSHELL=0;
-  GNULIB_GROUP_MEMBER=0;
-  GNULIB_ISATTY=0;
-  GNULIB_LCHOWN=0;
-  GNULIB_LINK=0;
-  GNULIB_LINKAT=0;
-  GNULIB_LSEEK=0;
-  GNULIB_PIPE=0;
-  GNULIB_PIPE2=0;
-  GNULIB_PREAD=0;
-  GNULIB_PWRITE=0;
-  GNULIB_READ=0;
-  GNULIB_READLINK=0;
-  GNULIB_READLINKAT=0;
-  GNULIB_RMDIR=0;
-  GNULIB_SETHOSTNAME=0;
-  GNULIB_SLEEP=0;
-  GNULIB_SYMLINK=0;
-  GNULIB_SYMLINKAT=0;
-  GNULIB_TRUNCATE=0;
-  GNULIB_TTYNAME_R=0;
-  GNULIB_UNISTD_H_NONBLOCKING=0;
-  GNULIB_UNISTD_H_SIGPIPE=0;
-  GNULIB_UNLINK=0;
-  GNULIB_UNLINKAT=0;
-  GNULIB_USLEEP=0;
-  GNULIB_WRITE=0;
-    GNULIB_MDA_ACCESS=1;
-  GNULIB_MDA_CHDIR=1;
-  GNULIB_MDA_CLOSE=1;
-  GNULIB_MDA_DUP=1;
-  GNULIB_MDA_DUP2=1;
-  GNULIB_MDA_EXECL=1;
-  GNULIB_MDA_EXECLE=1;
-  GNULIB_MDA_EXECLP=1;
-  GNULIB_MDA_EXECV=1;
-  GNULIB_MDA_EXECVE=1;
-  GNULIB_MDA_EXECVP=1;
-  GNULIB_MDA_EXECVPE=1;
-  GNULIB_MDA_GETCWD=1;
-  GNULIB_MDA_GETPID=1;
-  GNULIB_MDA_ISATTY=1;
-  GNULIB_MDA_LSEEK=1;
-  GNULIB_MDA_READ=1;
-  GNULIB_MDA_RMDIR=1;
-  GNULIB_MDA_SWAB=1;
-  GNULIB_MDA_UNLINK=1;
-  GNULIB_MDA_WRITE=1;
-    HAVE_CHOWN=1;
-  HAVE_COPY_FILE_RANGE=1;
-  HAVE_DUP3=1;
-  HAVE_EUIDACCESS=1;
-  HAVE_EXECVPE=1;
-  HAVE_FACCESSAT=1;
-  HAVE_FCHDIR=1;
-  HAVE_FCHOWNAT=1;
-  HAVE_FDATASYNC=1;
-  HAVE_FSYNC=1;
-  HAVE_FTRUNCATE=1;
-  HAVE_GETDTABLESIZE=1;
-  HAVE_GETENTROPY=1;
-  HAVE_GETGROUPS=1;
-  HAVE_GETHOSTNAME=1;
-  HAVE_GETLOGIN=1;
-  HAVE_GETPAGESIZE=1;
-  HAVE_GETPASS=1;
-  HAVE_GROUP_MEMBER=1;
-  HAVE_LCHOWN=1;
-  HAVE_LINK=1;
-  HAVE_LINKAT=1;
-  HAVE_PIPE=1;
-  HAVE_PIPE2=1;
-  HAVE_PREAD=1;
-  HAVE_PWRITE=1;
-  HAVE_READLINK=1;
-  HAVE_READLINKAT=1;
-  HAVE_SETHOSTNAME=1;
-  HAVE_SLEEP=1;
-  HAVE_SYMLINK=1;
-  HAVE_SYMLINKAT=1;
-  HAVE_UNLINKAT=1;
-  HAVE_USLEEP=1;
-  HAVE_DECL_ENVIRON=1;
-  HAVE_DECL_EXECVPE=1;
-  HAVE_DECL_FCHDIR=1;
-  HAVE_DECL_FDATASYNC=1;
-  HAVE_DECL_GETDOMAINNAME=1;
-  HAVE_DECL_GETLOGIN=1;
-  HAVE_DECL_GETLOGIN_R=1;
-  HAVE_DECL_GETPAGESIZE=1;
-  HAVE_DECL_GETUSERSHELL=1;
-  HAVE_DECL_SETHOSTNAME=1;
-  HAVE_DECL_TRUNCATE=1;
-  HAVE_DECL_TTYNAME_R=1;
-  HAVE_OS_H=0;
-  HAVE_SYS_PARAM_H=0;
-  REPLACE_ACCESS=0;
-  REPLACE_CHOWN=0;
-  REPLACE_CLOSE=0;
-  REPLACE_DUP=0;
-  REPLACE_DUP2=0;
-  REPLACE_EXECL=0;
-  REPLACE_EXECLE=0;
-  REPLACE_EXECLP=0;
-  REPLACE_EXECV=0;
-  REPLACE_EXECVE=0;
-  REPLACE_EXECVP=0;
-  REPLACE_EXECVPE=0;
-  REPLACE_FACCESSAT=0;
-  REPLACE_FCHOWNAT=0;
-  REPLACE_FTRUNCATE=0;
-  REPLACE_GETCWD=0;
-  REPLACE_GETDOMAINNAME=0;
-  REPLACE_GETDTABLESIZE=0;
-  REPLACE_GETLOGIN_R=0;
-  REPLACE_GETGROUPS=0;
-  REPLACE_GETPAGESIZE=0;
-  REPLACE_GETPASS=0;
-  REPLACE_ISATTY=0;
-  REPLACE_LCHOWN=0;
-  REPLACE_LINK=0;
-  REPLACE_LINKAT=0;
-  REPLACE_LSEEK=0;
-  REPLACE_PREAD=0;
-  REPLACE_PWRITE=0;
-  REPLACE_READ=0;
-  REPLACE_READLINK=0;
-  REPLACE_READLINKAT=0;
-  REPLACE_RMDIR=0;
-  REPLACE_SLEEP=0;
-  REPLACE_SYMLINK=0;
-  REPLACE_SYMLINKAT=0;
-  REPLACE_TRUNCATE=0;
-  REPLACE_TTYNAME_R=0;
-  REPLACE_UNLINK=0;
-  REPLACE_UNLINKAT=0;
-  REPLACE_USLEEP=0;
-  REPLACE_WRITE=0;
-  UNISTD_H_HAVE_SYS_RANDOM_H=0;
-  UNISTD_H_HAVE_WINSOCK2_H=0;
-  UNISTD_H_HAVE_WINSOCK2_H_AND_USE_SOCKETS=0;
 
 
 
@@ -10618,56 +10995,6 @@ $as_echo "$gl_cv_member_st_size_64" >&6; }
       ;;
   esac
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for C/C++ restrict keyword" >&5
-$as_echo_n "checking for C/C++ restrict keyword... " >&6; }
-if ${ac_cv_c_restrict+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_cv_c_restrict=no
-   # Put '__restrict__' first, to avoid problems with glibc and non-GCC; see:
-   # https://lists.gnu.org/archive/html/bug-autoconf/2016-02/msg00006.html
-   # Put 'restrict' last, because C++ lacks it.
-   for ac_kw in __restrict__ __restrict _Restrict restrict; do
-     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-typedef int *int_ptr;
-           int foo (int_ptr $ac_kw ip) { return ip[0]; }
-           int bar (int [$ac_kw]); /* Catch GCC bug 14050.  */
-           int bar (int ip[$ac_kw]) { return ip[0]; }
-
-int
-main ()
-{
-int s[1];
-           int *$ac_kw t = s;
-           t[0] = 0;
-           return foo (t) + bar (t);
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  ac_cv_c_restrict=$ac_kw
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-     test "$ac_cv_c_restrict" != no && break
-   done
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_c_restrict" >&5
-$as_echo "$ac_cv_c_restrict" >&6; }
-
- case $ac_cv_c_restrict in
-   restrict) ;;
-   no) $as_echo "#define restrict /**/" >>confdefs.h
- ;;
-   *)  cat >>confdefs.h <<_ACEOF
-#define restrict $ac_cv_c_restrict
-_ACEOF
- ;;
- esac
-
 
 
 
@@ -11983,322 +12310,6 @@ $as_echo "#define HAVE_WEAK_SYMBOLS 1" >>confdefs.h
   else
     LIB_SETLOCALE_NULL=
   fi
-
-
-
-
-
-  GNULIB_SOCKET=0;
-  GNULIB_CONNECT=0;
-  GNULIB_ACCEPT=0;
-  GNULIB_BIND=0;
-  GNULIB_GETPEERNAME=0;
-  GNULIB_GETSOCKNAME=0;
-  GNULIB_GETSOCKOPT=0;
-  GNULIB_LISTEN=0;
-  GNULIB_RECV=0;
-  GNULIB_SEND=0;
-  GNULIB_RECVFROM=0;
-  GNULIB_SENDTO=0;
-  GNULIB_SETSOCKOPT=0;
-  GNULIB_SHUTDOWN=0;
-  GNULIB_ACCEPT4=0;
-  HAVE_STRUCT_SOCKADDR_STORAGE=1;
-  HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY=1;
-
-  HAVE_SA_FAMILY_T=1;
-  HAVE_ACCEPT4=1;
-
-
-
-
-
-        case "$host_os" in
-    osf*)
-
-$as_echo "#define _POSIX_PII_SOCKET 1" >>confdefs.h
-
-      ;;
-  esac
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether <sys/socket.h> is self-contained" >&5
-$as_echo_n "checking whether <sys/socket.h> is self-contained... " >&6; }
-if ${gl_cv_header_sys_socket_h_selfcontained+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <sys/socket.h>
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  gl_cv_header_sys_socket_h_selfcontained=yes
-else
-  gl_cv_header_sys_socket_h_selfcontained=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_header_sys_socket_h_selfcontained" >&5
-$as_echo "$gl_cv_header_sys_socket_h_selfcontained" >&6; }
-  if test $gl_cv_header_sys_socket_h_selfcontained = yes; then
-            for ac_func in shutdown
-do :
-  ac_fn_c_check_func "$LINENO" "shutdown" "ac_cv_func_shutdown"
-if test "x$ac_cv_func_shutdown" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_SHUTDOWN 1
-_ACEOF
-
-fi
-done
-
-    if test $ac_cv_func_shutdown = yes; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether <sys/socket.h> defines the SHUT_* macros" >&5
-$as_echo_n "checking whether <sys/socket.h> defines the SHUT_* macros... " >&6; }
-if ${gl_cv_header_sys_socket_h_shut+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-          cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <sys/socket.h>
-int
-main ()
-{
-int a[] = { SHUT_RD, SHUT_WR, SHUT_RDWR };
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  gl_cv_header_sys_socket_h_shut=yes
-else
-  gl_cv_header_sys_socket_h_shut=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_header_sys_socket_h_shut" >&5
-$as_echo "$gl_cv_header_sys_socket_h_shut" >&6; }
-      if test $gl_cv_header_sys_socket_h_shut = no; then
-        SYS_SOCKET_H='sys/socket.h'
-      fi
-    fi
-  fi
-  # We need to check for ws2tcpip.h now.
-
-
-
-
-
-
-
-
-
-
-
-     if test $gl_cv_have_include_next = yes; then
-       gl_cv_next_sys_socket_h='<'sys/socket.h'>'
-     else
-       { $as_echo "$as_me:${as_lineno-$LINENO}: checking absolute name of <sys/socket.h>" >&5
-$as_echo_n "checking absolute name of <sys/socket.h>... " >&6; }
-if ${gl_cv_next_sys_socket_h+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-             if test $ac_cv_header_sys_socket_h = yes; then
-
-
-
-
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <sys/socket.h>
-_ACEOF
-                case "$host_os" in
-    aix*) gl_absname_cpp="$ac_cpp -C" ;;
-    *)    gl_absname_cpp="$ac_cpp" ;;
-  esac
-
-  case "$host_os" in
-    mingw*)
-                                          gl_dirsep_regex='[/\\]'
-      ;;
-    *)
-      gl_dirsep_regex='\/'
-      ;;
-  esac
-      gl_make_literal_regex_sed='s,[]$^\\.*/[],\\&,g'
-  gl_header_literal_regex=`echo 'sys/socket.h' \
-                           | sed -e "$gl_make_literal_regex_sed"`
-  gl_absolute_header_sed="/${gl_dirsep_regex}${gl_header_literal_regex}/"'{
-      s/.*"\(.*'"${gl_dirsep_regex}${gl_header_literal_regex}"'\)".*/\1/
-      s|^/[^/]|//&|
-      p
-      q
-    }'
-
-        gl_cv_absolute_sys_socket_h=`(eval "$gl_absname_cpp conftest.$ac_ext") 2>&5 |
-  sed -n "$gl_absolute_header_sed"`
-
-           gl_header=$gl_cv_absolute_sys_socket_h
-           gl_cv_next_sys_socket_h='"'$gl_header'"'
-          else
-               gl_cv_next_sys_socket_h='<'sys/socket.h'>'
-             fi
-
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_next_sys_socket_h" >&5
-$as_echo "$gl_cv_next_sys_socket_h" >&6; }
-     fi
-     NEXT_SYS_SOCKET_H=$gl_cv_next_sys_socket_h
-
-     if test $gl_cv_have_include_next = yes || test $gl_cv_have_include_next = buggy; then
-       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include_next'
-       gl_next_as_first_directive='<'sys/socket.h'>'
-     else
-       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include'
-       gl_next_as_first_directive=$gl_cv_next_sys_socket_h
-     fi
-     NEXT_AS_FIRST_DIRECTIVE_SYS_SOCKET_H=$gl_next_as_first_directive
-
-
-
-
-  if test $ac_cv_header_sys_socket_h = yes; then
-    HAVE_SYS_SOCKET_H=1
-  else
-    HAVE_SYS_SOCKET_H=0
-  fi
-
-
-
-  if test $ac_cv_header_sys_socket_h = yes; then
-    HAVE_WS2TCPIP_H=0
-  else
-    if test $ac_cv_header_ws2tcpip_h = yes; then
-      HAVE_WS2TCPIP_H=1
-    else
-      HAVE_WS2TCPIP_H=0
-    fi
-  fi
-
-
-
-  ac_fn_c_check_type "$LINENO" "struct sockaddr_storage" "ac_cv_type_struct_sockaddr_storage" "
-  /* sys/types.h is not needed according to POSIX, but the
-     sys/socket.h in i386-unknown-freebsd4.10 and
-     powerpc-apple-darwin5.5 required it. */
-#include <sys/types.h>
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_WS2TCPIP_H
-#include <ws2tcpip.h>
-#endif
-
-"
-if test "x$ac_cv_type_struct_sockaddr_storage" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_SOCKADDR_STORAGE 1
-_ACEOF
-
-
-fi
-ac_fn_c_check_type "$LINENO" "sa_family_t" "ac_cv_type_sa_family_t" "
-  /* sys/types.h is not needed according to POSIX, but the
-     sys/socket.h in i386-unknown-freebsd4.10 and
-     powerpc-apple-darwin5.5 required it. */
-#include <sys/types.h>
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_WS2TCPIP_H
-#include <ws2tcpip.h>
-#endif
-
-"
-if test "x$ac_cv_type_sa_family_t" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_SA_FAMILY_T 1
-_ACEOF
-
-
-fi
-
-  if test $ac_cv_type_struct_sockaddr_storage = no; then
-    HAVE_STRUCT_SOCKADDR_STORAGE=0
-  fi
-  if test $ac_cv_type_sa_family_t = no; then
-    HAVE_SA_FAMILY_T=0
-  fi
-  if test $ac_cv_type_struct_sockaddr_storage != no; then
-    ac_fn_c_check_member "$LINENO" "struct sockaddr_storage" "ss_family" "ac_cv_member_struct_sockaddr_storage_ss_family" "#include <sys/types.h>
-       #ifdef HAVE_SYS_SOCKET_H
-       #include <sys/socket.h>
-       #endif
-       #ifdef HAVE_WS2TCPIP_H
-       #include <ws2tcpip.h>
-       #endif
-
-"
-if test "x$ac_cv_member_struct_sockaddr_storage_ss_family" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY 1
-_ACEOF
-
-
-else
-  HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY=0
-fi
-
-  fi
-  if test $HAVE_STRUCT_SOCKADDR_STORAGE = 0 || test $HAVE_SA_FAMILY_T = 0 \
-     || test $HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY = 0; then
-    SYS_SOCKET_H='sys/socket.h'
-  fi
-
-
-
-
-  if test $ac_cv_header_sys_socket_h != yes; then
-                    for ac_header in winsock2.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "winsock2.h" "ac_cv_header_winsock2_h" "$ac_includes_default"
-if test "x$ac_cv_header_winsock2_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_WINSOCK2_H 1
-_ACEOF
-
-fi
-
-done
-
-  fi
-  if test "$ac_cv_header_winsock2_h" = yes; then
-    HAVE_WINSOCK2_H=1
-    UNISTD_H_HAVE_WINSOCK2_H=1
-    SYS_IOCTL_H_HAVE_WINSOCK2_H=1
-  else
-    HAVE_WINSOCK2_H=0
-  fi
-
-
-
-
-
 
 
 
@@ -17767,6 +17778,11 @@ $as_echo "$gl_cv_next_sys_types_h" >&6; }
 
 
 
+  GNULIB_WAITPID=0;
+
+
+
+
   GNULIB_CTIME=0;
   GNULIB_MKTIME=0;
   GNULIB_LOCALTIME=0;
@@ -18120,6 +18136,34 @@ fi
 
   gl_source_base='import'
 
+  if test "$ac_cv_header_winsock2_h" = yes; then
+
+
+
+
+
+
+
+
+  gl_LIBOBJS="$gl_LIBOBJS accept.$ac_objext"
+
+  fi
+
+
+
+
+
+          GNULIB_ACCEPT=1
+
+
+
+
+
+$as_echo "#define GNULIB_TEST_ACCEPT 1" >>confdefs.h
+
+
+
+
 
   if test $ac_cv_func_alloca_works = no; then
     :
@@ -18289,6 +18333,34 @@ $as_echo "$gl_cv_next_arpa_inet_h" >&6; }
 
 
 
+
+
+
+
+  if test "$ac_cv_header_winsock2_h" = yes; then
+
+
+
+
+
+
+
+
+  gl_LIBOBJS="$gl_LIBOBJS bind.$ac_objext"
+
+  fi
+
+
+
+
+
+          GNULIB_BIND=1
+
+
+
+
+
+$as_echo "#define GNULIB_TEST_BIND 1" >>confdefs.h
 
 
 
@@ -18906,6 +18978,34 @@ done
 
 
 $as_echo "#define GNULIB_TEST_CLOSEDIR 1" >>confdefs.h
+
+
+
+
+  if test "$ac_cv_header_winsock2_h" = yes; then
+
+
+
+
+
+
+
+
+  gl_LIBOBJS="$gl_LIBOBJS connect.$ac_objext"
+
+  fi
+
+
+
+
+
+          GNULIB_CONNECT=1
+
+
+
+
+
+$as_echo "#define GNULIB_TEST_CONNECT 1" >>confdefs.h
 
 
 
@@ -23649,6 +23749,34 @@ $as_echo "$gl_cv_c___inline" >&6; }
 $as_echo "#define HAVE___INLINE 1" >>confdefs.h
 
   fi
+
+
+
+  if test "$ac_cv_header_winsock2_h" = yes; then
+
+
+
+
+
+
+
+
+  gl_LIBOBJS="$gl_LIBOBJS listen.$ac_objext"
+
+  fi
+
+
+
+
+
+          GNULIB_LISTEN=1
+
+
+
+
+
+$as_echo "#define GNULIB_TEST_LISTEN 1" >>confdefs.h
+
 
 
 
@@ -28604,6 +28732,34 @@ $as_echo "#define GNULIB_TEST_SETLOCALE_NULL 1" >>confdefs.h
 
 
 
+  if test "$ac_cv_header_winsock2_h" = yes; then
+
+
+
+
+
+
+
+
+  gl_LIBOBJS="$gl_LIBOBJS setsockopt.$ac_objext"
+
+  fi
+
+
+
+
+
+          GNULIB_SETSOCKOPT=1
+
+
+
+
+
+$as_echo "#define GNULIB_TEST_SETSOCKOPT 1" >>confdefs.h
+
+
+
+
 
 
 
@@ -28710,6 +28866,43 @@ fi
 
 
 
+
+
+
+
+  if test "$ac_cv_header_winsock2_h" = yes; then
+
+
+
+
+
+
+
+
+  gl_LIBOBJS="$gl_LIBOBJS socket.$ac_objext"
+
+  fi
+  # When this module is used, sockets may actually occur as file descriptors,
+  # hence it is worth warning if the modules 'close' and 'ioctl' are not used.
+
+
+
+  if test "$ac_cv_header_winsock2_h" = yes; then
+    UNISTD_H_HAVE_WINSOCK2_H_AND_USE_SOCKETS=1
+    SYS_IOCTL_H_HAVE_WINSOCK2_H_AND_USE_SOCKETS=1
+  fi
+
+
+
+
+
+          GNULIB_SOCKET=1
+
+
+
+
+
+$as_echo "#define GNULIB_TEST_SOCKET 1" >>confdefs.h
 
 
 
@@ -30717,6 +30910,95 @@ $as_echo "$gl_cv_next_sys_uio_h" >&6; }
   else
     HAVE_SYS_UIO_H=0
   fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     if test $gl_cv_have_include_next = yes; then
+       gl_cv_next_sys_wait_h='<'sys/wait.h'>'
+     else
+       { $as_echo "$as_me:${as_lineno-$LINENO}: checking absolute name of <sys/wait.h>" >&5
+$as_echo_n "checking absolute name of <sys/wait.h>... " >&6; }
+if ${gl_cv_next_sys_wait_h+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+             if test $ac_cv_header_sys_wait_h = yes; then
+
+
+
+
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/wait.h>
+_ACEOF
+                case "$host_os" in
+    aix*) gl_absname_cpp="$ac_cpp -C" ;;
+    *)    gl_absname_cpp="$ac_cpp" ;;
+  esac
+
+  case "$host_os" in
+    mingw*)
+                                          gl_dirsep_regex='[/\\]'
+      ;;
+    *)
+      gl_dirsep_regex='\/'
+      ;;
+  esac
+      gl_make_literal_regex_sed='s,[]$^\\.*/[],\\&,g'
+  gl_header_literal_regex=`echo 'sys/wait.h' \
+                           | sed -e "$gl_make_literal_regex_sed"`
+  gl_absolute_header_sed="/${gl_dirsep_regex}${gl_header_literal_regex}/"'{
+      s/.*"\(.*'"${gl_dirsep_regex}${gl_header_literal_regex}"'\)".*/\1/
+      s|^/[^/]|//&|
+      p
+      q
+    }'
+
+        gl_cv_absolute_sys_wait_h=`(eval "$gl_absname_cpp conftest.$ac_ext") 2>&5 |
+  sed -n "$gl_absolute_header_sed"`
+
+           gl_header=$gl_cv_absolute_sys_wait_h
+           gl_cv_next_sys_wait_h='"'$gl_header'"'
+          else
+               gl_cv_next_sys_wait_h='<'sys/wait.h'>'
+             fi
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_next_sys_wait_h" >&5
+$as_echo "$gl_cv_next_sys_wait_h" >&6; }
+     fi
+     NEXT_SYS_WAIT_H=$gl_cv_next_sys_wait_h
+
+     if test $gl_cv_have_include_next = yes || test $gl_cv_have_include_next = buggy; then
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include_next'
+       gl_next_as_first_directive='<'sys/wait.h'>'
+     else
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include'
+       gl_next_as_first_directive=$gl_cv_next_sys_wait_h
+     fi
+     NEXT_AS_FIRST_DIRECTIVE_SYS_WAIT_H=$gl_next_as_first_directive
+
+
+
+
+
+
+
+
+
 
 
 

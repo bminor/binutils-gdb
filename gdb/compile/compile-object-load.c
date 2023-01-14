@@ -1,6 +1,6 @@
 /* Load module for 'compile' command.
 
-   Copyright (C) 2014-2021 Free Software Foundation, Inc.
+   Copyright (C) 2014-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -421,7 +421,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
   lookup_name_info func_matcher (GCC_FE_WRAPPER_FUNCTION,
 				 symbol_name_match_type::SEARCH_NAME);
 
-  bv = SYMTAB_BLOCKVECTOR (func_sym->owner.symtab);
+  bv = func_sym->owner.symtab->blockvector ();
   nblocks = BLOCKVECTOR_NBLOCKS (bv);
 
   gdb_ptr_type_sym = NULL;
@@ -552,8 +552,8 @@ store_regs (struct type *regs_type, CORE_ADDR regs_base)
 
   for (fieldno = 0; fieldno < regs_type->num_fields (); fieldno++)
     {
-      const char *reg_name = TYPE_FIELD_NAME (regs_type, fieldno);
-      ULONGEST reg_bitpos = TYPE_FIELD_BITPOS (regs_type, fieldno);
+      const char *reg_name = regs_type->field (fieldno).name ();
+      ULONGEST reg_bitpos = regs_type->field (fieldno).loc_bitpos ();
       ULONGEST reg_bitsize = TYPE_FIELD_BITSIZE (regs_type, fieldno);
       ULONGEST reg_offset;
       struct type *reg_type
@@ -585,7 +585,8 @@ store_regs (struct type *regs_type, CORE_ADDR regs_base)
 	error (_("Register \"%s\" is not available."), reg_name);
 
       inferior_addr = regs_base + reg_offset;
-      if (0 != target_write_memory (inferior_addr, value_contents (regval),
+      if (0 != target_write_memory (inferior_addr,
+				    value_contents (regval).data (),
 				    reg_size))
 	error (_("Cannot write register \"%s\" to inferior memory at %s."),
 	       reg_name, paddress (gdbarch, inferior_addr));

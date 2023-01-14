@@ -2,7 +2,7 @@
 
 # x86_64_gd_to_ie.sh -- a test for GDesc -> IE conversion.
 
-# Copyright (C) 2020-2021 Free Software Foundation, Inc.
+# Copyright (C) 2020-2022 Free Software Foundation, Inc.
 
 # This file is part of gold.
 

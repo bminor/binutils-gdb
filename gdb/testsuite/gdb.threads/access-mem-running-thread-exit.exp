@@ -1,4 +1,4 @@
-# Copyright (C) 2021 Free Software Foundation, Inc.
+# Copyright (C) 2021-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,16 +26,18 @@
 # memory through exits.
 #
 # The test spawns two processes and alternates memory accesses between
-# them to force flushing per-process caches.  At the time of writing,
-# the Linux backend accesses inferior memory via /proc/<pid>/mem, and
-# keeps one such file open, as a cache.  Alternating inferiors forces
-# opening such file for a different process, which fails if GDB tries
-# to open the file for a thread that exited.  The test does ensures
-# those reopen/fail code paths are exercised.
+# them to force flushing per-process caches.  When the testcase was
+# originally written, the Linux backend would access inferior memory
+# via /proc/PID/mem, and kept one such file open, as a cache.
+# Alternating inferiors would force re-opening such file for a
+# different process, which would fail if GDB tried to open the file
+# for a thread that exited.  The test thus ensured those reopen/fail
+# code paths were exercised.  Nowadays, GDB keeps one /proc/PID/mem
+# file open per inferior.
 
 standard_testfile
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug pthreads}] == -1} {
+if {[build_executable "failed to prepare" $testfile $srcfile {debug pthreads}] == -1} {
     return -1
 }
 
@@ -53,7 +55,6 @@ proc test { non_stop } {
     }
 
     if ![runto_main] {
-	fail "cannot run to main"
 	return -1
     }
 
@@ -84,7 +85,6 @@ proc test { non_stop } {
 	gdb_load $binfile
 
 	if ![runto_main] {
-	    fail "cannot run to main"
 	    return -1
 	}
     }

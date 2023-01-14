@@ -1,4 +1,4 @@
-# Copyright (C) 2007-2021 Free Software Foundation, Inc.
+# Copyright (C) 2007-2022 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -47,6 +47,7 @@
 WHICH = mips-linux mips-dsp-linux \
 	mips64-linux mips64-dsp-linux \
 	nios2-linux \
+	or1k-linux \
 	rs6000/powerpc-32 \
 	rs6000/powerpc-32l rs6000/powerpc-altivec32l rs6000/powerpc-e500l \
 	rs6000/powerpc-64l rs6000/powerpc-altivec64l rs6000/powerpc-vsx32l \
@@ -203,6 +204,7 @@ FEATURE_XMLFILES = aarch64-core.xml \
 	arm/arm-core.xml \
 	arm/arm-fpa.xml \
 	arm/arm-m-profile.xml \
+	arm/arm-m-profile-mve.xml \
 	arm/arm-m-profile-with-fpa.xml \
 	arm/arm-vfpv2.xml \
 	arm/arm-vfpv3.xml \

@@ -1,5 +1,5 @@
 /* Main simulator entry points specific to the eBPF.
-   Copyright (C) 2020-2021 Free Software Foundation, Inc.
+   Copyright (C) 2020-2022 Free Software Foundation, Inc.
 
    This file is part of GDB, the GNU debugger.
 
@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 
+#include "sim/callback.h"
 #include "sim-main.h"
 #include "sim-options.h"
 #include "libiberty.h"
@@ -147,10 +148,7 @@ sim_open (SIM_OPEN_KIND kind,
   if (sim_parse_args (sd, argv) != SIM_RC_OK)
     goto error;
 
-  if (sim_analyze_program (sd,
-                           (STATE_PROG_ARGV (sd) != NULL
-                            ? *STATE_PROG_ARGV (sd)
-                            : NULL), abfd) != SIM_RC_OK)
+  if (sim_analyze_program (sd, STATE_PROG_FILE (sd), abfd) != SIM_RC_OK)
     goto error;
 
   if (sim_config (sd) != SIM_RC_OK)
@@ -193,9 +191,10 @@ sim_open (SIM_OPEN_KIND kind,
 
 SIM_RC
 sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
-		     char *const *argv, char *const *envp)
+		     char *const *argv, char *const *env)
 {
   SIM_CPU *current_cpu = STATE_CPU (sd, 0);
+  host_callback *cb = STATE_CALLBACK (sd);
   SIM_ADDR addr;
 
   /* Determine the start address.
@@ -215,6 +214,15 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
       freeargv (STATE_PROG_ARGV (sd));
       STATE_PROG_ARGV (sd) = dupargv (argv);
     }
+
+  if (STATE_PROG_ENVP (sd) != env)
+    {
+      freeargv (STATE_PROG_ENVP (sd));
+      STATE_PROG_ENVP (sd) = dupargv (env);
+    }
+
+  cb->argv = STATE_PROG_ARGV (sd);
+  cb->envp = STATE_PROG_ENVP (sd);
 
   return SIM_RC_OK;
 }

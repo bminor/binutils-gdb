@@ -1,6 +1,6 @@
 /* Definitions for BFD wrappers used by GDB.
 
-   Copyright (C) 2011-2021 Free Software Foundation, Inc.
+   Copyright (C) 2011-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -222,5 +222,12 @@ gdb_bfd_sections (const gdb_bfd_ref_ptr &abfd)
 {
   return gdb_bfd_section_range (abfd->sections);
 };
+
+/* A wrapper for bfd_errmsg to produce a more helpful error message
+   in the case of bfd_error_file_ambiguously recognized.
+   MATCHING, if non-NULL, is the corresponding argument to
+   bfd_check_format_matches, and will be freed.  */
+
+extern std::string gdb_bfd_errmsg (bfd_error_type error_tag, char **matching);
 
 #endif /* GDB_BFD_H */

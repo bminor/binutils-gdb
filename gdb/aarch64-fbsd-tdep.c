@@ -1,6 +1,6 @@
 /* Target-dependent code for FreeBSD/aarch64.
 
-   Copyright (C) 2017-2021 Free Software Foundation, Inc.
+   Copyright (C) 2017-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -153,7 +153,7 @@ aarch64_fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 static void
 aarch64_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   /* Generic FreeBSD support.  */
   fbsd_init_abi (info, gdbarch);

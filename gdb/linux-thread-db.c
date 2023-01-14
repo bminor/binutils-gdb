@@ -1,6 +1,6 @@
 /* libthread_db assisted debugging support, generic parts.
 
-   Copyright (C) 1999-2021 Free Software Foundation, Inc.
+   Copyright (C) 1999-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -102,7 +102,7 @@ public:
 				      CORE_ADDR load_module_addr,
 				      CORE_ADDR offset) override;
   const char *extra_thread_info (struct thread_info *) override;
-  ptid_t get_ada_task_ptid (long lwp, long thread) override;
+  ptid_t get_ada_task_ptid (long lwp, ULONGEST thread) override;
 
   thread_info *thread_handle_to_thread_info (const gdb_byte *thread_handle,
 					     int handle_len,
@@ -110,7 +110,7 @@ public:
   gdb::byte_vector thread_info_to_thread_handle (struct thread_info *) override;
 };
 
-static char *libthread_db_search_path;
+static std::string libthread_db_search_path = LIBTHREAD_DB_SEARCH_PATH;
 
 /* Set to true if thread_db auto-loading is enabled
    by the "set auto-load libthread-db" command.  */
@@ -135,11 +135,8 @@ static void
 set_libthread_db_search_path (const char *ignored, int from_tty,
 			      struct cmd_list_element *c)
 {
-  if (*libthread_db_search_path == '\0')
-    {
-      xfree (libthread_db_search_path);
-      libthread_db_search_path = xstrdup (LIBTHREAD_DB_SEARCH_PATH);
-    }
+  if (libthread_db_search_path.empty ())
+    libthread_db_search_path = LIBTHREAD_DB_SEARCH_PATH;
 }
 
 /* If non-zero, print details of libthread_db processing.  */
@@ -687,7 +684,7 @@ check_thread_db_callback (const td_thrhandle_t *th, void *arg)
      calls are made, we just assume they were; future changes
      to how GDB accesses TLS could result in this passing
      without exercising the calls it's supposed to.  */
-  ptid_t ptid = ptid_t (tdb_testinfo->info->pid, ti.ti_lid, 0);
+  ptid_t ptid = ptid_t (tdb_testinfo->info->pid, ti.ti_lid);
   thread_info *thread_info = find_thread_ptid (linux_target, ptid);
   if (thread_info != NULL && thread_info->priv != NULL)
     {
@@ -920,13 +917,12 @@ try_thread_db_load_1 (struct thread_db_info *info)
 
   if (info->td_ta_thr_iter_p == NULL)
     {
-      struct lwp_info *lp;
       int pid = inferior_ptid.pid ();
       thread_info *curr_thread = inferior_thread ();
 
       linux_stop_and_wait_all_lwps ();
 
-      ALL_LWPS (lp)
+      for (const lwp_info *lp : all_lwps ())
 	if (lp->ptid.pid () == pid)
 	  thread_from_lwp (curr_thread, lp->ptid);
 
@@ -942,23 +938,16 @@ try_thread_db_load_1 (struct thread_db_info *info)
 
   printf_unfiltered (_("[Thread debugging using libthread_db enabled]\n"));
 
-  if (*libthread_db_search_path || libthread_db_debug)
+  if (!libthread_db_search_path.empty () || libthread_db_debug)
     {
-      struct ui_file *file;
       const char *library;
 
       library = dladdr_to_soname ((const void *) *info->td_ta_new_p);
       if (library == NULL)
 	library = LIBTHREAD_DB_SO;
 
-      /* If we'd print this to gdb_stdout when debug output is
-	 disabled, still print it to gdb_stdout if debug output is
-	 enabled.  User visible output should not depend on debug
-	 settings.  */
-      file = *libthread_db_search_path != '\0' ? gdb_stdout : gdb_stdlog;
-      fprintf_unfiltered (file,
-			  _("Using host libthread_db library \"%ps\".\n"),
-			  styled_string (file_name_style.style (), library));
+      printf_unfiltered (_("Using host libthread_db library \"%ps\".\n"),
+			 styled_string (file_name_style.style (), library));
     }
 
   /* The thread library was detected.  Activate the thread_db target
@@ -1143,7 +1132,7 @@ thread_db_load_search (void)
   bool rc = false;
 
   std::vector<gdb::unique_xmalloc_ptr<char>> dir_vec
-    = dirnames_to_char_ptr_vec (libthread_db_search_path);
+    = dirnames_to_char_ptr_vec (libthread_db_search_path.c_str ());
 
   for (const gdb::unique_xmalloc_ptr<char> &this_dir_up : dir_vec)
     {
@@ -1411,7 +1400,7 @@ thread_db_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
   ptid = beneath->wait (ptid, ourstatus, options);
 
-  switch (ourstatus->kind)
+  switch (ourstatus->kind ())
     {
     case TARGET_WAITKIND_IGNORE:
     case TARGET_WAITKIND_EXITED:
@@ -1641,7 +1630,7 @@ thread_db_target::update_thread_list ()
 	continue;
 
       thread_info *thread = any_live_thread_of_inferior (inf);
-      if (thread == NULL || thread->executing)
+      if (thread == NULL || thread->executing ())
 	continue;
 
       /* It's best to avoid td_ta_thr_iter if possible.  That walks
@@ -1839,10 +1828,10 @@ thread_db_target::get_thread_local_address (ptid_t ptid,
 /* Implement the to_get_ada_task_ptid target method for this target.  */
 
 ptid_t
-thread_db_target::get_ada_task_ptid (long lwp, long thread)
+thread_db_target::get_ada_task_ptid (long lwp, ULONGEST thread)
 {
   /* NPTL uses a 1:1 model, so the LWP id suffices.  */
-  return ptid_t (inferior_ptid.pid (), lwp, 0);
+  return ptid_t (inferior_ptid.pid (), lwp);
 }
 
 void
@@ -2005,8 +1994,6 @@ _initialize_thread_db ()
      executable -- there could be multiple versions of glibc,
      and until there is a running inferior, we can't tell which
      libthread_db is the correct one to load.  */
-
-  libthread_db_search_path = xstrdup (LIBTHREAD_DB_SEARCH_PATH);
 
   add_setshow_optional_filename_cmd ("libthread-db-search-path",
 				     class_support,

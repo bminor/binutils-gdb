@@ -1,6 +1,6 @@
 /* DWARF 2 location expression support for GDB.
 
-   Copyright (C) 2003-2021 Free Software Foundation, Inc.
+   Copyright (C) 2003-2022 Free Software Foundation, Inc.
 
    Contributed by Daniel Jacobowitz, MontaVista Software, Inc.
 
@@ -139,7 +139,9 @@ decode_debug_loc_addresses (const gdb_byte *loc_ptr, const gdb_byte *buf_end,
   if (*low == 0 && *high == 0)
     return DEBUG_LOC_END_OF_LIST;
 
-  return DEBUG_LOC_START_END;
+  /* We want the caller to apply the base address, so we must return
+     DEBUG_LOC_OFFSET_PAIR here.  */
+  return DEBUG_LOC_OFFSET_PAIR;
 }
 
 /* Decode the addresses in .debug_loclists entry.
@@ -354,9 +356,9 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int addr_size = baton->per_cu->addr_size ();
   int signed_addr_p = bfd_get_sign_extend_vma (objfile->obfd);
-  /* Adjust base_address for relocatable objects.  */
-  CORE_ADDR base_offset = baton->per_objfile->objfile->text_section_offset ();
-  CORE_ADDR base_address = baton->base_address + base_offset;
+  /* Adjustment for relocatable objects.  */
+  CORE_ADDR text_offset = baton->per_objfile->objfile->text_section_offset ();
+  CORE_ADDR base_address = baton->base_address;
   const gdb_byte *loc_ptr, *buf_end;
 
   loc_ptr = baton->data;
@@ -394,7 +396,7 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 	  return NULL;
 
 	case DEBUG_LOC_BASE_ADDRESS:
-	  base_address = high + base_offset;
+	  base_address = high;
 	  continue;
 
 	case DEBUG_LOC_START_END:
@@ -414,15 +416,14 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
       /* Otherwise, a location expression entry.
 	 If the entry is from a DWO, don't add base address: the entry is from
 	 .debug_addr which already has the DWARF "base address". We still add
-	 base_offset in case we're debugging a PIE executable. However, if the
+	 text offset in case we're debugging a PIE executable. However, if the
 	 entry is DW_LLE_offset_pair from a DWO, add the base address as the
-	 operands are offsets relative to the applicable base address.  */
-      if (baton->from_dwo && kind != DEBUG_LOC_OFFSET_PAIR)
-	{
-	  low += base_offset;
-	  high += base_offset;
-	}
-      else
+	 operands are offsets relative to the applicable base address.
+	 If the entry is DW_LLE_start_end or DW_LLE_start_length, then
+	 it already is an address, and we don't need to add the base.  */
+      low += text_offset;
+      high += text_offset;
+      if (!baton->from_dwo && kind == DEBUG_LOC_OFFSET_PAIR)
 	{
 	  low += base_address;
 	  high += base_address;
@@ -640,7 +641,7 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
 			  struct call_site *call_site,
 			  struct frame_info *caller_frame)
 {
-  switch (FIELD_LOC_KIND (call_site->target))
+  switch (call_site->target.loc_kind ())
     {
     case FIELD_LOC_KIND_DWARF_BLOCK:
       {
@@ -649,15 +650,15 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
 	struct type *caller_core_addr_type;
 	struct gdbarch *caller_arch;
 
-	dwarf_block = FIELD_DWARF_BLOCK (call_site->target);
+	dwarf_block = call_site->target.loc_dwarf_block ();
 	if (dwarf_block == NULL)
 	  {
 	    struct bound_minimal_symbol msym;
 	    
-	    msym = lookup_minimal_symbol_by_pc (call_site->pc - 1);
+	    msym = lookup_minimal_symbol_by_pc (call_site->pc () - 1);
 	    throw_error (NO_ENTRY_VALUE_ERROR,
 			 _("DW_AT_call_target is not specified at %s in %s"),
-			 paddress (call_site_gdbarch, call_site->pc),
+			 paddress (call_site_gdbarch, call_site->pc ()),
 			 (msym.minsym == NULL ? "???"
 			  : msym.minsym->print_name ()));
 			
@@ -666,12 +667,12 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
 	  {
 	    struct bound_minimal_symbol msym;
 	    
-	    msym = lookup_minimal_symbol_by_pc (call_site->pc - 1);
+	    msym = lookup_minimal_symbol_by_pc (call_site->pc () - 1);
 	    throw_error (NO_ENTRY_VALUE_ERROR,
 			 _("DW_AT_call_target DWARF block resolving "
 			   "requires known frame which is currently not "
 			   "available at %s in %s"),
-			 paddress (call_site_gdbarch, call_site->pc),
+			 paddress (call_site_gdbarch, call_site->pc ()),
 			 (msym.minsym == NULL ? "???"
 			  : msym.minsym->print_name ()));
 			
@@ -694,17 +695,17 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
 	const char *physname;
 	struct bound_minimal_symbol msym;
 
-	physname = FIELD_STATIC_PHYSNAME (call_site->target);
+	physname = call_site->target.loc_physname ();
 
 	/* Handle both the mangled and demangled PHYSNAME.  */
 	msym = lookup_minimal_symbol (physname, NULL, NULL);
 	if (msym.minsym == NULL)
 	  {
-	    msym = lookup_minimal_symbol_by_pc (call_site->pc - 1);
+	    msym = lookup_minimal_symbol_by_pc (call_site->pc () - 1);
 	    throw_error (NO_ENTRY_VALUE_ERROR,
 			 _("Cannot find function \"%s\" for a call site target "
 			   "at %s in %s"),
-			 physname, paddress (call_site_gdbarch, call_site->pc),
+			 physname, paddress (call_site_gdbarch, call_site->pc ()),
 			 (msym.minsym == NULL ? "???"
 			  : msym.minsym->print_name ()));
 			
@@ -713,7 +714,14 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
       }
 
     case FIELD_LOC_KIND_PHYSADDR:
-      return FIELD_STATIC_PHYSADDR (call_site->target);
+      {
+	dwarf2_per_objfile *per_objfile = call_site->per_objfile;
+	compunit_symtab *cust = per_objfile->get_symtab (call_site->per_cu);
+	int sect_idx = cust->block_line_section ();
+	CORE_ADDR delta = per_objfile->objfile->section_offsets[sect_idx];
+
+	return call_site->target.loc_physaddr () + delta;
+      }
 
     default:
       internal_error (__FILE__, __LINE__, _("invalid call site target kind"));
@@ -810,7 +818,7 @@ func_verify_no_selftailcall (struct gdbarch *gdbarch, CORE_ADDR verify_addr)
 static void
 tailcall_dump (struct gdbarch *gdbarch, const struct call_site *call_site)
 {
-  CORE_ADDR addr = call_site->pc;
+  CORE_ADDR addr = call_site->pc ();
   struct bound_minimal_symbol msym = lookup_minimal_symbol_by_pc (addr - 1);
 
   fprintf_unfiltered (gdb_stdlog, " %s(%s)", paddress (gdbarch, addr),
@@ -986,7 +994,7 @@ call_site_find_chain_1 (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
 
 	  if (target_call_site)
 	    {
-	      if (addr_hash.insert (target_call_site->pc).second)
+	      if (addr_hash.insert (target_call_site->pc ()).second)
 		{
 		  /* Successfully entered TARGET_CALL_SITE.  */
 
@@ -1005,7 +1013,7 @@ call_site_find_chain_1 (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
 	      call_site = chain.back ();
 	      chain.pop_back ();
 
-	      size_t removed = addr_hash.erase (call_site->pc);
+	      size_t removed = addr_hash.erase (call_site->pc ());
 	      gdb_assert (removed == 1);
 
 	      target_call_site = call_site->tail_call_next;
@@ -1275,6 +1283,7 @@ static const struct lval_funcs entry_data_value_funcs =
 {
   NULL,	/* read */
   NULL,	/* write */
+  nullptr,
   NULL,	/* indirect */
   entry_data_value_coerce_ref,
   NULL,	/* check_synthetic_pointer */
@@ -1330,7 +1339,8 @@ value_of_dwarf_reg_entry (struct type *type, struct frame_info *frame,
 				 release_value (target_val).release ());
 
   /* Copy the referencing pointer to the new computed value.  */
-  memcpy (value_contents_raw (val), value_contents_raw (outer_val),
+  memcpy (value_contents_raw (val).data (),
+	  value_contents_raw (outer_val).data (),
 	  TYPE_LENGTH (checked_type));
   set_value_lazy (val, 0);
 
@@ -3912,9 +3922,9 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
   unsigned int addr_size = dlbaton->per_cu->addr_size ();
   int offset_size = dlbaton->per_cu->offset_size ();
   int signed_addr_p = bfd_get_sign_extend_vma (objfile->obfd);
-  /* Adjust base_address for relocatable objects.  */
-  CORE_ADDR base_offset = objfile->text_section_offset ();
-  CORE_ADDR base_address = dlbaton->base_address + base_offset;
+  /* Adjustment for relocatable objects.  */
+  CORE_ADDR text_offset = objfile->text_section_offset ();
+  CORE_ADDR base_address = dlbaton->base_address;
   int done = 0;
 
   loc_ptr = dlbaton->data;
@@ -3954,7 +3964,7 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 	  continue;
 
 	case DEBUG_LOC_BASE_ADDRESS:
-	  base_address = high + base_offset;
+	  base_address = high;
 	  fprintf_filtered (stream, _("  Base address %s"),
 			    paddress (gdbarch, base_address));
 	  continue;
@@ -3974,8 +3984,13 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 	}
 
       /* Otherwise, a location expression entry.  */
-      low += base_address;
-      high += base_address;
+      low += text_offset;
+      high += text_offset;
+      if (!dlbaton->from_dwo && kind == DEBUG_LOC_OFFSET_PAIR)
+	{
+	  low += base_address;
+	  high += base_address;
+	}
 
       low = gdbarch_adjust_dwarf2_addr (gdbarch, low);
       high = gdbarch_adjust_dwarf2_addr (gdbarch, high);

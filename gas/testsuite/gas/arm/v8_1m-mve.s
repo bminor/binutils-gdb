@@ -22,3 +22,8 @@ vstr d15,[r1]
 vldr d15,[r1]
 vstr s31,[r1]
 vldr s31,[r1]
+	
+vpush {s0-s31}		// -> false error, is a valid command
+vpush {s0-s15}		// OK
+vpop {s0-s15}		// OK
+vpop {s0-s31}		// -> false error, is a valid command

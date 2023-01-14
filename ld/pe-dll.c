@@ -1,5 +1,5 @@
 /* Routines to help build PEI-format DLLs (Win32 etc)
-   Copyright (C) 1998-2021 Free Software Foundation, Inc.
+   Copyright (C) 1998-2022 Free Software Foundation, Inc.
    Written by DJ Delorie <dj@cygnus.com>
 
    This file is part of the GNU Binutils.
@@ -348,6 +348,7 @@ static const autofilter_entry_type autofilter_liblist[] =
   { STRING_COMMA_LEN ("libgcj") },
   { STRING_COMMA_LEN ("libmsvcrt") },
   { STRING_COMMA_LEN ("libmsvcrt-os") },
+  { STRING_COMMA_LEN ("libucrt") },
   { STRING_COMMA_LEN ("libucrtbase") },
   { NULL, 0 }
 };
@@ -1972,6 +1973,7 @@ static int symptr;
 static int tmp_seq;
 static const char *dll_filename;
 static char *dll_symname;
+static int dll_symname_len;
 
 #define UNDSEC bfd_und_section_ptr
 
@@ -2082,8 +2084,8 @@ make_head (bfd *parent)
   char *oname;
   bfd *abfd;
 
-  oname = xmalloc (20);
-  sprintf (oname, "d%06d.o", tmp_seq);
+  oname = xmalloc (20 + dll_symname_len);
+  sprintf (oname, "%s_d%06d.o", dll_symname, tmp_seq);
   tmp_seq++;
 
   abfd = bfd_create (oname, parent);
@@ -2171,8 +2173,8 @@ make_tail (bfd *parent)
   char *oname;
   bfd *abfd;
 
-  oname = xmalloc (20);
-  sprintf (oname, "d%06d.o", tmp_seq);
+  oname = xmalloc (20 + dll_symname_len);
+  sprintf (oname, "%s_d%06d.o", dll_symname, tmp_seq);
   tmp_seq++;
 
   abfd = bfd_create (oname, parent);
@@ -2322,8 +2324,8 @@ make_one (def_file_export *exp, bfd *parent, bool include_jmp_stub)
 	}
     }
 
-  oname = xmalloc (20);
-  sprintf (oname, "d%06d.o", tmp_seq);
+  oname = xmalloc (20 + dll_symname_len);
+  sprintf (oname, "%s_d%06d.o", dll_symname, tmp_seq);
   tmp_seq++;
 
   abfd = bfd_create (oname, parent);
@@ -2508,8 +2510,8 @@ make_singleton_name_thunk (const char *import, bfd *parent)
   char *oname;
   bfd *abfd;
 
-  oname = xmalloc (20);
-  sprintf (oname, "nmth%06d.o", tmp_seq);
+  oname = xmalloc (20 + dll_symname_len);
+  sprintf (oname, "%s_nmth%06d.o", dll_symname, tmp_seq);
   tmp_seq++;
 
   abfd = bfd_create (oname, parent);
@@ -2584,8 +2586,8 @@ make_import_fixup_entry (const char *name,
   char *oname;
   bfd *abfd;
 
-  oname = xmalloc (20);
-  sprintf (oname, "fu%06d.o", tmp_seq);
+  oname = xmalloc (20 + dll_symname_len);
+  sprintf (oname, "%s_fu%06d.o", dll_symname, tmp_seq);
   tmp_seq++;
 
   abfd = bfd_create (oname, parent);
@@ -2638,8 +2640,8 @@ make_runtime_pseudo_reloc (const char *name ATTRIBUTE_UNUSED,
   bfd *abfd;
   bfd_size_type size;
 
-  oname = xmalloc (20);
-  sprintf (oname, "rtr%06d.o", tmp_seq);
+  oname = xmalloc (20 + dll_symname_len);
+  sprintf (oname, "%s_rtr%06d.o", dll_symname, tmp_seq);
   tmp_seq++;
 
   abfd = bfd_create (oname, parent);
@@ -2725,8 +2727,8 @@ pe_create_runtime_relocator_reference (bfd *parent)
   char *oname;
   bfd *abfd;
 
-  oname = xmalloc (20);
-  sprintf (oname, "ertr%06d.o", tmp_seq);
+  oname = xmalloc (20 + dll_symname_len);
+  sprintf (oname, "%s_ertr%06d.o", dll_symname, tmp_seq);
   tmp_seq++;
 
   abfd = bfd_create (oname, parent);
@@ -2833,6 +2835,7 @@ pe_dll_generate_implib (def_file *def, const char *impfilename, struct bfd_link_
 
   dll_filename = (def->name) ? def->name : dll_name;
   dll_symname = xstrdup (dll_filename);
+  dll_symname_len = strlen (dll_symname);
   for (i = 0; dll_symname[i]; i++)
     if (!ISALNUM (dll_symname[i]))
       dll_symname[i] = '_';
@@ -3201,6 +3204,7 @@ pe_process_import_defs (bfd *output_bfd, struct bfd_link_info *linfo)
 
       dll_filename = module->name;
       dll_symname = xstrdup (module->name);
+      dll_symname_len = strlen (dll_symname);
       for (j = 0; dll_symname[j]; j++)
 	if (!ISALNUM (dll_symname[j]))
 	  dll_symname[j] = '_';

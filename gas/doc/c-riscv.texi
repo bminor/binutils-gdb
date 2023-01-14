@@ -1,4 +1,4 @@
-@c Copyright (C) 2016-2021 Free Software Foundation, Inc.
+@c Copyright (C) 2016-2022 Free Software Foundation, Inc.
 @c This is part of the GAS anual.
 @c For copying conditions, see the file as.texinfo
 @c man end
@@ -194,7 +194,7 @@ command-line options are respected for the bulk of the file being assembled.
 @itemx norvc
 Enables or disables the generation of compressed instructions.  Instructions
 are opportunistically compressed by the RISC-V assembler when possible, but
-sometimes this behavior is not desirable.
+sometimes this behavior is not desirable, especially when handling alignments.
 
 @item pic
 @itemx nopic
@@ -212,14 +212,37 @@ desirable.
 @itemx no-csr-check
 Enables or disables the CSR checking.
 
+@item arch, @var{+extension[version]} [,...,@var{+extension_n[version_n]}]
+@itemx arch, @var{-extension} [,...,@var{-extension_n}]
+@itemx arch, @var{=ISA}
+Enables or disables the extensions for specific code region.  For example,
+@samp{.option arch, +m2p0} means add m extension with version 2.0, and
+@samp{.option arch, -f, -d} means remove extensions, f and d, from the
+architecture string.  Note that, @samp{.option arch, +c, -c} have the same
+behavior as @samp{.option rvc, norvc}.  However, they are also undesirable
+sometimes.  Besides, @samp{.option arch, -i} is illegal, since we cannot
+remove the base i extension anytime.  If you want to reset the whole ISA
+string, you can also use @samp{.option arch, =rv32imac} to overwrite the
+previous settings.
+
 @cindex INSN directives
-@item .insn @var{value}
+@item .insn @var{type}, @var{operand} [,...,@var{operand_n}]
+@itemx .insn @var{insn_length}, @var{value}
 @itemx .insn @var{value}
 This directive permits the numeric representation of an instructions
 and makes the assembler insert the operands according to one of the
 instruction formats for @samp{.insn} (@ref{RISC-V-Formats}).
 For example, the instruction @samp{add a0, a1, a2} could be written as
-@samp{.insn r 0x33, 0, 0, a0, a1, a2}.
+@samp{.insn r 0x33, 0, 0, a0, a1, a2}.  But in fact, the instruction
+formats are difficult to use for some users, so most of them are using
+@samp{.word} to encode the instruction directly, rather than using
+@samp{.insn}.  It is fine for now, but will be wrong when the mapping
+symbols are supported, since @samp{.word} will not be shown as an
+instruction, it should be shown as data.  Therefore, we also support
+two more formats of the @samp{.insn}, the instruction @samp{add a0, a1, a2}
+could also be written as @samp{.insn 0x4, 0xc58533} or @samp{.insn 0xc58533}.
+When the @var{insn_length} is set, then assembler will check if the
+@var{value} is a valid @var{insn_length} bytes instruction.
 
 @cindex @code{.attribute} directive, RISC-V
 @item .attribute @var{tag}, @var{value}

@@ -1,5 +1,5 @@
 /* Compiler options:
-#notarget: cris*-*-elf
+#progos: linux
 #cc: additional_flags=-pthread
 #output: Starting process a\naaaaaaaaStarting process b\nababbbbbbbbb
 

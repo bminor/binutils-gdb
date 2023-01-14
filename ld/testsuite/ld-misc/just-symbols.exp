@@ -1,5 +1,5 @@
 # Expect script for ld --just-symbols tests.
-#   Copyright (C) 2020-2021 Free Software Foundation, Inc.
+#   Copyright (C) 2020-2022 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -44,7 +44,7 @@ run_ld_link_tests [list \
      "" \
      {just-symbols-0.s} \
      {} \
-     "just-symbols-0.o"] \
+     "just-symbols-r"] \
     [list "Executable for --just-symbols test" \
      "$LDFLAGS -e 0 -T just-symbols.ld" "" \
      "" \

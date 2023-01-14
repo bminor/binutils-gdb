@@ -86,7 +86,6 @@ mrs x0, trcextinselr1
 mrs x0, trcextinselr2
 mrs x0, trcextinselr3
 mrs x0, trcimspec0
-mrs x0, trcimspec0
 mrs x0, trcimspec1
 mrs x0, trcimspec2
 mrs x0, trcimspec3
@@ -264,7 +263,6 @@ msr trcextinselr, x0
 msr trcextinselr1, x0
 msr trcextinselr2, x0
 msr trcextinselr3, x0
-msr trcimspec0, x0
 msr trcimspec0, x0
 msr trcimspec1, x0
 msr trcimspec2, x0

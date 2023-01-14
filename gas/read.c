@@ -1,5 +1,5 @@
 /* read.c - read a source file -
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -382,10 +382,10 @@ static const pseudo_typeS potable[] = {
   {"ds.b", s_space, 1},
   {"ds.d", s_space, 8},
   {"ds.l", s_space, 4},
-  {"ds.p", s_space, 12},
+  {"ds.p", s_space, 'p'},
   {"ds.s", s_space, 4},
   {"ds.w", s_space, 2},
-  {"ds.x", s_space, 12},
+  {"ds.x", s_space, 'x'},
   {"debug", s_ignore, 0},
 #ifdef S_SET_DESC
   {"desc", s_desc, 0},
@@ -3327,6 +3327,29 @@ s_space (int mult)
   md_flush_pending_output ();
 #endif
 
+  switch (mult)
+    {
+    case 'x':
+#ifdef X_PRECISION
+# ifndef P_PRECISION
+#  define P_PRECISION     X_PRECISION
+#  define P_PRECISION_PAD X_PRECISION_PAD
+# endif
+      mult = (X_PRECISION + X_PRECISION_PAD) * sizeof (LITTLENUM_TYPE);
+      if (!mult)
+#endif
+	mult = 12;
+      break;
+
+    case 'p':
+#ifdef P_PRECISION
+      mult = (P_PRECISION + P_PRECISION_PAD) * sizeof (LITTLENUM_TYPE);
+      if (!mult)
+#endif
+	mult = 12;
+      break;
+    }
+
 #ifdef md_cons_align
   md_cons_align (1);
 #endif
@@ -3616,6 +3639,68 @@ s_nops (int ignore ATTRIBUTE_UNUSED)
   *p = val.X_add_number;
 }
 
+/* Obtain the size of a floating point number, given a type.  */
+
+static int
+float_length (int float_type, int *pad_p)
+{
+  int length, pad = 0;
+
+  switch (float_type)
+    {
+    case 'b':
+    case 'B':
+    case 'h':
+    case 'H':
+      length = 2;
+      break;
+
+    case 'f':
+    case 'F':
+    case 's':
+    case 'S':
+      length = 4;
+      break;
+
+    case 'd':
+    case 'D':
+    case 'r':
+    case 'R':
+      length = 8;
+      break;
+
+    case 'x':
+    case 'X':
+#ifdef X_PRECISION
+      length = X_PRECISION * sizeof (LITTLENUM_TYPE);
+      pad = X_PRECISION_PAD * sizeof (LITTLENUM_TYPE);
+      if (!length)
+#endif
+	length = 12;
+      break;
+
+    case 'p':
+    case 'P':
+#ifdef P_PRECISION
+      length = P_PRECISION * sizeof (LITTLENUM_TYPE);
+      pad = P_PRECISION_PAD * sizeof (LITTLENUM_TYPE);
+      if (!length)
+#endif
+	length = 12;
+      break;
+
+    default:
+      as_bad (_("unknown floating type '%c'"), float_type);
+      length = -1;
+      break;
+    }
+
+  if (pad_p)
+    *pad_p = pad;
+
+  return length;
+}
+
 static int
 parse_one_float (int float_type, char temp[MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT])
 {
@@ -3686,16 +3771,19 @@ s_float_space (int float_type)
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
-      as_bad (_("missing value"));
-      ignore_rest_of_line ();
-      if (flag_mri)
-	mri_comment_end (stop, stopc);
-      return;
+      int pad;
+
+      flen = float_length (float_type, &pad);
+      if (flen >= 0)
+	memset (temp, 0, flen += pad);
+    }
+  else
+    {
+      ++input_line_pointer;
+
+      flen = parse_one_float (float_type, temp);
     }
 
-  ++input_line_pointer;
-
-  flen = parse_one_float (float_type, temp);
   if (flen < 0)
     {
       if (flag_mri)
@@ -4824,39 +4912,11 @@ parse_repeat_cons (expressionS *exp, unsigned int nbytes)
 static int
 hex_float (int float_type, char *bytes)
 {
-  int length;
+  int pad, length = float_length (float_type, &pad);
   int i;
 
-  switch (float_type)
-    {
-    case 'f':
-    case 'F':
-    case 's':
-    case 'S':
-      length = 4;
-      break;
-
-    case 'd':
-    case 'D':
-    case 'r':
-    case 'R':
-      length = 8;
-      break;
-
-    case 'x':
-    case 'X':
-      length = 12;
-      break;
-
-    case 'p':
-    case 'P':
-      length = 12;
-      break;
-
-    default:
-      as_bad (_("unknown floating type type '%c'"), float_type);
-      return -1;
-    }
+  if (length < 0)
+    return length;
 
   /* It would be nice if we could go through expression to parse the
      hex constant, but if we get a bignum it's a pain to sort it into
@@ -4903,7 +4963,9 @@ hex_float (int float_type, char *bytes)
 	memset (bytes, 0, length - i);
     }
 
-  return length;
+  memset (bytes + length, 0, pad);
+
+  return length + pad;
 }
 
 /*			float_cons()
@@ -5580,7 +5642,7 @@ next_char_of_string (void)
 	case '8':
 	case '9':
 	  {
-	    long number;
+	    unsigned number;
 	    int i;
 
 	    for (i = 0, number = 0;
@@ -5598,7 +5660,7 @@ next_char_of_string (void)
 	case 'x':
 	case 'X':
 	  {
-	    long number;
+	    unsigned number;
 
 	    number = 0;
 	    c = *input_line_pointer++;

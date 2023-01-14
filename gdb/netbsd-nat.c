@@ -1,6 +1,6 @@
 /* Native-dependent code for NetBSD.
 
-   Copyright (C) 2006-2021 Free Software Foundation, Inc.
+   Copyright (C) 2006-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -132,7 +132,7 @@ nbsd_add_threads (nbsd_nat_target *target, pid_t pid)
   netbsd_nat::for_each_thread (pid, fn);
 }
 
-/* Implement the "post_startup_inferior" target_ops method.  */
+/* Implement the virtual inf_ptrace_target::post_startup_inferior method.  */
 
 void
 nbsd_nat_target::post_startup_inferior (ptid_t ptid)
@@ -247,13 +247,12 @@ nbsd_nat_target::find_memory_regions (find_memory_region_ftype func,
       size_t size = kve->kve_end - kve->kve_start;
       if (info_verbose)
 	{
-	  fprintf_filtered (gdb_stdout,
-			    "Save segment, %ld bytes at %s (%c%c%c)\n",
-			    (long) size,
-			    paddress (target_gdbarch (), kve->kve_start),
-			    kve->kve_protection & KVME_PROT_READ ? 'r' : '-',
-			    kve->kve_protection & KVME_PROT_WRITE ? 'w' : '-',
-			    kve->kve_protection & KVME_PROT_EXEC ? 'x' : '-');
+	  printf_filtered ("Save segment, %ld bytes at %s (%c%c%c)\n",
+			   (long) size,
+			   paddress (target_gdbarch (), kve->kve_start),
+			   kve->kve_protection & KVME_PROT_READ ? 'r' : '-',
+			   kve->kve_protection & KVME_PROT_WRITE ? 'w' : '-',
+			   kve->kve_protection & KVME_PROT_EXEC ? 'x' : '-');
 	}
 
       /* Invoke the callback function to create the corefile segment.
@@ -560,7 +559,7 @@ nbsd_wait (ptid_t ptid, struct target_waitstatus *ourstatus,
   if (pid == -1)
     perror_with_name (_("Child process unexpectedly missing"));
 
-  store_waitstatus (ourstatus, status);
+  *ourstatus = host_status_to_waitstatus (status);
   return pid;
 }
 
@@ -576,7 +575,7 @@ nbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
   ptid_t wptid = ptid_t (pid);
 
   /* If the child stopped, keep investigating its status.  */
-  if (ourstatus->kind != TARGET_WAITKIND_STOPPED)
+  if (ourstatus->kind () != TARGET_WAITKIND_STOPPED)
     return wptid;
 
   /* Extract the event and thread that received a signal.  */
@@ -620,12 +619,11 @@ nbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	 Ignore exited events for an unknown LWP.  */
       thread_info *thr = find_thread_ptid (this, wptid);
       if (thr == nullptr)
-	  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+	  ourstatus->set_spurious ();
       else
 	{
-	  ourstatus->kind = TARGET_WAITKIND_THREAD_EXITED;
 	  /* NetBSD does not store an LWP exit status.  */
-	  ourstatus->value.integer = 0;
+	  ourstatus->set_thread_exited (0);
 
 	  if (print_thread_events)
 	    printf_unfiltered (_("[%s exited]\n"),
@@ -650,19 +648,18 @@ nbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	 not yet reported their PTRACE_LWP_CREATE event.  Ignore
 	 born events for an already-known LWP.  */
       if (in_thread_list (this, wptid))
-	  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+	  ourstatus->set_spurious ();
       else
 	{
 	  add_thread (this, wptid);
-	  ourstatus->kind = TARGET_WAITKIND_THREAD_CREATED;
+	  ourstatus->set_thread_created ();
 	}
       return wptid;
     }
 
   if (code == TRAP_EXEC)
     {
-      ourstatus->kind = TARGET_WAITKIND_EXECD;
-      ourstatus->value.execd_pathname = xstrdup (pid_to_exec_file (pid));
+      ourstatus->set_execd (make_unique_xstrdup (pid_to_exec_file (pid)));
       return wptid;
     }
 
@@ -679,14 +676,14 @@ nbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
       if (!catch_syscall_enabled () || !catching_syscall_number (sysnum))
 	{
 	  /* If the core isn't interested in this event, ignore it.  */
-	  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+	  ourstatus->set_spurious ();
 	  return wptid;
 	}
 
-      ourstatus->kind =
-	(code == TRAP_SCE) ? TARGET_WAITKIND_SYSCALL_ENTRY :
-	TARGET_WAITKIND_SYSCALL_RETURN;
-      ourstatus->value.syscall_number = sysnum;
+      if (code == TRAP_SCE)
+	ourstatus->set_syscall_entry (sysnum);
+      else
+	ourstatus->set_syscall_return (sysnum);
       return wptid;
     }
 
@@ -697,7 +694,7 @@ nbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
     }
 
   /* Unclassified SIGTRAP event.  */
-  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+  ourstatus->set_spurious ();
   return wptid;
 }
 

@@ -1,4 +1,4 @@
-# Copyright 2014-2021 Free Software Foundation, Inc.
+# Copyright 2014-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,6 +35,18 @@ proc gdb_init_commands {} {
 proc string_to_regexp {str} {
     set result $str
     regsub -all {[]?*+.|(){}^$\[\\]} $str {\\&} result
+    return $result
+}
+
+# Given a list of strings, adds backslashes as needed to each string to
+# create a regexp that will match the string, and join the result.
+
+proc string_list_to_regexp { args } {
+    set result ""
+    foreach arg $args {
+	set arg [string_to_regexp $arg]
+       append result $arg
+    }
     return $result
 }
 

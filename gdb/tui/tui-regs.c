@@ -1,6 +1,6 @@
 /* TUI display registers in window.
 
-   Copyright (C) 1998-2021 Free Software Foundation, Inc.
+   Copyright (C) 1998-2022 Free Software Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -100,7 +100,7 @@ tui_register_format (struct frame_info *frame, int regnum)
   gdbarch_print_registers_info (gdbarch, &stream, frame, regnum, 1);
 
   /* Remove the possible \n.  */
-  std::string &str = stream.string ();
+  std::string str = stream.release ();
   if (!str.empty () && str.back () == '\n')
     str.resize (str.size () - 1);
 
@@ -606,20 +606,20 @@ tui_reg_command (const char *args, int from_tty)
       struct reggroup *group;
       int first;
 
-      printf_unfiltered (_("\"tui reg\" must be followed by the name of "
-			   "either a register group,\nor one of 'next' "
-			   "or 'prev'.  Known register groups are:\n"));
+      printf_filtered (_("\"tui reg\" must be followed by the name of "
+			 "either a register group,\nor one of 'next' "
+			 "or 'prev'.  Known register groups are:\n"));
 
       for (first = 1, group = reggroup_next (gdbarch, NULL);
 	   group != NULL;
 	   first = 0, group = reggroup_next (gdbarch, group))
 	{
 	  if (!first)
-	    printf_unfiltered (", ");
-	  printf_unfiltered ("%s", reggroup_name (group));
+	    printf_filtered (", ");
+	  printf_filtered ("%s", reggroup_name (group));
 	}
 
-      printf_unfiltered ("\n");
+      printf_filtered ("\n");
     }
 }
 

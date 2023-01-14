@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2021 Free Software Foundation, Inc.
+# Copyright (C) 2020-2022 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -25,6 +25,11 @@ if [skip_ctf_tests] {
 
 if ![is_elf_format] {
     unsupported "CTF needs bfd changes to be emitted on non-ELF"
+    return 0
+}
+
+if ![check_shared_lib_support] {
+    unsupported "CTF needs shared lib support"
     return 0
 }
 

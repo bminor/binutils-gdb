@@ -1,6 +1,8 @@
 # msp430 simulator testsuite
 
-if [istarget msp430-*] {
+sim_init
+
+if [istarget *] {
     # all machines
     set all_machs "msp430"
 

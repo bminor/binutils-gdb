@@ -1,6 +1,6 @@
 /* Print and select stack frames for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -55,6 +55,7 @@
 #include "gdbsupport/def-vector.h"
 #include "cli/cli-option.h"
 #include "cli/cli-style.h"
+#include "gdbsupport/buildargv.h"
 
 /* The possible choices of "set print frame-arguments", and the value
    of this setting.  */
@@ -874,7 +875,7 @@ print_frame_args (const frame_print_options &fp_opts,
 	  /* Print the current arg.  */
 	  if (!first)
 	    uiout->text (", ");
-	  uiout->wrap_hint ("    ");
+	  uiout->wrap_hint (4);
 
 	  if (!print_args)
 	    {
@@ -894,7 +895,7 @@ print_frame_args (const frame_print_options &fp_opts,
 	      if (arg.entry_kind != print_entry_values_only)
 		{
 		  uiout->text (", ");
-		  uiout->wrap_hint ("    ");
+		  uiout->wrap_hint (4);
 		}
 
 	      print_frame_arg (fp_opts, &entryarg);
@@ -1367,7 +1368,7 @@ print_frame (const frame_print_options &fp_opts,
     string_file stb;
     fputs_filtered (funname ? funname.get () : "??", &stb);
     uiout->field_stream ("func", stb, function_name_style.style ());
-    uiout->wrap_hint ("   ");
+    uiout->wrap_hint (3);
     annotate_frame_args ();
 
     uiout->text (" (");
@@ -1405,7 +1406,7 @@ print_frame (const frame_print_options &fp_opts,
       
 	filename_display = symtab_to_filename_for_display (sal.symtab);
 	annotate_frame_source_begin ();
-	uiout->wrap_hint ("   ");
+	uiout->wrap_hint (3);
 	uiout->text (" at ");
 	annotate_frame_source_file ();
 	uiout->field_string ("file", filename_display,
@@ -1432,7 +1433,7 @@ print_frame (const frame_print_options &fp_opts,
 	if (lib)
 	  {
 	    annotate_frame_where ();
-	    uiout->wrap_hint ("  ");
+	    uiout->wrap_hint (2);
 	    uiout->text (" from ");
 	    uiout->field_string ("from", lib, file_name_style.style ());
 	  }
@@ -1548,21 +1549,21 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
     {
       printf_filtered (_("Stack frame at "));
     }
-  fputs_filtered (paddress (gdbarch, get_frame_base (fi)), gdb_stdout);
+  puts_filtered (paddress (gdbarch, get_frame_base (fi)));
   printf_filtered (":\n");
   printf_filtered (" %s = ", pc_regname);
   if (frame_pc_p)
-    fputs_filtered (paddress (gdbarch, get_frame_pc (fi)), gdb_stdout);
+    puts_filtered (paddress (gdbarch, get_frame_pc (fi)));
   else
     fputs_styled ("<unavailable>", metadata_style.style (), gdb_stdout);
 
-  wrap_here ("   ");
+  gdb_stdout->wrap_here (3);
   if (funname)
     {
       printf_filtered (" in ");
-      fputs_filtered (funname, gdb_stdout);
+      puts_filtered (funname);
     }
-  wrap_here ("   ");
+  gdb_stdout->wrap_here (3);
   if (sal.symtab)
     printf_filtered
       (" (%ps:%d)",
@@ -1570,7 +1571,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
 		      symtab_to_filename_for_display (sal.symtab)),
        sal.line);
   puts_filtered ("; ");
-  wrap_here ("    ");
+  gdb_stdout->wrap_here (4);
   printf_filtered ("saved %s = ", pc_regname);
 
   if (!frame_id_p (frame_unwind_caller_id (fi)))
@@ -1602,7 +1603,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
     }
 
   if (caller_pc_p)
-    fputs_filtered (paddress (gdbarch, caller_pc), gdb_stdout);
+    puts_filtered (paddress (gdbarch, caller_pc));
   printf_filtered ("\n");
 
   if (calling_frame_info == NULL)
@@ -1622,24 +1623,22 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
   else
     {
       printf_filtered (" called by frame at ");
-      fputs_filtered (paddress (gdbarch, get_frame_base (calling_frame_info)),
-		      gdb_stdout);
+      puts_filtered (paddress (gdbarch, get_frame_base (calling_frame_info)));
     }
   if (get_next_frame (fi) && calling_frame_info)
     puts_filtered (",");
-  wrap_here ("   ");
+  gdb_stdout->wrap_here (3);
   if (get_next_frame (fi))
     {
       printf_filtered (" caller of frame at ");
-      fputs_filtered (paddress (gdbarch, get_frame_base (get_next_frame (fi))),
-		      gdb_stdout);
+      puts_filtered (paddress (gdbarch, get_frame_base (get_next_frame (fi))));
     }
   if (get_next_frame (fi) || calling_frame_info)
     puts_filtered ("\n");
 
   if (s)
     printf_filtered (" source language %s.\n",
-		     language_str (s->language));
+		     language_str (s->language ()));
 
   {
     /* Address of the argument list for this frame, or 0.  */
@@ -1652,7 +1651,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
     else
       {
 	printf_filtered (" Arglist at ");
-	fputs_filtered (paddress (gdbarch, arg_list), gdb_stdout);
+	puts_filtered (paddress (gdbarch, arg_list));
 	printf_filtered (",");
 
 	if (!gdbarch_frame_num_args_p (gdbarch))
@@ -1685,7 +1684,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
     else
       {
 	printf_filtered (" Locals at ");
-	fputs_filtered (paddress (gdbarch, arg_list), gdb_stdout);
+	puts_filtered (paddress (gdbarch, arg_list));
 	printf_filtered (",");
       }
   }
@@ -1716,18 +1715,17 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
 		enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 		int sp_size = register_size (gdbarch, sp_regnum);
 
-		sp = extract_unsigned_integer (value_contents_all (value),
-					       sp_size, byte_order);
+		sp = extract_unsigned_integer
+		  (value_contents_all (value).data (), sp_size, byte_order);
 
 		printf_filtered (" Previous frame's sp is ");
-		fputs_filtered (paddress (gdbarch, sp), gdb_stdout);
+		puts_filtered (paddress (gdbarch, sp));
 		printf_filtered ("\n");
 	      }
 	    else if (VALUE_LVAL (value) == lval_memory)
 	      {
 		printf_filtered (" Previous frame's sp at ");
-		fputs_filtered (paddress (gdbarch, value_address (value)),
-				gdb_stdout);
+		puts_filtered (paddress (gdbarch, value_address (value)));
 		printf_filtered ("\n");
 	      }
 	    else if (VALUE_LVAL (value) == lval_register)
@@ -1767,10 +1765,10 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
 		puts_filtered (" Saved registers:\n ");
 	      else
 		puts_filtered (",");
-	      wrap_here (" ");
+	      gdb_stdout->wrap_here (1);
 	      printf_filtered (" %s at ",
 			       gdbarch_register_name (gdbarch, i));
-	      fputs_filtered (paddress (gdbarch, addr), gdb_stdout);
+	      puts_filtered (paddress (gdbarch, addr));
 	      count++;
 	    }
 	}
@@ -2322,6 +2320,8 @@ do_print_variable_and_value (const char *print_name,
   if (p->treg.has_value ()
       && !treg_matches_sym_type_name (*p->treg, sym))
     return;
+  if (language_def (sym->language ())->symbol_printing_suppressed (sym))
+    return;
 
   frame = frame_find_by_id (p->frame_id);
   if (frame == NULL)
@@ -2424,12 +2424,7 @@ print_frame_local_vars (struct frame_info *frame,
 struct info_print_options
 {
   bool quiet = false;
-  char *type_regexp = nullptr;
-
-  ~info_print_options ()
-  {
-    xfree (type_regexp);
-  }
+  std::string type_regexp;
 };
 
 /* The options used by the 'info locals' and 'info args' commands.  */
@@ -2488,9 +2483,11 @@ info_locals_command (const char *args, int from_tty)
   if (args != nullptr && *args == '\0')
     args = nullptr;
 
-  print_frame_local_vars (get_selected_frame (_("No frame selected.")),
-			  opts.quiet, args, opts.type_regexp,
-			  0, gdb_stdout);
+  print_frame_local_vars
+    (get_selected_frame (_("No frame selected.")),
+     opts.quiet, args,
+     opts.type_regexp.empty () ? nullptr : opts.type_regexp.c_str (),
+     0, gdb_stdout);
 }
 
 /* Iterate over all the argument variables in block B.  */
@@ -2599,8 +2596,11 @@ info_args_command (const char *args, int from_tty)
   if (args != nullptr && *args == '\0')
     args = nullptr;
 
-  print_frame_arg_vars (get_selected_frame (_("No frame selected.")),
-			opts.quiet, args, opts.type_regexp, gdb_stdout);
+  print_frame_arg_vars
+    (get_selected_frame (_("No frame selected.")),
+     opts.quiet, args,
+     opts.type_regexp.empty () ? nullptr : opts.type_regexp.c_str (),
+     gdb_stdout);
 }
 
 /* Return the symbol-block in which the selected frame is executing.
@@ -2840,7 +2840,7 @@ return_command (const char *retval_exp, int from_tty)
 		  && rv_conv != RETURN_VALUE_ABI_RETURNS_ADDRESS);
       gdbarch_return_value (cache_arch, function, return_type,
 			    get_current_regcache (), NULL /*read*/,
-			    value_contents (return_value) /*write*/);
+			    value_contents (return_value).data () /*write*/);
     }
 
   /* If we are at the end of a call dummy now, pop the dummy frame
@@ -3026,8 +3026,8 @@ frame_apply_command_count (const char *which_command,
 	       set to the selected frame.  */
 	    scoped_restore_current_thread restore_fi_current_frame;
 
-	    cmd_result = execute_command_to_string
-	      (cmd, from_tty, gdb_stdout->term_out ());
+	    execute_command_to_string
+	      (cmd_result, cmd, from_tty, gdb_stdout->term_out ());
 	  }
 	  fi = get_selected_frame (_("frame apply "
 				     "unable to get selected frame."));

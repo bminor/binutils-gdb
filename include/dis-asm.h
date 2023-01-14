@@ -1,6 +1,6 @@
 /* Interface between the opcode library and its callers.
 
-   Copyright (C) 1999-2021 Free Software Foundation, Inc.
+   Copyright (C) 1999-2022 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -307,6 +307,7 @@ extern void print_arm_disassembler_options (FILE *);
 extern void print_arc_disassembler_options (FILE *);
 extern void print_s390_disassembler_options (FILE *);
 extern void print_wasm32_disassembler_options (FILE *);
+extern void print_loongarch_disassembler_options (FILE *);
 extern bool aarch64_symbol_is_valid (asymbol *, struct disassemble_info *);
 extern bool arm_symbol_is_valid (asymbol *, struct disassemble_info *);
 extern bool csky_symbol_is_valid (asymbol *, struct disassemble_info *);
@@ -319,6 +320,7 @@ extern const disasm_options_and_args_t *disassembler_options_arc (void);
 extern const disasm_options_and_args_t *disassembler_options_arm (void);
 extern const disasm_options_and_args_t *disassembler_options_mips (void);
 extern const disasm_options_and_args_t *disassembler_options_powerpc (void);
+extern const disasm_options_and_args_t *disassembler_options_riscv (void);
 extern const disasm_options_and_args_t *disassembler_options_s390 (void);
 
 /* Fetch the disassembler for a given architecture ARC, endianess (big

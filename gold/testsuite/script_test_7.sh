@@ -2,7 +2,7 @@
 
 # script_test_7.sh -- test for SEGMENT_START expressions.
 
-# Copyright (C) 2009-2021 Free Software Foundation, Inc.
+# Copyright (C) 2009-2022 Free Software Foundation, Inc.
 # Written by Doug Kwan <dougkwan@google.com>.
 
 # This file is part of gold.

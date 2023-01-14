@@ -1,4 +1,4 @@
-# Copyright 2005-2021 Free Software Foundation, Inc.
+# Copyright 2005-2022 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,7 +28,6 @@ clean_restart ${testfile}
 # Start the inferior
 
 if ![runto_main] then {
-   fail "cannot run to main, testcase aborted"
    return 0
 }
 

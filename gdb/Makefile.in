@@ -1,4 +1,4 @@
-# Copyright (C) 1989-2021 Free Software Foundation, Inc.
+# Copyright (C) 1989-2022 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -248,6 +248,10 @@ GDBFLAGS =
 GNULIB_PARENT_DIR = ..
 include $(GNULIB_PARENT_DIR)/gnulib/Makefile.gnulib.inc
 
+# For libbacktrace.
+LIBBACKTRACE_INC=@LIBBACKTRACE_INC@
+LIBBACKTRACE_LIB=@LIBBACKTRACE_LIB@
+
 SUPPORT = ../gdbsupport
 LIBSUPPORT = $(SUPPORT)/libgdbsupport.a
 INCSUPPORT = -I$(srcdir)/.. -I..
@@ -387,6 +391,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-bpevent.c \
 	python/py-breakpoint.c \
 	python/py-cmd.c \
+	python/py-connection.c \
 	python/py-continueevent.c \
 	python/py-event.c \
 	python/py-evtregistry.c \
@@ -403,6 +408,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-instruction.c \
 	python/py-lazy-string.c \
 	python/py-linetable.c \
+	python/py-membuf.c \
 	python/py-newobjfileevent.c \
 	python/py-objfile.c \
 	python/py-param.c \
@@ -456,6 +462,7 @@ SELFTESTS_SRCS = \
 	unittests/offset-type-selftests.c \
 	unittests/observable-selftests.c \
 	unittests/optional-selftests.c \
+	unittests/parallel-for-selftests.c \
 	unittests/parse-connection-spec-selftests.c \
 	unittests/ptid-selftests.c \
 	unittests/main-thread-selftests.c \
@@ -470,6 +477,7 @@ SELFTESTS_SRCS = \
 	unittests/style-selftests.c \
 	unittests/tracepoint-selftests.c \
 	unittests/tui-selftests.c \
+	unittests/ui-file-selftests.c \
 	unittests/unpack-selftests.c \
 	unittests/utils-selftests.c \
 	unittests/vec-utils-selftests.c \
@@ -613,9 +621,9 @@ INTERNAL_CFLAGS_BASE = \
 	$(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) $(ZLIBINC) \
 	$(BFD_CFLAGS) $(INCLUDE_CFLAGS) $(LIBDECNUMBER_CFLAGS) \
-	$(INTL_CFLAGS) $(INCGNU) $(INCSUPPORT) $(ENABLE_CFLAGS) \
-	$(INTERNAL_CPPFLAGS) $(SRCHIGH_CFLAGS) $(TOP_CFLAGS) $(PTHREAD_CFLAGS) \
-	$(DEBUGINFOD_CFLAGS)
+	$(INTL_CFLAGS) $(INCGNU) $(INCSUPPORT) $(LIBBACKTRACE_INC) \
+	$(ENABLE_CFLAGS) $(INTERNAL_CPPFLAGS) $(SRCHIGH_CFLAGS) \
+	$(TOP_CFLAGS) $(PTHREAD_CFLAGS) $(DEBUGINFOD_CFLAGS)
 INTERNAL_WARN_CFLAGS = $(INTERNAL_CFLAGS_BASE) $(GDB_WARN_CFLAGS)
 INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(GDB_WERROR_CFLAGS)
 
@@ -636,12 +644,12 @@ INTERNAL_LDFLAGS = \
 # LIBIBERTY appears twice on purpose.
 CLIBS = $(SIM) $(READLINE) $(OPCODES) $(LIBCTF) $(BFD) $(ZLIB) \
         $(LIBSUPPORT) $(INTL) $(LIBIBERTY) $(LIBDECNUMBER) \
-	$(XM_CLIBS) $(GDBTKLIBS) \
+	$(XM_CLIBS) $(GDBTKLIBS)  $(LIBBACKTRACE_LIB) \
 	@LIBS@ @GUILE_LIBS@ @PYTHON_LIBS@ \
 	$(LIBEXPAT) $(LIBLZMA) $(LIBBABELTRACE) $(LIBIPT) \
 	$(WIN32LIBS) $(LIBGNU) $(LIBGNU_EXTRA_LIBS) $(LIBICONV) \
 	$(LIBMPFR) $(LIBGMP) $(SRCHIGH_LIBS) $(LIBXXHASH) $(PTHREAD_LIBS) \
-	$(DEBUGINFOD_LIBS)
+	$(DEBUGINFOD_LIBS) $(LIBBABELTRACE_LIB)
 CDEPS = $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) $(CTF_DEPS) \
 	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU) \
 	$(LIBSUPPORT)
@@ -703,10 +711,21 @@ ALL_64_TARGET_OBS = \
 	arch/aarch64-insn.o \
 	arch/aarch64-mte-linux.o \
 	arch/amd64.o \
+	arch/riscv.o \
 	ia64-linux-tdep.o \
 	ia64-tdep.o \
 	ia64-vms-tdep.o \
+	mips-fbsd-tdep.o \
+	mips-linux-tdep.o \
+	mips-netbsd-tdep.o \
+	mips-sde-tdep.o \
+	mips-tdep.o \
 	mips64-obsd-tdep.o \
+	riscv-fbsd-tdep.o \
+	riscv-linux-tdep.o \
+	riscv-none-tdep.o \
+	riscv-ravenscar-thread.o \
+	riscv-tdep.o \
 	sparc64-fbsd-tdep.o \
 	sparc64-linux-tdep.o \
 	sparc64-netbsd-tdep.o \
@@ -718,6 +737,7 @@ ALL_64_TARGET_OBS = \
 ALL_TARGET_OBS = \
 	aarch32-tdep.o \
 	arc-linux-tdep.o \
+	arc-newlib-tdep.o \
 	arc-tdep.o \
 	arch/aarch32.o \
 	arch/arc.o \
@@ -726,7 +746,6 @@ ALL_TARGET_OBS = \
 	arch/arm-linux.o \
 	arch/i386.o \
 	arch/ppc-linux-common.o \
-	arch/riscv.o \
 	arm-bsd-tdep.o \
 	arm-fbsd-tdep.o \
 	arm-linux-tdep.o \
@@ -785,11 +804,6 @@ ALL_TARGET_OBS = \
 	mep-tdep.o \
 	microblaze-linux-tdep.o \
 	microblaze-tdep.o \
-	mips-fbsd-tdep.o \
-	mips-linux-tdep.o \
-	mips-netbsd-tdep.o \
-	mips-sde-tdep.o \
-	mips-tdep.o \
 	mn10300-linux-tdep.o \
 	mn10300-tdep.o \
 	moxie-tdep.o \
@@ -810,11 +824,6 @@ ALL_TARGET_OBS = \
 	ppc-sysv-tdep.o \
 	ppc64-tdep.o \
 	ravenscar-thread.o \
-	riscv-fbsd-tdep.o \
-	riscv-linux-tdep.o \
-	riscv-none-tdep.o \
-	riscv-ravenscar-thread.o \
-	riscv-tdep.o \
 	rl78-tdep.o \
 	rs6000-aix-tdep.o \
 	rs6000-lynx178-tdep.o \
@@ -990,10 +999,13 @@ COMMON_SFILES = \
 	bfd-target.c \
 	block.c \
 	blockframe.c \
+	break-catch-exec.c \
+	break-catch-fork.c \
 	break-catch-sig.c \
 	break-catch-syscall.c \
 	break-catch-throw.c \
 	breakpoint.c \
+	bt-utils.c \
 	btrace.c \
 	build-id.c \
 	buildsym-legacy.c \
@@ -1064,9 +1076,6 @@ COMMON_SFILES = \
 	gcore.c \
 	gdb-demangle.c \
 	gdb_bfd.c \
-	gdb_obstack.c \
-	gdb_regex.c \
-	gdbarch.c \
 	gdbtypes.c \
 	gmp-utils.c \
 	gnu-v2-abi.c \
@@ -1255,6 +1264,7 @@ HFILES_NO_SRCDIR = \
 	breakpoint.h \
 	bsd-kvm.h \
 	bsd-uthread.h \
+	bt-utils.h \
 	build-id.h \
 	buildsym-legacy.h \
 	buildsym.h \
@@ -1306,9 +1316,7 @@ HFILES_NO_SRCDIR = \
 	gdb_bfd.h \
 	gdb_curses.h \
 	gdb_expat.h \
-	gdb_obstack.h \
 	gdb_proc_service.h \
-	gdb_regex.h \
 	gdb_select.h \
 	gdb-stabs.h \
 	gdb_vfork.h \
@@ -1376,6 +1384,7 @@ HFILES_NO_SRCDIR = \
 	objfiles.h \
 	obsd-nat.h \
 	obsd-tdep.h \
+	or1k-linux-tdep.h \
 	osabi.h \
 	osdata.h \
 	p-lang.h \
@@ -1408,7 +1417,6 @@ HFILES_NO_SRCDIR = \
 	riscv-ravenscar-thread.h \
 	riscv-tdep.h \
 	rs6000-aix-tdep.h \
-	rs6000-tdep.h \
 	run-on-main-thread.h \
 	s390-linux-tdep.h \
 	s390-tdep.h \
@@ -1674,12 +1682,12 @@ check-perf: force
 	  $(MAKE) $(TARGET_FLAGS_TO_PASS) check-perf; \
 	else true; fi
 
-check-read1: force
+check-read1 check-readmore: force
 	@if [ -f testsuite/Makefile ]; then \
 	  rootme=`pwd`; export rootme; \
 	  rootsrc=`cd $(srcdir); pwd`; export rootsrc; \
 	  cd testsuite; \
-	  $(MAKE) $(TARGET_FLAGS_TO_PASS) check-read1; \
+	  $(MAKE) $(TARGET_FLAGS_TO_PASS) $@; \
 	else true; fi
 
 check-parallel: force
@@ -1811,8 +1819,8 @@ uninstall: force $(CONFIG_UNINSTALL)
 		else \
 		  true ; \
 		fi ; \
-		rm -f $(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) \
-		      $(DESTDIR)$(man1dir)/$$transformed_name.1
+		rm -f $(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT)
+		rm -f $(DESTDIR)$(includedir)/gdb/jit-reader.h
 	if test "x$(HAVE_NATIVE_GCORE_TARGET)$(HAVE_NATIVE_GCORE_HOST)" != x; \
 	then \
 	  transformed_name=`t='$(program_transform_name)'; \
@@ -1824,6 +1832,14 @@ uninstall: force $(CONFIG_UNINSTALL)
 		  fi ; \
 		  rm -f $(DESTDIR)$(bindir)/$$transformed_name; \
 	fi
+	transformed_name=`t='$(program_transform_name)'; \
+			  echo gdb-add-index | sed -e "$$t"` ; \
+	if test "x$$transformed_name" = x; then \
+	  transformed_name=gdb-add-index ; \
+	else \
+	  true ; \
+	fi ; \
+	rm -f $(DESTDIR)$(bindir)/$$transformed_name
 	@$(MAKE) DO=uninstall "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do
 
 # The C++ name parser can be built standalone for testing.
@@ -2246,6 +2262,7 @@ ALLDEPFILES = \
 	nios2-tdep.c \
 	obsd-nat.c \
 	obsd-tdep.c \
+	or1k-linux-nat.c \
 	posix-hdep.c \
 	ppc-fbsd-nat.c \
 	ppc-fbsd-tdep.c \
@@ -2269,8 +2286,8 @@ ALLDEPFILES = \
 	riscv-ravenscar-thread.c \
 	riscv-tdep.c \
 	rl78-tdep.c \
+	rs6000-aix-nat.c \
 	rs6000-lynx178-tdep.c \
-	rs6000-nat.c \
 	rs6000-tdep.c \
 	rx-tdep.c \
 	s390-linux-nat.c \
@@ -2439,20 +2456,19 @@ po/$(PACKAGE).pot: force
 	  rm -f $@.tmp && \
 	  mv $@.new $@
 %.c: %.l
-	$(ECHO_LEX) $(FLEX) -t $<  \
-	    | sed -e '/extern.*malloc/d' \
-	        -e '/extern.*realloc/d' \
-	        -e '/extern.*free/d' \
-	        -e '/include.*malloc.h/d' \
-	        -e 's/\([^x]\)malloc/\1xmalloc/g' \
-	        -e 's/\([^x]\)realloc/\1xrealloc/g' \
-	        -e 's/\([ \t;,(]\)free\([ \t]*[&(),]\)/\1xfree\2/g' \
-	        -e 's/\([ \t;,(]\)free$$/\1xfree/g' \
-		-e 's/yy_flex_xrealloc/yyxrealloc/g' \
-	      > $@.new && \
-	    mv $@.new $@
-
-.PRECIOUS: ada-lex.c
+	$(ECHO_LEX) $(FLEX) -t $< > $@.tmp || (rm -f $@.tmp; false)
+	@sed -e '/extern.*malloc/d' \
+	     -e '/extern.*realloc/d' \
+	     -e '/extern.*free/d' \
+	     -e '/include.*malloc.h/d' \
+	     -e 's/\([^x]\)malloc/\1xmalloc/g' \
+	     -e 's/\([^x]\)realloc/\1xrealloc/g' \
+	     -e 's/\([ \t;,(]\)free\([ \t]*[&(),]\)/\1xfree\2/g' \
+	     -e 's/\([ \t;,(]\)free$$/\1xfree/g' \
+	     -e 's/yy_flex_xrealloc/yyxrealloc/g' \
+	     < $@.tmp > $@.new && \
+	     rm -f $@.tmp && \
+	     mv $@.new $@
 
 # XML rules
 

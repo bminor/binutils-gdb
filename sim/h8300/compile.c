@@ -492,6 +492,7 @@ decode (SIM_DESC sd, int addr, unsigned char *data, decoded_inst *dst)
 
   dst->dst.type = -1;
   dst->src.type = -1;
+  dst->op3.type = -1;
 
   /* Find the exact opcode/arg combo.  */
   for (q = h8_opcodes; q->name; q++)
@@ -1853,7 +1854,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 		of the same register.
 	  */
 
-	  if (code->op3.type == 0)
+	  if (code->op3.type == -1)
 	    {
 	      /* Short form: src == INDEXB/INDEXW, dst == op3 == 0.
 		 We get to compose dst and op3 as follows:
@@ -4755,10 +4756,7 @@ sim_open (SIM_OPEN_KIND kind,
     }
 
   /* Check for/establish the a reference program image.  */
-  if (sim_analyze_program (sd,
-			   (STATE_PROG_ARGV (sd) != NULL
-			    ? *STATE_PROG_ARGV (sd)
-			    : NULL), abfd) != SIM_RC_OK)
+  if (sim_analyze_program (sd, STATE_PROG_FILE (sd), abfd) != SIM_RC_OK)
     {
       free_state (sd);
       return 0;

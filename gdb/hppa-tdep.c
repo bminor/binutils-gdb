@@ -1,6 +1,6 @@
 /* Target-dependent code for the HP PA-RISC architecture.
 
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -259,6 +259,7 @@ internalize_unwinds (struct objfile *objfile, struct unwind_table_entry *table,
   if (size > 0)
     {
       struct gdbarch *gdbarch = objfile->arch ();
+      hppa_gdbarch_tdep *tdep = (hppa_gdbarch_tdep *) gdbarch_tdep (gdbarch);
       unsigned long tmp;
       unsigned i;
       char *buf = (char *) alloca (size);
@@ -270,7 +271,7 @@ internalize_unwinds (struct objfile *objfile, struct unwind_table_entry *table,
 	 Note that when loading a shared library (text_offset != 0) the
 	 unwinds are already relative to the text_offset that will be
 	 passed in.  */
-      if (gdbarch_tdep (gdbarch)->is_elf && text_offset == 0)
+      if (tdep->is_elf && text_offset == 0)
 	{
 	  low_text_segment_address = -1;
 
@@ -280,9 +281,9 @@ internalize_unwinds (struct objfile *objfile, struct unwind_table_entry *table,
 
 	  text_offset = low_text_segment_address;
 	}
-      else if (gdbarch_tdep (gdbarch)->solib_get_text_base)
+      else if (tdep->solib_get_text_base)
 	{
-	  text_offset = gdbarch_tdep (gdbarch)->solib_get_text_base (objfile);
+	  text_offset = tdep->solib_get_text_base (objfile);
 	}
 
       bfd_get_section_contents (objfile->obfd, section, buf, 0, size);
@@ -730,7 +731,7 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Global pointer (r19) of the function we are trying to call.  */
   CORE_ADDR gp;
 
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  hppa_gdbarch_tdep *tdep = (hppa_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   for (write_pass = 0; write_pass < 2; write_pass++)
     {
@@ -758,8 +759,8 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      param_len = 4;
 	      struct_ptr += align_up (TYPE_LENGTH (type), 8);
 	      if (write_pass)
-		write_memory (struct_end - struct_ptr, value_contents (arg),
-			      TYPE_LENGTH (type));
+		write_memory (struct_end - struct_ptr,
+			      value_contents (arg).data (), TYPE_LENGTH (type));
 	      store_unsigned_integer (param_val, 4, byte_order,
 				      struct_end - struct_ptr);
 	    }
@@ -769,15 +770,15 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      /* Integer value store, right aligned.  "unpack_long"
 		 takes care of any sign-extension problems.  */
 	      param_len = align_up (TYPE_LENGTH (type), 4);
-	      store_unsigned_integer (param_val, param_len, byte_order,
-				      unpack_long (type,
-						   value_contents (arg)));
+	      store_unsigned_integer
+		(param_val, param_len, byte_order,
+		 unpack_long (type, value_contents (arg).data ()));
 	    }
 	  else if (type->code () == TYPE_CODE_FLT)
 	    {
 	      /* Floating point value store, right aligned.  */
 	      param_len = align_up (TYPE_LENGTH (type), 4);
-	      memcpy (param_val, value_contents (arg), param_len);
+	      memcpy (param_val, value_contents (arg).data (), param_len);
 	    }
 	  else
 	    {
@@ -785,7 +786,7 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 	      /* Small struct value are stored right-aligned.  */
 	      memcpy (param_val + param_len - TYPE_LENGTH (type),
-		      value_contents (arg), TYPE_LENGTH (type));
+		      value_contents (arg).data (), TYPE_LENGTH (type));
 
 	      /* Structures of size 5, 6 and 7 bytes are special in that
 		 the higher-ordered word is stored in the lower-ordered
@@ -967,7 +968,7 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			function_call_return_method return_method,
 			CORE_ADDR struct_addr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  hppa_gdbarch_tdep *tdep = (hppa_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int i, offset = 0;
   CORE_ADDR gp;
@@ -1041,7 +1042,7 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		     the right halves of the floating point registers;
 		     the left halves are unused."  */
 		  regcache->cooked_write_part (regnum, offset % 8, len,
-					       value_contents (arg));
+					       value_contents (arg).data ());
 		}
 	    }
 	}
@@ -1065,7 +1066,7 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	{
 	  ULONGEST codeptr, fptr;
 
-	  codeptr = unpack_long (type, value_contents (arg));
+	  codeptr = unpack_long (type, value_contents (arg).data ());
 	  fptr = hppa64_convert_code_addr_to_fptr (gdbarch, codeptr);
 	  store_unsigned_integer (fptrbuf, TYPE_LENGTH (type), byte_order,
 				  fptr);
@@ -1073,7 +1074,7 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	}
       else
 	{
-	  valbuf = value_contents (arg);
+	  valbuf = value_contents (arg).data ();
 	}
 
       /* Always store the argument in memory.  */
@@ -2170,7 +2171,7 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
 	      fprintf_unfiltered (gdb_stdlog, " (base=%s) [saved]",
 				  paddress (gdbarch, cache->base));
       }
-    else
+     else
       {
 	/* The prologue has been slowly allocating stack space.  Adjust
 	   the SP back.  */
@@ -2253,9 +2254,7 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
   }
 
   {
-    struct gdbarch_tdep *tdep;
-
-    tdep = gdbarch_tdep (gdbarch);
+    hppa_gdbarch_tdep *tdep = (hppa_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
     if (tdep->unwind_adjust_stub)
       tdep->unwind_adjust_stub (this_frame, cache->base, cache->saved_regs);
@@ -2485,7 +2484,7 @@ hppa_stub_unwind_sniffer (const struct frame_unwind *self,
 {
   CORE_ADDR pc = get_frame_address_in_block (this_frame);
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  hppa_gdbarch_tdep *tdep = (hppa_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (pc == 0
       || (tdep->in_solib_call_trampoline != NULL
@@ -2573,19 +2572,19 @@ unwind_command (const char *exp, int from_tty)
 
   if (!u)
     {
-      printf_unfiltered ("Can't find unwind table entry for %s\n", exp);
+      printf_filtered ("Can't find unwind table entry for %s\n", exp);
       return;
     }
 
-  printf_unfiltered ("unwind_table_entry (%s):\n", host_address_to_string (u));
+  printf_filtered ("unwind_table_entry (%s):\n", host_address_to_string (u));
 
-  printf_unfiltered ("\tregion_start = %s\n", hex_string (u->region_start));
+  printf_filtered ("\tregion_start = %s\n", hex_string (u->region_start));
 
-  printf_unfiltered ("\tregion_end = %s\n", hex_string (u->region_end));
+  printf_filtered ("\tregion_end = %s\n", hex_string (u->region_end));
 
-#define pif(FLD) if (u->FLD) printf_unfiltered (" "#FLD);
+#define pif(FLD) if (u->FLD) printf_filtered (" "#FLD);
 
-  printf_unfiltered ("\n\tflags =");
+  printf_filtered ("\n\tflags =");
   pif (Cannot_unwind);
   pif (Millicode);
   pif (Millicode_save_sr0);
@@ -2610,9 +2609,9 @@ unwind_command (const char *exp, int from_tty)
   pif (Large_frame);
   pif (alloca_frame);
 
-  putchar_unfiltered ('\n');
+  putchar_filtered ('\n');
 
-#define pin(FLD) printf_unfiltered ("\t"#FLD" = 0x%x\n", u->FLD);
+#define pin(FLD) printf_filtered ("\t"#FLD" = 0x%x\n", u->FLD);
 
   pin (Region_description);
   pin (Entry_FR);
@@ -2621,26 +2620,26 @@ unwind_command (const char *exp, int from_tty)
 
   if (u->stub_unwind.stub_type)
     {
-      printf_unfiltered ("\tstub type = ");
+      printf_filtered ("\tstub type = ");
       switch (u->stub_unwind.stub_type)
 	{
 	  case LONG_BRANCH:
-	    printf_unfiltered ("long branch\n");
+	    printf_filtered ("long branch\n");
 	    break;
 	  case PARAMETER_RELOCATION:
-	    printf_unfiltered ("parameter relocation\n");
+	    printf_filtered ("parameter relocation\n");
 	    break;
 	  case EXPORT:
-	    printf_unfiltered ("export\n");
+	    printf_filtered ("export\n");
 	    break;
 	  case IMPORT:
-	    printf_unfiltered ("import\n");
+	    printf_filtered ("import\n");
 	    break;
 	  case IMPORT_SHLIB:
-	    printf_unfiltered ("import shlib\n");
+	    printf_filtered ("import shlib\n");
 	    break;
 	  default:
-	    printf_unfiltered ("unknown (%d)\n", u->stub_unwind.stub_type);
+	    printf_filtered ("unknown (%d)\n", u->stub_unwind.stub_type);
 	}
     }
 }
@@ -2769,7 +2768,7 @@ hppa_frame_prev_register_helper (struct frame_info *this_frame,
 	trad_frame_get_prev_register (this_frame, saved_regs,
 				      HPPA_PCOQ_HEAD_REGNUM);
 
-      pc = extract_unsigned_integer (value_contents_all (pcoq_val),
+      pc = extract_unsigned_integer (value_contents_all (pcoq_val).data (),
 				     size, byte_order);
       return frame_unwind_got_constant (this_frame, regnum, pc + 4);
     }
@@ -3029,7 +3028,6 @@ hppa_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 static struct gdbarch *
 hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
 
   /* find a candidate among the list of pre-declared architectures.  */
@@ -3038,7 +3036,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return (arches->gdbarch);
 
   /* If none found, then allocate and initialize one.  */
-  tdep = XCNEW (struct gdbarch_tdep);
+  hppa_gdbarch_tdep *tdep = new hppa_gdbarch_tdep;
   gdbarch = gdbarch_alloc (&info, tdep);
 
   /* Determine from the bfd_arch_info structure if we are dealing with
@@ -3162,11 +3160,11 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 static void
 hppa_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  hppa_gdbarch_tdep *tdep = (hppa_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
-  fprintf_unfiltered (file, "bytes_per_address = %d\n", 
-		      tdep->bytes_per_address);
-  fprintf_unfiltered (file, "elf = %s\n", tdep->is_elf ? "yes" : "no");
+  fprintf_filtered (file, "bytes_per_address = %d\n", 
+		    tdep->bytes_per_address);
+  fprintf_filtered (file, "elf = %s\n", tdep->is_elf ? "yes" : "no");
 }
 
 void _initialize_hppa_tdep ();

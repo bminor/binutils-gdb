@@ -1,6 +1,6 @@
 /* mem.h --- interface to memory for M32C simulator.
 
-Copyright (C) 2005-2021 Free Software Foundation, Inc.
+Copyright (C) 2005-2022 Free Software Foundation, Inc.
 Contributed by Red Hat, Inc.
 
 This file is part of the GNU simulators.
@@ -36,6 +36,8 @@ enum mem_ptr_action
 void init_mem (void);
 void mem_usage_stats (void);
 unsigned long mem_usage_cycles (void);
+
+#undef PAGE_SIZE	/* Cleanup system headers.  */
 
 /* rx_mem_ptr returns a pointer which is valid as long as the address
    requested remains within the same page.  */

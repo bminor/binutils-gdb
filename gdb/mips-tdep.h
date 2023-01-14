@@ -1,6 +1,6 @@
 /* Target-dependent header for the MIPS architecture, for GDB, the GNU Debugger.
 
-   Copyright (C) 2002-2021 Free Software Foundation, Inc.
+   Copyright (C) 2002-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,6 +21,7 @@
 #define MIPS_TDEP_H
 
 #include "objfiles.h"
+#include "gdbarch.h"
 
 struct gdbarch;
 
@@ -83,39 +84,39 @@ enum mips_fpu_type
 };
 
 /* MIPS specific per-architecture information.  */
-struct gdbarch_tdep
+struct mips_gdbarch_tdep : gdbarch_tdep
 {
   /* from the elf header */
-  int elf_flags;
+  int elf_flags = 0;
 
   /* mips options */
-  enum mips_abi mips_abi;
-  enum mips_abi found_abi;
-  enum mips_isa mips_isa;
-  enum mips_fpu_type mips_fpu_type;
-  int mips_last_arg_regnum;
-  int mips_last_fp_arg_regnum;
-  int default_mask_address_p;
+  enum mips_abi mips_abi {};
+  enum mips_abi found_abi {};
+  enum mips_isa mips_isa {};
+  enum mips_fpu_type mips_fpu_type {};
+  int mips_last_arg_regnum = 0;
+  int mips_last_fp_arg_regnum = 0;
+  int default_mask_address_p = 0;
   /* Is the target using 64-bit raw integer registers but only
      storing a left-aligned 32-bit value in each?  */
-  int mips64_transfers_32bit_regs_p;
+  int mips64_transfers_32bit_regs_p = 0;
   /* Indexes for various registers.  IRIX and embedded have
      different values.  This contains the "public" fields.  Don't
      add any that do not need to be public.  */
-  const struct mips_regnum *regnum;
+  const struct mips_regnum *regnum = nullptr;
   /* Register names table for the current register set.  */
-  const char * const *mips_processor_reg_names;
+  const char * const *mips_processor_reg_names = nullptr;
 
   /* The size of register data available from the target, if known.
      This doesn't quite obsolete the manual
      mips64_transfers_32bit_regs_p, since that is documented to force
      left alignment even for big endian (very strange).  */
-  int register_size_valid_p;
-  int register_size;
+  int register_size_valid_p = 0;
+  int register_size = 0;
 
   /* Return the expected next PC if FRAME is stopped at a syscall
      instruction.  */
-  CORE_ADDR (*syscall_next_pc) (struct frame_info *frame);
+  CORE_ADDR (*syscall_next_pc) (struct frame_info *frame) = nullptr;
 };
 
 /* Register numbers of various important registers.  */

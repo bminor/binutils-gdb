@@ -1,6 +1,6 @@
 /* Python interface to finish breakpoints
 
-   Copyright (C) 2011-2021 Free Software Foundation, Inc.
+   Copyright (C) 2011-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -293,7 +293,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
       /* Set a breakpoint on the return address.  */
       event_location_up location
 	= new_address_location (get_frame_pc (prev_frame), NULL, 0);
-      create_breakpoint (python_gdbarch,
+      create_breakpoint (gdbpy_enter::get_gdbarch (),
 			 location.get (), NULL, thread, NULL, false,
 			 0,
 			 1 /*temp_flag*/,
@@ -378,9 +378,9 @@ bpfinishpy_detect_out_scope_cb (struct breakpoint *b,
    out of the scope of any FinishBreakpoint before it has been hit.  */
 
 static void
-bpfinishpy_handle_stop (struct bpstats *bs, int print_frame)
+bpfinishpy_handle_stop (struct bpstat *bs, int print_frame)
 {
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
 
   for (breakpoint *bp : all_breakpoints_safe ())
     bpfinishpy_detect_out_scope_cb (bp, bs == NULL ? NULL : bs->breakpoint_at);
@@ -392,7 +392,7 @@ bpfinishpy_handle_stop (struct bpstats *bs, int print_frame)
 static void
 bpfinishpy_handle_exit (struct inferior *inf)
 {
-  gdbpy_enter enter_py (target_gdbarch (), current_language);
+  gdbpy_enter enter_py (target_gdbarch ());
 
   for (breakpoint *bp : all_breakpoints_safe ())
     bpfinishpy_detect_out_scope_cb (bp, nullptr);

@@ -1,6 +1,6 @@
 /* Native-dependent code for OpenBSD.
 
-   Copyright (C) 2014-2021 Free Software Foundation, Inc.
+   Copyright (C) 2014-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -35,9 +35,10 @@ class obsd_nat_target : public inf_ptrace_target
 
   int remove_fork_catchpoint (int) override;
 
-  void post_startup_inferior (ptid_t) override;
-
   void post_attach (int) override;
+
+protected:
+  void post_startup_inferior (ptid_t) override;
 };
 
 #endif /* obsd-nat.h */

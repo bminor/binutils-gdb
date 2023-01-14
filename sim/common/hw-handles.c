@@ -1,6 +1,6 @@
 /* The common simulator framework for GDB, the GNU Debugger.
 
-   Copyright 2002-2021 Free Software Foundation, Inc.
+   Copyright 2002-2022 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney and Red Hat.
 
@@ -22,10 +22,10 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <stdlib.h>
+
 #include "hw-main.h"
 #include "hw-base.h"
-
-#include <stdlib.h>
 
 struct hw_handle_mapping
 {

@@ -1,5 +1,5 @@
 /* BFD back-end for ns32k a.out-ish binaries.
-   Copyright (C) 1990-2021 Free Software Foundation, Inc.
+   Copyright (C) 1990-2022 Free Software Foundation, Inc.
    Contributed by Ian Dall (idall@eleceng.adelaide.edu.au).
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -143,12 +143,12 @@ reloc_howto_type MY (howto_table)[] =
 static reloc_howto_type *
 MY (reloc_howto) (bfd *abfd ATTRIBUTE_UNUSED,
 		  struct reloc_std_external *rel,
-		  int *r_index,
+		  unsigned int *r_index,
 		  int *r_extern,
 		  int *r_pcrel)
 {
   unsigned int r_length;
-  int r_ns32k_type;
+  unsigned int r_ns32k_type;
 
   *r_index =  ((rel->r_index[2] << 16)
 	       | (rel->r_index[1] << 8)
@@ -159,6 +159,8 @@ MY (reloc_howto) (bfd *abfd ATTRIBUTE_UNUSED,
 		>> RELOC_STD_BITS_LENGTH_SH_LITTLE);
   r_ns32k_type  =  ((rel->r_type[0] & RELOC_STD_BITS_NS32K_TYPE_LITTLE)
 		    >> RELOC_STD_BITS_NS32K_TYPE_SH_LITTLE);
+  if (r_length > 2 || r_ns32k_type > 2)
+    return NULL;
   return (MY (howto_table) + r_length + 3 * (*r_pcrel) + 6 * r_ns32k_type);
 }
 
@@ -271,7 +273,7 @@ MY_swap_std_reloc_in (bfd *abfd,
 		      asymbol **symbols,
 		      bfd_size_type symcount ATTRIBUTE_UNUSED)
 {
-  int r_index;
+  unsigned int r_index;
   int r_extern;
   int r_pcrel;
   struct aoutdata  *su = &(abfd->tdata.aout_data->a);

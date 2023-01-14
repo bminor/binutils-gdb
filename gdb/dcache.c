@@ -1,6 +1,6 @@
 /* Caching code for GDB, the GNU debugger.
 
-   Copyright (C) 1992-2021 Free Software Foundation, Inc.
+   Copyright (C) 1992-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -116,6 +116,10 @@ struct dcache_struct
 
   /* The ptid of last inferior to use cache or null_ptid.  */
   ptid_t ptid;
+
+  /* The process target of last inferior to use the cache or
+     nullptr.  */
+  process_stratum_target *proc_target;
 };
 
 typedef void (block_func) (struct dcache_block *block, void *param);
@@ -249,6 +253,7 @@ dcache_invalidate (DCACHE *dcache)
   dcache->oldest = NULL;
   dcache->size = 0;
   dcache->ptid = null_ptid;
+  dcache->proc_target = nullptr;
 
   if (dcache->line_size != dcache_line_size)
     {
@@ -453,6 +458,7 @@ dcache_init (void)
   dcache->size = 0;
   dcache->line_size = dcache_line_size;
   dcache->ptid = null_ptid;
+  dcache->proc_target = nullptr;
 
   return dcache;
 }
@@ -470,13 +476,15 @@ dcache_read_memory_partial (struct target_ops *ops, DCACHE *dcache,
 {
   ULONGEST i;
 
-  /* If this is a different inferior from what we've recorded,
-     flush the cache.  */
+  /* If this is a different thread from what we've recorded, flush the
+     cache.  */
 
-  if (inferior_ptid != dcache->ptid)
+  process_stratum_target *proc_target = current_inferior ()->process_target ();
+  if (proc_target != dcache->proc_target || inferior_ptid != dcache->ptid)
     {
       dcache_invalidate (dcache);
       dcache->ptid = inferior_ptid;
+      dcache->proc_target = proc_target;
     }
 
   for (i = 0; i < len; i++)
@@ -694,13 +702,12 @@ With no arguments, this command prints the cache configuration and a\n\
 summary of each line in the cache.  With an argument, dump\"\n\
 the contents of the given line."));
 
-  add_basic_prefix_cmd ("dcache", class_obscure, _("\
+  add_setshow_prefix_cmd ("dcache", class_obscure,
+			  _("\
 Use this command to set number of lines in dcache and line-size."),
-			&dcache_set_list, /*allow_unknown*/0, &setlist);
-  add_show_prefix_cmd ("dcache", class_obscure, _("\
-Show dcachesettings."),
-		       &dcache_show_list, /*allow_unknown*/0,
-		       &showlist);
+			  ("Show dcache settings."),
+			  &dcache_set_list, &dcache_show_list,
+			  &setlist, &showlist);
 
   add_setshow_zuinteger_cmd ("line-size", class_obscure,
 			     &dcache_line_size, _("\

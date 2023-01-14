@@ -1,5 +1,5 @@
 /* bucomm.c -- Bin Utils COMmon code.
-   Copyright (C) 1991-2021 Free Software Foundation, Inc.
+   Copyright (C) 1991-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -70,7 +70,6 @@ bfd_nonfatal_message (const char *filename,
 {
   const char *errmsg;
   const char *section_name;
-  va_list args;
   enum bfd_error err = bfd_get_error ();
 
   if (err == bfd_error_no_error)
@@ -79,7 +78,6 @@ bfd_nonfatal_message (const char *filename,
     errmsg = bfd_errmsg (err);
   fflush (stdout);
   section_name = NULL;
-  va_start (args, format);
   fprintf (stderr, "%s", program_name);
 
   if (abfd)
@@ -96,11 +94,13 @@ bfd_nonfatal_message (const char *filename,
 
   if (format)
     {
+      va_list args;
+      va_start (args, format);
       fprintf (stderr, ": ");
       vfprintf (stderr, format, args);
+      va_end (args);
     }
   fprintf (stderr, ": %s\n", errmsg);
-  va_end (args);
 }
 
 void

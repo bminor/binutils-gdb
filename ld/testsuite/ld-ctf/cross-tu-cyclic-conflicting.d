@@ -3,7 +3,7 @@
 #as:
 #source: cross-tu-cyclic-1.c
 #source: cross-tu-cyclic-2.c
-#objdump: --ctf=.ctf
+#objdump: --ctf
 #ld: -shared
 #name: cross-TU-cyclic-conflicting
 

@@ -1,6 +1,6 @@
 /* none on ARM target support.
 
-   Copyright (C) 2020-2021 Free Software Foundation, Inc.
+   Copyright (C) 2020-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -177,7 +177,7 @@ arm_none_iterate_over_regset_sections (struct gdbarch *gdbarch,
 				       void *cb_data,
 				       const struct regcache *regcache)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   cb (".reg", ARM_NONE_SIZEOF_GREGSET, ARM_NONE_SIZEOF_GREGSET,
       &arm_none_gregset, nullptr, cb_data);

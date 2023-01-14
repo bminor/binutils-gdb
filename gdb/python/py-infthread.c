@@ -1,6 +1,6 @@
 /* Python interface to inferior threads.
 
-   Copyright (C) 2009-2021 Free Software Foundation, Inc.
+   Copyright (C) 2009-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -66,14 +66,10 @@ static PyObject *
 thpy_get_name (PyObject *self, void *ignore)
 {
   thread_object *thread_obj = (thread_object *) self;
-  const char *name;
 
   THPY_REQUIRE_VALID (thread_obj);
 
-  name = thread_obj->thread->name;
-  if (name == NULL)
-    name = target_thread_name (thread_obj->thread);
-
+  const char *name = thread_name (thread_obj->thread);
   if (name == NULL)
     Py_RETURN_NONE;
 
@@ -115,8 +111,7 @@ thpy_set_name (PyObject *self, PyObject *newvalue, void *ignore)
 	return -1;
     }
 
-  xfree (thread_obj->thread->name);
-  thread_obj->thread->name = name.release ();
+  thread_obj->thread->set_name (std::move (name));
 
   return 0;
 }
@@ -296,7 +291,8 @@ PyObject *
 gdbpy_create_ptid_object (ptid_t ptid)
 {
   int pid;
-  long tid, lwp;
+  long lwp;
+  ULONGEST tid;
   PyObject *ret;
 
   ret = PyTuple_New (3);
@@ -313,7 +309,7 @@ gdbpy_create_ptid_object (ptid_t ptid)
   gdbpy_ref<> lwp_obj = gdb_py_object_from_longest (lwp);
   if (lwp_obj == nullptr)
     return nullptr;
-  gdbpy_ref<> tid_obj = gdb_py_object_from_longest (tid);
+  gdbpy_ref<> tid_obj = gdb_py_object_from_ulongest (tid);
   if (tid_obj == nullptr)
     return nullptr;
 
@@ -408,7 +404,7 @@ PyTypeObject thread_object_type =
   0,				  /*tp_getattro*/
   0,				  /*tp_setattro*/
   0,				  /*tp_as_buffer*/
-  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_ITER,  /*tp_flags*/
+  Py_TPFLAGS_DEFAULT,		  /*tp_flags*/
   "GDB thread object",		  /* tp_doc */
   0,				  /* tp_traverse */
   0,				  /* tp_clear */

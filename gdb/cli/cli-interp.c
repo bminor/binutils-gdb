@@ -1,6 +1,6 @@
 /* CLI Definitions for GDB, the GNU debugger.
 
-   Copyright (C) 2002-2021 Free Software Foundation, Inc.
+   Copyright (C) 2002-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -125,7 +125,7 @@ should_print_stop_to_console (struct interp *console_interp,
 /* Observer for the normal_stop notification.  */
 
 static void
-cli_on_normal_stop (struct bpstats *bs, int print_frame)
+cli_on_normal_stop (struct bpstat *bs, int print_frame)
 {
   if (!print_frame)
     return;

@@ -1,5 +1,5 @@
 /* ldlex.h -
-   Copyright (C) 1991-2021 Free Software Foundation, Inc.
+   Copyright (C) 1991-2022 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -191,7 +191,7 @@ extern void ldlex_mri_script (void);
 extern void ldlex_version_script (void);
 extern void ldlex_version_file (void);
 extern void ldlex_expression (void);
-extern void ldlex_both (void);
+extern void ldlex_wild (void);
 extern void ldlex_popstate (void);
 extern void ldlex_backup (void);
 extern const char* ldlex_filename (void);

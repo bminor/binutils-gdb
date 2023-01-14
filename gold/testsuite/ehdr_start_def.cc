@@ -1,6 +1,6 @@
 // ehdr_start_def.cc -- test for __ehdr_start linker-defined symbol.
 
-// Copyright (C) 2014-2021 Free Software Foundation, Inc.
+// Copyright (C) 2014-2022 Free Software Foundation, Inc.
 // Written by Cary Coutant <ccoutant@google.com>.
 
 // This file is part of gold.

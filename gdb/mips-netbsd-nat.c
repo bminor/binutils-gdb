@@ -1,6 +1,6 @@
 /* Native-dependent code for MIPS systems running NetBSD.
 
-   Copyright (C) 2000-2021 Free Software Foundation, Inc.
+   Copyright (C) 2000-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,9 +30,10 @@
 
 #include "mips-tdep.h"
 #include "mips-netbsd-tdep.h"
+#include "netbsd-nat.h"
 #include "inf-ptrace.h"
 
-class mips_nbsd_nat_target final : public inf_ptrace_target
+class mips_nbsd_nat_target final : public nbsd_nat_target
 {
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;

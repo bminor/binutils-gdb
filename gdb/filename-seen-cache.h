@@ -1,6 +1,6 @@
 /* Filename-seen cache for the GNU debugger, GDB.
 
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,6 +22,7 @@
 
 #include "defs.h"
 #include "gdbsupport/function-view.h"
+#include "gdbsupport/gdb-hashtab.h"
 
 /* Cache to watch for file names already seen.  */
 

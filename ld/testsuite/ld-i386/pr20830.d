@@ -1,6 +1,6 @@
 #name: PR ld/20830 (.plt.got)
 #as: --32
-#ld: -melf_i386 -shared -z relro --ld-generated-unwind-info --hash-style=sysv -z noseparate-code
+#ld: -melf_i386 -shared -z relro --ld-generated-unwind-info --hash-style=sysv -z noseparate-code $NO_DT_RELR_LDFLAGS
 #objdump: -dw -Wf
 
 .*: +file format .*
@@ -49,12 +49,12 @@ Disassembly of section .plt:
 Disassembly of section .plt.got:
 
 0+120 <func@plt>:
- +[a-f0-9]+:	ff a3 fc ff ff ff    	jmp    \*-0x4\(%ebx\)
+ +[a-f0-9]+:	ff a3 78 f0 ff ff    	jmp    \*-0xf88\(%ebx\)
  +[a-f0-9]+:	66 90                	xchg   %ax,%ax
 
 Disassembly of section .text:
 
 0+128 <foo>:
  +[a-f0-9]+:	e8 f3 ff ff ff       	call   120 <func@plt>
- +[a-f0-9]+:	8b 83 fc ff ff ff    	mov    -0x4\(%ebx\),%eax
+ +[a-f0-9]+:	8b 83 78 f0 ff ff    	mov    -0xf88\(%ebx\),%eax
 #pass

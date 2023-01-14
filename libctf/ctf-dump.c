@@ -1,5 +1,5 @@
 /* Textual dumping of CTF data.
-   Copyright (C) 2019-2021 Free Software Foundation, Inc.
+   Copyright (C) 2019-2022 Free Software Foundation, Inc.
 
    This file is part of libctf.
 
@@ -564,7 +564,6 @@ ctf_dump_type (ctf_id_t id, int flag, void *arg)
 {
   char *str;
   char *indent;
-  int err = 0;
   ctf_dump_state_t *state = arg;
   ctf_dump_membstate_t membstate = { &str, state->cds_fp, NULL };
 
@@ -619,9 +618,8 @@ ctf_dump_type (ctf_id_t id, int flag, void *arg)
 
 	  if (asprintf (&bit, "%s: %i\n", enumerand, value) < 0)
 	    {
-	      err = ENOMEM;
 	      ctf_next_destroy (it);
-	      goto err;
+	      goto oom;
 	    }
 	  str = str_append (str, bit);
 	  free (bit);
@@ -648,7 +646,15 @@ ctf_dump_type (ctf_id_t id, int flag, void *arg)
  err:
   free (indent);
   free (str);
-  return ctf_set_errno (state->cds_fp, err);
+
+  /* Swallow the error: don't cause an error in one type to abort all
+     type dumping.  */
+  return 0;
+
+ oom:
+  free (indent);
+  free (str);
+  return ctf_set_errno (state->cds_fp, ENOMEM);
 }
 
 /* Dump the string table into the cds_items.  */

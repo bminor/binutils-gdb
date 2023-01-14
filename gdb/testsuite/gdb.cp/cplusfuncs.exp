@@ -1,4 +1,4 @@
-# Copyright 1992-2021 Free Software Foundation, Inc.
+# Copyright 1992-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -580,8 +580,6 @@ proc test_paddr_hairy_functions {} {
 proc do_tests {} {
     global binfile
     global dm_type_int_star
-
-    clean_restart $binfile
 
     gdb_test_no_output "set width 0"
 

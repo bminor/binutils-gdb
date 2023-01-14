@@ -1,5 +1,5 @@
 /* List lines of source files for GDB, the GNU debugger.
-   Copyright (C) 1999-2021 Free Software Foundation, Inc.
+   Copyright (C) 1999-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -39,13 +39,14 @@ extern int openp (const char *, openp_flags, const char *, int,
 
 extern int source_full_path_of (const char *, gdb::unique_xmalloc_ptr<char> *);
 
-extern void mod_path (const char *, char **);
+extern void mod_path (const char *, std::string &);
 
 extern void add_path (const char *, char **, int);
+extern void add_path (const char *, std::string &, int);
 
 extern void directory_switch (const char *, int);
 
-extern char *source_path;
+extern std::string source_path;
 
 extern void init_source_path (void);
 
@@ -127,7 +128,7 @@ extern symtab_and_line set_current_source_symtab_and_line
 extern void clear_current_source_symtab_and_line (void);
 
 /* Add a source path substitution rule.  */
-extern void add_substitute_path_rule (char *, char *);
+extern void add_substitute_path_rule (const char *, const char *);
 
 /* Flags passed as 4th argument to print_source_lines.  */
 enum print_source_lines_flag

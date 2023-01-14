@@ -1,6 +1,6 @@
 /* The IGEN simulator generator for GDB, the GNU Debugger.
 
-   Copyright 2002-2021 Free Software Foundation, Inc.
+   Copyright 2002-2022 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney.
 
@@ -30,29 +30,11 @@ enum
 };
 
 
-/* Define a 64bit data type */
-
-#if defined __GNUC__ || defined _WIN32
-#ifdef __GNUC__
-
-typedef long long signed64;
-typedef unsigned long long unsigned64;
-
-#else /* _WIN32 */
-
-typedef __int64 signed64;
-typedef unsigned __int64 unsigned64;
-
-#endif /* _WIN32 */
-#else /* Not GNUC or WIN32 */
-/* Not supported */
-#endif
-
-
-#include <stdio.h>
 #include <ctype.h>
-#include <string.h>
+#include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #if !defined (__attribute__) && (!defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 7))
 #define __attribute__(arg)

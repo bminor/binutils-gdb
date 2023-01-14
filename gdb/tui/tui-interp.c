@@ -1,6 +1,6 @@
 /* TUI Interpreter definitions for GDB, the GNU debugger.
 
-   Copyright (C) 2003-2021 Free Software Foundation, Inc.
+   Copyright (C) 2003-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -79,7 +79,7 @@ tui_exit (void)
 /* Observer for the normal_stop notification.  */
 
 static void
-tui_on_normal_stop (struct bpstats *bs, int print_frame)
+tui_on_normal_stop (struct bpstat *bs, int print_frame)
 {
   if (!print_frame)
     return;
@@ -242,9 +242,15 @@ tui_interp::init (bool top_level)
   atexit (tui_exit);
 
   tui_initialize_io ();
-  tui_initialize_win ();
   if (gdb_stdout->isatty ())
-    tui_ensure_readline_initialized ();
+    {
+      tui_ensure_readline_initialized ();
+
+      /* This installs the SIGWINCH signal handler.  The handler needs to do
+	 readline calls (to rl_resize_terminal), so it must not be installed
+	 unless readline is properly initialized.  */
+      tui_initialize_win ();
+    }
 }
 
 /* Used as the command handler for the tui.  */

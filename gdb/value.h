@@ -1,6 +1,6 @@
 /* Definitions for values of C expressions, for GDB.
 
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -264,6 +264,12 @@ struct lval_funcs
      TOVAL is not considered as an lvalue.  */
   void (*write) (struct value *toval, struct value *fromval);
 
+  /* Return true if any part of V is optimized out, false otherwise.
+     This will only be called for lazy values -- if the value has been
+     fetched, then the value's optimized-out bits are consulted
+     instead.  */
+  bool (*is_optimized_out) (struct value *v);
+
   /* If non-NULL, this is used to implement pointer indirection for
      this value.  This method may return NULL, in which case value_ind
      will fall back to ordinary indirection.  */
@@ -354,7 +360,7 @@ extern void error_value_optimized_out (void);
    get to the real subobject, if the value happens to represent
    something embedded in a larger run-time object.  */
 
-extern gdb_byte *value_contents_raw (struct value *);
+extern gdb::array_view<gdb_byte> value_contents_raw (struct value *);
 
 /* Actual contents of the value.  For use of this value; setting it
    uses the stuff above.  Not valid if lazy is nonzero.  Target
@@ -362,24 +368,24 @@ extern gdb_byte *value_contents_raw (struct value *);
    value.  Note that a value therefore extends beyond what is
    declared here.  */
 
-extern const gdb_byte *value_contents (struct value *);
-extern gdb_byte *value_contents_writeable (struct value *);
+extern gdb::array_view<const gdb_byte> value_contents (struct value *);
+extern gdb::array_view<gdb_byte> value_contents_writeable (struct value *);
 
 /* The ALL variants of the above two macros do not adjust the returned
    pointer by the embedded_offset value.  */
 
-extern gdb_byte *value_contents_all_raw (struct value *);
-extern const gdb_byte *value_contents_all (struct value *);
+extern gdb::array_view<gdb_byte> value_contents_all_raw (struct value *);
+extern gdb::array_view<const gdb_byte> value_contents_all (struct value *);
 
 /* Like value_contents_all, but does not require that the returned
    bits be valid.  This should only be used in situations where you
    plan to check the validity manually.  */
-extern const gdb_byte *value_contents_for_printing (struct value *value);
+extern gdb::array_view<const gdb_byte> value_contents_for_printing (struct value *value);
 
 /* Like value_contents_for_printing, but accepts a constant value
    pointer.  Unlike value_contents_for_printing however, the pointed
    value must _not_ be lazy.  */
-extern const gdb_byte *
+extern gdb::array_view<const gdb_byte>
   value_contents_for_printing_const (const struct value *value);
 
 extern void value_fetch_lazy (struct value *val);
@@ -942,6 +948,10 @@ extern void binop_promote (const struct language_defn *language,
 
 extern struct value *access_value_history (int num);
 
+/* Return the number of items in the value history.  */
+
+extern ULONGEST value_history_count ();
+
 extern struct value *value_of_internalvar (struct gdbarch *gdbarch,
 					   struct internalvar *var);
 
@@ -1022,7 +1032,15 @@ extern int value_equal_contents (struct value *arg1, struct value *arg2);
 
 extern int value_less (struct value *arg1, struct value *arg2);
 
-extern int value_logical_not (struct value *arg1);
+/* Simulate the C operator ! -- return true if ARG1 contains zero.  */
+extern bool value_logical_not (struct value *arg1);
+
+/* Returns true if the value VAL represents a true value.  */
+static inline bool
+value_true (struct value *val)
+{
+  return !value_logical_not (val);
+}
 
 /* C++ */
 
@@ -1150,10 +1168,6 @@ extern struct value *find_function_in_inferior (const char *,
 						struct objfile **);
 
 extern struct value *value_allocate_space_in_inferior (int);
-
-extern struct value *value_subscripted_rvalue (struct value *array,
-					       LONGEST index,
-					       LONGEST lowerbound);
 
 /* User function handler.  */
 

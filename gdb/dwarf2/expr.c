@@ -1,6 +1,6 @@
 /* DWARF 2 Expression Evaluator.
 
-   Copyright (C) 2001-2021 Free Software Foundation, Inc.
+   Copyright (C) 2001-2022 Free Software Foundation, Inc.
 
    Contributed by Daniel Berlin (dan@dberlin.org)
 
@@ -32,6 +32,7 @@
 #include "frame.h"
 #include "gdbsupport/underlying.h"
 #include "gdbarch.h"
+#include "objfiles.h"
 
 /* Cookie for gdbarch data.  */
 
@@ -148,10 +149,13 @@ allocate_piece_closure (dwarf2_per_cu_data *per_cu,
 /* Read or write a pieced value V.  If FROM != NULL, operate in "write
    mode": copy FROM into the pieces comprising V.  If FROM == NULL,
    operate in "read mode": fetch the contents of the (lazy) value V by
-   composing it from its pieces.  */
+   composing it from its pieces.  If CHECK_OPTIMIZED is true, then no
+   reading or writing is done; instead the return value of this
+   function is true if any piece is optimized out.  When
+   CHECK_OPTIMIZED is true, FROM must be nullptr.  */
 
-static void
-rw_pieced_value (value *v, value *from)
+static bool
+rw_pieced_value (value *v, value *from, bool check_optimized)
 {
   int i;
   LONGEST offset = 0, max_offset;
@@ -162,9 +166,10 @@ rw_pieced_value (value *v, value *from)
   gdb::byte_vector buffer;
   bool bits_big_endian = type_byte_order (value_type (v)) == BFD_ENDIAN_BIG;
 
+  gdb_assert (!check_optimized || from == nullptr);
   if (from != nullptr)
     {
-      from_contents = value_contents (from);
+      from_contents = value_contents (from).data ();
       v_contents = nullptr;
     }
   else
@@ -173,7 +178,10 @@ rw_pieced_value (value *v, value *from)
 	internal_error (__FILE__, __LINE__,
 			_("Should not be able to create a lazy value with "
 			  "an enclosing type"));
-      v_contents = value_contents_raw (v);
+      if (check_optimized)
+	v_contents = nullptr;
+      else
+	v_contents = value_contents_raw (v).data ();
       from_contents = nullptr;
     }
 
@@ -239,17 +247,22 @@ rw_pieced_value (value *v, value *from)
 					       buffer, &optim, &unavail))
 		  {
 		    if (optim)
-		      mark_value_bits_optimized_out (v, offset,
-						     this_size_bits);
-		    if (unavail)
+		      {
+			if (check_optimized)
+			  return true;
+			mark_value_bits_optimized_out (v, offset,
+						       this_size_bits);
+		      }
+		    if (unavail && !check_optimized)
 		      mark_value_bits_unavailable (v, offset,
 						   this_size_bits);
 		    break;
 		  }
 
-		copy_bitwise (v_contents, offset,
-			      buffer.data (), bits_to_skip % 8,
-			      this_size_bits, bits_big_endian);
+		if (!check_optimized)
+		  copy_bitwise (v_contents, offset,
+				buffer.data (), bits_to_skip % 8,
+				this_size_bits, bits_big_endian);
 	      }
 	    else
 	      {
@@ -285,6 +298,9 @@ rw_pieced_value (value *v, value *from)
 
 	case DWARF_VALUE_MEMORY:
 	  {
+	    if (check_optimized)
+	      break;
+
 	    bits_to_skip += p->offset;
 
 	    CORE_ADDR start_addr = p->v.mem.addr + bits_to_skip / 8;
@@ -354,6 +370,9 @@ rw_pieced_value (value *v, value *from)
 
 	case DWARF_VALUE_STACK:
 	  {
+	    if (check_optimized)
+	      break;
+
 	    if (from != nullptr)
 	      {
 		mark_value_bits_optimized_out (v, offset, this_size_bits);
@@ -375,7 +394,7 @@ rw_pieced_value (value *v, value *from)
 	      bits_to_skip += p->offset;
 
 	    copy_bitwise (v_contents, offset,
-			  value_contents_all (p->v.value),
+			  value_contents_all (p->v.value).data (),
 			  bits_to_skip,
 			  this_size_bits, bits_big_endian);
 	  }
@@ -383,6 +402,9 @@ rw_pieced_value (value *v, value *from)
 
 	case DWARF_VALUE_LITERAL:
 	  {
+	    if (check_optimized)
+	      break;
+
 	    if (from != nullptr)
 	      {
 		mark_value_bits_optimized_out (v, offset, this_size_bits);
@@ -417,6 +439,8 @@ rw_pieced_value (value *v, value *from)
 	  break;
 
 	case DWARF_VALUE_OPTIMIZED_OUT:
+	  if (check_optimized)
+	    return true;
 	  mark_value_bits_optimized_out (v, offset, this_size_bits);
 	  break;
 
@@ -427,18 +451,26 @@ rw_pieced_value (value *v, value *from)
       offset += this_size_bits;
       bits_to_skip = 0;
     }
+
+  return false;
 }
 
 static void
 read_pieced_value (value *v)
 {
-  rw_pieced_value (v, nullptr);
+  rw_pieced_value (v, nullptr, false);
 }
 
 static void
 write_pieced_value (value *to, value *from)
 {
-  rw_pieced_value (to, from);
+  rw_pieced_value (to, from, false);
+}
+
+static bool
+is_optimized_out_pieced_value (value *v)
+{
+  return rw_pieced_value (v, nullptr, true);
 }
 
 /* An implementation of an lval_funcs method to see whether a value is
@@ -545,8 +577,7 @@ indirect_pieced_value (value *value)
      encode address spaces and other things in CORE_ADDR.  */
   bfd_endian byte_order = gdbarch_byte_order (get_frame_arch (frame));
   LONGEST byte_offset
-    = extract_signed_integer (value_contents (value),
-			      TYPE_LENGTH (type), byte_order);
+    = extract_signed_integer (value_contents (value), byte_order);
   byte_offset += piece->v.ptr.offset;
 
   return indirect_synthetic_pointer (piece->v.ptr.die_sect_off,
@@ -616,6 +647,7 @@ free_pieced_value_closure (value *v)
 static const struct lval_funcs pieced_value_funcs = {
   read_pieced_value,
   write_pieced_value,
+  is_optimized_out_pieced_value,
   indirect_pieced_value,
   coerce_pieced_ref,
   check_pieced_synthetic_pointer,
@@ -926,9 +958,11 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	{
 	case DWARF_VALUE_REGISTER:
 	  {
+	    gdbarch *f_arch = get_frame_arch (this->m_frame);
 	    int dwarf_regnum
 	      = longest_to_int (value_as_long (this->fetch (0)));
-	    int gdb_regnum = dwarf_reg_to_regnum_or_error (arch, dwarf_regnum);
+	    int gdb_regnum = dwarf_reg_to_regnum_or_error (f_arch,
+							   dwarf_regnum);
 
 	    if (subobj_offset != 0)
 	      error (_("cannot use offset on synthetic pointer to register"));
@@ -1002,8 +1036,8 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	    if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG)
 	      subobj_offset += n - max;
 
-	    memcpy (value_contents_raw (retval),
-		    value_contents_all (val) + subobj_offset, len);
+	    copy (value_contents_all (val).slice (subobj_offset, len),
+		  value_contents_raw (retval));
 	  }
 	  break;
 
@@ -1015,7 +1049,7 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	      invalid_synthetic_pointer ();
 
 	    retval = allocate_value (subobj_type);
-	    bfd_byte *contents = value_contents_raw (retval);
+	    bfd_byte *contents = value_contents_raw (retval).data ();
 	    memcpy (contents, this->m_data + subobj_offset, n);
 	  }
 	  break;
@@ -1122,9 +1156,7 @@ dwarf_expr_context::fetch_address (int n)
   ULONGEST result;
 
   dwarf_require_integral (value_type (result_val));
-  result = extract_unsigned_integer (value_contents (result_val),
-				     TYPE_LENGTH (value_type (result_val)),
-				     byte_order);
+  result = extract_unsigned_integer (value_contents (result_val), byte_order);
 
   /* For most architectures, calling extract_unsigned_integer() alone
      is sufficient for extracting an address.  However, some
@@ -2331,13 +2363,15 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    else
 	      result_val
 		= value_from_contents (type,
-				       value_contents_all (result_val));
+				       value_contents_all (result_val).data ());
 	  }
 	  break;
 
 	case DW_OP_push_object_address:
 	  /* Return the address of the object we are currently observing.  */
-	  if (this->m_addr_info == nullptr)
+	  if (this->m_addr_info == nullptr
+	      || (this->m_addr_info->valaddr.data () == nullptr
+		  && this->m_addr_info->addr == 0))
 	    error (_("Location address is not set."));
 
 	  result_val

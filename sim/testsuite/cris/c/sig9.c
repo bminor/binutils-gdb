@@ -1,5 +1,5 @@
 /* Check that TRT happens at an non-abort ignored signal, more than one thread.
-#notarget: cris*-*-elf
+#progos: linux
 #cc: additional_flags=-pthread
 */
 

@@ -1,6 +1,6 @@
 /* Scheme interface to breakpoints.
 
-   Copyright (C) 2008-2021 Free Software Foundation, Inc.
+   Copyright (C) 2008-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -883,7 +883,7 @@ gdbscm_breakpoint_expression (SCM self)
 
   wp = (struct watchpoint *) bp_smob->bp;
 
-  const char *str = wp->exp_string;
+  const char *str = wp->exp_string.get ();
   if (! str)
     str = "";
 
@@ -899,7 +899,7 @@ gdbscm_breakpoint_condition (SCM self)
     = bpscm_get_valid_breakpoint_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   char *str;
 
-  str = bp_smob->bp->cond_string;
+  str = bp_smob->bp->cond_string.get ();
   if (! str)
     return SCM_BOOL_F;
 
@@ -968,7 +968,7 @@ gdbscm_set_breakpoint_stop_x (SCM self, SCM newvalue)
 	= xstrprintf (_("Only one stop condition allowed.  There is"
 			" currently a %s stop condition defined for"
 			" this breakpoint."),
-		      ext_lang_capitalized_name (extlang));
+		      ext_lang_capitalized_name (extlang)).release ();
 
       scm_dynwind_begin ((scm_t_dynwind_flags) 0);
       gdbscm_dynwind_xfree (error_text);

@@ -1,6 +1,6 @@
 /* Low-level I/O routines for BFDs.
 
-   Copyright (C) 1990-2021 Free Software Foundation, Inc.
+   Copyright (C) 1990-2022 Free Software Foundation, Inc.
 
    Written by Cygnus Support.
 
@@ -231,9 +231,11 @@ bfd_bread (void *ptr, bfd_size_type size, bfd *abfd)
     }
   offset += abfd->origin;
 
-  /* If this is an archive element, don't read past the end of
+  /* If this is a non-thin archive element, don't read past the end of
      this element.  */
-  if (element_bfd->arelt_data != NULL)
+  if (element_bfd->arelt_data != NULL
+      && element_bfd->my_archive != NULL
+      && !bfd_is_thin_archive (element_bfd->my_archive))
     {
       bfd_size_type maxbytes = arelt_size (element_bfd);
 

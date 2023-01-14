@@ -3,7 +3,7 @@
 # icf_test_pr21066.sh -- regression test for ICF tracking exception handling
 # metadata differences
 
-# Copyright (C) 2009-2021 Free Software Foundation, Inc.
+# Copyright (C) 2009-2022 Free Software Foundation, Inc.
 # Written by Joshua Oreman <oremanj@hudson-trading.com>, based on icf_test.sh
 
 # This file is part of gold.

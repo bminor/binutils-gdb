@@ -1,6 +1,6 @@
 /* Target-dependent code for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -332,7 +332,7 @@ ppc_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
   unsigned int insnbuf[POWERPC32_PLT_CHECK_LEN];
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR target = 0;
   int scan_limit, i;
@@ -898,7 +898,7 @@ ppc_linux_vsxregset (void)
 const struct regset *
 ppc_linux_cgprregset (struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (tdep->wordsize == 4)
     {
@@ -938,7 +938,7 @@ ppc_linux_collect_core_cpgrregset (const struct regset *regset,
 				   int regnum, void *buf, size_t len)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   const struct regset *cgprregset = ppc_linux_cgprregset (gdbarch);
 
@@ -985,7 +985,7 @@ ppc_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					void *cb_data,
 					const struct regcache *regcache)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   int have_altivec = tdep->ppc_vr0_regnum != -1;
   int have_vsx = tdep->ppc_vsr0_upper_regnum != -1;
   int have_ppr = tdep->ppc_ppr_regnum != -1;
@@ -1170,7 +1170,7 @@ ppc_linux_sigtramp_cache (struct frame_info *this_frame,
   CORE_ADDR fpregs;
   int i;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   base = get_frame_register_unsigned (this_frame,
@@ -1341,7 +1341,7 @@ ppc_linux_get_syscall_number (struct gdbarch *gdbarch,
 			      thread_info *thread)
 {
   struct regcache *regcache = get_thread_regcache (thread);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   /* Make sure we're in a 32- or 64-bit machine */
@@ -1371,7 +1371,7 @@ static struct linux_record_tdep ppc64_linux_record_tdep;
    SYSCALL.  */
 
 static enum gdb_syscall
-ppc_canonicalize_syscall (int syscall)
+ppc_canonicalize_syscall (int syscall, int wordsize)
 {
   int result = -1;
 
@@ -1391,6 +1391,15 @@ ppc_canonicalize_syscall (int syscall)
     result = syscall += 259 - 240;
   else if (syscall >= 250 && syscall <= 251)	/* tgkill */
     result = syscall + 270 - 250;
+  else if (syscall == 286)
+    result = gdb_sys_openat;
+  else if (syscall == 291)
+    {
+      if (wordsize == 64)
+	result = gdb_sys_newfstatat;
+      else
+	result = gdb_sys_fstatat64;
+    }
   else if (syscall == 336)
     result = gdb_sys_recv;
   else if (syscall == 337)
@@ -1408,18 +1417,19 @@ static int
 ppc_linux_syscall_record (struct regcache *regcache)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   ULONGEST scnum;
   enum gdb_syscall syscall_gdb;
   int ret;
 
   regcache_raw_read_unsigned (regcache, tdep->ppc_gp0_regnum, &scnum);
-  syscall_gdb = ppc_canonicalize_syscall (scnum);
+  syscall_gdb = ppc_canonicalize_syscall (scnum, tdep->wordsize);
 
   if (syscall_gdb < 0)
     {
-      printf_unfiltered (_("Process record and replay target doesn't "
-			   "support syscall number %d\n"), (int) scnum);
+      fprintf_unfiltered (gdb_stderr,
+			  _("Process record and replay target doesn't "
+			    "support syscall number %d\n"), (int) scnum);
       return 0;
     }
 
@@ -1497,7 +1507,7 @@ ppc_linux_record_signal (struct gdbarch *gdbarch, struct regcache *regcache,
   const int SIGNAL_FRAMESIZE = 128;
   const int sizeof_rt_sigframe = 1440 * 2 + 8 * 2 + 4 * 6 + 8 + 8 + 128 + 512;
   ULONGEST sp;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   int i;
 
   for (i = 3; i <= 12; i++)
@@ -1973,11 +1983,60 @@ ppc_floatformat_for_type (struct gdbarch *gdbarch,
   return default_floatformat_for_type (gdbarch, name, len);
 }
 
+/* Specify the powerpc64le target triplet.
+   This can be variations of
+	ppc64le-{distro}-linux-gcc
+   and
+	powerpc64le-{distro}-linux-gcc.  */
+
+static const char *
+ppc64le_gnu_triplet_regexp (struct gdbarch *gdbarch)
+{
+  return "p(ower)?pc64le";
+}
+
+/* Specify the powerpc64 target triplet.
+   This can be variations of
+	ppc64-{distro}-linux-gcc
+   and
+	powerpc64-{distro}-linux-gcc.  */
+
+static const char *
+ppc64_gnu_triplet_regexp (struct gdbarch *gdbarch)
+{
+  return "p(ower)?pc64";
+}
+
+/* Implement the linux_gcc_target_options method.  */
+
+static std::string
+ppc64_linux_gcc_target_options (struct gdbarch *gdbarch)
+{
+  return "";
+}
+
+static displaced_step_prepare_status
+ppc_linux_displaced_step_prepare  (gdbarch *arch, thread_info *thread,
+				   CORE_ADDR &displaced_pc)
+{
+  ppc_inferior_data *per_inferior = get_ppc_per_inferior (thread->inf);
+  if (!per_inferior->disp_step_buf.has_value ())
+    {
+      /* Figure out where the displaced step buffer is.  */
+      CORE_ADDR disp_step_buf_addr
+	= linux_displaced_step_location (thread->inf->gdbarch);
+
+      per_inferior->disp_step_buf.emplace (disp_step_buf_addr);
+    }
+
+  return per_inferior->disp_step_buf->prepare (thread, displaced_pc);
+}
+
 static void
 ppc_linux_init_abi (struct gdbarch_info info,
 		    struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   struct tdesc_arch_data *tdesc_data = info.tdesc_data;
   static const char *const stap_integer_prefixes[] = { "i", NULL };
   static const char *const stap_register_indirection_prefixes[] = { "(",
@@ -2035,7 +2094,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
       /* Shared library handling.  */
       set_gdbarch_skip_trampoline_code (gdbarch, ppc_skip_trampoline_code);
       set_solib_svr4_fetch_link_map_offsets
-	(gdbarch, svr4_ilp32_fetch_link_map_offsets);
+	(gdbarch, linux_ilp32_fetch_link_map_offsets);
 
       /* Setting the correct XML syscall filename.  */
       set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_PPC);
@@ -2087,7 +2146,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
       /* Shared library handling.  */
       set_gdbarch_skip_trampoline_code (gdbarch, ppc64_skip_trampoline_code);
       set_solib_svr4_fetch_link_map_offsets
-	(gdbarch, svr4_lp64_fetch_link_map_offsets);
+	(gdbarch, linux_lp64_fetch_link_map_offsets);
 
       /* Setting the correct XML syscall filename.  */
       set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_PPC64);
@@ -2103,6 +2162,13 @@ ppc_linux_init_abi (struct gdbarch_info info,
 	set_gdbarch_gcore_bfd_target (gdbarch, "elf64-powerpcle");
       else
 	set_gdbarch_gcore_bfd_target (gdbarch, "elf64-powerpc");
+     /* Set compiler triplet.  */
+      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
+	set_gdbarch_gnu_triplet_regexp (gdbarch, ppc64le_gnu_triplet_regexp);
+      else
+	set_gdbarch_gnu_triplet_regexp (gdbarch, ppc64_gnu_triplet_regexp);
+      /* Set GCC target options.  */
+      set_gdbarch_gcc_target_options (gdbarch, ppc64_linux_gcc_target_options);
     }
 
   set_gdbarch_core_read_description (gdbarch, ppc_linux_core_read_description);
@@ -2142,6 +2208,11 @@ ppc_linux_init_abi (struct gdbarch_info info,
 
   ppc_init_linux_record_tdep (&ppc_linux_record_tdep, 4);
   ppc_init_linux_record_tdep (&ppc64_linux_record_tdep, 8);
+
+  /* Setup displaced stepping.  */
+  set_gdbarch_displaced_step_prepare (gdbarch,
+				      ppc_linux_displaced_step_prepare);
+
 }
 
 void _initialize_ppc_linux_tdep ();

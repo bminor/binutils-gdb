@@ -24,3 +24,20 @@ target:
 	clmul	a0, a1, a2
 	clmulh	a0, a1, a2
 	clmulr	a0, a1, a2
+	bclri   a0, a1, 0
+	bclri   a0, a1, 31
+	bseti   a0, a1, 0
+	bseti   a0, a1, 31
+	binvi   a0, a1, 0
+	binvi   a0, a1, 31
+	bexti   a0, a1, 0
+	bexti   a0, a1, 31
+	bclr    a0, a1, a2
+	bset    a0, a1, a2
+	binv    a0, a1, a2
+	bext    a0, a1, a2
+	#aliases
+	bclr    a0, a1, 31
+	bset    a0, a1, 31
+	binv    a0, a1, 31
+	bext    a0, a1, 31

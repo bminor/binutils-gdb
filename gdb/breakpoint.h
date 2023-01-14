@@ -1,5 +1,5 @@
 /* Data structures associated with breakpoints in GDB.
-   Copyright (C) 1992-2021 Free Software Foundation, Inc.
+   Copyright (C) 1992-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -41,7 +41,7 @@ struct gdbpy_breakpoint_object;
 struct gdbscm_breakpoint_object;
 struct number_or_range_parser;
 struct thread_info;
-struct bpstats;
+struct bpstat;
 struct bp_location;
 struct linespec_result;
 struct linespec_sals;
@@ -328,7 +328,7 @@ public:
   /* Construct a bp_location with type TYPE.  */
   bp_location (breakpoint *owner, bp_loc_type type);
 
-  virtual ~bp_location ();
+  virtual ~bp_location () = default;
 
   /* Chain pointer to the next breakpoint location for
      the same parent breakpoint.  */
@@ -467,7 +467,7 @@ public:
      with it.  */
   bound_probe probe {};
 
-  char *function_name = NULL;
+  gdb::unique_xmalloc_ptr<char> function_name;
 
   /* Details of the placed breakpoint, when inserted.  */
   bp_target_info target_info {};
@@ -587,11 +587,11 @@ struct breakpoint_ops
   int (*breakpoint_hit) (const struct bp_location *bl,
 			 const address_space *aspace,
 			 CORE_ADDR bp_addr,
-			 const struct target_waitstatus *ws);
+			 const target_waitstatus &ws);
 
   /* Check internal conditions of the breakpoint referred to by BS.
      If we should not stop for this breakpoint, set BS->stop to 0.  */
-  void (*check_status) (struct bpstats *bs);
+  void (*check_status) (struct bpstat *bs);
 
   /* Tell how many hardware resources (debug registers) are needed
      for this breakpoint.  If this function is not provided, then
@@ -605,7 +605,7 @@ struct breakpoint_ops
 
   /* The normal print routine for this breakpoint, called when we
      hit it.  */
-  enum print_stop_action (*print_it) (struct bpstats *bs);
+  enum print_stop_action (*print_it) (struct bpstat *bs);
 
   /* Display information about this breakpoint, for "info
      breakpoints".  */
@@ -674,7 +674,7 @@ struct breakpoint_ops
 
   /* Called after evaluating the breakpoint's condition,
      and only if it evaluated true.  */
-  void (*after_condition_true) (struct bpstats *bs);
+  void (*after_condition_true) (struct bpstat *bs);
 };
 
 /* Helper for breakpoint_ops->print_recreate implementations.  Prints
@@ -720,7 +720,7 @@ using bp_location_range = next_range<bp_location>;
 
 struct breakpoint
 {
-  virtual ~breakpoint ();
+  virtual ~breakpoint () = default;
 
   /* Return a range of this breakpoint's locations.  */
   bp_location_range locations ();
@@ -785,11 +785,11 @@ struct breakpoint
   int input_radix = 0;
   /* String form of the breakpoint condition (malloc'd), or NULL if
      there is no condition.  */
-  char *cond_string = NULL;
+  gdb::unique_xmalloc_ptr<char> cond_string;
 
   /* String form of extra parameters, or NULL if there are none.
      Malloc'd.  */
-  char *extra_string = NULL;
+  gdb::unique_xmalloc_ptr<char> extra_string;
 
   /* Holds the address of the related watchpoint_scope breakpoint when
      using watchpoints on local variables (might the concept of a
@@ -831,13 +831,11 @@ struct breakpoint
 
 struct watchpoint : public breakpoint
 {
-  ~watchpoint () override;
-
   /* String form of exp to use for displaying to the user (malloc'd),
      or NULL if none.  */
-  char *exp_string;
+  gdb::unique_xmalloc_ptr<char> exp_string;
   /* String form to use for reparsing of EXP (malloc'd) or NULL.  */
-  char *exp_string_reparse;
+  gdb::unique_xmalloc_ptr<char> exp_string_reparse;
 
   /* The expression we are watching, or NULL if not a watchpoint.  */
   expression_up exp;
@@ -884,20 +882,6 @@ struct watchpoint : public breakpoint
   /* The mask address for a masked hardware watchpoint.  */
   CORE_ADDR hw_wp_mask;
 };
-
-/* Given a function FUNC (struct breakpoint *B, void *DATA) and
-   USER_DATA, call FUNC for every known breakpoint passing USER_DATA
-   as argument.
-
-   If FUNC returns 1, the loop stops and the current
-   'struct breakpoint' being processed is returned.  If FUNC returns
-   zero, the loop continues.
-
-   This function returns either a 'struct breakpoint' pointer or NULL.
-   It was based on BFD's bfd_sections_find_if function.  */
-
-extern struct breakpoint *breakpoint_find_if
-  (int (*func) (struct breakpoint *b, void *d), void *user_data);
 
 /* Return true if BPT is either a software breakpoint or a hardware
    breakpoint.  */
@@ -951,22 +935,20 @@ struct tracepoint : public breakpoint
    status").  This provides the ability to determine whether we have
    stopped at a breakpoint, and what we should do about it.  */
 
-typedef struct bpstats *bpstat;
-
 /* Clears a chain of bpstat, freeing storage
    of each.  */
-extern void bpstat_clear (bpstat *);
+extern void bpstat_clear (bpstat **);
 
 /* Return a copy of a bpstat.  Like "bs1 = bs2" but all storage that
    is part of the bpstat is copied as well.  */
-extern bpstat bpstat_copy (bpstat);
+extern bpstat *bpstat_copy (bpstat *);
 
 /* Build the (raw) bpstat chain for the stop information given by ASPACE,
    BP_ADDR, and WS.  Returns the head of the bpstat chain.  */
 
-extern bpstat build_bpstat_chain (const address_space *aspace,
+extern bpstat *build_bpstat_chain (const address_space *aspace,
 				  CORE_ADDR bp_addr,
-				  const struct target_waitstatus *ws);
+				  const target_waitstatus &ws);
 
 /* Get a bpstat associated with having just stopped at address
    BP_ADDR in thread PTID.  STOP_CHAIN may be supplied as a previously
@@ -988,10 +970,10 @@ extern bpstat build_bpstat_chain (const address_space *aspace,
    Each element of the chain has valid next, breakpoint_at,
    commands, FIXME??? fields.  */
 
-extern bpstat bpstat_stop_status (const address_space *aspace,
+extern bpstat *bpstat_stop_status (const address_space *aspace,
 				  CORE_ADDR pc, thread_info *thread,
-				  const struct target_waitstatus *ws,
-				  bpstat stop_chain = NULL);
+				  const target_waitstatus &ws,
+				  bpstat *stop_chain = nullptr);
 
 /* This bpstat_what stuff tells wait_for_inferior what to do with a
    breakpoint (a challenging task).
@@ -1089,22 +1071,22 @@ struct bpstat_what
   };
 
 /* Tell what to do about this bpstat.  */
-struct bpstat_what bpstat_what (bpstat);
+struct bpstat_what bpstat_what (bpstat *);
 
 /* Run breakpoint event callbacks associated with the breakpoints that
    triggered.  */
-extern void bpstat_run_callbacks (bpstat bs_head);
+extern void bpstat_run_callbacks (bpstat *bs_head);
 
 /* Find the bpstat associated with a breakpoint.  NULL otherwise.  */
-bpstat bpstat_find_breakpoint (bpstat, struct breakpoint *);
+bpstat *bpstat_find_breakpoint (bpstat *, struct breakpoint *);
 
 /* True if a signal that we got in target_wait() was due to
    circumstances explained by the bpstat; the signal is therefore not
    random.  */
-extern bool bpstat_explains_signal (bpstat, enum gdb_signal);
+extern bool bpstat_explains_signal (bpstat *, enum gdb_signal);
 
 /* True if this bpstat causes a stop.  */
-extern bool bpstat_causes_stop (bpstat);
+extern bool bpstat_causes_stop (bpstat *);
 
 /* True if we should step constantly (e.g. watchpoints on machines
    without hardware support).  This isn't related to a specific bpstat,
@@ -1114,7 +1096,7 @@ extern bool bpstat_should_step ();
 /* Print a message indicating what happened.  Returns nonzero to
    say that only the source line should be printed after this (zero
    return means print the frame as well as the source line).  */
-extern enum print_stop_action bpstat_print (bpstat, int);
+extern enum print_stop_action bpstat_print (bpstat *, int);
 
 /* Put in *NUM the breakpoint number of the first breakpoint we are
    stopped at.  *BSP upon return is a bpstat which points to the
@@ -1125,7 +1107,7 @@ extern enum print_stop_action bpstat_print (bpstat, int);
    Return -1 if stopped at a breakpoint that has been deleted since
    we set it.
    Return 1 otherwise.  */
-extern int bpstat_num (bpstat *, int *);
+extern int bpstat_num (bpstat **, int *);
 
 /* Perform actions associated with the stopped inferior.  Actually, we
    just use this for breakpoint commands.  Perhaps other actions will
@@ -1156,18 +1138,18 @@ enum bp_print_how
     print_it_done
   };
 
-struct bpstats
+struct bpstat
   {
-    bpstats ();
-    bpstats (struct bp_location *bl, bpstat **bs_link_pointer);
+    bpstat ();
+    bpstat (struct bp_location *bl, bpstat ***bs_link_pointer);
 
-    bpstats (const bpstats &);
-    bpstats &operator= (const bpstats &) = delete;
+    bpstat (const bpstat &);
+    bpstat &operator= (const bpstat &) = delete;
 
     /* Linked list because there can be more than one breakpoint at
        the same place, and a bpstat reflects the fact that all have
        been hit.  */
-    bpstat next;
+    bpstat *next;
 
     /* Location that caused the stop.  Locations are refcounted, so
        this will never be NULL.  Note that this location may end up
@@ -1313,7 +1295,7 @@ extern void set_ignore_count (int, int, int);
 
 extern void breakpoint_init_inferior (enum inf_context);
 
-extern void breakpoint_auto_delete (bpstat);
+extern void breakpoint_auto_delete (bpstat *);
 
 /* Return the chain of command lines to execute when this breakpoint
    is hit.  */
@@ -1627,7 +1609,7 @@ extern int insert_single_step_breakpoints (struct gdbarch *);
 
 /* Check if any hardware watchpoints have triggered, according to the
    target.  */
-int watchpoints_triggered (struct target_waitstatus *);
+int watchpoints_triggered (const target_waitstatus &);
 
 /* Helper for transparent breakpoint hiding for memory read and write
    routines.
@@ -1678,8 +1660,8 @@ extern int catch_syscall_enabled (void);
 
 /* Checks if we are catching syscalls with the specific
    syscall_number.  Used for "filtering" the catchpoints.
-   Returns 0 if not, greater than 0 if we are.  */
-extern int catching_syscall_number (int syscall_number);
+   Returns false if not, true if we are.  */
+extern bool catching_syscall_number (int syscall_number);
 
 /* Return a tracepoint with the given number if found.  */
 extern struct tracepoint *get_tracepoint (int num);
@@ -1763,7 +1745,7 @@ const std::vector<bp_location *> &all_bp_locations ();
 
 extern int pc_at_non_inline_function (const address_space *aspace,
 				      CORE_ADDR pc,
-				      const struct target_waitstatus *ws);
+				      const target_waitstatus &ws);
 
 extern int user_breakpoint_p (struct breakpoint *);
 

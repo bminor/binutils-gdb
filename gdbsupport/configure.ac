@@ -1,5 +1,5 @@
 dnl Autoconf configure script for GDB support library
-dnl Copyright (C) 2020-2021 Free Software Foundation, Inc.
+dnl Copyright (C) 2020-2022 Free Software Foundation, Inc.
 dnl
 dnl This program is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -57,11 +57,8 @@ AM_CONDITIONAL(SELFTEST, $enable_unittests)
 GDB_AC_PTRACE
 
 # Detect support warning flags.
+AM_GDB_COMPILER_TYPE
 AM_GDB_WARNINGS
-
-TARGET_WORD_SIZE=`sed -n 's,#define BFD_ARCH_SIZE \(.*\)$,\1,p' ../bfd/bfd-in3.h`
-AC_DEFINE_UNQUOTED(TARGET_WORD_SIZE, $TARGET_WORD_SIZE,
-   [Define to the word size for the target.])
 
 case ${host} in
   *mingw32*)

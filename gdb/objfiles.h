@@ -1,6 +1,6 @@
 /* Definitions for symbol file management in GDB.
 
-   Copyright (C) 1992-2021 Free Software Foundation, Inc.
+   Copyright (C) 1992-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,7 +21,7 @@
 #define OBJFILES_H
 
 #include "hashtab.h"
-#include "gdb_obstack.h"	/* For obstack internals.  */
+#include "gdbsupport/gdb_obstack.h"	/* For obstack internals.  */
 #include "objfile-flags.h"
 #include "symfile.h"
 #include "progspace.h"
@@ -935,6 +935,11 @@ const char *objfile_flavour_name (struct objfile *objfile);
 
 extern void set_objfile_main_name (struct objfile *objfile,
 				   const char *name, enum language lang);
+
+/* Find an integer type SIZE_IN_BYTES bytes in size from OF and return it.
+   UNSIGNED_P controls if the integer is unsigned or not.  */
+extern struct type *objfile_int_type (struct objfile *of, int size_in_bytes,
+				      bool unsigned_p);
 
 extern void objfile_register_static_link
   (struct objfile *objfile,

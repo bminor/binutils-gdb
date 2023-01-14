@@ -1,6 +1,6 @@
 %{ /* deffilep.y - parser for .def files */
 
-/*   Copyright (C) 1995-2021 Free Software Foundation, Inc.
+/*   Copyright (C) 1995-2022 Free Software Foundation, Inc.
 
      This file is part of GNU Binutils.
 
@@ -102,7 +102,7 @@ static void def_version (int, int);
 static void def_directive (char *);
 static void def_aligncomm (char *str, int align);
 static int def_parse (void);
-static int def_error (const char *);
+static void def_error (const char *);
 static int def_lex (void);
 
 static int lex_forced_token = 0;
@@ -1261,12 +1261,11 @@ def_aligncomm (char *str, int align)
     }
 }
 
-static int
+static void
 def_error (const char *err)
 {
   einfo ("%P: %s:%d: %s\n",
 	 def_filename ? def_filename : "<unknown-file>", linenumber, err);
-  return 0;
 }
 
 

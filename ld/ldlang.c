@@ -1,5 +1,5 @@
 /* Linker command language support.
-   Copyright (C) 1991-2021 Free Software Foundation, Inc.
+   Copyright (C) 1991-2022 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -2701,6 +2701,16 @@ lang_add_section (lang_statement_list_type *ptr,
       output->block_value = 128;
     }
 
+  /* When a .ctors section is placed in .init_array it must be copied
+     in reverse order.  Similarly for .dtors.  Set that up.  */
+  if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour
+      && ((startswith (section->name, ".ctors")
+	   && strcmp (output->bfd_section->name, ".init_array") == 0)
+	  || (startswith (section->name, ".dtors")
+	      && strcmp (output->bfd_section->name, ".fini_array") == 0))
+      && (section->name[6] == 0 || section->name[6] == '.'))
+    section->flags |= SEC_ELF_REVERSE_COPY;
+
   if (section->alignment_power > output->bfd_section->alignment_power)
     output->bfd_section->alignment_power = section->alignment_power;
 
@@ -3392,6 +3402,22 @@ lang_get_output_target (void)
 static void
 open_output (const char *name)
 {
+  lang_input_statement_type *f;
+  char *out = lrealpath (name);
+
+  for (f = (void *) input_file_chain.head;
+       f != NULL;
+       f = f->next_real_file)
+    if (f->flags.real)
+      {
+	char *in = lrealpath (f->local_sym_name);
+	if (filename_cmp (in, out) == 0)
+	  einfo (_("%F%P: input file '%s' is the same as output file\n"),
+		 f->filename);
+	free (in);
+      }
+  free (out);
+
   output_target = lang_get_output_target ();
 
   /* Has the user requested a particular endianness on the command
@@ -6344,41 +6370,101 @@ lang_size_segment (seg_align_type *seg)
 static bfd_vma
 lang_size_relro_segment_1 (seg_align_type *seg)
 {
-  bfd_vma relro_end, desired_end;
-  asection *sec;
+  bfd_vma relro_end, desired_relro_base;
+  asection *sec, *relro_sec = NULL;
+  unsigned int max_alignment_power = 0;
+  bool seen_reloc_section = false;
+  bool desired_relro_base_reduced = false;
 
   /* Compute the expected PT_GNU_RELRO/PT_LOAD segment end.  */
   relro_end = ((seg->relro_end + seg->pagesize - 1)
 	       & ~(seg->pagesize - 1));
 
   /* Adjust by the offset arg of XXX_SEGMENT_RELRO_END.  */
-  desired_end = relro_end - seg->relro_offset;
+  desired_relro_base = relro_end - seg->relro_offset;
 
-  /* For sections in the relro segment..  */
+  /* For sections in the relro segment.  */
   for (sec = link_info.output_bfd->section_last; sec; sec = sec->prev)
-    if ((sec->flags & SEC_ALLOC) != 0
-	&& sec->vma >= seg->base
-	&& sec->vma < seg->relro_end - seg->relro_offset)
+    if ((sec->flags & SEC_ALLOC) != 0)
       {
-	/* Where do we want to put this section so that it ends as
-	   desired?  */
-	bfd_vma start, end, bump;
+	/* Record the maximum alignment for all sections starting from
+	   the relro segment.  */
+	if (sec->alignment_power > max_alignment_power)
+	  max_alignment_power = sec->alignment_power;
 
-	end = start = sec->vma;
-	if (!IS_TBSS (sec))
-	  end += TO_ADDR (sec->size);
-	bump = desired_end - end;
-	/* We'd like to increase START by BUMP, but we must heed
-	   alignment so the increase might be less than optimum.  */
-	start += bump;
-	start &= ~(((bfd_vma) 1 << sec->alignment_power) - 1);
-	/* This is now the desired end for the previous section.  */
-	desired_end = start;
+	if (sec->vma >= seg->base
+	    && sec->vma < seg->relro_end - seg->relro_offset)
+	  {
+	    /* Where do we want to put the relro section so that the
+	       relro segment ends on the page bounary?  */
+	    bfd_vma start, end, bump;
+
+	    end = start = sec->vma;
+	    if (!IS_TBSS (sec))
+	      end += TO_ADDR (sec->size);
+	    bump = desired_relro_base - end;
+	    /* We'd like to increase START by BUMP, but we must heed
+	       alignment so the increase might be less than optimum.  */
+	    start += bump;
+	    start &= ~(((bfd_vma) 1 << sec->alignment_power) - 1);
+	    /* This is now the desired end for the previous section.  */
+	    desired_relro_base = start;
+	    relro_sec = sec;
+	    seen_reloc_section = true;
+	  }
+	else if (seen_reloc_section)
+	  {
+	    /* Stop searching if we see a non-relro section after seeing
+	       relro sections.  */
+	    break;
+	  }
       }
 
+  if (relro_sec != NULL
+      && seg->maxpagesize >= (1U << max_alignment_power))
+    {
+      asection *prev_sec;
+      bfd_vma prev_sec_end_plus_1_page;
+
+       /* Find the first preceding load section.  */
+      for (prev_sec = relro_sec->prev;
+	   prev_sec != NULL;
+	   prev_sec = prev_sec->prev)
+	if ((prev_sec->flags & SEC_ALLOC) != 0)
+	  break;
+
+      prev_sec_end_plus_1_page = (prev_sec->vma + prev_sec->size
+				  + seg->maxpagesize);
+      if (prev_sec_end_plus_1_page < desired_relro_base)
+	{
+	  bfd_vma aligned_relro_base;
+
+	  desired_relro_base_reduced = true;
+
+	  /* Don't add the 1-page gap before the relro segment.  Align
+	     the relro segment first.  */
+	  aligned_relro_base = (desired_relro_base
+				 & ~(seg->maxpagesize - 1));
+	  if (prev_sec_end_plus_1_page < aligned_relro_base)
+	    {
+	      /* Subtract the maximum page size if therer is still a
+		 1-page gap.  */
+	      desired_relro_base -= seg->maxpagesize;
+	      relro_end -= seg->maxpagesize;
+	    }
+	  else
+	    {
+	      /* Align the relro segment.  */
+	      desired_relro_base = aligned_relro_base;
+	      relro_end &= ~(seg->maxpagesize - 1);
+	    }
+	}
+    }
+
   seg->phase = exp_seg_relro_adjust;
-  ASSERT (desired_end >= seg->base);
-  seg->base = desired_end;
+  ASSERT (desired_relro_base_reduced
+	  || desired_relro_base >= seg->base);
+  seg->base = desired_relro_base;
   return relro_end;
 }
 
@@ -6386,36 +6472,24 @@ static bool
 lang_size_relro_segment (bool *relax, bool check_regions)
 {
   bool do_reset = false;
-  bool do_data_relro;
-  bfd_vma data_initial_base, data_relro_end;
 
   if (link_info.relro && expld.dataseg.relro_end)
     {
-      do_data_relro = true;
-      data_initial_base = expld.dataseg.base;
-      data_relro_end = lang_size_relro_segment_1 (&expld.dataseg);
-    }
-  else
-    {
-      do_data_relro = false;
-      data_initial_base = data_relro_end = 0;
-    }
+      bfd_vma data_initial_base = expld.dataseg.base;
+      bfd_vma data_relro_end = lang_size_relro_segment_1 (&expld.dataseg);
 
-  if (do_data_relro)
-    {
       lang_reset_memory_regions ();
       one_lang_size_sections_pass (relax, check_regions);
 
       /* Assignments to dot, or to output section address in a user
 	 script have increased padding over the original.  Revert.  */
-      if (do_data_relro && expld.dataseg.relro_end > data_relro_end)
+      if (expld.dataseg.relro_end > data_relro_end)
 	{
 	  expld.dataseg.base = data_initial_base;;
 	  do_reset = true;
 	}
     }
-
-  if (!do_data_relro && lang_size_segment (&expld.dataseg))
+  else if (lang_size_segment (&expld.dataseg))
     do_reset = true;
 
   return do_reset;
@@ -6481,32 +6555,34 @@ lang_do_assignments_1 (lang_statement_union_type *s,
 	    os = &(s->output_section_statement);
 	    os->after_end = *found_end;
 	    init_opb (os->bfd_section);
-	    if (os->bfd_section != NULL && !os->ignored)
+	    newdot = dot;
+	    if (os->bfd_section != NULL)
 	      {
-		if ((os->bfd_section->flags & SEC_ALLOC) != 0)
+		if (!os->ignored && (os->bfd_section->flags & SEC_ALLOC) != 0)
 		  {
 		    current_section = os;
 		    prefer_next_section = false;
 		  }
-		dot = os->bfd_section->vma;
+		newdot = os->bfd_section->vma;
 	      }
 	    newdot = lang_do_assignments_1 (os->children.head,
-					    os, os->fill, dot, found_end);
+					    os, os->fill, newdot, found_end);
 	    if (!os->ignored)
 	      {
 		if (os->bfd_section != NULL)
 		  {
+		    newdot = os->bfd_section->vma;
+
 		    /* .tbss sections effectively have zero size.  */
 		    if (!IS_TBSS (os->bfd_section)
 			|| bfd_link_relocatable (&link_info))
-		      dot += TO_ADDR (os->bfd_section->size);
+		      newdot += TO_ADDR (os->bfd_section->size);
 
 		    if (os->update_dot_tree != NULL)
 		      exp_fold_tree (os->update_dot_tree,
-				     bfd_abs_section_ptr, &dot);
+				     bfd_abs_section_ptr, &newdot);
 		  }
-		else
-		  dot = newdot;
+		dot = newdot;
 	      }
 	  }
 	  break;
@@ -6914,6 +6990,44 @@ lang_finalize_start_stop (void)
 }
 
 static void
+lang_symbol_tweaks (void)
+{
+  /* Give initial values for __start and __stop symbols, so that  ELF
+     gc_sections will keep sections referenced by these symbols.  Must
+     be done before lang_do_assignments.  */
+  if (config.build_constructors)
+    lang_init_start_stop ();
+
+  /* Make __ehdr_start hidden, and set def_regular even though it is
+     likely undefined at this stage.  For lang_check_relocs.  */
+  if (is_elf_hash_table (link_info.hash)
+      && !bfd_link_relocatable (&link_info))
+    {
+      struct elf_link_hash_entry *h = (struct elf_link_hash_entry *)
+	bfd_link_hash_lookup (link_info.hash, "__ehdr_start",
+			      false, false, true);
+
+      /* Only adjust the export class if the symbol was referenced
+	 and not defined, otherwise leave it alone.  */
+      if (h != NULL
+	  && (h->root.type == bfd_link_hash_new
+	      || h->root.type == bfd_link_hash_undefined
+	      || h->root.type == bfd_link_hash_undefweak
+	      || h->root.type == bfd_link_hash_common))
+	{
+	  const struct elf_backend_data *bed;
+	  bed = get_elf_backend_data (link_info.output_bfd);
+	  (*bed->elf_backend_hide_symbol) (&link_info, h, true);
+	  if (ELF_ST_VISIBILITY (h->other) != STV_INTERNAL)
+	    h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_HIDDEN;
+	  h->def_regular = 1;
+	  h->root.linker_def = 1;
+	  h->root.rel_from_abs = 1;
+	}
+    }
+}
+
+static void
 lang_end (void)
 {
   struct bfd_link_hash_entry *h;
@@ -6984,7 +7098,8 @@ lang_end (void)
 	  if (!bfd_set_start_address (link_info.output_bfd, val))
 	    einfo (_("%F%P: can't set start address\n"));
 	}
-      else
+      /* BZ 2004952: Only use the start of the entry section for executables.  */
+      else if bfd_link_executable (&link_info)
 	{
 	  asection *ts;
 
@@ -7009,6 +7124,13 @@ lang_end (void)
 			 " not setting start address\n"),
 		       entry_symbol.name);
 	    }
+	}
+      else
+	{
+	  if (warn)
+	    einfo (_("%P: warning: cannot find entry symbol %s;"
+		     " not setting start address\n"),
+		   entry_symbol.name);
 	}
     }
 }
@@ -7673,7 +7795,8 @@ lang_find_relro_sections (void)
 void
 lang_relax_sections (bool need_layout)
 {
-  if (RELAXATION_ENABLED)
+  /* NB: Also enable relaxation to layout sections for DT_RELR.  */
+  if (RELAXATION_ENABLED || link_info.enable_dt_relr)
     {
       /* We may need more than one relaxation pass.  */
       int i = link_info.relax_pass;
@@ -8120,11 +8243,7 @@ lang_process (void)
      files.  */
   ldctor_build_sets ();
 
-  /* Give initial values for __start and __stop symbols, so that  ELF
-     gc_sections will keep sections referenced by these symbols.  Must
-     be done before lang_do_assignments below.  */
-  if (config.build_constructors)
-    lang_init_start_stop ();
+  lang_symbol_tweaks ();
 
   /* PR 13683: We must rerun the assignments prior to running garbage
      collection in order to make sure that all symbol aliases are resolved.  */

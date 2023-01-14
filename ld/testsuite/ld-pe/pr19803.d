@@ -9,5 +9,5 @@
 # collection.
 
 #...
-.*\(sec  1\)\(fl 0x00\)\(ty   0\)\(scl   2\) \(nx 0\) 0x0+000 .*Startup.*
+.*\(sec  1\)\(fl 0x00\)\(ty    0\)\(scl   2\) \(nx 0\) 0x0+000 .*Startup.*
 #pass

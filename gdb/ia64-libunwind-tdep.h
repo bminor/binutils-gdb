@@ -1,6 +1,6 @@
 /* Frame unwinder for ia64 frames with libunwind frame information.
 
-   Copyright (C) 2003-2021 Free Software Foundation, Inc.
+   Copyright (C) 2003-2022 Free Software Foundation, Inc.
 
    Contributed by Jeff Johnston.
 

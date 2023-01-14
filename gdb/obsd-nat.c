@@ -1,6 +1,6 @@
 /* Native-dependent code for OpenBSD.
 
-   Copyright (C) 2012-2021 Free Software Foundation, Inc.
+   Copyright (C) 2012-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -90,7 +90,7 @@ obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 		       target_wait_flags options)
 {
   ptid_t wptid = inf_ptrace_target::wait (ptid, ourstatus, options);
-  if (ourstatus->kind == TARGET_WAITKIND_STOPPED)
+  if (ourstatus->kind () == TARGET_WAITKIND_STOPPED)
     {
       ptrace_state_t pe;
 
@@ -103,8 +103,7 @@ obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
       switch (pe.pe_report_event)
 	{
 	case PTRACE_FORK:
-	  ourstatus->kind = TARGET_WAITKIND_FORKED;
-	  ourstatus->value.related_pid = ptid_t (pe.pe_other_pid);
+	  ourstatus->set_forked (ptid_t (pe.pe_other_pid));
 
 	  /* Make sure the other end of the fork is stopped too.  */
 	  pid_t fpid = waitpid (pe.pe_other_pid, nullptr, 0);
@@ -119,11 +118,11 @@ obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	  gdb_assert (pe.pe_other_pid == pid);
 	  if (find_inferior_pid (this, fpid) != nullptr)
 	    {
-	      ourstatus->value.related_pid = ptid_t (pe.pe_other_pid);
+	      ourstatus->set_forked (ptid_t (pe.pe_other_pid));
 	      wptid = ptid_t (fpid, pe.pe_tid, 0);
 	    }
 
-	  obsd_enable_proc_events (ourstatus->value.related_pid.pid ());
+	  obsd_enable_proc_events (ourstatus->child_ptid ().pid ());
 	  break;
 	}
 
@@ -145,6 +144,8 @@ obsd_nat_target::post_attach (int pid)
 {
   obsd_enable_proc_events (pid);
 }
+
+/* Implement the virtual inf_ptrace_target::post_startup_inferior method.  */
 
 void
 obsd_nat_target::post_startup_inferior (ptid_t pid)

@@ -38,7 +38,7 @@ Raw dump of debug contents of section \.z?debug_line:
 
  The File Name Table \(offset 0x.*, lines 2, columns 2\):
   Entry	Dir	Name
-  0	0	\(indirect line string, offset: 0x.*\): dwarf5-line-4.s
+  0	1	\(indirect line string, offset: 0x.*\): dwarf5-line-4.s
   1	1	\(indirect line string, offset: 0x.*\): dwarf5-line-4.s
 
  Line Number Statements:

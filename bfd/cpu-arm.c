@@ -1,5 +1,5 @@
 /* BFD support for the ARM processor
-   Copyright (C) 1994-2021 Free Software Foundation, Inc.
+   Copyright (C) 1994-2022 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -166,6 +166,7 @@ processors[] =
   { bfd_mach_arm_7,	  "cortex-r4f"	    },
   { bfd_mach_arm_7,	  "cortex-r5"	    },
   { bfd_mach_arm_8R,	  "cortex-r52"	    },
+  { bfd_mach_arm_8R,	  "cortex-r52plus"	    },
   { bfd_mach_arm_7,	  "cortex-r7"	    },
   { bfd_mach_arm_7,	  "cortex-r8"	    },
   { bfd_mach_arm_8,	  "cortex-x1"	    },
@@ -192,6 +193,7 @@ processors[] =
   { bfd_mach_arm_XScale,  "xscale"	    },
   { bfd_mach_arm_8,	  "xgene1"	    },
   { bfd_mach_arm_8,	  "xgene2"	    },
+  { bfd_mach_arm_9,	  "cortex-a710"	    },
   { bfd_mach_arm_ep9312,  "ep9312"	    },
   { bfd_mach_arm_iWMMXt,  "iwmmxt"	    },
   { bfd_mach_arm_iWMMXt2, "iwmmxt2"	    },
@@ -257,6 +259,7 @@ static const bfd_arch_info_type arch_info_struct[] =
   N (bfd_mach_arm_8M_BASE,   "armv8-m.base",   false, & arch_info_struct[25]),
   N (bfd_mach_arm_8M_MAIN,   "armv8-m.main",   false, & arch_info_struct[26]),
   N (bfd_mach_arm_8_1M_MAIN, "armv8.1-m.main", false, & arch_info_struct[27]),
+  N (bfd_mach_arm_9,         "armv9-a",        false, & arch_info_struct[28]),
   N (bfd_mach_arm_unknown,   "arm_any",        false, NULL)
 };
 

@@ -1,5 +1,5 @@
 /* Check for proper pipe semantics at corner cases.
-#notarget: cris*-*-elf
+#progos: linux
 */
 
 #include <stdio.h>

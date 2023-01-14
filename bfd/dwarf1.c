@@ -1,5 +1,5 @@
 /* DWARF 1 find nearest line (_bfd_dwarf1_find_nearest_line).
-   Copyright (C) 1998-2021 Free Software Foundation, Inc.
+   Copyright (C) 1998-2022 Free Software Foundation, Inc.
 
    Written by Gavin Romig-Koch of Cygnus Solutions (gavin@cygnus.com).
 
@@ -193,8 +193,8 @@ parse_die (bfd *	     abfd,
     return false;
   aDieInfo->length = bfd_get_32 (abfd, xptr);
   xptr += 4;
-  if (aDieInfo->length == 0
-      || this_die + aDieInfo->length > aDiePtrEnd)
+  if (aDieInfo->length <= 4
+      || (size_t) (aDiePtrEnd - this_die) < aDieInfo->length)
     return false;
   aDiePtrEnd = this_die + aDieInfo->length;
   if (aDieInfo->length < 6)
@@ -258,8 +258,7 @@ parse_die (bfd *	     abfd,
 	  if (xptr + 2 <= aDiePtrEnd)
 	    {
 	      block_len = bfd_get_16 (abfd, xptr);
-	      if (xptr + block_len > aDiePtrEnd
-		  || xptr + block_len < xptr)
+	      if ((size_t) (aDiePtrEnd - xptr) < block_len)
 		return false;
 	      xptr += block_len;
 	    }
@@ -269,8 +268,7 @@ parse_die (bfd *	     abfd,
 	  if (xptr + 4 <= aDiePtrEnd)
 	    {
 	      block_len = bfd_get_32 (abfd, xptr);
-	      if (xptr + block_len > aDiePtrEnd
-		  || xptr + block_len < xptr)
+	      if ((size_t) (aDiePtrEnd - xptr) < block_len)
 		return false;
 	      xptr += block_len;
 	    }

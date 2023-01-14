@@ -1,5 +1,5 @@
 /* Generic simulator watchpoint support.
-   Copyright (C) 1997-2021 Free Software Foundation, Inc.
+   Copyright (C) 1997-2022 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -20,17 +20,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "libiberty.h"
+
 #include "sim-main.h"
 #include "sim-options.h"
 #include "sim-signal.h"
-#include "libiberty.h"
-
 #include "sim-assert.h"
-
-#include <ctype.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 
 enum {
   OPTION_WATCH_DELETE                      = OPTION_START,

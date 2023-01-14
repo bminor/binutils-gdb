@@ -72,6 +72,7 @@ cpu-iq2000.c
 cpu-k1om.c
 cpu-l1om.c
 cpu-lm32.c
+cpu-loongarch.c
 cpu-m10200.c
 cpu-m10300.c
 cpu-m32c.c
@@ -262,6 +263,8 @@ elfxx-aarch64.c
 elfxx-aarch64.h
 elfxx-ia64.c
 elfxx-ia64.h
+elfxx-loongarch.c
+elfxx-loongarch.h
 elfxx-mips.c
 elfxx-mips.h
 elfxx-riscv.c
@@ -320,6 +323,7 @@ pe-x86_64.c
 pef-traceback.h
 pef.c
 pef.h
+pei-aarch64.c
 pei-arm-wince.c
 pei-arm.c
 pei-i386.c

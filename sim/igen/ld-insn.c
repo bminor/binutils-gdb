@@ -1,6 +1,6 @@
 /* The IGEN simulator generator for GDB, the GNU Debugger.
 
-   Copyright 2002-2021 Free Software Foundation, Inc.
+   Copyright 2002-2022 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney.
 
@@ -203,7 +203,7 @@ parse_insn_word (line_ref *line, char *string, int word_nr)
 	    {
 	      /* when the length/pos field is omited, an integer field
 	         is always binary */
-	      unsigned64 val = 0;
+	      uint64_t val = 0;
 	      int i;
 	      for (i = 0; i < strlen_val; i++)
 		{

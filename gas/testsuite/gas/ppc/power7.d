@@ -103,9 +103,5 @@ Disassembly of section \.text:
 .*:	(7f bd eb 78|78 eb bd 7f) 	mdoio
 .*:	(7f de f3 78|78 f3 de 7f) 	mdoom
 .*:	(7f de f3 78|78 f3 de 7f) 	mdoom
-.*:	(7d 40 e2 a6|a6 e2 40 7d) 	mfppr   r10
-.*:	(7d 62 e2 a6|a6 e2 62 7d) 	mfppr32 r11
-.*:	(7d 80 e3 a6|a6 e3 80 7d) 	mtppr   r12
-.*:	(7d a2 e3 a6|a6 e3 a2 7d) 	mtppr32 r13
 .*:	(7d 60 52 64|64 52 60 7d) 	tlbie   r10,r11
 #pass

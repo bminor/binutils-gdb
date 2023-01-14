@@ -1,5 +1,5 @@
 /* BFD back-end for MIPS Extended-Coff files.
-   Copyright (C) 1990-2021 Free Software Foundation, Inc.
+   Copyright (C) 1990-2022 Free Software Foundation, Inc.
    Original version by Per Bothner.
    Full support added by Ian Lance Taylor, ian@cygnus.com.
 
@@ -351,7 +351,14 @@ mips_adjust_reloc_in (bfd *abfd,
 		      arelent *rptr)
 {
   if (intern->r_type > MIPS_R_PCREL16)
-    abort ();
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, intern->r_type);
+      bfd_set_error (bfd_error_bad_value);
+      rptr->howto  = NULL;
+      return;
+    }
 
   if (! intern->r_extern
       && (intern->r_type == MIPS_R_GPREL

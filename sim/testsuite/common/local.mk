@@ -1,17 +1,17 @@
-# Copyright (C) 1997-2021 Free Software Foundation, Inc.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+## Copyright (C) 1997-2022 Free Software Foundation, Inc.
+##
+## This program is free software; you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 EXTRA_PROGRAMS += %D%/bits-gen
 
@@ -48,7 +48,7 @@ check_PROGRAMS += $(TESTS)
 %D%/bits32m0$(EXEEXT): $(%C%_bits32m0_OBJECTS) $(%C%_bits32m0_DEPENDENCIES) %D%/$(am__dirstamp)
 	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(%C%_bits32m0_OBJECTS) $(%C%_bits32m0_LDADD)
 
-%D%/bits32m0.c: %D%/bits-gen %D%/bits-tst.c
+%D%/bits32m0.c: %D%/bits-gen$(EXEEXT) %D%/bits-tst.c
 	$(AM_V_GEN)$< 32 0 big > $@.tmp
 	$(AM_V_at)cat $(srcdir)/%D%/bits-tst.c >> $@.tmp
 	$(AM_V_at)mv $@.tmp $@
@@ -56,7 +56,7 @@ check_PROGRAMS += $(TESTS)
 %D%/bits32m31$(EXEEXT): $(%C%_bits32m31_OBJECTS) $(%C%_bits32m31_DEPENDENCIES) %D%/$(am__dirstamp)
 	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(%C%_bits32m31_OBJECTS) $(%C%_bits32m31_LDADD)
 
-%D%/bits32m31.c: %D%/bits-gen %D%/bits-tst.c
+%D%/bits32m31.c: %D%/bits-gen$(EXEEXT) %D%/bits-tst.c
 	$(AM_V_GEN)$< 32 31 little > $@.tmp
 	$(AM_V_at)cat $(srcdir)/%D%/bits-tst.c >> $@.tmp
 	$(AM_V_at)mv $@.tmp $@
@@ -64,7 +64,7 @@ check_PROGRAMS += $(TESTS)
 %D%/bits64m0$(EXEEXT): $(%C%_bits64m0_OBJECTS) $(%C%_bits64m0_DEPENDENCIES) %D%/$(am__dirstamp)
 	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(%C%_bits64m0_OBJECTS) $(%C%_bits64m0_LDADD)
 
-%D%/bits64m0.c: %D%/bits-gen %D%/bits-tst.c
+%D%/bits64m0.c: %D%/bits-gen$(EXEEXT) %D%/bits-tst.c
 	$(AM_V_GEN)$< 64 0 big > $@.tmp
 	$(AM_V_at)cat $(srcdir)/%D%/bits-tst.c >> $@.tmp
 	$(AM_V_at)mv $@.tmp $@
@@ -72,7 +72,7 @@ check_PROGRAMS += $(TESTS)
 %D%/bits64m63$(EXEEXT): $(%C%_bits64m63_OBJECTS) $(%C%_bits64m63_DEPENDENCIES) %D%/$(am__dirstamp)
 	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(%C%_bits64m63_OBJECTS) $(%C%_bits64m63_LDADD)
 
-%D%/bits64m63.c: %D%/bits-gen %D%/bits-tst.c
+%D%/bits64m63.c: %D%/bits-gen$(EXEEXT) %D%/bits-tst.c
 	$(AM_V_GEN)$< 64 63 little > $@.tmp
 	$(AM_V_at)cat $(srcdir)/%D%/bits-tst.c >> $@.tmp
 	$(AM_V_at)mv $@.tmp $@

@@ -1,5 +1,5 @@
 target:
-	.option norvc
+	.option arch, -c
 	zext.b	a0, a0
 	zext.h	a0, a0
 	sext.b	a0, a0
@@ -18,7 +18,7 @@ target:
 	sext.w	a1, a2
 .endif
 
-	.option rvc
+	.option arch, +c
 	zext.b	a0, a0
 	zext.h	a0, a0
 	sext.b	a0, a0

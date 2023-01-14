@@ -1,6 +1,6 @@
 /* The common simulator framework for GDB, the GNU Debugger.
 
-   Copyright 2002-2021 Free Software Foundation, Inc.
+   Copyright 2002-2022 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney and Red Hat.
 
@@ -22,23 +22,22 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
-#include "sim-main.h"
-#include "sim-io.h"
-#include "sim/callback.h"
-#include "targ-vals.h"
-
 #include <errno.h>
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-
+#include <stdarg.h>
+#include <stdint.h>
+#include <stdlib.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
-#include <stdlib.h>
-
 #undef open
+
+#include "sim-main.h"
+#include "sim-io.h"
+#include "sim/callback.h"
 
 /* Define the rate at which the simulator should poll the host
    for a quit. */
@@ -309,9 +308,9 @@ sim_io_error (SIM_DESC sd,
     va_start (ap, fmt);
     STATE_CALLBACK (sd)->evprintf_filtered (STATE_CALLBACK (sd), fmt, ap);
     va_end (ap);
-    /* Printing a space here avoids empty printf compiler warnings.  Not ideal,
-       but we want error's side-effect where it halts processing.  */
-    STATE_CALLBACK (sd)->error (STATE_CALLBACK (sd), " ");
+    /* The %s avoids empty printf compiler warnings.  Not ideal, but we want
+       error's side-effect where it halts processing.  */
+    STATE_CALLBACK (sd)->error (STATE_CALLBACK (sd), "%s", "");
   }
 }
 
@@ -350,7 +349,7 @@ sim_io_poll_read (SIM_DESC sd,
 		  char *buf,
 		  int sizeof_buf)
 {
-#if defined(O_NDELAY) && defined(F_GETFL) && defined(F_SETFL)
+#if defined(O_NONBLOCK) && defined(F_GETFL) && defined(F_SETFL)
   int fd = STATE_CALLBACK (sd)->fdmap[sim_io_fd];
   int flags;
   int status;
@@ -365,7 +364,7 @@ sim_io_poll_read (SIM_DESC sd,
       return 0;
     }
   /* temp, disable blocking IO */
-  status = fcntl (fd, F_SETFL, flags | O_NDELAY);
+  status = fcntl (fd, F_SETFL, flags | O_NONBLOCK);
   if (status == -1)
     {
       perror ("sim_io_read_stdin");

@@ -1,6 +1,6 @@
 /* Target-machine dependent code for Renesas H8/300, for GDB.
 
-   Copyright (C) 1988-2021 Free Software Foundation, Inc.
+   Copyright (C) 1988-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -648,7 +648,7 @@ h8300_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       struct type *type = value_type (args[argument]);
       int len = TYPE_LENGTH (type);
-      char *contents = (char *) value_contents (args[argument]);
+      char *contents = (char *) value_contents (args[argument]).data ();
 
       /* Pad the argument appropriately.  */
       int padded_len = align_up (len, wordsize);

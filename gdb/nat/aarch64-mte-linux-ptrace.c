@@ -1,6 +1,6 @@
 /* Common Linux native ptrace code for AArch64 MTE.
 
-   Copyright (C) 2021 Free Software Foundation, Inc.
+   Copyright (C) 2021-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -44,7 +44,7 @@ aarch64_mte_linux_peek_error (int error)
       perror_with_name (_("Couldn't fetch allocation tags"));
       break;
     case EOPNOTSUPP:
-      perror_with_name (_("PROT_ME not enabled for requested address"));
+      perror_with_name (_("PROT_MTE not enabled for requested address"));
     default:
       perror_with_name (_("Unknown MTE error"));
       break;
@@ -66,7 +66,7 @@ aarch64_mte_linux_poke_error (int error)
       perror_with_name (_("Couldn't store allocation tags"));
       break;
     case EOPNOTSUPP:
-      perror_with_name (_("PROT_ME not enabled for requested address"));
+      perror_with_name (_("PROT_MTE not enabled for requested address"));
     default:
       perror_with_name (_("Unknown MTE error"));
       break;

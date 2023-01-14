@@ -1,6 +1,6 @@
 /* Altivec registers, for PSIM, the PowerPC simulator.
 
-   Copyright 2003-2021 Free Software Foundation, Inc.
+   Copyright 2003-2022 Free Software Foundation, Inc.
 
    Contributed by Red Hat Inc; developed under contract from Motorola.
    Written by matthew green <mrg@redhat.com>.
@@ -24,12 +24,12 @@
    entities.  */
 typedef union
 {
-  unsigned8 b[16];
-  unsigned16 h[8];
-  unsigned32 w[4];
+  uint8_t b[16];
+  uint16_t h[8];
+  uint32_t w[4];
 } vreg;
 
-typedef unsigned32 vscreg;
+typedef uint32_t vscreg;
 
 struct altivec_regs {
   /* AltiVec Registers */

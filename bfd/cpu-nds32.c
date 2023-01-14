@@ -1,5 +1,5 @@
 /* BFD support for the NDS32 processor
-   Copyright (C) 2012-2021 Free Software Foundation, Inc.
+   Copyright (C) 2012-2022 Free Software Foundation, Inc.
    Contributed by Andes Technology Corporation.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -42,4 +42,4 @@ static const bfd_arch_info_type arch_info_struct[] =
 };
 
 const bfd_arch_info_type bfd_nds32_arch =
-  N (bfd_mach_n1, "n1h", true, NEXT);
+  N (bfd_mach_n1, "n1", true, NEXT);

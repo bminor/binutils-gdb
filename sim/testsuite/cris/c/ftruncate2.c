@@ -1,5 +1,5 @@
 /*
-#notarget: cris*-*-elf
+#progos: linux
 */
 
 /* Check that we get a proper error indication if trying ftruncate on a

@@ -1,6 +1,6 @@
 /* AArch64 assembler/disassembler support.
 
-   Copyright (C) 2009-2021 Free Software Foundation, Inc.
+   Copyright (C) 2009-2022 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GNU Binutils.
@@ -51,6 +51,7 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_V8_4	     (1ULL << 11) /* ARMv8.4 processors.  */
 #define AARCH64_FEATURE_V8_R	     (1ULL << 12) /* Armv8-R processors.  */
 #define AARCH64_FEATURE_V8_7	     (1ULL << 13) /* Armv8.7 processors.  */
+#define AARCH64_FEATURE_SME	     (1ULL << 14) /* Scalable Matrix Extension.  */
 #define AARCH64_FEATURE_LS64	     (1ULL << 15) /* Atomic 64-byte load/store.  */
 #define AARCH64_FEATURE_PAC	     (1ULL << 16) /* v8.3 Pointer Authentication.  */
 #define AARCH64_FEATURE_FP	     (1ULL << 17) /* FP instructions.  */
@@ -86,60 +87,96 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_SSBS	     (1ULL << 47) /* SSBS mechanism enabled.  */
 #define AARCH64_FEATURE_MEMTAG       (1ULL << 48) /* Memory Tagging Extension.  */
 #define AARCH64_FEATURE_TME	     (1ULL << 49) /* Transactional Memory Extension.  */
+#define AARCH64_FEATURE_MOPS	     (1ULL << 50) /* Standardization of memory operations.  */
+#define AARCH64_FEATURE_HBC	     (1ULL << 51) /* Hinted conditional branches.  */
 #define AARCH64_FEATURE_I8MM	     (1ULL << 52) /* Matrix Multiply instructions.  */
 #define AARCH64_FEATURE_F32MM	     (1ULL << 53)
 #define AARCH64_FEATURE_F64MM	     (1ULL << 54)
 #define AARCH64_FEATURE_FLAGM	     (1ULL << 55) /* v8.4 Flag Manipulation.  */
+#define AARCH64_FEATURE_V9	     (1ULL << 56) /* Armv9.0-A processors.  */
+#define AARCH64_FEATURE_SME_F64	     (1ULL << 57) /* SME F64.  */
+#define AARCH64_FEATURE_SME_I64	     (1ULL << 58) /* SME I64.  */
+#define AARCH64_FEATURE_V8_8	     (1ULL << 59) /* Armv8.8 processors.  */
 
 /* Crypto instructions are the combination of AES and SHA2.  */
 #define AARCH64_FEATURE_CRYPTO	(AARCH64_FEATURE_SHA2 | AARCH64_FEATURE_AES)
 
+#define AARCH64_ARCH_V8_FEATURES	(AARCH64_FEATURE_V8_A		\
+					 | AARCH64_FEATURE_FP		\
+					 | AARCH64_FEATURE_RAS		\
+					 | AARCH64_FEATURE_SIMD)
+#define AARCH64_ARCH_V8_1_FEATURES	(AARCH64_FEATURE_V8_1		\
+					 | AARCH64_FEATURE_CRC		\
+					 | AARCH64_FEATURE_LSE		\
+					 | AARCH64_FEATURE_PAN		\
+					 | AARCH64_FEATURE_LOR		\
+					 | AARCH64_FEATURE_RDMA)
+#define AARCH64_ARCH_V8_2_FEATURES	(AARCH64_FEATURE_V8_2)
+#define AARCH64_ARCH_V8_3_FEATURES	(AARCH64_FEATURE_V8_3		\
+					 | AARCH64_FEATURE_PAC		\
+					 | AARCH64_FEATURE_RCPC		\
+					 | AARCH64_FEATURE_COMPNUM)
+#define AARCH64_ARCH_V8_4_FEATURES	(AARCH64_FEATURE_V8_4		\
+					 | AARCH64_FEATURE_DOTPROD	\
+					 | AARCH64_FEATURE_FLAGM	\
+					 | AARCH64_FEATURE_F16_FML)
+#define AARCH64_ARCH_V8_5_FEATURES	(AARCH64_FEATURE_V8_5		\
+					 | AARCH64_FEATURE_FLAGMANIP	\
+					 | AARCH64_FEATURE_FRINTTS	\
+					 | AARCH64_FEATURE_SB		\
+					 | AARCH64_FEATURE_PREDRES	\
+					 | AARCH64_FEATURE_CVADP	\
+					 | AARCH64_FEATURE_BTI		\
+					 | AARCH64_FEATURE_SCXTNUM	\
+					 | AARCH64_FEATURE_ID_PFR2	\
+					 | AARCH64_FEATURE_SSBS)
+#define AARCH64_ARCH_V8_6_FEATURES	(AARCH64_FEATURE_V8_6		\
+					 | AARCH64_FEATURE_BFLOAT16	\
+					 | AARCH64_FEATURE_I8MM)
+#define AARCH64_ARCH_V8_7_FEATURES	(AARCH64_FEATURE_V8_7		\
+					 | AARCH64_FEATURE_LS64)
+#define AARCH64_ARCH_V8_8_FEATURES	(AARCH64_FEATURE_V8_8		\
+					 | AARCH64_FEATURE_MOPS		\
+					 | AARCH64_FEATURE_HBC)
+
+#define AARCH64_ARCH_V9_FEATURES	(AARCH64_FEATURE_V9		\
+					 | AARCH64_FEATURE_SVE		\
+					 | AARCH64_FEATURE_SVE2)
+#define AARCH64_ARCH_V9_1_FEATURES	(AARCH64_ARCH_V8_6_FEATURES)
+#define AARCH64_ARCH_V9_2_FEATURES	(AARCH64_ARCH_V8_7_FEATURES)
+#define AARCH64_ARCH_V9_3_FEATURES	(AARCH64_ARCH_V8_8_FEATURES)
+
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8		AARCH64_FEATURE (AARCH64_FEATURE_V8, \
-						 AARCH64_FEATURE_V8_A \
-						 | AARCH64_FEATURE_FP  \
-						 | AARCH64_FEATURE_RAS \
-						 | AARCH64_FEATURE_SIMD)
+						 AARCH64_ARCH_V8_FEATURES)
 #define AARCH64_ARCH_V8_1	AARCH64_FEATURE (AARCH64_ARCH_V8, \
-						 AARCH64_FEATURE_CRC	\
-						 | AARCH64_FEATURE_V8_1 \
-						 | AARCH64_FEATURE_LSE	\
-						 | AARCH64_FEATURE_PAN	\
-						 | AARCH64_FEATURE_LOR	\
-						 | AARCH64_FEATURE_RDMA)
+						 AARCH64_ARCH_V8_1_FEATURES)
 #define AARCH64_ARCH_V8_2	AARCH64_FEATURE (AARCH64_ARCH_V8_1,	\
-						 AARCH64_FEATURE_V8_2)
+						 AARCH64_ARCH_V8_2_FEATURES)
 #define AARCH64_ARCH_V8_3	AARCH64_FEATURE (AARCH64_ARCH_V8_2,	\
-						 AARCH64_FEATURE_V8_3	\
-						 | AARCH64_FEATURE_PAC	\
-						 | AARCH64_FEATURE_RCPC	\
-						 | AARCH64_FEATURE_COMPNUM)
+						 AARCH64_ARCH_V8_3_FEATURES)
 #define AARCH64_ARCH_V8_4	AARCH64_FEATURE (AARCH64_ARCH_V8_3,	\
-						 AARCH64_FEATURE_V8_4   \
-						 | AARCH64_FEATURE_DOTPROD \
-						 | AARCH64_FEATURE_FLAGM \
-						 | AARCH64_FEATURE_F16_FML)
+						 AARCH64_ARCH_V8_4_FEATURES)
 #define AARCH64_ARCH_V8_5	AARCH64_FEATURE (AARCH64_ARCH_V8_4,	\
-						 AARCH64_FEATURE_V8_5   \
-						 | AARCH64_FEATURE_FLAGMANIP \
-						 | AARCH64_FEATURE_FRINTTS \
-						 | AARCH64_FEATURE_SB   \
-						 | AARCH64_FEATURE_PREDRES \
-						 | AARCH64_FEATURE_CVADP \
-						 | AARCH64_FEATURE_BTI	\
-						 | AARCH64_FEATURE_SCXTNUM \
-						 | AARCH64_FEATURE_ID_PFR2 \
-						 | AARCH64_FEATURE_SSBS)
+						 AARCH64_ARCH_V8_5_FEATURES)
 #define AARCH64_ARCH_V8_6	AARCH64_FEATURE (AARCH64_ARCH_V8_5,	\
-						 AARCH64_FEATURE_V8_6   \
-						 | AARCH64_FEATURE_BFLOAT16 \
-						 | AARCH64_FEATURE_I8MM)
+						 AARCH64_ARCH_V8_6_FEATURES)
 #define AARCH64_ARCH_V8_7	AARCH64_FEATURE (AARCH64_ARCH_V8_6,	\
-						 AARCH64_FEATURE_V8_7	\
-						 | AARCH64_FEATURE_LS64)
+						 AARCH64_ARCH_V8_7_FEATURES)
+#define AARCH64_ARCH_V8_8	AARCH64_FEATURE (AARCH64_ARCH_V8_7,	\
+						 AARCH64_ARCH_V8_8_FEATURES)
 #define AARCH64_ARCH_V8_R	(AARCH64_FEATURE (AARCH64_ARCH_V8_4,	\
 						 AARCH64_FEATURE_V8_R)	\
 			      & ~(AARCH64_FEATURE_V8_A | AARCH64_FEATURE_LOR))
+
+#define AARCH64_ARCH_V9		AARCH64_FEATURE (AARCH64_ARCH_V8_5,	\
+						 AARCH64_ARCH_V9_FEATURES)
+#define AARCH64_ARCH_V9_1	AARCH64_FEATURE (AARCH64_ARCH_V9,	\
+						 AARCH64_ARCH_V9_1_FEATURES)
+#define AARCH64_ARCH_V9_2	AARCH64_FEATURE (AARCH64_ARCH_V9_1,	\
+						 AARCH64_ARCH_V9_2_FEATURES)
+#define AARCH64_ARCH_V9_3	AARCH64_FEATURE (AARCH64_ARCH_V9_2,	\
+						 AARCH64_ARCH_V9_3_FEATURES)
 
 #define AARCH64_ARCH_NONE	AARCH64_FEATURE (0, 0)
 #define AARCH64_ANY		AARCH64_FEATURE (-1, 0)	/* Any basic core.  */
@@ -329,7 +366,6 @@ enum aarch64_opnd
   AARCH64_OPND_PRFOP,		/* Prefetch operation.  */
   AARCH64_OPND_BARRIER_PSB,	/* Barrier operand for PSB.  */
   AARCH64_OPND_BTI_TARGET,	/* BTI {<target>}.  */
-
   AARCH64_OPND_SVE_ADDR_RI_S4x16,   /* SVE [<Xn|SP>, #<simm4>*16].  */
   AARCH64_OPND_SVE_ADDR_RI_S4x32,   /* SVE [<Xn|SP>, #<simm4>*32].  */
   AARCH64_OPND_SVE_ADDR_RI_S4xVL,   /* SVE [<Xn|SP>, #<simm4>, MUL VL].  */
@@ -347,6 +383,7 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_ADDR_RR_LSL1,    /* SVE [<Xn|SP>, <Xm|XZR>, LSL #1].  */
   AARCH64_OPND_SVE_ADDR_RR_LSL2,    /* SVE [<Xn|SP>, <Xm|XZR>, LSL #2].  */
   AARCH64_OPND_SVE_ADDR_RR_LSL3,    /* SVE [<Xn|SP>, <Xm|XZR>, LSL #3].  */
+  AARCH64_OPND_SVE_ADDR_RR_LSL4,    /* SVE [<Xn|SP>, <Xm|XZR>, LSL #4].  */
   AARCH64_OPND_SVE_ADDR_RX,	    /* SVE [<Xn|SP>, <Xm>].  */
   AARCH64_OPND_SVE_ADDR_RX_LSL1,    /* SVE [<Xn|SP>, <Xm>, LSL #1].  */
   AARCH64_OPND_SVE_ADDR_RX_LSL2,    /* SVE [<Xn|SP>, <Xm>, LSL #2].  */
@@ -437,8 +474,22 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_ZnxN,	/* SVE vector register list in Zn.  */
   AARCH64_OPND_SVE_Zt,		/* SVE vector register in Zt.  */
   AARCH64_OPND_SVE_ZtxN,	/* SVE vector register list in Zt.  */
+  AARCH64_OPND_SME_ZAda_2b,	/* SME <ZAda>.S, 2-bits.  */
+  AARCH64_OPND_SME_ZAda_3b,	/* SME <ZAda>.D, 3-bits.  */
+  AARCH64_OPND_SME_ZA_HV_idx_src,	/* SME source ZA tile vector.  */
+  AARCH64_OPND_SME_ZA_HV_idx_dest,	/* SME destination ZA tile vector.  */
+  AARCH64_OPND_SME_Pm,		/* SME scalable predicate register, bits [15:13].  */
+  AARCH64_OPND_SME_list_of_64bit_tiles, /* SME list of ZA tiles.  */
+  AARCH64_OPND_SME_ZA_HV_idx_ldstr,	/* SME destination ZA tile vector.  */
+  AARCH64_OPND_SME_ZA_array,        /* SME ZA[<Wv>{, #<imm>}].  */
+  AARCH64_OPND_SME_ADDR_RI_U4xVL,   /* SME [<Xn|SP>{, #<imm>, MUL VL}].  */
+  AARCH64_OPND_SME_SM_ZA,           /* SME {SM | ZA}.  */
+  AARCH64_OPND_SME_PnT_Wm_imm,           /* SME <Pn>.<T>[<Wm>, #<imm>].  */
   AARCH64_OPND_TME_UIMM16,	/* TME unsigned 16-bit immediate.  */
   AARCH64_OPND_SM3_IMM2,	/* SM3 encodes lane in bits [13, 14].  */
+  AARCH64_OPND_MOPS_ADDR_Rd,	/* [Rd]!, in bits [0, 4].  */
+  AARCH64_OPND_MOPS_ADDR_Rs,	/* [Rs]!, in bits [16, 20].  */
+  AARCH64_OPND_MOPS_WB_Rn	/* Rn!, in bits [5, 9].  */
 };
 
 /* Qualifier constrains an operand.  It either specifies a variant of an
@@ -601,6 +652,11 @@ enum aarch64_insn_class
   movewide,
   pcreladdr,
   ic_system,
+  sme_misc,
+  sme_ldr,
+  sme_str,
+  sme_start,
+  sme_stop,
   sve_cpy,
   sve_index,
   sve_limm,
@@ -895,7 +951,11 @@ extern const aarch64_opcode aarch64_opcode_table[];
 /* This instruction's operation width is determined by the operand with the
    largest element size.  */
 #define C_MAX_ELEM (1U << 1)
-/* Next bit is 2.  */
+#define C_SCAN_MOPS_P (1U << 2)
+#define C_SCAN_MOPS_M (2U << 2)
+#define C_SCAN_MOPS_E (3U << 2)
+#define C_SCAN_MOPS_PME (3U << 2)
+/* Next bit is 4.  */
 
 static inline bool
 alias_opcode_p (const aarch64_opcode *opcode)
@@ -1102,6 +1162,18 @@ struct aarch64_opnd_info
 	  uint32_t flags;
 	} sysreg;
 
+      /* ZA tile vector, e.g. <ZAn><HV>.D[<Wv>{, <imm>}]  */
+      struct
+	{
+	  int regno;      /* <ZAn> */
+	  struct
+	  {
+	    int regno;    /* <Wv>  */
+	    int imm;      /* <imm>  */
+	  } index;
+	  unsigned v : 1;	/* <HV> horizontal or vertical vector indicator.  */
+	} za_tile_vector;
+
       const aarch64_cond *cond;
       /* The encoding of the PSTATE field.  */
       aarch64_insn pstatefield;
@@ -1177,6 +1249,17 @@ struct aarch64_inst
      Less severe error found during the parsing, very possibly because that
      GAS has picked up a wrong instruction template for the parsing.
 
+   AARCH64_OPDE_A_SHOULD_FOLLOW_B
+     The instruction forms (or is expected to form) part of a sequence,
+     but the preceding instruction in the sequence wasn't the expected one.
+     The message refers to two strings: the name of the current instruction,
+     followed by the name of the expected preceding instruction.
+
+   AARCH64_OPDE_EXPECTED_A_AFTER_B
+     Same as AARCH64_OPDE_A_SHOULD_FOLLOW_B, but shifting the focus
+     so that the current instruction is assumed to be the incorrect one:
+     "since the previous instruction was B, the current one should be A".
+
    AARCH64_OPDE_SYNTAX_ERROR
      General syntax error; it can be either a user error, or simply because
      that GAS is trying a wrong instruction template.
@@ -1187,6 +1270,10 @@ struct aarch64_inst
    AARCH64_OPDE_INVALID_VARIANT
      No syntax error, but the operands are not a valid combination, e.g.
      FMOV D0,S0
+
+   AARCH64_OPDE_UNTIED_IMMS
+     The asm failed to use the same immediate for a destination operand
+     and a tied source operand.
 
    AARCH64_OPDE_UNTIED_OPERAND
      The asm failed to use the same register for a destination operand
@@ -1207,11 +1294,8 @@ struct aarch64_inst
      Error of the highest severity and used for any severe issue that does not
      fall into any of the above categories.
 
-   The enumerators are only interesting to GAS.  They are declared here (in
-   libopcodes) because that some errors are detected (and then notified to GAS)
-   by libopcodes (rather than by GAS solely).
-
-   The first three errors are only deteced by GAS while the
+   AARCH64_OPDE_RECOVERABLE, AARCH64_OPDE_SYNTAX_ERROR and
+   AARCH64_OPDE_FATAL_SYNTAX_ERROR are only deteced by GAS while the
    AARCH64_OPDE_INVALID_VARIANT error can only be spotted by libopcodes as
    only libopcodes has the information about the valid variants of each
    instruction.
@@ -1225,9 +1309,12 @@ enum aarch64_operand_error_kind
 {
   AARCH64_OPDE_NIL,
   AARCH64_OPDE_RECOVERABLE,
+  AARCH64_OPDE_A_SHOULD_FOLLOW_B,
+  AARCH64_OPDE_EXPECTED_A_AFTER_B,
   AARCH64_OPDE_SYNTAX_ERROR,
   AARCH64_OPDE_FATAL_SYNTAX_ERROR,
   AARCH64_OPDE_INVALID_VARIANT,
+  AARCH64_OPDE_UNTIED_IMMS,
   AARCH64_OPDE_UNTIED_OPERAND,
   AARCH64_OPDE_OUT_OF_RANGE,
   AARCH64_OPDE_UNALIGNED,
@@ -1241,7 +1328,11 @@ struct aarch64_operand_error
   enum aarch64_operand_error_kind kind;
   int index;
   const char *error;
-  int data[3];	/* Some data for extra information.  */
+  /* Some data for extra information.  */
+  union {
+    int i;
+    const char *s;
+  } data[3];
   bool non_fatal;
 };
 
@@ -1249,15 +1340,13 @@ struct aarch64_operand_error
    dependencies for both assembler and disassembler.  */
 struct aarch64_instr_sequence
 {
-  /* The instruction that caused this sequence to be opened.  */
+  /* The instructions in the sequence, starting with the one that
+     caused it to be opened.  */
   aarch64_inst *instr;
-  /* The number of instructions the above instruction allows one to be kept in the
-     sequence before an automatic close is done.  */
-  int num_insns;
-  /* The instructions currently added to the sequence.  */
-  aarch64_inst **current_insns;
   /* The number of instructions already in the sequence.  */
-  int next_insn;
+  int num_added_insns;
+  /* The number of instructions allocated to the sequence.  */
+  int num_allocated_insns;
 };
 
 /* Encoding entrypoint.  */

@@ -1,6 +1,8 @@
 # iq2000 simulator testsuite
 
-if [istarget iq2000-*] {
+sim_init
+
+if [istarget *] {
     # all machines
     set all_machs "iq2000"
 

@@ -1,6 +1,6 @@
 # This testcase is part of GDB, the GNU debugger.
 
-# Copyright 2019-2021 Free Software Foundation, Inc.
+# Copyright 2019-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -183,7 +183,6 @@ proc_with_prefix test-print {{prefix ""}} {
     clean_restart $binfile
 
     if ![runto_main] {
-	fail "cannot run to main"
 	return
     }
 
@@ -296,7 +295,6 @@ proc_with_prefix test-backtrace {} {
     clean_restart $binfile
 
     if ![runto_main] {
-	fail "cannot run to main"
 	return
     }
 

@@ -1,5 +1,5 @@
 /* symbols.h -
-   Copyright (C) 1987-2021 Free Software Foundation, Inc.
+   Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -193,6 +193,8 @@ extern int symbol_mri_common_p (symbolS *);
 extern void symbol_mark_written (symbolS *);
 extern void symbol_clear_written (symbolS *);
 extern int symbol_written_p (symbolS *);
+extern void symbol_mark_removed (symbolS *);
+extern int symbol_removed_p (symbolS *);
 extern void symbol_mark_resolved (symbolS *);
 extern int symbol_resolved_p (symbolS *);
 extern int symbol_section_p (symbolS *);

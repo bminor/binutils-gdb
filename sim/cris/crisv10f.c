@@ -1,5 +1,5 @@
 /* CRIS v10 simulator support code
-   Copyright (C) 2004-2021 Free Software Foundation, Inc.
+   Copyright (C) 2004-2022 Free Software Foundation, Inc.
    Contributed by Axis Communications.
 
 This file is part of the GNU simulators.
@@ -60,7 +60,7 @@ MY (deliver_interrupt) (SIM_CPU *current_cpu,
   unsigned char entryaddr_le[4];
   int was_user;
   SIM_DESC sd = CPU_STATE (current_cpu);
-  unsigned32 entryaddr;
+  uint32_t entryaddr;
 
   /* We haven't implemented other interrupt-types yet.  */
   if (type != CRIS_INT_INT)

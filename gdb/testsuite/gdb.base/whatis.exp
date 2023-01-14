@@ -1,4 +1,4 @@
-# Copyright 1988-2021 Free Software Foundation, Inc.
+# Copyright 1988-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -50,8 +50,6 @@ proc do_test {dir options} {
 	      [list $srcfile] $options] } {
 	return 0
     }
-
-    clean_restart ${binfile}
 
     #
     # Test whatis command with basic C types

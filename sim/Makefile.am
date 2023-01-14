@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
-#
-#   Copyright (C) 1993-2021 Free Software Foundation, Inc.
+##
+#   Copyright (C) 1993-2022 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 AUTOMAKE_OPTIONS = dejagnu foreign no-dist subdir-objects
 ACLOCAL_AMFLAGS = -Im4 -I.. -I../config
 
+srccom = $(srcdir)/common
 srcroot = $(srcdir)/..
 
 SUBDIRS = @subdirs@ $(SIM_SUBDIRS)
@@ -25,8 +26,9 @@ SUBDIRS = @subdirs@ $(SIM_SUBDIRS)
 SIM_PRIMARY_TARGET = @SIM_PRIMARY_TARGET@
 AM_MAKEFLAGS = SIM_PRIMARY_TARGET=$(SIM_PRIMARY_TARGET)
 
-# We don't set some of these vars here, but we need to define them so they may
-# be used consistently in local.mk files we include below.
+## We don't set some of these vars here, but we need to define them so they may
+## be used consistently in local.mk files we include below.
+pkginclude_HEADERS =
 check_PROGRAMS =
 noinst_LIBRARIES =
 EXTRA_PROGRAMS =
@@ -43,29 +45,85 @@ AM_CPPFLAGS = \
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS) $(CFLAGS_FOR_BUILD)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
 
-# Deps to add to the all-recursive target.  These are built before descending
-# into any subdirs.
+## Deps to add to the all-recursive target.  These are built before descending
+## into any subdirs.
 SIM_ALL_RECURSIVE_DEPS =
 
-# Generate nltvals.def for newlib/libgloss using devo and build tree.
+# Generate target constants for newlib/libgloss from its source tree.
 # This file is shipped with distributions so we build in the source dir.
 # Use `make nltvals' to rebuild.
-# Note: If gdb releases begin to contain target header files (not a good idea,
-# but if they did ...), nltvals.def coud be generated at build time.
-# An alternative is to slurp in the tables at runtime.
 .PHONY: nltvals
 nltvals:
-	$(abs_srcdir)/common/gennltvals.py --cpp "$(CPP)" --output nltvals.def --srcroot $(srcroot)
-	$(SHELL) $(srcroot)/move-if-change nltvals.def $(abs_srcdir)/common/nltvals.def
+	$(srccom)/gennltvals.py --cpp "$(CPP)"
 
-pkginclude_HEADERS = \
+if ENABLE_SIM
+pkginclude_HEADERS += \
 	$(srcroot)/include/sim/callback.h \
 	$(srcroot)/include/sim/sim.h
+endif
 
 include common/local.mk
 if SIM_ENABLE_IGEN
 include igen/local.mk
 endif
 include testsuite/local.mk
+
+if SIM_ENABLE_ARCH_arm
+include arm/local.mk
+endif
+if SIM_ENABLE_ARCH_bpf
+include bpf/local.mk
+endif
+if SIM_ENABLE_ARCH_cr16
+include cr16/local.mk
+endif
+if SIM_ENABLE_ARCH_cris
+include cris/local.mk
+endif
+if SIM_ENABLE_ARCH_d10v
+include d10v/local.mk
+endif
+if SIM_ENABLE_ARCH_erc32
+include erc32/local.mk
+endif
+if SIM_ENABLE_ARCH_frv
+include frv/local.mk
+endif
+if SIM_ENABLE_ARCH_iq2000
+include iq2000/local.mk
+endif
+if SIM_ENABLE_ARCH_lm32
+include lm32/local.mk
+endif
+if SIM_ENABLE_ARCH_m32c
+include m32c/local.mk
+endif
+if SIM_ENABLE_ARCH_m32r
+include m32r/local.mk
+endif
+if SIM_ENABLE_ARCH_m68hc11
+include m68hc11/local.mk
+endif
+if SIM_ENABLE_ARCH_mn10300
+include mn10300/local.mk
+endif
+if SIM_ENABLE_ARCH_moxie
+include moxie/local.mk
+endif
+if SIM_ENABLE_ARCH_or1k
+include or1k/local.mk
+endif
+if SIM_ENABLE_ARCH_ppc
+include ppc/local.mk
+endif
+if SIM_ENABLE_ARCH_rx
+include rx/local.mk
+endif
+if SIM_ENABLE_ARCH_sh
+include sh/local.mk
+endif
+if SIM_ENABLE_ARCH_v850
+include v850/local.mk
+endif
 
 all-recursive: $(SIM_ALL_RECURSIVE_DEPS)

@@ -1,7 +1,7 @@
 /* Blackfin General Purpose Ports (GPIO) model
    For "new style" GPIOs on BF54x parts.
 
-   Copyright (C) 2010-2021 Free Software Foundation, Inc.
+   Copyright (C) 2010-2022 Free Software Foundation, Inc.
    Contributed by Analog Devices, Inc. and Mike Frysinger.
 
    This file is part of simulators.
@@ -83,7 +83,7 @@ bfin_gpio_io_write_buffer (struct hw *me, const void *source, int space,
     value = dv_load_4 (source);
   else
     value = dv_load_2 (source);
-  valuep = (void *)((unsigned long)port + mmr_base() + mmr_off);
+  valuep = (void *)((uintptr_t)port + mmr_base() + mmr_off);
   value16p = valuep;
   value32p = valuep;
 
@@ -166,7 +166,7 @@ bfin_gpio_io_read_buffer (struct hw *me, void *dest, int space,
     if (!dv_bfin_mmr_require_16 (me, addr, nr_bytes, false))
       return 0;
 
-  valuep = (void *)((unsigned long)port + mmr_base() + mmr_off);
+  valuep = (void *)((uintptr_t)port + mmr_base() + mmr_off);
   value16p = valuep;
   value32p = valuep;
 

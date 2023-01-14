@@ -1,5 +1,5 @@
 /* Read AIX xcoff symbol tables and convert to internal format, for GDB.
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
    Derived from coffread.c, dbxread.c, and a lot of hacking.
    Contributed by IBM Corporation.
 
@@ -1574,7 +1574,7 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
       sym->set_linkage_name (SYMNAME_ALLOC (name, symname_alloced));
       SYMBOL_TYPE (sym) = objfile_type (objfile)->nodebug_text_symbol;
 
-      SYMBOL_ACLASS_INDEX (sym) = LOC_BLOCK;
+      sym->set_aclass_index (LOC_BLOCK);
       sym2 = new (&objfile->objfile_obstack) symbol (*sym);
 
       if (cs->c_sclass == C_EXT || C_WEAKEXT)
@@ -1678,12 +1678,12 @@ coff_getfilename (union internal_auxent *aux_entry, struct objfile *objfile)
 {
   static char buffer[BUFSIZ];
 
-  if (aux_entry->x_file.x_n.x_zeroes == 0)
+  if (aux_entry->x_file.x_n.x_n.x_zeroes == 0)
     strcpy (buffer, (XCOFF_DATA (objfile)->strtbl
-		     + aux_entry->x_file.x_n.x_offset));
+		     + aux_entry->x_file.x_n.x_n.x_offset));
   else
     {
-      strncpy (buffer, aux_entry->x_file.x_fname, FILNMLEN);
+      strncpy (buffer, aux_entry->x_file.x_n.x_fname, FILNMLEN);
       buffer[FILNMLEN] = '\0';
     }
   return (buffer);

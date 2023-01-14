@@ -1,6 +1,6 @@
 
 /* YACC parser for Fortran expressions, for GDB.
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    Contributed by Motorola.  Adapted from the C parser by Farooq Butt
    (fmbutt@engage.sps.mot.com).
@@ -1269,27 +1269,27 @@ yylex (void)
 
   if (*pstate->lexptr == '.')
     {
-      for (int i = 0; i < ARRAY_SIZE (boolean_values); i++)
+      for (const auto &candidate : boolean_values)
 	{
-	  if (strncasecmp (tokstart, boolean_values[i].name,
-			   strlen (boolean_values[i].name)) == 0)
+	  if (strncasecmp (tokstart, candidate.name,
+			   strlen (candidate.name)) == 0)
 	    {
-	      pstate->lexptr += strlen (boolean_values[i].name);
-	      yylval.lval = boolean_values[i].value;
+	      pstate->lexptr += strlen (candidate.name);
+	      yylval.lval = candidate.value;
 	      return BOOLEAN_LITERAL;
 	    }
 	}
     }
 
   /* See if it is a Fortran operator.  */
-  for (int i = 0; i < ARRAY_SIZE (fortran_operators); i++)
-    if (strncasecmp (tokstart, fortran_operators[i].oper,
-		     strlen (fortran_operators[i].oper)) == 0)
+  for (const auto &candidate : fortran_operators)
+    if (strncasecmp (tokstart, candidate.oper,
+		     strlen (candidate.oper)) == 0)
       {
-	gdb_assert (!fortran_operators[i].case_sensitive);
-	pstate->lexptr += strlen (fortran_operators[i].oper);
-	yylval.opcode = fortran_operators[i].opcode;
-	return fortran_operators[i].token;
+	gdb_assert (!candidate.case_sensitive);
+	pstate->lexptr += strlen (candidate.oper);
+	yylval.opcode = candidate.opcode;
+	return candidate.token;
       }
 
   switch (c = *tokstart)
@@ -1452,15 +1452,15 @@ yylex (void)
   
   /* Catch specific keywords.  */
 
-  for (int i = 0; i < ARRAY_SIZE (f77_keywords); i++)
-    if (strlen (f77_keywords[i].oper) == namelen
-	&& ((!f77_keywords[i].case_sensitive
-	     && strncasecmp (tokstart, f77_keywords[i].oper, namelen) == 0)
-	    || (f77_keywords[i].case_sensitive
-		&& strncmp (tokstart, f77_keywords[i].oper, namelen) == 0)))
+  for (const auto &keyword : f77_keywords)
+    if (strlen (keyword.oper) == namelen
+	&& ((!keyword.case_sensitive
+	     && strncasecmp (tokstart, keyword.oper, namelen) == 0)
+	    || (keyword.case_sensitive
+		&& strncmp (tokstart, keyword.oper, namelen) == 0)))
       {
-	yylval.opcode = f77_keywords[i].opcode;
-	return f77_keywords[i].token;
+	yylval.opcode = keyword.opcode;
+	return keyword.token;
       }
 
   yylval.sval.ptr = tokstart;
@@ -1475,7 +1475,7 @@ yylex (void)
   {
     std::string tmp = copy_name (yylval.sval);
     struct block_symbol result;
-    enum domain_enum_tag lookup_domains[] =
+    const enum domain_enum_tag lookup_domains[] =
     {
       STRUCT_DOMAIN,
       VAR_DOMAIN,
@@ -1483,10 +1483,10 @@ yylex (void)
     };
     int hextype;
 
-    for (int i = 0; i < ARRAY_SIZE (lookup_domains); ++i)
+    for (const auto &domain : lookup_domains)
       {
 	result = lookup_symbol (tmp.c_str (), pstate->expression_context_block,
-				lookup_domains[i], NULL);
+				domain, NULL);
 	if (result.symbol && SYMBOL_CLASS (result.symbol) == LOC_TYPEDEF)
 	  {
 	    yylval.tsym.type = SYMBOL_TYPE (result.symbol);

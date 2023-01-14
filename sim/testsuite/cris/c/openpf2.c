@@ -1,5 +1,5 @@
 /* Check that the simulator has chdir:ed to the --sysroot argument
-#sim: --sysroot=@srcdir@
+#sim: --sysroot=$srcdir/$subdir
    (or that  --sysroot is applied to relative file paths).  */
 
 #include <stdio.h>

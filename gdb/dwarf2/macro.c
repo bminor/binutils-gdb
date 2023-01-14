@@ -1,6 +1,6 @@
 /* Read DWARF macro information
 
-   Copyright (C) 1994-2021 Free Software Foundation, Inc.
+   Copyright (C) 1994-2022 Free Software Foundation, Inc.
 
    Adapted by Gary Funck (gary@intrepid.com), Intrepid Technology,
    Inc.  with support from Florida State University (under contract
@@ -35,6 +35,7 @@
 #include "buildsym.h"
 #include "macrotab.h"
 #include "complaints.h"
+#include "objfiles.h"
 
 static void
 dwarf2_macro_malformed_definition_complaint (const char *arg1)

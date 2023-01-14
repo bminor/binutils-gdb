@@ -1,5 +1,5 @@
 /* ELF emulation code for targets using elf.em.
-   Copyright (C) 1991-2021 Free Software Foundation, Inc.
+   Copyright (C) 1991-2022 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -71,7 +71,26 @@ ldelf_after_parse (void)
 	einfo (_("%P: warning: -z dynamic-undefined-weak ignored\n"));
       link_info.dynamic_undefined_weak = 0;
     }
+
+  /* Disable DT_RELR if not building PIE nor shared library.  */
+  if (!bfd_link_pic (&link_info))
+    link_info.enable_dt_relr = 0;
+
+  /* Add 3 spare tags for DT_RELR, DT_RELRSZ and DT_RELRENT.  */
+  if (link_info.enable_dt_relr)
+    link_info.spare_dynamic_tags += 3;
+
   after_parse_default ();
+  if (link_info.commonpagesize > link_info.maxpagesize)
+    {
+      if (!link_info.commonpagesize_is_set)
+	link_info.commonpagesize = link_info.maxpagesize;
+      else if (!link_info.maxpagesize_is_set)
+	link_info.maxpagesize = link_info.commonpagesize;
+      else
+	einfo (_("%F%P: common page size (0x%v) > maximum page size (0x%v)\n"),
+	       link_info.commonpagesize, link_info.maxpagesize);
+    }
 }
 
 /* Handle the generation of DT_NEEDED tags.  */
@@ -1043,10 +1062,18 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
   /* Do not allow executable files to be used as inputs to the link.  */
   for (abfd = link_info.input_bfds; abfd; abfd = abfd->link.next)
     {
+      /* Discard input .note.gnu.build-id sections.  */
+      s = bfd_get_section_by_name (abfd, ".note.gnu.build-id");
+      while (s != NULL)
+	{
+	  if (s != elf_tdata (link_info.output_bfd)->o->build_id.sec)
+	    s->flags |= SEC_EXCLUDE;
+	  s = bfd_get_next_section_by_name (NULL, s);
+	}
+
       if (abfd->xvec->flavour == bfd_target_elf_flavour
 	  && !bfd_input_just_syms (abfd)
 	  && elf_tdata (abfd) != NULL
-	  && elf_tdata (abfd)->elf_header != NULL
 	  /* FIXME: Maybe check for other non-supportable types as well ?  */
 	  && (elf_tdata (abfd)->elf_header->e_type == ET_EXEC
 	      || (elf_tdata (abfd)->elf_header->e_type == ET_DYN
@@ -1387,6 +1414,9 @@ write_build_id (bfd *abfd)
   id_bits = contents + size;
   size = asec->size - size;
 
+  /* Clear the build ID field.  */
+  memset (id_bits, 0, size);
+
   bfd_h_put_32 (abfd, sizeof "GNU", &e_note->namesz);
   bfd_h_put_32 (abfd, size, &e_note->descsz);
   bfd_h_put_32 (abfd, NT_GNU_BUILD_ID, &e_note->type);
@@ -1418,7 +1448,8 @@ ldelf_setup_build_id (bfd *ibfd)
 
   flags = (SEC_ALLOC | SEC_LOAD | SEC_IN_MEMORY
 	   | SEC_LINKER_CREATED | SEC_READONLY | SEC_DATA);
-  s = bfd_make_section_with_flags (ibfd, ".note.gnu.build-id", flags);
+  s = bfd_make_section_anyway_with_flags (ibfd, ".note.gnu.build-id",
+					  flags);
   if (s != NULL && bfd_set_section_alignment (s, 2))
     {
       struct elf_obj_tdata *t = elf_tdata (link_info.output_bfd);
@@ -1576,11 +1607,6 @@ ldelf_before_allocation (char *audit, char *depaudit,
 		  || h->root.type == bfd_link_hash_undefweak
 		  || h->root.type == bfd_link_hash_common))
 	    {
-	      const struct elf_backend_data *bed;
-	      bed = get_elf_backend_data (link_info.output_bfd);
-	      (*bed->elf_backend_hide_symbol) (&link_info, h, true);
-	      if (ELF_ST_VISIBILITY (h->other) != STV_INTERNAL)
-		h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_HIDDEN;
 	      /* Don't leave the symbol undefined.  Undefined hidden
 		 symbols typically won't have dynamic relocations, but
 		 we most likely will need dynamic relocations for
@@ -1593,7 +1619,6 @@ ldelf_before_allocation (char *audit, char *depaudit,
 		      sizeof ehdr_start_save_u);
 	      ehdr_start->type = bfd_link_hash_defined;
 	      /* It will be converted to section-relative later.  */
-	      ehdr_start->rel_from_abs = 1;
 	      ehdr_start->u.def.section = bfd_abs_section_ptr;
 	      ehdr_start->u.def.value = 0;
 	    }

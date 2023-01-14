@@ -1,5 +1,5 @@
 /* nm.c -- Describe symbol table of a rel file.
-   Copyright (C) 1991-2021 Free Software Foundation, Inc.
+   Copyright (C) 1991-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -36,8 +36,14 @@
 #include "coff/internal.h"
 #include "libcoff.h"
 #include "bucomm.h"
+#include "demanguse.h"
 #include "plugin-api.h"
 #include "plugin.h"
+#include "safe-ctype.h"
+
+#ifndef streq
+#define streq(a,b) (strcmp ((a),(b)) == 0)
+#endif
 
 /* When sorting by size, we use this structure to hold the size and a
    pointer to the minisymbol.  */
@@ -216,6 +222,18 @@ static const char *plugin_target = NULL;
 static bfd *lineno_cache_bfd;
 static bfd *lineno_cache_rel_bfd;
 
+typedef enum unicode_display_type
+{
+  unicode_default = 0,
+  unicode_locale,
+  unicode_escape,
+  unicode_hex,
+  unicode_highlight,
+  unicode_invalid
+} unicode_display_type;
+
+static unicode_display_type unicode_display = unicode_default;
+
 enum long_option_values
 {
   OPTION_TARGET = 200,
@@ -260,6 +278,7 @@ static struct option long_options[] =
   {"target", required_argument, 0, OPTION_TARGET},
   {"defined-only", no_argument, &defined_only, 1},
   {"undefined-only", no_argument, &undefined_only, 1},
+  {"unicode", required_argument, NULL, 'U'},
   {"version", no_argument, &show_version, 1},
   {"with-symbol-versions", no_argument, &with_symbol_versions, 1},
   {"without-symbol-versions", no_argument, &with_symbol_versions, 0},
@@ -273,52 +292,88 @@ usage (FILE *stream, int status)
 {
   fprintf (stream, _("Usage: %s [option(s)] [file(s)]\n"), program_name);
   fprintf (stream, _(" List symbols in [file(s)] (a.out by default).\n"));
-  fprintf (stream, _(" The options are:\n\
-  -a, --debug-syms       Display debugger-only symbols\n\
-  -A, --print-file-name  Print name of the input file before every symbol\n\
-  -B                     Same as --format=bsd\n\
-  -C, --demangle[=STYLE] Decode low-level symbol names into user-level names\n\
-                          The STYLE, if specified, can be `auto' (the default),\n\
-                          `gnu', `lucid', `arm', `hp', `edg', `gnu-v3', `java'\n\
-                          or `gnat'\n\
-      --no-demangle      Do not demangle low-level symbol names\n\
-      --recurse-limit    Enable a demangling recursion limit.  This is the default.\n\
-      --no-recurse-limit Disable a demangling recursion limit.\n\
-  -D, --dynamic          Display dynamic symbols instead of normal symbols\n\
-      --defined-only     Display only defined symbols\n\
-  -e                     (ignored)\n\
+  fprintf (stream, _(" The options are:\n"));
+  fprintf (stream, _("\
+  -a, --debug-syms       Display debugger-only symbols\n"));
+  fprintf (stream, _("\
+  -A, --print-file-name  Print name of the input file before every symbol\n"));
+  fprintf (stream, _("\
+  -B                     Same as --format=bsd\n"));
+  fprintf (stream, _("\
+  -C, --demangle[=STYLE] Decode mangled/processed symbol names\n"));
+  display_demangler_styles (stream, _("\
+                           STYLE can be "));
+  fprintf (stream, _("\
+      --no-demangle      Do not demangle low-level symbol names\n"));
+  fprintf (stream, _("\
+      --recurse-limit    Enable a demangling recursion limit.  (default)\n"));
+  fprintf (stream, _("\
+      --no-recurse-limit Disable a demangling recursion limit.\n"));
+  fprintf (stream, _("\
+  -D, --dynamic          Display dynamic symbols instead of normal symbols\n"));
+  fprintf (stream, _("\
+      --defined-only     Display only defined symbols\n"));
+  fprintf (stream, _("\
+  -e                     (ignored)\n"));
+  fprintf (stream, _("\
   -f, --format=FORMAT    Use the output format FORMAT.  FORMAT can be `bsd',\n\
-                           `sysv', `posix' or 'just-symbols'.  The default is `bsd'\n\
-  -g, --extern-only      Display only external symbols\n\
-    --ifunc-chars=CHARS  Characters to use when displaying ifunc symbols\n\
-  -j, --just-symbols     Same as --format=just-symbols\n\
+                           `sysv', `posix' or 'just-symbols'.\n\
+                           The default is `bsd'\n"));
+  fprintf (stream, _("\
+  -g, --extern-only      Display only external symbols\n"));
+  fprintf (stream, _("\
+    --ifunc-chars=CHARS  Characters to use when displaying ifunc symbols\n"));
+  fprintf (stream, _("\
+  -j, --just-symbols     Same as --format=just-symbols\n"));
+  fprintf (stream, _("\
   -l, --line-numbers     Use debugging information to find a filename and\n\
-                           line number for each symbol\n\
-  -n, --numeric-sort     Sort symbols numerically by address\n\
-  -o                     Same as -A\n\
-  -p, --no-sort          Do not sort the symbols\n\
-  -P, --portability      Same as --format=posix\n\
+                           line number for each symbol\n"));
+  fprintf (stream, _("\
+  -n, --numeric-sort     Sort symbols numerically by address\n"));
+  fprintf (stream, _("\
+  -o                     Same as -A\n"));
+  fprintf (stream, _("\
+  -p, --no-sort          Do not sort the symbols\n"));
+  fprintf (stream, _("\
+  -P, --portability      Same as --format=posix\n"));
+  fprintf (stream, _("\
   -r, --reverse-sort     Reverse the sense of the sort\n"));
 #if BFD_SUPPORTS_PLUGINS
   fprintf (stream, _("\
       --plugin NAME      Load the specified plugin\n"));
 #endif
   fprintf (stream, _("\
-  -S, --print-size       Print size of defined symbols\n\
-  -s, --print-armap      Include index for symbols from archive members\n\
-      --quiet            Suppress \"no symbols\" diagnostic\n\
-      --size-sort        Sort symbols by size\n\
-      --special-syms     Include special symbols in the output\n\
-      --synthetic        Display synthetic symbols as well\n\
-  -t, --radix=RADIX      Use RADIX for printing symbol values\n\
-      --target=BFDNAME   Specify the target object format as BFDNAME\n\
-  -u, --undefined-only   Display only undefined symbols\n\
-      --with-symbol-versions  Display version strings after symbol names\n\
-  -X 32_64               (ignored)\n\
-  @FILE                  Read options from FILE\n\
-  -h, --help             Display this information\n\
-  -V, --version          Display this program's version number\n\
-\n"));
+  -S, --print-size       Print size of defined symbols\n"));
+  fprintf (stream, _("\
+  -s, --print-armap      Include index for symbols from archive members\n"));
+  fprintf (stream, _("\
+      --quiet            Suppress \"no symbols\" diagnostic\n"));
+  fprintf (stream, _("\
+      --size-sort        Sort symbols by size\n"));
+  fprintf (stream, _("\
+      --special-syms     Include special symbols in the output\n"));
+  fprintf (stream, _("\
+      --synthetic        Display synthetic symbols as well\n"));
+  fprintf (stream, _("\
+  -t, --radix=RADIX      Use RADIX for printing symbol values\n"));
+  fprintf (stream, _("\
+      --target=BFDNAME   Specify the target object format as BFDNAME\n"));
+  fprintf (stream, _("\
+  -u, --undefined-only   Display only undefined symbols\n"));
+  fprintf (stream, _("\
+  -U {d|s|i|x|e|h}       Specify how to treat UTF-8 encoded unicode characters\n\
+      --unicode={default|show|invalid|hex|escape|highlight}\n"));
+  fprintf (stream, _("\
+      --with-symbol-versions  Display version strings after symbol names\n"));
+  fprintf (stream, _("\
+  -X 32_64               (ignored)\n"));
+  fprintf (stream, _("\
+  @FILE                  Read options from FILE\n"));
+  fprintf (stream, _("\
+  -h, --help             Display this information\n"));
+  fprintf (stream, _("\
+  -V, --version          Display this program's version number\n"));
+
   list_supported_targets (program_name, stream);
   if (REPORT_BUGS_TO[0] && status == 0)
     fprintf (stream, _("Report bugs to %s.\n"), REPORT_BUGS_TO);
@@ -432,6 +487,187 @@ get_coff_symbol_type (const struct internal_syment *sym)
   return bufp;
 }
 
+/* Convert a potential UTF-8 encoded sequence in IN into characters in OUT.
+   The conversion format is controlled by the unicode_display variable.
+   Returns the number of characters added to OUT.
+   Returns the number of bytes consumed from IN in CONSUMED.
+   Always consumes at least one byte and displays at least one character.  */
+   
+static unsigned int
+display_utf8 (const unsigned char * in, char * out, unsigned int * consumed)
+{
+  char *        orig_out = out;
+  unsigned int  nchars = 0;
+  unsigned int j;
+
+  if (unicode_display == unicode_default)
+    goto invalid;
+
+  if (in[0] < 0xc0)
+    goto invalid;
+
+  if ((in[1] & 0xc0) != 0x80)
+    goto invalid;
+
+  if ((in[0] & 0x20) == 0)
+    {
+      nchars = 2;
+      goto valid;
+    }
+
+  if ((in[2] & 0xc0) != 0x80)
+    goto invalid;
+
+  if ((in[0] & 0x10) == 0)
+    {
+      nchars = 3;
+      goto valid;
+    }
+
+  if ((in[3] & 0xc0) != 0x80)
+    goto invalid;
+
+  nchars = 4;
+
+ valid:
+  switch (unicode_display)
+    {
+    case unicode_locale:
+      /* Copy the bytes into the output buffer as is.  */
+      memcpy (out, in, nchars);
+      out += nchars;
+      break;
+
+    case unicode_invalid:
+    case unicode_hex:
+      out += sprintf (out, "%c", unicode_display == unicode_hex ? '<' : '{');
+      out += sprintf (out, "0x");
+      for (j = 0; j < nchars; j++)
+	out += sprintf (out, "%02x", in [j]);
+      out += sprintf (out, "%c", unicode_display == unicode_hex ? '>' : '}');
+      break;
+      
+    case unicode_highlight:
+      if (isatty (1))
+	out += sprintf (out, "\x1B[31;47m"); /* Red.  */
+      /* Fall through.  */
+    case unicode_escape:
+      switch (nchars)
+	{
+	case 2:
+	  out += sprintf (out, "\\u%02x%02x",
+		  ((in[0] & 0x1c) >> 2), 
+		  ((in[0] & 0x03) << 6) | (in[1] & 0x3f));
+	  break;
+
+	case 3:
+	  out += sprintf (out, "\\u%02x%02x",
+		  ((in[0] & 0x0f) << 4) | ((in[1] & 0x3c) >> 2),
+		  ((in[1] & 0x03) << 6) | ((in[2] & 0x3f)));
+	  break;
+
+	case 4:
+	  out += sprintf (out, "\\u%02x%02x%02x",
+		  ((in[0] & 0x07) << 6) | ((in[1] & 0x3c) >> 2),
+		  ((in[1] & 0x03) << 6) | ((in[2] & 0x3c) >> 2),
+		  ((in[2] & 0x03) << 6) | ((in[3] & 0x3f)));
+	  break;
+	default:
+	  /* URG.  */
+	  break;
+	}
+
+      if (unicode_display == unicode_highlight && isatty (1))
+	out += sprintf (out, "\033[0m"); /* Default colour.  */
+      break;
+
+    default:
+      /* URG */
+      break;
+    }
+
+  * consumed = nchars;
+  return out - orig_out;
+
+ invalid:
+  /* Not a valid UTF-8 sequence.  */
+  *out = *in;
+  * consumed = 1;
+  return 1;
+}
+
+/* Convert any UTF-8 encoded characters in NAME into the form specified by
+   unicode_display.  Also converts control characters.  Returns a static
+   buffer if conversion was necessary.
+   Code stolen from objdump.c:sanitize_string().  */
+
+static const char *
+convert_utf8 (const char * in)
+{
+  static char *  buffer = NULL;
+  static size_t  buffer_len = 0;
+  const char *   original = in;
+  char *         out;
+
+  /* Paranoia.  */
+  if (in == NULL)
+    return "";
+
+  /* See if any conversion is necessary.
+     In the majority of cases it will not be needed.  */
+  do
+    {
+      unsigned char c = *in++;
+
+      if (c == 0)
+	return original;
+
+      if (ISCNTRL (c))
+	break;
+
+      if (unicode_display != unicode_default && c >= 0xc0)
+	break;
+    }
+  while (1);
+
+  /* Copy the input, translating as needed.  */
+  in = original;
+  if (buffer_len < (strlen (in) * 9))
+    {
+      free ((void *) buffer);
+      buffer_len = strlen (in) * 9;
+      buffer = xmalloc (buffer_len + 1);
+    }
+
+  out = buffer;
+  do
+    {
+      unsigned char c = *in++;
+
+      if (c == 0)
+	break;
+
+      if (ISCNTRL (c))
+	{
+	  *out++ = '^';
+	  *out++ = c + 0x40;
+	}
+      else if (unicode_display != unicode_default && c >= 0xc0)
+	{
+	  unsigned int num_consumed;
+
+	  out += display_utf8 ((const unsigned char *)(in - 1), out, & num_consumed);
+	  in += num_consumed - 1;
+	}
+      else
+	*out++ = c;
+    }
+  while (1);
+
+  *out = 0;
+  return buffer;
+}
+
 /* Print symbol name NAME, read from ABFD, with printf format FORM,
    demangling it if requested.  */
 
@@ -444,6 +680,7 @@ print_symname (const char *form, struct extended_symbol_info *info,
 
   if (name == NULL)
     name = info->sinfo->name;
+
   if (!with_symbol_versions
       && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     {
@@ -451,11 +688,17 @@ print_symname (const char *form, struct extended_symbol_info *info,
       if (atver)
 	*atver = 0;
     }
+
   if (do_demangle && *name)
     {
       alloc = bfd_demangle (abfd, name, demangle_flags);
       if (alloc != NULL)
 	name = alloc;
+    }
+
+  if (unicode_display != unicode_default)
+    {
+      name = convert_utf8 (name);
     }
 
   if (info != NULL && info->elfinfo && with_symbol_versions)
@@ -544,7 +787,8 @@ filter_symbols (bfd *abfd, bool is_dynamic, void *minisyms,
       if (sym == NULL)
 	bfd_fatal (bfd_get_filename (abfd));
 
-      if (sym->name[0] == '_'
+      if (sym->name != NULL
+	  && sym->name[0] == '_'
 	  && sym->name[1] == '_'
 	  && strcmp (sym->name + (sym->name[2] == '_'), "__gnu_lto_slim") == 0
 	  && report_plugin_err)
@@ -1807,7 +2051,7 @@ main (int argc, char **argv)
     fatal (_("fatal error: libbfd ABI mismatch"));
   set_default_bfd_target ();
 
-  while ((c = getopt_long (argc, argv, "aABCDef:gHhjJlnopPrSst:uvVvX:",
+  while ((c = getopt_long (argc, argv, "aABCDef:gHhjJlnopPrSst:uU:vVvX:",
 			   long_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -1900,6 +2144,24 @@ main (int argc, char **argv)
 	case 'u':
 	  undefined_only = 1;
 	  break;
+
+	case 'U':
+	  if (streq (optarg, "default") || streq (optarg, "d"))
+	    unicode_display = unicode_default;
+	  else if (streq (optarg, "locale") || streq (optarg, "l"))
+	    unicode_display = unicode_locale;
+	  else if (streq (optarg, "escape") || streq (optarg, "e"))
+	    unicode_display = unicode_escape;
+	  else if (streq (optarg, "invalid") || streq (optarg, "i"))
+	    unicode_display = unicode_invalid;
+	  else if (streq (optarg, "hex") || streq (optarg, "x"))
+	    unicode_display = unicode_hex;
+	  else if (streq (optarg, "highlight") || streq (optarg, "h"))
+	    unicode_display = unicode_highlight;
+	  else
+	    fatal (_("invalid argument to -U/--unicode: %s"), optarg);
+	  break;
+
 	case 'V':
 	  show_version = 1;
 	  break;

@@ -1,5 +1,5 @@
 /* tc-csky.c -- Assembler for C-SKY
-   Copyright (C) 1989-2021 Free Software Foundation, Inc.
+   Copyright (C) 1989-2022 Free Software Foundation, Inc.
    Created by Lifang Xia (lifang_xia@c-sky.com)
    Contributed by C-SKY Microsystems and Mentor Graphics.
 
@@ -5476,7 +5476,8 @@ md_apply_fix (fixS   *fixP,
 	  else if (fixP->fx_size == 1 && val >= -256 && val <= 255)
 	    ;
 	  else
-	    abort ();
+	    break;
+
 	  md_number_to_chars (buf, val, fixP->fx_size);
 	  fixP->fx_done = 1;
 	}

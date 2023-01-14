@@ -1,6 +1,6 @@
 /* This file is part of SIS (SPARC instruction simulator)
 
-   Copyright (C) 1995-2021 Free Software Foundation, Inc.
+   Copyright (C) 1995-2022 Free Software Foundation, Inc.
    Contributed by Jiri Gaisler, European Space Agency
 
    This program is free software; you can redistribute it and/or modify
@@ -62,7 +62,7 @@ clear_accex(void)
 
 /* How to map SPARC FSR onto the host */
 void
-set_fsr(uint32 fsr)
+set_fsr(uint32_t fsr)
 {
     int fround;
 

@@ -3,7 +3,7 @@
 # x86_64_indirect_call_to_direct.sh -- a test for indirect call(jump) to direct
 # conversion.
 
-# Copyright (C) 2016-2021 Free Software Foundation, Inc.
+# Copyright (C) 2016-2022 Free Software Foundation, Inc.
 # Written by Sriraman Tallam <tmsriram@google.com>
 
 # This file is part of gold.

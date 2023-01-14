@@ -29,7 +29,7 @@
 #include <string.h>
 
 void
-error (char *msg, ...)
+error (const char *msg, ...)
 {
   va_list ap;
   va_start(ap, msg);
@@ -49,7 +49,7 @@ zalloc(long size)
 }
 
 void
-dumpf (int indent, char *msg, ...)
+dumpf (int indent, const char *msg, ...)
 {
   va_list ap;
   for (; indent > 0; indent--)
@@ -159,8 +159,8 @@ name2i(const char *names,
   const char *name = names;
   while (*name != '\0') {
     /* find our name */
-    char *end = strchr(name, ',');
-    char *next;
+    const char *end = strchr(name, ',');
+    const char *next;
     int len;
     if (end == NULL) {
       end = strchr(name, '\0');

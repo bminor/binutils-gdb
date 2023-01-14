@@ -1,4 +1,4 @@
-# Copyright 2017-2021 Free Software Foundation, Inc.
+# Copyright 2017-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -58,7 +58,9 @@ with_test_prefix "user-initiated check" {
 
     # User-initiated check with NPTL possibly uninitialized.
     gdb_test "continue" \
-	".*Stopped due to shared library event.*Inferior loaded .*libpthread.*"
+	[multi_line \
+	     "Stopped due to shared library event:" \
+	     "  Inferior loaded .*(libpthread|libc).*"]
 
     gdb_test_sequence "maint check libthread-db" \
 	"libpthread.so possibly not initialized" \

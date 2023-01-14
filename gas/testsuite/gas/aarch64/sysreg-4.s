@@ -38,7 +38,7 @@ func:
 	msr gcr_el1, x3
 
 	# MSR (immediate)
-	msr TCO, #8
+	msr TCO, #1
 
 	# Data cache
 	dc igvac, x1

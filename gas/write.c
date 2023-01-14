@@ -1,5 +1,5 @@
 /* write.c - emit .o file
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1289,6 +1289,13 @@ write_relocs (bfd *abfd ATTRIBUTE_UNUSED, asection *sec,
 	as_bad_where (fixp->fx_file, fixp->fx_line,
 		      _("internal error: fixup not contained within frag"));
 
+#ifdef obj_fixup_removed_symbol
+      if (fixp->fx_addsy && symbol_removed_p (fixp->fx_addsy))
+	obj_fixup_removed_symbol (&fixp->fx_addsy);
+      if (fixp->fx_subsy && symbol_removed_p (fixp->fx_subsy))
+	obj_fixup_removed_symbol (&fixp->fx_subsy);
+#endif
+
 #ifndef RELOC_EXPANSION_POSSIBLE
       *reloc = tc_gen_reloc (sec, fixp);
 #else
@@ -1308,7 +1315,34 @@ write_relocs (bfd *abfd ATTRIBUTE_UNUSED, asection *sec,
 		}
 	      r = r->next;
 	    }
-	  relocs[n++] = *reloc;
+#ifdef GAS_SORT_RELOCS
+	  if (n != 0 && (*reloc)->address < relocs[n - 1]->address)
+	    {
+	      size_t lo = 0;
+	      size_t hi = n - 1;
+	      bfd_vma look = (*reloc)->address;
+	      while (lo < hi)
+		{
+		  size_t mid = (lo + hi) / 2;
+		  if (relocs[mid]->address > look)
+		    hi = mid;
+		  else
+		    {
+		      lo = mid + 1;
+		      if (relocs[mid]->address == look)
+			break;
+		    }
+		}
+	      while (lo < hi && relocs[lo]->address == look)
+		lo++;
+	      memmove (relocs + lo + 1, relocs + lo,
+		       (n - lo) * sizeof (*relocs));
+	      n++;
+	      relocs[lo] = *reloc;
+	    }
+	  else
+#endif
+	    relocs[n++] = *reloc;
 	  install_reloc (sec, *reloc, fixp->fx_frag,
 			 fixp->fx_file, fixp->fx_line);
 #ifndef RELOC_EXPANSION_POSSIBLE
@@ -1755,9 +1789,10 @@ set_symtab (void)
      two.  Generate unused section symbols only if needed.  */
   nsyms = 0;
   for (symp = symbol_rootP; symp; symp = symbol_next (symp))
-    if (bfd_keep_unused_section_symbols (stdoutput)
-	|| !symbol_section_p (symp)
-	|| symbol_used_in_reloc_p (symp))
+    if (!symbol_removed_p (symp)
+	&& (bfd_keep_unused_section_symbols (stdoutput)
+	    || !symbol_section_p (symp)
+	    || symbol_used_in_reloc_p (symp)))
       nsyms++;
 
   if (nsyms)
@@ -1768,9 +1803,10 @@ set_symtab (void)
       asympp = (asymbol **) bfd_alloc (stdoutput, amt);
       symp = symbol_rootP;
       for (i = 0; i < nsyms; symp = symbol_next (symp))
-	if (bfd_keep_unused_section_symbols (stdoutput)
-	    || !symbol_section_p (symp)
-	    || symbol_used_in_reloc_p (symp))
+	if (!symbol_removed_p (symp)
+	    && (bfd_keep_unused_section_symbols (stdoutput)
+		|| !symbol_section_p (symp)
+		|| symbol_used_in_reloc_p (symp)))
 	  {
 	    asympp[i] = symbol_get_bfdsym (symp);
 	    if (asympp[i]->flags != BSF_SECTION_SYM

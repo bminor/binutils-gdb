@@ -1,3 +1,5 @@
+.arch armv8-a+lor
+
 /* Read from system registers.  */
 mrs x0, lorc_el1
 mrs x0, lorea_el1

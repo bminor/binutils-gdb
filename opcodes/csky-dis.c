@@ -1,5 +1,5 @@
 /* C-SKY disassembler.
-   Copyright (C) 1988-2021 Free Software Foundation, Inc.
+   Copyright (C) 1988-2022 Free Software Foundation, Inc.
    Contributed by C-SKY Microsystems and Mentor Graphics.
 
    This file is part of the GNU opcodes library.
@@ -565,7 +565,7 @@ csky_output_operand (char *str, struct operand const *oprnd,
 				      ? &floatformat_ieee_double_big
 				      : &floatformat_ieee_double_little),
 				     ibytes, &f);
-	    sprintf (buf, "%f", f);
+	    sprintf (buf, "%.7g", f);
 	  }
 	else
 	  {
@@ -645,7 +645,7 @@ csky_output_operand (char *str, struct operand const *oprnd,
 	floatformat_to_double (&floatformat_ieee_double_little, valbytes,
 			       &fvalue);
 
-	sprintf (buf, "%f", fvalue);
+	sprintf (buf, "%.7g", fvalue);
 	strcat (str, buf);
 	break;
       }
@@ -673,7 +673,7 @@ csky_output_operand (char *str, struct operand const *oprnd,
 
 	float f = 0;
 	memcpy (&f, &value, sizeof (float));
-	sprintf (buf, "%f\t// imm9:%4d, imm4:%2d", f, imm8, imm4);
+	sprintf (buf, "%.7g\t// imm9:%4d, imm4:%2d", f, imm8, imm4);
 	strcat (str, buf);
 
 	break;
@@ -702,7 +702,7 @@ csky_output_operand (char *str, struct operand const *oprnd,
 	  }
 	double d = 0;
 	memcpy (&d, &dvalue, sizeof (double));
-	sprintf (buf, "%lf\t// imm9:%4ld, imm4:%2ld", d, (long) imm8, (long) imm4);
+	sprintf (buf, "%.7g\t// imm9:%4ld, imm4:%2ld", d, (long) imm8, (long) imm4);
 	strcat (str, buf);
 
 	break;

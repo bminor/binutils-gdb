@@ -1,5 +1,5 @@
 /* BFD back-end for IBM RS/6000 "XCOFF" files.
-   Copyright (C) 1990-2021 Free Software Foundation, Inc.
+   Copyright (C) 1990-2022 Free Software Foundation, Inc.
    Written by Metin G. Ozisik, Mimi Phuong-Thao Vo, and John Gilmore.
    Archive support from Damon A. Permezel.
    Contributed by IBM Corporation and Cygnus Support.
@@ -386,7 +386,7 @@ _bfd_xcoff_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
   else
     {
       sec = coff_section_from_bfd_index (ibfd, ix->sntoc);
-      if (sec == NULL)
+      if (sec == NULL || sec->output_section == NULL)
 	ox->sntoc = 0;
       else
 	ox->sntoc = sec->output_section->target_index;
@@ -396,7 +396,7 @@ _bfd_xcoff_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
   else
     {
       sec = coff_section_from_bfd_index (ibfd, ix->snentry);
-      if (sec == NULL)
+      if (sec == NULL || sec->output_section == NULL)
 	ox->snentry = 0;
       else
 	ox->snentry = sec->output_section->target_index;
@@ -489,12 +489,13 @@ _bfd_xcoff_swap_aux_in (bfd *abfd, void * ext1, int type ATTRIBUTE_UNUSED,
     case C_FILE:
       if (ext->x_file.x_n.x_fname[0] == 0)
 	{
-	  in->x_file.x_n.x_zeroes = 0;
-	  in->x_file.x_n.x_offset =
+	  in->x_file.x_n.x_n.x_zeroes = 0;
+	  in->x_file.x_n.x_n.x_offset =
 	    H_GET_32 (abfd, ext->x_file.x_n.x_n.x_offset);
 	}
       else
-	memcpy (in->x_file.x_fname, ext->x_file.x_n.x_fname, FILNMLEN);
+	memcpy (in->x_file.x_n.x_fname, ext->x_file.x_n.x_fname, FILNMLEN);
+      in->x_file.x_ftype = H_GET_8 (abfd, ext->x_file.x_ftype);
       break;
 
       /* RS/6000 "csect" auxents.
@@ -573,14 +574,15 @@ _bfd_xcoff_swap_aux_out (bfd *abfd, void * inp, int type ATTRIBUTE_UNUSED,
       break;
 
     case C_FILE:
-      if (in->x_file.x_fname[0] == 0)
+      if (in->x_file.x_n.x_fname[0] == 0)
 	{
 	  H_PUT_32 (abfd, 0, ext->x_file.x_n.x_n.x_zeroes);
-	  H_PUT_32 (abfd, in->x_file.x_n.x_offset,
+	  H_PUT_32 (abfd, in->x_file.x_n.x_n.x_offset,
 		    ext->x_file.x_n.x_n.x_offset);
 	}
       else
-	memcpy (ext->x_file.x_n.x_fname, in->x_file.x_fname, FILNMLEN);
+	memcpy (ext->x_file.x_n.x_fname, in->x_file.x_n.x_fname, FILNMLEN);
+      H_PUT_8 (abfd, in->x_file.x_ftype, ext->x_file.x_ftype);
       break;
 
       /* RS/6000 "csect" auxents */
@@ -1104,7 +1106,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,			/* special_function */
-	 "R_TLSM",		/* name */
+	 "R_TLSML",		/* name */
 	 true,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
@@ -1669,6 +1671,10 @@ _bfd_xcoff_read_ar_hdr (bfd *abfd)
       ret->filename = (char *) hdrp + SIZEOF_AR_HDR_BIG;
     }
 
+  /* Size occupied by the header above that covered in the fixed
+     SIZEOF_AR_HDR or SIZEOF_AR_HDR_BIG.  */
+  ret->extra_size = namlen + (namlen & 1) + SXCOFFARFMAG;
+
   /* Skip over the XCOFFARFMAG at the end of the file name.  */
   if (bfd_seek (abfd, (file_ptr) ((namlen & 1) + SXCOFFARFMAG), SEEK_CUR) != 0)
     return NULL;
@@ -1682,6 +1688,7 @@ bfd *
 _bfd_xcoff_openr_next_archived_file (bfd *archive, bfd *last_file)
 {
   file_ptr filestart;
+  file_ptr laststart, lastend;
 
   if (xcoff_ardata (archive) == NULL)
     {
@@ -1692,9 +1699,27 @@ _bfd_xcoff_openr_next_archived_file (bfd *archive, bfd *last_file)
   if (! xcoff_big_format_p (archive))
     {
       if (last_file == NULL)
-	filestart = bfd_ardata (archive)->first_file_filepos;
+	{
+	  filestart = bfd_ardata (archive)->first_file_filepos;
+	  laststart = 0;
+	  lastend = SIZEOF_AR_FILE_HDR;
+	}
       else
-	GET_VALUE_IN_FIELD (filestart, arch_xhdr (last_file)->nextoff, 10);
+	{
+	  struct areltdata *arel = arch_eltdata (last_file);
+
+	  GET_VALUE_IN_FIELD (filestart, arch_xhdr (last_file)->nextoff, 10);
+	  laststart = last_file->proxy_origin;
+	  lastend = laststart + arel->parsed_size;
+	  laststart -= SIZEOF_AR_HDR + arel->extra_size;
+	}
+
+      /* Sanity check that we aren't pointing into the previous element.  */
+      if (filestart != 0 && filestart >= laststart && filestart < lastend)
+	{
+	  bfd_set_error (bfd_error_malformed_archive);
+	  return NULL;
+	}
 
       if (filestart == 0
 	  || EQ_VALUE_IN_FIELD (filestart, xcoff_ardata (archive)->memoff, 10)
@@ -1707,9 +1732,27 @@ _bfd_xcoff_openr_next_archived_file (bfd *archive, bfd *last_file)
   else
     {
       if (last_file == NULL)
-	filestart = bfd_ardata (archive)->first_file_filepos;
+	{
+	  filestart = bfd_ardata (archive)->first_file_filepos;
+	  laststart = 0;
+	  lastend = SIZEOF_AR_FILE_HDR_BIG;
+	}
       else
-	GET_VALUE_IN_FIELD (filestart, arch_xhdr_big (last_file)->nextoff, 10);
+	{
+	  struct areltdata *arel = arch_eltdata (last_file);
+
+	  GET_VALUE_IN_FIELD (filestart, arch_xhdr_big (last_file)->nextoff, 10);
+	  laststart = last_file->proxy_origin;
+	  lastend = laststart + arel->parsed_size;
+	  laststart -= SIZEOF_AR_HDR_BIG + arel->extra_size;
+	}
+
+      /* Sanity check that we aren't pointing into the previous element.  */
+      if (filestart != 0 && filestart >= laststart && filestart < lastend)
+	{
+	  bfd_set_error (bfd_error_malformed_archive);
+	  return NULL;
+	}
 
       if (filestart == 0
 	  || EQ_VALUE_IN_FIELD (filestart, xcoff_ardata_big (archive)->memoff, 10)
@@ -1720,7 +1763,7 @@ _bfd_xcoff_openr_next_archived_file (bfd *archive, bfd *last_file)
 	}
     }
 
-  return _bfd_get_elt_at_filepos (archive, filestart);
+  return _bfd_get_elt_at_filepos (archive, filestart, NULL);
 }
 
 /* Stat an element in an XCOFF archive.  */
@@ -3193,27 +3236,19 @@ xcoff_reloc_type_tls (bfd *input_bfd ATTRIBUTE_UNUSED,
 
   h = obj_xcoff_sym_hashes (input_bfd)[rel->r_symndx];
 
-  /* FIXME: R_TLSML is targeting a internal TOC symbol, which will
-     make the following checks failing. It should be moved with
-     R_TLSM bellow once it works.  */
+  /* R_TLSML is handled by the loader but must be from a
+     TOC entry targeting itslef.  This is already verified in
+     xcoff_link_add_symbols.
+     The value must be 0.  */
   if (howto->type == R_TLSML)
     {
       *relocation = 0;
       return true;
     }
 
-  /* FIXME: h is sometimes null, if the TLS symbol is not exported.  */
-  if (!h)
-    {
-      char vaddr_buf[128];
-
-      sprintf_vma (vaddr_buf, rel->r_vaddr);
-      _bfd_error_handler
-	(_("%pB: TLS relocation at 0x%s over internal symbols (C_HIDEXT) not yet possible\n"),
-	 input_bfd, vaddr_buf);
-      return false;
-    }
-
+  /* The target symbol should always be available even if it's not
+     exported.  */
+  BFD_ASSERT (h != NULL);
 
   /* TLS relocations must target a TLS symbol.  */
   if (h->smclas != XMC_TL && h->smclas != XMC_UL)
@@ -3243,9 +3278,8 @@ xcoff_reloc_type_tls (bfd *input_bfd ATTRIBUTE_UNUSED,
       return false;
     }
 
-  /* R_TLSM and R_TLSML are relocations used by the loader.
-     The value must be 0.
-     FIXME: move R_TLSML here.  */
+  /* R_TLSM are relocations used by the loader.
+     The value must be 0.  */
   if (howto->type == R_TLSM)
     {
       *relocation = 0;
@@ -3578,10 +3612,10 @@ xcoff_complain_overflow_unsigned_func (bfd *input_bfd,
    R_TLS_LE:
    Thread-local storage relocation using local-exec model.
 
-   R_TLS:
+   R_TLSM:
    Tread-local storage relocation used by the loader.
 
-   R_TLSM:
+   R_TLSML:
    Tread-local storage relocation used by the loader.
 
    R_TOCU:

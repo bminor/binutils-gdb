@@ -1,6 +1,6 @@
 /* Target-dependent code for AMD64.
 
-   Copyright (C) 2001-2021 Free Software Foundation, Inc.
+   Copyright (C) 2001-2022 Free Software Foundation, Inc.
 
    Contributed by Jiri Smid, SuSE Labs.
 
@@ -247,7 +247,7 @@ static const int amd64_dwarf_regmap_len =
 static int
 amd64_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   int ymm0_regnum = tdep->ymm0_regnum;
   int regnum = -1;
 
@@ -331,7 +331,7 @@ static const char * const amd64_dword_names[] =
 static const char *
 amd64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   if (i386_byte_regnum_p (gdbarch, regnum))
     return amd64_byte_names[regnum - tdep->al_regnum];
   else if (i386_zmm_regnum_p (gdbarch, regnum))
@@ -353,12 +353,12 @@ amd64_pseudo_register_read_value (struct gdbarch *gdbarch,
 				  readable_regcache *regcache,
 				  int regnum)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   value *result_value = allocate_value (register_type (gdbarch, regnum));
   VALUE_LVAL (result_value) = lval_register;
   VALUE_REGNUM (result_value) = regnum;
-  gdb_byte *buf = value_contents_raw (result_value);
+  gdb_byte *buf = value_contents_raw (result_value).data ();
 
   if (i386_byte_regnum_p (gdbarch, regnum))
     {
@@ -413,7 +413,7 @@ amd64_pseudo_register_write (struct gdbarch *gdbarch,
 			     struct regcache *regcache,
 			     int regnum, const gdb_byte *buf)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (i386_byte_regnum_p (gdbarch, regnum))
     {
@@ -465,7 +465,7 @@ static int
 amd64_ax_pseudo_register_collect (struct gdbarch *gdbarch,
 				  struct agent_expr *ax, int regnum)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (i386_byte_regnum_p (gdbarch, regnum))
     {
@@ -553,7 +553,6 @@ amd64_has_unaligned_fields (struct type *type)
       for (int i = 0; i < type->num_fields (); i++)
 	{
 	  struct type *subtype = check_typedef (type->field (i).type ());
-	  int bitpos = TYPE_FIELD_BITPOS (type, i);
 
 	  /* Ignore static fields, empty fields (for example nested
 	     empty structures), and bitfields (these are handled by
@@ -563,6 +562,8 @@ amd64_has_unaligned_fields (struct type *type)
 		  && TYPE_LENGTH (subtype) == 0)
 	      || TYPE_FIELD_PACKED (type, i))
 	    continue;
+
+	  int bitpos = type->field (i).loc_bitpos ();
 
 	  if (bitpos % 8 != 0)
 	    return true;
@@ -592,20 +593,20 @@ amd64_classify_aggregate_field (struct type *type, int i,
 				unsigned int bitoffset)
 {
   struct type *subtype = check_typedef (type->field (i).type ());
-  int bitpos = bitoffset + TYPE_FIELD_BITPOS (type, i);
-  int pos = bitpos / 64;
   enum amd64_reg_class subclass[2];
   int bitsize = TYPE_FIELD_BITSIZE (type, i);
-  int endpos;
 
   if (bitsize == 0)
     bitsize = TYPE_LENGTH (subtype) * 8;
-  endpos = (bitpos + bitsize - 1) / 64;
 
   /* Ignore static fields, or empty fields, for example nested
      empty structures.*/
   if (field_is_static (&type->field (i)) || bitsize == 0)
     return;
+
+  int bitpos = bitoffset + type->field (i).loc_bitpos ();
+  int pos = bitpos / 64;
+  int endpos = (bitpos + bitsize - 1) / 64;
 
   if (subtype->code () == TYPE_CODE_STRUCT
       || subtype->code () == TYPE_CODE_UNION)
@@ -655,9 +656,19 @@ amd64_classify_aggregate_field (struct type *type, int i,
 static void
 amd64_classify_aggregate (struct type *type, enum amd64_reg_class theclass[2])
 {
-  /* 1. If the size of an object is larger than two eightbytes, or it has
-	unaligned fields, it has class memory.  */
-  if (TYPE_LENGTH (type) > 16 || amd64_has_unaligned_fields (type))
+  /* 1. If the size of an object is larger than two times eight bytes, or
+	it is a non-trivial C++ object, or it has unaligned fields, then it
+	has class memory.
+
+	It is important that the trivially_copyable check is before the
+	unaligned fields check, as C++ classes with virtual base classes
+	will have fields (for the virtual base classes) with non-constant
+	loc_bitpos attributes, which will cause an assert to trigger within
+	the unaligned field check.  As classes with virtual bases are not
+	trivially copyable, checking that first avoids this problem.  */
+  if (TYPE_LENGTH (type) > 16
+      || !language_pass_by_reference (type).trivially_copyable
+      || amd64_has_unaligned_fields (type))
     {
       theclass[0] = theclass[1] = AMD64_MEMORY;
       return;
@@ -728,10 +739,10 @@ amd64_classify (struct type *type, enum amd64_reg_class theclass[2])
       && (len == 1 || len == 2 || len == 4 || len == 8))
     theclass[0] = AMD64_INTEGER;
 
-  /* Arguments of types float, double, _Decimal32, _Decimal64 and __m64
-     are in class SSE.  */
+  /* Arguments of types _Float16, float, double, _Decimal32, _Decimal64 and
+     __m64 are in class SSE.  */
   else if ((code == TYPE_CODE_FLT || code == TYPE_CODE_DECFLOAT)
-	   && (len == 4 || len == 8))
+	   && (len == 2 || len == 4 || len == 8))
     /* FIXME: __m64 .  */
     theclass[0] = AMD64_SSE;
 
@@ -749,8 +760,8 @@ amd64_classify (struct type *type, enum amd64_reg_class theclass[2])
     /* Class X87 and X87UP.  */
     theclass[0] = AMD64_X87, theclass[1] = AMD64_X87UP;
 
-  /* Arguments of complex T where T is one of the types float or
-     double get treated as if they are implemented as:
+  /* Arguments of complex T - where T is one of the types _Float16, float or
+     double - get treated as if they are implemented as:
 
      struct complexT {
        T real;
@@ -758,7 +769,7 @@ amd64_classify (struct type *type, enum amd64_reg_class theclass[2])
      };
 
   */
-  else if (code == TYPE_CODE_COMPLEX && len == 8)
+  else if (code == TYPE_CODE_COMPLEX && (len == 8 || len == 4))
     theclass[0] = AMD64_SSE;
   else if (code == TYPE_CODE_COMPLEX && len == 16)
     theclass[0] = theclass[1] = AMD64_SSE;
@@ -976,7 +987,7 @@ if (return_method == return_method_struct)
       else
 	{
 	  /* The argument will be passed in registers.  */
-	  const gdb_byte *valbuf = value_contents (args[i]);
+	  const gdb_byte *valbuf = value_contents (args[i]).data ();
 	  gdb_byte buf[8];
 
 	  gdb_assert (len <= 16);
@@ -1028,7 +1039,7 @@ if (return_method == return_method_struct)
   for (i = 0; i < num_stack_args; i++)
     {
       struct type *type = value_type (stack_args[i]);
-      const gdb_byte *valbuf = value_contents (stack_args[i]);
+      const gdb_byte *valbuf = value_contents (stack_args[i]).data ();
       int len = TYPE_LENGTH (type);
 
       write_memory (sp + element * 8, valbuf, len);
@@ -2463,8 +2474,8 @@ amd64_skip_xmm_prologue (CORE_ADDR pc, CORE_ADDR start_pc)
 
   start_pc_sal = find_pc_sect_line (start_pc, NULL, 0);
   if (start_pc_sal.symtab == NULL
-      || producer_is_gcc_ge_4 (COMPUNIT_PRODUCER
-	   (SYMTAB_COMPUNIT (start_pc_sal.symtab))) < 6
+      || producer_is_gcc_ge_4 (start_pc_sal.symtab->compunit ()
+			       ->producer ()) < 6
       || start_pc_sal.pc != start_pc || pc >= start_pc_sal.end)
     return pc;
 
@@ -2534,9 +2545,9 @@ amd64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 	 compilers to emit usable line notes.  */
       if (post_prologue_pc
 	  && (cust != NULL
-	      && COMPUNIT_PRODUCER (cust) != NULL
-	      && (producer_is_llvm (COMPUNIT_PRODUCER (cust))
-	      || producer_is_icc_ge_19 (COMPUNIT_PRODUCER (cust)))))
+	      && cust->producer () != nullptr
+	      && (producer_is_llvm (cust->producer ())
+	      || producer_is_icc_ge_19 (cust->producer ()))))
         return std::max (start_pc, post_prologue_pc);
     }
 
@@ -2738,7 +2749,7 @@ static struct amd64_frame_cache *
 amd64_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct amd64_frame_cache *cache;
   CORE_ADDR addr;
@@ -2820,7 +2831,8 @@ amd64_sigtramp_frame_sniffer (const struct frame_unwind *self,
 			      struct frame_info *this_frame,
 			      void **this_cache)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (this_frame));
+  gdbarch *arch = get_frame_arch (this_frame);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (arch);
 
   /* We shouldn't even bother if we don't have a sigcontext_addr
      handler.  */
@@ -2889,7 +2901,7 @@ amd64_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   struct compunit_symtab *cust;
 
   cust = find_pc_compunit_symtab (pc);
-  if (cust != NULL && COMPUNIT_EPILOGUE_UNWIND_VALID (cust))
+  if (cust != NULL && cust->epilogue_unwind_valid ())
     return 0;
 
   if (target_read_memory (pc, &insn, 1))
@@ -3020,7 +3032,7 @@ amd64_supply_fpregset (const struct regset *regset, struct regcache *regcache,
 		       int regnum, const void *fpregs, size_t len)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  const i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   gdb_assert (len >= tdep->sizeof_fpregset);
   amd64_supply_fxsave (regcache, regnum, fpregs);
@@ -3037,7 +3049,7 @@ amd64_collect_fpregset (const struct regset *regset,
 			int regnum, void *fpregs, size_t len)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  const i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   gdb_assert (len >= tdep->sizeof_fpregset);
   amd64_collect_fxsave (regcache, regnum, fpregs);
@@ -3061,7 +3073,8 @@ amd64_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
   gdb_byte buf[8];
   CORE_ADDR jb_addr;
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  int jb_pc_offset = gdbarch_tdep (gdbarch)->jb_pc_offset;
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  int jb_pc_offset = tdep->jb_pc_offset;
   int len = TYPE_LENGTH (builtin_type (gdbarch)->builtin_func_ptr);
 
   /* If JB_PC_OFFSET is -1, we have no way to find out where the
@@ -3104,7 +3117,7 @@ void
 amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
 		const target_desc *default_tdesc)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   const struct target_desc *tdesc = info.target_desc;
   static const char *const stap_integer_prefixes[] = { "$", NULL };
   static const char *const stap_register_prefixes[] = { "%", NULL };
@@ -3283,7 +3296,7 @@ amd64_none_init_abi (gdbarch_info info, gdbarch *arch)
 static struct type *
 amd64_x32_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   switch (regnum - tdep->eax_regnum)
     {
@@ -3301,7 +3314,7 @@ void
 amd64_x32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
 		    const target_desc *default_tdesc)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   amd64_init_abi (info, gdbarch, default_tdesc);
 
@@ -3371,7 +3384,7 @@ amd64_supply_fxsave (struct regcache *regcache, int regnum,
 		     const void *fxsave)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   i387_supply_fxsave (regcache, regnum, fxsave);
 
@@ -3394,7 +3407,7 @@ amd64_supply_xsave (struct regcache *regcache, int regnum,
 		    const void *xsave)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   i387_supply_xsave (regcache, regnum, xsave);
 
@@ -3429,7 +3442,7 @@ amd64_collect_fxsave (const struct regcache *regcache, int regnum,
 		      void *fxsave)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   gdb_byte *regs = (gdb_byte *) fxsave;
 
   i387_collect_fxsave (regcache, regnum, fxsave);
@@ -3450,7 +3463,7 @@ amd64_collect_xsave (const struct regcache *regcache, int regnum,
 		     void *xsave, int gcore)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   gdb_byte *regs = (gdb_byte *) xsave;
 
   i387_collect_xsave (regcache, regnum, xsave, gcore);

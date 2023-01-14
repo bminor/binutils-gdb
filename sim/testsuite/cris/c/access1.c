@@ -1,5 +1,5 @@
 /* Check access(2) trivially.  Newlib doesn't have it.
-#notarget: cris*-*-elf
+#progos: linux
 */
 #include <unistd.h>
 #include <stdio.h>

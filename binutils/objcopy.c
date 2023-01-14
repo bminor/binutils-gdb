@@ -1,5 +1,5 @@
 /* objcopy.c -- copy object file from input to output, optionally massaging it.
-   Copyright (C) 1991-2021 Free Software Foundation, Inc.
+   Copyright (C) 1991-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -1542,6 +1542,14 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 	{
 	  char *new_name;
 
+	  if (name != NULL
+	      && name[0] == '_'
+	      && name[1] == '_'
+	      && strcmp (name + (name[2] == '_'), "__gnu_lto_slim") == 0)
+	    {
+	      fatal (_("redefining symbols does not work on LTO-compiled object files"));
+	    }
+	  
 	  new_name = (char *) lookup_sym_redefinition (name);
 	  if (new_name == name
 	      && (flags & BSF_SECTION_SYM) != 0)
@@ -1886,9 +1894,8 @@ static bool
 copy_unknown_object (bfd *ibfd, bfd *obfd)
 {
   char *cbuf;
-  int tocopy;
-  long ncopied;
-  long size;
+  bfd_size_type tocopy;
+  off_t size;
   struct stat buf;
 
   if (bfd_stat_arch_elt (ibfd, &buf) != 0)
@@ -1916,30 +1923,28 @@ copy_unknown_object (bfd *ibfd, bfd *obfd)
 	    bfd_get_archive_filename (ibfd), bfd_get_filename (obfd));
 
   cbuf = (char *) xmalloc (BUFSIZE);
-  ncopied = 0;
-  while (ncopied < size)
+  while (size != 0)
     {
-      tocopy = size - ncopied;
-      if (tocopy > BUFSIZE)
+      if (size > BUFSIZE)
 	tocopy = BUFSIZE;
+      else
+	tocopy = size;
 
-      if (bfd_bread (cbuf, (bfd_size_type) tocopy, ibfd)
-	  != (bfd_size_type) tocopy)
+      if (bfd_bread (cbuf, tocopy, ibfd) != tocopy)
 	{
 	  bfd_nonfatal_message (NULL, ibfd, NULL, NULL);
 	  free (cbuf);
 	  return false;
 	}
 
-      if (bfd_bwrite (cbuf, (bfd_size_type) tocopy, obfd)
-	  != (bfd_size_type) tocopy)
+      if (bfd_bwrite (cbuf, tocopy, obfd) != tocopy)
 	{
 	  bfd_nonfatal_message (NULL, obfd, NULL, NULL);
 	  free (cbuf);
 	  return false;
 	}
 
-      ncopied += tocopy;
+      size -= tocopy;
     }
 
   /* We should at least to be able to read it back when copying an
@@ -3600,6 +3605,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 
       if (preserve_dates)
 	{
+	  memset (&buf, 0, sizeof (buf));
 	  stat_status = bfd_stat_arch_elt (this_element, &buf);
 
 	  if (stat_status != 0)
@@ -4079,9 +4085,6 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
       goto loser;
     }
 
-  if (make_nobits)
-    elf_section_type (osection) = SHT_NOBITS;
-
   size = bfd_section_size (isection);
   size = bfd_convert_section_size (ibfd, isection, obfd, size);
   if (copy_byte >= 0)
@@ -4174,6 +4177,9 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
       err = _("failed to copy private data");
       goto loser;
     }
+
+  if (make_nobits)
+    elf_section_type (osection) = SHT_NOBITS;
 
   /* All went well.  */
   return;
@@ -4968,25 +4974,55 @@ set_pe_subsystem (const char *s)
 
 /* Convert EFI target to PEI target.  */
 
-static void
-convert_efi_target (char *efi)
+static int
+convert_efi_target (char **targ)
 {
-  efi[0] = 'p';
-  efi[1] = 'e';
-  efi[2] = 'i';
+  size_t len;
+  char *pei;
+  char *efi = *targ + 4;
+  int subsys = -1;
+
+  if (startswith (efi, "app-"))
+    subsys = IMAGE_SUBSYSTEM_EFI_APPLICATION;
+  else if (startswith (efi, "bsdrv-"))
+    {
+      subsys = IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER;
+      efi += 2;
+    }
+  else if (startswith (efi, "rtdrv-"))
+    {
+      subsys = IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER;
+      efi += 2;
+    }
+  else
+    return subsys;
+
+  len = strlen (efi);
+  pei = xmalloc (len + sizeof ("-little"));
+  memcpy (pei, efi, len + 1);
+  pei[0] = 'p';
+  pei[1] = 'e';
+  pei[2] = 'i';
 
   if (strcmp (efi + 4, "ia32") == 0)
     {
       /* Change ia32 to i386.  */
-      efi[5]= '3';
-      efi[6]= '8';
-      efi[7]= '6';
+      pei[5]= '3';
+      pei[6]= '8';
+      pei[7]= '6';
     }
   else if (strcmp (efi + 4, "x86_64") == 0)
     {
       /* Change x86_64 to x86-64.  */
-      efi[7] = '-';
+      pei[7] = '-';
     }
+  else if (strcmp (efi + 4, "aarch64") == 0)
+    {
+      /* Change aarch64 to aarch64-little.  */
+      memcpy (pei + 4 + sizeof ("aarch64") - 1, "-little", sizeof ("-little"));
+    }
+  *targ = pei;
+  return subsys;
 }
 
 /* Allocate and return a pointer to a struct section_add, initializing the
@@ -5869,53 +5905,24 @@ copy_main (int argc, char *argv[])
   if (input_target != NULL
       && startswith (input_target, "efi-"))
     {
-      char *efi;
-
-      efi = xstrdup (output_target + 4);
-      if (startswith (efi, "bsdrv-")
-	  || startswith (efi, "rtdrv-"))
-	efi += 2;
-      else if (!startswith (efi, "app-"))
+      if (convert_efi_target (&input_target) < 0)
 	fatal (_("unknown input EFI target: %s"), input_target);
-
-      input_target = efi;
-      convert_efi_target (efi);
     }
 
   /* Convert output EFI target to PEI target.  */
   if (output_target != NULL
       && startswith (output_target, "efi-"))
     {
-      char *efi;
+      int subsys = convert_efi_target (&output_target);
 
-      efi = xstrdup (output_target + 4);
-      if (startswith (efi, "app-"))
-	{
-	  if (pe_subsystem == -1)
-	    pe_subsystem = IMAGE_SUBSYSTEM_EFI_APPLICATION;
-	}
-      else if (startswith (efi, "bsdrv-"))
-	{
-	  if (pe_subsystem == -1)
-	    pe_subsystem = IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER;
-	  efi += 2;
-	}
-      else if (startswith (efi, "rtdrv-"))
-	{
-	  if (pe_subsystem == -1)
-	    pe_subsystem = IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER;
-	  efi += 2;
-	}
-      else
+      if (subsys < 0)
 	fatal (_("unknown output EFI target: %s"), output_target);
-
+      if (pe_subsystem == -1)
+	pe_subsystem = subsys;
       if (pe_file_alignment == (bfd_vma) -1)
 	pe_file_alignment = PE_DEF_FILE_ALIGNMENT;
       if (pe_section_alignment == (bfd_vma) -1)
 	pe_section_alignment = PE_DEF_SECTION_ALIGNMENT;
-
-      output_target = efi;
-      convert_efi_target (efi);
     }
 
   /* If there is no destination file, or the source and destination files

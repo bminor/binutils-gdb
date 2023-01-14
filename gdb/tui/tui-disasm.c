@@ -1,6 +1,6 @@
 /* Disassembly display.
 
-   Copyright (C) 1998-2021 Free Software Foundation, Inc.
+   Copyright (C) 1998-2022 Free Software Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -130,14 +130,12 @@ tui_disassemble (struct gdbarch *gdbarch,
 	}
 
       /* Capture the disassembled instruction.  */
-      tal.insn = std::move (gdb_dis_out.string ());
-      gdb_dis_out.clear ();
+      tal.insn = gdb_dis_out.release ();
 
       /* And capture the address the instruction is at.  */
       tal.addr = orig_pc;
       print_address (gdbarch, orig_pc, &gdb_dis_out);
-      tal.addr_string = std::move (gdb_dis_out.string ());
-      gdb_dis_out.clear ();
+      tal.addr_string = gdb_dis_out.release ();
 
       if (addr_size != nullptr)
 	{

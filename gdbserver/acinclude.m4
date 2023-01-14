@@ -7,6 +7,9 @@ dnl system search paths.
 dnl gdb/gdbserver/configure.in uses BFD_HAVE_SYS_PROCFS_TYPE.
 m4_include(../bfd/bfd.m4)
 
+# This get AM_GDB_COMPILER_TYPE.
+m4_include(../gdbsupport/compiler-type.m4)
+
 dnl This gets AM_GDB_WARNINGS.
 m4_include(../gdbsupport/warning.m4)
 

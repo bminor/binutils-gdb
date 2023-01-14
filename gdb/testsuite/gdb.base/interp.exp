@@ -1,4 +1,4 @@
-# Copyright 2004-2021 Free Software Foundation, Inc.
+# Copyright 2004-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,10 +22,9 @@ if { [prepare_for_testing "failed to prepare" ${testfile} $srcfile {debug}] } {
 }
 
 # Do not use gdb_test for this test, since it has two prompts.
-set cmd "interpreter-exec mi \"-var-update *\""
-gdb_test_multiple $cmd $cmd {
+gdb_test_multiple "interpreter-exec mi \"-var-update *\"" "" {
     -re "\\^done,changelist=\\\[\\\]\r\n$gdb_prompt " {
-	pass "$cmd"
+	pass $gdb_test_name
 	gdb_expect 1 {
 	    -re "\r\n$gdb_prompt $" { }
 	}
@@ -37,47 +36,43 @@ gdb_test "interpreter-exec console \"show version\"" "GNU gdb .*"
 gdb_test_multiple "interpreter-exec mi \"-break-insert --thread a\"" \
     "regression test for mi_parse crash" {
 	-re ".error,msg=.Invalid value for the '--thread' option.\r\n$gdb_prompt " {
-	    pass "$cmd"
+	    pass $gdb_test_name
 	    gdb_expect 1 {
 		-re "\r\n$gdb_prompt $" { }
 	    }
 	}
     }
 
-set cmd "interpreter-exec mi \"-stack-info-frame\""
-gdb_test_multiple $cmd $cmd {
+gdb_test_multiple "interpreter-exec mi \"-stack-info-frame\"" "" {
     -re ".error,msg=.No registers\..\r\n$gdb_prompt " {
-	pass "$cmd"
+	pass $gdb_test_name
 	gdb_expect 1 {
 	    -re "\r\n$gdb_prompt $" { }
 	}
     }
 }
 
-set cmd "interpreter-exec mi1 \"-break-insert main\""
-gdb_test_multiple $cmd $cmd {
+gdb_test_multiple "interpreter-exec mi1 \"-break-insert main\"" "" {
     -re ".done.bkpt=.number=.\[0-9\]\[^\n\]+\r\n$gdb_prompt " {
-	pass "$cmd"
+	pass $gdb_test_name
 	gdb_expect 1 {
 	    -re "\r\n$gdb_prompt $" { }
 	}
     }
 }
 
-set cmd "interpreter-exec mi2 \"-break-insert main\""
-gdb_test_multiple $cmd $cmd {
+gdb_test_multiple "interpreter-exec mi2 \"-break-insert main\"" "" {
     -re ".done.bkpt=.number=.\[0-9\]\[^\n\]+\r\n$gdb_prompt " {
-	pass "$cmd"
+	pass $gdb_test_name
 	gdb_expect 1 {
 	    -re "\r\n$gdb_prompt $" { }
 	}
     }
 }
 
-set cmd "interpreter-exec mi3 \"-break-insert main\""
-gdb_test_multiple $cmd $cmd {
+gdb_test_multiple "interpreter-exec mi3 \"-break-insert main\"" "" {
     -re ".done.bkpt=.number=.\[0-9\]\[^\n\]+\r\n$gdb_prompt " {
-	pass "$cmd"
+	pass $gdb_test_name
 	gdb_expect 1 {
 	    -re "\r\n$gdb_prompt $" { }
 	}
@@ -85,7 +80,6 @@ gdb_test_multiple $cmd $cmd {
 }
 
 if ![runto_main] then {
-  fail "run to main"
   return -1
 }
 

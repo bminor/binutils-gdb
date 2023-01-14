@@ -40,8 +40,8 @@ new_filter(const char *filt,
   while (strlen(filt) > 0) {
     filter *new_filter;
     /* break up the filt list */
-    char *end = strchr(filt, ',');
-    char *next;
+    const char *end = strchr(filt, ',');
+    const char *next;
     int len;
     if (end == NULL) {
       end = strchr(filt, '\0');
@@ -71,8 +71,8 @@ is_filtered_out(const char *flags,
     int present;
     filter *filt = filters;
     /* break the string up */
-    char *end = strchr(flags, ',');
-    char *next;
+    const char *end = strchr(flags, ',');
+    const char *next;
     int len;
     if (end == NULL) {
       end = strchr(flags, '\0');

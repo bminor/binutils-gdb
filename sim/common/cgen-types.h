@@ -1,5 +1,5 @@
 /* Types for Cpu tools GENerated simulators.
-   Copyright (C) 1996-2021 Free Software Foundation, Inc.
+   Copyright (C) 1996-2022 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -57,17 +57,19 @@ typedef enum mode_type {
 extern const char * const cgen_mode_names[];
 #define MODE_NAME(m) (cgen_mode_names[m])
 
+/* Some system headers define VOID already, so undo it.  */
+#undef VOID
 typedef void VOID;
 typedef unsigned char BI;
-typedef signed8 QI;
-typedef signed16 HI;
-typedef signed32 SI;
-typedef unsigned8 UQI;
-typedef unsigned16 UHI;
-typedef unsigned32 USI;
+typedef int8_t QI;
+typedef int16_t HI;
+typedef int32_t SI;
+typedef uint8_t UQI;
+typedef uint16_t UHI;
+typedef uint32_t USI;
 
-typedef signed64 DI;
-typedef unsigned64 UDI;
+typedef int64_t DI;
+typedef uint64_t UDI;
 #define GETLODI(di) ((SI) (di))
 #define GETHIDI(di) ((SI) ((UDI) (di) >> 32))
 #define SETLODI(di, val) ((di) = (((di) & 0xffffffff00000000LL) | (val)))

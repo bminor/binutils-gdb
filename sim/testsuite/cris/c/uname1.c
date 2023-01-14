@@ -1,5 +1,5 @@
 /* Check that the right machine name appears in the uname result.
-#notarget: *-*-elf
+#progos: linux
 */
 #include <sys/utsname.h>
 #include <stdio.h>

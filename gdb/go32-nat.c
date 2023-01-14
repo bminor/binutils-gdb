@@ -1,5 +1,5 @@
 /* Native debugging support for Intel x86 running DJGPP.
-   Copyright (C) 1997-2021 Free Software Foundation, Inc.
+   Copyright (C) 1997-2022 Free Software Foundation, Inc.
    Written by Robert Hoehne.
 
    This file is part of GDB.
@@ -511,24 +511,20 @@ go32_nat_target::wait (ptid_t ptid, struct target_waitstatus *status,
     chdir (current_directory);
 
   if (a_tss.tss_irqn == 0x21)
-    {
-      status->kind = TARGET_WAITKIND_EXITED;
-      status->value.integer = a_tss.tss_eax & 0xff;
-    }
+    status->set_exited (a_tss.tss_eax & 0xff);
   else
     {
-      status->value.sig = GDB_SIGNAL_UNKNOWN;
-      status->kind = TARGET_WAITKIND_STOPPED;
+      status->set_stopped (GDB_SIGNAL_UNKNOWN);
       for (i = 0; sig_map[i].go32_sig != -1; i++)
 	{
 	  if (a_tss.tss_irqn == sig_map[i].go32_sig)
 	    {
 #if __DJGPP_MINOR__ < 3
-	      if ((status->value.sig = sig_map[i].gdb_sig) !=
-		  GDB_SIGNAL_TRAP)
-		status->kind = TARGET_WAITKIND_SIGNALLED;
+	      status->set_stopped (sig_map[i].gdb_sig);
+	      if (status->sig () != GDB_SIGNAL_TRAP)
+		status->set_signalled (status->sig ());
 #else
-	      status->value.sig = sig_map[i].gdb_sig;
+	      status->set_stopped (sig_map[i].gdb_sig);
 #endif
 	      break;
 	    }
@@ -667,7 +663,7 @@ static cmdline_t child_cmd;	/* Parsed child's command line kept here.  */
 void
 go32_nat_target::files_info ()
 {
-  printf_unfiltered ("You are running a DJGPP V2 program.\n");
+  printf_filtered ("You are running a DJGPP V2 program.\n");
 }
 
 void
@@ -903,9 +899,9 @@ go32_nat_target::terminal_init ()
 void
 go32_nat_target::terminal_info (const char *args, int from_tty)
 {
-  printf_unfiltered ("Inferior's terminal is in %s mode.\n",
-		     !inf_mode_valid
-		     ? "default" : inf_terminal_mode ? "raw" : "cooked");
+  printf_filtered ("Inferior's terminal is in %s mode.\n",
+		   !inf_mode_valid
+		   ? "default" : inf_terminal_mode ? "raw" : "cooked");
 
 #if __DJGPP_MINOR__ > 2
   if (child_cmd.redirection)
@@ -915,15 +911,15 @@ go32_nat_target::terminal_info (const char *args, int from_tty)
       for (i = 0; i < DBG_HANDLES; i++)
 	{
 	  if (child_cmd.redirection[i]->file_name)
-	    printf_unfiltered ("\tFile handle %d is redirected to `%s'.\n",
-			       i, child_cmd.redirection[i]->file_name);
+	    printf_filtered ("\tFile handle %d is redirected to `%s'.\n",
+			     i, child_cmd.redirection[i]->file_name);
 	  else if (_get_dev_info (child_cmd.redirection[i]->inf_handle) == -1)
-	    printf_unfiltered
+	    printf_filtered
 	      ("\tFile handle %d appears to be closed by inferior.\n", i);
 	  /* Mask off the raw/cooked bit when comparing device info words.  */
 	  else if ((_get_dev_info (child_cmd.redirection[i]->inf_handle) & 0xdf)
 		   != (_get_dev_info (i) & 0xdf))
-	    printf_unfiltered
+	    printf_filtered
 	      ("\tFile handle %d appears to be redirected by inferior.\n", i);
 	}
     }

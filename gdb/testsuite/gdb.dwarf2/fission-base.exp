@@ -1,4 +1,4 @@
-# Copyright 2012-2021 Free Software Foundation, Inc.
+# Copyright 2012-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ set obj [standard_output_file "${testfile}.o"]
 set dwo [standard_output_file "${testfile}.dwo"]
 if [build_executable_and_dwo_files "$testfile.exp" "${binfile}" {nodebug} \
 	[list $srcfile \
-	     [list nodebug split-dwo additional_flags=-DDWO=$dwo] \
+	     [list nodebug split-dwo additional_flags=-DDWO=\"$dwo\"] \
 	     $obj]] {
     return -1
 }

@@ -1,6 +1,6 @@
 #as:
 #source: diag-parlabel.s
-#objdump: --ctf=.ctf
+#objdump: --ctf
 #ld: -shared --ctf-variables
 #name: Diagnostics - Non-zero parlabel in parent
 

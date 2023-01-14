@@ -1,7 +1,7 @@
-#name: PR ld/20830 (.plt.got)
+#name: PR ld/20830 x32 (.plt.got)
 #source: pr20830.s
 #as: --x32
-#ld: -melf32_x86_64 -shared -z relro --ld-generated-unwind-info --hash-style=sysv -z max-page-size=0x200000 -z noseparate-code
+#ld: -melf32_x86_64 -shared -z relro --ld-generated-unwind-info --hash-style=sysv -z max-page-size=0x200000 -z noseparate-code $NO_DT_RELR_LDFLAGS
 #objdump: -dw -Wf
 
 .*: +file format .*
@@ -49,12 +49,12 @@ Disassembly of section .plt:
 Disassembly of section .plt.got:
 
 0+130 <func@plt>:
- +[a-f0-9]+:	ff 25 c2 0e 20 00    	jmp    \*0x200ec2\(%rip\)        # 200ff8 <func>
+ +[a-f0-9]+:	ff 25 ea 00 20 00    	jmp    \*0x2000ea\(%rip\)        # 200220 <func>
  +[a-f0-9]+:	66 90                	xchg   %ax,%ax
 
 Disassembly of section .text:
 
 0+138 <foo>:
  +[a-f0-9]+:	e8 f3 ff ff ff       	call   130 <func@plt>
- +[a-f0-9]+:	48 8b 05 b4 0e 20 00 	mov    0x200eb4\(%rip\),%rax        # 200ff8 <func>
+ +[a-f0-9]+:	48 8b 05 dc 00 20 00 	mov    0x2000dc\(%rip\),%rax        # 200220 <func>
 #pass

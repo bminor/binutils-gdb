@@ -1,6 +1,6 @@
 /* UI_FILE - a generic STDIO like output stream.
 
-   Copyright (C) 1999-2021 Free Software Foundation, Inc.
+   Copyright (C) 1999-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,7 +21,7 @@
 
 #include "defs.h"
 #include "ui-file.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "gdbsupport/gdb_select.h"
 #include "gdbsupport/filestuff.h"
 #include "cli/cli-style.h"
@@ -47,13 +47,15 @@ ui_file::printf (const char *format, ...)
 void
 ui_file::putstr (const char *str, int quoter)
 {
-  fputstr_unfiltered (str, quoter, this);
+  while (*str)
+    printchar (*str++, quoter, false);
 }
 
 void
-ui_file::putstrn (const char *str, int n, int quoter)
+ui_file::putstrn (const char *str, int n, int quoter, bool async_safe)
 {
-  fputstrn_unfiltered (str, n, quoter, fputc_unfiltered, this);
+  for (int i = 0; i < n; i++)
+    printchar (str[i], quoter, async_safe);
 }
 
 int
@@ -66,6 +68,67 @@ void
 ui_file::vprintf (const char *format, va_list args)
 {
   vfprintf_unfiltered (this, format, args);
+}
+
+/* See ui-file.h.  */
+
+void
+ui_file::printchar (int c, int quoter, bool async_safe)
+{
+  char buf[4];
+  int out = 0;
+
+  c &= 0xFF;			/* Avoid sign bit follies */
+
+  if (c < 0x20			 /* Low control chars */
+      || (c >= 0x7F && c < 0xA0) /* DEL, High controls */
+      || (sevenbit_strings && c >= 0x80))
+    {				/* high order bit set */
+      buf[out++] = '\\';
+
+      switch (c)
+	{
+	case '\n':
+	  buf[out++] = 'n';
+	  break;
+	case '\b':
+	  buf[out++] = 'b';
+	  break;
+	case '\t':
+	  buf[out++] = 't';
+	  break;
+	case '\f':
+	  buf[out++] = 'f';
+	  break;
+	case '\r':
+	  buf[out++] = 'r';
+	  break;
+	case '\033':
+	  buf[out++] = 'e';
+	  break;
+	case '\007':
+	  buf[out++] = 'a';
+	  break;
+	default:
+	  {
+	    buf[out++] = '0' + ((c >> 6) & 0x7);
+	    buf[out++] = '0' + ((c >> 3) & 0x7);
+	    buf[out++] = '0' + ((c >> 0) & 0x7);
+	    break;
+	  }
+	}
+    }
+  else
+    {
+      if (quoter != 0 && (c == '\\' || c == quoter))
+	buf[out++] = '\\';
+      buf[out++] = c;
+    }
+
+  if (async_safe)
+    this->write_async_safe (buf, out);
+  else
+    this->write (buf, out);
 }
 
 

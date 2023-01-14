@@ -1,6 +1,6 @@
 // layout.cc -- lay out output file sections for gold
 
-// Copyright (C) 2006-2021 Free Software Foundation, Inc.
+// Copyright (C) 2006-2022 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -3245,7 +3245,8 @@ Layout::create_note(const char* name, int note_type,
   if (allocate)
     {
       flags = elfcpp::SHF_ALLOC;
-      order = ORDER_RO_NOTE;
+      order = (note_type == elfcpp::NT_GNU_PROPERTY_TYPE_0
+	       ?  ORDER_PROPERTY_NOTE : ORDER_RO_NOTE);
     }
   Output_section* os = this->choose_output_section(NULL, section_name,
 						   elfcpp::SHT_NOTE,

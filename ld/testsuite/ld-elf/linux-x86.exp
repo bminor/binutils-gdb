@@ -1,5 +1,5 @@
 # Expect script for simple native Linux/x86 tests.
-#   Copyright (C) 2018-2021 Free Software Foundation, Inc.
+#   Copyright (C) 2018-2022 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -184,6 +184,42 @@ run_ld_link_exec_tests [list \
 	"" \
 	"" \
 	"tmpdir/indirect-extern-access-2.so" \
+    ] \
+    [list \
+	"Run p_align-1a without PIE" \
+	"$NOPIE_LDFLAGS" \
+	"" \
+	{ p_align-1.c } \
+	"p_align-1a" \
+	"pass.out" \
+	"$NOPIE_CFLAGS" \
+    ] \
+    [list \
+	"Run p_align-1b with PIE" \
+	"-pie" \
+	"" \
+	{ p_align-1.c } \
+	"p_align-1b" \
+	"pass.out" \
+	"-fpie" \
+    ] \
+    [list \
+	"Run p_align-1c with -Wl,-z,max-page-size=0x1000 without PIE" \
+	"$NOPIE_LDFLAGS -Wl,-z,max-page-size=0x1000" \
+	"" \
+	{ p_align-1.c } \
+	"p_align-1c" \
+	"pass.out" \
+	"$NOPIE_CFLAGS" \
+    ] \
+    [list \
+	"Run p_align-1d with -Wl,-z,max-page-size=0x1000 with PIE" \
+	"-pie -Wl,-z,max-page-size=0x1000" \
+	"" \
+	{ p_align-1.c } \
+	"p_align-1d" \
+	"pass.out" \
+	"-fpie" \
     ] \
 ]
 

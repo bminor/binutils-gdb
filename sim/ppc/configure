@@ -621,10 +621,6 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
-sim_fpu
-sim_fpu_cflags
-sim_targ_vals
-sim_callback
 sim_devzero
 sim_termio
 sim_model_issue
@@ -649,9 +645,7 @@ sim_decode_mechanism
 sim_dup
 sim_switch
 sim_opcode
-sim_config
 sim_line_nr
-sim_warnings
 EGREP
 GREP
 CPP
@@ -707,7 +701,6 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 enable_sim_bitsize
-enable_sim_config
 enable_sim_decode_mechanism
 enable_sim_default_model
 enable_sim_duplicate
@@ -726,7 +719,6 @@ enable_sim_packages
 enable_sim_smp
 enable_sim_switch
 enable_sim_timebase
-enable_sim_warnings
 enable_sim_xor_endian
 '
       ac_precious_vars='build_alias
@@ -1346,7 +1338,6 @@ Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-sim-bitsize=n		Specify target bitsize (32 or 64).
-  --enable-sim-config=file		Override default config file
   --enable-sim-decode-mechanism=which		Specify the instruction decode mechanism.
   --enable-sim-default-model=which	Specify default PowerPC to model.
   --enable-sim-duplicate		Expand (duplicate) semantic functions.
@@ -1365,7 +1356,6 @@ Optional Features:
   --enable-sim-smp=n			Specify number of processors to configure for.
   --enable-sim-switch			Use a switch instead of a table for instruction call.
   --enable-sim-timebase			Specify whether the PPC timebase is supported.
-  --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings except for idecode.o, semantics.o and psim.o
   --enable-sim-xor-endian=n		Specify number bytes involved in PowerPC XOR bi-endian mode (default 8).
 
 Some influential environment variables:
@@ -2939,30 +2929,6 @@ else
 fi
 
 
-# Check whether --enable-sim-config was given.
-if test "${enable_sim_config+set}" = set; then :
-  enableval=$enable_sim_config; case "${enableval}" in
-  yes|no)	as_fn_error $? "\"No value supplied for --enable-sim-config=file\"" "$LINENO" 5;;
-  *)		if test -f "${srcdir}/${enableval}"; then
-		  sim_config="${enableval}";
-		elif test -f "${srcdir}/${enableval}-config.h"; then
-		  sim_config="${enableval}-config.h"
-		else
-		  as_fn_error $? "\"Config file $enableval was not found\"" "$LINENO" 5;
-		  sim_config=std-config.h
-		fi;;
-esac
-if test x"$silent" != x"yes" && test x"$sim_config" != x""; then
-  echo "Setting config flags = $sim_config" 6>&1
-fi
-else
-  sim_config="std-config.h"
-if test x"$silent" != x"yes"; then
-  echo "Setting config flags = $sim_config" 6>&1
-fi
-fi
-
-
 # Check whether --enable-sim-decode-mechanism was given.
 if test "${enable_sim_decode_mechanism+set}" = set; then :
   enableval=$enable_sim_decode_mechanism; case "${enableval}" in
@@ -3475,58 +3441,6 @@ if test x"$silent" != x"yes" && test x"$sim_timebase" != x""; then
 fi
 else
   sim_timebase=""
-fi
-
-
-sim_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith
--Wno-unused -Wunused-value -Wunused-function
--Wno-switch -Wno-char-subscripts
--Wempty-body -Wunused-but-set-parameter
--Wno-error=maybe-uninitialized
--Wno-missing-declarations
--Wno-missing-prototypes
--Wdeclaration-after-statement -Wmissing-parameter-type
--Wno-pointer-sign
--Wold-style-declaration -Wold-style-definition
-"
-# Check whether --enable-sim-warnings was given.
-if test "${enable_sim_warnings+set}" = set; then :
-  enableval=$enable_sim_warnings; case "${enableval}" in
-  yes)	;;
-  no)	sim_warnings="-w";;
-  *)	sim_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
-esac
-if test x"$silent" != x"yes" && test x"$sim_warnings" != x""; then
-  echo "Setting warning flags = $sim_warnings" 6>&1
-fi
-fi
-if test "x${sim_warnings}" != x -a "x$GCC" = xyes; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking compiler warning flags" >&5
-$as_echo_n "checking compiler warning flags... " >&6; }
-  build_warnings="${sim_warnings}"
-  sim_warnings=
-  for w in ${build_warnings}; do
-        saved_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -Werror $w"
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  sim_warnings="${sim_warnings} $w"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-    CFLAGS="$saved_CFLAGS"
-  done
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${sim_warnings}" >&5
-$as_echo "${sim_warnings}" >&6; }
 fi
 
 
@@ -4205,34 +4119,6 @@ else
   sim_devzero=""
 fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for common simulator directory" >&5
-$as_echo_n "checking for common simulator directory... " >&6; }
-if test -f "${srcdir}/../common/callback.c"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-  sim_callback="callback.o targ-map.o"
-  sim_targ_vals="targ-vals.h targ-map.c targ-vals.def"
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-  sim_callback=""
-  sim_targ_vals=""
-fi
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for common simulator directory fpu implementation" >&5
-$as_echo_n "checking for common simulator directory fpu implementation... " >&6; }
-if test -f "${srcdir}/../common/sim-fpu.c"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-  sim_fpu_cflags="-DHAVE_COMMON_FPU -I../common -I${srcdir}/../common"
-  sim_fpu="sim-fpu.o"
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-  sim_fpu_cflags=
-  sim_fpu=
-fi
-
 # Since we run commands on the build system, we have to create a
 # separate config header for the build system if build != host.
 if test x$host = x$build; then
@@ -4264,12 +4150,6 @@ else
   cd ..
   rm -rf $tempdir
 fi
-
-
-
-
-
-
 
 
 

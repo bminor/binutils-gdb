@@ -1,6 +1,6 @@
 /* The common simulator framework for GDB, the GNU Debugger.
 
-   Copyright 2002-2021 Free Software Foundation, Inc.
+   Copyright 2002-2022 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney and Red Hat.
 
@@ -22,16 +22,17 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <ctype.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "hw-main.h"
 #include "hw-base.h"
 #include "hw-tree.h"
 
 #include "sim-io.h"
 #include "sim-assert.h"
-
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
 
 /* manipulate/lookup device names */
 
@@ -880,7 +881,7 @@ hw_tree_vparse (struct hw *current,
 #endif
 	    case '[':
 	      {
-		unsigned8 words[1024];
+		uint8_t words[1024];
 		char *curr = spec.value + 1;
 		int nr_words = 0;
 		while (1)
@@ -1126,7 +1127,7 @@ print_properties (struct hw *me,
 		  }
 		else
 		  {
-		    unsigned8 *w = (unsigned8*)property->array;
+		    uint8_t *w = (uint8_t*)property->array;
 		    p->print (p->file, " [");
 		    while ((char*)w - (char*)property->array < property->sizeof_array)
 		      {

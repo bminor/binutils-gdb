@@ -1,7 +1,7 @@
 /* Target-dependent code for Windows (including Cygwin) running on i386's,
    for GDB.
 
-   Copyright (C) 2003-2021 Free Software Foundation, Inc.
+   Copyright (C) 2003-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,7 +23,7 @@
 #include "i386-tdep.h"
 #include "windows-tdep.h"
 #include "regset.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "xml-support.h"
 #include "gdbcore.h"
 #include "inferior.h"
@@ -136,7 +136,7 @@ i386_windows_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 static void
 i386_windows_init_abi_common (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   set_gdbarch_skip_trampoline_code (gdbarch, i386_windows_skip_trampoline_code);
 

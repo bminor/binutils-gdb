@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script
 dnl
-dnl   Copyright (C) 2012-2021 Free Software Foundation, Inc.
+dnl   Copyright (C) 2012-2022 Free Software Foundation, Inc.
 dnl
 dnl This file is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ AC_CANONICAL_TARGET
 AC_CANONICAL_BUILD
 
 AM_INIT_AUTOMAKE
+AM_SILENT_RULES([yes])
 AM_MAINTAINER_MODE
 
 AC_PROG_CC
@@ -59,13 +60,8 @@ AC_ARG_ENABLE(targets,
   no)       enable_targets= ;;
   *)        enable_targets=$enableval ;;
 esac])dnl
-AC_ARG_ENABLE(64-bit-bfd,
-[  --enable-64-bit-bfd     64-bit support (on hosts with narrower word sizes)],
-[case "${enableval}" in
-  yes)  want64=true  ;;
-  no)   want64=false ;;
-  *)    AC_MSG_ERROR(bad value ${enableval} for 64-bit-bfd option) ;;
-esac],[want64=false])dnl
+
+BFD_64_BIT
 
 AC_ARG_WITH(sysroot,
 [  --with-sysroot[=DIR] Search for usr/lib et al within DIR.],
@@ -365,15 +361,6 @@ all_emul_extras=
 all_libpath=
 TDIRS=
 
-# If the host is 64-bit, then we enable 64-bit targets by default.
-# This is consistent with what ../bfd/configure.ac does.
-if test x${want64} = xfalse; then
-  AC_CHECK_SIZEOF(void *)
-  if test "x${ac_cv_sizeof_void_p}" = "x8"; then
-    want64=true
-  fi
-fi
-
 elf_list_options=false
 elf_shlib_list_options=false
 elf_plt_unwind_list_options=false
@@ -399,11 +386,11 @@ do
       EMUL=$targ_emul
     fi
 
-    if test x${want64} = xfalse; then
+    if test x${enable_64_bit_bfd} = xno; then
       . ${srcdir}/../bfd/config.bfd
     fi
 
-    if test x${want64} = xtrue; then
+    if test x${enable_64_bit_bfd} = xyes; then
       targ_extra_emuls="$targ_extra_emuls $targ64_extra_emuls"
       targ_extra_libpath="$targ_extra_libpath $targ64_extra_libpath"
     fi
@@ -538,7 +525,7 @@ AC_SUBST(TDIRS)
 AM_SUBST_NOTMAKE(TDIRS)
 
 if test x${all_targets} = xtrue; then
-  if test x${want64} = xtrue; then
+  if test x${enable_64_bit_bfd} = xyes; then
     EMULATION_OFILES='$(ALL_EMULATIONS) $(ALL_64_EMULATIONS)'
     EMUL_EXTRA_OFILES='$(ALL_EMUL_EXTRA_OFILES) $(ALL_64_EMUL_EXTRA_OFILES)'
   else

@@ -1,6 +1,6 @@
 #### Makefile.in --- Makefile template for the M32C simulator
 
-### Copyright (C) 2005-2021 Free Software Foundation, Inc.
+### Copyright (C) 2005-2022 Free Software Foundation, Inc.
 ### Contributed by Red Hat, Inc.
 ### 
 ### This file is part of the GNU simulators.
@@ -20,7 +20,7 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-SIM_EXTRA_CFLAGS = -Wall -DTIMER_A
+SIM_EXTRA_CFLAGS = -DTIMER_A
 
 SIM_RUN_OBJS = \
 	main.o \
@@ -41,26 +41,3 @@ SIM_OBJS = \
 	$(ENDLIST)
 
 ## COMMON_POST_CONFIG_FRAG
-
-arch = m32c
-
-# opc2c leaks memory, and therefore makes AddressSanitizer unhappy.  Disable
-# leak detection while running it.
-OPC2C = ASAN_OPTIONS=detect_leaks=0 ./opc2c
-
-r8c.c : r8c.opc opc2c
-	$(OPC2C) -l r8c.out $(srcdir)/r8c.opc > r8c.c.tmp
-	mv r8c.c.tmp r8c.c
-
-m32c.c : m32c.opc opc2c
-	$(OPC2C) -l m32c.out $(srcdir)/m32c.opc > m32c.c.tmp
-	mv m32c.c.tmp m32c.c
-
-opc2c : opc2c.o
-	$(LINK_FOR_BUILD) $^
-
-encodings:
-	grep '/\* [01]' $(srcdir)/r8c.opc | sort
-
-opc2c.o : opc2c.c
-	$(COMPILE_FOR_BUILD) -c $(srcdir)/opc2c.c

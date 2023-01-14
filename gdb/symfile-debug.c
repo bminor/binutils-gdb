@@ -1,6 +1,6 @@
 /* Debug logging for the symbol file functions for the GNU debugger, GDB.
 
-   Copyright (C) 2013-2021 Free Software Foundation, Inc.
+   Copyright (C) 2013-2022 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -245,7 +245,7 @@ objfile::lookup_symbol (block_enum kind, const char *name, domain_enum domain)
   auto search_one_symtab = [&] (compunit_symtab *stab)
   {
     struct symbol *sym, *with_opaque = NULL;
-    const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (stab);
+    const struct blockvector *bv = stab->blockvector ();
     const struct block *block = BLOCKVECTOR_BLOCK (bv, kind);
 
     sym = block_find_symbol (block, name, domain,
@@ -257,14 +257,14 @@ objfile::lookup_symbol (block_enum kind, const char *name, domain_enum domain)
        information (but NAME might contain it).  */
 
     if (sym != NULL
-	&& SYMBOL_MATCHES_SEARCH_NAME (sym, lookup_name))
+	&& symbol_matches_search_name (sym, lookup_name))
       {
 	retval = stab;
 	/* Found it.  */
 	return false;
       }
     if (with_opaque != NULL
-	&& SYMBOL_MATCHES_SEARCH_NAME (with_opaque, lookup_name))
+	&& symbol_matches_search_name (with_opaque, lookup_name))
       retval = stab;
 
     /* Keep looking through other psymtabs.  */
@@ -289,7 +289,7 @@ objfile::lookup_symbol (block_enum kind, const char *name, domain_enum domain)
   if (debug_symfile)
     fprintf_filtered (gdb_stdlog, "qf->lookup_symbol (...) = %s\n",
 		      retval
-		      ? debug_symtab_name (compunit_primary_filetab (retval))
+		      ? debug_symtab_name (retval->primary_filetab ())
 		      : "NULL");
 
   return retval;
@@ -454,7 +454,7 @@ objfile::find_pc_sect_compunit_symtab (struct bound_minimal_symbol msymbol,
     fprintf_filtered (gdb_stdlog,
 		      "qf->find_pc_sect_compunit_symtab (...) = %s\n",
 		      retval
-		      ? debug_symtab_name (compunit_primary_filetab (retval))
+		      ? debug_symtab_name (retval->primary_filetab ())
 		      : "NULL");
 
   return retval;
@@ -495,7 +495,7 @@ objfile::find_compunit_symtab_by_address (CORE_ADDR address)
     fprintf_filtered (gdb_stdlog,
 		      "qf->find_compunit_symtab_by_address (...) = %s\n",
 		      result
-		      ? debug_symtab_name (compunit_primary_filetab (result))
+		      ? debug_symtab_name (result->primary_filetab ())
 		      : "NULL");
 
   return result;

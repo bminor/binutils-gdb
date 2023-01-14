@@ -1,6 +1,6 @@
 /* Xilinx MicroBlaze-specific support for 32-bit ELF
 
-   Copyright (C) 2009-2021 Free Software Foundation, Inc.
+   Copyright (C) 2009-2022 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -2088,8 +2088,6 @@ microblaze_elf_relax_section (bfd *abfd,
 		  if (isym->st_shndx == shndx
 		      && (ELF32_ST_TYPE (isym->st_info) == STT_SECTION))
 		    {
-		      bfd_vma immediate;
-
 		      if (ocontents == NULL)
 			{
 			  if (elf_section_data (o)->this_hdr.contents != NULL)
@@ -2112,15 +2110,7 @@ microblaze_elf_relax_section (bfd *abfd,
 			      elf_section_data (o)->this_hdr.contents = ocontents;
 			    }
 			}
-	  unsigned long instr_hi =  bfd_get_32 (abfd, ocontents
-						+ irelscan->r_offset);
-	  unsigned long instr_lo =  bfd_get_32 (abfd, ocontents
-						+ irelscan->r_offset
-						+ INST_WORD_SIZE);
-	  immediate = (instr_hi & 0x0000ffff) << 16;
-	  immediate |= (instr_lo & 0x0000ffff);
 		      offset = calc_fixup (irelscan->r_addend, 0, sec);
-		      immediate -= offset;
 		      irelscan->r_addend -= offset;
 		    }
 		}
@@ -2326,7 +2316,6 @@ microblaze_elf_check_relocs (bfd * abfd,
 {
   Elf_Internal_Shdr *		symtab_hdr;
   struct elf_link_hash_entry ** sym_hashes;
-  struct elf_link_hash_entry ** sym_hashes_end;
   const Elf_Internal_Rela *	rel;
   const Elf_Internal_Rela *	rel_end;
   struct elf32_mb_link_hash_table *htab;
@@ -2341,9 +2330,6 @@ microblaze_elf_check_relocs (bfd * abfd,
 
   symtab_hdr = & elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
-  sym_hashes_end = sym_hashes + symtab_hdr->sh_size / sizeof (Elf32_External_Sym);
-  if (!elf_bad_symtab (abfd))
-    sym_hashes_end -= symtab_hdr->sh_info;
 
   rel_end = relocs + sec->reloc_count;
 

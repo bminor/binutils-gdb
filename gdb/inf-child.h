@@ -1,6 +1,6 @@
 /* Base/prototype target for default child (native) targets.
 
-   Copyright (C) 2004-2021 Free Software Foundation, Inc.
+   Copyright (C) 2004-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -55,8 +55,6 @@ public:
   void interrupt () override;
   void pass_ctrlc () override;
 
-  void post_startup_inferior (ptid_t) override;
-
   void follow_exec (inferior *follow_inf, ptid_t ptid,
 		    const char *execd_pathname) override;
 
@@ -104,10 +102,9 @@ protected:
   void maybe_unpush_target ();
 };
 
-/* Functions for helping to write a native target.  */
+/* Convert the host wait(2) status to a target_waitstatus.  */
 
-/* This is for native targets which use a unix/POSIX-style waitstatus.  */
-extern void store_waitstatus (struct target_waitstatus *, int);
+extern target_waitstatus host_status_to_waitstatus (int hoststatus);
 
 /* Register TARGET as native target and set it up to respond to the
    "target native" command.  */

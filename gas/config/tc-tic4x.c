@@ -1,5 +1,5 @@
 /* tc-tic4x.c -- Assemble for the Texas Instruments TMS320C[34]x.
-   Copyright (C) 1997-2021 Free Software Foundation, Inc.
+   Copyright (C) 1997-2022 Free Software Foundation, Inc.
 
    Contributed by Michael P. Hayes (m.hayes@elec.canterbury.ac.nz)
 
@@ -383,9 +383,11 @@ tic4x_gen_to_words (FLONUM_TYPE flonum, LITTLENUM_TYPE *words, int precision)
 
   /* 0.0e0 or NaN seen.  */
   if (flonum.low > flonum.leader  /* = 0.0e0 */
-      || flonum.sign == 0) /* = NaN */
+      || flonum.sign == 0 /* = NaN */
+      || flonum.sign == 'Q' || flonum.sign == 'q' /* = QNaN */
+      || flonum.sign == 'S' || flonum.sign == 's') /* = SNaN */
     {
-      if(flonum.sign == 0)
+      if (flonum.sign != '+' && flonum.sign != '-')
         as_bad (_("Nan, using zero."));
       words[0] = 0x8000;
       return return_value;

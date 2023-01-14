@@ -1,6 +1,6 @@
 /* Maintenance commands for testing the options framework.
 
-   Copyright (C) 2019-2021 Free Software Foundation, Inc.
+   Copyright (C) 2019-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -133,39 +133,32 @@ struct test_options_opts
   const char *enum_opt = test_options_enum_values_xxx;
   unsigned int uint_opt = 0;
   int zuint_unl_opt = 0;
-  char *string_opt = nullptr;
+  std::string string_opt;
 
   test_options_opts () = default;
 
   DISABLE_COPY_AND_ASSIGN (test_options_opts);
 
-  ~test_options_opts ()
-  {
-    xfree (string_opt);
-  }
-
   /* Dump the options to FILE.  ARGS is the remainder unprocessed
      arguments.  */
   void dump (ui_file *file, const char *args) const
   {
-    fprintf_unfiltered (file,
-			_("-flag %d -xx1 %d -xx2 %d -bool %d "
-			  "-enum %s -uint %s -zuint-unl %s -string '%s' -- %s\n"),
-			flag_opt,
-			xx1_opt,
-			xx2_opt,
-			boolean_opt,
-			enum_opt,
-			(uint_opt == UINT_MAX
-			 ? "unlimited"
-			 : pulongest (uint_opt)),
-			(zuint_unl_opt == -1
-			 ? "unlimited"
-			 : plongest (zuint_unl_opt)),
-			(string_opt != nullptr
-			 ? string_opt
-			 : ""),
-			args);
+    fprintf_filtered (file,
+		      _("-flag %d -xx1 %d -xx2 %d -bool %d "
+			"-enum %s -uint %s -zuint-unl %s -string '%s' -- %s\n"),
+		      flag_opt,
+		      xx1_opt,
+		      xx2_opt,
+		      boolean_opt,
+		      enum_opt,
+		      (uint_opt == UINT_MAX
+		       ? "unlimited"
+		       : pulongest (uint_opt)),
+		      (zuint_unl_opt == -1
+		       ? "unlimited"
+		       : plongest (zuint_unl_opt)),
+		      string_opt.c_str (),
+		      args);
   }
 };
 
@@ -302,8 +295,7 @@ save_completion_result (const test_options_opts &opts, bool res,
 
       stream.puts ("1 ");
       opts.dump (&stream, text);
-      maintenance_test_options_command_completion_text
-	= std::move (stream.string ());
+      maintenance_test_options_command_completion_text = stream.release ();
     }
   else
     {

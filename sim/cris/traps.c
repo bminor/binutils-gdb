@@ -1,5 +1,5 @@
 /* CRIS exception, interrupt, and trap (EIT) support
-   Copyright (C) 2004-2021 Free Software Foundation, Inc.
+   Copyright (C) 2004-2022 Free Software Foundation, Inc.
    Contributed by Axis Communications.
 
 This file is part of the GNU simulators.
@@ -803,7 +803,7 @@ dump_statistics (SIM_CPU *current_cpu)
   SIM_DESC sd = CPU_STATE (current_cpu);
   CRIS_MISC_PROFILE *profp
     = CPU_CRIS_MISC_PROFILE (current_cpu);
-  unsigned64 total = profp->basic_cycle_count;
+  uint64_t total = profp->basic_cycle_count;
 
   /* Historically, these messages have gone to stderr, so we'll keep it
      that way.  It's also easier to then tell it from normal program

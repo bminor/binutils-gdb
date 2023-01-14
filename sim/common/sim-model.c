@@ -1,5 +1,5 @@
 /* Model support.
-   Copyright (C) 1996-2021 Free Software Foundation, Inc.
+   Copyright (C) 1996-2022 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -20,13 +20,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include "bfd.h"
+#include "libiberty.h"
+
 #include "sim-main.h"
 #include "sim-model.h"
-#include "libiberty.h"
 #include "sim-options.h"
 #include "sim-io.h"
 #include "sim-assert.h"
-#include "bfd.h"
 
 static void model_set (sim_cpu *, const SIM_MODEL *);
 

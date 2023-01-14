@@ -1,5 +1,5 @@
 /* BFD library support routines for architectures.
-   Copyright (C) 1990-2021 Free Software Foundation, Inc.
+   Copyright (C) 1990-2022 Free Software Foundation, Inc.
    Hacked by John Gilmore and Steve Chamberlain of Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -337,6 +337,7 @@ DESCRIPTION
 .#define bfd_mach_arm_8M_BASE   25
 .#define bfd_mach_arm_8M_MAIN   26
 .#define bfd_mach_arm_8_1M_MAIN 27
+.#define bfd_mach_arm_9         28
 .  bfd_arch_nds32,     {* Andes NDS32.  *}
 .#define bfd_mach_n1		1
 .#define bfd_mach_n1h		2
@@ -555,6 +556,9 @@ DESCRIPTION
 .#define bfd_mach_ck807		6
 .#define bfd_mach_ck810		7
 .#define bfd_mach_ck860		8
+.  bfd_arch_loongarch,       {* LoongArch *}
+.#define bfd_mach_loongarch32	1
+.#define bfd_mach_loongarch64	2
 .  bfd_arch_last
 .  };
 */
@@ -635,6 +639,7 @@ extern const bfd_arch_info_type bfd_iq2000_arch;
 extern const bfd_arch_info_type bfd_k1om_arch;
 extern const bfd_arch_info_type bfd_l1om_arch;
 extern const bfd_arch_info_type bfd_lm32_arch;
+extern const bfd_arch_info_type bfd_loongarch_arch;
 extern const bfd_arch_info_type bfd_m32c_arch;
 extern const bfd_arch_info_type bfd_m32r_arch;
 extern const bfd_arch_info_type bfd_m68hc11_arch;
@@ -724,6 +729,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_k1om_arch,
     &bfd_l1om_arch,
     &bfd_lm32_arch,
+    &bfd_loongarch_arch,
     &bfd_m32c_arch,
     &bfd_m32r_arch,
     &bfd_m68hc11_arch,
@@ -864,7 +870,7 @@ bfd_arch_list (void)
 	}
     }
 
-  amt = (vec_length + 1) * sizeof (char **);
+  amt = (vec_length + 1) * sizeof (char *);
   name_list = (const char **) bfd_malloc (amt);
   if (name_list == NULL)
     return NULL;

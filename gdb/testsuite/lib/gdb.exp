@@ -1,4 +1,4 @@
-# Copyright 1992-2021 Free Software Foundation, Inc.
+# Copyright 1992-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,6 +24,13 @@ if {$tool == ""} {
     send_error "`site.exp' not found, run `make site.exp'!\n"
     exit 2
 }
+
+# If GDB is built with ASAN (and because there are leaks), it will output a
+# leak report when exiting as well as exit with a non-zero (failure) status.
+# This can affect tests that are sensitive to what GDB prints on stderr or its
+# exit status.  Add `detect_leaks=0` to the ASAN_OPTIONS environment variable
+# (which will affect any spawned sub-process) to avoid this.
+append ::env(ASAN_OPTIONS) ",detect_leaks=0"
 
 # List of procs to run in gdb_finish.
 set gdb_finish_hooks [list]
@@ -235,6 +242,11 @@ proc gdb_unload {} {
 	    exp_continue
 	}
 	-re "$gdb_prompt $" {}
+	-re "A problem internal to GDB has been detected" {
+	    perror "Couldn't unload file in $GDB (GDB internal error)."
+	    gdb_internal_error_resync
+	    return -1
+	}
 	timeout {
 	    perror "couldn't unload file in $GDB (timeout)."
 	    return -1
@@ -407,6 +419,9 @@ proc gdb_run_cmd { {inferior_args {}} } {
 	-notransfer -re "Starting program: \[^\r\n\]*" {}
 	-notransfer -re "$gdb_prompt $" {
 	    # There is no more input expected.
+	}
+	-notransfer -re "A problem internal to GDB has been detected" {
+	    # Let caller handle this.
 	}
     }
 
@@ -601,7 +616,7 @@ proc gdb_breakpoint { function args } {
 #
 # If there are additional arguments, pass them to gdb_breakpoint.
 # We recognize no-message/message ourselves.
-# The default is no-message.
+#
 # no-message is messed up here, like gdb_breakpoint: to preserve
 # historical usage fails are always printed by default.
 # no-message: turns off printing of fails (and passes, but they're already off)
@@ -612,9 +627,6 @@ proc runto { function args } {
     global decimal
 
     delete_breakpoints
-
-    # Default to "no-message".
-    set args "no-message $args"
 
     set print_pass 0
     set print_fail 1
@@ -699,7 +711,7 @@ proc runto { function args } {
 # If you don't want that, use gdb_start_cmd.
 
 proc runto_main { } {
-    return [runto main no-message qualified]
+    return [runto main qualified]
 }
 
 ### Continue, and expect to hit a breakpoint.
@@ -768,6 +780,10 @@ proc gdb_internal_error_resync {} {
 	    }
 	    timeout {
 		perror "Could not resync from internal error (timeout)"
+		return 0
+	    }
+	    eof {
+		perror "Could not resync from internal error (eof)"
 		return 0
 	    }
 	}
@@ -2080,7 +2096,9 @@ proc default_gdb_spawn { } {
 	    exit 1
 	}
     }
-    set res [remote_spawn host "$GDB $INTERNAL_GDBFLAGS $GDBFLAGS [host_info gdb_opts]"]
+
+    # Put GDBFLAGS last so that tests can put "--args ..." in it.
+    set res [remote_spawn host "$GDB $INTERNAL_GDBFLAGS [host_info gdb_opts] $GDBFLAGS"]
     if { $res < 0 || $res == "" } {
 	perror "Spawning $GDB failed."
 	return 1
@@ -2190,21 +2208,34 @@ proc gdb_interact { } {
 # Examine the output of compilation to determine whether compilation
 # failed or not.  If it failed determine whether it is due to missing
 # compiler or due to compiler error.  Report pass, fail or unsupported
-# as appropriate
+# as appropriate.
 
 proc gdb_compile_test {src output} {
+    set msg "compilation [file tail $src]"
+
     if { $output == "" } {
-	pass "compilation [file tail $src]"
-    } elseif { [regexp {^[a-zA-Z_0-9]+: Can't find [^ ]+\.$} $output] } {
-	unsupported "compilation [file tail $src]"
-    } elseif { [regexp {.*: command not found[\r|\n]*$} $output] } {
-	unsupported "compilation [file tail $src]"
-    } elseif { [regexp {.*: [^\r\n]*compiler not installed[^\r\n]*[\r|\n]*$} $output] } {
-	unsupported "compilation [file tail $src]"
-    } else {
-	verbose -log "compilation failed: $output" 2
-	fail "compilation [file tail $src]"
+	pass $msg
+	return
     }
+
+    if { [regexp {^[a-zA-Z_0-9]+: Can't find [^ ]+\.$} $output]
+	 || [regexp {.*: command not found[\r|\n]*$} $output]
+	 || [regexp {.*: [^\r\n]*compiler not installed[^\r\n]*[\r|\n]*$} $output] } {
+	unsupported "$msg (missing compiler)"
+	return
+    }
+
+    set gcc_re ".*: error: unrecognized command line option "
+    set clang_re ".*: error: unsupported option "
+    if { [regexp "(?:$gcc_re|$clang_re)(\[^ \t;\r\n\]*)" $output dummy option]
+	 && $option != "" } {
+	unsupported "$msg (unsupported option $option)"
+	return
+    }
+
+    # Unclassified compilation failure, be more verbose.
+    verbose -log "compilation failed: $output" 2
+    fail "$msg"
 }
 
 # Return a 1 for configurations for which we don't even want to try to
@@ -2466,6 +2497,32 @@ proc proc_with_prefix {name arguments body} {
     proc $name $arguments [list with_test_prefix $name $body]
 }
 
+# Return an id corresponding to the test prefix stored in $pf_prefix, which
+# is more suitable for use in a file name.
+# F.i., for a pf_prefix:
+#   gdb.dwarf2/dw2-lines.exp: \
+#     cv=5: cdw=64: lv=5: ldw=64: string_form=line_strp:
+# return an id:
+#   cv-5-cdw-32-lv-5-ldw-64-string_form-line_strp
+
+proc prefix_id {} {
+    global pf_prefix
+    set id $pf_prefix
+
+    # Strip ".exp: " prefix.
+    set id [regsub  {.*\.exp: } $id {}]
+
+    # Strip colon suffix.
+    set id [regsub  {:$} $id {}]
+
+    # Strip spaces.
+    set id [regsub -all { } $id {}]
+
+    # Replace colons, equal signs.
+    set id [regsub -all \[:=\] $id -]
+
+    return $id
+}
 
 # Run BODY in the context of the caller.  After BODY is run, the variables
 # listed in VARS will be reset to the values they had before BODY was run.
@@ -3384,6 +3441,57 @@ gdb_caching_proc skip_avx512bf16_tests {
     return $skip_avx512bf16_tests
 }
 
+# Run a test on the target to see if it supports avx512fp16.  Return 0 if so,
+# 1 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
+
+gdb_caching_proc skip_avx512fp16_tests {
+    global srcdir subdir gdb_prompt inferior_exited_re
+
+    set me "skip_avx512fp16_tests"
+    if { ![istarget "i?86-*-*"] && ![istarget "x86_64-*-*"] } {
+        verbose "$me:  target does not support avx512fp16, returning 1" 2
+        return 1
+    }
+
+    # Compile a test program.
+    set src {
+        int main() {
+            asm volatile ("vcvtps2phx %xmm1, %xmm0");
+            return 0;
+        }
+    }
+    if {![gdb_simple_compile $me $src executable]} {
+        return 1
+    }
+
+    # No error message, compilation succeeded so now run it via gdb.
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load "$obj"
+    gdb_run_cmd
+    gdb_expect {
+        -re ".*Illegal instruction.*${gdb_prompt} $" {
+            verbose -log "$me:  avx512fp16 hardware not detected."
+            set skip_avx512fp16_tests 1
+        }
+        -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+            verbose -log "$me:  avx512fp16 hardware detected."
+            set skip_avx512fp16_tests 0
+        }
+        default {
+            warning "\n$me:  default case taken."
+            set skip_avx512fp16_tests 1
+        }
+    }
+    gdb_exit
+    remote_file build delete $obj
+
+    verbose "$me:  returning $skip_avx512fp16_tests" 2
+    return $skip_avx512fp16_tests
+}
+
 # Run a test on the target to see if it supports btrace hardware.  Return 0 if so,
 # 1 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
 
@@ -3574,8 +3682,8 @@ gdb_caching_proc skip_ifunc_tests {
 # backtraces.  Requires get_compiler_info and get_debug_format.
 
 proc skip_inline_frame_tests {} {
-    # GDB only recognizes inlining information in DWARF 2 (DWARF 3).
-    if { ! [test_debug_format "DWARF 2"] } {
+    # GDB only recognizes inlining information in DWARF.
+    if { ! [test_debug_format "DWARF \[0-9\]"] } {
 	return 1
     }
 
@@ -3593,8 +3701,8 @@ proc skip_inline_frame_tests {} {
 # inlined functions.  Requires get_compiler_info and get_debug_format.
 
 proc skip_inline_var_tests {} {
-    # GDB only recognizes inlining information in DWARF 2 (DWARF 3).
-    if { ! [test_debug_format "DWARF 2"] } {
+    # GDB only recognizes inlining information in DWARF.
+    if { ! [test_debug_format "DWARF \[0-9\]"] } {
 	return 1
     }
 
@@ -3632,12 +3740,15 @@ proc skip_hw_watchpoint_tests {} {
     }
 
     # These targets support hardware watchpoints natively
+    # Note, not all Power 9 processors support hardware watchpoints due to a HW
+    # bug.  Use has_hw_wp_support to check do a runtime check for hardware
+    # watchpoint support on Powerpc.
     if { [istarget "i?86-*-*"] 
 	 || [istarget "x86_64-*-*"]
 	 || [istarget "ia64-*-*"] 
 	 || [istarget "arm*-*-*"]
 	 || [istarget "aarch64*-*-*"]
-	 || [istarget "powerpc*-*-linux*"]
+	 || ([istarget "powerpc*-*-linux*"] && [has_hw_wp_support])
 	 || [istarget "s390*-*-*"] } {
 	return 0
     }
@@ -3776,7 +3887,7 @@ proc gdb_is_target_1 { target_name target_stack_regexp prompt_regexp } {
 # Helper for gdb_is_target_remote where the expected prompt is variable.
 
 proc gdb_is_target_remote_prompt { prompt_regexp } {
-    return [gdb_is_target_1 "remote" ".*emote serial target in gdb-specific protocol.*" $prompt_regexp]
+    return [gdb_is_target_1 "remote" ".*emote target using gdb-specific protocol.*" $prompt_regexp]
 }
 
 # Check whether we're testing with the remote or extended-remote
@@ -5328,7 +5439,11 @@ proc gdb_load_no_complaints { arg } {
     }
 
     # Verify that there were no complaints.
-    set re "^Reading symbols from \[^\r\n\]*\r\n$gdb_prompt $"
+    set re \
+	[multi_line \
+	     "^(Reading symbols from \[^\r\n\]*" \
+	     ")+(Expanding full symbols from \[^\r\n\]*" \
+	     ")?$gdb_prompt $"]
     gdb_assert {[regexp $re $gdb_file_cmd_msg]} "No complaints"
 }
 
@@ -6998,6 +7113,29 @@ proc get_endianness { } {
     return "little"
 }
 
+# Get the target's default endianness and return it.
+gdb_caching_proc target_endianness {
+    global gdb_prompt
+
+    set me "target_endianness"
+
+    set src { int main() { return 0; } }
+    if {![gdb_simple_compile $me $src executable]} {
+        return 0
+    }
+
+    clean_restart $obj
+    if ![runto_main] {
+        return 0
+    }
+    set res [get_endianness]
+
+    gdb_exit
+    remote_file build delete $obj
+
+    return $res
+}
+
 # ROOT and FULL are file names.  Returns the relative path from ROOT
 # to FULL.  Note that FULL must be in a subdirectory of ROOT.
 # For example, given ROOT = /usr/bin and FULL = /usr/bin/ls, this
@@ -7289,8 +7427,8 @@ proc using_fission { } {
     return [regexp -- "-gsplit-dwarf" $debug_flags]
 }
 
-# Search the caller's ARGS list and set variables according to the list of
-# valid options described by ARGSET.
+# Search LISTNAME in uplevel LEVEL caller and set variables according to the
+# list of valid options with prefix PREFIX described by ARGSET.
 #
 # The first member of each one- or two-element list in ARGSET defines the
 # name of a variable that will be added to the caller's scope.
@@ -7301,13 +7439,15 @@ proc using_fission { } {
 #
 # If two elements are given, the second element is the default value of
 # the variable.  This is then overwritten if the option exists in ARGS.
+# If EVAL, then subst is called on the value, which allows variables
+# to be used.
 #
 # Any parse_args elements in (the caller's) ARGS will be removed, leaving
 # any optional components.
-
+#
 # Example:
 # proc myproc {foo args} {
-#  parse_args {{bar} {baz "abc"} {qux}}
+#   parse_list args 1 {{bar} {baz "abc"} {qux}} "-" false
 #    # ...
 # }
 # myproc ABC -bar -baz DEF peanut butter
@@ -7315,41 +7455,77 @@ proc using_fission { } {
 # foo (=ABC), bar (=1), baz (=DEF), and qux (=0)
 # args will be the list {peanut butter}
 
-proc parse_args { argset } {
-    upvar args args
+proc parse_list { level listname argset prefix eval } {
+    upvar $level $listname args
 
     foreach argument $argset {
-        if {[llength $argument] == 1} {
-            # No default specified, so we assume that we should set
-            # the value to 1 if the arg is present and 0 if it's not.
-            # It is assumed that no value is given with the argument.
-            set result [lsearch -exact $args "-$argument"]
-            if {$result != -1} then {
-                uplevel 1 [list set $argument 1]
-                set args [lreplace $args $result $result]
-            } else {
-                uplevel 1 [list set $argument 0]
-            }
-        } elseif {[llength $argument] == 2} {
-            # There are two items in the argument.  The second is a
-            # default value to use if the item is not present.
-            # Otherwise, the variable is set to whatever is provided
-            # after the item in the args.
-            set arg [lindex $argument 0]
-            set result [lsearch -exact $args "-[lindex $arg 0]"]
-            if {$result != -1} then {
-                uplevel 1 [list set $arg [lindex $args [expr $result+1]]]
-                set args [lreplace $args $result [expr $result+1]]
-            } else {
-                uplevel 1 [list set $arg [lindex $argument 1]]
-            }
-        } else {
-            error "Badly formatted argument \"$argument\" in argument set"
-        }
+	if {[llength $argument] == 1} {
+	    # Normalize argument, strip leading/trailing whitespace.
+	    # Allows us to treat {foo} and { foo } the same.
+	    set argument [string trim $argument]
+
+	    # No default specified, so we assume that we should set
+	    # the value to 1 if the arg is present and 0 if it's not.
+	    # It is assumed that no value is given with the argument.
+	    set pattern "$prefix$argument"
+	    set result [lsearch -exact $args $pattern]
+
+	    if {$result != -1} then {
+		set value 1
+		set args [lreplace $args $result $result]
+	    } else {
+		set value 0
+	    }
+	    uplevel $level [list set $argument $value]
+	} elseif {[llength $argument] == 2} {
+	    # There are two items in the argument.  The second is a
+	    # default value to use if the item is not present.
+	    # Otherwise, the variable is set to whatever is provided
+	    # after the item in the args.
+	    set arg [lindex $argument 0]
+	    set pattern "$prefix[lindex $arg 0]"
+	    set result [lsearch -exact $args $pattern]
+
+	    if {$result != -1} then {
+		set value [lindex $args [expr $result+1]]
+		if { $eval } {
+		    set value [uplevel [expr $level + 1] [list subst $value]]
+		}
+		set args [lreplace $args $result [expr $result+1]]
+	    } else {
+		set value [lindex $argument 1]
+		if { $eval } {
+		    set value [uplevel $level [list subst $value]]
+		}
+	    }
+	    uplevel $level [list set $arg $value]
+	} else {
+	    error "Badly formatted argument \"$argument\" in argument set"
+	}
     }
+}
+
+# Search the caller's args variable and set variables according to the list of
+# valid options described by ARGSET.
+
+proc parse_args { argset } {
+    parse_list 2 args $argset "-" false
 
     # The remaining args should be checked to see that they match the
     # number of items expected to be passed into the procedure...
+}
+
+# Process the caller's options variable and set variables according
+# to the list of valid options described by OPTIONSET.
+
+proc parse_options { optionset } {
+    parse_list 2 options $optionset "" true
+
+    # Require no remaining options.
+    upvar 1 options options
+    if { [llength $options] != 0 } {
+	error "Options left unparsed: $options"
+    }
 }
 
 # Capture the output of COMMAND in a string ignoring PREFIX (a regexp);
@@ -7513,7 +7689,7 @@ proc gdb_debug_init { } {
     }
 
     # First ensure logging is off.
-    send_gdb "set logging off\n"
+    send_gdb "set logging enabled off\n"
 
     set debugfile [standard_output_file gdb.debug]
     send_gdb "set logging file $debugfile\n"
@@ -7526,7 +7702,7 @@ proc gdb_debug_init { } {
     }
 
     # Now that everything is set, enable logging.
-    send_gdb "set logging on\n"
+    send_gdb "set logging enabled on\n"
     gdb_expect 10 {
 	-re "Copying output to $debugfile.*Redirecting debug output to $debugfile.*$gdb_prompt $" {}
 	timeout { warning "Couldn't set logging file" }
@@ -7619,7 +7795,7 @@ proc cmp_file_string { file str msg } {
     }
 }
 
-# Does the compiler support CTF debug output using '-gt' compiler
+# Does the compiler support CTF debug output using '-gctf' compiler
 # flag?  If not then we should skip these tests.  We should also
 # skip them if libctf was explicitly disabled.
 
@@ -7634,7 +7810,7 @@ gdb_caching_proc skip_ctf_tests {
 	int main () {
 	    return 0;
 	}
-    } executable "additional_flags=-gt"]
+    } executable "additional_flags=-gctf"]
 
     return [expr {!$can_ctf}]
 }
@@ -7799,22 +7975,45 @@ proc add_gdb_index { program {style ""} } {
 # string (the default) means .gdb_index; "-dwarf-5" means .debug_names.
 
 proc ensure_gdb_index { binfile {style ""} } {
+    global decimal
+
     set testfile [file tail $binfile]
     set test "check if index present"
-    gdb_test_multiple "mt print objfiles ${testfile}" $test {
-	-re -wrap "gdb_index.*" {
-	    return 0
+    set has_index 0
+    set has_readnow 0
+    gdb_test_multiple "mt print objfiles ${testfile}" $test -lbl {
+	-re "\r\n\\.gdb_index: version ${decimal}(?=\r\n)" {
+	    set has_index 1
+	    gdb_test_lines "" $gdb_test_name ".*"
 	}
-	-re -wrap "debug_names.*" {
-	    return 0
+	-re "\r\n\\.debug_names: exists(?=\r\n)" {
+	    set has_index 1
+	    gdb_test_lines "" $gdb_test_name ".*"
 	}
-	-re -wrap "Psymtabs.*" {
-	    if { [add_gdb_index $binfile $style] != "1" } {
-		return -1
-	    }
-	    return 1
+	-re "\r\nPsymtabs:(?=\r\n)" {
+	    gdb_test_lines "" $gdb_test_name ".*"
+	}
+	-re ".gdb_index: faked for \"readnow\"" {
+	    set has_readnow 1
+	    gdb_test_lines "" $gdb_test_name ".*"
+	}
+	-re -wrap "" {
+	    fail $gdb_test_name
 	}
     }
+
+    if { $has_index } {
+	return 0
+    }
+
+    if { $has_readnow } {
+	return -1
+    }
+
+    if { [add_gdb_index $binfile $style] == "1" } {
+	return 1
+    }
+
     return -1
 }
 
@@ -7885,9 +8084,14 @@ proc with_override { name override body } {
     #   the override
     # So, we use this more elaborate but cleaner mechanism.
 
-    # Save the old proc.
-    set old_args [info args $name]
-    set old_body [info body $name]
+    # Save the old proc, if it exists.
+    if { [info procs $name] != "" } {
+	set old_args [info args $name]
+	set old_body [info body $name]
+	set existed true
+    } else {
+	set existed false
+    }
 
     # Install the override.
     set new_args [info args $override]
@@ -7897,8 +8101,12 @@ proc with_override { name override body } {
     # Execute body.
     set code [catch {uplevel 1 $body} result]
 
-    # Restore old proc.
-    eval proc $name {$old_args} {$old_body}
+    # Restore old proc if it existed on entry, else delete it.
+    if { $existed } {
+	eval proc $name {$old_args} {$old_body}
+    } else {
+	rename $name ""
+    }
 
     # Return as appropriate.
     if { $code == 1 } {
@@ -8028,6 +8236,159 @@ gdb_caching_proc have_mpx {
 
     verbose "$me:  returning $status" 2
     return $status
+}
+
+# Return 1 if target supports avx, otherwise return 0.
+gdb_caching_proc have_avx {
+    global srcdir
+
+    set me "have_avx"
+    if { ![istarget "i?86-*-*"] && ![istarget "x86_64-*-*"] } {
+        verbose "$me: target does not support avx, returning 0" 2
+        return 0
+    }
+
+    # Compile a test program.
+    set src {
+       #include "nat/x86-cpuid.h"
+
+	int main() {
+	  unsigned int eax, ebx, ecx, edx;
+
+	if (!x86_cpuid (1, &eax, &ebx, &ecx, &edx))
+	  return 0;
+
+	if ((ecx & (bit_AVX | bit_OSXSAVE)) == (bit_AVX | bit_OSXSAVE))
+	  return 1;
+	else
+	  return 0;
+	}
+    }
+    set compile_flags "incdir=${srcdir}/.."
+    if {![gdb_simple_compile $me $src executable $compile_flags]} {
+        return 0
+    }
+
+    set result [remote_exec target $obj]
+    set status [lindex $result 0]
+    set output [lindex $result 1]
+    if { $output != "" } {
+	set status 0
+    }
+
+    remote_file build delete $obj
+
+    verbose "$me: returning $status" 2
+    return $status
+}
+
+# Called as either:
+# - require EXPR VAL
+# - require EXPR OP VAL
+# In the first case, OP is ==.
+#
+# Require EXPR OP VAL, where EXPR is evaluated in caller context.  If not,
+# return in the caller's context.
+
+proc require { fn arg1 {arg2 ""} } {
+    if { $arg2 == "" } {
+	set op ==
+	set val $arg1
+    } else {
+	set op $arg1
+	set val $arg2
+    }
+    set res [uplevel 1 $fn]
+    if { [expr $res $op $val] } {
+	return
+    }
+
+    switch "$fn $op $val" {
+	"gdb_skip_xml_test == 0" { set msg "missing xml support" }
+	"ensure_gdb_index $binfile != -1" -
+	"ensure_gdb_index $binfile -dwarf-5 != -1" {
+	    set msg "Couldn't ensure index in binfile"
+	}
+	"use_gdb_stub == 0" {
+	    set msg "Remote stub used"
+	}
+	default { set msg "$fn != $val" }
+    }
+
+    untested $msg
+    return -code return 0
+}
+
+# Wait up to ::TIMEOUT seconds for file PATH to exist on the target system.
+# Return 1 if it does exist, 0 otherwise.
+
+proc target_file_exists_with_timeout { path } {
+    for {set i 0} {$i < $::timeout} {incr i} {
+	if { [remote_file target exists $path] } {
+	    return 1
+	}
+
+	sleep 1
+    }
+
+    return 0
+}
+
+gdb_caching_proc has_hw_wp_support {
+    # Power 9, proc rev 2.2 does not support HW watchpoints due to HW bug.
+    # Need to use a runtime test to determine if the Power processor has
+    # support for HW watchpoints.
+    global srcdir subdir gdb_prompt inferior_exited_re
+
+    set compile_flags {debug nowarnings quiet}
+    set me "has_hw_wp_support"
+
+    # Compile a test program to test if HW watchpoints are supported
+    set src {
+	int main (void) {
+	    volatile int local;
+	    local = 1;
+	    if (local == 1)
+		return 1;
+	    return 0;
+	}
+    }
+
+    if {![gdb_simple_compile $me $src executable $compile_flags]} {
+        return 0
+    }
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load "$obj"
+
+    if ![runto_main] {
+	set has_hw_wp_support 0
+	return $has_hw_wp_support
+    }
+
+    # The goal is to determine if HW watchpoints are available in general.
+    # Use "watch" and then check if gdb responds with hardware watch point.
+    set test "watch local"
+
+    gdb_test_multiple  $test "Check for HW watchpoint support" {
+	-re ".*Hardware watchpoint.*" {
+	    #  HW watchpoint supported by platform
+	    verbose -log "\n$me: Hardware watchpoint detected"
+            set has_hw_wp_support 1
+	}
+	-re ".*$gdb_prompt $" {
+	    set has_hw_wp_support 0
+	    verbose -log "\n$me: Default, hardware watchpoint not deteced"
+	}
+    }
+
+    gdb_exit
+    remote_file build delete $obj
+
+    verbose "$me: returning $has_hw_wp_support" 2
+    return $has_hw_wp_support
 }
 
 # Always load compatibility stuff.

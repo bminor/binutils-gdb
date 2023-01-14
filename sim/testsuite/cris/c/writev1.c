@@ -1,5 +1,5 @@
 /* Trivial test of writev.
-#notarget: cris*-*-elf
+#progos: linux
 #output: abcdefghijklmn\npass\n
 */
 #include <sys/uio.h>

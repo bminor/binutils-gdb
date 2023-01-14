@@ -1,5 +1,5 @@
 /* Mach-O support for BFD.
-   Copyright (C) 1999-2021 Free Software Foundation, Inc.
+   Copyright (C) 1999-2022 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -36,7 +36,7 @@
 #define bfd_mach_o_mkobject bfd_mach_o_gen_mkobject
 
 #define FILE_ALIGN(off, algn) \
-  (((off) + ((file_ptr) 1 << (algn)) - 1) & ((file_ptr) -1U << (algn)))
+  (((off) + ((ufile_ptr) 1 << (algn)) - 1) & ((ufile_ptr) -1 << (algn)))
 
 static bool
 bfd_mach_o_read_dyld_content (bfd *abfd, bfd_mach_o_dyld_info_command *cmd);
@@ -66,7 +66,7 @@ bfd_mach_o_valid (bfd *abfd)
   return true;
 }
 
-static INLINE bool
+static inline bool
 mach_o_wide_p (bfd_mach_o_header *header)
 {
   switch (header->version)
@@ -81,7 +81,7 @@ mach_o_wide_p (bfd_mach_o_header *header)
     }
 }
 
-static INLINE bool
+static inline bool
 bfd_mach_o_wide_p (bfd *abfd)
 {
   return mach_o_wide_p (&bfd_mach_o_get_data (abfd)->header);
@@ -3653,12 +3653,12 @@ bfd_mach_o_read_section_32 (bfd *abfd, unsigned long prot)
   section->offset = bfd_h_get_32 (abfd, raw.offset);
   section->align = bfd_h_get_32 (abfd, raw.align);
   /* PR 17512: file: 0017eb76.  */
-  if (section->align > 64)
+  if (section->align >= 31)
     {
       _bfd_error_handler
-	(_("bfd_mach_o_read_section_32: overlarge alignment value: %#lx, "
-	   "using 32 instead"), section->align);
-      section->align = 32;
+	(_("bfd_mach_o_read_section_32: overlarge alignment value: %#lx"),
+	 section->align);
+      section->align = 30;
     }
   section->reloff = bfd_h_get_32 (abfd, raw.reloff);
   section->nreloc = bfd_h_get_32 (abfd, raw.nreloc);
@@ -3696,12 +3696,12 @@ bfd_mach_o_read_section_64 (bfd *abfd, unsigned long prot)
   section->size = bfd_h_get_64 (abfd, raw.size);
   section->offset = bfd_h_get_32 (abfd, raw.offset);
   section->align = bfd_h_get_32 (abfd, raw.align);
-  if (section->align > 64)
+  if (section->align >= 63)
     {
       _bfd_error_handler
-	(_("bfd_mach_o_read_section_64: overlarge alignment value: %#lx, "
-	   "using 32 instead"), section->align);
-      section->align = 32;
+	(_("bfd_mach_o_read_section_64: overlarge alignment value: %#lx"),
+	 section->align);
+      section->align = 62;
     }
   section->reloff = bfd_h_get_32 (abfd, raw.reloff);
   section->nreloc = bfd_h_get_32 (abfd, raw.nreloc);
@@ -5509,6 +5509,7 @@ bfd_mach_o_fat_archive_p (bfd *abfd)
   struct mach_o_fat_header_external hdr;
   unsigned long i;
   size_t amt;
+  ufile_ptr filesize;
 
   if (bfd_seek (abfd, 0, SEEK_SET) != 0
       || bfd_bread (&hdr, sizeof (hdr), abfd) != sizeof (hdr))
@@ -5538,6 +5539,7 @@ bfd_mach_o_fat_archive_p (bfd *abfd)
   if (adata->archentries == NULL)
     goto error;
 
+  filesize = bfd_get_file_size (abfd);
   for (i = 0; i < adata->nfat_arch; i++)
     {
       struct mach_o_fat_arch_external arch;
@@ -5548,6 +5550,15 @@ bfd_mach_o_fat_archive_p (bfd *abfd)
       adata->archentries[i].offset = bfd_getb32 (arch.offset);
       adata->archentries[i].size = bfd_getb32 (arch.size);
       adata->archentries[i].align = bfd_getb32 (arch.align);
+      if (filesize != 0
+	  && (adata->archentries[i].offset > filesize
+	      || (adata->archentries[i].size
+		  > filesize - adata->archentries[i].offset)))
+	{
+	  bfd_release (abfd, adata);
+	  bfd_set_error (bfd_error_malformed_archive);
+	  return NULL;
+	}
     }
 
   abfd->tdata.mach_o_fat_data = adata;

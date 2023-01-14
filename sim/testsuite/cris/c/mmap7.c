@@ -1,7 +1,7 @@
 /* Check that mmapping a page-aligned size, larger than the file,
    works.
 
-#notarget: cris*-*-elf
+#progos: linux
 */
 
 /* Make sure we get an address where the size fits.  */

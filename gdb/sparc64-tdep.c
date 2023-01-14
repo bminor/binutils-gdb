@@ -1,6 +1,6 @@
 /* Target-dependent code for UltraSPARC.
 
-   Copyright (C) 2003-2021 Free Software Foundation, Inc.
+   Copyright (C) 2003-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -327,8 +327,8 @@ adi_is_addr_mapped (CORE_ADDR vaddr, size_t cnt)
 	    }
 	}
       }
-    else
-      warning (_("unable to open /proc file '%s'"), filename);
+  else
+    warning (_("unable to open /proc file '%s'"), filename);
 
   return false;
 }
@@ -648,7 +648,7 @@ sparc64_structure_or_union_p (const struct type *type)
 static struct type *
 sparc64_pstate_type (struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  sparc_gdbarch_tdep *tdep = (sparc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (!tdep->sparc64_pstate_type)
     {
@@ -675,7 +675,7 @@ sparc64_pstate_type (struct gdbarch *gdbarch)
 static struct type *
 sparc64_ccr_type (struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  sparc_gdbarch_tdep *tdep = (sparc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (tdep->sparc64_ccr_type == NULL)
     {
@@ -700,7 +700,7 @@ sparc64_ccr_type (struct gdbarch *gdbarch)
 static struct type *
 sparc64_fsr_type (struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  sparc_gdbarch_tdep *tdep = (sparc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (!tdep->sparc64_fsr_type)
     {
@@ -733,7 +733,7 @@ sparc64_fsr_type (struct gdbarch *gdbarch)
 static struct type *
 sparc64_fprs_type (struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  sparc_gdbarch_tdep *tdep = (sparc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (!tdep->sparc64_fprs_type)
     {
@@ -1267,7 +1267,7 @@ sparc64_store_floating_fields (struct regcache *regcache, struct type *type,
       for (i = 0; i < type->num_fields (); i++)
 	{
 	  struct type *subtype = check_typedef (type->field (i).type ());
-	  int subpos = bitpos + TYPE_FIELD_BITPOS (type, i);
+	  int subpos = bitpos + type->field (i).loc_bitpos ();
 
 	  sparc64_store_floating_fields (regcache, subtype, valbuf,
 					 element, subpos);
@@ -1355,7 +1355,7 @@ sparc64_extract_floating_fields (struct regcache *regcache, struct type *type,
       for (i = 0; i < type->num_fields (); i++)
 	{
 	  struct type *subtype = check_typedef (type->field (i).type ());
-	  int subpos = bitpos + TYPE_FIELD_BITPOS (type, i);
+	  int subpos = bitpos + type->field (i).loc_bitpos ();
 
 	  sparc64_extract_floating_fields (regcache, subtype, valbuf, subpos);
 	}
@@ -1418,7 +1418,7 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
 		 a problem.  */
 	      sp &= ~0xf;
 
-	      write_memory (sp, value_contents (args[i]), len);
+	      write_memory (sp, value_contents (args[i]).data (), len);
 	      args[i] = value_from_pointer (lookup_pointer_type (type), sp);
 	      num_elements++;
 	    }
@@ -1487,7 +1487,7 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
 
   for (i = 0; i < nargs; i++)
     {
-      const gdb_byte *valbuf = value_contents (args[i]);
+      const gdb_byte *valbuf = value_contents (args[i]).data ();
       struct type *type = value_type (args[i]);
       int len = TYPE_LENGTH (type);
       int regnum = -1;
@@ -1806,7 +1806,7 @@ sparc64_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr)
 void
 sparc64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  sparc_gdbarch_tdep *tdep = (sparc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   tdep->pc_regnum = SPARC64_PC_REGNUM;
   tdep->npc_regnum = SPARC64_NPC_REGNUM;

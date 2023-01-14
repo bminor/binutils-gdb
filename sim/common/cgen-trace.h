@@ -1,5 +1,5 @@
 /* Simulator tracing support for Cpu tools GENerated simulators.
-   Copyright (C) 1996-2021 Free Software Foundation, Inc.
+   Copyright (C) 1996-2022 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #ifndef CGEN_TRACE_H
 #define CGEN_TRACE_H
+
+#include "ansidecl.h"
 
 void cgen_trace_insn_init (SIM_CPU *, int);
 void cgen_trace_insn_fini (SIM_CPU *, const struct argbuf *, int);

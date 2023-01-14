@@ -1,5 +1,5 @@
 /* aarch64-asm.c -- AArch64 assembler support.
-   Copyright (C) 2012-2021 Free Software Foundation, Inc.
+   Copyright (C) 2012-2022 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of the GNU opcodes library.
@@ -147,7 +147,7 @@ aarch64_ins_reglane (const aarch64_operand *self, const aarch64_opnd_info *info,
 	  insert_fields (code, reglane_index, 0, 2, FLD_L, FLD_H);
 	  break;
 	default:
-	  assert (0);
+	  return false;
 	}
     }
   else if (inst->opcode->iclass == cryptosm3)
@@ -185,7 +185,7 @@ aarch64_ins_reglane (const aarch64_operand *self, const aarch64_opnd_info *info,
 	  insert_field (FLD_H, code, reglane_index, 0);
 	  break;
 	default:
-	  assert (0);
+	  return false;
 	}
     }
   return true;
@@ -229,7 +229,7 @@ aarch64_ins_ldst_reglist (const aarch64_operand *self ATTRIBUTE_UNUSED,
 	case 2: value = 0xa; break;
 	case 3: value = 0x6; break;
 	case 4: value = 0x2; break;
-	default: assert (0);
+	default: return false;
 	}
       break;
     case 2:
@@ -242,7 +242,7 @@ aarch64_ins_ldst_reglist (const aarch64_operand *self ATTRIBUTE_UNUSED,
       value = 0x0;
       break;
     default:
-      assert (0);
+      return false;
     }
   insert_field (FLD_opcode, code, value, 0);
 
@@ -315,7 +315,7 @@ aarch64_ins_ldst_elemlist (const aarch64_operand *self ATTRIBUTE_UNUSED,
       opcodeh2 = 0x2;
       break;
     default:
-      assert (0);
+      return false;
     }
   insert_fields (code, QSsize, 0, 3, FLD_vldst_size, FLD_S, FLD_Q);
   gen_sub_field (FLD_asisdlso_opcode, 1, 2, &field);
@@ -605,7 +605,7 @@ aarch64_ins_ft (const aarch64_operand *self, const aarch64_opnd_info *info,
 	case AARCH64_OPND_QLF_S_S: value = 0; break;
 	case AARCH64_OPND_QLF_S_D: value = 1; break;
 	case AARCH64_OPND_QLF_S_Q: value = 2; break;
-	default: assert (0);
+	default: return false;
 	}
       insert_field (FLD_ldst_size, code, value, 0);
     }
@@ -848,6 +848,10 @@ aarch64_ins_pstatefield (const aarch64_operand *self ATTRIBUTE_UNUSED,
   /* op1:op2 */
   insert_fields (code, info->pstatefield, inst->opcode->mask, 2,
 		 FLD_op2, FLD_op1);
+
+  /* Extra CRm mask.  */
+  if (info->sysreg.flags | F_REG_IN_CRM)
+    insert_field (FLD_CRm, code, PSTATE_DECODE_CRM (info->sysreg.flags), 0);
   return true;
 }
 
@@ -1325,6 +1329,209 @@ aarch64_ins_sve_float_zero_one (const aarch64_operand *self,
   return true;
 }
 
+/* Encode in SME instruction such as MOVA ZA tile vector register number,
+   vector indicator, vector selector and immediate.  */
+bool
+aarch64_ins_sme_za_hv_tiles (const aarch64_operand *self,
+                             const aarch64_opnd_info *info,
+                             aarch64_insn *code,
+                             const aarch64_inst *inst ATTRIBUTE_UNUSED,
+                             aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  int fld_size;
+  int fld_q;
+  int fld_v = info->za_tile_vector.v;
+  int fld_rv = info->za_tile_vector.index.regno - 12;
+  int fld_zan_imm = info->za_tile_vector.index.imm;
+  int regno = info->za_tile_vector.regno;
+
+  switch (info->qualifier)
+    {
+    case AARCH64_OPND_QLF_S_B:
+      fld_size = 0;
+      fld_q = 0;
+      break;
+    case AARCH64_OPND_QLF_S_H:
+      fld_size = 1;
+      fld_q = 0;
+      fld_zan_imm |= regno << 3;
+      break;
+    case AARCH64_OPND_QLF_S_S:
+      fld_size = 2;
+      fld_q = 0;
+      fld_zan_imm |= regno << 2;
+      break;
+    case AARCH64_OPND_QLF_S_D:
+      fld_size = 3;
+      fld_q = 0;
+      fld_zan_imm |= regno << 1;
+      break;
+    case AARCH64_OPND_QLF_S_Q:
+      fld_size = 3;
+      fld_q = 1;
+      fld_zan_imm = regno;
+      break;
+    default:
+      return false;
+    }
+
+  insert_field (self->fields[0], code, fld_size, 0);
+  insert_field (self->fields[1], code, fld_q, 0);
+  insert_field (self->fields[2], code, fld_v, 0);
+  insert_field (self->fields[3], code, fld_rv, 0);
+  insert_field (self->fields[4], code, fld_zan_imm, 0);
+
+  return true;
+}
+
+/* Encode in SME instruction ZERO list of up to eight 64-bit element tile names
+   separated by commas, encoded in the "imm8" field.
+
+   For programmer convenience an assembler must also accept the names of
+   32-bit, 16-bit and 8-bit element tiles which are converted into the
+   corresponding set of 64-bit element tiles.
+*/
+bool
+aarch64_ins_sme_za_list (const aarch64_operand *self,
+                         const aarch64_opnd_info *info,
+                         aarch64_insn *code,
+                         const aarch64_inst *inst ATTRIBUTE_UNUSED,
+                         aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  int fld_mask = info->imm.value;
+  insert_field (self->fields[0], code, fld_mask, 0);
+  return true;
+}
+
+bool
+aarch64_ins_sme_za_array (const aarch64_operand *self,
+                          const aarch64_opnd_info *info,
+                          aarch64_insn *code,
+                          const aarch64_inst *inst ATTRIBUTE_UNUSED,
+                          aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  int regno = info->za_tile_vector.index.regno - 12;
+  int imm = info->za_tile_vector.index.imm;
+  insert_field (self->fields[0], code, regno, 0);
+  insert_field (self->fields[1], code, imm, 0);
+  return true;
+}
+
+bool
+aarch64_ins_sme_addr_ri_u4xvl (const aarch64_operand *self,
+                               const aarch64_opnd_info *info,
+                               aarch64_insn *code,
+                               const aarch64_inst *inst ATTRIBUTE_UNUSED,
+                               aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  int regno = info->addr.base_regno;
+  int imm = info->addr.offset.imm;
+  insert_field (self->fields[0], code, regno, 0);
+  insert_field (self->fields[1], code, imm, 0);
+  return true;
+}
+
+/* Encode in SMSTART and SMSTOP {SM | ZA } mode.  */
+bool
+aarch64_ins_sme_sm_za (const aarch64_operand *self,
+                       const aarch64_opnd_info *info,
+                       aarch64_insn *code,
+                       const aarch64_inst *inst ATTRIBUTE_UNUSED,
+                       aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  aarch64_insn fld_crm;
+  /* Set CRm[3:1] bits.  */
+  if (info->reg.regno == 's')
+    fld_crm = 0x02 ; /* SVCRSM.  */
+  else if (info->reg.regno == 'z')
+    fld_crm = 0x04; /* SVCRZA.  */
+  else
+    return false;
+
+  insert_field (self->fields[0], code, fld_crm, 0);
+  return true;
+}
+
+/* Encode source scalable predicate register (Pn), name of the index base
+   register W12-W15 (Rm), and optional element index, defaulting to 0, in the
+   range 0 to one less than the number of vector elements in a 128-bit vector
+   register, encoded in "i1:tszh:tszl".
+*/
+bool
+aarch64_ins_sme_pred_reg_with_index (const aarch64_operand *self,
+                                     const aarch64_opnd_info *info,
+                                     aarch64_insn *code,
+                                     const aarch64_inst *inst ATTRIBUTE_UNUSED,
+                                     aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  int fld_pn = info->za_tile_vector.regno;
+  int fld_rm = info->za_tile_vector.index.regno - 12;
+  int imm = info->za_tile_vector.index.imm;
+  int fld_i1, fld_tszh, fld_tshl;
+
+  insert_field (self->fields[0], code, fld_rm, 0);
+  insert_field (self->fields[1], code, fld_pn, 0);
+
+  /* Optional element index, defaulting to 0, in the range 0 to one less than
+     the number of vector elements in a 128-bit vector register, encoded in
+     "i1:tszh:tszl".
+
+        i1  tszh  tszl  <T>
+        0   0     000   RESERVED
+        x   x     xx1   B
+        x   x     x10   H
+        x   x     100   S
+        x   1     000   D
+  */
+  switch (info->qualifier)
+  {
+    case AARCH64_OPND_QLF_S_B:
+      /* <imm> is 4 bit value.  */
+      fld_i1 = (imm >> 3) & 0x1;
+      fld_tszh = (imm >> 2) & 0x1;
+      fld_tshl = ((imm << 1) | 0x1) & 0x7;
+      break;
+    case AARCH64_OPND_QLF_S_H:
+      /* <imm> is 3 bit value.  */
+      fld_i1 = (imm >> 2) & 0x1;
+      fld_tszh = (imm >> 1) & 0x1;
+      fld_tshl = ((imm << 2) | 0x2) & 0x7;
+      break;
+    case AARCH64_OPND_QLF_S_S:
+      /* <imm> is 2 bit value.  */
+      fld_i1 = (imm >> 1) & 0x1;
+      fld_tszh = imm & 0x1;
+      fld_tshl = 0x4;
+      break;
+    case AARCH64_OPND_QLF_S_D:
+      /* <imm> is 1 bit value.  */
+      fld_i1 = imm & 0x1;
+      fld_tszh = 0x1;
+      fld_tshl = 0x0;
+      break;
+    default:
+      return false;
+  }
+
+  insert_field (self->fields[2], code, fld_i1, 0);
+  insert_field (self->fields[3], code, fld_tszh, 0);
+  insert_field (self->fields[4], code, fld_tshl, 0);
+  return true;
+}
+
+/* Insert X0-X30.  Register 31 is unallocated.  */
+bool
+aarch64_ins_x0_to_x30 (const aarch64_operand *self,
+		       const aarch64_opnd_info *info,
+		       aarch64_insn *code,
+		       const aarch64_inst *inst ATTRIBUTE_UNUSED,
+		       aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  assert (info->reg.regno <= 30);
+  insert_field (self->fields[0], code, info->reg.regno, 0);
+  return true;
+}
+
 /* Miscellaneous encoding functions.  */
 
 /* Encode size[0], i.e. bit 22, for
@@ -1350,7 +1557,7 @@ encode_asimd_fcvt (aarch64_inst *inst)
       qualifier = inst->operands[0].qualifier;
       break;
     default:
-      assert (0);
+      return;
     }
   assert (qualifier == AARCH64_OPND_QLF_V_4S
 	  || qualifier == AARCH64_OPND_QLF_V_2D);
@@ -1555,7 +1762,7 @@ do_special_encoding (struct aarch64_inst *inst)
 	case AARCH64_OPND_QLF_S_S: value = 0; break;
 	case AARCH64_OPND_QLF_S_D: value = 1; break;
 	case AARCH64_OPND_QLF_S_H: value = 3; break;
-	default: assert (0);
+	default: return;
 	}
       insert_field (FLD_type, &inst->value, value, 0);
     }
@@ -1904,13 +2111,13 @@ convert_mov_to_movewide (aarch64_inst *inst)
       value = ~inst->operands[1].imm.value;
       break;
     default:
-      assert (0);
+      return;
     }
   inst->operands[1].type = AARCH64_OPND_HALF;
   is32 = inst->operands[0].qualifier == AARCH64_OPND_QLF_W;
   if (! aarch64_wide_constant_p (value, is32, &shift_amount))
     /* The constraint check should have guaranteed this wouldn't happen.  */
-    assert (0);
+    return;
   value >>= shift_amount;
   value &= 0xffff;
   inst->operands[1].imm.value = value;

@@ -1,4 +1,4 @@
-# Copyright 2015-2021 Free Software Foundation, Inc.
+# Copyright 2015-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ Dwarf::assemble $asm_file {
     # this information being correct (w.r.t. funtion / argument types)
     # just so long as the compilation using makes use of the
     # .debug_ranges data then the test achieves its objective.
-    cu {} {
+    cu { label cu_label } {
 	compile_unit {
 	    {language @DW_LANG_C}
 	    {name dw-ranges-base.c}
@@ -123,6 +123,12 @@ Dwarf::assemble $asm_file {
 	    range 0 [lindex $frame3_func 1]
 	}
     }
+
+    aranges {} cu_label {
+	arange {} [lindex $main_func 0] [lindex $main_func 1]
+	arange {} [lindex $frame2_func 0] [lindex $frame2_func 1]
+	arange {} [lindex $frame3_func 0] [lindex $frame3_func 1]
+    }
 }
 
 if { [prepare_for_testing "failed to prepare" ${testfile} \
@@ -165,6 +171,10 @@ gdb_test_multiple "maint info line-table gdb.dwarf2/dw2-ranges-base.c" \
 	    set prev 1
 	    incr seq_count
 	    incr end_seq_count
+	    exp_continue
+	}
+	-re "^\r\n" {
+	    # Empty lines between tables.
 	    exp_continue
 	}
 	-re "^$gdb_prompt $" {

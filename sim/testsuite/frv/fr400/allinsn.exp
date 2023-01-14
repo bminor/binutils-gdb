@@ -1,6 +1,8 @@
 # FRV simulator testsuite.
 
-if [istarget frv*-*] {
+sim_init
+
+if [istarget *] {
     # all machines
     set all_machs "fr400 fr405 fr450 fr550"
     set cpu_option -mcpu

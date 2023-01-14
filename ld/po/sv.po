@@ -1682,7 +1682,7 @@ msgstr "Avkoda symbolnamn [använd STIL]"
 #: lexsup.c:320
 msgid ""
 "Do not allow multiple definitions with symbols included\n"
-"           in filename invoked by -R or --just-symbols"
+"                                in filename invoked by -R or --just-symbols"
 msgstr ""
 
 #: lexsup.c:324

@@ -1,5 +1,5 @@
 /* ELF executable support for BFD.
-   Copyright (C) 1991-2021 Free Software Foundation, Inc.
+   Copyright (C) 1991-2022 Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
@@ -325,9 +325,10 @@ elf_swap_shdr_in (bfd *abfd,
 	  && ((ufile_ptr) dst->sh_offset > filesize
 	      || dst->sh_size > filesize - dst->sh_offset))
 	{
+	  if (!abfd->read_only)
+	    _bfd_error_handler (_("warning: %pB has a section "
+				  "extending past end of file"), abfd);
 	  abfd->read_only = 1;
-	  _bfd_error_handler (_("warning: %pB has a section "
-				"extending past end of file"), abfd);
 	}
     }
   dst->sh_link = H_GET_32 (abfd, src->sh_link);

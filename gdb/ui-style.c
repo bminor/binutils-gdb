@@ -1,5 +1,5 @@
 /* Styling for ui_file
-   Copyright (C) 2018-2021 Free Software Foundation, Inc.
+   Copyright (C) 2018-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,7 +18,7 @@
 
 #include "defs.h"
 #include "ui-style.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 
 /* A regular expression that is used for matching ANSI terminal escape
    sequences.  */

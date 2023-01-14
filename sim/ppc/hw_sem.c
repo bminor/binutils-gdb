@@ -187,7 +187,7 @@ hw_sem_io_read_buffer(device *me,
   hw_sem_device *sem = (hw_sem_device*)device_data(me);
   struct sembuf sb;
   int status;
-  unsigned32 u32;
+  uint32_t u32;
   union semun help;
 
   /* do we need to worry about out of range addresses? */

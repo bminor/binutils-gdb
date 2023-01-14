@@ -650,9 +650,169 @@ SIM_ENABLE_HW_TRUE
 cgen
 cgendir
 CGEN_MAINT
+ENABLE_SIM_FALSE
+ENABLE_SIM_TRUE
 SIM_ENABLE_IGEN_FALSE
 SIM_ENABLE_IGEN_TRUE
+CC_FOR_TARGET_EXAMPLE_SYNACOR
+LD_FOR_TARGET_EXAMPLE_SYNACOR
+AS_FOR_TARGET_EXAMPLE_SYNACOR
+SIM_ENABLE_ARCH_v850_FALSE
+SIM_ENABLE_ARCH_v850_TRUE
+CC_FOR_TARGET_V850
+LD_FOR_TARGET_V850
+AS_FOR_TARGET_V850
+SIM_ENABLE_ARCH_erc32_FALSE
+SIM_ENABLE_ARCH_erc32_TRUE
+CC_FOR_TARGET_ERC32
+LD_FOR_TARGET_ERC32
+AS_FOR_TARGET_ERC32
+SIM_ENABLE_ARCH_sh_FALSE
+SIM_ENABLE_ARCH_sh_TRUE
+CC_FOR_TARGET_SH
+LD_FOR_TARGET_SH
+AS_FOR_TARGET_SH
+SIM_ENABLE_ARCH_rx_FALSE
+SIM_ENABLE_ARCH_rx_TRUE
+CC_FOR_TARGET_RX
+LD_FOR_TARGET_RX
+AS_FOR_TARGET_RX
+SIM_ENABLE_ARCH_rl78_FALSE
+SIM_ENABLE_ARCH_rl78_TRUE
+CC_FOR_TARGET_RL78
+LD_FOR_TARGET_RL78
+AS_FOR_TARGET_RL78
+SIM_ENABLE_ARCH_riscv_FALSE
+SIM_ENABLE_ARCH_riscv_TRUE
+CC_FOR_TARGET_RISCV
+LD_FOR_TARGET_RISCV
+AS_FOR_TARGET_RISCV
+SIM_ENABLE_ARCH_pru_FALSE
+SIM_ENABLE_ARCH_pru_TRUE
+CC_FOR_TARGET_PRU
+LD_FOR_TARGET_PRU
+AS_FOR_TARGET_PRU
+SIM_ENABLE_ARCH_ppc_FALSE
+SIM_ENABLE_ARCH_ppc_TRUE
+CC_FOR_TARGET_PPC
+LD_FOR_TARGET_PPC
+AS_FOR_TARGET_PPC
+SIM_ENABLE_ARCH_or1k_FALSE
+SIM_ENABLE_ARCH_or1k_TRUE
+CC_FOR_TARGET_OR1K
+LD_FOR_TARGET_OR1K
+AS_FOR_TARGET_OR1K
+SIM_ENABLE_ARCH_msp430_FALSE
+SIM_ENABLE_ARCH_msp430_TRUE
+CC_FOR_TARGET_MSP430
+LD_FOR_TARGET_MSP430
+AS_FOR_TARGET_MSP430
+SIM_ENABLE_ARCH_moxie_FALSE
+SIM_ENABLE_ARCH_moxie_TRUE
+CC_FOR_TARGET_MOXIE
+LD_FOR_TARGET_MOXIE
+AS_FOR_TARGET_MOXIE
+SIM_ENABLE_ARCH_mn10300_FALSE
+SIM_ENABLE_ARCH_mn10300_TRUE
+CC_FOR_TARGET_MN10300
+LD_FOR_TARGET_MN10300
+AS_FOR_TARGET_MN10300
+SIM_ENABLE_ARCH_mips_FALSE
+SIM_ENABLE_ARCH_mips_TRUE
+CC_FOR_TARGET_MIPS
+LD_FOR_TARGET_MIPS
+AS_FOR_TARGET_MIPS
+SIM_ENABLE_ARCH_microblaze_FALSE
+SIM_ENABLE_ARCH_microblaze_TRUE
+CC_FOR_TARGET_MICROBLAZE
+LD_FOR_TARGET_MICROBLAZE
+AS_FOR_TARGET_MICROBLAZE
+SIM_ENABLE_ARCH_mcore_FALSE
+SIM_ENABLE_ARCH_mcore_TRUE
+CC_FOR_TARGET_MCORE
+LD_FOR_TARGET_MCORE
+AS_FOR_TARGET_MCORE
+SIM_ENABLE_ARCH_m68hc11_FALSE
+SIM_ENABLE_ARCH_m68hc11_TRUE
+CC_FOR_TARGET_M68HC11
+LD_FOR_TARGET_M68HC11
+AS_FOR_TARGET_M68HC11
+SIM_ENABLE_ARCH_m32r_FALSE
+SIM_ENABLE_ARCH_m32r_TRUE
+CC_FOR_TARGET_M32R
+LD_FOR_TARGET_M32R
+AS_FOR_TARGET_M32R
+SIM_ENABLE_ARCH_m32c_FALSE
+SIM_ENABLE_ARCH_m32c_TRUE
+CC_FOR_TARGET_M32C
+LD_FOR_TARGET_M32C
+AS_FOR_TARGET_M32C
+SIM_ENABLE_ARCH_lm32_FALSE
+SIM_ENABLE_ARCH_lm32_TRUE
+CC_FOR_TARGET_LM32
+LD_FOR_TARGET_LM32
+AS_FOR_TARGET_LM32
+SIM_ENABLE_ARCH_iq2000_FALSE
+SIM_ENABLE_ARCH_iq2000_TRUE
+CC_FOR_TARGET_IQ2000
+LD_FOR_TARGET_IQ2000
+AS_FOR_TARGET_IQ2000
+SIM_ENABLE_ARCH_h8300_FALSE
+SIM_ENABLE_ARCH_h8300_TRUE
+CC_FOR_TARGET_H8300
+LD_FOR_TARGET_H8300
+AS_FOR_TARGET_H8300
+SIM_ENABLE_ARCH_ft32_FALSE
+SIM_ENABLE_ARCH_ft32_TRUE
+CC_FOR_TARGET_FT32
+LD_FOR_TARGET_FT32
+AS_FOR_TARGET_FT32
+SIM_ENABLE_ARCH_frv_FALSE
+SIM_ENABLE_ARCH_frv_TRUE
+CC_FOR_TARGET_FRV
+LD_FOR_TARGET_FRV
+AS_FOR_TARGET_FRV
+SIM_ENABLE_ARCH_d10v_FALSE
+SIM_ENABLE_ARCH_d10v_TRUE
+CC_FOR_TARGET_D10V
+LD_FOR_TARGET_D10V
+AS_FOR_TARGET_D10V
+SIM_ENABLE_ARCH_cris_FALSE
+SIM_ENABLE_ARCH_cris_TRUE
+CC_FOR_TARGET_CRIS
+LD_FOR_TARGET_CRIS
+AS_FOR_TARGET_CRIS
+SIM_ENABLE_ARCH_cr16_FALSE
+SIM_ENABLE_ARCH_cr16_TRUE
+CC_FOR_TARGET_CR16
+LD_FOR_TARGET_CR16
+AS_FOR_TARGET_CR16
+SIM_ENABLE_ARCH_bpf_FALSE
+SIM_ENABLE_ARCH_bpf_TRUE
+CC_FOR_TARGET_BPF
+LD_FOR_TARGET_BPF
+AS_FOR_TARGET_BPF
 subdirs
+SIM_ENABLE_ARCH_bfin_FALSE
+SIM_ENABLE_ARCH_bfin_TRUE
+CC_FOR_TARGET_BFIN
+LD_FOR_TARGET_BFIN
+AS_FOR_TARGET_BFIN
+SIM_ENABLE_ARCH_avr_FALSE
+SIM_ENABLE_ARCH_avr_TRUE
+CC_FOR_TARGET_AVR
+LD_FOR_TARGET_AVR
+AS_FOR_TARGET_AVR
+SIM_ENABLE_ARCH_arm_FALSE
+SIM_ENABLE_ARCH_arm_TRUE
+CC_FOR_TARGET_ARM
+LD_FOR_TARGET_ARM
+AS_FOR_TARGET_ARM
+SIM_ENABLE_ARCH_aarch64_FALSE
+SIM_ENABLE_ARCH_aarch64_TRUE
+CC_FOR_TARGET_AARCH64
+LD_FOR_TARGET_AARCH64
+AS_FOR_TARGET_AARCH64
 SIM_COMMON_BUILD_FALSE
 SIM_COMMON_BUILD_TRUE
 SIM_SUBDIRS
@@ -809,6 +969,7 @@ PACKAGE_TARNAME
 PACKAGE_NAME
 PATH_SEPARATOR
 SHELL
+SIM_TOOLCHAIN_VARS
 WERROR_CFLAGS
 WARN_CFLAGS'
 ac_subst_files=''
@@ -862,13 +1023,109 @@ PKG_CONFIG
 PKG_CONFIG_PATH
 PKG_CONFIG_LIBDIR
 SDL_CFLAGS
-SDL_LIBS'
+SDL_LIBS
+AS_FOR_TARGET_AARCH64
+LD_FOR_TARGET_AARCH64
+CC_FOR_TARGET_AARCH64
+AS_FOR_TARGET_ARM
+LD_FOR_TARGET_ARM
+CC_FOR_TARGET_ARM
+AS_FOR_TARGET_AVR
+LD_FOR_TARGET_AVR
+CC_FOR_TARGET_AVR
+AS_FOR_TARGET_BFIN
+LD_FOR_TARGET_BFIN
+CC_FOR_TARGET_BFIN
+AS_FOR_TARGET_BPF
+LD_FOR_TARGET_BPF
+CC_FOR_TARGET_BPF
+AS_FOR_TARGET_CR16
+LD_FOR_TARGET_CR16
+CC_FOR_TARGET_CR16
+AS_FOR_TARGET_CRIS
+LD_FOR_TARGET_CRIS
+CC_FOR_TARGET_CRIS
+AS_FOR_TARGET_D10V
+LD_FOR_TARGET_D10V
+CC_FOR_TARGET_D10V
+AS_FOR_TARGET_FRV
+LD_FOR_TARGET_FRV
+CC_FOR_TARGET_FRV
+AS_FOR_TARGET_FT32
+LD_FOR_TARGET_FT32
+CC_FOR_TARGET_FT32
+AS_FOR_TARGET_H8300
+LD_FOR_TARGET_H8300
+CC_FOR_TARGET_H8300
+AS_FOR_TARGET_IQ2000
+LD_FOR_TARGET_IQ2000
+CC_FOR_TARGET_IQ2000
+AS_FOR_TARGET_LM32
+LD_FOR_TARGET_LM32
+CC_FOR_TARGET_LM32
+AS_FOR_TARGET_M32C
+LD_FOR_TARGET_M32C
+CC_FOR_TARGET_M32C
+AS_FOR_TARGET_M32R
+LD_FOR_TARGET_M32R
+CC_FOR_TARGET_M32R
+AS_FOR_TARGET_M68HC11
+LD_FOR_TARGET_M68HC11
+CC_FOR_TARGET_M68HC11
+AS_FOR_TARGET_MCORE
+LD_FOR_TARGET_MCORE
+CC_FOR_TARGET_MCORE
+AS_FOR_TARGET_MICROBLAZE
+LD_FOR_TARGET_MICROBLAZE
+CC_FOR_TARGET_MICROBLAZE
+AS_FOR_TARGET_MIPS
+LD_FOR_TARGET_MIPS
+CC_FOR_TARGET_MIPS
+AS_FOR_TARGET_MN10300
+LD_FOR_TARGET_MN10300
+CC_FOR_TARGET_MN10300
+AS_FOR_TARGET_MOXIE
+LD_FOR_TARGET_MOXIE
+CC_FOR_TARGET_MOXIE
+AS_FOR_TARGET_MSP430
+LD_FOR_TARGET_MSP430
+CC_FOR_TARGET_MSP430
+AS_FOR_TARGET_OR1K
+LD_FOR_TARGET_OR1K
+CC_FOR_TARGET_OR1K
+AS_FOR_TARGET_PPC
+LD_FOR_TARGET_PPC
+CC_FOR_TARGET_PPC
+AS_FOR_TARGET_PRU
+LD_FOR_TARGET_PRU
+CC_FOR_TARGET_PRU
+AS_FOR_TARGET_RISCV
+LD_FOR_TARGET_RISCV
+CC_FOR_TARGET_RISCV
+AS_FOR_TARGET_RL78
+LD_FOR_TARGET_RL78
+CC_FOR_TARGET_RL78
+AS_FOR_TARGET_RX
+LD_FOR_TARGET_RX
+CC_FOR_TARGET_RX
+AS_FOR_TARGET_SH
+LD_FOR_TARGET_SH
+CC_FOR_TARGET_SH
+AS_FOR_TARGET_ERC32
+LD_FOR_TARGET_ERC32
+CC_FOR_TARGET_ERC32
+AS_FOR_TARGET_V850
+LD_FOR_TARGET_V850
+CC_FOR_TARGET_V850
+AS_FOR_TARGET_EXAMPLE_SYNACOR
+LD_FOR_TARGET_EXAMPLE_SYNACOR
+CC_FOR_TARGET_EXAMPLE_SYNACOR'
 ac_subdirs_all='bpf
 mips
 mn10300
 or1k
-riscv
 ppc
+riscv
 v850'
 
 # Initialize some variables set by options.
@@ -1567,6 +1824,198 @@ Some influential environment variables:
               path overriding pkg-config's built-in search path
   SDL_CFLAGS  C compiler flags for SDL, overriding pkg-config
   SDL_LIBS    linker flags for SDL, overriding pkg-config
+  AS_FOR_TARGET_AARCH64
+              Assembler for aarch64 tests
+  LD_FOR_TARGET_AARCH64
+              Linker for aarch64 tests
+  CC_FOR_TARGET_AARCH64
+              C compiler for aarch64 tests
+  AS_FOR_TARGET_ARM
+              Assembler for arm tests
+  LD_FOR_TARGET_ARM
+              Linker for arm tests
+  CC_FOR_TARGET_ARM
+              C compiler for arm tests
+  AS_FOR_TARGET_AVR
+              Assembler for avr tests
+  LD_FOR_TARGET_AVR
+              Linker for avr tests
+  CC_FOR_TARGET_AVR
+              C compiler for avr tests
+  AS_FOR_TARGET_BFIN
+              Assembler for bfin tests
+  LD_FOR_TARGET_BFIN
+              Linker for bfin tests
+  CC_FOR_TARGET_BFIN
+              C compiler for bfin tests
+  AS_FOR_TARGET_BPF
+              Assembler for bpf tests
+  LD_FOR_TARGET_BPF
+              Linker for bpf tests
+  CC_FOR_TARGET_BPF
+              C compiler for bpf tests
+  AS_FOR_TARGET_CR16
+              Assembler for cr16 tests
+  LD_FOR_TARGET_CR16
+              Linker for cr16 tests
+  CC_FOR_TARGET_CR16
+              C compiler for cr16 tests
+  AS_FOR_TARGET_CRIS
+              Assembler for cris tests
+  LD_FOR_TARGET_CRIS
+              Linker for cris tests
+  CC_FOR_TARGET_CRIS
+              C compiler for cris tests
+  AS_FOR_TARGET_D10V
+              Assembler for d10v tests
+  LD_FOR_TARGET_D10V
+              Linker for d10v tests
+  CC_FOR_TARGET_D10V
+              C compiler for d10v tests
+  AS_FOR_TARGET_FRV
+              Assembler for frv tests
+  LD_FOR_TARGET_FRV
+              Linker for frv tests
+  CC_FOR_TARGET_FRV
+              C compiler for frv tests
+  AS_FOR_TARGET_FT32
+              Assembler for ft32 tests
+  LD_FOR_TARGET_FT32
+              Linker for ft32 tests
+  CC_FOR_TARGET_FT32
+              C compiler for ft32 tests
+  AS_FOR_TARGET_H8300
+              Assembler for h8300 tests
+  LD_FOR_TARGET_H8300
+              Linker for h8300 tests
+  CC_FOR_TARGET_H8300
+              C compiler for h8300 tests
+  AS_FOR_TARGET_IQ2000
+              Assembler for iq2000 tests
+  LD_FOR_TARGET_IQ2000
+              Linker for iq2000 tests
+  CC_FOR_TARGET_IQ2000
+              C compiler for iq2000 tests
+  AS_FOR_TARGET_LM32
+              Assembler for lm32 tests
+  LD_FOR_TARGET_LM32
+              Linker for lm32 tests
+  CC_FOR_TARGET_LM32
+              C compiler for lm32 tests
+  AS_FOR_TARGET_M32C
+              Assembler for m32c tests
+  LD_FOR_TARGET_M32C
+              Linker for m32c tests
+  CC_FOR_TARGET_M32C
+              C compiler for m32c tests
+  AS_FOR_TARGET_M32R
+              Assembler for m32r tests
+  LD_FOR_TARGET_M32R
+              Linker for m32r tests
+  CC_FOR_TARGET_M32R
+              C compiler for m32r tests
+  AS_FOR_TARGET_M68HC11
+              Assembler for m68hc11 tests
+  LD_FOR_TARGET_M68HC11
+              Linker for m68hc11 tests
+  CC_FOR_TARGET_M68HC11
+              C compiler for m68hc11 tests
+  AS_FOR_TARGET_MCORE
+              Assembler for mcore tests
+  LD_FOR_TARGET_MCORE
+              Linker for mcore tests
+  CC_FOR_TARGET_MCORE
+              C compiler for mcore tests
+  AS_FOR_TARGET_MICROBLAZE
+              Assembler for microblaze tests
+  LD_FOR_TARGET_MICROBLAZE
+              Linker for microblaze tests
+  CC_FOR_TARGET_MICROBLAZE
+              C compiler for microblaze tests
+  AS_FOR_TARGET_MIPS
+              Assembler for mips tests
+  LD_FOR_TARGET_MIPS
+              Linker for mips tests
+  CC_FOR_TARGET_MIPS
+              C compiler for mips tests
+  AS_FOR_TARGET_MN10300
+              Assembler for mn10300 tests
+  LD_FOR_TARGET_MN10300
+              Linker for mn10300 tests
+  CC_FOR_TARGET_MN10300
+              C compiler for mn10300 tests
+  AS_FOR_TARGET_MOXIE
+              Assembler for moxie tests
+  LD_FOR_TARGET_MOXIE
+              Linker for moxie tests
+  CC_FOR_TARGET_MOXIE
+              C compiler for moxie tests
+  AS_FOR_TARGET_MSP430
+              Assembler for msp430 tests
+  LD_FOR_TARGET_MSP430
+              Linker for msp430 tests
+  CC_FOR_TARGET_MSP430
+              C compiler for msp430 tests
+  AS_FOR_TARGET_OR1K
+              Assembler for or1k tests
+  LD_FOR_TARGET_OR1K
+              Linker for or1k tests
+  CC_FOR_TARGET_OR1K
+              C compiler for or1k tests
+  AS_FOR_TARGET_PPC
+              Assembler for ppc tests
+  LD_FOR_TARGET_PPC
+              Linker for ppc tests
+  CC_FOR_TARGET_PPC
+              C compiler for ppc tests
+  AS_FOR_TARGET_PRU
+              Assembler for pru tests
+  LD_FOR_TARGET_PRU
+              Linker for pru tests
+  CC_FOR_TARGET_PRU
+              C compiler for pru tests
+  AS_FOR_TARGET_RISCV
+              Assembler for riscv tests
+  LD_FOR_TARGET_RISCV
+              Linker for riscv tests
+  CC_FOR_TARGET_RISCV
+              C compiler for riscv tests
+  AS_FOR_TARGET_RL78
+              Assembler for rl78 tests
+  LD_FOR_TARGET_RL78
+              Linker for rl78 tests
+  CC_FOR_TARGET_RL78
+              C compiler for rl78 tests
+  AS_FOR_TARGET_RX
+              Assembler for rx tests
+  LD_FOR_TARGET_RX
+              Linker for rx tests
+  CC_FOR_TARGET_RX
+              C compiler for rx tests
+  AS_FOR_TARGET_SH
+              Assembler for sh tests
+  LD_FOR_TARGET_SH
+              Linker for sh tests
+  CC_FOR_TARGET_SH
+              C compiler for sh tests
+  AS_FOR_TARGET_ERC32
+              Assembler for erc32 tests
+  LD_FOR_TARGET_ERC32
+              Linker for erc32 tests
+  CC_FOR_TARGET_ERC32
+              C compiler for erc32 tests
+  AS_FOR_TARGET_V850
+              Assembler for v850 tests
+  LD_FOR_TARGET_V850
+              Linker for v850 tests
+  CC_FOR_TARGET_V850
+              C compiler for v850 tests
+  AS_FOR_TARGET_EXAMPLE_SYNACOR
+              Assembler for example-synacor tests
+  LD_FOR_TARGET_EXAMPLE_SYNACOR
+              Linker for example-synacor tests
+  CC_FOR_TARGET_EXAMPLE_SYNACOR
+              C compiler for example-synacor tests
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -5554,48 +6003,49 @@ if ${lt_cv_path_NM+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   if test -n "$NM"; then
-  # Let the user override the test.
-  lt_cv_path_NM="$NM"
-else
-  lt_nm_to_check="${ac_tool_prefix}nm"
-  if test -n "$ac_tool_prefix" && test "$build" = "$host"; then
-    lt_nm_to_check="$lt_nm_to_check nm"
-  fi
-  for lt_tmp_nm in $lt_nm_to_check; do
-    lt_save_ifs="$IFS"; IFS=$PATH_SEPARATOR
-    for ac_dir in $PATH /usr/ccs/bin/elf /usr/ccs/bin /usr/ucb /bin; do
-      IFS="$lt_save_ifs"
-      test -z "$ac_dir" && ac_dir=.
-      tmp_nm="$ac_dir/$lt_tmp_nm"
-      if test -f "$tmp_nm" || test -f "$tmp_nm$ac_exeext" ; then
-	# Check to see if the nm accepts a BSD-compat flag.
-	# Adding the `sed 1q' prevents false positives on HP-UX, which says:
-	#   nm: unknown option "B" ignored
-	# Tru64's nm complains that /dev/null is an invalid object file
-	case `"$tmp_nm" -B /dev/null 2>&1 | sed '1q'` in
-	*/dev/null* | *'Invalid file or object type'*)
-	  lt_cv_path_NM="$tmp_nm -B"
-	  break
-	  ;;
-	*)
-	  case `"$tmp_nm" -p /dev/null 2>&1 | sed '1q'` in
-	  */dev/null*)
-	    lt_cv_path_NM="$tmp_nm -p"
-	    break
-	    ;;
-	  *)
-	    lt_cv_path_NM=${lt_cv_path_NM="$tmp_nm"} # keep the first match, but
-	    continue # so that we can try to find one that supports BSD flags
-	    ;;
-	  esac
-	  ;;
-	esac
-      fi
-    done
-    IFS="$lt_save_ifs"
-  done
-  : ${lt_cv_path_NM=no}
-fi
+   # Let the user override the nm to test.
+   lt_nm_to_check="$NM"
+ else
+   lt_nm_to_check="${ac_tool_prefix}nm"
+   if test -n "$ac_tool_prefix" && test "$build" = "$host"; then
+     lt_nm_to_check="$lt_nm_to_check nm"
+   fi
+ fi
+ for lt_tmp_nm in $lt_nm_to_check; do
+   lt_save_ifs="$IFS"; IFS=$PATH_SEPARATOR
+   for ac_dir in $PATH /usr/ccs/bin/elf /usr/ccs/bin /usr/ucb /bin; do
+     IFS="$lt_save_ifs"
+     test -z "$ac_dir" && ac_dir=.
+     case "$lt_tmp_nm" in
+     */*|*\\*) tmp_nm="$lt_tmp_nm";;
+     *) tmp_nm="$ac_dir/$lt_tmp_nm";;
+     esac
+     if test -f "$tmp_nm" || test -f "$tmp_nm$ac_exeext" ; then
+       # Check to see if the nm accepts a BSD-compat flag.
+       # Adding the `sed 1q' prevents false positives on HP-UX, which says:
+       #   nm: unknown option "B" ignored
+       case `"$tmp_nm" -B "$tmp_nm" 2>&1 | grep -v '^ *$' | sed '1q'` in
+       *$tmp_nm*) lt_cv_path_NM="$tmp_nm -B"
+	 break
+	 ;;
+       *)
+	 case `"$tmp_nm" -p "$tmp_nm" 2>&1 | grep -v '^ *$' | sed '1q'` in
+	 *$tmp_nm*)
+	   lt_cv_path_NM="$tmp_nm -p"
+	   break
+	   ;;
+	 *)
+	   lt_cv_path_NM=${lt_cv_path_NM="$tmp_nm"} # keep the first match, but
+	   continue # so that we can try to find one that supports BSD flags
+	   ;;
+	 esac
+	 ;;
+       esac
+     fi
+   done
+   IFS="$lt_save_ifs"
+ done
+ : ${lt_cv_path_NM=no}
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $lt_cv_path_NM" >&5
 $as_echo "$lt_cv_path_NM" >&6; }
@@ -6796,7 +7246,7 @@ osf*)
   symcode='[BCDEGQRST]'
   ;;
 solaris*)
-  symcode='[BDRT]'
+  symcode='[BCDRT]'
   ;;
 sco3.2v5*)
   symcode='[DT]'
@@ -11386,7 +11836,7 @@ haiku*)
   soname_spec='${libname}${release}${shared_ext}$major'
   shlibpath_var=LIBRARY_PATH
   shlibpath_overrides_runpath=yes
-  sys_lib_dlsearch_path_spec='/boot/home/config/lib /boot/common/lib /boot/beos/system/lib'
+  sys_lib_dlsearch_path_spec='/boot/home/config/lib /boot/common/lib /boot/system/lib'
   hardcode_into_libs=yes
   ;;
 
@@ -12182,7 +12632,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12185 "configure"
+#line 12635 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12288,7 +12738,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12291 "configure"
+#line 12741 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12708,6 +13158,136 @@ _ACEOF
 fi
 
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for dlopen in -ldl" >&5
+$as_echo_n "checking for dlopen in -ldl... " >&6; }
+if ${ac_cv_lib_dl_dlopen+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-ldl  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char dlopen ();
+int
+main ()
+{
+return dlopen ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_dl_dlopen=yes
+else
+  ac_cv_lib_dl_dlopen=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_dl_dlopen" >&5
+$as_echo "$ac_cv_lib_dl_dlopen" >&6; }
+if test "x$ac_cv_lib_dl_dlopen" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBDL 1
+_ACEOF
+
+  LIBS="-ldl $LIBS"
+
+fi
+
+if test "${ac_cv_lib_dl_dlopen}" = "yes"; then
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sdl2" >&5
+$as_echo_n "checking for sdl2... " >&6; }
+
+if test -n "$SDL_CFLAGS"; then
+    pkg_cv_SDL_CFLAGS="$SDL_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"sdl2\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "sdl2") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_SDL_CFLAGS=`$PKG_CONFIG --cflags "sdl2" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$SDL_LIBS"; then
+    pkg_cv_SDL_LIBS="$SDL_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"sdl2\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "sdl2") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_SDL_LIBS=`$PKG_CONFIG --libs "sdl2" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+if test $pkg_failed = no; then
+  pkg_save_LDFLAGS="$LDFLAGS"
+  LDFLAGS="$LDFLAGS $pkg_cv_SDL_LIBS"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+
+else
+  pkg_failed=yes
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$pkg_save_LDFLAGS
+fi
+
+
+
+if test $pkg_failed = yes; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        SDL_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "sdl2" 2>&1`
+        else
+	        SDL_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "sdl2" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$SDL_PKG_ERRORS" >&5
+
+
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for sdl" >&5
@@ -12801,51 +13381,125 @@ else
 	SDL_LIBS=$pkg_cv_SDL_LIBS
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-	  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for dlopen in -ldl" >&5
-$as_echo_n "checking for dlopen in -ldl... " >&6; }
-if ${ac_cv_lib_dl_dlopen+:} false; then :
-  $as_echo_n "(cached) " >&6
+	      SDL_CFLAGS="${SDL_CFLAGS} -DHAVE_SDL=1"
+      SDL_LIBS="-ldl"
+
+fi
+
+elif test $pkg_failed = untried; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sdl" >&5
+$as_echo_n "checking for sdl... " >&6; }
+
+if test -n "$SDL_CFLAGS"; then
+    pkg_cv_SDL_CFLAGS="$SDL_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"sdl\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "sdl") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_SDL_CFLAGS=`$PKG_CONFIG --cflags "sdl" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
 else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-ldl  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$SDL_LIBS"; then
+    pkg_cv_SDL_LIBS="$SDL_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"sdl\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "sdl") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_SDL_LIBS=`$PKG_CONFIG --libs "sdl" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+if test $pkg_failed = no; then
+  pkg_save_LDFLAGS="$LDFLAGS"
+  LDFLAGS="$LDFLAGS $pkg_cv_SDL_LIBS"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char dlopen ();
 int
 main ()
 {
-return dlopen ();
+
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_dl_dlopen=yes
+
 else
-  ac_cv_lib_dl_dlopen=no
+  pkg_failed=yes
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
+  LDFLAGS=$pkg_save_LDFLAGS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_dl_dlopen" >&5
-$as_echo "$ac_cv_lib_dl_dlopen" >&6; }
-if test "x$ac_cv_lib_dl_dlopen" = xyes; then :
-      SDL_CFLAGS="${SDL_CFLAGS} -DHAVE_SDL"
-    SDL_LIBS="-ldl"
+
+
+
+if test $pkg_failed = yes; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        SDL_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "sdl" 2>&1`
+        else
+	        SDL_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "sdl" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$SDL_PKG_ERRORS" >&5
+
+	:
+elif test $pkg_failed = untried; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	:
+else
+	SDL_CFLAGS=$pkg_cv_SDL_CFLAGS
+	SDL_LIBS=$pkg_cv_SDL_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	      SDL_CFLAGS="${SDL_CFLAGS} -DHAVE_SDL=1"
+      SDL_LIBS="-ldl"
+
+fi
 
 else
-  SDL_CFLAGS= SDL_LIBS=
+	SDL_CFLAGS=$pkg_cv_SDL_CFLAGS
+	SDL_LIBS=$pkg_cv_SDL_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	    SDL_CFLAGS="${SDL_CFLAGS} -DHAVE_SDL=2"
+    SDL_LIBS="-ldl"
+
 fi
-
-
+else
+  SDL_CFLAGS=
+  SDL_LIBS=
 fi
 
 
@@ -13722,7 +14376,8 @@ if test "${enable_sim}" != no; then
   sim_igen=no
   for targ in `echo $target $enable_targets | sed 's/,/ /g'`
   do
-      case "${targ}" in
+      sim_enable_arch_aarch64=false
+  case "${targ}" in
     all|aarch64*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=aarch64
@@ -13736,11 +14391,33 @@ if test "${enable_sim}" != no; then
     ac_config_commands="$ac_config_commands depdir-aarch64"
 
 
+      sim_enable_arch_aarch64=true
 
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "aarch64"; then :
+      : "${AS_FOR_TARGET_AARCH64:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_AARCH64:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_AARCH64:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_AARCH64 LD_FOR_TARGET_AARCH64 CC_FOR_TARGET_AARCH64"
+
+   if ${sim_enable_arch_aarch64}; then
+  SIM_ENABLE_ARCH_aarch64_TRUE=
+  SIM_ENABLE_ARCH_aarch64_FALSE='#'
+else
+  SIM_ENABLE_ARCH_aarch64_TRUE='#'
+  SIM_ENABLE_ARCH_aarch64_FALSE=
+fi
+
+
+      sim_enable_arch_arm=false
+  case "${targ}" in
     all|arm*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=arm
@@ -13754,11 +14431,33 @@ if test "${enable_sim}" != no; then
     ac_config_commands="$ac_config_commands depdir-arm"
 
 
+      sim_enable_arch_arm=true
 
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "arm"; then :
+      : "${AS_FOR_TARGET_ARM:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_ARM:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_ARM:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_ARM LD_FOR_TARGET_ARM CC_FOR_TARGET_ARM"
+
+   if ${sim_enable_arch_arm}; then
+  SIM_ENABLE_ARCH_arm_TRUE=
+  SIM_ENABLE_ARCH_arm_FALSE='#'
+else
+  SIM_ENABLE_ARCH_arm_TRUE='#'
+  SIM_ENABLE_ARCH_arm_FALSE=
+fi
+
+
+      sim_enable_arch_avr=false
+  case "${targ}" in
     all|avr*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=avr
@@ -13772,11 +14471,33 @@ if test "${enable_sim}" != no; then
     ac_config_commands="$ac_config_commands depdir-avr"
 
 
+      sim_enable_arch_avr=true
 
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "avr"; then :
+      : "${AS_FOR_TARGET_AVR:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_AVR:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_AVR:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_AVR LD_FOR_TARGET_AVR CC_FOR_TARGET_AVR"
+
+   if ${sim_enable_arch_avr}; then
+  SIM_ENABLE_ARCH_avr_TRUE=
+  SIM_ENABLE_ARCH_avr_FALSE='#'
+else
+  SIM_ENABLE_ARCH_avr_TRUE='#'
+  SIM_ENABLE_ARCH_avr_FALSE=
+fi
+
+
+      sim_enable_arch_bfin=false
+  case "${targ}" in
     all|bfin-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=bfin
@@ -13790,11 +14511,33 @@ if test "${enable_sim}" != no; then
     ac_config_commands="$ac_config_commands depdir-bfin"
 
 
+      sim_enable_arch_bfin=true
 
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "bfin"; then :
+      : "${AS_FOR_TARGET_BFIN:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_BFIN:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_BFIN:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_BFIN LD_FOR_TARGET_BFIN CC_FOR_TARGET_BFIN"
+
+   if ${sim_enable_arch_bfin}; then
+  SIM_ENABLE_ARCH_bfin_TRUE=
+  SIM_ENABLE_ARCH_bfin_FALSE='#'
+else
+  SIM_ENABLE_ARCH_bfin_TRUE='#'
+  SIM_ENABLE_ARCH_bfin_FALSE=
+fi
+
+
+      sim_enable_arch_bpf=false
+  case "${targ}" in
     all|bpf-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=bpf
@@ -13807,11 +14550,33 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-bpf"
 
 
+      sim_enable_arch_bpf=true
 
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "bpf"; then :
+      : "${AS_FOR_TARGET_BPF:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_BPF:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_BPF:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_BPF LD_FOR_TARGET_BPF CC_FOR_TARGET_BPF"
+
+   if ${sim_enable_arch_bpf}; then
+  SIM_ENABLE_ARCH_bpf_TRUE=
+  SIM_ENABLE_ARCH_bpf_FALSE='#'
+else
+  SIM_ENABLE_ARCH_bpf_TRUE='#'
+  SIM_ENABLE_ARCH_bpf_FALSE=
+fi
+
+
+      sim_enable_arch_cr16=false
+  case "${targ}" in
     all|cr16*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=cr16
@@ -13825,11 +14590,33 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-cr16"
 
 
+      sim_enable_arch_cr16=true
 
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "cr16"; then :
+      : "${AS_FOR_TARGET_CR16:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_CR16:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_CR16:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_CR16 LD_FOR_TARGET_CR16 CC_FOR_TARGET_CR16"
+
+   if ${sim_enable_arch_cr16}; then
+  SIM_ENABLE_ARCH_cr16_TRUE=
+  SIM_ENABLE_ARCH_cr16_FALSE='#'
+else
+  SIM_ENABLE_ARCH_cr16_TRUE='#'
+  SIM_ENABLE_ARCH_cr16_FALSE=
+fi
+
+
+      sim_enable_arch_cris=false
+  case "${targ}" in
     all|cris-*-* | crisv32-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=cris
@@ -13843,11 +14630,33 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-cris"
 
 
+      sim_enable_arch_cris=true
 
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "cris"; then :
+      : "${AS_FOR_TARGET_CRIS:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_CRIS:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_CRIS:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_CRIS LD_FOR_TARGET_CRIS CC_FOR_TARGET_CRIS"
+
+   if ${sim_enable_arch_cris}; then
+  SIM_ENABLE_ARCH_cris_TRUE=
+  SIM_ENABLE_ARCH_cris_FALSE='#'
+else
+  SIM_ENABLE_ARCH_cris_TRUE='#'
+  SIM_ENABLE_ARCH_cris_FALSE=
+fi
+
+
+      sim_enable_arch_d10v=false
+  case "${targ}" in
     all|d10v-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=d10v
@@ -13861,11 +14670,33 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-d10v"
 
 
+      sim_enable_arch_d10v=true
 
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "d10v"; then :
+      : "${AS_FOR_TARGET_D10V:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_D10V:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_D10V:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_D10V LD_FOR_TARGET_D10V CC_FOR_TARGET_D10V"
+
+   if ${sim_enable_arch_d10v}; then
+  SIM_ENABLE_ARCH_d10v_TRUE=
+  SIM_ENABLE_ARCH_d10v_FALSE='#'
+else
+  SIM_ENABLE_ARCH_d10v_TRUE='#'
+  SIM_ENABLE_ARCH_d10v_FALSE=
+fi
+
+
+      sim_enable_arch_frv=false
+  case "${targ}" in
     all|frv-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=frv
@@ -13879,11 +14710,33 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-frv"
 
 
+      sim_enable_arch_frv=true
 
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "frv"; then :
+      : "${AS_FOR_TARGET_FRV:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_FRV:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_FRV:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_FRV LD_FOR_TARGET_FRV CC_FOR_TARGET_FRV"
+
+   if ${sim_enable_arch_frv}; then
+  SIM_ENABLE_ARCH_frv_TRUE=
+  SIM_ENABLE_ARCH_frv_FALSE='#'
+else
+  SIM_ENABLE_ARCH_frv_TRUE='#'
+  SIM_ENABLE_ARCH_frv_FALSE=
+fi
+
+
+      sim_enable_arch_ft32=false
+  case "${targ}" in
     all|ft32-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=ft32
@@ -13897,11 +14750,33 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-ft32"
 
 
+      sim_enable_arch_ft32=true
 
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "ft32"; then :
+      : "${AS_FOR_TARGET_FT32:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_FT32:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_FT32:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_FT32 LD_FOR_TARGET_FT32 CC_FOR_TARGET_FT32"
+
+   if ${sim_enable_arch_ft32}; then
+  SIM_ENABLE_ARCH_ft32_TRUE=
+  SIM_ENABLE_ARCH_ft32_FALSE='#'
+else
+  SIM_ENABLE_ARCH_ft32_TRUE='#'
+  SIM_ENABLE_ARCH_ft32_FALSE=
+fi
+
+
+      sim_enable_arch_h8300=false
+  case "${targ}" in
     all|h8300*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=h8300
@@ -13915,11 +14790,33 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-h8300"
 
 
+      sim_enable_arch_h8300=true
 
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "h8300"; then :
+      : "${AS_FOR_TARGET_H8300:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_H8300:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_H8300:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_H8300 LD_FOR_TARGET_H8300 CC_FOR_TARGET_H8300"
+
+   if ${sim_enable_arch_h8300}; then
+  SIM_ENABLE_ARCH_h8300_TRUE=
+  SIM_ENABLE_ARCH_h8300_FALSE='#'
+else
+  SIM_ENABLE_ARCH_h8300_TRUE='#'
+  SIM_ENABLE_ARCH_h8300_FALSE=
+fi
+
+
+      sim_enable_arch_iq2000=false
+  case "${targ}" in
     all|iq2000-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=iq2000
@@ -13933,11 +14830,33 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-iq2000"
 
 
+      sim_enable_arch_iq2000=true
 
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "iq2000"; then :
+      : "${AS_FOR_TARGET_IQ2000:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_IQ2000:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_IQ2000:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_IQ2000 LD_FOR_TARGET_IQ2000 CC_FOR_TARGET_IQ2000"
+
+   if ${sim_enable_arch_iq2000}; then
+  SIM_ENABLE_ARCH_iq2000_TRUE=
+  SIM_ENABLE_ARCH_iq2000_FALSE='#'
+else
+  SIM_ENABLE_ARCH_iq2000_TRUE='#'
+  SIM_ENABLE_ARCH_iq2000_FALSE=
+fi
+
+
+      sim_enable_arch_lm32=false
+  case "${targ}" in
     all|lm32-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=lm32
@@ -13951,11 +14870,33 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-lm32"
 
 
+      sim_enable_arch_lm32=true
 
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "lm32"; then :
+      : "${AS_FOR_TARGET_LM32:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_LM32:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_LM32:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_LM32 LD_FOR_TARGET_LM32 CC_FOR_TARGET_LM32"
+
+   if ${sim_enable_arch_lm32}; then
+  SIM_ENABLE_ARCH_lm32_TRUE=
+  SIM_ENABLE_ARCH_lm32_FALSE='#'
+else
+  SIM_ENABLE_ARCH_lm32_TRUE='#'
+  SIM_ENABLE_ARCH_lm32_FALSE=
+fi
+
+
+      sim_enable_arch_m32c=false
+  case "${targ}" in
     all|m32c-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m32c
@@ -13969,11 +14910,33 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-m32c"
 
 
+      sim_enable_arch_m32c=true
 
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "m32c"; then :
+      : "${AS_FOR_TARGET_M32C:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_M32C:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_M32C:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_M32C LD_FOR_TARGET_M32C CC_FOR_TARGET_M32C"
+
+   if ${sim_enable_arch_m32c}; then
+  SIM_ENABLE_ARCH_m32c_TRUE=
+  SIM_ENABLE_ARCH_m32c_FALSE='#'
+else
+  SIM_ENABLE_ARCH_m32c_TRUE='#'
+  SIM_ENABLE_ARCH_m32c_FALSE=
+fi
+
+
+      sim_enable_arch_m32r=false
+  case "${targ}" in
     all|m32r-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m32r
@@ -13987,11 +14950,33 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-m32r"
 
 
+      sim_enable_arch_m32r=true
 
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "m32r"; then :
+      : "${AS_FOR_TARGET_M32R:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_M32R:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_M32R:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_M32R LD_FOR_TARGET_M32R CC_FOR_TARGET_M32R"
+
+   if ${sim_enable_arch_m32r}; then
+  SIM_ENABLE_ARCH_m32r_TRUE=
+  SIM_ENABLE_ARCH_m32r_FALSE='#'
+else
+  SIM_ENABLE_ARCH_m32r_TRUE='#'
+  SIM_ENABLE_ARCH_m32r_FALSE=
+fi
+
+
+      sim_enable_arch_m68hc11=false
+  case "${targ}" in
     all|m68hc11-*-*|m6811-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m68hc11
@@ -14005,11 +14990,33 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-m68hc11"
 
 
+      sim_enable_arch_m68hc11=true
 
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "m68hc11"; then :
+      : "${AS_FOR_TARGET_M68HC11:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_M68HC11:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_M68HC11:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_M68HC11 LD_FOR_TARGET_M68HC11 CC_FOR_TARGET_M68HC11"
+
+   if ${sim_enable_arch_m68hc11}; then
+  SIM_ENABLE_ARCH_m68hc11_TRUE=
+  SIM_ENABLE_ARCH_m68hc11_FALSE='#'
+else
+  SIM_ENABLE_ARCH_m68hc11_TRUE='#'
+  SIM_ENABLE_ARCH_m68hc11_FALSE=
+fi
+
+
+      sim_enable_arch_mcore=false
+  case "${targ}" in
     all|mcore-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=mcore
@@ -14023,12 +15030,34 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-mcore"
 
 
+      sim_enable_arch_mcore=true
 
       ;;
   esac
 
-      case "${targ}" in
-    all|microblaze-*-*)
+
+
+  if test "$SIM_PRIMARY_TARGET" = "mcore"; then :
+      : "${AS_FOR_TARGET_MCORE:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_MCORE:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_MCORE:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_MCORE LD_FOR_TARGET_MCORE CC_FOR_TARGET_MCORE"
+
+   if ${sim_enable_arch_mcore}; then
+  SIM_ENABLE_ARCH_mcore_TRUE=
+  SIM_ENABLE_ARCH_mcore_FALSE='#'
+else
+  SIM_ENABLE_ARCH_mcore_TRUE='#'
+  SIM_ENABLE_ARCH_mcore_FALSE=
+fi
+
+
+      sim_enable_arch_microblaze=false
+  case "${targ}" in
+    all|microblaze*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=microblaze
       fi
@@ -14041,11 +15070,33 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-microblaze"
 
 
+      sim_enable_arch_microblaze=true
 
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "microblaze"; then :
+      : "${AS_FOR_TARGET_MICROBLAZE:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_MICROBLAZE:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_MICROBLAZE:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_MICROBLAZE LD_FOR_TARGET_MICROBLAZE CC_FOR_TARGET_MICROBLAZE"
+
+   if ${sim_enable_arch_microblaze}; then
+  SIM_ENABLE_ARCH_microblaze_TRUE=
+  SIM_ENABLE_ARCH_microblaze_FALSE='#'
+else
+  SIM_ENABLE_ARCH_microblaze_TRUE='#'
+  SIM_ENABLE_ARCH_microblaze_FALSE=
+fi
+
+
+      sim_enable_arch_mips=false
+  case "${targ}" in
     all|mips*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=mips
@@ -14056,11 +15107,33 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-mips"
 
 
+      sim_enable_arch_mips=true
       sim_igen=yes
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "mips"; then :
+      : "${AS_FOR_TARGET_MIPS:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_MIPS:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_MIPS:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_MIPS LD_FOR_TARGET_MIPS CC_FOR_TARGET_MIPS"
+
+   if ${sim_enable_arch_mips}; then
+  SIM_ENABLE_ARCH_mips_TRUE=
+  SIM_ENABLE_ARCH_mips_FALSE='#'
+else
+  SIM_ENABLE_ARCH_mips_TRUE='#'
+  SIM_ENABLE_ARCH_mips_FALSE=
+fi
+
+
+      sim_enable_arch_mn10300=false
+  case "${targ}" in
     all|mn10300*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=mn10300
@@ -14071,11 +15144,33 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-mn10300"
 
 
+      sim_enable_arch_mn10300=true
       sim_igen=yes
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "mn10300"; then :
+      : "${AS_FOR_TARGET_MN10300:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_MN10300:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_MN10300:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_MN10300 LD_FOR_TARGET_MN10300 CC_FOR_TARGET_MN10300"
+
+   if ${sim_enable_arch_mn10300}; then
+  SIM_ENABLE_ARCH_mn10300_TRUE=
+  SIM_ENABLE_ARCH_mn10300_FALSE='#'
+else
+  SIM_ENABLE_ARCH_mn10300_TRUE='#'
+  SIM_ENABLE_ARCH_mn10300_FALSE=
+fi
+
+
+      sim_enable_arch_moxie=false
+  case "${targ}" in
     all|moxie-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=moxie
@@ -14089,11 +15184,33 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-moxie"
 
 
+      sim_enable_arch_moxie=true
 
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "moxie"; then :
+      : "${AS_FOR_TARGET_MOXIE:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_MOXIE:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_MOXIE:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_MOXIE LD_FOR_TARGET_MOXIE CC_FOR_TARGET_MOXIE"
+
+   if ${sim_enable_arch_moxie}; then
+  SIM_ENABLE_ARCH_moxie_TRUE=
+  SIM_ENABLE_ARCH_moxie_FALSE='#'
+else
+  SIM_ENABLE_ARCH_moxie_TRUE='#'
+  SIM_ENABLE_ARCH_moxie_FALSE=
+fi
+
+
+      sim_enable_arch_msp430=false
+  case "${targ}" in
     all|msp430*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=msp430
@@ -14107,12 +15224,34 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-msp430"
 
 
+      sim_enable_arch_msp430=true
 
       ;;
   esac
 
-      case "${targ}" in
-    all|or1k-*-* | or1knd-*-*)
+
+
+  if test "$SIM_PRIMARY_TARGET" = "msp430"; then :
+      : "${AS_FOR_TARGET_MSP430:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_MSP430:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_MSP430:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_MSP430 LD_FOR_TARGET_MSP430 CC_FOR_TARGET_MSP430"
+
+   if ${sim_enable_arch_msp430}; then
+  SIM_ENABLE_ARCH_msp430_TRUE=
+  SIM_ENABLE_ARCH_msp430_FALSE='#'
+else
+  SIM_ENABLE_ARCH_msp430_TRUE='#'
+  SIM_ENABLE_ARCH_msp430_FALSE=
+fi
+
+
+      sim_enable_arch_or1k=false
+  case "${targ}" in
+    all|or1k*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=or1k
       fi
@@ -14122,11 +15261,70 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-or1k"
 
 
+      sim_enable_arch_or1k=true
 
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "or1k"; then :
+      : "${AS_FOR_TARGET_OR1K:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_OR1K:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_OR1K:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_OR1K LD_FOR_TARGET_OR1K CC_FOR_TARGET_OR1K"
+
+   if ${sim_enable_arch_or1k}; then
+  SIM_ENABLE_ARCH_or1k_TRUE=
+  SIM_ENABLE_ARCH_or1k_FALSE='#'
+else
+  SIM_ENABLE_ARCH_or1k_TRUE='#'
+  SIM_ENABLE_ARCH_or1k_FALSE=
+fi
+
+
+      sim_enable_arch_ppc=false
+  case "${targ}" in
+    all|powerpc*-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=ppc
+      fi
+            subdirs="$subdirs ppc"
+
+
+    ac_config_commands="$ac_config_commands depdir-ppc"
+
+
+      sim_enable_arch_ppc=true
+
+      ;;
+  esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "ppc"; then :
+      : "${AS_FOR_TARGET_PPC:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_PPC:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_PPC:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_PPC LD_FOR_TARGET_PPC CC_FOR_TARGET_PPC"
+
+   if ${sim_enable_arch_ppc}; then
+  SIM_ENABLE_ARCH_ppc_TRUE=
+  SIM_ENABLE_ARCH_ppc_FALSE='#'
+else
+  SIM_ENABLE_ARCH_ppc_TRUE='#'
+  SIM_ENABLE_ARCH_ppc_FALSE=
+fi
+
+
+      sim_enable_arch_pru=false
+  case "${targ}" in
     all|pru*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=pru
@@ -14140,11 +15338,33 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-pru"
 
 
+      sim_enable_arch_pru=true
 
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "pru"; then :
+      : "${AS_FOR_TARGET_PRU:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_PRU:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_PRU:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_PRU LD_FOR_TARGET_PRU CC_FOR_TARGET_PRU"
+
+   if ${sim_enable_arch_pru}; then
+  SIM_ENABLE_ARCH_pru_TRUE=
+  SIM_ENABLE_ARCH_pru_FALSE='#'
+else
+  SIM_ENABLE_ARCH_pru_TRUE='#'
+  SIM_ENABLE_ARCH_pru_FALSE=
+fi
+
+
+      sim_enable_arch_riscv=false
+  case "${targ}" in
     all|riscv*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=riscv
@@ -14155,11 +15375,33 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-riscv"
 
 
+      sim_enable_arch_riscv=true
 
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "riscv"; then :
+      : "${AS_FOR_TARGET_RISCV:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_RISCV:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_RISCV:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_RISCV LD_FOR_TARGET_RISCV CC_FOR_TARGET_RISCV"
+
+   if ${sim_enable_arch_riscv}; then
+  SIM_ENABLE_ARCH_riscv_TRUE=
+  SIM_ENABLE_ARCH_riscv_FALSE='#'
+else
+  SIM_ENABLE_ARCH_riscv_TRUE='#'
+  SIM_ENABLE_ARCH_riscv_FALSE=
+fi
+
+
+      sim_enable_arch_rl78=false
+  case "${targ}" in
     all|rl78-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=rl78
@@ -14173,11 +15415,33 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-rl78"
 
 
+      sim_enable_arch_rl78=true
 
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "rl78"; then :
+      : "${AS_FOR_TARGET_RL78:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_RL78:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_RL78:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_RL78 LD_FOR_TARGET_RL78 CC_FOR_TARGET_RL78"
+
+   if ${sim_enable_arch_rl78}; then
+  SIM_ENABLE_ARCH_rl78_TRUE=
+  SIM_ENABLE_ARCH_rl78_FALSE='#'
+else
+  SIM_ENABLE_ARCH_rl78_TRUE='#'
+  SIM_ENABLE_ARCH_rl78_FALSE=
+fi
+
+
+      sim_enable_arch_rx=false
+  case "${targ}" in
     all|rx-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=rx
@@ -14191,11 +15455,33 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-rx"
 
 
+      sim_enable_arch_rx=true
 
       ;;
   esac
 
-      case "${targ}" in
+
+
+  if test "$SIM_PRIMARY_TARGET" = "rx"; then :
+      : "${AS_FOR_TARGET_RX:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_RX:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_RX:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_RX LD_FOR_TARGET_RX CC_FOR_TARGET_RX"
+
+   if ${sim_enable_arch_rx}; then
+  SIM_ENABLE_ARCH_rx_TRUE=
+  SIM_ENABLE_ARCH_rx_FALSE='#'
+else
+  SIM_ENABLE_ARCH_rx_TRUE='#'
+  SIM_ENABLE_ARCH_rx_FALSE=
+fi
+
+
+      sim_enable_arch_sh=false
+  case "${targ}" in
     all|sh*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=sh
@@ -14209,12 +15495,34 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-sh"
 
 
+      sim_enable_arch_sh=true
 
       ;;
   esac
 
-      case "${targ}" in
-    all|sparc-*-rtems*|sparc-*-elf*)
+
+
+  if test "$SIM_PRIMARY_TARGET" = "sh"; then :
+      : "${AS_FOR_TARGET_SH:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_SH:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_SH:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_SH LD_FOR_TARGET_SH CC_FOR_TARGET_SH"
+
+   if ${sim_enable_arch_sh}; then
+  SIM_ENABLE_ARCH_sh_TRUE=
+  SIM_ENABLE_ARCH_sh_FALSE='#'
+else
+  SIM_ENABLE_ARCH_sh_TRUE='#'
+  SIM_ENABLE_ARCH_sh_FALSE=
+fi
+
+
+      sim_enable_arch_erc32=false
+  case "${targ}" in
+    all|sparc-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=erc32
       fi
@@ -14227,26 +15535,33 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-erc32"
 
 
+      sim_enable_arch_erc32=true
 
       ;;
   esac
 
-      case "${targ}" in
-    all|powerpc*-*-*)
-      if test "${targ}" = "${target}"; then
-        SIM_PRIMARY_TARGET=ppc
-      fi
-            subdirs="$subdirs ppc"
 
 
-    ac_config_commands="$ac_config_commands depdir-ppc"
+  if test "$SIM_PRIMARY_TARGET" = "erc32"; then :
+      : "${AS_FOR_TARGET_ERC32:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_ERC32:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_ERC32:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_ERC32 LD_FOR_TARGET_ERC32 CC_FOR_TARGET_ERC32"
+
+   if ${sim_enable_arch_erc32}; then
+  SIM_ENABLE_ARCH_erc32_TRUE=
+  SIM_ENABLE_ARCH_erc32_FALSE='#'
+else
+  SIM_ENABLE_ARCH_erc32_TRUE='#'
+  SIM_ENABLE_ARCH_erc32_FALSE=
+fi
 
 
-
-      ;;
-  esac
-
-      case "${targ}" in
+      sim_enable_arch_v850=false
+  case "${targ}" in
     all|v850*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=v850
@@ -14257,13 +15572,43 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-v850"
 
 
+      sim_enable_arch_v850=true
       sim_igen=yes
       ;;
   esac
 
+
+
+  if test "$SIM_PRIMARY_TARGET" = "v850"; then :
+      : "${AS_FOR_TARGET_V850:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_V850:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_V850:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_V850 LD_FOR_TARGET_V850 CC_FOR_TARGET_V850"
+
+   if ${sim_enable_arch_v850}; then
+  SIM_ENABLE_ARCH_v850_TRUE=
+  SIM_ENABLE_ARCH_v850_FALSE='#'
+else
+  SIM_ENABLE_ARCH_v850_TRUE='#'
+  SIM_ENABLE_ARCH_v850_FALSE=
+fi
+
+
   done
 
   if test "x${enable_example_sims}" = xyes; then
+
+
+
+  : "${AS_FOR_TARGET_EXAMPLE_SYNACOR:=\$(abs_builddir)/../gas/as-new}"
+  : "${LD_FOR_TARGET_EXAMPLE_SYNACOR:=\$(abs_builddir)/../ld/ld-new}"
+  : "${CC_FOR_TARGET_EXAMPLE_SYNACOR:=\$(CC)}"
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_EXAMPLE_SYNACOR LD_FOR_TARGET_EXAMPLE_SYNACOR CC_FOR_TARGET_EXAMPLE_SYNACOR"
+
           ac_config_files="$ac_config_files example-synacor/Makefile.sim:example-synacor/Makefile.in"
 
     ac_config_commands="$ac_config_commands example-synacor/Makefile"
@@ -14281,6 +15626,14 @@ fi
 else
   SIM_ENABLE_IGEN_TRUE='#'
   SIM_ENABLE_IGEN_FALSE=
+fi
+
+ if test -n "$SIM_SUBDIRS"; then
+  ENABLE_SIM_TRUE=
+  ENABLE_SIM_FALSE='#'
+else
+  ENABLE_SIM_TRUE='#'
+  ENABLE_SIM_FALSE=
 fi
 
 
@@ -14439,16 +15792,8 @@ if test "$enable_sim_hardware" = no; then
   sim_hw_cflags="-DWITH_HW=0"
 elif test "$enable_sim_hardware" = yes; then
   sim_hw_cflags="-DWITH_HW=1"
-  # mingw does not support sockser
-  case ${host} in
-    *mingw*) ;;
-    *) # TODO: We don't add dv-sockser to sim_hw as it is not a "real" device
-       # that you instatiate.  Instead, other code will call into it directly.
-       # At some point, we should convert it over.
-       sim_hw_sockser="dv-sockser.o"
-       sim_hw_cflags="$sim_hw_cflags -DHAVE_DV_SOCKSER"
-       ;;
-  esac
+        sim_hw_sockser="dv-sockser.o"
+  sim_hw_cflags="$sim_hw_cflags -DHAVE_DV_SOCKSER"
 else
   as_fn_error $? "unknown argument \"$enable_sim_hardware\"" "$LINENO" 5
 fi
@@ -14748,7 +16093,7 @@ yes|no) ;;
 esac
 fi
 
-if test "x${enable_sim_frv_trapdump}" != xno; then
+if test "x${enable_sim_frv_trapdump}" = xyes; then
   SIM_FRV_TRAPDUMP_FLAGS="-DTRAPDUMP=1"
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
@@ -14924,8 +16269,136 @@ else
   am__EXEEXT_FALSE=
 fi
 
+if test -z "${SIM_ENABLE_ARCH_aarch64_TRUE}" && test -z "${SIM_ENABLE_ARCH_aarch64_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_aarch64\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_arm_TRUE}" && test -z "${SIM_ENABLE_ARCH_arm_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_arm\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_avr_TRUE}" && test -z "${SIM_ENABLE_ARCH_avr_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_avr\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_bfin_TRUE}" && test -z "${SIM_ENABLE_ARCH_bfin_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_bfin\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_bpf_TRUE}" && test -z "${SIM_ENABLE_ARCH_bpf_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_bpf\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_cr16_TRUE}" && test -z "${SIM_ENABLE_ARCH_cr16_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_cr16\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_cris_TRUE}" && test -z "${SIM_ENABLE_ARCH_cris_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_cris\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_d10v_TRUE}" && test -z "${SIM_ENABLE_ARCH_d10v_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_d10v\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_frv_TRUE}" && test -z "${SIM_ENABLE_ARCH_frv_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_frv\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_ft32_TRUE}" && test -z "${SIM_ENABLE_ARCH_ft32_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_ft32\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_h8300_TRUE}" && test -z "${SIM_ENABLE_ARCH_h8300_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_h8300\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_iq2000_TRUE}" && test -z "${SIM_ENABLE_ARCH_iq2000_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_iq2000\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_lm32_TRUE}" && test -z "${SIM_ENABLE_ARCH_lm32_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_lm32\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_m32c_TRUE}" && test -z "${SIM_ENABLE_ARCH_m32c_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_m32c\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_m32r_TRUE}" && test -z "${SIM_ENABLE_ARCH_m32r_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_m32r\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_m68hc11_TRUE}" && test -z "${SIM_ENABLE_ARCH_m68hc11_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_m68hc11\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_mcore_TRUE}" && test -z "${SIM_ENABLE_ARCH_mcore_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_mcore\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_microblaze_TRUE}" && test -z "${SIM_ENABLE_ARCH_microblaze_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_microblaze\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_mips_TRUE}" && test -z "${SIM_ENABLE_ARCH_mips_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_mips\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_mn10300_TRUE}" && test -z "${SIM_ENABLE_ARCH_mn10300_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_mn10300\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_moxie_TRUE}" && test -z "${SIM_ENABLE_ARCH_moxie_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_moxie\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_msp430_TRUE}" && test -z "${SIM_ENABLE_ARCH_msp430_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_msp430\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_or1k_TRUE}" && test -z "${SIM_ENABLE_ARCH_or1k_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_or1k\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_ppc_TRUE}" && test -z "${SIM_ENABLE_ARCH_ppc_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_ppc\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_pru_TRUE}" && test -z "${SIM_ENABLE_ARCH_pru_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_pru\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_riscv_TRUE}" && test -z "${SIM_ENABLE_ARCH_riscv_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_riscv\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_rl78_TRUE}" && test -z "${SIM_ENABLE_ARCH_rl78_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_rl78\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_rx_TRUE}" && test -z "${SIM_ENABLE_ARCH_rx_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_rx\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_sh_TRUE}" && test -z "${SIM_ENABLE_ARCH_sh_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_sh\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_erc32_TRUE}" && test -z "${SIM_ENABLE_ARCH_erc32_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_erc32\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_v850_TRUE}" && test -z "${SIM_ENABLE_ARCH_v850_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_v850\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 if test -z "${SIM_ENABLE_IGEN_TRUE}" && test -z "${SIM_ENABLE_IGEN_FALSE}"; then
   as_fn_error $? "conditional \"SIM_ENABLE_IGEN\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${ENABLE_SIM_TRUE}" && test -z "${ENABLE_SIM_FALSE}"; then
+  as_fn_error $? "conditional \"ENABLE_SIM\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${SIM_ENABLE_HW_TRUE}" && test -z "${SIM_ENABLE_HW_FALSE}"; then
@@ -15882,6 +17355,7 @@ do
     "msp430/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS msp430/Makefile" ;;
     "depdir-msp430") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-msp430" ;;
     "depdir-or1k") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-or1k" ;;
+    "depdir-ppc") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-ppc" ;;
     "pru/Makefile.sim") CONFIG_FILES="$CONFIG_FILES pru/Makefile.sim:pru/Makefile.in" ;;
     "pru/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS pru/Makefile" ;;
     "depdir-pru") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-pru" ;;
@@ -15898,7 +17372,6 @@ do
     "erc32/Makefile.sim") CONFIG_FILES="$CONFIG_FILES erc32/Makefile.sim:erc32/Makefile.in" ;;
     "erc32/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS erc32/Makefile" ;;
     "depdir-erc32") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-erc32" ;;
-    "depdir-ppc") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-ppc" ;;
     "depdir-v850") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-v850" ;;
     "example-synacor/Makefile.sim") CONFIG_FILES="$CONFIG_FILES example-synacor/Makefile.sim:example-synacor/Makefile.in" ;;
     "example-synacor/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS example-synacor/Makefile" ;;
@@ -17483,6 +18956,7 @@ $as_echo X"$file" |
  ;;
     "depdir-msp430":C) $SHELL $ac_aux_dir/mkinstalldirs msp430/$DEPDIR ;;
     "depdir-or1k":C) $SHELL $ac_aux_dir/mkinstalldirs or1k/$DEPDIR ;;
+    "depdir-ppc":C) $SHELL $ac_aux_dir/mkinstalldirs ppc/$DEPDIR ;;
     "pru/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
 		/^srcdir = / s:$:/pru:
@@ -17549,7 +19023,6 @@ $as_echo X"$file" |
  rm -f erc32/Makesim1.tmp erc32/Makesim2.tmp
  ;;
     "depdir-erc32":C) $SHELL $ac_aux_dir/mkinstalldirs erc32/$DEPDIR ;;
-    "depdir-ppc":C) $SHELL $ac_aux_dir/mkinstalldirs ppc/$DEPDIR ;;
     "depdir-v850":C) $SHELL $ac_aux_dir/mkinstalldirs v850/$DEPDIR ;;
     "example-synacor/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {

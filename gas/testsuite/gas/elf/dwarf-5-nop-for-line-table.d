@@ -1,6 +1,6 @@
 #as: --gdwarf-5
 #name: Check line table is produced with .nops
-#readelf: -wL
+#readelf: -W -wL
 
 #...
 Contents of the .debug_line section:

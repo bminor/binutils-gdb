@@ -1,6 +1,6 @@
 /* Abstraction of GNU v2 abi.
 
-   Copyright (C) 2001-2021 Free Software Foundation, Inc.
+   Copyright (C) 2001-2022 Free Software Foundation, Inc.
 
    Contributed by Daniel Berlin <dberlin@redhat.com>
 
@@ -189,7 +189,7 @@ gnuv2_value_rtti_type (struct value *v, int *full, LONGEST *top, int *using_enc)
   struct type *rtti_type;
   CORE_ADDR vtbl;
   struct bound_minimal_symbol minsym;
-  char *demangled_name, *p;
+  char *p;
   const char *linkage_name;
   struct type *btype;
   struct type *known_type_vptr_basetype;
@@ -248,14 +248,15 @@ gnuv2_value_rtti_type (struct value *v, int *full, LONGEST *top, int *using_enc)
     return NULL;
 
   /* If we just skip the prefix, we get screwed by namespaces.  */
-  demangled_name=gdb_demangle(linkage_name,DMGL_PARAMS|DMGL_ANSI);
-  p = strchr (demangled_name, ' ');
+  gdb::unique_xmalloc_ptr<char> demangled_name
+    = gdb_demangle(linkage_name,DMGL_PARAMS|DMGL_ANSI);
+  p = strchr (demangled_name.get (), ' ');
   if (p)
     *p = '\0';
 
   /* Lookup the type for the name.  */
   /* FIXME: chastain/2003-11-26: block=NULL is bogus.  See pr gdb/1465.  */
-  rtti_type = cp_lookup_rtti_type (demangled_name, NULL);
+  rtti_type = cp_lookup_rtti_type (demangled_name.get (), NULL);
   if (rtti_type == NULL)
     return NULL;
 
@@ -294,7 +295,7 @@ static int
 vb_match (struct type *type, int index, struct type *basetype)
 {
   struct type *fieldtype;
-  const char *name = TYPE_FIELD_NAME (type, index);
+  const char *name = type->field (index).name ();
   const char *field_class_name = NULL;
 
   if (*name != '_')
@@ -363,7 +364,7 @@ gnuv2_baseclass_offset (struct type *type, int index,
 	      CORE_ADDR addr;
 
 	      field_type = check_typedef (type->field (i).type ());
-	      field_offset = TYPE_FIELD_BITPOS (type, i) / 8;
+	      field_offset = type->field (i).loc_bitpos () / 8;
 	      field_length = TYPE_LENGTH (field_type);
 
 	      if (!value_bytes_available (val, embedded_offset + field_offset,

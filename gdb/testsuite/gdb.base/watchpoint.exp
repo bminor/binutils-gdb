@@ -1,4 +1,4 @@
-# Copyright 1992-2021 Free Software Foundation, Inc.
+# Copyright 1992-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -805,7 +805,9 @@ proc test_no_hw_watchpoints {} {
     # (This proves rather little on kernels that don't support
     # fast watchpoints, but still...)
     #
-    if ![runto_main] then { fail "watch tests suppressed" }
+    if ![runto_main] then {
+	return
+    }
 
     gdb_test_no_output "set can-use-hw-watchpoints 0" "disable fast watches"
 

@@ -1,5 +1,5 @@
 /* Common target dependent code for GDB on ARM systems.
-   Copyright (C) 2002-2021 Free Software Foundation, Inc.
+   Copyright (C) 2002-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -87,57 +87,70 @@ enum struct_return
 };
 
 /* Target-dependent structure in gdbarch.  */
-struct gdbarch_tdep
+struct arm_gdbarch_tdep : gdbarch_tdep
 {
   /* The ABI for this architecture.  It should never be set to
      ARM_ABI_AUTO.  */
-  enum arm_abi_kind arm_abi;
+  enum arm_abi_kind arm_abi {};
 
-  enum arm_float_model fp_model; /* Floating point calling conventions.  */
+  enum arm_float_model fp_model {}; /* Floating point calling conventions.  */
 
-  bool have_fpa_registers;	/* Does the target report the FPA registers?  */
-  bool have_wmmx_registers;	/* Does the target report the WMMX registers?  */
+  bool have_fpa_registers = false;	/* Does the target report the FPA registers?  */
+  bool have_wmmx_registers = false;	/* Does the target report the WMMX registers?  */
   /* The number of VFP registers reported by the target.  It is zero
      if VFP registers are not supported.  */
-  int vfp_register_count;
-  bool have_vfp_pseudos;	/* Are we synthesizing the single precision
+  int vfp_register_count = 0;
+  bool have_s_pseudos = false;	/* Are we synthesizing the single precision
 				   VFP registers?  */
-  bool have_neon_pseudos;	/* Are we synthesizing the quad precision
-				   NEON registers?  Requires
-				   have_vfp_pseudos.  */
-  bool have_neon;		/* Do we have a NEON unit?  */
+  int s_pseudo_base = 0;	/* Register number for the first S pseudo
+				   register.  */
+  int s_pseudo_count = 0;	/* Number of S pseudo registers.  */
+  bool have_q_pseudos = false;	/* Are we synthesizing the quad precision
+				   Q (NEON or MVE) registers?  Requires
+				   have_s_pseudos.  */
+  int q_pseudo_base = 0;	/* Register number for the first quad
+				   precision pseudo register.  */
+  int q_pseudo_count = 0;	/* Number of quad precision pseudo
+				   registers.  */
+  bool have_neon = false;	/* Do we have a NEON unit?  */
 
-  bool is_m;			/* Does the target follow the "M" profile.  */
-  CORE_ADDR lowest_pc;		/* Lowest address at which instructions 
+  bool have_mve = false;	/* Do we have a MVE extension?  */
+  int mve_vpr_regnum = 0;	/* MVE VPR register number.  */
+  int mve_pseudo_base = 0;	/* Number of the first MVE pseudo register.  */
+  int mve_pseudo_count = 0;	/* Total number of MVE pseudo registers.  */
+
+  bool is_m = false;		/* Does the target follow the "M" profile.  */
+  CORE_ADDR lowest_pc = 0;	/* Lowest address at which instructions
 				   will appear.  */
 
-  const gdb_byte *arm_breakpoint;	/* Breakpoint pattern for an ARM insn.  */
-  int arm_breakpoint_size;	/* And its size.  */
-  const gdb_byte *thumb_breakpoint;	/* Breakpoint pattern for a Thumb insn.  */
-  int thumb_breakpoint_size;	/* And its size.  */
+  const gdb_byte *arm_breakpoint = nullptr;	/* Breakpoint pattern for an ARM insn.  */
+  int arm_breakpoint_size = 0;	/* And its size.  */
+  const gdb_byte *thumb_breakpoint = nullptr;	/* Breakpoint pattern for a Thumb insn.  */
+  int thumb_breakpoint_size = 0;	/* And its size.  */
 
   /* If the Thumb breakpoint is an undefined instruction (which is
      affected by IT blocks) rather than a BKPT instruction (which is
      not), then we need a 32-bit Thumb breakpoint to preserve the
      instruction count in IT blocks.  */
-  const gdb_byte *thumb2_breakpoint;
-  int thumb2_breakpoint_size;
+  const gdb_byte *thumb2_breakpoint = nullptr;
+  int thumb2_breakpoint_size = 0;
 
-  int jb_pc;			/* Offset to PC value in jump buffer.
+  int jb_pc = 0;			/* Offset to PC value in jump buffer.
 				   If this is negative, longjmp support
 				   will be disabled.  */
-  size_t jb_elt_size;		/* And the size of each entry in the buf.  */
+  size_t jb_elt_size = 0;		/* And the size of each entry in the buf.  */
 
   /* Convention for returning structures.  */
-  enum struct_return struct_return;
+  enum struct_return struct_return {};
 
   /* ISA-specific data types.  */
-  struct type *arm_ext_type;
-  struct type *neon_double_type;
-  struct type *neon_quad_type;
+  struct type *arm_ext_type = nullptr;
+  struct type *neon_double_type = nullptr;
+  struct type *neon_quad_type = nullptr;
 
    /* syscall record.  */
-  int (*arm_syscall_record) (struct regcache *regcache, unsigned long svc_number);
+  int (*arm_syscall_record) (struct regcache *regcache,
+			     unsigned long svc_number) = nullptr;
 };
 
 /* Structures used for displaced stepping.  */

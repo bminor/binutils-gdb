@@ -1,7 +1,7 @@
 /* Target-dependent code for the IQ2000 architecture, for GDB, the GNU
    Debugger.
 
-   Copyright (C) 2000-2021 Free Software Foundation, Inc.
+   Copyright (C) 2000-2022 Free Software Foundation, Inc.
 
    Contributed by Red Hat.
 
@@ -712,7 +712,7 @@ iq2000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       type = value_type (args[i]);
       typelen = TYPE_LENGTH (type);
-      val = value_contents (args[i]);
+      val = value_contents (args[i]).data ();
       if (typelen <= 4)
 	{
 	  /* Char, short, int, float, pointer, and structs <= four bytes.  */

@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux, architecture independent.
 
-   Copyright (C) 2009-2021 Free Software Foundation, Inc.
+   Copyright (C) 2009-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,16 +31,17 @@
 #include "inferior.h"
 #include "cli/cli-utils.h"
 #include "arch-utils.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "observable.h"
 #include "objfiles.h"
 #include "infcall.h"
 #include "gdbcmd.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include "gdbsupport/enum-flags.h"
 #include "gdbsupport/gdb_optional.h"
 #include "gcore.h"
 #include "gcore-elf.h"
+#include "solib-svr4.h"
 
 #include <ctype.h>
 
@@ -378,6 +379,13 @@ linux_get_siginfo_type_with_fields (struct gdbarch *gdbarch,
   append_composite_type_field (type, "si_band", long_type);
   append_composite_type_field (type, "si_fd", int_type);
   append_composite_type_field (sifields_type, "_sigpoll", type);
+
+  /* _sigsys */
+  type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
+  append_composite_type_field (type, "_call_addr", void_ptr_type);
+  append_composite_type_field (type, "_syscall", int_type);
+  append_composite_type_field (type, "_arch", uint_type);
+  append_composite_type_field (sifields_type, "_sigsys", type);
 
   /* struct siginfo */
   siginfo_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
@@ -1096,16 +1104,11 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
    for each mapping.  */
 
 static void
-linux_read_core_file_mappings (struct gdbarch *gdbarch,
-			       struct bfd *cbfd,
-			       gdb::function_view<void (ULONGEST count)>
-				 pre_loop_cb,
-			       gdb::function_view<void (int num,
-							ULONGEST start,
-							ULONGEST end,
-							ULONGEST file_ofs,
-							const char *filename)>
-				 loop_cb)
+linux_read_core_file_mappings
+  (struct gdbarch *gdbarch,
+   struct bfd *cbfd,
+   read_core_file_mappings_pre_loop_ftype pre_loop_cb,
+   read_core_file_mappings_loop_ftype  loop_cb)
 {
   /* Ensure that ULONGEST is big enough for reading 64-bit core files.  */
   gdb_static_assert (sizeof (ULONGEST) >= 8);
@@ -1188,7 +1191,7 @@ linux_read_core_file_mappings (struct gdbarch *gdbarch,
       char * filename = filenames;
       filenames += strlen ((char *) filenames) + 1;
 
-      loop_cb (i, start, end, file_ofs, filename);
+      loop_cb (i, start, end, file_ofs, filename, nullptr);
     }
 }
 
@@ -1217,7 +1220,7 @@ linux_core_info_proc_mappings (struct gdbarch *gdbarch, const char *args)
 	  }
       },
     [=] (int num, ULONGEST start, ULONGEST end, ULONGEST file_ofs,
-	 const char *filename)
+	 const char *filename, const bfd_build_id *build_id)
       {
 	if (gdbarch_addr_bit (gdbarch) == 32)
 	  printf_filtered ("\t%10s %10s %10s %10s %s\n",
@@ -2723,4 +2726,63 @@ VM_DONTDUMP flag (\"dd\" in /proc/PID/smaps) when generating the corefile.  For\
 more information about this file, refer to the manpage of proc(5) and core(5)."),
 			   NULL, show_dump_excluded_mappings,
 			   &setlist, &showlist);
+}
+
+/* Fetch (and possibly build) an appropriate `link_map_offsets' for
+   ILP32/LP64 Linux systems which don't have the r_ldsomap field.  */
+
+link_map_offsets *
+linux_ilp32_fetch_link_map_offsets ()
+{
+  static link_map_offsets lmo;
+  static link_map_offsets *lmp = nullptr;
+
+  if (lmp == nullptr)
+    {
+      lmp = &lmo;
+
+      lmo.r_version_offset = 0;
+      lmo.r_version_size = 4;
+      lmo.r_map_offset = 4;
+      lmo.r_brk_offset = 8;
+      lmo.r_ldsomap_offset = -1;
+
+      /* Everything we need is in the first 20 bytes.  */
+      lmo.link_map_size = 20;
+      lmo.l_addr_offset = 0;
+      lmo.l_name_offset = 4;
+      lmo.l_ld_offset = 8;
+      lmo.l_next_offset = 12;
+      lmo.l_prev_offset = 16;
+    }
+
+  return lmp;
+}
+
+link_map_offsets *
+linux_lp64_fetch_link_map_offsets ()
+{
+  static link_map_offsets lmo;
+  static link_map_offsets *lmp = nullptr;
+
+  if (lmp == nullptr)
+    {
+      lmp = &lmo;
+
+      lmo.r_version_offset = 0;
+      lmo.r_version_size = 4;
+      lmo.r_map_offset = 8;
+      lmo.r_brk_offset = 16;
+      lmo.r_ldsomap_offset = -1;
+
+      /* Everything we need is in the first 40 bytes.  */
+      lmo.link_map_size = 40;
+      lmo.l_addr_offset = 0;
+      lmo.l_name_offset = 8;
+      lmo.l_ld_offset = 16;
+      lmo.l_next_offset = 24;
+      lmo.l_prev_offset = 32;
+    }
+
+  return lmp;
 }

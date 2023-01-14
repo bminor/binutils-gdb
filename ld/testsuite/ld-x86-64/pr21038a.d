@@ -1,6 +1,6 @@
 #name: PR ld/21038 (.plt.got)
 #as: --64
-#ld: -z bndplt -melf_x86_64 -shared -z relro --ld-generated-unwind-info --hash-style=sysv -z max-page-size=0x200000 -z noseparate-code
+#ld: -z bndplt -melf_x86_64 -shared -z relro --ld-generated-unwind-info --hash-style=sysv -z max-page-size=0x200000 -z noseparate-code $NO_DT_RELR_LDFLAGS
 #objdump: -dw -Wf
 
 .*: +file format .*
@@ -56,12 +56,12 @@ Disassembly of section .plt:
 Disassembly of section .plt.got:
 
 0+1c0 <func@plt>:
- +[a-f0-9]+:	f2 ff 25 31 0e 20 00 	bnd jmp \*0x200e31\(%rip\)        # 200ff8 <func>
+ +[a-f0-9]+:	f2 ff 25 71 01 20 00 	bnd jmp \*0x200171\(%rip\)        # 200338 <func>
  +[a-f0-9]+:	90                   	nop
 
 Disassembly of section .text:
 
 0+1c8 <foo>:
  +[a-f0-9]+:	e8 f3 ff ff ff       	call   1c0 <func@plt>
- +[a-f0-9]+:	48 8b 05 24 0e 20 00 	mov    0x200e24\(%rip\),%rax        # 200ff8 <func>
+ +[a-f0-9]+:	48 8b 05 64 01 20 00 	mov    0x200164\(%rip\),%rax        # 200338 <func>
 #pass

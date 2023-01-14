@@ -1,6 +1,6 @@
 /* The IGEN simulator generator for GDB, the GNU Debugger.
 
-   Copyright 2002-2021 Free Software Foundation, Inc.
+   Copyright 2002-2022 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney.
 
@@ -759,7 +759,7 @@ static void
 gen_idecode_h (lf *file,
 	       gen_table *gen, insn_table *insns, cache_entry *cache_rules)
 {
-  lf_printf (file, "typedef unsigned%d %sinstruction_word;\n",
+  lf_printf (file, "typedef uint%d_t %sinstruction_word;\n",
 	     options.insn_bit_size, options.module.global.prefix.l);
   if (options.gen.delayed_branch)
     {
@@ -1166,10 +1166,12 @@ main (int argc, char **argv, char **envp)
 		       "B:D:F:G:H:I:M:N:P:T:W:o:k:i:n:hc:d:e:m:r:s:t:f:x"))
 	 != -1)
     {
+#if 0  /* For debugging.  */
       fprintf (stderr, "  -%c ", ch);
       if (optarg)
 	fprintf (stderr, "%s ", optarg);
       fprintf (stderr, "\\\n");
+#endif
 
       switch (ch)
 	{

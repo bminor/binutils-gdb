@@ -1,4 +1,4 @@
-# Copyright 2011-2021 Free Software Foundation, Inc.
+# Copyright 2011-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -56,6 +56,13 @@ if [info exists REMOTE_TMPDIR] {
     set_board_info remotedir $REMOTE_TMPDIR
 }
 
+unset_board_info gdb_server_prog
+if [info exists GDBSERVER] {
+    set_board_info gdb_server_prog $GDBSERVER
+} else {
+    set_board_info gdb_server_prog /usr/bin/gdbserver
+}
+
 proc get_remote_login { } {
     set result ""
     if {[board_info [target_info name] exists username]} {
@@ -70,7 +77,8 @@ proc get_remote_login { } {
 proc get_target_remote_pipe_cmd { } {
     set target_exec [gdbserver_download_current_prog]
     set rsh_cmd "[board_info [target_info name] rsh_prog] [get_remote_login]"
-    return "$rsh_cmd /usr/bin/gdbserver --once stdio $target_exec"
+    set gdbserver "[board_info [target_info name] gdb_server_prog]"
+    return "$rsh_cmd $gdbserver --once stdio $target_exec"
 }
 
 proc ${board}_file { dest op args } {

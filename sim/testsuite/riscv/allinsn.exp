@@ -1,6 +1,8 @@
 # RISC-V simulator testsuite.
 
-if [istarget riscv*-*] {
+sim_init
+
+if [istarget *] {
     # all machines
     set all_machs "riscv"
 

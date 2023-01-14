@@ -1,6 +1,6 @@
 /* General utility routines for GDB/Python.
 
-   Copyright (C) 2008-2021 Free Software Foundation, Inc.
+   Copyright (C) 2008-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -93,8 +93,9 @@ unicode_to_encoded_python_string (PyObject *unicode_str, const char *charset)
 gdb::unique_xmalloc_ptr<char>
 unicode_to_target_string (PyObject *unicode_str)
 {
-  return unicode_to_encoded_string (unicode_str,
-				    target_charset (python_gdbarch));
+  return (unicode_to_encoded_string
+	  (unicode_str,
+	   target_charset (gdbpy_enter::get_gdbarch ())));
 }
 
 /* Returns a PyObject with the contents of the given unicode string
@@ -104,8 +105,9 @@ unicode_to_target_string (PyObject *unicode_str)
 static gdbpy_ref<>
 unicode_to_target_python_string (PyObject *unicode_str)
 {
-  return unicode_to_encoded_python_string (unicode_str,
-					   target_charset (python_gdbarch));
+  return (unicode_to_encoded_python_string
+	  (unicode_str,
+	   target_charset (gdbpy_enter::get_gdbarch ())));
 }
 
 /* Converts a python string (8-bit or unicode) to a target string in

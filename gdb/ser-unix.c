@@ -1,6 +1,6 @@
 /* Serial interface for local (hardwired) serial ports on Un*x like systems
 
-   Copyright (C) 1992-2021 Free Software Foundation, Inc.
+   Copyright (C) 1992-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -75,7 +75,7 @@ static int hardwire_setstopbits (struct serial *, int);
 static int
 hardwire_open (struct serial *scb, const char *name)
 {
-  scb->fd = gdb_open_cloexec (name, O_RDWR, 0);
+  scb->fd = gdb_open_cloexec (name, O_RDWR, 0).release ();
   if (scb->fd < 0)
     return -1;
 

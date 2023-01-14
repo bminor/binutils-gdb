@@ -1,5 +1,5 @@
 /* objdump.c -- dump information about an object file.
-   Copyright (C) 1990-2021 Free Software Foundation, Inc.
+   Copyright (C) 1990-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -55,6 +55,7 @@
 #include "progress.h"
 #include "bucomm.h"
 #include "elfcomm.h"
+#include "demanguse.h"
 #include "dwarf.h"
 #include "ctf-api.h"
 #include "getopt.h"
@@ -130,6 +131,7 @@ static bool color_output = false;	/* --visualize-jumps=color.  */
 static bool extended_color_output = false; /* --visualize-jumps=extended-color.  */
 static int process_links = false;       /* --process-links.  */
 
+static int dump_any_debugging;
 static int demangle_flags = DMGL_ANSI | DMGL_PARAMS;
 
 /* A structure to record the sections mentioned in -j switches.  */
@@ -204,6 +206,18 @@ static const struct objdump_private_desc * const objdump_private_vectors[] =
 
 /* The list of detected jumps inside a function.  */
 static struct jump_info *detected_jumps = NULL;
+
+typedef enum unicode_display_type
+{
+  unicode_default = 0,
+  unicode_locale,
+  unicode_escape,
+  unicode_hex,
+  unicode_highlight,
+  unicode_invalid
+} unicode_display_type;
+
+static unicode_display_type unicode_display = unicode_default;
 
 static void usage (FILE *, int) ATTRIBUTE_NORETURN;
 static void
@@ -273,7 +287,7 @@ usage (FILE *stream, int status)
                             separate debuginfo files.  (Implies -WK)\n"));
 #ifdef ENABLE_LIBCTF
   fprintf (stream, _("\
-      --ctf=SECTION        Display CTF info from SECTION\n"));
+      --ctf[=SECTION]      Display CTF info from SECTION, (default `.ctf')\n"));
 #endif
   fprintf (stream, _("\
   -t, --syms               Display the contents of the symbol table(s)\n"));
@@ -318,10 +332,9 @@ usage (FILE *stream, int status)
       fprintf (stream, _("\
   -F, --file-offsets             Include file offsets when displaying information\n"));
       fprintf (stream, _("\
-  -C, --demangle[=STYLE]         Decode mangled/processed symbol names\n\
-                                  The STYLE, if specified, can be `auto', `gnu',\n\
-                                  `lucid', `arm', `hp', `edg', `gnu-v3', `java'\n\
-                                  or `gnat'\n"));
+  -C, --demangle[=STYLE]         Decode mangled/processed symbol names\n"));
+      display_demangler_styles (stream, _("\
+                                   STYLE can be "));
       fprintf (stream, _("\
       --recurse-limit            Enable a limit on recursion whilst demangling\n\
                                   (default)\n"));
@@ -329,6 +342,9 @@ usage (FILE *stream, int status)
       --no-recurse-limit         Disable a limit on recursion whilst demangling\n"));
       fprintf (stream, _("\
   -w, --wide                     Format output for more than 80 columns\n"));
+      fprintf (stream, _("\
+  -U[d|l|i|x|e|h]                Controls the display of UTF-8 unicode characters\n\
+  --unicode=[default|locale|invalid|hex|escape|highlight]\n"));
       fprintf (stream, _("\
   -z, --disassemble-zeroes       Do not skip blocks of zeroes when disassembling\n"));
       fprintf (stream, _("\
@@ -361,7 +377,7 @@ usage (FILE *stream, int status)
       --dwarf-check              Make additional dwarf consistency checks.\n"));
 #ifdef ENABLE_LIBCTF
       fprintf (stream, _("\
-      --ctf-parent=SECTION       Use SECTION as the CTF parent\n"));
+      --ctf-parent=NAME          Use CTF archive member NAME as the CTF parent\n"));
 #endif
       fprintf (stream, _("\
       --visualize-jumps          Visualize jumps by drawing ASCII art lines\n"));
@@ -420,17 +436,23 @@ static struct option long_options[]=
 {
   {"adjust-vma", required_argument, NULL, OPTION_ADJUST_VMA},
   {"all-headers", no_argument, NULL, 'x'},
-  {"private-headers", no_argument, NULL, 'p'},
-  {"private", required_argument, NULL, 'P'},
   {"architecture", required_argument, NULL, 'm'},
   {"archive-headers", no_argument, NULL, 'a'},
+#ifdef ENABLE_LIBCTF
+  {"ctf", optional_argument, NULL, OPTION_CTF},
+  {"ctf-parent", required_argument, NULL, OPTION_CTF_PARENT},
+#endif
   {"debugging", no_argument, NULL, 'g'},
   {"debugging-tags", no_argument, NULL, 'e'},
   {"demangle", optional_argument, NULL, 'C'},
   {"disassemble", optional_argument, NULL, 'd'},
   {"disassemble-all", no_argument, NULL, 'D'},
-  {"disassembler-options", required_argument, NULL, 'M'},
   {"disassemble-zeroes", no_argument, NULL, 'z'},
+  {"disassembler-options", required_argument, NULL, 'M'},
+  {"dwarf", optional_argument, NULL, OPTION_DWARF},
+  {"dwarf-check", no_argument, 0, OPTION_DWARF_CHECK},
+  {"dwarf-depth", required_argument, 0, OPTION_DWARF_DEPTH},
+  {"dwarf-start", required_argument, 0, OPTION_DWARF_START},
   {"dynamic-reloc", no_argument, NULL, 'R'},
   {"dynamic-syms", no_argument, NULL, 'T'},
   {"endian", required_argument, NULL, OPTION_ENDIAN},
@@ -440,16 +462,23 @@ static struct option long_options[]=
   {"full-contents", no_argument, NULL, 's'},
   {"headers", no_argument, NULL, 'h'},
   {"help", no_argument, NULL, 'H'},
+  {"include", required_argument, NULL, 'I'},
   {"info", no_argument, NULL, 'i'},
+  {"inlines", no_argument, 0, OPTION_INLINES},
+  {"insn-width", required_argument, NULL, OPTION_INSN_WIDTH},
   {"line-numbers", no_argument, NULL, 'l'},
-  {"no-show-raw-insn", no_argument, &show_raw_insn, -1},
   {"no-addresses", no_argument, &no_addresses, 1},
-  {"process-links", no_argument, &process_links, true},
-  {"prefix-addresses", no_argument, &prefix_addresses, 1},
-  {"recurse-limit", no_argument, NULL, OPTION_RECURSE_LIMIT},
-  {"recursion-limit", no_argument, NULL, OPTION_RECURSE_LIMIT},
   {"no-recurse-limit", no_argument, NULL, OPTION_NO_RECURSE_LIMIT},
   {"no-recursion-limit", no_argument, NULL, OPTION_NO_RECURSE_LIMIT},
+  {"no-show-raw-insn", no_argument, &show_raw_insn, -1},
+  {"prefix", required_argument, NULL, OPTION_PREFIX},
+  {"prefix-addresses", no_argument, &prefix_addresses, 1},
+  {"prefix-strip", required_argument, NULL, OPTION_PREFIX_STRIP},
+  {"private", required_argument, NULL, 'P'},
+  {"private-headers", no_argument, NULL, 'p'},
+  {"process-links", no_argument, &process_links, true},
+  {"recurse-limit", no_argument, NULL, OPTION_RECURSE_LIMIT},
+  {"recursion-limit", no_argument, NULL, OPTION_RECURSE_LIMIT},
   {"reloc", no_argument, NULL, 'r'},
   {"section", required_argument, NULL, 'j'},
   {"section-headers", no_argument, NULL, 'h'},
@@ -457,28 +486,16 @@ static struct option long_options[]=
   {"source", no_argument, NULL, 'S'},
   {"source-comment", optional_argument, NULL, OPTION_SOURCE_COMMENT},
   {"special-syms", no_argument, &dump_special_syms, 1},
-  {"include", required_argument, NULL, 'I'},
-  {"dwarf", optional_argument, NULL, OPTION_DWARF},
-#ifdef ENABLE_LIBCTF
-  {"ctf", required_argument, NULL, OPTION_CTF},
-  {"ctf-parent", required_argument, NULL, OPTION_CTF_PARENT},
-#endif
   {"stabs", no_argument, NULL, 'G'},
   {"start-address", required_argument, NULL, OPTION_START_ADDRESS},
   {"stop-address", required_argument, NULL, OPTION_STOP_ADDRESS},
   {"syms", no_argument, NULL, 't'},
   {"target", required_argument, NULL, 'b'},
+  {"unicode", required_argument, NULL, 'U'},
   {"version", no_argument, NULL, 'V'},
-  {"wide", no_argument, NULL, 'w'},
-  {"prefix", required_argument, NULL, OPTION_PREFIX},
-  {"prefix-strip", required_argument, NULL, OPTION_PREFIX_STRIP},
-  {"insn-width", required_argument, NULL, OPTION_INSN_WIDTH},
-  {"dwarf-depth", required_argument, 0, OPTION_DWARF_DEPTH},
-  {"dwarf-start", required_argument, 0, OPTION_DWARF_START},
-  {"dwarf-check", no_argument, 0, OPTION_DWARF_CHECK},
-  {"inlines", no_argument, 0, OPTION_INLINES},
   {"visualize-jumps", optional_argument, 0, OPTION_VISUALIZE_JUMPS},
-  {0, no_argument, 0, 0}
+  {"wide", no_argument, NULL, 'w'},
+  {NULL, no_argument, NULL, 0}
 };
 
 static void
@@ -488,9 +505,121 @@ nonfatal (const char *msg)
   exit_status = 1;
 }
 
+/* Convert a potential UTF-8 encoded sequence in IN into characters in OUT.
+   The conversion format is controlled by the unicode_display variable.
+   Returns the number of characters added to OUT.
+   Returns the number of bytes consumed from IN in CONSUMED.
+   Always consumes at least one byte and displays at least one character.  */
+
+static unsigned int
+display_utf8 (const unsigned char * in, char * out, unsigned int * consumed)
+{
+  char *        orig_out = out;
+  unsigned int  nchars = 0;
+  unsigned int j;
+
+  if (unicode_display == unicode_default)
+    goto invalid;
+
+  if (in[0] < 0xc0)
+    goto invalid;
+
+  if ((in[1] & 0xc0) != 0x80)
+    goto invalid;
+
+  if ((in[0] & 0x20) == 0)
+    {
+      nchars = 2;
+      goto valid;
+    }
+
+  if ((in[2] & 0xc0) != 0x80)
+    goto invalid;
+
+  if ((in[0] & 0x10) == 0)
+    {
+      nchars = 3;
+      goto valid;
+    }
+
+  if ((in[3] & 0xc0) != 0x80)
+    goto invalid;
+
+  nchars = 4;
+
+ valid:
+  switch (unicode_display)
+    {
+    case unicode_locale:
+      /* Copy the bytes into the output buffer as is.  */
+      memcpy (out, in, nchars);
+      out += nchars;
+      break;
+
+    case unicode_invalid:
+    case unicode_hex:
+      out += sprintf (out, "%c", unicode_display == unicode_hex ? '<' : '{');
+      out += sprintf (out, "0x");
+      for (j = 0; j < nchars; j++)
+	out += sprintf (out, "%02x", in [j]);
+      out += sprintf (out, "%c", unicode_display == unicode_hex ? '>' : '}');
+      break;
+
+    case unicode_highlight:
+      if (isatty (1))
+	out += sprintf (out, "\x1B[31;47m"); /* Red.  */
+      /* Fall through.  */
+    case unicode_escape:
+      switch (nchars)
+	{
+	case 2:
+	  out += sprintf (out, "\\u%02x%02x",
+		  ((in[0] & 0x1c) >> 2),
+		  ((in[0] & 0x03) << 6) | (in[1] & 0x3f));
+	  break;
+
+	case 3:
+	  out += sprintf (out, "\\u%02x%02x",
+		  ((in[0] & 0x0f) << 4) | ((in[1] & 0x3c) >> 2),
+		  ((in[1] & 0x03) << 6) | ((in[2] & 0x3f)));
+	  break;
+
+	case 4:
+	  out += sprintf (out, "\\u%02x%02x%02x",
+		  ((in[0] & 0x07) << 6) | ((in[1] & 0x3c) >> 2),
+		  ((in[1] & 0x03) << 6) | ((in[2] & 0x3c) >> 2),
+		  ((in[2] & 0x03) << 6) | ((in[3] & 0x3f)));
+	  break;
+	default:
+	  /* URG.  */
+	  break;
+	}
+
+      if (unicode_display == unicode_highlight && isatty (1))
+	out += sprintf (out, "\033[0m"); /* Default colour.  */
+      break;
+
+    default:
+      /* URG */
+      break;
+    }
+
+  * consumed = nchars;
+  return out - orig_out;
+
+ invalid:
+  /* Not a valid UTF-8 sequence.  */
+  *out = *in;
+  * consumed = 1;
+  return 1;
+}
+
 /* Returns a version of IN with any control characters
    replaced by escape sequences.  Uses a static buffer
-   if necessary.  */
+   if necessary.
+
+   If unicode display is enabled, then also handles the
+   conversion of unicode characters.  */
 
 static const char *
 sanitize_string (const char * in)
@@ -508,40 +637,50 @@ sanitize_string (const char * in)
      of cases it will not be needed.  */
   do
     {
-      char c = *in++;
+      unsigned char c = *in++;
 
       if (c == 0)
 	return original;
 
       if (ISCNTRL (c))
 	break;
+
+      if (unicode_display != unicode_default && c >= 0xc0)
+	break;
     }
   while (1);
 
   /* Copy the input, translating as needed.  */
   in = original;
-  if (buffer_len < (strlen (in) * 2))
+  if (buffer_len < (strlen (in) * 9))
     {
       free ((void *) buffer);
-      buffer_len = strlen (in) * 2;
+      buffer_len = strlen (in) * 9;
       buffer = xmalloc (buffer_len + 1);
     }
 
   out = buffer;
   do
     {
-      char c = *in++;
+      unsigned char c = *in++;
 
       if (c == 0)
 	break;
 
-      if (!ISCNTRL (c))
-	*out++ = c;
-      else
+      if (ISCNTRL (c))
 	{
 	  *out++ = '^';
 	  *out++ = c + 0x40;
 	}
+      else if (unicode_display != unicode_default && c >= 0xc0)
+	{
+	  unsigned int num_consumed;
+
+	  out += display_utf8 ((const unsigned char *)(in - 1), out, & num_consumed);
+	  in += num_consumed - 1;
+	}
+      else
+	*out++ = c;
     }
   while (1);
 
@@ -777,7 +916,7 @@ dump_headers (bfd *abfd)
 
   if (wide_output)
     bfd_map_over_sections (abfd, find_longest_section_name,
-                           &max_section_name_length);
+			   &max_section_name_length);
 
   printf (_("Idx %-*s Size      %-*s%-*sFile off  Algn"),
 	  max_section_name_length, "Name",
@@ -789,7 +928,7 @@ dump_headers (bfd *abfd)
   printf ("\n");
 
   bfd_map_over_sections (abfd, dump_section_header,
-                         &max_section_name_length);
+			 &max_section_name_length);
 }
 
 static asymbol **
@@ -1159,7 +1298,7 @@ sym_ok (bool want_section,
   if (want_section)
     {
       /* NB: An object file can have different sections with the same
-         section name.  Compare compare section pointers if they have
+	 section name.  Compare compare section pointers if they have
 	 the same owner.  */
       if (sorted_syms[place]->section->owner == sec->owner
 	  && sorted_syms[place]->section != sec)
@@ -1279,7 +1418,7 @@ find_symbol_for_address (bfd_vma vma,
 		      && vma >= bfd_section_vma (sec)
 		      && vma < (bfd_section_vma (sec)
 				+ bfd_section_size (sec) / opb)));
-  
+
   if (! sym_ok (want_section, abfd, thisplace, sec, inf))
     {
       long i;
@@ -1350,7 +1489,7 @@ find_symbol_for_address (bfd_vma vma,
 	  if (rel->address == vma)
 	    {
 	      /* Absolute relocations do not provide a more helpful
-	         symbolic address.  Find a non-absolute relocation
+		 symbolic address.  Find a non-absolute relocation
 		 with the same address.  */
 	      arelent **rel_vma = rel_mid;
 	      for (rel_mid--;
@@ -1840,7 +1979,7 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
 	    {
 	      /* Demangle the name.  */
 	      demangle_alloc = bfd_demangle (abfd, functionname,
-	                                          demangle_flags);
+					     demangle_flags);
 	    }
 
 	  /* Demangling adds trailing parens, so don't print those.  */
@@ -2427,7 +2566,7 @@ disassemble_jumps (struct disassemble_info * inf,
       inf->bytes_per_line = 0;
       inf->bytes_per_chunk = 0;
       inf->flags = ((disassemble_all ? DISASSEMBLE_DATA : 0)
-        | (wide_output ? WIDE_OUTPUT : 0));
+		    | (wide_output ? WIDE_OUTPUT : 0));
       if (machine)
 	inf->flags |= USER_SPECIFIED_MACHINE_TYPE;
 
@@ -3208,7 +3347,7 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 	    }
 	}
     }
-  rel_ppend = rel_pp + rel_count;
+  rel_ppend = PTR_ADD (rel_pp, rel_count);
 
   if (!bfd_malloc_and_get_section (abfd, section, &data))
     {
@@ -3238,8 +3377,8 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
   /* Find the nearest symbol forwards from our current position.  */
   paux->require_sec = true;
   sym = (asymbol *) find_symbol_for_address (section->vma + addr_offset,
-                                             (struct disassemble_info *) inf,
-                                             &place);
+					     (struct disassemble_info *) inf,
+					     &place);
   paux->require_sec = false;
 
   /* PR 9774: If the target used signed addresses then we must make
@@ -3491,7 +3630,7 @@ disassemble_data (bfd *abfd)
      because that will screw up the relocs.  */
   sorted_symcount = symcount ? symcount : dynsymcount;
   sorted_syms = (asymbol **) xmalloc ((sorted_symcount + synthcount)
-                                      * sizeof (asymbol *));
+				      * sizeof (asymbol *));
   if (sorted_symcount != 0)
     {
       memcpy (sorted_syms, symcount ? syms : dynsyms,
@@ -3711,6 +3850,10 @@ load_debug_section (enum dwarf_section_display_enum debug, void *file)
   struct dwarf_section *section = &debug_displays [debug].section;
   bfd *abfd = (bfd *) file;
   asection *sec;
+  const char *name;
+
+  if (!dump_any_debugging)
+    return false;
 
   /* If it is already loaded, do nothing.  */
   if (section->start != NULL)
@@ -3719,24 +3862,24 @@ load_debug_section (enum dwarf_section_display_enum debug, void *file)
 	return true;
     }
   /* Locate the debug section.  */
-  sec = bfd_get_section_by_name (abfd, section->uncompressed_name);
-  if (sec != NULL)
-    section->name = section->uncompressed_name;
-  else
+  name = section->uncompressed_name;
+  sec = bfd_get_section_by_name (abfd, name);
+  if (sec == NULL)
     {
-      sec = bfd_get_section_by_name (abfd, section->compressed_name);
-      if (sec != NULL)
-        section->name = section->compressed_name;
-      else
-	{
-	  sec = bfd_get_section_by_name (abfd, section->xcoff_name);
-	  if (sec != NULL)
-	    section->name = section->xcoff_name;
-	}
+      name = section->compressed_name;
+      if (*name)
+	sec = bfd_get_section_by_name (abfd, name);
+    }
+  if (sec == NULL)
+    {
+      name = section->xcoff_name;
+      if (*name)
+	sec = bfd_get_section_by_name (abfd, name);
     }
   if (sec == NULL)
     return false;
 
+  section->name = name;
   return load_specific_debug_section (debug, sec, file);
 }
 
@@ -3770,7 +3913,7 @@ open_debug_file (const char * pathname)
 
   if (! bfd_check_format (data, bfd_object))
     return NULL;
-  
+
   return data;
 }
 
@@ -3803,11 +3946,19 @@ get_build_id (void * data)
 
 static void
 dump_dwarf_section (bfd *abfd, asection *section,
-		    void *arg ATTRIBUTE_UNUSED)
+		    void *arg)
 {
   const char *name = bfd_section_name (section);
   const char *match;
   int i;
+  bool is_mainfile = *(bool *) arg;
+
+  if (*name == 0)
+    return;
+
+  if (!is_mainfile && !process_links
+      && (section->flags & SEC_DEBUGGING) == 0)
+    return;
 
   if (startswith (name, ".gnu.linkonce.wi."))
     match = ".debug_info";
@@ -3830,7 +3981,7 @@ dump_dwarf_section (bfd *abfd, asection *section,
 	else
 	  sec->name = sec->xcoff_name;
 	if (load_specific_debug_section ((enum dwarf_section_display_enum) i,
-                                         section, abfd))
+					 section, abfd))
 	  {
 	    debug_displays [i].display (sec, abfd);
 
@@ -3844,7 +3995,7 @@ dump_dwarf_section (bfd *abfd, asection *section,
 /* Dump the dwarf debugging information.  */
 
 static void
-dump_dwarf (bfd *abfd)
+dump_dwarf (bfd *abfd, bool is_mainfile)
 {
   /* The byte_get pointer should have been set at the start of dump_bfd().  */
   if (byte_get == NULL)
@@ -3870,7 +4021,7 @@ dump_dwarf (bfd *abfd)
   init_dwarf_regnames_by_bfd_arch_and_mach (bfd_get_arch (abfd),
 					    bfd_get_mach (abfd));
 
-  bfd_map_over_sections (abfd, dump_dwarf_section, NULL);
+  bfd_map_over_sections (abfd, dump_dwarf_section, (void *) &is_mainfile);
 }
 
 /* Read ABFD's stabs section STABSECT_NAME, and return a pointer to
@@ -4152,29 +4303,27 @@ dump_ctf_errs (ctf_dict_t *fp)
 
 /* Dump one CTF archive member.  */
 
-static int
-dump_ctf_archive_member (ctf_dict_t *ctf, const char *name, void *arg)
+static void
+dump_ctf_archive_member (ctf_dict_t *ctf, const char *name, ctf_dict_t *parent,
+			 size_t member)
 {
-  ctf_dict_t *parent = (ctf_dict_t *) arg;
   const char *things[] = {"Header", "Labels", "Data objects",
 			  "Function objects", "Variables", "Types", "Strings",
 			  ""};
   const char **thing;
   size_t i;
 
-  /* Only print out the name of non-default-named archive members.
-     The name .ctf appears everywhere, even for things that aren't
-     really archives, so printing it out is liable to be confusing.
+  /* Don't print out the name of the default-named archive member if it appears
+     first in the list.  The name .ctf appears everywhere, even for things that
+     aren't really archives, so printing it out is liable to be confusing; also,
+     the common case by far is for only one archive member to exist, and hiding
+     it in that case seems worthwhile.  */
 
-     The parent, if there is one, is the default-owned archive member:
-     avoid importing it into itself.  (This does no harm, but looks
-     confusing.)  */
+  if (strcmp (name, ".ctf") != 0 || member != 0)
+    printf (_("\nCTF archive member: %s:\n"), sanitize_string (name));
 
-  if (strcmp (name, ".ctf") != 0)
-    {
-      printf (_("\nCTF archive member: %s:\n"), sanitize_string (name));
-      ctf_import (ctf, parent);
-    }
+  if (ctf_parent_name (ctf) != NULL)
+    ctf_import (ctf, parent);
 
   for (i = 0, thing = things; *thing[0]; thing++, i++)
     {
@@ -4198,8 +4347,6 @@ dump_ctf_archive_member (ctf_dict_t *ctf, const char *name, void *arg)
     }
 
   dump_ctf_errs (ctf);
-
-  return 0;
 }
 
 /* Dump the CTF debugging information.  */
@@ -4207,22 +4354,25 @@ dump_ctf_archive_member (ctf_dict_t *ctf, const char *name, void *arg)
 static void
 dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
 {
-  ctf_archive_t *ctfa, *parenta = NULL, *lookparent;
-  bfd_byte *ctfdata, *parentdata = NULL;
-  bfd_size_type ctfsize, parentsize;
+  ctf_archive_t *ctfa = NULL;
+  bfd_byte *ctfdata = NULL;
+  bfd_size_type ctfsize;
   ctf_sect_t ctfsect;
-  ctf_dict_t *parent = NULL;
+  ctf_dict_t *parent;
+  ctf_dict_t *fp;
+  ctf_next_t *i = NULL;
+  const char *name;
+  size_t member = 0;
   int err;
+
+  if (sect_name == NULL)
+    sect_name = ".ctf";
 
   if ((ctfdata = read_section_stabs (abfd, sect_name, &ctfsize, NULL)) == NULL)
       bfd_fatal (bfd_get_filename (abfd));
 
-  if (parent_name
-      && (parentdata = read_section_stabs (abfd, parent_name, &parentsize,
-					   NULL)) == NULL)
-      bfd_fatal (bfd_get_filename (abfd));
-
-  /* Load the CTF file and dump it.  */
+  /* Load the CTF file and dump it.  Preload the parent dict, since it will
+     need to be imported into every child in turn. */
 
   ctfsect = make_ctfsect (sect_name, ctfdata, ctfsize);
   if ((ctfa = ctf_bfdopen_ctfsect (abfd, &ctfsect, &err)) == NULL)
@@ -4232,25 +4382,7 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
       bfd_fatal (bfd_get_filename (abfd));
     }
 
-  if (parentdata)
-    {
-      ctfsect = make_ctfsect (parent_name, parentdata, parentsize);
-      if ((parenta = ctf_bfdopen_ctfsect (abfd, &ctfsect, &err)) == NULL)
-	{
-	  dump_ctf_errs (NULL);
-	  non_fatal (_("CTF open failure: %s"), ctf_errmsg (err));
-	  bfd_fatal (bfd_get_filename (abfd));
-	}
-
-      lookparent = parenta;
-    }
-  else
-    lookparent = ctfa;
-
-  /* Assume that the applicable parent archive member is the default one.
-     (This is what all known implementations are expected to do, if they
-     put CTFs and their parents in archives together.)  */
-  if ((parent = ctf_dict_open (lookparent, NULL, &err)) == NULL)
+  if ((parent = ctf_dict_open (ctfa, parent_name, &err)) == NULL)
     {
       dump_ctf_errs (NULL);
       non_fatal (_("CTF open failure: %s"), ctf_errmsg (err));
@@ -4259,7 +4391,9 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
 
   printf (_("Contents of CTF section %s:\n"), sanitize_string (sect_name));
 
-  if ((err = ctf_archive_iter (ctfa, dump_ctf_archive_member, parent)) != 0)
+  while ((fp = ctf_archive_next (ctfa, &i, &name, 0, &err)) != NULL)
+    dump_ctf_archive_member (fp, name, parent, member++);
+  if (err != ECTF_NEXT_END)
     {
       dump_ctf_errs (NULL);
       non_fatal (_("CTF archive member open failure: %s"), ctf_errmsg (err));
@@ -4267,8 +4401,6 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
     }
   ctf_dict_close (parent);
   ctf_close (ctfa);
-  ctf_close (parenta);
-  free (parentdata);
   free (ctfdata);
 }
 #else
@@ -4315,22 +4447,22 @@ dump_target_specific (bfd *abfd)
       e = strchr (b, ',');
 
       if (e)
-        *e = 0;
+	*e = 0;
 
       for (opt = (*desc)->options; opt->name; opt++)
-        if (strcmp (opt->name, b) == 0)
-          {
-            opt->selected = true;
-            break;
-          }
+	if (strcmp (opt->name, b) == 0)
+	  {
+	    opt->selected = true;
+	    break;
+	  }
       if (opt->name == NULL)
-        non_fatal (_("target specific dump '%s' not supported"), b);
+	non_fatal (_("target specific dump '%s' not supported"), b);
 
       if (e)
-        {
-          *e = ',';
-          b = e + 1;
-        }
+	{
+	  *e = ',';
+	  b = e + 1;
+	}
     }
   while (e != NULL);
 
@@ -4537,6 +4669,24 @@ dump_symbols (bfd *abfd ATTRIBUTE_UNUSED, bool dynamic)
 		  free (alloc);
 		}
 	    }
+	  else if (unicode_display != unicode_default
+		   && name != NULL && *name != '\0')
+	    {
+	      const char * sanitized_name;
+
+	      /* If we want to sanitize the name, we do it here, and
+		 temporarily clobber it while calling bfd_print_symbol.
+		 FIXME: This is a gross hack.  */
+	      sanitized_name = sanitize_string (name);
+	      if (sanitized_name != name)
+		(*current)->name = sanitized_name;
+	      else
+		sanitized_name = NULL;
+	      bfd_print_symbol (cur_bfd, stdout, *current,
+				bfd_print_symbol_all);
+	      if (sanitized_name != NULL)
+		(*current)->name = name;
+	    }
 	  else
 	    bfd_print_symbol (cur_bfd, stdout, *current,
 			      bfd_print_symbol_all);
@@ -4595,8 +4745,8 @@ dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
       if (with_line_numbers
 	  && sec != NULL
 	  && bfd_find_nearest_line_discriminator (abfd, sec, syms, q->address,
-                                                  &filename, &functionname,
-                                                  &linenumber, &discriminator))
+						  &filename, &functionname,
+						  &linenumber, &discriminator))
 	{
 	  if (functionname != NULL
 	      && (last_functionname == NULL
@@ -4613,15 +4763,15 @@ dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
 		  || (filename != NULL
 		      && last_filename != NULL
 		      && filename_cmp (filename, last_filename) != 0)
-                  || (discriminator != last_discriminator)))
+		  || (discriminator != last_discriminator)))
 	    {
-              if (discriminator > 0)
-                printf ("%s:%u\n", filename == NULL ? "???" :
+	      if (discriminator > 0)
+		printf ("%s:%u\n", filename == NULL ? "???" :
 			sanitize_string (filename), linenumber);
-              else
-                printf ("%s:%u (discriminator %u)\n",
+	      else
+		printf ("%s:%u (discriminator %u)\n",
 			filename == NULL ? "???" : sanitize_string (filename),
-                        linenumber, discriminator);
+			linenumber, discriminator);
 	      last_line = linenumber;
 	      last_discriminator = discriminator;
 	      if (last_filename != NULL)
@@ -4874,10 +5024,10 @@ dump_bfd (bfd *abfd, bool is_mainfile)
      displaying information about the main file.  Any memory allocated by
      load_separate_debug_files will be released when we call
      free_debug_memory below.
-     
+
      The test on is_mainfile is there because the chain of separate debug
      info files is a global variable shared by all invocations of dump_bfd.  */
-  if (is_mainfile)
+  if (byte_get != NULL && is_mainfile)
     {
       load_separate_debug_files (abfd, bfd_get_filename (abfd));
 
@@ -4912,23 +5062,23 @@ dump_bfd (bfd *abfd, bool is_mainfile)
       bfd_map_over_sections (abfd, adjust_addresses, &has_reloc);
     }
 
-  if (! is_mainfile && ! process_links)
-    return;
-
-  if (! dump_debugging_tags && ! suppress_bfd_header)
-    printf (_("\n%s:     file format %s\n"),
-	    sanitize_string (bfd_get_filename (abfd)),
-	    abfd->xvec->name);
-  if (dump_ar_hdrs)
-    print_arelt_descr (stdout, abfd, true, false);
-  if (dump_file_header)
-    dump_bfd_header (abfd);
-  if (dump_private_headers)
-    dump_bfd_private_header (abfd);
-  if (dump_private_options != NULL)
-    dump_target_specific (abfd);
-  if (! dump_debugging_tags && ! suppress_bfd_header)
-    putchar ('\n');
+  if (is_mainfile || process_links)
+    {
+      if (! dump_debugging_tags && ! suppress_bfd_header)
+	printf (_("\n%s:     file format %s\n"),
+		sanitize_string (bfd_get_filename (abfd)),
+		abfd->xvec->name);
+      if (dump_ar_hdrs)
+	print_arelt_descr (stdout, abfd, true, false);
+      if (dump_file_header)
+	dump_bfd_header (abfd);
+      if (dump_private_headers)
+	dump_bfd_private_header (abfd);
+      if (dump_private_options != NULL)
+	dump_target_specific (abfd);
+      if (! dump_debugging_tags && ! suppress_bfd_header)
+	putchar ('\n');
+    }
 
   if (dump_symtab
       || dump_reloc_info
@@ -4947,7 +5097,7 @@ dump_bfd (bfd *abfd, bool is_mainfile)
 	    {
 	      asymbol **  extra_syms;
 	      long        old_symcount = symcount;
-	      
+
 	      extra_syms = slurp_symtab (i->handle);
 
 	      if (extra_syms)
@@ -4971,39 +5121,46 @@ dump_bfd (bfd *abfd, bool is_mainfile)
 	}
     }
 
-  if (dump_section_headers)
-    dump_headers (abfd);
-
-  if (dump_dynamic_symtab || dump_dynamic_reloc_info
-      || (disassemble && bfd_get_dynamic_symtab_upper_bound (abfd) > 0))
-    dynsyms = slurp_dynamic_symtab (abfd);
-
-  if (disassemble)
+  if (is_mainfile || process_links)
     {
-      synthcount = bfd_get_synthetic_symtab (abfd, symcount, syms,
-					     dynsymcount, dynsyms, &synthsyms);
-      if (synthcount < 0)
-	synthcount = 0;
-    }
+      if (dump_section_headers)
+	dump_headers (abfd);
 
-  if (dump_symtab)
-    dump_symbols (abfd, false);
-  if (dump_dynamic_symtab)
-    dump_symbols (abfd, true);
+      if (dump_dynamic_symtab || dump_dynamic_reloc_info
+	  || (disassemble && bfd_get_dynamic_symtab_upper_bound (abfd) > 0))
+	dynsyms = slurp_dynamic_symtab (abfd);
+
+      if (disassemble)
+	{
+	  synthcount = bfd_get_synthetic_symtab (abfd, symcount, syms,
+						 dynsymcount, dynsyms,
+						 &synthsyms);
+	  if (synthcount < 0)
+	    synthcount = 0;
+	}
+
+      if (dump_symtab)
+	dump_symbols (abfd, false);
+      if (dump_dynamic_symtab)
+	dump_symbols (abfd, true);
+    }
   if (dump_dwarf_section_info)
-    dump_dwarf (abfd);
-  if (dump_ctf_section_info)
-    dump_ctf (abfd, dump_ctf_section_name, dump_ctf_parent_name);
-  if (dump_stab_section_info)
-    dump_stabs (abfd);
-  if (dump_reloc_info && ! disassemble)
-    dump_relocs (abfd);
-  if (dump_dynamic_reloc_info && ! disassemble)
-    dump_dynamic_relocs (abfd);
-  if (dump_section_contents)
-    dump_data (abfd);
-  if (disassemble)
-    disassemble_data (abfd);
+    dump_dwarf (abfd, is_mainfile);
+  if (is_mainfile || process_links)
+    {
+      if (dump_ctf_section_info)
+	dump_ctf (abfd, dump_ctf_section_name, dump_ctf_parent_name);
+      if (dump_stab_section_info)
+	dump_stabs (abfd);
+      if (dump_reloc_info && ! disassemble)
+	dump_relocs (abfd);
+      if (dump_dynamic_reloc_info && ! disassemble)
+	dump_dynamic_relocs (abfd);
+      if (dump_section_contents)
+	dump_data (abfd);
+      if (disassemble)
+	disassemble_data (abfd);
+    }
 
   if (dump_debugging)
     {
@@ -5028,7 +5185,7 @@ dump_bfd (bfd *abfd, bool is_mainfile)
       else if (! dump_dwarf_section_info)
 	{
 	  dwarf_select_sections_all ();
-	  dump_dwarf (abfd);
+	  dump_dwarf (abfd, is_mainfile);
 	}
     }
 
@@ -5112,7 +5269,7 @@ display_any_bfd (bfd *file, int level)
       bfd *last_arfile = NULL;
 
       if (level == 0)
-        printf (_("In archive %s:\n"), sanitize_string (bfd_get_filename (file)));
+	printf (_("In archive %s:\n"), sanitize_string (bfd_get_filename (file)));
       else if (level > 100)
 	{
 	  /* Prevent corrupted files from spinning us into an
@@ -5121,7 +5278,7 @@ display_any_bfd (bfd *file, int level)
 	  return;
 	}
       else
-        printf (_("In nested archive %s:\n"),
+	printf (_("In nested archive %s:\n"),
 		sanitize_string (bfd_get_filename (file)));
 
       for (;;)
@@ -5220,7 +5377,7 @@ main (int argc, char **argv)
   set_default_bfd_target ();
 
   while ((c = getopt_long (argc, argv,
-			   "pP:ib:m:M:VvCdDlfFaHhrRtTxsSI:j:wE:zgeGW::",
+			   "CDE:FGHI:LM:P:RSTU:VW::ab:defghij:lm:prstvwxz",
 			   long_options, (int *) 0))
 	 != EOF)
     {
@@ -5466,7 +5623,8 @@ main (int argc, char **argv)
 #ifdef ENABLE_LIBCTF
 	case OPTION_CTF:
 	  dump_ctf_section_info = true;
-	  dump_ctf_section_name = xstrdup (optarg);
+	  if (optarg)
+	    dump_ctf_section_name = xstrdup (optarg);
 	  seenflag = true;
 	  break;
 	case OPTION_CTF_PARENT:
@@ -5503,6 +5661,23 @@ main (int argc, char **argv)
 	  seenflag = true;
 	  break;
 
+	case 'U':
+	  if (streq (optarg, "default") || streq (optarg, "d"))
+	    unicode_display = unicode_default;
+	  else if (streq (optarg, "locale") || streq (optarg, "l"))
+	    unicode_display = unicode_locale;
+	  else if (streq (optarg, "escape") || streq (optarg, "e"))
+	    unicode_display = unicode_escape;
+	  else if (streq (optarg, "invalid") || streq (optarg, "i"))
+	    unicode_display = unicode_invalid;
+	  else if (streq (optarg, "hex") || streq (optarg, "x"))
+	    unicode_display = unicode_hex;
+	  else if (streq (optarg, "highlight") || streq (optarg, "h"))
+	    unicode_display = unicode_highlight;
+	  else
+	    fatal (_("invalid argument to -U/--unicode: %s"), optarg);
+	  break;
+
 	case 'H':
 	  usage (stdout, 0);
 	  /* No need to set seenflag or to break - usage() does not return.  */
@@ -5516,6 +5691,10 @@ main (int argc, char **argv)
 
   if (!seenflag)
     usage (stderr, 2);
+
+  dump_any_debugging = (dump_debugging
+			|| dump_dwarf_section_info
+			|| process_links);
 
   if (formats_info)
     exit_status = display_info ();

@@ -1,6 +1,6 @@
 /* Shared general utility routines for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,6 +21,7 @@
 #include "common-utils.h"
 #include "host-defs.h"
 #include "safe-ctype.h"
+#include "gdbsupport/gdb-xfree.h"
 
 void *
 xzalloc (size_t size)
@@ -31,19 +32,18 @@ xzalloc (size_t size)
 /* Like asprintf/vasprintf but get an internal_error if the call
    fails. */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 xstrprintf (const char *format, ...)
 {
-  char *ret;
   va_list args;
 
   va_start (args, format);
-  ret = xstrvprintf (format, args);
+  gdb::unique_xmalloc_ptr<char> ret = xstrvprintf (format, args);
   va_end (args);
   return ret;
 }
 
-char *
+gdb::unique_xmalloc_ptr<char>
 xstrvprintf (const char *format, va_list ap)
 {
   char *ret = NULL;
@@ -55,7 +55,7 @@ xstrvprintf (const char *format, va_list ap)
      happen, but just to be sure.  */
   if (ret == NULL || status < 0)
     internal_error (__FILE__, __LINE__, _("vasprintf call failed"));
-  return ret;
+  return gdb::unique_xmalloc_ptr<char> (ret);
 }
 
 int
@@ -119,7 +119,7 @@ string_vprintf (const char* fmt, va_list args)
 
 /* See documentation in common-utils.h.  */
 
-void
+std::string &
 string_appendf (std::string &str, const char *fmt, ...)
 {
   va_list vp;
@@ -127,12 +127,14 @@ string_appendf (std::string &str, const char *fmt, ...)
   va_start (vp, fmt);
   string_vappendf (str, fmt, vp);
   va_end (vp);
+
+  return str;
 }
 
 
 /* See documentation in common-utils.h.  */
 
-void
+std::string &
 string_vappendf (std::string &str, const char *fmt, va_list args)
 {
   va_list vp;
@@ -148,6 +150,8 @@ string_vappendf (std::string &str, const char *fmt, va_list args)
   /* C++11 and later guarantee std::string uses contiguous memory and
      always includes the terminating '\0'.  */
   vsprintf (&str[curr_size], fmt, args); /* ARI: vsprintf */
+
+  return str;
 }
 
 char *

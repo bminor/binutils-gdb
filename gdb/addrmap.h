@@ -1,6 +1,6 @@
 /* addrmap.h --- interface to address map data structure.
 
-   Copyright (C) 2007-2021 Free Software Foundation, Inc.
+   Copyright (C) 2007-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -103,5 +103,11 @@ typedef gdb::function_view<int (CORE_ADDR start_addr, void *obj)>
    immediately, and the value is returned.  Otherwise, this function
    returns 0.  */
 int addrmap_foreach (struct addrmap *map, addrmap_foreach_fn fn);
+
+/* Dump the addrmap to OUTFILE.  If PAYLOAD is non-NULL, only dump any
+   components that map to PAYLOAD.  (If PAYLOAD is NULL, the entire
+   map is dumped.)  */
+void addrmap_dump (struct addrmap *map, struct ui_file *outfile,
+		   void *payload);
 
 #endif /* ADDRMAP_H */

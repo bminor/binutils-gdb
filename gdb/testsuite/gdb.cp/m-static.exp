@@ -1,4 +1,4 @@
-# Copyright 2002-2021 Free Software Foundation, Inc.
+# Copyright 2002-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ if ![runto_main] then {
 }
 
 get_debug_format
-set non_dwarf [expr ! [test_debug_format "DWARF 2"]]
+set non_dwarf [expr ! [test_debug_format "DWARF \[0-9\]"]]
 
 # First, run to after we've constructed all the objects:
 

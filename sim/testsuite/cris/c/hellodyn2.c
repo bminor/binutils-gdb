@@ -1,5 +1,4 @@
 /*
-#dynamic:
-#sim: --sysroot=@exedir@ --load-vma
+#sim: --sysroot=$pwd --load-vma
  */
 #include "hello.c"

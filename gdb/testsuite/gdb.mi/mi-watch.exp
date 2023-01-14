@@ -1,4 +1,4 @@
-# Copyright 1999-2021 Free Software Foundation, Inc.
+# Copyright 1999-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -131,7 +131,7 @@ proc test_watchpoint_triggering {} {
     mi_execute_to "exec-continue" "watchpoint-scope" "callee3" ".*" \
         ".*basics.c" $line_callee3_close_brace \
         {"" "wpnum=\"2\""} \
-        "watchpoint trigger"
+        "watchpoint scope"
 }
 
 proc test_watchpoint_all {mi_mode type} {

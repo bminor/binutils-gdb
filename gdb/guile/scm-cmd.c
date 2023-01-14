@@ -1,6 +1,6 @@
 /* GDB commands implemented in Scheme.
 
-   Copyright (C) 2008-2021 Free Software Foundation, Inc.
+   Copyright (C) 2008-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -475,9 +475,7 @@ gdbscm_parse_command_name (const char *name,
   struct cmd_list_element *elt;
   int len = strlen (name);
   int i, lastchar;
-  char *prefix_text;
-  const char *prefix_text2;
-  char *result, *msg;
+  char *msg;
 
   /* Skip trailing whitespace.  */
   for (i = len - 1; i >= 0 && (name[i] == ' ' || name[i] == '\t'); --i)
@@ -493,9 +491,9 @@ gdbscm_parse_command_name (const char *name,
   /* Find first character of the final word.  */
   for (; i > 0 && valid_cmd_char_p (name[i - 1]); --i)
     ;
-  result = (char *) xmalloc (lastchar - i + 2);
-  memcpy (result, &name[i], lastchar - i + 1);
-  result[lastchar - i + 1] = '\0';
+  gdb::unique_xmalloc_ptr<char> result ((char *) xmalloc (lastchar - i + 2));
+  memcpy (result.get (), &name[i], lastchar - i + 1);
+  result.get ()[lastchar - i + 1] = '\0';
 
   /* Skip whitespace again.  */
   for (--i; i >= 0 && (name[i] == ' ' || name[i] == '\t'); --i)
@@ -503,20 +501,19 @@ gdbscm_parse_command_name (const char *name,
   if (i < 0)
     {
       *base_list = start_list;
-      return result;
+      return result.release ();
     }
 
-  prefix_text = (char *) xmalloc (i + 2);
-  memcpy (prefix_text, name, i + 1);
-  prefix_text[i + 1] = '\0';
+  gdb::unique_xmalloc_ptr<char> prefix_text ((char *) xmalloc (i + 2));
+  memcpy (prefix_text.get (), name, i + 1);
+  prefix_text.get ()[i + 1] = '\0';
 
-  prefix_text2 = prefix_text;
+  const char *prefix_text2 = prefix_text.get ();
   elt = lookup_cmd_1 (&prefix_text2, *start_list, NULL, NULL, 1);
   if (elt == NULL || elt == CMD_LIST_AMBIGUOUS)
     {
-      msg = xstrprintf (_("could not find command prefix '%s'"), prefix_text);
-      xfree (prefix_text);
-      xfree (result);
+      msg = xstrprintf (_("could not find command prefix '%s'"),
+			prefix_text.get ()).release ();
       scm_dynwind_begin ((scm_t_dynwind_flags) 0);
       gdbscm_dynwind_xfree (msg);
       gdbscm_out_of_range_error (func_name, arg_pos,
@@ -525,14 +522,12 @@ gdbscm_parse_command_name (const char *name,
 
   if (elt->is_prefix ())
     {
-      xfree (prefix_text);
       *base_list = elt->subcommands;
-      return result;
+      return result.release ();
     }
 
-  msg = xstrprintf (_("'%s' is not a prefix command"), prefix_text);
-  xfree (prefix_text);
-  xfree (result);
+  msg = xstrprintf (_("'%s' is not a prefix command"),
+		    prefix_text.get ()).release ();
   scm_dynwind_begin ((scm_t_dynwind_flags) 0);
   gdbscm_dynwind_xfree (msg);
   gdbscm_out_of_range_error (func_name, arg_pos,

@@ -1,5 +1,5 @@
 /* Handling of inferior events for the event loop for GDB, the GNU debugger.
-   Copyright (C) 1999-2021 Free Software Foundation, Inc.
+   Copyright (C) 1999-2022 Free Software Foundation, Inc.
    Written by Elena Zannoni <ezannoni@cygnus.com> of Cygnus Solutions.
 
    This file is part of GDB.
@@ -85,7 +85,7 @@ inferior_event_handler (enum inferior_event_type event_type)
       break;
 
     default:
-      printf_unfiltered (_("Event type not recognized.\n"));
+      fprintf_unfiltered (gdb_stderr, _("Event type not recognized.\n"));
       break;
     }
 }

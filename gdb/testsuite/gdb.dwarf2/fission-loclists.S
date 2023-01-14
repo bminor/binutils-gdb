@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2013-2021 Free Software Foundation, Inc.
+   Copyright 2013-2022 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -32,9 +32,6 @@
      return 0;
    }
 */
-
-#define XSTR(s) STR(s)
-#define STR(s) #s
 
 	.file	"fission-loclists.c"
 	.text
@@ -243,7 +240,7 @@ main:
 	.byte	0x5
 	.4byte	.Ldebug_ranges0	# DW_AT_GNU_ranges_base
 	.ascii "/tmp/src/gdb/testsuite\0"	# DW_AT_comp_dir
-	.asciz XSTR(DWO)	# DW_AT_GNU_dwo_name
+	.asciz DWO	# DW_AT_GNU_dwo_name
 	.4byte	.Ldebug_pubnames0	# DW_AT_GNU_pubnames
 	.4byte	.Ldebug_pubtypes0	# DW_AT_GNU_pubtypes
 	.4byte	.Ldebug_addr0	# DW_AT_GNU_addr_base

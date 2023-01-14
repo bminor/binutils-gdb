@@ -1,6 +1,6 @@
 /* Common target-dependent functionality for AArch64.
 
-   Copyright (C) 2017-2021 Free Software Foundation, Inc.
+   Copyright (C) 2017-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,6 +21,15 @@
 #define ARCH_AARCH64_H
 
 #include "gdbsupport/tdesc.h"
+
+/* Holds information on what architectural features are available.  This is
+   used to select register sets.  */
+struct aarch64_features
+{
+  bool sve = false;
+  bool pauth = false;
+  bool mte = false;
+};
 
 /* Create the aarch64 target description.  A non zero VQ value indicates both
    the presence of SVE and the Vector Quotient - the number of 128bit chunks in

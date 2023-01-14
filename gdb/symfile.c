@@ -1,6 +1,6 @@
 /* Generic symbol file reading for the GNU debugger, GDB.
 
-   Copyright (C) 1990-2021 Free Software Foundation, Inc.
+   Copyright (C) 1990-2022 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -40,7 +40,7 @@
 #include "regcache.h"
 #include "filenames.h"		/* for DOSish file names */
 #include "gdb-stabs.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "completer.h"
 #include "bcache.h"
 #include "hashtab.h"
@@ -61,6 +61,7 @@
 #include "gdbsupport/selftest.h"
 #include "cli/cli-style.h"
 #include "gdbsupport/forward-scope-exit.h"
+#include "gdbsupport/buildargv.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -1261,8 +1262,8 @@ separate_debug_file_exists (const std::string &name, unsigned long crc,
 
   if (separate_debug_file_debug)
     {
-      printf_filtered (_("  Trying %s..."), name.c_str ());
-      gdb_flush (gdb_stdout);
+      fprintf_filtered (gdb_stdlog, _("  Trying %s..."), name.c_str ());
+      gdb_flush (gdb_stdlog);
     }
 
   gdb_bfd_ref_ptr abfd (gdb_bfd_open (name.c_str (), gnutarget));
@@ -1270,7 +1271,7 @@ separate_debug_file_exists (const std::string &name, unsigned long crc,
   if (abfd == NULL)
     {
       if (separate_debug_file_debug)
-	printf_filtered (_(" no, unable to open.\n"));
+	fprintf_filtered (gdb_stdlog, _(" no, unable to open.\n"));
 
       return 0;
     }
@@ -1294,7 +1295,8 @@ separate_debug_file_exists (const std::string &name, unsigned long crc,
 	  && abfd_stat.st_ino == parent_stat.st_ino)
 	{
 	  if (separate_debug_file_debug)
-	    printf_filtered (_(" no, same file as the objfile.\n"));
+	    fprintf_filtered (gdb_stdlog,
+			      _(" no, same file as the objfile.\n"));
 
 	  return 0;
 	}
@@ -1308,7 +1310,7 @@ separate_debug_file_exists (const std::string &name, unsigned long crc,
   if (!file_crc_p)
     {
       if (separate_debug_file_debug)
-	printf_filtered (_(" no, error computing CRC.\n"));
+	fprintf_filtered (gdb_stdlog, _(" no, error computing CRC.\n"));
 
       return 0;
     }
@@ -1326,7 +1328,8 @@ separate_debug_file_exists (const std::string &name, unsigned long crc,
 	  if (!gdb_bfd_crc (parent_objfile->obfd, &parent_crc))
 	    {
 	      if (separate_debug_file_debug)
-		printf_filtered (_(" no, error computing CRC.\n"));
+		fprintf_filtered (gdb_stdlog,
+				  _(" no, error computing CRC.\n"));
 
 	      return 0;
 	    }
@@ -1338,18 +1341,18 @@ separate_debug_file_exists (const std::string &name, unsigned long crc,
 		 name.c_str (), objfile_name (parent_objfile));
 
       if (separate_debug_file_debug)
-	printf_filtered (_(" no, CRC doesn't match.\n"));
+	fprintf_filtered (gdb_stdlog, _(" no, CRC doesn't match.\n"));
 
       return 0;
     }
 
   if (separate_debug_file_debug)
-    printf_filtered (_(" yes!\n"));
+    fprintf_filtered (gdb_stdlog, _(" yes!\n"));
 
   return 1;
 }
 
-char *debug_file_directory = NULL;
+std::string debug_file_directory;
 static void
 show_debug_file_directory (struct ui_file *file, int from_tty,
 			   struct cmd_list_element *c, const char *value)
@@ -1379,8 +1382,9 @@ find_separate_debug_file (const char *dir,
 			  unsigned long crc32, struct objfile *objfile)
 {
   if (separate_debug_file_debug)
-    printf_filtered (_("\nLooking for separate debug info (debug link) for "
-		       "%s\n"), objfile_name (objfile));
+    fprintf_filtered (gdb_stdlog,
+		      _("\nLooking for separate debug info (debug link) for "
+			"%s\n"), objfile_name (objfile));
 
   /* First try in the same directory as the original file.  */
   std::string debugfile = dir;
@@ -1406,8 +1410,9 @@ find_separate_debug_file (const char *dir,
   bool target_prefix = startswith (dir, "target:");
   const char *dir_notarget = target_prefix ? dir + strlen ("target:") : dir;
   std::vector<gdb::unique_xmalloc_ptr<char>> debugdir_vec
-    = dirnames_to_char_ptr_vec (debug_file_directory);
-  gdb::unique_xmalloc_ptr<char> canon_sysroot = gdb_realpath (gdb_sysroot);
+    = dirnames_to_char_ptr_vec (debug_file_directory.c_str ());
+  gdb::unique_xmalloc_ptr<char> canon_sysroot
+    = gdb_realpath (gdb_sysroot.c_str ());
 
  /* MS-Windows/MS-DOS don't allow colons in file names; we must
     convert the drive letter into a one-letter directory, so that the
@@ -1448,7 +1453,7 @@ find_separate_debug_file (const char *dir,
 	  if (canon_sysroot.get () != NULL)
 	    base_path = child_path (canon_sysroot.get (), canon_dir);
 	  else
-	    base_path = child_path (gdb_sysroot, canon_dir);
+	    base_path = child_path (gdb_sysroot.c_str (), canon_dir);
 	}
       if (base_path != NULL)
 	{
@@ -1796,7 +1801,7 @@ load_command (const char *arg, int from_tty)
   /* The user might be reloading because the binary has changed.  Take
      this opportunity to check.  */
   reopen_exec_file ();
-  reread_symbols ();
+  reread_symbols (from_tty);
 
   std::string temp;
   if (arg == NULL)
@@ -2272,8 +2277,8 @@ add_symbol_file_command (const char *args, int from_tty)
      statements because hex_string returns a local static
      string.  */
 
-  printf_unfiltered (_("add symbol table from file \"%s\""),
-		     filename.get ());
+  printf_filtered (_("add symbol table from file \"%s\""),
+		   filename.get ());
   section_addr_info section_addrs;
   std::vector<sect_opt>::const_iterator it = sect_opts.begin ();
   if (!seen_addr)
@@ -2285,7 +2290,7 @@ add_symbol_file_command (const char *args, int from_tty)
       const char *sec = it->name;
 
       if (section_addrs.empty ())
-	printf_unfiltered (_(" at\n"));
+	printf_filtered (_(" at\n"));
       addr = parse_and_eval_address (val);
 
       /* Here we store the section offsets in the order they were
@@ -2305,13 +2310,13 @@ add_symbol_file_command (const char *args, int from_tty)
 	 so we can't determine what section names are valid.  */
     }
   if (seen_offset)
-      printf_unfiltered (_("%s offset by %s\n"),
-			 (section_addrs.empty ()
-			  ? _(" with all sections")
-			  : _("with other sections")),
-			 paddress (gdbarch, offset));
+    printf_filtered (_("%s offset by %s\n"),
+		     (section_addrs.empty ()
+		      ? _(" with all sections")
+		      : _("with other sections")),
+		     paddress (gdbarch, offset));
   else if (section_addrs.empty ())
-    printf_unfiltered ("\n");
+    printf_filtered ("\n");
 
   if (from_tty && (!query ("%s", "")))
     error (_("Not confirmed."));
@@ -2410,7 +2415,7 @@ remove_symbol_file_command (const char *args, int from_tty)
 /* Re-read symbols if a symbol-file has changed.  */
 
 void
-reread_symbols (void)
+reread_symbols (int from_tty)
 {
   long new_modtime;
   struct stat new_statbuf;
@@ -2587,11 +2592,24 @@ reread_symbols (void)
 
 	  read_symbols (objfile, 0);
 
+	  if ((objfile->flags & OBJF_READNOW))
+	    {
+	      const int mainline = objfile->flags & OBJF_MAINLINE;
+	      const int should_print = (print_symbol_loading_p (from_tty, mainline, 1)
+					&& readnow_symbol_files);
+	      if (should_print)
+		printf_filtered (_("Expanding full symbols from %ps...\n"),
+				 styled_string (file_name_style.style (),
+						objfile_name (objfile)));
+
+	      objfile->expand_all_symtabs ();
+	    }
+
 	  if (!objfile_has_symbols (objfile))
 	    {
-	      wrap_here ("");
+	      gdb_stdout->wrap_here (0);
 	      printf_filtered (_("(no debugging symbols found)\n"));
-	      wrap_here ("");
+	      gdb_stdout->wrap_here (0);
 	    }
 
 	  /* We're done reading the symbol file; finish off complaints.  */
@@ -2654,7 +2672,7 @@ add_filename_language (const char *ext, enum language lang)
   filename_language_table.emplace_back (ext, lang);
 }
 
-static char *ext_args;
+static std::string ext_args;
 static void
 show_ext_args (struct ui_file *file, int from_tty,
 	       struct cmd_list_element *c, const char *value)
@@ -2669,48 +2687,48 @@ static void
 set_ext_lang_command (const char *args,
 		      int from_tty, struct cmd_list_element *e)
 {
-  char *cp = ext_args;
-  enum language lang;
+  const char *begin = ext_args.c_str ();
+  const char *end = ext_args.c_str ();
 
   /* First arg is filename extension, starting with '.'  */
-  if (*cp != '.')
-    error (_("'%s': Filename extension must begin with '.'"), ext_args);
+  if (*end != '.')
+    error (_("'%s': Filename extension must begin with '.'"), ext_args.c_str ());
 
   /* Find end of first arg.  */
-  while (*cp && !isspace (*cp))
-    cp++;
+  while (*end != '\0' && !isspace (*end))
+    end++;
 
-  if (*cp == '\0')
+  if (*end == '\0')
     error (_("'%s': two arguments required -- "
 	     "filename extension and language"),
-	   ext_args);
+	   ext_args.c_str ());
 
-  /* Null-terminate first arg.  */
-  *cp++ = '\0';
+  /* Extract first arg, the extension.  */
+  std::string extension = ext_args.substr (0, end - begin);
 
   /* Find beginning of second arg, which should be a source language.  */
-  cp = skip_spaces (cp);
+  begin = skip_spaces (end);
 
-  if (*cp == '\0')
+  if (*begin == '\0')
     error (_("'%s': two arguments required -- "
 	     "filename extension and language"),
-	   ext_args);
+	   ext_args.c_str ());
 
   /* Lookup the language from among those we know.  */
-  lang = language_enum (cp);
+  language lang = language_enum (begin);
 
   auto it = filename_language_table.begin ();
   /* Now lookup the filename extension: do we already know it?  */
   for (; it != filename_language_table.end (); it++)
     {
-      if (it->ext == ext_args)
+      if (it->ext == extension)
 	break;
     }
 
   if (it == filename_language_table.end ())
     {
       /* New file extension.  */
-      add_filename_language (ext_args, lang);
+      add_filename_language (extension.data (), lang);
     }
   else
     {
@@ -2756,13 +2774,13 @@ deduce_language_from_filename (const char *filename)
 struct symtab *
 allocate_symtab (struct compunit_symtab *cust, const char *filename)
 {
-  struct objfile *objfile = cust->objfile;
+  struct objfile *objfile = cust->objfile ();
   struct symtab *symtab
     = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct symtab);
 
   symtab->filename = objfile->intern (filename);
   symtab->fullname = NULL;
-  symtab->language = deduce_language_from_filename (filename);
+  symtab->set_language (deduce_language_from_filename (filename));
 
   /* This can be very verbose with lots of headers.
      Only print at higher debug levels.  */
@@ -2786,19 +2804,10 @@ allocate_symtab (struct compunit_symtab *cust, const char *filename)
     }
 
   /* Add it to CUST's list of symtabs.  */
-  if (cust->filetabs == NULL)
-    {
-      cust->filetabs = symtab;
-      cust->last_filetab = symtab;
-    }
-  else
-    {
-      cust->last_filetab->next = symtab;
-      cust->last_filetab = symtab;
-    }
+  cust->add_filetab (symtab);
 
   /* Backlink to the containing compunit symtab.  */
-  symtab->compunit_symtab = cust;
+  symtab->set_compunit (cust);
 
   return symtab;
 }
@@ -2814,7 +2823,7 @@ allocate_compunit_symtab (struct objfile *objfile, const char *name)
 					       struct compunit_symtab);
   const char *saved_name;
 
-  cu->objfile = objfile;
+  cu->set_objfile (objfile);
 
   /* The name we record here is only for display/debugging purposes.
      Just save the basename to avoid path issues (too long for display,
@@ -2822,7 +2831,7 @@ allocate_compunit_symtab (struct objfile *objfile, const char *name)
   saved_name = lbasename (name);
   cu->name = obstack_strdup (&objfile->objfile_obstack, saved_name);
 
-  COMPUNIT_DEBUGFORMAT (cu) = "unknown";
+  cu->set_debugformat ("unknown");
 
   if (symtab_create_debug)
     {
@@ -2840,8 +2849,8 @@ allocate_compunit_symtab (struct objfile *objfile, const char *name)
 void
 add_compunit_symtab_to_objfile (struct compunit_symtab *cu)
 {
-  cu->next = cu->objfile->compunit_symtabs;
-  cu->objfile->compunit_symtabs = cu;
+  cu->next = cu->objfile ()->compunit_symtabs;
+  cu->objfile ()->compunit_symtabs = cu;
 }
 
 
@@ -3193,13 +3202,13 @@ list_overlays_command (const char *args, int from_tty)
 	      name = bfd_section_name (osect->the_bfd_section);
 
 	      printf_filtered ("Section %s, loaded at ", name);
-	      fputs_filtered (paddress (gdbarch, lma), gdb_stdout);
+	      puts_filtered (paddress (gdbarch, lma));
 	      puts_filtered (" - ");
-	      fputs_filtered (paddress (gdbarch, lma + size), gdb_stdout);
+	      puts_filtered (paddress (gdbarch, lma + size));
 	      printf_filtered (", mapped at ");
-	      fputs_filtered (paddress (gdbarch, vma), gdb_stdout);
+	      puts_filtered (paddress (gdbarch, vma));
 	      puts_filtered (" - ");
-	      fputs_filtered (paddress (gdbarch, vma + size), gdb_stdout);
+	      puts_filtered (paddress (gdbarch, vma + size));
 	      puts_filtered ("\n");
 
 	      nmapped++;
@@ -3245,8 +3254,8 @@ map_overlay_command (const char *args, int from_tty)
 									sec2))
 		{
 		  if (info_verbose)
-		    printf_unfiltered (_("Note: section %s unmapped by overlap\n"),
-				       bfd_section_name (sec2->the_bfd_section));
+		    printf_filtered (_("Note: section %s unmapped by overlap\n"),
+				     bfd_section_name (sec2->the_bfd_section));
 		  sec2->ovly_mapped = 0; /* sec2 overlaps sec: unmap sec2.  */
 		}
 	  return;
@@ -3294,7 +3303,7 @@ overlay_auto_command (const char *args, int from_tty)
   overlay_debugging = ovly_auto;
   enable_overlay_breakpoints ();
   if (info_verbose)
-    printf_unfiltered (_("Automatic overlay debugging enabled."));
+    printf_filtered (_("Automatic overlay debugging enabled."));
 }
 
 /* Function: overlay_manual_command
@@ -3307,7 +3316,7 @@ overlay_manual_command (const char *args, int from_tty)
   overlay_debugging = ovly_on;
   disable_overlay_breakpoints ();
   if (info_verbose)
-    printf_unfiltered (_("Overlay debugging enabled."));
+    printf_filtered (_("Overlay debugging enabled."));
 }
 
 /* Function: overlay_off_command
@@ -3320,7 +3329,7 @@ overlay_off_command (const char *args, int from_tty)
   overlay_debugging = ovly_off;
   disable_overlay_breakpoints ();
   if (info_verbose)
-    printf_unfiltered (_("Overlay debugging disabled."));
+    printf_filtered (_("Overlay debugging disabled."));
 }
 
 static void
@@ -3784,8 +3793,7 @@ test_set_ext_lang_command ()
   SELF_CHECK (lang == language_unknown);
 
   /* Test adding a new extension using the CLI command.  */
-  auto args_holder = make_unique_xstrdup (".hello rust");
-  ext_args = args_holder.get ();
+  ext_args = ".hello rust";
   set_ext_lang_command (NULL, 1, NULL);
 
   lang = deduce_language_from_filename ("cake.hello");
@@ -3793,8 +3801,7 @@ test_set_ext_lang_command ()
 
   /* Test overriding an existing extension using the CLI command.  */
   int size_before = filename_language_table.size ();
-  args_holder.reset (xstrdup (".hello pascal"));
-  ext_args = args_holder.get ();
+  ext_args = ".hello pascal";
   set_ext_lang_command (NULL, 1, NULL);
   int size_after = filename_language_table.size ();
 

@@ -1,5 +1,5 @@
 /* Remote utility routines for the remote server for GDB.
-   Copyright (C) 1993-2021 Free Software Foundation, Inc.
+   Copyright (C) 1993-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -41,7 +41,7 @@ void enable_async_io (void);
 void disable_async_io (void);
 void check_remote_input_interrupt_request (void);
 void prepare_resume_reply (char *buf, ptid_t ptid,
-			   struct target_waitstatus *status);
+			   const target_waitstatus &status);
 
 const char *decode_address_to_semicolon (CORE_ADDR *addrp, const char *start);
 void decode_address (CORE_ADDR *addrp, const char *start, int len);

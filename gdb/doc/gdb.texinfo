@@ -1,5 +1,5 @@
 \input texinfo      @c -*-texinfo-*-
-@c Copyright (C) 1988--2021 Free Software Foundation, Inc.
+@c Copyright (C) 1988--2022 Free Software Foundation, Inc.
 @c
 @c %**start of header
 @c makeinfo ignores cmds prev to setfilename, so its arg cannot make use
@@ -50,7 +50,7 @@
 
 @copying
 @c man begin COPYRIGHT
-Copyright @copyright{} 1988-2021 Free Software Foundation, Inc.
+Copyright @copyright{} 1988-2022 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -120,7 +120,7 @@ This is the @value{EDITION} Edition, for @value{GDBN}
 @end ifset
 Version @value{GDBVN}.
 
-Copyright (C) 1988-2021 Free Software Foundation, Inc.
+Copyright (C) 1988-2022 Free Software Foundation, Inc.
 
 This edition of the GDB manual is dedicated to the memory of Fred
 Fish.  Fred was a long-standing contributor to GDB and to Free
@@ -184,6 +184,7 @@ software in general.  We will miss him.
                                  the operating system
 * Trace File Format::		GDB trace file format
 * Index Section Format::        .gdb_index section format
+* Debuginfod::                  Download debugging resources with @code{debuginfod}
 * Man Pages::			Manual pages
 * Copying::			GNU General Public License says
                                 how you can copy and share GDB
@@ -840,7 +841,7 @@ The essentials are:
 @item
 type @samp{@value{GDBP}} to start @value{GDBN}.
 @item
-type @kbd{quit} or @kbd{Ctrl-d} to exit.
+type @kbd{quit}, @kbd{exit} or @kbd{Ctrl-d} to exit.
 @end itemize
 
 @menu
@@ -1579,14 +1580,16 @@ Options,,Choosing Modes}.
 
 @table @code
 @kindex quit @r{[}@var{expression}@r{]}
+@kindex exit @r{[}@var{expression}@r{]}
 @kindex q @r{(@code{quit})}
 @item quit @r{[}@var{expression}@r{]}
+@itemx exit @r{[}@var{expression}@r{]}
 @itemx q
 To exit @value{GDBN}, use the @code{quit} command (abbreviated
-@code{q}), or type an end-of-file character (usually @kbd{Ctrl-d}).  If you
-do not supply @var{expression}, @value{GDBN} will terminate normally;
-otherwise it will terminate using the result of @var{expression} as the
-error code.
+@code{q}), the @code{exit} command, or type an end-of-file
+character (usually @kbd{Ctrl-d}).  If you do not supply @var{expression},
+@value{GDBN} will terminate normally; otherwise it will terminate using
+the result of @var{expression} as the error code.
 @end table
 
 @cindex interrupt
@@ -1704,17 +1707,15 @@ You may want to save the output of @value{GDBN} commands to a file.
 There are several commands to control @value{GDBN}'s logging.
 
 @table @code
-@kindex set logging
-@item set logging on
-Enable logging.
-@item set logging off
-Disable logging.
+@kindex set logging enabled
+@item set logging enabled [on|off]
+Enable or disable logging.
 @cindex logging file name
 @item set logging file @var{file}
 Change the name of the current logfile.  The default logfile is @file{gdb.txt}.
 @item set logging overwrite [on|off]
 By default, @value{GDBN} will append to the logfile.  Set @code{overwrite} if
-you want @code{set logging on} to overwrite the logfile instead.
+you want @code{set logging enabled on} to overwrite the logfile instead.
 @item set logging redirect [on|off]
 By default, @value{GDBN} output will go to both the terminal and the logfile.
 Set @code{redirect} if you want output to go only to the log file.
@@ -2141,10 +2142,10 @@ on @code{-} after the command name.  For example:
 
 @smallexample
 (@value{GDBP}) print -@key{TAB}@key{TAB}
--address         -max-depth       -raw-values      -union
--array           -null-stop       -repeats         -vtbl
--array-indexes   -object          -static-members
--elements        -pretty          -symbol
+-address         -max-depth               -pretty          -symbol
+-array           -memory-tag-violations   -raw-values      -union
+-array-indexes   -null-stop               -repeats         -vtbl
+-elements        -object                  -static-members
 @end smallexample
 
 Completion will in some cases guide you with a suggestion of what kind
@@ -3330,8 +3331,12 @@ use @code{run} to spawn a local program, etc.
 @item clone-inferior [ -copies @var{n} ] [ @var{infno} ]
 Adds @var{n} inferiors ready to execute the same program as inferior
 @var{infno}; @var{n} defaults to 1, and @var{infno} defaults to the
-number of the current inferior.  This is a convenient command when you
-want to run another instance of the inferior you are debugging.
+number of the current inferior.  This command copies the values of the
+@var{args}, @w{@var{inferior-tty}} and @var{cwd} properties from the
+current inferior to the new one.  It also propagates changes the user
+made to environment variables using the @w{@code{set environment}} and
+@w{@code{unset environment}} commands.  This is a convenient command
+when you want to run another instance of the inferior you are debugging.
 
 @smallexample
 (@value{GDBP}) info inferiors
@@ -3395,7 +3400,7 @@ control use @w{@code{set print inferior-events}}:
 The @code{set print inferior-events} command allows you to enable or
 disable printing of messages when @value{GDBN} notices that new
 inferiors have started or that inferiors have exited or have been
-detached.  By default, these messages will not be printed.
+detached.  By default, these messages will be printed.
 
 @kindex show print inferior-events
 @item show print inferior-events
@@ -3898,6 +3903,14 @@ Display current libthread_db search path.
 @itemx show debug libthread-db
 Turns on or off display of @code{libthread_db}-related events.
 Use @code{1} to enable, @code{0} to disable.
+
+@kindex set debug threads
+@kindex show debug threads
+@cindex debugging @code{threads}
+@item set debug threads @r{[}on@r{|}off@r{]}
+@itemx show debug threads
+When @samp{on} @value{GDBN} will print additional messages when
+threads are created and deleted.
 @end table
 
 @node Forks
@@ -4861,7 +4874,7 @@ slow down the running of your program.
 
 @table @code
 @kindex watch
-@item watch @r{[}-l@r{|}-location@r{]} @var{expr} @r{[}thread @var{thread-id}@r{]} @r{[}mask @var{maskvalue}@r{]}
+@item watch @r{[}-l@r{|}-location@r{]} @var{expr} @r{[}thread @var{thread-id}@r{]} @r{[}mask @var{maskvalue}@r{]} @r{[}task @var{task-id}@r{]}
 Set a watchpoint for an expression.  @value{GDBN} will break when the
 expression @var{expr} is written into by the program and its value
 changes.  The simplest (and the most popular) use of this command is
@@ -4877,6 +4890,9 @@ argument, @value{GDBN} breaks only when the thread identified by
 change the value of @var{expr}, @value{GDBN} will not break.  Note
 that watchpoints restricted to a single thread in this way only work
 with Hardware Watchpoints.
+
+Similarly, if the @code{task} argument is given, then the watchpoint
+will be specific to the indicated Ada task (@pxref{Ada Tasks}).
 
 Ordinarily a watchpoint respects the scope of variables in @var{expr}
 (see below).  The @code{-location} argument tells @value{GDBN} to
@@ -8919,6 +8935,7 @@ prefer to use Emacs facilities to view source; see @ref{Emacs, ,Using
 * Search::                      Searching source files
 * Source Path::                 Specifying source directories
 * Machine Code::                Source and machine code
+* Disable Reading Source::	Disable Reading Source Code
 @end menu
 
 @node List
@@ -9926,6 +9943,31 @@ OFF, which means never display the disassembly of the next line or
 instruction.
 @end table
 
+@node Disable Reading Source
+@section Disable Reading Source Code
+@cindex source code, disable access
+
+In some cases it can be desirable to prevent @value{GDBN} from
+accessing source code files.  One case where this might be desirable
+is if the source code files are located over a slow network
+connection.
+
+The following command can be used to control whether @value{GDBN}
+should access source code files or not:
+
+@table @code
+@kindex set source open
+@kindex show source open
+@item set source open @r{[}on@r{|}off@r{]}
+@itemx show source open
+When this option is @code{on}, which is the default, @value{GDBN} will
+access source code files when needed, for example to print source
+lines when @value{GDBN} stops, or in response to the @code{list}
+command.
+
+When this option is @code{off}, @value{GDBN} will not access source
+code files.
+@end table
 
 @node Data
 @chapter Examining Data
@@ -9976,6 +10018,10 @@ Set limit on string chars or array elements to print.  The value
 @item -max-depth @var{depth}|@code{unlimited}
 Set the threshold after which nested structures are replaced with
 ellipsis.  Related setting: @ref{set print max-depth}.
+
+@item -memory-tag-violations [@code{on}|@code{off}]
+Set printing of additional information about memory tag violations.
+@xref{set print memory-tag-violations}.
 
 @item -null-stop [@code{on}|@code{off}]
 Set printing of char arrays to stop at first null char.  Related
@@ -10881,7 +10927,7 @@ words (@samp{w}) of memory above the stack pointer (here, @samp{$sp};
 
 You can also specify a negative repeat count to examine memory backward
 from the given address.  For example, @samp{x/-3uh 0x54320} prints three
-halfwords (@code{h}) at @code{0x54314}, @code{0x54328}, and @code{0x5431c}.
+halfwords (@code{h}) at @code{0x5431a}, @code{0x5431c}, and @code{0x5431e}.
 
 Since the letters indicating unit sizes are all distinct from the
 letters specifying output formats, you do not have to remember whether
@@ -11350,7 +11396,6 @@ that the number of elements to print is unlimited.
 
 @item show print elements
 Display the number of elements of a large array that @value{GDBN} will print.
-If the number is 0, then the printing is unlimited.
 
 @anchor{set print frame-arguments}
 @item set print frame-arguments @var{value}
@@ -18506,6 +18551,41 @@ from the current task to the given task.
 #4  0x804aacc in un () at un.adb:5
 @end smallexample
 
+@item task apply [@var{task-id-list} | all] [@var{flag}]@dots{} @var{command}
+The @code{task apply} command is the Ada tasking analogue of
+@code{thread apply} (@pxref{Threads}).  It allows you to apply the
+named @var{command} to one or more tasks.  Specify the tasks that you
+want affected using a list of task IDs, or specify @code{all} to apply
+to all tasks.
+
+The @var{flag} arguments control what output to produce and how to
+handle errors raised when applying @var{command} to a task.
+@var{flag} must start with a @code{-} directly followed by one letter
+in @code{qcs}.  If several flags are provided, they must be given
+individually, such as @code{-c -q}.
+
+By default, @value{GDBN} displays some task information before the
+output produced by @var{command}, and an error raised during the
+execution of a @var{command} will abort @code{task apply}.  The
+following flags can be used to fine-tune this behavior:
+
+@table @code
+@item -c
+The flag @code{-c}, which stands for @samp{continue}, causes any
+errors in @var{command} to be displayed, and the execution of
+@code{task apply} then continues.
+@item -s
+The flag @code{-s}, which stands for @samp{silent}, causes any errors
+or empty output produced by a @var{command} to be silently ignored.
+That is, the execution continues, but the task information and errors
+are not printed.
+@item -q
+The flag @code{-q} (@samp{quiet}) disables printing the task
+information.
+@end table
+
+Flags @code{-c} and @code{-s} cannot be used together.
+
 @item break @var{location} task @var{taskno}
 @itemx break @var{location} task @var{taskno} if @dots{}
 @cindex breakpoints and tasks, in Ada
@@ -21373,7 +21453,9 @@ For the ``build ID'' method, @value{GDBN} looks in the
 a file named @file{@var{nn}/@var{nnnnnnnn}.debug}, where @var{nn} are the
 first 2 hex characters of the build ID bit string, and @var{nnnnnnnn}
 are the rest of the bit string.  (Real build ID strings are 32 or more
-hex characters, not 10.)
+hex characters, not 10.)  @value{GDBN} can automatically query
+@code{debuginfod} servers using build IDs in order to download separate debug
+files that cannot be found locally.  For more information see @ref{Debuginfod}.
 @end itemize
 
 So, for example, suppose you ask @value{GDBN} to debug
@@ -21393,6 +21475,10 @@ debug information files, in the indicated order:
 @item
 @file{/usr/lib/debug/usr/bin/ls.debug}.
 @end itemize
+
+If the debug file still has not been found and @code{debuginfod}
+(@pxref{Debuginfod}) is enabled, @value{GDBN} will attempt to download the
+file from @code{debuginfod} servers.
 
 @anchor{debug-file-directory}
 Global debugging info directories default to what is set by @value{GDBN}
@@ -21759,14 +21845,14 @@ Indices only work when using DWARF debugging information, not stabs.
 @cindex automatic symbol index cache
 It is possible for @value{GDBN} to automatically save a copy of this index in a
 cache on disk and retrieve it from there when loading the same binary in the
-future.  This feature can be turned on with @kbd{set index-cache on}.  The
-following commands can be used to tweak the behavior of the index cache.
+future.  This feature can be turned on with @kbd{set index-cache enabled on}.
+The following commands can be used to tweak the behavior of the index cache.
 
 @table @code
 
 @kindex set index-cache
-@item set index-cache on
-@itemx set index-cache off
+@item set index-cache enabled on
+@itemx set index-cache enabled off
 Enable or disable the use of the symbol index cache.
 
 @item set index-cache directory @var{directory}
@@ -26033,10 +26119,16 @@ Show the current state of styling.
 
 @item set style sources @samp{on|off}
 Enable or disable source code styling.  This affects whether source
-code, such as the output of the @code{list} command, is styled.  Note
-that source styling only works if styling in general is enabled, and
-if @value{GDBN} was linked with the GNU Source Highlight library.  The
-default is @samp{on}.
+code, such as the output of the @code{list} command, is styled.  The
+default is @samp{on}.  Note that source styling only works if styling
+in general is enabled, and if a source highlighting library is
+available to @value{GDBN}.
+
+There are two ways that highlighting can be done.  First, if
+@value{GDBN} was linked with the GNU Source Highlight library, then it
+is used.  Otherwise, if @value{GDBN} was configured with Python
+scripting support, and if the Python Pygments package is available,
+then it will be used.
 
 @item show style sources
 Show the current state of source code styling.
@@ -26936,12 +27028,12 @@ Turn on or off debugging messages from JIT debug support.
 @item show debug jit
 Displays the current state of @value{GDBN} JIT debugging.
 
-@item set debug lin-lwp
-@cindex @sc{gnu}/Linux LWP debug messages
-@cindex Linux lightweight processes
-Turn on or off debugging messages from the Linux LWP debug support.
-@item show debug lin-lwp
-Show the current state of Linux LWP debugging messages.
+@item set debug linux-nat @r{[}on@r{|}off@r{]}
+@cindex @sc{gnu}/Linux native target debug messages
+@cindex Linux native targets
+Turn on or off debugging messages from the Linux native target debug support.
+@item show debug linux-nat
+Show the current state of Linux native target debugging messages.
 
 @item set debug linux-namespaces
 @cindex @sc{gnu}/Linux namespaces debug messages
@@ -28720,9 +28812,10 @@ otherwise a default layout is used.
 @kindex tui disable
 Disable TUI mode, returning to the console interpreter.
 
+@anchor{info_win_command}
 @item info win
 @kindex info win
-List and give the size of all displayed windows.
+List the names and sizes of all currently displayed windows.
 
 @item tui new-layout @var{name} @var{window} @var{weight} @r{[}@var{window} @var{weight}@dots{}@r{]}
 @kindex tui new-layout
@@ -28869,11 +28962,11 @@ Update the source window and the current execution point.
 @item winheight @var{name} +@var{count}
 @itemx winheight @var{name} -@var{count}
 @kindex winheight
-Change the height of the window @var{name} by @var{count}
-lines.  Positive counts increase the height, while negative counts
-decrease it.  The @var{name} parameter can be one of @code{src} (the
-source window), @code{cmd} (the command window), @code{asm} (the
-disassembly window), or @code{regs} (the register display window).
+Change the height of the window @var{name} by @var{count} lines.
+Positive counts increase the height, while negative counts decrease
+it.  The @var{name} parameter can be the name of any currently visible
+window.  The names of the currently visible windows can be discovered
+using @kbd{info win} (@pxref{info_win_command,,info win}).
 @end table
 
 @node TUI Configuration
@@ -29314,8 +29407,12 @@ find if asynchronous execution is enabled using the
 @code{-list-target-features} command.
 
 @table @code
-@item -gdb-set mi-async on
-@item -gdb-set mi-async off
+@cindex foreground execution
+@cindex background execution
+@cindex asynchronous execution
+@cindex execution, foreground, background and asynchronous
+@kindex set mi-async
+@item -gdb-set mi-async @r{[}on@r{|}off@r{]}
 Set whether MI is in asynchronous mode.
 
 When @code{off}, which is the default, MI execution commands (e.g.,
@@ -29327,6 +29424,7 @@ commands (e.g., @code{-exec-continue} becomes the equivalent of the
 @code{c&} CLI command), and so @value{GDBN} is capable of processing
 MI commands even while the target is running.
 
+@kindex show mi-async
 @item -gdb-show mi-async
 Show whether MI asynchronous mode is enabled.
 @end table
@@ -38626,8 +38724,8 @@ directory (@file{gdb-@value{GDBVN}}, for version @value{GDBVN}).
 
 Here is a summary of the @file{configure} options and arguments that
 are most often useful for building @value{GDBN}.  @file{configure}
-also has several other options not listed here.  @inforef{Running
-configure scripts,,autoconf.info}, for a full
+also has several other options not listed here.  @xref{Running
+configure Scripts,,,autoconf}, for a full
 explanation of @file{configure}.
 
 @smallexample
@@ -38719,12 +38817,12 @@ Use the curses library instead of the termcap library, for text-mode
 terminal operations.
 
 @item --with-debuginfod
-Build @value{GDBN} with libdebuginfod, the debuginfod client library.
-Used to automatically fetch source files and separate debug files from
-debuginfod servers using the associated executable's build ID. Enabled
-by default if libdebuginfod is installed and found at configure time.
-debuginfod is packaged with elfutils, starting with version 0.178. You
-can get the latest version from `https://sourceware.org/elfutils/'.
+Build @value{GDBN} with @file{libdebuginfod}, the @code{debuginfod} client
+library.  Used to automatically fetch ELF, DWARF and source files from
+@code{debuginfod} servers using build IDs associated with any missing
+files.  Enabled by default if @file{libdebuginfod} is installed and found
+at configure time.  For more information regarding @code{debuginfod} see
+@ref{Debuginfod}.
 
 @item --with-libunwind-ia64
 Use the libunwind library for unwinding function call stack on ia64
@@ -38837,7 +38935,7 @@ different warning flags, depending on the exact version of the
 compiler you are using.
 
 @item --enable-werror
-Treat compiler warnings as werrors.  It adds the @code{-Werror} flag
+Treat compiler warnings as errors.  It adds the @code{-Werror} flag
 to the compiler, which will fail the compilation if the compiler
 outputs any warning messages.
 
@@ -39225,6 +39323,20 @@ demangler warnings always create a core file and this cannot be
 disabled.
 @end table
 
+@kindex maint set internal-error
+@kindex maint show internal-error
+@kindex maint set internal-warning
+@kindex maint show internal-warning
+@item maint set internal-error backtrace @r{[}on|off@r{]}
+@itemx maint show internal-error backtrace
+@itemx maint set internal-warning backtrace @r{[}on|off@r{]}
+@itemx maint show internal-warning backtrace
+When @value{GDBN} reports an internal problem (error or warning) it is
+possible to have a backtrace of @value{GDBN} printed to the standard
+error stream.  This is @samp{on} by default for @code{internal-error}
+and @samp{off} by default for @code{internal-warning}.
+
+@anchor{maint packet}
 @kindex maint packet
 @item maint packet @var{text}
 If @value{GDBN} is talking to an inferior via the serial protocol,
@@ -39232,6 +39344,9 @@ then this command sends the string @var{text} to the inferior, and
 displays the response packet.  @value{GDBN} supplies the initial
 @samp{$} character, the terminating @samp{#} character, and the
 checksum.
+
+Any non-printable characters in the reply are printed as escaped hex,
+e.g. @samp{\x00}, @samp{\x01}, etc.
 
 @kindex maint print architecture
 @item maint print architecture @r{[}@var{file}@r{]}
@@ -39359,6 +39474,19 @@ frame cache.  This command is useful when debugging issues related to
 register fetching, or frame unwinding.  The command @code{flushregs}
 is deprecated in favor of @code{maint flush register-cache}.
 
+@kindex maint flush source-cache
+@cindex source code, caching
+@item maint flush source-cache
+Flush @value{GDBN}'s cache of source code file contents.  After
+@value{GDBN} reads a source file, and optionally applies styling
+(@pxref{Output Styling}), the file contents are cached.  This command
+clears that cache.  The next time @value{GDBN} wants to show lines
+from a source file, the content will be re-read.
+
+This command is useful when debugging issues related to source code
+styling.  After flushing the cache any source code displayed by
+@value{GDBN} will be re-read and re-styled.
+
 @kindex maint print objfiles
 @cindex info for known object files
 @item maint print objfiles @r{[}@var{regexp}@r{]}
@@ -39427,11 +39555,19 @@ data structures, including its flags and contained types.
 
 @kindex maint selftest
 @cindex self tests
-@item maint selftest @r{[}@var{filter}@r{]}
+@item maint selftest @r{[}-verbose@r{]} @r{[}@var{filter}@r{]}
 Run any self tests that were compiled in to @value{GDBN}.  This will
 print a message showing how many tests were run, and how many failed.
 If a @var{filter} is passed, only the tests with @var{filter} in their
-name will by ran.
+name will be ran.  If @code{-verbose} is passed, the self tests can be
+more verbose.
+
+@kindex maint set selftest verbose
+@kindex maint show selftest verbose
+@cindex self tests
+@item maint set selftest verbose
+@item maint show selftest verbose
+Control whether self tests are run verbosely or not.
 
 @kindex maint info selftests
 @cindex self tests
@@ -39662,6 +39798,25 @@ unload the library and continue searching for a suitable candidate as
 described in @ref{set libthread-db-search-path}.  For more information
 about the tests, see @ref{maint check libthread-db}.
 
+@kindex maint set gnu-source-highlight enabled
+@kindex maint show gnu-source-highlight enabled
+@item maint set gnu-source-highlight enabled @r{[}on|off@r{]}
+@itemx maint show gnu-source-highlight enabled
+Control whether @value{GDBN} should use the GNU Source Highlight
+library for applying styling to source code (@pxref{Output Styling}).
+This will be @samp{on} by default if the GNU Source Highlight library
+is available.  If the GNU Source Highlight library is not available,
+then this will be @samp{off} by default, and attempting to change this
+value to @samp{on} will give an error.
+
+If the GNU Source Highlight library is not being used, then
+@value{GDBN} will use the Python Pygments package for source code
+styling, if it is available.
+
+This option is useful for debugging @value{GDBN}'s use of the Pygments
+library when @value{GDBN} is linked against the GNU Source Highlight
+library.
+
 @kindex maint space
 @cindex memory used by commands
 @item maint space @var{value}
@@ -39715,6 +39870,24 @@ support in the command options framework.
 These are representative commands for each @var{kind} of setting type
 @value{GDBN} supports.  They are used by the testsuite for exercising
 the settings infrastructure.
+
+@kindex maint set backtrace-on-fatal-signal
+@kindex maint show backtrace-on-fatal-signal
+@item maint set backtrace-on-fatal-signal [on|off]
+@itemx maint show backtrace-on-fatal-signal
+When this setting is @code{on}, if @value{GDBN} itself terminates with
+a fatal signal (e.g.@: SIGSEGV), then a limited backtrace will be
+printed to the standard error stream.  This backtrace can be used to
+help diagnose crashes within @value{GDBN} in situations where a user
+is unable to share a corefile with the @value{GDBN} developers.
+
+If the functionality to provide this backtrace is not available for
+the platform on which GDB is running then this feature will be
+@code{off} by default, and attempting to turn this feature on will
+give an error.
+
+For platforms that do support creating the backtrace this feature is
+@code{on} by default.
 
 @kindex maint with
 @item maint with @var{setting} [@var{value}] [-- @var{command}]
@@ -45948,11 +46121,17 @@ pointers; printing a code pointer converts it into a symbolic
 address.  The stack pointer and any dedicated address registers
 may be marked as data pointers.
 
+@item ieee_half
+Half precision IEEE floating point.
+
 @item ieee_single
 Single precision IEEE floating point.
 
 @item ieee_double
 Double precision IEEE floating point.
+
+@item bfloat16
+The 16-bit @dfn{brain floating point} format used e.g.@: by x86 and ARM.
 
 @item arm_fpa_ext
 The 12-byte extended precision format used by ARM FPA registers.
@@ -46142,6 +46321,17 @@ and @samp{xpsr}.
 
 The @samp{org.gnu.gdb.arm.fpa} feature is optional.  If present, it
 should contain registers @samp{f0} through @samp{f7} and @samp{fps}.
+
+The @samp{org.gnu.gdb.arm.m-profile-mve} feature is optional.  If present, it
+must contain register @samp{vpr}.
+
+If the @samp{org.gnu.gdb.arm.m-profile-mve} feature is available, @value{GDBN}
+will synthesize the @samp{p0} pseudo register from @samp{vpr} contents.
+
+If the @samp{org.gnu.gdb.arm.vfp} feature is available alongside the
+@samp{org.gnu.gdb.arm.m-profile-mve} feature, @value{GDBN} will
+synthesize the @samp{q} pseudo registers from @samp{d} register
+contents.
 
 The @samp{org.gnu.gdb.xscale.iwmmxt} feature is optional.  If present,
 it should contain at least registers @samp{wR0} through @samp{wR15} and
@@ -46989,6 +47179,83 @@ switch (die->tag)
   @}
 @end smallexample
 
+@node Debuginfod
+@appendix Download debugging resources with Debuginfod
+@cindex debuginfod
+
+@code{debuginfod} is an HTTP server for distributing ELF, DWARF and source
+files.
+
+With the @code{debuginfod} client library, @file{libdebuginfod}, @value{GDBN}
+can query servers using the build IDs associated with missing debug info,
+executables and source files in order to download them on demand.
+
+For instructions on building @value{GDBN} with @file{libdebuginfod},
+@pxref{Configure Options,,--with-debuginfod}.  @code{debuginfod} is packaged
+with @code{elfutils}, starting with version 0.178.  See
+@uref{https://sourceware.org/elfutils/Debuginfod.html} for more information
+regarding @code{debuginfod}.
+
+@menu
+* Debuginfod Settings::		Configuring debuginfod with @value{GDBN}
+@end menu
+
+@node Debuginfod Settings
+@section Debuginfod Settings
+
+@value{GDBN} provides the following commands for configuring @code{debuginfod}.
+
+@table @code
+@kindex set debuginfod enabled
+@anchor{set debuginfod enabled}
+@item set debuginfod enabled
+@itemx set debuginfod enabled on
+@cindex enable debuginfod
+@value{GDBN} will attempt to query @code{debuginfod} servers when missing debug
+info or source files.
+
+@item set debuginfod enabled off
+@value{GDBN} will not attempt to query @code{debuginfod} servers when missing
+debug info or source files.  By default, @code{debuginfod enabled} is set to
+@code{off} for non-interactive sessions.
+
+@item set debuginfod enabled ask
+@value{GDBN} will prompt the user to enable or disable @code{debuginfod} before
+attempting to perform the next query.  By default, @code{debuginfod enabled}
+is set to @code{ask} for interactive sessions.
+
+@kindex show debuginfod enabled
+@item show debuginfod enabled
+Display whether @code{debuginfod enabled} is set to @code{on}, @code{off} or
+@code{ask}.
+
+@kindex set debuginfod urls
+@cindex configure debuginfod URLs
+@item set debuginfod urls
+@itemx set debuginfod urls @var{urls}
+Set the space-separated list of URLs that @code{debuginfod} will attempt to
+query.  Only @code{http://}, @code{https://} and @code{file://} protocols
+should be used.  The default value of @code{debuginfod urls} is copied from
+the @var{DEBUGINFOD_URLS} environment variable.
+
+@kindex show debuginfod urls
+@item show debuginfod urls
+Display the list of URLs that @code{debuginfod} will attempt to query.
+
+@kindex set debuginfod verbose
+@cindex debuginfod verbosity
+@item set debuginfod verbose
+@itemx set debuginfod verbose @var{n}
+Enable or disable @code{debuginfod}-related output.  Use a non-zero value
+to enable and @code{0} to disable.  @code{debuginfod} output is shown by
+default.
+
+@kindex show debuginfod verbose
+@item show debuginfod verbose
+Show the current verbosity setting.
+
+@end table
+
 @node Man Pages
 @appendix Manual pages
 @cindex Man pages
@@ -47007,14 +47274,7 @@ switch (die->tag)
 @c man title gdb The GNU Debugger
 
 @c man begin SYNOPSIS gdb
-gdb [@option{-help}] [@option{-nh}] [@option{-nx}] [@option{-q}]
-[@option{-batch}] [@option{-cd=}@var{dir}] [@option{-f}]
-[@option{-b}@w{ }@var{bps}]
-    [@option{-tty=}@var{dev}] [@option{-s} @var{symfile}]
-[@option{-e}@w{ }@var{prog}] [@option{-se}@w{ }@var{prog}]
-[@option{-c}@w{ }@var{core}] [@option{-p}@w{ }@var{procID}]
-    [@option{-x}@w{ }@var{cmds}] [@option{-d}@w{ }@var{dir}]
-[@var{prog}|@var{prog} @var{procID}|@var{prog} @var{core}]
+gdb [OPTIONS] [@var{prog}|@var{prog} @var{procID}|@var{prog} @var{core}]
 @c man end
 
 @c man begin DESCRIPTION gdb
@@ -47045,7 +47305,7 @@ Modula-2.
 
 @value{GDBN} is invoked with the shell command @code{gdb}.  Once started, it reads
 commands from the terminal until you tell it to exit with the @value{GDBN}
-command @code{quit}.  You can get online help from @value{GDBN} itself
+command @code{quit} or @code{exit}.  You can get online help from @value{GDBN} itself
 by using the command @code{help}.
 
 You can run @code{gdb} with no arguments or options; but the most
@@ -47078,8 +47338,8 @@ Here are some of the most frequently needed @value{GDBN} commands:
 
 @c pod2man highlights the right hand side of the @item lines.
 @table @env
-@item break [@var{file}:]@var{function}
-Set a breakpoint at @var{function} (in @var{file}).
+@item break [@var{file}:][@var{function}|@var{line}]
+Set a breakpoint at @var{function} or @var{line} (in @var{file}).
 
 @item run [@var{arglist}]
 Start your program (with @var{arglist}, if specified).
@@ -47112,6 +47372,7 @@ Show information about @value{GDBN} command @var{name}, or general information
 about using @value{GDBN}.
 
 @item quit
+@itemx exit
 Exit from @value{GDBN}.
 @end table
 
@@ -47127,72 +47388,91 @@ as the @code{gdb} entry in the @code{info} program.
 Any arguments other than options specify an executable
 file and core file (or process ID); that is, the first argument
 encountered with no
-associated option flag is equivalent to a @option{-se} option, and the second,
+associated option flag is equivalent to a @option{--se} option, and the second,
 if any, is equivalent to a @option{-c} option if it's the name of a file.
 Many options have
-both long and short forms; both are shown here.  The long forms are also
+both long and abbreviated forms; both are shown here.  The long forms are also
 recognized if you truncate them, so long as enough of the option is
-present to be unambiguous.  (If you prefer, you can flag option
-arguments with @option{+} rather than @option{-}, though we illustrate the
-more usual convention.)
+present to be unambiguous.
+
+The abbreviated forms are shown here with @samp{-} and long forms are shown
+with @samp{--} to reflect how they are shown in @option{--help}. However,
+@value{GDBN} recognizes all of the following conventions for most options:
+
+@table @code
+@item --option=@var{value}
+@item --option @var{value}
+@item -option=@var{value}
+@item -option @var{value}
+@item --o=@var{value}
+@item --o @var{value}
+@item -o=@var{value}
+@item -o @var{value}
+@end table
 
 All the options and command line arguments you give are processed
 in sequential order.  The order makes a difference when the @option{-x}
 option is used.
 
 @table @env
-@item -help
+@item --help
 @itemx -h
 List all options, with brief explanations.
 
-@item -symbols=@var{file}
+@item --symbols=@var{file}
 @itemx -s @var{file}
-Read symbol table from file @var{file}.
+Read symbol table from @var{file}.
 
-@item -write
+@item --write
 Enable writing into executable and core files.
 
-@item -exec=@var{file}
+@item --exec=@var{file}
 @itemx -e @var{file}
-Use file @var{file} as the executable file to execute when
+Use @var{file} as the executable file to execute when
 appropriate, and for examining pure data in conjunction with a core
 dump.
 
-@item -se=@var{file}
-Read symbol table from file @var{file} and use it as the executable
+@item --se=@var{file}
+Read symbol table from @var{file} and use it as the executable
 file.
 
-@item -core=@var{file}
+@item --core=@var{file}
 @itemx -c @var{file}
-Use file @var{file} as a core dump to examine.
+Use @var{file} as a core dump to examine.
 
-@item -command=@var{file}
+@item --command=@var{file}
 @itemx -x @var{file}
-Execute @value{GDBN} commands from file @var{file}.
+Execute @value{GDBN} commands from @var{file}.
 
+@item --eval-command=@var{command}
 @item -ex @var{command}
 Execute given @value{GDBN} @var{command}.
 
-@item -directory=@var{directory}
+@item --init-eval-command=@var{command}
+@item -iex
+Execute @value{GDBN} @var{command} before loading the inferior.
+
+@item --directory=@var{directory}
 @itemx -d @var{directory}
 Add @var{directory} to the path to search for source files.
 
-@item -nh
+@item --nh
 Do not execute commands from @file{~/.config/gdb/gdbinit},
 @file{~/.gdbinit}, @file{~/.config/gdb/gdbearlyinit}, or
 @file{~/.gdbearlyinit}
 
-@item -nx
+@item --nx
 @itemx -n
 Do not execute commands from any @file{.gdbinit} or
 @file{.gdbearlyinit} initialization files.
 
-@item -quiet
+@item --quiet
+@item --silent
 @itemx -q
 ``Quiet''.  Do not print the introductory and copyright messages.  These
 messages are also suppressed in batch mode.
 
-@item -batch
+@item --batch
 Run in batch mode.  Exit with status @code{0} after processing all the command
 files specified with @option{-x} (and @file{.gdbinit}, if not inhibited).
 Exit with nonzero status if an error occurs in executing the @value{GDBN}
@@ -47210,11 +47490,71 @@ Program exited normally.
 (which is ordinarily issued whenever a program running under @value{GDBN} control
 terminates) is not issued when running in batch mode.
 
-@item -cd=@var{directory}
+@item --batch-silent
+Run in batch mode, just like @option{--batch}, but totally silent.  All @value{GDBN}
+output is supressed (stderr is unaffected).  This is much quieter than
+@option{--silent} and would be useless for an interactive session.
+
+This is particularly useful when using targets that give @samp{Loading section}
+messages, for example.
+
+Note that targets that give their output via @value{GDBN}, as opposed to writing
+directly to @code{stdout}, will also be made silent.
+
+@item --args @var{prog} [@var{arglist}]
+Change interpretation of command line so that arguments following this
+option are passed as arguments to the inferior.  As an example, take
+the following command:
+
+@smallexample
+gdb ./a.out -q
+@end smallexample
+
+@noindent
+It would start @value{GDBN} with @option{-q}, not printing the introductory message.  On
+the other hand, using:
+
+@smallexample
+gdb --args ./a.out -q
+@end smallexample
+
+@noindent
+starts @value{GDBN} with the introductory message, and passes the option to the inferior.
+
+@item --pid=@var{pid}
+Attach @value{GDBN} to an already running program, with the PID @var{pid}.
+
+@item --tui
+Open the terminal user interface.
+
+@item --readnow
+Read all symbols from the given symfile on the first access.
+
+@item --readnever
+Do not read symbol files.
+
+@item --dbx
+Run in DBX compatibility mode.
+
+@item --return-child-result
+@value{GDBN}'s exit code will be the same as the child's exit code.
+
+@item --configuration
+Print details about GDB configuration and then exit.
+
+@item --version
+Print version information and then exit.
+
+@item --cd=@var{directory}
 Run @value{GDBN} using @var{directory} as its working directory,
 instead of the current directory.
 
-@item -fullname
+@item --data-directory=@var{directory}
+@item -D
+Run @value{GDBN} using @var{directory} as its data directory.  The data
+directory is where @value{GDBN} searches for its auxiliary files.
+
+@item --fullname
 @itemx -f
 Emacs sets this option when it runs @value{GDBN} as a subprocess.  It tells
 @value{GDBN} to output the full file name and line number in a standard,
@@ -47225,11 +47565,14 @@ and character position separated by colons, and a newline.  The
 Emacs-to-@value{GDBN} interface program uses the two @samp{\032}
 characters as a signal to display the source code for the frame.
 
-@item -b @var{bps}
+@item -b @var{baudrate}
 Set the line speed (baud rate or bits per second) of any serial
 interface used by @value{GDBN} for remote debugging.
 
-@item -tty=@var{device}
+@item -l @var{timeout}
+Set timeout, in seconds, for remote debugging.
+
+@item --tty=@var{device}
 Run using @var{device} for your program's standard input and output.
 @end table
 @c man end

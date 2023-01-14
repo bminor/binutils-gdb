@@ -1,5 +1,5 @@
 # MIPS simulator testsuite utility functions.
-# Copyright (C) 2004-2021 Free Software Foundation, Inc.
+# Copyright (C) 2004-2022 Free Software Foundation, Inc.
 # Contributed by Chris Demetriou of Broadcom Corporation.
 #
 # This file is part of the GNU simulators.
@@ -147,4 +147,59 @@ _dowrite:
 	load64	$1, \val
 	checkreg \reg, $1
 	.set pop
+	.endm
+
+
+	# Check hi-lo register pair against data stored at base+o1 and base+o2
+	# Clobbers $1 - $5
+	.macro checkpair lo, hi, base, w, o1, o2
+	move  $2, \lo
+	move  $3, \hi
+	.set noat
+	la   $1, \base
+	l\w	$4, \o1($1)
+	l\w	$5, \o2($1)
+	.set at
+	checkreg  $2, $4
+	checkreg  $3, $5
+	.endm
+
+	.macro checkpair_le_d lo, hi, base
+	checkpair \lo, \hi, \base, w, 0, 4
+	.endm
+
+	.macro checkpair_be_d lo, hi, base
+	checkpair \lo, \hi, \base, w, 4, 0
+	.endm
+
+	.macro checkpair_le_q lo, hi, base
+	checkpair \lo, \hi, \base, d, 0, 8
+	.endm
+
+	.macro checkpair_be_q lo, hi, base
+	checkpair \lo, \hi, \base, d, 8, 0
+	.endm
+
+	# Endian-ness for comparison is determined by reading a word at ec
+	.macro checkpair_xendian lo, hi, base, ec, w
+	.set noat
+	lw   $1, \ec
+	andi $1, $1, 0x1
+	# check endianess
+	beqz  $1, 2f
+	.set at
+1: # big endian
+	checkpair_be_\w \lo, \hi, \base
+	b 3f
+2: # little endian
+	checkpair_le_\w \lo, \hi, \base
+3:
+	.endm
+
+	.macro checkpair_qword lo, hi, base, oe
+	checkpair_xendian \lo, \hi, \base, \oe, q
+	.endm
+
+	.macro checkpair_dword lo, hi, base, oe
+	checkpair_xendian \lo, \hi, \base, \oe, d
 	.endm

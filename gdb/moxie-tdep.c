@@ -1,6 +1,6 @@
 /* Target-dependent code for Moxie.
 
-   Copyright (C) 2009-2021 Free Software Foundation, Inc.
+   Copyright (C) 2009-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -279,9 +279,10 @@ moxie_process_readu (CORE_ADDR addr, gdb_byte *buf,
   if (target_read_memory (addr, buf, length))
     {
       if (record_debug)
-	printf_unfiltered (_("Process record: error reading memory at "
-			     "addr 0x%s len = %d.\n"),
-			   paddress (target_gdbarch (), addr), length);
+	fprintf_unfiltered (gdb_stderr,
+			    _("Process record: error reading memory at "
+			      "addr 0x%s len = %d.\n"),
+			    paddress (target_gdbarch (), addr), length);
       return -1;
     }
 
@@ -1052,7 +1053,6 @@ static struct gdbarch *
 moxie_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
-  struct gdbarch_tdep *tdep;
 
   /* If there is already a candidate, use it.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
@@ -1060,7 +1060,7 @@ moxie_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return arches->gdbarch;
 
   /* Allocate space for the new architecture.  */
-  tdep = XCNEW (struct gdbarch_tdep);
+  moxie_gdbarch_tdep *tdep = new moxie_gdbarch_tdep;
   gdbarch = gdbarch_alloc (&info, tdep);
 
   set_gdbarch_wchar_bit (gdbarch, 32);

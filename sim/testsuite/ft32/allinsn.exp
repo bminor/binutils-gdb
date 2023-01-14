@@ -1,6 +1,8 @@
 # ft32 simulator testsuite
 
-if [istarget ft32-*] {
+sim_init
+
+if [istarget *] {
     # all machines
     set all_machs "ft32"
 

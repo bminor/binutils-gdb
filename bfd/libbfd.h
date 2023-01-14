@@ -6,7 +6,7 @@
 /* libbfd.h -- Declarations used by bfd library *implementation*.
    (This include file is not for users of the library.)
 
-   Copyright (C) 1990-2021 Free Software Foundation, Inc.
+   Copyright (C) 1990-2022 Free Software Foundation, Inc.
 
    Written by Cygnus Support.
 
@@ -177,7 +177,7 @@ extern bool _bfd_write_archive_contents
 extern bool _bfd_compute_and_write_armap
   (bfd *, unsigned int) ATTRIBUTE_HIDDEN;
 extern bfd *_bfd_get_elt_at_filepos
-  (bfd *, file_ptr) ATTRIBUTE_HIDDEN;
+  (bfd *, file_ptr, struct bfd_link_info *) ATTRIBUTE_HIDDEN;
 extern bfd *_bfd_generic_get_elt_at_index
   (bfd *, symindex) ATTRIBUTE_HIDDEN;
 extern bfd * _bfd_new_bfd
@@ -1549,6 +1549,7 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_PPC64_ADDR64_LOCAL",
   "BFD_RELOC_PPC64_ENTRY",
   "BFD_RELOC_PPC64_REL24_NOTOC",
+  "BFD_RELOC_PPC64_REL24_P9NOTOC",
   "BFD_RELOC_PPC64_D34",
   "BFD_RELOC_PPC64_D34_LO",
   "BFD_RELOC_PPC64_D34_HI30",
@@ -3416,6 +3417,49 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_CKCORE_PCREL_BLOOP_IMM4BY4",
   "BFD_RELOC_CKCORE_PCREL_BLOOP_IMM12BY4",
   "BFD_RELOC_S12Z_OPR",
+  "BFD_RELOC_LARCH_TLS_DTPMOD32",
+  "BFD_RELOC_LARCH_TLS_DTPREL32",
+  "BFD_RELOC_LARCH_TLS_DTPMOD64",
+  "BFD_RELOC_LARCH_TLS_DTPREL64",
+  "BFD_RELOC_LARCH_TLS_TPREL32",
+  "BFD_RELOC_LARCH_TLS_TPREL64",
+  "BFD_RELOC_LARCH_MARK_LA",
+  "BFD_RELOC_LARCH_MARK_PCREL",
+  "BFD_RELOC_LARCH_SOP_PUSH_PCREL",
+  "BFD_RELOC_LARCH_SOP_PUSH_ABSOLUTE",
+  "BFD_RELOC_LARCH_SOP_PUSH_DUP",
+  "BFD_RELOC_LARCH_SOP_PUSH_GPREL",
+  "BFD_RELOC_LARCH_SOP_PUSH_TLS_TPREL",
+  "BFD_RELOC_LARCH_SOP_PUSH_TLS_GOT",
+  "BFD_RELOC_LARCH_SOP_PUSH_TLS_GD",
+  "BFD_RELOC_LARCH_SOP_PUSH_PLT_PCREL",
+  "BFD_RELOC_LARCH_SOP_ASSERT",
+  "BFD_RELOC_LARCH_SOP_NOT",
+  "BFD_RELOC_LARCH_SOP_SUB",
+  "BFD_RELOC_LARCH_SOP_SL",
+  "BFD_RELOC_LARCH_SOP_SR",
+  "BFD_RELOC_LARCH_SOP_ADD",
+  "BFD_RELOC_LARCH_SOP_AND",
+  "BFD_RELOC_LARCH_SOP_IF_ELSE",
+  "BFD_RELOC_LARCH_SOP_POP_32_S_10_5",
+  "BFD_RELOC_LARCH_SOP_POP_32_U_10_12",
+  "BFD_RELOC_LARCH_SOP_POP_32_S_10_12",
+  "BFD_RELOC_LARCH_SOP_POP_32_S_10_16",
+  "BFD_RELOC_LARCH_SOP_POP_32_S_10_16_S2",
+  "BFD_RELOC_LARCH_SOP_POP_32_S_5_20",
+  "BFD_RELOC_LARCH_SOP_POP_32_S_0_5_10_16_S2",
+  "BFD_RELOC_LARCH_SOP_POP_32_S_0_10_10_16_S2",
+  "BFD_RELOC_LARCH_SOP_POP_32_U",
+  "BFD_RELOC_LARCH_ADD8",
+  "BFD_RELOC_LARCH_ADD16",
+  "BFD_RELOC_LARCH_ADD24",
+  "BFD_RELOC_LARCH_ADD32",
+  "BFD_RELOC_LARCH_ADD64",
+  "BFD_RELOC_LARCH_SUB8",
+  "BFD_RELOC_LARCH_SUB16",
+  "BFD_RELOC_LARCH_SUB24",
+  "BFD_RELOC_LARCH_SUB32",
+  "BFD_RELOC_LARCH_SUB64",
  "@@overflow: BFD_RELOC_UNUSED@@",
 };
 #endif

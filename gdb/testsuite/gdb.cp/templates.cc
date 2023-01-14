@@ -690,6 +690,18 @@ int gf2 (int a) {
 
 char string[3];
 
+// Template class with typedefs and const attributes.
+template<typename DataT>
+class Cfoo
+{
+  typedef float myfloat;
+public:
+  DataT me0;
+  const DataT me1=1;
+  const myfloat me2=2.0;
+  const int me3=0;
+};
+
 
 // Template for nested instantiations
 
@@ -778,6 +790,8 @@ int main()
   sic.spec ('c');
   siip.spec (&x);
 
+  Cfoo<double> cfoo;
+
   Garply<int> f;
   Garply<char> fc;
   f.x = 13;
@@ -801,5 +815,5 @@ int main()
 
   arg.method(empty);
 
-  return 0;
+  return 0;	/* Final breakpoint.  */
 }

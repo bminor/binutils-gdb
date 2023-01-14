@@ -1,5 +1,5 @@
 /* Agent expression code for remote server.
-   Copyright (C) 2009-2021 Free Software Foundation, Inc.
+   Copyright (C) 2009-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -39,19 +39,16 @@ ax_vdebug (const char *fmt, ...)
 #ifdef IN_PROCESS_AGENT
   fprintf (stderr, PROG "/ax: %s\n", buf);
 #else
-  debug_printf (PROG "/ax: %s\n", buf);
+  threads_debug_printf (PROG "/ax: %s", buf);
 #endif
   va_end (ap);
 }
 
-#define ax_debug_1(level, fmt, args...)	\
+#define ax_debug(fmt, args...) \
   do {						\
-    if (level <= debug_threads)			\
+    if (debug_threads)			\
       ax_vdebug ((fmt), ##args);		\
   } while (0)
-
-#define ax_debug(FMT, args...)		\
-  ax_debug_1 (1, FMT, ##args)
 
 /* This enum must exactly match what is documented in
    gdb/doc/agentexpr.texi, including all the numerical values.  */
@@ -878,7 +875,7 @@ ax_printf (CORE_ADDR fn, CORE_ADDR chan, const char *format,
 	    break;
 
 	  case long_long_arg:
-#if defined (CC_HAS_LONG_LONG) && defined (PRINTF_HAS_LONG_LONG)
+#if defined (PRINTF_HAS_LONG_LONG)
 	    {
 	      long long val = args[i];
 

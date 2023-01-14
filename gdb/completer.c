@@ -1,5 +1,5 @@
 /* Line completion stuff for GDB, the GNU debugger.
-   Copyright (C) 2000-2021 Free Software Foundation, Inc.
+   Copyright (C) 2000-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1073,13 +1073,13 @@ add_struct_fields (struct type *type, completion_list &output,
       if (i < TYPE_N_BASECLASSES (type))
 	add_struct_fields (TYPE_BASECLASS (type, i),
 			   output, fieldname, namelen);
-      else if (TYPE_FIELD_NAME (type, i))
+      else if (type->field (i).name ())
 	{
-	  if (TYPE_FIELD_NAME (type, i)[0] != '\0')
+	  if (type->field (i).name ()[0] != '\0')
 	    {
-	      if (! strncmp (TYPE_FIELD_NAME (type, i), 
+	      if (! strncmp (type->field (i).name (), 
 			     fieldname, namelen))
-		output.emplace_back (xstrdup (TYPE_FIELD_NAME (type, i)));
+		output.emplace_back (xstrdup (type->field (i).name ()));
 	    }
 	  else if (type->field (i).type ()->code () == TYPE_CODE_UNION)
 	    {
@@ -1134,7 +1134,7 @@ complete_expression (completion_tracker &tracker,
       for (;;)
 	{
 	  type = check_typedef (type);
-	  if (type->code () != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
+	  if (!type->is_pointer_or_reference ())
 	    break;
 	  type = TYPE_TARGET_TYPE (type);
 	}

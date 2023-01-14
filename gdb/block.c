@@ -1,6 +1,6 @@
 /* Block-related functions for the GNU debugger, GDB.
 
-   Copyright (C) 2003-2021 Free Software Foundation, Inc.
+   Copyright (C) 2003-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,7 +21,7 @@
 #include "block.h"
 #include "symtab.h"
 #include "symfile.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "cp-support.h"
 #include "addrmap.h"
 #include "gdbtypes.h"
@@ -51,7 +51,7 @@ block_objfile (const struct block *block)
     return symbol_objfile (BLOCK_FUNCTION (block));
 
   global_block = (struct global_block *) block_global_block (block);
-  return COMPUNIT_OBJFILE (global_block->compunit_symtab);
+  return global_block->compunit_symtab->objfile ();
 }
 
 /* See block.  */
@@ -197,7 +197,7 @@ blockvector_for_pc_sect (CORE_ADDR pc, struct obj_section *section,
 	return 0;
     }
 
-  bl = COMPUNIT_BLOCKVECTOR (cust);
+  bl = cust->blockvector ();
 
   /* Then search that symtab for the smallest block that wins.  */
   b = find_block_in_blockvector (bl, pc);
@@ -225,15 +225,15 @@ struct call_site *
 call_site_for_pc (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   struct compunit_symtab *cust;
-  void **slot = NULL;
+  call_site *cs = nullptr;
 
   /* -1 as tail call PC can be already after the compilation unit range.  */
   cust = find_pc_compunit_symtab (pc - 1);
 
-  if (cust != NULL && COMPUNIT_CALL_SITE_HTAB (cust) != NULL)
-    slot = htab_find_slot (COMPUNIT_CALL_SITE_HTAB (cust), &pc, NO_INSERT);
+  if (cust != nullptr)
+    cs = cust->find_call_site (pc);
 
-  if (slot == NULL)
+  if (cs == nullptr)
     {
       struct bound_minimal_symbol msym = lookup_minimal_symbol_by_pc (pc);
 
@@ -247,7 +247,7 @@ call_site_for_pc (struct gdbarch *gdbarch, CORE_ADDR pc)
 		    : msym.minsym->print_name ()));
     }
 
-  return (struct call_site *) *slot;
+  return cs;
 }
 
 /* Return the blockvector immediately containing the innermost lexical block
@@ -543,7 +543,7 @@ block_iterator_step (struct block_iterator *iterator, int first)
 	  if (cust == NULL)
 	    return  NULL;
 
-	  block = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust),
+	  block = BLOCKVECTOR_BLOCK (cust->blockvector (),
 				     iterator->which);
 	  sym = mdict_iterator_first (BLOCK_MULTIDICT (block),
 				      &iterator->mdict_iter);
@@ -612,7 +612,7 @@ block_iter_match_step (struct block_iterator *iterator,
 	  if (cust == NULL)
 	    return  NULL;
 
-	  block = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust),
+	  block = BLOCKVECTOR_BLOCK (cust->blockvector (),
 				     iterator->which);
 	  sym = mdict_iter_match_first (BLOCK_MULTIDICT (block), name,
 					&iterator->mdict_iter);

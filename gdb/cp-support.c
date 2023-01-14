@@ -1,5 +1,5 @@
 /* Helper routines for C++ support in GDB.
-   Copyright (C) 2002-2021 Free Software Foundation, Inc.
+   Copyright (C) 2002-2022 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
 
@@ -147,9 +147,9 @@ inspect_type (struct demangle_parse_info *info,
   name[ret_comp->u.s_name.len] = '\0';
 
   /* Ignore any typedefs that should not be substituted.  */
-  for (int i = 0; i < ARRAY_SIZE (ignore_typedefs); ++i)
+  for (const char *ignorable : ignore_typedefs)
     {
-      if (strcmp (name, ignore_typedefs[i]) == 0)
+      if (strcmp (name, ignorable) == 0)
 	return 0;
     }
 
@@ -661,10 +661,9 @@ cp_canonicalize_string (const char *string)
 
 static std::unique_ptr<demangle_parse_info>
 mangled_name_to_comp (const char *mangled_name, int options,
-		      void **memory, char **demangled_p)
+		      void **memory,
+		      gdb::unique_xmalloc_ptr<char> *demangled_p)
 {
-  char *demangled_name;
-
   /* If it looks like a v3 mangled name, then try to go directly
      to trees.  */
   if (mangled_name[0] == '_' && mangled_name[1] == 'Z')
@@ -684,22 +683,20 @@ mangled_name_to_comp (const char *mangled_name, int options,
 
   /* If it doesn't, or if that failed, then try to demangle the
      name.  */
-  demangled_name = gdb_demangle (mangled_name, options);
+  gdb::unique_xmalloc_ptr<char> demangled_name = gdb_demangle (mangled_name,
+							       options);
   if (demangled_name == NULL)
    return NULL;
   
   /* If we could demangle the name, parse it to build the component
      tree.  */
   std::unique_ptr<demangle_parse_info> info
-    = cp_demangled_name_to_comp (demangled_name, NULL);
+    = cp_demangled_name_to_comp (demangled_name.get (), NULL);
 
   if (info == NULL)
-    {
-      xfree (demangled_name);
-      return NULL;
-    }
+    return NULL;
 
-  *demangled_p = demangled_name;
+  *demangled_p = std::move (demangled_name);
   return info;
 }
 
@@ -709,7 +706,7 @@ char *
 cp_class_name_from_physname (const char *physname)
 {
   void *storage = NULL;
-  char *demangled_name = NULL;
+  gdb::unique_xmalloc_ptr<char> demangled_name;
   gdb::unique_xmalloc_ptr<char> ret;
   struct demangle_component *ret_comp, *prev_comp, *cur_comp;
   std::unique_ptr<demangle_parse_info> info;
@@ -789,7 +786,6 @@ cp_class_name_from_physname (const char *physname)
     }
 
   xfree (storage);
-  xfree (demangled_name);
   return ret.release ();
 }
 
@@ -857,7 +853,7 @@ char *
 method_name_from_physname (const char *physname)
 {
   void *storage = NULL;
-  char *demangled_name = NULL;
+  gdb::unique_xmalloc_ptr<char> demangled_name;
   gdb::unique_xmalloc_ptr<char> ret;
   struct demangle_component *ret_comp;
   std::unique_ptr<demangle_parse_info> info;
@@ -875,7 +871,6 @@ method_name_from_physname (const char *physname)
     ret = cp_comp_to_string (ret_comp, 10);
 
   xfree (storage);
-  xfree (demangled_name);
   return ret.release ();
 }
 
@@ -1335,8 +1330,7 @@ add_symbol_overload_list_adl_namespace (struct type *type,
   const char *type_name;
   int i, prefix_len;
 
-  while (type->code () == TYPE_CODE_PTR
-	 || TYPE_IS_REFERENCE (type)
+  while (type->is_pointer_or_reference ()
 	 || type->code () == TYPE_CODE_ARRAY
 	 || type->code () == TYPE_CODE_TYPEDEF)
     {
@@ -1470,7 +1464,7 @@ add_symbol_overload_list_qualified (const char *func_name,
       for (compunit_symtab *cust : objfile->compunits ())
 	{
 	  QUIT;
-	  b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), GLOBAL_BLOCK);
+	  b = BLOCKVECTOR_BLOCK (cust->blockvector (), GLOBAL_BLOCK);
 	  add_symbol_overload_list_block (func_name, b, overload_list);
 	}
     }
@@ -1480,7 +1474,7 @@ add_symbol_overload_list_qualified (const char *func_name,
       for (compunit_symtab *cust : objfile->compunits ())
 	{
 	  QUIT;
-	  b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), STATIC_BLOCK);
+	  b = BLOCKVECTOR_BLOCK (cust->blockvector (), STATIC_BLOCK);
 	  /* Don't do this block twice.  */
 	  if (b == surrounding_static_block)
 	    continue;
@@ -1605,10 +1599,10 @@ report_failed_demangle (const char *name, bool core_dump_allowed,
 
 /* A wrapper for bfd_demangle.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 gdb_demangle (const char *name, int options)
 {
-  char *result = NULL;
+  gdb::unique_xmalloc_ptr<char> result;
   int crash_signal = 0;
 
 #ifdef HAVE_WORKING_FORK
@@ -1637,7 +1631,7 @@ gdb_demangle (const char *name, int options)
 #endif
 
   if (crash_signal == 0)
-    result = bfd_demangle (NULL, name, options);
+    result.reset (bfd_demangle (NULL, name, options));
 
 #ifdef HAVE_WORKING_FORK
   if (catch_demangler_crashes)
@@ -2191,7 +2185,7 @@ first_component_command (const char *arg, int from_tty)
   memcpy (prefix, arg, len);
   prefix[len] = '\0';
 
-  printf_unfiltered ("%s\n", prefix);
+  printf_filtered ("%s\n", prefix);
 }
 
 /* Implement "info vtbl".  */

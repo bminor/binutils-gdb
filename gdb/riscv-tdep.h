@@ -1,7 +1,7 @@
 /* Target-dependent header for the RISC-V architecture, for GDB, the
    GNU Debugger.
 
-   Copyright (C) 2018-2021 Free Software Foundation, Inc.
+   Copyright (C) 2018-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,6 +22,7 @@
 #define RISCV_TDEP_H
 
 #include "arch/riscv.h"
+#include "gdbarch.h"
 
 /* RiscV register numbers.  */
 enum
@@ -75,7 +76,7 @@ enum
 };
 
 /* RISC-V specific per-architecture information.  */
-struct gdbarch_tdep
+struct riscv_gdbarch_tdep : gdbarch_tdep
 {
   /* Features about the target hardware that impact how the gdbarch is
      configured.  Two gdbarch instances are compatible only if this field
@@ -105,7 +106,7 @@ struct gdbarch_tdep
 
   /* Return the expected next PC assuming FRAME is stopped at a syscall
      instruction.  */
-  CORE_ADDR (*syscall_next_pc) (struct frame_info *frame);
+  CORE_ADDR (*syscall_next_pc) (struct frame_info *frame) = nullptr;
 };
 
 

@@ -1,6 +1,6 @@
 \input texinfo
 @setfilename ld.info
-@c Copyright (C) 1991-2021 Free Software Foundation, Inc.
+@c Copyright (C) 1991-2022 Free Software Foundation, Inc.
 @syncodeindex ky cp
 @c man begin INCLUDE
 @include configdoc.texi
@@ -57,7 +57,7 @@ This file documents the @sc{gnu} linker LD
 @end ifset
 version @value{VERSION}.
 
-Copyright @copyright{} 1991-2021 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2022 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -94,7 +94,7 @@ section entitled ``GNU Free Documentation License''.
 
 @vskip 0pt plus 1filll
 @c man begin COPYRIGHT
-Copyright @copyright{} 1991-2021 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2022 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -1429,6 +1429,17 @@ called.
 
 @item origin
 Specify that the object requires @samp{$ORIGIN} handling in paths.
+
+@item pack-relative-relocs
+@itemx nopack-relative-relocs
+Generate compact relative relocation in position-independent executable
+and shared library.  It adds @code{DT_RELR}, @code{DT_RELRSZ} and
+@code{DT_RELRENT} entries to the dynamic section.  It is ignored when
+building position-dependent executable and relocatable output.
+@option{nopack-relative-relocs} is the default, which disables compact
+relative relocation.  When linked against the GNU C Library, a
+GLIBC_ABI_DT_RELR symbol version dependency on the shared C Library is
+added to the output.  Supported for i386 and x86-64.
 
 @item relro
 @itemx norelro
@@ -3910,7 +3921,9 @@ the value of a target-specific symbol, if it is defined;  For many
 targets this is @code{start}, but PE- and BeOS-based systems for example
 check a list of possible entry symbols, matching the first one found.
 @item
-the address of the first byte of the @samp{.text} section, if present;
+the address of the first byte of the code section, if present and an
+executable is being created - the code section is usually
+@samp{.text}, but can be something else; 
 @item
 The address @code{0}.
 @end itemize
@@ -5019,13 +5032,6 @@ character may be used to specify a range of characters, as in
 @item \
 quotes the following character
 @end table
-
-When a file name is matched with a wildcard, the wildcard characters
-will not match a @samp{/} character (used to separate directory names on
-Unix).  A pattern consisting of a single @samp{*} character is an
-exception; it will always match any file name, whether it contains a
-@samp{/} or not.  In a section name, the wildcard characters will match
-a @samp{/} character.
 
 File name wildcard patterns only match files which are explicitly
 specified on the command line or in an @code{INPUT} command.  The linker
@@ -6286,9 +6292,11 @@ expect when you upgrade.
 @cindex expressions
 @cindex arithmetic
 The syntax for expressions in the linker script language is identical to
-that of C expressions.  All expressions are evaluated as integers.  All
-expressions are evaluated in the same size, which is 32 bits if both the
-host and target are 32 bits, and is otherwise 64 bits.
+that of C expressions, except that whitespace is required in some
+places to resolve syntactic ambiguities.  All expressions are
+evaluated as integers.  All expressions are evaluated in the same
+size, which is 32 bits if both the host and target are 32 bits, and is
+otherwise 64 bits.
 
 You can use and set symbol values in expressions.
 
@@ -7042,7 +7050,6 @@ SECTIONS@{ @dots{}
 @end smallexample
 
 @item SIZEOF_HEADERS
-@itemx sizeof_headers
 @kindex SIZEOF_HEADERS
 @cindex header size
 Return the size in bytes of the output file's headers.  This is

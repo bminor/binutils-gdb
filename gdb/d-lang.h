@@ -1,6 +1,6 @@
 /* D language support definitions for GDB, the GNU debugger.
 
-   Copyright (C) 2005-2021 Free Software Foundation, Inc.
+   Copyright (C) 2005-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -62,7 +62,8 @@ extern int d_parse (struct parser_state *);
 
 extern const char *d_main_name (void);
 
-extern char *d_demangle (const char *mangled, int options);
+extern gdb::unique_xmalloc_ptr<char> d_demangle (const char *mangled,
+						 int options);
 
 extern const struct builtin_d_type *builtin_d_type (struct gdbarch *);
 

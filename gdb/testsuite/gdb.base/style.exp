@@ -1,4 +1,4 @@
-# Copyright 2018-2021 Free Software Foundation, Inc.
+# Copyright 2018-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -87,7 +87,6 @@ proc run_style_tests { } {
 	set readnow [readnow]
 
 	if {![runto_main]} {
-	    fail "style tests failed"
 	    return
 	}
 
@@ -170,10 +169,15 @@ proc run_style_tests { } {
 
 	    gdb_test_no_output "set width $width"
 	    gdb_test "frame" $re_styled "frame when width=$width"
-	}
 
-	# Reset width back to 0.
-	gdb_test_no_output "set width 0" ""
+	    # Reset width back to 0.  Doing this in the loop rather than
+	    # after, avoids trying to do "set width 30" while width is 20,
+	    # which causes horizontal scrolling in the case that the fallback
+	    # stub-termcap.c is used:
+	    # ^M<et width 30^M
+	    # (gdb) FAIL: gdb.base/style.exp: all styles enabled: set width 30
+	    gdb_test_no_output "set width 0" ""
+	}
 
 	if {$test_macros} {
 	    set macro_line [gdb_get_line_number "\#define SOME_MACRO"]
@@ -196,6 +200,24 @@ proc run_style_tests { } {
 	set evalue [limited_style VALUE_TWO variable]
 	gdb_test "print struct_value" \
 	    "\{$ifield = 23,.*$sfield = .*,.*$efield = $evalue.*"
+
+	set ffield [limited_style field variable]
+	set cstart [string_to_regexp "/* XXX "]
+	set cend [string_to_regexp " */"]
+	set p1field [limited_style "$cstart.*$decimal.*-bit.*padding.*$cend" \
+			 highlight]
+	set p2field [limited_style "$cstart.*$decimal.*-byte.*padding.*$cend" \
+			 highlight]
+
+	gdb_test "ptype/o just_bitfield_value" \
+	    [multi_line \
+		 ".* type = struct just_bitfield {" \
+		 ".* unsigned int $ffield : 3;" \
+		 "$p1field" \
+		 "$p2field" \
+		 "" \
+		 ".* total size.*: *$decimal *$cend" \
+		 " *}.*"]
 
 	set address_style_expr [limited_style ".*\".*address.*\".*style.*" address]
 	set color "blue"

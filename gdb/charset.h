@@ -1,5 +1,5 @@
 /* Character set conversion support for GDB.
-   Copyright (C) 2001-2021 Free Software Foundation, Inc.
+   Copyright (C) 2001-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -158,10 +158,5 @@ class wchar_iterator
 /* Convert a letter, like 'c', to its corresponding control
    character.  */
 char host_letter_to_control_character (char c);
-
-/* Convert a hex digit character to its numeric value.  E.g., 'f' is
-   converted to 15.  This function assumes that C is a valid hex
-   digit.  Both upper- and lower-case letters are recognized.  */
-int host_hex_value (char c);
 
 #endif /* CHARSET_H */

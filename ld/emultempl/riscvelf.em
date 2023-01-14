@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright (C) 2004-2021 Free Software Foundation, Inc.
+#   Copyright (C) 2004-2022 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -42,7 +42,7 @@ riscv_elf_before_allocation (void)
 	ENABLE_RELAXATION;
     }
 
-  link_info.relax_pass = 4;
+  link_info.relax_pass = 3;
 }
 
 static void
@@ -76,11 +76,7 @@ gld${EMULATION_NAME}_after_allocation (void)
   enum phase_enum *phase = &(expld.dataseg.phase);
   bfd_elf${ELFSIZE}_riscv_set_data_segment_info (&link_info, (int *) phase);
 
-  do
-    {
-      ldelf_map_segments (need_layout);
-    }
-  while (bfd_elf${ELFSIZE}_riscv_restart_relax_sections (&link_info));
+  ldelf_map_segments (need_layout);
 }
 
 /* This is a convenient point to tell BFD about target specific flags.

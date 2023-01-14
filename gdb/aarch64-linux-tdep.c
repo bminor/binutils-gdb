@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux AArch64.
 
-   Copyright (C) 2009-2021 Free Software Foundation, Inc.
+   Copyright (C) 2009-2022 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GDB.
@@ -286,7 +286,7 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   CORE_ADDR sp = get_frame_register_unsigned (this_frame, AARCH64_SP_REGNUM);
   CORE_ADDR sigcontext_addr = (sp + AARCH64_RT_SIGFRAME_UCONTEXT_OFFSET
 			       + AARCH64_UCONTEXT_SIGCONTEXT_OFFSET );
@@ -640,7 +640,8 @@ aarch64_linux_collect_sve_regset (const struct regset *regset,
   gdb_byte *header = (gdb_byte *) buf;
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  uint64_t vq = gdbarch_tdep (gdbarch)->vq;
+  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  uint64_t vq = tdep->vq;
 
   gdb_assert (buf != NULL);
   gdb_assert (size > SVE_HEADER_SIZE);
@@ -675,7 +676,7 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					    void *cb_data,
 					    const struct regcache *regcache)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   cb (".reg", AARCH64_LINUX_SIZEOF_GREGSET, AARCH64_LINUX_SIZEOF_GREGSET,
       &aarch64_linux_gregset, NULL, cb_data);
@@ -1488,9 +1489,10 @@ aarch64_linux_syscall_record (struct regcache *regcache,
 
   if (syscall_gdb < 0)
     {
-      printf_unfiltered (_("Process record and replay target doesn't "
-			   "support syscall number %s\n"),
-			 plongest (svc_number));
+      fprintf_unfiltered (gdb_stderr,
+			  _("Process record and replay target doesn't "
+			    "support syscall number %s\n"),
+			  plongest (svc_number));
       return -1;
     }
 
@@ -1621,7 +1623,7 @@ aarch64_linux_set_memtags (struct gdbarch *gdbarch, struct value *address,
 
       /* Update the value's content with the tag.  */
       enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-      gdb_byte *srcbuf = value_contents_raw (address);
+      gdb_byte *srcbuf = value_contents_raw (address).data ();
       store_unsigned_integer (srcbuf, sizeof (addr), byte_order, addr);
     }
   else
@@ -1719,7 +1721,7 @@ aarch64_linux_report_signal_info (struct gdbarch *gdbarch,
 				  struct ui_out *uiout,
 				  enum gdb_signal siggnal)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (!tdep->has_mte () || siggnal != GDB_SIGNAL_SEGV)
     return;
@@ -1788,14 +1790,14 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 								    NULL };
   static const char *const stap_register_indirection_suffixes[] = { "]",
 								    NULL };
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   tdep->lowest_pc = 0x8000;
 
   linux_init_abi (info, gdbarch, 1);
 
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
-					 svr4_lp64_fetch_link_map_offsets);
+					 linux_lp64_fetch_link_map_offsets);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,

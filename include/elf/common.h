@@ -1,5 +1,5 @@
 /* ELF support for BFD.
-   Copyright (C) 1991-2021 Free Software Foundation, Inc.
+   Copyright (C) 1991-2022 Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
@@ -354,6 +354,9 @@
 #define EM_65816	257	/* WDC 65816/65C816 */
 #define EM_LOONGARCH	258	/* LoongArch */
 #define EM_KF32		259	/* ChipON KungFu32 */
+#define EM_U16_U8CORE	260	/* LAPIS nX-U16/U8 */
+#define EM_TACHYUM	261	/* Tachyum */
+#define EM_56800EF	262	/* NXP 56800EF Digital Signal Controller (DSC) */
 
 /* If it is necessary to assign new unofficial EM_* values, please pick large
    random numbers (0x8523, 0xa7f2, etc.) to minimize the chances of collision
@@ -523,6 +526,7 @@
 #define SHT_PREINIT_ARRAY 16		/* Array of ptrs to pre-init funcs */
 #define SHT_GROUP	  17		/* Section contains a section group */
 #define SHT_SYMTAB_SHNDX  18		/* Indices for SHN_XINDEX entries */
+#define SHT_RELR	  19		/* RELR relative relocations */
 
 #define SHT_LOOS	0x60000000	/* First of OS specific semantics */
 #define SHT_HIOS	0x6fffffff	/* Last of OS specific semantics */
@@ -672,25 +676,38 @@
 					/*   note name must be "LINUX".  */
 #define NT_ARM_PAC_MASK	0x406		/* AArch pointer authentication code masks */
 					/*   note name must be "LINUX".  */
+#define NT_ARM_PACA_KEYS  0x407		/* ARM pointer authentication address
+					   keys */
+					/*   note name must be "LINUX".  */
+#define NT_ARM_PACG_KEYS  0x408		/* ARM pointer authentication generic
+					   keys */
+					/*  note name must be "LINUX".  */
 #define NT_ARM_TAGGED_ADDR_CTRL	0x409	/* AArch64 tagged address control
 					   (prctl()) */
 					/*   note name must be "LINUX".  */
+#define NT_ARM_PAC_ENABLED_KEYS	0x40a	/* AArch64 pointer authentication
+					   enabled keys (prctl()) */
+					/*   note name must be "LINUX".  */
 #define NT_ARC_V2	0x600		/* ARC HS accumulator/extra registers.  */
 					/*   note name must be "LINUX".  */
-#define NT_RISCV_CSR    0x900		/* RISC-V Control and Status Registers */
+#define NT_LARCH_CPUCFG 0xa00		/* LoongArch CPU config registers */
+					/*   note name must be "LINUX".  */
+#define NT_LARCH_CSR    0xa01		/* LoongArch Control State Registers */
+					/*   note name must be "LINUX".  */
+#define NT_LARCH_LSX    0xa02		/* LoongArch SIMD eXtension registers */
+					/*   note name must be "LINUX".  */
+#define NT_LARCH_LASX   0xa03		/* LoongArch Advanced SIMD eXtension registers */
+					/*   note name must be "LINUX".  */
+#define NT_LARCH_LBT    0xa04		/* LoongArch Binary Translation registers */
 					/*   note name must be "CORE".  */
+#define NT_RISCV_CSR    0x900		/* RISC-V Control and Status Registers */
+					/*   note name must be "LINUX".  */
 #define NT_SIGINFO	0x53494749	/* Fields of siginfo_t.  */
 #define NT_FILE		0x46494c45	/* Description of mapped files.  */
 
 /* The range 0xff000000 to 0xffffffff is set aside for notes that don't
    originate from any particular operating system.  */
 #define NT_GDB_TDESC	0xff000000	/* Contains copy of GDB's target description XML.  */
-#define NT_MEMTAG	0xff000001	/* Contains a copy of the memory tags.  */
-
-/* NT_MEMTAG record types.  */
-
-/* ARM-specific NT_MEMTAG types.  */
-#define NT_MEMTAG_TYPE_AARCH_MTE  0x400	/* MTE memory tags for AArch64.  */
 
 /* Note segments for core files on dir-style procfs systems.  */
 
@@ -738,6 +755,29 @@
 #define NT_OPENBSD_XFPREGS	22
 #define NT_OPENBSD_WCOOKIE	23
 
+
+/* Note segments for core files on Solaris systems.  Note name
+   must start with "CORE".  */
+#define SOLARIS_NT_PRSTATUS    1
+#define SOLARIS_NT_PRFPREG     2
+#define SOLARIS_NT_PRPSINFO    3
+#define SOLARIS_NT_PRXREG      4
+#define SOLARIS_NT_PLATFORM    5
+#define SOLARIS_NT_AUXV        6
+#define SOLARIS_NT_GWINDOWS    7
+#define SOLARIS_NT_ASRS        8
+#define SOLARIS_NT_LDT         9
+#define SOLARIS_NT_PSTATUS    10
+#define SOLARIS_NT_PSINFO     13
+#define SOLARIS_NT_PRCRED     14
+#define SOLARIS_NT_UTSNAME    15
+#define SOLARIS_NT_LWPSTATUS  16
+#define SOLARIS_NT_LWPSINFO   17
+#define SOLARIS_NT_PRPRIV     18
+#define SOLARIS_NT_PRPRIVINFO 19
+#define SOLARIS_NT_CONTENT    20
+#define SOLARIS_NT_ZONENAME   21
+#define SOLARIS_NT_PRCPUXREG  22
 
 /* Note segments for core files on SPU systems.  Note name
    must start with "SPU/".  */
@@ -960,6 +1000,9 @@
 
 #define NT_FREEBSD_ABI_TAG	1
 
+/* Values for FDO .note.package notes as defined on https://systemd.io/COREDUMP_PACKAGE_METADATA/  */
+#define FDO_PACKAGING_METADATA	0xcafe1a7e
+
 /* These three macros disassemble and assemble a symbol table st_info field,
    which contains the symbol binding and symbol type.  The STB_ and STT_
    defines identify the binding and type.  */
@@ -1065,10 +1108,13 @@
 #define DT_FINI_ARRAYSZ 28
 #define DT_RUNPATH	29
 #define DT_FLAGS	30
-#define DT_ENCODING	32
 #define DT_PREINIT_ARRAY   32
 #define DT_PREINIT_ARRAYSZ 33
 #define DT_SYMTAB_SHNDX    34
+#define DT_RELRSZ	35
+#define DT_RELR		36
+#define DT_RELRENT	37
+#define DT_ENCODING	38
 
 /* Note, the Oct 4, 1999 draft of the ELF ABI changed the values
    for DT_LOOS and DT_HIOS.  Some implementations however, use
@@ -1349,6 +1395,8 @@
 #define AT_FREEBSD_ENVC         30      /* Environment count. */
 #define AT_FREEBSD_ENVV         31      /* Environment vvector. */
 #define AT_FREEBSD_PS_STRINGS   32      /* struct ps_strings. */
+#define AT_FREEBSD_FXRNG        33      /* Pointer to root RNG seed version. */
+#define AT_FREEBSD_KPRELOAD     34      /* Base of vdso. */
 
 #define AT_SUN_UID      2000    /* Effective user ID.  */
 #define AT_SUN_RUID     2001    /* Real user ID.  */
@@ -1361,7 +1409,9 @@
 #define AT_SUN_PLATFORM 2008    /* Platform name string.  */
 #define AT_SUN_CAP_HW1	2009	/* Machine dependent hints about
 				   processor capabilities.  */
+#ifndef AT_SUN_HWCAP
 #define AT_SUN_HWCAP	AT_SUN_CAP_HW1 /* For backward compat only.  */
+#endif
 #define AT_SUN_IFLUSH   2010    /* Should flush icache? */
 #define AT_SUN_CPU      2011    /* CPU name string.  */
 #define AT_SUN_EMUL_ENTRY 2012	/* COFF entry point address.  */

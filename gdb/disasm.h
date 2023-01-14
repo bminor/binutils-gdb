@@ -1,5 +1,5 @@
 /* Disassemble support for GDB.
-   Copyright (C) 2002-2021 Free Software Foundation, Inc.
+   Copyright (C) 2002-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -75,7 +75,15 @@ private:
      using this field.  */
   std::string m_disassembler_options_holder;
 
-  CORE_ADDR m_err_memaddr;
+  /* This member variable is given a value by calling dis_asm_memory_error.
+     If after calling into the libopcodes disassembler we get back a
+     negative value (which indicates an error), then, if this variable has
+     a value, we report a memory error to the user, otherwise, we report a
+     non-memory error.  */
+  gdb::optional<CORE_ADDR> m_err_memaddr;
+
+  static int dis_asm_fprintf (void *stream, const char *format, ...)
+    ATTRIBUTE_PRINTF(2,3);
 
   static int dis_asm_read_memory (bfd_vma memaddr, gdb_byte *myaddr,
 				  unsigned int len,
@@ -164,6 +172,6 @@ extern char *get_disassembler_options (struct gdbarch *gdbarch);
 
 /* Sets the active gdbarch's disassembler options to OPTIONS.  */
 
-extern void set_disassembler_options (char *options);
+extern void set_disassembler_options (const char *options);
 
 #endif

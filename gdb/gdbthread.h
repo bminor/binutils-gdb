@@ -1,5 +1,5 @@
 /* Multi-process/thread control defs for GDB, the GNU debugger.
-   Copyright (C) 1987-2021 Free Software Foundation, Inc.
+   Copyright (C) 1987-2022 Free Software Foundation, Inc.
    Contributed by Lynx Real-Time Systems, Inc.  Los Gatos, CA.
    
 
@@ -37,6 +37,16 @@ struct symtab;
 
 struct inferior;
 struct process_stratum_target;
+
+/* When true, print debug messages related to GDB thread creation and
+   deletion.  */
+
+extern bool debug_threads;
+
+/* Print a "threads" debug statement.  */
+
+#define threads_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (debug_threads, "threads", fmt, ##__VA_ARGS__)
 
 /* Frontend view of the thread state.  Possible extensions: stepping,
    finishing, until(ling),...
@@ -154,7 +164,7 @@ struct thread_control_state
 
   /* Chain containing status of breakpoint(s) the thread stopped
      at.  */
-  bpstat stop_bpstat = nullptr;
+  bpstat *stop_bpstat = nullptr;
 
   /* Whether the command that started the thread was a stepping
      command.  This is used to decide whether "set scheduler-locking
@@ -180,7 +190,7 @@ struct thread_suspend_state
   enum target_stop_reason stop_reason = TARGET_STOPPED_BY_NO_REASON;
 
   /* The waitstatus for this thread's last event.  */
-  struct target_waitstatus waitstatus {};
+  struct target_waitstatus waitstatus;
   /* If true WAITSTATUS hasn't been handled yet.  */
   int waitstatus_pending_p = 0;
 
@@ -197,9 +207,12 @@ struct thread_suspend_state
        stop_reason: if the thread's PC has changed since the thread
        last stopped, a pending breakpoint waitstatus is discarded.
 
-     - If the thread is running, this is set to -1, to avoid leaving
-       it with a stale value, to make it easier to catch bugs.  */
-  CORE_ADDR stop_pc = 0;
+     - If the thread is running, then this field has its value removed by
+       calling stop_pc.reset() (see thread_info::set_executing()).
+       Attempting to read a gdb::optional with no value is undefined
+       behaviour and will trigger an assertion error when _GLIBCXX_DEBUG is
+       defined, which should make error easier to track down.  */
+  gdb::optional<CORE_ADDR> stop_pc;
 };
 
 /* Base class for target-specific thread data.  */
@@ -283,19 +296,35 @@ public:
   /* The inferior this thread belongs to.  */
   struct inferior *inf;
 
-  /* The name of the thread, as specified by the user.  This is NULL
-     if the thread does not have a user-given name.  */
-  char *name = NULL;
+  /* The user-given name of the thread.
 
-  /* True means the thread is executing.  Note: this is different
-     from saying that there is an active target and we are stopped at
-     a breakpoint, for instance.  This is a real indicator whether the
-     thread is off and running.  */
-  bool executing = false;
+     Returns nullptr if the thread does not have a user-given name.  */
+  const char *name () const
+  {
+    return m_name.get ();
+  }
+
+  /* Set the user-given name of the thread.
+
+     Pass nullptr to clear the name.  */
+  void set_name (gdb::unique_xmalloc_ptr<char> name)
+  {
+    m_name = std::move (name);
+  }
+
+  bool executing () const
+  { return m_executing; }
+
+  /* Set the thread's 'm_executing' field from EXECUTING, and if EXECUTING
+     is true also clears the thread's stop_pc.  */
+  void set_executing (bool executing);
 
   bool resumed () const
   { return m_resumed; }
 
+  /* Set the thread's 'm_resumed' field from RESUMED.  The thread may also
+     be added to (when RESUMED is true), or removed from (when RESUMED is
+     false), the list of threads with a pending wait status.  */
   void set_resumed (bool resumed);
 
   /* Frontend view of the thread state.  Note that the THREAD_RUNNING/
@@ -323,11 +352,15 @@ public:
     m_suspend = suspend;
   }
 
-  /* Return this thread's stop PC.  */
+  /* Return this thread's stop PC.  This should only be called when it is
+     known that stop_pc has a value.  If this function is being used in a
+     situation where a thread may not have had a stop_pc assigned, then
+     stop_pc_p() can be used to check if the stop_pc is defined.  */
 
   CORE_ADDR stop_pc () const
   {
-    return m_suspend.stop_pc;
+    gdb_assert (m_suspend.stop_pc.has_value ());
+    return *m_suspend.stop_pc;
   }
 
   /* Set this thread's stop PC.  */
@@ -335,6 +368,21 @@ public:
   void set_stop_pc (CORE_ADDR stop_pc)
   {
     m_suspend.stop_pc = stop_pc;
+  }
+
+  /* Remove the stop_pc stored on this thread.  */
+
+  void clear_stop_pc ()
+  {
+    m_suspend.stop_pc.reset ();
+  }
+
+  /* Return true if this thread has a cached stop pc value, otherwise
+     return false.  */
+
+  bool stop_pc_p () const
+  {
+    return m_suspend.stop_pc.has_value ();
   }
 
   /* Return true if this thread has a pending wait status.  */
@@ -488,9 +536,20 @@ private:
      the thread run.  */
   bool m_resumed = false;
 
+  /* True means the thread is executing.  Note: this is different
+     from saying that there is an active target and we are stopped at
+     a breakpoint, for instance.  This is a real indicator whether the
+     thread is off and running.  */
+  bool m_executing = false;
+
   /* State of inferior thread to restore after GDB is done with an inferior
      call.  See `struct thread_suspend_state'.  */
   thread_suspend_state m_suspend;
+
+  /* The user-given name of the thread.
+
+     Nullptr if the thread does not have a user-given name.  */
+  gdb::unique_xmalloc_ptr<char> m_name;
 };
 
 using thread_info_resumed_with_pending_wait_status_node
@@ -920,5 +979,32 @@ extern void print_selected_thread_frame (struct ui_out *uiout,
    was parsed from.  This is used in the error message if THR is not
    alive anymore.  */
 extern void thread_select (const char *tidstr, class thread_info *thr);
+
+/* Return THREAD's name.
+
+   If THREAD has a user-given name, return it.  Otherwise, query the thread's
+   target to get the name.  May return nullptr.  */
+extern const char *thread_name (thread_info *thread);
+
+/* Switch to thread TP if it is alive.  Returns true if successfully
+   switched, false otherwise.  */
+
+extern bool switch_to_thread_if_alive (thread_info *thr);
+
+/* Assuming that THR is the current thread, execute CMD.
+   If ADA_TASK is not empty, it is the Ada task ID, and will
+   be printed instead of the thread information.
+   FLAGS.QUIET controls the printing of the thread information.
+   FLAGS.CONT and FLAGS.SILENT control how to handle errors.  Can throw an
+   exception if !FLAGS.SILENT and !FLAGS.CONT and CMD fails.  */
+
+extern void thread_try_catch_cmd (thread_info *thr,
+				  gdb::optional<int> ada_task,
+				  const char *cmd, int from_tty,
+				  const qcs_flags &flags);
+
+/* Return a string representation of STATE.  */
+
+extern const char *thread_state_string (enum thread_state state);
 
 #endif /* GDBTHREAD_H */

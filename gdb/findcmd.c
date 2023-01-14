@@ -1,6 +1,6 @@
 /* The find command.
 
-   Copyright (C) 2008-2021 Free Software Foundation, Inc.
+   Copyright (C) 2008-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -185,7 +185,7 @@ parse_find_args (const char *args, ULONGEST *max_countp,
 	}
       else
 	{
-	  const gdb_byte *contents = value_contents (v);
+	  const gdb_byte *contents = value_contents (v).data ();
 	  pattern_buf.insert (pattern_buf.end (), contents,
 			      contents + TYPE_LENGTH (t));
 	}

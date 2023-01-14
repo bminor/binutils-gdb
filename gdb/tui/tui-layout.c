@@ -1,6 +1,6 @@
 /* TUI layout window management.
 
-   Copyright (C) 1998-2021 Free Software Foundation, Inc.
+   Copyright (C) 1998-2022 Free Software Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -163,7 +163,7 @@ find_layout (tui_layout_split *layout)
       if (layout == layouts[i].get ())
 	return i;
     }
-  gdb_assert_not_reached (_("layout not found!?"));
+  gdb_assert_not_reached ("layout not found!?");
 }
 
 /* Function to set the layout. */
@@ -850,10 +850,10 @@ add_layout_command (const char *name, tui_layout_split *layout)
   layout->specification (&spec, 0);
 
   gdb::unique_xmalloc_ptr<char> doc
-    (xstrprintf (_("Apply the \"%s\" layout.\n\
+    = xstrprintf (_("Apply the \"%s\" layout.\n\
 This layout was created using:\n\
   tui new-layout %s %s"),
-		 name, name, spec.c_str ()));
+		  name, name, spec.c_str ());
 
   cmd = add_cmd (name, class_tui, nullptr, doc.get (), &layout_list);
   cmd->set_context (layout);

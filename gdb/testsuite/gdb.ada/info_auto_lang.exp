@@ -1,4 +1,4 @@
-# Copyright 2018-2021 Free Software Foundation, Inc.
+# Copyright 2018-2022 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -46,7 +46,6 @@ clean_restart ${testfile}
 
 set bp_location [gdb_get_line_number "STOP" ${testdir}/some_c.c]
 if ![runto "some_c.c:$bp_location"] then {
-    fail "can't run to some_c.c STOP location"
     return
 }
 

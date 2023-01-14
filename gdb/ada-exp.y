@@ -1,5 +1,5 @@
 /* YACC parser for Ada expressions, for GDB.
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1126,15 +1126,15 @@ write_int (struct parser_state *par_state, LONGEST arg, struct type *type)
 }
 
 /* Emit expression corresponding to the renamed object named 
- * designated by RENAMED_ENTITY[0 .. RENAMED_ENTITY_LEN-1] in the
- * context of ORIG_LEFT_CONTEXT, to which is applied the operations
- * encoded by RENAMING_EXPR.  MAX_DEPTH is the maximum number of
- * cascaded renamings to allow.  If ORIG_LEFT_CONTEXT is null, it
- * defaults to the currently selected block. ORIG_SYMBOL is the 
- * symbol that originally encoded the renaming.  It is needed only
- * because its prefix also qualifies any index variables used to index
- * or slice an array.  It should not be necessary once we go to the
- * new encoding entirely (FIXME pnh 7/20/2007).  */
+   designated by RENAMED_ENTITY[0 .. RENAMED_ENTITY_LEN-1] in the
+   context of ORIG_LEFT_CONTEXT, to which is applied the operations
+   encoded by RENAMING_EXPR.  MAX_DEPTH is the maximum number of
+   cascaded renamings to allow.  If ORIG_LEFT_CONTEXT is null, it
+   defaults to the currently selected block. ORIG_SYMBOL is the 
+   symbol that originally encoded the renaming.  It is needed only
+   because its prefix also qualifies any index variables used to index
+   or slice an array.  It should not be necessary once we go to the
+   new encoding entirely (FIXME pnh 7/20/2007).  */
 
 static void
 write_object_renaming (struct parser_state *par_state,
@@ -1302,7 +1302,7 @@ block_lookup (const struct block *context, const char *raw_name)
     symtab = NULL;
 
   if (symtab != NULL)
-    result = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab), STATIC_BLOCK);
+    result = BLOCKVECTOR_BLOCK (symtab->blockvector (), STATIC_BLOCK);
   else if (syms.empty () || SYMBOL_CLASS (syms[0].symbol) != LOC_BLOCK)
     {
       if (context == NULL)

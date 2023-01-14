@@ -1,5 +1,5 @@
 /* Trivial test of failing writev: invalid file descriptor.
-#notarget: cris*-*-elf
+#progos: linux
 */
 #include <sys/uio.h>
 #include <errno.h>

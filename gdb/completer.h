@@ -1,5 +1,5 @@
 /* Header for GDB line completion.
-   Copyright (C) 2000-2021 Free Software Foundation, Inc.
+   Copyright (C) 2000-2022 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 #if !defined (COMPLETER_H)
 #define COMPLETER_H 1
 
+#include "gdbsupport/gdb-hashtab.h"
 #include "gdbsupport/gdb_vecs.h"
 #include "command.h"
 

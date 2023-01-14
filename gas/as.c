@@ -1,5 +1,5 @@
 /* as.c - GAS main program.
-   Copyright (C) 1987-2021 Free Software Foundation, Inc.
+   Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -474,7 +474,7 @@ parse_args (int * pargc, char *** pargv)
       OPTION_DEBUG_PREFIX_MAP,
       OPTION_DEFSYM,
       OPTION_LISTING_LHS_WIDTH,
-      OPTION_LISTING_LHS_WIDTH2,
+      OPTION_LISTING_LHS_WIDTH2, /* = STD_BASE + 10 */
       OPTION_LISTING_RHS_WIDTH,
       OPTION_LISTING_CONT_LINES,
       OPTION_DEPFILE,
@@ -484,7 +484,7 @@ parse_args (int * pargc, char *** pargv)
       OPTION_GDWARF_3,
       OPTION_GDWARF_4,
       OPTION_GDWARF_5,
-      OPTION_GDWARF_SECTIONS,
+      OPTION_GDWARF_SECTIONS, /* = STD_BASE + 20 */
       OPTION_GDWARF_CIE_VERSION,
       OPTION_STRIP_LOCAL_ABSOLUTE,
       OPTION_TRADITIONAL_FORMAT,
@@ -494,7 +494,7 @@ parse_args (int * pargc, char *** pargv)
       OPTION_NOEXECSTACK,
       OPTION_SIZE_CHECK,
       OPTION_ELF_STT_COMMON,
-      OPTION_ELF_BUILD_NOTES,
+      OPTION_ELF_BUILD_NOTES, /* = STD_BASE + 30 */
       OPTION_SECTNAME_SUBST,
       OPTION_ALTERNATE,
       OPTION_AL,
@@ -503,7 +503,8 @@ parse_args (int * pargc, char *** pargv)
       OPTION_WARN_FATAL,
       OPTION_COMPRESS_DEBUG,
       OPTION_NOCOMPRESS_DEBUG,
-      OPTION_NO_PAD_SECTIONS /* = STD_BASE + 40 */
+      OPTION_NO_PAD_SECTIONS,
+      OPTION_MULTIBYTE_HANDLING  /* = STD_BASE + 40 */
     /* When you add options here, check that they do
        not collide with OPTION_MD_BASE.  See as.h.  */
     };
@@ -581,6 +582,7 @@ parse_args (int * pargc, char *** pargv)
     ,{"target-help", no_argument, NULL, OPTION_TARGET_HELP}
     ,{"traditional-format", no_argument, NULL, OPTION_TRADITIONAL_FORMAT}
     ,{"warn", no_argument, NULL, OPTION_WARN}
+    ,{"multibyte-handling", required_argument, NULL, OPTION_MULTIBYTE_HANDLING}
   };
 
   /* Construct the option lists from the standard list and the target
@@ -683,10 +685,23 @@ parse_args (int * pargc, char *** pargv)
 	  flag_traditional_format = 1;
 	  break;
 
+	case OPTION_MULTIBYTE_HANDLING:
+	  if (strcmp (optarg, "allow") == 0)
+	    multibyte_handling = multibyte_allow;
+	  else if (strcmp (optarg, "warn") == 0)
+	    multibyte_handling = multibyte_warn;
+	  else if (strcmp (optarg, "warn-sym-only") == 0)
+	    multibyte_handling = multibyte_warn_syms;
+	  else if (strcmp (optarg, "warn_sym_only") == 0)
+	    multibyte_handling = multibyte_warn_syms;
+	  else
+	    as_fatal (_("unexpected argument to --multibyte-input-option: '%s'"), optarg);
+	  break;
+
 	case OPTION_VERSION:
 	  /* This output is intended to follow the GNU standards document.  */
 	  printf (_("GNU assembler %s\n"), BFD_VERSION_STRING);
-	  printf (_("Copyright (C) 2021 Free Software Foundation, Inc.\n"));
+	  printf (_("Copyright (C) 2022 Free Software Foundation, Inc.\n"));
 	  printf (_("\
 This program is free software; you may redistribute it under the terms of\n\
 the GNU General Public License version 3 or later.\n\

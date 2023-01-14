@@ -1,4 +1,4 @@
-# Copyright 2017-2021 Free Software Foundation, Inc.
+# Copyright 2017-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -254,10 +254,8 @@ proc test_gdb_complete_unique_re { input_line complete_line_re {append_char " "}
 	}
     }
 
-    # Trim INPUT_LINE and COMPLETE LINE, for the case we're completing
-    # a command with leading whitespace.  Leading command whitespace
-    # is discarded by GDB.
-    set input_line [string trimleft $input_line]
+    # Trim COMPLETE LINE, for the case we're completing a command with leading
+    # whitespace.  Leading command whitespace is discarded by GDB.
     set expected_output_re [string trimleft $complete_line_re]
     if {$append_char_re != " "} {
 	append expected_output_re $append_char_re
@@ -266,7 +264,7 @@ proc test_gdb_complete_unique_re { input_line complete_line_re {append_char " "}
 	set max_completion_reached_msg \
 	    "*** List may be truncated, max-completions reached. ***"
 	set input_line_re \
-	    [string_to_regexp $input_line]
+	    [string_to_regexp [string trimleft $input_line]]
 	set max_completion_reached_msg_re \
 	    [string_to_regexp $max_completion_reached_msg]
 

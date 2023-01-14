@@ -1,5 +1,5 @@
 /* Profiling definitions for the fr550 model of the FRV simulator
-   Copyright (C) 2003-2021 Free Software Foundation, Inc.
+   Copyright (C) 2003-2022 Free Software Foundation, Inc.
    Contributed by Red Hat.
 
 This file is part of the GNU Simulators.

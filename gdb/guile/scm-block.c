@@ -1,6 +1,6 @@
 /* Scheme interface to blocks.
 
-   Copyright (C) 2008-2021 Free Software Foundation, Inc.
+   Copyright (C) 2008-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -554,7 +554,7 @@ bkscm_print_block_syms_progress_smob (SCM self, SCM port,
 		    : i_smob->iter.d.compunit_symtab->includes[i_smob->iter.idx]);
 	    gdbscm_printf (port, " %s",
 			   symtab_to_filename_for_display
-			     (compunit_primary_filetab (cust)));
+			     (cust->primary_filetab ()));
 	    break;
 	  }
 	case FIRST_LOCAL_BLOCK:
@@ -685,7 +685,7 @@ gdbscm_lookup_block (SCM pc_scm)
     {
       cust = find_pc_compunit_symtab (pc);
 
-      if (cust != NULL && COMPUNIT_OBJFILE (cust) != NULL)
+      if (cust != NULL && cust->objfile () != NULL)
 	block = block_for_pc (pc);
     }
   catch (const gdb_exception &except)
@@ -694,14 +694,14 @@ gdbscm_lookup_block (SCM pc_scm)
     }
 
   GDBSCM_HANDLE_GDB_EXCEPTION (exc);
-  if (cust == NULL || COMPUNIT_OBJFILE (cust) == NULL)
+  if (cust == NULL || cust->objfile () == NULL)
     {
       gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG1, pc_scm,
 				 _("cannot locate object file for block"));
     }
 
   if (block != NULL)
-    return bkscm_scm_from_block (block, COMPUNIT_OBJFILE (cust));
+    return bkscm_scm_from_block (block, cust->objfile ());
   return SCM_BOOL_F;
 }
 

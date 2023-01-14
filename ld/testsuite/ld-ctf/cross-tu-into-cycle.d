@@ -7,7 +7,7 @@
 #as:
 #source: cross-tu-cyclic-3.c
 #source: cross-tu-cyclic-4.c
-#objdump: --ctf=.ctf
+#objdump: --ctf
 #ld: -shared --ctf-variables
 #name: cross-TU-into-cycle
 

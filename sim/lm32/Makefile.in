@@ -24,8 +24,8 @@ SIM_EXTRA_DEPS = $(CGEN_INCLUDE_DEPS) $(srcdir)/../../opcodes/lm32-desc.h \
 
 SIM_EXTRA_CLEAN = lm32-clean
 
-# Code doesn't build cleanly yet.
-SIM_WERROR_CFLAGS =
+# Some modules don't build cleanly yet.
+dv-lm32cpu.o mloop.o sem.o traps.o user.o: SIM_WERROR_CFLAGS =
 
 ## COMMON_POST_CONFIG_FRAG
 
@@ -35,18 +35,7 @@ LM32BF_INCLUDE_DEPS = \
 	$(CGEN_MAIN_CPU_DEPS) \
 	cpu.h decode.h eng.h
 
-# FIXME: Use of `mono' is wip.
-mloop.c eng.h: stamp-mloop
-stamp-mloop: $(srcdir)/../common/genmloop.sh mloop.in Makefile
-	$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
-		-mono -fast -pbb -switch sem-switch.c \
-		-cpu lm32bf -infile $(srcdir)/mloop.in
-	$(SHELL) $(srcroot)/move-if-change eng.hin eng.h
-	$(SHELL) $(srcroot)/move-if-change mloop.cin mloop.c
-	touch stamp-mloop
-
 lm32-clean:
-	rm -f mloop.c eng.h stamp-mloop
 	rm -f stamp-arch stamp-cpu 
 	rm -f tmp-*
 
@@ -54,7 +43,7 @@ stamp-arch: $(CGEN_READ_SCM) $(CGEN_ARCH_SCM) $(CPU_DIR)/lm32.cpu
 	$(MAKE) cgen-arch $(CGEN_FLAGS_TO_PASS) mach=all \
 	  archfile=$(CPU_DIR)/lm32.cpu \
 	  FLAGS="with-scache with-profile=fn"
-	touch stamp-arch
+	$(SILENCE) touch $@
 arch.h arch.c cpuall.h: $(CGEN_MAINT) stamp-arch
 
 stamp-cpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CPU_DIR)/lm32.cpu
@@ -63,5 +52,5 @@ stamp-cpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CPU_DIR)/lm32.c
 	  archfile=$(CPU_DIR)/lm32.cpu \
 	  FLAGS="with-scache with-profile=fn" \
 	  EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"
-	touch stamp-cpu
+	$(SILENCE) touch $@
 cpu.h sem.c sem-switch.c model.c decode.c decode.h: $(CGEN_MAINT) stamp-cpu

@@ -1,6 +1,6 @@
 /* Debug register code for x86 (i386 and x86-64).
 
-   Copyright (C) 2001-2021 Free Software Foundation, Inc.
+   Copyright (C) 2001-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -52,7 +52,7 @@ x86_dr_low_set_addr (struct x86_debug_reg_state *new_state, int i)
 
 /* Return the inferior's debug register REGNUM.  */
 
-static unsigned long
+static CORE_ADDR
 x86_dr_low_get_addr (int i)
 {
   return x86_dr_low.get_addr (i);

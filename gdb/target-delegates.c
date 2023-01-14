@@ -51,7 +51,6 @@ struct dummy_target : public target_ops
   void terminal_info (const char *arg0, int arg1) override;
   void kill () override;
   void load (const char *arg0, int arg1) override;
-  void post_startup_inferior (ptid_t arg0) override;
   int insert_fork_catchpoint (int arg0) override;
   int remove_fork_catchpoint (int arg0) override;
   int insert_vfork_catchpoint (int arg0) override;
@@ -99,7 +98,7 @@ struct dummy_target : public target_ops
   void flash_erase (ULONGEST arg0, LONGEST arg1) override;
   void flash_done () override;
   const struct target_desc *read_description () override;
-  ptid_t get_ada_task_ptid (long arg0, long arg1) override;
+  ptid_t get_ada_task_ptid (long arg0, ULONGEST arg1) override;
   int auxv_parse (gdb_byte **arg0, gdb_byte *arg1, CORE_ADDR *arg2, CORE_ADDR *arg3) override;
   int search_memory (CORE_ADDR arg0, ULONGEST arg1, const gdb_byte *arg2, ULONGEST arg3, CORE_ADDR *arg4) override;
   bool can_execute_reverse () override;
@@ -146,7 +145,7 @@ struct dummy_target : public target_ops
   traceframe_info_up traceframe_info () override;
   bool use_agent (bool arg0) override;
   bool can_use_agent () override;
-  struct btrace_target_info *enable_btrace (ptid_t arg0, const struct btrace_config *arg1) override;
+  struct btrace_target_info *enable_btrace (thread_info *arg0, const struct btrace_config *arg1) override;
   void disable_btrace (struct btrace_target_info *arg0) override;
   void teardown_btrace (struct btrace_target_info *arg0) override;
   enum btrace_error read_btrace (struct btrace_data *arg0, struct btrace_target_info *arg1, enum btrace_read_type arg2) override;
@@ -226,7 +225,6 @@ struct debug_target : public target_ops
   void terminal_info (const char *arg0, int arg1) override;
   void kill () override;
   void load (const char *arg0, int arg1) override;
-  void post_startup_inferior (ptid_t arg0) override;
   int insert_fork_catchpoint (int arg0) override;
   int remove_fork_catchpoint (int arg0) override;
   int insert_vfork_catchpoint (int arg0) override;
@@ -274,7 +272,7 @@ struct debug_target : public target_ops
   void flash_erase (ULONGEST arg0, LONGEST arg1) override;
   void flash_done () override;
   const struct target_desc *read_description () override;
-  ptid_t get_ada_task_ptid (long arg0, long arg1) override;
+  ptid_t get_ada_task_ptid (long arg0, ULONGEST arg1) override;
   int auxv_parse (gdb_byte **arg0, gdb_byte *arg1, CORE_ADDR *arg2, CORE_ADDR *arg3) override;
   int search_memory (CORE_ADDR arg0, ULONGEST arg1, const gdb_byte *arg2, ULONGEST arg3, CORE_ADDR *arg4) override;
   bool can_execute_reverse () override;
@@ -321,7 +319,7 @@ struct debug_target : public target_ops
   traceframe_info_up traceframe_info () override;
   bool use_agent (bool arg0) override;
   bool can_use_agent () override;
-  struct btrace_target_info *enable_btrace (ptid_t arg0, const struct btrace_config *arg1) override;
+  struct btrace_target_info *enable_btrace (thread_info *arg0, const struct btrace_config *arg1) override;
   void disable_btrace (struct btrace_target_info *arg0) override;
   void teardown_btrace (struct btrace_target_info *arg0) override;
   enum btrace_error read_btrace (struct btrace_data *arg0, struct btrace_target_info *arg1, enum btrace_read_type arg2) override;
@@ -1390,27 +1388,6 @@ debug_target::load (const char *arg0, int arg1)
   target_debug_print_const_char_p (arg0);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_int (arg1);
-  fputs_unfiltered (")\n", gdb_stdlog);
-}
-
-void
-target_ops::post_startup_inferior (ptid_t arg0)
-{
-  this->beneath ()->post_startup_inferior (arg0);
-}
-
-void
-dummy_target::post_startup_inferior (ptid_t arg0)
-{
-}
-
-void
-debug_target::post_startup_inferior (ptid_t arg0)
-{
-  fprintf_unfiltered (gdb_stdlog, "-> %s->post_startup_inferior (...)\n", this->beneath ()->shortname ());
-  this->beneath ()->post_startup_inferior (arg0);
-  fprintf_unfiltered (gdb_stdlog, "<- %s->post_startup_inferior (", this->beneath ()->shortname ());
-  target_debug_print_ptid_t (arg0);
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 
@@ -2598,19 +2575,19 @@ debug_target::read_description ()
 }
 
 ptid_t
-target_ops::get_ada_task_ptid (long arg0, long arg1)
+target_ops::get_ada_task_ptid (long arg0, ULONGEST arg1)
 {
   return this->beneath ()->get_ada_task_ptid (arg0, arg1);
 }
 
 ptid_t
-dummy_target::get_ada_task_ptid (long arg0, long arg1)
+dummy_target::get_ada_task_ptid (long arg0, ULONGEST arg1)
 {
   return default_get_ada_task_ptid (this, arg0, arg1);
 }
 
 ptid_t
-debug_target::get_ada_task_ptid (long arg0, long arg1)
+debug_target::get_ada_task_ptid (long arg0, ULONGEST arg1)
 {
   ptid_t result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->get_ada_task_ptid (...)\n", this->beneath ()->shortname ());
@@ -2618,7 +2595,7 @@ debug_target::get_ada_task_ptid (long arg0, long arg1)
   fprintf_unfiltered (gdb_stdlog, "<- %s->get_ada_task_ptid (", this->beneath ()->shortname ());
   target_debug_print_long (arg0);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_long (arg1);
+  target_debug_print_ULONGEST (arg1);
   fputs_unfiltered (") = ", gdb_stdlog);
   target_debug_print_ptid_t (result);
   fputs_unfiltered ("\n", gdb_stdlog);
@@ -3784,25 +3761,25 @@ debug_target::can_use_agent ()
 }
 
 struct btrace_target_info *
-target_ops::enable_btrace (ptid_t arg0, const struct btrace_config *arg1)
+target_ops::enable_btrace (thread_info *arg0, const struct btrace_config *arg1)
 {
   return this->beneath ()->enable_btrace (arg0, arg1);
 }
 
 struct btrace_target_info *
-dummy_target::enable_btrace (ptid_t arg0, const struct btrace_config *arg1)
+dummy_target::enable_btrace (thread_info *arg0, const struct btrace_config *arg1)
 {
   tcomplain ();
 }
 
 struct btrace_target_info *
-debug_target::enable_btrace (ptid_t arg0, const struct btrace_config *arg1)
+debug_target::enable_btrace (thread_info *arg0, const struct btrace_config *arg1)
 {
   struct btrace_target_info * result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->enable_btrace (...)\n", this->beneath ()->shortname ());
   result = this->beneath ()->enable_btrace (arg0, arg1);
   fprintf_unfiltered (gdb_stdlog, "<- %s->enable_btrace (", this->beneath ()->shortname ());
-  target_debug_print_ptid_t (arg0);
+  target_debug_print_thread_info_p (arg0);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_const_struct_btrace_config_p (arg1);
   fputs_unfiltered (") = ", gdb_stdlog);

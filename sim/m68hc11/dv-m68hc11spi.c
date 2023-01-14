@@ -1,5 +1,5 @@
 /*  dv-m68hc11spi.c -- Simulation of the 68HC11 SPI
-    Copyright (C) 2000-2021 Free Software Foundation, Inc.
+    Copyright (C) 2000-2022 Free Software Foundation, Inc.
     Written by Stephane Carrez (stcarrez@nerim.fr)
     (From a driver model Contributed by Cygnus Solutions.)
 
@@ -159,7 +159,7 @@ m68hc11spi_port_event (struct hw *me,
   SIM_DESC sd;
   struct m68hc11spi *controller;
   sim_cpu *cpu;
-  unsigned8 val;
+  uint8_t val;
   
   controller = hw_data (me);
   sd         = hw_system (me);
@@ -193,7 +193,7 @@ m68hc11spi_port_event (struct hw *me,
 static void
 set_bit_port (struct hw *me, sim_cpu *cpu, int port, int mask, int value)
 {
-  uint8 val;
+  uint8_t val;
   
   if (value)
     val = cpu->ios[port] | mask;
@@ -330,10 +330,10 @@ static void
 m68hc11spi_info (struct hw *me)
 {
   SIM_DESC sd;
-  uint16 base = 0;
+  uint16_t base = 0;
   sim_cpu *cpu;
   struct m68hc11spi *controller;
-  uint8 val;
+  uint8_t val;
   
   sd = hw_system (me);
   cpu = STATE_CPU (sd, 0);
@@ -353,7 +353,7 @@ m68hc11spi_info (struct hw *me)
 
   if (controller->spi_event)
     {
-      signed64 t;
+      int64_t t;
 
       sim_io_printf (sd, "  SPI has %d bits to send\n",
                      controller->tx_bit + 1);
@@ -388,7 +388,7 @@ m68hc11spi_io_read_buffer (struct hw *me,
   SIM_DESC sd;
   struct m68hc11spi *controller;
   sim_cpu *cpu;
-  unsigned8 val;
+  uint8_t val;
   
   HW_TRACE ((me, "read 0x%08lx %d", (long) base, (int) nr_bytes));
 
@@ -419,7 +419,7 @@ m68hc11spi_io_read_buffer (struct hw *me,
     default:
       return 0;
     }
-  *((unsigned8*) dest) = val;
+  *((uint8_t*) dest) = val;
   return 1;
 }
 
@@ -433,7 +433,7 @@ m68hc11spi_io_write_buffer (struct hw *me,
   SIM_DESC sd;
   struct m68hc11spi *controller;
   sim_cpu *cpu;
-  unsigned8 val;
+  uint8_t val;
 
   HW_TRACE ((me, "write 0x%08lx %d", (long) base, (int) nr_bytes));
 
@@ -441,7 +441,7 @@ m68hc11spi_io_write_buffer (struct hw *me,
   cpu = STATE_CPU (sd, 0);
   controller = hw_data (me);
   
-  val = *((const unsigned8*) source);
+  val = *((const uint8_t*) source);
   switch (base)
     {
     case M6811_SPCR:

@@ -1,5 +1,5 @@
 /* ELF core file support for BFD.
-   Copyright (C) 1995-2021 Free Software Foundation, Inc.
+   Copyright (C) 1995-2022 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -92,6 +92,7 @@ elf_core_file_p (bfd *abfd)
   unsigned int phindex;
   const struct elf_backend_data *ebd;
   bfd_size_type amt;
+  ufile_ptr filesize;
 
   /* Read in the ELF header in external format.  */
   if (bfd_bread (&x_ehdr, sizeof (x_ehdr), abfd) != sizeof (x_ehdr))
@@ -286,29 +287,21 @@ elf_core_file_p (bfd *abfd)
       goto fail;
 
   /* Check for core truncation.  */
-  {
-    bfd_size_type high = 0;
-    struct stat statbuf;
-    for (phindex = 0; phindex < i_ehdrp->e_phnum; ++phindex)
-      {
-	Elf_Internal_Phdr *p = i_phdrp + phindex;
-	if (p->p_filesz)
-	  {
-	    bfd_size_type current = p->p_offset + p->p_filesz;
-	    if (high < current)
-	      high = current;
-	  }
-      }
-    if (bfd_stat (abfd, &statbuf) == 0)
-      {
-	if ((bfd_size_type) statbuf.st_size < high)
-	  {
-	    _bfd_error_handler
-	      /* xgettext:c-format */
-	      (_("warning: %pB is truncated: expected core file "
-		 "size >= %" PRIu64 ", found: %" PRIu64),
-	       abfd, (uint64_t) high, (uint64_t) statbuf.st_size);
-	  }
+  filesize = bfd_get_file_size (abfd);
+  if (filesize != 0)
+    {
+      for (phindex = 0; phindex < i_ehdrp->e_phnum; ++phindex)
+	{
+	  Elf_Internal_Phdr *p = i_phdrp + phindex;
+	  if (p->p_filesz
+	      && (p->p_offset >= filesize
+		  || p->p_filesz > filesize - p->p_offset))
+	    {
+	      _bfd_error_handler (_("warning: %pB has a segment "
+				    "extending past end of file"), abfd);
+	      abfd->read_only = 1;
+	      break;
+	    }
       }
   }
 

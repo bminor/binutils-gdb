@@ -47,9 +47,12 @@
 #  --no-libtool \
 #  --macro-prefix=gl \
 #  --no-vc-files \
+#  accept \
 #  alloca \
+#  bind \
 #  canonicalize-lgpl \
 #  chown \
+#  connect \
 #  count-one-bits \
 #  dirent \
 #  dirfd \
@@ -66,6 +69,7 @@
 #  inet_ntop \
 #  inttypes \
 #  limits-h \
+#  listen \
 #  lstat \
 #  memchr \
 #  memmem \
@@ -79,12 +83,15 @@
 #  rename \
 #  select \
 #  setenv \
+#  setsockopt \
 #  signal-h \
+#  socket \
 #  strchrnul \
 #  strerror_r-posix \
 #  strstr \
 #  strtok_r \
 #  sys_stat \
+#  sys_wait \
 #  time_r \
 #  unistd \
 #  unsetenv \
@@ -329,6 +336,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/import/m4/sys_time_h.m4 \
 	$(top_srcdir)/import/m4/sys_types_h.m4 \
 	$(top_srcdir)/import/m4/sys_uio_h.m4 \
+	$(top_srcdir)/import/m4/sys_wait_h.m4 \
 	$(top_srcdir)/import/m4/tempname.m4 \
 	$(top_srcdir)/import/m4/threadlib.m4 \
 	$(top_srcdir)/import/m4/time_h.m4 \
@@ -915,6 +923,7 @@ GNULIB_VPRINTF_POSIX = @GNULIB_VPRINTF_POSIX@
 GNULIB_VSCANF = @GNULIB_VSCANF@
 GNULIB_VSNPRINTF = @GNULIB_VSNPRINTF@
 GNULIB_VSPRINTF_POSIX = @GNULIB_VSPRINTF_POSIX@
+GNULIB_WAITPID = @GNULIB_WAITPID@
 GNULIB_WCPCPY = @GNULIB_WCPCPY@
 GNULIB_WCPNCPY = @GNULIB_WCPNCPY@
 GNULIB_WCRTOMB = @GNULIB_WCRTOMB@
@@ -1409,6 +1418,7 @@ NEXT_AS_FIRST_DIRECTIVE_SYS_STAT_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_STAT_H@
 NEXT_AS_FIRST_DIRECTIVE_SYS_TIME_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_TIME_H@
 NEXT_AS_FIRST_DIRECTIVE_SYS_TYPES_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_TYPES_H@
 NEXT_AS_FIRST_DIRECTIVE_SYS_UIO_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_UIO_H@
+NEXT_AS_FIRST_DIRECTIVE_SYS_WAIT_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_WAIT_H@
 NEXT_AS_FIRST_DIRECTIVE_TIME_H = @NEXT_AS_FIRST_DIRECTIVE_TIME_H@
 NEXT_AS_FIRST_DIRECTIVE_UNISTD_H = @NEXT_AS_FIRST_DIRECTIVE_UNISTD_H@
 NEXT_AS_FIRST_DIRECTIVE_WCHAR_H = @NEXT_AS_FIRST_DIRECTIVE_WCHAR_H@
@@ -1440,6 +1450,7 @@ NEXT_SYS_STAT_H = @NEXT_SYS_STAT_H@
 NEXT_SYS_TIME_H = @NEXT_SYS_TIME_H@
 NEXT_SYS_TYPES_H = @NEXT_SYS_TYPES_H@
 NEXT_SYS_UIO_H = @NEXT_SYS_UIO_H@
+NEXT_SYS_WAIT_H = @NEXT_SYS_WAIT_H@
 NEXT_TIME_H = @NEXT_TIME_H@
 NEXT_UNISTD_H = @NEXT_UNISTD_H@
 NEXT_WCHAR_H = @NEXT_WCHAR_H@
@@ -1815,10 +1826,11 @@ noinst_HEADERS =
 noinst_LIBRARIES = libgnu.a
 noinst_LTLIBRARIES = 
 # No GNU Make output.
-EXTRA_DIST = m4/gnulib-cache.m4 alloca.c alloca.in.h arpa_inet.in.h \
-	assure.h attribute.h basename-lgpl.h btowc.c \
-	canonicalize-lgpl.c chdir-long.c chdir-long.h chown.c \
-	fchown-stub.c cloexec.h close.c closedir.c dirent-private.h \
+EXTRA_DIST = m4/gnulib-cache.m4 accept.c w32sock.h alloca.c \
+	alloca.in.h arpa_inet.in.h assure.h attribute.h \
+	basename-lgpl.h bind.c w32sock.h btowc.c canonicalize-lgpl.c \
+	chdir-long.c chdir-long.h chown.c fchown-stub.c cloexec.h \
+	close.c closedir.c dirent-private.h connect.c w32sock.h \
 	count-one-bits.h ctype.in.h dirent.in.h dirfd.c dirname.h \
 	dup.c dup2.c eloop-threshold.h errno.in.h error.c error.h \
 	exitfail.h fchdir.c fcntl.c fcntl.in.h fd-hook.h fdopendir.c \
@@ -1833,8 +1845,8 @@ EXTRA_DIST = m4/gnulib-cache.m4 alloca.c alloca.in.h arpa_inet.in.h \
 	glob.in.h hard-locale.h inet_ntop.c intprops.h inttypes.in.h \
 	isblank.c float+.h isnan.c isnand-nolibm.h isnand.c float+.h \
 	isnan.c isnanl-nolibm.h isnanl.c cdefs.h libc-config.h \
-	limits.in.h localcharset.h locale.in.h lstat.c malloc.c \
-	malloca.h math.in.h lc-charset-dispatch.c \
+	limits.in.h listen.c w32sock.h localcharset.h locale.in.h \
+	lstat.c malloc.c malloca.h math.in.h lc-charset-dispatch.c \
 	lc-charset-dispatch.h mbrtowc-impl-utf8.h mbrtowc-impl.h \
 	mbrtowc.c mbtowc-lock.c mbtowc-lock.h windows-initguard.h \
 	mbsinit.c mbsrtowcs-impl.h mbsrtowcs-state.c mbsrtowcs.c \
@@ -1847,17 +1859,17 @@ EXTRA_DIST = m4/gnulib-cache.m4 alloca.c alloca.in.h arpa_inet.in.h \
 	readlink.c realloc.c rename.c dirent-private.h rewinddir.c \
 	rmdir.c same-inode.h save-cwd.h malloc/scratch_buffer.h \
 	scratch_buffer.h select.c setenv.c setlocale-lock.c \
-	setlocale_null.h windows-initguard.h signal.in.h _Noreturn.h \
-	arg-nonnull.h c++defs.h warn-on-use.h w32sock.h stat-w32.c \
-	stat-w32.h stat.c stat-time.h stdalign.in.h stdbool.in.h \
-	stddef.in.h stdint.in.h stdio.in.h stdlib.in.h strchrnul.c \
-	strchrnul.valgrind strdup.c streq.h strerror.c \
-	strerror-override.c strerror-override.h strerror_r.c \
-	string.in.h strings.in.h strnlen.c strstr.c str-two-way.h \
-	strstr.c strtok_r.c sys_random.in.h sys_select.in.h \
-	sys_socket.in.h sys_stat.in.h sys_time.in.h sys_types.in.h \
-	sys_uio.in.h tempname.h time.in.h time_r.c unistd.in.h \
-	unistd--.h unistd-safer.h unsetenv.c \
+	setlocale_null.h windows-initguard.h setsockopt.c w32sock.h \
+	signal.in.h _Noreturn.h arg-nonnull.h c++defs.h warn-on-use.h \
+	socket.c w32sock.h w32sock.h stat-w32.c stat-w32.h stat.c \
+	stat-time.h stdalign.in.h stdbool.in.h stddef.in.h stdint.in.h \
+	stdio.in.h stdlib.in.h strchrnul.c strchrnul.valgrind strdup.c \
+	streq.h strerror.c strerror-override.c strerror-override.h \
+	strerror_r.c string.in.h strings.in.h strnlen.c strstr.c \
+	str-two-way.h strstr.c strtok_r.c sys_random.in.h \
+	sys_select.in.h sys_socket.in.h sys_stat.in.h sys_time.in.h \
+	sys_types.in.h sys_uio.in.h sys_wait.in.h tempname.h time.in.h \
+	time_r.c unistd.in.h unistd--.h unistd-safer.h unsetenv.c \
 	$(top_srcdir)/import/extra/update-copyright verify.h \
 	wchar.in.h wctype.in.h windows-initguard.h windows-mutex.c \
 	windows-mutex.h windows-once.c windows-once.h \
@@ -1870,7 +1882,7 @@ BUILT_SOURCES = $(ALLOCA_H) arpa/inet.h ctype.h dirent.h $(ERRNO_H) \
 	$(STDALIGN_H) $(STDBOOL_H) $(STDDEF_H) $(STDINT_H) stdio.h \
 	stdlib.h string.h strings.h sys/random.h sys/select.h \
 	sys/socket.h sys/stat.h sys/time.h sys/types.h sys/uio.h \
-	time.h unistd.h wchar.h wctype.h
+	sys/wait.h time.h unistd.h wchar.h wctype.h
 SUFFIXES = 
 MOSTLYCLEANFILES = core *.stackdump alloca.h alloca.h-t arpa/inet.h \
 	arpa/inet.h-t ctype.h ctype.h-t dirent.h dirent.h-t errno.h \
@@ -1884,9 +1896,9 @@ MOSTLYCLEANFILES = core *.stackdump alloca.h alloca.h-t arpa/inet.h \
 	sys/random.h sys/random.h-t sys/select.h sys/select.h-t \
 	sys/socket.h sys/socket.h-t sys/stat.h sys/stat.h-t sys/time.h \
 	sys/time.h-t sys/types.h sys/types.h-t sys/uio.h sys/uio.h-t \
-	time.h time.h-t unistd.h unistd.h-t wchar.h wchar.h-t wctype.h \
-	wctype.h-t
-MOSTLYCLEANDIRS = arpa netinet sys sys sys sys sys
+	sys/wait.h sys/wait.h-t time.h time.h-t unistd.h unistd.h-t \
+	wchar.h wchar.h-t wctype.h wctype.h-t
+MOSTLYCLEANDIRS = arpa netinet sys sys sys sys sys sys
 CLEANFILES = 
 DISTCLEANFILES = 
 MAINTAINERCLEANFILES = 
@@ -1907,25 +1919,26 @@ libgnu_a_SOURCES = openat-priv.h openat-proc.c basename-lgpl.c \
 	dup-safer.c fd-safer.c pipe-safer.c wctype-h.c
 libgnu_a_LIBADD = $(gl_LIBOBJS) @ALLOCA@
 libgnu_a_DEPENDENCIES = $(gl_LIBOBJS) @ALLOCA@
-EXTRA_libgnu_a_SOURCES = alloca.c btowc.c canonicalize-lgpl.c \
-	chdir-long.c chown.c fchown-stub.c close.c closedir.c dirfd.c \
-	dup.c dup2.c error.c fchdir.c fcntl.c fdopendir.c ffs.c \
-	float.c itold.c fnmatch.c fnmatch_loop.c fnmatch.c free.c \
-	frexp.c frexp.c frexpl.c fstat.c stat-w32.c at-func.c \
-	fstatat.c getcwd.c getcwd-lgpl.c getdelim.c getdtablesize.c \
-	getline.c getlogin_r.c getrandom.c gettimeofday.c glob.c \
-	glob_pattern_p.c globfree.c inet_ntop.c isblank.c isnan.c \
-	isnand.c isnan.c isnanl.c lstat.c malloc.c \
-	lc-charset-dispatch.c mbrtowc.c mbtowc-lock.c mbsinit.c \
-	mbsrtowcs-state.c mbsrtowcs.c mbtowc.c memchr.c memmem.c \
-	memmem.c mempcpy.c memrchr.c mkdir.c mkdtemp.c mkostemp.c \
-	msvc-inval.c msvc-nothrow.c open.c openat.c opendir.c pipe.c \
-	rawmemchr.c readdir.c readlink.c realloc.c rename.c \
-	rewinddir.c rmdir.c select.c setenv.c setlocale-lock.c \
-	stat-w32.c stat.c strchrnul.c strdup.c strerror.c \
-	strerror-override.c strerror_r.c strnlen.c strstr.c strstr.c \
-	strtok_r.c time_r.c unsetenv.c windows-mutex.c windows-once.c \
-	windows-recmutex.c windows-rwlock.c wmemchr.c wmempcpy.c
+EXTRA_libgnu_a_SOURCES = accept.c alloca.c bind.c btowc.c \
+	canonicalize-lgpl.c chdir-long.c chown.c fchown-stub.c close.c \
+	closedir.c connect.c dirfd.c dup.c dup2.c error.c fchdir.c \
+	fcntl.c fdopendir.c ffs.c float.c itold.c fnmatch.c \
+	fnmatch_loop.c fnmatch.c free.c frexp.c frexp.c frexpl.c \
+	fstat.c stat-w32.c at-func.c fstatat.c getcwd.c getcwd-lgpl.c \
+	getdelim.c getdtablesize.c getline.c getlogin_r.c getrandom.c \
+	gettimeofday.c glob.c glob_pattern_p.c globfree.c inet_ntop.c \
+	isblank.c isnan.c isnand.c isnan.c isnanl.c listen.c lstat.c \
+	malloc.c lc-charset-dispatch.c mbrtowc.c mbtowc-lock.c \
+	mbsinit.c mbsrtowcs-state.c mbsrtowcs.c mbtowc.c memchr.c \
+	memmem.c memmem.c mempcpy.c memrchr.c mkdir.c mkdtemp.c \
+	mkostemp.c msvc-inval.c msvc-nothrow.c open.c openat.c \
+	opendir.c pipe.c rawmemchr.c readdir.c readlink.c realloc.c \
+	rename.c rewinddir.c rmdir.c select.c setenv.c \
+	setlocale-lock.c setsockopt.c socket.c stat-w32.c stat.c \
+	strchrnul.c strdup.c strerror.c strerror-override.c \
+	strerror_r.c strnlen.c strstr.c strstr.c strtok_r.c time_r.c \
+	unsetenv.c windows-mutex.c windows-once.c windows-recmutex.c \
+	windows-rwlock.c wmemchr.c wmempcpy.c
 
 # Use this preprocessor expression to decide whether #include_next works.
 # Do not rely on a 'configure'-time test for this, since the expression
@@ -2037,9 +2050,11 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/accept.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/alloca.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/at-func.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basename-lgpl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bind.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/btowc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canonicalize-lgpl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chdir-long.Po@am__quote@
@@ -2047,6 +2062,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cloexec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/close.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/closedir.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connect.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/count-one-bits.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dirfd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dirname-lgpl.Po@am__quote@
@@ -2093,6 +2109,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/isnanl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/itold.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lc-charset-dispatch.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/listen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/localcharset.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lstat.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/malloc.Po@am__quote@
@@ -2132,6 +2149,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/setenv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/setlocale-lock.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/setlocale_null.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/setsockopt.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/socket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sockets.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stat-time.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stat-w32.Po@am__quote@
@@ -3743,6 +3762,24 @@ sys/uio.h: sys_uio.in.h $(top_builddir)/config.status
 	      < $(srcdir)/sys_uio.in.h; \
 	} > $@-t && \
 	mv -f $@-t $@
+
+# We need the following in order to create <sys/wait.h> when the system
+# has one that is incomplete.
+sys/wait.h: sys_wait.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(WARN_ON_USE_H)
+	$(AM_V_at)$(MKDIR_P) sys
+	$(AM_V_GEN)rm -f $@-t $@ && \
+	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
+	  sed -e 's|@''GUARD_PREFIX''@|GL|g' \
+	      -e 's|@''INCLUDE_NEXT''@|$(INCLUDE_NEXT)|g' \
+	      -e 's|@''PRAGMA_SYSTEM_HEADER''@|@PRAGMA_SYSTEM_HEADER@|g' \
+	      -e 's|@''PRAGMA_COLUMNS''@|@PRAGMA_COLUMNS@|g' \
+	      -e 's|@''NEXT_SYS_WAIT_H''@|$(NEXT_SYS_WAIT_H)|g' \
+	      -e 's/@''GNULIB_WAITPID''@/$(GNULIB_WAITPID)/g' \
+	      -e '/definitions of _GL_FUNCDECL_RPL/r $(CXXDEFS_H)' \
+	      -e '/definition of _GL_WARN_ON_USE/r $(WARN_ON_USE_H)' \
+	      < $(srcdir)/sys_wait.in.h; \
+	} > $@-t && \
+	mv $@-t $@
 
 # We need the following in order to create <time.h> when the system
 # doesn't have one that works with the given compiler.

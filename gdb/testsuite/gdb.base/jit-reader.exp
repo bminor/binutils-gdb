@@ -1,4 +1,4 @@
-# Copyright 2012-2021 Free Software Foundation, Inc.
+# Copyright 2012-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -226,6 +226,16 @@ proc jit_reader_test {} {
 		gdb_test "print \$rbp = -1" \
 		    "Attempt to assign to an unmodifiable value\." \
 		    "cannot assign to register"
+	    }
+
+	    if { ![skip_python_tests] } {
+		gdb_test "python print(gdb.objfiles())" \
+		    "$any<gdb.Objfile filename=<< JIT compiled code at $hex >>>$any" \
+		    "python gdb.Objfile.__repr__ ()"
+
+		gdb_test "python print(list(map(lambda objf : objf.filename, gdb.objfiles())))" \
+		    "$any'<< JIT compiled code at $hex >>'$any" \
+		    "python gdb.Objfile.filename"
 	    }
 	}
     }

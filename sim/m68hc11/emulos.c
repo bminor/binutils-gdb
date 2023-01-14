@@ -1,5 +1,5 @@
 /* emulos.c -- Small OS emulation
-   Copyright 1999-2021 Free Software Foundation, Inc.
+   Copyright 1999-2022 Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@worldnet.fr)
 
 This file is part of GDB, GAS, and the GNU binutils.
@@ -107,7 +107,7 @@ emul_write (sim_cpu *cpu)
   cpu->cpu_running = 0;
   while (size)
     {
-      uint8 val = memory_read8 (cpu, addr);
+      uint8_t val = memory_read8 (cpu, addr);
 
       if (write (0, &val, 1) != 1)
 	printf ("write failed: %s\n", strerror (errno));

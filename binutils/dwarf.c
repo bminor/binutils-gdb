@@ -1,5 +1,5 @@
 /* dwarf.c -- display DWARF contents of a BFD binary file
-   Copyright (C) 2005-2021 Free Software Foundation, Inc.
+   Copyright (C) 2005-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -2743,6 +2743,8 @@ read_and_display_attr_value (unsigned long           attribute,
       
     default:
       warn (_("Unrecognized form: 0x%lx\n"), form);
+      /* What to do?  Consume a byte maybe?  */
+      ++data;
       break;
     }
 
@@ -5135,7 +5137,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 	      else
 		directory = (char *) directory_table[ix - 1];
 
-	      if (do_wide || strlen (directory) < 76)
+	      if (do_wide)
 		printf (_("CU: %s/%s:\n"), directory, file_table[0].name);
 	      else
 		printf ("%s:\n", file_table[0].name);
@@ -5297,15 +5299,17 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		state_machine_regs.file = uladv;
 
 		{
-		  unsigned file = state_machine_regs.file - 1;
+		  unsigned file = state_machine_regs.file;
 		  unsigned dir;
 
+		  if (linfo.li_version < 5)
+		    --file;
 		  if (file_table == NULL || n_files == 0)
 		    printf (_("\n [Use file table entry %d]\n"), file);
 		  /* PR 20439 */
 		  else if (file >= n_files)
 		    {
-		      warn (_("file index %u > number of files %u\n"), file + 1, n_files);
+		      warn (_("file index %u > number of files %u\n"), file, n_files);
 		      printf (_("\n <over large file table index %u>"), file);
 		    }
 		  else if ((dir = file_table[file].directory_index) == 0)
@@ -5414,7 +5418,10 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 
 	      if (file_table)
 		{
-		  unsigned indx = state_machine_regs.file - 1;
+		  unsigned indx = state_machine_regs.file;
+
+		  if (linfo.li_version < 5)
+		    --indx;
 		  /* PR 20439  */
 		  if (indx >= n_files)
 		    {
@@ -5567,7 +5574,7 @@ display_debug_lines (struct dwarf_section *section, void *file)
 }
 
 static debug_info *
-find_debug_info_for_offset (unsigned long offset)
+find_debug_info_for_offset (dwarf_vma offset)
 {
   unsigned int i;
 
@@ -6323,11 +6330,10 @@ display_loc_list (struct dwarf_section *section,
 {
   unsigned char *start = *start_ptr, *vstart = *vstart_ptr;
   unsigned char *section_end = section->start + section->size;
-  unsigned long cu_offset;
+  dwarf_vma    cu_offset;
   unsigned int pointer_size;
   unsigned int offset_size;
   int dwarf_version;
-
   dwarf_vma begin;
   dwarf_vma end;
   unsigned short length;
@@ -6364,7 +6370,8 @@ display_loc_list (struct dwarf_section *section,
 	  break;
 	}
 
-      printf ("    %8.8lx ", (unsigned long) off);
+      printf ("    ");
+      print_dwarf_vma (off, 4);
 
       SAFE_BYTE_GET_AND_INC (begin, start, pointer_size, section_end);
       SAFE_BYTE_GET_AND_INC (end, start, pointer_size, section_end);
@@ -6468,7 +6475,7 @@ display_loclists_list (struct dwarf_section *section,
 {
   unsigned char *start = *start_ptr, *vstart = *vstart_ptr;
   unsigned char *section_end = section->start + section->size;
-  unsigned long cu_offset;
+  dwarf_vma    cu_offset;
   unsigned int pointer_size;
   unsigned int offset_size;
   int dwarf_version;
@@ -6511,7 +6518,8 @@ display_loclists_list (struct dwarf_section *section,
 	  break;
 	}
 
-      printf ("    %8.8lx ", (unsigned long) off);
+      printf ("    ");
+      print_dwarf_vma (off, 4);
 
       SAFE_BYTE_GET_AND_INC (llet, start, 1, section_end);
 
@@ -6654,7 +6662,7 @@ display_loc_list_dwo (struct dwarf_section *section,
 {
   unsigned char *start = *start_ptr, *vstart = *vstart_ptr;
   unsigned char *section_end = section->start + section->size;
-  unsigned long cu_offset;
+  dwarf_vma    cu_offset;
   unsigned int pointer_size;
   unsigned int offset_size;
   int dwarf_version;
@@ -6684,7 +6692,8 @@ display_loc_list_dwo (struct dwarf_section *section,
 
   while (1)
     {
-      printf ("    %8.8lx ", (unsigned long) (offset + (start - *start_ptr)));
+      printf ("    ");
+      print_dwarf_vma (offset + (start - *start_ptr), 4);
 
       if (start >= section_end)
 	{
@@ -6822,11 +6831,11 @@ static int
 display_debug_loc (struct dwarf_section *section, void *file)
 {
   unsigned char *start = section->start, *vstart = NULL;
-  unsigned long bytes;
+  dwarf_vma bytes;
   unsigned char *section_begin = start;
   unsigned int num_loc_list = 0;
-  unsigned long last_offset = 0;
-  unsigned long last_view = 0;
+  dwarf_vma last_offset = 0;
+  dwarf_vma last_view = 0;
   unsigned int first = 0;
   unsigned int i;
   unsigned int j;
@@ -7017,28 +7026,32 @@ display_debug_loc (struct dwarf_section *section, void *file)
 	  else
 	    {
 	      if (start < next)
-		warn (_("There is a hole [0x%lx - 0x%lx] in .debug_loc section.\n"),
+		warn (_("There is a hole [0x%lx - 0x%lx] in %s section.\n"),
 		      (unsigned long) (start - section_begin),
-		      (unsigned long) offset);
+		      (unsigned long) offset,
+		      section->name);
 	      else if (start > next)
-		warn (_("There is an overlap [0x%lx - 0x%lx] in .debug_loc section.\n"),
+		warn (_("There is an overlap [0x%lx - 0x%lx] in %s section.\n"),
 		      (unsigned long) (start - section_begin),
-		      (unsigned long) offset);
+		      (unsigned long) offset,
+		      section->name);
 	    }
 	  start = next;
 	  vstart = vnext;
 
 	  if (offset >= bytes)
 	    {
-	      warn (_("Offset 0x%lx is bigger than .debug_loc section size.\n"),
-		    (unsigned long) offset);
+	      warn (_("Offset 0x%lx is bigger than %s section size.\n"),
+		    (unsigned long) offset,
+		    section->name);
 	      continue;
 	    }
 
 	  if (vnext && voffset >= bytes)
 	    {
-	      warn (_("View Offset 0x%lx is bigger than .debug_loc section size.\n"),
-		    (unsigned long) voffset);
+	      warn (_("View Offset 0x%lx is bigger than %s section size.\n"),
+		    (unsigned long) voffset,
+		    section->name);
 	      continue;
 	    }
 
@@ -7094,7 +7107,7 @@ display_debug_str (struct dwarf_section *section,
 		   void *file ATTRIBUTE_UNUSED)
 {
   unsigned char *start = section->start;
-  unsigned long bytes = section->size;
+  dwarf_vma bytes = section->size;
   dwarf_vma addr = section->address;
 
   if (bytes == 0)
@@ -7185,10 +7198,9 @@ display_debug_aranges (struct dwarf_section *section,
       unsigned char *addr_ranges;
       dwarf_vma length;
       dwarf_vma address;
-      unsigned long sec_off;
+      dwarf_vma     sec_off;
       unsigned char address_size;
-      int excess;
-      unsigned int offset_size;
+      unsigned int  offset_size;
       unsigned char *end_ranges;
 
       hdrptr = start;
@@ -7207,7 +7219,7 @@ display_debug_aranges (struct dwarf_section *section,
 	{
 	  warn (_("Debug info is corrupted, %s header at %#lx has length %s\n"),
 		section->name,
-		sec_off,
+		(unsigned long) sec_off,
 		dwarf_vmatoa ("x", arange.ar_length));
 	  break;
 	}
@@ -7272,22 +7284,22 @@ display_debug_aranges (struct dwarf_section *section,
       addr_ranges = hdrptr;
 
       /* Must pad to an alignment boundary that is twice the address size.  */
-      excess = (hdrptr - start) % (2 * address_size);
-      if (excess)
-	addr_ranges += (2 * address_size) - excess;
+      addr_ranges += (2 * address_size - 1
+		      - (hdrptr - start - 1) % (2 * address_size));
 
-      start = end_ranges;
-
-      while (2u * address_size <= (size_t) (start - addr_ranges))
+      while (2 * address_size <= end_ranges - addr_ranges)
 	{
-	  SAFE_BYTE_GET_AND_INC (address, addr_ranges, address_size, start);
-	  SAFE_BYTE_GET_AND_INC (length, addr_ranges, address_size, start);
-
+	  SAFE_BYTE_GET_AND_INC (address, addr_ranges, address_size,
+				 end_ranges);
+	  SAFE_BYTE_GET_AND_INC (length, addr_ranges, address_size,
+				 end_ranges);
 	  printf ("    ");
 	  print_dwarf_vma (address, address_size);
 	  print_dwarf_vma (length, address_size);
 	  putchar ('\n');
 	}
+
+      start = end_ranges;
     }
 
   printf ("\n");
@@ -7546,9 +7558,11 @@ range_entry_compar (const void *ap, const void *bp)
 }
 
 static void
-display_debug_ranges_list (unsigned char *start, unsigned char *finish,
-			   unsigned int pointer_size, unsigned long offset,
-			   unsigned long base_address)
+display_debug_ranges_list (unsigned char *  start,
+			   unsigned char *  finish,
+			   unsigned int     pointer_size,
+			   dwarf_vma        offset,
+			   dwarf_vma        base_address)
 {
   while (start < finish)
     {
@@ -7560,7 +7574,8 @@ display_debug_ranges_list (unsigned char *start, unsigned char *finish,
 	break;
       SAFE_SIGNED_BYTE_GET_AND_INC (end, start, pointer_size, finish);
 
-      printf ("    %8.8lx ", offset);
+      printf ("    ");
+      print_dwarf_vma (offset, 4);
 
       if (begin == 0 && end == 0)
 	{
@@ -7592,27 +7607,30 @@ display_debug_ranges_list (unsigned char *start, unsigned char *finish,
 }
 
 static void
-display_debug_rnglists_list (unsigned char *start, unsigned char *finish,
-			     unsigned int pointer_size, unsigned long offset,
-			     unsigned long base_address)
+display_debug_rnglists_list (unsigned char * start,
+			     unsigned char * finish,
+			     unsigned int    pointer_size,
+			     dwarf_vma       offset,
+			     dwarf_vma       base_address)
 {
   unsigned char *next = start;
 
   while (1)
     {
-      unsigned long off = offset + (start - next);
+      dwarf_vma off = offset + (start - next);
       enum dwarf_range_list_entry rlet;
       /* Initialize it due to a false compiler warning.  */
       dwarf_vma begin = -1, length, end = -1;
 
       if (start >= finish)
 	{
-	  warn (_("Range list starting at offset 0x%lx is not terminated.\n"),
-		offset);
+	  warn (_("Range list starting at offset 0x%s is not terminated.\n"),
+		dwarf_vmatoa ("x", offset));
 	  break;
 	}
 
-      printf ("    %8.8lx ", off);
+      printf ("    ");
+      print_dwarf_vma (off, 4);
 
       SAFE_BYTE_GET_AND_INC (rlet, start, 1, finish);
 
@@ -7672,17 +7690,18 @@ static int
 display_debug_ranges (struct dwarf_section *section,
 		      void *file ATTRIBUTE_UNUSED)
 {
-  unsigned char *start = section->start;
-  unsigned char *last_start = start;
-  unsigned long bytes = section->size;
-  unsigned char *section_begin = start;
-  unsigned char *finish = start + bytes;
-  unsigned int num_range_list, i;
-  struct range_entry *range_entries, *range_entry_fill;
-  int is_rnglists = strstr (section->name, "debug_rnglists") != NULL;
+  unsigned char *       start = section->start;
+  unsigned char *       last_start = start;
+  dwarf_vma             bytes = section->size;
+  unsigned char *       section_begin = start;
+  unsigned char *       finish = start + bytes;
+  unsigned int          num_range_list, i;
+  struct range_entry *  range_entries;
+  struct range_entry *  range_entry_fill;
+  int                   is_rnglists = strstr (section->name, "debug_rnglists") != NULL;
   /* Initialize it due to a false compiler warning.  */
-  unsigned char address_size = 0;
-  dwarf_vma last_offset = 0;
+  unsigned char         address_size = 0;
+  dwarf_vma             last_offset = 0;
 
   if (bytes == 0)
     {
@@ -7725,7 +7744,6 @@ display_debug_ranges (struct dwarf_section *section,
 	      return 0;
 	    }
 	}
-      finish = start + initial_length;
 
       /* Get and check the version number.  */
       SAFE_BYTE_GET_AND_INC (version, start, 2, finish);
@@ -8770,9 +8788,6 @@ display_debug_frames (struct dwarf_section *section,
 
 	  if (!cie)
 	    {
-	      warn ("Invalid CIE pointer 0x%s in FDE at %#08lx\n",
-		    dwarf_vmatoa_1 (NULL, cie_id, offset_size),
-		    (unsigned long) (saved_start - section_start));
 	      fc->ncols = 0;
 	      fc->col_type = (short int *) xmalloc (sizeof (short int));
 	      fc->col_offset = (int *) xmalloc (sizeof (int));
@@ -8855,12 +8870,20 @@ display_debug_frames (struct dwarf_section *section,
 	      start += augmentation_data_len;
 	    }
 
-	  printf ("\n%08lx %s %s FDE cie=%08lx pc=",
+	  printf ("\n%08lx %s %s FDE ",
 		  (unsigned long)(saved_start - section_start),
 		  dwarf_vmatoa_1 (NULL, length, fc->ptr_size),
-		  dwarf_vmatoa_1 (NULL, cie_id, offset_size),
-		  (unsigned long)(cie->chunk_start - section_start));
+		  dwarf_vmatoa_1 (NULL, cie_id, offset_size));
 
+	  if (cie->chunk_start)
+	    printf ("cie=%08lx",
+		    (unsigned long) (cie->chunk_start - section_start));
+	  else
+	    /* Ideally translate "invalid " to 8 chars, trailing space
+	       is optional.  */
+	    printf (_("cie=invalid "));
+
+	  printf (" pc=");
 	  if (fc->segment_size)
 	    printf ("%04lx:", segment_selector);
 
@@ -10442,7 +10465,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 	 Check for integer overflow (can occur when size_t is 32-bit)
 	 with overlarge ncols or nused values.  */
       if (nused == -1u
-	  || _mul_overflow ((size_t) ncols, 4, &temp)
+	  || _mul_overflow ((size_t) ncols, 4, &temp)	  
 	  || _mul_overflow ((size_t) nused + 1, temp, &total)
 	  || total > (size_t) (limit - ppool))
 	{
@@ -10450,7 +10473,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 		section->name);
 	  return 0;
 	}
-
+      
       if (do_display)
 	{
 	  printf (_("  Offset table\n"));
@@ -10573,7 +10596,21 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 	      for (j = 0; j < ncols; j++)
 		{
 		  unsigned char *p = prow + j * 4;
+
+		  /* PR 28645: Check for overflow.  Since we do not know how
+		     many populated rows there will be, we cannot just
+		     perform a single check at the start of this function.  */
+		  if (p > (limit - 4))
+		    {
+		      if (do_display)
+			printf ("\n");
+		      warn (_("Too many rows/columns in DWARF index section %s\n"),
+			    section->name);
+		      return 0;
+		    }
+
 		  SAFE_BYTE_GET (val, p, 4, limit);
+
 		  if (do_display)
 		    printf (" %8d", val);
 		  else
@@ -11016,6 +11053,9 @@ load_separate_debug_info (const char *            main_filename,
   char *         canon_dir;
   size_t         canon_dirlen;
   size_t         dirlen;
+  char *         canon_filename;
+  char *         canon_debug_filename;
+  bool		 self;
 
   if ((separate_filename = parse_func (xlink, func_data)) == NULL)
     {
@@ -11027,7 +11067,8 @@ load_separate_debug_info (const char *            main_filename,
   /* Attempt to locate the separate file.
      This should duplicate the logic in bfd/opncls.c:find_separate_debug_file().  */
 
-  canon_dir = lrealpath (main_filename);
+  canon_filename = lrealpath (main_filename);
+  canon_dir = xstrdup (canon_filename);
 
   for (canon_dirlen = strlen (canon_dir); canon_dirlen > 0; canon_dirlen--)
     if (IS_DIR_SEPARATOR (canon_dir[canon_dirlen - 1]))
@@ -11059,6 +11100,7 @@ load_separate_debug_info (const char *            main_filename,
     {
       warn (_("Out of memory"));
       free (canon_dir);
+      free (canon_filename);
       return NULL;
     }
 
@@ -11177,10 +11219,21 @@ load_separate_debug_info (const char *            main_filename,
 
   free (canon_dir);
   free (debug_filename);
+  free (canon_filename);
   return NULL;
 
  found:
   free (canon_dir);
+
+  canon_debug_filename = lrealpath (debug_filename);
+  self = strcmp (canon_debug_filename, canon_filename) == 0;
+  free (canon_filename);
+  free (canon_debug_filename);
+  if (self)
+    {
+      free (debug_filename);
+      return NULL;
+    }
 
   void * debug_handle;
 
@@ -11238,6 +11291,113 @@ load_dwo_file (const char * main_filename, const char * name, const char * dir, 
   /* Note - separate_filename will be freed in free_debug_memory().  */
   return separate_handle;
 }
+
+static void *
+try_build_id_prefix (const char * prefix, char * filename, const unsigned char * data, unsigned long id_len)
+{
+  char * f = filename;
+
+  f += sprintf (f, "%s.build-id/%02x/", prefix, (unsigned) *data++);
+  id_len --;
+  while (id_len --)
+    f += sprintf (f, "%02x", (unsigned) *data++);
+  strcpy (f, ".debug");
+
+  return open_debug_file (filename);
+}
+
+/* Try to load a debug file based upon the build-id held in the .note.gnu.build-id section.  */
+
+static void
+load_build_id_debug_file (const char * main_filename ATTRIBUTE_UNUSED, void * main_file)
+{
+  if (! load_debug_section (note_gnu_build_id, main_file))
+    return; /* No .note.gnu.build-id section.  */
+
+  struct dwarf_section * section = & debug_displays [note_gnu_build_id].section;
+  if (section == NULL)
+    {
+      warn (_("Unable to load the .note.gnu.build-id section\n"));
+      return;
+    }
+
+  if (section->start == NULL || section->size < 0x18)
+    {
+      warn (_(".note.gnu.build-id section is corrupt/empty\n"));
+      return;
+    }
+
+  /* In theory we should extract the contents of the section into
+     a note structure and then check the fields.  For now though
+     just use hard coded offsets instead:
+     
+       Field  Bytes    Contents
+	NSize  0...3   4
+	DSize  4...7   8+
+	Type   8..11   3  (NT_GNU_BUILD_ID)
+        Name   12.15   GNU\0
+	Data   16....   */
+
+  /* FIXME: Check the name size, name and type fields.  */
+
+  unsigned long build_id_size;
+  build_id_size = byte_get (section->start + 4, 4);
+  if (build_id_size < 8)
+    {
+      warn (_(".note.gnu.build-id data size is too small\n"));
+      return;
+    }
+  
+  if (build_id_size > (section->size - 16))
+    {
+      warn (_(".note.gnu.build-id data size is too bug\n"));
+      return;
+    }
+
+  char * filename;
+  filename = xmalloc (strlen (".build-id/")
+		      + build_id_size * 2 + 2
+		      + strlen (".debug")
+		      /* The next string should be the same as the longest
+			 name found in the prefixes[] array below.  */
+		      + strlen ("/usrlib64/debug/usr")
+		      + 1);
+  void * handle;
+
+  static const char * prefixes[] =
+    {
+      "",
+      ".debug/",
+      "/usr/lib/debug/",
+      "/usr/lib/debug/usr/",
+      "/usr/lib64/debug/",
+      "/usr/lib64/debug/usr"
+    };
+  long unsigned int i;
+
+  for (i = 0; i < ARRAY_SIZE (prefixes); i++)
+    {
+      handle = try_build_id_prefix (prefixes[i], filename,
+				    section->start + 16, build_id_size);
+      if (handle != NULL)
+	break;
+    }
+  /* FIXME: TYhe BFD library also tries a global debugfile directory prefix.  */
+  if (handle == NULL)
+    {
+      /* Failed to find a debug file associated with the build-id.
+	 This is not an error however, rather it just means that
+	 the debug info has probably not been loaded on the system,
+	 or that another method is being used to link to the debug
+	 info.  */
+      free (filename);
+      return;
+    }
+
+  add_separate_debug_file (filename, handle);
+}
+
+/* Try to load a debug file pointed to by the .debug_sup section.  */
 
 static void
 load_debug_sup_file (const char * main_filename, void * file)
@@ -11356,6 +11516,8 @@ check_for_and_load_links (void * file, const char * filename)
     }
 
   load_debug_sup_file (filename, file);
+
+  load_build_id_debug_file (filename, file);
 }
 
 /* Load the separate debug info file(s) attached to FILE, if any exist.
@@ -11726,7 +11888,8 @@ struct dwarf_section_display debug_displays[] =
   /* Separate debug info files can containt their own .debug_str section,
      and this might be in *addition* to a .debug_str section already present
      in the main file.	Hence we need to have two entries for .debug_str.  */
-  { { ".debug_str",	    ".zdebug_str",	"",	  NO_ABBREVS },	     display_debug_str,	   &do_debug_str,	false },
+  { { ".debug_str",	    ".zdebug_str",	     "",	 NO_ABBREVS },	    display_debug_str,	    &do_debug_str,	false },
+  { { ".note.gnu.build-id", "",                      "",	 NO_ABBREVS },	    display_debug_not_supported, NULL,		false },
 };
 
 /* A static assertion.  */

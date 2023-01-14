@@ -33,9 +33,12 @@
 #  --no-libtool \
 #  --macro-prefix=gl \
 #  --no-vc-files \
+#  accept \
 #  alloca \
+#  bind \
 #  canonicalize-lgpl \
 #  chown \
+#  connect \
 #  count-one-bits \
 #  dirent \
 #  dirfd \
@@ -52,6 +55,7 @@
 #  inet_ntop \
 #  inttypes \
 #  limits-h \
+#  listen \
 #  lstat \
 #  memchr \
 #  memmem \
@@ -65,12 +69,15 @@
 #  rename \
 #  select \
 #  setenv \
+#  setsockopt \
 #  signal-h \
+#  socket \
 #  strchrnul \
 #  strerror_r-posix \
 #  strstr \
 #  strtok_r \
 #  sys_stat \
+#  sys_wait \
 #  time_r \
 #  unistd \
 #  unsetenv \
@@ -113,6 +120,15 @@ EXTRA_libgnu_a_SOURCES =
 HAVE_INCLUDE_NEXT = (__GNUC__ || __clang__ || 60000000 <= __DECC_VER)
 
 ## end   gnulib module absolute-header
+
+## begin gnulib module accept
+
+
+EXTRA_DIST += accept.c w32sock.h
+
+EXTRA_libgnu_a_SOURCES += accept.c
+
+## end   gnulib module accept
 
 ## begin gnulib module alloca
 
@@ -213,6 +229,15 @@ EXTRA_DIST += basename-lgpl.h
 
 ## end   gnulib module basename-lgpl
 
+## begin gnulib module bind
+
+
+EXTRA_DIST += bind.c w32sock.h
+
+EXTRA_libgnu_a_SOURCES += bind.c
+
+## end   gnulib module bind
+
 ## begin gnulib module btowc
 
 
@@ -274,6 +299,15 @@ EXTRA_DIST += closedir.c dirent-private.h
 EXTRA_libgnu_a_SOURCES += closedir.c
 
 ## end   gnulib module closedir
+
+## begin gnulib module connect
+
+
+EXTRA_DIST += connect.c w32sock.h
+
+EXTRA_libgnu_a_SOURCES += connect.c
+
+## end   gnulib module connect
 
 ## begin gnulib module count-one-bits
 
@@ -974,6 +1008,15 @@ MOSTLYCLEANFILES += limits.h limits.h-t
 EXTRA_DIST += limits.in.h
 
 ## end   gnulib module limits-h
+
+## begin gnulib module listen
+
+
+EXTRA_DIST += listen.c w32sock.h
+
+EXTRA_libgnu_a_SOURCES += listen.c
+
+## end   gnulib module listen
 
 ## begin gnulib module localcharset
 
@@ -1730,6 +1773,15 @@ EXTRA_libgnu_a_SOURCES += setlocale-lock.c
 
 ## end   gnulib module setlocale-null
 
+## begin gnulib module setsockopt
+
+
+EXTRA_DIST += setsockopt.c w32sock.h
+
+EXTRA_libgnu_a_SOURCES += setsockopt.c
+
+## end   gnulib module setsockopt
+
 ## begin gnulib module signal-h
 
 BUILT_SOURCES += signal.h
@@ -1819,6 +1871,15 @@ WARN_ON_USE_H=$(srcdir)/warn-on-use.h
 EXTRA_DIST += warn-on-use.h
 
 ## end   gnulib module snippet/warn-on-use
+
+## begin gnulib module socket
+
+
+EXTRA_DIST += socket.c w32sock.h
+
+EXTRA_libgnu_a_SOURCES += socket.c
+
+## end   gnulib module socket
 
 ## begin gnulib module sockets
 
@@ -2754,6 +2815,34 @@ MOSTLYCLEANDIRS += sys
 EXTRA_DIST += sys_uio.in.h
 
 ## end   gnulib module sys_uio
+
+## begin gnulib module sys_wait
+
+BUILT_SOURCES += sys/wait.h
+
+# We need the following in order to create <sys/wait.h> when the system
+# has one that is incomplete.
+sys/wait.h: sys_wait.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(WARN_ON_USE_H)
+	$(AM_V_at)$(MKDIR_P) sys
+	$(AM_V_GEN)rm -f $@-t $@ && \
+	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
+	  sed -e 's|@''GUARD_PREFIX''@|GL|g' \
+	      -e 's|@''INCLUDE_NEXT''@|$(INCLUDE_NEXT)|g' \
+	      -e 's|@''PRAGMA_SYSTEM_HEADER''@|@PRAGMA_SYSTEM_HEADER@|g' \
+	      -e 's|@''PRAGMA_COLUMNS''@|@PRAGMA_COLUMNS@|g' \
+	      -e 's|@''NEXT_SYS_WAIT_H''@|$(NEXT_SYS_WAIT_H)|g' \
+	      -e 's/@''GNULIB_WAITPID''@/$(GNULIB_WAITPID)/g' \
+	      -e '/definitions of _GL_FUNCDECL_RPL/r $(CXXDEFS_H)' \
+	      -e '/definition of _GL_WARN_ON_USE/r $(WARN_ON_USE_H)' \
+	      < $(srcdir)/sys_wait.in.h; \
+	} > $@-t && \
+	mv $@-t $@
+MOSTLYCLEANFILES += sys/wait.h sys/wait.h-t
+MOSTLYCLEANDIRS += sys
+
+EXTRA_DIST += sys_wait.in.h
+
+## end   gnulib module sys_wait
 
 ## begin gnulib module tempname
 

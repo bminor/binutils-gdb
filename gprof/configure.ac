@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl
-dnl   Copyright (C) 2012-2021 Free Software Foundation, Inc.
+dnl   Copyright (C) 2012-2022 Free Software Foundation, Inc.
 dnl
 dnl This file is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ AC_CONFIG_SRCDIR([gprof.c])
 AC_CANONICAL_TARGET([])
 
 AM_INIT_AUTOMAKE
+AM_SILENT_RULES([yes])
 
 dnl For simplicity, we use the BFD configuration file for most
 dnl things.  However, we also need our own configuration file for

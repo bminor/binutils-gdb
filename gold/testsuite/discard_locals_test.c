@@ -1,6 +1,6 @@
 /* discard_locals_test.c -- test --discard-locals option.
 
-   Copyright (C) 2009-2021 Free Software Foundation, Inc.
+   Copyright (C) 2009-2022 Free Software Foundation, Inc.
    Doug Kwan <dougkwan@google.com>.
 
    This file is part of gold.

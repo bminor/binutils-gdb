@@ -1,4 +1,4 @@
-# Copyright 2004-2021 Free Software Foundation, Inc.
+# Copyright 2004-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,12 +30,17 @@ if [get_compiler_info] {
     return -1
 }
 
-set additional_flags ""
+set flags { debug }
+
+# C11 for _Alignas, gnu for asm.
+lappend flags additional_flags=-std=gnu11
+
 if { [test_compiler_info gcc*] || [test_compiler_info clang*] } {
-    set additional_flags "additional_flags=-msse -I${srcdir}/.."
+    lappend flags "additional_flags=-msse -I${srcdir}/.."
 }
 
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug $additional_flags]] != "" } {
+if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable \
+	  $flags] != "" } {
     unsupported "compiler does not support SSE"
     return
 }
@@ -43,7 +48,6 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list
 clean_restart ${binfile}
 
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 

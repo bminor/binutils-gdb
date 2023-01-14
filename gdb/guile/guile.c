@@ -1,6 +1,6 @@
 /* General GDB/Guile code.
 
-   Copyright (C) 2014-2021 Free Software Foundation, Inc.
+   Copyright (C) 2014-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -302,7 +302,7 @@ gdbscm_execute_gdb_command (SCM command_scm, SCM rest)
 
       scoped_restore preventer = prevent_dont_repeat ();
       if (to_string)
-	to_string_res = execute_command_to_string (command, from_tty, false);
+	execute_command_to_string (to_string_res, command, from_tty, false);
       else
 	execute_command (command, from_tty);
 
@@ -780,17 +780,17 @@ This command is only a placeholder.")
 	   );
   add_com_alias ("gu", guile_cmd_element, class_obscure, 1);
 
-  cmd_list_element *set_guile_cmd
-    = add_basic_prefix_cmd ("guile", class_obscure,
-			    _("Prefix command for Guile preference settings."),
-			    &set_guile_list, 0, &setlist);
-  add_alias_cmd ("gu", set_guile_cmd, class_obscure, 1, &setlist);
+  set_show_commands setshow_guile_cmds
+    = add_setshow_prefix_cmd ("guile", class_obscure,
+			      _("\
+Prefix command for Guile preference settings."),
+			      _("\
+Prefix command for Guile preference settings."),
+			      &set_guile_list, &show_guile_list,
+			      &setlist, &showlist);
 
-  cmd_list_element *show_guile_cmd
-    = add_show_prefix_cmd ("guile", class_obscure,
-			   _("Prefix command for Guile preference settings."),
-			   &show_guile_list, 0, &showlist);
-  add_alias_cmd ("gu", show_guile_cmd, class_obscure, 1, &showlist);
+  add_alias_cmd ("gu", setshow_guile_cmds.set, class_obscure, 1, &setlist);
+  add_alias_cmd ("gu", setshow_guile_cmds.show, class_obscure, 1, &showlist);
 
   cmd_list_element *info_guile_cmd
     = add_basic_prefix_cmd ("guile", class_obscure,

@@ -1,6 +1,6 @@
 /* Python frame unwinder interface.
 
-   Copyright (C) 2015-2021 Free Software Foundation, Inc.
+   Copyright (C) 2015-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "arch-utils.h"
 #include "frame-unwind.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "gdbcmd.h"
 #include "language.h"
 #include "observable.h"
@@ -133,7 +133,7 @@ pyuw_value_obj_to_pointer (PyObject *pyo_value, CORE_ADDR *addr)
       if ((value = value_object_to_value (pyo_value)) != NULL)
 	{
 	  *addr = unpack_pointer (value_type (value),
-				  value_contents (value));
+				  value_contents (value).data ());
 	  rc = 1;
 	}
     }
@@ -524,7 +524,7 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
   struct gdbarch *gdbarch = (struct gdbarch *) (self->unwind_data);
   cached_frame_info *cached_frame;
 
-  gdbpy_enter enter_py (gdbarch, current_language);
+  gdbpy_enter enter_py (gdbarch);
 
   pyuw_debug_printf ("frame=%d, sp=%s, pc=%s",
 		     frame_relative_level (this_frame),
@@ -631,7 +631,8 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
 	gdb_assert (data_size == TYPE_LENGTH (value_type (value)));
 
 	cached_frame->reg[i].data = (gdb_byte *) xmalloc (data_size);
-	memcpy (cached_frame->reg[i].data, value_contents (value), data_size);
+	memcpy (cached_frame->reg[i].data,
+		value_contents (value).data (), data_size);
       }
   }
 

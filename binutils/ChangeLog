@@ -1,3 +1,208 @@
+2022-01-27  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
+2022-01-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/bg.po: Updated Bulgarian translation.
+	* po/fr.po: Updated French translation.
+	* po/ro.po: Updated Romanian translation.
+	* po/uk.po: Updated Ukranian translation.
+
+2022-01-22  Martin Storsjö  <martin@martin.st>
+
+	* dlltool.c (main): Allow inferring tmp_prefix from the dll name
+	from a def file.
+
+2022-01-22  Nick Clifton  <nickc@redhat.com>
+
+	* configure: Regenerate.
+	* po/binutils.pot: Regenerate.
+
+2022-01-22  Nick Clifton  <nickc@redhat.com>
+
+	* 2.38 release branch created.
+
+2022-01-17  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.in: Regenerate.
+
+2022-01-11  Fangrui Song  <maskray@google.com>
+
+	PR binutils/28759
+	* ar.c (long_options): Add --thin.
+	(usage) Add --thin. Deprecate -T without diagnostics.
+	* doc/binutils.texi: Add doc.
+	* NEWS: Mention --thin.
+	* binutils/testsuite/binutils-all/ar.exp: Add tests.
+
+2022-01-11  Martin Storsjö  <martin@martin.st>
+
+	* dlltool.c (main): If a prefix has not been provided, attempt to
+	use a deterministic one based upon the dll name.
+
+2022-01-07  Pavel Mayorov  <pmayorov@cloudlinux.com>
+
+	PR 28718
+	* dwarf.c: Revert previous delta.
+	(debug_get_real_type): Reject indirect types that point to
+	indirect types.
+	(debug_get_type_name, debug_get_type_size, debug_write_type):
+	Likewise.
+
+2022-01-06  Nick Clifton  <nickc@redhat.com>
+
+	* debug.c (debug_write_type): Allow for malicious recursion via
+	indirect debug types.
+
+2022-01-04  Nick Clifton  <nickc@redhat.com>
+
+	PR 28716
+	* dwarf.c (load_build_id_debug_file): Remove spurious printf.
+
+2021-12-16  Nick Clifton  <nickc@redhat.com>
+
+	PR 28697
+	* dwarf.c (load_build_id_debug_file): New function.
+	(try_build_id_prefix): New function.
+	(check_for_and_load_links): Call load_build_id_debug_file.
+	(debug_displays): Add entry for .note.gnu.build-id.
+	* dwarf.h (enum dwarf_section_display_enum): Add
+	note_gnu_build_id.
+	* testsuite/binutils-all/debuginfod.exp (test_fetch_debuglink):
+	Fix regexp for loads via debuglink section.
+
+2021-12-03  Chenghua Xu  <xuchenghua@loongson.cn>
+
+	* MAINTAINERS: Add myself and Zhensong Liu
+	as the LoongArch maintainer.
+
+2021-12-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 28645
+	* dwarf.c (process_cu_tu_index): Add test for overruning section
+	whilst processing slots.
+
+2021-11-30  Roland McGrath  <mcgrathr@google.com>
+
+	* doc/local.mk: Give each man page target its missing dependency on
+	doc/$(am__dirstamp).
+
+2021-11-30  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (find_debug_info_for_offset): Use dwarf_vma type for
+	offsets, sizes and ranges.
+	(display_loc_list): Likewise.  Also use print_dwarf_vma to print
+	the offset.
+	(display_loclists_list): Likewise.
+	(display_loc_list_dwo): Likewise.
+	(display_debug_str): Likewise.
+	(display_debug_aranges): Likewise.
+	(display_debug_ranges_list): Likewise.
+	(display_debug_rnglists_list): Likewise.
+	(display_debug_ranges): Likewise.
+
+2021-11-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 28632
+	* strings.c (usage): Update desciption of -n option.
+	* doc/binutils.texi: Likewise.
+
+2021-11-24  Nick Clifton  <nickc@redhat.com>
+
+	PR 28564
+	* sysdump.c (getCHARS): Check for an out of bounds read.
+
+2021-11-16  Fangrui Song  <maskray@google.com>
+
+	* readelf.c (enum relocation_type): New.
+	(slurp_relr_relocs): New.
+	(dump_relocations): Change is_rela to rel_type.
+	Dump RELR.
+	(dynamic_relocations): Add DT_RELR.
+	(process_relocs): Check SHT_RELR and DT_RELR.
+	(process_dynamic_section): Store into dynamic_info for
+	DT_RELR/DT_RELRENT/DT_RELRSZ.
+
+2021-11-09  Nick Clifton  <nickc@redhat.com>
+
+	* nm.c: Add --unicode option to control how unicode characters are
+	handled.
+	* objdump.c: Likewise.
+	* readelf.c: Likewise.
+	* strings.c: Likewise.
+	* binutils.texi: Document the new feature.
+	* NEWS: Document the new feature.
+	* testsuite/binutils-all/unicode.exp: New file.
+	* testsuite/binutils-all/nm.hex.unicode
+	* testsuite/binutils-all/strings.escape.unicode
+	* testsuite/binutils-all/objdump.highlight.unicode
+	* testsuite/binutils-all/readelf.invalid.unicode
+
+2021-11-03  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf.c (display_debug_loc): Use section name in warnings.
+
+2021-10-25  Nick Alcock  <nick.alcock@oracle.com>
+
+	* objdump.c (usage): --ctf now has an optional argument.
+	(main): Adjust accordingly.
+	(dump_ctf): Default it.
+	* doc/ctf.options.texi: Adjust.
+
+2021-10-25  Nick Alcock  <nick.alcock@oracle.com>
+
+	* objdump.c (usage): --ctf-parent now takes a name, not a section.
+	(dump_ctf): Don't open a separate section; use the parent_name in
+	ctf_dict_open instead.  Use ctf_archive_next, not ctf_archive_iter,
+	so we can pass down a member count.
+	(dump_ctf_archive_member): Add the member count; don't return
+	anything.  Import parents into children no matter what the
+	parent's name, while still avoiding displaying the header for the
+	common parent name of ".ctf".
+	* readelf.c (usage): Adjust similarly.
+	(dump_section_as_ctf): Likewise.
+	(dump_ctf_archive_member): Likewise.  Never stop iterating over
+	archive members, even if ctf_dump of one member fails.
+	* doc/ctf.options.texi: Adjust.
+
+2021-10-19  Nick Clifton  <nickc@redhat.com>
+
+	* nm.c (filter_symbols): Test for a NULL name before checking to
+	see if the symbol is __gnu_lto_slim.
+	* objcopy.c (filter_symbols): Likewise.
+
+2021-09-30  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (filter_symbols): Fail if attempting to dredefine
+	symbols in an LTO object file.
+
+2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
+
+	* configure: Regenerate.
+
+2021-09-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/binutils-all/riscv/riscv.exp: New file.
+	* testsuite/binutils-all/riscv/unknown.d: New file.
+	* testsuite/binutils-all/riscv/unknown.s: New file.
+
+2021-09-07  Luis Machado  <luis.machado@linaro.org>
+
+	Revert: [AArch64] MTE corefile support
+
+	2021-05-21  Luis Machado  <luis.machado@linaro.org>
+
+	* readelf.c (get_note_type): Handle NT_MEMTAG note types.
+
+2021-08-11  Nick Clifton  <nickc@redhat.com>
+
+	* po/pt.po: Updated Portuguese translation.
+
+2021-08-10  Nick Clifton  <nickc@redhat.com>
+
+	* po/sr.po: Updated Serbian translation.
+
 2021-07-16  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.
@@ -1371,7 +1576,7 @@
 
 For older changes see ChangeLog-2020
 
-Copyright (C) 2021 Free Software Foundation, Inc.
+Copyright (C) 2021-2022 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

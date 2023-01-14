@@ -1,5 +1,5 @@
 #    Makefile template for Configure for the erc32sim library.
-#    Copyright (C) 1993-2021 Free Software Foundation, Inc.
+#    Copyright (C) 1993-2022 Free Software Foundation, Inc.
 #    Written by Cygnus Support
 #    Modified by J.Gaisler ESA/ESTEC
 # 
@@ -32,8 +32,8 @@ SIM_EXTRA_CLEAN = clean-sis
 # behaviour of UART interrupt routines ...
 SIM_EXTRA_CFLAGS += -DFAST_UART -I$(srcroot)
 
-# Code doesn't build cleanly yet.
-SIM_WERROR_CFLAGS =
+# Some modules don't build cleanly yet.
+exec.o: SIM_WERROR_CFLAGS =
 
 ## COMMON_POST_CONFIG_FRAG
 
@@ -42,7 +42,7 @@ SIS_OFILES = exec.o erc32.o func.o help.o float.o
 
 all: sis$(EXEEXT)
 sis$(EXEEXT): sis.o $(SIS_OFILES) libsim.a $(LIBDEPS)
-	$(CC) $(ALL_CFLAGS) -o sis$(EXEEXT) \
+	$(ECHO_CCLD) $(CC) $(ALL_CFLAGS) -o sis$(EXEEXT) \
 	  sis.o $(SIS_OFILES) libsim.a $(EXTRA_LIBS)
 
 # Copy the files into directories where they will be run.
@@ -52,11 +52,3 @@ install-sis: installdirs
 
 clean-sis:
 	rm -f sis
-
-configure:
-	@echo "Rebuilding configure..."
-	if [ x"${srcdir}" = x"@srcdir@" ] ; then \
-	  srcdir=. ; export srcdir ; \
-	else true ; fi ; \
-	(cd $${srcdir}; autoconf --localdir=../common)
-

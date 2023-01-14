@@ -2,7 +2,7 @@
 #source: pr26936b.s
 #source: pr26936c.s
 #as: --gen-debug
-#ld: -z noseparate-code -Ttext-segment 0x10000 -z max-page-size=0x1000
+#ld: -z noseparate-code -Ttext-segment 0x10000 -z max-page-size=0x1000 -z common-page-size=0x1000
 #readelf: -wL -W
 #target: [check_shared_lib_support]
 # Assembly source file for the HPPA assembler is renamed and modifed by

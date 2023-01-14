@@ -1,4 +1,4 @@
-# Copyright 2012-2021 Free Software Foundation, Inc.
+# Copyright 2012-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,7 +26,6 @@ if [build_executable $testfile.exp $testfile $srcfile $opts] {
 mi_clean_restart $binfile
 
 if {[mi_runto_main] < 0} {
-    untested "could not run to main"
     return -1
 }
 

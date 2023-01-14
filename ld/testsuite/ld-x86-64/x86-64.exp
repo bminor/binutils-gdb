@@ -1,5 +1,5 @@
 # Expect script for ld-x86_64 tests
-#   Copyright (C) 2002-2021 Free Software Foundation, Inc.
+#   Copyright (C) 2002-2022 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -45,28 +45,6 @@ set x86_64tests {
     {"basic PLT generation"
      "-melf_x86_64 tmpdir/libpltlib.so" "" "--64" {plt.s}
      {{objdump -drj.plt plt.pd}} "plt"}
-    {"TLS -fpic -shared transitions"
-     "-shared -melf_x86_64 --no-ld-generated-unwind-info \
-      -z noseparate-code -z max-page-size=0x200000 --hash-style=sysv" ""
-     "--64" {tlspic1.s tlspic2.s}
-     {{readelf -WSsrl tlspic.rd} {objdump -drj.text\ -Mintel64 tlspic.dd}
-      {objdump -sj.got tlspic.sd} {objdump -sj.tdata tlspic.td}}
-      "libtlspic.so"}
-    {"TLS -fpic -shared transitions with r15 as GOT base"
-     "-shared -melf_x86_64 --no-ld-generated-unwind-info \
-      -z noseparate-code -z max-page-size=0x200000 --hash-style=sysv" ""
-     "--64 -mrelax-relocations=yes"
-     {tlspic3.s tlspic2.s}
-     {{readelf -WSsrl tlspic2.rd} {objdump -drj.text\ -Mintel64 tlspic2.dd}
-      {objdump -sj.got tlspic2.sd} {objdump -sj.tdata tlspic2.td}}
-      "libtlspic2.so"}
-    {"TLS descriptor -fpic -shared transitions"
-     "-shared -melf_x86_64 --no-ld-generated-unwind-info \
-      -z noseparate-code -z max-page-size=0x200000 --hash-style=sysv" ""
-     "--64" {tlsdesc.s tlspic2.s}
-     {{readelf -WSsrld tlsdesc.rd} {objdump -drj.text tlsdesc.dd}
-      {objdump "-s -j.got -j.got.plt" tlsdesc.sd} {objdump -sj.tdata tlsdesc.td}
-      {objdump -drj.plt tlsdesc.pd}} "libtlsdesc.so"}
     {"Helper shared library" "-shared -melf_x86_64" ""
      "--64" {tlslib.s} {} "libtlslib.so"}
     {"TLS -fpic and -fno-pic exec transitions"
@@ -239,6 +217,49 @@ set x86_64tests {
 }
 
 run_ld_link_tests $x86_64tests
+
+run_ld_link_tests [list \
+    [list \
+	"TLS -fpic -shared transitions" \
+	"-shared -melf_x86_64 --no-ld-generated-unwind-info \
+	 -z noseparate-code -z max-page-size=0x200000 --hash-style=sysv \
+	 $NO_DT_RELR_LDFLAGS" \
+	"" "--64" \
+	{tlspic1.s tlspic2.s} \
+	{{readelf -WSsrl tlspic.rd} \
+	 {objdump {-drj.text -Mintel64} tlspic.dd} \
+	 {objdump -sj.got tlspic.sd} \
+	 {objdump -sj.tdata tlspic.td}} \
+	"libtlspic.so" \
+    ] \
+    [list \
+	"TLS -fpic -shared transitions with r15 as GOT base" \
+	"-shared -melf_x86_64 --no-ld-generated-unwind-info \
+	 -z noseparate-code -z max-page-size=0x200000 --hash-style=sysv \
+	 $NO_DT_RELR_LDFLAGS" \
+	 "" "--64 -mrelax-relocations=yes" \
+	{tlspic3.s tlspic2.s} \
+	{{readelf -WSsrl tlspic2.rd} \
+	 {objdump {-drj.text -Mintel64} tlspic2.dd} \
+	 {objdump -sj.got tlspic2.sd} \
+	 {objdump -sj.tdata tlspic2.td}} \
+	"libtlspic2.so" \
+    ] \
+    [list \
+	"TLS descriptor -fpic -shared transitions" \
+	"-shared -melf_x86_64 --no-ld-generated-unwind-info \
+	 -z noseparate-code -z max-page-size=0x200000 --hash-style=sysv \
+	 $NO_DT_RELR_LDFLAGS" \
+	"" "--64" \
+	{tlsdesc.s tlspic2.s} \
+	{{readelf -WSsrld tlsdesc.rd} \
+	 {objdump -drj.text tlsdesc.dd} \
+	 {objdump {-s -j.got -j.got.plt} tlsdesc.sd} \
+	 {objdump -sj.tdata tlsdesc.td} \
+	 {objdump -drj.plt tlsdesc.pd}} \
+	 "libtlsdesc.so" \
+    ] \
+]
 
 set test_name "Mixed x86_64 and i386 input test 1"
 set test mixed1
@@ -480,6 +501,17 @@ run_dump_test "property-x86-isa3-x32"
 run_dump_test "property-x86-isa4"
 run_dump_test "property-x86-isa4-x32"
 run_dump_test "code16"
+run_dump_test "pr27491-1a"
+run_dump_test "pr27491-1b"
+run_dump_test "pr27491-1c"
+run_dump_test "pr27491-2"
+run_dump_test "pr27491-3"
+run_dump_test "pr27491-4"
+run_dump_test "dt-relr-1a"
+run_dump_test "dt-relr-1a-x32"
+run_dump_test "dt-relr-1b"
+run_dump_test "dt-relr-1b-x32"
+run_dump_test "pr28743-1"
 
 if ![istarget "x86_64-*-linux*"] {
     return
@@ -1964,8 +1996,8 @@ if { [isnative] && [check_compiler_available] } {
 	    [list \
 		"Build plt-main with -z bndplt" \
 		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt \
-		 -z noseparate-code -z max-page-size=0x200000" \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -Wl,-z,bndplt \
+		 -Wl,-z,noseparate-code,-z,max-page-size=0x200000" \
 		"-Wa,-mx86-used-note=yes $NOCF_PROTECTION_CFLAGS" \
 		{ plt-main5.c } \
 		{{objdump {-drw} plt-main-bnd.dd}} \
@@ -1974,8 +2006,9 @@ if { [isnative] && [check_compiler_available] } {
 	    [list \
 		"Build plt-main with PIE and -z bndplt" \
 		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt -pie \
-		 -z noseparate-code -z max-page-size=0x200000" \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -pie \
+		 -Wl,-z,bndplt,-z,noseparate-code \
+		 -Wl,-z,max-page-size=0x200000" \
 		"-fPIC -Wa,-mx86-used-note=yes $NOCF_PROTECTION_CFLAGS" \
 		{ plt-main5.c } \
 		{{objdump {-drw} plt-main-bnd.dd}} \
@@ -1984,8 +2017,8 @@ if { [isnative] && [check_compiler_available] } {
 	    [list \
 		"Build plt-main with -z bndplt -z now" \
 		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt -z now \
-		 -z noseparate-code -z max-page-size=0x200000" \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -Wl,-z,bndplt \
+		 -Wl,-z,now,-z,noseparate-code,-z,max-page-size=0x200000" \
 		"-Wa,-mx86-used-note=yes $NOCF_PROTECTION_CFLAGS" \
 		{ plt-main5.c } \
 		{{readelf {-SW} plt-main-bnd-now.rd} {objdump {-drw} plt-main-bnd.dd}} \
@@ -1994,8 +2027,9 @@ if { [isnative] && [check_compiler_available] } {
 	    [list \
 		"Build plt-main with PIE and -z bndplt -z now" \
 		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt -z now -pie \
-		 -z noseparate-code -z max-page-size=0x200000" \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -pie \
+		 -Wl,-z,bndplt,-z,now,-z,noseparate-code \
+		 -Wl,-z,max-page-size=0x200000" \
 		"-fPIC -Wa,-mx86-used-note=yes $NOCF_PROTECTION_CFLAGS" \
 		{ plt-main5.c } \
 		{{readelf {-SW} plt-main-bnd-now.rd} {objdump {-drw} plt-main-bnd.dd}} \
@@ -2091,8 +2125,8 @@ if { [isnative] && [check_compiler_available] } {
 	    [list \
 		"Build plt-main with -z ibtplt" \
 		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z ibtplt \
-		 -z noseparate-code -z max-page-size=0x200000" \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -Wl,-z,ibtplt \
+		 -Wl,-z,noseparate-code,-z,max-page-size=0x200000" \
 		"-Wa,-mx86-used-note=yes" \
 		{ plt-main5.c } \
 		$pltdump \
@@ -2101,8 +2135,9 @@ if { [isnative] && [check_compiler_available] } {
 	    [list \
 		"Build plt-main with PIE and -z ibtplt" \
 		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z ibtplt -pie \
-		 -z noseparate-code -z max-page-size=0x200000" \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -pie \
+		 -Wl,-z,ibtplt,-z,noseparate-code \
+		 -Wl,-z,max-page-size=0x200000" \
 		"-fPIC -Wa,-mx86-used-note=yes" \
 		{ plt-main5.c } \
 		$pltdump \
@@ -2111,8 +2146,8 @@ if { [isnative] && [check_compiler_available] } {
 	    [list \
 		"Build plt-main with -z ibtplt -z now" \
 		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z ibtplt -z now \
-		 -z noseparate-code -z max-page-size=0x200000" \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -Wl,-z,ibtplt \
+		 -Wl,-z,now,-z,noseparate-code,-z,max-page-size=0x200000" \
 		"-Wa,-mx86-used-note=yes" \
 		{ plt-main5.c } \
 		$pltsecdump \
@@ -2121,8 +2156,9 @@ if { [isnative] && [check_compiler_available] } {
 	    [list \
 		"Build plt-main with PIE and -z ibtplt -z now" \
 		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z ibtplt -z now -pie \
-		 -z noseparate-code -z max-page-size=0x200000" \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -pie \
+		 -Wl,-z,ibtplt,-z,now,-z,noseparate-code \
+		 -Wl,-z,max-page-size=0x200000" \
 		"-fPIC -Wa,-mx86-used-note=yes" \
 		{ plt-main5.c } \
 		$pltsecdump \
@@ -2130,8 +2166,8 @@ if { [isnative] && [check_compiler_available] } {
 	    ] \
 	    [list \
 		"Build libibtplt-lib.so with -z ibtplt" \
-		"-shared -z ibtplt \
-		 -z noseparate-code -z max-page-size=0x200000" \
+		"-shared -Wl,-z,ibtplt,-z,noseparate-code \
+		 -Wl,-z,max-page-size=0x200000" \
 		"-fPIC -Wa,-mx86-used-note=yes" \
 		{ plt-main1.c plt-main2.c plt-main3.c plt-main4.c} \
 		$pltdump \
@@ -2139,8 +2175,8 @@ if { [isnative] && [check_compiler_available] } {
 	    ] \
 	    [list \
 		"Build libibtplt--now-lib.so with -z ibtplt -z now" \
-		"-shared -z ibtplt -z now \
-		 -z noseparate-code -z max-page-size=0x200000" \
+		"-shared -Wl,-z,ibtplt,-z,now,-z,noseparate-code \
+		 -Wl,-z,max-page-size=0x200000" \
 		"-fPIC -Wa,-mx86-used-note=yes" \
 		{ plt-main1.c plt-main2.c plt-main3.c plt-main4.c} \
 		$pltdump \

@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux on MIPS processors.
 
-   Copyright (C) 2001-2021 Free Software Foundation, Inc.
+   Copyright (C) 2001-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1317,7 +1317,7 @@ mips_linux_get_syscall_number (struct gdbarch *gdbarch,
 			       thread_info *thread)
 {
   struct regcache *regcache = get_thread_regcache (thread);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  mips_gdbarch_tdep *tdep = (mips_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int regsize = register_size (gdbarch, MIPS_V0_REGNUM);
   /* The content of a register */
@@ -1527,7 +1527,7 @@ static void
 mips_linux_init_abi (struct gdbarch_info info,
 		     struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  mips_gdbarch_tdep *tdep = (mips_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum mips_abi abi = mips_abi (gdbarch);
   struct tdesc_arch_data *tdesc_data = info.tdesc_data;
 
@@ -1542,7 +1542,7 @@ mips_linux_init_abi (struct gdbarch_info info,
 	set_gdbarch_get_longjmp_target (gdbarch,
 					mips_linux_get_longjmp_target);
 	set_solib_svr4_fetch_link_map_offsets
-	  (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+	  (gdbarch, linux_ilp32_fetch_link_map_offsets);
 	tramp_frame_prepend_unwinder (gdbarch, &micromips_linux_o32_sigframe);
 	tramp_frame_prepend_unwinder (gdbarch,
 				      &micromips_linux_o32_rt_sigframe);
@@ -1554,7 +1554,7 @@ mips_linux_init_abi (struct gdbarch_info info,
 	set_gdbarch_get_longjmp_target (gdbarch,
 					mips_linux_get_longjmp_target);
 	set_solib_svr4_fetch_link_map_offsets
-	  (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+	  (gdbarch, linux_ilp32_fetch_link_map_offsets);
 	set_gdbarch_long_double_bit (gdbarch, 128);
 	/* These floatformats should probably be renamed.  MIPS uses
 	   the same 128-bit IEEE floating point format that IA-64 uses,
@@ -1570,7 +1570,7 @@ mips_linux_init_abi (struct gdbarch_info info,
 	set_gdbarch_get_longjmp_target (gdbarch,
 					mips64_linux_get_longjmp_target);
 	set_solib_svr4_fetch_link_map_offsets
-	  (gdbarch, svr4_lp64_fetch_link_map_offsets);
+	  (gdbarch, linux_lp64_fetch_link_map_offsets);
 	set_gdbarch_long_double_bit (gdbarch, 128);
 	/* These floatformats should probably be renamed.  MIPS uses
 	   the same 128-bit IEEE floating point format that IA-64 uses,

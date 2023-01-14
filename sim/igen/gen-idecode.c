@@ -1,6 +1,6 @@
 /* The IGEN simulator generator for GDB, the GNU Debugger.
 
-   Copyright 2002-2021 Free Software Foundation, Inc.
+   Copyright 2002-2022 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney.
 
@@ -984,8 +984,8 @@ print_idecode_globals (lf *file)
   lf_printf (file, "\n");
   lf_printf (file, "typedef struct _idecode_table_entry {\n");
   lf_printf (file, "  int shift;\n");
-  lf_printf (file, "  unsigned%d mask;\n", options.insn_bit_size);
-  lf_printf (file, "  unsigned%d value;\n", options.insn_bit_size);
+  lf_printf (file, "  uint%d_t mask;\n", options.insn_bit_size);
+  lf_printf (file, "  uint%d_t value;\n", options.insn_bit_size);
   lf_printf (file, "  void *function_or_table;\n");
   lf_printf (file, "} idecode_table_entry;\n");
 }

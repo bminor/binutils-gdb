@@ -1,6 +1,6 @@
 #name: Local BLX instructions in Thumb mode.
 #objdump: -drw --prefix-addresses --show-raw-insn
-#skip: *-*-pe *-*-wince *-*nto* *-*netbsdelf*
+#skip: *-*-pe *-*-wince *-*nto* *-*netbsd*
 #as:
 #warning_output: blx-local-thumb.l
 

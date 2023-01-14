@@ -1,6 +1,8 @@
 # AArch64 simulator testsuite
 
-if [istarget aarch64*-*] {
+sim_init
+
+if [istarget *] {
     # all machines
     set all_machs "aarch64"
 

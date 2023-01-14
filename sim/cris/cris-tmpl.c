@@ -1,5 +1,5 @@
 /* CRIS base simulator support code
-   Copyright (C) 2004-2021 Free Software Foundation, Inc.
+   Copyright (C) 2004-2022 Free Software Foundation, Inc.
    Contributed by Axis Communications.
 
 This file is part of the GNU simulators.
@@ -123,7 +123,7 @@ MY (f_model_insn_before) (SIM_CPU *current_cpu, int first_p ATTRIBUTE_UNUSED)
   {
     int i;
     char flags[7];
-    unsigned64 cycle_count;
+    uint64_t cycle_count;
 
     SIM_DESC sd = CPU_STATE (current_cpu);
 
@@ -196,6 +196,7 @@ MY (f_model_insn_after) (SIM_CPU *current_cpu, int last_p ATTRIBUTE_UNUSED,
 #endif
 }
 
+#if 0
 /* Initialize cycle counting for an insn.
    FIRST_P is non-zero if this is the first insn in a set of parallel
    insns.  */
@@ -218,7 +219,6 @@ MY (f_model_update_insn_cycles) (SIM_CPU *current_cpu ATTRIBUTE_UNUSED,
   abort ();
 }
 
-#if 0
 void
 MY (f_model_record_cycles) (SIM_CPU *current_cpu, unsigned long cycles)
 {
@@ -240,7 +240,7 @@ MY (f_model_mark_set_h_gr) (SIM_CPU *current_cpu, ARGBUF *abuf)
 
 /* Set the thread register contents.  */
 
-void
+static void
 MY (set_target_thread_data) (SIM_CPU *current_cpu, USI val)
 {
   (CPU (XCONCAT2 (h_sr_v, BASENUM) [CRIS_TLS_REGISTER])) = val;
@@ -248,7 +248,7 @@ MY (set_target_thread_data) (SIM_CPU *current_cpu, USI val)
 
 /* Create the context for a thread.  */
 
-void *
+static void *
 MY (make_thread_cpu_data) (SIM_CPU *current_cpu, void *context)
 {
   void *info = xmalloc (current_cpu->thread_cpu_data_size);

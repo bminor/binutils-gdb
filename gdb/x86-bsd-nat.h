@@ -1,6 +1,6 @@
 /* Native-dependent code for x86 BSD's.
 
-   Copyright (C) 2011-2021 Free Software Foundation, Inc.
+   Copyright (C) 2011-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,9 +21,6 @@
 #define X86_BSD_NAT_H
 
 #include "x86-nat.h"
-
-/* Low level x86 XSAVE info.  */
-extern size_t x86bsd_xsave_len;
 
 /* A prototype *BSD/x86 target.  */
 

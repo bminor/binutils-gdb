@@ -1,6 +1,6 @@
 # Make sure that "dot" is updated for empty sections if their addresses
 # are set.
-#   Copyright (C) 2006-2021 Free Software Foundation, Inc.
+#   Copyright (C) 2006-2022 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -32,5 +32,6 @@ run_dump_test empty-address-2b
 run_dump_test empty-address-3a
 run_dump_test empty-address-3b
 run_dump_test empty-address-3c
+run_dump_test empty-address-4
 
 set LDFLAGS $old_LDFLAGS

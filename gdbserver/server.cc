@@ -1,5 +1,5 @@
 /* Main code for remote server for GDB.
-   Copyright (C) 1989-2021 Free Software Foundation, Inc.
+   Copyright (C) 1989-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -173,12 +173,12 @@ get_client_state ()
 /* Put a stop reply to the stop reply queue.  */
 
 static void
-queue_stop_reply (ptid_t ptid, struct target_waitstatus *status)
+queue_stop_reply (ptid_t ptid, const target_waitstatus &status)
 {
   struct vstop_notif *new_notif = new struct vstop_notif;
 
   new_notif->ptid = ptid;
-  new_notif->status = *status;
+  new_notif->status = status;
 
   notif_event_enque (&notif_stop, new_notif);
 }
@@ -225,7 +225,7 @@ vstop_notif_reply (struct notif_event *event, char *own_buf)
 {
   struct vstop_notif *vstop = (struct vstop_notif *) event;
 
-  prepare_resume_reply (own_buf, vstop->ptid, &vstop->status);
+  prepare_resume_reply (own_buf, vstop->ptid, vstop->status);
 }
 
 /* Helper for in_queued_stop_replies.  */
@@ -239,9 +239,9 @@ in_queued_stop_replies_ptid (struct notif_event *event, ptid_t filter_ptid)
     return true;
 
   /* Don't resume fork children that GDB does not know about yet.  */
-  if ((vstop_event->status.kind == TARGET_WAITKIND_FORKED
-       || vstop_event->status.kind == TARGET_WAITKIND_VFORKED)
-      && vstop_event->status.value.related_pid.matches (filter_ptid))
+  if ((vstop_event->status.kind () == TARGET_WAITKIND_FORKED
+       || vstop_event->status.kind () == TARGET_WAITKIND_VFORKED)
+      && vstop_event->status.child_ptid ().matches (filter_ptid))
     return true;
 
   return false;
@@ -327,9 +327,9 @@ attach_inferior (int pid)
       /* GDB knows to ignore the first SIGSTOP after attaching to a running
 	 process using the "attach" command, but this is different; it's
 	 just using "target remote".  Pretend it's just starting up.  */
-      if (cs.last_status.kind == TARGET_WAITKIND_STOPPED
-	  && cs.last_status.value.sig == GDB_SIGNAL_STOP)
-	cs.last_status.value.sig = GDB_SIGNAL_TRAP;
+      if (cs.last_status.kind () == TARGET_WAITKIND_STOPPED
+	  && cs.last_status.sig () == GDB_SIGNAL_STOP)
+	cs.last_status.set_stopped (GDB_SIGNAL_TRAP);
 
       current_thread->last_resume_kind = resume_stop;
       current_thread->last_status = cs.last_status;
@@ -409,7 +409,7 @@ handle_btrace_enable_bts (struct thread_info *thread)
     error (_("Btrace already enabled."));
 
   current_btrace_conf.format = BTRACE_FORMAT_BTS;
-  thread->btrace = target_enable_btrace (thread->id, &current_btrace_conf);
+  thread->btrace = target_enable_btrace (thread, &current_btrace_conf);
 }
 
 /* Handle btrace enabling in Intel Processor Trace format.  */
@@ -421,7 +421,7 @@ handle_btrace_enable_pt (struct thread_info *thread)
     error (_("Btrace already enabled."));
 
   current_btrace_conf.format = BTRACE_FORMAT_PT;
-  thread->btrace = target_enable_btrace (thread->id, &current_btrace_conf);
+  thread->btrace = target_enable_btrace (thread, &current_btrace_conf);
 }
 
 /* Handle btrace disabling.  */
@@ -736,13 +736,9 @@ handle_general_set (char *own_buf)
       std::string final_var = hex2str (p);
       std::string var_name, var_value;
 
-      if (remote_debug)
-	{
-	  debug_printf (_("[QEnvironmentHexEncoded received '%s']\n"), p);
-	  debug_printf (_("[Environment variable to be set: '%s']\n"),
-			final_var.c_str ());
-	  debug_flush ();
-	}
+      remote_debug_printf ("[QEnvironmentHexEncoded received '%s']", p);
+      remote_debug_printf ("[Environment variable to be set: '%s']",
+			   final_var.c_str ());
 
       size_t pos = final_var.find ('=');
       if (pos == std::string::npos)
@@ -767,13 +763,9 @@ handle_general_set (char *own_buf)
       const char *p = own_buf + sizeof ("QEnvironmentUnset:") - 1;
       std::string varname = hex2str (p);
 
-      if (remote_debug)
-	{
-	  debug_printf (_("[QEnvironmentUnset received '%s']\n"), p);
-	  debug_printf (_("[Environment variable to be unset: '%s']\n"),
-			varname.c_str ());
-	  debug_flush ();
-	}
+      remote_debug_printf ("[QEnvironmentUnset received '%s']", p);
+      remote_debug_printf ("[Environment variable to be unset: '%s']",
+			   varname.c_str ());
 
       our_environ.unset (varname.c_str ());
 
@@ -783,11 +775,7 @@ handle_general_set (char *own_buf)
 
   if (strcmp (own_buf, "QStartNoAckMode") == 0)
     {
-      if (remote_debug)
-	{
-	  debug_printf ("[noack mode enabled]\n");
-	  debug_flush ();
-	}
+      remote_debug_printf ("[noack mode enabled]");
 
       cs.noack_mode = 1;
       write_ok (own_buf);
@@ -824,8 +812,7 @@ handle_general_set (char *own_buf)
 
       non_stop = (req != 0);
 
-      if (remote_debug)
-	debug_printf ("[%s mode enabled]\n", req_str);
+      remote_debug_printf ("[%s mode enabled]", req_str);
 
       write_ok (own_buf);
       return;
@@ -839,12 +826,9 @@ handle_general_set (char *own_buf)
       unpack_varlen_hex (packet, &setting);
       cs.disable_randomization = setting;
 
-      if (remote_debug)
-	{
-	  debug_printf (cs.disable_randomization
-			? "[address space randomization disabled]\n"
-			: "[address space randomization enabled]\n");
-	}
+      remote_debug_printf (cs.disable_randomization
+			   ? "[address space randomization disabled]"
+			       : "[address space randomization enabled]");
 
       write_ok (own_buf);
       return;
@@ -872,8 +856,7 @@ handle_general_set (char *own_buf)
 
       /* Update the flag.  */
       use_agent = req;
-      if (remote_debug)
-	debug_printf ("[%s agent]\n", req ? "Enable" : "Disable");
+      remote_debug_printf ("[%s agent]", req ? "Enable" : "Disable");
       write_ok (own_buf);
       return;
     }
@@ -905,12 +888,8 @@ handle_general_set (char *own_buf)
 
       cs.report_thread_events = (req == TRIBOOL_TRUE);
 
-      if (remote_debug)
-	{
-	  const char *req_str = cs.report_thread_events ? "enabled" : "disabled";
-
-	  debug_printf ("[thread events are now %s]\n", req_str);
-	}
+      remote_debug_printf ("[thread events are now %s]\n",
+			   cs.report_thread_events ? "enabled" : "disabled");
 
       write_ok (own_buf);
       return;
@@ -933,9 +912,8 @@ handle_general_set (char *own_buf)
 	  return;
 	}
 
-      if (remote_debug)
-	debug_printf (_("[Inferior will %s started with shell]"),
-		      startup_with_shell ? "be" : "not be");
+      remote_debug_printf ("[Inferior will %s started with shell]",
+			   startup_with_shell ? "be" : "not be");
 
       write_ok (own_buf);
       return;
@@ -949,9 +927,8 @@ handle_general_set (char *own_buf)
 	{
 	  std::string path = hex2str (p);
 
-	  if (remote_debug)
-	    debug_printf (_("[Set the inferior's current directory to %s]\n"),
-			  path.c_str ());
+	  remote_debug_printf ("[Set the inferior's current directory to %s]",
+			       path.c_str ());
 
 	  set_inferior_cwd (std::move (path));
 	}
@@ -961,9 +938,8 @@ handle_general_set (char *own_buf)
 	     previously set cwd for the inferior.  */
 	  set_inferior_cwd ("");
 
-	  if (remote_debug)
-	    debug_printf (_("\
-[Unset the inferior's current directory; will use gdbserver's cwd]\n"));
+	  remote_debug_printf ("[Unset the inferior's current directory; will "
+			       "use gdbserver's cwd]");
 	}
       write_ok (own_buf);
 
@@ -1228,8 +1204,7 @@ handle_detach (char *own_buf)
 	 pass signals down without informing GDB.  */
       if (!non_stop)
 	{
-	  if (debug_threads)
-	    debug_printf ("Forcing non-stop mode\n");
+	  threads_debug_printf ("Forcing non-stop mode");
 
 	  non_stop = true;
 	  the_target->start_non_stop (true);
@@ -1250,6 +1225,35 @@ handle_detach (char *own_buf)
   /* We'll need this after PROCESS has been destroyed.  */
   int pid = process->pid;
 
+  /* If this process has an unreported fork child, that child is not known to
+     GDB, so GDB won't take care of detaching it.  We must do it here.
+
+     Here, we specifically don't want to use "safe iteration", as detaching
+     another process might delete the next thread in the iteration, which is
+     the one saved by the safe iterator.  We will never delete the currently
+     iterated on thread, so standard iteration should be safe.  */
+  for (thread_info *thread : all_threads)
+    {
+      /* Only threads that are of the process we are detaching.  */
+      if (thread->id.pid () != pid)
+	continue;
+
+      /* Only threads that have a pending fork event.  */
+      thread_info *child = target_thread_pending_child (thread);
+      if (child == nullptr)
+	continue;
+
+      process_info *fork_child_process = get_thread_process (child);
+      gdb_assert (fork_child_process != nullptr);
+
+      int fork_child_pid = fork_child_process->pid;
+
+      if (detach_inferior (fork_child_process) != 0)
+	warning (_("Failed to detach fork child %s, child of %s"),
+		 target_pid_to_str (ptid_t (fork_child_pid)).c_str (),
+		 target_pid_to_str (thread->id).c_str ());
+    }
+
   if (detach_inferior (process) != 0)
     write_enn (own_buf);
   else
@@ -1262,11 +1266,10 @@ handle_detach (char *own_buf)
 	  /* There is still at least one inferior remaining or
 	     we are in extended mode, so don't terminate gdbserver,
 	     and instead treat this like a normal program exit.  */
-	  cs.last_status.kind = TARGET_WAITKIND_EXITED;
-	  cs.last_status.value.integer = 0;
+	  cs.last_status.set_exited (0);
 	  cs.last_ptid = ptid_t (pid);
 
-	  current_thread = NULL;
+	  switch_to_thread (nullptr);
 	}
       else
 	{
@@ -1352,12 +1355,12 @@ handle_monitor_command (char *mon, char *own_buf)
 {
   if (strcmp (mon, "set debug 1") == 0)
     {
-      debug_threads = 1;
+      debug_threads = true;
       monitor_output ("Debug output enabled.\n");
     }
   else if (strcmp (mon, "set debug 0") == 0)
     {
-      debug_threads = 0;
+      debug_threads = false;
       monitor_output ("Debug output disabled.\n");
     }
   else if (strcmp (mon, "set debug-hw-points 1") == 0)
@@ -1372,12 +1375,12 @@ handle_monitor_command (char *mon, char *own_buf)
     }
   else if (strcmp (mon, "set remote-debug 1") == 0)
     {
-      remote_debug = 1;
+      remote_debug = true;
       monitor_output ("Protocol debug output enabled.\n");
     }
   else if (strcmp (mon, "set remote-debug 0") == 0)
     {
-      remote_debug = 0;
+      remote_debug = false;
       monitor_output ("Protocol debug output disabled.\n");
     }
   else if (strcmp (mon, "set event-loop-debug 1") == 0)
@@ -1657,6 +1660,12 @@ handle_qxfer_threads_worker (thread_info *thread, struct buffer *buffer)
   gdb_byte *handle;
   bool handle_status = target_thread_handle (ptid, &handle, &handle_len);
 
+  /* If this is a fork or vfork child (has a fork parent), GDB does not yet
+     know about this process, and must not know about it until it gets the
+     corresponding (v)fork event.  Exclude this thread from the list.  */
+  if (target_thread_pending_parent (thread) != nullptr)
+    return;
+
   write_ptid (ptid_s, ptid);
 
   buffer_xml_printf (buffer, "<thread id=\"%s\"", ptid_s);
@@ -1688,8 +1697,7 @@ handle_qxfer_threads_proper (struct buffer *buffer)
 {
   client_state &cs = get_client_state ();
 
-  scoped_restore save_current_thread
-    = make_scoped_restore (&current_thread);
+  scoped_restore_current_thread restore_thread;
   scoped_restore save_current_general_thread
     = make_scoped_restore (&cs.general_thread);
 
@@ -2224,7 +2232,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
   if (strcmp ("qSymbol::", own_buf) == 0)
     {
-      struct thread_info *save_thread = current_thread;
+      scoped_restore_current_thread restore_thread;
 
       /* For qSymbol, GDB only changes the current thread if the
 	 previous current thread was of a different process.  So if
@@ -2233,15 +2241,15 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	 exec in a non-leader thread.  */
       if (current_thread == NULL)
 	{
-	  current_thread
+	  thread_info *any_thread
 	    = find_any_thread_of_pid (cs.general_thread.pid ());
+	  switch_to_thread (any_thread);
 
 	  /* Just in case, if we didn't find a thread, then bail out
 	     instead of crashing.  */
 	  if (current_thread == NULL)
 	    {
 	      write_enn (own_buf);
-	      current_thread = save_thread;
 	      return;
 	    }
 	}
@@ -2263,8 +2271,6 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       if (current_thread != NULL)
 	the_target->look_up_symbols ();
-
-      current_thread = save_thread;
 
       strcpy (own_buf, "OK");
       return;
@@ -2796,7 +2802,7 @@ handle_pending_status (const struct thread_resume *resumption,
 
       cs.last_status = thread->last_status;
       cs.last_ptid = thread->id;
-      prepare_resume_reply (cs.own_buf, cs.last_ptid, &cs.last_status);
+      prepare_resume_reply (cs.own_buf, cs.last_ptid, cs.last_status);
       return 1;
     }
   return 0;
@@ -2944,7 +2950,7 @@ resume (struct thread_resume *actions, size_t num_actions)
     {
       cs.last_ptid = mywait (minus_one_ptid, &cs.last_status, 0, 1);
 
-      if (cs.last_status.kind == TARGET_WAITKIND_NO_RESUMED
+      if (cs.last_status.kind () == TARGET_WAITKIND_NO_RESUMED
 	  && !report_no_resumed)
 	{
 	  /* The client does not support this stop reply.  At least
@@ -2954,9 +2960,9 @@ resume (struct thread_resume *actions, size_t num_actions)
 	  return;
 	}
 
-      if (cs.last_status.kind != TARGET_WAITKIND_EXITED
-	  && cs.last_status.kind != TARGET_WAITKIND_SIGNALLED
-	  && cs.last_status.kind != TARGET_WAITKIND_NO_RESUMED)
+      if (cs.last_status.kind () != TARGET_WAITKIND_EXITED
+	  && cs.last_status.kind () != TARGET_WAITKIND_SIGNALLED
+	  && cs.last_status.kind () != TARGET_WAITKIND_NO_RESUMED)
 	current_thread->last_status = cs.last_status;
 
       /* From the client's perspective, all-stop mode always stops all
@@ -2964,11 +2970,11 @@ resume (struct thread_resume *actions, size_t num_actions)
 	 so by now).  Tag all threads as "want-stopped", so we don't
 	 resume them implicitly without the client telling us to.  */
       gdb_wants_all_threads_stopped ();
-      prepare_resume_reply (cs.own_buf, cs.last_ptid, &cs.last_status);
+      prepare_resume_reply (cs.own_buf, cs.last_ptid, cs.last_status);
       disable_async_io ();
 
-      if (cs.last_status.kind == TARGET_WAITKIND_EXITED
-	  || cs.last_status.kind == TARGET_WAITKIND_SIGNALLED)
+      if (cs.last_status.kind () == TARGET_WAITKIND_EXITED
+	  || cs.last_status.kind () == TARGET_WAITKIND_SIGNALLED)
 	target_mourn_inferior (cs.last_ptid);
     }
 }
@@ -2997,7 +3003,7 @@ handle_v_attach (char *own_buf)
 	  write_ok (own_buf);
 	}
       else
-	prepare_resume_reply (own_buf, cs.last_ptid, &cs.last_status);
+	prepare_resume_reply (own_buf, cs.last_ptid, cs.last_status);
     }
   else
     write_enn (own_buf);
@@ -3113,9 +3119,9 @@ handle_v_run (char *own_buf)
 
   target_create_inferior (program_path.get (), program_args);
 
-  if (cs.last_status.kind == TARGET_WAITKIND_STOPPED)
+  if (cs.last_status.kind () == TARGET_WAITKIND_STOPPED)
     {
-      prepare_resume_reply (own_buf, cs.last_ptid, &cs.last_status);
+      prepare_resume_reply (own_buf, cs.last_ptid, cs.last_status);
 
       /* In non-stop, sending a resume reply doesn't set the general
 	 thread, but GDB assumes a vRun sets it (this is so GDB can
@@ -3143,8 +3149,7 @@ handle_v_kill (char *own_buf)
 
   if (proc != nullptr && kill_inferior (proc) == 0)
     {
-      cs.last_status.kind = TARGET_WAITKIND_SIGNALLED;
-      cs.last_status.value.sig = GDB_SIGNAL_KILL;
+      cs.last_status.set_signalled (GDB_SIGNAL_KILL);
       cs.last_ptid = ptid_t (pid);
       discard_queued_stop_replies (cs.last_ptid);
       write_ok (own_buf);
@@ -3306,21 +3311,16 @@ queue_stop_reply_callback (thread_info *thread)
     {
       if (target_thread_stopped (thread))
 	{
-	  if (debug_threads)
-	    {
-	      std::string status_string
-		= target_waitstatus_to_string (&thread->last_status);
+	  threads_debug_printf
+	    ("Reporting thread %s as already stopped with %s",
+	     target_pid_to_str (thread->id).c_str (),
+	     thread->last_status.to_string ().c_str ());
 
-	      debug_printf ("Reporting thread %s as already stopped with %s\n",
-			    target_pid_to_str (thread->id),
-			    status_string.c_str ());
-	    }
-
-	  gdb_assert (thread->last_status.kind != TARGET_WAITKIND_IGNORE);
+	  gdb_assert (thread->last_status.kind () != TARGET_WAITKIND_IGNORE);
 
 	  /* Pass the last stop reply back to GDB, but don't notify
 	     yet.  */
-	  queue_stop_reply (thread->id, &thread->last_status);
+	  queue_stop_reply (thread->id, thread->last_status);
 	}
     }
 }
@@ -3334,12 +3334,11 @@ gdb_wants_thread_stopped (thread_info *thread)
 {
   thread->last_resume_kind = resume_stop;
 
-  if (thread->last_status.kind == TARGET_WAITKIND_IGNORE)
+  if (thread->last_status.kind () == TARGET_WAITKIND_IGNORE)
     {
       /* Most threads are stopped implicitly (all-stop); tag that with
 	 signal 0.  */
-      thread->last_status.kind = TARGET_WAITKIND_STOPPED;
-      thread->last_status.value.sig = GDB_SIGNAL_0;
+      thread->last_status.set_stopped (GDB_SIGNAL_0);
     }
 }
 
@@ -3357,15 +3356,15 @@ gdb_wants_all_threads_stopped (void)
 static void
 set_pending_status_callback (thread_info *thread)
 {
-  if (thread->last_status.kind != TARGET_WAITKIND_STOPPED
-      || (thread->last_status.value.sig != GDB_SIGNAL_0
+  if (thread->last_status.kind () != TARGET_WAITKIND_STOPPED
+      || (thread->last_status.sig () != GDB_SIGNAL_0
 	  /* A breakpoint, watchpoint or finished step from a previous
 	     GDB run isn't considered interesting for a new GDB run.
 	     If we left those pending, the new GDB could consider them
 	     random SIGTRAPs.  This leaves out real async traps.  We'd
 	     have to peek into the (target-specific) siginfo to
 	     distinguish those.  */
-	  && thread->last_status.value.sig != GDB_SIGNAL_TRAP))
+	  && thread->last_status.sig () != GDB_SIGNAL_TRAP))
     thread->status_pending_p = 1;
 }
 
@@ -3412,9 +3411,9 @@ handle_status (char *own_buf)
 
       /* Prefer the last thread that reported an event to GDB (even if
 	 that was a GDB_SIGNAL_TRAP).  */
-      if (cs.last_status.kind != TARGET_WAITKIND_IGNORE
-	  && cs.last_status.kind != TARGET_WAITKIND_EXITED
-	  && cs.last_status.kind != TARGET_WAITKIND_SIGNALLED)
+      if (cs.last_status.kind () != TARGET_WAITKIND_IGNORE
+	  && cs.last_status.kind () != TARGET_WAITKIND_EXITED
+	  && cs.last_status.kind () != TARGET_WAITKIND_SIGNALLED)
 	thread = find_thread_ptid (cs.last_ptid);
 
       /* If the last event thread is not found for some reason, look
@@ -3443,8 +3442,8 @@ handle_status (char *own_buf)
 	  cs.general_thread = thread->id;
 	  set_desired_thread ();
 
-	  gdb_assert (tp->last_status.kind != TARGET_WAITKIND_IGNORE);
-	  prepare_resume_reply (own_buf, tp->id, &tp->last_status);
+	  gdb_assert (tp->last_status.kind () != TARGET_WAITKIND_IGNORE);
+	  prepare_resume_reply (own_buf, tp->id, tp->last_status);
 	}
       else
 	strcpy (own_buf, "W00");
@@ -3455,7 +3454,7 @@ static void
 gdbserver_version (void)
 {
   printf ("GNU gdbserver %s%s\n"
-	  "Copyright (C) 2021 Free Software Foundation, Inc.\n"
+	  "Copyright (C) 2022 Free Software Foundation, Inc.\n"
 	  "gdbserver is free software, covered by the "
 	  "GNU General Public License.\n"
 	  "This gdbserver was configured as \"%s\"\n",
@@ -3790,7 +3789,7 @@ captured_main (int argc, char *argv[])
 	  *next_arg = NULL;
 	}
       else if (strcmp (*next_arg, "--debug") == 0)
-	debug_threads = 1;
+	debug_threads = true;
       else if (startswith (*next_arg, "--debug-format="))
 	{
 	  std::string error_msg
@@ -3804,7 +3803,7 @@ captured_main (int argc, char *argv[])
 	    }
 	}
       else if (strcmp (*next_arg, "--remote-debug") == 0)
-	remote_debug = 1;
+	remote_debug = true;
       else if (strcmp (*next_arg, "--event-loop-debug") == 0)
 	debug_event_loop = debug_event_loop_kind::ALL;
       else if (startswith (*next_arg, "--debug-file="))
@@ -3989,8 +3988,7 @@ captured_main (int argc, char *argv[])
     }
   else
     {
-      cs.last_status.kind = TARGET_WAITKIND_EXITED;
-      cs.last_status.value.integer = 0;
+      cs.last_status.set_exited (0);
       cs.last_ptid = minus_one_ptid;
     }
 
@@ -4002,8 +4000,8 @@ captured_main (int argc, char *argv[])
   if (current_thread != nullptr)
     current_process ()->dlls_changed = false;
 
-  if (cs.last_status.kind == TARGET_WAITKIND_EXITED
-      || cs.last_status.kind == TARGET_WAITKIND_SIGNALLED)
+  if (cs.last_status.kind () == TARGET_WAITKIND_EXITED
+      || cs.last_status.kind () == TARGET_WAITKIND_SIGNALLED)
     was_running = 0;
   else
     was_running = 1;
@@ -4160,16 +4158,14 @@ process_point_options (struct gdb_breakpoint *bp, const char **packet)
       if (*dataptr == 'X')
 	{
 	  /* Conditional expression.  */
-	  if (debug_threads)
-	    debug_printf ("Found breakpoint condition.\n");
+	  threads_debug_printf ("Found breakpoint condition.");
 	  if (!add_breakpoint_condition (bp, &dataptr))
 	    dataptr = strchrnul (dataptr, ';');
 	}
       else if (startswith (dataptr, "cmds:"))
 	{
 	  dataptr += strlen ("cmds:");
-	  if (debug_threads)
-	    debug_printf ("Found breakpoint commands %s.\n", dataptr);
+	  threads_debug_printf ("Found breakpoint commands %s.", dataptr);
 	  persist = (*dataptr == '1');
 	  dataptr += 2;
 	  if (add_breakpoint_commands (bp, &dataptr, persist))
@@ -4456,8 +4452,7 @@ process_serial_event (void)
 	 running.  The traditional protocol will exit instead.  */
       if (extended_protocol)
 	{
-	  cs.last_status.kind = TARGET_WAITKIND_EXITED;
-	  cs.last_status.value.sig = GDB_SIGNAL_KILL;
+	  cs.last_status.set_exited (GDB_SIGNAL_KILL);
 	  return 0;
 	}
       else
@@ -4497,7 +4492,7 @@ process_serial_event (void)
 	    {
 	      target_create_inferior (program_path.get (), program_args);
 
-	      if (cs.last_status.kind == TARGET_WAITKIND_STOPPED)
+	      if (cs.last_status.kind () == TARGET_WAITKIND_STOPPED)
 		{
 		  /* Stopped at the first instruction of the target
 		     process.  */
@@ -4511,8 +4506,7 @@ process_serial_event (void)
 	    }
 	  else
 	    {
-	      cs.last_status.kind = TARGET_WAITKIND_EXITED;
-	      cs.last_status.value.sig = GDB_SIGNAL_KILL;
+	      cs.last_status.set_exited (GDB_SIGNAL_KILL);
 	    }
 	  return 0;
 	}
@@ -4555,8 +4549,7 @@ process_serial_event (void)
 void
 handle_serial_event (int err, gdb_client_data client_data)
 {
-  if (debug_threads)
-    debug_printf ("handling possible serial event\n");
+  threads_debug_printf ("handling possible serial event");
 
   /* Really handle it.  */
   if (process_serial_event () < 0)
@@ -4573,11 +4566,11 @@ handle_serial_event (int err, gdb_client_data client_data)
 /* Push a stop notification on the notification queue.  */
 
 static void
-push_stop_notification (ptid_t ptid, struct target_waitstatus *status)
+push_stop_notification (ptid_t ptid, const target_waitstatus &status)
 {
   struct vstop_notif *vstop_notif = new struct vstop_notif;
 
-  vstop_notif->status = *status;
+  vstop_notif->status = status;
   vstop_notif->ptid = ptid;
   /* Push Stop notification.  */
   notif_push (&notif_stop, vstop_notif);
@@ -4589,30 +4582,29 @@ void
 handle_target_event (int err, gdb_client_data client_data)
 {
   client_state &cs = get_client_state ();
-  if (debug_threads)
-    debug_printf ("handling possible target event\n");
+  threads_debug_printf ("handling possible target event");
 
   cs.last_ptid = mywait (minus_one_ptid, &cs.last_status,
 		      TARGET_WNOHANG, 1);
 
-  if (cs.last_status.kind == TARGET_WAITKIND_NO_RESUMED)
+  if (cs.last_status.kind () == TARGET_WAITKIND_NO_RESUMED)
     {
       if (gdb_connected () && report_no_resumed)
-	push_stop_notification (null_ptid, &cs.last_status);
+	push_stop_notification (null_ptid, cs.last_status);
     }
-  else if (cs.last_status.kind != TARGET_WAITKIND_IGNORE)
+  else if (cs.last_status.kind () != TARGET_WAITKIND_IGNORE)
     {
       int pid = cs.last_ptid.pid ();
       struct process_info *process = find_process_pid (pid);
       int forward_event = !gdb_connected () || process->gdb_detached;
 
-      if (cs.last_status.kind == TARGET_WAITKIND_EXITED
-	  || cs.last_status.kind == TARGET_WAITKIND_SIGNALLED)
+      if (cs.last_status.kind () == TARGET_WAITKIND_EXITED
+	  || cs.last_status.kind () == TARGET_WAITKIND_SIGNALLED)
 	{
 	  mark_breakpoints_out (process);
 	  target_mourn_inferior (cs.last_ptid);
 	}
-      else if (cs.last_status.kind == TARGET_WAITKIND_THREAD_EXITED)
+      else if (cs.last_status.kind () == TARGET_WAITKIND_THREAD_EXITED)
 	;
       else
 	{
@@ -4631,9 +4623,9 @@ handle_target_event (int err, gdb_client_data client_data)
 	      exit (0);
 	    }
 
-	  if (cs.last_status.kind == TARGET_WAITKIND_EXITED
-	      || cs.last_status.kind == TARGET_WAITKIND_SIGNALLED
-	      || cs.last_status.kind == TARGET_WAITKIND_THREAD_EXITED)
+	  if (cs.last_status.kind () == TARGET_WAITKIND_EXITED
+	      || cs.last_status.kind () == TARGET_WAITKIND_SIGNALLED
+	      || cs.last_status.kind () == TARGET_WAITKIND_THREAD_EXITED)
 	    ;
 	  else
 	    {
@@ -4642,21 +4634,20 @@ handle_target_event (int err, gdb_client_data client_data)
 		 inferior, as if it wasn't being traced.  */
 	      enum gdb_signal signal;
 
-	      if (debug_threads)
-		debug_printf ("GDB not connected; forwarding event %d for"
-			      " [%s]\n",
-			      (int) cs.last_status.kind,
-			      target_pid_to_str (cs.last_ptid));
+	      threads_debug_printf ("GDB not connected; forwarding event %d for"
+				    " [%s]",
+				    (int) cs.last_status.kind (),
+				    target_pid_to_str (cs.last_ptid).c_str ());
 
-	      if (cs.last_status.kind == TARGET_WAITKIND_STOPPED)
-		signal = cs.last_status.value.sig;
+	      if (cs.last_status.kind () == TARGET_WAITKIND_STOPPED)
+		signal = cs.last_status.sig ();
 	      else
 		signal = GDB_SIGNAL_0;
 	      target_continue (cs.last_ptid, signal);
 	    }
 	}
       else
-	push_stop_notification (cs.last_ptid, &cs.last_status);
+	push_stop_notification (cs.last_ptid, cs.last_status);
     }
 
   /* Be sure to not change the selected thread behind GDB's back.

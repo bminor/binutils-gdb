@@ -15,6 +15,9 @@ m4_include(acx_configure_dir.m4)
 # This gets GDB_AC_TRANSFORM.
 m4_include(transform.m4)
 
+# This get AM_GDB_COMPILER_TYPE.
+m4_include(../gdbsupport/compiler-type.m4)
+
 # This gets AM_GDB_WARNINGS.
 m4_include(../gdbsupport/warning.m4)
 

@@ -1,4 +1,4 @@
-# Copyright 2020-2021 Free Software Foundation, Inc.
+# Copyright 2020-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,7 +34,6 @@ save_vars { GDBFLAGS } {
 gdb_test "maintenance show target-async" "Controlling the inferior in asynchronous mode is off\\."
 
 if { ![runto_main] } {
-    fail "can't run to main"
     return
 }
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2007-2021 Free Software Foundation, Inc.
+# Copyright (C) 2007-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ standard_testfile .c
 # Try to compile the test case.  If we can't, assume the
 # toolchain does not yet provide DFP support and bail out.
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {quiet debug}] != "" } {
+    unsupported "decimal floating point not supported for this target."
     verbose "Skipping DFP tests."
     return -1
 }
@@ -36,7 +37,7 @@ if ![runto_main] then {
 
 set sizeof_long [get_sizeof "long" 4]
 
-proc d32_set_tests {} {
+proc_with_prefix d32_set_tests {} {
 
     gdb_test "p d32=123.45df" " = 123.45"
     gdb_test "p d32=12345.df" " = 12345"
@@ -67,7 +68,7 @@ proc d32_set_tests {} {
     gdb_test "p d32=1.23E45Adf" ".*Conversion syntax.*" "1.23E45A is an invalid number"
 }
 
-proc d64_set_tests {} {
+proc_with_prefix d64_set_tests {} {
 
     gdb_test "p d64=123.45dd" " = 123.45"
     gdb_test "p d64=12345.dd" " = 12345"
@@ -97,7 +98,7 @@ proc d64_set_tests {} {
     gdb_test "p d64=1.23E45Add" ".*Conversion syntax.*" "1.23E45A is an invalid number"
 }
 
-proc d128_set_tests {} {
+proc_with_prefix d128_set_tests {} {
 
     gdb_test "p d128=123.45dl" " = 123.45"
     gdb_test "p d128=12345.dl" " = 12345"

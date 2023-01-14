@@ -1,6 +1,6 @@
 /* Example synacor simulator.
 
-   Copyright (C) 2005-2021 Free Software Foundation, Inc.
+   Copyright (C) 2005-2022 Free Software Foundation, Inc.
    Contributed by Mike Frysinger.
 
    This file is part of simulators.
@@ -26,12 +26,12 @@
 
 struct _sim_cpu {
   /* ... simulator specific members ... */
-  unsigned16 regs[8];
+  uint16_t regs[8];
   sim_cia pc;
 
   /* This isn't a real register, and the stack is not directly addressable,
      so use memory outside of the 16-bit address space.  */
-  unsigned32 sp;
+  uint32_t sp;
 
   sim_cpu_base base;
 };

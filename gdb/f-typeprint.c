@@ -1,6 +1,6 @@
 /* Support for printing Fortran types for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    Contributed by Motorola.  Adapted from the C version by Farooq Butt
    (fmbutt@engage.sps.mot.com).
@@ -21,7 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "bfd.h"
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -250,7 +250,7 @@ f_language::f_type_print_varspec_suffix (struct type *type,
 	      if (i > 0)
 		{
 		  fputs_filtered (", ", stream);
-		  wrap_here ("    ");
+		  stream->wrap_here (4);
 		}
 	      print_type (type->field (i).type (), "", stream, -1, 0, 0);
 	    }
@@ -290,7 +290,7 @@ f_language::f_type_print_base (struct type *type, struct ui_file *stream,
 
   QUIT;
 
-  wrap_here ("    ");
+  stream->wrap_here (4);
   if (type == NULL)
     {
       fputs_styled ("<type unknown>", metadata_style.style (), stream);
@@ -406,7 +406,7 @@ f_language::f_type_print_base (struct type *type, struct ui_file *stream,
 	      f_type_print_base (type->field (index).type (), stream,
 				 show - 1, level + 4);
 	      fputs_filtered (" :: ", stream);
-	      fputs_styled (TYPE_FIELD_NAME (type, index),
+	      fputs_styled (type->field (index).name (),
 			    variable_name_style.style (), stream);
 	      f_type_print_varspec_suffix (type->field (index).type (),
 					   stream, show - 1, 0, 0, 0, false);

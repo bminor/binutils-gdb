@@ -1,6 +1,6 @@
 # This testcase is part of GDB, the GNU debugger.
 
-# Copyright 2010-2021 Free Software Foundation, Inc.
+# Copyright 2010-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ gdb_breakpoint [gdb_get_line_number "break-at-exit"]
 
 gdb_test_no_output "set debug infrun 1"
 
-# The ia64 SIGILL signal is visible only in the lin-lwp debug.
+# The ia64 SIGILL signal is visible only in the linux-nat debug output.
 
 set prompt "$gdb_prompt \\\[infrun\\\] fetch_inferior_event: exit\r\n$"
 gdb_test_multiple "continue" "continue" -prompt $prompt {

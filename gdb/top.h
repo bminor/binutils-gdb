@@ -1,6 +1,6 @@
 /* Top level stuff for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,8 +24,6 @@
 #include "gdbsupport/event-loop.h"
 #include "gdbsupport/next-iterator.h"
 #include "value.h"
-
-struct tl_interp_info;
 
 /* Prompt state.  */
 
@@ -261,7 +259,7 @@ extern scoped_value_mark prepare_execute_command (void);
 
 /* This function returns a pointer to the string that is used
    by gdb for its command prompt.  */
-extern char *get_prompt (void);
+extern const std::string &get_prompt ();
 
 /* This function returns a pointer to the string that is used
    by gdb for its command prompt.  */

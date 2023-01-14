@@ -1,5 +1,12 @@
 -*- text -*-
 
+Changes in 2.38:
+
+* Add -z pack-relative-relocs/-z no pack-relative-relocs to x86 ELF
+  linker to pack relative relocations in the DT_RELR section.
+
+* Add support for the LoongArch architecture.
+
 * Add -z indirect-extern-access/-z noindirect-extern-access to x86 ELF
   linker to control canonical function pointers and copy relocation.
 
@@ -880,7 +887,7 @@ Changes in version 2.1:
   other utilities should work on Risc/Ultrix and Irix.
 
 
-Copyright (C) 2012-2021 Free Software Foundation, Inc.
+Copyright (C) 2012-2022 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

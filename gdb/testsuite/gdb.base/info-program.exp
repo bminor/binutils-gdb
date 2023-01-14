@@ -1,4 +1,4 @@
-# Copyright 1997-2021 Free Software Foundation, Inc.
+# Copyright 1997-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
 }
 
 if { ![runto_main] } {
-    fail "can't run to main"
     return -1
 }
 
@@ -35,7 +34,6 @@ gdb_test "info program" "Program stopped at $hex\.\r\nIt stopped after being ste
     "info program after next"
 
 if { ![runto_main] } then {
-    fail "can't restart program"
     return -1
 }
 

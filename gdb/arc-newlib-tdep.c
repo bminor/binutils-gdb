@@ -1,6 +1,6 @@
 /* Target-dependent code for Newlib ARC.
 
-   Copyright (C) 2016-2021 Free Software Foundation, Inc.
+   Copyright (C) 2016-2022 Free Software Foundation, Inc.
    Contributed by Synopsys Inc.
 
    This file is part of GDB.
@@ -36,7 +36,7 @@ arc_newlib_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   arc_newlib_debug_printf ("Initialization.");
 
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  arc_gdbarch_tdep *tdep = (arc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   /* Offset of original PC in longjmp jump buffer (in registers).  Value of PC
      offset can be found in newlib/libc/machine/arc/setjmp.S.  */

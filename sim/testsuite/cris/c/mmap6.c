@@ -1,6 +1,6 @@
 /* Check that mmapping specifying a previously mmapped address without
    MAP_FIXED works; that we just don't get the same address.
-#notarget: cris*-*-elf
+#progos: linux
 */
 #define NO_MUNMAP
 #define MMAP_FLAGS2 MAP_PRIVATE

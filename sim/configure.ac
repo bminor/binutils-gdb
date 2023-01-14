@@ -92,21 +92,28 @@ dnl arg[2] is the arch subdir name.
 dnl arg[3] is whether the arch has a dedicated configure script.
 dnl arg[4] is any additional shell code to run for this arch.
 m4_define([SIM_TARGET], [dnl
+  sim_enable_arch_$2=false
   case "${targ}" in
     all|$1)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=$2
       fi
       SIM_BUILD_TARGET($2, $3)
+      sim_enable_arch_$2=true
       $4
       ;;
   esac
+  SIM_AC_TOOLCHAIN_FOR_TARGET($2)
+  AM_CONDITIONAL([SIM_ENABLE_ARCH_$2], [${sim_enable_arch_$2}])
 ])
 
 dnl WHEN ADDING ENTRIES TO THIS MATRIX:
 dnl Make sure that the left side always has two dashes.  Otherwise you can get
 dnl spurious matches.  Even for unambiguous cases, do this as a convention, else
 dnl the table becomes a real mess to understand and maintain.
+dnl
+dnl NB: Target matching is aligned with gdb/configure.tgt.  Changes must be kept
+dnl in sync with that file.
 if test "${enable_sim}" != no; then
   sim_igen=no
   for targ in `echo $target $enable_targets | sed 's/,/ /g'`
@@ -128,27 +135,29 @@ if test "${enable_sim}" != no; then
     SIM_TARGET([m32r-*-*], [m32r])
     SIM_TARGET([m68hc11-*-*|m6811-*-*], [m68hc11])
     SIM_TARGET([mcore-*-*], [mcore])
-    SIM_TARGET([microblaze-*-*], [microblaze])
+    SIM_TARGET([microblaze*-*-*], [microblaze])
     SIM_TARGET([mips*-*-*], [mips], [true], [sim_igen=yes])
     SIM_TARGET([mn10300*-*-*], [mn10300], [true], [sim_igen=yes])
     SIM_TARGET([moxie-*-*], [moxie])
     SIM_TARGET([msp430*-*-*], [msp430])
-    SIM_TARGET([or1k-*-* | or1knd-*-*], [or1k], [true])
+    SIM_TARGET([or1k*-*-*], [or1k], [true])
+    SIM_TARGET([powerpc*-*-*], [ppc], [true])
     SIM_TARGET([pru*-*-*], [pru])
     SIM_TARGET([riscv*-*-*], [riscv], [true])
     SIM_TARGET([rl78-*-*], [rl78])
     SIM_TARGET([rx-*-*], [rx])
     SIM_TARGET([sh*-*-*], [sh])
-    SIM_TARGET([sparc-*-rtems*|sparc-*-elf*], [erc32])
-    SIM_TARGET([powerpc*-*-*], [ppc], [true])
+    SIM_TARGET([sparc-*-*], [erc32])
     SIM_TARGET([v850*-*-*], [v850], [true], [sim_igen=yes])
   done
 
   if test "x${enable_example_sims}" = xyes; then
+    SIM_AC_TOOLCHAIN_FOR_TARGET(example-synacor)
     SIM_BUILD_TARGET([example-synacor])
   fi
 fi
 AM_CONDITIONAL([SIM_ENABLE_IGEN], [test "$sim_igen" = "yes"])
+AM_CONDITIONAL([ENABLE_SIM], [test -n "$SIM_SUBDIRS"])
 
 dnl Standard (and optional) simulator options.
 dnl Eventually all simulators will support these.

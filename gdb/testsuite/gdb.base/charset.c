@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2001-2021 Free Software Foundation, Inc.
+   Copyright 2001-2022 Free Software Foundation, Inc.
 
    Contributed by Red Hat, originally written by Jim Blandy.
 
@@ -183,7 +183,7 @@ int main ()
                47, 22, 12,
                37, 13, 5,
                11, 74, 17);
-  /* In EBCDIC, the upper-case letters are broken into three separate runs.  */
+  /* In IBM1047, the upper-case letters are broken into three separate runs.  */
   fill_run (ibm1047_string, 7, 9, 193);
   fill_run (ibm1047_string, 16, 9, 209);
   fill_run (ibm1047_string, 25, 8, 226);

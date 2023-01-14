@@ -25,7 +25,7 @@ addsf (CGEN_FPU* fpu, SF x, SF y)
   sim_fpu op1;
   sim_fpu op2;
   sim_fpu ans;
-  unsigned32 res;
+  uint32_t res;
   sim_fpu_status status;
 
   sim_fpu_32to (&op1, x);
@@ -44,7 +44,7 @@ subsf (CGEN_FPU* fpu, SF x, SF y)
   sim_fpu op1;
   sim_fpu op2;
   sim_fpu ans;
-  unsigned32 res;
+  uint32_t res;
   sim_fpu_status status;
 
   sim_fpu_32to (&op1, x);
@@ -63,7 +63,7 @@ mulsf (CGEN_FPU* fpu, SF x, SF y)
   sim_fpu op1;
   sim_fpu op2;
   sim_fpu ans;
-  unsigned32 res;
+  uint32_t res;
   sim_fpu_status status;
 
   sim_fpu_32to (&op1, x);
@@ -82,7 +82,7 @@ divsf (CGEN_FPU* fpu, SF x, SF y)
   sim_fpu op1;
   sim_fpu op2;
   sim_fpu ans;
-  unsigned32 res;
+  uint32_t res;
   sim_fpu_status status;
 
   sim_fpu_32to (&op1, x);
@@ -101,7 +101,7 @@ remsf (CGEN_FPU* fpu, SF x, SF y)
   sim_fpu op1;
   sim_fpu op2;
   sim_fpu ans;
-  unsigned32 res;
+  uint32_t res;
   sim_fpu_status status;
 
   sim_fpu_32to (&op1, x);
@@ -119,7 +119,7 @@ negsf (CGEN_FPU* fpu, SF x)
 {
   sim_fpu op1;
   sim_fpu ans;
-  unsigned32 res;
+  uint32_t res;
   sim_fpu_status status;
 
   sim_fpu_32to (&op1, x);
@@ -136,7 +136,7 @@ abssf (CGEN_FPU* fpu, SF x)
 {
   sim_fpu op1;
   sim_fpu ans;
-  unsigned32 res;
+  uint32_t res;
   sim_fpu_status status;
 
   sim_fpu_32to (&op1, x);
@@ -153,7 +153,7 @@ sqrtsf (CGEN_FPU* fpu, SF x)
 {
   sim_fpu op1;
   sim_fpu ans;
-  unsigned32 res;
+  uint32_t res;
   sim_fpu_status status;
 
   sim_fpu_32to (&op1, x);
@@ -170,7 +170,7 @@ invsf (CGEN_FPU* fpu, SF x)
 {
   sim_fpu op1;
   sim_fpu ans;
-  unsigned32 res;
+  uint32_t res;
   sim_fpu_status status;
 
   sim_fpu_32to (&op1, x);
@@ -188,7 +188,7 @@ minsf (CGEN_FPU* fpu, SF x, SF y)
   sim_fpu op1;
   sim_fpu op2;
   sim_fpu ans;
-  unsigned32 res;
+  uint32_t res;
   sim_fpu_status status;
 
   sim_fpu_32to (&op1, x);
@@ -207,7 +207,7 @@ maxsf (CGEN_FPU* fpu, SF x, SF y)
   sim_fpu op1;
   sim_fpu op2;
   sim_fpu ans;
-  unsigned32 res;
+  uint32_t res;
   sim_fpu_status status;
 
   sim_fpu_32to (&op1, x);
@@ -322,7 +322,7 @@ static DF
 fextsfdf (CGEN_FPU* fpu, int how UNUSED, SF x)
 {
   sim_fpu op1;
-  unsigned64 res;
+  uint64_t res;
 
   sim_fpu_32to (&op1, x);
   sim_fpu_to64 (&res, &op1);
@@ -334,7 +334,7 @@ static SF
 ftruncdfsf (CGEN_FPU* fpu, int how UNUSED, DF x)
 {
   sim_fpu op1;
-  unsigned32 res;
+  uint32_t res;
 
   sim_fpu_64to (&op1, x);
   sim_fpu_to32 (&res, &op1);
@@ -346,7 +346,7 @@ static SF
 floatsisf (CGEN_FPU* fpu, int how UNUSED, SI x)
 {
   sim_fpu ans;
-  unsigned32 res;
+  uint32_t res;
 
   sim_fpu_i32to (&ans, x, sim_fpu_round_near);
   sim_fpu_to32 (&res, &ans);
@@ -357,7 +357,7 @@ static DF
 floatsidf (CGEN_FPU* fpu, int how UNUSED, SI x)
 {
   sim_fpu ans;
-  unsigned64 res;
+  uint64_t res;
 
   sim_fpu_i32to (&ans, x, sim_fpu_round_near);
   sim_fpu_to64 (&res, &ans);
@@ -368,7 +368,7 @@ static DF
 floatdidf (CGEN_FPU* fpu, int how UNUSED, DI x)
 {
   sim_fpu ans;
-  unsigned64 res;
+  uint64_t res;
 
   sim_fpu_i64to (&ans, x, sim_fpu_round_near);
   sim_fpu_to64 (&res, &ans);
@@ -379,7 +379,7 @@ static SF
 ufloatsisf (CGEN_FPU* fpu, int how UNUSED, USI x)
 {
   sim_fpu ans;
-  unsigned32 res;
+  uint32_t res;
 
   sim_fpu_u32to (&ans, x, sim_fpu_round_near);
   sim_fpu_to32 (&res, &ans);
@@ -390,7 +390,7 @@ static SI
 fixsfsi (CGEN_FPU* fpu, int how UNUSED, SF x)
 {
   sim_fpu op1;
-  signed32 res;
+  int32_t res;
 
   sim_fpu_32to (&op1, x);
   sim_fpu_to32i (&res, &op1, sim_fpu_round_near);
@@ -401,7 +401,7 @@ static SI
 fixdfsi (CGEN_FPU* fpu, int how UNUSED, DF x)
 {
   sim_fpu op1;
-  signed32 res;
+  int32_t res;
 
   sim_fpu_64to (&op1, x);
   sim_fpu_to32i (&res, &op1, sim_fpu_round_near);
@@ -412,7 +412,7 @@ static DI
 fixdfdi (CGEN_FPU* fpu, int how UNUSED, DF x)
 {
   sim_fpu op1;
-  signed64 res;
+  int64_t res;
 
   sim_fpu_64to (&op1, x);
   sim_fpu_to64i (&res, &op1, sim_fpu_round_near);
@@ -423,7 +423,7 @@ static USI
 ufixsfsi (CGEN_FPU* fpu, int how UNUSED, SF x)
 {
   sim_fpu op1;
-  unsigned32 res;
+  uint32_t res;
 
   sim_fpu_32to (&op1, x);
   sim_fpu_to32u (&res, &op1, sim_fpu_round_near);
@@ -438,7 +438,7 @@ adddf (CGEN_FPU* fpu, DF x, DF y)
   sim_fpu op1;
   sim_fpu op2;
   sim_fpu ans;
-  unsigned64 res;
+  uint64_t res;
   sim_fpu_status status;
 
   sim_fpu_64to (&op1, x);
@@ -457,7 +457,7 @@ subdf (CGEN_FPU* fpu, DF x, DF y)
   sim_fpu op1;
   sim_fpu op2;
   sim_fpu ans;
-  unsigned64 res;
+  uint64_t res;
   sim_fpu_status status;
 
   sim_fpu_64to (&op1, x);
@@ -476,7 +476,7 @@ muldf (CGEN_FPU* fpu, DF x, DF y)
   sim_fpu op1;
   sim_fpu op2;
   sim_fpu ans;
-  unsigned64 res;
+  uint64_t res;
   sim_fpu_status status;
 
   sim_fpu_64to (&op1, x);
@@ -495,7 +495,7 @@ divdf (CGEN_FPU* fpu, DF x, DF y)
   sim_fpu op1;
   sim_fpu op2;
   sim_fpu ans;
-  unsigned64 res;
+  uint64_t res;
   sim_fpu_status status;
 
   sim_fpu_64to (&op1, x);
@@ -514,7 +514,7 @@ remdf (CGEN_FPU* fpu, DF x, DF y)
   sim_fpu op1;
   sim_fpu op2;
   sim_fpu ans;
-  unsigned64 res;
+  uint64_t res;
   sim_fpu_status status;
 
   sim_fpu_64to (&op1, x);
@@ -532,7 +532,7 @@ negdf (CGEN_FPU* fpu, DF x)
 {
   sim_fpu op1;
   sim_fpu ans;
-  unsigned64 res;
+  uint64_t res;
   sim_fpu_status status;
 
   sim_fpu_64to (&op1, x);
@@ -549,7 +549,7 @@ absdf (CGEN_FPU* fpu, DF x)
 {
   sim_fpu op1;
   sim_fpu ans;
-  unsigned64 res;
+  uint64_t res;
   sim_fpu_status status;
 
   sim_fpu_64to (&op1, x);
@@ -566,7 +566,7 @@ sqrtdf (CGEN_FPU* fpu, DF x)
 {
   sim_fpu op1;
   sim_fpu ans;
-  unsigned64 res;
+  uint64_t res;
   sim_fpu_status status;
 
   sim_fpu_64to (&op1, x);
@@ -583,7 +583,7 @@ invdf (CGEN_FPU* fpu, DF x)
 {
   sim_fpu op1;
   sim_fpu ans;
-  unsigned64 res;
+  uint64_t res;
   sim_fpu_status status;
 
   sim_fpu_64to (&op1, x);
@@ -601,7 +601,7 @@ mindf (CGEN_FPU* fpu, DF x, DF y)
   sim_fpu op1;
   sim_fpu op2;
   sim_fpu ans;
-  unsigned64 res;
+  uint64_t res;
   sim_fpu_status status;
 
   sim_fpu_64to (&op1, x);
@@ -620,7 +620,7 @@ maxdf (CGEN_FPU* fpu, DF x, DF y)
   sim_fpu op1;
   sim_fpu op2;
   sim_fpu ans;
-  unsigned64 res;
+  uint64_t res;
   sim_fpu_status status;
 
   sim_fpu_64to (&op1, x);

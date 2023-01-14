@@ -1,7 +1,7 @@
 #name: PR ld/21038 (.plt.got and .plt.sec, -z now)
 #source: pr21038c.s
 #as: --64
-#ld: -z now -z bndplt -melf_x86_64 -shared -z relro --ld-generated-unwind-info --hash-style=sysv -z max-page-size=0x200000 -z noseparate-code
+#ld: -z now -z bndplt -melf_x86_64 -shared -z relro --ld-generated-unwind-info --hash-style=sysv -z max-page-size=0x200000 -z noseparate-code $NO_DT_RELR_LDFLAGS
 #objdump: -dw -Wf
 
 .*: +file format .*
@@ -59,8 +59,8 @@ Contents of the .eh_frame section:
 Disassembly of section .plt:
 
 0+1f0 <.plt>:
- +[a-f0-9]+:	ff 35 ea 0d 20 00    	push   0x200dea\(%rip\)        # 200fe0 <_GLOBAL_OFFSET_TABLE_\+0x8>
- +[a-f0-9]+:	f2 ff 25 eb 0d 20 00 	bnd jmp \*0x200deb\(%rip\)        # 200fe8 <_GLOBAL_OFFSET_TABLE_\+0x10>
+ +[a-f0-9]+:	ff 35 12 02 20 00    	push   0x200212\(%rip\)        # 200408 <_GLOBAL_OFFSET_TABLE_\+0x8>
+ +[a-f0-9]+:	f2 ff 25 13 02 20 00 	bnd jmp \*0x200213\(%rip\)        # 200410 <_GLOBAL_OFFSET_TABLE_\+0x10>
  +[a-f0-9]+:	0f 1f 00             	nopl   \(%rax\)
  +[a-f0-9]+:	68 00 00 00 00       	push   \$0x0
  +[a-f0-9]+:	f2 e9 e5 ff ff ff    	bnd jmp 1f0 <func1@plt-0x20>
@@ -69,13 +69,13 @@ Disassembly of section .plt:
 Disassembly of section .plt.got:
 
 0+210 <func1@plt>:
- +[a-f0-9]+:	f2 ff 25 e1 0d 20 00 	bnd jmp \*0x200de1\(%rip\)        # 200ff8 <func1>
+ +[a-f0-9]+:	f2 ff 25 09 02 20 00 	bnd jmp \*0x200209\(%rip\)        # 200420 <func1>
  +[a-f0-9]+:	90                   	nop
 
 Disassembly of section .plt.sec:
 
 0+218 <func2@plt>:
- +[a-f0-9]+:	f2 ff 25 d1 0d 20 00 	bnd jmp \*0x200dd1\(%rip\)        # 200ff0 <func2>
+ +[a-f0-9]+:	f2 ff 25 f9 01 20 00 	bnd jmp \*0x2001f9\(%rip\)        # 200418 <func2>
  +[a-f0-9]+:	90                   	nop
 
 Disassembly of section .text:
@@ -83,5 +83,5 @@ Disassembly of section .text:
 0+220 <foo>:
  +[a-f0-9]+:	e8 eb ff ff ff       	call   210 <func1@plt>
  +[a-f0-9]+:	e8 ee ff ff ff       	call   218 <func2@plt>
- +[a-f0-9]+:	48 8b 05 c7 0d 20 00 	mov    0x200dc7\(%rip\),%rax        # 200ff8 <func1>
+ +[a-f0-9]+:	48 8b 05 ef 01 20 00 	mov    0x2001ef\(%rip\),%rax        # 200420 <func1>
 #pass

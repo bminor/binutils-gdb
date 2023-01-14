@@ -1,5 +1,5 @@
 /* pj-dis.c -- Disassemble picoJava instructions.
-   Copyright (C) 1999-2021 Free Software Foundation, Inc.
+   Copyright (C) 1999-2022 Free Software Foundation, Inc.
    Contributed by Steve Chamberlain, of Transmeta (sac@pobox.com).
 
    This file is part of the GNU opcodes library.
@@ -21,6 +21,7 @@
 
 #include "sysdep.h"
 #include <stdio.h>
+#include "libiberty.h"
 #include "opcode/pj.h"
 #include "disassemble.h"
 
@@ -65,7 +66,7 @@ print_insn_pj (bfd_vma addr, struct disassemble_info *info)
       char *sep = "\t";
       int insn_start = addr;
       const pj_opc_info_t *op = &pj_opc_info[opcode];
-      int a;
+      unsigned int a;
 
       addr++;
       fprintf_fn (stream, "%s", op->u.name);
@@ -145,7 +146,7 @@ print_insn_pj (bfd_vma addr, struct disassemble_info *info)
 	  return addr - insn_start;
 	}
 
-      for (a = 0; op->arg[a]; a++)
+      for (a = 0; a < ARRAY_SIZE (op->arg) && op->arg[a]; a++)
 	{
 	  unsigned char data[4];
 	  int val = 0;
@@ -158,7 +159,7 @@ print_insn_pj (bfd_vma addr, struct disassemble_info *info)
 	  val = (UNS (op->arg[0]) || ((data[0] & 0x80) == 0)) ? 0 : -1;
 
 	  for (i = 0; i < size; i++)
-	    val = (val << 8) | (data[i] & 0xff);
+	    val = ((unsigned) val << 8) | (data[i] & 0xff);
 
 	  fprintf_fn (stream, "%s", sep);
 	  if (PCREL (op->arg[a]))

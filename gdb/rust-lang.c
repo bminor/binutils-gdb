@@ -1,6 +1,6 @@
 /* Rust language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 2016-2021 Free Software Foundation, Inc.
+   Copyright (C) 2016-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -135,7 +135,7 @@ rust_underscore_fields (struct type *type)
 	  char buf[20];
 
 	  xsnprintf (buf, sizeof (buf), "__%d", field_number);
-	  if (strcmp (buf, TYPE_FIELD_NAME (type, i)) != 0)
+	  if (strcmp (buf, type->field (i).name ()) != 0)
 	    return false;
 	  field_number++;
 	}
@@ -182,7 +182,7 @@ rust_range_type_p (struct type *type)
     return true;
 
   i = 0;
-  if (strcmp (TYPE_FIELD_NAME (type, 0), "start") == 0)
+  if (strcmp (type->field (0).name (), "start") == 0)
     {
       if (type->num_fields () == 1)
 	return true;
@@ -194,7 +194,7 @@ rust_range_type_p (struct type *type)
       return false;
     }
 
-  return strcmp (TYPE_FIELD_NAME (type, i), "end") == 0;
+  return strcmp (type->field (i).name (), "end") == 0;
 }
 
 /* Return true if TYPE is an inclusive range type, otherwise false.
@@ -244,9 +244,9 @@ rust_get_trait_object_pointer (struct value *value)
   int vtable_field = 0;
   for (int i = 0; i < 2; ++i)
     {
-      if (strcmp (TYPE_FIELD_NAME (type, i), "vtable") == 0)
+      if (strcmp (type->field (i).name (), "vtable") == 0)
 	vtable_field = i;
-      else if (strcmp (TYPE_FIELD_NAME (type, i), "pointer") != 0)
+      else if (strcmp (type->field (i).name (), "pointer") != 0)
 	return NULL;
     }
 
@@ -381,7 +381,7 @@ rust_language::val_print_struct
 
       if (!is_tuple && !is_tuple_struct)
 	{
-	  fputs_styled (TYPE_FIELD_NAME (type, i),
+	  fputs_styled (type->field (i).name (),
 			variable_name_style.style (), stream);
 	  fputs_filtered (": ", stream);
 	}
@@ -415,8 +415,9 @@ rust_language::print_enum (struct value *val, struct ui_file *stream,
   opts.deref_ref = 0;
 
   gdb_assert (rust_enum_p (type));
-  gdb::array_view<const gdb_byte> view (value_contents_for_printing (val),
-					TYPE_LENGTH (value_type (val)));
+  gdb::array_view<const gdb_byte> view
+    (value_contents_for_printing (val).data (),
+     TYPE_LENGTH (value_type (val)));
   type = resolve_dynamic_type (type, view, value_address (val));
 
   if (rust_empty_enum_p (type))
@@ -463,7 +464,7 @@ rust_language::print_enum (struct value *val, struct ui_file *stream,
       if (!is_tuple)
 	fprintf_filtered (stream, "%ps: ",
 			  styled_string (variable_name_style.style (),
-					 TYPE_FIELD_NAME (variant_type, j)));
+					 variant_type->field (j).name ()));
 
       common_val_print (value_field (val, j), stream, recurse + 1, &opts,
 			this);
@@ -558,7 +559,7 @@ rust_language::value_print_inner
 	   encoding.  */
 	fputs_filtered ("b", stream);
 	printstr (stream, TYPE_TARGET_TYPE (type),
-		  value_contents_for_printing (val),
+		  value_contents_for_printing (val).data (),
 		  high_bound - low_bound + 1, "ASCII", 0, &opts);
       }
       break;
@@ -685,8 +686,8 @@ rust_print_struct_def (struct type *type, const char *varstring,
     std::sort (fields.begin (), fields.end (),
 	       [&] (int a, int b)
 	       {
-		 return (TYPE_FIELD_BITPOS (type, a)
-			 < TYPE_FIELD_BITPOS (type, b));
+		 return (type->field (a).loc_bitpos ()
+			 < type->field (b).loc_bitpos ());
 	       });
 
   for (int i : fields)
@@ -708,12 +709,12 @@ rust_print_struct_def (struct type *type, const char *varstring,
       if (!for_rust_enum || flags->print_offsets)
 	print_spaces_filtered (level + 2, stream);
       if (is_enum)
-	fputs_styled (TYPE_FIELD_NAME (type, i), variable_name_style.style (),
+	fputs_styled (type->field (i).name (), variable_name_style.style (),
 		      stream);
       else if (!is_tuple_struct)
 	fprintf_filtered (stream, "%ps: ",
 			  styled_string (variable_name_style.style (),
-					 TYPE_FIELD_NAME (type, i)));
+					 type->field (i).name ()));
 
       rust_internal_print_type (type->field (i).type (), NULL,
 				stream, (is_enum ? show : show - 1),
@@ -840,7 +841,7 @@ rust_internal_print_type (struct type *type, const char *varstring,
 
 	for (int i = 0; i < type->num_fields (); ++i)
 	  {
-	    const char *name = TYPE_FIELD_NAME (type, i);
+	    const char *name = type->field (i).name ();
 
 	    QUIT;
 
@@ -912,10 +913,10 @@ rust_composite_type (struct type *original,
     {
       struct field *field = &result->field (i);
 
-      SET_FIELD_BITPOS (*field, bitpos);
+      field->set_loc_bitpos (bitpos);
       bitpos += TYPE_LENGTH (type1) * TARGET_CHAR_BIT;
 
-      FIELD_NAME (*field) = field1;
+      field->set_name (field1);
       field->set_type (type1);
       ++i;
     }
@@ -933,16 +934,16 @@ rust_composite_type (struct type *original,
 	  if (delta != 0)
 	    bitpos += align - delta;
 	}
-      SET_FIELD_BITPOS (*field, bitpos);
+      field->set_loc_bitpos (bitpos);
 
-      FIELD_NAME (*field) = field2;
+      field->set_name (field2);
       field->set_type (type2);
       ++i;
     }
 
   if (i > 0)
     TYPE_LENGTH (result)
-      = (TYPE_FIELD_BITPOS (result, i - 1) / TARGET_CHAR_BIT +
+      = (result->field (i - 1).loc_bitpos () / TARGET_CHAR_BIT +
 	 TYPE_LENGTH (result->field (i - 1).type ()));
   return result;
 }
@@ -1071,14 +1072,14 @@ rust_compute_range (struct type *type, struct value *range,
     return;
 
   i = 0;
-  if (strcmp (TYPE_FIELD_NAME (type, 0), "start") == 0)
+  if (strcmp (type->field (0).name (), "start") == 0)
     {
       *kind = RANGE_HIGH_BOUND_DEFAULT;
       *low = value_as_long (value_field (range, 0));
       ++i;
     }
   if (type->num_fields () > i
-      && strcmp (TYPE_FIELD_NAME (type, i), "end") == 0)
+      && strcmp (type->field (i).name (), "end") == 0)
     {
       *kind = (*kind == (RANGE_LOW_BOUND_DEFAULT | RANGE_HIGH_BOUND_DEFAULT)
 	       ? RANGE_LOW_BOUND_DEFAULT : RANGE_STANDARD);
@@ -1125,7 +1126,7 @@ rust_subscript (struct type *expect_type, struct expression *exp,
 	{
 	  for (int i = 0; i < type->num_fields (); ++i)
 	    {
-	      if (strcmp (TYPE_FIELD_NAME (type, i), "data_ptr") == 0)
+	      if (strcmp (type->field (i).name (), "data_ptr") == 0)
 		{
 		  base_type = TYPE_TARGET_TYPE (type->field (i).type ());
 		  break;
@@ -1243,21 +1244,27 @@ rust_subscript (struct type *expect_type, struct expression *exp,
   return result;
 }
 
-/* A helper function for UNOP_IND.  */
+namespace expr
+{
 
 struct value *
-eval_op_rust_ind (struct type *expect_type, struct expression *exp,
-		  enum noside noside,
-		  enum exp_opcode opcode,
-		  struct value *value)
+rust_unop_ind_operation::evaluate (struct type *expect_type,
+				   struct expression *exp,
+				   enum noside noside)
 {
-  gdb_assert (noside == EVAL_NORMAL);
+  if (noside != EVAL_NORMAL)
+    return unop_ind_operation::evaluate (expect_type, exp, noside);
+
+  struct value *value = std::get<0> (m_storage)->evaluate (nullptr, exp,
+							   noside);
   struct value *trait_ptr = rust_get_trait_object_pointer (value);
   if (trait_ptr != NULL)
     value = trait_ptr;
 
   return value_ind (value);
 }
+
+} /* namespace expr */
 
 /* A helper function for UNOP_COMPLEMENT.  */
 
@@ -1301,13 +1308,17 @@ eval_op_rust_array (struct type *expect_type, struct expression *exp,
     }
 }
 
-/* A helper function for STRUCTOP_ANONYMOUS.  */
+namespace expr
+{
 
 struct value *
-eval_op_rust_struct_anon (struct type *expect_type, struct expression *exp,
-			  enum noside noside,
-			  int field_number, struct value *lhs)
+rust_struct_anon::evaluate (struct type *expect_type,
+			    struct expression *exp,
+			    enum noside noside)
 {
+  value *lhs = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+  int field_number = std::get<0> (m_storage);
+
   struct type *type = value_type (lhs);
 
   if (type->code () == TYPE_CODE_STRUCT)
@@ -1316,9 +1327,8 @@ eval_op_rust_struct_anon (struct type *expect_type, struct expression *exp,
 
       if (rust_enum_p (type))
 	{
-	  gdb::array_view<const gdb_byte> view (value_contents (lhs),
-						TYPE_LENGTH (type));
-	  type = resolve_dynamic_type (type, view, value_address (lhs));
+	  type = resolve_dynamic_type (type, value_contents (lhs),
+				       value_address (lhs));
 
 	  if (rust_empty_enum_p (type))
 	    error (_("Cannot access field %d of empty enum %s"),
@@ -1368,20 +1378,20 @@ eval_op_rust_struct_anon (struct type *expect_type, struct expression *exp,
 tuple structs, and tuple-like enum variants"));
 }
 
-/* A helper function for STRUCTOP_STRUCT.  */
-
 struct value *
-eval_op_rust_structop (struct type *expect_type, struct expression *exp,
-		       enum noside noside,
-		       struct value *lhs, const char *field_name)
+rust_structop::evaluate (struct type *expect_type,
+			 struct expression *exp,
+			 enum noside noside)
 {
+  value *lhs = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+  const char *field_name = std::get<1> (m_storage).c_str ();
+
   struct value *result;
   struct type *type = value_type (lhs);
   if (type->code () == TYPE_CODE_STRUCT && rust_enum_p (type))
     {
-      gdb::array_view<const gdb_byte> view (value_contents (lhs),
-					    TYPE_LENGTH (type));
-      type = resolve_dynamic_type (type, view, value_address (lhs));
+      type = resolve_dynamic_type (type, value_contents (lhs),
+				   value_address (lhs));
 
       if (rust_empty_enum_p (type))
 	error (_("Cannot access field %s of empty enum %s"),
@@ -1416,9 +1426,6 @@ eval_op_rust_structop (struct type *expect_type, struct expression *exp,
     result = value_zero (value_type (result), VALUE_LVAL (result));
   return result;
 }
-
-namespace expr
-{
 
 value *
 rust_aggregate_operation::evaluate (struct type *expect_type,

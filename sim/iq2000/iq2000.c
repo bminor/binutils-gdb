@@ -1,5 +1,5 @@
 /* IQ2000 simulator support code
-   Copyright (C) 2000-2021 Free Software Foundation, Inc.
+   Copyright (C) 2000-2022 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
    This file is part of the GNU simulators.
@@ -27,7 +27,7 @@
 #include "sim-signal.h"
 #include "cgen-mem.h"
 #include "cgen-ops.h"
-#include "targ-vals.h"
+#include "target-newlib-syscall.h"
 #include <stdlib.h>
 
 enum
@@ -80,7 +80,7 @@ do_syscall (SIM_CPU *current_cpu, PCADDR pc)
 	  exit (1);
 	}
 
-    case TARGET_SYS_write:
+    case TARGET_NEWLIB_SYS_write:
       buf = zalloc (PARM3);
       sim_read (CPU_STATE (current_cpu), CPU2DATA(PARM2), buf, PARM3);
       SET_H_GR (ret_reg,
@@ -89,18 +89,18 @@ do_syscall (SIM_CPU *current_cpu, PCADDR pc)
       free (buf);
       break;
 
-    case TARGET_SYS_lseek:
+    case TARGET_NEWLIB_SYS_lseek:
       SET_H_GR (ret_reg,
 		sim_io_lseek (CPU_STATE (current_cpu),
 			      PARM1, PARM2, PARM3));
       break;
 	    
-    case TARGET_SYS_exit:
+    case TARGET_NEWLIB_SYS_exit:
       sim_engine_halt (CPU_STATE (current_cpu), current_cpu,
 		       NULL, pc, sim_exited, PARM1);
       break;
 
-    case TARGET_SYS_read:
+    case TARGET_NEWLIB_SYS_read:
       buf = zalloc (PARM3);
       SET_H_GR (ret_reg,
 		sim_io_read (CPU_STATE (current_cpu),
@@ -109,7 +109,7 @@ do_syscall (SIM_CPU *current_cpu, PCADDR pc)
       free (buf);
       break;
 	    
-    case TARGET_SYS_open:
+    case TARGET_NEWLIB_SYS_open:
       buf = fetch_str (current_cpu, pc, PARM1);
       SET_H_GR (ret_reg,
 		sim_io_open (CPU_STATE (current_cpu),
@@ -117,12 +117,12 @@ do_syscall (SIM_CPU *current_cpu, PCADDR pc)
       free (buf);
       break;
 
-    case TARGET_SYS_close:
+    case TARGET_NEWLIB_SYS_close:
       SET_H_GR (ret_reg,
 		sim_io_close (CPU_STATE (current_cpu), PARM1));
       break;
 
-    case TARGET_SYS_time:
+    case TARGET_NEWLIB_SYS_time:
       SET_H_GR (ret_reg, time (0));
       break;
 
@@ -211,14 +211,14 @@ iq2000bf_fetch_register (SIM_CPU *cpu, int nr, unsigned char *buf, int len)
       && nr < (GPR0_REGNUM + NR_GPR)
       && len == 4)
     {
-      *((unsigned32*)buf) =
+      *((uint32_t*)buf) =
 	H2T_4 (iq2000bf_h_gr_get (cpu, nr - GPR0_REGNUM));
       return 4;
     }
   else if (nr == PC_REGNUM
 	   && len == 4)
     {
-      *((unsigned32*)buf) = H2T_4 (get_h_pc (cpu));
+      *((uint32_t*)buf) = H2T_4 (get_h_pc (cpu));
       return 4;
     }
   else
@@ -232,13 +232,13 @@ iq2000bf_store_register (SIM_CPU *cpu, int nr, unsigned char *buf, int len)
       && nr < (GPR0_REGNUM + NR_GPR)
       && len == 4)
     {
-      iq2000bf_h_gr_set (cpu, nr - GPR0_REGNUM, T2H_4 (*((unsigned32*)buf)));
+      iq2000bf_h_gr_set (cpu, nr - GPR0_REGNUM, T2H_4 (*((uint32_t*)buf)));
       return 4;
     }
   else if (nr == PC_REGNUM
 	   && len == 4)
     {
-      set_h_pc (cpu, T2H_4 (*((unsigned32*)buf)));
+      set_h_pc (cpu, T2H_4 (*((uint32_t*)buf)));
       return 4;
     }
   else

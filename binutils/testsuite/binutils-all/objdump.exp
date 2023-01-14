@@ -1,4 +1,4 @@
-#   Copyright (C) 1993-2021 Free Software Foundation, Inc.
+#   Copyright (C) 1993-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ lappend cpus_expected mips mn10200 mn10300 ms1 msp MSP430 nds32 n1h_v3 ns32k
 lappend cpus_expected or1k or1knd pj powerpc pyramid riscv romp rs6000 s390 sh sparc
 lappend cpus_expected tic54x tilegx tms320c30 tms320c4x tms320c54x
 lappend cpus_expected v850 vax x86-64 xscale xtensa z8k z8001 z8002
+lappend cpus_expected Loongarch64 Loongarch32
 
 # Make sure the target CPU shows up in the list.
 lappend cpus_expected ${target_cpu}
@@ -62,6 +63,7 @@ set obj o
 if { [istarget "*-*-vms"] } then {
     set obj obj
 }
+set exe [exeext]
 
 # The remaining tests require a test file.
 
@@ -519,6 +521,7 @@ proc test_build_id_debuglink {} {
     global OBJCOPY
     global OBJDUMP
     global CFLAGS_FOR_TARGET
+    global exe
     
     set test "build-id-debuglink"
 
@@ -528,7 +531,7 @@ proc test_build_id_debuglink {} {
     }
     set CFLAGS_FOR_TARGET "-g -Wl,--build-id=0x12345678abcdef01"
 
-    if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog executable debug] != "" } {
+    if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog${exe} executable debug] != "" } {
 	unsupported "$test (build)"
 	return
     }
@@ -539,12 +542,12 @@ proc test_build_id_debuglink {} {
 	unset CFLAGS_FOR_TARGET
     }
 
-    if { [binutils_run $STRIP "--strip-debug --remove-section=.comment tmpdir/testprog -o tmpdir/testprog.strip"] != "" } {
+    if { [binutils_run $STRIP "--strip-debug --remove-section=.comment tmpdir/testprog${exe} -o tmpdir/testprog.strip"] != "" } {
 	fail "$test (strip debug info)"
 	return
     }
 
-    if { [binutils_run $OBJCOPY "--only-keep-debug tmpdir/testprog tmpdir/testprog.debug"] != "" } {
+    if { [binutils_run $OBJCOPY "--only-keep-debug tmpdir/testprog${exe} tmpdir/testprog.debug"] != "" } {
 	fail "$test (create separate debug info file)"
 	return
     }
@@ -813,15 +816,16 @@ proc test_objdump_S { } {
     global subdir
     global OBJDUMP
     global OBJDUMPFLAGS
+    global exe
     
     set test "objdump -S"
 
-    if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog executable debug] != "" } {
+    if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog${exe} executable debug] != "" } {
 	unsupported "$test (build)"
 	return
     }
 
-    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -D -S tmpdir/testprog"]
+    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -D -S tmpdir/testprog${exe}"]
 
     set want "static int local = 2"
 
@@ -833,7 +837,7 @@ proc test_objdump_S { } {
 
     set test "objdump --source-comment"
 
-    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS --disassemble-all --source-comment=// tmpdir/testprog"]
+    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS --disassemble-all --source-comment=// tmpdir/testprog${exe}"]
 
     set want "//static int local = 2"
 

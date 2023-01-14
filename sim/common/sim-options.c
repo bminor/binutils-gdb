@@ -1,5 +1,5 @@
 /* Simulator option handling.
-   Copyright (C) 1996-2021 Free Software Foundation, Inc.
+   Copyright (C) 1996-2022 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -20,19 +20,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This must come before any other includes.  */
 #include "defs.h"
 
-#include "sim-main.h"
-#include <string.h>
-#include <stdlib.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#include "bfd.h"
+#include "environ.h"
+#include "hashtab.h"
 #include "libiberty.h"
+
+#include "sim-main.h"
 #include "sim-options.h"
 #include "sim-io.h"
 #include "sim-assert.h"
 #include "version.h"
-#include "hashtab.h"
-
-#include "bfd.h"
 
 /* Add a set of options to the simulator.
    TABLE is an array of OPTIONS terminated by a NULL `opt.name' entry.
@@ -93,6 +96,7 @@ typedef enum {
   OPTION_DO_COMMAND,
   OPTION_ARCHITECTURE,
   OPTION_TARGET,
+  OPTION_TARGET_INFO,
   OPTION_ARCHITECTURE_INFO,
   OPTION_ENVIRONMENT,
   OPTION_ALIGNMENT,
@@ -103,7 +107,11 @@ typedef enum {
   OPTION_VERSION,
   OPTION_LOAD_LMA,
   OPTION_LOAD_VMA,
-  OPTION_SYSROOT
+  OPTION_SYSROOT,
+  OPTION_ARGV0,
+  OPTION_ENV_SET,
+  OPTION_ENV_UNSET,
+  OPTION_ENV_CLEAR,
 } STANDARD_OPTIONS;
 
 static const OPTION standard_options[] =
@@ -113,7 +121,7 @@ static const OPTION standard_options[] =
       standard_option_handler, NULL },
 
   { {"endian", required_argument, NULL, OPTION_ENDIAN},
-      'E', "big|little", "Set endianness",
+      'E', "B|big|L|little", "Set endianness",
       standard_option_handler, NULL },
 
   /* This option isn't supported unless all choices are supported in keeping
@@ -142,7 +150,7 @@ static const OPTION standard_options[] =
       standard_option_handler },
 
   { {"help", no_argument, NULL, OPTION_HELP},
-      'H', NULL, "Print help information",
+      'h', NULL, "Print help information",
       standard_option_handler },
   { {"version", no_argument, NULL, OPTION_VERSION},
       '\0', NULL, "Print version information",
@@ -161,6 +169,10 @@ static const OPTION standard_options[] =
   { {"target", required_argument, NULL, OPTION_TARGET},
       '\0', "BFDNAME", "Specify the object-code format for the object files",
       standard_option_handler },
+  { {"target-info", no_argument, NULL, OPTION_TARGET_INFO},
+      '\0', NULL, "List supported targets", standard_option_handler },
+  { {"info-target", no_argument, NULL, OPTION_TARGET_INFO},
+      '\0', NULL, NULL, standard_option_handler },
 
   { {"load-lma", no_argument, NULL, OPTION_LOAD_LMA},
       '\0', NULL,
@@ -174,8 +186,66 @@ static const OPTION standard_options[] =
     "Root for system calls with absolute file-names and cwd at start",
       standard_option_handler, NULL },
 
+  { {"argv0", required_argument, NULL, OPTION_ARGV0},
+      '\0', "ARGV0", "Set argv[0] to the specified string",
+      standard_option_handler, NULL },
+
+  { {"env-set", required_argument, NULL, OPTION_ENV_SET},
+      '\0', "VAR=VAL", "Set the variable in the program's environment",
+      standard_option_handler, NULL },
+  { {"env-unset", required_argument, NULL, OPTION_ENV_UNSET},
+      '\0', "VAR", "Unset the variable in the program's environment",
+      standard_option_handler, NULL },
+  { {"env-clear", no_argument, NULL, OPTION_ENV_CLEAR},
+      '\0', NULL, "Clear the program's environment",
+      standard_option_handler, NULL },
+
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL, NULL }
 };
+
+static SIM_RC
+env_set (SIM_DESC sd, const char *arg)
+{
+  int i, varlen;
+  char *eq;
+  char **envp;
+
+  if (STATE_PROG_ENVP (sd) == NULL)
+    STATE_PROG_ENVP (sd) = dupargv (environ);
+
+  eq = strchr (arg, '=');
+  if (eq == NULL)
+    {
+      sim_io_eprintf (sd, "invalid syntax when setting env var `%s'"
+		      ": missing value", arg);
+      return SIM_RC_FAIL;
+    }
+  /* Include the = in the comparison below.  */
+  varlen = eq - arg + 1;
+
+  /* If we can find an existing variable, replace it.  */
+  envp = STATE_PROG_ENVP (sd);
+  for (i = 0; envp[i]; ++i)
+    {
+      if (strncmp (envp[i], arg, varlen) == 0)
+	{
+	  free (envp[i]);
+	  envp[i] = xstrdup (arg);
+	  break;
+	}
+    }
+
+  /* If we didn't find the var, add it.  */
+  if (envp[i] == NULL)
+    {
+      envp = xrealloc (envp, (i + 2) * sizeof (char *));
+      envp[i] = xstrdup (arg);
+      envp[i + 1] = NULL;
+      STATE_PROG_ENVP (sd) = envp;
+  }
+
+  return SIM_RC_OK;
+}
 
 static SIM_RC
 standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
@@ -190,7 +260,7 @@ standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
       break;
 
     case OPTION_ENDIAN:
-      if (strcmp (arg, "big") == 0)
+      if (strcmp (arg, "big") == 0 || strcmp (arg, "B") == 0)
 	{
 	  if (WITH_TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
 	    {
@@ -200,7 +270,7 @@ standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 	  /* FIXME:wip: Need to set something in STATE_CONFIG.  */
 	  current_target_byte_order = BFD_ENDIAN_BIG;
 	}
-      else if (strcmp (arg, "little") == 0)
+      else if (strcmp (arg, "little") == 0 || strcmp (arg, "L") == 0)
 	{
 	  if (WITH_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	    {
@@ -365,6 +435,20 @@ standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 	break;
       }
 
+    case OPTION_TARGET_INFO:
+      {
+	const char **list = bfd_target_list ();
+	const char **lp;
+	if (list == NULL)
+	  abort ();
+	sim_io_printf (sd, "Possible targets:");
+	for (lp = list; *lp != NULL; lp++)
+	  sim_io_printf (sd, " %s", *lp);
+	sim_io_printf (sd, "\n");
+	free (list);
+	break;
+      }
+
     case OPTION_LOAD_LMA:
       {
 	STATE_LOAD_AT_LMA_P (sd) = 1;
@@ -400,6 +484,51 @@ standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 	simulator_sysroot = xstrdup (arg);
       else
 	simulator_sysroot = "";
+      break;
+
+    case OPTION_ARGV0:
+      free (STATE_PROG_ARGV0 (sd));
+      STATE_PROG_ARGV0 (sd) = xstrdup (arg);
+      break;
+
+    case OPTION_ENV_SET:
+      return env_set (sd, arg);
+
+    case OPTION_ENV_UNSET:
+      {
+	int i, varlen;
+	char **envp;
+
+	if (STATE_PROG_ENVP (sd) == NULL)
+	  STATE_PROG_ENVP (sd) = dupargv (environ);
+
+	varlen = strlen (arg);
+
+	/* If we can find an existing variable, replace it.  */
+	envp = STATE_PROG_ENVP (sd);
+	for (i = 0; envp[i]; ++i)
+	  {
+	    char *env = envp[i];
+
+	    if (strncmp (env, arg, varlen) == 0
+		&& (env[varlen] == '\0' || env[varlen] == '='))
+	      {
+		free (envp[i]);
+		break;
+	      }
+	  }
+
+	/* If we clear the var, shift the array down.  */
+	for (; envp[i]; ++i)
+	  envp[i] = envp[i + 1];
+
+	break;
+      }
+
+    case OPTION_ENV_CLEAR:
+      freeargv (STATE_PROG_ENVP (sd));
+      STATE_PROG_ENVP (sd) = xmalloc (sizeof (char *));
+      STATE_PROG_ENVP (sd)[0] = NULL;
       break;
     }
 
@@ -585,7 +714,44 @@ sim_parse_args (SIM_DESC sd, char * const *argv)
       if (optc == -1)
 	{
 	  if (STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
-	    STATE_PROG_ARGV (sd) = dupargv (argv + optind);
+	    {
+	      char **new_argv;
+
+	      free (STATE_PROG_FILE (sd));
+	      STATE_PROG_FILE (sd) = NULL;
+
+	      /* Handle any inline variables if -- wasn't used.  */
+	      if (argv[optind] != NULL && optind > 0
+		  && strcmp (argv[optind - 1], "--") != 0)
+		{
+		  while (1)
+		    {
+		      const char *arg = argv[optind];
+
+		      if (strchr (arg, '=') == NULL)
+			break;
+
+		      env_set (sd, arg);
+		      ++optind;
+		    }
+		}
+
+	      new_argv = dupargv (argv + optind);
+	      freeargv (STATE_PROG_ARGV (sd));
+	      STATE_PROG_ARGV (sd) = new_argv;
+
+	      /* Skip steps when argc == 0.  */
+	      if (argv[optind] != NULL)
+		{
+		  STATE_PROG_FILE (sd) = xstrdup (argv[optind]);
+
+		  if (STATE_PROG_ARGV0 (sd) != NULL)
+		    {
+		      free (new_argv[0]);
+		      new_argv[0] = xstrdup (STATE_PROG_ARGV0 (sd));
+		    }
+		}
+	    }
 	  break;
 	}
       if (optc == '?')
@@ -765,7 +931,8 @@ void
 sim_print_help (SIM_DESC sd, int is_command)
 {
   if (STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
-    sim_io_printf (sd, "Usage: %s [options] program [program args]\n",
+    sim_io_printf (sd,
+		   "Usage: %s [options] [VAR=VAL|--] program [program args]\n",
 		   STATE_MY_NAME (sd));
 
   /* Initialize duplicate argument checker.  */
@@ -801,6 +968,9 @@ sim_print_help (SIM_DESC sd, int is_command)
   if (STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
     {
       sim_io_printf (sd, "\n");
+      sim_io_printf (sd,
+		     "VAR=VAL         Environment variables to set.  "
+		     "Ignored if -- is used.\n");
       sim_io_printf (sd, "program args    Arguments to pass to simulated program.\n");
       sim_io_printf (sd, "                Note: Very few simulators support this.\n");
     }

@@ -1,4 +1,4 @@
-# Copyright 1988-2021 Free Software Foundation, Inc.
+# Copyright 1988-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -509,7 +509,7 @@ gdb_test "ptype the_highest" \
 
 gdb_test "ptype the_highest.anonymous_level_1" \
          "type = struct \{.*\[\r\n\] *int b;.*\[\r\n\] *struct \{.*\[\r\n\] *int c;.*\[\r\n\] *\} anonymous_level_2;.*\[\r\n\]}.*" \
-         "ptype the_highest" 
+         "ptype the_highest.anonymous_level_1"
 
 get_debug_format
 
@@ -578,9 +578,9 @@ gdb_test "list intfoo" ".*"
 gdb_test "ptype foo" "type = int" "ptype foo typedef after first list of intfoo"
 gdb_test "list charfoo" ".*"
 gdb_test "ptype foo" "type = char" "ptype foo typedef after first list of charfoo"
-gdb_test "list intfoo" ".*"
+gdb_test "list intfoo" ".*" "second list intfoo"
 gdb_test "ptype foo" "type = int" "ptype foo typedef after second list of intfoo"
-gdb_test "list charfoo" ".*"
+gdb_test "list charfoo" ".*" "second list charfoo"
 gdb_test "ptype foo" "type = char" "ptype foo typedef after second list of charfoo"
 
 # Test printing type of string constants and array constants, but

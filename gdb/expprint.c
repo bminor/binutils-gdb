@@ -1,6 +1,6 @@
 /* Print in infix form a struct expression.
 
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -138,9 +138,9 @@ dump_for_expression (struct ui_file *stream, int depth,
 {
   fprintf_filtered (stream, _("%*sType flags: "), depth, "");
   if (flags & TYPE_INSTANCE_FLAG_CONST)
-    fputs_unfiltered ("const ", stream);
+    fputs_filtered ("const ", stream);
   if (flags & TYPE_INSTANCE_FLAG_VOLATILE)
-    fputs_unfiltered ("volatile", stream);
+    fputs_filtered ("volatile", stream);
   fprintf_filtered (stream, "\n");
 }
 
@@ -152,24 +152,24 @@ dump_for_expression (struct ui_file *stream, int depth,
   switch (flags & ~C_CHAR)
     {
     case C_WIDE_STRING:
-      fputs_unfiltered (_("wide "), stream);
+      fputs_filtered (_("wide "), stream);
       break;
     case C_STRING_16:
-      fputs_unfiltered (_("u16 "), stream);
+      fputs_filtered (_("u16 "), stream);
       break;
     case C_STRING_32:
-      fputs_unfiltered (_("u32 "), stream);
+      fputs_filtered (_("u32 "), stream);
       break;
     default:
-      fputs_unfiltered (_("ordinary "), stream);
+      fputs_filtered (_("ordinary "), stream);
       break;
     }
 
   if ((flags & C_CHAR) != 0)
-    fputs_unfiltered (_("char"), stream);
+    fputs_filtered (_("char"), stream);
   else
-    fputs_unfiltered (_("string"), stream);
-  fputs_unfiltered ("\n", stream);
+    fputs_filtered (_("string"), stream);
+  fputs_filtered ("\n", stream);
 }
 
 void
@@ -178,13 +178,13 @@ dump_for_expression (struct ui_file *stream, int depth,
 {
   fprintf_filtered (stream, _("%*sRange:"), depth, "");
   if ((flags & RANGE_LOW_BOUND_DEFAULT) != 0)
-    fputs_unfiltered (_("low-default "), stream);
+    fputs_filtered (_("low-default "), stream);
   if ((flags & RANGE_HIGH_BOUND_DEFAULT) != 0)
-    fputs_unfiltered (_("high-default "), stream);
+    fputs_filtered (_("high-default "), stream);
   if ((flags & RANGE_HIGH_BOUND_EXCLUSIVE) != 0)
-    fputs_unfiltered (_("high-exclusive "), stream);
+    fputs_filtered (_("high-exclusive "), stream);
   if ((flags & RANGE_HAS_STRIDE) != 0)
-    fputs_unfiltered (_("has-stride"), stream);
+    fputs_filtered (_("has-stride"), stream);
   fprintf_filtered (stream, "\n");
 }
 

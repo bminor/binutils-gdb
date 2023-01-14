@@ -1,6 +1,6 @@
 /* Self tests for disassembler for GDB, the GNU debugger.
 
-   Copyright (C) 2017-2021 Free Software Foundation, Inc.
+   Copyright (C) 2017-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -85,8 +85,19 @@ print_one_insn_test (struct gdbarch *gdbarch)
       /* PR 21003 */
       if (gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_arc_arc601)
 	return;
+      goto generic_case;
+    case bfd_arch_i386:
+      {
+	const struct bfd_arch_info *info = gdbarch_bfd_arch_info (gdbarch);
+	/* The disassembly tests will fail on x86-linux because
+	   opcodes rejects an attempt to disassemble for an arch with
+	   a 64-bit address size when bfd_vma is 32-bit.  */
+	if (info->bits_per_address > sizeof (bfd_vma) * CHAR_BIT)
+	  return;
+      }
       /* fall through */
     default:
+    generic_case:
       {
 	/* Test disassemble breakpoint instruction.  */
 	CORE_ADDR pc = 0;
@@ -103,8 +114,7 @@ print_one_insn_test (struct gdbarch *gdbarch)
 
   /* Test gdb_disassembler for a given gdbarch by reading data from a
      pre-allocated buffer.  If you want to see the disassembled
-     instruction printed to gdb_stdout, set verbose to true.  */
-  static const bool verbose = false;
+     instruction printed to gdb_stdout, use maint selftest -verbose.  */
 
   class gdb_disassembler_test : public gdb_disassembler
   {
@@ -114,7 +124,7 @@ print_one_insn_test (struct gdbarch *gdbarch)
 				    const gdb_byte *insn,
 				    size_t len)
       : gdb_disassembler (gdbarch,
-			  (verbose ? gdb_stdout : &null_stream),
+			  (run_verbose () ? gdb_stdout : &null_stream),
 			  gdb_disassembler_test::read_memory),
 	m_insn (insn), m_len (len)
     {
@@ -123,7 +133,7 @@ print_one_insn_test (struct gdbarch *gdbarch)
     int
     print_insn (CORE_ADDR memaddr)
     {
-      if (verbose)
+      if (run_verbose ())
 	{
 	  fprintf_unfiltered (stream (), "%s ",
 			      gdbarch_bfd_arch_info (arch ())->arch_name);
@@ -131,7 +141,7 @@ print_one_insn_test (struct gdbarch *gdbarch)
 
       int len = gdb_disassembler::print_insn (memaddr);
 
-      if (verbose)
+      if (run_verbose ())
 	fprintf_unfiltered (stream (), "\n");
 
       return len;
@@ -187,6 +197,16 @@ memory_error_test (struct gdbarch *gdbarch)
       return -1;
     }
   };
+
+  if (gdbarch_bfd_arch_info (gdbarch)->arch == bfd_arch_i386)
+    {
+      const struct bfd_arch_info *info = gdbarch_bfd_arch_info (gdbarch);
+      /* This test will fail on x86-linux because opcodes rejects an
+	 attempt to disassemble for an arch with a 64-bit address size
+	 when bfd_vma is 32-bit.  */
+      if (info->bits_per_address > sizeof (bfd_vma) * CHAR_BIT)
+	return;
+    }
 
   gdb_disassembler_test di (gdbarch);
   bool saw_memory_error = false;

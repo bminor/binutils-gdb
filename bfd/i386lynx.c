@@ -1,5 +1,5 @@
 /* BFD back-end for i386 a.out binaries under LynxOS.
-   Copyright (C) 1990-2021 Free Software Foundation, Inc.
+   Copyright (C) 1990-2022 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -282,38 +282,40 @@ NAME(lynx,swap_ext_reloc_out) (bfd *abfd,
 #define MOVE_ADDRESS(ad)						\
   if (r_extern)								\
     {									\
-   /* undefined symbol */						\
-     cache_ptr->sym_ptr_ptr = symbols + r_index;			\
-     cache_ptr->addend = ad;						\
+      /* undefined symbol */						\
+      if (r_index < bfd_get_symcount (abfd))				\
+	cache_ptr->sym_ptr_ptr = symbols + r_index;			\
+      cache_ptr->addend = ad;						\
     }									\
   else									\
     {									\
-    /* defined, section relative. replace symbol with pointer to	\
-       symbol which points to section  */				\
-    switch (r_index) {							\
-    case N_TEXT:							\
-    case N_TEXT | N_EXT:						\
-      cache_ptr->sym_ptr_ptr  = obj_textsec(abfd)->symbol_ptr_ptr;	\
-      cache_ptr->addend = ad  - su->textsec->vma;			\
-      break;								\
-    case N_DATA:							\
-    case N_DATA | N_EXT:						\
-      cache_ptr->sym_ptr_ptr  = obj_datasec(abfd)->symbol_ptr_ptr;	\
-      cache_ptr->addend = ad - su->datasec->vma;			\
-      break;								\
-    case N_BSS:								\
-    case N_BSS | N_EXT:							\
-      cache_ptr->sym_ptr_ptr  = obj_bsssec(abfd)->symbol_ptr_ptr;	\
-      cache_ptr->addend = ad - su->bsssec->vma;				\
-      break;								\
-    default:								\
-    case N_ABS:								\
-    case N_ABS | N_EXT:							\
-     cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;	\
-      cache_ptr->addend = ad;						\
-      break;								\
+      /* defined, section relative. replace symbol with pointer to	\
+	 symbol which points to section  */				\
+      switch (r_index)							\
+	{								\
+	case N_TEXT:							\
+	case N_TEXT | N_EXT:						\
+	  cache_ptr->sym_ptr_ptr  = obj_textsec(abfd)->symbol_ptr_ptr;	\
+	  cache_ptr->addend = ad  - su->textsec->vma;			\
+	  break;							\
+	case N_DATA:							\
+	case N_DATA | N_EXT:						\
+	  cache_ptr->sym_ptr_ptr  = obj_datasec(abfd)->symbol_ptr_ptr;	\
+	  cache_ptr->addend = ad - su->datasec->vma;			\
+	  break;							\
+	case N_BSS:							\
+	case N_BSS | N_EXT:						\
+	  cache_ptr->sym_ptr_ptr  = obj_bsssec(abfd)->symbol_ptr_ptr;	\
+	  cache_ptr->addend = ad - su->bsssec->vma;			\
+	  break;							\
+	default:							\
+	case N_ABS:							\
+	case N_ABS | N_EXT:						\
+	  cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;	\
+	  cache_ptr->addend = ad;					\
+	  break;							\
+	}								\
     }									\
-  }									\
 
 static void
 NAME(lynx,swap_ext_reloc_in) (bfd *abfd,
@@ -322,7 +324,7 @@ NAME(lynx,swap_ext_reloc_in) (bfd *abfd,
 			      asymbol **symbols,
 			      bfd_size_type symcount ATTRIBUTE_UNUSED)
 {
-  int r_index;
+  unsigned int r_index;
   int r_extern;
   unsigned int r_type;
   struct aoutdata *su = &(abfd->tdata.aout_data->a);
@@ -345,7 +347,7 @@ NAME(lynx,swap_std_reloc_in) (bfd *abfd,
 			      asymbol **symbols,
 			      bfd_size_type symcount ATTRIBUTE_UNUSED)
 {
-  int r_index;
+  unsigned int r_index;
   int r_extern;
   unsigned int r_length;
   int r_pcrel;

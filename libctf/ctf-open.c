@@ -1,5 +1,5 @@
 /* Opening CTF files.
-   Copyright (C) 2019-2021 Free Software Foundation, Inc.
+   Copyright (C) 2019-2022 Free Software Foundation, Inc.
 
    This file is part of libctf.
 
@@ -238,7 +238,7 @@ init_symtab (ctf_dict_t *fp, const ctf_header_t *hp, const ctf_sect_t *sp)
   int skip_func_info = 0;
   int i;
   uint32_t *xp = fp->ctf_sxlate;
-  uint32_t *xend = xp + fp->ctf_nsyms;
+  uint32_t *xend = PTR_ADD (xp, fp->ctf_nsyms);
 
   uint32_t objtoff = hp->cth_objtoff;
   uint32_t funcoff = hp->cth_funcoff;
@@ -1449,7 +1449,7 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
        != hp->cth_funcoff - hp->cth_objtoff))
     {
       ctf_err_warn (NULL, 0, ECTF_CORRUPT,
-		    _("Object index section exists is neither empty nor the "
+		    _("Object index section is neither empty nor the "
 		      "same length as the object section: %u versus %u "
 		      "bytes"), hp->cth_funcoff - hp->cth_objtoff,
 		    hp->cth_funcidxoff - hp->cth_objtidxoff);
@@ -1458,10 +1458,11 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
   if ((hp->cth_varoff - hp->cth_funcidxoff != 0) &&
       (hp->cth_varoff - hp->cth_funcidxoff
-       != hp->cth_objtidxoff - hp->cth_funcoff))
+       != hp->cth_objtidxoff - hp->cth_funcoff) &&
+      (hp->cth_flags & CTF_F_NEWFUNCINFO))
     {
       ctf_err_warn (NULL, 0, ECTF_CORRUPT,
-		    _("Function index section exists is neither empty nor the "
+		    _("Function index section is neither empty nor the "
 		      "same length as the function section: %u versus %u "
 		      "bytes"), hp->cth_objtidxoff - hp->cth_funcoff,
 		    hp->cth_varoff - hp->cth_funcidxoff);

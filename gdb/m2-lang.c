@@ -1,6 +1,6 @@
 /* Modula 2 language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 1992-2021 Free Software Foundation, Inc.
+   Copyright (C) 1992-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -165,7 +165,7 @@ m2_language::printstr (struct ui_file *stream, struct type *elttype,
 
   if (length == 0)
     {
-      fputs_filtered ("\"\"", gdb_stdout);
+      puts_filtered ("\"\"");
       return;
     }
 

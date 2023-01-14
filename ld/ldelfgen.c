@@ -1,5 +1,5 @@
 /* Emulation code used by all ELF targets.
-   Copyright (C) 1991-2021 Free Software Foundation, Inc.
+   Copyright (C) 1991-2022 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -173,8 +173,9 @@ compare_link_order (const void *a, const void *b)
 
   if (! bfd_link_relocatable (&link_info))
     {
-      /* The only way we should get matching LMAs is when
-	 the first of the two sections has zero size.  */
+      /* The only way we should get matching LMAs is when the first of
+	 the two sections has zero size, or asec and bsec are the
+	 same section.  */
       if (asec->size < bsec->size)
 	return -1;
       else if (asec->size > bsec->size)
@@ -183,7 +184,7 @@ compare_link_order (const void *a, const void *b)
 
   /* If they are both zero size then they almost certainly have the same
      VMA and thus are not ordered with respect to each other.  Test VMA
-     anyway, and fall back to id to make the result reproducible across
+     anyway, and fall back to idx to make the result reproducible across
      qsort implementations.  */
   apos = asec->output_section->vma + asec->output_offset;
   bpos = bsec->output_section->vma + bsec->output_offset;
@@ -191,8 +192,8 @@ compare_link_order (const void *a, const void *b)
     return -1;
   else if (apos > bpos)
     return 1;
-
-  return asec->id - bsec->id;
+  else
+    return ai->idx - bi->idx;
 }
 
 /* Rearrange sections with SHF_LINK_ORDER into the same order as their
@@ -281,7 +282,7 @@ ldelf_map_segments (bool need_layout)
 		      && bfd_link_relocatable (&link_info))
 		    {
 		      einfo (_("%F%P: "
-			       "%pA has both ordered and unordered sections"),
+			       "%pA has both ordered and unordered sections\n"),
 			     os->bfd_section);
 		      return;
 		    }
@@ -303,7 +304,8 @@ ldelf_map_segments (bool need_layout)
 	  if (lang_phdr_list == NULL)
 	    elf_seg_map (link_info.output_bfd) = NULL;
 	  if (!_bfd_elf_map_sections_to_segments (link_info.output_bfd,
-						  &link_info))
+						  &link_info,
+						  &need_layout))
 	    einfo (_("%F%P: map sections to segments failed: %E\n"));
 
 	  if (phdr_size != elf_program_header_size (link_info.output_bfd))
@@ -324,7 +326,7 @@ ldelf_map_segments (bool need_layout)
   while (need_layout && --tries);
 
   if (tries == 0)
-    einfo (_("%F%P: looping in map_segments"));
+    einfo (_("%F%P: looping in map_segments\n"));
 
   if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour
       && lang_phdr_list == NULL)
@@ -336,7 +338,7 @@ ldelf_map_segments (bool need_layout)
       if (bed->elf_backend_strip_zero_sized_dynamic_sections
 	  && !bed->elf_backend_strip_zero_sized_dynamic_sections
 		(&link_info))
-	  einfo (_("%F%P: failed to strip zero-sized dynamic sections"));
+	  einfo (_("%F%P: failed to strip zero-sized dynamic sections\n"));
     }
 }
 

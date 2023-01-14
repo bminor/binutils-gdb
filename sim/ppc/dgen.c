@@ -286,7 +286,9 @@ main(int argc,
 
 
   while ((ch = getopt(argc, argv, "hLsn:r:p:")) != -1) {
+#if 0  /* For debugging.  */
     fprintf(stderr, "\t-%c %s\n", ch, ( optarg ? optarg : ""));
+#endif
     switch(ch) {
     case 's':
       spreg_lookup_table = 0;

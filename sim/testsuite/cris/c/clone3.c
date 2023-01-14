@@ -1,5 +1,5 @@
 /* Check that exiting from a parent thread does not kill the child.
-#notarget: cris*-*-elf
+#progos: linux
 */
 
 #include <stddef.h>

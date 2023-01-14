@@ -1,5 +1,5 @@
 /* A YACC grammar to parse a superset of the AT&T linker scripting language.
-   Copyright (C) 1991-2021 Free Software Foundation, Inc.
+   Copyright (C) 1991-2022 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support (steve@cygnus.com).
 
    This file is part of the GNU Binutils.
@@ -248,9 +248,8 @@ mri_script_command:
 	|	CASE casesymlist
 	|	EXTERN extern_name_list
 	|	INCLUDE filename
-		{ ldlex_script (); ldfile_open_command_file($2); }
+		{ ldfile_open_command_file ($2); }
 		mri_script_lines END
-		{ ldlex_popstate (); }
 	|	START NAME
 		{ lang_add_entry ($2, false); }
 	|
@@ -281,25 +280,19 @@ casesymlist:
 	| casesymlist ',' NAME
 	;
 
-/* Parsed as expressions so that commas separate entries */
 extern_name_list:
-	{ ldlex_expression (); }
-	extern_name_list_body
-	{ ldlex_popstate (); }
-
-extern_name_list_body:
-	  NAME
+	NAME
 			{ ldlang_add_undef ($1, false); }
-	| extern_name_list_body NAME
+	| extern_name_list NAME
 			{ ldlang_add_undef ($2, false); }
-	| extern_name_list_body ',' NAME
+	| extern_name_list ',' NAME
 			{ ldlang_add_undef ($3, false); }
 	;
 
 script_file:
-	{ ldlex_both(); }
+	{ ldlex_script (); }
 	ifile_list
-	{ ldlex_popstate(); }
+	{ ldlex_popstate (); }
 	;
 
 ifile_list:
@@ -346,9 +339,8 @@ ifile_p1:
 	|	MAP '(' filename ')'
 		{ lang_add_map($3); }
 	|	INCLUDE filename
-		{ ldlex_script (); ldfile_open_command_file($2); }
+		{ ldfile_open_command_file ($2); }
 		ifile_list END
-		{ ldlex_popstate (); }
 	|	NOCROSSREFS '(' nocrossref_list ')'
 		{
 		  lang_add_nocrossref ($3);
@@ -357,7 +349,8 @@ ifile_p1:
 		{
 		  lang_add_nocrossref_to ($3);
 		}
-	|	EXTERN '(' extern_name_list ')'
+	|	EXTERN '(' { ldlex_expression (); } extern_name_list ')'
+			{ ldlex_popstate (); }
 	|	INSERT_K AFTER NAME
 		{ lang_add_insert ($3, 0); }
 	|	INSERT_K BEFORE NAME
@@ -422,26 +415,16 @@ sec_or_group_p1:
 statement_anywhere:
 		ENTRY '(' NAME ')'
 		{ lang_add_entry ($3, false); }
-	|	assignment end
+	|	assignment separator
 	|	ASSERT_K  {ldlex_expression ();} '(' exp ',' NAME ')'
 		{ ldlex_popstate ();
 		  lang_add_assignment (exp_assert ($4, $6)); }
 	;
 
-/* The '*' and '?' cases are there because the lexer returns them as
-   separate tokens rather than as NAME.  */
 wildcard_name:
 		NAME
 			{
 			  $$ = $1;
-			}
-	|	'*'
-			{
-			  $$ = "*";
-			}
-	|	'?'
-			{
-			  $$ = "?";
 			}
 	;
 
@@ -663,16 +646,15 @@ input_section_spec:
 	;
 
 statement:
-		assignment end
-	|	CREATE_OBJECT_SYMBOLS
+	';'
+	| assignment separator
+	| CREATE_OBJECT_SYMBOLS
 		{
-		lang_add_attribute(lang_object_symbols_statement_enum);
+		  lang_add_attribute (lang_object_symbols_statement_enum);
 		}
-	|	';'
-	|	CONSTRUCTORS
+	| CONSTRUCTORS
 		{
-
-		  lang_add_attribute(lang_constructors_statement_enum);
+		  lang_add_attribute (lang_constructors_statement_enum);
 		}
 	| SORT_BY_NAME '(' CONSTRUCTORS ')'
 		{
@@ -689,13 +671,18 @@ statement:
 		{
 		  lang_add_fill ($3);
 		}
-	| ASSERT_K  {ldlex_expression ();} '(' exp ',' NAME ')' end
-			{ ldlex_popstate ();
-			  lang_add_assignment (exp_assert ($4, $6)); }
+	| ASSERT_K
+		{ ldlex_expression (); }
+	  '(' exp ',' NAME ')' separator
+		{
+		  ldlex_popstate ();
+		  lang_add_assignment (exp_assert ($4, $6));
+		}
 	| INCLUDE filename
-		{ ldlex_script (); ldfile_open_command_file($2); }
-		statement_list_opt END
-		{ ldlex_popstate (); }
+		{
+		  ldfile_open_command_file ($2);
+		}
+	  statement_list_opt END
 	;
 
 statement_list:
@@ -754,7 +741,7 @@ assign_op:
 
 	;
 
-end:	';' | ','
+separator:	';' | ','
 	;
 
 
@@ -808,9 +795,8 @@ memory_spec:	NAME
 		origin_spec opt_comma length_spec
 		{}
 	|	INCLUDE filename
-		{ ldlex_script (); ldfile_open_command_file($2); }
+		{ ldfile_open_command_file ($2); }
 		memory_spec_list_opt END
-		{ ldlex_popstate (); }
 	;
 
 origin_spec:
@@ -823,6 +809,11 @@ origin_spec:
 length_spec:
 	     LENGTH '=' mustbe_exp
 		{
+		  if (yychar == NAME)
+		    {
+		      yyclearin;
+		      ldlex_backup ();
+		    }
 		  region->length_exp = $3;
 		}
 	;
@@ -905,13 +896,13 @@ nocrossref_list:
 		}
 	;
 
-paren_script_name:
-		{ ldlex_script (); } '(' NAME  { ldlex_popstate (); } ')'
-			{ $$ = $3; }
+paren_script_name:	{ ldlex_script (); }
+		'(' NAME ')'
+			{ ldlex_popstate (); $$ = $3; }
 
-mustbe_exp:		 { ldlex_expression (); }
+mustbe_exp:		{ ldlex_expression (); }
 		exp
-			 { ldlex_popstate (); $$=$2;}
+			{ ldlex_popstate (); $$ = $2; }
 	;
 
 exp	:
@@ -1015,10 +1006,10 @@ exp	:
 			{ $$ = exp_binop (MIN_K, $3, $5 ); }
 	|	ASSERT_K '(' exp ',' NAME ')'
 			{ $$ = exp_assert ($3, $5); }
-	|	ORIGIN '(' NAME ')'
-			{ $$ = exp_nameop (ORIGIN, $3); }
-	|	LENGTH '(' NAME ')'
-			{ $$ = exp_nameop (LENGTH, $3); }
+	|	ORIGIN paren_script_name
+			{ $$ = exp_nameop (ORIGIN, $2); }
+	|	LENGTH paren_script_name
+			{ $$ = exp_nameop (LENGTH, $2); }
 	|	LOG2CEIL '(' exp ')'
 			{ $$ = exp_unop (LOG2CEIL, $3); }
 	;
@@ -1056,43 +1047,53 @@ sect_constraint:
 	|	{ $$ = 0; }
 	;
 
-section:	NAME		{ ldlex_expression(); }
+section:	NAME
+			{ ldlex_expression(); }
 		opt_exp_with_type
 		opt_at
 		opt_align
 		opt_align_with_input
-		opt_subalign	{ ldlex_popstate (); ldlex_script (); }
+		opt_subalign
 		sect_constraint
-		'{'
 			{
-			  lang_enter_output_section_statement($1, $3,
-							      sectype,
-							      $5, $7, $4, $9, $6);
+			  ldlex_popstate ();
+			  ldlex_wild ();
+			  lang_enter_output_section_statement($1, $3, sectype,
+							      $5, $7, $4,
+							      $8, $6);
 			}
+		'{'
 		statement_list_opt
-		'}' { ldlex_popstate (); ldlex_expression (); }
+		'}'
+			{ ldlex_popstate (); }
 		memspec_opt memspec_at_opt phdr_opt fill_opt
-		{
-		  if (yychar == NAME)
-		    {
-		      yyclearin;
-		      ldlex_backup ();
-		    }
-		  ldlex_popstate ();
-		  lang_leave_output_section_statement ($18, $15, $17, $16);
-		}
+			{
+			  /* fill_opt may have switched the lexer into
+			     expression state, and back again, but in
+			     order to find the end of the fill
+			     expression the parser must look ahead one
+			     token.  If it is a NAME, throw it away as
+			     it will have been lexed in the wrong
+			     state.  */
+			  if (yychar == NAME)
+			    {
+			      yyclearin;
+			      ldlex_backup ();
+			    }
+			  lang_leave_output_section_statement ($17, $14,
+							       $16, $15);
+			}
 		opt_comma
 	|	OVERLAY
 			{ ldlex_expression (); }
 		opt_exp_without_type opt_nocrossrefs opt_at opt_subalign
-			{ ldlex_popstate (); ldlex_script (); }
+			{ ldlex_popstate (); }
 		'{'
 			{
 			  lang_enter_overlay ($3, $6);
 			}
 		overlay_section
 		'}'
-			{ ldlex_popstate (); ldlex_expression (); }
 		memspec_opt memspec_at_opt phdr_opt fill_opt
 			{
 			  if (yychar == NAME)
@@ -1100,26 +1101,27 @@ section:	NAME		{ ldlex_expression(); }
 			      yyclearin;
 			      ldlex_backup ();
 			    }
-			  ldlex_popstate ();
 			  lang_leave_overlay ($5, (int) $4,
-					      $16, $13, $15, $14);
+					      $15, $12, $14, $13);
 			}
 		opt_comma
 	|	/* The GROUP case is just enough to support the gcc
 		   svr3.ifile script.  It is not intended to be full
 		   support.  I'm not even sure what GROUP is supposed
 		   to mean.  */
-		GROUP { ldlex_expression (); }
+		GROUP
+			{ ldlex_expression (); }
 		opt_exp_with_type
-		{
-		  ldlex_popstate ();
-		  lang_add_assignment (exp_assign (".", $3, false));
-		}
+			{
+			  ldlex_popstate ();
+			  lang_add_assignment (exp_assign (".", $3, false));
+			}
 		'{' sec_or_group_p1 '}'
 	|	INCLUDE filename
-		{ ldlex_script (); ldfile_open_command_file($2); }
+			{
+			  ldfile_open_command_file ($2);
+			}
 		sec_or_group_p1 END
-		{ ldlex_popstate (); }
 	;
 
 type:
@@ -1190,10 +1192,13 @@ overlay_section:
 	|	overlay_section
 		NAME
 			{
+			  ldlex_wild ();
 			  lang_enter_overlay_section ($2);
 			}
-		'{' statement_list_opt '}'
-			{ ldlex_expression (); }
+		'{'
+		statement_list_opt
+		'}'
+			{ ldlex_popstate (); }
 		phdr_opt fill_opt
 			{
 			  if (yychar == NAME)
@@ -1201,7 +1206,6 @@ overlay_section:
 			      yyclearin;
 			      ldlex_backup ();
 			    }
-			  ldlex_popstate ();
 			  lang_leave_overlay_section ($9, $8);
 			}
 		opt_comma
@@ -1258,6 +1262,10 @@ phdr_type:
 			    $$ = exp_intop (0x6474e550);
 			  else if (strcmp (s, "PT_GNU_STACK") == 0)
 			    $$ = exp_intop (0x6474e551);
+			  else if (strcmp (s, "PT_GNU_RELRO") == 0)
+			    $$ = exp_intop (0x6474e552);
+			  else if (strcmp (s, "PT_GNU_PROPERTY") == 0)
+			    $$ = exp_intop (0x6474e553);
 			  else
 			    {
 			      einfo (_("\

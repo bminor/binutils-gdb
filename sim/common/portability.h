@@ -1,5 +1,5 @@
 /* Portability shims for missing OS support.
-   Copyright (C) 2021 Free Software Foundation, Inc.
+   Copyright (C) 2021-2022 Free Software Foundation, Inc.
    Contributed by Mike Frysinger.
 
 This file is part of the GNU Simulators.

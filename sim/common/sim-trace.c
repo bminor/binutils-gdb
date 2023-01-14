@@ -1,5 +1,5 @@
 /* Simulator tracing/debugging support.
-   Copyright (C) 1997-2021 Free Software Foundation, Inc.
+   Copyright (C) 1997-2022 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -20,21 +20,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "ansidecl.h"
+#include "bfd.h"
+#include "dis-asm.h"
+#include "libiberty.h"
+
 #include "sim-main.h"
+#include "sim-assert.h"
 #include "sim-io.h"
 #include "sim-options.h"
 #include "sim-fpu.h"
 #include "sim/callback.h"
-
-#include "bfd.h"
-#include "libiberty.h"
-
-#include "dis-asm.h"
-
-#include "sim-assert.h"
-
-#include <string.h>
-#include <stdlib.h>
 
 #ifndef SIZE_PHASE
 #define SIZE_PHASE 8
@@ -558,13 +558,13 @@ print_data (SIM_DESC sd,
       {
 	switch (size)
 	  {
-	  case sizeof (unsigned32):
-	    trace_printf (sd, cpu, " 0x%08lx", (long) * (unsigned32*) data);
+	  case sizeof (uint32_t):
+	    trace_printf (sd, cpu, " 0x%08lx", (long) * (uint32_t*) data);
 	    break;
-	  case sizeof (unsigned64):
+	  case sizeof (uint64_t):
 	    trace_printf (sd, cpu, " 0x%08lx%08lx",
-			  (long) ((* (unsigned64*) data) >> 32),
-			  (long) * (unsigned64*) data);
+			  (long) ((* (uint64_t*) data) >> 32),
+			  (long) * (uint64_t*) data);
 	    break;
 	  default:
 	    abort ();
@@ -585,10 +585,10 @@ print_data (SIM_DESC sd,
 	  {
 	    /* FIXME: Assumes sizeof float == 4; sizeof double == 8 */
 	  case 4:
-	    sim_fpu_32to (&fp, *(unsigned32*)data);
+	    sim_fpu_32to (&fp, *(uint32_t*)data);
 	    break;
 	  case 8:
-	    sim_fpu_64to (&fp, *(unsigned64*)data);
+	    sim_fpu_64to (&fp, *(uint64_t*)data);
 	    break;
 	  default:
 	    abort ();
@@ -598,12 +598,12 @@ print_data (SIM_DESC sd,
 	  {
 	  case 4:
 	    trace_printf (sd, cpu, " (0x%08lx)",
-			  (long) *(unsigned32*)data);
+			  (long) *(uint32_t*)data);
 	    break;
 	  case 8:
 	    trace_printf (sd, cpu, " (0x%08lx%08lx)",
-			  (long) (*(unsigned64*)data >> 32),
-			  (long) (*(unsigned64*)data));
+			  (long) (*(uint64_t*)data >> 32),
+			  (long) (*(uint64_t*)data));
 	    break;
 	  default:
 	    abort ();

@@ -1,5 +1,5 @@
 /* Miscellaneous simulator utilities.
-   Copyright (C) 1997-2021 Free Software Foundation, Inc.
+   Copyright (C) 1997-2022 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -30,8 +30,8 @@ gen_struct (void)
   printf ("  int line;\n");
   printf ("  int row;\n");
   printf ("  int col;\n");
-  printf ("  unsigned64 val;\n");
-  printf ("  unsigned64 check;\n");
+  printf ("  uint64_t val;\n");
+  printf ("  uint64_t check;\n");
   printf ("} test_tuples;\n");
   printf ("\n");
   printf ("typedef struct _test_spec {\n");

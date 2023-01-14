@@ -1,6 +1,6 @@
 /* Shared library declarations for GDB, the GNU Debugger.
    
-   Copyright (C) 1992-2021 Free Software Foundation, Inc.
+   Copyright (C) 1992-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -111,6 +111,12 @@ extern CORE_ADDR gdb_bfd_lookup_symbol_from_symtab (bfd *abfd,
 						      (const asymbol *,
 						       const void *),
 						    const void *data);
+
+/* Scan for DESIRED_DYNTAG in .dynamic section of ABFD.  If DESIRED_DYNTAG is
+   found, 1 is returned and the corresponding PTR and PTR_ADDR are set.  */
+
+extern int gdb_bfd_scan_elf_dyntag (const int desired_dyntag, bfd *abfd,
+				    CORE_ADDR *ptr, CORE_ADDR *ptr_addr);
 
 /* Enable or disable optional solib event breakpoints as appropriate.  */
 

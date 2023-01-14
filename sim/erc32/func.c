@@ -1,6 +1,6 @@
 /* This file is part of SIS (SPARC instruction simulator)
 
-   Copyright (C) 1995-2021 Free Software Foundation, Inc.
+   Copyright (C) 1995-2022 Free Software Foundation, Inc.
    Contributed by Jiri Gaisler, European Space Agency
 
    This program is free software; you can redistribute it and/or modify
@@ -49,28 +49,28 @@ int             sparclite_board = 0;	/* emulating SPARClite board RAM? */
 char            uart_dev1[128] = "";
 char            uart_dev2[128] = "";
 extern	int	ext_irl;
-uint32		last_load_addr = 0;
+uint32_t		last_load_addr = 0;
 
 #ifdef ERRINJ
-uint32		errcnt = 0;
-uint32		errper = 0;
-uint32		errtt = 0;
-uint32		errftt = 0;
-uint32		errmec = 0;
+uint32_t		errcnt = 0;
+uint32_t		errper = 0;
+uint32_t		errtt = 0;
+uint32_t		errftt = 0;
+uint32_t		errmec = 0;
 #endif
 
 /* Forward declarations */
 
 static int	batch (struct pstate *sregs, char *fname);
-static void	set_rega (struct pstate *sregs, char *reg, uint32 rval);
+static void	set_rega (struct pstate *sregs, char *reg, uint32_t rval);
 static void	disp_reg (struct pstate *sregs, char *reg);
-static uint32	limcalc (float32 freq);
-static void	int_handler (int32 sig);
+static uint32_t	limcalc (float32 freq);
+static void	int_handler (int32_t sig);
 static void	init_event (void);
 static int	disp_fpu (struct pstate  *sregs);
 static void	disp_regs (struct pstate  *sregs, int cwp);
 static void	disp_ctrl (struct pstate *sregs);
-static void	disp_mem (uint32 addr, uint32 len);
+static void	disp_mem (uint32_t addr, uint32_t len);
 
 static int 
 batch(struct pstate *sregs, char *fname)
@@ -98,9 +98,9 @@ batch(struct pstate *sregs, char *fname)
 }
 
 void
-set_regi(struct pstate *sregs, int32 reg, uint32 rval)
+set_regi(struct pstate *sregs, int32_t reg, uint32_t rval)
 {
-    uint32          cwp;
+    uint32_t          cwp;
 
     cwp = ((sregs->psr & 0x7) << 4);
     if ((reg > 0) && (reg < 8)) {
@@ -139,10 +139,10 @@ set_regi(struct pstate *sregs, int32 reg, uint32 rval)
 }
 
 void
-get_regi(struct pstate * sregs, int32 reg, char *buf)
+get_regi(struct pstate * sregs, int32_t reg, unsigned char *buf)
 {
-    uint32          cwp;
-    uint32          rval = 0;
+    uint32_t          cwp;
+    uint32_t          rval = 0;
 
     cwp = ((sregs->psr & 0x7) << 4);
     if ((reg >= 0) && (reg < 8)) {
@@ -185,10 +185,10 @@ get_regi(struct pstate * sregs, int32 reg, char *buf)
 
 
 static void
-set_rega(struct pstate *sregs, char *reg, uint32 rval)
+set_rega(struct pstate *sregs, char *reg, uint32_t rval)
 {
-    uint32          cwp;
-    int32           err = 0;
+    uint32_t          cwp;
+    int32_t           err = 0;
 
     cwp = ((sregs->psr & 0x7) << 4);
     if (strcmp(reg, "psr") == 0)
@@ -329,10 +329,10 @@ errinjstart()
 
 #endif
 
-static uint32
+static uint32_t
 limcalc (float32 freq)
 {
-    uint32          unit, lim;
+    uint32_t          unit, lim;
     double	    flim;
     char           *cmd1, *cmd2;
 
@@ -348,7 +348,7 @@ limcalc (float32 freq)
         flim = (double) lim * (double) unit * (double) freq + 
 	   (double) ebase.simtime;
         if ((flim > ebase.simtime) && (flim < 4294967296.0)) {
-            lim = (uint32) flim;
+            lim = (uint32_t) flim;
         } else  {
             printf("error in expression\n");
             lim = -1;
@@ -361,9 +361,9 @@ int
 exec_cmd(struct pstate *sregs, const char *cmd)
 {
     char           *cmd1, *cmd2;
-    int32           stat;
-    uint32          len, i, clen, j;
-    static uint32   daddr = 0;
+    int32_t           stat;
+    uint32_t          len, i, clen, j;
+    static uint32_t   daddr = 0;
     char           *cmdsave, *cmdsave2 = NULL;
 
     stat = OK;
@@ -563,8 +563,8 @@ exec_cmd(struct pstate *sregs, const char *cmd)
 	    sim_halt();
 	} else if (strncmp(cmd1, "tlimit", clen) == 0) {
 	   sregs->tlimit = limcalc(sregs->freq);
-	   if (sregs->tlimit != (uint32) -1)
-              printf("simulation limit = %u (%.3f ms)\n",(uint32) sregs->tlimit,
+	   if (sregs->tlimit != (uint32_t) -1)
+              printf("simulation limit = %u (%.3f ms)\n",(uint32_t) sregs->tlimit,
 		sregs->tlimit / sregs->freq / 1000);
 	} else if (strncmp(cmd1, "tra", clen) == 0) {
 	    if ((cmd1 = strtok(NULL, " \t\n\r")) == NULL) {
@@ -614,8 +614,8 @@ reset_stat(struct pstate *sregs)
 void
 show_stat(struct pstate *sregs)
 {
-    uint32          iinst;
-    uint32          stime;
+    uint32_t          iinst;
+    uint32_t          stime;
 
     if (sregs->tottime == 0.0)
         sregs->tottime += 1E-6;
@@ -677,7 +677,7 @@ init_bpt(struct pstate *sregs)
 }
 
 static void
-int_handler(int32 sig)
+int_handler(int32_t sig)
 {
     if (sig != 2)
 	printf("\n\n Signal handler error  (%d)\n\n", sig);
@@ -743,7 +743,7 @@ disp_regs(struct pstate *sregs, int cwp)
     }
 }
 
-static void print_insn_sparc_sis(uint32 addr, struct disassemble_info *info)
+static void print_insn_sparc_sis(uint32_t addr, struct disassemble_info *info)
 {
     unsigned char           i[4];
 
@@ -758,7 +758,7 @@ static void
 disp_ctrl(struct pstate *sregs)
 {
 
-    uint32           i;
+    uint32_t           i;
 
     printf("\n psr: %08X   wim: %08X   tbr: %08X   y: %08X\n",
 	   sregs->psr, sregs->wim, sregs->tbr, sregs->y);
@@ -774,15 +774,15 @@ disp_ctrl(struct pstate *sregs)
 }
 
 static void
-disp_mem(uint32 addr, uint32 len)
+disp_mem(uint32_t addr, uint32_t len)
 {
 
-    uint32          i;
+    uint32_t          i;
     union {
 	    unsigned char u8[4];
-	    uint32 u32;
+	    uint32_t u32;
     } data;
-    uint32          mem[4], j;
+    uint32_t          mem[4], j;
     char           *p;
 
     for (i = addr & ~3; i < ((addr + len) & ~3); i += 16) {
@@ -805,12 +805,12 @@ disp_mem(uint32 addr, uint32 len)
 }
 
 void
-dis_mem(uint32 addr, uint32 len, struct disassemble_info *info)
+dis_mem(uint32_t addr, uint32_t len, struct disassemble_info *info)
 {
-    uint32          i;
+    uint32_t          i;
     union {
 	    unsigned char u8[4];
-	    uint32 u32;
+	    uint32_t u32;
     } data;
 
     for (i = addr & -3; i < ((addr & -3) + (len << 2)); i += 4) {
@@ -825,7 +825,7 @@ dis_mem(uint32 addr, uint32 len, struct disassemble_info *info)
 /* Add event to event queue */
 
 void
-event(void (*cfunc) (), int32 arg, uint64 delta)
+event(void (*cfunc) (), int32_t arg, uint64_t delta)
 {
     struct evcell  *ev1, *evins;
 
@@ -863,7 +863,7 @@ stop_event()
 void
 init_event(void)
 {
-    int32           i;
+    int32_t           i;
 
     ebase.eq.nxt = NULL;
     ebase.freeq = evbuf;
@@ -874,7 +874,7 @@ init_event(void)
 }
 
 void
-set_int(int32 level, void (*callback) (), int32 arg)
+set_int(int32_t level, void (*callback) (), int32_t arg)
 {
     irqarr[level & 0x0f].callback = callback;
     irqarr[level & 0x0f].arg = arg;
@@ -888,8 +888,8 @@ advance_time(struct pstate *sregs)
 
     struct evcell  *evrem;
     void            (*cfunc) ();
-    uint32          arg;
-    uint64          endtime;
+    uint32_t          arg;
+    uint64_t          endtime;
 
 #ifdef STAT
     sregs->fholdt += sregs->fhold;
@@ -913,7 +913,7 @@ advance_time(struct pstate *sregs)
 
 }
 
-uint32
+uint32_t
 now(void)
 {
     return ebase.simtime;
@@ -927,8 +927,8 @@ wait_for_irq(void)
 {
     struct evcell  *evrem;
     void            (*cfunc) ();
-    int32           arg;
-    uint64          endtime;
+    int32_t           arg;
+    uint64_t          endtime;
 
     if (ebase.eq.nxt == NULL)
 	printf("Warning: event queue empty - power-down mode not entered\n");
@@ -954,11 +954,11 @@ wait_for_irq(void)
 int
 check_bpt(struct pstate *sregs)
 {
-    int32           i;
+    int32_t           i;
 
     if ((sregs->bphit) || (sregs->annul))
 	return 0;
-    for (i = 0; i < (int32) sregs->bptnum; i++) {
+    for (i = 0; i < (int32_t) sregs->bptnum; i++) {
 	if (sregs->pc == sregs->bpts[i])
 	    return BPT_HIT;
     }
@@ -996,7 +996,9 @@ sys_halt(void)
 #include "libiberty.h"
 #include "bfd.h"
 
+#ifndef min
 #define min(A, B) (((A) < (B)) ? (A) : (B))
+#endif
 #define LOAD_ADDRESS 0
 
 int

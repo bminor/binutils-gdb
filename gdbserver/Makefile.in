@@ -1,4 +1,4 @@
-# Copyright (C) 1989-2021 Free Software Foundation, Inc.
+# Copyright (C) 1989-2022 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -26,23 +26,7 @@ target_alias = @target_noncanonical@
 program_transform_name = @program_transform_name@
 bindir = @bindir@
 libdir = @libdir@
-tooldir = $(libdir)/$(target_alias)
 
-datarootdir = @datarootdir@
-datadir = @datadir@
-mandir = @mandir@
-man1dir = $(mandir)/man1
-man2dir = $(mandir)/man2
-man3dir = $(mandir)/man3
-man4dir = $(mandir)/man4
-man5dir = $(mandir)/man5
-man6dir = $(mandir)/man6
-man7dir = $(mandir)/man7
-man8dir = $(mandir)/man8
-man9dir = $(mandir)/man9
-infodir = @infodir@
-htmldir = $(prefix)/html
-includedir = @includedir@
 CONFIG_SRC_SUBDIR = @CONFIG_SRC_SUBDIR@
 
 install_sh = @install_sh@
@@ -196,6 +180,7 @@ SFILES = \
 	$(srcdir)/linux-m68k-low.cc \
 	$(srcdir)/linux-mips-low.cc \
 	$(srcdir)/linux-nios2-low.cc \
+	$(srcdir)/linux-or1k-low.cc \
 	$(srcdir)/linux-ppc-low.cc \
 	$(srcdir)/linux-riscv-low.cc \
 	$(srcdir)/linux-s390-low.cc \
@@ -290,16 +275,7 @@ extra_libraries = @extra_libraries@
 FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
 	"exec_prefix=$(exec_prefix)" \
-	"infodir=$(infodir)" \
-	"datarootdir=$(datarootdir)" \
-	"docdir=$(docdir)" \
-	"htmldir=$(htmldir)" \
-	"pdfdir=$(pdfdir)" \
 	"libdir=$(libdir)" \
-	"mandir=$(mandir)" \
-	"datadir=$(datadir)" \
-	"includedir=$(includedir)" \
-	"against=$(against)" \
 	"DESTDIR=$(DESTDIR)" \
 	"AR=$(AR)" \
 	"AR_FLAGS=$(AR_FLAGS)" \
@@ -351,7 +327,10 @@ install-strip:
 uninstall: force
 	n=`echo gdbserver | sed '$(program_transform_name)'`; \
 	if [ x$$n = x ]; then n=gdbserver; else true; fi; \
-	rm -f $(DESTDIR)/$(bindir)/$$n$(EXEEXT) $(DESTDIR)$(man1dir)/$$n.1
+	if [ x"$(IPA_DEPFILES)" != x ]; then \
+		rm -f $(DESTDIR)$(libdir)/$(IPA_LIB); \
+	fi; \
+	rm -f $(DESTDIR)/$(bindir)/$$n$(EXEEXT)
 
 installcheck:
 check:
@@ -433,8 +412,7 @@ mostlyclean clean:
 	done
 
 maintainer-clean realclean distclean: clean
-	rm -f Makefile config.status config.h stamp-h config.log
-	rm -f Makefile
+	rm -f Makefile config.status config.h stamp-h config.log config.cache
 	for i in $(CONFIG_SRC_SUBDIR); do \
 		rmdir $$i/$(DEPDIR); \
 	done

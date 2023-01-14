@@ -1,6 +1,6 @@
 #as:
 #source: forward.c
-#objdump: --ctf=.ctf
+#objdump: --ctf
 #ld: -shared
 #name: Forwards
 

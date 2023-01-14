@@ -1,7 +1,7 @@
 /* Target-dependent code for PowerPC systems using the SVR4 ABI
    for GDB, the GNU debugger.
 
-   Copyright (C) 2000-2021 Free Software Foundation, Inc.
+   Copyright (C) 2000-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -65,7 +65,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			      function_call_return_method return_method,
 			      CORE_ADDR struct_addr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int opencl_abi = ppc_sysv_use_opencl_abi (value_type (function));
   ULONGEST saved_sp;
@@ -122,7 +122,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  struct value *arg = args[argno];
 	  struct type *type = check_typedef (value_type (arg));
 	  int len = TYPE_LENGTH (type);
-	  const bfd_byte *val = value_contents (arg);
+	  const bfd_byte *val = value_contents (arg).data ();
 
 	  if (type->code () == TYPE_CODE_FLT && len <= 8
 	      && !tdep->soft_float)
@@ -597,7 +597,7 @@ get_decimal_float_return_value (struct gdbarch *gdbarch, struct type *valtype,
 				struct regcache *regcache, gdb_byte *readbuf,
 				const gdb_byte *writebuf)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   gdb_assert (valtype->code () == TYPE_CODE_DECFLOAT);
 
@@ -675,7 +675,7 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *func_type,
 			  gdb_byte *readbuf, const gdb_byte *writebuf,
 			  int broken_gcc)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int opencl_abi = func_type? ppc_sysv_use_opencl_abi (func_type) : 0;
 
@@ -1250,7 +1250,7 @@ ppc64_sysv_abi_push_val (struct gdbarch *gdbarch,
 			 const bfd_byte *val, int len, int align,
 			 struct ppc64_sysv_argpos *argpos)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   int offset = 0;
 
   /* Enforce alignment of stack location, if requested.  */
@@ -1300,7 +1300,7 @@ static void
 ppc64_sysv_abi_push_integer (struct gdbarch *gdbarch, ULONGEST val,
 			     struct ppc64_sysv_argpos *argpos)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[PPC_MAX_REGISTER_SIZE];
 
@@ -1318,7 +1318,7 @@ ppc64_sysv_abi_push_freg (struct gdbarch *gdbarch,
 			  struct type *type, const bfd_byte *val,
 			  struct ppc64_sysv_argpos *argpos)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   if (tdep->soft_float)
     return;
 
@@ -1403,7 +1403,7 @@ static void
 ppc64_sysv_abi_push_vreg (struct gdbarch *gdbarch, const bfd_byte *val,
 			  struct ppc64_sysv_argpos *argpos)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (argpos->regcache && argpos->vreg <= 13)
     argpos->regcache->cooked_write (tdep->ppc_vr0_regnum + argpos->vreg, val);
@@ -1419,7 +1419,7 @@ ppc64_sysv_abi_push_param (struct gdbarch *gdbarch,
 			   struct type *type, const bfd_byte *val,
 			   struct ppc64_sysv_argpos *argpos)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (type->code () == TYPE_CODE_FLT
       || type->code () == TYPE_CODE_DECFLOAT)
@@ -1545,7 +1545,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 				CORE_ADDR struct_addr)
 {
   CORE_ADDR func_addr = find_function_addr (function, NULL);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int opencl_abi = ppc_sysv_use_opencl_abi (value_type (function));
   ULONGEST back_chain;
@@ -1633,7 +1633,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 	{
 	  struct value *arg = args[argno];
 	  struct type *type = check_typedef (value_type (arg));
-	  const bfd_byte *val = value_contents (arg);
+	  const bfd_byte *val = value_contents (arg).data ();
 
 	  if (type->code () == TYPE_CODE_COMPLEX)
 	    {
@@ -1739,22 +1739,39 @@ ppc64_sysv_abi_return_value_base (struct gdbarch *gdbarch, struct type *valtype,
 				  struct regcache *regcache, gdb_byte *readbuf,
 				  const gdb_byte *writebuf, int index)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   /* Integers live in GPRs starting at r3.  */
   if ((valtype->code () == TYPE_CODE_INT
        || valtype->code () == TYPE_CODE_ENUM
        || valtype->code () == TYPE_CODE_CHAR
-       || valtype->code () == TYPE_CODE_BOOL)
+       || valtype->code () == TYPE_CODE_BOOL
+       || valtype->code () == TYPE_CODE_RANGE
+       || is_fixed_point_type (valtype))
       && TYPE_LENGTH (valtype) <= 8)
     {
       int regnum = tdep->ppc_gp0_regnum + 3 + index;
 
       if (writebuf != NULL)
 	{
+	  LONGEST return_val;
+
+	  if (is_fixed_point_type (valtype))
+	    {
+	      /* Fixed point type values need to be returned unscaled.  */
+	      gdb_mpz unscaled;
+
+	      unscaled.read (gdb::make_array_view (writebuf,
+						   TYPE_LENGTH (valtype)),
+			     type_byte_order (valtype),
+			     valtype->is_unsigned ());
+	      return_val = unscaled.as_integer<LONGEST> ();
+	    }
+	  else
+	    return_val = unpack_long (valtype, writebuf);
+
 	  /* Be careful to sign extend the value.  */
-	  regcache_cooked_write_unsigned (regcache, regnum,
-					  unpack_long (valtype, writebuf));
+	  regcache_cooked_write_unsigned (regcache, regnum, return_val);
 	}
       if (readbuf != NULL)
 	{
@@ -1905,7 +1922,7 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
 			     struct type *valtype, struct regcache *regcache,
 			     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   struct type *func_type = function ? value_type (function) : NULL;
   int opencl_abi = func_type? ppc_sysv_use_opencl_abi (func_type) : 0;
   struct type *eltype;

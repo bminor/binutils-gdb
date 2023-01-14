@@ -1,5 +1,5 @@
 /* vms.c -- BFD back-end for EVAX (openVMS/Alpha) files.
-   Copyright (C) 1996-2021 Free Software Foundation, Inc.
+   Copyright (C) 1996-2022 Free Software Foundation, Inc.
 
    Initial version written by Klaus Kaempf (kkaempf@rmi.de)
    Major rewrite by Adacore.
@@ -4794,26 +4794,26 @@ build_module_list (bfd *abfd)
 	 since we can compute the start address and the end address
 	 of every module from the section contents.  */
       bfd_size_type size = bfd_section_size (dmt);
-      unsigned char *ptr, *end;
+      unsigned char *buf, *ptr, *end;
 
-      if (! bfd_malloc_and_get_section (abfd, dmt, &ptr))
+      if (! bfd_malloc_and_get_section (abfd, dmt, &buf))
 	return NULL;
 
       vms_debug2 ((2, "DMT\n"));
 
+      ptr = buf;
       end = ptr + size;
-
       while (end - ptr >= DBG_S_C_DMT_HEADER_SIZE)
 	{
 	  /* Each header declares a module with its start offset and size
 	     of debug info in the DST section, as well as the count of
 	     program sections (i.e. address spans) it contains.  */
-	  int modbeg = bfd_getl32 (ptr + DBG_S_L_DMT_MODBEG);
-	  int msize = bfd_getl32 (ptr + DBG_S_L_DST_SIZE);
+	  unsigned int modbeg = bfd_getl32 (ptr + DBG_S_L_DMT_MODBEG);
+	  unsigned int msize = bfd_getl32 (ptr + DBG_S_L_DST_SIZE);
 	  int count = bfd_getl16 (ptr + DBG_S_W_DMT_PSECT_COUNT);
 	  ptr += DBG_S_C_DMT_HEADER_SIZE;
 
-	  vms_debug2 ((3, "module: modbeg = %d, size = %d, count = %d\n",
+	  vms_debug2 ((3, "module: modbeg = %u, size = %u, count = %d\n",
 		       modbeg, msize, count));
 
 	  /* We create a 'module' structure for each program section since
@@ -4823,8 +4823,8 @@ build_module_list (bfd *abfd)
 	     cause problems in practice.  */
 	  while (count-- > 0 && end - ptr >= DBG_S_C_DMT_PSECT_SIZE)
 	    {
-	      int start = bfd_getl32 (ptr + DBG_S_L_DMT_PSECT_START);
-	      int length = bfd_getl32 (ptr + DBG_S_L_DMT_PSECT_LENGTH);
+	      unsigned int start = bfd_getl32 (ptr + DBG_S_L_DMT_PSECT_START);
+	      unsigned int length = bfd_getl32 (ptr + DBG_S_L_DMT_PSECT_LENGTH);
 	      module = new_module (abfd);
 	      module->modbeg = modbeg;
 	      module->size = msize;
@@ -4834,11 +4834,11 @@ build_module_list (bfd *abfd)
 	      list = module;
 	      ptr += DBG_S_C_DMT_PSECT_SIZE;
 
-	      vms_debug2 ((4, "section: start = 0x%x, length = %d\n",
+	      vms_debug2 ((4, "section: start = 0x%x, length = %u\n",
 			   start, length));
 	    }
 	}
-      free (ptr);
+      free (buf);
     }
   else
     {
@@ -6098,16 +6098,18 @@ static void
 evax_bfd_print_egsd (FILE *file, unsigned char *rec, unsigned int rec_len)
 {
   unsigned int off = sizeof (struct vms_egsd);
-  unsigned int n;
+  unsigned int n = 0;
 
   fprintf (file, _("  EGSD (len=%u):\n"), rec_len);
+  if (rec_len < sizeof (struct vms_egsd) + sizeof (struct vms_egsd_entry))
+    return;
 
-  n = 0;
-  for (off = sizeof (struct vms_egsd); off < rec_len; )
+  while (off <= rec_len - sizeof (struct vms_egsd_entry))
     {
       struct vms_egsd_entry *e = (struct vms_egsd_entry *)(rec + off);
       unsigned int type;
       unsigned int len;
+      unsigned int rest;
 
       type = (unsigned)bfd_getl16 (e->gsdtyp);
       len = (unsigned)bfd_getl16 (e->gsdsiz);
@@ -6117,174 +6119,212 @@ evax_bfd_print_egsd (FILE *file, unsigned char *rec, unsigned int rec_len)
 	       n, type, len);
       n++;
 
-      if (off + len > rec_len || off + len < off)
+      if (len < sizeof (struct vms_egsd_entry) || len > rec_len - off)
 	{
-	  fprintf (file, _("   Error: length larger than remaining space in record\n"));
+	  fprintf (file, _("   Erroneous length\n"));
 	  return;
 	}
 
       switch (type)
 	{
 	case EGSD__C_PSC:
-	  {
-	    struct vms_egps *egps = (struct vms_egps *)e;
-	    unsigned int flags = bfd_getl16 (egps->flags);
-	    unsigned int l;
+	  if (len >= offsetof (struct vms_egps, name))
+	    {
+	      struct vms_egps *egps = (struct vms_egps *) e;
+	      unsigned int flags = bfd_getl16 (egps->flags);
+	      unsigned int l;
 
-	    fprintf (file, _("PSC - Program section definition\n"));
-	    fprintf (file, _("   alignment  : 2**%u\n"), egps->align);
-	    fprintf (file, _("   flags      : 0x%04x"), flags);
-	    evax_bfd_print_egsd_flags (file, flags);
-	    fputc ('\n', file);
-	    l = bfd_getl32 (egps->alloc);
-	    fprintf (file, _("   alloc (len): %u (0x%08x)\n"), l, l);
-	    fprintf (file, _("   name       : %.*s\n"),
-		     egps->namlng, egps->name);
-	  }
+	      fprintf (file, _("PSC - Program section definition\n"));
+	      fprintf (file, _("   alignment  : 2**%u\n"), egps->align);
+	      fprintf (file, _("   flags      : 0x%04x"), flags);
+	      evax_bfd_print_egsd_flags (file, flags);
+	      fputc ('\n', file);
+	      l = bfd_getl32 (egps->alloc);
+	      fprintf (file, _("   alloc (len): %u (0x%08x)\n"), l, l);
+	      rest = len - offsetof (struct vms_egps, name);
+	      fprintf (file, _("   name       : %.*s\n"),
+		       egps->namlng > rest ? rest : egps->namlng,
+		       egps->name);
+	    }
 	  break;
 	case EGSD__C_SPSC:
-	  {
-	    struct vms_esgps *esgps = (struct vms_esgps *)e;
-	    unsigned int flags = bfd_getl16 (esgps->flags);
-	    unsigned int l;
+	  if (len >= offsetof (struct vms_esgps, name))
+	    {
+	      struct vms_esgps *esgps = (struct vms_esgps *) e;
+	      unsigned int flags = bfd_getl16 (esgps->flags);
+	      unsigned int l;
 
-	    fprintf (file, _("SPSC - Shared Image Program section def\n"));
-	    fprintf (file, _("   alignment  : 2**%u\n"), esgps->align);
-	    fprintf (file, _("   flags      : 0x%04x"), flags);
-	    evax_bfd_print_egsd_flags (file, flags);
-	    fputc ('\n', file);
-	    l = bfd_getl32 (esgps->alloc);
-	    fprintf (file, _("   alloc (len)   : %u (0x%08x)\n"), l, l);
-	    fprintf (file, _("   image offset  : 0x%08x\n"),
-		     (unsigned int)bfd_getl32 (esgps->base));
-	    fprintf (file, _("   symvec offset : 0x%08x\n"),
-		     (unsigned int)bfd_getl32 (esgps->value));
-	    fprintf (file, _("   name          : %.*s\n"),
-		     esgps->namlng, esgps->name);
-	  }
+	      fprintf (file, _("SPSC - Shared Image Program section def\n"));
+	      fprintf (file, _("   alignment  : 2**%u\n"), esgps->align);
+	      fprintf (file, _("   flags      : 0x%04x"), flags);
+	      evax_bfd_print_egsd_flags (file, flags);
+	      fputc ('\n', file);
+	      l = bfd_getl32 (esgps->alloc);
+	      fprintf (file, _("   alloc (len)   : %u (0x%08x)\n"), l, l);
+	      fprintf (file, _("   image offset  : 0x%08x\n"),
+		       (unsigned int) bfd_getl32 (esgps->base));
+	      fprintf (file, _("   symvec offset : 0x%08x\n"),
+		       (unsigned int) bfd_getl32 (esgps->value));
+	      rest = len - offsetof (struct vms_esgps, name);
+	      fprintf (file, _("   name          : %.*s\n"),
+		       esgps->namlng > rest ? rest : esgps->namlng,
+		       esgps->name);
+	    }
 	  break;
 	case EGSD__C_SYM:
-	  {
-	    struct vms_egsy *egsy = (struct vms_egsy *)e;
-	    unsigned int flags = bfd_getl16 (egsy->flags);
+	  if (len >= sizeof (struct vms_egsy))
+	    {
+	      struct vms_egsy *egsy = (struct vms_egsy *) e;
+	      unsigned int flags = bfd_getl16 (egsy->flags);
 
-	    if (flags & EGSY__V_DEF)
-	      {
-		struct vms_esdf *esdf = (struct vms_esdf *)e;
+	      if ((flags & EGSY__V_DEF) != 0
+		  && len >= offsetof (struct vms_esdf, name))
+		{
+		  struct vms_esdf *esdf = (struct vms_esdf *) e;
 
-		fprintf (file, _("SYM - Global symbol definition\n"));
-		fprintf (file, _("   flags: 0x%04x"), flags);
-		exav_bfd_print_egsy_flags (flags, file);
-		fputc ('\n', file);
-		fprintf (file, _("   psect offset: 0x%08x\n"),
-			 (unsigned)bfd_getl32 (esdf->value));
-		if (flags & EGSY__V_NORM)
-		  {
-		    fprintf (file, _("   code address: 0x%08x\n"),
-			     (unsigned)bfd_getl32 (esdf->code_address));
-		    fprintf (file, _("   psect index for entry point : %u\n"),
-			     (unsigned)bfd_getl32 (esdf->ca_psindx));
-		  }
-		fprintf (file, _("   psect index : %u\n"),
-			 (unsigned)bfd_getl32 (esdf->psindx));
-		fprintf (file, _("   name        : %.*s\n"),
-			 esdf->namlng, esdf->name);
-	      }
-	    else
-	      {
-		struct vms_esrf *esrf = (struct vms_esrf *)e;
+		  fprintf (file, _("SYM - Global symbol definition\n"));
+		  fprintf (file, _("   flags: 0x%04x"), flags);
+		  exav_bfd_print_egsy_flags (flags, file);
+		  fputc ('\n', file);
+		  fprintf (file, _("   psect offset: 0x%08x\n"),
+			   (unsigned) bfd_getl32 (esdf->value));
+		  if (flags & EGSY__V_NORM)
+		    {
+		      fprintf (file, _("   code address: 0x%08x\n"),
+			       (unsigned) bfd_getl32 (esdf->code_address));
+		      fprintf (file, _("   psect index for entry point : %u\n"),
+			       (unsigned) bfd_getl32 (esdf->ca_psindx));
+		    }
+		  fprintf (file, _("   psect index : %u\n"),
+			   (unsigned) bfd_getl32 (esdf->psindx));
+		  rest = len - offsetof (struct vms_esdf, name);
+		  fprintf (file, _("   name        : %.*s\n"),
+			   esdf->namlng > rest ? rest : esdf->namlng,
+			   esdf->name);
+		}
+	      else if (len >= offsetof (struct vms_esrf, name))
+		{
+		  struct vms_esrf *esrf = (struct vms_esrf *)e;
 
-		fprintf (file, _("SYM - Global symbol reference\n"));
-		fprintf (file, _("   name       : %.*s\n"),
-			 esrf->namlng, esrf->name);
-	      }
-	  }
+		  fprintf (file, _("SYM - Global symbol reference\n"));
+		  rest = len - offsetof (struct vms_esrf, name);
+		  fprintf (file, _("   name       : %.*s\n"),
+			   esrf->namlng > rest ? rest : esrf->namlng,
+			   esrf->name);
+		}
+	    }
 	  break;
 	case EGSD__C_IDC:
-	  {
-	    struct vms_eidc *eidc = (struct vms_eidc *)e;
-	    unsigned int flags = bfd_getl32 (eidc->flags);
-	    unsigned char *p;
+	  if (len >= sizeof (struct vms_eidc))
+	    {
+	      struct vms_eidc *eidc = (struct vms_eidc *) e;
+	      unsigned int flags = bfd_getl32 (eidc->flags);
+	      unsigned char *p;
 
-	    fprintf (file, _("IDC - Ident Consistency check\n"));
-	    fprintf (file, _("   flags         : 0x%08x"), flags);
-	    if (flags & EIDC__V_BINIDENT)
-	      fputs (" BINDENT", file);
-	    fputc ('\n', file);
-	    fprintf (file, _("   id match      : %x\n"),
-		     (flags >> EIDC__V_IDMATCH_SH) & EIDC__V_IDMATCH_MASK);
-	    fprintf (file, _("   error severity: %x\n"),
-		     (flags >> EIDC__V_ERRSEV_SH) & EIDC__V_ERRSEV_MASK);
-	    p = eidc->name;
-	    fprintf (file, _("   entity name   : %.*s\n"), p[0], p + 1);
-	    p += 1 + p[0];
-	    fprintf (file, _("   object name   : %.*s\n"), p[0], p + 1);
-	    p += 1 + p[0];
-	    if (flags & EIDC__V_BINIDENT)
-	      fprintf (file, _("   binary ident  : 0x%08x\n"),
-		       (unsigned)bfd_getl32 (p + 1));
-	    else
-	      fprintf (file, _("   ascii ident   : %.*s\n"), p[0], p + 1);
-	  }
+	      fprintf (file, _("IDC - Ident Consistency check\n"));
+	      fprintf (file, _("   flags         : 0x%08x"), flags);
+	      if (flags & EIDC__V_BINIDENT)
+		fputs (" BINDENT", file);
+	      fputc ('\n', file);
+	      fprintf (file, _("   id match      : %x\n"),
+		       (flags >> EIDC__V_IDMATCH_SH) & EIDC__V_IDMATCH_MASK);
+	      fprintf (file, _("   error severity: %x\n"),
+		       (flags >> EIDC__V_ERRSEV_SH) & EIDC__V_ERRSEV_MASK);
+	      p = eidc->name;
+	      rest = len - (p - (unsigned char *) e);
+	      fprintf (file, _("   entity name   : %.*s\n"),
+		       p[0] > rest - 1 ? rest - 1 : p[0], p + 1);
+	      if (rest > 1u + p[0])
+		{
+		  rest -= 1 + p[0];
+		  p += 1 + p[0];
+		  fprintf (file, _("   object name   : %.*s\n"),
+			   p[0] > rest - 1 ? rest - 1 : p[0], p + 1);
+		  if (rest > 1u + p[0])
+		    {
+		      rest -= 1 + p[0];
+		      p += 1 + p[0];
+		      if (flags & EIDC__V_BINIDENT)
+			{
+			  if (rest >= 4)
+			    fprintf (file, _("   binary ident  : 0x%08x\n"),
+				     (unsigned) bfd_getl32 (p));
+			}
+		      else
+			fprintf (file, _("   ascii ident   : %.*s\n"),
+				 p[0] > rest - 1 ? rest - 1 : p[0], p + 1);
+		    }
+		}
+	    }
 	  break;
 	case EGSD__C_SYMG:
-	  {
-	    struct vms_egst *egst = (struct vms_egst *)e;
-	    unsigned int flags = bfd_getl16 (egst->header.flags);
+	  if (len >= offsetof (struct vms_egst, name))
+	    {
+	      struct vms_egst *egst = (struct vms_egst *) e;
+	      unsigned int flags = bfd_getl16 (egst->header.flags);
 
-	    fprintf (file, _("SYMG - Universal symbol definition\n"));
-	    fprintf (file, _("   flags: 0x%04x"), flags);
-	    exav_bfd_print_egsy_flags (flags, file);
-	    fputc ('\n', file);
-	    fprintf (file, _("   symbol vector offset: 0x%08x\n"),
-		     (unsigned)bfd_getl32 (egst->value));
-	    fprintf (file, _("   entry point: 0x%08x\n"),
-		     (unsigned)bfd_getl32 (egst->lp_1));
-	    fprintf (file, _("   proc descr : 0x%08x\n"),
-		     (unsigned)bfd_getl32 (egst->lp_2));
-	    fprintf (file, _("   psect index: %u\n"),
-		     (unsigned)bfd_getl32 (egst->psindx));
-	    fprintf (file, _("   name       : %.*s\n"),
-		     egst->namlng, egst->name);
-	  }
+	      fprintf (file, _("SYMG - Universal symbol definition\n"));
+	      fprintf (file, _("   flags: 0x%04x"), flags);
+	      exav_bfd_print_egsy_flags (flags, file);
+	      fputc ('\n', file);
+	      fprintf (file, _("   symbol vector offset: 0x%08x\n"),
+		       (unsigned) bfd_getl32 (egst->value));
+	      fprintf (file, _("   entry point: 0x%08x\n"),
+		       (unsigned) bfd_getl32 (egst->lp_1));
+	      fprintf (file, _("   proc descr : 0x%08x\n"),
+		       (unsigned) bfd_getl32 (egst->lp_2));
+	      fprintf (file, _("   psect index: %u\n"),
+		       (unsigned) bfd_getl32 (egst->psindx));
+	      rest = len - offsetof (struct vms_egst, name);
+	      fprintf (file, _("   name       : %.*s\n"),
+		       egst->namlng > rest ? rest : egst->namlng,
+		       egst->name);
+	    }
 	  break;
 	case EGSD__C_SYMV:
-	  {
-	    struct vms_esdfv *esdfv = (struct vms_esdfv *)e;
-	    unsigned int flags = bfd_getl16 (esdfv->flags);
+	  if (len >= offsetof (struct vms_esdfv, name))
+	    {
+	      struct vms_esdfv *esdfv = (struct vms_esdfv *) e;
+	      unsigned int flags = bfd_getl16 (esdfv->flags);
 
-	    fprintf (file, _("SYMV - Vectored symbol definition\n"));
-	    fprintf (file, _("   flags: 0x%04x"), flags);
-	    exav_bfd_print_egsy_flags (flags, file);
-	    fputc ('\n', file);
-	    fprintf (file, _("   vector      : 0x%08x\n"),
-		     (unsigned)bfd_getl32 (esdfv->vector));
-	    fprintf (file, _("   psect offset: %u\n"),
-		     (unsigned)bfd_getl32 (esdfv->value));
-	    fprintf (file, _("   psect index : %u\n"),
-		     (unsigned)bfd_getl32 (esdfv->psindx));
-	    fprintf (file, _("   name        : %.*s\n"),
-		     esdfv->namlng, esdfv->name);
-	  }
+	      fprintf (file, _("SYMV - Vectored symbol definition\n"));
+	      fprintf (file, _("   flags: 0x%04x"), flags);
+	      exav_bfd_print_egsy_flags (flags, file);
+	      fputc ('\n', file);
+	      fprintf (file, _("   vector      : 0x%08x\n"),
+		       (unsigned) bfd_getl32 (esdfv->vector));
+	      fprintf (file, _("   psect offset: %u\n"),
+		       (unsigned) bfd_getl32 (esdfv->value));
+	      fprintf (file, _("   psect index : %u\n"),
+		       (unsigned) bfd_getl32 (esdfv->psindx));
+	      rest = len - offsetof (struct vms_esdfv, name);
+	      fprintf (file, _("   name        : %.*s\n"),
+		       esdfv->namlng > rest ? rest : esdfv->namlng,
+		       esdfv->name);
+	    }
 	  break;
 	case EGSD__C_SYMM:
-	  {
-	    struct vms_esdfm *esdfm = (struct vms_esdfm *)e;
-	    unsigned int flags = bfd_getl16 (esdfm->flags);
+	  if (len >= offsetof (struct vms_esdfm, name))
+	    {
+	      struct vms_esdfm *esdfm = (struct vms_esdfm *) e;
+	      unsigned int flags = bfd_getl16 (esdfm->flags);
 
-	    fprintf (file, _("SYMM - Global symbol definition with version\n"));
-	    fprintf (file, _("   flags: 0x%04x"), flags);
-	    exav_bfd_print_egsy_flags (flags, file);
-	    fputc ('\n', file);
-	    fprintf (file, _("   version mask: 0x%08x\n"),
-		     (unsigned)bfd_getl32 (esdfm->version_mask));
-	    fprintf (file, _("   psect offset: %u\n"),
-		     (unsigned)bfd_getl32 (esdfm->value));
-	    fprintf (file, _("   psect index : %u\n"),
-		     (unsigned)bfd_getl32 (esdfm->psindx));
-	    fprintf (file, _("   name        : %.*s\n"),
-		     esdfm->namlng, esdfm->name);
-	  }
+	      fprintf (file,
+		       _("SYMM - Global symbol definition with version\n"));
+	      fprintf (file, _("   flags: 0x%04x"), flags);
+	      exav_bfd_print_egsy_flags (flags, file);
+	      fputc ('\n', file);
+	      fprintf (file, _("   version mask: 0x%08x\n"),
+		       (unsigned)bfd_getl32 (esdfm->version_mask));
+	      fprintf (file, _("   psect offset: %u\n"),
+		       (unsigned)bfd_getl32 (esdfm->value));
+	      fprintf (file, _("   psect index : %u\n"),
+		       (unsigned)bfd_getl32 (esdfm->psindx));
+	      rest = len - offsetof (struct vms_esdfm, name);
+	      fprintf (file, _("   name        : %.*s\n"),
+		       esdfm->namlng > rest ? rest : esdfm->namlng,
+		       esdfm->name);
+	    }
 	  break;
 	default:
 	  fprintf (file, _("unhandled egsd entry type %u\n"), type);
@@ -6319,8 +6359,12 @@ evax_bfd_print_hex (FILE *file, const char *pfx,
 }
 
 static void
-evax_bfd_print_etir_stc_ir (FILE *file, const unsigned char *buf, int is_ps)
+evax_bfd_print_etir_stc_ir (FILE *file, const unsigned char *buf,
+			    unsigned int len, int is_ps)
 {
+  if (is_ps ? len < 44 : len < 33)
+    return;
+
   /* xgettext:c-format */
   fprintf (file, _("    linkage index: %u, replacement insn: 0x%08x\n"),
 	   (unsigned)bfd_getl32 (buf),
@@ -6342,62 +6386,71 @@ evax_bfd_print_etir_stc_ir (FILE *file, const unsigned char *buf, int is_ps)
 	     (unsigned)bfd_getl32 (buf + 40),
 	     (unsigned)bfd_getl32 (buf + 36));
   else
-    fprintf (file, _("    global name: %.*s\n"), buf[32], buf + 33);
+    fprintf (file, _("    global name: %.*s\n"),
+	     buf[32] > len - 33 ? len - 33 : buf[32],
+	     buf + 33);
 }
 
 static void
 evax_bfd_print_etir (FILE *file, const char *name,
 		     unsigned char *rec, unsigned int rec_len)
 {
-  unsigned int off = sizeof (struct vms_egsd);
-  unsigned int sec_len = 0;
+  unsigned int off = sizeof (struct vms_eobjrec);
 
   /* xgettext:c-format */
-  fprintf (file, _("  %s (len=%u+%u):\n"), name,
-	   (unsigned)(rec_len - sizeof (struct vms_eobjrec)),
-	   (unsigned)sizeof (struct vms_eobjrec));
+  fprintf (file, _("  %s (len=%u):\n"), name, (unsigned) rec_len);
+  if (rec_len < sizeof (struct vms_eobjrec) + sizeof (struct vms_etir))
+    return;
 
-  for (off = sizeof (struct vms_eobjrec); off < rec_len; )
+  while (off <= rec_len - sizeof (struct vms_etir))
     {
       struct vms_etir *etir = (struct vms_etir *)(rec + off);
       unsigned char *buf;
       unsigned int type;
       unsigned int size;
+      unsigned int rest;
 
       type = bfd_getl16 (etir->rectyp);
       size = bfd_getl16 (etir->size);
       buf = rec + off + sizeof (struct vms_etir);
 
-      if (off + size > rec_len || off + size < off)
+      if (size < sizeof (struct vms_etir) || size > rec_len - off)
 	{
-	  fprintf (file, _("   Error: length larger than remaining space in record\n"));
+	  fprintf (file, _("   Erroneous length\n"));
 	  return;
 	}
 
       /* xgettext:c-format */
-      fprintf (file, _("   (type: %3u, size: 4+%3u): "), type, size - 4);
+      fprintf (file, _("   (type: %3u, size: %3u): "), type, size);
+      rest = size - sizeof (struct vms_etir);
       switch (type)
 	{
 	case ETIR__C_STA_GBL:
-	  fprintf (file, _("STA_GBL (stack global) %.*s\n"),
-		   buf[0], buf + 1);
+	  if (rest >= 1)
+	    fprintf (file, _("STA_GBL (stack global) %.*s\n"),
+		     buf[0] > rest - 1 ? rest - 1 : buf[0], buf + 1);
 	  break;
 	case ETIR__C_STA_LW:
-	  fprintf (file, _("STA_LW (stack longword) 0x%08x\n"),
-		   (unsigned)bfd_getl32 (buf));
+	  fprintf (file, _("STA_LW (stack longword)"));
+	  if (rest >= 4)
+	    fprintf (file, " 0x%08x\n",
+		     (unsigned) bfd_getl32 (buf));
 	  break;
 	case ETIR__C_STA_QW:
-	  fprintf (file, _("STA_QW (stack quadword) 0x%08x %08x\n"),
-		   (unsigned)bfd_getl32 (buf + 4),
-		   (unsigned)bfd_getl32 (buf + 0));
+	  fprintf (file, _("STA_QW (stack quadword)"));
+	  if (rest >= 8)
+	    fprintf (file, " 0x%08x %08x\n",
+		     (unsigned) bfd_getl32 (buf + 4),
+		     (unsigned) bfd_getl32 (buf + 0));
 	  break;
 	case ETIR__C_STA_PQ:
 	  fprintf (file, _("STA_PQ (stack psect base + offset)\n"));
-	  /* xgettext:c-format */
-	  fprintf (file, _("    psect: %u, offset: 0x%08x %08x\n"),
-		   (unsigned)bfd_getl32 (buf + 0),
-		   (unsigned)bfd_getl32 (buf + 8),
-		   (unsigned)bfd_getl32 (buf + 4));
+	  if (rest >= 12)
+	    /* xgettext:c-format */
+	    fprintf (file, _("    psect: %u, offset: 0x%08x %08x\n"),
+		     (unsigned) bfd_getl32 (buf + 0),
+		     (unsigned) bfd_getl32 (buf + 8),
+		     (unsigned) bfd_getl32 (buf + 4));
 	  break;
 	case ETIR__C_STA_LI:
 	  fprintf (file, _("STA_LI (stack literal)\n"));
@@ -6422,22 +6475,26 @@ evax_bfd_print_etir (FILE *file, const char *name,
 	  fprintf (file, _("STO_QW (store quadword)\n"));
 	  break;
 	case ETIR__C_STO_IMMR:
-	  {
-	    unsigned int len = bfd_getl32 (buf);
-	    fprintf (file,
-		     _("STO_IMMR (store immediate repeat) %u bytes\n"),
-		     len);
-	    evax_bfd_print_hex (file, "   ", buf + 4, len);
-	    sec_len += len;
-	  }
+	  if (rest >= 4)
+	    {
+	      unsigned int rpt = bfd_getl32 (buf);
+	      fprintf (file,
+		       _("STO_IMMR (store immediate repeat) %u bytes\n"),
+		       rpt);
+	      if (rpt > rest - 4)
+		rpt = rest - 4;
+	      evax_bfd_print_hex (file, "   ", buf + 4, rpt);
+	    }
 	  break;
 	case ETIR__C_STO_GBL:
-	  fprintf (file, _("STO_GBL (store global) %.*s\n"),
-		   buf[0], buf + 1);
+	  if (rest >= 1)
+	    fprintf (file, _("STO_GBL (store global) %.*s\n"),
+		     buf[0] > rest - 1 ? rest - 1 : buf[0], buf + 1);
 	  break;
 	case ETIR__C_STO_CA:
-	  fprintf (file, _("STO_CA (store code address) %.*s\n"),
-		   buf[0], buf + 1);
+	  if (rest >= 1)
+	    fprintf (file, _("STO_CA (store code address) %.*s\n"),
+		     buf[0] > rest - 1 ? rest - 1 : buf[0], buf + 1);
 	  break;
 	case ETIR__C_STO_RB:
 	  fprintf (file, _("STO_RB (store relative branch)\n"));
@@ -6449,18 +6506,21 @@ evax_bfd_print_etir (FILE *file, const char *name,
 	  fprintf (file, _("STO_OFF (store offset to psect)\n"));
 	  break;
 	case ETIR__C_STO_IMM:
-	  {
-	    unsigned int len = bfd_getl32 (buf);
-	    fprintf (file,
-		     _("STO_IMM (store immediate) %u bytes\n"),
-		     len);
-	    evax_bfd_print_hex (file, "   ", buf + 4, len);
-	    sec_len += len;
-	  }
+	  if (rest >= 4)
+	    {
+	      unsigned int rpt = bfd_getl32 (buf);
+	      fprintf (file,
+		       _("STO_IMM (store immediate) %u bytes\n"),
+		       rpt);
+	      if (rpt > rest - 4)
+		rpt = rest - 4;
+	      evax_bfd_print_hex (file, "   ", buf + 4, rpt);
+	    }
 	  break;
 	case ETIR__C_STO_GBL_LW:
-	  fprintf (file, _("STO_GBL_LW (store global longword) %.*s\n"),
-		   buf[0], buf + 1);
+	  if (rest >= 1)
+	    fprintf (file, _("STO_GBL_LW (store global longword) %.*s\n"),
+		     buf[0] > rest - 1 ? rest - 1 : buf[0], buf + 1);
 	  break;
 	case ETIR__C_STO_LP_PSB:
 	  fprintf (file, _("STO_OFF (store LP with procedure signature)\n"));
@@ -6530,65 +6590,79 @@ evax_bfd_print_etir (FILE *file, const char *name,
 	case ETIR__C_STC_LP_PSB:
 	  fprintf (file,
 		   _("STC_LP_PSB (store cond linkage pair + signature)\n"));
-	  /* xgettext:c-format */
-	  fprintf (file, _("   linkage index: %u, procedure: %.*s\n"),
-		   (unsigned)bfd_getl32 (buf), buf[4], buf + 5);
-	  buf += 4 + 1 + buf[4];
-	  fprintf (file, _("   signature: %.*s\n"), buf[0], buf + 1);
+	  if (rest >= 5)
+	    {
+	      /* xgettext:c-format */
+	      fprintf (file, _("   linkage index: %u, procedure: %.*s\n"),
+		       (unsigned) bfd_getl32 (buf),
+		       buf[4] > rest - 5 ? rest - 5 : buf[4], buf + 5);
+	      if (rest > 4 + 1u + buf[4])
+		{
+		  rest -= 4 + 1 + buf[4];
+		  buf += 4 + 1 + buf[4];
+		  fprintf (file, _("   signature: %.*s\n"),
+			   buf[0] > rest - 1 ? rest - 1: buf[0], buf + 1);
+		}
+	    }
 	  break;
 	case ETIR__C_STC_GBL:
 	  fprintf (file, _("STC_GBL (store cond global)\n"));
-	  /* xgettext:c-format */
-	  fprintf (file, _("   linkage index: %u, global: %.*s\n"),
-		   (unsigned)bfd_getl32 (buf), buf[4], buf + 5);
+	  if (rest >= 5)
+	    /* xgettext:c-format */
+	    fprintf (file, _("   linkage index: %u, global: %.*s\n"),
+		     (unsigned) bfd_getl32 (buf),
+		     buf[4] > rest - 5 ? rest - 5 : buf[4], buf + 5);
 	  break;
 	case ETIR__C_STC_GCA:
 	  fprintf (file, _("STC_GCA (store cond code address)\n"));
-	  /* xgettext:c-format */
-	  fprintf (file, _("   linkage index: %u, procedure name: %.*s\n"),
-		   (unsigned)bfd_getl32 (buf), buf[4], buf + 5);
+	  if (rest >= 5)
+	    /* xgettext:c-format */
+	    fprintf (file, _("   linkage index: %u, procedure name: %.*s\n"),
+		     (unsigned) bfd_getl32 (buf),
+		     buf[4] > rest - 5 ? rest - 5 : buf[4], buf + 5);
 	  break;
 	case ETIR__C_STC_PS:
 	  fprintf (file, _("STC_PS (store cond psect + offset)\n"));
-	  fprintf (file,
-		   /* xgettext:c-format */
-		   _("   linkage index: %u, psect: %u, offset: 0x%08x %08x\n"),
-		   (unsigned)bfd_getl32 (buf),
-		   (unsigned)bfd_getl32 (buf + 4),
-		   (unsigned)bfd_getl32 (buf + 12),
-		   (unsigned)bfd_getl32 (buf + 8));
+	  if (rest >= 16)
+	    fprintf (file,
+		     /* xgettext:c-format */
+		     _("   linkage index: %u, psect: %u, offset: 0x%08x %08x\n"),
+		     (unsigned)bfd_getl32 (buf),
+		     (unsigned)bfd_getl32 (buf + 4),
+		     (unsigned)bfd_getl32 (buf + 12),
+		     (unsigned)bfd_getl32 (buf + 8));
 	  break;
 	case ETIR__C_STC_NOP_GBL:
 	  fprintf (file, _("STC_NOP_GBL (store cond NOP at global addr)\n"));
-	  evax_bfd_print_etir_stc_ir (file, buf, 0);
+	  evax_bfd_print_etir_stc_ir (file, buf, rest, 0);
 	  break;
 	case ETIR__C_STC_NOP_PS:
 	  fprintf (file, _("STC_NOP_PS (store cond NOP at psect + offset)\n"));
-	  evax_bfd_print_etir_stc_ir (file, buf, 1);
+	  evax_bfd_print_etir_stc_ir (file, buf, rest, 1);
 	  break;
 	case ETIR__C_STC_BSR_GBL:
 	  fprintf (file, _("STC_BSR_GBL (store cond BSR at global addr)\n"));
-	  evax_bfd_print_etir_stc_ir (file, buf, 0);
+	  evax_bfd_print_etir_stc_ir (file, buf, rest, 0);
 	  break;
 	case ETIR__C_STC_BSR_PS:
 	  fprintf (file, _("STC_BSR_PS (store cond BSR at psect + offset)\n"));
-	  evax_bfd_print_etir_stc_ir (file, buf, 1);
+	  evax_bfd_print_etir_stc_ir (file, buf, rest, 1);
 	  break;
 	case ETIR__C_STC_LDA_GBL:
 	  fprintf (file, _("STC_LDA_GBL (store cond LDA at global addr)\n"));
-	  evax_bfd_print_etir_stc_ir (file, buf, 0);
+	  evax_bfd_print_etir_stc_ir (file, buf, rest, 0);
 	  break;
 	case ETIR__C_STC_LDA_PS:
 	  fprintf (file, _("STC_LDA_PS (store cond LDA at psect + offset)\n"));
-	  evax_bfd_print_etir_stc_ir (file, buf, 1);
+	  evax_bfd_print_etir_stc_ir (file, buf, rest, 1);
 	  break;
 	case ETIR__C_STC_BOH_GBL:
 	  fprintf (file, _("STC_BOH_GBL (store cond BOH at global addr)\n"));
-	  evax_bfd_print_etir_stc_ir (file, buf, 0);
+	  evax_bfd_print_etir_stc_ir (file, buf, rest, 0);
 	  break;
 	case ETIR__C_STC_BOH_PS:
 	  fprintf (file, _("STC_BOH_PS (store cond BOH at psect + offset)\n"));
-	  evax_bfd_print_etir_stc_ir (file, buf, 1);
+	  evax_bfd_print_etir_stc_ir (file, buf, rest, 1);
 	  break;
 	case ETIR__C_STC_NBH_GBL:
 	  fprintf (file,
@@ -6601,13 +6675,14 @@ evax_bfd_print_etir (FILE *file, const char *name,
 
 	case ETIR__C_CTL_SETRB:
 	  fprintf (file, _("CTL_SETRB (set relocation base)\n"));
-	  sec_len += 4;
 	  break;
 	case ETIR__C_CTL_AUGRB:
-	  {
-	    unsigned int val = bfd_getl32 (buf);
-	    fprintf (file, _("CTL_AUGRB (augment relocation base) %u\n"), val);
-	  }
+	  if (rest >= 4)
+	    {
+	      unsigned int val = bfd_getl32 (buf);
+	      fprintf (file, _("CTL_AUGRB (augment relocation base) %u\n"),
+		       val);
+	    }
 	  break;
 	case ETIR__C_CTL_DFLOC:
 	  fprintf (file, _("CTL_DFLOC (define location)\n"));
@@ -6754,34 +6829,35 @@ evax_bfd_print_eobj (struct bfd *abfd, FILE *file)
 }
 
 static void
-evax_bfd_print_relocation_records (FILE *file, const unsigned char *rel,
+evax_bfd_print_relocation_records (FILE *file, const unsigned char *buf,
+				   size_t buf_size, size_t off,
 				   unsigned int stride)
 {
-  while (1)
+  while (off <= buf_size - 8)
     {
       unsigned int base;
       unsigned int count;
       unsigned int j;
 
-      count = bfd_getl32 (rel + 0);
+      count = bfd_getl32 (buf + off + 0);
 
       if (count == 0)
 	break;
-      base = bfd_getl32 (rel + 4);
+      base = bfd_getl32 (buf + off + 4);
 
       /* xgettext:c-format */
       fprintf (file, _("  bitcount: %u, base addr: 0x%08x\n"),
 	       count, base);
 
-      rel += 8;
-      for (j = 0; count > 0; j += 4, count -= 32)
+      off += 8;
+      for (j = 0; count > 0 && off <= buf_size - 4; j += 4, count -= 32)
 	{
 	  unsigned int k;
 	  unsigned int n = 0;
 	  unsigned int val;
 
-	  val = bfd_getl32 (rel);
-	  rel += 4;
+	  val = bfd_getl32 (buf + off);
+	  off += 4;
 
 	  /* xgettext:c-format */
 	  fprintf (file, _("   bitmap: 0x%08x (count: %u):\n"), val, count);
@@ -6806,60 +6882,62 @@ evax_bfd_print_relocation_records (FILE *file, const unsigned char *rel,
 }
 
 static void
-evax_bfd_print_address_fixups (FILE *file, const unsigned char *rel)
+evax_bfd_print_address_fixups (FILE *file, const unsigned char *buf,
+			       size_t buf_size, size_t off)
 {
-  while (1)
+  while (off <= buf_size - 8)
     {
       unsigned int j;
       unsigned int count;
 
-      count = bfd_getl32 (rel + 0);
+      count = bfd_getl32 (buf + off + 0);
       if (count == 0)
 	return;
       /* xgettext:c-format */
       fprintf (file, _("  image %u (%u entries)\n"),
-	       (unsigned)bfd_getl32 (rel + 4), count);
-      rel += 8;
-      for (j = 0; j < count; j++)
+	       (unsigned) bfd_getl32 (buf + off + 4), count);
+      off += 8;
+      for (j = 0; j < count && off <= buf_size - 8; j++)
 	{
 	  /* xgettext:c-format */
 	  fprintf (file, _("   offset: 0x%08x, val: 0x%08x\n"),
-		   (unsigned)bfd_getl32 (rel + 0),
-		   (unsigned)bfd_getl32 (rel + 4));
-	  rel += 8;
+		   (unsigned) bfd_getl32 (buf + off + 0),
+		   (unsigned) bfd_getl32 (buf + off + 4));
+	  off += 8;
 	}
     }
 }
 
 static void
-evax_bfd_print_reference_fixups (FILE *file, const unsigned char *rel)
+evax_bfd_print_reference_fixups (FILE *file, const unsigned char *buf,
+				 size_t buf_size, size_t off)
 {
   unsigned int count;
 
-  while (1)
+  while (off <= buf_size - 8)
     {
       unsigned int j;
       unsigned int n = 0;
 
-      count = bfd_getl32 (rel + 0);
+      count = bfd_getl32 (buf + off + 0);
       if (count == 0)
 	break;
       /* xgettext:c-format */
       fprintf (file, _("  image %u (%u entries), offsets:\n"),
-	       (unsigned)bfd_getl32 (rel + 4), count);
-      rel += 8;
-      for (j = 0; j < count; j++)
+	       (unsigned) bfd_getl32 (buf + off + 4), count);
+      off += 8;
+      for (j = 0; j < count && off <= buf_size - 4; j++)
 	{
 	  if (n == 0)
 	    fputs ("   ", file);
-	  fprintf (file, _(" 0x%08x"), (unsigned)bfd_getl32 (rel));
+	  fprintf (file, _(" 0x%08x"), (unsigned) bfd_getl32 (buf + off));
 	  n++;
 	  if (n == 7)
 	    {
 	      fputs ("\n", file);
 	      n = 0;
 	    }
-	  rel += 4;
+	  off += 4;
 	}
       if (n)
 	fputs ("\n", file);
@@ -6962,8 +7040,12 @@ evax_bfd_get_dsc_name (unsigned int v)
 }
 
 static void
-evax_bfd_print_desc (const unsigned char *buf, int indent, FILE *file)
+evax_bfd_print_desc (const unsigned char *buf, unsigned int bufsize,
+		     int indent, FILE *file)
 {
+  if (bufsize < 8)
+    return;
+
   unsigned char bclass = buf[3];
   unsigned char dtype = buf[2];
   unsigned int len = (unsigned)bfd_getl16 (buf);
@@ -6992,38 +7074,47 @@ evax_bfd_print_desc (const unsigned char *buf, int indent, FILE *file)
 	    evax_bfd_print_indent (indent, file);
 	    fprintf (file, _("non-contiguous array of %s\n"),
 		     evax_bfd_get_dsc_name (dsc->dtype));
-	    evax_bfd_print_indent (indent + 1, file);
-	    fprintf (file,
-		     /* xgettext:c-format */
-		     _("dimct: %u, aflags: 0x%02x, digits: %u, scale: %u\n"),
-		     dsc->dimct, dsc->aflags, dsc->digits, dsc->scale);
-	    evax_bfd_print_indent (indent + 1, file);
-	    fprintf (file,
-		     /* xgettext:c-format */
-		     _("arsize: %u, a0: 0x%08x\n"),
-		     (unsigned)bfd_getl32 (dsc->arsize),
-		     (unsigned)bfd_getl32 (dsc->a0));
-	    evax_bfd_print_indent (indent + 1, file);
-	    fprintf (file, _("Strides:\n"));
-	    b = buf + sizeof (*dsc);
-	    for (i = 0; i < dsc->dimct; i++)
+	    if (bufsize >= sizeof (*dsc))
 	      {
-		evax_bfd_print_indent (indent + 2, file);
-		fprintf (file, "[%u]: %u\n", i + 1,
-			 (unsigned)bfd_getl32 (b));
-		b += 4;
-	      }
-	    evax_bfd_print_indent (indent + 1, file);
-	    fprintf (file, _("Bounds:\n"));
-	    b = buf + sizeof (*dsc);
-	    for (i = 0; i < dsc->dimct; i++)
-	      {
-		evax_bfd_print_indent (indent + 2, file);
-		/* xgettext:c-format */
-		fprintf (file, _("[%u]: Lower: %u, upper: %u\n"), i + 1,
-			 (unsigned)bfd_getl32 (b + 0),
-			 (unsigned)bfd_getl32 (b + 4));
-		b += 8;
+		evax_bfd_print_indent (indent + 1, file);
+		fprintf (file,
+			 /* xgettext:c-format */
+			 _("dimct: %u, aflags: 0x%02x, digits: %u, scale: %u\n"),
+			 dsc->dimct, dsc->aflags, dsc->digits, dsc->scale);
+		evax_bfd_print_indent (indent + 1, file);
+		fprintf (file,
+			 /* xgettext:c-format */
+			 _("arsize: %u, a0: 0x%08x\n"),
+			 (unsigned) bfd_getl32 (dsc->arsize),
+			 (unsigned) bfd_getl32 (dsc->a0));
+		evax_bfd_print_indent (indent + 1, file);
+		fprintf (file, _("Strides:\n"));
+		b = buf + sizeof (*dsc);
+		bufsize -= sizeof (*dsc);
+		for (i = 0; i < dsc->dimct; i++)
+		  {
+		    if (bufsize < 4)
+		      break;
+		    evax_bfd_print_indent (indent + 2, file);
+		    fprintf (file, "[%u]: %u\n", i + 1,
+			     (unsigned) bfd_getl32 (b));
+		    b += 4;
+		    bufsize -= 4;
+		  }
+		evax_bfd_print_indent (indent + 1, file);
+		fprintf (file, _("Bounds:\n"));
+		for (i = 0; i < dsc->dimct; i++)
+		  {
+		    if (bufsize < 8)
+		      break;
+		    evax_bfd_print_indent (indent + 2, file);
+		    /* xgettext:c-format */
+		    fprintf (file, _("[%u]: Lower: %u, upper: %u\n"), i + 1,
+			     (unsigned) bfd_getl32 (b + 0),
+			     (unsigned) bfd_getl32 (b + 4));
+		    b += 8;
+		    bufsize -= 8;
+		  }
 	      }
 	  }
 	  break;
@@ -7034,12 +7125,15 @@ evax_bfd_print_desc (const unsigned char *buf, int indent, FILE *file)
 	    evax_bfd_print_indent (indent, file);
 	    fprintf (file, _("unaligned bit-string of %s\n"),
 		     evax_bfd_get_dsc_name (ubs->dtype));
-	    evax_bfd_print_indent (indent + 1, file);
-	    fprintf (file,
-		     /* xgettext:c-format */
-		     _("base: %u, pos: %u\n"),
-		     (unsigned)bfd_getl32 (ubs->base),
-		     (unsigned)bfd_getl32 (ubs->pos));
+	    if (bufsize >= sizeof (*ubs))
+	      {
+		evax_bfd_print_indent (indent + 1, file);
+		fprintf (file,
+			 /* xgettext:c-format */
+			 _("base: %u, pos: %u\n"),
+			 (unsigned) bfd_getl32 (ubs->base),
+			 (unsigned) bfd_getl32 (ubs->pos));
+	      }
 	  }
 	  break;
 	default:
@@ -7050,16 +7144,21 @@ evax_bfd_print_desc (const unsigned char *buf, int indent, FILE *file)
 }
 
 static unsigned int
-evax_bfd_print_valspec (const unsigned char *buf, int indent, FILE *file)
+evax_bfd_print_valspec (const unsigned char *buf, unsigned int bufsize,
+			int indent, FILE *file)
 {
+  if (bufsize < 5)
+    return bufsize;
+
   unsigned int vflags = buf[0];
-  unsigned int value = (unsigned)bfd_getl32 (buf + 1);
+  unsigned int value = (unsigned) bfd_getl32 (buf + 1);
   unsigned int len = 5;
 
   evax_bfd_print_indent (indent, file);
   /* xgettext:c-format */
   fprintf (file, _("vflags: 0x%02x, value: 0x%08x "), vflags, value);
   buf += 5;
+  bufsize -= 5;
 
   switch (vflags)
     {
@@ -7074,7 +7173,8 @@ evax_bfd_print_valspec (const unsigned char *buf, int indent, FILE *file)
       break;
     case DST__K_VFLAGS_DSC:
       fprintf (file, _("(descriptor)\n"));
-      evax_bfd_print_desc (buf + value, indent + 1, file);
+      if (value <= bufsize)
+	evax_bfd_print_desc (buf + value, bufsize - value, indent + 1, file);
       break;
     case DST__K_VFLAGS_TVS:
       fprintf (file, _("(trailing value)\n"));
@@ -7113,29 +7213,36 @@ evax_bfd_print_valspec (const unsigned char *buf, int indent, FILE *file)
 }
 
 static void
-evax_bfd_print_typspec (const unsigned char *buf, int indent, FILE *file)
+evax_bfd_print_typspec (const unsigned char *buf, unsigned int bufsize,
+			int indent, FILE *file)
 {
+  if (bufsize < 3)
+    return;
+
   unsigned char kind = buf[2];
-  unsigned int len = (unsigned)bfd_getl16 (buf);
+  unsigned int len = (unsigned) bfd_getl16 (buf);
 
   evax_bfd_print_indent (indent, file);
   /* xgettext:c-format */
   fprintf (file, _("len: %2u, kind: %2u "), len, kind);
   buf += 3;
+  bufsize -= 3;
   switch (kind)
     {
     case DST__K_TS_ATOM:
     /* xgettext:c-format */
-      fprintf (file, _("atomic, type=0x%02x %s\n"),
-	       buf[0], evax_bfd_get_dsc_name (buf[0]));
+      if (bufsize >= 1)
+	fprintf (file, _("atomic, type=0x%02x %s\n"),
+		 buf[0], evax_bfd_get_dsc_name (buf[0]));
       break;
     case DST__K_TS_IND:
-      fprintf (file, _("indirect, defined at 0x%08x\n"),
-	       (unsigned)bfd_getl32 (buf));
+      if (bufsize >= 4)
+	fprintf (file, _("indirect, defined at 0x%08x\n"),
+		 (unsigned) bfd_getl32 (buf));
       break;
     case DST__K_TS_TPTR:
       fprintf (file, _("typed pointer\n"));
-      evax_bfd_print_typspec (buf, indent + 1, file);
+      evax_bfd_print_typspec (buf, bufsize, indent + 1, file);
       break;
     case DST__K_TS_PTR:
       fprintf (file, _("pointer\n"));
@@ -7143,29 +7250,51 @@ evax_bfd_print_typspec (const unsigned char *buf, int indent, FILE *file)
     case DST__K_TS_ARRAY:
       {
 	const unsigned char *vs;
+	unsigned int vs_len;
 	unsigned int vec_len;
 	unsigned int i;
 
+	if (bufsize == 0)
+	  return;
 	fprintf (file, _("array, dim: %u, bitmap: "), buf[0]);
+	--bufsize;
 	vec_len = (buf[0] + 1 + 7) / 8;
 	for (i = 0; i < vec_len; i++)
-	  fprintf (file, " %02x", buf[i + 1]);
+	  {
+	    if (bufsize == 0)
+	      break;
+	    fprintf (file, " %02x", buf[i + 1]);
+	    --bufsize;
+	  }
 	fputc ('\n', file);
+	if (bufsize == 0)
+	  return;
 	vs = buf + 1 + vec_len;
 	evax_bfd_print_indent (indent, file);
 	fprintf (file, _("array descriptor:\n"));
-	vs += evax_bfd_print_valspec (vs, indent + 1, file);
-	for (i = 0; i < buf[0] + 1U; i++)
-	  if (buf[1 + i / 8] & (1 << (i % 8)))
-	    {
-	      evax_bfd_print_indent (indent, file);
-	      if (i == 0)
-		fprintf (file, _("type spec for element:\n"));
-	      else
-		fprintf (file, _("type spec for subscript %u:\n"), i);
-	      evax_bfd_print_typspec (vs, indent + 1, file);
-	      vs += bfd_getl16 (vs);
-	    }
+	vs_len = evax_bfd_print_valspec (vs, bufsize, indent + 1, file);
+	vs += vs_len;
+	if (bufsize > vs_len)
+	  {
+	    bufsize -= vs_len;
+	    for (i = 0; i < buf[0] + 1U; i++)
+	      if (buf[1 + i / 8] & (1 << (i % 8)))
+		{
+		  evax_bfd_print_indent (indent, file);
+		  if (i == 0)
+		    fprintf (file, _("type spec for element:\n"));
+		  else
+		    fprintf (file, _("type spec for subscript %u:\n"), i);
+		  evax_bfd_print_typspec (vs, bufsize, indent + 1, file);
+		  if (bufsize < 2)
+		    break;
+		  vs_len = bfd_getl16 (vs);
+		  if (bufsize <= vs_len)
+		    break;
+		  vs += vs_len;
+		  bufsize -= vs_len;
+		}
+	  }
       }
       break;
     default:
@@ -7199,20 +7328,24 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
       /* xgettext:c-format */
       fprintf (file, _(" type: %3u, len: %3u (at 0x%08x): "),
 	       type, len, off);
-      if (len == 0)
+      if (len < sizeof (dsth))
 	{
 	  fputc ('\n', file);
 	  break;
 	}
-      len++;
       dst_size -= len;
       off += len;
       len -= sizeof (dsth);
-      buf = _bfd_malloc_and_read (abfd, len, len);
-      if (buf == NULL)
+      if (len == 0)
+	buf = NULL;
+      else
 	{
-	  fprintf (file, _("cannot read DST symbol\n"));
-	  return;
+	  buf = _bfd_malloc_and_read (abfd, len, len);
+	  if (buf == NULL)
+	    {
+	      fprintf (file, _("cannot read DST symbol\n"));
+	      return;
+	    }
 	}
       switch (type)
 	{
@@ -7256,7 +7389,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 	case DSC__K_DTYPE_VT2:
 	  fprintf (file, _("standard data: %s\n"),
 		   evax_bfd_get_dsc_name (type));
-	  evax_bfd_print_valspec (buf, 4, file);
+	  evax_bfd_print_valspec (buf, len, 4, file);
 	  fprintf (file, _("    name: %.*s\n"), buf[5], buf + 6);
 	  break;
 	case DST__K_MODBEG:
@@ -7265,6 +7398,8 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 	    const char *name = (const char *)buf + sizeof (*dst);
 
 	    fprintf (file, _("modbeg\n"));
+	    if (len < sizeof (*dst))
+	      break;
 	    /* xgettext:c-format */
 	    fprintf (file, _("   flags: %d, language: %u, "
 			     "major: %u, minor: %u\n"),
@@ -7272,11 +7407,21 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 		     (unsigned)bfd_getl32 (dst->language),
 		     (unsigned)bfd_getl16 (dst->major),
 		     (unsigned)bfd_getl16 (dst->minor));
-	    fprintf (file, _("   module name: %.*s\n"),
-		     name[0], name + 1);
-	    name += name[0] + 1;
-	    fprintf (file, _("   compiler   : %.*s\n"),
-		     name[0], name + 1);
+	    len -= sizeof (*dst);
+	    if (len > 0)
+	      {
+		int nlen = len - 1;
+		fprintf (file, _("   module name: %.*s\n"),
+			 name[0] > nlen ? nlen : name[0], name + 1);
+		if (name[0] < nlen)
+		  {
+		    len -= name[0] + 1;
+		    name += name[0] + 1;
+		    nlen = len - 1;
+		    fprintf (file, _("   compiler   : %.*s\n"),
+			     name[0] > nlen ? nlen: name[0], name + 1);
+		  }
+	      }
 	  }
 	  break;
 	case DST__K_MODEND:
@@ -7288,39 +7433,51 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 	    const char *name = (const char *)buf + sizeof (*dst);
 
 	    fputs (_("rtnbeg\n"), file);
-	    /* xgettext:c-format */
-	    fprintf (file, _("    flags: %u, address: 0x%08x, "
-			     "pd-address: 0x%08x\n"),
-		     dst->flags,
-		     (unsigned)bfd_getl32 (dst->address),
-		     (unsigned)bfd_getl32 (dst->pd_address));
-	    fprintf (file, _("    routine name: %.*s\n"),
-		     name[0], name + 1);
+	    if (len >= sizeof (*dst))
+	      {
+		/* xgettext:c-format */
+		fprintf (file, _("    flags: %u, address: 0x%08x, "
+				 "pd-address: 0x%08x\n"),
+			 dst->flags,
+			 (unsigned) bfd_getl32 (dst->address),
+			 (unsigned) bfd_getl32 (dst->pd_address));
+		len -= sizeof (*dst);
+		if (len > 0)
+		  {
+		    int nlen = len - 1;
+		    fprintf (file, _("    routine name: %.*s\n"),
+			     name[0] > nlen ? nlen : name[0], name + 1);
+		  }
+	      }
 	  }
 	  break;
 	case DST__K_RTNEND:
 	  {
 	    struct vms_dst_rtnend *dst = (void *)buf;
 
-	    fprintf (file, _("rtnend: size 0x%08x\n"),
-		     (unsigned)bfd_getl32 (dst->size));
+	    if (len >= sizeof (*dst))
+	      fprintf (file, _("rtnend: size 0x%08x\n"),
+		       (unsigned) bfd_getl32 (dst->size));
 	  }
 	  break;
 	case DST__K_PROLOG:
 	  {
 	    struct vms_dst_prolog *dst = (void *)buf;
 
-	    fprintf (file, _("prolog: bkpt address 0x%08x\n"),
-		     (unsigned)bfd_getl32 (dst->bkpt_addr));
+	    if (len >= sizeof (*dst))
+	      /* xgettext:c-format */
+	      fprintf (file, _("prolog: bkpt address 0x%08x\n"),
+		       (unsigned) bfd_getl32 (dst->bkpt_addr));
 	  }
 	  break;
 	case DST__K_EPILOG:
 	  {
 	    struct vms_dst_epilog *dst = (void *)buf;
 
-	    /* xgettext:c-format */
-	    fprintf (file, _("epilog: flags: %u, count: %u\n"),
-		     dst->flags, (unsigned)bfd_getl32 (dst->count));
+	    if (len >= sizeof (*dst))
+	      /* xgettext:c-format */
+	      fprintf (file, _("epilog: flags: %u, count: %u\n"),
+		       dst->flags, (unsigned) bfd_getl32 (dst->count));
 	  }
 	  break;
 	case DST__K_BLKBEG:
@@ -7328,31 +7485,50 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 	    struct vms_dst_blkbeg *dst = (void *)buf;
 	    const char *name = (const char *)buf + sizeof (*dst);
 
-	    /* xgettext:c-format */
-	    fprintf (file, _("blkbeg: address: 0x%08x, name: %.*s\n"),
-		     (unsigned)bfd_getl32 (dst->address),
-		     name[0], name + 1);
+	    if (len > sizeof (*dst))
+	      {
+		int nlen;
+		len -= sizeof (*dst);
+		nlen = len - 1;
+		/* xgettext:c-format */
+		fprintf (file, _("blkbeg: address: 0x%08x, name: %.*s\n"),
+			 (unsigned) bfd_getl32 (dst->address),
+			 name[0] > nlen ? nlen : name[0], name + 1);
+	      }
 	  }
 	  break;
 	case DST__K_BLKEND:
 	  {
 	    struct vms_dst_blkend *dst = (void *)buf;
 
-	    fprintf (file, _("blkend: size: 0x%08x\n"),
-		     (unsigned)bfd_getl32 (dst->size));
+	    if (len >= sizeof (*dst))
+	      /* xgettext:c-format */
+	      fprintf (file, _("blkend: size: 0x%08x\n"),
+		       (unsigned) bfd_getl32 (dst->size));
 	  }
 	  break;
 	case DST__K_TYPSPEC:
 	  {
 	    fprintf (file, _("typspec (len: %u)\n"), len);
-	    fprintf (file, _("    name: %.*s\n"), buf[0], buf + 1);
-	    evax_bfd_print_typspec (buf + 1 + buf[0], 5, file);
+	    if (len >= 1)
+	      {
+		int nlen = len - 1;
+		fprintf (file, _("    name: %.*s\n"),
+			 buf[0] > nlen ? nlen : buf[0], buf + 1);
+		if (nlen > buf[0])
+		  evax_bfd_print_typspec (buf + 1 + buf[0], len - (1 + buf[0]),
+					  5, file);
+	      }
 	  }
 	  break;
 	case DST__K_SEPTYP:
 	  {
-	    fprintf (file, _("septyp, name: %.*s\n"), buf[5], buf + 6);
-	    evax_bfd_print_valspec (buf, 4, file);
+	    if (len >= 6)
+	      {
+		fprintf (file, _("septyp, name: %.*s\n"),
+			 buf[5] > len - 6 ? len - 6 : buf[5], buf + 6);
+		evax_bfd_print_valspec (buf, len, 4, file);
+	      }
 	  }
 	  break;
 	case DST__K_RECBEG:
@@ -7360,23 +7536,36 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 	    struct vms_dst_recbeg *recbeg = (void *)buf;
 	    const char *name = (const char *)buf + sizeof (*recbeg);
 
-	    fprintf (file, _("recbeg: name: %.*s\n"), name[0], name + 1);
-	    evax_bfd_print_valspec (buf, 4, file);
-	    fprintf (file, _("    len: %u bits\n"),
-		     (unsigned)bfd_getl32 (name + 1 + name[0]));
+	    if (len > sizeof (*recbeg))
+	      {
+		int nlen = len - sizeof (*recbeg) - 1;
+		if (name[0] < nlen)
+		  nlen = name[0];
+		fprintf (file, _("recbeg: name: %.*s\n"), nlen, name + 1);
+		evax_bfd_print_valspec (buf, len, 4, file);
+		len -= 1 + nlen;
+		if (len >= 4)
+		  fprintf (file, _("    len: %u bits\n"),
+			   (unsigned) bfd_getl32 (name + 1 + nlen));
+	      }
 	  }
 	  break;
 	case DST__K_RECEND:
 	  fprintf (file, _("recend\n"));
 	  break;
 	case DST__K_ENUMBEG:
-	  /* xgettext:c-format */
-	  fprintf (file, _("enumbeg, len: %u, name: %.*s\n"),
-		   buf[0], buf[1], buf + 2);
+	  if (len >= 2)
+	    /* xgettext:c-format */
+	    fprintf (file, _("enumbeg, len: %u, name: %.*s\n"),
+		     buf[0], buf[1] > len - 2 ? len - 2 : buf[1], buf + 2);
 	  break;
 	case DST__K_ENUMELT:
-	  fprintf (file, _("enumelt, name: %.*s\n"), buf[5], buf + 6);
-	  evax_bfd_print_valspec (buf, 4, file);
+	  if (len >= 6)
+	    {
+	      fprintf (file, _("enumelt, name: %.*s\n"),
+		       buf[5] > len - 6 ? len - 6 : buf[5], buf + 6);
+	      evax_bfd_print_valspec (buf, len, 4, file);
+	    }
 	  break;
 	case DST__K_ENUMEND:
 	  fprintf (file, _("enumend\n"));
@@ -7384,26 +7573,36 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 	case DST__K_LABEL:
 	  {
 	    struct vms_dst_label *lab = (void *)buf;
-	    fprintf (file, _("label, name: %.*s\n"),
-		     lab->name[0], lab->name + 1);
-	    fprintf (file, _("    address: 0x%08x\n"),
-		     (unsigned)bfd_getl32 (lab->value));
+	    if (len >= sizeof (*lab))
+	      {
+		fprintf (file, _("label, name: %.*s\n"),
+			 lab->name[0] > len - 1 ? len - 1 : lab->name[0],
+			 lab->name + 1);
+		fprintf (file, _("    address: 0x%08x\n"),
+			 (unsigned) bfd_getl32 (lab->value));
+	      }
 	  }
 	  break;
 	case DST__K_DIS_RANGE:
-	  {
-	    unsigned int cnt = bfd_getl32 (buf);
-	    unsigned char *rng = buf + 4;
-	    unsigned int i;
+	  if (len >= 4)
+	    {
+	      unsigned int cnt = bfd_getl32 (buf);
+	      unsigned char *rng = buf + 4;
+	      unsigned int i;
 
-	    fprintf (file, _("discontiguous range (nbr: %u)\n"), cnt);
-	    for (i = 0; i < cnt; i++, rng += 8)
-	      /* xgettext:c-format */
-	      fprintf (file, _("    address: 0x%08x, size: %u\n"),
-		       (unsigned)bfd_getl32 (rng),
-		       (unsigned)bfd_getl32 (rng + 4));
-
-	  }
+	      fprintf (file, _("discontiguous range (nbr: %u)\n"), cnt);
+	      len -= 4;
+	      for (i = 0; i < cnt; i++, rng += 8)
+		{
+		  if (len < 8)
+		    break;
+		  /* xgettext:c-format */
+		  fprintf (file, _("    address: 0x%08x, size: %u\n"),
+			   (unsigned) bfd_getl32 (rng),
+			   (unsigned) bfd_getl32 (rng + 4));
+		  len -= 8;
+		}
+	    }
 	  break;
 	case DST__K_LINE_NUM:
 	  {
@@ -7413,79 +7612,101 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 
 	    while (len > 0)
 	      {
-		signed char cmd;
-		unsigned char cmdlen;
+		int cmd;
 		unsigned int val;
+		int cmdlen = -1;
 
-		cmd = buf[0];
-		cmdlen = 0;
+		cmd = *buf++;
+		len--;
 
 		fputs ("    ", file);
 
 		switch (cmd)
 		  {
 		  case DST__K_DELTA_PC_W:
-		    val = bfd_getl16 (buf + 1);
+		    if (len < 2)
+		      break;
+		    val = bfd_getl16 (buf);
 		    fprintf (file, _("delta_pc_w %u\n"), val);
 		    pc += val;
 		    line++;
-		    cmdlen = 3;
+		    cmdlen = 2;
 		    break;
 		  case DST__K_INCR_LINUM:
-		    val = buf[1];
+		    if (len < 1)
+		      break;
+		    val = *buf;
 		    fprintf (file, _("incr_linum(b): +%u\n"), val);
 		    line += val;
-		    cmdlen = 2;
+		    cmdlen = 1;
 		    break;
 		  case DST__K_INCR_LINUM_W:
-		    val = bfd_getl16 (buf + 1);
+		    if (len < 2)
+		      break;
+		    val = bfd_getl16 (buf);
 		    fprintf (file, _("incr_linum_w: +%u\n"), val);
 		    line += val;
-		    cmdlen = 3;
+		    cmdlen = 2;
 		    break;
 		  case DST__K_INCR_LINUM_L:
-		    val = bfd_getl32 (buf + 1);
+		    if (len < 4)
+		      break;
+		    val = bfd_getl32 (buf);
 		    fprintf (file, _("incr_linum_l: +%u\n"), val);
 		    line += val;
-		    cmdlen = 5;
+		    cmdlen = 4;
 		    break;
 		  case DST__K_SET_LINUM:
-		    line = bfd_getl16 (buf + 1);
+		    if (len < 2)
+		      break;
+		    line = bfd_getl16 (buf);
 		    fprintf (file, _("set_line_num(w) %u\n"), line);
-		    cmdlen = 3;
+		    cmdlen = 2;
 		    break;
 		  case DST__K_SET_LINUM_B:
-		    line = buf[1];
+		    if (len < 1)
+		      break;
+		    line = *buf;
 		    fprintf (file, _("set_line_num_b %u\n"), line);
-		    cmdlen = 2;
+		    cmdlen = 1;
 		    break;
 		  case DST__K_SET_LINUM_L:
-		    line = bfd_getl32 (buf + 1);
+		    if (len < 4)
+		      break;
+		    line = bfd_getl32 (buf);
 		    fprintf (file, _("set_line_num_l %u\n"), line);
-		    cmdlen = 5;
+		    cmdlen = 4;
 		    break;
 		  case DST__K_SET_ABS_PC:
-		    pc = bfd_getl32 (buf + 1);
+		    if (len < 4)
+		      break;
+		    pc = bfd_getl32 (buf);
 		    fprintf (file, _("set_abs_pc: 0x%08x\n"), pc);
-		    cmdlen = 5;
+		    cmdlen = 4;
 		    break;
 		  case DST__K_DELTA_PC_L:
+		    if (len < 4)
+		      break;
 		    fprintf (file, _("delta_pc_l: +0x%08x\n"),
-			     (unsigned)bfd_getl32 (buf + 1));
-		    cmdlen = 5;
+			     (unsigned) bfd_getl32 (buf));
+		    cmdlen = 4;
 		    break;
 		  case DST__K_TERM:
-		    fprintf (file, _("term(b): 0x%02x"), buf[1]);
-		    pc += buf[1];
+		    if (len < 1)
+		      break;
+		    fprintf (file, _("term(b): 0x%02x"), *buf);
+		    pc += *buf;
 		    fprintf (file, _("        pc: 0x%08x\n"), pc);
-		    cmdlen = 2;
+		    cmdlen = 1;
 		    break;
 		  case DST__K_TERM_W:
-		    val = bfd_getl16 (buf + 1);
+		    if (len < 2)
+		      break;
+		    val = bfd_getl16 (buf);
 		    fprintf (file, _("term_w: 0x%04x"), val);
 		    pc += val;
 		    fprintf (file, _("    pc: 0x%08x\n"), pc);
-		    cmdlen = 3;
+		    cmdlen = 2;
 		    break;
 		  default:
 		    if (cmd <= 0)
@@ -7496,13 +7717,13 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 			/* xgettext:c-format */
 			fprintf (file, _("    pc: 0x%08x line: %5u\n"),
 				 pc, line);
-			cmdlen = 1;
+			cmdlen = 0;
 		      }
 		    else
 		      fprintf (file, _("    *unhandled* cmd %u\n"), cmd);
 		    break;
 		  }
-		if (cmdlen == 0)
+		if (cmdlen < 0)
 		  break;
 		len -= cmdlen;
 		buf += cmdlen;
@@ -7518,16 +7739,20 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 
 	    while (len > 0)
 	      {
-		signed char cmd = buf[0];
-		unsigned char cmdlen = 0;
+		int cmd = *buf++;
+		int cmdlen = -1;
 
+		len--;
 		switch (cmd)
 		  {
 		  case DST__K_SRC_DECLFILE:
 		    {
-		      struct vms_dst_src_decl_src *src = (void *)(buf + 1);
+		      struct vms_dst_src_decl_src *src = (void *) buf;
 		      const char *name;
+		      int nlen;
 
+		      if (len < sizeof (*src))
+			break;
 		      /* xgettext:c-format */
 		      fprintf (file, _("   declfile: len: %u, flags: %u, "
 				       "fileid: %u\n"),
@@ -7542,58 +7767,80 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 			       (unsigned)bfd_getl32 (src->rms_ebk),
 			       (unsigned)bfd_getl16 (src->rms_ffb),
 			       src->rms_rfo);
-		      name = (const char *)buf + 1 + sizeof (*src);
+		      if (src->length > len || src->length <= sizeof (*src))
+			break;
+		      nlen = src->length - sizeof (*src) - 1;
+		      name = (const char *) buf + sizeof (*src);
 		      fprintf (file, _("   filename   : %.*s\n"),
-			       name[0], name + 1);
+			       name[0] > nlen ? nlen : name[0], name + 1);
+		      if (name[0] >= nlen)
+			break;
+		      nlen -= name[0] + 1;
 		      name += name[0] + 1;
 		      fprintf (file, _("   module name: %.*s\n"),
-			       name[0], name + 1);
-		      cmdlen = 2 + src->length;
+			       name[0] > nlen ? nlen : name[0], name + 1);
+		      if (name[0] > nlen)
+			break;
+		      cmdlen = src->length;
 		    }
 		    break;
 		  case DST__K_SRC_SETFILE:
+		    if (len < 2)
+		      break;
 		    fprintf (file, _("   setfile %u\n"),
-			     (unsigned)bfd_getl16 (buf + 1));
-		    cmdlen = 3;
+			     (unsigned) bfd_getl16 (buf));
+		    cmdlen = 2;
 		    break;
 		  case DST__K_SRC_SETREC_W:
+		    if (len < 2)
+		      break;
 		    fprintf (file, _("   setrec %u\n"),
-			     (unsigned)bfd_getl16 (buf + 1));
-		    cmdlen = 3;
+			     (unsigned) bfd_getl16 (buf));
+		    cmdlen = 2;
 		    break;
 		  case DST__K_SRC_SETREC_L:
+		    if (len < 4)
+		      break;
 		    fprintf (file, _("   setrec %u\n"),
-			     (unsigned)bfd_getl32 (buf + 1));
-		    cmdlen = 5;
+			     (unsigned) bfd_getl32 (buf));
+		    cmdlen = 4;
 		    break;
 		  case DST__K_SRC_SETLNUM_W:
+		    if (len < 2)
+		      break;
 		    fprintf (file, _("   setlnum %u\n"),
-			     (unsigned)bfd_getl16 (buf + 1));
-		    cmdlen = 3;
+			     (unsigned) bfd_getl16 (buf));
+		    cmdlen = 2;
 		    break;
 		  case DST__K_SRC_SETLNUM_L:
+		    if (len < 4)
+		      break;
 		    fprintf (file, _("   setlnum %u\n"),
-			     (unsigned)bfd_getl32 (buf + 1));
-		    cmdlen = 5;
+			     (unsigned) bfd_getl32 (buf));
+		    cmdlen = 4;
 		    break;
 		  case DST__K_SRC_DEFLINES_W:
+		    if (len < 2)
+		      break;
 		    fprintf (file, _("   deflines %u\n"),
-			     (unsigned)bfd_getl16 (buf + 1));
-		    cmdlen = 3;
+			     (unsigned) bfd_getl16 (buf));
+		    cmdlen = 2;
 		    break;
 		  case DST__K_SRC_DEFLINES_B:
-		    fprintf (file, _("   deflines %u\n"), buf[1]);
-		    cmdlen = 2;
+		    if (len < 1)
+		      break;
+		    fprintf (file, _("   deflines %u\n"), *buf);
+		    cmdlen = 1;
 		    break;
 		  case DST__K_SRC_FORMFEED:
 		    fprintf (file, _("   formfeed\n"));
-		    cmdlen = 1;
+		    cmdlen = 0;
 		    break;
 		  default:
 		    fprintf (file, _("   *unhandled* cmd %u\n"), cmd);
 		    break;
 		  }
-		if (cmdlen == 0)
+		if (cmdlen < 0)
 		  break;
 		len -= cmdlen;
 		buf += cmdlen;
@@ -7767,7 +8014,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
 	}
       mask = bfd_getl32 (eihvn.subsystem_mask);
       for (j = 0; j < 32; j++)
-	if (mask & (1 << j))
+	if (mask & (1u << j))
 	  {
 	    struct vms_eihvn_subversion ver;
 	    if (bfd_bread (&ver, sizeof (ver), abfd) != sizeof (ver))
@@ -8111,7 +8358,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
       fprintf (file, _("Global symbol table:\n"));
       evax_bfd_print_eobj (abfd, file);
     }
-  if (eiaf_vbn != 0)
+  if (eiaf_vbn != 0 && eiaf_size >= sizeof (struct vms_eiaf))
     {
       unsigned char *buf;
       struct vms_eiaf *eiaf;
@@ -8183,12 +8430,14 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
 
       if (shlstoff)
 	{
-	  struct vms_shl *shl = (struct vms_shl *)(buf + shlstoff);
 	  unsigned int j;
 
 	  fprintf (file, _(" Shareable images:\n"));
-	  for (j = 0; j < shrimgcnt; j++, shl++)
+	  for (j = 0;
+	       j < shrimgcnt && shlstoff <= eiaf_size - sizeof (struct vms_shl);
+	       j++, shlstoff += sizeof (struct vms_shl))
 	    {
+	      struct vms_shl *shl = (struct vms_shl *) (buf + shlstoff);
 	      fprintf (file,
 		       /* xgettext:c-format */
 		       _("  %u: size: %u, flags: 0x%02x, name: %.*s\n"),
@@ -8199,50 +8448,54 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
       if (qrelfixoff != 0)
 	{
 	  fprintf (file, _(" quad-word relocation fixups:\n"));
-	  evax_bfd_print_relocation_records (file, buf + qrelfixoff, 8);
+	  evax_bfd_print_relocation_records (file, buf, eiaf_size,
+					     qrelfixoff, 8);
 	}
       if (lrelfixoff != 0)
 	{
 	  fprintf (file, _(" long-word relocation fixups:\n"));
-	  evax_bfd_print_relocation_records (file, buf + lrelfixoff, 4);
+	  evax_bfd_print_relocation_records (file, buf, eiaf_size,
+					     lrelfixoff, 4);
 	}
       if (qdotadroff != 0)
 	{
 	  fprintf (file, _(" quad-word .address reference fixups:\n"));
-	  evax_bfd_print_address_fixups (file, buf + qdotadroff);
+	  evax_bfd_print_address_fixups (file, buf, eiaf_size, qdotadroff);
 	}
       if (ldotadroff != 0)
 	{
 	  fprintf (file, _(" long-word .address reference fixups:\n"));
-	  evax_bfd_print_address_fixups (file, buf + ldotadroff);
+	  evax_bfd_print_address_fixups (file, buf, eiaf_size, ldotadroff);
 	}
       if (codeadroff != 0)
 	{
 	  fprintf (file, _(" Code Address Reference Fixups:\n"));
-	  evax_bfd_print_reference_fixups (file, buf + codeadroff);
+	  evax_bfd_print_reference_fixups (file, buf, eiaf_size, codeadroff);
 	}
       if (lpfixoff != 0)
 	{
 	  fprintf (file, _(" Linkage Pairs Reference Fixups:\n"));
-	  evax_bfd_print_reference_fixups (file, buf + lpfixoff);
+	  evax_bfd_print_reference_fixups (file, buf, eiaf_size, lpfixoff);
 	}
-      if (chgprtoff)
+      if (chgprtoff && chgprtoff <= eiaf_size - 4)
 	{
-	  unsigned int count = (unsigned)bfd_getl32 (buf + chgprtoff);
-	  struct vms_eicp *eicp = (struct vms_eicp *)(buf + chgprtoff + 4);
+	  unsigned int count = (unsigned) bfd_getl32 (buf + chgprtoff);
 	  unsigned int j;
 
 	  fprintf (file, _(" Change Protection (%u entries):\n"), count);
-	  for (j = 0; j < count; j++, eicp++)
+	  for (j = 0, chgprtoff += 4;
+	       j < count && chgprtoff <= eiaf_size - sizeof (struct vms_eicp);
+	       j++, chgprtoff += sizeof (struct vms_eicp))
 	    {
+	      struct vms_eicp *eicp = (struct vms_eicp *) (buf + chgprtoff);
 	      unsigned int prot = bfd_getl32 (eicp->newprt);
 	      fprintf (file,
 		       /* xgettext:c-format */
 		       _("  base: 0x%08x %08x, size: 0x%08x, prot: 0x%08x "),
-		       (unsigned)bfd_getl32 (eicp->baseva + 4),
-		       (unsigned)bfd_getl32 (eicp->baseva + 0),
-		       (unsigned)bfd_getl32 (eicp->size),
-		       (unsigned)bfd_getl32 (eicp->newprt));
+		       (unsigned) bfd_getl32 (eicp->baseva + 4),
+		       (unsigned) bfd_getl32 (eicp->baseva + 0),
+		       (unsigned) bfd_getl32 (eicp->size),
+		       (unsigned) bfd_getl32 (eicp->newprt));
 	      switch (prot)
 		{
 		case PRT__C_NA:

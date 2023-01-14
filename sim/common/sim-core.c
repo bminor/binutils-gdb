@@ -1,6 +1,6 @@
 /* The common simulator framework for GDB, the GNU Debugger.
 
-   Copyright 2002-2021 Free Software Foundation, Inc.
+   Copyright 2002-2022 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney and Red Hat.
 
@@ -26,16 +26,17 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <stdlib.h>
+
+#include "libiberty.h"
+
 #include "sim-main.h"
 #include "sim-assert.h"
 #include "sim-signal.h"
-#include "libiberty.h"
 
 #if (WITH_HW)
 #include "sim-hw.h"
 #endif
-
-#include <stdlib.h>
 
 /* "core" module install handler.
 
@@ -284,14 +285,14 @@ sim_core_attach (SIM_DESC sd,
     {
       unsigned mask = modulo - 1;
       /* any zero bits */
-      while (mask >= sizeof (unsigned64)) /* minimum modulo */
+      while (mask >= sizeof (uint64_t)) /* minimum modulo */
 	{
 	  if ((mask & 1) == 0)
 	    mask = 0;
 	  else
 	    mask >>= 1;
 	}
-      if (mask != sizeof (unsigned64) - 1)
+      if (mask != sizeof (uint64_t) - 1)
 	{
 #if (WITH_HW)
 	  sim_hw_abort (sd, client, "sim_core_attach - internal error - modulo %lx not power of two", (long) modulo);
@@ -312,7 +313,7 @@ sim_core_attach (SIM_DESC sd,
     {
       if (optional_buffer == NULL)
 	{
-	  int padding = (addr % sizeof (unsigned64));
+	  int padding = (addr % sizeof (uint64_t));
 	  unsigned long bytes = (modulo == 0 ? nr_bytes : modulo) + padding;
 	  free_buffer = zalloc (bytes);
 	  buffer = (char*) free_buffer + padding;
@@ -452,7 +453,7 @@ STATIC_INLINE_SIM_CORE\
 sim_core_translate (sim_core_mapping *mapping,
 		    address_word addr)
 {
-  return (void *)((unsigned8 *) mapping->buffer
+  return (void *)((uint8_t *) mapping->buffer
 		  + ((addr - mapping->base) & mapping->mask));
 }
 

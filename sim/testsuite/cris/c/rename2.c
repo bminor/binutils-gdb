@@ -17,12 +17,6 @@ void err (const char *s)
 
 int main (int argc, char *argv[])
 {
-  /* Avoid getting files with random characters due to errors
-     elsewhere.  */
-  if (argc != 1
-      || (argv[0][0] != '.' && argv[0][0] != '/' && argv[0][0] != 'r'))
-    abort ();
-
   if (rename (argv[0], NULL) != -1
       || errno != EFAULT)
     err ("rename 1 ");

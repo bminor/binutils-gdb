@@ -1,6 +1,6 @@
 /* Process record and replay target code for GNU/Linux.
 
-   Copyright (C) 2008-2021 Free Software Foundation, Inc.
+   Copyright (C) 2008-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -492,15 +492,17 @@ record_linux_system_call (enum gdb_syscall syscall,
 	}
       else if (tmpulongest == tdep->ioctl_TIOCSERGSTRUCT)
 	{
-	  printf_unfiltered (_("Process record and replay target doesn't "
-			       "support ioctl request TIOCSERGSTRUCT\n"));
+	  fprintf_unfiltered (gdb_stderr,
+			      _("Process record and replay target doesn't "
+				"support ioctl request TIOCSERGSTRUCT\n"));
 	  return 1;
 	}
       else
 	{
-	  printf_unfiltered (_("Process record and replay target doesn't "
-			       "support ioctl request 0x%s.\n"),
-			     OUTPUT_REG (tmpulongest, tdep->arg2));
+	  fprintf_unfiltered (gdb_stderr,
+			      _("Process record and replay target doesn't "
+				"support ioctl request 0x%s.\n"),
+			      OUTPUT_REG (tmpulongest, tdep->arg2));
 	  return 1;
 	}
       break;
@@ -1008,9 +1010,10 @@ Do you want to stop the program?"),
 	  }
 	  break;
 	default:
-	  printf_unfiltered (_("Process record and replay target "
-			       "doesn't support socketcall call 0x%s\n"),
-			     OUTPUT_REG (tmpulongest, tdep->arg1));
+	  fprintf_unfiltered (gdb_stderr,
+			      _("Process record and replay target "
+				"doesn't support socketcall call 0x%s\n"),
+			      OUTPUT_REG (tmpulongest, tdep->arg1));
 	  return -1;
 	  break;
 	}
@@ -1148,9 +1151,10 @@ Do you want to stop the program?"),
 	  break;
 	default:
 	  /* XXX RECORD_SEMCTL still not supported.  */
-	  printf_unfiltered (_("Process record and replay target doesn't "
-			       "support ipc number %s\n"),
-			     pulongest (tmpulongest));
+	  fprintf_unfiltered (gdb_stderr,
+			      _("Process record and replay target doesn't "
+				"support ipc number %s\n"),
+			      pulongest (tmpulongest));
 	  break;
 	}
       break;
@@ -2032,8 +2036,9 @@ Do you want to stop the program?"),
       break;
 
     default:
-      printf_unfiltered (_("Process record and replay target doesn't "
-			   "support syscall number %d\n"), syscall);
+      fprintf_unfiltered (gdb_stderr,
+			  _("Process record and replay target doesn't "
+			    "support syscall number %d\n"), syscall);
       return -1;
       break;
     }

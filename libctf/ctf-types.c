@@ -1,5 +1,5 @@
 /* Type handling functions.
-   Copyright (C) 2019-2021 Free Software Foundation, Inc.
+   Copyright (C) 2019-2022 Free Software Foundation, Inc.
 
    This file is part of libctf.
 
@@ -1641,20 +1641,27 @@ ctf_type_rvisit (ctf_dict_t *fp, ctf_id_t type, ctf_visit_f *func,
   unsigned char *vlen;
   ssize_t size, increment, vbytes;
   uint32_t kind, n, i = 0;
+  int nonrepresentable = 0;
   int rc;
 
-  if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
-    return -1;			/* errno is set for us.  */
+  if ((type = ctf_type_resolve (fp, type)) == CTF_ERR) {
+    if (ctf_errno (fp) != ECTF_NONREPRESENTABLE)
+      return -1;		/* errno is set for us.  */
+    else
+      nonrepresentable = 1;
+  }
 
-  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
-    return -1;			/* errno is set for us.  */
+  if (!nonrepresentable)
+    if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+      return -1;		/* errno is set for us.  */
 
   if ((rc = func (name, otype, offset, depth, arg)) != 0)
     return rc;
 
-  kind = LCTF_INFO_KIND (fp, tp->ctt_info);
+  if (!nonrepresentable)
+    kind = LCTF_INFO_KIND (fp, tp->ctt_info);
 
-  if (kind != CTF_K_STRUCT && kind != CTF_K_UNION)
+  if (nonrepresentable || (kind != CTF_K_STRUCT && kind != CTF_K_UNION))
     return 0;
 
   ctf_get_ctt_size (fp, tp, &size, &increment);

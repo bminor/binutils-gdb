@@ -70,7 +70,7 @@ force_decode_gen_type(const char *type)
 
 
 decode_table *
-load_decode_table(char *file_name,
+load_decode_table(const char *file_name,
 		  int hi_bit_nr)
 {
   table *file = table_open(file_name, nr_decode_fields, 0);

@@ -1,6 +1,6 @@
 /* Example synacor simulator.
 
-   Copyright (C) 2005-2021 Free Software Foundation, Inc.
+   Copyright (C) 2005-2022 Free Software Foundation, Inc.
    Contributed by Mike Frysinger.
 
    This file is part of simulators.
@@ -28,8 +28,8 @@
 #include "sim-signal.h"
 
 /* Get the register number from the number.  */
-static unsigned16
-register_num (SIM_CPU *cpu, unsigned16 num)
+static uint16_t
+register_num (SIM_CPU *cpu, uint16_t num)
 {
   SIM_DESC sd = CPU_STATE (cpu);
 
@@ -40,8 +40,8 @@ register_num (SIM_CPU *cpu, unsigned16 num)
 }
 
 /* Helper to process immediates according to the ISA.  */
-static unsigned16
-interp_num (SIM_CPU *cpu, unsigned16 num)
+static uint16_t
+interp_num (SIM_CPU *cpu, uint16_t num)
 {
   SIM_DESC sd = CPU_STATE (cpu);
 
@@ -69,7 +69,7 @@ interp_num (SIM_CPU *cpu, unsigned16 num)
 void step_once (SIM_CPU *cpu)
 {
   SIM_DESC sd = CPU_STATE (cpu);
-  unsigned16 iw1, num1;
+  uint16_t iw1, num1;
   sim_cia pc = sim_pc_get (cpu);
 
   iw1 = sim_core_read_aligned_2 (cpu, pc, exec_map, pc);
@@ -86,7 +86,7 @@ void step_once (SIM_CPU *cpu)
   else if (num1 == 1)
     {
       /* set: 1 a b: Set register <a> to the value of <b>.  */
-      unsigned16 iw2, iw3, num2, num3;
+      uint16_t iw2, iw3, num2, num3;
 
       iw2 = sim_core_read_aligned_2 (cpu, pc, exec_map, pc + 2);
       num2 = register_num (cpu, iw2);
@@ -103,7 +103,7 @@ void step_once (SIM_CPU *cpu)
   else if (num1 == 2)
     {
       /* push: 2 a: Push <a> onto the stack.  */
-      unsigned16 iw2, num2;
+      uint16_t iw2, num2;
 
       iw2 = sim_core_read_aligned_2 (cpu, pc, exec_map, pc + 2);
       num2 = interp_num (cpu, iw2);
@@ -120,7 +120,7 @@ void step_once (SIM_CPU *cpu)
     {
       /* pop: 3 a: Remove the top element from the stack and write it into <a>.
 	 Empty stack = error.  */
-      unsigned16 iw2, num2, result;
+      uint16_t iw2, num2, result;
 
       iw2 = sim_core_read_aligned_2 (cpu, pc, exec_map, pc + 2);
       num2 = register_num (cpu, iw2);
@@ -139,7 +139,7 @@ void step_once (SIM_CPU *cpu)
     {
       /* eq: 4 a b c: Set <a> to 1 if <b> is equal to <c>; set it to 0
 	 otherwise.  */
-      unsigned16 iw2, iw3, iw4, num2, num3, num4, result;
+      uint16_t iw2, iw3, iw4, num2, num3, num4, result;
 
       iw2 = sim_core_read_aligned_2 (cpu, pc, exec_map, pc + 2);
       num2 = register_num (cpu, iw2);
@@ -161,7 +161,7 @@ void step_once (SIM_CPU *cpu)
     {
       /* gt: 5 a b c: Set <a> to 1 if <b> is greater than <c>; set it to 0
 	 otherwise.  */
-      unsigned16 iw2, iw3, iw4, num2, num3, num4, result;
+      uint16_t iw2, iw3, iw4, num2, num3, num4, result;
 
       iw2 = sim_core_read_aligned_2 (cpu, pc, exec_map, pc + 2);
       num2 = register_num (cpu, iw2);
@@ -182,7 +182,7 @@ void step_once (SIM_CPU *cpu)
   else if (num1 == 6)
     {
       /* jmp: 6 a: Jump to <a>.  */
-      unsigned16 iw2, num2;
+      uint16_t iw2, num2;
 
       iw2 = sim_core_read_aligned_2 (cpu, pc, exec_map, pc + 2);
       num2 = interp_num (cpu, iw2);
@@ -197,7 +197,7 @@ void step_once (SIM_CPU *cpu)
   else if (num1 == 7)
     {
       /* jt: 7 a b: If <a> is nonzero, jump to <b>.  */
-      unsigned16 iw2, iw3, num2, num3;
+      uint16_t iw2, iw3, num2, num3;
 
       iw2 = sim_core_read_aligned_2 (cpu, pc, exec_map, pc + 2);
       num2 = interp_num (cpu, iw2);
@@ -220,7 +220,7 @@ void step_once (SIM_CPU *cpu)
   else if (num1 == 8)
     {
       /* jf: 8 a b: If <a> is zero, jump to <b>.  */
-      unsigned16 iw2, iw3, num2, num3;
+      uint16_t iw2, iw3, num2, num3;
 
       iw2 = sim_core_read_aligned_2 (cpu, pc, exec_map, pc + 2);
       num2 = interp_num (cpu, iw2);
@@ -243,7 +243,7 @@ void step_once (SIM_CPU *cpu)
   else if (num1 == 9)
     {
       /* add: 9 a b c: Assign <a> the sum of <b> and <c> (modulo 32768).  */
-      unsigned16 iw2, iw3, iw4, num2, num3, num4, result;
+      uint16_t iw2, iw3, iw4, num2, num3, num4, result;
 
       iw2 = sim_core_read_aligned_2 (cpu, pc, exec_map, pc + 2);
       num2 = register_num (cpu, iw2);
@@ -266,7 +266,7 @@ void step_once (SIM_CPU *cpu)
     {
       /* mult: 10 a b c: Store into <a> the product of <b> and <c> (modulo
 	 32768).  */
-      unsigned16 iw2, iw3, iw4, num2, num3, num4, result;
+      uint16_t iw2, iw3, iw4, num2, num3, num4, result;
 
       iw2 = sim_core_read_aligned_2 (cpu, pc, exec_map, pc + 2);
       num2 = register_num (cpu, iw2);
@@ -288,7 +288,7 @@ void step_once (SIM_CPU *cpu)
   else if (num1 == 11)
     {
       /* mod: 11 a b c: Store into <a> the remainder of <b> divided by <c>.  */
-      unsigned16 iw2, iw3, iw4, num2, num3, num4, result;
+      uint16_t iw2, iw3, iw4, num2, num3, num4, result;
 
       iw2 = sim_core_read_aligned_2 (cpu, pc, exec_map, pc + 2);
       num2 = register_num (cpu, iw2);
@@ -309,7 +309,7 @@ void step_once (SIM_CPU *cpu)
   else if (num1 == 12)
     {
       /* and: 12 a b c: Stores into <a> the bitwise and of <b> and <c>.  */
-      unsigned16 iw2, iw3, iw4, num2, num3, num4, result;
+      uint16_t iw2, iw3, iw4, num2, num3, num4, result;
 
       iw2 = sim_core_read_aligned_2 (cpu, pc, exec_map, pc + 2);
       num2 = register_num (cpu, iw2);
@@ -330,7 +330,7 @@ void step_once (SIM_CPU *cpu)
   else if (num1 == 13)
     {
       /* or: 13 a b c: Stores into <a> the bitwise or of <b> and <c>.  */
-      unsigned16 iw2, iw3, iw4, num2, num3, num4, result;
+      uint16_t iw2, iw3, iw4, num2, num3, num4, result;
 
       iw2 = sim_core_read_aligned_2 (cpu, pc, exec_map, pc + 2);
       num2 = register_num (cpu, iw2);
@@ -351,7 +351,7 @@ void step_once (SIM_CPU *cpu)
   else if (num1 == 14)
     {
       /* not: 14 a b: Stores 15-bit bitwise inverse of <b> in <a>.  */
-      unsigned16 iw2, iw3, num2, num3, result;
+      uint16_t iw2, iw3, num2, num3, result;
 
       iw2 = sim_core_read_aligned_2 (cpu, pc, exec_map, pc + 2);
       num2 = register_num (cpu, iw2);
@@ -370,7 +370,7 @@ void step_once (SIM_CPU *cpu)
   else if (num1 == 15)
     {
       /* rmem: 15 a b: Read memory at address <b> and write it to <a>.  */
-      unsigned16 iw2, iw3, num2, num3, result;
+      uint16_t iw2, iw3, num2, num3, result;
 
       iw2 = sim_core_read_aligned_2 (cpu, pc, exec_map, pc + 2);
       num2 = register_num (cpu, iw2);
@@ -392,7 +392,7 @@ void step_once (SIM_CPU *cpu)
   else if (num1 == 16)
     {
       /* wmem: 16 a b: Write the value from <b> into memory at address <a>.  */
-      unsigned16 iw2, iw3, num2, num3;
+      uint16_t iw2, iw3, num2, num3;
 
       iw2 = sim_core_read_aligned_2 (cpu, pc, exec_map, pc + 2);
       num2 = interp_num (cpu, iw2);
@@ -412,7 +412,7 @@ void step_once (SIM_CPU *cpu)
     {
       /* call: 17 a: Write the address of the next instruction to the stack and
 	 jump to <a>.  */
-      unsigned16 iw2, num2;
+      uint16_t iw2, num2;
 
       iw2 = sim_core_read_aligned_2 (cpu, pc, exec_map, pc + 2);
       num2 = interp_num (cpu, iw2);
@@ -433,7 +433,7 @@ void step_once (SIM_CPU *cpu)
     {
       /* ret: 18: Remove the top element from the stack and jump to it; empty
 	 stack = halt.  */
-      unsigned16 result;
+      uint16_t result;
 
       TRACE_INSN (cpu, "RET");
       cpu->sp += 2;
@@ -447,7 +447,7 @@ void step_once (SIM_CPU *cpu)
   else if (num1 == 19)
     {
       /* out: 19 a: Write the character <a> to the terminal.  */
-      unsigned16 iw2, num2;
+      uint16_t iw2, num2;
 
       iw2 = sim_core_read_aligned_2 (cpu, pc, exec_map, pc + 2);
       num2 = interp_num (cpu, iw2);
@@ -465,7 +465,7 @@ void step_once (SIM_CPU *cpu)
 	 to <a>.  It can be assumed that once input starts, it will continue
 	 until a newline is encountered.  This means that you can safely read
 	 lines from the keyboard and trust that they will be fully read.  */
-      unsigned16 iw2, num2;
+      uint16_t iw2, num2;
       char c;
 
       iw2 = sim_core_read_aligned_2 (cpu, pc, exec_map, pc + 2);

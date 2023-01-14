@@ -1,4 +1,4 @@
-# Copyright 2019-2021 Free Software Foundation, Inc.
+# Copyright 2019-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,15 +23,20 @@ set MIFLAGS "-i=mi"
 
 standard_testfile "mi-fortran-modules.f90" "mi-fortran-modules-2.f90"
 
-if {[prepare_for_testing "failed to prepare" ${testfile} \
+if {[build_executable "failed to prepare" ${testfile} \
 	 [list $srcfile2 $srcfile] {debug f90}]} {
     return -1
 }
 
 mi_clean_restart $binfile
 
+# Avoid shared lib symbols.
+mi_gdb_test "-gdb-set auto-solib-add off" "\\^done"
+
 mi_runto_main
 
+# Avoid libc symbols.
+mi_gdb_test {-interpreter-exec console "nosharedlibrary"}
 
 # Patterns to skip optional system modules that appear with later versions of GFortran.
 set system_modules_pattern \

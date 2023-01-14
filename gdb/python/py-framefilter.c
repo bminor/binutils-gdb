@@ -1,6 +1,6 @@
 /* Python frame filters
 
-   Copyright (C) 2013-2021 Free Software Foundation, Inc.
+   Copyright (C) 2013-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -74,11 +74,11 @@ extract_sym (PyObject *obj, gdb::unique_xmalloc_ptr<char> *name,
       if (*name == NULL)
 	return EXT_LANG_BT_ERROR;
       /* If the API returns a string (and not a symbol), then there is
-	no symbol derived language available and the frame filter has
-	either overridden the symbol with a string, or supplied a
-	entirely synthetic symbol/value pairing.  In that case, use
-	python_language.  */
-      *language = python_language;
+	 no symbol derived language available and the frame filter has
+	 either overridden the symbol with a string, or supplied a
+	 entirely synthetic symbol/value pairing.  In that case, use
+	 the current language.  */
+      *language = current_language;
       *sym = NULL;
       *sym_block = NULL;
     }
@@ -501,7 +501,7 @@ enumerate_args (PyObject *iter,
 	      if (arg.entry_kind != print_entry_values_only)
 		{
 		  out->text (", ");
-		  out->wrap_hint ("    ");
+		  out->wrap_hint (4);
 		}
 
 	      py_print_single_arg (out, NULL, &entryarg, NULL, &opts,
@@ -705,7 +705,7 @@ py_print_args (PyObject *filter,
 
   ui_out_emit_list list_emitter (out, "args");
 
-  out->wrap_hint ("   ");
+  out->wrap_hint (3);
   annotate_frame_args ();
   out->text (" (");
 
@@ -984,7 +984,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 	      if (filename == NULL)
 		return EXT_LANG_BT_ERROR;
 
-	      out->wrap_hint ("   ");
+	      out->wrap_hint (3);
 	      out->text (" at ");
 	      annotate_frame_source_file ();
 	      out->field_string ("file", filename.get (),
@@ -1157,7 +1157,7 @@ gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,
       return EXT_LANG_BT_NO_FILTERS;
     }
 
-  gdbpy_enter enter_py (gdbarch, current_language);
+  gdbpy_enter enter_py (gdbarch);
 
   /* When we're limiting the number of frames, be careful to request
      one extra frame, so that we can print a message if there are more

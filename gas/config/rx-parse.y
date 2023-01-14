@@ -1,5 +1,5 @@
 /* rx-parse.y  Renesas RX parser
-   Copyright (C) 2008-2021 Free Software Foundation, Inc.
+   Copyright (C) 2008-2022 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1316,7 +1316,7 @@ token_table[] =
 
   { "DPSW", DCREG, 0 },
   { "DCMR", DCREG, 1 },
-  { "DCENT", DCREG, 2 },
+  { "DECNT", DCREG, 2 },
   { "DEPC", DCREG, 3 },
   { "DCR0", DCREG, 0 },
   { "DCR1", DCREG, 1 },

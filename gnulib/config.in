@@ -143,6 +143,12 @@
    whether the gnulib module tempname shall be considered present. */
 #undef GNULIB_TEMPNAME
 
+/* Define to 1 when the gnulib module accept should be tested. */
+#undef GNULIB_TEST_ACCEPT
+
+/* Define to 1 when the gnulib module bind should be tested. */
+#undef GNULIB_TEST_BIND
+
 /* Define to 1 when the gnulib module btowc should be tested. */
 #undef GNULIB_TEST_BTOWC
 
@@ -164,6 +170,9 @@
 
 /* Define to 1 when the gnulib module closedir should be tested. */
 #undef GNULIB_TEST_CLOSEDIR
+
+/* Define to 1 when the gnulib module connect should be tested. */
+#undef GNULIB_TEST_CONNECT
 
 /* Define to 1 when the gnulib module dirfd should be tested. */
 #undef GNULIB_TEST_DIRFD
@@ -227,6 +236,9 @@
 
 /* Define to 1 when the gnulib module glob should be tested. */
 #undef GNULIB_TEST_GLOB
+
+/* Define to 1 when the gnulib module listen should be tested. */
+#undef GNULIB_TEST_LISTEN
 
 /* Define to 1 when the gnulib module lstat should be tested. */
 #undef GNULIB_TEST_LSTAT
@@ -311,6 +323,12 @@
 
 /* Define to 1 when the gnulib module setlocale_null should be tested. */
 #undef GNULIB_TEST_SETLOCALE_NULL
+
+/* Define to 1 when the gnulib module setsockopt should be tested. */
+#undef GNULIB_TEST_SETSOCKOPT
+
+/* Define to 1 when the gnulib module socket should be tested. */
+#undef GNULIB_TEST_SOCKET
 
 /* Define to 1 when the gnulib module stat should be tested. */
 #undef GNULIB_TEST_STAT
@@ -900,6 +918,9 @@
 
 /* Define to 1 if you have the <sys/uio.h> header file. */
 #undef HAVE_SYS_UIO_H
+
+/* Define to 1 if you have the <sys/wait.h> header file. */
+#undef HAVE_SYS_WAIT_H
 
 /* Define to 1 if you have the `thrd_create' function. */
 #undef HAVE_THRD_CREATE

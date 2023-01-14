@@ -2,7 +2,7 @@
    Written by Fred Fish <fnf@cygnus.com>
    Rewritten by Jim Blandy <jimb@cygnus.com>
 
-   Copyright (C) 1999-2021 Free Software Foundation, Inc.
+   Copyright (C) 1999-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,7 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "bcache.h"
 
 #include <algorithm>
@@ -68,7 +68,7 @@ bcache::expand_hash_table ()
      so we roughly double the table size each time.  After we fall off 
      the end of this table, we just double.  Don't laugh --- there have
      been executables sighted with a gigabyte of debug info.  */
-  static unsigned long sizes[] = { 
+  static const unsigned long sizes[] = {
     1021, 2053, 4099, 8191, 16381, 32771,
     65537, 131071, 262144, 524287, 1048573, 2097143,
     4194301, 8388617, 16777213, 33554467, 67108859, 134217757,
@@ -85,10 +85,10 @@ bcache::expand_hash_table ()
 
   /* Find the next size.  */
   new_num_buckets = m_num_buckets * 2;
-  for (i = 0; i < (sizeof (sizes) / sizeof (sizes[0])); i++)
-    if (sizes[i] > m_num_buckets)
+  for (unsigned long a_size : sizes)
+    if (a_size > m_num_buckets)
       {
-	new_num_buckets = sizes[i];
+	new_num_buckets = a_size;
 	break;
       }
 

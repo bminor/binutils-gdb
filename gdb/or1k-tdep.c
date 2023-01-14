@@ -1,5 +1,5 @@
 /* Target-dependent code for the 32-bit OpenRISC 1000, for the GDB.
-   Copyright (C) 2008-2021 Free Software Foundation, Inc.
+   Copyright (C) 2008-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -42,6 +42,7 @@
 #include "target-descriptions.h"
 #include <inttypes.h>
 #include "dis-asm.h"
+#include "gdbarch.h"
 
 /* OpenRISC specific includes.  */
 #include "or1k-tdep.h"
@@ -62,11 +63,11 @@ show_or1k_debug (struct ui_file *file, int from_tty,
 
 /* The target-dependent structure for gdbarch.  */
 
-struct gdbarch_tdep
+struct or1k_gdbarch_tdep : gdbarch_tdep
 {
-  int bytes_per_word;
-  int bytes_per_address;
-  CGEN_CPU_DESC gdb_cgen_cpu_desc;
+  int bytes_per_word = 0;
+  int bytes_per_address = 0;
+  CGEN_CPU_DESC gdb_cgen_cpu_desc = nullptr;
 };
 
 /* Support functions for the architecture definition.  */
@@ -247,7 +248,8 @@ or1k_return_value (struct gdbarch *gdbarch, struct value *functype,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   enum type_code rv_type = valtype->code ();
   unsigned int rv_size = TYPE_LENGTH (valtype);
-  int bpw = (gdbarch_tdep (gdbarch))->bytes_per_word;
+  or1k_gdbarch_tdep *tdep = (or1k_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  int bpw = tdep->bytes_per_word;
 
   /* Deal with struct/union as addresses.  If an array won't fit in a
      single register it is returned as address.  Anything larger than 2
@@ -346,33 +348,16 @@ constexpr gdb_byte or1k_break_insn[] = {0x21, 0x00, 0x00, 0x01};
 
 typedef BP_MANIPULATION (or1k_break_insn) or1k_breakpoint;
 
-/* Implement the single_step_through_delay gdbarch method.  */
-
 static int
-or1k_single_step_through_delay (struct gdbarch *gdbarch,
-				struct frame_info *this_frame)
+or1k_delay_slot_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  ULONGEST val;
-  CORE_ADDR ppc;
-  CORE_ADDR npc;
-  CGEN_FIELDS tmp_fields;
   const CGEN_INSN *insn;
-  struct regcache *regcache = get_current_regcache ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  /* Get the previous and current instruction addresses.  If they are not
-    adjacent, we cannot be in a delay slot.  */
-  regcache_cooked_read_unsigned (regcache, OR1K_PPC_REGNUM, &val);
-  ppc = (CORE_ADDR) val;
-  regcache_cooked_read_unsigned (regcache, OR1K_NPC_REGNUM, &val);
-  npc = (CORE_ADDR) val;
-
-  if (0x4 != (npc - ppc))
-    return 0;
+  CGEN_FIELDS tmp_fields;
+  or1k_gdbarch_tdep *tdep = (or1k_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   insn = cgen_lookup_insn (tdep->gdb_cgen_cpu_desc,
 			   NULL,
-			   or1k_fetch_instruction (gdbarch, ppc),
+			   or1k_fetch_instruction (gdbarch, pc),
 			   NULL, 32, &tmp_fields, 0);
 
   /* NULL here would mean the last instruction was not understood by cgen.
@@ -388,6 +373,51 @@ or1k_single_step_through_delay (struct gdbarch *gdbarch,
 	  || (CGEN_INSN_NUM (insn) == OR1K_INSN_L_JALR)
 	  || (CGEN_INSN_NUM (insn) == OR1K_INSN_L_BNF)
 	  || (CGEN_INSN_NUM (insn) == OR1K_INSN_L_BF));
+}
+
+/* Implement the single_step_through_delay gdbarch method.  */
+
+static int
+or1k_single_step_through_delay (struct gdbarch *gdbarch,
+				struct frame_info *this_frame)
+{
+  ULONGEST val;
+  CORE_ADDR ppc;
+  CORE_ADDR npc;
+  struct regcache *regcache = get_current_regcache ();
+
+  /* Get the previous and current instruction addresses.  If they are not
+    adjacent, we cannot be in a delay slot.  */
+  regcache_cooked_read_unsigned (regcache, OR1K_PPC_REGNUM, &val);
+  ppc = (CORE_ADDR) val;
+  regcache_cooked_read_unsigned (regcache, OR1K_NPC_REGNUM, &val);
+  npc = (CORE_ADDR) val;
+
+  if (0x4 != (npc - ppc))
+    return 0;
+
+  return or1k_delay_slot_p (gdbarch, ppc);
+}
+
+/* or1k_software_single_step() is called just before we want to resume
+   the inferior, if we want to single-step it but there is no hardware
+   or kernel single-step support (OpenRISC on GNU/Linux for example).  We
+   find the target of the coming instruction skipping over delay slots
+   and breakpoint it.  */
+
+std::vector<CORE_ADDR>
+or1k_software_single_step (struct regcache *regcache)
+{
+  struct gdbarch *gdbarch = regcache->arch ();
+  CORE_ADDR pc, next_pc;
+
+  pc = regcache_read_pc (regcache);
+  next_pc = pc + 4;
+
+  if (or1k_delay_slot_p (gdbarch, pc))
+    next_pc += 4;
+
+  return {next_pc};
 }
 
 /* Name for or1k general registers.  */
@@ -441,8 +471,8 @@ or1k_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	{
 	  struct symtab_and_line prologue_sal = find_pc_line (start_pc, 0);
 	  struct compunit_symtab *compunit
-	    = SYMTAB_COMPUNIT (prologue_sal.symtab);
-	  const char *debug_format = COMPUNIT_DEBUGFORMAT (compunit);
+	    = prologue_sal.symtab->compunit ();
+	  const char *debug_format = compunit->debugformat ();
 
 	  if ((NULL != debug_format)
 	      && (strlen ("dwarf") <= strlen (debug_format))
@@ -605,8 +635,9 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int heap_offset = 0;
   CORE_ADDR heap_sp = sp - 128;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int bpa = (gdbarch_tdep (gdbarch))->bytes_per_address;
-  int bpw = (gdbarch_tdep (gdbarch))->bytes_per_word;
+  or1k_gdbarch_tdep *tdep = (or1k_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  int bpa = tdep->bytes_per_address;
+  int bpw = tdep->bytes_per_word;
   struct type *func_type = value_type (function);
 
   /* Return address */
@@ -655,7 +686,7 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      heap_offset += align_up (len, bpw);
 	      valaddr = heap_sp + heap_offset;
 
-	      write_memory (valaddr, value_contents (arg), len);
+	      write_memory (valaddr, value_contents (arg).data (), len);
 	    }
 
 	  /* The ABI passes all structures by reference, so get its
@@ -667,7 +698,7 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       else
 	{
 	  /* Everything else, we just get the value.  */
-	  val = value_contents (arg);
+	  val = value_contents (arg).data ();
 	}
 
       /* Stick the value in a register.  */
@@ -767,7 +798,7 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  val = valbuf;
 	}
       else
-	val = value_contents (arg);
+	val = value_contents (arg).data ();
 
       while (len > 0)
 	{
@@ -1112,7 +1143,6 @@ static struct gdbarch *
 or1k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
-  struct gdbarch_tdep *tdep;
   const struct bfd_arch_info *binfo;
   tdesc_arch_data_up tdesc_data;
   const struct target_desc *tdesc = info.target_desc;
@@ -1127,7 +1157,7 @@ or1k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      actually know which target we are talking to, but put in some defaults
      for now.  */
   binfo = info.bfd_arch_info;
-  tdep = XCNEW (struct gdbarch_tdep);
+  or1k_gdbarch_tdep *tdep = new or1k_gdbarch_tdep;
   tdep->bytes_per_word = binfo->bits_per_word / binfo->bits_per_byte;
   tdep->bytes_per_address = binfo->bits_per_address / binfo->bits_per_byte;
   gdbarch = gdbarch_alloc (&info, tdep);
@@ -1255,15 +1285,15 @@ or1k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 static void
 or1k_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  or1k_gdbarch_tdep *tdep = (or1k_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (NULL == tdep)
     return; /* Nothing to report */
 
-  fprintf_unfiltered (file, "or1k_dump_tdep: %d bytes per word\n",
-		      tdep->bytes_per_word);
-  fprintf_unfiltered (file, "or1k_dump_tdep: %d bytes per address\n",
-		      tdep->bytes_per_address);
+  fprintf_filtered (file, "or1k_dump_tdep: %d bytes per word\n",
+		    tdep->bytes_per_word);
+  fprintf_filtered (file, "or1k_dump_tdep: %d bytes per address\n",
+		    tdep->bytes_per_address);
 }
 
 

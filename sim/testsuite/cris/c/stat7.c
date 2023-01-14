@@ -1,5 +1,5 @@
 /*
-#notarget: cris*-*-elf
+#progos: linux
 */
 
 #include <sys/types.h>

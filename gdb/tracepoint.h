@@ -1,5 +1,5 @@
 /* Data structures associated with tracepoints in GDB.
-   Copyright (C) 1997-2021 Free Software Foundation, Inc.
+   Copyright (C) 1997-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -159,7 +159,7 @@ struct trace_status
 
 struct trace_status *current_trace_status (void);
 
-extern char *default_collect;
+extern std::string default_collect;
 
 extern int trace_regblock_size;
 

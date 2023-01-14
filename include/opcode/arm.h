@@ -1,5 +1,5 @@
 /* ARM assembler/disassembler support.
-   Copyright (C) 2004-2021 Free Software Foundation, Inc.
+   Copyright (C) 2004-2022 Free Software Foundation, Inc.
 
    This file is part of GDB and GAS.
 
@@ -94,6 +94,7 @@
 					   Authentication and Branch
 					   Target Identification
 					   Extension.  */
+#define ARM_EXT3_V9A	        0x00000002 /* Armv9-A.	               */
 
 /* Co-processor space extensions.  */
 #define ARM_CEXT_XSCALE	     0x00000001	/* Allow MIA etc.	 	   */
@@ -376,6 +377,8 @@
 #define ARM_ARCH_V8_6A	 ARM_FEATURE (ARM_AEXT_V8A, ARM_AEXT2_V8_6A	   \
 				      | ARM_EXT2_CRC, FPU_NEON_EXT_RDMA	   \
 						    | FPU_NEON_EXT_DOTPROD)
+#define ARM_ARCH_V8_7A	 ARM_ARCH_V8_6A
+#define ARM_ARCH_V8_8A	 ARM_ARCH_V8_7A
 #define ARM_ARCH_V8M_BASE      ARM_FEATURE_CORE (ARM_AEXT_V8M_BASE,	   \
 						 ARM_AEXT2_V8M_BASE)
 #define ARM_ARCH_V8M_MAIN      ARM_FEATURE_CORE (ARM_AEXT_V8M_MAIN,	   \
@@ -385,11 +388,23 @@
 #define ARM_ARCH_V8R	       ARM_FEATURE_CORE (ARM_AEXT_V8R, ARM_AEXT2_V8R)
 #define ARM_ARCH_V8_1M_MAIN    ARM_FEATURE_CORE (ARM_AEXT_V8_1M_MAIN,	   \
 						 ARM_AEXT2_V8_1M_MAIN)
+#define ARM_ARCH_V9A	       ARM_FEATURE_ALL(ARM_AEXT_V8A,	   \
+				      ARM_AEXT2_V8_5A | ARM_EXT2_CRC,	   \
+				      ARM_EXT3_V9A,	   \
+                      FPU_NEON_EXT_RDMA	| FPU_NEON_EXT_DOTPROD)
+#define ARM_ARCH_V9_1A	 ARM_FEATURE_ALL (ARM_AEXT_V8A,			   \
+				          ARM_AEXT2_V8_6A | ARM_EXT2_CRC,  \
+					  ARM_EXT3_V9A,	   		   \
+					  FPU_NEON_EXT_RDMA		   \
+					  | FPU_NEON_EXT_DOTPROD)
+#define ARM_ARCH_V9_2A   ARM_ARCH_V9_1A
+#define ARM_ARCH_V9_3A   ARM_ARCH_V9_2A
 
 /* Some useful combinations:  */
-#define ARM_ARCH_NONE	ARM_FEATURE_LOW (0, 0)
-#define FPU_NONE	ARM_FEATURE_LOW (0, 0)
-#define ARM_ANY		ARM_FEATURE (-1, -1 & ~ (ARM_EXT2_MVE | ARM_EXT2_MVE_FP), 0)	/* Any basic core.  */
+#define ARM_ARCH_NONE	ARM_FEATURE_ALL (0, 0, 0, 0)
+#define FPU_NONE	ARM_FEATURE_ALL (0, 0, 0, 0)
+#define ARM_ARCH_UNKNOWN	ARM_FEATURE_ALL (-1, -1 & ~(ARM_EXT2_MVE | ARM_EXT2_MVE_FP), -1, -1)	/* Machine type is unknown.  */
+#define ARM_ANY		ARM_FEATURE_ALL (-1, -1 & ~(ARM_EXT2_MVE | ARM_EXT2_MVE_FP), -1, 0)	/* Any basic core.  */
 #define FPU_ANY		ARM_FEATURE_COPROC (-1 & ~(ARM_CEXT_XSCALE | ARM_CEXT_IWMMXT | ARM_CEXT_IWMMXT2)) /* Any FPU.  */
 #define FPU_ANY_HARD	ARM_FEATURE_COPROC (FPU_FPA | FPU_VFP_HARD | FPU_MAVERICK)
 /* Extensions containing some Thumb-2 instructions.  If any is present, Thumb
@@ -429,8 +444,8 @@
 
 /* There are too many feature bits to fit in a single word, so use a
    structure.  For simplicity we put all core features in array CORE
-   and everything else in the other.  All the bits in element core[0]
-   have been occupied, so new feature should use bit in element core[1]
+   and everything else in the other.  All the bits in element core[0:1]
+   have been occupied, so new feature should use bit in element core[2]
    and use macro ARM_FEATURE to initialize the feature set variable.  */
 typedef struct
 {
@@ -494,10 +509,13 @@ typedef struct
    && (T1).core[1] == (T2).core[1]		\
    && (T1).core[2] == (T2).core[2])
 
-#define ARM_FEATURE_LOW(core, coproc) {{(core), 0}, (coproc)}
-#define ARM_FEATURE_CORE(core1, core2) {{(core1), (core2)}, 0}
-#define ARM_FEATURE_CORE_LOW(core) {{(core), 0}, 0}
-#define ARM_FEATURE_CORE_HIGH(core) {{0, (core)}, 0}
+#define ARM_FEATURE_LOW(core, coproc) {{(core), 0, 0}, (coproc)}
+#define ARM_FEATURE_CORE(core1, core2) {{(core1), (core2), 0}, 0}
+#define ARM_FEATURE_CORE_LOW(core) {{(core), 0, 0}, 0}
+#define ARM_FEATURE_CORE_HIGH(core) {{0, (core), 0}, 0}
 #define ARM_FEATURE_CORE_HIGH_HIGH(core) {{0, 0, (core)}, 0}
-#define ARM_FEATURE_COPROC(coproc) {{0, 0}, (coproc)}
-#define ARM_FEATURE(core1, core2, coproc) {{(core1), (core2)}, (coproc)}
+#define ARM_FEATURE_COPROC(coproc) {{0, 0, 0}, (coproc)}
+#define ARM_FEATURE(core1, core2, coproc) {{(core1), (core2), 0}, (coproc)}
+/* Below macro is used to set all fields in arm_feature_set struct.
+*/
+#define ARM_FEATURE_ALL(core1, core2, core3, coproc) {{(core1), (core2), (core3)}, (coproc)}

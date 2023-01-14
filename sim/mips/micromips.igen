@@ -1,5 +1,5 @@
 // Simulator definition for the micromips ASE.
-// Copyright (C) 2005-2021 Free Software Foundation, Inc.
+// Copyright (C) 2005-2022 Free Software Foundation, Inc.
 // Contributed by Imagination Technologies, Ltd.
 // Written by Andrew Bennett <andrew.bennett@imgtec.com>
 //
@@ -81,11 +81,11 @@
 }
 
 
-:function:::unsigned32:compute_movep_src_reg:int reg
+:function:::uint32_t:compute_movep_src_reg:int reg
 *micromips32:
 *micromips64:
 {
-  switch(reg)
+  switch (reg)
     {
     case 0: return 0;
     case 1: return 17;
@@ -99,7 +99,7 @@
     }
 }
 
-:function:::unsigned32:compute_andi16_imm:int encoded_imm
+:function:::uint32_t:compute_andi16_imm:int encoded_imm
 *micromips32:
 *micromips64:
 {
@@ -1311,7 +1311,7 @@
 {
   if (lwmregs & 0x10)
     {
-      switch(lwmregs & 0xf)
+      switch (lwmregs & 0xf)
         {
         case 0:
           return "ra";
@@ -1339,7 +1339,7 @@
     }
   else
     {
-      switch(lwmregs & 0xf)
+      switch (lwmregs & 0xf)
         {
         case 1:
           return "s0";
@@ -1761,7 +1761,7 @@
 *micromips32:
 *micromips64:
 {
-  do_sc (SD_, RT, EXTEND12 (IMMEDIATE), BASE, instruction_0);
+  do_sc (SD_, RT, EXTEND12 (IMMEDIATE), BASE, instruction_0, 1);
 }
 
 
@@ -3074,7 +3074,7 @@
 *micromips64:
 {
   check_u64 (SD_, instruction_0);
-  do_scd (SD_, RT, OFFSET, BASE);
+  do_scd (SD_, RT, OFFSET, BASE, 1);
 }
 
 110110,5.RT,5.BASE,16.OFFSET:MICROMIPS64:64::SD

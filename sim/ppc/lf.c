@@ -42,8 +42,8 @@ struct _lf {
 
 
 lf *
-lf_open(char *name,
-	char *real_name,
+lf_open(const char *name,
+	const char *real_name,
 	lf_file_references references,
 	lf_file_type type,
 	const char *program)

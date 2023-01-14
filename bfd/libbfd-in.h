@@ -1,7 +1,7 @@
 /* libbfd.h -- Declarations used by bfd library *implementation*.
    (This include file is not for users of the library.)
 
-   Copyright (C) 1990-2021 Free Software Foundation, Inc.
+   Copyright (C) 1990-2022 Free Software Foundation, Inc.
 
    Written by Cygnus Support.
 
@@ -172,7 +172,7 @@ extern bool _bfd_write_archive_contents
 extern bool _bfd_compute_and_write_armap
   (bfd *, unsigned int) ATTRIBUTE_HIDDEN;
 extern bfd *_bfd_get_elt_at_filepos
-  (bfd *, file_ptr) ATTRIBUTE_HIDDEN;
+  (bfd *, file_ptr, struct bfd_link_info *) ATTRIBUTE_HIDDEN;
 extern bfd *_bfd_generic_get_elt_at_index
   (bfd *, symindex) ATTRIBUTE_HIDDEN;
 extern bfd * _bfd_new_bfd

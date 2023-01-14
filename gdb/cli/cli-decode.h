@@ -1,6 +1,6 @@
 /* Header file for GDB command decoding library.
 
-   Copyright (C) 2000-2021 Free Software Foundation, Inc.
+   Copyright (C) 2000-2022 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -23,9 +23,11 @@
 
 /* Include the public interfaces.  */
 #include "command.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include "cli-script.h"
 #include "completer.h"
+#include "gdbsupport/intrusive_list.h"
+#include "gdbsupport/buildargv.h"
 
 /* Not a set/show command.  Note that some commands which begin with
    "set" or "show" might be in this category, if their syntax does
@@ -55,7 +57,6 @@ struct cmd_list_element
       allow_unknown (0),
       abbrev_flag (0),
       type (not_set_cmd),
-      var_type (var_boolean),
       doc (doc_)
   {
     memset (&function, 0, sizeof (function));
@@ -78,6 +79,12 @@ struct cmd_list_element
 
      For non-prefix commands, return an empty string.  */
   std::string prefixname () const;
+
+  /* Return a vector of strings describing the components of the full name
+     of this command.  For example, if this command is 'set AA BB CC',
+     then the vector will contain 4 elements 'set', 'AA', 'BB', and 'CC'
+     in that order.  */
+  std::vector<std::string> command_components () const;
 
   /* Return true if this command is an alias of another command.  */
   bool is_alias () const
@@ -160,9 +167,6 @@ struct cmd_list_element
      or "show").  */
   ENUM_BITFIELD (cmd_types) type : 2;
 
-  /* What kind of variable is *VAR?  */
-  ENUM_BITFIELD (var_types) var_type : 4;
-
   /* Function definition of this command.  NULL for command class
      names and for help topics that are not really commands.  NOTE:
      cagney/2002-02-02: This function signature is evolving.  For
@@ -228,9 +232,8 @@ struct cmd_list_element
      used to finalize the CONTEXT field, if needed.  */
   void (*destroyer) (struct cmd_list_element *self, void *context) = nullptr;
 
-  /* Pointer to variable affected by "set" and "show".  Doesn't
-     matter if type is not_set.  */
-  void *var = nullptr;
+  /* Setting affected by "set" and "show".  Not used if type is not_set_cmd.  */
+  gdb::optional<setting> var;
 
   /* Pointer to NULL terminated list of enumerated values (like
      argv).  */
@@ -251,11 +254,18 @@ struct cmd_list_element
      aliased command can be located in case it has been hooked.  */
   struct cmd_list_element *alias_target = nullptr;
 
-  /* Start of a linked list of all aliases of this command.  */
-  struct cmd_list_element *aliases = nullptr;
+  /* Node to link aliases on an alias list.  */
+  using aliases_list_node_type
+    = intrusive_list_node<cmd_list_element>;
+  aliases_list_node_type aliases_list_node;
 
-  /* Link pointer for aliases on an alias list.  */
-  struct cmd_list_element *alias_chain = nullptr;
+  /* Linked list of all aliases of this command.  */
+  using aliases_list_member_node_type
+    = intrusive_member_node<cmd_list_element,
+			    &cmd_list_element::aliases_list_node>;
+  using aliases_list_type
+    = intrusive_list<cmd_list_element, aliases_list_member_node_type>;
+  aliases_list_type aliases;
 
   /* If non-null, the pointer to a field in 'struct
      cli_suppress_notification', which will be set to true in cmd_func

@@ -1,4 +1,4 @@
-# Copyright 2013-2021 Free Software Foundation, Inc.
+# Copyright 2013-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -54,7 +54,6 @@ with_test_prefix "file symlink" {
     clean_restart "$filelink"
 
     if ![runto_main] {
-	untested "could not run to main"
 	return -1
     }
 
@@ -95,7 +94,6 @@ with_test_prefix "dir symlink" {
     clean_restart "$dirlink/$filelink"
 
     if ![runto_main] {
-	untested "could not run to main"
 	return -1
     }
 

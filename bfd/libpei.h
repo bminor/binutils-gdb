@@ -1,5 +1,5 @@
 /* Support for the generic parts of PE/PEI; common header information.
-   Copyright (C) 1995-2021 Free Software Foundation, Inc.
+   Copyright (C) 1995-2022 Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -275,6 +275,41 @@
 #define _bfd_XXi_write_codeview_record			_bfd_pepi_write_codeview_record
 #define _bfd_XXi_slurp_codeview_record			_bfd_pepi_slurp_codeview_record
 
+#elif defined COFF_WITH_peAArch64
+
+#define GET_OPTHDR_IMAGE_BASE		 H_GET_64
+#define PUT_OPTHDR_IMAGE_BASE		 H_PUT_64
+#define GET_OPTHDR_SIZE_OF_STACK_RESERVE H_GET_64
+#define PUT_OPTHDR_SIZE_OF_STACK_RESERVE H_PUT_64
+#define GET_OPTHDR_SIZE_OF_STACK_COMMIT	 H_GET_64
+#define PUT_OPTHDR_SIZE_OF_STACK_COMMIT	 H_PUT_64
+#define GET_OPTHDR_SIZE_OF_HEAP_RESERVE	 H_GET_64
+#define PUT_OPTHDR_SIZE_OF_HEAP_RESERVE	 H_PUT_64
+#define GET_OPTHDR_SIZE_OF_HEAP_COMMIT	 H_GET_64
+#define PUT_OPTHDR_SIZE_OF_HEAP_COMMIT	 H_PUT_64
+#define GET_PDATA_ENTRY			 bfd_get_32
+
+#define _bfd_XX_bfd_copy_private_bfd_data_common	_bfd_peAArch64_bfd_copy_private_bfd_data_common
+#define _bfd_XX_bfd_copy_private_section_data		_bfd_peAArch64_bfd_copy_private_section_data
+#define _bfd_XX_get_symbol_info				_bfd_peAArch64_get_symbol_info
+#define _bfd_XX_only_swap_filehdr_out			_bfd_peAArch64_only_swap_filehdr_out
+#define _bfd_XX_print_private_bfd_data_common		_bfd_peAArch64_print_private_bfd_data_common
+#define _bfd_XXi_final_link_postscript			_bfd_peAArch64i_final_link_postscript
+#define _bfd_XXi_only_swap_filehdr_out			_bfd_peAArch64i_only_swap_filehdr_out
+#define _bfd_XXi_swap_aouthdr_in			_bfd_peAArch64i_swap_aouthdr_in
+#define _bfd_XXi_swap_aouthdr_out			_bfd_peAArch64i_swap_aouthdr_out
+#define _bfd_XXi_swap_aux_in				_bfd_peAArch64i_swap_aux_in
+#define _bfd_XXi_swap_aux_out				_bfd_peAArch64i_swap_aux_out
+#define _bfd_XXi_swap_lineno_in				_bfd_peAArch64i_swap_lineno_in
+#define _bfd_XXi_swap_lineno_out			_bfd_peAArch64i_swap_lineno_out
+#define _bfd_XXi_swap_scnhdr_out			_bfd_peAArch64i_swap_scnhdr_out
+#define _bfd_XXi_swap_sym_in				_bfd_peAArch64i_swap_sym_in
+#define _bfd_XXi_swap_sym_out				_bfd_peAArch64i_swap_sym_out
+#define _bfd_XXi_swap_debugdir_in			_bfd_peAArch64i_swap_debugdir_in
+#define _bfd_XXi_swap_debugdir_out			_bfd_peAArch64i_swap_debugdir_out
+#define _bfd_XXi_write_codeview_record			_bfd_peAArch64i_write_codeview_record
+#define _bfd_XXi_slurp_codeview_record			_bfd_peAArch64i_slurp_codeview_record
+
 #else /* !COFF_WITH_pep */
 
 #define GET_OPTHDR_IMAGE_BASE H_GET_32
@@ -369,5 +404,6 @@ bool _bfd_XX_bfd_copy_private_section_data
 bool _bfd_pe_print_ce_compressed_pdata (bfd *, void *);
 bool _bfd_pe64_print_ce_compressed_pdata (bfd *, void *);
 bool _bfd_pex64_print_ce_compressed_pdata (bfd *, void *);
+bool _bfd_peAArch64_print_ce_compressed_pdata (bfd *, void *);
 bool _bfd_pep_print_ce_compressed_pdata (bfd *, void *);
 

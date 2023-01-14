@@ -25,8 +25,7 @@
 /* Note: this module is called via a table.  There is no benefit in
    making it inline */
 
-#include "emul_generic.h"
-#include "emul_netbsd.h"
+#include "defs.h"
 
 #include <string.h>
 #include <sys/types.h>
@@ -37,6 +36,9 @@
 #include <errno.h>
 #include <sys/param.h>
 #include <sys/time.h>
+
+#include "emul_generic.h"
+#include "emul_netbsd.h"
 
 #ifdef HAVE_GETRUSAGE
 #ifndef HAVE_SYS_RESOURCE_H
@@ -629,7 +631,7 @@ do_sigprocmask(os_emul_data *emul,
 	       cpu *processor,
 	       unsigned_word cia)
 {
-  natural_word how = cpu_registers(processor)->gpr[arg0];
+  signed_word how = cpu_registers(processor)->gpr[arg0];
   unsigned_word set = cpu_registers(processor)->gpr[arg0+1];
   unsigned_word oset = cpu_registers(processor)->gpr[arg0+2];
 #ifdef SYS_sigprocmask
@@ -1008,12 +1010,12 @@ do___sysctl(os_emul_data *emul,
 {
   /* call the arguments by their real name */
   unsigned_word name = cpu_registers(processor)->gpr[arg0];
-  natural_word namelen = cpu_registers(processor)->gpr[arg0+1];
+  signed_word namelen = cpu_registers(processor)->gpr[arg0+1];
   unsigned_word oldp = cpu_registers(processor)->gpr[arg0+2];
   unsigned_word oldlenp = cpu_registers(processor)->gpr[arg0+3];
-  natural_word oldlen;
-  natural_word mib;
-  natural_word int_val;
+  signed_word oldlen;
+  signed_word mib;
+  signed_word int_val;
   SYS(__sysctl);
 
   /* pluck out the management information base id */
@@ -1047,7 +1049,7 @@ do___sysctl(os_emul_data *emul,
 				     oldlenp,
 				     processor,
 				     cia);
-      if (sizeof(natural_word) > oldlen)
+      if (sizeof(signed_word) > oldlen)
 	error("system_call()sysctl - CTL_HW.HW_PAGESIZE - to small\n");
       int_val = 8192;
       oldlen = sizeof(int_val);

@@ -1,4 +1,4 @@
-# Copyright (C) 2010-2021 Free Software Foundation, Inc.
+# Copyright (C) 2010-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -127,7 +127,10 @@ proc_with_prefix test_boolean_parameter { } {
     gdb_test "python print (test_param.value)" "False" \
 	"test boolean parameter value is False"
     gdb_test "help show print test-param" \
-	"Show the state of the boolean test-param.*" "test show help"
+	[multi_line \
+	     "Show the state of the boolean test-param" \
+	     "When enabled, test param does something useful\\. When disabled, does nothing\\."] \
+	"test show help"
     gdb_test "help set print test-param" \
 	"Set the state of the boolean test-param.*" "test set help"
     gdb_test "help set print" \
@@ -233,11 +236,14 @@ proc_with_prefix test_undocumented_parameter { } {
     gdb_test "python print (test_undoc_param.value)" \
 	"False" "test undocumented parameter value is False"
     gdb_test "help show print test-undoc-param" \
-	"This command is not documented.*" "test show help"
+	[multi_line \
+	     "Show the current value of 'print test-undoc-param'\\." \
+	     "This command is not documented.*"] \
+	"test show help"
     gdb_test "help set print test-undoc-param" \
 	"This command is not documented.*" "test set help"
     gdb_test "help set print" \
-	"set print test-undoc-param -- This command is not documented.*" \
+	"set print test-undoc-param -- Set the current value of 'print test-undoc-param'\\..*" \
 	"test general help"
 }
 
@@ -255,19 +261,24 @@ proc_with_prefix test_really_undocumented_parameter { } {
 	"end"
 
     gdb_test "show print test-nodoc-param" \
-	"This command is not documented.*" "show parameter on"
+	"The current value of 'print test-nodoc-param' is \"on\"\\." \
+	"show parameter on"
     gdb_test_no_output "set print test-nodoc-param off" \
 	"turn off parameter"
     gdb_test "show print test-nodoc-param" \
-	"This command is not documented.*.*" "show parameter off"
+	"The current value of 'print test-nodoc-param' is \"off\"\\." \
+	"show parameter off"
     gdb_test "python print (test_nodoc_param.value)" \
 	"False" "test really undocumented parameter value is False"
     gdb_test "help show print test-nodoc-param" \
-	"This command is not documented.*" "test show help"
+	[multi_line \
+	     "Show the current value of 'print test-nodoc-param'\\." \
+	     "This command is not documented.*"] \
+	"test show help"
     gdb_test "help set print test-nodoc-param" \
 	"This command is not documented.*" "test set help"
     gdb_test "help set print" \
-	"set print test-nodoc-param -- This command is not documented.*" \
+	"set print test-nodoc-param -- Set the current value of 'print test-nodoc-param'\\..*" \
 	"test general help"
 }
 
@@ -290,14 +301,19 @@ proc_with_prefix test_deprecated_api_parameter { } {
     gdb_test "python print (test_param.value)" "True" \
 	"test deprecated API parameter value is True"
     gdb_test "show print test-param" \
-	"State of the Test Parameter on.*" "show parameter on"
+	"The current value of 'print test-param' is \"on\"\\." \
+	"show parameter on"
     gdb_test_no_output "set print test-param off" "turn off parameter"
     gdb_test "show print test-param" \
-	"State of the Test Parameter off.*" "show parameter off"
+	"The current value of 'print test-param' is \"off\"\\." \
+	"show parameter off"
     gdb_test "python print (test_param.value)" "False" \
 	"test deprecated API parameter value is False"
     gdb_test "help show print test-param" \
-	"State of the Test Parameter.*" "test show help"
+	[multi_line \
+	     "State of the Test Parameter" \
+	     "When enabled, test param does something useful\\. When disabled, does nothing\\."] \
+	"test show help"
     gdb_test "help set print test-param" \
 	"Set the state of the Test Parameter.*" "test set help"
     gdb_test "help set print" \
@@ -364,3 +380,7 @@ test_really_undocumented_parameter
 test_deprecated_api_parameter
 test_integer_parameter
 test_throwing_parameter
+
+# This caused a gdb crash.
+gdb_test "python print(gdb.parameter('endian'))" "auto" \
+    "print endian parameter"

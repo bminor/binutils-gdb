@@ -3,7 +3,7 @@
 #as:
 #source: cross-tu-1.c
 #source: cross-tu-2.c
-#objdump: --ctf=.ctf
+#objdump: --ctf
 #ld: -shared --ctf-variables
 #name: cross-TU-noncyclic
 

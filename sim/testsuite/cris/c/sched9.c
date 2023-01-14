@@ -1,5 +1,5 @@
 /* Check corner error case: specifying invalid scheduling policy.
-#notarget: cris*-*-elf
+#progos: linux
 */
 
 #include <sched.h>

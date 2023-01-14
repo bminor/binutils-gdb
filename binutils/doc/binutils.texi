@@ -10,7 +10,7 @@
 
 @copying
 @c man begin COPYRIGHT
-Copyright @copyright{} 1991-2021 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2022 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -118,7 +118,7 @@ Demangle encoded C++ symbols (on MS-DOS, this program is named
 @code{cxxfilt})
 
 @item addr2line
-Convert addresses into file names and line numbers
+Convert addresses or symbol+offset into file names and line numbers
 
 @item windres
 Manipulate Windows resources
@@ -146,7 +146,7 @@ in the section entitled ``GNU Free Documentation License''.
 * strip::                       Discard symbols
 * c++filt::			Filter to demangle encoded C++ symbols
 * cxxfilt: c++filt.             MS-DOS name for c++filt
-* addr2line::			Convert addresses to file and line
+* addr2line::			Convert addresses or symbol+offset to file and line
 * windmc::			Generator for Windows message resources
 * windres::			Manipulate Windows resources
 * dlltool::			Create files needed to build and use DLLs
@@ -256,7 +256,7 @@ program.
 
 @smallexample
 @c man begin SYNOPSIS ar
-ar [@option{-X32_64}] [@option{-}]@var{p}[@var{mod}] [@option{--plugin} @var{name}] [@option{--target} @var{bfdname}] [@option{--output} @var{dirname}] [@option{--record-libdeps} @var{libdeps}] [@var{relpos}] [@var{count}] @var{archive} [@var{member}@dots{}]
+ar [@option{-X32_64}] [@option{-}]@var{p}[@var{mod}] [@option{--plugin} @var{name}] [@option{--target} @var{bfdname}] [@option{--output} @var{dirname}] [@option{--record-libdeps} @var{libdeps}] [@option{--thin}] [@var{relpos}] [@var{count}] @var{archive} [@var{member}@dots{}]
 @c man end
 @end smallexample
 
@@ -507,10 +507,9 @@ with the linker.  In order to build a symbol table, you must omit the
 @samp{ranlib} on the archive.
 
 @item T
-@cindex creating thin archive
-Make the specified @var{archive} a @emph{thin} archive.  If it already
-exists and is a regular archive, the existing members must be present
-in the same directory as @var{archive}.
+Deprecated alias for @option{--thin}.  @option{T} is not recommended because in
+many ar implementations @option{T} has a different meaning, as specified by
+X/Open System Interface.
 
 @item u
 @cindex updating an archive
@@ -602,6 +601,12 @@ line.
 @item --record-libdeps @var{libdeps}
 The @option{--record-libdeps} option is identical to the @option{l} modifier,
 just handled in long form.
+
+@item --thin
+@cindex creating thin archive
+Make the specified @var{archive} a @emph{thin} archive.  If it already
+exists and is a regular archive, the existing members must be present
+in the same directory as @var{archive}.
 
 @end table
 @c man end
@@ -812,6 +817,7 @@ nm [@option{-A}|@option{-o}|@option{--print-file-name}]
    [@option{-s}|@option{--print-armap}]
    [@option{-t} @var{radix}|@option{--radix=}@var{radix}]
    [@option{-u}|@option{--undefined-only}]
+   [@option{-U} @var{method}] [@option{--unicode=}@var{method}]
    [@option{-V}|@option{--version}]
    [@option{-X 32_64}]
    [@option{--defined-only}]
@@ -1131,6 +1137,21 @@ Use @var{radix} as the radix for printing the symbol values.  It must be
 @cindex external symbols
 @cindex undefined symbols
 Display only undefined symbols (those external to each object file).
+
+@item -U @var{[d|i|l|e|x|h]}
+@itemx --unicode=@var{[default|invalid|locale|escape|hex|highlight]}
+Controls the display of UTF-8 encoded multibyte characters in strings.
+The default (@option{--unicode=default}) is to give them no special
+treatment.  The @option{--unicode=locale} option displays the sequence
+in the current locale, which may or may not support them.  The options
+@option{--unicode=hex} and @option{--unicode=invalid} display them as
+hex byte sequences enclosed by either angle brackets or curly braces.
+
+The @option{--unicode=escape} option displays them as escape sequences
+(@var{\uxxxx}) and the @option{--unicode=highlight} option displays
+them as escape sequences highlighted in red (if supported by the
+output device).  The colouring is intended to draw attention to the
+presence of unicode sequences where they might not be expected.
 
 @item -V
 @itemx --version
@@ -2247,6 +2268,7 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{--prefix-strip=}@var{level}]
         [@option{--insn-width=}@var{width}]
         [@option{--visualize-jumps[=color|=extended-color|=off]}
+        [@option{-U} @var{method}] [@option{--unicode=}@var{method}]
         [@option{-V}|@option{--version}]
         [@option{-H}|@option{--help}]
         @var{objfile}@dots{}
@@ -2921,6 +2943,21 @@ When displaying symbols include those which the target considers to be
 special in some way and which would not normally be of interest to the
 user.
 
+@item -U @var{[d|i|l|e|x|h]}
+@itemx --unicode=@var{[default|invalid|locale|escape|hex|highlight]}
+Controls the display of UTF-8 encoded multibyte characters in strings.
+The default (@option{--unicode=default}) is to give them no special
+treatment.  The @option{--unicode=locale} option displays the sequence
+in the current locale, which may or may not support them.  The options
+@option{--unicode=hex} and @option{--unicode=invalid} display them as
+hex byte sequences enclosed by either angle brackets or curly braces.
+
+The @option{--unicode=escape} option displays them as escape sequences
+(@var{\uxxxx}) and the @option{--unicode=highlight} option displays
+them as escape sequences highlighted in red (if supported by the
+output device).  The colouring is intended to draw attention to the
+presence of unicode sequences where they might not be expected.
+
 @item -V
 @itemx --version
 Print the version number of @command{objdump} and exit.
@@ -3197,10 +3234,11 @@ strings [@option{-afovV}] [@option{-}@var{min-len}]
         [@option{-n} @var{min-len}] [@option{--bytes=}@var{min-len}]
         [@option{-t} @var{radix}] [@option{--radix=}@var{radix}]
         [@option{-e} @var{encoding}] [@option{--encoding=}@var{encoding}]
+        [@option{-U} @var{method}] [@option{--unicode=}@var{method}]
         [@option{-}] [@option{--all}] [@option{--print-file-name}]
         [@option{-T} @var{bfdname}] [@option{--target=}@var{bfdname}]
         [@option{-w}] [@option{--include-all-whitespace}]
-        [@option{-s}] [@option{--output-separator}@var{sep_string}]
+        [@option{-s}] [@option{--output-separator} @var{sep_string}]
         [@option{--help}] [@option{--version}] @var{file}@dots{}
 @c man end
 @end smallexample
@@ -3264,8 +3302,13 @@ Print a summary of the program usage on the standard output and exit.
 @item -@var{min-len}
 @itemx -n @var{min-len}
 @itemx --bytes=@var{min-len}
-Print sequences of characters that are at least @var{min-len} characters
-long, instead of the default 4.
+Print sequences of displayable characters that are at least
+@var{min-len} characters long.  If not specified a default minimum
+length of 4 is used.  The distinction between displayable and
+non-displayable characters depends upon the setting of the 
+@option{-e} and @option{-U} options.  Sequences are always terminated
+at control characters such as new-line and carriage-return, but not
+the tab character.
 
 @item -o
 Like @samp{-t o}.  Some other versions of @command{strings} have @option{-o}
@@ -3287,6 +3330,28 @@ single-8-bit-byte characters, @samp{b} = 16-bit bigendian, @samp{l} =
 16-bit littleendian, @samp{B} = 32-bit bigendian, @samp{L} = 32-bit
 littleendian.  Useful for finding wide character strings. (@samp{l}
 and @samp{b} apply to, for example, Unicode UTF-16/UCS-2 encodings).
+
+@item -U @var{[d|i|l|e|x|h]}
+@itemx --unicode=@var{[default|invalid|locale|escape|hex|highlight]}
+Controls the display of UTF-8 encoded multibyte characters in strings.
+The default (@option{--unicode=default}) is to give them no special
+treatment, and instead rely upon the setting of the
+@option{--encoding} option.  The other values for this option
+automatically enable @option{--encoding=S}.
+
+The @option{--unicode=invalid} option treats them as non-graphic
+characters and hence not part of a valid string.  All the remaining
+options treat them as valid string characters.
+
+The @option{--unicode=locale} option displays them in the current
+locale, which may or may not support UTF-8 encoding.  The
+@option{--unicode=hex} option displays them as hex byte sequences
+enclosed between @var{<>} characters.  The @option{--unicode=escape}
+option displays them as escape sequences (@var{\uxxxx}) and the
+@option{--unicode=highlight} option displays them as escape sequences
+highlighted in red (if supported by the output device).  The colouring
+is intended to draw attention to the presence of unicode sequences
+where they might not be expected.
 
 @item -T @var{bfdname}
 @itemx --target=@var{bfdname}
@@ -3837,7 +3902,7 @@ c++filt @var{option} @var{symbol}
 @kindex addr2line
 @cindex address to file name and line number
 
-@c man title addr2line convert addresses into file names and line numbers
+@c man title addr2line convert addresses or symbol+offset into file names and line numbers
 
 @smallexample
 @c man begin SYNOPSIS addr2line
@@ -3858,8 +3923,8 @@ addr2line [@option{-a}|@option{--addresses}]
 
 @c man begin DESCRIPTION addr2line
 
-@command{addr2line} translates addresses into file names and line numbers.
-Given an address in an executable or an offset in a section of a relocatable
+@command{addr2line} translates addresses or symbol+offset into file names and line numbers.
+Given an address or symbol+offset in an executable or an offset in a section of a relocatable
 object, it uses the debugging information to figure out which file name and
 line number are associated with it.
 
@@ -3869,11 +3934,11 @@ object to use is specified with the @option{-j} option.
 
 @command{addr2line} has two modes of operation.
 
-In the first, hexadecimal addresses are specified on the command line,
+In the first, hexadecimal addresses or symbol+offset are specified on the command line,
 and @command{addr2line} displays the file name and line number for each
 address.
 
-In the second, @command{addr2line} reads hexadecimal addresses from
+In the second, @command{addr2line} reads hexadecimal addresses or symbol+offset from
 standard input, and prints the file name and line number for each
 address on standard output.  In this mode, @command{addr2line} may be used
 in a pipe to convert dynamically chosen addresses.
@@ -3909,6 +3974,10 @@ by the text @samp{(inlined by)}.
 If the file name or function name can not be determined,
 @command{addr2line} will print two question marks in their place.  If the
 line number can not be determined, @command{addr2line} will print 0.
+
+When symbol+offset is used, +offset is optional, except when the symbol
+is ambigious with a hex number. The resolved symbols can be mangled
+or unmangled, except unmangled symbols with + are not allowed.
 
 @c man end
 
@@ -4796,6 +4865,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{--demangle@var{=style}}|@option{--no-demangle}]
         [@option{--quiet}]
         [@option{--recurse-limit}|@option{--no-recurse-limit}]
+        [@option{-U} @var{method}|@option{--unicode=}@var{method}]
         [@option{-n}|@option{--notes}]
         [@option{-r}|@option{--relocs}]
         [@option{-u}|@option{--unwind}]
@@ -4961,6 +5031,28 @@ The default is for this limit to be enabled, but disabling it may be
 necessary in order to demangle truly complicated names.  Note however
 that if the recursion limit is disabled then stack exhaustion is
 possible and any bug reports about such an event will be rejected.
+
+@item -U @var{[d|i|l|e|x|h]}
+@itemx --unicode=[default|invalid|locale|escape|hex|highlight]
+Controls the display of non-ASCII characters in identifier names.
+The default (@option{--unicode=locale} or @option{--unicode=default}) is
+to treat them as multibyte characters and display them in the current
+locale.  All other versions of this option treat the bytes as UTF-8
+encoded values and attempt to interpret them.  If they cannot be
+interpreted or if the @option{--unicode=invalid} option is used then
+they are displayed as a sequence of hex bytes, encloses in curly
+parethesis characters.
+
+Using the @option{--unicode=escape} option will display the characters
+as as unicode escape sequences (@var{\uxxxx}).  Using the
+@option{--unicode=hex} will display the characters as hex byte
+sequences enclosed between angle brackets.
+
+Using the @option{--unicode=highlight} will display the characters as 
+unicode escape sequences but it will also highlighted them in red,
+assuming that colouring is supported by the output device.  The
+colouring is intended to draw attention to the presence of unicode
+sequences when they might not be expected.
 
 @item -e
 @itemx --headers
@@ -5128,9 +5220,11 @@ objdump(1), and the Info entries for @file{binutils}.
 elfedit [@option{--input-mach=}@var{machine}]
         [@option{--input-type=}@var{type}]
         [@option{--input-osabi=}@var{osabi}]
+        [@option{--input-abiversion=}@var{version}]
         @option{--output-mach=}@var{machine}
         @option{--output-type=}@var{type}
         @option{--output-osabi=}@var{osabi}
+        @option{--output-abiversion=}@var{version}
         @option{--enable-x86-feature=}@var{feature}
         @option{--disable-x86-feature=}@var{feature}
         [@option{-v}|@option{--version}]
@@ -5155,6 +5249,7 @@ should be updated.
 The long and short forms of options, shown here as alternatives, are
 equivalent. At least one of the @option{--output-mach},
 @option{--output-type}, @option{--output-osabi},
+@option{--output-abiversion},
 @option{--enable-x86-feature} and @option{--disable-x86-feature}
 options must be given.
 
@@ -5195,6 +5290,15 @@ The supported ELF OSABIs are, @var{none}, @var{HPUX}, @var{NetBSD},
 @item --output-osabi=@var{osabi}
 Change the ELF OSABI in the ELF header to @var{osabi}.  The
 supported ELF OSABI are the same as @option{--input-osabi}.
+
+@item --input-abiversion=@var{version}
+Set the matching input ELF file ABIVERSION to @var{version}.
+@var{version} must be between 0 and 255.  If @option{--input-abiversion}
+isn't specified, it will match any ELF ABIVERSIONs.
+
+@item --output-abiversion=@var{version}
+Change the ELF ABIVERSION in the ELF header to @var{version}.
+@var{version} must be between 0 and 255.
 
 @item --enable-x86-feature=@var{feature}
 Set the @var{feature} bit in program property in @var{exec} or @var{dyn}

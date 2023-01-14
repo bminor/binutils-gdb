@@ -1,6 +1,6 @@
 /* GDB Notifications to Observers.
 
-   Copyright (C) 2003-2021 Free Software Foundation, Inc.
+   Copyright (C) 2003-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -75,8 +75,10 @@ DEFINE_OBSERVABLE (inferior_call_pre);
 DEFINE_OBSERVABLE (inferior_call_post);
 DEFINE_OBSERVABLE (register_changed);
 DEFINE_OBSERVABLE (user_selected_context_changed);
-DEFINE_OBSERVABLE (source_styling_changed);
+DEFINE_OBSERVABLE (styling_changed);
 DEFINE_OBSERVABLE (current_source_symtab_and_line_changed);
+DEFINE_OBSERVABLE (gdb_exiting);
+DEFINE_OBSERVABLE (connection_removed);
 
 } /* namespace observers */
 } /* namespace gdb */

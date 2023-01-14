@@ -10,7 +10,6 @@ main (int argc, char *argv[])
   ctf_next_t *i = NULL;
   ctf_id_t type;
   const char *arcname;
-  char *type_name;
   int err;
 
   if (argc != 2)

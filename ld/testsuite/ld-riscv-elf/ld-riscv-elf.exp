@@ -1,5 +1,5 @@
 # Expect script for RISC-V ELF linker tests
-#   Copyright (C) 2017-2021 Free Software Foundation, Inc.
+#   Copyright (C) 2017-2022 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -119,8 +119,10 @@ proc run_relax_twice_test {} {
 }
 
 if [istarget "riscv*-*-*"] {
+    run_dump_test "align-small-region"
     run_dump_test "call-relax"
-    run_dump_test "pcgp-relax"
+    run_dump_test "pcgp-relax-01"
+    run_dump_test "pcgp-relax-02"
     run_dump_test "c-lui"
     run_dump_test "c-lui-2"
     run_dump_test "disas-jalr"
@@ -130,7 +132,22 @@ if [istarget "riscv*-*-*"] {
     run_dump_test "pcrel-lo-addend-3a"
     run_dump_test "pcrel-lo-addend-3b"
     run_dump_test "pcrel-lo-addend-3c"
-    run_dump_test "restart-relax"
+    run_dump_test "code-model-medlow-01"
+    run_dump_test "code-model-medlow-02"
+    run_dump_test "code-model-medlow-weakref-01"
+    run_dump_test "code-model-medlow-weakref-02"
+    run_dump_test "code-model-medany-01"
+    run_dump_test "code-model-medany-02"
+    run_dump_test "code-model-medany-weakref-01"
+    run_dump_test "code-model-medany-weakref-02"
+    run_dump_test "code-model-relax-medlow-01"
+    run_dump_test "code-model-relax-medlow-02"
+    run_dump_test "code-model-relax-medlow-weakref-01"
+    run_dump_test "code-model-relax-medlow-weakref-02"
+    run_dump_test "code-model-relax-medany-01"
+    run_dump_test "code-model-relax-medany-02"
+    run_dump_test "code-model-relax-medany-weakref-01"
+    run_dump_test "code-model-relax-medany-weakref-02"
     run_dump_test "attr-merge-arch-01"
     run_dump_test "attr-merge-arch-02"
     run_dump_test "attr-merge-arch-03"
@@ -168,6 +185,9 @@ if [istarget "riscv*-*-*"] {
 
     run_dump_test "relro-relax-lui"
     run_dump_test "relro-relax-pcrel"
+    run_dump_test "variant_cc-now"
+    run_dump_test "variant_cc-shared"
+    run_dump_test "variant_cc-r"
     run_relax_twice_test
 
     set abis [list rv32gc ilp32 [riscv_choose_ilp32_emul] rv64gc lp64 [riscv_choose_lp64_emul]]

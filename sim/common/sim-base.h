@@ -1,6 +1,6 @@
 /* Simulator pseudo baseclass.
 
-   Copyright 1997-2021 Free Software Foundation, Inc.
+   Copyright 1997-2022 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -151,10 +151,23 @@ struct sim_state {
   const char *model_name;
 #define STATE_MODEL_NAME(sd) ((sd)->model_name)
 
+  /* In standalone simulator, this is the program to run.  Not to be confused
+     with argv which are the strings passed to the program itself.  */
+  char *prog_file;
+#define STATE_PROG_FILE(sd) ((sd)->prog_file)
+
   /* In standalone simulator, this is the program's arguments passed
      on the command line.  */
   char **prog_argv;
 #define STATE_PROG_ARGV(sd) ((sd)->prog_argv)
+
+  /* Thie is the program's argv[0] override.  */
+  char *prog_argv0;
+#define STATE_PROG_ARGV0(sd) ((sd)->prog_argv0)
+
+  /* The program's environment.  */
+  char **prog_envp;
+#define STATE_PROG_ENVP(sd) ((sd)->prog_envp)
 
   /* The program's bfd.  */
   struct bfd *prog_bfd;

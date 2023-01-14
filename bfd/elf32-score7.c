@@ -1,5 +1,5 @@
 /* 32-bit ELF support for S+core.
-   Copyright (C) 2009-2021 Free Software Foundation, Inc.
+   Copyright (C) 2009-2022 Free Software Foundation, Inc.
    Contributed by
    Brain.lin (brain.lin@sunplusct.com)
    Mei Ligang (ligang@sunnorth.com.cn)
@@ -340,23 +340,14 @@ score_elf_final_gp (bfd *output_bfd,
 
 static bfd_reloc_status_type
 score_elf_gprel15_with_gp (bfd *abfd,
-			   asymbol *symbol,
 			   arelent *reloc_entry,
 			   asection *input_section,
 			   bool relocateable,
 			   void * data,
 			   bfd_vma gp ATTRIBUTE_UNUSED)
 {
-  bfd_vma relocation;
   unsigned long insn;
 
-  if (bfd_is_com_section (symbol->section))
-    relocation = 0;
-  else
-    relocation = symbol->value;
-
-  relocation += symbol->section->output_section->vma;
-  relocation += symbol->section->output_offset;
   if (reloc_entry->address > input_section->size)
     return bfd_reloc_outofrange;
 
@@ -441,14 +432,16 @@ score_elf_gprel15_reloc (bfd *abfd,
     {
       relocateable = false;
       output_bfd = symbol->section->output_section->owner;
+      if (output_bfd == NULL)
+	return bfd_reloc_undefined;
     }
 
   ret = score_elf_final_gp (output_bfd, symbol, relocateable, error_message, &gp);
   if (ret != bfd_reloc_ok)
     return ret;
 
-  return score_elf_gprel15_with_gp (abfd, symbol, reloc_entry,
-					 input_section, relocateable, data, gp);
+  return score_elf_gprel15_with_gp (abfd, reloc_entry,
+				    input_section, relocateable, data, gp);
 }
 
 /* Do a R_SCORE_GPREL32 relocation.  This is a 32 bit value which must
@@ -876,7 +869,7 @@ static const struct score_reloc_map elf32_score_reloc_map[] =
   {BFD_RELOC_SCORE_DUMMY_HI16,	 R_SCORE_DUMMY_HI16},
 };
 
-static INLINE hashval_t
+static inline hashval_t
 score_elf_hash_bfd_vma (bfd_vma addr)
 {
 #ifdef BFD64

@@ -1,6 +1,8 @@
 # mcore simulator testsuite
 
-if [istarget mcore-*] {
+sim_init
+
+if [istarget *] {
     # all machines
     set all_machs "mcore"
 

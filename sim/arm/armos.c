@@ -31,11 +31,6 @@
 #include <errno.h>
 #include <limits.h>
 #include <string.h>
-#include "targ-vals.h"
-
-#ifndef TARGET_O_BINARY
-#define TARGET_O_BINARY 0
-#endif
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>		/* For SEEK_SET etc.  */
@@ -188,7 +183,17 @@ ARMul_OSInit (ARMul_State * state)
    return TRUE;
 }
 
-static int translate_open_mode[] =
+/* These are libgloss defines, but seem to be common across all supported ARM
+   targets at the moment.  These should get moved to the callback open_map.  */
+#define TARGET_O_BINARY 0
+#define TARGET_O_APPEND 0x8
+#define TARGET_O_CREAT 0x200
+#define TARGET_O_RDONLY 0x0
+#define TARGET_O_RDWR 0x2
+#define TARGET_O_TRUNC 0x400
+#define TARGET_O_WRONLY 0x1
+
+static const int translate_open_mode[] =
 {
   TARGET_O_RDONLY,		/* "r"   */
   TARGET_O_RDONLY + TARGET_O_BINARY,	/* "rb"  */

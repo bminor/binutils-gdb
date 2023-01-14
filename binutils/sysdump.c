@@ -1,5 +1,5 @@
 /* Sysroff object format dumper.
-   Copyright (C) 1994-2021 Free Software Foundation, Inc.
+   Copyright (C) 1994-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -58,6 +58,12 @@ getCHARS (unsigned char *ptr, int *idx, int size, int max)
       /* Got to work out the length of the string from self.  */
       b = ptr[oc++];
       (*idx) += 8;
+    }
+
+  if (oc + b > size)
+    {
+      /* PR 28564  */
+      return _("*corrupt*");
     }
 
   *idx += b * 8;

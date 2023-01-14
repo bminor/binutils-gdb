@@ -1,6 +1,6 @@
 /* Cache and manage frames for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,7 +24,7 @@
 #include "inferior.h"	/* for inferior_ptid */
 #include "regcache.h"
 #include "user-regs.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "dummy-frame.h"
 #include "sentinel-frame.h"
 #include "gdbcore.h"
@@ -1156,7 +1156,7 @@ frame_register_unwind (frame_info *next_frame, int regnum,
   if (bufferp)
     {
       if (!*optimizedp && !*unavailablep)
-	memcpy (bufferp, value_contents_all (value),
+	memcpy (bufferp, value_contents_all (value).data (),
 		TYPE_LENGTH (value_type (value)));
       else
 	memset (bufferp, 0, TYPE_LENGTH (value_type (value)));
@@ -1261,7 +1261,7 @@ frame_unwind_register_value (frame_info *next_frame, int regnum)
 	  else
 	    {
 	      int i;
-	      const gdb_byte *buf = value_contents (value);
+	      gdb::array_view<const gdb_byte> buf = value_contents (value);
 
 	      fprintf_unfiltered (&debug_file, " bytes=");
 	      fprintf_unfiltered (&debug_file, "[");
@@ -1288,7 +1288,6 @@ frame_unwind_register_signed (frame_info *next_frame, int regnum)
 {
   struct gdbarch *gdbarch = frame_unwind_arch (next_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int size = register_size (gdbarch, regnum);
   struct value *value = frame_unwind_register_value (next_frame, regnum);
 
   gdb_assert (value != NULL);
@@ -1304,8 +1303,7 @@ frame_unwind_register_signed (frame_info *next_frame, int regnum)
 		   _("Register %d is not available"), regnum);
     }
 
-  LONGEST r = extract_signed_integer (value_contents_all (value), size,
-				      byte_order);
+  LONGEST r = extract_signed_integer (value_contents_all (value), byte_order);
 
   release_value (value);
   return r;
@@ -1338,8 +1336,8 @@ frame_unwind_register_unsigned (frame_info *next_frame, int regnum)
 		   _("Register %d is not available"), regnum);
     }
 
-  ULONGEST r = extract_unsigned_integer (value_contents_all (value), size,
-					 byte_order);
+  ULONGEST r = extract_unsigned_integer (value_contents_all (value).data (),
+					 size, byte_order);
 
   release_value (value);
   return r;
@@ -1364,7 +1362,8 @@ read_frame_register_unsigned (frame_info *frame, int regnum,
       enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
       int size = register_size (gdbarch, VALUE_REGNUM (regval));
 
-      *val = extract_unsigned_integer (value_contents (regval), size, byte_order);
+      *val = extract_unsigned_integer (value_contents (regval).data (), size,
+				       byte_order);
       return true;
     }
 
@@ -1496,7 +1495,8 @@ get_frame_register_bytes (frame_info *frame, int regnum,
 	      return false;
 	    }
 
-	  memcpy (myaddr, value_contents_all (value) + offset, curr_len);
+	  memcpy (myaddr, value_contents_all (value).data () + offset,
+		  curr_len);
 	  release_value (value);
 	}
 
@@ -1546,9 +1546,10 @@ put_frame_register_bytes (struct frame_info *frame, int regnum,
 							     regnum);
 	  gdb_assert (value != NULL);
 
-	  memcpy ((char *) value_contents_writeable (value) + offset, myaddr,
-		  curr_len);
-	  put_frame_register (frame, regnum, value_contents_raw (value));
+	  memcpy ((char *) value_contents_writeable (value).data () + offset,
+		  myaddr, curr_len);
+	  put_frame_register (frame, regnum,
+			      value_contents_raw (value).data ());
 	  release_value (value);
 	}
 
@@ -1789,7 +1790,7 @@ has_stack_frames ()
 	return false;
 
       /* ... or from a spinning thread.  */
-      if (tp->executing)
+      if (tp->executing ())
 	return false;
     }
 
@@ -2044,14 +2045,23 @@ frame_register_unwind_location (struct frame_info *this_frame, int regnum,
    outermost, with UNWIND_SAME_ID stop reason.  Unlike the other
    validity tests, that compare THIS_FRAME and the next frame, we do
    this right after creating the previous frame, to avoid ever ending
-   up with two frames with the same id in the frame chain.  */
+   up with two frames with the same id in the frame chain.
+
+   There is however, one case where this cycle detection is not desirable,
+   when asking for the previous frame of an inline frame, in this case, if
+   the previous frame is a duplicate and we return nullptr then we will be
+   unable to calculate the frame_id of the inline frame, this in turn
+   causes inline_frame_this_id() to fail.  So for inline frames (and only
+   for inline frames), the previous frame will always be returned, even when it
+   has a duplicate frame_id.  We're not worried about cycles in the frame
+   chain as, if the previous frame returned here has a duplicate frame_id,
+   then the frame_id of the inline frame, calculated based off the frame_id
+   of the previous frame, should also be a duplicate.  */
 
 static struct frame_info *
-get_prev_frame_if_no_cycle (struct frame_info *this_frame)
+get_prev_frame_maybe_check_cycle (struct frame_info *this_frame)
 {
-  struct frame_info *prev_frame;
-
-  prev_frame = get_prev_frame_raw (this_frame);
+  struct frame_info *prev_frame = get_prev_frame_raw (this_frame);
 
   /* Don't compute the frame id of the current frame yet.  Unwinding
      the sentinel frame can fail (e.g., if the thread is gone and we
@@ -2070,7 +2080,42 @@ get_prev_frame_if_no_cycle (struct frame_info *this_frame)
   try
     {
       compute_frame_id (prev_frame);
-      if (!frame_stash_add (prev_frame))
+
+      bool cycle_detection_p = get_frame_type (this_frame) != INLINE_FRAME;
+
+      /* This assert checks GDB's state with respect to calculating the
+	 frame-id of THIS_FRAME, in the case where THIS_FRAME is an inline
+	 frame.
+
+	 If THIS_FRAME is frame #0, and is an inline frame, then we put off
+	 calculating the frame_id until we specifically make a call to
+	 get_frame_id().  As a result we can enter this function in two
+	 possible states.  If GDB asked for the previous frame of frame #0
+	 then THIS_FRAME will be frame #0 (an inline frame), and the
+	 frame_id will be in the NOT_COMPUTED state.  However, if GDB asked
+	 for the frame_id of frame #0, then, as getting the frame_id of an
+	 inline frame requires us to get the frame_id of the previous
+	 frame, we will still end up in here, and the frame_id status will
+	 be COMPUTING.
+
+	 If, instead, THIS_FRAME is at a level greater than #0 then things
+	 are simpler.  For these frames we immediately compute the frame_id
+	 when the frame is initially created, and so, for those frames, we
+	 will always enter this function with the frame_id status of
+	 COMPUTING.  */
+      gdb_assert (cycle_detection_p
+		  || (this_frame->level > 0
+		      && (this_frame->this_id.p
+			  == frame_id_status::COMPUTING))
+		  || (this_frame->level == 0
+		      && (this_frame->this_id.p
+			  != frame_id_status::COMPUTED)));
+
+      /* We must do the CYCLE_DETECTION_P check after attempting to add
+	 PREV_FRAME into the cache; if PREV_FRAME is unique then we do want
+	 it in the cache, but if it is a duplicate and CYCLE_DETECTION_P is
+	 false, then we don't want to unlink it.  */
+      if (!frame_stash_add (prev_frame) && cycle_detection_p)
 	{
 	  /* Another frame with the same id was already in the stash.  We just
 	     detected a cycle.  */
@@ -2147,7 +2192,7 @@ get_prev_frame_always_1 (struct frame_info *this_frame)
      until we have unwound all the way down to the previous non-inline
      frame.  */
   if (get_frame_type (this_frame) == INLINE_FRAME)
-    return get_prev_frame_if_no_cycle (this_frame);
+    return get_prev_frame_maybe_check_cycle (this_frame);
 
   /* If this_frame is the current frame, then compute and stash its
      frame id prior to fetching and computing the frame id of the
@@ -2248,7 +2293,7 @@ get_prev_frame_always_1 (struct frame_info *this_frame)
 	}
     }
 
-  return get_prev_frame_if_no_cycle (this_frame);
+  return get_prev_frame_maybe_check_cycle (this_frame);
 }
 
 /* Return a "struct frame_info" corresponding to the frame that called
@@ -3082,16 +3127,15 @@ _initialize_frame ()
   gdb::observers::target_changed.attach (frame_observer_target_changed,
 					 "frame");
 
-  add_basic_prefix_cmd ("backtrace", class_maintenance, _("\
+  add_setshow_prefix_cmd ("backtrace", class_maintenance,
+			  _("\
 Set backtrace specific variables.\n\
 Configure backtrace variables such as the backtrace limit"),
-			&set_backtrace_cmdlist,
-			0/*allow-unknown*/, &setlist);
-  add_show_prefix_cmd ("backtrace", class_maintenance, _("\
+			  _("\
 Show backtrace specific variables.\n\
 Show backtrace variables such as the backtrace limit."),
-		       &show_backtrace_cmdlist,
-		       0/*allow-unknown*/, &showlist);
+			  &set_backtrace_cmdlist, &show_backtrace_cmdlist,
+			  &setlist, &showlist);
 
   add_setshow_uinteger_cmd ("limit", class_obscure,
 			    &user_set_backtrace_options.backtrace_limit, _("\

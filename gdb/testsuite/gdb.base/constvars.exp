@@ -1,4 +1,4 @@
-# Copyright 1997-2021 Free Software Foundation, Inc.
+# Copyright 1997-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ get_debug_format
 proc local_compiler_xfail_check { } {
     if { [test_compiler_info gcc-2-*] } then {
 	if { ![test_debug_format "HP"] \
-		&& ![test_debug_format "DWARF 2"] } then {
+		&& ![test_debug_format "DWARF \[0-9\]"] } then {
 	    setup_xfail "*-*-*" 
 	}
     }

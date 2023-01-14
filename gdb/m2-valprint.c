@@ -1,6 +1,6 @@
 /* Support for printing Modula 2 values for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -102,7 +102,7 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
       for (i = low_bound; i <= high_bound; i++)
 	{
 	  bitval = value_bit_index (type->field (field).type (),
-				    (TYPE_FIELD_BITPOS (type, field) / 8) +
+				    (type->field (field).loc_bitpos () / 8) +
 				    valaddr + embedded_offset, i);
 	  if (bitval < 0)
 	    error (_("bit test is out of range"));
@@ -165,10 +165,10 @@ m2_print_unbounded_array (struct value *value,
   struct value *val;
 
   struct type *type = check_typedef (value_type (value));
-  const gdb_byte *valaddr = value_contents_for_printing (value);
+  const gdb_byte *valaddr = value_contents_for_printing (value).data ();
 
   addr = unpack_pointer (type->field (0).type (),
-			 (TYPE_FIELD_BITPOS (type, 0) / 8) +
+			 (type->field (0).loc_bitpos () / 8) +
 			 valaddr);
 
   val = value_at_lazy (TYPE_TARGET_TYPE (type->field (0).type ()),
@@ -305,7 +305,7 @@ m2_language::value_print_inner (struct value *val, struct ui_file *stream,
   unsigned len;
   struct type *elttype;
   CORE_ADDR addr;
-  const gdb_byte *valaddr = value_contents_for_printing (val);
+  const gdb_byte *valaddr = value_contents_for_printing (val).data ();
   const CORE_ADDR address = value_address (val);
 
   struct type *type = check_typedef (value_type (val));

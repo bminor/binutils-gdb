@@ -175,6 +175,14 @@ case "${gdbserver_host}" in
 			srv_linux_usrregs=yes
 			srv_linux_thread_db=yes
 			;;
+  or1k*-*-linux*)	srv_regobj="or1k-linux.o"
+			srv_tgtobj="$srv_linux_obj linux-or1k-low.o"
+			srv_xmlfiles="or1k-linux.xml"
+			srv_xmlfiles="${srv_xmlfiles} or1k-core.xml"
+			srv_linux_regsets=yes
+			srv_linux_usrregs=yes
+			srv_linux_thread_db=yes
+			;;
   powerpc*-*-linux*)	srv_regobj="powerpc-32l.o"
 			srv_regobj="${srv_regobj} powerpc-altivec32l.o"
 			srv_regobj="${srv_regobj} powerpc-vsx32l.o"

@@ -1,6 +1,6 @@
 /* For this test, we need to do the lstat syscall directly, or else
    glibc gets a SEGV.
-#notarget: cris*-*-elf
+#progos: linux
 */
 
 #include <unistd.h>

@@ -1,5 +1,5 @@
 /* ELF object file format.
-   Copyright (C) 1992-2021 Free Software Foundation, Inc.
+   Copyright (C) 1992-2022 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -271,6 +271,11 @@ extern void obj_elf_init_stab_section (segT);
 extern void elf_frob_symbol (symbolS *, int *);
 #ifndef obj_frob_symbol
 #define obj_frob_symbol(symp, punt) elf_frob_symbol (symp, &punt)
+#endif
+
+extern void elf_fixup_removed_symbol (symbolS **);
+#ifndef obj_fixup_removed_symbol
+#define obj_fixup_removed_symbol(sympp) elf_fixup_removed_symbol (sympp)
 #endif
 
 extern void elf_pop_insert (void);

@@ -24,7 +24,7 @@ _start:
 	vcvtuqq2ps	xmm0, [rax]
 
 	vfpclasspd	k0, [eax], 0
-	vfpclassps	k0, [eax], 0
+	vfpclassps	k0, [eax+1], 0
 
 	.att_syntax prefix
 

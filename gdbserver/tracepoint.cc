@@ -1,5 +1,5 @@
 /* Tracepoint code for remote server for GDB.
-   Copyright (C) 2009-2021 Free Software Foundation, Inc.
+   Copyright (C) 2009-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -77,27 +77,20 @@ trace_vdebug (const char *fmt, ...)
   va_end (ap);
 }
 
-#define trace_debug_1(level, fmt, args...)	\
+#define trace_debug(fmt, args...)	\
   do {						\
-    if (level <= debug_threads)		\
+    if (debug_threads)				\
       trace_vdebug ((fmt), ##args);		\
   } while (0)
 
 #else
 
-#define trace_debug_1(level, fmt, args...)	\
+#define trace_debug(fmt, args...)	\
   do {						\
-    if (level <= debug_threads)			\
-      {						\
-	debug_printf ((fmt), ##args);		\
-	debug_printf ("\n");			\
-      }						\
+      threads_debug_printf ((fmt), ##args);	\
   } while (0)
 
 #endif
-
-#define trace_debug(FMT, args...)		\
-  trace_debug_1 (1, FMT, ##args)
 
 /* Prefix exported symbols, for good citizenship.  All the symbols
    that need exporting are defined in this module.  Note that all
@@ -327,8 +320,7 @@ tracepoint_look_up_symbols (void)
 
       if (look_up_one_symbol (symbol_list[i].name, addrp, 1) == 0)
 	{
-	  if (debug_threads)
-	    debug_printf ("symbol `%s' not found\n", symbol_list[i].name);
+	  threads_debug_printf ("symbol `%s' not found", symbol_list[i].name);
 	  return;
 	}
     }
@@ -3975,18 +3967,14 @@ gdb_agent_about_to_close (int pid)
 
   if (!maybe_write_ipa_not_loaded (buf))
     {
-      struct thread_info *saved_thread;
-
-      saved_thread = current_thread;
+      scoped_restore_current_thread restore_thread;
 
       /* Find any thread which belongs to process PID.  */
-      current_thread = find_any_thread_of_pid (pid);
+      switch_to_thread (find_any_thread_of_pid (pid));
 
       strcpy (buf, "close");
 
       run_inferior_command (buf, strlen (buf) + 1);
-
-      current_thread = saved_thread;
     }
 }
 
@@ -4408,7 +4396,7 @@ tracepoint_finished_step (struct thread_info *tinfo, CORE_ADDR stop_pc)
   wstep_link = &tinfo->while_stepping;
 
   trace_debug ("Thread %s finished a single-step for tracepoint %d at 0x%s",
-	       target_pid_to_str (tinfo->id),
+	       target_pid_to_str (tinfo->id).c_str (),
 	       wstep->tp_number, paddress (wstep->tp_address));
 
   ctx.base.type = trap_tracepoint;
@@ -4421,7 +4409,7 @@ tracepoint_finished_step (struct thread_info *tinfo, CORE_ADDR stop_pc)
 	{
 	  trace_debug ("NO TRACEPOINT %d at 0x%s FOR THREAD %s!",
 		       wstep->tp_number, paddress (wstep->tp_address),
-		       target_pid_to_str (tinfo->id));
+		       target_pid_to_str (tinfo->id).c_str ());
 
 	  /* Unlink.  */
 	  *wstep_link = wstep->next;
@@ -4441,7 +4429,7 @@ tracepoint_finished_step (struct thread_info *tinfo, CORE_ADDR stop_pc)
 	{
 	  /* The requested numbers of steps have occurred.  */
 	  trace_debug ("Thread %s done stepping for tracepoint %d at 0x%s",
-		       target_pid_to_str (tinfo->id),
+		       target_pid_to_str (tinfo->id).c_str (),
 		       wstep->tp_number, paddress (wstep->tp_address));
 
 	  /* Unlink the wstep.  */
@@ -4526,15 +4514,14 @@ handle_tracepoint_bkpts (struct thread_info *tinfo, CORE_ADDR stop_pc)
 		   ipa_expr_eval_result,
 		   paddress (ipa_error_tracepoint));
 
-      if (debug_threads)
-	{
-	  if (ipa_trace_buffer_is_full)
-	    trace_debug ("lib stopped due to full buffer.");
-	  if (ipa_stopping_tracepoint)
-	    trace_debug ("lib stopped due to tpoint");
-	  if (ipa_error_tracepoint)
-	    trace_debug ("lib stopped due to error");
-	}
+      if (ipa_trace_buffer_is_full)
+	trace_debug ("lib stopped due to full buffer.");
+
+      if (ipa_stopping_tracepoint)
+	trace_debug ("lib stopped due to tpoint");
+
+      if (ipa_error_tracepoint)
+	trace_debug ("lib stopped due to error");
 
       if (ipa_stopping_tracepoint != 0)
 	{
@@ -4588,7 +4575,7 @@ tracepoint_was_hit (struct thread_info *tinfo, CORE_ADDR stop_pc)
 	  && tpoint->type != static_tracepoint)
 	{
 	  trace_debug ("Thread %s at address of tracepoint %d at 0x%s",
-		       target_pid_to_str (tinfo->id),
+		       target_pid_to_str (tinfo->id).c_str (),
 		       tpoint->number, paddress (tpoint->address));
 
 	  /* Test the condition if present, and collect if true.  */
@@ -6899,8 +6886,13 @@ init_named_socket (const char *name)
 
   addr.sun_family = AF_UNIX;
 
-  strncpy (addr.sun_path, name, UNIX_PATH_MAX);
-  addr.sun_path[UNIX_PATH_MAX - 1] = '\0';
+  if (strlen (name) >= ARRAY_SIZE (addr.sun_path))
+    {
+      warning ("socket name too long for sockaddr_un::sun_path field: %s", name);
+      return -1;
+    }
+
+  strcpy (addr.sun_path, name);
 
   result = access (name, F_OK);
   if (result == 0)
@@ -6942,8 +6934,8 @@ gdb_agent_socket_init (void)
 {
   int result, fd;
 
-  result = xsnprintf (agent_socket_name, UNIX_PATH_MAX, "%s/gdb_ust%d",
-		      SOCK_DIR, getpid ());
+  result = snprintf (agent_socket_name, UNIX_PATH_MAX, "%s/gdb_ust%d",
+		     SOCK_DIR, getpid ());
   if (result >= UNIX_PATH_MAX)
     {
       trace_debug ("string overflow allocating socket name");

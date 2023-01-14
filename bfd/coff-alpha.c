@@ -1,5 +1,5 @@
 /* BFD back-end for ALPHA Extended-Coff files.
-   Copyright (C) 1993-2021 Free Software Foundation, Inc.
+   Copyright (C) 1993-2022 Free Software Foundation, Inc.
    Modified from coff-mips.c by Steve Chamberlain <sac@cygnus.com> and
    Ian Lance Taylor <ian@cygnus.com>.
 
@@ -2045,7 +2045,8 @@ alpha_ecoff_read_ar_hdr (bfd *abfd)
    we uncompress the archive element if necessary.  */
 
 static bfd *
-alpha_ecoff_get_elt_at_filepos (bfd *archive, file_ptr filepos)
+alpha_ecoff_get_elt_at_filepos (bfd *archive, file_ptr filepos,
+				struct bfd_link_info *info)
 {
   bfd *nbfd = NULL;
   struct areltdata *tdata;
@@ -2057,7 +2058,7 @@ alpha_ecoff_get_elt_at_filepos (bfd *archive, file_ptr filepos)
   ufile_ptr filesize;
 
   buf = NULL;
-  nbfd = _bfd_get_elt_at_filepos (archive, filepos);
+  nbfd = _bfd_get_elt_at_filepos (archive, filepos, info);
   if (nbfd == NULL)
     goto error_return;
 
@@ -2215,7 +2216,7 @@ alpha_ecoff_openr_next_archived_file (bfd *archive, bfd *last_file)
 	}
     }
 
-  return alpha_ecoff_get_elt_at_filepos (archive, filestart);
+  return alpha_ecoff_get_elt_at_filepos (archive, filestart, NULL);
 }
 
 /* Open the archive file given an index into the armap.  */
@@ -2226,7 +2227,8 @@ alpha_ecoff_get_elt_at_index (bfd *abfd, symindex sym_index)
   carsym *entry;
 
   entry = bfd_ardata (abfd)->symdefs + sym_index;
-  return alpha_ecoff_get_elt_at_filepos (abfd, entry->file_offset);
+  return alpha_ecoff_get_elt_at_filepos (abfd, entry->file_offset,
+					 NULL);
 }
 
 static void

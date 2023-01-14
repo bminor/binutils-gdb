@@ -1,5 +1,5 @@
 /*
-   Copyright 2020-2021 Free Software Foundation, Inc.
+   Copyright 2020-2022 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -29,8 +29,15 @@ foo (int a)
 }
 
 int
+quux (int a)
+{
+  asm ("quux_label: .globl quux_label");
+  return foo (a);
+}
+
+int
 main (void)
 {
   asm ("main_label: .globl main_label");
-  return foo (5) + 1;
+  return quux (5) + 1;
 }

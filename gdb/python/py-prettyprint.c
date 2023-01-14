@@ -1,6 +1,6 @@
 /* Python pretty-printing
 
-   Copyright (C) 2008-2021 Free Software Foundation, Inc.
+   Copyright (C) 2008-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -474,7 +474,7 @@ print_children (PyObject *printer, const char *hint,
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
 	  else
-	    wrap_here (n_spaces (2 + 2 *recurse));
+	    stream->wrap_here (2 + 2 *recurse);
 	}
 
       if (is_map && i % 2 == 0)

@@ -1,5 +1,5 @@
 /* Support for printing Pascal types for GDB, the GNU debugger.
-   Copyright (C) 2000-2021 Free Software Foundation, Inc.
+   Copyright (C) 2000-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,7 +19,7 @@
 /* This file is derived from p-typeprint.c */
 
 #include "defs.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "bfd.h"		/* Binary File Description */
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -287,7 +287,7 @@ pascal_language::print_func_args (struct type *type, struct ui_file *stream,
       if (i > 0)
 	{
 	  fputs_filtered (", ", stream);
-	  wrap_here ("    ");
+	  stream->wrap_here (4);
 	}
       /*  Can we find if it is a var parameter ??
 	  if ( TYPE_FIELD(type, i) == )
@@ -419,7 +419,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
   section_type;
 
   QUIT;
-  wrap_here ("    ");
+  stream->wrap_here (4);
   if (type == NULL)
     {
       fputs_styled ("<type unknown>", metadata_style.style (), stream);
@@ -487,7 +487,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
       fprintf_filtered (stream, "case <?> of ");
 
     struct_union:
-      wrap_here ("    ");
+      stream->wrap_here (4);
       if (show < 0)
 	{
 	  /* If we just printed a tag name, no need to print anything else.  */
@@ -523,8 +523,8 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 	    {
 	      QUIT;
 	      /* Don't print out virtual function table.  */
-	      if ((startswith (TYPE_FIELD_NAME (type, i), "_vptr"))
-		  && is_cplus_marker ((TYPE_FIELD_NAME (type, i))[5]))
+	      if ((startswith (type->field (i).name (), "_vptr"))
+		  && is_cplus_marker ((type->field (i).name ())[5]))
 		continue;
 
 	      /* If this is a pascal object or class we can print the
@@ -565,7 +565,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 	      if (field_is_static (&type->field (i)))
 		fprintf_filtered (stream, "static ");
 	      print_type (type->field (i).type (),
-				 TYPE_FIELD_NAME (type, i),
+				 type->field (i).name (),
 				 stream, show - 1, level + 4, flags);
 	      if (!field_is_static (&type->field (i))
 		  && TYPE_FIELD_PACKED (type, i))
@@ -692,7 +692,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
       /* enum is just defined by
 	 type enume_name = (enum_member1,enum_member2,...)  */
       fprintf_filtered (stream, " = ");
-      wrap_here ("    ");
+      stream->wrap_here (4);
       if (show < 0)
 	{
 	  /* If we just printed a tag name, no need to print anything else.  */
@@ -709,14 +709,14 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 	      QUIT;
 	      if (i)
 		fprintf_filtered (stream, ", ");
-	      wrap_here ("    ");
-	      fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
-	      if (lastval != TYPE_FIELD_ENUMVAL (type, i))
+	      stream->wrap_here (4);
+	      fputs_filtered (type->field (i).name (), stream);
+	      if (lastval != type->field (i).loc_enumval ())
 		{
 		  fprintf_filtered (stream,
 				    " := %s",
-				    plongest (TYPE_FIELD_ENUMVAL (type, i)));
-		  lastval = TYPE_FIELD_ENUMVAL (type, i);
+				    plongest (type->field (i).loc_enumval ()));
+		  lastval = type->field (i).loc_enumval ();
 		}
 	      lastval++;
 	    }

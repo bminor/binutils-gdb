@@ -1,5 +1,5 @@
 /* tc-arm.c -- Assemble for the ARM
-   Copyright (C) 1994-2021 Free Software Foundation, Inc.
+   Copyright (C) 1994-2022 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
 	Cirrus coprocessor mods by Aldy Hernandez (aldyh@redhat.com)
@@ -688,7 +688,8 @@ enum arm_reg_type
   REG_TYPE_MMXWCG,
   REG_TYPE_XSCALE,
   REG_TYPE_RNB,
-  REG_TYPE_ZR
+  REG_TYPE_ZR,
+  REG_TYPE_PSEUDO
 };
 
 /* Structure for a hash table entry for a register.
@@ -733,6 +734,7 @@ const char * const reg_expected_msgs[] =
   [REG_TYPE_MQ]	    = N_("MVE vector register expected"),
   [REG_TYPE_RNB]    = "",
   [REG_TYPE_ZR]     = N_("ZR register expected"),
+  [REG_TYPE_PSEUDO] = N_("Pseudo register expected"),
 };
 
 /* Some well known registers that we refer to directly elsewhere.  */
@@ -1247,55 +1249,12 @@ md_atof (int type, char * litP, int * sizeP)
     {
     case 'H':
     case 'h':
+    /* bfloat16, despite not being part of the IEEE specification, can also
+       be handled by atof_ieee().  */
+    case 'b':
       prec = 1;
       break;
 
-    /* If this is a bfloat16, then parse it slightly differently, as it
-       does not follow the IEEE specification for floating point numbers
-       exactly.  */
-    case 'b':
-      {
-	FLONUM_TYPE generic_float;
-
-	t = atof_ieee_detail (input_line_pointer, 1, 8, words, &generic_float);
-
-	if (t)
-	  input_line_pointer = t;
-	else
-	  return _("invalid floating point number");
-
-	switch (generic_float.sign)
-	  {
-	  /* Is +Inf.  */
-	  case 'P':
-	    words[0] = 0x7f80;
-	    break;
-
-	  /* Is -Inf.  */
-	  case 'N':
-	    words[0] = 0xff80;
-	    break;
-
-	  /* Is NaN.  */
-	  /* bfloat16 has two types of NaN - quiet and signalling.
-	     Quiet NaN has bit[6] == 1 && faction != 0, whereas
-	     signalling NaN's have bit[0] == 0 && fraction != 0.
-	     Chosen this specific encoding as it is the same form
-	     as used by other IEEE 754 encodings in GAS.  */
-	  case 0:
-	    words[0] = 0x7fff;
-	    break;
-
-	  default:
-	    break;
-	  }
-
-	*sizeP = 2;
-
-	md_number_to_chars (litP, (valueT) words[0], sizeof (LITTLENUM_TYPE));
-
-	return NULL;
-      }
     case 'f':
     case 'F':
     case 's':
@@ -1936,6 +1895,7 @@ parse_scalar (char **ccp, int elsize, struct neon_type_el *type, enum
 enum reg_list_els
 {
   REGLIST_RN,
+  REGLIST_PSEUDO,
   REGLIST_CLRM,
   REGLIST_VFP_S,
   REGLIST_VFP_S_VPR,
@@ -1953,7 +1913,8 @@ parse_reg_list (char ** strp, enum reg_list_els etype)
   long range = 0;
   int another_range;
 
-  gas_assert (etype == REGLIST_RN || etype == REGLIST_CLRM);
+  gas_assert (etype == REGLIST_RN || etype == REGLIST_CLRM
+	      || etype == REGLIST_PSEUDO);
 
   /* We come back here if we get ranges concatenated by '+' or '|'.  */
   do
@@ -1973,8 +1934,14 @@ parse_reg_list (char ** strp, enum reg_list_els etype)
 	      int reg;
 	      const char apsr_str[] = "apsr";
 	      int apsr_str_len = strlen (apsr_str);
+	      enum arm_reg_type rt;
 
-	      reg = arm_reg_parse (&str, REG_TYPE_RN);
+	      if (etype == REGLIST_RN || etype == REGLIST_CLRM)
+		rt = REG_TYPE_RN;
+	      else
+		rt = REG_TYPE_PSEUDO;
+
+	      reg = arm_reg_parse (&str, rt);
 	      if (etype == REGLIST_CLRM)
 		{
 		  if (reg == REG_SP || reg == REG_PC)
@@ -1990,6 +1957,14 @@ parse_reg_list (char ** strp, enum reg_list_els etype)
 		  if (reg == FAIL)
 		    {
 		      first_error (_("r0-r12, lr or APSR expected"));
+		      return FAIL;
+		    }
+		}
+	      else if (etype == REGLIST_PSEUDO)
+		{
+		  if (reg == FAIL)
+		    {
+		      first_error (_(reg_expected_msgs[REG_TYPE_PSEUDO]));
 		      return FAIL;
 		    }
 		}
@@ -4301,6 +4276,32 @@ s_arm_unwind_personality (int ignored ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
+/* Parse a directive saving pseudo registers.  */
+
+static void
+s_arm_unwind_save_pseudo (void)
+{
+  valueT op;
+  long range;
+
+  range = parse_reg_list (&input_line_pointer, REGLIST_PSEUDO);
+  if (range == FAIL)
+    {
+      as_bad (_("expected pseudo register list"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  demand_empty_rest_of_line ();
+
+  if (range & (1 << 9))
+    {
+      /* Opcode for restoring RA_AUTH_CODE.  */
+      op = 0xb4;
+      add_unwind_opcode (op, 1);
+    }
+}
+
 
 /* Parse a directive saving core registers.  */
 
@@ -4766,6 +4767,10 @@ s_arm_unwind_save (int arch_v6)
 
     case REG_TYPE_RN:
       s_arm_unwind_save_core ();
+      return;
+
+    case REG_TYPE_PSEUDO:
+      s_arm_unwind_save_pseudo ();
       return;
 
     case REG_TYPE_VFD:
@@ -20732,19 +20737,31 @@ do_neon_ldm_stm (void)
 }
 
 static void
+do_vfp_nsyn_push_pop_check (void)
+{
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1xd), _(BAD_FPU));
+
+  if (inst.operands[1].issingle)
+    {
+      constraint (inst.operands[1].imm < 1 || inst.operands[1].imm > 32,
+		  _("register list must contain at least 1 and at most 32 registers"));
+    }
+  else
+    {
+      constraint (inst.operands[1].imm < 1 || inst.operands[1].imm > 16,
+		  _("register list must contain at least 1 and at most 16 registers"));
+    }
+}
+
+static void
 do_vfp_nsyn_pop (void)
 {
   nsyn_insert_sp ();
-  if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext)) {
+
+  if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
     return do_vfp_nsyn_opcode ("vldm");
-  }
 
-  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1xd),
-	      _(BAD_FPU));
-
-  constraint (inst.operands[1].imm < 1 || inst.operands[1].imm > 16,
-	      _("register list must contain at least 1 and at most 16 "
-		"registers"));
+  do_vfp_nsyn_push_pop_check ();
 
   if (inst.operands[1].issingle)
     do_vfp_nsyn_opcode ("fldmias");
@@ -20756,23 +20773,17 @@ static void
 do_vfp_nsyn_push (void)
 {
   nsyn_insert_sp ();
-  if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext)) {
+
+  if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
     return do_vfp_nsyn_opcode ("vstmdb");
-  }
 
-  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1xd),
-	      _(BAD_FPU));
-
-  constraint (inst.operands[1].imm < 1 || inst.operands[1].imm > 16,
-	      _("register list must contain at least 1 and at most 16 "
-		"registers"));
+  do_vfp_nsyn_push_pop_check ();
 
   if (inst.operands[1].issingle)
     do_vfp_nsyn_opcode ("fstmdbs");
   else
     do_vfp_nsyn_opcode ("fstmdbd");
 }
-
 
 static void
 do_neon_ldr_str (void)
@@ -23958,8 +23969,12 @@ static const struct reg_entry reg_names[] =
   /* XScale accumulator registers.  */
   REGNUM(acc,0,XSCALE), REGNUM(ACC,0,XSCALE),
 
-  /* Alias 'ra_auth_code' to r12 for pacbti.  */
-  REGDEF(ra_auth_code,12,RN),
+  /* DWARF ABI defines RA_AUTH_CODE to 143. It also reserves 134-142 for future
+     expansion.  RA_AUTH_CODE here is given the value 143 % 134 to make it easy
+     for tc_arm_regname_to_dw2regnum to translate to DWARF reg number using
+     134 + reg_number should the range 134 to 142 be used for more pseudo regs
+     in the future.  This also helps fit RA_AUTH_CODE into a bitmask.  */
+  REGDEF(ra_auth_code,9,PSEUDO),
 };
 #undef REGDEF
 #undef REGNUM
@@ -31625,6 +31640,11 @@ static const struct arm_cpu_option_table arm_cpus[] =
   ARM_CPU_OPT ("cortex-a78c",   "Cortex-A78C",	   ARM_ARCH_V8_2A,
 	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST | ARM_EXT2_SB),
 	       FPU_ARCH_DOTPROD_NEON_VFP_ARMV8),
+  ARM_CPU_OPT ("cortex-a710",   "Cortex-A710",	   ARM_ARCH_V9A,
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST
+				    | ARM_EXT2_BF16
+				    | ARM_EXT2_I8MM),
+	       FPU_ARCH_DOTPROD_NEON_VFP_ARMV8),
   ARM_CPU_OPT ("ares",    "Ares",	       ARM_ARCH_V8_2A,
 	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
 	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_DOTPROD),
@@ -31644,6 +31664,9 @@ static const struct arm_cpu_option_table arm_cpus[] =
 	       ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV),
 	       FPU_ARCH_VFP_V3D16),
   ARM_CPU_OPT ("cortex-r52",	  "Cortex-R52",	       ARM_ARCH_V8R,
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
+	      FPU_ARCH_NEON_VFP_ARMV8),
+  ARM_CPU_OPT ("cortex-r52plus",	  "Cortex-R52+",	       ARM_ARCH_V8R,
 	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
 	      FPU_ARCH_NEON_VFP_ARMV8),
   ARM_CPU_OPT ("cortex-m35p",	  "Cortex-M35P",       ARM_ARCH_V8M_MAIN,
@@ -31931,6 +31954,28 @@ static const struct arm_ext_table armv86a_ext_table[] =
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
 };
 
+#define armv87a_ext_table armv86a_ext_table
+#define armv88a_ext_table armv87a_ext_table
+
+static const struct arm_ext_table armv9a_ext_table[] =
+{
+  ARM_ADD ("simd", FPU_ARCH_DOTPROD_NEON_VFP_ARMV8),
+  ARM_ADD ("fp16", FPU_ARCH_NEON_VFP_ARMV8_4_FP16FML),
+  ARM_ADD ("bf16", ARM_FEATURE_CORE_HIGH (ARM_EXT2_BF16)),
+  ARM_ADD ("i8mm", ARM_FEATURE_CORE_HIGH (ARM_EXT2_I8MM)),
+  ARM_EXT ("crypto", FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_4,
+	   ARM_FEATURE_COPROC (FPU_CRYPTO_ARMV8)),
+
+  /* Armv9-a does not allow an FP implementation without SIMD, so the user
+     should use the +simd option to turn on FP.  */
+  ARM_REMOVE ("fp", ALL_FP),
+  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
+};
+
+#define armv91a_ext_table armv86a_ext_table
+#define armv92a_ext_table armv91a_ext_table
+#define armv93a_ext_table armv92a_ext_table
+
 #define CDE_EXTENSIONS \
   ARM_ADD ("cdecp0", ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE | ARM_EXT2_CDE0)), \
   ARM_ADD ("cdecp1", ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE | ARM_EXT2_CDE1)), \
@@ -32053,6 +32098,12 @@ static const struct arm_arch_option_table arm_archs[] =
   ARM_ARCH_OPT2 ("armv8.4-a",	  ARM_ARCH_V8_4A,	FPU_ARCH_VFP, armv84a),
   ARM_ARCH_OPT2 ("armv8.5-a",	  ARM_ARCH_V8_5A,	FPU_ARCH_VFP, armv85a),
   ARM_ARCH_OPT2 ("armv8.6-a",	  ARM_ARCH_V8_6A,	FPU_ARCH_VFP, armv86a),
+  ARM_ARCH_OPT2 ("armv8.7-a",	  ARM_ARCH_V8_7A,	FPU_ARCH_VFP, armv87a),
+  ARM_ARCH_OPT2 ("armv8.8-a",	  ARM_ARCH_V8_8A,	FPU_ARCH_VFP, armv88a),
+  ARM_ARCH_OPT2 ("armv9-a",	  ARM_ARCH_V9A,		FPU_ARCH_VFP, armv9a),
+  ARM_ARCH_OPT2 ("armv9.1-a",	  ARM_ARCH_V9_1A,	FPU_ARCH_VFP, armv91a),
+  ARM_ARCH_OPT2 ("armv9.2-a",	  ARM_ARCH_V9_2A,	FPU_ARCH_VFP, armv92a),
+  ARM_ARCH_OPT2 ("armv9.3-a",	  ARM_ARCH_V9_2A,	FPU_ARCH_VFP, armv93a),
   ARM_ARCH_OPT ("xscale",	  ARM_ARCH_XSCALE,	FPU_ARCH_VFP),
   ARM_ARCH_OPT ("iwmmxt",	  ARM_ARCH_IWMMXT,	FPU_ARCH_VFP),
   ARM_ARCH_OPT ("iwmmxt2",	  ARM_ARCH_IWMMXT2,	FPU_ARCH_VFP),
@@ -32836,6 +32887,12 @@ static const cpu_arch_ver_table cpu_arch_ver[] =
     {TAG_CPU_ARCH_V8,	      ARM_ARCH_V8_5A},
     {TAG_CPU_ARCH_V8_1M_MAIN, ARM_ARCH_V8_1M_MAIN},
     {TAG_CPU_ARCH_V8,	    ARM_ARCH_V8_6A},
+    {TAG_CPU_ARCH_V8,	    ARM_ARCH_V8_7A},
+    {TAG_CPU_ARCH_V8,	    ARM_ARCH_V8_8A},
+    {TAG_CPU_ARCH_V9,	    ARM_ARCH_V9A},
+    {TAG_CPU_ARCH_V9,	    ARM_ARCH_V9_1A},
+    {TAG_CPU_ARCH_V9,	    ARM_ARCH_V9_2A},
+    {TAG_CPU_ARCH_V9,	    ARM_ARCH_V9_3A},
     {-1,		    ARM_ARCH_NONE}
 };
 
@@ -32919,9 +32976,9 @@ get_aeabi_cpu_arch_from_fset (const arm_feature_set *arch_ext_fset,
   if (ARM_FEATURE_EQUAL (*arch_ext_fset, arm_arch_any))
     {
       /* Force revisiting of decision for each new architecture.  */
-      gas_assert (MAX_TAG_CPU_ARCH <= TAG_CPU_ARCH_V8_1M_MAIN);
+      gas_assert (MAX_TAG_CPU_ARCH <= TAG_CPU_ARCH_V9);
       *profile = 'A';
-      return TAG_CPU_ARCH_V8;
+      return TAG_CPU_ARCH_V9;
     }
 
   ARM_CLEAR_FEATURE (arch_fset, *arch_ext_fset, *ext_fset);
@@ -33197,7 +33254,7 @@ aeabi_set_public_attributes (void)
      by the base architecture.
 
      For new architectures we will have to check these tests.  */
-  gas_assert (arch <= TAG_CPU_ARCH_V8_1M_MAIN);
+  gas_assert (arch <= TAG_CPU_ARCH_V9);
   if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v8)
       || ARM_CPU_HAS_FEATURE (flags, arm_ext_v8m))
     aeabi_set_attribute_int (Tag_DIV_use, 0);
@@ -33559,6 +33616,10 @@ arm_convert_symbolic_attribute (const char *name)
       T (Tag_Virtualization_use),
       T (Tag_DSP_extension),
       T (Tag_MVE_arch),
+      T (Tag_PAC_extension),
+      T (Tag_BTI_extension),
+      T (Tag_BTI_use),
+      T (Tag_PACRET_use),
       /* We deliberately do not include Tag_MPextension_use_legacy.  */
 #undef T
     };

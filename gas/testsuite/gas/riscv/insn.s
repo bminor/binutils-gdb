@@ -53,3 +53,8 @@ target:
 	.insn r  0x33,  0,  0, fa0, a1, fa2
 	.insn r  0x33,  0,  0, a0, fa1, fa2
 	.insn r  0x33,  0,  0, fa0, fa1, fa2
+
+	.insn 0x0001
+	.insn 0x00000013
+	.insn 0x2, 0x0001
+	.insn 0x4, 0x00000013

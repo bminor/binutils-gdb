@@ -1,6 +1,6 @@
 /* Parse expressions for GDB.
 
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    Modified from expread.y by the Department of Computer Science at the
    State University of New York at Buffalo, 1991.
@@ -199,7 +199,8 @@ parser_state::mark_completion_tag (enum type_code tag, const char *ptr,
 	      || tag == TYPE_CODE_STRUCT
 	      || tag == TYPE_CODE_ENUM);
   m_completion_state.expout_tag_completion_type = tag;
-  m_completion_state.expout_completion_name.reset (xstrndup (ptr, length));
+  m_completion_state.expout_completion_name
+    = make_unique_xstrndup (ptr, length);
 }
 
 /* See parser-defs.h.  */
@@ -461,7 +462,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
       struct symtab_and_line cursal = get_current_source_symtab_and_line ();
       if (cursal.symtab)
 	expression_context_block
-	  = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (cursal.symtab),
+	  = BLOCKVECTOR_BLOCK (cursal.symtab->blockvector (),
 			       STATIC_BLOCK);
       if (expression_context_block)
 	expression_context_pc = BLOCK_ENTRY_PC (expression_context_block);

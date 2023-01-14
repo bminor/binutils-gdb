@@ -1,4 +1,4 @@
-dnl   Copyright (C) 1997-2021 Free Software Foundation, Inc.
+dnl Copyright (C) 1997-2022 Free Software Foundation, Inc.
 dnl
 dnl This program is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -26,16 +26,11 @@ if test "$enable_sim_hardware" = no; then
   sim_hw_cflags="-DWITH_HW=0"
 elif test "$enable_sim_hardware" = yes; then
   sim_hw_cflags="-DWITH_HW=1"
-  # mingw does not support sockser
-  case ${host} in
-    *mingw*) ;;
-    *) # TODO: We don't add dv-sockser to sim_hw as it is not a "real" device
-       # that you instatiate.  Instead, other code will call into it directly.
-       # At some point, we should convert it over.
-       sim_hw_sockser="dv-sockser.o"
-       sim_hw_cflags="$sim_hw_cflags -DHAVE_DV_SOCKSER"
-       ;;
-  esac
+  dnl TODO: We don't add dv-sockser to sim_hw as it is not a "real" device
+  dnl that you instatiate.  Instead, other code will call into it directly.
+  dnl At some point, we should convert it over.
+  sim_hw_sockser="dv-sockser.o"
+  sim_hw_cflags="$sim_hw_cflags -DHAVE_DV_SOCKSER"
 else
   AC_MSG_ERROR([unknown argument "$enable_sim_hardware"])
 fi

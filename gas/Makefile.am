@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 #
-#   Copyright (C) 2012-2021 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2022 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,10 +17,12 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-AUTOMAKE_OPTIONS = dejagnu foreign no-dist subdir-objects
+AUTOMAKE_OPTIONS = dejagnu foreign no-dist subdir-objects info-in-builddir no-texinfo.tex
 ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
 
-SUBDIRS = doc po
+MAINTAINERCLEANFILES =
+
+SUBDIRS = po
 
 tooldir = $(exec_prefix)/$(target_alias)
 
@@ -154,6 +156,7 @@ TARGET_CPU_CFILES = \
 	config/tc-ip2k.c \
 	config/tc-iq2000.c \
 	config/tc-lm32.c \
+	config/tc-loongarch.c \
 	config/tc-m32c.c \
 	config/tc-m32r.c \
 	config/tc-m68hc11.c \
@@ -374,7 +377,8 @@ EXTRA_SCRIPTS = .gdbinit
 EXTRA_DIST = config/m68k-parse.c itbl-parse.c itbl-parse.h itbl-lex.c \
 	config/bfin-parse.c config/bfin-parse.h config/bfin-lex.c \
 	config/rl78-parse.c config/rl78-parse.h \
-	config/rx-parse.c config/rx-parse.h
+	config/rx-parse.c config/rx-parse.h \
+	config/loongarch-parse.c config/loongarch-parse.h config/loongarch-lex.c
 
 diststuff: $(EXTRA_DIST) info
 
@@ -470,6 +474,19 @@ config/rx-parse.c: $(srcdir)/config/rx-parse.y
 	$(SHELL) $(YLWRAP) $(srcdir)/config/rx-parse.y y.tab.c $@ y.tab.h config/rx-parse.h -- $(YACCCOMPILE) -d ;
 config/rx-parse.h: config/rx-parse.c
 	@true
+
+# The LoongArch lexical analyzer and parser.
+EXTRA_as_new_SOURCES += config/loongarch-parse.y
+config/loongarch-parse.c: $(srcdir)/config/loongarch-parse.y
+	$(SHELL) $(YLWRAP) $(srcdir)/config/loongarch-parse.y y.tab.c $@ y.tab.h config/loongarch-parse.h -- $(YACCCOMPILE) -d ;
+config/loongarch-parse.h: config/loongarch-parse.c
+	@true
+
+EXTRA_as_new_SOURCES += config/loongarch-lex.l
+config/loongarch-lex.c: $(srcdir)/config/loongarch-lex.l
+	$(SHELL) $(YLWRAP) $(srcdir)/config/loongarch-lex.l lex.yy.c $@ -- $(LEXCOMPILE)
+
+config/loongarch-lex-wrapper.@OBJEXT@: config/loongarch-lex.c config/loongarch-parse.h
 
 # The mips instruction table specification lexical analyzer and parser.
 
@@ -629,3 +646,5 @@ de-stage3:
 CONFIG_STATUS_DEPENDENCIES = $(srcdir)/configure.tgt $(BFDDIR)/development.sh
 
 EXTRA_DEJAGNU_SITE_CONFIG = development.exp
+
+include doc/local.mk

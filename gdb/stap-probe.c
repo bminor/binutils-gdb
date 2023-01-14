@@ -1,6 +1,6 @@
 /* SystemTap probe support for GDB.
 
-   Copyright (C) 2012-2021 Free Software Foundation, Inc.
+   Copyright (C) 2012-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1330,7 +1330,7 @@ stap_probe::parse_arguments (struct gdbarch *gdbarch)
 static CORE_ADDR
 relocate_address (CORE_ADDR address, struct objfile *objfile)
 {
-  return address + objfile->data_section_offset ();
+  return address + objfile->text_section_offset ();
 }
 
 /* Implementation of the get_relocated_address method.  */

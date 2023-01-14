@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2019-2021 Free Software Foundation, Inc.
+   Copyright 2019-2022 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -61,6 +61,6 @@ tree xx;
 int
 main()
 {
-  get_alias_set (&xx);
+  get_alias_set (&xx);  /* Beginning of main */
   return 0;
 } // main

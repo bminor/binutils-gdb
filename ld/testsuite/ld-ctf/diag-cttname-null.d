@@ -1,6 +1,6 @@
 #as:
 #source: diag-cttname-null.s
-#objdump: --ctf=.ctf
+#objdump: --ctf
 #ld: -shared --ctf-variables
 #name: Diagnostics - Null type name
 

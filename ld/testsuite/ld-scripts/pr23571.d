@@ -1,5 +1,5 @@
 #source: align2a.s
-#ld: -T pr23571.t -z common-page-size=0x1000
+#ld: -T pr23571.t -z common-page-size=0x1000 -z max-page-size=0x1000
 #objdump: -h -w
 
 .*: +file format .*

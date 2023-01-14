@@ -1,6 +1,6 @@
 /* Everything about syscall catchpoints, for GDB.
 
-   Copyright (C) 2009-2021 Free Software Foundation, Inc.
+   Copyright (C) 2009-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -143,7 +143,7 @@ remove_catch_syscall (struct bp_location *bl, enum remove_bp_reason reason)
 static int
 breakpoint_hit_catch_syscall (const struct bp_location *bl,
 			      const address_space *aspace, CORE_ADDR bp_addr,
-			      const struct target_waitstatus *ws)
+			      const target_waitstatus &ws)
 {
   /* We must check if we are catching specific syscalls in this
      breakpoint.  If we are, then we must guarantee that the called
@@ -152,11 +152,11 @@ breakpoint_hit_catch_syscall (const struct bp_location *bl,
   const struct syscall_catchpoint *c
     = (const struct syscall_catchpoint *) bl->owner;
 
-  if (ws->kind != TARGET_WAITKIND_SYSCALL_ENTRY
-      && ws->kind != TARGET_WAITKIND_SYSCALL_RETURN)
+  if (ws.kind () != TARGET_WAITKIND_SYSCALL_ENTRY
+      && ws.kind () != TARGET_WAITKIND_SYSCALL_RETURN)
     return 0;
 
-  syscall_number = ws->value.syscall_number;
+  syscall_number = ws.syscall_number ();
 
   /* Now, checking if the syscall is the same.  */
   if (!c->syscalls_to_be_caught.empty ())
@@ -175,7 +175,7 @@ breakpoint_hit_catch_syscall (const struct bp_location *bl,
    catchpoints.  */
 
 static enum print_stop_action
-print_it_catch_syscall (bpstat bs)
+print_it_catch_syscall (bpstat *bs)
 {
   struct ui_out *uiout = current_uiout;
   struct breakpoint *b = bs->breakpoint_at;
@@ -189,7 +189,7 @@ print_it_catch_syscall (bpstat bs)
 
   get_last_target_status (nullptr, nullptr, &last);
 
-  get_syscall_by_number (gdbarch, last.value.syscall_number, &s);
+  get_syscall_by_number (gdbarch, last.syscall_number (), &s);
 
   annotate_catchpoint (b->number);
   maybe_print_thread_hit_breakpoint (uiout);
@@ -201,20 +201,20 @@ print_it_catch_syscall (bpstat bs)
   if (uiout->is_mi_like_p ())
     {
       uiout->field_string ("reason",
-			   async_reason_lookup (last.kind == TARGET_WAITKIND_SYSCALL_ENTRY
+			   async_reason_lookup (last.kind () == TARGET_WAITKIND_SYSCALL_ENTRY
 						? EXEC_ASYNC_SYSCALL_ENTRY
 						: EXEC_ASYNC_SYSCALL_RETURN));
       uiout->field_string ("disp", bpdisp_text (b->disposition));
     }
   uiout->field_signed ("bkptno", b->number);
 
-  if (last.kind == TARGET_WAITKIND_SYSCALL_ENTRY)
+  if (last.kind () == TARGET_WAITKIND_SYSCALL_ENTRY)
     uiout->text (" (call to syscall ");
   else
     uiout->text (" (returned from syscall ");
 
   if (s.name == NULL || uiout->is_mi_like_p ())
-    uiout->field_signed ("syscall-number", last.value.syscall_number);
+    uiout->field_signed ("syscall-number", last.syscall_number ());
   if (s.name != NULL)
     uiout->field_string ("syscall-name", s.name);
 
@@ -250,28 +250,24 @@ print_one_catch_syscall (struct breakpoint *b,
 
   if (!c->syscalls_to_be_caught.empty ())
     {
-      char *text = xstrprintf ("%s", "");
+      std::string text;
 
+      bool first = true;
       for (int iter : c->syscalls_to_be_caught)
 	{
-	  char *previous_text = text;
 	  struct syscall s;
 	  get_syscall_by_number (gdbarch, iter, &s);
 
-	  if (s.name != NULL)
-	    text = xstrprintf ("%s%s, ", text, s.name);
-	  else
-	    text = xstrprintf ("%s%d, ", text, iter);
+	  if (!first)
+	    text += ", ";
+	  first = false;
 
-	  /* We have to xfree previous_text because xstrprintf dynamically
-	     allocates new space for text on every call.  */
-	  xfree (previous_text);
+	  if (s.name != NULL)
+	    text += s.name;
+	  else
+	    text += std::to_string (iter);
 	}
-      /* Remove the last comma.  */
-      text[strlen (text) - 2] = '\0';
-      uiout->field_string ("what", text);
-      /* xfree last text.  */
-      xfree (text);
+      uiout->field_string ("what", text.c_str ());
     }
   else
     uiout->field_string ("what", "<any syscall>", metadata_style.style ());
@@ -486,15 +482,12 @@ catch_syscall_enabled (void)
   return inf_data->total_syscalls_count != 0;
 }
 
-/* Helper function for catching_syscall_number.  If B is a syscall
-   catchpoint for SYSCALL_NUMBER, return 1 (which will make
-   'breakpoint_find_if' return).  Otherwise, return 0.  */
+/* Helper function for catching_syscall_number.  return true if B is a syscall
+   catchpoint for SYSCALL_NUMBER, else false.  */
 
-static int
-catching_syscall_number_1 (struct breakpoint *b,
-			   void *data)
+static bool
+catching_syscall_number_1 (struct breakpoint *b, int syscall_number)
 {
-  int syscall_number = (int) (uintptr_t) data;
 
   if (is_syscall_catchpoint_enabled (b))
     {
@@ -504,22 +497,23 @@ catching_syscall_number_1 (struct breakpoint *b,
 	{
 	  for (int iter : c->syscalls_to_be_caught)
 	    if (syscall_number == iter)
-	      return 1;
+	      return true;
 	}
       else
-	return 1;
+	return true;
     }
 
-  return 0;
+  return false;
 }
 
-int
+bool
 catching_syscall_number (int syscall_number)
 {
-  struct breakpoint *b = breakpoint_find_if (catching_syscall_number_1,
-					 (void *) (uintptr_t) syscall_number);
+  for (breakpoint *b : all_breakpoints ())
+    if (catching_syscall_number_1 (b, syscall_number))
+      return true;
 
-  return b != NULL;
+  return false;
 }
 
 /* Complete syscall names.  Used by "catch syscall".  */

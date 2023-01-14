@@ -1,5 +1,5 @@
 /* Header file for GDB CLI command implementation library.
-   Copyright (C) 2000-2021 Free Software Foundation, Inc.
+   Copyright (C) 2000-2022 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -93,9 +93,37 @@ extern struct cmd_list_element *maintenanceprintlist;
 
 extern struct cmd_list_element *maintenanceflushlist;
 
+/* Chain containing all defined "maintenance check" subcommands.  */
+
+extern struct cmd_list_element *maintenancechecklist;
+
+/* Chain containing all defined "maintenance set" subcommands.  */
+
+extern struct cmd_list_element *maintenance_set_cmdlist;
+
+/* Chain containing all defined "maintenance show" subcommands.  */
+
+extern struct cmd_list_element *maintenance_show_cmdlist;
+
 extern struct cmd_list_element *setprintlist;
 
 extern struct cmd_list_element *showprintlist;
+
+/* Chain containing all defined "set print raw" subcommands.  */
+
+extern struct cmd_list_element *setprintrawlist;
+
+/* Chain containing all defined "show print raw" subcommands.  */
+
+extern struct cmd_list_element *showprintrawlist;
+
+/* Chain containing all defined "set print type" subcommands.  */
+
+extern struct cmd_list_element *setprinttypelist;
+
+/* Chain containing all defined "show print type" subcommands.  */
+
+extern struct cmd_list_element *showprinttypelist;
 
 extern struct cmd_list_element *setdebuglist;
 
@@ -104,6 +132,18 @@ extern struct cmd_list_element *showdebuglist;
 extern struct cmd_list_element *setchecklist;
 
 extern struct cmd_list_element *showchecklist;
+
+/* Chain containing all defined "save" subcommands.  */
+
+extern struct cmd_list_element *save_cmdlist;
+
+/* Chain containing all defined "set source" subcommands.  */
+
+extern struct cmd_list_element *setsourcelist;
+
+/* Chain containing all defined "show source" subcommands.  */
+
+extern struct cmd_list_element *showsourcelist;
 
 /* Limit the call depth of user-defined commands */
 

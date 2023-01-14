@@ -393,7 +393,9 @@ main(int argc,
   while ((ch = getopt(argc, argv,
 		      "F:EI:RSLJT:CB:H:N:o:k:i:n:hc:d:m:s:t:f:"))
 	 != -1) {
+#if 0  /* For debugging.  */
     fprintf(stderr, "\t-%c %s\n", ch, (optarg ? optarg : ""));
+#endif
     switch(ch) {
     case 'C':
       code |= generate_with_icache;

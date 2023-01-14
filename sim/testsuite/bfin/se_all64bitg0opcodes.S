@@ -10,9 +10,9 @@
 # Don't want to enable for normal `make check` as it takes way too long in
 # the sim -- executes over 3 billion insns, and even at 10 MIPS, that's 10+
 # minutes.  Useful for directed testing, but that's about it.
-# mach: none
+# mach: bfin
 # sim: --environment operating
-# xfail: too many invalid insns are decoded as valid
+# xfail: "too many invalid insns are decoded as valid" *-*
 
 #include "test.h"
 	.include "testutils.inc"

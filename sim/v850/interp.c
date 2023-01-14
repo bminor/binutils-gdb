@@ -12,6 +12,8 @@
 
 #include "bfd.h"
 
+#include "target-newlib-syscall.h"
+
 static const char * get_insn_name (sim_cpu *, int);
 
 /* For compatibility.  */
@@ -168,7 +170,7 @@ get_insn_name (sim_cpu *cpu, int i)
 
 /* These default values correspond to expected usage for the chip.  */
 
-uint32 OP[4];
+uint32_t OP[4];
 
 static sim_cia
 v850_pc_get (sim_cpu *cpu)
@@ -199,6 +201,7 @@ sim_open (SIM_OPEN_KIND    kind,
 
   /* Set default options before parsing user options.  */
   current_target_byte_order = BFD_ENDIAN_LITTLE;
+  cb->syscall_map = cb_v850_syscall_map;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
@@ -239,11 +242,7 @@ sim_open (SIM_OPEN_KIND    kind,
     }
 
   /* check for/establish the a reference program image */
-  if (sim_analyze_program (sd,
-			   (STATE_PROG_ARGV (sd) != NULL
-			    ? *STATE_PROG_ARGV (sd)
-			    : NULL),
-			   abfd) != SIM_RC_OK)
+  if (sim_analyze_program (sd, STATE_PROG_FILE (sd), abfd) != SIM_RC_OK)
     {
       sim_module_uninstall (sd);
       return 0;
@@ -316,13 +315,13 @@ sim_create_inferior (SIM_DESC      sd,
 static int
 v850_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
-  *(unsigned32*)memory = H2T_4 (State.regs[rn]);
+  *(uint32_t*)memory = H2T_4 (State.regs[rn]);
   return -1;
 }
 
 static int
 v850_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
-  State.regs[rn] = T2H_4 (*(unsigned32 *) memory);
+  State.regs[rn] = T2H_4 (*(uint32_t *) memory);
   return length;
 }

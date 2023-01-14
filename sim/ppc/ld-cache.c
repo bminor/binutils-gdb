@@ -42,9 +42,10 @@ static const name_map cache_type_map[] = {
 
 
 void
-append_cache_rule (cache_table **table, char *type, char *field_name,
-		   char *derived_name, char *type_def,
-		   char *expression, table_entry *file_entry)
+append_cache_rule (cache_table **table, const char *type,
+		   const char *field_name, const char *derived_name,
+		   const char *type_def, const char *expression,
+		   table_entry *file_entry)
 {
   while ((*table) != NULL)
     table = &(*table)->next;
@@ -60,7 +61,7 @@ append_cache_rule (cache_table **table, char *type, char *field_name,
 
 
 cache_table *
-load_cache_table(char *file_name,
+load_cache_table(const char *file_name,
 		 int hi_bit_nr)
 {
   table *file = table_open(file_name, nr_cache_rule_fields, 0);

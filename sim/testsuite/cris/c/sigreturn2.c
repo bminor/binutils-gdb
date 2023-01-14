@@ -1,5 +1,5 @@
 /* Check that TRT happens for spurious sigreturn calls.  Multiple threads.
-#notarget: cris*-*-elf
+#progos: linux
 #cc: additional_flags=-pthread
 #xerror:
 #output: Invalid sigreturn syscall: no signal handler active (0x1, 0x2, 0x3, 0x4, 0x5, 0x6)\n

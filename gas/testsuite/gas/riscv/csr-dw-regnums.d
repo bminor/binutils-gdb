@@ -229,16 +229,6 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r4925 \(mhpmevent29\) at cfa\+3316
   DW_CFA_offset_extended_sf: r4926 \(mhpmevent30\) at cfa\+3320
   DW_CFA_offset_extended_sf: r4927 \(mhpmevent31\) at cfa\+3324
-  DW_CFA_offset_extended_sf: r4608 \(hstatus\) at cfa\+2048
-  DW_CFA_offset_extended_sf: r4610 \(hedeleg\) at cfa\+2056
-  DW_CFA_offset_extended_sf: r4611 \(hideleg\) at cfa\+2060
-  DW_CFA_offset_extended_sf: r4612 \(hie\) at cfa\+2064
-  DW_CFA_offset_extended_sf: r4613 \(htvec\) at cfa\+2068
-  DW_CFA_offset_extended_sf: r4672 \(hscratch\) at cfa\+2304
-  DW_CFA_offset_extended_sf: r4673 \(hepc\) at cfa\+2308
-  DW_CFA_offset_extended_sf: r4674 \(hcause\) at cfa\+2312
-  DW_CFA_offset_extended_sf: r4675 \(hbadaddr\) at cfa\+2316
-  DW_CFA_offset_extended_sf: r4676 \(hip\) at cfa\+2320
   DW_CFA_offset_extended_sf: r4992 \(mbase\) at cfa\+3584
   DW_CFA_offset_extended_sf: r4993 \(mbound\) at cfa\+3588
   DW_CFA_offset_extended_sf: r4994 \(mibase\) at cfa\+3592

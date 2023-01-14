@@ -1,5 +1,5 @@
 /* Check that --sysroot is applied to open(2).
-#sim: --sysroot=@exedir@
+#sim: --sysroot=$pwd
 
    We assume, with EXE being the name of the executable:
    - The simulator executes with cwd the same directory where the executable
@@ -21,7 +21,7 @@ int main (int argc, char *argv[])
       if (fnam == NULL)
 	abort ();
       strcpy (fnam, "/");
-      strcat (fnam, argv[0]);
+      strcat (fnam, basename (argv[0]));
     }
 
   f = fopen (fnam, "rb");

@@ -1,4 +1,4 @@
-dnl   Copyright (C) 1997-2021 Free Software Foundation, Inc.
+dnl Copyright (C) 1997-2022 Free Software Foundation, Inc.
 dnl
 dnl This program is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ AC_ARG_ENABLE(sim-frv-trapdump,
 yes|no) ;;
 *) AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-trapdump");;
 esac])
-if test "x${enable_sim_frv_trapdump}" != xno; then
+if test "x${enable_sim_frv_trapdump}" = xyes; then
   SIM_FRV_TRAPDUMP_FLAGS="-DTRAPDUMP=1"
   AC_MSG_RESULT([yes])
 else

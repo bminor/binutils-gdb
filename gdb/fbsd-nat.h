@@ -1,6 +1,6 @@
 /* Native-dependent code for FreeBSD.
 
-   Copyright (C) 2004-2021 Free Software Foundation, Inc.
+   Copyright (C) 2004-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -76,7 +76,6 @@ public:
 
   ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
-  void post_startup_inferior (ptid_t) override;
   void post_attach (int) override;
 
 #ifdef USE_SIGTRAP_SIGINFO
@@ -106,6 +105,10 @@ public:
 
   bool supports_disable_randomization () override;
 
+protected:
+
+  void post_startup_inferior (ptid_t) override;
+
 private:
   /* Helper routines for use in fetch_registers and store_registers in
      subclasses.  These routines fetch and store a single set of
@@ -117,12 +120,15 @@ private:
      of registers to a native thread.
 
      The caller must provide storage for the set of registers in REGS,
-     and SIZE is the size of the storage.  */
+     and SIZE is the size of the storage.
 
-  void fetch_register_set (struct regcache *regcache, int regnum, int fetch_op,
+     Returns true if the register set was transferred due to a
+     matching REGNUM.*/
+
+  bool fetch_register_set (struct regcache *regcache, int regnum, int fetch_op,
 			   const struct regset *regset, void *regs, size_t size);
 
-  void store_register_set (struct regcache *regcache, int regnum, int fetch_op,
+  bool store_register_set (struct regcache *regcache, int regnum, int fetch_op,
 			   int store_op, const struct regset *regset,
 			   void *regs, size_t size);
 protected:
@@ -130,21 +136,21 @@ protected:
      type such as 'struct reg' or 'struct fpreg'.  */
 
   template <class Regset>
-  void fetch_register_set (struct regcache *regcache, int regnum, int fetch_op,
+  bool fetch_register_set (struct regcache *regcache, int regnum, int fetch_op,
 			   const struct regset *regset)
   {
     Regset regs;
-    fetch_register_set (regcache, regnum, fetch_op, regset, &regs,
-			sizeof (regs));
+    return fetch_register_set (regcache, regnum, fetch_op, regset, &regs,
+			       sizeof (regs));
   }
 
   template <class Regset>
-  void store_register_set (struct regcache *regcache, int regnum, int fetch_op,
+  bool store_register_set (struct regcache *regcache, int regnum, int fetch_op,
 			   int store_op, const struct regset *regset)
   {
     Regset regs;
-    store_register_set (regcache, regnum, fetch_op, store_op, regset, &regs,
-			sizeof (regs));
+    return store_register_set (regcache, regnum, fetch_op, store_op, regset,
+			       &regs, sizeof (regs));
   }
 };
 

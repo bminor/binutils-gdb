@@ -1,6 +1,6 @@
 /* interp.c -- AArch64 sim interface to GDB.
 
-   Copyright (C) 2015-2021 Free Software Foundation, Inc.
+   Copyright (C) 2015-2022 Free Software Foundation, Inc.
 
    Contributed by Red Hat.
 
@@ -126,6 +126,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 		     char * const *argv, char * const *env)
 {
   sim_cpu *cpu = STATE_CPU (sd, 0);
+  host_callback *cb = STATE_CALLBACK (sd);
   bfd_vma addr = 0;
 
   if (abfd != NULL)
@@ -143,6 +144,15 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
       freeargv (STATE_PROG_ARGV (sd));
       STATE_PROG_ARGV (sd) = dupargv (argv);
     }
+
+  if (STATE_PROG_ENVP (sd) != env)
+    {
+      freeargv (STATE_PROG_ENVP (sd));
+      STATE_PROG_ENVP (sd) = dupargv (env);
+    }
+
+  cb->argv = STATE_PROG_ARGV (sd);
+  cb->envp = STATE_PROG_ENVP (sd);
 
   if (trace_load_symbols (sd))
     {
@@ -339,10 +349,7 @@ sim_open (SIM_OPEN_KIND                  kind,
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK
       || sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK
       || sim_parse_args (sd, argv) != SIM_RC_OK
-      || sim_analyze_program (sd,
-			      (STATE_PROG_ARGV (sd) != NULL
-			       ? *STATE_PROG_ARGV (sd)
-			       : NULL), abfd) != SIM_RC_OK
+      || sim_analyze_program (sd, STATE_PROG_FILE (sd), abfd) != SIM_RC_OK
       || sim_config (sd) != SIM_RC_OK
       || sim_post_argv_init (sd) != SIM_RC_OK)
     {

@@ -1,5 +1,5 @@
 /* Xtensa-specific support for 32-bit ELF.
-   Copyright (C) 2003-2021 Free Software Foundation, Inc.
+   Copyright (C) 2003-2022 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -885,7 +885,8 @@ xtensa_read_table_entries (bfd *abfd,
   flagword predef_flags;
   bfd_size_type table_entry_size, section_limit;
 
-  if (!section
+  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour
+      || !section
       || !(section->flags & SEC_ALLOC)
       || (section->flags & SEC_DEBUGGING))
     {
@@ -909,7 +910,14 @@ xtensa_read_table_entries (bfd *abfd,
     table_entry_size -= 4;
 
   num_records = table_size / table_entry_size;
+
   table_data = retrieve_contents (abfd, table_section, true);
+  if (table_data == NULL)
+    {
+      *table_p = NULL;
+      return 0;
+    }
+
   blocks = (property_table_entry *)
     bfd_malloc (num_records * sizeof (property_table_entry));
   block_count = 0;
@@ -1968,6 +1976,8 @@ elf_xtensa_do_reloc (reloc_howto_type *howto,
       return bfd_reloc_dangerous;
     }
 
+  if (input_size <= address)
+    return bfd_reloc_outofrange;
   /* Read the instruction into a buffer and decode the opcode.  */
   xtensa_insnbuf_from_chars (isa, ibuff, contents + address,
 			     input_size - address);

@@ -1,5 +1,5 @@
 /* Check that TRT happens when we reach the #threads implementation limit.
-#notarget: cris*-*-elf
+#progos: linux
 */
 
 #include <stddef.h>

@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2021 Free Software Foundation, Inc.
+/* Copyright (C) 2009-2022 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GDB.
@@ -41,6 +41,11 @@ extern bool aarch64_debug;
    bit FN.  The result is sign-extended.  */
 #define sbits(obj,st,fn) \
   ((long) (bits(obj,st,fn) | ((long) bit(obj,fn) * ~ submask (fn - st))))
+
+/* Prologue analyzer helper macros.  */
+
+/* Is the instruction "bti"?  */
+#define IS_BTI(instruction) ((instruction & 0xffffff3f) == 0xd503241f)
 
 /* List of opcodes that we need for building the jump pad and relocating
    an instruction.  */

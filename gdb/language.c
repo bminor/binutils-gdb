@@ -1,6 +1,6 @@
 /* Multiple source language support for GDB.
 
-   Copyright (C) 1991-2021 Free Software Foundation, Inc.
+   Copyright (C) 1991-2022 Free Software Foundation, Inc.
 
    Contributed by the Department of Computer Science at the State University
    of New York at Buffalo.
@@ -114,12 +114,12 @@ show_language_command (struct ui_file *file, int from_tty,
   enum language flang;		/* The language of the frame.  */
 
   if (language_mode == language_mode_auto)
-    fprintf_filtered (gdb_stdout,
+    fprintf_filtered (file,
 		      _("The current source language is "
 			"\"auto; currently %s\".\n"),
 		      current_language->name ());
   else
-    fprintf_filtered (gdb_stdout,
+    fprintf_filtered (file,
 		      _("The current source language is \"%s\".\n"),
 		      current_language->name ());
 
@@ -132,7 +132,7 @@ show_language_command (struct ui_file *file, int from_tty,
       if (flang != language_unknown
 	  && language_mode == language_mode_manual
 	  && current_language->la_language != flang)
-	printf_filtered ("%s\n", _(lang_frame_mismatch_warn));
+	fprintf_filtered (file, "%s\n", _(lang_frame_mismatch_warn));
     }
 }
 
@@ -220,12 +220,12 @@ show_range_command (struct ui_file *file, int from_tty,
 			  "Unrecognized range check setting.");
 	}
 
-      fprintf_filtered (gdb_stdout,
+      fprintf_filtered (file,
 			_("Range checking is \"auto; currently %s\".\n"),
 			tmp);
     }
   else
-    fprintf_filtered (gdb_stdout, _("Range checking is \"%s\".\n"),
+    fprintf_filtered (file, _("Range checking is \"%s\".\n"),
 		      value);
 
   if (range_check == range_check_warn
@@ -296,13 +296,13 @@ show_case_command (struct ui_file *file, int from_tty,
 			  "Unrecognized case-sensitive setting.");
 	}
 
-      fprintf_filtered (gdb_stdout,
+      fprintf_filtered (file,
 			_("Case sensitivity in "
 			  "name search is \"auto; currently %s\".\n"),
 			tmp);
     }
   else
-    fprintf_filtered (gdb_stdout,
+    fprintf_filtered (file,
 		      _("Case sensitivity in name search is \"%s\".\n"),
 		      value);
 
@@ -383,33 +383,8 @@ language_info ()
     return;
 
   expected_language = current_language;
-  printf_unfiltered (_("Current language:  %s\n"), language);
-  show_language_command (NULL, 1, NULL, NULL);
-}
-
-
-/* Returns non-zero if the value is a pointer type.  */
-int
-pointer_type (struct type *type)
-{
-  return type->code () == TYPE_CODE_PTR || TYPE_IS_REFERENCE (type);
-}
-
-
-/* This page contains functions that return info about
-   (struct value) values used in GDB.  */
-
-/* Returns non-zero if the value VAL represents a true value.  */
-int
-value_true (struct value *val)
-{
-  /* It is possible that we should have some sort of error if a non-boolean
-     value is used in this context.  Possibly dependent on some kind of
-     "boolean-checking" option like range checking.  But it should probably
-     not depend on the language except insofar as is necessary to identify
-     a "boolean" value (i.e. in C using a float, pointer, etc., as a boolean
-     should be an error, probably).  */
-  return !value_logical_not (val);
+  printf_filtered (_("Current language:  %s\n"), language);
+  show_language_command (gdb_stdout, 1, NULL, NULL);
 }
 
 /* This page contains functions for the printing out of
@@ -501,7 +476,8 @@ add_set_language_command ()
   /* Display "auto", "local" and "unknown" first, and then the rest,
      alpha sorted.  */
   const char **language_names_p = language_names;
-  *language_names_p++ = language_def (language_auto)->name ();
+  language = language_def (language_auto)->name ();
+  *language_names_p++ = language;
   *language_names_p++ = "local";
   *language_names_p++ = language_def (language_unknown)->name ();
   const char **sort_begin = language_names_p;
@@ -576,7 +552,7 @@ skip_language_trampoline (struct frame_info *frame, CORE_ADDR pc)
    more flexible demangler for the languages that need it.
    FIXME: Sometimes the demangler is invoked when we don't know the
    language, so we can't use this everywhere.  */
-char *
+gdb::unique_xmalloc_ptr<char>
 language_demangle (const struct language_defn *current_language, 
 				const char *mangled, int options)
 {
@@ -627,8 +603,7 @@ language_defn::watch_location_expression (struct type *type,
   /* Generates an expression that assumes a C like syntax is valid.  */
   type = check_typedef (TYPE_TARGET_TYPE (check_typedef (type)));
   std::string name = type_to_string (type);
-  return gdb::unique_xmalloc_ptr<char>
-    (xstrprintf ("* (%s *) %s", name.c_str (), core_addr_to_string (addr)));
+  return xstrprintf ("* (%s *) %s", name.c_str (), core_addr_to_string (addr));
 }
 
 /* See language.h.  */
@@ -796,7 +771,8 @@ public:
 
   /* See language.h.  */
 
-  char *demangle_symbol (const char *mangled, int options) const override
+  gdb::unique_xmalloc_ptr<char> demangle_symbol (const char *mangled,
+						 int options) const override
   {
     /* The auto language just uses the C++ demangler.  */
     return gdb_demangle (mangled, options);
@@ -1026,7 +1002,7 @@ language_arch_info::type_and_symbol::alloc_type_symbol
   symbol->set_section_index (0);
   SYMBOL_TYPE (symbol) = type;
   SYMBOL_DOMAIN (symbol) = VAR_DOMAIN;
-  SYMBOL_ACLASS_INDEX (symbol) = LOC_TYPEDEF;
+  symbol->set_aclass_index (LOC_TYPEDEF);
   return symbol;
 }
 
@@ -1164,20 +1140,19 @@ _initialize_language ()
 
   /* GDB commands for language specific stuff.  */
 
-  cmd_list_element *set_check_cmd
-    = add_basic_prefix_cmd ("check", no_class,
-			    _("Set the status of the type/range checker."),
-			    &setchecklist, 0, &setlist);
-  add_alias_cmd ("c", set_check_cmd, no_class, 1, &setlist);
-  add_alias_cmd ("ch", set_check_cmd, no_class, 1, &setlist);
+  set_show_commands setshow_check_cmds
+    = add_setshow_prefix_cmd ("check", no_class,
+			      _("Set the status of the type/range checker."),
+			      _("Show the status of the type/range checker."),
+			      &setchecklist, &showchecklist,
+			      &setlist, &showlist);
+  add_alias_cmd ("c", setshow_check_cmds.set, no_class, 1, &setlist);
+  add_alias_cmd ("ch", setshow_check_cmds.set, no_class, 1, &setlist);
+  add_alias_cmd ("c", setshow_check_cmds.show, no_class, 1, &showlist);
+  add_alias_cmd ("ch", setshow_check_cmds.show, no_class, 1, &showlist);
 
-  cmd_list_element *show_check_cmd
-    = add_show_prefix_cmd ("check", no_class,
-			 _("Show the status of the type/range checker."),
-			 &showchecklist, 0, &showlist);
-  add_alias_cmd ("c", show_check_cmd, no_class, 1, &showlist);
-  add_alias_cmd ("ch", show_check_cmd, no_class, 1, &showlist);
-
+  range = type_or_range_names[3];
+  gdb_assert (strcmp (range, "auto") == 0);
   add_setshow_enum_cmd ("range", class_support, type_or_range_names,
 			&range,
 			_("Set range checking (on/warn/off/auto)."),
@@ -1186,6 +1161,8 @@ _initialize_language ()
 			show_range_command,
 			&setchecklist, &showchecklist);
 
+  case_sensitive = case_sensitive_names[2];
+  gdb_assert (strcmp (case_sensitive, "auto") == 0);
   add_setshow_enum_cmd ("case-sensitive", class_support, case_sensitive_names,
 			&case_sensitive, _("\
 Set case sensitivity in name search (on/off/auto)."), _("\
@@ -1201,10 +1178,6 @@ For Fortran the default is off; for other languages the default is on."),
   current_language = language_def (language_unknown);
 
   add_set_language_command ();
-
-  language = "auto";
-  range = "auto";
-  case_sensitive = "auto";
 
   /* Have the above take effect.  */
   set_language (language_auto);

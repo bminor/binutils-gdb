@@ -1,6 +1,6 @@
 /* C/C++ language support for compilation.
 
-   Copyright (C) 2014-2021 Free Software Foundation, Inc.
+   Copyright (C) 2014-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -352,7 +352,7 @@ struct c_add_code_header
 	break;
 
       default:
-	gdb_assert_not_reached (_("Unknown compiler scope reached."));
+	gdb_assert_not_reached ("Unknown compiler scope reached.");
       }
   }
 };
@@ -376,7 +376,7 @@ struct c_add_code_footer
 	break;
 
       default:
-	gdb_assert_not_reached (_("Unknown compiler scope reached."));
+	gdb_assert_not_reached ("Unknown compiler scope reached.");
       }
   }
 };
@@ -477,7 +477,7 @@ struct cplus_add_code_header
       break;
 
     default:
-      gdb_assert_not_reached (_("Unknown compiler scope reached."));
+      gdb_assert_not_reached ("Unknown compiler scope reached.");
     }
   }
 };
@@ -635,7 +635,7 @@ public:
       PopUserExpressionPolicy::pop_user_expression (&buf);
 
     AddCodeFooterPolicy::add_code_footer (m_instance->scope (), &buf);
-    return buf.string ();
+    return buf.release ();
   }
 
 private:

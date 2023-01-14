@@ -1,5 +1,29 @@
 -*- text -*-
 
+Changes in 2.38:
+
+* elfedit: Add --output-abiversion option to update ABIVERSION.
+
+* Add support for the LoongArch instruction set.
+
+* Tools which display symbols or strings (readelf, strings, nm, objdump)
+  have a new command line option which controls how unicode characters are
+  handled.  By default they are treated as normal for the tool.  Using
+  --unicode=locale will display them according to the current locale.
+  Using --unicode=hex will display them as hex byte values, whilst
+  --unicode=escape will display them as escape sequences.  In addition
+  using --unicode=highlight will display them as unicode escape sequences
+  highlighted in red (if supported by the output device).
+
+* readelf -r dumps RELR relative relocations now.
+
+* Support for efi-app-aarch64, efi-rtdrv-aarch64 and efi-bsdrv-aarch64 has been
+  added to objcopy in order to enable UEFI development using binutils.
+
+* ar: Add --thin for creating thin archives. -T is a deprecated alias without
+  diagnostics. In many ar implementations -T has a different meaning, as
+  specified by X/Open System Interface.
+
 Changes in 2.37:
 
 * The readelf tool has a new command line option which can be used to specify
@@ -812,7 +836,7 @@ Changes in binutils 2.1:
   and/or local symbols only.  They now also support long options.
 
 
-Copyright (C) 2012-2021 Free Software Foundation, Inc.
+Copyright (C) 2012-2022 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

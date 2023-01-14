@@ -1,6 +1,6 @@
 /* Scheme interface to values.
 
-   Copyright (C) 2008-2021 Free Software Foundation, Inc.
+   Copyright (C) 2008-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -828,7 +828,7 @@ gdbscm_value_to_bytevector (SCM self)
     {
       type = check_typedef (type);
       length = TYPE_LENGTH (type);
-      contents = value_contents (value);
+      contents = value_contents (value).data ();
     }
   catch (const gdb_exception &except)
     {
@@ -978,7 +978,8 @@ gdbscm_value_to_real (SCM self)
     {
       if (is_floating_value (value))
 	{
-	  d = target_float_to_host_double (value_contents (value), type);
+	  d = target_float_to_host_double (value_contents (value).data (),
+					   type);
 	  check = value_from_host_double (type, d);
 	}
       else if (type->is_unsigned ())

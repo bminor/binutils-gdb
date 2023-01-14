@@ -1,5 +1,5 @@
 # Makefile template for configure for the eBPF simulator
-# Copyright (C) 2020-2021 Free Software Foundation, Inc.
+# Copyright (C) 2020-2022 Free Software Foundation, Inc.
 #
 # This file is part of GDB, the GNU debugger.
 #
@@ -89,7 +89,7 @@ stamp-arch: $(CGEN_COMMON_DEPS) $(CGEN_ARCH_SCM)
 		mach=bpf cpu=bpfbf \
 		archfile=$(srcdir)/../../cpu/bpf.cpu \
 		FLAGS="with-scache"
-	touch $@
+	$(SILENCE) touch $@
 $(srcdir)/arch.h $(srcdir)/arch.c $(srcdir)/cpuall.h: $(CGEN_MAINT) stamp-arch
 	@true
 
@@ -99,7 +99,7 @@ stamp-cpu: $(CGEN_COMMON_DEPS) $(CGEN_CPU_SCM)
 		archfile=$(srcdir)/../../cpu/bpf.cpu \
 		FLAGS="with-multiple-isa with-scache"
 	rm -f $(srcdir)/model.c
-	touch $@
+	$(SILENCE) touch $@
 $(srcdir)/cpu.h $(srcdir)/cpu.c $(srcdir)/model.c: $(CGEN_MAINT) stamp-cpu
 	@true
 
@@ -121,7 +121,7 @@ stamp-defs-le: $(CGEN_COMMON_DEPS) $(CGEN_CPU_SCM)
 		archfile=$(srcdir)/../../cpu/bpf.cpu \
 		FLAGS="with-scache" \
                 SUFFIX="-le"
-	touch $@
+	$(SILENCE) touch $@
 $(srcdir)/defs-le.h: $(CGEN_MAINT) stamp-defs-le
 	@true
 
@@ -132,7 +132,7 @@ stamp-defs-be: $(CGEN_COMMON_DEPS) $(CGEN_CPU_SCM)
 		archfile=$(srcdir)/../../cpu/bpf.cpu \
 		FLAGS="with-scache" \
                 SUFFIX="-be"
-	touch $@
+	$(SILENCE) touch $@
 $(srcdir)/defs-be.h: $(CGEN_MAINT) stamp-defs-be
 	@true
 
@@ -143,7 +143,7 @@ stamp-decode-le: $(CGEN_COMMON_DEPS) $(CGEN_CPU_SCM) $(GEN_DECODE_SCM)
 		FLAGS="with-scache" \
                 SUFFIX="-le" \
 		EXTRAFILES="$(CGEN_CPU_SEM)"
-	touch $@
+	$(SILENCE) touch $@
 $(srcdir)/sem-le.c $(srcdir)/decode-le.c $(srcdir)/decode-le.h: \
               $(CGEN_MAINT) stamp-decode-le
 	@true
@@ -156,36 +156,12 @@ stamp-decode-be: $(CGEN_COMMON_DEPS) $(CGEN_CPU_SCM) $(GEN_DECODE_SCM)
 		FLAGS="with-scache" \
                 SUFFIX="-be" \
 		EXTRAFILES="$(CGEN_CPU_SEM)"
-	touch $@
+	$(SILENCE) touch $@
 $(srcdir)/sem-be.c $(srcdir)/decode-be.c $(srcdir)/decode-be.h: \
               $(CGEN_MAINT) stamp-decode-be
-	@true
-
-# Note the following files are generated in objdir, not srcdir.
-
-stamp-mloop: stamp-mloop-le stamp-mloop-be
-
-stamp-mloop-le: $(srcdir)/../common/genmloop.sh mloop.in Makefile
-	$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
-		-mono -scache -prefix bpfbf_ebpfle -cpu bpfbf \
-                -infile $(srcdir)/mloop.in -outfile-suffix -le
-	$(SHELL) $(srcroot)/move-if-change eng-le.hin eng-le.h
-	$(SHELL) $(srcroot)/move-if-change mloop-le.cin mloop-le.c
-	touch $@
-mloop-le.c eng-le.h: stamp-mloop-le
-	@true
-
-stamp-mloop-be: $(srcdir)/../common/genmloop.sh mloop.in Makefile
-	$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
-		-mono -scache -prefix bpfbf_ebpfbe -cpu bpfbf \
-                -infile $(srcdir)/mloop.in -outfile-suffix -be
-	$(SHELL) $(srcroot)/move-if-change eng-be.hin eng-be.h
-	$(SHELL) $(srcroot)/move-if-change mloop-be.cin mloop-be.c
-	touch $@
-mloop-be.c eng-be.h: stamp-mloop-be
 	@true
 
 .PHONY = bpf-clean
 
 bpf-clean:
-	rm -f stamp-arch stamp-cpu stamp-decode stamp-defs stamp-mloop
+	rm -f stamp-arch stamp-cpu stamp-decode stamp-defs

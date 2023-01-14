@@ -3,7 +3,7 @@
    Run "make headers" in your build bfd/ to regenerate.  */
 
 /* BFD COFF object file private structure.
-   Copyright (C) 1990-2021 Free Software Foundation, Inc.
+   Copyright (C) 1990-2022 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -658,6 +658,10 @@ typedef struct coff_ptr_struct
 
  /* Selector for the union above.  */
  bool is_sym;
+
+ /* An extra pointer which can used by format based on COFF (like XCOFF)
+    to provide extra information to their backend.  */
+ void *extrap;
 } combined_entry_type;
 
 

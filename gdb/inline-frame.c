@@ -1,6 +1,6 @@
 /* Inline frame unwinder for GDB.
 
-   Copyright (C) 2008-2021 Free Software Foundation, Inc.
+   Copyright (C) 2008-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -163,7 +163,10 @@ inline_frame_this_id (struct frame_info *this_frame,
      function, there must be previous frames, so this is safe - as
      long as we're careful not to create any cycles.  See related
      comments in get_prev_frame_always_1.  */
-  *this_id = get_frame_id (get_prev_frame_always (this_frame));
+  frame_info *prev_frame = get_prev_frame_always (this_frame);
+  if (prev_frame == nullptr)
+    error (_("failed to find previous frame when computing inline frame id"));
+  *this_id = get_frame_id (prev_frame);
 
   /* We need a valid frame ID, so we need to be based on a valid
      frame.  FSF submission NOTE: this would be a good assertion to
@@ -305,9 +308,9 @@ block_starting_point_at (CORE_ADDR pc, const struct block *block)
    set at FRAME_BLOCK.  */
 
 static bool
-stopped_by_user_bp_inline_frame (const block *frame_block, bpstat stop_chain)
+stopped_by_user_bp_inline_frame (const block *frame_block, bpstat *stop_chain)
 {
-  for (bpstat s = stop_chain; s != NULL; s = s->next)
+  for (bpstat *s = stop_chain; s != nullptr; s = s->next)
     {
       struct breakpoint *bpt = s->breakpoint_at;
 
@@ -338,7 +341,7 @@ stopped_by_user_bp_inline_frame (const block *frame_block, bpstat stop_chain)
 /* See inline-frame.h.  */
 
 void
-skip_inline_frames (thread_info *thread, bpstat stop_chain)
+skip_inline_frames (thread_info *thread, bpstat *stop_chain)
 {
   const struct block *frame_block, *cur_block;
   std::vector<struct symbol *> skipped_syms;

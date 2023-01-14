@@ -1,7 +1,7 @@
 /* Internal format of COFF object file data structures, for GNU BFD.
    This file is part of BFD, the Binary File Descriptor library.
 
-   Copyright (C) 1999-2021 Free Software Foundation, Inc.
+   Copyright (C) 1999-2022 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -536,11 +536,17 @@ struct internal_syment
 #define DECREF(x) \
   ((((x) >> N_TSHIFT) & ~ N_BTMASK) | ((x) & N_BTMASK))
 
+/* Visibility flag, in XCOFF n_type.  */
+#define SYM_V_INTERNAL		0x1000
+#define SYM_V_HIDDEN		0x2000
+#define SYM_V_PROTECTED 	0x3000
+#define SYM_V_EXPORTED		0x4000
+#define SYM_V_MASK		0xF000
+
 union internal_auxent
 {
   struct
   {
-
     union
     {
       long l;			/* str, un, or enum tag indx */
@@ -578,18 +584,26 @@ union internal_auxent
     unsigned short x_tvndx;	/* tv index */
   }      x_sym;
 
-  union
+  struct
   {
-    /* PR 17754: We use to FILNMLEN for the size of the x_fname
-       array, but that causes problems as PE targets use a larger
-       value.  We cannot use their definition of E_FILNMLEN as this
-       header can be used without including any PE headers.  */
-    char x_fname[20];
-    struct
+    union
     {
-      long x_zeroes;
-      long x_offset;
-    }      x_n;
+      /* PR 17754: We used to use FILNMLEN for the size of the x_fname
+	 array, but that causes problems as PE targets use a larger
+	 value.  We cannot use their definition of E_FILNMLEN as this
+	 header can be used without including any PE headers.  */
+      char x_fname[20];
+      struct
+      {
+	/* PR 28630: We use bfd_hostptr_t because these fields may be
+	   used to hold pointers.  We assume that this type is at least
+	   as big as the long type.  */
+	bfd_hostptr_t x_zeroes;
+	bfd_hostptr_t x_offset;
+      }      x_n;
+    } x_n;
+
+    unsigned char x_ftype;
   }     x_file;
 
   struct

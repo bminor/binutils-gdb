@@ -1,7 +1,7 @@
 #as:
 #source: nonrepresentable-1.c
 #source: nonrepresentable-2.c
-#objdump: --ctf=.ctf
+#objdump: --ctf
 #ld: -shared
 #name: Nonrepresentable types
 

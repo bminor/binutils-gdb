@@ -1,4 +1,4 @@
-# Copyright 2002-2021 Free Software Foundation, Inc.
+# Copyright 2002-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -112,7 +112,7 @@ mi_check_thread_states {"running" "running" "stopped"} "thread state, stop on co
 # Check that when we update all varobj, we don't get no error about varobj
 # bound to running thread.
 mi_varobj_update * {I_W1} "update varobj, 2"
-mi_check_varobj_value I_W1 3 "check varobj, w1, 1"
+mi_check_varobj_value I_W1 3 "check varobj, w1, 2"
 
 
 # Check that stack commands are allowed on a stopped thread, even if some other threads
@@ -147,6 +147,6 @@ if { [mi_is_target_remote] } {
 # See that we can still poke other threads.
 mi_gdb_test "-stack-list-frames --thread 3" \
     "\\^done,stack=\\\[frame={level=\"0\",addr=\".*\",func=\"break_at_me\".*" \
-    "stacktrace of stopped thread"
+    "stacktrace of stopped thread, 2"
 
 mi_gdb_exit

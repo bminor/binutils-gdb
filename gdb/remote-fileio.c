@@ -1,6 +1,6 @@
 /* Remote File-I/O communications
 
-   Copyright (C) 2003-2021 Free Software Foundation, Inc.
+   Copyright (C) 2003-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -425,7 +425,7 @@ remote_fileio_func_open (remote_target *remote, char *buf)
 	}
     }
 
-  fd = gdb_open_cloexec (pathname, flags, mode);
+  fd = gdb_open_cloexec (pathname, flags, mode).release ();
   if (fd < 0)
     {
       remote_fileio_return_errno (remote, -1);
@@ -1290,8 +1290,8 @@ show_system_call_allowed (const char *args, int from_tty)
   if (args)
     error (_("Garbage after \"show remote "
 	     "system-call-allowed\" command: `%s'"), args);
-  printf_unfiltered ("Calling host system(3) call from target is %sallowed\n",
-		     remote_fio_system_call_allowed ? "" : "not ");
+  printf_filtered ("Calling host system(3) call from target is %sallowed\n",
+		   remote_fio_system_call_allowed ? "" : "not ");
 }
 
 void

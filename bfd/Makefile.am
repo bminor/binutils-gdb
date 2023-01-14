@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 #
-#   Copyright (C) 2012-2021 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2022 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,13 +17,18 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-AUTOMAKE_OPTIONS = no-dist foreign
+AUTOMAKE_OPTIONS = no-dist foreign info-in-builddir no-texinfo.tex
 ACLOCAL_AMFLAGS = -I . -I .. -I ../config
+
+MOSTLYCLEANFILES =
+CLEANFILES =
+DISTCLEANFILES =
+MAINTAINERCLEANFILES =
 
 INCDIR = $(srcdir)/../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
 
-SUBDIRS = doc po
+SUBDIRS = po
 
 bfddocdir = doc
 
@@ -118,6 +123,7 @@ ALL_MACHINES = \
 	cpu-ip2k.lo \
 	cpu-iq2000.lo \
 	cpu-lm32.lo \
+	cpu-loongarch.lo \
 	cpu-m10200.lo \
 	cpu-m10300.lo \
 	cpu-m32c.lo \
@@ -202,6 +208,7 @@ ALL_MACHINES_CFILES = \
 	cpu-ip2k.c \
 	cpu-iq2000.c \
 	cpu-lm32.c \
+	cpu-loongarch.c \
 	cpu-m10200.c \
 	cpu-m10300.c \
 	cpu-m32c.c \
@@ -548,6 +555,9 @@ BFD64_BACKENDS = \
 	elf64-ia64.lo \
 	elf64-ia64-vms.lo \
 	elfxx-ia64.lo \
+	elf32-loongarch.lo \
+	elf64-loongarch.lo \
+	elfxx-loongarch.lo \
 	elfn32-mips.lo \
 	elf64-mips.lo \
 	elfxx-mips.lo \
@@ -567,7 +577,9 @@ BFD64_BACKENDS = \
 	mach-o-aarch64.lo \
 	mach-o-x86-64.lo \
 	mmo.lo \
+	pe-aarch64igen.lo \
 	pe-x86_64.lo \
+	pei-aarch64.lo \
 	pei-ia64.lo \
 	pei-x86_64.lo \
 	pepigen.lo \
@@ -601,12 +613,14 @@ BFD64_BACKENDS_CFILES = \
 	elfn32-mips.c \
 	elfxx-aarch64.c \
 	elfxx-ia64.c \
+	elfxx-loongarch.c \
 	elfxx-mips.c \
 	elfxx-riscv.c \
 	mach-o-aarch64.c \
 	mach-o-x86-64.c \
 	mmo.c \
 	pe-x86_64.c \
+	pei-aarch64.c \
 	pei-ia64.c \
 	pei-x86_64.c \
 	vms-alpha.c
@@ -665,8 +679,9 @@ SOURCE_CFILES = \
 BUILD_CFILES = \
 	elf32-aarch64.c elf64-aarch64.c \
 	elf32-ia64.c elf64-ia64.c \
+	elf32-loongarch.c elf64-loongarch.c \
 	elf32-riscv.c elf64-riscv.c \
-	peigen.c pepigen.c pex64igen.c
+	peigen.c pepigen.c pex64igen.c pe-aarch64igen.c
 
 CFILES = $(SOURCE_CFILES) $(BUILD_CFILES)
 
@@ -686,7 +701,7 @@ SOURCE_HFILES = \
 	elf-bfd.h elfcode.h elfcore.h elf-hppa.h elf-linker-x86.h \
 	elf-linux-core.h elf-nacl.h elf-s390.h elf-vxworks.h \
 	elfxx-aarch64.h elfxx-ia64.h elfxx-mips.h elfxx-riscv.h \
-	elfxx-sparc.h elfxx-tilegx.h elfxx-x86.h \
+	elfxx-sparc.h elfxx-tilegx.h elfxx-x86.h elfxx-loongarch.h \
 	genlink.h go32stub.h \
 	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h \
 	libpei.h libxcoff.h \
@@ -706,6 +721,15 @@ BUILD_HFILES = \
 BUILT_SOURCES = $(BUILD_HFILES)
 
 HFILES = $(SOURCE_HFILES) $(BUILD_HFILES)
+
+BFD_H_DEPS = $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/diagnostics.h
+LOCAL_H_DEPS = libbfd.h sysdep.h config.h
+$(BFD32_LIBS) \
+ $(BFD64_LIBS) \
+ $(ALL_MACHINES) \
+ $(BFD32_BACKENDS) \
+ $(BFD64_BACKENDS) \
+ $(OPTIONAL_BACKENDS): $(BFD_H) $(BFD_H_DEPS) $(LOCAL_H_DEPS)
 
 SRC_POTFILES = $(SOURCE_CFILES) $(SOURCE_HFILES)
 BLD_POTFILES = $(BUILD_CFILES) $(BUILD_HFILES)
@@ -777,99 +801,102 @@ libbfd.a: stamp-lib ; @true
 # vector names.  It is built from config.bfd.  It is not compiled by
 # itself, but is included by targets.c.
 targmatch.h: config.bfd targmatch.sed
-	rm -f targmatch.h
-	$(SED) -f $(srcdir)/targmatch.sed < $(srcdir)/config.bfd > targmatch.new
-	mv -f targmatch.new targmatch.h
+	$(AM_V_at)rm -f targmatch.h
+	$(AM_V_GEN)$(SED) -f $(srcdir)/targmatch.sed < $(srcdir)/config.bfd > targmatch.new
+	$(AM_V_at)mv -f targmatch.new targmatch.h
 
 # When compiling archures.c and targets.c, supply the default target
 # info from configure.
 
 targets.lo: targets.c Makefile
 if am__fastdepCC
-	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $(TDEFAULTS) $(srcdir)/targets.c
-	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $(TDEFAULTS) $(srcdir)/targets.c
+	$(AM_V_at)mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
 else
 if AMDEP
 	source='targets.c' object='$@' libtool=yes @AMDEPBACKSLASH@
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
-	$(LTCOMPILE) -c -o $@ $(TDEFAULTS) $(srcdir)/targets.c
+	$(AM_V_CC)$(LTCOMPILE) -c -o $@ $(TDEFAULTS) $(srcdir)/targets.c
 endif
 
 archures.lo: archures.c Makefile
 if am__fastdepCC
-	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $(TDEFAULTS) $(srcdir)/archures.c
-	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $(TDEFAULTS) $(srcdir)/archures.c
+	$(AM_V_at)mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
 else
 if AMDEP
 	source='archures.c' object='$@' libtool=yes @AMDEPBACKSLASH@
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
-	$(LTCOMPILE) -c -o $@ $(TDEFAULTS) $(srcdir)/archures.c
+	$(AM_V_CC)$(LTCOMPILE) -c -o $@ $(TDEFAULTS) $(srcdir)/archures.c
 endif
 
 dwarf2.lo: dwarf2.c Makefile
 if am__fastdepCC
-	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ -DDEBUGDIR=\"$(DEBUGDIR)\" $(srcdir)/dwarf2.c
-	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ -DDEBUGDIR=\"$(DEBUGDIR)\" $(srcdir)/dwarf2.c
+	$(AM_V_at)mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
 else
 if AMDEP
 	source='dwarf2.c' object='$@' libtool=yes @AMDEPBACKSLASH@
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
-	$(LTCOMPILE) -c -o $@ -DDEBUGDIR=\"$(DEBUGDIR)\" $(srcdir)/dwarf2.c
+	$(AM_V_CC)$(LTCOMPILE) -c -o $@ -DDEBUGDIR=\"$(DEBUGDIR)\" $(srcdir)/dwarf2.c
 endif
 
 elf32-target.h : elfxx-target.h
-	$(SED) -e s/NN/32/g < $< > $@
+	$(AM_V_GEN)$(SED) -e s/NN/32/g < $< > $@
 
 elf64-target.h : elfxx-target.h
-	$(SED) -e s/NN/64/g < $< > $@
+	$(AM_V_GEN)$(SED) -e s/NN/64/g < $< > $@
 
 elf32-aarch64.c : elfnn-aarch64.c
-	echo "#line 1 \"elfnn-aarch64.c\"" > $@
-	$(SED) -e s/NN/32/g < $< >> $@
+	$(AM_V_at)echo "#line 1 \"elfnn-aarch64.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/NN/32/g < $< >> $@
 
 elf64-aarch64.c : elfnn-aarch64.c
-	echo "#line 1 \"elfnn-aarch64.c\"" > $@
-	$(SED) -e s/NN/64/g < $< >> $@
+	$(AM_V_at)echo "#line 1 \"elfnn-aarch64.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/NN/64/g < $< >> $@
 
 elf32-ia64.c : elfnn-ia64.c
-	echo "#line 1 \"elfnn-ia64.c\"" > $@
-	$(SED) -e s/NN/32/g < $< >> $@
+	$(AM_V_at)echo "#line 1 \"elfnn-ia64.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/NN/32/g < $< >> $@
 
 elf64-ia64.c : elfnn-ia64.c
-	echo "#line 1 \"elfnn-ia64.c\"" > $@
-	$(SED) -e s/NN/64/g < $< >> $@
+	$(AM_V_at)echo "#line 1 \"elfnn-ia64.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/NN/64/g < $< >> $@
+
+elf32-loongarch.c : elfnn-loongarch.c
+	$(AM_V_at)echo "#line 1 \"elfnn-loongarch.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/NN/32/g < $< >> $@
+
+elf64-loongarch.c : elfnn-loongarch.c
+	$(AM_V_at)echo "#line 1 \"elfnn-loongarch.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/NN/64/g < $< >> $@
 
 elf32-riscv.c : elfnn-riscv.c
-	echo "#line 1 \"elfnn-riscv.c\"" > $@
-	$(SED) -e s/NN/32/g < $< >> $@
+	$(AM_V_at)echo "#line 1 \"elfnn-riscv.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/NN/32/g < $< >> $@
 
 elf64-riscv.c : elfnn-riscv.c
-	echo "#line 1 \"elfnn-riscv.c\"" > $@
-	$(SED) -e s/NN/64/g < $< >> $@
+	$(AM_V_at)echo "#line 1 \"elfnn-riscv.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/NN/64/g < $< >> $@
 
 peigen.c : peXXigen.c
-	echo "#line 1 \"peXXigen.c\"" > $@
-	$(SED) -e s/XX/pe/g < $< >> $@
+	$(AM_V_at)echo "#line 1 \"peXXigen.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/XX/pe/g < $< >> $@
 
 pepigen.c : peXXigen.c
-	echo "#line 1 \"peXXigen.c\"" > $@
-	$(SED) -e s/XX/pep/g < $< >> $@
+	$(AM_V_at)echo "#line 1 \"peXXigen.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/XX/pep/g < $< >> $@
 
 pex64igen.c: peXXigen.c
-	echo "#line 1 \"peXXigen.c\"" > $@
-	$(SED) -e s/XX/pex64/g < $< >> $@
+	$(AM_V_at)echo "#line 1 \"peXXigen.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/XX/pex64/g < $< >> $@
 
-BFD_H_DEPS= $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/diagnostics.h
-LOCAL_H_DEPS= libbfd.h sysdep.h config.h
-$(BFD32_LIBS) \
- $(BFD64_LIBS) \
- $(ALL_MACHINES) \
- $(BFD32_BACKENDS) \
- $(BFD64_BACKENDS) \
- $(OPTIONAL_BACKENDS): $(BFD_H) $(BFD_H_DEPS) $(LOCAL_H_DEPS)
+pe-aarch64igen.c: peXXigen.c
+	$(AM_V_at)echo "#line 1 \"peXXigen.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/XX/peAArch64/g < $< >> $@
 
 host-aout.lo: Makefile
 
@@ -898,50 +925,58 @@ LIBBFD_H_FILES = libbfd-in.h libbfd.c bfdio.c bfdwin.c \
 	cache.c reloc.c archures.c linker.c
 LIBCOFF_H_FILES = libcoff-in.h coffcode.h
 
-# Could really use a "copy-if-change"...
-headers:
-	(cd $(bfddocdir); $(MAKE) protos $(FLAGS_TO_PASS))
-	cp $(bfddocdir)/bfd.h bfd-in2.h-new
-	$(SHELL) $(srcdir)/../move-if-change bfd-in2.h-new $(srcdir)/bfd-in2.h
-	cp $(bfddocdir)/libbfd.h libbfd.h-new
-	$(SHELL) $(srcdir)/../move-if-change libbfd.h-new $(srcdir)/libbfd.h
-	cp $(bfddocdir)/libcoff.h libcoff.h-new
-	$(SHELL) $(srcdir)/../move-if-change libcoff.h-new $(srcdir)/libcoff.h
+headers: stmp-bin2-h stmp-lbfd-h stmp-lcoff-h
 
 # We only rebuild the header files automatically if we have been
 # configured with --enable-maintainer-mode.
 
+REGEN_HEADER = \
+	( \
+	set -e; \
+	echo "$$H_FILES" | sed -f $(srcdir)/doc/header.sed; \
+	for file in $$H_FILES; do \
+	  file="$(srcdir)/$$file"; \
+	  case $$file in \
+	    *-in.h) cat $$file;; \
+	    *)	echo $$file | sed -e 's,.*/,,' -e 's,^,/* Extracted from ,' \
+				-e 's,$$,.  */,'; \
+		$(MKDOC) $$CHEW_FLAGS -f $(srcdir)/doc/proto.str < $$file;; \
+	  esac; \
+	done; \
+	echo "\#ifdef __cplusplus"; \
+	echo "}"; \
+	echo "\#endif"; \
+	echo "\#endif"; \
+	)
+
 $(srcdir)/bfd-in2.h: @MAINT@ stmp-bin2-h ; @true
-stmp-bin2-h: $(BFD_H_FILES) $(BFD64_H_FILES)
-	(cd $(bfddocdir); $(MAKE) $(FLAGS_TO_PASS) bfd.h)
-	cp $(bfddocdir)/bfd.h bfd-in2.h-new
-	$(SHELL) $(srcdir)/../move-if-change bfd-in2.h-new $(srcdir)/bfd-in2.h
-	touch stmp-bin2-h
+stmp-bin2-h: $(BFD_H_FILES) $(BFD64_H_FILES) $(MKDOC)
+	$(AM_V_GEN)H_FILES="$(BFD_H_FILES)" CHEW_FLAGS= ; $(REGEN_HEADER) > bfd-in2.h-new
+	$(AM_V_at)$(SHELL) $(srcdir)/../move-if-change bfd-in2.h-new $(srcdir)/bfd-in2.h
+	$(AM_V_at)touch stmp-bin2-h
 
 $(srcdir)/libbfd.h: @MAINT@ stmp-lbfd-h ; @true
-stmp-lbfd-h: $(LIBBFD_H_FILES)
-	(cd $(bfddocdir); $(MAKE) $(FLAGS_TO_PASS) libbfd.h)
-	cp $(bfddocdir)/libbfd.h libbfd.h-new
-	$(SHELL) $(srcdir)/../move-if-change libbfd.h-new $(srcdir)/libbfd.h
-	touch stmp-lbfd-h
+stmp-lbfd-h: $(LIBBFD_H_FILES) $(MKDOC)
+	$(AM_V_GEN)H_FILES="$(LIBBFD_H_FILES)" CHEW_FLAGS=-i ; $(REGEN_HEADER) > libbfd.h-new
+	$(AM_V_at)$(SHELL) $(srcdir)/../move-if-change libbfd.h-new $(srcdir)/libbfd.h
+	$(AM_V_at)touch stmp-lbfd-h
 
 $(srcdir)/libcoff.h: @MAINT@ stmp-lcoff-h ; @true
-stmp-lcoff-h: $(LIBCOFF_H_FILES)
-	(cd $(bfddocdir); $(MAKE) $(FLAGS_TO_PASS) libcoff.h)
-	cp $(bfddocdir)/libcoff.h libcoff.h-new
-	$(SHELL) $(srcdir)/../move-if-change libcoff.h-new $(srcdir)/libcoff.h
-	touch stmp-lcoff-h
+stmp-lcoff-h: $(LIBCOFF_H_FILES) $(MKDOC)
+	$(AM_V_GEN)H_FILES="$(LIBCOFF_H_FILES)" CHEW_FLAGS=-i ; $(REGEN_HEADER) > libcoff.h-new
+	$(AM_V_at)$(SHELL) $(srcdir)/../move-if-change libcoff.h-new $(srcdir)/libcoff.h
+	$(AM_V_at)touch stmp-lcoff-h
 
-MOSTLYCLEANFILES = ofiles stamp-ofiles
+MOSTLYCLEANFILES += ofiles stamp-ofiles
 
-CLEANFILES = bfd.h dep.sed stmp-bfd-h DEP DEPA DEP1 DEP2 libbfd.a stamp-lib \
+CLEANFILES += bfd.h dep.sed stmp-bfd-h DEP DEPA DEP1 DEP2 libbfd.a stamp-lib \
 	stmp-bin2-h stmp-lbfd-h stmp-lcoff-h
 
-DISTCLEANFILES = $(BUILD_CFILES) $(BUILD_HFILES) libtool-soversion
+DISTCLEANFILES += $(BUILD_CFILES) $(BUILD_HFILES) libtool-soversion
 
 bfdver.h: $(srcdir)/version.h $(srcdir)/development.sh $(srcdir)/Makefile.in
-	@echo "creating $@"
-	@bfd_version=`echo "$(VERSION)" | $(SED) -e 's/\([^\.]*\)\.*\([^\.]*\)\.*\([^\.]*\)\.*\([^\.]*\)\.*\([^\.]*\).*/\1.00\2.00\3.00\4.00\5/' -e 's/\([^\.]*\)\..*\(..\)\..*\(..\)\..*\(..\)\..*\(..\)$$/\1\2\3\4\5/'` ;\
+	$(AM_V_GEN)\
+	bfd_version=`echo "$(VERSION)" | $(SED) -e 's/\([^\.]*\)\.*\([^\.]*\)\.*\([^\.]*\)\.*\([^\.]*\)\.*\([^\.]*\).*/\1.00\2.00\3.00\4.00\5/' -e 's/\([^\.]*\)\..*\(..\)\..*\(..\)\..*\(..\)\..*\(..\)$$/\1\2\3\4\5/'` ;\
 	bfd_version_string="\"$(VERSION)\"" ;\
 	bfd_soversion="$(VERSION)" ;\
 	bfd_version_package="\"$(PKGVERSION)\"" ;\
@@ -962,15 +997,17 @@ bfdver.h: $(srcdir)/version.h $(srcdir)/development.sh $(srcdir)/Makefile.in
 # Disable -Werror, if it has been enabled, since coffswap.h won't
 # compile with gcc 4.5 and above.
 coff-tic4x.lo: coff-tic4x.c
-@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $< $(NO_WERROR)
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $< $(NO_WERROR)
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $< $(NO_WERROR)
+@am__fastdepCC_FALSE@	$(AM_V_CC)$(LTCOMPILE) -c -o $@ $< $(NO_WERROR)
 
 coff-tic54x.lo: coff-tic54x.c
-@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $< $(NO_WERROR)
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $< $(NO_WERROR)
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $< $(NO_WERROR)
+@am__fastdepCC_FALSE@	$(AM_V_CC)$(LTCOMPILE) -c -o $@ $< $(NO_WERROR)
+
+include doc/local.mk

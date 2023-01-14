@@ -28,7 +28,7 @@ Displays the contents of the @samp{.debug_cu_index} and/or
 Display the raw contents of a @samp{.debug_frame} section.
 
 @item F
-@item =frame-interp
+@item =frames-interp
 Display the interpreted contents of a @samp{.debug_frame} section.
 
 @item g

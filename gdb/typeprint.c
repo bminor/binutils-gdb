@@ -1,6 +1,6 @@
 /* Language independent support for printing types for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "bfd.h"		/* Binary File Description */
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -104,12 +104,18 @@ print_offset_data::maybe_print_hole (struct ui_file *stream,
       unsigned int hole_bit = hole % TARGET_CHAR_BIT;
 
       if (hole_bit > 0)
-	fprintf_filtered (stream, "/* XXX %2u-bit %-7s    */\n", hole_bit,
-			  for_what);
+	{
+	  fprintf_styled (stream, highlight_style.style (),
+			  "/* XXX %2u-bit %-7s    */", hole_bit, for_what);
+	  fputs_filtered ("\n", stream);
+	}
 
       if (hole_byte > 0)
-	fprintf_filtered (stream, "/* XXX %2u-byte %-7s   */\n", hole_byte,
-			  for_what);
+	{
+	  fprintf_styled (stream, highlight_style.style (),
+			  "/* XXX %2u-byte %-7s   */", hole_byte, for_what);
+	  fputs_filtered ("\n", stream);
+	}
     }
 }
 
@@ -137,7 +143,7 @@ print_offset_data::update (struct type *type, unsigned int field_idx,
       return;
     }
 
-  unsigned int bitpos = TYPE_FIELD_BITPOS (type, field_idx);
+  unsigned int bitpos = type->field (field_idx).loc_bitpos ();
   unsigned int fieldsize_byte = TYPE_LENGTH (ftype);
   unsigned int fieldsize_bit = fieldsize_byte * TARGET_CHAR_BIT;
 
@@ -400,7 +406,7 @@ type_to_string (struct type *type)
       string_file stb;
 
       type_print (type, "", &stb, -1);
-      return std::move (stb.string ());
+      return stb.release ();
     }
   catch (const gdb_exception &except)
     {
@@ -538,7 +544,7 @@ whatis_exp (const char *exp, int show)
   get_user_print_options (&opts);
   if (val != NULL && opts.objectprint)
     {
-      if (((type->code () == TYPE_CODE_PTR) || TYPE_IS_REFERENCE (type))
+      if (type->is_pointer_or_reference ()
 	  && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_STRUCT))
 	real_type = value_rtti_indirect_type (val, &full, &top, &using_enc);
       else if (type->code () == TYPE_CODE_STRUCT)
@@ -548,7 +554,7 @@ whatis_exp (const char *exp, int show)
   if (flags.print_offsets
       && (type->code () == TYPE_CODE_STRUCT
 	  || type->code () == TYPE_CODE_UNION))
-    fprintf_filtered (gdb_stdout, "/* offset      |    size */  ");
+    printf_filtered ("/* offset      |    size */  ");
 
   printf_filtered ("type = ");
 
@@ -620,14 +626,14 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
       len = type->num_fields ();
       for (i = 0; i < len; i++)
 	{
-	  if (TYPE_FIELD_ENUMVAL (type, i) == val)
+	  if (type->field (i).loc_enumval () == val)
 	    {
 	      break;
 	    }
 	}
       if (i < len)
 	{
-	  fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
+	  fputs_filtered (type->field (i).name (), stream);
 	}
       else
 	{
@@ -845,12 +851,11 @@ Available FLAGS are:\n\
 Only one level of typedefs is unrolled.  See also \"ptype\"."));
   set_cmd_completer (c, expression_completer);
 
-  add_show_prefix_cmd ("type", no_class,
-		       _("Generic command for showing type-printing settings."),
-		       &showprinttypelist, 0, &showprintlist);
-  add_basic_prefix_cmd ("type", no_class,
-			_("Generic command for setting how types print."),
-			&setprinttypelist, 0, &setprintlist);
+  add_setshow_prefix_cmd ("type", no_class,
+			  _("Generic command for showing type-printing settings."),
+			  _("Generic command for setting how types print."),
+			  &setprinttypelist, &showprinttypelist,
+			  &setprintlist, &showprintlist);
 
   add_setshow_boolean_cmd ("methods", no_class, &print_methods,
 			   _("\

@@ -1,5 +1,41 @@
 -*- text -*-
 
+Changes in 2.38:
+
+* Add support for AArch64 system registers that were missing in previous
+  releases.
+
+* Add support for the LoongArch instruction set.
+
+* Add a command-line option, -muse-unaligned-vector-move, for x86 target
+  to encode aligned vector move as unaligned vector move.
+
+* Add support for Cortex-R52+ for Arm.
+
+* Add support for Cortex-A510, Cortex-A710, Cortex-X2 for AArch64.
+
+* Add support for Cortex-A710 for Arm.
+
+* Add support for Scalable Matrix Extension (SME) for AArch64.
+
+* The --multibyte-handling=[allow|warn|warn-sym-only] option tells the
+  assembler what to when it encoutners multibyte characters in the input.  The
+  default is to allow them.  Setting the option to "warn" will generate a
+  warning message whenever any multibyte character is encountered.  Using the
+  option to "warn-sym-only" will make the assembler generate a warning whenever a
+  symbol is defined containing multibyte characters.  (References to undefined
+  symbols will not generate warnings).
+
+* Outputs of .ds.x directive and .tfloat directive with hex input from
+  x86 assembler have been reduced from 12 bytes to 10 bytes to match the
+  output of .tfloat directive.
+
+* Add support for 'armv8.8-a', 'armv9-a', 'armv9.1-a', 'armv9.2-a' and
+  'armv9.3-a' for -march in AArch64 GAS.
+
+* Add support for 'armv8.7-a', 'armv8.8-a', 'armv9-a', 'armv9.1-a',
+  'armv9.2-a' and 'armv9.3-a' for -march in Arm GAS.
+
 * Add support for Intel AVX512_FP16 instructions.
 
 Changes in 2.37:
@@ -897,7 +933,7 @@ Changes in 1.93.01:
   of new CPUs and formats, lots of bugs fixed.
 
 
-Copyright (C) 2012-2021 Free Software Foundation, Inc.
+Copyright (C) 2012-2022 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

@@ -1,6 +1,6 @@
 /* Gdb/Python header for private use by Python module.
 
-   Copyright (C) 2008-2021 Free Software Foundation, Inc.
+   Copyright (C) 2008-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -92,7 +92,6 @@
 #endif
 
 #ifdef IS_PY3K
-#define Py_TPFLAGS_HAVE_ITER 0
 #define Py_TPFLAGS_CHECKTYPES 0
 
 #define PyInt_Check PyLong_Check
@@ -296,7 +295,7 @@ struct block;
 struct value;
 struct language_defn;
 struct program_space;
-struct bpstats;
+struct bpstat;
 struct inferior;
 
 extern int gdb_python_initialized;
@@ -412,6 +411,8 @@ extern enum ext_lang_rc gdbpy_get_matching_xmethod_workers
 
 
 PyObject *gdbpy_history (PyObject *self, PyObject *args);
+PyObject *gdbpy_add_history (PyObject *self, PyObject *args);
+extern PyObject *gdbpy_history_count (PyObject *self, PyObject *args);
 PyObject *gdbpy_convenience_variable (PyObject *self, PyObject *args);
 PyObject *gdbpy_set_convenience_variable (PyObject *self, PyObject *args);
 PyObject *gdbpy_breakpoints (PyObject *, PyObject *);
@@ -438,7 +439,7 @@ PyObject *gdbpy_create_ptid_object (ptid_t ptid);
 PyObject *gdbpy_selected_thread (PyObject *self, PyObject *args);
 PyObject *gdbpy_selected_inferior (PyObject *self, PyObject *args);
 PyObject *gdbpy_string_to_argv (PyObject *self, PyObject *args);
-PyObject *gdbpy_parameter_value (enum var_types type, void *var);
+PyObject *gdbpy_parameter_value (const setting &var);
 gdb::unique_xmalloc_ptr<char> gdbpy_parse_command_name
   (const char *name, struct cmd_list_element ***base_list,
    struct cmd_list_element **start_list);
@@ -469,6 +470,7 @@ PyObject *objfpy_get_xmethods (PyObject *, void *);
 PyObject *gdbpy_lookup_objfile (PyObject *self, PyObject *args, PyObject *kw);
 
 PyObject *gdbarch_to_arch_object (struct gdbarch *gdbarch);
+PyObject *gdbpy_all_architecture_names (PyObject *self, PyObject *args);
 
 PyObject *gdbpy_new_register_descriptor_iterator (struct gdbarch *gdbarch,
 						  const char *group_name);
@@ -477,6 +479,13 @@ PyObject *gdbpy_new_reggroup_iterator (struct gdbarch *gdbarch);
 gdbpy_ref<thread_object> create_thread_object (struct thread_info *tp);
 gdbpy_ref<> thread_to_thread_object (thread_info *thr);;
 gdbpy_ref<inferior_object> inferior_to_inferior_object (inferior *inf);
+
+PyObject *gdbpy_buffer_to_membuf (gdb::unique_xmalloc_ptr<gdb_byte> buffer,
+				  CORE_ADDR address, ULONGEST length);
+
+struct process_stratum_target;
+gdbpy_ref<> target_to_connection_object (process_stratum_target *target);
+PyObject *gdbpy_connections (PyObject *self, PyObject *args);
 
 const struct block *block_object_to_block (PyObject *obj);
 struct symbol *symbol_object_to_symbol (PyObject *obj);
@@ -549,6 +558,10 @@ int gdbpy_initialize_unwind (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_tui ()
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_membuf ()
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_connection ()
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 
 /* A wrapper for PyErr_Fetch that handles reference counting for the
    caller.  */
@@ -613,13 +626,35 @@ class gdbpy_enter
 {
  public:
 
-  gdbpy_enter (struct gdbarch *gdbarch, const struct language_defn *language);
+  /* Set the ambient Python architecture to GDBARCH and the language
+     to LANGUAGE.  If GDBARCH is nullptr, then the architecture will
+     be computed, when needed, using get_current_arch; see the
+     get_gdbarch method.  If LANGUAGE is not nullptr, then the current
+     language at time of construction will be saved (to be restored on
+     destruction), and the current language will be set to
+     LANGUAGE.  */
+  explicit gdbpy_enter (struct gdbarch *gdbarch = nullptr,
+			const struct language_defn *language = nullptr);
 
   ~gdbpy_enter ();
 
   DISABLE_COPY_AND_ASSIGN (gdbpy_enter);
 
+  /* Return the current gdbarch, as known to the Python layer.  This
+     is either python_gdbarch (which comes from the most recent call
+     to the gdbpy_enter constructor), or, if that is nullptr, the
+     result of get_current_arch.  */
+  static struct gdbarch *get_gdbarch ();
+
+  /* Called only during gdb shutdown.  This sets python_gdbarch to an
+     acceptable value.  */
+  static void finalize ();
+
  private:
+
+  /* The current gdbarch, according to Python.  This can be
+     nullptr.  */
+  static struct gdbarch *python_gdbarch;
 
   struct active_ext_lang_state *m_previous_active;
   PyGILState_STATE m_state;
@@ -667,9 +702,6 @@ private:
 
   PyThreadState *m_save;
 };
-
-extern struct gdbarch *python_gdbarch;
-extern const struct language_defn *python_language;
 
 /* Use this after a TRY_EXCEPT to throw the appropriate Python
    exception.  */

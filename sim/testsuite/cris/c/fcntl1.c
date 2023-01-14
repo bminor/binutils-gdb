@@ -1,5 +1,5 @@
 /* Check that we get the expected message for unsupported fcntl calls.
-#notarget: cris*-*-elf
+#progos: linux
 #xerror:
 #output: Unimplemented fcntl*
 #output: program stopped with signal 4 (*).\n

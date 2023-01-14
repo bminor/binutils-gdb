@@ -1,6 +1,6 @@
 /* Main header file for the bfd library -- portable access to object files.
 
-   Copyright (C) 1990-2021 Free Software Foundation, Inc.
+   Copyright (C) 1990-2022 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -84,14 +84,6 @@ typedef BFD_HOST_U_64_BIT bfd_uint64_t;
 #define BFD64
 #endif
 
-#ifndef INLINE
-#if __GNUC__ >= 2
-#define INLINE __inline__
-#else
-#define INLINE
-#endif
-#endif
-
 /* Declaring a type wide enough to hold a host long and a host pointer.  */
 #define BFD_HOSTPTR_T @BFD_HOSTPTR_T@
 typedef BFD_HOSTPTR_T bfd_hostptr_t;
@@ -112,6 +104,11 @@ typedef struct bfd bfd;
 # define FALSE 0
 # define TRUE 1
 #endif
+
+/* Silence "applying zero offset to null pointer" UBSAN warnings.  */
+#define PTR_ADD(P,A) ((A) != 0 ? (P) + (A) : (P))
+/* Also prevent non-zero offsets from being applied to a null pointer.  */
+#define NPTR_ADD(P,A) ((P) != NULL ? (P) + (A) : (P))
 
 #ifdef BFD64
 

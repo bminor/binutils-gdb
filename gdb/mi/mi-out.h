@@ -1,5 +1,5 @@
 /* MI Command Set - MI output generating routines for GDB.
-   Copyright (C) 2000-2021 Free Software Foundation, Inc.
+   Copyright (C) 2000-2022 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -76,7 +76,7 @@ protected:
   virtual void do_message (const ui_file_style &style,
 			   const char *format, va_list args) override
     ATTRIBUTE_PRINTF (3,0);
-  virtual void do_wrap_hint (const char *identstring) override;
+  virtual void do_wrap_hint (int indent) override;
   virtual void do_flush () override;
   virtual void do_redirect (struct ui_file *outstream) override;
 

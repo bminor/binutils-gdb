@@ -1,5 +1,5 @@
 /* tc-aarch64.h -- Header file for tc-aarch64.c.
-   Copyright (C) 2009-2021 Free Software Foundation, Inc.
+   Copyright (C) 2009-2022 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GAS.
@@ -225,6 +225,8 @@ void mapping_state (enum mstate);
 
 struct aarch64_segment_info_type
 {
+  const char *last_file;
+  unsigned last_line;
   enum mstate mapstate;
   unsigned int marked_pr_dependency;
   aarch64_instr_sequence insn_sequence;

@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# Copyright (C) 2011-2021 Free Software Foundation, Inc.
+# Copyright (C) 2011-2022 Free Software Foundation, Inc.
 #
 # This file is part of GDB.
 #
@@ -132,7 +132,7 @@ def may_have_copyright_notice(filename):
     This function assumes that the current working directory is that root
     directory.
 
-    The algorigthm is fairly crude, meaning that it might return
+    The algorithm is fairly crude, meaning that it might return
     some false positives.  I do not think it will return any false
     negatives...  We might improve this function to handle more
     complex cases later...
@@ -209,6 +209,7 @@ def main():
 EXCLUDE_LIST = (
     "gdb/nat/glibc_thread_db.h",
     "gdb/CONTRIBUTE",
+    "gdbsupport/Makefile.in",
     "gnulib/import",
     "gnulib/config.in",
     "gnulib/Makefile.in",
@@ -245,9 +246,10 @@ MULTIPLE_COPYRIGHT_HEADERS = (
     "gdb/doc/gdb.texinfo",
     "gdb/doc/refcard.tex",
     "gdb/gdbarch.sh",
+    "gdb/syscalls/update-netbsd.sh",
 )
 
-# The list of file which have a copyright, but not head by the FSF.
+# The list of file which have a copyright, but not held by the FSF.
 # Filenames are relative to the root directory.
 NOT_FSF_LIST = (
     "gdb/exc_request.defs",
@@ -411,7 +413,7 @@ NOT_FSF_LIST = (
     "sim/ppc/vm.h",
     "sim/ppc/hw_iobus.c",
     "sim/ppc/inline.h",
-    "sim/testsuite/sim/mips/mips32-dsp2.s",
+    "sim/testsuite/mips/mips32-dsp2.s",
 )
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 /* BFD support for the ft32 processor.
-   Copyright (C) 2013-2021 Free Software Foundation, Inc.
+   Copyright (C) 2013-2022 Free Software Foundation, Inc.
    Written by FTDI (support@ftdichip.com)
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -43,7 +43,6 @@
 
 static const bfd_arch_info_type arch_info_struct[] =
 {
-  N (bfd_mach_ft32, "ft32", false, &arch_info_struct[1]),
   N (bfd_mach_ft32b, "ft32b", false, NULL)
 };
 

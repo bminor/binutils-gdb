@@ -636,6 +636,8 @@ LIBCTF
 LTLIBBABELTRACE
 LIBBABELTRACE
 HAVE_LIBBABELTRACE
+LIBBACKTRACE_LIB
+LIBBACKTRACE_INC
 HAVE_NATIVE_GCORE_HOST
 NAT_GENERATED_FILES
 XM_CLIBS
@@ -770,6 +772,8 @@ PKG_CONFIG_PATH
 PKG_CONFIG
 HAVE_NATIVE_GCORE_TARGET
 TARGET_OBS
+ENABLE_BFD_64_BIT_FALSE
+ENABLE_BFD_64_BIT_TRUE
 subdirs
 GDB_DATADIR
 DEBUGDIR
@@ -908,6 +912,7 @@ with_python
 with_python_libdir
 with_guile
 enable_source_highlight
+enable_threading
 with_intel_pt
 with_libipt_prefix
 with_libipt_type
@@ -925,6 +930,7 @@ with_tcl
 with_tk
 with_x
 enable_sim
+enable_libbacktrace
 with_babeltrace
 with_libbabeltrace_prefix
 with_libbabeltrace_type
@@ -1594,6 +1600,8 @@ Optional Features:
   --disable-rpath         do not hardcode runtime library paths
   --enable-source-highlight
                           enable source-highlight for source listings
+  --enable-threading      include support for parallel processing of data
+                          (yes/no)
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings if gcc is used
   --enable-gdb-build-warnings
@@ -1601,6 +1609,8 @@ Optional Features:
                           gcc is used
   --enable-ubsan          enable undefined behavior sanitizer (auto/yes/no)
   --enable-sim            link gdb with simulator
+  --enable-libbacktrace   use libbacktrace to write a backtrace after a fatal
+                          signal.
   --enable-libctf         Handle .ctf type-info sections [default=yes]
   --enable-unit-tests     Enable the inclusion of unit tests when compiling
                           GDB
@@ -2362,6 +2372,52 @@ $as_echo "$ac_res" >&6; }
 
 } # ac_fn_c_check_func
 
+# ac_fn_cxx_try_link LINENO
+# -------------------------
+# Try to link conftest.$ac_ext, and return whether this succeeded.
+ac_fn_cxx_try_link ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  rm -f conftest.$ac_objext conftest$ac_exeext
+  if { { ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+$as_echo "$ac_try_echo"; } >&5
+  (eval "$ac_link") 2>conftest.err
+  ac_status=$?
+  if test -s conftest.err; then
+    grep -v '^ *+' conftest.err >conftest.er1
+    cat conftest.er1 >&5
+    mv -f conftest.er1 conftest.err
+  fi
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } && {
+	 test -z "$ac_cxx_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 test -x conftest$ac_exeext
+       }; then :
+  ac_retval=0
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_retval=1
+fi
+  # Delete the IPA/IPO (Inter Procedural Analysis/Optimization) information
+  # created by the PGI compiler (conftest_ipa8_conftest.oo), as it would
+  # interfere with the next link command; also delete a directory that is
+  # left behind by Apple's compiler.  We do this before executing the actions.
+  rm -rf conftest.dSYM conftest_ipa8_conftest.oo
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+  as_fn_set_status $ac_retval
+
+} # ac_fn_cxx_try_link
+
 # ac_fn_c_check_type LINENO TYPE VAR INCLUDES
 # -------------------------------------------
 # Tests whether TYPE exists after having included INCLUDES, setting cache
@@ -2518,52 +2574,6 @@ $as_echo "$ac_res" >&6; }
   eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
 
 } # ac_fn_c_check_member
-
-# ac_fn_cxx_try_link LINENO
-# -------------------------
-# Try to link conftest.$ac_ext, and return whether this succeeded.
-ac_fn_cxx_try_link ()
-{
-  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  rm -f conftest.$ac_objext conftest$ac_exeext
-  if { { ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
-$as_echo "$ac_try_echo"; } >&5
-  (eval "$ac_link") 2>conftest.err
-  ac_status=$?
-  if test -s conftest.err; then
-    grep -v '^ *+' conftest.err >conftest.er1
-    cat conftest.er1 >&5
-    mv -f conftest.er1 conftest.err
-  fi
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } && {
-	 test -z "$ac_cxx_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 test -x conftest$ac_exeext
-       }; then :
-  ac_retval=0
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_retval=1
-fi
-  # Delete the IPA/IPO (Inter Procedural Analysis/Optimization) information
-  # created by the PGI compiler (conftest_ipa8_conftest.oo), as it would
-  # interfere with the next link command; also delete a directory that is
-  # left behind by Apple's compiler.  We do this before executing the actions.
-  rm -rf conftest.dSYM conftest_ipa8_conftest.oo
-  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
-  as_fn_set_status $ac_retval
-
-} # ac_fn_cxx_try_link
 
 # ac_fn_cxx_check_func LINENO FUNC VAR
 # ------------------------------------
@@ -5841,6 +5851,10 @@ eval ac_res=\$$cachevar
 $as_echo "$ac_res" >&6; }
       if eval test x\$$cachevar = xyes; then
         CXX_DIALECT="$switch"
+        CXX="$CXX $switch"
+        if test -n "$CXXCPP" ; then
+          CXXCPP="$CXXCPP $switch"
+        fi
         ac_success=yes
         break
       fi
@@ -6160,6 +6174,10 @@ eval ac_res=\$$cachevar
 $as_echo "$ac_res" >&6; }
         if eval test x\$$cachevar = xyes; then
           CXX_DIALECT="$switch"
+          CXX="$CXX $switch"
+          if test -n "$CXXCPP" ; then
+            CXXCPP="$CXXCPP $switch"
+          fi
           ac_success=yes
           break
         fi
@@ -6633,17 +6651,70 @@ esac
 fi
 
 
-# Check whether to enable 64-bit support on 32-bit hosts
 # Check whether --enable-64-bit-bfd was given.
 if test "${enable_64_bit_bfd+set}" = set; then :
-  enableval=$enable_64_bit_bfd; case "${enableval}" in
-  yes)  want64=true  ;;
-  no)   want64=false ;;
-  *)    as_fn_error $? "bad value ${enableval} for 64-bit-bfd option" "$LINENO" 5 ;;
+  enableval=$enable_64_bit_bfd; case $enableval in #(
+  yes|no) :
+     ;; #(
+  *) :
+    as_fn_error $? "bad value ${enableval} for 64-bit-bfd option" "$LINENO" 5 ;; #(
+  *) :
+     ;;
 esac
 else
-  want64=false
+  enable_64_bit_bfd=no
 fi
+
+
+if test "x$enable_64_bit_bfd" = "xno"; then :
+    # The cast to long int works around a bug in the HP C Compiler
+# version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
+# declarations like `int a3[[(sizeof (unsigned char)) >= 0]];'.
+# This bug is HP SR number 8606223364.
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking size of void *" >&5
+$as_echo_n "checking size of void *... " >&6; }
+if ${ac_cv_sizeof_void_p+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if ac_fn_c_compute_int "$LINENO" "(long int) (sizeof (void *))" "ac_cv_sizeof_void_p"        "$ac_includes_default"; then :
+
+else
+  if test "$ac_cv_type_void_p" = yes; then
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error 77 "cannot compute sizeof (void *)
+See \`config.log' for more details" "$LINENO" 5; }
+   else
+     ac_cv_sizeof_void_p=0
+   fi
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sizeof_void_p" >&5
+$as_echo "$ac_cv_sizeof_void_p" >&6; }
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define SIZEOF_VOID_P $ac_cv_sizeof_void_p
+_ACEOF
+
+
+  if test "x$ac_cv_sizeof_void_p" = "x8"; then :
+  enable_64_bit_bfd=yes
+fi
+
+fi
+
+ if test "x$enable_64_bit_bfd" = "xyes"; then
+  ENABLE_BFD_64_BIT_TRUE=
+  ENABLE_BFD_64_BIT_FALSE='#'
+else
+  ENABLE_BFD_64_BIT_TRUE='#'
+  ENABLE_BFD_64_BIT_FALSE=
+fi
+
+
 
 # Provide defaults for some variables set by the per-host and per-target
 # configuration.
@@ -6693,7 +6764,7 @@ fi
     done
 
     # Check whether this target needs 64-bit CORE_ADDR
-    if test x${want64} = xfalse; then
+    if test x${enable_64_bit_bfd} = xno; then
       . ${srcdir}/../bfd/config.bfd
     fi
 
@@ -6706,55 +6777,7 @@ fi
 done
 
 if test x${all_targets} = xtrue; then
-
-  # We want all 64-bit targets if we either:
-  #  - run on a 64-bit host  or
-  #  - already require 64-bit support for some other target  or
-  #  - the --enable-64-bit-bfd option was supplied
-  # Otherwise we only support all 32-bit targets.
-  #
-  # NOTE: This test must be in sync with the corresponding
-  #       tests in BFD!
-
-  if test x${want64} = xfalse; then
-    # The cast to long int works around a bug in the HP C Compiler
-# version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
-# declarations like `int a3[[(sizeof (unsigned char)) >= 0]];'.
-# This bug is HP SR number 8606223364.
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking size of long" >&5
-$as_echo_n "checking size of long... " >&6; }
-if ${ac_cv_sizeof_long+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if ac_fn_c_compute_int "$LINENO" "(long int) (sizeof (long))" "ac_cv_sizeof_long"        "$ac_includes_default"; then :
-
-else
-  if test "$ac_cv_type_long" = yes; then
-     { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error 77 "cannot compute sizeof (long)
-See \`config.log' for more details" "$LINENO" 5; }
-   else
-     ac_cv_sizeof_long=0
-   fi
-fi
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sizeof_long" >&5
-$as_echo "$ac_cv_sizeof_long" >&6; }
-
-
-
-cat >>confdefs.h <<_ACEOF
-#define SIZEOF_LONG $ac_cv_sizeof_long
-_ACEOF
-
-
-    if test "x${ac_cv_sizeof_long}" = "x8"; then
-      want64=true
-    fi
-  fi
-  if test x${want64} = xtrue; then
+  if test x${enable_64_bit_bfd} = xyes; then
     TARGET_OBS='$(ALL_TARGET_OBS) $(ALL_64_TARGET_OBS)'
   else
     TARGET_OBS='$(ALL_TARGET_OBS)'
@@ -9211,6 +9234,23 @@ fi
 
 
 if test "$with_system_readline" = yes; then
+  for ac_header in readline/readline.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "readline/readline.h" "ac_cv_header_readline_readline_h" "$ac_includes_default"
+if test "x$ac_cv_header_readline_readline_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_READLINE_READLINE_H 1
+_ACEOF
+ readline_h=yes
+else
+  readline_h=no
+fi
+
+done
+
+  if test "$readline_h" = "no"; then
+    as_fn_error $? "readline development packages are probably missing" "$LINENO" 5
+  fi
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether system readline is new enough" >&5
 $as_echo_n "checking whether system readline is new enough... " >&6; }
 if ${gdb_cv_readline_ok+:} false; then :
@@ -12090,13 +12130,73 @@ $as_echo "no - pkg-config not found" >&6; }
           ;;
       esac
 
-      SRCHIGH_CFLAGS=`${pkg_config_prog_path} --cflags source-highlight`
-      SRCHIGH_LIBS=`${pkg_config_prog_path} --libs source-highlight`
+      srchigh_pkg_cflags=`${pkg_config_prog_path} --cflags source-highlight`
+      srchigh_pkg_libs=`${pkg_config_prog_path} --libs source-highlight`
+
+      # Now that we have found a source-highlight library, check if we can use
+      # it.  In particular, we're trying to detect the situation that the
+      # library is using the new libstdc++ library abi ( see
+      # https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html )
+      # while the compiler being used to compile gdb is using the old abi.
+      # Such a situation will result in an undefined reference to
+      # srchilite::SourceHighlight::SourceHighlight(std::string const&).
+      # This situation can occur for instance when using a source highlight
+      # library compiled with g++ 7.5.0 while building gdb with g++ 4.8.5.
+      ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+      save_CFLAGS="$CFLAGS"
+      save_LDFLAGS="$LDFLAGS"
+      CFLAGS="$CFLAGS $srchigh_pkg_cflags"
+      LDFLAGS="$LDFLAGS $srchigh_pkg_libs"
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <srchilite/sourcehighlight.h>
+int
+main ()
+{
+std::string outlang = "esc.outlang";
+           new srchilite::SourceHighlight (outlang);
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  have_usable_source_highlight=yes
+else
+  have_usable_source_highlight=no
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+      CFLAGS="$save_CFLAGS"
+      LDFLAGS="$save_LDFLAGS"
+      ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+      if test "${have_usable_source_highlight}" = "yes"; then
 
 $as_echo "#define HAVE_SOURCE_HIGHLIGHT 1" >>confdefs.h
 
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
+        SRCHIGH_CFLAGS="$srchigh_pkg_cflags"
+        SRCHIGH_LIBS="$srchigh_pkg_libs"
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+        if test "${enable_source_highlight}" = "yes"; then
+          as_fn_error $? "source-highlight in your system could not be used" "$LINENO" 5
+        fi
+      fi
     else
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
@@ -12309,6 +12409,18 @@ do :
 if test "x$ac_cv_header_ws2tcpip_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_WS2TCPIP_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in execinfo.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "execinfo.h" "ac_cv_header_execinfo_h" "$ac_includes_default"
+if test "x$ac_cv_header_execinfo_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_EXECINFO_H 1
 _ACEOF
 
 fi
@@ -13838,6 +13950,22 @@ fi
 done
 
 
+  # This is needed for RHEL 5 and uclibc-ng < 1.0.39.
+  # These did not define ADDR_NO_RANDOMIZE in sys/personality.h,
+  # only in linux/personality.h.
+  ac_fn_c_check_decl "$LINENO" "ADDR_NO_RANDOMIZE" "ac_cv_have_decl_ADDR_NO_RANDOMIZE" "#include <sys/personality.h>
+"
+if test "x$ac_cv_have_decl_ADDR_NO_RANDOMIZE" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_ADDR_NO_RANDOMIZE $ac_have_decl
+_ACEOF
+
+
   ac_fn_c_check_decl "$LINENO" "strstr" "ac_cv_have_decl_strstr" "$ac_includes_default"
 if test "x$ac_cv_have_decl_strstr" = xyes; then :
   ac_have_decl=1
@@ -13945,6 +14073,22 @@ _ACEOF
 
 fi
 done
+
+
+  # ----------------------- #
+  # Check for threading.    #
+  # ----------------------- #
+
+  # Check whether --enable-threading was given.
+if test "${enable_threading+set}" = set; then :
+  enableval=$enable_threading; case "$enableval" in
+    yes) want_threading=yes ;;
+    no) want_threading=no ;;
+    *) as_fn_error $? "bad value $enableval for threading" "$LINENO" 5 ;;
+    esac
+else
+  want_threading=yes
+fi
 
 
   # Check for std::thread.  This does not work on some platforms, like
@@ -14644,10 +14788,13 @@ done
     LIBS="$save_LIBS"
     CXXFLAGS="$save_CXXFLAGS"
   fi
-  if test "$gdb_cv_cxx_std_thread" = "yes"; then
+
+  if test "$want_threading" = "yes"; then
+    if test "$gdb_cv_cxx_std_thread" = "yes"; then
 
 $as_echo "#define CXX_STD_THREAD 1" >>confdefs.h
 
+    fi
   fi
   ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -15255,6 +15402,52 @@ fi
 
       LIBS=$save_LIBS
     fi
+  fi
+
+  # Check if the compiler and runtime support printing long longs.
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for long long support in printf" >&5
+$as_echo_n "checking for long long support in printf... " >&6; }
+if ${gdb_cv_printf_has_long_long+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test "$cross_compiling" = yes; then :
+  gdb_cv_printf_has_long_long=no
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$ac_includes_default
+int
+main ()
+{
+char buf[32];
+    long long l = 0;
+    l = (l << 16) + 0x0123;
+    l = (l << 16) + 0x4567;
+    l = (l << 16) + 0x89ab;
+    l = (l << 16) + 0xcdef;
+    sprintf (buf, "0x%016llx", l);
+    return (strcmp ("0x0123456789abcdef", buf));
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  gdb_cv_printf_has_long_long=yes
+else
+  gdb_cv_printf_has_long_long=no
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_printf_has_long_long" >&5
+$as_echo "$gdb_cv_printf_has_long_long" >&6; }
+  if test "$gdb_cv_printf_has_long_long" = yes; then
+
+$as_echo "#define PRINTF_HAS_LONG_LONG 1" >>confdefs.h
+
   fi
 
 
@@ -16151,52 +16344,6 @@ if test "$gdb_cv_c_long_long" != yes; then
   as_fn_error $? "Compiler must support long long for GDB." "$LINENO" 5
 fi
 
-# Check if the compiler and runtime support printing long longs.
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for long long support in printf" >&5
-$as_echo_n "checking for long long support in printf... " >&6; }
-if ${gdb_cv_printf_has_long_long+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test "$cross_compiling" = yes; then :
-  gdb_cv_printf_has_long_long=no
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$ac_includes_default
-int
-main ()
-{
-char buf[32];
-  long long l = 0;
-  l = (l << 16) + 0x0123;
-  l = (l << 16) + 0x4567;
-  l = (l << 16) + 0x89ab;
-  l = (l << 16) + 0xcdef;
-  sprintf (buf, "0x%016llx", l);
-  return (strcmp ("0x0123456789abcdef", buf));
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-  gdb_cv_printf_has_long_long=yes
-else
-  gdb_cv_printf_has_long_long=no
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_printf_has_long_long" >&5
-$as_echo "$gdb_cv_printf_has_long_long" >&6; }
-if test "$gdb_cv_printf_has_long_long" = yes; then
-
-$as_echo "#define PRINTF_HAS_LONG_LONG 1" >>confdefs.h
-
-fi
-
 # Check if the compiler and runtime support printing decfloats.
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for decfloat support in printf" >&5
@@ -16483,6 +16630,45 @@ fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $found" >&5
 $as_echo "$found" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether execinfo.h backtrace is available" >&5
+$as_echo_n "checking whether execinfo.h backtrace is available... " >&6; }
+if ${gdb_cv_execinfo_backtrace+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+         #include <execinfo.h>
+
+int
+main ()
+{
+
+         int f;
+         void *b[2];
+         f = backtrace (b, 2);
+         backtrace_symbols_fd (b, f, 2);
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  gdb_cv_execinfo_backtrace=yes
+else
+  gdb_cv_execinfo_backtrace=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_execinfo_backtrace" >&5
+$as_echo "$gdb_cv_execinfo_backtrace" >&6; }
+if test "$gdb_cv_execinfo_backtrace" = yes; then
+
+$as_echo "#define HAVE_EXECINFO_BACKTRACE 1" >>confdefs.h
+
+fi
 
 
 if test "${build}" = "${host}" -a "${host}" = "${target}" ; then
@@ -16814,6 +17000,64 @@ _ACEOF
 
 
 
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking the compiler type" >&5
+$as_echo_n "checking the compiler type... " >&6; }
+if ${gdb_cv_compiler_type+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  gdb_cv_compiler_type=unknown
+  if test "$gdb_cv_compiler_type" = unknown; then
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+                          #if !defined __GNUC__ || defined __clang__
+                          #error not gcc
+                          #endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gdb_cv_compiler_type=gcc
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  fi
+
+  if test "$gdb_cv_compiler_type" = unknown; then
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+                          #ifndef __clang__
+                          #error not clang
+                          #endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gdb_cv_compiler_type=clang
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_compiler_type" >&5
+$as_echo "$gdb_cv_compiler_type" >&6; }
+
+ GDB_COMPILER_TYPE="$gdb_cv_compiler_type"
+
+
 # Check whether --enable-werror was given.
 if test "${enable_werror+set}" = set; then :
   enableval=$enable_werror; case "${enableval}" in
@@ -16850,9 +17094,15 @@ build_warnings="-Wall -Wpointer-arith \
 -Wdeprecated-copy-dtor \
 -Wredundant-move \
 -Wmissing-declarations \
--Wmissing-prototypes \
 -Wstrict-null-sentinel \
 "
+
+# The -Wmissing-prototypes flag will be accepted by GCC, but results
+# in a warning being printed about the flag not being valid for C++,
+# this is something to do with using ccache, and argument ordering.
+if test "$GDB_COMPILER_TYPE" != gcc; then
+  build_warnings="$build_warnings -Wmissing-prototypes"
+fi
 
 case "${host}" in
   *-*-mingw32*)
@@ -18608,6 +18858,33 @@ _ACEOF
 
 fi
 
+# Setup possible use of libbacktrace.
+# Check whether --enable-libbacktrace was given.
+if test "${enable_libbacktrace+set}" = set; then :
+  enableval=$enable_libbacktrace; case "${enableval}" in
+  yes)  enable_libbacktrace=yes ;;
+  no)   enable_libbacktrace=no  ;;
+  *)    as_fn_error $? "bad value ${enableval} for --enable-libbacktrace option" "$LINENO" 5 ;;
+esac
+else
+  enable_libbacktrace=yes
+fi
+
+
+if test "${enable_libbacktrace}" == "yes"; then
+  LIBBACKTRACE_INC="-I$srcdir/../libbacktrace/ -I../libbacktrace/"
+  LIBBACKTRACE_LIB=../libbacktrace/.libs/libbacktrace.a
+
+$as_echo "#define HAVE_LIBBACKTRACE 1" >>confdefs.h
+
+else
+  LIBBACKTRACE_INC=
+  LIBBACKTRACE_LIB=
+fi
+
+
+
+
 # Check for babeltrace and babeltrace-ctf
 
 # Check whether --with-babeltrace was given.
@@ -19918,6 +20195,10 @@ LTLIBOBJS=$ac_ltlibobjs
 
 if test -z "${MAINTAINER_MODE_TRUE}" && test -z "${MAINTAINER_MODE_FALSE}"; then
   as_fn_error $? "conditional \"MAINTAINER_MODE\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${ENABLE_BFD_64_BIT_TRUE}" && test -z "${ENABLE_BFD_64_BIT_FALSE}"; then
+  as_fn_error $? "conditional \"ENABLE_BFD_64_BIT\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_PYTHON_TRUE}" && test -z "${HAVE_PYTHON_FALSE}"; then

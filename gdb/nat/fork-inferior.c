@@ -1,6 +1,6 @@
 /* Fork a Unix child process, and set up to debug it, for GDB and GDBserver.
 
-   Copyright (C) 1990-2021 Free Software Foundation, Inc.
+   Copyright (C) 1990-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -479,7 +479,6 @@ startup_inferior (process_stratum_target *proc_target, pid_t pid, int ntraps,
       ptid_t event_ptid;
 
       struct target_waitstatus ws;
-      memset (&ws, 0, sizeof (ws));
       event_ptid = target_wait (resume_ptid, &ws, 0);
 
       if (last_waitstatus != NULL)
@@ -487,11 +486,11 @@ startup_inferior (process_stratum_target *proc_target, pid_t pid, int ntraps,
       if (last_ptid != NULL)
 	*last_ptid = event_ptid;
 
-      if (ws.kind == TARGET_WAITKIND_IGNORE)
+      if (ws.kind () == TARGET_WAITKIND_IGNORE)
 	/* The inferior didn't really stop, keep waiting.  */
 	continue;
 
-      switch (ws.kind)
+      switch (ws.kind ())
 	{
 	  case TARGET_WAITKIND_SPURIOUS:
 	  case TARGET_WAITKIND_LOADED:
@@ -507,32 +506,28 @@ startup_inferior (process_stratum_target *proc_target, pid_t pid, int ntraps,
 	    target_terminal::ours ();
 	    target_mourn_inferior (event_ptid);
 	    error (_("During startup program terminated with signal %s, %s."),
-		   gdb_signal_to_name (ws.value.sig),
-		   gdb_signal_to_string (ws.value.sig));
+		   gdb_signal_to_name (ws.sig ()),
+		   gdb_signal_to_string (ws.sig ()));
 	    return resume_ptid;
 
 	  case TARGET_WAITKIND_EXITED:
 	    target_terminal::ours ();
 	    target_mourn_inferior (event_ptid);
-	    if (ws.value.integer)
+	    if (ws.exit_status ())
 	      error (_("During startup program exited with code %d."),
-		     ws.value.integer);
+		     ws.exit_status ());
 	    else
 	      error (_("During startup program exited normally."));
 	    return resume_ptid;
 
 	  case TARGET_WAITKIND_EXECD:
 	    /* Handle EXEC signals as if they were SIGTRAP signals.  */
-	    /* Free the exec'ed pathname, but only if this isn't the
-	       waitstatus we are returning to the caller.  */
-	    if (pending_execs != 1)
-	      xfree (ws.value.execd_pathname);
 	    resume_signal = GDB_SIGNAL_TRAP;
 	    switch_to_thread (proc_target, event_ptid);
 	    break;
 
 	  case TARGET_WAITKIND_STOPPED:
-	    resume_signal = ws.value.sig;
+	    resume_signal = ws.sig ();
 	    switch_to_thread (proc_target, event_ptid);
 	    break;
 	}

@@ -59,4 +59,9 @@ iq2000_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), \
 #define IQ2000_INSN_MEM_SIZE (CPU2INSN(0x800000) - CPU2INSN(0x0000))
 #define IQ2000_DATA_MEM_SIZE (CPU2DATA(0x800000) - CPU2DATA(0x0000))
 
+PCADDR get_h_pc (SIM_CPU *);
+void set_h_pc (SIM_CPU *, PCADDR);
+void do_syscall (SIM_CPU *, PCADDR);
+void do_break (SIM_CPU *, PCADDR);
+
 #endif /* SIM_MAIN_H */

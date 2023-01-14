@@ -1,5 +1,5 @@
 /* Support routines for building symbol tables in GDB's internal format.
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,7 +19,7 @@
 #include "defs.h"
 #include "buildsym-legacy.h"
 #include "bfd.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"
@@ -977,15 +977,13 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
       if (subfile->line_vector)
 	{
 	  /* Reallocate the line table on the symbol obstack.  */
-	  SYMTAB_LINETABLE (symtab) = (struct linetable *)
-	    obstack_alloc (&m_objfile->objfile_obstack, linetablesize);
-	  memcpy (SYMTAB_LINETABLE (symtab), subfile->line_vector,
-		  linetablesize);
+	  symtab->set_linetable
+	    ((struct linetable *)
+	     obstack_alloc (&m_objfile->objfile_obstack, linetablesize));
+	  memcpy (symtab->linetable (), subfile->line_vector, linetablesize);
 	}
       else
-	{
-	  SYMTAB_LINETABLE (symtab) = NULL;
-	}
+	symtab->set_linetable (nullptr);
 
       /* Use whatever language we have been using for this
 	 subfile, not the one that was deduced in allocate_symtab
@@ -993,31 +991,11 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
 	 we created the subfile, and we may have altered our
 	 opinion of what language it is from things we found in
 	 the symbols.  */
-      symtab->language = subfile->language;
+      symtab->set_language (subfile->language);
     }
 
-  /* Make sure the symtab of main_subfile is the first in its list.  */
-  {
-    struct symtab *main_symtab, *prev_symtab;
-
-    main_symtab = m_main_subfile->symtab;
-    prev_symtab = NULL;
-    for (symtab *symtab : compunit_filetabs (cu))
-      {
-	if (symtab == main_symtab)
-	  {
-	    if (prev_symtab != NULL)
-	      {
-		prev_symtab->next = main_symtab->next;
-		main_symtab->next = COMPUNIT_FILETABS (cu);
-		COMPUNIT_FILETABS (cu) = main_symtab;
-	      }
-	    break;
-	  }
-	prev_symtab = symtab;
-      }
-    gdb_assert (main_symtab == COMPUNIT_FILETABS (cu));
-  }
+  /* Make sure the filetab of main_subfile is the primary filetab of the CU.  */
+  cu->set_primary_filetab (m_main_subfile->symtab);
 
   /* Fill out the compunit symtab.  */
 
@@ -1025,33 +1003,33 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
     {
       /* Reallocate the dirname on the symbol obstack.  */
       const char *comp_dir = m_comp_dir.get ();
-      COMPUNIT_DIRNAME (cu) = obstack_strdup (&m_objfile->objfile_obstack,
-					      comp_dir);
+      cu->set_dirname (obstack_strdup (&m_objfile->objfile_obstack,
+				       comp_dir));
     }
 
   /* Save the debug format string (if any) in the symtab.  */
-  COMPUNIT_DEBUGFORMAT (cu) = m_debugformat;
+  cu->set_debugformat (m_debugformat);
 
   /* Similarly for the producer.  */
-  COMPUNIT_PRODUCER (cu) = m_producer;
+  cu->set_producer (m_producer);
 
-  COMPUNIT_BLOCKVECTOR (cu) = blockvector;
+  cu->set_blockvector (blockvector);
   {
     struct block *b = BLOCKVECTOR_BLOCK (blockvector, GLOBAL_BLOCK);
 
     set_block_compunit_symtab (b, cu);
   }
 
-  COMPUNIT_BLOCK_LINE_SECTION (cu) = section;
+  cu->set_block_line_section (section);
 
-  COMPUNIT_MACRO_TABLE (cu) = release_macros ();
+  cu->set_macro_table (release_macros ());
 
   /* Default any symbols without a specified symtab to the primary symtab.  */
   {
     int block_i;
 
     /* The main source file's symtab.  */
-    struct symtab *symtab = COMPUNIT_FILETABS (cu);
+    struct symtab *symtab = cu->primary_filetab ();
 
     for (block_i = 0; block_i < BLOCKVECTOR_NBLOCKS (blockvector); block_i++)
       {
@@ -1170,7 +1148,7 @@ set_missing_symtab (struct pending *pending_list,
       for (i = 0; i < pending->nsyms; ++i)
 	{
 	  if (symbol_symtab (pending->symbol[i]) == NULL)
-	    symbol_set_symtab (pending->symbol[i], COMPUNIT_FILETABS (cu));
+	    symbol_set_symtab (pending->symbol[i], cu->primary_filetab ());
 	}
     }
 }
@@ -1183,7 +1161,7 @@ void
 buildsym_compunit::augment_type_symtab ()
 {
   struct compunit_symtab *cust = m_compunit_symtab;
-  const struct blockvector *blockvector = COMPUNIT_BLOCKVECTOR (cust);
+  const struct blockvector *blockvector = cust->blockvector ();
 
   if (!m_context_stack.empty ())
     complaint (_("Context stack not empty in augment_type_symtab"));

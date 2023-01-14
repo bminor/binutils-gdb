@@ -25,3 +25,7 @@ Disassembly of section .text:
  *[0-9a-f]+:	ed91 fb00 	vldr	d15, \[r1\]
  *[0-9a-f]+:	edc1 fa00 	vstr	s31, \[r1\]
  *[0-9a-f]+:	edd1 fa00 	vldr	s31, \[r1\]
+ *[0-9a-f]+:	ed2d 0a20 	vpush	{s0-s31}
+ *[0-9a-f]+:	ed2d 0a10 	vpush	{s0-s15}
+ *[0-9a-f]+:	ecbd 0a10 	vpop	{s0-s15}
+ *[0-9a-f]+:	ecbd 0a20 	vpop	{s0-s31}

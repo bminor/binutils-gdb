@@ -1,5 +1,5 @@
 # Expect script for AIX 5.2+ tests
-#   Copyright (C) 2009-2021 Free Software Foundation, Inc.
+#   Copyright (C) 2009-2022 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -284,7 +284,8 @@ set aix7tests {
 
     {"TLS relocations" "-shared -bE:aix-tls-reloc.ex"
 	"" {aix-tls-reloc.s}
-	{{objdump -dr aix-tls-reloc-SIZE.d}}
+	{{objdump {-dr -j.data} aix-tls-reloc-SIZE.dd}
+	 {objdump {-dr -j.tdata -j.tbss} aix-tls-reloc-SIZE.dt}}
 	"aix-tls-reloc.so"}
 
     {"TLS section" "-shared -bE:aix-tls-section.ex"

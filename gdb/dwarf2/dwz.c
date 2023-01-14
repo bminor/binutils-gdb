@@ -1,6 +1,6 @@
 /* DWARF DWZ handling for GDB.
 
-   Copyright (C) 2003-2021 Free Software Foundation, Inc.
+   Copyright (C) 2003-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -118,7 +118,7 @@ dwz_search_other_debugdirs (std::string &filename, bfd_byte *buildid,
 
   gdb_bfd_ref_ptr dwz_bfd;
   std::vector<gdb::unique_xmalloc_ptr<char>> debugdir_vec
-    = dirnames_to_char_ptr_vec (debug_file_directory);
+    = dirnames_to_char_ptr_vec (debug_file_directory.c_str ());
 
   for (const gdb::unique_xmalloc_ptr<char> &debugdir : debugdir_vec)
     {

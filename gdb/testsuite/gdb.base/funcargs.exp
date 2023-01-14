@@ -1,4 +1,4 @@
-# Copyright 1992-2021 Free Software Foundation, Inc.
+# Copyright 1992-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile $compile_flags]}
 # Locate actual args; integral types.
 #
 
-proc integral_args {} {
+proc_with_prefix integral_args {} {
     global gdb_prompt
     global det_file
     global gcc_compiled
@@ -199,7 +199,7 @@ proc float_and_integral_args {} {
 # Locate actual args; _Complex types.
 #
 
-proc complex_args {} {
+proc_with_prefix complex_args {} {
     global gdb_prompt
 
     delete_breakpoints
@@ -226,7 +226,7 @@ proc complex_args {} {
 #
 # Locate actual args; _Complex types and integral.
 #
-proc complex_integral_args {} {
+proc_with_prefix complex_integral_args {} {
     global gdb_prompt
 
     delete_breakpoints
@@ -244,7 +244,7 @@ proc complex_integral_args {} {
 #
 # Locate actual args; _Complex types and integral/float.
 #
-proc complex_float_integral_args {} {
+proc_with_prefix complex_float_integral_args {} {
     global gdb_prompt
 
     delete_breakpoints
@@ -263,7 +263,7 @@ proc complex_float_integral_args {} {
 # Locate actual args; dereference pointers to ints and floats.
 #
 
-proc pointer_args {} {
+proc_with_prefix pointer_args {} {
     global gdb_prompt
     global hex
     global det_file
@@ -306,7 +306,7 @@ proc pointer_args {} {
 # Locate actual args; structures and unions passed by reference.
 #
 
-proc structs_by_reference {} {
+proc_with_prefix structs_by_reference {} {
     global gdb_prompt
     global hex
     global det_file
@@ -355,7 +355,7 @@ proc structs_by_reference {} {
 # Locate actual args; structures and unions passed by value.
 #
 
-proc structs_by_value {} {
+proc_with_prefix structs_by_value {} {
     global gdb_prompt
     global hex
     global det_file
@@ -415,7 +415,7 @@ proc structs_by_value {} {
 # Locate actual args; discard, shuffle, and call
 #
 
-proc discard_and_shuffle {} {
+proc_with_prefix discard_and_shuffle {} {
     global gdb_prompt
     global hex
     global decimal
@@ -617,7 +617,7 @@ proc discard_and_shuffle {} {
 # Locate actual args; shuffle round robin and call
 #
 
-proc shuffle_round_robin {} {
+proc_with_prefix shuffle_round_robin {} {
     global gdb_prompt
     global hex
     global decimal
@@ -814,7 +814,7 @@ proc shuffle_round_robin {} {
 # Locate actual args; recursive passing of structs by value
 #
 
-proc recursive_structs_by_value {} {
+proc_with_prefix recursive_structs_by_value {} {
     global gdb_prompt
     global hex
     global decimal
@@ -844,7 +844,7 @@ proc recursive_structs_by_value {} {
 #
 # Test for accessing local stack variables in functions which call alloca
 #
-proc localvars_after_alloca { } {
+proc_with_prefix localvars_after_alloca { } {
     global gdb_prompt
     global hex
     global decimal
@@ -878,7 +878,7 @@ proc localvars_after_alloca { } {
     gdb_test "backtrace 8" "#0.*localvars_after_alloca \\(c=97 'a', s=1, i=2, l=3\\).*#1.*main.*" "backtrace after alloca"
 }
 
-proc call_after_alloca { } {
+proc_with_prefix call_after_alloca { } {
     global gdb_prompt
     global hex
     global decimal
@@ -907,7 +907,7 @@ proc call_after_alloca { } {
 # and finally stepping into indirect calls.  The point is that on the PA
 # these use a funky `dyncall' mechanism which GDB needs to know about.
 #
-proc localvars_in_indirect_call { } {
+proc_with_prefix localvars_in_indirect_call { } {
     global gdb_prompt
     global hex
     global decimal
@@ -979,7 +979,7 @@ proc localvars_in_indirect_call { } {
 # cascaded) on both the call path and the gdb_suppress_tests; path.
 # to handle trampolines.
 #
-proc test_stepping_over_trampolines { } {
+proc_with_prefix stepping_over_trampolines { } {
     global gdb_prompt
     global hex
     global decimal
@@ -1106,6 +1106,6 @@ recursive_structs_by_value
 localvars_after_alloca
 call_after_alloca
 localvars_in_indirect_call
-test_stepping_over_trampolines
+stepping_over_trampolines
 
 set timeout $prev_timeout

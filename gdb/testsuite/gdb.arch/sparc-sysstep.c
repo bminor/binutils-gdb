@@ -1,6 +1,6 @@
 /* Test single-stepping system call instructions in sparc.
 
-   Copyright 2014-2021 Free Software Foundation, Inc.
+   Copyright 2014-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

@@ -140,7 +140,7 @@ trace_usage(int verbose)
     printf_filtered("\n");
   }
   if (verbose > 1) {
-    const char *format = "\t%-18s%s\n";
+    static const char format[] = "\t%-18s%s\n";
     int i;
     printf_filtered(format, "all", "enable all the trace options");
     for (i = 0; trace_description[i].option < nr_trace_options; i++)

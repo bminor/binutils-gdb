@@ -1,4 +1,4 @@
-# Copyright 2008-2021 Free Software Foundation, Inc.
+# Copyright 2008-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -115,8 +115,17 @@ mi_check_thread_states \
 # gdb_test_multiple (or an MI equivalent)
 
 mi_gdb_test "102-break-delete" "102\\^done.*"
-mi_gdb_test "print done = 1" { = 1"}
-mi_gdb_test "103-exec-continue --all" "\[^\n\]*\r\n$running_re"
+set re [list \
+	    [string_list_to_regexp ~ {"} $] \
+	    $decimal \
+	    [string_list_to_regexp " = 1" \\ n {"} \r\n ^ done]]
+set re [join $re ""]
+mi_gdb_test "print done = 1" $re
+
+# Command exec-continue --all attempts to resume all threads, but only
+# thread 5 was stopped, so only that one is reported as running.
+set running_re "\\*running,thread-id=\"5\""
+mi_gdb_test "103-exec-continue --all" "\[^\n\]*\r\n$running_re" \
 
 gdb_expect {
     -re "\\*stopped,reason=\"exited-normally\"" {

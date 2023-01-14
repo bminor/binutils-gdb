@@ -1,5 +1,5 @@
 /* COFF specific linker code.
-   Copyright (C) 1994-2021 Free Software Foundation, Inc.
+   Copyright (C) 1994-2022 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -963,7 +963,7 @@ _bfd_coff_final_link (bfd *abfd,
 		  else
 		    {
 		      BFD_ASSERT (isym.n_numaux == 1);
-		      iaux.x_file.x_n.x_offset = STRING_SIZE_SIZE + indx;
+		      iaux.x_file.x_n.x_n.x_offset = STRING_SIZE_SIZE + indx;
 		      bfd_coff_swap_aux_out (abfd, &iaux, isym.n_type, C_FILE,
 					     0, 1, flaginfo.outsyms + symesz);
 		      if (bfd_seek (abfd, pos + symesz, SEEK_SET) != 0
@@ -2006,13 +2006,13 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *flaginfo, bfd *input_bfd)
 		{
 		  /* If this is a long filename, we must put it in the
 		     string table.  */
-		  if (auxp->x_file.x_n.x_zeroes == 0
-		      && auxp->x_file.x_n.x_offset != 0)
+		  if (auxp->x_file.x_n.x_n.x_zeroes == 0
+		      && auxp->x_file.x_n.x_n.x_offset != 0)
 		    {
 		      const char *filename;
 		      bfd_size_type indx;
 
-		      BFD_ASSERT (auxp->x_file.x_n.x_offset
+		      BFD_ASSERT (auxp->x_file.x_n.x_n.x_offset
 				  >= STRING_SIZE_SIZE);
 		      if (strings == NULL)
 			{
@@ -2020,15 +2020,15 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *flaginfo, bfd *input_bfd)
 			  if (strings == NULL)
 			    return false;
 			}
-		      if ((bfd_size_type) auxp->x_file.x_n.x_offset >= obj_coff_strings_len (input_bfd))
+		      if ((bfd_size_type) auxp->x_file.x_n.x_n.x_offset >= obj_coff_strings_len (input_bfd))
 			filename = _("<corrupt>");
 		      else
-			filename = strings + auxp->x_file.x_n.x_offset;
+			filename = strings + auxp->x_file.x_n.x_n.x_offset;
 		      indx = _bfd_stringtab_add (flaginfo->strtab, filename,
 						 hash, copy);
 		      if (indx == (bfd_size_type) -1)
 			return false;
-		      auxp->x_file.x_n.x_offset = STRING_SIZE_SIZE + indx;
+		      auxp->x_file.x_n.x_n.x_offset = STRING_SIZE_SIZE + indx;
 		    }
 		}
 	      else if ((isymp->n_sclass != C_STAT || isymp->n_type != T_NULL)

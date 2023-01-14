@@ -1,6 +1,6 @@
 /* Fortran language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 1993-2021 Free Software Foundation, Inc.
+   Copyright (C) 1993-2022 Free Software Foundation, Inc.
 
    Contributed by Motorola.  Adapted from the C parser by Farooq Butt
    (fmbutt@engage.sps.mot.com).
@@ -263,7 +263,7 @@ public:
      will be creating values for each element as we load them and then copy
      them into the M_DEST value.  Set a value mark so we can free these
      temporary values.  */
-  void start_dimension (bool inner_p)
+  void start_dimension (struct type *index_type, LONGEST nelts, bool inner_p)
   {
     if (inner_p)
       {
@@ -330,7 +330,8 @@ public:
   /* Create a lazy value in target memory representing a single element,
      then load the element into GDB's memory and copy the contents into the
      destination value.  */
-  void process_element (struct type *elt_type, LONGEST elt_off, bool last_p)
+  void process_element (struct type *elt_type, LONGEST elt_off,
+			LONGEST index, bool last_p)
   {
     copy_element_to_dest (value_at_lazy (elt_type, m_addr + elt_off));
   }
@@ -368,7 +369,8 @@ public:
   /* Extract an element of ELT_TYPE at offset (M_BASE_OFFSET + ELT_OFF)
      from the content buffer of M_VAL then copy this extracted value into
      the repacked destination value.  */
-  void process_element (struct type *elt_type, LONGEST elt_off, bool last_p)
+  void process_element (struct type *elt_type, LONGEST elt_off,
+			LONGEST index, bool last_p)
   {
     struct value *elt
       = value_from_component (m_val, elt_type, (elt_off + m_base_offset));
@@ -770,7 +772,7 @@ eval_op_f_abs (struct type *expect_type, struct expression *exp,
     case TYPE_CODE_FLT:
       {
 	double d
-	  = fabs (target_float_to_host_double (value_contents (arg1),
+	  = fabs (target_float_to_host_double (value_contents (arg1).data (),
 					       value_type (arg1)));
 	return value_from_host_double (type, d);
       }
@@ -800,10 +802,10 @@ eval_op_f_mod (struct type *expect_type, struct expression *exp,
     case TYPE_CODE_FLT:
       {
 	double d1
-	  = target_float_to_host_double (value_contents (arg1),
+	  = target_float_to_host_double (value_contents (arg1).data (),
 					 value_type (arg1));
 	double d2
-	  = target_float_to_host_double (value_contents (arg2),
+	  = target_float_to_host_double (value_contents (arg2).data (),
 					 value_type (arg2));
 	double d3 = fmod (d1, d2);
 	return value_from_host_double (type, d3);
@@ -833,7 +835,7 @@ eval_op_f_ceil (struct type *expect_type, struct expression *exp,
   if (type->code () != TYPE_CODE_FLT)
     error (_("argument to CEILING must be of type float"));
   double val
-    = target_float_to_host_double (value_contents (arg1),
+    = target_float_to_host_double (value_contents (arg1).data (),
 				   value_type (arg1));
   val = ceil (val);
   return value_from_host_double (type, val);
@@ -851,7 +853,7 @@ eval_op_f_floor (struct type *expect_type, struct expression *exp,
   if (type->code () != TYPE_CODE_FLT)
     error (_("argument to FLOOR must be of type float"));
   double val
-    = target_float_to_host_double (value_contents (arg1),
+    = target_float_to_host_double (value_contents (arg1).data (),
 				   value_type (arg1));
   val = floor (val);
   return value_from_host_double (type, val);
@@ -883,10 +885,10 @@ eval_op_f_modulo (struct type *expect_type, struct expression *exp,
     case TYPE_CODE_FLT:
       {
 	double a
-	  = target_float_to_host_double (value_contents (arg1),
+	  = target_float_to_host_double (value_contents (arg1).data (),
 					 value_type (arg1));
 	double p
-	  = target_float_to_host_double (value_contents (arg2),
+	  = target_float_to_host_double (value_contents (arg2).data (),
 					 value_type (arg2));
 	double result = fmod (a, p);
 	if (result != 0 && (a < 0.0) != (p < 0.0))
@@ -1384,11 +1386,9 @@ fortran_undetermined::value_subarray (value *array,
 	    array = value_at_lazy (array_slice_type,
 				   value_address (array) + total_offset);
 	  else
-	    array = value_from_contents_and_address (array_slice_type,
-						     (value_contents (array)
-						      + total_offset),
-						     (value_address (array)
-						      + total_offset));
+	    array = value_from_contents_and_address
+	      (array_slice_type, value_contents (array).data () + total_offset,
+	       value_address (array) + total_offset);
 	}
       else if (!value_lazy (array))
 	array = value_from_component (array, array_slice_type, total_offset);
@@ -1518,7 +1518,7 @@ fortran_structop_operation::evaluate (struct type *expect_type,
       struct type *elt_type = value_type (elt);
       if (is_dynamic_type (elt_type))
 	{
-	  const gdb_byte *valaddr = value_contents_for_printing (elt);
+	  const gdb_byte *valaddr = value_contents_for_printing (elt).data ();
 	  CORE_ADDR address = value_address (elt);
 	  gdb::array_view<const gdb_byte> view
 	    = gdb::make_array_view (valaddr, TYPE_LENGTH (elt_type));
@@ -1531,6 +1531,20 @@ fortran_structop_operation::evaluate (struct type *expect_type,
 }
 
 } /* namespace expr */
+
+/* See language.h.  */
+
+void
+f_language::print_array_index (struct type *index_type, LONGEST index,
+			       struct ui_file *stream,
+			       const value_print_options *options) const
+{
+  struct value *index_value = value_from_longest (index_type, index);
+
+  fprintf_filtered (stream, "(");
+  value_print (index_value, stream, options);
+  fprintf_filtered (stream, ") = ");
+}
 
 /* See language.h.  */
 
@@ -1683,13 +1697,12 @@ _initialize_f_language ()
 {
   f_type_data = gdbarch_data_register_post_init (build_fortran_types);
 
-  add_basic_prefix_cmd ("fortran", no_class,
-			_("Prefix command for changing Fortran-specific settings."),
-			&set_fortran_list, 0, &setlist);
-
-  add_show_prefix_cmd ("fortran", no_class,
-		       _("Generic command for showing Fortran-specific settings."),
-		       &show_fortran_list, 0, &showlist);
+  add_setshow_prefix_cmd
+    ("fortran", no_class,
+     _("Prefix command for changing Fortran-specific settings."),
+     _("Generic command for showing Fortran-specific settings."),
+     &set_fortran_list, &show_fortran_list,
+     &setlist, &showlist);
 
   add_setshow_boolean_cmd ("repack-array-slices", class_vars,
 			   &repack_array_slices, _("\
@@ -1746,10 +1759,9 @@ fortran_argument_convert (struct value *value, bool is_artificial)
 	  const int length = TYPE_LENGTH (type);
 	  const CORE_ADDR addr
 	    = value_as_long (value_allocate_space_in_inferior (length));
-	  write_memory (addr, value_contents (value), length);
-	  struct value *val
-	    = value_from_contents_and_address (type, value_contents (value),
-					       addr);
+	  write_memory (addr, value_contents (value).data (), length);
+	  struct value *val = value_from_contents_and_address
+	    (type, value_contents (value).data (), addr);
 	  return value_addr (val);
 	}
       else

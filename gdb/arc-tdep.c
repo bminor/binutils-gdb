@@ -1,6 +1,6 @@
 /* Target dependent code for ARC architecture, for GDB.
 
-   Copyright 2005-2021 Free Software Foundation, Inc.
+   Copyright 2005-2022 Free Software Foundation, Inc.
    Contributed by Synopsys Inc.
 
    This file is part of GDB.
@@ -779,9 +779,10 @@ arc_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  unsigned int len = TYPE_LENGTH (value_type (args[i]));
 	  unsigned int space = align_up (len, 4);
 
-	  memcpy (data, value_contents (args[i]), (size_t) len);
+	  memcpy (data, value_contents (args[i]).data (), (size_t) len);
 	  arc_debug_printf ("copying arg %d, val 0x%08x, len %d to mem",
-			    i, *((int *) value_contents (args[i])), len);
+			    i, *((int *) value_contents (args[i]).data ()),
+			    len);
 
 	  data += space;
 	}
@@ -1001,7 +1002,7 @@ arc_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
   arc_debug_printf ("called");
 
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  arc_gdbarch_tdep *tdep = (arc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   int pc_offset = tdep->jb_pc * ARC_REGISTER_SIZE;
   gdb_byte buf[ARC_REGISTER_SIZE];
   CORE_ADDR jb_addr = get_frame_register_unsigned (frame, ARC_FIRST_ARG_REGNUM);
@@ -1831,7 +1832,8 @@ arc_make_sigtramp_frame_cache (struct frame_info *this_frame)
 {
   arc_debug_printf ("called");
 
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (this_frame));
+  gdbarch *arch = get_frame_arch (this_frame);
+  arc_gdbarch_tdep *tdep = (arc_gdbarch_tdep *) gdbarch_tdep (arch);
 
   /* Allocate new frame cache instance and space for saved register info.  */
   struct arc_frame_cache *cache = FRAME_OBSTACK_ZALLOC (struct arc_frame_cache);
@@ -1905,11 +1907,10 @@ arc_sigtramp_frame_sniffer (const struct frame_unwind *self,
 			    struct frame_info *this_frame,
 			    void **this_cache)
 {
-  struct gdbarch_tdep *tdep;
-
   arc_debug_printf ("called");
 
-  tdep = gdbarch_tdep (get_frame_arch (this_frame));
+  gdbarch *arch = get_frame_arch (this_frame);
+  arc_gdbarch_tdep *tdep = (arc_gdbarch_tdep *) gdbarch_tdep (arch);
 
   /* If we have a sigcontext_addr handler, then just return 1 (same as the
      "default_frame_sniffer ()").  */
@@ -2294,11 +2295,11 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Allocate the ARC-private target-dependent information structure, and the
      GDB target-independent information structure.  */
-  gdb::unique_xmalloc_ptr<struct gdbarch_tdep> tdep
-    (XCNEW (struct gdbarch_tdep));
+  std::unique_ptr<arc_gdbarch_tdep> tdep_holder (new arc_gdbarch_tdep);
+  arc_gdbarch_tdep *tdep = tdep_holder.get ();
   tdep->jb_pc = -1; /* No longjmp support by default.  */
   tdep->has_hw_loops = arc_check_for_hw_loops (tdesc, tdesc_data.get ());
-  struct gdbarch *gdbarch = gdbarch_alloc (&info, tdep.release ());
+  struct gdbarch *gdbarch = gdbarch_alloc (&info, tdep_holder.release ());
 
   /* Data types.  */
   set_gdbarch_short_bit (gdbarch, 16);
@@ -2383,7 +2384,7 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      It can override functions set earlier.  */
   gdbarch_init_osabi (info, gdbarch);
 
-  if (gdbarch_tdep (gdbarch)->jb_pc >= 0)
+  if (tdep->jb_pc >= 0)
     set_gdbarch_get_longjmp_target (gdbarch, arc_get_longjmp_target);
 
   /* Disassembler options.  Enforce CPU if it was specified in XML target
@@ -2453,18 +2454,18 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 static void
 arc_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  arc_gdbarch_tdep *tdep = (arc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
-  fprintf_unfiltered (file, "arc_dump_tdep: jb_pc = %i\n", tdep->jb_pc);
+  fprintf_filtered (file, "arc_dump_tdep: jb_pc = %i\n", tdep->jb_pc);
 
-  fprintf_unfiltered (file, "arc_dump_tdep: is_sigtramp = <%s>\n",
-		      host_address_to_string (tdep->is_sigtramp));
-  fprintf_unfiltered (file, "arc_dump_tdep: sigcontext_addr = <%s>\n",
-		      host_address_to_string (tdep->sigcontext_addr));
-  fprintf_unfiltered (file, "arc_dump_tdep: sc_reg_offset = <%s>\n",
-		      host_address_to_string (tdep->sc_reg_offset));
-  fprintf_unfiltered (file, "arc_dump_tdep: sc_num_regs = %d\n",
-		      tdep->sc_num_regs);
+  fprintf_filtered (file, "arc_dump_tdep: is_sigtramp = <%s>\n",
+		    host_address_to_string (tdep->is_sigtramp));
+  fprintf_filtered (file, "arc_dump_tdep: sigcontext_addr = <%s>\n",
+		    host_address_to_string (tdep->sigcontext_addr));
+  fprintf_filtered (file, "arc_dump_tdep: sc_reg_offset = <%s>\n",
+		    host_address_to_string (tdep->sc_reg_offset));
+  fprintf_filtered (file, "arc_dump_tdep: sc_num_regs = %d\n",
+		    tdep->sc_num_regs);
 }
 
 /* This command accepts single argument - address of instruction to

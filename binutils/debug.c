@@ -1,5 +1,5 @@
 /* debug.c -- Handle generic debugging information.
-   Copyright (C) 1995-2021 Free Software Foundation, Inc.
+   Copyright (C) 1995-2022 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -2065,7 +2065,9 @@ debug_get_real_type (void *handle, debug_type type,
       /* The default case is just here to avoid warnings.  */
     default:
     case DEBUG_KIND_INDIRECT:
-      if (*type->u.kindirect->slot != NULL)
+      /* A valid non-self-referencing indirect type.  */
+      if (*type->u.kindirect->slot != NULL
+	  && *type->u.kindirect->slot != type)
 	return debug_get_real_type (handle, *type->u.kindirect->slot, &rl);
       return type;
     case DEBUG_KIND_NAMED:
@@ -2095,7 +2097,9 @@ debug_get_type_name (void *handle, debug_type type)
 {
   if (type->kind == DEBUG_KIND_INDIRECT)
     {
-      if (*type->u.kindirect->slot != NULL)
+      /* A valid non-self-referencing indirect type.  */
+      if (*type->u.kindirect->slot != NULL
+	  && *type->u.kindirect->slot != type)
 	return debug_get_type_name (handle, *type->u.kindirect->slot);
       return type->u.kindirect->tag;
     }
@@ -2124,7 +2128,9 @@ debug_get_type_size (void *handle, debug_type type)
     default:
       return 0;
     case DEBUG_KIND_INDIRECT:
-      if (*type->u.kindirect->slot != NULL)
+      /* A valid non-self-referencing indirect type.  */
+      if (*type->u.kindirect->slot != NULL
+	  && *type->u.kindirect->slot != type)
 	return debug_get_type_size (handle, *type->u.kindirect->slot);
       return 0;
     case DEBUG_KIND_NAMED:
@@ -2484,6 +2490,9 @@ debug_write_type (struct debug_handle *info,
       debug_error (_("debug_write_type: illegal type encountered"));
       return false;
     case DEBUG_KIND_INDIRECT:
+      /* Prevent infinite recursion.  */
+      if (*type->u.kindirect->slot == type)
+	return (*fns->empty_type) (fhandle);
       return debug_write_type (info, fns, fhandle, *type->u.kindirect->slot,
 			       name);
     case DEBUG_KIND_VOID:
@@ -3334,7 +3343,7 @@ debug_class_type_samep (struct debug_handle *info, struct debug_type_s *t1,
 	      || strcmp (m1->name, m2->name) != 0
 	      || (m1->variants == NULL) != (m2->variants == NULL))
 	    return false;
-	  if (m1->variants == NULL)
+	  if (m1->variants != NULL)
 	    {
 	      struct debug_method_variant_s **pv1, **pv2;
 

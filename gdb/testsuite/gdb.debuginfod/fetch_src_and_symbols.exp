@@ -1,4 +1,4 @@
-# Copyright 2020-2021 Free Software Foundation, Inc.
+# Copyright 2020-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,8 +30,13 @@ if { [which curl] == 0 } {
 }
 
 # Skip testing if gdb was not configured with debuginfod
+#
+# If GDB is built with ASan, it warns that some signal handlers (installed by
+# ASan) exist on startup.  That makes TCL's exec throw an error.  Disable that
+# by passing --quiet.
+
 if { [string first "with-debuginfod" \
-	 [eval exec $GDB $INTERNAL_GDBFLAGS --configuration]] == -1 } {
+	 [eval exec $GDB --quiet $INTERNAL_GDBFLAGS --configuration]] == -1 } {
     untested "gdb not configured with debuginfod"
     return -1
 }
@@ -54,7 +59,7 @@ if { [catch {file copy -force ${srcdir}/${subdir}/${srcfile} \
 }
 
 if { [gdb_compile "$sourcetmp" "$binfile" executable {debug}] != "" } {
-    fail "compile"
+    untested "failed to compile"
     return -1
 }
 
@@ -180,11 +185,16 @@ proc local_url { } {
 	spawn debuginfod -vvvv -d $db -p $port -F $debugdir
 	expect {
 	    "started http server on IPv4 IPv6 port=$port" { set found 1 }
-	    "failed to bind to port" { kill_wait_spawned_process $spawn_id }
+	    "started http server on IPv4 port=$port" { set found 1 }
+	    "started http server on IPv6 port=$port" {}
+	    "failed to bind to port" {}
 	    timeout {
 		fail "find port timeout"
 		return -1
 	    }
+	}
+	if { ! $found } {
+	    kill_wait_spawned_process $spawn_id
 	}
     }
 
@@ -217,7 +227,8 @@ proc local_url { } {
     setenv DEBUGINFOD_URLS http://127.0.0.1:$port
 
     # gdb should now find the symbol and source files
-    clean_restart $binfile
+    clean_restart
+    gdb_test "file $binfile" "" "file [file tail $binfile]" "Enable debuginfod?.*" "y"
     gdb_test_no_output "set substitute-path $outputdir /dev/null" \
 	"set substitute-path"
     gdb_test "br main" "Breakpoint 1 at.*file.*"
@@ -226,8 +237,26 @@ proc local_url { } {
     # gdb should now find the debugaltlink file
     clean_restart
     gdb_test "file ${binfile}_alt.o" \
-	".*Reading symbols from ${binfile}_alt.o\.\.\.*" \
-	"file [file tail ${binfile}_alt.o]"
+	".*Downloading.*separate debug info.*" \
+	"file [file tail ${binfile}_alt.o]" \
+	".*Enable debuginfod?.*" "y"
+
+    # Configure debuginfod with commands
+    unsetenv DEBUGINFOD_URLS
+    clean_restart
+    gdb_test "file $binfile" ".*No debugging symbols.*" \
+	"file [file tail $binfile] cmd"
+    gdb_test_no_output "set debuginfod enabled off"
+    gdb_test_no_output "set debuginfod urls http://127.0.0.1:$port"
+
+    # gdb shouldn't find the debuginfo since debuginfod has been disabled
+    gdb_test "file $binfile" ".*No debugging symbols.*" \
+	"file [file tail $binfile] cmd off"
+
+    # Enable debuginfod and fetch the debuginfo
+    gdb_test_no_output "set debuginfod enabled on"
+    gdb_test "file $binfile" ".*Reading symbols from.*debuginfo.*" \
+	"file [file tail $binfile] cmd on"
 }
 
 set envlist \

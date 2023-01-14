@@ -1,5 +1,5 @@
 /* Simulator cache routines for CGEN simulators (and maybe others).
-   Copyright (C) 1996-2021 Free Software Foundation, Inc.
+   Copyright (C) 1996-2022 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -22,9 +22,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #define SCACHE_DEFINE_INLINE
 
-#include "sim-main.h"
 #include <stdlib.h>
+
 #include "libiberty.h"
+
+#include "sim-main.h"
 #include "sim-options.h"
 #include "sim-io.h"
 

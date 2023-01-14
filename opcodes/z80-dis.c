@@ -1,5 +1,5 @@
 /* Print Z80, Z180, EZ80 and R800 instructions
-   Copyright (C) 2005-2021 Free Software Foundation, Inc.
+   Copyright (C) 2005-2022 Free Software Foundation, Inc.
    Contributed by Arnold Metselaar <arnold_m@operamail.com>
 
    This file is part of the GNU opcodes library.
@@ -95,6 +95,8 @@ fetch_data (struct buffer *buf, disassemble_info * info, int n)
 			      n, info);
   if (r == 0)
     buf->n_fetch += n;
+  else
+    info->memory_error_func (r, buf->base + buf->n_fetch, info);
   return !r;
 }
 

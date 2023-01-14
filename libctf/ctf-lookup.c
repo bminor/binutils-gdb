@@ -1,5 +1,5 @@
 /* Symbol, variable and name lookup.
-   Copyright (C) 2019-2021 Free Software Foundation, Inc.
+   Copyright (C) 2019-2022 Free Software Foundation, Inc.
 
    This file is part of libctf.
 
@@ -176,7 +176,7 @@ ctf_lookup_by_name_internal (ctf_dict_t *fp, ctf_dict_t *child,
 	  int in_child = 0;
 
 	  ntype = CTF_ERR;
-	  if (child && idx <= child->ctf_pptrtab_len)
+	  if (child && idx < child->ctf_pptrtab_len)
 	    {
 	      ntype = child->ctf_pptrtab[idx];
 	      if (ntype)
@@ -206,7 +206,7 @@ ctf_lookup_by_name_internal (ctf_dict_t *fp, ctf_dict_t *child,
 	      idx = LCTF_TYPE_TO_INDEX (fp, ntype);
 
 	      ntype = CTF_ERR;
-	      if (child && idx <= child->ctf_pptrtab_len)
+	      if (child && idx < child->ctf_pptrtab_len)
 		{
 		  ntype = child->ctf_pptrtab[idx];
 		  if (ntype)

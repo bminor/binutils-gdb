@@ -1,4 +1,4 @@
-# Copyright 2007-2021 Free Software Foundation, Inc.
+# Copyright 2007-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ gdb_test_no_output "set listsize 1"
 
 gdb_test "list -q main" ".*"
 get_debug_format
-set non_dwarf [expr ! [test_debug_format "DWARF 2"]]
+set non_dwarf [expr ! [test_debug_format "DWARF \[0-9\]"]]
 
 # We should be able to find the source file containing the definition,
 # even though it was an included header.

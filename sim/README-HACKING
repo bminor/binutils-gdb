@@ -20,10 +20,7 @@ The common directory contains:
 - common Makefile fragment and configury (e.g. Make-common.in, aclocal.m4).
 
 In addition "common" contains portions of the system call support
-(e.g. callback.c, nltvals.def).
-
-Even though no files are built in this directory, it is still configured
-so support for regenerating nltvals.def is present.
+(e.g. callback.c, target-newlib-*.c).
 
 Common Makefile Support
 =======================
@@ -161,8 +158,8 @@ internal state pretty printed from gdb.
 
 FIXME: This can obviously be made more elaborate.  As needed it will be.
 
-Rebuilding nltvals.def
-======================
+Rebuilding target-newlib-* files
+================================
 
 Checkout a copy of the SIM and LIBGLOSS modules (Unless you've already
 got one to hand):
@@ -191,17 +188,9 @@ all set!  If the target has a custom syscall table, you need to declare it:
 		Add your new processor target (you'll need to grub
 		around to find where your syscall.h lives).
 
-	devo/sim/<processor>/Makefile.in
-
-		Add the definition:
-
-			``NL_TARGET = -DNL_TARGET_d10v''
-
-		just before the line COMMON_POST_CONFIG_FRAG.
-
 	devo/sim/<processor>/*.[ch]
 
-		Include targ-vals.h instead of syscall.h.
+		Include target-newlib-syscall.h instead of syscall.h.
 
 Tracing
 =======
@@ -335,8 +324,8 @@ only store the error code when the result is an error.
 
 Keep in mind that the CB_SYS_xxx defines are normalized values with no real
 meaning with respect to the target.  They provide a unique map on the host so
-that it can parse things sanely.  For libgloss, the common/nltvals.def file
-creates the target's system call numbers to the CB_SYS_xxx values.
+that it can parse things sanely.  For libgloss, the common/target-newlib-syscall
+file contains the target's system call numbers to the CB_SYS_xxx values.
 
 To simulate other userspace targets, you really only need to update the maps
 pointers that are part of the callback interface.  So create CB_TARGET_DEFS_MAP

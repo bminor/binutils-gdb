@@ -1,5 +1,5 @@
 /* symbols.c -symbol table-
-   Copyright (C) 1987-2021 Free Software Foundation, Inc.
+   Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -78,6 +78,14 @@ struct symbol_flags
      before.  It is cleared as soon as any direct reference to the
      symbol is present.  */
   unsigned int weakrefd : 1;
+
+  /* Whether the symbol has been marked to be removed by a .symver
+     directive.  */
+  unsigned int removed : 1;
+
+  /* Set when a warning about the symbol containing multibyte characters
+     is generated.  */
+  unsigned int multibyte_warned : 1;
 };
 
 /* A pointer in the symbol may point to either a complete symbol
@@ -194,7 +202,7 @@ static void *
 symbol_entry_find (htab_t table, const char *name)
 {
   hashval_t hash = htab_hash_string (name);
-  symbol_entry_t needle = { { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+  symbol_entry_t needle = { { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
 			      hash, name, 0, 0, 0 } };
   return htab_find_with_hash (table, &needle, hash);
 }
@@ -304,6 +312,18 @@ symbol_init (symbolS *symbolP, const char *name, asection *sec,
     as_fatal ("bfd_make_empty_symbol: %s", bfd_errmsg (bfd_get_error ()));
   symbolP->bsym->name = name;
   symbolP->bsym->section = sec;
+
+  if (multibyte_handling == multibyte_warn_syms
+      && ! symbolP->flags.local_symbol
+      && sec != undefined_section
+      && ! symbolP->flags.multibyte_warned
+      && scan_for_multibyte_characters ((const unsigned char *) name,
+					(const unsigned char *) name + strlen (name),
+					false /* Do not warn.  */))
+    {
+      as_warn (_("symbol '%s' contains multibyte characters"), name);
+      symbolP->flags.multibyte_warned = 1;
+    }
 
   S_SET_VALUE (symbolP, valu);
 
@@ -2423,7 +2443,21 @@ S_SET_SEGMENT (symbolS *s, segT seg)
 	abort ();
     }
   else
-    s->bsym->section = seg;
+    {
+      if (multibyte_handling == multibyte_warn_syms
+	  && ! s->flags.local_symbol
+	  && seg != undefined_section
+	  && ! s->flags.multibyte_warned
+	  && scan_for_multibyte_characters ((const unsigned char *) s->name,
+					    (const unsigned char *) s->name + strlen (s->name),
+					    false))
+	{
+	  as_warn (_("symbol '%s' contains multibyte characters"), s->name);
+	  s->flags.multibyte_warned = 1;
+	}
+
+      s->bsym->section = seg;
+    }
 }
 
 void
@@ -2805,6 +2839,26 @@ symbol_written_p (symbolS *s)
   if (s->flags.local_symbol)
     return 0;
   return s->flags.written;
+}
+
+/* Mark a symbol as to be removed.  */
+
+void
+symbol_mark_removed (symbolS *s)
+{
+  if (s->flags.local_symbol)
+    return;
+  s->flags.removed = 1;
+}
+
+/* Return whether a symbol has been marked to be removed.  */
+
+int
+symbol_removed_p (symbolS *s)
+{
+  if (s->flags.local_symbol)
+    return 0;
+  return s->flags.removed;
 }
 
 /* Mark a symbol has having been resolved.  */

@@ -1,5 +1,5 @@
 /* Declarations for Intel 80386 opcode table
-   Copyright (C) 2007-2021 Free Software Foundation, Inc.
+   Copyright (C) 2007-2022 Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
 
@@ -633,8 +633,6 @@ enum
 
   /* SSE to AVX support required */
   SSE2AVX,
-  /* No AVX equivalent */
-  NoAVX,
 
   /* insn has EVEX prefix:
 	1: 512bit EVEX prefix.
@@ -760,7 +758,6 @@ typedef struct i386_opcode_modifier
   unsigned int vexsources:2;
   unsigned int sib:3;
   unsigned int sse2avx:1;
-  unsigned int noavx:1;
   unsigned int evex:3;
   unsigned int masking:2;
   unsigned int broadcast:3;

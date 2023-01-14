@@ -1,6 +1,7 @@
 # sh testcase for fsrra
 # mach: sh
 # as(sh):	-defsym sim_cpu=0
+# xerror: test hasn't been run in a long time
 
 	.include "testutils.inc"
 

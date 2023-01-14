@@ -1,5 +1,5 @@
 /* Check that the syscall set_thread_area is supported and does the right thing.
-#notarget: cris*-*-elf
+#progos: linux
 */
 
 #include <unistd.h>

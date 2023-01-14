@@ -1,3 +1,161 @@
+2022-02-02  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
+2022-01-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/bg.po: Updated Bulgarian translation.
+	* po/uk.po: Updated Ukranian translation.
+
+2022-01-22  Alexander von Gluck IV  <kallisti5@unixzen.com>
+
+	* configure.tgt (arm-haiku): Fix typo.
+	* emulparams/armelf_haiku.su (MAXPAGESIZE): Use the default value.
+	(COMMONPAGESIZE): Likewise.
+
+2022-01-22  Nick Clifton  <nickc@redhat.com>
+
+	* configure: Regenerate.
+	* po/ld.pot: Regenerate.
+
+2022-01-22  Nick Clifton  <nickc@redhat.com>
+
+	* 2.38 release branch created.
+
+2022-01-21  Nick Clifton  <nickc@redhat.com>
+
+	* po/sr.po: Updated Serbian translation.
+
+2022-01-17  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.in: Regenerate.
+	* po/ld.pot: Regenerate.
+
+2022-01-11  Martin Storsjö  <martin@martin.st>
+
+	* pe-dll.c (make_head): Prefix the symbol name with the dll name.
+	(make_tail, make_one, make_singleton_name_thunk): Likewise.
+	(make_import_fixup_entry, make_runtime_pseudo_reloc): Likewise.
+	(pe_create_runtime_relocator_reference): Likewise.
+	(pe_dll_generate_implib): Set dll_symname_len.
+	(pe_process_import_defs): Likewise.
+
+2021-12-16  Nick Clifton  <nickc@redhat.com>
+
+	PR 28686
+	* testsuite/ld-avr/avr-prop-7.d: Adjust expected output.
+	* testsuite/ld-avr/avr-prop-8.d: Likewise.
+	* testsuite/ld-avr/pr13402.d: Likewise.
+
+2021-11-30  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/pru.sc (.pru_irq_map): Define output section.
+	* testsuite/ld-pru/pru_irq_map-1.d: New test.
+	* testsuite/ld-pru/pru_irq_map-2.d: New test.
+	* testsuite/ld-pru/pru_irq_map.s: New test.
+
+2021-11-17  Jeremy Drake  <cygwin@jdrake.com>
+
+	* emultempl/pep.em (DEFAULT_DLL_CHARACTERISTICS): Set to 0 for
+	Cygwin targets.
+	* emultempl/pep.em (DEFAULT_DLL_CHARACTERISTICS): Likewise.
+
+2021-11-17  Nick Clifton  <nickc@redhat.com>
+
+	PR 28452
+	* ldgram.y: Add support for PT_GNU_RELRO and PT_GNU_PROPERTY.
+	* ldgram.c: Regenerate.
+
+2021-11-15  Roland McGrath  <mcgrathr@google.com>
+
+	* testsuite/ld-aarch64/dt_textrel.d: Pass explicit -z notext in
+	case ld was configured with --enable-textrel-check=error.
+	* testsuite/ld-aarch64/pr22764.d: Likewise.
+	* testsuite/ld-aarch64/pr20402.d: Likewise.
+
+2021-10-25  Nick Alcock  <nick.alcock@oracle.com>
+
+	* testsuite/ld-ctf/nonrepresentable-member.*: New test.
+
+2021-10-25  Nick Alcock  <nick.alcock@oracle.com>
+
+	* testsuite/ld-ctf/array.d: Change --ctf=.ctf to --ctf.
+	* testsuite/ld-ctf/conflicting-cycle-1.B-1.d: Likewise.
+	* testsuite/ld-ctf/conflicting-cycle-1.B-2.d: Likewise.
+	* testsuite/ld-ctf/conflicting-cycle-1.parent.d: Likewise.
+	* testsuite/ld-ctf/conflicting-cycle-2.A-1.d: Likewise.
+	* testsuite/ld-ctf/conflicting-cycle-2.A-2.d: Likewise.
+	* testsuite/ld-ctf/conflicting-cycle-2.parent.d: Likewise.
+	* testsuite/ld-ctf/conflicting-cycle-3.C-1.d: Likewise.
+	* testsuite/ld-ctf/conflicting-cycle-3.C-2.d: Likewise.
+	* testsuite/ld-ctf/conflicting-cycle-3.parent.d: Likewise.
+	* testsuite/ld-ctf/conflicting-enums.d: Likewise.
+	* testsuite/ld-ctf/conflicting-typedefs.d: Likewise.
+	* testsuite/ld-ctf/cross-tu-cyclic-conflicting.d: Likewise.
+	* testsuite/ld-ctf/cross-tu-cyclic-nonconflicting.d: Likewise.
+	* testsuite/ld-ctf/cross-tu-into-cycle.d: Likewise.
+	* testsuite/ld-ctf/cross-tu-noncyclic.d: Likewise.
+	* testsuite/ld-ctf/cycle-1.d: Likewise.
+	* testsuite/ld-ctf/cycle-2.A.d: Likewise.
+	* testsuite/ld-ctf/cycle-2.B.d: Likewise.
+	* testsuite/ld-ctf/cycle-2.C.d: Likewise.
+	* testsuite/ld-ctf/data-func-conflicted.d: Likewise.
+	* testsuite/ld-ctf/diag-cttname-null.d: Likewise.
+	* testsuite/ld-ctf/diag-cuname.d: Likewise.
+	* testsuite/ld-ctf/diag-parlabel.d: Likewise.
+	* testsuite/ld-ctf/enum-forward.d: Likewise.
+	* testsuite/ld-ctf/enums.d: Likewise.
+	* testsuite/ld-ctf/forward.d: Likewise.
+	* testsuite/ld-ctf/function.d: Likewise.
+	* testsuite/ld-ctf/nonrepresentable.d: Likewise.
+	* testsuite/ld-ctf/slice.d: Likewise.
+	* testsuite/ld-ctf/super-sub-cycles.d: Likewise.
+
+2021-09-30  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* scripttempl/pru.sc (.resource_table): Align the output
+	section, not the first symbol.
+
+2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
+
+	* configure: Regenerate.
+
+2021-09-21  Nick Clifton  <nickc@redhat.com>
+
+	* ldlang.c (lang_end): When computing the entry point, only
+	try the start address of the entry section when creating an
+	executable.
+	* ld.texi (Entry point): Update description of heuristic used to
+	choose the entry point.
+	testsuite/ld-alpha/tlspic.rd: Update expected entry point address.
+	testsuite/ld-arm/tls-gdesc-got.d: Likewise.
+	testsuite/ld-i386/tlsnopic.rd: Likewise.
+	testsuite/ld-ia64/tlspic.rd: Likewise.
+	testsuite/ld-sparc/gotop32.rd: Likewise.
+	testsuite/ld-sparc/gotop64.rd: Likewise.
+	testsuite/ld-sparc/tlssunnopic32.rd: Likewise.
+	testsuite/ld-sparc/tlssunnopic64.rd: Likewise.
+	testsuite/ld-sparc/tlssunpic32.rd: Likewise.
+	testsuite/ld-sparc/tlssunpic64.rd: Likewise.
+	testsuite/ld-tic6x/shlib-1.rd: Likewise.
+	testsuite/ld-tic6x/shlib-1b.rd: Likewise.
+	testsuite/ld-tic6x/shlib-1r.rd: Likewise.
+	testsuite/ld-tic6x/shlib-1rb.rd: Likewise.
+	testsuite/ld-tic6x/shlib-noindex.rd: Likewise.
+	testsuite/ld-x86-64/pr14207.d: Likewise.
+	testsuite/ld-x86-64/tlsdesc.rd: Likewise.
+	testsuite/ld-x86-64/tlspic.rd: Likewise.
+	testsuite/ld-x86-64/tlspic2.rd: Likewise.
+
+2021-09-15  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/ld-arc/got-weak.d: Update file.
+
+2021-09-14  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* ld-arc/got-weak.d: New file.
+	* ld-arc/got-weak.s: Likewise.
+
 2021-07-26  Roland McGrath  <mcgrathr@google.com>
 
 	* testsuite/ld-x86-64/x86-64.exp (Build textrel-1): Use --warn-textrel.
@@ -1638,7 +1796,7 @@
 
 For older changes see ChangeLog-2020
 
-Copyright (C) 2021 Free Software Foundation, Inc.
+Copyright (C) 2021-2022 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

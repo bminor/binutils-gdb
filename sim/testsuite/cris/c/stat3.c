@@ -1,5 +1,5 @@
 /* Simulator options:
-#sim: --sysroot=@exedir@
+#sim: --sysroot=$pwd
 */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -13,7 +13,7 @@ int main (int argc, char *argv[])
   char path[1024] = "/";
   struct stat buf;
 
-  strcat (path, argv[0]);
+  strcat (path, basename (argv[0]));
   if (stat (".", &buf) != 0
       || !S_ISDIR (buf.st_mode))
     abort ();

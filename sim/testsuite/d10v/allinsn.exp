@@ -1,6 +1,8 @@
 # d10v simulator testsuite.
 
-if [istarget d10v*-*] {
+sim_init
+
+if [istarget *] {
     # all machines
     set all_machs "d10v"
 

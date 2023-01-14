@@ -1,3 +1,82 @@
+2022-01-22  Nick Clifton  <nickc@redhat.com>
+
+	* 2.38 release branch created.
+
+2021-11-08  Nick Alcock  <nick.alcock@oracle.com>
+
+	* doc/ctf-spec.texi: New file.
+	* configure.ac (MAKEINFO): Add.
+	(BUILD_INFO): Likewise.
+	(AC_CONFIG_FILES) [doc/Makefile]: Add.
+	* Makefile.am [BUILD_INFO] (SUBDIRS): Add doc/.
+	* doc/Makefile.am: New file.
+	* doc/Makefile.in: Likewise.
+	* configure: Regenerated.
+	* Makefile.in: Likewise.
+
+2021-10-25  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-types.c (ctf_type_rvisit): Handle nonrepresentable types.
+
+2021-10-25  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-dump.c (ctf_dump_type): Do not abort on error.
+
+2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-lookup.c (ctf_lookup_by_name_internal): Fix pptrtab bounds.
+	* testsuite/libctf-writable/pptrtab-writable-page-deep-lookup.*:
+	New test.
+
+2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
+
+	* testsuite/libctf-lookup/enum-symbol.c: Remove unused label.
+	* testsuite/libctf-lookup/conflicting-type-syms.c: Remove unused
+	variables.
+	* testsuite/libctf-regression/pptrtab.c: Likewise.
+	* testsuite/libctf-regression/type-add-unnamed-struct.c: Likewise.
+	* testsuite/libctf-writable/pptrtab.c: Likewise.
+	* testsuite/libctf-writable/reserialize-strtab-corruption.c:
+	Likewise.
+	* testsuite/libctf-regression/nonstatic-var-section-ld-r.c: Fix
+	format string.
+	* testsuite/libctf-regression/nonstatic-var-section-ld.c:
+	Likewise.
+	* testsuite/libctf-regression/nonstatic-var-section-ld.lk: Adjust.
+	* testsuite/libctf-writable/symtypetab-nonlinker-writeout.c: Fix
+	initializer.
+
+2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-open.c (ctf_bufopen_internal): Don't complain about corrupt
+	function index symtypetab sections if this is an old-format
+	function symtypetab section (which should be ignored in any case).
+	Fix bad grammar.
+
+2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
+
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+
+2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
+
+	PR libctf/27967
+	* configure.ac (VERSION_FLAGS): Replace with...
+	(ac_cv_libctf_version_script): ... this multiple test.
+	(VERSION_FLAGS_NOBFD): Substitute this too.
+	* Makefile.am (libctf_nobfd_la_LDFLAGS): Use it.  Split out...
+	(libctf_ldflags_nover): ... non-versioning flags here.
+	(libctf_la_LDFLAGS): Use it.
+	* libctf.ver: Give every symbol not in libctf-nobfd a comment on
+	the same line noting as much.
+
+2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
+
+	PR libctf/27360
+	* Makefile.am (libctf_la_LIBADD): Link against libiberty
+	before pulling in libbfd.la or pulling in libctf-nobfd.la.
+	* Makefile.in: Regenerate.
+
 2021-07-03  Nick Clifton  <nickc@redhat.com>
 
 	* 2.37 release branch created.
@@ -776,7 +855,7 @@
 
 For older changes see ChangeLog-2020
 
-Copyright (C) 2021 Free Software Foundation, Inc.
+Copyright (C) 2021-2022 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

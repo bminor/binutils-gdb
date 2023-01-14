@@ -366,14 +366,14 @@ print_icache_body(lf *file,
 
 typedef struct _icache_tree icache_tree;
 struct _icache_tree {
-  char *name;
+  const char *name;
   icache_tree *next;
   icache_tree *children;
 };
 
 static icache_tree *
 icache_tree_insert(icache_tree *tree,
-		   char *name)
+		   const char *name)
 {
   icache_tree *new_tree;
   /* find it */

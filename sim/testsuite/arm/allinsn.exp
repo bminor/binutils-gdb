@@ -1,12 +1,10 @@
 # ARM simulator testsuite.
 
-if { [istarget arm*-*-*] } {
+sim_init
+
+if { [istarget *] } {
     # all machines
     set all_machs "xscale"
-
-    if [is_remote host] {
-      remote_download host $srcdir/$subdir/testutils.inc
-    }
 
     # The .cgs suffix is for "cgen .s".
     foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.cgs]] {
@@ -17,9 +15,5 @@ if { [istarget arm*-*-*] } {
 	}
 
 	run_sim_test $src $all_machs
-    }
-
-    if [is_remote host] {
-      remote_file host delete testutils.inc
     }
 }

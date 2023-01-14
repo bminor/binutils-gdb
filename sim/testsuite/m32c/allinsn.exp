@@ -1,7 +1,9 @@
 # M32C simulator testsuite.
 # TODO: Add support for .c tests.
 
-if [istarget m32c*-*-*] {
+sim_init
+
+if [istarget *] {
     # all machines
     set all_machs "m32c"
 

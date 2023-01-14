@@ -15,7 +15,7 @@
 [^:]*:17: Error: extraneous register at operand 2 -- `tlbi alle3is,x0'
 [^:]*:18: Error: missing register at operand 2 -- `tlbi vaale1is'
 [^:]*:19: Error: comma expected between operands at operand 2 -- `tlbi vaale1is x0'
-[^:]*:20: Error: immediate value out of range 0 to 1 at operand 1 -- `msr spsel,3'
+[^:]*:20: Error: immediate value out of range 0 to 1 at operand 2 -- `msr spsel,3'
 [^:]*:21: Error: immediate value out of range 1 to 64 at operand 3 -- `fcvtzu x15,d31,#66'
 [^:]*:22: Error: immediate value out of range 1 to 32 at operand 3 -- `scvtf s0,w0,33'
 [^:]*:23: Error: immediate value out of range 1 to 32 at operand 3 -- `scvtf s0,w0,0'

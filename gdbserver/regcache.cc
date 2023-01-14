@@ -1,5 +1,5 @@
 /* Register support routines for the remote server for GDB.
-   Copyright (C) 2001-2021 Free Software Foundation, Inc.
+   Copyright (C) 2001-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -49,14 +49,13 @@ get_thread_regcache (struct thread_info *thread, int fetch)
 
   if (fetch && regcache->registers_valid == 0)
     {
-      struct thread_info *saved_thread = current_thread;
+      scoped_restore_current_thread restore_thread;
 
-      current_thread = thread;
+      switch_to_thread (thread);
       /* Invalidate all registers, to prevent stale left-overs.  */
       memset (regcache->register_status, REG_UNAVAILABLE,
 	      regcache->tdesc->reg_defs.size ());
       fetch_inferior_registers (regcache, -1);
-      current_thread = saved_thread;
       regcache->registers_valid = 1;
     }
 
@@ -83,11 +82,10 @@ regcache_invalidate_thread (struct thread_info *thread)
 
   if (regcache->registers_valid)
     {
-      struct thread_info *saved_thread = current_thread;
+      scoped_restore_current_thread restore_thread;
 
-      current_thread = thread;
+      switch_to_thread (thread);
       store_inferior_registers (regcache, -1);
-      current_thread = saved_thread;
     }
 
   regcache->registers_valid = 0;

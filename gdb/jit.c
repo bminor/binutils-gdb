@@ -1,6 +1,6 @@
 /* Handle JIT code generation in the inferior for GDB, the GNU Debugger.
 
-   Copyright (C) 2009-2021 Free Software Foundation, Inc.
+   Copyright (C) 2009-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -164,8 +164,8 @@ jit_reader_load_command (const char *args, int from_tty)
     error (_("JIT reader already loaded.  Run jit-reader-unload first."));
 
   if (!IS_ABSOLUTE_PATH (file.get ()))
-    file.reset (xstrprintf ("%s%s%s", jit_reader_dir.c_str (), SLASH_STRING,
-			    file.get ()));
+    file = xstrprintf ("%s%s%s", jit_reader_dir.c_str (),
+		       SLASH_STRING, file.get ());
 
   loaded_jit_reader = jit_reader_load (file.get ());
   reinit_frame_cache ();
@@ -251,8 +251,8 @@ jit_read_descriptor (gdbarch *gdbarch,
   err = target_read_memory (addr, desc_buf, desc_size);
   if (err)
     {
-      printf_unfiltered (_("Unable to read JIT descriptor from "
-			   "remote memory\n"));
+      fprintf_unfiltered (gdb_stderr, _("Unable to read JIT descriptor from "
+					"remote memory\n"));
       return false;
     }
 
@@ -380,7 +380,16 @@ struct gdb_object
 /* The type of the `private' data passed around by the callback
    functions.  */
 
-typedef CORE_ADDR jit_dbg_reader_data;
+struct jit_dbg_reader_data
+{
+  /* Address of the jit_code_entry in the inferior's address space.  */
+  CORE_ADDR entry_addr;
+
+  /* The code entry, copied in our address space.  */
+  const jit_code_entry &entry;
+
+  struct gdbarch *gdbarch;
+};
 
 /* The reader calls into this function to read data off the targets
    address space.  */
@@ -500,11 +509,11 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
     });
 
   cust = allocate_compunit_symtab (objfile, stab->file_name.c_str ());
-  allocate_symtab (cust, stab->file_name.c_str ());
+  symtab *filetab = allocate_symtab (cust, stab->file_name.c_str ());
   add_compunit_symtab_to_objfile (cust);
 
   /* JIT compilers compile in memory.  */
-  COMPUNIT_DIRNAME (cust) = NULL;
+  cust->set_dirname (nullptr);
 
   /* Copy over the linetable entry if one was provided.  */
   if (stab->linetable)
@@ -512,17 +521,16 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       size_t size = ((stab->linetable->nitems - 1)
 		     * sizeof (struct linetable_entry)
 		     + sizeof (struct linetable));
-      SYMTAB_LINETABLE (COMPUNIT_FILETABS (cust))
-	= (struct linetable *) obstack_alloc (&objfile->objfile_obstack, size);
-      memcpy (SYMTAB_LINETABLE (COMPUNIT_FILETABS (cust)),
-	      stab->linetable.get (), size);
+      filetab->set_linetable ((struct linetable *)
+			      obstack_alloc (&objfile->objfile_obstack, size));
+      memcpy (filetab->linetable (), stab->linetable.get (), size);
     }
 
   blockvector_size = (sizeof (struct blockvector)
 		      + (actual_nblocks - 1) * sizeof (struct block *));
   bv = (struct blockvector *) obstack_alloc (&objfile->objfile_obstack,
 					     blockvector_size);
-  COMPUNIT_BLOCKVECTOR (cust) = bv;
+  cust->set_blockvector (bv);
 
   /* At the end of this function, (begin, end) will contain the PC range this
      entire blockvector spans.  */
@@ -552,8 +560,8 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 
       /* The name.  */
       SYMBOL_DOMAIN (block_name) = VAR_DOMAIN;
-      SYMBOL_ACLASS_INDEX (block_name) = LOC_BLOCK;
-      symbol_set_symtab (block_name, COMPUNIT_FILETABS (cust));
+      block_name->set_aclass_index (LOC_BLOCK);
+      symbol_set_symtab (block_name, filetab);
       SYMBOL_TYPE (block_name) = lookup_function_type (block_type);
       SYMBOL_BLOCK_VALUE (block_name) = new_block;
 
@@ -623,19 +631,20 @@ static void
 jit_object_close_impl (struct gdb_symbol_callbacks *cb,
 		       struct gdb_object *obj)
 {
-  struct objfile *objfile;
-  jit_dbg_reader_data *priv_data;
+  jit_dbg_reader_data *priv_data = (jit_dbg_reader_data *) cb->priv_data;
+  std::string objfile_name
+    = string_printf ("<< JIT compiled code at %s >>",
+		     paddress (priv_data->gdbarch,
+			       priv_data->entry.symfile_addr));
 
-  priv_data = (jit_dbg_reader_data *) cb->priv_data;
-
-  objfile = objfile::make (nullptr, "<< JIT compiled code >>",
-			   OBJF_NOT_FILENAME);
-  objfile->per_bfd->gdbarch = target_gdbarch ();
+  objfile *objfile = objfile::make (nullptr, objfile_name.c_str (),
+				    OBJF_NOT_FILENAME);
+  objfile->per_bfd->gdbarch = priv_data->gdbarch;
 
   for (gdb_symtab &symtab : obj->symtabs)
     finalize_symtab (&symtab, objfile);
 
-  add_objfile_entry (objfile, *priv_data);
+  add_objfile_entry (objfile, priv_data->entry_addr);
 
   delete obj;
 }
@@ -645,11 +654,16 @@ jit_object_close_impl (struct gdb_symbol_callbacks *cb,
    inferior address space.  */
 
 static int
-jit_reader_try_read_symtab (struct jit_code_entry *code_entry,
+jit_reader_try_read_symtab (gdbarch *gdbarch, jit_code_entry *code_entry,
 			    CORE_ADDR entry_addr)
 {
   int status;
-  jit_dbg_reader_data priv_data;
+  jit_dbg_reader_data priv_data
+    {
+      entry_addr,
+      *code_entry,
+      gdbarch
+    };
   struct gdb_reader_funcs *funcs;
   struct gdb_symbol_callbacks callbacks =
     {
@@ -664,8 +678,6 @@ jit_reader_try_read_symtab (struct jit_code_entry *code_entry,
 
       &priv_data
     };
-
-  priv_data = entry_addr;
 
   if (!loaded_jit_reader)
     return 0;
@@ -719,7 +731,8 @@ jit_bfd_try_read_symtab (struct jit_code_entry *code_entry,
       (code_entry->symfile_addr, code_entry->symfile_size, gnutarget));
   if (nbfd == NULL)
     {
-      puts_unfiltered (_("Error opening JITed symbol file, ignoring it.\n"));
+      fputs_unfiltered (_("Error opening JITed symbol file, ignoring it.\n"),
+			gdb_stderr);
       return;
     }
 
@@ -727,7 +740,7 @@ jit_bfd_try_read_symtab (struct jit_code_entry *code_entry,
      We would segfault later without this line.  */
   if (!bfd_check_format (nbfd.get (), bfd_object))
     {
-      printf_unfiltered (_("\
+      fprintf_unfiltered (gdb_stderr, _("\
 JITed symbol file is not an object file, ignoring it.\n"));
       return;
     }
@@ -778,7 +791,7 @@ jit_register_code (struct gdbarch *gdbarch,
 		    paddress (gdbarch, code_entry->symfile_addr),
 		    pulongest (code_entry->symfile_size));
 
-  success = jit_reader_try_read_symtab (code_entry, entry_addr);
+  success = jit_reader_try_read_symtab (gdbarch, code_entry, entry_addr);
 
   if (!success)
     jit_bfd_try_read_symtab (code_entry, entry_addr, gdbarch);
@@ -1138,9 +1151,10 @@ jit_inferior_init (inferior *inf)
       /* Check that the version number agrees with that we support.  */
       if (descriptor.version != 1)
 	{
-	  printf_unfiltered (_("Unsupported JIT protocol version %ld "
-			       "in descriptor (expected 1)\n"),
-			     (long) descriptor.version);
+	  fprintf_unfiltered (gdb_stderr,
+			      _("Unsupported JIT protocol version %ld "
+				"in descriptor (expected 1)\n"),
+			      (long) descriptor.version);
 	  continue;
 	}
 
@@ -1229,9 +1243,10 @@ jit_event_handler (gdbarch *gdbarch, objfile *jiter)
       {
 	objfile *jited = jit_find_objf_with_entry_addr (entry_addr);
 	if (jited == nullptr)
-	  printf_unfiltered (_("Unable to find JITed code "
-			       "entry at address: %s\n"),
-			     paddress (gdbarch, entry_addr));
+	  fprintf_unfiltered (gdb_stderr,
+			      _("Unable to find JITed code "
+				"entry at address: %s\n"),
+			      paddress (gdbarch, entry_addr));
 	else
 	  jited->unlink ();
 

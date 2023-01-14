@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 Free Software Foundation, Inc.
+# Copyright (C) 2002-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,8 +28,9 @@ if {[which curl] == 0} {
     return
 }
 
-if { ![is_elf_format] } {
+if { ![is_elf_format] || ![isnative] } {
     unsupported "$test (unsupported target)"
+    return
 }
 
 if { [which $OBJDUMP] == 0} {
@@ -160,10 +161,10 @@ proc test_fetch_debuglink { prog progargs } {
 
     set got [binutils_run $prog "$progargs tmpdir/testprog"]
 
-    if { [regexp ".*Found separate debug info file.*Contents\[^\n\]*loaded from\[^\n\]*$cache.*" $got] } {
+    if { [regexp ".*Found separate debug info file.*Contents\[^\n\]*loaded from\[^\n\]*" $got] } {
        pass "$test ($prog debuglink)"
     } else {
-       fail "$test ($prog debuglink)"
+       fail "$test ($prog did not find debuglink to cache $cache)"
     }
 }
 
@@ -179,7 +180,7 @@ proc test_fetch_debugaltlink { prog progargs } {
     if { [regexp ".*Found separate debug info file\[^\n\]*$cache/$buildid" $got] } {
         pass "$test ($prog debugaltlink)"
     } else {
-        fail "$test ($prog debugaltlink)"
+        fail "$test ($prog could not load debugaltlink)"
     }
 }
 

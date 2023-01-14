@@ -1,5 +1,5 @@
 /* Hardware ports.
-   Copyright (C) 1998-2021 Free Software Foundation, Inc.
+   Copyright (C) 1998-2022 Free Software Foundation, Inc.
    Contributed by Andrew Cagney and Cygnus Solutions.
 
 This file is part of GDB, the GNU debugger.
@@ -20,13 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This must come before any other includes.  */
 #include "defs.h"
 
-#include "hw-main.h"
-#include "hw-base.h"
-
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
+#include "hw-main.h"
+#include "hw-base.h"
 
 struct hw_port_edge
 {

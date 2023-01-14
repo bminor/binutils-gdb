@@ -1,5 +1,5 @@
 /* BFD back-end for TMS320C54X coff binaries.
-   Copyright (C) 1999-2021 Free Software Foundation, Inc.
+   Copyright (C) 1999-2022 Free Software Foundation, Inc.
    Contributed by Timothy Wall (twall@cygnus.com)
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -278,7 +278,7 @@ tic54x_lookup_howto (bfd *abfd,
 
   _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 		      abfd, (unsigned int) dst->r_type);
-  abort ();
+  internal->howto = NULL;
 }
 
 #define RELOC_PROCESSING(RELENT,RELOC,SYMS,ABFD,SECT)\

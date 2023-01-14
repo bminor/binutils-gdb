@@ -1,6 +1,6 @@
 /* Exception (throw catch) mechanism, for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -52,7 +52,7 @@ print_flush (void)
 
   /* 1.  The _filtered buffer.  */
   if (filtered_printing_initialized ())
-    wrap_here ("");
+    gdb_stdout->wrap_here (0);
 
   /* 2.  The stdio buffer.  */
   gdb_flush (gdb_stdout);

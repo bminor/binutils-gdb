@@ -1,5 +1,5 @@
 /* aarch64-dis.h -- Header file for aarch64-dis.c and aarch64-dis-2.c.
-   Copyright (C) 2012-2021 Free Software Foundation, Inc.
+   Copyright (C) 2012-2022 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of the GNU opcodes library.
@@ -122,8 +122,15 @@ AARCH64_DECL_OPD_EXTRACTOR (ext_sve_reglist);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_scale);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_shlimm);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_shrimm);
+AARCH64_DECL_OPD_EXTRACTOR (ext_sme_za_hv_tiles);
+AARCH64_DECL_OPD_EXTRACTOR (ext_sme_za_list);
+AARCH64_DECL_OPD_EXTRACTOR (ext_sme_za_array);
+AARCH64_DECL_OPD_EXTRACTOR (ext_sme_addr_ri_u4xvl);
+AARCH64_DECL_OPD_EXTRACTOR (ext_sme_sm_za);
+AARCH64_DECL_OPD_EXTRACTOR (ext_sme_pred_reg_with_index);
 AARCH64_DECL_OPD_EXTRACTOR (ext_imm_rotate1);
 AARCH64_DECL_OPD_EXTRACTOR (ext_imm_rotate2);
+AARCH64_DECL_OPD_EXTRACTOR (ext_x0_to_x30);
 
 #undef AARCH64_DECL_OPD_EXTRACTOR
 

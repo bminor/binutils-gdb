@@ -1,5 +1,5 @@
 /* tc-ppc.c -- Assemble for the PowerPC or POWER (RS/6000)
-   Copyright (C) 1994-2021 Free Software Foundation, Inc.
+   Copyright (C) 1994-2022 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -107,8 +107,10 @@ static void ppc_es (int);
 static void ppc_csect (int);
 static void ppc_dwsect (int);
 static void ppc_change_csect (symbolS *, offsetT);
+static void ppc_file (int);
 static void ppc_function (int);
 static void ppc_extern (int);
+static void ppc_globl (int);
 static void ppc_lglobl (int);
 static void ppc_ref (int);
 static void ppc_section (int);
@@ -118,6 +120,8 @@ static void ppc_rename (int);
 static void ppc_toc (int);
 static void ppc_xcoff_cons (int);
 static void ppc_vbyte (int);
+static void ppc_weak (int);
+static void ppc_GNU_visibility (int);
 #endif
 
 #ifdef OBJ_ELF
@@ -227,7 +231,9 @@ const pseudo_typeS md_pseudo_table[] =
   { "ei",	ppc_biei,	1 },
   { "es",	ppc_es,		0 },
   { "extern",	ppc_extern,	0 },
+  { "file",	ppc_file,	0 },
   { "function",	ppc_function,	0 },
+  { "globl",    ppc_globl,	0 },
   { "lglobl",	ppc_lglobl,	0 },
   { "ref",	ppc_ref,	0 },
   { "rename",	ppc_rename,	0 },
@@ -240,6 +246,12 @@ const pseudo_typeS md_pseudo_table[] =
   { "word",	ppc_xcoff_cons,	1 },
   { "short",	ppc_xcoff_cons,	1 },
   { "vbyte",    ppc_vbyte,	0 },
+  { "weak",     ppc_weak,	0 },
+
+  /* Enable GNU syntax for symbol visibility.  */
+  {"internal",  ppc_GNU_visibility, SYM_V_INTERNAL},
+  {"hidden",    ppc_GNU_visibility, SYM_V_HIDDEN},
+  {"protected", ppc_GNU_visibility, SYM_V_PROTECTED},
 #endif
 
 #ifdef OBJ_ELF
@@ -2253,6 +2265,10 @@ ppc_elf_suffix (char **str_p, expressionS *exp_p)
 	    exp_p->X_add_symbol = &abs_symbol;
 	  }
 
+	if (reloc == BFD_RELOC_PPC64_REL24_NOTOC
+	    && (ppc_cpu & PPC_OPCODE_POWER10) == 0)
+	  reloc = BFD_RELOC_PPC64_REL24_P9NOTOC;
+
 	return (bfd_reloc_code_real_type) reloc;
       }
 
@@ -3126,6 +3142,7 @@ fixup_size (bfd_reloc_code_real_type reloc, bool *pc_relative)
     case BFD_RELOC_32_PCREL:
     case BFD_RELOC_32_PLT_PCREL:
     case BFD_RELOC_PPC64_REL24_NOTOC:
+    case BFD_RELOC_PPC64_REL24_P9NOTOC:
 #ifndef OBJ_XCOFF
     case BFD_RELOC_PPC_B16:
 #endif
@@ -4278,6 +4295,71 @@ ppc_byte (int ignore ATTRIBUTE_UNUSED)
    to handle symbol suffixes for such symbols.  */
 static bool ppc_stab_symbol;
 
+/* Retrieve the visiblity input for pseudo-ops having ones.  */
+static unsigned short
+ppc_xcoff_get_visibility (void) {
+  SKIP_WHITESPACE();
+
+  if (startswith (input_line_pointer, "exported"))
+    {
+      input_line_pointer += 8;
+      return SYM_V_EXPORTED;
+    }
+
+  if (startswith (input_line_pointer, "hidden"))
+    {
+      input_line_pointer += 6;
+      return SYM_V_HIDDEN;
+    }
+
+  if (startswith (input_line_pointer, "internal"))
+    {
+      input_line_pointer += 8;
+      return SYM_V_INTERNAL;
+    }
+
+  if (startswith (input_line_pointer, "protected"))
+    {
+      input_line_pointer += 9;
+      return SYM_V_PROTECTED;
+    }
+
+  return 0;
+}
+
+/* Retrieve visiblity using GNU syntax.  */
+static void ppc_GNU_visibility (int visibility) {
+  int c;
+  char *name;
+  symbolS *symbolP;
+  coff_symbol_type *coffsym;
+
+  do
+    {
+      if ((name = read_symbol_name ()) == NULL)
+	break;
+      symbolP = symbol_find_or_make (name);
+      coffsym = coffsymbol (symbol_get_bfdsym (symbolP));
+
+      coffsym->native->u.syment.n_type &= ~SYM_V_MASK;
+      coffsym->native->u.syment.n_type |= visibility;
+
+      c = *input_line_pointer;
+      if (c == ',')
+	{
+	  input_line_pointer ++;
+
+	  SKIP_WHITESPACE ();
+
+	  if (*input_line_pointer == '\n')
+	    c = '\n';
+	}
+    }
+  while (c == ',');
+
+  demand_empty_rest_of_line ();
+}
+
 /* The .comm and .lcomm pseudo-ops for XCOFF.  XCOFF puts common
    symbols in the .bss segment as though they were local common
    symbols, and uses a different smclas.  The native Aix 4.3.3 assembler
@@ -4298,6 +4380,7 @@ ppc_comm (int lcomm)
   symbolS *lcomm_sym = NULL;
   symbolS *sym;
   char *pfrag;
+  unsigned short visibility = 0;
   struct ppc_xcoff_section *section;
 
   endc = get_symbol_name (&name);
@@ -4333,6 +4416,19 @@ ppc_comm (int lcomm)
 	    {
 	      as_warn (_("ignoring bad alignment"));
 	      align = 2;
+	    }
+
+	  /* The fourth argument to .comm is the visibility.  */
+	  if (*input_line_pointer == ',')
+	    {
+	      input_line_pointer++;
+	      visibility = ppc_xcoff_get_visibility ();
+	      if (!visibility)
+		{
+		  as_bad (_("Unknown visibility field in .comm"));
+		  ignore_rest_of_line ();
+		  return;
+		}
 	    }
 	}
     }
@@ -4454,6 +4550,14 @@ ppc_comm (int lcomm)
       symbol_set_frag (sym, symbol_get_frag (lcomm_sym));
       S_SET_VALUE (sym, symbol_get_frag (lcomm_sym)->fr_offset);
       symbol_get_frag (lcomm_sym)->fr_offset += size;
+    }
+
+  if (!lcomm && visibility)
+    {
+      /* Add visibility to .comm symbol.  */
+      coff_symbol_type *coffsym = coffsymbol (symbol_get_bfdsym (sym));
+      coffsym->native->u.syment.n_type &= ~SYM_V_MASK;
+      coffsym->native->u.syment.n_type |= visibility;
     }
 
   subseg_set (current_seg, current_subseg);
@@ -4835,13 +4939,102 @@ static void
 ppc_extern (int ignore ATTRIBUTE_UNUSED)
 {
   char *name;
-  char endc;
+  symbolS *sym;
 
-  endc = get_symbol_name (&name);
+  if ((name = read_symbol_name ()) == NULL)
+    return;
 
-  (void) symbol_find_or_make (name);
+  sym = symbol_find_or_make (name);
 
-  (void) restore_line_pointer (endc);
+  if (*input_line_pointer == ',')
+    {
+      unsigned short visibility;
+      coff_symbol_type *coffsym = coffsymbol (symbol_get_bfdsym (sym));
+
+      input_line_pointer++;
+      visibility = ppc_xcoff_get_visibility ();
+      if (!visibility)
+	{
+	  as_bad (_("Unknown visibility field in .extern"));
+	  ignore_rest_of_line ();
+	  return;
+	}
+
+      coffsym->native->u.syment.n_type &= ~SYM_V_MASK;
+      coffsym->native->u.syment.n_type |= visibility;
+    }
+
+  demand_empty_rest_of_line ();
+}
+
+/* XCOFF semantic for .globl says that the second parameter is
+   the symbol visibility.  */
+
+static void
+ppc_globl (int ignore ATTRIBUTE_UNUSED)
+{
+  char *name;
+  symbolS *sym;
+
+  if ((name = read_symbol_name ()) == NULL)
+    return;
+
+  sym = symbol_find_or_make (name);
+  S_SET_EXTERNAL (sym);
+
+  if (*input_line_pointer == ',')
+    {
+      unsigned short visibility;
+      coff_symbol_type *coffsym = coffsymbol (symbol_get_bfdsym (sym));
+
+      input_line_pointer++;
+      visibility = ppc_xcoff_get_visibility ();
+      if (!visibility)
+	{
+	  as_bad (_("Unknown visibility field in .globl"));
+	  ignore_rest_of_line ();
+	  return;
+	}
+
+      coffsym->native->u.syment.n_type &= ~SYM_V_MASK;
+      coffsym->native->u.syment.n_type |= visibility;
+    }
+
+  demand_empty_rest_of_line ();
+}
+
+/* XCOFF semantic for .weak says that the second parameter is
+   the symbol visibility.  */
+
+static void
+ppc_weak (int ignore ATTRIBUTE_UNUSED)
+{
+  char *name;
+  symbolS *sym;
+
+  if ((name = read_symbol_name ()) == NULL)
+    return;
+
+  sym = symbol_find_or_make (name);
+  S_SET_WEAK (sym);
+
+  if (*input_line_pointer == ',')
+    {
+      unsigned short visibility;
+      coff_symbol_type *coffsym = coffsymbol (symbol_get_bfdsym (sym));
+
+      input_line_pointer++;
+      visibility = ppc_xcoff_get_visibility ();
+      if (!visibility)
+	{
+	  as_bad (_("Unknown visibility field in .weak"));
+	  ignore_rest_of_line ();
+	  return;
+	}
+
+      coffsym->native->u.syment.n_type &= ~SYM_V_MASK;
+      coffsym->native->u.syment.n_type |= visibility;
+    }
 
   demand_empty_rest_of_line ();
 }
@@ -5071,6 +5264,67 @@ ppc_stabx (int ignore ATTRIBUTE_UNUSED)
     }
 
   demand_empty_rest_of_line ();
+}
+
+/* The .file pseudo-op. On XCOFF, .file can have several parameters
+   which are being added to the symbol table to provide additional
+   information.  */
+
+static void
+ppc_file (int ignore ATTRIBUTE_UNUSED)
+{
+  char *sfname, *s1 = NULL, *s2 = NULL, *s3 = NULL;
+  int length, auxnb = 1;
+
+  /* Some assemblers tolerate immediately following '"'.  */
+  if ((sfname = demand_copy_string (&length)) != 0)
+    {
+      coff_symbol_type *coffsym;
+      if (*input_line_pointer == ',')
+	{
+	  ++input_line_pointer;
+	  s1 = demand_copy_string (&length);
+	  auxnb++;
+
+	  if (*input_line_pointer == ',')
+	    {
+	      ++input_line_pointer;
+	      s2 = demand_copy_string (&length);
+	      auxnb++;
+
+	      if (*input_line_pointer == ',')
+		{
+		  ++input_line_pointer;
+		  s3 = demand_copy_string (&length);
+		  auxnb++;
+		}
+	    }
+	}
+
+      /* Use coff dot_file creation and adjust auxiliary entries.  */
+      c_dot_file_symbol (sfname, 0);
+      S_SET_NUMBER_AUXILIARY (symbol_rootP, auxnb);
+      coffsym = coffsymbol (symbol_get_bfdsym (symbol_rootP));
+      coffsym->native[1].u.auxent.x_file.x_ftype = XFT_FN;
+
+      if (s1)
+	{
+	  coffsym->native[2].u.auxent.x_file.x_ftype = XFT_CT;
+	  coffsym->native[2].extrap = s1;
+	}
+      if (s2)
+	{
+	  coffsym->native[3].u.auxent.x_file.x_ftype = XFT_CV;
+	  coffsym->native[3].extrap = s2;
+	}
+      if (s3)
+	{
+	  coffsym->native[4].u.auxent.x_file.x_ftype = XFT_CD;
+	  coffsym->native[4].extrap = s3;
+	}
+
+      demand_empty_rest_of_line ();
+    }
 }
 
 /* The .function pseudo-op.  This takes several arguments.  The first
@@ -6494,6 +6748,7 @@ ppc_force_relocation (fixS *fix)
     case BFD_RELOC_PPC_B16:
     case BFD_RELOC_PPC_BA16:
     case BFD_RELOC_PPC64_REL24_NOTOC:
+    case BFD_RELOC_PPC64_REL24_P9NOTOC:
       /* All branch fixups targeting a localentry symbol must
          force a relocation.  */
       if (fix->fx_addsy)
@@ -6532,6 +6787,7 @@ ppc_fix_adjustable (fixS *fix)
     case BFD_RELOC_PPC_BA16_BRTAKEN:
     case BFD_RELOC_PPC_BA16_BRNTAKEN:
     case BFD_RELOC_PPC64_REL24_NOTOC:
+    case BFD_RELOC_PPC64_REL24_P9NOTOC:
       if (fix->fx_addsy)
 	{
 	  asymbol *bfdsym = symbol_get_bfdsym (fix->fx_addsy);
@@ -7356,22 +7612,25 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	case BFD_RELOC_PPC64_TLSM:
 	  gas_assert (fixP->fx_addsy != NULL);
 	  S_SET_THREAD_LOCAL (fixP->fx_addsy);
-	  fieldval = 0;
 	  break;
 
-	  /* TLSML relocations are targeting a XMC_TC symbol named
-	     "_$TLSML". We can't check earlier because the relocation
-	     can target any symbol name which will be latter .rename
-	     to "_$TLSML".  */
+	  /* Officially, R_TLSML relocations must be from a TOC entry
+	     targeting itself. In practice, this TOC entry is always
+	     named (or .rename) "_$TLSML".
+	     Thus, as it doesn't seem possible to retrieve the symbol
+	     being relocated here, we simply check that the symbol
+	     targeted by R_TLSML is indeed a TOC entry named "_$TLSML".
+	     FIXME: Find a way to correctly check R_TLSML relocations
+	     as described above.  */
 	case BFD_RELOC_PPC_TLSML:
 	case BFD_RELOC_PPC64_TLSML:
 	  gas_assert (fixP->fx_addsy != NULL);
-	  if (strcmp (symbol_get_tc (fixP->fx_addsy)->real_name, "_$TLSML") != 0)
-	    {
-	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    _("R_TLSML relocation doesn't target a "
-			      "symbol named \"_$TLSML\". %s"), S_GET_NAME(fixP->fx_addsy));
-	    }
+	  if ((symbol_get_tc (fixP->fx_addsy)->symbol_class != XMC_TC
+	       || symbol_get_tc (fixP->fx_addsy)->symbol_class != XMC_TE)
+	      && strcmp (symbol_get_tc (fixP->fx_addsy)->real_name, "_$TLSML") != 0)
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("R_TLSML relocation doesn't target a "
+			    "TOC entry named \"_$TLSML\": %s"), S_GET_NAME(fixP->fx_addsy));
 	  fieldval = 0;
 	  break;
 
@@ -7449,12 +7708,15 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
       *valP = value;
     }
   else if (fixP->fx_r_type == BFD_RELOC_PPC_TLSM
-	   || fixP->fx_r_type == BFD_RELOC_PPC64_TLSM)
+	   || fixP->fx_r_type == BFD_RELOC_PPC64_TLSM
+	   || fixP->fx_r_type == BFD_RELOC_PPC_TLSML
+	   || fixP->fx_r_type == BFD_RELOC_PPC64_TLSML)
     /* AIX ld expects the section contents for these relocations
        to be zero.  Arrange for that to occur when
        bfd_install_relocation is called.  */
     fixP->fx_addnumber = (- bfd_section_vma (S_GET_SEGMENT (fixP->fx_addsy))
-			  - S_GET_VALUE (fixP->fx_addsy));
+			  - S_GET_VALUE (fixP->fx_addsy)
+			  - fieldval);
   else
     fixP->fx_addnumber = 0;
 #endif

@@ -1,5 +1,5 @@
 /* MI Command Set - environment commands.
-   Copyright (C) 2002-2021 Free Software Foundation, Inc.
+   Copyright (C) 2002-2022 Free Software Foundation, Inc.
 
    Contributed by Red Hat Inc.
 
@@ -48,7 +48,7 @@ env_execute_cli_command (const char *cmd, const char *args)
       gdb::unique_xmalloc_ptr<char> run;
 
       if (args != NULL)
-	run.reset (xstrprintf ("%s %s", cmd, args));
+	run = xstrprintf ("%s %s", cmd, args);
       else
 	run.reset (xstrdup (cmd));
       execute_command ( /*ui */ run.get (), 0 /*from_tty */ );
@@ -93,7 +93,7 @@ mi_cmd_env_cd (const char *command, char **argv, int argc)
 }
 
 static void
-env_mod_path (const char *dirname, char **which_path)
+env_mod_path (const char *dirname, std::string &which_path)
 {
   if (dirname == 0 || dirname[0] == '\0')
     return;
@@ -109,7 +109,6 @@ void
 mi_cmd_env_path (const char *command, char **argv, int argc)
 {
   struct ui_out *uiout = current_uiout;
-  char *exec_path;
   const char *env;
   int reset = 0;
   int oind = 0;
@@ -152,11 +151,11 @@ mi_cmd_env_path (const char *command, char **argv, int argc)
   argv += oind;
   argc -= oind;
 
-
+  std::string exec_path;
   if (reset)
     {
       /* Reset implies resetting to original path first.  */
-      exec_path = xstrdup (orig_path);
+      exec_path = orig_path;
     }
   else
     {
@@ -166,14 +165,14 @@ mi_cmd_env_path (const char *command, char **argv, int argc)
       /* Can be null if path is not set.  */
       if (!env)
 	env = "";
-      exec_path = xstrdup (env);
+
+      exec_path = env;
     }
 
   for (i = argc - 1; i >= 0; --i)
-    env_mod_path (argv[i], &exec_path);
+    env_mod_path (argv[i], exec_path);
 
-  current_inferior ()->environment.set (path_var_name, exec_path);
-  xfree (exec_path);
+  current_inferior ()->environment.set (path_var_name, exec_path.c_str ());
   env = current_inferior ()->environment.get (path_var_name);
   uiout->field_string ("path", env);
 }
@@ -228,12 +227,11 @@ mi_cmd_env_dir (const char *command, char **argv, int argc)
   if (reset)
     {
       /* Reset means setting to default path first.  */
-      xfree (source_path);
       init_source_path ();
     }
 
   for (i = argc - 1; i >= 0; --i)
-    env_mod_path (argv[i], &source_path);
+    env_mod_path (argv[i], source_path);
 
   uiout->field_string ("source-path", source_path);
   forget_cached_source_info ();

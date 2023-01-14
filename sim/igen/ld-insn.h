@@ -1,6 +1,6 @@
 /* The IGEN simulator generator for GDB, the GNU Debugger.
 
-   Copyright 2002-2021 Free Software Foundation, Inc.
+   Copyright 2002-2022 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney.
 
@@ -21,7 +21,7 @@
 
 
 
-typedef unsigned64 insn_uint;
+typedef uint64_t insn_uint;
 
 
 /* Common among most entries:

@@ -1,5 +1,5 @@
 /* Target operations for the remote server for GDB.
-   Copyright (C) 2002-2021 Free Software Foundation, Inc.
+   Copyright (C) 2002-2022 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
 
@@ -35,7 +35,7 @@ set_desired_thread ()
   client_state &cs = get_client_state ();
   thread_info *found = find_thread_ptid (cs.general_thread);
 
-  current_thread = found;
+  switch_to_thread (found);
   return (current_thread != NULL);
 }
 
@@ -101,7 +101,7 @@ prepare_to_access_memory (void)
       return 1;
     }
 
-  current_thread = thread;
+  switch_to_thread (thread);
   cs.general_thread = ptid_of (thread);
 
   return 0;
@@ -172,8 +172,8 @@ mywait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
   /* We don't expose _LOADED events to gdbserver core.  See the
      `dlls_changed' global.  */
-  if (ourstatus->kind == TARGET_WAITKIND_LOADED)
-    ourstatus->kind = TARGET_WAITKIND_STOPPED;
+  if (ourstatus->kind () == TARGET_WAITKIND_LOADED)
+    ourstatus->set_stopped (GDB_SIGNAL_0);
 
   /* If GDB is connected through TCP/serial, then GDBserver will most
      probably be running on its own terminal/console, so it's nice to
@@ -183,13 +183,13 @@ mywait (ptid_t ptid, struct target_waitstatus *ourstatus,
      regular GDB output, in that same terminal.  */
   if (!remote_connection_is_stdio ())
     {
-      if (ourstatus->kind == TARGET_WAITKIND_EXITED)
+      if (ourstatus->kind () == TARGET_WAITKIND_EXITED)
 	fprintf (stderr,
-		 "\nChild exited with status %d\n", ourstatus->value.integer);
-      else if (ourstatus->kind == TARGET_WAITKIND_SIGNALLED)
+		 "\nChild exited with status %d\n", ourstatus->exit_status ());
+      else if (ourstatus->kind () == TARGET_WAITKIND_SIGNALLED)
 	fprintf (stderr, "\nChild terminated with signal = 0x%x (%s)\n",
-		 gdb_signal_to_host (ourstatus->value.sig),
-		 gdb_signal_to_name (ourstatus->value.sig));
+		 gdb_signal_to_host (ourstatus->sig ()),
+		 gdb_signal_to_name (ourstatus->sig ()));
     }
 
   if (connected_wait)
@@ -276,26 +276,23 @@ set_target_ops (process_stratum_target *target)
 
 /* Convert pid to printable format.  */
 
-const char *
+std::string
 target_pid_to_str (ptid_t ptid)
 {
-  static char buf[80];
-
   if (ptid == minus_one_ptid)
-    xsnprintf (buf, sizeof (buf), "<all threads>");
+    return string_printf("<all threads>");
   else if (ptid == null_ptid)
-    xsnprintf (buf, sizeof (buf), "<null thread>");
+    return string_printf("<null thread>");
   else if (ptid.tid () != 0)
-    xsnprintf (buf, sizeof (buf), "Thread %d.0x%lx",
-	       ptid.pid (), ptid.tid ());
+    return string_printf("Thread %d.0x%s",
+			 ptid.pid (),
+			 phex_nz (ptid.tid (), sizeof (ULONGEST)));
   else if (ptid.lwp () != 0)
-    xsnprintf (buf, sizeof (buf), "LWP %d.%ld",
-	       ptid.pid (), ptid.lwp ());
+    return string_printf("LWP %d.%ld",
+			 ptid.pid (), ptid.lwp ());
   else
-    xsnprintf (buf, sizeof (buf), "Process %d",
-	       ptid.pid ());
-
-  return buf;
+    return string_printf("Process %d",
+			 ptid.pid ());
 }
 
 int
@@ -739,7 +736,8 @@ process_stratum_target::supports_agent ()
 }
 
 btrace_target_info *
-process_stratum_target::enable_btrace (ptid_t ptid, const btrace_config *conf)
+process_stratum_target::enable_btrace (thread_info *tp,
+				       const btrace_config *conf)
 {
   error (_("Target does not support branch tracing."));
 }
@@ -836,6 +834,18 @@ process_stratum_target::thread_handle (ptid_t ptid, gdb_byte **handle,
 				       int *handle_len)
 {
   return false;
+}
+
+thread_info *
+process_stratum_target::thread_pending_parent (thread_info *thread)
+{
+  return nullptr;
+}
+
+thread_info *
+process_stratum_target::thread_pending_child (thread_info *thread)
+{
+  return nullptr;
 }
 
 bool

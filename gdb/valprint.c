@@ -1,6 +1,6 @@
 /* Print values for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,7 +30,7 @@
 #include "target-float.h"
 #include "extension.h"
 #include "ada-lang.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "charset.h"
 #include "typeprint.h"
 #include <ctype.h>
@@ -484,7 +484,7 @@ generic_value_print_ptr (struct value *val, struct ui_file *stream,
     {
       struct type *type = check_typedef (value_type (val));
       struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
-      const gdb_byte *valaddr = value_contents_for_printing (val);
+      const gdb_byte *valaddr = value_contents_for_printing (val).data ();
       CORE_ADDR addr = unpack_pointer (type, valaddr);
 
       print_unpacked_pointer (type, elttype, addr, stream, options);
@@ -520,7 +520,7 @@ get_value_addr_contents (struct value *deref_val)
   gdb_assert (deref_val != NULL);
 
   if (value_lval_const (deref_val) == lval_memory)
-    return value_contents_for_printing_const (value_addr (deref_val));
+    return value_contents_for_printing_const (value_addr (deref_val)).data ();
   else
     {
       /* We have a non-addressable value, such as a DW_AT_const_value.  */
@@ -545,7 +545,7 @@ generic_val_print_ref (struct type *type,
   const int must_coerce_ref = ((options->addressprint && value_is_synthetic)
 			       || options->deref_ref);
   const int type_is_defined = elttype->code () != TYPE_CODE_UNDEF;
-  const gdb_byte *valaddr = value_contents_for_printing (original_value);
+  const gdb_byte *valaddr = value_contents_for_printing (original_value).data ();
 
   if (must_coerce_ref && type_is_defined)
     {
@@ -608,14 +608,14 @@ generic_val_print_enum_1 (struct type *type, LONGEST val,
   for (i = 0; i < len; i++)
     {
       QUIT;
-      if (val == TYPE_FIELD_ENUMVAL (type, i))
+      if (val == type->field (i).loc_enumval ())
 	{
 	  break;
 	}
     }
   if (i < len)
     {
-      fputs_styled (TYPE_FIELD_NAME (type, i), variable_name_style.style (),
+      fputs_styled (type->field (i).name (), variable_name_style.style (),
 		    stream);
     }
   else if (type->is_flag_enum ())
@@ -630,7 +630,7 @@ generic_val_print_enum_1 (struct type *type, LONGEST val,
 	{
 	  QUIT;
 
-	  ULONGEST enumval = TYPE_FIELD_ENUMVAL (type, i);
+	  ULONGEST enumval = type->field (i).loc_enumval ();
 	  int nbits = count_one_bits_ll (enumval);
 
 	  gdb_assert (nbits == 0 || nbits == 1);
@@ -645,8 +645,8 @@ generic_val_print_enum_1 (struct type *type, LONGEST val,
 	      else
 		fputs_filtered (" | ", stream);
 
-	      val &= ~TYPE_FIELD_ENUMVAL (type, i);
-	      fputs_styled (TYPE_FIELD_NAME (type, i),
+	      val &= ~type->field (i).loc_enumval ();
+	      fputs_styled (type->field (i).name (),
 			    variable_name_style.style (), stream);
 	    }
 	}
@@ -693,7 +693,7 @@ generic_val_print_enum (struct type *type,
 
   gdb_assert (!options->format);
 
-  const gdb_byte *valaddr = value_contents_for_printing (original_value);
+  const gdb_byte *valaddr = value_contents_for_printing (original_value).data ();
 
   val = unpack_long (type, valaddr + embedded_offset * unit_size);
 
@@ -740,7 +740,7 @@ generic_value_print_bool
     }
   else
     {
-      const gdb_byte *valaddr = value_contents_for_printing (value);
+      const gdb_byte *valaddr = value_contents_for_printing (value).data ();
       struct type *type = check_typedef (value_type (value));
       LONGEST val = unpack_long (type, valaddr);
       if (val == 0)
@@ -783,7 +783,7 @@ generic_value_print_char (struct value *value, struct ui_file *stream,
     {
       struct type *unresolved_type = value_type (value);
       struct type *type = check_typedef (unresolved_type);
-      const gdb_byte *valaddr = value_contents_for_printing (value);
+      const gdb_byte *valaddr = value_contents_for_printing (value).data ();
 
       LONGEST val = unpack_long (type, valaddr);
       if (type->is_unsigned ())
@@ -804,7 +804,7 @@ generic_val_print_float (struct type *type, struct ui_file *stream,
 {
   gdb_assert (!options->format);
 
-  const gdb_byte *valaddr = value_contents_for_printing (original_value);
+  const gdb_byte *valaddr = value_contents_for_printing (original_value).data ();
 
   print_floating (valaddr, type, stream);
 }
@@ -821,7 +821,7 @@ generic_val_print_fixed_point (struct value *val, struct ui_file *stream,
     {
       struct type *type = value_type (val);
 
-      const gdb_byte *valaddr = value_contents_for_printing (val);
+      const gdb_byte *valaddr = value_contents_for_printing (val).data ();
       gdb_mpf f;
 
       f.read_fixed_point (gdb::make_array_view (valaddr, TYPE_LENGTH (type)),
@@ -867,7 +867,7 @@ generic_value_print_memberptr
       /* Member pointers are essentially specific to C++, and so if we
 	 encounter one, we should print it according to C++ rules.  */
       struct type *type = check_typedef (value_type (val));
-      const gdb_byte *valaddr = value_contents_for_printing (val);
+      const gdb_byte *valaddr = value_contents_for_printing (val).data ();
       cp_print_class_member (valaddr, type, stream, "&");
     }
   else
@@ -977,7 +977,7 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
       break;
 
     case TYPE_CODE_METHODPTR:
-      cplus_print_method_ptr (value_contents_for_printing (val), type,
+      cplus_print_method_ptr (value_contents_for_printing (val).data (), type,
 			      stream);
       break;
 
@@ -1050,7 +1050,7 @@ do_val_print (struct value *value, struct ui_file *stream, int recurse,
   catch (const gdb_exception_error &except)
     {
       fprintf_styled (stream, metadata_style.style (),
-		      _("<error reading variable>"));
+		      _("<error reading variable: %s>"), except.what ());
     }
 }
 
@@ -1193,7 +1193,7 @@ static void
 val_print_type_code_flags (struct type *type, struct value *original_value,
 			   int embedded_offset, struct ui_file *stream)
 {
-  const gdb_byte *valaddr = (value_contents_for_printing (original_value)
+  const gdb_byte *valaddr = (value_contents_for_printing (original_value).data ()
 			     + embedded_offset);
   ULONGEST val = unpack_long (type, valaddr);
   int field, nfields = type->num_fields ();
@@ -1203,7 +1203,7 @@ val_print_type_code_flags (struct type *type, struct value *original_value,
   fputs_filtered ("[", stream);
   for (field = 0; field < nfields; field++)
     {
-      if (TYPE_FIELD_NAME (type, field)[0] != '\0')
+      if (type->field (field).name ()[0] != '\0')
 	{
 	  struct type *field_type = type->field (field).type ();
 
@@ -1214,22 +1214,22 @@ val_print_type_code_flags (struct type *type, struct value *original_value,
 		 int.  */
 	      && TYPE_FIELD_BITSIZE (type, field) == 1)
 	    {
-	      if (val & ((ULONGEST)1 << TYPE_FIELD_BITPOS (type, field)))
+	      if (val & ((ULONGEST)1 << type->field (field).loc_bitpos ()))
 		fprintf_filtered
 		  (stream, " %ps",
 		   styled_string (variable_name_style.style (),
-				  TYPE_FIELD_NAME (type, field)));
+				  type->field (field).name ()));
 	    }
 	  else
 	    {
 	      unsigned field_len = TYPE_FIELD_BITSIZE (type, field);
-	      ULONGEST field_val = val >> TYPE_FIELD_BITPOS (type, field);
+	      ULONGEST field_val = val >> type->field (field).loc_bitpos ();
 
 	      if (field_len < sizeof (ULONGEST) * TARGET_CHAR_BIT)
 		field_val &= ((ULONGEST) 1 << field_len) - 1;
 	      fprintf_filtered (stream, " %ps=",
 				styled_string (variable_name_style.style (),
-					       TYPE_FIELD_NAME (type, field)));
+					       type->field (field).name ()));
 	      if (field_type->code () == TYPE_CODE_ENUM)
 		generic_val_print_enum_1 (field_type, field_val, stream);
 	      else
@@ -1267,7 +1267,7 @@ value_print_scalar_formatted (struct value *val,
   /* value_contents_for_printing fetches all VAL's contents.  They are
      needed to check whether VAL is optimized-out or unavailable
      below.  */
-  const gdb_byte *valaddr = value_contents_for_printing (val);
+  const gdb_byte *valaddr = value_contents_for_printing (val).data ();
 
   /* A scalar object that does not have all bits available can't be
      printed, because all bits contribute to its representation.  */
@@ -1946,7 +1946,7 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
 	  fprintf_filtered (stream, "\n");
 	  print_spaces_filtered (2 + 2 * recurse, stream);
 	}
-      wrap_here (n_spaces (2 + 2 * recurse));
+      stream->wrap_here (2 + 2 * recurse);
       maybe_print_array_index (index_type, i + low_bound,
 			       stream, options);
 
@@ -3155,7 +3155,7 @@ test_print_flags (gdbarch *arch)
   append_flags_type_field (flags_type, 5, 3, field_type, "C");
 
   value *val = allocate_value (flags_type);
-  gdb_byte *contents = value_contents_writeable (val);
+  gdb_byte *contents = value_contents_writeable (val).data ();
   store_unsigned_integer (contents, 4, gdbarch_byte_order (arch), 0xaa);
 
   string_file out;
@@ -3173,33 +3173,26 @@ _initialize_valprint ()
   selftests::register_test_foreach_arch ("print-flags", test_print_flags);
 #endif
 
-  cmd_list_element *cmd;
-
-  cmd_list_element *set_print_cmd
-    = add_basic_prefix_cmd ("print", no_class,
-			    _("Generic command for setting how things print."),
-			    &setprintlist, 0, &setlist);
-  add_alias_cmd ("p", set_print_cmd, no_class, 1, &setlist);
+  set_show_commands setshow_print_cmds
+    = add_setshow_prefix_cmd ("print", no_class,
+			      _("Generic command for setting how things print."),
+			      _("Generic command for showing print settings."),
+			      &setprintlist, &showprintlist,
+			      &setlist, &showlist);
+  add_alias_cmd ("p", setshow_print_cmds.set, no_class, 1, &setlist);
   /* Prefer set print to set prompt.  */
-  add_alias_cmd ("pr", set_print_cmd, no_class, 1, &setlist);
+  add_alias_cmd ("pr", setshow_print_cmds.set, no_class, 1, &setlist);
+  add_alias_cmd ("p", setshow_print_cmds.show, no_class, 1, &showlist);
+  add_alias_cmd ("pr", setshow_print_cmds.show, no_class, 1, &showlist);
 
-  cmd_list_element *show_print_cmd
-    = add_show_prefix_cmd ("print", no_class,
-			   _("Generic command for showing print settings."),
-			   &showprintlist, 0, &showlist);
-  add_alias_cmd ("p", show_print_cmd, no_class, 1, &showlist);
-  add_alias_cmd ("pr", show_print_cmd, no_class, 1, &showlist);
-
-  cmd = add_basic_prefix_cmd ("raw", no_class,
-			      _("\
-Generic command for setting what things to print in \"raw\" mode."),
-			      &setprintrawlist, 0, &setprintlist);
-  deprecate_cmd (cmd, nullptr);
-
-  cmd = add_show_prefix_cmd ("raw", no_class,
-			     _("Generic command for showing \"print raw\" settings."),
-			     &showprintrawlist, 0, &showprintlist);
-  deprecate_cmd (cmd, nullptr);
+  set_show_commands setshow_print_raw_cmds
+    = add_setshow_prefix_cmd
+	("raw", no_class,
+	 _("Generic command for setting what things to print in \"raw\" mode."),
+	 _("Generic command for showing \"print raw\" settings."),
+	 &setprintrawlist, &showprintrawlist, &setprintlist, &showprintlist);
+  deprecate_cmd (setshow_print_raw_cmds.set, nullptr);
+  deprecate_cmd (setshow_print_raw_cmds.show, nullptr);
 
   gdb::option::add_setshow_cmds_for_options
     (class_support, &user_print_options, value_print_option_defs,

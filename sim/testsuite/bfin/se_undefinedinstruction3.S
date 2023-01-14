@@ -2,7 +2,7 @@
 // Description: 32 bit special cases Undefined Instructions in Supervisor Mode
 # mach: bfin
 # sim: --environment operating
-# xfail: "missing checks in A0/A1 macfunc" bfin-*
+# xfail: "missing checks in A0/A1 macfunc" *-*
 
 #include "test.h"
 .include "testutils.inc"

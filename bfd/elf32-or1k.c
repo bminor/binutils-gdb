@@ -1,5 +1,5 @@
 /* Or1k-specific support for 32-bit ELF.
-   Copyright (C) 2001-2021 Free Software Foundation, Inc.
+   Copyright (C) 2001-2022 Free Software Foundation, Inc.
    Contributed for OR32 by Johan Rydberg, jrydberg@opencores.org
 
    PIC parts added by Stefan Kristiansson, stefan.kristiansson@saunalahti.fi,
@@ -828,6 +828,23 @@ static reloc_howto_type or1k_elf_howto_table[] =
 	 false),		/* pcrel_offset */
 };
 
+/* A copy of the R_OR1K_GOT16 used in the presense of R_OR1K_GOT_AHI16
+   relocations when we know we can ignore overflows.  */
+static reloc_howto_type or1k_elf_got16_no_overflow_howto =
+  HOWTO (R_OR1K_GOT16,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_OR1K_GOT16",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 false);		/* pcrel_offset */
+
 /* Map BFD reloc types to Or1k ELF reloc types.  */
 
 struct or1k_reloc_map
@@ -1506,12 +1523,11 @@ or1k_elf_relocate_section (bfd *output_bfd,
 	    if (r_type == R_OR1K_GOT_AHI16)
 	      saw_gotha = true;
 
-	    /* If we have a R_OR1K_GOT16 followed by a R_OR1K_GOT_AHI16
+	    /* If we have a R_OR1K_GOT16 following a R_OR1K_GOT_AHI16
 	       relocation we assume the code is doing the right thing to avoid
-	       overflows.  Here we mask the lower 16-bit of the relocation to
-	       avoid overflow validation failures.  */
+	       overflows.  */
 	    if (r_type == R_OR1K_GOT16 && saw_gotha)
-	      relocation &= 0xffff;
+	      howto = &or1k_elf_got16_no_overflow_howto;
 
 	  /* Addend should be zero.  */
 	  if (rel->r_addend != 0)

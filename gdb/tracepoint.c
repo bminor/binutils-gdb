@@ -1,6 +1,6 @@
 /* Tracing functionality for remote targets in custom GDB protocol
 
-   Copyright (C) 1997-2021 Free Software Foundation, Inc.
+   Copyright (C) 1997-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -58,6 +58,7 @@
 #include <algorithm>
 #include "cli/cli-style.h"
 #include "expop.h"
+#include "gdbsupport/buildargv.h"
 
 #include <unistd.h>
 
@@ -130,7 +131,7 @@ static traceframe_info_up current_traceframe_info;
 static struct cmd_list_element *tfindlist;
 
 /* List of expressions to collect by default at each tracepoint hit.  */
-char *default_collect;
+std::string default_collect;
 
 static bool disconnected_tracing;
 
@@ -146,15 +147,15 @@ static int trace_buffer_size = -1;
 
 /* Textual notes applying to the current and/or future trace runs.  */
 
-static char *trace_user = NULL;
+static std::string trace_user;
 
 /* Textual notes applying to the current and/or future trace runs.  */
 
-static char *trace_notes = NULL;
+static std::string trace_notes;
 
 /* Textual notes applying to the stopping of a trace.  */
 
-static char *trace_stop_notes = NULL;
+static std::string trace_stop_notes;
 
 /* support routines */
 
@@ -1688,10 +1689,11 @@ start_tracing (const char *notes)
   target_set_trace_buffer_size (trace_buffer_size);
 
   if (!notes)
-    notes = trace_notes;
-  ret = target_set_trace_notes (trace_user, notes, NULL);
+    notes = trace_notes.c_str ();
 
-  if (!ret && (trace_user || notes))
+  ret = target_set_trace_notes (trace_user.c_str (), notes, NULL);
+
+  if (!ret && (!trace_user.empty () || notes))
     warning (_("Target does not support trace user/notes, info ignored"));
 
   /* Now insert traps and begin collecting data.  */
@@ -1764,7 +1766,8 @@ stop_tracing (const char *note)
     }
 
   if (!note)
-    note = trace_stop_notes;
+    note = trace_stop_notes.c_str ();
+
   ret = target_set_trace_notes (NULL, NULL, note);
 
   if (!ret && note)
@@ -2193,8 +2196,8 @@ tfind_1 (enum trace_find_type type, int num,
 	}
       else
 	{
-	  printf_unfiltered (_("Found trace frame %d, tracepoint %d\n"),
-			     traceframe_number, tracepoint_number);
+	  printf_filtered (_("Found trace frame %d, tracepoint %d\n"),
+			   traceframe_number, tracepoint_number);
 	}
     }
   else
@@ -2202,9 +2205,9 @@ tfind_1 (enum trace_find_type type, int num,
       if (uiout->is_mi_like_p ())
 	uiout->field_string ("found", "0");
       else if (type == tfind_number && num == -1)
-	printf_unfiltered (_("No longer looking at any trace frame\n"));
+	printf_filtered (_("No longer looking at any trace frame\n"));
       else /* This case may never occur, check.  */
-	printf_unfiltered (_("No trace frame found\n"));
+	printf_filtered (_("No trace frame found\n"));
     }
 
   /* If we're in nonstop mode and getting out of looking at trace
@@ -2392,10 +2395,10 @@ tfind_line_command (const char *args, int from_tty)
 	  printf_filtered ("Line %d of \"%s\"",
 			   sal.line,
 			   symtab_to_filename_for_display (sal.symtab));
-	  wrap_here ("  ");
+	  gdb_stdout->wrap_here (2);
 	  printf_filtered (" is at address ");
 	  print_address (get_current_arch (), start_pc, gdb_stdout);
-	  wrap_here ("  ");
+	  gdb_stdout->wrap_here (2);
 	  printf_filtered (" but contains no code.\n");
 	  sal = find_pc_line (start_pc, 0);
 	  if (sal.line > 0
@@ -2407,14 +2410,14 @@ tfind_line_command (const char *args, int from_tty)
 	    error (_("Cannot find a good line."));
 	}
       }
-    else
-      {
-	/* Is there any case in which we get here, and have an address
-	   which the user would want to see?  If we have debugging
-	   symbols and no line numbers?  */
-	error (_("Line number %d is out of range for \"%s\"."),
-	       sal.line, symtab_to_filename_for_display (sal.symtab));
-      }
+  else
+    {
+      /* Is there any case in which we get here, and have an address
+	 which the user would want to see?  If we have debugging
+	 symbols and no line numbers?  */
+      error (_("Line number %d is out of range for \"%s\"."),
+	     sal.line, symtab_to_filename_for_display (sal.symtab));
+    }
 
   /* Find within range of stated line.  */
   if (args && *args)
@@ -2564,8 +2567,8 @@ info_scope_command (const char *args_in, int from_tty)
 		  printf_filtered ("constant bytes: ");
 		  if (SYMBOL_TYPE (sym))
 		    for (j = 0; j < TYPE_LENGTH (SYMBOL_TYPE (sym)); j++)
-		      fprintf_filtered (gdb_stdout, " %02x",
-					(unsigned) SYMBOL_VALUE_BYTES (sym)[j]);
+		      printf_filtered (" %02x",
+				       (unsigned) SYMBOL_VALUE_BYTES (sym)[j]);
 		  break;
 		case LOC_STATIC:
 		  printf_filtered ("in static storage at address ");
@@ -2639,7 +2642,7 @@ info_scope_command (const char *args_in, int from_tty)
 		  printf_filtered ("optimized out.\n");
 		  continue;
 		case LOC_COMPUTED:
-		  gdb_assert_not_reached (_("LOC_COMPUTED variable missing a method"));
+		  gdb_assert_not_reached ("LOC_COMPUTED variable missing a method");
 		}
 	    }
 	  if (SYMBOL_TYPE (sym))
@@ -2804,10 +2807,10 @@ all_tracepoint_actions (struct breakpoint *t)
      validation is per-tracepoint (local var "xyz" might be valid for
      one tracepoint and not another, etc), we make up the action on
      the fly, and don't cache it.  */
-  if (*default_collect)
+  if (!default_collect.empty ())
     {
       gdb::unique_xmalloc_ptr<char> default_collect_line
-	(xstrprintf ("collect %s", default_collect));
+	= xstrprintf ("collect %s", default_collect.c_str ());
 
       validate_actionline (default_collect_line.get (), t);
       actions.reset (new struct command_line (simple_control,
@@ -2896,7 +2899,7 @@ set_trace_user (const char *args, int from_tty,
 {
   int ret;
 
-  ret = target_set_trace_notes (trace_user, NULL, NULL);
+  ret = target_set_trace_notes (trace_user.c_str (), NULL, NULL);
 
   if (!ret)
     warning (_("Target does not support trace notes, user ignored"));
@@ -2908,7 +2911,7 @@ set_trace_notes (const char *args, int from_tty,
 {
   int ret;
 
-  ret = target_set_trace_notes (NULL, trace_notes, NULL);
+  ret = target_set_trace_notes (NULL, trace_notes.c_str (), NULL);
 
   if (!ret)
     warning (_("Target does not support trace notes, note ignored"));
@@ -2920,7 +2923,7 @@ set_trace_stop_notes (const char *args, int from_tty,
 {
   int ret;
 
-  ret = target_set_trace_notes (NULL, NULL, trace_stop_notes);
+  ret = target_set_trace_notes (NULL, NULL, trace_stop_notes.c_str ());
 
   if (!ret)
     warning (_("Target does not support trace notes, stop note ignored"));
@@ -3092,7 +3095,7 @@ find_matching_tracepoint_location (struct uploaded_tp *utp)
       if (b->type == utp->type
 	  && t->step_count == utp->step
 	  && t->pass_count == utp->pass
-	  && cond_string_is_same (t->cond_string,
+	  && cond_string_is_same (t->cond_string.get (),
 				  utp->cond_string.get ())
 	  /* FIXME also test actions.  */
 	  )
@@ -3657,8 +3660,6 @@ print_one_static_tracepoint_marker (int count,
 {
   struct symbol *sym;
 
-  char wrap_indent[80];
-  char extra_field_indent[80];
   struct ui_out *uiout = current_uiout;
 
   symtab_and_line sal;
@@ -3679,14 +3680,13 @@ print_one_static_tracepoint_marker (int count,
 		    !tracepoints.empty () ? 'y' : 'n');
   uiout->spaces (2);
 
-  strcpy (wrap_indent, "                                   ");
-
+  int wrap_indent = 35;
   if (gdbarch_addr_bit (marker.gdbarch) <= 32)
-    strcat (wrap_indent, "           ");
+    wrap_indent += 11;
   else
-    strcat (wrap_indent, "                   ");
+    wrap_indent += 19;
 
-  strcpy (extra_field_indent, "         ");
+  const char *extra_field_indent = "         ";
 
   uiout->field_core_addr ("addr", marker.gdbarch, marker.address);
 
@@ -3818,7 +3818,7 @@ sdata_make_value (struct gdbarch *gdbarch, struct internalvar *var,
       type = init_vector_type (builtin_type (gdbarch)->builtin_true_char,
 			       buf->size ());
       v = allocate_value (type);
-      memcpy (value_contents_raw (v), buf->data (), buf->size ());
+      memcpy (value_contents_raw (v).data (), buf->data (), buf->size ());
       return v;
     }
   else
@@ -4137,7 +4137,6 @@ Tracepoint actions may include collecting of specified data,\n\
 single-stepping, or enabling/disabling other tracepoints,\n\
 depending on target's capabilities."));
 
-  default_collect = xstrdup ("");
   add_setshow_string_cmd ("default-collect", class_trace,
 			  &default_collect, _("\
 Set the list of expressions to collect by default."), _("\

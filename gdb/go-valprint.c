@@ -1,6 +1,6 @@
 /* Support for printing Go values for GDB, the GNU debugger.
 
-   Copyright (C) 2012-2021 Free Software Foundation, Inc.
+   Copyright (C) 2012-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -52,7 +52,7 @@ print_go_string (struct type *type,
      unpack_value_field_as_pointer.  Do this until we can get
      unpack_value_field_as_pointer.  */
   LONGEST addr;
-  const gdb_byte *valaddr = value_contents_for_printing (val);
+  const gdb_byte *valaddr = value_contents_for_printing (val).data ();
 
 
   if (! unpack_value_field_as_long (type, valaddr, embedded_offset, 0,

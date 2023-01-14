@@ -1,3 +1,160 @@
+2022-01-28  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
+2022-01-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/uk.po: Updated Ukranian translation.
+
+2022-01-22  Nick Clifton  <nickc@redhat.com>
+
+	* configure: Regenerate.
+	* po/gas.pot: Regenerate.
+
+2022-01-22  Nick Clifton  <nickc@redhat.com>
+
+	* 2.38 release branch created.
+
+2022-01-17  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.in: Regenerate.
+	* po/gas.pot: Regenerate.
+
+2022-01-17  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 28762
+	* app.c (do_scrub_chars): Correct handling when the symbol is not 'af'.
+
+2021-12-16  Nick Clifton  <nickc@redhat.com>
+
+	PR 28686
+	* config/tc-avr.h (tc_fix_adjustable): Define.
+	* config/tc-avr.c (avr_fix_adjustable): New function.
+	* testsuite/gas/all/gas.exp: Skip tests that need adjustable fixups.
+	* testsuite/gas/elf/elf.exp: Likewise.
+	* testsuite/gas/avr/diffreloc_withrelax.d: Adjust expected output.
+	* testsuite/gas/avr/pc-relative-reloc.d: Adjust expected output.
+
+2021-11-26  Tom de Vries  <tdevries@suse.de>
+
+	PR 28629
+	* dwarf2dbg.c (out_dir_and_file_list): When copying file 1 to file 0,
+	also copy dir and md5 fields.
+	* testsuite/gas/i386/dwarf5-line-4.d: Adjust expected output.
+
+2021-11-18  Nick Clifton  <nickc@redhat.com>
+
+	* as.c (parse_args): Add support for --multibyte-handling.
+	* as.h (multibyte_handling): Declare.
+	* app.c (scan_for_multibyte_characters): New function.
+	(do_scrub_chars): Call the new function if multibyte warning is
+	enabled.
+	* input-scrub,c (input_scrub_next_buffer): Call the multibyte
+	scanning function if multibyte warnings are enabled.
+	* symbols.c (struct symbol_flags): Add multibyte_warned bit.
+	(symbol_init): Call the multibyte scanning function if multibyte
+	symbol warnings are enabled.
+	(S_SET_SEGMENT): Likewise.
+	* NEWS: Mention the new feature.
+	* doc/as.texi: Document the new feature.
+	* testsuite/gas/all/multibyte.s: New test source file.
+	* testsuite/gas/all/multibyte1.d: New test driver file.
+	* testsuite/gas/all/multibyte1.l: New test expected output.
+	* testsuite/gas/all/multibyte2.d: New test driver file.
+	* testsuite/gas/all/multibyte2.l: New test expected output.
+	* testsuite/gas/all/gas.exp: Run the new tests.
+
+2021-11-15  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* doc/as.texi (File): Update description of .file 0 directive.
+	* dwarf2dbg.c (get_directory_table_entry): Remove obsolete comment
+	and pass file0_dirname in recursive call.
+	(allocate_filename_to_slot): Deal with a full path in the file name
+	if the index number is 0.
+	* testsuite/gas/elf/dwarf-5-file0.d: Fix pasto.
+	* testsuite/gas/elf/dwarf-5-file0-2.d: Likewise.
+	* testsuite/gas/elf/dwarf-5-file0-3.d: New file.
+	* testsuite/gas/elf/dwarf-5-file0-3.s: Likewise.
+	* testsuite/gas/elf/elf.exp: Run dwarf-5-file0-3.
+
+2021-10-28  Markus Klein  <markus.klein@sma.de>
+
+	PR 28436
+	* config/tc-arm.c (do_vfp_nsyn_push_pop_check): New function.
+	(do_vfp_nsyn_pop): Use the new function.
+	(do_vfp_nsyn_push): Use the new function.
+	* testsuite/gas/arm/v8_1m-mve.s: Add new instructions.
+	* testsuite/gas/arm/v8_1m-mve.d: Updated expected disassembly.
+
+2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
+
+	* configure: Regenerate.
+
+2021-09-25  Peter Bergner  <bergner@linux.ibm.com>
+
+	* testsuite/gas/ppc/power5.s: New test.
+	* testsuite/gas/ppc/power5.d: Likewise.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+	* testsuite/gas/ppc/power7.s: Remove tests for mfppr, mfppr32, mtppr
+	and mtppr32.
+	* testsuite/gas/ppc/power7.d: Likewise.
+
+2021-09-13  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-ia64.c (cross_section): Use obj_elf_section_name to
+	parse the section name.
+	* config/tc-mips.c (s_change_section): Likewise.
+
+2021-09-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 28292
+	* config/tc-v850.c (handle_lo16): Also accept
+	BFD_RELOC_V850_LO16_SPLIT_OFFSET.
+	* testsuite/gas/v850/split-lo16.s: Add extra line.
+	* testsuite/gas/v850/split-lo16.d: Update expected disassembly.
+
+2021-08-11  Darius Galis  <darius.galis@cyberthorstudios.com>
+
+	* config/rx-parse.y (DECNT): Fixed typo.
+	* testsuite/gas/rx/dpopm.sm (DECNT): Fixed typo.
+	* testsuite/gas/rx/dpushm.sm (DECNT): Fixed typo.
+	* testsuite/gas/rx/macros.inc (DECNT): Fixed typo.
+
+2021-08-11  Nick Clifton  <nickc@redhat.com>
+
+	PR 28215
+	* config/tc-csky.c (md_apply_fix): Correctly handle a fixup that
+	involves an overlarge constant.
+
+2021-08-11  Matt Jacobson  <mhjacobson@me.com>
+
+	* config/tc-avr.c (enum options): Add option flag.
+	(struct option): Add option -mno-dollar-line-separator.
+	(md_parse_option): Adjust treatment of $ when option is present.
+	(usage): Mention the new option.
+	* config/tc-avr.h: Use avr_line_separator_chars.
+	* doc/c-avr.texi: Document the new option.
+
+2021-08-11  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-tic4x.c (tic4x_gen_to_words): Fix typo.
+
+2021-08-10  Nick Clifton  <nickc@redhat.com>
+
+	* po/ru.po: Updated Russian translation.
+
+2021-08-09  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf2dbg.c (get_directory_table_entry): Ensure that dir[0]
+	contains current working directory.
+	(out_dir_and_file_list): Likewise.
+	* testsuite/gas/elf/dwarf-5-dir0.s: New test source file.
+	* testsuite/gas/elf/dwarf-5-dir0.d: New test driver.
+	* testsuite/gas/elf/elf.exp: Run the new test.
+	* testsuite/gas/elf/dwarf-5-file0.d: Adjust expected output.
+	* testsuite/gas/i386/dwarf5-line-1.d: Likewise.
+	* testsuite/gas/i386/dwarf5-line-2.d: Likewise.
+
 2021-07-14  Alan Modra  <amodra@gmail.com>
 
 	* write.c (TC_VALIDATE_FIX_SUB): Default to 0.
@@ -2446,7 +2603,7 @@
 
 For older changes see ChangeLog-2020
 
-Copyright (C) 2021 Free Software Foundation, Inc.
+Copyright (C) 2021-2022 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

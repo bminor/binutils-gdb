@@ -1,6 +1,6 @@
 /* C language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 1992-2021 Free Software Foundation, Inc.
+   Copyright (C) 1992-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -32,7 +32,7 @@
 #include "demangle.h"
 #include "cp-abi.h"
 #include "cp-support.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include <ctype.h>
 #include "gdbcore.h"
 #include "gdbarch.h"
@@ -88,7 +88,7 @@ classify_type (struct type *elttype, struct gdbarch *gdbarch,
     {
       const char *name = elttype->name ();
 
-      if (elttype->code () == TYPE_CODE_CHAR || !name)
+      if (name == nullptr)
 	{
 	  result = C_CHAR;
 	  goto done;
@@ -302,7 +302,7 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
       && (*length < 0 || *length <= fetchlimit))
     {
       int i;
-      const gdb_byte *contents = value_contents (value);
+      const gdb_byte *contents = value_contents (value).data ();
 
       /* If a length is specified, use that.  */
       if (*length >= 0)
@@ -410,7 +410,7 @@ convert_ucn (const char *p, const char *limit, const char *dest_charset,
   int i;
 
   for (i = 0; i < length && p < limit && ISXDIGIT (*p); ++i, ++p)
-    result = (result << 4) + host_hex_value (*p);
+    result = (result << 4) + fromhex (*p);
 
   for (i = 3; i >= 0; --i)
     {
@@ -454,7 +454,7 @@ convert_octal (struct type *type, const char *p,
        i < 3 && p < limit && ISDIGIT (*p) && *p != '8' && *p != '9';
        ++i)
     {
-      value = 8 * value + host_hex_value (*p);
+      value = 8 * value + fromhex (*p);
       ++p;
     }
 
@@ -476,7 +476,7 @@ convert_hex (struct type *type, const char *p,
 
   while (p < limit && ISXDIGIT (*p))
     {
-      value = 16 * value + host_hex_value (*p);
+      value = 16 * value + fromhex (*p);
       ++p;
     }
 
@@ -675,7 +675,7 @@ c_string_operation::evaluate (struct type *expect_type,
 	    error (_("Too many array elements"));
 
 	  result = allocate_value (expect_type);
-	  memcpy (value_contents_raw (result), obstack_base (&output),
+	  memcpy (value_contents_raw (result).data (), obstack_base (&output),
 		  obstack_object_size (&output));
 	}
       else
@@ -944,8 +944,9 @@ public:
   }
 
   /* See language.h.  */
-  bool sniff_from_mangled_name (const char *mangled,
-				char **demangled) const override
+  bool sniff_from_mangled_name
+       (const char *mangled,
+	gdb::unique_xmalloc_ptr<char> *demangled) const override
   {
     *demangled = gdb_demangle (mangled, DMGL_PARAMS | DMGL_ANSI);
     return *demangled != NULL;
@@ -953,7 +954,8 @@ public:
 
   /* See language.h.  */
 
-  char *demangle_symbol (const char *mangled, int options) const override
+  gdb::unique_xmalloc_ptr<char> demangle_symbol (const char *mangled,
+						 int options) const override
   {
     return gdb_demangle (mangled, options);
   }

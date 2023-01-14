@@ -1,6 +1,6 @@
 /* This file is part of SIS (SPARC instruction simulator)
 
-   Copyright (C) 1995-2021 Free Software Foundation, Inc.
+   Copyright (C) 1995-2022 Free Software Foundation, Inc.
    Contributed by Jiri Gaisler, European Space Agency
 
    This program is free software; you can redistribute it and/or modify
@@ -62,7 +62,7 @@ int             sis_gdb_break = 1;
 host_callback *sim_callback;
 
 int
-run_sim(struct pstate *sregs, uint64 icount, int dis)
+run_sim(struct pstate *sregs, uint64_t icount, int dis)
 {
     int             mexc, irq;
 
@@ -400,13 +400,13 @@ flush_windows (void)
 
   for (win = invwin; ; win = (win - 1) & PSR_CWP)
     {
-      uint32 sp;
+      uint32_t sp;
       int i;
 
       sp = sregs.r[(win * 16 + 14) & 0x7f];
 #if 1
       if (sis_verbose > 2) {
-	uint32 fp = sregs.r[(win * 16 + 30) & 0x7f];
+	uint32_t fp = sregs.r[(win * 16 + 30) & 0x7f];
 	printf("flush_window: win %d, sp %x, fp %x\n", win, sp, fp);
       }
 #endif

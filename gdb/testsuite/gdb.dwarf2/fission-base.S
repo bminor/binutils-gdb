@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2012-2021 Free Software Foundation, Inc.
+   Copyright 2012-2022 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -19,9 +19,6 @@
    gcc -gdwarf-4 -gsplit-debug -S -dA fission-base.c
    and then massaging the output.
 */
-
-#define XSTR(s) STR(s)
-#define STR(s) #s
 
 	.file	"fission-base.c"
 
@@ -146,7 +143,7 @@ main:
 	.8byte	.Letext0-.Ltext0	# DW_AT_high_pc
 	.4byte	.Ldebug_line0	# DW_AT_stmt_list
 	.ascii "/tmp/src/gdb/testsuite\0"	# DW_AT_comp_dir
-	.asciz XSTR(DWO)	# DW_AT_GNU_dwo_name
+	.asciz DWO	# DW_AT_GNU_dwo_name
 	.4byte	.Ldebug_pubnames0	# DW_AT_GNU_pubnames
 	.4byte	.Ldebug_pubtypes0	# DW_AT_GNU_pubtypes
 	.4byte	.Ldebug_addr0_begin	# DW_AT_GNU_addr_base

@@ -1,5 +1,5 @@
 # Support routines for libctf testsuite.
-#   Copyright (C) 1994-2021 Free Software Foundation, Inc.
+#   Copyright (C) 1994-2022 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -48,10 +48,10 @@ proc run_native_host_cmd { command } {
 
 # Compile and link a C source file for execution on the host.
 proc compile_link_one_host_cc { src output additional_args } {
-    global CC_FOR_HOST
+    global CC
     global CFLAGS
 
-    return [run_native_host_cmd "./libtool --quiet --tag=CC --mode=link $CC_FOR_HOST $CFLAGS $src -o $output $additional_args" ]
+    return [run_native_host_cmd "./libtool --quiet --tag=CC --mode=link $CC $CFLAGS $src -o $output $additional_args" ]
 }
 
 # run_lookup_test FILE
@@ -110,7 +110,7 @@ proc compile_link_one_host_cc { src output additional_args } {
 # regexps in FILE.d.
 #
 proc run_lookup_test { name } {
-    global CC CFLAGS LIBS
+    global CC_FOR_TARGET CFLAGS_FOR_TARGET LIBS
     global copyfile env runtests srcdir subdir verbose
 
     if ![runtest_file_p $runtests $name] then {
@@ -217,7 +217,7 @@ proc run_lookup_test { name } {
 	    }
 	}
 
-	set comp_output [run_host_cmd "$CC" "$CFLAGS $lookup_flags [concat $src] -o $lookup_output"]
+	set comp_output [run_host_cmd "$CC_FOR_TARGET" "$CFLAGS_FOR_TARGET $lookup_flags [concat $src] -o $lookup_output"]
 
 	if { $comp_output != ""} {
 	    send_log "compilation of CTF program [concat $src] failed with <$comp_output>"

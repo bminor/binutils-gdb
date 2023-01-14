@@ -1,5 +1,5 @@
 /* Common things used by the various darwin files
-   Copyright (C) 1995-2021 Free Software Foundation, Inc.
+   Copyright (C) 1995-2022 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -111,7 +111,7 @@ class darwin_nat_target : public inf_child_target
 
   bool supports_multi_process () override;
 
-  ptid_t get_ada_task_ptid (long lwp, long thread) override;
+  ptid_t get_ada_task_ptid (long lwp, ULONGEST thread) override;
 
 private:
   ptid_t wait_1 (ptid_t, struct target_waitstatus *);
@@ -200,14 +200,8 @@ extern mach_port_t darwin_port_set;
 /* A copy of mach_host_self ().  */
 extern mach_port_t darwin_host_self;
 
-/* FUNCTION_NAME is defined in common-utils.h (or not).  */
-#ifdef FUNCTION_NAME
 #define MACH_CHECK_ERROR(ret) \
-  mach_check_error (ret, __FILE__, __LINE__, FUNCTION_NAME)
-#else
-#define MACH_CHECK_ERROR(ret) \
-  mach_check_error (ret, __FILE__, __LINE__, "??")
-#endif
+  mach_check_error (ret, __FILE__, __LINE__, __func__)
 
 extern void mach_check_error (kern_return_t ret, const char *file,
 			      unsigned int line, const char *func);

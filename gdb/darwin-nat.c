@@ -1,5 +1,5 @@
 /* Darwin support for GDB, the GNU debugger.
-   Copyright (C) 2008-2021 Free Software Foundation, Inc.
+   Copyright (C) 2008-2022 Free Software Foundation, Inc.
 
    Contributed by AdaCore.
 
@@ -169,8 +169,8 @@ inferior_debug (int level, const char *fmt, ...)
     return;
 
   va_start (ap, fmt);
-  printf_unfiltered (_("[%d inferior]: "), getpid ());
-  vprintf_unfiltered (fmt, ap);
+  fprintf_unfiltered (gdb_stdlog, _("[%d inferior]: "), getpid ());
+  vfprintf_unfiltered (gdb_stdlog, fmt, ap);
   va_end (ap);
 }
 
@@ -459,13 +459,20 @@ darwin_resume_inferior (struct inferior *inf)
 static void
 darwin_dump_message (mach_msg_header_t *hdr, int disp_body)
 {
-  printf_unfiltered (_("message header:\n"));
-  printf_unfiltered (_(" bits: 0x%x\n"), hdr->msgh_bits);
-  printf_unfiltered (_(" size: 0x%x\n"), hdr->msgh_size);
-  printf_unfiltered (_(" remote-port: 0x%x\n"), hdr->msgh_remote_port);
-  printf_unfiltered (_(" local-port: 0x%x\n"), hdr->msgh_local_port);
-  printf_unfiltered (_(" reserved: 0x%x\n"), hdr->msgh_reserved);
-  printf_unfiltered (_(" id: 0x%x\n"), hdr->msgh_id);
+  fprintf_unfiltered (gdb_stdlog,
+		      _("message header:\n"));
+  fprintf_unfiltered (gdb_stdlog,
+		      _(" bits: 0x%x\n"), hdr->msgh_bits);
+  fprintf_unfiltered (gdb_stdlog,
+		      _(" size: 0x%x\n"), hdr->msgh_size);
+  fprintf_unfiltered (gdb_stdlog,
+		      _(" remote-port: 0x%x\n"), hdr->msgh_remote_port);
+  fprintf_unfiltered (gdb_stdlog,
+		      _(" local-port: 0x%x\n"), hdr->msgh_local_port);
+  fprintf_unfiltered (gdb_stdlog,
+		      _(" reserved: 0x%x\n"), hdr->msgh_reserved);
+  fprintf_unfiltered (gdb_stdlog,
+		      _(" id: 0x%x\n"), hdr->msgh_id);
 
   if (disp_body)
     {
@@ -484,21 +491,24 @@ darwin_dump_message (mach_msg_header_t *hdr, int disp_body)
 	    (mach_msg_port_descriptor_t *)(bod + 1);
 	  int k;
 	  NDR_record_t *ndr;
-	  printf_unfiltered (_("body: descriptor_count=%u\n"),
-			     bod->msgh_descriptor_count);
+	  fprintf_unfiltered (gdb_stdlog,
+			      _("body: descriptor_count=%u\n"),
+			      bod->msgh_descriptor_count);
 	  data += sizeof (mach_msg_body_t);
 	  size -= sizeof (mach_msg_body_t);
 	  for (k = 0; k < bod->msgh_descriptor_count; k++)
 	    switch (desc[k].type)
 	      {
 	      case MACH_MSG_PORT_DESCRIPTOR:
-		printf_unfiltered
-		  (_(" descr %d: type=%u (port) name=0x%x, dispo=%d\n"),
+		fprintf_unfiltered
+		  (gdb_stdlog,
+		   _(" descr %d: type=%u (port) name=0x%x, dispo=%d\n"),
 		   k, desc[k].type, desc[k].name, desc[k].disposition);
 		break;
 	      default:
-		printf_unfiltered (_(" descr %d: type=%u\n"),
-				   k, desc[k].type);
+		fprintf_unfiltered (gdb_stdlog,
+				    _(" descr %d: type=%u\n"),
+				    k, desc[k].type);
 		break;
 	      }
 	  data += bod->msgh_descriptor_count
@@ -506,8 +516,9 @@ darwin_dump_message (mach_msg_header_t *hdr, int disp_body)
 	  size -= bod->msgh_descriptor_count
 	    * sizeof (mach_msg_port_descriptor_t);
 	  ndr = (NDR_record_t *)(desc + bod->msgh_descriptor_count);
-	  printf_unfiltered
-	    (_("NDR: mig=%02x if=%02x encod=%02x "
+	  fprintf_unfiltered
+	    (gdb_stdlog,
+	     _("NDR: mig=%02x if=%02x encod=%02x "
 	       "int=%02x char=%02x float=%02x\n"),
 	     ndr->mig_vers, ndr->if_vers, ndr->mig_encoding,
 	     ndr->int_rep, ndr->char_rep, ndr->float_rep);
@@ -515,11 +526,11 @@ darwin_dump_message (mach_msg_header_t *hdr, int disp_body)
 	  size -= sizeof (NDR_record_t);
 	}
 
-      printf_unfiltered (_("  data:"));
+      fprintf_unfiltered (gdb_stdlog, _("  data:"));
       ldata = (const unsigned int *)data;
       for (i = 0; i < size / sizeof (unsigned int); i++)
-	printf_unfiltered (" %08x", ldata[i]);
-      printf_unfiltered (_("\n"));
+	fprintf_unfiltered (gdb_stdlog, " %08x", ldata[i]);
+      fprintf_unfiltered (gdb_stdlog, _("\n"));
     }
 }
 
@@ -906,8 +917,8 @@ darwin_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
   int nsignal;
 
   inferior_debug
-    (2, _("darwin_resume: pid=%d, tid=0x%lx, step=%d, signal=%d\n"),
-     ptid.pid (), ptid.tid (), step, signal);
+    (2, _("darwin_resume: ptid=%s, step=%d, signal=%d\n"),
+     ptid.to_string ().c_str (), step, signal);
 
   if (signal == GDB_SIGNAL_0)
     nsignal = 0;
@@ -977,15 +988,15 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
       if (res < 0)
 	{
 	  /* Should not happen...  */
-	  printf_unfiltered
-	    (_("darwin_wait: ill-formatted message (id=0x%x)\n"), hdr->msgh_id);
+	  warning (_("darwin_wait: ill-formatted message (id=0x%x)\n"),
+		   hdr->msgh_id);
 	  /* FIXME: send a failure reply?  */
-	  status->kind = TARGET_WAITKIND_IGNORE;
+	  status->set_ignore ();
 	  return minus_one_ptid;
 	}
       if (inf == NULL)
 	{
-	  status->kind = TARGET_WAITKIND_IGNORE;
+	  status->set_ignore ();
 	  return minus_one_ptid;
 	}
       *pinf = inf;
@@ -995,7 +1006,6 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
 
       priv->pending_messages++;
 
-      status->kind = TARGET_WAITKIND_STOPPED;
       thread->msg_state = DARWIN_MESSAGE;
 
       inferior_debug (4, _("darwin_wait: thread=0x%x, got %s\n"),
@@ -1005,25 +1015,25 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
       switch (thread->event.ex_type)
 	{
 	case EXC_BAD_ACCESS:
-	  status->value.sig = GDB_EXC_BAD_ACCESS;
+	  status->set_stopped (GDB_EXC_BAD_ACCESS);
 	  break;
 	case EXC_BAD_INSTRUCTION:
-	  status->value.sig = GDB_EXC_BAD_INSTRUCTION;
+	  status->set_stopped (GDB_EXC_BAD_INSTRUCTION);
 	  break;
 	case EXC_ARITHMETIC:
-	  status->value.sig = GDB_EXC_ARITHMETIC;
+	  status->set_stopped (GDB_EXC_ARITHMETIC);
 	  break;
 	case EXC_EMULATION:
-	  status->value.sig = GDB_EXC_EMULATION;
+	  status->set_stopped (GDB_EXC_EMULATION);
 	  break;
 	case EXC_SOFTWARE:
 	  if (thread->event.ex_data[0] == EXC_SOFT_SIGNAL)
 	    {
-	      status->value.sig =
-		gdb_signal_from_host (thread->event.ex_data[1]);
+	      status->set_stopped
+		(gdb_signal_from_host (thread->event.ex_data[1]));
 	      inferior_debug (5, _("  (signal %d: %s)\n"),
 			      thread->event.ex_data[1],
-			      gdb_signal_to_name (status->value.sig));
+			      gdb_signal_to_name (status->sig ()));
 
 	      /* If the thread is stopped because it has received a signal
 		 that gdb has just sent, continue.  */
@@ -1032,20 +1042,20 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
 		  thread->signaled = 0;
 		  darwin_send_reply (inf, thread);
 		  thread->msg_state = DARWIN_RUNNING;
-		  status->kind = TARGET_WAITKIND_IGNORE;
+		  status->set_ignore ();
 		}
 	    }
 	  else
-	    status->value.sig = GDB_EXC_SOFTWARE;
+	    status->set_stopped (GDB_EXC_SOFTWARE);
 	  break;
 	case EXC_BREAKPOINT:
 	  /* Many internal GDB routines expect breakpoints to be reported
 	     as GDB_SIGNAL_TRAP, and will report GDB_EXC_BREAKPOINT
 	     as a spurious signal.  */
-	  status->value.sig = GDB_SIGNAL_TRAP;
+	  status->set_stopped (GDB_SIGNAL_TRAP);
 	  break;
 	default:
-	  status->value.sig = GDB_SIGNAL_UNKNOWN;
+	  status->set_stopped (GDB_SIGNAL_UNKNOWN);
 	  break;
 	}
 
@@ -1061,7 +1071,7 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
       if (res < 0)
 	{
 	  /* Should not happen...  */
-	  printf_unfiltered
+	  warning
 	    (_("darwin_wait: ill-formatted message (id=0x%x, res=%d)\n"),
 	     hdr->msgh_id, res);
 	}
@@ -1071,7 +1081,7 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
 
       if (res < 0 || inf == NULL)
 	{
-	  status->kind = TARGET_WAITKIND_IGNORE;
+	  status->set_ignore ();
 	  return minus_one_ptid;
 	}
 
@@ -1087,20 +1097,17 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
 	      res_pid = wait4 (inf->pid, &wstatus, 0, NULL);
 	      if (res_pid < 0 || res_pid != inf->pid)
 		{
-		  printf_unfiltered (_("wait4: res=%d: %s\n"),
-				     res_pid, safe_strerror (errno));
-		  status->kind = TARGET_WAITKIND_IGNORE;
+		  warning (_("wait4: res=%d: %s\n"),
+			   res_pid, safe_strerror (errno));
+		  status->set_ignore ();
 		  return minus_one_ptid;
 		}
 	      if (WIFEXITED (wstatus))
-		{
-		  status->kind = TARGET_WAITKIND_EXITED;
-		  status->value.integer = WEXITSTATUS (wstatus);
-		}
+		status->set_exited (WEXITSTATUS (wstatus));
 	      else
 		{
-		  status->kind = TARGET_WAITKIND_SIGNALLED;
-		  status->value.sig = gdb_signal_from_host (WTERMSIG (wstatus));
+		  status->set_signalled
+		    (gdb_signal_from_host (WTERMSIG (wstatus)));
 		}
 
 	      inferior_debug (4, _("darwin_wait: pid=%d exit, status=0x%x\n"),
@@ -1114,8 +1121,7 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
 	  else
 	    {
 	      inferior_debug (4, _("darwin_wait: pid=%d\n"), inf->pid);
-	      status->kind = TARGET_WAITKIND_EXITED;
-	      status->value.integer = 0; /* Don't know.  */
+	      status->set_exited (0 /* Don't know.  */);
 	      return ptid_t (inf->pid, 0, 0);
 	    }
 	}
@@ -1123,7 +1129,7 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
 
   /* Unknown message.  */
   warning (_("darwin: got unknown message, id: 0x%x"), hdr->msgh_id);
-  status->kind = TARGET_WAITKIND_IGNORE;
+  status->set_ignore ();
   return minus_one_ptid;
 }
 
@@ -1171,8 +1177,8 @@ darwin_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *status)
   darwin_thread_t *thread;
 
   inferior_debug
-    (2, _("darwin_wait: waiting for a message pid=%d thread=%lx\n"),
-     ptid.pid (), ptid.tid ());
+    (2, _("darwin_wait: waiting for a message ptid=%s\n"),
+     ptid.to_string ().c_str ());
 
   /* Handle fake stop events at first.  */
   if (darwin_inf_fake_stop != NULL)
@@ -1182,8 +1188,7 @@ darwin_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *status)
 
       darwin_inferior *priv = get_darwin_inferior (inf);
 
-      status->kind = TARGET_WAITKIND_STOPPED;
-      status->value.sig = GDB_SIGNAL_TRAP;
+      status->set_stopped (GDB_SIGNAL_TRAP);
       thread = priv->threads[0];
       thread->msg_state = DARWIN_STOPPED;
       return ptid_t (inf->pid, 0, thread->gdb_port);
@@ -1201,14 +1206,14 @@ darwin_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *status)
 
       if (kret == MACH_RCV_INTERRUPTED)
 	{
-	  status->kind = TARGET_WAITKIND_IGNORE;
+	  status->set_ignore ();
 	  return minus_one_ptid;
 	}
 
       if (kret != MACH_MSG_SUCCESS)
 	{
 	  inferior_debug (5, _("mach_msg: ret=0x%x\n"), kret);
-	  status->kind = TARGET_WAITKIND_SPURIOUS;
+	  status->set_spurious ();
 	  return minus_one_ptid;
 	}
 
@@ -1225,7 +1230,7 @@ darwin_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *status)
       if (inf == NULL)
 	return res;
     }
-  while (status->kind == TARGET_WAITKIND_IGNORE);
+  while (status->kind () == TARGET_WAITKIND_IGNORE);
 
   /* Stop all tasks.  */
   for (inferior *inf : all_inferiors (this))
@@ -1400,8 +1405,8 @@ darwin_nat_target::stop_inferior (inferior *inf)
   while (1)
     {
       ptid = wait_1 (ptid_t (inf->pid), &wstatus);
-      if (wstatus.kind == TARGET_WAITKIND_STOPPED
-	  && wstatus.value.sig == GDB_SIGNAL_STOP)
+      if (wstatus.kind () == TARGET_WAITKIND_STOPPED
+	  && wstatus.sig () == GDB_SIGNAL_STOP)
 	break;
     }
 }
@@ -1822,7 +1827,7 @@ may_have_sip ()
 static void
 copy_shell_to_cache (const char *shell, const std::string &new_name)
 {
-  scoped_fd from_fd (gdb_open_cloexec (shell, O_RDONLY, 0));
+  scoped_fd from_fd = gdb_open_cloexec (shell, O_RDONLY, 0);
   if (from_fd.get () < 0)
     error (_("Could not open shell (%s) for reading: %s"),
 	   shell, safe_strerror (errno));
@@ -1833,7 +1838,7 @@ copy_shell_to_cache (const char *shell, const std::string &new_name)
 	   new_dir.c_str (), safe_strerror (errno));
 
   gdb::char_vector temp_name = make_temp_filename (new_name);
-  scoped_fd to_fd (gdb_mkostemp_cloexec (&temp_name[0]));
+  scoped_fd to_fd = gdb_mkostemp_cloexec (&temp_name[0]);
   gdb::unlinker unlink_file_on_error (temp_name.data ());
 
   if (to_fd.get () < 0)
@@ -2008,17 +2013,7 @@ darwin_nat_target::attach (const char *args, int from_tty)
   if (pid == getpid ())		/* Trying to masturbate?  */
     error (_("I refuse to debug myself!"));
 
-  if (from_tty)
-    {
-      const char *exec_file = get_exec_file (0);
-
-      if (exec_file)
-	printf_unfiltered (_("Attaching to program: %s, %s\n"), exec_file,
-			   target_pid_to_str (ptid_t (pid)).c_str ());
-      else
-	printf_unfiltered (_("Attaching to %s\n"),
-			   target_pid_to_str (ptid_t (pid)).c_str ());
-    }
+  target_announce_attach (from_tty, pid);
 
   if (pid == 0 || ::kill (pid, 0) < 0)
     error (_("Can't attach to process %d: %s (%d)"),
@@ -2072,8 +2067,8 @@ darwin_nat_target::detach (inferior *inf, int from_tty)
     {
       res = PTRACE (PT_DETACH, inf->pid, 0, 0);
       if (res != 0)
-	printf_unfiltered (_("Unable to detach from process-id %d: %s (%d)"),
-			   inf->pid, safe_strerror (errno), errno);
+	warning (_("Unable to detach from process-id %d: %s (%d)"),
+		 inf->pid, safe_strerror (errno), errno);
     }
 
   darwin_reply_to_all_pending_messages (inf);
@@ -2376,7 +2371,7 @@ darwin_nat_target::pid_to_exec_file (int pid)
 }
 
 ptid_t
-darwin_nat_target::get_ada_task_ptid (long lwp, long thread)
+darwin_nat_target::get_ada_task_ptid (long lwp, ULONGEST thread)
 {
   struct inferior *inf = current_inferior ();
   darwin_inferior *priv = get_darwin_inferior (inf);

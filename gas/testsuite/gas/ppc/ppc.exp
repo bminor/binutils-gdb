@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2021 Free Software Foundation, Inc.
+# Copyright (C) 2012-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -116,6 +116,7 @@ run_dump_test "e500mc64_nop"
 run_dump_test "e5500_nop"
 run_dump_test "e6500_nop"
 run_dump_test "power4_32"
+run_dump_test "power5"
 run_dump_test "power6"
 run_dump_test "power7"
 run_dump_test "power8"

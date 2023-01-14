@@ -1,4 +1,4 @@
-@c Copyright (C) 2008--2021 Free Software Foundation, Inc.
+@c Copyright (C) 2008--2022 Free Software Foundation, Inc.
 @c Permission is granted to copy, distribute and/or modify this document
 @c under the terms of the GNU Free Documentation License, Version 1.3 or
 @c any later version published by the Free Software Foundation; with the
@@ -220,6 +220,7 @@ optional arguments while skipping others.  Example:
 * Lazy Strings In Python::      Python representation of lazy strings.
 * Architectures In Python::     Python representation of architectures.
 * Registers In Python::         Python representation of registers.
+* Connections In Python::	Python representation of connections.
 * TUI Windows In Python::       Implementing new TUI windows.
 @end menu
 
@@ -331,6 +332,32 @@ parameter's value is converted to a Python value of the appropriate
 type, and returned.
 @end defun
 
+@findex gdb.set_parameter
+@defun gdb.set_parameter (name, value)
+Sets the gdb parameter @var{name} to @var{value}.  As with
+@code{gdb.parameter}, the parameter name string may contain spaces if
+the parameter has a multi-part name.
+@end defun
+
+@findex gdb.with_parameter
+@defun gdb.with_parameter (name, value)
+Create a Python context manager (for use with the Python
+@command{with} statement) that temporarily sets the gdb parameter
+@var{name} to @var{value}.  On exit from the context, the previous
+value will be restored.
+
+This uses @code{gdb.parameter} in its implementation, so it can throw
+the same exceptions as that function.
+
+For example, it's sometimes useful to evaluate some Python code with a
+particular gdb language:
+
+@smallexample
+with gdb.with_parameter('language', 'pascal'):
+  ... language-specific operations
+@end smallexample
+@end defun
+
 @findex gdb.history
 @defun gdb.history (number)
 Return a value from @value{GDBN}'s value history (@pxref{Value
@@ -344,6 +371,25 @@ raised.
 
 If no exception is raised, the return value is always an instance of
 @code{gdb.Value} (@pxref{Values From Inferior}).
+@end defun
+
+@defun gdb.add_history (value)
+Takes @var{value}, an instance of @code{gdb.Value} (@pxref{Values From
+Inferior}), and appends the value this object represents to
+@value{GDBN}'s value history (@pxref{Value History}), and return an
+integer, its history number.  If @var{value} is not a
+@code{gdb.Value}, it is is converted using the @code{gdb.Value}
+constructor.  If @var{value} can't be converted to a @code{gdb.Value}
+then a @code{TypeError} is raised.
+
+When a command implemented in Python prints a single @code{gdb.Value}
+as its result, then placing the value into the history will allow the
+user convenient access to those values via CLI history facilities.
+@end defun
+
+@defun gdb.history_count ()
+Return an integer indicating the number of values in @value{GDBN}'s
+value history (@pxref{Value History}).
 @end defun
 
 @findex gdb.convenience_variable
@@ -429,7 +475,7 @@ this.  For example:
 @end defun
 
 @findex gdb.write 
-@defun gdb.write (string @r{[}, stream{]})
+@defun gdb.write (string @r{[}, stream@r{]})
 Print a string to @value{GDBN}'s paginated output stream.  The
 optional @var{stream} determines the stream to print to.  The default
 stream is @value{GDBN}'s standard output stream.  Possible stream
@@ -503,6 +549,14 @@ Return the name of the current target wide character set
 never returned.
 @end defun
 
+@findex gdb.host_charset
+@defun gdb.host_charset ()
+Return a string, the name of the current host character set
+(@pxref{Character Sets}).  This differs from
+@code{gdb.parameter('host-charset')} in that @samp{auto} is never
+returned.
+@end defun
+
 @findex gdb.solib_name
 @defun gdb.solib_name (address)
 Return the name of the shared library holding the given @var{address}
@@ -541,6 +595,21 @@ the current prompt.
 Some prompts cannot be substituted in @value{GDBN}.  Secondary prompts
 such as those used by readline for command input, and annotation
 related prompts are prohibited from being changed.
+@end defun
+
+@defun gdb.architecture_names ()
+Return a list containing all of the architecture names that the
+current build of @value{GDBN} supports.  Each architecture name is a
+string.  The names returned in this list are the same names as are
+returned from @code{gdb.Architecture.name}
+(@pxref{gdbpy_architecture_name,,Architecture.name}).
+@end defun
+
+@anchor{gdbpy_connections}
+@defun gdb.connections
+Return a list of @code{gdb.TargetConnection} objects, one for each
+currently active connection (@pxref{Connections In Python}).  The
+connection objects are in no particular order in the returned list.
 @end defun
 
 @node Exception Handling
@@ -797,6 +866,9 @@ This second form of the @code{gdb.Value} constructor returns a
 from the Python buffer object specified by @var{val}.  The number of
 bytes in the Python buffer object must be greater than or equal to the
 size of @var{type}.
+
+If @var{type} is @code{None} then this version of @code{__init__}
+behaves as though @var{type} was not passed at all.
 @end defun
 
 @defun Value.cast (type)
@@ -1102,6 +1174,9 @@ Otherwise, it is searched for globally.
 Ordinarily, this function will return an instance of @code{gdb.Type}.
 If the named type cannot be found, it will throw an exception.
 @end defun
+
+Integer types can be found without looking them up by name.
+@xref{Architectures In Python}, for the @code{integer_type} method.
 
 If the type is a structure or class type, or an enum type, the fields
 of that type can be accessed using the Python @dfn{dictionary syntax}.
@@ -3070,10 +3145,18 @@ A @code{gdb.Inferior} object has the following attributes:
 ID of inferior, as assigned by GDB.
 @end defvar
 
+@anchor{gdbpy_inferior_connection}
+@defvar Inferior.connection
+The @code{gdb.TargetConnection} for this inferior (@pxref{Connections
+In Python}), or @code{None} if this inferior has no connection.
+@end defvar
+
 @defvar Inferior.connection_num
 ID of inferior's connection as assigned by @value{GDBN}, or None if
-the inferior is not connected to a target.
-@xref{Inferiors Connections and Programs}.
+the inferior is not connected to a target.  @xref{Inferiors Connections
+and Programs}.  This is equivalent to
+@code{gdb.Inferior.connection.num} in the case where
+@code{gdb.Inferior.connection} is not @code{None}.
 @end defvar
 
 @defvar Inferior.pid
@@ -3188,7 +3271,10 @@ Here is an example:
 @smallexample
 def exit_handler (event):
     print ("event type: exit")
-    print ("exit code: %d" % (event.exit_code))
+    if hasattr (event, 'exit_code'):
+        print ("exit code: %d" % (event.exit_code))
+    else:
+        print ("exit code not available")
 
 gdb.events.exited.connect (exit_handler)
 @end smallexample
@@ -3399,6 +3485,25 @@ This has a single attribute:
 
 @defvar NewThreadEvent.inferior_thread
 The new thread.
+@end defvar
+
+@item events.gdb_exiting
+This is emitted when @value{GDBN} exits.  This event is not emitted if
+@value{GDBN} exits as a result of an internal error, or after an
+unexpected signal.  The event is of type @code{gdb.GdbExitingEvent},
+which has a single attribute:
+
+@defvar GdbExitingEvent.exit_code
+An integer, the value of the exit code @value{GDBN} will return.
+@end defvar
+
+@item events.connection_removed
+This is emitted when @value{GDBN} removes a connection
+(@pxref{Connections In Python}).  The event is of type
+@code{gdb.ConnectionEvent}.  This has a single read-only attribute:
+
+@defvar ConnectionEvent.connection
+The @code{gdb.TargetConnection} that is being removed.
 @end defvar
 
 @end table
@@ -4070,23 +4175,46 @@ represent the possible values for the parameter.
 If @var{parameter-class} is not @code{PARAM_ENUM}, then the presence
 of a fourth argument will cause an exception to be thrown.
 
-The help text for the new parameter is taken from the Python
-documentation string for the parameter's class, if there is one.  If
-there is no documentation string, a default value is used.
+The help text for the new parameter includes the Python documentation
+string from the parameter's class, if there is one.  If there is no
+documentation string, a default value is used.  The documentation
+string is included in the output of the parameters @code{help set} and
+@code{help show} commands, and should be written taking this into
+account.
 @end defun
 
 @defvar Parameter.set_doc
 If this attribute exists, and is a string, then its value is used as
-the help text for this parameter's @code{set} command.  The value is
-examined when @code{Parameter.__init__} is invoked; subsequent changes
-have no effect.
+the first part of the help text for this parameter's @code{set}
+command.  The second part of the help text is taken from the
+documentation string for the parameter's class, if there is one.
+
+The value of @code{set_doc} should give a brief summary specific to
+the set action, this text is only displayed when the user runs the
+@code{help set} command for this parameter.  The class documentation
+should be used to give a fuller description of what the parameter
+does, this text is displayed for both the @code{help set} and
+@code{help show} commands.
+
+The @code{set_doc} value is examined when @code{Parameter.__init__} is
+invoked; subsequent changes have no effect.
 @end defvar
 
 @defvar Parameter.show_doc
 If this attribute exists, and is a string, then its value is used as
-the help text for this parameter's @code{show} command.  The value is
-examined when @code{Parameter.__init__} is invoked; subsequent changes
-have no effect.
+the first part of the help text for this parameter's @code{show}
+command.  The second part of the help text is taken from the
+documentation string for the parameter's class, if there is one.
+
+The value of @code{show_doc} should give a brief summary specific to
+the show action, this text is only displayed when the user runs the
+@code{help show} command for this parameter.  The class documentation
+should be used to give a fuller description of what the parameter
+does, this text is displayed for both the @code{help set} and
+@code{help show} commands.
+
+The @code{show_doc} value is examined when @code{Parameter.__init__}
+is invoked; subsequent changes have no effect.
 @end defvar
 
 @defvar Parameter.value
@@ -4456,7 +4584,7 @@ historical compatibility.
 @end defun
 
 @findex gdb.lookup_objfile
-@defun gdb.lookup_objfile (name @r{[}, by_build_id{]})
+@defun gdb.lookup_objfile (name @r{[}, by_build_id@r{]})
 Look up @var{name}, a file name or build ID, in the list of objfiles
 for the current program space (@pxref{Progspaces In Python}).
 If the objfile is not found throw the Python @code{ValueError} exception.
@@ -5807,6 +5935,7 @@ by an instance of the @code{gdb.Architecture} class.
 
 A @code{gdb.Architecture} class has the following methods:
 
+@anchor{gdbpy_architecture_name}
 @defun Architecture.name ()
 Return the name (string value) of the architecture.
 @end defun
@@ -5845,6 +5974,21 @@ The value corresponding to this key is the length (integer value) of the
 instruction in bytes.
 
 @end table
+@end defun
+
+@findex Architecture.integer_type
+@defun Architecture.integer_type (size @r{[}, signed@r{]})
+This function looks up an integer type by its @var{size}, and
+optionally whether or not it is signed.
+
+@var{size} is the size, in bits, of the desired integer type.  Only
+certain sizes are currently supported: 0, 8, 16, 24, 32, 64, and 128.
+
+If @var{signed} is not specified, it defaults to @code{True}.  If
+@var{signed} is @code{False}, the returned type will be unsigned.
+
+If the indicated type cannot be found, this function will throw a
+@code{ValueError} exception.
 @end defun
 
 @anchor{gdbpy_architecture_registers}
@@ -5918,6 +6062,134 @@ properties:
 @defvar RegisterGroup.name
 A string that is the name of this register group.
 @end defvar
+
+@node Connections In Python
+@subsubsection Connections In Python
+@cindex connections in python
+@value{GDBN} lets you run and debug multiple programs in a single
+session.  Each program being debugged has a connection, the connection
+describes how @value{GDBN} controls the program being debugged.
+Examples of different connection types are @samp{native} and
+@samp{remote}.  @xref{Inferiors Connections and Programs}.
+
+Connections in @value{GDBN} are represented as instances of
+@code{gdb.TargetConnection}, or as one of its sub-classes.  To get a
+list of all connections use @code{gdb.connections}
+(@pxref{gdbpy_connections,,gdb.connections}).
+
+To get the connection for a single @code{gdb.Inferior} read its
+@code{gdb.Inferior.connection} attribute
+(@pxref{gdbpy_inferior_connection,,gdb.Inferior.connection}).
+
+Currently there is only a single sub-class of
+@code{gdb.TargetConnection}, @code{gdb.RemoteTargetConnection},
+however, additional sub-classes may be added in future releases of
+@value{GDBN}.  As a result you should avoid writing code like:
+
+@smallexample
+conn = gdb.selected_inferior().connection
+if type(conn) is gdb.RemoteTargetConnection:
+  print("This is a remote target connection")
+@end smallexample
+
+@noindent
+as this may fail when more connection types are added.  Instead, you
+should write:
+
+@smallexample
+conn = gdb.selected_inferior().connection
+if isinstance(conn, gdb.RemoteTargetConnection):
+  print("This is a remote target connection")
+@end smallexample
+
+A @code{gdb.TargetConnection} has the following method:
+
+@defun TargetConnection.is_valid ()
+Return @code{True} if the @code{gdb.TargetConnection} object is valid,
+@code{False} if not.  A @code{gdb.TargetConnection} will become
+invalid if the connection no longer exists within @value{GDBN}, this
+might happen when no inferiors are using the connection, but could be
+delayed until the user replaces the current target.
+
+Reading any of the @code{gdb.TargetConnection} properties will throw
+an exception if the connection is invalid.
+@end defun
+
+A @code{gdb.TargetConnection} has the following read-only properties:
+
+@defvar TargetConnection.num
+An integer assigned by @value{GDBN} to uniquely identify this
+connection.  This is the same value as displayed in the @samp{Num}
+column of the @code{info connections} command output (@pxref{Inferiors
+Connections and Programs,,info connections}).
+@end defvar
+
+@defvar TargetConnection.type
+A string that describes what type of connection this is.  This string
+will be one of the valid names that can be passed to the @code{target}
+command (@pxref{Target Commands,,target command}).
+@end defvar
+
+@defvar TargetConnection.description
+A string that gives a short description of this target type.  This is
+the same string that is displayed in the @samp{Description} column of
+the @code{info connection} command output (@pxref{Inferiors
+Connections and Programs,,info connections}).
+@end defvar
+
+@defvar TargetConnection.details
+An optional string that gives additional information about this
+connection.  This attribute can be @code{None} if there are no
+additional details for this connection.
+
+An example of a connection type that might have additional details is
+the @samp{remote} connection, in this case the details string can
+contain the @samp{@var{hostname}:@var{port}} that was used to connect
+to the remote target.
+@end defvar
+
+The @code{gdb.RemoteTargetConnection} class is a sub-class of
+@code{gdb.TargetConnection}, and is used to represent @samp{remote}
+and @samp{extended-remote} connections.  In addition to the attributes
+and methods available from the @code{gdb.TargetConnection} base class,
+a @code{gdb.RemoteTargetConnection} has the following method:
+
+@kindex maint packet
+@defun RemoteTargetConnection.send_packet (@var{packet})
+This method sends @var{packet} to the remote target and returns the
+response.  The @var{packet} should either be a @code{bytes} object, or
+a @code{Unicode} string.
+
+If @var{packet} is a @code{Unicode} string, then the string is encoded
+to a @code{bytes} object using the @sc{ascii} codec.  If the string
+can't be encoded then an @code{UnicodeError} is raised.
+
+If @var{packet} is not a @code{bytes} object, or a @code{Unicode}
+string, then a @code{TypeError} is raised.  If @var{packet} is empty
+then a @code{ValueError} is raised.
+
+The response is returned as a @code{bytes} object.  For Python 3 if it
+is known that the response can be represented as a string then this
+can be decoded from the buffer.  For example, if it is known that the
+response is an @sc{ascii} string:
+
+@smallexample
+remote_connection.send_packet("some_packet").decode("ascii")
+@end smallexample
+
+In Python 2 @code{bytes} and @code{str} are aliases, so the result is
+already a string, if the response includes non-printable characters,
+or null characters, then these will be present in the result, care
+should be taken when processing the result to handle this case.
+
+The prefix, suffix, and checksum (as required by the remote serial
+protocol) are automatically added to the outgoing packet, and removed
+from the incoming packet before the contents of the reply are
+returned.
+
+This is equivalent to the @code{maintenance packet} command
+(@pxref{maint packet}).
+@end defun
 
 @node TUI Windows In Python
 @subsubsection Implementing new TUI windows
@@ -6034,9 +6306,9 @@ and so the content should appear to move up.
 
 @defun Window.click (@var{x}, @var{y}, @var{button})
 This is called on a mouse click in this window.  @var{x} and @var{y} are
-the mouse coordinates inside the window (0-based), and @var{button}
-specifies which mouse button was used, whose values can be 1 (left),
-2 (middle), or 3 (right).
+the mouse coordinates inside the window (0-based, from the top left
+corner), and @var{button} specifies which mouse button was used, whose
+values can be 1 (left), 2 (middle), or 3 (right).
 @end defun
 
 @node Python Auto-loading

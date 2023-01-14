@@ -1,7 +1,5 @@
 #readelf: -S -s -p .strtab
 #name: Multibyte symbol names
-# The following targets use an unusual .set syntax...
-#notarget: alpha*-*-* h8300-*-*
 
 #...
 Section Headers:

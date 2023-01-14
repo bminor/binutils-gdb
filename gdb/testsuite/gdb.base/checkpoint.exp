@@ -1,4 +1,4 @@
-#   Copyright 2005-2021 Free Software Foundation, Inc.
+#   Copyright 2005-2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ gdb_test "checkpoint" ".*" ""
 gdb_test "continue 10" "breakpoint 1.*" "break1 three"
 
 gdb_test "checkpoint" ".*" ""
-gdb_test "continue 10" "breakpoint 1.*" "break1 four" 
+gdb_test "continue 10" "breakpoint 1.*" "break1 four"
 
 gdb_test "checkpoint" ".*" ""
 gdb_test "continue 10" "breakpoint 1.*" "break1 five"
@@ -146,7 +146,7 @@ gdb_test "print i + 1 == lines * 79" " = 1" "verify i 10 one"
 gdb_test "print lines" " = 91.*" "verify lines 10 one"
 
 #
-# Now let the files be closed by the original process, 
+# Now let the files be closed by the original process,
 # and diff them.
 
 gdb_test "restart 0" "Switching to .*breakpoint 2.*" "restart 0 one"
@@ -158,7 +158,7 @@ gdb_test "shell diff -s $pi_txt $copy1_txt" \
     "diff input and output one"
 
 #
-# And now run from various checkpoints, allowing 
+# And now run from various checkpoints, allowing
 # various amounts of input and output.
 #
 
@@ -198,7 +198,7 @@ gdb_test "restart 6" "Switching to .*c == EOF.*" "restart 6 two"
 gdb_test "continue" ".*" ""
 gdb_test "continue 1000" "breakpoint 1.*" "breakpoint 1 6 one"
 gdb_test "step" "if .c == EOF.*" "step in 6 two"
-gdb_test "print lines" " = 1052.*" "verify lines 5 two"
+gdb_test "print lines" " = 1052.*" "verify lines 6 two"
 
 gdb_test "restart 7" "Switching to .*c == EOF.*" "restart 7 two"
 gdb_test "continue" ".*" ""
@@ -210,12 +210,12 @@ gdb_test "shell diff -s $pi_txt $copy1_txt" \
     "Files .*pi.txt and .*copy1.txt are identical.*" \
     "diff input and output two"
 
-# 
-# OK, now allow the original program to delete the output file, 
+#
+# OK, now allow the original program to delete the output file,
 # and verify that the checkpoints can still write to it.
-# 
+#
 
-gdb_test "restart 0" "Switching to .*breakpoint 3.*" "restart 0 one"
+gdb_test "restart 0" "Switching to .*breakpoint 3.*" "restart 0 two"
 gdb_breakpoint $break4_loc
 gdb_test "continue" "breakpoint 4.*" "break4 one"
 
@@ -259,7 +259,7 @@ gdb_test "continue" \
 
 #
 # There should be still at least five forks left
-# 
+#
 
 gdb_test "info checkpoints" " 1 .* 2 .* 3 .* 4 .* 5 .*" \
     "info checkpoints two"
@@ -271,7 +271,7 @@ gdb_test "info checkpoints" " 1 .* 2 .* 3 .* 4 .* 5 .*" \
 gdb_test "kill" "" "kill all one" \
     "Kill the program being debugged.*y or n. $" "y"
 
-# 
+#
 # and confirm that all are gone
 #
 
@@ -324,7 +324,7 @@ gdb_test_multiple "info checkpoints" $msg {
 	    fail $msg
 	}
     }
-}    
+}
 
 #
 # OK, kill 'em all...

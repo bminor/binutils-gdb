@@ -1,5 +1,5 @@
 /* BFD back-end for IBM RS/6000 "XCOFF64" files.
-   Copyright (C) 2000-2021 Free Software Foundation, Inc.
+   Copyright (C) 2000-2022 Free Software Foundation, Inc.
    Written Clinton Popetz.
    Contributed by Cygnus Support.
 
@@ -386,12 +386,13 @@ _bfd_xcoff64_swap_aux_in (bfd *abfd, void *ext1, int type ATTRIBUTE_UNUSED,
 
       if (ext->x_file.x_n.x_n.x_zeroes[0] == 0)
 	{
-	  in->x_file.x_n.x_zeroes = 0;
-	  in->x_file.x_n.x_offset =
+	  in->x_file.x_n.x_n.x_zeroes = 0;
+	  in->x_file.x_n.x_n.x_offset =
 	    H_GET_32 (abfd, ext->x_file.x_n.x_n.x_offset);
 	}
       else
-	memcpy (in->x_file.x_fname, ext->x_file.x_n.x_fname, FILNMLEN);
+	memcpy (in->x_file.x_n.x_fname, ext->x_file.x_n.x_fname, FILNMLEN);
+      in->x_file.x_ftype = H_GET_8 (abfd, ext->x_file.x_ftype);
       break;
 
       /* RS/6000 "csect" auxents.
@@ -410,11 +411,8 @@ _bfd_xcoff64_swap_aux_in (bfd *abfd, void *ext1, int type ATTRIBUTE_UNUSED,
 	  if (auxtype != _AUX_CSECT)
 	    goto error;
 
-	  bfd_signed_vma h = 0;
-	  bfd_vma l = 0;
-
-	  h = H_GET_S32 (abfd, ext->x_csect.x_scnlen_hi);
-	  l = H_GET_32 (abfd, ext->x_csect.x_scnlen_lo);
+	  bfd_vma h = H_GET_S32 (abfd, ext->x_csect.x_scnlen_hi);
+	  bfd_vma l = H_GET_32 (abfd, ext->x_csect.x_scnlen_lo);
 
 	  in->x_csect.x_scnlen.l = h << 32 | (l & 0xffffffff);
 
@@ -502,14 +500,15 @@ _bfd_xcoff64_swap_aux_out (bfd *abfd, void *inp, int type ATTRIBUTE_UNUSED,
       break;
 
     case C_FILE:
-      if (in->x_file.x_n.x_zeroes == 0)
+      if (in->x_file.x_n.x_n.x_zeroes == 0)
 	{
 	  H_PUT_32 (abfd, 0, ext->x_file.x_n.x_n.x_zeroes);
-	  H_PUT_32 (abfd, in->x_file.x_n.x_offset,
+	  H_PUT_32 (abfd, in->x_file.x_n.x_n.x_offset,
 		    ext->x_file.x_n.x_n.x_offset);
 	}
       else
-	memcpy (ext->x_file.x_n.x_fname, in->x_file.x_fname, FILNMLEN);
+	memcpy (ext->x_file.x_n.x_fname, in->x_file.x_n.x_fname, FILNMLEN);
+      H_PUT_8 (abfd, in->x_file.x_ftype, ext->x_file.x_ftype);
       H_PUT_8 (abfd, _AUX_FILE, ext->x_file.x_auxtype);
       break;
 
@@ -1351,7 +1350,7 @@ reloc_howto_type xcoff64_howto_table[] =
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,			/* special_function */
-	 "R_TLSM",		/* name */
+	 "R_TLSML",		/* name */
 	 true,			/* partial_inplace */
 	 MINUS_ONE,		/* src_mask */
 	 MINUS_ONE,		/* dst_mask */
@@ -1938,8 +1937,6 @@ xcoff64_archive_p (bfd *abfd)
 static bfd *
 xcoff64_openr_next_archived_file (bfd *archive, bfd *last_file)
 {
-  bfd_vma filestart;
-
   if ((xcoff_ardata (archive) == NULL)
       || ! xcoff_big_format_p (archive))
     {
@@ -1947,27 +1944,7 @@ xcoff64_openr_next_archived_file (bfd *archive, bfd *last_file)
       return NULL;
     }
 
-  if (last_file == NULL)
-    {
-      filestart = bfd_ardata (archive)->first_file_filepos;
-    }
-  else
-    {
-      filestart = bfd_scan_vma (arch_xhdr_big (last_file)->nextoff,
-				(const char **) NULL, 10);
-    }
-
-  if (filestart == 0
-      || filestart == bfd_scan_vma (xcoff_ardata_big (archive)->memoff,
-				    (const char **) NULL, 10)
-      || filestart == bfd_scan_vma (xcoff_ardata_big (archive)->symoff,
-				    (const char **) NULL, 10))
-    {
-      bfd_set_error (bfd_error_no_more_archived_files);
-      return NULL;
-    }
-
-  return _bfd_get_elt_at_filepos (archive, (file_ptr) filestart);
+  return _bfd_xcoff_openr_next_archived_file (archive, last_file);
 }
 
 /* We can't use the usual coff_sizeof_headers routine, because AIX

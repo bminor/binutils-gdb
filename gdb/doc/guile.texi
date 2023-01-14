@@ -1,4 +1,4 @@
-@c Copyright (C) 2008--2021 Free Software Foundation, Inc.
+@c Copyright (C) 2008--2022 Free Software Foundation, Inc.
 @c Permission is granted to copy, distribute and/or modify this document
 @c under the terms of the GNU Free Documentation License, Version 1.3 or
 @c any later version published by the Free Software Foundation; with the
@@ -239,8 +239,8 @@ int
 
 The @code{(gdb)} module provides these basic Guile functions.
 
-@c TODO: line length 
-@deffn {Scheme Procedure} execute command @r{[}#:from-tty boolean@r{]} @r{[}#:to-string boolean@r{]}
+@deffn {Scheme Procedure} execute command @w{@r{[}#:from-tty boolean@r{]}} @
+    @w{@r{[}#:to-string boolean@r{]}}
 Evaluate @var{command}, a string, as a @value{GDBN} CLI command.
 If a @value{GDBN} exception happens while @var{command} runs, it is
 translated as described in
@@ -853,8 +853,9 @@ Return a Scheme bytevector with the raw contents of @code{<gdb:value>}
 @var{value}.  No transformation, endian or otherwise, is performed.
 @end deffn
 
-@c TODO: line length
-@deffn {Scheme Procedure} value->string value @r{[}#:encoding encoding@r{]} @r{[}#:errors errors@r{]} @r{[}#:length length@r{]}
+@deffn {Scheme Procedure} value->string value @
+    @w{@r{[}#:encoding encoding@r{]}} @w{@r{[}#:errors errors@r{]}} @
+    @w{@r{[}#:length length@r{]}}
 If @var{value>} represents a string, then this method
 converts the contents to a Guile string.  Otherwise, this method will
 throw an exception.
@@ -895,8 +896,8 @@ fetched and converted to the given length.
 The length must be a Scheme integer and not a @code{<gdb:value>} integer.
 @end deffn
 
-@c TODO: line length
-@deffn {Scheme Procedure} value->lazy-string value @r{[}#:encoding encoding@r{]} @r{[}#:length length@r{]}
+@deffn {Scheme Procedure} value->lazy-string value @
+    @w{@r{[}#:encoding encoding@r{]}} @w{@r{[}#:length length@r{]}}
 If this @code{<gdb:value>} represents a string, then this method
 converts @var{value} to a @code{<gdb:lazy-string} (@pxref{Lazy Strings
 In Guile}).  Otherwise, this method will throw an exception.
@@ -1727,8 +1728,10 @@ the command to @value{GDBN} from @code{make-command}.
 There is no support for multi-line commands, that is commands that
 consist of multiple lines and are terminated with @code{end}.
 
-@c TODO: line length
-@deffn {Scheme Procedure} (make-command name @r{[}#:invoke invoke{]} @r{[}#:command-class command-class@r{]} @r{[}#:completer-class completer{]} @r{[}#:prefix? prefix@r{]} @r{[}#:doc doc-string{]})
+@deffn {Scheme Procedure} make-command name @w{@r{[}#:invoke invoke@r{]}} @
+    @w{@r{[}#:command-class command-class@r{]}} @
+    @w{@r{[}#:completer-class completer@r{]}} @
+    @w{@r{[}#:prefix? prefix@r{]}} @w{@r{[}#:doc doc-string@r{]}}
 
 The argument @var{name} is the name of the command.  If @var{name} consists of
 multiple words, then the initial words are looked for as prefix
@@ -2017,8 +2020,13 @@ the parameter to @value{GDBN} from @code{make-parameter}.
 Parameters are exposed to the user via the @code{set} and
 @code{show} commands.  @xref{Help}.
 
-@c TODO line length
-@deffn {Scheme Procedure} (make-parameter name @r{[}#:command-class command-class@r{]} @r{[}#:parameter-type parameter-type{]} @r{[}#:enum-list enum-list@r{]} @r{[}#:set-func set-func{]} @r{[}#:show-func show-func{]} @r{[}#:doc doc{]} @r{[}#:set-doc set-doc{]} @r{[}#:show-doc show-doc{]} @r{[}#:initial-value initial-value{]})
+@deffn {Scheme Procedure} make-parameter name @
+    @w{@r{[}#:command-class command-class@r{]}} @
+    @w{@r{[}#:parameter-type parameter-type@r{]}} @
+    @w{@r{[}#:enum-list enum-list@r{]}} @w{@r{[}#:set-func set-func@r{]}} @
+    @w{@r{[}#:show-func show-func@r{]}} @w{@r{[}#:doc doc@r{]}} @
+    @w{@r{[}#:set-doc set-doc@r{]}} @w{@r{[}#:show-doc show-doc@r{]}} @
+    @w{@r{[}#:initial-value initial-value@r{]}}
 
 The argument @var{name} is the name of the new parameter.  If @var{name}
 consists of multiple words, then the initial words are looked for as prefix
@@ -2729,8 +2737,8 @@ its value, then @var{frame} must be given.  If @var{frame} is not
 given, or if @var{frame} is invalid, then an exception is thrown.
 @end deffn
 
-@c TODO: line length
-@deffn {Scheme Procedure} lookup-symbol name @r{[}#:block block@r{]} @r{[}#:domain domain@r{]}
+@deffn {Scheme Procedure} lookup-symbol name @w{@r{[}#:block block@r{]}} @
+    @w{@r{[}#:domain domain@r{]}}
 This function searches for a symbol by name.  The search scope can be
 restricted to the parameters defined in the optional domain and block
 arguments.
@@ -2964,8 +2972,9 @@ outside of Guile.
 The following breakpoint-related procedures are provided by the
 @code{(gdb)} module:
 
-@c TODO: line length
-@deffn {Scheme Procedure} make-breakpoint location @r{[}#:type type@r{]} @r{[}#:wp-class wp-class@r{]} @r{[}#:internal internal@r{]} @r{[}#:temporary temporary@r{]}
+@deffn {Scheme Procedure} make-breakpoint location @w{@r{[}#:type type@r{]}} @
+    @w{@r{[}#:wp-class wp-class@r{]}} @w{@r{[}#:internal internal@r{]}} @
+    @w{@r{[}#:temporary temporary@r{]}}
 Create a new breakpoint at @var{location}, a string naming the
 location of the breakpoint, or an expression that defines a watchpoint.
 The contents can be any location recognized by the @code{break} command,
@@ -3469,8 +3478,9 @@ The disassembler can be invoked from Scheme code.
 Furthermore, the disassembler can take a Guile port as input,
 allowing one to disassemble from any source, and not just target memory.
 
-@c TODO: line length
-@deffn {Scheme Procedure} arch-disassemble arch start-pc @r{[}#:port port@r{]} @r{[}#:offset offset@r{]} @r{[}#:size size@r{]} @r{[}#:count count@r{]}
+@deffn {Scheme Procedure} arch-disassemble arch start-pc @
+    @w{@r{[}#:port port@r{]}} @w{@r{[}#:offset offset@r{]}} @
+    @w{@r{[}#:size size@r{]}} @w{@r{[}#:count count@r{]}}
 Return a list of disassembled instructions starting from the memory
 address @var{start-pc}.
 
@@ -3561,7 +3571,8 @@ This allows Guile code to read/write target memory using Guile's port and
 bytevector functionality.  The main routine is @code{open-memory} which
 returns a port object.  One can then read/write memory using that object.
 
-@deffn {Scheme Procedure} open-memory @r{[}#:mode mode{]} @r{[}#:start address{]} @r{[}#:size size{]}
+@deffn {Scheme Procedure} open-memory @w{@r{[}#:mode mode@r{]}} @
+    @w{@r{[}#:start address@r{]}} @w{@r{[}#:size size@r{]}}
 Return a port object that can be used for reading and writing memory.
 The port will be open according to @var{mode}, which is the standard
 mode argument to Guile port open routines, except that the @samp{"a"}

@@ -1,6 +1,6 @@
 /* Solaris threads debugging interface.
 
-   Copyright (C) 1996-2021 Free Software Foundation, Inc.
+   Copyright (C) 1996-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -88,7 +88,7 @@ public:
   void resume (ptid_t, int, enum gdb_signal) override;
   void mourn_inferior () override;
   std::string pid_to_str (ptid_t) override;
-  ptid_t get_ada_task_ptid (long lwp, long thread) override;
+  ptid_t get_ada_task_ptid (long lwp, ULONGEST thread) override;
 
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
@@ -441,7 +441,7 @@ sol_thread_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
   ptid_t rtnval = beneath ()->wait (ptid, ourstatus, options);
 
-  if (ourstatus->kind != TARGET_WAITKIND_EXITED)
+  if (ourstatus->kind () != TARGET_WAITKIND_EXITED)
     {
       /* Map the LWP of interest back to the appropriate thread ID.  */
       ptid_t thr_ptid = lwp_to_thread (rtnval);
@@ -1120,7 +1120,7 @@ info_solthreads (const char *args, int from_tty)
 static int
 thread_db_find_thread_from_tid (struct thread_info *thread, void *data)
 {
-  long *tid = (long *) data;
+  ULONGEST *tid = (ULONGEST *) data;
 
   if (thread->ptid.tid () == *tid)
     return 1;
@@ -1129,7 +1129,7 @@ thread_db_find_thread_from_tid (struct thread_info *thread, void *data)
 }
 
 ptid_t
-sol_thread_target::get_ada_task_ptid (long lwp, long thread)
+sol_thread_target::get_ada_task_ptid (long lwp, ULONGEST thread)
 {
   struct thread_info *thread_info =
     iterate_over_threads (thread_db_find_thread_from_tid, &thread);

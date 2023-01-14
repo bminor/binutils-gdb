@@ -1,5 +1,5 @@
 /* bfdlink.h -- header file for BFD link routines
-   Copyright (C) 1993-2021 Free Software Foundation, Inc.
+   Copyright (C) 1993-2022 Free Software Foundation, Inc.
    Written by Steve Chamberlain and Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -413,6 +413,10 @@ struct bfd_link_info
   /* TRUE if PT_GNU_RELRO segment should be created.  */
   unsigned int relro: 1;
 
+  /* TRUE if DT_RELR should be enabled for compact relative
+     relocations.  */
+  unsigned int enable_dt_relr: 1;
+
   /* TRUE if separate code segment should be created.  */
   unsigned int separate_code: 1;
 
@@ -524,6 +528,12 @@ struct bfd_link_info
 
   /* TRUE if all symbol names should be unique.  */
   unsigned int unique_symbol : 1;
+
+  /* TRUE if maxpagesize is set on command-line.  */
+  unsigned int maxpagesize_is_set : 1;
+
+  /* TRUE if commonpagesize is set on command-line.  */
+  unsigned int commonpagesize_is_set : 1;
 
   /* Char that may appear as the first char of a symbol, but should be
      skipped (like symbol_leading_char) when looking up symbols in

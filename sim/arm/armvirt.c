@@ -46,6 +46,7 @@
 
 #endif
 
+#undef PAGESIZE			/* Cleanup system headers.  */
 #define NUMPAGES 64 * 1024
 #define PAGESIZE 64 * 1024
 #define PAGEBITS 16

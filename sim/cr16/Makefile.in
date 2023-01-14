@@ -1,5 +1,5 @@
 # Makefile template for Configure for the CR16 sim library.
-# Copyright (C) 2008-2021 Free Software Foundation, Inc.
+# Copyright (C) 2008-2022 Free Software Foundation, Inc.
 # Contributed by M Ranga Swami Reddy <MR.Swami.Reddy@nsc.com>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -23,32 +23,7 @@ SIM_OBJS = \
 	interp.o \
 	table.o \
 	simops.o
-SIM_EXTRA_CLEAN = clean-extra
 
 SIM_EXTRA_DEPS = simops.h
 
-INCLUDE = cr16_sim.h $(srcroot)/include/sim/callback.h targ-vals.h \
-	$(srcroot)/include/gdb/sim-cr16.h
-
-# This selects the cr16 newlib/libgloss syscall definitions.
-NL_TARGET = -DNL_TARGET_cr16
-
 ## COMMON_POST_CONFIG_FRAG
-
-simops.h: gencode
-	./gencode -h >$@
-
-table.c: gencode simops.h
-	./gencode >$@
-
-gencode.o: gencode.c $(INCLUDE)
-	$(COMPILE_FOR_BUILD) $(WARN_CFLAGS) -c $(srcdir)/gencode.c
-
-cr16-opc.o: $(srcdir)/../../opcodes/cr16-opc.c
-	$(COMPILE_FOR_BUILD) $(WARN_CFLAGS) -c $(srcdir)/../../opcodes/cr16-opc.c
-
-gencode: gencode.o cr16-opc.o
-	$(LINK_FOR_BUILD) gencode.o cr16-opc.o
-
-clean-extra:
-	rm -f table.c simops.h gencode

@@ -1,5 +1,5 @@
 /* Read coff symbol tables and convert to internal format, for GDB.
-   Copyright (C) 1987-2021 Free Software Foundation, Inc.
+   Copyright (C) 1987-2022 Free Software Foundation, Inc.
    Contributed by David D. Johnson, Brown University (ddj@cs.brown.edu).
 
    This file is part of GDB.
@@ -24,7 +24,7 @@
 #include "breakpoint.h"
 
 #include "bfd.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include <ctype.h>
 
 #include "coff/internal.h"	/* Internal format of COFF symbols in BFD */
@@ -1177,7 +1177,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
   {
     for (compunit_symtab *cu : objfile->compunits ())
       {
-	for (symtab *s : compunit_filetabs (cu))
+	for (symtab *s : cu->filetabs ())
 	  patch_opaque_types (s);
       }
   }
@@ -1340,15 +1340,15 @@ coff_getfilename (union internal_auxent *aux_entry)
   static char buffer[BUFSIZ];
   const char *result;
 
-  if (aux_entry->x_file.x_n.x_zeroes == 0)
+  if (aux_entry->x_file.x_n.x_n.x_zeroes == 0)
     {
-      if (strlen (stringtab + aux_entry->x_file.x_n.x_offset) >= BUFSIZ)
+      if (strlen (stringtab + aux_entry->x_file.x_n.x_n.x_offset) >= BUFSIZ)
 	internal_error (__FILE__, __LINE__, _("coff file name too long"));
-      strcpy (buffer, stringtab + aux_entry->x_file.x_n.x_offset);
+      strcpy (buffer, stringtab + aux_entry->x_file.x_n.x_n.x_offset);
     }
   else
     {
-      strncpy (buffer, aux_entry->x_file.x_fname, FILNMLEN);
+      strncpy (buffer, aux_entry->x_file.x_n.x_fname, FILNMLEN);
       buffer[FILNMLEN] = '\0';
     }
   result = buffer;
@@ -1483,7 +1483,7 @@ patch_opaque_types (struct symtab *s)
   struct symbol *real_sym;
 
   /* Go through the per-file symbols only.  */
-  b = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (s), STATIC_BLOCK);
+  b = BLOCKVECTOR_BLOCK (s->blockvector (), STATIC_BLOCK);
   ALL_BLOCK_SYMBOLS (b, iter, real_sym)
     {
       /* Find completed typedefs to use to fix opaque ones.
@@ -1575,7 +1575,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	lookup_function_type (decode_function_type (cs, cs->c_type,
 						    aux, objfile));
 
-      SYMBOL_ACLASS_INDEX (sym) = LOC_BLOCK;
+      sym->set_aclass_index (LOC_BLOCK);
       if (cs->c_sclass == C_STAT || cs->c_sclass == C_THUMBSTAT
 	  || cs->c_sclass == C_THUMBSTATFUNC)
 	add_symbol_to_list (sym, get_file_symbols ());
@@ -1592,14 +1592,14 @@ process_coff_symbol (struct coff_symbol *cs,
 	  break;
 
 	case C_AUTO:
-	  SYMBOL_ACLASS_INDEX (sym) = LOC_LOCAL;
+	  sym->set_aclass_index (LOC_LOCAL);
 	  add_symbol_to_list (sym, get_local_symbols ());
 	  break;
 
 	case C_THUMBEXT:
 	case C_THUMBEXTFUNC:
 	case C_EXT:
-	  SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
+	  sym->set_aclass_index (LOC_STATIC);
 	  SET_SYMBOL_VALUE_ADDRESS (sym,
 				    (CORE_ADDR) cs->c_value
 				    + objfile->section_offsets[SECT_OFF_TEXT (objfile)]);
@@ -1609,7 +1609,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	case C_THUMBSTAT:
 	case C_THUMBSTATFUNC:
 	case C_STAT:
-	  SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
+	  sym->set_aclass_index (LOC_STATIC);
 	  SET_SYMBOL_VALUE_ADDRESS (sym,
 				    (CORE_ADDR) cs->c_value
 				    + objfile->section_offsets[SECT_OFF_TEXT (objfile)]);
@@ -1629,7 +1629,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	case C_GLBLREG:
 #endif
 	case C_REG:
-	  SYMBOL_ACLASS_INDEX (sym) = coff_register_index;
+	  sym->set_aclass_index (coff_register_index);
 	  SYMBOL_VALUE (sym) = cs->c_value;
 	  add_symbol_to_list (sym, get_local_symbols ());
 	  break;
@@ -1639,20 +1639,20 @@ process_coff_symbol (struct coff_symbol *cs,
 	  break;
 
 	case C_ARG:
-	  SYMBOL_ACLASS_INDEX (sym) = LOC_ARG;
+	  sym->set_aclass_index (LOC_ARG);
 	  SYMBOL_IS_ARGUMENT (sym) = 1;
 	  add_symbol_to_list (sym, get_local_symbols ());
 	  break;
 
 	case C_REGPARM:
-	  SYMBOL_ACLASS_INDEX (sym) = coff_register_index;
+	  sym->set_aclass_index (coff_register_index);
 	  SYMBOL_IS_ARGUMENT (sym) = 1;
 	  SYMBOL_VALUE (sym) = cs->c_value;
 	  add_symbol_to_list (sym, get_local_symbols ());
 	  break;
 
 	case C_TPDEF:
-	  SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
+	  sym->set_aclass_index (LOC_TYPEDEF);
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 
 	  /* If type has no name, give it one.  */
@@ -1707,7 +1707,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	case C_STRTAG:
 	case C_UNTAG:
 	case C_ENTAG:
-	  SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
+	  sym->set_aclass_index (LOC_TYPEDEF);
 	  SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
 
 	  /* Some compilers try to be helpful by inventing "fake"
@@ -2008,10 +2008,11 @@ coff_read_struct_type (int index, int length, int lastsym,
 	  list = newobj;
 
 	  /* Save the data.  */
-	  list->field.name = obstack_strdup (&objfile->objfile_obstack, name);
+	  list->field.set_name (obstack_strdup (&objfile->objfile_obstack,
+						name));
 	  list->field.set_type (decode_type (ms, ms->c_type, &sub_aux,
 					     objfile));
-	  SET_FIELD_BITPOS (list->field, 8 * ms->c_value);
+	  list->field.set_loc_bitpos (8 * ms->c_value);
 	  FIELD_BITSIZE (list->field) = 0;
 	  nfields++;
 	  break;
@@ -2024,10 +2025,11 @@ coff_read_struct_type (int index, int length, int lastsym,
 	  list = newobj;
 
 	  /* Save the data.  */
-	  list->field.name = obstack_strdup (&objfile->objfile_obstack, name);
+	  list->field.set_name (obstack_strdup (&objfile->objfile_obstack,
+						name));
 	  list->field.set_type (decode_type (ms, ms->c_type, &sub_aux,
 					     objfile));
-	  SET_FIELD_BITPOS (list->field, ms->c_value);
+	  list->field.set_loc_bitpos (ms->c_value);
 	  FIELD_BITSIZE (list->field) = sub_aux.x_sym.x_misc.x_lnsz.x_size;
 	  nfields++;
 	  break;
@@ -2096,7 +2098,7 @@ coff_read_enum_type (int index, int length, int lastsym,
 
 	  name = obstack_strdup (&objfile->objfile_obstack, name);
 	  sym->set_linkage_name (name);
-	  SYMBOL_ACLASS_INDEX (sym) = LOC_CONST;
+	  sym->set_aclass_index (LOC_CONST);
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	  SYMBOL_VALUE (sym) = ms->c_value;
 	  add_symbol_to_list (sym, symlist);
@@ -2142,8 +2144,8 @@ coff_read_enum_type (int index, int length, int lastsym,
 	  struct symbol *xsym = syms->symbol[j];
 
 	  SYMBOL_TYPE (xsym) = type;
-	  TYPE_FIELD_NAME (type, n) = xsym->linkage_name ();
-	  SET_FIELD_ENUMVAL (type->field (n), SYMBOL_VALUE (xsym));
+	  type->field (n).set_name (xsym->linkage_name ());
+	  type->field (n).set_loc_enumval (SYMBOL_VALUE (xsym));
 	  if (SYMBOL_VALUE (xsym) < 0)
 	    unsigned_enum = 0;
 	  TYPE_FIELD_BITSIZE (type, n) = 0;

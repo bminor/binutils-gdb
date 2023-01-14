@@ -1,6 +1,6 @@
 /* Convert a DWARF location expression to C
 
-   Copyright (C) 2014-2021 Free Software Foundation, Inc.
+   Copyright (C) 2014-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,6 +19,7 @@
 
 #include "defs.h"
 #include "dwarf2.h"
+#include "objfiles.h"
 #include "dwarf2/expr.h"
 #include "dwarf2/loc.h"
 #include "dwarf2/read.h"
@@ -674,7 +675,7 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
       uint64_t uoffset, reg;
       int64_t offset;
 
-      print_spaces (indent - 2, stream);
+      stream->printf ("%*s", indent - 2, "");
       if (info[op_ptr - base].label)
 	{
 	  print_label (stream, scope, op_ptr - base);

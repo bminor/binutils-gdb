@@ -1,5 +1,5 @@
 /* Disassemble AVR instructions.
-   Copyright (C) 1999-2021 Free Software Foundation, Inc.
+   Copyright (C) 1999-2022 Free Software Foundation, Inc.
 
    Contributed by Denis Chertykov <denisc@overta.ru>
 
@@ -49,8 +49,17 @@ const struct avr_opcodes_s avr_opcodes[] =
 static const char * comment_start = "0x";
 
 static int
-avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constraint,
-             char *opcode_str, char *buf, char *comment, int regs, int *sym, bfd_vma *sym_addr)
+avr_operand (unsigned int        insn,
+	     unsigned int        insn2,
+	     unsigned int        pc,
+	     int                 constraint,
+             char *              opcode_str,
+	     char *              buf,
+	     char *              comment,
+	     int                 regs,
+	     int *               sym,
+	     bfd_vma *           sym_addr,
+	     disassemble_info *  info)
 {
   int ok = 1;
   *sym = 0;
@@ -161,6 +170,9 @@ avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constra
 	 objdump_print_address() which would affect many targets.  */
       sprintf (buf, "%#lx", (unsigned long) *sym_addr);
       strcpy (comment, comment_start);
+      info->insn_info_valid = 1;
+      info->insn_type = dis_jsr;
+      info->target = *sym_addr;
       break;
 
     case 'L':
@@ -170,6 +182,9 @@ avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constra
         *sym = 1;
         *sym_addr = pc + 2 + rel_addr;
 	strcpy (comment, comment_start);
+        info->insn_info_valid = 1;
+        info->insn_type = dis_branch;
+        info->target = *sym_addr;
       }
       break;
 
@@ -181,6 +196,9 @@ avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constra
         *sym = 1;
         *sym_addr = pc + 2 + rel_addr;
 	strcpy (comment, comment_start);
+        info->insn_info_valid = 1;
+        info->insn_type = dis_condbranch;
+        info->target = *sym_addr;
       }
       break;
 
@@ -314,6 +332,13 @@ print_insn_avr (bfd_vma addr, disassemble_info *info)
   int sym_op1 = 0, sym_op2 = 0;
   bfd_vma sym_addr1, sym_addr2;
 
+  /* Clear instruction information field.  */
+  info->insn_info_valid = 0;
+  info->branch_delay_insns = 0;
+  info->data_size = 0;
+  info->insn_type = dis_noninsn;
+  info->target = 0;
+  info->target2 = 0;
 
   if (!initialized)
     {
@@ -395,11 +420,13 @@ print_insn_avr (bfd_vma addr, disassemble_info *info)
 	{
 	  int regs = REGISTER_P (*constraints);
 
-	  ok = avr_operand (insn, insn2, addr, *constraints, opcode_str, op1, comment1, 0, &sym_op1, &sym_addr1);
+	  ok = avr_operand (insn, insn2, addr, *constraints, opcode_str, op1,
+			    comment1, 0, &sym_op1, &sym_addr1, info);
 
 	  if (ok && *(++constraints) == ',')
-	    ok = avr_operand (insn, insn2, addr, *(++constraints), opcode_str, op2,
-			      *comment1 ? comment2 : comment1, regs, &sym_op2, &sym_addr2);
+	    ok = avr_operand (insn, insn2, addr, *(++constraints), opcode_str,
+			      op2, *comment1 ? comment2 : comment1, regs,
+			      &sym_op2, &sym_addr2, info);
 	}
     }
 

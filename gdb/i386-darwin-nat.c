@@ -1,5 +1,5 @@
 /* Darwin support for GDB, the GNU debugger.
-   Copyright (C) 1997-2021 Free Software Foundation, Inc.
+   Copyright (C) 1997-2022 Free Software Foundation, Inc.
 
    Contributed by Apple Computer, Inc.
 
@@ -77,9 +77,9 @@ i386_darwin_nat_target::fetch_registers (struct regcache *regcache, int regno)
 	     &gp_count);
 	  if (ret != KERN_SUCCESS)
 	    {
-	      printf_unfiltered (_("Error calling thread_get_state for "
-				   "GP registers for thread 0x%lx\n"),
-				 (unsigned long) current_thread);
+	      warning (_("Error calling thread_get_state for "
+			 "GP registers for thread 0x%lx\n"),
+		       (unsigned long) current_thread);
 	      MACH_CHECK_ERROR (ret);
 	    }
 
@@ -102,9 +102,9 @@ i386_darwin_nat_target::fetch_registers (struct regcache *regcache, int regno)
 	     &fp_count);
 	  if (ret != KERN_SUCCESS)
 	    {
-	      printf_unfiltered (_("Error calling thread_get_state for "
-				   "float registers for thread 0x%lx\n"),
-				 (unsigned long) current_thread);
+	      warning (_("Error calling thread_get_state for "
+			 "float registers for thread 0x%lx\n"),
+		       (unsigned long) current_thread);
 	      MACH_CHECK_ERROR (ret);
 	    }
 	  amd64_supply_fxsave (regcache, -1, &fp_regs.ufs.fs64.__fpu_fcw);
@@ -126,9 +126,9 @@ i386_darwin_nat_target::fetch_registers (struct regcache *regcache, int regno)
 	     &gp_count);
 	  if (ret != KERN_SUCCESS)
 	    {
-	      printf_unfiltered (_("Error calling thread_get_state for "
-				   "GP registers for thread 0x%lx\n"),
-				 (unsigned long) current_thread);
+	      warning (_("Error calling thread_get_state for "
+			 "GP registers for thread 0x%lx\n"),
+		       (unsigned long) current_thread);
 	      MACH_CHECK_ERROR (ret);
 	    }
 	  for (i = 0; i < I386_NUM_GREGS; i++)
@@ -150,9 +150,9 @@ i386_darwin_nat_target::fetch_registers (struct regcache *regcache, int regno)
 	     &fp_count);
 	  if (ret != KERN_SUCCESS)
 	    {
-	      printf_unfiltered (_("Error calling thread_get_state for "
-				   "float registers for thread 0x%lx\n"),
-				 (unsigned long) current_thread);
+	      warning (_("Error calling thread_get_state for "
+			 "float registers for thread 0x%lx\n"),
+		       (unsigned long) current_thread);
 	      MACH_CHECK_ERROR (ret);
 	    }
 	  i387_supply_fxsave (regcache, -1, &fp_regs.__fpu_fcw);
@@ -588,8 +588,8 @@ darwin_set_sstep (thread_t thread, int enable)
 			   (thread_state_t) &regs, &count);
   if (kret != KERN_SUCCESS)
     {
-      printf_unfiltered (_("darwin_set_sstep: error %x, thread=%x\n"),
-			 kret, thread);
+      warning (_("darwin_set_sstep: error %x, thread=%x\n"),
+	       kret, thread);
       return;
     }
 

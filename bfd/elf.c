@@ -1,6 +1,6 @@
 /* ELF executable support for BFD.
 
-   Copyright (C) 1993-2021 Free Software Foundation, Inc.
+   Copyright (C) 1993-2022 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -1773,6 +1773,9 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
 	    case DT_REL: name = "REL"; break;
 	    case DT_RELSZ: name = "RELSZ"; break;
 	    case DT_RELENT: name = "RELENT"; break;
+	    case DT_RELR: name = "RELR"; break;
+	    case DT_RELRSZ: name = "RELRSZ"; break;
+	    case DT_RELRENT: name = "RELRENT"; break;
 	    case DT_PLTREL: name = "PLTREL"; break;
 	    case DT_DEBUG: name = "DEBUG"; break;
 	    case DT_TEXTREL: name = "TEXTREL"; break;
@@ -2356,16 +2359,22 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 
     case SHT_REL:
     case SHT_RELA:
+    case SHT_RELR:
       /* *These* do a lot of work -- but build no sections!  */
       {
 	asection *target_sect;
 	Elf_Internal_Shdr *hdr2, **p_hdr;
 	unsigned int num_sec = elf_numsections (abfd);
 	struct bfd_elf_section_data *esdt;
+	bfd_size_type size;
 
-	if (hdr->sh_entsize
-	    != (bfd_size_type) (hdr->sh_type == SHT_REL
-				? bed->s->sizeof_rel : bed->s->sizeof_rela))
+	if (hdr->sh_type == SHT_REL)
+	  size = bed->s->sizeof_rel;
+	else if (hdr->sh_type == SHT_RELA)
+	  size = bed->s->sizeof_rela;
+	else
+	  size = bed->s->arch_size / 8;
+	if (hdr->sh_entsize != size)
 	  goto fail;
 
 	/* Check for a bogus link to avoid crashing.  */
@@ -2378,40 +2387,6 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	    ret = _bfd_elf_make_section_from_shdr (abfd, hdr, name,
 						   shindex);
 	    goto success;
-	  }
-
-	/* For some incomprehensible reason Oracle distributes
-	   libraries for Solaris in which some of the objects have
-	   bogus sh_link fields.  It would be nice if we could just
-	   reject them, but, unfortunately, some people need to use
-	   them.  We scan through the section headers; if we find only
-	   one suitable symbol table, we clobber the sh_link to point
-	   to it.  I hope this doesn't break anything.
-
-	   Don't do it on executable nor shared library.  */
-	if ((abfd->flags & (DYNAMIC | EXEC_P)) == 0
-	    && elf_elfsections (abfd)[hdr->sh_link]->sh_type != SHT_SYMTAB
-	    && elf_elfsections (abfd)[hdr->sh_link]->sh_type != SHT_DYNSYM)
-	  {
-	    unsigned int scan;
-	    int found;
-
-	    found = 0;
-	    for (scan = 1; scan < num_sec; scan++)
-	      {
-		if (elf_elfsections (abfd)[scan]->sh_type == SHT_SYMTAB
-		    || elf_elfsections (abfd)[scan]->sh_type == SHT_DYNSYM)
-		  {
-		    if (found != 0)
-		      {
-			found = 0;
-			break;
-		      }
-		    found = scan;
-		  }
-	      }
-	    if (found != 0)
-	      hdr->sh_link = found;
 	  }
 
 	/* Get the symbol table.  */
@@ -2739,6 +2714,7 @@ static const struct bfd_elf_special_section special_sections_r[] =
 {
   { STRING_COMMA_LEN (".rodata"), -2, SHT_PROGBITS, SHF_ALLOC },
   { STRING_COMMA_LEN (".rodata1"), 0, SHT_PROGBITS, SHF_ALLOC },
+  { STRING_COMMA_LEN (".relr.dyn"), 0, SHT_RELR, SHF_ALLOC },
   { STRING_COMMA_LEN (".rela"),	  -1, SHT_RELA,	    0 },
   { STRING_COMMA_LEN (".rel"),	  -1, SHT_REL,	    0 },
   { NULL,		    0,	   0, 0,	    0 }
@@ -3526,7 +3502,8 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
 	  /* If called from the assembler, swap_out_syms will have set up
 	     elf_section_syms.
 	     PR 25699: A corrupt input file could contain bogus group info.  */
-	  if (elf_section_syms (abfd) == NULL)
+	  if (sec->index >= elf_num_section_syms (abfd)
+	      || elf_section_syms (abfd)[sec->index] == NULL)
 	    {
 	      *failedptr = true;
 	      return;
@@ -3770,9 +3747,9 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
     }
 
   need_symtab = (bfd_get_symcount (abfd) > 0
-		|| (link_info == NULL
-		    && ((abfd->flags & (EXEC_P | DYNAMIC | HAS_RELOC))
-			== HAS_RELOC)));
+		 || (link_info == NULL
+		     && ((abfd->flags & (EXEC_P | DYNAMIC | HAS_RELOC))
+			 == HAS_RELOC)));
   if (need_symtab)
     {
       elf_onesymtab (abfd) = section_number++;
@@ -3926,11 +3903,17 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 	     section.  sh_link is the section index of the symbol
 	     table.  sh_info is the section index of the section to
 	     which the relocation entries apply.  We assume that an
-	     allocated reloc section uses the dynamic symbol table.
-	     FIXME: How can we be sure?  */
-	  s = bfd_get_section_by_name (abfd, ".dynsym");
-	  if (s != NULL)
-	    d->this_hdr.sh_link = elf_section_data (s)->this_idx;
+	     allocated reloc section uses the dynamic symbol table
+	     if there is one.  Otherwise we guess the normal symbol
+	     table.  FIXME: How can we be sure?  */
+	  if (d->this_hdr.sh_link == 0 && (sec->flags & SEC_ALLOC) != 0)
+	    {
+	      s = bfd_get_section_by_name (abfd, ".dynsym");
+	      if (s != NULL)
+		d->this_hdr.sh_link = elf_section_data (s)->this_idx;
+	    }
+	  if (d->this_hdr.sh_link == 0)
+	    d->this_hdr.sh_link = elf_onesymtab (abfd);
 
 	  s = elf_get_reloc_section (sec);
 	  if (s != NULL)
@@ -3985,8 +3968,8 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 	  /* sh_link is the section header index of the prelink library
 	     list used for the dynamic entries, or the symbol table, or
 	     the version strings.  */
-	  s = bfd_get_section_by_name (abfd, (sec->flags & SEC_ALLOC)
-					     ? ".dynstr" : ".gnu.libstr");
+	  s = bfd_get_section_by_name (abfd, ((sec->flags & SEC_ALLOC)
+					      ? ".dynstr" : ".gnu.libstr"));
 	  if (s != NULL)
 	    d->this_hdr.sh_link = elf_section_data (s)->this_idx;
 	  break;
@@ -4360,6 +4343,20 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
   return true;
 }
 
+/* Retrieve .eh_frame_hdr.  Prior to size_dynamic_sections the
+   function effectively returns whether --eh-frame-hdr is given on the
+   command line.  After size_dynamic_sections the result reflects
+   whether .eh_frame_hdr will actually be output (sizing isn't done
+   until ldemul_after_allocation).  */
+
+static asection *
+elf_eh_frame_hdr (const struct bfd_link_info *info)
+{
+  if (info != NULL && is_elf_hash_table (info->hash))
+    return elf_hash_table (info)->eh_info.hdr_sec;
+  return NULL;
+}
+
 /* Make an initial estimate of the size of the program header.  If we
    get the number wrong here, we'll redo section placement.  */
 
@@ -4396,7 +4393,7 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
       ++segs;
     }
 
-  if (elf_eh_frame_hdr (abfd))
+  if (elf_eh_frame_hdr (info))
     {
       /* We need a PT_GNU_EH_FRAME segment.  */
       ++segs;
@@ -4626,10 +4623,13 @@ elf_modify_segment_map (bfd *abfd,
 #define IS_TBSS(s) \
   ((s->flags & (SEC_THREAD_LOCAL | SEC_LOAD)) == SEC_THREAD_LOCAL)
 
-/* Set up a mapping from BFD sections to program segments.  */
+/* Set up a mapping from BFD sections to program segments.  Update
+   NEED_LAYOUT if the section layout is changed.  */
 
 bool
-_bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
+_bfd_elf_map_sections_to_segments (bfd *abfd,
+				   struct bfd_link_info *info,
+				   bool *need_layout)
 {
   unsigned int count;
   struct elf_segment_map *m;
@@ -4640,7 +4640,17 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
   no_user_phdrs = elf_seg_map (abfd) == NULL;
 
   if (info != NULL)
-    info->user_phdrs = !no_user_phdrs;
+    {
+      info->user_phdrs = !no_user_phdrs;
+
+      /* Size the relative relocations if DT_RELR is enabled.  */
+      if (info->enable_dt_relr
+	  && need_layout != NULL
+	  && bed->size_relative_relocs
+	  && !bed->size_relative_relocs (info, need_layout))
+	info->callbacks->einfo
+	  (_("%F%P: failed to size relative relocations\n"));
+    }
 
   if (no_user_phdrs && bfd_count_sections (abfd) != 0)
     {
@@ -5138,7 +5148,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 
       /* If there is a .eh_frame_hdr section, throw in a PT_GNU_EH_FRAME
 	 segment.  */
-      eh_frame_hdr = elf_eh_frame_hdr (abfd);
+      eh_frame_hdr = elf_eh_frame_hdr (info);
       if (eh_frame_hdr != NULL
 	  && (eh_frame_hdr->output_section->flags & SEC_LOAD) != 0)
 	{
@@ -5425,13 +5435,15 @@ assign_file_positions_for_load_sections (bfd *abfd,
   Elf_Internal_Phdr *p;
   file_ptr off;  /* Octets.  */
   bfd_size_type maxpagesize;
+  bfd_size_type p_align;
+  bool p_align_p = false;
   unsigned int alloc, actual;
   unsigned int i, j;
   struct elf_segment_map **sorted_seg_map;
   unsigned int opb = bfd_octets_per_byte (abfd, NULL);
 
   if (link_info == NULL
-      && !_bfd_elf_map_sections_to_segments (abfd, link_info))
+      && !_bfd_elf_map_sections_to_segments (abfd, link_info, NULL))
     return false;
 
   alloc = 0;
@@ -5509,6 +5521,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
     qsort (sorted_seg_map, alloc, sizeof (*sorted_seg_map),
 	   elf_sort_segments);
 
+  p_align = bed->p_align;
   maxpagesize = 1;
   if ((abfd->flags & D_PAGED) != 0)
     {
@@ -5579,6 +5592,15 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	     segment.  */
 	  if (m->p_align_valid)
 	    maxpagesize = m->p_align;
+	  else if (p_align != 0
+		   && (link_info == NULL
+		       || !link_info->maxpagesize_is_set))
+	    /* Set p_align to the default p_align value while laying
+	       out segments aligning to the maximum page size or the
+	       largest section alignment.  The run-time loader can
+	       align segments to the default p_align value or the
+	       maximum page size, depending on system page size.  */
+	    p_align_p = true;
 
 	  p->p_align = maxpagesize;
 	}
@@ -5616,7 +5638,22 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		}
 	      align = (bfd_size_type) 1 << align_power;
 	      if (align < maxpagesize)
-		align = maxpagesize;
+		{
+		  /* If a section requires alignment higher than the
+		     default p_align value, don't set p_align to the
+		     default p_align value.  */
+		  if (align > p_align)
+		    p_align_p = false;
+		  align = maxpagesize;
+		}
+	      else
+		{
+		  /* If a section requires alignment higher than the
+		     maximum page size, set p_align to the section
+		     alignment.  */
+		  p_align_p = true;
+		  p_align = align;
+		}
 	    }
 
 	  for (i = 0; i < m->count; i++)
@@ -5995,6 +6032,9 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		  print_segment_map (m);
 		}
 	    }
+
+	  if (p_align_p)
+	    p->p_align = p_align;
 	}
     }
 
@@ -6258,10 +6298,15 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 		    }
 		}
 	    }
-	  if (link_info != NULL)
-	    BFD_ASSERT (ok);
+
 	  if (!ok)
-	    memset (p, 0, sizeof *p);
+	    {
+	      if (link_info != NULL)
+		_bfd_error_handler
+		  (_("%pB: warning: unable to allocate any sections to PT_GNU_RELRO segment"),
+		   abfd);
+	      memset (p, 0, sizeof *p);
+	    }
 	}
       else if (p->p_type == PT_GNU_STACK)
 	{
@@ -6302,8 +6347,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 		  Elf_Internal_Shdr *hdr = &elf_section_data (sect)->this_hdr;
 		  if (hdr->sh_type != SHT_NOBITS)
 		    {
-		      p->p_filesz = (sect->filepos - m->sections[0]->filepos
-				     + hdr->sh_size);
+		      p->p_filesz = sect->filepos - p->p_offset + hdr->sh_size;
 		      /* NB: p_memsz of the loadable PT_NOTE segment
 			 should be the same as p_filesz.  */
 		      if (p->p_type == PT_NOTE
@@ -6778,15 +6822,14 @@ _bfd_elf_symbol_from_bfd_symbol (bfd *abfd, asymbol **asym_ptr_ptr)
       && asym_ptr->section)
     {
       asection *sec;
-      int indx;
 
       sec = asym_ptr->section;
       if (sec->owner != abfd && sec->output_section != NULL)
 	sec = sec->output_section;
       if (sec->owner == abfd
-	  && (indx = sec->index) < elf_num_section_syms (abfd)
-	  && elf_section_syms (abfd)[indx] != NULL)
-	asym_ptr->udata.i = elf_section_syms (abfd)[indx]->udata.i;
+	  && sec->index < elf_num_section_syms (abfd)
+	  && elf_section_syms (abfd)[sec->index] != NULL)
+	asym_ptr->udata.i = elf_section_syms (abfd)[sec->index]->udata.i;
     }
 
   idx = asym_ptr->udata.i;
@@ -6953,9 +6996,14 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd, bfd_vma maxpagesize)
    && !(SEGMENT_AFTER_SEGMENT (seg1, seg2, p_paddr)			\
 	|| SEGMENT_AFTER_SEGMENT (seg2, seg1, p_paddr)))
 
-  /* Initialise the segment mark field.  */
+  /* Initialise the segment mark field, and discard stupid alignment.  */
   for (section = ibfd->sections; section != NULL; section = section->next)
-    section->segment_mark = false;
+    {
+      asection *o = section->output_section;
+      if (o != NULL && o->alignment_power >= (sizeof (bfd_vma) * 8) - 1)
+	o->alignment_power = 0;
+      section->segment_mark = false;
+    }
 
   /* The Solaris linker creates program headers in which all the
      p_paddr fields are zero.  When we try to objcopy or strip such a
@@ -7494,6 +7542,40 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd, bfd_vma maxpagesize)
   return true;
 }
 
+/* Return true if p_align in the ELF program header in ABFD is valid.  */
+
+static bool
+elf_is_p_align_valid (bfd *abfd)
+{
+  unsigned int i;
+  Elf_Internal_Phdr *segment;
+  unsigned int num_segments;
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  bfd_size_type maxpagesize = bed->maxpagesize;
+  bfd_size_type p_align = bed->p_align;
+
+  /* Return true if the default p_align value isn't set or the maximum
+     page size is the same as the minimum page size.  */
+  if (p_align == 0 || maxpagesize == bed->minpagesize)
+    return true;
+
+  /* When the default p_align value is set, p_align may be set to the
+     default p_align value while segments are aligned to the maximum
+     page size.  In this case, the input p_align will be ignored and
+     the maximum page size will be used to align the output segments.  */
+  segment = elf_tdata (abfd)->phdr;
+  num_segments = elf_elfheader (abfd)->e_phnum;
+  for (i = 0; i < num_segments; i++, segment++)
+    if (segment->p_type == PT_LOAD
+	&& (segment->p_align != p_align
+	    || vma_page_aligned_bias (segment->p_vaddr,
+				      segment->p_offset,
+				      maxpagesize) != 0))
+      return true;
+
+  return false;
+}
+
 /* Copy ELF program header information.  */
 
 static bool
@@ -7508,6 +7590,7 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
   unsigned int num_segments;
   bool phdr_included = false;
   bool p_paddr_valid;
+  bool p_palign_valid;
   unsigned int opb = bfd_octets_per_byte (ibfd, NULL);
 
   iehdr = elf_elfheader (ibfd);
@@ -7527,6 +7610,8 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 	p_paddr_valid = true;
 	break;
       }
+
+  p_palign_valid = elf_is_p_align_valid (ibfd);
 
   for (i = 0, segment = elf_tdata (ibfd)->phdr;
        i < num_segments;
@@ -7570,7 +7655,7 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
       map->p_paddr = segment->p_paddr;
       map->p_paddr_valid = p_paddr_valid;
       map->p_align = segment->p_align;
-      map->p_align_valid = 1;
+      map->p_align_valid = p_palign_valid;
       map->p_vaddr_offset = 0;
 
       if (map->p_type == PT_GNU_RELRO
@@ -7985,7 +8070,7 @@ _bfd_elf_fixup_group_sections (bfd *ibfd, asection *discarded)
 		    isec->flags |= SEC_EXCLUDE;
 		  }
 	      }
-	    else
+	    else if (isec->output_section != NULL)
 	      {
 		/* Adjust the output section size when called from
 		   objcopy. */
@@ -8095,7 +8180,6 @@ swap_out_syms (bfd *abfd,
   bfd_byte *outbound_syms;
   bfd_byte *outbound_shndx;
   unsigned long outbound_syms_index;
-  unsigned long outbound_shndx_index;
   unsigned int idx;
   unsigned int num_locals;
   size_t amt;
@@ -8144,7 +8228,6 @@ swap_out_syms (bfd *abfd,
   outbound_syms_index = 0;
 
   outbound_shndx = NULL;
-  outbound_shndx_index = 0;
 
   if (elf_symtab_shndx_list (abfd))
     {
@@ -8180,10 +8263,7 @@ swap_out_syms (bfd *abfd,
     sym.st_target_internal = 0;
     symstrtab[0].sym = sym;
     symstrtab[0].dest_index = outbound_syms_index;
-    symstrtab[0].destshndx_index = outbound_shndx_index;
     outbound_syms_index++;
-    if (outbound_shndx != NULL)
-      outbound_shndx_index++;
   }
 
   name_local_sections
@@ -8415,11 +8495,8 @@ Unable to handle section index %x in ELF symbol.  Using ABS instead."),
       idx++;
       symstrtab[idx].sym = sym;
       symstrtab[idx].dest_index = outbound_syms_index;
-      symstrtab[idx].destshndx_index = outbound_shndx_index;
 
       outbound_syms_index++;
-      if (outbound_shndx != NULL)
-	outbound_shndx_index++;
     }
 
   /* Finalize the .strtab section.  */
@@ -8444,9 +8521,9 @@ Unable to handle section index %x in ELF symbol.  Using ABS instead."),
 			       (outbound_syms
 				+ (elfsym->dest_index
 				   * bed->s->sizeof_sym)),
-			       (outbound_shndx
-				+ (elfsym->destshndx_index
-				   * sizeof (Elf_External_Sym_Shndx))));
+			       NPTR_ADD (outbound_shndx,
+					 (elfsym->dest_index
+					  * sizeof (Elf_External_Sym_Shndx))));
     }
   free (symstrtab);
 
@@ -9600,23 +9677,6 @@ elfcore_make_auxv_note_section (bfd *abfd, Elf_Internal_Note *note,
   return true;
 }
 
-static bool
-elfcore_make_memtag_note_section (bfd *abfd, Elf_Internal_Note *note,
-				  size_t offs)
-{
-  asection *sect = bfd_make_section_anyway_with_flags (abfd, ".memtag",
-						       SEC_HAS_CONTENTS);
-
-  if (sect == NULL)
-    return false;
-
-  sect->size = note->descsz - offs;
-  sect->filepos = note->descpos + offs;
-  sect->alignment_power = 1 + bfd_get_arch_size (abfd) / 32;
-
-  return true;
-}
-
 /* prstatus_t exists on:
      solaris 2.5+
      linux 2.[01] + glibc
@@ -9974,6 +10034,30 @@ static bool
 elfcore_grok_gdb_tdesc (bfd *abfd, Elf_Internal_Note *note)
 {
   return elfcore_make_note_pseudosection (abfd, ".gdb-tdesc", note);
+}
+
+static bool
+elfcore_grok_loongarch_cpucfg (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-loongarch-cpucfg", note);
+}
+
+static bool
+elfcore_grok_loongarch_lbt (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-loongarch-lbt", note);
+}
+
+static bool
+elfcore_grok_loongarch_lsx (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-loongarch-lsx", note);
+}
+
+static bool
+elfcore_grok_loongarch_lasx (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-loongarch-lasx", note);
 }
 
 #if defined (HAVE_PRPSINFO_T)
@@ -10655,6 +10739,34 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
       else
 	return true;
 
+    case NT_LARCH_CPUCFG:
+      if (note->namesz == 6
+	  && strcmp (note->namedata, "LINUX") == 0)
+	return elfcore_grok_loongarch_cpucfg (abfd, note);
+      else
+	return true;
+
+    case NT_LARCH_LBT:
+      if (note->namesz == 6
+	  && strcmp (note->namedata, "LINUX") == 0)
+	return elfcore_grok_loongarch_lbt (abfd, note);
+      else
+	return true;
+
+    case NT_LARCH_LSX:
+      if (note->namesz == 6
+	  && strcmp (note->namedata, "LINUX") == 0)
+	return elfcore_grok_loongarch_lsx (abfd, note);
+      else
+	return true;
+
+    case NT_LARCH_LASX:
+      if (note->namesz == 6
+	  && strcmp (note->namedata, "LINUX") == 0)
+	return elfcore_grok_loongarch_lasx (abfd, note);
+      else
+	return true;
+
     case NT_PRPSINFO:
     case NT_PSINFO:
       if (bed->elf_backend_grok_psinfo)
@@ -10677,8 +10789,6 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
       return elfcore_make_note_pseudosection (abfd, ".note.linuxcore.siginfo",
 					      note);
 
-    case NT_MEMTAG:
-      return elfcore_make_memtag_note_section (abfd, note, 0);
     }
 }
 
@@ -11082,6 +11192,195 @@ elfcore_grok_openbsd_procinfo (bfd *abfd, Elf_Internal_Note *note)
     = _bfd_elfcore_strndup (abfd, note->descdata + 0x48, 31);
 
   return true;
+}
+
+/* Processes Solaris's process status note.
+   sig_off ~ offsetof(prstatus_t, pr_cursig)
+   pid_off ~ offsetof(prstatus_t, pr_pid)
+   lwpid_off ~ offsetof(prstatus_t, pr_who)
+   gregset_size ~ sizeof(gregset_t)
+   gregset_offset ~ offsetof(prstatus_t, pr_reg)  */
+
+static bool
+elfcore_grok_solaris_prstatus (bfd *abfd, Elf_Internal_Note* note, int sig_off,
+			       int pid_off, int lwpid_off, size_t gregset_size,
+			       size_t gregset_offset)
+{
+  asection *sect = NULL;
+  elf_tdata (abfd)->core->signal
+    = bfd_get_16 (abfd, note->descdata + sig_off);
+  elf_tdata (abfd)->core->pid
+    = bfd_get_32 (abfd, note->descdata + pid_off);
+  elf_tdata (abfd)->core->lwpid
+    = bfd_get_32 (abfd, note->descdata + lwpid_off);
+
+  sect = bfd_get_section_by_name (abfd, ".reg");
+  if (sect != NULL)
+    sect->size = gregset_size;
+
+  return _bfd_elfcore_make_pseudosection (abfd, ".reg", gregset_size,
+					  note->descpos + gregset_offset);
+}
+
+/* Gets program and arguments from a core.
+   prog_off ~ offsetof(prpsinfo | psinfo_t, pr_fname)
+   comm_off ~ offsetof(prpsinfo | psinfo_t, pr_psargs)  */
+
+static bool
+elfcore_grok_solaris_info(bfd *abfd, Elf_Internal_Note* note,
+			  int prog_off, int comm_off)
+{
+  elf_tdata (abfd)->core->program
+    = _bfd_elfcore_strndup (abfd, note->descdata + prog_off, 16);
+  elf_tdata (abfd)->core->command
+    = _bfd_elfcore_strndup (abfd, note->descdata + comm_off, 80);
+
+  return true;
+}
+
+/* Processes Solaris's LWP status note.
+   gregset_size ~ sizeof(gregset_t)
+   gregset_off ~ offsetof(lwpstatus_t, pr_reg)
+   fpregset_size ~ sizeof(fpregset_t)
+   fpregset_off ~ offsetof(lwpstatus_t, pr_fpreg)  */
+
+static bool
+elfcore_grok_solaris_lwpstatus (bfd *abfd, Elf_Internal_Note* note,
+				size_t gregset_size, int gregset_off,
+				size_t fpregset_size, int fpregset_off)
+{
+  asection *sect = NULL;
+  char reg2_section_name[16] = { 0 };
+
+  (void) snprintf (reg2_section_name, 16, "%s/%i", ".reg2",
+		   elf_tdata (abfd)->core->lwpid);
+
+  /* offsetof(lwpstatus_t, pr_lwpid) */
+  elf_tdata (abfd)->core->lwpid
+    = bfd_get_32 (abfd, note->descdata + 4);
+  /* offsetof(lwpstatus_t, pr_cursig) */
+  elf_tdata (abfd)->core->signal
+    = bfd_get_16 (abfd, note->descdata + 12);
+
+  sect = bfd_get_section_by_name (abfd, ".reg");
+  if (sect != NULL)
+    sect->size = gregset_size;
+  else if (!_bfd_elfcore_make_pseudosection (abfd, ".reg", gregset_size,
+					     note->descpos + gregset_off))
+    return false;
+
+  sect = bfd_get_section_by_name (abfd, reg2_section_name);
+  if (sect != NULL)
+    {
+      sect->size = fpregset_size;
+      sect->filepos = note->descpos + fpregset_off;
+      sect->alignment_power = 2;
+    }
+  else if (!_bfd_elfcore_make_pseudosection (abfd, ".reg2", fpregset_size,
+					     note->descpos + fpregset_off))
+    return false;
+
+  return true;
+}
+
+static bool
+elfcore_grok_solaris_note_impl (bfd *abfd, Elf_Internal_Note *note)
+{
+  if (note == NULL)
+    return false;
+
+  /* core files are identified as 32- or 64-bit, SPARC or x86,
+     by the size of the descsz which matches the sizeof()
+     the type appropriate for that note type (e.g., prstatus_t for
+     SOLARIS_NT_PRSTATUS) for the corresponding architecture
+     on Solaris. The core file bitness may differ from the bitness of
+     gdb itself, so fixed values are used instead of sizeof().
+     Appropriate fixed offsets are also used to obtain data from
+     the note.  */
+
+  switch ((int) note->type)
+    {
+    case SOLARIS_NT_PRSTATUS:
+      switch (note->descsz)
+	{
+	case 508: /* sizeof(prstatus_t) SPARC 32-bit */
+	  return elfcore_grok_solaris_prstatus(abfd, note,
+					       136, 216, 308, 152, 356);
+	case 904: /* sizeof(prstatus_t) SPARC 64-bit */
+	  return elfcore_grok_solaris_prstatus(abfd, note,
+					       264, 360, 520, 304, 600);
+	case 432: /* sizeof(prstatus_t) Intel 32-bit */
+	  return elfcore_grok_solaris_prstatus(abfd, note,
+					       136, 216, 308, 76, 356);
+	case 824: /* sizeof(prstatus_t) Intel 64-bit */
+	  return elfcore_grok_solaris_prstatus(abfd, note,
+					       264, 360, 520, 224, 600);
+	default:
+	  return true;
+	}
+
+    case SOLARIS_NT_PSINFO:
+    case SOLARIS_NT_PRPSINFO:
+      switch (note->descsz)
+	{
+	case 260: /* sizeof(prpsinfo_t) SPARC and Intel 32-bit */
+	  return elfcore_grok_solaris_info(abfd, note, 84, 100);
+	case 328: /* sizeof(prpsinfo_t) SPARC and Intel 64-bit */
+	  return elfcore_grok_solaris_info(abfd, note, 120, 136);
+	case 360: /* sizeof(psinfo_t) SPARC and Intel 32-bit */
+	  return elfcore_grok_solaris_info(abfd, note, 88, 104);
+	case 440: /* sizeof(psinfo_t) SPARC and Intel 64-bit */
+	  return elfcore_grok_solaris_info(abfd, note, 136, 152);
+	default:
+	  return true;
+	}
+
+    case SOLARIS_NT_LWPSTATUS:
+      switch (note->descsz)
+	{
+	case 896: /* sizeof(lwpstatus_t) SPARC 32-bit */
+	  return elfcore_grok_solaris_lwpstatus(abfd, note,
+						152, 344, 400, 496);
+	case 1392: /* sizeof(lwpstatus_t) SPARC 64-bit */
+	  return elfcore_grok_solaris_lwpstatus(abfd, note,
+						304, 544, 544, 848);
+	case 800: /* sizeof(lwpstatus_t) Intel 32-bit */
+	  return elfcore_grok_solaris_lwpstatus(abfd, note,
+						76, 344, 380, 420);
+	case 1296: /* sizeof(lwpstatus_t) Intel 64-bit */
+	  return elfcore_grok_solaris_lwpstatus(abfd, note,
+						224, 544, 528, 768);
+	default:
+	  return true;
+	}
+
+    case SOLARIS_NT_LWPSINFO:
+      /* sizeof(lwpsinfo_t) on 32- and 64-bit, respectively */
+      if (note->descsz == 128 || note->descsz == 152)
+	elf_tdata (abfd)->core->lwpid =
+	  bfd_get_32 (abfd, note->descdata + 4);
+      break;
+
+    default:
+      break;
+    }
+
+  return true;
+}
+
+/* For name starting with "CORE" this may be either a Solaris
+   core file or a gdb-generated core file.  Do Solaris-specific
+   processing on selected note types first with
+   elfcore_grok_solaris_note(), then process the note
+   in elfcore_grok_note().  */
+
+static bool
+elfcore_grok_solaris_note (bfd *abfd, Elf_Internal_Note *note)
+{
+  if (!elfcore_grok_solaris_note_impl (abfd, note))
+    return false;
+
+  return elfcore_grok_note (abfd, note);
 }
 
 static bool
@@ -12048,6 +12347,55 @@ elfcore_write_arc_v2 (bfd *abfd,
 			     note_name, NT_ARC_V2, arc_v2, size);
 }
 
+char *
+elfcore_write_loongarch_cpucfg (bfd *abfd,
+				char *buf,
+				int *bufsiz,
+				const void *loongarch_cpucfg,
+				int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+			     note_name, NT_LARCH_CPUCFG,
+			     loongarch_cpucfg, size);
+}
+
+char *
+elfcore_write_loongarch_lbt (bfd *abfd,
+			     char *buf,
+			     int *bufsiz,
+			     const void *loongarch_lbt,
+			     int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+			     note_name, NT_LARCH_LBT, loongarch_lbt, size);
+}
+
+char *
+elfcore_write_loongarch_lsx (bfd *abfd,
+			     char *buf,
+			     int *bufsiz,
+			     const void *loongarch_lsx,
+			     int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+			     note_name, NT_LARCH_LSX, loongarch_lsx, size);
+}
+
+char *
+elfcore_write_loongarch_lasx (bfd *abfd,
+			      char *buf,
+			      int *bufsiz,
+			      const void *loongarch_lasx,
+			      int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+			     note_name, NT_LARCH_LASX, loongarch_lasx, size);
+}
+
 /* Write the buffer of csr values in CSRS (length SIZE) into the note
    buffer BUF and update *BUFSIZ.  ABFD is the bfd the note is being
    written into.  Return a pointer to the new start of the note buffer, to
@@ -12172,6 +12520,14 @@ elfcore_write_register_note (bfd *abfd,
     return elfcore_write_gdb_tdesc (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-riscv-csr") == 0)
     return elfcore_write_riscv_csr (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-loongarch-cpucfg") == 0)
+    return elfcore_write_loongarch_cpucfg (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-loongarch-lbt") == 0)
+    return elfcore_write_loongarch_lbt (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-loongarch-lsx") == 0)
+    return elfcore_write_loongarch_lsx (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-loongarch-lasx") == 0)
+    return elfcore_write_loongarch_lasx (abfd, buf, bufsiz, data, size);
   return NULL;
 }
 
@@ -12241,10 +12597,11 @@ elf_parse_notes (bfd *abfd, char *buf, size_t size, file_ptr offset,
 	      GROKER_ELEMENT ("", elfcore_grok_note),
 	      GROKER_ELEMENT ("FreeBSD", elfcore_grok_freebsd_note),
 	      GROKER_ELEMENT ("NetBSD-CORE", elfcore_grok_netbsd_note),
-	      GROKER_ELEMENT ( "OpenBSD", elfcore_grok_openbsd_note),
+	      GROKER_ELEMENT ("OpenBSD", elfcore_grok_openbsd_note),
 	      GROKER_ELEMENT ("QNX", elfcore_grok_nto_note),
 	      GROKER_ELEMENT ("SPU/", elfcore_grok_spu_note),
-	      GROKER_ELEMENT ("GNU", elfobj_grok_gnu_note)
+	      GROKER_ELEMENT ("GNU", elfobj_grok_gnu_note),
+	      GROKER_ELEMENT ("CORE", elfcore_grok_solaris_note)
 	    };
 #undef GROKER_ELEMENT
 	    int i;

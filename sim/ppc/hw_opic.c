@@ -305,7 +305,7 @@ typedef struct _opic_timer {
   hw_opic_device *opic; /* ditto */
   unsigned base_count;
   int inhibited;
-  signed64 count; /* *ONLY* if inhibited */
+  int64_t count; /* *ONLY* if inhibited */
   event_entry_tag timeout_event;
   opic_interrupt_source *interrupt_source;
 } opic_timer;
@@ -347,7 +347,7 @@ struct _hw_opic_device {
   unsigned timer_frequency;
 
   /* init register */
-  unsigned32 init;
+  uint32_t init;
 
   /* address maps */
   opic_idu idu;
@@ -417,10 +417,12 @@ hw_opic_init_data(device *me)
       }
       if (!device_find_integer_array_property(me, "interrupt-ranges",
 					      reg_nr * 2,
-					      &opic->isu_block[isb].int_number)
+					      (signed_cell *)
+					        &opic->isu_block[isb].int_number)
 	  || !device_find_integer_array_property(me, "interrupt-ranges",
 						 reg_nr * 2 + 1,
-						 &opic->isu_block[isb].range))
+						 (signed_cell *)
+						   &opic->isu_block[isb].range))
 	device_error(me, "missing or invalid interrupt-ranges property entry %d", reg_nr);
       /* first reg entry specifies the address of both the IDU and the
          first set of ISU registers, adjust things accordingly */

@@ -1,5 +1,5 @@
 #as: --32
-#ld: -shared -melf_i386
+#ld: -shared -melf_i386 $NO_DT_RELR_LDFLAGS
 #readelf: -r -s --wide
 
 Relocation section '.rel.dyn' at offset 0x[a-f0-9]+ contains 1 entry:

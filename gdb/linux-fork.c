@@ -1,6 +1,6 @@
 /* GNU/Linux native-dependent code for debugging multiple forks.
 
-   Copyright (C) 2005-2021 Free Software Foundation, Inc.
+   Copyright (C) 2005-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -41,7 +41,7 @@
 struct fork_info
 {
   explicit fork_info (pid_t pid)
-    : ptid (pid, pid, 0)
+    : ptid (pid, pid)
   {
   }
 
@@ -580,7 +580,7 @@ info_checkpoints_command (const char *arg, int from_tty)
       if (fi.num == 0)
 	printf_filtered (_(" (main process)"));
       printf_filtered (_(" at "));
-      fputs_filtered (paddress (gdbarch, pc), gdb_stdout);
+      puts_filtered (paddress (gdbarch, pc));
 
       symtab_and_line sal = find_pc_line (pc, 0);
       if (sal.symtab)

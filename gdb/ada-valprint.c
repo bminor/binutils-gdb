@@ -1,6 +1,6 @@
 /* Support for printing Ada values for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -94,7 +94,7 @@ print_optional_low_bound (struct ui_file *stream, struct type *type,
     case TYPE_CODE_ENUM:
       if (low_bound == 0)
 	return 0;
-      low_bound = TYPE_FIELD_ENUMVAL (index_type, low_bound);
+      low_bound = index_type->field (low_bound).loc_enumval ();
       break;
     case TYPE_CODE_UNDEF:
       index_type = NULL;
@@ -178,7 +178,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 	  fprintf_filtered (stream, "\n");
 	  print_spaces_filtered (2 + 2 * recurse, stream);
 	}
-      wrap_here (n_spaces (2 + 2 * recurse));
+      stream->wrap_here (2 + 2 * recurse);
       maybe_print_array_index (index_type, i + low, stream, options);
 
       i0 = i;
@@ -235,7 +235,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 		    {
 		      fprintf_filtered (stream, ", ");
 		    }
-		  wrap_here (n_spaces (2 + 2 * recurse));
+		  stream->wrap_here (2 + 2 * recurse);
 		  maybe_print_array_index (index_type, j + low,
 					   stream, options);
 		}
@@ -307,7 +307,7 @@ ada_print_floating (const gdb_byte *valaddr, struct type *type,
 
   print_floating (valaddr, type, &tmp_stream);
 
-  std::string &s = tmp_stream.string ();
+  std::string s = tmp_stream.release ();
   size_t skip_count = 0;
 
   /* Modify for Ada rules.  */
@@ -381,14 +381,14 @@ ada_print_scalar (struct type *type, LONGEST val, struct ui_file *stream)
       len = type->num_fields ();
       for (i = 0; i < len; i++)
 	{
-	  if (TYPE_FIELD_ENUMVAL (type, i) == val)
+	  if (type->field (i).loc_enumval () == val)
 	    {
 	      break;
 	    }
 	}
       if (i < len)
 	{
-	  fputs_styled (ada_enum_name (TYPE_FIELD_NAME (type, i)),
+	  fputs_styled (ada_enum_name (type->field (i).name ()),
 			variable_name_style.style (), stream);
 	}
       else
@@ -614,13 +614,13 @@ print_field_values (struct value *value, struct value *outer_value,
 	}
       else
 	{
-	  wrap_here (n_spaces (2 + 2 * recurse));
+	  stream->wrap_here (2 + 2 * recurse);
 	}
 
       annotate_field_begin (type->field (i).type ());
       fprintf_filtered (stream, "%.*s",
-			ada_name_prefix_len (TYPE_FIELD_NAME (type, i)),
-			TYPE_FIELD_NAME (type, i));
+			ada_name_prefix_len (type->field (i).name ()),
+			type->field (i).name ());
       annotate_field_name_end ();
       fputs_filtered (" => ", stream);
       annotate_field_value ();
@@ -637,7 +637,7 @@ print_field_values (struct value *value, struct value *outer_value,
 	  else
 	    {
 	      struct value *v;
-	      int bit_pos = TYPE_FIELD_BITPOS (type, i);
+	      int bit_pos = type->field (i).loc_bitpos ();
 	      int bit_size = TYPE_FIELD_BITSIZE (type, i);
 	      struct value_print_options opts;
 
@@ -747,7 +747,7 @@ ada_value_print_num (struct value *val, struct ui_file *stream, int recurse,
 		     const struct value_print_options *options)
 {
   struct type *type = ada_check_typedef (value_type (val));
-  const gdb_byte *valaddr = value_contents_for_printing (val);
+  const gdb_byte *valaddr = value_contents_for_printing (val).data ();
 
   if (type->code () == TYPE_CODE_RANGE
       && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_ENUM
@@ -827,7 +827,7 @@ ada_val_print_enum (struct value *value, struct ui_file *stream, int recurse,
     }
 
   struct type *type = ada_check_typedef (value_type (value));
-  const gdb_byte *valaddr = value_contents_for_printing (value);
+  const gdb_byte *valaddr = value_contents_for_printing (value).data ();
   int offset_aligned = ada_aligned_value_addr (type, valaddr) - valaddr;
 
   len = type->num_fields ();
@@ -835,13 +835,13 @@ ada_val_print_enum (struct value *value, struct ui_file *stream, int recurse,
   for (i = 0; i < len; i++)
     {
       QUIT;
-      if (val == TYPE_FIELD_ENUMVAL (type, i))
+      if (val == type->field (i).loc_enumval ())
 	break;
     }
 
   if (i < len)
     {
-      const char *name = ada_enum_name (TYPE_FIELD_NAME (type, i));
+      const char *name = ada_enum_name (type->field (i).name ());
 
       if (name[0] == '\'')
 	fprintf_filtered (stream, "%ld %ps", (long) val,
@@ -895,7 +895,7 @@ ada_value_print_array (struct value *val, struct ui_file *stream, int recurse,
   if (ada_is_string_type (type)
       && (options->format == 0 || options->format == 's'))
     {
-      const gdb_byte *valaddr = value_contents_for_printing (val);
+      const gdb_byte *valaddr = value_contents_for_printing (val).data ();
       int offset_aligned = ada_aligned_value_addr (type, valaddr) - valaddr;
 
       ada_val_print_string (type, valaddr, offset_aligned, stream, recurse,
@@ -910,7 +910,7 @@ ada_value_print_array (struct value *val, struct ui_file *stream, int recurse,
     val_print_optimized_out (val, stream);
   else if (TYPE_FIELD_BITSIZE (type, 0) > 0)
     {
-      const gdb_byte *valaddr = value_contents_for_printing (val);
+      const gdb_byte *valaddr = value_contents_for_printing (val).data ();
       int offset_aligned = ada_aligned_value_addr (type, valaddr) - valaddr;
       val_print_packed_array_elements (type, valaddr, offset_aligned,
 				       stream, recurse, options);
@@ -970,12 +970,6 @@ ada_val_print_ref (struct type *type, const gdb_byte *valaddr,
   if (ada_is_tagged_type (value_type (deref_val), 1))
     deref_val = ada_tag_value_at_base_address (deref_val);
 
-  /* Make sure that the object does not have an unreasonable size
-     before trying to print it.  This can happen for instance with
-     references to dynamic objects whose contents is uninitialized
-     (Eg: an array whose bounds are not set yet).  */
-  ada_ensure_varsize_limit (value_type (deref_val));
-
   if (value_lazy (deref_val))
     value_fetch_lazy (deref_val);
 
@@ -984,12 +978,12 @@ ada_val_print_ref (struct type *type, const gdb_byte *valaddr,
 }
 
 /* See the comment on ada_value_print.  This function differs in that
-   it does not catch evaluation errors (leaving that to
-   ada_value_print).  */
+   it does not catch evaluation errors (leaving that to its
+   caller).  */
 
-static void
-ada_value_print_1 (struct value *val, struct ui_file *stream, int recurse,
-		   const struct value_print_options *options)
+void
+ada_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
+		       const struct value_print_options *options)
 {
   struct type *type = ada_check_typedef (value_type (val));
 
@@ -1015,7 +1009,7 @@ ada_value_print_1 (struct value *val, struct ui_file *stream, int recurse,
   type = value_type (val);
   struct type *saved_type = type;
 
-  const gdb_byte *valaddr = value_contents_for_printing (val);
+  const gdb_byte *valaddr = value_contents_for_printing (val).data ();
   CORE_ADDR address = value_address (val);
   gdb::array_view<const gdb_byte> view
     = gdb::make_array_view (valaddr, TYPE_LENGTH (type));
@@ -1074,25 +1068,6 @@ ada_value_print_1 (struct value *val, struct ui_file *stream, int recurse,
 			 address, stream, recurse, val,
 			 options);
       break;
-    }
-}
-
-/* See ada-lang.h.  */
-
-void
-ada_value_print_inner (struct value *val, struct ui_file *stream,
-		       int recurse,
-		       const struct value_print_options *options)
-{
-  try
-    {
-      ada_value_print_1 (val, stream, recurse, options);
-    }
-  catch (const gdb_exception_error &except)
-    {
-      fprintf_styled (stream, metadata_style.style (),
-		      _("<error reading variable: %s>"),
-		      except.what ());
     }
 }
 

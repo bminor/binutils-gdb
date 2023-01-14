@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-# Copyright (C) 2016-2021 Free Software Foundation, Inc.
+# Copyright (C) 2016-2022 Free Software Foundation, Inc.
 #
 # This file is part of GDB.
 #
@@ -145,7 +145,7 @@ def identify_racy_tests():
     # to be ignored.  For example, tests both in the PASS and KFAIL
     # states should not be considered racy.
     ignored_tests = set()
-    for s1, s2 in ignore_relations.iteritems():
+    for s1, s2 in ignore_relations.items():
         try:
             ignored_tests |= all_tests[s1] & all_tests[s2]
         except:
@@ -159,16 +159,16 @@ def identify_racy_tests():
     racy_tests = racy_tests - ignored_tests
 
     # Print the header.
-    print "\t\t=== gdb racy tests ===\n"
+    print("\t\t=== gdb racy tests ===\n")
 
     # Print each test.
     for line in sorted(racy_tests):
-        print line
+        print(line)
 
     # Print the summary.
-    print "\n"
-    print "\t\t=== gdb Summary ===\n"
-    print "# of racy tests:\t\t%d" % len(racy_tests)
+    print("\n")
+    print("\t\t=== gdb Summary ===\n")
+    print("# of racy tests:\t\t%d" % len(racy_tests))
 
 
 if __name__ == "__main__":

@@ -90,7 +90,6 @@ Disassembly of section \.text:
 [^:]+:	d5310a80 	mrs	x0, trcextinselr2
 [^:]+:	d5310b80 	mrs	x0, trcextinselr3
 [^:]+:	d53100e0 	mrs	x0, trcimspec0
-[^:]+:	d53100e0 	mrs	x0, trcimspec0
 [^:]+:	d53101e0 	mrs	x0, trcimspec1
 [^:]+:	d53102e0 	mrs	x0, trcimspec2
 [^:]+:	d53103e0 	mrs	x0, trcimspec3
@@ -266,7 +265,6 @@ Disassembly of section \.text:
 [^:]+:	d5110980 	msr	trcextinselr1, x0
 [^:]+:	d5110a80 	msr	trcextinselr2, x0
 [^:]+:	d5110b80 	msr	trcextinselr3, x0
-[^:]+:	d51100e0 	msr	trcimspec0, x0
 [^:]+:	d51100e0 	msr	trcimspec0, x0
 [^:]+:	d51101e0 	msr	trcimspec1, x0
 [^:]+:	d51102e0 	msr	trcimspec2, x0

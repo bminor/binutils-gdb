@@ -1,6 +1,6 @@
 /* Low level child interface to ptrace.
 
-   Copyright (C) 2004-2021 Free Software Foundation, Inc.
+   Copyright (C) 2004-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -60,6 +60,17 @@ struct inf_ptrace_target : public inf_child_target
 protected:
   /* Cleanup the inferior after a successful ptrace detach.  */
   void detach_success (inferior *inf);
+
+  /* Some targets don't allow us to request notification of inferior events
+     such as fork and vfork immediately after the inferior is created.
+     (This is because of how gdb creates inferiors via invoking a shell to
+     do it.  In such a scenario, if the shell init file has commands in it,
+     the shell will fork and exec for each of those commands, and we will
+     see each such fork event.  Very bad.)
+
+     Such targets will supply an appropriate definition for this
+     function.  */
+  virtual void post_startup_inferior (ptid_t ptid) = 0;
 };
 
 #ifndef __NetBSD__

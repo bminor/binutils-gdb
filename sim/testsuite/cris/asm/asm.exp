@@ -1,4 +1,4 @@
-# Copyright (C) 2005-2021 Free Software Foundation, Inc.
+# Copyright (C) 2005-2022 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,7 +15,9 @@
 
 # Miscellaneous CRIS simulator testcases in assembly code.
 
-if [istarget cris*-*-*] {
+sim_init
+
+if [istarget *] {
     global ASFLAGS_FOR_TARGET
     # All machines we test and the corresponding assembler option.  Needs
     # update if we build the simulator for crisv0 crisv3 and crisv8 too.

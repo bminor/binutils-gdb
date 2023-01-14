@@ -1,6 +1,6 @@
 /* The common simulator framework for GDB, the GNU Debugger.
 
-   Copyright 2002-2021 Free Software Foundation, Inc.
+   Copyright 2002-2022 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney and Red Hat.
 
@@ -23,6 +23,9 @@
 #ifndef HW_TREE
 #define HW_TREE
 
+#include <stdarg.h>
+
+#include "ansidecl.h"
 
 struct hw *hw_tree_create
 (SIM_DESC sd,

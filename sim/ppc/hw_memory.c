@@ -25,6 +25,9 @@
 #define STATIC_INLINE_HW_MEMORY STATIC_INLINE
 #endif
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <stdlib.h>
 
 #include "device_table.h"
@@ -199,9 +202,9 @@ hw_memory_init_address(device *me)
 	 cell_nr += 2) {
       hw_memory_chunk *new_chunk = ZALLOC(hw_memory_chunk);
       device_find_integer_array_property(me, "available", cell_nr,
-					 &new_chunk->address);
+					 (signed_cell *)&new_chunk->address);
       device_find_integer_array_property(me, "available", cell_nr + 1,
-					 &new_chunk->size);
+					 (signed_cell *)&new_chunk->size);
       new_chunk->available = 1;
       *curr_chunk = new_chunk;
       curr_chunk = &new_chunk->next;

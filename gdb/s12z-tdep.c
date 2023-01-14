@@ -1,5 +1,5 @@
 /* Target-dependent code for the S12Z, for the GDB.
-   Copyright (C) 2018-2021 Free Software Foundation, Inc.
+   Copyright (C) 2018-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,6 +31,7 @@
 #include "trad-frame.h"
 #include "remote.h"
 #include "opcodes/s12z-opc.h"
+#include "gdbarch.h"
 
 /* Two of the registers included in S12Z_N_REGISTERS are
    the CCH and CCL "registers" which are just views into
@@ -482,7 +483,7 @@ constexpr gdb_byte s12z_break_insn[] = {0x00};
 
 typedef BP_MANIPULATION (s12z_break_insn) s12z_breakpoint;
 
-struct gdbarch_tdep
+struct s12z_gdbarch_tdep : gdbarch_tdep
 {
 };
 
@@ -634,13 +635,13 @@ show_bdccsr_command (const char *args, int from_tty)
   struct string_file output;
   target_rcmd ("bdccsr", &output);
 
-  printf_unfiltered ("The current BDCCSR value is %s\n", output.string().c_str());
+  printf_filtered ("The current BDCCSR value is %s\n", output.string().c_str());
 }
 
 static struct gdbarch *
 s12z_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch_tdep *tdep = XNEW (struct gdbarch_tdep);
+  s12z_gdbarch_tdep *tdep = new s12z_gdbarch_tdep;
   struct gdbarch *gdbarch = gdbarch_alloc (&info, tdep);
 
   add_cmd ("bdccsr", class_support, show_bdccsr_command,

@@ -1,6 +1,6 @@
 #as:
 #source: enums.c
-#objdump: --ctf=.ctf
+#objdump: --ctf
 #ld: -shared
 #name: Enumerated types
 

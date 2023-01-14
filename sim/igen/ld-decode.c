@@ -1,6 +1,6 @@
 /* The IGEN simulator generator for GDB, the GNU Debugger.
 
-   Copyright 2002-2021 Free Software Foundation, Inc.
+   Copyright 2002-2022 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney.
 
@@ -70,7 +70,7 @@ static const name_map decode_search_map[] = {
 
 
 static void
-set_bits (int bit[max_insn_bit_size], unsigned64 value)
+set_bits (int bit[max_insn_bit_size], uint64_t value)
 {
   int bit_nr;
   for (bit_nr = 0; bit_nr < max_insn_bit_size; bit_nr++)

@@ -1,6 +1,6 @@
 /*  This file is part of the program GDB, the GNU debugger.
     
-    Copyright (C) 1998-2021 Free Software Foundation, Inc.
+    Copyright (C) 1998-2022 Free Software Foundation, Inc.
     Contributed by Cygnus Solutions.
     
     This program is free software; you can redistribute it and/or modify
@@ -81,8 +81,8 @@ enum serial_register_types {
 #define SIO_STAT_RRDY 0x0010
 
 typedef struct _mn10300_serial {
-  unsigned16 status, control;
-  unsigned8  txb, rxb, intmode;
+  uint16_t status, control;
+  uint8_t  txb, rxb, intmode;
   struct hw_event *event;
 } mn10300_serial;
 
@@ -91,7 +91,7 @@ typedef struct _mn10300_serial {
 struct mn103ser {
   struct mn103ser_block block;
   mn10300_serial device[NR_SERIAL_DEVS];
-  unsigned8      serial2_timer_reg;
+  uint8_t      serial2_timer_reg;
   do_hw_poll_read_method *reader;
 };
 
@@ -238,7 +238,7 @@ do_polling_event (struct hw *me,
 {
   SIM_DESC sd = hw_system (me);
   struct mn103ser *serial = hw_data(me);
-  long serial_reg = (long) data;
+  long serial_reg = (uintptr_t) data;
   char c;
   int count, status;
 
@@ -280,7 +280,7 @@ do_polling_event (struct hw *me,
   /* Schedule next polling event */
   serial->device[serial_reg].event
     = hw_event_queue_schedule (me, 1000,
-			       do_polling_event, (void *)serial_reg);
+			       do_polling_event, (void *)(uintptr_t)serial_reg);
 
 }
 
@@ -294,7 +294,7 @@ read_control_reg (struct hw *me,
   /* really allow 1 byte read, too */
   if ( nr_bytes == 2 )
     {
-      *(unsigned16 *)dest = H2LE_2 (serial->device[serial_reg].control);
+      *(uint16_t *)dest = H2LE_2 (serial->device[serial_reg].control);
     }
   else
     {
@@ -313,7 +313,7 @@ read_intmode_reg (struct hw *me,
 {
   if ( nr_bytes == 1 )
     {
-      *(unsigned8 *)dest = serial->device[serial_reg].intmode;
+      *(uint8_t *)dest = serial->device[serial_reg].intmode;
     }
   else
     {
@@ -332,7 +332,7 @@ read_txb (struct hw *me,
 {
   if ( nr_bytes == 1 )
     {
-      *(unsigned8 *)dest = serial->device[serial_reg].txb;
+      *(uint8_t *)dest = serial->device[serial_reg].txb;
     }
   else
     {
@@ -351,7 +351,7 @@ read_rxb (struct hw *me,
 {
   if ( nr_bytes == 1 )
     {
-      *(unsigned8 *)dest = serial->device[serial_reg].rxb;
+      *(uint8_t *)dest = serial->device[serial_reg].rxb;
       /* Reception buffer is now empty. */
       serial->device[serial_reg].status &= ~SIO_STAT_RRDY;
     }
@@ -424,16 +424,16 @@ read_status_reg (struct hw *me,
       serial->device[serial_reg].event
 	= hw_event_queue_schedule (me, 1000,
 				   do_polling_event,
-				   (void *) (long) serial_reg);
+				   (void *)(uintptr_t)serial_reg);
     }
 
   if ( nr_bytes == 1 )
     {
-      *(unsigned8 *)dest = (unsigned8)serial->device[serial_reg].status;
+      *(uint8_t *)dest = (uint8_t)serial->device[serial_reg].status;
     }
   else if ( nr_bytes == 2 && serial_reg != SC2STR )
     {
-      *(unsigned16 *)dest = H2LE_2 (serial->device[serial_reg].status);
+      *(uint16_t *)dest = H2LE_2 (serial->device[serial_reg].status);
     }
   else
     {
@@ -451,7 +451,7 @@ read_serial2_timer_reg (struct hw *me,
 {
   if ( nr_bytes == 1 )
     {
-      * (unsigned8 *) dest = (unsigned8) serial->serial2_timer_reg;
+      * (uint8_t *) dest = (uint8_t) serial->serial2_timer_reg;
     }
   else
     {
@@ -480,7 +480,7 @@ mn103ser_io_read_buffer (struct hw *me,
     case SC2CTR:
       read_control_reg(me, serial, serial_reg-SC0CTR, dest, nr_bytes);
       HW_TRACE ((me, "read - ctrl reg%d has 0x%x\n", serial_reg-SC0CTR,
-		 *(unsigned8 *)dest));
+		 *(uint8_t *)dest));
       break;
 
     /* interrupt mode registers */
@@ -489,7 +489,7 @@ mn103ser_io_read_buffer (struct hw *me,
     case SC2ICR:
       read_intmode_reg(me, serial, serial_reg-SC0ICR, dest, nr_bytes);
       HW_TRACE ((me, "read - intmode reg%d has 0x%x\n", serial_reg-SC0ICR,
-		 *(unsigned8 *)dest));
+		 *(uint8_t *)dest));
       break;
 
     /* transmission buffers */
@@ -516,12 +516,12 @@ mn103ser_io_read_buffer (struct hw *me,
     case SC2STR: 
       read_status_reg(me, serial, serial_reg-SC0STR, dest, nr_bytes);
       HW_TRACE ((me, "read - status reg%d has 0x%x\n", serial_reg-SC0STR,
-		 *(unsigned8 *)dest));
+		 *(uint8_t *)dest));
       break;
 
     case SC2TIM:
       read_serial2_timer_reg(me, serial, dest, nr_bytes);
-      HW_TRACE ((me, "read - serial2 timer reg %d\n", *(unsigned8 *)dest));
+      HW_TRACE ((me, "read - serial2 timer reg %d\n", *(uint8_t *)dest));
       break;
 
     default:
@@ -539,7 +539,7 @@ write_control_reg (struct hw *me,
 		   const void *source,
 		   unsigned  nr_bytes)
 {
-  unsigned16 val = LE2H_2 (*(unsigned16 *)source);
+  uint16_t val = LE2H_2 (*(uint16_t *)source);
 
   /* really allow 1 byte write, too */
   if ( nr_bytes == 2 )
@@ -568,7 +568,7 @@ write_intmode_reg (struct hw *me,
 		   const void *source,
 		   unsigned  nr_bytes)
 {
-unsigned8 val = *(unsigned8 *)source;
+uint8_t val = *(uint8_t *)source;
 
   if ( nr_bytes == 1 )
     {
@@ -604,7 +604,7 @@ write_txb (struct hw *me,
       SIM_DESC sd = hw_system (me);
       int status;
 
-      serial->device[serial_reg].txb = *(unsigned8 *)source;
+      serial->device[serial_reg].txb = *(uint8_t *)source;
 
       status = dv_sockser_status (sd);
       if (!(status & DV_SOCKSER_DISCONNECTED))
@@ -635,7 +635,7 @@ write_serial2_timer_reg (struct hw *me,
 {
   if ( nr_bytes == 1 )
     {
-      serial->serial2_timer_reg = *(unsigned8 *)source;
+      serial->serial2_timer_reg = *(uint8_t *)source;
     }
   else
     {
@@ -663,7 +663,7 @@ mn103ser_io_write_buffer (struct hw *me,
     case SC1CTR:
     case SC2CTR:
       HW_TRACE ((me, "write - ctrl reg%d has 0x%x, nrbytes=%d.\n",
-		 serial_reg-SC0CTR, *(unsigned8 *)source, nr_bytes));
+		 serial_reg-SC0CTR, *(uint8_t *)source, nr_bytes));
       write_control_reg(me, serial, serial_reg-SC0CTR, source, nr_bytes);
       break;
 
@@ -672,7 +672,7 @@ mn103ser_io_write_buffer (struct hw *me,
     case SC1ICR:
     case SC2ICR:
       HW_TRACE ((me, "write - intmode reg%d has 0x%x, nrbytes=%d.\n",
-		 serial_reg-SC0ICR, *(unsigned8 *)source, nr_bytes));
+		 serial_reg-SC0ICR, *(uint8_t *)source, nr_bytes));
       write_intmode_reg(me, serial, serial_reg-SC0ICR, source, nr_bytes);
       break;
 
@@ -701,7 +701,7 @@ mn103ser_io_write_buffer (struct hw *me,
 
     case SC2TIM:
       HW_TRACE ((me, "read - serial2 timer reg %d (nrbytes=%d)\n",
-		 *(unsigned8 *)source, nr_bytes));
+		 *(uint8_t *)source, nr_bytes));
       write_serial2_timer_reg(me, serial, source, nr_bytes);
       break;
 

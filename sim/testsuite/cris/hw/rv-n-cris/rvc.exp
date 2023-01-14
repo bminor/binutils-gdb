@@ -1,4 +1,4 @@
-# Copyright (C) 2006-2021 Free Software Foundation, Inc.
+# Copyright (C) 2006-2022 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,15 +16,20 @@
 # Miscellaneous CRIS simulator testcases in assembly code, testing
 # dv-rv.c and dv-cris.c functions.
 
+sim_init
+
 # Check whether dv-rv and dv-cris are present.
 
 proc sim_has_rv_and_cris {} {
     global srcdir
     global subdir
-    global SIMFLAGS
-    global global_as_options
-    global global_ld_options
-    global global_sim_options
+    global objdir
+    global sim_path
+    global SIMFLAGS_FOR_TARGET
+
+    if ![file exists $sim_path] {
+	return 0
+    }
 
     # We need to assemble and link a trivial program and pass that, in
     # order to test successful exit.
@@ -33,18 +38,12 @@ proc sim_has_rv_and_cris {} {
     # what we want to do it to run the simulator without affecting the
     # PASS/FAIL counters, and we can use e.g. run_sim_test for that.
 
-    if ![info exists global_as_options] {
-        set global_as_options ""
-    }
-    if ![info exists global_ld_options] {
-        set global_ld_options ""
-    }
-    if ![info exists global_sim_options] {
-        set global_sim_options ""
+    if ![info exists SIMFLAGS_FOR_TARGET] {
+	set SIMFLAGS_FOR_TARGET ""
     }
 
-    set comp_output [target_assemble $srcdir/$subdir/quit.s quit.o \
-			 "-I$srcdir/$subdir $global_as_options"]
+    set comp_output [target_assemble $srcdir/$subdir/quit.s $objdir/quit.o \
+			 "-I$srcdir/$subdir"]
 
     if ![string match "" $comp_output] {
 	verbose -log "$comp_output" 3
@@ -52,7 +51,7 @@ proc sim_has_rv_and_cris {} {
 	return 0
     }
 
-    set comp_output [target_link quit.o quit.x "$global_ld_options"]
+    set comp_output [target_link $objdir/quit.o $objdir/quit.x ""]
 
     if ![string match "" $comp_output] {
 	verbose -log "$comp_output" 3
@@ -61,8 +60,8 @@ proc sim_has_rv_and_cris {} {
     }
 
     set result \
-	[sim_run quit.x \
-	     "$global_sim_options --hw-device rv --hw-device cris --hw-info" \
+	[sim_run $objdir/quit.x \
+	     "$SIMFLAGS_FOR_TARGET --hw-device rv --hw-device cris --hw-info" \
 	     "" "" ""]
     set return_code [lindex $result 0]
     set output [lindex $result 1]
@@ -80,6 +79,7 @@ proc sim_has_rv_and_cris {} {
 # including parameters may not contain ":".
 
 proc slurp_rv { file } {
+    global subdir srcdir
     if [catch { set f [open $file r] } x] {
 	#perror "couldn't open `$file': $x"
 	perror "$x"
@@ -97,6 +97,11 @@ proc slurp_rv { file } {
 	# Whitespace here is space-tab.
 	if [regexp $pat $line xxx cmd] {
 	    # match!
+	    set cmd [string map [list \
+		{$pwd} [pwd] \
+		{$srcdir} "$srcdir" \
+		{$subdir} "$subdir" \
+	    ] "$cmd"]
 	    lappend rv_array $cmd
 	    set seen_opt 1
 	} else {
@@ -111,24 +116,14 @@ proc slurp_rv { file } {
 
 # The main test loop.
 
-if [istarget cris*-*-*] {
+if [istarget *] {
     global ASFLAGS_FOR_TARGET
+    global LDFLAGS_FOR_TARGET
+    global SIMFLAGS_FOR_TARGET
     set has_rv_and_cris [sim_has_rv_and_cris]
-    global global_as_options
-    global global_ld_options
-    global global_sim_options
 
-    set saved_global_sim_options $global_sim_options
-    set saved_global_ld_options $global_ld_options
-
-    # See the logic in sim-defs.exp for more details.
-    set sim [board_info target sim]
-    if [string equal "" $sim] {
-	global objdir
-	set rvdummy "$objdir/cris/rvdummy"
-    } else {
-	set rvdummy "[file dirname [board_info target sim]]/rvdummy"
-    }
+    global builddir
+    set rvdummy "$builddir/cris/rvdummy"
 
     # All machines we test and the corresponding assembler option.
     # We'll only ever test v10 and higher here.
@@ -161,8 +156,10 @@ if [istarget cris*-*-*] {
 		continue
 	    }
 
-	    set sim_defaults "--hw-file $srcdir/$subdir/std.dev"
-	    set ld_defaults "--section-start=.text=0"
+	    # Unfortunately this seems like the only way to pass
+	    # additional sim, ld etc. options to run_sim_test.
+	    set SIMFLAGS_FOR_TARGET "--hw-file $srcdir/$subdir/std.dev"
+	    set LDFLAGS_FOR_TARGET "--section-start=.text=0"
 
 	    # We parse options an extra time besides in run_sim_test,
 	    # to determine if our defaults should be overridden.
@@ -176,11 +173,7 @@ if [istarget cris*-*-*] {
 		# Allow concatenating to the default options by
 		# specifying a mach.
 		if { $opt_name == "sim" && $opt_machs == "" } {
-		    set sim_defaults ""
-		}
-
-		if { $opt_name == "ld" && $opt_machs == "" } {
-		    set ld_defaults ""
+		    set SIMFLAGS_FOR_TARGET ""
 		}
 	    }
 
@@ -204,11 +197,6 @@ if [istarget cris*-*-*] {
 		    error "$x"
 		} {
 		    set contents [join $hostcmds "\n"]
-
-		    # Make it possible to use files from the test
-		    # source directory; expected with the @-command.
-		    regsub -all "@srcdir@" $contents "$srcdir/$subdir" contents
-
 		    verbose "rv: $contents" 2
 		    puts $f $contents
 		    close $f
@@ -222,13 +210,7 @@ if [istarget cris*-*-*] {
 		set rvdummy_id $spawn_id
 	    }
 
-	    # Unfortunately this seems like the only way to pass
-	    # additional sim, ld etc. options to run_sim_test.
-	    set global_sim_options "$saved_global_sim_options $sim_defaults"
-	    set global_ld_options "$saved_global_ld_options $ld_defaults"
 	    run_sim_test $src $mach
-	    set global_sim_options $saved_global_sim_options
-	    set global_ld_options $saved_global_ld_options
 
 	    # Stop the rvdummy, if it's still running.  We need to
 	    # wait on it anyway to avoid it turning into a zombie.

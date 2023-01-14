@@ -1,7 +1,7 @@
 #name: PR ld/21038 (.plt.sec, -z now)
 #source: pr21038b.s
 #as: --64
-#ld: -z now -z bndplt -melf_x86_64 -shared -z relro --ld-generated-unwind-info --hash-style=sysv -z max-page-size=0x200000 -z noseparate-code
+#ld: -z now -z bndplt -melf_x86_64 -shared -z relro --ld-generated-unwind-info --hash-style=sysv -z max-page-size=0x200000 -z noseparate-code $NO_DT_RELR_LDFLAGS
 #objdump: -dw -Wf
 
 .*: +file format .*
@@ -50,8 +50,8 @@ Contents of the .eh_frame section:
 Disassembly of section .plt:
 
 0+1b0 <.plt>:
- +[a-f0-9]+:	ff 35 32 0e 20 00    	push   0x200e32\(%rip\)        # 200fe8 <_GLOBAL_OFFSET_TABLE_\+0x8>
- +[a-f0-9]+:	f2 ff 25 33 0e 20 00 	bnd jmp \*0x200e33\(%rip\)        # 200ff0 <_GLOBAL_OFFSET_TABLE_\+0x10>
+ +[a-f0-9]+:	ff 35 b2 01 20 00    	push   0x2001b2\(%rip\)        # 200368 <_GLOBAL_OFFSET_TABLE_\+0x8>
+ +[a-f0-9]+:	f2 ff 25 b3 01 20 00 	bnd jmp \*0x2001b3\(%rip\)        # 200370 <_GLOBAL_OFFSET_TABLE_\+0x10>
  +[a-f0-9]+:	0f 1f 00             	nopl   \(%rax\)
  +[a-f0-9]+:	68 00 00 00 00       	push   \$0x0
  +[a-f0-9]+:	f2 e9 e5 ff ff ff    	bnd jmp 1b0 <func@plt-0x20>
@@ -60,7 +60,7 @@ Disassembly of section .plt:
 Disassembly of section .plt.sec:
 
 0+1d0 <func@plt>:
- +[a-f0-9]+:	f2 ff 25 21 0e 20 00 	bnd jmp \*0x200e21\(%rip\)        # 200ff8 <func>
+ +[a-f0-9]+:	f2 ff 25 a1 01 20 00 	bnd jmp \*0x2001a1\(%rip\)        # 200378 <func>
  +[a-f0-9]+:	90                   	nop
 
 Disassembly of section .text:

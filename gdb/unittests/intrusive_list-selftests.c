@@ -1,5 +1,5 @@
 /* Tests fpr intrusive double linked list for GDB, the GNU debugger.
-   Copyright (C) 2021 Free Software Foundation, Inc.
+   Copyright (C) 2021-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -754,7 +754,7 @@ struct intrusive_list_test
 
 template <typename ListType>
 static void
-test_intrusive_list ()
+test_intrusive_list_1 ()
 {
   intrusive_list_test<ListType> tests;
 
@@ -804,8 +804,8 @@ test_node_is_linked ()
 static void
 test_intrusive_list ()
 {
-  test_intrusive_list<item_with_base_list> ();
-  test_intrusive_list<item_with_member_list> ();
+  test_intrusive_list_1<item_with_base_list> ();
+  test_intrusive_list_1<item_with_member_list> ();
   test_node_is_linked ();
 }
 

@@ -1,5 +1,5 @@
 /* POWER/PowerPC XCOFF linker support.
-   Copyright (C) 1995-2021 Free Software Foundation, Inc.
+   Copyright (C) 1995-2022 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -798,10 +798,14 @@ xcoff_dynamic_definition_p (struct xcoff_link_hash_entry *h,
 	  || h->root.type == bfd_link_hash_undefweak))
     return true;
 
-  /* If H is currently undefined, LDSYM defines it.  */
+  /* If H is currently undefined, LDSYM defines it.
+     However, if H has a hidden visibility, LDSYM must not
+     define it.  */
   if ((h->flags & XCOFF_DEF_DYNAMIC) == 0
       && (h->root.type == bfd_link_hash_undefined
-	  || h->root.type == bfd_link_hash_undefweak))
+	  || h->root.type == bfd_link_hash_undefweak)
+      && (h->visibility != SYM_V_HIDDEN
+	  && h->visibility != SYM_V_INTERNAL))
     return true;
 
   return false;
@@ -1178,6 +1182,26 @@ xcoff_find_reloc (struct internal_reloc *relocs,
   return min;
 }
 
+/* Return true if the symbol has to be added to the linker hash
+   table.  */
+static bool
+xcoff_link_add_symbols_to_hash_table (struct internal_syment sym,
+				      union internal_auxent aux)
+{
+  /* External symbols must be added.  */
+  if (EXTERN_SYM_P (sym.n_sclass))
+    return true;
+
+  /* Hidden TLS symbols must be added to verify TLS relocations
+     in xcoff_reloc_type_tls.  */
+  if (sym.n_sclass == C_HIDEXT
+      && ((aux.x_csect.x_smclas == XMC_TL
+	   || aux.x_csect.x_smclas == XMC_UL)))
+    return true;
+
+  return false;
+}
+
 /* Add all the symbols from an object file to the hash table.
 
    XCOFF is a weird format.  A normal XCOFF .o files will have three
@@ -1223,6 +1247,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
     bfd_byte *linenos;
   } *reloc_info = NULL;
   bfd_size_type amt;
+  unsigned short visibility;
 
   keep_syms = obj_coff_keep_syms (abfd);
 
@@ -1460,6 +1485,9 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	    }
 	}
 
+      /* Record visibility.  */
+      visibility = sym.n_type & SYM_V_MASK;
+
       /* Pick up the csect auxiliary information.  */
       if (sym.n_numaux == 0)
 	{
@@ -1551,6 +1579,11 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	     32 bit has a csect length of 4 for TOC
 	     64 bit has a csect length of 8 for TOC
 
+	     An exception is made for TOC entries with a R_TLSML
+	     relocation.  This relocation is made for the loader.
+	     We must check that the referenced symbol is the TOC entry
+	     itself.
+
 	     The conditions to get past the if-check are not that bad.
 	     They are what is used to create the TOC csects in the first
 	     place.  */
@@ -1580,7 +1613,8 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 		 64 bit R_POS r_size is 63  */
 	      if (relindx < enclosing->reloc_count
 		  && rel->r_vaddr == (bfd_vma) sym.n_value
-		  && rel->r_type == R_POS
+		  && (rel->r_type == R_POS ||
+		      rel->r_type == R_TLSML)
 		  && ((bfd_xcoff_is_xcoff32 (abfd)
 		       && rel->r_size == 31)
 		      || (bfd_xcoff_is_xcoff64 (abfd)
@@ -1651,6 +1685,22 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 			     this symbol.  */
 			  set_toc = h;
 			}
+		    }
+		  else if (rel->r_type == R_TLSML)
+		    {
+			csect_index = ((esym
+					- (bfd_byte *) obj_coff_external_syms (abfd))
+				       / symesz);
+			if (((unsigned long) rel->r_symndx) != csect_index)
+			  {
+			    _bfd_error_handler
+			      /* xgettext:c-format */
+			      (_("%pB: TOC entry `%s' has a R_TLSML"
+				 "relocation not targeting itself"),
+			       abfd, name);
+			    bfd_set_error (bfd_error_bad_value);
+			    goto error_return;
+			  }
 		    }
 		}
 	    }
@@ -1749,9 +1799,10 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	    if (first_csect == NULL)
 	      first_csect = csect;
 
-	    /* If this symbol is external, we treat it as starting at the
-	       beginning of the newly created section.  */
-	    if (EXTERN_SYM_P (sym.n_sclass))
+	    /* If this symbol must be added to the linker hash table,
+	       we treat it as starting at the beginning of the newly
+	       created section.  */
+	    if (xcoff_link_add_symbols_to_hash_table (sym, aux))
 	      {
 		section = csect;
 		value = 0;
@@ -1847,7 +1898,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	  if (first_csect == NULL)
 	    first_csect = csect;
 
-	  if (EXTERN_SYM_P (sym.n_sclass))
+	  if (xcoff_link_add_symbols_to_hash_table (sym, aux))
 	    {
 	      csect->flags |= SEC_IS_COMMON;
 	      csect->size = 0;
@@ -1888,7 +1939,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
       /* Now we have enough information to add the symbol to the
 	 linker hash table.  */
 
-      if (EXTERN_SYM_P (sym.n_sclass))
+      if (xcoff_link_add_symbols_to_hash_table (sym, aux))
 	{
 	  bool copy, ok;
 	  flagword flags;
@@ -2015,6 +2066,22 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 		  /* Try not to give this error too many times.  */
 		  (*sym_hash)->flags &= ~XCOFF_MULTIPLY_DEFINED;
 		}
+
+
+	      /* If the symbol is hidden or internal, completely undo
+		 any dynamic link state.  */
+	      if ((*sym_hash)->flags & XCOFF_DEF_DYNAMIC
+		  && (visibility == SYM_V_HIDDEN
+		      || visibility == SYM_V_INTERNAL))
+		  (*sym_hash)->flags &= ~XCOFF_DEF_DYNAMIC;
+	      else
+		{
+		  /* Keep the most constraining visibility.  */
+		  unsigned short hvis = (*sym_hash)->visibility;
+		  if (visibility && ( !hvis || visibility < hvis))
+		    (*sym_hash)->visibility = visibility;
+		}
+
 	    }
 
 	  /* _bfd_generic_link_add_one_symbol may call the linker to
@@ -2605,6 +2672,11 @@ xcoff_auto_export_p (struct bfd_link_info *info,
 
   /* Don't export functions; export their descriptors instead.  */
   if (h->root.root.string[0] == '.')
+    return false;
+
+  /* Don't export hidden or internal symbols.  */
+  if (h->visibility == SYM_V_HIDDEN
+      || h->visibility == SYM_V_INTERNAL)
     return false;
 
   /* We don't export a symbol which is being defined by an object
@@ -3205,6 +3277,19 @@ bfd_xcoff_export_symbol (bfd *output_bfd,
   if (bfd_get_flavour (output_bfd) != bfd_target_xcoff_flavour)
     return true;
 
+  /* As AIX linker, symbols exported with hidden visibility are
+     silently ignored.  */
+  if (h->visibility == SYM_V_HIDDEN)
+    return true;
+
+  if (h->visibility == SYM_V_INTERNAL)
+    {
+      _bfd_error_handler (_("%pB: cannot export internal symbol `%s`."),
+			  output_bfd, h->root.root.string);
+      bfd_set_error (bfd_error_bad_value);
+      return false;
+    }
+
   h->flags |= XCOFF_EXPORT;
 
   /* FIXME: I'm not at all sure what syscall is supposed to mean, so
@@ -3312,8 +3397,6 @@ xcoff_mark_auto_exports (struct xcoff_link_hash_entry *h, void *data)
     }
   return true;
 }
-
-/* Add a symbol to the .loader symbols, if necessary.  */
 
 /* INPUT_BFD has an external symbol associated with hash table entry H
    and csect CSECT.   Return true if INPUT_BFD defines H.  */
@@ -4531,6 +4614,13 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 			       - (*csectpp)->vma);
 	    }
 
+	  /* Update visibility.  */
+	  if (*sym_hash)
+	    {
+	      isym.n_type &= ~SYM_V_MASK;
+	      isym.n_type |= (*sym_hash)->visibility;
+	    }
+
 	  /* Output the symbol.  */
 	  bfd_coff_swap_sym_out (output_bfd, (void *) &isym, (void *) outsym);
 
@@ -4550,13 +4640,13 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 		  /* This is the file name (or some comment put in by
 		     the compiler).  If it is long, we must put it in
 		     the string table.  */
-		  if (aux.x_file.x_n.x_zeroes == 0
-		      && aux.x_file.x_n.x_offset != 0)
+		  if (aux.x_file.x_n.x_n.x_zeroes == 0
+		      && aux.x_file.x_n.x_n.x_offset != 0)
 		    {
 		      const char *filename;
 		      bfd_size_type indx;
 
-		      BFD_ASSERT (aux.x_file.x_n.x_offset
+		      BFD_ASSERT (aux.x_file.x_n.x_n.x_offset
 				  >= STRING_SIZE_SIZE);
 		      if (strings == NULL)
 			{
@@ -4564,15 +4654,15 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 			  if (strings == NULL)
 			    return false;
 			}
-		      if ((bfd_size_type) aux.x_file.x_n.x_offset >= obj_coff_strings_len (input_bfd))
+		      if ((bfd_size_type) aux.x_file.x_n.x_n.x_offset >= obj_coff_strings_len (input_bfd))
 			filename = _("<corrupt>");
 		      else
-			filename = strings + aux.x_file.x_n.x_offset;
+			filename = strings + aux.x_file.x_n.x_n.x_offset;
 		      indx = _bfd_stringtab_add (flinfo->strtab, filename,
 						 hash, copy);
 		      if (indx == (bfd_size_type) -1)
 			return false;
-		      aux.x_file.x_n.x_offset = STRING_SIZE_SIZE + indx;
+		      aux.x_file.x_n.x_n.x_offset = STRING_SIZE_SIZE + indx;
 		    }
 		}
 	      else if (CSECT_SYM_P (isymp->n_sclass)

@@ -8,7 +8,7 @@
 
 Contents of the .debug_line section:
 
-CU: ./relax.s:
+CU: .*relax.s:
 File +name +Line +number +Starting +address +View +Stmt
 relax.s +2 +0 +x
 relax.s +5 +0x10018 +x

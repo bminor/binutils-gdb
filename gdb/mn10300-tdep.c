@@ -1,6 +1,6 @@
 /* Target-dependent code for the Matsushita MN10300 for GDB, the GNU debugger.
 
-   Copyright (C) 1996-2021 Free Software Foundation, Inc.
+   Copyright (C) 1996-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -372,7 +372,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
   int rn;
   pv_t regs[MN10300_MAX_NUM_REGS];
   CORE_ADDR after_last_frame_setup_insn = start_pc;
-  int am33_mode = AM33_MODE (gdbarch);
+  int am33_mode = get_am33_mode (gdbarch);
 
   memset (result, 0, sizeof (*result));
   result->gdbarch = gdbarch;
@@ -1222,7 +1222,7 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
       else
 	{
 	  arg_len = TYPE_LENGTH (value_type (*args));
-	  val = value_contents (*args);
+	  val = value_contents (*args).data ();
 	}
 
       while (regs_used < 2 && arg_len > 0)
@@ -1337,14 +1337,13 @@ mn10300_gdbarch_init (struct gdbarch_info info,
 		      struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
-  struct gdbarch_tdep *tdep;
   int num_regs;
 
   arches = gdbarch_list_lookup_by_info (arches, &info);
   if (arches != NULL)
     return arches->gdbarch;
 
-  tdep = XCNEW (struct gdbarch_tdep);
+  mn10300_gdbarch_tdep *tdep = new mn10300_gdbarch_tdep;
   gdbarch = gdbarch_alloc (&info, tdep);
 
   switch (info.bfd_arch_info->mach)
@@ -1413,9 +1412,9 @@ mn10300_gdbarch_init (struct gdbarch_info info,
 static void
 mn10300_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  fprintf_unfiltered (file, "mn10300_dump_tdep: am33_mode = %d\n",
-		      tdep->am33_mode);
+  mn10300_gdbarch_tdep *tdep = (mn10300_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  fprintf_filtered (file, "mn10300_dump_tdep: am33_mode = %d\n",
+		    tdep->am33_mode);
 }
 
 void _initialize_mn10300_tdep ();

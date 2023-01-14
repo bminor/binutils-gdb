@@ -1,6 +1,6 @@
 /* Support for ignoring signals.
 
-   Copyright (C) 2021 Free Software Foundation, Inc.
+   Copyright (C) 2021-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -75,7 +75,12 @@ public:
 
 	    sigpending (&pending);
 	    if (sigismember (&pending, Sig))
-	      sigwait (&set, nullptr);
+	      {
+		int sig_found;
+
+		sigwait (&set, &sig_found);
+		gdb_assert (sig_found == Sig);
+	      }
 #endif
 	  }
 

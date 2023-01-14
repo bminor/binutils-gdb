@@ -1,6 +1,6 @@
 /* DWARF 2 debugging format support for GDB.
 
-   Copyright (C) 1994-2021 Free Software Foundation, Inc.
+   Copyright (C) 1994-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,10 +23,11 @@
 #include <queue>
 #include <unordered_map>
 #include "dwarf2/comp-unit-head.h"
+#include "dwarf2/file-and-dir.h"
 #include "dwarf2/index-cache.h"
 #include "dwarf2/section.h"
 #include "filename-seen-cache.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "gdbsupport/hash_enum.h"
 #include "gdbsupport/function-view.h"
 #include "psympriv.h"
@@ -178,6 +179,12 @@ struct dwarf2_per_cu_data
      Don't access this field directly, use the get_header method instead.  It
      should be private, but we can't make it private at the moment.  */
   mutable comp_unit_head m_header {};
+
+  /* The file and directory for this CU.  This is cached so that we
+     don't need to re-examine the DWO in some situations.  This may be
+     nullptr, depending on the CU; for example a partial unit won't
+     have one.  */
+  std::unique_ptr<file_and_directory> fnd;
 
   /* When dwarf2_per_bfd::using_index is true, the 'quick' field
      is active.  Otherwise, the 'psymtab' field is active.  */
@@ -517,15 +524,10 @@ struct dwarf2_per_objfile
 				const struct comp_unit_head *cu_header,
 				unsigned int *bytes_read_ptr);
 
-  /* Resize the M_SYMTABS vector to the needed size (the number of partial
-     symtabs allocated by the per-bfd).  */
-  void resize_symtabs ()
-  {
-    /* The symtabs vector should only grow, not shrink.  */
-    gdb_assert (per_bfd->all_comp_units.size () >= m_symtabs.size ());
-
-    m_symtabs.resize (per_bfd->all_comp_units.size ());
-  }
+  /* Return pointer to string at .debug_line_str offset as read from BUF.
+     The offset_size is OFFSET_SIZE.  */
+  const char *read_line_string (const gdb_byte *buf,
+				unsigned int offset_size);
 
   /* Return true if the symtab corresponding to PER_CU has been set,
      false otherwise.  */
@@ -546,10 +548,6 @@ struct dwarf2_per_objfile
 
   void set_type_for_signatured_type (signatured_type *sig_type,
 				     struct type *type);
-
-  /* Find an integer type SIZE_IN_BYTES bytes in size and return it.
-     UNSIGNED_P controls if the integer is unsigned or not.  */
-  struct type *int_type (int size_in_bytes, bool unsigned_p) const;
 
   /* Get the dwarf2_cu matching PER_CU for this objfile.  */
   dwarf2_cu *get_cu (dwarf2_per_cu_data *per_cu);

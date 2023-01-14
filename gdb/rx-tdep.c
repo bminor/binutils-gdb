@@ -1,6 +1,6 @@
 /* Target-dependent code for the Renesas RX for GDB, the GNU debugger.
 
-   Copyright (C) 2008-2021 Free Software Foundation, Inc.
+   Copyright (C) 2008-2022 Free Software Foundation, Inc.
 
    Contributed by Red Hat, Inc.
 
@@ -35,6 +35,7 @@
 #include "dwarf2/frame.h"
 #include "remote.h"
 #include "target-descriptions.h"
+#include "gdbarch.h"
 
 #include "elf/rx.h"
 #include "elf-bfd.h"
@@ -68,16 +69,16 @@ enum rx_frame_type {
 };
 
 /* Architecture specific data.  */
-struct gdbarch_tdep
+struct rx_gdbarch_tdep : gdbarch_tdep
 {
   /* The ELF header flags specify the multilib used.  */
-  int elf_flags;
+  int elf_flags = 0;
 
   /* Type of PSW and BPSW.  */
-  struct type *rx_psw_type;
+  struct type *rx_psw_type = nullptr;
 
   /* Type of FPSW.  */
-  struct type *rx_fpsw_type;
+  struct type *rx_fpsw_type = nullptr;
 };
 
 /* This structure holds the results of a prologue analysis.  */
@@ -518,9 +519,9 @@ rx_frame_prev_register (struct frame_info *this_frame, void **this_cache,
 
 	  psw_val = rx_frame_prev_register (this_frame, this_cache,
 					    RX_PSW_REGNUM);
-	  psw = extract_unsigned_integer (value_contents_all (psw_val), 4, 
-					  gdbarch_byte_order (
-					    get_frame_arch (this_frame)));
+	  psw = extract_unsigned_integer
+	    (value_contents_all (psw_val).data (), 4,
+	     gdbarch_byte_order (get_frame_arch (this_frame)));
 
 	  if ((psw & 0x20000 /* U bit */) != 0)
 	    return rx_frame_prev_register (this_frame, this_cache,
@@ -724,7 +725,7 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       for (i = 0; i < nargs; i++)
 	{
 	  struct value *arg = args[i];
-	  const gdb_byte *arg_bits = value_contents_all (arg);
+	  const gdb_byte *arg_bits = value_contents_all (arg).data ();
 	  struct type *arg_type = check_typedef (value_type (arg));
 	  ULONGEST arg_size = TYPE_LENGTH (arg_type);
 
@@ -944,7 +945,6 @@ static struct gdbarch *
 rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
-  struct gdbarch_tdep *tdep;
   int elf_flags;
   tdesc_arch_data_up tdesc_data;
   const struct target_desc *tdesc = info.target_desc;
@@ -963,7 +963,10 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
-      if (gdbarch_tdep (arches->gdbarch)->elf_flags != elf_flags)
+      rx_gdbarch_tdep *tdep
+	= (rx_gdbarch_tdep *) gdbarch_tdep (arches->gdbarch);
+
+      if (tdep->elf_flags != elf_flags)
 	continue;
 
       return arches->gdbarch;
@@ -994,7 +997,7 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   gdb_assert(tdesc_data != NULL);
 
-  tdep = XCNEW (struct gdbarch_tdep);
+  rx_gdbarch_tdep *tdep = new rx_gdbarch_tdep;
   gdbarch = gdbarch_alloc (&info, tdep);
   tdep->elf_flags = elf_flags;
 

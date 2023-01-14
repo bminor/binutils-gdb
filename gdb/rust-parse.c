@@ -1,6 +1,6 @@
 /* Rust expression parsing for GDB, the GNU debugger.
 
-   Copyright (C) 2016-2021 Free Software Foundation, Inc.
+   Copyright (C) 2016-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,8 +22,8 @@
 #include "block.h"
 #include "charset.h"
 #include "cp-support.h"
-#include "gdb_obstack.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_obstack.h"
+#include "gdbsupport/gdb_regex.h"
 #include "rust-lang.h"
 #include "parser-defs.h"
 #include "gdbsupport/selftest.h"
@@ -32,6 +32,12 @@
 #include "rust-exp.h"
 
 using namespace expr;
+
+#if WORDS_BIGENDIAN
+#define UTF32 "UTF-32BE"
+#else
+#define UTF32 "UTF-32LE"
+#endif
 
 /* A regular expression for matching Rust numbers.  This is split up
    since it is very long and this gives us a way to comment the
@@ -577,6 +583,35 @@ rust_parser::lex_escape (int is_byte)
   return result;
 }
 
+/* A helper for lex_character.  Search forward for the closing single
+   quote, then convert the bytes from the host charset to UTF-32.  */
+
+static uint32_t
+lex_multibyte_char (const char *text, int *len)
+{
+  /* Only look a maximum of 5 bytes for the closing quote.  This is
+     the maximum for UTF-8.  */
+  int quote;
+  gdb_assert (text[0] != '\'');
+  for (quote = 1; text[quote] != '\0' && text[quote] != '\''; ++quote)
+    ;
+  *len = quote;
+  /* The caller will issue an error.  */
+  if (text[quote] == '\0')
+    return 0;
+
+  auto_obstack result;
+  convert_between_encodings (host_charset (), UTF32, (const gdb_byte *) text,
+			     quote, 1, &result, translit_none);
+
+  int size = obstack_object_size (&result);
+  if (size > 4)
+    error (_("overlong character literal"));
+  uint32_t value;
+  memcpy (&value, obstack_finish (&result), size);
+  return value;
+}
+
 /* Lex a character constant.  */
 
 int
@@ -592,13 +627,15 @@ rust_parser::lex_character ()
     }
   gdb_assert (pstate->lexptr[0] == '\'');
   ++pstate->lexptr;
-  /* This should handle UTF-8 here.  */
-  if (pstate->lexptr[0] == '\\')
+  if (pstate->lexptr[0] == '\'')
+    error (_("empty character literal"));
+  else if (pstate->lexptr[0] == '\\')
     value = lex_escape (is_byte);
   else
     {
-      value = pstate->lexptr[0] & 0xff;
-      ++pstate->lexptr;
+      int len;
+      value = lex_multibyte_char (&pstate->lexptr[0], &len);
+      pstate->lexptr += len;
     }
 
   if (pstate->lexptr[0] != '\'')
@@ -695,7 +732,7 @@ rust_parser::lex_string ()
 	  if (is_byte)
 	    obstack_1grow (&obstack, value);
 	  else
-	    convert_between_encodings ("UTF-32", "UTF-8", (gdb_byte *) &value,
+	    convert_between_encodings (UTF32, "UTF-8", (gdb_byte *) &value,
 				       sizeof (value), sizeof (value),
 				       &obstack, translit_none);
 	}
@@ -739,7 +776,10 @@ rust_identifier_start_p (char c)
   return ((c >= 'a' && c <= 'z')
 	  || (c >= 'A' && c <= 'Z')
 	  || c == '_'
-	  || c == '$');
+	  || c == '$'
+	  /* Allow any non-ASCII character as an identifier.  There
+	     doesn't seem to be a need to be picky about this.  */
+	  || (c & 0x80) != 0);
 }
 
 /* Lex an identifier.  */
@@ -749,7 +789,6 @@ rust_parser::lex_identifier ()
 {
   unsigned int length;
   const struct token_info *token;
-  int i;
   int is_gdb_var = pstate->lexptr[0] == '$';
 
   bool is_raw = false;
@@ -766,13 +805,14 @@ rust_parser::lex_identifier ()
 
   ++pstate->lexptr;
 
-  /* For the time being this doesn't handle Unicode rules.  Non-ASCII
-     identifiers are gated anyway.  */
+  /* Allow any non-ASCII character here.  This "handles" UTF-8 by
+     passing it through.  */
   while ((pstate->lexptr[0] >= 'a' && pstate->lexptr[0] <= 'z')
 	 || (pstate->lexptr[0] >= 'A' && pstate->lexptr[0] <= 'Z')
 	 || pstate->lexptr[0] == '_'
 	 || (is_gdb_var && pstate->lexptr[0] == '$')
-	 || (pstate->lexptr[0] >= '0' && pstate->lexptr[0] <= '9'))
+	 || (pstate->lexptr[0] >= '0' && pstate->lexptr[0] <= '9')
+	 || (pstate->lexptr[0] & 0x80) != 0)
     ++pstate->lexptr;
 
 
@@ -780,12 +820,12 @@ rust_parser::lex_identifier ()
   token = NULL;
   if (!is_raw)
     {
-      for (i = 0; i < ARRAY_SIZE (identifier_tokens); ++i)
+      for (const auto &candidate : identifier_tokens)
 	{
-	  if (length == strlen (identifier_tokens[i].name)
-	      && strncmp (identifier_tokens[i].name, start, length) == 0)
+	  if (length == strlen (candidate.name)
+	      && strncmp (candidate.name, start, length) == 0)
 	    {
-	      token = &identifier_tokens[i];
+	      token = &candidate;
 	      break;
 	    }
 	}
@@ -838,15 +878,14 @@ int
 rust_parser::lex_operator ()
 {
   const struct token_info *token = NULL;
-  int i;
 
-  for (i = 0; i < ARRAY_SIZE (operator_tokens); ++i)
+  for (const auto &candidate : operator_tokens)
     {
-      if (strncmp (operator_tokens[i].name, pstate->lexptr,
-		   strlen (operator_tokens[i].name)) == 0)
+      if (strncmp (candidate.name, pstate->lexptr,
+		   strlen (candidate.name)) == 0)
 	{
-	  pstate->lexptr += strlen (operator_tokens[i].name);
-	  token = &operator_tokens[i];
+	  pstate->lexptr += strlen (candidate.name);
+	  token = &candidate;
 	  break;
 	}
     }
@@ -1100,7 +1139,7 @@ rust_parser::parse_tuple ()
     {
       /* Parenthesized expression.  */
       lex ();
-      return expr;
+      return make_operation<rust_parenthesized_operation> (std::move (expr));
     }
 
   std::vector<operation_up> ops;
@@ -2239,8 +2278,6 @@ rust_lex_test_push_back (rust_parser *parser)
 static void
 rust_lex_tests (void)
 {
-  int i;
-
   /* Set up dummy "parser", so that rust_type works.  */
   struct parser_state ps (language_def (language_rust), target_gdbarch (),
 			  nullptr, 0, 0, nullptr, 0, nullptr, false);
@@ -2335,13 +2372,11 @@ rust_lex_tests (void)
   rust_lex_stringish_test (&parser, "br####\"\\x73tring\"####", "\\x73tring",
 			   BYTESTRING);
 
-  for (i = 0; i < ARRAY_SIZE (identifier_tokens); ++i)
-    rust_lex_test_one (&parser, identifier_tokens[i].name,
-		       identifier_tokens[i].value);
+  for (const auto &candidate : identifier_tokens)
+    rust_lex_test_one (&parser, candidate.name, candidate.value);
 
-  for (i = 0; i < ARRAY_SIZE (operator_tokens); ++i)
-    rust_lex_test_one (&parser, operator_tokens[i].name,
-		       operator_tokens[i].value);
+  for (const auto &candidate : operator_tokens)
+    rust_lex_test_one (&parser, candidate.name, candidate.value);
 
   rust_lex_test_completion (&parser);
   rust_lex_test_push_back (&parser);

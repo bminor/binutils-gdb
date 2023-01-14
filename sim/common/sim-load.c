@@ -1,5 +1,5 @@
 /* Utility to load a file into the simulator.
-   Copyright (C) 1997-2021 Free Software Foundation, Inc.
+   Copyright (C) 1997-2022 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,18 +21,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This must come before any other includes.  */
 #include "defs.h"
 
-#include "ansidecl.h"
-#include <stdio.h> /* for NULL */
 #include <stdarg.h>
+#include <stdio.h> /* for NULL */
 #include <stdlib.h>
 #include <time.h>
 
-#include "sim-basics.h"
+#include "ansidecl.h"
 #include "bfd.h"
-#include "sim-utils.h"
 
 #include "sim/callback.h"
 #include "sim/sim.h"
+#include "sim-utils.h"
 
 static void eprintf (host_callback *, const char *, ...);
 static void xprintf (host_callback *, const char *, ...);

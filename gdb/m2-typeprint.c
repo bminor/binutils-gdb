@@ -1,5 +1,5 @@
 /* Support for printing Modula 2 types for GDB, the GNU debugger.
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -17,7 +17,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "bfd.h"		/* Binary File Description */
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -79,7 +79,7 @@ m2_print_type (struct type *type, const char *varstring,
 
   QUIT;
 
-  wrap_here ("    ");
+  stream->wrap_here (4);
   if (type == NULL)
     {
       fputs_styled (_("<type unknown>"), metadata_style.style (), stream);
@@ -292,7 +292,7 @@ m2_procedure (struct type *type, struct ui_file *stream,
 	  if (i > 0)
 	    {
 	      fputs_filtered (", ", stream);
-	      wrap_here ("    ");
+	      stream->wrap_here (4);
 	    }
 	  m2_print_type (type->field (i).type (), "", stream, -1, 0, flags);
 	}
@@ -353,8 +353,8 @@ m2_is_long_set (struct type *type)
 	    return 0;
 	  if (type->field (i).type ()->code () != TYPE_CODE_SET)
 	    return 0;
-	  if (TYPE_FIELD_NAME (type, i) != NULL
-	      && (strcmp (TYPE_FIELD_NAME (type, i), "") != 0))
+	  if (type->field (i).name () != NULL
+	      && (strcmp (type->field (i).name (), "") != 0))
 	    return 0;
 	  range = type->field (i).type ()->index_type ();
 	  if ((i > TYPE_N_BASECLASSES (type))
@@ -492,9 +492,9 @@ m2_is_unbounded_array (struct type *type)
        */
       if (type->num_fields () != 2)
 	return 0;
-      if (strcmp (TYPE_FIELD_NAME (type, 0), "_m2_contents") != 0)
+      if (strcmp (type->field (0).name (), "_m2_contents") != 0)
 	return 0;
-      if (strcmp (TYPE_FIELD_NAME (type, 1), "_m2_high") != 0)
+      if (strcmp (type->field (1).name (), "_m2_high") != 0)
 	return 0;
       if (type->field (0).type ()->code () != TYPE_CODE_PTR)
 	return 0;
@@ -539,7 +539,7 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
 	    fprintf_filtered (stream, " = ");
 	}
     }
-  wrap_here ("    ");
+  stream->wrap_here (4);
   if (show < 0)
     {
       if (type->code () == TYPE_CODE_STRUCT)
@@ -563,7 +563,7 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
 	  QUIT;
 
 	  print_spaces_filtered (level + 4, stream);
-	  fputs_styled (TYPE_FIELD_NAME (type, i),
+	  fputs_styled (type->field (i).name (),
 			variable_name_style.style (), stream);
 	  fputs_filtered (" : ", stream);
 	  m2_print_type (type->field (i).type (),
@@ -608,14 +608,14 @@ m2_enum (struct type *type, struct ui_file *stream, int show, int level)
 	  QUIT;
 	  if (i > 0)
 	    fprintf_filtered (stream, ", ");
-	  wrap_here ("    ");
-	  fputs_styled (TYPE_FIELD_NAME (type, i),
+	  stream->wrap_here (4);
+	  fputs_styled (type->field (i).name (),
 			variable_name_style.style (), stream);
-	  if (lastval != TYPE_FIELD_ENUMVAL (type, i))
+	  if (lastval != type->field (i).loc_enumval ())
 	    {
 	      fprintf_filtered (stream, " = %s",
-				plongest (TYPE_FIELD_ENUMVAL (type, i)));
-	      lastval = TYPE_FIELD_ENUMVAL (type, i);
+				plongest (type->field (i).loc_enumval ()));
+	      lastval = type->field (i).loc_enumval ();
 	    }
 	  lastval++;
 	}

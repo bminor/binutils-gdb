@@ -1,5 +1,5 @@
 /* Check that unimplemented clone syscalls get the right treatment.
-#notarget: cris*-*-elf
+#progos: linux
 #xerror:
 #output: Unimplemented clone syscall *
 #output: program stopped with signal 4 (*).\n
