@@ -68,7 +68,6 @@ dnl Enable a particular arch subdir.
 dnl arg[1] is the matching target triple.
 dnl arg[2] is the arch subdir name.
 dnl arg[3] is whether the arch has a dedicated configure script.
-dnl arg[4] is any additional shell code to run for this arch.
 m4_define([SIM_TARGET], [dnl
   sim_enable_arch_$2=false
   case "${targ}" in
@@ -78,7 +77,6 @@ m4_define([SIM_TARGET], [dnl
       fi
       SIM_BUILD_TARGET($2, $3)
       sim_enable_arch_$2=true
-      $4
       ;;
   esac
   SIM_AC_TOOLCHAIN_FOR_TARGET($2)
@@ -93,7 +91,6 @@ dnl
 dnl NB: Target matching is aligned with gdb/configure.tgt.  Changes must be kept
 dnl in sync with that file.
 if test "${enable_sim}" != no; then
-  sim_igen=no
   for targ in `echo $target $enable_targets | sed 's/,/ /g'`
   do
     SIM_TARGET([aarch64*-*-*], [aarch64])
@@ -114,8 +111,8 @@ if test "${enable_sim}" != no; then
     SIM_TARGET([m68hc11-*-*|m6811-*-*], [m68hc11])
     SIM_TARGET([mcore-*-*], [mcore])
     SIM_TARGET([microblaze*-*-*], [microblaze])
-    SIM_TARGET([mips*-*-*], [mips], [], [sim_igen=yes])
-    SIM_TARGET([mn10300*-*-*], [mn10300], [], [sim_igen=yes])
+    SIM_TARGET([mips*-*-*], [mips])
+    SIM_TARGET([mn10300*-*-*], [mn10300])
     SIM_TARGET([moxie-*-*], [moxie])
     SIM_TARGET([msp430*-*-*], [msp430])
     SIM_TARGET([or1k*-*-*], [or1k])
@@ -126,7 +123,7 @@ if test "${enable_sim}" != no; then
     SIM_TARGET([rx-*-*], [rx])
     SIM_TARGET([sh*-*-*], [sh])
     SIM_TARGET([sparc-*-*], [erc32])
-    SIM_TARGET([v850*-*-*], [v850], [], [sim_igen=yes])
+    SIM_TARGET([v850*-*-*], [v850])
   done
 
   if test "x${enable_example_sims}" = xyes; then
@@ -135,7 +132,6 @@ if test "${enable_sim}" != no; then
   fi
   AM_CONDITIONAL([SIM_ENABLE_ARCH_examples], [test "${enable_example_sims}" = "yes"])
 fi
-AM_CONDITIONAL([SIM_ENABLE_IGEN], [test "$sim_igen" = "yes"])
 AM_CONDITIONAL([ENABLE_SIM], [test "$ENABLE_SIM" = "yes"])
 
 dnl Standard (and optional) simulator options.

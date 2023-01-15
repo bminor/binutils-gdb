@@ -33,6 +33,7 @@ SIM_PRIMARY_TARGET = @SIM_PRIMARY_TARGET@
 pkginclude_HEADERS =
 check_PROGRAMS =
 noinst_PROGRAMS =
+EXTRA_LIBRARIES =
 noinst_LIBRARIES =
 EXTRA_PROGRAMS =
 BUILT_SOURCES =
@@ -101,9 +102,7 @@ SIM_COMPILE = \
 	$(am__mv) $(SIM_DEPBASE).Tpo $(SIM_DEPBASE).Po
 
 include common/local.mk
-if SIM_ENABLE_IGEN
 include igen/local.mk
-endif
 include testsuite/local.mk
 
 ## Arch includes must come after common/local.mk.

@@ -27,7 +27,7 @@ IGEN_RUN = ASAN_OPTIONS=detect_leaks=0 $(IGEN) $(IGEN_FLAGS_SMP)
 # Alias for developers.
 igen: $(IGEN)
 
-noinst_LIBRARIES += %D%/libigen.a
+EXTRA_LIBRARIES += %D%/libigen.a
 %C%_libigen_a_SOURCES = \
 	%D%/table.c \
 	%D%/lf.c \
