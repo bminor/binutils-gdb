@@ -19,6 +19,7 @@
 
 #include "defs.h"
 #include "auxv.h"
+#include "diagnostics.h"
 #include "gdbcore.h"
 #include "inferior.h"
 #include "objfiles.h"
@@ -663,7 +664,16 @@ fbsd_make_note_desc (enum target_object object, uint32_t structsize)
 
   gdb::byte_vector desc (sizeof (structsize) + buf->size ());
   memcpy (desc.data (), &structsize, sizeof (structsize));
+#if defined (__sparc__)
+  /* g++ 12.2.1 on sparc seems confused about the vector buf sizes.  */
+  DIAGNOSTIC_PUSH
+  DIAGNOSTIC_IGNORE_STRINGOP_OVERFLOW
+  DIAGNOSTIC_IGNORE_RESTRICT
+#endif
   memcpy (desc.data () + sizeof (structsize), buf->data (), buf->size ());
+#if defined (__sparc__)
+  DIAGNOSTIC_POP
+#endif
   return desc;
 }
 
