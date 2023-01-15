@@ -112,7 +112,7 @@ BUILT_SOURCES += \
 	$(AM_V_at)touch $@
 
 ## FIXME: Use of `mono' is wip.
-%D%/mloopx.c %D%/engx.h: %D%/stamp-mloop ; @true
+%D%/mloopx.c %D%/engx.h: %D%/stamp-mloop-x ; @true
 %D%/stamp-mloop-x: $(srccom)/genmloop.sh %D%/mloop.in
 	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
 		-mono -no-fast -pbb -parallel-write -switch semx-switch.c \
@@ -123,7 +123,7 @@ BUILT_SOURCES += \
 	$(AM_V_at)touch $@
 
 ## FIXME: Use of `mono' is wip.
-%D%/mloop2.c %D%/eng2.h: %D%/stamp-mloop ; @true
+%D%/mloop2.c %D%/eng2.h: %D%/stamp-mloop-2 ; @true
 %D%/stamp-mloop-2: $(srccom)/genmloop.sh %D%/mloop.in
 	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
 		-mono -no-fast -pbb -parallel-write -switch sem2-switch.c \
