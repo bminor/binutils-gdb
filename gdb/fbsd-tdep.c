@@ -663,7 +663,7 @@ fbsd_make_note_desc (enum target_object object, uint32_t structsize)
 
   gdb::byte_vector desc (sizeof (structsize) + buf->size ());
   memcpy (desc.data (), &structsize, sizeof (structsize));
-  memcpy (desc.data () + sizeof (structsize), buf->data (), buf->size ());
+  std::copy (buf->begin (), buf->end (), desc.data () + sizeof (structsize));
   return desc;
 }
 
