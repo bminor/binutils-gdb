@@ -7,7 +7,10 @@
 
 #include "bfd.h"
 #include "sim-assert.h"
+#include "sim-fpu.h"
 #include "sim-signal.h"
+
+#include "mn10300-sim.h"
 
 #include <stdlib.h>
 #include <string.h>

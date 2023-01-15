@@ -34,11 +34,19 @@ mn10300_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), (TRANSFER), 
 /**
  * TODO: Move these includes to the igen files that need them.
  * This requires extending the igen syntax to support header includes.
+ *
+ * For now only include them in the igen generated support.c,
+ * semantics.c, idecode.c and engine.c files.
  */
+#if defined(SUPPORT_C) \
+    || defined(SEMANTICS_C) \
+    || defined(IDECODE_C) \
+    || defined(ENGINE_C)
 #include "sim-fpu.h"
 #include "sim-signal.h"
 
 #include "mn10300-sim.h"
+#endif
 
 extern SIM_CORE_SIGNAL_FN mn10300_core_signal;
 

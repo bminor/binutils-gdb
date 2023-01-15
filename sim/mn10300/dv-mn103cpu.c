@@ -22,7 +22,11 @@
 #include "defs.h"
 
 #include "sim-main.h"
+#include "sim-fpu.h"
+#include "sim-signal.h"
 #include "hw-main.h"
+
+#include "mn10300-sim.h"
 
 /* DEVICE
 
