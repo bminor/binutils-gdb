@@ -5092,6 +5092,14 @@ SUBSUBSECTION
 	structure, in a back end specific way. For instance, the 386
 	uses the @code{r_type} to directly produce an index
 	into a howto table vector.
+
+	o Note that @code{arelent.addend} for COFF is often not what
+	most people understand as a relocation addend, but rather an
+	adjustment to the relocation addend stored in section contents
+	of relocatable object files.  The value found in section
+	contents may also be confusing, depending on both symbol value
+	and addend somewhat similar to the field value for a
+	final-linked object.  See @code{CALC_ADDEND}.
 */
 
 #ifndef CALC_ADDEND
