@@ -2063,6 +2063,11 @@ struct reloc_howto_struct
      empty (e.g., ELF); this flag signals the fact.  */
   unsigned int pcrel_offset:1;
 
+  /* Whether bfd_install_relocation should just install the addend,
+     or should follow the practice of some older object formats and
+     install a value including the symbol.  */
+  unsigned int install_addend:1;
+
   /* src_mask selects the part of the instruction (or data) to be used
      in the relocation sum.  If the target relocations don't have an
      addend in the reloc, eg. ELF USE_REL, src_mask will normally equal
@@ -2088,11 +2093,13 @@ struct reloc_howto_struct
   const char *name;
 };
 
+#define HOWTO_INSTALL_ADDEND 0
 #define HOWTO_RSIZE(sz) ((sz) < 0 ? -(sz) : (sz))
 #define HOWTO(type, right, size, bits, pcrel, left, ovf, func, name,   \
               inplace, src_mask, dst_mask, pcrel_off)                  \
   { (unsigned) type, HOWTO_RSIZE (size), bits, right, left, ovf,       \
-    size < 0, pcrel, inplace, pcrel_off, src_mask, dst_mask, func, name }
+    size < 0, pcrel, inplace, pcrel_off, HOWTO_INSTALL_ADDEND,         \
+    src_mask, dst_mask, func, name }
 #define EMPTY_HOWTO(C) \
   HOWTO ((C), 0, 1, 0, false, 0, complain_overflow_dont, NULL, \
          NULL, false, 0, 0, false)

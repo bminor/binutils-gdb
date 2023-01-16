@@ -338,6 +338,11 @@ CODE_FRAGMENT
 .     empty (e.g., ELF); this flag signals the fact.  *}
 .  unsigned int pcrel_offset:1;
 .
+.  {* Whether bfd_install_relocation should just install the addend,
+.     or should follow the practice of some older object formats and
+.     install a value including the symbol.  *}
+.  unsigned int install_addend:1;
+.
 .  {* src_mask selects the part of the instruction (or data) to be used
 .     in the relocation sum.  If the target relocations don't have an
 .     addend in the reloc, eg. ELF USE_REL, src_mask will normally equal
@@ -373,11 +378,13 @@ DESCRIPTION
 	The HOWTO macro fills in a reloc_howto_type (a typedef for
 	const struct reloc_howto_struct).
 
+.#define HOWTO_INSTALL_ADDEND 0
 .#define HOWTO_RSIZE(sz) ((sz) < 0 ? -(sz) : (sz))
 .#define HOWTO(type, right, size, bits, pcrel, left, ovf, func, name,	\
 .              inplace, src_mask, dst_mask, pcrel_off)			\
 .  { (unsigned) type, HOWTO_RSIZE (size), bits, right, left, ovf,	\
-.    size < 0, pcrel, inplace, pcrel_off, src_mask, dst_mask, func, name }
+.    size < 0, pcrel, inplace, pcrel_off, HOWTO_INSTALL_ADDEND,		\
+.    src_mask, dst_mask, func, name }
 
 DESCRIPTION
 	This is used to fill in an empty howto entry in an array.
@@ -1019,8 +1026,6 @@ bfd_install_relocation (bfd *abfd,
 	 reloc_entry->address field might actually be valid for the
 	 backend concerned.  It is up to the special_function itself
 	 to call bfd_reloc_offset_in_range if needed.  */
-      /* XXX - The special_function calls haven't been fixed up to deal
-	 with creating new relocations and section contents.  */
       cont = howto->special_function (abfd, reloc_entry, symbol,
 				      /* XXX - Non-portable! */
 				      ((bfd_byte *) data_start
@@ -1030,197 +1035,81 @@ bfd_install_relocation (bfd *abfd,
 	return cont;
     }
 
-  if (bfd_is_abs_section (symbol->section))
+  if (howto->install_addend)
+    relocation = reloc_entry->addend;
+  else
     {
-      reloc_entry->address += input_section->output_offset;
-      return bfd_reloc_ok;
+      if (bfd_is_abs_section (symbol->section))
+	return bfd_reloc_ok;
+
+      /* Work out which section the relocation is targeted at and the
+	 initial relocation command value.  */
+
+      /* Get symbol value.  (Common symbols are special.)  */
+      if (bfd_is_com_section (symbol->section))
+	relocation = 0;
+      else
+	relocation = symbol->value;
+
+      reloc_target_output_section = symbol->section;
+
+      /* Convert input-section-relative symbol value to absolute.  */
+      if (! howto->partial_inplace)
+	output_base = 0;
+      else
+	output_base = reloc_target_output_section->vma;
+
+      /* If symbol addresses are in octets, convert to bytes.  */
+      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
+	  && (symbol->section->flags & SEC_ELF_OCTETS))
+	output_base *= bfd_octets_per_byte (abfd, input_section);
+
+      relocation += output_base;
+
+      /* Add in supplied addend.  */
+      relocation += reloc_entry->addend;
+
+      /* Here the variable relocation holds the final address of the
+	 symbol we are relocating against, plus any addend.  */
+
+      if (howto->pc_relative)
+	{
+	  relocation -= input_section->vma;
+
+	  if (howto->pcrel_offset && howto->partial_inplace)
+	    relocation -= reloc_entry->address;
+	}
     }
 
-  /* No need to check for howto != NULL if !bfd_is_abs_section as
-     it will have been checked in `bfd_perform_relocation already'.  */
+  if (!howto->partial_inplace)
+    {
+      reloc_entry->addend = relocation;
+      return flag;
+    }
+
+  if (!howto->install_addend
+      && abfd->xvec->flavour == bfd_target_coff_flavour)
+    {
+      /* This is just weird.  We're subtracting out the original
+	 addend, so that for COFF the addend is ignored???  */
+      relocation -= reloc_entry->addend;
+      /* FIXME: There should be no target specific code here...  */
+      if (strcmp (abfd->xvec->name, "coff-z8k") != 0)
+	reloc_entry->addend = 0;
+    }
+  else
+    reloc_entry->addend = relocation;
 
   /* Is the address of the relocation really within the section?  */
   octets = reloc_entry->address * bfd_octets_per_byte (abfd, input_section);
   if (!bfd_reloc_offset_in_range (howto, abfd, input_section, octets))
     return bfd_reloc_outofrange;
 
-  /* Work out which section the relocation is targeted at and the
-     initial relocation command value.  */
-
-  /* Get symbol value.  (Common symbols are special.)  */
-  if (bfd_is_com_section (symbol->section))
-    relocation = 0;
-  else
-    relocation = symbol->value;
-
-  reloc_target_output_section = symbol->section->output_section;
-
-  /* Convert input-section-relative symbol value to absolute.  */
-  if (! howto->partial_inplace)
-    output_base = 0;
-  else
-    output_base = reloc_target_output_section->vma;
-
-  output_base += symbol->section->output_offset;
-
-  /* If symbol addresses are in octets, convert to bytes.  */
-  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
-      && (symbol->section->flags & SEC_ELF_OCTETS))
-    output_base *= bfd_octets_per_byte (abfd, input_section);
-
-  relocation += output_base;
-
-  /* Add in supplied addend.  */
-  relocation += reloc_entry->addend;
-
-  /* Here the variable relocation holds the final address of the
-     symbol we are relocating against, plus any addend.  */
-
-  if (howto->pc_relative)
-    {
-      /* This is a PC relative relocation.  We want to set RELOCATION
-	 to the distance between the address of the symbol and the
-	 location.  RELOCATION is already the address of the symbol.
-
-	 We start by subtracting the address of the section containing
-	 the location.
-
-	 If pcrel_offset is set, we must further subtract the position
-	 of the location within the section.  Some targets arrange for
-	 the addend to be the negative of the position of the location
-	 within the section; for example, i386-aout does this.  For
-	 i386-aout, pcrel_offset is FALSE.  Some other targets do not
-	 include the position of the location; for example, ELF.
-	 For those targets, pcrel_offset is TRUE.
-
-	 If we are producing relocatable output, then we must ensure
-	 that this reloc will be correctly computed when the final
-	 relocation is done.  If pcrel_offset is FALSE we want to wind
-	 up with the negative of the location within the section,
-	 which means we must adjust the existing addend by the change
-	 in the location within the section.  If pcrel_offset is TRUE
-	 we do not want to adjust the existing addend at all.
-
-	 FIXME: This seems logical to me, but for the case of
-	 producing relocatable output it is not what the code
-	 actually does.  I don't want to change it, because it seems
-	 far too likely that something will break.  */
-
-      relocation -=
-	input_section->output_section->vma + input_section->output_offset;
-
-      if (howto->pcrel_offset && howto->partial_inplace)
-	relocation -= reloc_entry->address;
-    }
-
-  if (! howto->partial_inplace)
-    {
-      /* This is a partial relocation, and we want to apply the relocation
-	 to the reloc entry rather than the raw data. Modify the reloc
-	 inplace to reflect what we now know.  */
-      reloc_entry->addend = relocation;
-      reloc_entry->address += input_section->output_offset;
-      return flag;
-    }
-  else
-    {
-      /* This is a partial relocation, but inplace, so modify the
-	 reloc record a bit.
-
-	 If we've relocated with a symbol with a section, change
-	 into a ref to the section belonging to the symbol.  */
-      reloc_entry->address += input_section->output_offset;
-
-      /* WTF?? */
-      if (abfd->xvec->flavour == bfd_target_coff_flavour)
-	{
-
-	  /* For m68k-coff, the addend was being subtracted twice during
-	     relocation with -r.  Removing the line below this comment
-	     fixes that problem; see PR 2953.
-
-However, Ian wrote the following, regarding removing the line below,
-which explains why it is still enabled:  --djm
-
-If you put a patch like that into BFD you need to check all the COFF
-linkers.  I am fairly certain that patch will break coff-i386 (e.g.,
-SCO); see coff_i386_reloc in coff-i386.c where I worked around the
-problem in a different way.  There may very well be a reason that the
-code works as it does.
-
-Hmmm.  The first obvious point is that bfd_install_relocation should
-not have any tests that depend upon the flavour.  It's seem like
-entirely the wrong place for such a thing.  The second obvious point
-is that the current code ignores the reloc addend when producing
-relocatable output for COFF.  That's peculiar.  In fact, I really
-have no idea what the point of the line you want to remove is.
-
-A typical COFF reloc subtracts the old value of the symbol and adds in
-the new value to the location in the object file (if it's a pc
-relative reloc it adds the difference between the symbol value and the
-location).  When relocating we need to preserve that property.
-
-BFD handles this by setting the addend to the negative of the old
-value of the symbol.  Unfortunately it handles common symbols in a
-non-standard way (it doesn't subtract the old value) but that's a
-different story (we can't change it without losing backward
-compatibility with old object files) (coff-i386 does subtract the old
-value, to be compatible with existing coff-i386 targets, like SCO).
-
-So everything works fine when not producing relocatable output.  When
-we are producing relocatable output, logically we should do exactly
-what we do when not producing relocatable output.  Therefore, your
-patch is correct.  In fact, it should probably always just set
-reloc_entry->addend to 0 for all cases, since it is, in fact, going to
-add the value into the object file.  This won't hurt the COFF code,
-which doesn't use the addend; I'm not sure what it will do to other
-formats (the thing to check for would be whether any formats both use
-the addend and set partial_inplace).
-
-When I wanted to make coff-i386 produce relocatable output, I ran
-into the problem that you are running into: I wanted to remove that
-line.  Rather than risk it, I made the coff-i386 relocs use a special
-function; it's coff_i386_reloc in coff-i386.c.  The function
-specifically adds the addend field into the object file, knowing that
-bfd_install_relocation is not going to.  If you remove that line, then
-coff-i386.c will wind up adding the addend field in twice.  It's
-trivial to fix; it just needs to be done.
-
-The problem with removing the line is just that it may break some
-working code.  With BFD it's hard to be sure of anything.  The right
-way to deal with this is simply to build and test at least all the
-supported COFF targets.  It should be straightforward if time and disk
-space consuming.  For each target:
-    1) build the linker
-    2) generate some executable, and link it using -r (I would
-       probably use paranoia.o and link against newlib/libc.a, which
-       for all the supported targets would be available in
-       /usr/cygnus/progressive/H-host/target/lib/libc.a).
-    3) make the change to reloc.c
-    4) rebuild the linker
-    5) repeat step 2
-    6) if the resulting object files are the same, you have at least
-       made it no worse
-    7) if they are different you have to figure out which version is
-       right.  */
-	  relocation -= reloc_entry->addend;
-	  /* FIXME: There should be no target specific code here...  */
-	  if (strcmp (abfd->xvec->name, "coff-z8k") != 0)
-	    reloc_entry->addend = 0;
-	}
-      else
-	{
-	  reloc_entry->addend = relocation;
-	}
-    }
-
   /* FIXME: This overflow checking is incomplete, because the value
      might have overflowed before we get here.  For a correct check we
      need to compute the value in a size larger than bitsize, but we
      can't reasonably do that for a reloc the same size as a host
-     machine word.
-     FIXME: We should also do overflow checking on the result after
-     adding in the value contained in the object file.  */
+     machine word.  */
   if (howto->complain_on_overflow != complain_overflow_dont)
     flag = bfd_check_overflow (howto->complain_on_overflow,
 			       howto->bitsize,
@@ -1228,70 +1117,10 @@ space consuming.  For each target:
 			       bfd_arch_bits_per_address (abfd),
 			       relocation);
 
-  /* Either we are relocating all the way, or we don't want to apply
-     the relocation to the reloc entry (probably because there isn't
-     any room in the output format to describe addends to relocs).  */
-
-  /* The cast to bfd_vma avoids a bug in the Alpha OSF/1 C compiler
-     (OSF version 1.3, compiler version 3.11).  It miscompiles the
-     following program:
-
-     struct str
-     {
-       unsigned int i0;
-     } s = { 0 };
-
-     int
-     main ()
-     {
-       unsigned long x;
-
-       x = 0x100000000;
-       x <<= (unsigned long) s.i0;
-       if (x == 0)
-	 printf ("failed\n");
-       else
-	 printf ("succeeded (%lx)\n", x);
-     }
-     */
-
   relocation >>= (bfd_vma) howto->rightshift;
 
   /* Shift everything up to where it's going to be used.  */
   relocation <<= (bfd_vma) howto->bitpos;
-
-  /* Wait for the day when all have the mask in them.  */
-
-  /* What we do:
-     i instruction to be left alone
-     o offset within instruction
-     r relocation offset to apply
-     S src mask
-     D dst mask
-     N ~dst mask
-     A part 1
-     B part 2
-     R result
-
-     Do this:
-     ((	 i i i i i o o o o o  from bfd_get<size>
-     and	   S S S S S) to get the size offset we want
-     +	 r r r r r r r r r r) to get the final value to place
-     and	   D D D D D  to chop to right size
-     -----------------------
-     =		   A A A A A
-     And this:
-     (	 i i i i i o o o o o  from bfd_get<size>
-     and N N N N N	    ) get instruction
-     -----------------------
-     =	 B B B B B
-
-     And then:
-     (	 B B B B B
-     or		   A A A A A)
-     -----------------------
-     =	 R R R R R R R R R R  put into bfd_put<size>
-     */
 
   data = (bfd_byte *) data_start + (octets - data_start_offset);
   apply_reloc (abfd, data, howto, relocation);
