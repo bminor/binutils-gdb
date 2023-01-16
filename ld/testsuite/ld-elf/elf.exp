@@ -516,31 +516,24 @@ run_cc_link_tests [list \
 	{{nm "" pr26391.nd}} \
 	"pr26391-4" \
     ] \
-]
-
-run_ld_link_tests [list \
     [list \
 	"Build pr26391-5.o" \
-	"-z unique-symbol -r" \
-	"" \
-	"" \
+	"-Wl,-z,unique-symbol -r -nostdlib -nostartfiles" \
+	"-fno-function-sections" \
 	{pr26391a.c pr26391b.c pr26391c.c pr26391d.c} \
 	[list \
 	    [list "nm" "$dep_plug_opt" "pr26391.nd"] \
 	    [list "nm" "$dep_plug_opt" "pr26391.fd"] \
 	] \
 	"pr26391-5.o" \
-	"-fno-function-sections" \
     ] \
     [list \
 	"Build pr26391-6.o" \
-	"-z unique-symbol -r" \
-	"" \
-	"" \
+	"-Wl,-z,unique-symbol -r -nostdlib -nostartfiles" \
+	"-ffunction-sections" \
 	{pr26391a.c pr26391b.c pr26391c.c pr26391d.c} \
 	{{nm "" pr26391.nd}} \
 	"pr26391-6.o" \
-	"-ffunction-sections" \
     ] \
 ]
 
