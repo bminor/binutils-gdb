@@ -333,7 +333,7 @@ When the time comes to actually make the release....
 
   27.  Upload the tarballs to ftp.gnu.org.
 
-            gnupload --to ftp.gnu.org:binutils binutils-2.4*.tar.*
+          for A in bz2 gz lz xz ; do gnupload --to ftp.gnu.org:binutils binutils-2.41.tar.$A ; done
 
         Be prepared to provide the password for the key, if you
 	signed the binaries.
