@@ -801,9 +801,7 @@ bfd_perform_relocation (bfd *abfd,
 	  reloc_entry->address += input_section->output_offset;
 
 	  /* WTF?? */
-	  if (abfd->xvec->flavour == bfd_target_coff_flavour
-	      && strcmp (abfd->xvec->name, "coff-Intel-little") != 0
-	      && strcmp (abfd->xvec->name, "coff-Intel-big") != 0)
+	  if (abfd->xvec->flavour == bfd_target_coff_flavour)
 	    {
 	      /* For m68k-coff, the addend was being subtracted twice during
 		 relocation with -r.  Removing the line below this comment
@@ -1134,9 +1132,7 @@ bfd_install_relocation (bfd *abfd,
       reloc_entry->address += input_section->output_offset;
 
       /* WTF?? */
-      if (abfd->xvec->flavour == bfd_target_coff_flavour
-	  && strcmp (abfd->xvec->name, "coff-Intel-little") != 0
-	  && strcmp (abfd->xvec->name, "coff-Intel-big") != 0)
+      if (abfd->xvec->flavour == bfd_target_coff_flavour)
 	{
 
 	  /* For m68k-coff, the addend was being subtracted twice during
