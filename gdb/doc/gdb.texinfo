@@ -20765,6 +20765,36 @@ Show permission to call functions in the program.
 
 @end table
 
+When calling a function within a program, it is possible that the
+program could enter a state from which the called function may never
+return.  If this happens then it is possible to interrupt the function
+call by typing the interrupt character (often @kbd{Ctrl-c}).
+
+If a called function is interrupted for any reason, and the stack is
+not unwound (due to @code{set unwind-on-terminating-exception on} or
+@code{set unwindonsignal on}), then the dummy-frame, created by
+@value{GDBN} to facilitate the call to the program function, will be
+visible in the backtrace, for example frame @code{#3} in the following
+backtrace:
+
+@smallexample
+(@value{GDBP}) backtrace
+#0  0x00007ffff7b3d1e7 in nanosleep () from /lib64/libc.so.6
+#1  0x00007ffff7b3d11e in sleep () from /lib64/libc.so.6
+#2  0x000000000040113f in deadlock () at test.cc:13
+#3  <function called from gdb>
+#4  breakpt () at test.cc:20
+#5  0x0000000000401151 in main () at test.cc:25
+@end smallexample
+
+At this point it is possible to examine the state of the inferior just
+like any other stop.
+
+Depending on why the function was interrupted then it may be possible
+to resume the inferior (using commands like @code{continue},
+@code{step}, etc).  In this case, when the inferior finally returns to
+the dummy-frame, @value{GDBN} will once again halt the inferior.
+
 @subsection Calling functions with no debug info
 
 @cindex no debug info functions
