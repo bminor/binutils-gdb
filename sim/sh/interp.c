@@ -38,9 +38,7 @@
 
 #include <string.h>
 #include <stdlib.h>
-#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
 #include <time.h>
 #include <sys/time.h>
 #ifdef HAVE_UTIME_H

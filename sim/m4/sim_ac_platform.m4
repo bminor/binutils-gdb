@@ -37,7 +37,6 @@ AC_CHECK_HEADERS_ONCE(m4_flatten([
   sys/param.h
   sys/resource.h
   sys/socket.h
-  sys/stat.h
   sys/statfs.h
   sys/termio.h
   sys/termios.h
@@ -126,9 +125,7 @@ AC_CHECK_MEMBERS([[struct stat.st_dev], [struct stat.st_ino],
 [[#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif]])
+#include <sys/stat.h>]])
 
 AC_CHECK_TYPES([__int128])
 AC_CHECK_TYPES(socklen_t, [], [],

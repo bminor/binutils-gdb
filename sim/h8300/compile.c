@@ -26,11 +26,11 @@
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
+#include <sys/stat.h>
 
 #include "bfd.h"
 #include "sim-main.h"
 #include "sim/sim-h8300.h"
-#include "sys/stat.h"
 #include "sys/types.h"
 #include "sim-options.h"
 #include "sim-signal.h"

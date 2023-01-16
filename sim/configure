@@ -2810,7 +2810,6 @@ as_fn_append ac_header_list " sys/mount.h"
 as_fn_append ac_header_list " sys/param.h"
 as_fn_append ac_header_list " sys/resource.h"
 as_fn_append ac_header_list " sys/socket.h"
-as_fn_append ac_header_list " sys/stat.h"
 as_fn_append ac_header_list " sys/statfs.h"
 as_fn_append ac_header_list " sys/termio.h"
 as_fn_append ac_header_list " sys/termios.h"
@@ -5217,8 +5216,6 @@ _ACEOF
 fi
 
 done
-
-
 
 
 
@@ -8425,9 +8422,7 @@ fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_dev" "ac_cv_member_struct_stat_st_dev" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
 "
 if test "x$ac_cv_member_struct_stat_st_dev" = xyes; then :
 
@@ -8440,9 +8435,7 @@ fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_ino" "ac_cv_member_struct_stat_st_ino" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
 "
 if test "x$ac_cv_member_struct_stat_st_ino" = xyes; then :
 
@@ -8455,9 +8448,7 @@ fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_mode" "ac_cv_member_struct_stat_st_mode" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
 "
 if test "x$ac_cv_member_struct_stat_st_mode" = xyes; then :
 
@@ -8470,9 +8461,7 @@ fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_nlink" "ac_cv_member_struct_stat_st_nlink" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
 "
 if test "x$ac_cv_member_struct_stat_st_nlink" = xyes; then :
 
@@ -8485,9 +8474,7 @@ fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_uid" "ac_cv_member_struct_stat_st_uid" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
 "
 if test "x$ac_cv_member_struct_stat_st_uid" = xyes; then :
 
@@ -8500,9 +8487,7 @@ fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_gid" "ac_cv_member_struct_stat_st_gid" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
 "
 if test "x$ac_cv_member_struct_stat_st_gid" = xyes; then :
 
@@ -8515,9 +8500,7 @@ fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_rdev" "ac_cv_member_struct_stat_st_rdev" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
 "
 if test "x$ac_cv_member_struct_stat_st_rdev" = xyes; then :
 
@@ -8530,9 +8513,7 @@ fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_size" "ac_cv_member_struct_stat_st_size" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
 "
 if test "x$ac_cv_member_struct_stat_st_size" = xyes; then :
 
@@ -8545,9 +8526,7 @@ fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_blksize" "ac_cv_member_struct_stat_st_blksize" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
 "
 if test "x$ac_cv_member_struct_stat_st_blksize" = xyes; then :
 
@@ -8560,9 +8539,7 @@ fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_blocks" "ac_cv_member_struct_stat_st_blocks" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
 "
 if test "x$ac_cv_member_struct_stat_st_blocks" = xyes; then :
 
@@ -8575,9 +8552,7 @@ fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_atime" "ac_cv_member_struct_stat_st_atime" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
 "
 if test "x$ac_cv_member_struct_stat_st_atime" = xyes; then :
 
@@ -8590,9 +8565,7 @@ fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_mtime" "ac_cv_member_struct_stat_st_mtime" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
 "
 if test "x$ac_cv_member_struct_stat_st_mtime" = xyes; then :
 
@@ -8605,9 +8578,7 @@ fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_ctime" "ac_cv_member_struct_stat_st_ctime" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
 "
 if test "x$ac_cv_member_struct_stat_st_ctime" = xyes; then :
 
@@ -12286,7 +12257,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12289 "configure"
+#line 12260 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12392,7 +12363,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12395 "configure"
+#line 12366 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H

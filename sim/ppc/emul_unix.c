@@ -1055,7 +1055,6 @@ typedef uint32_t	solaris_ino_t;
 typedef uint32_t	solaris_mode_t;
 typedef	uint32_t	solaris_nlink_t;
 
-#ifdef HAVE_SYS_STAT_H
 #define	SOLARIS_ST_FSTYPSZ 16		/* array size for file system type name */
 
 /* AIX 7.1 defines st_pad[123] to st_[amc]tim.tv_pad, respectively */
@@ -1145,7 +1144,6 @@ convert_to_solaris_stat(unsigned_word addr,
 
   emul_write_buffer(&target, addr, sizeof(target), processor, cia);
 }
-#endif /* HAVE_SYS_STAT_H */
 
 #ifndef HAVE_STAT
 #define do_solaris_stat 0
@@ -2011,7 +2009,6 @@ typedef int32_t	linux_time_t;
 typedef int32_t	linux_clock_t;
 typedef int32_t	linux_daddr_t;
 
-#ifdef HAVE_SYS_STAT_H
 /* For the PowerPC, don't both with the 'old' stat structure, since there
    should be no extant binaries with that structure.  */
 
@@ -2082,7 +2079,6 @@ convert_to_linux_stat(unsigned_word addr,
 
   emul_write_buffer(&target, addr, sizeof(target), processor, cia);
 }
-#endif /* HAVE_SYS_STAT_H */
 
 #ifndef HAVE_STAT
 #define do_linux_stat 0

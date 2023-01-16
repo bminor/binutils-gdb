@@ -30,9 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif
-#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
 
 #include "sim-main.h"
 #include "sim-assert.h"
