@@ -29,9 +29,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdlib.h>
-#if HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 
 #undef open
 

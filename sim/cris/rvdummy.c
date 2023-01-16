@@ -36,10 +36,7 @@ main (int argc, char *argv[])
 #include "libiberty.h"
 
 #include <stdio.h>
-
-#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 #include <stdlib.h>
 #include <string.h>
 #ifdef HAVE_SYS_TYPES_H

@@ -18,12 +18,12 @@ AC_DEFUN([SIM_AC_PLATFORM],
 [dnl
 dnl Check for common headers.
 dnl NB: You can assume C11 headers exist.
+dnl NB: We use gnulib from ../gnulib/, so we don't probe headers it provides.
 AC_CHECK_HEADERS_ONCE(m4_flatten([
   dlfcn.h
   fcntl.h
   fpu_control.h
   termios.h
-  unistd.h
   utime.h
   linux/if_tun.h
   linux/mii.h
@@ -46,6 +46,7 @@ AC_CHECK_HEADERS_ONCE(m4_flatten([
 ]))
 AC_HEADER_DIRENT
 
+dnl NB: We use gnulib from ../gnulib/, so we don't probe functions it provides.
 AC_CHECK_FUNCS_ONCE(m4_flatten([
   __setfpucw
   access

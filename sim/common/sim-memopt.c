@@ -26,9 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #endif
 #include <stdlib.h>
 #include <string.h>
-#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif

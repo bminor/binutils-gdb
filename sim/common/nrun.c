@@ -21,10 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <stdlib.h>
 /* For strsignal.  */
 #include <string.h>
-#ifdef HAVE_UNISTD_H
 /* For chdir.  */
 #include <unistd.h>
-#endif
 
 #include "bfd.h"
 #include "environ.h"

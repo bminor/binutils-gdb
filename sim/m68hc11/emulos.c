@@ -21,9 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "defs.h"
 
 #include "sim-main.h"
-#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 
 #include "m68hc11-sim.h"
 

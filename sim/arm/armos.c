@@ -31,10 +31,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <string.h>
-
-#ifdef HAVE_UNISTD_H
 #include <unistd.h>		/* For SEEK_SET etc.  */
-#endif
 
 #include "armdefs.h"
 #include "armos.h"

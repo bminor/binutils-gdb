@@ -12,9 +12,7 @@
 #include <utime.h>
 #endif
 #include <time.h>
-#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 #include <stdlib.h>
 #include <string.h>
 
