@@ -4980,17 +4980,25 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 	$(AM_V_at)mv $@.tmp $@
 @SIM_ENABLE_ARCH_aarch64_TRUE@$(aarch64_libsim_a_OBJECTS) $(aarch64_libsim_a_LIBADD): aarch64/hw-config.h
 
+@SIM_ENABLE_ARCH_aarch64_TRUE@aarch64/modules.o: aarch64/modules.c
+
 @SIM_ENABLE_ARCH_aarch64_TRUE@aarch64/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_aarch64_TRUE@-@am__include@ aarch64/$(DEPDIR)/*.Po
 @SIM_ENABLE_ARCH_arm_TRUE@$(arm_libsim_a_OBJECTS) $(arm_libsim_a_LIBADD): arm/hw-config.h
+
+@SIM_ENABLE_ARCH_arm_TRUE@arm/modules.o: arm/modules.c
 
 @SIM_ENABLE_ARCH_arm_TRUE@arm/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_arm_TRUE@-@am__include@ arm/$(DEPDIR)/*.Po
 @SIM_ENABLE_ARCH_avr_TRUE@$(avr_libsim_a_OBJECTS) $(avr_libsim_a_LIBADD): avr/hw-config.h
 
+@SIM_ENABLE_ARCH_avr_TRUE@avr/modules.o: avr/modules.c
+
 @SIM_ENABLE_ARCH_avr_TRUE@avr/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_avr_TRUE@-@am__include@ avr/$(DEPDIR)/*.Po
 @SIM_ENABLE_ARCH_bfin_TRUE@$(bfin_libsim_a_OBJECTS) $(bfin_libsim_a_LIBADD): bfin/hw-config.h
+
+@SIM_ENABLE_ARCH_bfin_TRUE@bfin/modules.o: bfin/modules.c
 
 @SIM_ENABLE_ARCH_bfin_TRUE@bfin/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_bfin_TRUE@-@am__include@ bfin/$(DEPDIR)/*.Po
@@ -5013,6 +5021,8 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_bfin_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change $@.tmp $(srcdir)/bfin/linux-fixed-code.h
 @SIM_ENABLE_ARCH_bfin_TRUE@	$(AM_V_at)touch $(srcdir)/bfin/linux-fixed-code.h
 @SIM_ENABLE_ARCH_bpf_TRUE@$(bpf_libsim_a_OBJECTS) $(bpf_libsim_a_LIBADD): bpf/hw-config.h
+
+@SIM_ENABLE_ARCH_bpf_TRUE@bpf/modules.o: bpf/modules.c
 
 @SIM_ENABLE_ARCH_bpf_TRUE@bpf/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_bpf_TRUE@-@am__include@ bpf/$(DEPDIR)/*.Po
@@ -5067,6 +5077,8 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_bpf_TRUE@bpf/sem-be.c bpf/decode-be.c bpf/decode-be.h: @CGEN_MAINT@ bpf/cgen-decode-be
 @SIM_ENABLE_ARCH_cr16_TRUE@$(cr16_libsim_a_OBJECTS) $(cr16_libsim_a_LIBADD): cr16/hw-config.h
 
+@SIM_ENABLE_ARCH_cr16_TRUE@cr16/modules.o: cr16/modules.c
+
 @SIM_ENABLE_ARCH_cr16_TRUE@cr16/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_cr16_TRUE@-@am__include@ cr16/$(DEPDIR)/*.Po
 
@@ -5088,6 +5100,8 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_cr16_TRUE@cr16/table.c: cr16/gencode$(EXEEXT)
 @SIM_ENABLE_ARCH_cr16_TRUE@	$(AM_V_GEN)$< >$@
 @SIM_ENABLE_ARCH_cris_TRUE@$(cris_libsim_a_OBJECTS) $(cris_libsim_a_LIBADD): cris/hw-config.h
+
+@SIM_ENABLE_ARCH_cris_TRUE@cris/modules.o: cris/modules.c
 
 @SIM_ENABLE_ARCH_cris_TRUE@cris/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_cris_TRUE@-@am__include@ cris/$(DEPDIR)/*.Po
@@ -5131,6 +5145,8 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_cris_TRUE@cris/cpuv32.h cris/cpuv32.c cris/semcrisv32f-switch.c cris/modelv32.c cris/decodev32.c cris/decodev32.h: @CGEN_MAINT@ cris/cgen-cpu-decode-v32f
 @SIM_ENABLE_ARCH_d10v_TRUE@$(d10v_libsim_a_OBJECTS) $(d10v_libsim_a_LIBADD): d10v/hw-config.h
 
+@SIM_ENABLE_ARCH_d10v_TRUE@d10v/modules.o: d10v/modules.c
+
 @SIM_ENABLE_ARCH_d10v_TRUE@d10v/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_d10v_TRUE@-@am__include@ d10v/$(DEPDIR)/*.Po
 
@@ -5153,6 +5169,8 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_d10v_TRUE@	$(AM_V_GEN)$< >$@
 @SIM_ENABLE_ARCH_erc32_TRUE@$(erc32_libsim_a_OBJECTS) $(erc32_libsim_a_LIBADD): erc32/hw-config.h
 
+@SIM_ENABLE_ARCH_erc32_TRUE@erc32/modules.o: erc32/modules.c
+
 @SIM_ENABLE_ARCH_erc32_TRUE@erc32/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_erc32_TRUE@-@am__include@ erc32/$(DEPDIR)/*.Po
 
@@ -5166,9 +5184,13 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_erc32_TRUE@	rm -f $(DESTDIR)$(bindir)/sis
 @SIM_ENABLE_ARCH_examples_TRUE@$(example_synacor_libsim_a_OBJECTS) $(example_synacor_libsim_a_LIBADD): example-synacor/hw-config.h
 
+@SIM_ENABLE_ARCH_examples_TRUE@example-synacor/modules.o: example-synacor/modules.c
+
 @SIM_ENABLE_ARCH_examples_TRUE@example-synacor/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_examples_TRUE@-@am__include@ example-synacor/$(DEPDIR)/*.Po
 @SIM_ENABLE_ARCH_frv_TRUE@$(frv_libsim_a_OBJECTS) $(frv_libsim_a_LIBADD): frv/hw-config.h
+
+@SIM_ENABLE_ARCH_frv_TRUE@frv/modules.o: frv/modules.c
 
 @SIM_ENABLE_ARCH_frv_TRUE@frv/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_frv_TRUE@-@am__include@ frv/$(DEPDIR)/*.Po
@@ -5196,13 +5218,19 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_frv_TRUE@frv/cpu.h frv/sem.c frv/model.c frv/decode.c frv/decode.h: @CGEN_MAINT@ frv/cgen-cpu-decode
 @SIM_ENABLE_ARCH_ft32_TRUE@$(ft32_libsim_a_OBJECTS) $(ft32_libsim_a_LIBADD): ft32/hw-config.h
 
+@SIM_ENABLE_ARCH_ft32_TRUE@ft32/modules.o: ft32/modules.c
+
 @SIM_ENABLE_ARCH_ft32_TRUE@ft32/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_ft32_TRUE@-@am__include@ ft32/$(DEPDIR)/*.Po
 @SIM_ENABLE_ARCH_h8300_TRUE@$(h8300_libsim_a_OBJECTS) $(h8300_libsim_a_LIBADD): h8300/hw-config.h
 
+@SIM_ENABLE_ARCH_h8300_TRUE@h8300/modules.o: h8300/modules.c
+
 @SIM_ENABLE_ARCH_h8300_TRUE@h8300/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_h8300_TRUE@-@am__include@ h8300/$(DEPDIR)/*.Po
 @SIM_ENABLE_ARCH_iq2000_TRUE@$(iq2000_libsim_a_OBJECTS) $(iq2000_libsim_a_LIBADD): iq2000/hw-config.h
+
+@SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/modules.o: iq2000/modules.c
 
 @SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_iq2000_TRUE@-@am__include@ iq2000/$(DEPDIR)/*.Po
@@ -5230,6 +5258,8 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/cpu.h iq2000/sem.c iq2000/sem-switch.c iq2000/model.c iq2000/decode.c iq2000/decode.h: @CGEN_MAINT@ iq2000/cgen-cpu-decode
 @SIM_ENABLE_ARCH_lm32_TRUE@$(lm32_libsim_a_OBJECTS) $(lm32_libsim_a_LIBADD): lm32/hw-config.h
 
+@SIM_ENABLE_ARCH_lm32_TRUE@lm32/modules.o: lm32/modules.c
+
 @SIM_ENABLE_ARCH_lm32_TRUE@lm32/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_lm32_TRUE@-@am__include@ lm32/$(DEPDIR)/*.Po
 
@@ -5256,6 +5286,8 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_lm32_TRUE@lm32/cpu.h lm32/sem.c lm32/sem-switch.c lm32/model.c lm32/decode.c lm32/decode.h: @CGEN_MAINT@ lm32/cgen-cpu-decode
 @SIM_ENABLE_ARCH_m32c_TRUE@$(m32c_libsim_a_OBJECTS) $(m32c_libsim_a_LIBADD): m32c/hw-config.h
 
+@SIM_ENABLE_ARCH_m32c_TRUE@m32c/modules.o: m32c/modules.c
+
 @SIM_ENABLE_ARCH_m32c_TRUE@m32c/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_m32c_TRUE@-@am__include@ m32c/$(DEPDIR)/*.Po
 
@@ -5277,6 +5309,8 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_m32c_TRUE@	$(AM_V_GEN)$(m32c_OPC2C_RUN) -l $@.log $< > $@.tmp
 @SIM_ENABLE_ARCH_m32c_TRUE@	$(AM_V_at)mv $@.tmp $@
 @SIM_ENABLE_ARCH_m32r_TRUE@$(m32r_libsim_a_OBJECTS) $(m32r_libsim_a_LIBADD): m32r/hw-config.h
+
+@SIM_ENABLE_ARCH_m32r_TRUE@m32r/modules.o: m32r/modules.c
 
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_m32r_TRUE@-@am__include@ m32r/$(DEPDIR)/*.Po
@@ -5332,6 +5366,8 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/cpu2.h m32r/sem2-switch.c m32r/model2.c m32r/decode2.c m32r/decode2.h: @CGEN_MAINT@ m32r/cgen-cpu-decode-2
 @SIM_ENABLE_ARCH_m68hc11_TRUE@$(m68hc11_libsim_a_OBJECTS) $(m68hc11_libsim_a_LIBADD): m68hc11/hw-config.h
 
+@SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11/modules.o: m68hc11/modules.c
+
 @SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_m68hc11_TRUE@-@am__include@ m68hc11/$(DEPDIR)/*.Po
 
@@ -5352,13 +5388,19 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_m68hc11_TRUE@	$(AM_V_GEN)$< -m6812 >$@
 @SIM_ENABLE_ARCH_mcore_TRUE@$(mcore_libsim_a_OBJECTS) $(mcore_libsim_a_LIBADD): mcore/hw-config.h
 
+@SIM_ENABLE_ARCH_mcore_TRUE@mcore/modules.o: mcore/modules.c
+
 @SIM_ENABLE_ARCH_mcore_TRUE@mcore/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_mcore_TRUE@-@am__include@ mcore/$(DEPDIR)/*.Po
 @SIM_ENABLE_ARCH_microblaze_TRUE@$(microblaze_libsim_a_OBJECTS) $(microblaze_libsim_a_LIBADD): microblaze/hw-config.h
 
+@SIM_ENABLE_ARCH_microblaze_TRUE@microblaze/modules.o: microblaze/modules.c
+
 @SIM_ENABLE_ARCH_microblaze_TRUE@microblaze/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_microblaze_TRUE@-@am__include@ microblaze/$(DEPDIR)/*.Po
 @SIM_ENABLE_ARCH_mips_TRUE@$(mips_libsim_a_OBJECTS) $(mips_libsim_a_LIBADD): mips/hw-config.h
+
+@SIM_ENABLE_ARCH_mips_TRUE@mips/modules.o: mips/modules.c
 
 @SIM_ENABLE_ARCH_mips_TRUE@mips/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_mips_TRUE@-@am__include@ mips/$(DEPDIR)/*.Po
@@ -5564,6 +5606,8 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_mips_TRUE@	$(AM_V_at)touch $@
 @SIM_ENABLE_ARCH_mn10300_TRUE@$(mn10300_libsim_a_OBJECTS) $(mn10300_libsim_a_LIBADD): mn10300/hw-config.h
 
+@SIM_ENABLE_ARCH_mn10300_TRUE@mn10300/modules.o: mn10300/modules.c
+
 @SIM_ENABLE_ARCH_mn10300_TRUE@mn10300/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_mn10300_TRUE@-@am__include@ mn10300/$(DEPDIR)/*.Po
 
@@ -5598,6 +5642,8 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)touch $@
 @SIM_ENABLE_ARCH_moxie_TRUE@$(moxie_libsim_a_OBJECTS) $(moxie_libsim_a_LIBADD): moxie/hw-config.h
 
+@SIM_ENABLE_ARCH_moxie_TRUE@moxie/modules.o: moxie/modules.c
+
 @SIM_ENABLE_ARCH_moxie_TRUE@moxie/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_moxie_TRUE@-@am__include@ moxie/$(DEPDIR)/*.Po
 
@@ -5614,9 +5660,13 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_moxie_TRUE@	fi
 @SIM_ENABLE_ARCH_msp430_TRUE@$(msp430_libsim_a_OBJECTS) $(msp430_libsim_a_LIBADD): msp430/hw-config.h
 
+@SIM_ENABLE_ARCH_msp430_TRUE@msp430/modules.o: msp430/modules.c
+
 @SIM_ENABLE_ARCH_msp430_TRUE@msp430/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_msp430_TRUE@-@am__include@ msp430/$(DEPDIR)/*.Po
 @SIM_ENABLE_ARCH_or1k_TRUE@$(or1k_libsim_a_OBJECTS) $(or1k_libsim_a_LIBADD): or1k/hw-config.h
+
+@SIM_ENABLE_ARCH_or1k_TRUE@or1k/modules.o: or1k/modules.c
 
 @SIM_ENABLE_ARCH_or1k_TRUE@or1k/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_or1k_TRUE@-@am__include@ or1k/$(DEPDIR)/*.Po
@@ -5662,21 +5712,31 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)touch $(srcdir)/ppc/spreg.h
 @SIM_ENABLE_ARCH_pru_TRUE@$(pru_libsim_a_OBJECTS) $(pru_libsim_a_LIBADD): pru/hw-config.h
 
+@SIM_ENABLE_ARCH_pru_TRUE@pru/modules.o: pru/modules.c
+
 @SIM_ENABLE_ARCH_pru_TRUE@pru/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_pru_TRUE@-@am__include@ pru/$(DEPDIR)/*.Po
 @SIM_ENABLE_ARCH_riscv_TRUE@$(riscv_libsim_a_OBJECTS) $(riscv_libsim_a_LIBADD): riscv/hw-config.h
+
+@SIM_ENABLE_ARCH_riscv_TRUE@riscv/modules.o: riscv/modules.c
 
 @SIM_ENABLE_ARCH_riscv_TRUE@riscv/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_riscv_TRUE@-@am__include@ riscv/$(DEPDIR)/*.Po
 @SIM_ENABLE_ARCH_rl78_TRUE@$(rl78_libsim_a_OBJECTS) $(rl78_libsim_a_LIBADD): rl78/hw-config.h
 
+@SIM_ENABLE_ARCH_rl78_TRUE@rl78/modules.o: rl78/modules.c
+
 @SIM_ENABLE_ARCH_rl78_TRUE@rl78/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_rl78_TRUE@-@am__include@ rl78/$(DEPDIR)/*.Po
 @SIM_ENABLE_ARCH_rx_TRUE@$(rx_libsim_a_OBJECTS) $(rx_libsim_a_LIBADD): rx/hw-config.h
 
+@SIM_ENABLE_ARCH_rx_TRUE@rx/modules.o: rx/modules.c
+
 @SIM_ENABLE_ARCH_rx_TRUE@rx/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_rx_TRUE@-@am__include@ rx/$(DEPDIR)/*.Po
 @SIM_ENABLE_ARCH_sh_TRUE@$(sh_libsim_a_OBJECTS) $(sh_libsim_a_LIBADD): sh/hw-config.h
+
+@SIM_ENABLE_ARCH_sh_TRUE@sh/modules.o: sh/modules.c
 
 @SIM_ENABLE_ARCH_sh_TRUE@sh/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_sh_TRUE@-@am__include@ sh/$(DEPDIR)/*.Po
@@ -5700,6 +5760,8 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_sh_TRUE@sh/table.c: sh/gencode$(EXEEXT)
 @SIM_ENABLE_ARCH_sh_TRUE@	$(AM_V_GEN)$< -s >$@
 @SIM_ENABLE_ARCH_v850_TRUE@$(v850_libsim_a_OBJECTS) $(v850_libsim_a_LIBADD): v850/hw-config.h
+
+@SIM_ENABLE_ARCH_v850_TRUE@v850/modules.o: v850/modules.c
 
 @SIM_ENABLE_ARCH_v850_TRUE@v850/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_v850_TRUE@-@am__include@ v850/$(DEPDIR)/*.Po

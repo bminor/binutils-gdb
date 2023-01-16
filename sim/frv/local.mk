@@ -64,6 +64,9 @@ $(%C%_libsim_a_OBJECTS) $(%C%_libsim_a_LIBADD): %D%/hw-config.h
 
 noinst_LIBRARIES += %D%/libsim.a
 
+## Override wildcards that trigger common/modules.c to be (incorrectly) used.
+%D%/modules.o: %D%/modules.c
+
 %D%/%.o: common/%.c ; $(SIM_COMPILE)
 -@am__include@ %D%/$(DEPDIR)/*.Po
 
