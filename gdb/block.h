@@ -147,14 +147,6 @@ struct block
   void set_multidict (multidictionary *multidict)
   { m_multidict = multidict; }
 
-  /* Return this block's namespace info.  */
-  block_namespace_info *namespace_info () const
-  { return m_namespace_info; }
-
-  /* Set this block's namespace info.  */
-  void set_namespace_info (block_namespace_info *namespace_info)
-  { m_namespace_info = namespace_info; }
-
   /* Return a view on this block's ranges.  */
   gdb::array_view<blockrange> ranges ()
   {
@@ -216,6 +208,29 @@ struct block
 
   bool inlined_p () const;
 
+  /* This returns the namespace that this block is enclosed in, or ""
+     if it isn't enclosed in a namespace at all.  This travels the
+     chain of superblocks looking for a scope, if necessary.  */
+
+  const char *scope () const;
+
+  /* Set this block's scope member to SCOPE; if needed, allocate
+     memory via OBSTACK.  (It won't make a copy of SCOPE, however, so
+     that already has to be allocated correctly.)  */
+
+  void set_scope (const char *scope, struct obstack *obstack);
+
+  /* This returns the using directives list associated with this
+     block, if any.  */
+
+  struct using_direct *get_using () const;
+
+  /* Set this block's using member to USING; if needed, allocate
+     memory via OBSTACK.  (It won't make a copy of USING, however, so
+     that already has to be allocated correctly.)  */
+
+  void set_using (struct using_direct *using_decl, struct obstack *obstack);
+
   /* Addresses in the executable code that are in this block.  */
 
   CORE_ADDR m_start;
@@ -248,6 +263,12 @@ struct block
      startaddr and endaddr above.  */
 
   struct blockranges *m_ranges;
+
+private:
+
+  /* If the namespace_info is NULL, allocate it via OBSTACK and
+     initialize its members to zero.  */
+  void initialize_namespace (struct obstack *obstack);
 };
 
 /* The global block is singled out so that we can provide a back-link
@@ -372,17 +393,6 @@ extern struct call_site *call_site_for_pc (struct gdbarch *gdbarch,
 extern const struct block *block_for_pc (CORE_ADDR);
 
 extern const struct block *block_for_pc_sect (CORE_ADDR, struct obj_section *);
-
-extern const char *block_scope (const struct block *block);
-
-extern void block_set_scope (struct block *block, const char *scope,
-			     struct obstack *obstack);
-
-extern struct using_direct *block_using (const struct block *block);
-
-extern void block_set_using (struct block *block,
-			     struct using_direct *using_decl,
-			     struct obstack *obstack);
 
 extern const struct block *block_static_block (const struct block *block);
 

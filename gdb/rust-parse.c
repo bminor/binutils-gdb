@@ -375,7 +375,7 @@ rust_parser::super_name (const std::string &ident, unsigned int n_supers)
 {
   const char *scope = "";
   if (pstate->expression_context_block != nullptr)
-    scope = block_scope (pstate->expression_context_block);
+    scope = pstate->expression_context_block->scope ();
   int offset;
 
   if (scope[0] == '\0')

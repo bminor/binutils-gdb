@@ -2160,7 +2160,7 @@ lookup_local_symbol (const char *name,
 
   struct symbol *sym;
   const struct block *static_block = block_static_block (block);
-  const char *scope = block_scope (block);
+  const char *scope = block->scope ();
   
   /* Check if it's a global block.  */
   if (static_block == nullptr)

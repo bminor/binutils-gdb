@@ -372,11 +372,10 @@ buildsym_compunit::finish_block_internal
       opblock = pblock;
     }
 
-  block_set_using (block,
-		   (is_global
-		    ? m_global_using_directives
-		    : m_local_using_directives),
-		   &m_objfile->objfile_obstack);
+  block->set_using ((is_global
+		     ? m_global_using_directives
+		     : m_local_using_directives),
+		    &m_objfile->objfile_obstack);
   if (is_global)
     m_global_using_directives = NULL;
   else

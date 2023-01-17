@@ -148,7 +148,7 @@ public:
   {
     struct block_symbol result = {};
 
-    const char *scope = block == nullptr ? "" : block_scope (block);
+    const char *scope = block == nullptr ? "" : block->scope ();
     symbol_lookup_debug_printf
       ("rust_lookup_symbol_non_local (%s, %s (scope %s), %s)",
        name, host_address_to_string (block), scope,

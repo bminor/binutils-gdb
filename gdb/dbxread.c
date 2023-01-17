@@ -2361,8 +2361,8 @@ cp_set_block_scope (const struct symbol *symbol,
       const char *name = symbol->demangled_name ();
       unsigned int prefix_len = cp_entire_prefix_len (name);
 
-      block_set_scope (block, obstack_strndup (obstack, name, prefix_len),
-		       obstack);
+      block->set_scope (obstack_strndup (obstack, name, prefix_len),
+			obstack);
     }
 }
 

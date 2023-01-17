@@ -58,7 +58,7 @@ rust_last_path_segment (const char *path)
 std::string
 rust_crate_for_block (const struct block *block)
 {
-  const char *scope = block_scope (block);
+  const char *scope = block->scope ();
 
   if (scope[0] == '\0')
     return std::string ();

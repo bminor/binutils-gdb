@@ -413,7 +413,7 @@ cp_lookup_symbol_via_imports (const char *scope,
   /* Go through the using directives.  If any of them add new names to
      the namespace we're searching in, see if we can find a match by
      applying them.  */
-  for (current = block_using (block);
+  for (current = block->get_using ();
        current != NULL;
        current = current->next)
     {
@@ -769,7 +769,7 @@ cp_lookup_symbol_nonlocal (const struct language_defn *langdef,
 			   const domain_enum domain)
 {
   struct block_symbol sym;
-  const char *scope = block_scope (block);
+  const char *scope = block == nullptr ? "" : block->scope ();
 
   symbol_lookup_debug_printf
     ("cp_lookup_symbol_non_local (%s, %s (scope %s), %s)",
@@ -1025,7 +1025,7 @@ cp_lookup_transparent_type (const char *name)
 
   /* If that doesn't work and we're within a namespace, look there
      instead.  */
-  scope = block_scope (get_selected_block (0));
+  scope = get_selected_block (0)->scope ();
 
   if (scope[0] == '\0')
     return NULL;

@@ -285,40 +285,36 @@ block_for_pc (CORE_ADDR pc)
 /* Now come some functions designed to deal with C++ namespace issues.
    The accessors are safe to use even in the non-C++ case.  */
 
-/* This returns the namespace that BLOCK is enclosed in, or "" if it
-   isn't enclosed in a namespace at all.  This travels the chain of
-   superblocks looking for a scope, if necessary.  */
+/* See block.h.  */
 
 const char *
-block_scope (const struct block *block)
+block::scope () const
 {
-  for (; block != NULL; block = block->superblock ())
+  for (const block *block = this;
+       block != nullptr;
+       block = block->superblock ())
     {
-      if (block->namespace_info () != NULL
-	  && block->namespace_info ()->scope != NULL)
-	return block->namespace_info ()->scope;
+      if (block->m_namespace_info != nullptr
+	  && block->m_namespace_info->scope != nullptr)
+	return block->m_namespace_info->scope;
     }
 
   return "";
 }
 
-/* If block->namespace_info () is NULL, allocate it via OBSTACK and
-   initialize its members to zero.  */
-
-static void
-block_initialize_namespace (struct block *block, struct obstack *obstack)
-{
-  if (block->namespace_info () == NULL)
-    block->set_namespace_info (new (obstack) struct block_namespace_info ());
-}
-
-/* Set BLOCK's scope member to SCOPE; if needed, allocate memory via
-   OBSTACK.  (It won't make a copy of SCOPE, however, so that already
-   has to be allocated correctly.)  */
+/* See block.h.  */
 
 void
-block_set_scope (struct block *block, const char *scope,
-		 struct obstack *obstack)
+block::initialize_namespace (struct obstack *obstack)
+{
+  if (m_namespace_info == nullptr)
+    m_namespace_info = new (obstack) struct block_namespace_info;
+}
+
+/* See block.h.  */
+
+void
+block::set_scope (const char *scope, struct obstack *obstack)
 {
   if (scope == nullptr || scope[0] == '\0')
     {
@@ -326,31 +322,25 @@ block_set_scope (struct block *block, const char *scope,
       return;
     }
 
-  block_initialize_namespace (block, obstack);
-
-  block->namespace_info ()->scope = scope;
+  initialize_namespace (obstack);
+  m_namespace_info->scope = scope;
 }
 
-/* This returns the using directives list associated with BLOCK, if
-   any.  */
+/* See block.h.  */
 
 struct using_direct *
-block_using (const struct block *block)
+block::get_using () const
 {
-  if (block->namespace_info () == NULL)
-    return NULL;
+  if (m_namespace_info == nullptr)
+    return nullptr;
   else
-    return block->namespace_info ()->using_decl;
+    return m_namespace_info->using_decl;
 }
 
-/* Set BLOCK's using member to USING; if needed, allocate memory via
-   OBSTACK.  (It won't make a copy of USING, however, so that already
-   has to be allocated correctly.)  */
+/* See block.h.  */
 
 void
-block_set_using (struct block *block,
-		 struct using_direct *using_decl,
-		 struct obstack *obstack)
+block::set_using (struct using_direct *using_decl, struct obstack *obstack)
 {
   if (using_decl == nullptr)
     {
@@ -358,9 +348,8 @@ block_set_using (struct block *block,
       return;
     }
 
-  block_initialize_namespace (block, obstack);
-
-  block->namespace_info ()->using_decl = using_decl;
+  initialize_namespace (obstack);
+  m_namespace_info->using_decl = using_decl;
 }
 
 /* Return the static block associated to BLOCK.  Return NULL if block

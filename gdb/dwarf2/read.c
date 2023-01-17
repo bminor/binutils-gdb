@@ -10170,8 +10170,8 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
        || cu->lang () == language_d
        || cu->lang () == language_rust)
       && cu->processing_has_namespace_info)
-    block_set_scope (block, determine_prefix (die, cu),
-		     &objfile->objfile_obstack);
+    block->set_scope (determine_prefix (die, cu),
+		      &objfile->objfile_obstack);
 
   /* If we have address ranges, record them.  */
   dwarf2_record_block_ranges (die, block, baseaddr, cu);

@@ -5424,7 +5424,7 @@ ada_add_block_renamings (std::vector<struct block_symbol> &result,
   symbol_name_matcher_ftype *name_match
     = ada_get_symbol_name_matcher (lookup_name);
 
-  for (renaming = block_using (block);
+  for (renaming = block->get_using ();
        renaming != NULL;
        renaming = renaming->next)
     {
