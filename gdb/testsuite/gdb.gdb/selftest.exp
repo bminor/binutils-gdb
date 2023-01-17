@@ -114,11 +114,18 @@ proc test_with_self { } {
 	    }
 	}
     }
-    
+
     set description "send SIGINT signal to child process"
-    gdb_test_multiple "signal SIGINT" "$description" {
-	-re "^signal SIGINT\r\nContinuing with signal SIGINT.\r\nQuit\r\n.* $" {
-	    pass "$description"
+    gdb_test_multiple "signal SIGINT" "$description, top GDB message" {
+	-re "^signal SIGINT\r\nContinuing with signal SIGINT.\r\n" {
+	    pass $gdb_test_name
+	}
+    }
+
+    gdb_test_multiple "" "$description, bottom GDB message" {
+	-i $inferior_spawn_id
+	-re "Quit\r\n\\(xgdb\\) $" {
+	    pass $gdb_test_name
 	}
     }
 
