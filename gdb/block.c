@@ -320,6 +320,12 @@ void
 block_set_scope (struct block *block, const char *scope,
 		 struct obstack *obstack)
 {
+  if (scope == nullptr || scope[0] == '\0')
+    {
+      /* Don't bother.  */
+      return;
+    }
+
   block_initialize_namespace (block, obstack);
 
   block->namespace_info ()->scope = scope;
@@ -346,6 +352,12 @@ block_set_using (struct block *block,
 		 struct using_direct *using_decl,
 		 struct obstack *obstack)
 {
+  if (using_decl == nullptr)
+    {
+      /* Don't bother.  */
+      return;
+    }
+
   block_initialize_namespace (block, obstack);
 
   block->namespace_info ()->using_decl = using_decl;
