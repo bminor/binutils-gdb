@@ -48,10 +48,6 @@ struct gdbarch
   gdbarch_tdep_up tdep;
   gdbarch_dump_tdep_ftype *dump_tdep = nullptr;
 
-  /* per-architecture data-pointers.  */
-  unsigned nr_data = 0;
-  void **data = nullptr;
-
   int short_bit = 2*TARGET_CHAR_BIT;
   int int_bit = 4*TARGET_CHAR_BIT;
   int long_bit = 4*TARGET_CHAR_BIT;

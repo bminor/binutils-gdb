@@ -289,10 +289,6 @@ with open("gdbarch.c", "w") as f:
     print("  gdbarch_tdep_up tdep;", file=f)
     print("  gdbarch_dump_tdep_ftype *dump_tdep = nullptr;", file=f)
     print(file=f)
-    print("  /* per-architecture data-pointers.  */", file=f)
-    print("  unsigned nr_data = 0;", file=f)
-    print("  void **data = nullptr;", file=f)
-    print(file=f)
     for c in filter(not_info, components):
         if isinstance(c, Function):
             print(f"  gdbarch_{c.name}_ftype *", file=f, end="")
