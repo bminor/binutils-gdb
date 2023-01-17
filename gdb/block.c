@@ -37,9 +37,6 @@ struct block_namespace_info : public allocate_on_obstack
   struct using_direct *using_decl = nullptr;
 };
 
-static void block_initialize_namespace (struct block *block,
-					struct obstack *obstack);
-
 /* See block.h.  */
 
 struct objfile *
@@ -305,6 +302,16 @@ block_scope (const struct block *block)
   return "";
 }
 
+/* If block->namespace_info () is NULL, allocate it via OBSTACK and
+   initialize its members to zero.  */
+
+static void
+block_initialize_namespace (struct block *block, struct obstack *obstack)
+{
+  if (block->namespace_info () == NULL)
+    block->set_namespace_info (new (obstack) struct block_namespace_info ());
+}
+
 /* Set BLOCK's scope member to SCOPE; if needed, allocate memory via
    OBSTACK.  (It won't make a copy of SCOPE, however, so that already
    has to be allocated correctly.)  */
@@ -342,16 +349,6 @@ block_set_using (struct block *block,
   block_initialize_namespace (block, obstack);
 
   block->namespace_info ()->using_decl = using_decl;
-}
-
-/* If block->namespace_info () is NULL, allocate it via OBSTACK and
-   initialize its members to zero.  */
-
-static void
-block_initialize_namespace (struct block *block, struct obstack *obstack)
-{
-  if (block->namespace_info () == NULL)
-    block->set_namespace_info (new (obstack) struct block_namespace_info ());
 }
 
 /* Return the static block associated to BLOCK.  Return NULL if block
