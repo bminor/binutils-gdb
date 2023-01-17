@@ -72,7 +72,7 @@ get_frame_block (frame_info_ptr frame, CORE_ADDR *addr_in_block)
 
   while (inline_count > 0)
     {
-      if (block_inlined_p (bl))
+      if (bl->inlined_p ())
 	inline_count--;
 
       bl = bl->superblock ();

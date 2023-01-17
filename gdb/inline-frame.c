@@ -228,7 +228,7 @@ inline_frame_sniffer (const struct frame_unwind *self,
   cur_block = frame_block;
   while (cur_block->superblock ())
     {
-      if (block_inlined_p (cur_block))
+      if (cur_block->inlined_p ())
 	depth++;
       else if (cur_block->function () != NULL)
 	break;
@@ -357,7 +357,7 @@ skip_inline_frames (thread_info *thread, bpstat *stop_chain)
       cur_block = frame_block;
       while (cur_block->superblock ())
 	{
-	  if (block_inlined_p (cur_block))
+	  if (cur_block->inlined_p ())
 	    {
 	      /* See comments in inline_frame_this_id about this use
 		 of BLOCK_ENTRY_PC.  */

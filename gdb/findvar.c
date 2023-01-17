@@ -533,7 +533,7 @@ get_hosting_frame (struct symbol *var, const struct block *var_block,
       if (frame == NULL)
 	{
 	  if (var_block->function ()
-	      && !block_inlined_p (var_block)
+	      && !var_block->inlined_p ()
 	      && var_block->function ()->print_name ())
 	    error (_("No frame is currently executing in block %s."),
 		   var_block->function ()->print_name ());

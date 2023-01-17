@@ -212,6 +212,10 @@ struct block
 
   struct gdbarch *gdbarch () const;
 
+  /* Return true if BL represents an inlined function.  */
+
+  bool inlined_p () const;
+
   /* Addresses in the executable code that are in this block.  */
 
   CORE_ADDR m_start;
@@ -342,8 +346,6 @@ private:
 extern struct symbol *block_linkage_function (const struct block *);
 
 extern struct symbol *block_containing_function (const struct block *);
-
-extern int block_inlined_p (const struct block *block);
 
 /* Return true if block A is lexically nested within block B, or if a
    and b have the same pc range.  Return false otherwise.  If

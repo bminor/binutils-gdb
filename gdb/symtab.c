@@ -2182,7 +2182,7 @@ lookup_local_symbol (const char *name,
 	    return blocksym;
 	}
 
-      if (block->function () != NULL && block_inlined_p (block))
+      if (block->function () != NULL && block->inlined_p ())
 	break;
       block = block->superblock ();
     }
@@ -3897,7 +3897,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
   function_block = NULL;
   while (b != NULL)
     {
-      if (b->function () != NULL && block_inlined_p (b))
+      if (b->function () != NULL && b->inlined_p ())
 	function_block = b;
       else if (b->function () != NULL)
 	break;
@@ -3993,7 +3993,7 @@ skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
 	  bl = block_for_pc (prologue_sal.end);
 	  while (bl)
 	    {
-	      if (block_inlined_p (bl))
+	      if (bl->inlined_p ())
 		break;
 	      if (bl->function ())
 		{
@@ -5856,7 +5856,7 @@ default_collect_symbol_completion_matches_break_on
 	/* Stop when we encounter an enclosing function.  Do not stop for
 	   non-inlined functions - the locals of the enclosing function
 	   are in scope for a nested function.  */
-	if (b->function () != NULL && block_inlined_p (b))
+	if (b->function () != NULL && b->inlined_p ())
 	  break;
 	b = b->superblock ();
       }

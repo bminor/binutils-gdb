@@ -77,7 +77,7 @@ contained_in (const struct block *a, const struct block *b,
 	return true;
       /* If A is a function block, then A cannot be contained in B,
 	 except if A was inlined.  */
-      if (!allow_nested && a->function () != NULL && !block_inlined_p (a))
+      if (!allow_nested && a->function () != NULL && !a->inlined_p ())
 	return false;
       a = a->superblock ();
     }
@@ -95,7 +95,7 @@ contained_in (const struct block *a, const struct block *b,
 struct symbol *
 block_linkage_function (const struct block *bl)
 {
-  while ((bl->function () == NULL || block_inlined_p (bl))
+  while ((bl->function () == NULL || bl->inlined_p ())
 	 && bl->superblock () != NULL)
     bl = bl->superblock ();
 
@@ -116,12 +116,12 @@ block_containing_function (const struct block *bl)
   return bl->function ();
 }
 
-/* Return one if BL represents an inlined function.  */
+/* See block.h.  */
 
-int
-block_inlined_p (const struct block *bl)
+bool
+block::inlined_p () const
 {
-  return bl->function () != NULL && bl->function ()->is_inlined ();
+  return function () != nullptr && function ()->is_inlined ();
 }
 
 /* A helper function that checks whether PC is in the blockvector BL.
