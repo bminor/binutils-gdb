@@ -208,6 +208,10 @@ struct block
 
   struct objfile *objfile () const;
 
+  /* Return the architecture of this block.  */
+
+  struct gdbarch *gdbarch () const;
+
   /* Addresses in the executable code that are in this block.  */
 
   CORE_ADDR m_start;
@@ -334,10 +338,6 @@ private:
   /* The blocks themselves.  */
   struct block *m_blocks[1];
 };
-
-/* Return the architecture of BLOCK, which must be non-NULL.  */
-
-extern struct gdbarch *block_gdbarch (const struct block *block);
 
 extern struct symbol *block_linkage_function (const struct block *);
 

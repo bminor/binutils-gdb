@@ -13822,7 +13822,7 @@ public:
 	if (block == NULL)
 	  gdbarch = target_gdbarch ();
 	else
-	  gdbarch = block_gdbarch (block);
+	  gdbarch = block->gdbarch ();
 	sym.symbol
 	  = language_lookup_primitive_type_as_symbol (this, gdbarch, name);
 	if (sym.symbol != NULL)

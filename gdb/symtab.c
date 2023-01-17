@@ -2442,7 +2442,7 @@ language_defn::lookup_symbol_nonlocal (const char *name,
       if (block == NULL)
 	gdbarch = target_gdbarch ();
       else
-	gdbarch = block_gdbarch (block);
+	gdbarch = block->gdbarch ();
       result.symbol = language_lookup_primitive_type_as_symbol (this,
 								gdbarch, name);
       result.block = NULL;

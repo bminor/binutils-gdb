@@ -94,7 +94,7 @@ d_lookup_symbol (const struct language_defn *langdef,
       if (block == NULL)
 	gdbarch = target_gdbarch ();
       else
-	gdbarch = block_gdbarch (block);
+	gdbarch = block->gdbarch ();
       sym.symbol
 	= language_lookup_primitive_type_as_symbol (langdef, gdbarch, name);
       sym.block = NULL;

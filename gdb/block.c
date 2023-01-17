@@ -54,12 +54,12 @@ block::objfile () const
 /* See block.  */
 
 struct gdbarch *
-block_gdbarch (const struct block *block)
+block::gdbarch () const
 {
-  if (block->function () != nullptr)
-    return block->function ()->arch ();
+  if (function () != nullptr)
+    return function ()->arch ();
 
-  return block->objfile ()->arch ();
+  return objfile ()->arch ();
 }
 
 /* See block.h.  */
