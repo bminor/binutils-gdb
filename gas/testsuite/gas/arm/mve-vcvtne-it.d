@@ -1,10 +1,10 @@
 # name: Armv8.1-M Mainline vcvt instruction in it block (with MVE)
 # as: -march=armv8.1-m.main+mve.fp+fp.dp
 #warning: [^:]*: Assembler messages:
-#warning: [^:]*:10: Warning: ARMv8.2 scalar fp16 instruction cannot be conditional, the behaviour is UNPREDICTABLE
-#warning: [^:]*:11: Warning: ARMv8.2 scalar fp16 instruction cannot be conditional, the behaviour is UNPREDICTABLE
-#warning: [^:]*:19: Warning: ARMv8.2 scalar fp16 instruction cannot be conditional, the behaviour is UNPREDICTABLE
-#warning: [^:]*:20: Warning: ARMv8.2 scalar fp16 instruction cannot be conditional, the behaviour is UNPREDICTABLE
+#warning: [^:]*:10: Warning: scalar fp16 instruction cannot be conditional, the behaviour is UNPREDICTABLE
+#warning: [^:]*:11: Warning: scalar fp16 instruction cannot be conditional, the behaviour is UNPREDICTABLE
+#warning: [^:]*:19: Warning: scalar fp16 instruction cannot be conditional, the behaviour is UNPREDICTABLE
+#warning: [^:]*:20: Warning: scalar fp16 instruction cannot be conditional, the behaviour is UNPREDICTABLE
 # objdump: -dr --prefix-addresses --show-raw-insn -marmv8.1-m.main
 
 .*: +file format .*arm.*

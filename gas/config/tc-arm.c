@@ -8360,7 +8360,7 @@ static void
 do_scalar_fp16_v82_encode (void)
 {
   if (inst.cond < COND_ALWAYS)
-    as_warn (_("ARMv8.2 scalar fp16 instruction cannot be conditional,"
+    as_warn (_("scalar fp16 instruction cannot be conditional,"
 	       " the behaviour is UNPREDICTABLE"));
   constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_fp16),
 	      _(BAD_FP16));
@@ -20595,7 +20595,7 @@ do_neon_movhf (void)
     {
       if (thumb_mode)
 	{
-	  as_warn (_("ARMv8.2 scalar fp16 instruction cannot be conditional,"
+	  as_warn (_("scalar fp16 instruction cannot be conditional,"
 		     " the behaviour is UNPREDICTABLE"));
 	}
       else
