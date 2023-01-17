@@ -623,7 +623,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       bv->set_block (i, new_block);
 
       if (i == GLOBAL_BLOCK)
-	set_block_compunit_symtab (new_block, cust);
+	new_block->set_compunit_symtab (cust);
     }
 
   /* Fill up the superblock fields for the real blocks, using the

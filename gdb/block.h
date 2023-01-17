@@ -254,6 +254,10 @@ struct block
 
   const struct block *global_block () const;
 
+  /* Set the compunit of this block, which must be a global block.  */
+
+  void set_compunit_symtab (struct compunit_symtab *);
+
   /* Addresses in the executable code that are in this block.  */
 
   CORE_ADDR m_start;
@@ -416,9 +420,6 @@ extern const struct block *block_for_pc_sect (CORE_ADDR, struct obj_section *);
 extern struct block *allocate_block (struct obstack *obstack);
 
 extern struct block *allocate_global_block (struct obstack *obstack);
-
-extern void set_block_compunit_symtab (struct block *,
-				       struct compunit_symtab *);
 
 /* Return a property to evaluate the static link associated to BLOCK.
 

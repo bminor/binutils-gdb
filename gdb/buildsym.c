@@ -971,7 +971,7 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
   {
     struct block *b = blockvector->global_block ();
 
-    set_block_compunit_symtab (b, cu);
+    b->set_compunit_symtab (cu);
   }
 
   cu->set_macro_table (release_macros ());

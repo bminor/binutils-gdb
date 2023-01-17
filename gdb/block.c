@@ -404,15 +404,15 @@ allocate_global_block (struct obstack *obstack)
   return &bl->block;
 }
 
-/* Set the compunit of the global block.  */
+/* See block.h.  */
 
 void
-set_block_compunit_symtab (struct block *block, struct compunit_symtab *cu)
+block::set_compunit_symtab (struct compunit_symtab *cu)
 {
   struct global_block *gb;
 
-  gdb_assert (block->superblock () == NULL);
-  gb = (struct global_block *) block;
+  gdb_assert (superblock () == NULL);
+  gb = (struct global_block *) this;
   gdb_assert (gb->compunit_symtab == NULL);
   gb->compunit_symtab = cu;
 }
