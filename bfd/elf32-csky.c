@@ -2864,7 +2864,6 @@ elf32_csky_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
   bfd *obfd = info->output_bfd;
   obj_attribute *in_attr;
   obj_attribute *out_attr;
-  obj_attribute tattr;
   csky_arch_for_merge *old_arch = NULL;
   csky_arch_for_merge *new_arch = NULL;
   int i;
@@ -3064,8 +3063,8 @@ csky_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   sec_name = get_elf_backend_data (ibfd)->obj_attrs_section;
 
   if (bfd_get_section_by_name (ibfd, sec_name) == NULL
-      || (new_flags & (CSKY_ARCH_MASK | CSKY_ABI_MASK) !=
-	  old_flags & (CSKY_ARCH_MASK | CSKY_ABI_MASK)))
+      || ((new_flags & (CSKY_ARCH_MASK | CSKY_ABI_MASK)) !=
+	  (old_flags & (CSKY_ARCH_MASK | CSKY_ABI_MASK))))
     {
       /* Input BFDs have no ".csky.attribute" section.  */
       new_arch = csky_find_arch_with_eflag (new_flags & CSKY_ARCH_MASK);
