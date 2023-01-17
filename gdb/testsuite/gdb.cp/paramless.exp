@@ -17,7 +17,7 @@
 
 # Test template breakpoints without parameters.
 
-if { [skip_cplus_tests] } { continue }
+require allow_cplus_tests
 
 standard_testfile .cc
 
