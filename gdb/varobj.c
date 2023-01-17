@@ -2397,7 +2397,7 @@ varobj_invalidate_if_uses_objfile (struct objfile *objfile)
     {
       if (var->root->valid_block != nullptr)
 	{
-	  struct objfile *bl_objfile = block_objfile (var->root->valid_block);
+	  struct objfile *bl_objfile = var->root->valid_block->objfile ();
 	  if (bl_objfile->separate_debug_objfile_backlink != nullptr)
 	    bl_objfile = bl_objfile->separate_debug_objfile_backlink;
 

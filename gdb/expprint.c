@@ -78,7 +78,7 @@ namespace expr
 bool
 check_objfile (const struct block *block, struct objfile *objfile)
 {
-  return check_objfile (block_objfile (block), objfile);
+  return check_objfile (block->objfile (), objfile);
 }
 
 void

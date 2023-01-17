@@ -40,14 +40,14 @@ struct block_namespace_info : public allocate_on_obstack
 /* See block.h.  */
 
 struct objfile *
-block_objfile (const struct block *block)
+block::objfile () const
 {
   const struct global_block *global_block;
 
-  if (block->function () != nullptr)
-    return block->function ()->objfile ();
+  if (function () != nullptr)
+    return function ()->objfile ();
 
-  global_block = (struct global_block *) block_global_block (block);
+  global_block = (struct global_block *) block_global_block (this);
   return global_block->compunit_symtab->objfile ();
 }
 
@@ -59,7 +59,7 @@ block_gdbarch (const struct block *block)
   if (block->function () != nullptr)
     return block->function ()->arch ();
 
-  return block_objfile (block)->arch ();
+  return block->objfile ()->arch ();
 }
 
 /* See block.h.  */
@@ -434,7 +434,7 @@ set_block_compunit_symtab (struct block *block, struct compunit_symtab *cu)
 struct dynamic_prop *
 block_static_link (const struct block *block)
 {
-  struct objfile *objfile = block_objfile (block);
+  struct objfile *objfile = block->objfile ();
 
   /* Only objfile-owned blocks that materialize top function scopes can have
      static links.  */

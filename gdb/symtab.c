@@ -1970,7 +1970,7 @@ lookup_language_this (const struct language_defn *lang,
 
   symbol_lookup_debug_printf_v ("lookup_language_this (%s, %s (objfile %s))",
 				lang->name (), host_address_to_string (block),
-				objfile_debug_name (block_objfile (block)));
+				objfile_debug_name (block->objfile ()));
 
   while (block)
     {
@@ -2058,7 +2058,7 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
   if (symbol_lookup_debug)
     {
       struct objfile *objfile = (block == nullptr
-				 ? nullptr : block_objfile (block));
+				 ? nullptr : block->objfile ());
 
       symbol_lookup_debug_printf
 	("demangled symbol name = \"%s\", block @ %s (objfile %s)",
@@ -2204,7 +2204,7 @@ lookup_symbol_in_block (const char *name, symbol_name_match_type match_type,
   if (symbol_lookup_debug)
     {
       struct objfile *objfile
-	= block == nullptr ? nullptr : block_objfile (block);
+	= block == nullptr ? nullptr : block->objfile ();
 
       symbol_lookup_debug_printf_v
 	("lookup_symbol_in_block (%s, %s (objfile %s), %s)",
@@ -2472,7 +2472,7 @@ lookup_symbol_in_static_block (const char *name,
   if (symbol_lookup_debug)
     {
       struct objfile *objfile = (block == nullptr
-				 ? nullptr : block_objfile (block));
+				 ? nullptr : block->objfile ());
 
       symbol_lookup_debug_printf
 	("lookup_symbol_in_static_block (%s, %s (objfile %s), %s)",
@@ -2612,7 +2612,7 @@ lookup_global_symbol (const char *name,
   struct objfile *objfile = nullptr;
   if (block != nullptr)
     {
-      objfile = block_objfile (block);
+      objfile = block->objfile ();
       if (objfile->separate_debug_objfile_backlink != nullptr)
 	objfile = objfile->separate_debug_objfile_backlink;
     }

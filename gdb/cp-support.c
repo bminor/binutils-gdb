@@ -1467,7 +1467,7 @@ add_symbol_overload_list_qualified (const char *func_name,
      symbols which match.  */
 
   const block *block = get_selected_block (0);
-  struct objfile *current_objfile = block ? block_objfile (block) : nullptr;
+  struct objfile *current_objfile = block ? block->objfile () : nullptr;
 
   gdbarch_iterate_over_objfiles_in_search_order
     (current_objfile ? current_objfile->arch () : target_gdbarch (),

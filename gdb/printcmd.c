@@ -2371,7 +2371,7 @@ clear_dangling_display_expressions (struct objfile *objfile)
       struct objfile *bl_objf = nullptr;
       if (d->block != nullptr)
 	{
-	  bl_objf = block_objfile (d->block);
+	  bl_objf = d->block->objfile ();
 	  if (bl_objf->separate_debug_objfile_backlink != nullptr)
 	    bl_objf = bl_objf->separate_debug_objfile_backlink;
 	}
