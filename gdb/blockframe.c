@@ -162,7 +162,7 @@ find_pc_sect_containing_function (CORE_ADDR pc, struct obj_section *section)
   if (bl == nullptr)
     return nullptr;
 
-  return block_containing_function (bl);
+  return bl->containing_function ();
 }
 
 /* These variables are used to cache the most recent result of

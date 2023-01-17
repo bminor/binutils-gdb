@@ -100,14 +100,13 @@ block::linkage_function () const
   return bl->function ();
 }
 
-/* Return the symbol for the function which contains a specified
-   block, described by a struct block BL.  The return value will be
-   the closest enclosing function, which might be an inline
-   function.  */
+/* See block.h.  */
 
 struct symbol *
-block_containing_function (const struct block *bl)
+block::containing_function () const
 {
+  const block *bl = this;
+
   while (bl->function () == NULL && bl->superblock () != NULL)
     bl = bl->superblock ();
 

@@ -238,6 +238,13 @@ struct block
 
   struct symbol *linkage_function () const;
 
+  /* Return the symbol for the function which contains a specified
+     block, described by a struct block.  The return value will be the
+     closest enclosing function, which might be an inline
+     function.  */
+
+  struct symbol *containing_function () const;
+
   /* Addresses in the executable code that are in this block.  */
 
   CORE_ADDR m_start;
@@ -370,8 +377,6 @@ private:
   /* The blocks themselves.  */
   struct block *m_blocks[1];
 };
-
-extern struct symbol *block_containing_function (const struct block *);
 
 /* Return true if block A is lexically nested within block B, or if a
    and b have the same pc range.  Return false otherwise.  If

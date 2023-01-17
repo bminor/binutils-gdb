@@ -2128,7 +2128,7 @@ create_sals_line_offset (struct linespec_state *self,
 	if (filter[i])
 	  {
 	    struct symbol *sym = (blocks[i]
-				  ? block_containing_function (blocks[i])
+				  ? blocks[i]->containing_function ()
 				  : NULL);
 
 	    if (self->funfirstline)
