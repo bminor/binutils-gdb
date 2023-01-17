@@ -9230,7 +9230,7 @@ resolve_sal_pc (struct symtab_and_line *sal)
 				    sal->symtab->compunit ());
       if (bv != NULL)
 	{
-	  sym = block_linkage_function (b);
+	  sym = b->linkage_function ();
 	  if (sym != NULL)
 	    sal->section
 	      = sym->obj_section (sal->symtab->compunit ()->objfile ());

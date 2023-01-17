@@ -451,7 +451,7 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 	  struct symbol *pc_func = NULL;
 
 	  if (pc_block)
-	    pc_func = block_linkage_function (pc_block);
+	    pc_func = pc_block->linkage_function ();
 
 	  if (pc_func && pc == pc_func->value_block ()->entry_pc ())
 	    {
@@ -2643,7 +2643,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	    if (!b)
 	      error (_("No block found for address"));
 
-	    framefunc = block_linkage_function (b);
+	    framefunc = b->linkage_function ();
 
 	    if (!framefunc)
 	      error (_("No function found for block"));
@@ -3169,7 +3169,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 	error (_("No block found for address for symbol \"%s\"."),
 	       symbol->print_name ());
 
-      framefunc = block_linkage_function (b);
+      framefunc = b->linkage_function ();
 
       if (!framefunc)
 	error (_("No function found for block for symbol \"%s\"."),

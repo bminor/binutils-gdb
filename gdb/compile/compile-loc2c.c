@@ -892,7 +892,7 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
 	    if (!b)
 	      error (_("No block found for address"));
 
-	    framefunc = block_linkage_function (b);
+	    framefunc = b->linkage_function ();
 
 	    if (!framefunc)
 	      error (_("No function found for block"));

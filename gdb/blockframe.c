@@ -91,7 +91,7 @@ get_pc_function_start (CORE_ADDR pc)
   bl = block_for_pc (pc);
   if (bl)
     {
-      struct symbol *symbol = block_linkage_function (bl);
+      struct symbol *symbol = bl->linkage_function ();
 
       if (symbol)
 	{
@@ -139,7 +139,7 @@ find_pc_sect_function (CORE_ADDR pc, struct obj_section *section)
 
   if (b == 0)
     return 0;
-  return block_linkage_function (b);
+  return b->linkage_function ();
 }
 
 /* Return the function containing pc value PC.

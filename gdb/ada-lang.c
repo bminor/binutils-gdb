@@ -5309,7 +5309,7 @@ remove_irrelevant_renamings (std::vector<struct block_symbol> *syms,
   if (current_block == NULL)
     return;
 
-  current_function = block_linkage_function (current_block);
+  current_function = current_block->linkage_function ();
   if (current_function == NULL)
     return;
 

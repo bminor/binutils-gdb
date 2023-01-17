@@ -771,7 +771,7 @@ dwarf_expr_context::get_frame_base (const gdb_byte **start,
   /* Use block_linkage_function, which returns a real (not inlined)
      function, instead of get_frame_function, which may return an
      inlined function.  */
-  symbol *framefunc = block_linkage_function (bl);
+  symbol *framefunc = bl->linkage_function ();
 
   /* If we found a frame-relative symbol then it was certainly within
      some function associated with a frame. If we can't find the frame,

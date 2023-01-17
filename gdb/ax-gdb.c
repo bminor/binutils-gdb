@@ -1887,7 +1887,7 @@ op_this_operation::do_generate_ax (struct expression *exp,
   const struct language_defn *lang;
 
   b = block_for_pc (ax->scope);
-  func = block_linkage_function (b);
+  func = b->linkage_function ();
   lang = language_def (func->language ());
 
   sym = lookup_language_this (lang, b).symbol;

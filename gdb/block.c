@@ -86,15 +86,13 @@ contained_in (const struct block *a, const struct block *b,
   return false;
 }
 
-
-/* Return the symbol for the function which contains a specified
-   lexical block, described by a struct block BL.  The return value
-   will not be an inlined function; the containing function will be
-   returned instead.  */
+/* See block.h.  */
 
 struct symbol *
-block_linkage_function (const struct block *bl)
+block::linkage_function () const
 {
+  const block *bl = this;
+
   while ((bl->function () == NULL || bl->inlined_p ())
 	 && bl->superblock () != NULL)
     bl = bl->superblock ();
