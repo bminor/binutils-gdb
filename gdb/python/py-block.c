@@ -188,7 +188,7 @@ blpy_get_global_block (PyObject *self, void *closure)
 
   BLPY_REQUIRE_VALID (self, block);
 
-  global_block = block_global_block (block);
+  global_block = block->global_block ();
 
   return block_to_block_object (global_block,
 				self_obj->objfile);
@@ -210,7 +210,7 @@ blpy_get_static_block (PyObject *self, void *closure)
   if (block->superblock () == NULL)
     Py_RETURN_NONE;
 
-  static_block = block_static_block (block);
+  static_block = block->static_block ();
 
   return block_to_block_object (static_block, self_obj->objfile);
 }

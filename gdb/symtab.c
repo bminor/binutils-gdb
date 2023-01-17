@@ -2159,7 +2159,7 @@ lookup_local_symbol (const char *name,
     return {};
 
   struct symbol *sym;
-  const struct block *static_block = block_static_block (block);
+  const struct block *static_block = block->static_block ();
   const char *scope = block->scope ();
   
   /* Check if it's a global block.  */
@@ -2463,7 +2463,7 @@ lookup_symbol_in_static_block (const char *name,
   if (block == nullptr)
     return {};
 
-  const struct block *static_block = block_static_block (block);
+  const struct block *static_block = block->static_block ();
   struct symbol *sym;
 
   if (static_block == NULL)
@@ -2598,7 +2598,7 @@ lookup_global_symbol (const char *name,
      global block first.  This yields "more expected" behavior, and is
      needed to support 'FILENAME'::VARIABLE lookups.  */
   const struct block *global_block
-    = block == nullptr ? nullptr : block_global_block (block);
+    = block == nullptr ? nullptr : block->global_block ();
   symbol *sym = NULL;
   if (global_block != nullptr)
     {
@@ -5831,8 +5831,8 @@ default_collect_symbol_completion_matches_break_on
      visible from current context.  */
 
   b = get_selected_block (0);
-  surrounding_static_block = b == nullptr ? nullptr : block_static_block (b);
-  surrounding_global_block = b == nullptr : nullptr : block_global_block (b);
+  surrounding_static_block = b == nullptr ? nullptr : b->static_block ();
+  surrounding_global_block = b == nullptr ? nullptr : b->global_block ();
   if (surrounding_static_block != NULL)
     while (b != surrounding_static_block)
       {

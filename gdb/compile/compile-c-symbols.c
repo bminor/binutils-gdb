@@ -228,7 +228,7 @@ convert_symbol_sym (compile_c_instance *context, const char *identifier,
 
   const struct block *static_block = nullptr;
   if (sym.block != nullptr)
-    static_block = block_static_block (sym.block);
+    static_block = sym.block->static_block ();
   /* STATIC_BLOCK is NULL if FOUND_BLOCK is the global block.  */
   is_local_symbol = (sym.block != static_block && static_block != NULL);
   if (is_local_symbol)
@@ -239,7 +239,7 @@ convert_symbol_sym (compile_c_instance *context, const char *identifier,
       /* If the outer symbol is in the static block, we ignore it, as
 	 it cannot be referenced.  */
       if (global_sym.symbol != NULL
-	  && global_sym.block != block_static_block (global_sym.block))
+	  && global_sym.block != global_sym.block->static_block ())
 	{
 	  if (compile_debug)
 	    gdb_printf (gdb_stdlog,
@@ -617,7 +617,7 @@ generate_c_for_variable_locations (compile_instance *compiler,
   if (block == nullptr)
     return {};
 
-  const struct block *static_block = block_static_block (block);
+  const struct block *static_block = block->static_block ();
 
   /* If we're already in the static or global block, there is nothing
      to write.  */

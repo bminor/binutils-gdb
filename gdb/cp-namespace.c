@@ -141,7 +141,7 @@ cp_basic_lookup_symbol (const char *name, const struct block *block,
 	 but should be treated as local to a single file nonetheless.
 	 So we only search the current file's global block.  */
 
-      const struct block *global_block = block_global_block (block);
+      const struct block *global_block = block->global_block ();
 
       if (global_block != NULL)
 	{

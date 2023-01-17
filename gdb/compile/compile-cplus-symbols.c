@@ -241,7 +241,7 @@ convert_symbol_sym (compile_cplus_instance *instance,
 
   const struct block *static_block = nullptr;
   if (sym.block != nullptr)
-    static_block = block_static_block (sym.block);
+    static_block = sym.block->static_block ();
   /* STATIC_BLOCK is NULL if FOUND_BLOCK is the global block.  */
   bool is_local_symbol = (sym.block != static_block && static_block != nullptr);
   if (is_local_symbol)
@@ -252,7 +252,7 @@ convert_symbol_sym (compile_cplus_instance *instance,
       /* If the outer symbol is in the static block, we ignore it, as
 	 it cannot be referenced.  */
       if (global_sym.symbol != nullptr
-	  && global_sym.block != block_static_block (global_sym.block))
+	  && global_sym.block != global_sym.block->static_block ())
 	{
 	  if (compile_debug)
 	    gdb_printf (gdb_stdlog,

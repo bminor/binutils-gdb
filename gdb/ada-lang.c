@@ -13798,7 +13798,7 @@ public:
     sym = ada_lookup_symbol (name,
 			     (block == nullptr
 			      ? nullptr
-			      : block_static_block (block)),
+			      : block->static_block ()),
 			     domain);
     if (sym.symbol != NULL)
       return sym;

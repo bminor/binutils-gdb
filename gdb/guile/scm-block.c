@@ -438,7 +438,7 @@ gdbscm_block_global_block (SCM self)
   const struct block *block = b_smob->block;
   const struct block *global_block;
 
-  global_block = block_global_block (block);
+  global_block = block->global_block ();
 
   return bkscm_scm_from_block (global_block, b_smob->objfile);
 }
@@ -458,7 +458,7 @@ gdbscm_block_static_block (SCM self)
   if (block->superblock () == NULL)
     return SCM_BOOL_F;
 
-  static_block = block_static_block (block);
+  static_block = block->static_block ();
 
   return bkscm_scm_from_block (static_block, b_smob->objfile);
 }

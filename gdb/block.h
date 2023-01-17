@@ -245,6 +245,15 @@ struct block
 
   struct symbol *containing_function () const;
 
+  /* Return the static block associated with this block.  Return NULL
+     if block is a global block.  */
+
+  const struct block *static_block () const;
+
+  /* Return the static block associated with block.  */
+
+  const struct block *global_block () const;
+
   /* Addresses in the executable code that are in this block.  */
 
   CORE_ADDR m_start;
@@ -403,10 +412,6 @@ extern struct call_site *call_site_for_pc (struct gdbarch *gdbarch,
 extern const struct block *block_for_pc (CORE_ADDR);
 
 extern const struct block *block_for_pc_sect (CORE_ADDR, struct obj_section *);
-
-extern const struct block *block_static_block (const struct block *block);
-
-extern const struct block *block_global_block (const struct block *block);
 
 extern struct block *allocate_block (struct obstack *obstack);
 

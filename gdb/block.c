@@ -47,7 +47,7 @@ block::objfile () const
   if (function () != nullptr)
     return function ()->objfile ();
 
-  global_block = (struct global_block *) block_global_block (this);
+  global_block = (struct global_block *) this->global_block ();
   return global_block->compunit_symtab->objfile ();
 }
 
@@ -349,26 +349,28 @@ block::set_using (struct using_direct *using_decl, struct obstack *obstack)
   m_namespace_info->using_decl = using_decl;
 }
 
-/* Return the static block associated to BLOCK.  Return NULL if block
-   is a global block.  */
+/* See block.h.  */
 
 const struct block *
-block_static_block (const struct block *block)
+block::static_block () const
 {
-  if (block->superblock () == NULL)
-    return NULL;
+  if (superblock () == nullptr)
+    return nullptr;
 
+  const block *block = this;
   while (block->superblock ()->superblock () != NULL)
     block = block->superblock ();
 
   return block;
 }
 
-/* Return the static block associated to BLOCK.  */
+/* See block.h.  */
 
 const struct block *
-block_global_block (const struct block *block)
+block::global_block () const
 {
+  const block *block = this;
+
   while (block->superblock () != NULL)
     block = block->superblock ();
 

@@ -421,7 +421,7 @@ munge_name_and_block (const char **name, const struct block **block)
   if (startswith (*name, "::"))
     {
       *name += 2;
-      *block = block_static_block (*block);
+      *block = (*block)->static_block ();
     }
 }
 
