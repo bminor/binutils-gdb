@@ -39,48 +39,85 @@
 
 #include "libcoff.h"
 
+/* For these howto special functions,
+   output_bfd == NULL => final link, or objdump -W and other calls to
+   bfd_simple_get_relocated_section_contents
+   output_bfd != NULL && output_bfd != abfd => ld -r
+   output_bfd != NULL && output_bfd == abfd => gas.
+   FIXME: ld -r is punted to bfd_perform_relocation.  This won't be
+   correct for cases where the addend needs to be adjusted, eg. for
+   relocations against section symbols, and the field is split because
+   bfd_perform_relocation can't write addends to split relocation fields.  */
+
 static bfd_reloc_status_type
-coff_aarch64_rel21_reloc (bfd *abfd ATTRIBUTE_UNUSED,
+coff_aarch64_rel21_reloc (bfd *abfd,
 			  arelent *reloc_entry,
-			  asymbol *symbol ATTRIBUTE_UNUSED,
+			  asymbol *symbol,
 			  void *data,
-			  asection *input_section ATTRIBUTE_UNUSED,
-			  bfd *output_bfd ATTRIBUTE_UNUSED,
+			  asection *input_section,
+			  bfd *output_bfd,
 			  char **error_message ATTRIBUTE_UNUSED)
 {
-  uint32_t op;
-  int32_t param;
+  if (output_bfd != NULL && output_bfd != abfd)
+    return bfd_reloc_continue;
 
-  op = bfd_getl32 (data + reloc_entry->address);
-  param = reloc_entry->addend;
+  if (!bfd_reloc_offset_in_range (reloc_entry->howto, abfd,
+				  input_section, reloc_entry->address))
+    return bfd_reloc_outofrange;
 
-  if (param > 0xfffff || param < -0x100000)
-    return bfd_reloc_overflow;
+  uint32_t op = bfd_getl32 (data + reloc_entry->address);
+  bfd_vma relocation = reloc_entry->addend;
+  bfd_reloc_status_type ret = bfd_reloc_ok;
+  if (output_bfd == NULL)
+    {
+      if (bfd_is_und_section (symbol->section))
+	{
+	  if ((symbol->flags & BSF_WEAK) == 0)
+	    ret = bfd_reloc_undefined;
+	}
+      else if (!bfd_is_com_section (symbol->section))
+	relocation += (symbol->value
+		       + symbol->section->output_offset
+		       + symbol->section->output_section->vma);
+      bfd_vma addend = ((op >> 3) & 0x1ffffc) | ((op >> 29) & 0x3);
+      addend = (addend ^ 0x100000) - 0x100000;
+      relocation += addend;
+      relocation -= (reloc_entry->address
+		     + input_section->output_offset
+		     + input_section->output_section->vma);
+      relocation = (bfd_signed_vma) relocation >> reloc_entry->howto->rightshift;
+    }
+  if (relocation + 0x100000 > 0x1fffff)
+    ret = bfd_reloc_overflow;
 
   op &= 0x9f00001f;
-  op |= (param & 0x1ffffc) << 3;
-  op |= (param & 0x3) << 29;
+  op |= (relocation & 0x1ffffc) << 3;
+  op |= (relocation & 0x3) << 29;
 
   bfd_putl32 (op, data + reloc_entry->address);
 
-  return bfd_reloc_ok;
+  return ret;
 }
 
 static bfd_reloc_status_type
-coff_aarch64_po12l_reloc (bfd *abfd ATTRIBUTE_UNUSED,
+coff_aarch64_po12l_reloc (bfd *abfd,
 			  arelent *reloc_entry,
 			  asymbol *symbol ATTRIBUTE_UNUSED,
 			  void *data,
-			  asection *input_section ATTRIBUTE_UNUSED,
-			  bfd *output_bfd ATTRIBUTE_UNUSED,
+			  asection *input_section,
+			  bfd *output_bfd,
 			  char **error_message ATTRIBUTE_UNUSED)
 {
-  uint32_t op;
-  int32_t param;
-  uint8_t shift;
+  if (output_bfd != NULL && output_bfd != abfd)
+    return bfd_reloc_continue;
 
-  op = bfd_getl32 (data + reloc_entry->address);
-  param = reloc_entry->addend & 0xfff;
+  if (!bfd_reloc_offset_in_range (reloc_entry->howto, abfd,
+				  input_section, reloc_entry->address))
+    return bfd_reloc_outofrange;
+
+  uint32_t op = bfd_getl32 (data + reloc_entry->address);
+  bfd_vma relocation = reloc_entry->addend & 0xfff;
+  int shift;
 
   if ((op & 0xff800000) == 0x3d800000)
     {
@@ -93,53 +130,120 @@ coff_aarch64_po12l_reloc (bfd *abfd ATTRIBUTE_UNUSED,
       shift = op >> 30;
     }
 
-  if (param & ((1 << shift) - 1))
-    return bfd_reloc_overflow;
+  bfd_reloc_status_type ret = bfd_reloc_ok;
+  if (output_bfd == NULL)
+    {
+      if (bfd_is_und_section (symbol->section))
+	{
+	  if ((symbol->flags & BSF_WEAK) == 0)
+	    ret = bfd_reloc_undefined;
+	}
+      else if (!bfd_is_com_section (symbol->section))
+	relocation += (symbol->value
+		       + symbol->section->output_offset
+		       + symbol->section->output_section->vma);
+      bfd_vma addend = (op >> 10) & 0xfff;
+      addend <<= shift;
+      relocation += addend;
+    }
 
-  param >>= shift;
+  if (relocation & ((1 << shift) - 1))
+    ret = bfd_reloc_overflow;
 
   op &= 0xffc003ff;
-  op |= param << 10;
+  op |= (relocation >> shift << 10) & 0x3ffc00;
 
   bfd_putl32 (op, data + reloc_entry->address);
 
-  return bfd_reloc_ok;
+  return ret;
 }
 
 static bfd_reloc_status_type
-coff_aarch64_addr32nb_reloc (bfd *abfd ATTRIBUTE_UNUSED,
+coff_aarch64_addr32nb_reloc (bfd *abfd,
 			     arelent *reloc_entry,
 			     asymbol *symbol ATTRIBUTE_UNUSED,
 			     void *data,
-			     asection *input_section ATTRIBUTE_UNUSED,
-			     bfd *output_bfd ATTRIBUTE_UNUSED,
-			     char **error_message ATTRIBUTE_UNUSED)
+			     asection *input_section,
+			     bfd *output_bfd,
+			     char **error_message)
 {
-  uint64_t val;
+  if (output_bfd != NULL && output_bfd != abfd)
+    return bfd_reloc_continue;
 
-  if ((int64_t) reloc_entry->addend > 0x7fffffff
-      || (int64_t) reloc_entry->addend < -0x7fffffff)
-    return bfd_reloc_overflow;
+  if (!bfd_reloc_offset_in_range (reloc_entry->howto, abfd,
+				  input_section, reloc_entry->address))
+    return bfd_reloc_outofrange;
 
-  val = reloc_entry->addend;
+  bfd_vma relocation = reloc_entry->addend;
+  bfd_reloc_status_type ret = bfd_reloc_ok;
+  if (output_bfd == NULL)
+    {
+      if (bfd_is_und_section (symbol->section))
+	{
+	  if ((symbol->flags & BSF_WEAK) == 0)
+	    ret = bfd_reloc_undefined;
+	}
+      else if (!bfd_is_com_section (symbol->section))
+	relocation += (symbol->value
+		       + symbol->section->output_offset
+		       + symbol->section->output_section->vma);
+      bfd_vma addend = bfd_getl_signed_32 (data + reloc_entry->address);
+      relocation += addend;
+      if (bfd_get_flavour (output_bfd) == bfd_target_coff_flavour
+	  && obj_pe (output_bfd))
+	relocation -= pe_data (output_bfd)->pe_opthdr.ImageBase;
+      else
+	{
+	  *error_message = "unsupported";
+	  return bfd_reloc_dangerous;
+	}
+    }
 
-  bfd_putl32 ((uint32_t) val, data + reloc_entry->address);
+  if (relocation + 0x80000000 > 0xffffffff)
+    ret = bfd_reloc_overflow;
 
-  return bfd_reloc_ok;
+  bfd_putl32 (relocation, data + reloc_entry->address);
+
+  return ret;
 }
 
 static bfd_reloc_status_type
-coff_aarch64_secrel_reloc (bfd *abfd ATTRIBUTE_UNUSED,
+coff_aarch64_secrel_reloc (bfd *abfd,
 			   arelent *reloc_entry,
 			   asymbol *symbol ATTRIBUTE_UNUSED,
 			   void *data,
-			   asection *input_section ATTRIBUTE_UNUSED,
-			   bfd *output_bfd ATTRIBUTE_UNUSED,
+			   asection *input_section,
+			   bfd *output_bfd,
 			   char **error_message ATTRIBUTE_UNUSED)
 {
-  bfd_putl32 (reloc_entry->addend, data + reloc_entry->address);
+  if (output_bfd != NULL && output_bfd != abfd)
+    return bfd_reloc_continue;
 
-  return bfd_reloc_ok;
+  if (!bfd_reloc_offset_in_range (reloc_entry->howto, abfd,
+				  input_section, reloc_entry->address))
+    return bfd_reloc_outofrange;
+
+  bfd_vma relocation = reloc_entry->addend;
+  bfd_reloc_status_type ret = bfd_reloc_ok;
+  if (output_bfd == NULL)
+    {
+      if (bfd_is_und_section (symbol->section))
+	{
+	  if ((symbol->flags & BSF_WEAK) == 0)
+	    ret = bfd_reloc_undefined;
+	}
+      else if (!bfd_is_com_section (symbol->section))
+	relocation += (symbol->value
+		       + symbol->section->output_offset);
+      bfd_vma addend = bfd_getl_signed_32 (data + reloc_entry->address);
+      relocation += addend;
+    }
+  if (relocation > 0xffffffff)
+    ret = bfd_reloc_overflow;
+
+  bfd_putl32 (relocation, data + reloc_entry->address);
+
+  return ret;
 }
 
 #define coff_aarch64_NULL NULL
@@ -437,6 +541,17 @@ coff_pe_aarch64_relocate_section (bfd *output_bfd,
       if (symndx < 0
 	  || (unsigned long) symndx >= obj_raw_syment_count (input_bfd))
 	continue;
+
+      /* All the relocs handled below operate on 4 bytes.  */
+      if (input_section->size < rel->r_vaddr
+	  || input_section->size - rel->r_vaddr < 4)
+	{
+	  _bfd_error_handler
+	    /* xgettext: c-format */
+	    (_("%pB: bad reloc address %#" PRIx64 " in section `%pA'"),
+	     input_bfd, (uint64_t) rel->r_vaddr, input_section);
+	  continue;
+	}
 
       switch (rel->r_type)
 	{
