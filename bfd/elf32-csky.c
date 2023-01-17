@@ -2892,15 +2892,7 @@ elf32_csky_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
       /* This is the first object.  Copy the attributes.  */
       out_attr = elf_known_obj_attributes_proc (obfd);
 
-      /* If Tag_CSKY_CPU_NAME is already set, save it.  */
-      memcpy (&tattr, &out_attr[Tag_CSKY_ARCH_NAME], sizeof (tattr));
-
       _bfd_elf_copy_obj_attributes (ibfd, obfd);
-
-      out_attr = elf_known_obj_attributes_proc (obfd);
-
-      /* Restore Tag_CSKY_CPU_NAME.  */
-      memcpy (&out_attr[Tag_CSKY_ARCH_NAME], &tattr, sizeof (tattr));
 
       /* Use the Tag_null value to indicate the attributes have been
 	 initialized.  */
@@ -3066,12 +3058,14 @@ csky_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   old_flags = elf_elfheader (obfd)->e_flags;
   out_attr = elf_known_obj_attributes_proc (obfd);
 
-  /* the flags like"e , f ,g ..." , we take collection.  */
-  newest_flag = (old_flags & (~CSKY_ARCH_MASK))
-   | (new_flags & (~CSKY_ARCH_MASK));
+  /* The flags like "e , f ,g ..." , we take collection.  */
+  newest_flag = old_flags | new_flags;
 
   sec_name = get_elf_backend_data (ibfd)->obj_attrs_section;
-  if (bfd_get_section_by_name (ibfd, sec_name) == NULL)
+
+  if (bfd_get_section_by_name (ibfd, sec_name) == NULL
+      || (new_flags & (CSKY_ARCH_MASK | CSKY_ABI_MASK) !=
+	  old_flags & (CSKY_ARCH_MASK | CSKY_ABI_MASK)))
     {
       /* Input BFDs have no ".csky.attribute" section.  */
       new_arch = csky_find_arch_with_eflag (new_flags & CSKY_ARCH_MASK);
@@ -3110,9 +3104,6 @@ csky_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	      out_attr[Tag_CSKY_ARCH_NAME].s =
 		_bfd_elf_attr_strdup (obfd, newest_arch->name);
 	    }
-	  else
-	    newest_flag |= ((new_flags & (CSKY_ARCH_MASK | CSKY_ABI_MASK))
-			    | (old_flags & (CSKY_ARCH_MASK | CSKY_ABI_MASK)));
 	}
       else
 	{
