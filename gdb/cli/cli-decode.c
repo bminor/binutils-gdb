@@ -161,7 +161,7 @@ cmd_list_element::command_components () const
 
 /* Add element named NAME.
    Space for NAME and DOC must be allocated by the caller.
-   CLASS is the top level category into which commands are broken down
+   THECLASS is the top level category into which commands are broken down
    for "help" purposes.
    FUN should be the function to execute the command;
    it will get a character string as argument, with leading
@@ -494,7 +494,7 @@ empty_func (const char *args, int from_tty, cmd_list_element *c)
 /* Add element named NAME to command list LIST (the list for set/show
    or some sublist thereof).
    TYPE is set_cmd or show_cmd.
-   CLASS is as in add_cmd.
+   THECLASS is as in add_cmd.
    VAR_TYPE is the kind of thing we are setting.
    VAR is address of the variable being controlled by this command.
    SET_SETTING_FUNC is a pointer to an optional function callback used to set
@@ -525,7 +525,7 @@ add_set_or_show_cmd (const char *name,
 }
 
 /* Add element named NAME to both the command SET_LIST and SHOW_LIST.
-   CLASS is as in add_cmd.  VAR_TYPE is the kind of thing we are
+   THECLASS is as in add_cmd.  VAR_TYPE is the kind of thing we are
    setting.  VAR is address of the variable being controlled by this
    command.  If nullptr is given as VAR, then both SET_SETTING_FUNC and
    GET_SETTING_FUNC must be provided. SET_SETTING_FUNC and GET_SETTING_FUNC are
@@ -610,7 +610,7 @@ add_setshow_cmd_full (const char *name,
 }
 
 /* Add element named NAME to command list LIST (the list for set or
-   some sublist thereof).  CLASS is as in add_cmd.  ENUMLIST is a list
+   some sublist thereof).  THECLASS is as in add_cmd.  ENUMLIST is a list
    of strings which may follow NAME.  VAR is address of the variable
    which will contain the matching string (from ENUMLIST).  */
 
@@ -674,7 +674,7 @@ add_setshow_enum_cmd (const char *name, command_class theclass,
 const char * const auto_boolean_enums[] = { "on", "off", "auto", NULL };
 
 /* Add an auto-boolean command named NAME to both the set and show
-   command list lists.  CLASS is as in add_cmd.  VAR is address of the
+   command list lists.  THECLASS is as in add_cmd.  VAR is address of the
    variable which will contain the value.  DOC is the documentation
    string.  FUNC is the corresponding callback.  */
 
@@ -730,7 +730,7 @@ add_setshow_auto_boolean_cmd (const char *name, command_class theclass,
 const char * const boolean_enums[] = { "on", "off", NULL };
 
 /* Add element named NAME to both the set and show command LISTs (the
-   list for set/show or some sublist thereof).  CLASS is as in
+   list for set/show or some sublist thereof).  THECLASS is as in
    add_cmd.  VAR is address of the variable which will contain the
    value.  SET_DOC and SHOW_DOC are the documentation strings.
    Returns the new command element.  */
@@ -995,7 +995,7 @@ integer_unlimited_completer (struct cmd_list_element *ignore,
 }
 
 /* Add element named NAME to both the set and show command LISTs (the
-   list for set/show or some sublist thereof).  CLASS is as in
+   list for set/show or some sublist thereof).  THECLASS is as in
    add_cmd.  VAR is address of the variable which will contain the
    value.  SET_DOC and SHOW_DOC are the documentation strings.  This
    function is only used in Python API.  Please don't use it elsewhere.  */
@@ -1045,7 +1045,7 @@ add_setshow_integer_cmd (const char *name, command_class theclass,
 }
 
 /* Add element named NAME to both the set and show command LISTs (the
-   list for set/show or some sublist thereof).  CLASS is as in
+   list for set/show or some sublist thereof).  THECLASS is as in
    add_cmd.  VAR is address of the variable which will contain the
    value.  SET_DOC and SHOW_DOC are the documentation strings.  */
 
@@ -1095,7 +1095,7 @@ add_setshow_uinteger_cmd (const char *name, command_class theclass,
 }
 
 /* Add element named NAME to both the set and show command LISTs (the
-   list for set/show or some sublist thereof).  CLASS is as in
+   list for set/show or some sublist thereof).  THECLASS is as in
    add_cmd.  VAR is address of the variable which will contain the
    value.  SET_DOC and SHOW_DOC are the documentation strings.  */
 
@@ -1182,7 +1182,7 @@ add_setshow_zuinteger_unlimited_cmd (const char *name, command_class theclass,
 }
 
 /* Add element named NAME to both the set and show command LISTs (the
-   list for set/show or some sublist thereof).  CLASS is as in
+   list for set/show or some sublist thereof).  THECLASS is as in
    add_cmd.  VAR is address of the variable which will contain the
    value.  SET_DOC and SHOW_DOC are the documentation strings.  */
 
@@ -1638,7 +1638,7 @@ help_cmd (const char *command, struct ui_file *stream)
  *
  * LIST is the list.
  * CMDTYPE is the prefix to use in the title string.
- * CLASS is the class with which to list the nodes of this list (see
+ * THECLASS is the class with which to list the nodes of this list (see
  * documentation for help_cmd_list below),  As usual, ALL_COMMANDS for
  * everything, ALL_CLASSES for just classes, and non-negative for only things
  * in a specific class.
