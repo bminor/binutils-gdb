@@ -496,11 +496,8 @@ empty_func (const char *args, int from_tty, cmd_list_element *c)
    TYPE is set_cmd or show_cmd.
    THECLASS is as in add_cmd.
    VAR_TYPE is the kind of thing we are setting.
-   VAR is address of the variable being controlled by this command.
-   SET_SETTING_FUNC is a pointer to an optional function callback used to set
-   the setting value.
-   GET_SETTING_FUNC is a pointer to an optional function callback used to get
-   the setting value.
+   ARGS is a pre-validated type-erased reference to the variable being
+   controlled by this command.
    DOC is the documentation string.  */
 
 static struct cmd_list_element *
@@ -526,12 +523,10 @@ add_set_or_show_cmd (const char *name,
 
 /* Add element named NAME to both command lists SET_LIST and SHOW_LIST.
    THECLASS is as in add_cmd.  VAR_TYPE is the kind of thing we are
-   setting.  VAR is address of the variable being controlled by this
-   command.  If nullptr is given as VAR, then both SET_SETTING_FUNC and
-   GET_SETTING_FUNC must be provided. SET_SETTING_FUNC and GET_SETTING_FUNC are
-   callbacks used to access and modify the underlying property, whatever its
-   storage is.  SET_FUNC and SHOW_FUNC are the callback functions (if non-NULL).
-   SET_DOC, SHOW_DOC and HELP_DOC are the documentation strings.
+   setting.  ARGS is a pre-validated type-erased reference to the
+   variable being controlled by this command.  SET_FUNC and SHOW_FUNC
+   are the callback functions (if non-NULL).  SET_DOC, SHOW_DOC and
+   HELP_DOC are the documentation strings.
 
    Return the newly created set and show commands.  */
 
