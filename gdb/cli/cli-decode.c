@@ -580,6 +580,18 @@ add_setshow_cmd_full_erased (const char *name,
   return {set, show};
 }
 
+/* Add element named NAME to both command lists SET_LIST and SHOW_LIST.
+   THECLASS is as in add_cmd.  VAR_TYPE is the kind of thing we are
+   setting.  VAR is address of the variable being controlled by this
+   command.  If nullptr is given as VAR, then both SET_SETTING_FUNC and
+   GET_SETTING_FUNC must be provided.  SET_SETTING_FUNC and GET_SETTING_FUNC
+   are callbacks used to access and modify the underlying property,
+   whatever its storage is.  SET_FUNC and SHOW_FUNC are the callback
+   functions (if non-NULL).  SET_DOC, SHOW_DOC and HELP_DOC are the
+   documentation strings.
+
+   Return the newly created set and show commands.  */
+
 template<typename T>
 static set_show_commands
 add_setshow_cmd_full (const char *name,
