@@ -5713,6 +5713,17 @@ conditions for the
 purpose of performing side effects when a breakpoint is reached
 (@pxref{Break Commands, ,Breakpoint Command Lists}).
 
+If a breakpoint condition calls a function in your program, then it is
+possible that your program could stop for some reason while in the
+called function.  For example, @value{GDBN} might hit a breakpoint in
+the called function, or the called function may receive a signal
+(e.g.@ a @code{SIGSEGV}) as a result of some undefined behaviour, if
+this happens then @value{GDBN} will stop.  Depending on the settings
+@code{unwindonsignal} and @code{unwind-on-terminating-exception}
+(@pxref{Calling,,Calling Program Functions}) @value{GDBN} may unwind
+the stack back to the breakpoint location, or may leave the program at
+the frame where the stop occurred.
+
 Breakpoint conditions can also be evaluated on the target's side if
 the target supports it.  Instead of evaluating the conditions locally,
 @value{GDBN} encodes the expression into an agent expression
