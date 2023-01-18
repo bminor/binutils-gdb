@@ -220,6 +220,7 @@ input_scrub_begin (void)
 
   physical_input_file = NULL;	/* No file read yet.  */
   next_saved_file = NULL;	/* At EOF, don't pop to any other file */
+  macro_nest = 0;
   input_scrub_reinit ();
   do_scrub_begin (flag_m68k_mri);
 }
