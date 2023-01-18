@@ -296,10 +296,10 @@ extern int section_is_overlay (struct obj_section *);
 extern int section_is_mapped (struct obj_section *);
 
 /* Return true if pc belongs to section's VMA.  */
-extern CORE_ADDR pc_in_mapped_range (CORE_ADDR, struct obj_section *);
+extern bool pc_in_mapped_range (CORE_ADDR, struct obj_section *);
 
 /* Return true if pc belongs to section's LMA.  */
-extern CORE_ADDR pc_in_unmapped_range (CORE_ADDR, struct obj_section *);
+extern bool pc_in_unmapped_range (CORE_ADDR, struct obj_section *);
 
 /* Map an address from a section's LMA to its VMA.  */
 extern CORE_ADDR overlay_mapped_address (CORE_ADDR, struct obj_section *);

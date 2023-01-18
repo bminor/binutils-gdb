@@ -1208,18 +1208,13 @@ find_pc_section (CORE_ADDR pc)
 
 /* Return non-zero if PC is in a section called NAME.  */
 
-int
+bool
 pc_in_section (CORE_ADDR pc, const char *name)
 {
-  struct obj_section *s;
-  int retval = 0;
-
-  s = find_pc_section (pc);
-
-  retval = (s != NULL
-	    && s->the_bfd_section->name != NULL
-	    && strcmp (s->the_bfd_section->name, name) == 0);
-  return (retval);
+  struct obj_section *s = find_pc_section (pc);
+  return (s != nullptr
+	  && s->the_bfd_section->name != nullptr
+	  && strcmp (s->the_bfd_section->name, name) == 0);
 }
 
 

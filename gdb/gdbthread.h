@@ -892,7 +892,7 @@ extern void delete_exited_threads (void);
 
 /* Return true if PC is in the stepping range of THREAD.  */
 
-int pc_in_thread_step_range (CORE_ADDR pc, struct thread_info *thread);
+bool pc_in_thread_step_range (CORE_ADDR pc, struct thread_info *thread);
 
 /* Enable storing stack temporaries for thread THR and disable and
    clear the stack temporaries on destruction.  Holds a strong

@@ -3022,7 +3022,7 @@ section_is_mapped (struct obj_section *osect)
 /* Function: pc_in_unmapped_range
    If PC falls into the lma range of SECTION, return true, else false.  */
 
-CORE_ADDR
+bool
 pc_in_unmapped_range (CORE_ADDR pc, struct obj_section *section)
 {
   if (section_is_overlay (section))
@@ -3035,26 +3035,26 @@ pc_in_unmapped_range (CORE_ADDR pc, struct obj_section *section)
 
       if (bfd_section_lma (bfd_section) + offset <= pc
 	  && pc < bfd_section_lma (bfd_section) + offset + size)
-	return 1;
+	return true;
     }
 
-  return 0;
+  return false;
 }
 
 /* Function: pc_in_mapped_range
    If PC falls into the vma range of SECTION, return true, else false.  */
 
-CORE_ADDR
+bool
 pc_in_mapped_range (CORE_ADDR pc, struct obj_section *section)
 {
   if (section_is_overlay (section))
     {
       if (section->addr () <= pc
 	  && pc < section->endaddr ())
-	return 1;
+	return true;
     }
 
-  return 0;
+  return false;
 }
 
 /* Return true if the mapped ranges of sections A and B overlap, false
