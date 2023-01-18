@@ -33,7 +33,6 @@
 #
 
 
-
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -143,16 +142,6 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = bfd-in3.h po/Makefile.in
 CONFIG_CLEAN_VPATH_FILES =
-LIBRARIES = $(noinst_LIBRARIES)
-ARFLAGS = cru
-AM_V_AR = $(am__v_AR_@AM_V@)
-am__v_AR_ = $(am__v_AR_@AM_DEFAULT_V@)
-am__v_AR_0 = @echo "  AR      " $@;
-am__v_AR_1 = 
-libbfd_a_AR = $(AR) $(ARFLAGS)
-libbfd_a_LIBADD =
-am_libbfd_a_OBJECTS =
-libbfd_a_OBJECTS = $(am_libbfd_a_OBJECTS)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -234,8 +223,7 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(libbfd_a_SOURCES) $(libbfd_la_SOURCES) \
-	$(EXTRA_libbfd_la_SOURCES)
+SOURCES = $(libbfd_la_SOURCES) $(EXTRA_libbfd_la_SOURCES)
 AM_V_DVIPS = $(am__v_DVIPS_@AM_V@)
 am__v_DVIPS_ = $(am__v_DVIPS_@AM_DEFAULT_V@)
 am__v_DVIPS_0 = @echo "  DVIPS   " $@;
@@ -501,8 +489,8 @@ zlibinc = @zlibinc@
 AUTOMAKE_OPTIONS = no-dist foreign info-in-builddir no-texinfo.tex
 ACLOCAL_AMFLAGS = -I . -I .. -I ../config
 MOSTLYCLEANFILES = ofiles stamp-ofiles $(MKDOC) doc/*.o doc/*.stamp
-CLEANFILES = bfd.h dep.sed stmp-bfd-h DEP DEPA DEP1 DEP2 libbfd.a \
-	stamp-lib stmp-bin2-h stmp-lbfd-h stmp-lcoff-h
+CLEANFILES = bfd.h dep.sed stmp-bfd-h DEP DEPA DEP1 DEP2 stmp-bin2-h \
+	stmp-lbfd-h stmp-lcoff-h
 DISTCLEANFILES = $(BUILD_CFILES) $(BUILD_HFILES) libtool-soversion \
 	doc/bfd.?? doc/bfd.??? texput.log
 MAINTAINERCLEANFILES = $(DOCFILES) doc/bfd.info
@@ -1208,13 +1196,6 @@ libbfd_la_SOURCES = $(BFD32_LIBS_CFILES)
 EXTRA_libbfd_la_SOURCES = $(CFILES)
 libbfd_la_DEPENDENCIES = $(OFILES) ofiles ../libsframe/libsframe.la
 libbfd_la_LIBADD = `cat ofiles` @SHARED_LIBADD@ $(LIBDL) $(ZLIB) $(ZSTD_LIBS) ../libsframe/libsframe.la
-
-# libtool will build .libs/libbfd.a.  We create libbfd.a in the build
-# directory so that we don't have to convert all the programs that use
-# libbfd.a simultaneously.  This is a hack which should be removed if
-# everything else starts using libtool.  FIXME.
-noinst_LIBRARIES = libbfd.a
-libbfd_a_SOURCES = 
 BFD_H_FILES = bfd-in.h opncls.c libbfd.c \
 	bfdio.c bfdwin.c section.c archures.c reloc.c \
 	syms.c bfd.c archive.c corefile.c targets.c format.c \
@@ -1385,9 +1366,6 @@ bfd-in3.h: $(top_builddir)/config.status $(srcdir)/bfd-in2.h
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 po/Makefile.in: $(top_builddir)/config.status $(top_srcdir)/po/Make-in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-
-clean-noinstLIBRARIES:
-	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
 
 install-bfdlibLTLIBRARIES: $(bfdlib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
@@ -2043,8 +2021,7 @@ distclean-tags:
 check-am: all-am
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-recursive
-all-am: Makefile $(INFO_DEPS) $(LIBRARIES) $(LTLIBRARIES) $(HEADERS) \
-		config.h
+all-am: Makefile $(INFO_DEPS) $(LTLIBRARIES) $(HEADERS) config.h
 installdirs: installdirs-recursive
 installdirs-am:
 	for dir in "$(DESTDIR)$(bfdlibdir)" "$(DESTDIR)$(infodir)" "$(DESTDIR)$(bfdincludedir)"; do \
@@ -2090,8 +2067,7 @@ maintainer-clean-generic:
 clean: clean-recursive
 
 clean-am: clean-aminfo clean-bfdlibLTLIBRARIES clean-generic \
-	clean-libtool clean-noinstLIBRARIES clean-noinstLTLIBRARIES \
-	mostlyclean-am
+	clean-libtool clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
@@ -2263,24 +2239,23 @@ uninstall-am: uninstall-bfdincludeHEADERS uninstall-bfdlibLTLIBRARIES \
 .PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am \
 	am--refresh check check-am clean clean-aminfo \
 	clean-bfdlibLTLIBRARIES clean-cscope clean-generic \
-	clean-libtool clean-noinstLIBRARIES clean-noinstLTLIBRARIES \
-	cscope cscopelist-am ctags ctags-am dist-info distclean \
-	distclean-compile distclean-generic distclean-hdr \
-	distclean-libtool distclean-tags dvi dvi-am html html-am \
-	html-local info info-am install install-am \
-	install-bfdincludeHEADERS install-bfdlibLTLIBRARIES \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs installdirs-am \
-	maintainer-clean maintainer-clean-aminfo \
-	maintainer-clean-generic mostlyclean mostlyclean-aminfo \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	pdf pdf-am ps ps-am tags tags-am uninstall uninstall-am \
-	uninstall-bfdincludeHEADERS uninstall-bfdlibLTLIBRARIES \
-	uninstall-dvi-am uninstall-html-am uninstall-info-am \
-	uninstall-pdf-am uninstall-ps-am
+	clean-libtool clean-noinstLTLIBRARIES cscope cscopelist-am \
+	ctags ctags-am dist-info distclean distclean-compile \
+	distclean-generic distclean-hdr distclean-libtool \
+	distclean-tags dvi dvi-am html html-am html-local info info-am \
+	install install-am install-bfdincludeHEADERS \
+	install-bfdlibLTLIBRARIES install-data install-data-am \
+	install-dvi install-dvi-am install-exec install-exec-am \
+	install-html install-html-am install-info install-info-am \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs installdirs-am maintainer-clean \
+	maintainer-clean-aminfo maintainer-clean-generic mostlyclean \
+	mostlyclean-aminfo mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-am uninstall \
+	uninstall-am uninstall-bfdincludeHEADERS \
+	uninstall-bfdlibLTLIBRARIES uninstall-dvi-am uninstall-html-am \
+	uninstall-info-am uninstall-pdf-am uninstall-ps-am
 
 .PRECIOUS: Makefile
 
@@ -2317,17 +2292,6 @@ stamp-ofiles: Makefile
 	touch stamp-ofiles
 
 ofiles: stamp-ofiles ; @true
-
-stamp-lib: libbfd.la
-	libtooldir=`$(LIBTOOL) --config | $(SED) -n -e 's/^objdir=//p'`; \
-	if [ -f $$libtooldir/libbfd.a ]; then \
-	  cp $$libtooldir/libbfd.a libbfd.tmp; \
-	  $(RANLIB) libbfd.tmp; \
-	  $(SHELL) $(srcdir)/../move-if-change libbfd.tmp libbfd.a; \
-	else true; fi
-	touch stamp-lib
-
-libbfd.a: stamp-lib ; @true
 
 # This file holds an array associating configuration triplets and
 # vector names.  It is built from config.bfd.  It is not compiled by

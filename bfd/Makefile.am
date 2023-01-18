@@ -781,25 +781,6 @@ libbfd_la_DEPENDENCIES = $(OFILES) ofiles ../libsframe/libsframe.la
 libbfd_la_LIBADD = `cat ofiles` @SHARED_LIBADD@ $(LIBDL) $(ZLIB) $(ZSTD_LIBS) ../libsframe/libsframe.la
 libbfd_la_LDFLAGS += -release `cat libtool-soversion` @SHARED_LDFLAGS@
 
-# libtool will build .libs/libbfd.a.  We create libbfd.a in the build
-# directory so that we don't have to convert all the programs that use
-# libbfd.a simultaneously.  This is a hack which should be removed if
-# everything else starts using libtool.  FIXME.
-
-noinst_LIBRARIES = libbfd.a
-libbfd_a_SOURCES =
-
-stamp-lib: libbfd.la
-	libtooldir=`$(LIBTOOL) --config | $(SED) -n -e 's/^objdir=//p'`; \
-	if [ -f $$libtooldir/libbfd.a ]; then \
-	  cp $$libtooldir/libbfd.a libbfd.tmp; \
-	  $(RANLIB) libbfd.tmp; \
-	  $(SHELL) $(srcdir)/../move-if-change libbfd.tmp libbfd.a; \
-	else true; fi
-	touch stamp-lib
-
-libbfd.a: stamp-lib ; @true
-
 # This file holds an array associating configuration triplets and
 # vector names.  It is built from config.bfd.  It is not compiled by
 # itself, but is included by targets.c.
@@ -976,7 +957,7 @@ stmp-lcoff-h: $(LIBCOFF_H_FILES) $(MKDOC)
 
 MOSTLYCLEANFILES += ofiles stamp-ofiles
 
-CLEANFILES += bfd.h dep.sed stmp-bfd-h DEP DEPA DEP1 DEP2 libbfd.a stamp-lib \
+CLEANFILES += bfd.h dep.sed stmp-bfd-h DEP DEPA DEP1 DEP2 \
 	stmp-bin2-h stmp-lbfd-h stmp-lcoff-h
 
 DISTCLEANFILES += $(BUILD_CFILES) $(BUILD_HFILES) libtool-soversion
