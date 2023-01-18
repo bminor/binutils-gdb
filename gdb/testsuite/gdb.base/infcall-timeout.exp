@@ -28,7 +28,11 @@ if { [build_executable "failed to prepare" ${binfile} "${srcfile}" \
 # then adjust the direct-call-timeout, and make an inferior function
 # call that will never return.  GDB should eventually timeout and stop
 # the inferior.
-proc run_test { target_async target_non_stop non_stop } {
+#
+# When UNWIND is "off" the inferior wil be left in the frame where the
+# timeout occurs, otherwise, when UNWIND is "on", GDB should unwind
+# back to the frame where the inferior call was made.
+proc run_test { target_async target_non_stop non_stop unwind } {
     save_vars { ::GDBFLAGS } {
 	append ::GDBFLAGS \
 	    " -ex \"maint set target-non-stop $target_non_stop\""
@@ -45,28 +49,43 @@ proc run_test { target_async target_non_stop non_stop } {
     }
 
     gdb_test_no_output "set direct-call-timeout 5"
+    gdb_test_no_output "set unwind-on-timeout $unwind"
 
-    # When non-stop mode is off we get slightly different output from GDB.
-    if { ([target_info gdb_protocol] == "remote"
-	  || [target_info gdb_protocol] == "extended-remote")
-	 && !$target_non_stop } {
-	set stopped_line_pattern "Program received signal SIGINT, Interrupt\\."
+    if { $unwind } {
+	gdb_test "print function_that_never_returns ()" \
+	    [multi_line \
+		 "The program being debugged timed out while in a function called from GDB\\." \
+		 "GDB has restored the context to what it was before the call\\." \
+		 "To change this behavior use \"set unwind-on-timeout off\"\\." \
+		 "Evaluation of the expression containing the function" \
+		 "\\(function_that_never_returns\\) will be abandoned\\."]
+
+	gdb_test "bt" \
+	    "#0\\s+main \\(\\).*"
     } else {
-	set stopped_line_pattern "Program stopped\\."
+	# When non-stop mode is off we get slightly different output from GDB.
+	if { ([target_info gdb_protocol] == "remote"
+	      || [target_info gdb_protocol] == "extended-remote")
+	     && !$target_non_stop } {
+	    set stopped_line_pattern "Program received signal SIGINT, Interrupt\\."
+	} else {
+	    set stopped_line_pattern "Program stopped\\."
+	}
+
+	gdb_test "print function_that_never_returns ()" \
+	    [multi_line \
+		 $stopped_line_pattern \
+		 ".*" \
+		 "The program being debugged timed out while in a function called from GDB\\." \
+		 "GDB remains in the frame where the timeout occurred\\." \
+		 "To change this behavior use \"set unwind-on-timeout on\"\\." \
+		 "Evaluation of the expression containing the function" \
+		 "\\(function_that_never_returns\\) will be abandoned\\." \
+		 "When the function is done executing, GDB will silently stop\\."]
+
+	gdb_test "bt" \
+	    ".* function_that_never_returns .*<function called from gdb>.*"
     }
-
-    gdb_test "print function_that_never_returns ()" \
-	[multi_line \
-	     $stopped_line_pattern \
-	     ".*" \
-	     "The program being debugged timed out while in a function called from GDB\\." \
-	     "GDB remains in the frame where the timeout occurred\\." \
-	     "To change this behavior use \"set unwind-on-timeout on\"\\." \
-	     "Evaluation of the expression containing the function" \
-	     "\\(function_that_never_returns\\) will be abandoned\\." \
-	     "When the function is done executing, GDB will silently stop\\."]
-
-    gdb_test "bt" ".* function_that_never_returns .*<function called from gdb>.*"
 }
 
 foreach_with_prefix target_async { "on" "off" } {
@@ -88,7 +107,9 @@ foreach_with_prefix target_async { "on" "off" } {
 		continue
 	    }
 
-	    run_test $target_async $target_non_stop $non_stop
+	    foreach_with_prefix unwind { "on" "off" } {
+		run_test $target_async $target_non_stop $non_stop $unwind
+	    }
 	}
     }
 }
