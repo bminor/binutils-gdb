@@ -2354,6 +2354,9 @@ elfNN_aarch64_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
    name can be changed. The only requirement is the %s be present.  */
 #define STUB_ENTRY_NAME   "__%s_veneer"
 
+/* Stub name for a BTI landing stub.  */
+#define BTI_STUB_ENTRY_NAME   "__%s_bti_veneer"
+
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
 #define ELF_DYNAMIC_INTERPRETER     "/lib/ld.so.1"
@@ -2406,6 +2409,12 @@ static const uint32_t aarch64_long_branch_stub[] =
   0x00000000,
 };
 
+static const uint32_t aarch64_bti_direct_branch_stub[] =
+{
+  0xd503245f,			/*	bti	c */
+  0x14000000,			/*	b	<label> */
+};
+
 static const uint32_t aarch64_erratum_835769_stub[] =
 {
   0x00000000,    /* Placeholder for multiply accumulate.  */
@@ -2427,6 +2436,7 @@ enum elf_aarch64_stub_type
   aarch64_stub_none,
   aarch64_stub_adrp_branch,
   aarch64_stub_long_branch,
+  aarch64_stub_bti_direct_branch,
   aarch64_stub_erratum_835769_veneer,
   aarch64_stub_erratum_843419_veneer,
 };
@@ -2454,6 +2464,9 @@ struct elf_aarch64_stub_hash_entry
 
   /* Destination symbol type */
   unsigned char st_type;
+
+  /* The target is also a stub.  */
+  bool double_stub;
 
   /* Where this stub is being called from, or, in the case of combined
      stub sections, the first input section in the group.  */
@@ -2678,6 +2691,11 @@ struct elf_aarch64_link_hash_table
   unsigned int bfd_count;
   unsigned int top_index;
   asection **input_list;
+
+  /* True when two stubs are added where one targets the other, happens
+     when BTI stubs are inserted and then the stub layout must not change
+     during elfNN_aarch64_build_stubs.  */
+  bool has_double_stub;
 
   /* JUMP_SLOT relocs for variant PCS symbols may be present.  */
   int variant_pcs;
@@ -2974,14 +2992,6 @@ aarch64_relocate (unsigned int r_type, bfd *input_bfd, asection *input_section,
 				      howto, value) == bfd_reloc_ok;
 }
 
-static enum elf_aarch64_stub_type
-aarch64_select_branch_stub (bfd_vma value, bfd_vma place)
-{
-  if (aarch64_valid_for_adrp_p (value, place))
-    return aarch64_stub_adrp_branch;
-  return aarch64_stub_long_branch;
-}
-
 /* Determine the type of stub needed, if any, for a call.  */
 
 static enum elf_aarch64_stub_type
@@ -3251,14 +3261,17 @@ aarch64_build_one_stub (struct bfd_hash_entry *gen_entry,
   bfd_vma veneer_entry_loc;
   bfd_signed_vma branch_offset = 0;
   unsigned int template_size;
+  unsigned int pad_size = 0;
   const uint32_t *template;
   unsigned int i;
   struct bfd_link_info *info;
+  struct elf_aarch64_link_hash_table *htab;
 
   /* Massage our args to the form they really have.  */
   stub_entry = (struct elf_aarch64_stub_hash_entry *) gen_entry;
 
   info = (struct bfd_link_info *) in_arg;
+  htab = elf_aarch64_hash_table (info);
 
   /* Fail if the target section could not be assigned to an output
      section.  The user should fix his linker script.  */
@@ -3270,6 +3283,10 @@ aarch64_build_one_stub (struct bfd_hash_entry *gen_entry,
 			    stub_entry->target_section);
 
   stub_sec = stub_entry->stub_sec;
+
+  /* The layout must not change when a stub may be the target of another.  */
+  if (htab->has_double_stub)
+    BFD_ASSERT (stub_entry->stub_offset == stub_sec->size);
 
   /* Make a note of the offset within the stubs for this entry.  */
   stub_entry->stub_offset = stub_sec->size;
@@ -3289,7 +3306,14 @@ aarch64_build_one_stub (struct bfd_hash_entry *gen_entry,
 
       /* See if we can relax the stub.  */
       if (aarch64_valid_for_adrp_p (sym_value, place))
-	stub_entry->stub_type = aarch64_select_branch_stub (sym_value, place);
+	{
+	  stub_entry->stub_type = aarch64_stub_adrp_branch;
+
+	  /* Avoid the relaxation changing the layout.  */
+	  if (htab->has_double_stub)
+	    pad_size = sizeof (aarch64_long_branch_stub)
+		       - sizeof (aarch64_adrp_branch_stub);
+	}
     }
 
   switch (stub_entry->stub_type)
@@ -3301,6 +3325,10 @@ aarch64_build_one_stub (struct bfd_hash_entry *gen_entry,
     case aarch64_stub_long_branch:
       template = aarch64_long_branch_stub;
       template_size = sizeof (aarch64_long_branch_stub);
+      break;
+    case aarch64_stub_bti_direct_branch:
+      template = aarch64_bti_direct_branch_stub;
+      template_size = sizeof (aarch64_bti_direct_branch_stub);
       break;
     case aarch64_stub_erratum_835769_veneer:
       template = aarch64_erratum_835769_stub;
@@ -3320,6 +3348,7 @@ aarch64_build_one_stub (struct bfd_hash_entry *gen_entry,
       loc += 4;
     }
 
+  template_size += pad_size;
   template_size = (template_size + 7) & ~7;
   stub_sec->size += template_size;
 
@@ -3342,6 +3371,12 @@ aarch64_build_one_stub (struct bfd_hash_entry *gen_entry,
 	 value itself.  */
       if (!aarch64_relocate (AARCH64_R (PRELNN), stub_bfd, stub_sec,
 			     stub_entry->stub_offset + 16, sym_value + 12))
+	BFD_FAIL ();
+      break;
+
+    case aarch64_stub_bti_direct_branch:
+      if (!aarch64_relocate (AARCH64_R (JUMP26), stub_bfd, stub_sec,
+			     stub_entry->stub_offset + 4, sym_value))
 	BFD_FAIL ();
       break;
 
@@ -3375,7 +3410,8 @@ aarch64_build_one_stub (struct bfd_hash_entry *gen_entry,
 }
 
 /* As above, but don't actually build the stub.  Just bump offset so
-   we know stub section sizes.  */
+   we know stub section sizes and record the offset for each stub so
+   a stub can target another stub (needed for BTI direct branch stub).  */
 
 static bool
 aarch64_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
@@ -3396,6 +3432,9 @@ aarch64_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
     case aarch64_stub_long_branch:
       size = sizeof (aarch64_long_branch_stub);
       break;
+    case aarch64_stub_bti_direct_branch:
+      size = sizeof (aarch64_bti_direct_branch_stub);
+      break;
     case aarch64_stub_erratum_835769_veneer:
       size = sizeof (aarch64_erratum_835769_stub);
       break;
@@ -3411,8 +3450,18 @@ aarch64_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
     }
 
   size = (size + 7) & ~7;
+  stub_entry->stub_offset = stub_entry->stub_sec->size;
   stub_entry->stub_sec->size += size;
   return true;
+}
+
+/* Output is BTI compatible.  */
+
+static bool
+elf_aarch64_bti_p (bfd *output_bfd)
+{
+  uint32_t prop = elf_aarch64_tdata (output_bfd)->gnu_and_prop;
+  return prop & GNU_PROPERTY_AARCH64_FEATURE_1_BTI;
 }
 
 /* External entry points for sizing and building linker stubs.  */
@@ -3620,6 +3669,16 @@ group_sections (struct elf_aarch64_link_hash_table *htab,
 
 #undef PREV_SEC
 #undef PREV_SEC
+
+/* True if the inserted stub does not break BTI compatibility.  */
+
+static bool
+aarch64_bti_stub_p (struct elf_aarch64_stub_hash_entry *stub_entry)
+{
+  /* Stubs without indirect branch are BTI compatible.  */
+  return stub_entry->stub_type != aarch64_stub_adrp_branch
+	 && stub_entry->stub_type != aarch64_stub_long_branch;
+}
 
 #define AARCH64_BITS(x, pos, n) (((x) >> (pos)) & ((1 << (n)) - 1))
 
@@ -4080,7 +4139,10 @@ _bfd_aarch64_resize_stubs (struct elf_aarch64_link_hash_table *htab)
       /* Ignore non-stub sections.  */
       if (!strstr (section->name, STUB_SUFFIX))
 	continue;
-      section->size = 0;
+
+      /* Add space for a branch.  Add 8 bytes to keep section 8 byte aligned,
+	 as long branch stubs contain a 64-bit address.  */
+      section->size = 8;
     }
 
   bfd_hash_traverse (&htab->stub_hash_table, aarch64_size_one_stub, htab);
@@ -4091,10 +4153,9 @@ _bfd_aarch64_resize_stubs (struct elf_aarch64_link_hash_table *htab)
       if (!strstr (section->name, STUB_SUFFIX))
 	continue;
 
-      /* Add space for a branch.  Add 8 bytes to keep section 8 byte aligned,
-	 as long branch stubs contain a 64-bit address.  */
-      if (section->size)
-	section->size += 8;
+      /* Empty stub section.  */
+      if (section->size == 8)
+	section->size = 0;
 
       /* Ensure all stub sections have a size which is a multiple of
 	 4096.  This is important in order to ensure that the insertion
@@ -4276,6 +4337,7 @@ _bfd_aarch64_add_call_stub_entries (bool *stub_changed, bfd *output_bfd,
 				    struct bfd_link_info *info)
 {
   struct elf_aarch64_link_hash_table *htab = elf_aarch64_hash_table (info);
+  bool need_bti = elf_aarch64_bti_p (output_bfd);
   bfd *input_bfd;
 
   for (input_bfd = info->input_bfds; input_bfd != NULL;
@@ -4327,13 +4389,16 @@ _bfd_aarch64_add_call_stub_entries (bool *stub_changed, bfd *output_bfd,
 	      unsigned int r_type, r_indx;
 	      enum elf_aarch64_stub_type stub_type;
 	      struct elf_aarch64_stub_hash_entry *stub_entry;
+	      struct elf_aarch64_stub_hash_entry *stub_entry_bti;
 	      asection *sym_sec;
 	      bfd_vma sym_value;
 	      bfd_vma destination;
 	      struct elf_aarch64_link_hash_entry *hash;
 	      const char *sym_name;
 	      char *stub_name;
+	      char *stub_name_bti;
 	      const asection *id_sec;
+	      const asection *id_sec_bti;
 	      unsigned char st_type;
 	      bfd_size_type len;
 
@@ -4498,6 +4563,25 @@ _bfd_aarch64_add_call_stub_entries (bool *stub_changed, bfd *output_bfd,
 		  /* Always update this stub's target since it may have
 		     changed after layout.  */
 		  stub_entry->target_value = sym_value + irela->r_addend;
+
+		  if (stub_entry->double_stub)
+		    {
+		      /* Update the target of both stubs.  */
+
+		      id_sec_bti = htab->stub_group[sym_sec->id].link_sec;
+		      stub_name_bti =
+			elfNN_aarch64_stub_name (id_sec_bti, sym_sec, hash,
+						 irela);
+		      if (!stub_name_bti)
+			goto error_ret_free_internal;
+		      stub_entry_bti =
+			aarch64_stub_hash_lookup (&htab->stub_hash_table,
+						  stub_name_bti, false, false);
+		      BFD_ASSERT (stub_entry_bti != NULL);
+		      free (stub_name_bti);
+		      stub_entry_bti->target_value = stub_entry->target_value;
+		      stub_entry->target_value = stub_entry_bti->stub_offset;
+		    }
 		  continue;
 		}
 
@@ -4527,6 +4611,60 @@ _bfd_aarch64_add_call_stub_entries (bool *stub_changed, bfd *output_bfd,
 
 	      snprintf (stub_entry->output_name, len, STUB_ENTRY_NAME,
 			sym_name);
+
+	      /* A stub with indirect jump may break BTI compatibility, so
+		 insert another stub with direct jump near the target then.  */
+	      if (need_bti && !aarch64_bti_stub_p (stub_entry))
+		{
+		  stub_entry->double_stub = true;
+		  htab->has_double_stub = true;
+		  id_sec_bti = htab->stub_group[sym_sec->id].link_sec;
+		  stub_name_bti =
+		    elfNN_aarch64_stub_name (id_sec_bti, sym_sec, hash, irela);
+		  if (!stub_name_bti)
+		    {
+		      free (stub_name);
+		      goto error_ret_free_internal;
+		    }
+
+		  stub_entry_bti =
+		    aarch64_stub_hash_lookup (&htab->stub_hash_table,
+					      stub_name_bti, false, false);
+		  if (stub_entry_bti == NULL)
+		    stub_entry_bti =
+		      _bfd_aarch64_add_stub_entry_in_group (stub_name_bti,
+							    sym_sec, htab);
+		  if (stub_entry_bti == NULL)
+		    {
+		      free (stub_name);
+		      free (stub_name_bti);
+		      goto error_ret_free_internal;
+		    }
+
+		  stub_entry_bti->target_value = sym_value + irela->r_addend;
+		  stub_entry_bti->target_section = sym_sec;
+		  stub_entry_bti->stub_type = aarch64_stub_bti_direct_branch;
+		  stub_entry_bti->h = hash;
+		  stub_entry_bti->st_type = st_type;
+
+		  len = sizeof (BTI_STUB_ENTRY_NAME) + strlen (sym_name);
+		  stub_entry_bti->output_name = bfd_alloc (htab->stub_bfd, len);
+		  if (stub_entry_bti->output_name == NULL)
+		    {
+		      free (stub_name);
+		      free (stub_name_bti);
+		      goto error_ret_free_internal;
+		    }
+		  snprintf (stub_entry_bti->output_name, len,
+			    BTI_STUB_ENTRY_NAME, sym_name);
+
+		  /* Update the indirect call stub to target the BTI stub.  */
+		  stub_entry->target_value = 0;
+		  stub_entry->target_section = stub_entry_bti->stub_sec;
+		  stub_entry->stub_type = stub_type;
+		  stub_entry->h = NULL;
+		  stub_entry->st_type = STT_FUNC;
+		}
 
 	      *stub_changed = true;
 	    }
@@ -8441,6 +8579,13 @@ aarch64_map_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       if (!elfNN_aarch64_output_map_sym (osi, AARCH64_MAP_INSN, addr))
 	return false;
       if (!elfNN_aarch64_output_map_sym (osi, AARCH64_MAP_DATA, addr + 16))
+	return false;
+      break;
+    case aarch64_stub_bti_direct_branch:
+      if (!elfNN_aarch64_output_stub_sym (osi, stub_name, addr,
+	  sizeof (aarch64_bti_direct_branch_stub)))
+	return false;
+      if (!elfNN_aarch64_output_map_sym (osi, AARCH64_MAP_INSN, addr))
 	return false;
       break;
     case aarch64_stub_erratum_835769_veneer:
