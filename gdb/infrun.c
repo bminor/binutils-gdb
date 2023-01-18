@@ -1868,7 +1868,6 @@ struct execution_control_state
 
   struct target_waitstatus ws;
   int stop_func_filled_in = 0;
-  CORE_ADDR stop_func_alt_start = 0;
   CORE_ADDR stop_func_start = 0;
   CORE_ADDR stop_func_end = 0;
   const char *stop_func_name = nullptr;
@@ -4664,12 +4663,6 @@ fill_in_stop_func (struct gdbarch *gdbarch,
 				    &block);
       ecs->stop_func_name = gsi == nullptr ? nullptr : gsi->print_name ();
 
-      /* PowerPC functions have a Local Entry Point and a Global Entry
-	 Point.  There is only one Entry Point (GEP = LEP) for other
-	 architectures.  Save the alternate entry point address (GEP) for
-	 use later.  */
-      ecs->stop_func_alt_start = ecs->stop_func_start;
-
       /* The call to find_pc_partial_function, above, will set
 	 stop_func_start and stop_func_end to the start and end
 	 of the range containing the stop pc.  If this range
@@ -4686,9 +4679,6 @@ fill_in_stop_func (struct gdbarch *gdbarch,
 	    += gdbarch_deprecated_function_start_offset (gdbarch);
 
 	  if (gdbarch_skip_entrypoint_p (gdbarch))
-	    /* The PowerPC architecture uses two entry points.  Stop at the
-	       regular entry point (LEP on PowerPC) initially.  Will setup a
-	       breakpoint for the alternate entry point (GEP) later.  */
 	    ecs->stop_func_start
 	      = gdbarch_skip_entrypoint (gdbarch, ecs->stop_func_start);
 	}
@@ -6764,7 +6754,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 
 	  /* Return using a step range so we will keep stepping back to the
 	     first instruction in the source code line.  */
-	  tp->control.step_range_start = ecs->stop_func_alt_start;
+	  tp->control.step_range_start = ecs->stop_func_start;
 	  tp->control.step_range_end = ecs->stop_func_start;
 	  keep_going (ecs);
 	  return;
@@ -6901,10 +6891,8 @@ process_event_stop_test (struct execution_control_state *ecs)
 	 (unless it's the function entry point, in which case
 	 keep going back to the call point).  */
       CORE_ADDR stop_pc = ecs->event_thread->stop_pc ();
-
       if (stop_pc == ecs->event_thread->control.step_range_start
-	  && (stop_pc < ecs->stop_func_alt_start
-	      || stop_pc > ecs->stop_func_start)
+	  && stop_pc != ecs->stop_func_start
 	  && execution_direction == EXEC_REVERSE)
 	end_stepping_range (ecs);
       else
