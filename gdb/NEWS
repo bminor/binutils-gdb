@@ -35,6 +35,15 @@ show indirect-call-timeout
   ignored, GDB will wait indefinitely for an inferior function to
   complete, unless interrupted by the user using Ctrl-C.
 
+set unwind-on-timeout on|off
+show unwind-on-timeout
+  These commands control whether GDB should unwind the stack when a
+  timeout occurs during an inferior function call.  The default is
+  off, in which case the inferior will remain in the frame where the
+  timeout occurred.  When on GDB will unwind the stack remocing the
+  dummy frame that was added for the inferior call, and restoring the
+  inferior state to how it was before the inferior call started.
+
 * MI changes
 
 ** mi now reports 'no-history' as a stop reason when hitting the end of the

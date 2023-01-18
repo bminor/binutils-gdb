@@ -217,6 +217,27 @@ show_unwind_on_terminating_exception_p (struct ui_file *file, int from_tty,
 	      value);
 }
 
+/* This boolean tells what gdb should do if a signal is received while
+   in a function called from gdb (call dummy).  If set, gdb unwinds
+   the stack and restore the context to what as it was before the
+   call.
+
+   The default is to stop in the frame where the signal was received.  */
+
+static bool unwind_on_timeout_p = false;
+
+/* Implement 'show unwind-on-timeout'.  */
+
+static void
+show_unwind_on_timeout_p (struct ui_file *file, int from_tty,
+			  struct cmd_list_element *c, const char *value)
+{
+  gdb_printf (file,
+	      _("Unwinding of stack if a timeout occurs "
+		"while in a call dummy is %s.\n"),
+	      value);
+}
+
 /* Perform the standard coercions that are specified
    for arguments to be passed to C, Ada or Fortran functions.
 
@@ -1688,14 +1709,27 @@ When the function is done executing, GDB will silently stop."),
 	  /* A timeout results in a signal being sent to the inferior.  */
 	  gdb_assert (stopped_by_random_signal);
 
-	  /* Indentation is weird here.  A later patch is going to move the
-	    following block into an if/else, so I'm leaving the indentation
-	    here to minimise the later patch.
+	  if (unwind_on_timeout_p)
+	    {
+	      /* The user wants the context restored.  */
 
-	    Also, the error message used below refers to 'set
-	    unwind-on-timeout' which doesn't exist yet.  This will be added
-	    in a later commit, I'm leaving this in for now to minimise the
-	    churn caused by the commit that adds unwind-on-timeout.  */
+	      /* We must get back to the frame we were before the
+		 dummy call.  */
+	      dummy_frame_pop (dummy_id, call_thread.get ());
+
+	      /* We also need to restore inferior status to that before the
+		 dummy call.  */
+	      restore_infcall_control_state (inf_status.release ());
+
+	      error (_("\
+The program being debugged timed out while in a function called from GDB.\n\
+GDB has restored the context to what it was before the call.\n\
+To change this behavior use \"set unwind-on-timeout off\".\n\
+Evaluation of the expression containing the function\n\
+(%s) will be abandoned."),
+		     name.c_str ());
+	    }
+	  else
 	    {
 	      /* The user wants to stay in the frame where we stopped
 		 (default).  Discard inferior status, we're not at the same
@@ -1819,6 +1853,20 @@ std::terminate call to proceed.\n\
 The default is to unwind the frame."),
 			   NULL,
 			   show_unwind_on_terminating_exception_p,
+			   &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("unwind-on-timeout", no_class,
+			   &unwind_on_timeout_p, _("\
+Set unwinding of stack if a timeout occurs while in a call dummy."), _("\
+Show unwinding of stack if a timeout occurs while in a call dummy."),
+			   _("\
+The unwind on timeout flag lets the user determine what gdb should do if\n\
+gdb times out while in a function called from gdb.  If set, gdb unwinds\n\
+the stack and restores the context to what it was before the call.  If\n\
+unset, gdb leaves the inferior in the frame where the timeout occurred.\n\
+The default is to stop in the frame where the timeout occurred."),
+			   NULL,
+			   show_unwind_on_timeout_p,
 			   &setlist, &showlist);
 
   add_setshow_uinteger_cmd ("direct-call-timeout", no_class,

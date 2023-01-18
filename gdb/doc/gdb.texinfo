@@ -5719,10 +5719,10 @@ called function.  For example, @value{GDBN} might hit a breakpoint in
 the called function, or the called function may receive a signal
 (e.g.@ a @code{SIGSEGV}) as a result of some undefined behaviour, if
 this happens then @value{GDBN} will stop.  Depending on the settings
-@code{unwindonsignal} and @code{unwind-on-terminating-exception}
-(@pxref{Calling,,Calling Program Functions}) @value{GDBN} may unwind
-the stack back to the breakpoint location, or may leave the program at
-the frame where the stop occurred.
+@code{unwindonsignal}, @code{unwind-on-terminating-exception}, and
+@code{unwind-on-timeout} (@pxref{Calling,,Calling Program Functions})
+@value{GDBN} may unwind the stack back to the breakpoint location, or
+may leave the program at the frame where the stop occurred.
 
 Breakpoint conditions can also be evaluated on the target's side if
 the target supports it.  Instead of evaluating the conditions locally,
@@ -20752,6 +20752,21 @@ the default C@t{++} exception handler and the inferior terminated.
 Show the current setting of stack unwinding in the functions called by
 @value{GDBN}.
 
+@item set unwind-on-timeout
+@kindex set unwind-on-timeout
+@cindex unwind stack in called functions when timing out
+@cindex call dummy stack unwinding on timeout.
+Set unwinding of the stack if a function called from @value{GDBN}
+times out.  If set to @code{off} (the default), @value{GDBN} stops in
+the frame where the timeout occurred.  If set to @code{on},
+@value{GDBN} unwinds the stack it created for the call and restores
+the context to what it was before the call.
+
+@item show unwind-on-timeout
+@kindex show unwind-on-timeout
+Show whether @value{GDBN} will unwind the stack if a function called
+from @value{GDBN} times out.
+
 @item set may-call-functions
 @kindex set may-call-functions
 @cindex disabling calling functions in the program
@@ -20782,11 +20797,11 @@ return.  If this happens then it is possible to interrupt the function
 call by typing the interrupt character (often @kbd{Ctrl-c}).
 
 If a called function is interrupted for any reason, and the stack is
-not unwound (due to @code{set unwind-on-terminating-exception on} or
-@code{set unwindonsignal on}), then the dummy-frame, created by
-@value{GDBN} to facilitate the call to the program function, will be
-visible in the backtrace, for example frame @code{#3} in the following
-backtrace:
+not unwound (due to @code{set unwind-on-terminating-exception on},
+@code{set unwind-on-timeout}, or @code{set unwindonsignal on}), then
+the dummy-frame, created by @value{GDBN} to facilitate the call to the
+program function, will be visible in the backtrace, for example frame
+@code{#3} in the following backtrace:
 
 @smallexample
 (@value{GDBP}) backtrace

@@ -41,7 +41,12 @@ set segfault_line [gdb_get_line_number "Segfault here"]
 # thread, on which the inferior call relies, either hits a breakpoint
 # (when OTHER_THREAD_BP is true), or crashes (when OTHER_THREAD_BP is
 # false).
-proc run_test { target_async target_non_stop other_thread_bp } {
+#
+# When UNWIND is "on" GDB will unwind the thread which performed the
+# inferior function call back to the state where the inferior call was
+# made (when the inferior call times out).  Otherwise, when UNWIND is
+# "off", the inferior is left in the frame where the timeout occurred.
+proc run_test { target_async target_non_stop other_thread_bp unwind } {
     save_vars { ::GDBFLAGS } {
 	append ::GDBFLAGS " -ex \"maint set target-non-stop $target_non_stop\""
 	append ::GDBFLAGS " -ex \"maintenance set target-async ${target_async}\""
@@ -72,6 +77,7 @@ proc run_test { target_async target_non_stop other_thread_bp } {
     # for this timeout.  For now though, we just hope 5 seconds is
     # enough.
     gdb_test_no_output "set indirect-call-timeout 5"
+    gdb_test_no_output "set unwind-on-timeout $unwind"
 
     gdb_breakpoint \
 	"${::srcfile}:${::cond_bp_line} if (condition_func ())"
@@ -92,18 +98,35 @@ proc run_test { target_async target_non_stop other_thread_bp } {
 				 "get number for segfault breakpoint"]
     }
 
-    gdb_test "continue" \
-	[multi_line \
-	     "Thread ${::decimal} \"\[^\r\n\"\]+\" stopped\\." \
-	     ".*" \
-	     "Error in testing condition for breakpoint ${bp_num}:" \
-	     "The program being debugged timed out while in a function called from GDB\\." \
-	     "GDB remains in the frame where the timeout occurred\\." \
-	     "To change this behavior use \"set unwind-on-timeout on\"\\." \
-	     "Evaluation of the expression containing the function" \
-	     "\\(condition_func\\) will be abandoned\\." \
-	     "When the function is done executing, GDB will silently stop\\."] \
-	"expected timeout waiting for inferior call to complete"
+    if { $unwind } {
+	gdb_test "continue" \
+	    [multi_line \
+		 "Thread ${::decimal} \"\[^\r\n\"\]+\" stopped\\." \
+		 ".*" \
+		 "Error in testing condition for breakpoint ${bp_num}:" \
+		 "The program being debugged timed out while in a function called from GDB\\." \
+		 "GDB has restored the context to what it was before the call\\." \
+		 "To change this behavior use \"set unwind-on-timeout off\"\\." \
+		 "Evaluation of the expression containing the function" \
+		 "\\(condition_func\\) will be abandoned\\." \
+		 "" \
+		 "Thread ${::decimal}\[^\r\n\]*hit Breakpoint ${bp_num}, \[^\r\n\]+" \
+		 "\[^\r\n\]+ Conditional breakpoint here\\. \[^\r\n\]+"] \
+	    "expected timeout waiting for inferior call to complete"
+    } else {
+	gdb_test "continue" \
+	    [multi_line \
+		 "Thread ${::decimal} \"\[^\r\n\"\]+\" stopped\\." \
+		 ".*" \
+		 "Error in testing condition for breakpoint ${bp_num}:" \
+		 "The program being debugged timed out while in a function called from GDB\\." \
+		 "GDB remains in the frame where the timeout occurred\\." \
+		 "To change this behavior use \"set unwind-on-timeout on\"\\." \
+		 "Evaluation of the expression containing the function" \
+		 "\\(condition_func\\) will be abandoned\\." \
+		 "When the function is done executing, GDB will silently stop\\."] \
+	    "expected timeout waiting for inferior call to complete"
+    }
 
     # Remember that other thread that either crashed (with a segfault)
     # or hit a breakpoint?  Now that the inferior call has timed out,
@@ -142,8 +165,10 @@ foreach_with_prefix target_async {"on" "off" } {
     }
 
     foreach_with_prefix target_non_stop {"off" "on"} {
-	foreach_with_prefix other_thread_bp { true false } {
-	    run_test $target_async $target_non_stop $other_thread_bp
+	foreach_with_prefix unwind {"off" "on"} {
+	    foreach_with_prefix other_thread_bp { true false } {
+		run_test $target_async $target_non_stop $other_thread_bp $unwind
+	    }
 	}
     }
 }
