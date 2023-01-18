@@ -227,6 +227,10 @@ proc jit_reader_test {} {
 		gdb_test "python print(list(map(lambda objf : objf.filename, gdb.objfiles())))" \
 		    "$any'<< JIT compiled code at $hex >>'$any" \
 		    "python gdb.Objfile.filename"
+
+		gdb_test "python print( \[o for o in gdb.objfiles() if o.filename.startswith('<< JIT compiled code')\]\[0\].build_id )" \
+		    "None" \
+		    "python gdb.Objfile.build_id"
 	    }
 	}
     }

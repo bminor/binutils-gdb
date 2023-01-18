@@ -32,6 +32,12 @@
 const struct bfd_build_id *
 build_id_bfd_get (bfd *abfd)
 {
+  /* Dynamic objfiles such as ones created by JIT reader API
+     have no underlaying bfd structure (that is, objfile->obfd
+     is NULL).  */
+  if (abfd == nullptr)
+    return nullptr;
+
   if (!bfd_check_format (abfd, bfd_object)
       && !bfd_check_format (abfd, bfd_core))
     return NULL;
