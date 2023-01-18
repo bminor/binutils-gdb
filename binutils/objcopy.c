@@ -2035,19 +2035,19 @@ contained_by (objcopy_internal_note * needle,
   return needle->start >= haystack->start && needle->end <= haystack->end;
 }
 
-static bool
+static inline bool
 is_open_note (objcopy_internal_note * pnote)
 {
   return pnote->note.type == NT_GNU_BUILD_ATTRIBUTE_OPEN;
 }
 
-static bool
+static inline bool
 is_func_note (objcopy_internal_note * pnote)
 {
   return pnote->note.type == NT_GNU_BUILD_ATTRIBUTE_FUNC;
 }
 
-static bool
+static inline bool
 is_deleted_note (objcopy_internal_note * pnote)
 {
   return pnote->note.type == 0;
@@ -2403,6 +2403,8 @@ merge_gnu_build_notes (bfd *          abfd,
 	    other note then if they are both of the same type (open
 	    or func) then they can be merged and one deleted.  If
 	    they are of different types then they cannot be merged.  */
+  objcopy_internal_note * prev_note = NULL;
+
   for (pnote = pnotes; pnote < pnotes_end; pnote ++)
     {
       /* Skip already deleted notes.
@@ -2424,7 +2426,9 @@ merge_gnu_build_notes (bfd *          abfd,
       objcopy_internal_note * back;
 
       /* Rule 2: Check to see if there is an identical previous note.  */
-      for (iter = 0, back = pnote - 1; back >= pnotes; back --)
+      for (iter = 0, back = prev_note ? prev_note : pnote - 1;
+	   back >= pnotes;
+	   back --)
 	{
 	  if (is_deleted_note (back))
 	    continue;
@@ -2486,11 +2490,17 @@ merge_gnu_build_notes (bfd *          abfd,
 	      break;
 	    }
 	}
-#if DEBUG_MERGE
+
       if (! is_deleted_note (pnote))
-	merge_debug ("Unable to do anything with note at %#08lx\n",
-		     (pnote->note.namedata - (char *) contents) - 12);
+	{
+	  /* Keep a pointer to this note, so that we can
+	     start the next search for rule 2 matches here.  */
+	  prev_note = pnote;
+#if DEBUG_MERGE
+	  merge_debug ("Unable to do anything with note at %#08lx\n",
+		       (pnote->note.namedata - (char *) contents) - 12);
 #endif
+	}
     }
 
   /* Resort the notes.  */
