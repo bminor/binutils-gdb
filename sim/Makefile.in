@@ -285,7 +285,7 @@ TESTS = testsuite/common/bits32m0$(EXEEXT) \
 @SIM_ENABLE_ARCH_or1k_TRUE@am__append_89 = or1k/eng.h
 @SIM_ENABLE_ARCH_or1k_TRUE@am__append_90 = $(or1k_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_ppc_TRUE@am__append_91 = common/libcommon.a
-@SIM_ENABLE_ARCH_ppc_TRUE@am__append_92 = ppc/run ppc/psim
+@SIM_ENABLE_ARCH_ppc_TRUE@am__append_92 = ppc/run
 @SIM_ENABLE_ARCH_pru_TRUE@am__append_93 = pru/libsim.a
 @SIM_ENABLE_ARCH_pru_TRUE@am__append_94 = pru/run
 @SIM_ENABLE_ARCH_riscv_TRUE@am__append_95 = riscv/libsim.a
@@ -925,8 +925,7 @@ am__EXEEXT_7 = testsuite/common/bits32m0$(EXEEXT) \
 @SIM_ENABLE_ARCH_moxie_TRUE@am__EXEEXT_31 = moxie/run$(EXEEXT)
 @SIM_ENABLE_ARCH_msp430_TRUE@am__EXEEXT_32 = msp430/run$(EXEEXT)
 @SIM_ENABLE_ARCH_or1k_TRUE@am__EXEEXT_33 = or1k/run$(EXEEXT)
-@SIM_ENABLE_ARCH_ppc_TRUE@am__EXEEXT_34 = ppc/run$(EXEEXT) \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/psim$(EXEEXT)
+@SIM_ENABLE_ARCH_ppc_TRUE@am__EXEEXT_34 = ppc/run$(EXEEXT)
 @SIM_ENABLE_ARCH_pru_TRUE@am__EXEEXT_35 = pru/run$(EXEEXT)
 @SIM_ENABLE_ARCH_riscv_TRUE@am__EXEEXT_36 = riscv/run$(EXEEXT)
 @SIM_ENABLE_ARCH_rl78_TRUE@am__EXEEXT_37 = rl78/run$(EXEEXT)
@@ -1101,9 +1100,6 @@ am_or1k_run_OBJECTS =
 or1k_run_OBJECTS = $(am_or1k_run_OBJECTS)
 @SIM_ENABLE_ARCH_or1k_TRUE@or1k_run_DEPENDENCIES = or1k/nrun.o \
 @SIM_ENABLE_ARCH_or1k_TRUE@	or1k/libsim.a $(am__DEPENDENCIES_4)
-ppc_psim_SOURCES = ppc/psim.c
-ppc_psim_OBJECTS = ppc/psim.$(OBJEXT)
-ppc_psim_LDADD = $(LDADD)
 am_ppc_run_OBJECTS =
 ppc_run_OBJECTS = $(am_ppc_run_OBJECTS)
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_run_DEPENDENCIES = ppc/main.o \
@@ -1247,14 +1243,13 @@ SOURCES = $(aarch64_libsim_a_SOURCES) \
 	$(m68hc11_run_SOURCES) $(mcore_run_SOURCES) \
 	$(microblaze_run_SOURCES) $(mips_run_SOURCES) \
 	$(mn10300_run_SOURCES) $(moxie_run_SOURCES) \
-	$(msp430_run_SOURCES) $(or1k_run_SOURCES) ppc/psim.c \
-	$(ppc_run_SOURCES) $(pru_run_SOURCES) $(riscv_run_SOURCES) \
-	$(rl78_run_SOURCES) $(rx_run_SOURCES) $(sh_gencode_SOURCES) \
-	$(sh_run_SOURCES) testsuite/common/alu-tst.c \
-	testsuite/common/bits-gen.c testsuite/common/bits32m0.c \
-	testsuite/common/bits32m31.c testsuite/common/bits64m0.c \
-	testsuite/common/bits64m63.c testsuite/common/fpu-tst.c \
-	$(v850_run_SOURCES)
+	$(msp430_run_SOURCES) $(or1k_run_SOURCES) $(ppc_run_SOURCES) \
+	$(pru_run_SOURCES) $(riscv_run_SOURCES) $(rl78_run_SOURCES) \
+	$(rx_run_SOURCES) $(sh_gencode_SOURCES) $(sh_run_SOURCES) \
+	testsuite/common/alu-tst.c testsuite/common/bits-gen.c \
+	testsuite/common/bits32m0.c testsuite/common/bits32m31.c \
+	testsuite/common/bits64m0.c testsuite/common/bits64m63.c \
+	testsuite/common/fpu-tst.c $(v850_run_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -3837,14 +3832,6 @@ or1k/run$(EXEEXT): $(or1k_run_OBJECTS) $(or1k_run_DEPENDENCIES) $(EXTRA_or1k_run
 ppc/$(am__dirstamp):
 	@$(MKDIR_P) ppc
 	@: > ppc/$(am__dirstamp)
-ppc/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) ppc/$(DEPDIR)
-	@: > ppc/$(DEPDIR)/$(am__dirstamp)
-ppc/psim.$(OBJEXT): ppc/$(am__dirstamp) ppc/$(DEPDIR)/$(am__dirstamp)
-
-@SIM_ENABLE_ARCH_ppc_FALSE@ppc/psim$(EXEEXT): $(ppc_psim_OBJECTS) $(ppc_psim_DEPENDENCIES) $(EXTRA_ppc_psim_DEPENDENCIES) ppc/$(am__dirstamp)
-@SIM_ENABLE_ARCH_ppc_FALSE@	@rm -f ppc/psim$(EXEEXT)
-@SIM_ENABLE_ARCH_ppc_FALSE@	$(AM_V_CCLD)$(LINK) $(ppc_psim_OBJECTS) $(ppc_psim_LDADD) $(LIBS)
 
 ppc/run$(EXEEXT): $(ppc_run_OBJECTS) $(ppc_run_DEPENDENCIES) $(EXTRA_ppc_run_DEPENDENCIES) ppc/$(am__dirstamp)
 	@rm -f ppc/run$(EXEEXT)
@@ -3930,7 +3917,6 @@ mostlyclean-compile:
 	-rm -f moxie/*.$(OBJEXT)
 	-rm -f msp430/*.$(OBJEXT)
 	-rm -f or1k/*.$(OBJEXT)
-	-rm -f ppc/*.$(OBJEXT)
 	-rm -f pru/*.$(OBJEXT)
 	-rm -f riscv/*.$(OBJEXT)
 	-rm -f rl78/*.$(OBJEXT)
@@ -3999,7 +3985,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@moxie/$(DEPDIR)/modules.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@msp430/$(DEPDIR)/modules.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@or1k/$(DEPDIR)/modules.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@ppc/$(DEPDIR)/psim.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@pru/$(DEPDIR)/modules.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@riscv/$(DEPDIR)/modules.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@rl78/$(DEPDIR)/modules.Po@am__quote@
@@ -4675,7 +4660,6 @@ distclean-generic:
 	-rm -f msp430/$(am__dirstamp)
 	-rm -f or1k/$(DEPDIR)/$(am__dirstamp)
 	-rm -f or1k/$(am__dirstamp)
-	-rm -f ppc/$(DEPDIR)/$(am__dirstamp)
 	-rm -f ppc/$(am__dirstamp)
 	-rm -f pru/$(DEPDIR)/$(am__dirstamp)
 	-rm -f pru/$(am__dirstamp)
@@ -4704,7 +4688,7 @@ clean-am: clean-checkPROGRAMS clean-generic clean-libtool \
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf aarch64/$(DEPDIR) arm/$(DEPDIR) avr/$(DEPDIR) bfin/$(DEPDIR) bpf/$(DEPDIR) common/$(DEPDIR) cr16/$(DEPDIR) cris/$(DEPDIR) d10v/$(DEPDIR) erc32/$(DEPDIR) example-synacor/$(DEPDIR) frv/$(DEPDIR) ft32/$(DEPDIR) h8300/$(DEPDIR) igen/$(DEPDIR) iq2000/$(DEPDIR) lm32/$(DEPDIR) m32c/$(DEPDIR) m32r/$(DEPDIR) m68hc11/$(DEPDIR) mcore/$(DEPDIR) microblaze/$(DEPDIR) mips/$(DEPDIR) mn10300/$(DEPDIR) moxie/$(DEPDIR) msp430/$(DEPDIR) or1k/$(DEPDIR) ppc/$(DEPDIR) pru/$(DEPDIR) riscv/$(DEPDIR) rl78/$(DEPDIR) rx/$(DEPDIR) sh/$(DEPDIR) testsuite/common/$(DEPDIR) v850/$(DEPDIR)
+	-rm -rf aarch64/$(DEPDIR) arm/$(DEPDIR) avr/$(DEPDIR) bfin/$(DEPDIR) bpf/$(DEPDIR) common/$(DEPDIR) cr16/$(DEPDIR) cris/$(DEPDIR) d10v/$(DEPDIR) erc32/$(DEPDIR) example-synacor/$(DEPDIR) frv/$(DEPDIR) ft32/$(DEPDIR) h8300/$(DEPDIR) igen/$(DEPDIR) iq2000/$(DEPDIR) lm32/$(DEPDIR) m32c/$(DEPDIR) m32r/$(DEPDIR) m68hc11/$(DEPDIR) mcore/$(DEPDIR) microblaze/$(DEPDIR) mips/$(DEPDIR) mn10300/$(DEPDIR) moxie/$(DEPDIR) msp430/$(DEPDIR) or1k/$(DEPDIR) pru/$(DEPDIR) riscv/$(DEPDIR) rl78/$(DEPDIR) rx/$(DEPDIR) sh/$(DEPDIR) testsuite/common/$(DEPDIR) v850/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-DEJAGNU distclean-compile \
 	distclean-generic distclean-hdr distclean-libtool \
@@ -4755,7 +4739,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf aarch64/$(DEPDIR) arm/$(DEPDIR) avr/$(DEPDIR) bfin/$(DEPDIR) bpf/$(DEPDIR) common/$(DEPDIR) cr16/$(DEPDIR) cris/$(DEPDIR) d10v/$(DEPDIR) erc32/$(DEPDIR) example-synacor/$(DEPDIR) frv/$(DEPDIR) ft32/$(DEPDIR) h8300/$(DEPDIR) igen/$(DEPDIR) iq2000/$(DEPDIR) lm32/$(DEPDIR) m32c/$(DEPDIR) m32r/$(DEPDIR) m68hc11/$(DEPDIR) mcore/$(DEPDIR) microblaze/$(DEPDIR) mips/$(DEPDIR) mn10300/$(DEPDIR) moxie/$(DEPDIR) msp430/$(DEPDIR) or1k/$(DEPDIR) ppc/$(DEPDIR) pru/$(DEPDIR) riscv/$(DEPDIR) rl78/$(DEPDIR) rx/$(DEPDIR) sh/$(DEPDIR) testsuite/common/$(DEPDIR) v850/$(DEPDIR)
+	-rm -rf aarch64/$(DEPDIR) arm/$(DEPDIR) avr/$(DEPDIR) bfin/$(DEPDIR) bpf/$(DEPDIR) common/$(DEPDIR) cr16/$(DEPDIR) cris/$(DEPDIR) d10v/$(DEPDIR) erc32/$(DEPDIR) example-synacor/$(DEPDIR) frv/$(DEPDIR) ft32/$(DEPDIR) h8300/$(DEPDIR) igen/$(DEPDIR) iq2000/$(DEPDIR) lm32/$(DEPDIR) m32c/$(DEPDIR) m32r/$(DEPDIR) m68hc11/$(DEPDIR) mcore/$(DEPDIR) microblaze/$(DEPDIR) mips/$(DEPDIR) mn10300/$(DEPDIR) moxie/$(DEPDIR) msp430/$(DEPDIR) or1k/$(DEPDIR) pru/$(DEPDIR) riscv/$(DEPDIR) rl78/$(DEPDIR) rx/$(DEPDIR) sh/$(DEPDIR) testsuite/common/$(DEPDIR) v850/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -5692,9 +5676,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_or1k_TRUE@or1k/cgen-cpu-decode:
 @SIM_ENABLE_ARCH_or1k_TRUE@	$(AM_V_GEN)cpu=or1k32bf mach=or32,or32nd FLAGS="with-scache" EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
 @SIM_ENABLE_ARCH_or1k_TRUE@or1k/cpu.h or1k/cpu.c or1k/model.c or1k/sem.c or1k/sem-switch.c or1k/decode.c or1k/decode.h: @CGEN_MAINT@ or1k/cgen-cpu-decode
-
-@SIM_ENABLE_ARCH_ppc_TRUE@ppc/psim$(EXEEXT): ppc/run$(EXEEXT)
-@SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_GEN)ln $< $@ 2>/dev/null || $(LN_S) $< $@ 2>/dev/null || cp -p $< $@
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc/libsim.a: common/libcommon.a
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
