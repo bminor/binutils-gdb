@@ -150,6 +150,10 @@ struct thread_control_state
      the finished single step.  */
   int trap_expected = 0;
 
+  /* Nonzero if the thread is being proceeded for a "finish" command
+     or a similar situation when return value should be printed.  */
+  int proceed_to_finish = 0;
+
   /* Nonzero if the thread is being proceeded for an inferior function
      call.  */
   int in_infcall = 0;

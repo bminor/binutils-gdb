@@ -625,6 +625,9 @@ run_inferior_call (std::unique_ptr<call_thread_fsm> sm,
 
   disable_watchpoints_before_interactive_call_start ();
 
+  /* We want to print return value, please...  */
+  call_thread->control.proceed_to_finish = 1;
+
   try
     {
       /* Infcalls run synchronously, in the foreground.  */
