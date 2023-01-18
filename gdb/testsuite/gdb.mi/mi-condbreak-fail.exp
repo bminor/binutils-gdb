@@ -43,7 +43,7 @@ proc run_test { unwind_on_signal } {
 	return
     }
 
-    mi_gdb_test "-gdb-set unwindonsignal ${unwind_on_signal}" {\^done} \
+    mi_gdb_test "-gdb-set unwind-on-signal ${unwind_on_signal}" {\^done} \
 	"set unwind-on-signal"
 
     # Create the conditional breakpoint.
@@ -70,7 +70,7 @@ proc run_test { unwind_on_signal } {
 		 "&\"The program being debugged received signal SIGSEGV, Segmentation fault\\\\n\"" \
 		 "&\"while in a function called from GDB\\.  GDB has restored the context\\\\n\"" \
 		 "&\"to what it was before the call\\.  To change this behavior use\\\\n\"" \
-		 "&\"\\\\\"set unwindonsignal off\\\\\"\\.  Evaluation of the expression containing\\\\n\"" \
+		 "&\"\\\\\"set unwind-on-signal off\\\\\"\\.  Evaluation of the expression containing\\\\n\"" \
 		 "&\"the function \\(cond_fail\\) will be abandoned\\.\\\\n\"" \
 		 "=breakpoint-modified,bkpt={number=\"$bpnum\",type=\"breakpoint\",\[^\r\n\]+times=\"1\",\[^\r\n\]+}" \
 		 "~\"\\\\n\"" \
@@ -92,7 +92,7 @@ proc run_test { unwind_on_signal } {
 		 "&\"Error in testing condition for breakpoint $bpnum:\\\\n\"" \
 		 "&\"The program being debugged was signaled while in a function called from GDB\\.\\\\n\"" \
 		 "&\"GDB remains in the frame where the signal was received\\.\\\\n\"" \
-		 "&\"To change this behavior use \\\\\"set unwindonsignal on\\\\\"\\.\\\\n\"" \
+		 "&\"To change this behavior use \\\\\"set unwind-on-signal on\\\\\"\\.\\\\n\"" \
 		 "&\"Evaluation of the expression containing the function\\\\n\"" \
 		 "&\"\\(cond_fail\\) will be abandoned\\.\\\\n\"" \
 		 "&\"When the function is done executing, GDB will silently stop\\.\\\\n\"" \

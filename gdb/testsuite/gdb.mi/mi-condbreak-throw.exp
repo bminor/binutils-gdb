@@ -103,7 +103,7 @@ proc run_test { unwind_on_exception } {
 		 "&\"Error in testing condition for breakpoint $bpnum:\\\\n\"" \
 		 "&\"The program being debugged was signaled while in a function called from GDB\\.\\\\n\"" \
 		 "&\"GDB remains in the frame where the signal was received\\.\\\\n\"" \
-		 "&\"To change this behavior use \\\\\"set unwindonsignal on\\\\\"\\.\\\\n\"" \
+		 "&\"To change this behavior use \\\\\"set unwind-on-signal on\\\\\"\\.\\\\n\"" \
 		 "&\"Evaluation of the expression containing the function\\\\n\"" \
 		 "&\"\\(cond_throw\\(\\)\\) will be abandoned\\.\\\\n\"" \
 		 "&\"When the function is done executing, GDB will silently stop\\.\\\\n\"" \

@@ -94,7 +94,7 @@ mi_gdb_test "409-stack-list-frames 0 0" \
 # 
 
 mi_gdb_test "410-data-evaluate-expression bar()" \
-  ".*410\\^error,msg=\"The program being debugged was signaled while in a function called from GDB.\\\\nGDB remains in the frame where the signal was received.\\\\nTo change this behavior use \\\\\"set unwindonsignal on\\\\\".\\\\nEvaluation of the expression containing the function\\\\n\\(bar\\) will be abandoned.\\\\nWhen the function is done executing, GDB will silently stop.\"" \
+  ".*410\\^error,msg=\"The program being debugged was signaled while in a function called from GDB.\\\\nGDB remains in the frame where the signal was received.\\\\nTo change this behavior use \\\\\"set unwind-on-signal on\\\\\".\\\\nEvaluation of the expression containing the function\\\\n\\(bar\\) will be abandoned.\\\\nWhen the function is done executing, GDB will silently stop.\"" \
   "call inferior function which raises exception"
 
 mi_gdb_test "411-stack-list-frames" "411\\^done,stack=\\\[frame=\{level=\"0\",addr=\"$hex\",func=\"bar\",file=\".*mi-syn-frame.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$decimal\",arch=\"$any\"},frame=\{level=\"1\",addr=\"$hex\",func=\"<function called from gdb>\"\},frame=\{level=\"2\",addr=\"$hex\",func=\"main\",file=\".*mi-syn-frame.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$decimal\",arch=\"$any\"}.*\\\]" "backtrace from inferior function at exception"

@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Test use of unwindonsignal when a hand function call that gets interrupted
+# Test use of unwind-on-signal when a hand function call that gets interrupted
 # by a signal in another thread.
 
 set NR_THREADS 4
@@ -49,12 +49,12 @@ gdb_test "continue" \
 # We want the main thread (hand_call_with_signal) and
 # thread 1 (sigabrt_handler) to both run.
 
-# Do turn on unwindonsignal.
+# Do turn on unwind-on-signal.
 # We want to test gdb handling of the current thread changing when
 # unwindonsignal is in effect.
-gdb_test_no_output "set unwindonsignal on" \
+gdb_test_no_output "set unwind-on-signal on" \
 	"setting unwindonsignal"
-gdb_test "show unwindonsignal" \
+gdb_test "show unwind-on-signal" \
 	"Unwinding of stack .* is on." \
 	"showing unwindonsignal"
 

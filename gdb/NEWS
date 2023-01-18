@@ -32,6 +32,10 @@ maintenance info line-table
   if the line is considered the start of the epilgoue, and thus a point at
   which the frame can be considered destroyed.
 
+set unwindonsignal on|off
+show unwindonsignal
+  These commands are now aliases for the new set/show unwind-on-signal.
+
 * New commands
 
 info missing-debug-handler
@@ -80,6 +84,11 @@ show unwind-on-timeout
   timeout occurred.  When on, GDB will unwind the stack removing the
   dummy frame that was added for the inferior call, and restoring the
   inferior state to how it was before the inferior call started.
+
+set unwind-on-signal on|off
+show unwind-on-signal
+  These new commands replaces the existing set/show unwindonsignal.  The
+  old command is maintained as an alias.
 
 * New features in the GDB remote stub, GDBserver
 

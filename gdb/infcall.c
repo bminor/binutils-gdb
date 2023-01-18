@@ -1752,7 +1752,7 @@ When the function is done executing, GDB will silently stop."),
 The program being debugged received signal %s, %s\n\
 while in a function called from GDB.  GDB has restored the context\n\
 to what it was before the call.  To change this behavior use\n\
-\"set unwindonsignal off\".  Evaluation of the expression containing\n\
+\"set unwind-on-signal off\".  Evaluation of the expression containing\n\
 the function (%s) will be abandoned."),
 		     gdb_signal_to_name (stop_signal),
 		     gdb_signal_to_string (stop_signal),
@@ -1771,7 +1771,7 @@ the function (%s) will be abandoned."),
 	      error (_("\
 The program being debugged was signaled while in a function called from GDB.\n\
 GDB remains in the frame where the signal was received.\n\
-To change this behavior use \"set unwindonsignal on\".\n\
+To change this behavior use \"set unwind-on-signal on\".\n\
 Evaluation of the expression containing the function\n\
 (%s) will be abandoned.\n\
 When the function is done executing, GDB will silently stop."),
@@ -1903,17 +1903,22 @@ The default is to perform the conversion."),
 			   show_coerce_float_to_double_p,
 			   &setlist, &showlist);
 
-  add_setshow_boolean_cmd ("unwindonsignal", no_class,
-			   &unwind_on_signal_p, _("\
+  set_show_commands setshow_unwind_on_signal_cmds
+    = add_setshow_boolean_cmd ("unwind-on-signal", no_class,
+			       &unwind_on_signal_p, _("\
 Set unwinding of stack if a signal is received while in a call dummy."), _("\
 Show unwinding of stack if a signal is received while in a call dummy."), _("\
-The unwindonsignal lets the user determine what gdb should do if a signal\n\
+The unwind-on-signal lets the user determine what gdb should do if a signal\n\
 is received while in a function called from gdb (call dummy).  If set, gdb\n\
 unwinds the stack and restore the context to what as it was before the call.\n\
 The default is to stop in the frame where the signal was received."),
-			   NULL,
-			   show_unwind_on_signal_p,
-			   &setlist, &showlist);
+			       NULL,
+			       show_unwind_on_signal_p,
+			       &setlist, &showlist);
+  add_alias_cmd ("unwindonsignal", setshow_unwind_on_signal_cmds.set,
+		 no_class, 1, &setlist);
+  add_alias_cmd ("unwindonsignal", setshow_unwind_on_signal_cmds.show,
+		 no_class, 1, &showlist);
 
   add_setshow_boolean_cmd ("unwind-on-terminating-exception", no_class,
 			   &unwind_on_terminating_exception_p, _("\

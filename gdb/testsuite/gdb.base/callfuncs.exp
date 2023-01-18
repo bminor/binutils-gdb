@@ -46,7 +46,7 @@ proc do_function_calls {prototypes} {
 
     # If any of these calls segv we don't want to affect subsequent tests.
     # E.g., we want to ensure register values are restored.
-    gdb_test_no_output "set unwindonsignal on"
+    gdb_test_no_output "set unwind-on-signal on"
 
     gdb_test "p t_char_values(0,0)" " = 0"
     gdb_test "p t_char_values('a','b')" " = 1"
@@ -237,7 +237,7 @@ proc do_function_calls {prototypes} {
     	"call inferior func with struct - returns char *"
 
     # Restore default value.
-    gdb_test_no_output "set unwindonsignal off"
+    gdb_test_no_output "set unwind-on-signal off"
 }
 
 # Procedure to get current content of all registers.
