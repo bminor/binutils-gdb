@@ -44,6 +44,17 @@ show unwind-on-timeout
   dummy frame that was added for the inferior call, and restoring the
   inferior state to how it was before the inferior call started.
 
+set unwind-on-signal on|off
+show unwind-on-signal
+  These new commands replaces the existing set/show unwindonsignal.  The
+  old command is maintained as an alias.
+
+* Changed commands
+
+set unwindonsignal on|off
+show unwindonsignal
+  These commands are now aliases for the new set/show unwind-on-signal.
+
 * MI changes
 
 ** mi now reports 'no-history' as a stop reason when hitting the end of the

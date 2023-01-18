@@ -20707,7 +20707,7 @@ value history.
 It is possible for the function you call via the @code{print} or
 @code{call} command to generate a signal (e.g., if there's a bug in
 the function, or if you passed it incorrect arguments).  What happens
-in that case is controlled by the @code{set unwindonsignal} command.
+in that case is controlled by the @code{set unwind-on-signal} command.
 
 Similarly, with a C@t{++} program it is possible for the function you
 call via the @code{print} or @code{call} command to generate an
@@ -20720,7 +20720,8 @@ in that case is controlled by the
 @code{set unwind-on-terminating-exception} command.
 
 @table @code
-@item set unwindonsignal
+@item set unwind-on-signal
+@kindex set unwind-on-signal
 @kindex set unwindonsignal
 @cindex unwind stack in called functions
 @cindex call dummy stack unwinding
@@ -20731,10 +20732,17 @@ the context to what it was before the call.  If set to off (the
 default), @value{GDBN} stops in the frame where the signal was
 received.
 
-@item show unwindonsignal
+The command @code{set unwindonsignal} is an alias for this command,
+and is maintained for backward compatibility.
+
+@item show unwind-on-signal
+@kindex show unwind-on-signal
 @kindex show unwindonsignal
 Show the current setting of stack unwinding in the functions called by
 @value{GDBN}.
+
+The command @code{show unwindonsignal} is an alias for this command,
+and is maintained for backward compatibility.
 
 @item set unwind-on-terminating-exception
 @kindex set unwind-on-terminating-exception
@@ -20798,7 +20806,7 @@ call by typing the interrupt character (often @kbd{Ctrl-c}).
 
 If a called function is interrupted for any reason, and the stack is
 not unwound (due to @code{set unwind-on-terminating-exception on},
-@code{set unwind-on-timeout}, or @code{set unwindonsignal on}), then
+@code{set unwind-on-timeout}, or @code{set unwind-on-signal on}), then
 the dummy-frame, created by @value{GDBN} to facilitate the call to the
 program function, will be visible in the backtrace, for example frame
 @code{#3} in the following backtrace:

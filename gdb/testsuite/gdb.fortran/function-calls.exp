@@ -44,7 +44,7 @@ if {![runto [gdb_get_line_number "post_init"]]} {
 }
 
 # Use inspired by gdb.base/callfuncs.exp.
-gdb_test_no_output "set unwindonsignal on"
+gdb_test_no_output "set unwind-on-signal on"
 
 # Baseline: function and subroutine call with no arguments.
 gdb_test "p no_arg()" " = .TRUE."

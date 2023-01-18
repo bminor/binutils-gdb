@@ -129,7 +129,7 @@ gdb_test "return" "\r\n#0  main .*" "return" \
 	 "Make _gdb_expr\\(__gdb_regs\\*\\) return now\\? \\(y or n\\) " "y"
 gdb_test "info sym $infcall_pc" "\r\nNo symbol matches .*" "info sym not found"
 
-gdb_test_no_output "set unwindonsignal on"
+gdb_test_no_output "set unwind-on-signal on"
 gdb_test "compile code *(volatile int *) 0 = 0;" \
     "The program being debugged was signaled while in a function called from GDB\\.\r\nGDB has restored the context to what it was before the call\\.\r\n.*" \
     "compile code segfault second"

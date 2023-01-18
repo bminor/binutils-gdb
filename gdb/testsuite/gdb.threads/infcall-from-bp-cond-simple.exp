@@ -174,7 +174,7 @@ proc_with_prefix run_bp_cond_segfaults { target_async target_non_stop } {
 	     "Error in testing condition for breakpoint ${bp_1_num}:" \
 	     "The program being debugged was signaled while in a function called from GDB\\." \
 	     "GDB remains in the frame where the signal was received\\." \
-	     "To change this behavior use \"set unwindonsignal on\"\\." \
+	     "To change this behavior use \"set unwind-on-signal on\"\\." \
 	     "Evaluation of the expression containing the function" \
 	     "\\(function_that_segfaults\\) will be abandoned\\." \
 	     "When the function is done executing, GDB will silently stop\\."]
