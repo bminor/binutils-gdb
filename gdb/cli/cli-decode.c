@@ -524,7 +524,7 @@ add_set_or_show_cmd (const char *name,
   return c;
 }
 
-/* Add element named NAME to both the command SET_LIST and SHOW_LIST.
+/* Add element named NAME to both command lists SET_LIST and SHOW_LIST.
    THECLASS is as in add_cmd.  VAR_TYPE is the kind of thing we are
    setting.  VAR is address of the variable being controlled by this
    command.  If nullptr is given as VAR, then both SET_SETTING_FUNC and
