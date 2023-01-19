@@ -61,17 +61,20 @@
 /* All possible aarch64 target descriptors.  */
 static std::unordered_map <aarch64_features, target_desc *> tdesc_aarch64_map;
 
-/* The standard register names, and all the valid aliases for them.  */
+/* The standard register names, and all the valid aliases for them.
+   We're not adding fp here, that name is already taken, see
+   _initialize_frame_reg.  */
 static const struct
 {
   const char *const name;
   int regnum;
 } aarch64_register_aliases[] =
 {
-  /* 64-bit register names.  */
-  {"fp", AARCH64_FP_REGNUM},
+  /* Link register alias for x30.  */
   {"lr", AARCH64_LR_REGNUM},
-  {"sp", AARCH64_SP_REGNUM},
+  /* SP is the canonical name for x31 according to aarch64_r_register_names,
+     so we're adding an x31 alias for sp.  */
+  {"x31", AARCH64_SP_REGNUM},
   /*  specials */
   {"ip0", AARCH64_X0_REGNUM + 16},
   {"ip1", AARCH64_X0_REGNUM + 17}
