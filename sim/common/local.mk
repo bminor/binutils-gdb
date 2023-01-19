@@ -31,6 +31,7 @@ noinst_LIBRARIES += %D%/libcommon.a
 	%D%/callback.c \
 	%D%/portability.c \
 	%D%/sim-load.c \
+	%D%/sim-signal.c \
 	%D%/syscall.c \
 	%D%/target-newlib-errno.c \
 	%D%/target-newlib-open.c \
@@ -95,7 +96,6 @@ SIM_NEW_COMMON_OBJS = \
 	sim-profile.o \
 	sim-reason.o \
 	sim-reg.o \
-	sim-signal.o \
 	sim-stop.o \
 	sim-syscall.o \
 	sim-trace.o \

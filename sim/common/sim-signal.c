@@ -22,7 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <signal.h>
 
-#include "sim-main.h"
+#include "sim/sim.h"
+#include "sim-io.h"
 #include "sim-signal.h"
 
 /* Convert SIM_SIGFOO to SIGFOO.

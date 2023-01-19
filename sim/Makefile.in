@@ -380,8 +380,8 @@ aarch64_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_aarch64_TRUE@	aarch64/simulator.o
 am__dirstamp = $(am__leading_dot)dirstamp
 am__objects_1 = common/callback.$(OBJEXT) common/portability.$(OBJEXT) \
-	common/sim-load.$(OBJEXT) common/syscall.$(OBJEXT) \
-	common/target-newlib-errno.$(OBJEXT) \
+	common/sim-load.$(OBJEXT) common/sim-signal.$(OBJEXT) \
+	common/syscall.$(OBJEXT) common/target-newlib-errno.$(OBJEXT) \
 	common/target-newlib-open.$(OBJEXT) \
 	common/target-newlib-signal.$(OBJEXT) \
 	common/target-newlib-syscall.$(OBJEXT) \
@@ -458,7 +458,8 @@ common_libcommon_a_AR = $(AR) $(ARFLAGS)
 common_libcommon_a_LIBADD =
 am_common_libcommon_a_OBJECTS = common/callback.$(OBJEXT) \
 	common/portability.$(OBJEXT) common/sim-load.$(OBJEXT) \
-	common/syscall.$(OBJEXT) common/target-newlib-errno.$(OBJEXT) \
+	common/sim-signal.$(OBJEXT) common/syscall.$(OBJEXT) \
+	common/target-newlib-errno.$(OBJEXT) \
 	common/target-newlib-open.$(OBJEXT) \
 	common/target-newlib-signal.$(OBJEXT) \
 	common/target-newlib-syscall.$(OBJEXT) \
@@ -1837,6 +1838,7 @@ common_libcommon_a_SOURCES = \
 	common/callback.c \
 	common/portability.c \
 	common/sim-load.c \
+	common/sim-signal.c \
 	common/syscall.c \
 	common/target-newlib-errno.c \
 	common/target-newlib-open.c \
@@ -1860,9 +1862,9 @@ SIM_NEW_COMMON_OBJS = sim-arange.o sim-bits.o sim-close.o \
 	sim-command.o sim-config.o sim-core.o sim-cpu.o sim-endian.o \
 	sim-engine.o sim-events.o sim-fpu.o sim-hload.o sim-hrw.o \
 	sim-io.o sim-info.o sim-memopt.o sim-model.o sim-module.o \
-	sim-options.o sim-profile.o sim-reason.o sim-reg.o \
-	sim-signal.o sim-stop.o sim-syscall.o sim-trace.o sim-utils.o \
-	sim-watch.o $(am__append_2)
+	sim-options.o sim-profile.o sim-reason.o sim-reg.o sim-stop.o \
+	sim-syscall.o sim-trace.o sim-utils.o sim-watch.o \
+	$(am__append_2)
 SIM_HW_DEVICES = cfi core pal glue
 am_arch_d = $(subst -,_,$(@D))
 GEN_MODULES_C_SRCS = \
@@ -3194,6 +3196,8 @@ common/portability.$(OBJEXT): common/$(am__dirstamp) \
 	common/$(DEPDIR)/$(am__dirstamp)
 common/sim-load.$(OBJEXT): common/$(am__dirstamp) \
 	common/$(DEPDIR)/$(am__dirstamp)
+common/sim-signal.$(OBJEXT): common/$(am__dirstamp) \
+	common/$(DEPDIR)/$(am__dirstamp)
 common/syscall.$(OBJEXT): common/$(am__dirstamp) \
 	common/$(DEPDIR)/$(am__dirstamp)
 common/target-newlib-errno.$(OBJEXT): common/$(am__dirstamp) \
@@ -3936,6 +3940,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/callback.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/portability.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/sim-load.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/sim-signal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/syscall.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/target-newlib-errno.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/target-newlib-open.Po@am__quote@
