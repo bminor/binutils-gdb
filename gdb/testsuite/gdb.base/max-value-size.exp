@@ -92,4 +92,4 @@ gdb_test "set max-value-size 1" \
 gdb_test "set max-value-size 0" \
     "max-value-size set too low, increasing to \[0-9\]+ bytes"
 gdb_test "set max-value-size -5" \
-    "only -1 is allowed to set as unlimited"
+    "integer -5 out of range"

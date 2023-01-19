@@ -496,6 +496,8 @@ empty_func (const char *args, int from_tty, cmd_list_element *c)
    TYPE is set_cmd or show_cmd.
    THECLASS is as in add_cmd.
    VAR_TYPE is the kind of thing we are setting.
+   EXTRA_LITERALS if non-NULL define extra literals to be accepted in lieu of
+   a number for integer variables.
    ARGS is a pre-validated type-erased reference to the variable being
    controlled by this command.
    DOC is the documentation string.  */
@@ -505,6 +507,7 @@ add_set_or_show_cmd (const char *name,
 		     enum cmd_types type,
 		     enum command_class theclass,
 		     var_types var_type,
+		     const literal_def *extra_literals,
 		     const setting::erased_args &arg,
 		     const char *doc,
 		     struct cmd_list_element **list)
@@ -513,7 +516,7 @@ add_set_or_show_cmd (const char *name,
 
   gdb_assert (type == set_cmd || type == show_cmd);
   c->type = type;
-  c->var.emplace (var_type, arg);
+  c->var.emplace (var_type, extra_literals, arg);
 
   /* This needs to be something besides NULL so that this isn't
      treated as a help class.  */
@@ -523,10 +526,12 @@ add_set_or_show_cmd (const char *name,
 
 /* Add element named NAME to both command lists SET_LIST and SHOW_LIST.
    THECLASS is as in add_cmd.  VAR_TYPE is the kind of thing we are
-   setting.  ARGS is a pre-validated type-erased reference to the
-   variable being controlled by this command.  SET_FUNC and SHOW_FUNC
-   are the callback functions (if non-NULL).  SET_DOC, SHOW_DOC and
-   HELP_DOC are the documentation strings.
+   setting.  EXTRA_LITERALS if non-NULL define extra literals to be
+   accepted in lieu of a number for integer variables.  ARGS is a
+   pre-validated type-erased reference to the variable being controlled
+   by this command.  SET_FUNC and SHOW_FUNC are the callback functions
+   (if non-NULL).  SET_DOC, SHOW_DOC and HELP_DOC are the documentation
+   strings.
 
    Return the newly created set and show commands.  */
 
@@ -534,6 +539,7 @@ static set_show_commands
 add_setshow_cmd_full_erased (const char *name,
 			     enum command_class theclass,
 			     var_types var_type,
+			     const literal_def *extra_literals,
 			     const setting::erased_args &args,
 			     const char *set_doc, const char *show_doc,
 			     const char *help_doc,
@@ -557,14 +563,16 @@ add_setshow_cmd_full_erased (const char *name,
       full_set_doc = make_unique_xstrdup (set_doc);
       full_show_doc = make_unique_xstrdup (show_doc);
     }
-  set = add_set_or_show_cmd (name, set_cmd, theclass, var_type, args,
+  set = add_set_or_show_cmd (name, set_cmd, theclass, var_type,
+			     extra_literals, args,
 			     full_set_doc.release (), set_list);
   set->doc_allocated = 1;
 
   if (set_func != NULL)
     set->func = set_func;
 
-  show = add_set_or_show_cmd (name, show_cmd, theclass, var_type, args,
+  show = add_set_or_show_cmd (name, show_cmd, theclass, var_type,
+			      extra_literals, args,
 			      full_show_doc.release (), show_list);
   show->doc_allocated = 1;
   show->show_value_func = show_func;
@@ -575,17 +583,81 @@ add_setshow_cmd_full_erased (const char *name,
   return {set, show};
 }
 
+/* Completes on integer commands that support extra literals.  */
+
+static void
+integer_literals_completer (struct cmd_list_element *c,
+			    completion_tracker &tracker,
+			    const char *text, const char *word)
+{
+  const literal_def *extra_literals = c->var->extra_literals ();
+
+  if (*text == '\0')
+    {
+      tracker.add_completion (make_unique_xstrdup ("NUMBER"));
+      for (const literal_def *l = extra_literals;
+	   l->literal != nullptr;
+	   l++)
+	tracker.add_completion (make_unique_xstrdup (l->literal));
+    }
+  else
+    for (const literal_def *l = extra_literals;
+	 l->literal != nullptr;
+	 l++)
+      if (startswith (l->literal, text))
+	tracker.add_completion (make_unique_xstrdup (l->literal));
+}
+
 /* Add element named NAME to both command lists SET_LIST and SHOW_LIST.
    THECLASS is as in add_cmd.  VAR_TYPE is the kind of thing we are
    setting.  VAR is address of the variable being controlled by this
-   command.  If nullptr is given as VAR, then both SET_SETTING_FUNC and
-   GET_SETTING_FUNC must be provided.  SET_SETTING_FUNC and GET_SETTING_FUNC
-   are callbacks used to access and modify the underlying property,
-   whatever its storage is.  SET_FUNC and SHOW_FUNC are the callback
-   functions (if non-NULL).  SET_DOC, SHOW_DOC and HELP_DOC are the
+   command.  EXTRA_LITERALS if non-NULL define extra literals to be
+   accepted in lieu of a number for integer variables.  If nullptr is
+   given as VAR, then both SET_SETTING_FUNC and GET_SETTING_FUNC must
+   be provided.  SET_SETTING_FUNC and GET_SETTING_FUNC are callbacks
+   used to access and modify the underlying property, whatever its
+   storage is.  SET_FUNC and SHOW_FUNC are the callback functions
+   (if non-NULL).  SET_DOC, SHOW_DOC and HELP_DOC are the
    documentation strings.
 
    Return the newly created set and show commands.  */
+
+template<typename T>
+static set_show_commands
+add_setshow_cmd_full (const char *name,
+		      enum command_class theclass,
+		      var_types var_type, T *var,
+		      const literal_def *extra_literals,
+		      const char *set_doc, const char *show_doc,
+		      const char *help_doc,
+		      typename setting_func_types<T>::set set_setting_func,
+		      typename setting_func_types<T>::get get_setting_func,
+		      cmd_func_ftype *set_func,
+		      show_value_ftype *show_func,
+		      struct cmd_list_element **set_list,
+		      struct cmd_list_element **show_list)
+{
+  auto erased_args
+    = setting::erase_args (var_type, var,
+			   set_setting_func, get_setting_func);
+  auto cmds = add_setshow_cmd_full_erased (name,
+					   theclass,
+					   var_type, extra_literals,
+					   erased_args,
+					   set_doc, show_doc,
+					   help_doc,
+					   set_func,
+					   show_func,
+					   set_list,
+					   show_list);
+
+  if (extra_literals != nullptr)
+    set_cmd_completer (cmds.set, integer_literals_completer);
+
+  return cmds;
+}
+
+/* Same as above but omitting EXTRA_LITERALS.  */
 
 template<typename T>
 static set_show_commands
@@ -601,19 +673,10 @@ add_setshow_cmd_full (const char *name,
 		      struct cmd_list_element **set_list,
 		      struct cmd_list_element **show_list)
 {
-  auto erased_args
-    = setting::erase_args (var_type, var,
-			   set_setting_func, get_setting_func);
-
-  return add_setshow_cmd_full_erased (name,
-				      theclass,
-				      var_type, erased_args,
-				      set_doc, show_doc,
-				      help_doc,
-				      set_func,
-				      show_func,
-				      set_list,
-				      show_list);
+  return add_setshow_cmd_full (name, theclass, var_type, var, nullptr,
+			       set_doc, show_doc, help_doc,
+			       set_setting_func, get_setting_func,
+			       set_func, show_func, set_list, show_list);
 }
 
 /* Add element named NAME to command list LIST (the list for set or
@@ -982,30 +1045,60 @@ add_setshow_optional_filename_cmd (const char *name, command_class theclass,
   return cmds;
 }
 
-/* Completes on literal "unlimited".  Used by integer commands that
-   support a special "unlimited" value.  */
-
-static void
-integer_unlimited_completer (struct cmd_list_element *ignore,
-			     completion_tracker &tracker,
-			     const char *text, const char *word)
-{
-  static const char * const keywords[] =
-    {
-      "unlimited",
-      NULL,
-    };
-
-  if (*text == '\0')
-    tracker.add_completion (make_unique_xstrdup ("NUMBER"));
-  complete_on_enum (tracker, keywords, text, word);
-}
-
 /* Add element named NAME to both the set and show command LISTs (the
    list for set/show or some sublist thereof).  THECLASS is as in
    add_cmd.  VAR is address of the variable which will contain the
    value.  SET_DOC and SHOW_DOC are the documentation strings.  This
    function is only used in Python API.  Please don't use it elsewhere.  */
+
+set_show_commands
+add_setshow_integer_cmd (const char *name, enum command_class theclass,
+			 int *var, const literal_def *extra_literals,
+			 const char *set_doc, const char *show_doc,
+			 const char *help_doc,
+			 cmd_func_ftype *set_func,
+			 show_value_ftype *show_func,
+			 struct cmd_list_element **set_list,
+			 struct cmd_list_element **show_list)
+{
+  set_show_commands commands
+    = add_setshow_cmd_full<int> (name, theclass, var_integer, var,
+				 extra_literals, set_doc, show_doc,
+				 help_doc, nullptr, nullptr, set_func,
+				 show_func, set_list, show_list);
+  return commands;
+}
+
+/* Same as above but using a getter and a setter function instead of a pointer
+   to a global storage buffer.  */
+
+set_show_commands
+add_setshow_integer_cmd (const char *name, command_class theclass,
+			 const literal_def *extra_literals,
+			 const char *set_doc, const char *show_doc,
+			 const char *help_doc,
+			 setting_func_types<int>::set set_func,
+			 setting_func_types<int>::get get_func,
+			 show_value_ftype *show_func,
+			 cmd_list_element **set_list,
+			 cmd_list_element **show_list)
+{
+  auto cmds = add_setshow_cmd_full<int> (name, theclass, var_integer, nullptr,
+					 extra_literals, set_doc, show_doc,
+					 help_doc, set_func, get_func, nullptr,
+					 show_func, set_list, show_list);
+  return cmds;
+}
+
+/* Accept `unlimited' or 0, translated internally to INT_MAX.  */
+const literal_def integer_unlimited_literals[] =
+  {
+    { "unlimited", INT_MAX, 0 },
+    { nullptr }
+  };
+
+/* Same as above but using `integer_unlimited_literals', with a pointer
+   to a global storage buffer.  */
 
 set_show_commands
 add_setshow_integer_cmd (const char *name, enum command_class theclass,
@@ -1019,12 +1112,10 @@ add_setshow_integer_cmd (const char *name, enum command_class theclass,
 {
   set_show_commands commands
     = add_setshow_cmd_full<int> (name, theclass, var_integer, var,
+				 integer_unlimited_literals,
 				 set_doc, show_doc, help_doc,
 				 nullptr, nullptr, set_func,
 				 show_func, set_list, show_list);
-
-  set_cmd_completer (commands.set, integer_unlimited_completer);
-
   return commands;
 }
 
@@ -1042,12 +1133,54 @@ add_setshow_integer_cmd (const char *name, command_class theclass,
 			 cmd_list_element **show_list)
 {
   auto cmds = add_setshow_cmd_full<int> (name, theclass, var_integer, nullptr,
+					 integer_unlimited_literals,
 					 set_doc, show_doc, help_doc, set_func,
 					 get_func, nullptr, show_func, set_list,
 					 show_list);
+  return cmds;
+}
 
-  set_cmd_completer (cmds.set, integer_unlimited_completer);
+/* Add element named NAME to both the set and show command LISTs (the
+   list for set/show or some sublist thereof).  CLASS is as in
+   add_cmd.  VAR is address of the variable which will contain the
+   value.  SET_DOC and SHOW_DOC are the documentation strings.  */
 
+set_show_commands
+add_setshow_pinteger_cmd (const char *name, enum command_class theclass,
+			  int *var, const literal_def *extra_literals,
+			  const char *set_doc, const char *show_doc,
+			  const char *help_doc,
+			  cmd_func_ftype *set_func,
+			  show_value_ftype *show_func,
+			  struct cmd_list_element **set_list,
+			  struct cmd_list_element **show_list)
+{
+  set_show_commands commands
+    = add_setshow_cmd_full<int> (name, theclass, var_pinteger, var,
+				 extra_literals, set_doc, show_doc,
+				 help_doc, nullptr, nullptr, set_func,
+				 show_func, set_list, show_list);
+  return commands;
+}
+
+/* Same as above but using a getter and a setter function instead of a pointer
+   to a global storage buffer.  */
+
+set_show_commands
+add_setshow_pinteger_cmd (const char *name, command_class theclass,
+			  const literal_def *extra_literals,
+			  const char *set_doc, const char *show_doc,
+			  const char *help_doc,
+			  setting_func_types<int>::set set_func,
+			  setting_func_types<int>::get get_func,
+			  show_value_ftype *show_func,
+			  cmd_list_element **set_list,
+			  cmd_list_element **show_list)
+{
+  auto cmds = add_setshow_cmd_full<int> (name, theclass, var_pinteger, nullptr,
+					 extra_literals, set_doc, show_doc,
+					 help_doc, set_func, get_func, nullptr,
+					 show_func, set_list, show_list);
   return cmds;
 }
 
@@ -1055,6 +1188,57 @@ add_setshow_integer_cmd (const char *name, command_class theclass,
    list for set/show or some sublist thereof).  THECLASS is as in
    add_cmd.  VAR is address of the variable which will contain the
    value.  SET_DOC and SHOW_DOC are the documentation strings.  */
+
+set_show_commands
+add_setshow_uinteger_cmd (const char *name, enum command_class theclass,
+			  unsigned int *var, const literal_def *extra_literals,
+			  const char *set_doc, const char *show_doc,
+			  const char *help_doc,
+			  cmd_func_ftype *set_func,
+			  show_value_ftype *show_func,
+			  struct cmd_list_element **set_list,
+			  struct cmd_list_element **show_list)
+{
+  set_show_commands commands
+    = add_setshow_cmd_full<unsigned int> (name, theclass, var_uinteger, var,
+					  extra_literals, set_doc, show_doc,
+					  help_doc, nullptr, nullptr, set_func,
+					  show_func, set_list, show_list);
+  return commands;
+}
+
+/* Same as above but using a getter and a setter function instead of a pointer
+   to a global storage buffer.  */
+
+set_show_commands
+add_setshow_uinteger_cmd (const char *name, command_class theclass,
+			  const literal_def *extra_literals,
+			  const char *set_doc, const char *show_doc,
+			  const char *help_doc,
+			  setting_func_types<unsigned int>::set set_func,
+			  setting_func_types<unsigned int>::get get_func,
+			  show_value_ftype *show_func,
+			  cmd_list_element **set_list,
+			  cmd_list_element **show_list)
+{
+  auto cmds = add_setshow_cmd_full<unsigned int> (name, theclass, var_uinteger,
+						  nullptr, extra_literals,
+						  set_doc, show_doc, help_doc,
+						  set_func, get_func, nullptr,
+						  show_func, set_list,
+						  show_list);
+  return cmds;
+}
+
+/* Accept `unlimited' or 0, translated internally to UINT_MAX.  */
+const literal_def uinteger_unlimited_literals[] =
+  {
+    { "unlimited", UINT_MAX, 0 },
+    { nullptr }
+  };
+
+/* Same as above but using `uinteger_unlimited_literals', with a pointer
+   to a global storage buffer.  */
 
 set_show_commands
 add_setshow_uinteger_cmd (const char *name, enum command_class theclass,
@@ -1068,12 +1252,10 @@ add_setshow_uinteger_cmd (const char *name, enum command_class theclass,
 {
   set_show_commands commands
     = add_setshow_cmd_full<unsigned int> (name, theclass, var_uinteger, var,
-					  set_doc, show_doc, help_doc,
-					  nullptr, nullptr, set_func,
-					  show_func, set_list, show_list);
-
-  set_cmd_completer (commands.set, integer_unlimited_completer);
-
+					  uinteger_unlimited_literals,
+					  set_doc, show_doc, help_doc, nullptr,
+					  nullptr, set_func, show_func,
+					  set_list, show_list);
   return commands;
 }
 
@@ -1091,13 +1273,12 @@ add_setshow_uinteger_cmd (const char *name, command_class theclass,
 			  cmd_list_element **show_list)
 {
   auto cmds = add_setshow_cmd_full<unsigned int> (name, theclass, var_uinteger,
-						  nullptr, set_doc, show_doc,
-						  help_doc, set_func, get_func,
-						  nullptr, show_func, set_list,
+						  nullptr,
+						  uinteger_unlimited_literals,
+						  set_doc, show_doc, help_doc,
+						  set_func, get_func, nullptr,
+						  show_func, set_list,
 						  show_list);
-
-  set_cmd_completer (cmds.set, integer_unlimited_completer);
-
   return cmds;
 }
 
@@ -1116,7 +1297,7 @@ add_setshow_zinteger_cmd (const char *name, enum command_class theclass,
 			  struct cmd_list_element **set_list,
 			  struct cmd_list_element **show_list)
 {
-  return add_setshow_cmd_full<int> (name, theclass, var_zinteger, var,
+  return add_setshow_cmd_full<int> (name, theclass, var_integer, var,
 				    set_doc, show_doc, help_doc,
 				    nullptr, nullptr, set_func,
 				    show_func, set_list, show_list);
@@ -1135,11 +1316,21 @@ add_setshow_zinteger_cmd (const char *name, command_class theclass,
 			  cmd_list_element **set_list,
 			  cmd_list_element **show_list)
 {
-  return add_setshow_cmd_full<int> (name, theclass, var_zinteger, nullptr,
+  return add_setshow_cmd_full<int> (name, theclass, var_integer, nullptr,
 				    set_doc, show_doc, help_doc, set_func,
 				    get_func, nullptr, show_func, set_list,
 				    show_list);
 }
+
+/* Accept `unlimited' or -1, using -1 internally.  */
+const literal_def pinteger_unlimited_literals[] =
+  {
+    { "unlimited", -1, -1 },
+    { nullptr }
+  };
+
+/* Same as above but using `pinteger_unlimited_literals', with a pointer
+   to a global storage buffer.  */
 
 set_show_commands
 add_setshow_zuinteger_unlimited_cmd (const char *name,
@@ -1154,13 +1345,11 @@ add_setshow_zuinteger_unlimited_cmd (const char *name,
 				     struct cmd_list_element **show_list)
 {
   set_show_commands commands
-    = add_setshow_cmd_full<int> (name, theclass, var_zuinteger_unlimited, var,
+    = add_setshow_cmd_full<int> (name, theclass, var_pinteger, var,
+				 pinteger_unlimited_literals,
 				 set_doc, show_doc, help_doc, nullptr,
 				 nullptr, set_func, show_func, set_list,
 				 show_list);
-
-  set_cmd_completer (commands.set, integer_unlimited_completer);
-
   return commands;
 }
 
@@ -1178,13 +1367,11 @@ add_setshow_zuinteger_unlimited_cmd (const char *name, command_class theclass,
 				     cmd_list_element **show_list)
 {
   auto cmds
-    = add_setshow_cmd_full<int> (name, theclass, var_zuinteger_unlimited,
-				 nullptr, set_doc, show_doc, help_doc, set_func,
+    = add_setshow_cmd_full<int> (name, theclass, var_pinteger, nullptr,
+				 pinteger_unlimited_literals,
+				 set_doc, show_doc, help_doc, set_func,
 				 get_func, nullptr, show_func, set_list,
 				 show_list);
-
-  set_cmd_completer (cmds.set, integer_unlimited_completer);
-
   return cmds;
 }
 
@@ -1203,7 +1390,7 @@ add_setshow_zuinteger_cmd (const char *name, enum command_class theclass,
 			   struct cmd_list_element **set_list,
 			   struct cmd_list_element **show_list)
 {
-  return add_setshow_cmd_full<unsigned int> (name, theclass, var_zuinteger,
+  return add_setshow_cmd_full<unsigned int> (name, theclass, var_uinteger,
 					     var, set_doc, show_doc, help_doc,
 					     nullptr, nullptr, set_func,
 					     show_func, set_list, show_list);
@@ -1222,7 +1409,7 @@ add_setshow_zuinteger_cmd (const char *name, command_class theclass,
 			   cmd_list_element **set_list,
 			   cmd_list_element **show_list)
 {
-  return add_setshow_cmd_full<unsigned int> (name, theclass, var_zuinteger,
+  return add_setshow_cmd_full<unsigned int> (name, theclass, var_uinteger,
 					     nullptr, set_doc, show_doc,
 					     help_doc, set_func, get_func,
 					     nullptr, show_func, set_list,

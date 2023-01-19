@@ -143,7 +143,7 @@ proc test-integer {variant} {
     if {$variant == "zuinteger-unlimited"} {
 	# -1 means unlimited.  Other negative values are rejected.  -1
 	# -is tested further below, along the "unlimited" tests.
-	gdb_test "$set_cmd -2" "only -1 is allowed to set as unlimited"
+	gdb_test "$set_cmd -2" "integer -2 out of range"
 	check_type "test-settings $variant" "type = int"
     } elseif {$variant == "uinteger" || $variant == "zuinteger"} {
 	# Negative values are not accepted.

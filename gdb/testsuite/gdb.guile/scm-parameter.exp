@@ -113,24 +113,18 @@ foreach_with_prefix param {
 	    \\(3\\) \\(3\\)\\)>"
     switch -- $param {
 	"listsize" {
-	    set param_get_one $param_type_error
-	    set param_get_zero $param_type_error
-	    set param_get_minus_one $param_type_error
-	    set param_get_unlimited $param_type_error
+	    set param_get_zero "#:unlimited"
+	    set param_get_minus_one -1
 	    set param_set_minus_one ""
 	}
 	"print elements" {
-	    set param_get_one 1
 	    set param_get_zero "#:unlimited"
 	    set param_get_minus_one "#:unlimited"
-	    set param_get_unlimited "#:unlimited"
 	    set param_set_minus_one $param_range_error
 	}
 	"max-completions" {
-	    set param_get_one 1
 	    set param_get_zero 0
 	    set param_get_minus_one "#:unlimited"
-	    set param_get_unlimited "#:unlimited"
 	    set param_set_minus_one ""
 	}
 	default {
@@ -141,7 +135,7 @@ foreach_with_prefix param {
     gdb_test_no_output "set $param 1" "test set to 1"
 
     gdb_test "guile (print (parameter-value \"$param\"))" \
-	$param_get_one "test value of 1"
+	1 "test value of 1"
 
     gdb_test_no_output "set $param 0" "test set to 0"
 
@@ -157,7 +151,7 @@ foreach_with_prefix param {
     gdb_test_no_output "set $param unlimited" "test set to 'unlimited'"
 
     gdb_test "guile (print (parameter-value \"$param\"))" \
-	$param_get_unlimited "test value of 'unlimited'"
+	"#:unlimited" "test value of 'unlimited'"
 }
 
 foreach_with_prefix kind {
@@ -189,8 +183,7 @@ foreach_with_prefix kind {
 	     #:unlimited" \
 	    "Error while executing Scheme code\\."]
     set param_minus_one_error "integer -1 out of range"
-    set param_minus_two_range "integer -2 out of range"
-    set param_minus_two_unlimited "only -1 is allowed to set as unlimited"
+    set param_minus_two_error "integer -2 out of range"
     switch -- $kind {
 	PARAM_UINTEGER {
 	    set param_get_zero "#:unlimited"
@@ -199,7 +192,7 @@ foreach_with_prefix kind {
 	    set param_str_unlimited unlimited
 	    set param_set_unlimited ""
 	    set param_set_minus_one $param_minus_one_error
-	    set param_set_minus_two $param_minus_two_range
+	    set param_set_minus_two $param_minus_two_error
 	}
 	PARAM_ZINTEGER {
 	    set param_get_zero 0
@@ -217,7 +210,7 @@ foreach_with_prefix kind {
 	    set param_str_unlimited 2
 	    set param_set_unlimited $param_integer_error
 	    set param_set_minus_one $param_minus_one_error
-	    set param_set_minus_two $param_minus_two_range
+	    set param_set_minus_two $param_minus_two_error
 	}
 	PARAM_ZUINTEGER_UNLIMITED {
 	    set param_get_zero 0
@@ -226,7 +219,7 @@ foreach_with_prefix kind {
 	    set param_str_unlimited unlimited
 	    set param_set_unlimited ""
 	    set param_set_minus_one ""
-	    set param_set_minus_two $param_minus_two_unlimited
+	    set param_set_minus_two $param_minus_two_error
 	}
 	default {
 	    error "invalid kind: $kind"

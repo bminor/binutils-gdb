@@ -2861,8 +2861,8 @@ using boolean_option_def
   = gdb::option::boolean_option_def<value_print_options>;
 using uinteger_option_def
   = gdb::option::uinteger_option_def<value_print_options>;
-using zuinteger_unlimited_option_def
-  = gdb::option::zuinteger_unlimited_option_def<value_print_options>;
+using pinteger_option_def
+  = gdb::option::pinteger_option_def<value_print_options>;
 
 /* Definitions of options for the "print" and "compile print"
    commands.  */
@@ -2907,15 +2907,17 @@ static const gdb::option::option_def value_print_option_defs[] = {
   uinteger_option_def {
     "elements",
     [] (value_print_options *opt) { return &opt->print_max; },
+    uinteger_unlimited_literals,
     show_print_max, /* show_cmd_cb */
     N_("Set limit on string chars or array elements to print."),
     N_("Show limit on string chars or array elements to print."),
     N_("\"unlimited\" causes there to be no limit."),
   },
 
-  zuinteger_unlimited_option_def {
+  pinteger_option_def {
     "max-depth",
     [] (value_print_options *opt) { return &opt->max_depth; },
+    pinteger_unlimited_literals,
     show_print_max_depth, /* show_cmd_cb */
     N_("Set maximum print depth for nested structures, unions and arrays."),
     N_("Show maximum print depth for nested structures, unions, and arrays."),
@@ -2975,6 +2977,7 @@ pretty-printers for that value.")
   uinteger_option_def {
     "repeats",
     [] (value_print_options *opt) { return &opt->repeat_count_threshold; },
+    uinteger_unlimited_literals,
     show_repeat_count_threshold, /* show_cmd_cb */
     N_("Set threshold for repeated print elements."),
     N_("Show threshold for repeated print elements."),

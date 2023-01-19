@@ -104,7 +104,7 @@ with_test_prefix "maint" {
     test_with_error "zuinteger" "" \
 	"Argument required \\(integer to set it to\\)\\."
     test_with_error "zuinteger-unlimited" "-2" \
-	"only -1 is allowed to set as unlimited"
+	"integer -2 out of range"
     test_with_error "zuinteger-unlimited" "" \
 	"Argument required \\(integer to set it to, or \"unlimited\"\\)\\."
     test_with_error "filename" "" \

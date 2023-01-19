@@ -504,27 +504,45 @@ gdbpy_parameter_value (const setting &var)
 	  Py_RETURN_NONE;
       }
 
-    case var_integer:
-      if (var.get<int> () == INT_MAX)
-	Py_RETURN_NONE;
-      /* Fall through.  */
-    case var_zinteger:
-    case var_zuinteger_unlimited:
-      return gdb_py_object_from_longest (var.get<int> ()).release ();
-
     case var_uinteger:
+    case var_integer:
+    case var_pinteger:
       {
-	unsigned int val = var.get<unsigned int> ();
+	LONGEST value
+	  = (var.type () == var_uinteger
+	     ? static_cast<LONGEST> (var.get<unsigned int> ())
+	     : static_cast<LONGEST> (var.get<int> ()));
 
-	if (val == UINT_MAX)
-	  Py_RETURN_NONE;
-	return gdb_py_object_from_ulongest (val).release ();
-      }
+	if (var.extra_literals () != nullptr)
+	  for (const literal_def *l = var.extra_literals ();
+	       l->literal != nullptr;
+	       l++)
+	    if (value == l->use)
+	      {
+		if (strcmp (l->literal, "unlimited") == 0)
+		  {
+		    /* Compatibility hack for API brokenness.  */
+		    if (var.type () == var_pinteger
+			&& l->val.has_value ()
+			&& *l->val == -1)
+		      value = -1;
+		    else
+		      Py_RETURN_NONE;
+		  }
+		else if (l->val.has_value ())
+		  value = *l->val;
+		else
+		  return host_string_to_python_string (l->literal).release ();
+	      }
 
-    case var_zuinteger:
-      {
-	unsigned int val = var.get<unsigned int> ();
-	return gdb_py_object_from_ulongest (val).release ();
+	if (var.type () == var_uinteger)
+	  return
+	    gdb_py_object_from_ulongest
+	      (static_cast<unsigned int> (value)).release ();
+	else
+	  return
+	    gdb_py_object_from_longest
+	      (static_cast<int> (value)).release ();
       }
     }
 

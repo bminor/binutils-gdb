@@ -38,7 +38,7 @@ union option_value
   /* For var_uinteger options.  */
   unsigned int uinteger;
 
-  /* For var_zuinteger_unlimited options.  */
+  /* For var_integer and var_pinteger options.  */
   int integer;
 
   /* For var_enum options.  */
@@ -356,42 +356,52 @@ parse_option (gdb::array_view<const option_def_group> options_group,
 	return option_def_and_value {*match, match_ctx, val};
       }
     case var_uinteger:
-    case var_zuinteger_unlimited:
+    case var_integer:
+    case var_pinteger:
       {
-	if (completion != nullptr)
+	if (completion != nullptr && match->extra_literals != nullptr)
 	  {
+	    /* Convenience to let the user know what the option can
+	       accept.  Make sure there's no common prefix between
+	       "NUMBER" and all the strings when adding new ones,
+	       so that readline doesn't do a partial match.  */
 	    if (**args == '\0')
 	      {
-		/* Convenience to let the user know what the option
-		   can accept.  Note there's no common prefix between
-		   the strings on purpose, so that readline doesn't do
-		   a partial match.  */
 		completion->tracker.add_completion
 		  (make_unique_xstrdup ("NUMBER"));
-		completion->tracker.add_completion
-		  (make_unique_xstrdup ("unlimited"));
+		for (const literal_def *l = match->extra_literals;
+		     l->literal != nullptr;
+		     l++)
+		  completion->tracker.add_completion
+		    (make_unique_xstrdup (l->literal));
 		return {};
 	      }
-	    else if (startswith ("unlimited", *args))
+	    else
 	      {
-		completion->tracker.add_completion
-		  (make_unique_xstrdup ("unlimited"));
-		return {};
+		bool completions = false;
+		for (const literal_def *l = match->extra_literals;
+		     l->literal != nullptr;
+		     l++)
+		  if (startswith (l->literal, *args))
+		    {
+		      completion->tracker.add_completion
+			(make_unique_xstrdup (l->literal));
+		      completions = true;
+		    }
+		if (completions)
+		  return {};
 	      }
 	  }
 
-	if (match->type == var_zuinteger_unlimited)
-	  {
-	    option_value val;
-	    val.integer = parse_cli_var_zuinteger_unlimited (args, false);
-	    return option_def_and_value {*match, match_ctx, val};
-	  }
+	LONGEST v = parse_cli_var_integer (match->type,
+					   match->extra_literals,
+					   args, false);
+	option_value val;
+	if (match->type == var_uinteger)
+	  val.uinteger = v;
 	else
-	  {
-	    option_value val;
-	    val.uinteger = parse_cli_var_uinteger (match->type, args, false);
-	    return option_def_and_value {*match, match_ctx, val};
-	  }
+	  val.integer = v;
+	return option_def_and_value {*match, match_ctx, val};
       }
     case var_enum:
       {
@@ -593,7 +603,8 @@ save_option_value_in_ctx (gdb::optional<option_def_and_value> &ov)
       *ov->option.var_address.uinteger (ov->option, ov->ctx)
 	= ov->value->uinteger;
       break;
-    case var_zuinteger_unlimited:
+    case var_integer:
+    case var_pinteger:
       *ov->option.var_address.integer (ov->option, ov->ctx)
 	= ov->value->integer;
       break;
@@ -664,8 +675,20 @@ get_val_type_str (const option_def &opt, std::string &buffer)
     case var_boolean:
       return "[on|off]";
     case var_uinteger:
-    case var_zuinteger_unlimited:
-      return "NUMBER|unlimited";
+    case var_integer:
+    case var_pinteger:
+      {
+	buffer = "NUMBER";
+	if (opt.extra_literals != nullptr)
+	  for (const literal_def *l = opt.extra_literals;
+	       l->literal != nullptr;
+	       l++)
+	    {
+	      buffer += '|';
+	      buffer += l->literal;
+	    }
+	return buffer.c_str ();
+      }
     case var_enum:
       {
 	buffer = "";
@@ -789,20 +812,31 @@ add_setshow_cmds_for_options (command_class cmd_class,
 	{
 	  add_setshow_uinteger_cmd (option.name, cmd_class,
 				    option.var_address.uinteger (option, data),
+				    option.extra_literals,
 				    option.set_doc, option.show_doc,
 				    option.help_doc,
 				    nullptr, option.show_cmd_cb,
 				    set_list, show_list);
 	}
-      else if (option.type == var_zuinteger_unlimited)
+      else if (option.type == var_integer)
 	{
-	  add_setshow_zuinteger_unlimited_cmd
-	    (option.name, cmd_class,
-	     option.var_address.integer (option, data),
-	     option.set_doc, option.show_doc,
-	     option.help_doc,
-	     nullptr, option.show_cmd_cb,
-	     set_list, show_list);
+	  add_setshow_integer_cmd (option.name, cmd_class,
+				   option.var_address.integer (option, data),
+				   option.extra_literals,
+				   option.set_doc, option.show_doc,
+				   option.help_doc,
+				   nullptr, option.show_cmd_cb,
+				   set_list, show_list);
+	}
+      else if (option.type == var_pinteger)
+	{
+	  add_setshow_pinteger_cmd (option.name, cmd_class,
+				    option.var_address.integer (option, data),
+				    option.extra_literals,
+				    option.set_doc, option.show_doc,
+				    option.help_doc,
+				    nullptr, option.show_cmd_cb,
+				    set_list, show_list);
 	}
       else if (option.type == var_enum)
 	{

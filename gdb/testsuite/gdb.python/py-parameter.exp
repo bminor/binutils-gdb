@@ -434,6 +434,7 @@ proc_with_prefix test_integer_parameter { } {
 		set param_get_minus_one None
 		set param_get_minus_five 1
 		set param_get_none None
+		set param_get_unlimited None
 		set param_set_minus_one $param_range_error
 		set param_set_minus_five $param_range_error
 		set param_set_none ""
@@ -443,6 +444,7 @@ proc_with_prefix test_integer_parameter { } {
 		set param_get_minus_one -1
 		set param_get_minus_five -5
 		set param_get_none None
+		set param_get_unlimited None
 		set param_set_minus_one -1
 		set param_set_minus_five -5
 		set param_set_none ""
@@ -452,6 +454,7 @@ proc_with_prefix test_integer_parameter { } {
 		set param_get_minus_one -1
 		set param_get_minus_five -5
 		set param_get_none 5
+		set param_get_unlimited 0
 		set param_set_minus_one ""
 		set param_set_minus_five ""
 		set param_set_none $param_integer_error
@@ -461,6 +464,7 @@ proc_with_prefix test_integer_parameter { } {
 		set param_get_minus_one 0
 		set param_get_minus_five 1
 		set param_get_none 5
+		set param_get_unlimited 0
 		set param_set_minus_one $param_range_error
 		set param_set_minus_five $param_range_error
 		set param_set_none $param_integer_error
@@ -470,6 +474,7 @@ proc_with_prefix test_integer_parameter { } {
 		set param_get_minus_one -1
 		set param_get_minus_five 1
 		set param_get_none -1
+		set param_get_unlimited -1
 		set param_set_minus_one ""
 		set param_set_minus_five $param_range_error
 		set param_set_none ""
@@ -526,6 +531,16 @@ proc_with_prefix test_integer_parameter { } {
 
 	gdb_test "python print(gdb.parameter('test-$kind'))" \
 	    $param_get_zero "test value of 0 via gdb.parameter"
+
+	py_param_test_maybe_no_output \
+	    "python test_param_$kind.value = 'unlimited'" \
+	    $param_set_none "test set to 'unlimited'"
+
+	gdb_test "python print(test_param_$kind.value)" \
+	    $param_get_unlimited "test value of 'unlimited'"
+
+	gdb_test "python print(gdb.parameter('test-$kind'))" \
+	    $param_get_unlimited "test value of 'unlimited' via gdb.parameter"
     }
 }
 

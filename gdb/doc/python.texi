@@ -4611,14 +4611,18 @@ Python, true and false are represented using boolean constants, and
 @findex PARAM_UINTEGER
 @findex gdb.PARAM_UINTEGER
 @item gdb.PARAM_UINTEGER
-The value is an unsigned integer.  The value of 0 should be
-interpreted to mean ``unlimited''.
+The value is an unsigned integer.  The value of @code{None} should be
+interpreted to mean ``unlimited'' (literal @code{'unlimited'} can also
+be used to set that value), and the value of 0 is reserved and should
+not be used.
 
 @findex PARAM_INTEGER
 @findex gdb.PARAM_INTEGER
 @item gdb.PARAM_INTEGER
-The value is a signed integer.  The value of 0 should be interpreted
-to mean ``unlimited''.
+The value is a signed integer.  The value of @code{None} should be
+interpreted to mean ``unlimited'' (literal @code{'unlimited'} can also
+be used to set that value), and the value of 0 is reserved and should
+not be used.
 
 @findex PARAM_STRING
 @findex gdb.PARAM_STRING
@@ -4648,21 +4652,23 @@ The value is a filename.  This is just like
 @findex PARAM_ZINTEGER
 @findex gdb.PARAM_ZINTEGER
 @item gdb.PARAM_ZINTEGER
-The value is an integer.  This is like @code{PARAM_INTEGER}, except 0
-is interpreted as itself.
+The value is a signed integer.  This is like @code{PARAM_INTEGER},
+except that 0 is allowed and the value of @code{None} is not supported.
 
 @findex PARAM_ZUINTEGER
 @findex gdb.PARAM_ZUINTEGER
 @item gdb.PARAM_ZUINTEGER
-The value is an unsigned integer.  This is like @code{PARAM_INTEGER},
-except 0 is interpreted as itself, and the value cannot be negative.
+The value is an unsigned integer.  This is like @code{PARAM_UINTEGER},
+except that 0 is allowed and the value of @code{None} is not supported.
 
 @findex PARAM_ZUINTEGER_UNLIMITED
 @findex gdb.PARAM_ZUINTEGER_UNLIMITED
 @item gdb.PARAM_ZUINTEGER_UNLIMITED
-The value is a signed integer.  This is like @code{PARAM_ZUINTEGER},
-except the special value -1 should be interpreted to mean
-``unlimited''.  Other negative values are not allowed.
+The value is a signed integer.  This is like @code{PARAM_INTEGER}
+including that the value of @code{None} should be interpreted to mean
+``unlimited'' (literal @code{'unlimited'} can also be used to set that
+value), except that 0 is allowed, and the value cannot be negative,
+except the special value -1 is returned for the setting of ``unlimited''.
 
 @findex PARAM_ENUM
 @findex gdb.PARAM_ENUM

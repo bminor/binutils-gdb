@@ -2213,22 +2213,40 @@ value_from_setting (const setting &var, struct gdbarch *gdbarch)
 {
   switch (var.type ())
     {
+    case var_uinteger:
     case var_integer:
-      if (var.get<int> () == INT_MAX)
-	return value_from_longest (builtin_type (gdbarch)->builtin_int,
-				   0);
-      else
-	return value_from_longest (builtin_type (gdbarch)->builtin_int,
-				   var.get<int> ());
-    case var_zinteger:
-      return value_from_longest (builtin_type (gdbarch)->builtin_int,
-				 var.get<int> ());
+    case var_pinteger:
+      {
+	LONGEST value
+	  = (var.type () == var_uinteger
+	     ? static_cast<LONGEST> (var.get<unsigned int> ())
+	     : static_cast<LONGEST> (var.get<int> ()));
+
+	if (var.extra_literals () != nullptr)
+	  for (const literal_def *l = var.extra_literals ();
+	       l->literal != nullptr;
+	       l++)
+	    if (value == l->use)
+	      {
+		if (l->val.has_value ())
+		  value = *l->val;
+		else
+		  return allocate_value (builtin_type (gdbarch)->builtin_void);
+		break;
+	      }
+
+	if (var.type () == var_uinteger)
+	  return
+	    value_from_ulongest (builtin_type (gdbarch)->builtin_unsigned_int,
+				 static_cast<unsigned int> (value));
+	else
+	  return
+	    value_from_longest (builtin_type (gdbarch)->builtin_int,
+				static_cast<int> (value));
+      }
     case var_boolean:
       return value_from_longest (builtin_type (gdbarch)->builtin_int,
 				 var.get<bool> () ? 1 : 0);
-    case var_zuinteger_unlimited:
-      return value_from_longest (builtin_type (gdbarch)->builtin_int,
-				 var.get<int> ());
     case var_auto_boolean:
       {
 	int val;
@@ -2250,17 +2268,6 @@ value_from_setting (const setting &var, struct gdbarch *gdbarch)
 	return value_from_longest (builtin_type (gdbarch)->builtin_int,
 				   val);
       }
-    case var_uinteger:
-      if (var.get<unsigned int> () == UINT_MAX)
-	return value_from_ulongest
-	  (builtin_type (gdbarch)->builtin_unsigned_int, 0);
-      else
-	return value_from_ulongest
-	  (builtin_type (gdbarch)->builtin_unsigned_int,
-	   var.get<unsigned int> ());
-    case var_zuinteger:
-      return value_from_ulongest (builtin_type (gdbarch)->builtin_unsigned_int,
-				  var.get<unsigned int> ());
     case var_string:
     case var_string_noescape:
     case var_optional_filename:
@@ -2330,13 +2337,11 @@ str_value_from_setting (const setting &var, struct gdbarch *gdbarch)
 {
   switch (var.type ())
     {
-    case var_integer:
-    case var_zinteger:
-    case var_boolean:
-    case var_zuinteger_unlimited:
-    case var_auto_boolean:
     case var_uinteger:
-    case var_zuinteger:
+    case var_integer:
+    case var_pinteger:
+    case var_boolean:
+    case var_auto_boolean:
       {
 	std::string cmd_val = get_setshow_command_value_string (var);
 
