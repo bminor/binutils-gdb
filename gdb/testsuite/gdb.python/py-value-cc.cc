@@ -77,7 +77,7 @@ func (const A &a)
   Btd &b_td = b1;
 
   U u;
-  u.a = 99;
+  u.a = 0x63636363;
 
   X x;
   x.x = 101;
