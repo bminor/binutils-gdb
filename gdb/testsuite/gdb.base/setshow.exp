@@ -374,6 +374,27 @@ proc_with_prefix test_setshow_listsize {} {
     gdb_test "show listsize" "Number of source lines gdb will list by default is 100..*" "show listsize (100)"
 }
 
+proc_with_prefix test_setshow_print_characters {} {
+    clean_restart
+
+    gdb_test "p \$_gdb_setting(\"print characters\")" " = void" \
+	"_gdb_setting print characters default"
+    gdb_test "p \$_gdb_setting_str(\"print characters\")" " = \"elements\"" \
+	"_gdb_setting_str print characters default"
+
+    gdb_test_no_output "set print characters unlimited"
+    gdb_test "p \$_gdb_setting(\"print characters\")" " = 0" \
+	"_gdb_setting print characters unlimited"
+    gdb_test "p \$_gdb_setting_str(\"print characters\")" " = \"unlimited\"" \
+	"_gdb_setting_str print characters unlimited"
+
+    gdb_test_no_output "set print characters 1"
+    gdb_test "p \$_gdb_setting(\"print characters\")" " = 1" \
+	"_gdb_setting print characters 1"
+    gdb_test "p \$_gdb_setting_str(\"print characters\")" " = \"1\"" \
+	"_gdb_setting_str print characters 1"
+}
+
 proc_with_prefix test_setshow_prompt {} {
     clean_restart
 
@@ -493,6 +514,7 @@ test_setshow_height
 test_setshow_history
 test_setshow_language
 test_setshow_listsize
+test_setshow_print_characters
 test_setshow_prompt
 test_setshow_radix
 test_setshow_width

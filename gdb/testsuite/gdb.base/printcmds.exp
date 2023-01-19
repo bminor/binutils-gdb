@@ -449,13 +449,14 @@ proc test_print_all_chars {} {
 }
 
 # Test interaction of the number of print elements to print and the
-# repeat count, set to the default of 10.
+# repeat count, set to the default of 10.  SETTING is the print
+# setting to verify, either "elements" or "characters".
 
-proc test_print_repeats_10 {} {
+proc test_print_repeats_10_one { setting } {
     global gdb_prompt decimal
 
     for { set x 1 } { $x <= 16 } { incr x } {
-	gdb_test_no_output "set print elements $x" "elements $x repeats"
+	gdb_test_no_output "set print $setting $x" "$setting $x repeats"
 	for { set e 1 } { $e <= 16 } {incr e } {
 	    set v [expr $e - 1]
 	    set command "p &ctable2\[${v}*16\]"
@@ -495,9 +496,16 @@ proc test_print_repeats_10 {} {
 		set xstr "${xstr}\[.\]\[.\]\[.\]"
 	    }
 	    set string " = \[(\]unsigned char \[*\]\[)\] <ctable2(\\+$decimal)?> ${a}${xstr}"
-	    gdb_test "$command" "$string" "$command with print elements set to $x"
+	    gdb_test "$command" "$string" "$command with print $setting set to $x"
 	}
     }
+}
+
+proc test_print_repeats_10 {} {
+    foreach_with_prefix setting { "elements" "characters" } {
+	test_print_repeats_10_one $setting
+    }
+    gdb_test_no_output "set print characters elements"
 }
 
 # This tests whether GDB uses the correct element content offsets
@@ -512,7 +520,7 @@ proc test_print_repeats_embedded_array {} {
 	"correct element repeats in array embedded at offset > 0"
 }
 
-proc test_print_strings {} {
+proc test_print_strings_one { setting } {
     global gdb_prompt decimal
 
     # We accept "(unsigned char *) " before the string.  char vs. unsigned char
@@ -520,35 +528,35 @@ proc test_print_strings {} {
 
     # Test that setting print elements unlimited doesn't completely suppress
     # printing; this was a bug in older gdb's.
-    gdb_test_no_output "set print elements 0"
+    gdb_test_no_output "set print $setting 0"
     gdb_test "p teststring" \
-	" = (.unsigned char .. )?\"teststring contents\"" "p teststring with elements set to 0"
-    gdb_test_no_output "set print elements 1"
+	" = (.unsigned char .. )?\"teststring contents\"" "p teststring with $setting set to 0"
+    gdb_test_no_output "set print $setting 1"
     gdb_test "p teststring" \
-	" = (.unsigned char .. )?\"t\"\\.\\.\\." "p teststring with elements set to 1"
-    gdb_test_no_output "set print elements 5"
+	" = (.unsigned char .. )?\"t\"\\.\\.\\." "p teststring with $setting set to 1"
+    gdb_test_no_output "set print $setting 5"
     gdb_test "p teststring" \
-	" = (.unsigned char .. )?\"tests\"\\.\\.\\." "p teststring with elements set to 5"
-    gdb_test_no_output "set print elements 19"
+	" = (.unsigned char .. )?\"tests\"\\.\\.\\." "p teststring with $setting set to 5"
+    gdb_test_no_output "set print $setting 19"
     gdb_test "p teststring" \
-	" = (.unsigned char .. )?\"teststring contents\"" "p teststring with elements set to 19"
-    gdb_test_no_output "set print elements 20"
+	" = (.unsigned char .. )?\"teststring contents\"" "p teststring with $setting set to 19"
+    gdb_test_no_output "set print $setting 20"
     gdb_test "p teststring" \
-	" = (.unsigned char .. )?\"teststring contents\"" "p teststring with elements set to 20"
+	" = (.unsigned char .. )?\"teststring contents\"" "p teststring with $setting set to 20"
 
-    gdb_test "p -elements 1 -- teststring" \
+    gdb_test "p -$setting 1 -- teststring" \
 	" = (.unsigned char .. )?\"t\"\\.\\.\\."
-    gdb_test "p -elements 5 -- teststring" \
+    gdb_test "p -$setting 5 -- teststring" \
 	" = (.unsigned char .. )?\"tests\"\\.\\.\\."
-    gdb_test "p -elements 19 -- teststring" \
+    gdb_test "p -$setting 19 -- teststring" \
 	" = (.unsigned char .. )?\"teststring contents\""
-    gdb_test "p -elements 20 -- teststring" \
+    gdb_test "p -$setting 20 -- teststring" \
 	" = (.unsigned char .. )?\"teststring contents\""
 
     gdb_test "print teststring2" \
 	" = \\(charptr\\) \"more contents\""
 
-    gdb_test_no_output "set print elements 8"
+    gdb_test_no_output "set print $setting 8"
 
     # Set the target-charset to ASCII, because the output varies from
     # different charset.
@@ -619,6 +627,26 @@ proc test_print_strings {} {
 	    " = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"\\\\360\\\\361\\\\362\\\\363\\\\364\\\\365\\\\366\\\\367\"..."
 	gdb_test "p &ctable1\[31*8\]" \
 	    " = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"\\\\370\\\\371\\\\372\\\\373\\\\374\\\\375\\\\376\\\\377\"..."
+    }
+
+    gdb_test_no_output "set print $setting unlimited"
+}
+
+proc test_print_strings {} {
+
+    foreach_with_prefix setting { "elements" "characters" } {
+	test_print_strings_one $setting
+    }
+
+    gdb_test "p -elements 8 -- teststring" \
+	" = (.unsigned char .. )?\"teststring contents\""
+    gdb_test "p -characters 8 -- teststring" \
+	" = (.unsigned char .. )?\"teststri\"\\.\\.\\."
+    gdb_test "p -elements 8 -characters elements -- teststring" \
+	" = (.unsigned char .. )?\"teststri\"\\.\\.\\."
+
+    with_test_prefix strings {
+	gdb_test_no_output "set print characters elements"
     }
 }
 

@@ -104,6 +104,7 @@ foreach_with_prefix param {
     "listsize"
     "print elements"
     "max-completions"
+    "print characters"
 } {
     set param_range_error "integer -1 out of range"
     set param_type_error \
@@ -117,7 +118,8 @@ foreach_with_prefix param {
 	    set param_get_minus_one -1
 	    set param_set_minus_one ""
 	}
-	"print elements" {
+	"print elements" -
+	"print characters" {
 	    set param_get_zero "#:unlimited"
 	    set param_get_minus_one "#:unlimited"
 	    set param_set_minus_one $param_range_error
@@ -152,6 +154,13 @@ foreach_with_prefix param {
 
     gdb_test "guile (print (parameter-value \"$param\"))" \
 	"#:unlimited" "test value of 'unlimited'"
+
+    if {$param == "print characters"} {
+	gdb_test_no_output "set $param elements" "test set to 'elements'"
+
+	gdb_test "guile (print (parameter-value \"$param\"))" \
+	    "#:elements" "test value of 'elements'"
+    }
 }
 
 foreach_with_prefix kind {

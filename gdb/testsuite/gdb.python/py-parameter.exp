@@ -337,6 +337,7 @@ proc_with_prefix test_gdb_parameter { } {
 	"listsize"
 	"print elements"
 	"max-completions"
+	"print characters"
     } {
 	clean_restart
 
@@ -349,7 +350,8 @@ proc_with_prefix test_gdb_parameter { } {
 		set param_get_unlimited None
 		set param_set_minus_one ""
 	    }
-	    "print elements" {
+	    "print elements" -
+	    "print characters" {
 		set param_get_zero None
 		set param_get_minus_one None
 		set param_get_none None
@@ -398,6 +400,15 @@ proc_with_prefix test_gdb_parameter { } {
 
 	gdb_test "python print(gdb.parameter('$param'))" \
 	    $param_get_unlimited "test value of 'unlimited'"
+
+	if {$param == "print characters"} {
+	    gdb_test_no_output \
+		"python gdb.set_parameter('$param', 'elements')" \
+		"test set to 'elements'"
+
+	    gdb_test "python print(gdb.parameter('$param'))" \
+		elements "test value of 'elements'"
+	}
     }
 
     clean_restart
