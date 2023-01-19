@@ -39,7 +39,6 @@
 #include "inferior.h"
 #include "regcache.h"
 #include "filenames.h"		/* for DOSish file names */
-#include "gdb-stabs.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "completer.h"
 #include "bcache.h"

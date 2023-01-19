@@ -30,7 +30,6 @@
 #include "process-stratum-target.h"
 #include "gdbcmd.h"
 #include "objfiles.h"
-#include "gdb-stabs.h"
 #include "gdbthread.h"
 #include "remote.h"
 #include "remote-notif.h"

@@ -27,7 +27,6 @@
 #include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "gdb-stabs.h"
 #include "target.h"
 #include "bcache.h"
 #include "expression.h"
