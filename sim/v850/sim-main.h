@@ -1,10 +1,6 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
-/* The v850 has 32bit words, numbered 31 (MSB) to 0 (LSB) */
-
-#define WITH_TARGET_WORD_MSB 31
-
 #include "sim-basics.h"
 #include "sim-base.h"
 
