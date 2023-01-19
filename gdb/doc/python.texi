@@ -1135,6 +1135,11 @@ the @emph{declared} type should be used.  (See @code{set print object} in
 representation of a C@t{++} object, @code{False} if they shouldn't (see
 @code{set print static-members} in @ref{Print Settings}).
 
+@item max_characters
+Number of string characters to print, @code{0} to follow
+@code{max_elements}, or @code{UINT_MAX} to print an unlimited number
+of characters (see @code{set print characters} in @ref{Print Settings}).
+
 @item max_elements
 Number of array elements to print, or @code{0} to print an unlimited
 number of elements (see @code{set print elements} in @ref{Print

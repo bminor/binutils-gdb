@@ -10309,10 +10309,18 @@ Related setting: @ref{set print array}.
 Set printing of array indexes.
 Related setting: @ref{set print array-indexes}.
 
-@item -elements @var{number-of-elements}|@code{unlimited}
-Set limit on string chars or array elements to print.  The value
+@item -characters @var{number-of-characters}|@code{elements}|@code{unlimited}
+Set limit on string characters to print.  The value @code{elements}
+causes the limit on array elements to print to be used.  The value
 @code{unlimited} causes there to be no limit.  Related setting:
-@ref{set print elements}.
+@ref{set print characters}.
+
+@item -elements @var{number-of-elements}|@code{unlimited}
+Set limit on array elements and optionally string characters to print.
+See @ref{set print characters}, and the @code{-characters} option above
+for when this option applies to strings.  The value @code{unlimited}
+causes there to be no limit.  @xref{set print elements}, for a related
+CLI command.
 
 @item -max-depth @var{depth}|@code{unlimited}
 Set the threshold after which nested structures are replaced with
@@ -11709,6 +11717,31 @@ Don't printing binary values in groups.  This is the default.
 @item show print nibbles
 Show whether to print binary values in groups of four bits.
 
+@anchor{set print characters}
+@item set print characters @var{number-of-characters}
+@itemx set print characters elements
+@itemx set print characters unlimited
+@cindex number of string characters to print
+@cindex limit on number of printed string characters
+Set a limit on how many characters of a string @value{GDBN} will print.
+If @value{GDBN} is printing a large string, it stops printing after it
+has printed the number of characters set by the @code{set print
+characters} command.  This equally applies to multi-byte and wide
+character strings, that is for strings whose character type is
+@code{wchar_t}, @code{char16_t}, or @code{char32_t} it is the number of
+actual characters rather than underlying bytes the encoding uses that
+this setting controls.
+Setting @var{number-of-characters} to @code{elements} means that the
+limit on the number of characters to print follows one for array
+elements; see @ref{set print elements}.
+Setting @var{number-of-characters} to @code{unlimited} means that the
+number of characters to print is unlimited.
+When @value{GDBN} starts, this limit is set to @code{elements}.
+
+@item show print characters
+Display the number of characters of a large string that @value{GDBN}
+will print.
+
 @anchor{set print elements}
 @item set print elements @var{number-of-elements}
 @itemx set print elements unlimited
@@ -11717,7 +11750,8 @@ Show whether to print binary values in groups of four bits.
 Set a limit on how many elements of an array @value{GDBN} will print.
 If @value{GDBN} is printing a large array, it stops printing after it has
 printed the number of elements set by the @code{set print elements} command.
-This limit also applies to the display of strings.
+By default this limit also applies to the display of strings; see
+@ref{set print characters}.
 When @value{GDBN} starts, this limit is set to 200.
 Setting @var{number-of-elements} to @code{unlimited} or zero means
 that the number of elements to print is unlimited.
@@ -15233,7 +15267,7 @@ The optional @var{mods} changes the usual handling of the arguments.
 @code{s} requests that pointers to chars be handled as strings, in
 particular collecting the contents of the memory being pointed at, up
 to the first zero.  The upper bound is by default the value of the
-@code{print elements} variable; if @code{s} is followed by a decimal
+@code{print characters} variable; if @code{s} is followed by a decimal
 number, that is the upper bound instead.  So for instance
 @samp{collect/s25 mystr} collects as many as 25 characters at
 @samp{mystr}.

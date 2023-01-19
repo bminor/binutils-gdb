@@ -327,12 +327,14 @@ m2_language::value_print_inner (struct value *val, struct ui_file *stream,
 		 elements up to it.  */
 	      if (options->stop_print_at_null)
 		{
+		  unsigned int print_max_chars = get_print_max_chars (options);
 		  unsigned int temp_len;
 
 		  /* Look for a NULL char.  */
 		  for (temp_len = 0;
 		       (valaddr[temp_len]
-			&& temp_len < len && temp_len < options->print_max);
+			&& temp_len < len
+			&& temp_len < print_max_chars);
 		       temp_len++);
 		  len = temp_len;
 		}

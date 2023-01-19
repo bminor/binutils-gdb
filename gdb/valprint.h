@@ -51,11 +51,14 @@ struct value_print_options
      in its vtables.  */
   bool objectprint;
 
-  /* Maximum number of chars to print for a string pointer value or vector
-     contents, or UINT_MAX for no limit.  Note that "set print elements 0"
-     stores UINT_MAX in print_max, which displays in a show command as
-     "unlimited".  */
+  /* Maximum number of elements to print for vector contents, or UINT_MAX
+     for no limit.  Note that "set print elements 0" stores UINT_MAX in
+     print_max, which displays in a show command as "unlimited".  */
   unsigned int print_max;
+
+  /* Maximum number of string chars to print for a string pointer value,
+     zero if to follow the value of print_max, or UINT_MAX for no limit.  */
+  unsigned int print_max_chars;
 
   /* Print repeat counts if there are more than this many repetitions
      of an element in an array.  */
@@ -104,6 +107,21 @@ struct value_print_options
   /* Maximum print depth when printing nested aggregates.  */
   int max_depth;
 };
+
+/* The value to use for `print_max_chars' to follow `print_max'.  */
+#define PRINT_MAX_CHARS_ELEMENTS 0
+
+/* The value to use for `print_max_chars' for no limit.  */
+#define PRINT_MAX_CHARS_UNLIMITED UINT_MAX
+
+/* Return the character count limit for printing strings.  */
+
+static inline unsigned int
+get_print_max_chars (const struct value_print_options *options)
+{
+  return (options->print_max_chars != PRINT_MAX_CHARS_ELEMENTS
+	  ? options->print_max_chars : options->print_max);
+}
 
 /* Create an option_def_group for the value_print options, with OPTS
    as context.  */

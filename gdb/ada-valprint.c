@@ -469,7 +469,8 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
       return;
     }
 
-  for (i = 0; i < length && things_printed < options->print_max; i += 1)
+  unsigned int print_max_chars = get_print_max_chars (options);
+  for (i = 0; i < length && things_printed < print_max_chars; i += 1)
     {
       /* Position of the character we are examining
 	 to see whether it is repeated.  */
@@ -705,12 +706,13 @@ ada_val_print_string (struct type *type, const gdb_byte *valaddr,
      elements up to it.  */
   if (options->stop_print_at_null)
     {
+      unsigned int print_max_chars = get_print_max_chars (options);
       int temp_len;
 
       /* Look for a NULL char.  */
       for (temp_len = 0;
 	   (temp_len < len
-	    && temp_len < options->print_max
+	    && temp_len < print_max_chars
 	    && char_at (valaddr + offset_aligned,
 			temp_len, eltlen, byte_order) != 0);
 	   temp_len += 1);

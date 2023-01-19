@@ -957,17 +957,18 @@ find_string_backward (struct gdbarch *gdbarch,
 					 chars_to_read * char_size);
       chars_read /= char_size;
       read_error = (chars_read == chars_to_read) ? 0 : 1;
+      unsigned int print_max_chars = get_print_max_chars (options);
       /* Searching for '\0' from the end of buffer in backward direction.  */
       for (i = 0; i < chars_read && count > 0 ; ++i, ++chars_counted)
 	{
 	  int offset = (chars_to_read - i - 1) * char_size;
 
 	  if (integer_is_zero (&buffer[offset], char_size)
-	      || chars_counted == options->print_max)
+	      || chars_counted == print_max_chars)
 	    {
-	      /* Found '\0' or reached print_max.  As OFFSET is the offset to
-		 '\0', we add CHAR_SIZE to return the start address of
-		 a string.  */
+	      /* Found '\0' or reached `print_max_chars'.  As OFFSET
+		 is the offset to '\0', we add CHAR_SIZE to return
+		 the start address of a string.  */
 	      --count;
 	      string_start_addr = addr + offset + char_size;
 	      chars_counted = 0;

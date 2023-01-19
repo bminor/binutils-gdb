@@ -105,13 +105,16 @@ pascal_language::value_print_inner (struct value *val,
 		   elements up to it.  */
 		if (options->stop_print_at_null)
 		  {
+		    unsigned int print_max_chars
+		      = get_print_max_chars (options);
 		    unsigned int temp_len;
 
 		    /* Look for a NULL char.  */
 		    for (temp_len = 0;
-			 extract_unsigned_integer (valaddr + temp_len * eltlen,
-						   eltlen, byte_order)
-			   && temp_len < len && temp_len < options->print_max;
+			 (extract_unsigned_integer
+			    (valaddr + temp_len * eltlen, eltlen, byte_order)
+			  && temp_len < len
+			  && temp_len < print_max_chars);
 			 temp_len++);
 		    len = temp_len;
 		  }

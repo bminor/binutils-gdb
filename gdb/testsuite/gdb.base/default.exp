@@ -520,6 +520,10 @@ gdb_test_no_output "set print address" "set print address"
 gdb_test_no_output "set print array" "set print array"
 #test set print asm-demangle
 gdb_test_no_output "set print asm-demangle" "set print asm-demangle"
+#test set print characters
+gdb_test "set print characters" \
+	 "Argument required \\(integer to set it to, or one of:\
+	  \"elements\", \"unlimited\"\\)\\."
 #test set print demangle
 gdb_test_no_output "set print demangle" "set print demangle"
 #test set print elements
@@ -664,6 +668,9 @@ gdb_test "show print address" "Printing of addresses is on."
 gdb_test "show print array" "Pretty formatting of arrays is on."
 #test show print asm-demangle
 gdb_test "show print asm-demangle" "Demangling of C\[+\]+/ObjC names in disassembly listings is on."
+#test show print characters
+gdb_test "show print characters" \
+	 "Limit on string characters to print is elements\\."
 #test show print demangle
 gdb_test "show print demangle" "Demangling of encoded C\[+\]+/ObjC names when displaying symbols is on."
 #test show print elements

@@ -647,6 +647,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
       "actual_objects",		/* See set print object on|off.  */
       "static_members",		/* See set print static-members on|off.  */
       /* C non-bool options.  */
+      "max_characters", 	/* See set print characters N.  */
       "max_elements", 		/* See set print elements N.  */
       "max_depth",		/* See set print max-depth N.  */
       "repeat_threshold",	/* See set print repeats.  */
@@ -695,7 +696,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
   char *format = NULL;
   if (!gdb_PyArg_ParseTupleAndKeywords (args,
 					kw,
-					"|O!O!O!O!O!O!O!O!O!O!O!O!O!IIIs",
+					"|O!O!O!O!O!O!O!O!O!O!O!O!O!IIIIs",
 					keywords,
 					&PyBool_Type, &raw_obj,
 					&PyBool_Type, &pretty_arrays_obj,
@@ -710,6 +711,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
 					&PyBool_Type, &deref_refs_obj,
 					&PyBool_Type, &actual_objects_obj,
 					&PyBool_Type, &static_members_obj,
+					&opts.print_max_chars,
 					&opts.print_max,
 					&opts.max_depth,
 					&opts.repeat_count_threshold,

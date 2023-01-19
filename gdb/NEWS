@@ -174,6 +174,20 @@ set style tui-current-position [on|off]
   Whether to style the source and assembly code highlighted by the
   TUI's current position indicator.  The default is off.
 
+set print characters LIMIT
+show print characters
+  This new setting is like 'set print elements', but controls how many
+  characters of a string are printed.  This functionality used to be
+  covered by 'set print elements', but it can be controlled separately
+  now.  LIMIT can be set to a numerical value to request that particular
+  character count, to 'unlimited' to print all characters of a string,
+  or to 'elements', which is also the default, to follow the setting of
+ 'set print elements' as it used to be.
+
+print -characters LIMIT
+  This new option to the 'print' command has the same effect as a temporary
+  use of 'set print characters'.
+
 * Changed commands
 
 document user-defined
