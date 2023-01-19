@@ -1786,16 +1786,6 @@ struct compunit_symtab
     m_blockvector = blockvector;
   }
 
-  int block_line_section () const
-  {
-    return m_block_line_section;
-  }
-
-  void set_block_line_section (int block_line_section)
-  {
-    m_block_line_section = block_line_section;
-  }
-
   bool locations_valid () const
   {
     return m_locations_valid;
@@ -1883,10 +1873,6 @@ struct compunit_symtab
   /* List of all symbol scope blocks for this symtab.  It is shared among
      all symtabs in a given compilation unit.  */
   struct blockvector *m_blockvector;
-
-  /* Section in objfile->section_offsets for the blockvector and
-     the linetable.  Probably always SECT_OFF_TEXT.  */
-  int m_block_line_section;
 
   /* Symtab has been compiled with both optimizations and debug info so that
      GDB may stop skipping prologues as variables locations are valid already

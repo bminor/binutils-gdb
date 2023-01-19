@@ -718,9 +718,7 @@ call_site_target::iterate_over_addresses
     case call_site_target::PHYSADDR:
       {
 	dwarf2_per_objfile *per_objfile = call_site->per_objfile;
-	compunit_symtab *cust = per_objfile->get_symtab (call_site->per_cu);
-	int sect_idx = cust->block_line_section ();
-	CORE_ADDR delta = per_objfile->objfile->section_offsets[sect_idx];
+	CORE_ADDR delta = per_objfile->objfile->text_section_offset ();
 
 	callback (m_loc.physaddr + delta);
       }
@@ -729,9 +727,7 @@ call_site_target::iterate_over_addresses
     case call_site_target::ADDRESSES:
       {
 	dwarf2_per_objfile *per_objfile = call_site->per_objfile;
-	compunit_symtab *cust = per_objfile->get_symtab (call_site->per_cu);
-	int sect_idx = cust->block_line_section ();
-	CORE_ADDR delta = per_objfile->objfile->section_offsets[sect_idx];
+	CORE_ADDR delta = per_objfile->objfile->text_section_offset ();
 
 	for (unsigned i = 0; i < m_loc.addresses.length; ++i)
 	  callback (m_loc.addresses.values[i] + delta);

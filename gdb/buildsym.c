@@ -974,8 +974,6 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
     set_block_compunit_symtab (b, cu);
   }
 
-  cu->set_block_line_section (SECT_OFF_TEXT (m_objfile));
-
   cu->set_macro_table (release_macros ());
 
   /* Default any symbols without a specified symtab to the primary symtab.  */

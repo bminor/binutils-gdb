@@ -342,8 +342,7 @@ compunit_symtab::find_call_site (CORE_ADDR pc) const
   if (m_call_site_htab == nullptr)
     return nullptr;
 
-  CORE_ADDR delta
-    = this->objfile ()->section_offsets[this->block_line_section ()];
+  CORE_ADDR delta = this->objfile ()->text_section_offset ();
   CORE_ADDR unrelocated_pc = pc - delta;
 
   struct call_site call_site_local (unrelocated_pc, nullptr, nullptr);

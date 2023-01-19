@@ -6436,9 +6436,7 @@ objfile_type (struct objfile *objfile)
 CORE_ADDR
 call_site::pc () const
 {
-  compunit_symtab *cust = this->per_objfile->get_symtab (this->per_cu);
-  CORE_ADDR delta
-	= this->per_objfile->objfile->section_offsets[cust->block_line_section ()];
+  CORE_ADDR delta = this->per_objfile->objfile->text_section_offset ();
   return m_unrelocated_pc + delta;
 }
 
