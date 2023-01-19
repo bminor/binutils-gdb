@@ -420,7 +420,7 @@ scache_lookup_or_alloc (SIM_CPU *cpu, IADDR pc, int n, SCACHE **bufp)
 /* Print cache access statics for CPU.  */
 
 void
-scache_print_profile (SIM_CPU *cpu, int verbose)
+scache_print_profile (SIM_CPU *cpu, bool verbose)
 {
   SIM_DESC sd = CPU_STATE (cpu);
   unsigned long hits = CPU_SCACHE_HITS (cpu);

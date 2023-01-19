@@ -20,6 +20,7 @@
 #ifndef SIM_SIM_H
 #define SIM_SIM_H 1
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -197,9 +198,9 @@ int sim_store_register (SIM_DESC sd, int regno, const void *buf, int length);
 
 /* Print whatever statistics the simulator has collected.
 
-   VERBOSE is currently unused and must always be zero.  */
+   When VERBOSE is enabled, extra details will be shown.  */
 
-void sim_info (SIM_DESC sd, int verbose);
+void sim_info (SIM_DESC sd, bool verbose);
 
 
 /* Return a memory map in XML format.

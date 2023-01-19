@@ -2272,7 +2272,7 @@ sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
 }
 
 void
-sim_info (SIM_DESC sd, int verbose)
+sim_info (SIM_DESC sd, bool verbose)
 {
   double timetaken = 
     (double) saved_state.asregs.ticks / (double) now_persec ();

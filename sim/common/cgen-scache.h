@@ -117,7 +117,7 @@ extern void scache_flush_cpu (SIM_CPU *);
 /* Scache profiling support.  */
 
 /* Print summary scache usage information.  */
-extern void scache_print_profile (SIM_CPU *cpu, int verbose);
+extern void scache_print_profile (SIM_CPU *cpu, bool verbose);
 
 #if WITH_PROFILE_SCACHE_P
 

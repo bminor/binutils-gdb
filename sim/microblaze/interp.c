@@ -368,7 +368,7 @@ microblaze_reg_fetch (SIM_CPU *cpu, int rn, void *memory, int length)
 }
 
 void
-sim_info (SIM_DESC sd, int verbose)
+sim_info (SIM_DESC sd, bool verbose)
 {
   SIM_CPU *cpu = STATE_CPU (sd, 0);
   host_callback *callback = STATE_CALLBACK (sd);

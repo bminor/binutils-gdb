@@ -391,7 +391,7 @@ sim_store_register (SIM_DESC sd, int regno, const void *buf, int length)
 /* Print out message associated with "info target".  */
 
 void
-sim_info (SIM_DESC sd, int verbose)
+sim_info (SIM_DESC sd, bool verbose)
 {
   check_desc (sd);
 

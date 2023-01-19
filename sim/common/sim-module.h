@@ -39,7 +39,7 @@ typedef SIM_RC (MODULE_INIT_FN) (SIM_DESC);
 typedef SIM_RC (MODULE_RESUME_FN) (SIM_DESC);
 typedef SIM_RC (MODULE_SUSPEND_FN) (SIM_DESC);
 typedef void   (MODULE_UNINSTALL_FN) (SIM_DESC);
-typedef void   (MODULE_INFO_FN) (SIM_DESC, int);
+typedef void   (MODULE_INFO_FN) (SIM_DESC, bool);
 
 
 /* Lists of installed handlers.  */
@@ -98,7 +98,7 @@ SIM_RC sim_module_suspend (SIM_DESC sd);
 SIM_RC sim_module_resume (SIM_DESC sd);
 
 /* Report general information on module */
-void sim_module_info (SIM_DESC sd, int verbose);
+void sim_module_info (SIM_DESC sd, bool verbose);
 
 
 /* Module private data */

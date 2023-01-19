@@ -515,7 +515,7 @@ sim_engine_run (SIM_DESC sd,
 }
 
 void
-sim_info (SIM_DESC sd, int verbose)
+sim_info (SIM_DESC sd, bool verbose)
 {
   const char *cpu_type;
   const struct bfd_arch_info *arch;

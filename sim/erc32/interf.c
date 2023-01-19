@@ -354,7 +354,7 @@ sim_read (SIM_DESC sd, uint64_t mem, void *buffer, uint64_t length)
 }
 
 void
-sim_info(SIM_DESC sd, int verbose)
+sim_info(SIM_DESC sd, bool verbose)
 {
     show_stat(&sregs);
 }

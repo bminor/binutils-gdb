@@ -149,7 +149,7 @@ sim_write (SIM_DESC sd, uint64_t mem, const void *buf, uint64_t length)
 }
 
 void
-sim_info (SIM_DESC sd, int verbose)
+sim_info (SIM_DESC sd, bool verbose)
 {
   TRACE(trace_gdb, ("sim_info(verbose=%d) called\n", verbose));
   psim_print_info (simulator, verbose);

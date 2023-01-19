@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
    sim-module. */
 
 void
-sim_info (SIM_DESC sd, int verbose)
+sim_info (SIM_DESC sd, bool verbose)
 {
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   sim_module_info (sd, verbose || STATE_VERBOSE_P (sd));

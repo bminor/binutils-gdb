@@ -705,7 +705,7 @@ sim_memory_map (SIM_DESC sd)
 }
 
 void
-sim_info (SIM_DESC sd, int verbose)
+sim_info (SIM_DESC sd, bool verbose)
 {
   printf ("The m32c minisim doesn't collect any statistics.\n");
 }

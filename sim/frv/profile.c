@@ -1991,7 +1991,7 @@ slot_names[] =
 };
 
 static void
-print_parallel (SIM_CPU *cpu, int verbose)
+print_parallel (SIM_CPU *cpu, bool verbose)
 {
   SIM_DESC sd = CPU_STATE (cpu);
   PROFILE_DATA *p = CPU_PROFILE_DATA (cpu);
@@ -2057,7 +2057,7 @@ print_parallel (SIM_CPU *cpu, int verbose)
 }
 
 void
-frv_profile_info (SIM_CPU *cpu, int verbose)
+frv_profile_info (SIM_CPU *cpu, bool verbose)
 {
   /* FIXME: Need to add smp support.  */
   PROFILE_DATA *p = CPU_PROFILE_DATA (cpu);

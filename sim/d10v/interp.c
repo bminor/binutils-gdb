@@ -1043,7 +1043,7 @@ sim_engine_run (SIM_DESC sd,
 }
 
 void
-sim_info (SIM_DESC sd, int verbose)
+sim_info (SIM_DESC sd, bool verbose)
 {
   char buf1[40];
   char buf2[40];

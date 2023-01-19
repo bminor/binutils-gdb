@@ -36,7 +36,7 @@
 #define M32R_DEFAULT_MEM_SIZE 0x2000000 /* 32M */
 
 static void free_state (SIM_DESC);
-static void print_m32r_misc_cpu (SIM_CPU *cpu, int verbose);
+static void print_m32r_misc_cpu (SIM_CPU *cpu, bool verbose);
 
 /* Cover function of sim_state_free to free the cpu buffers as well.  */
 
@@ -194,7 +194,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char * const *argv,
 /* PROFILE_CPU_CALLBACK */
 
 static void
-print_m32r_misc_cpu (SIM_CPU *cpu, int verbose)
+print_m32r_misc_cpu (SIM_CPU *cpu, bool verbose)
 {
   SIM_DESC sd = CPU_STATE (cpu);
   char buf[20];
