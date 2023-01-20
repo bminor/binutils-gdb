@@ -1576,12 +1576,29 @@ expand_templates (char *name, const char *str, htab_t opcode_hash_table,
   return idx;
 }
 
+static int mnemonic_cmp(const void *p1, const void *p2)
+{
+  const struct opcode_hash_entry *const *e1 = p1, *const *e2 = p2;
+  const char *s1 = (*e1)->name, *s2 = (*e2)->name;
+  unsigned int i;
+  size_t l1 = strlen (s1), l2 = strlen (s2);
+
+  for (i = 1; i <= l1 && i <= l2; ++i)
+    {
+      if (s1[l1 - i] != s2[l2 - i])
+	return (unsigned char)s1[l1 - i] - (unsigned char)s2[l2 - i];
+    }
+
+  return (int)(l1 - l2);
+}
+
 static void
 process_i386_opcodes (FILE *table)
 {
   FILE *fp;
   char buf[2048];
   unsigned int i, j, nr, offs;
+  size_t l;
   char *str, *p, *last, *name;
   htab_t opcode_hash_table;
   struct opcode_hash_entry **opcode_array = NULL;
@@ -1720,6 +1737,8 @@ process_i386_opcodes (FILE *table)
   fprintf (table, "};\n");
 
   /* Emit mnemonics and associated #define-s.  */
+  qsort (opcode_array, i, sizeof (*opcode_array), mnemonic_cmp);
+
   fp = fopen ("i386-mnem.h", "w");
   if (fp == NULL)
     fail (_("can't create i386-mnem.h, errno = %s\n"),
@@ -1731,14 +1750,28 @@ process_i386_opcodes (FILE *table)
   fprintf (table, "const char i386_mnemonics[] =\n");
   fprintf (fp, "\nextern const char i386_mnemonics[];\n\n");
 
-  for (offs = j = 0; j < i; j++)
+  for (l = strlen (opcode_array[offs = j = 0]->name); j < i; j++)
     {
+      const char *next = NULL;
+      size_t l1 = j + 1 < i ? strlen(next = opcode_array[j + 1]->name) : 0;
+
       name = opcode_array[j]->name;
-      fprintf (table, "  \"\\0\"\"%s\"\n", name);
       str = mkident (name);
-      fprintf (fp, "#define MN_%s %#x\n", str, offs + 1);
+      if (l < l1 && !strcmp(name, next + l1 - l))
+	{
+	  fprintf (fp, "#define MN_%s ", str);
+	  free (str);
+	  str = mkident (next);
+	  fprintf (fp, "(MN_%s + %u)\n", str, l1 - l);
+	}
+      else
+	{
+	  fprintf (table, "  \"\\0\"\"%s\"\n", name);
+	  fprintf (fp, "#define MN_%s %#x\n", str, offs + 1);
+	  offs += strlen (name) + 1;
+	}
       free (str);
-      offs += strlen (name) + 1;
+      l = l1;
     }
 
   fprintf (table, ";\n");
