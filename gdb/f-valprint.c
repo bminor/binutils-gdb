@@ -618,13 +618,11 @@ static void
 info_common_command_for_block (const struct block *block, const char *comname,
 			       int *any_printed)
 {
-  struct block_iterator iter;
-  struct symbol *sym;
   struct value_print_options opts;
 
   get_user_print_options (&opts);
 
-  ALL_BLOCK_SYMBOLS (block, iter, sym)
+  for (struct symbol *sym : block_iterator_range (block))
     if (sym->domain () == COMMON_BLOCK_DOMAIN)
       {
 	const struct common_block *common = sym->value_common_block ();

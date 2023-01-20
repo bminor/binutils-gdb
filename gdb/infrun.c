@@ -8123,8 +8123,6 @@ check_exception_resume (struct execution_control_state *ecs,
   try
     {
       const struct block *b;
-      struct block_iterator iter;
-      struct symbol *sym;
       int argno = 0;
 
       /* The exception breakpoint is a thread-specific breakpoint on
@@ -8142,7 +8140,7 @@ check_exception_resume (struct execution_control_state *ecs,
 	 handler.  */
 
       b = func->value_block ();
-      ALL_BLOCK_SYMBOLS (b, iter, sym)
+      for (struct symbol *sym : block_iterator_range (b))
 	{
 	  if (!sym->is_argument ())
 	    continue;

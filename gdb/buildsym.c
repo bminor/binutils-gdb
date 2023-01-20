@@ -997,7 +997,7 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
 
 	/* Note that we only want to fix up symbols from the local
 	   blocks, not blocks coming from included symtabs.  That is why
-	   we use ALL_DICT_SYMBOLS here and not ALL_BLOCK_SYMBOLS.  */
+	   we use ALL_DICT_SYMBOLS here and not a block iterator.  */
 	ALL_DICT_SYMBOLS (block->multidict (), miter, sym)
 	  if (sym->symtab () == NULL)
 	    sym->set_symtab (symtab);

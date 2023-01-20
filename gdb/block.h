@@ -595,15 +595,6 @@ extern int block_find_non_opaque_type (struct symbol *sym, void *data);
 extern int block_find_non_opaque_type_preferred (struct symbol *sym,
 						 void *data);
 
-/* Macro to loop through all symbols in BLOCK, in no particular
-   order.  ITER helps keep track of the iteration, and must be a
-   struct block_iterator.  SYM points to the current symbol.  */
-
-#define ALL_BLOCK_SYMBOLS(block, iter, sym)		\
-  for ((sym) = block_iterator_first ((block), &(iter));	\
-       (sym);						\
-       (sym) = block_iterator_next (&(iter)))
-
 /* Given a vector of pairs, allocate and build an obstack allocated
    blockranges struct for a block.  */
 struct blockranges *make_blockranges (struct objfile *objfile,

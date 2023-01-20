@@ -2459,12 +2459,10 @@ tfind_outside_command (const char *args, int from_tty)
 static void
 info_scope_command (const char *args_in, int from_tty)
 {
-  struct symbol *sym;
   struct bound_minimal_symbol msym;
   const struct block *block;
   const char *symname;
   const char *save_args = args_in;
-  struct block_iterator iter;
   int j, count = 0;
   struct gdbarch *gdbarch;
   int regno;
@@ -2492,7 +2490,7 @@ info_scope_command (const char *args_in, int from_tty)
   while (block != 0)
     {
       QUIT;			/* Allow user to bail out with ^C.  */
-      ALL_BLOCK_SYMBOLS (block, iter, sym)
+      for (struct symbol *sym : block_iterator_range (block))
 	{
 	  QUIT;			/* Allow user to bail out with ^C.  */
 	  if (count == 0)

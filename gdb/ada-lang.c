@@ -6111,10 +6111,8 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
       const std::string &ada_lookup_name = lookup_name.ada ().lookup_name ();
       const char *name = ada_lookup_name.c_str ();
       size_t name_len = ada_lookup_name.size ();
-      struct symbol *sym;
-      struct block_iterator iter;
 
-      ALL_BLOCK_SYMBOLS (block, iter, sym)
+      for (struct symbol *sym : block_iterator_range (block))
       {
 	if (symbol_matches_domain (sym->language (),
 				   sym->domain (), domain))
@@ -13049,10 +13047,7 @@ ada_add_exceptions_from_frame (compiled_regex *preg,
 
   while (block != 0)
     {
-      struct block_iterator iter;
-      struct symbol *sym;
-
-      ALL_BLOCK_SYMBOLS (block, iter, sym)
+      for (struct symbol *sym : block_iterator_range (block))
 	{
 	  switch (sym->aclass ())
 	    {
@@ -13134,10 +13129,8 @@ ada_add_global_exceptions (compiled_regex *preg,
 	  for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)
 	    {
 	      const struct block *b = bv->block (i);
-	      struct block_iterator iter;
-	      struct symbol *sym;
 
-	      ALL_BLOCK_SYMBOLS (b, iter, sym)
+	      for (struct symbol *sym : block_iterator_range (b))
 		if (ada_is_non_standard_exception_sym (sym)
 		    && name_matches_regex (sym->natural_name (), preg))
 		  {
@@ -13639,9 +13632,7 @@ public:
 					  const char *text, const char *word,
 					  enum type_code code) const override
   {
-    struct symbol *sym;
     const struct block *b, *surrounding_static_block = 0;
-    struct block_iterator iter;
 
     gdb_assert (code == TYPE_CODE_UNDEF);
 
@@ -13701,7 +13692,7 @@ public:
 	if (!b->superblock ())
 	  surrounding_static_block = b;   /* For elmin of dups */
 
-	ALL_BLOCK_SYMBOLS (b, iter, sym)
+	for (struct symbol *sym : block_iterator_range (b))
 	  {
 	    if (completion_skip_symbol (mode, sym))
 	      continue;
@@ -13722,7 +13713,7 @@ public:
 	  {
 	    QUIT;
 	    b = s->blockvector ()->global_block ();
-	    ALL_BLOCK_SYMBOLS (b, iter, sym)
+	    for (struct symbol *sym : block_iterator_range (b))
 	      {
 		if (completion_skip_symbol (mode, sym))
 		  continue;
@@ -13744,7 +13735,7 @@ public:
 	    /* Don't do this block twice.  */
 	    if (b == surrounding_static_block)
 	      continue;
-	    ALL_BLOCK_SYMBOLS (b, iter, sym)
+	    for (struct symbol *sym : block_iterator_range (b))
 	      {
 		if (completion_skip_symbol (mode, sym))
 		  continue;

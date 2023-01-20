@@ -751,10 +751,8 @@ print_frame_args (const frame_print_options &fp_opts,
   if (func)
     {
       const struct block *b = func->value_block ();
-      struct block_iterator iter;
-      struct symbol *sym;
 
-      ALL_BLOCK_SYMBOLS (b, iter, sym)
+      for (struct symbol *sym : block_iterator_range (b))
 	{
 	  struct frame_arg arg, entryarg;
 
@@ -2221,10 +2219,7 @@ static void
 iterate_over_block_locals (const struct block *b,
 			   iterate_over_block_arg_local_vars_cb cb)
 {
-  struct block_iterator iter;
-  struct symbol *sym;
-
-  ALL_BLOCK_SYMBOLS (b, iter, sym)
+  for (struct symbol *sym : block_iterator_range (b))
     {
       switch (sym->aclass ())
 	{
@@ -2470,10 +2465,7 @@ void
 iterate_over_block_arg_vars (const struct block *b,
 			     iterate_over_block_arg_local_vars_cb cb)
 {
-  struct block_iterator iter;
-  struct symbol *sym, *sym2;
-
-  ALL_BLOCK_SYMBOLS (b, iter, sym)
+  for (struct symbol *sym : block_iterator_range (b))
     {
       /* Don't worry about things which aren't arguments.  */
       if (sym->is_argument ())
@@ -2489,8 +2481,9 @@ iterate_over_block_arg_vars (const struct block *b,
 	     float).  There are also LOC_ARG/LOC_REGISTER pairs which
 	     are not combined in symbol-reading.  */
 
-	  sym2 = lookup_symbol_search_name (sym->search_name (),
-					    b, VAR_DOMAIN).symbol;
+	  struct symbol *sym2
+	    = lookup_symbol_search_name (sym->search_name (),
+					 b, VAR_DOMAIN).symbol;
 	  cb (sym->print_name (), sym2);
 	}
     }

@@ -3900,14 +3900,12 @@ find_label_symbols_in_block (const struct block *block,
 {
   if (completion_mode)
     {
-      struct block_iterator iter;
-      struct symbol *sym;
       size_t name_len = strlen (name);
 
       int (*cmp) (const char *, const char *, size_t);
       cmp = case_sensitivity == case_sensitive_on ? strncmp : strncasecmp;
 
-      ALL_BLOCK_SYMBOLS (block, iter, sym)
+      for (struct symbol *sym : block_iterator_range (block))
 	{
 	  if (symbol_matches_domain (sym->language (),
 				     sym->domain (), LABEL_DOMAIN)

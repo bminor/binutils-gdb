@@ -1503,12 +1503,9 @@ patch_type (struct type *type, struct type *real_type)
 static void
 patch_opaque_types (struct symtab *s)
 {
-  struct block_iterator iter;
-  struct symbol *real_sym;
-
   /* Go through the per-file symbols only.  */
   const struct block *b = s->compunit ()->blockvector ()->static_block ();
-  ALL_BLOCK_SYMBOLS (b, iter, real_sym)
+  for (struct symbol *real_sym : block_iterator_range (b))
     {
       /* Find completed typedefs to use to fix opaque ones.
 	 Remove syms from the chain when their types are stored,
