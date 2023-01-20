@@ -2462,48 +2462,48 @@ struct op
    need to update onebyte_has_modrm or twobyte_has_modrm.  */
 #define MODRM_CHECK  if (!ins->need_modrm) abort ()
 
-static const char *const intel_index16[] = {
+static const char intel_index16[][6] = {
   "bx+si", "bx+di", "bp+si", "bp+di", "si", "di", "bp", "bx"
 };
 
-static const char *const att_names64[] = {
+static const char att_names64[][8] = {
   "%rax", "%rcx", "%rdx", "%rbx", "%rsp", "%rbp", "%rsi", "%rdi",
   "%r8", "%r9", "%r10", "%r11", "%r12", "%r13", "%r14", "%r15"
 };
-static const char *const att_names32[] = {
+static const char att_names32[][8] = {
   "%eax", "%ecx", "%edx", "%ebx", "%esp", "%ebp", "%esi", "%edi",
   "%r8d", "%r9d", "%r10d", "%r11d", "%r12d", "%r13d", "%r14d", "%r15d"
 };
-static const char *const att_names16[] = {
+static const char att_names16[][8] = {
   "%ax", "%cx", "%dx", "%bx", "%sp", "%bp", "%si", "%di",
   "%r8w", "%r9w", "%r10w", "%r11w", "%r12w", "%r13w", "%r14w", "%r15w"
 };
-static const char *const att_names8[] = {
+static const char att_names8[][8] = {
   "%al", "%cl", "%dl", "%bl", "%ah", "%ch", "%dh", "%bh",
 };
-static const char *const att_names8rex[] = {
+static const char att_names8rex[][8] = {
   "%al", "%cl", "%dl", "%bl", "%spl", "%bpl", "%sil", "%dil",
   "%r8b", "%r9b", "%r10b", "%r11b", "%r12b", "%r13b", "%r14b", "%r15b"
 };
-static const char *const att_names_seg[] = {
+static const char att_names_seg[][4] = {
   "%es", "%cs", "%ss", "%ds", "%fs", "%gs", "%?", "%?",
 };
 static const char att_index64[] = "%riz";
 static const char att_index32[] = "%eiz";
-static const char *const att_index16[] = {
+static const char att_index16[][8] = {
   "%bx,%si", "%bx,%di", "%bp,%si", "%bp,%di", "%si", "%di", "%bp", "%bx"
 };
 
-static const char *const att_names_mm[] = {
+static const char att_names_mm[][8] = {
   "%mm0", "%mm1", "%mm2", "%mm3",
   "%mm4", "%mm5", "%mm6", "%mm7"
 };
 
-static const char *const att_names_bnd[] = {
+static const char att_names_bnd[][8] = {
   "%bnd0", "%bnd1", "%bnd2", "%bnd3"
 };
 
-static const char *const att_names_xmm[] = {
+static const char att_names_xmm[][8] = {
   "%xmm0", "%xmm1", "%xmm2", "%xmm3",
   "%xmm4", "%xmm5", "%xmm6", "%xmm7",
   "%xmm8", "%xmm9", "%xmm10", "%xmm11",
@@ -2514,7 +2514,7 @@ static const char *const att_names_xmm[] = {
   "%xmm28", "%xmm29", "%xmm30", "%xmm31"
 };
 
-static const char *const att_names_ymm[] = {
+static const char att_names_ymm[][8] = {
   "%ymm0", "%ymm1", "%ymm2", "%ymm3",
   "%ymm4", "%ymm5", "%ymm6", "%ymm7",
   "%ymm8", "%ymm9", "%ymm10", "%ymm11",
@@ -2525,7 +2525,7 @@ static const char *const att_names_ymm[] = {
   "%ymm28", "%ymm29", "%ymm30", "%ymm31"
 };
 
-static const char *const att_names_zmm[] = {
+static const char att_names_zmm[][8] = {
   "%zmm0", "%zmm1", "%zmm2", "%zmm3",
   "%zmm4", "%zmm5", "%zmm6", "%zmm7",
   "%zmm8", "%zmm9", "%zmm10", "%zmm11",
@@ -2536,12 +2536,12 @@ static const char *const att_names_zmm[] = {
   "%zmm28", "%zmm29", "%zmm30", "%zmm31"
 };
 
-static const char *const att_names_tmm[] = {
+static const char att_names_tmm[][8] = {
   "%tmm0", "%tmm1", "%tmm2", "%tmm3",
   "%tmm4", "%tmm5", "%tmm6", "%tmm7"
 };
 
-static const char *const att_names_mask[] = {
+static const char att_names_mask[][8] = {
   "%k0", "%k1", "%k2", "%k3", "%k4", "%k5", "%k6", "%k7"
 };
 
@@ -11291,22 +11291,22 @@ append_seg (instr_info *ins)
   switch (ins->active_seg_prefix)
     {
     case PREFIX_CS:
-      oappend_register (ins, "%cs");
+      oappend_register (ins, att_names_seg[1]);
       break;
     case PREFIX_DS:
-      oappend_register (ins, "%ds");
+      oappend_register (ins, att_names_seg[3]);
       break;
     case PREFIX_SS:
-      oappend_register (ins, "%ss");
+      oappend_register (ins, att_names_seg[2]);
       break;
     case PREFIX_ES:
-      oappend_register (ins, "%es");
+      oappend_register (ins, att_names_seg[0]);
       break;
     case PREFIX_FS:
-      oappend_register (ins, "%fs");
+      oappend_register (ins, att_names_seg[4]);
       break;
     case PREFIX_GS:
-      oappend_register (ins, "%gs");
+      oappend_register (ins, att_names_seg[5]);
       break;
     default:
       break;
@@ -11649,7 +11649,7 @@ static void
 print_register (instr_info *ins, unsigned int reg, unsigned int rexmask,
 		int bytemode, int sizeflag)
 {
-  const char *const *names;
+  const char (*names)[8];
 
   USED_REX (rexmask);
   if (ins->rex & rexmask)
@@ -11888,7 +11888,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 			 || bytemode == bnd_mode
 			 || bytemode == bnd_swap_mode);
       bool check_gather = false;
-      const char *const *indexes = NULL;
+      const char (*indexes)[8] = NULL;
 
       havebase = 1;
       base = ins->modrm.rm;
@@ -12177,8 +12177,8 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
       if (ins->modrm.mod != 0 || ins->modrm.rm != 6)
 	{
 	  oappend_char (ins, ins->open_char);
-	  oappend (ins, (ins->intel_syntax ? intel_index16
-			 : att_index16)[ins->modrm.rm]);
+	  oappend (ins, ins->intel_syntax ? intel_index16[ins->modrm.rm]
+					  : att_index16[ins->modrm.rm]);
 	  if (ins->intel_syntax
 	      && (disp || ins->modrm.mod != 0 || ins->modrm.rm == 6))
 	    {
@@ -12801,7 +12801,7 @@ OP_ESreg (instr_info *ins, int code, int sizeflag)
 	  intel_operand_size (ins, b_mode, sizeflag);
 	}
     }
-  oappend_register (ins, "%es");
+  oappend_register (ins, att_names_seg[0]);
   oappend_char (ins, ':');
   ptr_reg (ins, code, sizeflag);
 }
@@ -12898,7 +12898,7 @@ OP_MMX (instr_info *ins, int bytemode ATTRIBUTE_UNUSED,
 	int sizeflag ATTRIBUTE_UNUSED)
 {
   int reg = ins->modrm.reg;
-  const char *const *names;
+  const char (*names)[8];
 
   ins->used_prefixes |= (ins->prefixes & PREFIX_DATA);
   if (ins->prefixes & PREFIX_DATA)
@@ -12916,7 +12916,7 @@ OP_MMX (instr_info *ins, int bytemode ATTRIBUTE_UNUSED,
 static void
 print_vector_reg (instr_info *ins, unsigned int reg, int bytemode)
 {
-  const char *const *names;
+  const char (*names)[8];
 
   if (bytemode == xmmq_mode
       || bytemode == evex_half_bcst_xmmqh_mode
@@ -13014,7 +13014,7 @@ static void
 OP_EM (instr_info *ins, int bytemode, int sizeflag)
 {
   int reg;
-  const char *const *names;
+  const char (*names)[8];
 
   if (ins->modrm.mod != 3)
     {
@@ -13370,8 +13370,8 @@ OP_Monitor (instr_info *ins, int bytemode ATTRIBUTE_UNUSED,
   /* monitor %{e,r,}ax,%ecx,%edx"  */
   if (!ins->intel_syntax)
     {
-      const char *const *names = (ins->address_mode == mode_64bit
-				  ? att_names64 : att_names32);
+      const char (*names)[8] = (ins->address_mode == mode_64bit
+				? att_names64 : att_names32);
 
       if (ins->prefixes & PREFIX_ADDR)
 	{
@@ -13547,7 +13547,7 @@ CMPXCHG8B_Fixup (instr_info *ins, int bytemode, int sizeflag)
 static void
 XMM_Fixup (instr_info *ins, int reg, int sizeflag ATTRIBUTE_UNUSED)
 {
-  const char *const *names = att_names_xmm;
+  const char (*names)[8] = att_names_xmm;
 
   if (ins->need_vex)
     {
@@ -13588,7 +13588,7 @@ static void
 OP_VEX (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 {
   int reg, modrm_reg, sib_index = -1;
-  const char *const *names;
+  const char (*names)[8];
 
   if (!ins->need_vex)
     abort ();
@@ -13763,7 +13763,7 @@ static void
 OP_REG_VexI4 (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 {
   int reg;
-  const char *const *names = att_names_xmm;
+  const char (*names)[8] = att_names_xmm;
 
   FETCH_DATA (ins->info, ins->codep + 1);
   reg = *ins->codep++;
