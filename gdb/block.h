@@ -486,6 +486,56 @@ extern struct symbol *block_iterator_first
 
 extern struct symbol *block_iterator_next (struct block_iterator *iterator);
 
+/* An iterator that wraps a block_iterator.  The naming here is
+   unfortunate, but block_iterator was named before gdb switched to
+   C++.  */
+struct block_iterator_wrapper
+{
+  typedef block_iterator_wrapper self_type;
+  typedef struct symbol *value_type;
+
+  explicit block_iterator_wrapper (const struct block *block,
+				   const lookup_name_info *name = nullptr)
+    : m_sym (block_iterator_first (block, &m_iter, name))
+  {
+  }
+
+  block_iterator_wrapper ()
+    : m_sym (nullptr)
+  {
+  }
+
+  value_type operator* () const
+  {
+    return m_sym;
+  }
+
+  bool operator== (const self_type &other) const
+  {
+    return m_sym == other.m_sym;
+  }
+
+  bool operator!= (const self_type &other) const
+  {
+    return m_sym != other.m_sym;
+  }
+
+  self_type &operator++ ()
+  {
+    m_sym = block_iterator_next (&m_iter);
+    return *this;
+  }
+
+private:
+
+  struct symbol *m_sym;
+  struct block_iterator m_iter;
+};
+
+/* An iterator range for block_iterator_wrapper.  */
+
+typedef iterator_range<block_iterator_wrapper> block_iterator_range;
+
 /* Return true if symbol A is the best match possible for DOMAIN.  */
 
 extern bool best_symbol (struct symbol *a, const domain_enum domain);
