@@ -987,7 +987,7 @@ insn_template;
 /* these are for register name --> number & type hash lookup */
 typedef struct
 {
-  const char *reg_name;
+  char reg_name[8];
   i386_operand_type reg_type;
   unsigned char reg_flags;
 #define RegRex	    0x1  /* Extended register.  */
