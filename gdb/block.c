@@ -692,16 +692,13 @@ block_lookup_symbol (const struct block *block, const char *name,
 		     symbol_name_match_type match_type,
 		     const domain_enum domain)
 {
-  struct block_iterator iter;
-  struct symbol *sym;
-
   lookup_name_info lookup_name (name, match_type);
 
   if (!block->function ())
     {
       struct symbol *other = NULL;
 
-      ALL_BLOCK_SYMBOLS_WITH_NAME (block, lookup_name, iter, sym)
+      for (struct symbol *sym : block_iterator_range (block, &lookup_name))
 	{
 	  /* See comment related to PR gcc/debug/91507 in
 	     block_lookup_symbol_primary.  */
@@ -730,7 +727,7 @@ block_lookup_symbol (const struct block *block, const char *name,
 
       struct symbol *sym_found = NULL;
 
-      ALL_BLOCK_SYMBOLS_WITH_NAME (block, lookup_name, iter, sym)
+      for (struct symbol *sym : block_iterator_range (block, &lookup_name))
 	{
 	  if (symbol_matches_domain (sym->language (),
 				     sym->domain (), domain))
@@ -815,16 +812,13 @@ block_find_symbol (const struct block *block, const char *name,
 		   const domain_enum domain,
 		   block_symbol_matcher_ftype *matcher, void *data)
 {
-  struct block_iterator iter;
-  struct symbol *sym;
-
   lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
 
   /* Verify BLOCK is STATIC_BLOCK or GLOBAL_BLOCK.  */
   gdb_assert (block->superblock () == NULL
 	      || block->superblock ()->superblock () == NULL);
 
-  ALL_BLOCK_SYMBOLS_WITH_NAME (block, lookup_name, iter, sym)
+  for (struct symbol *sym : block_iterator_range (block, &lookup_name))
     {
       /* MATCHER is deliberately called second here so that it never sees
 	 a non-domain-matching symbol.  */

@@ -265,24 +265,18 @@ blpy_getitem (PyObject *self, PyObject *key)
 
   lookup_name_info lookup_name (name.get(), symbol_name_match_type::FULL);
 
-  /* We use ALL_BLOCK_SYMBOLS_WITH_NAME instead of block_lookup_symbol so
-     that we can look up symbols irrespective of the domain, matching the
-     iterator. It would be confusing if the iterator returns symbols you
-     can't find via getitem.  */
-  struct block_iterator iter;
-  struct symbol *sym = nullptr;
-  ALL_BLOCK_SYMBOLS_WITH_NAME (block, lookup_name, iter, sym)
+  /* We use an iterator instead of block_lookup_symbol so that we can
+     look up symbols irrespective of the domain, matching the
+     iterator. It would be confusing if the iterator returns symbols
+     you can't find via getitem.  */
+  for (struct symbol *sym : block_iterator_range (block, &lookup_name))
     {
       /* Just stop at the first match */
-      break;
+      return symbol_to_symbol_object (sym);
     }
 
-  if (sym == nullptr)
-    {
-      PyErr_SetObject (PyExc_KeyError, key);
-      return nullptr;
-    }
-  return symbol_to_symbol_object (sym);
+  PyErr_SetObject (PyExc_KeyError, key);
+  return nullptr;
 }
 
 static void

@@ -2771,10 +2771,7 @@ iterate_over_symbols (const struct block *block,
 		      const domain_enum domain,
 		      gdb::function_view<symbol_found_callback_ftype> callback)
 {
-  struct block_iterator iter;
-  struct symbol *sym;
-
-  ALL_BLOCK_SYMBOLS_WITH_NAME (block, name, iter, sym)
+  for (struct symbol *sym : block_iterator_range (block, &name))
     {
       if (symbol_matches_domain (sym->language (), sym->domain (), domain))
 	{

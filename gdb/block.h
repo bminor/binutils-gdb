@@ -604,16 +604,6 @@ extern int block_find_non_opaque_type_preferred (struct symbol *sym,
        (sym);						\
        (sym) = block_iterator_next (&(iter)))
 
-/* Macro to loop through all symbols in BLOCK with a name that matches
-   NAME, in no particular order.  ITER helps keep track of the
-   iteration, and must be a struct block_iterator.  SYM points to the
-   current symbol.  */
-
-#define ALL_BLOCK_SYMBOLS_WITH_NAME(block, name, iter, sym)		\
-  for ((sym) = block_iterator_first ((block), &(iter), &(name));	\
-       (sym) != NULL;							\
-       (sym) = block_iterator_next (&(iter)))
-
 /* Given a vector of pairs, allocate and build an obstack allocated
    blockranges struct for a block.  */
 struct blockranges *make_blockranges (struct objfile *objfile,
