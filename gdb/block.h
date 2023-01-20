@@ -449,6 +449,9 @@ struct block_iterator
     const struct block *block;
   } d;
 
+  /* If we're trying to match a name, this will be non-NULL.  */
+  const lookup_name_info *name;
+
   /* If we're iterating over a single block, this is always -1.
      Otherwise, it holds the index of the current "included" symtab in
      the canonical symtab (that is, d.symtab->includes[idx]), with -1
@@ -493,10 +496,9 @@ extern struct symbol *block_iter_match_first (const struct block *block,
    symbols.  Don't call this if you've previously received NULL from
    block_iterator_match_first or block_iterator_match_next on this
    iteration.  And don't call it unless ITERATOR was created by a
-   previous call to block_iter_match_first with the same NAME.  */
+   previous call to block_iter_match_first.  */
 
-extern struct symbol *block_iter_match_next
-  (const lookup_name_info &name, struct block_iterator *iterator);
+extern struct symbol *block_iter_match_next (struct block_iterator *iterator);
 
 /* Return true if symbol A is the best match possible for DOMAIN.  */
 
@@ -574,7 +576,7 @@ extern int block_find_non_opaque_type_preferred (struct symbol *sym,
 #define ALL_BLOCK_SYMBOLS_WITH_NAME(block, name, iter, sym)		\
   for ((sym) = block_iter_match_first ((block), (name), &(iter));	\
        (sym) != NULL;							\
-       (sym) = block_iter_match_next ((name), &(iter)))
+       (sym) = block_iter_match_next (&(iter)))
 
 /* Given a vector of pairs, allocate and build an obstack allocated
    blockranges struct for a block.  */

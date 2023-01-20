@@ -453,12 +453,14 @@ get_block_compunit_symtab (const struct block *block)
 
 static void
 initialize_block_iterator (const struct block *block,
-			   struct block_iterator *iter)
+			   struct block_iterator *iter,
+			   const lookup_name_info *name = nullptr)
 {
   enum block_enum which;
   struct compunit_symtab *cu;
 
   iter->idx = -1;
+  iter->name = name;
 
   if (block->superblock () == NULL)
     {
@@ -585,7 +587,6 @@ block_iterator_next (struct block_iterator *iterator)
 
 static struct symbol *
 block_iter_match_step (struct block_iterator *iterator,
-		       const lookup_name_info &name,
 		       int first)
 {
   struct symbol *sym;
@@ -605,11 +606,11 @@ block_iter_match_step (struct block_iterator *iterator,
 	    return  NULL;
 
 	  block = cust->blockvector ()->block (iterator->which);
-	  sym = mdict_iter_match_first (block->multidict (), name,
+	  sym = mdict_iter_match_first (block->multidict (), *iterator->name,
 					&iterator->mdict_iter);
 	}
       else
-	sym = mdict_iter_match_next (name, &iterator->mdict_iter);
+	sym = mdict_iter_match_next (*iterator->name, &iterator->mdict_iter);
 
       if (sym != NULL)
 	return sym;
@@ -629,25 +630,26 @@ block_iter_match_first (const struct block *block,
 			const lookup_name_info &name,
 			struct block_iterator *iterator)
 {
-  initialize_block_iterator (block, iterator);
+  initialize_block_iterator (block, iterator, &name);
 
   if (iterator->which == FIRST_LOCAL_BLOCK)
     return mdict_iter_match_first (block->multidict (), name,
 				   &iterator->mdict_iter);
 
-  return block_iter_match_step (iterator, name, 1);
+  return block_iter_match_step (iterator, 1);
 }
 
 /* See block.h.  */
 
 struct symbol *
-block_iter_match_next (const lookup_name_info &name,
-		       struct block_iterator *iterator)
+block_iter_match_next (struct block_iterator *iterator)
 {
-  if (iterator->which == FIRST_LOCAL_BLOCK)
-    return mdict_iter_match_next (name, &iterator->mdict_iter);
+  gdb_assert (iterator->name != nullptr);
 
-  return block_iter_match_step (iterator, name, 0);
+  if (iterator->which == FIRST_LOCAL_BLOCK)
+    return mdict_iter_match_next (*iterator->name, &iterator->mdict_iter);
+
+  return block_iter_match_step (iterator, 0);
 }
 
 /* See block.h.  */
