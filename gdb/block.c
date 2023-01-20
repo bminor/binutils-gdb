@@ -377,29 +377,6 @@ block::global_block () const
   return block;
 }
 
-/* Allocate a block on OBSTACK, and initialize its elements to
-   zero/NULL.  This is useful for creating "dummy" blocks that don't
-   correspond to actual source files.
-
-   Warning: it sets the block's BLOCK_MULTIDICT to NULL, which isn't a
-   valid value.  If you really don't want the block to have a
-   dictionary, then you should subsequently set its BLOCK_MULTIDICT to
-   dict_create_linear (obstack, NULL).  */
-
-struct block *
-allocate_block (struct obstack *obstack)
-{
-  return new (obstack) struct block;
-}
-
-/* Allocate a global block.  */
-
-struct block *
-allocate_global_block (struct obstack *obstack)
-{
-  return new (obstack) struct global_block;
-}
-
 /* See block.h.  */
 
 void

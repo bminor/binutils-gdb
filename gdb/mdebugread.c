@@ -4723,7 +4723,7 @@ static struct block *
 new_block (struct objfile *objfile, enum block_type type,
 	   enum language language)
 {
-  struct block *retval = allocate_block (&objfile->objfile_obstack);
+  struct block *retval = new (&objfile->objfile_obstack) block;
 
   if (type == FUNCTION_BLOCK)
     retval->set_multidict (mdict_create_linear_expandable (language));

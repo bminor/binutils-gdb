@@ -567,7 +567,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
   int block_idx = FIRST_LOCAL_BLOCK;
   for (gdb_block &gdb_block_iter : stab->blocks)
     {
-      struct block *new_block = allocate_block (&objfile->objfile_obstack);
+      struct block *new_block = new (&objfile->objfile_obstack) block;
       struct symbol *block_name = new (&objfile->objfile_obstack) symbol;
       struct type *block_type = arch_type (objfile->arch (),
 					   TYPE_CODE_VOID,
@@ -609,9 +609,10 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
     {
       struct block *new_block;
 
-      new_block = (i == GLOBAL_BLOCK
-		   ? allocate_global_block (&objfile->objfile_obstack)
-		   : allocate_block (&objfile->objfile_obstack));
+      if (i == GLOBAL_BLOCK)
+	new_block = new (&objfile->objfile_obstack) global_block;
+      else
+	new_block = new (&objfile->objfile_obstack) block;
       new_block->set_multidict
 	(mdict_create_linear (&objfile->objfile_obstack, NULL));
       new_block->set_superblock (block_iter);

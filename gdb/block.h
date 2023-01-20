@@ -426,10 +426,6 @@ extern const struct block *block_for_pc (CORE_ADDR);
 
 extern const struct block *block_for_pc_sect (CORE_ADDR, struct obj_section *);
 
-extern struct block *allocate_block (struct obstack *obstack);
-
-extern struct block *allocate_global_block (struct obstack *obstack);
-
 /* A block iterator.  This structure should be treated as though it
    were opaque; it is only defined here because we want to support
    stack allocation of iterators.  */

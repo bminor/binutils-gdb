@@ -211,9 +211,10 @@ buildsym_compunit::finish_block_internal
   struct pending_block *pblock;
   struct pending_block *opblock;
 
-  block = (is_global
-	   ? allocate_global_block (&m_objfile->objfile_obstack)
-	   : allocate_block (&m_objfile->objfile_obstack));
+  if (is_global)
+    block = new (&m_objfile->objfile_obstack) global_block;
+  else
+    block = new (&m_objfile->objfile_obstack) struct block;
 
   if (symbol)
     {
