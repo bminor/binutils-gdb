@@ -609,7 +609,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
       if (i.imm_operands)
 	{
 	  as_bad (_("`%s': RC/SAE operand must precede immediate operands"),
-		  current_templates->start->name);
+		  insn_name (current_templates->start));
 	  return 0;
 	}
 
@@ -705,9 +705,9 @@ i386_intel_operand (char *operand_string, int got_a_float)
 
 	case O_dword_ptr:
 	  i.types[this_operand].bitfield.dword = 1;
-	  if ((current_templates->start->name[0] == 'l'
-	       && current_templates->start->name[2] == 's'
-	       && current_templates->start->name[3] == 0)
+	  if ((insn_name (current_templates->start)[0] == 'l'
+	       && insn_name (current_templates->start)[2] == 's'
+	       && insn_name (current_templates->start)[3] == 0)
 	      || (current_templates->start->opcode_modifier.opcodespace == SPACE_BASE
 		  && current_templates->start->base_opcode == 0x62 /* bound */))
 	    suffix = WORD_MNEM_SUFFIX;
@@ -727,9 +727,9 @@ i386_intel_operand (char *operand_string, int got_a_float)
 
 	case O_fword_ptr:
 	  i.types[this_operand].bitfield.fword = 1;
-	  if (current_templates->start->name[0] == 'l'
-	      && current_templates->start->name[2] == 's'
-	      && current_templates->start->name[3] == 0)
+	  if (insn_name (current_templates->start)[0] == 'l'
+	      && insn_name (current_templates->start)[2] == 's'
+	      && insn_name (current_templates->start)[3] == 0)
 	    suffix = LONG_MNEM_SUFFIX;
 	  else if (!got_a_float)
 	    {
@@ -990,7 +990,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	    if (i.rounding.type == RC_NamesTable[j].type)
 	      break;
 	  as_bad (_("`%s': misplaced `{%s}'"),
-		  current_templates->start->name, RC_NamesTable[j].name);
+		  insn_name (current_templates->start), RC_NamesTable[j].name);
 	  return 0;
 	}
     }

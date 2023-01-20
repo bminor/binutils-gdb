@@ -2426,6 +2426,11 @@ offset_in_range (offsetT val, int size)
   return val & mask;
 }
 
+static INLINE const char *insn_name (const insn_template *t)
+{
+  return t->name;
+}
+
 enum PREFIX_GROUP
 {
   PREFIX_EXIST = 0,
@@ -2989,8 +2994,8 @@ md_begin (void)
     (void) sizeof (sets == &current_templates->start);
     (void) sizeof (end == &current_templates->end);
     for (; sets < end; ++sets)
-      if (str_hash_insert (op_hash, (*sets)->name, sets, 0))
-	as_fatal (_("duplicate %s"), (*sets)->name);
+      if (str_hash_insert (op_hash, insn_name (*sets), sets, 0))
+	as_fatal (_("duplicate %s"), insn_name (*sets));
   }
 
   /* Initialize reg_hash hash table.  */
@@ -3809,7 +3814,7 @@ get_broadcast_bytes (const insn_template *t, bool diag)
 
   if (diag)
     as_warn (_("ambiguous broadcast for `%s', using %u-bit form"),
-	     t->name, bytes * 8);
+	     insn_name (t), bytes * 8);
 
   return bytes;
 }
@@ -4030,7 +4035,7 @@ check_hle (void)
     case PrefixNoTrack:
     case PrefixRep:
       as_bad (_("invalid instruction `%s' after `%s'"),
-	      i.tm.name, i.hle_prefix);
+	      insn_name (&i.tm), i.hle_prefix);
       return 0;
     case PrefixHLELock:
       if (i.prefix[LOCK_PREFIX])
@@ -4043,13 +4048,13 @@ check_hle (void)
       if (i.prefix[HLE_PREFIX] != XRELEASE_PREFIX_OPCODE)
 	{
 	  as_bad (_("instruction `%s' after `xacquire' not allowed"),
-		  i.tm.name);
+		  insn_name (&i.tm));
 	  return 0;
 	}
       if (i.mem_operands == 0 || !(i.flags[i.operands - 1] & Operand_Mem))
 	{
 	  as_bad (_("memory destination needed for instruction `%s'"
-		    " after `xrelease'"), i.tm.name);
+		    " after `xrelease'"), insn_name (&i.tm));
 	  return 0;
 	}
       return 1;
@@ -4544,7 +4549,7 @@ load_insn_p (void)
 	return 0;
 
       /* pop.   */
-      if (strcmp (i.tm.name, "pop") == 0)
+      if (strcmp (insn_name (&i.tm), "pop") == 0)
 	return 1;
     }
 
@@ -4723,7 +4728,7 @@ insert_lfence_after (void)
 	  && i.prefix[REP_PREFIX])
 	{
 	    as_warn (_("`%s` changes flags which would affect control flow behavior"),
-		     i.tm.name);
+		     insn_name (&i.tm));
 	}
       char *p = frag_more (3);
       *p++ = 0xf;
@@ -4765,7 +4770,7 @@ insert_lfence_before (void)
 	       && lfence_before_indirect_branch != lfence_branch_register)
 	{
 	  as_warn (_("indirect `%s` with memory operand should be avoided"),
-		   i.tm.name);
+		   insn_name (&i.tm));
 	  return;
 	}
       else
@@ -4776,7 +4781,7 @@ insert_lfence_before (void)
 	{
 	  as_warn_where (last_insn.file, last_insn.line,
 			 _("`%s` skips -mlfence-before-indirect-branch on `%s`"),
-			 last_insn.name, i.tm.name);
+			 last_insn.name, insn_name (&i.tm));
 	  return;
 	}
 
@@ -4797,7 +4802,7 @@ insert_lfence_before (void)
 	{
 	  as_warn_where (last_insn.file, last_insn.line,
 			 _("`%s` skips -mlfence-before-ret on `%s`"),
-			 last_insn.name, i.tm.name);
+			 last_insn.name, insn_name (&i.tm));
 	  return;
 	}
 
@@ -5014,7 +5019,7 @@ md_assemble (char *line)
 	  copy = NULL;
   no_match:
 	  pass1_err = i.error;
-	  pass1_mnem = current_templates->start->name;
+	  pass1_mnem = insn_name (current_templates->start);
 	  goto retry;
 	}
 
@@ -5057,11 +5062,11 @@ md_assemble (char *line)
 	  break;
 	case unsupported:
 	  as_bad (_("unsupported instruction `%s'"),
-		  pass1_mnem ? pass1_mnem : current_templates->start->name);
+		  pass1_mnem ? pass1_mnem : insn_name (current_templates->start));
 	  return;
 	case unsupported_on_arch:
 	  as_bad (_("`%s' is not supported on `%s%s'"),
-		  pass1_mnem ? pass1_mnem : current_templates->start->name,
+		  pass1_mnem ? pass1_mnem : insn_name (current_templates->start),
 		  cpu_arch_name ? cpu_arch_name : default_arch,
 		  cpu_sub_arch_name ? cpu_sub_arch_name : "");
 	  return;
@@ -5070,23 +5075,22 @@ md_assemble (char *line)
 	    {
 	      if (flag_code == CODE_64BIT)
 		as_bad (_("`%s%c' is not supported in 64-bit mode"),
-			pass1_mnem ? pass1_mnem : current_templates->start->name,
+			pass1_mnem ? pass1_mnem : insn_name (current_templates->start),
 			mnem_suffix);
 	      else
 		as_bad (_("`%s%c' is only supported in 64-bit mode"),
-			pass1_mnem ? pass1_mnem : current_templates->start->name,
+			pass1_mnem ? pass1_mnem : insn_name (current_templates->start),
 			mnem_suffix);
 	    }
 	  else
 	    {
 	      if (flag_code == CODE_64BIT)
 		as_bad (_("`%s' is not supported in 64-bit mode"),
-			pass1_mnem ? pass1_mnem : current_templates->start->name);
+			pass1_mnem ? pass1_mnem : insn_name (current_templates->start));
 	      else
 		as_bad (_("`%s' is only supported in 64-bit mode"),
-			pass1_mnem ? pass1_mnem : current_templates->start->name);
+			pass1_mnem ? pass1_mnem : insn_name (current_templates->start));
 	    }
-		  
 	  return;
 	case invalid_sib_address:
 	  err_msg = _("invalid SIB address");
@@ -5129,7 +5133,7 @@ md_assemble (char *line)
 	  break;
 	}
       as_bad (_("%s for `%s'"), err_msg,
-	      pass1_mnem ? pass1_mnem : current_templates->start->name);
+	      pass1_mnem ? pass1_mnem : insn_name (current_templates->start));
       return;
     }
 
@@ -5156,7 +5160,7 @@ md_assemble (char *line)
       if (j >= t->operands && simd)
 	(sse_check == check_warning
 	 ? as_warn
-	 : as_bad) (_("SSE instruction `%s' is used"), i.tm.name);
+	 : as_bad) (_("SSE instruction `%s' is used"), insn_name (&i.tm));
     }
 
   if (i.tm.opcode_modifier.fwait)
@@ -5167,7 +5171,7 @@ md_assemble (char *line)
   if (i.rep_prefix && i.tm.opcode_modifier.prefixok != PrefixRep)
     {
       as_bad (_("invalid instruction `%s' after `%s'"),
-		i.tm.name, i.rep_prefix);
+		insn_name (&i.tm), i.rep_prefix);
       return;
     }
 
@@ -5190,7 +5194,7 @@ md_assemble (char *line)
       /* Check for data size prefix on VEX/XOP/EVEX encoded and SIMD insns.  */
       if (i.prefix[DATA_PREFIX])
 	{
-	  as_bad (_("data size prefix invalid with `%s'"), i.tm.name);
+	  as_bad (_("data size prefix invalid with `%s'"), insn_name (&i.tm));
 	  return;
 	}
 
@@ -5202,7 +5206,7 @@ md_assemble (char *line)
 	  case BFD_RELOC_386_TLS_LE_32:
 	  case BFD_RELOC_X86_64_GOTTPOFF:
 	  case BFD_RELOC_X86_64_TLSLD:
-	    as_bad (_("TLS relocation cannot be used with `%s'"), i.tm.name);
+	    as_bad (_("TLS relocation cannot be used with `%s'"), insn_name (&i.tm));
 	    return;
 	  default:
 	    break;
@@ -5259,7 +5263,7 @@ md_assemble (char *line)
 	  || i.tm.opcode_modifier.opcodespace != SPACE_BASE))
     {
       as_bad (_("input/output port address isn't allowed with `%s'"),
-	      i.tm.name);
+	      insn_name (&i.tm));
       return;
     }
 
@@ -5275,7 +5279,7 @@ md_assemble (char *line)
   /* Check if IP-relative addressing requirements can be satisfied.  */
   if (i.tm.cpu_flags.bitfield.cpuprefetchi
       && !(i.base_reg && i.base_reg->reg_num == RegIP))
-    as_warn (_("'%s' only supports RIP-relative address"), i.tm.name);
+    as_warn (_("'%s' only supports RIP-relative address"), insn_name (&i.tm));
 
   /* Update operand types and check extended states.  */
   for (j = 0; j < i.operands; j++)
@@ -5329,7 +5333,7 @@ md_assemble (char *line)
   else if (!quiet_warnings && i.tm.opcode_modifier.operandconstraint == UGH)
     {
       /* UnixWare fsub no args is alias for fsubp, fadd -> faddp, etc.  */
-      as_warn (_("translating to `%sp'"), i.tm.name);
+      as_warn (_("translating to `%sp'"), insn_name (&i.tm));
     }
 
   if (is_any_vex_encoding (&i.tm))
@@ -5337,14 +5341,14 @@ md_assemble (char *line)
       if (!cpu_arch_flags.bitfield.cpui286)
 	{
 	  as_bad (_("instruction `%s' isn't supported outside of protected mode."),
-		  i.tm.name);
+		  insn_name (&i.tm));
 	  return;
 	}
 
       /* Check for explicit REX prefix.  */
       if (i.prefix[REX_PREFIX] || i.rex_encoding)
 	{
-	  as_bad (_("REX prefix invalid with `%s'"), i.tm.name);
+	  as_bad (_("REX prefix invalid with `%s'"), insn_name (&i.tm));
 	  return;
 	}
 
@@ -5454,7 +5458,7 @@ md_assemble (char *line)
   if (i.tm.opcode_modifier.isprefix)
     {
       last_insn.kind = last_insn_prefix;
-      last_insn.name = i.tm.name;
+      last_insn.name = insn_name (&i.tm);
       last_insn.file = as_where (&last_insn.line);
     }
   else
@@ -5535,7 +5539,7 @@ parse_insn (const char *line, char *mnemonic)
 	      as_bad ((flag_code != CODE_64BIT
 		       ? _("`%s' is only supported in 64-bit mode")
 		       : _("`%s' is not supported in 64-bit mode")),
-		      current_templates->start->name);
+		      insn_name (current_templates->start));
 	      return NULL;
 	    }
 	  /* If we are in 16-bit mode, do not allow addr16 or data16.
@@ -5547,7 +5551,7 @@ parse_insn (const char *line, char *mnemonic)
 		  ^ (flag_code == CODE_16BIT)))
 	    {
 	      as_bad (_("redundant %s prefix"),
-		      current_templates->start->name);
+		      insn_name (current_templates->start));
 	      return NULL;
 	    }
 
@@ -5609,15 +5613,15 @@ parse_insn (const char *line, char *mnemonic)
 		  return NULL;
 		case PREFIX_DS:
 		  if (current_templates->start->cpu_flags.bitfield.cpuibt)
-		    i.notrack_prefix = current_templates->start->name;
+		    i.notrack_prefix = insn_name (current_templates->start);
 		  break;
 		case PREFIX_REP:
 		  if (current_templates->start->cpu_flags.bitfield.cpuhle)
-		    i.hle_prefix = current_templates->start->name;
+		    i.hle_prefix = insn_name (current_templates->start);
 		  else if (current_templates->start->cpu_flags.bitfield.cpumpx)
-		    i.bnd_prefix = current_templates->start->name;
+		    i.bnd_prefix = insn_name (current_templates->start);
 		  else
-		    i.rep_prefix = current_templates->start->name;
+		    i.rep_prefix = insn_name (current_templates->start);
 		  break;
 		default:
 		  break;
@@ -6792,8 +6796,8 @@ match_template (char mnem_suffix)
 	  && !cpu_arch_flags.bitfield.cpui386
 	  && (intel_syntax
 	      ? (t->opcode_modifier.mnemonicsize != IGNORESIZE
-		 && !intel_float_operand (t->name))
-	      : intel_float_operand (t->name) != 2)
+		 && !intel_float_operand (insn_name (t)))
+	      : intel_float_operand (insn_name (t)) != 2)
 	  && (t->operands == i.imm_operands
 	      || (operand_types[i.imm_operands].bitfield.class != RegMMX
 	       && operand_types[i.imm_operands].bitfield.class != RegSIMD
@@ -7103,14 +7107,14 @@ match_template (char mnem_suffix)
     {
       if (!intel_syntax
 	  && (i.jumpabsolute != (t->opcode_modifier.jump == JUMP_ABSOLUTE)))
-	as_warn (_("indirect %s without `*'"), t->name);
+	as_warn (_("indirect %s without `*'"), insn_name (t));
 
       if (t->opcode_modifier.isprefix
 	  && t->opcode_modifier.mnemonicsize == IGNORESIZE)
 	{
 	  /* Warn them that a data or address size prefix doesn't
 	     affect assembly of the next line of code.  */
-	  as_warn (_("stand-alone `%s' prefix"), t->name);
+	  as_warn (_("stand-alone `%s' prefix"), insn_name (t));
 	}
     }
 
@@ -7170,7 +7174,7 @@ check_string (void)
   if (i.seg[op] != NULL && i.seg[op] != reg_es)
     {
       as_bad (_("`%s' operand %u must use `%ses' segment"),
-	      i.tm.name,
+	      insn_name (&i.tm),
 	      intel_syntax ? i.tm.operands - es_op : es_op + 1,
 	      register_prefix);
       return 0;
@@ -7309,7 +7313,7 @@ process_suffix (void)
 	  /* Warn about changed behavior for segment register push/pop.  */
 	  else if ((i.tm.base_opcode | 1) == 0x07)
 	    as_warn (_("generating 32-bit `%s', unlike earlier gas versions"),
-		     i.tm.name);
+		     insn_name (&i.tm));
 	}
     }
   else if (!i.suffix
@@ -7425,13 +7429,13 @@ process_suffix (void)
 	      && (i.tm.opcode_modifier.mnemonicsize != DEFAULTSIZE
 		  || operand_check == check_error))
 	    {
-	      as_bad (_("ambiguous operand size for `%s'"), i.tm.name);
+	      as_bad (_("ambiguous operand size for `%s'"), insn_name (&i.tm));
 	      return 0;
 	    }
 	  if (operand_check == check_error)
 	    {
 	      as_bad (_("no instruction mnemonic suffix given and "
-			"no register operands; can't size `%s'"), i.tm.name);
+			"no register operands; can't size `%s'"), insn_name (&i.tm));
 	      return 0;
 	    }
 	  if (operand_check == check_warning)
@@ -7440,7 +7444,7 @@ process_suffix (void)
 		       ? _("ambiguous operand size")
 		       : _("no instruction mnemonic suffix given and "
 			   "no register operands"),
-		       i.tm.name);
+		       insn_name (&i.tm));
 
 	  if (i.tm.opcode_modifier.floatmf)
 	    i.suffix = SHORT_MNEM_SUFFIX;
@@ -7578,7 +7582,7 @@ process_suffix (void)
 	      && i.op[0].regs->reg_type.bitfield.word)
 	    {
 	      as_bad (_("16-bit addressing unavailable for `%s'"),
-		      i.tm.name);
+		      insn_name (&i.tm));
 	      return 0;
 	    }
 
@@ -7646,7 +7650,7 @@ process_suffix (void)
 		}
 
 	      as_bad (_("invalid register operand size for `%s'"),
-		      i.tm.name);
+		      insn_name (&i.tm));
 	      return 0;
 	    }
 	}
@@ -7687,7 +7691,7 @@ check_byte_reg (void)
       /* Any other register is bad.  */
       as_bad (_("`%s%s' not allowed with `%s%c'"),
 	      register_prefix, i.op[op].regs->reg_name,
-	      i.tm.name, i.suffix);
+	      insn_name (&i.tm), i.suffix);
       return 0;
     }
   return 1;
@@ -7713,7 +7717,7 @@ check_long_reg (void)
 	as_bad (_("`%s%s' not allowed with `%s%c'"),
 		register_prefix,
 		i.op[op].regs->reg_name,
-		i.tm.name,
+		insn_name (&i.tm),
 		i.suffix);
 	return 0;
       }
@@ -7761,7 +7765,7 @@ check_qword_reg (void)
 	as_bad (_("`%s%s' not allowed with `%s%c'"),
 		register_prefix,
 		i.op[op].regs->reg_name,
-		i.tm.name,
+		insn_name (&i.tm),
 		i.suffix);
 	return 0;
       }
@@ -7800,7 +7804,7 @@ check_word_reg (void)
 	as_bad (_("`%s%s' not allowed with `%s%c'"),
 		register_prefix,
 		i.op[op].regs->reg_name,
-		i.tm.name,
+		insn_name (&i.tm),
 		i.suffix);
 	return 0;
       }
@@ -8057,7 +8061,7 @@ process_operands (void)
 		 register_prefix, i.op[1].regs->reg_name,
 		 register_prefix, i.op[1].regs->reg_name, first_reg_in_group,
 		 register_prefix, i.op[1].regs->reg_name, last_reg_in_group,
-		 i.tm.name);
+		 insn_name (&i.tm));
     }
   else if (i.tm.opcode_modifier.operandconstraint == REG_KLUDGE)
     {
@@ -8097,7 +8101,7 @@ process_operands (void)
 	    && i.op[0].regs->reg_num < 4)
 	{
 	  as_bad (_("you can't `%s %s%s'"),
-		  i.tm.name, register_prefix, i.op[0].regs->reg_name);
+		  insn_name (&i.tm), register_prefix, i.op[0].regs->reg_name);
 	  return 0;
 	}
       if (i.op[0].regs->reg_num > 3
@@ -8138,13 +8142,13 @@ process_operands (void)
 	  if (i.operands != 2)
 	    {
 	      /* Extraneous `l' suffix on fp insn.  */
-	      as_warn (_("translating to `%s %s%s'"), i.tm.name,
+	      as_warn (_("translating to `%s %s%s'"), insn_name (&i.tm),
 		       register_prefix, i.op[0].regs->reg_name);
 	    }
 	  else if (i.op[0].regs->reg_type.bitfield.instance != Accum)
 	    {
 	      /* Reversed arguments on faddp or fmulp.  */
-	      as_warn (_("translating to `%s %s%s,%s%s'"), i.tm.name,
+	      as_warn (_("translating to `%s %s%s,%s%s'"), insn_name (&i.tm),
 		       register_prefix, i.op[!intel_syntax].regs->reg_name,
 		       register_prefix, i.op[intel_syntax].regs->reg_name);
 	    }
@@ -8157,7 +8161,7 @@ process_operands (void)
       && !is_any_vex_encoding(&i.tm))
     {
       if (!quiet_warnings)
-	as_warn (_("segment override on `%s' is ineffectual"), i.tm.name);
+	as_warn (_("segment override on `%s' is ineffectual"), insn_name (&i.tm));
       if (optimize)
 	{
 	  i.seg[0] = NULL;
@@ -8889,7 +8893,7 @@ output_branch (void)
     }
 
   if (i.prefixes != 0)
-    as_warn (_("skipping prefixes on `%s'"), i.tm.name);
+    as_warn (_("skipping prefixes on `%s'"), insn_name (&i.tm));
 
   /* It's always a symbol;  End frag & setup for relax.
      Make sure there is enough room in this frag for the largest
@@ -9037,7 +9041,7 @@ output_jump (void)
     }
 
   if (i.prefixes != 0)
-    as_warn (_("skipping prefixes on `%s'"), i.tm.name);
+    as_warn (_("skipping prefixes on `%s'"), insn_name (&i.tm));
 
   if (now_seg == absolute_section)
     {
@@ -9119,7 +9123,7 @@ output_interseg_jump (void)
     size = 2;
 
   if (i.prefixes != 0)
-    as_warn (_("skipping prefixes on `%s'"), i.tm.name);
+    as_warn (_("skipping prefixes on `%s'"), insn_name (&i.tm));
 
   if (now_seg == absolute_section)
     {
@@ -9438,7 +9442,7 @@ add_fused_jcc_padding_frag_p (enum mf_cmp_kind* mf_cmp_p)
       if (flag_debug)
 	as_warn_where (last_insn.file, last_insn.line,
 		       _("`%s` skips -malign-branch-boundary on `%s`"),
-		       last_insn.name, i.tm.name);
+		       last_insn.name, insn_name (&i.tm));
     }
 
   return 0;
@@ -9470,7 +9474,7 @@ add_branch_prefix_frag_p (void)
   if (flag_debug)
     as_warn_where (last_insn.file, last_insn.line,
 		   _("`%s` skips -malign-branch-boundary on `%s`"),
-		   last_insn.name, i.tm.name);
+		   last_insn.name, insn_name (&i.tm));
 
   return 0;
 }
@@ -9559,7 +9563,7 @@ add_branch_padding_frag_p (enum align_branch_kind *branch_p,
       if (flag_debug)
 	as_warn_where (last_insn.file, last_insn.line,
 		       _("`%s` skips -malign-branch-boundary on `%s`"),
-		       last_insn.name, i.tm.name);
+		       last_insn.name, insn_name (&i.tm));
       return 0;
     }
 
@@ -9759,10 +9763,10 @@ output_insn (void)
 	  /* Encode lfence, mfence, and sfence as
 	     f0 83 04 24 00   lock addl $0x0, (%{re}sp).  */
 	  if (flag_code == CODE_16BIT)
-	    as_bad (_("Cannot convert `%s' in 16-bit mode"), i.tm.name);
+	    as_bad (_("Cannot convert `%s' in 16-bit mode"), insn_name (&i.tm));
 	  else if (omit_lock_prefix)
 	    as_bad (_("Cannot convert `%s' with `-momit-lock-prefix=yes' in effect"),
-		    i.tm.name);
+		    insn_name (&i.tm));
 	  else if (now_seg != absolute_section)
 	    {
 	      offsetT val = 0x240483f0ULL;
@@ -11673,7 +11677,7 @@ i386_att_operand (char *operand_string)
 	    if (i.rounding.type == RC_NamesTable[j].type)
 	      break;
 	  as_bad (_("`%s': misplaced `{%s}'"),
-		  current_templates->start->name, RC_NamesTable[j].name);
+		  insn_name (current_templates->start), RC_NamesTable[j].name);
 	  return 0;
 	}
     }
@@ -11695,7 +11699,7 @@ i386_att_operand (char *operand_string)
       if (i.rounding.type != rc_none)
 	{
 	  as_bad (_("`%s': RC/SAE operand must follow immediate operands"),
-		  current_templates->start->name);
+		  insn_name (current_templates->start));
 	  return 0;
 	}
     }
@@ -11708,7 +11712,7 @@ i386_att_operand (char *operand_string)
 	      && i.op[0].regs->reg_type.bitfield.class != Reg))
 	{
 	  as_bad (_("`%s': misplaced `%s'"),
-		  current_templates->start->name, operand_string);
+		  insn_name (current_templates->start), operand_string);
 	  return 0;
 	}
     }
