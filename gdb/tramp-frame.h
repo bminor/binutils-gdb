@@ -22,7 +22,6 @@
 
 #include "frame.h"		/* For "enum frame_type".  */
 
-struct trad_frame;
 class frame_info_ptr;
 struct trad_frame_cache;
 
