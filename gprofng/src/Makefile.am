@@ -160,7 +160,7 @@ gp_display_text_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK) $(ZLIB)
 
 if BUILD_MAN
 
-man_MANS = gprofng.1 \
+man_MANS = \
 	gp-archive.1 \
 	gp-collect-app.1 \
 	gp-display-src.1 \
@@ -191,10 +191,6 @@ H2M_FILTER = | sed 's/\.TP/\.TP\n.B/' | sed 's/Commands:/\.SH COMMANDS/' \
   | sed 's/See also:/\.SH SEE ALSO/' | sed 's/Documentation:/.SH DOCUMENTATION/' \
   | sed 's/Limitations:/.SH LIMITATIONS/'
 
-gprofng.1: $(srcdir)/gprofng.cc $(common_mandeps) | ./gprofng$(EXEEXT)
-	$(AM_V_GEN)_BUILDING_MANPAGE=1 $(HELP2MAN) $(HELP2MAN_OPT) \
-	  --name=$(TEXT_GPROFNG) ./gprofng$(EXEEXT) $(H2M_FILTER) > $@
-
 gp-archive.1: $(srcdir)/gp-archive.cc $(common_mandeps) | ./gp-archive$(EXEEXT)
 	$(AM_V_GEN)_BUILDING_MANPAGE=1 $(HELP2MAN) $(HELP2MAN_OPT) \
 	  --name=$(TEXT_GP_ARCHIVE) ./gp-archive$(EXEEXT) $(H2M_FILTER) > $@
@@ -223,3 +219,5 @@ dist-hook: $(LIBGPROFNG)
 
 install-data-local: install-pkglibLTLIBRARIES
 	rm -f $(DESTDIR)/$(pkglibdir)/*.la $(DESTDIR)/$(pkglibdir)/*.a
+
+$(srcdir)/DbeSession.cc: QLParser.tab.hh

@@ -23,7 +23,7 @@ AUTOMAKE_OPTIONS = dejagnu foreign
 if BUILD_COLLECTOR
     COLLECTOR_SUBDIRS = libcollector
 endif
-if BUILD_MAN
+if BUILD_DOC
     DOC_SUBDIR = doc
 endif
 if BUILD_SRC
