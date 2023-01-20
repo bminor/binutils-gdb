@@ -6079,9 +6079,9 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
 
   arg_sym = NULL;
   found_sym = false;
-  for (sym = block_iter_match_first (block, lookup_name, &iter);
+  for (sym = block_iterator_first (block, &iter, &lookup_name);
        sym != NULL;
-       sym = block_iter_match_next (&iter))
+       sym = block_iterator_next (&iter))
     {
       if (symbol_matches_domain (sym->language (), sym->domain (), domain))
 	{

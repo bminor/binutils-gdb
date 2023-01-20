@@ -556,31 +556,6 @@ block_iterator_step (struct block_iterator *iterator, int first)
     }
 }
 
-/* See block.h.  */
-
-struct symbol *
-block_iterator_first (const struct block *block,
-		      struct block_iterator *iterator)
-{
-  initialize_block_iterator (block, iterator);
-
-  if (iterator->which == FIRST_LOCAL_BLOCK)
-    return mdict_iterator_first (block->multidict (), &iterator->mdict_iter);
-
-  return block_iterator_step (iterator, 1);
-}
-
-/* See block.h.  */
-
-struct symbol *
-block_iterator_next (struct block_iterator *iterator)
-{
-  if (iterator->which == FIRST_LOCAL_BLOCK)
-    return mdict_iterator_next (&iterator->mdict_iter);
-
-  return block_iterator_step (iterator, 0);
-}
-
 /* Perform a single step for a "match" block iterator, iterating
    across symbol tables as needed.  Returns the next symbol, or NULL
    when iteration is complete.  */
@@ -626,14 +601,23 @@ block_iter_match_step (struct block_iterator *iterator,
 /* See block.h.  */
 
 struct symbol *
-block_iter_match_first (const struct block *block,
-			const lookup_name_info &name,
-			struct block_iterator *iterator)
+block_iterator_first (const struct block *block,
+		      struct block_iterator *iterator,
+		      const lookup_name_info *name)
 {
-  initialize_block_iterator (block, iterator, &name);
+  initialize_block_iterator (block, iterator, name);
+
+  if (name == nullptr)
+    {
+      if (iterator->which == FIRST_LOCAL_BLOCK)
+	return mdict_iterator_first (block->multidict (),
+				     &iterator->mdict_iter);
+
+      return block_iterator_step (iterator, 1);
+    }
 
   if (iterator->which == FIRST_LOCAL_BLOCK)
-    return mdict_iter_match_first (block->multidict (), name,
+    return mdict_iter_match_first (block->multidict (), *name,
 				   &iterator->mdict_iter);
 
   return block_iter_match_step (iterator, 1);
@@ -642,9 +626,15 @@ block_iter_match_first (const struct block *block,
 /* See block.h.  */
 
 struct symbol *
-block_iter_match_next (struct block_iterator *iterator)
+block_iterator_next (struct block_iterator *iterator)
 {
-  gdb_assert (iterator->name != nullptr);
+  if (iterator->name == nullptr)
+    {
+      if (iterator->which == FIRST_LOCAL_BLOCK)
+	return mdict_iterator_next (&iterator->mdict_iter);
+
+      return block_iterator_step (iterator, 0);
+    }
 
   if (iterator->which == FIRST_LOCAL_BLOCK)
     return mdict_iter_match_next (*iterator->name, &iterator->mdict_iter);

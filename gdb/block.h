@@ -471,10 +471,13 @@ struct block_iterator
 };
 
 /* Initialize ITERATOR to point at the first symbol in BLOCK, and
-   return that first symbol, or NULL if BLOCK is empty.  */
+   return that first symbol, or NULL if BLOCK is empty.  If NAME is
+   not NULL, only return symbols matching that name.  */
 
-extern struct symbol *block_iterator_first (const struct block *block,
-					    struct block_iterator *iterator);
+extern struct symbol *block_iterator_first
+     (const struct block *block,
+      struct block_iterator *iterator,
+      const lookup_name_info *name = nullptr);
 
 /* Advance ITERATOR, and return the next symbol, or NULL if there are
    no more symbols.  Don't call this if you've previously received
@@ -482,23 +485,6 @@ extern struct symbol *block_iterator_first (const struct block *block,
    iteration.  */
 
 extern struct symbol *block_iterator_next (struct block_iterator *iterator);
-
-/* Initialize ITERATOR to point at the first symbol in BLOCK whose
-   search_name () matches NAME, and return that first symbol, or
-   NULL if there are no such symbols.  */
-
-extern struct symbol *block_iter_match_first (const struct block *block,
-					      const lookup_name_info &name,
-					      struct block_iterator *iterator);
-
-/* Advance ITERATOR to point at the next symbol in BLOCK whose
-   search_name () matches NAME, or NULL if there are no more such
-   symbols.  Don't call this if you've previously received NULL from
-   block_iterator_match_first or block_iterator_match_next on this
-   iteration.  And don't call it unless ITERATOR was created by a
-   previous call to block_iter_match_first.  */
-
-extern struct symbol *block_iter_match_next (struct block_iterator *iterator);
 
 /* Return true if symbol A is the best match possible for DOMAIN.  */
 
@@ -574,9 +560,9 @@ extern int block_find_non_opaque_type_preferred (struct symbol *sym,
    current symbol.  */
 
 #define ALL_BLOCK_SYMBOLS_WITH_NAME(block, name, iter, sym)		\
-  for ((sym) = block_iter_match_first ((block), (name), &(iter));	\
+  for ((sym) = block_iterator_first ((block), &(iter), &(name));	\
        (sym) != NULL;							\
-       (sym) = block_iter_match_next (&(iter)))
+       (sym) = block_iterator_next (&(iter)))
 
 /* Given a vector of pairs, allocate and build an obstack allocated
    blockranges struct for a block.  */
