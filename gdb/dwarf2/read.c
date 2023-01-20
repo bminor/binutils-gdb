@@ -17588,7 +17588,6 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   int low_default_is_valid;
   int high_bound_is_count = 0;
   const char *name;
-  ULONGEST negative_mask;
 
   orig_base_type = read_subrange_index_type (die, cu);
 
@@ -17684,15 +17683,25 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
      with GCC, for instance, where the ambiguous DW_FORM_dataN form
      is used instead.  To work around that ambiguity, we treat
      the bounds as signed, and thus sign-extend their values, when
-     the base type is signed.  */
-  negative_mask =
-    -((ULONGEST) 1 << (base_type->length () * TARGET_CHAR_BIT - 1));
-  if (low.kind () == PROP_CONST
-      && !base_type->is_unsigned () && (low.const_val () & negative_mask))
-    low.set_const_val (low.const_val () | negative_mask);
-  if (high.kind () == PROP_CONST
-      && !base_type->is_unsigned () && (high.const_val () & negative_mask))
-    high.set_const_val (high.const_val () | negative_mask);
+     the base type is signed.
+
+     Skip it if the base type's length is larger than ULONGEST, to avoid
+     the undefined behavior of a too large left shift.  We don't really handle
+     constants larger than 8 bytes anyway, at the moment.  */
+
+  if (base_type->length () <= sizeof (ULONGEST))
+    {
+      ULONGEST negative_mask
+	= -((ULONGEST) 1 << (base_type->length () * TARGET_CHAR_BIT - 1));
+
+      if (low.kind () == PROP_CONST
+	  && !base_type->is_unsigned () && (low.const_val () & negative_mask))
+	low.set_const_val (low.const_val () | negative_mask);
+
+      if (high.kind () == PROP_CONST
+	  && !base_type->is_unsigned () && (high.const_val () & negative_mask))
+	high.set_const_val (high.const_val () | negative_mask);
+    }
 
   /* Check for bit and byte strides.  */
   struct dynamic_prop byte_stride_prop;

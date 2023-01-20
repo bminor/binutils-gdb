@@ -77,6 +77,26 @@ Dwarf::assemble $asm_file {
 		{name subrange_with_buggy_negative_bounds_variable}
 		{type :$subrange_with_buggy_negative_bounds_label}
 	    }
+
+	    # This subrange's base type is 16-bytes long (although the bounds fit in
+	    # signed 64-bit).  This is to test the fix for PR 29386.
+	    declare_labels a_16_byte_integer_label a_16_byte_subrange_label
+
+	    a_16_byte_integer_label: base_type {
+		{byte_size 16 udata}
+		{encoding @DW_ATE_signed}
+	    }
+
+	    a_16_byte_subrange_label: subrange_type {
+		{lower_bound -9223372036854775808 DW_FORM_sdata}
+		{upper_bound 9223372036854775807 DW_FORM_sdata}
+		{type :$a_16_byte_integer_label}
+	    }
+
+	    DW_TAG_variable {
+		{name a_16_byte_subrange_variable}
+		{type :$a_16_byte_subrange_label}
+	    }
 	}
     }
 }
@@ -92,3 +112,5 @@ gdb_test "ptype TByteArray" \
     "type = array \\\[0\\.\\.191\\\] of byte"
 gdb_test "ptype subrange_with_buggy_negative_bounds_variable" \
     "type = -16\\.\\.-12"
+gdb_test "ptype a_16_byte_subrange_variable" \
+    "type = -9223372036854775808\\.\\.9223372036854775807"
