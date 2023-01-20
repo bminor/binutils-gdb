@@ -271,6 +271,12 @@ struct block : public allocate_on_obstack
 
   struct dynamic_prop *static_link () const;
 
+private:
+
+  /* If the namespace_info is NULL, allocate it via OBSTACK and
+     initialize its members to zero.  */
+  void initialize_namespace (struct obstack *obstack);
+
   /* Addresses in the executable code that are in this block.  */
 
   CORE_ADDR m_start = 0;
@@ -303,12 +309,6 @@ struct block : public allocate_on_obstack
      startaddr and endaddr above.  */
 
   struct blockranges *m_ranges = nullptr;
-
-private:
-
-  /* If the namespace_info is NULL, allocate it via OBSTACK and
-     initialize its members to zero.  */
-  void initialize_namespace (struct obstack *obstack);
 };
 
 /* The global block is singled out so that we can provide a back-link
