@@ -378,15 +378,11 @@ block_static_block (const struct block *block)
   return block;
 }
 
-/* Return the static block associated to BLOCK.  Return NULL if block
-   is NULL.  */
+/* Return the static block associated to BLOCK.  */
 
 const struct block *
 block_global_block (const struct block *block)
 {
-  if (block == NULL)
-    return NULL;
-
   while (block->superblock () != NULL)
     block = block->superblock ();
 

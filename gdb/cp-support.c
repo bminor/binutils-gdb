@@ -1309,14 +1309,15 @@ add_symbol_overload_list_namespace (const char *func_name,
   /* Look in the static block.  */
   block = get_selected_block (0);
   block = block == nullptr ? nullptr : block_static_block (block);
-  if (block)
-    add_symbol_overload_list_block (name, block, overload_list);
+  if (block != nullptr)
+    {
+      add_symbol_overload_list_block (name, block, overload_list);
 
-  /* Look in the global block.  */
-  block = block_global_block (block);
-  if (block)
-    add_symbol_overload_list_block (name, block, overload_list);
-
+      /* Look in the global block.  */
+      block = block_global_block (block);
+      if (block)
+	add_symbol_overload_list_block (name, block, overload_list);
+    }
 }
 
 /* Search the namespace of the given type and namespace of and public
