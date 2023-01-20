@@ -337,7 +337,7 @@ block_set_scope (struct block *block, const char *scope,
 struct using_direct *
 block_using (const struct block *block)
 {
-  if (block == NULL || block->namespace_info () == NULL)
+  if (block->namespace_info () == NULL)
     return NULL;
   else
     return block->namespace_info ()->using_decl;
