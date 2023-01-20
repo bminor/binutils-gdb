@@ -389,9 +389,7 @@ block::global_block () const
 struct block *
 allocate_block (struct obstack *obstack)
 {
-  struct block *bl = OBSTACK_ZALLOC (obstack, struct block);
-
-  return bl;
+  return new (obstack) struct block;
 }
 
 /* Allocate a global block.  */
@@ -399,7 +397,7 @@ allocate_block (struct obstack *obstack)
 struct block *
 allocate_global_block (struct obstack *obstack)
 {
-  struct global_block *bl = OBSTACK_ZALLOC (obstack, struct global_block);
+  struct global_block *bl = new (obstack) struct global_block;
 
   return &bl->block;
 }

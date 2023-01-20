@@ -105,7 +105,7 @@ struct blockranges
    This implies that within the body of one function
    the blocks appear in the order of a depth-first tree walk.  */
 
-struct block
+struct block : public allocate_on_obstack
 {
   /* Return this block's start address.  */
   CORE_ADDR start () const
@@ -273,13 +273,13 @@ struct block
 
   /* Addresses in the executable code that are in this block.  */
 
-  CORE_ADDR m_start;
-  CORE_ADDR m_end;
+  CORE_ADDR m_start = 0;
+  CORE_ADDR m_end = 0;
 
   /* The symbol that names this block, if the block is the body of a
      function (real or inlined); otherwise, zero.  */
 
-  struct symbol *m_function;
+  struct symbol *m_function = nullptr;
 
   /* The `struct block' for the containing block, or 0 if none.
 
@@ -287,22 +287,22 @@ struct block
      case of C) is the STATIC_BLOCK.  The superblock of the
      STATIC_BLOCK is the GLOBAL_BLOCK.  */
 
-  const struct block *m_superblock;
+  const struct block *m_superblock = nullptr;
 
   /* This is used to store the symbols in the block.  */
 
-  struct multidictionary *m_multidict;
+  struct multidictionary *m_multidict = nullptr;
 
   /* Contains information about namespace-related info relevant to this block:
      using directives and the current namespace scope.  */
 
-  struct block_namespace_info *m_namespace_info;
+  struct block_namespace_info *m_namespace_info = nullptr;
 
   /* Address ranges for blocks with non-contiguous ranges.  If this
      is NULL, then there is only one range which is specified by
      startaddr and endaddr above.  */
 
-  struct blockranges *m_ranges;
+  struct blockranges *m_ranges = nullptr;
 
 private:
 
@@ -314,7 +314,7 @@ private:
 /* The global block is singled out so that we can provide a back-link
    to the compunit symtab.  */
 
-struct global_block
+struct global_block : public allocate_on_obstack
 {
   /* The block.  */
 
@@ -322,7 +322,7 @@ struct global_block
 
   /* This holds a pointer to the compunit symtab holding this block.  */
 
-  struct compunit_symtab *compunit_symtab;
+  struct compunit_symtab *compunit_symtab = nullptr;
 };
 
 struct blockvector
