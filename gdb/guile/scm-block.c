@@ -501,20 +501,15 @@ gdbscm_block_symbols (SCM self)
   block_smob *b_smob
     = bkscm_get_valid_block_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct block *block = b_smob->block;
-  struct block_iterator iter;
-  struct symbol *sym;
   SCM result;
 
   result = SCM_EOL;
 
-  sym = block_iterator_first (block, &iter);
-
-  while (sym != NULL)
+  for (struct symbol *sym : block_iterator_range (block))
     {
       SCM s_scm = syscm_scm_from_symbol (sym);
 
       result = scm_cons (s_scm, result);
-      sym = block_iterator_next (&iter);
     }
 
   return scm_reverse_x (result, SCM_EOL);

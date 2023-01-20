@@ -633,14 +633,9 @@ generate_c_for_variable_locations (compile_instance *compiler,
 
   while (1)
     {
-      struct symbol *sym;
-      struct block_iterator iter;
-
       /* Iterate over symbols in this block, generating code to
 	 compute the location of each local variable.  */
-      for (sym = block_iterator_first (block, &iter);
-	   sym != NULL;
-	   sym = block_iterator_next (&iter))
+      for (struct symbol *sym : block_iterator_range (block))
 	{
 	  if (!symbol_seen (symhash.get (), sym))
 	    generate_c_for_for_one_variable (compiler, stream, gdbarch,

@@ -6070,18 +6070,14 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
 		       const lookup_name_info &lookup_name,
 		       domain_enum domain, struct objfile *objfile)
 {
-  struct block_iterator iter;
   /* A matching argument symbol, if any.  */
   struct symbol *arg_sym;
   /* Set true when we find a matching non-argument symbol.  */
   bool found_sym;
-  struct symbol *sym;
 
   arg_sym = NULL;
   found_sym = false;
-  for (sym = block_iterator_first (block, &iter, &lookup_name);
-       sym != NULL;
-       sym = block_iterator_next (&iter))
+  for (struct symbol *sym : block_iterator_range (block, &lookup_name))
     {
       if (symbol_matches_domain (sym->language (), sym->domain (), domain))
 	{
@@ -6115,6 +6111,8 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
       const std::string &ada_lookup_name = lookup_name.ada ().lookup_name ();
       const char *name = ada_lookup_name.c_str ();
       size_t name_len = ada_lookup_name.size ();
+      struct symbol *sym;
+      struct block_iterator iter;
 
       ALL_BLOCK_SYMBOLS (block, iter, sym)
       {
