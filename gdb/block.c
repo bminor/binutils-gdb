@@ -397,9 +397,7 @@ allocate_block (struct obstack *obstack)
 struct block *
 allocate_global_block (struct obstack *obstack)
 {
-  struct global_block *bl = new (obstack) struct global_block;
-
-  return &bl->block;
+  return new (obstack) struct global_block;
 }
 
 /* See block.h.  */

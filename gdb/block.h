@@ -314,12 +314,8 @@ private:
 /* The global block is singled out so that we can provide a back-link
    to the compunit symtab.  */
 
-struct global_block : public allocate_on_obstack
+struct global_block : public block
 {
-  /* The block.  */
-
-  struct block block;
-
   /* This holds a pointer to the compunit symtab holding this block.  */
 
   struct compunit_symtab *compunit_symtab = nullptr;
