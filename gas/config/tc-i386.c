@@ -4550,7 +4550,7 @@ load_insn_p (void)
 	return 0;
 
       /* pop.   */
-      if (strcmp (insn_name (&i.tm), "pop") == 0)
+      if (i.tm.mnem_off == MN_pop)
 	return 1;
     }
 
@@ -4919,7 +4919,8 @@ md_assemble (char *line)
 	}
       return;
     }
-  if (may_need_pass2 (current_templates->start))
+  t = current_templates->start;
+  if (may_need_pass2 (t))
     {
       /* Make a copy of the full line in case we need to retry.  */
       copy = xstrdup (line);
@@ -4946,14 +4947,14 @@ md_assemble (char *line)
      AT&T modes.  */
   if (intel_syntax
       && i.operands > 1
-      && (strcmp (mnemonic, "bound") != 0)
-      && (strncmp (mnemonic, "invlpg", 6) != 0)
+      && (t->mnem_off != MN_bound)
+      && !startswith (mnemonic, "invlpg")
       && !startswith (mnemonic, "monitor")
       && !startswith (mnemonic, "mwait")
-      && (strcmp (mnemonic, "pvalidate") != 0)
+      && (t->mnem_off != MN_pvalidate)
       && !startswith (mnemonic, "rmp")
-      && (strcmp (mnemonic, "tpause") != 0)
-      && (strcmp (mnemonic, "umwait") != 0)
+      && (t->mnem_off != MN_tpause)
+      && (t->mnem_off != MN_umwait)
       && !(i.operands == 2
 	   && operand_type_check (i.types[0], imm)
 	   && operand_type_check (i.types[1], imm)))
@@ -4962,15 +4963,14 @@ md_assemble (char *line)
   /* The order of the immediates should be reversed
      for 2 immediates extrq and insertq instructions */
   if (i.imm_operands == 2
-      && (strcmp (mnemonic, "extrq") == 0
-	  || strcmp (mnemonic, "insertq") == 0))
+      && (t->mnem_off == MN_extrq || t->mnem_off == MN_insertq))
       swap_2_operands (0, 1);
 
   if (i.imm_operands)
     optimize_imm ();
 
-  if (i.disp_operands && !want_disp32 (current_templates->start)
-      && (!current_templates->start->opcode_modifier.jump
+  if (i.disp_operands && !want_disp32 (t)
+      && (!t->opcode_modifier.jump
 	  || i.jumpabsolute || i.types[0].bitfield.baseindex))
     {
       for (j = 0; j < i.operands; ++j)
