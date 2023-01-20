@@ -918,7 +918,7 @@ typedef union i386_operand_type
 typedef struct insn_template
 {
   /* instruction name sans width suffix ("mov" for movl insns) */
-  const char *name;
+  unsigned int mnem_off;
 
   /* Bitfield arrangement is such that individual fields can be easily
      extracted (in native builds at least) - either by at most a masking

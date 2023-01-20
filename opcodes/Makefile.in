@@ -758,7 +758,8 @@ MOSTLYCLEANFILES = aarch64-gen$(EXEEXT_FOR_BUILD) i386-gen$(EXEEXT_FOR_BUILD) \
 	z8kgen$(EXEEXT_FOR_BUILD) opc2c$(EXEEXT_FOR_BUILD)
 
 MAINTAINERCLEANFILES = $(srcdir)/aarch64-asm-2.c $(srcdir)/aarch64-dis-2.c \
-	$(srcdir)/aarch64-opc-2.c $(srcdir)/i386-tbl.h $(srcdir)/i386-init.h \
+	$(srcdir)/aarch64-opc-2.c \
+	$(srcdir)/i386-tbl.h $(srcdir)/i386-init.h $(srcdir)/i386-mnem.h \
 	$(srcdir)/ia64-asmtab.c $(srcdir)/z8k-opc.h \
 	$(srcdir)/msp430-decode.c \
 	$(srcdir)/rl78-decode.c \
@@ -1526,16 +1527,17 @@ i386-gen.o: i386-gen.c i386-opc.h $(srcdir)/../include/opcode/i386.h \
 	config.h sysdep.h
 	$(COMPILE_FOR_BUILD) -c $(srcdir)/i386-gen.c
 
-# i386-gen will generate both headers in one go.  Use a pattern rule to properly
+# i386-gen will generate all headers in one go.  Use a pattern rule to properly
 # express this, with the inner dash ('-') arbitrarily chosen to be the stem.
-$(srcdir)/i386%tbl.h $(srcdir)/i386%init.h: @MAINT@ i386-gen$(EXEEXT_FOR_BUILD) i386-opc.tbl i386-reg.tbl i386-opc.h
+$(srcdir)/i386%tbl.h $(srcdir)/i386%init.h $(srcdir)/i386%mnem.h: \
+		@MAINT@ i386-gen$(EXEEXT_FOR_BUILD) i386-opc.tbl i386-reg.tbl i386-opc.h
 	$(AM_V_GEN)$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) - \
 		< $(srcdir)/i386-opc.tbl \
 		| ./i386-gen$(EXEEXT_FOR_BUILD) --srcdir $(srcdir)
 
-# While not really dependencies, specify i386-{init,tbl}.h here as well to
-# make sure they are re-generated as necessary.
-i386-dis.lo: $(srcdir)/i386-tbl.h $(srcdir)/i386-init.h
+# While not really dependencies, specify other generated i386-*.h here as well
+# to make sure they are re-generated as necessary.
+i386-dis.lo: $(srcdir)/i386-tbl.h $(srcdir)/i386-init.h $(srcdir)/i386-mnem.h
 
 ia64-gen$(EXEEXT_FOR_BUILD): ia64-gen.o $(BUILD_LIB_DEPS)
 	$(AM_V_CCLD)$(LINK_FOR_BUILD) ia64-gen.o $(BUILD_LIBS)

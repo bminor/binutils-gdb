@@ -1146,12 +1146,26 @@ process_i386_operand_type (FILE *table, char *op, enum stage stage,
 		       stage, indent);
 }
 
+static char *mkident (const char *mnem)
+{
+  char *ident = xstrdup (mnem), *p = ident;
+
+  do
+    {
+      if (!ISALNUM (*p))
+	*p = '_';
+    }
+  while (*++p);
+
+  return ident;
+}
+
 static void
 output_i386_opcode (FILE *table, const char *name, char *str,
 		    char *last, int lineno)
 {
   unsigned int i, length, prefix = 0, space = 0;
-  char *base_opcode, *extension_opcode, *end;
+  char *base_opcode, *extension_opcode, *end, *ident;
   char *cpu_flags, *opcode_modifier, *operand_types [MAX_OPERANDS];
   unsigned long long opcode;
 
@@ -1245,9 +1259,11 @@ output_i386_opcode (FILE *table, const char *name, char *str,
     fail (_("%s:%d: %s: residual opcode (0x%0*llx) too large\n"),
 	  filename, lineno, name, 2 * length, opcode);
 
-  fprintf (table, "  { \"%s\", 0x%0*llx%s, %lu, %s,\n",
-	   name, 2 * (int)length, opcode, end, i,
+  ident = mkident (name);
+  fprintf (table, "  { MN_%s, 0x%0*llx%s, %lu, %s,\n",
+	   ident, 2 * (int)length, opcode, end, i,
 	   extension_opcode ? extension_opcode : "None");
+  free (ident);
 
   process_i386_opcode_modifier (table, opcode_modifier, space, prefix,
 				operand_types, lineno);
@@ -1565,7 +1581,7 @@ process_i386_opcodes (FILE *table)
 {
   FILE *fp;
   char buf[2048];
-  unsigned int i, j, nr;
+  unsigned int i, j, nr, offs;
   char *str, *p, *last, *name;
   htab_t opcode_hash_table;
   struct opcode_hash_entry **opcode_array = NULL;
@@ -1579,6 +1595,7 @@ process_i386_opcodes (FILE *table)
 					 opcode_hash_eq, NULL,
 					 xcalloc, free);
 
+  fprintf (table, "\n#include \"i386-mnem.h\"\n");
   fprintf (table, "\n/* i386 opcode table.  */\n\n");
   fprintf (table, "static const insn_template i386_optab[] =\n{\n");
 
@@ -1701,6 +1718,32 @@ process_i386_opcodes (FILE *table)
     }
 
   fprintf (table, "};\n");
+
+  /* Emit mnemonics and associated #define-s.  */
+  fp = fopen ("i386-mnem.h", "w");
+  if (fp == NULL)
+    fail (_("can't create i386-mnem.h, errno = %s\n"),
+	  xstrerror (errno));
+
+  process_copyright (fp);
+
+  fprintf (table, "\n/* i386 mnemonics table.  */\n\n");
+  fprintf (table, "const char i386_mnemonics[] =\n");
+  fprintf (fp, "\nextern const char i386_mnemonics[];\n\n");
+
+  for (offs = j = 0; j < i; j++)
+    {
+      name = opcode_array[j]->name;
+      fprintf (table, "  \"\\0\"\"%s\"\n", name);
+      str = mkident (name);
+      fprintf (fp, "#define MN_%s %#x\n", str, offs + 1);
+      free (str);
+      offs += strlen (name) + 1;
+    }
+
+  fprintf (table, ";\n");
+
+  fclose (fp);
 }
 
 static void

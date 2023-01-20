@@ -34,6 +34,7 @@
 #include "sframe.h"
 #include "elf/x86-64.h"
 #include "opcodes/i386-init.h"
+#include "opcodes/i386-mnem.h"
 #include <limits.h>
 
 #ifndef INFER_ADDR_PREFIX
@@ -2428,7 +2429,7 @@ offset_in_range (offsetT val, int size)
 
 static INLINE const char *insn_name (const insn_template *t)
 {
-  return t->name;
+  return &i386_mnemonics[t->mnem_off];
 }
 
 enum PREFIX_GROUP
