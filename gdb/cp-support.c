@@ -1307,7 +1307,8 @@ add_symbol_overload_list_namespace (const char *func_name,
     }
 
   /* Look in the static block.  */
-  block = block_static_block (get_selected_block (0));
+  block = get_selected_block (0);
+  block = block == nullptr ? nullptr : block_static_block (block);
   if (block)
     add_symbol_overload_list_block (name, block, overload_list);
 
@@ -1457,6 +1458,9 @@ add_symbol_overload_list_qualified (const char *func_name,
     add_symbol_overload_list_block (func_name, b, overload_list);
 
   surrounding_static_block = block_static_block (get_selected_block (0));
+  surrounding_static_block = (surrounding_static_block == nullptr
+			      ? nullptr
+			      : block_static_block (surrounding_static_block));
 
   /* Go through the symtabs and check the externs and statics for
      symbols which match.  */

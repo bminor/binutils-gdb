@@ -13795,7 +13795,11 @@ public:
   {
     struct block_symbol sym;
 
-    sym = ada_lookup_symbol (name, block_static_block (block), domain);
+    sym = ada_lookup_symbol (name,
+			     (block == nullptr
+			      ? nullptr
+			      : block_static_block (block)),
+			     domain);
     if (sym.symbol != NULL)
       return sym;
 

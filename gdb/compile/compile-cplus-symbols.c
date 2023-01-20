@@ -239,7 +239,9 @@ convert_symbol_sym (compile_cplus_instance *instance,
      }
   */
 
-  const struct block *static_block = block_static_block (sym.block);
+  const struct block *static_block = nullptr;
+  if (sym.block != nullptr)
+    static_block = block_static_block (sym.block);
   /* STATIC_BLOCK is NULL if FOUND_BLOCK is the global block.  */
   bool is_local_symbol = (sym.block != static_block && static_block != nullptr);
   if (is_local_symbol)

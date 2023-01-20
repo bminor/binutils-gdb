@@ -2155,13 +2155,15 @@ lookup_local_symbol (const char *name,
 		     const domain_enum domain,
 		     enum language language)
 {
+  if (block == nullptr)
+    return {};
+
   struct symbol *sym;
   const struct block *static_block = block_static_block (block);
   const char *scope = block_scope (block);
   
-  /* Check if either no block is specified or it's a global block.  */
-
-  if (static_block == NULL)
+  /* Check if it's a global block.  */
+  if (static_block == nullptr)
     return {};
 
   while (block != static_block)
@@ -2458,6 +2460,9 @@ lookup_symbol_in_static_block (const char *name,
 			       const struct block *block,
 			       const domain_enum domain)
 {
+  if (block == nullptr)
+    return {};
+
   const struct block *static_block = block_static_block (block);
   struct symbol *sym;
 
@@ -5825,7 +5830,7 @@ default_collect_symbol_completion_matches_break_on
      visible from current context.  */
 
   b = get_selected_block (0);
-  surrounding_static_block = block_static_block (b);
+  surrounding_static_block = b == nullptr ? nullptr : block_static_block (b);
   surrounding_global_block = block_global_block (b);
   if (surrounding_static_block != NULL)
     while (b != surrounding_static_block)

@@ -364,12 +364,12 @@ block_set_using (struct block *block,
 }
 
 /* Return the static block associated to BLOCK.  Return NULL if block
-   is NULL or if block is a global block.  */
+   is a global block.  */
 
 const struct block *
 block_static_block (const struct block *block)
 {
-  if (block == NULL || block->superblock () == NULL)
+  if (block->superblock () == NULL)
     return NULL;
 
   while (block->superblock ()->superblock () != NULL)

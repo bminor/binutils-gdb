@@ -212,7 +212,6 @@ static void
 convert_symbol_sym (compile_c_instance *context, const char *identifier,
 		    struct block_symbol sym, domain_enum domain)
 {
-  const struct block *static_block;
   int is_local_symbol;
 
   /* If we found a symbol and it is not in the  static or global
@@ -227,7 +226,9 @@ convert_symbol_sym (compile_c_instance *context, const char *identifier,
      }
   */
 
-  static_block = block_static_block (sym.block);
+  const struct block *static_block = nullptr;
+  if (sym.block != nullptr)
+    static_block = block_static_block (sym.block);
   /* STATIC_BLOCK is NULL if FOUND_BLOCK is the global block.  */
   is_local_symbol = (sym.block != static_block && static_block != NULL);
   if (is_local_symbol)
@@ -613,6 +614,9 @@ generate_c_for_variable_locations (compile_instance *compiler,
 				   const struct block *block,
 				   CORE_ADDR pc)
 {
+  if (block == nullptr)
+    return {};
+
   const struct block *static_block = block_static_block (block);
 
   /* If we're already in the static or global block, there is nothing
