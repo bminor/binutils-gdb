@@ -498,7 +498,7 @@ get_hosting_frame (struct symbol *var, const struct block *var_block,
       else if (frame_block->function ())
 	{
 	  const struct dynamic_prop *static_link
-	    = block_static_link (frame_block);
+	    = frame_block->static_link ();
 	  int could_climb_up = 0;
 
 	  if (static_link != NULL)
