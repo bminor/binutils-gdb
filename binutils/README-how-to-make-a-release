@@ -310,7 +310,7 @@ When the time comes to actually make the release....
         make install-gas install-gold install-ld install-binutils install-gprofng
 
         # Needed for step 29...
-        make html pdf html-libctf pdf-libctf
+	make html pdf html-libctf pdf-libctf html-libsframe pdf-libsframe
 
         popd
 
@@ -434,6 +434,10 @@ When the time comes to actually make the release....
 	 lcd ../../libctf/doc
 	 put ctf-spec.html
 	 put ctf-spec.pdf
+
+	 lcd ../../libsframe/doc
+	 put sframe-spec.html
+	 put sframe-spec.pdf
 	 
       Edit the top level binutils index.html file to change the links
       to point to the new documentation.
