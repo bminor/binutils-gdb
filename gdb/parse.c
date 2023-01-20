@@ -86,7 +86,7 @@ innermost_block_tracker::update (const struct block *b,
 {
   if ((m_types & t) != 0
       && (m_innermost_block == NULL
-	  || contained_in (b, m_innermost_block)))
+	  || m_innermost_block->contains (b)))
     m_innermost_block = b;
 }
 

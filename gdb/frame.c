@@ -895,7 +895,7 @@ frame_id_inner (struct gdbarch *gdbarch, struct frame_id l, struct frame_id r)
 	/* This will return true if LB and RB are the same block, or
 	   if the block with the smaller depth lexically encloses the
 	   block with the greater depth.  */
-	inner = contained_in (lb, rb);
+	inner = rb->contains (lb);
     }
   else
     /* Only return non-zero when strictly inner than.  Note that, per

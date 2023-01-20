@@ -5149,7 +5149,7 @@ watchpoint_check (bpstat *bs)
 
 	  function = get_frame_function (fr);
 	  if (function == NULL
-	      || !contained_in (b->exp_valid_block, function->value_block ()))
+	      || !function->value_block ()->contains (b->exp_valid_block))
 	    within_current_scope = false;
 	}
 

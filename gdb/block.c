@@ -65,15 +65,14 @@ block::gdbarch () const
 /* See block.h.  */
 
 bool
-contained_in (const struct block *a, const struct block *b,
-	      bool allow_nested)
+block::contains (const struct block *a, bool allow_nested) const
 {
-  if (!a || !b)
+  if (a == nullptr)
     return false;
 
   do
     {
-      if (a == b)
+      if (a == this)
 	return true;
       /* If A is a function block, then A cannot be contained in B,
 	 except if A was inlined.  */

@@ -469,7 +469,7 @@ block_innermost_frame (const struct block *block)
   while (frame != NULL)
     {
       const struct block *frame_block = get_frame_block (frame, NULL);
-      if (frame_block != NULL && contained_in (frame_block, block))
+      if (frame_block != NULL && block->contains (frame_block))
 	return frame;
 
       frame = get_prev_frame (frame);

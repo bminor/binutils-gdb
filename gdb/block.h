@@ -271,6 +271,15 @@ struct block : public allocate_on_obstack
 
   struct dynamic_prop *static_link () const;
 
+  /* Return true if block A is lexically nested within this block, or
+     if A and this block have the same pc range.  Return false
+     otherwise.  If ALLOW_NESTED is true, then block A is considered
+     to be in this block if A is in a nested function in this block's
+     function.  If ALLOW_NESTED is false (the default), then blocks in
+     nested functions are not considered to be contained.  */
+
+  bool contains (const struct block *a, bool allow_nested = false) const;
+
 private:
 
   /* If the namespace_info is NULL, allocate it via OBSTACK and
@@ -399,16 +408,6 @@ private:
   /* The blocks themselves.  */
   struct block *m_blocks[1];
 };
-
-/* Return true if block A is lexically nested within block B, or if a
-   and b have the same pc range.  Return false otherwise.  If
-   ALLOW_NESTED is true, then block A is considered to be in block B
-   if A is in a nested function in B's function.  If ALLOW_NESTED is
-   false (the default), then blocks in nested functions are not
-   considered to be contained.  */
-
-extern bool contained_in (const struct block *a, const struct block *b,
-			  bool allow_nested = false);
 
 extern const struct blockvector *blockvector_for_pc (CORE_ADDR,
 					       const struct block **);
