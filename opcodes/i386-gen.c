@@ -1750,13 +1750,15 @@ process_i386_opcodes (FILE *table)
   fprintf (table, "const char i386_mnemonics[] =\n");
   fprintf (fp, "\nextern const char i386_mnemonics[];\n\n");
 
+  str = NULL;
   for (l = strlen (opcode_array[offs = j = 0]->name); j < i; j++)
     {
       const char *next = NULL;
       size_t l1 = j + 1 < i ? strlen(next = opcode_array[j + 1]->name) : 0;
 
       name = opcode_array[j]->name;
-      str = mkident (name);
+      if (str == NULL)
+	str = mkident (name);
       if (l < l1 && !strcmp(name, next + l1 - l))
 	{
 	  fprintf (fp, "#define MN_%s ", str);
@@ -1769,8 +1771,9 @@ process_i386_opcodes (FILE *table)
 	  fprintf (table, "  \"\\0\"\"%s\"\n", name);
 	  fprintf (fp, "#define MN_%s %#x\n", str, offs + 1);
 	  offs += strlen (name) + 1;
+	  free (str);
+	  str = NULL;
 	}
-      free (str);
       l = l1;
     }
 
