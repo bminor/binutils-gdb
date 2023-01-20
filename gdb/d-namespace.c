@@ -511,7 +511,7 @@ d_lookup_symbol_nonlocal (const struct language_defn *langdef,
 			  const domain_enum domain)
 {
   struct block_symbol sym;
-  const char *scope = block_scope (block);
+  const char *scope = block == nullptr ? "" : block_scope (block);
 
   sym = lookup_module_scope (langdef, name, block, domain, scope, 0);
   if (sym.symbol != NULL)

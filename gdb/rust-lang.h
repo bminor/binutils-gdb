@@ -148,17 +148,16 @@ public:
   {
     struct block_symbol result = {};
 
+    const char *scope = block == nullptr ? "" : block_scope (block);
     symbol_lookup_debug_printf
       ("rust_lookup_symbol_non_local (%s, %s (scope %s), %s)",
-       name, host_address_to_string (block), block_scope (block),
+       name, host_address_to_string (block), scope,
        domain_name (domain));
 
     /* Look up bare names in the block's scope.  */
     std::string scopedname;
     if (name[cp_find_first_component (name)] == '\0')
       {
-	const char *scope = block_scope (block);
-
 	if (scope[0] != '\0')
 	  {
 	    scopedname = std::string (scope) + "::" + name;
