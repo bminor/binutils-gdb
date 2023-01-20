@@ -210,11 +210,19 @@ AM_ZLIB
 
 # Generate manpages, if possible.
 build_man=false
+build_doc=false
 if test $cross_compiling = no; then
-  AM_MISSING_PROG(HELP2MAN, help2man)
-  AC_CHECK_PROGS([MAKEINFO], makeinfo, ["@echo makeinfo missing; true"])
-  case "$MAKEINFO" in
-    *true)
+  AC_CHECK_PROGS([HELP2MAN], help2man, [$MISSING help2man])
+  case "x$HELP2MAN" in
+    x | */missing\ help2man* )
+      AC_MSG_WARN([gprofng: help2man is missing. Man pages will not be built.])
+      ;;
+    * ) build_man=true ;;
+    esac
+
+  AC_CHECK_PROGS([MAKEINFO], makeinfo, [$MISSING makeinfo])
+  case "x$MAKEINFO" in
+    x | */missing\ makeinfo*)
       AC_MSG_WARN([gprofng: makeinfo is missing. Info documentation will not be built.])
       ;;
     *)
@@ -223,15 +231,14 @@ if test $cross_compiling = no; then
 	  AC_MSG_WARN([gprofng: $MAKEINFO is too old. Info documentation will not be built.])
 	  MAKEINFO="@echo $MAKEINFO is too old, 6.5 or newer required; true"
 	  ;;
-	x* )
-	  build_man=true
-	  ;;
+	x* ) build_doc=true ;;
 	esac
       ;;
     esac
   AC_SUBST(MAKEINFO)
 fi
 AM_CONDITIONAL([BUILD_MAN], [test x$build_man = xtrue])
+AM_CONDITIONAL([BUILD_DOC], [test x$build_doc = xtrue])
 
 AC_SUBST(LD_NO_AS_NEEDED, [${no_as_needed}])
 AC_SUBST(GPROFNG_CFLAGS, [${gprofng_cflags}])

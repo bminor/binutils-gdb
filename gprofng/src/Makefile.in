@@ -572,7 +572,7 @@ gp_display_src_SOURCES = gp-display-src.cc
 gp_display_src_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK) $(ZLIB)
 gp_display_text_SOURCES = gp-display-text.cc ipc.cc ipcio.cc
 gp_display_text_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK) $(ZLIB)
-@BUILD_MAN_TRUE@man_MANS = gprofng.1 \
+@BUILD_MAN_TRUE@man_MANS = \
 @BUILD_MAN_TRUE@	gp-archive.1 \
 @BUILD_MAN_TRUE@	gp-collect-app.1 \
 @BUILD_MAN_TRUE@	gp-display-src.1 \
@@ -1176,10 +1176,6 @@ uninstall-man: uninstall-man1
 QLParser.tab.cc QLParser.tab.hh: QLParser.yy
 	$(BISON) $^
 
-@BUILD_MAN_TRUE@gprofng.1: $(srcdir)/gprofng.cc $(common_mandeps) | ./gprofng$(EXEEXT)
-@BUILD_MAN_TRUE@	$(AM_V_GEN)_BUILDING_MANPAGE=1 $(HELP2MAN) $(HELP2MAN_OPT) \
-@BUILD_MAN_TRUE@	  --name=$(TEXT_GPROFNG) ./gprofng$(EXEEXT) $(H2M_FILTER) > $@
-
 @BUILD_MAN_TRUE@gp-archive.1: $(srcdir)/gp-archive.cc $(common_mandeps) | ./gp-archive$(EXEEXT)
 @BUILD_MAN_TRUE@	$(AM_V_GEN)_BUILDING_MANPAGE=1 $(HELP2MAN) $(HELP2MAN_OPT) \
 @BUILD_MAN_TRUE@	  --name=$(TEXT_GP_ARCHIVE) ./gp-archive$(EXEEXT) $(H2M_FILTER) > $@
@@ -1206,6 +1202,8 @@ dist-hook: $(LIBGPROFNG)
 
 install-data-local: install-pkglibLTLIBRARIES
 	rm -f $(DESTDIR)/$(pkglibdir)/*.la $(DESTDIR)/$(pkglibdir)/*.a
+
+$(srcdir)/DbeSession.cc: QLParser.tab.hh
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
