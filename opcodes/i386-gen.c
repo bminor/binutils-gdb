@@ -1293,10 +1293,13 @@ output_i386_opcode (FILE *table, const char *name, char *str,
 
 struct opcode_hash_entry
 {
-  struct opcode_hash_entry *next;
-  char *name;
-  char *opcode;
-  int lineno;
+  const char *name;
+  struct opcode_entry
+  {
+    struct opcode_entry *next;
+    char *opcode;
+    int lineno;
+  } entry;
 };
 
 /* Calculate the hash value of an opcode hash entry P.  */
@@ -1432,7 +1435,8 @@ expand_templates (char *name, const char *str, htab_t opcode_hash_table,
 {
   static unsigned int idx, opcode_array_size;
   struct opcode_hash_entry **opcode_array = *opcode_array_p;
-  struct opcode_hash_entry **hash_slot, **entry;
+  struct opcode_hash_entry **hash_slot;
+  struct opcode_entry *entry;
   char *ptr1 = strchr(name, '<'), *ptr2;
 
   if (ptr1 == NULL)
@@ -1458,26 +1462,25 @@ expand_templates (char *name, const char *str, htab_t opcode_hash_table,
 
 	  opcode_array[idx] = (struct opcode_hash_entry *)
 	    xmalloc (sizeof (struct opcode_hash_entry));
-	  opcode_array[idx]->next = NULL;
 	  opcode_array[idx]->name = xstrdup (name);
-	  opcode_array[idx]->opcode = xstrdup (str);
-	  opcode_array[idx]->lineno = lineno;
 	  *hash_slot = opcode_array[idx];
+	  entry = &opcode_array[idx]->entry;
 	  idx++;
 	}
       else
 	{
 	  /* Append it to the existing one.  */
-	  entry = hash_slot;
-	  while ((*entry) != NULL)
-	    entry = &(*entry)->next;
-	  *entry = (struct opcode_hash_entry *)
-	    xmalloc (sizeof (struct opcode_hash_entry));
-	  (*entry)->next = NULL;
-	  (*entry)->name = (*hash_slot)->name;
-	  (*entry)->opcode = xstrdup (str);
-	  (*entry)->lineno = lineno;
+	  struct opcode_entry **entryp = &(*hash_slot)->entry.next;
+
+	  while (*entryp != NULL)
+	    entryp = &(*entryp)->next;
+	  entry = (struct opcode_entry *)xmalloc (sizeof (struct opcode_entry));
+	  *entryp = entry;
 	}
+
+      entry->next = NULL;
+      entry->opcode = xstrdup (str);
+      entry->lineno = lineno;
     }
   else if ((ptr2 = strchr(ptr1 + 1, '>')) == NULL)
     fail ("%s: %d: missing '>'\n", filename, lineno);
@@ -1599,7 +1602,7 @@ process_i386_opcodes (FILE *table)
   char buf[2048];
   unsigned int i, j, nr, offs;
   size_t l;
-  char *str, *p, *last, *name;
+  char *str, *p, *last;
   htab_t opcode_hash_table;
   struct opcode_hash_entry **opcode_array = NULL;
   int lineno = 0, marker = 0;
@@ -1619,6 +1622,8 @@ process_i386_opcodes (FILE *table)
   /* Put everything on opcode array.  */
   while (!feof (fp))
     {
+      char *name;
+
       if (fgets (buf, sizeof (buf), fp) == NULL)
 	break;
 
@@ -1700,11 +1705,11 @@ process_i386_opcodes (FILE *table)
   /* Process opcode array.  */
   for (j = 0; j < i; j++)
     {
-      struct opcode_hash_entry *next;
+      const char *name = opcode_array[j]->name;
+      struct opcode_entry *next;
 
-      for (next = opcode_array[j]; next; next = next->next)
+      for (next = &opcode_array[j]->entry; next; next = next->next)
 	{
-	  name = next->name;
 	  str = next->opcode;
 	  lineno = next->lineno;
 	  last = str + strlen (str);
@@ -1723,7 +1728,7 @@ process_i386_opcodes (FILE *table)
 
   for (nr = j = 0; j < i; j++)
     {
-      struct opcode_hash_entry *next = opcode_array[j];
+      struct opcode_entry *next = &opcode_array[j]->entry;
 
       do
 	{
@@ -1753,10 +1758,10 @@ process_i386_opcodes (FILE *table)
   str = NULL;
   for (l = strlen (opcode_array[offs = j = 0]->name); j < i; j++)
     {
+      const char *name = opcode_array[j]->name;
       const char *next = NULL;
       size_t l1 = j + 1 < i ? strlen(next = opcode_array[j + 1]->name) : 0;
 
-      name = opcode_array[j]->name;
       if (str == NULL)
 	str = mkident (name);
       if (l < l1 && !strcmp(name, next + l1 - l))
