@@ -30,7 +30,6 @@
 #include "target.h"
 #include "regcache.h"
 #include "safe-ctype.h"
-#include "block.h"
 #include "reggroups.h"
 #include "arch-utils.h"
 #include "frame-unwind.h"

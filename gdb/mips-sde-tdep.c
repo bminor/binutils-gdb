@@ -20,7 +20,6 @@
 #include "defs.h"
 #include "osabi.h"
 #include "elf-bfd.h"
-#include "block.h"
 #include "symtab.h"
 
 #include "frame.h"

@@ -33,7 +33,6 @@
 #include "regcache.h"
 #include "osabi.h"
 #include "riscv-tdep.h"
-#include "block.h"
 #include "reggroups.h"
 #include "opcode/riscv.h"
 #include "elf/riscv.h"

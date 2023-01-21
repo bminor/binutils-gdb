@@ -35,7 +35,6 @@
 #include "reggroups.h"
 #include "arch-utils.h"
 #include "osabi.h"
-#include "block.h"
 #include "infcall.h"
 #include "trad-frame.h"
 

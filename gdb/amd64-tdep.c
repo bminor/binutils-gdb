@@ -24,7 +24,6 @@
 #include "opcode/i386.h"
 #include "dis-asm.h"
 #include "arch-utils.h"
-#include "block.h"
 #include "dummy-frame.h"
 #include "frame.h"
 #include "frame-base.h"
