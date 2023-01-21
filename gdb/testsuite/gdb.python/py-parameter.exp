@@ -76,7 +76,8 @@ proc_with_prefix test_data_directory { } {
     set rel_path_to_output_dir \
 	[file join "." [string replace ${abs_path_to_output_dir} 0 \
 			    [string length ${abs_path_to_cwd}] ""]]
-    gdb_test_no_output "set data-directory ${rel_path_to_output_dir}"
+    gdb_test_no_output "set data-directory ${rel_path_to_output_dir}" \
+	"set data-directory to relative path"
 
     gdb_test "python print (gdb.parameter ('data-directory'))" \
 	${abs_path_to_output_dir} \
