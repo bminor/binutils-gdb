@@ -20,7 +20,6 @@
 #ifndef EXPOP_H
 #define EXPOP_H
 
-#include "block.h"
 #include "c-lang.h"
 #include "cp-abi.h"
 #include "expression.h"
@@ -229,11 +228,8 @@ check_objfile (struct symbol *sym, struct objfile *objfile)
   return check_objfile (sym->objfile (), objfile);
 }
 
-static inline bool
-check_objfile (const struct block *block, struct objfile *objfile)
-{
-  return check_objfile (block_objfile (block), objfile);
-}
+extern bool check_objfile (const struct block *block,
+			   struct objfile *objfile);
 
 static inline bool
 check_objfile (const block_symbol &sym, struct objfile *objfile)

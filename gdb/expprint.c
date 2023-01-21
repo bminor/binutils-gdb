@@ -75,6 +75,12 @@ debug_exp (struct expression *exp)
 namespace expr
 {
 
+bool
+check_objfile (const struct block *block, struct objfile *objfile)
+{
+  return check_objfile (block_objfile (block), objfile);
+}
+
 void
 dump_for_expression (struct ui_file *stream, int depth, enum exp_opcode op)
 {
