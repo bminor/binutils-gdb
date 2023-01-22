@@ -167,7 +167,7 @@ if [support_complex_tests] {
     }
 }
 
-if ![gdb_skip_float_test] {
+if {[allow_float_test]} {
     foreach ta $float_types {
 	start_gdb_and_run_tests $lang $ta
     }

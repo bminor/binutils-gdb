@@ -3167,7 +3167,7 @@ proc with_read1_timeout_factor { factor body } {
 
 gdb_caching_proc support_complex_tests {
 
-    if { [gdb_skip_float_test] } {
+    if { ![allow_float_test] } {
 	# If floating point is not supported, _Complex is not
 	# supported.
 	return 0
@@ -6846,13 +6846,13 @@ proc exec_is_pie { executable } {
     return 0
 }
 
-# Return true if a test should be skipped due to lack of floating
+# Return false if a test should be skipped due to lack of floating
 # point support or GDB can't fetch the contents from floating point
 # registers.
 
-gdb_caching_proc gdb_skip_float_test {
+gdb_caching_proc allow_float_test {
     if [target_info exists gdb,skip_float_tests] {
-	return 1
+	return 0
     }
 
     # There is an ARM kernel ptrace bug that hardware VFP registers
@@ -6901,13 +6901,13 @@ gdb_caching_proc gdb_skip_float_test {
 
 	if {![string match "" $lines]} {
 	    verbose "testfile compilation failed, returning 1" 2
-	    return 0
+	    return 1
 	}
 
 	# No error message, compilation succeeded so now run it via gdb.
 	# Run the test up to 5 times to detect whether ptrace can
 	# correctly update VFP registers or not.
-	set skip_vfp_test 0
+	set allow_vfp_test 1
 	for {set i 0} {$i < 5} {incr i} {
 	    global gdb_prompt srcdir subdir
 
@@ -6931,7 +6931,7 @@ gdb_caching_proc gdb_skip_float_test {
 		-re "exited normally.*$gdb_prompt $" {
 		    # However, the exit code is 0.  That means something
 		    # wrong in setting VFP registers.
-		    set skip_vfp_test 1
+		    set allow_vfp_test 0
 		    break
 		}
 	    }
@@ -6940,9 +6940,9 @@ gdb_caching_proc gdb_skip_float_test {
 	gdb_exit
 	remote_file build delete $exe
 
-	return $skip_vfp_test
+	return $allow_vfp_test
     }
-    return 0
+    return 1
 }
 
 # Print a message and return true if a test should be skipped

@@ -21,10 +21,7 @@ if {![istarget "riscv*-*-*"]} {
     return
 }
 
-if { [gdb_skip_float_test] } {
-    untested "no floating point support"
-    return
-}
+require allow_float_test
 
 standard_testfile
 
