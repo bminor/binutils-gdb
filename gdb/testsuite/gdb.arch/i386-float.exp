@@ -18,10 +18,7 @@
 
 # Test the x87 floating point information printout.
 
-if {![istarget "i?86-*-*"] && ![istarget "x86_64-*-*"]} {
-    verbose "Skipping i386 tests for x87 floating point support."
-    return
-}
+require {is_any_target "i?86-*-*" "x86_64-*-*"}
 
 standard_testfile .S
 

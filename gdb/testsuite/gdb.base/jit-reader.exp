@@ -18,9 +18,7 @@ load_lib gdb-python.exp
 
 standard_testfile jit-reader-host.c
 
-if { (![istarget x86_64-*-*] && ![istarget i?86-*-*]) || ![is_lp64_target] } {
-    return -1;
-}
+require {is_any_target "i?86-*-*" "x86_64-*-*"} is_lp64_target
 
 require allow_shlib_tests isnative
 

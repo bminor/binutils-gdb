@@ -19,10 +19,7 @@
 # This file is part of the gdb testsuite.
 
 
-if {(![istarget "x86_64-*-*"] && ![istarget "i?86-*-*"])} {
-    verbose "Skipping i386 word register tests."
-    return
-}
+require {is_any_target "x86_64-*-*" "i?86-*-*"}
 
 standard_testfile i386-pseudo.c
 

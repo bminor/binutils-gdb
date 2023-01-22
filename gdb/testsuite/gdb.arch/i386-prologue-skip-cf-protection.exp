@@ -22,10 +22,7 @@
 standard_testfile .c
 set binfile ${binfile}
 
-if { ![istarget x86_64-*-*] && ![istarget i?86-*-*] } {
-    verbose "Skipping ${testfile}."
-    return
-}
+require {is_any_target x86_64-*-* i?86-*-*}
 
 require supports_fcf_protection
 

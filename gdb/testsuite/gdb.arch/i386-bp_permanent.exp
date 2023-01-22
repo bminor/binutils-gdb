@@ -18,10 +18,7 @@
 
 # Test stepping over permanent breakpoints on i386.
 
-if {![istarget "i?86-*-*"] && ![istarget "x86_64-*-*"]} {
-    verbose "Skipping skip over permanent breakpoint on i386 tests."
-    return
-}
+require {is_any_target "i?86-*-*" "x86_64-*-*"}
 
 standard_testfile
 

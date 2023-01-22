@@ -23,9 +23,7 @@ set cr "\[\r\n\]+"
 
 # Only x86 and x86_64 targets are supported for now.
 
-if { ![istarget "x86_64-*"] && ![istarget "i?86-*"] } {
-    return
-}
+require {is_any_target "x86_64-*" "i?86-*"}
 
 proc compile_stap_bin {exec_name {arg ""}} {
     global srcfile

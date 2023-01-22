@@ -15,10 +15,7 @@
 
 # Test vector register access for s390 platforms.
 
-if { ![istarget s390-*-*] && ![istarget s390x-*-* ] } {
-    verbose "Skipping s390 vector register tests."
-    return
-}
+require {is_any_target s390-*-* s390x-*-*}
 
 standard_testfile .S
 

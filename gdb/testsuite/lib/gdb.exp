@@ -4201,6 +4201,16 @@ proc gdb_is_target_native { } {
     return [gdb_is_target_1 "native" ".*native \\(Native process\\).*" "$gdb_prompt $"]
 }
 
+# Like istarget, but checks a list of targets.
+proc is_any_target {args} {
+    foreach targ $args {
+	if {[istarget $targ]} {
+	    return 1
+	}
+    }
+    return 0
+}
+
 # Return the effective value of use_gdb_stub.
 #
 # If the use_gdb_stub global has been set (it is set when the gdb process is

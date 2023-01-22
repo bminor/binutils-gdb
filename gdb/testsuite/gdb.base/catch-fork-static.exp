@@ -23,9 +23,7 @@
 
 # Until "catch fork" is implemented on other targets...
 #
-if {![istarget "*-*-linux*"] && ![istarget "*-*-openbsd*"]} {
-    return
-}
+require {is_any_target "*-*-linux*" "*-*-openbsd*"}
 
 # Reusing foll-fork.c since it's a simple forking program.
 standard_testfile foll-fork.c

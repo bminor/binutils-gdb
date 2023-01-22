@@ -15,10 +15,7 @@
 
 # This file is part of the gdb testsuite.
 
-if {![istarget "aarch64*-*-*"] && ![istarget "arm*-*-*"]} {
-    verbose "Skipping ${gdb_test_file_name}."
-    return
-}
+require {is_any_target "aarch64*-*-*" "arm*-*-*"}
 
 require allow_float_test
 
