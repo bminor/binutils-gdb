@@ -3457,18 +3457,18 @@ proc support_displaced_stepping {} {
     return 0
 }
 
-# Run a test on the target to see if it supports vmx hardware.  Return 0 if so, 
-# 1 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
+# Run a test on the target to see if it supports vmx hardware.  Return 1 if so, 
+# 0 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
 
-gdb_caching_proc skip_altivec_tests {
+gdb_caching_proc allow_altivec_tests {
     global srcdir subdir gdb_prompt inferior_exited_re
 
-    set me "skip_altivec_tests"
+    set me "allow_altivec_tests"
 
     # Some simulators are known to not support VMX instructions.
     if { [istarget powerpc-*-eabi] || [istarget powerpc*-*-eabispe] } {
-        verbose "$me:  target known to not support VMX, returning 1" 2
-        return 1
+	verbose "$me:  target known to not support VMX, returning 0" 2
+	return 0
     }
 
     # Make sure we have a compiler that understands altivec.
@@ -3477,8 +3477,8 @@ gdb_caching_proc skip_altivec_tests {
     } elseif [test_compiler_info xlc*] {
         set compile_flags "additional_flags=-qaltivec"
     } else {
-        verbose "Could not compile with altivec support, returning 1" 2
-        return 1
+	verbose "Could not compile with altivec support, returning 0" 2
+	return 0
     }
 
     # Compile a test program containing VMX instructions.
@@ -3493,7 +3493,7 @@ gdb_caching_proc skip_altivec_tests {
 	}
     }
     if {![gdb_simple_compile $me $src executable $compile_flags]} {
-        return 1
+	return 0
     }
 
     # Compilation succeeded so now run it via gdb.
@@ -3506,22 +3506,22 @@ gdb_caching_proc skip_altivec_tests {
     gdb_expect {
         -re ".*Illegal instruction.*${gdb_prompt} $" {
             verbose -log "\n$me altivec hardware not detected" 
-            set skip_vmx_tests 1
+	    set allow_vmx_tests 0
         }
         -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
             verbose -log "\n$me: altivec hardware detected" 
-            set skip_vmx_tests 0
+	    set allow_vmx_tests 1
         }
         default {
           warning "\n$me: default case taken"
-            set skip_vmx_tests 1
+	    set allow_vmx_tests 0
         }
     }
     gdb_exit
     remote_file build delete $obj
 
-    verbose "$me:  returning $skip_vmx_tests" 2
-    return $skip_vmx_tests
+    verbose "$me:  returning $allow_vmx_tests" 2
+    return $allow_vmx_tests
 }
 
 # Run a test on the power target to see if it supports ISA 3.1 instructions

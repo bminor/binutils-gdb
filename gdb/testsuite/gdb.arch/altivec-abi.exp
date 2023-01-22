@@ -21,7 +21,8 @@
 # This file uses altivec-abi.c for input.
 #
 
-if {![istarget "powerpc*"] || [skip_altivec_tests]} {
+require allow_altivec_tests
+if {![istarget "powerpc*"]} {
     verbose "Skipping altivec abi tests."
     return
 }
