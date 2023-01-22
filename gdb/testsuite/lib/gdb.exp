@@ -3901,7 +3901,7 @@ gdb_caching_proc allow_btrace_pt_tests {
 gdb_caching_proc allow_aarch64_sve_tests {
     global srcdir subdir gdb_prompt inferior_exited_re
 
-    set me "skip_aarch64_sve_tests"
+    set me "allow_aarch64_sve_tests"
 
     if { ![is_aarch64_target]} {
 	return 0
