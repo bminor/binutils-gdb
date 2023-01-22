@@ -138,7 +138,10 @@ fragment <<EOF
 #undef PE_DEF_FILE_ALIGNMENT
 #define NT_EXE_IMAGE_BASE		0x00010000
 
-#if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_wince_pe)
+#if defined(TARGET_IS_armpe)
+#define PE_DEF_SECTION_ALIGNMENT	0x00001000
+#define	PE_DEF_SUBSYSTEM		2
+#elif defined(TARGET_IS_arm_wince_pe)
 #define PE_DEF_SECTION_ALIGNMENT	0x00001000
 #define	PE_DEF_SUBSYSTEM		9
 #else
