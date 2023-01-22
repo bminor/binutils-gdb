@@ -76,7 +76,7 @@ gdb_exit
 # skip the rerun test when using gdbserver
 # otherwise rerun twice, target should be automatically disabled
 load_lib gdbserver-support.exp
-if !{[allow_gdbserver_tests]} {
+if {![allow_gdbserver_tests]} {
     unsupported "target does not support gdbserver"
     return 0
 }
