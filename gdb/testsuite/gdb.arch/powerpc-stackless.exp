@@ -15,10 +15,7 @@
 
 # Testcase for PR tdep/17379.
 
-if {![istarget "powerpc*-*-*"]} {
-    verbose "Skipping powerpc-stackless.exp"
-    return
-}
+require {istarget "powerpc*-*-*"}
 
 standard_testfile .S
 

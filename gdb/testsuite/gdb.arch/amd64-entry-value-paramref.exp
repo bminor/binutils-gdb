@@ -15,10 +15,7 @@
 
 standard_testfile .S .cc
 
-if { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
-    verbose "Skipping amd64-entry-value-paramref."
-    return
-}
+require {istarget x86_64-*-*} is_lp64_target
 
 if { [prepare_for_testing_full "failed to prepare" \
 	  [list $testfile "c++" $srcfile {}]] } {

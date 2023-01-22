@@ -25,11 +25,7 @@
 
 # Observe that the until command doesn't go all the way to sub2.
 
-
-if {![istarget "sh-*-*"]} {
-    verbose "Skipping SH backtrace tests."
-    return
-}
+require {istarget "sh-*-*"}
 
 set testfile "gdb1431"
 set srcfile ${testfile}.s

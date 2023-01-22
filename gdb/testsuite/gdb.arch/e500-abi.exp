@@ -21,11 +21,7 @@
 # This file uses e500-abi.c for input.
 #
 
-
-if {![istarget "powerpc-*eabispe"]} {
-    verbose "Skipping e500 abi tests."
-    return
-}
+require {istarget "powerpc-*eabispe"}
 
 set testfile "e500-abi"
 set binfile ${objdir}/${subdir}/${testfile}

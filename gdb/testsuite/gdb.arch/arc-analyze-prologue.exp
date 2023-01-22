@@ -15,10 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if {![istarget "arc*-*-*"]} {
-    verbose "Skipping ARC prologue test."
-    return
-}
+require {istarget "arc*-*-*"}
 
 standard_testfile .S
 

@@ -16,10 +16,7 @@
 
 # Tests for ARM iWMMXt register setting and fetching.
 
-if {![istarget "arm*-*-*"]} {
-    verbose "Skipping iWMMXt register tests."
-    return
-}
+require {istarget "arm*-*-*"}
 
 set testfile "iwmmxt-regs"
 set binfile ${objdir}/${subdir}/${testfile}

@@ -24,10 +24,7 @@ if { ![istarget i?86-*-*] && ![istarget x86_64-*-* ] } {
     return
 }
 
-if { ![have_avx] } {
-    verbose "Skipping x86 AVX tests."
-    return
-}
+require have_avx
 
 standard_testfile .c
 

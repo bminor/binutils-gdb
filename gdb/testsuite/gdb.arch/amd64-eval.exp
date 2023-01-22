@@ -17,10 +17,7 @@
 
 # This testcase exercises evaluation with amd64 calling conventions.
 
-if { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
-    verbose "Skipping x86_64 eval test."
-    return
-}
+require {istarget x86_64-*-*} is_lp64_target
 
 standard_testfile .cc
 

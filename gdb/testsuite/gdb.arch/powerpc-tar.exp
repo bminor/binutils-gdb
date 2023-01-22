@@ -22,10 +22,7 @@
 # branch to TAR and check that we stop at the address that we wrote to
 # register.
 
-if {![istarget "powerpc*-*-linux*"]} {
-    verbose "Skipping PowerPC test for the TAR register."
-    return
-}
+require {istarget "powerpc*-*-linux*"}
 
 standard_testfile .c
 

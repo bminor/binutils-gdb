@@ -21,11 +21,7 @@
 # This file uses e500-regs.c for input.
 #
 
-
-if {![istarget "powerpc-*eabispe"]} {
-    verbose "Skipping e500 register tests."
-    return
-}
+require {istarget "powerpc-*eabispe"}
 
 set testfile "e500-regs"
 set binfile ${objdir}/${subdir}/${testfile}

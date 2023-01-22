@@ -15,9 +15,7 @@
 
 # This file is part of the gdb testsuite.
 
-if { ![istarget "arm*-*-*"]} {
-     return 1
-}
+require {istarget "arm*-*-*"}
 
 standard_testfile
 if { [prepare_for_testing "failed to prepare" $testfile $srcfile ]} {

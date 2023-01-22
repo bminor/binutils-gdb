@@ -15,10 +15,7 @@
 
 # Test single stepping over Thumb-2 IT blocks.
 
-if {![istarget arm*-*eabi*]} {
-    verbose "Skipping Thumb-2 tests."
-    return
-}
+require {istarget arm*-*eabi*}
 
 standard_testfile .S
 

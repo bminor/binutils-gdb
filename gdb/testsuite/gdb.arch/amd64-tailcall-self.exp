@@ -15,10 +15,7 @@
 
 standard_testfile .S
 
-if { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
-    verbose "Skipping ${testfile}."
-    return
-}
+require {istarget x86_64-*-*} is_lp64_target
 
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {}] } {
     return -1

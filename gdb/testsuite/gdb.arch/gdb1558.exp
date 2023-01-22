@@ -21,11 +21,7 @@
 # Tests for PR:1558.  Hits breakpoint at main after function called
 # from main.
 
-
-if {![istarget "sh-*-*"]} {
-    verbose "Skipping SH breakpoint test."
-    return
-}
+require {istarget "sh-*-*"}
 
 set testfile "gdb1558"
 set srcfile ${testfile}.c

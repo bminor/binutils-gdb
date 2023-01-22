@@ -27,10 +27,7 @@ if { ![istarget x86_64-*-*] && ![istarget i?86-*-*] } {
     return
 }
 
-if { ![supports_fcf_protection] } {
-    untested "-fcf-protection not supported"
-    return
-}
+require supports_fcf_protection
 
 set opts {debug additional_flags=-fcf-protection=full}
 

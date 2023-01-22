@@ -15,10 +15,7 @@
 
 # Check that we can load different RISC-V target descriptions.
 
-if {![istarget "riscv*-*-*"]} {
-    verbose "Skipping ${gdb_test_file_name}."
-    return
-}
+require {istarget "riscv*-*-*"}
 
 clean_restart
 

@@ -23,11 +23,7 @@
 # running native.  It should be executed on a sufficiently new Linux
 # kernel that provides the 'system_call' regset.
 
-require isnative
-if { ![istarget s390x-*-* ] } {
-    verbose "Skipping s390 multi-arch tests."
-    return
-}
+require isnative {istarget s390x-*-*}
 
 standard_testfile
 set binprefix $binfile

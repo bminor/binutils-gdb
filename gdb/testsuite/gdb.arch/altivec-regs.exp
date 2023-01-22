@@ -22,10 +22,7 @@
 #
 
 require allow_altivec_tests
-if {![istarget "powerpc*"]} {
-    verbose "Skipping altivec register tests."
-    return
-}
+require {istarget "powerpc*"}
 
 standard_testfile
 

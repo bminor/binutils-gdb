@@ -17,10 +17,7 @@
 # loading a new target description file, and which registers show up
 # in the output of the 'info registers' command.
 
-if {![istarget "riscv*-*-*"]} {
-    verbose "Skipping ${gdb_test_file_name}."
-    return
-}
+require {istarget "riscv*-*-*"}
 
 standard_testfile
 

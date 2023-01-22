@@ -20,10 +20,7 @@
 
 # Testcase for ppc decimal128 pseudo-registers.
 
-if {![istarget "powerpc64*-*"]} {
-    verbose "Skipping powerpc Decimal128 pseudo-registers testcase."
-    return
-}
+require {istarget "powerpc64*-*"}
 
 standard_testfile
 

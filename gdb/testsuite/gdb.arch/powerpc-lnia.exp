@@ -23,10 +23,7 @@
 #		lnia Rx == addpcis Rx,0 == lnia Rx
 #		subcis Rx,value == addpcis Rx,-value
 
-if { ![istarget powerpc*-*] } {
-    verbose "Skipping powerpc lnia test."
-    return
-}
+require {istarget powerpc*-*}
 
 set retval 0
 

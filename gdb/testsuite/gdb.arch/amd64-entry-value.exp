@@ -20,9 +20,8 @@ if [info exists COMPILE] {
     # make check RUNTESTFLAGS="gdb.arch/amd64-entry-value.exp COMPILE=1"
     set srcfile ${testfile}.cc
     lappend opts debug optimize=-O2
-} elseif { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
-    verbose "Skipping amd64-entry-value."
-    return
+} else {
+    require {istarget x86_64-*-*} is_lp64_target
 }
 
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} $opts] } {

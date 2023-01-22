@@ -20,10 +20,7 @@
 standard_testfile .s
 set objfile [standard_output_file ${testfile}.o]
 
-if {![istarget "powerpc*-*-*"]} {
-    verbose "Skipping PowerPC instructions disassembly."
-    return
-}
+require {istarget "powerpc*-*-*"}
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${objfile}" object {debug}] != "" } {
     untested "PowerPC instructions disassembly"

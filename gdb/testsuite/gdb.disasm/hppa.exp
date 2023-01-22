@@ -16,12 +16,7 @@
 
 # This file was written by Jeff Law. (law@cs.utah.edu)
 
-if ![istarget "hppa*-*-*"] {
-    verbose "Tests ignored for all but hppa based targets."
-    return
-}
-
-
+require {istarget "hppa*-*-*"}
 
 set testfile "hppa"
 set srcfile ${srcdir}/${subdir}/${testfile}.s

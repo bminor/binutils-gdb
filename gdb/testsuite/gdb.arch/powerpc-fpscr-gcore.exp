@@ -18,10 +18,7 @@
 # This tests checks that generating and loading a core file preserves
 # the correct FPSCR size.
 
-if {![istarget "powerpc*-*-linux*"]} {
-    verbose "Skipping PowerPC test for corefiles with FPSCR."
-    return
-}
+require {istarget "powerpc*-*-linux*"}
 
 standard_testfile .c
 

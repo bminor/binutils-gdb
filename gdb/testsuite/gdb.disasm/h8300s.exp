@@ -15,10 +15,7 @@
 
 # This file was written by Kazu Hirata. (kazu@hxi.com)
 
-if ![istarget "h8300*-*-*"] {
-    verbose "Tests ignored for all but h8300s based targets."
-    return
-}
+require {istarget "h8300*-*-*"}
 
 
 set testfile "h8300s"

@@ -23,11 +23,7 @@
 
 # Test SH backtraces with >256 byte frame stack. (PR:1291)
 
-
-if {![istarget "sh-*-*"]} {
-    verbose "Skipping SH backtrace tests."
-    return
-}
+require {istarget "sh-*-*"}
 
 set testfile "gdb1291"
 set srcfile ${testfile}.s

@@ -15,10 +15,7 @@
 
 # This file was written by Jeff Law. (law@cs.utah.edu)
 
-if ![istarget "sh3*-*-*"] {
-    verbose "Tests ignored for all but sh3 based targets."
-    return
-}
+require {istarget "sh3*-*-*"}
 
 
 set testfile "sh3"

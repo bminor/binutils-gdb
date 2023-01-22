@@ -25,10 +25,7 @@
 # registers are then checked against the saved values, because the
 # abort should have reverted the registers to these values.
 
-if {![istarget "powerpc*-*-linux*"]} {
-    verbose "Skipping PowerPC test for HTM registers."
-    return
-}
+require {istarget "powerpc*-*-linux*"}
 
 standard_testfile .c .gen.c
 

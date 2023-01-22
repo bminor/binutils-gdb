@@ -21,9 +21,7 @@
 # PC must be extracted from the sigreturn register save area in the
 # stack.
 
-if {![istarget "sparc*-*-linux*"]} {
-    return 0
-}
+require {istarget "sparc*-*-linux*"}
 
 set testfile sparc-sysstep
 set srcfile ${testfile}.c

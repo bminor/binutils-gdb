@@ -15,10 +15,7 @@
 
 # This file was written by Michael Snyder (msnyder@redhat.com)
 
-if ![istarget "h8300*-*-*"] {
-    verbose "Tests ignored for all but h8300s based targets."
-    return
-}
+require {istarget "h8300*-*-*"}
 
 
 set testfile "t11_logs"

@@ -104,15 +104,13 @@ proc sparc_register_tests { } {
 	    "list changed registers"
 }
 
-if {[istarget "sparc-*-*"]} {
-    mi_clean_restart
-    sparc_register_tests_no_exec
-    mi_clean_restart $binfile
-    mi_runto_main
-    sparc_register_tests
-} else {
-    verbose "mi-regs.exp tests ignored for this target"
-}
+require {istarget "sparc-*-*"}
+
+mi_clean_restart
+sparc_register_tests_no_exec
+mi_clean_restart $binfile
+mi_runto_main
+sparc_register_tests
 
 mi_gdb_exit
 return 0

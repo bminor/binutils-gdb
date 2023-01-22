@@ -16,12 +16,7 @@
 # Check the formatting of the fcsr, fflags, and frm registers in the
 # output of the 'info registers' command.
 
-if {![istarget "riscv*-*-*"]} {
-    verbose "Skipping ${gdb_test_file_name}."
-    return
-}
-
-require allow_float_test
+require {istarget "riscv*-*-*"} allow_float_test
 
 standard_testfile
 

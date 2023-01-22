@@ -18,10 +18,7 @@
 # Contributed by Pierre Langlois  <pierre.langlois@embecosm.com>
 # Tests for the AVR __flash named address space qualifier.
 
-if {![istarget "avr*"]} {
-  verbose "Skipping ${gdb_test_file_name}."
-  return
-}
+require {istarget "avr*"}
 
 # The __flash qualifier was added in GCC 4.7.
 if {[test_compiler_info {gcc-[0-4]-[0-6]}]} {

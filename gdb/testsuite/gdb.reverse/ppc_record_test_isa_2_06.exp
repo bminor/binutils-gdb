@@ -37,10 +37,7 @@ set gen_src record_test_isa_2_06.c
 set executable record_test_isa_2_06
 set options [list debug]
 
-if {![istarget "powerpc*"]} {
-    verbose "Skipping PowerPC ISA 2.06 instruction record_test_2_06."
-    return
-}
+require {istarget "powerpc*"}
 
 if {[build_executable "failed to prepare" $executable $srcfile $options] == -1} {
     return -1

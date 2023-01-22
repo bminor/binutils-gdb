@@ -24,9 +24,8 @@ if [info exists COMPILE] {
     # make check RUNTESTFLAGS='gdb.arch/amd64-prologue-xmm.exp COMPILE=1'
     set srcfile ${csrcfile}
     lappend opts debug optimize=-O0
-} elseif { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
-    verbose "Skipping amd64-prologue-xmm test."
-    return 0
+} else {
+    require {istarget x86_64-*-*} is_lp64_target
 }
 
 if {[prepare_for_testing "failed to prepare" ${binfile} $srcfile $opts]} {

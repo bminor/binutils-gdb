@@ -16,10 +16,7 @@
 standard_testfile .S
 set binfile ${binfile}.o
 
-if { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
-    verbose "Skipping ${testfile}."
-    return
-}
+require {istarget x86_64-*-*} is_lp64_target
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" object {debug}] != "" } {
     untested "failed to compile"

@@ -15,10 +15,7 @@
 
 # Test ARC disassembler options.
 
-if {![istarget "arc-*-*"]} {
-    verbose "Skipping ARC disassembler option test."
-    return
-}
+require {istarget "arc-*-*"}
 
 standard_testfile .s
 set objfile [standard_output_file ${testfile}.o]

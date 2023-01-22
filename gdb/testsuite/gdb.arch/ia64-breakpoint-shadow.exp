@@ -13,10 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if ![istarget "ia64-*-*"] {
-    verbose "Skipping ia64-breakpoint-shadow test."
-    return
-}
+require {istarget "ia64-*-*"}
 
 set testfile ia64-breakpoint-shadow
 set srcfile ${testfile}.S

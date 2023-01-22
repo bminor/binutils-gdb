@@ -23,10 +23,7 @@
 #
 # In all other cases the default will be RV64.
 
-if {![istarget "riscv*-*-*"]} {
-    verbose "Skipping ${gdb_test_file_name}."
-    return
-}
+require {istarget "riscv*-*-*"}
 
 # Start GDB with no executable.
 gdb_start

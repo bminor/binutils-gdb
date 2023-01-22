@@ -19,11 +19,7 @@
 # a lwarx/ldarx instruction and ending with a stwcx/stdcx
 # instruction.
 
-
-if {![istarget "powerpc*"] || ![is_lp64_target]} {
-    verbose "Skipping testing of powerpc64 single stepping over atomic sequences."
-    return
-}
+require {istarget "powerpc*"} is_lp64_target
 
 standard_testfile .S
 

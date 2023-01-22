@@ -18,10 +18,7 @@
 # Test rs6000 prologue analyzer.
 
 
-if {![istarget "powerpc-*-aix*"]} {
-    verbose "Skipping powerpc-aix prologue tests."
-    return
-}
+require {istarget "powerpc-*-aix*"}
 
 set testfile "powerpc-aix-prologue"
 set srcfile ${testfile}.c

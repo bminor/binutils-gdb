@@ -17,11 +17,7 @@
 
 # Test PowerPC E500 prologue analyzer.
 
-
-if {![istarget "powerpc-*"]} {
-    verbose "Skipping powerpc E500 prologue tests."
-    return
-}
+require {istarget "powerpc-*"}
 
 set testfile "e500-prologue"
 set srcfile ${testfile}.c

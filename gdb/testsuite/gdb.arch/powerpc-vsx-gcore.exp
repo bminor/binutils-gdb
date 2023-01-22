@@ -18,11 +18,7 @@
 # This test checks that generating and loading a core file preserves
 # the correct VSX register state.
 
-if {![istarget "powerpc*-*-linux*"]} {
-    verbose "Skipping PowerPC test for corefiles with VSX registers."
-    return
-}
-require allow_vsx_tests
+require {istarget "powerpc*-*-linux*"} allow_vsx_tests
 
 standard_testfile .c
 

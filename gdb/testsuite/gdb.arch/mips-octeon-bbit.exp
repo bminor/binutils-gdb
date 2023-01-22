@@ -15,9 +15,7 @@
 
 # Test single-step on bbit.  
 
-if ![istarget "*octeon*"] {
-  return -1
-}
+require {istarget "*octeon*"}
 
 proc current_insn {} {
     global gdb_prompt

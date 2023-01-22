@@ -20,10 +20,7 @@
 # values, then write to the registers trough GDB, step once, and check
 # again if we read back the same values.
 
-if {![istarget "powerpc*-*-linux*"]} {
-    verbose "Skipping PowerPC test for PPR and DSCR registers."
-    return
-}
+require {istarget "powerpc*-*-linux*"}
 
 standard_testfile .c
 

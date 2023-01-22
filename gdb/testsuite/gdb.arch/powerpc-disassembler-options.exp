@@ -18,10 +18,7 @@
 # This test exercises set/show disassembler-options results are preserved
 # across multiple set architecture calls.
 
-if {![istarget "powerpc*-*-*"]} {
-    verbose "Skipping PowerPC disassembler options."
-    return
-}
+require {istarget "powerpc*-*-*"}
 
 gdb_exit
 gdb_start
