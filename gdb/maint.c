@@ -1042,11 +1042,11 @@ scoped_command_stats::scoped_command_stats (bool msg_type)
 #ifdef HAVE_USEFUL_SBRK
       char *lim = (char *) sbrk (0);
       m_start_space = lim - lim_at_start;
-      m_space_enabled = 1;
+      m_space_enabled = true;
 #endif
     }
   else
-    m_space_enabled = 0;
+    m_space_enabled = false;
 
   if (msg_type == 0 || per_command_time)
     {
@@ -1054,13 +1054,13 @@ scoped_command_stats::scoped_command_stats (bool msg_type)
 
       m_start_cpu_time = run_time_clock::now ();
       m_start_wall_time = steady_clock::now ();
-      m_time_enabled = 1;
+      m_time_enabled = true;
 
       if (per_command_time)
 	print_time (_("command started"));
     }
   else
-    m_time_enabled = 0;
+    m_time_enabled = false;
 
   if (msg_type == 0 || per_command_symtab)
     {
@@ -1070,10 +1070,10 @@ scoped_command_stats::scoped_command_stats (bool msg_type)
       m_start_nr_symtabs = nr_symtabs;
       m_start_nr_compunit_symtabs = nr_compunit_symtabs;
       m_start_nr_blocks = nr_blocks;
-      m_symtab_enabled = 1;
+      m_symtab_enabled = true;
     }
   else
-    m_symtab_enabled = 0;
+    m_symtab_enabled = false;
 
   /* Initialize timer to keep track of how long we waited for the user.  */
   reset_prompt_for_continue_wait_time ();

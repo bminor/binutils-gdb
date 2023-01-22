@@ -49,9 +49,9 @@ class scoped_command_stats
   /* Track whether the stat was enabled at the start of the command
      so that we can avoid printing anything if it gets turned on by
      the current command.  */
-  int m_time_enabled : 1;
-  int m_space_enabled : 1;
-  int m_symtab_enabled : 1;
+  bool m_time_enabled : 1;
+  bool m_space_enabled : 1;
+  bool m_symtab_enabled : 1;
   run_time_clock::time_point m_start_cpu_time;
   std::chrono::steady_clock::time_point m_start_wall_time;
   long m_start_space;
