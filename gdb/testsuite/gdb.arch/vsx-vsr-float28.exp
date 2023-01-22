@@ -18,11 +18,11 @@
 # Test the vsr registers print values in float128 bit format.
 #
 
-
-if {![istarget "powerpc*"] || [skip_vsx_tests]} {
+if {![istarget "powerpc*"]} {
     verbose "Skipping vsr float128 field tests."
     return
 }
+require allow_vsx_tests
 
 standard_testfile
 

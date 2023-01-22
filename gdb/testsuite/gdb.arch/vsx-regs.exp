@@ -19,10 +19,11 @@
 #
 
 
-if {![istarget "powerpc*"] || [skip_vsx_tests]} {
+if {![istarget "powerpc*"]} {
     verbose "Skipping vsx register tests."
     return
 }
+require allow_vsx_tests
 
 standard_testfile
 
