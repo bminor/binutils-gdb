@@ -15,10 +15,9 @@
 
 standard_testfile .c realname-expand-real.c
 
-if [is_remote host] {
-    unsupported "compiling on a remote host does not support a filename with directory."
-    return 0
-}
+# Compiling on a remote host does not support a filename with
+# directory.
+require {!is_remote host}
 
 set srcdirabs [file join [pwd] $srcdir]
 set srcfilelink [standard_output_file realname-expand-link.c]

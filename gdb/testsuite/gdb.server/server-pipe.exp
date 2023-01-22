@@ -24,9 +24,7 @@
 # This test relies on starting gdbserver using the pipe syntax.  Not
 # sure how well this will run if part of this test is being run
 # elsewhere.
-if { [is_remote target] || [is_remote host] } {
-    return 0
-}
+require {!is_remote target} {!is_remote host}
 
 load_lib gdbserver-support.exp
 

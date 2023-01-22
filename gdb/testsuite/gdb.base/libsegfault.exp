@@ -22,10 +22,7 @@
 
 # We cannot expect remote hosts to see environment variables set on
 # the local machine.
-if { [is_remote host] } {
-    unsupported "can't set environment variables on remote host"
-    return -1
-}
+require {!is_remote host}
 
 # Spawn GDB with LIB preloaded with LD_PRELOAD.  CMDLINE_OPTS are
 # command line options passed to GDB.

@@ -16,9 +16,7 @@
 require allow_shlib_tests
 
 # The testcase assumes the target can access the OBJDIR.
-if [is_remote target] {
-    return
-}
+require {!is_remote target}
 
 # We need to be able to influence the target's environment and working
 # directory.  Can't do that if when we connect the inferior is already

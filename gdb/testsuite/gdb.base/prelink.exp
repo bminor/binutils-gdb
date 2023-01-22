@@ -20,9 +20,7 @@
 
 
 require isnative allow_shlib_tests is_c_compiler_gcc
-if { [is_remote host] } {
-    return
-}
+require {!is_remote host}
 
 load_lib prelink-support.exp
 

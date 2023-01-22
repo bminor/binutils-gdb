@@ -20,11 +20,7 @@
 
 # We cannot expect remote hosts to see environment variables set on the
 # local machine.
-
-if { [is_remote host] } {
-    unsupported "can't set environment variables on remote host"
-    return -1
-}
+require {!is_remote host}
 
 # Check that the history size is properly set to SIZE when the environment
 # variable ENV_VAR is set to GDBHISTSIZE.

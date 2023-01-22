@@ -19,9 +19,7 @@ load_lib dwarf.exp
 require dwarf2_support
 
 # No remote host testing either.
-if {[is_remote host]} {
-    return 0
-}
+require {!is_remote host}
 
 standard_testfile main.c dwznolink.S
 

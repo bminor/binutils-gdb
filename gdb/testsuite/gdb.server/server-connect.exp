@@ -25,9 +25,7 @@ standard_testfile normal.c
 require allow_gdbserver_tests
 
 # We want to have control over where we start gdbserver.
-if { [is_remote target] } {
-    return 0
-}
+require {!is_remote target}
 
 if { [prepare_for_testing "failed to prepare" $testfile $srcfile debug] } {
     return -1

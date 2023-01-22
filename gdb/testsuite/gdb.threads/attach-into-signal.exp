@@ -18,9 +18,8 @@
 
 # This test only works on Linux
 require !use_gdb_stub isnative
-if { [is_remote host] || ![istarget *-linux*] } {
-    return
-}
+require {!is_remote host}
+require {istarget *-linux*}
 
 standard_testfile
 set executable_nothr ${testfile}-nothr

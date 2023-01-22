@@ -18,10 +18,7 @@
 # Do not run if gdb debug is enabled as it will interfere with log redirect.
 require !gdb_debug_enabled
 
-if {[is_remote host]} {
-    untested "does not work on remote host"
-    return 0
-}
+require {!is_remote host}
 
 standard_testfile style.c
 

@@ -18,12 +18,9 @@
 
 standard_testfile
 
-# We rely on being able to copy things around.
-
-if { [is_remote host] } {
-    untested "setting breakpoints by full path"
-    return -1
-}
+# We rely on being able to copy things around and being able to set
+# breakpoints by full path.
+require {!is_remote host}
 
 # Create a temporary file in the build directory.  Use a different
 # filename in case ${srcdir} == ${objdir}.

@@ -23,9 +23,7 @@ standard_testfile
 # If the host is remote, source files are uploaded to the host and compiled
 # there, but without the directory structure we expect, making the test
 # pointless.  Skip the test in that case.
-if { [is_remote host] } {
-    return
-}
+require {!is_remote host}
 
 # Copy the source file at these locations in the output directory ($out):
 #

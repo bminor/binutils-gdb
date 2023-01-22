@@ -15,9 +15,7 @@
 
 standard_testfile
 
-if [is_remote host] {
-    return 0
-}
+require {!is_remote host}
 
 set targetdir "${binfile}.dir"
 set sourcescript "${srcdir}/${subdir}/${testfile}-script"

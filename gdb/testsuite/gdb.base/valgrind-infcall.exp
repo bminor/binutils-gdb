@@ -18,10 +18,7 @@ require allow_xml_test
 
 load_lib valgrind.exp
 
-if [is_remote target] {
-    # The test always runs locally.
-    return 0
-}
+require {!is_remote target}
 
 standard_testfile .c
 if {[build_executable $testfile.exp $testfile $srcfile {debug}] == -1} {

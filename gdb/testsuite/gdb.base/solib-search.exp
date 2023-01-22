@@ -17,10 +17,7 @@
 # is properly reset when the path is changed.
 
 require allow_shlib_tests
-if {[is_remote target]} {
-    untested "skipping remote target and shared library tests"
-    return -1
-}
+require {!is_remote target}
 
 # Build "wrong" and "right" versions of the libraries in separate directories.
 set wrong_lib_subdir "solib-search-wrong"

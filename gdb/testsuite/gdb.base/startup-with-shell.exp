@@ -20,10 +20,7 @@ require !use_gdb_stub
 
 # There's no easy way to set environment variables on remote targets
 # (via dejagnu) yet.
-if { [is_remote target] } {
-    untested "remote board"
-    return
-}
+require {!is_remote target}
 
 standard_testfile
 

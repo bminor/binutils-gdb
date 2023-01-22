@@ -22,10 +22,7 @@
 
 require isnative
 
-if { [is_remote host] } {
-    unsupported "argv0-symlink.exp not supported on remote host"
-    return -1
-}
+require {!is_remote host}
 
 standard_testfile
 
