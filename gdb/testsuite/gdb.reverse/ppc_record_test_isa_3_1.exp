@@ -37,10 +37,11 @@ standard_testfile
 set gen_src record_test_isa_3_1.c
 set executable record_test_isa_3_1
 
-if {![istarget "powerpc*"] || [skip_power_isa_3_1_tests]}  {
+if {![istarget "powerpc*"]}  {
     verbose "Skipping PowerPC ISA 3.1 instruction record_test."
     return
 }
+require allow_power_isa_3_1_tests
 
 set options [list additional_flags=-mcpu=power10 debug]
 if {[build_executable "failed to prepare" $executable $srcfile $options] == -1} {

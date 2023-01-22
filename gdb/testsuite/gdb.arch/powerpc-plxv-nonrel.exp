@@ -16,10 +16,11 @@
 # Test to see if gdb is properly single stepping over the
 # displaced plxv instruction.
 
-if { ![istarget powerpc*-*] || [skip_power_isa_3_1_tests] } {
+if { ![istarget powerpc*-*] } {
     verbose "Skipping powerpc ISA 3.1 plxv test."
     return
 }
+require allow_power_isa_3_1_tests
 
 set retval 0
 

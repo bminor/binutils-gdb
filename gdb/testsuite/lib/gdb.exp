@@ -3525,10 +3525,10 @@ gdb_caching_proc allow_altivec_tests {
 }
 
 # Run a test on the power target to see if it supports ISA 3.1 instructions
-gdb_caching_proc skip_power_isa_3_1_tests {
+gdb_caching_proc allow_power_isa_3_1_tests {
     global srcdir subdir gdb_prompt inferior_exited_re
 
-    set me "skip_power_isa_3_1_tests"
+    set me "allow_power_isa_3_1_tests"
 
     # Compile a test program containing ISA 3.1 instructions.
     set src {
@@ -3540,7 +3540,7 @@ gdb_caching_proc skip_power_isa_3_1_tests {
 	}
 
     if {![gdb_simple_compile $me $src executable ]} {
-        return 1
+	return 0
     }
 
     # No error message, compilation succeeded so now run it via gdb.
@@ -3553,22 +3553,22 @@ gdb_caching_proc skip_power_isa_3_1_tests {
     gdb_expect {
         -re ".*Illegal instruction.*${gdb_prompt} $" {
             verbose -log "\n$me Power ISA 3.1 hardware not detected"
-            set skip_power_isa_3_1_tests 1
+	    set allow_power_isa_3_1_tests 0
         }
         -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
             verbose -log "\n$me: Power ISA 3.1 hardware detected"
-            set skip_power_isa_3_1_tests 0
+	    set allow_power_isa_3_1_tests 1
         }
         default {
-          warning "\n$me: default case taken"
-            set skip_power_isa_3_1_tests 1
+	    warning "\n$me: default case taken"
+	    set allow_power_isa_3_1_tests 0
         }
     }
     gdb_exit
     remote_file build delete $obj
 
-    verbose "$me:  returning $skip_power_isa_3_1_tests" 2
-    return $skip_power_isa_3_1_tests
+    verbose "$me:  returning $allow_power_isa_3_1_tests" 2
+    return $allow_power_isa_3_1_tests
 }
 
 # Run a test on the target to see if it supports vmx hardware.  Return 0 if so,
