@@ -115,6 +115,7 @@ if { ![runto_main] } {
 
 if { ![gdb_target_supports_trace] } {
     # Test cannot run on this target.
+    unsupported "test requires trace"
     return 1
 }
 

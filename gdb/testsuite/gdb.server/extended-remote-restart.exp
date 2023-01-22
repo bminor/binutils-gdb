@@ -30,6 +30,7 @@
 
 # This test is only for extended remote targets.
 if {[target_info gdb_protocol] != "extended-remote"} {
+    unsupported "requires extended-remote"
     return
 }
 
@@ -40,6 +41,7 @@ require {is_any_target "*-*-linux*" "*-*-openbsd*"}
 # And we need to be able to reconnect to gdbserver.
 set gdbserver_reconnect_p 1
 if { [info proc gdb_reconnect] == "" } {
+    unsupported "requires gdbserver reconnect"
     return 0
 }
 

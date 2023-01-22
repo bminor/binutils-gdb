@@ -26,7 +26,7 @@ switch -glob -- [istarget] {
 	set testfile "pa64-nullify"
     }
     "*" {
-        verbose "Skipping hppa nullification tests."
+        unsupported "Skipping hppa nullification tests."
         return
     }
 }

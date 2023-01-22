@@ -17,6 +17,7 @@
 
 set gdbserver_reconnect_p 1
 if { [info proc gdb_reconnect] == "" } {
+    unsupported "requires gdbserver reconnect"
     return 0
 }
 

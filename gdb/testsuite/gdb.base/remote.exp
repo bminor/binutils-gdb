@@ -16,6 +16,7 @@
 # Test only on boards that actually use the remote protocol.
 if {[target_info gdb_protocol] != "remote"
     && [target_info gdb_protocol] != "extended-remote"} {
+    unsupported "requires remote protocol"
     return
 }
 

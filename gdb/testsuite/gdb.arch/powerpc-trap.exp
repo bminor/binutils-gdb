@@ -29,7 +29,7 @@ if { [istarget powerpc-*] } {
    # with the source file powerpc64-trap.s.
    set expected_traps 5
 } else {
-    verbose "Skipping ${gdb_test_file_name}."
+    unsupported "Skipping powerpc-specific tests"
     return
 }
 

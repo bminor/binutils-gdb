@@ -29,6 +29,7 @@ if [info exists COMPILE] {
     lappend opts debug optimize=-O2
 } elseif {![is_x86_like_target]} {
     # This test can only be run on x86 targets.
+    unsupported "needs x86-like target"
     return 0  
 }
 
