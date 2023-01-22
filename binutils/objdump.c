@@ -3910,6 +3910,13 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 		{
 		  do_print = true;
 
+		  /* Skip over the relocs belonging to addresses below the
+		     symbol address.  */
+		  const bfd_vma sym_offset = bfd_asymbol_value (sym) - section->vma;
+		  while (rel_pp < rel_ppend &&
+		   (*rel_pp)->address - rel_offset < sym_offset)
+			  ++rel_pp;
+
 		  if (sym->flags & BSF_FUNCTION)
 		    {
 		      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
