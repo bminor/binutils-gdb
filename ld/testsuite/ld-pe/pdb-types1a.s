@@ -8,20 +8,20 @@
 
 .long CV_SIGNATURE_C13
 
-# Type 1000, volatile long
+/* Type 1000, volatile long */
 .mod1:
 .short .mod2 - .mod1 - 2
 .short LF_MODIFIER
 .long T_LONG
-.short 2 # volatile
+.short 2 /* volatile */
 .p2align 2
 
-# Type 1001, const long
+/* Type 1001, const long */
 .mod2:
 .short .types_end - .mod2 - 2
 .short LF_MODIFIER
 .long T_LONG
-.short 1 # const
+.short 1 /* const */
 .p2align 2
 
 .types_end:

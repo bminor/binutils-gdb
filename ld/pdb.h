@@ -820,6 +820,7 @@ struct objname
 
 #define CV_CFL_80386			0x03
 #define CV_CFL_X64			0xD0
+#define CV_CFL_ARM64			0xF6
 
 #define CV_CFL_LINK			0x07
 

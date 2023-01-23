@@ -36,7 +36,7 @@
 .long 0x67452310
 .long 0x01234567
 .long 0x89abcdef
-.short 0 # padding
+.short 0 /* padding */
 
 .long .src2 - .strings_start
 .byte NUM_MD5_BYTES
@@ -45,7 +45,7 @@
 .long 0x4c5d6e7f
 .long 0x7f6e5d4c
 .long 0x3b2a1908
-.short 0 # padding
+.short 0 /* padding */
 
 .chksms_end:
 

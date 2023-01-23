@@ -22,21 +22,21 @@
 
 .long CV_SIGNATURE_C13
 
-# Type 1000, string "test"
+/* Type 1000, string "test" */
 .string1:
 .short .string2 - .string1 - 2
 .short LF_STRING_ID
-.long 0 # sub-string
+.long 0 /* sub-string */
 .asciz "test"
 .byte 0xf3
 .byte 0xf2
 .byte 0xf1
 
-# Type 1001, string "foo"
+/* Type 1001, string "foo" */
 .string2:
 .short .types_end - .string2 - 2
 .short LF_STRING_ID
-.long 0 # sub-string
+.long 0 /* sub-string */
 .asciz "foo"
 
 .types_end:

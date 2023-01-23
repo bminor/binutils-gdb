@@ -591,13 +591,20 @@ populate_type_stream (bfd *pdb, bfd *stream, struct types *types)
 static uint16_t
 get_arch_number (bfd *abfd)
 {
-  if (abfd->arch_info->arch != bfd_arch_i386)
-    return 0;
+  switch (abfd->arch_info->arch)
+    {
+    case bfd_arch_i386:
+      if (abfd->arch_info->mach & bfd_mach_x86_64)
+	return IMAGE_FILE_MACHINE_AMD64;
+      else
+	return IMAGE_FILE_MACHINE_I386;
 
-  if (abfd->arch_info->mach & bfd_mach_x86_64)
-    return IMAGE_FILE_MACHINE_AMD64;
+    case bfd_arch_aarch64:
+      return IMAGE_FILE_MACHINE_ARM64;
 
-  return IMAGE_FILE_MACHINE_I386;
+    default:
+      return 0;
+    }
 }
 
 /* Validate the DEBUG_S_FILECHKSMS entry within a module's .debug$S
@@ -3618,13 +3625,20 @@ handle_debugt_section (asection *s, bfd *mod, struct types *types,
 static uint16_t
 target_processor (bfd *abfd)
 {
-  if (abfd->arch_info->arch != bfd_arch_i386)
-    return 0;
+  switch (abfd->arch_info->arch)
+    {
+    case bfd_arch_i386:
+      if (abfd->arch_info->mach & bfd_mach_x86_64)
+	return CV_CFL_X64;
+      else
+	return CV_CFL_80386;
 
-  if (abfd->arch_info->mach & bfd_mach_x86_64)
-    return CV_CFL_X64;
-  else
-    return CV_CFL_80386;
+    case bfd_arch_aarch64:
+      return CV_CFL_ARM64;
+
+    default:
+      return 0;
+    }
 }
 
 /* Create the symbols that go in "* Linker *", the dummy module created

@@ -19,7 +19,8 @@
 # MA 02110-1301, USA.
 
 if {![istarget i*86-*-mingw*]
-  && ![istarget x86_64-*-mingw*]} {
+  && ![istarget x86_64-*-mingw*]
+  && ![istarget aarch64-*-mingw*]} {
     return
 }
 
