@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: binutils 2.39.90\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
 "POT-Creation-Date: 2022-12-31 12:19+0000\n"
-"PO-Revision-Date: 2023-01-15 13:15+0100\n"
+"PO-Revision-Date: 2023-01-22 16:13+0100\n"
 "Last-Translator: Göran Uddeborg <goeran@uddeborg.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -1394,16 +1394,14 @@ msgid "      --non-deterministic-libraries\n"
 msgstr "      --non-deterministic-libraries\n"
 
 #: dlltool.c:3688
-#, fuzzy, c-format
-#| msgid "  [U]          - use actual timestamps and uids/gids\n"
+#, c-format
 msgid "                             Use actual timestamps and uids/gids in output libraries\n"
-msgstr "  [D]          - använd verkliga tidsstämplar och uid/gid\n"
+msgstr "                             Använd verkliga tidsstämplar och uid/gid i utmatade bibliotek\n"
 
 #: dlltool.c:3690
-#, fuzzy, c-format
-#| msgid "  [U]          - use actual timestamps and uids/gids (default)\n"
+#, c-format
 msgid "                             Use actual timestamps and uids/gids in output libraries (default)\n"
-msgstr "  [D]          - använd verkliga tidsstämplar och uid/gid (standard)\n"
+msgstr "                             Använd verkliga tidsstämplar och uid/gid i utmatade bibliotek (standard)\n"
 
 #: dlltool.c:3691
 #, c-format
@@ -1935,16 +1933,14 @@ msgstr ""
 "\n"
 
 #: dwarf.c:448
-#, fuzzy, c-format
-#| msgid "Length (%lu) of DW_LNE_set_address op is too long\n"
+#, c-format
 msgid "Length (%zu) of DW_LNE_set_address op is too long\n"
-msgstr "Längden (%lu) på DW_LNE_set_address op är för lång\n"
+msgstr "Längden (%zu) på DW_LNE_set_address op är för lång\n"
 
 #: dwarf.c:454
-#, fuzzy, c-format
-#| msgid "set Address to 0x%s\n"
+#, c-format
 msgid "set Address to %#<PRIx64>\n"
-msgstr "sätt Adress till 0x%s\n"
+msgstr "sätt adress till %#<PRIx64>\n"
 
 #: dwarf.c:461
 #, c-format
@@ -1961,10 +1957,9 @@ msgid "DW_LNE_define_file: Bad opcode length\n"
 msgstr "DW_LNE_define_file: Felaktig opkod-längd\n"
 
 #: dwarf.c:488
-#, fuzzy, c-format
-#| msgid "set Discriminator to %s\n"
+#, c-format
 msgid "set Discriminator to %<PRIu64>\n"
-msgstr "sätt diskriminator till %s\n"
+msgstr "sätt diskriminator till %<PRIu64>\n"
 
 #: dwarf.c:554
 #, c-format
@@ -1995,10 +1990,9 @@ msgid "<no .debug_str section>"
 msgstr "<ingen .debug_str-sektion>"
 
 #: dwarf.c:596
-#, fuzzy, c-format
-#| msgid "DW_FORM_strp offset too big: 0x%s\n"
+#, c-format
 msgid "DW_FORM_strp offset too big: %#<PRIx64>\n"
-msgstr "DW_FORM_strp-avstånd är för stort: 0x%s\n"
+msgstr "DW_FORM_strp-avstånd är för stort: %#<PRIx64>\n"
 
 #: dwarf.c:597 dwarf.c:624 dwarf.c:1821
 msgid "<offset is too big>"
@@ -2013,10 +2007,9 @@ msgid "<no .debug_line_str section>"
 msgstr "<ingen .debug_line_str-sektion>"
 
 #: dwarf.c:623
-#, fuzzy, c-format
-#| msgid "DW_FORM_line_strp offset too big: 0x%s\n"
+#, c-format
 msgid "DW_FORM_line_strp offset too big: %#<PRIx64>\n"
-msgstr "DW_FORM_line_strp-avstånd är för stort: 0x%s\n"
+msgstr "DW_FORM_line_strp-avstånd är för stort: %<PRIx64>\n"
 
 #: dwarf.c:634
 msgid "<no NUL byte at end of .debug_line_str section>"
@@ -2035,20 +2028,18 @@ msgid "<no .debug_str.dwo section>"
 msgstr "<ingen .debug_str.dwo-sektion>"
 
 #: dwarf.c:671
-#, fuzzy, c-format
-#| msgid "string index of %s converts to an offset of 0x%s which is too big for section %s"
+#, c-format
 msgid "string index of %<PRIu64> converts to an offset of %#<PRIx64> which is too big for section %s"
-msgstr "ett strängindex på %s konverterar till ett avstånd på 0x%s vilket är för stort för sektionen %s"
+msgstr "ett strängindex på %<PRIu64> konverterar till ett avstånd på %#<PRIx64> vilket är för stort för sektionen %s"
 
 #: dwarf.c:675
 msgid "<string index too big>"
 msgstr "<strängindexet är för stort>"
 
 #: dwarf.c:688
-#, fuzzy, c-format
-#| msgid "indirect offset too big: 0x%s\n"
+#, c-format
 msgid "indirect offset too big: %#<PRIx64>\n"
-msgstr "indirekt avstånd är för stort: 0x%s\n"
+msgstr "indirekt avstånd är för stort: %#<PRIx64>\n"
 
 #: dwarf.c:689
 msgid "<indirect index offset is too big>"
@@ -2063,10 +2054,9 @@ msgid "Cannot fetch indexed address: the .debug_addr section is missing\n"
 msgstr "Det går inte att hämta den indexerade adressen: sektionen .debug_addr saknas\n"
 
 #: dwarf.c:717 dwarf.c:773
-#, fuzzy, c-format
-#| msgid "Offset into section %s too big: 0x%s\n"
+#, c-format
 msgid "Offset into section %s too big: %#<PRIx64>\n"
-msgstr "Avstånd in i sektionen %s är för stort: 0x%s\n"
+msgstr "Avstånd in i sektionen %s är för stort: %#<PRIx64>\n"
 
 #: dwarf.c:738
 #, c-format
@@ -2074,42 +2064,36 @@ msgid "Unable to locate %s section\n"
 msgstr "Kan inte hitta sektionen %s\n"
 
 #: dwarf.c:744
-#, fuzzy, c-format
-#| msgid "Section %s is too small to contain a CU/TU header\n"
+#, c-format
 msgid "Section %s is too small to contain an value indexed from another section!\n"
-msgstr "Sektionen %s är för liten för att innehålla ett CU-/TU-huvud\n"
+msgstr "Sektionen %s är för liten för att innehålla ett värde indexerat från en annan sektion!\n"
 
 #. Report the missing single zero which ends the section.
 #: dwarf.c:1051
-#, fuzzy, c-format
-#| msgid ".debug_macro section not zero terminated\n"
+#, c-format
 msgid "%s section not zero terminated\n"
-msgstr "sektionen .debug_macro är inte nollterminerad\n"
+msgstr "sektionen %s är inte nollterminerad\n"
 
 #. PR 17531: file:4bcd9ce9.
 #: dwarf.c:1079
-#, fuzzy, c-format
-#| msgid "Debug info is corrupted, abbrev size (%lx) is larger than abbrev section size (%lx)\n"
+#, c-format
 msgid "Debug info is corrupted, abbrev size (%#<PRIx64>) is larger than abbrev section size (%#<PRIx64>)\n"
-msgstr "Felsökningsinfo är trasig, abbrev-storlek (%lx) är större än abbrev-sektionstorleken (%lx)\n"
+msgstr "Felsökningsinfo är trasig, abbrev-storlek (%#<PRIx64>) är större än abbrev-sektionstorleken (%#<PRIx64>)\n"
 
 #: dwarf.c:1086
-#, fuzzy, c-format
-#| msgid "Debug info is corrupted, abbrev offset (%lx) is larger than abbrev section size (%lx)\n"
+#, c-format
 msgid "Debug info is corrupted, abbrev offset (%#<PRIx64>) is larger than abbrev section size (%#<PRIx64>)\n"
-msgstr "Felsökningsinfo är trasig, abbrev-avstånd (%lx) är större än abbrev-sektionstorleken (%lx)\n"
+msgstr "Felsökningsinfo är trasig, abbrev-avstånd (%#<PRIx64>) är större än abbrev-sektionstorleken (%<PRIx64>)\n"
 
 #: dwarf.c:1119
-#, fuzzy, c-format
-#| msgid "User TAG value: %#lx"
+#, c-format
 msgid "User TAG value: %#<PRIx64>"
-msgstr "Användar-TAG-värde: %#lx"
+msgstr "Användar-TAG-värde: %#<PRIx64>"
 
 #: dwarf.c:1122
-#, fuzzy, c-format
-#| msgid "Unknown TAG value: %#lx"
+#, c-format
 msgid "Unknown TAG value: %#<PRIx64>"
-msgstr "Okänt TAG-värde: %#lx"
+msgstr "Okänt TAG-värde: %#<PRIx64>"
 
 #: dwarf.c:1143
 #, c-format
@@ -2122,10 +2106,9 @@ msgid "Unknown IDX value: %lx"
 msgstr "Okänt IDX-värde: %lx"
 
 #: dwarf.c:1175
-#, fuzzy, c-format
-#| msgid "%c%s byte block: "
+#, c-format
 msgid "%c%<PRIu64> byte block: "
-msgstr "%c%s byte-block: "
+msgstr "%c%<PRIu64> byte-block: "
 
 #: dwarf.c:1512
 #, c-format
@@ -2133,16 +2116,14 @@ msgid "(DW_OP_call_ref in frame info)"
 msgstr "(DW_OP_call_ref i raminformation)"
 
 #: dwarf.c:1535
-#, fuzzy, c-format
-#| msgid "size: %s "
+#, c-format
 msgid "size: %<PRIu64> "
-msgstr "storlek: %s "
+msgstr "storlek: %<PRIu64> "
 
 #: dwarf.c:1537
-#, fuzzy, c-format
-#| msgid "offset: %s "
+#, c-format
 msgid "offset: %<PRIu64> "
-msgstr "avstånd: %s "
+msgstr "avstånd: %<PRIu64> "
 
 #: dwarf.c:1553
 #, c-format
@@ -2160,16 +2141,14 @@ msgid "(DW_OP_GNU_variable_value in frame info)"
 msgstr "(DW_OP_GNU_variable_value i raminformation)"
 
 #: dwarf.c:1734
-#, fuzzy, c-format
-#| msgid "(User defined location op 0x%x)"
+#, c-format
 msgid "(User defined location op %#x)"
-msgstr "(Användardefinierad plats-op 0x%x)"
+msgstr "(Användardefinierad plats-op %#x)"
 
 #: dwarf.c:1736
-#, fuzzy, c-format
-#| msgid "(Unknown location op 0x%x)"
+#, c-format
 msgid "(Unknown location op %#x)"
-msgstr "(Okänd plats-op 0x%x)"
+msgstr "(Okänd plats-op %#x)"
 
 #: dwarf.c:1790
 msgid "<no links available>"
@@ -2180,10 +2159,9 @@ msgid "<no NUL byte at end of alt .debug_str section>"
 msgstr "<ingen NUL-byte vid slutet av alternativ .debug_str-sektion>"
 
 #: dwarf.c:1819
-#, fuzzy, c-format
-#| msgid "DW_FORM_GNU_strp_alt offset (%s) too big or no string sections available\n"
+#, c-format
 msgid "DW_FORM_GNU_strp_alt offset (%#<PRIx64>) too big or no string sections available\n"
-msgstr "DW_FORM_GNU_strp_alt-avstånd (%s) är för stort eller ingen strängsektion tillgänglig\n"
+msgstr "DW_FORM_GNU_strp_alt-avstånd (%#<PRIx64>) är för stort eller ingen strängsektion tillgänglig\n"
 
 #: dwarf.c:1842
 #, c-format
@@ -2191,22 +2169,19 @@ msgid "Unknown AT value: %lx"
 msgstr "Okänt AT-värde: %lx"
 
 #: dwarf.c:1908
-#, fuzzy, c-format
-#| msgid "Corrupt attribute block length: %lx\n"
+#, c-format
 msgid "Corrupt attribute block length: %#<PRIx64>\n"
-msgstr "trasigt längd på attributblock: %lx\n"
+msgstr "trasigt längd på attributblock: %#<PRIx64>\n"
 
 #: dwarf.c:2090
-#, fuzzy, c-format
-#| msgid "Unable to resolve ref_addr form: uvalue %lx > section size %lx (%s)\n"
+#, c-format
 msgid "Unable to resolve ref_addr form: uvalue %lx > section size %<PRIx64> (%s)\n"
-msgstr "Kan inte slå upp ref_addr-form: uvalue %lx > sektionsstorleken %lx (%s)\n"
+msgstr "Kan inte slå upp ref_addr-form: uvalue %lx > sektionsstorleken %<PRIx64> (%s)\n"
 
 #: dwarf.c:2109
-#, fuzzy, c-format
-#| msgid "Unable to resolve ref form: uvalue %lx + cu_offset %lx > CU size %lx\n"
+#, c-format
 msgid "Unable to resolve ref form: uvalue %lx + cu_offset %<PRIx64> > CU size %tx\n"
-msgstr "Kan inte slå upp ref-form: uvalue %lx + cu_offset %lx > CU-storlek %lx\n"
+msgstr "Kan inte slå upp ref-form: uvalue %lx + cu_offset %<PRIx64> > CU-storlek %tx\n"
 
 #: dwarf.c:2120
 #, c-format
@@ -2255,47 +2230,40 @@ msgstr "Blocket tar slut i förtid\n"
 
 #. We have already displayed the form name.
 #: dwarf.c:2648 dwarf.c:2661 dwarf.c:2685
-#, fuzzy, c-format
-#| msgid "%c(offset: 0x%s): %s"
+#, c-format
 msgid "%c(offset: %#<PRIx64>): %s"
-msgstr "%c(avstånd: 0x%s): %s"
+msgstr "%c(avstånd: %#<PRIx64>): %s"
 
 #: dwarf.c:2651
-#, fuzzy, c-format
-#| msgid "%c(indirect string, offset: 0x%s): %s"
+#, c-format
 msgid "%c(indirect string, offset: %#<PRIx64>): %s"
-msgstr "%c(indirekt sträng, avstånd: 0x%s): %s"
+msgstr "%c(indirekt sträng, avstånd: %#<PRIx64>): %s"
 
 #: dwarf.c:2664
-#, fuzzy, c-format
-#| msgid "%c(indirect line string, offset: 0x%s): %s"
+#, c-format
 msgid "%c(indirect line string, offset: %#<PRIx64>): %s"
-msgstr "%c(indirekt radsträng, avstånd: 0x%s): %s"
+msgstr "%c(indirekt radsträng, avstånd: %#<PRIx64>): %s"
 
 #: dwarf.c:2688
-#, fuzzy, c-format
-#| msgid "%c(indexed string: 0x%s): %s"
+#, c-format
 msgid "%c(indexed string: %#<PRIx64>): %s"
-msgstr "%c(indexerad sträng: 0x%s): %s"
+msgstr "%c(indexerad sträng: %#<PRIx64>): %s"
 
 #. We have already displayed the form name.
 #: dwarf.c:2698
-#, fuzzy, c-format
-#| msgid "%c(offset: 0x%s) %s"
+#, c-format
 msgid "%c(offset: %#<PRIx64>) %s"
-msgstr "%c(avstånd: 0x%s) %s"
+msgstr "%c(avstånd: %#<PRIx64>) %s"
 
 #: dwarf.c:2701
-#, fuzzy, c-format
-#| msgid "%c(alt indirect string, offset: 0x%s) %s"
+#, c-format
 msgid "%c(alt indirect string, offset: %#<PRIx64>) %s"
-msgstr "%c(alt indirekt sträng, avstånd: 0x%s) %s"
+msgstr "%c(alt indirekt sträng, avstånd: %#<PRIx64>) %s"
 
 #: dwarf.c:2753
-#, fuzzy, c-format
-#| msgid "<offset is too big>"
+#, c-format
 msgid "loc_offset %<PRIu64> too big\n"
-msgstr "<avståndet är för stort>"
+msgstr "loc_offset %<PRIu64> är för stort\n"
 
 #: dwarf.c:2794
 #, c-format
@@ -2303,28 +2271,24 @@ msgid "%c(index: %#<PRIx64>): %#<PRIx64>"
 msgstr "%c(index: %#<PRIx64>): %#<PRIx64>"
 
 #: dwarf.c:2805
-#, fuzzy, c-format
-#| msgid "Unrecognized form: 0x%lx\n"
+#, c-format
 msgid "Unrecognized form: %#lx\n"
-msgstr "Okänd formtyp: 0x%lx\n"
+msgstr "Okänd form: %#lx\n"
 
 #: dwarf.c:2819
-#, fuzzy, c-format
-#| msgid "CU @ 0x%s has multiple loclists_base values (0x%s and 0x%s)"
+#, c-format
 msgid "CU @ %#<PRIx64> has multiple loclists_base values (%#<PRIx64> and %#<PRIx64>)"
-msgstr "CU @ 0x%s har flera loclists_base-värden (0x%s och 0x%s)"
+msgstr "CU @ %#<PRIx64> har flera loclists_base-värden (%#<PRIx64> och %#<PRIx64>)"
 
 #: dwarf.c:2827
-#, fuzzy, c-format
-#| msgid "CU @ 0x%s has multiple rnglists_base values (0x%s and 0x%s)"
+#, c-format
 msgid "CU @ %#<PRIx64> has multiple rnglists_base values (%#<PRIx64> and %#<PRIx64>)"
-msgstr "CU @ 0x%s har flera rnglists_base-värden (0x%s och 0x%s)"
+msgstr "CU @ %#<PRIx64> har flera rnglists_base-värden (%#<PRIx64> och %#<PRIx64>)"
 
 #: dwarf.c:2835
-#, fuzzy, c-format
-#| msgid "CU @ 0x%s has multiple str_offsets_base values (0x%s and 0x%s)"
+#, c-format
 msgid "CU @ %#<PRIx64> has multiple str_offsets_base values %#<PRIx64> and %#<PRIx64>)"
-msgstr "CU @ 0x%s har flera str_offsets_base-värden (0x%s och 0x%s)"
+msgstr "CU @ %#<PRIx64> har flera str_offsets_base-värden (%#<PRIx64> och %#<PRIx64>)"
 
 #: dwarf.c:2899
 msgid "More location offset attributes than DW_AT_GNU_locview attributes\n"
@@ -2360,22 +2324,19 @@ msgid "(declared as inline and inlined)"
 msgstr "(deklarerad som inline och inline:ad)"
 
 #: dwarf.c:3095
-#, fuzzy, c-format
-#| msgid "  (Unknown inline attribute value: %s)"
+#, c-format
 msgid "  (Unknown inline attribute value: %#<PRIx64>)"
-msgstr "  (Okänt inline-attributvärde: %s)"
+msgstr "  (Okänt inline-attributvärde: %#<PRIx64>)"
 
 #: dwarf.c:3152
-#, fuzzy, c-format
-#| msgid "(implementation defined: %s)"
+#, c-format
 msgid "(implementation defined: %#<PRIx64>)"
-msgstr "(implementationsdefinierad: %s)"
+msgstr "(implementationsdefinierad: %#<PRIx64>)"
 
 #: dwarf.c:3154
-#, fuzzy, c-format
-#| msgid "<unknown: %x>"
+#, c-format
 msgid "(unknown: %#<PRIx64>)"
-msgstr "<okänd: %x>"
+msgstr "(okänt: %#<PRIx64>)"
 
 #: dwarf.c:3199
 #, c-format
@@ -2488,10 +2449,9 @@ msgid " [without DW_AT_frame_base]"
 msgstr " [utan DW_AT_frame_base]"
 
 #: dwarf.c:3411
-#, fuzzy, c-format
-#| msgid "Offset %s used as value for DW_AT_import attribute of DIE at offset 0x%lx is too big.\n"
+#, c-format
 msgid "Offset %#<PRIx64> used as value for DW_AT_import attribute of DIE at offset %#tx is too big.\n"
-msgstr "Avståndet %s som används som ett värde till attributet DW_AT_import på DIE vid avståndet 0x%lx är för stort.\n"
+msgstr "Avståndet %#<PRIx64> som används som ett värde till attributet DW_AT_import på DIE vid avståndet %#tx är för stort.\n"
 
 #: dwarf.c:3417
 #, c-format
@@ -2535,16 +2495,14 @@ msgstr ""
 "\n"
 
 #: dwarf.c:3581
-#, fuzzy, c-format
-#| msgid "Reserved length value (0x%s) found in section %s\n"
+#, c-format
 msgid "Reserved length value (%#<PRIx64>) found in section %s\n"
-msgstr "Reserverat längdvärde (0x%s) hittat i sektionen %s\n"
+msgstr "Reserverat längdvärde (%#<PRIx64>) hittat i sektionen %s\n"
 
 #: dwarf.c:3591
-#, fuzzy, c-format
-#| msgid "Corrupt unit length (got 0x%s expected at most 0x%s) in section %s\n"
+#, c-format
 msgid "Corrupt unit length (got %#<PRIx64> expected at most %#tx) in section %s\n"
-msgstr "Trasig enhetslängd (fick 0x%s men högst 0x%s förväntades) i sektionen %s\n"
+msgstr "Trasig enhetslängd (fick %#<PRIx64> men högst %#tx förväntades) i sektionen %s\n"
 
 #: dwarf.c:3601
 #, c-format
@@ -2567,16 +2525,14 @@ msgid "Invalid pointer size (%d) in compunit header, using %d instead\n"
 msgstr "Felaktig pekarstorlek (%d) i compunit-huvud, använder %d istället\n"
 
 #: dwarf.c:3850
-#, fuzzy, c-format
-#| msgid "  Compilation Unit @ offset 0x%s:\n"
+#, c-format
 msgid "  Compilation Unit @ offset %#<PRIx64>:\n"
-msgstr "  Kompileringsenhet @ avstånd 0x%s:\n"
+msgstr "  Kompileringsenhet @ avstånd %#<PRIx64>:\n"
 
 #: dwarf.c:3852
-#, fuzzy, c-format
-#| msgid "   Length:        0x%s (%s)\n"
+#, c-format
 msgid "   Length:        %#<PRIx64> (%s)\n"
-msgstr "   Längd:         0x%s (%s)\n"
+msgstr "   Längd:         %#<PRIx64> (%s)\n"
 
 #: dwarf.c:3855
 #, c-format
@@ -2589,10 +2545,9 @@ msgid "   Unit Type:     %s (%x)\n"
 msgstr "   Enhetstyp:     %s (%x)\n"
 
 #: dwarf.c:3864
-#, fuzzy, c-format
-#| msgid "   Abbrev Offset: 0x%s\n"
+#, c-format
 msgid "   Abbrev Offset: %#<PRIx64>\n"
-msgstr "   Förk.-avstånd: 0x%s\n"
+msgstr "   Förk.-avstånd: %#<PRIx64>\n"
 
 #: dwarf.c:3866
 #, c-format
@@ -2600,22 +2555,19 @@ msgid "   Pointer Size:  %d\n"
 msgstr "   Pekarstorlek:  %d\n"
 
 #: dwarf.c:3869
-#, fuzzy, c-format
-#| msgid "   Signature:     0x%s\n"
+#, c-format
 msgid "   Signature:     %#<PRIx64>\n"
-msgstr "   Signatur:      0x%s\n"
+msgstr "   Signatur:      %#<PRIx64>\n"
 
 #: dwarf.c:3870
-#, fuzzy, c-format
-#| msgid "   Type Offset:   0x%s\n"
+#, c-format
 msgid "   Type Offset:   %#<PRIx64>\n"
-msgstr "   Typavstånd:    0x%s\n"
+msgstr "   Typavstånd:    %#<PRIx64>\n"
 
 #: dwarf.c:3873
-#, fuzzy, c-format
-#| msgid "   DWO ID:        0x%s\n"
+#, c-format
 msgid "   DWO ID:        %#<PRIx64>\n"
-msgstr "   DWO ID:        0x%s\n"
+msgstr "   DWO ID:        %#<PRIx64>\n"
 
 #: dwarf.c:3879
 #, c-format
@@ -2623,40 +2575,34 @@ msgid "   Section contributions:\n"
 msgstr "   Sektionsbidrag:\n"
 
 #: dwarf.c:3880
-#, fuzzy, c-format
-#| msgid "    .debug_abbrev.dwo:       0x%s  0x%s\n"
+#, c-format
 msgid "    .debug_abbrev.dwo:       %#<PRIx64>  %#zx\n"
-msgstr "    .debug_abbrev.dwo:       0x%s  0x%s\n"
+msgstr "    .debug_abbrev.dwo:       %#<PRIx64>  %#zx\n"
 
 #: dwarf.c:3882
-#, fuzzy, c-format
-#| msgid "    .debug_line.dwo:         0x%s  0x%s\n"
+#, c-format
 msgid "    .debug_line.dwo:         %#<PRIx64>  %#zx\n"
-msgstr "    .debug_line.dwo:         0x%s  0x%s\n"
+msgstr "    .debug_line.dwo:         %#<PRIx64>  %#zx\n"
 
 #: dwarf.c:3884
-#, fuzzy, c-format
-#| msgid "    .debug_loc.dwo:          0x%s  0x%s\n"
+#, c-format
 msgid "    .debug_loc.dwo:          %#<PRIx64>  %#zx\n"
-msgstr "    .debug_loc.dwo:          0x%s  0x%s\n"
+msgstr "    .debug_loc.dwo:          %#<PRIx64>  %#zx\n"
 
 #: dwarf.c:3886
-#, fuzzy, c-format
-#| msgid "    .debug_str_offsets.dwo:  0x%s  0x%s\n"
+#, c-format
 msgid "    .debug_str_offsets.dwo:  %#<PRIx64>  %#zx\n"
-msgstr "    .debug_str_offsets.dwo:  0x%s  0x%s\n"
+msgstr "    .debug_str_offsets.dwo:  %#<PRIx64>  %#zx\n"
 
 #: dwarf.c:3896
-#, fuzzy, c-format
-#| msgid "CU at offset %s contains corrupt or unsupported version number: %d.\n"
+#, c-format
 msgid "CU at offset %#<PRIx64> contains corrupt or unsupported version number: %d.\n"
-msgstr "CU vid avståndet %s innehåller trasiga eller ej stödda versionsnummer: %d.\n"
+msgstr "CU vid avståndet %#<PRIx64> innehåller trasiga eller ej stödda versionsnummer: %d.\n"
 
 #: dwarf.c:3908
-#, fuzzy, c-format
-#| msgid "CU at offset %s contains corrupt or unsupported unit type: %d.\n"
+#, c-format
 msgid "CU at offset %#<PRIx64> contains corrupt or unsupported unit type: %d.\n"
-msgstr "CU vid avståndet %s innehåller en trasig eller ej stödd enhetstyp: %d.\n"
+msgstr "CU vid avståndet %#<PRIx64> innehåller en trasig eller ej stödd enhetstyp: %d.\n"
 
 #: dwarf.c:3953
 #, c-format
@@ -2683,20 +2629,18 @@ msgid " <%d><%lx>: ...\n"
 msgstr " <%d><%lx>: …\n"
 
 #: dwarf.c:4010
-#, fuzzy, c-format
-#| msgid "DIE at offset 0x%lx refers to abbreviation number %lu which does not exist\n"
+#, c-format
 msgid "DIE at offset %#lx refers to abbreviation number %lu which does not exist\n"
-msgstr "DIE på avståndet 0x%lx refererar till förkortning nummer %lu som inte finns\n"
+msgstr "DIE på avståndet %#lx refererar till förkortning nummer %lu som inte finns\n"
 
 #: dwarf.c:4085
 msgid "DIE has locviews without loclist\n"
 msgstr "DIE har locviews utan loclist\n"
 
 #: dwarf.c:4196
-#, fuzzy, c-format
-#| msgid "The length field (0x%lx) in the debug_line header is wrong - the section is too small\n"
+#, c-format
 msgid "The length field (%#<PRIx64>) in the debug_line header is wrong - the section is too small\n"
-msgstr "Längdfältet (0x%lx) i debug_line-huvudet är trasig — sektionen är för liten\n"
+msgstr "Längdfältet (%#<PRIx64>) i debug_line-huvudet är trasig — sektionen är för liten\n"
 
 #: dwarf.c:4213
 msgid "Only DWARF version 2, 3, 4 and 5 line info is currently supported.\n"
@@ -2739,10 +2683,9 @@ msgstr ""
 "%s är tom.\n"
 
 #: dwarf.c:4296
-#, fuzzy, c-format
-#| msgid "%s: Corrupt entry count - expected %s but none found\n"
+#, c-format
 msgid "%s: Corrupt entry count - expected %#<PRIx64> but none found\n"
-msgstr "%s: Trasigt postantal – %s förväntades men inget hittades\n"
+msgstr "%s: Trasigt postantal – %#<PRIx64> förväntades men inget hittades\n"
 
 #: dwarf.c:4303
 #, c-format
@@ -2750,16 +2693,13 @@ msgid "%s: format count is zero, but the table is not empty\n"
 msgstr "%s: formatantal är noll, men tabellen är inte tom\n"
 
 #: dwarf.c:4308
-#, fuzzy, c-format
-#| msgid ""
-#| "\n"
-#| " The %s (offset 0x%lx, lines %s, columns %u):\n"
+#, c-format
 msgid ""
 "\n"
 " The %s (offset %#tx, lines %<PRIu64>, columns %u):\n"
 msgstr ""
 "\n"
-"%s (avstånd 0x%lx, raderna %s, kolumner %u):\n"
+" %s (avstånd %#tx, raderna %#<PRIx64>, kolumner %u):\n"
 
 #: dwarf.c:4311
 #, c-format
@@ -2792,10 +2732,9 @@ msgid "\tMD5\t\t\t"
 msgstr "\tMD5\t\t\t"
 
 #: dwarf.c:4340
-#, fuzzy, c-format
-#| msgid "\t(Unknown format content type %s)"
+#, c-format
 msgid "\t(Unknown format content type %<PRIu64>)"
-msgstr "\t(Okänd formatinnehållstyp %s)"
+msgstr "\t(Okänd formatinnehållstyp %#<PRIx64>)"
 
 #: dwarf.c:4374
 #, c-format
@@ -2835,10 +2774,9 @@ msgid "corrupt .debug_sup section: checksum length is longer than the remaining 
 msgstr "trasig .debug_sup-sektion: kontrollsummelängden är längre än den återstående sektionslängden\n"
 
 #: dwarf.c:4439
-#, fuzzy, c-format
-#| msgid "corrupt .debug_sup section: there are 0x%lx extra, unused bytes at the end of the section\n"
+#, c-format
 msgid "corrupt .debug_sup section: there are %#<PRIx64> extra, unused bytes at the end of the section\n"
-msgstr "trasig .debug_sup-sektion: det finns 0x%lx extra, oanvända byte i slutet av sektionen\n"
+msgstr "trasig .debug_sup-sektion: det finns %#<PRIx64> extra, oanvända byte i slutet av sektionen\n"
 
 #: dwarf.c:4444
 #, c-format
@@ -2856,10 +2794,9 @@ msgid "  Filename:     %s\n"
 msgstr "  Filnamn:      %s\n"
 
 #: dwarf.c:4447
-#, fuzzy, c-format
-#| msgid "  Checksum Len: %lu\n"
+#, c-format
 msgid "  Checksum Len: %<PRIu64>\n"
-msgstr "  Kontr.sum.ln: %lu\n"
+msgstr "  Kontr.sum.ln: %<PRIu64>\n"
 
 #: dwarf.c:4450
 #, c-format
@@ -2871,16 +2808,14 @@ msgid "Partial .debug_line. section encountered without a prior full .debug_line
 msgstr "Partiell .debug_line-sektion påträffad utan en föregående fullständig .debug_line-sektion\n"
 
 #: dwarf.c:4511
-#, fuzzy, c-format
-#| msgid "  Offset:                      0x%lx\n"
+#, c-format
 msgid "  Offset:                      %#tx\n"
-msgstr "  Avstånd:                     0x%lx\n"
+msgstr "  Avstånd:                     %#tx\n"
 
 #: dwarf.c:4512
-#, fuzzy, c-format
-#| msgid "  Length:                      %ld\n"
+#, c-format
 msgid "  Length:                      %<PRId64>\n"
-msgstr "  Längd:                       %ld\n"
+msgstr "  Längd:                       %<PRId64>\n"
 
 #: dwarf.c:4513
 #, c-format
@@ -2967,16 +2902,13 @@ msgstr ""
 " Katalogtabellen är tom.\n"
 
 #: dwarf.c:4575
-#, fuzzy, c-format
-#| msgid ""
-#| "\n"
-#| " The Directory Table (offset 0x%lx):\n"
+#, c-format
 msgid ""
 "\n"
 " The Directory Table (offset %#tx):\n"
 msgstr ""
 "\n"
-" Katalogtabellen (avstånd 0x%lx):\n"
+" Katalogtabellen (avstånd %#tx):\n"
 
 #: dwarf.c:4598
 #, c-format
@@ -2988,16 +2920,13 @@ msgstr ""
 " Filnamnstabellen är tom.\n"
 
 #: dwarf.c:4601
-#, fuzzy, c-format
-#| msgid ""
-#| "\n"
-#| " The File Name Table (offset 0x%lx):\n"
+#, c-format
 msgid ""
 "\n"
 " The File Name Table (offset %#tx):\n"
 msgstr ""
 "\n"
-" Filnamnstabellen (avstånd 0x%lx):\n"
+" Filnamnstabellen (avstånd %#tx):\n"
 
 #: dwarf.c:4626
 msgid "Corrupt file name table entry\n"
@@ -3014,10 +2943,9 @@ msgid " Line Number Statements:\n"
 msgstr " Radnummersatser:\n"
 
 #: dwarf.c:4668
-#, fuzzy, c-format
-#| msgid "  Special opcode %d: advance Address by %s to 0x%s%s"
+#, c-format
 msgid "  Special opcode %d: advance Address by %<PRIu64> to %#<PRIx64>%s"
-msgstr "  Särskild op-kod %d: öka adressen med %s till 0x%s%s"
+msgstr "  Särskild op-kod %d: öka adressen med %<PRIu64> till %#<PRIx64>%s"
 
 #: dwarf.c:4673 dwarf.c:4694 dwarf.c:4736 dwarf.c:4756 dwarf.c:4804
 #: dwarf.c:4824
@@ -3025,16 +2953,14 @@ msgid " (reset view)"
 msgstr " (återställ vy)"
 
 #: dwarf.c:4688
-#, fuzzy, c-format
-#| msgid "  Special opcode %d: advance Address by %s to 0x%s[%d]%s"
+#, c-format
 msgid "  Special opcode %d: advance Address by %<PRIu64> to %#<PRIx64>[%d]%s"
-msgstr "  Särskild op-kod %d: öka adressen med %s till 0x%s[%d]%s"
+msgstr "  Särskild op-kod %d: öka adressen med %<PRIu64> till %#<PRIx64>[%d]%s"
 
 #: dwarf.c:4698
-#, fuzzy, c-format
-#| msgid " and Line by %s to %d"
+#, c-format
 msgid " and Line by %<PRId64> to %d"
-msgstr " och radnumret med %s till %d"
+msgstr " och radnumret med %<PRId64> till %d"
 
 #: dwarf.c:4701 dwarf.c:4718
 #, c-format
@@ -3047,40 +2973,34 @@ msgid "  Copy"
 msgstr "  Kopiera"
 
 #: dwarf.c:4732
-#, fuzzy, c-format
-#| msgid "  Advance PC by %s to 0x%s%s\n"
+#, c-format
 msgid "  Advance PC by %<PRIu64> to %#<PRIx64>%s\n"
-msgstr "  Öka programräknaren med %s till 0x%s%s\n"
+msgstr "  Öka programräknaren med %<PRIu64> till %#<PRIx64>%s\n"
 
 #: dwarf.c:4751
-#, fuzzy, c-format
-#| msgid "  Advance PC by %s to 0x%s[%d]%s\n"
+#, c-format
 msgid "  Advance PC by %<PRIu64> to %#<PRIx64>[%d]%s\n"
-msgstr "  Öka programräknaren med %s till 0x%s[%d]%s\n"
+msgstr "  Öka programräknaren med %<PRIu64> till %#<PRIx64>[%d]%s\n"
 
 #: dwarf.c:4763
-#, fuzzy, c-format
-#| msgid "  Advance Line by %s to %d\n"
+#, c-format
 msgid "  Advance Line by %<PRId64> to %d\n"
-msgstr "  Öka radnumret med %s till %d\n"
+msgstr "  Öka radnumret med %<PRId64> till %d\n"
 
 #: dwarf.c:4769
-#, fuzzy, c-format
-#| msgid "  Set File Name to entry %s in the File Name Table\n"
+#, c-format
 msgid "  Set File Name to entry %<PRIu64> in the File Name Table\n"
-msgstr "  Sätt filnamnet till post %s i filnamnstabellen\n"
+msgstr "  Sätt filnamnet till post %<PRIu64> i filnamnstabellen\n"
 
 #: dwarf.c:4776
-#, fuzzy, c-format
-#| msgid "  Set column to %s\n"
+#, c-format
 msgid "  Set column to %<PRIu64>\n"
-msgstr "  Sätt kolumnen till %s\n"
+msgstr "  Sätt kolumnen till %<PRIu64>\n"
 
 #: dwarf.c:4783
-#, fuzzy, c-format
-#| msgid "  Set is_stmt to %s\n"
+#, c-format
 msgid "  Set is_stmt to %<PRId64>\n"
-msgstr "  Sätt is_stmt till %s\n"
+msgstr "  Sätt is_stmt till %<PRId64>\n"
 
 #: dwarf.c:4788
 #, c-format
@@ -3088,22 +3008,19 @@ msgid "  Set basic block\n"
 msgstr "  Sätt basblocket\n"
 
 #: dwarf.c:4800
-#, fuzzy, c-format
-#| msgid "  Advance PC by constant %s to 0x%s%s\n"
+#, c-format
 msgid "  Advance PC by constant %<PRIu64> to %#<PRIx64>%s\n"
-msgstr "  Öka programräknaren med konstanten %s till 0x%s%s\n"
+msgstr "  Öka programräknaren med konstanten %<PRIu64> till %#<PRIx64>%s\n"
 
 #: dwarf.c:4819
-#, fuzzy, c-format
-#| msgid "  Advance PC by constant %s to 0x%s[%d]%s\n"
+#, c-format
 msgid "  Advance PC by constant %<PRIu64> to %#<PRIx64>[%d]%s\n"
-msgstr "  Öka programräknaren med konstant %s till 0x%s[%d]%s\n"
+msgstr "  Öka programräknaren med konstant %<PRIu64> till %#<PRIx64>[%d]%s\n"
 
 #: dwarf.c:4832
-#, fuzzy, c-format
-#| msgid "  Advance PC by fixed size amount %s to 0x%s\n"
+#, c-format
 msgid "  Advance PC by fixed size amount %<PRIu64> to %#<PRIx64>\n"
-msgstr "  Öka programräknaren med en fast storlek %s till 0x%s\n"
+msgstr "  Öka programräknaren med en fast storlek %<PRIu64> till %#<PRIx64>\n"
 
 #: dwarf.c:4839
 #, c-format
@@ -3116,10 +3033,9 @@ msgid "  Set epilogue_begin to true\n"
 msgstr "  Sätt epilogue_begin till sann\n"
 
 #: dwarf.c:4848
-#, fuzzy, c-format
-#| msgid "  Set ISA to %lu\n"
+#, c-format
 msgid "  Set ISA to %<PRIu64>\n"
-msgstr "  Sätt ISA till %lu\n"
+msgstr "  Sätt ISA till %<PRIu64>\n"
 
 #: dwarf.c:4852 dwarf.c:5511
 #, c-format
@@ -3174,10 +3090,9 @@ msgid "<unknown>"
 msgstr "<okänd>"
 
 #: dwarf.c:5232 dwarf.c:5438
-#, fuzzy, c-format
-#| msgid "directory index %u > number of directories %s\n"
+#, c-format
 msgid "directory index %u >= number of directories %u\n"
-msgstr "katalogindex %u > antalet kataloger %s\n"
+msgstr "katalogindex %u > antalet kataloger %u\n"
 
 #: dwarf.c:5235 dwarf.c:5546 elfcomm.c:762 readelf.c:426 readelf.c:925
 #: readelf.c:8089 readelf.c:8656 readelf.c:10691 readelf.c:13127
@@ -3218,10 +3133,9 @@ msgstr ""
 " [Använd filtabellspost %d]\n"
 
 #: dwarf.c:5412 dwarf.c:5544
-#, fuzzy, c-format
-#| msgid "file index %u > number of files %u\n"
+#, c-format
 msgid "file index %u >= number of files %u\n"
-msgstr "filindex %u > antalet filer %u\n"
+msgstr "filindex %u ≥ antalet filer %u\n"
 
 #: dwarf.c:5414
 #, c-format
@@ -3288,22 +3202,19 @@ msgid "unused7"
 msgstr "oanvänd7"
 
 #: dwarf.c:5759
-#, fuzzy, c-format
-#| msgid "Debug info is corrupted, %s header at %#lx has length %s\n"
+#, c-format
 msgid "Debug info is corrupted, %s header at %#lx has length %#<PRIx64>\n"
-msgstr "Felsökningsinfo är trasig, %s-huvudet vid %#lx har längden %s\n"
+msgstr "Felsökningsinfo är trasig, %s-huvudet vid %#lx har längden %#<PRIx64>\n"
 
 #: dwarf.c:5774 dwarf.c:7588
-#, fuzzy, c-format
-#| msgid ".debug_info offset of 0x%lx in %s section does not point to a CU header.\n"
+#, c-format
 msgid ".debug_info offset of %#<PRIx64> in %s section does not point to a CU header.\n"
-msgstr ".debug_info-avstånd på 0x%lx i sektionen %s pekar inte på ett CU-huvud.\n"
+msgstr ".debug_info-avstånd på %#<PRIx64> i sektionen %s pekar inte på ett CU-huvud.\n"
 
 #: dwarf.c:5780
-#, fuzzy, c-format
-#| msgid "  Length:                              %ld\n"
+#, c-format
 msgid "  Length:                              %<PRId64>\n"
-msgstr "  längd:                               %ld\n"
+msgstr "  längd:                               %<PRId64>\n"
 
 #: dwarf.c:5782
 #, c-format
@@ -3311,16 +3222,14 @@ msgid "  Version:                             %d\n"
 msgstr "  version:                             %d\n"
 
 #: dwarf.c:5784
-#, fuzzy, c-format
-#| msgid "  Offset into .debug_info section:     0x%lx\n"
+#, c-format
 msgid "  Offset into .debug_info section:     %#<PRIx64>\n"
-msgstr "  Avstånd in i .debug_info-sektionen:  0x%lx\n"
+msgstr "  Avstånd in i .debug_info-sektionen:  %#<PRIx64>\n"
 
 #: dwarf.c:5786
-#, fuzzy, c-format
-#| msgid "  Size of area in .debug_info section: %ld\n"
+#, c-format
 msgid "  Size of area in .debug_info section: %<PRId64>\n"
-msgstr "  storl. på omr. i .debug_info-sekt.:  %ld\n"
+msgstr "  storl. på omr. i .debug_info-sekt.:  %<PRId64>\n"
 
 #: dwarf.c:5795
 msgid "Only DWARF 2 and 3 pubnames are currently supported\n"
@@ -3383,10 +3292,9 @@ msgid "Expected to find a version number of 4 or 5 in section %s but found %d in
 msgstr "Förväntade att hitta ett versionsnummer 4 eller 5 i sektionen %s men hittade %d istället\n"
 
 #: dwarf.c:6084
-#, fuzzy, c-format
-#| msgid "  Offset:                      0x%lx\n"
+#, c-format
 msgid "  Offset:                      %#<PRIx64>\n"
-msgstr "  Avstånd:                     0x%lx\n"
+msgstr "  Avstånd:                     %#<PRIx64>\n"
 
 #: dwarf.c:6085
 #, c-format
@@ -3399,10 +3307,9 @@ msgid "  Offset size:                 %d\n"
 msgstr "  Avståndsstorlek:             %d\n"
 
 #: dwarf.c:6090
-#, fuzzy, c-format
-#| msgid "  Offset into .debug_line:     0x%lx\n"
+#, c-format
 msgid "  Offset into .debug_line:     %#<PRIx64>\n"
-msgstr "  Avstånd in i .debug_info:    0x%lx\n"
+msgstr "  Avstånd in i .debug_info:    %#<PRIx64>\n"
 
 #: dwarf.c:6104
 #, c-format
@@ -3468,34 +3375,29 @@ msgid " DW_MACRO_undef_strp - lineno : %d macro : %s\n"
 msgstr " DW_MACRO_undef_strp — radnr : %d makro : %s\n"
 
 #: dwarf.c:6240
-#, fuzzy, c-format
-#| msgid " DW_MACRO_import - offset : 0x%lx\n"
+#, c-format
 msgid " DW_MACRO_import - offset : %#<PRIx64>\n"
-msgstr " DW_MACRO_import — avstånd : 0x%lx\n"
+msgstr " DW_MACRO_import — avstånd : %#<PRIx64>\n"
 
 #: dwarf.c:6247
-#, fuzzy, c-format
-#| msgid " DW_MACRO_define_sup - lineno : %d macro offset : 0x%lx\n"
+#, c-format
 msgid " DW_MACRO_define_sup - lineno : %d macro offset : %#<PRIx64>\n"
-msgstr " DW_MACRO_define_sup — radnr : %d makroavstånd : 0x%lx\n"
+msgstr " DW_MACRO_define_sup — radnr : %d makroavstånd : %#<PRIx64>\n"
 
 #: dwarf.c:6255
-#, fuzzy, c-format
-#| msgid " DW_MACRO_undef_sup - lineno : %d macro offset : 0x%lx\n"
+#, c-format
 msgid " DW_MACRO_undef_sup - lineno : %d macro offset : %#<PRIx64>\n"
-msgstr " DW_MACRO_undef_sup — radnr : %d makroavstånd : 0x%lx\n"
+msgstr " DW_MACRO_undef_sup — radnr : %d makroavstånd : %#<PRIx64>\n"
 
 #: dwarf.c:6262
-#, fuzzy, c-format
-#| msgid " DW_MACRO_import_sup - offset : 0x%lx\n"
+#, c-format
 msgid " DW_MACRO_import_sup - offset : %#<PRIx64>\n"
-msgstr " DW_MACRO_import_sup — avstånd : 0x%lx\n"
+msgstr " DW_MACRO_import_sup — avstånd : %#<PRIx64>\n"
 
 #: dwarf.c:6277
-#, fuzzy, c-format
-#| msgid "(with offset %s) "
+#, c-format
 msgid "(with offset %#<PRIx64>) "
-msgstr "(med avstånd %s) "
+msgstr "(med avstånd %#<PRIx64>) "
 
 #: dwarf.c:6278
 #, c-format
@@ -3523,10 +3425,9 @@ msgid " DW_MACRO_%02x -"
 msgstr " DW_MACRO_%02x —"
 
 #: dwarf.c:6352
-#, fuzzy, c-format
-#| msgid "  Number TAG (0x%lx)\n"
+#, c-format
 msgid "  Number TAG (%#<PRIx64>)\n"
-msgstr "  Nummer-TAGG (0x%lx)\n"
+msgstr "  Nummer-TAGG (%#<PRIx64>)\n"
 
 #: dwarf.c:6361
 msgid "has children"
@@ -3554,10 +3455,9 @@ msgstr "Felaktig pekarstorlek (%d) i felsökningsinformation för post %d\n"
 #: dwarf.c:6480 dwarf.c:6533 dwarf.c:6542 dwarf.c:6628 dwarf.c:6739
 #: dwarf.c:6747 dwarf.c:6845 dwarf.c:6917 dwarf.c:6925 dwarf.c:7136
 #: dwarf.c:7154
-#, fuzzy, c-format
-#| msgid "Location list starting at offset 0x%lx is not terminated.\n"
+#, c-format
 msgid "Location list starting at offset %#<PRIx64> is not terminated.\n"
-msgstr "Platslistan som startar på avstånd 0x%lx är inte avslutad.\n"
+msgstr "Platslistan som startar på avstånd %#<PRIx64> är inte avslutad.\n"
 
 #: dwarf.c:6502 dwarf.c:6656 dwarf.c:6882 dwarf.c:7957 dwarf.c:8022
 #, c-format
@@ -3571,15 +3471,12 @@ msgid "(base address)\n"
 msgstr "(basadress)\n"
 
 #: dwarf.c:6528 dwarf.c:6650 dwarf.c:6871
-#, fuzzy, c-format
-#| msgid ""
-#| "views at %8.8lx for:\n"
-#| "    %*s "
+#, c-format
 msgid ""
 "views at %8.8<PRIx64> for:\n"
 "    %*s "
 msgstr ""
-"vyer vid %8.8lx för:\n"
+"vyer vid %8.8<PRIx64> för:\n"
 "    %*s "
 
 #: dwarf.c:6563 dwarf.c:6768 dwarf.c:7976 dwarf.c:8088
@@ -3636,16 +3533,14 @@ msgid "Unknown location list entry type 0x%x.\n"
 msgstr "Okänd typ av platslistpost 0x%x.\n"
 
 #: dwarf.c:6992
-#, fuzzy, c-format
-#| msgid "Table at Offset 0x%lx\n"
+#, c-format
 msgid "Table at Offset %#tx\n"
-msgstr "Tabell på avståndet 0x%lx\n"
+msgstr "Tabell på avståndet %#tx\n"
 
 #: dwarf.c:7008 dwarf.c:8155
-#, fuzzy, c-format
-#| msgid "  Length:          0x%s\n"
+#, c-format
 msgid "  Length:          %#<PRIx64>\n"
-msgstr "  Längd:           0x%s\n"
+msgstr "  Längd:           %#<PRIx64>\n"
 
 #: dwarf.c:7009 dwarf.c:8156
 #, c-format
@@ -3683,22 +3578,18 @@ msgid "The %s section contains a table without offset\n"
 msgstr "Sektionen %s innehåller en tabell utan avstånd\n"
 
 #: dwarf.c:7037
-#, fuzzy, c-format
-#| msgid ""
-#| "\n"
-#| "   Offset Entries starting at 0x%lx:\n"
+#, c-format
 msgid ""
 "\n"
 "   Offset Entries starting at %#tx:\n"
 msgstr ""
 "\n"
-"   Avståndposter börar vid 0x%lx:\n"
+"   Avståndposter börar vid %#tx:\n"
 
 #: dwarf.c:7045 dwarf.c:8189
-#, fuzzy, c-format
-#| msgid "    [%6u] 0x%x\n"
+#, c-format
 msgid "    [%6u] %#<PRIx64>\n"
-msgstr "    [%6u] 0x%x\n"
+msgstr "    [%6u] %#<PRIx64>\n"
 
 #: dwarf.c:7062
 #, c-format
@@ -3746,10 +3637,9 @@ msgid "No location lists in .debug_info section!\n"
 msgstr "Inga platslistor i sektionen .debug_info!\n"
 
 #: dwarf.c:7300
-#, fuzzy, c-format
-#| msgid "Location lists in %s section start at 0x%s rather than 0x%s\n"
+#, c-format
 msgid "Location lists in %s section start at %#<PRIx64> rather than %#<PRIx64>\n"
-msgstr "Platslistorna i sektionen %s startar vid 0x%s istället för 0x%s\n"
+msgstr "Platslistorna i sektionen %s startar vid %#<PRIx64> istället för %#<PRIx64>\n"
 
 #: dwarf.c:7311
 #, c-format
@@ -3767,28 +3657,24 @@ msgid "    Offset   Begin            End              Expression\n"
 msgstr "    Avstånd  Start            Slut             Instruktion\n"
 
 #: dwarf.c:7383 dwarf.c:7387
-#, fuzzy, c-format
-#| msgid "There is a hole [0x%lx - 0x%lx] in %s section.\n"
+#, c-format
 msgid "There is a hole [%#tx - %#<PRIx64>] in %s section.\n"
-msgstr "Det finns ett hål [0x%lx - 0x%lx] i sektionen %s.\n"
+msgstr "Det finns ett hål [%#tx - %#<PRIx64>] i sektionen %s.\n"
 
 #: dwarf.c:7392
-#, fuzzy, c-format
-#| msgid "There is an overlap [0x%lx - 0x%lx] in %s section.\n"
+#, c-format
 msgid "There is an overlap [%#tx - %#<PRIx64>] in %s section.\n"
-msgstr "Det finns en överlappning [0x%lx - 0x%lx] i sektionen %s.\n"
+msgstr "Det finns en överlappning [%#tx - %#<PRIx64>] i sektionen %s.\n"
 
 #: dwarf.c:7400
-#, fuzzy, c-format
-#| msgid "Offset 0x%lx is bigger than %s section size.\n"
+#, c-format
 msgid "Offset %#<PRIx64> is bigger than %s section size.\n"
-msgstr "Avstånd 0x%lx är större än storleken på sektionen %s.\n"
+msgstr "Avstånd %#<PRIx64> är större än storleken på sektionen %s.\n"
 
 #: dwarf.c:7407
-#, fuzzy, c-format
-#| msgid "View Offset 0x%lx is bigger than %s section size.\n"
+#, c-format
 msgid "View Offset %#<PRIx64> is bigger than %s section size.\n"
-msgstr "Vyavståndet 0x%lx är större än storleken på sektionen %s.\n"
+msgstr "Vyavståndet %#<PRIx64> är större än storleken på sektionen %s.\n"
 
 #: dwarf.c:7424
 msgid "DWO is not yet supported.\n"
@@ -3806,20 +3692,18 @@ msgstr[0] "Det finns %ld oanvänd byte i slutet av sektionen %s\n"
 msgstr[1] "Det finns %ld oanvända byte i slutet av sektionen %s\n"
 
 #: dwarf.c:7574
-#, fuzzy, c-format
-#| msgid "Debug info is corrupted, %s header at %#lx has length %s\n"
+#, c-format
 msgid "Debug info is corrupted, %s header at %#<PRIx64> has length %#<PRIx64>\n"
-msgstr "Felsökningsinfo är trasig, %s-huvudet vid %#lx har längden %s\n"
+msgstr "Felsökningsinfo är trasig, %s-huvudet vid %#<PRIx64> har längden %#<PRIx64>\n"
 
 #: dwarf.c:7602
 msgid "Only DWARF 2 and 3 aranges are currently supported.\n"
 msgstr "Endast DWARF 2 och 3 a-intervall hanteras för närvarande.\n"
 
 #: dwarf.c:7606
-#, fuzzy, c-format
-#| msgid "  Length:                   %ld\n"
+#, c-format
 msgid "  Length:                   %<PRId64>\n"
-msgstr "  längd:                    %ld\n"
+msgstr "  längd:                    %<PRId64>\n"
 
 #: dwarf.c:7607
 #, c-format
@@ -3827,10 +3711,9 @@ msgid "  Version:                  %d\n"
 msgstr "  version:                  %d\n"
 
 #: dwarf.c:7608
-#, fuzzy, c-format
-#| msgid "  Offset into .debug_info:  0x%lx\n"
+#, c-format
 msgid "  Offset into .debug_info:  %#<PRIx64>\n"
-msgstr "  Avstånd in i .debug_info: 0x%lx\n"
+msgstr "  Avstånd in i .debug_info: %#<PRIx64>\n"
 
 #: dwarf.c:7610
 #, c-format
@@ -3870,16 +3753,14 @@ msgstr ""
 "    Adress     Längd\n"
 
 #: dwarf.c:7712
-#, fuzzy, c-format
-#| msgid "Corrupt address base (%lx) found in debug section %u\n"
+#, c-format
 msgid "Corrupt address base (%#<PRIx64>) found in debug section %u\n"
-msgstr "Trasig adressbas (%lx) upptäckt i felsökningssektion %u\n"
+msgstr "Trasig adressbas (%#<PRIx64>) upptäckt i felsökningssektion %u\n"
 
 #: dwarf.c:7730
-#, fuzzy, c-format
-#| msgid "  For compilation unit at offset 0x%s:\n"
+#, c-format
 msgid "  For compilation unit at offset %#<PRIx64>:\n"
-msgstr "  För kompileringsenhet på avstånd 0x%s:\n"
+msgstr "  För kompileringsenhet på avstånd %#<PRIx64>:\n"
 
 #: dwarf.c:7733
 #, c-format
@@ -3887,10 +3768,9 @@ msgid "\tIndex\tAddress\n"
 msgstr "\tIndex\tAdress\n"
 
 #: dwarf.c:7745
-#, fuzzy, c-format
-#| msgid "Corrupt %s section: expecting header size of 8 or 16, but found %ld instead\n"
+#, c-format
 msgid "Corrupt %s section: expecting header size of 8 or 16, but found %zd instead\n"
-msgstr "Trasig %s-sektion: huvudstorlek på 8 eller 16 förväntades, men %ld hittades istället\n"
+msgstr "Trasig %s-sektion: huvudstorlek på 8 eller 16 förväntades, men %zd hittades istället\n"
 
 #: dwarf.c:7756
 #, c-format
@@ -3913,10 +3793,9 @@ msgid "\t%d:\t"
 msgstr "\t%d:\t"
 
 #: dwarf.c:7856 dwarf.c:7880
-#, fuzzy, c-format
-#| msgid "    Length: %#lx\n"
+#, c-format
 msgid "    Length: %#<PRIx64>\n"
-msgstr "    Längd: %#lx\n"
+msgstr "    Längd: %#<PRIx64>\n"
 
 #: dwarf.c:7857 dwarf.c:7882
 #, c-format
@@ -3924,10 +3803,9 @@ msgid "       Index   Offset [String]\n"
 msgstr "       Index   Avst.  [Sträng]\n"
 
 #: dwarf.c:7865
-#, fuzzy, c-format
-#| msgid "Section %s is too small %#lx\n"
+#, c-format
 msgid "Section %s is too small %#<PRIx64>\n"
-msgstr "Sektionen %s är för liten %#lx\n"
+msgstr "Sektionen %s är för liten %#<PRIx64>\n"
 
 #: dwarf.c:7873
 #, c-format
@@ -3940,16 +3818,14 @@ msgid "Unexpected value in str_offset header's padding field: %#x\n"
 msgstr "Oväntat värde i str_offset-huvudets utfyllnadsfält: %#x\n"
 
 #: dwarf.c:7881
-#, fuzzy, c-format
-#| msgid "    Version: %#lx\n"
+#, c-format
 msgid "    Version: %#x\n"
-msgstr "    Version: %#lx\n"
+msgstr "    Version: %#x\n"
 
 #: dwarf.c:8009
-#, fuzzy, c-format
-#| msgid "Range list starting at offset 0x%s is not terminated.\n"
+#, c-format
 msgid "Range list starting at offset %#<PRIx64> is not terminated.\n"
-msgstr "Intervallistan som startar på avstånd 0x%s är inte avslutad.\n"
+msgstr "Intervallistan som startar på avstånd %#<PRIx64> är inte avslutad.\n"
 
 #: dwarf.c:8027
 #, c-format
@@ -3962,44 +3838,36 @@ msgid "Invalid range list entry type %d\n"
 msgstr "Okänd typ av intervallistpost %d\n"
 
 #: dwarf.c:8138
-#, fuzzy, c-format
-#| msgid "The length field (0x%lx) in the debug_rnglists header is wrong - the section is too small\n"
+#, c-format
 msgid "The length field (%#<PRIx64>) in the debug_rnglists header is wrong - the section is too small\n"
-msgstr "Längdfältet (0x%lx) i huvudet debug_rnglists är felaktigt — sektionen är för liten\n"
+msgstr "Längdfältet (%#<PRIx64>) i huvudet debug_rnglists är felaktigt — sektionen är för liten\n"
 
 #: dwarf.c:8154
-#, fuzzy, c-format
-#| msgid " Table at Offset: 0x%s:\n"
+#, c-format
 msgid " Table at Offset: %#<PRIx64>:\n"
-msgstr " Tabell på avstånd: 0x%s\n"
+msgstr " Tabell på avstånd: %#<PRIx64>\n"
 
 #: dwarf.c:8172
 msgid "Only DWARF version 5+ debug_rnglists info is currently supported.\n"
 msgstr "Endast debug_rnglists-information från DWARF version 5+ stödjs för närvarande.\n"
 
 #: dwarf.c:8181
-#, fuzzy, c-format
-#| msgid ""
-#| "\n"
-#| "   Offsets starting at 0x%lx:\n"
+#, c-format
 msgid ""
 "\n"
 "   Offsets starting at %#tx:\n"
 msgstr ""
 "\n"
-"   Avstånd börjar på 0x%lx:\n"
+"   Avstånd börjar på %#tx:\n"
 
 #: dwarf.c:8200
-#, fuzzy, c-format
-#| msgid ""
-#| "\n"
-#| "  Offset: %lx, Index: 0x%s\n"
+#, c-format
 msgid ""
 "\n"
 "  Offset: %#<PRIx64>, Index: %#<PRIx64>\n"
 msgstr ""
 "\n"
-"  Avstånd: %lx, index: 0x%s\n"
+"  Avstånd: %#<PRIx64>, index: %#<PRIx64>\n"
 
 #: dwarf.c:8202 dwarf.c:8291
 #, c-format
@@ -4014,34 +3882,29 @@ msgid "No range lists in .debug_info section.\n"
 msgstr "Inga intervallistor i sektionen .debug_info.\n"
 
 #: dwarf.c:8287
-#, fuzzy, c-format
-#| msgid "Range lists in %s section start at 0x%lx\n"
+#, c-format
 msgid "Range lists in %s section start at %#<PRIx64>\n"
-msgstr "Intervallistor i sektionen %s startar vid 0x%lx\n"
+msgstr "Intervallistor i sektionen %s startar vid %#<PRIx64>\n"
 
 #: dwarf.c:8309
-#, fuzzy, c-format
-#| msgid "Corrupt pointer size (%d) in debug entry at offset %8.8lx\n"
+#, c-format
 msgid "Corrupt pointer size (%d) in debug entry at offset %#<PRIx64>\n"
-msgstr "Trasig pekarstorlek (%d) i felsökningspost på position %8.8lx\n"
+msgstr "Trasig pekarstorlek (%d) i felsökningspost på position %#<PRIx64>\n"
 
 #: dwarf.c:8316
-#, fuzzy, c-format
-#| msgid "Corrupt offset (%#8.8lx) in range entry %u\n"
+#, c-format
 msgid "Corrupt offset (%#<PRIx64>) in range entry %u\n"
-msgstr "Trasigt avstånd (%#8.8lx) i intervallpost %u\n"
+msgstr "Trasigt avstånd (%#<PRIx64>) i intervallpost %u\n"
 
 #: dwarf.c:8335
-#, fuzzy, c-format
-#| msgid "There is a hole [0x%lx - 0x%lx] in %s section.\n"
+#, c-format
 msgid "There is a hole [%#tx - %#tx] in %s section.\n"
-msgstr "Det finns ett hål [0x%lx - 0x%lx] i sektionen %s.\n"
+msgstr "Det finns ett hål [%#tx - %#tx] i sektionen %s.\n"
 
 #: dwarf.c:8341
-#, fuzzy, c-format
-#| msgid "There is an overlap [0x%lx - 0x%lx] in %s section.\n"
+#, c-format
 msgid "There is an overlap [%#tx - %#tx] in %s section.\n"
-msgstr "Det finns en överlappning [0x%lx - 0x%lx] i sektionen %s.\n"
+msgstr "Det finns en överlappning [%#tx - %#tx] i sektionen %s.\n"
 
 #: dwarf.c:8416
 #, c-format
@@ -4068,10 +3931,9 @@ msgid "Invalid segment size (%d) in CIE data\n"
 msgstr "Felaktig segmentstorlek (%d) i CIE-data\n"
 
 #: dwarf.c:8958 dwarf.c:9330
-#, fuzzy, c-format
-#| msgid "Augmentation data too long: 0x%s, expected at most %#lx\n"
+#, c-format
 msgid "Augmentation data too long: %#<PRIx64>, expected at most %#tx\n"
-msgstr "Tilläggsdatan är för lång: 0x%s, förväntades högst %#lx\n"
+msgstr "Tilläggsdatan är för lång: %#<PRIx64>, förväntades högst %#tx\n"
 
 #: dwarf.c:9043
 #, c-format
@@ -4108,10 +3970,9 @@ msgid "Invalid column number in saved frame state\n"
 msgstr "Felaktigt kolumnantal i sparat ramtillstånd\n"
 
 #: dwarf.c:9832 dwarf.c:9856
-#, fuzzy, c-format
-#| msgid "  DW_CFA_expression: <corrupt len %lu>\n"
+#, c-format
 msgid "  %s: <corrupt len %<PRIu64>>\n"
-msgstr "  DW_CFA_expression: <trasig längd %lu>\n"
+msgstr "  %s: <trasig längd %<PRIu64>>\n"
 
 #: dwarf.c:10000
 #, c-format
@@ -4124,10 +3985,9 @@ msgid "Unsupported or unknown Dwarf Call Frame Instruction number: %#x\n"
 msgstr "Ej stött eller okänt nummer på Dwarf anropsramsinstruktion: %#x\n"
 
 #: dwarf.c:10106
-#, fuzzy, c-format
-#| msgid "Debug info is corrupted, %s header at %#lx has length %s\n"
+#, c-format
 msgid "Debug info is corrupted, %s header at %#tx has length %#<PRIx64>\n"
-msgstr "Felsökningsinfo är trasig, %s-huvudet vid %#lx har längden %s\n"
+msgstr "Felsökningsinfo är trasig, %s-huvudet vid %#tx har längden %#<PRIx64>\n"
 
 #: dwarf.c:10115
 #, fuzzy, c-format
