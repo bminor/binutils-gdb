@@ -612,7 +612,7 @@ disasmpy_result_string (PyObject *self, void *closure)
   disasm_result_object *obj = (disasm_result_object *) self;
 
   gdb_assert (obj->content != nullptr);
-  gdb_assert (strlen (obj->content->c_str ()) > 0);
+  gdb_assert (obj->content->size () > 0);
   gdb_assert (obj->length > 0);
   return PyUnicode_Decode (obj->content->c_str (),
 			   obj->content->size (),
