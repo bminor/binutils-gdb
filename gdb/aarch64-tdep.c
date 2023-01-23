@@ -149,6 +149,8 @@ static const char *const aarch64_mte_register_names[] =
   "tag_ctl"
 };
 
+static int aarch64_stack_frame_destroyed_p (struct gdbarch *, CORE_ADDR);
+
 /* AArch64 prologue cache structure.  */
 struct aarch64_prologue_cache
 {
@@ -1000,7 +1002,10 @@ aarch64_make_prologue_cache_1 (frame_info_ptr this_frame,
   if (unwound_fp == 0)
     return;
 
-  cache->prev_sp = unwound_fp + cache->framesize;
+  cache->prev_sp = unwound_fp;
+  if (!aarch64_stack_frame_destroyed_p (get_frame_arch (this_frame),
+					cache->prev_pc))
+    cache->prev_sp += cache->framesize;
 
   /* Calculate actual addresses of saved registers using offsets
      determined by aarch64_analyze_prologue.  */
