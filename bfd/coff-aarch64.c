@@ -305,6 +305,10 @@ static const reloc_howto_type arm64_reloc_howto_secrel
 = HOW (IMAGE_REL_ARM64_SECREL,
        0, 4, 32, false, 0, dont, secrel_reloc, 0xffffffff);
 
+static const reloc_howto_type arm64_reloc_howto_secidx
+= HOW (IMAGE_REL_ARM64_SECTION,
+       0, 2, 16, false, 0, dont, NULL, 0xffff);
+
 static const reloc_howto_type* const arm64_howto_table[] = {
      &arm64_reloc_howto_abs,
      &arm64_reloc_howto_64,
@@ -318,7 +322,8 @@ static const reloc_howto_type* const arm64_howto_table[] = {
      &arm64_reloc_howto_branch14,
      &arm64_reloc_howto_pgoff12a,
      &arm64_reloc_howto_32nb,
-     &arm64_reloc_howto_secrel
+     &arm64_reloc_howto_secrel,
+     &arm64_reloc_howto_secidx
 };
 
 /* No adjustment to addends should be needed.  The actual relocation
@@ -372,6 +377,8 @@ coff_aarch64_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED, bfd_reloc_code_real
     return &arm64_reloc_howto_32nb;
   case BFD_RELOC_32_SECREL:
     return &arm64_reloc_howto_secrel;
+  case BFD_RELOC_16_SECIDX:
+    return &arm64_reloc_howto_secidx;
   default:
     BFD_FAIL ();
     return NULL;
@@ -428,6 +435,8 @@ coff_aarch64_rtype_lookup (unsigned int code)
       return &arm64_reloc_howto_32nb;
     case IMAGE_REL_ARM64_SECREL:
       return &arm64_reloc_howto_secrel;
+    case IMAGE_REL_ARM64_SECTION:
+      return &arm64_reloc_howto_secidx;
     default:
       return NULL;
   }
@@ -842,6 +851,31 @@ coff_pe_aarch64_relocate_section (bfd *output_bfd,
 		input_section, rel->r_vaddr - input_section->vma);
 
 	    bfd_putl32 (val, contents + rel->r_vaddr);
+	    rel->r_type = IMAGE_REL_ARM64_ABSOLUTE;
+
+	    break;
+	  }
+
+	case IMAGE_REL_ARM64_SECTION:
+	  {
+	    uint16_t idx = 0, i = 1;
+	    asection *s;
+
+	    s = output_bfd->sections;
+	    while (s)
+	      {
+		if (s == sec->output_section)
+		  {
+		    idx = i;
+		    break;
+		  }
+
+		i++;
+		s = s->next;
+	      }
+
+
+	    bfd_putl16 (idx, contents + rel->r_vaddr);
 	    rel->r_type = IMAGE_REL_ARM64_ABSOLUTE;
 
 	    break;

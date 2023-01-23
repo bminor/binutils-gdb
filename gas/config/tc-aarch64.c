@@ -2127,6 +2127,25 @@ tc_pe_dwarf2_emit_offset (symbolS *symbol, unsigned int size)
   exp.X_add_number = 0;
   emit_expr (&exp, size);
 }
+
+static void
+s_secidx (int dummy ATTRIBUTE_UNUSED)
+{
+  expressionS exp;
+
+  do
+    {
+      expression (&exp);
+      if (exp.X_op == O_symbol)
+	exp.X_op = O_secidx;
+
+      emit_expr (&exp, 2);
+    }
+  while (*input_line_pointer++ == ',');
+
+  input_line_pointer--;
+  demand_empty_rest_of_line ();
+}
 #endif	/* TE_PE */
 
 static void s_aarch64_arch (int);
@@ -2166,6 +2185,7 @@ const pseudo_typeS md_pseudo_table[] = {
 #endif
 #ifdef TE_PE
   {"secrel32", s_secrel, 0},
+  {"secidx", s_secidx, 0},
 #endif
   {"float16", float_cons, 'h'},
   {"bfloat16", float_cons, 'b'},
@@ -9304,6 +9324,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
 
     case BFD_RELOC_RVA:
     case BFD_RELOC_32_SECREL:
+    case BFD_RELOC_16_SECIDX:
       break;
 
     default:
@@ -9394,6 +9415,11 @@ cons_fix_new_aarch64 (fragS * frag, int where, int size, expressionS * exp)
     {
       exp->X_op = O_symbol;
       type = BFD_RELOC_32_SECREL;
+    }
+  else if (exp->X_op == O_secidx)
+    {
+      exp->X_op = O_symbol;
+      type = BFD_RELOC_16_SECIDX;
     }
   else
     {

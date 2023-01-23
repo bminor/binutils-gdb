@@ -86,6 +86,8 @@ if {[istarget "aarch64-*-pe*"] || [istarget "aarch64-*-mingw*"]} {
 	{{objdump -dr aarch64.d}} "aarch64.x"}
       {".secrel32" "--disable-reloc-section" "" "" {secrel1.s secrel2.s}
 	{{objdump -s secrel_64.d}} "secrel.x"}
+      {".secidx" "--disable-reloc-section" "" "" {secidx1.s secidx2.s}
+	{{objdump -s secidx_aarch64.d}} "secidx.x"}
     }
 
     run_ld_link_tests $pe_tests
