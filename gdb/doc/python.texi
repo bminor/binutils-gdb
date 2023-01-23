@@ -7032,6 +7032,8 @@ instance of this class should be returned from
 @w{@code{Disassembler.__call__}} (@pxref{Disassembler Class}) if an
 instruction was successfully disassembled.
 
+It is not possible to sub-class the @code{DisassemblerResult} class.
+
 The @code{DisassemblerResult} class has the following properties and
 methods:
 

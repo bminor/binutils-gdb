@@ -274,43 +274,6 @@ class ResultOfWrongType(TestDisassembler):
         return self.Blah(1, "ABC")
 
 
-class ResultWrapper(gdb.disassembler.DisassemblerResult):
-    def __init__(self, length, string, length_x=None, string_x=None):
-        super().__init__(length, string)
-        if length_x is None:
-            self.__length = length
-        else:
-            self.__length = length_x
-        if string_x is None:
-            self.__string = string
-        else:
-            self.__string = string_x
-
-    @property
-    def length(self):
-        return self.__length
-
-    @property
-    def string(self):
-        return self.__string
-
-
-class ResultWithInvalidLength(TestDisassembler):
-    """Return a result object with an invalid length."""
-
-    def disassemble(self, info):
-        result = gdb.disassembler.builtin_disassemble(info)
-        return ResultWrapper(result.length, result.string, 0)
-
-
-class ResultWithInvalidString(TestDisassembler):
-    """Return a result object with an empty string."""
-
-    def disassemble(self, info):
-        result = gdb.disassembler.builtin_disassemble(info)
-        return ResultWrapper(result.length, result.string, None, "")
-
-
 class TaggingDisassembler(TestDisassembler):
     """A simple disassembler that just tags the output."""
 

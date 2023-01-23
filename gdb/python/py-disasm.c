@@ -904,43 +904,14 @@ gdbpy_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
       return gdb::optional<int> (-1);
     }
 
-  /* The call into Python neither raised an exception, or returned None.
-     Check to see if the result looks valid.  */
-  gdbpy_ref<> length_obj (PyObject_GetAttrString (result.get (), "length"));
-  if (length_obj == nullptr)
-    {
-      gdbpy_print_stack ();
-      return gdb::optional<int> (-1);
-    }
+  /* The result from the Python disassembler has the correct type.  Convert
+     this back to the underlying C++ object and read the state directly
+     from this object.  */
+  struct disasm_result_object *result_obj
+    = (struct disasm_result_object *) result.get ();
 
-  gdbpy_ref<> string_obj (PyObject_GetAttrString (result.get (), "string"));
-  if (string_obj == nullptr)
-    {
-      gdbpy_print_stack ();
-      return gdb::optional<int> (-1);
-    }
-  if (!gdbpy_is_string (string_obj.get ()))
-    {
-      PyErr_SetString (PyExc_TypeError, _("String attribute is not a string."));
-      gdbpy_print_stack ();
-      return gdb::optional<int> (-1);
-    }
-
-  gdb::unique_xmalloc_ptr<char> string
-    = gdbpy_obj_to_string (string_obj.get ());
-  if (string == nullptr)
-    {
-      gdbpy_print_stack ();
-      return gdb::optional<int> (-1);
-    }
-
-  long length;
-  if (!gdb_py_int_as_long (length_obj.get (), &length))
-    {
-      gdbpy_print_stack ();
-      return gdb::optional<int> (-1);
-    }
-
+  /* Validate the length of the disassembled instruction.  */
+  long length = result_obj->length;
   long max_insn_length = (gdbarch_max_insn_length_p (gdbarch) ?
 			  gdbarch_max_insn_length (gdbarch) : INT_MAX);
   if (length <= 0)
@@ -961,7 +932,10 @@ gdbpy_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
       return gdb::optional<int> (-1);
     }
 
-  if (strlen (string.get ()) == 0)
+  /* Validate the text of the disassembled instruction.  */
+  gdb_assert (result_obj->content != nullptr);
+  std::string string (std::move (result_obj->content->release ()));
+  if (strlen (string.c_str ()) == 0)
     {
       PyErr_SetString (PyExc_ValueError,
 		       _("String attribute must not be empty."));
@@ -971,7 +945,7 @@ gdbpy_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
 
   /* Print the disassembled instruction back to core GDB, and return the
      length of the disassembled instruction.  */
-  info->fprintf_func (info->stream, "%s", string.get ());
+  info->fprintf_func (info->stream, "%s", string.c_str ());
   return gdb::optional<int> (length);
 }
 
@@ -1159,7 +1133,7 @@ PyTypeObject disasm_result_object_type = {
   0,						/*tp_getattro*/
   0,						/*tp_setattro*/
   0,						/*tp_as_buffer*/
-  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,	/*tp_flags*/
+  Py_TPFLAGS_DEFAULT,				/*tp_flags*/
   "GDB object, representing a disassembler result",	/* tp_doc */
   0,						/* tp_traverse */
   0,						/* tp_clear */

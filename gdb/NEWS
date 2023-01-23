@@ -170,6 +170,9 @@ info main
      (program-counter) values, and can be used as the frame-id when
      calling gdb.PendingFrame.create_unwind_info.
 
+  ** It is now no longer possible to sub-class the
+     gdb.disassembler.DisassemblerResult type.
+
 *** Changes in GDB 13
 
 * MI version 1 is deprecated, and will be removed in GDB 14.

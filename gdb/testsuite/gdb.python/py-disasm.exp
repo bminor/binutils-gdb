@@ -96,9 +96,7 @@ set test_plans \
 	 [list "ReadMemoryCaughtRuntimeErrorDisassembler" "${addr_pattern}${nop}\r\n.*"] \
 	 [list "MemorySourceNotABufferDisassembler" "${addr_pattern}Python Exception <class 'TypeError'>: Result from read_memory is not a buffer\r\n\r\n${unknown_error_pattern}"] \
 	 [list "MemorySourceBufferTooLongDisassembler" "${addr_pattern}Python Exception <class 'ValueError'>: Buffer returned from read_memory is sized $decimal instead of the expected $decimal\r\n\r\n${unknown_error_pattern}"] \
-	 [list "ResultOfWrongType" "${addr_pattern}Python Exception <class 'TypeError'>: Result is not a DisassemblerResult.\r\n.*"] \
-	 [list "ResultWithInvalidLength" "${addr_pattern}Python Exception <class 'ValueError'>: Invalid length attribute: length must be greater than 0.\r\n.*"] \
-	 [list "ResultWithInvalidString" "${addr_pattern}Python Exception <class 'ValueError'>: String attribute must not be empty.\r\n.*"]]
+	 [list "ResultOfWrongType" "${addr_pattern}Python Exception <class 'TypeError'>: Result is not a DisassemblerResult.\r\n.*"]]
 
 # Now execute each test plan.
 foreach plan $test_plans {
@@ -217,3 +215,14 @@ with_test_prefix "Bad DisassembleInfo creation" {
 	     "RuntimeError: DisassembleInfo is no longer valid\\." \
 	     "Error while executing Python code\\."]
 }
+
+# Test that we can't inherit from the DisassemblerResult class.
+gdb_test_multiline "Sub-class a breakpoint" \
+    "python" "" \
+    "class InvalidResultType(gdb.disassembler.DisassemblerResult):" "" \
+    "   def __init__(self):" "" \
+    "     pass" "" \
+    "end" \
+    [multi_line \
+	 "TypeError: type 'gdb\\.disassembler\\.DisassemblerResult' is not an acceptable base type" \
+	 "Error while executing Python code\\."]
