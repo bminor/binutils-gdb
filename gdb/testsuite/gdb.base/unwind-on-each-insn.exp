@@ -25,9 +25,19 @@
 
 standard_testfile .c -foo.c
 
+set debug_flags {debug}
+set nodebug_flags {nodebug}
+
+# Make sure that we don't use .eh_frame info, by not generating it,
+# using -fno-asynchronous-unwind-tables, if supported.
+if { [gdb_can_simple_compile fno-asynchronous-unwind-tables \
+	  { void foo () { } } object -fno-asynchronous-unwind-tables] } {
+    lappend nodebug_flags additional_flags=-fno-asynchronous-unwind-tables
+}
+
 if {[prepare_for_testing_full "failed to prepare" \
-	 [list ${testfile} debug \
-	      $srcfile {debug} $srcfile2 {nodebug}]]} {
+	 [list ${testfile} $debug_flags \
+	      $srcfile $debug_flags $srcfile2 $nodebug_flags]]} {
     return -1
 }
 
