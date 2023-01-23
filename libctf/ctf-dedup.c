@@ -2306,6 +2306,10 @@ sort_output_mapping (const ctf_next_hkv_t *one, const ctf_next_hkv_t *two,
   ctf_id_t one_type;
   ctf_id_t two_type;
 
+  /* Inputs are always equal to themselves.  */
+  if (one == two)
+    return 0;
+
   one_gid = ctf_dynhash_lookup (d->cd_output_first_gid, one_hval);
   two_gid = ctf_dynhash_lookup (d->cd_output_first_gid, two_hval);
 
