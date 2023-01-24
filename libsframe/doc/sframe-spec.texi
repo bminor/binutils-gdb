@@ -243,7 +243,7 @@ must be the end of the auxilliary SFrame header, if the latter is present.
 
 Tieing it all together:
 
-@multitable {Offset} {@code{int8_t sfh_cfa_fixed_fp_offset}} {The ABI/arch identifier. See above}
+@multitable {Offset} {@code{int8_t sfh_cfa_fixed_fp_offset}} {The number of SFrame FREs in the section.}
 @headitem Offset @tab Name @tab Description
 @item 0x00
 @tab @code{sframe_preamble sfh_preamble}
@@ -396,7 +396,7 @@ used for the function.
 
 The info word is a bitfield split into three parts.  From MSB to LSB:
 
-@multitable {Bit offset} {@code{isroot}} {Length of variable-length data for this type (some kinds only).}
+@multitable {Bit offset} {@code{pauth_key}} {Specify which key is used for signing the return addresses}
 @headitem Bit offset @tab Name @tab Description
 @item 7--6
 @tab @code{unused}
@@ -405,12 +405,16 @@ The info word is a bitfield split into three parts.  From MSB to LSB:
 @item 5
 @tab @code{pauth_key}
 @tab Specify which key is used for signing the return addresses in the SFrame
-FDE.  Two possible values: SFRAME_AARCH64_PAUTH_KEY_A (0) or
+FDE.  Two possible values: @*
+SFRAME_AARCH64_PAUTH_KEY_A (0), or @*
 SFRAME_AARCH64_PAUTH_KEY_B (1).
 
 @item 4
 @tab @code{fdetype}
-@tab SFRAME_FDE_TYPE_PCMASK (1) or SFRAME_FDE_TYPE_PCINC (0). @xref{The SFrame FDE types}.
+@tab Specify the SFrame FDE type.  Two possible values: @*
+SFRAME_FDE_TYPE_PCMASK (1), or @*
+SFRAME_FDE_TYPE_PCINC (0). @*
+@xref{The SFrame FDE types}.
 
 @item 0--3
 @tab @code{fretype}
@@ -437,14 +441,16 @@ useful for the cases where a small pattern of instructions in a program stub is
 used repeatedly for a specific functionality.  Typical usecases are pltN
 entries and trampolines.
 
-@multitable {Name of SFrame FDE type} {Value} {Unwinders perform a (PC >= FRE_START_ADDR)}
+@multitable {SFRAME_FDE_TYPE_PCMASK} {Value} {Unwinders perform a Unwinders perform a}
 @headitem Name of SFrame FDE type @tab Value @tab Description
 
 @item SFRAME_FDE_TYPE_PCINC
-@tab 0 @tab Unwinders perform a (PC >= FRE_START_ADDR) to look up a matching FRE.
+@tab 0 @tab Unwinders perform a @*
+(PC >= FRE_START_ADDR) to look up a matching FRE.
 
 @item SFRAME_FDE_TYPE_PCMASK
-@tab 1 @tab  Unwinders perform a (PC & FRE_START_ADDR_AS_MASK >= FRE_START_ADDR_AS_MASK)
+@tab 1 @tab  Unwinders perform a @*
+(PC & FRE_START_ADDR_AS_MASK >= FRE_START_ADDR_AS_MASK)
 to look up a matching FRE.
 
 @end multitable
@@ -577,8 +583,10 @@ The SFrame FRE info word is a bitfield split into four parts.  From MSB to LSB:
 
 @item 5-6
 @tab @code{fre_offset_size}
-@tab Size of stack offsets in bytes.  Valid values are SFRAME_FRE_OFFSET_1B,
-SFRAME_FRE_OFFSET_2B, and SFRAME_FRE_OFFSET_4B.
+@tab Size of stack offsets in bytes.  Valid values are: @*
+SFRAME_FRE_OFFSET_1B, @*
+SFRAME_FRE_OFFSET_2B, and @*
+SFRAME_FRE_OFFSET_4B.
 
 @item 1-4
 @tab @code{fre_offset_count}
