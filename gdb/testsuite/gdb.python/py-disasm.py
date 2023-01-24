@@ -113,6 +113,18 @@ class ShowResultRepr(TestDisassembler):
         return DisassemblerResult(length=length, string=string)
 
 
+class ShowResultStr(TestDisassembler):
+    """Call the __str__ method on a DisassemblerResult object, incude the
+    resulting string in a comment within the disassembler output."""
+
+    def disassemble(self, info):
+        result = gdb.disassembler.builtin_disassemble(info)
+        comment = "\t## " + str(result)
+        string = result.string + comment
+        length = result.length
+        return DisassemblerResult(length=length, string=string)
+
+
 class GlobalPreInfoDisassembler(TestDisassembler):
     """Check the attributes of DisassembleInfo before disassembly has occurred."""
 
