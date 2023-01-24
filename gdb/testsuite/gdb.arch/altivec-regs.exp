@@ -22,7 +22,6 @@
 #
 
 require allow_altivec_tests
-require {istarget "powerpc*"}
 
 standard_testfile
 

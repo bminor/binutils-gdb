@@ -20,7 +20,7 @@
 # 0 to 31 in each of the 16 bytes of each corresponding register, and
 # we then check if gdb sees these same values.
 
-require allow_altivec_tests {[istarget "powerpc*"}
+require allow_altivec_tests
 
 standard_testfile
 

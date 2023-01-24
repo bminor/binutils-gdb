@@ -3471,6 +3471,11 @@ gdb_caching_proc allow_altivec_tests {
 	return 0
     }
 
+    if {![istarget powerpc*]} {
+	verbose "$me: PPC target required, returning 0" 2
+	return 0
+    }
+
     # Make sure we have a compiler that understands altivec.
     if [test_compiler_info gcc*] {
         set compile_flags "additional_flags=-maltivec"
