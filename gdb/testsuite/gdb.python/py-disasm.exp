@@ -73,6 +73,9 @@ set test_plans \
     [list \
 	 [list "" "${base_pattern}\r\n.*"] \
 	 [list "GlobalNullDisassembler" "${base_pattern}\r\n.*"] \
+	 [list "ShowInfoRepr" "${base_pattern}\\s+## <gdb.disassembler.DisassembleInfo address=$hex architecture=\[^>\]+>\r\n.*"] \
+	 [list "ShowInfoSubClassRepr" "${base_pattern}\\s+## <MyInfo address=$hex architecture=\[^>\]+>\r\n.*"] \
+	 [list "ShowResultRepr" "${base_pattern}\\s+## <gdb.disassembler.DisassemblerResult length=$decimal string=\"\[^\r\n\]+\">\r\n.*"] \
 	 [list "GlobalPreInfoDisassembler" "${base_pattern}\\s+## ad = $hex, ar = ${curr_arch}\r\n.*"] \
 	 [list "GlobalPostInfoDisassembler" "${base_pattern}\\s+## ad = $hex, ar = ${curr_arch}\r\n.*"] \
 	 [list "GlobalReadDisassembler" "${base_pattern}\\s+## bytes =( $hex)+\r\n.*"] \

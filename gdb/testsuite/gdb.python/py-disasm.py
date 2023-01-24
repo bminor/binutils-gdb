@@ -64,6 +64,55 @@ class TestDisassembler(Disassembler):
         raise NotImplementedError("override the disassemble method")
 
 
+class ShowInfoRepr(TestDisassembler):
+    """Call the __repr__ method on the DisassembleInfo, convert the result
+    to a string, and incude it in a comment in the disassembler output."""
+
+    def disassemble(self, info):
+        comment = "\t## " + repr(info)
+        result = gdb.disassembler.builtin_disassemble(info)
+        string = result.string + comment
+        length = result.length
+        return DisassemblerResult(length=length, string=string)
+
+
+class ShowInfoSubClassRepr(TestDisassembler):
+    """Create a sub-class of DisassembleInfo.  Create an instace of this
+    sub-class and call the __repr__ method on it.  Convert the result
+    to a string, and incude it in a comment in the disassembler
+    output.  The DisassembleInfo sub-class does not override __repr__
+    so we are calling the implementation on the parent class."""
+
+    class MyInfo(gdb.disassembler.DisassembleInfo):
+        """A wrapper around DisassembleInfo, doesn't add any new
+        functionality, just gives a new name in order to check the
+        __repr__ functionality."""
+
+        def __init__(self, info):
+            super().__init__(info)
+
+    def disassemble(self, info):
+        info = self.MyInfo(info)
+        comment = "\t## " + repr(info)
+        result = gdb.disassembler.builtin_disassemble(info)
+        string = result.string + comment
+        length = result.length
+        return DisassemblerResult(length=length, string=string)
+
+
+class ShowResultRepr(TestDisassembler):
+    """Call the __repr__ method on the DisassemblerResult, convert the
+    result to a string, and incude it in a comment in the disassembler
+    output."""
+
+    def disassemble(self, info):
+        result = gdb.disassembler.builtin_disassemble(info)
+        comment = "\t## " + repr(result)
+        string = result.string + comment
+        length = result.length
+        return DisassemblerResult(length=length, string=string)
+
+
 class GlobalPreInfoDisassembler(TestDisassembler):
     """Check the attributes of DisassembleInfo before disassembly has occurred."""
 
