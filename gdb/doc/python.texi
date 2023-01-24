@@ -6870,6 +6870,7 @@ values can be 1 (left), 2 (middle), or 3 (right).
 using the Python API.  The disassembler related features are contained
 within the @code{gdb.disassembler} module:
 
+@anchor{DisassembleInfo Class}
 @deftp {class} gdb.disassembler.DisassembleInfo
 Disassembly is driven by instances of this class.  Each time
 @value{GDBN} needs to disassemble an instruction, an instance of this
@@ -6971,6 +6972,25 @@ not itself raise a @code{MemoryError}.
 Any other exception type raised in @code{read_memory} will propagate
 back and be re-raised by @code{builtin_disassemble}.
 @end defun
+
+@defun DisassembleInfo.text_part (style, string)
+Create a new @code{DisassemblerTextPart} representing a piece of a
+disassembled instruction.  @var{string} should be a non-empty string,
+and @var{style} should be an appropriate style constant
+(@pxref{Disassembler Style Constants}).
+
+Disassembler parts are used when creating a @code{DisassemblerResult}
+in order to represent the styling within an instruction
+(@pxref{DisassemblerResult Class}).
+@end defun
+
+@defun DisassembleInfo.address_part (address)
+Create a new @code{DisassemblerAddressPart}.  @var{address} is the
+value of the absolute address this part represents.  A
+@code{DisassemblerAddressPart} is displayed as an absolute address and
+an associated symbol, the address and symbol are styled appropriately.
+@end defun
+
 @end deftp
 
 @anchor{Disassembler Class}
@@ -7024,6 +7044,7 @@ the error stream according to the @kbd{set python print-stack} setting
 @end defun
 @end deftp
 
+@anchor{DisassemblerResult Class}
 @deftp {class} gdb.disassembler.DisassemblerResult
 This class represents the result of disassembling a single
 instruction.  An instance of this class will be returned from
@@ -7037,11 +7058,30 @@ It is not possible to sub-class the @code{DisassemblerResult} class.
 The @code{DisassemblerResult} class has the following properties and
 methods:
 
-@defun DisassemblerResult.__init__ (length, string)
+@defun DisassemblerResult.__init__ (length, string, parts)
 Initialize an instance of this class, @var{length} is the length of
 the disassembled instruction in bytes, which must be greater than
-zero, and @var{string} is a non-empty string that represents the
-disassembled instruction.
+zero.
+
+Only one of @var{string} or @var{parts} should be used to initialize a
+new @code{DisassemblerResult}; the other one should be passed the
+value @code{None}.  Alternatively, the arguments can be passed by
+name, and the unused argument can be ignored.
+
+The @var{string} argument, if not @code{None}, is a non-empty string
+that represents the entire disassembled instruction.  Building a result
+object using the @var{string} argument does not allow for any styling
+information to be included in the result.  @value{GDBN} will style the
+result as a single @code{DisassemblerTextPart} with @code{STYLE_TEXT}
+style (@pxref{Disassembler Styling Parts}).
+
+The @var{parts} argument, if not @code{None}, is a non-empty sequence
+of @code{DisassemblerPart} objects.  Each part represents a small part
+of the disassembled instruction along with associated styling
+information.  A result object built using @var{parts} can be displayed
+by @value{GDBN} with full styling information
+(@pxref{style_disassembler_enabled,,@kbd{set style disassembler
+enabled}}).
 @end defun
 
 @defvar DisassemblerResult.length
@@ -7051,9 +7091,272 @@ instruction in bytes, this will always be greater than zero.
 
 @defvar DisassemblerResult.string
 A read-only property containing a non-empty string representing the
-disassembled instruction.
+disassembled instruction.  The @var{string} is a representation of the
+disassembled instruction without any styling information.  To see how
+the instruction will be styled use the @var{parts} property.
+
+If this instance was initialized using separate
+@code{DisassemblerPart} objects, the @var{string} property will still
+be valid.  The @var{string} value is created by concatenating the
+@code{DisassemblerPart.string} values of each component part
+(@pxref{Disassembler Styling Parts}).
+@end defvar
+
+@defvar DisassemblerResult.parts
+A read-only property containing a non-empty sequence of
+@code{DisassemblerPart} objects.  Each @code{DisassemblerPart} object
+contains a small part of the instruction along with information about
+how that part should be styled.  @value{GDBN} uses this information to
+create styled disassembler output
+(@pxref{style_disassembler_enabled,,@kbd{set style disassembler
+enabled}}).
+
+If this instance was initialized using a single string rather than
+with a sequence of @code{DisassemblerPart} objects, the @var{parts}
+property will still be valid.  In this case the @var{parts} property
+will hold a sequence containing a single @code{DisassemblerTextPart}
+object, the string of which will represent the entire instruction, and
+the style of which will be @code{STYLE_TEXT}.
 @end defvar
 @end deftp
+
+@anchor{Disassembler Styling Parts}
+@deftp {class} gdb.disassembler.DisassemblerPart
+This is a parent class from which the different part sub-classes
+inherit.  Only instances of the sub-classes detailed below will be
+returned by the Python API.
+
+It is not possible to directly create instances of either this parent
+class, or any of the sub-classes listed below.  Instances of the
+sub-classes listed below are created by calling
+@code{builtin_disassemble} (@pxref{builtin_disassemble}) and are
+returned within the @code{DisassemblerResult} object, or can be
+created by calling the @code{text_part} and @code{address_part}
+methods on the @code{DisassembleInfo} class (@pxref{DisassembleInfo
+Class}).
+
+The @code{DisassemblerPart} class has a single property:
+
+@defvar DisassemblerPart.string
+A read-only property that contains a non-empty string representing
+this part of the disassembled instruction.  The string within this
+property doesn't include any styling information.
+@end defvar
+@end deftp
+
+@deftp {class} gdb.disassembler.DisassemblerTextPart
+The @code{DisassemblerTextPart} class represents a piece of the
+disassembled instruction and the associated style for that piece.
+Instances of this class can't be created directly, instead call
+@code{DisassembleInfo.text_part} to create a new instance of this
+class (@pxref{DisassembleInfo Class}).
+
+As well as the properties of its parent class, the
+@code{DisassemblerTextPart} has the following additional property:
+
+@defvar DisassemblerTextPart.style
+A read-only property that contains one of the defined style constants.
+@value{GDBN} will use this style when styling this part of the
+disassembled instruction (@pxref{Disassembler Style Constants}).
+@end defvar
+@end deftp
+
+@deftp {class} gdb.disassembler.DisassemblerAddressPart
+The @code{DisassemblerAddressPart} class represents an absolute
+address within a disassembled instruction.  Using a
+@code{DisassemblerAddressPart} instead of a
+@code{DisassemblerTextPart} with @code{STYLE_ADDRESS} is preferred,
+@value{GDBN} will display the address as both an absolute address, and
+will look up a suitable symbol to display next to the address.  Using
+@code{DisassemblerAddressPart} also ensures that user settings such as
+@code{set print max-symbolic-offset} are respected.
+
+Here is an example of an x86-64 instruction:
+
+@smallexample
+call   0x401136 <foo>
+@end smallexample
+
+@noindent
+In this instruction the @code{0x401136 <foo>} was generated from a
+single @code{DisassemblerAddressPart}.  The @code{0x401136} will be
+styled with @code{STYLE_ADDRESS}, and @code{foo} will be styled with
+@code{STYLE_SYMBOL}.  The @code{<} and @code{>} will be styled as
+@code{STYLE_TEXT}.
+
+If the inclusion of the symbol name is not required then a
+@code{DisassemblerTextPart} with style @code{STYLE_ADDRESS} can be
+used instead.
+
+Instances of this class can't be created directly, instead call
+@code{DisassembleInfo.address_part} to create a new instance of this
+class (@pxref{DisassembleInfo Class}).
+
+As well as the properties of its parent class, the
+@code{DisassemblerAddressPart} has the following additional property:
+
+@defvar DisassemblerAddressPart.address
+A read-only property that contains the @var{address} passed to this
+object's @code{__init__} method.
+@end defvar
+@end deftp
+
+@anchor{Disassembler Style Constants}
+
+The following table lists all of the disassembler styles that are
+available.  @value{GDBN} maps these style constants onto its style
+settings (@pxref{Output Styling}).  In some cases, several style
+constants produce the same style settings, and thus will produce the
+same visual effect on the screen.  This could change in future
+releases of @value{GDBN}, so care should be taken to select the
+correct style constant to ensure correct output styling in future
+releases of @value{GDBN}.
+
+@vtable @code
+@vindex STYLE_TEXT
+@item gdb.disassembler.STYLE_TEXT
+This is the default style used by @value{GDBN} when styling
+disassembler output.  This style should be used for any parts of the
+instruction that don't fit any of the other styles listed below.
+@value{GDBN} styles text with this style using its default style.
+
+@vindex STYLE_MNEMONIC
+@item gdb.disassembler.STYLE_MNEMONIC
+This style is used for styling the primary instruction mnemonic, which
+usually appears at, or near, the start of the disassembled instruction
+string.
+
+@value{GDBN} styles text with this style using the @code{disassembler
+mnemonic} style setting.
+
+@vindex STYLE_SUB_MNEMONIC
+@item gdb.disassembler.STYLE_SUB_MNEMONIC
+This style is used for styling any sub-mnemonics within a disassembled
+instruction.  A sub-mnemonic is any text within the instruction that
+controls the function of the instruction, but which is disjoint from
+the primary mnemonic (which will have styled @code{STYLE_MNEMONIC}).
+
+As an example, consider this AArch64 instruction:
+
+@smallexample
+add	w16, w7, w1, lsl #1
+@end smallexample
+
+@noindent
+The @code{add} is the primary instruction mnemonic, and would be given
+style @code{STYLE_MNEMONIC}, while @code{lsl} is the sub-mnemonic, and
+would be given the style @code{STYLE_SUB_MNEMONIC}.
+
+@value{GDBN} styles text with this style using the @code{disassembler
+mnemonic} style setting.
+
+@vindex STYLE_ASSEMBLER_DIRECTIVE
+@item gdb.disassembler.STYLE_ASSEMBLER_DIRECTIVE
+Sometimes a series of bytes doesn't decode to a valid instruction.  In
+this case the disassembler may choose to represent the result of
+disassembling using an assembler directive, for example:
+
+@smallexample
+.word	0x1234
+@end smallexample
+
+@noindent
+In this case, the @code{.word} would be give the
+@code{STYLE_ASSEMBLER_DIRECTIVE} style.  An assembler directive is
+similar to a mnemonic in many ways but is something that is not part
+of the architecture's instruction set.
+
+@value{GDBN} styles text with this style using the @code{disassembler
+mnemonic} style setting.
+
+@vindex STYLE_REGISTER
+@item gdb.disassembler.STYLE_REGISTER
+This style is used for styling any text that represents a register
+name, or register number, within a disassembled instruction.
+
+@value{GDBN} styles text with this style using the @code{disassembler
+register} style setting.
+
+@vindex STYLE_ADDRESS
+@item gdb.disassembler.STYLE_ADDRESS
+This style is used for styling numerical values that represent
+absolute addresses within the disassembled instruction.
+
+When creating a @code{DisassemblerTextPart} with this style, you
+should consider if a @code{DisassemblerAddressPart} would be more
+appropriate.  See @ref{Disassembler Styling Parts} for a description
+of what each part offers.
+
+@value{GDBN} styles text with this style using the @code{disassembler
+address} style setting.
+
+@vindex STYLE_ADDRESS_OFFSET
+@item gdb.disassembler.STYLE_ADDRESS_OFFSET
+This style is used for styling numerical values that represent offsets
+to addresses within the disassembled instruction.  A value is
+considered an address offset when the instruction itself is going to
+access memory, and the value is being used to offset which address is
+accessed.
+
+For example, an architecture might have an instruction that loads from
+memory using an address within a register.  If that instruction also
+allowed for an immediate offset to be encoded into the instruction,
+this would be an address offset.  Similarly, a branch instruction
+might jump to an address in a register plus an address offset that is
+encoded into the instruction.
+
+@value{GDBN} styles text with this style using the @code{disassembler
+immediate} style setting.
+
+@vindex STYLE_IMMEDIATE
+@item gdb.disassembler.STYLE_IMMEDIATE
+Use @code{STYLE_IMMEDIATE} for any numerical values within a
+disassembled instruction when those values are not addresses, address
+offsets, or register numbers (The styles @code{STYLE_ADDRESS},
+@code{STYLE_ADDRESS_OFFSET}, or @code{STYLE_REGISTER} can be used in
+those cases).
+
+@value{GDBN} styles text with this style using the @code{disassembler
+immediate} style setting.
+
+@vindex STYLE_SYMBOL
+@item gdb.disassembler.STYLE_SYMBOL
+This style is used for styling the textual name of a symbol that is
+included within a disassembled instruction.  A symbol name is often
+included next to an absolute address within a disassembled instruction
+to make it easier for the user to understand what the address is
+referring too.  For example:
+
+@smallexample
+call   0x401136 <foo>
+@end smallexample
+
+@noindent
+Here @code{foo} is the name of a symbol, and should be given the
+@code{STYLE_SYMBOL} style.
+
+Adding symbols next to absolute addresses like this is handled
+automatically by the @code{DisassemblerAddressPart} class
+(@pxref{Disassembler Styling Parts}).
+
+@value{GDBN} styles text with this style using the @code{disassembler
+symbol} style setting.
+
+@vindex STYLE_COMMENT_START
+@item gdb.disassembler.STYLE_COMMENT_START
+This style is used to start a line comment in the disassembly output.
+Unlike other styles, which only apply to the single
+@code{DisassemblerTextPiece} to which they are applied, the comment
+style is sticky, and overrides the style of any further pieces within
+this instruction.
+
+This means that, after a @code{STYLE_COMMENT_START} piece has been
+seen, @value{GDBN} will apply the comment style until the end of the
+line, ignoring the specific style within a piece.
+
+@value{GDBN} styles text with this style using the @code{disassembler
+comment} style setting.
+@end vtable
 
 The following functions are also contained in the
 @code{gdb.disassembler} module:

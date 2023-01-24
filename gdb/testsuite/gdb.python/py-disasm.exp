@@ -69,6 +69,12 @@ set nop "(nop|nop\t0)"
 set unknown_error_pattern "unknown disassembler error \\(error = -1\\)"
 set addr_pattern "\r\n=> ${curr_pc_pattern} <\[^>\]+>:\\s+"
 set base_pattern "${addr_pattern}${nop}"
+
+# Helper proc to format a Python exception of TYPE with MSG.
+proc make_exception_pattern { type msg } {
+    return "${::addr_pattern}Python Exception <class '$type'>: $msg\r\n\r\n${::unknown_error_pattern}"
+}
+
 set test_plans \
     [list \
 	 [list "" "${base_pattern}\r\n.*"] \
@@ -90,13 +96,40 @@ set test_plans \
 	 [list "RethrowMemoryErrorDisassembler" "${addr_pattern}Cannot access memory at address $hex"] \
 	 [list "ReadMemoryMemoryErrorDisassembler" "${addr_pattern}Cannot access memory at address ${curr_pc_pattern}"] \
 	 [list "ReadMemoryGdbErrorDisassembler" "${addr_pattern}read_memory raised GdbError\r\n${unknown_error_pattern}"] \
-	 [list "ReadMemoryRuntimeErrorDisassembler" "${addr_pattern}Python Exception <class 'RuntimeError'>: read_memory raised RuntimeError\r\n\r\n${unknown_error_pattern}"] \
+	 [list "ReadMemoryRuntimeErrorDisassembler" \
+	      [make_exception_pattern "RuntimeError" \
+		   "read_memory raised RuntimeError"]] \
 	 [list "ReadMemoryCaughtMemoryErrorDisassembler" "${addr_pattern}${nop}\r\n.*"] \
 	 [list "ReadMemoryCaughtGdbErrorDisassembler" "${addr_pattern}${nop}\r\n.*"] \
 	 [list "ReadMemoryCaughtRuntimeErrorDisassembler" "${addr_pattern}${nop}\r\n.*"] \
-	 [list "MemorySourceNotABufferDisassembler" "${addr_pattern}Python Exception <class 'TypeError'>: Result from read_memory is not a buffer\r\n\r\n${unknown_error_pattern}"] \
-	 [list "MemorySourceBufferTooLongDisassembler" "${addr_pattern}Python Exception <class 'ValueError'>: Buffer returned from read_memory is sized $decimal instead of the expected $decimal\r\n\r\n${unknown_error_pattern}"] \
-	 [list "ResultOfWrongType" "${addr_pattern}Python Exception <class 'TypeError'>: Result is not a DisassemblerResult.\r\n.*"]]
+	 [list "MemorySourceNotABufferDisassembler" \
+	      [make_exception_pattern "TypeError" \
+		   "Result from read_memory is not a buffer"]] \
+	 [list "MemorySourceBufferTooLongDisassembler" \
+	      [make_exception_pattern "ValueError" \
+		   "Buffer returned from read_memory is sized $decimal instead of the expected $decimal"]] \
+	 [list "ResultOfWrongType" \
+	      [make_exception_pattern "TypeError" \
+		   "Result is not a DisassemblerResult."]] \
+	 [list "ErrorCreatingTextPart_NoArgs" \
+	      [make_exception_pattern "TypeError" \
+		  "function missing required argument 'style' \\(pos 1\\)"]] \
+	 [list "ErrorCreatingAddressPart_NoArgs" \
+	      [make_exception_pattern "TypeError" \
+		  "function missing required argument 'address' \\(pos 1\\)"]] \
+	 [list "ErrorCreatingTextPart_NoString" \
+	      [make_exception_pattern "TypeError" \
+		  "function missing required argument 'string' \\(pos 2\\)"]] \
+	 [list "ErrorCreatingTextPart_NoStyle" \
+	      [make_exception_pattern "TypeError" \
+		  "function missing required argument 'style' \\(pos 1\\)"]] \
+	 [list "All_Text_Part_Styles" "${addr_pattern}p1p2p3p4p5p6p7p8p9p10\r\n.*"] \
+	 [list "ErrorCreatingTextPart_StringAndParts" \
+	      [make_exception_pattern "ValueError" \
+		  "Cannot use 'string' and 'parts' when creating gdb\\.disassembler\\.DisassemblerResult\\."]] \
+	 [list "Build_Result_Using_All_Parts" \
+	      "${addr_pattern}fake\treg, ${curr_pc_pattern}(?: <\[^>\]+>)?, 123\r\n.*"] \
+	]
 
 # Now execute each test plan.
 foreach plan $test_plans {
@@ -216,13 +249,48 @@ with_test_prefix "Bad DisassembleInfo creation" {
 	     "Error while executing Python code\\."]
 }
 
-# Test that we can't inherit from the DisassemblerResult class.
-gdb_test_multiline "Sub-class a breakpoint" \
-    "python" "" \
-    "class InvalidResultType(gdb.disassembler.DisassemblerResult):" "" \
-    "   def __init__(self):" "" \
-    "     pass" "" \
-    "end" \
+# Some of the disassembler related types should not be sub-typed,
+# check these now.
+with_test_prefix "check inheritance" {
+    foreach_with_prefix type {gdb.disassembler.DisassemblerResult \
+				  gdb.disassembler.DisassemblerPart
+				  gdb.disassembler.DisassemblerTextPart \
+				  gdb.disassembler.DisassemblerAddressPart} {
+	set type_ptn [string_to_regexp $type]
+	gdb_test_multiline "Sub-class a breakpoint" \
+	    "python" "" \
+	    "class InvalidResultType($type):" "" \
+	    "   def __init__(self):" "" \
+	    "     pass" "" \
+	    "end" \
+	    [multi_line \
+		 "TypeError: type '${type_ptn}' is not an acceptable base type" \
+		 "Error while executing Python code\\."]
+    }
+}
+
+
+# Test some error conditions when creating a DisassemblerResult object.
+gdb_test "python result = gdb.disassembler.DisassemblerResult()" \
     [multi_line \
-	 "TypeError: type 'gdb\\.disassembler\\.DisassemblerResult' is not an acceptable base type" \
-	 "Error while executing Python code\\."]
+	 "TypeError: function missing required argument 'length' \\(pos 1\\)" \
+	 "Error while executing Python code\\."] \
+    "try to create a DisassemblerResult without a length argument"
+
+foreach len {0 -1} {
+    gdb_test "python result = gdb.disassembler.DisassemblerResult($len)" \
+	[multi_line \
+	     "ValueError: Length must be greater than 0\\." \
+	     "Error while executing Python code\\."] \
+	"try to create a DisassemblerResult with length $len"
+}
+
+# Check we can't directly create DisassemblerTextPart or
+# DisassemblerAddressPart objects.
+foreach type {DisassemblerTextPart DisassemblerAddressPart} {
+    gdb_test "python result = gdb.disassembler.${type}()" \
+	[multi_line \
+	     "RuntimeError: Cannot create instances of DisassemblerPart\\." \
+	     "Error while executing Python code\\."] \
+	 "try to create an instance of ${type}"
+}

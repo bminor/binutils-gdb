@@ -173,6 +173,25 @@ info main
   ** It is now no longer possible to sub-class the
      gdb.disassembler.DisassemblerResult type.
 
+  ** The Disassembler API from the gdb.disassembler module has been
+     extended to include styling support:
+
+     - The DisassemblerResult class can now be initialized with a list
+       of parts.  Each part represents part of the disassembled
+       instruction along with the associated style information.  This
+       list of parts can be accessed with the new
+       DisassemblerResult.parts property.
+
+     - New constants gdb.disassembler.STYLE_* representing all the
+       different styles part of an instruction might have.
+
+     - New methods DisassembleInfo.text_part and
+       DisassembleInfo.address_part which are used to create the new
+       styled parts of a disassembled instruction.
+
+     - Changes are backwards compatible, the older API can still be
+       used to disassemble instructions without styling.
+
 *** Changes in GDB 13
 
 * MI version 1 is deprecated, and will be removed in GDB 14.

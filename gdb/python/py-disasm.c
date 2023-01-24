@@ -56,6 +56,49 @@ struct disasm_info_object
 extern PyTypeObject disasm_info_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("disasm_info_object");
 
+/* Implement gdb.disassembler.DisassembleAddressPart type.  An object of
+   this type represents a small part of a disassembled instruction; a part
+   that is an address that should be printed using a call to GDB's
+   internal print_address function.  */
+
+struct disasm_addr_part_object
+{
+  PyObject_HEAD
+
+  /* The address to be formatted.  */
+  bfd_vma address;
+
+  /* A gdbarch.  This is only needed in the case where the user asks for
+     the DisassemblerAddressPart to be converted to a string.  When we
+     return this part to GDB within a DisassemblerResult then GDB will use
+     the gdbarch from the initial disassembly request.  */
+  struct gdbarch *gdbarch;
+};
+
+extern PyTypeObject disasm_addr_part_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("disasm_addr_part_object");
+
+/* Implement gdb.disassembler.DisassembleTextPart type.  An object of
+   this type represents a small part of a disassembled instruction; a part
+   that is a piece of test along with an associated style.  */
+
+struct disasm_text_part_object
+{
+  PyObject_HEAD
+
+  /* The string that is this part.  */
+  std::string *string;
+
+  /* The style to use when displaying this part.  */
+  enum disassembler_style style;
+};
+
+extern PyTypeObject disasm_text_part_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("disasm_text_part_object");
+
+extern PyTypeObject disasm_part_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("PyObject");
+
 /* Implement gdb.disassembler.DisassemblerResult type, an object that holds
    the result of calling the disassembler.  This is mostly the length of
    the disassembled instruction (in bytes), and the string representing the
@@ -68,9 +111,9 @@ struct disasm_result_object
   /* The length of the disassembled instruction in bytes.  */
   int length;
 
-  /* A buffer which, when allocated, holds the disassembled content of an
-     instruction.  */
-  string_file *content;
+  /* A vector containing all the parts of the disassembled instruction.
+     Each part will be a DisassemblerPart sub-class.  */
+  std::vector<gdbpy_ref<>> *parts;
 };
 
 extern PyTypeObject disasm_result_object_type
@@ -88,7 +131,7 @@ static bool python_print_insn_enabled = false;
    placed in the application_data field of the disassemble_info that is
    used when we call gdbarch_print_insn.  */
 
-struct gdbpy_disassembler : public gdb_printing_disassembler
+struct gdbpy_disassembler : public gdb_disassemble_info
 {
   /* Constructor.  */
   gdbpy_disassembler (disasm_info_object *obj, PyObject *memory_source);
@@ -109,6 +152,27 @@ struct gdbpy_disassembler : public gdb_printing_disassembler
 			       unsigned int len,
 			       struct disassemble_info *info) noexcept;
 
+  /* Callback used as the disassemble_info's fprintf_func callback.  The
+     DIS_INFO pointer is a pointer to a gdbpy_disassembler object.  */
+  static int fprintf_func (void *dis_info, const char *format, ...) noexcept
+    ATTRIBUTE_PRINTF(2,3);
+
+  /* Callback used as the disassemble_info's fprintf_styled_func callback.
+     The DIS_INFO pointer is a pointer to a gdbpy_disassembler.  */
+  static int fprintf_styled_func (void *dis_info,
+				  enum disassembler_style style,
+				  const char *format, ...) noexcept
+    ATTRIBUTE_PRINTF(3,4);
+
+  /* Helper used by fprintf_func and fprintf_styled_func.  This function
+     creates a new DisassemblerTextPart and adds it to the disassembler's
+     parts list.  The actual disassembler is accessed through DIS_INFO,
+     which is a pointer to the gdbpy_disassembler object.  */
+  static int vfprintf_styled_func (void *dis_info,
+				   enum disassembler_style style,
+				   const char *format, va_list args) noexcept
+    ATTRIBUTE_PRINTF(3,0);
+
   /* Return a reference to an optional that contains the address at which a
      memory error occurred.  The optional will only have a value if a
      memory error actually occurred.  */
@@ -118,9 +182,9 @@ struct gdbpy_disassembler : public gdb_printing_disassembler
   /* Return the content of the disassembler as a string.  The contents are
      moved out of the disassembler, so after this call the disassembler
      contents have been reset back to empty.  */
-  std::string release ()
+  std::vector<gdbpy_ref<>> release ()
   {
-    return m_string_file.release ();
+    return std::move (m_parts);
   }
 
   /* If there is a Python exception stored in this disassembler then
@@ -147,8 +211,10 @@ struct gdbpy_disassembler : public gdb_printing_disassembler
 
 private:
 
-  /* Where the disassembler result is written.  */
-  string_file m_string_file;
+  /* The list of all the parts that make up this disassembled instruction.
+     This is populated as a result of the callbacks from libopcodes as the
+     instruction is disassembled.  */
+  std::vector<gdbpy_ref<>> m_parts;
 
   /* The DisassembleInfo object we are disassembling for.  */
   disasm_info_object *m_disasm_info_object;
@@ -286,6 +352,38 @@ disasmpy_set_memory_error_for_address (CORE_ADDR address)
   PyErr_SetObject (gdbpy_gdb_memory_error, address_obj);
 }
 
+/* Create a new DisassemblerTextPart and return a gdbpy_ref wrapper for
+   the new object.  STR is the string content of the part and STYLE is the
+   style to be used when GDB displays this part.  */
+
+static gdbpy_ref<>
+make_disasm_text_part (std::string &&str, enum disassembler_style style)
+{
+  PyTypeObject *type = &disasm_text_part_object_type;
+  disasm_text_part_object *text_part
+    = (disasm_text_part_object *) type->tp_alloc (type, 0);
+  text_part->string = new std::string (str);
+  text_part->style = style;
+
+  return gdbpy_ref<> ((PyObject *) text_part);
+}
+
+/* Create a new DisassemblerAddressPart and return a gdbpy_ref wrapper for
+   the new object.  GDBARCH is the architecture used when formatting the
+   address, and ADDRESS is the numerical address to be displayed.  */
+
+static gdbpy_ref<>
+make_disasm_addr_part (struct gdbarch *gdbarch, CORE_ADDR address)
+{
+  PyTypeObject *type = &disasm_addr_part_object_type;
+  disasm_addr_part_object *addr_part
+    = (disasm_addr_part_object *) type->tp_alloc (type, 0);
+  addr_part->address = address;
+  addr_part->gdbarch = gdbarch;
+
+  return gdbpy_ref<> ((PyObject *) addr_part);
+}
+
 /* Ensure that a gdb.disassembler.DisassembleInfo is valid.  */
 
 #define DISASMPY_DISASM_INFO_REQUIRE_VALID(Info)			\
@@ -298,21 +396,135 @@ disasmpy_set_memory_error_for_address (CORE_ADDR address)
       }									\
   } while (0)
 
-/* Initialise OBJ, a DisassemblerResult object with LENGTH and CONTENT.
+/* Implement DisassembleInfo.text_part method.  Creates and returns a new
+   DisassemblerTextPart object.  */
+
+static PyObject *
+disasmpy_info_make_text_part (PyObject *self, PyObject *args,
+			      PyObject *kwargs)
+{
+  disasm_info_object *obj = (disasm_info_object *) self;
+  DISASMPY_DISASM_INFO_REQUIRE_VALID (obj);
+
+  static const char *keywords[] = { "style", "string", NULL };
+  int style_num;
+  const char *string;
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kwargs, "is", keywords,
+					&style_num, &string))
+    return nullptr;
+
+  if (style_num < 0 || style_num > ((int) dis_style_comment_start))
+    {
+      PyErr_SetString (PyExc_ValueError,
+		       _("Invalid disassembler style."));
+      return nullptr;
+    }
+
+  if (strlen (string) == 0)
+    {
+      PyErr_SetString (PyExc_ValueError,
+		       _("String must not be empty."));
+      return nullptr;
+    }
+
+  gdbpy_ref<> text_part
+    = make_disasm_text_part (std::string (string),
+			     (enum disassembler_style) style_num);
+  return text_part.release ();
+}
+
+/* Implement DisassembleInfo.address_part method.  Creates and returns a
+   new DisassemblerAddressPart object.  */
+
+static PyObject *
+disasmpy_info_make_address_part (PyObject *self, PyObject *args,
+				 PyObject *kwargs)
+{
+  disasm_info_object *obj = (disasm_info_object *) self;
+  DISASMPY_DISASM_INFO_REQUIRE_VALID (obj);
+
+  static const char *keywords[] = { "address", NULL };
+  CORE_ADDR address;
+  PyObject *address_object;
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kwargs, "O", keywords,
+					&address_object))
+    return nullptr;
+
+  if (get_addr_from_python (address_object, &address) < 0)
+    return nullptr;
+
+  return make_disasm_addr_part (obj->gdbarch, address).release ();
+}
+
+/* Return a string representation of TEXT_PART.  The returned string does
+   not include any styling.  */
+
+static std::string
+disasmpy_part_to_string (const disasm_text_part_object *text_part)
+{
+  gdb_assert (text_part->string != nullptr);
+  return *(text_part->string);
+}
+
+/* Return a string representation of ADDR_PART.  The returned string does
+   not include any styling.  */
+
+static std::string
+disasmpy_part_to_string (const disasm_addr_part_object *addr_part)
+{
+  string_file buf;
+  print_address (addr_part->gdbarch, addr_part->address, &buf);
+  return buf.release ();
+}
+
+/* PARTS is a vector of Python objects, each is a sub-class of
+   DisassemblerPart.  Create a string by concatenating the string
+   representation of each part, and return this new string.
+
+   Converting an address part requires that we call back into GDB core,
+   which could throw an exception.  As such, calls to this function should
+   be wrapped with a try/catch.  */
+
+static std::string
+disasmpy_parts_list_to_string (const std::vector<gdbpy_ref<>> &parts)
+{
+  std::string str;
+  for (auto p : parts)
+    {
+      if (Py_TYPE (p.get ()) == &disasm_text_part_object_type)
+	{
+	  disasm_text_part_object *text_part
+	    = (disasm_text_part_object *) p.get ();
+	  str += disasmpy_part_to_string (text_part);
+	}
+      else
+	{
+	  gdb_assert (Py_TYPE (p.get ()) == &disasm_addr_part_object_type);
+
+	  disasm_addr_part_object *addr_part
+	    = (disasm_addr_part_object *) p.get ();
+	  str += disasmpy_part_to_string (addr_part);
+	}
+    }
+
+  return str;
+}
+
+/* Initialise OBJ, a DisassemblerResult object with LENGTH and PARTS.
    OBJ might already have been initialised, in which case any existing
-   content should be discarded before the new CONTENT is moved in.  */
+   content should be discarded before the new PARTS are moved in.  */
 
 static void
 disasmpy_init_disassembler_result (disasm_result_object *obj, int length,
-				   std::string content)
+				   std::vector<gdbpy_ref<>> &&parts)
 {
-  if (obj->content == nullptr)
-    obj->content = new string_file;
+  if (obj->parts == nullptr)
+    obj->parts = new std::vector<gdbpy_ref<>>;
   else
-    obj->content->clear ();
+    obj->parts->clear ();
 
   obj->length = length;
-  *(obj->content) = std::move (content);
+  *(obj->parts) = std::move (parts);
 }
 
 /* Implement gdb.disassembler.builtin_disassemble().  Calls back into GDB's
@@ -375,9 +587,19 @@ disasmpy_builtin_disassemble (PyObject *self, PyObject *args, PyObject *kw)
 	}
       else
 	{
-	  std::string content = disassembler.release ();
-	  if (!content.empty ())
-	    PyErr_SetString (gdbpy_gdberror_exc, content.c_str ());
+	  auto content = disassembler.release ();
+	  std::string str;
+
+	  try
+	    {
+	      str = disasmpy_parts_list_to_string (content);
+	    }
+	  catch (const gdb_exception &except)
+	    {
+	      GDB_PY_HANDLE_EXCEPTION (except);
+	    }
+	  if (!str.empty ())
+	    PyErr_SetString (gdbpy_gdberror_exc, str.c_str ());
 	  else
 	    PyErr_SetString (gdbpy_gdberror_exc,
 			     _("Unknown disassembly error."));
@@ -393,10 +615,10 @@ disasmpy_builtin_disassemble (PyObject *self, PyObject *args, PyObject *kw)
   gdb_assert (!disassembler.memory_error_address ().has_value ());
 
   /* Create a DisassemblerResult containing the results.  */
-  std::string content = disassembler.release ();
   PyTypeObject *type = &disasm_result_object_type;
   gdbpy_ref<disasm_result_object> res
     ((disasm_result_object *) type->tp_alloc (type, 0));
+  auto content = disassembler.release ();
   disasmpy_init_disassembler_result (res.get (), length, std::move (content));
   return reinterpret_cast<PyObject *> (res.release ());
 }
@@ -510,6 +732,88 @@ disasmpy_info_progspace (PyObject *self, void *closure)
   return pspace_to_pspace_object (obj->program_space).release ();
 }
 
+/* Helper function called when the libopcodes disassembler produces some
+   output.  FORMAT and ARGS are used to create a string which GDB will
+   display using STYLE.  The string is either added as a new
+   DisassemblerTextPart to the list of parts being built in the current
+   gdbpy_disassembler object (accessed through DIS_INFO).  Or, if the last
+   part in the gdbpy_disassembler is a text part in the same STYLE, then
+   the new string is appended to the previous part.
+
+   The merging behaviour make the Python API a little more user friendly,
+   some disassemblers produce their output character at a time, there's no
+   particular reason for this, it's just how they are implemented.  By
+   merging parts with the same style we make it easier for the user to
+   analyse the disassembler output.  */
+
+int
+gdbpy_disassembler::vfprintf_styled_func (void *dis_info,
+					  enum disassembler_style style,
+					  const char *format,
+					  va_list args) noexcept
+{
+  gdb_disassemble_info *di = (gdb_disassemble_info *) dis_info;
+  gdbpy_disassembler *dis
+    = gdb::checked_static_cast<gdbpy_disassembler *> (di);
+
+  if (!dis->m_parts.empty ()
+      && Py_TYPE (dis->m_parts.back ().get ()) == &disasm_text_part_object_type
+      && (((disasm_text_part_object *) dis->m_parts.back ().get ())->style
+	  == style))
+    {
+      std::string *string
+	= ((disasm_text_part_object *) dis->m_parts.back ().get ())->string;
+      string_vappendf (*string, format, args);
+    }
+  else
+    {
+      std::string str = string_vprintf (format, args);
+      if (str.size () > 0)
+	{
+	  gdbpy_ref<> text_part
+	    = make_disasm_text_part (std::move (str), style);
+	  dis->m_parts.emplace_back (std::move (text_part));
+	}
+    }
+
+  /* Something non -ve.  */
+  return 0;
+}
+
+/* Disassembler callback for architectures where libopcodes doesn't
+   created styled output.  In these cases we format all the output using
+   the (default) text style.  */
+
+int
+gdbpy_disassembler::fprintf_func (void *dis_info,
+				  const char *format, ...) noexcept
+{
+  va_list args;
+  va_start (args, format);
+  vfprintf_styled_func (dis_info, dis_style_text, format, args);
+  va_end (args);
+
+  /* Something non -ve.  */
+  return 0;
+}
+
+/* Disassembler callback for architectures where libopcodes does create
+   styled output.  Just creates a new text part with the given STYLE.  */
+
+int
+gdbpy_disassembler::fprintf_styled_func (void *dis_info,
+					 enum disassembler_style style,
+					 const char *format, ...) noexcept
+{
+  va_list args;
+  va_start (args, format);
+  vfprintf_styled_func (dis_info, style, format, args);
+  va_end (args);
+
+  /* Something non -ve.  */
+  return 0;
+}
+
 /* This implements the disassemble_info read_memory_func callback and is
    called from the libopcodes disassembler when the disassembler wants to
    read memory.
@@ -615,11 +919,24 @@ disasmpy_result_str (PyObject *self)
 {
   disasm_result_object *obj = (disasm_result_object *) self;
 
-  gdb_assert (obj->content != nullptr);
-  gdb_assert (obj->content->size () > 0);
+  /* These conditions are all enforced when the DisassemblerResult object
+     is created.  */
+  gdb_assert (obj->parts != nullptr);
+  gdb_assert (obj->parts->size () > 0);
   gdb_assert (obj->length > 0);
-  return PyUnicode_Decode (obj->content->c_str (),
-			   obj->content->size (),
+
+  std::string str;
+
+  try
+    {
+      str = disasmpy_parts_list_to_string (*obj->parts);
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+
+  return PyUnicode_Decode (str.c_str (), str.size (),
 			   host_charset (), nullptr);
 }
 
@@ -642,6 +959,39 @@ disasmpy_result_string (PyObject *self, void *closure)
   return disasmpy_result_str (self);
 }
 
+/* Implement DisassemblerResult.parts method.  Returns a list of all the
+   parts that make up this result.  There should always be at least one
+   part, so the returned list should never be empty.  */
+
+static PyObject *
+disasmpy_result_parts (PyObject *self, void *closure)
+{
+  disasm_result_object *obj = (disasm_result_object *) self;
+
+  /* These conditions are all enforced when the DisassemblerResult object
+     is created.  */
+  gdb_assert (obj->parts != nullptr);
+  gdb_assert (obj->parts->size () > 0);
+  gdb_assert (obj->length > 0);
+
+  gdbpy_ref<> result_list (PyList_New (obj->parts->size ()));
+  if (result_list == nullptr)
+    return nullptr;
+  Py_ssize_t idx = 0;
+  for (auto p : *obj->parts)
+    {
+      gdbpy_ref<> item = gdbpy_ref<>::new_reference (p.get ());
+      PyList_SET_ITEM (result_list.get (), idx, item.release ());
+      ++idx;
+    }
+
+  /* This should follow naturally from the obj->parts list being
+     non-empty.  */
+  gdb_assert (PyList_Size (result_list.get()) > 0);
+
+  return result_list.release ();
+}
+
 /* Implement DisassemblerResult.__init__.  Takes two arguments, an
    integer, the length in bytes of the disassembled instruction, and a
    string, the disassembled content of the instruction.  */
@@ -649,11 +999,12 @@ disasmpy_result_string (PyObject *self, void *closure)
 static int
 disasmpy_result_init (PyObject *self, PyObject *args, PyObject *kwargs)
 {
-  static const char *keywords[] = { "length", "string", NULL };
+  static const char *keywords[] = { "length", "string", "parts", NULL };
   int length;
-  const char *string;
-  if (!gdb_PyArg_ParseTupleAndKeywords (args, kwargs, "is", keywords,
-					&length, &string))
+  const char *string = nullptr;
+  PyObject *parts_list = nullptr;
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kwargs, "i|zO", keywords,
+					&length, &string, &parts_list))
     return -1;
 
   if (length <= 0)
@@ -663,17 +1014,85 @@ disasmpy_result_init (PyObject *self, PyObject *args, PyObject *kwargs)
       return -1;
     }
 
-  if (strlen (string) == 0)
+  if (parts_list == Py_None)
+    parts_list = nullptr;
+
+  if (string != nullptr && parts_list != nullptr)
     {
-      PyErr_SetString (PyExc_ValueError,
-		       _("String must not be empty."));
+      PyErr_Format (PyExc_ValueError,
+		    _("Cannot use 'string' and 'parts' when creating %s."),
+		    Py_TYPE (self)->tp_name);
       return -1;
     }
 
-  disasm_result_object *obj = (disasm_result_object *) self;
-  disasmpy_init_disassembler_result (obj, length, std::string (string));
+  if (string != nullptr)
+    {
+      if (strlen (string) == 0)
+	{
+	  PyErr_SetString (PyExc_ValueError,
+			   _("String must not be empty."));
+	  return -1;
+	}
+
+      disasm_result_object *obj = (disasm_result_object *) self;
+      std::vector<gdbpy_ref<>> content;
+      gdbpy_ref<> text_part
+	= make_disasm_text_part (std::string (string), dis_style_text);
+      content.emplace_back (text_part.release ());
+      disasmpy_init_disassembler_result (obj, length, std::move (content));
+    }
+  else
+    {
+      if (!PySequence_Check (parts_list))
+	{
+	  PyErr_SetString (PyExc_TypeError,
+			   _("'parts' argument is not a sequence"));
+	  return -1;
+	}
+
+      Py_ssize_t parts_count = PySequence_Size (parts_list);
+      if (parts_count <= 0)
+	{
+	  PyErr_SetString (PyExc_ValueError,
+			   _("'parts' list must not be empty."));
+	  return -1;
+	}
+
+      disasm_result_object *obj = (disasm_result_object *) self;
+      std::vector<gdbpy_ref<>> content (parts_count);
+
+      struct gdbarch *gdbarch = nullptr;
+      for (Py_ssize_t i = 0; i < parts_count; ++i)
+	{
+	  gdbpy_ref<> part (PySequence_GetItem (parts_list, i));
+
+	  if (part == nullptr)
+	    return -1;
+
+	  if (Py_TYPE (part.get ()) == &disasm_addr_part_object_type)
+	    {
+	      disasm_addr_part_object *addr_part
+		= (disasm_addr_part_object *) part.get ();
+	      gdb_assert (addr_part->gdbarch != nullptr);
+	      if (gdbarch == nullptr)
+		gdbarch = addr_part->gdbarch;
+	      else if (addr_part->gdbarch != gdbarch)
+		{
+		  PyErr_SetString (PyExc_ValueError,
+				   _("Inconsistent gdb.Architectures used "
+				     "in 'parts' sequence."));
+		  return -1;
+		}
+	    }
+
+	  content[i] = std::move (part);
+	}
+
+      disasmpy_init_disassembler_result (obj, length, std::move (content));
+    }
 
   return 0;
+
 }
 
 /* Implement __repr__ for the DisassemblerResult type.  */
@@ -683,12 +1102,12 @@ disasmpy_result_repr (PyObject *self)
 {
   disasm_result_object *obj = (disasm_result_object *) self;
 
-  gdb_assert (obj->content != nullptr);
+  gdb_assert (obj->parts != nullptr);
 
-  return PyUnicode_FromFormat ("<%s length=%d string=\"%s\">",
+  return PyUnicode_FromFormat ("<%s length=%d string=\"%U\">",
 			       Py_TYPE (obj)->tp_name,
 			       obj->length,
-			       obj->content->string ().c_str ());
+			       disasmpy_result_str (self));
 }
 
 /* Implement memory_error_func callback for disassemble_info.  Extract the
@@ -712,16 +1131,22 @@ gdbpy_disassembler::print_address_func (bfd_vma addr,
 {
   gdbpy_disassembler *dis
     = static_cast<gdbpy_disassembler *> (info->application_data);
-  print_address (dis->arch (), addr, dis->stream ());
+
+  gdbpy_ref<> addr_part
+    = make_disasm_addr_part (dis->arch (), addr);
+  dis->m_parts.emplace_back (std::move (addr_part));
 }
 
 /* constructor.  */
 
 gdbpy_disassembler::gdbpy_disassembler (disasm_info_object *obj,
 					PyObject *memory_source)
-  : gdb_printing_disassembler (obj->gdbarch, &m_string_file,
-			       read_memory_func, memory_error_func,
-			       print_address_func),
+  : gdb_disassemble_info (obj->gdbarch,
+			  read_memory_func,
+			  memory_error_func,
+			  print_address_func,
+			  fprintf_func,
+			  fprintf_styled_func),
     m_disasm_info_object (obj),
     m_memory_source (memory_source)
 { /* Nothing.  */ }
@@ -932,20 +1357,39 @@ gdbpy_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
       return gdb::optional<int> (-1);
     }
 
-  /* Validate the text of the disassembled instruction.  */
-  gdb_assert (result_obj->content != nullptr);
-  std::string string (std::move (result_obj->content->release ()));
-  if (strlen (string.c_str ()) == 0)
+  /* It is impossible to create a DisassemblerResult object with an empty
+     parts list.  We know that each part results in a non-empty string, so
+     we know that the instruction disassembly will not be the empty
+     string.  */
+  gdb_assert (result_obj->parts->size () > 0);
+
+  /* Now print out the parts that make up this instruction.  */
+  for (auto &p : *result_obj->parts)
     {
-      PyErr_SetString (PyExc_ValueError,
-		       _("String attribute must not be empty."));
-      gdbpy_print_stack ();
-      return gdb::optional<int> (-1);
+      if (Py_TYPE (p.get ()) == &disasm_text_part_object_type)
+	{
+	  disasm_text_part_object *text_part
+	    = (disasm_text_part_object *) p.get ();
+	  gdb_assert (text_part->string != nullptr);
+	  info->fprintf_styled_func (info->stream, text_part->style,
+				     "%s", text_part->string->c_str ());
+	}
+      else
+	{
+	  gdb_assert (Py_TYPE (p.get ()) == &disasm_addr_part_object_type);
+	  disasm_addr_part_object *addr_part
+	    = (disasm_addr_part_object *) p.get ();
+	  /* A DisassemblerAddressPart can only be created by calling a
+	     method on DisassembleInfo, and the gdbarch is copied from the
+	     DisassembleInfo into the DisassemblerAddressPart.  As the
+	     DisassembleInfo has its gdbarch initialised from GDBARCH in
+	     this scope, and this architecture can't be changed, then the
+	     following assert should hold.  */
+	  gdb_assert (addr_part->gdbarch == gdbarch);
+	  info->print_address_func (addr_part->address, info);
+	}
     }
 
-  /* Print the disassembled instruction back to core GDB, and return the
-     length of the disassembled instruction.  */
-  info->fprintf_func (info->stream, "%s", string.c_str ());
   return gdb::optional<int> (length);
 }
 
@@ -956,8 +1400,141 @@ static void
 disasmpy_dealloc_result (PyObject *self)
 {
   disasm_result_object *obj = (disasm_result_object *) self;
-  delete obj->content;
+  delete obj->parts;
   Py_TYPE (self)->tp_free (self);
+}
+
+/* The tp_init callback for the DisassemblerPart type.  This just raises an
+   exception, which prevents the user from creating objects of this type.
+   Instead the user should create instances of a sub-class.  */
+
+static int
+disasmpy_part_init (PyObject *self, PyObject *args, PyObject *kwargs)
+{
+  PyErr_SetString (PyExc_RuntimeError,
+		   _("Cannot create instances of DisassemblerPart."));
+  return -1;
+}
+
+/* Return a string representing STYLE.  The returned string is used as a
+   constant defined in the gdb.disassembler module.  */
+
+static const char *
+get_style_name (enum disassembler_style style)
+{
+  switch (style)
+    {
+    case dis_style_text: return "STYLE_TEXT";
+    case dis_style_mnemonic: return "STYLE_MNEMONIC";
+    case dis_style_sub_mnemonic: return "STYLE_SUB_MNEMONIC";
+    case dis_style_assembler_directive: return "STYLE_ASSEMBLER_DIRECTIVE";
+    case dis_style_register: return "STYLE_REGISTER";
+    case dis_style_immediate: return "STYLE_IMMEDIATE";
+    case dis_style_address: return "STYLE_ADDRESS";
+    case dis_style_address_offset: return "STYLE_ADDRESS_OFFSET";
+    case dis_style_symbol: return "STYLE_SYMBOL";
+    case dis_style_comment_start: return "STYLE_COMMENT_START";
+    }
+
+  gdb_assert_not_reached ("unknown disassembler style");
+}
+
+/* Implement DisassemblerTextPart.__repr__ method.  */
+
+static PyObject *
+disasmpy_text_part_repr (PyObject *self)
+{
+  disasm_text_part_object *obj = (disasm_text_part_object *) self;
+
+  gdb_assert (obj->string != nullptr);
+
+  return PyUnicode_FromFormat ("<%s string='%s', style='%s'>",
+			       Py_TYPE (obj)->tp_name,
+			       obj->string->c_str (),
+			       get_style_name (obj->style));
+}
+
+/* Implement DisassemblerTextPart.__str__ attribute.  */
+
+static PyObject *
+disasmpy_text_part_str (PyObject *self)
+{
+  disasm_text_part_object *obj = (disasm_text_part_object *) self;
+
+  return PyUnicode_Decode (obj->string->c_str (), obj->string->size (),
+			   host_charset (), nullptr);
+}
+
+/* Implement DisassemblerTextPart.string attribute.  */
+
+static PyObject *
+disasmpy_text_part_string (PyObject *self, void *closure)
+{
+  return disasmpy_text_part_str (self);
+}
+
+/* Implement DisassemblerTextPart.style attribute.   */
+
+static PyObject *
+disasmpy_text_part_style (PyObject *self, void *closure)
+{
+  disasm_text_part_object *obj = (disasm_text_part_object *) self;
+
+  LONGEST style_val = (LONGEST) obj->style;
+  return gdb_py_object_from_longest (style_val).release ();
+}
+
+/* Implement DisassemblerAddressPart.__repr__ method.  */
+
+static PyObject *
+disasmpy_addr_part_repr (PyObject *self)
+{
+  disasm_addr_part_object *obj = (disasm_addr_part_object *) self;
+
+  return PyUnicode_FromFormat ("<%s address='%s'>",
+			       Py_TYPE (obj)->tp_name,
+			       core_addr_to_string_nz (obj->address));
+}
+
+/* Implement DisassemblerAddressPart.__str__ attribute.  */
+
+static PyObject *
+disasmpy_addr_part_str (PyObject *self)
+{
+  disasm_addr_part_object *obj = (disasm_addr_part_object *) self;
+
+  std::string str;
+  try
+    {
+      string_file buf;
+      print_address (obj->gdbarch, obj->address, &buf);
+      str = buf.release ();
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+
+  return PyUnicode_Decode (str.c_str (), str.size (),
+			   host_charset (), nullptr);
+}
+
+/* Implement DisassemblerAddressPart.string attribute.  */
+
+static PyObject *
+disasmpy_addr_part_string (PyObject *self, void *closure)
+{
+  return disasmpy_addr_part_str (self);
+}
+
+/* Implement DisassemblerAddressPart.address attribute.  */
+
+static PyObject *
+disasmpy_addr_part_address (PyObject *self, void *closure)
+{
+  disasm_addr_part_object *obj = (disasm_addr_part_object *) self;
+
+  return gdb_py_object_from_longest (obj->address).release ();
 }
 
 /* The get/set attributes of the gdb.disassembler.DisassembleInfo type.  */
@@ -982,6 +1559,14 @@ Read LEN octets for the instruction to disassemble." },
   { "is_valid", disasmpy_info_is_valid, METH_NOARGS,
     "is_valid () -> Boolean.\n\
 Return true if this DisassembleInfo is valid, false if not." },
+  { "text_part", (PyCFunction) disasmpy_info_make_text_part,
+    METH_VARARGS | METH_KEYWORDS,
+    "text_part (STRING, STYLE) -> DisassemblerTextPart\n\
+Create a new text part, with contents STRING styled with STYLE." },
+  { "address_part", (PyCFunction) disasmpy_info_make_address_part,
+    METH_VARARGS | METH_KEYWORDS,
+    "address_part (ADDRESS) -> DisassemblerAddressPart\n\
+Create a new address part representing ADDRESS." },
   {nullptr}  /* Sentinel */
 };
 
@@ -992,6 +1577,28 @@ static gdb_PyGetSetDef disasm_result_object_getset[] = {
     "Length of the disassembled instruction.", nullptr },
   { "string", disasmpy_result_string, nullptr,
     "String representing the disassembled instruction.", nullptr },
+  { "parts", disasmpy_result_parts, nullptr,
+    "List of all the separate disassembly parts", nullptr },
+  { nullptr }   /* Sentinel */
+};
+
+/* The get/set attributes of the gdb.disassembler.DisassemblerTextPart type.  */
+
+static gdb_PyGetSetDef disasmpy_text_part_getset[] = {
+  { "string", disasmpy_text_part_string, nullptr,
+    "String representing a text part.", nullptr },
+  { "style", disasmpy_text_part_style, nullptr,
+    "The style of this text part.", nullptr },
+  { nullptr }   /* Sentinel */
+};
+
+/* The get/set attributes of the gdb.disassembler.DisassemblerAddressPart type.  */
+
+static gdb_PyGetSetDef disasmpy_addr_part_getset[] = {
+  { "string", disasmpy_addr_part_string, nullptr,
+    "String representing an address part.", nullptr },
+  { "address", disasmpy_addr_part_address, nullptr,
+    "The address of this address part.", nullptr },
   { nullptr }   /* Sentinel */
 };
 
@@ -1046,6 +1653,13 @@ gdbpy_initialize_disasm ()
   PyObject *dict = PyImport_GetModuleDict ();
   PyDict_SetItemString (dict, "_gdb.disassembler", gdb_disassembler_module);
 
+  for (int i = 0; i <= (int) dis_style_comment_start; ++i)
+    {
+      const char *style_name = get_style_name ((enum disassembler_style) i);
+      if (PyModule_AddIntConstant (gdb_disassembler_module, style_name, i) < 0)
+	return -1;
+    }
+
   disasm_info_object_type.tp_new = PyType_GenericNew;
   if (PyType_Ready (&disasm_info_object_type) < 0)
     return -1;
@@ -1060,6 +1674,32 @@ gdbpy_initialize_disasm ()
 
   if (gdb_pymodule_addobject (gdb_disassembler_module, "DisassemblerResult",
 			      (PyObject *) &disasm_result_object_type) < 0)
+    return -1;
+
+  disasm_part_object_type.tp_new = PyType_GenericNew;
+  if (PyType_Ready (&disasm_part_object_type) < 0)
+    return -1;
+
+  if (gdb_pymodule_addobject (gdb_disassembler_module, "DisassemblerPart",
+			      (PyObject *) &disasm_part_object_type) < 0)
+    return -1;
+
+  disasm_addr_part_object_type.tp_new = PyType_GenericNew;
+  if (PyType_Ready (&disasm_addr_part_object_type) < 0)
+    return -1;
+
+  if (gdb_pymodule_addobject (gdb_disassembler_module,
+			      "DisassemblerAddressPart",
+			      (PyObject *) &disasm_addr_part_object_type) < 0)
+    return -1;
+
+  disasm_text_part_object_type.tp_new = PyType_GenericNew;
+  if (PyType_Ready (&disasm_text_part_object_type) < 0)
+    return -1;
+
+  if (gdb_pymodule_addobject (gdb_disassembler_module,
+			      "DisassemblerTextPart",
+			      (PyObject *) &disasm_text_part_object_type) < 0)
     return -1;
 
   return 0;
@@ -1150,5 +1790,134 @@ PyTypeObject disasm_result_object_type = {
   0,						/* tp_descr_set */
   0,						/* tp_dictoffset */
   disasmpy_result_init,				/* tp_init */
+  0,						/* tp_alloc */
+};
+
+/* Describe the gdb.disassembler.DisassemblerPart type.  This type exists
+   only as an abstract base-class for the various part sub-types.  The
+   init method for this type throws an error.  As such we don't both to
+   provide a tp_repr method for this parent class.  */
+
+PyTypeObject disasm_part_object_type = {
+  PyVarObject_HEAD_INIT (nullptr, 0)
+  "gdb.disassembler.DisassemblerPart",		/*tp_name*/
+  sizeof (PyObject),				/*tp_basicsize*/
+  0,						/*tp_itemsize*/
+  0,						/*tp_dealloc*/
+  0,						/*tp_print*/
+  0,						/*tp_getattr*/
+  0,						/*tp_setattr*/
+  0,						/*tp_compare*/
+  0,						/*tp_repr*/
+  0,						/*tp_as_number*/
+  0,						/*tp_as_sequence*/
+  0,						/*tp_as_mapping*/
+  0,						/*tp_hash */
+  0,						/*tp_call*/
+  0,						/*tp_str*/
+  0,						/*tp_getattro*/
+  0,						/*tp_setattro*/
+  0,						/*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT,				/*tp_flags*/
+  "GDB object, representing part of a disassembled instruction",  /* tp_doc */
+  0,						/* tp_traverse */
+  0,						/* tp_clear */
+  0,						/* tp_richcompare */
+  0,						/* tp_weaklistoffset */
+  0,						/* tp_iter */
+  0,						/* tp_iternext */
+  0,						/* tp_methods */
+  0,						/* tp_members */
+  0,						/* tp_getset */
+  0,						/* tp_base */
+  0,						/* tp_dict */
+  0,						/* tp_descr_get */
+  0,						/* tp_descr_set */
+  0,						/* tp_dictoffset */
+  disasmpy_part_init,				/* tp_init */
+  0,						/* tp_alloc */
+};
+
+/* Describe the gdb.disassembler.DisassemblerTextPart type.  */
+
+PyTypeObject disasm_text_part_object_type = {
+  PyVarObject_HEAD_INIT (nullptr, 0)
+  "gdb.disassembler.DisassemblerTextPart",	/*tp_name*/
+  sizeof (disasm_text_part_object_type),	/*tp_basicsize*/
+  0,						/*tp_itemsize*/
+  0,						/*tp_dealloc*/
+  0,						/*tp_print*/
+  0,						/*tp_getattr*/
+  0,						/*tp_setattr*/
+  0,						/*tp_compare*/
+  disasmpy_text_part_repr,			/*tp_repr*/
+  0,						/*tp_as_number*/
+  0,						/*tp_as_sequence*/
+  0,						/*tp_as_mapping*/
+  0,						/*tp_hash */
+  0,						/*tp_call*/
+  disasmpy_text_part_str,			/*tp_str*/
+  0,						/*tp_getattro*/
+  0,						/*tp_setattro*/
+  0,						/*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT,				/*tp_flags*/
+  "GDB object, representing a text part of an instruction",  /* tp_doc */
+  0,						/* tp_traverse */
+  0,						/* tp_clear */
+  0,						/* tp_richcompare */
+  0,						/* tp_weaklistoffset */
+  0,						/* tp_iter */
+  0,						/* tp_iternext */
+  0,						/* tp_methods */
+  0,						/* tp_members */
+  disasmpy_text_part_getset,			/* tp_getset */
+  &disasm_part_object_type,			/* tp_base */
+  0,						/* tp_dict */
+  0,						/* tp_descr_get */
+  0,						/* tp_descr_set */
+  0,						/* tp_dictoffset */
+  0,						/* tp_init */
+  0,						/* tp_alloc */
+};
+
+/* Describe the gdb.disassembler.DisassemblerAddressPart type.  */
+
+PyTypeObject disasm_addr_part_object_type = {
+  PyVarObject_HEAD_INIT (nullptr, 0)
+  "gdb.disassembler.DisassemblerAddressPart",	/*tp_name*/
+  sizeof (disasm_addr_part_object),		/*tp_basicsize*/
+  0,						/*tp_itemsize*/
+  0,						/*tp_dealloc*/
+  0,						/*tp_print*/
+  0,						/*tp_getattr*/
+  0,						/*tp_setattr*/
+  0,						/*tp_compare*/
+  disasmpy_addr_part_repr,			/*tp_repr*/
+  0,						/*tp_as_number*/
+  0,						/*tp_as_sequence*/
+  0,						/*tp_as_mapping*/
+  0,						/*tp_hash */
+  0,						/*tp_call*/
+  disasmpy_addr_part_str,			/*tp_str*/
+  0,						/*tp_getattro*/
+  0,						/*tp_setattro*/
+  0,						/*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT,				/*tp_flags*/
+  "GDB object, representing an address part of an instruction",  /* tp_doc */
+  0,						/* tp_traverse */
+  0,						/* tp_clear */
+  0,						/* tp_richcompare */
+  0,						/* tp_weaklistoffset */
+  0,						/* tp_iter */
+  0,						/* tp_iternext */
+  0,						/* tp_methods */
+  0,						/* tp_members */
+  disasmpy_addr_part_getset,						/* tp_getset */
+  &disasm_part_object_type,			/* tp_base */
+  0,						/* tp_dict */
+  0,						/* tp_descr_get */
+  0,						/* tp_descr_set */
+  0,						/* tp_dictoffset */
+  0,						/* tp_init */
   0,						/* tp_alloc */
 };

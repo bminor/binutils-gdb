@@ -25,6 +25,26 @@ from gdb.disassembler import Disassembler, DisassemblerResult
 current_pc = None
 
 
+def builtin_disassemble_wrapper(info):
+    result = gdb.disassembler.builtin_disassemble(info)
+    assert result.length > 0
+    assert len(result.parts) > 0
+    tmp_str = ""
+    for p in result.parts:
+        assert(p.string == str(p))
+        tmp_str += p.string
+    assert tmp_str == result.string
+    return result
+
+
+def check_building_disassemble_result():
+    """Check that we can create DisassembleResult objects correctly."""
+
+    result = gdb.disassembler.DisassemblerResult()
+
+    print("PASS")
+
+
 def is_nop(s):
     return s == "nop" or s == "nop\t0"
 
@@ -70,7 +90,7 @@ class ShowInfoRepr(TestDisassembler):
 
     def disassemble(self, info):
         comment = "\t## " + repr(info)
-        result = gdb.disassembler.builtin_disassemble(info)
+        result = builtin_disassemble_wrapper(info)
         string = result.string + comment
         length = result.length
         return DisassemblerResult(length=length, string=string)
@@ -94,7 +114,7 @@ class ShowInfoSubClassRepr(TestDisassembler):
     def disassemble(self, info):
         info = self.MyInfo(info)
         comment = "\t## " + repr(info)
-        result = gdb.disassembler.builtin_disassemble(info)
+        result = builtin_disassemble_wrapper(info)
         string = result.string + comment
         length = result.length
         return DisassemblerResult(length=length, string=string)
@@ -106,7 +126,7 @@ class ShowResultRepr(TestDisassembler):
     output."""
 
     def disassemble(self, info):
-        result = gdb.disassembler.builtin_disassemble(info)
+        result = builtin_disassemble_wrapper(info)
         comment = "\t## " + repr(result)
         string = result.string + comment
         length = result.length
@@ -118,11 +138,11 @@ class ShowResultStr(TestDisassembler):
     resulting string in a comment within the disassembler output."""
 
     def disassemble(self, info):
-        result = gdb.disassembler.builtin_disassemble(info)
+        result = builtin_disassemble_wrapper(info)
         comment = "\t## " + str(result)
         string = result.string + comment
         length = result.length
-        return DisassemblerResult(length=length, string=string)
+        return DisassemblerResult(length=length, string=string, parts=None)
 
 
 class GlobalPreInfoDisassembler(TestDisassembler):
@@ -138,7 +158,7 @@ class GlobalPreInfoDisassembler(TestDisassembler):
         if not isinstance(ar, gdb.Architecture):
             raise gdb.GdbError("invalid architecture type")
 
-        result = gdb.disassembler.builtin_disassemble(info)
+        result = builtin_disassemble_wrapper(info)
 
         text = result.string + "\t## ad = 0x%x, ar = %s" % (ad, ar.name())
         return DisassemblerResult(result.length, text)
@@ -148,7 +168,7 @@ class GlobalPostInfoDisassembler(TestDisassembler):
     """Check the attributes of DisassembleInfo after disassembly has occurred."""
 
     def disassemble(self, info):
-        result = gdb.disassembler.builtin_disassemble(info)
+        result = builtin_disassemble_wrapper(info)
 
         ad = info.address
         ar = info.architecture
@@ -169,7 +189,7 @@ class GlobalReadDisassembler(TestDisassembler):
     adds them as a comment to the disassembler output."""
 
     def disassemble(self, info):
-        result = gdb.disassembler.builtin_disassemble(info)
+        result = builtin_disassemble_wrapper(info)
         len = result.length
         str = ""
         for o in range(len):
@@ -187,7 +207,7 @@ class GlobalAddrDisassembler(TestDisassembler):
     """Check the gdb.format_address method."""
 
     def disassemble(self, info):
-        result = gdb.disassembler.builtin_disassemble(info)
+        result = builtin_disassemble_wrapper(info)
         arch = info.architecture
         addr = info.address
         program_space = info.progspace
@@ -214,7 +234,7 @@ class GdbErrorLateDisassembler(TestDisassembler):
     """Raise a GdbError after calling the builtin disassembler."""
 
     def disassemble(self, info):
-        result = gdb.disassembler.builtin_disassemble(info)
+        result = builtin_disassemble_wrapper(info)
         raise gdb.GdbError("GdbError after builtin disassembler")
 
 
@@ -222,7 +242,7 @@ class RuntimeErrorLateDisassembler(TestDisassembler):
     """Raise a RuntimeError after calling the builtin disassembler."""
 
     def disassemble(self, info):
-        result = gdb.disassembler.builtin_disassemble(info)
+        result = builtin_disassemble_wrapper(info)
         raise RuntimeError("RuntimeError after builtin disassembler")
 
 
@@ -235,7 +255,7 @@ class MemoryErrorEarlyDisassembler(TestDisassembler):
             info.read_memory(1, -info.address + 2)
         except gdb.MemoryError:
             tag = "## AFTER ERROR"
-        result = gdb.disassembler.builtin_disassemble(info)
+        result = builtin_disassemble_wrapper(info)
         text = result.string + "\t" + tag
         return DisassemblerResult(result.length, text)
 
@@ -245,7 +265,7 @@ class MemoryErrorLateDisassembler(TestDisassembler):
     before we return a result."""
 
     def disassemble(self, info):
-        result = gdb.disassembler.builtin_disassemble(info)
+        result = builtin_disassemble_wrapper(info)
         # The following read will throw an error.
         info.read_memory(1, -info.address + 2)
         return DisassemblerResult(1, "BAD")
@@ -282,7 +302,7 @@ class TaggingDisassembler(TestDisassembler):
         self._tag = tag
 
     def disassemble(self, info):
-        result = gdb.disassembler.builtin_disassemble(info)
+        result = builtin_disassemble_wrapper(info)
         text = result.string + "\t## tag = %s" % self._tag
         return DisassemblerResult(result.length, text)
 
@@ -307,7 +327,7 @@ class GlobalCachingDisassembler(TestDisassembler):
         and cache the DisassembleInfo so that it is not garbage collected."""
         GlobalCachingDisassembler.cached_insn_disas.append(info)
         GlobalCachingDisassembler.cached_insn_disas.append(self.MyInfo(info))
-        result = gdb.disassembler.builtin_disassemble(info)
+        result = builtin_disassemble_wrapper(info)
         text = result.string + "\t## CACHED"
         return DisassemblerResult(result.length, text)
 
@@ -373,7 +393,7 @@ class ReadMemoryMemoryErrorDisassembler(TestDisassembler):
 
     def disassemble(self, info):
         info = self.MyInfo(info)
-        return gdb.disassembler.builtin_disassemble(info)
+        return builtin_disassemble_wrapper(info)
 
 
 class ReadMemoryGdbErrorDisassembler(TestDisassembler):
@@ -389,7 +409,7 @@ class ReadMemoryGdbErrorDisassembler(TestDisassembler):
 
     def disassemble(self, info):
         info = self.MyInfo(info)
-        return gdb.disassembler.builtin_disassemble(info)
+        return builtin_disassemble_wrapper(info)
 
 
 class ReadMemoryRuntimeErrorDisassembler(TestDisassembler):
@@ -405,7 +425,7 @@ class ReadMemoryRuntimeErrorDisassembler(TestDisassembler):
 
     def disassemble(self, info):
         info = self.MyInfo(info)
-        return gdb.disassembler.builtin_disassemble(info)
+        return builtin_disassemble_wrapper(info)
 
 
 class ReadMemoryCaughtMemoryErrorDisassembler(TestDisassembler):
@@ -422,7 +442,7 @@ class ReadMemoryCaughtMemoryErrorDisassembler(TestDisassembler):
     def disassemble(self, info):
         info = self.MyInfo(info)
         try:
-            return gdb.disassembler.builtin_disassemble(info)
+            return builtin_disassemble_wrapper(info)
         except gdb.MemoryError:
             return None
 
@@ -441,7 +461,7 @@ class ReadMemoryCaughtGdbErrorDisassembler(TestDisassembler):
     def disassemble(self, info):
         info = self.MyInfo(info)
         try:
-            return gdb.disassembler.builtin_disassemble(info)
+            return builtin_disassemble_wrapper(info)
         except gdb.GdbError as e:
             if e.args[0] == "exception message":
                 return None
@@ -462,7 +482,7 @@ class ReadMemoryCaughtRuntimeErrorDisassembler(TestDisassembler):
     def disassemble(self, info):
         info = self.MyInfo(info)
         try:
-            return gdb.disassembler.builtin_disassemble(info)
+            return builtin_disassemble_wrapper(info)
         except RuntimeError as e:
             if e.args[0] == "exception message":
                 return None
@@ -479,7 +499,7 @@ class MemorySourceNotABufferDisassembler(TestDisassembler):
 
     def disassemble(self, info):
         info = self.MyInfo(info)
-        return gdb.disassembler.builtin_disassemble(info)
+        return builtin_disassemble_wrapper(info)
 
 
 class MemorySourceBufferTooLongDisassembler(TestDisassembler):
@@ -501,7 +521,101 @@ class MemorySourceBufferTooLongDisassembler(TestDisassembler):
 
     def disassemble(self, info):
         info = self.MyInfo(info)
-        return gdb.disassembler.builtin_disassemble(info)
+        return builtin_disassemble_wrapper(info)
+
+
+class ErrorCreatingTextPart_NoArgs(TestDisassembler):
+    """Try to create a DisassemblerTextPart with no arguments."""
+
+    def disassemble(self, info):
+        part = info.text_part()
+        return None
+
+
+class ErrorCreatingAddressPart_NoArgs(TestDisassembler):
+    """Try to create a DisassemblerAddressPart with no arguments."""
+
+    def disassemble(self, info):
+        part = info.address_part()
+        return None
+
+
+class ErrorCreatingTextPart_NoString(TestDisassembler):
+    """Try to create a DisassemblerTextPart with no string argument."""
+
+    def disassemble(self, info):
+        part = info.text_part(gdb.disassembler.STYLE_TEXT)
+        return None
+
+
+class ErrorCreatingTextPart_NoStyle(TestDisassembler):
+    """Try to create a DisassemblerTextPart with no string argument."""
+
+    def disassemble(self, info):
+        part = info.text_part(string="abc")
+        return None
+
+
+class ErrorCreatingTextPart_StringAndParts(TestDisassembler):
+    """Try to create a DisassemblerTextPart with both a string and a parts list."""
+
+    def disassemble(self, info):
+        parts = []
+        parts.append(info.text_part(gdb.disassembler.STYLE_TEXT, "p1"))
+        parts.append(info.text_part(gdb.disassembler.STYLE_TEXT, "p2"))
+
+        return DisassemblerResult(length=4, string="p1p2", parts=parts)
+
+
+class All_Text_Part_Styles(TestDisassembler):
+    """Create text parts with all styles."""
+
+    def disassemble(self, info):
+        parts = []
+        parts.append(info.text_part(gdb.disassembler.STYLE_TEXT, "p1"))
+        parts.append(info.text_part(gdb.disassembler.STYLE_MNEMONIC, "p2"))
+        parts.append(info.text_part(gdb.disassembler.STYLE_SUB_MNEMONIC, "p3"))
+        parts.append(info.text_part(gdb.disassembler.STYLE_ASSEMBLER_DIRECTIVE, "p4"))
+        parts.append(info.text_part(gdb.disassembler.STYLE_REGISTER, "p5"))
+        parts.append(info.text_part(gdb.disassembler.STYLE_IMMEDIATE, "p6"))
+        parts.append(info.text_part(gdb.disassembler.STYLE_ADDRESS, "p7"))
+        parts.append(info.text_part(gdb.disassembler.STYLE_ADDRESS_OFFSET, "p8"))
+        parts.append(info.text_part(gdb.disassembler.STYLE_SYMBOL, "p9"))
+        parts.append(info.text_part(gdb.disassembler.STYLE_COMMENT_START, "p10"))
+
+        result = builtin_disassemble_wrapper(info)
+        result = DisassemblerResult(length=result.length, parts=parts)
+
+        tmp_str = "";
+        for p in parts:
+            assert (p.string == str(p))
+            tmp_str += str(p)
+        assert tmp_str == result.string
+
+        return result
+
+
+class Build_Result_Using_All_Parts(TestDisassembler):
+    """Disassemble an instruction and return a result that makes use of
+    text and address parts."""
+
+    def disassemble(self, info):
+        global current_pc
+
+        parts = []
+        parts.append(info.text_part(gdb.disassembler.STYLE_MNEMONIC, "fake"))
+        parts.append(info.text_part(gdb.disassembler.STYLE_TEXT, "\t"))
+        parts.append(info.text_part(gdb.disassembler.STYLE_REGISTER, "reg"))
+        parts.append(info.text_part(gdb.disassembler.STYLE_TEXT, ", "))
+        addr_part = info.address_part(current_pc)
+        assert addr_part.address == current_pc
+        parts.append(addr_part)
+        parts.append(info.text_part(gdb.disassembler.STYLE_TEXT, ", "))
+        parts.append(info.text_part(gdb.disassembler.STYLE_IMMEDIATE, "123"))
+
+        result = builtin_disassemble_wrapper(info)
+        result = DisassemblerResult(length=result.length, parts=parts)
+        return result
 
 
 class BuiltinDisassembler(Disassembler):
@@ -511,7 +625,7 @@ class BuiltinDisassembler(Disassembler):
         super().__init__("BuiltinDisassembler")
 
     def __call__(self, info):
-        return gdb.disassembler.builtin_disassemble(info)
+        return builtin_disassemble_wrapper(info)
 
 
 class AnalyzingDisassembler(Disassembler):
@@ -606,7 +720,7 @@ class AnalyzingDisassembler(Disassembler):
         # Override the info object, this provides access to our
         # read_memory function.
         info = self.MyInfo(info, self._start, self._end, self._nop_bytes)
-        result = gdb.disassembler.builtin_disassemble(info)
+        result = builtin_disassemble_wrapper(info)
 
         # Record some informaiton about the first 'nop' instruction we find.
         if self._nop_index is None and is_nop(result.string):
