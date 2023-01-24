@@ -131,7 +131,7 @@ fragment <<EOF
   					 | IMAGE_DLL_CHARACTERISTICS_NX_COMPAT)
 
 #if defined(TARGET_IS_i386pep) || defined(COFF_WITH_peAArch64) || ! defined(DLL_SUPPORT)
-#define	PE_DEF_SUBSYSTEM		3
+#define	PE_DEF_SUBSYSTEM		IMAGE_SUBSYSTEM_WINDOWS_CUI
 #undef NT_EXE_IMAGE_BASE
 #define NT_EXE_IMAGE_BASE \
   ((bfd_vma) (${move_default_addr_high} ? 0x100400000LL \
@@ -166,7 +166,7 @@ fragment <<EOF
   ((bfd_vma) (${move_default_addr_high} ? 0x0ffff0000LL \
 					: 0x0ffc0000LL))
 #undef  PE_DEF_SECTION_ALIGNMENT
-#define	PE_DEF_SUBSYSTEM		2
+#define	PE_DEF_SUBSYSTEM		IMAGE_SUBSYSTEM_WINDOWS_GUI
 #undef  PE_DEF_FILE_ALIGNMENT
 #define PE_DEF_FILE_ALIGNMENT		0x00000200
 #define PE_DEF_SECTION_ALIGNMENT	0x00000400
