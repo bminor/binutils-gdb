@@ -1,3 +1,11 @@
+2023-01-24  Nick Clifton  <nickc@redhat.com>
+
+	PR 29998
+	* pe-dll.c (generate_reloc): Handle sections with no assigned
+	output section.  Terminate early of there are no relocs to put in
+	the .reloc section.
+	(pe_exe_fill_sections): Do not emit an empty .reloc section.
+
 2023-01-06  Nick Clifton  <nickc@redhat.com>
 
 	* po/bg.po: Updated Bulgarian translation.

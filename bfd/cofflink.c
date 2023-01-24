@@ -2977,10 +2977,11 @@ _bfd_coff_generic_relocate_section (bfd *output_bfd,
       else
 	{
 	  if (h->root.type == bfd_link_hash_defined
+	      /* Defined weak symbols are a GNU extension.  */
 	      || h->root.type == bfd_link_hash_defweak)
 	    {
-	      /* Defined weak symbols are a GNU extension. */
 	      sec = h->root.u.def.section;
+	      BFD_ASSERT (sec->output_section != NULL);
 	      val = (h->root.u.def.value
 		     + sec->output_section->vma
 		     + sec->output_offset);
@@ -3087,7 +3088,6 @@ _bfd_coff_generic_relocate_section (bfd *output_bfd,
 	  return false;
 	case bfd_reloc_overflow:
 	  {
-
 	    /* Ignore any weak undef symbols that may have overflowed.  Due to
 	       PR ld/19011 the base address is now in the upper 64-bit address
 	       range.  This means that when _bfd_final_link_relocate calculates
@@ -3123,5 +3123,6 @@ _bfd_coff_generic_relocate_section (bfd *output_bfd,
 	  }
 	}
     }
+
   return true;
 }

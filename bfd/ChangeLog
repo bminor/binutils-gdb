@@ -1,3 +1,10 @@
+2023-01-24  Nick Clifton  <nickc@redhat.com>
+
+	PR 29998
+	* cofflink.c (_bfd_coff_generic_relocate_section): Add an
+	assertion that the output section is set for defined, global
+	symbols.
+
 2023-01-17  Xianmiao Qu  <cooper.qu@linux.alibaba.com>
 
 	* elf32-csky.c (elf32_csky_merge_attributes): Don't save

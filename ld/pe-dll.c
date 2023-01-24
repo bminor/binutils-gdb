@@ -168,7 +168,8 @@ static bfd_vma image_base;
 static bfd *filler_bfd;
 static struct bfd_section *edata_s, *reloc_s;
 static unsigned char *edata_d, *reloc_d;
-static size_t edata_sz, reloc_sz;
+static unsigned char *reloc_d = NULL;
+static size_t edata_sz, reloc_sz = 0;
 static int runtime_pseudo_relocs_created = 0;
 static bool runtime_pseudp_reloc_v2_init = false;
 
@@ -1033,9 +1034,10 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 /* Build the bfd that will contain .edata and .reloc sections.  */
 
 static void
-build_filler_bfd (int include_edata)
+build_filler_bfd (bool include_edata)
 {
   lang_input_statement_type *filler_file;
+
   filler_file = lang_add_input_file ("dll stuff",
 				     lang_input_file_is_fake_enum,
 				     NULL);
@@ -1526,6 +1528,8 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 
   if (reloc_s == NULL || reloc_s->output_section == bfd_abs_section_ptr)
     return;
+
+  /* Set an upper bound for the total number of relocations we will have to generate.  */
   total_relocs = 0;
   for (b = info->input_bfds; b; b = b->link.next)
     for (s = b->sections; s; s = s->next)
@@ -1541,28 +1545,34 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 
       for (s = b->sections; s; s = s->next)
 	{
-	  bfd_vma sec_vma = s->output_section->vma + s->output_offset;
+	  bfd_vma sec_vma;
 	  asymbol **symbols;
 
-	  /* If it's not loaded, we don't need to relocate it this way.  */
-	  if (!(s->output_section->flags & SEC_LOAD))
-	    continue;
+	  /* If the section is not going to be output, then ignore it.  */
+	  if (s->output_section == NULL)
+	    {
+	      /* PR 29998: LTO processing can elminate whole code sections,
+		 but it sets the output section to NULL rather than *ABS*.
+		 Fix that here, then ignore the section.  */
+	      s->output_section = bfd_abs_section_ptr;
+	      continue;
+	    }
 
 	  /* I don't know why there would be a reloc for these, but I've
 	     seen it happen - DJ  */
 	  if (s->output_section == bfd_abs_section_ptr)
 	    continue;
 
+	  /* If it's not loaded, we don't need to relocate it this way.  */
+	  if (!(s->output_section->flags & SEC_LOAD))
+	    continue;
+
+	  /* This happens when linking with --just-symbols=<file>
+	     so do not generate an error.  */
 	  if (s->output_section->vma == 0)
-	    {
-	      /* Huh?  Shouldn't happen, but punt if it does.  */
-#if 0 /* This happens when linking with --just-symbols=<file>, so do not generate an error.  */
-	      einfo (_("%P: zero vma section reloc detected: `%s' #%d f=%d\n"),
-		     s->output_section->name, s->output_section->index,
-		     s->output_section->flags);
-#endif
-	      continue;
-	    }
+	    continue;
+
+	  sec_vma = s->output_section->vma + s->output_offset;
 
 	  if (!bfd_generic_link_read_symbols (b))
 	    {
@@ -1696,12 +1706,17 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 		    }
 		}
 	    }
+
 	  free (relocs);
 	  /* Warning: the allocated symbols are remembered in BFD and
 	     reused later, so don't free them!  */
 	}
     }
 
+  /* This can happen for example when LTO has eliminated all code.  */
+  if (total_relocs == 0)
+    return;
+  
   /* At this point, we have total_relocs relocation addresses in
      reloc_addresses, which are all suitable for the .reloc section.
      We must now create the new sections.  */
@@ -1726,9 +1741,9 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 
   reloc_sz = (reloc_sz + 3) & ~3;	/* 4-byte align.  */
   reloc_d = xmalloc (reloc_sz);
-  sec_page = (bfd_vma) -1;
+
+  page_ptr = sec_page = (bfd_vma) -1;
   reloc_sz = 0;
-  page_ptr = (bfd_vma) -1;
 
   for (i = 0; i < total_relocs; i++)
     {
@@ -1758,7 +1773,6 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 	  bfd_put_16 (abfd, reloc_data[i].extra, reloc_d + reloc_sz);
 	  reloc_sz += 2;
 	}
-
     }
 
   while (reloc_sz & 3)
@@ -3649,14 +3663,14 @@ pe_dll_build_sections (bfd *abfd, struct bfd_link_info *info)
     {
       if (pe_dll_enable_reloc_section)
 	{
-	  build_filler_bfd (0);
+	  build_filler_bfd (false /* edata not needed.  */);
 	  pe_output_file_set_long_section_names (filler_bfd);
 	}
       return;
     }
 
   generate_edata ();
-  build_filler_bfd (1);
+  build_filler_bfd (true /* edata is needed.  */);
   pe_output_file_set_long_section_names (filler_bfd);
 }
 
@@ -3692,6 +3706,7 @@ pe_exe_fill_sections (bfd *abfd, struct bfd_link_info *info)
   image_base = pe_data (abfd)->pe_opthdr.ImageBase;
 
   generate_reloc (abfd, info);
+
   if (reloc_sz > 0)
     {
       bfd_set_section_size (reloc_s, reloc_sz);
@@ -3705,9 +3720,15 @@ pe_exe_fill_sections (bfd *abfd, struct bfd_link_info *info)
 
       /* Do the assignments again.  */
       lang_do_assignments (lang_final_phase_enum);
+
+      reloc_s->contents = reloc_d;
     }
-  if (reloc_s)
-    reloc_s->contents = reloc_d;
+  else if (reloc_s)
+    {
+      /* Do not emit an empty reloc section.  */
+      bfd_set_section_flags (reloc_s, SEC_IN_MEMORY | SEC_EXCLUDE);
+      reloc_s->output_section = bfd_abs_section_ptr;
+    }
 }
 
 bool
