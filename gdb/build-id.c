@@ -208,7 +208,8 @@ build_id_to_exec_bfd (size_t build_id_len, const bfd_byte *build_id)
 /* See build-id.h.  */
 
 std::string
-find_separate_debug_file_by_buildid (struct objfile *objfile)
+find_separate_debug_file_by_buildid (struct objfile *objfile,
+				     std::vector<std::string> *warnings_vector)
 {
   const struct bfd_build_id *build_id;
 
@@ -226,8 +227,14 @@ find_separate_debug_file_by_buildid (struct objfile *objfile)
       if (abfd != NULL
 	  && filename_cmp (bfd_get_filename (abfd.get ()),
 			   objfile_name (objfile)) == 0)
-	warning (_("\"%s\": separate debug info file has no debug info"),
-		 bfd_get_filename (abfd.get ()));
+	{
+	  std::string msg
+	    = string_printf (_("\"%s\": separate debug info file has no "
+			       "debug info"), bfd_get_filename (abfd.get ()));
+	  if (separate_debug_file_debug)
+	    gdb_printf (gdb_stdlog, "%s", msg.c_str ());
+	  warnings_vector->emplace_back (std::move (msg));
+	}
       else if (abfd != NULL)
 	return std::string (bfd_get_filename (abfd.get ()));
     }

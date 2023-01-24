@@ -7183,9 +7183,19 @@ proc build_id_debug_filename_get { filename } {
     return ".build-id/${data}.debug"
 }
 
-# Create stripped files for DEST, replacing it.  If ARGS is passed, it is a
-# list of optional flags.  The only currently supported flag is no-main,
-# which removes the symbol entry for main from the separate debug file.
+# DEST should be a file compiled with debug information.  This proc
+# creates two new files DEST.debug which contains the debug
+# information extracted from DEST, and DEST.stripped, which is a copy
+# of DEST with the debug information removed.  A '.gnu_debuglink'
+# section will be added to DEST.stripped that points to DEST.debug.
+#
+# If ARGS is passed, it is a list of optional flags.  The currently
+# supported flags are:
+#
+#   - no-main : remove the symbol entry for main from the separate
+#               debug file DEST.debug,
+#   - no-debuglink : don't add the '.gnu_debuglink' section to
+#                    DEST.stripped.
 #
 # Function returns zero on success.  Function will return non-zero failure code
 # on some targets not supporting separate debug info (such as i386-msdos).
@@ -7230,7 +7240,7 @@ proc gdb_gnu_strip_debug { dest args } {
     # leaves the symtab in the original file only.  There's no way to get
     # objcopy or strip to remove the symbol table without also removing the
     # debugging sections, so this is as close as we can get.
-    if { [llength $args] == 1 && [lindex $args 0] == "no-main" } {
+    if {[lsearch -exact $args "no-main"] != -1} {
 	set result [catch "exec $objcopy_program -N main ${debug_file} ${debug_file}-tmp" output]
 	verbose "result is $result"
 	verbose "output is $output"
@@ -7241,15 +7251,17 @@ proc gdb_gnu_strip_debug { dest args } {
 	file rename "${debug_file}-tmp" "${debug_file}"
     }
 
-    # Link the two previous output files together, adding the .gnu_debuglink
-    # section to the stripped_file, containing a pointer to the debug_file,
-    # save the new file in dest.
-    # This will be the regular executable filename, in the usual location.
-    set result [catch "exec $objcopy_program --add-gnu-debuglink=${debug_file} ${stripped_file} ${dest}" output]
-    verbose "result is $result"
-    verbose "output is $output"
-    if {$result == 1} {
-      return 1
+    # Unless the "no-debuglink" flag is passed, then link the two
+    # previous output files together, adding the .gnu_debuglink
+    # section to the stripped_file, containing a pointer to the
+    # debug_file, save the new file in dest.
+    if {[lsearch -exact $args "no-debuglink"] == -1} {
+	set result [catch "exec $objcopy_program --add-gnu-debuglink=${debug_file} ${stripped_file} ${dest}" output]
+	verbose "result is $result"
+	verbose "output is $output"
+	if {$result == 1} {
+	    return 1
+	}
     }
 
     # Workaround PR binutils/10802:

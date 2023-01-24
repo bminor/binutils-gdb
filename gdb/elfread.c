@@ -1213,10 +1213,14 @@ elf_symfile_read_dwarf2 (struct objfile *objfile,
 	   && objfile->separate_debug_objfile == NULL
 	   && objfile->separate_debug_objfile_backlink == NULL)
     {
-      std::string debugfile = find_separate_debug_file_by_buildid (objfile);
+      std::vector<std::string> warnings_vector;
+
+      std::string debugfile
+	= find_separate_debug_file_by_buildid (objfile, &warnings_vector);
 
       if (debugfile.empty ())
-	debugfile = find_separate_debug_file_by_debuglink (objfile);
+	debugfile = find_separate_debug_file_by_debuglink (objfile,
+							   &warnings_vector);
 
       if (!debugfile.empty ())
 	{
@@ -1258,6 +1262,11 @@ elf_symfile_read_dwarf2 (struct objfile *objfile,
 		}
 	    }
 	}
+      /* If all the methods to collect the debuginfo failed, print
+	 the warnings, if there're any. */
+      if (debugfile.empty () && !has_dwarf2 && !warnings_vector.empty ())
+	for (const std::string &w : warnings_vector)
+	  warning ("%s", w.c_str ());
     }
 
   return has_dwarf2;
