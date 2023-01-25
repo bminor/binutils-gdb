@@ -30,8 +30,6 @@ if [mi_gdb_start] {
     return
 }
 
-standard_testfile
-
 # A synchronous execution execution command that errors out.
 
 proc failing_sync_execution_command {} {
