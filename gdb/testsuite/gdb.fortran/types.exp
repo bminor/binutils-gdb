@@ -98,12 +98,7 @@ proc test_primitive_types_known {} {
     }
 }
 
-# Start with a fresh gdb.
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-
+clean_restart
 gdb_test "set print sevenbit-strings" ""
 
 if {[set_lang_fortran]} {
