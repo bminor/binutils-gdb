@@ -603,4 +603,3 @@ if { $allow_float_test } {
     # Approx size: (4+4)+8=16, 32, ...
     test { tf td } {2} {2}
 }
-return 0

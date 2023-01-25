@@ -152,5 +152,3 @@ proc test_tfind_remote { } {
 }
 
 test_tfind_remote
-
-return 0

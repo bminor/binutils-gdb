@@ -438,5 +438,3 @@ if {$allow_float_test} {
 
 # Approx size: 4, 8, ...
 test te
-
-return 0

@@ -54,6 +54,3 @@ gdb_continue_to_breakpoint "marker 1"
 gdb_test "print x->y2 - x->y1" "warning: Type size unknown, assuming 1\. Try casting to a known type, or void \*\.\[^=\]*= 1"
 
 gdb_exit
-return 0
-
-

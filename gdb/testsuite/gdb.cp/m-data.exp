@@ -96,4 +96,3 @@ gdb_test "print shadow" "\\$\[0-9]\* = 1" "shadowing member"
 gdb_test "print ::shadow" "\\$\[0-9]\* = 0" "shadowed global variable"
 
 gdb_exit
-return 0

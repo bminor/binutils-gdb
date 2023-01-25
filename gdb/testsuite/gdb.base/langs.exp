@@ -124,4 +124,3 @@ if {[runto csub]} {
 }
 
 set timeout $oldtimeout
-return 0

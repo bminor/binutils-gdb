@@ -116,4 +116,3 @@ with_test_prefix "sync_execution = 1, is_running = 0" {
 
 set GDBFLAGS $saved_gdbflags
 kill_wait_spawned_process $test_spawn_id
-return 0

@@ -171,5 +171,3 @@ if ![gdb_target_supports_trace] {
 }
 
 test_actions_changed
-
-return 0

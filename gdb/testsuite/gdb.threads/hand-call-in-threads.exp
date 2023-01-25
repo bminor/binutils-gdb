@@ -159,5 +159,3 @@ gdb_test "show scheduler-locking" ".* locking scheduler .* is \"off\"." "show sc
 #gdb_test "thread 1" ".*" "set thread to 1, prepare to resume"
 #
 #gdb_continue_to_end "hand-call-in-threads"
-
-return 0

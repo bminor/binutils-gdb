@@ -385,5 +385,3 @@ gdb_exit
 clean_restart $binfile
 
 do_exec_tests
-
-return 0

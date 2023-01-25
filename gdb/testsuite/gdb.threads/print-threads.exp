@@ -108,5 +108,3 @@ gdb_breakpoint "kill"
 set timeout [expr $oldtimeout + 120]
 test_all_threads "slow with kill breakpoint" 1
 set timeout $oldtimeout
-
-return 0

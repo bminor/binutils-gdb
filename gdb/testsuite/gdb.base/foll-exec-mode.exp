@@ -208,5 +208,3 @@ foreach cmd {"next" "continue"} {
 	}
     }
 }
-
-return 0

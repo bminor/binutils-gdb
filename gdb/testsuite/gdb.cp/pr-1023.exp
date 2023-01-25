@@ -50,4 +50,3 @@ gdb_test \
   "Breakpoint $decimal at $hex: file .*$srcfile, line 10.*"
 
 gdb_exit
-return 0

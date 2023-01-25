@@ -137,11 +137,3 @@ gdb_test "print (0 && (x=y))" ".$decimal = $false" \
 
 
 gdb_exit
-return 0
-
-
-
-
-
-
-

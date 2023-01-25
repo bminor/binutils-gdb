@@ -47,5 +47,3 @@ gdb_test "print o2.do_print3()"  "\\$\[0-9\]+ = 111111"
 gdb_test "print o" " = {<interface> = {.*_vptr.interface = $hex <vtable for Obj.*>}, <No data fields>}"
 
 gdb_exit
-return 0
-

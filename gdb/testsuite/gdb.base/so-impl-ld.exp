@@ -62,10 +62,3 @@ gdb_test "next" "${decimal}\[ \t\]*return ans;.* STEP .*" "step in solib call"
 gdb_step_until ".*main .. at.*return 0;.*" "step out of solib call"
 
 gdb_exit
-return 0
-
-
-
-
-
-

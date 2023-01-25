@@ -133,4 +133,3 @@ gdb_test "print operator== (mem1, mem2)" " = false"
 gdb_test "print operator== (mem1, mem1)" " = true"
 
 gdb_exit
-return 0

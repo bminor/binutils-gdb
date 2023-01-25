@@ -68,4 +68,3 @@ gdb_test "ptype '(anonymous namespace)'" \
     "type = namespace \\\(anonymous namespace\\\)"
 
 gdb_exit
-return 0

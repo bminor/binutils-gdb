@@ -221,5 +221,3 @@ with_test_prefix "software watchpoint" {
     gdb_test "watch \$pc" ".*" "set watchpoint"
     gdb_test "step" "soft-watch.*" "step still in same line"
 }
-
-return 0

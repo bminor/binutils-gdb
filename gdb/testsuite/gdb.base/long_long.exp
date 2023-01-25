@@ -282,4 +282,3 @@ send_gdb "\n"
 gdb_test "" "0x00.*0x00" "repeat x command"
 
 gdb_exit
-return 0

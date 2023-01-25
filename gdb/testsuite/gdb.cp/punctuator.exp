@@ -45,4 +45,3 @@ gdb_test_no_output "set \$v = 0x5a5a" "set \$v 3"
 gdb_test "print (\$u xor_eq 0xaaaa) == (\$v ^= 0xaaaa)" "= true"
 
 gdb_exit
-return 0

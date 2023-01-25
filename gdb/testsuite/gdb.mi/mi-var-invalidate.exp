@@ -122,4 +122,3 @@ mi_gdb_test "-var-info-type global_simple" \
 	"no type for invalid variable global_simple"
 
 mi_gdb_exit
-return 0

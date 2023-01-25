@@ -273,4 +273,3 @@ if {[file exists $dir2] && ![file writable $dir2]} {
 }
 
 set timeout $oldtimeout
-return 0

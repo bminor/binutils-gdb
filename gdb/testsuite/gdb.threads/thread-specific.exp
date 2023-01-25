@@ -128,5 +128,3 @@ if { $this_thread != -1 } {
 } else {
     untested "thread var at break"
 }
-
-return 0

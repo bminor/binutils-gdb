@@ -688,4 +688,3 @@ mi_gdb_test "-var-update L" \
     "in-and-out-of-scope: in scope now, not changed"
 
 mi_gdb_exit
-return 0

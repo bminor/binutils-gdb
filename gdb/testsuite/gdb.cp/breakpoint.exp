@@ -53,4 +53,3 @@ gdb_test "print i_" "\\\$2 = 3" "check the member variable from within C1::bar"
 
 
 gdb_exit
-return 0

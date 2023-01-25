@@ -209,4 +209,3 @@ mi_gdb_test "600-data-evaluate-expression pvla2" \
   "600\\^done,value=\"<not associated>\"" "evaluate vla pointer set to null"
 
 mi_gdb_exit
-return 0

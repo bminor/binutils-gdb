@@ -1321,4 +1321,3 @@ set tree "
 mi_walk_varobj_tree c $tree verify_everything
 
 mi_gdb_exit
-return 0

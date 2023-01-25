@@ -321,5 +321,3 @@ gdb_test "info address a_thread_local" "Symbol \"a_thread_local\" is a thread-lo
 # Done!
 #
 gdb_exit
-
-return 0

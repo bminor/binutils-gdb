@@ -126,4 +126,3 @@ foreach_with_prefix inline_test $inline_tests {
 }
 
 mi_gdb_exit
-return 0

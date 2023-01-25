@@ -40,5 +40,3 @@ gdb_test "next 2" ".*place2.*" "next 2 (3)"
 gdb_test "next 2" ".*place3.*" "next 2 (4)"
 gdb_test "next 2" ".*place2.*" "next 2 (5)"
 gdb_test "next 2" ".*place3.*" "next 2 (6)"
-
-return 0

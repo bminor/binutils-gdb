@@ -54,4 +54,3 @@ foreach i [list x y z] {
 }
 
 mi_gdb_exit
-return 0

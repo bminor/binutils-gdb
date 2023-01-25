@@ -270,4 +270,3 @@ if { [test_mi_interpreter_selection]
 }
 
 mi_gdb_exit
-return 0

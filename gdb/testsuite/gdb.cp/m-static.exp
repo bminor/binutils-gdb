@@ -194,4 +194,3 @@ gdb_test "step" "gnu_obj_1::method.*"
 gdb_test "print svar" " = true"
 
 gdb_exit
-return 0

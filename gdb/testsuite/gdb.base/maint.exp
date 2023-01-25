@@ -515,4 +515,3 @@ gdb_test_no_output "maint print msymbols"
 gdb_test_no_output "maint print psymbols"
 
 gdb_exit
-return 0

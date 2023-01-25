@@ -311,5 +311,3 @@ gdb_expect 60 {
 }
 
 do_tests
-
-return 0

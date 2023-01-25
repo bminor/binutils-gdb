@@ -208,4 +208,3 @@ test_stack_info_depth
 
 
 mi_gdb_exit
-return 0

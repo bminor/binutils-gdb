@@ -270,5 +270,3 @@ The program being debugged stopped while in a function called from GDB.*" \
 	"#0  handler .*#1  .signal handler called.*\#2 .*main.*" \
 	"backtrace for SIGUSR1"
 }
-
-return 0

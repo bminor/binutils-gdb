@@ -114,4 +114,3 @@ gdb_test "jump $out_line" \
     "y"
 
 gdb_exit
-return 0

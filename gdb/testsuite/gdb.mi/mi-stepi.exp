@@ -68,4 +68,3 @@ mi_runto_main
 test_stepi_nexti
 
 mi_gdb_exit
-return 0

@@ -138,5 +138,3 @@ gdb_test "continue" "Breakpoint \[0-9\]*, handle_signal.*" \
 
 gdb_test "continue" "$inferior_exited_re normally." \
     "continue to program exit"
-
-return 0

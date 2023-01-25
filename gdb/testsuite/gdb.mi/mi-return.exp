@@ -62,4 +62,3 @@ mi_gdb_test "205-break-delete" \
 test_return_simple
 
 mi_gdb_exit
-return 0

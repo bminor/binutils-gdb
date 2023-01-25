@@ -343,4 +343,3 @@ gdb_test_no_output "do-define" "invoke do-define"
 gdb_test "do-printit" "here" "invoke do-printit"
 
 gdb_exit
-return 0

@@ -223,5 +223,3 @@ gdb_exit
 # Restore the preserved old timeout value.
 set timeout $oldtimeout
 verbose "Timeout is now $timeout seconds" 2
-
-return 0

@@ -80,4 +80,3 @@ mi_list_array_varobj_children "vla" "5" "int" \
     "get children of vla"
 
 mi_gdb_exit
-return 0

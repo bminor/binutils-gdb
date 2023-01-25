@@ -225,4 +225,3 @@ if {![file exists $binfile]} {
 	gdb_assert { $saw_end_of_file && $saw_inferior_exit } $msg
     }
 }
-return 0

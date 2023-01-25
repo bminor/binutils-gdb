@@ -245,5 +245,3 @@ if ![gdb_target_supports_trace] {
 gdb_exit
 
 test_upload_tsv
-
-return 0

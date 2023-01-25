@@ -50,4 +50,3 @@ gdb_test "print theA->nonvirt" \
     "print nonvirtual method."
 
 gdb_exit
-return 0

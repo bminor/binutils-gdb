@@ -79,5 +79,3 @@ gdb_test "next" \
 gdb_test "next" \
          ".*RETURN \\(j\\);.*" \
 	 "next over dummy 10"
-
-return 0

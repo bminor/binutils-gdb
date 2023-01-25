@@ -175,5 +175,3 @@ if ![gdb_skip_stdio_test "print print_int_char_combo(*int_char_combo)"] {
 	".*Contents of int_char_combo_t:\[ \r\n\]+13\[ \t\]+!\[ \r\n\]+" \
 	".\[0-9\]+ = \\{int1 = 13, ch1 = 33 '!'\\}"
 }
-
-return

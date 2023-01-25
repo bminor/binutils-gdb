@@ -55,4 +55,3 @@ gdb_continue_to_breakpoint "end of constructors"
 gdb_test "print *theB" "\\$\[0-9\]* = {<A> = {\[^}\]*}, static b = <optimized out>}" "PR gdb/574"
 
 gdb_exit
-return 0

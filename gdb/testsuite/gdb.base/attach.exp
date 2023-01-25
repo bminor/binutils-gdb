@@ -650,5 +650,3 @@ do_command_attach_tests
 
 
 test_command_line_attach_run
-
-return 0

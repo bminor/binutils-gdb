@@ -187,4 +187,3 @@ test_controlling_breakpoints
 test_program_termination
 
 mi_gdb_exit
-return 0

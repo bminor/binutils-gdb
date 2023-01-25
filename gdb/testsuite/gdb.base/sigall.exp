@@ -184,5 +184,3 @@ gdb_test "continue" \
     "get signal TERM"
 gdb_test "continue" "Breakpoint.*handle_TERM.*" "send signal TERM"
 gdb_continue_to_end "continue to sigall exit"
-
-return 0

@@ -85,4 +85,3 @@ proc test_list_thread_groups { } {
 test_list_thread_groups
 
 mi_gdb_exit
-return 0

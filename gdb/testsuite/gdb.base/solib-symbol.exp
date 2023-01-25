@@ -65,7 +65,3 @@ gdb_test "br foo2" \
 	 "foo2 in mdlib"
 
 gdb_exit
-
-return 0
-
-

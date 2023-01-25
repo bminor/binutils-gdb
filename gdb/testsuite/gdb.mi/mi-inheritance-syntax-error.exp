@@ -63,4 +63,3 @@ mi_gdb_test "-data-evaluate-expression \"$path\"" \
     "-data-evaluate-expression $path"
 
 mi_gdb_exit
-return 0

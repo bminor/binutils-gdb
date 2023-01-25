@@ -107,4 +107,3 @@ gdb_test "show paths" \
     "show paths works properly"
 
 gdb_exit
-return 0

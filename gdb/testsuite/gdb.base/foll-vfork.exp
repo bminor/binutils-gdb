@@ -502,4 +502,3 @@ with_test_prefix "exit" {
 }
 
 set timeout $oldtimeout
-return 0

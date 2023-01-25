@@ -661,4 +661,3 @@ if { [info exists fp] } {
 
 
 mi_gdb_exit
-return 0

@@ -135,4 +135,3 @@ mi_send_resuming_command "exec-continue" "continuing to inferior exit"
 mi_expect_stop "exited-normally" "" "" "" "" "" "exit normally"
 
 mi_gdb_exit
-return 0

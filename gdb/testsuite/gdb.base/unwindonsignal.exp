@@ -71,5 +71,3 @@ gdb_test_multiple "maint print dummy-frames" \
 	pass "unwindonsignal, dummy frame removed"
     }
 }
-
-return 0

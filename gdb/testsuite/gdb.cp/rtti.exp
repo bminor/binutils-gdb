@@ -112,4 +112,3 @@ gdb_continue_to_breakpoint "end of constructors in func3"
 gdb_test "print *obj3" "\\$\[0-9\]* = {<n2::C2> = .*}"
 
 gdb_exit
-return 0

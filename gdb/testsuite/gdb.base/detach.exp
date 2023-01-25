@@ -57,5 +57,3 @@ exec sleep 1
 
 set pass "two"
 do_detach_tests
-
-return 0

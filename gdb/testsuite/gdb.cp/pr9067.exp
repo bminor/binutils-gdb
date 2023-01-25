@@ -33,5 +33,3 @@ gdb_test "print b"  ".*same as static member.*"
 
 
 gdb_exit
-return 0
-

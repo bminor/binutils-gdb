@@ -113,4 +113,3 @@ mi_runto_main
 sparc_register_tests
 
 mi_gdb_exit
-return 0

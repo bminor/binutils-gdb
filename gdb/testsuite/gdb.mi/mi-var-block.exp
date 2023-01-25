@@ -175,4 +175,3 @@ mi_gdb_test "-var-delete cb" \
 	"delete var cb"
 
 mi_gdb_exit
-return 0

@@ -118,4 +118,3 @@ test_first_component
 test_namespace
 
 gdb_exit
-return 0

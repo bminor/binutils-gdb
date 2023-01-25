@@ -627,5 +627,3 @@ if ![gdb_skip_stdio_test "print print_one_large_struct(...)"] {
 }
 
 set timeout $oldtimeout
-return
-

@@ -91,4 +91,3 @@ gdb_continue_to_breakpoint "stop_here_too"
 test_class A::B::inner
 
 gdb_exit
-return 0

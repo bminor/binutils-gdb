@@ -187,4 +187,3 @@ foreach f [list "$func" "'$func'"] {
 }
 
 gdb_exit
-return 0

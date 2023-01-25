@@ -82,5 +82,3 @@ linux_async_tests
 mi_gdb_exit
 
 set GDBFLAGS $saved_gdbflags
-
-return 0

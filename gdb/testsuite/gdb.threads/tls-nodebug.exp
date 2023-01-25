@@ -40,5 +40,3 @@ gdb_test "p (int) thread_local" "= 42" \
 # Done!
 #
 gdb_exit
-
-return 0

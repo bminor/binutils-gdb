@@ -258,5 +258,3 @@ gdb_exit
 test_reconnect
 
 test_pending_resolved
-
-return 0

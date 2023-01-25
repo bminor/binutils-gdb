@@ -37,5 +37,3 @@ mi_gdb_test "record stop" \
 mi_gdb_test "target record" \
     ".*=record-started,thread-group=\"i${decimal}\",method=\"full\".*\\^done" \
     "target record"
-
-return 0

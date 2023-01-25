@@ -1211,4 +1211,3 @@ if { [mi_run_inline_test child_deletion] < 0 } {
 
 
 mi_gdb_exit
-return 0

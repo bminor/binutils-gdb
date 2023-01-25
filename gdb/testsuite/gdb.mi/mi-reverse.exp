@@ -165,4 +165,3 @@ proc test_controlled_execution_reverse {} {
 test_controlled_execution_reverse
 
 mi_gdb_exit
-return 0

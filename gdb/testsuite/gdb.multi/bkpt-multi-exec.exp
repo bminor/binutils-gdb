@@ -76,5 +76,3 @@ gdb_test "inferior 1"
 # Now run to the breakpoint.  This should cross the exec, and stop at
 # the breakpoint before the crash.
 gdb_test "run" "${srcfile2}:${bp_location}.*set breakpoint here.*"
-
-return 0

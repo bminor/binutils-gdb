@@ -132,5 +132,3 @@ foreach_with_prefix opts { "" "pie" } {
 
     }
 # End of tests.
-
-return 0

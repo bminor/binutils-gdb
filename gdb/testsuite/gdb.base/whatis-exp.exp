@@ -69,4 +69,3 @@ gdb_test "whatis x++" "type = int" "whatis value of  x++"
 gdb_test "whatis x--" "type = int" "whatis value of  x--"
 
 gdb_exit
-return 0

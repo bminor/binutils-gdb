@@ -54,4 +54,3 @@ gdb_test_multiple "print obj->myB" "print obj->myB" {
 }
 
 gdb_exit
-return 0

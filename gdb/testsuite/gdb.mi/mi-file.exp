@@ -76,4 +76,3 @@ test_file_list_exec_source_file
 test_file_list_exec_source_files
 
 mi_gdb_exit
-return 0

@@ -78,4 +78,3 @@ mi_list_varobj_children "var2" {
 } "list children of class C"
 
 mi_gdb_exit
-return 0
