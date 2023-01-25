@@ -20,10 +20,6 @@ if [target_info exists gdb,nosignals] {
 
 require supports_reverse
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-
 standard_testfile sigall-reverse.c
 set precsave [standard_output_file sigall.precsave]
 
@@ -145,7 +141,7 @@ proc test_one_sig_reverse {prevsig} {
     }
 }
 
-gdb_load $binfile
+clean_restart $binfile
 
 runto gen_ABRT
 
