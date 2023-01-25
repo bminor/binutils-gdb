@@ -15,9 +15,7 @@
 
 require allow_ada_tests
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
+clean_restart
 
 gdb_test_no_output "set lang ada" \
          "set lang ada"
