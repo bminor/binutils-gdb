@@ -49,10 +49,7 @@ proc test_builtin_d_types_accepted {} {
     gdb_test "ptype dchar" "type = dchar"
 }
 
-# Start with a fresh gdb.
-
-gdb_exit
-gdb_start
+clean_restart
 
 if [set_lang_d] {
     test_builtin_d_types_accepted

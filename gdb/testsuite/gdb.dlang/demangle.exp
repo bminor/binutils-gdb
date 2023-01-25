@@ -195,10 +195,7 @@ proc test_d_demangling {} {
     test_demangling "_D3std6socket23UnknownAddressReference6__ctorMFPS4core3sys5posix3sys6socket8sockaddrkZC3std6socket23UnknownAddressReference" "std.socket.UnknownAddressReference.this(core.sys.posix.sys.socket.sockaddr*, uint)"
 }
 
-# Start with a fresh gdb.
-
-gdb_exit
-gdb_start
+clean_restart
 
 if [set_lang_d] {
     gdb_test_no_output "set width 0"

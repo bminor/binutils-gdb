@@ -80,10 +80,7 @@ proc test_d_typeof {} {
     gdb_test "ptype typeof(7.0f ^^ 3)" "type = float"
 }
 
-# Start with a fresh gdb.
-
-gdb_exit
-gdb_start
+clean_restart
 
 if [set_lang_d] {
     test_d_sizeof

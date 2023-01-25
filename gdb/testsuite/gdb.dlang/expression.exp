@@ -127,10 +127,7 @@ proc test_d_expressions {} {
     gdb_test "print \[1, 2\] ~ \[2, 3\]" " = \\\{1, 2, 2, 3\\\}"
 }
 
-# Start with a fresh gdb.
-
-gdb_exit
-gdb_start
+clean_restart
 
 if [set_lang_d] {
     test_d_integer_literals
