@@ -113,7 +113,12 @@ for { set i_count 1 } { true } { incr i_count } {
 	# Check we can unwind the stack-pointer and the frame base
 	# address correctly.
 	lassign [get_sp_and_fba "for main"] sp_value fba_value
-	gdb_assert { $sp_value == $main_sp }
+	if { $i_count == 1 } {
+	    # The stack-pointer may have changed while running to *foo.
+	    set main_sp $sp_value
+	} else {
+	    gdb_assert { $sp_value == $main_sp }
+	}
 	gdb_assert { $fba_value == $main_fba }
 
 	# Check we have a consistent value for main's frame-id.

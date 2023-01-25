@@ -15,11 +15,11 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-extern void foo ();
+extern void foo (const char *);
 
 int
 main ()
 {
-  foo ();
+  foo ("foo");
   return 0;
 }
