@@ -571,7 +571,6 @@ list_args_or_locals (const frame_print_options &fp_opts,
   const struct block *block;
   struct symbol *sym;
   struct block_iterator iter;
-  struct type *type;
   const char *name_of_result;
   struct ui_out *uiout = current_uiout;
 
@@ -649,17 +648,20 @@ list_args_or_locals (const frame_print_options &fp_opts,
 	      switch (values)
 		{
 		case PRINT_SIMPLE_VALUES:
-		  type = check_typedef (sym2->type ());
-		  if (type->code () != TYPE_CODE_ARRAY
-		      && type->code () != TYPE_CODE_STRUCT
-		      && type->code () != TYPE_CODE_UNION)
-		    {
+		  {
+		    struct type *type = check_typedef (sym2->type ());
+		    if (type->code () == TYPE_CODE_ARRAY
+			|| type->code () == TYPE_CODE_STRUCT
+			|| type->code () == TYPE_CODE_UNION)
+		      break;
+		  }
+		  /* FALLTHROUGH */
+
 		case PRINT_ALL_VALUES:
 		  if (sym->is_argument ())
 		    read_frame_arg (fp_opts, sym2, fi, &arg, &entryarg);
 		  else
 		    read_frame_local (sym2, fi, &arg);
-		    }
 		  break;
 		}
 
