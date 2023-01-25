@@ -20,10 +20,7 @@ load_lib gdb-guile.exp
 
 require allow_guile_tests
 
-# Start with a fresh gdb.
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
+clean_restart
 
 gdb_install_guile_utils
 gdb_install_guile_module

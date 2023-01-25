@@ -38,10 +38,7 @@ proc build_inferior {exefile lang} {
 proc restart_gdb {exefile} {
     global srcdir subdir
 
-    gdb_exit
-    gdb_start
-    gdb_reinitialize_dir $srcdir/$subdir
-    gdb_load ${exefile}
+    clean_restart $exefile
 
     if { ![allow_guile_tests] } {
 	return 0

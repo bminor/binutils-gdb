@@ -18,10 +18,7 @@
 
 load_lib gdb-guile.exp
 
-# Start with a fresh gdb.
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
+clean_restart
 
 # Do this instead of the skip_guile_check.
 # We want to do some tests when Guile is not present.

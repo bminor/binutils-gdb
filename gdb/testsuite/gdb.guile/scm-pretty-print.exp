@@ -22,10 +22,6 @@ require allow_guile_tests
 
 standard_testfile
 
-# Start with a fresh gdb.
-gdb_exit
-gdb_start
-
 proc run_lang_tests {exefile lang} {
     with_test_prefix "lang=$lang" {
 	global srcdir subdir srcfile testfile hex
@@ -37,10 +33,7 @@ proc run_lang_tests {exefile lang} {
 	set nl "\[\r\n\]+"
 
 	# Start with a fresh gdb.
-	gdb_exit
-	gdb_start
-	gdb_reinitialize_dir $srcdir/$subdir
-	gdb_load ${exefile}
+	clean_restart $exefile
 
 	if ![gdb_guile_runto_main] {
 	    return
@@ -121,11 +114,7 @@ run_lang_tests "${binfile}-cxx" "c++"
 
 # Run various other tests.
 
-# Start with a fresh gdb.
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart $binfile
 
 if ![gdb_guile_runto_main] {
     return
