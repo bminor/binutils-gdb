@@ -100,10 +100,7 @@ proc all_fp_misc_tests { } {
     }
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load $binfile
+clean_restart $binfile
 
 all_fp_move_and_load_tests
 all_fp_arithmetic_tests

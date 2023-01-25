@@ -640,9 +640,7 @@ proc all_block_data_transfer_tests { } {
     }
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
+clean_restart
 all_set_machine_h8300s
 gdb_load $binfile
 
