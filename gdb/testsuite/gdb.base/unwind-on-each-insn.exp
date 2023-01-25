@@ -142,9 +142,11 @@ proc do_test { function step_cmd } {
 		break
 	    }
 
+	    gdb_test $step_cmd
+
 	    set in_fn 0
-	    gdb_test_multiple $step_cmd "" {
-		-re -wrap "$::hex in $function \\(\\)" {
+	    gdb_test_multiple "info frame" "" {
+		-re -wrap "rip = $::hex in ${function}( \\(.*\\))?;.*" {
 		    set in_fn 1
 		}
 		-re -wrap "" {}
