@@ -1008,19 +1008,15 @@ proc mi_run_with_cli {args} {
 }
 
 # Starts fresh GDB binary and loads an optional executable into GDB.
-# Usage: mi_clean_restart [executable]
+# Usage: mi_clean_restart [EXECUTABLE]
 # EXECUTABLE is the basename of the binary.
 # Return -1 if starting gdb or loading the executable failed.
 
-proc mi_clean_restart { args } {
+proc mi_clean_restart {{executable ""}} {
     global srcdir
     global subdir
     global errcnt
     global warncnt
-
-    if { [llength $args] > 1 } {
-	error "bad number of args: [llength $args]"
-    }
 
     gdb_exit
 
@@ -1034,8 +1030,7 @@ proc mi_clean_restart { args } {
 
     mi_gdb_reinitialize_dir $srcdir/$subdir
 
-    if { [llength $args] >= 1 } {
-	set executable [lindex $args 0]
+    if {$executable != ""} {
 	set binfile [standard_output_file ${executable}]
 	return [mi_gdb_load ${binfile}]
     }
