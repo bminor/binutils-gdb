@@ -79,72 +79,91 @@ proc get_fid { } {
 lassign [get_sp_and_fba "in main"] main_sp main_fba
 set main_fid [get_fid]
 
-# Now enter the foo function.
-gdb_breakpoint "*foo"
-gdb_continue_to_breakpoint "enter foo"
+proc do_test { function step_cmd } {
+    # Now enter the function.  Ideally, stop at the first insn, so set a
+    # breakpoint at "*$function".  The "*$function" breakpoint may not trigger
+    # for archs with gdbarch_skip_entrypoint_p, so set a backup breakpoint at
+    # "$function".
+    gdb_breakpoint "*$function"
+    gdb_breakpoint "$function"
+    gdb_continue_to_breakpoint "enter $function"
+    # Cleanup breakpoints.
+    delete_breakpoints
 
-# Record the current stack-pointer, and the frame base address.
-lassign [get_sp_and_fba "in foo"] foo_sp foo_fba
-set foo_fid [get_fid]
+    # Record the current stack-pointer, and the frame base address.
+    lassign [get_sp_and_fba "in $function"] fn_sp fn_fba
+    set fn_fid [get_fid]
 
-for { set i_count 1 } { true } { incr i_count } {
-    with_test_prefix "instruction ${i_count}" {
+    for { set i_count 1 } { true } { incr i_count } {
+	with_test_prefix "instruction ${i_count}" {
 
-	# The current stack-pointer value can legitimately change
-	# throughout the lifetime of a function, so we don't check the
-	# current stack-pointer value.  But the frame base address
-	# should not change, so we do check for that.
-	lassign [get_sp_and_fba "for foo"] sp_value fba_value
-	gdb_assert { $fba_value == $foo_fba }
+	    # The current stack-pointer value can legitimately change
+	    # throughout the lifetime of a function, so we don't check the
+	    # current stack-pointer value.  But the frame base address
+	    # should not change, so we do check for that.
+	    lassign [get_sp_and_fba "for fn"] sp_value fba_value
+	    gdb_assert { $fba_value == $fn_fba }
 
-	# The frame-id should never change within a function, so check
-	# that now.
-	set fid [get_fid]
-	gdb_assert { [string equal $fid $foo_fid] } \
-	    "check frame-id matches"
+	    # The frame-id should never change within a function, so check
+	    # that now.
+	    set fid [get_fid]
+	    gdb_assert { [string equal $fid $fn_fid] } \
+		"check frame-id matches"
 
-	# Check that the previous frame is 'main'.
-	gdb_test "bt 2" "\r\n#1\\s+\[^\r\n\]+ in main \\(\\) .*"
+	    # Check that the previous frame is 'main'.
+	    gdb_test "bt 2" "\r\n#1\\s+\[^\r\n\]+ in main \\(\\) .*"
 
-	# Move up the stack (to main).
-	gdb_test "up" \
-	    "\r\n#1\\s+\[^\r\n\]+ in main \\(\\) .*"
+	    # Move up the stack (to main).
+	    gdb_test "up" \
+		"\r\n#1\\s+\[^\r\n\]+ in main \\(\\) .*"
 
-	# Check we can unwind the stack-pointer and the frame base
-	# address correctly.
-	lassign [get_sp_and_fba "for main"] sp_value fba_value
-	if { $i_count == 1 } {
-	    # The stack-pointer may have changed while running to *foo.
-	    set main_sp $sp_value
-	} else {
-	    gdb_assert { $sp_value == $main_sp }
-	}
-	gdb_assert { $fba_value == $main_fba }
-
-	# Check we have a consistent value for main's frame-id.
-	set fid [get_fid]
-	gdb_assert { [string equal $fid $main_fid] }
-
-	# Move back to the inner most frame.
-	gdb_test "frame 0" ".*"
-
-	if { $i_count > 100 } {
-	    # We expect a handful of instructions, if we reach 100,
-	    # something is going wrong.  Avoid an infinite loop.
-	    fail "exceeded max number of instructions"
-	    break
-	}
-
-	set in_foo 0
-	gdb_test_multiple "stepi" "" {
-	    -re -wrap "$hex in foo \\(\\)" {
-		set in_foo 1
+	    # Check we can unwind the stack-pointer and the frame base
+	    # address correctly.
+	    lassign [get_sp_and_fba "for main"] sp_value fba_value
+	    if { $i_count == 1 } {
+		# The stack-pointer may have changed while running to *$function.
+		set ::main_sp $sp_value
+	    } else {
+		gdb_assert { $sp_value == $::main_sp }
 	    }
-	    -re -wrap "" {}
-	}
+	    gdb_assert { $fba_value == $::main_fba }
 
-	if { ! $in_foo } {
-	    break
+	    # Check we have a consistent value for main's frame-id.
+	    set fid [get_fid]
+	    gdb_assert { [string equal $fid $::main_fid] }
+
+	    # Move back to the inner most frame.
+	    gdb_test "frame 0" ".*"
+
+	    if { $i_count > 100 } {
+		# We expect a handful of instructions, if we reach 100,
+		# something is going wrong.  Avoid an infinite loop.
+		fail "exceeded max number of instructions"
+		break
+	    }
+
+	    set in_fn 0
+	    gdb_test_multiple $step_cmd "" {
+		-re -wrap "$::hex in $function \\(\\)" {
+		    set in_fn 1
+		}
+		-re -wrap "" {}
+	    }
+
+	    if { ! $in_fn } {
+		break
+	    }
 	}
+    }
+}
+
+foreach {
+    function step_cmd
+} {
+    foo stepi
+    bar nexti
+} {
+    with_test_prefix $function {
+	do_test $function $step_cmd
     }
 }

@@ -20,3 +20,9 @@ foo (const char *s)
 {
   /* Nothing.  */
 }
+
+void
+bar (const char *s)
+{
+  foo (s);
+}
