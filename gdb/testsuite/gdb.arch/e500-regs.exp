@@ -136,10 +136,7 @@ gdb_expect_list "info vector" ".*$gdb_prompt $" {
 # We must restart everything, because we have set important registers to
 # some unusual values.
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart $binfile
 if {![runto_main]} {
     return 0
 }

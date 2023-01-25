@@ -47,10 +47,7 @@ proc altivec_abi_tests { extra_flags force_abi } {
 	}
     }
 
-    gdb_exit
-    gdb_start
-    gdb_reinitialize_dir $srcdir/$subdir
-    gdb_load ${binfile}
+    clean_restart $binfile
 
     # Run to `main' where we begin our tests.
     if {![runto_main]} {

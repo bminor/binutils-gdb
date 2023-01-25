@@ -28,10 +28,7 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {}] !
     return -1
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart $binfile
 
 # Insert a breakpoint in FUNCTION and verifies that the breakpoint was
 # inserted at the expected location.  EXPECTED_LOCATION should be an
