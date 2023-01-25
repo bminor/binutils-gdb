@@ -38,6 +38,7 @@
 
 #define CV_CFL_80386		0x03
 #define CV_CFL_X64		0xD0
+#define CV_CFL_ARM64		0xF6
 
 #define CHKSUM_TYPE_MD5		1
 
