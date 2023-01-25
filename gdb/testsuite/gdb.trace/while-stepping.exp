@@ -17,10 +17,6 @@
 
 load_lib "trace-support.exp"
 
-
-gdb_exit
-gdb_start
-
 standard_testfile actions.c
 require gdb_trace_common_supports_arch
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" $binfile \
@@ -28,11 +24,8 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" $binfile \
     untested "failed to compile"
     return -1
 }
-gdb_reinitialize_dir $srcdir/$subdir
 
-# If testing on a remote host, download the source file.
-# remote_download host $srcdir/$subdir/$srcfile
-
+clean_restart
 gdb_file_cmd $binfile
 
 #
@@ -151,9 +144,7 @@ gdb_test "tsave -ctf ${tracefile}.ctf" \
     "save ctf trace file"
 
 # Restart GDB and read the trace data in tfile target.
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
+clean_restart
 gdb_file_cmd $binfile
 gdb_test "target tfile ${tracefile}.tf" ".*" \
     "change to tfile target"
@@ -171,9 +162,7 @@ gdb_test_multiple "target ctf" "" {
 }
 
 if { $gdb_can_read_ctf_data } {
-    gdb_exit
-    gdb_start
-    gdb_reinitialize_dir $srcdir/$subdir
+    clean_restart
     gdb_file_cmd $binfile
     gdb_test "target ctf ${tracefile}.ctf" ".*" \
 	"change to ctf target"

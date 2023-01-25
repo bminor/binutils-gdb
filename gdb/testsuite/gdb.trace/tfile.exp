@@ -121,10 +121,7 @@ gdb_test "info registers" "The program has no registers now\." \
 
 # Now start afresh, using only a trace file.
 
-gdb_exit
-gdb_start
-
-gdb_load $binfile
+clean_restart $binfile
 
 gdb_test "target tfile $tfile_error" "Created tracepoint.*" \
     "target tfile [file tail $tfile_error]"

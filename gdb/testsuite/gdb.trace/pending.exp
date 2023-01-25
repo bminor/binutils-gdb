@@ -66,9 +66,7 @@ proc pending_tracepoint_resolved { trace_type } {
 	global lib_sl1
 
 	# Start with a fresh gdb.
-	gdb_exit
-	gdb_start
-	gdb_reinitialize_dir $srcdir/$subdir
+	clean_restart
 
 	gdb_test_multiple "$trace_type set_point1" "set pending tracepoint" {
 	    -re ".*Make \(fast |\)tracepoint pending.*y or \\\[n\\\]. $" {

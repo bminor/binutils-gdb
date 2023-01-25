@@ -17,10 +17,6 @@
 
 load_lib "trace-support.exp"
 
-
-gdb_exit
-gdb_start
-
 standard_testfile actions.c
 
 require gdb_trace_common_supports_arch
@@ -30,11 +26,8 @@ if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
     untested "failed to compile"
     return -1
 }
-gdb_reinitialize_dir $srcdir/$subdir
 
-# If testing on a remote host, download the source file.
-# remote_download host $srcdir/$subdir/$srcfile
-
+clean_restart
 gdb_file_cmd $binfile
 
 # define relative source line numbers:

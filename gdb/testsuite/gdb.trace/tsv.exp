@@ -15,9 +15,6 @@
 
 load_lib "trace-support.exp"
 
-
-gdb_exit
-gdb_start
 standard_testfile actions.c
 require gdb_trace_common_supports_arch
 if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
@@ -25,7 +22,8 @@ if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
     untested "failed to compile"
     return -1
 }
-gdb_load $binfile
+
+clean_restart $binfile
 
 # PR gdb/21352: Command tsave does not support -r argument
 gdb_test "tsave -r" "Argument required \\\(file in which to save trace data\\\)\." \

@@ -202,9 +202,7 @@ proc gdb_collect_args_test {} {
 
 	foreach target_name ${trace_file_targets} {
 	    # Restart GDB and read the trace data in ${TARGET_NAME} target.
-	    gdb_exit
-	    gdb_start
-	    gdb_reinitialize_dir $srcdir/$subdir
+	    clean_restart
 	    gdb_file_cmd $binfile
 	    gdb_test "target ${target_name} ${tracefile}.args.${target_name}" ".*" \
 		"change to ${target_name} target"
@@ -286,9 +284,7 @@ proc gdb_collect_locals_test { func msg } {
 
 	foreach target_name ${trace_file_targets} {
 	    # Restart GDB and read the trace data in ${TARGET_NAME} target.
-	    gdb_exit
-	    gdb_start
-	    gdb_reinitialize_dir $srcdir/$subdir
+	    clean_restart
 	    gdb_file_cmd $binfile
 	    gdb_test "target ${target_name} ${tracefile}.locals.${target_name}" ".*" \
 		"change to ${target_name} target"
@@ -369,9 +365,7 @@ proc gdb_unavailable_registers_test { } {
 
 	foreach target_name ${trace_file_targets} {
 	    # Restart GDB and read the trace data in ${TARGET_NAME} target.
-	    gdb_exit
-	    gdb_start
-	    gdb_reinitialize_dir $srcdir/$subdir
+	    clean_restart
 	    gdb_file_cmd $binfile
 	    gdb_test "target ${target_name} ${tracefile}.registers.${target_name}" ".*" \
 		"change to ${target_name} target"
@@ -433,9 +427,7 @@ proc gdb_unavailable_floats { } {
 
 	foreach target_name ${trace_file_targets} {
 	    # Restart GDB and read the trace data in ${TARGET_NAME} target.
-	    gdb_exit
-	    gdb_start
-	    gdb_reinitialize_dir $srcdir/$subdir
+	    clean_restart
 	    gdb_file_cmd $binfile
 	    gdb_test "target ${target_name} ${tracefile}.floats.${target_name}" ".*" \
 		"change to ${target_name} target"
@@ -701,9 +693,7 @@ proc gdb_collect_globals_test { } {
 
 	foreach target_name ${trace_file_targets} {
 	    # Restart GDB and read the trace data in ${TARGET_NAME} target.
-	    gdb_exit
-	    gdb_start
-	    gdb_reinitialize_dir $srcdir/$subdir
+	    clean_restart
 	    gdb_file_cmd $binfile
 	    gdb_test "target ${target_name} ${tracefile}.globals.${target_name}" ".*" \
 		"change to ${target_name} target"
