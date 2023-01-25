@@ -61,20 +61,3 @@ if { [test_compiler_info {gfortran-*} f90] } {
     setup_xfail *-*-* gcc/105454
     GDBInfoSymbols::check_entry "${srcfile}" "41" "Type s1;"
 }
-
-return 0
-
-gdb_test "info types" \
-    [multi_line \
-	 "All defined types:" \
-	 "" \
-	 "File .*:" \
-	 "\[\t \]+${character1}" \
-	 "\[\t \]+${integer4}" \
-	 "(\[\t \]+${integer8}" \
-	 ")?\[\t \]+${logical4}" \
-	 "(35:\[\t \]+Type __vtype_mod1_M1t1;" \
-	 ")?$decimal:\[\t \]+Type m1t1;" \
-	 "\[\t \]+${real4}" \
-	 "41:\[\t \]+Type s1;(" \
-	 ".*)?"]
