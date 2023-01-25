@@ -146,9 +146,7 @@ if {[gdb_compile [list ${binfile}1.o ${binfile}6.o] ${binfile}-fallback \
 
 foreach testname {ok mismatch fallback} {
     with_test_prefix $testname {
-	gdb_exit
-	gdb_start
-	gdb_reinitialize_dir $srcdir/$subdir
+	clean_restart
 
 	gdb_test_no_output "set debug-file-directory $debugdir" \
 	    "set debug-file-directory"

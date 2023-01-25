@@ -28,9 +28,7 @@ if {[build_executable $testfile.exp $testfile $srcfile {nodebug quiet}]} {
     return -1
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
+clean_restart
 
 gdb_test_no_output "set breakpoint pending off"
 

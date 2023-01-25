@@ -26,9 +26,7 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" ${binfile} object {debug}] !=
     return -1
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
+clean_restart
 
 # Be sure to set cp-abi before ${binfile} gets loaded
 gdb_test "set cp-abi gnu-v3"
