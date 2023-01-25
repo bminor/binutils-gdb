@@ -68,11 +68,7 @@ proc test_float_literal_types_accepted {} {
     gdb_test "pt 10E20" "type = double"
 }
 
-# Start with a fresh gdb.
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
+clean_restart
 
 if {[set_lang_pascal]} {
     test_integer_literal_types_accepted

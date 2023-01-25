@@ -57,11 +57,7 @@ proc test_float_rejected {} {
     test_print_reject "p 1.1ll"
 }
 
-# Start with a fresh gdb.
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
+clean_restart
 
 if [set_lang_pascal] {
     test_float_accepted
