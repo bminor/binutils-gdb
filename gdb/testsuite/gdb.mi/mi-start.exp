@@ -21,11 +21,6 @@ set MIFLAGS "-i=mi"
 # then there is no point in running this testcase...
 require !use_gdb_stub
 
-gdb_exit
-if [mi_gdb_start] {
-    continue
-}
-
 standard_testfile mi-start.c
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
@@ -33,10 +28,9 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      return -1
 }
 
-mi_delete_breakpoints
-mi_gdb_reinitialize_dir $srcdir/$subdir
-mi_gdb_reinitialize_dir $srcdir/$subdir
-mi_gdb_load ${binfile}
+if {[mi_clean_restart $binfile]} {
+    return
+}
 
 # First, verify that the debugger correctly advertises support
 # for the --start option of the -exec-run command.

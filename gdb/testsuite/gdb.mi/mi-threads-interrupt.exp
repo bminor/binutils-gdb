@@ -36,13 +36,9 @@ proc test_continue_interrupt { } {
   global binfile
   global async
 
-  gdb_exit
-  if {[mi_gdb_start]} {
+  if {[mi_clean_restart $binfile]} {
       return
   }
-
-  # Load the binary in gdb...
-  mi_gdb_load $binfile
 
   # ... and run it.
   #

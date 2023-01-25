@@ -31,8 +31,6 @@ set allow_hw_watchpoint_tests_p [allow_hw_watchpoint_tests]
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
-gdb_exit
-
 standard_testfile basics.c
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {

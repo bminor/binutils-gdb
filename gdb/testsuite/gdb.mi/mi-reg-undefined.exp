@@ -22,11 +22,6 @@ require dwarf2_support
 # This test can only be run on x86_64 targets.
 require is_x86_64_m64_target
 
-gdb_exit
-if [mi_gdb_start] {
-    return
-}
-
 standard_testfile .S
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug nopie}] != "" } {
@@ -34,10 +29,9 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      return -1
 }
 
-mi_delete_breakpoints
-mi_gdb_reinitialize_dir $srcdir/$subdir
-mi_gdb_reinitialize_dir $srcdir/$subdir
-mi_gdb_load ${binfile}
+if {[mi_clean_restart $binfile]} {
+    return
+}
 
 if ![mi_runto stop_frame] {
     perror "Failed to stop in stop_frame"

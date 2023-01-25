@@ -76,12 +76,10 @@ proc test_create_delete_modify_tsv { } {
 	    return -1
 	}
 	gdb_exit
-	if [mi_gdb_start] {
+
+	if {[mi_clean_restart $binfile]} {
 	    return
 	}
-
-	mi_gdb_reinitialize_dir $srcdir/$subdir
-	mi_gdb_load ${binfile}
 
 	mi_gdb_test "tvariable \$tvar3 = 3" \
 	    ".*=tsv-created,name=\"tvar3\",initial=\"3\".*\\^done" \
@@ -177,18 +175,10 @@ proc test_upload_tsv { } {
 	    }
 	}
 
-	gdb_exit
-
-	if [mi_gdb_start] {
+	global binfile
+	if {[mi_clean_restart $binfile]} {
 	    return
 	}
-
-	global srcdir
-	global subdir
-	global binfile
-
-	mi_gdb_reinitialize_dir $srcdir/$subdir
-	mi_gdb_load ${binfile}
 
 	global gdbserver_protocol
 	global gdbserver_gdbport

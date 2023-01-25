@@ -21,8 +21,7 @@
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
-gdb_exit
-if [mi_gdb_start] {
+if {[mi_clean_restart]} {
     return
 }
 

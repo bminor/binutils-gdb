@@ -25,20 +25,17 @@ if {![istarget *-*-linux*]} {
 # Support for XML-output is needed to run this test.
 require allow_xml_test
 
-gdb_exit
-if [mi_gdb_start] {
-    return
-}
-
 standard_testfile basics.c
 
 if [build_executable "Failed to build $testfile" $testfile $srcfile \
 	debug] {
     return -1;
 }
-if {[mi_gdb_load $binfile] < 0} {
-    return -1
+
+if {[mi_clean_restart $binfile]} {
+    return
 }
+
 # When testing a cross configuration, we need to be sure to first
 # connect to the target.  If we didn't do that, GDB would try running
 # the command against the default run target.  The usual way to do

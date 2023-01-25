@@ -45,10 +45,9 @@ if { [gdb_compile_pthreads $srcdir/$subdir/$srcfile $binfile executable $exec_op
 }
 
 # Start with a fresh gdb.
-gdb_exit
-mi_gdb_start
-mi_gdb_reinitialize_dir $srcdir/$subdir
-mi_gdb_load ${binfile}
+if {[mi_clean_restart $binfile]} {
+    return
+}
 mi_load_shlibs $lib_sl1
 mi_load_shlibs $lib_sl2
 

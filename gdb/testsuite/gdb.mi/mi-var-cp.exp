@@ -18,11 +18,6 @@ require allow_cplus_tests
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
-gdb_exit
-if [mi_gdb_start] {
-    return
-}
-
 standard_testfile .cc
 
 if {[gdb_compile $srcdir/$subdir/$srcfile $binfile executable {debug c++}] != ""} {
@@ -30,7 +25,9 @@ if {[gdb_compile $srcdir/$subdir/$srcfile $binfile executable {debug c++}] != ""
   return -1
 }
 
-mi_gdb_load ${binfile}
+if {[mi_clean_restart $binfile]} {
+    return
+}
 
 mi_prepare_inline_tests $srcfile
 
