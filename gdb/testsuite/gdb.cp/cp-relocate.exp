@@ -46,9 +46,7 @@ proc get_func_address { func } {
 
 # Load the file as an executable; GDB should assign non-overlapping
 # section offsets.
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
+clean_restart
 gdb_file_cmd ${binfile}
 
 # Find the interesting functions.  We go to a little effort to find
@@ -118,9 +116,7 @@ if { $func1_sec == $func2_sec } {
 }
 
 # Now start a clean GDB, for add-symbol-file tests.
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
+clean_restart
 
 gdb_test "add-symbol-file ${binfile} 0 -s ${func1_sec} 0x10000 -s ${func2_sec} 0x20000" \
 	"Reading symbols from .*${testfile}\\.o\\.\\.\\.(|\r\nUsing host libthread_db library .*libthread_db.so.*\\.)" \

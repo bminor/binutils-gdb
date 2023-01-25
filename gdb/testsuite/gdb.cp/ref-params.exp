@@ -28,8 +28,6 @@ if {[build_executable $testfile.exp $testfile $srcfile {debug c++}] == -1} {
     return -1
 }
 
-gdb_exit
-
 proc gdb_start_again { text } {
     global binfile
     global srcfile
