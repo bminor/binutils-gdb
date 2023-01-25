@@ -35,11 +35,7 @@ if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
     return -1
 }
 
-# Start with a fresh gdb.
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
+clean_restart
 
 gdb_test_multiple "break pendfunc1" "set pending breakpoint" {
      -re ".*Make breakpoint pending.*y or \\\[n\\\]. $" {
@@ -68,11 +64,7 @@ gdb_test "" \
 ".*Breakpoint.*pendfunc1.*at.*pendshr.c:$pendfunc1_loc.*y = x \\+ 4.*" \
 "run to resolved breakpoint 1 (without symbols)"
 
-# Restart with a fresh gdb.
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
+clean_restart
 
 with_test_prefix "second load" {
     gdb_load ${binfile}

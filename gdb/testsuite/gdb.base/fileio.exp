@@ -45,12 +45,7 @@ system "rm -rf [standard_output_file *.fileio.test]"
 set oldtimeout $timeout
 set timeout [expr "$timeout + 60"]
 
-# Start with a fresh gdb.
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart $binfile
 gdb_test_no_output "set print sevenbit-strings"
 gdb_test_no_output "set print address off"
 gdb_test_no_output "set width 0"

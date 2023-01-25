@@ -379,9 +379,6 @@ proc do_exec_tests {} {
    }
 }
 
-# Start with a fresh gdb
-
-gdb_exit
 clean_restart $binfile
 
 do_exec_tests

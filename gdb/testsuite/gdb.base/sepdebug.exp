@@ -561,9 +561,7 @@ proc test_different_dir {type test_different_dir xfail} {
 	global srcdir subdir binfile srcfile timeout gdb_prompt
 	global bp_location6 decimal hex
 
-	gdb_exit
-	gdb_start
-	gdb_reinitialize_dir $srcdir/$subdir
+	clean_restart
 	gdb_test_no_output "set debug-file-directory ${test_different_dir}" \
 	    "set separate debug location"
 	gdb_load ${binfile}
@@ -656,9 +654,7 @@ if {[build_executable sepdebug.exp sepdebug2 sepdebug2.c debug] != -1
 
     remote_exec build "cp ${debugfile} [standard_output_file sepdebug2.debug]"
 
-    gdb_exit
-    gdb_start
-    gdb_reinitialize_dir $srcdir/$subdir
+    clean_restart
 
     set escapedobjdirsubdir [string_to_regexp [standard_output_file {}]]
 

@@ -45,10 +45,7 @@ gdb_test "list sep-proc.c:$location" \
 # Try the same, but this time with a breakpoint.  We need to exit
 # GDB to make sure that we havn't loaded the full symbols yet when
 # we test the breakpoint insertion.
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart $binfile
 
 set test "breakpoint inside included file"
 gdb_test_multiple "break sep-proc.c:$location" "$test" {

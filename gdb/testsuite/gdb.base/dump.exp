@@ -52,11 +52,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable ${op
      return -1
 }
 
-# Start with a fresh gdb.
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
+clean_restart $binfile
 
 gdb_test "dump mem /dev/null 0x10 0x20" "Cannot access memory at address 0x10" \
 	 "inaccessible memory is reported"
@@ -479,8 +475,7 @@ foreach_with_prefix format $formats {
 
 # Now start a fresh gdb session, and reload the saved value files.
 
-gdb_exit
-gdb_start
+clean_restart
 gdb_file_cmd ${binfile}
 
 # Now fix the endianness at the correct state.

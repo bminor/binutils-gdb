@@ -16,9 +16,7 @@
 # Regression test for expression evaluation of address space qualifiers
 # in C and C++.
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
+clean_restart
 
 gdb_test_no_output "set language c"
 

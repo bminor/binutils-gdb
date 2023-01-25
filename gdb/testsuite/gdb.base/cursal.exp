@@ -21,9 +21,7 @@ if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug
     return -1
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
+clean_restart
 gdb_file_cmd ${binfile}
 gdb_test_no_output "set listsize 1"
 

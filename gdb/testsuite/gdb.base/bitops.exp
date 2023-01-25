@@ -28,10 +28,7 @@
 #
 
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-
+clean_restart
 
 gdb_test "print !1" ".\[0-9\]* = 0" "print value of !1"
 

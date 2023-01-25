@@ -34,9 +34,7 @@ if {$result == 1} {
     return
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
+clean_restart
 set testname "file [file tail $ofile]"
 if {[gdb_file_cmd $ofile] == 0} {
     pass $testname

@@ -199,9 +199,7 @@ save_vars { env(TERM) } {
 	set env(GDBHISTFILE) "${srcdir}/${subdir}/gdb_history"
 	set env(GDBHISTSIZE) "10"
 
-	gdb_exit
-	gdb_start
-	gdb_reinitialize_dir $srcdir/$subdir
+	clean_restart
 
 	operate_and_get_next "Simple operate-and-get-next, two" \
 	    "p 7" ".* = 7" \

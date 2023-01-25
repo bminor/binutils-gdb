@@ -290,10 +290,7 @@ gdb_test "restart 10" "Not found.*" "no more checkpoint 10"
 # Now let's try setting a large number of checkpoints (>600)
 #
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart $binfile
 
 runto_main
 gdb_breakpoint $break1_loc

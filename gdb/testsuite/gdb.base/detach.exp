@@ -42,11 +42,7 @@ proc do_detach_tests {} {
   gdb_test "detach" "Detaching from program: .*$escapedbinfile, .*" "detach, $pass"
 }
 
-# Start with a fresh gdb
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart $binfile
 
 global pass
 set pass "one"

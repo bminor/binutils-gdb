@@ -49,12 +49,7 @@ if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
     return -1
 }
 
-# Start with a fresh gdb.
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart $binfile
 gdb_load_shlib $lib_sl
 
 runto_main

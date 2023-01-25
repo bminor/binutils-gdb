@@ -49,9 +49,7 @@ if {![gdb_gcore_cmd $gcorefile "save a corefile"]} {
 proc test_load_core { print_symbol_loading } {
     global binfile binfile_lib gcorefile srcdir subdir
     with_test_prefix "core ${print_symbol_loading}" {
-	gdb_exit
-	gdb_start
-	gdb_reinitialize_dir $srcdir/$subdir
+	clean_restart
 	gdb_test_no_output "set print symbol-loading $print_symbol_loading"
 	if { ${print_symbol_loading} != "off" } {
 	    gdb_test "file $binfile" "Reading symbols from.*" "file"
