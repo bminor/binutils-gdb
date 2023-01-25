@@ -36,10 +36,7 @@ proc run_lang_tests {exefile lang} {
     set nl "\[\r\n\]+"
 
     # Start with a fresh gdb.
-    gdb_exit
-    gdb_start
-    gdb_reinitialize_dir $srcdir/$subdir
-    gdb_load ${exefile}
+    clean_restart $exefile
 
     if {![runto_main]} {
 	return
@@ -190,11 +187,7 @@ with_test_prefix c++ {
 
 # Run various other tests.
 
-# Start with a fresh gdb.
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart $binfile
 
 if {![runto_main]} {
     return
