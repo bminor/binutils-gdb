@@ -577,7 +577,8 @@ proc undefined_weak {cflags ldflags} {
     run_ld_link_exec_tests [list \
 	[list \
 	    "Run pr19704" \
-	    "$ldflags tmpdir/libpr19704.so -Wl,-R,tmpdir" \
+	    "$ldflags -Wl,--no-as-needed tmpdir/libpr19704.so \
+	     -Wl,-R,tmpdir" \
 	    "-Wa,-mrelax-relocations=yes" \
 	    { pr19704a.c } \
 	    "pr19704" \
@@ -1078,7 +1079,7 @@ if { [isnative]
 	] \
 	[list \
 	    "Run pr19031" \
-	    "$NOPIE_LDFLAGS tmpdir/pr19031.so" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr19031.so" \
 	    "-Wa,-mx86-used-note=yes" \
 	    { pr19031b.S pr19031c.c } \
 	    "pr19031" \
@@ -1087,7 +1088,7 @@ if { [isnative]
 	] \
 	[list \
 	    "Run got1" \
-	    "$NOPIE_LDFLAGS tmpdir/got1d.so" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/got1d.so" \
 	    "-Wa,-mx86-used-note=yes" \
 	    { got1a.S got1b.c got1c.c } \
 	    "got1" \
