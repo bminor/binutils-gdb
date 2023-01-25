@@ -22,6 +22,7 @@ standard_testfile
 
 # Support for XML is needed to run this test.
 require allow_xml_test
+require can_spawn_for_attach
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
     untested "failed to compile"
@@ -31,8 +32,6 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 if [mi_gdb_start] {
     return
 }
-
-require can_spawn_for_attach
 
 set string_re {(?:[^\\"]|\\.)*}
 
