@@ -3096,6 +3096,8 @@ dwarf2_cleanup (void)
 {
   purge_generated_debug (true);
   free (files);
+  for (unsigned int i = 0; i < dirs_in_use; i++)
+    free (dirs[i]);
   free (dirs);
 }
 
