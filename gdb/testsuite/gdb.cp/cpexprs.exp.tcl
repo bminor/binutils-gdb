@@ -722,6 +722,8 @@ foreach name [get_functions list] {
 # Test c/v gets recognized even without quoting.
 foreach cv {{} { const} { volatile} { const volatile}} {
   set test "p 'CV::m(int)$cv'"
+  set correct dummy_value
+
   gdb_test_multiple $test $test {
       -re "( = {.*} 0x\[0-9a-f\]+ <CV::m.*>)\r\n$gdb_prompt $" {
 	  # = {void (CV * const, CV::t)} 0x400944 <CV::m(int)>
