@@ -3414,6 +3414,11 @@ proc is_x86_like_target {} {
     return [expr [is_ilp32_target] && ![is_amd64_regs_target]]
 }
 
+# Return 1 if this target is an x86_64 with -m64.
+proc is_x86_64_m64_target {} {
+    return [expr [istarget x86_64-*-* ] && [is_lp64_target]]
+}
+
 # Return 1 if this target is an arm or aarch32 on aarch64.
 
 gdb_caching_proc is_aarch32_target {

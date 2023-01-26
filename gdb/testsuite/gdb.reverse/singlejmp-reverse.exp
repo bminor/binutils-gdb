@@ -26,12 +26,12 @@ if [info exists COMPILE] {
 				      ] == -1 } {
 	return -1
     }
-} elseif { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
-    verbose "Skipping ${testfile}."
-    return
-} elseif { [build_executable ${testfile}.exp ${testfile} \
-	    [list ${srcfile} ${srcfile2}] {}] == -1 } {
-    return -1
+} else {
+    require is_x86_64_m64_target
+    if { [build_executable ${testfile}.exp ${testfile} \
+	      [list ${srcfile} ${srcfile2}] {}] == -1 } {
+	return -1
+    }
 }
 
 clean_restart $executable

@@ -19,10 +19,7 @@ require allow_python_tests
 
 standard_testfile amd64-py-framefilter-invalidarg.S
 
-if { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
-    verbose "Skipping py-framefilter-invalidarg."
-    return
-}
+require is_x86_64_m64_target
 
 # We cannot use prepare_for_testing as we have to set the safe-patch
 # to check objfile and progspace printers.

@@ -23,7 +23,7 @@ require dwarf2_support
 # This test can only be run on x86 and amd64 targets (and not x32).
 if { [is_x86_like_target] } {
     set sfile ${test}.S
-} elseif {[istarget "x86_64-*-*"] && [is_lp64_target]} {
+} elseif { [is_x86_64_m64_target] } {
     set sfile ${test}-amd64.S
 } else {
     return 0

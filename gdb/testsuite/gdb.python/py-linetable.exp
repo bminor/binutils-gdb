@@ -22,9 +22,8 @@ if [info exists COMPILE] {
     # make check RUNTESTFLAGS="gdb.python/py-linetable.exp COMPILE=1"
     standard_testfile
     lappend opts debug optimize=-O2
-} elseif { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
-    verbose "Skipping ${testfile}."
-    return
+} else {
+    require is_x86_64_m64_target
 }
 
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} $opts] } {

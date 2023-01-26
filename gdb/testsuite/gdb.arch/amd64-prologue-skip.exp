@@ -16,7 +16,7 @@
 standard_testfile .S
 set binfile ${binfile}.o
 
-require {istarget x86_64-*-*} is_lp64_target
+require is_x86_64_m64_target
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" object {debug}] != "" } {
     untested "failed to compile"

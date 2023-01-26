@@ -28,9 +28,8 @@ if [info exists COMPILE] {
     # make check RUNTESTFLAGS="gdb.mi/mi2-amd64-entry-value.exp COMPILE=1"
     set srcfile ${testfile}.c
     lappend opts debug optimize=-O2
-} elseif { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
-    verbose "Skipping mi2-amd64-entry-value."
-    return
+} else {
+    require is_x86_64_m64_target
 }
 
 set executable ${testfile}

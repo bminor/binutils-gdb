@@ -24,7 +24,7 @@ if { [test_compiler_info gcc*] || [test_compiler_info clang*] } {
     lappend options c++
 }
 
-if { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
+if { ![is_x86_64_m64_target] } {
     verbose "Skipping x86_64 LOC_CONST test."
     set srcfile3 ""
 }

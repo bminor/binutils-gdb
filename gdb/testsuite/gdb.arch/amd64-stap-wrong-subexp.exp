@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-require {istarget x86_64-*-*} is_lp64_target
+require is_x86_64_m64_target
 
 standard_testfile amd64-stap-wrong-subexp.S
 

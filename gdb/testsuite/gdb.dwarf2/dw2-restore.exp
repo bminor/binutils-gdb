@@ -16,9 +16,7 @@
 # Test handling of DW_CFA_restore_state.
 
 # This test can only be run on x86_64 targets.
-if {![istarget x86_64-*] || ![is_lp64_target]} {
-    return 0  
-}
+require is_x86_64_m64_target
 standard_testfile .S
 
 set opts [list {additional_flags=-nostdlib}]

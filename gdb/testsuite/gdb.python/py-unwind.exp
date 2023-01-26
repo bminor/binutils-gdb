@@ -32,7 +32,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} "debug $fla
 }
 
 # This test runs on a specific platform.
-if { ![istarget x86_64-*-* ] || ![is_lp64_target] } { continue }
+require is_x86_64_m64_target
 
 # The following tests require execution.
 

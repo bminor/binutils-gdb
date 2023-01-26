@@ -22,9 +22,7 @@ load_lib dwarf.exp
 # This test can only be run on x86-like targets which support DWARF.
 require dwarf2_support allow_cplus_tests
 
-if {![istarget "x86_64-*-*"] || ![is_lp64_target]} {
-    return 0
-}
+require is_x86_64_m64_target
 
 standard_testfile .S
 set csrcfile "${testfile}.cc"

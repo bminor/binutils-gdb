@@ -18,7 +18,7 @@
 # Test displaced stepping over VEX-encoded RIP-relative AVX
 # instructions.
 
-require {istarget x86_64-*-*} is_lp64_target have_avx
+require is_x86_64_m64_target have_avx
 
 standard_testfile .S
 

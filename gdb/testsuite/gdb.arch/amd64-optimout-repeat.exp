@@ -21,7 +21,7 @@ if [info exists COMPILE] {
     set srcfile ${srcfile2}
     lappend opts debug optimize=-O2
 } else {
-    require {istarget x86_64-*-*} is_lp64_target
+    require is_x86_64_m64_target
 }
 
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} $opts] } {

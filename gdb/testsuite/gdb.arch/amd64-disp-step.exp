@@ -18,7 +18,7 @@
 # Test amd64 displaced stepping.
 
 
-require {istarget x86_64-*-*} is_lp64_target
+require is_x86_64_m64_target
 
 set newline "\[\r\n\]*"
 

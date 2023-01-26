@@ -18,7 +18,7 @@
 
 # This file is part of the gdb testsuite.
 
-require {istarget x86_64-*-*} is_lp64_target
+require is_x86_64_m64_target
 
 standard_testfile amd64-pseudo.c
 
