@@ -2320,8 +2320,18 @@ resolve_expression (expressionS *expressionP)
 	    return 0;
 	  left = (offsetT) left % (offsetT) right;
 	  break;
-	case O_left_shift:		left <<= right; break;
-	case O_right_shift:		left >>= right; break;
+	case O_left_shift:
+	  if (right >= sizeof (left) * CHAR_BIT)
+	    left = 0;
+	  else
+	    left <<= right;
+	  break;
+	case O_right_shift:
+	  if (right >= sizeof (left) * CHAR_BIT)
+	    left = 0;
+	  else
+	    left >>= right;
+	  break;
 	case O_bit_inclusive_or:	left |= right; break;
 	case O_bit_or_not:		left |= ~right; break;
 	case O_bit_exclusive_or:	left ^= right; break;
