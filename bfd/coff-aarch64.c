@@ -189,9 +189,10 @@ coff_aarch64_addr32nb_reloc (bfd *abfd,
 		       + symbol->section->output_section->vma);
       bfd_vma addend = bfd_getl_signed_32 (data + reloc_entry->address);
       relocation += addend;
-      if (bfd_get_flavour (output_bfd) == bfd_target_coff_flavour
-	  && obj_pe (output_bfd))
-	relocation -= pe_data (output_bfd)->pe_opthdr.ImageBase;
+      bfd *obfd = input_section->output_section->owner;
+      if (bfd_get_flavour (obfd) == bfd_target_coff_flavour
+	  && obj_pe (obfd))
+	relocation -= pe_data (obfd)->pe_opthdr.ImageBase;
       else
 	{
 	  *error_message = "unsupported";
