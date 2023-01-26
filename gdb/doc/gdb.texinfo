@@ -48227,11 +48227,7 @@ other floating point hardware.
 
 The @samp{org.gnu.gdb.riscv.vector} feature is optional.  If present,
 it should contain registers @samp{v0} through @samp{v31}, all of which
-must be the same size.  These requirements are based on the v0.10
-draft vector extension, as the vector extension is not yet final.  In
-the event that the register set of the vector extension changes for
-the final specification, the requirements given here could change for
-future releases of @value{GDBN}.
+must be the same size.
 
 @node RX Features
 @subsection RX Features
