@@ -1195,6 +1195,8 @@ dwarf2_directive_filename (void)
 	{
 	  dirname = filename;
 	  filename = demand_copy_C_string (&filename_len);
+	  if (filename == NULL)
+	    return NULL;
 	  SKIP_WHITESPACE ();
 	}
 
