@@ -88,8 +88,7 @@ extern void macro_init (int, int, int,
 extern void macro_end (void);
 extern void macro_set_alternate (int);
 extern void macro_mri_mode (int);
-extern const char *define_macro (size_t, sb *, sb *, size_t (*) (sb *),
-				 const char *, unsigned int, const char **);
+extern macro_entry *define_macro (sb *, sb *, size_t (*) (sb *));
 extern int check_macro (const char *, sb *, const char **, macro_entry **);
 extern void delete_macro (const char *);
 extern const char *expand_irp (int, size_t, sb *, sb *, size_t (*) (sb *));

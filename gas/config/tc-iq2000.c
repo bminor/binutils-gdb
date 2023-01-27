@@ -229,24 +229,20 @@ iq2000_add_macro (const char *  name,
 		  const char ** arguments)
 {
   macro_entry *macro;
-  sb macro_name;
-  const char *namestr;
 
   macro = XNEW (macro_entry);
+  macro->name = xstrdup (name);
   sb_new (& macro->sub);
-  sb_new (& macro_name);
-
   macro->formal_count = 0;
   macro->formals = 0;
+  macro->formal_hash = str_htab_create ();
+  macro->file = as_where (&macro->line);
 
   sb_add_string (& macro->sub, semantics);
 
   if (arguments != NULL)
     {
       formal_entry ** p = &macro->formals;
-
-      macro->formal_count = 0;
-      macro->formal_hash = str_htab_create ();
 
       while (*arguments != NULL)
 	{
@@ -261,7 +257,7 @@ iq2000_add_macro (const char *  name,
 	  /* chlm: Added the following to allow defaulted args.  */
 	  if (strchr (*arguments,'='))
 	    {
-	      char * tt_args = strdup (*arguments);
+	      char * tt_args = xstrdup (*arguments);
 	      char * tt_dflt = strchr (tt_args,'=');
 
 	      *tt_dflt = 0;
@@ -283,9 +279,7 @@ iq2000_add_macro (const char *  name,
 	}
     }
 
-  sb_add_string (&macro_name, name);
-  namestr = sb_terminate (&macro_name);
-  str_hash_insert (macro_hash, namestr, macro, 1);
+  str_hash_insert (macro_hash, macro->name, macro, 1);
 
   macro_defined = 1;
 }

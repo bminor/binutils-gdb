@@ -70,13 +70,23 @@ static size_t (*macro_expr) (const char *, size_t, sb *, offsetT *);
 
 static int macro_number;
 
+static void free_macro (macro_entry *);
+
+static void
+macro_del_f (void *ent)
+{
+  string_tuple_t *tuple = ent;
+  free_macro ((macro_entry *) tuple->value);
+}
+
 /* Initialize macro processing.  */
 
 void
 macro_init (int alternate, int mri, int strip_at,
 	    size_t (*exp) (const char *, size_t, sb *, offsetT *))
 {
-  macro_hash = str_htab_create ();
+  macro_hash = htab_create_alloc (16, hash_string_tuple, eq_string_tuple,
+				  macro_del_f, notes_calloc, NULL);
   macro_defined = 0;
   macro_alternate = alternate;
   macro_mri = mri;
@@ -664,34 +674,30 @@ free_macro (macro_entry *macro)
     }
   htab_delete (macro->formal_hash);
   sb_kill (&macro->sub);
+  free ((char *) macro->name);
   free (macro);
 }
 
-/* Define a new macro.  Returns NULL on success, otherwise returns an
-   error message.  If NAMEP is not NULL, *NAMEP is set to the name of
-   the macro which was defined.  */
+/* Define a new macro.  */
 
-const char *
-define_macro (size_t idx, sb *in, sb *label,
-	      size_t (*get_line) (sb *),
-	      const char *file, unsigned int line,
-	      const char **namep)
+macro_entry *
+define_macro (sb *in, sb *label, size_t (*get_line) (sb *))
 {
   macro_entry *macro;
   sb name;
+  size_t idx;
   const char *error = NULL;
 
   macro = XNEW (macro_entry);
   sb_new (&macro->sub);
   sb_new (&name);
-  macro->file = file;
-  macro->line = line;
+  macro->file = as_where (&macro->line);
 
   macro->formal_count = 0;
   macro->formals = 0;
   macro->formal_hash = str_htab_create ();
 
-  idx = sb_skip_white (idx, in);
+  idx = sb_skip_white (0, in);
   if (! buffer_and_nest ("MACRO", "ENDM", &macro->sub, get_line))
     error = _("unexpected end of file in macro `%s' definition");
   if (label != NULL && label->len != 0)
@@ -740,15 +746,16 @@ define_macro (size_t idx, sb *in, sb *label,
 	error = _("Macro `%s' was already defined");
     }
 
-  if (namep != NULL)
-    *namep = macro->name;
-
   if (!error)
     macro_defined = 1;
   else
-    free_macro (macro);
+    {
+      as_bad_where (macro->file, macro->line, error, macro->name);
+      free_macro (macro);
+      macro = NULL;
+    }
 
-  return error;
+  return macro;
 }
 
 /* Scan a token, and then skip KIND.  */
@@ -1318,10 +1325,7 @@ delete_macro (const char *name)
 
   macro = str_hash_find (macro_hash, copy);
   if (macro != NULL)
-    {
-      free_macro (macro);
-      str_hash_delete (macro_hash, copy);
-    }
+    str_hash_delete (macro_hash, copy);
   else
     as_warn (_("Attempt to purge non-existing macro `%s'"), copy);
   free (copy);

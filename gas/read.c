@@ -2647,13 +2647,8 @@ void
 s_macro (int ignore ATTRIBUTE_UNUSED)
 {
   char *eol;
-  const char * file;
-  unsigned int line;
   sb s;
-  const char *err;
-  const char *name;
-
-  file = as_where (&line);
+  macro_entry *macro;
 
   eol = find_end_of_line (input_line_pointer, 0);
   sb_build (&s, eol - input_line_pointer);
@@ -2664,19 +2659,18 @@ s_macro (int ignore ATTRIBUTE_UNUSED)
     {
       sb label;
       size_t len;
+      const char *name;
 
       name = S_GET_NAME (line_label);
       len = strlen (name);
       sb_build (&label, len);
       sb_add_buffer (&label, name, len);
-      err = define_macro (0, &s, &label, get_macro_line_sb, file, line, &name);
+      macro = define_macro (&s, &label, get_macro_line_sb);
       sb_kill (&label);
     }
   else
-    err = define_macro (0, &s, NULL, get_macro_line_sb, file, line, &name);
-  if (err != NULL)
-    as_bad_where (file, line, err, name);
-  else
+    macro = define_macro (&s, NULL, get_macro_line_sb);
+  if (macro != NULL)
     {
       if (line_label != NULL)
 	{
@@ -2686,14 +2680,16 @@ s_macro (int ignore ATTRIBUTE_UNUSED)
 	}
 
       if (((NO_PSEUDO_DOT || flag_m68k_mri)
-	   && str_hash_find (po_hash, name) != NULL)
+	   && str_hash_find (po_hash, macro->name) != NULL)
 	  || (!flag_m68k_mri
-	      && *name == '.'
-	      && str_hash_find (po_hash, name + 1) != NULL))
-	as_warn_where (file,
-		 line,
-		 _("attempt to redefine pseudo-op `%s' ignored"),
-		 name);
+	      && macro->name[0] == '.'
+	      && str_hash_find (po_hash, macro->name + 1) != NULL))
+	{
+	  as_warn_where (macro->file, macro->line,
+			 _("attempt to redefine pseudo-op `%s' ignored"),
+			 macro->name);
+	  str_hash_delete (macro_hash, macro->name);
+	}
     }
 
   sb_kill (&s);
