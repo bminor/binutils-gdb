@@ -48,7 +48,7 @@ gdb_test_multiple "ptype s" "ptype s" {
 	pass $gdb_test_name
     }
     -re -wrap $nodebug {
-	if {$has_runtime_debug_info} {
+	if {!$has_runtime_debug_info} {
 	    kfail "no debug info" $gdb_test_name
 	} else {
 	    fail $gdb_test_name
