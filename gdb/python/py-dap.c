@@ -45,10 +45,9 @@ public:
   {
   }
 
-  gdb_exception exec (const char *command) override
+  void exec (const char *command) override
   {
     /* Just ignore it.  */
-    return {};
   }
 
   void set_logging (ui_file_up logfile, bool logging_redirect,

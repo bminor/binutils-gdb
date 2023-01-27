@@ -39,6 +39,7 @@
 #include "top.h"		/* For command_loop.  */
 #include "main.h"
 #include "gdbsupport/buildargv.h"
+#include "gdbsupport/scope-exit.h"
 
 /* Each UI has its own independent set of interpreters.  */
 
@@ -332,7 +333,7 @@ interp_supports_command_editing (struct interp *interp)
 /* interp_exec - This executes COMMAND_STR in the current 
    interpreter.  */
 
-struct gdb_exception
+void
 interp_exec (struct interp *interp, const char *command_str)
 {
   struct ui_interp_info *ui_interp = get_current_interp_info ();
@@ -341,7 +342,7 @@ interp_exec (struct interp *interp, const char *command_str)
   scoped_restore save_command_interp
     = make_scoped_restore (&ui_interp->command_interpreter, interp);
 
-  return interp->exec (command_str);
+  interp->exec (command_str);
 }
 
 /* A convenience routine that nulls out all the common command hooks.
@@ -393,19 +394,13 @@ interpreter_exec_cmd (const char *args, int from_tty)
     error (_("Could not find interpreter \"%s\"."), prules[0]);
 
   interp_set (interp_to_use, false);
+  SCOPE_EXIT
+    {
+      interp_set (old_interp, false);
+    };
 
   for (i = 1; i < nrules; i++)
-    {
-      struct gdb_exception e = interp_exec (interp_to_use, prules[i]);
-
-      if (e.reason < 0)
-	{
-	  interp_set (old_interp, 0);
-	  error (_("error in command: \"%s\"."), prules[i]);
-	}
-    }
-
-  interp_set (old_interp, 0);
+    interp_exec (interp_to_use, prules[i]);
 }
 
 /* See interps.h.  */

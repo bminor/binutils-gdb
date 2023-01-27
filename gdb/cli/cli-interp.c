@@ -48,7 +48,7 @@ class cli_interp final : public cli_interp_base
   void init (bool top_level) override;
   void resume () override;
   void suspend () override;
-  gdb_exception exec (const char *command_str) override;
+  void exec (const char *command_str) override;
   ui_out *interp_ui_out () override;
 
 private:
@@ -74,11 +74,6 @@ as_cli_interp_base (interp *interp)
 {
   return dynamic_cast<cli_interp_base *> (interp);
 }
-
-/* Longjmp-safe wrapper for "execute_command".  */
-static struct gdb_exception safe_execute_command (struct ui_out *uiout,
-						  const char *command, 
-						  int from_tty);
 
 /* See cli-interp.h.
 
@@ -314,12 +309,9 @@ cli_interp::suspend ()
   gdb_disable_readline ();
 }
 
-gdb_exception
+void
 cli_interp::exec (const char *command_str)
 {
-  struct ui_file *old_stream;
-  struct gdb_exception result;
-
   /* gdb_stdout could change between the time m_cli_uiout was
      initialized and now.  Since we're probably using a different
      interpreter which has a new ui_file for gdb_stdout, use that one
@@ -327,41 +319,28 @@ cli_interp::exec (const char *command_str)
 
      It is important that it gets reset everytime, since the user
      could set gdb to use a different interpreter.  */
-  old_stream = m_cli_uiout->set_stream (gdb_stdout);
-  result = safe_execute_command (m_cli_uiout.get (), command_str, 1);
-  m_cli_uiout->set_stream (old_stream);
-  return result;
+  ui_file *old_stream = m_cli_uiout->set_stream (gdb_stdout);
+  SCOPE_EXIT { m_cli_uiout->set_stream (old_stream); };
+
+  /* Save and override the global ``struct ui_out'' builder.  */
+  scoped_restore saved_uiout = make_scoped_restore (&current_uiout,
+						    m_cli_uiout.get ());
+
+  try
+    {
+      execute_command (command_str, 1);
+    }
+  catch (const gdb_exception_error &ex)
+    {
+      exception_print (gdb_stderr, ex);
+      throw;
+    }
 }
 
 bool
 cli_interp_base::supports_command_editing ()
 {
   return true;
-}
-
-static struct gdb_exception
-safe_execute_command (struct ui_out *command_uiout, const char *command,
-		      int from_tty)
-{
-  struct gdb_exception e;
-
-  /* Save and override the global ``struct ui_out'' builder.  */
-  scoped_restore saved_uiout = make_scoped_restore (&current_uiout,
-						    command_uiout);
-
-  try
-    {
-      execute_command (command, from_tty);
-    }
-  catch (gdb_exception &exception)
-    {
-      e = std::move (exception);
-    }
-
-  /* FIXME: cagney/2005-01-13: This shouldn't be needed.  Instead the
-     caller should print the exception.  */
-  exception_print (gdb_stderr, e);
-  return e;
 }
 
 ui_out *

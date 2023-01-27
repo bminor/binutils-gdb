@@ -49,7 +49,7 @@ public:
   void init (bool top_level) override;
   void resume () override;
   void suspend () override;
-  gdb_exception exec (const char *command_str) override;
+  void exec (const char *command_str) override;
   ui_out *interp_ui_out () override;
 };
 
@@ -149,7 +149,7 @@ tui_interp::interp_ui_out ()
     return tui_old_uiout;
 }
 
-gdb_exception
+void
 tui_interp::exec (const char *command_str)
 {
   internal_error (_("tui_exec called"));

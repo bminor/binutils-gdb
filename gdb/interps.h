@@ -36,8 +36,7 @@ typedef struct interp *(*interp_factory_func) (const char *name);
 extern void interp_factory_register (const char *name,
 				     interp_factory_func func);
 
-extern struct gdb_exception interp_exec (struct interp *interp,
-					 const char *command);
+extern void interp_exec (struct interp *interp, const char *command);
 
 class interp
 {
@@ -51,7 +50,7 @@ public:
   virtual void resume () = 0;
   virtual void suspend () = 0;
 
-  virtual gdb_exception exec (const char *command) = 0;
+  virtual void exec (const char *command) = 0;
 
   /* Returns the ui_out currently used to collect results for this
      interpreter.  It can be a formatter for stdout, as is the case

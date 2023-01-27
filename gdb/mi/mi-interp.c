@@ -199,11 +199,10 @@ mi_interp::suspend ()
   gdb_disable_readline ();
 }
 
-gdb_exception
+void
 mi_interp::exec (const char *command)
 {
   mi_execute_command_wrapper (command);
-  return gdb_exception ();
 }
 
 void
@@ -240,12 +239,7 @@ mi_cmd_interpreter_exec (const char *command, char **argv, int argc)
     };
 
   for (i = 1; i < argc; i++)
-    {
-      struct gdb_exception e = interp_exec (interp_to_use, argv[i]);
-
-      if (e.reason < 0)
-	error ("%s", e.what ());
-    }
+    interp_exec (interp_to_use, argv[i]);
 }
 
 /* This inserts a number of hooks that are meant to produce
