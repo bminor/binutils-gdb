@@ -931,8 +931,8 @@ typedef struct insn_template
 #define Opcode_D	0x2 /* Direction bit:
 			       set if Reg --> Regmem;
 			       unset if Regmem --> Reg. */
-#define Opcode_FloatR	0x8 /* Bit to swap src/dest for float insns. */
-#define Opcode_FloatD 0x400 /* Direction bit for float insns. */
+#define Opcode_FloatR	0x8 /* ModR/M bit to swap src/dest for float insns. */
+#define Opcode_FloatD   0x4 /* Direction bit for float insns. */
 #define Opcode_ExtD	0x1 /* Direction bit for extended opcode space insns. */
 #define Opcode_SIMD_IntD 0x10 /* Direction bit for SIMD int insns. */
 /* The next value is arbitrary, as long as it's non-zero and distinct

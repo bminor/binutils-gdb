@@ -6995,8 +6995,10 @@ match_template (char mnem_suffix)
 		{
 		  if (t->opcode_modifier.operandconstraint != UGH)
 		    found_reverse_match = Opcode_FloatD;
+		  else
+		    found_reverse_match = ~0;
 		  /* FSUB{,R} and FDIV{,R} may need a 2nd bit flipped.  */
-		  if ((t->base_opcode & 0x20)
+		  if ((t->extension_opcode & 4)
 		      && (intel_syntax || intel_mnemonic))
 		    found_reverse_match |= Opcode_FloatR;
 		}
@@ -7131,6 +7133,12 @@ match_template (char mnem_suffix)
     case 0:
       break;
 
+    case Opcode_FloatR:
+    case Opcode_FloatR | Opcode_FloatD:
+      i.tm.extension_opcode ^= Opcode_FloatR >> 3;
+      found_reverse_match &= Opcode_FloatD;
+
+      /* Fall through.  */
     default:
       /* If we found a reverse match we must alter the opcode direction
 	 bit and clear/flip the regmem modifier one.  found_reverse_match
@@ -8027,9 +8035,14 @@ process_operands (void)
 	 process_immext ();
     }
   else if (i.tm.operand_types[0].bitfield.instance == Accum
-	   && i.tm.operand_types[0].bitfield.xmmword)
+	   && i.tm.opcode_modifier.modrm)
     {
       unsigned int j;
+
+      /* This needs to account for the adjustment already done ahead of
+	 calling process_operands().  */
+      if (i.tm.operand_types[0].bitfield.xmmword)
+	i.reg_operands--;
 
       for (j = 1; j < i.operands; j++)
 	{
@@ -8044,7 +8057,6 @@ process_operands (void)
 	}
 
       i.operands--;
-      i.reg_operands--;
       i.tm.operands--;
     }
   else if (i.tm.opcode_modifier.operandconstraint == IMPLICIT_QUAD_GROUP)
@@ -8092,6 +8104,24 @@ process_operands (void)
 	 index base bytes based on all the info we've collected.  */
 
       default_seg = build_modrm_byte ();
+
+      if (!quiet_warnings && i.tm.opcode_modifier.operandconstraint == UGH)
+	{
+	  /* Warn about some common errors, but press on regardless.  */
+	  if (i.operands == 2)
+	    {
+	      /* Reversed arguments on faddp or fmulp.  */
+	      as_warn (_("translating to `%s %s%s,%s%s'"), insn_name (&i.tm),
+		       register_prefix, i.op[!intel_syntax].regs->reg_name,
+		       register_prefix, i.op[intel_syntax].regs->reg_name);
+	    }
+	  else if (i.tm.opcode_modifier.mnemonicsize == IGNORESIZE)
+	    {
+	      /* Extraneous `l' suffix on fp insn.  */
+	      as_warn (_("translating to `%s %s%s'"), insn_name (&i.tm),
+		       register_prefix, i.op[0].regs->reg_name);
+	    }
+	}
     }
   else if (i.types[0].bitfield.class == SReg)
     {
@@ -8126,8 +8156,7 @@ process_operands (void)
     }
   else if (i.short_form)
     {
-      /* The register or float register operand is in operand
-	 0 or 1.  */
+      /* The register operand is in operand 0 or 1.  */
       const reg_entry *r = i.op[0].regs;
 
       if (i.imm_operands
@@ -8137,23 +8166,6 @@ process_operands (void)
       i.tm.base_opcode |= r->reg_num;
       if ((r->reg_flags & RegRex) != 0)
 	i.rex |= REX_B;
-      if (!quiet_warnings && i.tm.opcode_modifier.operandconstraint == UGH)
-	{
-	  /* Warn about some common errors, but press on regardless.  */
-	  if (i.operands != 2)
-	    {
-	      /* Extraneous `l' suffix on fp insn.  */
-	      as_warn (_("translating to `%s %s%s'"), insn_name (&i.tm),
-		       register_prefix, i.op[0].regs->reg_name);
-	    }
-	  else if (i.op[0].regs->reg_type.bitfield.instance != Accum)
-	    {
-	      /* Reversed arguments on faddp or fmulp.  */
-	      as_warn (_("translating to `%s %s%s,%s%s'"), insn_name (&i.tm),
-		       register_prefix, i.op[!intel_syntax].regs->reg_name,
-		       register_prefix, i.op[intel_syntax].regs->reg_name);
-	    }
-	}
     }
 
   if ((i.seg[0] || i.prefix[SEG_PREFIX])

@@ -596,9 +596,9 @@ verw, 0xf00/5, i286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Reg16|W
 // Floating point instructions.
 
 // load
-fld, 0xd9c0, FP, NoSuf, { FloatReg }
+fld, 0xd9/0, FP, Modrm|NoSuf, { FloatReg }
 fld, 0xd9/0, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
-fld, 0xd9c0, FP, IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|Ugh, { FloatReg }
+fld, 0xd9/0, FP, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|Ugh, { FloatReg }
 // Intel Syntax
 fld, 0xdb/5, FP, Modrm|NoSuf, { Tbyte|Unspecified|BaseIndex }
 fild, 0xdf/0, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
@@ -608,15 +608,15 @@ fldt, 0xdb/5, FP, Modrm|NoSuf, { Unspecified|BaseIndex }
 fbld, 0xdf/4, FP, Modrm|NoSuf, { Tbyte|Unspecified|BaseIndex }
 
 // store (no pop)
-fst, 0xddd0, FP, NoSuf, { FloatReg }
+fst, 0xdd/2, FP, Modrm|NoSuf, { FloatReg }
 fst, 0xd9/2, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
-fst, 0xddd0, FP, IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|Ugh, { FloatReg }
+fst, 0xdd/2, FP, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|Ugh, { FloatReg }
 fist, 0xdf/2, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
 
 // store (with pop)
-fstp, 0xddd8, FP, NoSuf, { FloatReg }
+fstp, 0xdd/3, FP, Modrm|NoSuf, { FloatReg }
 fstp, 0xd9/3, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
-fstp, 0xddd8, FP, IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|Ugh, { FloatReg }
+fstp, 0xdd/3, FP, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|Ugh, { FloatReg }
 // Intel Syntax
 fstp, 0xdb/7, FP, Modrm|NoSuf, { Tbyte|Unspecified|BaseIndex }
 fistp, 0xdf/3, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
@@ -626,32 +626,32 @@ fstpt, 0xdb/7, FP, Modrm|NoSuf, { Unspecified|BaseIndex }
 fbstp, 0xdf/6, FP, Modrm|NoSuf, { Tbyte|Unspecified|BaseIndex }
 
 // exchange %st<n> with %st0
-fxch, 0xd9c8, FP, NoSuf, { FloatReg }
+fxch, 0xd9/1, FP, Modrm|NoSuf, { FloatReg }
 // alias for fxch %st(1)
 fxch, 0xd9c9, FP, NoSuf, {}
 
 // comparison (without pop)
-fcom, 0xd8d0, FP, NoSuf, { FloatReg }
+fcom, 0xd8/2, FP, Modrm|NoSuf, { FloatReg }
 // alias for fcom %st(1)
 fcom, 0xd8d1, FP, NoSuf, {}
 fcom, 0xd8/2, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
-fcom, 0xd8d0, FP, IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|Ugh, { FloatReg }
+fcom, 0xd8/2, FP, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|Ugh, { FloatReg }
 ficom, 0xde/2, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
 
 // comparison (with pop)
-fcomp, 0xd8d8, FP, NoSuf, { FloatReg }
+fcomp, 0xd8/3, FP, Modrm|NoSuf, { FloatReg }
 // alias for fcomp %st(1)
 fcomp, 0xd8d9, FP, NoSuf, {}
 fcomp, 0xd8/3, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
-fcomp, 0xd8d8, FP, IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|Ugh, { FloatReg }
+fcomp, 0xd8/3, FP, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|Ugh, { FloatReg }
 ficomp, 0xde/3, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
 fcompp, 0xded9, FP, NoSuf, {}
 
 // unordered comparison (with pop)
-fucom, 0xdde0, i387, NoSuf, { FloatReg }
+fucom, 0xdd/4, i387, Modrm|NoSuf, { FloatReg }
 // alias for fucom %st(1)
 fucom, 0xdde1, i387, NoSuf, {}
-fucomp, 0xdde8, i387, NoSuf, { FloatReg }
+fucomp, 0xdd/4, i387, Modrm|NoSuf, { FloatReg }
 // alias for fucomp %st(1)
 fucomp, 0xdde9, i387, NoSuf, {}
 fucompp, 0xdae9, i387, NoSuf, {}
@@ -671,94 +671,94 @@ fldz, 0xd9ee, FP, NoSuf, {}
 // Arithmetic.
 
 // add
-fadd, 0xd8c0, FP, D|NoSuf, { FloatReg, FloatAcc }
+fadd, 0xd8/0, FP, D|Modrm|NoSuf, { FloatReg, FloatAcc }
 // alias for fadd %st(i), %st
-fadd, 0xd8c0, FP, NoSuf, { FloatReg }
+fadd, 0xd8/0, FP, Modrm|NoSuf, { FloatReg }
 // alias for faddp
 fadd, 0xdec1, FP, NoSuf|Ugh|ATTMnemonic, {}
 fadd, 0xd8/0, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
 fiadd, 0xde/0, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
 
-faddp, 0xdec0, FP, D|NoSuf|Ugh, { FloatAcc, FloatReg }
-faddp, 0xdec0, FP, NoSuf, { FloatReg }
+faddp, 0xde/0, FP, D|Modrm|NoSuf|Ugh, { FloatAcc, FloatReg }
+faddp, 0xde/0, FP, Modrm|NoSuf, { FloatReg }
 // alias for faddp %st, %st(1)
 faddp, 0xdec1, FP, NoSuf, {}
 
 // subtract
-fsub, 0xd8e0, FP, NoSuf, { FloatReg }
-fsub, 0xd8e0, FP, D|NoSuf, { FloatReg, FloatAcc }
+fsub, 0xd8/4, FP, Modrm|NoSuf, { FloatReg }
+fsub, 0xd8/4, FP, D|Modrm|NoSuf, { FloatReg, FloatAcc }
 // alias for fsubp
 fsub, 0xdee1, FP, NoSuf|Ugh|ATTMnemonic|ATTSyntax, {}
 fsub, 0xdee9, FP, NoSuf|Ugh|ATTMnemonic, {}
 fsub, 0xd8/4, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
 fisub, 0xde/4, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
 
-fsubp, 0xdee0, FP, NoSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
-fsubp, 0xdee0, FP, NoSuf|ATTMnemonic|ATTSyntax, { FloatReg }
+fsubp, 0xde/4, FP, Modrm|NoSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
+fsubp, 0xde/4, FP, Modrm|NoSuf|ATTMnemonic|ATTSyntax, { FloatReg }
 fsubp, 0xdee1, FP, NoSuf|ATTMnemonic|ATTSyntax, {}
-fsubp, 0xdee8, FP, NoSuf, { FloatAcc, FloatReg }
-fsubp, 0xdee8, FP, NoSuf, { FloatReg }
+fsubp, 0xde/5, FP, Modrm|NoSuf, { FloatAcc, FloatReg }
+fsubp, 0xde/5, FP, Modrm|NoSuf, { FloatReg }
 fsubp, 0xdee9, FP, NoSuf, {}
 
 // subtract reverse
-fsubr, 0xd8e8, FP, NoSuf, { FloatReg }
-fsubr, 0xd8e8, FP, D|NoSuf, { FloatReg, FloatAcc }
+fsubr, 0xd8/5, FP, Modrm|NoSuf, { FloatReg }
+fsubr, 0xd8/5, FP, D|Modrm|NoSuf, { FloatReg, FloatAcc }
 // alias for fsubrp
 fsubr, 0xdee9, FP, NoSuf|Ugh|ATTMnemonic|ATTSyntax, {}
 fsubr, 0xdee1, FP, NoSuf|Ugh|ATTMnemonic, {}
 fsubr, 0xd8/5, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
 fisubr, 0xde/5, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
 
-fsubrp, 0xdee8, FP, NoSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
-fsubrp, 0xdee8, FP, NoSuf|ATTMnemonic|ATTSyntax, { FloatReg }
+fsubrp, 0xde/5, FP, Modrm|NoSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
+fsubrp, 0xde/5, FP, Modrm|NoSuf|ATTMnemonic|ATTSyntax, { FloatReg }
 fsubrp, 0xdee9, FP, NoSuf|ATTMnemonic|ATTSyntax, {}
-fsubrp, 0xdee0, FP, NoSuf, { FloatAcc, FloatReg }
-fsubrp, 0xdee0, FP, NoSuf, { FloatReg }
+fsubrp, 0xde/4, FP, Modrm|NoSuf, { FloatAcc, FloatReg }
+fsubrp, 0xde/4, FP, Modrm|NoSuf, { FloatReg }
 fsubrp, 0xdee1, FP, NoSuf, {}
 
 // multiply
-fmul, 0xd8c8, FP, D|NoSuf, { FloatReg, FloatAcc }
-fmul, 0xd8c8, FP, NoSuf, { FloatReg }
+fmul, 0xd8/1, FP, D|Modrm|NoSuf, { FloatReg, FloatAcc }
+fmul, 0xd8/1, FP, Modrm|NoSuf, { FloatReg }
 // alias for fmulp
 fmul, 0xdec9, FP, NoSuf|Ugh|ATTMnemonic, {}
 fmul, 0xd8/1, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
 fimul, 0xde/1, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
 
-fmulp, 0xdec8, FP, D|NoSuf|Ugh, { FloatAcc, FloatReg }
-fmulp, 0xdec8, FP, NoSuf, { FloatReg }
+fmulp, 0xde/1, FP, D|Modrm|NoSuf|Ugh, { FloatAcc, FloatReg }
+fmulp, 0xde/1, FP, Modrm|NoSuf, { FloatReg }
 // alias for fmulp %st, %st(1)
 fmulp, 0xdec9, FP, NoSuf, {}
 
 // divide
-fdiv, 0xd8f0, FP, NoSuf, { FloatReg }
-fdiv, 0xd8f0, FP, D|NoSuf, { FloatReg, FloatAcc }
+fdiv, 0xd8/6, FP, Modrm|NoSuf, { FloatReg }
+fdiv, 0xd8/6, FP, D|Modrm|NoSuf, { FloatReg, FloatAcc }
 // alias for fdivp
 fdiv, 0xdef1, FP, NoSuf|Ugh|ATTMnemonic|ATTSyntax, {}
 fdiv, 0xdef9, FP, NoSuf|Ugh|ATTMnemonic, {}
 fdiv, 0xd8/6, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
 fidiv, 0xde/6, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
 
-fdivp, 0xdef0, FP, NoSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
-fdivp, 0xdef0, FP, NoSuf|ATTMnemonic|ATTSyntax, { FloatReg }
+fdivp, 0xde/6, FP, Modrm|NoSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
+fdivp, 0xde/6, FP, Modrm|NoSuf|ATTMnemonic|ATTSyntax, { FloatReg }
 fdivp, 0xdef1, FP, NoSuf|ATTMnemonic|ATTSyntax, {}
-fdivp, 0xdef8, FP, NoSuf, { FloatAcc, FloatReg }
-fdivp, 0xdef8, FP, NoSuf, { FloatReg }
+fdivp, 0xde/7, FP, Modrm|NoSuf, { FloatAcc, FloatReg }
+fdivp, 0xde/7, FP, Modrm|NoSuf, { FloatReg }
 fdivp, 0xdef9, FP, NoSuf, {}
 
 // divide reverse
-fdivr, 0xd8f8, FP, NoSuf, { FloatReg }
-fdivr, 0xd8f8, FP, D|NoSuf, { FloatReg, FloatAcc }
+fdivr, 0xd8/7, FP, Modrm|NoSuf, { FloatReg }
+fdivr, 0xd8/7, FP, D|Modrm|NoSuf, { FloatReg, FloatAcc }
 // alias for fdivrp
 fdivr, 0xdef9, FP, NoSuf|Ugh|ATTMnemonic|ATTSyntax, {}
 fdivr, 0xdef1, FP, NoSuf|Ugh|ATTMnemonic, {}
 fdivr, 0xd8/7, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
 fidivr, 0xde/7, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
 
-fdivrp, 0xdef8, FP, NoSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
-fdivrp, 0xdef8, FP, NoSuf|ATTMnemonic|ATTSyntax, { FloatReg }
+fdivrp, 0xde/7, FP, Modrm|NoSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
+fdivrp, 0xde/7, FP, Modrm|NoSuf|ATTMnemonic|ATTSyntax, { FloatReg }
 fdivrp, 0xdef9, FP, NoSuf|ATTMnemonic|ATTSyntax, {}
-fdivrp, 0xdef0, FP, NoSuf, { FloatAcc, FloatReg }
-fdivrp, 0xdef0, FP, NoSuf, { FloatReg }
+fdivrp, 0xde/6, FP, Modrm|NoSuf, { FloatAcc, FloatReg }
+fdivrp, 0xde/6, FP, Modrm|NoSuf, { FloatReg }
 fdivrp, 0xdef1, FP, NoSuf, {}
 
 f2xm1, 0xd9f0, FP, NoSuf, {}
@@ -811,9 +811,9 @@ fnsetpm, 0xdbe4, i287, NoSuf, {}
 fsetpm, 0xdbe4, i287, NoSuf|FWait, {}
 frstpm, 0xdbe5, i287, NoSuf, {}
 
-ffree, 0xddc0, FP, NoSuf, { FloatReg }
+ffree, 0xdd/0, FP, Modrm|NoSuf, { FloatReg }
 // P6:free st(i), pop st
-ffreep, 0xdfc0, i687, NoSuf, { FloatReg }
+ffreep, 0xdf/0, i687, Modrm|NoSuf, { FloatReg }
 fnop, 0xd9d0, FP, NoSuf, {}
 fwait, 0x9b, FP, NoSuf, {}
 
@@ -924,37 +924,37 @@ ud0, 0xfff, i186, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Un
 
 cmov<cc>, 0xf4<cc:opc>, CMOV, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
-fcmovb, 0xdac0, i687, NoSuf, { FloatReg, FloatAcc }
-fcmovnae, 0xdac0, i687, NoSuf, { FloatReg, FloatAcc }
-fcmove, 0xdac8, i687, NoSuf, { FloatReg, FloatAcc }
-fcmovbe, 0xdad0, i687, NoSuf, { FloatReg, FloatAcc }
-fcmovna, 0xdad0, i687, NoSuf, { FloatReg, FloatAcc }
-fcmovu, 0xdad8, i687, NoSuf, { FloatReg, FloatAcc }
-fcmovae, 0xdbc0, i687, NoSuf, { FloatReg, FloatAcc }
-fcmovnb, 0xdbc0, i687, NoSuf, { FloatReg, FloatAcc }
-fcmovne, 0xdbc8, i687, NoSuf, { FloatReg, FloatAcc }
-fcmova, 0xdbd0, i687, NoSuf, { FloatReg, FloatAcc }
-fcmovnbe, 0xdbd0, i687, NoSuf, { FloatReg, FloatAcc }
-fcmovnu, 0xdbd8, i687, NoSuf, { FloatReg, FloatAcc }
+fcmovb, 0xda/0, i687, Modrm|NoSuf, { FloatReg, FloatAcc }
+fcmovnae, 0xda/0, i687, Modrm|NoSuf, { FloatReg, FloatAcc }
+fcmove, 0xda/1, i687, Modrm|NoSuf, { FloatReg, FloatAcc }
+fcmovbe, 0xda/2, i687, Modrm|NoSuf, { FloatReg, FloatAcc }
+fcmovna, 0xda/2, i687, Modrm|NoSuf, { FloatReg, FloatAcc }
+fcmovu, 0xda/3, i687, Modrm|NoSuf, { FloatReg, FloatAcc }
+fcmovae, 0xdb/0, i687, Modrm|NoSuf, { FloatReg, FloatAcc }
+fcmovnb, 0xdb/0, i687, Modrm|NoSuf, { FloatReg, FloatAcc }
+fcmovne, 0xdb/1, i687, Modrm|NoSuf, { FloatReg, FloatAcc }
+fcmova, 0xdb/2, i687, Modrm|NoSuf, { FloatReg, FloatAcc }
+fcmovnbe, 0xdb/2, i687, Modrm|NoSuf, { FloatReg, FloatAcc }
+fcmovnu, 0xdb/3, i687, Modrm|NoSuf, { FloatReg, FloatAcc }
 
-fcomi, 0xdbf0, i687, NoSuf, { FloatReg, FloatAcc }
+fcomi, 0xdb/6, i687, Modrm|NoSuf, { FloatReg, FloatAcc }
 fcomi, 0xdbf1, i687, NoSuf, {}
-fcomi, 0xdbf0, i687, NoSuf, { FloatReg }
-fucomi, 0xdbe8, i687, NoSuf, { FloatReg, FloatAcc }
+fcomi, 0xdb/6, i687, Modrm|NoSuf, { FloatReg }
+fucomi, 0xdb/5, i687, Modrm|NoSuf, { FloatReg, FloatAcc }
 fucomi, 0xdbe9, i687, NoSuf, {}
-fucomi, 0xdbe8, i687, NoSuf, { FloatReg }
-fcomip, 0xdff0, i687, NoSuf, { FloatReg, FloatAcc }
+fucomi, 0xdb/5, i687, Modrm|NoSuf, { FloatReg }
+fcomip, 0xdf/6, i687, Modrm|NoSuf, { FloatReg, FloatAcc }
 fcomip, 0xdff1, i687, NoSuf, {}
-fcomip, 0xdff0, i687, NoSuf, { FloatReg }
-fcompi, 0xdff0, i687, NoSuf, { FloatReg, FloatAcc }
+fcomip, 0xdf/6, i687, Modrm|NoSuf, { FloatReg }
+fcompi, 0xdf/6, i687, Modrm|NoSuf, { FloatReg, FloatAcc }
 fcompi, 0xdff1, i687, NoSuf, {}
-fcompi, 0xdff0, i687, NoSuf, { FloatReg }
-fucomip, 0xdfe8, i687, NoSuf, { FloatReg, FloatAcc }
+fcompi, 0xdf/6, i687, Modrm|NoSuf, { FloatReg }
+fucomip, 0xdf/5, i687, Modrm|NoSuf, { FloatReg, FloatAcc }
 fucomip, 0xdfe9, i687, NoSuf, {}
-fucomip, 0xdfe8, i687, NoSuf, { FloatReg }
-fucompi, 0xdfe8, i687, NoSuf, { FloatReg, FloatAcc }
+fucomip, 0xdf/5, i687, Modrm|NoSuf, { FloatReg }
+fucompi, 0xdf/5, i687, Modrm|NoSuf, { FloatReg, FloatAcc }
 fucompi, 0xdfe9, i687, NoSuf, {}
-fucompi, 0xdfe8, i687, NoSuf, { FloatReg }
+fucompi, 0xdf/5, i687, Modrm|NoSuf, { FloatReg }
 
 // Pentium4 extensions.
 
