@@ -28,9 +28,6 @@
 
 #include "i386-opc.h"
 
-#include <libintl.h>
-#define _(String) gettext (String)
-
 /* Build-time checks are preferrable over runtime ones.  Use this construct
    in preference where possible.  */
 #define static_assert(e) ((void)sizeof (struct { int _:1 - 2 * !(e); }))
@@ -557,7 +554,7 @@ fail (const char *message, ...)
   va_list args;
 
   va_start (args, message);
-  fprintf (stderr, _("%s: error: "), program_name);
+  fprintf (stderr, "%s: error: ", program_name);
   vfprintf (stderr, message, args);
   va_end (args);
   xexit (1);
@@ -683,9 +680,9 @@ set_bitfield (char *f, bitfield *array, int value,
     }
 
   if (lineno != -1)
-    fail (_("%s: %d: unknown bitfield: %s\n"), filename, lineno, f);
+    fail ("%s: %d: unknown bitfield: %s\n", filename, lineno, f);
   else
-    fail (_("unknown bitfield: %s\n"), f);
+    fail ("unknown bitfield: %s\n", f);
 }
 
 static void
@@ -752,7 +749,7 @@ add_isa_dependencies (bitfield *flags, const char *f, int value,
       }
 
   if (!is_isa)
-    fail (_("unknown bitfield: %s\n"), f);
+    fail ("unknown bitfield: %s\n", f);
 }
 
 static void
@@ -817,7 +814,7 @@ process_i386_cpu_flag (FILE *table, char *flag,
 	  last -= 1;
 	  next = flag + 2;
 	  if (*last != ')')
-	    fail (_("%s: %d: missing `)' in bitfield: %s\n"), filename,
+	    fail ("%s: %d: missing `)' in bitfield: %s\n", filename,
 		  lineno, flag);
 	  *last = '\0';
 	}
@@ -917,7 +914,7 @@ get_element_size (char **opnd, int lineno)
   while (full != NULL && strstr(full, "BaseIndex") == NULL)
     full = *++opnd;
   if (full == NULL)
-    fail (_("%s: %d: no memory operand\n"), filename, lineno);
+    fail ("%s: %d: no memory operand\n", filename, lineno);
 
   op = xstrdup (full);
   last = op + strlen (op);
@@ -953,7 +950,7 @@ get_element_size (char **opnd, int lineno)
   free (op);
 
   if (elem_size == INT_MAX)
-    fail (_("%s: %d: unknown element size: %s\n"), filename, lineno, full);
+    fail ("%s: %d: unknown element size: %s\n", filename, lineno, full);
 
   return elem_size;
 }
@@ -1010,11 +1007,11 @@ process_i386_opcode_modifier (FILE *table, char *mod, unsigned int space,
 	  if (!modifiers[OpcodeSpace].value)
 	    modifiers[OpcodeSpace].value = space;
 	  else if (modifiers[OpcodeSpace].value != space)
-	    fail (_("%s:%d: Conflicting opcode space specifications\n"),
+	    fail ("%s:%d: Conflicting opcode space specifications\n",
 		  filename, lineno);
 	  else
 	    fprintf (stderr,
-		     _("%s:%d: Warning: redundant opcode space specification\n"),
+		     "%s:%d: Warning: redundant opcode space specification\n",
 		     filename, lineno);
 	}
 
@@ -1023,11 +1020,11 @@ process_i386_opcode_modifier (FILE *table, char *mod, unsigned int space,
 	  if (!modifiers[OpcodePrefix].value)
 	    modifiers[OpcodePrefix].value = prefix;
 	  else if (modifiers[OpcodePrefix].value != prefix)
-	    fail (_("%s:%d: Conflicting prefix specifications\n"),
+	    fail ("%s:%d: Conflicting prefix specifications\n",
 		  filename, lineno);
 	  else
 	    fprintf (stderr,
-		     _("%s:%d: Warning: redundant prefix specification\n"),
+		     "%s:%d: Warning: redundant prefix specification\n",
 		     filename, lineno);
 	}
 
@@ -1250,13 +1247,13 @@ output_i386_opcode (FILE *table, const char *name, char *str,
 	}
 
       if (space != SPACE_0F && --length == 1)
-	fail (_("%s:%d: %s: unrecognized opcode encoding space\n"),
+	fail ("%s:%d: %s: unrecognized opcode encoding space\n",
 	      filename, lineno, name);
       opcode &= (1ULL << (8 * --length)) - 1;
     }
 
   if (length > 2)
-    fail (_("%s:%d: %s: residual opcode (0x%0*llx) too large\n"),
+    fail ("%s:%d: %s: residual opcode (0x%0*llx) too large\n",
 	  filename, lineno, name, 2 * length, opcode);
 
   ident = mkident (name);
@@ -1648,7 +1645,7 @@ process_i386_opcodes (FILE *table)
 	  if (!j || buf[j - 1] != '+')
 	    break;
 	  if (j >= sizeof (buf) - 1)
-	    fail (_("%s: %d: (continued) line too long\n"), filename, lineno);
+	    fail ("%s: %d: (continued) line too long\n", filename, lineno);
 
 	  if (fgets (buf + j - 1, sizeof (buf) - j + 1, fp) == NULL)
 	    {
@@ -1746,7 +1743,7 @@ process_i386_opcodes (FILE *table)
 
   fp = fopen ("i386-mnem.h", "w");
   if (fp == NULL)
-    fail (_("can't create i386-mnem.h, errno = %s\n"),
+    fail ("can't create i386-mnem.h, errno = %s\n",
 	  xstrerror (errno));
 
   process_copyright (fp);
@@ -1800,7 +1797,7 @@ process_i386_registers (FILE *table)
   filename = "i386-reg.tbl";
   fp = fopen (filename, "r");
   if (fp == NULL)
-    fail (_("can't find i386-reg.tbl for reading, errno = %s\n"),
+    fail ("can't find i386-reg.tbl for reading, errno = %s\n",
 	  xstrerror (errno));
 
   fprintf (table, "\n/* i386 register table.  */\n\n");
@@ -1877,7 +1874,7 @@ process_i386_initializers (void)
   FILE *fp = fopen ("i386-init.h", "w");
 
   if (fp == NULL)
-    fail (_("can't create i386-init.h, errno = %s\n"),
+    fail ("can't create i386-init.h, errno = %s\n",
 	  xstrerror (errno));
 
   process_copyright (fp);
@@ -1992,7 +1989,7 @@ main (int argc, char **argv)
 
   if (srcdir != NULL)
     if (chdir (srcdir) != 0)
-      fail (_("unable to change directory to \"%s\", errno = %s\n"),
+      fail ("unable to change directory to \"%s\", errno = %s\n",
 	    srcdir, xstrerror (errno));
 
   /* cpu_flags isn't sorted by position.  */
@@ -2006,16 +2003,16 @@ main (int argc, char **argv)
   static_assert (ARRAY_SIZE (cpu_flags) == CpuMax + 2);
 
   if ((cpumax - 1) != CpuMax)
-    fail (_("CpuMax != %d!\n"), cpumax);
+    fail ("CpuMax != %d!\n", cpumax);
 #else
   static_assert (ARRAY_SIZE (cpu_flags) == CpuMax + 1);
 
   if (cpumax != CpuMax)
-    fail (_("CpuMax != %d!\n"), cpumax);
+    fail ("CpuMax != %d!\n", cpumax);
 
   c = CpuNumOfBits - CpuMax - 1;
   if (c)
-    fail (_("%d unused bits in i386_cpu_flags.\n"), c);
+    fail ("%d unused bits in i386_cpu_flags.\n", c);
 #endif
 
   static_assert (ARRAY_SIZE (opcode_modifiers) == Opcode_Modifier_Num);
@@ -2030,7 +2027,7 @@ main (int argc, char **argv)
 
   c = OTNumOfBits - OTNum;
   if (c)
-    fail (_("%d unused bits in i386_operand_type.\n"), c);
+    fail ("%d unused bits in i386_operand_type.\n", c);
 #endif
 
   qsort (cpu_flags, ARRAY_SIZE (cpu_flags), sizeof (cpu_flags [0]),
@@ -2044,7 +2041,7 @@ main (int argc, char **argv)
 
   table = fopen ("i386-tbl.h", "w");
   if (table == NULL)
-    fail (_("can't create i386-tbl.h, errno = %s\n"),
+    fail ("can't create i386-tbl.h, errno = %s\n",
 	  xstrerror (errno));
 
   process_copyright (table);
