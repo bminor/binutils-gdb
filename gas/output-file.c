@@ -96,7 +96,7 @@ output_file_close (void)
 
   /* Close the bfd.  */
   if (!flag_always_generate_output && had_errors ())
-    res = bfd_cache_close_all ();
+    res = bfd_close_all_done (obfd);
   else
     res = bfd_close (obfd);
   now_seg = NULL;
