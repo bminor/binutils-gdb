@@ -5317,14 +5317,6 @@ md_assemble (char *line)
   if (i.types[0].bitfield.imm1)
     i.imm_operands = 0;	/* kludge for shift insns.  */
 
-  /* We only need to check those implicit registers for instructions
-     with 3 operands or less.  */
-  if (i.operands <= 3)
-    for (j = 0; j < i.operands; j++)
-      if (i.types[j].bitfield.instance != InstanceNone
-	  && !i.types[j].bitfield.xmmword)
-	i.reg_operands--;
-
   /* For insns with operands there are more diddles to do to the opcode.  */
   if (i.operands)
     {
@@ -7936,6 +7928,13 @@ process_operands (void)
      unnecessary segment overrides.  */
   const reg_entry *default_seg = NULL;
 
+  /* We only need to check those implicit registers for instructions
+     with 3 operands or less.  */
+  if (i.operands <= 3)
+    for (unsigned int j = 0; j < i.operands; j++)
+      if (i.types[j].bitfield.instance != InstanceNone)
+	i.reg_operands--;
+
   if (i.tm.opcode_modifier.sse2avx)
     {
       /* Legacy encoded insns allow explicit REX prefixes, so these prefixes
@@ -7970,6 +7969,7 @@ process_operands (void)
 	     sources.  */
 	  i.tm.operand_types[0].bitfield.instance = InstanceNone;
 	  i.tm.operand_types[0].bitfield.class = RegSIMD;
+	  i.reg_operands++;
 	  goto duplicate;
 	}
 
@@ -8025,11 +8025,6 @@ process_operands (void)
     {
       unsigned int j;
 
-      /* This needs to account for the adjustment already done ahead of
-	 calling process_operands().  */
-      if (i.tm.operand_types[0].bitfield.xmmword)
-	i.reg_operands--;
-
       for (j = 1; j < i.operands; j++)
 	{
 	  i.op[j - 1] = i.op[j];
@@ -8042,6 +8037,8 @@ process_operands (void)
 	  i.flags[j - 1] = i.flags[j];
 	}
 
+      /* No adjustment to i.reg_operands: This was already done at the top
+	 of the function.  */
       i.operands--;
       i.tm.operands--;
     }
