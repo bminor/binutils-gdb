@@ -341,13 +341,10 @@ i386_intel_simplify_register (expressionS *e)
       const insn_template *t = current_templates->start;
 
       if (intel_state.in_scale
-	  || (t->opcode_modifier.opcodeprefix == PREFIX_0XF3
-	      && t->opcode_modifier.opcodespace == SPACE_0F
-	      && t->base_opcode == 0x1b /* bndmk */)
-	  || (t->opcode_modifier.opcodeprefix == PREFIX_NONE
-	      && t->opcode_modifier.opcodespace == SPACE_0F
-	      && (t->base_opcode & ~1) == 0x1a /* bnd{ld,st}x */)
-	  || i386_regtab[reg_num].reg_type.bitfield.baseindex)
+	  || i386_regtab[reg_num].reg_type.bitfield.baseindex
+	  || t->mnem_off == MN_bndmk
+	  || t->mnem_off == MN_bndldx
+	  || t->mnem_off == MN_bndstx)
 	intel_state.index = i386_regtab + reg_num;
       else
 	{
@@ -681,8 +678,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
     return 0;
 
   if (intel_state.op_modifier != O_absent
-      && (current_templates->start->opcode_modifier.opcodespace != SPACE_BASE
-          || current_templates->start->base_opcode != 0x8d /* lea */))
+      && current_templates->start->mnem_off != MN_lea)
     {
       i.types[this_operand].bitfield.unspecified = 0;
 
@@ -697,9 +693,8 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	  i.types[this_operand].bitfield.word = 1;
 	  if (got_a_float == 2)	/* "fi..." */
 	    suffix = SHORT_MNEM_SUFFIX;
-	  else if ((current_templates->start->base_opcode | 1) != 0x03
-		   || (current_templates->start->opcode_modifier.opcodespace
-		       != SPACE_0F)) /* lar, lsl */
+	  else if (current_templates->start->mnem_off != MN_lar
+		   && current_templates->start->mnem_off != MN_lsl)
 	    suffix = WORD_MNEM_SUFFIX;
 	  break;
 
@@ -708,8 +703,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	  if ((insn_name (current_templates->start)[0] == 'l'
 	       && insn_name (current_templates->start)[2] == 's'
 	       && insn_name (current_templates->start)[3] == 0)
-	      || (current_templates->start->opcode_modifier.opcodespace == SPACE_BASE
-		  && current_templates->start->base_opcode == 0x62 /* bound */))
+	      || current_templates->start->mnem_off == MN_bound)
 	    suffix = WORD_MNEM_SUFFIX;
 	  else if (flag_code != CODE_32BIT
 		   && (current_templates->start->opcode_modifier.jump == JUMP
@@ -727,9 +721,11 @@ i386_intel_operand (char *operand_string, int got_a_float)
 
 	case O_fword_ptr:
 	  i.types[this_operand].bitfield.fword = 1;
-	  if (insn_name (current_templates->start)[0] == 'l'
-	      && insn_name (current_templates->start)[2] == 's'
-	      && insn_name (current_templates->start)[3] == 0)
+	  if (current_templates->start->mnem_off == MN_les
+	      || current_templates->start->mnem_off == MN_lds
+	      || current_templates->start->mnem_off == MN_lss
+	      || current_templates->start->mnem_off == MN_lfs
+	      || current_templates->start->mnem_off == MN_lgs)
 	    suffix = LONG_MNEM_SUFFIX;
 	  else if (!got_a_float)
 	    {
@@ -741,8 +737,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
 
 	case O_qword_ptr: /* O_mmword_ptr */
 	  i.types[this_operand].bitfield.qword = 1;
-	  if ((current_templates->start->opcode_modifier.opcodespace == SPACE_BASE
-	       && current_templates->start->base_opcode == 0x62 /* bound */)
+	  if (current_templates->start->mnem_off == MN_bound
 	      || got_a_float == 1)	/* "f..." */
 	    suffix = LONG_MNEM_SUFFIX;
 	  else
@@ -799,8 +794,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	 REX.W) is going to be derived from it.  For this we check whether the
 	 given suffix is valid for any of the candidate templates.  */
       if (suffix && suffix != i.suffix
-	  && (current_templates->start->opcode_modifier.opcodespace != SPACE_BASE
-	      || current_templates->start->base_opcode != 0x62 /* bound */))
+	  && current_templates->start->mnem_off != MN_bound)
 	{
 	  const insn_template *t;
 
