@@ -805,13 +805,10 @@ RETURNS
 bool
 bfd_close (bfd *abfd)
 {
-  if (bfd_write_p (abfd))
-    {
-      if (! BFD_SEND_FMT (abfd, _bfd_write_contents, (abfd)))
-	return false;
-    }
+  bool ret = (!bfd_write_p (abfd)
+	      || BFD_SEND_FMT (abfd, _bfd_write_contents, (abfd)));
 
-  return bfd_close_all_done (abfd);
+  return bfd_close_all_done (abfd) && ret;
 }
 
 /*
@@ -839,15 +836,15 @@ RETURNS
 bool
 bfd_close_all_done (bfd *abfd)
 {
-  bool ret;
+  bool ret = BFD_SEND (abfd, _close_and_cleanup, (abfd));
 
-  if (! BFD_SEND (abfd, _close_and_cleanup, (abfd)))
-    return false;
+  if (ret && abfd->iovec != NULL)
+    {
+      ret = abfd->iovec->bclose (abfd) == 0;
 
-  ret = abfd->iovec->bclose (abfd) == 0;
-
-  if (ret)
-    _maybe_make_executable (abfd);
+      if (ret)
+	_maybe_make_executable (abfd);
+    }
 
   _bfd_delete_bfd (abfd);
 
