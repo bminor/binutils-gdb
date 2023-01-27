@@ -757,10 +757,15 @@ static unsigned int peek_abbrev_code (bfd *, const gdb_byte *);
 static const gdb_byte *read_attribute (const struct die_reader_specs *,
 				       struct attribute *,
 				       const struct attr_abbrev *,
-				       const gdb_byte *);
+				       const gdb_byte *,
+				       bool allow_reprocess = true);
 
+/* Note that the default for TAG is chosen because it only matters
+   when reading the top-level DIE, and that function is careful to
+   pass the correct tag.  */
 static void read_attribute_reprocess (const struct die_reader_specs *reader,
-				      struct attribute *attr, dwarf_tag tag);
+				      struct attribute *attr,
+				      dwarf_tag tag = DW_TAG_padding);
 
 static CORE_ADDR read_addr_index (struct dwarf2_cu *cu, unsigned int addr_index);
 
@@ -954,10 +959,12 @@ static struct die_info *read_die_and_siblings (const struct die_reader_specs *,
 
 static const gdb_byte *read_full_die_1 (const struct die_reader_specs *,
 					struct die_info **, const gdb_byte *,
-					int);
+					int, bool);
 
-static const gdb_byte *read_full_die (const struct die_reader_specs *,
-				      struct die_info **, const gdb_byte *);
+static const gdb_byte *read_toplevel_die (const struct die_reader_specs *,
+					  struct die_info **,
+					  const gdb_byte *,
+					  gdb::array_view<attribute *>  = {});
 
 static void process_die (struct die_info *, struct dwarf2_cu *);
 
@@ -3912,38 +3919,41 @@ read_cutu_die_from_dwo (dwarf2_cu *cu,
   struct objfile *objfile = per_objfile->objfile;
   bfd *abfd;
   const gdb_byte *begin_info_ptr, *info_ptr;
-  struct attribute *comp_dir, *stmt_list, *low_pc, *high_pc, *ranges;
-  int i,num_extra_attrs;
   struct dwarf2_section_info *dwo_abbrev_section;
-  struct die_info *comp_unit_die;
 
   /* At most one of these may be provided.  */
   gdb_assert ((stub_comp_unit_die != NULL) + (stub_comp_dir != NULL) <= 1);
 
-  /* These attributes aren't processed until later:
-     DW_AT_stmt_list, DW_AT_low_pc, DW_AT_high_pc, DW_AT_ranges.
-     DW_AT_comp_dir is used now, to find the DWO file, but it is also
-     referenced later.  However, these attributes are found in the stub
-     which we won't have later.  In order to not impose this complication
-     on the rest of the code, we read them here and copy them to the
-     DWO CU/TU die.  */
+  /* These attributes aren't processed until later: DW_AT_stmt_list,
+     DW_AT_low_pc, DW_AT_high_pc, DW_AT_ranges, DW_AT_comp_dir.
+     However, these attributes are found in the stub which we won't
+     have later.  In order to not impose this complication on the rest
+     of the code, we read them here and copy them to the DWO CU/TU
+     die.  */
 
-  stmt_list = NULL;
-  low_pc = NULL;
-  high_pc = NULL;
-  ranges = NULL;
-  comp_dir = NULL;
+  /* We store them all in an array.  */
+  struct attribute *attributes[5] {};
+  /* Next available element of the attributes array.  */
+  int next_attr_idx = 0;
+
+  /* Push an element into ATTRIBUTES.  */
+  auto push_back = [&] (struct attribute *attr)
+    {
+      gdb_assert (next_attr_idx < ARRAY_SIZE (attributes));
+      if (attr != nullptr)
+	attributes[next_attr_idx++] = attr;
+    };
 
   if (stub_comp_unit_die != NULL)
     {
       /* For TUs in DWO files, the DW_AT_stmt_list attribute lives in the
 	 DWO file.  */
       if (!per_cu->is_debug_types)
-	stmt_list = dwarf2_attr (stub_comp_unit_die, DW_AT_stmt_list, cu);
-      low_pc = dwarf2_attr (stub_comp_unit_die, DW_AT_low_pc, cu);
-      high_pc = dwarf2_attr (stub_comp_unit_die, DW_AT_high_pc, cu);
-      ranges = dwarf2_attr (stub_comp_unit_die, DW_AT_ranges, cu);
-      comp_dir = dwarf2_attr (stub_comp_unit_die, DW_AT_comp_dir, cu);
+	push_back (dwarf2_attr (stub_comp_unit_die, DW_AT_stmt_list, cu));
+      push_back (dwarf2_attr (stub_comp_unit_die, DW_AT_low_pc, cu));
+      push_back (dwarf2_attr (stub_comp_unit_die, DW_AT_high_pc, cu));
+      push_back (dwarf2_attr (stub_comp_unit_die, DW_AT_ranges, cu));
+      push_back (dwarf2_attr (stub_comp_unit_die, DW_AT_comp_dir, cu));
 
       cu->addr_base = stub_comp_unit_die->addr_base ();
 
@@ -3962,10 +3972,12 @@ read_cutu_die_from_dwo (dwarf2_cu *cu,
   else if (stub_comp_dir != NULL)
     {
       /* Reconstruct the comp_dir attribute to simplify the code below.  */
-      comp_dir = OBSTACK_ZALLOC (&cu->comp_unit_obstack, struct attribute);
+      struct attribute *comp_dir = OBSTACK_ZALLOC (&cu->comp_unit_obstack,
+						   struct attribute);
       comp_dir->name = DW_AT_comp_dir;
       comp_dir->form = DW_FORM_string;
       comp_dir->set_string_noncanonical (stub_comp_dir);
+      push_back (comp_dir);
     }
 
   /* Set up for reading the DWO CU/TU.  */
@@ -4022,42 +4034,13 @@ read_cutu_die_from_dwo (dwarf2_cu *cu,
   init_cu_die_reader (result_reader, cu, section, dwo_unit->dwo_file,
 		      result_dwo_abbrev_table->get ());
 
-  /* Read in the die, but leave space to copy over the attributes
-     from the stub.  This has the benefit of simplifying the rest of
-     the code - all the work to maintain the illusion of a single
+  /* Read in the die, filling in the attributes from the stub.  This
+     has the benefit of simplifying the rest of the code - all the
+     work to maintain the illusion of a single
      DW_TAG_{compile,type}_unit DIE is done here.  */
-  num_extra_attrs = ((stmt_list != NULL)
-		     + (low_pc != NULL)
-		     + (high_pc != NULL)
-		     + (ranges != NULL)
-		     + (comp_dir != NULL));
-  info_ptr = read_full_die_1 (result_reader, result_comp_unit_die, info_ptr,
-			      num_extra_attrs);
-
-  /* Copy over the attributes from the stub to the DIE we just read in.  */
-  comp_unit_die = *result_comp_unit_die;
-  i = comp_unit_die->num_attrs;
-  if (stmt_list != NULL)
-    comp_unit_die->attrs[i++] = *stmt_list;
-  if (low_pc != NULL)
-    comp_unit_die->attrs[i++] = *low_pc;
-  if (high_pc != NULL)
-    comp_unit_die->attrs[i++] = *high_pc;
-  if (ranges != NULL)
-    comp_unit_die->attrs[i++] = *ranges;
-  if (comp_dir != NULL)
-    comp_unit_die->attrs[i++] = *comp_dir;
-  comp_unit_die->num_attrs += num_extra_attrs;
-
-  if (dwarf_die_debug)
-    {
-      gdb_printf (gdb_stdlog,
-		  "Read die from %s@0x%x of %s:\n",
-		  section->get_name (),
-		  (unsigned) (begin_info_ptr - section->buffer),
-		  bfd_get_filename (abfd));
-      comp_unit_die->dump (dwarf_die_debug);
-    }
+  info_ptr = read_toplevel_die (result_reader, result_comp_unit_die, info_ptr,
+				gdb::make_array_view (attributes,
+						      next_attr_idx));
 
   /* Skip dummy compilation units.  */
   if (info_ptr >= begin_info_ptr + dwo_unit->length
@@ -4331,7 +4314,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
 
   /* Read the top level CU/TU die.  */
   init_cu_die_reader (this, cu, section, NULL, abbrev_table);
-  info_ptr = read_full_die (this, &comp_unit_die, info_ptr);
+  info_ptr = read_toplevel_die (this, &comp_unit_die, info_ptr);
 
   if (skip_partial && comp_unit_die->tag == DW_TAG_partial_unit)
     {
@@ -4473,7 +4456,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
 
   init_cu_die_reader (this, m_new_cu.get (), section, dwo_file,
 		      m_abbrev_table_holder.get ());
-  info_ptr = read_full_die (this, &comp_unit_die, info_ptr);
+  info_ptr = read_toplevel_die (this, &comp_unit_die, info_ptr);
 }
 
 
@@ -5416,7 +5399,10 @@ skip_one_die (const struct die_reader_specs *reader, const gdb_byte *info_ptr,
       /* The only abbrev we care about is DW_AT_sibling.  */
       if (do_skip_children && abbrev->attrs[i].name == DW_AT_sibling)
 	{
-	  read_attribute (reader, &attr, &abbrev->attrs[i], info_ptr);
+	  /* Note there is no need for the extra work of
+	     "reprocessing" here, so we pass false for that
+	     argument.  */
+	  read_attribute (reader, &attr, &abbrev->attrs[i], info_ptr, false);
 	  if (attr.form == DW_FORM_ref_addr)
 	    complaint (_("ignoring absolute DW_AT_sibling"));
 	  else
@@ -15791,7 +15777,7 @@ read_die_and_children (const struct die_reader_specs *reader,
   struct die_info *die;
   const gdb_byte *cur_ptr;
 
-  cur_ptr = read_full_die_1 (reader, &die, info_ptr, 0);
+  cur_ptr = read_full_die_1 (reader, &die, info_ptr, 0, true);
   if (die == NULL)
     {
       *new_info_ptr = cur_ptr;
@@ -15885,7 +15871,7 @@ read_die_and_siblings (const struct die_reader_specs *reader,
 static const gdb_byte *
 read_full_die_1 (const struct die_reader_specs *reader,
 		 struct die_info **diep, const gdb_byte *info_ptr,
-		 int num_extra_attrs)
+		 int num_extra_attrs, bool allow_reprocess)
 {
   unsigned int abbrev_number, bytes_read, i;
   const struct abbrev_info *abbrev;
@@ -15920,39 +15906,10 @@ read_full_die_1 (const struct die_reader_specs *reader,
      attributes.  */
   die->num_attrs = abbrev->num_attrs;
 
-  bool any_need_reprocess = false;
   for (i = 0; i < abbrev->num_attrs; ++i)
-    {
-      info_ptr = read_attribute (reader, &die->attrs[i], &abbrev->attrs[i],
-				 info_ptr);
-      if (die->attrs[i].requires_reprocessing_p ())
-	any_need_reprocess = true;
-    }
+    info_ptr = read_attribute (reader, &die->attrs[i], &abbrev->attrs[i],
+			       info_ptr, allow_reprocess);
 
-  struct attribute *attr = die->attr (DW_AT_str_offsets_base);
-  if (attr != nullptr && attr->form_is_unsigned ())
-    cu->str_offsets_base = attr->as_unsigned ();
-
-  attr = die->attr (DW_AT_loclists_base);
-  if (attr != nullptr)
-    cu->loclist_base = attr->as_unsigned ();
-
-  auto maybe_addr_base = die->addr_base ();
-  if (maybe_addr_base.has_value ())
-    cu->addr_base = *maybe_addr_base;
-
-  attr = die->attr (DW_AT_rnglists_base);
-  if (attr != nullptr)
-    cu->rnglists_base = attr->as_unsigned ();
-
-  if (any_need_reprocess)
-    {
-      for (i = 0; i < abbrev->num_attrs; ++i)
-	{
-	  if (die->attrs[i].requires_reprocessing_p ())
-	    read_attribute_reprocess (reader, &die->attrs[i], die->tag);
-	}
-    }
   *diep = die;
   return info_ptr;
 }
@@ -15962,12 +15919,44 @@ read_full_die_1 (const struct die_reader_specs *reader,
    except for its child, sibling, and parent fields.  */
 
 static const gdb_byte *
-read_full_die (const struct die_reader_specs *reader,
-	       struct die_info **diep, const gdb_byte *info_ptr)
+read_toplevel_die (const struct die_reader_specs *reader,
+		   struct die_info **diep, const gdb_byte *info_ptr,
+		   gdb::array_view<attribute *> extra_attrs)
 {
   const gdb_byte *result;
+  struct dwarf2_cu *cu = reader->cu;
 
-  result = read_full_die_1 (reader, diep, info_ptr, 0);
+  result = read_full_die_1 (reader, diep, info_ptr, extra_attrs.size (),
+			    false);
+
+  /* Copy in the extra attributes, if any.  */
+  attribute *next = &(*diep)->attrs[(*diep)->num_attrs];
+  for (attribute *extra : extra_attrs)
+    *next++ = *extra;
+
+  struct attribute *attr = (*diep)->attr (DW_AT_str_offsets_base);
+  if (attr != nullptr && attr->form_is_unsigned ())
+    cu->str_offsets_base = attr->as_unsigned ();
+
+  attr = (*diep)->attr (DW_AT_loclists_base);
+  if (attr != nullptr)
+    cu->loclist_base = attr->as_unsigned ();
+
+  auto maybe_addr_base = (*diep)->addr_base ();
+  if (maybe_addr_base.has_value ())
+    cu->addr_base = *maybe_addr_base;
+
+  attr = (*diep)->attr (DW_AT_rnglists_base);
+  if (attr != nullptr)
+    cu->rnglists_base = attr->as_unsigned ();
+
+  for (int i = 0; i < (*diep)->num_attrs; ++i)
+    {
+      if ((*diep)->attrs[i].form_requires_reprocessing ())
+	read_attribute_reprocess (reader, &(*diep)->attrs[i], (*diep)->tag);
+    }
+
+  (*diep)->num_attrs += extra_attrs.size ();
 
   if (dwarf_die_debug)
     {
@@ -16109,8 +16098,6 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
     {
       attribute attr;
       info_ptr = read_attribute (reader, &attr, &abbrev->attrs[i], info_ptr);
-      if (attr.requires_reprocessing_p ())
-	read_attribute_reprocess (reader, &attr, abbrev->tag);
 
       /* Store the data if it is of an attribute we want to keep in a
 	 partial symbol table.  */
@@ -17071,7 +17058,8 @@ read_attribute_reprocess (const struct die_reader_specs *reader,
 static const gdb_byte *
 read_attribute_value (const struct die_reader_specs *reader,
 		      struct attribute *attr, unsigned form,
-		      LONGEST implicit_const, const gdb_byte *info_ptr)
+		      LONGEST implicit_const, const gdb_byte *info_ptr,
+		      bool allow_reprocess)
 {
   struct dwarf2_cu *cu = reader->cu;
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
@@ -17152,6 +17140,8 @@ read_attribute_value (const struct die_reader_specs *reader,
 	attr->set_unsigned_reprocess (read_unsigned_leb128 (abfd, info_ptr,
 							    &bytes_read));
 	info_ptr += bytes_read;
+	if (allow_reprocess)
+	  read_attribute_reprocess (reader, attr);
       }
       break;
     case DW_FORM_string:
@@ -17225,6 +17215,8 @@ read_attribute_value (const struct die_reader_specs *reader,
 	attr->set_unsigned_reprocess (read_unsigned_leb128 (abfd, info_ptr,
 							    &bytes_read));
 	info_ptr += bytes_read;
+	if (allow_reprocess)
+	  read_attribute_reprocess (reader, attr);
       }
       break;
     case DW_FORM_udata:
@@ -17270,7 +17262,7 @@ read_attribute_value (const struct die_reader_specs *reader,
 	  info_ptr += bytes_read;
 	}
       info_ptr = read_attribute_value (reader, attr, form, implicit_const,
-				       info_ptr);
+				       info_ptr, allow_reprocess);
       break;
     case DW_FORM_implicit_const:
       attr->set_signed (implicit_const);
@@ -17280,6 +17272,8 @@ read_attribute_value (const struct die_reader_specs *reader,
       attr->set_unsigned_reprocess (read_unsigned_leb128 (abfd, info_ptr,
 							  &bytes_read));
       info_ptr += bytes_read;
+      if (allow_reprocess)
+	read_attribute_reprocess (reader, attr);
       break;
     case DW_FORM_strx:
     case DW_FORM_strx1:
@@ -17315,6 +17309,8 @@ read_attribute_value (const struct die_reader_specs *reader,
 	    info_ptr += bytes_read;
 	  }
 	attr->set_unsigned_reprocess (str_index);
+	if (allow_reprocess)
+	  read_attribute_reprocess (reader, attr);
       }
       break;
     default:
@@ -17351,13 +17347,14 @@ read_attribute_value (const struct die_reader_specs *reader,
 static const gdb_byte *
 read_attribute (const struct die_reader_specs *reader,
 		struct attribute *attr, const struct attr_abbrev *abbrev,
-		const gdb_byte *info_ptr)
+		const gdb_byte *info_ptr,
+		bool allow_reprocess)
 {
   attr->name = abbrev->name;
   attr->string_is_canonical = 0;
-  attr->requires_reprocessing = 0;
   return read_attribute_value (reader, attr, abbrev->form,
-			       abbrev->implicit_const, info_ptr);
+			       abbrev->implicit_const, info_ptr,
+			       allow_reprocess);
 }
 
 /* See read.h.  */
