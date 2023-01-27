@@ -277,22 +277,6 @@ LIBOPCODES_CFILES = \
 	dis-init.c \
 	disassemble.c
 
-# C source files that correspond to .o's.
-CFILES = \
-	$(LIBOPCODES_CFILES) \
-	aarch64-gen.c \
-	i386-gen.c \
-	ia64-asmtab.c \
-	ia64-gen.c \
-	ia64-opc-a.c \
-	ia64-opc-b.c \
-	ia64-opc-f.c \
-	ia64-opc-i.c \
-	ia64-opc-m.c \
-	ia64-opc-d.c \
-	s390-mkopc.c \
-	z8kgen.c
-
 ALL32_MACHINES = $(TARGET32_LIBOPCODES_CFILES:.c=.lo)
 ALL64_MACHINES = $(TARGET64_LIBOPCODES_CFILES:.c=.lo)
 
@@ -341,7 +325,7 @@ stamp-lib: libopcodes.la
 
 libopcodes.a: stamp-lib ; @true
 
-POTFILES = $(HFILES) $(CFILES)
+POTFILES = $(HFILES) $(LIBOPCODES_CFILES)
 po/POTFILES.in: @MAINT@ Makefile
 	for f in $(POTFILES); do echo $$f; done | LC_ALL=C sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
