@@ -7965,29 +7965,15 @@ process_operands (void)
       if (i.tm.operand_types[0].bitfield.instance == Accum
 	  && i.tm.operand_types[0].bitfield.xmmword)
 	{
-	  if (i.tm.opcode_modifier.vexsources == VEX3SOURCES)
-	    {
-	      /* Keep xmm0 for instructions with VEX prefix and 3
-		 sources.  */
-	      i.tm.operand_types[0].bitfield.instance = InstanceNone;
-	      i.tm.operand_types[0].bitfield.class = RegSIMD;
-	      goto duplicate;
-	    }
-	  else
-	    {
-	      /* We remove the first xmm0 and keep the number of
-		 operands unchanged, which in fact duplicates the
-		 destination.  */
-	      for (j = 1; j < i.operands; j++)
-		{
-		  i.op[j - 1] = i.op[j];
-		  i.types[j - 1] = i.types[j];
-		  i.tm.operand_types[j - 1] = i.tm.operand_types[j];
-		  i.flags[j - 1] = i.flags[j];
-		}
-	    }
+	  gas_assert (i.tm.opcode_modifier.vexsources == VEX3SOURCES);
+	  /* Keep xmm0 for instructions with VEX prefix and 3
+	     sources.  */
+	  i.tm.operand_types[0].bitfield.instance = InstanceNone;
+	  i.tm.operand_types[0].bitfield.class = RegSIMD;
+	  goto duplicate;
 	}
-      else if (i.tm.opcode_modifier.operandconstraint == IMPLICIT_1ST_XMM0)
+
+      if (i.tm.opcode_modifier.operandconstraint == IMPLICIT_1ST_XMM0)
 	{
 	  gas_assert ((MAX_OPERANDS - 1) > dupl
 		      && (i.tm.opcode_modifier.vexsources
