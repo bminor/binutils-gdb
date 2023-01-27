@@ -1082,6 +1082,22 @@ build_filler_bfd (bool include_edata)
 
   bfd_set_section_size (reloc_s, 0);
 
+  /* FIXME: I am not sure if this is the right way to solve PR 29998.
+     It might be better to change ldlang.c:lang_statement_append() so that it
+     checks to see if *(list->tail) is non-NULL and if so, set element->next
+     to its contents.
+
+     The issue is that this function is called after lang_process().
+     lang_process () will have gone through any input archives, and if the
+     last input file is an archive then it will have left file_chain.tail
+     pointing to the last used element of that archive.  Calling
+     ldlang_add_file() here then blows aaway the link to that archive element,
+     effectively deleting it from the input.  In order to prevent this, the
+     assignment below fills in the next field of the statement that is about
+     to appended to the file chain.  */
+  if (file_chain.tail != NULL)
+    filler_file->next = & (* file_chain.tail)->input_statement;
+
   ldlang_add_file (filler_file);
 }
 
@@ -1542,18 +1558,25 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
     {
       arelent **relocs;
       int relsize, nrelocs;
+      asymbol **symbols;
+
+      if (!bfd_generic_link_read_symbols (b))
+	{
+	  einfo (_("%F%P: %pB: could not read symbols: %E\n"), b);
+	  return;
+	}
+
+      symbols = bfd_get_outsymbols (b);
 
       for (s = b->sections; s; s = s->next)
 	{
 	  bfd_vma sec_vma;
-	  asymbol **symbols;
 
 	  /* If the section is not going to be output, then ignore it.  */
 	  if (s->output_section == NULL)
 	    {
-	      /* PR 29998: LTO processing can elminate whole code sections,
-		 but it sets the output section to NULL rather than *ABS*.
-		 Fix that here, then ignore the section.  */
+	      /* FIXME: This should not happen.  Convert to the correct
+		 form here, but really, this should be investigated.  */
 	      s->output_section = bfd_abs_section_ptr;
 	      continue;
 	    }
@@ -1574,13 +1597,6 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 
 	  sec_vma = s->output_section->vma + s->output_offset;
 
-	  if (!bfd_generic_link_read_symbols (b))
-	    {
-	      einfo (_("%F%P: %pB: could not read symbols: %E\n"), b);
-	      return;
-	    }
-
-	  symbols = bfd_get_outsymbols (b);
 	  relsize = bfd_get_reloc_upper_bound (b, s);
 	  relocs = xmalloc (relsize);
 	  nrelocs = bfd_canonicalize_reloc (b, s, relocs, symbols);
