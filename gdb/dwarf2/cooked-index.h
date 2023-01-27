@@ -254,7 +254,7 @@ private:
      found.  */
   dwarf2_per_cu_data *lookup (CORE_ADDR addr)
   {
-    return (dwarf2_per_cu_data *) m_addrmap->find (addr);
+    return static_cast<dwarf2_per_cu_data *> (m_addrmap->find (addr));
   }
 
   /* Create a new cooked_index_entry and register it with this object.

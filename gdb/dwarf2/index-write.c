@@ -474,7 +474,7 @@ add_address_entry (data_buf &addr_vec,
 int
 addrmap_index_data::operator() (CORE_ADDR start_addr, void *obj)
 {
-  dwarf2_per_cu_data *per_cu = (dwarf2_per_cu_data *) obj;
+  dwarf2_per_cu_data *per_cu = static_cast<dwarf2_per_cu_data *> (obj);
 
   if (previous_valid)
     add_address_entry (addr_vec,

@@ -40,7 +40,7 @@ addrmap_fixed::set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
 
 
 void *
-addrmap_fixed::find (CORE_ADDR addr) const
+addrmap_fixed::do_find (CORE_ADDR addr) const
 {
   const struct addrmap_transition *bottom = &transitions[0];
   const struct addrmap_transition *top = &transitions[num_transitions - 1];
@@ -82,7 +82,7 @@ addrmap_fixed::relocate (CORE_ADDR offset)
 
 
 int
-addrmap_fixed::foreach (addrmap_foreach_fn fn)
+addrmap_fixed::do_foreach (addrmap_foreach_fn fn) const
 {
   size_t i;
 
@@ -240,7 +240,7 @@ addrmap_mutable::set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
 
 
 void *
-addrmap_mutable::find (CORE_ADDR addr) const
+addrmap_mutable::do_find (CORE_ADDR addr) const
 {
   splay_tree_node n = splay_tree_lookup (addr);
   if (n != nullptr)
@@ -317,7 +317,7 @@ addrmap_mutable_foreach_worker (splay_tree_node node, void *data)
 
 
 int
-addrmap_mutable::foreach (addrmap_foreach_fn fn)
+addrmap_mutable::do_foreach (addrmap_foreach_fn fn) const
 {
   return splay_tree_foreach (tree, addrmap_mutable_foreach_worker, &fn);
 }
@@ -368,7 +368,7 @@ addrmap_dump (struct addrmap *map, struct ui_file *outfile, void *payload)
      addrmap entry defines the end of the range).  */
   bool previous_matched = false;
 
-  auto callback = [&] (CORE_ADDR start_addr, void *obj)
+  auto callback = [&] (CORE_ADDR start_addr, const void *obj)
   {
     QUIT;
 

@@ -36,8 +36,10 @@
 
 /* The type of a function used to iterate over the map.
    OBJ is NULL for unmapped regions.  */
-typedef gdb::function_view<int (CORE_ADDR start_addr, void *obj)>
-     addrmap_foreach_fn;
+using addrmap_foreach_fn
+  = gdb::function_view<int (CORE_ADDR start_addr, void *obj)>;
+using addrmap_foreach_const_fn
+  = gdb::function_view<int (CORE_ADDR start_addr, const void *obj)>;
 
 /* The base class for addrmaps.  */
 struct addrmap
@@ -85,7 +87,11 @@ struct addrmap
 			  void *obj) = 0;
 
   /* Return the object associated with ADDR in MAP.  */
-  virtual void *find (CORE_ADDR addr) const = 0;
+  const void *find (CORE_ADDR addr) const
+  { return this->do_find (addr); }
+
+  void *find (CORE_ADDR addr)
+  { return this->do_find (addr); }
 
   /* Relocate all the addresses in MAP by OFFSET.  (This can be applied
      to either mutable or immutable maps.)  */
@@ -95,7 +101,19 @@ struct addrmap
      If FN ever returns a non-zero value, the iteration ceases
      immediately, and the value is returned.  Otherwise, this function
      returns 0.  */
-  virtual int foreach (addrmap_foreach_fn fn) = 0;
+  int foreach (addrmap_foreach_const_fn fn) const
+  { return this->do_foreach (fn); }
+
+  int foreach (addrmap_foreach_fn fn)
+  { return this->do_foreach (fn); }
+
+
+private:
+  /* Worker for find, implemented by sub-classes.  */
+  virtual void *do_find (CORE_ADDR addr) const = 0;
+
+  /* Worker for foreach, implemented by sub-classes.  */
+  virtual int do_foreach (addrmap_foreach_fn fn) const = 0;
 };
 
 struct addrmap_mutable;
@@ -111,11 +129,11 @@ public:
 
   void set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
 		  void *obj) override;
-  void *find (CORE_ADDR addr) const override;
   void relocate (CORE_ADDR offset) override;
-  int foreach (addrmap_foreach_fn fn) override;
 
 private:
+  void *do_find (CORE_ADDR addr) const override;
+  int do_foreach (addrmap_foreach_fn fn) const override;
 
   /* A transition: a point in an address map where the value changes.
      The map maps ADDR to VALUE, but if ADDR > 0, it maps ADDR-1 to
@@ -149,11 +167,11 @@ public:
 
   void set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
 		  void *obj) override;
-  void *find (CORE_ADDR addr) const override;
   void relocate (CORE_ADDR offset) override;
-  int foreach (addrmap_foreach_fn fn) override;
 
 private:
+  void *do_find (CORE_ADDR addr) const override;
+  int do_foreach (addrmap_foreach_fn fn) const override;
 
   /* A splay tree, with a node for each transition; there is a
      transition at address T if T-1 and T map to different objects.

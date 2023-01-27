@@ -4276,8 +4276,9 @@ dwarf2_base_index_functions::find_per_cu (dwarf2_per_bfd *per_bfd,
 {
   if (per_bfd->index_addrmap == nullptr)
     return nullptr;
-  return ((struct dwarf2_per_cu_data *)
-	  per_bfd->index_addrmap->find (adjusted_pc));
+
+  void *obj = per_bfd->index_addrmap->find (adjusted_pc);
+  return static_cast<dwarf2_per_cu_data *> (obj);
 }
 
 struct compunit_symtab *
@@ -18276,8 +18277,8 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
 	  else if (*parent_entry == nullptr)
 	    {
 	      CORE_ADDR lookup = form_addr (origin_offset, origin_is_dwz);
-	      *parent_entry
-		= (cooked_index_entry *) m_die_range_map.find (lookup);
+	      void *obj = m_die_range_map.find (lookup);
+	      *parent_entry = static_cast <cooked_index_entry *> (obj);
 	    }
 
 	  unsigned int bytes_read;
@@ -18568,8 +18569,8 @@ cooked_indexer::make_index (cutu_reader *reader)
   for (const auto &entry : m_deferred_entries)
     {
       CORE_ADDR key = form_addr (entry.die_offset, m_per_cu->is_dwz);
-      cooked_index_entry *parent
-	= (cooked_index_entry *) m_die_range_map.find (key);
+      void *obj = m_die_range_map.find (key);
+      cooked_index_entry *parent = static_cast <cooked_index_entry *> (obj);
       m_index_storage->add (entry.die_offset, entry.tag, entry.flags,
 			    entry.name, parent, m_per_cu);
     }
