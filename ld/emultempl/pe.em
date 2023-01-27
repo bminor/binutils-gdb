@@ -1300,7 +1300,7 @@ pecoff_checksum_contents (bfd *abfd,
 static bool
 write_build_id (bfd *abfd)
 {
-  struct pe_tdata *t = pe_data (abfd);
+  struct pe_tdata *td = pe_data (abfd);
   asection *asec;
   struct bfd_link_order *link_order = NULL;
   unsigned char *contents;
@@ -1316,7 +1316,7 @@ write_build_id (bfd *abfd)
 	{
 	  if (l->type == bfd_indirect_link_order)
 	    {
-	      if (l->u.indirect.section == t->build_id.sec)
+	      if (l->u.indirect.section == td->build_id.sec)
 		{
 		  link_order = l;
 		  break;
@@ -1335,15 +1335,16 @@ write_build_id (bfd *abfd)
       return true;
     }
 
-  if (t->build_id.sec->contents == NULL)
-    t->build_id.sec->contents = (unsigned char *) xmalloc (t->build_id.sec->size);
-  contents = t->build_id.sec->contents;
+  if (td->build_id.sec->contents == NULL)
+    td->build_id.sec->contents = xmalloc (td->build_id.sec->size);
+  contents = td->build_id.sec->contents;
 
-  build_id_size = compute_build_id_size (t->build_id.style);
+  build_id_size = compute_build_id_size (td->build_id.style);
   build_id = xmalloc (build_id_size);
-  generate_build_id (abfd, t->build_id.style, pecoff_checksum_contents, build_id, build_id_size);
+  generate_build_id (abfd, td->build_id.style, pecoff_checksum_contents,
+		     build_id, build_id_size);
 
-  bfd_vma ib = pe_data (link_info.output_bfd)->pe_opthdr.ImageBase;
+  bfd_vma ib = td->pe_opthdr.ImageBase;
 
 #ifdef PDB_H
   if (pdb_name)
@@ -1390,10 +1391,12 @@ write_build_id (bfd *abfd)
   cvinfo.CVSignature = CVINFO_PDB70_CVSIGNATURE;
   cvinfo.Age = 1;
 
-  /* Zero pad or truncate the generated build_id to fit in the CodeView record.  */
+  /* Zero pad or truncate the generated build_id to fit in the
+     CodeView record.  */
   memset (&(cvinfo.Signature), 0, CV_INFO_SIGNATURE_LENGTH);
-  memcpy (&(cvinfo.Signature), build_id, (build_id_size > CV_INFO_SIGNATURE_LENGTH)
-	  ? CV_INFO_SIGNATURE_LENGTH :  build_id_size);
+  memcpy (&(cvinfo.Signature), build_id,
+	  (build_id_size > CV_INFO_SIGNATURE_LENGTH
+	   ? CV_INFO_SIGNATURE_LENGTH : build_id_size));
 
   free (build_id);
 
@@ -1403,9 +1406,9 @@ write_build_id (bfd *abfd)
     return 0;
 
   /* Record the location of the debug directory in the data directory.  */
-  pe_data (link_info.output_bfd)->pe_opthdr.DataDirectory[PE_DEBUG_DATA].VirtualAddress
-    = asec->vma  - ib + link_order->offset;
-  pe_data (link_info.output_bfd)->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size
+  td->pe_opthdr.DataDirectory[PE_DEBUG_DATA].VirtualAddress
+    = asec->vma - ib + link_order->offset;
+  td->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size
     = sizeof (struct external_IMAGE_DEBUG_DIRECTORY);
 
   return true;
@@ -1429,17 +1432,17 @@ setup_build_id (bfd *ibfd)
   s = bfd_make_section_anyway_with_flags (ibfd, ".buildid", flags);
   if (s != NULL)
     {
-      struct pe_tdata *t = pe_data (link_info.output_bfd);
-      t->build_id.after_write_object_contents = &write_build_id;
-      t->build_id.style = emit_build_id;
-      t->build_id.sec = s;
+      struct pe_tdata *td = pe_data (link_info.output_bfd);
+      td->build_id.after_write_object_contents = &write_build_id;
+      td->build_id.style = emit_build_id;
+      td->build_id.sec = s;
 
       /* Section is a fixed size:
 	 One IMAGE_DEBUG_DIRECTORY entry, of type IMAGE_DEBUG_TYPE_CODEVIEW,
 	 pointing at a CV_INFO_PDB70 record containing the build-id, followed by
 	 PdbFileName if relevant.  */
-      s->size = sizeof (struct external_IMAGE_DEBUG_DIRECTORY)
-	+ sizeof (CV_INFO_PDB70) + 1;
+      s->size = (sizeof (struct external_IMAGE_DEBUG_DIRECTORY)
+		 + sizeof (CV_INFO_PDB70) + 1);
 
 #ifdef PDB_H
       if (pdb_name)

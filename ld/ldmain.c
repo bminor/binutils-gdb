@@ -212,7 +212,14 @@ write_dependency_file (void)
 static void
 ld_cleanup (void)
 {
-  bfd_cache_close_all ();
+  bfd *ibfd, *inext;
+  if (link_info.output_bfd)
+    bfd_close_all_done (link_info.output_bfd);
+  for (ibfd = link_info.input_bfds; ibfd; ibfd = inext)
+    {
+      inext = ibfd->link.next;
+      bfd_close_all_done (ibfd);
+    }
 #if BFD_SUPPORTS_PLUGINS
   plugin_call_cleanup ();
 #endif
@@ -559,7 +566,9 @@ main (int argc, char **argv)
     }
   else
     {
-      if (!bfd_close (link_info.output_bfd))
+      bfd *obfd = link_info.output_bfd;
+      link_info.output_bfd = NULL;
+      if (!bfd_close (obfd))
 	einfo (_("%F%P: %s: final close failed: %E\n"), output_filename);
 
       /* If the --force-exe-suffix is enabled, and we're making an
@@ -621,7 +630,7 @@ main (int argc, char **argv)
       fflush (stderr);
     }
 
-  /* Prevent ld_cleanup from doing anything, after a successful link.  */
+  /* Prevent ld_cleanup from deleting the output file.  */
   output_filename = NULL;
 
   xexit (0);
