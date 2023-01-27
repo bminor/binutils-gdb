@@ -30,56 +30,43 @@
 
 /* See cooked-index.h.  */
 
-bool
+int
 cooked_index_entry::compare (const char *stra, const char *strb,
-			     bool completing)
+			     comparison_mode mode)
 {
-  /* If we've ever matched "<" in both strings, then we disable the
-     special template parameter handling.  */
-  bool seen_lt = false;
+  auto munge = [] (char c) -> unsigned char
+    {
+      /* We want to sort '<' before any other printable character.
+	 So, rewrite '<' to something just before ' '.  */
+      if (c == '<')
+	return '\x1f';
+      return TOLOWER ((unsigned char) c);
+    };
 
   while (*stra != '\0'
 	 && *strb != '\0'
-	 && (TOLOWER ((unsigned char) *stra)
-	     == TOLOWER ((unsigned char ) *strb)))
+	 && (munge (*stra) == munge (*strb)))
     {
-      if (*stra == '<')
-	seen_lt = true;
       ++stra;
       ++strb;
     }
 
-  unsigned c1 = TOLOWER ((unsigned char) *stra);
-  unsigned c2 = TOLOWER ((unsigned char) *strb);
+  unsigned char c1 = munge (*stra);
+  unsigned char c2 = munge (*strb);
 
-  if (completing)
+  if (c1 == c2)
+    return 0;
+
+  /* When completing, if STRB ends earlier than STRA, consider them as
+     equal.  When comparing, if STRB ends earlier and STRA ends with
+     '<', consider them as equal.  */
+  if (mode == COMPLETE || (mode == MATCH && c1 == munge ('<')))
     {
-      /* When completing, if one string ends earlier than the other,
-	 consider them as equal.  Also, completion mode ignores the
-	 special '<' handling.  */
-      if (c1 == '\0' || c2 == '\0')
-	return false;
-      /* Fall through to the generic case.  */
-    }
-  else if (seen_lt)
-    {
-      /* Fall through to the generic case.  */
-    }
-  else if (c1 == '\0' || c1 == '<')
-    {
-      /* Maybe they both end at the same spot.  */
-      if (c2 == '\0' || c2 == '<')
-	return false;
-      /* First string ended earlier.  */
-      return true;
-    }
-  else if (c2 == '\0' || c2 == '<')
-    {
-      /* Second string ended earlier.  */
-      return false;
+      if (c2 == '\0')
+	return 0;
     }
 
-  return c1 < c2;
+  return c1 < c2 ? -1 : 1;
 }
 
 #if GDB_SELF_TEST
@@ -89,45 +76,65 @@ namespace {
 void
 test_compare ()
 {
-  SELF_CHECK (!cooked_index_entry::compare ("abcd", "abcd", false));
-  SELF_CHECK (!cooked_index_entry::compare ("abcd", "abcd", false));
-  SELF_CHECK (!cooked_index_entry::compare ("abcd", "abcd", true));
-  SELF_CHECK (!cooked_index_entry::compare ("abcd", "abcd", true));
+  /* Convenience aliases.  */
+  const auto mode_compare = cooked_index_entry::MATCH;
+  const auto mode_sort = cooked_index_entry::SORT;
+  const auto mode_complete = cooked_index_entry::COMPLETE;
 
-  SELF_CHECK (cooked_index_entry::compare ("abcd", "ABCDE", false));
-  SELF_CHECK (!cooked_index_entry::compare ("ABCDE", "abcd", false));
-  SELF_CHECK (!cooked_index_entry::compare ("abcd", "ABCDE", true));
-  SELF_CHECK (!cooked_index_entry::compare ("ABCDE", "abcd", true));
+  SELF_CHECK (cooked_index_entry::compare ("abcd", "abcd",
+					   mode_compare) == 0);
+  SELF_CHECK (cooked_index_entry::compare ("abcd", "abcd",
+					   mode_complete) == 0);
 
-  SELF_CHECK (!cooked_index_entry::compare ("name", "name<>", false));
-  SELF_CHECK (!cooked_index_entry::compare ("name<>", "name", false));
-  SELF_CHECK (!cooked_index_entry::compare ("name", "name<>", true));
-  SELF_CHECK (!cooked_index_entry::compare ("name<>", "name", true));
+  SELF_CHECK (cooked_index_entry::compare ("abcd", "ABCDE",
+					   mode_compare) < 0);
+  SELF_CHECK (cooked_index_entry::compare ("ABCDE", "abcd",
+					   mode_compare) > 0);
+  SELF_CHECK (cooked_index_entry::compare ("abcd", "ABCDE",
+					   mode_complete) < 0);
+  SELF_CHECK (cooked_index_entry::compare ("ABCDE", "abcd",
+					   mode_complete) == 0);
 
-  SELF_CHECK (!cooked_index_entry::compare ("name<arg>", "name<arg>", false));
-  SELF_CHECK (!cooked_index_entry::compare ("name<arg>", "name<arg>", false));
-  SELF_CHECK (!cooked_index_entry::compare ("name<arg>", "name<arg>", true));
-  SELF_CHECK (!cooked_index_entry::compare ("name<arg>", "name<ag>", true));
+  SELF_CHECK (cooked_index_entry::compare ("name", "name<>",
+					   mode_compare) < 0);
+  SELF_CHECK (cooked_index_entry::compare ("name<>", "name",
+					   mode_compare) == 0);
+  SELF_CHECK (cooked_index_entry::compare ("name", "name<>",
+					   mode_complete) < 0);
+  SELF_CHECK (cooked_index_entry::compare ("name<>", "name",
+					   mode_complete) == 0);
 
-  SELF_CHECK (!cooked_index_entry::compare ("name<arg<more>>",
-					    "name<arg<more>>", false));
+  SELF_CHECK (cooked_index_entry::compare ("name<arg>", "name<arg>",
+					   mode_compare) == 0);
+  SELF_CHECK (cooked_index_entry::compare ("name<arg>", "name<ag>",
+					   mode_compare) > 0);
+  SELF_CHECK (cooked_index_entry::compare ("name<arg>", "name<arg>",
+					   mode_complete) == 0);
+  SELF_CHECK (cooked_index_entry::compare ("name<arg>", "name<ag>",
+					   mode_complete) > 0);
 
-  SELF_CHECK (!cooked_index_entry::compare ("name", "name<arg<more>>", false));
-  SELF_CHECK (!cooked_index_entry::compare ("name<arg<more>>", "name", false));
-  SELF_CHECK (cooked_index_entry::compare ("name<arg<", "name<arg<more>>",
-					   false));
-  SELF_CHECK (!cooked_index_entry::compare ("name<arg<",
-					    "name<arg<more>>",
-					    true));
-  SELF_CHECK (!cooked_index_entry::compare ("name<arg<more>>", "name<arg<",
-					    false));
-  SELF_CHECK (!cooked_index_entry::compare ("name<arg<more>>", "name<arg<",
-					    true));
+  SELF_CHECK (cooked_index_entry::compare ("name<arg<more>>",
+					   "name<arg<more>>",
+					   mode_compare) == 0);
 
-  SELF_CHECK (cooked_index_entry::compare ("", "abcd", false));
-  SELF_CHECK (!cooked_index_entry::compare ("", "abcd", true));
-  SELF_CHECK (!cooked_index_entry::compare ("abcd", "", false));
-  SELF_CHECK (!cooked_index_entry::compare ("abcd", "", true));
+  SELF_CHECK (cooked_index_entry::compare ("name", "name<arg<more>>",
+					   mode_compare) < 0);
+  SELF_CHECK (cooked_index_entry::compare ("name<arg<more>>", "name",
+					   mode_compare) == 0);
+  SELF_CHECK (cooked_index_entry::compare ("name<arg<more>>", "name<arg<",
+					   mode_compare) > 0);
+  SELF_CHECK (cooked_index_entry::compare ("name<arg<more>>", "name<arg<",
+					   mode_complete) == 0);
+
+  SELF_CHECK (cooked_index_entry::compare ("", "abcd", mode_compare) < 0);
+  SELF_CHECK (cooked_index_entry::compare ("", "abcd", mode_complete) < 0);
+  SELF_CHECK (cooked_index_entry::compare ("abcd", "", mode_compare) > 0);
+  SELF_CHECK (cooked_index_entry::compare ("abcd", "", mode_complete) == 0);
+
+  SELF_CHECK (cooked_index_entry::compare ("func", "func<type>",
+					   mode_sort) < 0);
+  SELF_CHECK (cooked_index_entry::compare ("func<type>", "func1",
+					   mode_sort) < 0);
 }
 
 } /* anonymous namespace */
@@ -359,20 +366,22 @@ cooked_index::find (const std::string &name, bool completing) const
 {
   wait ();
 
+  cooked_index_entry::comparison_mode mode = (completing
+					      ? cooked_index_entry::COMPLETE
+					      : cooked_index_entry::MATCH);
+
   auto lower = std::lower_bound (m_entries.cbegin (), m_entries.cend (), name,
 				 [=] (const cooked_index_entry *entry,
 				      const std::string &n)
   {
-    return cooked_index_entry::compare (entry->canonical, n.c_str (),
-					completing);
+    return cooked_index_entry::compare (entry->canonical, n.c_str (), mode) < 0;
   });
 
   auto upper = std::upper_bound (m_entries.cbegin (), m_entries.cend (), name,
 				 [=] (const std::string &n,
 				      const cooked_index_entry *entry)
   {
-    return cooked_index_entry::compare (n.c_str (), entry->canonical,
-					completing);
+    return cooked_index_entry::compare (entry->canonical, n.c_str (), mode) > 0;
   });
 
   return range (lower, upper);

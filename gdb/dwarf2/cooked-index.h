@@ -143,16 +143,54 @@ struct cooked_index_entry : public allocate_on_obstack
      STORAGE.  */
   const char *full_name (struct obstack *storage) const;
 
-  /* Compare two strings, case-insensitively.  Return true if STRA is
-     less than STRB.  If one string has template parameters, but the
-     other does not, then they are considered to be equal; so for
-     example "t<x>" == "t<x>", "t<x>" < "t<y>", but "t" == "t<x>".  */
-  static bool compare (const char *stra, const char *strb, bool completing);
+  /* Comparison modes for the 'compare' function.  See the function
+     for a description.  */
+  enum comparison_mode
+  {
+    MATCH,
+    SORT,
+    COMPLETE,
+  };
+
+  /* Compare two strings, case-insensitively.  Return -1 if STRA is
+     less than STRB, 0 if they are equal, and 1 if STRA is greater.
+
+     When comparing, '<' is considered to be less than all other
+     printable characters.  This ensures that "t<x>" sorts before
+     "t1", which is necessary when looking up "t".  This '<' handling
+     is to ensure that certain C++ lookups work correctly.  It is
+     inexact, and applied regardless of the search language, but this
+     is ok because callers of this code do more precise filtering
+     according to their needs.  This is also why using a
+     case-insensitive comparison works even for languages that are
+     case sensitive.
+
+     MODE controls how the comparison proceeds.
+
+     MODE==SORT is used when sorting and the only special '<' handling
+     that it does is to ensure that '<' sorts before all other
+     printable characters.  This ensures that the resulting ordering
+     will be binary-searchable.
+
+     MODE==MATCH is used when searching for a symbol.  In this case,
+     STRB must always be the search name, and STRA must be the name in
+     the index that is under consideration.  In compare mode, early
+     termination of STRB may match STRA -- for example, "t<int>" and
+     "t" will be considered to be equal.  (However, if A=="t" and
+     B=="t<int>", then this will not consider them as equal.)
+
+     MODE==COMPLETE is used when searching for a symbol for
+     completion.  In this case, STRB must always be the search name,
+     and STRA must be the name in the index that is under
+     consideration.  In completion mode, early termination of STRB
+     always results in a match.  */
+  static int compare (const char *stra, const char *strb,
+		      comparison_mode mode);
 
   /* Compare two entries by canonical name.  */
   bool operator< (const cooked_index_entry &other) const
   {
-    return compare (canonical, other.canonical, false);
+    return compare (canonical, other.canonical, SORT) < 0;
   }
 
   /* The name as it appears in DWARF.  This always points into one of
