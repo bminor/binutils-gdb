@@ -23,29 +23,8 @@
 # and that the previous stack-pointer value, and frame base address
 # value, can be calculated correctly.
 
-set debug_flags {debug}
-set nodebug_flags {nodebug}
-
-# Make sure that we don't use .eh_frame info, by not generating it,
-# using -fno-asynchronous-unwind-tables, if supported.
-if { [gdb_can_simple_compile fno-asynchronous-unwind-tables \
-	  { void foo () { } } object -fno-asynchronous-unwind-tables] } {
-    lappend nodebug_flags additional_flags=-fno-asynchronous-unwind-tables
-}
-
-if { $srcfile_debug } {
-    lappend srcfile_flags $debug_flags
-} else {
-    lappend srcfile_flags $nodebug_flags
-}
-if { $srcfile2_debug } {
-    lappend srcfile2_flags $debug_flags
-} else {
-    lappend srcfile2_flags $nodebug_flags
-}
-
 if {[prepare_for_testing_full "failed to prepare" \
-	 [list ${testfile} $debug_flags \
+	 [list ${testfile} {debug} \
 	      $srcfile $srcfile_flags $srcfile2 $srcfile2_flags]]} {
     return -1
 }

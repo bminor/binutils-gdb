@@ -15,9 +15,14 @@
 
 standard_testfile .c -foo.c
 
-set srcfile_flags {}
-set srcfile2_flags {}
-set srcfile_debug 1
-set srcfile2_debug 0
+set srcfile_flags {debug}
+set srcfile2_flags {nodebug}
+
+# Make sure that we don't use .eh_frame info, by not generating it,
+# using -fno-asynchronous-unwind-tables, if supported.
+if { [gdb_can_simple_compile fno-asynchronous-unwind-tables \
+	  { void foo () { } } object -fno-asynchronous-unwind-tables] } {
+    lappend srcfile2_flags additional_flags=-fno-asynchronous-unwind-tables
+}
 
 source $srcdir/$subdir/unwind-on-each-insn.exp.tcl
