@@ -1069,6 +1069,7 @@ COMMON_SFILES = \
 	dwarf2/comp-unit-head.c \
 	dwarf2/cooked-index.c \
 	dwarf2/cu.c \
+	dwarf2/die.c \
 	dwarf2/dwz.c \
 	dwarf2/expr.c \
 	dwarf2/frame-tailcall.c \
