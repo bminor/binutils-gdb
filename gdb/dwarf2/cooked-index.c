@@ -355,11 +355,11 @@ cooked_index::do_finalize ()
 /* See cooked-index.h.  */
 
 cooked_index::range
-cooked_index::find (const std::string &name, bool completing)
+cooked_index::find (const std::string &name, bool completing) const
 {
   wait ();
 
-  auto lower = std::lower_bound (m_entries.begin (), m_entries.end (), name,
+  auto lower = std::lower_bound (m_entries.cbegin (), m_entries.cend (), name,
 				 [=] (const cooked_index_entry *entry,
 				      const std::string &n)
   {
@@ -367,7 +367,7 @@ cooked_index::find (const std::string &name, bool completing)
 					completing);
   });
 
-  auto upper = std::upper_bound (m_entries.begin (), m_entries.end (), name,
+  auto upper = std::upper_bound (m_entries.cbegin (), m_entries.cend (), name,
 				 [=] (const std::string &n,
 				      const cooked_index_entry *entry)
   {
@@ -413,7 +413,7 @@ cooked_index_vector::get_addrmaps ()
 /* See cooked-index.h.  */
 
 cooked_index_vector::range
-cooked_index_vector::find (const std::string &name, bool completing)
+cooked_index_vector::find (const std::string &name, bool completing) const
 {
   std::vector<cooked_index::range> result_range;
   result_range.reserve (m_vector.size ());

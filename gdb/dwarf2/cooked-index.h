@@ -217,7 +217,7 @@ public:
   void finalize ();
 
   /* Wait for this index's finalization to be complete.  */
-  void wait ()
+  void wait () const
   {
     m_future.wait ();
   }
@@ -225,19 +225,20 @@ public:
   friend class cooked_index_vector;
 
   /* A simple range over part of m_entries.  */
-  typedef iterator_range<std::vector<cooked_index_entry *>::iterator> range;
+  typedef iterator_range<std::vector<cooked_index_entry *>::const_iterator>
+       range;
 
   /* Return a range of all the entries.  */
-  range all_entries ()
+  range all_entries () const
   {
     wait ();
-    return { m_entries.begin (), m_entries.end () };
+    return { m_entries.cbegin (), m_entries.cend () };
   }
 
   /* Look up an entry by name.  Returns a range of all matching
      results.  If COMPLETING is true, then a larger range, suitable
      for completion, will be returned.  */
-  range find (const std::string &name, bool completing);
+  range find (const std::string &name, bool completing) const;
 
 private:
 
@@ -317,7 +318,7 @@ public:
 
   /* Wait until the finalization of the entire cooked_index_vector is
      done.  */
-  void wait ()
+  void wait () const
   {
     for (auto &item : m_vector)
       item->wait ();
@@ -340,10 +341,10 @@ public:
   /* Look up an entry by name.  Returns a range of all matching
      results.  If COMPLETING is true, then a larger range, suitable
      for completion, will be returned.  */
-  range find (const std::string &name, bool completing);
+  range find (const std::string &name, bool completing) const;
 
   /* Return a range of all the entries.  */
-  range all_entries ()
+  range all_entries () const
   {
     std::vector<cooked_index::range> result_range;
     result_range.reserve (m_vector.size ());
