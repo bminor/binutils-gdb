@@ -30219,7 +30219,13 @@ the @key{SHIFT} key on your keyboard to temporarily bypass
 @value{GDBN}'s TUI and access the terminal's native mouse copy/paste
 functionality (commonly, click-drag-release or double-click to select
 text, middle-click to paste).  This copy/paste works with the
-terminal's selection buffer, as opposed to the TUI's buffer.
+terminal's selection buffer, as opposed to the TUI's buffer.  Alternatively, to
+disable mouse support in the TUI entirely and give the terminal control over
+mouse clicks, turn off the @code{tui mouse-events} setting
+(@pxref{tui-mouse-events,,set tui mouse-events}).
+
+Python extensions can react to mouse clicks
+(@pxref{python-window-click,,Window.click}).
 
 @node TUI Commands
 @section TUI-specific Commands
@@ -30499,6 +30505,13 @@ Set whether the TUI source window is displayed in ``compact'' form.
 The default display uses more space for line numbers; the compact
 display uses only as much space as is needed for the line numbers in
 the current file.
+
+@anchor{tui-mouse-events}
+@item set tui mouse-events @r{[}on@r{|}off@r{]}
+@kindex set tui mouse-events
+When on (default), mouse clicks control the TUI (@pxref{TUI Mouse Support}).
+When off, mouse clicks are handled by the terminal, enabling terminal-native
+text selection.
 
 @kindex set debug tui
 @item set debug tui @r{[}on|off@r{]}

@@ -657,7 +657,8 @@ static void
 tui_prep_terminal (int notused1)
 {
 #ifdef NCURSES_MOUSE_VERSION
-  mousemask (ALL_MOUSE_EVENTS, NULL);
+  if (tui_enable_mouse)
+    mousemask (ALL_MOUSE_EVENTS, NULL);
 #endif
 }
 

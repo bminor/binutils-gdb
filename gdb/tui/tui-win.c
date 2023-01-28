@@ -872,6 +872,17 @@ tui_show_compact_source (struct ui_file *file, int from_tty,
   gdb_printf (file, _("TUI source window compactness is %s.\n"), value);
 }
 
+bool tui_enable_mouse = true;
+
+/* Implement 'show tui mouse-events'.  */
+
+static void
+show_tui_mouse_events (struct ui_file *file, int from_tty,
+		       struct cmd_list_element *c, const char *value)
+{
+  gdb_printf (file, _("TUI mouse events are %s.\n"), value);
+}
+
 /* Set the tab width of the specified window.  */
 static void
 tui_set_tab_width_command (const char *arg, int from_tty)
@@ -1252,6 +1263,17 @@ Show whether the TUI source window is compact."), _("\
 This variable controls whether the TUI source window is shown\n\
 in a compact form.  The compact form uses less horizontal space."),
 			   tui_set_compact_source, tui_show_compact_source,
+			   &tui_setlist, &tui_showlist);
+
+  add_setshow_boolean_cmd ("mouse-events", class_tui,
+			   &tui_enable_mouse, _("\
+Set whether TUI mode handles mouse clicks."), _("\
+Show whether TUI mode handles mouse clicks."), _("\
+When on (default), mouse clicks control the TUI and can be accessed by Python\n\
+extensions.  When off, mouse clicks are handled by the terminal, enabling\n\
+terminal-native text selection."),
+			   nullptr,
+			   show_tui_mouse_events,
 			   &tui_setlist, &tui_showlist);
 
   add_setshow_boolean_cmd ("tui-current-position", class_maintenance,

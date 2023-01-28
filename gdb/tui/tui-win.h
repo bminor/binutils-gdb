@@ -51,6 +51,9 @@ struct cmd_list_element **tui_get_cmd_list (void);
 /* Whether compact source display should be used.  */
 extern bool compact_source;
 
+/* Whether the TUI should intercept terminal mouse events.  */
+extern bool tui_enable_mouse;
+
 /* Whether to style the source and assembly code highlighted by the TUI's
    current position indicator.  */
 extern bool style_tui_current_position;

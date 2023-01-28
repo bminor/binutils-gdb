@@ -6974,11 +6974,16 @@ contents.  A positive argument should cause the viewport to move down,
 and so the content should appear to move up.
 @end defun
 
+@anchor{python-window-click}
 @defun Window.click (x, y, button)
 This is called on a mouse click in this window.  @var{x} and @var{y} are
 the mouse coordinates inside the window (0-based, from the top left
 corner), and @var{button} specifies which mouse button was used, whose
 values can be 1 (left), 2 (middle), or 3 (right).
+
+When TUI mouse events are disabled by turning off the @code{tui mouse-events}
+setting (@pxref{tui-mouse-events,,set tui mouse-events}), then @code{click} will
+not be called.
 @end defun
 
 @node Disassembly In Python

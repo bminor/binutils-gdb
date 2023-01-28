@@ -133,6 +133,12 @@ show always-read-ctf
 info main
   Get main symbol to identify entry point into program.
 
+set tui mouse-events [on|off]
+show tui mouse-events
+  When on (default), mouse clicks control the TUI and can be accessed by
+  Python extensions.  When off, mouse clicks are handled by the terminal,
+  enabling terminal-native text selection.
+
 * New convenience function "$_shell", to execute a shell command and
   return the result.  This lets you run shell commands in expressions.
   Some examples:
