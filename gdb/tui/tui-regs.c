@@ -91,12 +91,6 @@ tui_register_format (frame_info_ptr frame, int regnum)
 
   /* Expand tabs into spaces, since ncurses on MS-Windows doesn't.  */
   tab_expansion_file stream;
-
-  scoped_restore save_pagination
-    = make_scoped_restore (&pagination_enabled, false);
-  scoped_restore save_stdout
-    = make_scoped_restore (&gdb_stdout, &stream);
-
   gdbarch_print_registers_info (gdbarch, &stream, frame, regnum, 1);
 
   /* Remove the possible \n.  */
