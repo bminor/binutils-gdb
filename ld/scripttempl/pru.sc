@@ -147,7 +147,6 @@ SECTIONS
     ${RELOCATING+ *(.rodata:*)}
     ${RELOCATING+*(.gnu.linkonce.d*)}
     ${RELOCATING+*(.gnu.linkonce.r*)}
-    ${RELOCATING+. = ALIGN(4);}
     ${RELOCATING+ PROVIDE (_data_end = .) ; }
 
     ${RELOCATING+/* Merge the bss input sections into the output
@@ -164,13 +163,22 @@ SECTIONS
     ${RELOCATING+*(COMMON)}
     ${RELOCATING+ PROVIDE (_bss_end = .) ; }
 
+    ${RELOCATING+/* In case this is the last input section, align to
+      keep the loadable segment size a multiple of the common page size.
+      Some SoCs have stricter memory size requirements than others.  */
+    . = ALIGN (CONSTANT (COMMONPAGESIZE));}
   } ${RELOCATING+ > dmem}
 
   /* Linux remoteproc loader requires the resource_table section
-     start address to be aligned to 8 bytes.  */
-  .resource_table ${RELOCATING-0} ${RELOCATING+ ALIGN (8)} :
+     start address to be aligned to 8 bytes for SoCs with AARCH64
+     host processors.  */
+  .resource_table ${RELOCATING-0} ${RELOCATING+ ALIGN (CONSTANT (MAXPAGESIZE))} :
   {
     KEEP (*(.resource_table))
+    ${RELOCATING+/* In case this is the last input section, align to
+      keep the loadable segment size a multiple of the common page size.
+      Some SoCs have stricter memory size requirements than others.  */
+    . = ALIGN (CONSTANT (COMMONPAGESIZE));}
   } ${RELOCATING+ > dmem}
 
   /* Global data not cleared after reset.  */
