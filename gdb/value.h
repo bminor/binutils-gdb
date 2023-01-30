@@ -119,13 +119,6 @@ struct value_ref_policy
 
 typedef gdb::ref_ptr<struct value, value_ref_policy> value_ref_ptr;
 
-/* Values are stored in a chain, so that they can be deleted easily
-   over calls to the inferior.  Values assigned to internal variables,
-   put into the value history or exposed to Python are taken off this
-   list.  */
-
-struct value *value_next (const struct value *);
-
 /* Type of the value.  */
 
 extern struct type *value_type (const struct value *);
