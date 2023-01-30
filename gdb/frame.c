@@ -259,6 +259,22 @@ frame_addr_hash_eq (const void *a, const void *b)
   return f_entry->this_id.value == f_element->this_id.value;
 }
 
+/* Deletion function for the frame cache hash table.  */
+
+static void
+frame_info_del (void *frame_v)
+{
+  frame_info *frame = (frame_info *) frame_v;
+
+  if (frame->prologue_cache != nullptr
+      && frame->unwind->dealloc_cache != nullptr)
+    frame->unwind->dealloc_cache (frame, frame->prologue_cache);
+
+  if (frame->base_cache != nullptr
+      && frame->base->unwind->dealloc_cache != nullptr)
+    frame->base->unwind->dealloc_cache (frame, frame->base_cache);
+}
+
 /* Internal function to create the frame_stash hash table.  100 seems
    to be a good compromise to start the hash table at.  */
 
@@ -268,7 +284,7 @@ frame_stash_create (void)
   frame_stash = htab_create (100,
 			     frame_addr_hash,
 			     frame_addr_hash_eq,
-			     NULL);
+			     frame_info_del);
 }
 
 /* Internal function to add a frame to the frame_stash hash table.
@@ -2048,25 +2064,18 @@ reinit_frame_cache (void)
 {
   ++frame_cache_generation;
 
-  /* Tear down all frame caches.  */
-  for (frame_info *fi = sentinel_frame; fi != NULL; fi = fi->prev)
-    {
-      if (fi->prologue_cache && fi->unwind->dealloc_cache)
-	fi->unwind->dealloc_cache (fi, fi->prologue_cache);
-      if (fi->base_cache && fi->base->unwind->dealloc_cache)
-	fi->base->unwind->dealloc_cache (fi, fi->base_cache);
-    }
+  if (sentinel_frame != NULL)
+    annotate_frames_invalid ();
+
+  invalidate_selected_frame ();
+
+  /* Invalidate cache.  */
+  sentinel_frame = NULL;
+  frame_stash_invalidate ();
 
   /* Since we can't really be sure what the first object allocated was.  */
   obstack_free (&frame_cache_obstack, 0);
   obstack_init (&frame_cache_obstack);
-
-  if (sentinel_frame != NULL)
-    annotate_frames_invalid ();
-
-  sentinel_frame = NULL;		/* Invalidate cache */
-  invalidate_selected_frame ();
-  frame_stash_invalidate ();
 
   for (frame_info_ptr &iter : frame_info_ptr::frame_list)
     iter.invalidate ();
