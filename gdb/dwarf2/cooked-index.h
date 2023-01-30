@@ -360,7 +360,7 @@ public:
 
   /* Return a new vector of all the addrmaps used by all the indexes
      held by this object.  */
-  std::vector<addrmap *> get_addrmaps ();
+  std::vector<const addrmap *> get_addrmaps () const;
 
   /* Return the entry that is believed to represent the program's
      "main".  This will return NULL if no such entry is available.  */

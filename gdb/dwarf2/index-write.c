@@ -433,7 +433,8 @@ write_hash_table (mapped_symtab *symtab, data_buf &output, data_buf &cpool)
     }
 }
 
-typedef std::unordered_map<dwarf2_per_cu_data *, unsigned int> cu_index_map;
+using cu_index_map
+  = std::unordered_map<const dwarf2_per_cu_data *, unsigned int>;
 
 /* Helper struct for building the address table.  */
 struct addrmap_index_data
@@ -446,7 +447,7 @@ struct addrmap_index_data
   data_buf &addr_vec;
   cu_index_map &cu_index_htab;
 
-  int operator() (CORE_ADDR start_addr, void *obj);
+  int operator() (CORE_ADDR start_addr, const void *obj);
 
   /* True if the previous_* fields are valid.
      We can't write an entry until we see the next entry (since it is only then
@@ -472,9 +473,10 @@ add_address_entry (data_buf &addr_vec,
 /* Worker function for traversing an addrmap to build the address table.  */
 
 int
-addrmap_index_data::operator() (CORE_ADDR start_addr, void *obj)
+addrmap_index_data::operator() (CORE_ADDR start_addr, const void *obj)
 {
-  dwarf2_per_cu_data *per_cu = static_cast<dwarf2_per_cu_data *> (obj);
+  const dwarf2_per_cu_data *per_cu
+    = static_cast<const dwarf2_per_cu_data *> (obj);
 
   if (previous_valid)
     add_address_entry (addr_vec,
@@ -500,7 +502,7 @@ addrmap_index_data::operator() (CORE_ADDR start_addr, void *obj)
    in the index file.  */
 
 static void
-write_address_map (struct addrmap *addrmap, data_buf &addr_vec,
+write_address_map (const addrmap *addrmap, data_buf &addr_vec,
 		   cu_index_map &cu_index_htab)
 {
   struct addrmap_index_data addrmap_index_data (addr_vec, cu_index_htab);

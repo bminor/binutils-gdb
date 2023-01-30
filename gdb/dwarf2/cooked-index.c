@@ -401,10 +401,10 @@ cooked_index_vector::lookup (CORE_ADDR addr)
 
 /* See cooked-index.h.  */
 
-std::vector<addrmap *>
-cooked_index_vector::get_addrmaps ()
+std::vector<const addrmap *>
+cooked_index_vector::get_addrmaps () const
 {
-  std::vector<addrmap *> result;
+  std::vector<const addrmap *> result;
   for (const auto &index : m_vector)
     result.push_back (index->m_addrmap);
   return result;
