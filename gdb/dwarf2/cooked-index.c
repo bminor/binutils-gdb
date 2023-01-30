@@ -20,6 +20,7 @@
 #include "defs.h"
 #include "dwarf2/cooked-index.h"
 #include "dwarf2/read.h"
+#include "dwarf2/stringify.h"
 #include "cp-support.h"
 #include "c-lang.h"
 #include "ada-lang.h"
@@ -27,6 +28,22 @@
 #include <algorithm>
 #include "safe-ctype.h"
 #include "gdbsupport/selftest.h"
+
+/* See cooked-index.h.  */
+
+std::string
+to_string (cooked_index_flag flags)
+{
+  static constexpr cooked_index_flag::string_mapping mapping[] = {
+    MAP_ENUM_FLAG (IS_MAIN),
+    MAP_ENUM_FLAG (IS_STATIC),
+    MAP_ENUM_FLAG (IS_ENUM_CLASS),
+    MAP_ENUM_FLAG (IS_LINKAGE),
+    MAP_ENUM_FLAG (IS_TYPE_DECLARATION),
+  };
+
+  return flags.to_string (mapping);
+}
 
 /* See cooked-index.h.  */
 
@@ -449,6 +466,82 @@ cooked_index_vector::get_main () const
     }
 
   return result;
+}
+
+/* See cooked-index.h.  */
+
+void
+cooked_index_vector::dump (gdbarch *arch) const
+{
+  /* Ensure the index is done building.  */
+  this->wait ();
+
+  gdb_printf ("  entries:\n");
+  gdb_printf ("\n");
+
+  size_t i = 0;
+  for (const cooked_index_entry *entry : this->all_entries ())
+    {
+      QUIT;
+
+      gdb_printf ("    [%zu] ((cooked_index_entry *) %p)\n", i++, entry);
+      gdb_printf ("    name:       %s\n", entry->name);
+      gdb_printf ("    canonical:  %s\n", entry->canonical);
+      gdb_printf ("    DWARF tag:  %s\n", dwarf_tag_name (entry->tag));
+      gdb_printf ("    flags:      %s\n", to_string (entry->flags).c_str ());
+      gdb_printf ("    DIE offset: 0x%lx\n",
+		  to_underlying (entry->die_offset));
+
+      if (entry->parent_entry != nullptr)
+	gdb_printf ("    parent:     ((cooked_index_entry *) %p) [%s]\n",
+		    entry->parent_entry, entry->parent_entry->name);
+      else
+	gdb_printf ("    parent:     ((cooked_index_entry *) 0)\n");
+
+      gdb_printf ("\n");
+    }
+
+  const cooked_index_entry *main_entry = this->get_main ();
+  if (main_entry != nullptr)
+    gdb_printf ("  main: ((cooked_index_entry *) %p) [%s]\n", main_entry,
+		  main_entry->name);
+  else
+    gdb_printf ("  main: ((cooked_index_entry *) 0)\n");
+
+  gdb_printf ("\n");
+  gdb_printf ("  address maps:\n");
+  gdb_printf ("\n");
+
+  std::vector<const addrmap *> addrmaps = this->get_addrmaps ();
+  for (i = 0; i < addrmaps.size (); ++i)
+    {
+      const addrmap &addrmap = *addrmaps[i];
+
+      gdb_printf ("    [%zu] ((addrmap *) %p)\n", i, &addrmap);
+      gdb_printf ("\n");
+
+      addrmap.foreach ([arch] (CORE_ADDR start_addr, const void *obj)
+	{
+	  QUIT;
+
+	  const char *start_addr_str = paddress (arch, start_addr);
+
+	  if (obj != nullptr)
+	    {
+	      const dwarf2_per_cu_data *per_cu
+		= static_cast<const dwarf2_per_cu_data *> (obj);
+	      gdb_printf ("      [%s] ((dwarf2_per_cu_data *) %p)\n",
+			  start_addr_str, per_cu);
+	    }
+	  else
+	    gdb_printf ("      [%s] ((dwarf2_per_cu_data *) 0)\n",
+			start_addr_str);
+
+	  return 0;
+	});
+
+      gdb_printf ("\n");
+    }
 }
 
 void _initialize_cooked_index ();

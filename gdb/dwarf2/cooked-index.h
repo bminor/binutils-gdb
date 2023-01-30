@@ -54,6 +54,10 @@ enum cooked_index_flag_enum : unsigned char
 };
 DEF_ENUM_FLAGS_TYPE (enum cooked_index_flag_enum, cooked_index_flag);
 
+/* Return a string representation of FLAGS.  */
+
+std::string to_string (cooked_index_flag flags);
+
 /* A cooked_index_entry represents a single item in the index.  Note
    that two entries can be created for the same DIE -- one using the
    name, and another one using the linkage name, if any.
@@ -410,6 +414,9 @@ public:
   }
 
   quick_symbol_functions_up make_quick_functions () const override;
+
+  /* Dump a human-readable form of the contents of the index.  */
+  void dump (gdbarch *arch) const;
 
 private:
 

@@ -18589,7 +18589,15 @@ struct cooked_index_functions : public dwarf2_base_index_functions
 
   void dump (struct objfile *objfile) override
   {
-    gdb_printf ("Cooked index in use\n");
+    gdb_printf ("Cooked index in use:\n");
+    gdb_printf ("\n");
+
+    dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
+    cooked_index_vector *index
+      = (gdb::checked_static_cast<cooked_index_vector *>
+         (per_objfile->per_bfd->index_table.get ()));
+
+    index->dump (objfile->arch ());
   }
 
   void expand_matching_symbols
