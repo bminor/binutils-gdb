@@ -489,7 +489,7 @@ cooked_index_vector::dump (gdbarch *arch) const
       gdb_printf ("    canonical:  %s\n", entry->canonical);
       gdb_printf ("    DWARF tag:  %s\n", dwarf_tag_name (entry->tag));
       gdb_printf ("    flags:      %s\n", to_string (entry->flags).c_str ());
-      gdb_printf ("    DIE offset: 0x%lx\n",
+      gdb_printf ("    DIE offset: 0x%" PRIx64 "\n",
 		  to_underlying (entry->die_offset));
 
       if (entry->parent_entry != nullptr)
