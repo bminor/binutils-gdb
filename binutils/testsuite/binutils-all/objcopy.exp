@@ -127,7 +127,6 @@ proc objcopy_test {testname srcfile type asflags ldflags} {
 }
 
 setup_xfail "hppa*-*-*"
-setup_xfail "sh-*-coff*"
 setup_xfail "tic54x-*-*"
 clear_xfail "hppa*64*-*-hpux*" "hppa*-*-linux*" "hppa*-*-lites*"
 clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-*elf*"
@@ -1215,14 +1214,7 @@ set elf64 ""
 if [is_elf_format] {
     objcopy_test_symbol_manipulation
     objcopy_test_elf_common_symbols
-
-    setup_xfail "hppa*-*-*"
-    setup_xfail "sh-*-coff*"
-    setup_xfail "tic54x-*-*"
-    clear_xfail "hppa*64*-*-hpux*" "hppa*-*-linux*" "hppa*-*-lites*"
-    clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-*elf*"
     objcopy_test "ELF unknown section type" unknown.s object "" ""
-
     objcopy_test_readelf "ELF group 1" group.s
     objcopy_test_readelf "ELF group 2" group-2.s
     objcopy_test_readelf "ELF group 3" group-3.s
@@ -1461,7 +1453,6 @@ run_dump_test "pr23633"
 run_dump_test "set-section-alignment"
 
 setup_xfail "hppa*-*-*"
-setup_xfail "sh-*-coff*"
 setup_xfail "spu-*-*"
 clear_xfail "hppa*64*-*-hpux*" "hppa*-*-linux*" "hppa*-*-lites*"
 clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-*elf*"

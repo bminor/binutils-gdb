@@ -28,7 +28,8 @@ if { [is_elf_format] } {
     setup_xfail hppa64-*-*
 } elseif { [is_pecoff_format] } {
     # Weak symbols are broken for most PE targets.
-    if { ![istarget i?86-*-*]
+    if { ![istarget aarch64-*-*]
+	 && ![istarget i?86-*-*]
 	 && ![istarget sh-*-*]
 	 && ![istarget x86_64-*-*] } {
 	setup_xfail *-*-*

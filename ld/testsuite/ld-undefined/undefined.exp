@@ -141,7 +141,12 @@ if { ![check_compiler_available] } {
     # error message is 8 instead of 9. On 64 bit s/390 this works
     # because of the new brasl instruction that doesn't need a literal
     # pool entry.
-    setup_xfail s390-*-*
+    # FIXME: this test has been an XPASS since 2021-04 (and maybe
+    # earlier, that's just where my logs went back to).  Testing the
+    # gcc version is a wild guess at what might have changed.
+    if ![at_least_gcc_version 11 0] {
+	setup_xfail s390-*-*
+    }
 
     # See comments above for Xtensa.
     setup_xfail xtensa*-*-linux*
