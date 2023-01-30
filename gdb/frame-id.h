@@ -128,12 +128,16 @@ struct frame_id
 /* For convenience.  All fields are zero.  This means "there is no frame".  */
 extern const struct frame_id null_frame_id;
 
-/* Sentinel frame.  */
-extern const struct frame_id sentinel_frame_id;
-
 /* This means "there is no frame ID, but there is a frame".  It should be
    replaced by best-effort frame IDs for the outermost frame, somehow.
    The implementation is only special_addr_p set.  */
 extern const struct frame_id outer_frame_id;
+
+/* Return true if ID represents a sentinel frame.  */
+static inline bool
+is_sentinel_frame_id (frame_id id)
+{
+  return id.stack_status == FID_STACK_SENTINEL;
+}
 
 #endif /* ifdef GDB_FRAME_ID_H  */

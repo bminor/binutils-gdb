@@ -159,6 +159,16 @@ extern struct frame_id
    as the special identifier address are set to indicate wild cards.  */
 extern struct frame_id frame_id_build_wild (CORE_ADDR stack_addr);
 
+/* Construct a frame ID for a sentinel frame.
+
+   If either STACK_ADDR or CODE_ADDR is not 0, the ID represents a sentinel
+   frame for a user-created frame.  STACK_ADDR and CODE_ADDR are the addresses
+   used to create the frame.
+
+   If STACK_ADDR and CODE_ADDR are both 0, the ID represents a regular sentinel
+   frame (i.e. the "next" frame of the target's current frame).  */
+extern frame_id frame_id_build_sentinel (CORE_ADDR stack_addr, CORE_ADDR code_addr);
+
 /* Returns true when L is a valid frame.  */
 extern bool frame_id_p (frame_id l);
 
