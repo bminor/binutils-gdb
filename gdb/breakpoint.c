@@ -2096,7 +2096,7 @@ update_watchpoint (struct watchpoint *b, bool reparse)
 		    {
 		      /* Extract the bit parameters out from the bitfield
 			 sub-expression.  */
-		      bitpos = value_bitpos (v);
+		      bitpos = v->bitpos ();
 		      bitsize = v->bitsize ();
 		    }
 		  else if (v == result && b->val_bitsize != 0)
@@ -10198,7 +10198,7 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 
   if (val_as_value != NULL && just_location)
     {
-      saved_bitpos = value_bitpos (val_as_value);
+      saved_bitpos = val_as_value->bitpos ();
       saved_bitsize = val_as_value->bitsize ();
     }
 

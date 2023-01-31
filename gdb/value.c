@@ -1035,17 +1035,6 @@ set_value_offset (struct value *value, LONGEST offset)
   value->m_offset = offset;
 }
 
-LONGEST
-value_bitpos (const struct value *value)
-{
-  return value->m_bitpos;
-}
-void
-set_value_bitpos (struct value *value, LONGEST bit)
-{
-  value->m_bitpos = bit;
-}
-
 struct value *
 value_parent (const struct value *value)
 {
@@ -3941,7 +3930,7 @@ value_fetch_lazy_bitfield (struct value *val)
   if (value_lazy (parent))
     value_fetch_lazy (parent);
 
-  unpack_value_bitfield (val, value_bitpos (val), val->bitsize (),
+  unpack_value_bitfield (val, val->bitpos (), val->bitsize (),
 			 value_contents_for_printing (parent).data (),
 			 value_offset (val), parent);
 }

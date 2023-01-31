@@ -172,7 +172,7 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
   if (v->bitsize ())
     {
       bits_to_skip += (8 * value_offset (value_parent (v))
-		       + value_bitpos (v));
+		       + v->bitpos ());
       if (from != nullptr
 	  && (type_byte_order (from->type ())
 	      == BFD_ENDIAN_BIG))
@@ -468,7 +468,7 @@ check_pieced_synthetic_pointer (const value *value, LONGEST bit_offset,
 
   bit_offset += 8 * value_offset (value);
   if (value->bitsize ())
-    bit_offset += value_bitpos (value);
+    bit_offset += value->bitpos ();
 
   for (i = 0; i < c->pieces.size () && bit_length > 0; i++)
     {
@@ -514,7 +514,7 @@ indirect_pieced_value (value *value)
   int bit_length = 8 * type->length ();
   LONGEST bit_offset = 8 * value_offset (value);
   if (value->bitsize ())
-    bit_offset += value_bitpos (value);
+    bit_offset += value->bitpos ();
 
   for (i = 0; i < c->pieces.size () && bit_length > 0; i++)
     {

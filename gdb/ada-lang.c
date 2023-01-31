@@ -569,7 +569,7 @@ coerce_unspec_val_to_type (struct value *val, struct type *type)
 	}
       set_value_component_location (result, val);
       result->set_bitsize (val->bitsize ());
-      set_value_bitpos (result, value_bitpos (val));
+      result->set_bitpos (val->bitpos ());
       if (VALUE_LVAL (result) == lval_memory)
 	set_value_address (result, value_address (val));
       return result;
@@ -2831,12 +2831,12 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
       long new_offset = offset;
 
       set_value_component_location (v, obj);
-      set_value_bitpos (v, bit_offset + value_bitpos (obj));
+      v->set_bitpos (bit_offset + obj->bitpos ());
       v->set_bitsize (bit_size);
-      if (value_bitpos (v) >= HOST_CHAR_BIT)
+      if (v->bitpos () >= HOST_CHAR_BIT)
 	{
 	  ++new_offset;
-	  set_value_bitpos (v, value_bitpos (v) - HOST_CHAR_BIT);
+	  v->set_bitpos (v->bitpos () - HOST_CHAR_BIT);
 	}
       set_value_offset (v, new_offset);
 
@@ -2896,7 +2896,7 @@ ada_value_assign (struct value *toval, struct value *fromval)
       && (type->code () == TYPE_CODE_FLT
 	  || type->code () == TYPE_CODE_STRUCT))
     {
-      int len = (value_bitpos (toval)
+      int len = (toval->bitpos ()
 		 + bits + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
       int from_size;
       gdb_byte *buffer = (gdb_byte *) alloca (len);
@@ -2915,7 +2915,7 @@ ada_value_assign (struct value *toval, struct value *fromval)
       ULONGEST from_offset = 0;
       if (is_big_endian && is_scalar_type (fromval->type ()))
 	from_offset = from_size - bits;
-      copy_bitwise (buffer, value_bitpos (toval),
+      copy_bitwise (buffer, toval->bitpos (),
 		    value_contents (fromval).data (), from_offset,
 		    bits, is_big_endian);
       write_memory_with_notification (to_addr, buffer, len);
@@ -2951,7 +2951,7 @@ value_assign_to_component (struct value *container, struct value *component,
   LONGEST offset_in_container =
     (LONGEST)  (value_address (component) - value_address (container));
   int bit_offset_in_container =
-    value_bitpos (component) - value_bitpos (container);
+    component->bitpos () - container->bitpos ();
   int bits;
 
   val = value_cast (component->type (), val);
@@ -2972,13 +2972,13 @@ value_assign_to_component (struct value *container, struct value *component,
 	src_offset = 0;
       copy_bitwise ((value_contents_writeable (container).data ()
 		     + offset_in_container),
-		    value_bitpos (container) + bit_offset_in_container,
+		    container->bitpos () + bit_offset_in_container,
 		    value_contents (val).data (), src_offset, bits, 1);
     }
   else
     copy_bitwise ((value_contents_writeable (container).data ()
 		   + offset_in_container),
-		  value_bitpos (container) + bit_offset_in_container,
+		  container->bitpos () + bit_offset_in_container,
 		  value_contents (val).data (), 0, bits, 0);
 }
 
@@ -6918,7 +6918,7 @@ ada_value_primitive_field (struct value *arg1, int offset, int fieldno,
   /* Handle packed fields.  It might be that the field is not packed
      relative to its containing structure, but the structure itself is
      packed; in this case we must take the bit-field path.  */
-  if (TYPE_FIELD_BITSIZE (arg_type, fieldno) != 0 || value_bitpos (arg1) != 0)
+  if (TYPE_FIELD_BITSIZE (arg_type, fieldno) != 0 || arg1->bitpos () != 0)
     {
       int bit_pos = arg_type->field (fieldno).loc_bitpos ();
       int bit_size = TYPE_FIELD_BITSIZE (arg_type, fieldno);

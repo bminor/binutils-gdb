@@ -180,6 +180,15 @@ struct value
   void set_bitsize (LONGEST bit)
   { m_bitsize = bit; }
 
+  /* Only used for bitfields; position of start of field.  For
+     little-endian targets, it is the position of the LSB.  For
+     big-endian targets, it is the position of the MSB.  */
+  LONGEST bitpos () const
+  { return m_bitpos; }
+
+  void set_bitpos (LONGEST bit)
+  { m_bitpos = bit; }
+
 
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
@@ -357,13 +366,6 @@ struct value
      loaded from the inferior.  */
   ULONGEST m_limited_length = 0;
 };
-
-/* Only used for bitfields; position of start of field.  For
-   little-endian targets, it is the position of the LSB.  For
-   big-endian targets, it is the position of the MSB.  */
-
-extern LONGEST value_bitpos (const struct value *);
-extern void set_value_bitpos (struct value *, LONGEST bit);
 
 /* Only used for bitfields; the containing value.  This allows a
    single read from the target when displaying multiple
