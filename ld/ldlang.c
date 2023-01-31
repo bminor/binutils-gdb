@@ -8017,6 +8017,8 @@ lang_process (void)
 	      *insert = &files.head->input_statement;
 	      files.head = (lang_statement_union_type *) *iter;
 	      *iter = temp;
+	      if (file_chain.tail == (lang_statement_union_type **) insert)
+		file_chain.tail = (lang_statement_union_type **) iter;
 	      if (my_arch != NULL)
 		{
 		  lang_input_statement_type *parent = bfd_usrdata (my_arch);
