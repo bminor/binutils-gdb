@@ -431,15 +431,12 @@ normalize (const char *file, bfd *abfd)
 
 static const char *output_filename = NULL;
 static FILE *output_file = NULL;
-static bfd *output_bfd = NULL;
 
 static void
 remove_output (void)
 {
   if (output_filename != NULL)
     {
-      if (output_bfd != NULL)
-	bfd_cache_close (output_bfd);
       if (output_file != NULL)
 	fclose (output_file);
       unlink_if_ordinary (output_filename);
@@ -1272,8 +1269,6 @@ write_archive (bfd *iarch)
       bfd_fatal (old_name);
     }
 
-  output_bfd = obfd;
-
   bfd_set_format (obfd, bfd_archive);
 
   /* Request writing the archive symbol table unless we've
@@ -1303,7 +1298,6 @@ write_archive (bfd *iarch)
   if (!bfd_close (obfd))
     bfd_fatal (old_name);
 
-  output_bfd = NULL;
   output_filename = NULL;
 
   /* We don't care if this fails; we might be creating the archive.  */
