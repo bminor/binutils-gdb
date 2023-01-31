@@ -1219,7 +1219,7 @@ valpy_get_is_lazy (PyObject *self, void *closure)
 
   try
     {
-      opt = value_lazy (value);
+      opt = value->lazy ();
     }
   catch (const gdb_exception &except)
     {
@@ -1240,7 +1240,7 @@ valpy_fetch_lazy (PyObject *self, PyObject *args)
 
   try
     {
-      if (value_lazy (value))
+      if (value->lazy ())
 	value_fetch_lazy (value);
     }
   catch (const gdb_exception &except)

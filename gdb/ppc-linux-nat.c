@@ -2462,7 +2462,7 @@ ppc_linux_nat_target::num_memory_accesses (const std::vector<value_ref_ptr>
 	  /* A lazy memory lvalue is one that GDB never needed to fetch;
 	     we either just used its address (e.g., `a' in `a.b') or
 	     we never needed it at all (e.g., `a' in `a,b').  */
-	  if (!value_lazy (v))
+	  if (!v->lazy ())
 	    found_memory_cnt++;
 	}
       /* Other kinds of values are not fine.  */

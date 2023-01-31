@@ -557,7 +557,7 @@ coerce_unspec_val_to_type (struct value *val, struct type *type)
 
       if (value_optimized_out (val))
 	result = allocate_optimized_out_value (type);
-      else if (value_lazy (val)
+      else if (val->lazy ()
 	       /* Be careful not to make a lazy not_lval value.  */
 	       || (VALUE_LVAL (val) != not_lval
 		   && type->length () > val->type ()->length ()))
@@ -2810,7 +2810,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
       v = allocate_value (type);
       src = valaddr + offset;
     }
-  else if (VALUE_LVAL (obj) == lval_memory && value_lazy (obj))
+  else if (VALUE_LVAL (obj) == lval_memory && obj->lazy ())
     {
       int src_len = (bit_size + bit_offset + HOST_CHAR_BIT - 1) / 8;
       gdb_byte *buf;
@@ -10852,7 +10852,7 @@ ada_var_msym_value_operation::evaluate_for_cast (struct type *expect_type,
      an address of the result of a cast (view conversion in Ada).  */
   if (VALUE_LVAL (val) == lval_memory)
     {
-      if (value_lazy (val))
+      if (val->lazy ())
 	value_fetch_lazy (val);
       VALUE_LVAL (val) = not_lval;
     }
@@ -10874,7 +10874,7 @@ ada_var_value_operation::evaluate_for_cast (struct type *expect_type,
      an address of the result of a cast (view conversion in Ada).  */
   if (VALUE_LVAL (val) == lval_memory)
     {
-      if (value_lazy (val))
+      if (val->lazy ())
 	value_fetch_lazy (val);
       VALUE_LVAL (val) = not_lval;
     }

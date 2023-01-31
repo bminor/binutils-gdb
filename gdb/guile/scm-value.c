@@ -1233,7 +1233,7 @@ gdbscm_value_lazy_p (SCM self)
     = vlscm_get_value_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct value *value = v_smob->value;
 
-  return scm_from_bool (value_lazy (value));
+  return scm_from_bool (value->lazy ());
 }
 
 /* (value-fetch-lazy! <gdb:value>) -> unspecified */
@@ -1247,7 +1247,7 @@ gdbscm_value_fetch_lazy_x (SCM self)
 
   return gdbscm_wrap ([=]
     {
-      if (value_lazy (value))
+      if (value->lazy ())
 	value_fetch_lazy (value);
       return SCM_UNSPECIFIED;
     });

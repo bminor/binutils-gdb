@@ -1366,7 +1366,7 @@ value_of_dwarf_reg_entry (struct type *type, frame_info_ptr frame,
   memcpy (value_contents_raw (val).data (),
 	  value_contents_raw (outer_val).data (),
 	  checked_type->length ());
-  set_value_lazy (val, 0);
+  val->set_lazy (0);
 
   return val;
 }

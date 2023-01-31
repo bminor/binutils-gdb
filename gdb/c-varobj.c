@@ -506,14 +506,14 @@ c_value_of_variable (const struct varobj *var,
 	  }
 	else
 	  {
-	    if (var->not_fetched && value_lazy (var->value.get ()))
+	    if (var->not_fetched && var->value.get ()->lazy ())
 	      /* Frozen variable and no value yet.  We don't
 		 implicitly fetch the value.  MI response will
 		 use empty string for the value, which is OK.  */
 	      return std::string ();
 
 	    gdb_assert (varobj_value_is_changeable_p (var));
-	    gdb_assert (!value_lazy (var->value.get ()));
+	    gdb_assert (!var->value.get ()->lazy ());
 	    
 	    /* If the specified format is the current one,
 	       we can reuse print_value.  */

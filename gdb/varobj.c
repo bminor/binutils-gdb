@@ -504,7 +504,7 @@ varobj_set_display_format (struct varobj *var,
     }
 
   if (varobj_value_is_changeable_p (var) 
-      && var->value != nullptr && !value_lazy (var->value.get ()))
+      && var->value != nullptr && !var->value.get ()->lazy ())
     {
       var->print_value = varobj_value_get_print_value (var->value.get (),
 						       var->format, var);
@@ -1007,7 +1007,7 @@ varobj_set_value (struct varobj *var, const char *expression)
   gdb_assert (varobj_value_is_changeable_p (var));
 
   /* The value of a changeable variable object must not be lazy.  */
-  gdb_assert (!value_lazy (var->value.get ()));
+  gdb_assert (!var->value.get ()->lazy ());
 
   /* Need to coerce the input.  We want to check if the
      value of the variable object will be different
@@ -1247,7 +1247,7 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
      that is we'll be comparing values of this type, fetch the
      value now.  Otherwise, on the next update the old value
      will be lazy, which means we've lost that old value.  */
-  if (need_to_fetch && value && value_lazy (value))
+  if (need_to_fetch && value && value->lazy ())
     {
       const struct varobj *parent = var->parent;
       bool frozen = var->frozen;
@@ -1292,7 +1292,7 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
      lazy -- if it is, the code above has decided that the value
      should not be fetched.  */
   std::string print_value;
-  if (value != NULL && !value_lazy (value)
+  if (value != NULL && !value->lazy ()
       && var->dynamic->pretty_printer == NULL)
     print_value = varobj_value_get_print_value (value, var->format, var);
 
@@ -1312,7 +1312,7 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
 	{
 	  /* Try to compare the values.  That requires that both
 	     values are non-lazy.  */
-	  if (var->not_fetched && value_lazy (var->value.get ()))
+	  if (var->not_fetched && var->value.get ()->lazy ())
 	    {
 	      /* This is a frozen varobj and the value was never read.
 		 Presumably, UI shows some "never read" indicator.
@@ -1330,8 +1330,8 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
 	    }
 	  else
 	    {
-	      gdb_assert (!value_lazy (var->value.get ()));
-	      gdb_assert (!value_lazy (value));
+	      gdb_assert (!var->value.get ()->lazy ());
+	      gdb_assert (!value->lazy ());
 
 	      gdb_assert (!var->print_value.empty () && !print_value.empty ());
 	      if (var->print_value != print_value)
@@ -1351,7 +1351,7 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
 
   /* We must always keep the new value, since children depend on it.  */
   var->value = value_holder;
-  if (value && value_lazy (value) && intentionally_not_fetched)
+  if (value && value->lazy () && intentionally_not_fetched)
     var->not_fetched = true;
   else
     var->not_fetched = false;

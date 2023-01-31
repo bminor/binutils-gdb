@@ -1943,7 +1943,7 @@ x_command (const char *exp, int from_tty)
 	 as $__.  If the last value has not been fetched from memory
 	 then don't fetch it now; instead mark it by voiding the $__
 	 variable.  */
-      if (value_lazy (last_examine_value.get ()))
+      if (last_examine_value.get ()->lazy ())
 	clear_internalvar (lookup_internalvar ("__"));
       else
 	set_internalvar (lookup_internalvar ("__"), last_examine_value.get ());

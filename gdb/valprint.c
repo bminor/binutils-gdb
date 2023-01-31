@@ -1043,7 +1043,7 @@ common_val_print (struct value *value, struct ui_file *stream, int recurse,
        get a fixed representation of our value.  */
     value = ada_to_fixed_value (value);
 
-  if (value_lazy (value))
+  if (value->lazy ())
     value_fetch_lazy (value);
 
   struct value_print_options local_opts = *options;

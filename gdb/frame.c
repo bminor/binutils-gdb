@@ -1306,7 +1306,7 @@ frame_unwind_register_value (frame_info_ptr next_frame, int regnum)
 	  else
 	    gdb_printf (&debug_file, " computed");
 
-	  if (value_lazy (value))
+	  if (value->lazy ())
 	    gdb_printf (&debug_file, " lazy");
 	  else
 	    {

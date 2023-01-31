@@ -187,7 +187,7 @@ value_subscript (struct value *array, LONGEST index)
 	 Instead mock up a new one and give it the original address.  */
       struct type *elt_type = check_typedef (tarray->target_type ());
       LONGEST elt_size = type_length_units (elt_type);
-      if (!value_lazy (array)
+      if (!array->lazy ()
 	  && !value_bytes_available (array, elt_size * index, elt_size))
 	{
 	  struct value *val = allocate_value (elt_type);

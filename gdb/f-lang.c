@@ -356,7 +356,7 @@ public:
       m_base_offset (base_offset),
       m_val (val)
   {
-    gdb_assert (!value_lazy (val));
+    gdb_assert (!val->lazy ());
   }
 
   /* Extract an element of ELT_TYPE at offset (M_BASE_OFFSET + ELT_OFF)
@@ -1441,7 +1441,7 @@ fortran_undetermined::value_subarray (value *array,
       /* Now copy the elements from the original ARRAY into the packed
 	 array value DEST.  */
       struct value *dest = allocate_value (repacked_array_type);
-      if (value_lazy (array)
+      if (array->lazy ()
 	  || (total_offset + array_slice_type->length ()
 	      > check_typedef (array->type ())->length ()))
 	{
@@ -1466,7 +1466,7 @@ fortran_undetermined::value_subarray (value *array,
 	     the requested slice is outside the values content range then
 	     just create a new lazy value pointing at the memory where the
 	     contents we're looking for exist.  */
-	  if (value_lazy (array)
+	  if (array->lazy ()
 	      || (total_offset + array_slice_type->length ()
 		  > check_typedef (array->type ())->length ()))
 	    array = value_at_lazy (array_slice_type,
@@ -1476,7 +1476,7 @@ fortran_undetermined::value_subarray (value *array,
 	      (array_slice_type, value_contents (array).data () + total_offset,
 	       value_address (array) + total_offset);
 	}
-      else if (!value_lazy (array))
+      else if (!array->lazy ())
 	array = value_from_component (array, array_slice_type, total_offset);
       else
 	error (_("cannot subscript arrays that are not in memory"));

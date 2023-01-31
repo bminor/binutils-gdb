@@ -2076,7 +2076,7 @@ update_watchpoint (struct watchpoint *b, bool reparse)
 	     still lazy, that means an error occurred reading it;
 	     watch it anyway in case it becomes readable.  */
 	  if (VALUE_LVAL (v) == lval_memory
-	      && (v == val_chain[0] || ! value_lazy (v)))
+	      && (v == val_chain[0] || ! v->lazy ()))
 	    {
 	      struct type *vtype = check_typedef (v->type ());
 
@@ -10415,7 +10415,7 @@ can_use_hardware_watchpoint (const std::vector<value_ref_ptr> &vals)
 
       if (VALUE_LVAL (v) == lval_memory)
 	{
-	  if (v != head && value_lazy (v))
+	  if (v != head && v->lazy ())
 	    /* A lazy memory lvalue in the chain is one that GDB never
 	       needed to fetch; we either just used its address (e.g.,
 	       `a' in `a.b') or we never needed it at all (e.g., `a'

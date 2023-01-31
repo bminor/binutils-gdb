@@ -580,9 +580,9 @@ read_frame_arg (const frame_print_options &fp_opts,
 	    {
 	      struct type *type = val->type ();
 
-	      if (value_lazy (val))
+	      if (val->lazy ())
 		value_fetch_lazy (val);
-	      if (value_lazy (entryval))
+	      if (entryval->lazy ())
 		value_fetch_lazy (entryval);
 
 	      if (value_contents_eq (val, 0, entryval, 0, type->length ()))
@@ -599,12 +599,12 @@ read_frame_arg (const frame_print_options &fp_opts,
 		      struct type *type_deref;
 
 		      val_deref = coerce_ref (val);
-		      if (value_lazy (val_deref))
+		      if (val_deref->lazy ())
 			value_fetch_lazy (val_deref);
 		      type_deref = val_deref->type ();
 
 		      entryval_deref = coerce_ref (entryval);
-		      if (value_lazy (entryval_deref))
+		      if (entryval_deref->lazy ())
 			value_fetch_lazy (entryval_deref);
 
 		      /* If the reference addresses match but dereferenced
@@ -2749,7 +2749,7 @@ return_command (const char *retval_exp, int from_tty)
 
       /* Make sure the value is fully evaluated.  It may live in the
 	 stack frame we're about to pop.  */
-      if (value_lazy (return_value))
+      if (return_value->lazy ())
 	value_fetch_lazy (return_value);
 
       if (thisfun != NULL)
