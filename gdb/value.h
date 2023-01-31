@@ -539,6 +539,10 @@ public:
      LVAL_MEMORY.  */
   void force_lval (CORE_ADDR);
 
+  /* Set this values's location as appropriate for a component of
+     WHOLE --- regardless of what kind of lvalue WHOLE is.  */
+  void set_component_location (const struct value *whole);
+
 
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
@@ -857,11 +861,6 @@ struct lval_funcs
    out.  */
 
 extern void error_value_optimized_out (void);
-
-/* Set COMPONENT's location as appropriate for a component of WHOLE
-   --- regardless of what kind of lvalue WHOLE is.  */
-extern void set_value_component_location (struct value *component,
-					  const struct value *whole);
 
 /* While the following fields are per- VALUE .CONTENT .PIECE (i.e., a
    single value might have multiple LVALs), this hacked interface is

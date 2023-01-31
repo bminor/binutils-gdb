@@ -567,7 +567,7 @@ coerce_unspec_val_to_type (struct value *val, struct type *type)
 	  result = value::allocate (type);
 	  value_contents_copy (result, 0, val, 0, type->length ());
 	}
-      set_value_component_location (result, val);
+      result->set_component_location (val);
       result->set_bitsize (val->bitsize ());
       result->set_bitpos (val->bitpos ());
       if (VALUE_LVAL (result) == lval_memory)
@@ -2830,7 +2830,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
     {
       long new_offset = offset;
 
-      set_value_component_location (v, obj);
+      v->set_component_location (obj);
       v->set_bitpos (bit_offset + obj->bitpos ());
       v->set_bitsize (bit_size);
       if (v->bitpos () >= HOST_CHAR_BIT)

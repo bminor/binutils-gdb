@@ -1599,25 +1599,24 @@ value::force_lval (CORE_ADDR addr)
 }
 
 void
-set_value_component_location (struct value *component,
-			      const struct value *whole)
+value::set_component_location (const struct value *whole)
 {
   struct type *type;
 
   gdb_assert (whole->m_lval != lval_xcallable);
 
   if (whole->m_lval == lval_internalvar)
-    VALUE_LVAL (component) = lval_internalvar_component;
+    VALUE_LVAL (this) = lval_internalvar_component;
   else
-    VALUE_LVAL (component) = whole->m_lval;
+    VALUE_LVAL (this) = whole->m_lval;
 
-  component->m_location = whole->m_location;
+  m_location = whole->m_location;
   if (whole->m_lval == lval_computed)
     {
       const struct lval_funcs *funcs = whole->m_location.computed.funcs;
 
       if (funcs->copy_closure)
-	component->m_location.computed.closure = funcs->copy_closure (whole);
+	m_location.computed.closure = funcs->copy_closure (whole);
     }
 
   /* If the WHOLE value has a dynamically resolved location property then
@@ -1625,11 +1624,11 @@ set_value_component_location (struct value *component,
   type = whole->type ();
   if (NULL != TYPE_DATA_LOCATION (type)
       && TYPE_DATA_LOCATION_KIND (type) == PROP_CONST)
-    component->set_address (TYPE_DATA_LOCATION_ADDR (type));
+    set_address (TYPE_DATA_LOCATION_ADDR (type));
 
   /* Similarly, if the COMPONENT value has a dynamically resolved location
      property then update its address.  */
-  type = component->type ();
+  type = this->type ();
   if (NULL != TYPE_DATA_LOCATION (type)
       && TYPE_DATA_LOCATION_KIND (type) == PROP_CONST)
     {
@@ -1650,14 +1649,14 @@ set_value_component_location (struct value *component,
          carry around both the parent value contents, and the contents of
          any dynamic fields within the parent.  This is a substantial
          change to how values work in GDB.  */
-      if (VALUE_LVAL (component) == lval_internalvar_component)
+      if (VALUE_LVAL (this) == lval_internalvar_component)
 	{
-	  gdb_assert (component->lazy ());
-	  VALUE_LVAL (component) = lval_memory;
+	  gdb_assert (lazy ());
+	  VALUE_LVAL (this) = lval_memory;
 	}
       else
-	gdb_assert (VALUE_LVAL (component) == lval_memory);
-      component->set_address (TYPE_DATA_LOCATION_ADDR (type));
+	gdb_assert (VALUE_LVAL (this) == lval_memory);
+      set_address (TYPE_DATA_LOCATION_ADDR (type));
     }
 }
 
@@ -2986,7 +2985,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
       v->m_offset = (arg1->offset () + offset
 		     + arg1->embedded_offset ());
     }
-  set_value_component_location (v, arg1);
+  v->set_component_location (arg1);
   return v;
 }
 
@@ -3584,7 +3583,7 @@ value_from_component (struct value *whole, struct type *type, LONGEST offset)
 			   type_length_units (type));
     }
   v->m_offset = whole->offset () + offset + whole->embedded_offset ();
-  set_value_component_location (v, whole);
+  v->set_component_location (whole);
 
   return v;
 }

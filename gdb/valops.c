@@ -4087,7 +4087,7 @@ value_slice (struct value *array, int lowbound, int length)
 			     type_length_units (slice_type));
       }
 
-    set_value_component_location (slice, array);
+    slice->set_component_location (array);
     slice->set_offset (array->offset () + offset);
   }
 
