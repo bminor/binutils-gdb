@@ -204,10 +204,10 @@ cooked_index_entry::write_scope (struct obstack *storage,
 /* See cooked-index.h.  */
 
 const cooked_index_entry *
-cooked_index::add (sect_offset die_offset, enum dwarf_tag tag,
-		   cooked_index_flag flags, const char *name,
-		   const cooked_index_entry *parent_entry,
-		   dwarf2_per_cu_data *per_cu)
+cooked_index_shard::add (sect_offset die_offset, enum dwarf_tag tag,
+			 cooked_index_flag flags, const char *name,
+			 const cooked_index_entry *parent_entry,
+			 dwarf2_per_cu_data *per_cu)
 {
   cooked_index_entry *result = create (die_offset, tag, flags, name,
 				       parent_entry, per_cu);
@@ -228,7 +228,7 @@ cooked_index::add (sect_offset die_offset, enum dwarf_tag tag,
 /* See cooked-index.h.  */
 
 void
-cooked_index::finalize ()
+cooked_index_shard::finalize ()
 {
   m_future = gdb::thread_pool::g_thread_pool->post_task ([this] ()
     {
@@ -239,8 +239,8 @@ cooked_index::finalize ()
 /* See cooked-index.h.  */
 
 gdb::unique_xmalloc_ptr<char>
-cooked_index::handle_gnat_encoded_entry (cooked_index_entry *entry,
-					 htab_t gnat_entries)
+cooked_index_shard::handle_gnat_encoded_entry (cooked_index_entry *entry,
+					       htab_t gnat_entries)
 {
   std::string canonical = ada_decode (entry->name, false, false);
   if (canonical.empty ())
@@ -281,7 +281,7 @@ cooked_index::handle_gnat_encoded_entry (cooked_index_entry *entry,
 /* See cooked-index.h.  */
 
 void
-cooked_index::do_finalize ()
+cooked_index_shard::do_finalize ()
 {
   auto hash_name_ptr = [] (const void *p)
     {
@@ -378,8 +378,8 @@ cooked_index::do_finalize ()
 
 /* See cooked-index.h.  */
 
-cooked_index::range
-cooked_index::find (const std::string &name, bool completing) const
+cooked_index_shard::range
+cooked_index_shard::find (const std::string &name, bool completing) const
 {
   wait ();
 
@@ -441,7 +441,7 @@ cooked_index_vector::get_addrmaps () const
 cooked_index_vector::range
 cooked_index_vector::find (const std::string &name, bool completing) const
 {
-  std::vector<cooked_index::range> result_range;
+  std::vector<cooked_index_shard::range> result_range;
   result_range.reserve (m_vector.size ());
   for (auto &entry : m_vector)
     result_range.push_back (entry->find (name, completing));

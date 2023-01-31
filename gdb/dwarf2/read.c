@@ -6611,7 +6611,7 @@ public:
 					eq_cutu_reader,
 					htab_delete_entry<cutu_reader>,
 					xcalloc, xfree)),
-      m_index (new cooked_index)
+      m_index (new cooked_index_shard)
   {
   }
 
@@ -6657,9 +6657,9 @@ public:
     return m_index->add (die_offset, tag, flags, name, parent_entry, per_cu);
   }
 
-  /* Install the current addrmap into the index being constructed,
+  /* Install the current addrmap into the index shard being constructed,
      then transfer ownership of the index to the caller.  */
-  std::unique_ptr<cooked_index> release ()
+  std::unique_ptr<cooked_index_shard> release ()
   {
     m_index->install_addrmap (&m_addrmap);
     return std::move (m_index);
@@ -6692,8 +6692,8 @@ private:
   abbrev_cache m_abbrev_cache;
   /* A hash table of cutu_reader objects.  */
   htab_up m_reader_hash;
-  /* The index that is being constructed.  */
-  std::unique_ptr<cooked_index> m_index;
+  /* The index shard that is being constructed.  */
+  std::unique_ptr<cooked_index_shard> m_index;
 
   /* A writeable addrmap being constructed by this scanner.  */
   addrmap_mutable m_addrmap;
@@ -7102,7 +7102,7 @@ dwarf2_build_psymtabs_hard (dwarf2_per_objfile *per_objfile)
   cooked_index_storage index_storage;
   create_all_units (per_objfile);
   build_type_psymtabs (per_objfile, &index_storage);
-  std::vector<std::unique_ptr<cooked_index>> indexes;
+  std::vector<std::unique_ptr<cooked_index_shard>> indexes;
 
   per_bfd->quick_file_names_table
     = create_quick_file_names_table (per_bfd->all_units.size ());
@@ -7128,7 +7128,7 @@ dwarf2_build_psymtabs_hard (dwarf2_per_objfile *per_objfile)
        GDB's I/O system is not thread-safe.  run_on_main_thread could be
        used, but that would mean the messages are printed after the
        prompt, which looks weird.  */
-    using result_type = std::pair<std::unique_ptr<cooked_index>,
+    using result_type = std::pair<std::unique_ptr<cooked_index_shard>,
 				  std::vector<gdb_exception>>;
     std::vector<result_type> results
       = gdb::parallel_for_each (1, per_bfd->all_units.begin (),

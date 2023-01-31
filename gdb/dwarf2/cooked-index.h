@@ -232,11 +232,11 @@ class cooked_index_vector;
    Operations on the index are described below.  They are chosen to
    make it relatively simple to implement the symtab "quick"
    methods.  */
-class cooked_index
+class cooked_index_shard
 {
 public:
-  cooked_index () = default;
-  DISABLE_COPY_AND_ASSIGN (cooked_index);
+  cooked_index_shard () = default;
+  DISABLE_COPY_AND_ASSIGN (cooked_index_shard);
 
   /* Create a new cooked_index_entry and register it with this object.
      Entries are owned by this object.  The new item is returned.  */
@@ -353,7 +353,7 @@ public:
 
   /* A convenience typedef for the vector that is contained in this
      object.  */
-  typedef std::vector<std::unique_ptr<cooked_index>> vec_type;
+  using vec_type = std::vector<std::unique_ptr<cooked_index_shard>>;
 
   explicit cooked_index_vector (vec_type &&vec);
   DISABLE_COPY_AND_ASSIGN (cooked_index_vector);
@@ -378,7 +378,7 @@ public:
   }
 
   /* A range over a vector of subranges.  */
-  typedef range_chain<cooked_index::range> range;
+  using range = range_chain<cooked_index_shard::range>;
 
   /* Look up an entry by name.  Returns a range of all matching
      results.  If COMPLETING is true, then a larger range, suitable
@@ -388,7 +388,7 @@ public:
   /* Return a range of all the entries.  */
   range all_entries () const
   {
-    std::vector<cooked_index::range> result_range;
+    std::vector<cooked_index_shard::range> result_range;
     result_range.reserve (m_vector.size ());
     for (auto &entry : m_vector)
       result_range.push_back (entry->all_entries ());
