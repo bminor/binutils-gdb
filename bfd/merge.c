@@ -279,7 +279,7 @@ hash_blob (const char *str, unsigned int len)
   uint32_t ret = 0;
   uint32_t mul = (1 << 0) +  (1 << 2) + (1 << 3) + (1 << 5) + (1 << 7);
   mul += (1 << 11) + (1 << 13) + (1 << 17) + (0 << 19) + (1 << 23) + (1 << 29);
-  mul += (1 << 31);
+  mul += (1u << 31);
   if (len >= 8)
     {
       uint32_t acc = len * 0x9e3779b1;
