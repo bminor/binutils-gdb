@@ -303,7 +303,7 @@ ada_funcall (int nargs)
       struct value *callee_v = callee->evaluate (nullptr,
 						 pstate->expout.get (),
 						 EVAL_AVOID_SIDE_EFFECTS);
-      callee_t = ada_check_typedef (value_type (callee_v));
+      callee_t = ada_check_typedef (callee_v->type ());
       array_arity = ada_array_arity (callee_t);
     }
 
@@ -503,7 +503,7 @@ exp1	:	exp
 			    = lhs->evaluate (nullptr, pstate->expout.get (),
 					     EVAL_AVOID_SIDE_EFFECTS);
 			  rhs = resolve (std::move (rhs), true,
-					 value_type (lhs_val));
+					 lhs_val->type ());
 			  pstate->push_new<ada_assign_operation>
 			    (std::move (lhs), std::move (rhs));
 			}

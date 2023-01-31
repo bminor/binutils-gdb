@@ -1749,7 +1749,7 @@ s390_handle_arg (struct s390_arg_state *as, struct value *arg,
 		 s390_gdbarch_tdep *tdep, int word_size,
 		 enum bfd_endian byte_order, int is_unnamed)
 {
-  struct type *type = check_typedef (value_type (arg));
+  struct type *type = check_typedef (arg->type ());
   unsigned int length = type->length ();
   int write_mode = as->regcache != NULL;
 
@@ -1911,7 +1911,7 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int i;
   struct s390_arg_state arg_state, arg_prep;
   CORE_ADDR param_area_start, new_sp;
-  struct type *ftype = check_typedef (value_type (function));
+  struct type *ftype = check_typedef (function->type ());
 
   if (ftype->code () == TYPE_CODE_PTR)
     ftype = check_typedef (ftype->target_type ());

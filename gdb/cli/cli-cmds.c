@@ -2190,7 +2190,7 @@ setting_cmd (const char *fnname, struct cmd_list_element *showlist,
   if (argc != 1)
     error (_("You can only provide one argument to %s"), fnname);
 
-  struct type *type0 = check_typedef (value_type (argv[0]));
+  struct type *type0 = check_typedef (argv[0]->type ());
 
   if (type0->code () != TYPE_CODE_ARRAY
       && type0->code () != TYPE_CODE_STRING)

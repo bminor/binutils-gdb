@@ -956,7 +956,7 @@ gdbscm_apply_val_pretty_printer (const struct extension_language_defn *extlang,
 				 const struct value_print_options *options,
 				 const struct language_defn *language)
 {
-  struct type *type = value_type (value);
+  struct type *type = value->type ();
   struct gdbarch *gdbarch = type->arch ();
   SCM exception = SCM_BOOL_F;
   SCM printer = SCM_BOOL_F;

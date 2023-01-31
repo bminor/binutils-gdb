@@ -2474,8 +2474,8 @@ print_variable_or_computed (const char *expression, enum print_values values)
   switch (values)
     {
     case PRINT_SIMPLE_VALUES:
-      type = check_typedef (value_type (val));
-      type_print (value_type (val), "", &stb, -1);
+      type = check_typedef (val->type ());
+      type_print (val->type (), "", &stb, -1);
       uiout->field_stream ("type", stb);
       if (type->code () != TYPE_CODE_ARRAY
 	  && type->code () != TYPE_CODE_STRUCT

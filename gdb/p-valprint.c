@@ -69,7 +69,7 @@ pascal_language::value_print_inner (struct value *val,
 				    const struct value_print_options *options) const
 
 {
-  struct type *type = check_typedef (value_type (val));
+  struct type *type = check_typedef (val->type ());
   struct gdbarch *gdbarch = type->arch ();
   enum bfd_endian byte_order = type_byte_order (type);
   unsigned int i = 0;	/* Number of characters printed */
@@ -408,7 +408,7 @@ void
 pascal_language::value_print (struct value *val, struct ui_file *stream,
 			      const struct value_print_options *options) const
 {
-  struct type *type = value_type (val);
+  struct type *type = val->type ();
   struct value_print_options opts = *options;
 
   opts.deref_ref = true;
@@ -521,7 +521,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
   char *last_dont_print
     = (char *) obstack_next_free (&dont_print_statmem_obstack);
 
-  struct type *type = check_typedef (value_type (val));
+  struct type *type = check_typedef (val->type ());
 
   gdb_printf (stream, "{");
   len = type->num_fields ();
@@ -655,7 +655,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 		  opts.deref_ref = false;
 
 		  struct value *v = value_primitive_field (val, 0, i,
-							   value_type (val));
+							   val->type ());
 		  common_val_print (v, stream, recurse + 1, &opts,
 				    current_language);
 		}
@@ -692,7 +692,7 @@ pascal_object_print_value (struct value *val, struct ui_file *stream,
   struct type **last_dont_print
     = (struct type **) obstack_next_free (&dont_print_vb_obstack);
   struct obstack tmp_obstack = dont_print_vb_obstack;
-  struct type *type = check_typedef (value_type (val));
+  struct type *type = check_typedef (val->type ());
   int i, n_baseclasses = TYPE_N_BASECLASSES (type);
 
   if (dont_print_vb == 0)
@@ -757,7 +757,7 @@ pascal_object_print_value (struct value *val, struct ui_file *stream,
 	      base_value = value_from_contents_and_address (baseclass,
 							    buf.data (),
 							    address + boffset);
-	      baseclass = value_type (base_value);
+	      baseclass = base_value->type ();
 	      boffset = 0;
 	    }
 	}
@@ -815,7 +815,7 @@ pascal_object_print_static_field (struct value *val,
 				  int recurse,
 				  const struct value_print_options *options)
 {
-  struct type *type = value_type (val);
+  struct type *type = val->type ();
   struct value_print_options opts;
 
   if (value_entirely_optimized_out (val))

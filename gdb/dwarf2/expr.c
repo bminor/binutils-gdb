@@ -151,7 +151,7 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
   piece_closure *c
     = (piece_closure *) value_computed_closure (v);
   gdb::byte_vector buffer;
-  bool bits_big_endian = type_byte_order (value_type (v)) == BFD_ENDIAN_BIG;
+  bool bits_big_endian = type_byte_order (v->type ()) == BFD_ENDIAN_BIG;
 
   gdb_assert (!check_optimized || from == nullptr);
   if (from != nullptr)
@@ -174,18 +174,18 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
       bits_to_skip += (8 * value_offset (value_parent (v))
 		       + value_bitpos (v));
       if (from != nullptr
-	  && (type_byte_order (value_type (from))
+	  && (type_byte_order (from->type ())
 	      == BFD_ENDIAN_BIG))
 	{
 	  /* Use the least significant bits of FROM.  */
-	  max_offset = 8 * value_type (from)->length ();
+	  max_offset = 8 * from->type ()->length ();
 	  offset = max_offset - value_bitsize (v);
 	}
       else
 	max_offset = value_bitsize (v);
     }
   else
-    max_offset = 8 * value_type (v)->length ();
+    max_offset = 8 * v->type ()->length ();
 
   /* Advance to the first non-skipped piece.  */
   for (i = 0; i < c->pieces.size () && bits_to_skip >= c->pieces[i].size; i++)
@@ -364,7 +364,7 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
 
 	    gdbarch *objfile_gdbarch = c->per_objfile->objfile->arch ();
 	    ULONGEST stack_value_size_bits
-	      = 8 * value_type (p->v.value)->length ();
+	      = 8 * p->v.value->type ()->length ();
 
 	    /* Use zeroes if piece reaches beyond stack value.  */
 	    if (p->offset + p->size > stack_value_size_bits)
@@ -507,7 +507,7 @@ indirect_pieced_value (value *value)
   int i;
   dwarf_expr_piece *piece = NULL;
 
-  struct type *type = check_typedef (value_type (value));
+  struct type *type = check_typedef (value->type ());
   if (type->code () != TYPE_CODE_PTR)
     return NULL;
 
@@ -574,7 +574,7 @@ indirect_pieced_value (value *value)
 static value *
 coerce_pieced_ref (const value *value)
 {
-  struct type *type = check_typedef (value_type (value));
+  struct type *type = check_typedef (value->type ());
 
   if (value_bits_synthetic_pointer (value, value_embedded_offset (value),
 				    TARGET_CHAR_BIT * type->length ()))
@@ -1012,7 +1012,7 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	case DWARF_VALUE_STACK:
 	  {
 	    value *val = this->fetch (0);
-	    size_t n = value_type (val)->length ();
+	    size_t n = val->type ()->length ();
 	    size_t len = subobj_type->length ();
 	    size_t max = type->length ();
 
@@ -1144,7 +1144,7 @@ dwarf_expr_context::fetch_address (int n)
   bfd_endian byte_order = gdbarch_byte_order (arch);
   ULONGEST result;
 
-  dwarf_require_integral (value_type (result_val));
+  dwarf_require_integral (result_val->type ());
   result = extract_unsigned_integer (value_contents (result_val), byte_order);
 
   /* For most architectures, calling extract_unsigned_integer() alone
@@ -1157,7 +1157,7 @@ dwarf_expr_context::fetch_address (int n)
     {
       gdb_byte *buf = (gdb_byte *) alloca (this->m_addr_size);
       type *int_type = get_unsigned_type (arch,
-					  value_type (result_val));
+					  result_val->type ());
 
       store_unsigned_integer (buf, this->m_addr_size, byte_order, result);
       return gdbarch_integer_to_address (arch, int_type, buf);
@@ -1929,18 +1929,18 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	      {
 	      case DW_OP_abs:
 		if (value_less (result_val,
-				value_zero (value_type (result_val), not_lval)))
+				value_zero (result_val->type (), not_lval)))
 		  result_val = value_neg (result_val);
 		break;
 	      case DW_OP_neg:
 		result_val = value_neg (result_val);
 		break;
 	      case DW_OP_not:
-		dwarf_require_integral (value_type (result_val));
+		dwarf_require_integral (result_val->type ());
 		result_val = value_complement (result_val);
 		break;
 	      case DW_OP_plus_uconst:
-		dwarf_require_integral (value_type (result_val));
+		dwarf_require_integral (result_val->type ());
 		result = value_as_long (result_val);
 		op_ptr = safe_read_uleb128 (op_ptr, op_end, &reg);
 		result += reg;
@@ -1977,14 +1977,14 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    first = fetch (0);
 	    pop ();
 
-	    if (! base_types_equal_p (value_type (first), value_type (second)))
+	    if (! base_types_equal_p (first->type (), second->type ()))
 	      error (_("Incompatible types on DWARF stack"));
 
 	    switch (op)
 	      {
 	      case DW_OP_and:
-		dwarf_require_integral (value_type (first));
-		dwarf_require_integral (value_type (second));
+		dwarf_require_integral (first->type ());
+		dwarf_require_integral (second->type ());
 		result_val = value_binop (first, second, BINOP_BITWISE_AND);
 		break;
 	      case DW_OP_div:
@@ -1996,7 +1996,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	      case DW_OP_mod:
 		{
 		  int cast_back = 0;
-		  struct type *orig_type = value_type (first);
+		  struct type *orig_type = first->type ();
 
 		  /* We have to special-case "old-style" untyped values
 		     -- these must have mod computed using unsigned
@@ -2020,25 +2020,25 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 		result_val = value_binop (first, second, BINOP_MUL);
 		break;
 	      case DW_OP_or:
-		dwarf_require_integral (value_type (first));
-		dwarf_require_integral (value_type (second));
+		dwarf_require_integral (first->type ());
+		dwarf_require_integral (second->type ());
 		result_val = value_binop (first, second, BINOP_BITWISE_IOR);
 		break;
 	      case DW_OP_plus:
 		result_val = value_binop (first, second, BINOP_ADD);
 		break;
 	      case DW_OP_shl:
-		dwarf_require_integral (value_type (first));
-		dwarf_require_integral (value_type (second));
+		dwarf_require_integral (first->type ());
+		dwarf_require_integral (second->type ());
 		result_val = value_binop (first, second, BINOP_LSH);
 		break;
 	      case DW_OP_shr:
-		dwarf_require_integral (value_type (first));
-		dwarf_require_integral (value_type (second));
-		if (!value_type (first)->is_unsigned ())
+		dwarf_require_integral (first->type ());
+		dwarf_require_integral (second->type ());
+		if (!first->type ()->is_unsigned ())
 		  {
 		    struct type *utype
-		      = get_unsigned_type (arch, value_type (first));
+		      = get_unsigned_type (arch, first->type ());
 
 		    first = value_cast (utype, first);
 		  }
@@ -2046,16 +2046,16 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 		result_val = value_binop (first, second, BINOP_RSH);
 		/* Make sure we wind up with the same type we started
 		   with.  */
-		if (value_type (result_val) != value_type (second))
-		  result_val = value_cast (value_type (second), result_val);
+		if (result_val->type () != second->type ())
+		  result_val = value_cast (second->type (), result_val);
 		break;
 	      case DW_OP_shra:
-		dwarf_require_integral (value_type (first));
-		dwarf_require_integral (value_type (second));
-		if (value_type (first)->is_unsigned ())
+		dwarf_require_integral (first->type ());
+		dwarf_require_integral (second->type ());
+		if (first->type ()->is_unsigned ())
 		  {
 		    struct type *stype
-		      = get_signed_type (arch, value_type (first));
+		      = get_signed_type (arch, first->type ());
 
 		    first = value_cast (stype, first);
 		  }
@@ -2063,12 +2063,12 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 		result_val = value_binop (first, second, BINOP_RSH);
 		/* Make sure we wind up with the same type we started
 		   with.  */
-		if (value_type (result_val) != value_type (second))
-		  result_val = value_cast (value_type (second), result_val);
+		if (result_val->type () != second->type ())
+		  result_val = value_cast (second->type (), result_val);
 		break;
 	      case DW_OP_xor:
-		dwarf_require_integral (value_type (first));
-		dwarf_require_integral (value_type (second));
+		dwarf_require_integral (first->type ());
+		dwarf_require_integral (second->type ());
 		result_val = value_binop (first, second, BINOP_BITWISE_XOR);
 		break;
 	      case DW_OP_le:
@@ -2142,7 +2142,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    offset = extract_signed_integer (op_ptr, 2, byte_order);
 	    op_ptr += 2;
 	    val = fetch (0);
-	    dwarf_require_integral (value_type (val));
+	    dwarf_require_integral (val->type ());
 	    if (value_as_long (val) != 0)
 	      op_ptr += offset;
 	    pop ();
@@ -2341,12 +2341,12 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	    if (op == DW_OP_convert || op == DW_OP_GNU_convert)
 	      result_val = value_cast (type, result_val);
-	    else if (type == value_type (result_val))
+	    else if (type == result_val->type ())
 	      {
 		/* Nothing.  */
 	      }
 	    else if (type->length ()
-		     != value_type (result_val)->length ())
+		     != result_val->type ()->length ())
 	      error (_("DW_OP_reinterpret has wrong size"));
 	    else
 	      result_val

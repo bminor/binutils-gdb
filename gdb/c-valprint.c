@@ -235,7 +235,7 @@ c_value_print_array (struct value *val,
 		     struct ui_file *stream, int recurse,
 		     const struct value_print_options *options)
 {
-  struct type *type = check_typedef (value_type (val));
+  struct type *type = check_typedef (val->type ());
   CORE_ADDR address = value_address (val);
   const gdb_byte *valaddr = value_contents_for_printing (val).data ();
   struct type *unresolved_elttype = type->target_type ();
@@ -333,7 +333,7 @@ c_value_print_ptr (struct value *val, struct ui_file *stream, int recurse,
       return;
     }
 
-  struct type *type = check_typedef (value_type (val));
+  struct type *type = check_typedef (val->type ());
   const gdb_byte *valaddr = value_contents_for_printing (val).data ();
 
   if (options->vtblprint && cp_is_vtbl_ptr_type (type))
@@ -363,7 +363,7 @@ static void
 c_value_print_struct (struct value *val, struct ui_file *stream, int recurse,
 		      const struct value_print_options *options)
 {
-  struct type *type = check_typedef (value_type (val));
+  struct type *type = check_typedef (val->type ());
 
   if (type->code () == TYPE_CODE_UNION && recurse && !options->unionprint)
     gdb_printf (stream, "{...}");
@@ -405,7 +405,7 @@ c_value_print_int (struct value *val, struct ui_file *stream,
 	 instead.  Since we don't know whether the value is really
 	 intended to be used as an integer or a character, print
 	 the character equivalent as well.  */
-      struct type *type = value_type (val);
+      struct type *type = val->type ();
       const gdb_byte *valaddr = value_contents_for_printing (val).data ();
       if (c_textual_element_type (type, options->format))
 	{
@@ -422,7 +422,7 @@ void
 c_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
 		     const struct value_print_options *options)
 {
-  struct type *type = value_type (val);
+  struct type *type = val->type ();
 
   type = check_typedef (type);
   switch (type->code ())
@@ -486,11 +486,11 @@ c_value_print (struct value *val, struct ui_file *stream,
      C++: if it is a member pointer, we will take care
      of that when we print it.  */
 
-  type = check_typedef (value_type (val));
+  type = check_typedef (val->type ());
 
   if (type->is_pointer_or_reference ())
     {
-      struct type *original_type = value_type (val);
+      struct type *original_type = val->type ();
 
       /* Hack:  remove (char *) for char strings.  Their
 	 type is indicated by the quoted string anyway.
@@ -541,7 +541,7 @@ c_value_print (struct value *val, struct ui_file *stream,
 	  if (is_ref)
 	    val = value_ref (value_ind (val), refcode);
 
-	  type = value_type (val);
+	  type = val->type ();
 	  type_print (type, "", stream, -1);
 	  gdb_printf (stream, ") ");
 	}
@@ -549,7 +549,7 @@ c_value_print (struct value *val, struct ui_file *stream,
 	{
 	  /* normal case */
 	  gdb_printf (stream, "(");
-	  type_print (value_type (val), "", stream, -1);
+	  type_print (val->type (), "", stream, -1);
 	  gdb_printf (stream, ") ");
 	}
     }

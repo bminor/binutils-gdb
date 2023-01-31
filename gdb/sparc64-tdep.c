@@ -1381,7 +1381,7 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
 
   for (i = 0; i < nargs; i++)
     {
-      struct type *type = value_type (args[i]);
+      struct type *type = args[i]->type ();
       int len = type->length ();
 
       if (sparc64_structure_or_union_p (type)
@@ -1481,7 +1481,7 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
   for (i = 0; i < nargs; i++)
     {
       const gdb_byte *valbuf = value_contents (args[i]).data ();
-      struct type *type = value_type (args[i]);
+      struct type *type = args[i]->type ();
       int len = type->length ();
       int regnum = -1;
       gdb_byte buf[16];

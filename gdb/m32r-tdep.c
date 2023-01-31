@@ -682,12 +682,12 @@ m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Now make sure there's space on the stack.  */
   for (argnum = 0, stack_alloc = 0; argnum < nargs; argnum++)
-    stack_alloc += ((value_type (args[argnum])->length () + 3) & ~3);
+    stack_alloc += ((args[argnum]->type ()->length () + 3) & ~3);
   sp -= stack_alloc;		/* Make room on stack for args.  */
 
   for (argnum = 0, stack_offset = 0; argnum < nargs; argnum++)
     {
-      type = value_type (args[argnum]);
+      type = args[argnum]->type ();
       typecode = type->code ();
       len = type->length ();
 

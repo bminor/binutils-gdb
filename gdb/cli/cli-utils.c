@@ -37,7 +37,7 @@ get_ulongest (const char **pp, int trailer)
 
       if (val != NULL)	/* Value history reference */
 	{
-	  if (value_type (val)->code () == TYPE_CODE_INT)
+	  if (val->type ()->code () == TYPE_CODE_INT)
 	    retval = value_as_long (val);
 	  else
 	    error (_("History value must have integer type."));
@@ -96,7 +96,7 @@ get_number_trailer (const char **pp, int trailer)
 
       if (val)	/* Value history reference */
 	{
-	  if (value_type (val)->code () == TYPE_CODE_INT)
+	  if (val->type ()->code () == TYPE_CODE_INT)
 	    retval = value_as_long (val);
 	  else
 	    {

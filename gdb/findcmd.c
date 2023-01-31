@@ -162,7 +162,7 @@ parse_find_args (const char *args, ULONGEST *max_countp,
       s = skip_spaces (s);
 
       v = parse_to_comma_and_eval (&s);
-      t = value_type (v);
+      t = v->type ();
 
       if (size != '\0')
 	{

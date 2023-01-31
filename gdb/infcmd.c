@@ -1478,7 +1478,7 @@ get_return_value (struct symbol *func_symbol, struct value *function)
     = check_typedef (func_symbol->type ()->target_type ());
   gdb_assert (value_type->code () != TYPE_CODE_VOID);
 
-  if (is_nocall_function (check_typedef (::value_type (function))))
+  if (is_nocall_function (check_typedef (function->type ())))
     {
       warning (_("Function '%s' does not follow the target calling "
 		 "convention, cannot determine its returned value."),
@@ -2158,7 +2158,7 @@ default_print_one_register_info (struct ui_file *file,
 				 const char *name,
 				 struct value *val)
 {
-  struct type *regtype = value_type (val);
+  struct type *regtype = val->type ();
   int print_raw_format;
   string_file format_stream;
   enum tab_stops

@@ -1211,7 +1211,7 @@ frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   stack_space = 0;
   for (argnum = 0; argnum < nargs; ++argnum)
-    stack_space += align_up (value_type (args[argnum])->length (), 4);
+    stack_space += align_up (args[argnum]->type ()->length (), 4);
 
   stack_space -= (6 * 4);
   if (stack_space > 0)
@@ -1231,7 +1231,7 @@ frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   for (argnum = 0; argnum < nargs; ++argnum)
     {
       arg = args[argnum];
-      arg_type = check_typedef (value_type (arg));
+      arg_type = check_typedef (arg->type ());
       len = arg_type->length ();
       typecode = arg_type->code ();
 

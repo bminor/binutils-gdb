@@ -844,7 +844,7 @@ read_frame_register_value (struct value *value, frame_info_ptr frame)
   LONGEST offset = 0;
   LONGEST reg_offset = value_offset (value);
   int regnum = VALUE_REGNUM (value);
-  int len = type_length_units (check_typedef (value_type (value)));
+  int len = type_length_units (check_typedef (value->type ()));
 
   gdb_assert (VALUE_LVAL (value) == lval_register);
 
@@ -859,7 +859,7 @@ read_frame_register_value (struct value *value, frame_info_ptr frame)
   while (len > 0)
     {
       struct value *regval = get_frame_register_value (frame, regnum);
-      int reg_len = type_length_units (value_type (regval)) - reg_offset;
+      int reg_len = type_length_units (regval->type ()) - reg_offset;
 
       /* If the register length is larger than the number of bytes
 	 remaining to copy, then only copy the appropriate bytes.  */

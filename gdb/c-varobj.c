@@ -245,7 +245,7 @@ static struct value *
 value_struct_element_index (struct value *value, int type_index)
 {
   struct value *result = NULL;
-  struct type *type = value_type (value);
+  struct type *type = value->type ();
 
   type = check_typedef (type);
 

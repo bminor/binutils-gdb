@@ -731,7 +731,7 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       for (i = 0; i < nargs; i++)
 	{
 	  struct value *arg = args[i];
-	  struct type *type = check_typedef (value_type (arg));
+	  struct type *type = check_typedef (arg->type ());
 	  /* The corresponding parameter that is pushed onto the
 	     stack, and [possibly] passed in a register.  */
 	  gdb_byte param_val[8];
@@ -965,7 +965,7 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   for (i = 0; i < nargs; i++)
     {
       struct value *arg = args[i];
-      struct type *type = value_type (arg);
+      struct type *type = arg->type ();
       int len = type->length ();
       const bfd_byte *valbuf;
       bfd_byte fptrbuf[8];

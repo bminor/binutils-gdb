@@ -298,7 +298,7 @@ gnuv3_rtti_type (struct value *value,
 		 int *full_p, LONGEST *top_p, int *using_enc_p)
 {
   struct gdbarch *gdbarch;
-  struct type *values_type = check_typedef (value_type (value));
+  struct type *values_type = check_typedef (value->type ());
   struct value *vtable;
   struct minimal_symbol *vtable_symbol;
   const char *vtable_symbol_name;
@@ -389,7 +389,7 @@ gnuv3_get_virtual_fn (struct gdbarch *gdbarch, struct value *container,
   struct value *vtable, *vfn;
 
   /* Every class with virtual functions must have a vtable.  */
-  vtable = gnuv3_get_vtable (gdbarch, value_type (container),
+  vtable = gnuv3_get_vtable (gdbarch, container->type (),
 			     value_as_address (value_addr (container)));
   gdb_assert (vtable != NULL);
 
@@ -419,7 +419,7 @@ gnuv3_virtual_fn_field (struct value **value_p,
 			struct fn_field *f, int j,
 			struct type *vfn_base, int offset)
 {
-  struct type *values_type = check_typedef (value_type (*value_p));
+  struct type *values_type = check_typedef ((*value_p)->type ());
   struct gdbarch *gdbarch;
 
   /* Some simple sanity checks.  */
@@ -740,10 +740,10 @@ gnuv3_method_ptr_to_value (struct value **this_p, struct value *method_ptr)
   LONGEST adjustment;
   int vbit;
 
-  self_type = TYPE_SELF_TYPE (check_typedef (value_type (method_ptr)));
+  self_type = TYPE_SELF_TYPE (check_typedef (method_ptr->type ()));
   final_type = lookup_pointer_type (self_type);
 
-  method_type = check_typedef (value_type (method_ptr))->target_type ();
+  method_type = check_typedef (method_ptr->type ())->target_type ();
 
   /* Extract the pointer to member.  */
   gdbarch = self_type->arch ();
@@ -845,7 +845,7 @@ compute_vtable_size (htab_t offset_hash,
 		     struct value *value)
 {
   int i;
-  struct type *type = check_typedef (value_type (value));
+  struct type *type = check_typedef (value->type ());
   void **slot;
   struct value_and_voffset search_vo, *current_vo;
 
@@ -902,7 +902,7 @@ print_one_vtable (struct gdbarch *gdbarch, struct value *value,
 		  struct value_print_options *opts)
 {
   int i;
-  struct type *type = check_typedef (value_type (value));
+  struct type *type = check_typedef (value->type ());
   struct value *vtable;
   CORE_ADDR vt_addr;
 
@@ -963,11 +963,11 @@ gnuv3_print_vtable (struct value *value)
   int count;
 
   value = coerce_ref (value);
-  type = check_typedef (value_type (value));
+  type = check_typedef (value->type ());
   if (type->code () == TYPE_CODE_PTR)
     {
       value = value_ind (value);
-      type = check_typedef (value_type (value));
+      type = check_typedef (value->type ());
     }
 
   get_user_print_options (&opts);
@@ -976,7 +976,7 @@ gnuv3_print_vtable (struct value *value)
   if (opts.objectprint)
     {
       value = value_full_object (value, NULL, 0, 0, 0);
-      type = check_typedef (value_type (value));
+      type = check_typedef (value->type ());
     }
 
   gdbarch = type->arch ();
@@ -1105,7 +1105,7 @@ gnuv3_get_typeid (struct value *value)
   if (value_lval_const (value) == lval_memory)
     value = coerce_ref (value);
 
-  type = check_typedef (value_type (value));
+  type = check_typedef (value->type ());
 
   /* In the non_lvalue case, a reference might have slipped through
      here.  */
@@ -1168,7 +1168,7 @@ gnuv3_get_typeid (struct value *value)
 static std::string
 gnuv3_get_typename_from_type_info (struct value *type_info_ptr)
 {
-  struct gdbarch *gdbarch = value_type (type_info_ptr)->arch ();
+  struct gdbarch *gdbarch = type_info_ptr->type ()->arch ();
   struct bound_minimal_symbol typeinfo_sym;
   CORE_ADDR addr;
   const char *symname;
@@ -1209,7 +1209,7 @@ gnuv3_get_type_from_type_info (struct value *type_info_ptr)
   std::string type_name = gnuv3_get_typename_from_type_info (type_info_ptr);
   expression_up expr (parse_expression (type_name.c_str ()));
   struct value *type_val = evaluate_type (expr.get ());
-  return value_type (type_val);
+  return type_val->type ();
 }
 
 /* Determine if we are currently in a C++ thunk.  If so, get the address

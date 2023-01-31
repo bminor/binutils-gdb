@@ -93,7 +93,7 @@ rs6000_lynx178_push_dummy_call (struct gdbarch *gdbarch,
       int reg_size = register_size (gdbarch, ii + 3);
 
       arg = args[argno];
-      type = check_typedef (value_type (arg));
+      type = check_typedef (arg->type ());
       len = type->length ();
 
       if (type->code () == TYPE_CODE_FLT)
@@ -184,7 +184,7 @@ ran_out_of_registers_for_arguments:
 	{
 	  struct value *val = args[jj];
 
-	  space += align_up (value_type (val)->length (), 4);
+	  space += align_up (val->type ()->length (), 4);
 	}
 
       /* Add location required for the rest of the parameters.  */
@@ -217,7 +217,7 @@ ran_out_of_registers_for_arguments:
 	{
 
 	  arg = args[argno];
-	  type = check_typedef (value_type (arg));
+	  type = check_typedef (arg->type ());
 	  len = type->length ();
 
 

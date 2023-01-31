@@ -1170,7 +1170,7 @@ m68hc11_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     regcache_cooked_write_unsigned (regcache, HARD_D_REGNUM, struct_addr);
   else if (nargs > 0)
     {
-      type = value_type (args[0]);
+      type = args[0]->type ();
 
       /* First argument is passed in D and X registers.  */
       if (type->length () <= 4)
@@ -1192,7 +1192,7 @@ m68hc11_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   for (argnum = nargs - 1; argnum >= first_stack_argnum; argnum--)
     {
-      type = value_type (args[argnum]);
+      type = args[argnum]->type ();
 
       if (type->length () & 1)
 	{

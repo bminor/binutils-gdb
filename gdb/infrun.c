@@ -9145,9 +9145,9 @@ siginfo_value_read (struct value *v)
 		 nullptr,
 		 value_contents_all_raw (v).data (),
 		 value_offset (v),
-		 value_type (v)->length ());
+		 v->type ()->length ());
 
-  if (transferred != value_type (v)->length ())
+  if (transferred != v->type ()->length ())
     error (_("Unable to read siginfo"));
 }
 
@@ -9168,9 +9168,9 @@ siginfo_value_write (struct value *v, struct value *fromval)
 			      nullptr,
 			      value_contents_all_raw (fromval).data (),
 			      value_offset (v),
-			      value_type (fromval)->length ());
+			      fromval->type ()->length ());
 
-  if (transferred != value_type (fromval)->length ())
+  if (transferred != fromval->type ()->length ())
     error (_("Unable to write siginfo"));
 }
 

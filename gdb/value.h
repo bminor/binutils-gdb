@@ -160,6 +160,11 @@ struct value
 
   DISABLE_COPY_AND_ASSIGN (value);
 
+  /* Type of the value.  */
+  struct type *type () const
+  { return m_type; }
+
+
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
   enum lval_type m_lval = not_lval;
@@ -336,10 +341,6 @@ struct value
      loaded from the inferior.  */
   ULONGEST m_limited_length = 0;
 };
-
-/* Type of the value.  */
-
-extern struct type *value_type (const struct value *);
 
 /* Return the gdbarch associated with the value. */
 

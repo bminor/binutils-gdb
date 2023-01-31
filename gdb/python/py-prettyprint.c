@@ -574,7 +574,7 @@ gdbpy_apply_val_pretty_printer (const struct extension_language_defn *extlang,
 				const struct value_print_options *options,
 				const struct language_defn *language)
 {
-  struct type *type = value_type (value);
+  struct type *type = value->type ();
   struct gdbarch *gdbarch = type->arch ();
   enum gdbpy_string_repr_result print_result;
 

@@ -724,7 +724,7 @@ info_mach_region_command (const char *exp, int from_tty)
 
   expression_up expr = parse_expression (exp);
   val = evaluate_expression (expr.get ());
-  if (TYPE_IS_REFERENCE (value_type (val)))
+  if (TYPE_IS_REFERENCE (val->type ()))
     {
       val = value_ind (val);
     }

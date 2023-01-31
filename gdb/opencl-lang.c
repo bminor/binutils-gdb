@@ -120,8 +120,8 @@ static void
 lval_func_read (struct value *v)
 {
   struct lval_closure *c = (struct lval_closure *) value_computed_closure (v);
-  struct type *type = check_typedef (value_type (v));
-  struct type *eltype = check_typedef (value_type (c->val))->target_type ();
+  struct type *type = check_typedef (v->type ());
+  struct type *eltype = check_typedef (c->val->type ())->target_type ();
   LONGEST offset = value_offset (v);
   LONGEST elsize = eltype->length ();
   int n, i, j = 0;
@@ -150,8 +150,8 @@ lval_func_write (struct value *v, struct value *fromval)
   scoped_value_mark mark;
 
   struct lval_closure *c = (struct lval_closure *) value_computed_closure (v);
-  struct type *type = check_typedef (value_type (v));
-  struct type *eltype = check_typedef (value_type (c->val))->target_type ();
+  struct type *type = check_typedef (v->type ());
+  struct type *eltype = check_typedef (c->val->type ())->target_type ();
   LONGEST offset = value_offset (v);
   LONGEST elsize = eltype->length ();
   int n, i, j = 0;
@@ -197,7 +197,7 @@ lval_func_check_synthetic_pointer (const struct value *v,
   struct lval_closure *c = (struct lval_closure *) value_computed_closure (v);
   /* Size of the target type in bits.  */
   int elsize =
-      check_typedef (value_type (c->val))->target_type ()->length () * 8;
+    check_typedef (c->val->type ())->target_type ()->length () * 8;
   int startrest = offset % elsize;
   int start = offset / elsize;
   int endrest = (offset + length) % elsize;
@@ -269,7 +269,7 @@ static struct value *
 create_value (struct gdbarch *gdbarch, struct value *val, enum noside noside,
 	      int *indices, int n)
 {
-  struct type *type = check_typedef (value_type (val));
+  struct type *type = check_typedef (val->type ());
   struct type *elm_type = type->target_type ();
   struct value *ret;
 
@@ -337,7 +337,7 @@ opencl_component_ref (struct expression *exp, struct value *val,
   int indices[16], i;
   int dst_len;
 
-  if (!get_array_bounds (check_typedef (value_type (val)), &lowb, &highb))
+  if (!get_array_bounds (check_typedef (val->type ()), &lowb, &highb))
     error (_("Could not determine the vector bounds"));
 
   src_len = highb - lowb + 1;
@@ -446,7 +446,7 @@ opencl_logical_not (struct type *expect_type, struct expression *exp,
 		    enum noside noside, enum exp_opcode op,
 		    struct value *arg)
 {
-  struct type *type = check_typedef (value_type (arg));
+  struct type *type = check_typedef (arg->type ());
   struct type *rettype;
   struct value *ret;
 
@@ -537,8 +537,8 @@ vector_relop (struct expression *exp, struct value *val1, struct value *val2,
   int t1_is_vec, t2_is_vec, i;
   LONGEST lowb1, lowb2, highb1, highb2;
 
-  type1 = check_typedef (value_type (val1));
-  type2 = check_typedef (value_type (val2));
+  type1 = check_typedef (val1->type ());
+  type2 = check_typedef (val2->type ());
 
   t1_is_vec = (type1->code () == TYPE_CODE_ARRAY && type1->is_vector ());
   t2_is_vec = (type2->code () == TYPE_CODE_ARRAY && type2->is_vector ());
@@ -589,7 +589,7 @@ vector_relop (struct expression *exp, struct value *val1, struct value *val2,
 struct value *
 opencl_value_cast (struct type *type, struct value *arg)
 {
-  if (type != value_type (arg))
+  if (type != arg->type ())
     {
       /* Casting scalar to vector is a special case for OpenCL, scalar
 	 is cast to element type of vector then replicated into each
@@ -603,10 +603,10 @@ opencl_value_cast (struct type *type, struct value *arg)
       to_type = check_typedef (type);
 
       code1 = to_type->code ();
-      code2 = check_typedef (value_type (arg))->code ();
+      code2 = check_typedef (arg->type ())->code ();
 
       if (code2 == TYPE_CODE_REF)
-	code2 = check_typedef (value_type (coerce_ref(arg)))->code ();
+	code2 = check_typedef (coerce_ref(arg)->type ())->code ();
 
       scalar = (code2 == TYPE_CODE_INT || code2 == TYPE_CODE_BOOL
 		|| code2 == TYPE_CODE_CHAR || code2 == TYPE_CODE_FLT
@@ -641,8 +641,8 @@ opencl_relop (struct type *expect_type, struct expression *exp,
 	      struct value *arg1, struct value *arg2)
 {
   struct value *val;
-  struct type *type1 = check_typedef (value_type (arg1));
-  struct type *type2 = check_typedef (value_type (arg2));
+  struct type *type1 = check_typedef (arg1->type ());
+  struct type *type2 = check_typedef (arg2->type ());
   int t1_is_vec = (type1->code () == TYPE_CODE_ARRAY
 		   && type1->is_vector ());
   int t2_is_vec = (type2->code () == TYPE_CODE_ARRAY
@@ -686,7 +686,7 @@ eval_opencl_assign (struct type *expect_type, struct expression *exp,
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     return arg1;
 
-  struct type *type1 = value_type (arg1);
+  struct type *type1 = arg1->type ();
   if (deprecated_value_modifiable (arg1)
       && VALUE_LVAL (arg1) != lval_internalvar)
     arg2 = opencl_value_cast (type1, arg2);
@@ -703,7 +703,7 @@ opencl_structop_operation::evaluate (struct type *expect_type,
 				     enum noside noside)
 {
   value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
-  struct type *type1 = check_typedef (value_type (arg1));
+  struct type *type1 = check_typedef (arg1->type ());
 
   if (type1->code () == TYPE_CODE_ARRAY && type1->is_vector ())
     return opencl_component_ref (exp, arg1, std::get<1> (m_storage).c_str (),
@@ -715,7 +715,7 @@ opencl_structop_operation::evaluate (struct type *expect_type,
 					  NULL, "structure");
 
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	v = value_zero (value_type (v), VALUE_LVAL (v));
+	v = value_zero (v->type (), VALUE_LVAL (v));
       return v;
     }
 }
@@ -735,8 +735,8 @@ opencl_logical_binop_operation::evaluate (struct type *expect_type,
      Therefore we evaluate it once using EVAL_AVOID_SIDE_EFFECTS.  */
   value *arg2 = std::get<2> (m_storage)->evaluate (nullptr, exp,
 						   EVAL_AVOID_SIDE_EFFECTS);
-  struct type *type1 = check_typedef (value_type (arg1));
-  struct type *type2 = check_typedef (value_type (arg2));
+  struct type *type1 = check_typedef (arg1->type ());
+  struct type *type2 = check_typedef (arg2->type ());
 
   if ((type1->code () == TYPE_CODE_ARRAY && type1->is_vector ())
       || (type2->code () == TYPE_CODE_ARRAY && type2->is_vector ()))
@@ -774,7 +774,7 @@ opencl_ternop_cond_operation::evaluate (struct type *expect_type,
 					enum noside noside)
 {
   value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
-  struct type *type1 = check_typedef (value_type (arg1));
+  struct type *type1 = check_typedef (arg1->type ());
   if (type1->code () == TYPE_CODE_ARRAY && type1->is_vector ())
     {
       struct value *arg2, *arg3, *tmp, *ret;
@@ -784,8 +784,8 @@ opencl_ternop_cond_operation::evaluate (struct type *expect_type,
 
       arg2 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
       arg3 = std::get<2> (m_storage)->evaluate (nullptr, exp, noside);
-      type2 = check_typedef (value_type (arg2));
-      type3 = check_typedef (value_type (arg3));
+      type2 = check_typedef (arg2->type ());
+      type3 = check_typedef (arg3->type ());
       t2_is_vec
 	= type2->code () == TYPE_CODE_ARRAY && type2->is_vector ();
       t3_is_vec
@@ -795,12 +795,12 @@ opencl_ternop_cond_operation::evaluate (struct type *expect_type,
       if (t2_is_vec || !t3_is_vec)
 	{
 	  arg3 = opencl_value_cast (type2, arg3);
-	  type3 = value_type (arg3);
+	  type3 = arg3->type ();
 	}
       else if (!t2_is_vec || t3_is_vec)
 	{
 	  arg2 = opencl_value_cast (type3, arg2);
-	  type2 = value_type (arg2);
+	  type2 = arg2->type ();
 	}
       else if (!t2_is_vec || !t3_is_vec)
 	{

@@ -821,7 +821,7 @@ cris_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       int reg_demand;
       int i;
       
-      len = value_type (args[argnum])->length ();
+      len = args[argnum]->type ()->length ();
       val = value_contents (args[argnum]).data ();
       
       /* How may registers worth of storage do we need for this argument?  */

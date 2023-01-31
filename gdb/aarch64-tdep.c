@@ -1800,7 +1800,7 @@ pass_in_v_vfp_candidate (struct gdbarch *gdbarch, struct regcache *regcache,
 	    continue;
 
 	  struct value *field = value_primitive_field (arg, 0, i, arg_type);
-	  struct type *field_type = check_typedef (value_type (field));
+	  struct type *field_type = check_typedef (field->type ());
 
 	  if (!pass_in_v_vfp_candidate (gdbarch, regcache, info, field_type,
 					field))
@@ -1875,7 +1875,7 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       struct type *arg_type, *fundamental_type;
       int len, elements;
 
-      arg_type = check_typedef (value_type (arg));
+      arg_type = check_typedef (arg->type ());
       len = arg_type->length ();
 
       /* If arg can be passed in v registers as per the AAPCS64, then do so if
@@ -2767,7 +2767,7 @@ aarch64_pseudo_read_value_1 (struct gdbarch *gdbarch,
 
   if (regcache->raw_read (v_regnum, reg_buf) != REG_VALID)
     mark_value_bytes_unavailable (result_value, 0,
-				  value_type (result_value)->length ());
+				  result_value->type ()->length ());
   else
     memcpy (value_contents_raw (result_value).data (), reg_buf, regsize);
 

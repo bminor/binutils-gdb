@@ -61,7 +61,7 @@ dynamic_array_type (struct type *type,
 
       true_type = lookup_array_range_type (true_type, 0, length - 1);
       ival = value_at (true_type, addr);
-      true_type = value_type (ival);
+      true_type = ival->type ();
 
       d_value_print_inner (ival, stream, recurse + 1, options);
       return 0;
@@ -77,7 +77,7 @@ d_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
 {
   int ret;
 
-  struct type *type = check_typedef (value_type (val));
+  struct type *type = check_typedef (val->type ());
   switch (type->code ())
     {
       case TYPE_CODE_STRUCT:

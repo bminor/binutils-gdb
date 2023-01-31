@@ -164,7 +164,7 @@ m2_print_unbounded_array (struct value *value,
   LONGEST len;
   struct value *val;
 
-  struct type *type = check_typedef (value_type (value));
+  struct type *type = check_typedef (value->type ());
   const gdb_byte *valaddr = value_contents_for_printing (value).data ();
 
   addr = unpack_pointer (type->field (0).type (),
@@ -260,7 +260,7 @@ m2_print_array_contents (struct value *val,
 			 const struct value_print_options *options,
 			 int len)
 {
-  struct type *type = check_typedef (value_type (val));
+  struct type *type = check_typedef (val->type ());
 
   if (type->length () > 0)
     {
@@ -308,7 +308,7 @@ m2_language::value_print_inner (struct value *val, struct ui_file *stream,
   const gdb_byte *valaddr = value_contents_for_printing (val).data ();
   const CORE_ADDR address = value_address (val);
 
-  struct type *type = check_typedef (value_type (val));
+  struct type *type = check_typedef (val->type ());
   switch (type->code ())
     {
     case TYPE_CODE_ARRAY:

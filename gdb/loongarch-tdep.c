@@ -566,11 +566,11 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
     {
       struct value *arg = args[i];
       const gdb_byte *val = value_contents (arg).data ();
-      struct type *type = check_typedef (value_type (arg));
+      struct type *type = check_typedef (arg->type ());
       size_t len = type->length ();
       int align = type_align (type);
       enum type_code code = type->code ();
-      struct type *func_type = check_typedef (value_type (function));
+      struct type *func_type = check_typedef (function->type ());
       bool varargs = (func_type->has_varargs () && i >= func_type->num_fields ());
 
       switch (code)

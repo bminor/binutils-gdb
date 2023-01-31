@@ -165,7 +165,7 @@ value::~value ()
 struct gdbarch *
 get_value_arch (const struct value *value)
 {
-  return value_type (value)->arch ();
+  return value->type ()->arch ();
 }
 
 int
@@ -912,10 +912,10 @@ static bool
 set_limited_array_length (struct value *val)
 {
   ULONGEST limit = val->m_limited_length;
-  ULONGEST len = value_type (val)->length ();
+  ULONGEST len = val->type ()->length ();
 
   if (array_length_limiting_element_count.has_value ())
-    len = calculate_limited_array_length (value_type (val));
+    len = calculate_limited_array_length (val->type ());
 
   if (limit != 0 && len > limit)
     len = limit;
@@ -944,8 +944,8 @@ allocate_value_contents (struct value *val, bool check_size)
 	     an element limit in effect, then we can possibly try
 	     to load only a sub-set of the array contents into
 	     GDB's memory.  */
-	  if (value_type (val) == enclosing_type
-	      && value_type (val)->code () == TYPE_CODE_ARRAY
+	  if (val->type () == enclosing_type
+	      && val->type ()->code () == TYPE_CODE_ARRAY
 	      && len > max_value_size
 	      && set_limited_array_length (val))
 	    len = val->m_limited_length;
@@ -1024,11 +1024,6 @@ allocate_optimized_out_value (struct type *type)
 
 /* Accessor methods.  */
 
-struct type *
-value_type (const struct value *value)
-{
-  return value->m_type;
-}
 void
 deprecated_set_value_type (struct value *value, struct type *type)
 {
@@ -1090,7 +1085,7 @@ value_contents_raw (struct value *value)
 
   allocate_value_contents (value, true);
 
-  ULONGEST length = value_type (value)->length ();
+  ULONGEST length = value->type ()->length ();
   return gdb::make_array_view
     (value->m_contents.get () + value->m_embedded_offset * unit_size, length);
 }
@@ -1123,7 +1118,7 @@ value_actual_type (struct value *value, int resolve_simple_types,
 
   if (real_type_found)
     *real_type_found = 0;
-  result = value_type (value);
+  result = value->type ();
   if (opts.objectprint)
     {
       /* If result's target type is TYPE_CODE_STRUCT, proceed to
@@ -1327,7 +1322,7 @@ value_contents_copy_raw_bitwise (struct value *dst, LONGEST dst_bit_offset,
   copy_bitwise (dst_contents.data (), dst_bit_offset,
 		src_contents.data (), src_bit_offset,
 		bit_length,
-		type_byte_order (value_type (src)) == BFD_ENDIAN_BIG);
+		type_byte_order (src->type ()) == BFD_ENDIAN_BIG);
 
   /* Copy the meta-data.  */
   value_ranges_copy_adjusted (dst, dst_bit_offset,
@@ -1529,10 +1524,10 @@ value_address (const struct value *value)
     return 0;
   if (value->m_parent != NULL)
     return value_address (value->m_parent.get ()) + value->m_offset;
-  if (NULL != TYPE_DATA_LOCATION (value_type (value)))
+  if (NULL != TYPE_DATA_LOCATION (value->type ()))
     {
-      gdb_assert (PROP_CONST == TYPE_DATA_LOCATION_KIND (value_type (value)));
-      return TYPE_DATA_LOCATION_ADDR (value_type (value));
+      gdb_assert (PROP_CONST == TYPE_DATA_LOCATION_KIND (value->type ()));
+      return TYPE_DATA_LOCATION_ADDR (value->type ());
     }
 
   return value->m_location.address + value->m_offset;
@@ -1738,7 +1733,7 @@ value_copy (const value *arg)
 struct value *
 make_cv_value (int cnst, int voltl, struct value *v)
 {
-  struct type *val_type = value_type (v);
+  struct type *val_type = v->type ();
   struct type *m_enclosing_type = value_enclosing_type (v);
   struct value *cv_val = value_copy (v);
 
@@ -1776,7 +1771,7 @@ value_force_lval (struct value *v, CORE_ADDR addr)
 {
   gdb_assert (VALUE_LVAL (v) == not_lval);
 
-  write_memory (addr, value_contents_raw (v).data (), value_type (v)->length ());
+  write_memory (addr, value_contents_raw (v).data (), v->type ()->length ());
   v->m_lval = lval_memory;
   v->m_location.address = addr;
 }
@@ -1805,14 +1800,14 @@ set_value_component_location (struct value *component,
 
   /* If the WHOLE value has a dynamically resolved location property then
      update the address of the COMPONENT.  */
-  type = value_type (whole);
+  type = whole->type ();
   if (NULL != TYPE_DATA_LOCATION (type)
       && TYPE_DATA_LOCATION_KIND (type) == PROP_CONST)
     set_value_address (component, TYPE_DATA_LOCATION_ADDR (type));
 
   /* Similarly, if the COMPONENT value has a dynamically resolved location
      property then update its address.  */
-  type = value_type (component);
+  type = component->type ();
   if (NULL != TYPE_DATA_LOCATION (type)
       && TYPE_DATA_LOCATION_KIND (type) == PROP_CONST)
     {
@@ -1853,7 +1848,7 @@ int
 record_latest_value (struct value *val)
 {
   struct type *enclosing_type = value_enclosing_type (val);
-  struct type *type = value_type (val);
+  struct type *type = val->type ();
 
   /* We don't want this value to have anything to do with the inferior anymore.
      In particular, "set $1 = 50" should not affect the variable from which
@@ -2296,7 +2291,7 @@ get_internalvar_integer (struct internalvar *var, LONGEST *result)
 
   if (var->kind == INTERNALVAR_VALUE)
     {
-      struct type *type = check_typedef (value_type (var->u.value));
+      struct type *type = check_typedef (var->u.value->type ());
 
       if (type->code () == TYPE_CODE_INT)
 	{
@@ -2340,11 +2335,11 @@ set_internalvar_component (struct internalvar *var,
       unit_size = gdbarch_addressable_memory_unit_size (arch);
 
       if (bitsize)
-	modify_field (value_type (var->u.value), addr + offset,
+	modify_field (var->u.value->type (), addr + offset,
 		      value_as_long (newval), bitpos, bitsize);
       else
 	memcpy (addr + offset * unit_size, value_contents (newval).data (),
-		value_type (newval)->length ());
+		newval->type ()->length ());
       break;
 
     default:
@@ -2363,7 +2358,7 @@ set_internalvar (struct internalvar *var, struct value *val)
     error (_("Cannot overwrite convenience function %s"), var->name);
 
   /* Prepare new contents.  */
-  switch (check_typedef (value_type (val))->code ())
+  switch (check_typedef (val->type ())->code ())
     {
     case TYPE_CODE_VOID:
       new_kind = INTERNALVAR_VOID;
@@ -2400,7 +2395,7 @@ set_internalvar (struct internalvar *var, struct value *val)
 	 when accessing the value.
 	 If we keep it, we would still refer to the origin value.
 	 Remove the location property in case it exist.  */
-      value_type (new_data.value)->remove_dyn_prop (DYN_PROP_DATA_LOCATION);
+      new_data.value->type ()->remove_dyn_prop (DYN_PROP_DATA_LOCATION);
 
       break;
     }
@@ -2718,7 +2713,7 @@ value_from_xmethod (xmethod_worker_up &&worker)
 struct type *
 result_type_of_xmethod (struct value *method, gdb::array_view<value *> argv)
 {
-  gdb_assert (value_type (method)->code () == TYPE_CODE_XMETHOD
+  gdb_assert (method->type ()->code () == TYPE_CODE_XMETHOD
 	      && method->m_lval == lval_xcallable && !argv.empty ());
 
   return method->m_location.xm_worker->get_result_type (argv[0], argv.slice (1));
@@ -2729,7 +2724,7 @@ result_type_of_xmethod (struct value *method, gdb::array_view<value *> argv)
 struct value *
 call_xmethod (struct value *method, gdb::array_view<value *> argv)
 {
-  gdb_assert (value_type (method)->code () == TYPE_CODE_XMETHOD
+  gdb_assert (method->type ()->code () == TYPE_CODE_XMETHOD
 	      && method->m_lval == lval_xcallable && !argv.empty ());
 
   return method->m_location.xm_worker->invoke (argv[0], argv.slice (1));
@@ -2747,7 +2742,7 @@ value_as_long (struct value *val)
      in disassemble_command).  It also dereferences references, which
      I suspect is the most logical thing to do.  */
   val = coerce_array (val);
-  return unpack_long (value_type (val), value_contents (val).data ());
+  return unpack_long (val->type (), value_contents (val).data ());
 }
 
 /* Extract a value as a C pointer.  Does not deallocate the value.
@@ -2756,7 +2751,7 @@ value_as_long (struct value *val)
 CORE_ADDR
 value_as_address (struct value *val)
 {
-  struct gdbarch *gdbarch = value_type (val)->arch ();
+  struct gdbarch *gdbarch = val->type ()->arch ();
 
   /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
      whether we want this to be true eventually.  */
@@ -2785,7 +2780,7 @@ value_as_address (struct value *val)
      cannot be modified.
 
      Upon entry to this function, if VAL is a value of type `function'
-     (that is, TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_FUNC), then
+     (that is, TYPE_CODE (val->type ()) == TYPE_CODE_FUNC), then
      value_address (val) is the address of the function.  This is what
      you'll get if you evaluate an expression like `main'.  The call
      to COERCE_ARRAY below actually does all the usual unary
@@ -2804,8 +2799,8 @@ value_as_address (struct value *val)
 
      The following shortcut avoids this whole mess.  If VAL is a
      function, just return its address directly.  */
-  if (value_type (val)->code () == TYPE_CODE_FUNC
-      || value_type (val)->code () == TYPE_CODE_METHOD)
+  if (val->type ()->code () == TYPE_CODE_FUNC
+      || val->type ()->code () == TYPE_CODE_METHOD)
     return value_address (val);
 
   val = coerce_array (val);
@@ -2847,12 +2842,12 @@ value_as_address (struct value *val)
      converted to pointers; usually, the ABI doesn't either, but
      ABI-specific code is a more reasonable place to handle it.  */
 
-  if (!value_type (val)->is_pointer_or_reference ()
+  if (!val->type ()->is_pointer_or_reference ()
       && gdbarch_integer_to_address_p (gdbarch))
-    return gdbarch_integer_to_address (gdbarch, value_type (val),
+    return gdbarch_integer_to_address (gdbarch, val->type (),
 				       value_contents (val).data ());
 
-  return unpack_long (value_type (val), value_contents (val).data ());
+  return unpack_long (val->type (), value_contents (val).data ());
 #endif
 }
 
@@ -2972,7 +2967,7 @@ unpack_pointer (struct type *type, const gdb_byte *valaddr)
 bool
 is_floating_value (struct value *val)
 {
-  struct type *type = check_typedef (value_type (val));
+  struct type *type = check_typedef (val->type ());
 
   if (is_floating_type (type))
     {
@@ -3181,7 +3176,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
 struct value *
 value_field (struct value *arg1, int fieldno)
 {
-  return value_primitive_field (arg1, 0, fieldno, value_type (arg1));
+  return value_primitive_field (arg1, 0, fieldno, arg1->type ());
 }
 
 /* Return a non-virtual function as a value.
@@ -3231,7 +3226,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
 
   if (arg1p)
     {
-      if (type != value_type (*arg1p))
+      if (type != (*arg1p)->type ())
 	*arg1p = value_ind (value_cast (lookup_pointer_type (type),
 					value_addr (*arg1p)));
 
@@ -3357,7 +3352,7 @@ unpack_value_bitfield (struct value *dest_val,
   enum bfd_endian byte_order;
   int src_bit_offset;
   int dst_bit_offset;
-  struct type *field_type = value_type (dest_val);
+  struct type *field_type = dest_val->type ();
 
   byte_order = type_byte_order (field_type);
 
@@ -3620,7 +3615,7 @@ value_from_host_double (struct type *type, double d)
   struct value *value = allocate_value (type);
   gdb_assert (type->code () == TYPE_CODE_FLT);
   target_float_from_host_double (value_contents_raw (value).data (),
-				 value_type (value), d);
+				 value->type (), d);
   return value;
 }
 
@@ -3811,7 +3806,7 @@ coerce_ref_if_computed (const struct value *arg)
 {
   const struct lval_funcs *funcs;
 
-  if (!TYPE_IS_REFERENCE (check_typedef (value_type (arg))))
+  if (!TYPE_IS_REFERENCE (check_typedef (arg->type ())))
     return NULL;
 
   if (value_lval_const (arg) != lval_computed)
@@ -3854,7 +3849,7 @@ readjust_indirect_value_type (struct value *value, struct type *enc_type,
 struct value *
 coerce_ref (struct value *arg)
 {
-  struct type *value_type_arg_tmp = check_typedef (value_type (arg));
+  struct type *value_type_arg_tmp = check_typedef (arg->type ());
   struct value *retval;
   struct type *enc_type;
 
@@ -3868,9 +3863,9 @@ coerce_ref (struct value *arg)
   enc_type = check_typedef (value_enclosing_type (arg));
   enc_type = enc_type->target_type ();
 
-  CORE_ADDR addr = unpack_pointer (value_type (arg), value_contents (arg).data ());
+  CORE_ADDR addr = unpack_pointer (arg->type (), value_contents (arg).data ());
   retval = value_at_lazy (enc_type, addr);
-  enc_type = value_type (retval);
+  enc_type = retval->type ();
   return readjust_indirect_value_type (retval, enc_type, value_type_arg_tmp,
 				       arg, addr);
 }
@@ -3881,7 +3876,7 @@ coerce_array (struct value *arg)
   struct type *type;
 
   arg = coerce_ref (arg);
-  type = check_typedef (value_type (arg));
+  type = check_typedef (arg->type ());
 
   switch (type->code ())
     {
@@ -3985,7 +3980,7 @@ value_fetch_lazy_memory (struct value *val)
   int len = 0;
   if (val->m_limited_length > 0)
     {
-      gdb_assert (value_type (val)->code () == TYPE_CODE_ARRAY);
+      gdb_assert (val->type ()->code () == TYPE_CODE_ARRAY);
       len = val->m_limited_length;
     }
   else if (type->length () > 0)
@@ -4005,7 +4000,7 @@ value_fetch_lazy_register (struct value *val)
 {
   frame_info_ptr next_frame;
   int regnum;
-  struct type *type = check_typedef (value_type (val));
+  struct type *type = check_typedef (val->type ());
   struct value *new_val = val, *mark = value_mark ();
 
   /* Offsets are not supported here; lazy register values must
@@ -4165,7 +4160,7 @@ isvoid_internal_fn (struct gdbarch *gdbarch,
   if (argc != 1)
     error (_("You must provide one argument for $_isvoid."));
 
-  ret = value_type (argv[0])->code () == TYPE_CODE_VOID;
+  ret = argv[0]->type ()->code () == TYPE_CODE_VOID;
 
   return value_from_longest (builtin_type (gdbarch)->builtin_int, ret);
 }
@@ -4182,7 +4177,7 @@ creal_internal_fn (struct gdbarch *gdbarch,
     error (_("You must provide one argument for $_creal."));
 
   value *cval = argv[0];
-  type *ctype = check_typedef (value_type (cval));
+  type *ctype = check_typedef (cval->type ());
   if (ctype->code () != TYPE_CODE_COMPLEX)
     error (_("expected a complex number"));
   return value_real_part (cval);
@@ -4201,7 +4196,7 @@ cimag_internal_fn (struct gdbarch *gdbarch,
     error (_("You must provide one argument for $_cimag."));
 
   value *cval = argv[0];
-  type *ctype = check_typedef (value_type (cval));
+  type *ctype = check_typedef (cval->type ());
   if (ctype->code () != TYPE_CODE_COMPLEX)
     error (_("expected a complex number"));
   return value_imaginary_part (cval);

@@ -377,7 +377,7 @@ varobj_create (const char *objname,
 	     right type.  */
 	  struct value *type_only_value = evaluate_type (var->root->exp.get ());
 
-	  var->type = value_type (type_only_value);
+	  var->type = type_only_value->type ();
 	}
 
       if (value != NULL)
@@ -1370,7 +1370,7 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
     }
   var->print_value = print_value;
 
-  gdb_assert (var->value == nullptr || value_type (var->value.get ()));
+  gdb_assert (var->value == nullptr || var->value.get ()->type ());
 
   return changed;
 }
@@ -1550,7 +1550,7 @@ varobj_update (struct varobj **varp, bool is_explicit)
 	  if (update_type_if_necessary (v, newobj))
 	    r.type_changed = true;
 	  if (newobj)
-	    new_type = value_type (newobj);
+	    new_type = newobj->type ();
 	  else
 	    new_type = v->root->lang_ops->type_of_child (v->parent, v->index);
 
@@ -1886,7 +1886,7 @@ varobj_get_value_type (const struct varobj *var)
   struct type *type;
 
   if (var->value != nullptr)
-    type = value_type (var->value.get ());
+    type = var->value.get ()->type ();
   else
     type = var->type;
 
@@ -2098,7 +2098,7 @@ value_of_root (struct varobj **var_handle, bool *type_changed)
 	/* For root varobj-s, a NULL value indicates a scoping issue.
 	   So, nothing to do in terms of checking for mutations.  */
       }
-    else if (varobj_value_has_mutated (var, value, value_type (value)))
+    else if (varobj_value_has_mutated (var, value, value->type ()))
       {
 	/* The type has mutated, so the children are no longer valid.
 	   Just delete them, and tell our caller that the type has
@@ -2229,7 +2229,7 @@ varobj_value_get_print_value (struct value *value,
 
 			  thevalue = std::string (s.get ());
 			  len = thevalue.size ();
-			  gdbarch = value_type (value)->arch ();
+			  gdbarch = value->type ()->arch ();
 			  type = builtin_type (gdbarch)->builtin_char;
 
 			  if (!string_print)

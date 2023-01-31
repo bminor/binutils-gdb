@@ -400,7 +400,7 @@ static void
 tlb_value_read (struct value *val)
 {
   CORE_ADDR tlb;
-  struct type *type = check_typedef (value_type (val));
+  struct type *type = check_typedef (val->type ());
 
   if (!target_get_tib_address (inferior_ptid, &tlb))
     error (_("Unable to read tlb"));

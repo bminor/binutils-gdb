@@ -181,7 +181,7 @@ value_arg_coerce (struct gdbarch *gdbarch, struct value *arg,
 		  struct type *param_type, int is_prototyped)
 {
   const struct builtin_type *builtin = builtin_type (gdbarch);
-  struct type *arg_type = check_typedef (value_type (arg));
+  struct type *arg_type = check_typedef (arg->type ());
   struct type *type
     = param_type ? check_typedef (param_type) : arg_type;
 
@@ -278,7 +278,7 @@ find_function_addr (struct value *function,
 		    struct type **retval_type,
 		    struct type **function_type)
 {
-  struct type *ftype = check_typedef (value_type (function));
+  struct type *ftype = check_typedef (function->type ());
   struct gdbarch *gdbarch = ftype->arch ();
   struct type *value_type = NULL;
   /* Initialize it just to avoid a GCC false warning.  */
@@ -972,7 +972,7 @@ call_function_by_hand_dummy (struct value *function,
 	    else
 	      {
 		gdb_assert (sp <= lastval_addr);
-		sp = lastval_addr + value_type (lastval)->length ();
+		sp = lastval_addr + lastval->type ()->length ();
 	      }
 
 	    if (gdbarch_frame_align_p (gdbarch))

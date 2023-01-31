@@ -470,7 +470,7 @@ gdbscm_value_referenced_value (SCM self)
 
       struct value *res_val;
 
-      switch (check_typedef (value_type (value))->code ())
+      switch (check_typedef (value->type ())->code ())
 	{
 	case TYPE_CODE_PTR:
 	  res_val = value_ind (value);
@@ -548,7 +548,7 @@ gdbscm_value_type (SCM self)
   struct value *value = v_smob->value;
 
   if (SCM_UNBNDP (v_smob->type))
-    v_smob->type = tyscm_scm_from_type (value_type (value));
+    v_smob->type = tyscm_scm_from_type (value->type ());
 
   return v_smob->type;
 }
@@ -571,7 +571,7 @@ gdbscm_value_dynamic_type (SCM self)
     {
       scoped_value_mark free_values;
 
-      type = value_type (value);
+      type = value->type ();
       type = check_typedef (type);
 
       if (((type->code () == TYPE_CODE_PTR)
@@ -710,7 +710,7 @@ gdbscm_value_subscript (SCM self, SCM index_scm)
   value_smob *v_smob
     = vlscm_get_value_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct value *value = v_smob->value;
-  struct type *type = value_type (value);
+  struct type *type = value->type ();
 
   SCM_ASSERT (type != NULL, self, SCM_ARG2, FUNC_NAME);
 
@@ -732,7 +732,7 @@ gdbscm_value_subscript (SCM self, SCM index_scm)
 	 Check the value's type is something that can be accessed via
 	 a subscript.  */
       struct value *tmp = coerce_ref (value);
-      struct type *tmp_type = check_typedef (value_type (tmp));
+      struct type *tmp_type = check_typedef (tmp->type ());
       if (tmp_type->code () != TYPE_CODE_ARRAY
 	  && tmp_type->code () != TYPE_CODE_PTR)
 	error (_("Cannot subscript requested type"));
@@ -758,7 +758,7 @@ gdbscm_value_call (SCM self, SCM args)
   gdbscm_gdb_exception exc {};
   try
     {
-      ftype = check_typedef (value_type (function));
+      ftype = check_typedef (function->type ());
     }
   catch (const gdb_exception &except)
     {
@@ -821,7 +821,7 @@ gdbscm_value_to_bytevector (SCM self)
   const gdb_byte *contents = NULL;
   SCM bv;
 
-  type = value_type (value);
+  type = value->type ();
 
   gdbscm_gdb_exception exc {};
   try
@@ -866,7 +866,7 @@ gdbscm_value_to_bool (SCM self)
   struct type *type;
   LONGEST l = 0;
 
-  type = value_type (value);
+  type = value->type ();
 
   gdbscm_gdb_exception exc {};
   try
@@ -910,7 +910,7 @@ gdbscm_value_to_integer (SCM self)
   struct type *type;
   LONGEST l = 0;
 
-  type = value_type (value);
+  type = value->type ();
 
   gdbscm_gdb_exception exc {};
   try
@@ -958,7 +958,7 @@ gdbscm_value_to_real (SCM self)
   double d = 0;
   struct value *check = nullptr;
 
-  type = value_type (value);
+  type = value->type ();
 
   gdbscm_gdb_exception exc {};
   try
@@ -1162,7 +1162,7 @@ gdbscm_value_to_lazy_string (SCM self, SCM rest)
       struct type *type, *realtype;
       CORE_ADDR addr;
 
-      type = value_type (value);
+      type = value->type ();
       realtype = check_typedef (type);
 
       switch (realtype->code ())

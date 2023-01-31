@@ -864,7 +864,7 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int stack_offset = 4;
   int references_offset = 4;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct type *func_type = value_type (function);
+  struct type *func_type = function->type ();
   /* The first arg passed on stack.  Mostly the first 10 args are passed by
      registers.  */
   int first_arg_on_stack = 10;
@@ -895,7 +895,7 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Now make space on the stack for the args.  */
   for (argnum = 0; argnum < nargs; argnum++)
     {
-      int len = align_up (value_type (args[argnum])->length (), 4);
+      int len = align_up (args[argnum]->type ()->length (), 4);
       if (argnum >= 10 - argreg)
 	references_offset += len;
       stack_offset += len;
@@ -913,7 +913,7 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       const gdb_byte *val;
       struct value *arg = args[argnum];
-      struct type *arg_type = check_typedef (value_type (arg));
+      struct type *arg_type = check_typedef (arg->type ());
       int len = arg_type->length ();
       enum type_code typecode = arg_type->code ();
 

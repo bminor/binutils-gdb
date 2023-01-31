@@ -806,7 +806,7 @@ csky_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       struct type *arg_type;
       const gdb_byte *val;
 
-      arg_type = check_typedef (value_type (args[argnum]));
+      arg_type = check_typedef (args[argnum]->type ());
       len = arg_type->length ();
       val = value_contents (args[argnum]).data ();
 

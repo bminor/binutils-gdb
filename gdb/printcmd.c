@@ -294,7 +294,7 @@ print_formatted (struct value *val, int size,
 		 const struct value_print_options *options,
 		 struct ui_file *stream)
 {
-  struct type *type = check_typedef (value_type (val));
+  struct type *type = check_typedef (val->type ());
   int len = type->length ();
 
   if (VALUE_LVAL (val) == lval_memory)
@@ -306,7 +306,7 @@ print_formatted (struct value *val, int size,
 	{
 	case 's':
 	  {
-	    struct type *elttype = value_type (val);
+	    struct type *elttype = val->type ();
 
 	    next_address = (value_address (val)
 			    + val_print_string (elttype, NULL,
@@ -1249,7 +1249,7 @@ print_value (value *val, const value_print_options &opts)
 
   int histindex = record_latest_value (val);
 
-  annotate_value_history_begin (histindex, value_type (val));
+  annotate_value_history_begin (histindex, val->type ());
 
   gdb_printf ("$%d = ", histindex);
 
@@ -1266,16 +1266,16 @@ print_value (value *val, const value_print_options &opts)
 static bool
 should_validate_memtags (struct value *value)
 {
-  gdb_assert (value != nullptr && value_type (value) != nullptr);
+  gdb_assert (value != nullptr && value->type () != nullptr);
 
   if (!target_supports_memory_tagging ())
     return false;
 
-  enum type_code code = value_type (value)->code ();
+  enum type_code code = value->type ()->code ();
 
   /* Skip non-address values.  */
   if (code != TYPE_CODE_PTR
-      && !TYPE_IS_REFERENCE (value_type (value)))
+      && !TYPE_IS_REFERENCE (value->type ()))
     return false;
 
   /* OK, we have an address value.  Check we have a complete value we
@@ -1329,8 +1329,8 @@ print_command_1 (const char *args, int voidprint)
 
   struct value *val = process_print_command_args (args, &print_opts, voidprint);
 
-  if (voidprint || (val && value_type (val) &&
-		    value_type (val)->code () != TYPE_CODE_VOID))
+  if (voidprint || (val && val->type () &&
+		    val->type ()->code () != TYPE_CODE_VOID))
     {
       /* If memory tagging validation is on, check if the tag is valid.  */
       if (print_opts.memory_tag_violations)
@@ -1495,7 +1495,7 @@ output_command (const char *exp, int from_tty)
 
   val = evaluate_expression (expr.get ());
 
-  annotate_value_begin (value_type (val));
+  annotate_value_begin (val->type ());
 
   get_formatted_print_options (&opts, format);
   opts.raw = fmt.raw;
@@ -1899,11 +1899,11 @@ x_command (const char *exp, int from_tty)
       if (from_tty)
 	set_repeat_arguments ("");
       val = evaluate_expression (expr.get ());
-      if (TYPE_IS_REFERENCE (value_type (val)))
+      if (TYPE_IS_REFERENCE (val->type ()))
 	val = coerce_ref (val);
       /* In rvalue contexts, such as this, functions are coerced into
 	 pointers to functions.  This makes "x/i main" work.  */
-      if (value_type (val)->code () == TYPE_CODE_FUNC
+      if (val->type ()->code () == TYPE_CODE_FUNC
 	   && VALUE_LVAL (val) == lval_memory)
 	next_address = value_address (val);
       else
@@ -1934,7 +1934,7 @@ x_command (const char *exp, int from_tty)
       /* Make last address examined available to the user as $_.  Use
 	 the correct pointer type.  */
       struct type *pointer_type
-	= lookup_pointer_type (value_type (last_examine_value.get ()));
+	= lookup_pointer_type (last_examine_value.get ()->type ());
       set_internalvar (lookup_internalvar ("_"),
 		       value_from_pointer (pointer_type,
 					   last_examine_address));
@@ -2445,11 +2445,11 @@ printf_c_string (struct ui_file *stream, const char *format,
 {
   const gdb_byte *str;
 
-  if (value_type (value)->code () != TYPE_CODE_PTR
+  if (value->type ()->code () != TYPE_CODE_PTR
       && VALUE_LVAL (value) == lval_internalvar
-      && c_is_string_type_p (value_type (value)))
+      && c_is_string_type_p (value->type ()))
     {
-      size_t len = value_type (value)->length ();
+      size_t len = value->type ()->length ();
 
       /* Copy the internal var value to TEM_STR and append a terminating null
 	 character.  This protects against corrupted C-style strings that lack
@@ -2513,16 +2513,16 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
 {
   const gdb_byte *str;
   size_t len;
-  struct gdbarch *gdbarch = value_type (value)->arch ();
+  struct gdbarch *gdbarch = value->type ()->arch ();
   struct type *wctype = lookup_typename (current_language,
 					 "wchar_t", NULL, 0);
   int wcwidth = wctype->length ();
 
   if (VALUE_LVAL (value) == lval_internalvar
-      && c_is_string_type_p (value_type (value)))
+      && c_is_string_type_p (value->type ()))
     {
       str = value_contents (value).data ();
-      len = value_type (value)->length ();
+      len = value->type ()->length ();
     }
   else
     {
@@ -2580,7 +2580,7 @@ printf_floating (struct ui_file *stream, const char *format,
 		 struct value *value, enum argclass argclass)
 {
   /* Parameter data.  */
-  struct type *param_type = value_type (value);
+  struct type *param_type = value->type ();
   struct gdbarch *gdbarch = param_type->arch ();
 
   /* Determine target type corresponding to the format string.  */
@@ -2629,7 +2629,7 @@ printf_floating (struct ui_file *stream, const char *format,
   if (fmt_type->code () == TYPE_CODE_FLT)
     {
       param_type = float_type_from_length (param_type);
-      if (param_type != value_type (value))
+      if (param_type != value->type ())
 	value = value_from_contents (param_type,
 				     value_contents (value).data ());
     }
@@ -2788,13 +2788,13 @@ ui_printf (const char *arg, struct ui_file *stream)
 	    break;
 	  case wide_char_arg:
 	    {
-	      struct gdbarch *gdbarch = value_type (val_args[i])->arch ();
+	      struct gdbarch *gdbarch = val_args[i]->type ()->arch ();
 	      struct type *wctype = lookup_typename (current_language,
 						     "wchar_t", NULL, 0);
 	      struct type *valtype;
 	      const gdb_byte *bytes;
 
-	      valtype = value_type (val_args[i]);
+	      valtype = val_args[i]->type ();
 	      if (valtype->length () != wctype->length ()
 		  || valtype->code () != TYPE_CODE_INT)
 		error (_("expected wchar_t argument for %%lc"));

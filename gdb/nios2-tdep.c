@@ -1818,7 +1818,7 @@ nios2_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Now make space on the stack for the args.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    arg_space += align_up (value_type (args[argnum])->length (), 4);
+    arg_space += align_up (args[argnum]->type ()->length (), 4);
   sp -= arg_space;
 
   /* Initialize the register pointer.  */
@@ -1836,7 +1836,7 @@ nios2_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       const gdb_byte *val;
       struct value *arg = args[argnum];
-      struct type *arg_type = check_typedef (value_type (arg));
+      struct type *arg_type = check_typedef (arg->type ());
       int len = arg_type->length ();
 
       val = value_contents (arg).data ();

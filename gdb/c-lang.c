@@ -245,7 +245,7 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
 {
   int err, width;
   unsigned int fetchlimit;
-  struct type *type = check_typedef (value_type (value));
+  struct type *type = check_typedef (value->type ());
   struct type *element_type = type->target_type ();
   int req_length = *length;
   enum bfd_endian byte_order

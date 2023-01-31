@@ -476,7 +476,7 @@ generic_val_print_array (struct value *val,
 			 const struct
 			     generic_val_print_decorations *decorations)
 {
-  struct type *type = check_typedef (value_type (val));
+  struct type *type = check_typedef (val->type ());
   struct type *unresolved_elttype = type->target_type ();
   struct type *elttype = check_typedef (unresolved_elttype);
 
@@ -511,7 +511,7 @@ generic_value_print_ptr (struct value *val, struct ui_file *stream,
     value_print_scalar_formatted (val, options, 0, stream);
   else
     {
-      struct type *type = check_typedef (value_type (val));
+      struct type *type = check_typedef (val->type ());
       struct type *elttype = check_typedef (type->target_type ());
       const gdb_byte *valaddr = value_contents_for_printing (val).data ();
       CORE_ADDR addr = unpack_pointer (type, valaddr);
@@ -770,7 +770,7 @@ generic_value_print_bool
   else
     {
       const gdb_byte *valaddr = value_contents_for_printing (value).data ();
-      struct type *type = check_typedef (value_type (value));
+      struct type *type = check_typedef (value->type ());
       LONGEST val = unpack_long (type, valaddr);
       if (val == 0)
 	gdb_puts (decorations->false_name, stream);
@@ -810,7 +810,7 @@ generic_value_print_char (struct value *value, struct ui_file *stream,
     }
   else
     {
-      struct type *unresolved_type = value_type (value);
+      struct type *unresolved_type = value->type ();
       struct type *type = check_typedef (unresolved_type);
       const gdb_byte *valaddr = value_contents_for_printing (value).data ();
 
@@ -848,7 +848,7 @@ generic_val_print_fixed_point (struct value *val, struct ui_file *stream,
     value_print_scalar_formatted (val, options, 0, stream);
   else
     {
-      struct type *type = value_type (val);
+      struct type *type = val->type ();
 
       const gdb_byte *valaddr = value_contents_for_printing (val).data ();
       gdb_mpf f;
@@ -895,7 +895,7 @@ generic_value_print_memberptr
     {
       /* Member pointers are essentially specific to C++, and so if we
 	 encounter one, we should print it according to C++ rules.  */
-      struct type *type = check_typedef (value_type (val));
+      struct type *type = check_typedef (val->type ());
       const gdb_byte *valaddr = value_contents_for_printing (val).data ();
       cp_print_class_member (valaddr, type, stream, "&");
     }
@@ -910,7 +910,7 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
 		     const struct value_print_options *options,
 		     const struct generic_val_print_decorations *decorations)
 {
-  struct type *type = value_type (val);
+  struct type *type = val->type ();
 
   type = check_typedef (type);
 
@@ -1047,7 +1047,7 @@ common_val_print (struct value *value, struct ui_file *stream, int recurse,
     value_fetch_lazy (value);
 
   struct value_print_options local_opts = *options;
-  struct type *type = value_type (value);
+  struct type *type = value->type ();
   struct type *real_type = check_typedef (type);
 
   if (local_opts.prettyformat == Val_prettyformat_default)
@@ -1134,7 +1134,7 @@ value_check_printable (struct value *val, struct ui_file *stream,
 
   if (value_entirely_optimized_out (val))
     {
-      if (options->summary && !val_print_scalar_type_p (value_type (val)))
+      if (options->summary && !val_print_scalar_type_p (val->type ()))
 	gdb_printf (stream, "...");
       else
 	val_print_optimized_out (val, stream);
@@ -1143,14 +1143,14 @@ value_check_printable (struct value *val, struct ui_file *stream,
 
   if (value_entirely_unavailable (val))
     {
-      if (options->summary && !val_print_scalar_type_p (value_type (val)))
+      if (options->summary && !val_print_scalar_type_p (val->type ()))
 	gdb_printf (stream, "...");
       else
 	val_print_unavailable (stream);
       return 0;
     }
 
-  if (value_type (val)->code () == TYPE_CODE_INTERNAL_FUNCTION)
+  if (val->type ()->code () == TYPE_CODE_INTERNAL_FUNCTION)
     {
       fprintf_styled (stream, metadata_style.style (),
 		      _("<internal function %s>"),
@@ -1158,13 +1158,13 @@ value_check_printable (struct value *val, struct ui_file *stream,
       return 0;
     }
 
-  if (type_not_associated (value_type (val)))
+  if (type_not_associated (val->type ()))
     {
       val_print_not_associated (stream);
       return 0;
     }
 
-  if (type_not_allocated (value_type (val)))
+  if (type_not_allocated (val->type ()))
     {
       val_print_not_allocated (stream);
       return 0;
@@ -1282,7 +1282,7 @@ value_print_scalar_formatted (struct value *val,
 			      int size,
 			      struct ui_file *stream)
 {
-  struct type *type = check_typedef (value_type (val));
+  struct type *type = check_typedef (val->type ());
 
   gdb_assert (val != NULL);
 
@@ -1955,7 +1955,7 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
   unsigned int reps;
   LONGEST low_bound, high_bound;
 
-  struct type *type = check_typedef (value_type (val));
+  struct type *type = check_typedef (val->type ());
 
   elttype = type->target_type ();
   unsigned bit_stride = type->bit_stride ();

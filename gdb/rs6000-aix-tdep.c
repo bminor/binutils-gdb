@@ -350,7 +350,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       int reg_size = register_size (gdbarch, ii + 3);
 
       arg = args[argno];
-      type = check_typedef (value_type (arg));
+      type = check_typedef (arg->type ());
       len = type->length ();
 
       if (type->code () == TYPE_CODE_FLT)
@@ -447,7 +447,7 @@ ran_out_of_registers_for_arguments:
       for (; jj < nargs; ++jj)
 	{
 	  struct value *val = args[jj];
-	  space += ((value_type (val)->length ()) + 3) & -4;
+	  space += ((val->type ()->length ()) + 3) & -4;
 	}
 
       /* Add location required for the rest of the parameters.  */
@@ -480,7 +480,7 @@ ran_out_of_registers_for_arguments:
 	{
 
 	  arg = args[argno];
-	  type = check_typedef (value_type (arg));
+	  type = check_typedef (arg->type ());
 	  len = type->length ();
 
 

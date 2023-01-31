@@ -1422,7 +1422,7 @@ nds32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   ULONGEST regval;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   nds32_gdbarch_tdep *tdep = gdbarch_tdep<nds32_gdbarch_tdep> (gdbarch);
-  struct type *func_type = value_type (function);
+  struct type *func_type = function->type ();
   int abi_use_fpr = nds32_abi_use_fpr (tdep->elf_abi);
   int abi_split = nds32_abi_split (tdep->elf_abi);
 
@@ -1442,7 +1442,7 @@ nds32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Now make sure there's space on the stack */
   for (i = 0; i < nargs; i++)
     {
-      struct type *type = value_type (args[i]);
+      struct type *type = args[i]->type ();
       int align = type_align (type);
 
       /* If align is zero, it may be an empty struct.
@@ -1466,7 +1466,7 @@ nds32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       int calling_use_fpr;
       int use_fpr = 0;
 
-      type = value_type (args[i]);
+      type = args[i]->type ();
       calling_use_fpr = nds32_check_calling_use_fpr (type);
       len = type->length ();
       align = type_align (type);

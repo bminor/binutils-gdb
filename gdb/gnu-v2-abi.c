@@ -85,7 +85,7 @@ gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
 			struct type * type, int offset)
 {
   struct value *arg1 = *arg1p;
-  struct type *type1 = check_typedef (value_type (arg1));
+  struct type *type1 = check_typedef (arg1->type ());
   struct type *entry_type;
   /* First, get the virtual function table pointer.  That comes
      with a strange type, so cast it to type `pointer to long' (which
@@ -113,7 +113,7 @@ gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
       struct value *tmp = value_cast (context, value_addr (arg1));
 
       arg1 = value_ind (tmp);
-      type1 = check_typedef (value_type (arg1));
+      type1 = check_typedef (arg1->type ());
     }
 
   context = type1;
@@ -132,8 +132,8 @@ gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
 
   /* With older versions of g++, the vtbl field pointed to an array
      of structures.  Nowadays it points directly to the structure.  */
-  if (value_type (vtbl)->code () == TYPE_CODE_PTR
-      && value_type (vtbl)->target_type ()->code () == TYPE_CODE_ARRAY)
+  if (vtbl->type ()->code () == TYPE_CODE_PTR
+      && vtbl->type ()->target_type ()->code () == TYPE_CODE_ARRAY)
     {
       /* Handle the case where the vtbl field points to an
 	 array of structures.  */
@@ -153,7 +153,7 @@ gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
       entry = value_ind (vtbl);
     }
 
-  entry_type = check_typedef (value_type (entry));
+  entry_type = check_typedef (entry->type ());
 
   if (entry_type->code () == TYPE_CODE_STRUCT)
     {
@@ -203,7 +203,7 @@ gnuv2_value_rtti_type (struct value *v, int *full, LONGEST *top, int *using_enc)
     *using_enc = 0;
 
   /* Get declared type.  */
-  known_type = value_type (v);
+  known_type = v->type ();
   known_type = check_typedef (known_type);
   /* RTTI works only or class objects.  */
   if (known_type->code () != TYPE_CODE_STRUCT)

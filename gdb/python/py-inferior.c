@@ -715,7 +715,7 @@ infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
     {
       struct value *val = value_object_to_value (handle_obj);
       bytes = value_contents_all (val).data ();
-      bytes_len = value_type (val)->length ();
+      bytes_len = val->type ()->length ();
     }
   else
     {

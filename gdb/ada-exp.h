@@ -249,7 +249,7 @@ public:
 		   enum noside noside) override
   {
     value *arg1 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
-    value *arg2 = std::get<2> (m_storage)->evaluate (value_type (arg1),
+    value *arg2 = std::get<2> (m_storage)->evaluate (arg1->type (),
 						     exp, noside);
     return ada_equal_binop (expect_type, exp, noside, std::get<0> (m_storage),
 			    arg1, arg2);
@@ -275,7 +275,7 @@ public:
     value *lhs = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
     value *rhs = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
     value *result = eval_op_binary (expect_type, exp, noside, OP, lhs, rhs);
-    return value_cast (value_type (lhs), result);
+    return value_cast (lhs->type (), result);
   }
 
   enum exp_opcode opcode () const override

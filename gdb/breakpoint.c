@@ -1864,7 +1864,7 @@ extract_bitfield_from_watchpoint_value (struct watchpoint *w, struct value *val)
   if (val == NULL)
     return NULL;
 
-  bit_val = allocate_value (value_type (val));
+  bit_val = allocate_value (val->type ());
 
   unpack_value_bitfield (bit_val,
 			 w->val_bitpos,
@@ -2078,7 +2078,7 @@ update_watchpoint (struct watchpoint *b, bool reparse)
 	  if (VALUE_LVAL (v) == lval_memory
 	      && (v == val_chain[0] || ! value_lazy (v)))
 	    {
-	      struct type *vtype = check_typedef (value_type (v));
+	      struct type *vtype = check_typedef (v->type ());
 
 	      /* We only watch structs and arrays if user asked
 		 for it explicitly, never if they just happen to
@@ -2125,7 +2125,7 @@ update_watchpoint (struct watchpoint *b, bool reparse)
 		  for (tmp = &(b->loc); *tmp != NULL; tmp = &((*tmp)->next))
 		    ;
 		  *tmp = loc;
-		  loc->gdbarch = value_type (v)->arch ();
+		  loc->gdbarch = v->type ()->arch ();
 
 		  loc->pspace = frame_pspace;
 		  loc->address
@@ -2137,7 +2137,7 @@ update_watchpoint (struct watchpoint *b, bool reparse)
 		      loc->length = ((bitpos % 8) + bitsize + 7) / 8;
 		    }
 		  else
-		    loc->length = value_type (v)->length ();
+		    loc->length = v->type ()->length ();
 
 		  loc->watchpoint_type = type;
 		}
@@ -10317,7 +10317,7 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   w->cond_exp_valid_block = cond_exp_valid_block;
   if (just_location)
     {
-      struct type *t = value_type (val.get ());
+      struct type *t = val.get ()->type ();
       CORE_ADDR addr = value_as_address (val.get ());
 
       w->exp_string_reparse
@@ -10426,7 +10426,7 @@ can_use_hardware_watchpoint (const std::vector<value_ref_ptr> &vals)
 	    {
 	      /* Ahh, memory we actually used!  Check if we can cover
 		 it with hardware watchpoints.  */
-	      struct type *vtype = check_typedef (value_type (v));
+	      struct type *vtype = check_typedef (v->type ());
 
 	      /* We only watch structs and arrays if user asked for it
 		 explicitly, never if they just happen to appear in a
@@ -10441,7 +10441,7 @@ can_use_hardware_watchpoint (const std::vector<value_ref_ptr> &vals)
 
 		  len = (target_exact_watchpoints
 			 && is_scalar_type_recursive (vtype))?
-		    1 : value_type (v)->length ();
+		    1 : v->type ()->length ();
 
 		  num_regs = target_region_ok_for_hw_watchpoint (vaddr, len);
 		  if (!num_regs)

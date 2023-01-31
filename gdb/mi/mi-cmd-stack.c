@@ -505,10 +505,10 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 	  /* A scalar object that does not have all bits available is
 	     also considered unavailable, because all bits contribute
 	     to its representation.  */
-	  || (val_print_scalar_type_p (value_type (arg->val))
+	  || (val_print_scalar_type_p (arg->val->type ())
 	      && !value_bytes_available (arg->val,
 					 value_embedded_offset (arg->val),
-					 value_type (arg->val)->length ()))))
+					 arg->val->type ()->length ()))))
     return;
 
   gdb::optional<ui_out_emit_tuple> tuple_emitter;

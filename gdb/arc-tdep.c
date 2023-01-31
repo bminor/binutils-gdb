@@ -761,7 +761,7 @@ arc_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	 argument's size up to an integral number of words.  */
       for (int i = 0; i < nargs; i++)
 	{
-	  unsigned int len = value_type (args[i])->length ();
+	  unsigned int len = args[i]->type ()->length ();
 	  unsigned int space = align_up (len, 4);
 
 	  total_space += space;
@@ -776,7 +776,7 @@ arc_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       gdb_byte *data = memory_image;
       for (int i = 0; i < nargs; i++)
 	{
-	  unsigned int len = value_type (args[i])->length ();
+	  unsigned int len = args[i]->type ()->length ();
 	  unsigned int space = align_up (len, 4);
 
 	  memcpy (data, value_contents (args[i]).data (), (size_t) len);

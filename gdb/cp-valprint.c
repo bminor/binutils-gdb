@@ -129,7 +129,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
   int fields_seen = 0;
   static int last_set_recurse = -1;
 
-  struct type *type = check_typedef (value_type (val));
+  struct type *type = check_typedef (val->type ());
 
   if (recurse == 0)
     {
@@ -389,7 +389,7 @@ cp_print_value (struct value *val, struct ui_file *stream,
 		int recurse, const struct value_print_options *options,
 		struct type **dont_print_vb)
 {
-  struct type *type = check_typedef (value_type (val));
+  struct type *type = check_typedef (val->type ());
   CORE_ADDR address = value_address (val);
   struct type **last_dont_print
     = (struct type **) obstack_next_free (&dont_print_vb_obstack);
@@ -461,7 +461,7 @@ cp_print_value (struct value *val, struct ui_file *stream,
 		  base_val = value_from_contents_and_address (baseclass,
 							      buf.data (),
 							      address + boffset);
-		  baseclass = value_type (base_val);
+		  baseclass = base_val->type ();
 		  boffset = 0;
 		}
 	      else

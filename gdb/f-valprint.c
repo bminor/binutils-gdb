@@ -450,7 +450,7 @@ f_language::value_print_inner (struct value *val, struct ui_file *stream,
 			       int recurse,
 			       const struct value_print_options *options) const
 {
-  struct type *type = check_typedef (value_type (val));
+  struct type *type = check_typedef (val->type ());
   struct gdbarch *gdbarch = type->arch ();
   int printed_field = 0; /* Number of fields printed.  */
   struct type *elttype;

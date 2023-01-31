@@ -1712,7 +1712,7 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
       for (int i = 0; i < nargs; i++)
 	{
 	  struct value *arg = args[i];
-	  struct type *arg_type = check_typedef (value_type (arg));
+	  struct type *arg_type = check_typedef (arg->type ());
 	  gdb_printf (gdb_stdlog, "%2d: %s %3s ", i,
 		      host_address_to_string (arg),
 		      pulongest (arg_type->length ()));
@@ -1748,7 +1748,7 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
     {
       struct argument_info *info = &arg_info[i];
       struct value *arg = args[i];
-      struct type *arg_type = check_typedef (value_type (arg));
+      struct type *arg_type = check_typedef (arg->type ());
 
       switch (arg_type->code ())
 	{

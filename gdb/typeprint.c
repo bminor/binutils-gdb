@@ -515,7 +515,7 @@ whatis_exp (const char *exp, int show)
 	 any typedef level.  "ptype" always strips all levels of
 	 typedefs.  */
       val = evaluate_type (expr.get ());
-      type = value_type (val);
+      type = val->type ();
 
       if (show == -1 && expr->first_opcode () == OP_TYPE)
 	{
@@ -536,7 +536,7 @@ whatis_exp (const char *exp, int show)
   else
     {
       val = access_value_history (0);
-      type = value_type (val);
+      type = val->type ();
     }
 
   if (flags.print_offsets && is_dynamic_type (type))
@@ -712,7 +712,7 @@ maintenance_print_type (const char *type_name, int from_tty)
     {
       expression_up expr = parse_expression (type_name);
       struct value *val = evaluate_type (expr.get ());
-      struct type *type = value_type (val);
+      struct type *type = val->type ();
 
       if (type != nullptr)
 	recursive_dump_type (type, 0);

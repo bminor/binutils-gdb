@@ -897,7 +897,7 @@ sh_stack_allocsize (int nargs, struct value **args)
 {
   int stack_alloc = 0;
   while (nargs-- > 0)
-    stack_alloc += ((value_type (args[nargs])->length () + 3) & ~3);
+    stack_alloc += ((args[nargs]->type ()->length () + 3) & ~3);
   return stack_alloc;
 }
 
@@ -1030,7 +1030,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
   int argreg = ARG0_REGNUM;
   int flt_argreg = 0;
   int argnum;
-  struct type *func_type = value_type (function);
+  struct type *func_type = function->type ();
   struct type *type;
   CORE_ADDR regval;
   const gdb_byte *val;
@@ -1060,7 +1060,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
      in four registers available.  Loop thru args from first to last.  */
   for (argnum = 0; argnum < nargs; argnum++)
     {
-      type = value_type (args[argnum]);
+      type = args[argnum]->type ();
       len = type->length ();
       val = sh_justify_value_in_reg (gdbarch, args[argnum], len);
 
@@ -1172,7 +1172,7 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
   int stack_offset = 0;
   int argreg = ARG0_REGNUM;
   int argnum;
-  struct type *func_type = value_type (function);
+  struct type *func_type = function->type ();
   struct type *type;
   CORE_ADDR regval;
   const gdb_byte *val;
@@ -1198,7 +1198,7 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
      in four registers available.  Loop thru args from first to last.  */
   for (argnum = 0; argnum < nargs; argnum++)
     {
-      type = value_type (args[argnum]);
+      type = args[argnum]->type ();
       len = type->length ();
       val = sh_justify_value_in_reg (gdbarch, args[argnum], len);
 
@@ -1364,7 +1364,7 @@ sh_return_value_nofpu (struct gdbarch *gdbarch, struct value *function,
 		       struct type *type, struct regcache *regcache,
 		       gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  struct type *func_type = function ? value_type (function) : NULL;
+  struct type *func_type = function ? function->type () : NULL;
 
   if (sh_use_struct_convention_nofpu
 	(sh_is_renesas_calling_convention (func_type), type))
@@ -1381,7 +1381,7 @@ sh_return_value_fpu (struct gdbarch *gdbarch, struct value *function,
 		     struct type *type, struct regcache *regcache,
 		     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  struct type *func_type = function ? value_type (function) : NULL;
+  struct type *func_type = function ? function->type () : NULL;
 
   if (sh_use_struct_convention (
 	sh_is_renesas_calling_convention (func_type), type))

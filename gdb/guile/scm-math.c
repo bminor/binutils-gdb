@@ -109,7 +109,7 @@ vlscm_unop_gdbthrow (enum valscm_unary_opcode opcode, SCM x,
       res_val = arg1;
       break;
     case VALSCM_ABS:
-      if (value_less (arg1, value_zero (value_type (arg1), not_lval)))
+      if (value_less (arg1, value_zero (arg1->type (), not_lval)))
 	res_val = value_neg (arg1);
       else
 	res_val = arg1;
@@ -160,8 +160,8 @@ vlscm_binop_gdbthrow (enum valscm_binary_opcode opcode, SCM x, SCM y,
     {
     case VALSCM_ADD:
       {
-	struct type *ltype = value_type (arg1);
-	struct type *rtype = value_type (arg2);
+	struct type *ltype = arg1->type ();
+	struct type *rtype = arg2->type ();
 
 	ltype = check_typedef (ltype);
 	ltype = STRIP_REFERENCE (ltype);
@@ -180,8 +180,8 @@ vlscm_binop_gdbthrow (enum valscm_binary_opcode opcode, SCM x, SCM y,
       break;
     case VALSCM_SUB:
       {
-	struct type *ltype = value_type (arg1);
-	struct type *rtype = value_type (arg2);
+	struct type *ltype = arg1->type ();
+	struct type *rtype = arg2->type ();
 
 	ltype = check_typedef (ltype);
 	ltype = STRIP_REFERENCE (ltype);

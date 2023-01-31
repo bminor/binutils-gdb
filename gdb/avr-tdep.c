@@ -1298,7 +1298,7 @@ avr_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       int last_regnum;
       int j;
       struct value *arg = args[i];
-      struct type *type = check_typedef (value_type (arg));
+      struct type *type = check_typedef (arg->type ());
       const bfd_byte *contents = value_contents (arg).data ();
       int len = type->length ();
 

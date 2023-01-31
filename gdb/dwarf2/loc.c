@@ -1273,7 +1273,7 @@ dwarf_entry_parameter_to_value (struct call_site_parameter *parameter,
 static struct value *
 entry_data_value_coerce_ref (const struct value *value)
 {
-  struct type *checked_type = check_typedef (value_type (value));
+  struct type *checked_type = check_typedef (value->type ());
   struct value *target_val;
 
   if (!TYPE_IS_REFERENCE (checked_type))

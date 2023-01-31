@@ -1585,7 +1585,7 @@ operation::generate_ax (struct expression *exp,
       struct value *v = evaluate (nullptr, exp, EVAL_AVOID_SIDE_EFFECTS);
       ax_const_l (ax, value_as_long (v));
       value->kind = axs_rvalue;
-      value->type = check_typedef (value_type (v));
+      value->type = check_typedef (v->type ());
     }
   else
     {
@@ -1745,7 +1745,7 @@ repeat_operation::do_generate_ax (struct expression *exp,
   struct value *v
     = std::get<1> (m_storage)->evaluate (nullptr, exp,
 					 EVAL_AVOID_SIDE_EFFECTS);
-  if (value_type (v)->code () != TYPE_CODE_INT)
+  if (v->type ()->code () != TYPE_CODE_INT)
     error (_("Right operand of `@' must be an integer."));
   int length = value_as_long (v);
   if (length <= 0)
@@ -1862,7 +1862,7 @@ unop_memval_type_operation::do_generate_ax (struct expression *exp,
   struct value *val
     = std::get<0> (m_storage)->evaluate (nullptr, exp,
 					 EVAL_AVOID_SIDE_EFFECTS);
-  struct type *type = value_type (val);
+  struct type *type = val->type ();
 
   std::get<1> (m_storage)->generate_ax (exp, ax, value);
 
@@ -1980,7 +1980,7 @@ unop_cast_type_operation::do_generate_ax (struct expression *exp,
   struct value *val
     = std::get<0> (m_storage)->evaluate (nullptr, exp,
 					 EVAL_AVOID_SIDE_EFFECTS);
-  std::get<1> (m_storage)->generate_ax (exp, ax, value, value_type (val));
+  std::get<1> (m_storage)->generate_ax (exp, ax, value, val->type ());
 }
 
 void

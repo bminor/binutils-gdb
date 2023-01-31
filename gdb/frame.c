@@ -1202,9 +1202,9 @@ frame_register_unwind (frame_info_ptr next_frame, int regnum,
     {
       if (!*optimizedp && !*unavailablep)
 	memcpy (bufferp, value_contents_all (value).data (),
-		value_type (value)->length ());
+		value->type ()->length ());
       else
-	memset (bufferp, 0, value_type (value)->length ());
+	memset (bufferp, 0, value->type ()->length ());
     }
 
   /* Dispose of the new value.  This prevents watchpoints from
