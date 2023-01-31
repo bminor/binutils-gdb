@@ -139,7 +139,7 @@ proc test_python_helper {} {
 		    " instance_flags = 0," \
 		    " length = $decimal," \
 		    " main_type = $hex}"]
-    gdb_test -prompt $outer_prompt_re "print *val->type" $answer "pretty print type"
+    gdb_test -prompt $outer_prompt_re "print *val->m_type" $answer "pretty print type"
 
     set answer [multi_line \
 		    "$decimal = " \
@@ -149,7 +149,7 @@ proc test_python_helper {} {
 		    " owner = $hex \\(gdbarch\\)," \
 		    " target_type = 0x0," \
 		    " type_specific_field = TYPE_SPECIFIC_NONE}"]
-    gdb_test -prompt $outer_prompt_re "print *val->type->main_type" $answer "pretty print type->main_type"
+    gdb_test -prompt $outer_prompt_re "print *val->m_type->main_type" $answer "pretty print type->main_type"
 
     # Send the continue to the outer GDB, which resumes the inner GDB,
     # we then detect the prompt from the inner GDB, hence the use of
@@ -175,7 +175,7 @@ proc test_python_helper {} {
 		    " owner = $hex \\(objfile\\)," \
 		    " target_type = 0x0," \
 		    " int_stuff = { bit_size = $decimal, bit_offset = $decimal }}"]
-    gdb_test -prompt $outer_prompt_re "print *val->type->main_type" $answer "pretty print type->main_type for DWARF type"
+    gdb_test -prompt $outer_prompt_re "print *val->m_type->main_type" $answer "pretty print type->main_type for DWARF type"
 
     # Send the continue to the outer GDB, which resumes the inner GDB,
     # we then detect the prompt from the inner GDB, hence the use of
