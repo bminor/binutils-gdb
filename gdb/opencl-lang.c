@@ -215,9 +215,8 @@ lval_func_check_synthetic_pointer (const struct value *v,
       int comp_offset = (i == start) ? startrest : 0;
       int comp_length = (i == end) ? endrest : elsize;
 
-      if (!value_bits_synthetic_pointer (c->val,
-					 c->indices[i] * elsize + comp_offset,
-					 comp_length))
+      if (!c->val->bits_synthetic_pointer (c->indices[i] * elsize + comp_offset,
+					   comp_length))
 	return 0;
     }
 

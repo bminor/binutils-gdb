@@ -1365,15 +1365,13 @@ mark_value_bits_optimized_out (struct value *value,
 }
 
 int
-value_bits_synthetic_pointer (const struct value *value,
-			      LONGEST offset, LONGEST length)
+value::bits_synthetic_pointer (LONGEST offset, LONGEST length) const
 {
-  if (value->m_lval != lval_computed
-      || !value->m_location.computed.funcs->check_synthetic_pointer)
+  if (m_lval != lval_computed
+      || !m_location.computed.funcs->check_synthetic_pointer)
     return 0;
-  return value->m_location.computed.funcs->check_synthetic_pointer (value,
-								  offset,
-								  length);
+  return m_location.computed.funcs->check_synthetic_pointer (this, offset,
+							     length);
 }
 
 const struct lval_funcs *

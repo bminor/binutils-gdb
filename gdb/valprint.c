@@ -381,8 +381,8 @@ valprint_check_validity (struct ui_file *stream,
 	  return 0;
 	}
 
-      if (value_bits_synthetic_pointer (val, TARGET_CHAR_BIT * embedded_offset,
-					TARGET_CHAR_BIT * type->length ()))
+      if (val->bits_synthetic_pointer (TARGET_CHAR_BIT * embedded_offset,
+				       TARGET_CHAR_BIT * type->length ()))
 	{
 	  const int is_ref = type->code () == TYPE_CODE_REF;
 	  int ref_is_addressable = 0;
@@ -568,9 +568,8 @@ generic_val_print_ref (struct type *type,
   struct type *elttype = check_typedef (type->target_type ());
   struct value *deref_val = NULL;
   const int value_is_synthetic
-    = value_bits_synthetic_pointer (original_value,
-				    TARGET_CHAR_BIT * embedded_offset,
-				    TARGET_CHAR_BIT * type->length ());
+    = original_value->bits_synthetic_pointer (TARGET_CHAR_BIT * embedded_offset,
+					      TARGET_CHAR_BIT * type->length ());
   const int must_coerce_ref = ((options->addressprint && value_is_synthetic)
 			       || options->deref_ref);
   const int type_is_defined = elttype->code () != TYPE_CODE_UNDEF;

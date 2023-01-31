@@ -576,8 +576,8 @@ coerce_pieced_ref (const value *value)
 {
   struct type *type = check_typedef (value->type ());
 
-  if (value_bits_synthetic_pointer (value, value->embedded_offset (),
-				    TARGET_CHAR_BIT * type->length ()))
+  if (value->bits_synthetic_pointer (value->embedded_offset (),
+				     TARGET_CHAR_BIT * type->length ()))
     {
       const piece_closure *closure
 	= (piece_closure *) value->computed_closure ();

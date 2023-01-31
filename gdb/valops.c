@@ -1556,8 +1556,8 @@ value_addr (struct value *arg1)
 
   if (TYPE_IS_REFERENCE (type))
     {
-      if (value_bits_synthetic_pointer (arg1, arg1->embedded_offset (),
-	  TARGET_CHAR_BIT * type->length ()))
+      if (arg1->bits_synthetic_pointer (arg1->embedded_offset (),
+					TARGET_CHAR_BIT * type->length ()))
 	arg1 = coerce_ref (arg1);
       else
 	{

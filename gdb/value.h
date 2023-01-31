@@ -455,6 +455,11 @@ public:
      values.  */
   bool contents_eq (const struct value *val2) const;
 
+  /* Given a value, determine whether the bits starting at OFFSET and
+     extending for LENGTH bits are a synthetic pointer.  */
+
+  int bits_synthetic_pointer (LONGEST offset, LONGEST length) const;
+
 
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
@@ -861,12 +866,6 @@ extern struct value *coerce_ref (struct value *value);
    References are dereferenced.  */
 
 extern struct value *coerce_array (struct value *value);
-
-/* Given a value, determine whether the bits starting at OFFSET and
-   extending for LENGTH bits are a synthetic pointer.  */
-
-extern int value_bits_synthetic_pointer (const struct value *value,
-					 LONGEST offset, LONGEST length);
 
 /* Given a value, determine whether the contents bytes starting at
    OFFSET and extending for LENGTH bytes are available.  This returns
