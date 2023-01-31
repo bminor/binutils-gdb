@@ -177,7 +177,7 @@ value_bits_available (const struct value *value,
   /* Don't pretend we have anything available there in the history beyond
      the boundaries of the value recorded.  It's not like inferior memory
      where there is actual stuff underneath.  */
-  ULONGEST val_len = TARGET_CHAR_BIT * value_enclosing_type (value)->length ();
+  ULONGEST val_len = TARGET_CHAR_BIT * value->enclosing_type ()->length ();
   return !((value->m_in_history
 	    && (offset < 0 || offset + length > val_len))
 	   || ranges_contain (value->m_unavailable, offset, length));
@@ -240,7 +240,7 @@ value_entirely_covered_by_range_vector (struct value *value,
 
       if (t.offset == 0
 	  && t.length == (TARGET_CHAR_BIT
-			  * value_enclosing_type (value)->length ()))
+			  * value->enclosing_type ()->length ()))
 	return 1;
     }
 
@@ -725,8 +725,8 @@ value_contents_eq (const struct value *val1, LONGEST offset1,
 bool
 value_contents_eq (const struct value *val1, const struct value *val2)
 {
-  ULONGEST len1 = check_typedef (value_enclosing_type (val1))->length ();
-  ULONGEST len2 = check_typedef (value_enclosing_type (val2))->length ();
+  ULONGEST len1 = check_typedef (val1->enclosing_type ())->length ();
+  ULONGEST len2 = check_typedef (val2->enclosing_type ())->length ();
   if (len1 != len2)
     return false;
   return value_contents_eq (val1, 0, val2, 0, len1);
@@ -934,7 +934,7 @@ allocate_value_contents (struct value *val, bool check_size)
 {
   if (!val->m_contents)
     {
-      struct type *enclosing_type = value_enclosing_type (val);
+      struct type *enclosing_type = val->enclosing_type ();
       ULONGEST len = enclosing_type->length ();
 
       if (check_size)
@@ -1042,14 +1042,8 @@ value_contents_all_raw (struct value *value)
 {
   allocate_value_contents (value, true);
 
-  ULONGEST length = value_enclosing_type (value)->length ();
+  ULONGEST length = value->enclosing_type ()->length ();
   return gdb::make_array_view (value->m_contents.get (), length);
-}
-
-struct type *
-value_enclosing_type (const struct value *value)
-{
-  return value->m_enclosing_type;
 }
 
 /* Look at value.h for description.  */
@@ -1089,7 +1083,7 @@ value_actual_type (struct value *value, int resolve_simple_types,
 	{
 	  if (real_type_found)
 	    *real_type_found = 1;
-	  result = value_enclosing_type (value);
+	  result = value->enclosing_type ();
 	}
     }
 
@@ -1128,7 +1122,7 @@ value_contents_for_printing (struct value *value)
   if (value->m_lazy)
     value_fetch_lazy (value);
 
-  ULONGEST length = value_enclosing_type (value)->length ();
+  ULONGEST length = value->enclosing_type ()->length ();
   return gdb::make_array_view (value->m_contents.get (), length);
 }
 
@@ -1137,7 +1131,7 @@ value_contents_for_printing_const (const struct value *value)
 {
   gdb_assert (!value->m_lazy);
 
-  ULONGEST length = value_enclosing_type (value)->length ();
+  ULONGEST length = value->enclosing_type ()->length ();
   return gdb::make_array_view (value->m_contents.get (), length);
 }
 
@@ -1614,7 +1608,7 @@ value_release_to_mark (const struct value *mark)
 struct value *
 value_copy (const value *arg)
 {
-  struct type *encl_type = value_enclosing_type (arg);
+  struct type *encl_type = arg->enclosing_type ();
   struct value *val;
 
   val = allocate_value_lazy (encl_type);
@@ -1643,7 +1637,7 @@ value_copy (const value *arg)
     {
       ULONGEST length = val->m_limited_length;
       if (length == 0)
-	length = value_enclosing_type (val)->length ();
+	length = val->enclosing_type ()->length ();
 
       gdb_assert (arg->m_contents != nullptr);
       const auto &arg_view
@@ -1676,12 +1670,11 @@ struct value *
 make_cv_value (int cnst, int voltl, struct value *v)
 {
   struct type *val_type = v->type ();
-  struct type *m_enclosing_type = value_enclosing_type (v);
+  struct type *m_enclosing_type = v->enclosing_type ();
   struct value *cv_val = value_copy (v);
 
   cv_val->deprecated_set_type (make_cv_type (cnst, voltl, val_type, NULL));
-  set_value_enclosing_type (cv_val,
-			    make_cv_type (cnst, voltl, m_enclosing_type, NULL));
+  cv_val->set_enclosing_type (make_cv_type (cnst, voltl, m_enclosing_type, NULL));
 
   return cv_val;
 }
@@ -1693,7 +1686,7 @@ value_non_lval (struct value *arg)
 {
   if (VALUE_LVAL (arg) != not_lval)
     {
-      struct type *enc_type = value_enclosing_type (arg);
+      struct type *enc_type = arg->enclosing_type ();
       struct value *val = allocate_value (enc_type);
 
       copy (value_contents_all (arg), value_contents_all_raw (val));
@@ -1788,7 +1781,7 @@ set_value_component_location (struct value *component,
 int
 record_latest_value (struct value *val)
 {
-  struct type *enclosing_type = value_enclosing_type (val);
+  struct type *enclosing_type = val->enclosing_type ();
   struct type *type = val->type ();
 
   /* We don't want this value to have anything to do with the inferior anymore.
@@ -2972,17 +2965,16 @@ value_static_field (struct type *type, int fieldno)
    data.  */
 
 void
-set_value_enclosing_type (struct value *val, struct type *new_encl_type)
+value::set_enclosing_type (struct type *new_encl_type)
 {
-  if (new_encl_type->length () > value_enclosing_type (val)->length ())
+  if (new_encl_type->length () > enclosing_type ()->length ())
     {
       check_type_length_before_alloc (new_encl_type);
-      val->m_contents
-	.reset ((gdb_byte *) xrealloc (val->m_contents.release (),
-				       new_encl_type->length ()));
+      m_contents.reset ((gdb_byte *) xrealloc (m_contents.release (),
+					       new_encl_type->length ()));
     }
 
-  val->m_enclosing_type = new_encl_type;
+  m_enclosing_type = new_encl_type;
 }
 
 /* Given a value ARG1 (offset by OFFSET bytes)
@@ -3062,12 +3054,12 @@ value_primitive_field (struct value *arg1, LONGEST offset,
 	boffset = arg_type->field (fieldno).loc_bitpos () / 8;
 
       if (value_lazy (arg1))
-	v = allocate_value_lazy (value_enclosing_type (arg1));
+	v = allocate_value_lazy (arg1->enclosing_type ());
       else
 	{
-	  v = allocate_value (value_enclosing_type (arg1));
+	  v = allocate_value (arg1->enclosing_type ());
 	  value_contents_copy_raw (v, 0, arg1, 0,
-				   value_enclosing_type (arg1)->length ());
+				   arg1->enclosing_type ()->length ());
 	}
       v->m_type = type;
       v->m_offset = arg1->offset ();
@@ -3780,7 +3772,7 @@ readjust_indirect_value_type (struct value *value, struct type *enc_type,
   value->deprecated_set_type (resolved_original_target_type);
 
   /* Add embedding info.  */
-  set_value_enclosing_type (value, enc_type);
+  value->set_enclosing_type (enc_type);
   set_value_embedded_offset (value, value_pointed_to_offset (original_value));
 
   /* We may be pointing to an object of some derived type.  */
@@ -3801,7 +3793,7 @@ coerce_ref (struct value *arg)
   if (!TYPE_IS_REFERENCE (value_type_arg_tmp))
     return arg;
 
-  enc_type = check_typedef (value_enclosing_type (arg));
+  enc_type = check_typedef (arg->enclosing_type ());
   enc_type = enc_type->target_type ();
 
   CORE_ADDR addr = unpack_pointer (arg->type (), value_contents (arg).data ());
@@ -3913,7 +3905,7 @@ value_fetch_lazy_memory (struct value *val)
   gdb_assert (VALUE_LVAL (val) == lval_memory);
 
   CORE_ADDR addr = value_address (val);
-  struct type *type = check_typedef (value_enclosing_type (val));
+  struct type *type = check_typedef (val->enclosing_type ());
 
   /* Figure out how much we should copy from memory.  Usually, this is just
      the size of the type, but, for arrays, we might only be loading a

@@ -327,7 +327,7 @@ value_cast_pointers (struct type *type, struct value *arg2,
   /* No superclass found, just change the pointer type.  */
   arg2 = value_copy (arg2);
   arg2->deprecated_set_type (type);
-  set_value_enclosing_type (arg2, type);
+  arg2->set_enclosing_type (type);
   set_value_pointed_to_offset (arg2, 0);	/* pai: chk_val */
   return arg2;
 }
@@ -649,7 +649,7 @@ value_cast (struct type *type, struct value *arg2)
 
       arg2 = value_copy (arg2);
       arg2->deprecated_set_type (to_type);
-      set_value_enclosing_type (arg2, to_type);
+      arg2->set_enclosing_type (to_type);
       set_value_pointed_to_offset (arg2, 0);	/* pai: chk_val */
       return arg2;
     }
@@ -1352,7 +1352,7 @@ value_assign (struct value *toval, struct value *fromval)
      to by TOVAL retains its original dynamic type after assignment.  */
   if (type->code () == TYPE_CODE_PTR)
     {
-      set_value_enclosing_type (val, value_enclosing_type (fromval));
+      val->set_enclosing_type (fromval->enclosing_type ());
       set_value_pointed_to_offset (val, value_pointed_to_offset (fromval));
     }
 
@@ -1371,14 +1371,14 @@ value_repeat (struct value *arg1, int count)
   if (count < 1)
     error (_("Invalid number %d of repetitions."), count);
 
-  val = allocate_repeat_value (value_enclosing_type (arg1), count);
+  val = allocate_repeat_value (arg1->enclosing_type (), count);
 
   VALUE_LVAL (val) = lval_memory;
   set_value_address (val, value_address (arg1));
 
   read_value_memory (val, 0, value_stack (val), value_address (val),
 		     value_contents_all_raw (val).data (),
-		     type_length_units (value_enclosing_type (val)));
+		     type_length_units (val->enclosing_type ()));
 
   return val;
 }
@@ -1568,13 +1568,13 @@ value_addr (struct value *arg1)
 	  struct type *type_ptr
 	    = lookup_pointer_type (type->target_type ());
 	  struct type *enclosing_type
-	    = check_typedef (value_enclosing_type (arg1));
+	    = check_typedef (arg1->enclosing_type ());
 	  struct type *enclosing_type_ptr
 	    = lookup_pointer_type (enclosing_type->target_type ());
 
 	  arg2 = value_copy (arg1);
 	  arg2->deprecated_set_type (type_ptr);
-	  set_value_enclosing_type (arg2, enclosing_type_ptr);
+	  arg2->set_enclosing_type (enclosing_type_ptr);
 
 	  return arg2;
 	}
@@ -1596,8 +1596,7 @@ value_addr (struct value *arg1)
 
   /* This may be a pointer to a base subobject; so remember the
      full derived object's type ...  */
-  set_value_enclosing_type (arg2,
-			    lookup_pointer_type (value_enclosing_type (arg1)));
+  arg2->set_enclosing_type (lookup_pointer_type (arg1->enclosing_type ()));
   /* ... and also the relative position of the subobject in the full
      object.  */
   set_value_pointed_to_offset (arg2, value_embedded_offset (arg1));
@@ -1657,7 +1656,7 @@ value_ind (struct value *arg1)
 
       /* We may be pointing to something embedded in a larger object.
 	 Get the real type of the enclosing object.  */
-      enc_type = check_typedef (value_enclosing_type (arg1));
+      enc_type = check_typedef (arg1->enclosing_type ());
       enc_type = enc_type->target_type ();
 
       CORE_ADDR base_addr;
@@ -1710,17 +1709,17 @@ value_array (int lowbound, int highbound, struct value **elemvec)
     {
       error (_("bad array bounds (%d, %d)"), lowbound, highbound);
     }
-  typelength = type_length_units (value_enclosing_type (elemvec[0]));
+  typelength = type_length_units (elemvec[0]->enclosing_type ());
   for (idx = 1; idx < nelem; idx++)
     {
-      if (type_length_units (value_enclosing_type (elemvec[idx]))
+      if (type_length_units (elemvec[idx]->enclosing_type ())
 	  != typelength)
 	{
 	  error (_("array elements must all be the same size"));
 	}
     }
 
-  arraytype = lookup_array_range_type (value_enclosing_type (elemvec[0]),
+  arraytype = lookup_array_range_type (elemvec[0]->enclosing_type (),
 				       lowbound, highbound);
 
   if (!current_language->c_style_arrays_p ())
@@ -2095,7 +2094,7 @@ struct_field_searcher::search (struct value *arg1, LONGEST offset,
 
 	  boffset += value_embedded_offset (arg1) + offset;
 	  if (boffset < 0
-	      || boffset >= value_enclosing_type (arg1)->length ())
+	      || boffset >= arg1->enclosing_type ()->length ())
 	    {
 	      CORE_ADDR base_addr;
 
@@ -3944,14 +3943,14 @@ value_full_object (struct value *argp,
     real_type = value_rtti_type (argp, &full, &top, &using_enc);
 
   /* If no RTTI data, or if object is already complete, do nothing.  */
-  if (!real_type || real_type == value_enclosing_type (argp))
+  if (!real_type || real_type == argp->enclosing_type ())
     return argp;
 
   /* In a destructor we might see a real type that is a superclass of
      the object's type.  In this case it is better to leave the object
      as-is.  */
   if (full
-      && real_type->length () < value_enclosing_type (argp)->length ())
+      && real_type->length () < argp->enclosing_type ()->length ())
     return argp;
 
   /* If we have the full object, but for some reason the enclosing
@@ -3960,7 +3959,7 @@ value_full_object (struct value *argp,
   if (full)
     {
       argp = value_copy (argp);
-      set_value_enclosing_type (argp, real_type);
+      argp->set_enclosing_type (real_type);
       return argp;
     }
 

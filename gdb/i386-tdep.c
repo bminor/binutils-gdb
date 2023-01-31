@@ -2725,11 +2725,11 @@ i386_thiscall_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       for (i = thiscall ? 1 : 0; i < nargs; i++)
 	{
-	  int len = value_enclosing_type (args[i])->length ();
+	  int len = args[i]->enclosing_type ()->length ();
 
 	  if (write_pass)
 	    {
-	      if (i386_16_byte_align_p (value_enclosing_type (args[i])))
+	      if (i386_16_byte_align_p (args[i]->enclosing_type ()))
 		args_space_used = align_up (args_space_used, 16);
 
 	      write_memory (sp + args_space_used,
@@ -2745,7 +2745,7 @@ i386_thiscall_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    }
 	  else
 	    {
-	      if (i386_16_byte_align_p (value_enclosing_type (args[i])))
+	      if (i386_16_byte_align_p (args[i]->enclosing_type ()))
 		args_space = align_up (args_space, 16);
 	      args_space += align_up (len, 4);
 	    }

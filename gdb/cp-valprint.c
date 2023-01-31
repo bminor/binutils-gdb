@@ -763,7 +763,7 @@ test_print_fields (gdbarch *arch)
 
   value *val = allocate_value (the_struct);
   gdb_byte *contents = value_contents_writeable (val).data ();
-  store_unsigned_integer (contents, value_enclosing_type (val)->length (),
+  store_unsigned_integer (contents, val->enclosing_type ()->length (),
 			  gdbarch_byte_order (arch), 0xe9);
 
   string_file out;

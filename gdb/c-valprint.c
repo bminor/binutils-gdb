@@ -571,18 +571,18 @@ c_value_print (struct value *val, struct ui_file *stream,
 	     better to leave the object as-is.  */
 	  if (!(full
 		&& (real_type->length ()
-		    < value_enclosing_type (val)->length ())))
+		    < val->enclosing_type ()->length ())))
 	    val = value_cast (real_type, val);
 	  gdb_printf (stream, "(%s%s) ",
 		      real_type->name (),
 		      full ? "" : _(" [incomplete object]"));
 	}
-      else if (type != check_typedef (value_enclosing_type (val)))
+      else if (type != check_typedef (val->enclosing_type ()))
 	{
 	  /* No RTTI information, so let's do our best.  */
 	  gdb_printf (stream, "(%s ?) ",
-		      value_enclosing_type (val)->name ());
-	  val = value_cast (value_enclosing_type (val), val);
+		      val->enclosing_type ()->name ());
+	  val = value_cast (val->enclosing_type (), val);
 	}
     }
 

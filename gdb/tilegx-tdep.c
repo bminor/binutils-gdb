@@ -298,7 +298,7 @@ tilegx_push_dummy_call (struct gdbarch *gdbarch,
   for (i = 0; i < nargs && argreg <= TILEGX_R9_REGNUM; i++)
     {
       const gdb_byte *val;
-      typelen = value_enclosing_type (args[i])->length ();
+      typelen = args[i]->enclosing_type ()->length ();
 
       if (typelen > (TILEGX_R9_REGNUM - argreg + 1) * tilegx_reg_size)
 	break;
@@ -325,7 +325,7 @@ tilegx_push_dummy_call (struct gdbarch *gdbarch,
     {
       const gdb_byte *contents = value_contents (args[j]).data ();
 
-      typelen = value_enclosing_type (args[j])->length ();
+      typelen = args[j]->enclosing_type ()->length ();
       slacklen = align_up (typelen, 8) - typelen;
       gdb::byte_vector val (typelen + slacklen);
       memcpy (val.data (), contents, typelen);

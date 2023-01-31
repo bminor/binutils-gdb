@@ -183,7 +183,7 @@ i386_darwin_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       for (i = 0; i < nargs; i++)
 	{
-	  struct type *arg_type = value_enclosing_type (args[i]);
+	  struct type *arg_type = args[i]->enclosing_type ();
 
 	  if (i386_m128_p (arg_type) && num_m128 < 4)
 	    {

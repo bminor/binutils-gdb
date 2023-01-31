@@ -544,7 +544,7 @@ m68k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Push arguments in reverse order.  */
   for (i = nargs - 1; i >= 0; i--)
     {
-      struct type *value_type = value_enclosing_type (args[i]);
+      struct type *value_type = args[i]->enclosing_type ();
       int len = value_type->length ();
       int container_len = (len + 3) & ~3;
       int offset;
