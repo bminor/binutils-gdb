@@ -1216,7 +1216,7 @@ value_contents_copy_raw (struct value *dst, LONGEST dst_offset,
   gdb::array_view<const gdb_byte> src_contents
     = src->contents_all_raw ().slice (src_offset * unit_size,
 					  length * unit_size);
-  copy (src_contents, dst_contents);
+  gdb::copy (src_contents, dst_contents);
 
   /* Copy the meta-data, adjusted.  */
   src_bit_offset = src_offset * unit_size * HOST_CHAR_BIT;
@@ -1562,7 +1562,7 @@ value_copy (const value *arg)
       gdb::array_view<gdb_byte> val_contents
 	= val->contents_all_raw ().slice (0, length);
 
-      copy (arg_view, val_contents);
+      gdb::copy (arg_view, val_contents);
     }
 
   if (VALUE_LVAL (val) == lval_computed)
@@ -1604,7 +1604,7 @@ value_non_lval (struct value *arg)
       struct type *enc_type = arg->enclosing_type ();
       struct value *val = value::allocate (enc_type);
 
-      copy (arg->contents_all (), val->contents_all_raw ());
+      gdb::copy (arg->contents_all (), val->contents_all_raw ());
       val->m_type = arg->m_type;
       val->set_embedded_offset (arg->embedded_offset ());
       val->set_pointed_to_offset (arg->pointed_to_offset ());
