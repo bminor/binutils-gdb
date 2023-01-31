@@ -663,7 +663,7 @@ gdbpy_get_varobj_pretty_printer (struct value *value)
 {
   try
     {
-      value = value_copy (value);
+      value = value->copy ();
     }
   catch (const gdb_exception &except)
     {

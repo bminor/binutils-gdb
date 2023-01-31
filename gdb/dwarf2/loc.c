@@ -1538,7 +1538,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, frame_info_ptr frame,
   value_ref_ptr value_holder = value_ref_ptr::new_reference (retval);
   free_values.free_to_mark ();
 
-  return value_copy (retval);
+  return retval->copy ();
 }
 
 /* The exported interface to dwarf2_evaluate_loc_desc_full; it always

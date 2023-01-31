@@ -1900,13 +1900,13 @@ convert_value_from_python (PyObject *obj)
 				   builtin_type_pychar);
 	}
       else if (PyObject_TypeCheck (obj, &value_object_type))
-	value = value_copy (((value_object *) obj)->value);
+	value = ((value_object *) obj)->value->copy ();
       else if (gdbpy_is_lazy_string (obj))
 	{
 	  PyObject *result;
 
 	  result = PyObject_CallMethodObjArgs (obj, gdbpy_value_cst,  NULL);
-	  value = value_copy (((value_object *) result)->value);
+	  value = ((value_object *) result)->value->copy ();
 	}
       else
 	PyErr_Format (PyExc_TypeError,

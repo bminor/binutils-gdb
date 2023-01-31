@@ -165,6 +165,11 @@ public:
   /* Create a value of type TYPE that is zero, and return it.  */
   static struct value *zero (struct type *type, enum lval_type lv);
 
+  /* Return a copy of the value.  It contains the same contents, for
+     the same memory address, but it's a different block of
+     storage.  */
+  struct value *copy () const;
+
   ~value ();
 
   DISABLE_COPY_AND_ASSIGN (value);
@@ -1446,8 +1451,6 @@ extern const char *internalvar_name (const struct internalvar *var);
 extern void preserve_values (struct objfile *);
 
 /* From values.c */
-
-extern struct value *value_copy (const value *);
 
 extern struct value *value_non_lval (struct value *);
 

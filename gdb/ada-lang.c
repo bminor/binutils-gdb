@@ -1762,7 +1762,7 @@ thin_data_pntr (struct value *val)
   data_type = lookup_pointer_type (data_type);
 
   if (type->code () == TYPE_CODE_PTR)
-    return value_cast (data_type, value_copy (val));
+    return value_cast (data_type, val->copy ());
   else
     return value_from_longest (data_type, val->address ());
 }
@@ -2190,7 +2190,7 @@ ada_coerce_to_simple_array_ptr (struct value *arr)
 
       if (arrType == NULL)
 	return NULL;
-      return value_cast (arrType, value_copy (desc_data (arr)));
+      return value_cast (arrType, desc_data (arr)->copy ());
     }
   else if (ada_is_constrained_packed_array_type (arr->type ()))
     return decode_constrained_packed_array (arr);
@@ -2920,7 +2920,7 @@ ada_value_assign (struct value *toval, struct value *fromval)
 		    bits, is_big_endian);
       write_memory_with_notification (to_addr, buffer, len);
 
-      val = value_copy (toval);
+      val = toval->copy ();
       memcpy (val->contents_raw ().data (),
 	      fromval->contents ().data (),
 	      type->length ());
@@ -3073,7 +3073,7 @@ ada_value_ptr_subscript (struct value *arr, int arity, struct value **ind)
       if (type->code () != TYPE_CODE_ARRAY)
 	error (_("too many subscripts (%d expected)"), k);
       arr = value_cast (lookup_pointer_type (type->target_type ()),
-			value_copy (arr));
+			arr->copy ());
       get_discrete_bounds (type->index_type (), &lwb, &upb);
       arr = value_ptradd (arr, pos_atr (ind[k]) - lwb);
       type = type->target_type ();

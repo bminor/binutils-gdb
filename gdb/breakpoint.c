@@ -4416,7 +4416,7 @@ bpstat::bpstat (const bpstat &other)
     print_it (other.print_it)
 {
   if (other.old_val != NULL)
-    old_val = release_value (value_copy (other.old_val.get ()));
+    old_val = release_value (other.old_val.get ()->copy ());
 }
 
 /* Return a copy of a bpstat.  Like "bs1 = bs2" but all storage that

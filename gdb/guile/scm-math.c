@@ -744,7 +744,7 @@ vlscm_convert_typed_value_from_scheme (const char *func_name,
 	      value = NULL;
 	    }
 	  else
-	    value = value_copy (vlscm_scm_to_value (obj));
+	    value = vlscm_scm_to_value (obj)->copy ();
 	}
       else if (gdbscm_is_true (scm_bytevector_p (obj)))
 	{

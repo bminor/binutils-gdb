@@ -1028,7 +1028,7 @@ ada_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
   type = ada_check_typedef (resolve_dynamic_type (type, view, address));
   if (type != saved_type)
     {
-      val = value_copy (val);
+      val = val->copy ();
       val->deprecated_set_type (type);
     }
 

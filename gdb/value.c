@@ -1517,34 +1517,33 @@ value_release_to_mark (const struct value *mark)
   return result;
 }
 
-/* Return a copy of the value ARG.  It contains the same contents,
-   for the same memory address, but it's a different block of storage.  */
+/* See value.h.  */
 
 struct value *
-value_copy (const value *arg)
+value::copy () const
 {
-  struct type *encl_type = arg->enclosing_type ();
+  struct type *encl_type = enclosing_type ();
   struct value *val;
 
   val = value::allocate_lazy (encl_type);
-  val->m_type = arg->m_type;
-  VALUE_LVAL (val) = arg->m_lval;
-  val->m_location = arg->m_location;
-  val->m_offset = arg->m_offset;
-  val->m_bitpos = arg->m_bitpos;
-  val->m_bitsize = arg->m_bitsize;
-  val->m_lazy = arg->m_lazy;
-  val->m_embedded_offset = arg->embedded_offset ();
-  val->m_pointed_to_offset = arg->m_pointed_to_offset;
-  val->m_modifiable = arg->m_modifiable;
-  val->m_stack = arg->m_stack;
-  val->m_is_zero = arg->m_is_zero;
-  val->m_in_history = arg->m_in_history;
-  val->m_initialized = arg->m_initialized;
-  val->m_unavailable = arg->m_unavailable;
-  val->m_optimized_out = arg->m_optimized_out;
-  val->m_parent = arg->m_parent;
-  val->m_limited_length = arg->m_limited_length;
+  val->m_type = m_type;
+  VALUE_LVAL (val) = m_lval;
+  val->m_location = m_location;
+  val->m_offset = m_offset;
+  val->m_bitpos = m_bitpos;
+  val->m_bitsize = m_bitsize;
+  val->m_lazy = m_lazy;
+  val->m_embedded_offset = embedded_offset ();
+  val->m_pointed_to_offset = m_pointed_to_offset;
+  val->m_modifiable = m_modifiable;
+  val->m_stack = m_stack;
+  val->m_is_zero = m_is_zero;
+  val->m_in_history = m_in_history;
+  val->m_initialized = m_initialized;
+  val->m_unavailable = m_unavailable;
+  val->m_optimized_out = m_optimized_out;
+  val->m_parent = m_parent;
+  val->m_limited_length = m_limited_length;
 
   if (!val->lazy ()
       && !(value_entirely_optimized_out (val)
@@ -1554,9 +1553,9 @@ value_copy (const value *arg)
       if (length == 0)
 	length = val->enclosing_type ()->length ();
 
-      gdb_assert (arg->m_contents != nullptr);
+      gdb_assert (m_contents != nullptr);
       const auto &arg_view
-	= gdb::make_array_view (arg->m_contents.get (), length);
+	= gdb::make_array_view (m_contents.get (), length);
 
       val->allocate_contents (false);
       gdb::array_view<gdb_byte> val_contents
@@ -1586,7 +1585,7 @@ make_cv_value (int cnst, int voltl, struct value *v)
 {
   struct type *val_type = v->type ();
   struct type *m_enclosing_type = v->enclosing_type ();
-  struct value *cv_val = value_copy (v);
+  struct value *cv_val = v->copy ();
 
   cv_val->deprecated_set_type (make_cv_type (cnst, voltl, val_type, NULL));
   cv_val->set_enclosing_type (make_cv_type (cnst, voltl, m_enclosing_type, NULL));
@@ -1762,7 +1761,7 @@ access_value_history (int num)
 
   absnum--;
 
-  return value_copy (value_history[absnum].get ());
+  return value_history[absnum].get ()->copy ();
 }
 
 /* See value.h.  */
@@ -2088,7 +2087,7 @@ value_of_internalvar (struct gdbarch *gdbarch, struct internalvar *var)
       break;
 
     case INTERNALVAR_VALUE:
-      val = value_copy (var->u.value);
+      val = var->u.value->copy ();
       if (val->lazy ())
 	val->fetch_lazy ();
       break;
@@ -2223,7 +2222,7 @@ set_internalvar (struct internalvar *var, struct value *val)
 
     default:
       new_kind = INTERNALVAR_VALUE;
-      struct value *copy = value_copy (val);
+      struct value *copy = val->copy ();
       copy->m_modifiable = 1;
 
       /* Force the value to be fetched from the target now, to avoid problems
@@ -4173,7 +4172,7 @@ test_value_copy ()
   /* Verify that we can copy an entirely optimized out value, that may not have
      its contents allocated.  */
   value_ref_ptr val = release_value (value::allocate_optimized_out (type));
-  value_ref_ptr copy = release_value (value_copy (val.get ()));
+  value_ref_ptr copy = release_value (val.get ()->copy ());
 
   SELF_CHECK (value_entirely_optimized_out (val.get ()));
   SELF_CHECK (value_entirely_optimized_out (copy.get ()));

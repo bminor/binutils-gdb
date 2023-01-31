@@ -325,7 +325,7 @@ value_cast_pointers (struct type *type, struct value *arg2,
     }
 
   /* No superclass found, just change the pointer type.  */
-  arg2 = value_copy (arg2);
+  arg2 = arg2->copy ();
   arg2->deprecated_set_type (type);
   arg2->set_enclosing_type (type);
   arg2->set_pointed_to_offset (0);	/* pai: chk_val */
@@ -428,7 +428,7 @@ value_cast (struct type *type, struct value *arg2)
 	 value completely.  */
       if (arg2->type () != type)
 	{
-	  arg2 = value_copy (arg2);
+	  arg2 = arg2->copy ();
 	  arg2->deprecated_set_type (type);
 	}
       return arg2;
@@ -647,7 +647,7 @@ value_cast (struct type *type, struct value *arg2)
       if (code1 == TYPE_CODE_PTR && code2 == TYPE_CODE_PTR)
 	return value_cast_pointers (to_type, arg2, 0);
 
-      arg2 = value_copy (arg2);
+      arg2 = arg2->copy ();
       arg2->deprecated_set_type (to_type);
       arg2->set_enclosing_type (to_type);
       arg2->set_pointed_to_offset (0);	/* pai: chk_val */
@@ -1342,7 +1342,7 @@ value_assign (struct value *toval, struct value *fromval)
   /* The return value is a copy of TOVAL so it shares its location
      information, but its contents are updated from FROMVAL.  This
      implies the returned value is not lazy, even if TOVAL was.  */
-  val = value_copy (toval);
+  val = toval->copy ();
   val->set_lazy (0);
   copy (fromval->contents (), val->contents_raw ());
 
@@ -1572,7 +1572,7 @@ value_addr (struct value *arg1)
 	  struct type *enclosing_type_ptr
 	    = lookup_pointer_type (enclosing_type->target_type ());
 
-	  arg2 = value_copy (arg1);
+	  arg2 = arg1->copy ();
 	  arg2->deprecated_set_type (type_ptr);
 	  arg2->set_enclosing_type (enclosing_type_ptr);
 
@@ -2107,7 +2107,7 @@ struct_field_searcher::search (struct value *arg1, LONGEST offset,
 	    }
 	  else
 	    {
-	      v2 = value_copy (arg1);
+	      v2 = arg1->copy ();
 	      v2->deprecated_set_type (basetype);
 	      v2->set_embedded_offset (boffset);
 	    }
@@ -3958,7 +3958,7 @@ value_full_object (struct value *argp,
   /* pai: FIXME -- sounds iffy */
   if (full)
     {
-      argp = value_copy (argp);
+      argp = argp->copy ();
       argp->set_enclosing_type (real_type);
       return argp;
     }
