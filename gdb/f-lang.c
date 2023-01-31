@@ -458,7 +458,7 @@ fortran_associated (struct gdbarch *gdbarch, const language_defn *lang,
      looking the value of the pointer itself.  We make the assumption that
      a non-associated pointer will be set to 0.  This is probably true for
      most targets, but might not be true for everyone.  */
-  if (value_lval_const (target) != lval_memory
+  if (target->lval () != lval_memory
       || type_not_associated (pointer_type)
       || (TYPE_ASSOCIATED_PROP (pointer_type) == nullptr
 	  && pointer_type->code () == TYPE_CODE_PTR

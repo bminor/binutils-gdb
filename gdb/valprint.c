@@ -392,7 +392,7 @@ valprint_check_validity (struct ui_file *stream,
 	      const struct value *deref_val = coerce_ref_if_computed (val);
 
 	      if (deref_val != NULL)
-		ref_is_addressable = value_lval_const (deref_val) == lval_memory;
+		ref_is_addressable = deref_val->lval () == lval_memory;
 	    }
 
 	  if (!is_ref || !ref_is_addressable)
@@ -416,7 +416,7 @@ valprint_check_validity (struct ui_file *stream,
 void
 val_print_optimized_out (const struct value *val, struct ui_file *stream)
 {
-  if (val != NULL && value_lval_const (val) == lval_register)
+  if (val != NULL && val->lval () == lval_register)
     val_print_not_saved (stream);
   else
     fprintf_styled (stream, metadata_style.style (), _("<optimized out>"));
@@ -548,7 +548,7 @@ get_value_addr_contents (struct value *deref_val)
 {
   gdb_assert (deref_val != NULL);
 
-  if (value_lval_const (deref_val) == lval_memory)
+  if (deref_val->lval () == lval_memory)
     return value_contents_for_printing_const (value_addr (deref_val)).data ();
   else
     {

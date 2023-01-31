@@ -310,6 +310,12 @@ struct value
      uses.  */
   void *computed_closure () const;
 
+  enum lval_type *deprecated_lval_hack ()
+  { return &m_lval; }
+
+  enum lval_type lval () const
+  { return m_lval; }
+
 
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
@@ -667,11 +673,7 @@ extern void set_value_component_location (struct value *component,
    limited to just the first PIECE.  Expect further change.  */
 /* Type of value; either not an lval, or one of the various different
    possible kinds of lval.  */
-extern enum lval_type *deprecated_value_lval_hack (struct value *);
-#define VALUE_LVAL(val) (*deprecated_value_lval_hack (val))
-
-/* Like VALUE_LVAL, except the parameter can be const.  */
-extern enum lval_type value_lval_const (const struct value *value);
+#define VALUE_LVAL(val) (*((val)->deprecated_lval_hack ()))
 
 /* If lval == lval_memory, return the address in the inferior.  If
    lval == lval_register, return the byte offset into the registers

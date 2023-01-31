@@ -1398,18 +1398,6 @@ value::computed_closure () const
   return m_location.computed.closure;
 }
 
-enum lval_type *
-deprecated_value_lval_hack (struct value *value)
-{
-  return &value->m_lval;
-}
-
-enum lval_type
-value_lval_const (const struct value *value)
-{
-  return value->m_lval;
-}
-
 CORE_ADDR
 value_address (const struct value *value)
 {
@@ -3694,7 +3682,7 @@ coerce_ref_if_computed (const struct value *arg)
   if (!TYPE_IS_REFERENCE (check_typedef (arg->type ())))
     return NULL;
 
-  if (value_lval_const (arg) != lval_computed)
+  if (arg->lval () != lval_computed)
     return NULL;
 
   funcs = arg->computed_funcs ();
