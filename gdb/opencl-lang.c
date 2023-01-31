@@ -687,7 +687,7 @@ eval_opencl_assign (struct type *expect_type, struct expression *exp,
     return arg1;
 
   struct type *type1 = arg1->type ();
-  if (deprecated_value_modifiable (arg1)
+  if (arg1->deprecated_modifiable ()
       && VALUE_LVAL (arg1) != lval_internalvar)
     arg2 = opencl_value_cast (type1, arg2);
 

@@ -10452,7 +10452,7 @@ can_use_hardware_watchpoint (const std::vector<value_ref_ptr> &vals)
 	    }
 	}
       else if (VALUE_LVAL (v) != not_lval
-	       && deprecated_value_modifiable (v) == 0)
+	       && v->deprecated_modifiable () == 0)
 	return 0;	/* These are values from the history (e.g., $1).  */
       else if (VALUE_LVAL (v) == lval_register)
 	return 0;	/* Cannot watch a register with a HW watchpoint.  */

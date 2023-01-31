@@ -209,6 +209,12 @@ struct value
   void set_offset (LONGEST offset)
   { m_offset = offset; }
 
+  /* The comment from "struct value" reads: ``Is it modifiable?  Only
+     relevant if lval != not_lval.''.  Shouldn't the value instead be
+     not_lval and be done with it?  */
+  int deprecated_modifiable () const
+  { return m_modifiable; }
+
 
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
@@ -386,12 +392,6 @@ struct value
      loaded from the inferior.  */
   ULONGEST m_limited_length = 0;
 };
-
-/* The comment from "struct value" reads: ``Is it modifiable?  Only
-   relevant if lval != not_lval.''.  Shouldn't the value instead be
-   not_lval and be done with it?  */
-
-extern int deprecated_value_modifiable (const struct value *value);
 
 /* If a value represents a C++ object, then the `type' field gives the
    object's compile-time type.  If the object actually belongs to some

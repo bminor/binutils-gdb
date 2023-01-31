@@ -2455,7 +2455,7 @@ ppc_linux_nat_target::num_memory_accesses (const std::vector<value_ref_ptr>
       struct value *v = iter.get ();
 
       /* Constants and values from the history are fine.  */
-      if (VALUE_LVAL (v) == not_lval || deprecated_value_modifiable (v) == 0)
+      if (VALUE_LVAL (v) == not_lval || v->->deprecated_modifiable () == 0)
 	continue;
       else if (VALUE_LVAL (v) == lval_memory)
 	{

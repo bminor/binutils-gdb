@@ -1515,11 +1515,6 @@ deprecated_value_regnum_hack (struct value *value)
   return &value->m_location.reg.regnum;
 }
 
-int
-deprecated_value_modifiable (const struct value *value)
-{
-  return value->m_modifiable;
-}
 
 /* Return a mark in the value chain.  All values allocated after the
    mark is obtained (except for those released) are subject to being freed
