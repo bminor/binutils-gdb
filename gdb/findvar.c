@@ -769,7 +769,7 @@ language_defn::read_var_value (struct symbol *var,
     case LOC_OPTIMIZED_OUT:
       if (is_dynamic_type (type))
 	type = resolve_dynamic_type (type, {}, /* Unused address.  */ 0);
-      return allocate_optimized_out_value (type);
+      return value::allocate_optimized_out (type);
 
     default:
       error (_("Cannot look up value of a botched symbol `%s'."),

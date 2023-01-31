@@ -2855,7 +2855,7 @@ var_value_operation::evaluate_for_sizeof (struct expression *exp,
 	    return value_zero (size_type, not_lval);
 	  else if (is_dynamic_type (type->index_type ())
 		   && type->bounds ()->high.kind () == PROP_UNDEFINED)
-	    return allocate_optimized_out_value (size_type);
+	    return value::allocate_optimized_out (size_type);
 	}
     }
   return evaluate_subexp_for_sizeof_base (exp, type);

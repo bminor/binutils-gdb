@@ -1008,10 +1008,10 @@ value::allocate_computed (struct type *type,
   return v;
 }
 
-/* Allocate NOT_LVAL value for type TYPE being OPTIMIZED_OUT.  */
+/* See value.h.  */
 
 struct value *
-allocate_optimized_out_value (struct type *type)
+value::allocate_optimized_out (struct type *type)
 {
   struct value *retval = value::allocate_lazy (type);
 
@@ -2875,7 +2875,7 @@ value_static_field (struct type *type, int fieldno)
 	  struct type *field_type = type->field (fieldno).type ();
 
 	  if (!msym.minsym)
-	    retval = allocate_optimized_out_value (field_type);
+	    retval = value::allocate_optimized_out (field_type);
 	  else
 	    retval = value_at_lazy (field_type, msym.value_address ());
 	}
@@ -3224,7 +3224,7 @@ unpack_value_bitfield (struct value *dest_val,
      valid.  Optimized out/unavailable bits are read as zero, but
      that's OK, as they'll end up marked below.  If the VAL is
      wholly-invalid we may have skipped allocating its contents,
-     though.  See allocate_optimized_out_value.  */
+     though.  See value::allocate_optimized_out.  */
   if (valaddr != NULL)
     {
       LONGEST num;
@@ -4196,7 +4196,7 @@ test_value_copy ()
 
   /* Verify that we can copy an entirely optimized out value, that may not have
      its contents allocated.  */
-  value_ref_ptr val = release_value (allocate_optimized_out_value (type));
+  value_ref_ptr val = release_value (value::allocate_optimized_out (type));
   value_ref_ptr copy = release_value (value_copy (val.get ()));
 
   SELF_CHECK (value_entirely_optimized_out (val.get ()));

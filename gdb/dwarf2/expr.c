@@ -1044,7 +1044,7 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	  break;
 
 	case DWARF_VALUE_OPTIMIZED_OUT:
-	  retval = allocate_optimized_out_value (subobj_type);
+	  retval = value::allocate_optimized_out (subobj_type);
 	  break;
 
 	  /* DWARF_VALUE_IMPLICIT_POINTER was converted to a pieced

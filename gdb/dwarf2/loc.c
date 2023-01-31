@@ -1429,7 +1429,7 @@ fetch_const_value_from_synthetic_pointer (sect_offset die, LONGEST byte_offset,
 	invalid_synthetic_pointer ();
     }
   else
-    result = allocate_optimized_out_value (type->target_type ());
+    result = value::allocate_optimized_out (type->target_type ());
 
   return result;
 }
@@ -1497,7 +1497,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, frame_info_ptr frame,
     invalid_synthetic_pointer ();
 
   if (size == 0)
-    return allocate_optimized_out_value (subobj_type);
+    return value::allocate_optimized_out (subobj_type);
 
   dwarf_expr_context ctx (per_objfile, per_cu->addr_size ());
 
@@ -1524,7 +1524,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, frame_info_ptr frame,
 	  if (entry_values_debug)
 	    exception_print (gdb_stdout, ex);
 	  free_values.free_to_mark ();
-	  return allocate_optimized_out_value (subobj_type);
+	  return value::allocate_optimized_out (subobj_type);
 	}
       else
 	throw;
@@ -3906,11 +3906,11 @@ loclist_read_variable_at_entry (struct symbol *symbol, frame_info_ptr frame)
   CORE_ADDR pc;
 
   if (frame == NULL || !get_frame_func_if_available (frame, &pc))
-    return allocate_optimized_out_value (symbol->type ());
+    return value::allocate_optimized_out (symbol->type ());
 
   data = dwarf2_find_location_expression (dlbaton, &size, pc);
   if (data == NULL)
-    return allocate_optimized_out_value (symbol->type ());
+    return value::allocate_optimized_out (symbol->type ());
 
   return value_of_dwarf_block_entry (symbol->type (), frame, data, size);
 }

@@ -2239,7 +2239,7 @@ s390_unwind_pseudo_register (frame_info_ptr this_frame, int regnum)
 	return value_cast (type, val);
     }
 
-  return allocate_optimized_out_value (type);
+  return value::allocate_optimized_out (type);
 }
 
 /* Translate a .eh_frame register to DWARF register, or adjust a

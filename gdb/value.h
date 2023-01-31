@@ -175,6 +175,9 @@ public:
 					  const struct lval_funcs *funcs,
 					  void *closure);
 
+  /* Allocate NOT_LVAL value for type TYPE being OPTIMIZED_OUT.  */
+  static struct value *allocate_optimized_out (struct type *type);
+
   ~value ();
 
   DISABLE_COPY_AND_ASSIGN (value);
@@ -624,8 +627,6 @@ struct lval_funcs
      VALUE's closure.  */
   void (*free_closure) (struct value *v);
 };
-
-extern struct value *allocate_optimized_out_value (struct type *type);
 
 /* Throw an error complaining that the value has been optimized
    out.  */

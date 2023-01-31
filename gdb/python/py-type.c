@@ -1189,7 +1189,7 @@ typy_optimized_out (PyObject *self, PyObject *args)
 {
   struct type *type = ((type_object *) self)->type;
 
-  return value_to_value_object (allocate_optimized_out_value (type));
+  return value_to_value_object (value::allocate_optimized_out (type));
 }
 
 /* Return a gdb.Field object for the field named by the argument.  */

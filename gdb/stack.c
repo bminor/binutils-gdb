@@ -674,7 +674,7 @@ read_frame_arg (const frame_print_options &fp_opts,
 	  || (fp_opts.print_entry_values == print_entry_values_preferred
 	      && (!val || value_optimized_out (val))))
 	{
-	  entryval = allocate_optimized_out_value (sym->type ());
+	  entryval = value::allocate_optimized_out (sym->type ());
 	  entryval_error = NULL;
 	}
     }
