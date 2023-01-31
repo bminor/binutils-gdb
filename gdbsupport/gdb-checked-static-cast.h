@@ -54,6 +54,9 @@ checked_static_cast (V *v)
 		 "types must be related");
 
 #ifdef DEVELOPMENT
+  if (v == nullptr)
+    return nullptr;
+
   T result = dynamic_cast<T> (v);
   gdb_assert (result != nullptr);
 #else
