@@ -191,18 +191,7 @@ struct value
   {
   }
 
-  ~value ()
-  {
-    if (VALUE_LVAL (this) == lval_computed)
-      {
-	const struct lval_funcs *funcs = m_location.computed.funcs;
-
-	if (funcs->free_closure)
-	  funcs->free_closure (this);
-      }
-    else if (VALUE_LVAL (this) == lval_xcallable)
-      delete m_location.xm_worker;
-  }
+  ~value ();
 
   DISABLE_COPY_AND_ASSIGN (value);
 
@@ -382,6 +371,19 @@ struct value
      loaded from the inferior.  */
   ULONGEST m_limited_length = 0;
 };
+
+value::~value ()
+{
+  if (VALUE_LVAL (this) == lval_computed)
+    {
+      const struct lval_funcs *funcs = m_location.computed.funcs;
+
+      if (funcs->free_closure)
+	funcs->free_closure (this);
+    }
+  else if (VALUE_LVAL (this) == lval_xcallable)
+    delete m_location.xm_worker;
+}
 
 /* See value.h.  */
 
