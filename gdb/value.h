@@ -144,6 +144,9 @@ typedef gdb::ref_ptr<struct value, value_ref_policy> value_ref_ptr;
 
 struct value
 {
+private:
+
+  /* Values can only be created via "static constructors".  */
   explicit value (struct type *type_)
     : m_modifiable (1),
       m_lazy (1),
@@ -155,6 +158,13 @@ struct value
       m_enclosing_type (type_)
   {
   }
+
+public:
+
+  /* Allocate a lazy value for type TYPE.  Its actual content is
+     "lazily" allocated too: the content field of the return value is
+     NULL; it will be allocated when it is fetched from the target.  */
+  static struct value *allocate_lazy (struct type *type);
 
   ~value ();
 
@@ -1002,7 +1012,7 @@ extern struct value *read_var_value (struct symbol *var,
 				     frame_info_ptr frame);
 
 extern struct value *allocate_value (struct type *type);
-extern struct value *allocate_value_lazy (struct type *type);
+
 extern void value_contents_copy (struct value *dst, LONGEST dst_offset,
 				 struct value *src, LONGEST src_offset,
 				 LONGEST length);

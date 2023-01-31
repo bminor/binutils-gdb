@@ -294,7 +294,7 @@ value_of_register_lazy (frame_info_ptr frame, int regnum)
   /* We should have a valid next frame.  */
   gdb_assert (frame_id_p (get_frame_id (next_frame)));
 
-  reg_val = allocate_value_lazy (register_type (gdbarch, regnum));
+  reg_val = value::allocate_lazy (register_type (gdbarch, regnum));
   VALUE_LVAL (reg_val) = lval_register;
   VALUE_REGNUM (reg_val) = regnum;
   VALUE_NEXT_FRAME_ID (reg_val) = get_frame_id (next_frame);

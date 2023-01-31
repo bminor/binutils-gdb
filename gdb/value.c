@@ -744,12 +744,10 @@ static std::vector<value_ref_ptr> value_history;
 
 static std::vector<value_ref_ptr> all_values;
 
-/* Allocate a lazy value for type TYPE.  Its actual content is
-   "lazily" allocated too: the content field of the return value is
-   NULL; it will be allocated when it is fetched from the target.  */
+/* See value.h.  */
 
 struct value *
-allocate_value_lazy (struct type *type)
+value::allocate_lazy (struct type *type)
 {
   struct value *val;
 
@@ -963,7 +961,7 @@ allocate_value_contents (struct value *val, bool check_size)
 static struct value *
 allocate_value (struct type *type, bool check_size)
 {
-  struct value *val = allocate_value_lazy (type);
+  struct value *val = value::allocate_lazy (type);
 
   allocate_value_contents (val, check_size);
   val->m_lazy = 0;
@@ -1001,7 +999,7 @@ allocate_computed_value (struct type *type,
 			 const struct lval_funcs *funcs,
 			 void *closure)
 {
-  struct value *v = allocate_value_lazy (type);
+  struct value *v = value::allocate_lazy (type);
 
   VALUE_LVAL (v) = lval_computed;
   v->m_location.computed.funcs = funcs;
@@ -1015,7 +1013,7 @@ allocate_computed_value (struct type *type,
 struct value *
 allocate_optimized_out_value (struct type *type)
 {
-  struct value *retval = allocate_value_lazy (type);
+  struct value *retval = value::allocate_lazy (type);
 
   mark_value_bytes_optimized_out (retval, 0, type->length ());
   retval->set_lazy (0);
@@ -1545,7 +1543,7 @@ value_copy (const value *arg)
   struct type *encl_type = arg->enclosing_type ();
   struct value *val;
 
-  val = allocate_value_lazy (encl_type);
+  val = value::allocate_lazy (encl_type);
   val->m_type = arg->m_type;
   VALUE_LVAL (val) = arg->m_lval;
   val->m_location = arg->m_location;
@@ -2950,7 +2948,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
       LONGEST bitpos = arg_type->field (fieldno).loc_bitpos ();
       LONGEST container_bitsize = type->length () * 8;
 
-      v = allocate_value_lazy (type);
+      v = value::allocate_lazy (type);
       v->m_bitsize = TYPE_FIELD_BITSIZE (arg_type, fieldno);
       if ((bitpos % container_bitsize) + v->m_bitsize <= container_bitsize
 	  && type->length () <= (int) sizeof (LONGEST))
@@ -2988,7 +2986,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
 	boffset = arg_type->field (fieldno).loc_bitpos () / 8;
 
       if (arg1->lazy ())
-	v = allocate_value_lazy (arg1->enclosing_type ());
+	v = value::allocate_lazy (arg1->enclosing_type ());
       else
 	{
 	  v = allocate_value (arg1->enclosing_type ());
@@ -3008,7 +3006,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
       gdb_assert (PROP_CONST == TYPE_DATA_LOCATION_KIND (type));
       /* For dynamic data types defer memory allocation
 	 until we actual access the value.  */
-      v = allocate_value_lazy (type);
+      v = value::allocate_lazy (type);
     }
   else
     {
@@ -3021,7 +3019,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
 	value_fetch_lazy (arg1);
 
       if (arg1->lazy ())
-	v = allocate_value_lazy (type);
+	v = value::allocate_lazy (type);
       else
 	{
 	  v = allocate_value (type);
@@ -3426,7 +3424,7 @@ pack_unsigned_long (gdb_byte *buf, struct type *type, ULONGEST num)
 struct value *
 value_zero (struct type *type, enum lval_type lv)
 {
-  struct value *val = allocate_value_lazy (type);
+  struct value *val = value::allocate_lazy (type);
 
   VALUE_LVAL (val) = (lv == lval_computed ? not_lval : lv);
   val->m_is_zero = true;
@@ -3500,7 +3498,7 @@ value_from_contents_and_address_unresolved (struct type *type,
   struct value *v;
 
   if (valaddr == NULL)
-    v = allocate_value_lazy (type);
+    v = value::allocate_lazy (type);
   else
     v = value_from_contents (type, valaddr);
   VALUE_LVAL (v) = lval_memory;
@@ -3526,7 +3524,7 @@ value_from_contents_and_address (struct type *type,
   struct value *v;
 
   if (valaddr == NULL)
-    v = allocate_value_lazy (resolved_type);
+    v = value::allocate_lazy (resolved_type);
   else
     v = value_from_contents (resolved_type, valaddr);
   if (TYPE_DATA_LOCATION (resolved_type_no_typedef) != NULL
@@ -3622,7 +3620,7 @@ value_from_component (struct value *whole, struct type *type, LONGEST offset)
   struct value *v;
 
   if (VALUE_LVAL (whole) == lval_memory && whole->lazy ())
-    v = allocate_value_lazy (type);
+    v = value::allocate_lazy (type);
   else
     {
       v = allocate_value (type);

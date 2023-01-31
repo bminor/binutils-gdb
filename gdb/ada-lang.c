@@ -561,7 +561,7 @@ coerce_unspec_val_to_type (struct value *val, struct type *type)
 	       /* Be careful not to make a lazy not_lval value.  */
 	       || (VALUE_LVAL (val) != not_lval
 		   && type->length () > val->type ()->length ()))
-	result = allocate_value_lazy (type);
+	result = value::allocate_lazy (type);
       else
 	{
 	  result = allocate_value (type);

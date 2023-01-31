@@ -4079,7 +4079,7 @@ value_slice (struct value *array, int lowbound, int length)
     slice_type->set_code (array_type->code ());
 
     if (VALUE_LVAL (array) == lval_memory && array->lazy ())
-      slice = allocate_value_lazy (slice_type);
+      slice = value::allocate_lazy (slice_type);
     else
       {
 	slice = allocate_value (slice_type);
