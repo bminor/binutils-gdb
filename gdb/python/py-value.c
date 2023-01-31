@@ -81,7 +81,7 @@ static void
 valpy_clear_value (value_object *self)
 {
   /* Indicate we are no longer interested in the value object.  */
-  value_decref (self->value);
+  self->value->decref ();
   self->value = nullptr;
 
   Py_CLEAR (self->address);
@@ -1806,7 +1806,7 @@ value_to_value_object_no_release (struct value *val)
   val_obj = PyObject_New (value_object, &value_object_type);
   if (val_obj != NULL)
     {
-      value_incref (val);
+      val->incref ();
       val_obj->value = val;
       val_obj->next = nullptr;
       val_obj->prev = nullptr;

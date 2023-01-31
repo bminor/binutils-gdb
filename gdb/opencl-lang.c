@@ -110,7 +110,7 @@ allocate_lval_closure (int *indices, int n, struct value *val)
   c->n = n;
   c->indices = XCNEWVEC (int, n);
   memcpy (c->indices, indices, n * sizeof (int));
-  value_incref (val); /* Increment the reference counter of the value.  */
+  val->incref (); /* Increment the reference counter of the value.  */
   c->val = val;
 
   return c;
@@ -242,7 +242,7 @@ lval_func_free_closure (struct value *v)
 
   if (c->refc == 0)
     {
-      value_decref (c->val); /* Decrement the reference counter of the value.  */
+      c->val->decref (); /* Decrement the reference counter of the value.  */
       xfree (c->indices);
       xfree (c);
     }

@@ -1447,28 +1447,17 @@ value_mark (void)
   return all_values.back ().get ();
 }
 
-/* See value.h.  */
-
-void
-value_incref (struct value *val)
-{
-  val->m_reference_count++;
-}
-
 /* Release a reference to VAL, which was acquired with value_incref.
    This function is also called to deallocate values from the value
    chain.  */
 
 void
-value_decref (struct value *val)
+value::decref ()
 {
-  if (val != nullptr)
-    {
-      gdb_assert (val->m_reference_count > 0);
-      val->m_reference_count--;
-      if (val->m_reference_count == 0)
-	delete val;
-    }
+  gdb_assert (m_reference_count > 0);
+  m_reference_count--;
+  if (m_reference_count == 0)
+    delete this;
 }
 
 /* Free all values allocated since MARK was obtained by value_mark
@@ -2309,7 +2298,7 @@ clear_internalvar (struct internalvar *var)
   switch (var->kind)
     {
     case INTERNALVAR_VALUE:
-      value_decref (var->u.value);
+      var->u.value->decref ();
       break;
 
     case INTERNALVAR_STRING:

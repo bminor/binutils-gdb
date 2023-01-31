@@ -1280,7 +1280,7 @@ entry_data_value_coerce_ref (const struct value *value)
     return NULL;
 
   target_val = (struct value *) value->computed_closure ();
-  value_incref (target_val);
+  target_val->incref ();
   return target_val;
 }
 
@@ -1291,7 +1291,7 @@ entry_data_value_copy_closure (const struct value *v)
 {
   struct value *target_val = (struct value *) v->computed_closure ();
 
-  value_incref (target_val);
+  target_val->incref ();
   return target_val;
 }
 
@@ -1302,7 +1302,7 @@ entry_data_value_free_closure (struct value *v)
 {
   struct value *target_val = (struct value *) v->computed_closure ();
 
-  value_decref (target_val);
+  target_val->decref ();
 }
 
 /* Vector for methods for an entry value reference where the referenced value

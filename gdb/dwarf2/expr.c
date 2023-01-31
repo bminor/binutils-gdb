@@ -128,7 +128,7 @@ allocate_piece_closure (dwarf2_per_cu_data *per_cu,
 
   for (dwarf_expr_piece &piece : c->pieces)
     if (piece.location == DWARF_VALUE_STACK)
-      value_incref (piece.v.value);
+      piece.v.value->incref ();
 
   return c;
 }
@@ -620,7 +620,7 @@ free_pieced_value_closure (value *v)
     {
       for (dwarf_expr_piece &p : c->pieces)
 	if (p.location == DWARF_VALUE_STACK)
-	  value_decref (p.v.value);
+	  p.v.value->decref ();
 
       delete c;
     }

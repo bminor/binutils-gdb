@@ -111,15 +111,6 @@ struct range
   }
 };
 
-/* Increase VAL's reference count.  */
-
-extern void value_incref (struct value *val);
-
-/* Decrease VAL's reference count.  When the reference count drops to
-   0, VAL will be freed.  */
-
-extern void value_decref (struct value *val);
-
 /* A policy class to interface gdb::ref_ptr with struct value.  */
 
 struct value_ref_policy
@@ -453,6 +444,14 @@ public:
 
   int bits_synthetic_pointer (LONGEST offset, LONGEST length) const;
 
+  /* Increase this value's reference count.  */
+  void incref ()
+  { ++m_reference_count; }
+
+  /* Decrease this value's reference count.  When the reference count
+     drops to 0, it will be freed.  */
+  void decref ();
+
 
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
@@ -673,13 +672,13 @@ private:
 inline void
 value_ref_policy::incref (struct value *ptr)
 {
-  value_incref (ptr);
+  ptr->incref ();
 }
 
 inline void
 value_ref_policy::decref (struct value *ptr)
 {
-  value_decref (ptr);
+  ptr->decref ();
 }
 
 /* Returns value_type or value_enclosing_type depending on
