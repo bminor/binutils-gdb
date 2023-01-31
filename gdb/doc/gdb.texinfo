@@ -26140,6 +26140,227 @@ but the lengths of the @code{z} and @code{p} registers will not change.  This
 is a known limitation of @value{GDBN} and does not affect the execution of the
 target process.
 
+For SVE, the following definitions are used throughout @value{GDBN}'s source
+code and in this document:
+
+@itemize
+
+@item
+@var{vl}: The vector length, in bytes.  It defines the size of each @code{Z}
+register.
+@anchor{vl}
+@cindex vl
+
+@item
+@var{vq}: The number of 128 bit units in @var{vl}.  This is mostly used
+internally by @value{GDBN} and the Linux Kernel.
+@anchor{vq}
+@cindex vq
+
+@item
+@var{vg}: The number of 64 bit units in @var{vl}.  This is mostly used
+internally by @value{GDBN} and the Linux Kernel.
+@anchor{vg}
+@cindex vg
+
+@end itemize
+
+@subsubsection AArch64 SME.
+@anchor{AArch64 SME}
+@cindex SME
+@cindex AArch64 SME
+@cindex Scalable Matrix Extension
+
+The Scalable Matrix Extension (@url{https://community.arm.com/arm-community-blogs/b/architectures-and-processors-blog/posts/scalable-matrix-extension-armv9-a-architecture, @acronym{SME}})
+is an AArch64 architecture extension that expands on the concept of the
+Scalable Vector Extension (@url{https://developer.arm.com/documentation/101726/4-0/Learn-about-the-Scalable-Vector-Extension--SVE-/What-is-the-Scalable-Vector-Extension-, @acronym{SVE}})
+by providing a 2-dimensional register @code{ZA}, which is a square
+matrix of variable size, just like SVE provides a group of vector registers of
+variable size.
+
+Similarly to SVE, where the size of each @code{Z} register is directly related
+to the vector length (@var{vl} for short), the @acronym{SME} @code{ZA} matrix
+register's size is directly related to the streaming vector length
+(@var{svl} for short).  @xref{vl}.  @xref{svl}.
+
+The @code{ZA} register state can be either active or inactive, if it is not in
+use.
+
+@acronym{SME} also introduces a new execution mode called streaming
+@acronym{SVE} mode (streaming mode for short).  When streaming mode is
+enabled, the program supports execution of @acronym{SVE2} instructions and the
+@acronym{SVE} registers will have vector length @var{svl}.  When streaming
+mode is disabled, the SVE registers have vector length @var{vl}.
+
+For more information about @acronym{SME} and @acronym{SVE}, please refer to
+official @url{https://developer.arm.com/documentation/ddi0487/latest,
+architecture documentation}.
+
+The following definitions are used throughout @value{GDBN}'s source code and
+in this document:
+
+@itemize
+
+@item
+@var{svl}: The streaming vector length, in bytes.  It defines the size of each
+dimension of the 2-dimensional square @code{ZA} matrix.  The total size of
+@code{ZA} is therefore @var{svl} by @var{svl}.
+
+When streaming mode is enabled, it defines the size of the @acronym{SVE}
+registers as well.
+@anchor{svl}
+@cindex svl
+
+@item
+@var{svq}: The number of 128 bit units in @var{svl}, also known as streaming
+vector granule.  This is mostly used internally by @value{GDBN} and the Linux
+Kernel.
+@anchor{svq}
+@cindex svq
+
+@item
+@var{svg}: The number of 64 bit units in @var{svl}.  This is mostly used
+internally by @value{GDBN} and the Linux Kernel.
+@anchor{svg}
+@cindex svg
+
+@end itemize
+
+When @value{GDBN} is debugging the AArch64 architecture, if the Scalable Matrix
+Extension (@acronym{SME}) is present, then @value{GDBN} will make the @code{ZA}
+register available.  @value{GDBN} will also make the @code{SVG} register and
+@code{SVCR} pseudo-register available.
+
+The @code{ZA} register is a 2-dimensional square @var{svl} by @var{svl}
+matrix of bytes.  To simplify the representation and access to the @code{ZA}
+register in @value{GDBN}, it is defined as a vector of
+@var{svl}x@var{svl} bytes.
+
+If the user wants to index the @code{ZA} register as a matrix, it is possible
+to reference @code{ZA} as @code{ZA[@var{i}][@var{j}]}, where @var{i} is the
+row number and @var{j} is the column number.
+
+The @code{SVG} register always contains the streaming vector granule
+(@var{svg}) for the current thread.  From the value of register @code{SVG} we
+can easily derive the @var{svl} value.
+
+@anchor{aarch64 sme svcr}
+The @code{SVCR} pseudo-register (streaming vector control register) is a status
+register that holds two state bits: @sc{sm} in bit 0 and @sc{za} in bit 1.
+
+If the @sc{sm} bit is 1, it means the current thread is in streaming
+mode, and the @acronym{SVE} registers will use @var{svl} for their sizes.  If
+the @sc{sm} bit is 0, the current thread is not in streaming mode, and the
+@acronym{SVE} registers will use @var{vl} for their sizes.  @xref{vl}.
+
+If the @sc{za} bit is 1, it means the @code{ZA} register is being used and
+has meaningful contents.  If the @sc{za} bit is 0, the @code{ZA} register is
+unavailable and its contents are undefined.
+
+For convenience and simplicity, if the @sc{za} bit is 0, the @code{ZA}
+register and all of its pseudo-registers will read as zero.
+
+If @var{svl} changes during the execution of a program, then the @code{ZA}
+register size and the bits in the @code{SVCR} pseudo-register will be updated
+to reflect it.
+
+It is possible for users to change @var{svl} during the execution of a
+program by modifying the @code{SVG} register value.
+
+Whenever the @code{SVG} register is modified with a new value, the
+following will be observed:
+
+@itemize
+
+@item The @sc{za} and @sc{sm} bits will be cleared in the @code{SVCR}
+pseudo-register.
+
+@item The @code{ZA} register will have a new size and its state will be
+cleared, forcing its contents and the contents of all of its pseudo-registers
+back to zero.
+
+@item If the @sc{sm} bit was 1, the @acronym{SVE} registers will be reset to
+having their sizes based on @var{vl} as opposed to @var{svl}.  If the
+@sc{sm} bit was 0 prior to modifying the @code{SVG} register, there will be no
+observable effect on the @acronym{SVE} registers.
+
+@end itemize
+
+The possible values for the @code{SVG} register are 2, 4, 8, 16, 32.  These
+numbers correspond to streaming vector length (@var{svl}) values of 16
+bytes, 32 bytes, 64 bytes, 128 bytes and 256 bytes respectively.
+
+The minimum size of the @code{ZA} register is 16 x 16 (256) bytes, and the
+maximum size is 256 x 256 (65536) bytes.  In streaming mode, with bit @sc{sm}
+set, the size of the @code{ZA} register is the size of all the SVE @code{Z}
+registers combined.
+
+The @code{ZA} register can also be accessed using tiles and tile slices.
+
+Tile pseudo-registers are square, 2-dimensional sub-arrays of elements within
+the @code{ZA} register.
+
+The tile pseudo-registers have the following naming pattern:
+@code{ZA<@var{tile number}><@var{qualifier}>}.
+
+There is a total of 31 @code{ZA} tile pseudo-registers.  They are
+@code{ZA0B}, @code{ZA0H} through @code{ZA1H}, @code{ZA0S} through @code{ZA3S},
+@code{ZA0D} through @code{ZA7D} and @code{ZA0Q} through @code{ZA15Q}.
+
+Tile slice pseudo-registers are vectors of horizontally or vertically
+contiguous elements within the @code{ZA} register.
+
+The tile slice pseudo-registers have the following naming pattern:
+@code{ZA<@var{tile number}><@var{direction}><@var{qualifier}>
+<@var{slice number}>}.
+
+There are up to 16 tiles (0 ~ 15), the direction can be either @code{v}
+(vertical) or @code{h} (horizontal), the qualifiers can be @code{b} (byte),
+@code{h} (halfword), @code{s} (word), @code{d} (doubleword) and @code{q}
+(quadword) and there are up to 256 slices (0 ~ 255) depending on the value
+of @var{svl}.  The number of slices is the same as the value of @var{svl}.
+
+The number of available tile slice pseudo-registers can be large.  For a
+minimum @var{svl} of 16 bytes, there are 5 (number of qualifiers) x
+2 (number of directions) x 16 (@var{svl}) pseudo-registers.  For the
+maximum @var{svl} of 256 bytes, there are 5 x 2 x 256 pseudo-registers.
+
+When listing all the available registers, users will see the
+currently-available @code{ZA} pseudo-registers.  Pseudo-registers that don't
+exist for a given @var{svl} value will not be displayed.
+
+For more information on @acronym{SME} and its terminology, please refer to the
+@url{https://developer.arm.com/documentation/ddi0616/aa/,
+Arm Architecture Reference Manual Supplement}, The Scalable Matrix Extension
+(@acronym{SME}), for Armv9-A.
+
+Some features are still under development and rely on
+@url{https://github.com/ARM-software/acle/releases/latest, ACLE} and
+@url{https://github.com/ARM-software/abi-aa/blob/main/aapcs64/aapcs64.rst, ABI}
+definitions, so there are known limitations to the current @acronym{SME}
+support in @value{GDBN}.
+
+One such example is calling functions in the program being debugged by
+@value{GDBN}.  Such calls are not @acronym{SME}-aware and thus don't take into
+account the @code{SVCR} pseudo-register bits nor the @code{ZA} register
+contents.  @xref{Calling}.
+
+The @url{https://github.com/ARM-software/abi-aa/blob/main/aapcs64/aapcs64.rst#the-za-lazy-saving-scheme,
+lazy saving scheme} involving the @code{TPIDR2} register is not yet supported
+by @value{GDBN}, though the @code{TPIDR2} register is known and supported
+by @value{GDBN}.
+
+Lastly, an important limitation for @command{gdbserver} is its inability to
+communicate @var{svl} changes to @value{GDBN}.  This means @command{gdbserver},
+even though it is capable of adjusting its internal caches to reflect a change
+in the value of @var{svl} mid-execution, will operate with a potentially
+different @var{svl} value compared to @value{GDBN}.  This can lead to
+@value{GDBN} showing incorrect values for the @code{ZA} register and
+incorrect values for SVE registers (when in streaming mode).
+
+This is the same limitation we have for the @acronym{SVE} registers, and there
+are plans to address this limitation going forward.
+
 @subsubsection AArch64 Pointer Authentication.
 @cindex AArch64 Pointer Authentication.
 @anchor{AArch64 PAC}
@@ -48376,6 +48597,37 @@ Memory Tagging detection is done via a runtime check though, so the presence
 of this feature and register is not enough to enable memory tagging support.
 
 This restriction may be lifted in the future.
+
+Extra registers are allowed in this feature, but they will not affect
+@value{GDBN}.
+
+@subsubsection AArch64 SME registers feature
+
+The @samp{org.gnu.gdb.aarch64.sme} feature is optional.  If present,
+it should contain registers @code{ZA}, @code{SVG} and @code{SVCR}.
+@xref{AArch64 SME}.
+
+@itemize @minus
+
+@item
+@code{ZA} is a register represented by a vector of @var{svl}x@var{svl}
+bytes.  @xref{svl}.
+
+@item
+@code{SVG} is a 64-bit register containing the value of @var{svg}.  @xref{svg}.
+
+@item
+@code{SVCR} is a 64-bit status pseudo-register with two valid bits.  Bit 0
+(@sc{sm}) shows whether the streaming @acronym{SVE} mode is enabled or disabled.
+Bit 1 (@sc{ZA}) shows whether the @code{ZA} register state is active (in use) or
+not.
+@xref{aarch64 sme svcr}.
+
+The rest of the unused bits of the @code{SVCR} pseudo-register is undefined
+and reserved.  Such bits should not be used and may be defined by future
+extensions of the architecture.
+
+@end itemize
 
 Extra registers are allowed in this feature, but they will not affect
 @value{GDBN}.

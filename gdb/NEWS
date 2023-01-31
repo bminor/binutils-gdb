@@ -3,6 +3,17 @@
 
 *** Changes since GDB 13
 
+* GDB now supports the AArch64 Scalable Matrix Extension (SME), which includes
+  a new matrix register named ZA, a new thread register TPIDR2 and a new vector
+  length register SVG (streaming vector granule).  GDB also supports tracking
+  ZA state across signal frames.
+
+  Some features are still under development or are dependent on ABI specs that
+  are still in alpha stage.  For example, manual function calls with ZA state
+  don't have any special handling, and tracking of SVG changes based on
+  DWARF information is still not implemented, but there are plans to do so in
+  the future.
+
 * GDB now recognizes the NO_COLOR environment variable and disables
   styling according to the spec.  See https://no-color.org/.
   Styling can be re-enabled with "set style enabled on".
