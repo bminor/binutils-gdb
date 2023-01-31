@@ -215,6 +215,19 @@ struct value
   int deprecated_modifiable () const
   { return m_modifiable; }
 
+  LONGEST pointed_to_offset () const
+  { return m_pointed_to_offset; }
+
+  void set_pointed_to_offset (LONGEST val)
+  { m_pointed_to_offset = val; }
+
+  LONGEST embedded_offset () const
+  { return m_embedded_offset; }
+
+  void set_embedded_offset (LONGEST val)
+  { m_embedded_offset = val; }
+
+
   /* If a value represents a C++ object, then the `type' field gives the
      object's compile-time type.  If the object actually belongs to some
      class derived from `type', perhaps with other base classes and
@@ -454,11 +467,6 @@ struct value
 extern struct type *value_actual_type (struct value *value,
 				       int resolve_simple_types,
 				       int *real_type_found);
-
-extern LONGEST value_pointed_to_offset (const struct value *value);
-extern void set_value_pointed_to_offset (struct value *value, LONGEST val);
-extern LONGEST value_embedded_offset (const struct value *value);
-extern void set_value_embedded_offset (struct value *value, LONGEST val);
 
 /* For lval_computed values, this structure holds functions used to
    retrieve and set the value (or portions of the value).

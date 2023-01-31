@@ -965,7 +965,7 @@ structop_base_operation::evaluate_funcall
 	 ``this'' changes.  */
       vals[0] = value_from_longest (lookup_pointer_type (temp->type ()),
 				    value_address (temp)
-				    + value_embedded_offset (temp));
+				    + temp->embedded_offset ());
     }
 
   /* Take out `this' if needed.  */

@@ -275,9 +275,9 @@ value_cast_structs (struct type *type, struct value *v2)
       if (v)
 	{
 	  /* Downcasting is possible (t1 is superclass of v2).  */
-	  CORE_ADDR addr2 = value_address (v2) + value_embedded_offset (v2);
+	  CORE_ADDR addr2 = value_address (v2) + v2->embedded_offset ();
 
-	  addr2 -= value_address (v) + value_embedded_offset (v);
+	  addr2 -= value_address (v) + v->embedded_offset ();
 	  return value_at (type, addr2);
 	}
     }
@@ -328,7 +328,7 @@ value_cast_pointers (struct type *type, struct value *arg2,
   arg2 = value_copy (arg2);
   arg2->deprecated_set_type (type);
   arg2->set_enclosing_type (type);
-  set_value_pointed_to_offset (arg2, 0);	/* pai: chk_val */
+  arg2->set_pointed_to_offset (0);	/* pai: chk_val */
   return arg2;
 }
 
@@ -650,7 +650,7 @@ value_cast (struct type *type, struct value *arg2)
       arg2 = value_copy (arg2);
       arg2->deprecated_set_type (to_type);
       arg2->set_enclosing_type (to_type);
-      set_value_pointed_to_offset (arg2, 0);	/* pai: chk_val */
+      arg2->set_pointed_to_offset (0);	/* pai: chk_val */
       return arg2;
     }
   else if (VALUE_LVAL (arg2) == lval_memory)
@@ -884,7 +884,7 @@ value_dynamic_cast (struct type *type, struct value *arg)
   else if (using_enc)
     addr += top;
   else
-    addr += top + value_embedded_offset (arg);
+    addr += top + arg->embedded_offset ();
 
   /* dynamic_cast<void *> means to return a pointer to the
      most-derived object.  */
@@ -903,7 +903,7 @@ value_dynamic_cast (struct type *type, struct value *arg)
       result = NULL;
       if (dynamic_cast_check_1 (resolved_type->target_type (),
 				value_contents_for_printing (tem).data (),
-				value_embedded_offset (tem),
+				tem->embedded_offset (),
 				value_address (tem), tem,
 				rtti_type, addr,
 				arg_type,
@@ -919,7 +919,7 @@ value_dynamic_cast (struct type *type, struct value *arg)
   if (is_public_ancestor (arg_type, rtti_type)
       && dynamic_cast_check_2 (resolved_type->target_type (),
 			       value_contents_for_printing (tem).data (),
-			       value_embedded_offset (tem),
+			       tem->embedded_offset (),
 			       value_address (tem), tem,
 			       rtti_type, &result) == 1)
     return value_cast (type,
@@ -1353,7 +1353,7 @@ value_assign (struct value *toval, struct value *fromval)
   if (type->code () == TYPE_CODE_PTR)
     {
       val->set_enclosing_type (fromval->enclosing_type ());
-      set_value_pointed_to_offset (val, value_pointed_to_offset (fromval));
+      val->set_pointed_to_offset (fromval->pointed_to_offset ());
     }
 
   return val;
@@ -1556,7 +1556,7 @@ value_addr (struct value *arg1)
 
   if (TYPE_IS_REFERENCE (type))
     {
-      if (value_bits_synthetic_pointer (arg1, value_embedded_offset (arg1),
+      if (value_bits_synthetic_pointer (arg1, arg1->embedded_offset (),
 	  TARGET_CHAR_BIT * type->length ()))
 	arg1 = coerce_ref (arg1);
       else
@@ -1592,14 +1592,14 @@ value_addr (struct value *arg1)
   /* Get target memory address.  */
   arg2 = value_from_pointer (lookup_pointer_type (arg1->type ()),
 			     (value_address (arg1)
-			      + value_embedded_offset (arg1)));
+			      + arg1->embedded_offset ()));
 
   /* This may be a pointer to a base subobject; so remember the
      full derived object's type ...  */
   arg2->set_enclosing_type (lookup_pointer_type (arg1->enclosing_type ()));
   /* ... and also the relative position of the subobject in the full
      object.  */
-  set_value_pointed_to_offset (arg2, value_embedded_offset (arg1));
+  arg2->set_pointed_to_offset (arg1->embedded_offset ());
   return arg2;
 }
 
@@ -1671,7 +1671,7 @@ value_ind (struct value *arg1)
 	{
 	  /* Retrieve the enclosing object pointed to.  */
 	  base_addr = (value_as_address (arg1)
-		       - value_pointed_to_offset (arg1));
+		       - arg1->pointed_to_offset ());
 	}
       arg2 = value_at_lazy (enc_type, base_addr);
       enc_type = arg2->type ();
@@ -2076,7 +2076,7 @@ struct_field_searcher::search (struct value *arg1, LONGEST offset,
       int found_baseclass = (m_looking_for_baseclass
 			     && TYPE_BASECLASS_NAME (type, i) != NULL
 			     && (strcmp_iw (m_name, basetype->name ()) == 0));
-      LONGEST boffset = value_embedded_offset (arg1) + offset;
+      LONGEST boffset = arg1->embedded_offset () + offset;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
@@ -2084,7 +2084,7 @@ struct_field_searcher::search (struct value *arg1, LONGEST offset,
 
 	  boffset = baseclass_offset (type, i,
 				      value_contents_for_printing (arg1).data (),
-				      value_embedded_offset (arg1) + offset,
+				      arg1->embedded_offset () + offset,
 				      value_address (arg1),
 				      arg1);
 
@@ -2092,7 +2092,7 @@ struct_field_searcher::search (struct value *arg1, LONGEST offset,
 	     by the user program.  Make sure that it still points to a
 	     valid memory location.  */
 
-	  boffset += value_embedded_offset (arg1) + offset;
+	  boffset += arg1->embedded_offset () + offset;
 	  if (boffset < 0
 	      || boffset >= arg1->enclosing_type ()->length ())
 	    {
@@ -2109,7 +2109,7 @@ struct_field_searcher::search (struct value *arg1, LONGEST offset,
 	    {
 	      v2 = value_copy (arg1);
 	      v2->deprecated_set_type (basetype);
-	      set_value_embedded_offset (v2, boffset);
+	      v2->set_embedded_offset (boffset);
 	    }
 
 	  if (found_baseclass)
@@ -3978,11 +3978,11 @@ value_full_object (struct value *argp,
      object, adjusting for the embedded offset of argp if that's what
      value_rtti_type used for its computation.  */
   new_val = value_at_lazy (real_type, value_address (argp) - top +
-			   (using_enc ? 0 : value_embedded_offset (argp)));
+			   (using_enc ? 0 : argp->embedded_offset ()));
   new_val->deprecated_set_type (argp->type ());
-  set_value_embedded_offset (new_val, (using_enc
-				       ? top + value_embedded_offset (argp)
-				       : top));
+  new_val->set_embedded_offset ((using_enc
+				 ? top + argp->embedded_offset ()
+				 : top));
   return new_val;
 }
 

@@ -1406,30 +1406,6 @@ value_bits_synthetic_pointer (const struct value *value,
 								  length);
 }
 
-LONGEST
-value_embedded_offset (const struct value *value)
-{
-  return value->m_embedded_offset;
-}
-
-void
-set_value_embedded_offset (struct value *value, LONGEST val)
-{
-  value->m_embedded_offset = val;
-}
-
-LONGEST
-value_pointed_to_offset (const struct value *value)
-{
-  return value->m_pointed_to_offset;
-}
-
-void
-set_value_pointed_to_offset (struct value *value, LONGEST val)
-{
-  value->m_pointed_to_offset = val;
-}
-
 const struct lval_funcs *
 value_computed_funcs (const struct value *v)
 {
@@ -1619,7 +1595,7 @@ value_copy (const value *arg)
   val->m_bitpos = arg->m_bitpos;
   val->m_bitsize = arg->m_bitsize;
   val->m_lazy = arg->m_lazy;
-  val->m_embedded_offset = value_embedded_offset (arg);
+  val->m_embedded_offset = arg->embedded_offset ();
   val->m_pointed_to_offset = arg->m_pointed_to_offset;
   val->m_modifiable = arg->m_modifiable;
   val->m_stack = arg->m_stack;
@@ -1691,8 +1667,8 @@ value_non_lval (struct value *arg)
 
       copy (value_contents_all (arg), value_contents_all_raw (val));
       val->m_type = arg->m_type;
-      set_value_embedded_offset (val, value_embedded_offset (arg));
-      set_value_pointed_to_offset (val, value_pointed_to_offset (arg));
+      val->set_embedded_offset (arg->embedded_offset ());
+      val->set_pointed_to_offset (arg->pointed_to_offset ());
       return val;
     }
    return arg;
@@ -3023,7 +2999,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
 	v->m_bitpos = bitpos % container_bitsize;
       else
 	v->m_bitpos = bitpos % 8;
-      v->m_offset = (value_embedded_offset (arg1)
+      v->m_offset = (arg1->embedded_offset ()
 		   + offset
 		   + (bitpos - v->m_bitpos) / 8);
       v->set_parent (arg1);
@@ -3047,7 +3023,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
       if (BASETYPE_VIA_VIRTUAL (arg_type, fieldno))
 	boffset = baseclass_offset (arg_type, fieldno,
 				    value_contents (arg1).data (),
-				    value_embedded_offset (arg1),
+				    arg1->embedded_offset (),
 				    value_address (arg1),
 				    arg1);
       else
@@ -3063,7 +3039,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
 	}
       v->m_type = type;
       v->m_offset = arg1->offset ();
-      v->m_embedded_offset = offset + value_embedded_offset (arg1) + boffset;
+      v->m_embedded_offset = offset + arg1->embedded_offset () + boffset;
     }
   else if (NULL != TYPE_DATA_LOCATION (type))
     {
@@ -3091,12 +3067,12 @@ value_primitive_field (struct value *arg1, LONGEST offset,
       else
 	{
 	  v = allocate_value (type);
-	  value_contents_copy_raw (v, value_embedded_offset (v),
-				   arg1, value_embedded_offset (arg1) + offset,
+	  value_contents_copy_raw (v, v->embedded_offset (),
+				   arg1, arg1->embedded_offset () + offset,
 				   type_length_units (type));
 	}
       v->m_offset = (arg1->offset () + offset
-		   + value_embedded_offset (arg1));
+		     + arg1->embedded_offset ());
     }
   set_value_component_location (v, arg1);
   return v;
@@ -3693,11 +3669,11 @@ value_from_component (struct value *whole, struct type *type, LONGEST offset)
   else
     {
       v = allocate_value (type);
-      value_contents_copy (v, value_embedded_offset (v),
-			   whole, value_embedded_offset (whole) + offset,
+      value_contents_copy (v, v->embedded_offset (),
+			   whole, whole->embedded_offset () + offset,
 			   type_length_units (type));
     }
-  v->m_offset = whole->offset () + offset + value_embedded_offset (whole);
+  v->m_offset = whole->offset () + offset + whole->embedded_offset ();
   set_value_component_location (v, whole);
 
   return v;
@@ -3721,14 +3697,14 @@ value_from_component_bitsize (struct value *whole, struct type *type,
 
   struct value *v = allocate_value (type);
 
-  LONGEST dst_offset = TARGET_CHAR_BIT * value_embedded_offset (v);
+  LONGEST dst_offset = TARGET_CHAR_BIT * v->embedded_offset ();
   if (is_scalar_type (type) && type_byte_order (type) == BFD_ENDIAN_BIG)
     dst_offset += TARGET_CHAR_BIT * type->length () - bit_length;
 
   value_contents_copy_raw_bitwise (v, dst_offset,
 				   whole,
 				   TARGET_CHAR_BIT
-				   * value_embedded_offset (whole)
+				   * whole->embedded_offset ()
 				   + bit_offset,
 				   bit_length);
   return v;
@@ -3773,7 +3749,7 @@ readjust_indirect_value_type (struct value *value, struct type *enc_type,
 
   /* Add embedding info.  */
   value->set_enclosing_type (enc_type);
-  set_value_embedded_offset (value, value_pointed_to_offset (original_value));
+  value->set_embedded_offset (original_value->pointed_to_offset ());
 
   /* We may be pointing to an object of some derived type.  */
   return value_full_object (value, NULL, 0, 0, 0);
@@ -3989,8 +3965,8 @@ value_fetch_lazy_register (struct value *val)
   /* Copy the contents and the unavailability/optimized-out
      meta-data from NEW_VAL to VAL.  */
   set_value_lazy (val, 0);
-  value_contents_copy (val, value_embedded_offset (val),
-		       new_val, value_embedded_offset (new_val),
+  value_contents_copy (val, val->embedded_offset (),
+		       new_val, new_val->embedded_offset (),
 		       type_length_units (type));
 
   if (frame_debug)

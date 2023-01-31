@@ -81,7 +81,7 @@ d_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
   switch (type->code ())
     {
       case TYPE_CODE_STRUCT:
-	ret = dynamic_array_type (type, value_embedded_offset (val),
+	ret = dynamic_array_type (type, val->embedded_offset (),
 				  value_address (val),
 				  stream, recurse, val, options);
 	if (ret == 0)

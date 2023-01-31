@@ -282,7 +282,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 		  opts->deref_ref = false;
 
 		  v = value_field_bitfield (type, i, valaddr,
-					    value_embedded_offset (val), val);
+					    val->embedded_offset (), val);
 
 		  common_val_print (v, stream, recurse + 1,
 				    opts, current_language);
@@ -321,7 +321,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 		    {
 		      CORE_ADDR addr;
 
-		      i_offset += value_embedded_offset (val);
+		      i_offset += val->embedded_offset ();
 		      addr = extract_typed_address (valaddr + i_offset, i_type);
 		      print_function_pointer_address (opts,
 						      type->arch (),
@@ -432,7 +432,7 @@ cp_print_value (struct value *val, struct ui_file *stream,
       try
 	{
 	  boffset = baseclass_offset (type, i, valaddr,
-				      value_embedded_offset (val),
+				      val->embedded_offset (),
 				      address, val);
 	}
       catch (const gdb_exception_error &ex)

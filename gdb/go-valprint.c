@@ -104,7 +104,7 @@ go_language::value_print_inner (struct value *val, struct ui_file *stream,
 	    case GO_TYPE_STRING:
 	      if (! options->raw)
 		{
-		  print_go_string (type, value_embedded_offset (val),
+		  print_go_string (type, val->embedded_offset (),
 				   value_address (val),
 				   stream, recurse, val, options);
 		  return;
