@@ -1057,7 +1057,7 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	}
     }
 
-  set_value_initialized (retval, this->m_initialized);
+  retval->set_initialized (this->m_initialized);
 
   return retval;
 }

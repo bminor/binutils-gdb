@@ -554,7 +554,7 @@ c_value_print (struct value *val, struct ui_file *stream,
 	}
     }
 
-  if (!value_initialized (val))
+  if (!val->initialized ())
     gdb_printf (stream, " [uninitialized] ");
 
   if (options->objectprint && (type->code () == TYPE_CODE_STRUCT))

@@ -3799,22 +3799,6 @@ using_struct_return (struct gdbarch *gdbarch,
 	  != RETURN_VALUE_REGISTER_CONVENTION);
 }
 
-/* Set the initialized field in a value struct.  */
-
-void
-set_value_initialized (struct value *val, int status)
-{
-  val->m_initialized = status;
-}
-
-/* Return the initialized field in a value struct.  */
-
-int
-value_initialized (const struct value *val)
-{
-  return val->m_initialized;
-}
-
 /* Helper for value_fetch_lazy when the value is a bitfield.  */
 
 static void

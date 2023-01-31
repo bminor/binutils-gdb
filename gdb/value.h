@@ -316,6 +316,15 @@ struct value
   enum lval_type lval () const
   { return m_lval; }
 
+  /* Set or return field indicating whether a variable is initialized or
+     not, based on debugging information supplied by the compiler.
+     1 = initialized; 0 = uninitialized.  */
+  int initialized () const
+  { return m_initialized; }
+
+  void set_initialized (int value)
+  { m_initialized = value; }
+
 
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
@@ -656,12 +665,6 @@ extern void mark_value_bytes_optimized_out (struct value *value,
 
 extern void mark_value_bits_optimized_out (struct value *value,
 					   LONGEST offset, LONGEST length);
-
-/* Set or return field indicating whether a variable is initialized or
-   not, based on debugging information supplied by the compiler.
-   1 = initialized; 0 = uninitialized.  */
-extern int value_initialized (const struct value *);
-extern void set_value_initialized (struct value *, int);
 
 /* Set COMPONENT's location as appropriate for a component of WHOLE
    --- regardless of what kind of lvalue WHOLE is.  */
