@@ -271,7 +271,7 @@ public:
 						     elt_off_prev);
 	repeated = ((value_entirely_available (e_prev)
 		     && value_entirely_available (e_val)
-		     && value_contents_eq (e_prev, e_val))
+		     && e_prev->contents_eq (e_val))
 		    || (value_entirely_unavailable (e_prev)
 			&& value_entirely_unavailable (e_val)));
       }
@@ -378,7 +378,7 @@ private:
 
 	return ((value_entirely_available (e_val1)
 		 && value_entirely_available (e_val2)
-		 && value_contents_eq (e_val1, e_val2))
+		 && e_val1->contents_eq (e_val2))
 		|| (value_entirely_unavailable (e_val1)
 		    && value_entirely_unavailable (e_val2)));
       }

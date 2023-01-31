@@ -585,7 +585,7 @@ read_frame_arg (const frame_print_options &fp_opts,
 	      if (entryval->lazy ())
 		entryval->fetch_lazy ();
 
-	      if (value_contents_eq (val, 0, entryval, 0, type->length ()))
+	      if (val->contents_eq (0, entryval, 0, type->length ()))
 		{
 		  /* Initialize it just to avoid a GCC false warning.  */
 		  struct value *val_deref = NULL, *entryval_deref;
@@ -610,9 +610,9 @@ read_frame_arg (const frame_print_options &fp_opts,
 		      /* If the reference addresses match but dereferenced
 			 content does not match print them.  */
 		      if (val != val_deref
-			  && value_contents_eq (val_deref, 0,
-						entryval_deref, 0,
-						type_deref->length ()))
+			  && val_deref->contents_eq (0,
+						     entryval_deref, 0,
+						     type_deref->length ()))
 			val_equal = 1;
 		    }
 		  catch (const gdb_exception_error &except)

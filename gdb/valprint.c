@@ -2029,7 +2029,7 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
 						bit_stride);
 	      bool repeated = ((available
 				&& value_entirely_available (rep_elt)
-				&& value_contents_eq (element, rep_elt))
+				&& element->contents_eq (rep_elt))
 			       || (unavailable
 				   && value_entirely_unavailable (rep_elt)));
 	      if (!repeated)

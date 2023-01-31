@@ -648,29 +648,28 @@ find_first_range_overlap_and_match (struct ranges_and_idx *rp1,
    with LENGTH bits of VAL2's contents starting at OFFSET2 bits.
    Return true if the available bits match.  */
 
-static bool
-value_contents_bits_eq (const struct value *val1, int offset1,
-			const struct value *val2, int offset2,
-			int length)
+bool
+value::contents_bits_eq (int offset1, const struct value *val2, int offset2,
+			 int length) const
 {
   /* Each array element corresponds to a ranges source (unavailable,
      optimized out).  '1' is for VAL1, '2' for VAL2.  */
   struct ranges_and_idx rp1[2], rp2[2];
 
   /* See function description in value.h.  */
-  gdb_assert (!val1->m_lazy && !val2->m_lazy);
+  gdb_assert (!m_lazy && !val2->m_lazy);
 
   /* We shouldn't be trying to compare past the end of the values.  */
   gdb_assert (offset1 + length
-	      <= val1->m_enclosing_type->length () * TARGET_CHAR_BIT);
+	      <= m_enclosing_type->length () * TARGET_CHAR_BIT);
   gdb_assert (offset2 + length
 	      <= val2->m_enclosing_type->length () * TARGET_CHAR_BIT);
 
   memset (&rp1, 0, sizeof (rp1));
   memset (&rp2, 0, sizeof (rp2));
-  rp1[0].ranges = &val1->m_unavailable;
+  rp1[0].ranges = &m_unavailable;
   rp2[0].ranges = &val2->m_unavailable;
-  rp1[1].ranges = &val1->m_optimized_out;
+  rp1[1].ranges = &m_optimized_out;
   rp2[1].ranges = &val2->m_optimized_out;
 
   while (length > 0)
@@ -698,7 +697,7 @@ value_contents_bits_eq (const struct value *val1, int offset1,
 	}
 
       /* Compare the available/valid contents.  */
-      if (memcmp_with_bit_offsets (val1->m_contents.get (), offset1,
+      if (memcmp_with_bit_offsets (m_contents.get (), offset1,
 				   val2->m_contents.get (), offset2, l) != 0)
 	return false;
 
@@ -710,26 +709,28 @@ value_contents_bits_eq (const struct value *val1, int offset1,
   return true;
 }
 
+/* See value.h.  */
+
 bool
-value_contents_eq (const struct value *val1, LONGEST offset1,
-		   const struct value *val2, LONGEST offset2,
-		   LONGEST length)
+value::contents_eq (LONGEST offset1,
+		    const struct value *val2, LONGEST offset2,
+		    LONGEST length) const
 {
-  return value_contents_bits_eq (val1, offset1 * TARGET_CHAR_BIT,
-				 val2, offset2 * TARGET_CHAR_BIT,
-				 length * TARGET_CHAR_BIT);
+  return contents_bits_eq (offset1 * TARGET_CHAR_BIT,
+			   val2, offset2 * TARGET_CHAR_BIT,
+			   length * TARGET_CHAR_BIT);
 }
 
 /* See value.h.  */
 
 bool
-value_contents_eq (const struct value *val1, const struct value *val2)
+value::contents_eq (const struct value *val2) const
 {
-  ULONGEST len1 = check_typedef (val1->enclosing_type ())->length ();
+  ULONGEST len1 = check_typedef (enclosing_type ())->length ();
   ULONGEST len2 = check_typedef (val2->enclosing_type ())->length ();
   if (len1 != len2)
     return false;
-  return value_contents_eq (val1, 0, val2, 0, len1);
+  return contents_eq (0, val2, 0, len1);
 }
 
 /* The value-history records all the values printed by print commands
