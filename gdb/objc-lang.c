@@ -212,7 +212,7 @@ value_nsstring (struct gdbarch *gdbarch, const char *ptr, int len)
   else
     type = lookup_pointer_type(sym->type ());
 
-  deprecated_set_value_type (nsstringValue, type);
+  nsstringValue->deprecated_set_type (type);
   return nsstringValue;
 }
 

@@ -2183,7 +2183,7 @@ eval_op_objc_msgcall (struct type *expect_type, struct expression *exp,
       /* Function objc_msg_lookup returns a pointer.  */
       struct type *tem_type = called_method->type ();
       tem_type = lookup_pointer_type (lookup_function_type (tem_type));
-      deprecated_set_value_type (called_method, tem_type);
+      called_method->deprecated_set_type (tem_type);
       called_method = call_function_by_hand (called_method, NULL, args);
     }
 

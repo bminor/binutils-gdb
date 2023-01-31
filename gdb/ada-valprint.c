@@ -1029,7 +1029,7 @@ ada_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
   if (type != saved_type)
     {
       val = value_copy (val);
-      deprecated_set_value_type (val, type);
+      val->deprecated_set_type (type);
     }
 
   if (is_fixed_point_type (type))

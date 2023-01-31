@@ -3087,7 +3087,7 @@ i386_return_value (struct gdbarch *gdbarch, struct value *function,
 	= i386_return_value (gdbarch, function, inner_type, regcache,
 			     read_value, writebuf);
       if (read_value != nullptr)
-	deprecated_set_value_type (*read_value, type);
+	(*read_value)->deprecated_set_type (type);
       return result;
     }
 

@@ -1024,12 +1024,6 @@ allocate_optimized_out_value (struct type *type)
 
 /* Accessor methods.  */
 
-void
-deprecated_set_value_type (struct value *value, struct type *type)
-{
-  value->m_type = type;
-}
-
 LONGEST
 value_offset (const struct value *value)
 {
@@ -1737,8 +1731,7 @@ make_cv_value (int cnst, int voltl, struct value *v)
   struct type *m_enclosing_type = value_enclosing_type (v);
   struct value *cv_val = value_copy (v);
 
-  deprecated_set_value_type (cv_val,
-			     make_cv_type (cnst, voltl, val_type, NULL));
+  cv_val->deprecated_set_type (make_cv_type (cnst, voltl, val_type, NULL));
   set_value_enclosing_type (cv_val,
 			    make_cv_type (cnst, voltl, m_enclosing_type, NULL));
 
@@ -3836,7 +3829,7 @@ readjust_indirect_value_type (struct value *value, struct type *enc_type,
 			    original_value_address);
 
   /* Re-adjust type.  */
-  deprecated_set_value_type (value, resolved_original_target_type);
+  value->deprecated_set_type (resolved_original_target_type);
 
   /* Add embedding info.  */
   set_value_enclosing_type (value, enc_type);

@@ -319,14 +319,14 @@ value_cast_pointers (struct type *type, struct value *arg2,
 	{
 	  struct value *v = value_addr (v2);
 
-	  deprecated_set_value_type (v, type);
+	  v->deprecated_set_type (type);
 	  return v;
 	}
     }
 
   /* No superclass found, just change the pointer type.  */
   arg2 = value_copy (arg2);
-  deprecated_set_value_type (arg2, type);
+  arg2->deprecated_set_type (type);
   set_value_enclosing_type (arg2, type);
   set_value_pointed_to_offset (arg2, 0);	/* pai: chk_val */
   return arg2;
@@ -429,7 +429,7 @@ value_cast (struct type *type, struct value *arg2)
       if (arg2->type () != type)
 	{
 	  arg2 = value_copy (arg2);
-	  deprecated_set_value_type (arg2, type);
+	  arg2->deprecated_set_type (type);
 	}
       return arg2;
     }
@@ -494,8 +494,7 @@ value_cast (struct type *type, struct value *arg2)
 						 range_type->target_type (),
 						 low_bound,
 						 new_length + low_bound - 1);
-	  deprecated_set_value_type (arg2, 
-				     create_array_type (NULL,
+	  arg2->deprecated_set_type (create_array_type (NULL,
 							element_type, 
 							range_type));
 	  return arg2;
@@ -649,7 +648,7 @@ value_cast (struct type *type, struct value *arg2)
 	return value_cast_pointers (to_type, arg2, 0);
 
       arg2 = value_copy (arg2);
-      deprecated_set_value_type (arg2, to_type);
+      arg2->deprecated_set_type (to_type);
       set_value_enclosing_type (arg2, to_type);
       set_value_pointed_to_offset (arg2, 0);	/* pai: chk_val */
       return arg2;
@@ -1574,7 +1573,7 @@ value_addr (struct value *arg1)
 	    = lookup_pointer_type (enclosing_type->target_type ());
 
 	  arg2 = value_copy (arg1);
-	  deprecated_set_value_type (arg2, type_ptr);
+	  arg2->deprecated_set_type (type_ptr);
 	  set_value_enclosing_type (arg2, enclosing_type_ptr);
 
 	  return arg2;
@@ -1622,7 +1621,7 @@ value_ref (struct value *arg1, enum type_code refcode)
     return arg1;
 
   arg2 = value_addr (arg1);
-  deprecated_set_value_type (arg2, lookup_reference_type (type, refcode));
+  arg2->deprecated_set_type (lookup_reference_type (type, refcode));
   return arg2;
 }
 
@@ -2110,7 +2109,7 @@ struct_field_searcher::search (struct value *arg1, LONGEST offset,
 	  else
 	    {
 	      v2 = value_copy (arg1);
-	      deprecated_set_value_type (v2, basetype);
+	      v2->deprecated_set_type (basetype);
 	      set_value_embedded_offset (v2, boffset);
 	    }
 
@@ -3981,7 +3980,7 @@ value_full_object (struct value *argp,
      value_rtti_type used for its computation.  */
   new_val = value_at_lazy (real_type, value_address (argp) - top +
 			   (using_enc ? 0 : value_embedded_offset (argp)));
-  deprecated_set_value_type (new_val, argp->type ());
+  new_val->deprecated_set_type (argp->type ());
   set_value_embedded_offset (new_val, (using_enc
 				       ? top + value_embedded_offset (argp)
 				       : top));

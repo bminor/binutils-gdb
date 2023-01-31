@@ -2924,7 +2924,7 @@ ada_value_assign (struct value *toval, struct value *fromval)
       memcpy (value_contents_raw (val).data (),
 	      value_contents (fromval).data (),
 	      type->length ());
-      deprecated_set_value_type (val, type);
+      val->deprecated_set_type (type);
 
       return val;
     }
@@ -3033,7 +3033,7 @@ ada_value_subscript (struct value *arr, int arity, struct value **ind)
 	     than as an access.  Another symptom of the same issue
 	     would be that an expression trying to dereference the
 	     element would also be improperly rejected.  */
-	  deprecated_set_value_type (elt, saved_elt_type);
+	  elt->deprecated_set_type (saved_elt_type);
 	}
 
       elt_type = ada_check_typedef (elt->type ());
@@ -9334,7 +9334,7 @@ coerce_for_assign (struct type *type, struct value *val)
 
       if (type2->target_type ()->length () != type->target_type ()->length ())
 	error (_("Incompatible types in assignment"));
-      deprecated_set_value_type (val, type);
+      val->deprecated_set_type (type);
     }
   return val;
 }

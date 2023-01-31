@@ -164,6 +164,12 @@ struct value
   struct type *type () const
   { return m_type; }
 
+  /* This is being used to change the type of an existing value, that
+     code should instead be creating a new value with the changed type
+     (but possibly shared content).  */
+  void deprecated_set_type (struct type *type)
+  { m_type = type; }
+
 
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
@@ -345,13 +351,6 @@ struct value
 /* Return the gdbarch associated with the value. */
 
 extern struct gdbarch *get_value_arch (const struct value *value);
-
-/* This is being used to change the type of an existing value, that
-   code should instead be creating a new value with the changed type
-   (but possibly shared content).  */
-
-extern void deprecated_set_value_type (struct value *value,
-				       struct type *type);
 
 /* Only used for bitfields; number of bits contained in them.  */
 
