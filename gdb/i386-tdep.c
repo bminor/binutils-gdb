@@ -3095,7 +3095,7 @@ i386_return_value (struct gdbarch *gdbarch, struct value *function,
     {
       *read_value = value::allocate (type);
       i386_extract_return_value (gdbarch, type, regcache,
-				 value_contents_raw (*read_value).data ());
+				 (*read_value)->contents_raw ().data ());
     }
   if (writebuf)
     i386_store_return_value (gdbarch, type, regcache, writebuf);
@@ -3379,7 +3379,7 @@ i386_pseudo_register_read_into_value (struct gdbarch *gdbarch,
 {
   gdb_byte raw_buf[I386_MAX_REGISTER_SIZE];
   enum register_status status;
-  gdb_byte *buf = value_contents_raw (result_value).data ();
+  gdb_byte *buf = result_value->contents_raw ().data ();
 
   if (i386_mmx_regnum_p (gdbarch, regnum))
     {

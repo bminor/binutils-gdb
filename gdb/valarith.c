@@ -717,7 +717,7 @@ value_concat (struct value *arg1, struct value *arg2)
 						lowbound + n_elts - 1);
 
   struct value *result = value::allocate (atype);
-  gdb::array_view<gdb_byte> contents = value_contents_raw (result);
+  gdb::array_view<gdb_byte> contents = result->contents_raw ();
   gdb::array_view<const gdb_byte> lhs_contents = value_contents (arg1);
   gdb::array_view<const gdb_byte> rhs_contents = value_contents (arg2);
   gdb::copy (lhs_contents, contents.slice (0, lhs_contents.size ()));
@@ -872,7 +872,7 @@ fixed_point_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
       value *fp_val = value::allocate (type1);
 
       fp.write_fixed_point
-	(value_contents_raw (fp_val),
+      (fp_val->contents_raw (),
 	 type_byte_order (type1),
 	 type1->is_unsigned (),
 	 type1->fixed_point_scaling_factor ());
@@ -1191,7 +1191,7 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 				  v2.data (), &eff_type_v2);
       target_float_binop (op, v1.data (), eff_type_v1,
 			      v2.data (), eff_type_v2,
-			      value_contents_raw (val).data (), result_type);
+			  val->contents_raw ().data (), result_type);
     }
   else if (type1->code () == TYPE_CODE_BOOL
 	   || type2->code () == TYPE_CODE_BOOL)
@@ -1230,7 +1230,7 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
       result_type = type1;
 
       val = value::allocate (result_type);
-      store_signed_integer (value_contents_raw (val).data (),
+      store_signed_integer (val->contents_raw ().data (),
 			    result_type->length (),
 			    type_byte_order (result_type),
 			    v);
@@ -1376,7 +1376,7 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	    }
 
 	  val = value::allocate (result_type);
-	  store_unsigned_integer (value_contents_raw (val).data (),
+	  store_unsigned_integer (val->contents_raw ().data (),
 				  val->type ()->length (),
 				  type_byte_order (result_type),
 				  v);
@@ -1537,7 +1537,7 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	    }
 
 	  val = value::allocate (result_type);
-	  store_signed_integer (value_contents_raw (val).data (),
+	  store_signed_integer (val->contents_raw ().data (),
 				val->type ()->length (),
 				type_byte_order (result_type),
 				v);
@@ -1582,7 +1582,7 @@ value_vector_widen (struct value *scalar_value, struct type *vector_type)
     error (_("conversion of scalar to vector involves truncation"));
 
   value *val = value::allocate (vector_type);
-  gdb::array_view<gdb_byte> val_contents = value_contents_writeable (val);
+  gdb::array_view<gdb_byte> val_contents = val->contents_writeable ();
   int elt_len = eltype->length ();
 
   for (i = 0; i < high_bound - low_bound + 1; i++)
@@ -1629,7 +1629,7 @@ vector_binop (struct value *val1, struct value *val2, enum exp_opcode op)
     error (_("Cannot perform operation on vectors with different types"));
 
   value *val = value::allocate (type1);
-  gdb::array_view<gdb_byte> val_contents = value_contents_writeable (val);
+  gdb::array_view<gdb_byte> val_contents = val->contents_writeable ();
   scoped_value_mark mark;
   for (i = 0; i < high_bound1 - low_bound1 + 1; i++)
     {
@@ -1924,7 +1924,7 @@ value_neg (struct value *arg1)
       if (!get_array_bounds (type, &low_bound, &high_bound))
 	error (_("Could not determine the vector bounds"));
 
-      gdb::array_view<gdb_byte> val_contents = value_contents_writeable (val);
+      gdb::array_view<gdb_byte> val_contents = val->contents_writeable ();
       int elt_len = eltype->length ();
 
       for (i = 0; i < high_bound - low_bound + 1; i++)
@@ -1969,7 +1969,7 @@ value_complement (struct value *arg1)
 	error (_("Could not determine the vector bounds"));
 
       val = value::allocate (type);
-      gdb::array_view<gdb_byte> val_contents = value_contents_writeable (val);
+      gdb::array_view<gdb_byte> val_contents = val->contents_writeable ();
       int elt_len = eltype->length ();
 
       for (i = 0; i < high_bound - low_bound + 1; i++)

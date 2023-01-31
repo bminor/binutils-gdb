@@ -2413,7 +2413,7 @@ array_operation::evaluate_struct_tuple (struct value *struct_val,
 
       bitsize = TYPE_FIELD_BITSIZE (struct_type, fieldno);
       bitpos = struct_type->field (fieldno).loc_bitpos ();
-      addr = value_contents_writeable (struct_val).data () + bitpos / 8;
+      addr = struct_val->contents_writeable ().data () + bitpos / 8;
       if (bitsize)
 	modify_field (struct_type, addr,
 		      value_as_long (val), bitpos % 8, bitsize);
@@ -2442,7 +2442,7 @@ array_operation::evaluate (struct type *expect_type,
     {
       struct value *rec = value::allocate (expect_type);
 
-      memset (value_contents_raw (rec).data (), '\0', type->length ());
+      memset (rec->contents_raw ().data (), '\0', type->length ());
       return evaluate_struct_tuple (rec, exp, noside, nargs);
     }
 
@@ -2461,7 +2461,7 @@ array_operation::evaluate (struct type *expect_type,
 	  high_bound = (type->length () / element_size) - 1;
 	}
       index = low_bound;
-      memset (value_contents_raw (array).data (), 0, expect_type->length ());
+      memset (array->contents_raw ().data (), 0, expect_type->length ());
       for (tem = nargs; --nargs >= 0;)
 	{
 	  struct value *element;
@@ -2473,7 +2473,7 @@ array_operation::evaluate (struct type *expect_type,
 	  if (index > high_bound)
 	    /* To avoid memory corruption.  */
 	    error (_("Too many array elements"));
-	  memcpy (value_contents_raw (array).data ()
+	  memcpy (array->contents_raw ().data ()
 		  + (index - low_bound) * element_size,
 		  value_contents (element).data (),
 		  element_size);
@@ -2486,7 +2486,7 @@ array_operation::evaluate (struct type *expect_type,
       && type->code () == TYPE_CODE_SET)
     {
       struct value *set = value::allocate (expect_type);
-      gdb_byte *valaddr = value_contents_raw (set).data ();
+      gdb_byte *valaddr = set->contents_raw ().data ();
       struct type *element_type = type->index_type ();
       struct type *check_type = element_type;
       LONGEST low_bound, high_bound;

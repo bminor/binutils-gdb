@@ -1598,10 +1598,10 @@ put_frame_register_bytes (frame_info_ptr frame, int regnum,
 					   regnum);
 	  gdb_assert (value != NULL);
 
-	  memcpy ((char *) value_contents_writeable (value).data () + offset,
+	  memcpy ((char *) value->contents_writeable ().data () + offset,
 		  myaddr, curr_len);
 	  put_frame_register (frame, regnum,
-			      value_contents_raw (value).data ());
+			      value->contents_raw ().data ());
 	  release_value (value);
 	}
 

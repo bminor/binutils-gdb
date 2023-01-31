@@ -2494,7 +2494,7 @@ aarch64_return_value (struct gdbarch *gdbarch, struct value *func_value,
     {
       *read_value = value::allocate (valtype);
       aarch64_extract_return_value (valtype, regcache,
-				    value_contents_raw (*read_value).data ());
+				    (*read_value)->contents_raw ().data ());
     }
 
   aarch64_debug_printf ("return value in registers");
@@ -2769,7 +2769,7 @@ aarch64_pseudo_read_value_1 (struct gdbarch *gdbarch,
     mark_value_bytes_unavailable (result_value, 0,
 				  result_value->type ()->length ());
   else
-    memcpy (value_contents_raw (result_value).data (), reg_buf, regsize);
+    memcpy (result_value->contents_raw ().data (), reg_buf, regsize);
 
   return result_value;
  }
@@ -2803,7 +2803,7 @@ aarch64_pseudo_read_value (struct gdbarch *gdbarch, readable_regcache *regcache,
       if (regcache->raw_read_part (x_regnum, offset, 4, data) != REG_VALID)
 	mark_value_bytes_unavailable (result_value, 0, 4);
       else
-	memcpy (value_contents_raw (result_value).data (), data, 4);
+	memcpy (result_value->contents_raw ().data (), data, 4);
 
       return result_value;
     }

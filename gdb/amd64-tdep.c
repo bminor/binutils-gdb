@@ -358,7 +358,7 @@ amd64_pseudo_register_read_value (struct gdbarch *gdbarch,
   value *result_value = value::allocate (register_type (gdbarch, regnum));
   VALUE_LVAL (result_value) = lval_register;
   VALUE_REGNUM (result_value) = regnum;
-  gdb_byte *buf = value_contents_raw (result_value).data ();
+  gdb_byte *buf = result_value->contents_raw ().data ();
 
   if (i386_byte_regnum_p (gdbarch, regnum))
     {
@@ -832,7 +832,7 @@ amd64_return_value (struct gdbarch *gdbarch, struct value *function,
   if (read_value != nullptr)
     {
       *read_value = value::allocate (type);
-      readbuf = value_contents_raw (*read_value).data ();
+      readbuf = (*read_value)->contents_raw ().data ();
     }
 
   /* 8. If the class is COMPLEX_X87, the real part of the value is

@@ -2846,7 +2846,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
     }
   else
     v->set_bitsize (bit_size);
-  unpacked = value_contents_writeable (v).data ();
+  unpacked = v->contents_writeable ().data ();
 
   if (bit_size == 0)
     {
@@ -2921,7 +2921,7 @@ ada_value_assign (struct value *toval, struct value *fromval)
       write_memory_with_notification (to_addr, buffer, len);
 
       val = value_copy (toval);
-      memcpy (value_contents_raw (val).data (),
+      memcpy (val->contents_raw ().data (),
 	      value_contents (fromval).data (),
 	      type->length ());
       val->deprecated_set_type (type);
@@ -2970,13 +2970,13 @@ value_assign_to_component (struct value *container, struct value *component,
 	  = component->type ()->length () * TARGET_CHAR_BIT - bits;
       else
 	src_offset = 0;
-      copy_bitwise ((value_contents_writeable (container).data ()
+      copy_bitwise ((container->contents_writeable ().data ()
 		     + offset_in_container),
 		    container->bitpos () + bit_offset_in_container,
 		    value_contents (val).data (), src_offset, bits, 1);
     }
   else
-    copy_bitwise ((value_contents_writeable (container).data ()
+    copy_bitwise ((container->contents_writeable ().data ()
 		   + offset_in_container),
 		  container->bitpos () + bit_offset_in_container,
 		  value_contents (val).data (), 0, bits, 0);
@@ -4529,7 +4529,7 @@ ada_convert_actual (struct value *actual, struct type *formal_type0)
 
 	      actual_type = ada_check_typedef (actual->type ());
 	      val = value::allocate (actual_type);
-	      copy (value_contents (actual), value_contents_raw (val));
+	      copy (value_contents (actual), val->contents_raw ());
 	      actual = ensure_lval (val);
 	    }
 	  result = value_addr (actual);
@@ -4592,12 +4592,12 @@ make_array_descriptor (struct type *type, struct value *arr)
        i > 0; i -= 1)
     {
       modify_field (bounds->type (),
-		    value_contents_writeable (bounds).data (),
+		    bounds->contents_writeable ().data (),
 		    ada_array_bound (arr, i, 0),
 		    desc_bound_bitpos (bounds_type, i, 0),
 		    desc_bound_bitsize (bounds_type, i, 0));
       modify_field (bounds->type (),
-		    value_contents_writeable (bounds).data (),
+		    bounds->contents_writeable ().data (),
 		    ada_array_bound (arr, i, 1),
 		    desc_bound_bitpos (bounds_type, i, 1),
 		    desc_bound_bitsize (bounds_type, i, 1));
@@ -4606,14 +4606,14 @@ make_array_descriptor (struct type *type, struct value *arr)
   bounds = ensure_lval (bounds);
 
   modify_field (descriptor->type (),
-		value_contents_writeable (descriptor).data (),
+		descriptor->contents_writeable ().data (),
 		value_pointer (ensure_lval (arr),
 			       desc_type->field (0).type ()),
 		fat_pntr_data_bitpos (desc_type),
 		fat_pntr_data_bitsize (desc_type));
 
   modify_field (descriptor->type (),
-		value_contents_writeable (descriptor).data (),
+		descriptor->contents_writeable ().data (),
 		value_pointer (bounds,
 			       desc_type->field (1).type ()),
 		fat_pntr_bounds_bitpos (desc_type),
@@ -9282,7 +9282,7 @@ ada_promote_array_of_integrals (struct type *type, struct value *val)
     error (_("unable to determine array bounds"));
 
   value *res = value::allocate (type);
-  gdb::array_view<gdb_byte> res_contents = value_contents_writeable (res);
+  gdb::array_view<gdb_byte> res_contents = res->contents_writeable ();
 
   /* Promote each array element.  */
   for (i = 0; i < hi - lo + 1; i++)
@@ -9404,7 +9404,7 @@ ada_value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
     }
 
   val = value::allocate (type1);
-  store_unsigned_integer (value_contents_raw (val).data (),
+  store_unsigned_integer (val->contents_raw ().data (),
 			  val->type ()->length (),
 			  type_byte_order (type1), v);
   return val;
@@ -10668,7 +10668,7 @@ ada_string_operation::evaluate (struct type *expect_type,
 	struct type *stringtype
 	  = lookup_array_range_type (char_type, 1, str.length ());
 	struct value *val = value::allocate (stringtype);
-	memcpy (value_contents_raw (val).data (), str.c_str (),
+	memcpy (val->contents_raw ().data (), str.c_str (),
 		str.length ());
 	return val;
       }
@@ -10703,7 +10703,7 @@ ada_string_operation::evaluate (struct type *expect_type,
 			       obstack_object_size (&converted)
 			       / char_type->length ());
   struct value *val = value::allocate (stringtype);
-  memcpy (value_contents_raw (val).data (),
+  memcpy (val->contents_raw ().data (),
 	  obstack_base (&converted),
 	  obstack_object_size (&converted));
   return val;

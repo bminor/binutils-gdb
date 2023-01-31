@@ -9193,7 +9193,7 @@ arm_return_value (struct gdbarch *gdbarch, struct value *function,
       if (read_value != nullptr)
 	{
 	  *read_value = value::allocate (valtype);
-	  readbuf = value_contents_raw (*read_value).data ();
+	  readbuf = (*read_value)->contents_raw ().data ();
 	}
 
       for (i = 0; i < vfp_base_count; i++)
@@ -9269,7 +9269,7 @@ arm_return_value (struct gdbarch *gdbarch, struct value *function,
   if (read_value != nullptr)
     {
       *read_value = value::allocate (valtype);
-      gdb_byte *readbuf = value_contents_raw (*read_value).data ();
+      gdb_byte *readbuf = (*read_value)->contents_raw ().data ();
       arm_extract_return_value (valtype, regcache, readbuf);
     }
 

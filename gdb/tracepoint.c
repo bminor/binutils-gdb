@@ -3778,7 +3778,7 @@ sdata_make_value (struct gdbarch *gdbarch, struct internalvar *var,
       type = init_vector_type (builtin_type (gdbarch)->builtin_true_char,
 			       buf->size ());
       v = value::allocate (type);
-      memcpy (value_contents_raw (v).data (), buf->data (), buf->size ());
+      memcpy (v->contents_raw ().data (), buf->data (), buf->size ());
       return v;
     }
   else

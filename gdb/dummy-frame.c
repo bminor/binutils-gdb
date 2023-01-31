@@ -354,7 +354,7 @@ dummy_frame_prev_register (frame_info_ptr this_frame,
      constructs either a raw or pseudo register from the raw
      register cache.  */
   cache->prev_regcache->cooked_read
-    (regnum, value_contents_writeable (reg_val).data ());
+    (regnum, reg_val->contents_writeable ().data ());
   return reg_val;
 }
 

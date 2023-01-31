@@ -587,7 +587,7 @@ language_defn::read_var_value (struct symbol *var,
 	}
       /* Put the constant back in target format. */
       v = value::allocate (type);
-      store_signed_integer (value_contents_raw (v).data (), type->length (),
+      store_signed_integer (v->contents_raw ().data (), type->length (),
 			    type_byte_order (type), var->value_longest ());
       VALUE_LVAL (v) = not_lval;
       return v;
@@ -627,7 +627,7 @@ language_defn::read_var_value (struct symbol *var,
 	  type = resolve_dynamic_type (type, {}, /* Unused address.  */ 0);
 	}
       v = value::allocate (type);
-      memcpy (value_contents_raw (v).data (), var->value_bytes (),
+      memcpy (v->contents_raw ().data (), var->value_bytes (),
 	      type->length ());
       VALUE_LVAL (v) = not_lval;
       return v;
@@ -900,7 +900,7 @@ value_from_register (struct type *type, int regnum, frame_info_ptr frame)
       VALUE_NEXT_FRAME_ID (v) = get_frame_id (get_next_frame_sentinel_okay (frame));
       VALUE_REGNUM (v) = regnum;
       ok = gdbarch_register_to_value (gdbarch, frame, regnum, type1,
-				      value_contents_raw (v).data (), &optim,
+				      v->contents_raw ().data (), &optim,
 				      &unavail);
 
       if (!ok)

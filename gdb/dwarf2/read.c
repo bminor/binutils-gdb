@@ -8992,7 +8992,7 @@ dwarf2_compute_name (const char *name,
 		      else if (bytes != NULL)
 			{
 			  v = value::allocate (type);
-			  memcpy (value_contents_writeable (v).data (), bytes,
+			  memcpy (v->contents_writeable ().data (), bytes,
 				  type->length ());
 			}
 		      else

@@ -255,7 +255,7 @@ ppc_linux_return_value (struct gdbarch *gdbarch, struct value *function,
   if (read_value != nullptr)
     {
       *read_value = value::allocate (valtype);
-      readbuf = value_contents_raw (*read_value).data ();
+      readbuf = (*read_value)->contents_raw ().data ();
     }
 
   if ((valtype->code () == TYPE_CODE_STRUCT

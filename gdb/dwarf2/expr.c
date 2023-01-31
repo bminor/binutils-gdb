@@ -164,7 +164,7 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
       if (check_optimized)
 	v_contents = nullptr;
       else
-	v_contents = value_contents_raw (v).data ();
+	v_contents = v->contents_raw ().data ();
       from_contents = nullptr;
     }
 
@@ -1026,7 +1026,7 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	      subobj_offset += n - max;
 
 	    copy (value_contents_all (val).slice (subobj_offset, len),
-		  value_contents_raw (retval));
+		  retval->contents_raw ());
 	  }
 	  break;
 
@@ -1038,7 +1038,7 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	      invalid_synthetic_pointer ();
 
 	    retval = value::allocate (subobj_type);
-	    bfd_byte *contents = value_contents_raw (retval).data ();
+	    bfd_byte *contents = retval->contents_raw ().data ();
 	    memcpy (contents, this->m_data + subobj_offset, n);
 	  }
 	  break;

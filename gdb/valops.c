@@ -392,7 +392,7 @@ value_cast_to_fixed_point (struct type *to_type, struct value *from_val)
   /* Finally, create the result value, and pack the unscaled value
      in it.  */
   struct value *result = value::allocate (to_type);
-  unscaled.write (value_contents_raw (result),
+  unscaled.write (result->contents_raw (),
 		  type_byte_order (to_type),
 		  to_type->is_unsigned ());
 
@@ -545,7 +545,7 @@ value_cast (struct type *type, struct value *arg2)
 	{
 	  struct value *v = value::allocate (to_type);
 	  target_float_convert (value_contents (arg2).data (), type2,
-				value_contents_raw (v).data (), type);
+				v->contents_raw ().data (), type);
 	  return v;
 	}
       else if (is_fixed_point_type (type2))
@@ -558,7 +558,7 @@ value_cast (struct type *type, struct value *arg2)
 				   type2->fixed_point_scaling_factor ());
 
 	  struct value *v = value::allocate (to_type);
-	  target_float_from_host_double (value_contents_raw (v).data (),
+	  target_float_from_host_double (v->contents_raw ().data (),
 					 to_type, mpq_get_d (fp_val.val));
 	  return v;
 	}
@@ -621,7 +621,7 @@ value_cast (struct type *type, struct value *arg2)
       struct value *result = value::allocate (to_type);
 
       cplus_make_method_ptr (to_type,
-			     value_contents_writeable (result).data (), 0, 0);
+			     result->contents_writeable ().data (), 0, 0);
       return result;
     }
   else if (code1 == TYPE_CODE_MEMBERPTR && code2 == TYPE_CODE_INT
@@ -955,7 +955,7 @@ value_one (struct type *type)
 	error (_("Could not determine the vector bounds"));
 
       val = value::allocate (type);
-      gdb::array_view<gdb_byte> val_contents = value_contents_writeable (val);
+      gdb::array_view<gdb_byte> val_contents = val->contents_writeable ();
       int elt_len = eltype->length ();
 
       for (i = 0; i < high_bound - low_bound + 1; i++)
@@ -1344,7 +1344,7 @@ value_assign (struct value *toval, struct value *fromval)
      implies the returned value is not lazy, even if TOVAL was.  */
   val = value_copy (toval);
   val->set_lazy (0);
-  copy (value_contents (fromval), value_contents_raw (val));
+  copy (value_contents (fromval), val->contents_raw ());
 
   /* We copy over the enclosing type and pointed-to offset from FROMVAL
      in the case of pointer types.  For object types, the enclosing type
@@ -1377,7 +1377,7 @@ value_repeat (struct value *arg1, int count)
   val->set_address (arg1->address ());
 
   read_value_memory (val, 0, val->stack (), val->address (),
-		     value_contents_all_raw (val).data (),
+		     val->contents_all_raw ().data (),
 		     type_length_units (val->enclosing_type ()));
 
   return val;
@@ -1750,7 +1750,7 @@ value_cstring (const char *ptr, ssize_t len, struct type *char_type)
     = lookup_array_range_type (char_type, lowbound, highbound + lowbound - 1);
 
   val = value::allocate (stringtype);
-  memcpy (value_contents_raw (val).data (), ptr, len);
+  memcpy (val->contents_raw ().data (), ptr, len);
   return val;
 }
 
@@ -1773,7 +1773,7 @@ value_string (const char *ptr, ssize_t len, struct type *char_type)
     = lookup_string_range_type (char_type, lowbound, highbound + lowbound - 1);
 
   val = value::allocate (stringtype);
-  memcpy (value_contents_raw (val).data (), ptr, len);
+  memcpy (val->contents_raw ().data (), ptr, len);
   return val;
 }
 
@@ -2101,7 +2101,7 @@ struct_field_searcher::search (struct value *arg1, LONGEST offset,
 	      base_addr = arg1->address () + boffset;
 	      v2 = value_at_lazy (basetype, base_addr);
 	      if (target_read_memory (base_addr, 
-				      value_contents_raw (v2).data (),
+				      v2->contents_raw ().data (),
 				      v2->type ()->length ()) != 0)
 		error (_("virtual baseclass botch"));
 	    }
@@ -3740,7 +3740,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 		  result = value::allocate
 		    (lookup_methodptr_type (TYPE_FN_FIELD_TYPE (f, j)));
 		  cplus_make_method_ptr (result->type (),
-					 value_contents_writeable (result).data (),
+					 result->contents_writeable ().data (),
 					 TYPE_FN_FIELD_VOFFSET (f, j), 1);
 		}
 	      else if (noside == EVAL_AVOID_SIDE_EFFECTS)
@@ -3765,7 +3765,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 		{
 		  result = value::allocate (lookup_methodptr_type (TYPE_FN_FIELD_TYPE (f, j)));
 		  cplus_make_method_ptr (result->type (),
-					 value_contents_writeable (result).data (),
+					 result->contents_writeable ().data (),
 					 v->address (), 0);
 		}
 	    }
@@ -4111,9 +4111,9 @@ value_literal_complex (struct value *arg1,
   int len = real_type->length ();
 
   copy (value_contents (arg1),
-	value_contents_raw (val).slice (0, len));
+	val->contents_raw ().slice (0, len));
   copy (value_contents (arg2),
-	value_contents_raw (val).slice (len, len));
+	val->contents_raw ().slice (len, len));
 
   return val;
 }
@@ -4158,9 +4158,9 @@ cast_into_complex (struct type *type, struct value *val)
       int len = val_real_type->length ();
 
       copy (value_contents (val).slice (0, len),
-	    value_contents_raw (re_val));
+	    re_val->contents_raw ());
       copy (value_contents (val).slice (len, len),
-	    value_contents_raw (im_val));
+	    im_val->contents_raw ());
 
       return value_literal_complex (re_val, im_val, type);
     }

@@ -370,6 +370,22 @@ public:
 
   int *deprecated_regnum_hack ();
 
+  /* contents() and contents_raw() both return the address of the gdb
+     buffer used to hold a copy of the contents of the lval.
+     contents() is used when the contents of the buffer are needed --
+     it uses fetch_lazy() to load the buffer from the process being
+     debugged if it hasn't already been loaded (contents_writeable()
+     is used when a writeable but fetched buffer is required)..
+     contents_raw() is used when data is being stored into the buffer,
+     or when it is certain that the contents of the buffer are valid.
+
+     Note: The contents pointer is adjusted by the offset required to
+     get to the real subobject, if the value happens to represent
+     something embedded in a larger run-time object.  */
+  gdb::array_view<gdb_byte> contents_raw ();
+  gdb::array_view<gdb_byte> contents_all_raw ();
+  gdb::array_view<gdb_byte> contents_writeable ();
+
 
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
@@ -636,22 +652,6 @@ struct lval_funcs
 
 extern void error_value_optimized_out (void);
 
-/* value_contents() and value_contents_raw() both return the address
-   of the gdb buffer used to hold a copy of the contents of the lval.
-   value_contents() is used when the contents of the buffer are needed
-   -- it uses value_fetch_lazy() to load the buffer from the process
-   being debugged if it hasn't already been loaded
-   (value_contents_writeable() is used when a writeable but fetched
-   buffer is required)..  value_contents_raw() is used when data is
-   being stored into the buffer, or when it is certain that the
-   contents of the buffer are valid.
-
-   Note: The contents pointer is adjusted by the offset required to
-   get to the real subobject, if the value happens to represent
-   something embedded in a larger run-time object.  */
-
-extern gdb::array_view<gdb_byte> value_contents_raw (struct value *);
-
 /* Actual contents of the value.  For use of this value; setting it
    uses the stuff above.  Not valid if lazy is nonzero.  Target
    byte-order.  We force it to be aligned properly for any possible
@@ -659,12 +659,10 @@ extern gdb::array_view<gdb_byte> value_contents_raw (struct value *);
    declared here.  */
 
 extern gdb::array_view<const gdb_byte> value_contents (struct value *);
-extern gdb::array_view<gdb_byte> value_contents_writeable (struct value *);
 
 /* The ALL variants of the above two macros do not adjust the returned
    pointer by the embedded_offset value.  */
 
-extern gdb::array_view<gdb_byte> value_contents_all_raw (struct value *);
 extern gdb::array_view<const gdb_byte> value_contents_all (struct value *);
 
 /* Like value_contents_all, but does not require that the returned

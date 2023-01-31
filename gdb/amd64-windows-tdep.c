@@ -410,7 +410,7 @@ amd64_windows_return_value (struct gdbarch *gdbarch, struct value *function,
 	{
 	  *read_value = value::allocate (type);
 	  regcache->raw_read_part (regnum, 0, len,
-				   value_contents_raw (*read_value).data ());
+				   (*read_value)->contents_raw ().data ());
 	}
       if (writebuf)
 	regcache->raw_write_part (regnum, 0, len, writebuf);
