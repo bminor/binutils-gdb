@@ -673,7 +673,7 @@ c_string_operation::evaluate (struct type *expect_type,
 	      > (high_bound - low_bound + 1))
 	    error (_("Too many array elements"));
 
-	  result = allocate_value (expect_type);
+	  result = value::allocate (expect_type);
 	  memcpy (value_contents_raw (result).data (), obstack_base (&output),
 		  obstack_object_size (&output));
 	}

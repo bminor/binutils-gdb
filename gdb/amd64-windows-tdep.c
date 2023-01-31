@@ -408,7 +408,7 @@ amd64_windows_return_value (struct gdbarch *gdbarch, struct value *function,
       /* Extract the return value from the register where it was stored.  */
       if (read_value != nullptr)
 	{
-	  *read_value = allocate_value (type);
+	  *read_value = value::allocate (type);
 	  regcache->raw_read_part (regnum, 0, len,
 				   value_contents_raw (*read_value).data ());
 	}

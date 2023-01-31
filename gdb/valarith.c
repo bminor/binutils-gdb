@@ -190,7 +190,7 @@ value_subscript (struct value *array, LONGEST index)
       if (!array->lazy ()
 	  && !value_bytes_available (array, elt_size * index, elt_size))
 	{
-	  struct value *val = allocate_value (elt_type);
+	  struct value *val = value::allocate (elt_type);
 	  mark_value_bytes_unavailable (val, 0, elt_size);
 	  VALUE_LVAL (val) = lval_memory;
 	  val->set_address (array->address () + elt_size * index);
@@ -716,7 +716,7 @@ value_concat (struct value *arg1, struct value *arg2)
 						lowbound,
 						lowbound + n_elts - 1);
 
-  struct value *result = allocate_value (atype);
+  struct value *result = value::allocate (atype);
   gdb::array_view<gdb_byte> contents = value_contents_raw (result);
   gdb::array_view<const gdb_byte> lhs_contents = value_contents (arg1);
   gdb::array_view<const gdb_byte> rhs_contents = value_contents (arg2);
@@ -869,7 +869,7 @@ fixed_point_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 
   auto fixed_point_to_value = [type1] (const gdb_mpq &fp)
     {
-      value *fp_val = allocate_value (type1);
+      value *fp_val = value::allocate (type1);
 
       fp.write_fixed_point
 	(value_contents_raw (fp_val),
@@ -1179,7 +1179,7 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
   if (is_floating_type (type1) || is_floating_type (type2))
     {
       result_type = promotion_type (type1, type2);
-      val = allocate_value (result_type);
+      val = value::allocate (result_type);
 
       struct type *eff_type_v1, *eff_type_v2;
       gdb::byte_vector v1, v2;
@@ -1229,7 +1229,7 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 
       result_type = type1;
 
-      val = allocate_value (result_type);
+      val = value::allocate (result_type);
       store_signed_integer (value_contents_raw (val).data (),
 			    result_type->length (),
 			    type_byte_order (result_type),
@@ -1375,7 +1375,7 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	      error (_("Invalid binary operation on numbers."));
 	    }
 
-	  val = allocate_value (result_type);
+	  val = value::allocate (result_type);
 	  store_unsigned_integer (value_contents_raw (val).data (),
 				  val->type ()->length (),
 				  type_byte_order (result_type),
@@ -1536,7 +1536,7 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	      error (_("Invalid binary operation on numbers."));
 	    }
 
-	  val = allocate_value (result_type);
+	  val = value::allocate (result_type);
 	  store_signed_integer (value_contents_raw (val).data (),
 				val->type ()->length (),
 				type_byte_order (result_type),
@@ -1581,7 +1581,7 @@ value_vector_widen (struct value *scalar_value, struct type *vector_type)
       && !value_equal (elval, scalar_value))
     error (_("conversion of scalar to vector involves truncation"));
 
-  value *val = allocate_value (vector_type);
+  value *val = value::allocate (vector_type);
   gdb::array_view<gdb_byte> val_contents = value_contents_writeable (val);
   int elt_len = eltype->length ();
 
@@ -1628,7 +1628,7 @@ vector_binop (struct value *val1, struct value *val2, enum exp_opcode op)
       || low_bound1 != low_bound2 || high_bound1 != high_bound2)
     error (_("Cannot perform operation on vectors with different types"));
 
-  value *val = allocate_value (type1);
+  value *val = value::allocate (type1);
   gdb::array_view<gdb_byte> val_contents = value_contents_writeable (val);
   scoped_value_mark mark;
   for (i = 0; i < high_bound1 - low_bound1 + 1; i++)
@@ -1916,7 +1916,7 @@ value_neg (struct value *arg1)
     return value_binop (value_zero (type, not_lval), arg1, BINOP_SUB);
   else if (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
     {
-      struct value *val = allocate_value (type);
+      struct value *val = value::allocate (type);
       struct type *eltype = check_typedef (type->target_type ());
       int i;
       LONGEST low_bound, high_bound;
@@ -1968,7 +1968,7 @@ value_complement (struct value *arg1)
       if (!get_array_bounds (type, &low_bound, &high_bound))
 	error (_("Could not determine the vector bounds"));
 
-      val = allocate_value (type);
+      val = value::allocate (type);
       gdb::array_view<gdb_byte> val_contents = value_contents_writeable (val);
       int elt_len = eltype->length ();
 

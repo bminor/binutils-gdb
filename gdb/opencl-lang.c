@@ -177,7 +177,7 @@ lval_func_write (struct value *v, struct value *fromval)
 
   for (i = offset; i < n; i++)
     {
-      struct value *from_elm_val = allocate_value (eltype);
+      struct value *from_elm_val = value::allocate (eltype);
       struct value *to_elm_val = value_subscript (c->val, c->indices[i]);
 
       memcpy (value_contents_writeable (from_elm_val).data (),
@@ -297,7 +297,7 @@ create_value (struct gdbarch *gdbarch, struct value *val, enum noside noside,
       make_cv_type (TYPE_CONST (type), TYPE_VOLATILE (type), dst_type, NULL);
 
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	ret = allocate_value (dst_type);
+	ret = value::allocate (dst_type);
       else
 	{
 	  /* Check whether to create a lvalue or not.  */
@@ -310,7 +310,7 @@ create_value (struct gdbarch *gdbarch, struct value *val, enum noside noside,
 	    {
 	      int i;
 
-	      ret = allocate_value (dst_type);
+	      ret = value::allocate (dst_type);
 
 	      /* Copy src val contents into the destination value.  */
 	      for (i = 0; i < n; i++)
@@ -464,7 +464,7 @@ opencl_logical_not (struct type *expect_type, struct expression *exp,
       rettype = lookup_opencl_vector_type (exp->gdbarch, TYPE_CODE_INT,
 					   eltype->length (), 0,
 					   highb - lowb + 1);
-      ret = allocate_value (rettype);
+      ret = value::allocate (rettype);
 
       for (i = 0; i < highb - lowb + 1; i++)
 	{
@@ -564,7 +564,7 @@ vector_relop (struct expression *exp, struct value *val1, struct value *val2,
   rettype = lookup_opencl_vector_type (exp->gdbarch, TYPE_CODE_INT,
 				       eltype1->length (), 0,
 				       highb1 - lowb1 + 1);
-  ret = allocate_value (rettype);
+  ret = value::allocate (rettype);
 
   for (i = 0; i < highb1 - lowb1 + 1; i++)
     {
@@ -831,7 +831,7 @@ Cannot perform operation on vectors with different types"));
 	error (_("\
 Cannot perform conditional operation on vectors with different sizes"));
 
-      ret = allocate_value (type2);
+      ret = value::allocate (type2);
 
       for (i = 0; i < highb1 - lowb1 + 1; i++)
 	{

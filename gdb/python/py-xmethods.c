@@ -580,7 +580,7 @@ python_xmethod_worker::invoke (struct value *obj,
     }
   else
     {
-      res = allocate_value (lookup_typename (current_language,
+      res = value::allocate (lookup_typename (current_language,
 					     "void", NULL, 0));
     }
 

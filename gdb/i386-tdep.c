@@ -3093,7 +3093,7 @@ i386_return_value (struct gdbarch *gdbarch, struct value *function,
 
   if (read_value != nullptr)
     {
-      *read_value = allocate_value (type);
+      *read_value = value::allocate (type);
       i386_extract_return_value (gdbarch, type, regcache,
 				 value_contents_raw (*read_value).data ());
     }
@@ -3557,7 +3557,7 @@ i386_pseudo_register_read_value (struct gdbarch *gdbarch,
 {
   struct value *result;
 
-  result = allocate_value (register_type (gdbarch, regnum));
+  result = value::allocate (register_type (gdbarch, regnum));
   VALUE_LVAL (result) = lval_register;
   VALUE_REGNUM (result) = regnum;
 

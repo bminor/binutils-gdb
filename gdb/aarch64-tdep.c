@@ -2492,7 +2492,7 @@ aarch64_return_value (struct gdbarch *gdbarch, struct value *func_value,
 
   if (read_value)
     {
-      *read_value = allocate_value (valtype);
+      *read_value = value::allocate (valtype);
       aarch64_extract_return_value (valtype, regcache,
 				    value_contents_raw (*read_value).data ());
     }
@@ -2781,7 +2781,7 @@ aarch64_pseudo_read_value (struct gdbarch *gdbarch, readable_regcache *regcache,
 			   int regnum)
 {
   aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
-  struct value *result_value = allocate_value (register_type (gdbarch, regnum));
+  struct value *result_value = value::allocate (register_type (gdbarch, regnum));
 
   VALUE_LVAL (result_value) = lval_register;
   VALUE_REGNUM (result_value) = regnum;

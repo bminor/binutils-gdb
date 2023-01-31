@@ -2231,7 +2231,7 @@ value_from_setting (const setting &var, struct gdbarch *gdbarch)
 		if (l->val.has_value ())
 		  value = *l->val;
 		else
-		  return allocate_value (builtin_type (gdbarch)->builtin_void);
+		  return value::allocate (builtin_type (gdbarch)->builtin_void);
 		break;
 	      }
 

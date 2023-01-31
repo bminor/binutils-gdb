@@ -968,7 +968,7 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 		   inspecting a register ($pc, $sp, etc.), return a
 		   generic optimized out value instead, so that we show
 		   <optimized out> instead of <not saved>.  */
-		value *tmp = allocate_value (subobj_type);
+		value *tmp = value::allocate (subobj_type);
 		value_contents_copy (tmp, 0, retval, 0,
 				     subobj_type->length ());
 		retval = tmp;
@@ -1019,7 +1019,7 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	    if (subobj_offset + len > max)
 	      invalid_synthetic_pointer ();
 
-	    retval = allocate_value (subobj_type);
+	    retval = value::allocate (subobj_type);
 
 	    /* The given offset is relative to the actual object.  */
 	    if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG)
@@ -1037,7 +1037,7 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	    if (subobj_offset + n > this->m_len)
 	      invalid_synthetic_pointer ();
 
-	    retval = allocate_value (subobj_type);
+	    retval = value::allocate (subobj_type);
 	    bfd_byte *contents = value_contents_raw (retval).data ();
 	    memcpy (contents, this->m_data + subobj_offset, n);
 	  }

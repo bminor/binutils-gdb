@@ -43,7 +43,7 @@ value_of_builtin_frame_fp_reg (frame_info_ptr frame, const void *baton)
   else
     {
       struct type *data_ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
-      struct value *val = allocate_value (data_ptr_type);
+      struct value *val = value::allocate (data_ptr_type);
       gdb_byte *buf = value_contents_raw (val).data ();
 
       gdbarch_address_to_pointer (gdbarch, data_ptr_type,
@@ -62,7 +62,7 @@ value_of_builtin_frame_pc_reg (frame_info_ptr frame, const void *baton)
   else
     {
       struct type *func_ptr_type = builtin_type (gdbarch)->builtin_func_ptr;
-      struct value *val = allocate_value (func_ptr_type);
+      struct value *val = value::allocate (func_ptr_type);
       gdb_byte *buf = value_contents_raw (val).data ();
 
       gdbarch_address_to_pointer (gdbarch, func_ptr_type,

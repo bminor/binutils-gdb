@@ -466,7 +466,7 @@ get_call_return_value (struct call_return_meta_info *ri)
   bool stack_temporaries = thread_stack_temporaries_enabled_p (thr);
 
   if (ri->value_type->code () == TYPE_CODE_VOID)
-    retval = allocate_value (ri->value_type);
+    retval = value::allocate (ri->value_type);
   else if (ri->struct_return_p)
     {
       if (stack_temporaries)

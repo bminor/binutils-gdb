@@ -761,7 +761,7 @@ test_print_fields (gdbarch *arch)
       FIELD_BITSIZE (*f) = 1;
     }
 
-  value *val = allocate_value (the_struct);
+  value *val = value::allocate (the_struct);
   gdb_byte *contents = value_contents_writeable (val).data ();
   store_unsigned_integer (contents, val->enclosing_type ()->length (),
 			  gdbarch_byte_order (arch), 0xe9);

@@ -3099,7 +3099,7 @@ test_print_flags (gdbarch *arch)
   append_flags_type_field (flags_type, 3, 2, field_type, "B");
   append_flags_type_field (flags_type, 5, 3, field_type, "C");
 
-  value *val = allocate_value (flags_type);
+  value *val = value::allocate (flags_type);
   gdb_byte *contents = value_contents_writeable (val).data ();
   store_unsigned_integer (contents, 4, gdbarch_byte_order (arch), 0xaa);
 

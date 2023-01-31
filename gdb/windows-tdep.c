@@ -436,7 +436,7 @@ tlb_make_value (struct gdbarch *gdbarch, struct internalvar *var, void *ignore)
       return allocate_computed_value (type, &tlb_value_funcs, NULL);
     }
 
-  return allocate_value (builtin_type (gdbarch)->builtin_void);
+  return value::allocate (builtin_type (gdbarch)->builtin_void);
 }
 
 

@@ -1618,7 +1618,7 @@ public:
 	    if (!TYPE_IS_REFERENCE (type))
 	      {
 		type = lookup_lvalue_reference_type (type);
-		result = allocate_value (type);
+		result = value::allocate (type);
 	      }
 	  }
 
@@ -1653,7 +1653,7 @@ public:
     value *result = std::get<0> (m_storage)->evaluate (nullptr, exp,
 						       sub_noside);
     if (noside != EVAL_NORMAL)
-      return allocate_value (cplus_typeid_type (exp->gdbarch));
+      return value::allocate (cplus_typeid_type (exp->gdbarch));
     return cplus_typeid (result);
   }
 

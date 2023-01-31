@@ -3777,12 +3777,12 @@ sdata_make_value (struct gdbarch *gdbarch, struct internalvar *var,
 
       type = init_vector_type (builtin_type (gdbarch)->builtin_true_char,
 			       buf->size ());
-      v = allocate_value (type);
+      v = value::allocate (type);
       memcpy (value_contents_raw (v).data (), buf->data (), buf->size ());
       return v;
     }
   else
-    return allocate_value (builtin_type (gdbarch)->builtin_void);
+    return value::allocate (builtin_type (gdbarch)->builtin_void);
 }
 
 #if !defined(HAVE_LIBEXPAT)

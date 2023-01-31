@@ -931,7 +931,7 @@ struct type
 
   /* Note that if thistype is a TYPEDEF type, you have to call check_typedef.
      But check_typedef does set the TYPE_LENGTH of the TYPEDEF type,
-     so you only have to call check_typedef once.  Since allocate_value
+     so you only have to call check_typedef once.  Since value::allocate
      calls check_typedef, X->type ()->length () is safe.  */
   ULONGEST length () const
   {

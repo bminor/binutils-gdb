@@ -1514,7 +1514,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, frame_info_ptr frame,
       if (ex.error == NOT_AVAILABLE_ERROR)
 	{
 	  free_values.free_to_mark ();
-	  retval = allocate_value (subobj_type);
+	  retval = value::allocate (subobj_type);
 	  mark_value_bytes_unavailable (retval, 0,
 					subobj_type->length ());
 	  return retval;

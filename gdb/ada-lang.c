@@ -564,7 +564,7 @@ coerce_unspec_val_to_type (struct value *val, struct type *type)
 	result = value::allocate_lazy (type);
       else
 	{
-	  result = allocate_value (type);
+	  result = value::allocate (type);
 	  value_contents_copy (result, 0, val, 0, type->length ());
 	}
       set_value_component_location (result, val);
@@ -2807,7 +2807,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
 
   if (obj == NULL)
     {
-      v = allocate_value (type);
+      v = value::allocate (type);
       src = valaddr + offset;
     }
   else if (VALUE_LVAL (obj) == lval_memory && obj->lazy ())
@@ -2822,7 +2822,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
     }
   else
     {
-      v = allocate_value (type);
+      v = value::allocate (type);
       src = value_contents (obj).data () + offset;
     }
 
@@ -3404,7 +3404,7 @@ empty_array (struct type *arr_type, int low, int high)
 	 high < low ? low - 1 : high);
   struct type *elt_type = ada_array_element_type (arr_type0, 1);
 
-  return allocate_value (create_array_type (NULL, elt_type, index_type));
+  return value::allocate (create_array_type (NULL, elt_type, index_type));
 }
 
 
@@ -4528,7 +4528,7 @@ ada_convert_actual (struct value *actual, struct type *formal_type0)
 	      struct value *val;
 
 	      actual_type = ada_check_typedef (actual->type ());
-	      val = allocate_value (actual_type);
+	      val = value::allocate (actual_type);
 	      copy (value_contents (actual), value_contents_raw (val));
 	      actual = ensure_lval (val);
 	    }
@@ -4544,7 +4544,7 @@ ada_convert_actual (struct value *actual, struct type *formal_type0)
     {
       /* We need to turn this parameter into an aligner type
 	 as well.  */
-      struct value *aligner = allocate_value (formal_type);
+      struct value *aligner = value::allocate (formal_type);
       struct value *component = ada_value_struct_elt (aligner, "F", 0);
 
       value_assign_to_component (aligner, component, actual);
@@ -4584,8 +4584,8 @@ make_array_descriptor (struct type *type, struct value *arr)
 {
   struct type *bounds_type = desc_bounds_type (type);
   struct type *desc_type = desc_base_type (type);
-  struct value *descriptor = allocate_value (desc_type);
-  struct value *bounds = allocate_value (bounds_type);
+  struct value *descriptor = value::allocate (desc_type);
+  struct value *bounds = value::allocate (bounds_type);
   int i;
 
   for (i = ada_array_arity (ada_check_typedef (arr->type ()));
@@ -9281,7 +9281,7 @@ ada_promote_array_of_integrals (struct type *type, struct value *val)
   if (!get_array_bounds (type, &lo, &hi))
     error (_("unable to determine array bounds"));
 
-  value *res = allocate_value (type);
+  value *res = value::allocate (type);
   gdb::array_view<gdb_byte> res_contents = value_contents_writeable (res);
 
   /* Promote each array element.  */
@@ -9403,7 +9403,7 @@ ada_value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
       v = 0;
     }
 
-  val = allocate_value (type1);
+  val = value::allocate (type1);
   store_unsigned_integer (value_contents_raw (val).data (),
 			  val->type ()->length (),
 			  type_byte_order (type1), v);
@@ -10667,7 +10667,7 @@ ada_string_operation::evaluate (struct type *expect_type,
 	   historical behavior.  */
 	struct type *stringtype
 	  = lookup_array_range_type (char_type, 1, str.length ());
-	struct value *val = allocate_value (stringtype);
+	struct value *val = value::allocate (stringtype);
 	memcpy (value_contents_raw (val).data (), str.c_str (),
 		str.length ());
 	return val;
@@ -10702,7 +10702,7 @@ ada_string_operation::evaluate (struct type *expect_type,
     = lookup_array_range_type (char_type, 1,
 			       obstack_object_size (&converted)
 			       / char_type->length ());
-  struct value *val = allocate_value (stringtype);
+  struct value *val = value::allocate (stringtype);
   memcpy (value_contents_raw (val).data (),
 	  obstack_base (&converted),
 	  obstack_object_size (&converted));
@@ -11208,7 +11208,7 @@ ada_funcall_operation::evaluate (struct type *expect_type,
 	{
 	  if (type->target_type () == NULL)
 	    error_call_unknown_return_type (NULL);
-	  return allocate_value (type->target_type ());
+	  return value::allocate (type->target_type ());
 	}
       return call_function_by_hand (callee, NULL, argvec);
     case TYPE_CODE_INTERNAL_FUNCTION:

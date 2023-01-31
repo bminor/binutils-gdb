@@ -1178,7 +1178,7 @@ default_gdbarch_return_value
 
   if (read_value != nullptr)
     {
-      *read_value = allocate_value (valtype);
+      *read_value = value::allocate (valtype);
       readbuf = value_contents_raw (*read_value).data ();
     }
 

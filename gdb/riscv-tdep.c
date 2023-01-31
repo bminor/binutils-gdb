@@ -3277,7 +3277,7 @@ riscv_return_value (struct gdbarch  *gdbarch,
 						   arg_type->length ()),
 			     type_byte_order (arg_type),
 			     arg_type->is_unsigned ());
-	      abi_val = allocate_value (info.type);
+	      abi_val = value::allocate (info.type);
 	      unscaled.write (value_contents_raw (abi_val),
 			      type_byte_order (info.type),
 			      info.type->is_unsigned ());
@@ -3291,7 +3291,7 @@ riscv_return_value (struct gdbarch  *gdbarch,
 	}
       else
 	{
-	  abi_val = allocate_value (info.type);
+	  abi_val = value::allocate (info.type);
 	  readbuf = value_contents_raw (abi_val).data ();
 	}
       arg_len = info.type->length ();
@@ -3408,7 +3408,7 @@ riscv_return_value (struct gdbarch  *gdbarch,
 	      unscaled.read (value_contents (abi_val),
 			     type_byte_order (info.type),
 			     info.type->is_unsigned ());
-	      *read_value = allocate_value (arg_type);
+	      *read_value = value::allocate (arg_type);
 	      unscaled.write (value_contents_raw (*read_value),
 			      type_byte_order (arg_type),
 			      arg_type->is_unsigned ());

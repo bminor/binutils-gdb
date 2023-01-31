@@ -166,6 +166,9 @@ public:
      NULL; it will be allocated when it is fetched from the target.  */
   static struct value *allocate_lazy (struct type *type);
 
+  /* Allocate a value and its contents for type TYPE.  */
+  static struct value *allocate (struct type *type);
+
   ~value ();
 
   DISABLE_COPY_AND_ASSIGN (value);
@@ -531,6 +534,12 @@ public:
      limited_length will be set to indicate the length in octets that were
      loaded from the inferior.  */
   ULONGEST m_limited_length = 0;
+
+private:
+
+  /* Allocate a value and its contents for type TYPE.  If CHECK_SIZE
+     is true, then apply the usual max-value-size checks.  */
+  static struct value *allocate (struct type *type, bool check_size);
 };
 
 /* Returns value_type or value_enclosing_type depending on
@@ -1010,8 +1019,6 @@ extern int symbol_read_needs_frame (struct symbol *);
 extern struct value *read_var_value (struct symbol *var,
 				     const struct block *var_block,
 				     frame_info_ptr frame);
-
-extern struct value *allocate_value (struct type *type);
 
 extern void value_contents_copy (struct value *dst, LONGEST dst_offset,
 				 struct value *src, LONGEST src_offset,

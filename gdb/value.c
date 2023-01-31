@@ -958,8 +958,8 @@ allocate_value_contents (struct value *val, bool check_size)
 /* Allocate a value and its contents for type TYPE.  If CHECK_SIZE is true,
    then apply the usual max-value-size checks.  */
 
-static struct value *
-allocate_value (struct type *type, bool check_size)
+struct value *
+value::allocate (struct type *type, bool check_size)
 {
   struct value *val = value::allocate_lazy (type);
 
@@ -971,9 +971,9 @@ allocate_value (struct type *type, bool check_size)
 /* Allocate a value and its contents for type TYPE.  */
 
 struct value *
-allocate_value (struct type *type)
+value::allocate (struct type *type)
 {
-  return allocate_value (type, true);
+  return allocate (type, true);
 }
 
 /* Allocate a  value  that has the correct length
@@ -991,7 +991,7 @@ allocate_repeat_value (struct type *type, int count)
   struct type *array_type
     = lookup_array_range_type (type, low_bound, count + low_bound - 1);
 
-  return allocate_value (array_type);
+  return value::allocate (array_type);
 }
 
 struct value *
@@ -1619,7 +1619,7 @@ value_non_lval (struct value *arg)
   if (VALUE_LVAL (arg) != not_lval)
     {
       struct type *enc_type = arg->enclosing_type ();
-      struct value *val = allocate_value (enc_type);
+      struct value *val = value::allocate (enc_type);
 
       copy (value_contents_all (arg), value_contents_all_raw (val));
       val->m_type = arg->m_type;
@@ -2077,18 +2077,18 @@ value_of_internalvar (struct gdbarch *gdbarch, struct internalvar *var)
 	val = value_from_longest (builtin_type (gdbarch)->builtin_int64,
 				  tsv->value);
       else
-	val = allocate_value (builtin_type (gdbarch)->builtin_void);
+	val = value::allocate (builtin_type (gdbarch)->builtin_void);
       return val;
     }
 
   switch (var->kind)
     {
     case INTERNALVAR_VOID:
-      val = allocate_value (builtin_type (gdbarch)->builtin_void);
+      val = value::allocate (builtin_type (gdbarch)->builtin_void);
       break;
 
     case INTERNALVAR_FUNCTION:
-      val = allocate_value (builtin_type (gdbarch)->internal_fn);
+      val = value::allocate (builtin_type (gdbarch)->internal_fn);
       break;
 
     case INTERNALVAR_INTEGER:
@@ -2566,7 +2566,7 @@ value_from_xmethod (xmethod_worker_up &&worker)
 {
   struct value *v;
 
-  v = allocate_value (builtin_type (target_gdbarch ())->xmethod);
+  v = value::allocate (builtin_type (target_gdbarch ())->xmethod);
   v->m_lval = lval_xcallable;
   v->m_location.xm_worker = worker.release ();
   v->m_modifiable = 0;
@@ -2989,7 +2989,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
 	v = value::allocate_lazy (arg1->enclosing_type ());
       else
 	{
-	  v = allocate_value (arg1->enclosing_type ());
+	  v = value::allocate (arg1->enclosing_type ());
 	  value_contents_copy_raw (v, 0, arg1, 0,
 				   arg1->enclosing_type ()->length ());
 	}
@@ -3022,7 +3022,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
 	v = value::allocate_lazy (type);
       else
 	{
-	  v = allocate_value (type);
+	  v = value::allocate (type);
 	  value_contents_copy_raw (v, v->embedded_offset (),
 				   arg1, arg1->embedded_offset () + offset,
 				   type_length_units (type));
@@ -3070,7 +3070,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
 	return NULL;
     }
 
-  v = allocate_value (ftype);
+  v = value::allocate (ftype);
   VALUE_LVAL (v) = lval_memory;
   if (sym)
     {
@@ -3259,7 +3259,7 @@ value_field_bitfield (struct type *type, int fieldno,
 {
   int bitpos = type->field (fieldno).loc_bitpos ();
   int bitsize = TYPE_FIELD_BITSIZE (type, fieldno);
-  struct value *res_val = allocate_value (type->field (fieldno).type ());
+  struct value *res_val = value::allocate (type->field (fieldno).type ());
 
   unpack_value_bitfield (res_val, bitpos, bitsize,
 			 valaddr, embedded_offset, val);
@@ -3436,7 +3436,7 @@ value_zero (struct type *type, enum lval_type lv)
 struct value *
 value_from_longest (struct type *type, LONGEST num)
 {
-  struct value *val = allocate_value (type);
+  struct value *val = value::allocate (type);
 
   pack_long (value_contents_raw (val).data (), type, num);
   return val;
@@ -3448,7 +3448,7 @@ value_from_longest (struct type *type, LONGEST num)
 struct value *
 value_from_ulongest (struct type *type, ULONGEST num)
 {
-  struct value *val = allocate_value (type);
+  struct value *val = value::allocate (type);
 
   pack_unsigned_long (value_contents_raw (val).data (), type, num);
 
@@ -3462,7 +3462,7 @@ value_from_ulongest (struct type *type, ULONGEST num)
 struct value *
 value_from_pointer (struct type *type, CORE_ADDR addr)
 {
-  struct value *val = allocate_value (type);
+  struct value *val = value::allocate (type);
 
   store_typed_address (value_contents_raw (val).data (),
 		       check_typedef (type), addr);
@@ -3476,7 +3476,7 @@ value_from_pointer (struct type *type, CORE_ADDR addr)
 struct value *
 value_from_host_double (struct type *type, double d)
 {
-  struct value *value = allocate_value (type);
+  struct value *value = value::allocate (type);
   gdb_assert (type->code () == TYPE_CODE_FLT);
   target_float_from_host_double (value_contents_raw (value).data (),
 				 value->type (), d);
@@ -3543,7 +3543,7 @@ value_from_contents (struct type *type, const gdb_byte *contents)
 {
   struct value *result;
 
-  result = allocate_value (type);
+  result = value::allocate (type);
   memcpy (value_contents_raw (result).data (), contents, type->length ());
   return result;
 }
@@ -3623,7 +3623,7 @@ value_from_component (struct value *whole, struct type *type, LONGEST offset)
     v = value::allocate_lazy (type);
   else
     {
-      v = allocate_value (type);
+      v = value::allocate (type);
       value_contents_copy (v, v->embedded_offset (),
 			   whole, whole->embedded_offset () + offset,
 			   type_length_units (type));
@@ -3650,7 +3650,7 @@ value_from_component_bitsize (struct value *whole, struct type *type,
       && bit_length == TARGET_CHAR_BIT * type->length ())
     return value_from_component (whole, type, bit_offset / TARGET_CHAR_BIT);
 
-  struct value *v = allocate_value (type);
+  struct value *v = value::allocate (type);
 
   LONGEST dst_offset = TARGET_CHAR_BIT * v->embedded_offset ();
   if (is_scalar_type (type) && type_byte_order (type) == BFD_ENDIAN_BIG)

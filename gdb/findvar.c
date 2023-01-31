@@ -586,7 +586,7 @@ language_defn::read_var_value (struct symbol *var,
 	  type = resolve_dynamic_type (type, {}, /* Unused address.  */ 0);
 	}
       /* Put the constant back in target format. */
-      v = allocate_value (type);
+      v = value::allocate (type);
       store_signed_integer (value_contents_raw (v).data (), type->length (),
 			    type_byte_order (type), var->value_longest ());
       VALUE_LVAL (v) = not_lval;
@@ -626,7 +626,7 @@ language_defn::read_var_value (struct symbol *var,
 	  /* Value is a constant byte-sequence and needs no memory access.  */
 	  type = resolve_dynamic_type (type, {}, /* Unused address.  */ 0);
 	}
-      v = allocate_value (type);
+      v = value::allocate (type);
       memcpy (value_contents_raw (v).data (), var->value_bytes (),
 	      type->length ());
       VALUE_LVAL (v) = not_lval;
@@ -801,7 +801,7 @@ default_value_from_register (struct gdbarch *gdbarch, struct type *type,
 			     int regnum, struct frame_id frame_id)
 {
   int len = type->length ();
-  struct value *value = allocate_value (type);
+  struct value *value = value::allocate (type);
   frame_info_ptr frame;
 
   VALUE_LVAL (value) = lval_register;
@@ -895,7 +895,7 @@ value_from_register (struct type *type, int regnum, frame_info_ptr frame)
 	 the corresponding [integer] type (see Alpha).  The assumption
 	 is that gdbarch_register_to_value populates the entire value
 	 including the location.  */
-      v = allocate_value (type);
+      v = value::allocate (type);
       VALUE_LVAL (v) = lval_register;
       VALUE_NEXT_FRAME_ID (v) = get_frame_id (get_next_frame_sentinel_okay (frame));
       VALUE_REGNUM (v) = regnum;

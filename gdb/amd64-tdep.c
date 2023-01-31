@@ -355,7 +355,7 @@ amd64_pseudo_register_read_value (struct gdbarch *gdbarch,
 {
   i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
 
-  value *result_value = allocate_value (register_type (gdbarch, regnum));
+  value *result_value = value::allocate (register_type (gdbarch, regnum));
   VALUE_LVAL (result_value) = lval_register;
   VALUE_REGNUM (result_value) = regnum;
   gdb_byte *buf = value_contents_raw (result_value).data ();
@@ -831,7 +831,7 @@ amd64_return_value (struct gdbarch *gdbarch, struct value *function,
   gdb_byte *readbuf = nullptr;
   if (read_value != nullptr)
     {
-      *read_value = allocate_value (type);
+      *read_value = value::allocate (type);
       readbuf = value_contents_raw (*read_value).data ();
     }
 

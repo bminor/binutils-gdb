@@ -1530,7 +1530,7 @@ sparc32_return_value (struct gdbarch *gdbarch, struct value *function,
 
   if (read_value != nullptr)
     {
-      *read_value = allocate_value (type);
+      *read_value = value::allocate (type);
       gdb_byte *readbuf = value_contents_raw (*read_value).data ();
       sparc32_extract_return_value (type, regcache, readbuf);
     }

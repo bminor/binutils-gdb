@@ -391,7 +391,7 @@ value_cast_to_fixed_point (struct type *to_type, struct value *from_val)
 
   /* Finally, create the result value, and pack the unscaled value
      in it.  */
-  struct value *result = allocate_value (to_type);
+  struct value *result = value::allocate (to_type);
   unscaled.write (value_contents_raw (result),
 		  type_byte_order (to_type),
 		  to_type->is_unsigned ());
@@ -543,7 +543,7 @@ value_cast (struct type *type, struct value *arg2)
     {
       if (is_floating_value (arg2))
 	{
-	  struct value *v = allocate_value (to_type);
+	  struct value *v = value::allocate (to_type);
 	  target_float_convert (value_contents (arg2).data (), type2,
 				value_contents_raw (v).data (), type);
 	  return v;
@@ -557,7 +557,7 @@ value_cast (struct type *type, struct value *arg2)
 				   type2->is_unsigned (),
 				   type2->fixed_point_scaling_factor ());
 
-	  struct value *v = allocate_value (to_type);
+	  struct value *v = value::allocate (to_type);
 	  target_float_from_host_double (value_contents_raw (v).data (),
 					 to_type, mpq_get_d (fp_val.val));
 	  return v;
@@ -618,7 +618,7 @@ value_cast (struct type *type, struct value *arg2)
   else if (code1 == TYPE_CODE_METHODPTR && code2 == TYPE_CODE_INT
 	   && value_as_long (arg2) == 0)
     {
-      struct value *result = allocate_value (to_type);
+      struct value *result = value::allocate (to_type);
 
       cplus_make_method_ptr (to_type,
 			     value_contents_writeable (result).data (), 0, 0);
@@ -954,7 +954,7 @@ value_one (struct type *type)
       if (!get_array_bounds (type1, &low_bound, &high_bound))
 	error (_("Could not determine the vector bounds"));
 
-      val = allocate_value (type);
+      val = value::allocate (type);
       gdb::array_view<gdb_byte> val_contents = value_contents_writeable (val);
       int elt_len = eltype->length ();
 
@@ -1724,7 +1724,7 @@ value_array (int lowbound, int highbound, struct value **elemvec)
 
   if (!current_language->c_style_arrays_p ())
     {
-      val = allocate_value (arraytype);
+      val = value::allocate (arraytype);
       for (idx = 0; idx < nelem; idx++)
 	value_contents_copy (val, idx * typelength, elemvec[idx], 0,
 			     typelength);
@@ -1734,7 +1734,7 @@ value_array (int lowbound, int highbound, struct value **elemvec)
   /* Allocate space to store the array, and then initialize it by
      copying in each element.  */
 
-  val = allocate_value (arraytype);
+  val = value::allocate (arraytype);
   for (idx = 0; idx < nelem; idx++)
     value_contents_copy (val, idx * typelength, elemvec[idx], 0, typelength);
   return val;
@@ -1749,7 +1749,7 @@ value_cstring (const char *ptr, ssize_t len, struct type *char_type)
   struct type *stringtype
     = lookup_array_range_type (char_type, lowbound, highbound + lowbound - 1);
 
-  val = allocate_value (stringtype);
+  val = value::allocate (stringtype);
   memcpy (value_contents_raw (val).data (), ptr, len);
   return val;
 }
@@ -1772,7 +1772,7 @@ value_string (const char *ptr, ssize_t len, struct type *char_type)
   struct type *stringtype
     = lookup_string_range_type (char_type, lowbound, highbound + lowbound - 1);
 
-  val = allocate_value (stringtype);
+  val = value::allocate (stringtype);
   memcpy (value_contents_raw (val).data (), ptr, len);
   return val;
 }
@@ -3598,7 +3598,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	      (lookup_memberptr_type (t->field (i).type (), domain),
 	       offset + (LONGEST) (t->field (i).loc_bitpos () >> 3));
 	  else if (noside != EVAL_NORMAL)
-	    return allocate_value (t->field (i).type ());
+	    return value::allocate (t->field (i).type ());
 	  else
 	    {
 	      /* Try to evaluate NAME as a qualified name with implicit
@@ -3737,14 +3737,14 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	    {
 	      if (want_address)
 		{
-		  result = allocate_value
+		  result = value::allocate
 		    (lookup_methodptr_type (TYPE_FN_FIELD_TYPE (f, j)));
 		  cplus_make_method_ptr (result->type (),
 					 value_contents_writeable (result).data (),
 					 TYPE_FN_FIELD_VOFFSET (f, j), 1);
 		}
 	      else if (noside == EVAL_AVOID_SIDE_EFFECTS)
-		return allocate_value (TYPE_FN_FIELD_TYPE (f, j));
+		return value::allocate (TYPE_FN_FIELD_TYPE (f, j));
 	      else
 		error (_("Cannot reference virtual member function \"%s\""),
 		       name);
@@ -3763,7 +3763,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 		result = v;
 	      else
 		{
-		  result = allocate_value (lookup_methodptr_type (TYPE_FN_FIELD_TYPE (f, j)));
+		  result = value::allocate (lookup_methodptr_type (TYPE_FN_FIELD_TYPE (f, j)));
 		  cplus_make_method_ptr (result->type (),
 					 value_contents_writeable (result).data (),
 					 v->address (), 0);
@@ -3839,7 +3839,7 @@ value_maybe_namespace_elt (const struct type *curtype,
     return NULL;
   else if ((noside == EVAL_AVOID_SIDE_EFFECTS)
 	   && (sym.symbol->aclass () == LOC_TYPEDEF))
-    result = allocate_value (sym.symbol->type ());
+    result = value::allocate (sym.symbol->type ());
   else
     result = value_of_variable (sym.symbol, sym.block);
 
@@ -4082,7 +4082,7 @@ value_slice (struct value *array, int lowbound, int length)
       slice = value::allocate_lazy (slice_type);
     else
       {
-	slice = allocate_value (slice_type);
+	slice = value::allocate (slice_type);
 	value_contents_copy (slice, 0, array, offset,
 			     type_length_units (slice_type));
       }
@@ -4104,7 +4104,7 @@ value_literal_complex (struct value *arg1,
   struct value *val;
   struct type *real_type = type->target_type ();
 
-  val = allocate_value (type);
+  val = value::allocate (type);
   arg1 = value_cast (real_type, arg1);
   arg2 = value_cast (real_type, arg2);
 
@@ -4153,8 +4153,8 @@ cast_into_complex (struct type *type, struct value *val)
   if (val->type ()->code () == TYPE_CODE_COMPLEX)
     {
       struct type *val_real_type = val->type ()->target_type ();
-      struct value *re_val = allocate_value (val_real_type);
-      struct value *im_val = allocate_value (val_real_type);
+      struct value *re_val = value::allocate (val_real_type);
+      struct value *im_val = value::allocate (val_real_type);
       int len = val_real_type->length ();
 
       copy (value_contents (val).slice (0, len),

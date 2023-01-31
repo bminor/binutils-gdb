@@ -666,7 +666,7 @@ evaluate_subexp_do_call (expression *exp, enum noside noside,
 	  if (return_type == NULL)
 	    error_call_unknown_return_type (function_name);
 
-	  return allocate_value (return_type);
+	  return value::allocate (return_type);
 	}
       else
 	error (_("Expression of type other than "
@@ -1880,7 +1880,7 @@ eval_op_type (struct type *expect_type, struct expression *exp,
 	      enum noside noside, struct type *type)
 {
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    return allocate_value (type);
+    return value::allocate (type);
   else
     error (_("Attempt to use a type name as an expression"));
 }
@@ -2162,9 +2162,9 @@ eval_op_objc_msgcall (struct type *expect_type, struct expression *exp,
       if (callee_type)
 	{
 	  if ((callee_type->code () == TYPE_CODE_ERROR) && expect_type)
-	    return allocate_value (expect_type);
+	    return value::allocate (expect_type);
 	  else
-	    return allocate_value (callee_type);
+	    return value::allocate (callee_type);
 	}
       else
 	error (_("Expression of type other than "
@@ -2440,7 +2440,7 @@ array_operation::evaluate (struct type *expect_type,
   if (expect_type != nullptr
       && type->code () == TYPE_CODE_STRUCT)
     {
-      struct value *rec = allocate_value (expect_type);
+      struct value *rec = value::allocate (expect_type);
 
       memset (value_contents_raw (rec).data (), '\0', type->length ());
       return evaluate_struct_tuple (rec, exp, noside, nargs);
@@ -2451,7 +2451,7 @@ array_operation::evaluate (struct type *expect_type,
     {
       struct type *range_type = type->index_type ();
       struct type *element_type = type->target_type ();
-      struct value *array = allocate_value (expect_type);
+      struct value *array = value::allocate (expect_type);
       int element_size = check_typedef (element_type)->length ();
       LONGEST low_bound, high_bound, index;
 
@@ -2485,7 +2485,7 @@ array_operation::evaluate (struct type *expect_type,
   if (expect_type != nullptr
       && type->code () == TYPE_CODE_SET)
     {
-      struct value *set = allocate_value (expect_type);
+      struct value *set = value::allocate (expect_type);
       gdb_byte *valaddr = value_contents_raw (set).data ();
       struct type *element_type = type->index_type ();
       struct type *check_type = element_type;
@@ -2569,7 +2569,7 @@ unop_extract_operation::evaluate (struct type *expect_type,
   if (type->length () > old_value->type ()->length ())
     error (_("length type is larger than the value type"));
 
-  struct value *result = allocate_value (type);
+  struct value *result = value::allocate (type);
   value_contents_copy (result, 0, old_value, 0, type->length ());
   return result;
 }

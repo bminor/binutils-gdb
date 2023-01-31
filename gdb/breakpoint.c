@@ -1864,7 +1864,7 @@ extract_bitfield_from_watchpoint_value (struct watchpoint *w, struct value *val)
   if (val == NULL)
     return NULL;
 
-  bit_val = allocate_value (val->type ());
+  bit_val = value::allocate (val->type ());
 
   unpack_value_bitfield (bit_val,
 			 w->val_bitpos,

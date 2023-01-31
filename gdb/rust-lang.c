@@ -1351,7 +1351,7 @@ eval_op_rust_array (struct type *expect_type, struct expression *exp,
     {
       struct type *arraytype
 	= lookup_array_range_type (elt->type (), 0, copies - 1);
-      return allocate_value (arraytype);
+      return value::allocate (arraytype);
     }
 }
 
@@ -1518,7 +1518,7 @@ rust_aggregate_operation::evaluate (struct type *expect_type,
     }
 
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    result = allocate_value (type);
+    result = value::allocate (type);
   else
     result = value_at_lazy (type, addr);
 

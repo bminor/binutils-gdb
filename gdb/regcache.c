@@ -743,7 +743,7 @@ readable_regcache::cooked_read_value (int regnum)
     {
       struct value *result;
 
-      result = allocate_value (register_type (m_descr->gdbarch, regnum));
+      result = value::allocate (register_type (m_descr->gdbarch, regnum));
       VALUE_LVAL (result) = lval_register;
       VALUE_REGNUM (result) = regnum;
 
