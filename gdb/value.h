@@ -84,12 +84,32 @@ struct value_print_options;
 
 extern bool overload_resolution;
 
-/* The structure which defines the type of a value.  It should never
-   be possible for a program lval value to survive over a call to the
-   inferior (i.e. to be put into the history list or an internal
-   variable).  */
+/* Defines an [OFFSET, OFFSET + LENGTH) range.  */
 
-struct value;
+struct range
+{
+  /* Lowest offset in the range.  */
+  LONGEST offset;
+
+  /* Length of the range.  */
+  ULONGEST length;
+
+  /* Returns true if THIS is strictly less than OTHER, useful for
+     searching.  We keep ranges sorted by offset and coalesce
+     overlapping and contiguous ranges, so this just compares the
+     starting offset.  */
+
+  bool operator< (const range &other) const
+  {
+    return offset < other.offset;
+  }
+
+  /* Returns true if THIS is equal to OTHER.  */
+  bool operator== (const range &other) const
+  {
+    return offset == other.offset && length == other.length;
+  }
+};
 
 /* Increase VAL's reference count.  */
 
@@ -118,6 +138,204 @@ struct value_ref_policy
 /* A gdb:;ref_ptr pointer to a struct value.  */
 
 typedef gdb::ref_ptr<struct value, value_ref_policy> value_ref_ptr;
+
+/* Note that the fields in this structure are arranged to save a bit
+   of memory.  */
+
+struct value
+{
+  explicit value (struct type *type_)
+    : m_modifiable (1),
+      m_lazy (1),
+      m_initialized (1),
+      m_stack (0),
+      m_is_zero (false),
+      m_in_history (false),
+      m_type (type_),
+      m_enclosing_type (type_)
+  {
+  }
+
+  ~value ();
+
+  DISABLE_COPY_AND_ASSIGN (value);
+
+  /* Type of value; either not an lval, or one of the various
+     different possible kinds of lval.  */
+  enum lval_type m_lval = not_lval;
+
+  /* Is it modifiable?  Only relevant if lval != not_lval.  */
+  unsigned int m_modifiable : 1;
+
+  /* If zero, contents of this value are in the contents field.  If
+     nonzero, contents are in inferior.  If the lval field is lval_memory,
+     the contents are in inferior memory at location.address plus offset.
+     The lval field may also be lval_register.
+
+     WARNING: This field is used by the code which handles watchpoints
+     (see breakpoint.c) to decide whether a particular value can be
+     watched by hardware watchpoints.  If the lazy flag is set for
+     some member of a value chain, it is assumed that this member of
+     the chain doesn't need to be watched as part of watching the
+     value itself.  This is how GDB avoids watching the entire struct
+     or array when the user wants to watch a single struct member or
+     array element.  If you ever change the way lazy flag is set and
+     reset, be sure to consider this use as well!  */
+  unsigned int m_lazy : 1;
+
+  /* If value is a variable, is it initialized or not.  */
+  unsigned int m_initialized : 1;
+
+  /* If value is from the stack.  If this is set, read_stack will be
+     used instead of read_memory to enable extra caching.  */
+  unsigned int m_stack : 1;
+
+  /* True if this is a zero value, created by 'value_zero'; false
+     otherwise.  */
+  bool m_is_zero : 1;
+
+  /* True if this a value recorded in value history; false otherwise.  */
+  bool m_in_history : 1;
+
+  /* Location of value (if lval).  */
+  union
+  {
+    /* If lval == lval_memory, this is the address in the inferior  */
+    CORE_ADDR address;
+
+    /*If lval == lval_register, the value is from a register.  */
+    struct
+    {
+      /* Register number.  */
+      int regnum;
+      /* Frame ID of "next" frame to which a register value is relative.
+	 If the register value is found relative to frame F, then the
+	 frame id of F->next will be stored in next_frame_id.  */
+      struct frame_id next_frame_id;
+    } reg;
+
+    /* Pointer to internal variable.  */
+    struct internalvar *internalvar;
+
+    /* Pointer to xmethod worker.  */
+    struct xmethod_worker *xm_worker;
+
+    /* If lval == lval_computed, this is a set of function pointers
+       to use to access and describe the value, and a closure pointer
+       for them to use.  */
+    struct
+    {
+      /* Functions to call.  */
+      const struct lval_funcs *funcs;
+
+      /* Closure for those functions to use.  */
+      void *closure;
+    } computed;
+  } m_location {};
+
+  /* Describes offset of a value within lval of a structure in target
+     addressable memory units.  Note also the member embedded_offset
+     below.  */
+  LONGEST m_offset = 0;
+
+  /* Only used for bitfields; number of bits contained in them.  */
+  LONGEST m_bitsize = 0;
+
+  /* Only used for bitfields; position of start of field.  For
+     little-endian targets, it is the position of the LSB.  For
+     big-endian targets, it is the position of the MSB.  */
+  LONGEST m_bitpos = 0;
+
+  /* The number of references to this value.  When a value is created,
+     the value chain holds a reference, so REFERENCE_COUNT is 1.  If
+     release_value is called, this value is removed from the chain but
+     the caller of release_value now has a reference to this value.
+     The caller must arrange for a call to value_free later.  */
+  int m_reference_count = 1;
+
+  /* Only used for bitfields; the containing value.  This allows a
+     single read from the target when displaying multiple
+     bitfields.  */
+  value_ref_ptr m_parent;
+
+  /* Type of the value.  */
+  struct type *m_type;
+
+  /* If a value represents a C++ object, then the `type' field gives
+     the object's compile-time type.  If the object actually belongs
+     to some class derived from `type', perhaps with other base
+     classes and additional members, then `type' is just a subobject
+     of the real thing, and the full object is probably larger than
+     `type' would suggest.
+
+     If `type' is a dynamic class (i.e. one with a vtable), then GDB
+     can actually determine the object's run-time type by looking at
+     the run-time type information in the vtable.  When this
+     information is available, we may elect to read in the entire
+     object, for several reasons:
+
+     - When printing the value, the user would probably rather see the
+     full object, not just the limited portion apparent from the
+     compile-time type.
+
+     - If `type' has virtual base classes, then even printing `type'
+     alone may require reaching outside the `type' portion of the
+     object to wherever the virtual base class has been stored.
+
+     When we store the entire object, `enclosing_type' is the run-time
+     type -- the complete object -- and `embedded_offset' is the
+     offset of `type' within that larger type, in target addressable memory
+     units.  The value_contents() macro takes `embedded_offset' into account,
+     so most GDB code continues to see the `type' portion of the value, just
+     as the inferior would.
+
+     If `type' is a pointer to an object, then `enclosing_type' is a
+     pointer to the object's run-time type, and `pointed_to_offset' is
+     the offset in target addressable memory units from the full object
+     to the pointed-to object -- that is, the value `embedded_offset' would
+     have if we followed the pointer and fetched the complete object.
+     (I don't really see the point.  Why not just determine the
+     run-time type when you indirect, and avoid the special case?  The
+     contents don't matter until you indirect anyway.)
+
+     If we're not doing anything fancy, `enclosing_type' is equal to
+     `type', and `embedded_offset' is zero, so everything works
+     normally.  */
+  struct type *m_enclosing_type;
+  LONGEST m_embedded_offset = 0;
+  LONGEST m_pointed_to_offset = 0;
+
+  /* Actual contents of the value.  Target byte-order.
+
+     May be nullptr if the value is lazy or is entirely optimized out.
+     Guaranteed to be non-nullptr otherwise.  */
+  gdb::unique_xmalloc_ptr<gdb_byte> m_contents;
+
+  /* Unavailable ranges in CONTENTS.  We mark unavailable ranges,
+     rather than available, since the common and default case is for a
+     value to be available.  This is filled in at value read time.
+     The unavailable ranges are tracked in bits.  Note that a contents
+     bit that has been optimized out doesn't really exist in the
+     program, so it can't be marked unavailable either.  */
+  std::vector<range> m_unavailable;
+
+  /* Likewise, but for optimized out contents (a chunk of the value of
+     a variable that does not actually exist in the program).  If LVAL
+     is lval_register, this is a register ($pc, $sp, etc., never a
+     program variable) that has not been saved in the frame.  Not
+     saved registers and optimized-out program variables values are
+     treated pretty much the same, except not-saved registers have a
+     different string representation and related error strings.  */
+  std::vector<range> m_optimized_out;
+
+  /* This is only non-zero for values of TYPE_CODE_ARRAY and if the size of
+     the array in inferior memory is greater than max_value_size.  If these
+     conditions are met then, when the value is loaded from the inferior
+     GDB will only load a portion of the array into memory, and
+     limited_length will be set to indicate the length in octets that were
+     loaded from the inferior.  */
+  ULONGEST m_limited_length = 0;
+};
 
 /* Type of the value.  */
 
