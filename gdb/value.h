@@ -124,15 +124,8 @@ extern void value_decref (struct value *val);
 
 struct value_ref_policy
 {
-  static void incref (struct value *ptr)
-  {
-    value_incref (ptr);
-  }
-
-  static void decref (struct value *ptr)
-  {
-    value_decref (ptr);
-  }
+  static void incref (struct value *ptr);
+  static void decref (struct value *ptr);
 };
 
 /* A gdb:;ref_ptr pointer to a struct value.  */
@@ -676,6 +669,18 @@ private:
   bool contents_bits_eq (int offset1, const struct value *val2, int offset2,
 			 int length) const;
 };
+
+inline void
+value_ref_policy::incref (struct value *ptr)
+{
+  value_incref (ptr);
+}
+
+inline void
+value_ref_policy::decref (struct value *ptr)
+{
+  value_decref (ptr);
+}
 
 /* Returns value_type or value_enclosing_type depending on
    value_print_options.objectprint.
