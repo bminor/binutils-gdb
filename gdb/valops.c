@@ -1125,14 +1125,14 @@ value_assign (struct value *toval, struct value *fromval)
 
 	/* Are we dealing with a bitfield?
 
-	   It is important to mention that `value_parent (toval)' is
+	   It is important to mention that `toval->parent ()' is
 	   non-NULL iff `toval->bitsize ()' is non-zero.  */
 	if (toval->bitsize ())
 	  {
 	    /* VALUE_INTERNALVAR below refers to the parent value, while
 	       the offset is relative to this parent value.  */
-	    gdb_assert (value_parent (value_parent (toval)) == NULL);
-	    offset += value_offset (value_parent (toval));
+	    gdb_assert (toval->parent ()->parent () == NULL);
+	    offset += value_offset (toval->parent ());
 	  }
 
 	set_internalvar_component (VALUE_INTERNALVAR (toval),
@@ -1152,7 +1152,7 @@ value_assign (struct value *toval, struct value *fromval)
 
 	if (toval->bitsize ())
 	  {
-	    struct value *parent = value_parent (toval);
+	    struct value *parent = toval->parent ();
 
 	    changed_addr = value_address (parent) + value_offset (toval);
 	    changed_len = (toval->bitpos ()
@@ -1215,7 +1215,7 @@ value_assign (struct value *toval, struct value *fromval)
 
 	if (toval->bitsize ())
 	  {
-	    struct value *parent = value_parent (toval);
+	    struct value *parent = toval->parent ();
 	    LONGEST offset = value_offset (parent) + value_offset (toval);
 	    size_t changed_len;
 	    gdb_byte buffer[sizeof (LONGEST)];

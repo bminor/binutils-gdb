@@ -171,7 +171,7 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
   ULONGEST bits_to_skip = 8 * value_offset (v);
   if (v->bitsize ())
     {
-      bits_to_skip += (8 * value_offset (value_parent (v))
+      bits_to_skip += (8 * value_offset (v->parent ())
 		       + v->bitpos ());
       if (from != nullptr
 	  && (type_byte_order (from->type ())

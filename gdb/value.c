@@ -1035,20 +1035,6 @@ set_value_offset (struct value *value, LONGEST offset)
   value->m_offset = offset;
 }
 
-struct value *
-value_parent (const struct value *value)
-{
-  return value->m_parent.get ();
-}
-
-/* See value.h.  */
-
-void
-set_value_parent (struct value *value, struct value *parent)
-{
-  value->m_parent = value_ref_ptr::new_reference (parent);
-}
-
 gdb::array_view<gdb_byte>
 value_contents_raw (struct value *value)
 {
@@ -3064,7 +3050,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
       v->m_offset = (value_embedded_offset (arg1)
 		   + offset
 		   + (bitpos - v->m_bitpos) / 8);
-      set_value_parent (v, arg1);
+      v->set_parent (arg1);
       if (!value_lazy (arg1))
 	value_fetch_lazy (v);
     }
@@ -3925,7 +3911,7 @@ value_fetch_lazy_bitfield (struct value *val)
      per bitfield.  It would be even better to read only the containing
      word, but we have no way to record that just specific bits of a
      value have been fetched.  */
-  struct value *parent = value_parent (val);
+  struct value *parent = val->parent ();
 
   if (value_lazy (parent))
     value_fetch_lazy (parent);

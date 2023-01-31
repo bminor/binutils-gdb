@@ -2842,7 +2842,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
 
       /* Also set the parent value.  This is needed when trying to
 	 assign a new value (in inferior memory).  */
-      set_value_parent (v, obj);
+      v->set_parent (obj);
     }
   else
     v->set_bitsize (bit_size);

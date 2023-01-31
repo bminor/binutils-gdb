@@ -189,6 +189,15 @@ struct value
   void set_bitpos (LONGEST bit)
   { m_bitpos = bit; }
 
+  /* Only used for bitfields; the containing value.  This allows a
+     single read from the target when displaying multiple
+     bitfields.  */
+  value *parent () const
+  { return m_parent.get (); }
+
+  void set_parent (struct value *parent)
+  {  m_parent = value_ref_ptr::new_reference (parent); }
+
 
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
@@ -366,13 +375,6 @@ struct value
      loaded from the inferior.  */
   ULONGEST m_limited_length = 0;
 };
-
-/* Only used for bitfields; the containing value.  This allows a
-   single read from the target when displaying multiple
-   bitfields.  */
-
-struct value *value_parent (const struct value *);
-extern void set_value_parent (struct value *value, struct value *parent);
 
 /* Describes offset of a value within lval of a structure in bytes.
    If lval == lval_memory, this is an offset to the address.  If lval
