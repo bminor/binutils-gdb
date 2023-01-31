@@ -1130,7 +1130,7 @@ call_function_by_hand_dummy (struct value *function,
       if (info.trivially_copy_constructible)
 	{
 	  int length = param_type->length ();
-	  write_memory (addr, value_contents (args[i]).data (), length);
+	  write_memory (addr, args[i]->contents ().data (), length);
 	}
       else
 	{

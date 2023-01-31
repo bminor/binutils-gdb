@@ -778,7 +778,7 @@ eval_op_f_abs (struct type *expect_type, struct expression *exp,
     case TYPE_CODE_FLT:
       {
 	double d
-	  = fabs (target_float_to_host_double (value_contents (arg1).data (),
+	  = fabs (target_float_to_host_double (arg1->contents ().data (),
 					       arg1->type ()));
 	return value_from_host_double (type, d);
       }
@@ -808,10 +808,10 @@ eval_op_f_mod (struct type *expect_type, struct expression *exp,
     case TYPE_CODE_FLT:
       {
 	double d1
-	  = target_float_to_host_double (value_contents (arg1).data (),
+	  = target_float_to_host_double (arg1->contents ().data (),
 					 arg1->type ());
 	double d2
-	  = target_float_to_host_double (value_contents (arg2).data (),
+	  = target_float_to_host_double (arg2->contents ().data (),
 					 arg2->type ());
 	double d3 = fmod (d1, d2);
 	return value_from_host_double (type, d3);
@@ -838,7 +838,7 @@ fortran_ceil_operation (value *arg1, type *result_type)
 {
   if (arg1->type ()->code () != TYPE_CODE_FLT)
     error (_("argument to CEILING must be of type float"));
-  double val = target_float_to_host_double (value_contents (arg1).data (),
+  double val = target_float_to_host_double (arg1->contents ().data (),
 					    arg1->type ());
   val = ceil (val);
   return value_from_longest (result_type, val);
@@ -877,7 +877,7 @@ fortran_floor_operation (value *arg1, type *result_type)
 {
   if (arg1->type ()->code () != TYPE_CODE_FLT)
     error (_("argument to FLOOR must be of type float"));
-  double val = target_float_to_host_double (value_contents (arg1).data (),
+  double val = target_float_to_host_double (arg1->contents ().data (),
 					    arg1->type ());
   val = floor (val);
   return value_from_longest (result_type, val);
@@ -933,10 +933,10 @@ eval_op_f_modulo (struct type *expect_type, struct expression *exp,
     case TYPE_CODE_FLT:
       {
 	double a
-	  = target_float_to_host_double (value_contents (arg1).data (),
+	  = target_float_to_host_double (arg1->contents ().data (),
 					 arg1->type ());
 	double p
-	  = target_float_to_host_double (value_contents (arg2).data (),
+	  = target_float_to_host_double (arg2->contents ().data (),
 					 arg2->type ());
 	double result = fmod (a, p);
 	if (result != 0 && (a < 0.0) != (p < 0.0))
@@ -1473,7 +1473,7 @@ fortran_undetermined::value_subarray (value *array,
 				   array->address () + total_offset);
 	  else
 	    array = value_from_contents_and_address
-	      (array_slice_type, value_contents (array).data () + total_offset,
+	      (array_slice_type, array->contents ().data () + total_offset,
 	       array->address () + total_offset);
 	}
       else if (!array->lazy ())
@@ -1631,7 +1631,7 @@ fortran_structop_operation::evaluate (struct type *expect_type,
       struct type *elt_type = elt->type ();
       if (is_dynamic_type (elt_type))
 	{
-	  const gdb_byte *valaddr = value_contents_for_printing (elt).data ();
+	  const gdb_byte *valaddr = elt->contents_for_printing ().data ();
 	  CORE_ADDR address = elt->address ();
 	  gdb::array_view<const gdb_byte> view
 	    = gdb::make_array_view (valaddr, elt_type->length ());
@@ -1878,9 +1878,9 @@ fortran_argument_convert (struct value *value, bool is_artificial)
 	  const int length = type->length ();
 	  const CORE_ADDR addr
 	    = value_as_long (value_allocate_space_in_inferior (length));
-	  write_memory (addr, value_contents (value).data (), length);
+	  write_memory (addr, value->contents ().data (), length);
 	  struct value *val = value_from_contents_and_address
-	    (type, value_contents (value).data (), addr);
+	    (type, value->contents ().data (), addr);
 	  return value_addr (val);
 	}
       else

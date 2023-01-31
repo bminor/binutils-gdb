@@ -1090,12 +1090,12 @@ error_value_optimized_out (void)
   throw_error (OPTIMIZED_OUT_ERROR, _("value has been optimized out"));
 }
 
-static void
-require_not_optimized_out (const struct value *value)
+void
+value::require_not_optimized_out () const
 {
-  if (!value->m_optimized_out.empty ())
+  if (!m_optimized_out.empty ())
     {
-      if (value->m_lval == lval_register)
+      if (m_lval == lval_register)
 	throw_error (OPTIMIZED_OUT_ERROR,
 		     _("register has not been saved in frame"));
       else
@@ -1103,38 +1103,38 @@ require_not_optimized_out (const struct value *value)
     }
 }
 
-static void
-require_available (const struct value *value)
+void
+value::require_available () const
 {
-  if (!value->m_unavailable.empty ())
+  if (!m_unavailable.empty ())
     throw_error (NOT_AVAILABLE_ERROR, _("value is not available"));
 }
 
 gdb::array_view<const gdb_byte>
-value_contents_for_printing (struct value *value)
+value::contents_for_printing ()
 {
-  if (value->m_lazy)
-    value->fetch_lazy ();
+  if (m_lazy)
+    fetch_lazy ();
 
-  ULONGEST length = value->enclosing_type ()->length ();
-  return gdb::make_array_view (value->m_contents.get (), length);
+  ULONGEST length = enclosing_type ()->length ();
+  return gdb::make_array_view (m_contents.get (), length);
 }
 
 gdb::array_view<const gdb_byte>
-value_contents_for_printing_const (const struct value *value)
+value::contents_for_printing () const
 {
-  gdb_assert (!value->m_lazy);
+  gdb_assert (!m_lazy);
 
-  ULONGEST length = value->enclosing_type ()->length ();
-  return gdb::make_array_view (value->m_contents.get (), length);
+  ULONGEST length = enclosing_type ()->length ();
+  return gdb::make_array_view (m_contents.get (), length);
 }
 
 gdb::array_view<const gdb_byte>
-value_contents_all (struct value *value)
+value::contents_all ()
 {
-  gdb::array_view<const gdb_byte> result = value_contents_for_printing (value);
-  require_not_optimized_out (value);
-  require_available (value);
+  gdb::array_view<const gdb_byte> result = contents_for_printing ();
+  require_not_optimized_out ();
+  require_available ();
   return result;
 }
 
@@ -1286,11 +1286,11 @@ value_contents_copy (struct value *dst, LONGEST dst_offset,
 }
 
 gdb::array_view<const gdb_byte>
-value_contents (struct value *value)
+value::contents ()
 {
-  gdb::array_view<const gdb_byte> result = value->contents_writeable ();
-  require_not_optimized_out (value);
-  require_available (value);
+  gdb::array_view<const gdb_byte> result = contents_writeable ();
+  require_not_optimized_out ();
+  require_available ();
   return result;
 }
 
@@ -1604,7 +1604,7 @@ value_non_lval (struct value *arg)
       struct type *enc_type = arg->enclosing_type ();
       struct value *val = value::allocate (enc_type);
 
-      copy (value_contents_all (arg), val->contents_all_raw ());
+      copy (arg->contents_all (), val->contents_all_raw ());
       val->m_type = arg->m_type;
       val->set_embedded_offset (arg->embedded_offset ());
       val->set_pointed_to_offset (arg->pointed_to_offset ());
@@ -2187,7 +2187,7 @@ set_internalvar_component (struct internalvar *var,
 	modify_field (var->u.value->type (), addr + offset,
 		      value_as_long (newval), bitpos, bitsize);
       else
-	memcpy (addr + offset * unit_size, value_contents (newval).data (),
+	memcpy (addr + offset * unit_size, newval->contents ().data (),
 		newval->type ()->length ());
       break;
 
@@ -2591,7 +2591,7 @@ value_as_long (struct value *val)
      in disassemble_command).  It also dereferences references, which
      I suspect is the most logical thing to do.  */
   val = coerce_array (val);
-  return unpack_long (val->type (), value_contents (val).data ());
+  return unpack_long (val->type (), val->contents ().data ());
 }
 
 /* Extract a value as a C pointer.  Does not deallocate the value.
@@ -2694,9 +2694,9 @@ value_as_address (struct value *val)
   if (!val->type ()->is_pointer_or_reference ()
       && gdbarch_integer_to_address_p (gdbarch))
     return gdbarch_integer_to_address (gdbarch, val->type (),
-				       value_contents (val).data ());
+				       val->contents ().data ());
 
-  return unpack_long (val->type (), value_contents (val).data ());
+  return unpack_long (val->type (), val->contents ().data ());
 #endif
 }
 
@@ -2820,7 +2820,7 @@ is_floating_value (struct value *val)
 
   if (is_floating_type (type))
     {
-      if (!target_float_is_valid (value_contents (val).data (), type))
+      if (!target_float_is_valid (val->contents ().data (), type))
 	error (_("Invalid floating value found in program."));
       return true;
     }
@@ -2961,7 +2961,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
 	 for references to ordinary fields of unavailable values.  */
       if (BASETYPE_VIA_VIRTUAL (arg_type, fieldno))
 	boffset = baseclass_offset (arg_type, fieldno,
-				    value_contents (arg1).data (),
+				    arg1->contents ().data (),
 				    arg1->embedded_offset (),
 				    arg1->address (),
 				    arg1);
@@ -3709,7 +3709,7 @@ coerce_ref (struct value *arg)
   enc_type = check_typedef (arg->enclosing_type ());
   enc_type = enc_type->target_type ();
 
-  CORE_ADDR addr = unpack_pointer (arg->type (), value_contents (arg).data ());
+  CORE_ADDR addr = unpack_pointer (arg->type (), arg->contents ().data ());
   retval = value_at_lazy (enc_type, addr);
   enc_type = retval->type ();
   return readjust_indirect_value_type (retval, enc_type, value_type_arg_tmp,
@@ -3790,7 +3790,7 @@ value::fetch_lazy_bitfield ()
     parent->fetch_lazy ();
 
   unpack_value_bitfield (this, bitpos (), bitsize (),
-			 value_contents_for_printing (parent).data (),
+			 parent->contents_for_printing ().data (),
 			 offset (), parent);
 }
 
@@ -3914,7 +3914,7 @@ value::fetch_lazy_register ()
       else
 	{
 	  int i;
-	  gdb::array_view<const gdb_byte> buf = value_contents (new_val);
+	  gdb::array_view<const gdb_byte> buf = new_val->contents ();
 
 	  if (VALUE_LVAL (new_val) == lval_register)
 	    gdb_printf (&debug_file, " register=%d",

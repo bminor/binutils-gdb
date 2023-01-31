@@ -185,7 +185,7 @@ parse_find_args (const char *args, ULONGEST *max_countp,
 	}
       else
 	{
-	  const gdb_byte *contents = value_contents (v).data ();
+	  const gdb_byte *contents = v->contents ().data ();
 	  pattern_buf.insert (pattern_buf.end (), contents,
 			      contents + t->length ());
 	}

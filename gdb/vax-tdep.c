@@ -121,7 +121,7 @@ vax_store_arguments (struct regcache *regcache, int nargs,
 
       sp -= (len + 3) & ~3;
       count += (len + 3) / 4;
-      write_memory (sp, value_contents_all (args[i]).data (), len);
+      write_memory (sp, args[i]->contents_all ().data (), len);
     }
 
   /* Push argument count.  */

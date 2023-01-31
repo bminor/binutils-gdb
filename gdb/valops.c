@@ -342,7 +342,7 @@ value_to_gdb_mpq (struct value *value)
   gdb_mpq result;
   if (is_floating_type (type))
     {
-      double d = target_float_to_host_double (value_contents (value).data (),
+      double d = target_float_to_host_double (value->contents ().data (),
 					      type);
       mpq_set_d (result.val, d);
     }
@@ -352,7 +352,7 @@ value_to_gdb_mpq (struct value *value)
 		  || is_fixed_point_type (type));
 
       gdb_mpz vz;
-      vz.read (value_contents (value), type_byte_order (type),
+      vz.read (value->contents (), type_byte_order (type),
 	       type->is_unsigned ());
       mpq_set_z (result.val, vz.val);
 
@@ -544,7 +544,7 @@ value_cast (struct type *type, struct value *arg2)
       if (is_floating_value (arg2))
 	{
 	  struct value *v = value::allocate (to_type);
-	  target_float_convert (value_contents (arg2).data (), type2,
+	  target_float_convert (arg2->contents ().data (), type2,
 				v->contents_raw ().data (), type);
 	  return v;
 	}
@@ -552,7 +552,7 @@ value_cast (struct type *type, struct value *arg2)
 	{
 	  gdb_mpq fp_val;
 
-	  fp_val.read_fixed_point (value_contents (arg2),
+	  fp_val.read_fixed_point (arg2->contents (),
 				   type_byte_order (type2),
 				   type2->is_unsigned (),
 				   type2->fixed_point_scaling_factor ());
@@ -584,7 +584,7 @@ value_cast (struct type *type, struct value *arg2)
 	 bits.  */
       if (code2 == TYPE_CODE_PTR)
 	longest = extract_unsigned_integer
-		    (value_contents (arg2), type_byte_order (type2));
+	  (arg2->contents (), type_byte_order (type2));
       else
 	longest = value_as_long (arg2);
       return value_from_longest (to_type, convert_to_boolean ?
@@ -902,7 +902,7 @@ value_dynamic_cast (struct type *type, struct value *arg)
 	return tem;
       result = NULL;
       if (dynamic_cast_check_1 (resolved_type->target_type (),
-				value_contents_for_printing (tem).data (),
+				tem->contents_for_printing ().data (),
 				tem->embedded_offset (),
 				tem->address (), tem,
 				rtti_type, addr,
@@ -918,7 +918,7 @@ value_dynamic_cast (struct type *type, struct value *arg)
   result = NULL;
   if (is_public_ancestor (arg_type, rtti_type)
       && dynamic_cast_check_2 (resolved_type->target_type (),
-			       value_contents_for_printing (tem).data (),
+			       tem->contents_for_printing ().data (),
 			       tem->embedded_offset (),
 			       tem->address (), tem,
 			       rtti_type, &result) == 1)
@@ -961,7 +961,7 @@ value_one (struct type *type)
       for (i = 0; i < high_bound - low_bound + 1; i++)
 	{
 	  value *tmp = value_one (eltype);
-	  copy (value_contents_all (tmp),
+	  copy (tmp->contents_all (),
 		val_contents.slice (i * elt_len, elt_len));
 	}
     }
@@ -1183,7 +1183,7 @@ value_assign (struct value *toval, struct value *fromval)
 	  {
 	    changed_addr = toval->address ();
 	    changed_len = type_length_units (type);
-	    dest_buffer = value_contents (fromval).data ();
+	    dest_buffer = fromval->contents ().data ();
 	  }
 
 	write_memory_with_notification (changed_addr, dest_buffer, changed_len);
@@ -1259,12 +1259,12 @@ value_assign (struct value *toval, struct value *fromval)
 		   format.  */
 		gdbarch_value_to_register (gdbarch, frame,
 					   VALUE_REGNUM (toval), type,
-					   value_contents (fromval).data ());
+					   fromval->contents ().data ());
 	      }
 	    else
 	      put_frame_register_bytes (frame, value_reg,
 					toval->offset (),
-					value_contents (fromval));
+					fromval->contents ());
 	  }
 
 	gdb::observers::register_changed.notify (frame, value_reg);
@@ -1344,7 +1344,7 @@ value_assign (struct value *toval, struct value *fromval)
      implies the returned value is not lazy, even if TOVAL was.  */
   val = value_copy (toval);
   val->set_lazy (0);
-  copy (value_contents (fromval), val->contents_raw ());
+  copy (fromval->contents (), val->contents_raw ());
 
   /* We copy over the enclosing type and pointed-to offset from FROMVAL
      in the case of pointer types.  For object types, the enclosing type
@@ -1485,7 +1485,7 @@ value_coerce_to_target (struct value *val)
 
   length = check_typedef (val->type ())->length ();
   addr = allocate_space_in_inferior (length);
-  write_memory (addr, value_contents (val).data (), length);
+  write_memory (addr, val->contents ().data (), length);
   return value_at_lazy (val->type (), addr);
 }
 
@@ -2083,7 +2083,7 @@ struct_field_searcher::search (struct value *arg1, LONGEST offset,
 	  struct value *v2;
 
 	  boffset = baseclass_offset (type, i,
-				      value_contents_for_printing (arg1).data (),
+				      arg1->contents_for_printing ().data (),
 				      arg1->embedded_offset () + offset,
 				      arg1->address (),
 				      arg1);
@@ -2287,13 +2287,13 @@ search_struct_method (const char *name, struct value **arg1p,
 	      base_val = value_from_contents_and_address (baseclass,
 							  tmp.data (),
 							  address + offset);
-	      base_valaddr = value_contents_for_printing (base_val).data ();
+	      base_valaddr = base_val->contents_for_printing ().data ();
 	      this_offset = 0;
 	    }
 	  else
 	    {
 	      base_val = *arg1p;
-	      base_valaddr = value_contents_for_printing (*arg1p).data ();
+	      base_valaddr = (*arg1p)->contents_for_printing ().data ();
 	      this_offset = offset;
 	    }
 
@@ -2558,7 +2558,7 @@ find_method_list (struct value **argp, const char *method,
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
 	  base_offset = baseclass_offset (type, i,
-					  value_contents_for_printing (*argp).data (),
+					  (*argp)->contents_for_printing ().data (),
 					  (*argp)->offset () + offset,
 					  (*argp)->address (), *argp);
 	}
@@ -3529,7 +3529,7 @@ get_baseclass_offset (struct type *vt, struct type *cls,
 	{
 	  if (BASETYPE_VIA_VIRTUAL (vt, i))
 	    {
-	      const gdb_byte *adr = value_contents_for_printing (v).data ();
+	      const gdb_byte *adr = v->contents_for_printing ().data ();
 	      *boffs = baseclass_offset (vt, i, adr, v->offset (),
 					 value_as_long (v), v);
 	      *isvirt = true;
@@ -3543,7 +3543,7 @@ get_baseclass_offset (struct type *vt, struct type *cls,
 	{
 	  if (*isvirt == false)	/* Add non-virtual base offset.  */
 	    {
-	      const gdb_byte *adr = value_contents_for_printing (v).data ();
+	      const gdb_byte *adr = v->contents_for_printing ().data ();
 	      *boffs += baseclass_offset (vt, i, adr, v->offset (),
 					  value_as_long (v), v);
 	    }
@@ -4110,9 +4110,9 @@ value_literal_complex (struct value *arg1,
 
   int len = real_type->length ();
 
-  copy (value_contents (arg1),
+  copy (arg1->contents (),
 	val->contents_raw ().slice (0, len));
-  copy (value_contents (arg2),
+  copy (arg2->contents (),
 	val->contents_raw ().slice (len, len));
 
   return val;
@@ -4157,9 +4157,9 @@ cast_into_complex (struct type *type, struct value *val)
       struct value *im_val = value::allocate (val_real_type);
       int len = val_real_type->length ();
 
-      copy (value_contents (val).slice (0, len),
+      copy (val->contents ().slice (0, len),
 	    re_val->contents_raw ());
-      copy (value_contents (val).slice (len, len),
+      copy (val->contents ().slice (len, len),
 	    im_val->contents_raw ());
 
       return value_literal_complex (re_val, im_val, type);

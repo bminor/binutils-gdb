@@ -301,7 +301,7 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
       && (*length < 0 || *length <= fetchlimit))
     {
       int i;
-      const gdb_byte *contents = value_contents (value).data ();
+      const gdb_byte *contents = value->contents ().data ();
 
       /* If a length is specified, use that.  */
       if (*length >= 0)

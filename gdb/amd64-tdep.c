@@ -995,7 +995,7 @@ if (return_method == return_method_struct)
       else
 	{
 	  /* The argument will be passed in registers.  */
-	  const gdb_byte *valbuf = value_contents (args[i]).data ();
+	  const gdb_byte *valbuf = args[i]->contents ().data ();
 	  gdb_byte buf[8];
 
 	  gdb_assert (len <= 16);
@@ -1047,7 +1047,7 @@ if (return_method == return_method_struct)
   for (i = 0; i < num_stack_args; i++)
     {
       struct type *type = stack_args[i]->type ();
-      const gdb_byte *valbuf = value_contents (stack_args[i]).data ();
+      const gdb_byte *valbuf = stack_args[i]->contents ().data ();
       int len = type->length ();
 
       write_memory (sp + element * 8, valbuf, len);

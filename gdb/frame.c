@@ -1201,7 +1201,7 @@ frame_register_unwind (frame_info_ptr next_frame, int regnum,
   if (bufferp)
     {
       if (!*optimizedp && !*unavailablep)
-	memcpy (bufferp, value_contents_all (value).data (),
+	memcpy (bufferp, value->contents_all ().data (),
 		value->type ()->length ());
       else
 	memset (bufferp, 0, value->type ()->length ());
@@ -1311,7 +1311,7 @@ frame_unwind_register_value (frame_info_ptr next_frame, int regnum)
 	  else
 	    {
 	      int i;
-	      gdb::array_view<const gdb_byte> buf = value_contents (value);
+	      gdb::array_view<const gdb_byte> buf = value->contents ();
 
 	      gdb_printf (&debug_file, " bytes=");
 	      gdb_printf (&debug_file, "[");
@@ -1353,7 +1353,7 @@ frame_unwind_register_signed (frame_info_ptr next_frame, int regnum)
 		   _("Register %d is not available"), regnum);
     }
 
-  LONGEST r = extract_signed_integer (value_contents_all (value), byte_order);
+  LONGEST r = extract_signed_integer (value->contents_all (), byte_order);
 
   release_value (value);
   return r;
@@ -1386,7 +1386,7 @@ frame_unwind_register_unsigned (frame_info_ptr next_frame, int regnum)
 		   _("Register %d is not available"), regnum);
     }
 
-  ULONGEST r = extract_unsigned_integer (value_contents_all (value).data (),
+  ULONGEST r = extract_unsigned_integer (value->contents_all ().data (),
 					 size, byte_order);
 
   release_value (value);
@@ -1412,7 +1412,7 @@ read_frame_register_unsigned (frame_info_ptr frame, int regnum,
       enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
       int size = register_size (gdbarch, VALUE_REGNUM (regval));
 
-      *val = extract_unsigned_integer (value_contents (regval).data (), size,
+      *val = extract_unsigned_integer (regval->contents ().data (), size,
 				       byte_order);
       return true;
     }
@@ -1546,7 +1546,7 @@ get_frame_register_bytes (frame_info_ptr frame, int regnum,
 	      return false;
 	    }
 
-	  memcpy (myaddr, value_contents_all (value).data () + offset,
+	  memcpy (myaddr, value->contents_all ().data () + offset,
 		  curr_len);
 	  release_value (value);
 	}

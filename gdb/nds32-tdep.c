@@ -1470,7 +1470,7 @@ nds32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       calling_use_fpr = nds32_check_calling_use_fpr (type);
       len = type->length ();
       align = type_align (type);
-      val = value_contents (args[i]).data ();
+      val = args[i]->contents ().data ();
 
       /* The size of a composite type larger than 4 bytes will be rounded
 	 up to the nearest multiple of 4.  */

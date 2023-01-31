@@ -1411,7 +1411,7 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
 		 a problem.  */
 	      sp &= ~0xf;
 
-	      write_memory (sp, value_contents (args[i]).data (), len);
+	      write_memory (sp, args[i]->contents ().data (), len);
 	      args[i] = value_from_pointer (lookup_pointer_type (type), sp);
 	      num_elements++;
 	    }
@@ -1480,7 +1480,7 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
 
   for (i = 0; i < nargs; i++)
     {
-      const gdb_byte *valbuf = value_contents (args[i]).data ();
+      const gdb_byte *valbuf = args[i]->contents ().data ();
       struct type *type = args[i]->type ();
       int len = type->length ();
       int regnum = -1;

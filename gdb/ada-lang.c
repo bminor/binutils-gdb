@@ -2516,7 +2516,7 @@ decode_constrained_packed_array (struct value *arr)
      bounds may be variable and were not passed to that function.  So,
      we further resolve the array bounds here and then update the
      sizes.  */
-  const gdb_byte *valaddr = value_contents_for_printing (arr).data ();
+  const gdb_byte *valaddr = arr->contents_for_printing ().data ();
   CORE_ADDR address = arr->address ();
   gdb::array_view<const gdb_byte> view
     = gdb::make_array_view (valaddr, type->length ());
@@ -2773,7 +2773,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   if (obj == NULL)
     src = valaddr + offset;
   else
-    src = value_contents (obj).data () + offset;
+    src = obj->contents ().data () + offset;
 
   if (is_dynamic_type (type))
     {
@@ -2823,7 +2823,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   else
     {
       v = value::allocate (type);
-      src = value_contents (obj).data () + offset;
+      src = obj->contents ().data () + offset;
     }
 
   if (obj != NULL)
@@ -2916,13 +2916,13 @@ ada_value_assign (struct value *toval, struct value *fromval)
       if (is_big_endian && is_scalar_type (fromval->type ()))
 	from_offset = from_size - bits;
       copy_bitwise (buffer, toval->bitpos (),
-		    value_contents (fromval).data (), from_offset,
+		    fromval->contents ().data (), from_offset,
 		    bits, is_big_endian);
       write_memory_with_notification (to_addr, buffer, len);
 
       val = value_copy (toval);
       memcpy (val->contents_raw ().data (),
-	      value_contents (fromval).data (),
+	      fromval->contents ().data (),
 	      type->length ());
       val->deprecated_set_type (type);
 
@@ -2973,13 +2973,13 @@ value_assign_to_component (struct value *container, struct value *component,
       copy_bitwise ((container->contents_writeable ().data ()
 		     + offset_in_container),
 		    container->bitpos () + bit_offset_in_container,
-		    value_contents (val).data (), src_offset, bits, 1);
+		    val->contents ().data (), src_offset, bits, 1);
     }
   else
     copy_bitwise ((container->contents_writeable ().data ()
 		   + offset_in_container),
 		  container->bitpos () + bit_offset_in_container,
-		  value_contents (val).data (), 0, bits, 0);
+		  val->contents ().data (), 0, bits, 0);
 }
 
 /* Determine if TYPE is an access to an unconstrained array.  */
@@ -4358,7 +4358,7 @@ ensure_lval (struct value *val)
 
       VALUE_LVAL (val) = lval_memory;
       val->set_address (addr);
-      write_memory (addr, value_contents (val).data (), len);
+      write_memory (addr, val->contents ().data (), len);
     }
 
   return val;
@@ -4529,7 +4529,7 @@ ada_convert_actual (struct value *actual, struct type *formal_type0)
 
 	      actual_type = ada_check_typedef (actual->type ());
 	      val = value::allocate (actual_type);
-	      copy (value_contents (actual), val->contents_raw ());
+	      copy (actual->contents (), val->contents_raw ());
 	      actual = ensure_lval (val);
 	    }
 	  result = value_addr (actual);
@@ -6924,7 +6924,7 @@ ada_value_primitive_field (struct value *arg1, int offset, int fieldno,
       int bit_size = TYPE_FIELD_BITSIZE (arg_type, fieldno);
 
       return ada_value_primitive_packed_val (arg1,
-					     value_contents (arg1).data (),
+					     arg1->contents ().data (),
 					     offset + bit_pos / 8,
 					     bit_pos % 8, bit_size, type);
     }
@@ -8846,7 +8846,7 @@ ada_to_fixed_value_create (struct type *type0, CORE_ADDR address,
       /* Our value does not live in memory; it could be a convenience
 	 variable, for instance.  Create a not_lval value using val0's
 	 contents.  */
-      return value_from_contents (type, value_contents (val0).data ());
+      return value_from_contents (type, val0->contents ().data ());
     }
 
   return value_from_contents_and_address (type, 0, address);
@@ -9290,7 +9290,7 @@ ada_promote_array_of_integrals (struct type *type, struct value *val)
       struct value *elt = value_cast (elt_type, value_subscript (val, lo + i));
       int elt_len = elt_type->length ();
 
-      copy (value_contents_all (elt), res_contents.slice (elt_len * i, elt_len));
+      copy (elt->contents_all (), res_contents.slice (elt_len * i, elt_len));
     }
 
   return res;
@@ -9436,8 +9436,8 @@ ada_value_equal (struct value *arg1, struct value *arg2)
 	 representations use all bits (no padding or undefined bits)
 	 and do not have user-defined equality.  */
       return (arg1_type->length () == arg2_type->length ()
-	      && memcmp (value_contents (arg1).data (),
-			 value_contents (arg2).data (),
+	      && memcmp (arg1->contents ().data (),
+			 arg2->contents ().data (),
 			 arg1_type->length ()) == 0);
     }
   return value_equal (arg1, arg2);

@@ -2181,7 +2181,7 @@ default_print_one_register_info (struct ui_file *file,
       || regtype->code () == TYPE_CODE_DECFLOAT)
     {
       struct value_print_options opts;
-      const gdb_byte *valaddr = value_contents_for_printing (val).data ();
+      const gdb_byte *valaddr = val->contents_for_printing ().data ();
       enum bfd_endian byte_order = type_byte_order (regtype);
 
       get_user_print_options (&opts);

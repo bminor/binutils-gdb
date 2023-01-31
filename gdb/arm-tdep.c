@@ -4682,7 +4682,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       len = arg_type->length ();
       target_type = arg_type->target_type ();
       typecode = arg_type->code ();
-      val = value_contents (args[argnum]).data ();
+      val = args[argnum]->contents ().data ();
 
       align = type_align (arg_type);
       /* Round alignment up to a whole number of words.  */

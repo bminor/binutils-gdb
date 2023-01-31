@@ -2235,7 +2235,7 @@ push_large_arguments (CORE_ADDR sp, int argc, struct value **argv,
 	  /* Reserve space for the copy, and then round the SP down, to
 	     make sure it's all aligned properly.  */
 	  sp = (sp - arg_len) & -4;
-	  write_memory (sp, value_contents (argv[i]).data (), arg_len);
+	  write_memory (sp, argv[i]->contents ().data (), arg_len);
 	  copy[i] = sp;
 	}
     }
@@ -2289,7 +2289,7 @@ mep_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       /* Arguments that fit in a GPR get expanded to fill the GPR.  */
       if (argv[i]->type ()->length () <= MEP_GPR_SIZE)
-	value = extract_unsigned_integer (value_contents (argv[i]).data (),
+	value = extract_unsigned_integer (argv[i]->contents ().data (),
 					  argv[i]->type ()->length (),
 					  byte_order);
 

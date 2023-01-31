@@ -808,7 +808,7 @@ csky_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       arg_type = check_typedef (args[argnum]->type ());
       len = arg_type->length ();
-      val = value_contents (args[argnum]).data ();
+      val = args[argnum]->contents ().data ();
 
       /* Copy the argument to argument registers or the dummy stack.
 	 Large arguments are split between registers and stack.

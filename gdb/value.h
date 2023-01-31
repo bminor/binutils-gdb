@@ -281,8 +281,8 @@ public:
 
      When we store the entire object, `enclosing_type' is the run-time
      type -- the complete object -- and `embedded_offset' is the offset
-     of `type' within that larger type, in bytes.  The value_contents()
-     macro takes `embedded_offset' into account, so most GDB code
+     of `type' within that larger type, in bytes.  The contents()
+     method takes `embedded_offset' into account, so most GDB code
      continues to see the `type' portion of the value, just as the
      inferior would.
 
@@ -367,8 +367,30 @@ public:
      get to the real subobject, if the value happens to represent
      something embedded in a larger run-time object.  */
   gdb::array_view<gdb_byte> contents_raw ();
+
+  /* Actual contents of the value.  For use of this value; setting it
+     uses the stuff above.  Not valid if lazy is nonzero.  Target
+     byte-order.  We force it to be aligned properly for any possible
+     value.  Note that a value therefore extends beyond what is
+     declared here.  */
+  gdb::array_view<const gdb_byte> contents ();
+
+  /* The ALL variants of the above two methods do not adjust the
+     returned pointer by the embedded_offset value.  */
+  gdb::array_view<const gdb_byte> contents_all ();
   gdb::array_view<gdb_byte> contents_all_raw ();
+
   gdb::array_view<gdb_byte> contents_writeable ();
+
+  /* Like contents_all, but does not require that the returned bits be
+     valid.  This should only be used in situations where you plan to
+     check the validity manually.  */
+  gdb::array_view<const gdb_byte> contents_for_printing ();
+
+  /* Like contents_for_printing, but accepts a constant value pointer.
+     Unlike contents_for_printing however, the pointed value must
+     _not_ be lazy.  */
+  gdb::array_view<const gdb_byte> contents_for_printing () const;
 
   /* Load the actual content of a lazy value.  Fetch the data from the
      user's process and clear the lazy flag to indicate that the data in
@@ -578,7 +600,7 @@ public:
      When we store the entire object, `enclosing_type' is the run-time
      type -- the complete object -- and `embedded_offset' is the
      offset of `type' within that larger type, in target addressable memory
-     units.  The value_contents() macro takes `embedded_offset' into account,
+     units.  The contents() method takes `embedded_offset' into account,
      so most GDB code continues to see the `type' portion of the value, just
      as the inferior would.
 
@@ -667,6 +689,9 @@ private:
      bits.  Return true if the available bits match.  */
   bool contents_bits_eq (int offset1, const struct value *val2, int offset2,
 			 int length) const;
+
+  void require_not_optimized_out () const;
+  void require_available () const;
 };
 
 inline void
@@ -762,30 +787,6 @@ struct lval_funcs
    out.  */
 
 extern void error_value_optimized_out (void);
-
-/* Actual contents of the value.  For use of this value; setting it
-   uses the stuff above.  Not valid if lazy is nonzero.  Target
-   byte-order.  We force it to be aligned properly for any possible
-   value.  Note that a value therefore extends beyond what is
-   declared here.  */
-
-extern gdb::array_view<const gdb_byte> value_contents (struct value *);
-
-/* The ALL variants of the above two macros do not adjust the returned
-   pointer by the embedded_offset value.  */
-
-extern gdb::array_view<const gdb_byte> value_contents_all (struct value *);
-
-/* Like value_contents_all, but does not require that the returned
-   bits be valid.  This should only be used in situations where you
-   plan to check the validity manually.  */
-extern gdb::array_view<const gdb_byte> value_contents_for_printing (struct value *value);
-
-/* Like value_contents_for_printing, but accepts a constant value
-   pointer.  Unlike value_contents_for_printing however, the pointed
-   value must _not_ be lazy.  */
-extern gdb::array_view<const gdb_byte>
-  value_contents_for_printing_const (const struct value *value);
 
 /* If nonzero, this is the value of a variable which does not actually
    exist in the program, at least partially.  If the value is lazy,

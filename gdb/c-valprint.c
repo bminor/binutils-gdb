@@ -237,7 +237,7 @@ c_value_print_array (struct value *val,
 {
   struct type *type = check_typedef (val->type ());
   CORE_ADDR address = val->address ();
-  const gdb_byte *valaddr = value_contents_for_printing (val).data ();
+  const gdb_byte *valaddr = val->contents_for_printing ().data ();
   struct type *unresolved_elttype = type->target_type ();
   struct type *elttype = check_typedef (unresolved_elttype);
 
@@ -334,7 +334,7 @@ c_value_print_ptr (struct value *val, struct ui_file *stream, int recurse,
     }
 
   struct type *type = check_typedef (val->type ());
-  const gdb_byte *valaddr = value_contents_for_printing (val).data ();
+  const gdb_byte *valaddr = val->contents_for_printing ().data ();
 
   if (options->vtblprint && cp_is_vtbl_ptr_type (type))
     {
@@ -375,7 +375,7 @@ c_value_print_struct (struct value *val, struct ui_file *stream, int recurse,
 	 TYPE_CODE_PTR.)  */
       int offset = type->field (VTBL_FNADDR_OFFSET).loc_bitpos () / 8;
       struct type *field_type = type->field (VTBL_FNADDR_OFFSET).type ();
-      const gdb_byte *valaddr = value_contents_for_printing (val).data ();
+      const gdb_byte *valaddr = val->contents_for_printing ().data ();
       CORE_ADDR addr = extract_typed_address (valaddr + offset, field_type);
 
       print_function_pointer_address (options, type->arch (), addr, stream);
@@ -406,7 +406,7 @@ c_value_print_int (struct value *val, struct ui_file *stream,
 	 intended to be used as an integer or a character, print
 	 the character equivalent as well.  */
       struct type *type = val->type ();
-      const gdb_byte *valaddr = value_contents_for_printing (val).data ();
+      const gdb_byte *valaddr = val->contents_for_printing ().data ();
       if (c_textual_element_type (type, options->format))
 	{
 	  gdb_puts (" ", stream);

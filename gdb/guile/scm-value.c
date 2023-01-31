@@ -828,7 +828,7 @@ gdbscm_value_to_bytevector (SCM self)
     {
       type = check_typedef (type);
       length = type->length ();
-      contents = value_contents (value).data ();
+      contents = value->contents ().data ();
     }
   catch (const gdb_exception &except)
     {
@@ -978,7 +978,7 @@ gdbscm_value_to_real (SCM self)
     {
       if (is_floating_value (value))
 	{
-	  d = target_float_to_host_double (value_contents (value).data (),
+	  d = target_float_to_host_double (value->contents ().data (),
 					   type);
 	  check = value_from_host_double (type, d);
 	}

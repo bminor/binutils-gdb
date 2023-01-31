@@ -1764,7 +1764,7 @@ s390_handle_arg (struct s390_arg_state *as, struct value *arg,
 	     it occupies the leftmost bits.  */
 	  if (write_mode)
 	    as->regcache->cooked_write_part (S390_F0_REGNUM + as->fr, 0, length,
-					     value_contents (arg).data ());
+					     arg->contents ().data ());
 	  as->fr += 2;
 	}
       else
@@ -1773,7 +1773,7 @@ s390_handle_arg (struct s390_arg_state *as, struct value *arg,
 	     it occupies the rightmost bits.  */
 	  as->argp = align_up (as->argp + length, word_size);
 	  if (write_mode)
-	    write_memory (as->argp - length, value_contents (arg).data (),
+	    write_memory (as->argp - length, arg->contents ().data (),
 			  length);
 	}
     }
@@ -1788,13 +1788,13 @@ s390_handle_arg (struct s390_arg_state *as, struct value *arg,
 
 	  if (write_mode)
 	    as->regcache->cooked_write_part (regnum, 0, length,
-					     value_contents (arg).data ());
+					     arg->contents ().data ());
 	  as->vr++;
 	}
       else
 	{
 	  if (write_mode)
-	    write_memory (as->argp, value_contents (arg).data (), length);
+	    write_memory (as->argp, arg->contents ().data (), length);
 	  as->argp = align_up (as->argp + length, word_size);
 	}
     }
@@ -1809,9 +1809,9 @@ s390_handle_arg (struct s390_arg_state *as, struct value *arg,
 	     memory word and sign- or zero-extend to full word size.
 	     This also applies to a struct or union.  */
 	  val = type->is_unsigned ()
-	    ? extract_unsigned_integer (value_contents (arg).data (),
+	    ? extract_unsigned_integer (arg->contents ().data (),
 					length, byte_order)
-	    : extract_signed_integer (value_contents (arg).data (),
+	    : extract_signed_integer (arg->contents ().data (),
 				      length, byte_order);
 	}
 
@@ -1838,10 +1838,10 @@ s390_handle_arg (struct s390_arg_state *as, struct value *arg,
 	  if (write_mode)
 	    {
 	      as->regcache->cooked_write (S390_R0_REGNUM + as->gr,
-					  value_contents (arg).data ());
+					  arg->contents ().data ());
 	      as->regcache->cooked_write
 		(S390_R0_REGNUM + as->gr + 1,
-		 value_contents (arg).data () + word_size);
+		 arg->contents ().data () + word_size);
 	    }
 	  as->gr += 2;
 	}
@@ -1852,7 +1852,7 @@ s390_handle_arg (struct s390_arg_state *as, struct value *arg,
 	  as->gr = 7;
 
 	  if (write_mode)
-	    write_memory (as->argp, value_contents (arg).data (), length);
+	    write_memory (as->argp, arg->contents ().data (), length);
 	  as->argp += length;
 	}
     }
@@ -1863,7 +1863,7 @@ s390_handle_arg (struct s390_arg_state *as, struct value *arg,
 	 alignment as a conservative assumption.  */
       as->copy = align_down (as->copy - length, 8);
       if (write_mode)
-	write_memory (as->copy, value_contents (arg).data (), length);
+	write_memory (as->copy, arg->contents ().data (), length);
 
       if (as->gr <= 6)
 	{

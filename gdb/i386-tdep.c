@@ -2733,7 +2733,7 @@ i386_thiscall_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		args_space_used = align_up (args_space_used, 16);
 
 	      write_memory (sp + args_space_used,
-			    value_contents_all (args[i]).data (), len);
+			    args[i]->contents_all ().data (), len);
 	      /* The System V ABI says that:
 
 	      "An argument's size is increased, if necessary, to make it a
@@ -2778,7 +2778,7 @@ i386_thiscall_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* The 'this' pointer needs to be in ECX.  */
   if (thiscall)
     regcache->cooked_write (I386_ECX_REGNUM,
-			    value_contents_all (args[0]).data ());
+			    args[0]->contents_all ().data ());
 
   /* If the PLT is position-independent, the SYSTEM V ABI requires %ebx to be
      set to the address of the GOT when doing a call to a PLT address.

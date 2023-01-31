@@ -883,12 +883,12 @@ sh_justify_value_in_reg (struct gdbarch *gdbarch, struct value *val, int len)
     {
       /* value gets right-justified in the register or stack word.  */
       if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
-	memcpy (valbuf + (4 - len), value_contents (val).data (), len);
+	memcpy (valbuf + (4 - len), val->contents ().data (), len);
       else
-	memcpy (valbuf, value_contents (val).data (), len);
+	memcpy (valbuf, val->contents ().data (), len);
       return valbuf;
     }
-  return value_contents (val).data ();
+  return val->contents ().data ();
 }
 
 /* Helper function to eval number of bytes to allocate on stack.  */

@@ -1717,7 +1717,7 @@ info_frame_command_core (frame_info_ptr fi, bool selected_frame_p)
 		int sp_size = register_size (gdbarch, sp_regnum);
 
 		sp = extract_unsigned_integer
-		  (value_contents_all (value).data (), sp_size, byte_order);
+		  (value->contents_all ().data (), sp_size, byte_order);
 
 		gdb_printf (" Previous frame's sp is ");
 		gdb_puts (paddress (gdbarch, sp));
@@ -2825,7 +2825,7 @@ return_command (const char *retval_exp, int from_tty)
       gdbarch_return_value_as_value
 	(cache_arch, function, return_type,
 	 get_current_regcache (), NULL /*read*/,
-	 value_contents (return_value).data () /*write*/);
+	 return_value->contents ().data () /*write*/);
     }
 
   /* If we are at the end of a call dummy now, pop the dummy frame

@@ -1839,7 +1839,7 @@ nios2_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       struct type *arg_type = check_typedef (arg->type ());
       int len = arg_type->length ();
 
-      val = value_contents (arg).data ();
+      val = arg->contents ().data ();
 
       /* Copy the argument to general registers or the stack in
 	 register-sized pieces.  Large arguments are split between

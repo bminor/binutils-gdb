@@ -4612,7 +4612,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    gdb_printf (gdb_stdlog, " push");
 	}
       else
-	val = value_contents (arg).data ();
+	val = arg->contents ().data ();
 
       /* 32-bit ABIs always start floating point arguments in an
 	 even-numbered floating point register.  Round the FP register
@@ -4988,7 +4988,7 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		    "mips_n32n64_push_dummy_call: %d len=%d type=%d",
 		    argnum + 1, len, (int) typecode);
 
-      val = value_contents (arg).data ();
+      val = arg->contents ().data ();
 
       /* A 128-bit long double value requires an even-odd pair of
 	 floating-point registers.  */
@@ -5468,7 +5468,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		    "mips_o32_push_dummy_call: %d len=%d type=%d",
 		    argnum + 1, len, (int) typecode);
 
-      val = value_contents (arg).data ();
+      val = arg->contents ().data ();
 
       /* 32-bit ABIs always start floating point arguments in an
 	 even-numbered floating point register.  Round the FP register
@@ -5989,7 +5989,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		    "mips_o64_push_dummy_call: %d len=%d type=%d",
 		    argnum + 1, len, (int) typecode);
 
-      val = value_contents (arg).data ();
+      val = arg->contents ().data ();
 
       /* Floating point arguments passed in registers have to be
 	 treated specially.  On 32-bit architectures, doubles are
@@ -6595,7 +6595,7 @@ print_gp_register_row (struct ui_file *file, frame_info_ptr frame,
 	  col++;
 	  continue;
 	}
-      raw_buffer = value_contents_all (value).data ();
+      raw_buffer = value->contents_all ().data ();
       /* pad small registers */
       for (byte = 0;
 	   byte < (mips_abi_regsize (gdbarch)

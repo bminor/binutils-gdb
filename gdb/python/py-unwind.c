@@ -131,7 +131,7 @@ pyuw_value_obj_to_pointer (PyObject *pyo_value, CORE_ADDR *addr)
       if ((value = value_object_to_value (pyo_value)) != NULL)
 	{
 	  *addr = unpack_pointer (value->type (),
-				  value_contents (value).data ());
+				  value->contents ().data ());
 	  rc = 1;
 	}
     }
@@ -624,7 +624,7 @@ pyuw_sniffer (const struct frame_unwind *self, frame_info_ptr this_frame,
 
 	cached_frame->reg[i].data = (gdb_byte *) xmalloc (data_size);
 	memcpy (cached_frame->reg[i].data,
-		value_contents (value).data (), data_size);
+		value->contents ().data (), data_size);
       }
   }
 

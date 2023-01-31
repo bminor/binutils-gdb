@@ -80,7 +80,7 @@ pascal_language::value_print_inner (struct value *val,
   struct type *char_type;
   CORE_ADDR addr;
   int want_space = 0;
-  const gdb_byte *valaddr = value_contents_for_printing (val).data ();
+  const gdb_byte *valaddr = val->contents_for_printing ().data ();
 
   switch (type->code ())
     {
@@ -539,7 +539,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
     {
       struct obstack tmp_obstack = dont_print_statmem_obstack;
       int fields_seen = 0;
-      const gdb_byte *valaddr = value_contents_for_printing (val).data ();
+      const gdb_byte *valaddr = val->contents_for_printing ().data ();
 
       if (dont_print_statmem == 0)
 	{

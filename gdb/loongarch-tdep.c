@@ -565,7 +565,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
   for (int i = 0; i < nargs; i++)
     {
       struct value *arg = args[i];
-      const gdb_byte *val = value_contents (arg).data ();
+      const gdb_byte *val = arg->contents ().data ();
       struct type *type = check_typedef (arg->type ());
       size_t len = type->length ();
       int align = type_align (type);

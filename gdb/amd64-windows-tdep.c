@@ -179,7 +179,7 @@ amd64_windows_adjust_args_passed_by_pointer (struct value **args,
     if (amd64_windows_passed_by_pointer (args[i]->type ()))
       {
 	struct type *type = args[i]->type ();
-	const gdb_byte *valbuf = value_contents (args[i]).data ();
+	const gdb_byte *valbuf = args[i]->contents ().data ();
 	const int len = type->length ();
 
 	/* Store a copy of that argument on the stack, aligned to
@@ -205,7 +205,7 @@ amd64_windows_store_arg_in_reg (struct regcache *regcache,
 				struct value *arg, int regno)
 {
   struct type *type = arg->type ();
-  const gdb_byte *valbuf = value_contents (arg).data ();
+  const gdb_byte *valbuf = arg->contents ().data ();
   gdb_byte buf[8];
 
   gdb_assert (type->length () <= 8);
@@ -295,7 +295,7 @@ amd64_windows_push_arguments (struct regcache *regcache, int nargs,
   for (i = 0; i < num_stack_args; i++)
     {
       struct type *type = stack_args[i]->type ();
-      const gdb_byte *valbuf = value_contents (stack_args[i]).data ();
+      const gdb_byte *valbuf = stack_args[i]->contents ().data ();
 
       write_memory (sp + element * 8, valbuf, type->length ());
       element += ((type->length () + 7) / 8);

@@ -718,8 +718,8 @@ value_concat (struct value *arg1, struct value *arg2)
 
   struct value *result = value::allocate (atype);
   gdb::array_view<gdb_byte> contents = result->contents_raw ();
-  gdb::array_view<const gdb_byte> lhs_contents = value_contents (arg1);
-  gdb::array_view<const gdb_byte> rhs_contents = value_contents (arg2);
+  gdb::array_view<const gdb_byte> lhs_contents = arg1->contents ();
+  gdb::array_view<const gdb_byte> rhs_contents = arg2->contents ();
   gdb::copy (lhs_contents, contents.slice (0, lhs_contents.size ()));
   gdb::copy (rhs_contents, contents.slice (lhs_contents.size ()));
 
@@ -785,7 +785,7 @@ value_args_as_target_float (struct value *arg1, struct value *arg2,
   if (is_floating_type (type1))
     {
       *eff_type_x = type1;
-      memcpy (x, value_contents (arg1).data (), type1->length ());
+      memcpy (x, arg1->contents ().data (), type1->length ());
     }
   else if (is_integral_type (type1))
     {
@@ -804,7 +804,7 @@ value_args_as_target_float (struct value *arg1, struct value *arg2,
   if (is_floating_type (type2))
     {
       *eff_type_y = type2;
-      memcpy (y, value_contents (arg2).data (), type2->length ());
+      memcpy (y, arg2->contents ().data (), type2->length ());
     }
   else if (is_integral_type (type2))
     {
@@ -859,10 +859,10 @@ fixed_point_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	  type2 = type1;
 	}
 
-      v1.read_fixed_point (value_contents (arg1),
+      v1.read_fixed_point (arg1->contents (),
 			   type_byte_order (type1), type1->is_unsigned (),
 			   type1->fixed_point_scaling_factor ());
-      v2.read_fixed_point (value_contents (arg2),
+      v2.read_fixed_point (arg2->contents (),
 			   type_byte_order (type2), type2->is_unsigned (),
 			   type2->fixed_point_scaling_factor ());
     }
@@ -1587,7 +1587,7 @@ value_vector_widen (struct value *scalar_value, struct type *vector_type)
 
   for (i = 0; i < high_bound - low_bound + 1; i++)
     /* Duplicate the contents of elval into the destination vector.  */
-    copy (value_contents_all (elval),
+    copy (elval->contents_all (),
 	  val_contents.slice (i * elt_len, elt_len));
 
   return val;
@@ -1635,7 +1635,7 @@ vector_binop (struct value *val1, struct value *val2, enum exp_opcode op)
     {
       value *tmp = value_binop (value_subscript (val1, i),
 				value_subscript (val2, i), op);
-      copy (value_contents_all (tmp),
+      copy (tmp->contents_all (),
 	    val_contents.slice (i * elsize, elsize));
      }
 
@@ -1692,10 +1692,10 @@ value_logical_not (struct value *arg1)
   type1 = check_typedef (arg1->type ());
 
   if (is_floating_value (arg1))
-    return target_float_is_zero (value_contents (arg1).data (), type1);
+    return target_float_is_zero (arg1->contents ().data (), type1);
 
   len = type1->length ();
-  p = value_contents (arg1).data ();
+  p = arg1->contents ().data ();
 
   while (--len >= 0)
     {
@@ -1714,8 +1714,8 @@ value_strcmp (struct value *arg1, struct value *arg2)
 {
   int len1 = arg1->type ()->length ();
   int len2 = arg2->type ()->length ();
-  const gdb_byte *s1 = value_contents (arg1).data ();
-  const gdb_byte *s2 = value_contents (arg2).data ();
+  const gdb_byte *s1 = arg1->contents ().data ();
+  const gdb_byte *s2 = arg2->contents ().data ();
   int i, len = len1 < len2 ? len1 : len2;
 
   for (i = 0; i < len; i++)
@@ -1790,8 +1790,8 @@ value_equal (struct value *arg1, struct value *arg2)
 	   && ((len = (int) type1->length ())
 	       == (int) type2->length ()))
     {
-      p1 = value_contents (arg1).data ();
-      p2 = value_contents (arg2).data ();
+      p1 = arg1->contents ().data ();
+      p2 = arg2->contents ().data ();
       while (--len >= 0)
 	{
 	  if (*p1++ != *p2++)
@@ -1821,8 +1821,8 @@ value_equal_contents (struct value *arg1, struct value *arg2)
 
   return (type1->code () == type2->code ()
 	  && type1->length () == type2->length ()
-	  && memcmp (value_contents (arg1).data (),
-		     value_contents (arg2).data (),
+	  && memcmp (arg1->contents ().data (),
+		     arg2->contents ().data (),
 		     type1->length ()) == 0);
 }
 
@@ -1897,7 +1897,7 @@ value_pos (struct value *arg1)
   if (is_integral_type (type) || is_floating_value (arg1)
       || (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
       || type->code () == TYPE_CODE_COMPLEX)
-    return value_from_contents (type, value_contents (arg1).data ());
+    return value_from_contents (type, arg1->contents ().data ());
   else
     error (_("Argument to positive operation not a number."));
 }
@@ -1930,7 +1930,7 @@ value_neg (struct value *arg1)
       for (i = 0; i < high_bound - low_bound + 1; i++)
 	{
 	  value *tmp = value_neg (value_subscript (arg1, i));
-	  copy (value_contents_all (tmp),
+	  copy (tmp->contents_all (),
 		val_contents.slice (i * elt_len, elt_len));
 	}
       return val;
@@ -1975,7 +1975,7 @@ value_complement (struct value *arg1)
       for (i = 0; i < high_bound - low_bound + 1; i++)
 	{
 	  value *tmp = value_complement (value_subscript (arg1, i));
-	  copy (value_contents_all (tmp),
+	  copy (tmp->contents_all (),
 		val_contents.slice (i * elt_len, elt_len));
 	}
     }
@@ -2037,7 +2037,7 @@ value_in (struct value *element, struct value *set)
       && eltype->code () != TYPE_CODE_ENUM
       && eltype->code () != TYPE_CODE_BOOL)
     error (_("First argument of 'IN' has wrong type"));
-  member = value_bit_index (settype, value_contents (set).data (),
+  member = value_bit_index (settype, set->contents ().data (),
 			    value_as_long (element));
   if (member < 0)
     error (_("First argument of 'IN' not in range"));

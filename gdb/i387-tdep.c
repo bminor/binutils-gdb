@@ -284,7 +284,7 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 
 	  if (value_entirely_available (regval))
 	    {
-	      const gdb_byte *raw = value_contents (regval).data ();
+	      const gdb_byte *raw = regval->contents ().data ();
 
 	      gdb_puts ("0x", file);
 	      for (i = 9; i >= 0; i--)

@@ -1622,7 +1622,7 @@ pass_in_x (struct gdbarch *gdbarch, struct regcache *regcache,
   int len = type->length ();
   enum type_code typecode = type->code ();
   int regnum = AARCH64_X0_REGNUM + info->ngrn;
-  const bfd_byte *buf = value_contents (arg).data ();
+  const bfd_byte *buf = arg->contents ().data ();
 
   info->argnum++;
 
@@ -1692,7 +1692,7 @@ static void
 pass_on_stack (struct aarch64_call_info *info, struct type *type,
 	       struct value *arg)
 {
-  const bfd_byte *buf = value_contents (arg).data ();
+  const bfd_byte *buf = arg->contents ().data ();
   int len = type->length ();
   int align;
   stack_item_t item;
@@ -1769,12 +1769,12 @@ pass_in_v_vfp_candidate (struct gdbarch *gdbarch, struct regcache *regcache,
     case TYPE_CODE_FLT:
     case TYPE_CODE_DECFLOAT:
       return pass_in_v (gdbarch, regcache, info, arg_type->length (),
-			value_contents (arg).data ());
+			arg->contents ().data ());
       break;
 
     case TYPE_CODE_COMPLEX:
       {
-	const bfd_byte *buf = value_contents (arg).data ();
+	const bfd_byte *buf = arg->contents ().data ();
 	struct type *target_type = check_typedef (arg_type->target_type ());
 
 	if (!pass_in_v (gdbarch, regcache, info, target_type->length (),
@@ -1788,7 +1788,7 @@ pass_in_v_vfp_candidate (struct gdbarch *gdbarch, struct regcache *regcache,
     case TYPE_CODE_ARRAY:
       if (arg_type->is_vector ())
 	return pass_in_v (gdbarch, regcache, info, arg_type->length (),
-			  value_contents (arg).data ());
+			  arg->contents ().data ());
       /* fall through.  */
 
     case TYPE_CODE_STRUCT:
@@ -1930,7 +1930,7 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      sp = align_down (sp - len, 16);
 
 	      /* Write the real data into the stack.  */
-	      write_memory (sp, value_contents (arg).data (), len);
+	      write_memory (sp, arg->contents ().data (), len);
 
 	      /* Construct the indirection.  */
 	      arg_type = lookup_pointer_type (arg_type);

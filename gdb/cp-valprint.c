@@ -189,7 +189,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
       vptr_fieldno = get_vptr_fieldno (type, &vptr_basetype);
       for (i = n_baseclasses; i < len; i++)
 	{
-	  const gdb_byte *valaddr = value_contents_for_printing (val).data ();
+	  const gdb_byte *valaddr = val->contents_for_printing ().data ();
 
 	  /* If requested, skip printing of static fields.  */
 	  if (!options->static_field_print
@@ -395,7 +395,7 @@ cp_print_value (struct value *val, struct ui_file *stream,
     = (struct type **) obstack_next_free (&dont_print_vb_obstack);
   struct obstack tmp_obstack = dont_print_vb_obstack;
   int i, n_baseclasses = TYPE_N_BASECLASSES (type);
-  const gdb_byte *valaddr = value_contents_for_printing (val).data ();
+  const gdb_byte *valaddr = val->contents_for_printing ().data ();
 
   if (dont_print_vb == 0)
     {

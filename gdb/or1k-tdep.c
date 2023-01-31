@@ -685,7 +685,7 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      heap_offset += align_up (len, bpw);
 	      valaddr = heap_sp + heap_offset;
 
-	      write_memory (valaddr, value_contents (arg).data (), len);
+	      write_memory (valaddr, arg->contents ().data (), len);
 	    }
 
 	  /* The ABI passes all structures by reference, so get its
@@ -697,7 +697,7 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       else
 	{
 	  /* Everything else, we just get the value.  */
-	  val = value_contents (arg).data ();
+	  val = arg->contents ().data ();
 	}
 
       /* Stick the value in a register.  */
@@ -797,7 +797,7 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  val = valbuf;
 	}
       else
-	val = value_contents (arg).data ();
+	val = arg->contents ().data ();
 
       while (len > 0)
 	{

@@ -1218,7 +1218,7 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
       else
 	{
 	  arg_len = (*args)->type ()->length ();
-	  val = value_contents (*args).data ();
+	  val = (*args)->contents ().data ();
 	}
 
       while (regs_used < 2 && arg_len > 0)

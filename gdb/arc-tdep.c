@@ -779,9 +779,9 @@ arc_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  unsigned int len = args[i]->type ()->length ();
 	  unsigned int space = align_up (len, 4);
 
-	  memcpy (data, value_contents (args[i]).data (), (size_t) len);
+	  memcpy (data, args[i]->contents ().data (), (size_t) len);
 	  arc_debug_printf ("copying arg %d, val 0x%08x, len %d to mem",
-			    i, *((int *) value_contents (args[i]).data ()),
+			    i, *((int *) args[i]->contents ().data ()),
 			    len);
 
 	  data += space;

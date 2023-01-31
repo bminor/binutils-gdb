@@ -1141,7 +1141,7 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 	  && regtype->field (2).type ()->code () == TYPE_CODE_FLT))
     {
       struct value_print_options opts;
-      const gdb_byte *valaddr = value_contents_for_printing (val).data ();
+      const gdb_byte *valaddr = val->contents_for_printing ().data ();
       enum bfd_endian byte_order = type_byte_order (regtype);
 
       get_user_print_options (&opts);
@@ -3070,7 +3070,7 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 
       if (info->type != arg_type)
 	arg_value = value_cast (info->type, arg_value);
-      info->contents = value_contents (arg_value).data ();
+      info->contents = arg_value->contents ().data ();
     }
 
   /* Adjust the stack pointer and align it.  */
@@ -3405,7 +3405,7 @@ riscv_return_value (struct gdbarch  *gdbarch,
 		 is unscaled.  */
 	      gdb_mpz unscaled;
 
-	      unscaled.read (value_contents (abi_val),
+	      unscaled.read (abi_val->contents (),
 			     type_byte_order (info.type),
 			     info.type->is_unsigned ());
 	      *read_value = value::allocate (arg_type);

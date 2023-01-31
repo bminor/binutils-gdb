@@ -2418,7 +2418,7 @@ array_operation::evaluate_struct_tuple (struct value *struct_val,
 	modify_field (struct_type, addr,
 		      value_as_long (val), bitpos % 8, bitsize);
       else
-	memcpy (addr, value_contents (val).data (),
+	memcpy (addr, val->contents ().data (),
 		val->type ()->length ());
 
     }
@@ -2475,7 +2475,7 @@ array_operation::evaluate (struct type *expect_type,
 	    error (_("Too many array elements"));
 	  memcpy (array->contents_raw ().data ()
 		  + (index - low_bound) * element_size,
-		  value_contents (element).data (),
+		  element->contents ().data (),
 		  element_size);
 	  index++;
 	}

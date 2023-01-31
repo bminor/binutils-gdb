@@ -1177,7 +1177,7 @@ m68hc11_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	{
 	  ULONGEST v;
 
-	  v = extract_unsigned_integer (value_contents (args[0]).data (),
+	  v = extract_unsigned_integer (args[0]->contents ().data (),
 					type->length (), byte_order);
 	  first_stack_argnum = 1;
 
@@ -1201,7 +1201,7 @@ m68hc11_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  sp--;
 	  write_memory (sp, &zero, 1);
 	}
-      val = value_contents (args[argnum]).data ();
+      val = args[argnum]->contents ().data ();
       sp -= type->length ();
       write_memory (sp, val, type->length ());
     }

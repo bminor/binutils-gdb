@@ -633,7 +633,7 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
 	     correct, and wasting a few bytes shouldn't be a problem.  */
 	  sp &= ~0x7;
 
-	  write_memory (sp, value_contents (args[i]).data (), len);
+	  write_memory (sp, args[i]->contents ().data (), len);
 	  args[i] = value_from_pointer (lookup_pointer_type (type), sp);
 	  num_elements++;
 	}
@@ -664,7 +664,7 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
 
   for (i = 0; i < nargs; i++)
     {
-      const bfd_byte *valbuf = value_contents (args[i]).data ();
+      const bfd_byte *valbuf = args[i]->contents ().data ();
       struct type *type = args[i]->type ();
       int len = type->length ();
       gdb_byte buf[4];

@@ -1251,7 +1251,7 @@ frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  /* The FDPIC ABI requires function descriptors to be passed instead
 	     of entry points.  */
 	  CORE_ADDR addr = extract_unsigned_integer
-			     (value_contents (arg).data (), 4, byte_order);
+	    (arg->contents ().data (), 4, byte_order);
 	  addr = find_func_descr (gdbarch, addr);
 	  store_unsigned_integer (valbuf, 4, byte_order, addr);
 	  typecode = TYPE_CODE_PTR;
@@ -1260,7 +1260,7 @@ frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	}
       else
 	{
-	  val = value_contents (arg).data ();
+	  val = arg->contents ().data ();
 	}
 
       while (len > 0)

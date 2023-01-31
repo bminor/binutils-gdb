@@ -1066,7 +1066,7 @@ v850_push_dummy_call (struct gdbarch *gdbarch,
       else
 	{
 	  len = (*args)->type ()->length ();
-	  val = (gdb_byte *) value_contents (*args).data ();
+	  val = (gdb_byte *) (*args)->contents ().data ();
 	}
 
       if (tdep->eight_byte_align

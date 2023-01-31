@@ -140,7 +140,7 @@ lval_func_read (struct value *v)
 
   for (i = offset; i < n; i++)
     memcpy (v->contents_raw ().data () + j++ * elsize,
-	    value_contents (c->val).data () + c->indices[i] * elsize,
+	    c->val->contents ().data () + c->indices[i] * elsize,
 	    elsize);
 }
 
@@ -181,7 +181,7 @@ lval_func_write (struct value *v, struct value *fromval)
       struct value *to_elm_val = value_subscript (c->val, c->indices[i]);
 
       memcpy (from_elm_val->contents_writeable ().data (),
-	      value_contents (fromval).data () + j++ * elsize,
+	      fromval->contents ().data () + j++ * elsize,
 	      elsize);
       value_assign (to_elm_val, from_elm_val);
     }
@@ -315,7 +315,7 @@ create_value (struct gdbarch *gdbarch, struct value *val, enum noside noside,
 	      for (i = 0; i < n; i++)
 		memcpy (ret->contents_writeable ().data ()
 			+ (i * elm_type->length ()),
-			value_contents (val).data ()
+			val->contents ().data ()
 			+ (indices[i] * elm_type->length ()),
 			elm_type->length ());
 	    }
@@ -837,7 +837,7 @@ Cannot perform conditional operation on vectors with different sizes"));
 	  tmp = value_logical_not (value_subscript (arg1, i)) ?
 	    value_subscript (arg3, i) : value_subscript (arg2, i);
 	  memcpy (ret->contents_writeable ().data () +
-		  i * eltype2->length (), value_contents_all (tmp).data (),
+		  i * eltype2->length (), tmp->contents_all ().data (),
 		  eltype2->length ());
 	}
 

@@ -456,7 +456,7 @@ rust_language::print_enum (struct value *val, struct ui_file *stream,
 
   gdb_assert (rust_enum_p (type));
   gdb::array_view<const gdb_byte> view
-    (value_contents_for_printing (val).data (),
+    (val->contents_for_printing ().data (),
      val->type ()->length ());
   type = resolve_dynamic_type (type, view, val->address ());
 
@@ -585,7 +585,7 @@ rust_language::value_print_inner
 	   encoding.  */
 	gdb_puts ("b", stream);
 	printstr (stream, type->target_type (),
-		  value_contents_for_printing (val).data (),
+		  val->contents_for_printing ().data (),
 		  high_bound - low_bound + 1, "ASCII", 0, &opts);
       }
       break;
@@ -1374,7 +1374,7 @@ rust_struct_anon::evaluate (struct type *expect_type,
 
       if (rust_enum_p (type))
 	{
-	  type = resolve_dynamic_type (type, value_contents (lhs),
+	  type = resolve_dynamic_type (type, lhs->contents (),
 				       lhs->address ());
 
 	  if (rust_empty_enum_p (type))
@@ -1437,7 +1437,7 @@ rust_structop::evaluate (struct type *expect_type,
   struct type *type = lhs->type ();
   if (type->code () == TYPE_CODE_STRUCT && rust_enum_p (type))
     {
-      type = resolve_dynamic_type (type, value_contents (lhs),
+      type = resolve_dynamic_type (type, lhs->contents (),
 				   lhs->address ());
 
       if (rust_empty_enum_p (type))
