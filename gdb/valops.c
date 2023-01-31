@@ -1376,7 +1376,7 @@ value_repeat (struct value *arg1, int count)
   VALUE_LVAL (val) = lval_memory;
   set_value_address (val, value_address (arg1));
 
-  read_value_memory (val, 0, value_stack (val), value_address (val),
+  read_value_memory (val, 0, val->stack (), value_address (val),
 		     value_contents_all_raw (val).data (),
 		     type_length_units (val->enclosing_type ()));
 

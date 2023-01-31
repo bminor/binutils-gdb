@@ -1005,7 +1005,7 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	    retval = value_at_lazy (subobj_type,
 				    address + subobj_offset);
 	    if (in_stack_memory)
-	      set_value_stack (retval, 1);
+	      retval->set_stack (1);
 	  }
 	  break;
 

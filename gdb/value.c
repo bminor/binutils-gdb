@@ -1291,18 +1291,6 @@ value_contents_copy (struct value *dst, LONGEST dst_offset,
   value_contents_copy_raw (dst, dst_offset, src, src_offset, length);
 }
 
-int
-value_stack (const struct value *value)
-{
-  return value->m_stack;
-}
-
-void
-set_value_stack (struct value *value, int val)
-{
-  value->m_stack = val;
-}
-
 gdb::array_view<const gdb_byte>
 value_contents (struct value *value)
 {
@@ -3886,7 +3874,7 @@ value_fetch_lazy_memory (struct value *val)
   gdb_assert (len >= 0);
 
   if (len > 0)
-    read_value_memory (val, 0, value_stack (val), addr,
+    read_value_memory (val, 0, val->stack (), addr,
 		       value_contents_all_raw (val).data (), len);
 }
 

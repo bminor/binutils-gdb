@@ -289,7 +289,7 @@ frame_unwind_got_memory (frame_info_ptr frame, int regnum, CORE_ADDR addr)
   struct gdbarch *gdbarch = frame_unwind_arch (frame);
   struct value *v = value_at_lazy (register_type (gdbarch, regnum), addr);
 
-  set_value_stack (v, 1);
+  v->set_stack (1);
   return v;
 }
 

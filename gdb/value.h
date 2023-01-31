@@ -295,6 +295,12 @@ struct value
 
   void set_enclosing_type (struct type *new_type);
 
+  int stack () const
+  { return m_stack; }
+
+  void set_stack (int val)
+  { m_stack = val; }
+
 
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
@@ -567,9 +573,6 @@ extern const struct lval_funcs *value_computed_funcs (const struct value *);
    returned value depends on the functions VALUE uses.  */
 
 extern void *value_computed_closure (const struct value *value);
-
-extern int value_stack (const struct value *);
-extern void set_value_stack (struct value *value, int val);
 
 /* Throw an error complaining that the value has been optimized
    out.  */
