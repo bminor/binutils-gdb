@@ -1359,7 +1359,7 @@ value_of_dwarf_reg_entry (struct type *type, frame_info_ptr frame,
 					       caller_per_cu,
 					       caller_per_objfile);
 
-  val = allocate_computed_value (type, &entry_data_value_funcs,
+  val = value::allocate_computed (type, &entry_data_value_funcs,
 				 release_value (target_val).release ());
 
   /* Copy the referencing pointer to the new computed value.  */

@@ -433,7 +433,7 @@ tlb_make_value (struct gdbarch *gdbarch, struct internalvar *var, void *ignore)
   if (target_has_stack () && inferior_ptid != null_ptid)
     {
       struct type *type = windows_get_tlb_type (gdbarch);
-      return allocate_computed_value (type, &tlb_value_funcs, NULL);
+      return value::allocate_computed (type, &tlb_value_funcs, NULL);
     }
 
   return value::allocate (builtin_type (gdbarch)->builtin_void);

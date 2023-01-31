@@ -932,7 +932,7 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
       piece_closure *c
 	= allocate_piece_closure (this->m_per_cu, this->m_per_objfile,
 				  std::move (this->m_pieces), this->m_frame);
-      retval = allocate_computed_value (subobj_type,
+      retval = value::allocate_computed (subobj_type,
 					&pieced_value_funcs, c);
       retval->set_offset (subobj_offset);
     }

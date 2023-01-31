@@ -9194,7 +9194,7 @@ siginfo_make_value (struct gdbarch *gdbarch, struct internalvar *var,
     {
       struct type *type = gdbarch_get_siginfo_type (gdbarch);
 
-      return allocate_computed_value (type, &siginfo_value_funcs, nullptr);
+      return value::allocate_computed (type, &siginfo_value_funcs, nullptr);
     }
 
   return value::allocate (builtin_type (gdbarch)->builtin_void);

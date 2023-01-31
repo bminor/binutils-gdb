@@ -995,9 +995,9 @@ allocate_repeat_value (struct type *type, int count)
 }
 
 struct value *
-allocate_computed_value (struct type *type,
-			 const struct lval_funcs *funcs,
-			 void *closure)
+value::allocate_computed (struct type *type,
+			  const struct lval_funcs *funcs,
+			  void *closure)
 {
   struct value *v = value::allocate_lazy (type);
 

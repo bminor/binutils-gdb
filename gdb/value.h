@@ -169,6 +169,12 @@ public:
   /* Allocate a value and its contents for type TYPE.  */
   static struct value *allocate (struct type *type);
 
+  /* Create a computed lvalue, with type TYPE, function pointers
+     FUNCS, and closure CLOSURE.  */
+  static struct value *allocate_computed (struct type *type,
+					  const struct lval_funcs *funcs,
+					  void *closure);
+
   ~value ();
 
   DISABLE_COPY_AND_ASSIGN (value);
@@ -618,13 +624,6 @@ struct lval_funcs
      VALUE's closure.  */
   void (*free_closure) (struct value *v);
 };
-
-/* Create a computed lvalue, with type TYPE, function pointers FUNCS,
-   and closure CLOSURE.  */
-
-extern struct value *allocate_computed_value (struct type *type,
-					      const struct lval_funcs *funcs,
-					      void *closure);
 
 extern struct value *allocate_optimized_out_value (struct type *type);
 
