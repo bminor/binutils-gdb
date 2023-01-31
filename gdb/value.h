@@ -325,6 +325,19 @@ struct value
   void set_initialized (int value)
   { m_initialized = value; }
 
+  /* If lval == lval_memory, return the address in the inferior.  If
+     lval == lval_register, return the byte offset into the registers
+     structure.  Otherwise, return 0.  The returned address
+     includes the offset, if any.  */
+  CORE_ADDR address () const;
+
+  /* Like address, except the result does not include value's
+     offset.  */
+  CORE_ADDR raw_address () const;
+
+  /* Set the address of a value.  */
+  void set_address (CORE_ADDR);
+
 
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
@@ -677,19 +690,6 @@ extern void set_value_component_location (struct value *component,
 /* Type of value; either not an lval, or one of the various different
    possible kinds of lval.  */
 #define VALUE_LVAL(val) (*((val)->deprecated_lval_hack ()))
-
-/* If lval == lval_memory, return the address in the inferior.  If
-   lval == lval_register, return the byte offset into the registers
-   structure.  Otherwise, return 0.  The returned address
-   includes the offset, if any.  */
-extern CORE_ADDR value_address (const struct value *);
-
-/* Like value_address, except the result does not include value's
-   offset.  */
-extern CORE_ADDR value_raw_address (const struct value *);
-
-/* Set the address of a value.  */
-extern void set_value_address (struct value *, CORE_ADDR);
 
 /* Pointer to internal variable.  */
 extern struct internalvar **deprecated_value_internalvar_hack (struct value *);

@@ -672,7 +672,7 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       if ((TYPE_CODE_STRUCT == typecode) || (TYPE_CODE_UNION == typecode)
 	  || (len > bpw * 2))
 	{
-	  CORE_ADDR valaddr = value_address (arg);
+	  CORE_ADDR valaddr = arg->address ();
 
 	  /* If the arg is fabricated (i.e. 3*i, instead of i) valaddr is
 	     undefined.  */
@@ -792,7 +792,7 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  || (len > bpw * 2))
 	{
 	  store_unsigned_integer (valbuf, bpa, byte_order,
-				  value_address (arg));
+				  arg->address ());
 	  len = bpa;
 	  val = valbuf;
 	}

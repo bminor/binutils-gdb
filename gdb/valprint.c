@@ -494,7 +494,7 @@ generic_val_print_array (struct value *val,
   else
     {
       /* Array of unspecified length: treat like pointer to first elt.  */
-      print_unpacked_pointer (type, elttype, value_address (val),
+      print_unpacked_pointer (type, elttype, val->address (),
 			      stream, options);
     }
 
@@ -965,7 +965,7 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
       if (options->format)
 	value_print_scalar_formatted (val, options, 0, stream);
       else
-	generic_val_print_func (type, 0, value_address (val), stream,
+	generic_val_print_func (type, 0, val->address (), stream,
 				val, options);
       break;
 

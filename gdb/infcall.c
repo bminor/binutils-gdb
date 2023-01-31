@@ -290,7 +290,7 @@ find_function_addr (struct value *function,
   /* Determine address to call.  */
   if (ftype->code () == TYPE_CODE_FUNC
       || ftype->code () == TYPE_CODE_METHOD)
-    funaddr = value_address (function);
+    funaddr = function->address ();
   else if (ftype->code () == TYPE_CODE_PTR)
     {
       funaddr = value_as_address (function);
@@ -962,7 +962,7 @@ call_function_by_hand_dummy (struct value *function,
 	lastval = get_last_thread_stack_temporary (call_thread.get ());
 	if (lastval != NULL)
 	  {
-	    CORE_ADDR lastval_addr = value_address (lastval);
+	    CORE_ADDR lastval_addr = lastval->address ();
 
 	    if (gdbarch_inner_than (gdbarch, 1, 2))
 	      {

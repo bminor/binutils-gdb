@@ -156,7 +156,7 @@ convert_one_symbol (compile_cplus_instance *instance,
 		     sym.symbol->print_name ());
 
 	    kind = GCC_CP_SYMBOL_VARIABLE;
-	    addr = value_address (val);
+	    addr = val->address ();
 	  }
 	  break;
 

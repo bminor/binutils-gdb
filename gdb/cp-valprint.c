@@ -390,7 +390,7 @@ cp_print_value (struct value *val, struct ui_file *stream,
 		struct type **dont_print_vb)
 {
   struct type *type = check_typedef (val->type ());
-  CORE_ADDR address = value_address (val);
+  CORE_ADDR address = val->address ();
   struct type **last_dont_print
     = (struct type **) obstack_next_free (&dont_print_vb_obstack);
   struct obstack tmp_obstack = dont_print_vb_obstack;
@@ -560,7 +560,7 @@ cp_print_static_field (struct type *type,
   if (real_type->code () == TYPE_CODE_STRUCT)
     {
       CORE_ADDR *first_dont_print;
-      CORE_ADDR addr = value_address (val);
+      CORE_ADDR addr = val->address ();
       int i;
 
       first_dont_print

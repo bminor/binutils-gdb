@@ -654,7 +654,7 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
 
       gdb_printf (stream, "%*s%s = %s;\n",
 		  indent, "", result_name,
-		  core_addr_to_string (value_address (val)));
+		  core_addr_to_string (val->address ()));
       gdb_printf (stream, "%*s}\n", indent - 2, "");
       return;
     }

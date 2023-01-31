@@ -325,7 +325,7 @@ gnuv3_rtti_type (struct value *value,
 
   /* Find the linker symbol for this vtable.  */
   vtable_symbol
-    = lookup_minimal_symbol_by_pc (value_address (vtable)
+    = lookup_minimal_symbol_by_pc (vtable->address ()
 				   + vtable->embedded_offset ()).minsym;
   if (! vtable_symbol)
     return NULL;
@@ -804,7 +804,7 @@ hash_value_and_voffset (const void *p)
 {
   const struct value_and_voffset *o = (const struct value_and_voffset *) p;
 
-  return value_address (o->value) + o->value->embedded_offset ();
+  return o->value->address () + o->value->embedded_offset ();
 }
 
 /* Equality function for value_and_voffset.  */
@@ -815,8 +815,8 @@ eq_value_and_voffset (const void *a, const void *b)
   const struct value_and_voffset *ova = (const struct value_and_voffset *) a;
   const struct value_and_voffset *ovb = (const struct value_and_voffset *) b;
 
-  return (value_address (ova->value) + ova->value->embedded_offset ()
-	  == value_address (ovb->value) + ovb->value->embedded_offset ());
+  return (ova->value->address () + ova->value->embedded_offset ()
+	  == ovb->value->address () + ovb->value->embedded_offset ());
 }
 
 /* Comparison function for value_and_voffset.  */
@@ -825,9 +825,9 @@ static bool
 compare_value_and_voffset (const struct value_and_voffset *va,
 			   const struct value_and_voffset *vb)
 {
-  CORE_ADDR addra = (value_address (va->value)
+  CORE_ADDR addra = (va->value->address ()
 		     + va->value->embedded_offset ());
-  CORE_ADDR addrb = (value_address (vb->value)
+  CORE_ADDR addrb = (vb->value->address ()
 		     + vb->value->embedded_offset ());
 
   return addra < addrb;
@@ -907,15 +907,15 @@ print_one_vtable (struct gdbarch *gdbarch, struct value *value,
   CORE_ADDR vt_addr;
 
   vtable = gnuv3_get_vtable (gdbarch, type,
-			     value_address (value)
+			     value->address ()
 			     + value->embedded_offset ());
-  vt_addr = value_address (value_field (vtable,
-					vtable_field_virtual_functions));
+  vt_addr = value_field (vtable,
+			 vtable_field_virtual_functions)->address ();
 
   gdb_printf (_("vtable for '%s' @ %s (subobject @ %s):\n"),
 	      TYPE_SAFE_NAME (type),
 	      paddress (gdbarch, vt_addr),
-	      paddress (gdbarch, (value_address (value)
+	      paddress (gdbarch, (value->address ()
 				  + value->embedded_offset ())));
 
   for (i = 0; i <= max_voffset; ++i)
@@ -1138,7 +1138,7 @@ gnuv3_get_typeid (struct value *value)
       && gnuv3_dynamic_class (type))
     {
       struct value *vtable, *typeinfo_value;
-      CORE_ADDR address = value_address (value) + value->embedded_offset ();
+      CORE_ADDR address = value->address () + value->embedded_offset ();
 
       vtable = gnuv3_get_vtable (gdbarch, type, address);
       if (vtable == NULL)

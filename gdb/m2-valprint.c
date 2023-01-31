@@ -270,7 +270,7 @@ m2_print_array_contents (struct value *val,
 	   || ((current_language->la_language == language_m2)
 	       && (type->code () == TYPE_CODE_CHAR)))
 	  && (options->format == 0 || options->format == 's'))
-	val_print_string (type, NULL, value_address (val), len+1, stream,
+	val_print_string (type, NULL, val->address (), len+1, stream,
 			  options);
       else
 	{
@@ -306,7 +306,7 @@ m2_language::value_print_inner (struct value *val, struct ui_file *stream,
   struct type *elttype;
   CORE_ADDR addr;
   const gdb_byte *valaddr = value_contents_for_printing (val).data ();
-  const CORE_ADDR address = value_address (val);
+  const CORE_ADDR address = val->address ();
 
   struct type *type = check_typedef (val->type ());
   switch (type->code ())

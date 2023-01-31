@@ -351,7 +351,7 @@ rust_val_print_slice (struct value *val, struct ui_file *stream, int recurse,
 							     llen - 1);
 	  struct value *array = allocate_value_lazy (array_type);
 	  VALUE_LVAL (array) = lval_memory;
-	  set_value_address (array, value_as_address (base));
+	  array->set_address (value_as_address (base));
 	  value_fetch_lazy (array);
 	  generic_value_print (array, stream, recurse, options,
 			       &rust_decorations);
@@ -458,7 +458,7 @@ rust_language::print_enum (struct value *val, struct ui_file *stream,
   gdb::array_view<const gdb_byte> view
     (value_contents_for_printing (val).data (),
      val->type ()->length ());
-  type = resolve_dynamic_type (type, view, value_address (val));
+  type = resolve_dynamic_type (type, view, val->address ());
 
   if (rust_empty_enum_p (type))
     {
@@ -1375,7 +1375,7 @@ rust_struct_anon::evaluate (struct type *expect_type,
       if (rust_enum_p (type))
 	{
 	  type = resolve_dynamic_type (type, value_contents (lhs),
-				       value_address (lhs));
+				       lhs->address ());
 
 	  if (rust_empty_enum_p (type))
 	    error (_("Cannot access field %d of empty enum %s"),
@@ -1438,7 +1438,7 @@ rust_structop::evaluate (struct type *expect_type,
   if (type->code () == TYPE_CODE_STRUCT && rust_enum_p (type))
     {
       type = resolve_dynamic_type (type, value_contents (lhs),
-				   value_address (lhs));
+				   lhs->address ());
 
       if (rust_empty_enum_p (type))
 	error (_("Cannot access field %s of empty enum %s"),

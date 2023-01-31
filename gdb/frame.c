@@ -1192,7 +1192,7 @@ frame_register_unwind (frame_info_ptr next_frame, int regnum,
   *optimizedp = value_optimized_out (value);
   *unavailablep = !value_entirely_available (value);
   *lvalp = VALUE_LVAL (value);
-  *addrp = value_address (value);
+  *addrp = value->address ();
   if (*lvalp == lval_register)
     *realnump = VALUE_REGNUM (value);
   else
@@ -1302,7 +1302,7 @@ frame_unwind_register_value (frame_info_ptr next_frame, int regnum)
 	  else if (VALUE_LVAL (value) == lval_memory)
 	    gdb_printf (&debug_file, " address=%s",
 			paddress (gdbarch,
-				  value_address (value)));
+				  value->address ()));
 	  else
 	    gdb_printf (&debug_file, " computed");
 

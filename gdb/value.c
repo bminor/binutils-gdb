@@ -1399,34 +1399,34 @@ value::computed_closure () const
 }
 
 CORE_ADDR
-value_address (const struct value *value)
+value::address () const
 {
-  if (value->m_lval != lval_memory)
+  if (m_lval != lval_memory)
     return 0;
-  if (value->m_parent != NULL)
-    return value_address (value->m_parent.get ()) + value->m_offset;
-  if (NULL != TYPE_DATA_LOCATION (value->type ()))
+  if (m_parent != NULL)
+    return m_parent.get ()->address () + m_offset;
+  if (NULL != TYPE_DATA_LOCATION (type ()))
     {
-      gdb_assert (PROP_CONST == TYPE_DATA_LOCATION_KIND (value->type ()));
-      return TYPE_DATA_LOCATION_ADDR (value->type ());
+      gdb_assert (PROP_CONST == TYPE_DATA_LOCATION_KIND (type ()));
+      return TYPE_DATA_LOCATION_ADDR (type ());
     }
 
-  return value->m_location.address + value->m_offset;
+  return m_location.address + m_offset;
 }
 
 CORE_ADDR
-value_raw_address (const struct value *value)
+value::raw_address () const
 {
-  if (value->m_lval != lval_memory)
+  if (m_lval != lval_memory)
     return 0;
-  return value->m_location.address;
+  return m_location.address;
 }
 
 void
-set_value_address (struct value *value, CORE_ADDR addr)
+value::set_address (CORE_ADDR addr)
 {
-  gdb_assert (value->m_lval == lval_memory);
-  value->m_location.address = addr;
+  gdb_assert (m_lval == lval_memory);
+  m_location.address = addr;
 }
 
 struct internalvar **
@@ -1677,7 +1677,7 @@ set_value_component_location (struct value *component,
   type = whole->type ();
   if (NULL != TYPE_DATA_LOCATION (type)
       && TYPE_DATA_LOCATION_KIND (type) == PROP_CONST)
-    set_value_address (component, TYPE_DATA_LOCATION_ADDR (type));
+    component->set_address (TYPE_DATA_LOCATION_ADDR (type));
 
   /* Similarly, if the COMPONENT value has a dynamically resolved location
      property then update its address.  */
@@ -1709,7 +1709,7 @@ set_value_component_location (struct value *component,
 	}
       else
 	gdb_assert (VALUE_LVAL (component) == lval_memory);
-      set_value_address (component, TYPE_DATA_LOCATION_ADDR (type));
+      component->set_address (TYPE_DATA_LOCATION_ADDR (type));
     }
 }
 
@@ -2655,7 +2655,7 @@ value_as_address (struct value *val)
 
      Upon entry to this function, if VAL is a value of type `function'
      (that is, TYPE_CODE (val->type ()) == TYPE_CODE_FUNC), then
-     value_address (val) is the address of the function.  This is what
+     val->address () is the address of the function.  This is what
      you'll get if you evaluate an expression like `main'.  The call
      to COERCE_ARRAY below actually does all the usual unary
      conversions, which includes converting values of type `function'
@@ -2675,7 +2675,7 @@ value_as_address (struct value *val)
      function, just return its address directly.  */
   if (val->type ()->code () == TYPE_CODE_FUNC
       || val->type ()->code () == TYPE_CODE_METHOD)
-    return value_address (val);
+    return val->address ();
 
   val = coerce_array (val);
 
@@ -2988,7 +2988,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
 	boffset = baseclass_offset (arg_type, fieldno,
 				    value_contents (arg1).data (),
 				    arg1->embedded_offset (),
-				    value_address (arg1),
+				    arg1->address (),
 				    arg1);
       else
 	boffset = arg_type->field (fieldno).loc_bitpos () / 8;
@@ -3082,7 +3082,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
   VALUE_LVAL (v) = lval_memory;
   if (sym)
     {
-      set_value_address (v, sym->value_block ()->entry_pc ());
+      v->set_address (sym->value_block ()->entry_pc ());
     }
   else
     {
@@ -3091,10 +3091,9 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
       struct objfile *objfile = msym.objfile;
       struct gdbarch *gdbarch = objfile->arch ();
 
-      set_value_address (v,
-	gdbarch_convert_from_func_ptr_addr
-	   (gdbarch, msym.value_address (),
-	    current_inferior ()->top_target ()));
+      v->set_address (gdbarch_convert_from_func_ptr_addr
+		      (gdbarch, msym.value_address (),
+		       current_inferior ()->top_target ()));
     }
 
   if (arg1p)
@@ -3511,7 +3510,7 @@ value_from_contents_and_address_unresolved (struct type *type,
   else
     v = value_from_contents (type, valaddr);
   VALUE_LVAL (v) = lval_memory;
-  set_value_address (v, address);
+  v->set_address (address);
   return v;
 }
 
@@ -3540,7 +3539,7 @@ value_from_contents_and_address (struct type *type,
       && TYPE_DATA_LOCATION_KIND (resolved_type_no_typedef) == PROP_CONST)
     address = TYPE_DATA_LOCATION_ADDR (resolved_type_no_typedef);
   VALUE_LVAL (v) = lval_memory;
-  set_value_address (v, address);
+  v->set_address (address);
   return v;
 }
 
@@ -3828,7 +3827,7 @@ value_fetch_lazy_memory (struct value *val)
 {
   gdb_assert (VALUE_LVAL (val) == lval_memory);
 
-  CORE_ADDR addr = value_address (val);
+  CORE_ADDR addr = val->address ();
   struct type *type = check_typedef (val->enclosing_type ());
 
   /* Figure out how much we should copy from memory.  Usually, this is just
@@ -3949,7 +3948,7 @@ value_fetch_lazy_register (struct value *val)
 	  else if (VALUE_LVAL (new_val) == lval_memory)
 	    gdb_printf (&debug_file, " address=%s",
 			paddress (gdbarch,
-				  value_address (new_val)));
+				  new_val->address ()));
 	  else
 	    gdb_printf (&debug_file, " computed");
 

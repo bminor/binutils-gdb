@@ -143,7 +143,7 @@ pascal_language::value_print_inner (struct value *val,
 	    break;
 	  }
 	/* Array of unspecified length: treat like pointer to first elt.  */
-	addr = value_address (val);
+	addr = val->address ();
       }
       goto print_unpacked_pointer;
 
@@ -748,7 +748,7 @@ pascal_object_print_value (struct value *val, struct ui_file *stream,
 
 	  if (boffset < 0 || boffset >= type->length ())
 	    {
-	      CORE_ADDR address= value_address (val);
+	      CORE_ADDR address= val->address ();
 	      gdb::byte_vector buf (baseclass->length ());
 
 	      if (target_read_memory (address + boffset, buf.data (),
@@ -836,7 +836,7 @@ pascal_object_print_static_field (struct value *val,
 
       while (--i >= 0)
 	{
-	  if (value_address (val) == first_dont_print[i])
+	  if (val->address () == first_dont_print[i])
 	    {
 	      fputs_styled (_("\
 <same as static member of an already seen type>"),
@@ -845,7 +845,7 @@ pascal_object_print_static_field (struct value *val,
 	    }
 	}
 
-      addr = value_address (val);
+      addr = val->address ();
       obstack_grow (&dont_print_statmem_obstack, (char *) &addr,
 		    sizeof (CORE_ADDR));
 

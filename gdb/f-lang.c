@@ -408,7 +408,7 @@ fortran_associated (struct gdbarch *gdbarch, const language_defn *lang,
   if (pointer_type->code () == TYPE_CODE_PTR)
     pointer_addr = value_as_address (pointer);
   else
-    pointer_addr = value_address (pointer);
+    pointer_addr = pointer->address ();
 
   /* The single argument case, is POINTER associated with anything?  */
   if (target == nullptr)
@@ -470,7 +470,7 @@ fortran_associated (struct gdbarch *gdbarch, const language_defn *lang,
   if (target_type->code () == TYPE_CODE_PTR)
     target_addr = value_as_address (target);
   else
-    target_addr = value_address (target);
+    target_addr = target->address ();
 
   /* Wrap the following checks inside a do { ... } while (false) loop so
      that we can use `break' to jump out of the loop.  */
@@ -1074,7 +1074,7 @@ eval_op_f_loc (struct type *expect_type, struct expression *exp,
   else
     result_type = builtin_f_type (exp->gdbarch)->builtin_integer_s8;
 
-  LONGEST result_value = value_address (arg1);
+  LONGEST result_value = arg1->address ();
   return value_from_longest (result_type, result_value);
 }
 
@@ -1410,7 +1410,7 @@ fortran_undetermined::value_subarray (value *array,
       debug_printf ("    |-> Total offset: %s\n",
 		    plongest (total_offset));
       debug_printf ("    |-> Base address: %s\n",
-		    core_addr_to_string (value_address (array)));
+		    core_addr_to_string (array->address ()));
       debug_printf ("    '-> Contiguous = %s\n",
 		    (is_all_contiguous ? "Yes" : "No"));
     }
@@ -1446,13 +1446,13 @@ fortran_undetermined::value_subarray (value *array,
 	      > check_typedef (array->type ())->length ()))
 	{
 	  fortran_array_walker<fortran_lazy_array_repacker_impl> p
-	    (array_slice_type, value_address (array) + total_offset, dest);
+	    (array_slice_type, array->address () + total_offset, dest);
 	  p.walk ();
 	}
       else
 	{
 	  fortran_array_walker<fortran_array_repacker_impl> p
-	    (array_slice_type, value_address (array) + total_offset,
+	    (array_slice_type, array->address () + total_offset,
 	     total_offset, array, dest);
 	  p.walk ();
 	}
@@ -1470,11 +1470,11 @@ fortran_undetermined::value_subarray (value *array,
 	      || (total_offset + array_slice_type->length ()
 		  > check_typedef (array->type ())->length ()))
 	    array = value_at_lazy (array_slice_type,
-				   value_address (array) + total_offset);
+				   array->address () + total_offset);
 	  else
 	    array = value_from_contents_and_address
 	      (array_slice_type, value_contents (array).data () + total_offset,
-	       value_address (array) + total_offset);
+	       array->address () + total_offset);
 	}
       else if (!array->lazy ())
 	array = value_from_component (array, array_slice_type, total_offset);
@@ -1632,7 +1632,7 @@ fortran_structop_operation::evaluate (struct type *expect_type,
       if (is_dynamic_type (elt_type))
 	{
 	  const gdb_byte *valaddr = value_contents_for_printing (elt).data ();
-	  CORE_ADDR address = value_address (elt);
+	  CORE_ADDR address = elt->address ();
 	  gdb::array_view<const gdb_byte> view
 	    = gdb::make_array_view (valaddr, elt_type->length ());
 	  elt_type = resolve_dynamic_type (elt_type, view, address);

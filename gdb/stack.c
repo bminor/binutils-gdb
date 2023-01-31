@@ -1726,7 +1726,7 @@ info_frame_command_core (frame_info_ptr fi, bool selected_frame_p)
 	    else if (VALUE_LVAL (value) == lval_memory)
 	      {
 		gdb_printf (" Previous frame's sp at ");
-		gdb_puts (paddress (gdbarch, value_address (value)));
+		gdb_puts (paddress (gdbarch, value->address ()));
 		gdb_printf ("\n");
 	      }
 	    else if (VALUE_LVAL (value) == lval_register)

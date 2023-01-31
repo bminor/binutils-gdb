@@ -331,7 +331,7 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
 	  if (VALUE_LVAL (value) != lval_memory)
 	    error (_("Attempt to take address of value "
 		     "not located in memory."));
-	  addr = value_address (value);
+	  addr = value->address ();
 	}
       else
 	addr = value_as_address (value);

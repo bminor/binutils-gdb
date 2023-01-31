@@ -234,7 +234,7 @@ gnuv2_value_rtti_type (struct value *v, int *full, LONGEST *top, int *using_enc)
   /* We can't use value_ind here, because it would want to use RTTI, and
      we'd waste a bunch of time figuring out we already know the type.
      Besides, we don't care about the type, just the actual pointer.  */
-  if (value_address (value_field (v, known_type_vptr_fieldno)) == 0)
+  if (value_field (v, known_type_vptr_fieldno)->address () == 0)
     return NULL;
 
   vtbl = value_as_address (value_field (v, known_type_vptr_fieldno));

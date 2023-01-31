@@ -4604,7 +4604,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	{
 	  gdb_assert (abi_regsize <= ARRAY_SIZE (ref_valbuf));
 	  store_unsigned_integer (ref_valbuf, abi_regsize, byte_order,
-				  value_address (arg));
+				  arg->address ());
 	  typecode = TYPE_CODE_PTR;
 	  len = abi_regsize;
 	  val = ref_valbuf;

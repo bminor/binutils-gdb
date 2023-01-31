@@ -236,7 +236,7 @@ c_value_print_array (struct value *val,
 		     const struct value_print_options *options)
 {
   struct type *type = check_typedef (val->type ());
-  CORE_ADDR address = value_address (val);
+  CORE_ADDR address = val->address ();
   const gdb_byte *valaddr = value_contents_for_printing (val).data ();
   struct type *unresolved_elttype = type->target_type ();
   struct type *elttype = check_typedef (unresolved_elttype);

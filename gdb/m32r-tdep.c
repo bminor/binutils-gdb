@@ -698,7 +698,7 @@ m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  && (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION))
 	{
 	  store_unsigned_integer (valbuf, 4, byte_order,
-				  value_address (args[argnum]));
+				  args[argnum]->address ());
 	  typecode = TYPE_CODE_PTR;
 	  len = 4;
 	  val = valbuf;

@@ -651,7 +651,7 @@ evaluate_subexp_do_call (expression *exp, enum noside noside,
 	{
 	  if (ftype->is_gnu_ifunc ())
 	    {
-	      CORE_ADDR address = value_address (callee);
+	      CORE_ADDR address = callee->address ();
 	      type *resolved_type = find_gnu_ifunc_target_type (address);
 
 	      if (resolved_type != NULL)
@@ -964,7 +964,7 @@ structop_base_operation::evaluate_funcall
 	 ``this'' pointer if necessary, so modify it to reflect any
 	 ``this'' changes.  */
       vals[0] = value_from_longest (lookup_pointer_type (temp->type ()),
-				    value_address (temp)
+				    temp->address ()
 				    + temp->embedded_offset ());
     }
 
@@ -1136,7 +1136,7 @@ eval_op_func_static_var (struct type *expect_type, struct expression *exp,
 			 enum noside noside,
 			 value *func, const char *var)
 {
-  CORE_ADDR addr = value_address (func);
+  CORE_ADDR addr = func->address ();
   const block *blk = block_for_pc (addr);
   struct block_symbol sym = lookup_symbol (var, blk, VAR_DOMAIN, NULL);
   if (sym.symbol == NULL)

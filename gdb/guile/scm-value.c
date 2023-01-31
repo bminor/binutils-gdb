@@ -1194,7 +1194,7 @@ gdbscm_value_to_lazy_string (SCM self, SCM rest)
 						low_bound,
 						low_bound + length - 1);
 	      }
-	    addr = value_address (value);
+	    addr = value->address ();
 	    break;
 	  }
 	case TYPE_CODE_PTR:
@@ -1204,7 +1204,7 @@ gdbscm_value_to_lazy_string (SCM self, SCM rest)
 	  break;
 	default:
 	  /* Should flag an error here.  PR 20769.  */
-	  addr = value_address (value);
+	  addr = value->address ();
 	  break;
 	}
 

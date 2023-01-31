@@ -2108,7 +2108,7 @@ update_watchpoint (struct watchpoint *b, bool reparse)
 		      bitsize = b->val_bitsize;
 		    }
 
-		  addr = value_address (v);
+		  addr = v->address ();
 		  if (bitsize != 0)
 		    {
 		      /* Skip the bytes that don't contain the bitfield.  */
@@ -10435,7 +10435,7 @@ can_use_hardware_watchpoint (const std::vector<value_ref_ptr> &vals)
 		  || (vtype->code () != TYPE_CODE_STRUCT
 		      && vtype->code () != TYPE_CODE_ARRAY))
 		{
-		  CORE_ADDR vaddr = value_address (v);
+		  CORE_ADDR vaddr = v->address ();
 		  int len;
 		  int num_regs;
 

@@ -298,7 +298,7 @@ print_formatted (struct value *val, int size,
   int len = type->length ();
 
   if (VALUE_LVAL (val) == lval_memory)
-    next_address = value_address (val) + len;
+    next_address = val->address () + len;
 
   if (size)
     {
@@ -308,9 +308,9 @@ print_formatted (struct value *val, int size,
 	  {
 	    struct type *elttype = val->type ();
 
-	    next_address = (value_address (val)
+	    next_address = (val->address ()
 			    + val_print_string (elttype, NULL,
-						value_address (val), -1,
+						val->address (), -1,
 						stream, options) * len);
 	  }
 	  return;
@@ -318,9 +318,9 @@ print_formatted (struct value *val, int size,
 	case 'i':
 	  /* We often wrap here if there are long symbolic names.  */
 	  stream->wrap_here (4);
-	  next_address = (value_address (val)
+	  next_address = (val->address ()
 			  + gdb_print_insn (type->arch (),
-					    value_address (val), stream,
+					    val->address (), stream,
 					    &branch_delay_insns));
 	  return;
 	}
@@ -1905,7 +1905,7 @@ x_command (const char *exp, int from_tty)
 	 pointers to functions.  This makes "x/i main" work.  */
       if (val->type ()->code () == TYPE_CODE_FUNC
 	   && VALUE_LVAL (val) == lval_memory)
-	next_address = value_address (val);
+	next_address = val->address ();
       else
 	next_address = value_as_address (val);
 

@@ -4009,7 +4009,7 @@ is_unique_ancestor (struct type *base, struct value *val)
   return is_unique_ancestor_worker (base, val->type (), &offset,
 				    value_contents_for_printing (val).data (),
 				    val->embedded_offset (),
-				    value_address (val), val) == 1;
+				    val->address (), val) == 1;
 }
 
 /* See gdbtypes.h.  */

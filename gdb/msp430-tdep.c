@@ -703,7 +703,7 @@ msp430_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    {
 	      /* Aggregates of any size are passed by reference.  */
 	      store_unsigned_integer (struct_addr_buf, 4, byte_order,
-				      value_address (arg));
+				      arg->address ());
 	      arg_bits = struct_addr_buf;
 	      arg_size = (code_model == MSP_LARGE_CODE_MODEL) ? 4 : 2;
 	    }

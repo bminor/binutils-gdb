@@ -193,7 +193,7 @@ value_subscript (struct value *array, LONGEST index)
 	  struct value *val = allocate_value (elt_type);
 	  mark_value_bytes_unavailable (val, 0, elt_size);
 	  VALUE_LVAL (val) = lval_memory;
-	  set_value_address (val, value_address (array) + elt_size * index);
+	  val->set_address (array->address () + elt_size * index);
 	  return val;
 	}
 
@@ -249,7 +249,7 @@ value_subscripted_rvalue (struct value *array, LONGEST index,
     {
       CORE_ADDR address;
 
-      address = value_address (array) + elt_offs;
+      address = array->address () + elt_offs;
       elt_type = resolve_dynamic_type (elt_type, {}, address);
     }
 

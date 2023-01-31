@@ -571,7 +571,7 @@ coerce_unspec_val_to_type (struct value *val, struct type *type)
       result->set_bitsize (val->bitsize ());
       result->set_bitpos (val->bitpos ());
       if (VALUE_LVAL (result) == lval_memory)
-	set_value_address (result, value_address (val));
+	result->set_address (val->address ());
       return result;
     }
 }
@@ -1764,7 +1764,7 @@ thin_data_pntr (struct value *val)
   if (type->code () == TYPE_CODE_PTR)
     return value_cast (data_type, value_copy (val));
   else
-    return value_from_longest (data_type, value_address (val));
+    return value_from_longest (data_type, val->address ());
 }
 
 /* True iff TYPE indicates a "thick" array pointer type.  */
@@ -1830,7 +1830,7 @@ desc_bounds (struct value *arr)
       if (type->code () == TYPE_CODE_PTR)
 	addr = value_as_long (arr);
       else
-	addr = value_address (arr);
+	addr = arr->address ();
 
       return
 	value_from_longest (lookup_pointer_type (bounds_type),
@@ -2517,7 +2517,7 @@ decode_constrained_packed_array (struct value *arr)
      we further resolve the array bounds here and then update the
      sizes.  */
   const gdb_byte *valaddr = value_contents_for_printing (arr).data ();
-  CORE_ADDR address = value_address (arr);
+  CORE_ADDR address = arr->address ();
   gdb::array_view<const gdb_byte> view
     = gdb::make_array_view (valaddr, type->length ());
   type = resolve_dynamic_type (type, view, address);
@@ -2815,9 +2815,9 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
       int src_len = (bit_size + bit_offset + HOST_CHAR_BIT - 1) / 8;
       gdb_byte *buf;
 
-      v = value_at (type, value_address (obj) + offset);
+      v = value_at (type, obj->address () + offset);
       buf = (gdb_byte *) alloca (src_len);
-      read_memory (value_address (v), buf, src_len);
+      read_memory (v->address (), buf, src_len);
       src = buf;
     }
   else
@@ -2901,7 +2901,7 @@ ada_value_assign (struct value *toval, struct value *fromval)
       int from_size;
       gdb_byte *buffer = (gdb_byte *) alloca (len);
       struct value *val;
-      CORE_ADDR to_addr = value_address (toval);
+      CORE_ADDR to_addr = toval->address ();
 
       if (type->code () == TYPE_CODE_FLT)
 	fromval = value_cast (type, fromval);
@@ -2949,7 +2949,7 @@ value_assign_to_component (struct value *container, struct value *component,
 			   struct value *val)
 {
   LONGEST offset_in_container =
-    (LONGEST)  (value_address (component) - value_address (container));
+    (LONGEST)  (component->address () - container->address ());
   int bit_offset_in_container =
     component->bitpos () - container->bitpos ();
   int bits;
@@ -4357,7 +4357,7 @@ ensure_lval (struct value *val)
 	value_as_long (value_allocate_space_in_inferior (len));
 
       VALUE_LVAL (val) = lval_memory;
-      set_value_address (val, addr);
+      val->set_address (addr);
       write_memory (addr, value_contents (val).data (), len);
     }
 
@@ -4425,9 +4425,9 @@ ada_value_struct_elt (struct value *arg, const char *name, int no_err)
       CORE_ADDR address;
 
       if (t->code () == TYPE_CODE_PTR)
-	address = value_address (ada_value_ind (arg));
+	address = ada_value_ind (arg)->address ();
       else
-	address = value_address (ada_coerce_ref (arg));
+	address = ada_coerce_ref (arg)->address ();
 
       /* Check to see if this is a tagged type.  We also need to handle
 	 the case where the type is a reference to a tagged type, but
@@ -4566,7 +4566,7 @@ value_pointer (struct value *value, struct type *type)
   gdb_byte *buf = (gdb_byte *) alloca (len);
   CORE_ADDR addr;
 
-  addr = value_address (value);
+  addr = value->address ();
   gdbarch_address_to_pointer (type->arch (), type, buf, addr);
   addr = extract_unsigned_integer (buf, len, type_byte_order (type));
   return addr;
@@ -6510,7 +6510,7 @@ ada_tag_value_at_base_address (struct value *obj)
       offset_to_top = -offset_to_top;
     }
 
-  base_address = value_address (obj) + offset_to_top;
+  base_address = obj->address () + offset_to_top;
   tag = value_tag_from_contents_and_address (obj_type, NULL, base_address);
 
   /* Make sure that we have a proper tag at the new address.
@@ -8591,7 +8591,7 @@ ada_to_fixed_type_1 (struct type *type, const gdb_byte *valaddr,
 	    if (real_type != NULL)
 	      return to_fixed_record_type
 		(real_type, NULL,
-		 value_address (ada_tag_value_at_base_address (obj)), NULL);
+		 ada_tag_value_at_base_address (obj)->address (), NULL);
 	  }
 
 	/* Check to see if there is a parallel ___XVZ variable.
@@ -8860,7 +8860,7 @@ struct value *
 ada_to_fixed_value (struct value *val)
 {
   val = unwrap_value (val);
-  val = ada_to_fixed_value_create (val->type (), value_address (val), val);
+  val = ada_to_fixed_value_create (val->type (), val->address (), val);
   return val;
 }
 
@@ -9225,7 +9225,7 @@ unwrap_value (struct value *val)
       return
 	coerce_unspec_val_to_type
 	(val, ada_to_fixed_type (raw_real_type, 0,
-				 value_address (val),
+				 val->address (),
 				 NULL, 1));
     }
 }
@@ -12033,7 +12033,7 @@ ada_exception_message_1 (void)
     return NULL;
 
   gdb::unique_xmalloc_ptr<char> e_msg ((char *) xmalloc (e_msg_len + 1));
-  read_memory (value_address (e_msg_val), (gdb_byte *) e_msg.get (),
+  read_memory (e_msg_val->address (), (gdb_byte *) e_msg.get (),
 	       e_msg_len);
   e_msg.get ()[e_msg_len] = '\0';
 

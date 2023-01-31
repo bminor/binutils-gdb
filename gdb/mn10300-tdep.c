@@ -1212,7 +1212,7 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
 	  arg_len = push_size;
 	  gdb_assert (push_size <= MN10300_MAX_REGISTER_SIZE);
 	  store_unsigned_integer (valbuf, push_size, byte_order,
-				  value_address (*args));
+				  (*args)->address ());
 	  val = &valbuf[0];
 	}
       else

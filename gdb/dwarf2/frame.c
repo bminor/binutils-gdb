@@ -236,7 +236,7 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
   value *result_val = ctx.evaluate (exp, len, true, nullptr, this_frame);
 
   if (VALUE_LVAL (result_val) == lval_memory)
-    return value_address (result_val);
+    return result_val->address ();
   else
     return value_as_address (result_val);
 }

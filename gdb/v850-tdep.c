@@ -1059,7 +1059,7 @@ v850_push_dummy_call (struct gdbarch *gdbarch,
 	  && (*args)->type ()->length () > E_MAX_RETTYPE_SIZE_IN_REGS)
 	{
 	  store_unsigned_integer (valbuf, 4, byte_order,
-				  value_address (*args));
+				  (*args)->address ());
 	  len = 4;
 	  val = valbuf;
 	}
