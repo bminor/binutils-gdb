@@ -170,6 +170,9 @@ struct value
   void deprecated_set_type (struct type *type)
   { m_type = type; }
 
+  /* Return the gdbarch associated with the value. */
+  struct gdbarch *arch () const;
+
 
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
@@ -347,10 +350,6 @@ struct value
      loaded from the inferior.  */
   ULONGEST m_limited_length = 0;
 };
-
-/* Return the gdbarch associated with the value. */
-
-extern struct gdbarch *get_value_arch (const struct value *value);
 
 /* Only used for bitfields; number of bits contained in them.  */
 

@@ -1045,7 +1045,7 @@ read_value_memory (struct value *val, LONGEST bit_offset,
 		   gdb_byte *buffer, size_t length)
 {
   ULONGEST xfered_total = 0;
-  struct gdbarch *arch = get_value_arch (val);
+  struct gdbarch *arch = val->arch ();
   int unit_size = gdbarch_addressable_memory_unit_size (arch);
   enum target_object object;
 
