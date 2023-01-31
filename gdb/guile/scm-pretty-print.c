@@ -966,7 +966,7 @@ gdbscm_apply_val_pretty_printer (const struct extension_language_defn *extlang,
   enum guile_string_repr_result print_result;
 
   if (value->lazy ())
-    value_fetch_lazy (value);
+    value->fetch_lazy ();
 
   /* No pretty-printer support for unavailable values.  */
   if (!value_bytes_available (value, 0, type->length ()))

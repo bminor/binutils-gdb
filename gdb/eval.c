@@ -212,7 +212,7 @@ fetch_subexp_value (struct expression *exp,
 
 	  try
 	    {
-	      value_fetch_lazy (result);
+	      result->fetch_lazy ();
 	      *valp = result;
 	    }
 	  catch (const gdb_exception_error &except)
@@ -2878,7 +2878,7 @@ var_msym_value_operation::evaluate_for_cast (struct type *to_type,
   if (VALUE_LVAL (val) == lval_memory)
     {
       if (val->lazy ())
-	value_fetch_lazy (val);
+	val->fetch_lazy ();
       VALUE_LVAL (val) = not_lval;
     }
   return val;
@@ -2899,7 +2899,7 @@ var_value_operation::evaluate_for_cast (struct type *to_type,
   if (VALUE_LVAL (val) == lval_memory)
     {
       if (val->lazy ())
-	value_fetch_lazy (val);
+	val->fetch_lazy ();
       VALUE_LVAL (val) = not_lval;
     }
   return val;

@@ -1044,7 +1044,7 @@ common_val_print (struct value *value, struct ui_file *stream, int recurse,
     value = ada_to_fixed_value (value);
 
   if (value->lazy ())
-    value_fetch_lazy (value);
+    value->fetch_lazy ();
 
   struct value_print_options local_opts = *options;
   struct type *type = value->type ();

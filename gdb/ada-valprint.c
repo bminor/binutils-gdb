@@ -983,7 +983,7 @@ ada_val_print_ref (struct type *type, const gdb_byte *valaddr,
     deref_val = ada_tag_value_at_base_address (deref_val);
 
   if (deref_val->lazy ())
-    value_fetch_lazy (deref_val);
+    deref_val->fetch_lazy ();
 
   common_val_print (deref_val, stream, recurse + 1,
 		    options, language_def (language_ada));

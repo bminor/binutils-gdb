@@ -352,7 +352,7 @@ rust_val_print_slice (struct value *val, struct ui_file *stream, int recurse,
 	  struct value *array = value::allocate_lazy (array_type);
 	  VALUE_LVAL (array) = lval_memory;
 	  array->set_address (value_as_address (base));
-	  value_fetch_lazy (array);
+	  array->fetch_lazy ();
 	  generic_value_print (array, stream, recurse, options,
 			       &rust_decorations);
 	}

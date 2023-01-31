@@ -1241,7 +1241,7 @@ valpy_fetch_lazy (PyObject *self, PyObject *args)
   try
     {
       if (value->lazy ())
-	value_fetch_lazy (value);
+	value->fetch_lazy ();
     }
   catch (const gdb_exception &except)
     {

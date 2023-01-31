@@ -386,6 +386,15 @@ public:
   gdb::array_view<gdb_byte> contents_all_raw ();
   gdb::array_view<gdb_byte> contents_writeable ();
 
+  /* Load the actual content of a lazy value.  Fetch the data from the
+     user's process and clear the lazy flag to indicate that the data in
+     the buffer is valid.
+
+     If the value is zero-length, we avoid calling read_memory, which
+     would abort.  We mark the value as fetched anyway -- all 0 bytes of
+     it.  */
+  void fetch_lazy ();
+
 
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
@@ -568,6 +577,15 @@ private:
   /* Allocate a value and its contents for type TYPE.  If CHECK_SIZE
      is true, then apply the usual max-value-size checks.  */
   static struct value *allocate (struct type *type, bool check_size);
+
+  /* Helper for fetch_lazy when the value is a bitfield.  */
+  void fetch_lazy_bitfield ();
+
+  /* Helper for fetch_lazy when the value is in memory.  */
+  void fetch_lazy_memory ();
+
+  /* Helper for fetch_lazy when the value is in a register.  */
+  void fetch_lazy_register ();
 };
 
 /* Returns value_type or value_enclosing_type depending on
@@ -675,8 +693,6 @@ extern gdb::array_view<const gdb_byte> value_contents_for_printing (struct value
    value must _not_ be lazy.  */
 extern gdb::array_view<const gdb_byte>
   value_contents_for_printing_const (const struct value *value);
-
-extern void value_fetch_lazy (struct value *val);
 
 /* If nonzero, this is the value of a variable which does not actually
    exist in the program, at least partially.  If the value is lazy,

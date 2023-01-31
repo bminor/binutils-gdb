@@ -10853,7 +10853,7 @@ ada_var_msym_value_operation::evaluate_for_cast (struct type *expect_type,
   if (VALUE_LVAL (val) == lval_memory)
     {
       if (val->lazy ())
-	value_fetch_lazy (val);
+	val->fetch_lazy ();
       VALUE_LVAL (val) = not_lval;
     }
   return val;
@@ -10875,7 +10875,7 @@ ada_var_value_operation::evaluate_for_cast (struct type *expect_type,
   if (VALUE_LVAL (val) == lval_memory)
     {
       if (val->lazy ())
-	value_fetch_lazy (val);
+	val->fetch_lazy ();
       VALUE_LVAL (val) = not_lval;
     }
   return val;

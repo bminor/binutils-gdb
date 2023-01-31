@@ -1248,7 +1248,7 @@ gdbscm_value_fetch_lazy_x (SCM self)
   return gdbscm_wrap ([=]
     {
       if (value->lazy ())
-	value_fetch_lazy (value);
+	value->fetch_lazy ();
       return SCM_UNSPECIFIED;
     });
 }

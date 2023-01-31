@@ -1268,7 +1268,7 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
 
 	  try
 	    {
-	      value_fetch_lazy (value);
+	      value->fetch_lazy ();
 	    }
 
 	  catch (const gdb_exception_error &except)
