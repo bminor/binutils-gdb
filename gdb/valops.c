@@ -1126,8 +1126,8 @@ value_assign (struct value *toval, struct value *fromval)
 	/* Are we dealing with a bitfield?
 
 	   It is important to mention that `value_parent (toval)' is
-	   non-NULL iff `value_bitsize (toval)' is non-zero.  */
-	if (value_bitsize (toval))
+	   non-NULL iff `toval->bitsize ()' is non-zero.  */
+	if (toval->bitsize ())
 	  {
 	    /* VALUE_INTERNALVAR below refers to the parent value, while
 	       the offset is relative to this parent value.  */
@@ -1138,7 +1138,7 @@ value_assign (struct value *toval, struct value *fromval)
 	set_internalvar_component (VALUE_INTERNALVAR (toval),
 				   offset,
 				   value_bitpos (toval),
-				   value_bitsize (toval),
+				   toval->bitsize (),
 				   fromval);
       }
       break;
@@ -1150,13 +1150,13 @@ value_assign (struct value *toval, struct value *fromval)
 	int changed_len;
 	gdb_byte buffer[sizeof (LONGEST)];
 
-	if (value_bitsize (toval))
+	if (toval->bitsize ())
 	  {
 	    struct value *parent = value_parent (toval);
 
 	    changed_addr = value_address (parent) + value_offset (toval);
 	    changed_len = (value_bitpos (toval)
-			   + value_bitsize (toval)
+			   + toval->bitsize ()
 			   + HOST_CHAR_BIT - 1)
 	      / HOST_CHAR_BIT;
 
@@ -1176,7 +1176,7 @@ value_assign (struct value *toval, struct value *fromval)
 
 	    read_memory (changed_addr, buffer, changed_len);
 	    modify_field (type, buffer, value_as_long (fromval),
-			  value_bitpos (toval), value_bitsize (toval));
+			  value_bitpos (toval), toval->bitsize ());
 	    dest_buffer = buffer;
 	  }
 	else
@@ -1213,7 +1213,7 @@ value_assign (struct value *toval, struct value *fromval)
 
 	gdbarch = get_frame_arch (frame);
 
-	if (value_bitsize (toval))
+	if (toval->bitsize ())
 	  {
 	    struct value *parent = value_parent (toval);
 	    LONGEST offset = value_offset (parent) + value_offset (toval);
@@ -1222,7 +1222,7 @@ value_assign (struct value *toval, struct value *fromval)
 	    int optim, unavail;
 
 	    changed_len = (value_bitpos (toval)
-			   + value_bitsize (toval)
+			   + toval->bitsize ()
 			   + HOST_CHAR_BIT - 1)
 			  / HOST_CHAR_BIT;
 
@@ -1244,7 +1244,7 @@ value_assign (struct value *toval, struct value *fromval)
 	      }
 
 	    modify_field (type, buffer, value_as_long (fromval),
-			  value_bitpos (toval), value_bitsize (toval));
+			  value_bitpos (toval), toval->bitsize ());
 
 	    put_frame_register_bytes (frame, value_reg, offset,
 				      {buffer, changed_len});
@@ -1325,11 +1325,11 @@ value_assign (struct value *toval, struct value *fromval)
   /* If the field does not entirely fill a LONGEST, then zero the sign
      bits.  If the field is signed, and is negative, then sign
      extend.  */
-  if ((value_bitsize (toval) > 0)
-      && (value_bitsize (toval) < 8 * (int) sizeof (LONGEST)))
+  if ((toval->bitsize () > 0)
+      && (toval->bitsize () < 8 * (int) sizeof (LONGEST)))
     {
       LONGEST fieldval = value_as_long (fromval);
-      LONGEST valmask = (((ULONGEST) 1) << value_bitsize (toval)) - 1;
+      LONGEST valmask = (((ULONGEST) 1) << toval->bitsize ()) - 1;
 
       fieldval &= valmask;
       if (!type->is_unsigned () 

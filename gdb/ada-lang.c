@@ -568,7 +568,7 @@ coerce_unspec_val_to_type (struct value *val, struct type *type)
 	  value_contents_copy (result, 0, val, 0, type->length ());
 	}
       set_value_component_location (result, val);
-      set_value_bitsize (result, value_bitsize (val));
+      result->set_bitsize (val->bitsize ());
       set_value_bitpos (result, value_bitpos (val));
       if (VALUE_LVAL (result) == lval_memory)
 	set_value_address (result, value_address (val));
@@ -2832,7 +2832,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
 
       set_value_component_location (v, obj);
       set_value_bitpos (v, bit_offset + value_bitpos (obj));
-      set_value_bitsize (v, bit_size);
+      v->set_bitsize (bit_size);
       if (value_bitpos (v) >= HOST_CHAR_BIT)
 	{
 	  ++new_offset;
@@ -2845,7 +2845,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
       set_value_parent (v, obj);
     }
   else
-    set_value_bitsize (v, bit_size);
+    v->set_bitsize (bit_size);
   unpacked = value_contents_writeable (v).data ();
 
   if (bit_size == 0)
@@ -2878,7 +2878,7 @@ static struct value *
 ada_value_assign (struct value *toval, struct value *fromval)
 {
   struct type *type = toval->type ();
-  int bits = value_bitsize (toval);
+  int bits = toval->bitsize ();
 
   toval = ada_coerce_ref (toval);
   fromval = ada_coerce_ref (fromval);
@@ -2907,7 +2907,7 @@ ada_value_assign (struct value *toval, struct value *fromval)
 	fromval = value_cast (type, fromval);
 
       read_memory (to_addr, buffer, len);
-      from_size = value_bitsize (fromval);
+      from_size = fromval->bitsize ();
       if (from_size == 0)
 	from_size = fromval->type ()->length () * TARGET_CHAR_BIT;
 
@@ -2956,10 +2956,10 @@ value_assign_to_component (struct value *container, struct value *component,
 
   val = value_cast (component->type (), val);
 
-  if (value_bitsize (component) == 0)
+  if (component->bitsize () == 0)
     bits = TARGET_CHAR_BIT * component->type ()->length ();
   else
-    bits = value_bitsize (component);
+    bits = component->bitsize ();
 
   if (type_byte_order (container->type ()) == BFD_ENDIAN_BIG)
     {
