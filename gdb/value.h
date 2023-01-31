@@ -338,6 +338,13 @@ struct value
   /* Set the address of a value.  */
   void set_address (CORE_ADDR);
 
+  struct internalvar **deprecated_internalvar_hack ()
+  { return &m_location.internalvar; }
+
+  struct frame_id *deprecated_next_frame_id_hack ();
+
+  int *deprecated_regnum_hack ();
+
 
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
@@ -692,19 +699,16 @@ extern void set_value_component_location (struct value *component,
 #define VALUE_LVAL(val) (*((val)->deprecated_lval_hack ()))
 
 /* Pointer to internal variable.  */
-extern struct internalvar **deprecated_value_internalvar_hack (struct value *);
-#define VALUE_INTERNALVAR(val) (*deprecated_value_internalvar_hack (val))
+#define VALUE_INTERNALVAR(val) (*((val)->deprecated_internalvar_hack ()))
 
 /* Frame ID of "next" frame to which a register value is relative.  A
    register value is indicated by VALUE_LVAL being set to lval_register.
    So, if the register value is found relative to frame F, then the
    frame id of F->next will be stored in VALUE_NEXT_FRAME_ID.  */
-extern struct frame_id *deprecated_value_next_frame_id_hack (struct value *);
-#define VALUE_NEXT_FRAME_ID(val) (*deprecated_value_next_frame_id_hack (val))
+#define VALUE_NEXT_FRAME_ID(val) (*((val)->deprecated_next_frame_id_hack ()))
 
 /* Register number if the value is from a register.  */
-extern int *deprecated_value_regnum_hack (struct value *);
-#define VALUE_REGNUM(val) (*deprecated_value_regnum_hack (val))
+#define VALUE_REGNUM(val) (*((val)->deprecated_regnum_hack ()))
 
 /* Return value after lval_funcs->coerce_ref (after check_typedef).  Return
    NULL if lval_funcs->coerce_ref is not applicable for whatever reason.  */

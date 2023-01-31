@@ -1429,24 +1429,18 @@ value::set_address (CORE_ADDR addr)
   m_location.address = addr;
 }
 
-struct internalvar **
-deprecated_value_internalvar_hack (struct value *value)
-{
-  return &value->m_location.internalvar;
-}
-
 struct frame_id *
-deprecated_value_next_frame_id_hack (struct value *value)
+value::deprecated_next_frame_id_hack ()
 {
-  gdb_assert (value->m_lval == lval_register);
-  return &value->m_location.reg.next_frame_id;
+  gdb_assert (m_lval == lval_register);
+  return &m_location.reg.next_frame_id;
 }
 
 int *
-deprecated_value_regnum_hack (struct value *value)
+value::deprecated_regnum_hack ()
 {
-  gdb_assert (value->m_lval == lval_register);
-  return &value->m_location.reg.regnum;
+  gdb_assert (m_lval == lval_register);
+  return &m_location.reg.regnum;
 }
 
 
