@@ -404,7 +404,7 @@ cooked_index_shard::find (const std::string &name, bool completing) const
   return range (lower, upper);
 }
 
-cooked_index_vector::cooked_index_vector (vec_type &&vec)
+cooked_index::cooked_index (vec_type &&vec)
   : m_vector (std::move (vec))
 {
   for (auto &idx : m_vector)
@@ -414,7 +414,7 @@ cooked_index_vector::cooked_index_vector (vec_type &&vec)
 /* See cooked-index.h.  */
 
 dwarf2_per_cu_data *
-cooked_index_vector::lookup (CORE_ADDR addr)
+cooked_index::lookup (CORE_ADDR addr)
 {
   for (const auto &index : m_vector)
     {
@@ -428,7 +428,7 @@ cooked_index_vector::lookup (CORE_ADDR addr)
 /* See cooked-index.h.  */
 
 std::vector<const addrmap *>
-cooked_index_vector::get_addrmaps () const
+cooked_index::get_addrmaps () const
 {
   std::vector<const addrmap *> result;
   for (const auto &index : m_vector)
@@ -438,8 +438,8 @@ cooked_index_vector::get_addrmaps () const
 
 /* See cooked-index.h.  */
 
-cooked_index_vector::range
-cooked_index_vector::find (const std::string &name, bool completing) const
+cooked_index::range
+cooked_index::find (const std::string &name, bool completing) const
 {
   std::vector<cooked_index_shard::range> result_range;
   result_range.reserve (m_vector.size ());
@@ -451,7 +451,7 @@ cooked_index_vector::find (const std::string &name, bool completing) const
 /* See cooked-index.h.  */
 
 const cooked_index_entry *
-cooked_index_vector::get_main () const
+cooked_index::get_main () const
 {
   const cooked_index_entry *result = nullptr;
 
@@ -471,7 +471,7 @@ cooked_index_vector::get_main () const
 /* See cooked-index.h.  */
 
 void
-cooked_index_vector::dump (gdbarch *arch) const
+cooked_index::dump (gdbarch *arch) const
 {
   /* Ensure the index is done building.  */
   this->wait ();

@@ -1124,7 +1124,7 @@ write_gdbindex_1 (FILE *out_file,
 /* Write the contents of the internal "cooked" index.  */
 
 static void
-write_cooked_index (cooked_index_vector *table,
+write_cooked_index (cooked_index *table,
 		    const cu_index_map &cu_index_htab,
 		    struct mapped_symtab *symtab)
 {
@@ -1199,8 +1199,7 @@ write_cooked_index (cooked_index_vector *table,
    associated dwz file, DWZ_OUT_FILE must be NULL.  */
 
 static void
-write_gdbindex (dwarf2_per_objfile *per_objfile,
-		cooked_index_vector *table,
+write_gdbindex (dwarf2_per_objfile *per_objfile, cooked_index *table,
 		FILE *out_file, FILE *dwz_out_file)
 {
   mapped_symtab symtab;
@@ -1289,8 +1288,7 @@ static const gdb_byte dwarf5_gdb_augmentation[] = { 'G', 'D', 'B', 0 };
    many bytes were expected to be written into OUT_FILE.  */
 
 static void
-write_debug_names (dwarf2_per_objfile *per_objfile,
-		   cooked_index_vector *table,
+write_debug_names (dwarf2_per_objfile *per_objfile, cooked_index *table,
 		   FILE *out_file, FILE *out_file_str)
 {
   const bool dwarf5_is_dwarf64 = check_dwarf64_offsets (per_objfile);
@@ -1464,8 +1462,7 @@ write_dwarf_index (dwarf2_per_objfile *per_objfile, const char *dir,
 
   if (per_objfile->per_bfd->index_table == nullptr)
     error (_("No debugging symbols"));
-  cooked_index_vector *table
-    = per_objfile->per_bfd->index_table->index_for_writing ();
+  cooked_index *table = per_objfile->per_bfd->index_table->index_for_writing ();
 
   if (per_objfile->per_bfd->types.size () > 1)
     error (_("Cannot make an index when the file has multiple .debug_types sections"));

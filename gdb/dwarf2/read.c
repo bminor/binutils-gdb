@@ -7173,7 +7173,7 @@ dwarf2_build_psymtabs_hard (dwarf2_per_objfile *per_objfile)
   indexes.push_back (index_storage.release ());
   indexes.shrink_to_fit ();
 
-  cooked_index_vector *vec = new cooked_index_vector (std::move (indexes));
+  cooked_index *vec = new cooked_index (std::move (indexes));
   per_bfd->index_table.reset (vec);
 
   const cooked_index_entry *main_entry = vec->get_main ();
@@ -18590,8 +18590,8 @@ struct cooked_index_functions : public dwarf2_base_index_functions
   void dump (struct objfile *objfile) override
   {
     dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
-    cooked_index_vector *index
-      = (gdb::checked_static_cast<cooked_index_vector *>
+    cooked_index *index
+      = (gdb::checked_static_cast<cooked_index *>
 	  (per_objfile->per_bfd->index_table.get ()));
     if (index == nullptr)
       return;
@@ -18636,8 +18636,8 @@ cooked_index_functions::find_per_cu (dwarf2_per_bfd *per_bfd,
 {
   if (per_bfd->index_table == nullptr)
     return nullptr;
-  cooked_index_vector *table
-    = (gdb::checked_static_cast<cooked_index_vector *>
+  cooked_index *table
+    = (gdb::checked_static_cast<cooked_index *>
        (per_bfd->index_table.get ()));
   return table->lookup (adjusted_pc);
 }
@@ -18654,8 +18654,8 @@ cooked_index_functions::find_compunit_symtab_by_address
     return nullptr;
 
   CORE_ADDR baseaddr = objfile->data_section_offset ();
-  cooked_index_vector *table
-    = (gdb::checked_static_cast<cooked_index_vector *>
+  cooked_index *table
+    = (gdb::checked_static_cast<cooked_index *>
        (per_objfile->per_bfd->index_table.get ()));
   dwarf2_per_cu_data *per_cu = table->lookup (address - baseaddr);
   if (per_cu == nullptr)
@@ -18682,8 +18682,8 @@ cooked_index_functions::expand_matching_symbols
   symbol_name_matcher_ftype *name_match
     = lang->get_symbol_name_matcher (lookup_name);
 
-  cooked_index_vector *table
-    = (gdb::checked_static_cast<cooked_index_vector *>
+  cooked_index *table
+    = (gdb::checked_static_cast<cooked_index *>
        (per_objfile->per_bfd->index_table.get ()));
   for (const cooked_index_entry *entry : table->all_entries ())
     {
@@ -18716,8 +18716,8 @@ cooked_index_functions::expand_symtabs_matching
   if (per_objfile->per_bfd->index_table == nullptr)
     return true;
 
-  cooked_index_vector *table
-    = (gdb::checked_static_cast<cooked_index_vector *>
+  cooked_index *table
+    = (gdb::checked_static_cast<cooked_index *>
        (per_objfile->per_bfd->index_table.get ()));
   table->wait ();
 
@@ -18845,7 +18845,7 @@ make_cooked_index_funcs ()
 }
 
 quick_symbol_functions_up
-cooked_index_vector::make_quick_functions () const
+cooked_index::make_quick_functions () const
 {
   return make_cooked_index_funcs ();
 }

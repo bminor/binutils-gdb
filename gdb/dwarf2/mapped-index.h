@@ -47,7 +47,7 @@ struct name_component
   offset_type idx;
 };
 
-class cooked_index_vector;
+class cooked_index;
 
 /* Base class of all DWARF scanner types.  */
 
@@ -72,7 +72,7 @@ struct dwarf_scanner_base
   /* This is called when writing an index.  For a cooked index, it
      will return 'this' as a cooked index.  For other forms, it will
      throw an exception with an appropriate error message.  */
-  virtual cooked_index_vector *index_for_writing () = 0;
+  virtual cooked_index *index_for_writing () = 0;
 };
 
 /* Base class containing bits shared by both .gdb_index and
@@ -117,7 +117,7 @@ struct mapped_index_base : public dwarf_scanner_base
 				 enum language lang,
 				 dwarf2_per_objfile *per_objfile) const;
 
-  cooked_index_vector *index_for_writing () override
+  cooked_index *index_for_writing () override
   {
     error (_("Cannot use an index to create the index"));
   }
