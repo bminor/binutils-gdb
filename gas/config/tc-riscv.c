@@ -2762,6 +2762,8 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		case 'p':
 		  goto branch;
 		case 'a':
+		  if (oparg == insn->args + 1)
+		    goto jump_check_gpr;
 		  goto jump;
 		case 'S': /* Floating-point RS1 x8-x15.  */
 		  if (!reg_lookup (&asarg, RCLASS_FPR, &regno)
@@ -3271,6 +3273,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		 but the 2nd (with 2 operands) might.  */
 	      if (oparg == insn->args)
 		{
+	    jump_check_gpr:
 		  asargStart = asarg;
 		  if (reg_lookup (&asarg, RCLASS_GPR, NULL)
 		      && (*asarg == ',' || (ISSPACE (*asarg) && asarg[1] == ',')))
