@@ -492,7 +492,7 @@ get_call_return_value (struct call_return_meta_info *ri)
 	     requiring GDB to evaluate the "this" pointer.  To evaluate
 	     the this pointer, GDB needs the memory address of the
 	     value.  */
-	  value_force_lval (retval, ri->struct_addr);
+	  retval->force_lval (ri->struct_addr);
 	  push_thread_stack_temporary (thr, retval);
 	}
     }

@@ -532,6 +532,13 @@ public:
      for LENGTH bits as optimized out.  */
   void mark_bits_optimized_out (LONGEST offset, LONGEST length);
 
+  /* Return a version of this that is non-lvalue.  */
+  struct value *non_lval ();
+
+  /* Write contents of this value at ADDR and set its lval type to be
+     LVAL_MEMORY.  */
+  void force_lval (CORE_ADDR);
+
 
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
@@ -1445,10 +1452,6 @@ extern const char *internalvar_name (const struct internalvar *var);
 extern void preserve_values (struct objfile *);
 
 /* From values.c */
-
-extern struct value *value_non_lval (struct value *);
-
-extern void value_force_lval (struct value *, CORE_ADDR);
 
 extern struct value *make_cv_value (int, int, struct value *);
 

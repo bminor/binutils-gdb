@@ -1567,35 +1567,35 @@ make_cv_value (int cnst, int voltl, struct value *v)
   return cv_val;
 }
 
-/* Return a version of ARG that is non-lvalue.  */
+/* See value.h.  */
 
 struct value *
-value_non_lval (struct value *arg)
+value::non_lval ()
 {
-  if (VALUE_LVAL (arg) != not_lval)
+  if (VALUE_LVAL (this) != not_lval)
     {
-      struct type *enc_type = arg->enclosing_type ();
+      struct type *enc_type = enclosing_type ();
       struct value *val = value::allocate (enc_type);
 
-      gdb::copy (arg->contents_all (), val->contents_all_raw ());
-      val->m_type = arg->m_type;
-      val->set_embedded_offset (arg->embedded_offset ());
-      val->set_pointed_to_offset (arg->pointed_to_offset ());
+      gdb::copy (contents_all (), val->contents_all_raw ());
+      val->m_type = m_type;
+      val->set_embedded_offset (embedded_offset ());
+      val->set_pointed_to_offset (pointed_to_offset ());
       return val;
     }
-   return arg;
+  return this;
 }
 
-/* Write contents of V at ADDR and set its lval type to be LVAL_MEMORY.  */
+/* See value.h.  */
 
 void
-value_force_lval (struct value *v, CORE_ADDR addr)
+value::force_lval (CORE_ADDR addr)
 {
-  gdb_assert (VALUE_LVAL (v) == not_lval);
+  gdb_assert (VALUE_LVAL (this) == not_lval);
 
-  write_memory (addr, v->contents_raw ().data (), v->type ()->length ());
-  v->m_lval = lval_memory;
-  v->m_location.address = addr;
+  write_memory (addr, contents_raw ().data (), type ()->length ());
+  m_lval = lval_memory;
+  m_location.address = addr;
 }
 
 void

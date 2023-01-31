@@ -111,7 +111,7 @@ expression::evaluate (struct type *expect_type, enum noside noside)
 
   if (stack_temporaries.has_value ()
       && value_in_thread_stack_temporaries (retval, inferior_thread ()))
-    retval = value_non_lval (retval);
+    retval = retval->non_lval ();
 
   return retval;
 }
@@ -1820,7 +1820,7 @@ eval_op_postinc (struct type *expect_type, struct expression *exp,
     }
   else
     {
-      struct value *arg3 = value_non_lval (arg1);
+      struct value *arg3 = arg1->non_lval ();
       struct value *arg2;
 
       if (ptrmath_type_p (exp->language_defn, arg1->type ()))
@@ -1854,7 +1854,7 @@ eval_op_postdec (struct type *expect_type, struct expression *exp,
     }
   else
     {
-      struct value *arg3 = value_non_lval (arg1);
+      struct value *arg3 = arg1->non_lval ();
       struct value *arg2;
 
       if (ptrmath_type_p (exp->language_defn, arg1->type ()))
