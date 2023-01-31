@@ -390,7 +390,7 @@ gdbscm_value_optimized_out_p (SCM self)
 
   return gdbscm_wrap ([=]
     {
-      return scm_from_bool (value_optimized_out (v_smob->value));
+      return scm_from_bool (v_smob->value->optimized_out ());
     });
 }
 

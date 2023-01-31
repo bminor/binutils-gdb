@@ -262,7 +262,6 @@ public:
   void set_lazy (int val)
   { m_lazy = val; }
 
-
   /* If a value represents a C++ object, then the `type' field gives the
      object's compile-time type.  If the object actually belongs to some
      class derived from `type', perhaps with other base classes and
@@ -478,6 +477,60 @@ public:
   /* Decrease this value's reference count.  When the reference count
      drops to 0, it will be freed.  */
   void decref ();
+
+  /* Given a value, determine whether the contents bytes starting at
+     OFFSET and extending for LENGTH bytes are available.  This returns
+     nonzero if all bytes in the given range are available, zero if any
+     byte is unavailable.  */
+  int bytes_available (LONGEST offset, ULONGEST length) const;
+
+  /* Given a value, determine whether the contents bits starting at
+     OFFSET and extending for LENGTH bits are available.  This returns
+     nonzero if all bits in the given range are available, zero if any
+     bit is unavailable.  */
+  int bits_available (LONGEST offset, ULONGEST length) const;
+
+  /* Like bytes_available, but return false if any byte in the
+     whole object is unavailable.  */
+  int entirely_available ();
+
+  /* Like entirely_available, but return false if any byte in the
+     whole object is available.  */
+  int entirely_unavailable ()
+  { return entirely_covered_by_range_vector (m_unavailable); }
+
+  /* Mark this value's content bytes starting at OFFSET and extending
+     for LENGTH bytes as unavailable.  */
+  void mark_bytes_unavailable (LONGEST offset, ULONGEST length);
+
+  /* Mark this value's content bits starting at OFFSET and extending
+     for LENGTH bits as unavailable.  */
+  void mark_bits_unavailable (LONGEST offset, ULONGEST length);
+
+  /* If nonzero, this is the value of a variable which does not actually
+     exist in the program, at least partially.  If the value is lazy,
+     this may fetch it now.  */
+  int optimized_out ();
+
+  /* Given a value, return true if any of the contents bits starting at
+     OFFSET and extending for LENGTH bits is optimized out, false
+     otherwise.  */
+  int bits_any_optimized_out (int bit_offset, int bit_length) const;
+
+  /* Like optimized_out, but return true iff the whole value is
+     optimized out.  */
+  int entirely_optimized_out ()
+  {
+    return entirely_covered_by_range_vector (m_optimized_out);
+  }
+
+  /* Mark this value's content bytes starting at OFFSET and extending
+     for LENGTH bytes as optimized out.  */
+  void mark_bytes_optimized_out (int offset, int length);
+
+  /* Mark this value's content bits starting at OFFSET and extending
+     for LENGTH bits as optimized out.  */
+  void mark_bits_optimized_out (LONGEST offset, LONGEST length);
 
 
   /* Type of value; either not an lval, or one of the various
@@ -697,6 +750,11 @@ private:
 
   void require_not_optimized_out () const;
   void require_available () const;
+
+  /* Returns true if this value is entirely covered by RANGES.  If the
+     value is lazy, it'll be read now.  Note that RANGE is a pointer
+     to pointer because reading the value might change *RANGE.  */
+  int entirely_covered_by_range_vector (const std::vector<range> &ranges);
 };
 
 inline void
@@ -793,34 +851,6 @@ struct lval_funcs
 
 extern void error_value_optimized_out (void);
 
-/* If nonzero, this is the value of a variable which does not actually
-   exist in the program, at least partially.  If the value is lazy,
-   this may fetch it now.  */
-extern int value_optimized_out (struct value *value);
-
-/* Given a value, return true if any of the contents bits starting at
-   OFFSET and extending for LENGTH bits is optimized out, false
-   otherwise.  */
-
-extern int value_bits_any_optimized_out (const struct value *value,
-					 int bit_offset, int bit_length);
-
-/* Like value_optimized_out, but return true iff the whole value is
-   optimized out.  */
-extern int value_entirely_optimized_out (struct value *value);
-
-/* Mark VALUE's content bytes starting at OFFSET and extending for
-   LENGTH bytes as optimized out.  */
-
-extern void mark_value_bytes_optimized_out (struct value *value,
-					    int offset, int length);
-
-/* Mark VALUE's content bits starting at OFFSET and extending for
-   LENGTH bits as optimized out.  */
-
-extern void mark_value_bits_optimized_out (struct value *value,
-					   LONGEST offset, LONGEST length);
-
 /* Set COMPONENT's location as appropriate for a component of WHOLE
    --- regardless of what kind of lvalue WHOLE is.  */
 extern void set_value_component_location (struct value *component,
@@ -876,42 +906,6 @@ extern struct value *coerce_ref (struct value *value);
    References are dereferenced.  */
 
 extern struct value *coerce_array (struct value *value);
-
-/* Given a value, determine whether the contents bytes starting at
-   OFFSET and extending for LENGTH bytes are available.  This returns
-   nonzero if all bytes in the given range are available, zero if any
-   byte is unavailable.  */
-
-extern int value_bytes_available (const struct value *value,
-				  LONGEST offset, ULONGEST length);
-
-/* Given a value, determine whether the contents bits starting at
-   OFFSET and extending for LENGTH bits are available.  This returns
-   nonzero if all bits in the given range are available, zero if any
-   bit is unavailable.  */
-
-extern int value_bits_available (const struct value *value,
-				 LONGEST offset, ULONGEST length);
-
-/* Like value_bytes_available, but return false if any byte in the
-   whole object is unavailable.  */
-extern int value_entirely_available (struct value *value);
-
-/* Like value_entirely_available, but return false if any byte in the
-   whole object is available.  */
-extern int value_entirely_unavailable (struct value *value);
-
-/* Mark VALUE's content bytes starting at OFFSET and extending for
-   LENGTH bytes as unavailable.  */
-
-extern void mark_value_bytes_unavailable (struct value *value,
-					  LONGEST offset, ULONGEST length);
-
-/* Mark VALUE's content bits starting at OFFSET and extending for
-   LENGTH bits as unavailable.  */
-
-extern void mark_value_bits_unavailable (struct value *value,
-					 LONGEST offset, ULONGEST length);
 
 /* Read LENGTH addressable memory units starting at MEMADDR into BUFFER,
    which is (or will be copied to) VAL's contents buffer offset by

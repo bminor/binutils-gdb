@@ -188,10 +188,10 @@ value_subscript (struct value *array, LONGEST index)
       struct type *elt_type = check_typedef (tarray->target_type ());
       LONGEST elt_size = type_length_units (elt_type);
       if (!array->lazy ()
-	  && !value_bytes_available (array, elt_size * index, elt_size))
+	  && !array->bytes_available (elt_size * index, elt_size))
 	{
 	  struct value *val = value::allocate (elt_type);
-	  mark_value_bytes_unavailable (val, 0, elt_size);
+	  val->mark_bytes_unavailable (0, elt_size);
 	  VALUE_LVAL (val) = lval_memory;
 	  val->set_address (array->address () + elt_size * index);
 	  return val;

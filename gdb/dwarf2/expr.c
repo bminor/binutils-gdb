@@ -233,12 +233,12 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
 		      {
 			if (check_optimized)
 			  return true;
-			mark_value_bits_optimized_out (v, offset,
-						       this_size_bits);
+			v->mark_bits_optimized_out (offset,
+						    this_size_bits);
 		      }
 		    if (unavail && !check_optimized)
-		      mark_value_bits_unavailable (v, offset,
-						   this_size_bits);
+		      v->mark_bits_unavailable (offset,
+						this_size_bits);
 		    break;
 		  }
 
@@ -358,7 +358,7 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
 
 	    if (from != nullptr)
 	      {
-		mark_value_bits_optimized_out (v, offset, this_size_bits);
+		v->mark_bits_optimized_out (offset, this_size_bits);
 		break;
 	      }
 
@@ -390,7 +390,7 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
 
 	    if (from != nullptr)
 	      {
-		mark_value_bits_optimized_out (v, offset, this_size_bits);
+		v->mark_bits_optimized_out (offset, this_size_bits);
 		break;
 	      }
 
@@ -413,7 +413,7 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
 	case DWARF_VALUE_IMPLICIT_POINTER:
 	    if (from != nullptr)
 	      {
-		mark_value_bits_optimized_out (v, offset, this_size_bits);
+		v->mark_bits_optimized_out (offset, this_size_bits);
 		break;
 	      }
 
@@ -424,7 +424,7 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
 	case DWARF_VALUE_OPTIMIZED_OUT:
 	  if (check_optimized)
 	    return true;
-	  mark_value_bits_optimized_out (v, offset, this_size_bits);
+	  v->mark_bits_optimized_out (offset, this_size_bits);
 	  break;
 
 	default:
@@ -960,7 +960,7 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 
 	    retval = value_from_register (subobj_type, gdb_regnum,
 					  this->m_frame);
-	    if (value_optimized_out (retval))
+	    if (retval->optimized_out ())
 	      {
 		/* This means the register has undefined value / was
 		   not saved.  As we're computing the location of some

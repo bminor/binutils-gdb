@@ -1096,7 +1096,7 @@ output_register (frame_info_ptr frame, int regnum, int format,
   struct value *val = value_of_register (regnum, frame);
   struct value_print_options opts;
 
-  if (skip_unavailable && !value_entirely_available (val))
+  if (skip_unavailable && !val->entirely_available ())
     return;
 
   ui_out_emit_tuple tuple_emitter (uiout, NULL);

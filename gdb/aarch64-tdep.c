@@ -2766,8 +2766,8 @@ aarch64_pseudo_read_value_1 (struct gdbarch *gdbarch,
   gdb_static_assert (AARCH64_V0_REGNUM == AARCH64_SVE_Z0_REGNUM);
 
   if (regcache->raw_read (v_regnum, reg_buf) != REG_VALID)
-    mark_value_bytes_unavailable (result_value, 0,
-				  result_value->type ()->length ());
+    result_value->mark_bytes_unavailable (0,
+					  result_value->type ()->length ());
   else
     memcpy (result_value->contents_raw ().data (), reg_buf, regsize);
 
@@ -2801,7 +2801,7 @@ aarch64_pseudo_read_value (struct gdbarch *gdbarch, readable_regcache *regcache,
 
       /* Read the bottom 4 bytes of X.  */
       if (regcache->raw_read_part (x_regnum, offset, 4, data) != REG_VALID)
-	mark_value_bytes_unavailable (result_value, 0, 4);
+	result_value->mark_bytes_unavailable (0, 4);
       else
 	memcpy (result_value->contents_raw ().data (), data, 4);
 

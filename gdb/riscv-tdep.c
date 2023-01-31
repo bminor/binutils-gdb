@@ -1126,8 +1126,8 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
       return;
     }
 
-  print_raw_format = (value_entirely_available (val)
-		      && !value_optimized_out (val));
+  print_raw_format = (val->entirely_available ()
+		      && !val->optimized_out ());
 
   if (regtype->code () == TYPE_CODE_FLT
       || (regtype->code () == TYPE_CODE_UNION

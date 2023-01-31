@@ -555,7 +555,7 @@ coerce_unspec_val_to_type (struct value *val, struct type *type)
     {
       struct value *result;
 
-      if (value_optimized_out (val))
+      if (val->optimized_out ())
 	result = value::allocate_optimized_out (type);
       else if (val->lazy ()
 	       /* Be careful not to make a lazy not_lval value.  */

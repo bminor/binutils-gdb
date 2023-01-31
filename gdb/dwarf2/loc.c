@@ -1515,8 +1515,8 @@ dwarf2_evaluate_loc_desc_full (struct type *type, frame_info_ptr frame,
 	{
 	  free_values.free_to_mark ();
 	  retval = value::allocate (subobj_type);
-	  mark_value_bytes_unavailable (retval, 0,
-					subobj_type->length ());
+	  retval->mark_bytes_unavailable (0,
+					  subobj_type->length ());
 	  return retval;
 	}
       else if (ex.error == NO_ENTRY_VALUE_ERROR)
@@ -1609,7 +1609,7 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 	throw;
     }
 
-  if (value_optimized_out (result))
+  if (result->optimized_out ())
     return 0;
 
   if (VALUE_LVAL (result) == lval_memory)
@@ -1709,7 +1709,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 	    val = dwarf2_evaluate_loc_desc (baton->property_type, frame, data,
 					    size, baton->loclist.per_cu,
 					    baton->loclist.per_objfile);
-	    if (!value_optimized_out (val))
+	    if (!val->optimized_out ())
 	      {
 		*value = value_as_address (val);
 		return true;

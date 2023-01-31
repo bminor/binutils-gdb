@@ -918,7 +918,7 @@ ada_value_print_array (struct value *val, struct ui_file *stream, int recurse,
   gdb_printf (stream, "(");
   print_optional_low_bound (stream, type, options);
 
-  if (value_entirely_optimized_out (val))
+  if (val->entirely_optimized_out ())
     val_print_optimized_out (val, stream);
   else if (TYPE_FIELD_BITSIZE (type, 0) > 0)
     {

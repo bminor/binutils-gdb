@@ -241,8 +241,8 @@ alpha_register_to_value (frame_info_ptr frame, int regnum,
   struct value *value = get_frame_register_value (frame, regnum);
 
   gdb_assert (value != NULL);
-  *optimizedp = value_optimized_out (value);
-  *unavailablep = !value_entirely_available (value);
+  *optimizedp = value->optimized_out ();
+  *unavailablep = !value->entirely_available ();
 
   if (*optimizedp || *unavailablep)
     {

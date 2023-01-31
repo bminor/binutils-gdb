@@ -366,8 +366,8 @@ gnuv2_baseclass_offset (struct type *type, int index,
 	      field_offset = type->field (i).loc_bitpos () / 8;
 	      field_length = field_type->length ();
 
-	      if (!value_bytes_available (val, embedded_offset + field_offset,
-					  field_length))
+	      if (!val->bytes_available (embedded_offset + field_offset,
+					 field_length))
 		throw_error (NOT_AVAILABLE_ERROR,
 			     _("Virtual baseclass pointer is not available"));
 

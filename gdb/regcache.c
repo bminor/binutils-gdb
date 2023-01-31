@@ -715,7 +715,7 @@ readable_regcache::cooked_read (int regnum, gdb_byte *buf)
 
       computed = gdbarch_pseudo_register_read_value (m_descr->gdbarch,
 						     this, regnum);
-      if (value_entirely_available (computed))
+      if (computed->entirely_available ())
 	memcpy (buf, computed->contents_raw ().data (),
 		m_descr->sizeof_register[regnum]);
       else
@@ -752,8 +752,8 @@ readable_regcache::cooked_read_value (int regnum)
 	 API is preferred.  */
       if (cooked_read (regnum,
 		       result->contents_raw ().data ()) == REG_UNAVAILABLE)
-	mark_value_bytes_unavailable (result, 0,
-				      result->type ()->length ());
+	result->mark_bytes_unavailable (0,
+					result->type ()->length ());
 
       return result;
     }

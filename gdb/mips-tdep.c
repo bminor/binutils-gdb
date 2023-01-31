@@ -6585,8 +6585,8 @@ print_gp_register_row (struct ui_file *file, frame_info_ptr frame,
 
       /* OK: get the data in raw format.  */
       value = get_frame_register_value (frame, regnum);
-      if (value_optimized_out (value)
-	|| !value_entirely_available (value))
+      if (value->optimized_out ()
+	  || !value->entirely_available ())
 	{
 	  gdb_printf (file, "%*s ",
 		      (int) mips_abi_regsize (gdbarch) * 2,

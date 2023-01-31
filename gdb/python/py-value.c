@@ -1197,7 +1197,7 @@ valpy_get_is_optimized_out (PyObject *self, void *closure)
 
   try
     {
-      opt = value_optimized_out (value);
+      opt = value->optimized_out ();
     }
   catch (const gdb_exception &except)
     {

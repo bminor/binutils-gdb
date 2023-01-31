@@ -1066,9 +1066,9 @@ read_value_memory (struct value *val, LONGEST bit_offset,
       if (status == TARGET_XFER_OK)
 	/* nothing */;
       else if (status == TARGET_XFER_UNAVAILABLE)
-	mark_value_bits_unavailable (val, (xfered_total * HOST_CHAR_BIT
-					   + bit_offset),
-				     xfered_partial * HOST_CHAR_BIT);
+	val->mark_bits_unavailable ((xfered_total * HOST_CHAR_BIT
+				     + bit_offset),
+				    xfered_partial * HOST_CHAR_BIT);
       else if (status == TARGET_XFER_EOF)
 	memory_error (TARGET_XFER_E_IO, memaddr + xfered_total);
       else

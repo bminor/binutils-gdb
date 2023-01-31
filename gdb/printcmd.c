@@ -1280,8 +1280,8 @@ should_validate_memtags (struct value *value)
 
   /* OK, we have an address value.  Check we have a complete value we
      can extract.  */
-  if (value_optimized_out (value)
-      || !value_entirely_available (value))
+  if (value->optimized_out ()
+      || !value->entirely_available ())
     return false;
 
   /* We do.  Check whether it includes any tags.  */

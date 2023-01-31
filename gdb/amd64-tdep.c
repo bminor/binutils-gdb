@@ -375,8 +375,8 @@ amd64_pseudo_register_read_value (struct gdbarch *gdbarch,
 	  if (status == REG_VALID)
 	    memcpy (buf, raw_buf + 1, 1);
 	  else
-	    mark_value_bytes_unavailable (result_value, 0,
-					  result_value->type ()->length ());
+	    result_value->mark_bytes_unavailable (0,
+						  result_value->type ()->length ());
 	}
       else
 	{
@@ -385,8 +385,8 @@ amd64_pseudo_register_read_value (struct gdbarch *gdbarch,
 	  if (status == REG_VALID)
 	    memcpy (buf, raw_buf, 1);
 	  else
-	    mark_value_bytes_unavailable (result_value, 0,
-					  result_value->type ()->length ());
+	    result_value->mark_bytes_unavailable (0,
+						  result_value->type ()->length ());
 	}
     }
   else if (i386_dword_regnum_p (gdbarch, regnum))
@@ -398,8 +398,8 @@ amd64_pseudo_register_read_value (struct gdbarch *gdbarch,
       if (status == REG_VALID)
 	memcpy (buf, raw_buf, 4);
       else
-	mark_value_bytes_unavailable (result_value, 0,
-				      result_value->type ()->length ());
+	result_value->mark_bytes_unavailable (0,
+					      result_value->type ()->length ());
     }
   else
     i386_pseudo_register_read_into_value (gdbarch, regcache, regnum,

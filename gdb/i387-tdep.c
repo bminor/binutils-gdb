@@ -282,7 +282,7 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 	  regnum = (fpreg + 8 - top) % 8 + I387_ST0_REGNUM (tdep);
 	  regval = get_frame_register_value (frame, regnum);
 
-	  if (value_entirely_available (regval))
+	  if (regval->entirely_available ())
 	    {
 	      const gdb_byte *raw = regval->contents ().data ();
 

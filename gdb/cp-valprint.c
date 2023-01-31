@@ -550,7 +550,7 @@ cp_print_static_field (struct type *type,
 {
   struct value_print_options opts;
 
-  if (value_entirely_optimized_out (val))
+  if (val->entirely_optimized_out ())
     {
       val_print_optimized_out (val, stream);
       return;

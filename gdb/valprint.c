@@ -373,9 +373,8 @@ valprint_check_validity (struct ui_file *stream,
       && type->code () != TYPE_CODE_STRUCT
       && type->code () != TYPE_CODE_ARRAY)
     {
-      if (value_bits_any_optimized_out (val,
-					TARGET_CHAR_BIT * embedded_offset,
-					TARGET_CHAR_BIT * type->length ()))
+      if (val->bits_any_optimized_out (TARGET_CHAR_BIT * embedded_offset,
+				       TARGET_CHAR_BIT * type->length ()))
 	{
 	  val_print_optimized_out (val, stream);
 	  return 0;
@@ -403,7 +402,7 @@ valprint_check_validity (struct ui_file *stream,
 	  return is_ref;
 	}
 
-      if (!value_bytes_available (val, embedded_offset, type->length ()))
+      if (!val->bytes_available (embedded_offset, type->length ()))
 	{
 	  val_print_unavailable (stream);
 	  return 0;
@@ -1131,7 +1130,7 @@ value_check_printable (struct value *val, struct ui_file *stream,
       return 0;
     }
 
-  if (value_entirely_optimized_out (val))
+  if (val->entirely_optimized_out ())
     {
       if (options->summary && !val_print_scalar_type_p (val->type ()))
 	gdb_printf (stream, "...");
@@ -1140,7 +1139,7 @@ value_check_printable (struct value *val, struct ui_file *stream,
       return 0;
     }
 
-  if (value_entirely_unavailable (val))
+  if (val->entirely_unavailable ())
     {
       if (options->summary && !val_print_scalar_type_p (val->type ()))
 	gdb_printf (stream, "...");
@@ -1304,10 +1303,10 @@ value_print_scalar_formatted (struct value *val,
 
   /* A scalar object that does not have all bits available can't be
      printed, because all bits contribute to its representation.  */
-  if (value_bits_any_optimized_out (val, 0,
-				    TARGET_CHAR_BIT * type->length ()))
+  if (val->bits_any_optimized_out (0,
+				   TARGET_CHAR_BIT * type->length ()))
     val_print_optimized_out (val, stream);
-  else if (!value_bytes_available (val, 0, type->length ()))
+  else if (!val->bytes_available (0, type->length ()))
     val_print_unavailable (stream);
   else
     print_scalar_formatted (valaddr, type, options, size, stream);
@@ -2017,8 +2016,8 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
 	 UINT_MAX (unlimited).  */
       if (options->repeat_count_threshold < UINT_MAX)
 	{
-	  bool unavailable = value_entirely_unavailable (element);
-	  bool available = value_entirely_available (element);
+	  bool unavailable = element->entirely_unavailable ();
+	  bool available = element->entirely_available ();
 
 	  while (rep1 < len)
 	    {
@@ -2027,10 +2026,10 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
 						rep1 * bit_stride,
 						bit_stride);
 	      bool repeated = ((available
-				&& value_entirely_available (rep_elt)
+				&& rep_elt->entirely_available ()
 				&& element->contents_eq (rep_elt))
 			       || (unavailable
-				   && value_entirely_unavailable (rep_elt)));
+				   && rep_elt->entirely_unavailable ()));
 	      if (!repeated)
 		break;
 	      ++reps;

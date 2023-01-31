@@ -269,11 +269,11 @@ public:
 	struct value *e_val = value_from_component (m_val, elt_type, elt_off);
 	struct value *e_prev = value_from_component (m_val, elt_type,
 						     elt_off_prev);
-	repeated = ((value_entirely_available (e_prev)
-		     && value_entirely_available (e_val)
+	repeated = ((e_prev->entirely_available ()
+		     && e_val->entirely_available ()
 		     && e_prev->contents_eq (e_val))
-		    || (value_entirely_unavailable (e_prev)
-			&& value_entirely_unavailable (e_val)));
+		    || (e_prev->entirely_unavailable ()
+			&& e_val->entirely_unavailable ()));
       }
 
     if (repeated)
@@ -376,11 +376,11 @@ private:
 	struct value *e_val1 = value_from_component (val, type, offset1);
 	struct value *e_val2 = value_from_component (val, type, offset2);
 
-	return ((value_entirely_available (e_val1)
-		 && value_entirely_available (e_val2)
+	return ((e_val1->entirely_available ()
+		 && e_val2->entirely_available ()
 		 && e_val1->contents_eq (e_val2))
-		|| (value_entirely_unavailable (e_val1)
-		    && value_entirely_unavailable (e_val2)));
+		|| (e_val1->entirely_unavailable ()
+		    && e_val2->entirely_unavailable ()));
       }
   }
 

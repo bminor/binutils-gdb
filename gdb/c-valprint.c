@@ -257,9 +257,9 @@ c_value_print_array (struct value *val,
 	 long as the entire array is valid.  */
       if (c_textual_element_type (unresolved_elttype,
 				  options->format)
-	  && value_bytes_available (val, 0, type->length ())
-	  && !value_bits_any_optimized_out (val, 0,
-					    TARGET_CHAR_BIT * type->length ()))
+	  && val->bytes_available (0, type->length ())
+	  && !val->bits_any_optimized_out (0,
+					   TARGET_CHAR_BIT * type->length ()))
 	{
 	  int force_ellipses = 0;
 
@@ -520,7 +520,7 @@ c_value_print (struct value *val, struct ui_file *stream,
 	  /* Pointer to class, check real type of object.  */
 	  gdb_printf (stream, "(");
 
-	  if (value_entirely_available (val))
+	  if (val->entirely_available ())
 	    {
 	      real_type = value_rtti_indirect_type (val, &full, &top,
 						    &using_enc);

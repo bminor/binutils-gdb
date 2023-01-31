@@ -2172,8 +2172,8 @@ default_print_one_register_info (struct ui_file *file,
   format_stream.puts (name);
   pad_to_column (format_stream, value_column_1);
 
-  print_raw_format = (value_entirely_available (val)
-		      && !value_optimized_out (val));
+  print_raw_format = (val->entirely_available ()
+		      && !val->optimized_out ());
 
   /* If virtual format is floating, print it that way, and in raw
      hex.  */

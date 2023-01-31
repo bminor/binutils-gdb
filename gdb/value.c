@@ -169,23 +169,21 @@ value::arch () const
 }
 
 int
-value_bits_available (const struct value *value,
-		      LONGEST offset, ULONGEST length)
+value::bits_available (LONGEST offset, ULONGEST length) const
 {
-  gdb_assert (!value->m_lazy);
+  gdb_assert (!m_lazy);
 
   /* Don't pretend we have anything available there in the history beyond
      the boundaries of the value recorded.  It's not like inferior memory
      where there is actual stuff underneath.  */
-  ULONGEST val_len = TARGET_CHAR_BIT * value->enclosing_type ()->length ();
-  return !((value->m_in_history
+  ULONGEST val_len = TARGET_CHAR_BIT * enclosing_type ()->length ();
+  return !((m_in_history
 	    && (offset < 0 || offset + length > val_len))
-	   || ranges_contain (value->m_unavailable, offset, length));
+	   || ranges_contain (m_unavailable, offset, length));
 }
 
 int
-value_bytes_available (const struct value *value,
-		       LONGEST offset, ULONGEST length)
+value::bytes_available (LONGEST offset, ULONGEST length) const
 {
   ULONGEST sign = (1ULL << (sizeof (ULONGEST) * 8 - 1)) / TARGET_CHAR_BIT;
   ULONGEST mask = (sign << 1) - 1;
@@ -195,68 +193,50 @@ value_bytes_available (const struct value *value,
       || (length > 0 && (~offset & (offset + length - 1) & sign) != 0))
     error (_("Integer overflow in data location calculation"));
 
-  return value_bits_available (value,
-			       offset * TARGET_CHAR_BIT,
-			       length * TARGET_CHAR_BIT);
+  return bits_available (offset * TARGET_CHAR_BIT, length * TARGET_CHAR_BIT);
 }
 
 int
-value_bits_any_optimized_out (const struct value *value, int bit_offset, int bit_length)
+value::bits_any_optimized_out (int bit_offset, int bit_length) const
 {
-  gdb_assert (!value->m_lazy);
+  gdb_assert (!m_lazy);
 
-  return ranges_contain (value->m_optimized_out, bit_offset, bit_length);
+  return ranges_contain (m_optimized_out, bit_offset, bit_length);
 }
 
 int
-value_entirely_available (struct value *value)
+value::entirely_available ()
 {
   /* We can only tell whether the whole value is available when we try
      to read it.  */
-  if (value->m_lazy)
-    value->fetch_lazy ();
+  if (m_lazy)
+    fetch_lazy ();
 
-  if (value->m_unavailable.empty ())
+  if (m_unavailable.empty ())
     return 1;
   return 0;
 }
 
-/* Returns true if VALUE is entirely covered by RANGES.  If the value
-   is lazy, it'll be read now.  Note that RANGE is a pointer to
-   pointer because reading the value might change *RANGE.  */
+/* See value.h.  */
 
-static int
-value_entirely_covered_by_range_vector (struct value *value,
-					const std::vector<range> &ranges)
+int
+value::entirely_covered_by_range_vector (const std::vector<range> &ranges)
 {
   /* We can only tell whether the whole value is optimized out /
      unavailable when we try to read it.  */
-  if (value->m_lazy)
-    value->fetch_lazy ();
+  if (m_lazy)
+    fetch_lazy ();
 
   if (ranges.size () == 1)
     {
       const struct range &t = ranges[0];
 
       if (t.offset == 0
-	  && t.length == (TARGET_CHAR_BIT
-			  * value->enclosing_type ()->length ()))
+	  && t.length == TARGET_CHAR_BIT * enclosing_type ()->length ())
 	return 1;
     }
 
   return 0;
-}
-
-int
-value_entirely_unavailable (struct value *value)
-{
-  return value_entirely_covered_by_range_vector (value, value->m_unavailable);
-}
-
-int
-value_entirely_optimized_out (struct value *value)
-{
-  return value_entirely_covered_by_range_vector (value, value->m_optimized_out);
 }
 
 /* Insert into the vector pointed to by VECTORP the bit range starting of
@@ -429,19 +409,16 @@ insert_into_bit_range_vector (std::vector<range> *vectorp,
 }
 
 void
-mark_value_bits_unavailable (struct value *value,
-			     LONGEST offset, ULONGEST length)
+value::mark_bits_unavailable (LONGEST offset, ULONGEST length)
 {
-  insert_into_bit_range_vector (&value->m_unavailable, offset, length);
+  insert_into_bit_range_vector (&m_unavailable, offset, length);
 }
 
 void
-mark_value_bytes_unavailable (struct value *value,
-			      LONGEST offset, ULONGEST length)
+value::mark_bytes_unavailable (LONGEST offset, ULONGEST length)
 {
-  mark_value_bits_unavailable (value,
-			       offset * TARGET_CHAR_BIT,
-			       length * TARGET_CHAR_BIT);
+  mark_bits_unavailable (offset * TARGET_CHAR_BIT,
+			 length * TARGET_CHAR_BIT);
 }
 
 /* Find the first range in RANGES that overlaps the range defined by
@@ -1012,7 +989,7 @@ value::allocate_optimized_out (struct type *type)
 {
   struct value *retval = value::allocate_lazy (type);
 
-  mark_value_bytes_optimized_out (retval, 0, type->length ());
+  retval->mark_bytes_optimized_out (0, type->length ());
   retval->set_lazy (0);
   return retval;
 }
@@ -1061,7 +1038,7 @@ value_actual_type (struct value *value, int resolve_simple_types,
       if (result->is_pointer_or_reference ()
 	  && (check_typedef (result->target_type ())->code ()
 	      == TYPE_CODE_STRUCT)
-	  && !value_optimized_out (value))
+	  && !value->optimized_out ())
 	{
 	  struct type *real_type;
 
@@ -1204,10 +1181,9 @@ value_contents_copy_raw (struct value *dst, LONGEST dst_offset,
   /* The overwritten DST range gets unavailability ORed in, not
      replaced.  Make sure to remember to implement replacing if it
      turns out actually necessary.  */
-  gdb_assert (value_bytes_available (dst, dst_offset, length));
-  gdb_assert (!value_bits_any_optimized_out (dst,
-					     TARGET_CHAR_BIT * dst_offset,
-					     TARGET_CHAR_BIT * length));
+  gdb_assert (dst->bytes_available (dst_offset, length));
+  gdb_assert (!dst->bits_any_optimized_out (TARGET_CHAR_BIT * dst_offset,
+					    TARGET_CHAR_BIT * length));
 
   /* Copy the data.  */
   gdb::array_view<gdb_byte> dst_contents
@@ -1247,9 +1223,9 @@ value_contents_copy_raw_bitwise (struct value *dst, LONGEST dst_bit_offset,
      turns out actually necessary.  */
   LONGEST dst_offset = dst_bit_offset / TARGET_CHAR_BIT;
   LONGEST length = bit_length / TARGET_CHAR_BIT;
-  gdb_assert (value_bytes_available (dst, dst_offset, length));
-  gdb_assert (!value_bits_any_optimized_out (dst, dst_bit_offset,
-					     bit_length));
+  gdb_assert (dst->bytes_available (dst_offset, length));
+  gdb_assert (!dst->bits_any_optimized_out (dst_bit_offset,
+					    bit_length));
 
   /* Copy the data.  */
   gdb::array_view<gdb_byte> dst_contents = dst->contents_all_raw ();
@@ -1303,26 +1279,26 @@ value::contents_writeable ()
 }
 
 int
-value_optimized_out (struct value *value)
+value::optimized_out ()
 {
-  if (value->m_lazy)
+  if (m_lazy)
     {
       /* See if we can compute the result without fetching the
 	 value.  */
-      if (VALUE_LVAL (value) == lval_memory)
+      if (VALUE_LVAL (this) == lval_memory)
 	return false;
-      else if (VALUE_LVAL (value) == lval_computed)
+      else if (VALUE_LVAL (this) == lval_computed)
 	{
-	  const struct lval_funcs *funcs = value->m_location.computed.funcs;
+	  const struct lval_funcs *funcs = m_location.computed.funcs;
 
 	  if (funcs->is_optimized_out != nullptr)
-	    return funcs->is_optimized_out (value);
+	    return funcs->is_optimized_out (this);
 	}
 
       /* Fall back to fetching.  */
       try
 	{
-	  value->fetch_lazy ();
+	  fetch_lazy ();
 	}
       catch (const gdb_exception_error &ex)
 	{
@@ -1341,27 +1317,25 @@ value_optimized_out (struct value *value)
 	}
     }
 
-  return !value->m_optimized_out.empty ();
+  return !m_optimized_out.empty ();
 }
 
 /* Mark contents of VALUE as optimized out, starting at OFFSET bytes, and
    the following LENGTH bytes.  */
 
 void
-mark_value_bytes_optimized_out (struct value *value, int offset, int length)
+value::mark_bytes_optimized_out (int offset, int length)
 {
-  mark_value_bits_optimized_out (value,
-				 offset * TARGET_CHAR_BIT,
-				 length * TARGET_CHAR_BIT);
+  mark_bits_optimized_out (offset * TARGET_CHAR_BIT,
+			   length * TARGET_CHAR_BIT);
 }
 
 /* See value.h.  */
 
 void
-mark_value_bits_optimized_out (struct value *value,
-			       LONGEST offset, LONGEST length)
+value::mark_bits_optimized_out (LONGEST offset, LONGEST length)
 {
-  insert_into_bit_range_vector (&value->m_optimized_out, offset, length);
+  insert_into_bit_range_vector (&m_optimized_out, offset, length);
 }
 
 int
@@ -1546,8 +1520,8 @@ value::copy () const
   val->m_limited_length = m_limited_length;
 
   if (!val->lazy ()
-      && !(value_entirely_optimized_out (val)
-	   || value_entirely_unavailable (val)))
+      && !(val->entirely_optimized_out ()
+	   || val->entirely_unavailable ()))
     {
       ULONGEST length = val->m_limited_length;
       if (length == 0)
@@ -1721,8 +1695,8 @@ record_latest_value (struct value *val)
 
   ULONGEST limit = val->m_limited_length;
   if (limit != 0)
-    mark_value_bytes_unavailable (val, limit,
-				  enclosing_type->length () - limit);
+    val->mark_bytes_unavailable (limit,
+				 enclosing_type->length () - limit);
 
   /* Mark the value as recorded in the history for the availability check.  */
   val->m_in_history = true;
@@ -3159,8 +3133,8 @@ unpack_value_field_as_long (struct type *type, const gdb_byte *valaddr,
   gdb_assert (val != NULL);
 
   bit_offset = embedded_offset * TARGET_CHAR_BIT + bitpos;
-  if (value_bits_any_optimized_out (val, bit_offset, bitsize)
-      || !value_bits_available (val, bit_offset, bitsize))
+  if (val->bits_any_optimized_out (bit_offset, bitsize)
+      || !val->bits_available (bit_offset, bitsize))
     return 0;
 
   *result = unpack_bits_as_long (field_type, valaddr + embedded_offset,
@@ -3905,7 +3879,7 @@ value::fetch_lazy_register ()
 		  user_reg_map_regnum_to_name (gdbarch, regnum));
 
       gdb_printf (&debug_file, "->");
-      if (value_optimized_out (new_val))
+      if (new_val->optimized_out ())
 	{
 	  gdb_printf (&debug_file, " ");
 	  val_print_optimized_out (new_val, &debug_file);
@@ -4174,8 +4148,8 @@ test_value_copy ()
   value_ref_ptr val = release_value (value::allocate_optimized_out (type));
   value_ref_ptr copy = release_value (val.get ()->copy ());
 
-  SELF_CHECK (value_entirely_optimized_out (val.get ()));
-  SELF_CHECK (value_entirely_optimized_out (copy.get ()));
+  SELF_CHECK (val.get ()->entirely_optimized_out ());
+  SELF_CHECK (copy.get ()->entirely_optimized_out ());
 }
 
 } /* namespace selftests */

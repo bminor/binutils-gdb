@@ -7989,7 +7989,7 @@ insert_exception_resume_breakpoint (struct thread_info *tp,
 					b, VAR_DOMAIN);
       value = read_var_value (vsym.symbol, vsym.block, frame);
       /* If the value was optimized out, revert to the old behavior.  */
-      if (! value_optimized_out (value))
+      if (! value->optimized_out ())
 	{
 	  handler = value_as_address (value);
 

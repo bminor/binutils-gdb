@@ -550,7 +550,7 @@ read_frame_arg (const frame_print_options &fp_opts,
       && SYMBOL_COMPUTED_OPS (sym)->read_variable_at_entry != NULL
       && fp_opts.print_entry_values != print_entry_values_no
       && (fp_opts.print_entry_values != print_entry_values_if_needed
-	  || !val || value_optimized_out (val)))
+	  || !val || val->optimized_out ()))
     {
       try
 	{
@@ -568,7 +568,7 @@ read_frame_arg (const frame_print_options &fp_opts,
 	    }
 	}
 
-      if (entryval != NULL && value_optimized_out (entryval))
+      if (entryval != NULL && entryval->optimized_out ())
 	entryval = NULL;
 
       if (fp_opts.print_entry_values == print_entry_values_compact
@@ -672,7 +672,7 @@ read_frame_arg (const frame_print_options &fp_opts,
       if (fp_opts.print_entry_values == print_entry_values_only
 	  || fp_opts.print_entry_values == print_entry_values_both
 	  || (fp_opts.print_entry_values == print_entry_values_preferred
-	      && (!val || value_optimized_out (val))))
+	      && (!val || val->optimized_out ())))
 	{
 	  entryval = value::allocate_optimized_out (sym->type ());
 	  entryval_error = NULL;
@@ -681,7 +681,7 @@ read_frame_arg (const frame_print_options &fp_opts,
   if ((fp_opts.print_entry_values == print_entry_values_compact
        || fp_opts.print_entry_values == print_entry_values_if_needed
        || fp_opts.print_entry_values == print_entry_values_preferred)
-      && (!val || value_optimized_out (val)) && entryval != NULL)
+      && (!val || val->optimized_out ()) && entryval != NULL)
     {
       val = NULL;
       val_error = NULL;
@@ -1708,7 +1708,7 @@ info_frame_command_core (frame_info_ptr fi, bool selected_frame_p)
 	struct value *value = frame_unwind_register_value (fi, sp_regnum);
 	gdb_assert (value != NULL);
 
-	if (!value_optimized_out (value) && value_entirely_available (value))
+	if (!value->optimized_out () && value->entirely_available ())
 	  {
 	    if (VALUE_LVAL (value) == not_lval)
 	      {
