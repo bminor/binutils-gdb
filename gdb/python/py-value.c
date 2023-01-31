@@ -1506,7 +1506,7 @@ valpy_absolute (PyObject *self)
     {
       scoped_value_mark free_values;
 
-      if (value_less (value, value_zero (value->type (), not_lval)))
+      if (value_less (value, value::zero (value->type (), not_lval)))
 	isabs = 0;
     }
   catch (const gdb_exception &except)

@@ -1929,7 +1929,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	      {
 	      case DW_OP_abs:
 		if (value_less (result_val,
-				value_zero (result_val->type (), not_lval)))
+				value::zero (result_val->type (), not_lval)))
 		  result_val = value_neg (result_val);
 		break;
 	      case DW_OP_neg:

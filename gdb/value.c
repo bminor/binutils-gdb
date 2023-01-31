@@ -3418,11 +3418,10 @@ pack_unsigned_long (gdb_byte *buf, struct type *type, ULONGEST num)
     }
 }
 
-
-/* Create a value of type TYPE that is zero, and return it.  */
+/* See value.h.  */
 
 struct value *
-value_zero (struct type *type, enum lval_type lv)
+value::zero (struct type *type, enum lval_type lv)
 {
   struct value *val = value::allocate_lazy (type);
 

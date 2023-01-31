@@ -271,7 +271,7 @@ value_cast_structs (struct type *type, struct value *v2)
 	 T2.  This wouldn't work properly for classes with virtual
 	 bases, but those were handled above.  */
       v = search_struct_field (t2->name (),
-			       value_zero (t1, not_lval), t1, 1);
+			       value::zero (t1, not_lval), t1, 1);
       if (v)
 	{
 	  /* Downcasting is possible (t1 is superclass of v2).  */
@@ -640,7 +640,7 @@ value_cast (struct type *type, struct value *arg2)
     error (_("can only cast scalar to vector of same size"));
   else if (code1 == TYPE_CODE_VOID)
     {
-      return value_zero (to_type, not_lval);
+      return value::zero (to_type, not_lval);
     }
   else if (type->length () == type2->length ())
     {
@@ -848,7 +848,7 @@ value_dynamic_cast (struct type *type, struct value *arg)
 
       /* Handle NULL pointers.  */
       if (value_as_long (arg) == 0)
-	return value_zero (type, not_lval);
+	return value::zero (type, not_lval);
 
       arg = value_ind (arg);
     }
@@ -928,7 +928,7 @@ value_dynamic_cast (struct type *type, struct value *arg)
 		       : value_addr (result));
 
   if (resolved_type->code () == TYPE_CODE_PTR)
-    return value_zero (type, not_lval);
+    return value::zero (type, not_lval);
 
   error (_("dynamic_cast failed"));
 }
@@ -4167,7 +4167,7 @@ cast_into_complex (struct type *type, struct value *val)
   else if (val->type ()->code () == TYPE_CODE_FLT
 	   || val->type ()->code () == TYPE_CODE_INT)
     return value_literal_complex (val, 
-				  value_zero (real_type, not_lval), 
+				  value::zero (real_type, not_lval), 
 				  type);
   else
     error (_("cannot cast non-number to complex"));

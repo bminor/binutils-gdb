@@ -961,7 +961,7 @@ eval_op_f_cmplx (type *expect_type, expression *exp, noside noside,
     return value_cast (result_type, arg1);
   else
     return value_literal_complex (arg1,
-				  value_zero (arg1->type (), not_lval),
+				  value::zero (arg1->type (), not_lval),
 				  result_type);
 }
 
@@ -1637,7 +1637,7 @@ fortran_structop_operation::evaluate (struct type *expect_type,
 	    = gdb::make_array_view (valaddr, elt_type->length ());
 	  elt_type = resolve_dynamic_type (elt_type, view, address);
 	}
-      elt = value_zero (elt_type, VALUE_LVAL (elt));
+      elt = value::zero (elt_type, VALUE_LVAL (elt));
     }
 
   return elt;

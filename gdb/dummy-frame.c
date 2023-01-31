@@ -348,7 +348,7 @@ dummy_frame_prev_register (frame_info_ptr this_frame,
 
   /* Describe the register's location.  Generic dummy frames always
      have the register value in an ``expression''.  */
-  reg_val = value_zero (register_type (gdbarch, regnum), not_lval);
+  reg_val = value::zero (register_type (gdbarch, regnum), not_lval);
 
   /* Use the regcache_cooked_read() method so that it, on the fly,
      constructs either a raw or pseudo register from the raw

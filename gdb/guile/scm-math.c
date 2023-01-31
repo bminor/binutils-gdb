@@ -109,7 +109,7 @@ vlscm_unop_gdbthrow (enum valscm_unary_opcode opcode, SCM x,
       res_val = arg1;
       break;
     case VALSCM_ABS:
-      if (value_less (arg1, value_zero (arg1->type (), not_lval)))
+      if (value_less (arg1, value::zero (arg1->type (), not_lval)))
 	res_val = value_neg (arg1);
       else
 	res_val = arg1;

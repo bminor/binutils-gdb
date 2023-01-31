@@ -178,6 +178,9 @@ public:
   /* Allocate NOT_LVAL value for type TYPE being OPTIMIZED_OUT.  */
   static struct value *allocate_optimized_out (struct type *type);
 
+  /* Create a value of type TYPE that is zero, and return it.  */
+  static struct value *zero (struct type *type, enum lval_type lv);
+
   ~value ();
 
   DISABLE_COPY_AND_ASSIGN (value);
@@ -398,7 +401,7 @@ public:
      used instead of read_memory to enable extra caching.  */
   unsigned int m_stack : 1;
 
-  /* True if this is a zero value, created by 'value_zero'; false
+  /* True if this is a zero value, created by 'value::zero'; false
      otherwise.  */
   bool m_is_zero : 1;
 
@@ -1158,8 +1161,6 @@ extern struct value *value_reinterpret_cast (struct type *type,
 					     struct value *arg);
 
 extern struct value *value_dynamic_cast (struct type *type, struct value *arg);
-
-extern struct value *value_zero (struct type *type, enum lval_type lv);
 
 extern struct value *value_one (struct type *type);
 

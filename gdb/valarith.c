@@ -532,7 +532,7 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
 
 	      if (return_type == NULL)
 		error (_("Xmethod is missing return type."));
-	      return value_zero (return_type, VALUE_LVAL (arg1));
+	      return value::zero (return_type, VALUE_LVAL (arg1));
 	    }
 	  return call_xmethod (argvec[0], argvec.slice (1));
 	}
@@ -541,7 +541,7 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
 	  struct type *return_type;
 
 	  return_type = check_typedef (argvec[0]->type ())->target_type ();
-	  return value_zero (return_type, VALUE_LVAL (arg1));
+	  return value::zero (return_type, VALUE_LVAL (arg1));
 	}
       return call_function_by_hand (argvec[0], NULL,
 				    argvec.slice (1, 2 - static_memfuncp));
@@ -645,7 +645,7 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
 
 	      if (return_type == NULL)
 		error (_("Xmethod is missing return type."));
-	      return value_zero (return_type, VALUE_LVAL (arg1));
+	      return value::zero (return_type, VALUE_LVAL (arg1));
 	    }
 	  return call_xmethod (argvec[0], argvec[1]);
 	}
@@ -654,7 +654,7 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
 	  struct type *return_type;
 
 	  return_type = check_typedef (argvec[0]->type ())->target_type ();
-	  return value_zero (return_type, VALUE_LVAL (arg1));
+	  return value::zero (return_type, VALUE_LVAL (arg1));
 	}
       return call_function_by_hand (argvec[0], NULL,
 				    argvec.slice (1, nargs));
@@ -988,7 +988,7 @@ complex_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
   else
     {
       arg1_real = arg1;
-      arg1_imag = value_zero (arg1_type, not_lval);
+      arg1_imag = value::zero (arg1_type, not_lval);
     }
   if (arg2_type->code () == TYPE_CODE_COMPLEX)
     {
@@ -998,7 +998,7 @@ complex_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
   else
     {
       arg2_real = arg2;
-      arg2_imag = value_zero (arg2_type, not_lval);
+      arg2_imag = value::zero (arg2_type, not_lval);
     }
 
   struct type *comp_type = promotion_type (arg1_real->type (),
@@ -1913,7 +1913,7 @@ value_neg (struct value *arg1)
   if (is_integral_type (type) || is_floating_type (type))
     return value_binop (value_from_longest (type, 0), arg1, BINOP_SUB);
   else if (is_fixed_point_type (type))
-    return value_binop (value_zero (type, not_lval), arg1, BINOP_SUB);
+    return value_binop (value::zero (type, not_lval), arg1, BINOP_SUB);
   else if (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
     {
       struct value *val = value::allocate (type);

@@ -278,7 +278,7 @@ create_value (struct gdbarch *gdbarch, struct value *val, enum noside noside,
   if (n == 1)
     {
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	ret = value_zero (elm_type, not_lval);
+	ret = value::zero (elm_type, not_lval);
       else
 	ret = value_subscript (val, indices[0]);
     }
@@ -715,7 +715,7 @@ opencl_structop_operation::evaluate (struct type *expect_type,
 					  NULL, "structure");
 
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	v = value_zero (v->type (), VALUE_LVAL (v));
+	v = value::zero (v->type (), VALUE_LVAL (v));
       return v;
     }
 }

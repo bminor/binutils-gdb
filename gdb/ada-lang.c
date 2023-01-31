@@ -8922,7 +8922,7 @@ ada_pos_atr (struct type *expect_type,
 {
   struct type *type = builtin_type (exp->gdbarch)->builtin_int;
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    return value_zero (type, not_lval);
+    return value::zero (type, not_lval);
   return value_from_longest (type, pos_atr (arg));
 }
 
@@ -8947,7 +8947,7 @@ struct value *
 ada_val_atr (enum noside noside, struct type *type, struct value *arg)
 {
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    return value_zero (type, not_lval);
+    return value::zero (type, not_lval);
 
   if (!discrete_type_p (type))
     error (_("'VAL only defined on discrete types"));
@@ -10164,7 +10164,7 @@ ada_atr_tag (struct type *expect_type,
 	     struct value *arg1)
 {
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    return value_zero (ada_tag_type (arg1), not_lval);
+    return value::zero (ada_tag_type (arg1), not_lval);
 
   return ada_value_tag (arg1);
 }
@@ -10186,7 +10186,7 @@ ada_atr_size (struct type *expect_type,
     type = type->target_type ();
 
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    return value_zero (builtin_type (exp->gdbarch)->builtin_int, not_lval);
+    return value::zero (builtin_type (exp->gdbarch)->builtin_int, not_lval);
   else
     return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
 			       TARGET_CHAR_BIT * type->length ());
@@ -10201,7 +10201,7 @@ ada_abs (struct type *expect_type,
 	 struct value *arg1)
 {
   unop_promote (exp->language_defn, exp->gdbarch, &arg1);
-  if (value_less (arg1, value_zero (arg1->type (), not_lval)))
+  if (value_less (arg1, value::zero (arg1->type (), not_lval)))
     return value_neg (arg1);
   else
     return arg1;
@@ -10218,7 +10218,7 @@ ada_mult_binop (struct type *expect_type,
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     {
       binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
-      return value_zero (arg1->type (), not_lval);
+      return value::zero (arg1->type (), not_lval);
     }
   else
     {
@@ -10340,7 +10340,7 @@ ada_binop_in_bounds (struct expression *exp, enum noside noside,
     {
       struct type *type = language_bool_type (exp->language_defn,
 					      exp->gdbarch);
-      return value_zero (type, not_lval);
+      return value::zero (type, not_lval);
     }
 
   struct type *type = ada_index_type (arg2->type (), n, "range");
@@ -10391,7 +10391,7 @@ ada_unop_atr (struct expression *exp, enum noside noside, enum exp_opcode op,
 	    }
 	}
 
-      return value_zero (type_arg, not_lval);
+      return value::zero (type_arg, not_lval);
     }
   else if (type_arg == NULL)
     {
@@ -10496,7 +10496,7 @@ ada_binop_minmax (struct type *expect_type,
 		  struct value *arg1, struct value *arg2)
 {
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    return value_zero (arg1->type (), not_lval);
+    return value::zero (arg1->type (), not_lval);
   else
     {
       binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
@@ -10513,7 +10513,7 @@ ada_binop_exp (struct type *expect_type,
 	       struct value *arg1, struct value *arg2)
 {
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    return value_zero (arg1->type (), not_lval);
+    return value::zero (arg1->type (), not_lval);
   else
     {
       /* For integer exponentiation operations,
@@ -10841,7 +10841,7 @@ ada_var_msym_value_operation::evaluate_for_cast (struct type *expect_type,
 						 enum noside noside)
 {
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    return value_zero (expect_type, not_lval);
+    return value::zero (expect_type, not_lval);
 
   const bound_minimal_symbol &b = std::get<0> (m_storage);
   value *val = evaluate_var_msym_value (noside, b.objfile, b.minsym);
@@ -10938,7 +10938,7 @@ ada_var_value_operation::evaluate (struct type *expect_type,
 		   This can happen if the debugging information is
 		   incomplete, for instance.  */
 		actual_type = type;
-	      return value_zero (actual_type, not_lval);
+	      return value::zero (actual_type, not_lval);
 	    }
 	  else
 	    {
@@ -10963,7 +10963,7 @@ ada_var_value_operation::evaluate (struct type *expect_type,
 	   && dynamic_template_type (type) != NULL)
 	  || (type->code () == TYPE_CODE_UNION
 	      && ada_find_parallel_type (type, "___XVU") != NULL))
-	return value_zero (to_static_fixed_type (type), not_lval);
+	return value::zero (to_static_fixed_type (type), not_lval);
     }
 
   value *arg1 = var_value_operation::evaluate (expect_type, exp, noside);
@@ -11047,19 +11047,19 @@ ada_unop_ind_operation::evaluate (struct type *expect_type,
 		(ada_aligned_type
 		 (ada_check_typedef (type->target_type ())));
 	    }
-	  return value_zero (type, lval_memory);
+	  return value::zero (type, lval_memory);
 	}
       else if (type->code () == TYPE_CODE_INT)
 	{
 	  /* GDB allows dereferencing an int.  */
 	  if (expect_type == NULL)
-	    return value_zero (builtin_type (exp->gdbarch)->builtin_int,
+	    return value::zero (builtin_type (exp->gdbarch)->builtin_int,
 			       lval_memory);
 	  else
 	    {
 	      expect_type =
 		to_static_fixed_type (ada_aligned_type (expect_type));
-	      return value_zero (expect_type, lval_memory);
+	      return value::zero (expect_type, lval_memory);
 	    }
 	}
       else
@@ -11120,7 +11120,7 @@ ada_structop_operation::evaluate (struct type *expect_type,
       else
 	type = ada_lookup_struct_elt_type (type1, str, 1, 0);
 
-      return value_zero (ada_aligned_type (type), lval_memory);
+      return value::zero (ada_aligned_type (type), lval_memory);
     }
   else
     {
@@ -11216,7 +11216,7 @@ ada_funcall_operation::evaluate (struct type *expect_type,
 	/* We don't know anything about what the internal
 	   function might return, but we have to return
 	   something.  */
-	return value_zero (builtin_type (exp->gdbarch)->builtin_int,
+	return value::zero (builtin_type (exp->gdbarch)->builtin_int,
 			   not_lval);
       else
 	return call_internal_function (exp->gdbarch, exp->language_defn,
@@ -11234,7 +11234,7 @@ ada_funcall_operation::evaluate (struct type *expect_type,
 	if (arity != nargs)
 	  error (_("wrong number of subscripts; expecting %d"), arity);
 	if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	  return value_zero (ada_aligned_type (type), lval_memory);
+	  return value::zero (ada_aligned_type (type), lval_memory);
 	return
 	  unwrap_value (ada_value_subscript
 			(callee, nargs, argvec.data ()));
@@ -11246,7 +11246,7 @@ ada_funcall_operation::evaluate (struct type *expect_type,
 	  if (type == NULL)
 	    error (_("element type of array unknown"));
 	  else
-	    return value_zero (ada_aligned_type (type), lval_memory);
+	    return value::zero (ada_aligned_type (type), lval_memory);
 	}
       return
 	unwrap_value (ada_value_subscript
@@ -11260,7 +11260,7 @@ ada_funcall_operation::evaluate (struct type *expect_type,
 	  if (type == NULL)
 	    error (_("element type of array unknown"));
 	  else
-	    return value_zero (ada_aligned_type (type), lval_memory);
+	    return value::zero (ada_aligned_type (type), lval_memory);
 	}
       return
 	unwrap_value (ada_value_ptr_subscript (callee, nargs,

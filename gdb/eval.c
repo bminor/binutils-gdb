@@ -552,7 +552,7 @@ type_instance_operation::evaluate (struct type *expect_type,
 value *
 evaluate_var_value (enum noside noside, const block *blk, symbol *var)
 {
-  /* JYG: We used to just return value_zero of the symbol type if
+  /* JYG: We used to just return value::zero of the symbol type if
      we're asked to avoid side effects.  Otherwise we return
      value_of_variable (...).  However I'm not sure if
      value_of_variable () has any side effect.  We need a full value
@@ -573,7 +573,7 @@ evaluate_var_value (enum noside noside, const block *blk, symbol *var)
       if (noside != EVAL_AVOID_SIDE_EFFECTS)
 	throw;
 
-      ret = value_zero (var->type (), not_lval);
+      ret = value::zero (var->type (), not_lval);
     }
 
   return ret;
@@ -606,7 +606,7 @@ evaluate_var_msym_value (enum noside noside,
   type *the_type = find_minsym_type_and_address (msymbol, objfile, &address);
 
   if (noside == EVAL_AVOID_SIDE_EFFECTS && !the_type->is_gnu_ifunc ())
-    return value_zero (the_type, not_lval);
+    return value::zero (the_type, not_lval);
   else
     return value_at_lazy (the_type, address);
 }
@@ -635,7 +635,7 @@ evaluate_subexp_do_call (expression *exp, enum noside noside,
 	  /* We don't know anything about what the internal
 	     function might return, but we have to return
 	     something.  */
-	  return value_zero (builtin_type (exp->gdbarch)->builtin_int,
+	  return value::zero (builtin_type (exp->gdbarch)->builtin_int,
 			     not_lval);
 	}
       else if (ftype->code () == TYPE_CODE_XMETHOD)
@@ -644,7 +644,7 @@ evaluate_subexp_do_call (expression *exp, enum noside noside,
 
 	  if (return_type == NULL)
 	    error (_("Xmethod is missing return type."));
-	  return value_zero (return_type, not_lval);
+	  return value::zero (return_type, not_lval);
 	}
       else if (ftype->code () == TYPE_CODE_FUNC
 	       || ftype->code () == TYPE_CODE_METHOD)
@@ -775,7 +775,7 @@ scope_operation::evaluate_funcall (struct type *expect_type,
       function_name = name.c_str ();
 
       /* We need a properly typed value for method lookup.  */
-      argvec[0] = value_zero (type, lval_memory);
+      argvec[0] = value::zero (type, lval_memory);
     }
 
   for (int i = 0; i < args.size (); ++i)
@@ -840,7 +840,7 @@ structop_member_base::evaluate_funcall (struct type *expect_type,
   if (a1_type->code () == TYPE_CODE_METHODPTR)
     {
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	callee = value_zero (a1_type->target_type (), not_lval);
+	callee = value::zero (a1_type->target_type (), not_lval);
       else
 	callee = cplus_method_ptr_to_value (&lhs, rhs);
 
@@ -1101,7 +1101,7 @@ eval_op_var_entry_value (struct type *expect_type, struct expression *exp,
 			 enum noside noside, symbol *sym)
 {
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    return value_zero (sym->type (), not_lval);
+    return value::zero (sym->type (), not_lval);
 
   if (SYMBOL_COMPUTED_OPS (sym) == NULL
       || SYMBOL_COMPUTED_OPS (sym)->read_variable_at_entry == NULL)
@@ -1165,7 +1165,7 @@ eval_op_register (struct type *expect_type, struct expression *exp,
      of the evaluation mode.  */
   if (noside == EVAL_AVOID_SIDE_EFFECTS
       && regno < gdbarch_num_cooked_regs (exp->gdbarch))
-    val = value_zero (register_type (exp->gdbarch, regno), not_lval);
+    val = value::zero (register_type (exp->gdbarch, regno), not_lval);
   else
     val = value_of_register (regno, get_selected_frame (NULL));
   if (val == NULL)
@@ -1224,7 +1224,7 @@ eval_op_structop_struct (struct type *expect_type, struct expression *exp,
   struct value *arg3 = value_struct_elt (&arg1, {}, string,
 					 NULL, "structure");
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    arg3 = value_zero (arg3->type (), VALUE_LVAL (arg3));
+    arg3 = value::zero (arg3->type (), VALUE_LVAL (arg3));
   return arg3;
 }
 
@@ -1280,7 +1280,7 @@ eval_op_structop_ptr (struct type *expect_type, struct expression *exp,
   struct value *arg3 = value_struct_elt (&arg1, {}, string,
 					 NULL, "structure pointer");
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    arg3 = value_zero (arg3->type (), VALUE_LVAL (arg3));
+    arg3 = value::zero (arg3->type (), VALUE_LVAL (arg3));
   return arg3;
 }
 
@@ -1299,7 +1299,7 @@ eval_op_member (struct type *expect_type, struct expression *exp,
     {
     case TYPE_CODE_METHODPTR:
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	return value_zero (type->target_type (), not_lval);
+	return value::zero (type->target_type (), not_lval);
       else
 	{
 	  arg2 = cplus_method_ptr_to_value (&arg1, arg2);
@@ -1447,7 +1447,7 @@ eval_op_subscript (struct type *expect_type, struct expression *exp,
 	}
 
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	return value_zero (type->target_type (), VALUE_LVAL (arg1));
+	return value::zero (type->target_type (), VALUE_LVAL (arg1));
       else
 	return value_subscript (arg1, value_as_long (arg2));
     }
@@ -1693,11 +1693,11 @@ eval_op_ind (struct type *expect_type, struct expression *exp,
 	  if (type->is_pointer_or_reference ()
 	      /* In C you can dereference an array to get the 1st elt.  */
 	      || type->code () == TYPE_CODE_ARRAY)
-	    return value_zero (type->target_type (),
+	    return value::zero (type->target_type (),
 			       lval_memory);
 	  else if (type->code () == TYPE_CODE_INT)
 	    /* GDB allows dereferencing an int.  */
-	    return value_zero (builtin_type (exp->gdbarch)->builtin_int,
+	    return value::zero (builtin_type (exp->gdbarch)->builtin_int,
 			       lval_memory);
 	  else
 	    error (_("Attempt to take contents of a non-pointer value."));
@@ -1738,7 +1738,7 @@ eval_op_memval (struct type *expect_type, struct expression *exp,
 		struct value *arg1, struct type *type)
 {
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    return value_zero (type, lval_memory);
+    return value::zero (type, lval_memory);
   else
     return value_at_lazy (type, value_as_address (arg1));
 }
@@ -2588,10 +2588,10 @@ evaluate_subexp_for_address_base (struct expression *exp, enum noside noside,
       struct type *type = check_typedef (x->type ());
 
       if (TYPE_IS_REFERENCE (type))
-	return value_zero (lookup_pointer_type (type->target_type ()),
+	return value::zero (lookup_pointer_type (type->target_type ()),
 			   not_lval);
       else if (VALUE_LVAL (x) == lval_memory || value_must_coerce_to_target (x))
-	return value_zero (lookup_pointer_type (x->type ()),
+	return value::zero (lookup_pointer_type (x->type ()),
 			   not_lval);
       else
 	error (_("Attempt to take address of "
@@ -2656,7 +2656,7 @@ var_msym_value_operation::evaluate_for_address (struct expression *exp,
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     {
       struct type *type = lookup_pointer_type (val->type ());
-      return value_zero (type, not_lval);
+      return value::zero (type, not_lval);
     }
   else
     return value_addr (val);
@@ -2702,7 +2702,7 @@ var_value_operation::evaluate_for_address (struct expression *exp,
 	  || sym_class == LOC_REGISTER)
 	error (_("Attempt to take address of register or constant."));
 
-      return value_zero (type, not_lval);
+      return value::zero (type, not_lval);
     }
   else
     return address_of_variable (var, std::get<0> (m_storage).block);
@@ -2852,7 +2852,7 @@ var_value_operation::evaluate_for_sizeof (struct expression *exp,
 	  /* FIXME: This should be size_t.  */
 	  struct type *size_type = builtin_type (exp->gdbarch)->builtin_int;
 	  if (type_not_allocated (type) || type_not_associated (type))
-	    return value_zero (size_type, not_lval);
+	    return value::zero (size_type, not_lval);
 	  else if (is_dynamic_type (type->index_type ())
 		   && type->bounds ()->high.kind () == PROP_UNDEFINED)
 	    return value::allocate_optimized_out (size_type);
@@ -2867,7 +2867,7 @@ var_msym_value_operation::evaluate_for_cast (struct type *to_type,
 					     enum noside noside)
 {
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    return value_zero (to_type, not_lval);
+    return value::zero (to_type, not_lval);
 
   const bound_minimal_symbol &b = std::get<0> (m_storage);
   value *val = evaluate_var_msym_value (noside, b.objfile, b.minsym);

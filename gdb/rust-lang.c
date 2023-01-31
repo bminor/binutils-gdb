@@ -1070,7 +1070,7 @@ rust_range (struct type *expect_type, struct expression *exp,
 				    high == NULL ? NULL : "end", index_type);
 
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    return value_zero (range_type, lval_memory);
+    return value::zero (range_type, lval_memory);
 
   addrval = value_allocate_space_in_inferior (range_type->length ());
   addr = value_as_long (addrval);
@@ -1204,7 +1204,7 @@ rust_subscript (struct type *expect_type, struct expression *exp,
       else
 	new_type = base_type;
 
-      return value_zero (new_type, VALUE_LVAL (lhs));
+      return value::zero (new_type, VALUE_LVAL (lhs));
     }
   else
     {
@@ -1470,7 +1470,7 @@ rust_structop::evaluate (struct type *expect_type,
   else
     result = value_struct_elt (&lhs, {}, field_name, NULL, "structure");
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    result = value_zero (result->type (), VALUE_LVAL (result));
+    result = value::zero (result->type (), VALUE_LVAL (result));
   return result;
 }
 
@@ -1571,7 +1571,7 @@ rust_structop::evaluate_funcall (struct type *expect_type,
     args[i + 1] = ops[i]->evaluate (nullptr, exp, noside);
 
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    return value_zero (fn_type->target_type (), not_lval);
+    return value::zero (fn_type->target_type (), not_lval);
   return call_function_by_hand (function, NULL, args);
 }
 
