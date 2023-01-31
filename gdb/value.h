@@ -198,6 +198,17 @@ struct value
   void set_parent (struct value *parent)
   {  m_parent = value_ref_ptr::new_reference (parent); }
 
+  /* Describes offset of a value within lval of a structure in bytes.
+     If lval == lval_memory, this is an offset to the address.  If
+     lval == lval_register, this is a further offset from
+     location.address within the registers structure.  Note also the
+     member embedded_offset below.  */
+  LONGEST offset () const
+  { return m_offset; }
+
+  void set_offset (LONGEST offset)
+  { m_offset = offset; }
+
 
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
@@ -375,15 +386,6 @@ struct value
      loaded from the inferior.  */
   ULONGEST m_limited_length = 0;
 };
-
-/* Describes offset of a value within lval of a structure in bytes.
-   If lval == lval_memory, this is an offset to the address.  If lval
-   == lval_register, this is a further offset from location.address
-   within the registers structure.  Note also the member
-   embedded_offset below.  */
-
-extern LONGEST value_offset (const struct value *);
-extern void set_value_offset (struct value *, LONGEST offset);
 
 /* The comment from "struct value" reads: ``Is it modifiable?  Only
    relevant if lval != not_lval.''.  Shouldn't the value instead be

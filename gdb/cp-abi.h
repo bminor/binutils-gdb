@@ -123,12 +123,12 @@ extern struct value *value_virtual_fn_field (struct value **valuep,
      - If *USING_ENC is zero, then *TOP is the offset from the start
        of the complete object to the start of the embedded subobject
        VALUE represents.  In other words, the enclosing object starts
-       at VALUE_ADDR (VALUE) + VALUE_OFFSET (VALUE) +
+       at VALUE_ADDR (VALUE) + VALUE->offset () +
        value_embedded_offset (VALUE) + *TOP
      - If *USING_ENC is non-zero, then *TOP is the offset from the
        address of the complete object to the enclosing object stored
        in VALUE.  In other words, the enclosing object starts at
-       VALUE_ADDR (VALUE) + VALUE_OFFSET (VALUE) + *TOP.
+       VALUE_ADDR (VALUE) + VALUE->offset () + *TOP.
      If VALUE's type and enclosing type are the same, then these two
      cases are equivalent.
 

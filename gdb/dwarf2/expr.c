@@ -168,10 +168,10 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
       from_contents = nullptr;
     }
 
-  ULONGEST bits_to_skip = 8 * value_offset (v);
+  ULONGEST bits_to_skip = 8 * v->offset ();
   if (v->bitsize ())
     {
-      bits_to_skip += (8 * value_offset (v->parent ())
+      bits_to_skip += (8 * v->parent ()->offset ()
 		       + v->bitpos ());
       if (from != nullptr
 	  && (type_byte_order (from->type ())
@@ -466,7 +466,7 @@ check_pieced_synthetic_pointer (const value *value, LONGEST bit_offset,
   piece_closure *c = (piece_closure *) value_computed_closure (value);
   int i;
 
-  bit_offset += 8 * value_offset (value);
+  bit_offset += 8 * value->offset ();
   if (value->bitsize ())
     bit_offset += value->bitpos ();
 
@@ -512,7 +512,7 @@ indirect_pieced_value (value *value)
     return NULL;
 
   int bit_length = 8 * type->length ();
-  LONGEST bit_offset = 8 * value_offset (value);
+  LONGEST bit_offset = 8 * value->offset ();
   if (value->bitsize ())
     bit_offset += value->bitpos ();
 
@@ -934,7 +934,7 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 				  std::move (this->m_pieces), this->m_frame);
       retval = allocate_computed_value (subobj_type,
 					&pieced_value_funcs, c);
-      set_value_offset (retval, subobj_offset);
+      retval->set_offset (subobj_offset);
     }
   else
     {

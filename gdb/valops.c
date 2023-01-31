@@ -1121,7 +1121,7 @@ value_assign (struct value *toval, struct value *fromval)
 
     case lval_internalvar_component:
       {
-	LONGEST offset = value_offset (toval);
+	LONGEST offset = toval->offset ();
 
 	/* Are we dealing with a bitfield?
 
@@ -1132,7 +1132,7 @@ value_assign (struct value *toval, struct value *fromval)
 	    /* VALUE_INTERNALVAR below refers to the parent value, while
 	       the offset is relative to this parent value.  */
 	    gdb_assert (toval->parent ()->parent () == NULL);
-	    offset += value_offset (toval->parent ());
+	    offset += toval->parent ()->offset ();
 	  }
 
 	set_internalvar_component (VALUE_INTERNALVAR (toval),
@@ -1154,7 +1154,7 @@ value_assign (struct value *toval, struct value *fromval)
 	  {
 	    struct value *parent = toval->parent ();
 
-	    changed_addr = value_address (parent) + value_offset (toval);
+	    changed_addr = value_address (parent) + toval->offset ();
 	    changed_len = (toval->bitpos ()
 			   + toval->bitsize ()
 			   + HOST_CHAR_BIT - 1)
@@ -1216,7 +1216,7 @@ value_assign (struct value *toval, struct value *fromval)
 	if (toval->bitsize ())
 	  {
 	    struct value *parent = toval->parent ();
-	    LONGEST offset = value_offset (parent) + value_offset (toval);
+	    LONGEST offset = parent->offset () + toval->offset ();
 	    size_t changed_len;
 	    gdb_byte buffer[sizeof (LONGEST)];
 	    int optim, unavail;
@@ -1263,7 +1263,7 @@ value_assign (struct value *toval, struct value *fromval)
 	      }
 	    else
 	      put_frame_register_bytes (frame, value_reg,
-					value_offset (toval),
+					toval->offset (),
 					value_contents (fromval));
 	  }
 
@@ -2560,7 +2560,7 @@ find_method_list (struct value **argp, const char *method,
 	{
 	  base_offset = baseclass_offset (type, i,
 					  value_contents_for_printing (*argp).data (),
-					  value_offset (*argp) + offset,
+					  (*argp)->offset () + offset,
 					  value_address (*argp), *argp);
 	}
       else /* Non-virtual base, simply use bit position from debug
@@ -3531,7 +3531,7 @@ get_baseclass_offset (struct type *vt, struct type *cls,
 	  if (BASETYPE_VIA_VIRTUAL (vt, i))
 	    {
 	      const gdb_byte *adr = value_contents_for_printing (v).data ();
-	      *boffs = baseclass_offset (vt, i, adr, value_offset (v),
+	      *boffs = baseclass_offset (vt, i, adr, v->offset (),
 					 value_as_long (v), v);
 	      *isvirt = true;
 	    }
@@ -3545,7 +3545,7 @@ get_baseclass_offset (struct type *vt, struct type *cls,
 	  if (*isvirt == false)	/* Add non-virtual base offset.  */
 	    {
 	      const gdb_byte *adr = value_contents_for_printing (v).data ();
-	      *boffs += baseclass_offset (vt, i, adr, value_offset (v),
+	      *boffs += baseclass_offset (vt, i, adr, v->offset (),
 					  value_as_long (v), v);
 	    }
 	  return true;
@@ -4089,7 +4089,7 @@ value_slice (struct value *array, int lowbound, int length)
       }
 
     set_value_component_location (slice, array);
-    set_value_offset (slice, value_offset (array) + offset);
+    slice->set_offset (array->offset () + offset);
   }
 
   return slice;

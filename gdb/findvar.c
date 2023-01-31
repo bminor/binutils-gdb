@@ -822,9 +822,9 @@ default_value_from_register (struct gdbarch *gdbarch, struct type *type,
   if (type_byte_order (type) == BFD_ENDIAN_BIG
       && len < register_size (gdbarch, regnum))
     /* Big-endian, and we want less than full size.  */
-    set_value_offset (value, register_size (gdbarch, regnum) - len);
+    value->set_offset (register_size (gdbarch, regnum) - len);
   else
-    set_value_offset (value, 0);
+    value->set_offset (0);
 
   return value;
 }
@@ -842,7 +842,7 @@ read_frame_register_value (struct value *value, frame_info_ptr frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   LONGEST offset = 0;
-  LONGEST reg_offset = value_offset (value);
+  LONGEST reg_offset = value->offset ();
   int regnum = VALUE_REGNUM (value);
   int len = type_length_units (check_typedef (value->type ()));
 

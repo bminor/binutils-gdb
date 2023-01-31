@@ -9144,7 +9144,7 @@ siginfo_value_read (struct value *v)
 		 TARGET_OBJECT_SIGNAL_INFO,
 		 nullptr,
 		 value_contents_all_raw (v).data (),
-		 value_offset (v),
+		 v->offset (),
 		 v->type ()->length ());
 
   if (transferred != v->type ()->length ())
@@ -9167,7 +9167,7 @@ siginfo_value_write (struct value *v, struct value *fromval)
 			      TARGET_OBJECT_SIGNAL_INFO,
 			      nullptr,
 			      value_contents_all_raw (fromval).data (),
-			      value_offset (v),
+			      v->offset (),
 			      fromval->type ()->length ());
 
   if (transferred != fromval->type ()->length ())

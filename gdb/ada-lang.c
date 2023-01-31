@@ -2838,7 +2838,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
 	  ++new_offset;
 	  v->set_bitpos (v->bitpos () - HOST_CHAR_BIT);
 	}
-      set_value_offset (v, new_offset);
+      v->set_offset (new_offset);
 
       /* Also set the parent value.  This is needed when trying to
 	 assign a new value (in inferior memory).  */

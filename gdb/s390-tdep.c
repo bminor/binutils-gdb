@@ -1240,7 +1240,7 @@ s390_value_from_register (struct gdbarch *gdbarch, struct type *type,
        && type->length () < 8)
       || regnum_is_vxr_full (tdep, regnum)
       || (regnum >= S390_V16_REGNUM && regnum <= S390_V31_REGNUM))
-    set_value_offset (value, 0);
+    value->set_offset (0);
 
   return value;
 }
