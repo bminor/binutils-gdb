@@ -2078,15 +2078,30 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
     stop_signal = GDB_SIGNAL_0;
 
   if (signalled_thr != nullptr)
-    linux_corefile_thread (signalled_thr, gdbarch, obfd, note_data, note_size,
-			   stop_signal);
+    {
+      /* On some architectures, like AArch64, each thread can have a distinct
+	 gdbarch (due to scalable extensions), and using the inferior gdbarch
+	 is incorrect.
+
+	 Fetch each thread's gdbarch and pass it down to the lower layers so
+	 we can dump the right set of registers.  */
+      linux_corefile_thread (signalled_thr,
+			     target_thread_architecture (signalled_thr->ptid),
+			     obfd, note_data, note_size, stop_signal);
+    }
   for (thread_info *thr : current_inferior ()->non_exited_threads ())
     {
       if (thr == signalled_thr)
 	continue;
 
-      linux_corefile_thread (thr, gdbarch, obfd, note_data, note_size,
-			     stop_signal);
+      /* On some architectures, like AArch64, each thread can have a distinct
+	 gdbarch (due to scalable extensions), and using the inferior gdbarch
+	 is incorrect.
+
+	 Fetch each thread's gdbarch and pass it down to the lower layers so
+	 we can dump the right set of registers.  */
+      linux_corefile_thread (thr, target_thread_architecture (thr->ptid),
+			     obfd, note_data, note_size, stop_signal);
     }
 
   if (!note_data)
