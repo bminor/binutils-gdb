@@ -586,6 +586,19 @@ private:
 
   /* Helper for fetch_lazy when the value is in a register.  */
   void fetch_lazy_register ();
+
+  /* Try to limit ourselves to only fetching the limited number of
+     elements.  However, if this limited number of elements still
+     puts us over max_value_size, then we still refuse it and
+     return failure here, which will ultimately throw an error.  */
+  bool set_limited_array_length ();
+
+public: /* Temporary */
+
+  /* Allocate the contents of this value if it has not been allocated
+     yet.  If CHECK_SIZE is true, then apply the usual max-value-size
+     checks.  */
+  void allocate_contents (bool check_size);
 };
 
 /* Returns value_type or value_enclosing_type depending on

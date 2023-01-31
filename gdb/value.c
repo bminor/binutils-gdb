@@ -901,39 +901,35 @@ calculate_limited_array_length (struct type *array_type)
   return len;
 }
 
-/* Try to limit ourselves to only fetching the limited number of
-   elements.  However, if this limited number of elements still
-   puts us over max_value_size, then we still refuse it and
-   return failure here, which will ultimately throw an error.  */
+/* See value.h.  */
 
-static bool
-set_limited_array_length (struct value *val)
+bool
+value::set_limited_array_length ()
 {
-  ULONGEST limit = val->m_limited_length;
-  ULONGEST len = val->type ()->length ();
+  ULONGEST limit = m_limited_length;
+  ULONGEST len = type ()->length ();
 
   if (array_length_limiting_element_count.has_value ())
-    len = calculate_limited_array_length (val->type ());
+    len = calculate_limited_array_length (type ());
 
   if (limit != 0 && len > limit)
     len = limit;
   if (len > max_value_size)
     return false;
 
-  val->m_limited_length = max_value_size;
+  m_limited_length = max_value_size;
   return true;
 }
 
-/* Allocate the contents of VAL if it has not been allocated yet.
-   If CHECK_SIZE is true, then apply the usual max-value-size checks.  */
+/* See value.h.  */
 
-static void
-allocate_value_contents (struct value *val, bool check_size)
+void
+value::allocate_contents (bool check_size)
 {
-  if (!val->m_contents)
+  if (!m_contents)
     {
-      struct type *enclosing_type = val->enclosing_type ();
-      ULONGEST len = enclosing_type->length ();
+      struct type *enc_type = enclosing_type ();
+      ULONGEST len = enc_type->length ();
 
       if (check_size)
 	{
@@ -942,16 +938,16 @@ allocate_value_contents (struct value *val, bool check_size)
 	     an element limit in effect, then we can possibly try
 	     to load only a sub-set of the array contents into
 	     GDB's memory.  */
-	  if (val->type () == enclosing_type
-	      && val->type ()->code () == TYPE_CODE_ARRAY
+	  if (type () == enc_type
+	      && type ()->code () == TYPE_CODE_ARRAY
 	      && len > max_value_size
-	      && set_limited_array_length (val))
-	    len = val->m_limited_length;
+	      && set_limited_array_length ())
+	    len = m_limited_length;
 	  else
-	    check_type_length_before_alloc (enclosing_type);
+	    check_type_length_before_alloc (enc_type);
 	}
 
-      val->m_contents.reset ((gdb_byte *) xzalloc (len));
+      m_contents.reset ((gdb_byte *) xzalloc (len));
     }
 }
 
@@ -963,7 +959,7 @@ value::allocate (struct type *type, bool check_size)
 {
   struct value *val = value::allocate_lazy (type);
 
-  allocate_value_contents (val, check_size);
+  val->allocate_contents (check_size);
   val->m_lazy = 0;
   return val;
 }
@@ -1027,7 +1023,7 @@ value::contents_raw ()
 {
   int unit_size = gdbarch_addressable_memory_unit_size (arch ());
 
-  allocate_value_contents (this, true);
+  allocate_contents (true);
 
   ULONGEST length = type ()->length ();
   return gdb::make_array_view
@@ -1037,7 +1033,7 @@ value::contents_raw ()
 gdb::array_view<gdb_byte>
 value::contents_all_raw ()
 {
-  allocate_value_contents (this, true);
+  allocate_contents (true);
 
   ULONGEST length = enclosing_type ()->length ();
   return gdb::make_array_view (m_contents.get (), length);
@@ -1574,7 +1570,7 @@ value_copy (const value *arg)
       const auto &arg_view
 	= gdb::make_array_view (arg->m_contents.get (), length);
 
-      allocate_value_contents (val, false);
+      val->allocate_contents (false);
       gdb::array_view<gdb_byte> val_contents
 	= val->contents_all_raw ().slice (0, length);
 
@@ -3963,7 +3959,7 @@ void
 value::fetch_lazy ()
 {
   gdb_assert (lazy ());
-  allocate_value_contents (this, true);
+  allocate_contents (true);
   /* A value is either lazy, or fully fetched.  The
      availability/validity is only established as we try to fetch a
      value.  */
