@@ -1279,7 +1279,7 @@ entry_data_value_coerce_ref (const struct value *value)
   if (!TYPE_IS_REFERENCE (checked_type))
     return NULL;
 
-  target_val = (struct value *) value_computed_closure (value);
+  target_val = (struct value *) value->computed_closure ();
   value_incref (target_val);
   return target_val;
 }
@@ -1289,7 +1289,7 @@ entry_data_value_coerce_ref (const struct value *value)
 static void *
 entry_data_value_copy_closure (const struct value *v)
 {
-  struct value *target_val = (struct value *) value_computed_closure (v);
+  struct value *target_val = (struct value *) v->computed_closure ();
 
   value_incref (target_val);
   return target_val;
@@ -1300,7 +1300,7 @@ entry_data_value_copy_closure (const struct value *v)
 static void
 entry_data_value_free_closure (struct value *v)
 {
-  struct value *target_val = (struct value *) value_computed_closure (v);
+  struct value *target_val = (struct value *) v->computed_closure ();
 
   value_decref (target_val);
 }

@@ -1273,7 +1273,7 @@ value_assign (struct value *toval, struct value *fromval)
 
     case lval_computed:
       {
-	const struct lval_funcs *funcs = value_computed_funcs (toval);
+	const struct lval_funcs *funcs = toval->computed_funcs ();
 
 	if (funcs->write != NULL)
 	  {
@@ -1639,7 +1639,7 @@ value_ind (struct value *arg1)
 
   if (VALUE_LVAL (arg1) == lval_computed)
     {
-      const struct lval_funcs *funcs = value_computed_funcs (arg1);
+      const struct lval_funcs *funcs = arg1->computed_funcs ();
 
       if (funcs->indirect)
 	{

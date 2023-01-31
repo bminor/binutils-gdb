@@ -301,6 +301,15 @@ struct value
   void set_stack (int val)
   { m_stack = val; }
 
+  /* If this value is lval_computed, return its lval_funcs
+     structure.  */
+  const struct lval_funcs *computed_funcs () const;
+
+  /* If this value is lval_computed, return its closure.  The meaning
+     of the returned value depends on the functions this value
+     uses.  */
+  void *computed_closure () const;
+
 
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
@@ -564,15 +573,6 @@ extern struct value *allocate_computed_value (struct type *type,
 					      void *closure);
 
 extern struct value *allocate_optimized_out_value (struct type *type);
-
-/* If VALUE is lval_computed, return its lval_funcs structure.  */
-
-extern const struct lval_funcs *value_computed_funcs (const struct value *);
-
-/* If VALUE is lval_computed, return its closure.  The meaning of the
-   returned value depends on the functions VALUE uses.  */
-
-extern void *value_computed_closure (const struct value *value);
 
 /* Throw an error complaining that the value has been optimized
    out.  */

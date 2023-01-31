@@ -1383,19 +1383,19 @@ value_bits_synthetic_pointer (const struct value *value,
 }
 
 const struct lval_funcs *
-value_computed_funcs (const struct value *v)
+value::computed_funcs () const
 {
-  gdb_assert (value_lval_const (v) == lval_computed);
+  gdb_assert (m_lval == lval_computed);
 
-  return v->m_location.computed.funcs;
+  return m_location.computed.funcs;
 }
 
 void *
-value_computed_closure (const struct value *v)
+value::computed_closure () const
 {
-  gdb_assert (v->m_lval == lval_computed);
+  gdb_assert (m_lval == lval_computed);
 
-  return v->m_location.computed.closure;
+  return m_location.computed.closure;
 }
 
 enum lval_type *
@@ -3697,7 +3697,7 @@ coerce_ref_if_computed (const struct value *arg)
   if (value_lval_const (arg) != lval_computed)
     return NULL;
 
-  funcs = value_computed_funcs (arg);
+  funcs = arg->computed_funcs ();
   if (funcs->coerce_ref == NULL)
     return NULL;
 
@@ -4025,8 +4025,8 @@ value_fetch_lazy (struct value *val)
   else if (VALUE_LVAL (val) == lval_register)
     value_fetch_lazy_register (val);
   else if (VALUE_LVAL (val) == lval_computed
-	   && value_computed_funcs (val)->read != NULL)
-    value_computed_funcs (val)->read (val);
+	   && val->computed_funcs ()->read != NULL)
+    val->computed_funcs ()->read (val);
   else
     internal_error (_("Unexpected lazy value type."));
 

@@ -149,7 +149,7 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
   gdb_byte *v_contents;
   const gdb_byte *from_contents;
   piece_closure *c
-    = (piece_closure *) value_computed_closure (v);
+    = (piece_closure *) v->computed_closure ();
   gdb::byte_vector buffer;
   bool bits_big_endian = type_byte_order (v->type ()) == BFD_ENDIAN_BIG;
 
@@ -463,7 +463,7 @@ static int
 check_pieced_synthetic_pointer (const value *value, LONGEST bit_offset,
 				int bit_length)
 {
-  piece_closure *c = (piece_closure *) value_computed_closure (value);
+  piece_closure *c = (piece_closure *) value->computed_closure ();
   int i;
 
   bit_offset += 8 * value->offset ();
@@ -503,7 +503,7 @@ static value *
 indirect_pieced_value (value *value)
 {
   piece_closure *c
-    = (piece_closure *) value_computed_closure (value);
+    = (piece_closure *) value->computed_closure ();
   int i;
   dwarf_expr_piece *piece = NULL;
 
@@ -580,7 +580,7 @@ coerce_pieced_ref (const value *value)
 				    TARGET_CHAR_BIT * type->length ()))
     {
       const piece_closure *closure
-	= (piece_closure *) value_computed_closure (value);
+	= (piece_closure *) value->computed_closure ();
       frame_info_ptr frame
 	= get_selected_frame (_("No frame selected."));
 
@@ -604,7 +604,7 @@ coerce_pieced_ref (const value *value)
 static void *
 copy_pieced_value_closure (const value *v)
 {
-  piece_closure *c = (piece_closure *) value_computed_closure (v);
+  piece_closure *c = (piece_closure *) v->computed_closure ();
 
   ++c->refc;
   return c;
@@ -613,7 +613,7 @@ copy_pieced_value_closure (const value *v)
 static void
 free_pieced_value_closure (value *v)
 {
-  piece_closure *c = (piece_closure *) value_computed_closure (v);
+  piece_closure *c = (piece_closure *) v->computed_closure ();
 
   --c->refc;
   if (c->refc == 0)
