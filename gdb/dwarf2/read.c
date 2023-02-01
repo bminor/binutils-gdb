@@ -18634,11 +18634,11 @@ dwarf2_per_cu_data *
 cooked_index_functions::find_per_cu (dwarf2_per_bfd *per_bfd,
 				     CORE_ADDR adjusted_pc)
 {
-  if (per_bfd->index_table == nullptr)
-    return nullptr;
   cooked_index *table
     = (gdb::checked_static_cast<cooked_index *>
        (per_bfd->index_table.get ()));
+  if (table == nullptr)
+    return nullptr;
   return table->lookup (adjusted_pc);
 }
 
@@ -18650,13 +18650,13 @@ cooked_index_functions::find_compunit_symtab_by_address
     return nullptr;
 
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
-  if (per_objfile->per_bfd->index_table == nullptr)
-    return nullptr;
-
-  CORE_ADDR baseaddr = objfile->data_section_offset ();
   cooked_index *table
     = (gdb::checked_static_cast<cooked_index *>
        (per_objfile->per_bfd->index_table.get ()));
+  if (table == nullptr)
+    return nullptr;
+
+  CORE_ADDR baseaddr = objfile->data_section_offset ();
   dwarf2_per_cu_data *per_cu = table->lookup (address - baseaddr);
   if (per_cu == nullptr)
     return nullptr;
@@ -18673,8 +18673,12 @@ cooked_index_functions::expand_matching_symbols
       symbol_compare_ftype *ordered_compare)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
-  if (per_objfile->per_bfd->index_table == nullptr)
+  cooked_index *table
+    = (gdb::checked_static_cast<cooked_index *>
+       (per_objfile->per_bfd->index_table.get ()));
+  if (table == nullptr)
     return;
+
   const block_search_flags search_flags = (global
 					   ? SEARCH_GLOBAL_BLOCK
 					   : SEARCH_STATIC_BLOCK);
@@ -18682,9 +18686,6 @@ cooked_index_functions::expand_matching_symbols
   symbol_name_matcher_ftype *name_match
     = lang->get_symbol_name_matcher (lookup_name);
 
-  cooked_index *table
-    = (gdb::checked_static_cast<cooked_index *>
-       (per_objfile->per_bfd->index_table.get ()));
   for (const cooked_index_entry *entry : table->all_entries ())
     {
       QUIT;
@@ -18713,12 +18714,13 @@ cooked_index_functions::expand_symtabs_matching
       enum search_domain kind)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
-  if (per_objfile->per_bfd->index_table == nullptr)
-    return true;
 
   cooked_index *table
     = (gdb::checked_static_cast<cooked_index *>
        (per_objfile->per_bfd->index_table.get ()));
+  if (table == nullptr)
+    return true;
+
   table->wait ();
 
   dw_expand_symtabs_matching_file_matcher (per_objfile, file_matcher);
