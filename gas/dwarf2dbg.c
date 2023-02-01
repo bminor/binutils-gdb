@@ -86,9 +86,9 @@
 #define DWARF2_ARANGES_VERSION 2
 #endif
 
-/* This implementation outputs version 3 .debug_line information.  */
+/* The .debug_line version is the same as the .debug_info version.  */
 #ifndef DWARF2_LINE_VERSION
-#define DWARF2_LINE_VERSION (dwarf_level > 3 ? dwarf_level : 3)
+#define DWARF2_LINE_VERSION DWARF2_VERSION
 #endif
 
 /* The .debug_rnglists has only been in DWARF version 5. */
@@ -119,7 +119,7 @@
    Note: If you want to change this, you'll have to update the
    "standard_opcode_lengths" table that is emitted below in
    out_debug_line().  */
-#define DWARF2_LINE_OPCODE_BASE		13
+#define DWARF2_LINE_OPCODE_BASE		(DWARF2_LINE_VERSION == 2 ? 10 : 13)
 
 #ifndef DWARF2_LINE_BASE
   /* Minimum line offset in a special line info. opcode.  This value
@@ -1328,11 +1328,15 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 	}
       else if (strcmp (p, "prologue_end") == 0)
 	{
+	  if (dwarf_level < 3)
+	    dwarf_level = 3;
 	  current.flags |= DWARF2_FLAG_PROLOGUE_END;
 	  *input_line_pointer = c;
 	}
       else if (strcmp (p, "epilogue_begin") == 0)
 	{
+	  if (dwarf_level < 3)
+	    dwarf_level = 3;
 	  current.flags |= DWARF2_FLAG_EPILOGUE_BEGIN;
 	  *input_line_pointer = c;
 	}
@@ -1352,6 +1356,8 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 	}
       else if (strcmp (p, "isa") == 0)
 	{
+	  if (dwarf_level < 3)
+	    dwarf_level = 3;
 	  (void) restore_line_pointer (c);
 	  value = get_absolute_expression ();
 	  if (value >= 0)
@@ -2479,12 +2485,17 @@ out_debug_line (segT line_seg)
   out_byte (0);			/* DW_LNS_set_basic_block */
   out_byte (0);			/* DW_LNS_const_add_pc */
   out_byte (1);			/* DW_LNS_fixed_advance_pc */
-  out_byte (0);			/* DW_LNS_set_prologue_end */
-  out_byte (0);			/* DW_LNS_set_epilogue_begin */
-  out_byte (1);			/* DW_LNS_set_isa */
-  /* We have emitted 12 opcode lengths, so make that this
-     matches up to the opcode base value we have been using.  */
-  gas_assert (DWARF2_LINE_OPCODE_BASE == 13);
+  if (DWARF2_LINE_VERSION >= 3)
+    {
+      out_byte (0);			/* DW_LNS_set_prologue_end */
+      out_byte (0);			/* DW_LNS_set_epilogue_begin */
+      out_byte (1);			/* DW_LNS_set_isa */
+      /* We have emitted 12 opcode lengths, so make that this
+	 matches up to the opcode base value we have been using.  */
+      gas_assert (DWARF2_LINE_OPCODE_BASE == 13);
+    }
+  else
+    gas_assert (DWARF2_LINE_OPCODE_BASE == 10);
 
   out_dir_and_file_list (line_seg, sizeof_offset);
 
