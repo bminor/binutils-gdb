@@ -33,10 +33,12 @@ if [ $# -ne 1 ]; then
    exit 1
 fi
 
+year=$(date +%Y)
+
 cat > freebsd.xml.tmp <<EOF
 <?xml version="1.0"?> <!-- THIS FILE IS GENERATED -*- buffer-read-only: t -*-  -->
 <!-- vi:set ro: -->
-<!-- Copyright (C) 2009-2020 Free Software Foundation, Inc.
+<!-- Copyright (C) 2009-$year Free Software Foundation, Inc.
 
      Copying and distribution of this file, with or without modification,
      are permitted in any medium without royalty provided the copyright
