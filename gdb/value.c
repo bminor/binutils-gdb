@@ -2092,7 +2092,7 @@ value_of_internalvar (struct gdbarch *gdbarch, struct internalvar *var)
      want.  */
 
   if (var->kind != INTERNALVAR_MAKE_VALUE
-      && val->m_lval != lval_computed)
+      && val->lval () != lval_computed)
     {
       VALUE_LVAL (val) = lval_internalvar;
       VALUE_INTERNALVAR (val) = var;
@@ -2904,15 +2904,15 @@ value_primitive_field (struct value *arg1, LONGEST offset,
       LONGEST container_bitsize = type->length () * 8;
 
       v = value::allocate_lazy (type);
-      v->m_bitsize = TYPE_FIELD_BITSIZE (arg_type, fieldno);
-      if ((bitpos % container_bitsize) + v->m_bitsize <= container_bitsize
+      v->set_bitsize (TYPE_FIELD_BITSIZE (arg_type, fieldno));
+      if ((bitpos % container_bitsize) + v->bitsize () <= container_bitsize
 	  && type->length () <= (int) sizeof (LONGEST))
-	v->m_bitpos = bitpos % container_bitsize;
+	v->set_bitpos (bitpos % container_bitsize);
       else
-	v->m_bitpos = bitpos % 8;
-      v->m_offset = (arg1->embedded_offset ()
-		   + offset
-		   + (bitpos - v->m_bitpos) / 8);
+	v->set_bitpos (bitpos % 8);
+      v->set_offset ((arg1->embedded_offset ()
+		      + offset
+		      + (bitpos - v->bitpos ()) / 8));
       v->set_parent (arg1);
       if (!arg1->lazy ())
 	v->fetch_lazy ();
@@ -2948,9 +2948,9 @@ value_primitive_field (struct value *arg1, LONGEST offset,
 	  value_contents_copy_raw (v, 0, arg1, 0,
 				   arg1->enclosing_type ()->length ());
 	}
-      v->m_type = type;
-      v->m_offset = arg1->offset ();
-      v->m_embedded_offset = offset + arg1->embedded_offset () + boffset;
+      v->deprecated_set_type (type);
+      v->set_offset (arg1->offset ());
+      v->set_embedded_offset (offset + arg1->embedded_offset () + boffset);
     }
   else if (NULL != TYPE_DATA_LOCATION (type))
     {
@@ -2982,8 +2982,8 @@ value_primitive_field (struct value *arg1, LONGEST offset,
 				   arg1, arg1->embedded_offset () + offset,
 				   type_length_units (type));
 	}
-      v->m_offset = (arg1->offset () + offset
-		     + arg1->embedded_offset ());
+      v->set_offset ((arg1->offset () + offset
+		      + arg1->embedded_offset ()));
     }
   v->set_component_location (arg1);
   return v;
@@ -3582,7 +3582,7 @@ value_from_component (struct value *whole, struct type *type, LONGEST offset)
 			   whole, whole->embedded_offset () + offset,
 			   type_length_units (type));
     }
-  v->m_offset = whole->offset () + offset + whole->embedded_offset ();
+  v->set_offset (whole->offset () + offset + whole->embedded_offset ());
   v->set_component_location (whole);
 
   return v;
