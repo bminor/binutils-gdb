@@ -2517,7 +2517,7 @@ show_convenience (const char *ignore, int from_tty)
 /* See value.h.  */
 
 struct value *
-value_from_xmethod (xmethod_worker_up &&worker)
+value::from_xmethod (xmethod_worker_up &&worker)
 {
   struct value *v;
 
@@ -2529,26 +2529,26 @@ value_from_xmethod (xmethod_worker_up &&worker)
   return v;
 }
 
-/* Return the type of the result of TYPE_CODE_XMETHOD value METHOD.  */
+/* See value.h.  */
 
 struct type *
-result_type_of_xmethod (struct value *method, gdb::array_view<value *> argv)
+value::result_type_of_xmethod (gdb::array_view<value *> argv)
 {
-  gdb_assert (method->type ()->code () == TYPE_CODE_XMETHOD
-	      && method->m_lval == lval_xcallable && !argv.empty ());
+  gdb_assert (type ()->code () == TYPE_CODE_XMETHOD
+	      && m_lval == lval_xcallable && !argv.empty ());
 
-  return method->m_location.xm_worker->get_result_type (argv[0], argv.slice (1));
+  return m_location.xm_worker->get_result_type (argv[0], argv.slice (1));
 }
 
-/* Call the xmethod corresponding to the TYPE_CODE_XMETHOD value METHOD.  */
+/* See value.h.  */
 
 struct value *
-call_xmethod (struct value *method, gdb::array_view<value *> argv)
+value::call_xmethod (gdb::array_view<value *> argv)
 {
-  gdb_assert (method->type ()->code () == TYPE_CODE_XMETHOD
-	      && method->m_lval == lval_xcallable && !argv.empty ());
+  gdb_assert (type ()->code () == TYPE_CODE_XMETHOD
+	      && m_lval == lval_xcallable && !argv.empty ());
 
-  return method->m_location.xm_worker->invoke (argv[0], argv.slice (1));
+  return m_location.xm_worker->invoke (argv[0], argv.slice (1));
 }
 
 /* Extract a value as a C number (either long or double).

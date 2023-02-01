@@ -640,7 +640,7 @@ evaluate_subexp_do_call (expression *exp, enum noside noside,
 	}
       else if (ftype->code () == TYPE_CODE_XMETHOD)
 	{
-	  type *return_type = result_type_of_xmethod (callee, argvec);
+	  type *return_type = callee->result_type_of_xmethod (argvec);
 
 	  if (return_type == NULL)
 	    error (_("Xmethod is missing return type."));
@@ -678,7 +678,7 @@ evaluate_subexp_do_call (expression *exp, enum noside noside,
       return call_internal_function (exp->gdbarch, exp->language_defn,
 				     callee, argvec.size (), argvec.data ());
     case TYPE_CODE_XMETHOD:
-      return call_xmethod (callee, argvec);
+      return callee->call_xmethod (argvec);
     default:
       return call_function_by_hand (callee, default_return_type, argvec);
     }

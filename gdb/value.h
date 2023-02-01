@@ -543,6 +543,17 @@ public:
      WHOLE --- regardless of what kind of lvalue WHOLE is.  */
   void set_component_location (const struct value *whole);
 
+  /* Build a value wrapping and representing WORKER.  The value takes
+     ownership of the xmethod_worker object.  */
+  static struct value *from_xmethod (xmethod_worker_up &&worker);
+
+  /* Return the type of the result of TYPE_CODE_XMETHOD value METHOD.  */
+  struct type *result_type_of_xmethod (gdb::array_view<value *> argv);
+
+  /* Call the xmethod corresponding to the TYPE_CODE_XMETHOD value
+     METHOD.  */
+  struct value *call_xmethod (gdb::array_view<value *> argv);
+
 
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
@@ -1513,17 +1524,6 @@ struct value *call_internal_function (struct gdbarch *gdbarch,
 				      int argc, struct value **argv);
 
 const char *value_internal_function_name (struct value *);
-
-/* Build a value wrapping and representing WORKER.  The value takes ownership
-   of the xmethod_worker object.  */
-
-extern struct value *value_from_xmethod (xmethod_worker_up &&worker);
-
-extern struct type *result_type_of_xmethod (struct value *method,
-					    gdb::array_view<value *> argv);
-
-extern struct value *call_xmethod (struct value *method,
-				   gdb::array_view<value *> argv);
 
 /* Destroy the values currently allocated.  This is called when GDB is
    exiting (e.g., on quit_force).  */

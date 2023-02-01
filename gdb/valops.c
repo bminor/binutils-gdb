@@ -3028,7 +3028,7 @@ find_overload_match (gdb::array_view<value *> args,
 				    method_oload_champ, basetype, boffset);
 	}
       else
-	*valp = value_from_xmethod
+	*valp = value::from_xmethod
 	  (std::move (xmethods[ext_method_oload_champ]));
     }
   else
