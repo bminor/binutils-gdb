@@ -91,7 +91,7 @@ gdbscm_preserve_values (const struct extension_language_defn *extlang,
   value_smob *iter;
 
   for (iter = values_in_scheme; iter; iter = iter->next)
-    preserve_one_value (iter->value, objfile, copied_types);
+    iter->value->preserve (objfile, copied_types);
 }
 
 /* Helper to add a value_smob to the global list.  */

@@ -2380,19 +2380,14 @@ add_internal_function (gdb::unique_xmalloc_ptr<char> &&name,
   cmd->name_allocated = 1;
 }
 
-/* Update VALUE before discarding OBJFILE.  COPIED_TYPES is used to
-   prevent cycles / duplicates.  */
-
 void
-preserve_one_value (struct value *value, struct objfile *objfile,
-		    htab_t copied_types)
+value::preserve (struct objfile *objfile, htab_t copied_types)
 {
-  if (value->m_type->objfile_owner () == objfile)
-    value->m_type = copy_type_recursive (value->m_type, copied_types);
+  if (m_type->objfile_owner () == objfile)
+    m_type = copy_type_recursive (m_type, copied_types);
 
-  if (value->m_enclosing_type->objfile_owner () == objfile)
-    value->m_enclosing_type = copy_type_recursive (value->m_enclosing_type,
-						 copied_types);
+  if (m_enclosing_type->objfile_owner () == objfile)
+    m_enclosing_type = copy_type_recursive (m_enclosing_type, copied_types);
 }
 
 /* Likewise for internal variable VAR.  */
@@ -2411,7 +2406,7 @@ preserve_one_internalvar (struct internalvar *var, struct objfile *objfile,
       break;
 
     case INTERNALVAR_VALUE:
-      preserve_one_value (var->u.value, objfile, copied_types);
+      var->u.value->preserve (objfile, copied_types);
       break;
     }
 }
@@ -2432,7 +2427,7 @@ preserve_one_varobj (struct varobj *varobj, struct objfile *objfile,
     }
 
   if (varobj->value != nullptr)
-    preserve_one_value (varobj->value.get (), objfile, copied_types);
+    varobj->value.get ()->preserve (objfile, copied_types);
 }
 
 /* Update the internal variables and value history when OBJFILE is
@@ -2451,7 +2446,7 @@ preserve_values (struct objfile *objfile)
   htab_up copied_types = create_copied_types_hash ();
 
   for (const value_ref_ptr &item : value_history)
-    preserve_one_value (item.get (), objfile, copied_types.get ());
+    item.get ()->preserve (objfile, copied_types.get ());
 
   for (var = internalvars; var; var = var->next)
     preserve_one_internalvar (var, objfile, copied_types.get ());

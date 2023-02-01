@@ -554,6 +554,10 @@ public:
      METHOD.  */
   struct value *call_xmethod (gdb::array_view<value *> argv);
 
+  /* Update this value before discarding OBJFILE.  COPIED_TYPES is
+     used to prevent cycles / duplicates.  */
+  void preserve (struct objfile *objfile, htab_t copied_types);
+
 
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
@@ -1464,8 +1468,6 @@ extern void preserve_values (struct objfile *);
 /* From values.c */
 
 extern struct value *make_cv_value (int, int, struct value *);
-
-extern void preserve_one_value (struct value *, struct objfile *, htab_t);
 
 /* From valops.c */
 

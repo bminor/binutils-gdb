@@ -228,7 +228,7 @@ gdbpy_preserve_values (const struct extension_language_defn *extlang,
   value_object *iter;
 
   for (iter = values_in_python; iter; iter = iter->next)
-    preserve_one_value (iter->value, objfile, copied_types);
+    iter->value->preserve (objfile, copied_types);
 }
 
 /* Given a value of a pointer type, apply the C unary * operator to it.  */
