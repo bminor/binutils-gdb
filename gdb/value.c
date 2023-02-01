@@ -1680,7 +1680,7 @@ record_latest_value (struct value *val)
   /* We preserve VALUE_LVAL so that the user can find out where it was fetched
      from.  This is a bit dubious, because then *&$1 does not just return $1
      but the current contents of that location.  c'est la vie...  */
-  val->m_modifiable = 0;
+  val->set_modifiable (0);
 
   value_history.push_back (release_value (val));
 
@@ -2173,7 +2173,7 @@ set_internalvar (struct internalvar *var, struct value *val)
     default:
       new_kind = INTERNALVAR_VALUE;
       struct value *copy = val->copy ();
-      copy->m_modifiable = 1;
+      copy->set_modifiable (1);
 
       /* Force the value to be fetched from the target now, to avoid problems
 	 later when this internalvar is referenced and the target is gone or

@@ -229,6 +229,10 @@ public:
   int deprecated_modifiable () const
   { return m_modifiable; }
 
+  /* Set or clear the modifiable flag.  */
+  void set_modifiable (int val)
+  { m_modifiable = val; }
+
   LONGEST pointed_to_offset () const
   { return m_pointed_to_offset; }
 
