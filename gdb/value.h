@@ -609,6 +609,8 @@ public:
      in the history.  The value is removed from the value chain.  */
   int record_latest ();
 
+private:
+
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
   enum lval_type m_lval = not_lval;
@@ -785,8 +787,6 @@ public:
      loaded from the inferior.  */
   ULONGEST m_limited_length = 0;
 
-private:
-
   /* Allocate a value and its contents for type TYPE.  If CHECK_SIZE
      is true, then apply the usual max-value-size checks.  */
   static struct value *allocate (struct type *type, bool check_size);
@@ -806,14 +806,10 @@ private:
      return failure here, which will ultimately throw an error.  */
   bool set_limited_array_length ();
 
-public: /* Temporary */
-
   /* Allocate the contents of this value if it has not been allocated
      yet.  If CHECK_SIZE is true, then apply the usual max-value-size
      checks.  */
   void allocate_contents (bool check_size);
-
-private:
 
   /* Helper function for value_contents_eq.  The only difference is that
      this function is bit rather than byte based.
