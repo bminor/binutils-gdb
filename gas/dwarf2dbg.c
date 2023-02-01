@@ -1641,7 +1641,7 @@ size_inc_line_addr (int line_delta, addressT addr_delta)
   tmp += DWARF2_LINE_OPCODE_BASE;
 
   /* Avoid overflow when addr_delta is large.  */
-  if (addr_delta < 256 + MAX_SPECIAL_ADDR_DELTA)
+  if (addr_delta < 256U + MAX_SPECIAL_ADDR_DELTA)
     {
       /* Try using a special opcode.  */
       opcode = tmp + addr_delta * DWARF2_LINE_RANGE;
@@ -1723,7 +1723,7 @@ emit_inc_line_addr (int line_delta, addressT addr_delta, char *p, int len)
   tmp += DWARF2_LINE_OPCODE_BASE;
 
   /* Avoid overflow when addr_delta is large.  */
-  if (addr_delta < 256 + MAX_SPECIAL_ADDR_DELTA)
+  if (addr_delta < 256U + MAX_SPECIAL_ADDR_DELTA)
     {
       /* Try using a special opcode.  */
       opcode = tmp + addr_delta * DWARF2_LINE_RANGE;
