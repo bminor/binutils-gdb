@@ -110,6 +110,9 @@ output_file_close (void)
 #ifdef md_end
   md_end ();
 #endif
+#ifdef obj_end
+  obj_end ();
+#endif
   macro_end ();
   expr_end ();
   read_end ();

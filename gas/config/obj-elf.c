@@ -188,24 +188,7 @@ static const pseudo_typeS ecoff_debug_pseudo_table[] =
 #undef NO_RELOC
 #include "aout/aout64.h"
 
-/* This is called when the assembler starts.  */
-
 asection *elf_com_section_ptr;
-
-void
-elf_begin (void)
-{
-  asection *s;
-
-  /* Add symbols for the known sections to the symbol table.  */
-  s = bfd_get_section_by_name (stdoutput, TEXT_SECTION_NAME);
-  symbol_table_insert (section_symbol (s));
-  s = bfd_get_section_by_name (stdoutput, DATA_SECTION_NAME);
-  symbol_table_insert (section_symbol (s));
-  s = bfd_get_section_by_name (stdoutput, BSS_SECTION_NAME);
-  symbol_table_insert (section_symbol (s));
-  elf_com_section_ptr = bfd_com_section_ptr;
-}
 
 void
 elf_pop_insert (void)
@@ -2462,10 +2445,11 @@ obj_elf_type (int ignore ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
+static segT comment_section;
+
 static void
 obj_elf_ident (int ignore ATTRIBUTE_UNUSED)
 {
-  static segT comment_section;
   segT old_section = now_seg;
   int old_subsection = now_subseg;
 
@@ -2813,12 +2797,11 @@ build_additional_section_info (bfd *abfd ATTRIBUTE_UNUSED,
   str_hash_insert (list->indexes, group_name, idx_ptr, 0);
 }
 
-static int
-free_section_idx (void **slot, void *arg ATTRIBUTE_UNUSED)
+static void
+free_section_idx (void *ent)
 {
-  string_tuple_t *tuple = *((string_tuple_t **) slot);
-  free ((char *)tuple->value);
-  return 1;
+  string_tuple_t *tuple = ent;
+  free ((char *) tuple->value);
 }
 
 /* Create symbols for group signature.  */
@@ -2831,7 +2814,8 @@ elf_adjust_symtab (void)
   /* Go find section groups.  */
   groups.num_group = 0;
   groups.head = NULL;
-  groups.indexes = str_htab_create ();
+  groups.indexes = htab_create_alloc (16, hash_string_tuple, eq_string_tuple,
+				      free_section_idx, notes_calloc, NULL);
   bfd_map_over_sections (stdoutput, build_additional_section_info,
 			 &groups);
 
@@ -3005,10 +2989,6 @@ elf_frob_file_after_relocs (void)
       frag_wane (frag_now);
     }
 
-  /* Cleanup hash.  */
-  htab_traverse_noresize (groups.indexes, free_section_idx, NULL);
-  htab_delete (groups.indexes);
-
 #ifdef NEED_ECOFF_DEBUG
   if (ECOFF_DEBUGGING)
     /* Generate the ECOFF debugging information.  */
@@ -3121,12 +3101,56 @@ elf_init_stab_section (segT seg)
     obj_elf_init_stab_section (seg);
 }
 
+/* This is called when the assembler starts.  */
+
+void
+elf_begin (void)
+{
+  asection *s;
+
+  /* Add symbols for the known sections to the symbol table.  */
+  s = bfd_get_section_by_name (stdoutput, TEXT_SECTION_NAME);
+  symbol_table_insert (section_symbol (s));
+  s = bfd_get_section_by_name (stdoutput, DATA_SECTION_NAME);
+  symbol_table_insert (section_symbol (s));
+  s = bfd_get_section_by_name (stdoutput, BSS_SECTION_NAME);
+  symbol_table_insert (section_symbol (s));
+  elf_com_section_ptr = bfd_com_section_ptr;
+  previous_section = NULL;
+  previous_subsection = 0;
+  comment_section = NULL;
+  memset (&groups, 0, sizeof (groups));
+}
+
+void
+elf_end (void)
+{
+  while (section_stack)
+    {
+      struct section_stack *top = section_stack;
+      section_stack = top->next;
+      free (top);
+    }
+  while (recorded_attributes)
+    {
+      struct recorded_attribute_info *rai = recorded_attributes;
+      recorded_attributes = rai->next;
+      free (rai);
+    }
+  if (groups.indexes)
+    {
+      htab_delete (groups.indexes);
+      free (groups.head);
+    }
+}
+
 const struct format_ops elf_format_ops =
 {
   bfd_target_elf_flavour,
   0,	/* dfl_leading_underscore */
   1,	/* emit_section_symbols */
   elf_begin,
+  elf_end,
   elf_file_symbol,
   elf_frob_symbol,
   elf_frob_file,

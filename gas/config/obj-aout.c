@@ -297,6 +297,7 @@ const struct format_ops aout_format_ops =
   1,	/* dfl_leading_underscore.  */
   0,	/* emit_section_symbols.  */
   0,	/* begin.  */
+  0,	/* end.  */
   0,	/* app_file.  */
   obj_aout_frob_symbol,
   0,	/* frob_file.  */

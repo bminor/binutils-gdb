@@ -36,6 +36,11 @@
 	 ? (*this_format->begin) ()			\
 	 : (void) 0)
 
+#define obj_end()					\
+	(this_format->end				\
+	 ? (*this_format->end) ()			\
+	 : (void) 0)
+
 #define obj_app_file(NAME)				\
 	(this_format->app_file				\
 	 ? (*this_format->app_file) (NAME)		\

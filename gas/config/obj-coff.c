@@ -1910,6 +1910,7 @@ const struct format_ops coff_format_ops =
   0,	/* dfl_leading_underscore */
   1,	/* emit_section_symbols */
   0,    /* begin */
+  0,	/* end.  */
   c_dot_file_symbol,
   coff_frob_symbol,
   0,	/* frob_file */

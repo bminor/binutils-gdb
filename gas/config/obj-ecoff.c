@@ -290,6 +290,7 @@ const struct format_ops ecoff_format_ops =
      the single-format definition (0) would be in order.  */
   1,	/* emit_section_symbols.  */
   0,	/* begin.  */
+  0,	/* end.  */
   ecoff_new_file,
   obj_ecoff_frob_symbol,
   ecoff_frob_file,

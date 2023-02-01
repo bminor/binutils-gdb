@@ -119,6 +119,11 @@ struct elf_section_match
 #endif
 extern void elf_begin (void);
 
+#ifndef obj_end
+#define obj_end() elf_end ()
+#endif
+extern void elf_end (void);
+
 #ifndef LOCAL_LABEL_PREFIX
 #define LOCAL_LABEL_PREFIX '.'
 #endif
