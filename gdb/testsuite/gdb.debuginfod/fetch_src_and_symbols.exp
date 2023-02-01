@@ -195,6 +195,12 @@ proc test_urls {urls pattern_re test} {
 	$test
 }
 
+# Used as a replacement for delete_breakpoints while calling
+# runto_main in one case where we don't want to delete all the
+# breakpoints.
+proc disable_delete_breakpoints {} {
+}
+
 # Uses the global variables DEBUGDIR and DB which are setup elsewhere
 # in this script.
 #
@@ -214,13 +220,12 @@ proc_with_prefix local_url { } {
 
     # GDB should now find the symbol and source files.
     clean_restart
-    set enable_debuginfod_question \
-	"Enable debuginfod for this session. \\(y or \\\[n\\\]\\) "
-    gdb_test "file $binfile" "" "file [file tail $binfile]" \
-	$enable_debuginfod_question "y"
+    gdb_test_no_output "set debuginfod enabled on" \
+	"enabled debuginfod for initial test"
+    gdb_load $binfile
     gdb_test_no_output "set substitute-path $outputdir /dev/null" \
 	"set substitute-path"
-    gdb_test "br main" "Breakpoint 1 at.*file.*"
+
     set lineno [gdb_get_line_number "Breakpoint here"]
     gdb_test "list $lineno" "return 0;\[^\r\n\]+Breakpoint here\\. .*"
 
@@ -228,12 +233,18 @@ proc_with_prefix local_url { } {
     # of the source file in the debuginfod client cache differs from
     # the contents of DW_AT_comp_dir and DW_AT_name.
     gdb_test "set cwd $debugdir" "" "file [file tail $binfile] cwd"
-    gdb_test_no_output "del breakpoint 1"
-    gdb_test "break $lineno" "Breakpoint 2 at.*file.*"
-    gdb_test "run" "Breakpoint 2.*" \
-	"file [file tail $binfile] set breakpoint"
+    gdb_breakpoint $lineno
+    with_override delete_breakpoints disable_delete_breakpoints {
+	if {![runto_main]} {
+	    return
+	}
+	gdb_continue_to_breakpoint "runto breakpoint in main" \
+	    ".* Breakpoint here\\. .*"
+    }
 
     # GDB should now find the executable file.
+    set enable_debuginfod_question \
+	"Enable debuginfod for this session. \\(y or \\\[n\\\]\\) "
     clean_restart
     gdb_test "core $::corefile" ".*return 0.*" "file [file tail $::corefile]" \
 	$enable_debuginfod_question "y"
