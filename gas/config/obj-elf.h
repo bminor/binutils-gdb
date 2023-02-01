@@ -33,7 +33,6 @@
 #define OUTPUT_FLAVOR bfd_target_elf_flavour
 #endif
 
-#define BYTES_IN_WORD 4		/* for now */
 #include "bfd/elf-bfd.h"
 
 #include "targ-cpu.h"
