@@ -141,8 +141,6 @@ as_info_where (const char *file, unsigned int line, unsigned int indent,
   va_list args;
   char buffer[2000];
 
-  gas_assert (file != NULL && line > 0 && indent <= INT_MAX);
-
   va_start (args, format);
   vsnprintf (buffer, sizeof (buffer), format, args);
   va_end (args);
