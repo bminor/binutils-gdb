@@ -1799,7 +1799,7 @@ pass_in_v_vfp_candidate (struct gdbarch *gdbarch, struct regcache *regcache,
 	  if (field_is_static (&arg_type->field (i)))
 	    continue;
 
-	  struct value *field = value_primitive_field (arg, 0, i, arg_type);
+	  struct value *field = arg->primitive_field (0, i, arg_type);
 	  struct type *field_type = check_typedef (field->type ());
 
 	  if (!pass_in_v_vfp_candidate (gdbarch, regcache, info, field_type,

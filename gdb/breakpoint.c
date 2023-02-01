@@ -1866,12 +1866,11 @@ extract_bitfield_from_watchpoint_value (struct watchpoint *w, struct value *val)
 
   bit_val = value::allocate (val->type ());
 
-  unpack_value_bitfield (bit_val,
-			 w->val_bitpos,
-			 w->val_bitsize,
-			 val->contents_for_printing ().data (),
-			 val->offset (),
-			 val);
+  val->unpack_bitfield (bit_val,
+			w->val_bitpos,
+			w->val_bitsize,
+			val->contents_for_printing ().data (),
+			val->offset ());
 
   return bit_val;
 }

@@ -1382,7 +1382,7 @@ rust_struct_anon::evaluate (struct type *expect_type,
 		   field_number, type->name ());
 
 	  int fieldno = rust_enum_variant (type);
-	  lhs = value_primitive_field (lhs, 0, fieldno, type);
+	  lhs = lhs->primitive_field (0, fieldno, type);
 	  outer_type = type;
 	  type = lhs->type ();
 	}
@@ -1418,7 +1418,7 @@ rust_struct_anon::evaluate (struct type *expect_type,
 		  field_number, type->name ());
 	}
 
-      return value_primitive_field (lhs, 0, field_number, type);
+      return lhs->primitive_field (0, field_number, type);
     }
   else
     error(_("Anonymous field access is only allowed on tuples, \
@@ -1445,7 +1445,7 @@ rust_structop::evaluate (struct type *expect_type,
 	       field_name, type->name ());
 
       int fieldno = rust_enum_variant (type);
-      lhs = value_primitive_field (lhs, 0, fieldno, type);
+      lhs = lhs->primitive_field (0, fieldno, type);
 
       struct type *outer_type = type;
       type = lhs->type ();

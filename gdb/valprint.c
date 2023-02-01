@@ -2007,9 +2007,9 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
       maybe_print_array_index (index_type, i + low_bound,
 			       stream, options);
 
-      struct value *element = value_from_component_bitsize (val, elttype,
-							    bit_stride * i,
-							    bit_stride);
+      struct value *element = val->from_component_bitsize (elttype,
+							   bit_stride * i,
+							   bit_stride);
       rep1 = i + 1;
       reps = 1;
       /* Only check for reps if repeat_count_threshold is not set to
@@ -2022,9 +2022,9 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
 	  while (rep1 < len)
 	    {
 	      struct value *rep_elt
-		= value_from_component_bitsize (val, elttype,
-						rep1 * bit_stride,
-						bit_stride);
+		= val->from_component_bitsize (elttype,
+					       rep1 * bit_stride,
+					       bit_stride);
 	      bool repeated = ((available
 				&& rep_elt->entirely_available ()
 				&& element->contents_eq (rep_elt))

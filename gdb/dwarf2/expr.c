@@ -969,8 +969,8 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 		   generic optimized out value instead, so that we show
 		   <optimized out> instead of <not saved>.  */
 		value *tmp = value::allocate (subobj_type);
-		value_contents_copy (tmp, 0, retval, 0,
-				     subobj_type->length ());
+		retval->contents_copy (tmp, 0, 0,
+				       subobj_type->length ());
 		retval = tmp;
 	      }
 	  }

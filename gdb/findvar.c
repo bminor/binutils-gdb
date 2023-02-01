@@ -866,7 +866,7 @@ read_frame_register_value (struct value *value, frame_info_ptr frame)
       if (reg_len > len)
 	reg_len = len;
 
-      value_contents_copy (value, offset, regval, reg_offset, reg_len);
+      regval->contents_copy (value, offset, reg_offset, reg_len);
 
       offset += reg_len;
       len -= reg_len;

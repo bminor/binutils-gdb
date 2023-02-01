@@ -127,7 +127,7 @@ gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
 
   /* The virtual function table is now an array of structures
      which have the form { int16 offset, delta; void *pfn; }.  */
-  vtbl = value_primitive_field (arg1, 0, context_vptr_fieldno,
+  vtbl = arg1->primitive_field (0, context_vptr_fieldno,
 				context_vptr_basetype);
 
   /* With older versions of g++, the vtbl field pointed to an array

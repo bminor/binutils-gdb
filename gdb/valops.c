@@ -1726,8 +1726,7 @@ value_array (int lowbound, int highbound, struct value **elemvec)
     {
       val = value::allocate (arraytype);
       for (idx = 0; idx < nelem; idx++)
-	value_contents_copy (val, idx * typelength, elemvec[idx], 0,
-			     typelength);
+	elemvec[idx]->contents_copy (val, idx * typelength, 0, typelength);
       return val;
     }
 
@@ -1736,7 +1735,7 @@ value_array (int lowbound, int highbound, struct value **elemvec)
 
   val = value::allocate (arraytype);
   for (idx = 0; idx < nelem; idx++)
-    value_contents_copy (val, idx * typelength, elemvec[idx], 0, typelength);
+    elemvec[idx]->contents_copy (val, idx * typelength, 0, typelength);
   return val;
 }
 
@@ -2022,7 +2021,7 @@ struct_field_searcher::search (struct value *arg1, LONGEST offset,
 	    if (field_is_static (&type->field (i)))
 	      v = value_static_field (type, i);
 	    else
-	      v = value_primitive_field (arg1, offset, i, type);
+	      v = arg1->primitive_field (offset, i, type);
 
 	    update_result (v, offset);
 	    return;
@@ -2118,7 +2117,7 @@ struct_field_searcher::search (struct value *arg1, LONGEST offset,
 	    search (v2, 0, TYPE_BASECLASS (type, i));
 	}
       else if (found_baseclass)
-	v = value_primitive_field (arg1, offset, i, type);
+	v = arg1->primitive_field (offset, i, type);
       else
 	{
 	  search (arg1, offset + TYPE_BASECLASS_BITPOS (type, i) / 8,
@@ -2467,7 +2466,7 @@ value_struct_elt_bitpos (struct value **argp, int bitpos, struct type *ftype,
       if (!field_is_static (&t->field (i))
 	  && bitpos == t->field (i).loc_bitpos ()
 	  && types_equal (ftype, t->field (i).type ()))
-	return value_primitive_field (*argp, 0, i, t);
+	return (*argp)->primitive_field (0, i, t);
     }
 
   error (_("No field with matching bitpos and type."));
@@ -4083,8 +4082,8 @@ value_slice (struct value *array, int lowbound, int length)
     else
       {
 	slice = value::allocate (slice_type);
-	value_contents_copy (slice, 0, array, offset,
-			     type_length_units (slice_type));
+	array->contents_copy (slice, 0, offset,
+			      type_length_units (slice_type));
       }
 
     slice->set_component_location (array);

@@ -565,7 +565,7 @@ coerce_unspec_val_to_type (struct value *val, struct type *type)
       else
 	{
 	  result = value::allocate (type);
-	  value_contents_copy (result, 0, val, 0, type->length ());
+	  val->contents_copy (result, 0, 0, type->length ());
 	}
       result->set_component_location (val);
       result->set_bitsize (val->bitsize ());
@@ -6929,7 +6929,7 @@ ada_value_primitive_field (struct value *arg1, int offset, int fieldno,
 					     bit_pos % 8, bit_size, type);
     }
   else
-    return value_primitive_field (arg1, offset, fieldno, arg_type);
+    return arg1->primitive_field (offset, fieldno, arg_type);
 }
 
 /* Find field with name NAME in object of type TYPE.  If found, 

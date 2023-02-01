@@ -2570,7 +2570,7 @@ unop_extract_operation::evaluate (struct type *expect_type,
     error (_("length type is larger than the value type"));
 
   struct value *result = value::allocate (type);
-  value_contents_copy (result, 0, old_value, 0, type->length ());
+  old_value->contents_copy (result, 0, 0, type->length ());
   return result;
 }
 

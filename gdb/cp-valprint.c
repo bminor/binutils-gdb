@@ -330,7 +330,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 		}
 	      else
 		{
-		  struct value *v = value_primitive_field (val, 0, i, type);
+		  struct value *v = val->primitive_field (0, i, type);
 		  opts->deref_ref = false;
 		  common_val_print (v, stream, recurse + 1, opts,
 				    current_language);
@@ -498,8 +498,8 @@ cp_print_value (struct value *val, struct ui_file *stream,
 	  if (!val_print_check_max_depth (stream, recurse, options,
 					  current_language))
 	    {
-	      struct value *baseclass_val = value_primitive_field (val, 0,
-								   i, type);
+	      struct value *baseclass_val = val->primitive_field (0,
+								  i, type);
 
 	      /* Attempt to run an extension language pretty-printer on the
 		 baseclass if possible.  */

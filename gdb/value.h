@@ -558,6 +558,49 @@ public:
      used to prevent cycles / duplicates.  */
   void preserve (struct objfile *objfile, htab_t copied_types);
 
+  /* Unpack a bitfield of BITSIZE bits found at BITPOS in the object
+     at VALADDR + EMBEDDEDOFFSET that has the type of DEST_VAL and
+     store the contents in DEST_VAL, zero or sign extending if the
+     type of DEST_VAL is wider than BITSIZE.  VALADDR points to the
+     contents of this value.  If this value's contents required to
+     extract the bitfield from are unavailable/optimized out, DEST_VAL
+     is correspondingly marked unavailable/optimized out.  */
+  void unpack_bitfield (struct value *dest_val,
+			LONGEST bitpos, LONGEST bitsize,
+			const gdb_byte *valaddr, LONGEST embedded_offset)
+    const;
+
+  /* Copy LENGTH bytes of this value's (all) contents
+     (value_contents_all) starting at SRC_OFFSET byte, into DST
+     value's (all) contents, starting at DST_OFFSET.  If unavailable
+     contents are being copied from this value, the corresponding DST
+     contents are marked unavailable accordingly.  DST must not be
+     lazy.  If this value is lazy, it will be fetched now.
+
+     It is assumed the contents of DST in the [DST_OFFSET,
+     DST_OFFSET+LENGTH) range are wholly available.  */
+  void contents_copy (struct value *dst, LONGEST dst_offset,
+		      LONGEST src_offset, LONGEST length);
+
+  /* Given a value (offset by OFFSET bytes)
+     of a struct or union type ARG_TYPE,
+     extract and return the value of one of its (non-static) fields.
+     FIELDNO says which field.  */
+  struct value *primitive_field (LONGEST offset, int fieldno,
+				 struct type *arg_type);
+
+  /* Create a new value by extracting it from this value.  TYPE is the
+     type of the new value.  BIT_OFFSET and BIT_LENGTH describe the
+     offset and field width of the value to extract from this value --
+     BIT_LENGTH may differ from TYPE's length in the case where this
+     value's type is packed.
+
+     When the value does come from a non-byte-aligned offset or field
+     width, it will be marked non_lval.  */
+  struct value *from_component_bitsize (struct type *type,
+					LONGEST bit_offset,
+					LONGEST bit_length);
+
 
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
@@ -781,6 +824,29 @@ private:
      value is lazy, it'll be read now.  Note that RANGE is a pointer
      to pointer because reading the value might change *RANGE.  */
   int entirely_covered_by_range_vector (const std::vector<range> &ranges);
+
+  /* Copy the ranges metadata from this value that overlaps
+     [SRC_BIT_OFFSET, SRC_BIT_OFFSET+BIT_LENGTH) into DST,
+     adjusted.  */
+  void ranges_copy_adjusted (struct value *dst, int dst_bit_offset,
+			     int src_bit_offset, int bit_length) const;
+
+  /* Copy LENGTH target addressable memory units of this value's (all)
+     contents (value_contents_all) starting at SRC_OFFSET, into DST
+     value's (all) contents, starting at DST_OFFSET.  If unavailable
+     contents are being copied from this, the corresponding DST
+     contents are marked unavailable accordingly.  Neither DST nor
+     this value may be lazy values.
+
+     It is assumed the contents of DST in the [DST_OFFSET,
+     DST_OFFSET+LENGTH) range are wholly available.  */
+  void contents_copy_raw (struct value *dst, LONGEST dst_offset,
+			  LONGEST src_offset, LONGEST length);
+
+  /* A helper for value_from_component_bitsize that copies bits from
+     this value to DEST.  */
+  void contents_copy_raw_bitwise (struct value *dst, LONGEST dst_bit_offset,
+				  LONGEST src_bit_offset, LONGEST bit_length);
 };
 
 inline void
@@ -995,12 +1061,6 @@ extern int unpack_value_field_as_long (struct type *type, const gdb_byte *valadd
 				LONGEST embedded_offset, int fieldno,
 				const struct value *val, LONGEST *result);
 
-extern void unpack_value_bitfield (struct value *dest_val,
-				   LONGEST bitpos, LONGEST bitsize,
-				   const gdb_byte *valaddr,
-				   LONGEST embedded_offset,
-				   const struct value *val);
-
 extern struct value *value_field_bitfield (struct type *type, int fieldno,
 					   const gdb_byte *valaddr,
 					   LONGEST embedded_offset,
@@ -1016,20 +1076,6 @@ extern struct value *value_from_history_ref (const char *, const char **);
 extern struct value *value_from_component (struct value *, struct type *,
 					   LONGEST);
 
-
-/* Create a new value by extracting it from WHOLE.  TYPE is the type
-   of the new value.  BIT_OFFSET and BIT_LENGTH describe the offset
-   and field width of the value to extract from WHOLE -- BIT_LENGTH
-   may differ from TYPE's length in the case where WHOLE's type is
-   packed.
-
-   When the value does come from a non-byte-aligned offset or field
-   width, it will be marked non_lval.  */
-
-extern struct value *value_from_component_bitsize (struct value *whole,
-						   struct type *type,
-						   LONGEST bit_offset,
-						   LONGEST bit_length);
 
 extern struct value *value_at (struct type *type, CORE_ADDR addr);
 extern struct value *value_at_lazy (struct type *type, CORE_ADDR addr);
@@ -1081,10 +1127,6 @@ extern int symbol_read_needs_frame (struct symbol *);
 extern struct value *read_var_value (struct symbol *var,
 				     const struct block *var_block,
 				     frame_info_ptr frame);
-
-extern void value_contents_copy (struct value *dst, LONGEST dst_offset,
-				 struct value *src, LONGEST src_offset,
-				 LONGEST length);
 
 extern struct value *allocate_repeat_value (struct type *type, int count);
 
@@ -1200,11 +1242,6 @@ extern int find_overload_match (gdb::array_view<value *> args,
 				enum noside noside);
 
 extern struct value *value_field (struct value *arg1, int fieldno);
-
-extern struct value *value_primitive_field (struct value *arg1, LONGEST offset,
-					    int fieldno,
-					    struct type *arg_type);
-
 
 extern struct type *value_rtti_indirect_type (struct value *, int *, LONGEST *,
 					      int *);

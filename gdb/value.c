@@ -1138,45 +1138,34 @@ ranges_copy_adjusted (std::vector<range> *dst_range, int dst_bit_offset,
     }
 }
 
-/* Copy the ranges metadata in SRC that overlaps [SRC_BIT_OFFSET,
-   SRC_BIT_OFFSET+BIT_LENGTH) into DST, adjusted.  */
+/* See value.h.  */
 
-static void
-value_ranges_copy_adjusted (struct value *dst, int dst_bit_offset,
-			    const struct value *src, int src_bit_offset,
-			    int bit_length)
+void
+value::ranges_copy_adjusted (struct value *dst, int dst_bit_offset,
+			     int src_bit_offset, int bit_length) const
 {
-  ranges_copy_adjusted (&dst->m_unavailable, dst_bit_offset,
-			src->m_unavailable, src_bit_offset,
-			bit_length);
-  ranges_copy_adjusted (&dst->m_optimized_out, dst_bit_offset,
-			src->m_optimized_out, src_bit_offset,
-			bit_length);
+  ::ranges_copy_adjusted (&dst->m_unavailable, dst_bit_offset,
+			  m_unavailable, src_bit_offset,
+			  bit_length);
+  ::ranges_copy_adjusted (&dst->m_optimized_out, dst_bit_offset,
+			  m_optimized_out, src_bit_offset,
+			  bit_length);
 }
 
-/* Copy LENGTH target addressable memory units of SRC value's (all) contents
-   (value_contents_all) starting at SRC_OFFSET, into DST value's (all)
-   contents, starting at DST_OFFSET.  If unavailable contents are
-   being copied from SRC, the corresponding DST contents are marked
-   unavailable accordingly.  Neither DST nor SRC may be lazy
-   values.
+/* See value.h.  */
 
-   It is assumed the contents of DST in the [DST_OFFSET,
-   DST_OFFSET+LENGTH) range are wholly available.  */
-
-static void
-value_contents_copy_raw (struct value *dst, LONGEST dst_offset,
-			 struct value *src, LONGEST src_offset, LONGEST length)
+void
+value::contents_copy_raw (struct value *dst, LONGEST dst_offset,
+			  LONGEST src_offset, LONGEST length)
 {
   LONGEST src_bit_offset, dst_bit_offset, bit_length;
-  struct gdbarch *arch = src->arch ();
-  int unit_size = gdbarch_addressable_memory_unit_size (arch);
+  int unit_size = gdbarch_addressable_memory_unit_size (arch ());
 
   /* A lazy DST would make that this copy operation useless, since as
      soon as DST's contents were un-lazied (by a later value_contents
      call, say), the contents would be overwritten.  A lazy SRC would
      mean we'd be copying garbage.  */
-  gdb_assert (!dst->m_lazy && !src->m_lazy);
+  gdb_assert (!dst->m_lazy && !m_lazy);
 
   /* The overwritten DST range gets unavailability ORed in, not
      replaced.  Make sure to remember to implement replacing if it
@@ -1190,8 +1179,8 @@ value_contents_copy_raw (struct value *dst, LONGEST dst_offset,
     = dst->contents_all_raw ().slice (dst_offset * unit_size,
 					  length * unit_size);
   gdb::array_view<const gdb_byte> src_contents
-    = src->contents_all_raw ().slice (src_offset * unit_size,
-					  length * unit_size);
+    = contents_all_raw ().slice (src_offset * unit_size,
+				 length * unit_size);
   gdb::copy (src_contents, dst_contents);
 
   /* Copy the meta-data, adjusted.  */
@@ -1199,24 +1188,22 @@ value_contents_copy_raw (struct value *dst, LONGEST dst_offset,
   dst_bit_offset = dst_offset * unit_size * HOST_CHAR_BIT;
   bit_length = length * unit_size * HOST_CHAR_BIT;
 
-  value_ranges_copy_adjusted (dst, dst_bit_offset,
-			      src, src_bit_offset,
-			      bit_length);
+  ranges_copy_adjusted (dst, dst_bit_offset,
+			src_bit_offset, bit_length);
 }
 
-/* A helper for value_from_component_bitsize that copies bits from SRC
-   to DEST.  */
+/* See value.h.  */
 
-static void
-value_contents_copy_raw_bitwise (struct value *dst, LONGEST dst_bit_offset,
-				 struct value *src, LONGEST src_bit_offset,
-				 LONGEST bit_length)
+void
+value::contents_copy_raw_bitwise (struct value *dst, LONGEST dst_bit_offset,
+				  LONGEST src_bit_offset,
+				  LONGEST bit_length)
 {
   /* A lazy DST would make that this copy operation useless, since as
      soon as DST's contents were un-lazied (by a later value_contents
      call, say), the contents would be overwritten.  A lazy SRC would
      mean we'd be copying garbage.  */
-  gdb_assert (!dst->m_lazy && !src->m_lazy);
+  gdb_assert (!dst->m_lazy && !m_lazy);
 
   /* The overwritten DST range gets unavailability ORed in, not
      replaced.  Make sure to remember to implement replacing if it
@@ -1229,36 +1216,26 @@ value_contents_copy_raw_bitwise (struct value *dst, LONGEST dst_bit_offset,
 
   /* Copy the data.  */
   gdb::array_view<gdb_byte> dst_contents = dst->contents_all_raw ();
-  gdb::array_view<const gdb_byte> src_contents = src->contents_all_raw ();
+  gdb::array_view<const gdb_byte> src_contents = contents_all_raw ();
   copy_bitwise (dst_contents.data (), dst_bit_offset,
 		src_contents.data (), src_bit_offset,
 		bit_length,
-		type_byte_order (src->type ()) == BFD_ENDIAN_BIG);
+		type_byte_order (type ()) == BFD_ENDIAN_BIG);
 
   /* Copy the meta-data.  */
-  value_ranges_copy_adjusted (dst, dst_bit_offset,
-			      src, src_bit_offset,
-			      bit_length);
+  ranges_copy_adjusted (dst, dst_bit_offset, src_bit_offset, bit_length);
 }
 
-/* Copy LENGTH bytes of SRC value's (all) contents
-   (value_contents_all) starting at SRC_OFFSET byte, into DST value's
-   (all) contents, starting at DST_OFFSET.  If unavailable contents
-   are being copied from SRC, the corresponding DST contents are
-   marked unavailable accordingly.  DST must not be lazy.  If SRC is
-   lazy, it will be fetched now.
-
-   It is assumed the contents of DST in the [DST_OFFSET,
-   DST_OFFSET+LENGTH) range are wholly available.  */
+/* See value.h.  */
 
 void
-value_contents_copy (struct value *dst, LONGEST dst_offset,
-		     struct value *src, LONGEST src_offset, LONGEST length)
+value::contents_copy (struct value *dst, LONGEST dst_offset,
+		      LONGEST src_offset, LONGEST length)
 {
-  if (src->m_lazy)
-    src->fetch_lazy ();
+  if (m_lazy)
+    fetch_lazy ();
 
-  value_contents_copy_raw (dst, dst_offset, src, src_offset, length);
+  contents_copy_raw (dst, dst_offset, src_offset, length);
 }
 
 gdb::array_view<const gdb_byte>
@@ -2859,19 +2836,14 @@ value::set_enclosing_type (struct type *new_encl_type)
   m_enclosing_type = new_encl_type;
 }
 
-/* Given a value ARG1 (offset by OFFSET bytes)
-   of a struct or union type ARG_TYPE,
-   extract and return the value of one of its (non-static) fields.
-   FIELDNO says which field.  */
+/* See value.h.  */
 
 struct value *
-value_primitive_field (struct value *arg1, LONGEST offset,
-		       int fieldno, struct type *arg_type)
+value::primitive_field (LONGEST offset, int fieldno, struct type *arg_type)
 {
   struct value *v;
   struct type *type;
-  struct gdbarch *arch = arg1->arch ();
-  int unit_size = gdbarch_addressable_memory_unit_size (arch);
+  int unit_size = gdbarch_addressable_memory_unit_size (arch ());
 
   arg_type = check_typedef (arg_type);
   type = arg_type->field (fieldno).type ();
@@ -2905,11 +2877,11 @@ value_primitive_field (struct value *arg1, LONGEST offset,
 	v->set_bitpos (bitpos % container_bitsize);
       else
 	v->set_bitpos (bitpos % 8);
-      v->set_offset ((arg1->embedded_offset ()
+      v->set_offset ((embedded_offset ()
 		      + offset
 		      + (bitpos - v->bitpos ()) / 8));
-      v->set_parent (arg1);
-      if (!arg1->lazy ())
+      v->set_parent (this);
+      if (!lazy ())
 	v->fetch_lazy ();
     }
   else if (fieldno < TYPE_N_BASECLASSES (arg_type))
@@ -2920,32 +2892,31 @@ value_primitive_field (struct value *arg1, LONGEST offset,
       LONGEST boffset;
 
       /* Lazy register values with offsets are not supported.  */
-      if (VALUE_LVAL (arg1) == lval_register && arg1->lazy ())
-	arg1->fetch_lazy ();
+      if (VALUE_LVAL (this) == lval_register && lazy ())
+	fetch_lazy ();
 
       /* We special case virtual inheritance here because this
 	 requires access to the contents, which we would rather avoid
 	 for references to ordinary fields of unavailable values.  */
       if (BASETYPE_VIA_VIRTUAL (arg_type, fieldno))
 	boffset = baseclass_offset (arg_type, fieldno,
-				    arg1->contents ().data (),
-				    arg1->embedded_offset (),
-				    arg1->address (),
-				    arg1);
+				    contents ().data (),
+				    embedded_offset (),
+				    address (),
+				    this);
       else
 	boffset = arg_type->field (fieldno).loc_bitpos () / 8;
 
-      if (arg1->lazy ())
-	v = value::allocate_lazy (arg1->enclosing_type ());
+      if (lazy ())
+	v = value::allocate_lazy (enclosing_type ());
       else
 	{
-	  v = value::allocate (arg1->enclosing_type ());
-	  value_contents_copy_raw (v, 0, arg1, 0,
-				   arg1->enclosing_type ()->length ());
+	  v = value::allocate (enclosing_type ());
+	  contents_copy_raw (v, 0, 0, enclosing_type ()->length ());
 	}
       v->deprecated_set_type (type);
-      v->set_offset (arg1->offset ());
-      v->set_embedded_offset (offset + arg1->embedded_offset () + boffset);
+      v->set_offset (this->offset ());
+      v->set_embedded_offset (offset + embedded_offset () + boffset);
     }
   else if (NULL != TYPE_DATA_LOCATION (type))
     {
@@ -2965,22 +2936,21 @@ value_primitive_field (struct value *arg1, LONGEST offset,
 		 / (HOST_CHAR_BIT * unit_size));
 
       /* Lazy register values with offsets are not supported.  */
-      if (VALUE_LVAL (arg1) == lval_register && arg1->lazy ())
-	arg1->fetch_lazy ();
+      if (VALUE_LVAL (this) == lval_register && lazy ())
+	fetch_lazy ();
 
-      if (arg1->lazy ())
+      if (lazy ())
 	v = value::allocate_lazy (type);
       else
 	{
 	  v = value::allocate (type);
-	  value_contents_copy_raw (v, v->embedded_offset (),
-				   arg1, arg1->embedded_offset () + offset,
-				   type_length_units (type));
+	  contents_copy_raw (v, v->embedded_offset (),
+			     embedded_offset () + offset,
+			     type_length_units (type));
 	}
-      v->set_offset ((arg1->offset () + offset
-		      + arg1->embedded_offset ()));
+      v->set_offset (this->offset () + offset + embedded_offset ());
     }
-  v->set_component_location (arg1);
+  v->set_component_location (this);
   return v;
 }
 
@@ -2991,7 +2961,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
 struct value *
 value_field (struct value *arg1, int fieldno)
 {
-  return value_primitive_field (arg1, 0, fieldno, arg1->type ());
+  return arg1->primitive_field (0, fieldno, arg1->type ());
 }
 
 /* Return a non-virtual function as a value.
@@ -3149,19 +3119,13 @@ unpack_field_as_long (struct type *type, const gdb_byte *valaddr, int fieldno)
   return unpack_bits_as_long (field_type, valaddr, bitpos, bitsize);
 }
 
-/* Unpack a bitfield of BITSIZE bits found at BITPOS in the object at
-   VALADDR + EMBEDDEDOFFSET that has the type of DEST_VAL and store
-   the contents in DEST_VAL, zero or sign extending if the type of
-   DEST_VAL is wider than BITSIZE.  VALADDR points to the contents of
-   VAL.  If the VAL's contents required to extract the bitfield from
-   are unavailable/optimized out, DEST_VAL is correspondingly
-   marked unavailable/optimized out.  */
+/* See value.h.  */
 
 void
-unpack_value_bitfield (struct value *dest_val,
-		       LONGEST bitpos, LONGEST bitsize,
-		       const gdb_byte *valaddr, LONGEST embedded_offset,
-		       const struct value *val)
+value::unpack_bitfield (struct value *dest_val,
+			LONGEST bitpos, LONGEST bitsize,
+			const gdb_byte *valaddr, LONGEST embedded_offset)
+  const
 {
   enum bfd_endian byte_order;
   int src_bit_offset;
@@ -3192,8 +3156,7 @@ unpack_value_bitfield (struct value *dest_val,
     dst_bit_offset = field_type->length () * TARGET_CHAR_BIT - bitsize;
   else
     dst_bit_offset = 0;
-  value_ranges_copy_adjusted (dest_val, dst_bit_offset,
-			      val, src_bit_offset, bitsize);
+  ranges_copy_adjusted (dest_val, dst_bit_offset, src_bit_offset, bitsize);
 }
 
 /* Return a new value with type TYPE, which is FIELDNO field of the
@@ -3211,8 +3174,7 @@ value_field_bitfield (struct type *type, int fieldno,
   int bitsize = TYPE_FIELD_BITSIZE (type, fieldno);
   struct value *res_val = value::allocate (type->field (fieldno).type ());
 
-  unpack_value_bitfield (res_val, bitpos, bitsize,
-			 valaddr, embedded_offset, val);
+  val->unpack_bitfield (res_val, bitpos, bitsize, valaddr, embedded_offset);
 
   return res_val;
 }
@@ -3573,9 +3535,9 @@ value_from_component (struct value *whole, struct type *type, LONGEST offset)
   else
     {
       v = value::allocate (type);
-      value_contents_copy (v, v->embedded_offset (),
-			   whole, whole->embedded_offset () + offset,
-			   type_length_units (type));
+      whole->contents_copy (v, v->embedded_offset (),
+			    whole->embedded_offset () + offset,
+			    type_length_units (type));
     }
   v->set_offset (whole->offset () + offset + whole->embedded_offset ());
   v->set_component_location (whole);
@@ -3586,10 +3548,10 @@ value_from_component (struct value *whole, struct type *type, LONGEST offset)
 /* See value.h.  */
 
 struct value *
-value_from_component_bitsize (struct value *whole, struct type *type,
-			      LONGEST bit_offset, LONGEST bit_length)
+value::from_component_bitsize (struct type *type,
+			       LONGEST bit_offset, LONGEST bit_length)
 {
-  gdb_assert (!whole->lazy ());
+  gdb_assert (!lazy ());
 
   /* Preserve lvalue-ness if possible.  This is needed to avoid
      array-printing failures (including crashes) when printing Ada
@@ -3597,7 +3559,7 @@ value_from_component_bitsize (struct value *whole, struct type *type,
   if ((bit_offset % TARGET_CHAR_BIT) == 0
       && (bit_length % TARGET_CHAR_BIT) == 0
       && bit_length == TARGET_CHAR_BIT * type->length ())
-    return value_from_component (whole, type, bit_offset / TARGET_CHAR_BIT);
+    return value_from_component (this, type, bit_offset / TARGET_CHAR_BIT);
 
   struct value *v = value::allocate (type);
 
@@ -3605,12 +3567,11 @@ value_from_component_bitsize (struct value *whole, struct type *type,
   if (is_scalar_type (type) && type_byte_order (type) == BFD_ENDIAN_BIG)
     dst_offset += TARGET_CHAR_BIT * type->length () - bit_length;
 
-  value_contents_copy_raw_bitwise (v, dst_offset,
-				   whole,
-				   TARGET_CHAR_BIT
-				   * whole->embedded_offset ()
-				   + bit_offset,
-				   bit_length);
+  contents_copy_raw_bitwise (v, dst_offset,
+			     TARGET_CHAR_BIT
+			     * embedded_offset ()
+			     + bit_offset,
+			     bit_length);
   return v;
 }
 
@@ -3756,9 +3717,9 @@ value::fetch_lazy_bitfield ()
   if (parent->lazy ())
     parent->fetch_lazy ();
 
-  unpack_value_bitfield (this, bitpos (), bitsize (),
-			 parent->contents_for_printing ().data (),
-			 offset (), parent);
+  parent->unpack_bitfield (this, bitpos (), bitsize (),
+			   parent->contents_for_printing ().data (),
+			   offset ());
 }
 
 /* See value.h.  */
@@ -3853,9 +3814,9 @@ value::fetch_lazy_register ()
   /* Copy the contents and the unavailability/optimized-out
      meta-data from NEW_VAL to VAL.  */
   set_lazy (0);
-  value_contents_copy (this, embedded_offset (),
-		       new_val, new_val->embedded_offset (),
-		       type_length_units (type));
+  new_val->contents_copy (this, embedded_offset (),
+			  new_val->embedded_offset (),
+			  type_length_units (type));
 
   if (frame_debug)
     {

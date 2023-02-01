@@ -654,8 +654,8 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 
 		  opts.deref_ref = false;
 
-		  struct value *v = value_primitive_field (val, 0, i,
-							   val->type ());
+		  struct value *v = val->primitive_field (0, i,
+							  val->type ());
 		  common_val_print (v, stream, recurse + 1, &opts,
 				    current_language);
 		}
@@ -729,7 +729,7 @@ pascal_object_print_value (struct value *val, struct ui_file *stream,
       struct value *base_value;
       try
 	{
-	  base_value = value_primitive_field (val, 0, i, type);
+	  base_value = val->primitive_field (0, i, type);
 	}
       catch (const gdb_exception_error &ex)
 	{
