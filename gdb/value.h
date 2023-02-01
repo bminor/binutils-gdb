@@ -143,6 +143,12 @@ private:
   {
   }
 
+  /* Values can only be destroyed via the reference-counting
+     mechanism.  */
+  ~value ();
+
+  DISABLE_COPY_AND_ASSIGN (value);
+
 public:
 
   /* Allocate a lazy value for type TYPE.  Its actual content is
@@ -169,10 +175,6 @@ public:
      the same memory address, but it's a different block of
      storage.  */
   struct value *copy () const;
-
-  ~value ();
-
-  DISABLE_COPY_AND_ASSIGN (value);
 
   /* Type of the value.  */
   struct type *type () const
