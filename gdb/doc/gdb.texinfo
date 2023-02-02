@@ -6760,13 +6760,14 @@ Set a catchpoint for the indicated signals.  @xref{Set Catchpoints},
 for details about this command.
 
 @kindex handle
-@item handle @var{signal} @r{[}@var{keywords}@dots{}@r{]}
-Change the way @value{GDBN} handles signal @var{signal}.  The @var{signal}
-can be the number of a signal or its name (with or without the
-@samp{SIG} at the beginning); a list of signal numbers of the form
-@samp{@var{low}-@var{high}}; or the word @samp{all}, meaning all the
-known signals.  Optional arguments @var{keywords}, described below,
-say what change to make.
+@item handle @var{signal} @r{[} @var{signal} @dots{} @r{]} @r{[}@var{keywords}@dots{}@r{]}
+Change the way @value{GDBN} handles each @var{signal}.  Each
+@var{signal} can be the number of a signal or its name (with or
+without the @samp{SIG} at the beginning); a list of signal numbers of
+the form @samp{@var{low}-@var{high}}; or the word @samp{all}, meaning
+all the known signals, except @code{SIGINT} and @code{SIGTRAP}, which
+are used by @value{GDBN}.  Optional argument @var{keywords}, described
+below, say what changes to make to all of the specified signals.
 @end table
 
 @c @group
