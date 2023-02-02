@@ -34,8 +34,8 @@ extern "C"
 /* SFrame format.
 
    SFrame format is a simple format to represent the information needed
-   for vanilla virtual stack unwinding.  SFrame format keeps track of the
-   minimal necessary information needed for stack unwinding:
+   for generating vanilla backtraces.  SFrame format keeps track of the
+   minimal necessary information needed for stack tracing:
      - Canonical Frame Address (CFA)
      - Frame Pointer (FP)
      - Return Address (RA)
@@ -59,13 +59,14 @@ extern "C"
    .text.* sections in the resulting binary artifact.  Each Function
    Descriptor Entry specifies the start PC of a function, the size in bytes
    of the function and an offset to its first Frame Row Entry (FRE).  Each FDE
-   additionally also specifies the type of FRE it uses to encode the unwind
-   information.
+   additionally also specifies the type of FRE it uses to encode the stack
+   trace information.
 
-   Next, the Frame Row Entry section is a list of variable size records,
-   each of which represent SFrame unwind information for a set of PCs.  A
-   singular Frame Row Entry is a self-sufficient record with information on
-   how to virtually unwind the stack for the applicable set of PCs.
+   Next, the SFrame Frame Row Entry sub-section is a list of variable size
+   records.  Each entry represents stack trace information for a set of PCs
+   of the function.  A singular Frame Row Entry is a self-sufficient record
+   which contains information on how to generate stack trace from the
+   applicable set of PCs.
 
    */
 
@@ -81,7 +82,7 @@ extern "C"
 
 /* Function Descriptor Entries are sorted on PC.  */
 #define SFRAME_F_FDE_SORTED	0x1
-/* Frame-pointer based unwinding.  */
+/* Functions preserve frame pointer.  */
 #define SFRAME_F_FRAME_POINTER 0x2
 
 #define SFRAME_CFA_FIXED_FP_INVALID 0
@@ -181,8 +182,7 @@ typedef struct sframe_func_desc_entry
   uint32_t sfde_func_start_fre_off;
   /* Number of frame row entries for the function.  */
   uint32_t sfde_func_num_fres;
-  /* Additional information for deciphering the unwind information for the
-     function.
+  /* Additional information for stack tracing from the function:
      - 4-bits: Identify the FRE type used for the function.
      - 1-bit: Identify the FDE type of the function - mask or inc.
      - 1-bit: PAC authorization A/B key (aarch64).
@@ -271,9 +271,9 @@ typedef struct sframe_fre_info
 
    Used for both AMD64 and AARCH64.
 
-   An SFrame Frame Row Entry is a self-sufficient record containing SFrame
-   unwind info for a range of addresses, starting at the specified offset in
-   the function.  Each SFrame Frame Row Entry is followed by S*N bytes, where:
+   An SFrame Frame Row Entry is a self-sufficient record which contains
+   information on how to generate the stack trace for the specified range of
+   PCs.  Each SFrame Frame Row Entry is followed by S*N bytes, where:
      S is the size of the stack frame offset for the FRE, and
      N is the number of stack frame offsets in the FRE
 
