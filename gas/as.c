@@ -317,7 +317,7 @@ Options:\n\
   fprintf (stream, _("\
                           generate GNU Build notes if none are present in the input\n"));
   fprintf (stream, _("\
-  --gsframe               generate SFrame unwind info\n"));
+  --gsframe               generate SFrame stack trace information\n"));
 #endif /* OBJ_ELF */
 
   fprintf (stream, _("\

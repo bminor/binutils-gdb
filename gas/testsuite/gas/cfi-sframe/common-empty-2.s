@@ -1,5 +1,5 @@
 ## CFA register is not defined to be SP/FP.
-## No SFrame unwind info for this function will be generated.
+## No SFrame stack trace info for this function will be generated.
 	.cfi_startproc simple
 	.long 0
 	.long 0

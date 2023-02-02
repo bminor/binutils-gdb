@@ -76,7 +76,7 @@ enum aarch64_abi_type
 };
 
 unsigned int aarch64_sframe_cfa_sp_reg;
-/* The other CFA base register for SFrame unwind info.  */
+/* The other CFA base register for SFrame stack trace info.  */
 unsigned int aarch64_sframe_cfa_fp_reg;
 unsigned int aarch64_sframe_cfa_ra_reg;
 
@@ -8474,7 +8474,7 @@ aarch64_init_frag (fragS * fragP, int max_chars)
     }
 }
 
-/* Whether SFrame unwind info is supported.  */
+/* Whether SFrame stack trace info is supported.  */
 
 bool
 aarch64_support_sframe_p (void)

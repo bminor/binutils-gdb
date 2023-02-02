@@ -149,7 +149,7 @@ struct sframe_version_ops
   unsigned char (*set_func_info) (unsigned int, unsigned int, unsigned int);
 };
 
-/* Generate SFrame unwind info and prepare contents for the output.
+/* Generate SFrame stack trace info and prepare contents for the output.
    outout_sframe ()  is called at the end of file.  */
 
 extern void output_sframe (segT sframe_seg);

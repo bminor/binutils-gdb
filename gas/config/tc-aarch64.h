@@ -263,19 +263,19 @@ extern void aarch64_after_parse_args (void);
 
 #ifdef OBJ_ELF
 
-/* Whether SFrame unwind info is supported.  */
+/* Whether SFrame stack trace info is supported.  */
 extern bool aarch64_support_sframe_p (void);
 #define support_sframe_p aarch64_support_sframe_p
 
-/* The stack-pointer register number for SFrame unwind info.  */
+/* The stack-pointer register number for SFrame stack trace info.  */
 extern unsigned int aarch64_sframe_cfa_sp_reg;
 #define SFRAME_CFA_SP_REG aarch64_sframe_cfa_sp_reg
 
-/* The base-pointer register number for CFA unwind info.  */
+/* The base-pointer register number for CFA stack trace info.  */
 extern unsigned int aarch64_sframe_cfa_fp_reg;
 #define SFRAME_CFA_FP_REG aarch64_sframe_cfa_fp_reg
 
-/* The return address register number for CFA unwind info.  */
+/* The return address register number for CFA stack trace info.  */
 extern unsigned int aarch64_sframe_cfa_ra_reg;
 #define SFRAME_CFA_RA_REG aarch64_sframe_cfa_ra_reg
 

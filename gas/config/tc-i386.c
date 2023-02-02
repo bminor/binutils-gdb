@@ -607,7 +607,7 @@ static int use_big_obj = 0;
 static int shared = 0;
 
 unsigned int x86_sframe_cfa_sp_reg;
-/* The other CFA base register for SFrame unwind info.  */
+/* The other CFA base register for SFrame stack trace info.  */
 unsigned int x86_sframe_cfa_fp_reg;
 unsigned int x86_sframe_cfa_ra_reg;
 
@@ -9285,7 +9285,7 @@ x86_cleanup (void)
 bool
 x86_support_sframe_p (void)
 {
-  /* At this time, SFrame unwind is supported for AMD64 ABI only.  */
+  /* At this time, SFrame stack trace is supported for AMD64 ABI only.  */
   return (x86_elf_abi == X86_64_ABI);
 }
 

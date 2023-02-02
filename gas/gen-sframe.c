@@ -33,7 +33,7 @@
 
 /* Whether frame row entries track RA.
 
-   A target may not need return address tracking for stack unwinding.  If it
+   A target may not need return address tracking for stack tracing.  If it
    does need the same, SFRAME_CFA_RA_REG must be defined with the return
    address register number.  */
 
@@ -892,7 +892,7 @@ sframe_xlate_ctx_add_fre (struct sframe_xlate_ctx *xlate_ctx,
   xlate_ctx->num_xlate_fres++;
 }
 
-/* A SFrame Frame Row Entry is self-sufficient in terms of unwind information
+/* A SFrame Frame Row Entry is self-sufficient in terms of stack tracing info
    for a given PC.  It contains information assimilated from multiple CFI
    instructions, and hence, a new SFrame FRE is initialized with the data from
    the previous known FRE, if any.
@@ -1024,7 +1024,7 @@ sframe_xlate_do_def_cfa_offset (struct sframe_xlate_ctx *xlate_ctx,
   gas_assert (cur_fre);
   /*  Define the current CFA rule to use the provided offset (but to keep
       the old register).  However, if the old register is not FP/SP,
-      skip creating SFrame unwind info for the function. */
+      skip creating SFrame stack trace info for the function.  */
   if ((cur_fre->cfa_base_reg == SFRAME_CFA_FP_REG)
       || (cur_fre->cfa_base_reg == SFRAME_CFA_SP_REG))
     {
@@ -1081,7 +1081,7 @@ sframe_xlate_do_val_offset (struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
   /* Previous value of register is CFA + offset.  However, if the specified
      register is not interesting (FP or RA reg), the current DW_CFA_val_offset
      instruction can be safely skipped without sacrificing the asynchonicity of
-     unwind information.  */
+     stack trace information.  */
   if (cfi_insn->u.r == SFRAME_CFA_FP_REG)
     return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
 #ifdef SFRAME_FRE_RA_TRACKING
@@ -1103,8 +1103,8 @@ sframe_xlate_do_remember_state (struct sframe_xlate_ctx *xlate_ctx)
   struct sframe_row_entry *last_fre = xlate_ctx->last_fre;
 
   /* If there is no FRE state to remember, nothing to do here.  Return
-     early with non-zero error code, this will cause no SFrame unwind info
-     for the function involved.  */
+     early with non-zero error code, this will cause no SFrame stack trace
+     info for the function involved.  */
   if (!last_fre)
     return SFRAME_XLATE_ERR_INVAL;
 
@@ -1248,7 +1248,7 @@ sframe_do_cfi_insn (struct sframe_xlate_ctx *xlate_ctx,
     default:
       {
 	/* Other CFI opcodes are not processed at this time.
-	   These do not impact the coverage of the basic stack unwinding
+	   These do not impact the coverage of the basic stack tracing
 	   information as conveyed in the SFrame format.
 	    - DW_CFA_register,
 	    - ...
@@ -1285,7 +1285,7 @@ sframe_do_fde (struct sframe_xlate_ctx *xlate_ctx,
       err = sframe_do_cfi_insn (xlate_ctx, cfi_insn);
       if (err != SFRAME_XLATE_OK)
 	{
-	  /* Skip generating SFrame unwind info for the function if any
+	  /* Skip generating SFrame stack trace info for the function if any
 	     offending CFI is encountered by sframe_do_cfi_insn ().  */
 	  return err; /* Return the error code.  */
 	}
@@ -1309,10 +1309,11 @@ sframe_do_fde (struct sframe_xlate_ctx *xlate_ctx,
   return SFRAME_XLATE_OK;
 }
 
-/* Create SFrame unwind info for all functions.
+/* Create SFrame stack trace info for all functions.
 
-   This function consumes the already generated FDEs (by dw2gencfi) and
-   generates unwind data in SFrame format.  */
+   This function consumes the already generated DWARF FDEs (by dw2gencfi) and
+   generates data which is later emitted as stack trace information encoded in
+   the SFrame format.  */
 
 static void
 create_sframe_all (void)
@@ -1330,7 +1331,8 @@ create_sframe_all (void)
 
       /* Process and link SFrame FDEs if no error.  Also skip adding an SFrame
 	 FDE if it does not contain any SFrame FREs.  There is little use of an
-	 SFrame FDE if there is no unwind information about the function.  */
+	 SFrame FDE if there is no stack tracing information for the
+	 function.  */
       int err = sframe_do_fde (xlate_ctx, dw_fde);
       if (err || xlate_ctx->num_xlate_fres == 0)
 	{
@@ -1355,7 +1357,7 @@ output_sframe (segT sframe_seg)
   /* Setup the version specific access functions.  */
   sframe_set_version (SFRAME_VERSION_1);
 
-  /* Process all fdes and create SFrame unwind information.  */
+  /* Process all fdes and create SFrame stack trace information.  */
   create_sframe_all ();
 
   output_sframe_internal ();
