@@ -206,7 +206,7 @@ _bfd_elf_parse_sframe (bfd *abfd,
       return false;
     }
 
-  /* Read the SFrame unwind information from abfd.  */
+  /* Read the SFrame stack trace information from abfd.  */
   if (!bfd_malloc_and_get_section (abfd, sec, &sfbuf))
     goto fail_no_free;
 
@@ -438,10 +438,11 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
 		}
 	      else
 		{
-		  /* Expected to land here for SFrame unwind info as created
-		     for the .plt* sections.  These sections can have upto two
-		     FDE entries.  Although the code should work for > 2,
-		     leaving this assert here for safety.  */
+		  /* Expected to land here when SFrame stack trace info is
+		     created dynamically for the .plt* sections.  These
+		     sections are expected to have upto two SFrame FDE entries.
+		     Although the code should work for > 2,  leaving this
+		     assert here for safety.  */
 		  BFD_ASSERT (num_fidx <= 2);
 		  /* For the first entry, we know the offset of the SFrame FDE's
 		     sfde_func_start_address.  Side note: see how the value

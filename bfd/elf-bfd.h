@@ -702,7 +702,7 @@ struct elf_link_hash_table
   /* Used by eh_frame code when editing .eh_frame.  */
   struct eh_frame_hdr_info eh_info;
 
-  /* Used to link unwind data in .sframe sections.  */
+  /* Used to link stack trace info in .sframe sections.  */
   struct sframe_enc_info sfe_info;
 
   /* A linked list of local symbols to be added to .dynsym.  */

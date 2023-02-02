@@ -1804,7 +1804,7 @@ enum dynobj_sframe_plt_type
   SFRAME_PLT_SEC = 2
 };
 
-/* Create SFrame unwind info for the plt entries in the .plt section
+/* Create SFrame stack trace info for the plt entries in the .plt section
    of type PLT_SEC_TYPE.  */
 
 static bool
@@ -1819,7 +1819,7 @@ _bfd_x86_elf_create_sframe_plt (bfd *output_bfd,
   unsigned int plt0_entry_size;
   unsigned char func_info;
   unsigned int fre_type;
-  /* The dynamic plt section for which .sframe unwind information is being
+  /* The dynamic plt section for which .sframe stack trace information is being
      created.  */
   asection *dpltsec;
 
@@ -1832,7 +1832,7 @@ _bfd_x86_elf_create_sframe_plt (bfd *output_bfd,
 
   bed = get_elf_backend_data (output_bfd);
   htab = elf_x86_hash_table (info, bed->target_id);
-  /* Whether SFrame unwind info for plt0 is to be generated.  */
+  /* Whether SFrame stack trace info for plt0 is to be generated.  */
   plt0_generated_p = htab->plt.has_plt0;
   plt0_entry_size
     = (plt0_generated_p) ? htab->sframe_plt->plt0_entry_size : 0;
@@ -1906,7 +1906,7 @@ _bfd_x86_elf_create_sframe_plt (bfd *output_bfd,
       /* pltn entries use an SFrame FDE of type
 	 SFRAME_FDE_TYPE_PCMASK to exploit the repetitive
 	 pattern of the instructions in these entries.  Using this SFrame FDE
-	 type helps in keeping the unwind information for pltn entries
+	 type helps in keeping the SFrame stack trace info for pltn entries
 	 compact.  */
       func_info	= sframe_fde_create_func_info (fre_type,
 					       SFRAME_FDE_TYPE_PCMASK);

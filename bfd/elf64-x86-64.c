@@ -895,7 +895,7 @@ static const struct elf_x86_sframe_plt elf_x86_64_sframe_plt =
   { &elf_x86_64_sframe_pltn_fre1, &elf_x86_64_sframe_pltn_fre2 },
   NON_LAZY_PLT_ENTRY_SIZE,
   1, /* Number of FREs for PLTn for second PLT.  */
-  /* FREs for second plt ( unwind info for .plt.got is
+  /* FREs for second plt (stack trace info for .plt.got is
      identical).  Used when IBT or non-lazy PLT is in effect.  */
   { &elf_x86_64_sframe_sec_pltn_fre1 }
 };
