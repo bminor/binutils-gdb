@@ -527,12 +527,24 @@ _bfd_ecoff_slurp_symbolic_info (bfd *abfd,
      documented section. And the ordering of the sections varies between
      statically and dynamically linked executables.
      If bfd supports SEEK_END someday, this code could be simplified.  */
-  raw_end = 0;
+  raw_end = raw_base;
 
 #define UPDATE_RAW_END(start, count, size) \
-  cb_end = internal_symhdr->start + internal_symhdr->count * (size); \
-  if (cb_end > raw_end) \
-    raw_end = cb_end
+  do									\
+    if (internal_symhdr->count != 0)					\
+      {									\
+	if (internal_symhdr->start < raw_base)				\
+	  goto err;							\
+	if (_bfd_mul_overflow ((unsigned long) internal_symhdr->count,	\
+			       (size), &amt))				\
+	  goto err;							\
+	cb_end = internal_symhdr->start + amt;				\
+	if (cb_end < internal_symhdr->start)				\
+	  goto err;							\
+	if (cb_end > raw_end)						\
+	  raw_end = cb_end;						\
+      }									\
+  while (0)
 
   UPDATE_RAW_END (cbLineOffset, cbLine, sizeof (unsigned char));
   UPDATE_RAW_END (cbDnOffset, idnMax, backend->debug_swap.external_dnr_size);
@@ -599,6 +611,7 @@ _bfd_ecoff_slurp_symbolic_info (bfd *abfd,
   if (_bfd_mul_overflow ((unsigned long) internal_symhdr->ifdMax,
 			 sizeof (struct fdr), &amt))
     {
+    err:
       bfd_set_error (bfd_error_file_too_big);
       return false;
     }
