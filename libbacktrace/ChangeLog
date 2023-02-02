@@ -1,3 +1,8 @@
+2023-01-12  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.am (CLEANFILES): Import patch from upstream to prevent
+	allocafail.sh from being removed when running 'make clean'.
+
 2021-11-12  Martin Liska  <mliska@suse.cz>
 
 	PR libbacktrace/103167
