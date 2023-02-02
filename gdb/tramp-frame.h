@@ -21,6 +21,7 @@
 #define TRAMP_FRAME_H
 
 #include "frame.h"
+#include "frame-unwind.h"	/* For frame_prev_arch_ftype.  */
 
 class frame_info_ptr;
 struct trad_frame_cache;
@@ -75,6 +76,10 @@ struct tramp_frame
   int (*validate) (const struct tramp_frame *self,
 		   frame_info_ptr this_frame,
 		   CORE_ADDR *pc);
+
+  /* Given the current frame in THIS_FRAME and a frame cache in FRAME_CACHE,
+     return the architecture of the previous frame.  */
+  frame_prev_arch_ftype *prev_arch;
 };
 
 void tramp_frame_prepend_unwinder (struct gdbarch *gdbarch,

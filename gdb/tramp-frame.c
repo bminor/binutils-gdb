@@ -170,5 +170,6 @@ tramp_frame_prepend_unwinder (struct gdbarch *gdbarch,
   unwinder->stop_reason = default_frame_unwind_stop_reason;
   unwinder->this_id = tramp_frame_this_id;
   unwinder->prev_register = tramp_frame_prev_register;
+  unwinder->prev_arch = tramp_frame->prev_arch;
   frame_unwind_prepend_unwinder (gdbarch, unwinder);
 }

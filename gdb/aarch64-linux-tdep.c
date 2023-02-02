@@ -184,6 +184,39 @@
 #define AARCH64_SME_CONTEXT_SIZE(svq) \
   (AARCH64_SME_CONTEXT_REGS_OFFSET + AARCH64_SME_CONTEXT_ZA_SIZE (svq))
 
+/* Holds information about the signal frame.  */
+struct aarch64_linux_sigframe
+{
+  /* The stack pointer value.  */
+  CORE_ADDR sp = 0;
+  /* The sigcontext address.  */
+  CORE_ADDR sigcontext_address = 0;
+  /* The start/end signal frame section addresses.  */
+  CORE_ADDR section = 0;
+  CORE_ADDR section_end = 0;
+
+  /* Starting address of the section containing the general purpose
+     registers.  */
+  CORE_ADDR gpr_section = 0;
+  /* Starting address of the section containing the FPSIMD registers.  */
+  CORE_ADDR fpsimd_section = 0;
+  /* Starting address of the section containing the SVE registers.  */
+  CORE_ADDR sve_section = 0;
+  /* Starting address of the section containing the ZA register.  */
+  CORE_ADDR za_section = 0;
+  /* Starting address of the section containing extra information.  */
+  CORE_ADDR extra_section = 0;
+
+  /* The vector length (SVE or SSVE).  */
+  ULONGEST vl = 0;
+  /* The streaming vector length (SSVE/ZA).  */
+  ULONGEST svl = 0;
+  /* True if we are in streaming mode, false otherwise.  */
+  bool streaming_mode = false;
+  /* True if we have a ZA payload, false otherwise.  */
+  bool za_payload = false;
+};
+
 /* Read an aarch64_ctx, returning the magic value, and setting *SIZE to the
    size, or return 0 on error.  */
 
@@ -318,129 +351,115 @@ aarch64_linux_restore_vregs (struct gdbarch *gdbarch,
     }
 }
 
-/* Implement the "init" method of struct tramp_frame.  */
+/* Given a signal frame THIS_FRAME, read the signal frame information into
+   SIGNAL_FRAME.  */
 
 static void
-aarch64_linux_sigframe_init (const struct tramp_frame *self,
-			     frame_info_ptr this_frame,
-			     struct trad_frame_cache *this_cache,
-			     CORE_ADDR func)
+aarch64_linux_read_signal_frame_info (frame_info_ptr this_frame,
+				  struct aarch64_linux_sigframe &signal_frame)
 {
-  struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
-  CORE_ADDR sp = get_frame_register_unsigned (this_frame, AARCH64_SP_REGNUM);
-  CORE_ADDR sigcontext_addr = (sp + AARCH64_RT_SIGFRAME_UCONTEXT_OFFSET
-			       + AARCH64_UCONTEXT_SIGCONTEXT_OFFSET );
-  CORE_ADDR section = sigcontext_addr + AARCH64_SIGCONTEXT_RESERVED_OFFSET;
-  CORE_ADDR section_end = section + AARCH64_SIGCONTEXT_RESERVED_SIZE;
-  CORE_ADDR fpsimd = 0;
-  CORE_ADDR sve_regs = 0;
-  CORE_ADDR za_state = 0;
-  uint64_t svcr = 0;
+  signal_frame.sp = get_frame_register_unsigned (this_frame, AARCH64_SP_REGNUM);
+  signal_frame.sigcontext_address
+    = signal_frame.sp + AARCH64_RT_SIGFRAME_UCONTEXT_OFFSET
+      + AARCH64_UCONTEXT_SIGCONTEXT_OFFSET;
+  signal_frame.section
+    = signal_frame.sigcontext_address + AARCH64_SIGCONTEXT_RESERVED_OFFSET;
+  signal_frame.section_end
+    = signal_frame.section + AARCH64_SIGCONTEXT_RESERVED_SIZE;
+
+  signal_frame.gpr_section
+    = signal_frame.sigcontext_address + AARCH64_SIGCONTEXT_XO_OFFSET;
+
+  /* Search for all the other sections, stopping at null.  */
+  CORE_ADDR section = signal_frame.section;
+  CORE_ADDR section_end = signal_frame.section_end;
   uint32_t size, magic;
-  size_t vq = 0, svq = 0;
   bool extra_found = false;
-  int num_regs = gdbarch_num_regs (gdbarch);
+  enum bfd_endian byte_order
+    = gdbarch_byte_order (get_frame_arch (this_frame));
 
-  /* Read in the integer registers.  */
-
-  for (int i = 0; i < 31; i++)
-    {
-      trad_frame_set_reg_addr (this_cache,
-			       AARCH64_X0_REGNUM + i,
-			       sigcontext_addr + AARCH64_SIGCONTEXT_XO_OFFSET
-				 + i * AARCH64_SIGCONTEXT_REG_SIZE);
-    }
-  trad_frame_set_reg_addr (this_cache, AARCH64_SP_REGNUM,
-			   sigcontext_addr + AARCH64_SIGCONTEXT_XO_OFFSET
-			     + 31 * AARCH64_SIGCONTEXT_REG_SIZE);
-  trad_frame_set_reg_addr (this_cache, AARCH64_PC_REGNUM,
-			   sigcontext_addr + AARCH64_SIGCONTEXT_XO_OFFSET
-			     + 32 * AARCH64_SIGCONTEXT_REG_SIZE);
-
-  /* Search for the FP and SVE sections, stopping at null.  */
   while ((magic = read_aarch64_ctx (section, byte_order, &size)) != 0
 	 && size != 0)
     {
       switch (magic)
 	{
 	case AARCH64_FPSIMD_MAGIC:
-	  fpsimd = section;
-	  section += size;
-	  break;
+	  {
+	    signal_frame.fpsimd_section = section;
+	    section += size;
+	    break;
+	  }
 
 	case AARCH64_SVE_MAGIC:
 	  {
 	    /* Check if the section is followed by a full SVE dump, and set
 	       sve_regs if it is.  */
 	    gdb_byte buf[4];
-	    uint16_t flags;
 
-	    if (!tdep->has_sve ())
-	      break;
-
+	    /* Extract the vector length.  */
 	    if (target_read_memory (section + AARCH64_SVE_CONTEXT_VL_OFFSET,
 				    buf, 2) != 0)
 	      {
+		warning (_("Failed to read the vector length from the SVE "
+			   "signal frame context."));
 		section += size;
 		break;
 	      }
-	    vq = sve_vq_from_vl (extract_unsigned_integer (buf, 2, byte_order));
 
-	    /* If SME is supported, also read the flags field.  It may
-	       indicate if this SVE context is for streaming mode (SSVE).  */
-	    if (tdep->has_sme ())
+	    signal_frame.vl = extract_unsigned_integer (buf, 2, byte_order);
+
+	    /* Extract the flags to check if we are in streaming mode.  */
+	    if (target_read_memory (section
+				    + AARCH64_SVE_CONTEXT_FLAGS_OFFSET,
+				    buf, 2) != 0)
 	      {
-		if (target_read_memory (section
-					+ AARCH64_SVE_CONTEXT_FLAGS_OFFSET,
-					buf, 2) != 0)
-		  {
-		    section += size;
-		    break;
-		  }
-		flags = extract_unsigned_integer (buf, 2, byte_order);
-
-		/* Is this SSVE data? If so, enable the SM bit in SVCR.  */
-		if (flags & SVE_SIG_FLAG_SM)
-		  svcr |= SVCR_SM_BIT;
+		warning (_("Failed to read the flags from the SVE signal frame"
+			   " context."));
+		section += size;
+		break;
 	      }
 
-	    if (size >= AARCH64_SVE_CONTEXT_SIZE (vq))
-	      sve_regs = section + AARCH64_SVE_CONTEXT_REGS_OFFSET;
+	    uint16_t flags = extract_unsigned_integer (buf, 2, byte_order);
 
+	    /* Is this SSVE data? If so, we are in streaming mode.  */
+	    signal_frame.streaming_mode
+	      = (flags & SVE_SIG_FLAG_SM) ? true : false;
+
+	    ULONGEST vq = sve_vq_from_vl (signal_frame.vl);
+	    if (size >= AARCH64_SVE_CONTEXT_SIZE (vq))
+	      {
+		signal_frame.sve_section
+		  = section + AARCH64_SVE_CONTEXT_REGS_OFFSET;
+	      }
 	    section += size;
 	    break;
 	  }
 
 	case AARCH64_ZA_MAGIC:
 	  {
-	    if (!tdep->has_sme ())
-	      {
-		section += size;
-		break;
-	      }
-
 	    /* Check if the section is followed by a full ZA dump, and set
 	       za_state if it is.  */
 	    gdb_byte buf[2];
 
+	    /* Extract the streaming vector length.  */
 	    if (target_read_memory (section + AARCH64_SME_CONTEXT_SVL_OFFSET,
 				    buf, 2) != 0)
 	      {
+		warning (_("Failed to read the streaming vector length from "
+			   "ZA signal frame context."));
 		section += size;
 		break;
 	      }
-	    svq = sve_vq_from_vl (extract_unsigned_integer (buf, 2,
-							    byte_order));
+
+	    signal_frame.svl = extract_unsigned_integer (buf, 2, byte_order);
+	    ULONGEST svq = sve_vq_from_vl (signal_frame.svl);
 
 	    if (size >= AARCH64_SME_CONTEXT_SIZE (svq))
 	      {
-		za_state = section + AARCH64_SME_CONTEXT_REGS_OFFSET;
-		/* We have ZA data.  Enable the ZA bit in SVCR.  */
-		svcr |= SVCR_ZA_BIT;
+		signal_frame.za_section
+		  = section + AARCH64_SME_CONTEXT_REGS_OFFSET;
+		signal_frame.za_payload = true;
 	      }
-
 	    section += size;
 	    break;
 	  }
@@ -456,11 +475,14 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
 	    if (target_read_memory (section + AARCH64_EXTRA_DATAP_OFFSET,
 				    buf, 8) != 0)
 	      {
+		warning (_("Failed to read the extra section address from the"
+			   " signal frame context."));
 		section += size;
 		break;
 	      }
 
 	    section = extract_unsigned_integer (buf, 8, byte_order);
+	    signal_frame.extra_section = section;
 	    extra_found = true;
 	    break;
 	  }
@@ -476,11 +498,48 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
       if (!extra_found && section > section_end)
 	break;
     }
+}
 
-  if (sve_regs != 0)
+/* Implement the "init" method of struct tramp_frame.  */
+
+static void
+aarch64_linux_sigframe_init (const struct tramp_frame *self,
+			     frame_info_ptr this_frame,
+			     struct trad_frame_cache *this_cache,
+			     CORE_ADDR func)
+{
+  /* Read the signal context information.  */
+  struct aarch64_linux_sigframe signal_frame;
+  aarch64_linux_read_signal_frame_info (this_frame, signal_frame);
+
+  /* Now we have all the data required to restore the registers from the
+     signal frame.  */
+
+  /* Restore the general purpose registers.  */
+  CORE_ADDR offset = signal_frame.gpr_section;
+  for (int i = 0; i < 31; i++)
     {
-      CORE_ADDR offset;
+      trad_frame_set_reg_addr (this_cache, AARCH64_X0_REGNUM + i, offset);
+      offset += AARCH64_SIGCONTEXT_REG_SIZE;
+    }
+  trad_frame_set_reg_addr (this_cache, AARCH64_SP_REGNUM, offset);
+  offset += AARCH64_SIGCONTEXT_REG_SIZE;
+  trad_frame_set_reg_addr (this_cache, AARCH64_PC_REGNUM, offset);
 
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+  /* Restore the SVE / FPSIMD registers.  */
+  if (tdep->has_sve () && signal_frame.sve_section != 0)
+    {
+      ULONGEST vq = sve_vq_from_vl (signal_frame.vl);
+      CORE_ADDR sve_regs = signal_frame.sve_section;
+
+      /* Restore VG.  */
+      trad_frame_set_reg_value (this_cache, AARCH64_SVE_VG_REGNUM,
+				sve_vg_from_vl (signal_frame.vl));
+
+      int num_regs = gdbarch_num_regs (gdbarch);
       for (int i = 0; i < 32; i++)
 	{
 	  offset = sve_regs + (i * vq * 16);
@@ -510,30 +569,75 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
       trad_frame_set_reg_addr (this_cache, AARCH64_SVE_FFR_REGNUM, offset);
     }
 
-  if (fpsimd != 0)
+  /* Restore the FPSIMD registers.  */
+  if (signal_frame.fpsimd_section != 0)
     {
+      CORE_ADDR fpsimd = signal_frame.fpsimd_section;
+
       trad_frame_set_reg_addr (this_cache, AARCH64_FPSR_REGNUM,
 			       fpsimd + AARCH64_FPSIMD_FPSR_OFFSET);
       trad_frame_set_reg_addr (this_cache, AARCH64_FPCR_REGNUM,
 			       fpsimd + AARCH64_FPSIMD_FPCR_OFFSET);
 
       /* If there was no SVE section then set up the V registers.  */
-      if (sve_regs == 0)
+      if (!tdep->has_sve () || signal_frame.sve_section == 0)
 	aarch64_linux_restore_vregs (gdbarch, this_cache, fpsimd);
     }
 
-  if (za_state != 0)
+  /* Restore the SME registers.  */
+  if (tdep->has_sme ())
     {
-      /* Restore the ZA state.  */
-      trad_frame_set_reg_addr (this_cache, tdep->sme_za_regnum,
-			       za_state);
+      if (signal_frame.za_section != 0)
+	{
+	  /* Restore the ZA state.  */
+	  trad_frame_set_reg_addr (this_cache, tdep->sme_za_regnum,
+				   signal_frame.za_section);
+	}
+
+      /* Restore/Reconstruct SVCR.  */
+      ULONGEST svcr = 0;
+      svcr |= signal_frame.za_payload ? SVCR_ZA_BIT : 0;
+      svcr |= signal_frame.streaming_mode ? SVCR_SM_BIT : 0;
+      trad_frame_set_reg_value (this_cache, tdep->sme_svcr_regnum, svcr);
+
+      /* Restore SVG.  */
+      trad_frame_set_reg_value (this_cache, tdep->sme_svg_regnum,
+				sve_vg_from_vl (signal_frame.svl));
     }
 
-  /* If SME is supported, set SVCR as well.  */
-  if (tdep->has_sme ())
-    trad_frame_set_reg_value (this_cache, tdep->sme_svcr_regnum, svcr);
+  trad_frame_set_id (this_cache, frame_id_build (signal_frame.sp, func));
+}
 
-  trad_frame_set_id (this_cache, frame_id_build (sp, func));
+/* Implements the "prev_arch" method of struct tramp_frame.  */
+
+static struct gdbarch *
+aarch64_linux_sigframe_prev_arch (frame_info_ptr this_frame,
+				  void **frame_cache)
+{
+  struct trad_frame_cache *cache
+    = (struct trad_frame_cache *) *frame_cache;
+
+  gdb_assert (cache != nullptr);
+
+  struct aarch64_linux_sigframe signal_frame;
+  aarch64_linux_read_signal_frame_info (this_frame, signal_frame);
+
+  /* The SVE vector length and the SME vector length may change from frame to
+     frame.  Make sure we report the correct architecture to the previous
+     frame.
+
+     We can reuse the next frame's architecture here, as it should be mostly
+     the same, except for potential different vg and svg values.  */
+  const struct target_desc *tdesc
+    = gdbarch_target_desc (get_frame_arch (this_frame));
+  aarch64_features features = aarch64_features_from_target_desc (tdesc);
+  features.vq = sve_vq_from_vl (signal_frame.vl);
+  features.svq = (uint8_t) sve_vq_from_vl (signal_frame.svl);
+
+  struct gdbarch_info info;
+  info.bfd_arch_info = bfd_lookup_arch (bfd_arch_aarch64, bfd_mach_aarch64);
+  info.target_desc = aarch64_read_description (features);
+  return gdbarch_find_by_info (info);
 }
 
 static const struct tramp_frame aarch64_linux_rt_sigframe =
@@ -550,7 +654,9 @@ static const struct tramp_frame aarch64_linux_rt_sigframe =
     {0xd4000001, ULONGEST_MAX},
     {TRAMP_SENTINEL_INSN, ULONGEST_MAX}
   },
-  aarch64_linux_sigframe_init
+  aarch64_linux_sigframe_init,
+  nullptr, /* validate */
+  aarch64_linux_sigframe_prev_arch, /* prev_arch */
 };
 
 /* Register maps.  */
