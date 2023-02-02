@@ -25,7 +25,7 @@
 	.file FILENO "file.c"
 	.loc  FILENO LINENO [COLUMN] [basic_block] [prologue_end] \
 	      [epilogue_begin] [is_stmt VALUE] [isa VALUE] \
-	      [discriminator VALUE]
+	      [discriminator VALUE] [view VALUE]
 */
 
 #include "as.h"
