@@ -35,7 +35,7 @@ License''.
 
 This manual describes version 1 of the SFrame file format.  SFrame stands for
 Simple Frame format.  SFrame format keeps track of the minimal necessary
-information needed for stack unwinding:
+information needed for generating stack traces:
 
 @itemize @minus
 @item
@@ -47,7 +47,7 @@ Return Address (RA).
 @end itemize
 
 The reason for existence of the SFrame format is to support fast, online
-backtracing using a simple unwinder.
+generation of stack traces using simple means.
 
 @menu
 * Overview::
@@ -62,7 +62,7 @@ backtracing using a simple unwinder.
 @cindex Overview
 @tindex PT_GNU_SFRAME
 
-The SFrame unwind information is provided in a loaded section, known as the
+The SFrame stack trace information is provided in a loaded section, known as the
 @code{.sframe} section.  When available, the @code{.sframe} section appears in
 a new segment of its own, PT_GNU_SFRAME.
 
@@ -289,7 +289,7 @@ high-level function description for backtracing.
 @item 0x18
 @tab @code{uint32_t sfh_freoff}
 @tab The offset in bytes of the SFrame FRE sub-section, the core of the SFrame
-section, which describes the unwind information using variable-length array
+section, which describes the stack trace information using variable-length array
 elements. @xref{SFrame Frame Row Entries}.
 
 @end multitable
@@ -303,8 +303,9 @@ elements. @xref{SFrame Frame Row Entries}.
 @cindex SFrame ABI/arch identifier
 
 SFrame header identifies the ABI/arch of the target system for which the
-executable and it's unwind information is intended.  There are currently three
-identifiable ABI/arch values in the format.
+executable and hence, the stack trace information contained in the SFrame
+section, is intended.  There are currently three identifiable ABI/arch values
+in the format.
 
 @multitable {SFRAME_ABI_AARCH64_ENDIAN_LITTLE} {Value} {@code{AARCH64 little-endian}}
 @headitem ABI/arch Identifier @tab Value @tab Description
@@ -324,7 +325,7 @@ identifiable ABI/arch values in the format.
 @end multitable
 
 The presence of an explicit identification of ABI/arch in SFrame may allow
-unwinders to make certain ABI-specific decisions.
+stack trace generators to make certain ABI-specific decisions.
 
 @node SFrame Function Descriptor Entries
 @section SFrame FDE
@@ -332,8 +333,8 @@ unwinders to make certain ABI-specific decisions.
 
 The SFrame Function Descriptor Entry sub-section is a sorted array of
 fixed-length SFrame function descriptor entries (SFrame FDEs).  Each SFrame FDE
-is a packed structure which contains information to describe a function's unwind
-information at a high-level.
+is a packed structure which contains information to describe a function's stack
+trace information at a high-level.
 
 @example
 typedef struct sframe_func_desc_entry
@@ -459,7 +460,7 @@ to look up a matching FRE.
 @subsection The SFrame FRE types
 
 A real world application can have functions of size big and small.  SFrame
-format defines three types of SFrame FRE entries to represent the unwind
+format defines three types of SFrame FRE entries to represent the stack trace
 information for such a variety of function sizes.  These representations vary
 in the number of bits needed to encode the start address offset in the SFrame
 FRE.
@@ -488,21 +489,21 @@ The following constants are defined and used to identify the SFrame FRE types:
 32-bit value.
 @end multitable
 
-A single function must use the same type of FRE throughout.  The choice of
-which SFrame FRE is used to encode the unwind information of a function, is
-stored in the @xref{The SFrame FDE info word}.
+A single function must use the same type of SFrame FRE throughout.  An
+identifier to reflect the chosen SFrame FRE type is stored in the
+@xref{The SFrame FDE info word}.
 
 @node SFrame Frame Row Entries
 @section SFrame FRE
 @cindex SFrame FRE
 
-The SFrame Frame Row Entry sub-section contains the core of the unwind
+The SFrame Frame Row Entry sub-section contains the core of the stack trace
 information.
 
-An SFrame Frame Row Entry is a self-sufficient record containing SFrame unwind
-info for a range of contiguous addresses, starting at the specified offset from
-the start of the function.  Each SFrame Frame Row Entry is followed by S*N
-bytes, where:
+An SFrame Frame Row Entry is a self-sufficient record containing SFrame stack
+trace information for a range of contiguous addresses, starting at the
+specified offset from the start of the function.  Each SFrame Frame Row Entry
+is followed by S*N bytes, where:
 
 @itemize @minus
 @item
