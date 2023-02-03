@@ -914,7 +914,7 @@ typedef struct
      Each insn's value is stored with the insn.
      The first step in recognizing an insn for disassembly is
      (opcode & mask) == value.  */
-  CGEN_INSN_INT mask;
+  CGEN_INSN_LGUINT mask;
 #define CGEN_IFMT_MASK(ifmt) ((ifmt)->mask)
 
   /* Instruction fields.

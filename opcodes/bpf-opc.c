@@ -50,99 +50,103 @@ static const CGEN_IFMT ifmt_empty ATTRIBUTE_UNUSED = {
 };
 
 static const CGEN_IFMT ifmt_addile ATTRIBUTE_UNUSED = {
-  64, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_SRCLE) }, { F (F_OP_CODE) }, { F (F_DSTLE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 64, 0xfffff0ff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_SRCLE) }, { F (F_OP_CODE) }, { F (F_DSTLE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_addrle ATTRIBUTE_UNUSED = {
-  64, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_SRCLE) }, { F (F_OP_CODE) }, { F (F_DSTLE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 64, 0xffffffffffff00ff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_SRCLE) }, { F (F_OP_CODE) }, { F (F_DSTLE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_negle ATTRIBUTE_UNUSED = {
-  64, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_SRCLE) }, { F (F_OP_CODE) }, { F (F_DSTLE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 64, 0xfffffffffffff0ff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_SRCLE) }, { F (F_OP_CODE) }, { F (F_DSTLE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_addibe ATTRIBUTE_UNUSED = {
-  64, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_CODE) }, { F (F_SRCBE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 64, 0xffff0fff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_CODE) }, { F (F_SRCBE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_addrbe ATTRIBUTE_UNUSED = {
-  64, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_CODE) }, { F (F_SRCBE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 64, 0xffffffffffff00ff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_CODE) }, { F (F_SRCBE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_negbe ATTRIBUTE_UNUSED = {
-  64, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_CODE) }, { F (F_SRCBE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 64, 0xffffffffffff0fff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_CODE) }, { F (F_SRCBE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_endlele ATTRIBUTE_UNUSED = {
-  64, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_SRCLE) }, { F (F_OP_CODE) }, { F (F_DSTLE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 64, 0xfffff0ff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_SRCLE) }, { F (F_OP_CODE) }, { F (F_DSTLE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_endlebe ATTRIBUTE_UNUSED = {
-  64, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_CODE) }, { F (F_SRCBE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 64, 0xffff0fff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_CODE) }, { F (F_SRCBE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_lddwle ATTRIBUTE_UNUSED = {
-  64, 128, 0xff, { { F (F_IMM64) }, { F (F_OFFSET16) }, { F (F_SRCLE) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_DSTLE) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 128, 0xfffff0ff, { { F (F_IMM64) }, { F (F_OFFSET16) }, { F (F_SRCLE) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_DSTLE) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_lddwbe ATTRIBUTE_UNUSED = {
-  64, 128, 0xff, { { F (F_IMM64) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_SRCBE) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 128, 0xffff0fff, { { F (F_IMM64) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_SRCBE) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_ldabsw ATTRIBUTE_UNUSED = {
-  64, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_REGS) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 64, 0xffffffff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_REGS) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_ldindwle ATTRIBUTE_UNUSED = {
-  64, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_SRCLE) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_DSTLE) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 64, 0xffff0fff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_SRCLE) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_DSTLE) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_ldindwbe ATTRIBUTE_UNUSED = {
-  64, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_SRCBE) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 64, 0xfffff0ff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_SRCBE) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_ldxwle ATTRIBUTE_UNUSED = {
-  64, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_SRCLE) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_DSTLE) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 64, 0xffffffff000000ff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_SRCLE) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_DSTLE) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_ldxwbe ATTRIBUTE_UNUSED = {
-  64, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_SRCBE) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 64, 0xffffffff000000ff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_SRCBE) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_stble ATTRIBUTE_UNUSED = {
-  64, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_SRCLE) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_DSTLE) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 64, 0xf0ff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_SRCLE) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_DSTLE) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_stbbe ATTRIBUTE_UNUSED = {
-  64, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_SRCBE) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 64, 0xfff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_SRCBE) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_jeqile ATTRIBUTE_UNUSED = {
-  64, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_SRCLE) }, { F (F_OP_CODE) }, { F (F_DSTLE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 64, 0xf0ff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_SRCLE) }, { F (F_OP_CODE) }, { F (F_DSTLE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_jeqrle ATTRIBUTE_UNUSED = {
-  64, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_SRCLE) }, { F (F_OP_CODE) }, { F (F_DSTLE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 64, 0xffffffff000000ff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_SRCLE) }, { F (F_OP_CODE) }, { F (F_DSTLE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_jeqibe ATTRIBUTE_UNUSED = {
-  64, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_CODE) }, { F (F_SRCBE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 64, 0xfff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_CODE) }, { F (F_SRCBE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_jeqrbe ATTRIBUTE_UNUSED = {
-  64, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_CODE) }, { F (F_SRCBE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 64, 0xffffffff000000ff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_CODE) }, { F (F_SRCBE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_callle ATTRIBUTE_UNUSED = {
-  64, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_REGS) }, { F (F_OP_CODE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 64, 0xffff0fff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_SRCLE) }, { F (F_OP_CODE) }, { F (F_DSTLE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_callbe ATTRIBUTE_UNUSED = {
+  64, 64, 0xfffff0ff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_CODE) }, { F (F_SRCBE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_ja ATTRIBUTE_UNUSED = {
-  64, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_REGS) }, { F (F_OP_CODE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 64, 0xffffffff0000ffff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_REGS) }, { F (F_OP_CODE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_exit ATTRIBUTE_UNUSED = {
-  64, 64, 0xff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_REGS) }, { F (F_OP_CODE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
+  64, 64, 0xffffffffffffffff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_REGS) }, { F (F_OP_CODE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
 #undef F
@@ -1646,7 +1650,7 @@ static const CGEN_OPCODE bpf_cgen_insn_opcode_table[MAX_INSNS] =
   {
     { 0, 0, 0, 0 },
     { { MNEM, ' ', OP (DISP32), 0 } },
-    & ifmt_callle, { 0x85 }
+    & ifmt_callbe, { 0x85 }
   },
 /* call $dstle */
   {
