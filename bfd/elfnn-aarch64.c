@@ -3670,14 +3670,42 @@ group_sections (struct elf_aarch64_link_hash_table *htab,
 #undef PREV_SEC
 #undef PREV_SEC
 
+#define AARCH64_HINT(insn) (((insn) & 0xfffff01f) == 0xd503201f)
+#define AARCH64_PACIASP 0xd503233f
+#define AARCH64_PACIBSP 0xd503237f
+#define AARCH64_BTI_C   0xd503245f
+#define AARCH64_BTI_J   0xd503249f
+#define AARCH64_BTI_JC  0xd50324df
+
 /* True if the inserted stub does not break BTI compatibility.  */
 
 static bool
-aarch64_bti_stub_p (struct elf_aarch64_stub_hash_entry *stub_entry)
+aarch64_bti_stub_p (bfd *input_bfd,
+		    struct elf_aarch64_stub_hash_entry *stub_entry)
 {
   /* Stubs without indirect branch are BTI compatible.  */
-  return stub_entry->stub_type != aarch64_stub_adrp_branch
-	 && stub_entry->stub_type != aarch64_stub_long_branch;
+  if (stub_entry->stub_type != aarch64_stub_adrp_branch
+      && stub_entry->stub_type != aarch64_stub_long_branch)
+    return true;
+
+  /* Return true if the target instruction is compatible with BR x16.  */
+
+  asection *section = stub_entry->target_section;
+  bfd_byte loc[4];
+  file_ptr off = stub_entry->target_value;
+  bfd_size_type count = sizeof (loc);
+
+  if (!bfd_get_section_contents (input_bfd, section, loc, off, count))
+    return false;
+
+  uint32_t insn = bfd_getl32 (loc);
+  if (!AARCH64_HINT (insn))
+    return false;
+  return insn == AARCH64_BTI_C
+	 || insn == AARCH64_PACIASP
+	 || insn == AARCH64_BTI_JC
+	 || insn == AARCH64_BTI_J
+	 || insn == AARCH64_PACIBSP;
 }
 
 #define AARCH64_BITS(x, pos, n) (((x) >> (pos)) & ((1 << (n)) - 1))
@@ -4614,7 +4642,7 @@ _bfd_aarch64_add_call_stub_entries (bool *stub_changed, bfd *output_bfd,
 
 	      /* A stub with indirect jump may break BTI compatibility, so
 		 insert another stub with direct jump near the target then.  */
-	      if (need_bti && !aarch64_bti_stub_p (stub_entry))
+	      if (need_bti && !aarch64_bti_stub_p (input_bfd, stub_entry))
 		{
 		  stub_entry->double_stub = true;
 		  htab->has_double_stub = true;
