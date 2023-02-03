@@ -961,7 +961,7 @@ clone_inferior_command (const char *args, int from_tty)
 
       /* If the original inferior had a user specified target
 	 description, make the clone use it too.  */
-      if (target_desc_info_from_user_p (&inf->tdesc_info))
+      if (inf->tdesc_info.from_user_p ())
 	inf->tdesc_info = orginf->tdesc_info;
 
       clone_program_space (pspace, orginf->pspace);

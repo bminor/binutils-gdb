@@ -26,9 +26,6 @@
 
 struct tdesc_arch_data;
 struct target_ops;
-/* An inferior's target description info is stored in this opaque
-   object.  There's one such object per inferior.  */
-struct target_desc_info;
 struct inferior;
 
 /* Fetch the current inferior's description, and switch its current
@@ -47,11 +44,6 @@ void target_clear_description (void);
    through an existing gdbarch.  */
 
 const struct target_desc *target_current_description (void);
-
-/* Returns true if INFO indicates the target description had been
-   supplied by the user.  */
-
-int target_desc_info_from_user_p (struct target_desc_info *info);
 
 /* Record architecture-specific functions to call for pseudo-register
    support.  If tdesc_use_registers is called and gdbarch_num_pseudo_regs

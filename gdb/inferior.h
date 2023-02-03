@@ -345,6 +345,11 @@ extern void switch_to_inferior_no_thread (inferior *inf);
 
 struct target_desc_info
 {
+  /* Returns true if INFO indicates the target description had been supplied by
+     the user.  */
+  bool from_user_p ()
+  { return !this->filename.empty (); }
+
   /* A flag indicating that a description has already been fetched
      from the target, so it should not be queried again.  */
   bool fetched = false;

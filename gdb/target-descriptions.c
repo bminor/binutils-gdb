@@ -451,14 +451,6 @@ get_arch_data (struct gdbarch *gdbarch)
   return result;
 }
 
-/* See target-descriptions.h.  */
-
-int
-target_desc_info_from_user_p (struct target_desc_info *info)
-{
-  return info != nullptr && !info->filename.empty ();
-}
-
 /* The string manipulated by the "set tdesc filename ..." command.  */
 
 static std::string tdesc_filename_cmd_string;
