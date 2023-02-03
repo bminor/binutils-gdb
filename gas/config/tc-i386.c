@@ -8159,7 +8159,7 @@ process_operands (void)
     {
       if (!quiet_warnings)
 	as_warn (_("segment override on `%s' is ineffectual"), insn_name (&i.tm));
-      if (optimize)
+      if (optimize && !i.no_optimize)
 	{
 	  i.seg[0] = NULL;
 	  i.prefix[SEG_PREFIX] = 0;
