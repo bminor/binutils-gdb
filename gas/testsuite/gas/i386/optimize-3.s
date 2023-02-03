@@ -5,6 +5,9 @@
 _start:
 	{nooptimize} testl $0x7f, %eax
 
+	{nooptimize} lock xchg	%ecx, (%edx)
+	{nooptimize} lock xchg	(%ecx), %edx
+
 	{nooptimize} vmovdqa32	%ymm1, %ymm2
 	{nooptimize} vmovdqa64	%ymm1, %ymm2
 	{nooptimize} vmovdqu8	%xmm1, %xmm2

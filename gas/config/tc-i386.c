@@ -5179,14 +5179,20 @@ md_assemble (char *line)
 
   /* Check for lock without a lockable instruction.  Destination operand
      must be memory unless it is xchg (0x86).  */
-  if (i.prefix[LOCK_PREFIX]
-      && (i.tm.opcode_modifier.prefixok < PrefixLock
+  if (i.prefix[LOCK_PREFIX])
+    {
+      if (i.tm.opcode_modifier.prefixok < PrefixLock
 	  || i.mem_operands == 0
 	  || (i.tm.base_opcode != 0x86
-	      && !(i.flags[i.operands - 1] & Operand_Mem))))
-    {
-      as_bad (_("expecting lockable instruction after `lock'"));
-      return;
+	      && !(i.flags[i.operands - 1] & Operand_Mem)))
+	{
+	  as_bad (_("expecting lockable instruction after `lock'"));
+	  return;
+	}
+
+      /* Zap the redundant prefix from XCHG when optimizing.  */
+      if (i.tm.base_opcode == 0x86 && optimize && !i.no_optimize)
+	i.prefix[LOCK_PREFIX] = 0;
     }
 
   if (is_any_vex_encoding (&i.tm)

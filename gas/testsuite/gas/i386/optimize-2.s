@@ -20,6 +20,9 @@ _start:
 	or	%bp, %bp
 	or	%esi, %esi
 
+	lock xchg %ecx, (%edx)
+	lock xchg (%ecx), %edx
+
 	vandnpd	%zmm1, %zmm1, %zmm5
 
 	vmovdqa32	%xmm1, %xmm2

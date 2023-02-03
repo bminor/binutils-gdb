@@ -22,6 +22,8 @@ Disassembly of section .text:
  +[a-f0-9]+:	08 e4                	or     %ah,%ah
  +[a-f0-9]+:	66 09 ed             	or     %bp,%bp
  +[a-f0-9]+:	09 f6                	or     %esi,%esi
+ +[a-f0-9]+:	87 0a                	xchg   %ecx,\(%edx\)
+ +[a-f0-9]+:	87 11                	xchg   %edx,\(%ecx\)
  +[a-f0-9]+:	c5 f1 55 e9          	vandnpd %xmm1,%xmm1,%xmm5
  +[a-f0-9]+:	c5 f9 6f d1          	vmovdqa %xmm1,%xmm2
  +[a-f0-9]+:	c5 f9 6f d1          	vmovdqa %xmm1,%xmm2
