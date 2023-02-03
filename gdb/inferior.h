@@ -340,6 +340,29 @@ extern void set_current_inferior (inferior *);
    selected.  */
 extern void switch_to_inferior_no_thread (inferior *inf);
 
+/* Info about an inferior's target description.  There's one of these
+   for each inferior.  */
+
+struct target_desc_info
+{
+  /* A flag indicating that a description has already been fetched
+     from the target, so it should not be queried again.  */
+  bool fetched = false;
+
+  /* The description fetched from the target, or NULL if the target
+     did not supply any description.  Only valid when
+     FETCHED is set.  Only the description initialization
+     code should access this; normally, the description should be
+     accessed through the gdbarch object.  */
+  const struct target_desc *tdesc = nullptr;
+
+  /* If not empty, the filename to read a target description from, as set by
+     "set tdesc filename ...".
+
+     If empty, there is not filename specified by the user.  */
+  std::string filename;
+};
+
 /* GDB represents the state of each program execution with an object
    called an inferior.  An inferior typically corresponds to a process
    but is more general and applies also to targets that do not have a

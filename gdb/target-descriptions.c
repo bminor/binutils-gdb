@@ -436,32 +436,6 @@ struct tdesc_arch_data
   gdbarch_register_reggroup_p_ftype *pseudo_register_reggroup_p = NULL;
 };
 
-/* Info about an inferior's target description.  There's one of these
-   for each inferior.  */
-
-struct target_desc_info
-{
-  /* A flag indicating that a description has already been fetched
-     from the target, so it should not be queried again.  */
-
-  bool fetched = false;
-
-  /* The description fetched from the target, or NULL if the target
-     did not supply any description.  Only valid when
-     FETCHED is set.  Only the description initialization
-     code should access this; normally, the description should be
-     accessed through the gdbarch object.  */
-
-  const struct target_desc *tdesc = nullptr;
-
-  /* If not empty, the filename to read a target description from, as set by
-     "set tdesc filename ...".
-
-     If empty, there is not filename specified by the user.  */
-
-  std::string filename;
-};
-
 /* Get the inferior INF's target description info, allocating one on
    the stop if necessary.  */
 
