@@ -650,7 +650,8 @@ riscv_disassemble_insn (bfd_vma memaddr,
   static bool init = false;
   static const struct riscv_opcode *riscv_hash[OP_MASK_OP + 1];
   struct riscv_private_data *pd;
-  int insnlen;
+  int insnlen, i;
+  bool printed;
 
 #define OP_HASH_IDX(i) ((i) & (riscv_insn_length (i) == 2 ? 0x3 : OP_MASK_OP))
 
@@ -666,8 +667,6 @@ riscv_disassemble_insn (bfd_vma memaddr,
 
   if (info->private_data == NULL)
     {
-      int i;
-
       pd = info->private_data = xcalloc (1, sizeof (struct riscv_private_data));
       pd->gp = 0;
       pd->print_addr = 0;
@@ -783,37 +782,28 @@ riscv_disassemble_insn (bfd_vma memaddr,
 	}
     }
 
-  /* We did not find a match, so just print the instruction bits.  */
+  /* We did not find a match, so just print the instruction bits in
+     the shape of an assembler .insn directive.  */
   info->insn_type = dis_noninsn;
-  switch (insnlen)
+  (*info->fprintf_styled_func)
+    (info->stream, dis_style_assembler_directive, ".insn");
+  (*info->fprintf_styled_func) (info->stream, dis_style_text, "\t");
+  (*info->fprintf_styled_func) (info->stream, dis_style_immediate,
+				"%d", insnlen);
+  (*info->fprintf_styled_func) (info->stream, dis_style_text, ", ");
+  (*info->fprintf_styled_func) (info->stream, dis_style_immediate, "0x");
+  for (i = insnlen, printed = false; i >= 2; )
     {
-    case 2:
-    case 4:
-    case 8:
-      (*info->fprintf_styled_func)
-	(info->stream, dis_style_assembler_directive, ".%dbyte", insnlen);
-      (*info->fprintf_styled_func) (info->stream, dis_style_text, "\t");
+      i -= 2;
+      word = bfd_get_bits (packet + i, 16, false);
+      if (!word && !printed)
+	continue;
+
       (*info->fprintf_styled_func) (info->stream, dis_style_immediate,
-				    "0x%llx", (unsigned long long) word);
-      break;
-    default:
-      {
-        int i;
-	(*info->fprintf_styled_func)
-	  (info->stream, dis_style_assembler_directive, ".byte");
-	(*info->fprintf_styled_func) (info->stream, dis_style_text, "\t");
-        for (i = 0; i < insnlen; ++i)
-          {
-            if (i > 0)
-	      (*info->fprintf_styled_func) (info->stream, dis_style_text,
-					    ", ");
-	    (*info->fprintf_styled_func) (info->stream, dis_style_immediate,
-					  "0x%02x",
-					  (unsigned int) (*packet++));
-          }
-      }
-      break;
+				    "%04x", (unsigned int) word);
+      printed = true;
     }
+
   return insnlen;
 }
 
