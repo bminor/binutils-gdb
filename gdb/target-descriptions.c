@@ -436,14 +436,6 @@ struct tdesc_arch_data
   gdbarch_register_reggroup_p_ftype *pseudo_register_reggroup_p = NULL;
 };
 
-/* Get the inferior INF's target description info.  */
-
-static struct target_desc_info *
-get_tdesc_info (struct inferior *inf)
-{
-  return &inf->tdesc_info;
-}
-
 /* A handle for architecture-specific data associated with the
    target description (see struct tdesc_arch_data).  */
 
@@ -472,8 +464,8 @@ target_desc_info_from_user_p (struct target_desc_info *info)
 void
 copy_inferior_target_desc_info (struct inferior *destinf, struct inferior *srcinf)
 {
-  struct target_desc_info *src = get_tdesc_info (srcinf);
-  struct target_desc_info *dest = get_tdesc_info (destinf);
+  struct target_desc_info *src = &srcinf->tdesc_info;
+  struct target_desc_info *dest = &destinf->tdesc_info;
 
   *dest = *src;
 }
@@ -488,7 +480,7 @@ static std::string tdesc_filename_cmd_string;
 void
 target_find_description (void)
 {
-  target_desc_info *tdesc_info = get_tdesc_info (current_inferior ());
+  target_desc_info *tdesc_info = &current_inferior ()->tdesc_info;
 
   /* If we've already fetched a description from the target, don't do
      it again.  This allows a target to fetch the description early,
@@ -551,7 +543,7 @@ target_find_description (void)
 void
 target_clear_description (void)
 {
-  target_desc_info *tdesc_info = get_tdesc_info (current_inferior ());
+  target_desc_info *tdesc_info = &current_inferior ()->tdesc_info;
 
   if (!tdesc_info->fetched)
     return;
@@ -571,7 +563,7 @@ target_clear_description (void)
 const struct target_desc *
 target_current_description (void)
 {
-  target_desc_info *tdesc_info = get_tdesc_info (current_inferior ());
+  target_desc_info *tdesc_info = &current_inferior ()->tdesc_info;
 
   if (tdesc_info->fetched)
     return tdesc_info->tdesc;
@@ -1246,7 +1238,7 @@ static void
 set_tdesc_filename_cmd (const char *args, int from_tty,
 			struct cmd_list_element *c)
 {
-  target_desc_info *tdesc_info = get_tdesc_info (current_inferior ());
+  target_desc_info *tdesc_info = &current_inferior ()->tdesc_info;
 
   tdesc_info->filename = tdesc_filename_cmd_string;
 
@@ -1259,7 +1251,7 @@ show_tdesc_filename_cmd (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c,
 			 const char *value)
 {
-  value = get_tdesc_info (current_inferior ())->filename.data ();
+  value = current_inferior ()->tdesc_info.filename.data ();
 
   if (value != NULL && *value != '\0')
     gdb_printf (file,
@@ -1274,7 +1266,7 @@ show_tdesc_filename_cmd (struct ui_file *file, int from_tty,
 static void
 unset_tdesc_filename_cmd (const char *args, int from_tty)
 {
-  target_desc_info *tdesc_info = get_tdesc_info (current_inferior ());
+  target_desc_info *tdesc_info = &current_inferior ()->tdesc_info;
 
   tdesc_info->filename.clear ();
   target_clear_description ();
@@ -1730,7 +1722,7 @@ maint_print_c_tdesc_cmd (const char *args, int from_tty)
 	 architecture's.  This lets a GDB for one architecture generate C
 	 for another architecture's description, even though the gdbarch
 	 initialization code will reject the new description.  */
-      target_desc_info *tdesc_info = get_tdesc_info (current_inferior ());
+      target_desc_info *tdesc_info = &current_inferior ()->tdesc_info;
       tdesc = tdesc_info->tdesc;
       filename = tdesc_info->filename.data ();
     }
@@ -1803,7 +1795,7 @@ maint_print_xml_tdesc_cmd (const char *args, int from_tty)
 	 architecture's.  This lets a GDB for one architecture generate XML
 	 for another architecture's description, even though the gdbarch
 	 initialization code will reject the new description.  */
-      tdesc = get_tdesc_info (current_inferior ())->tdesc;
+      tdesc = current_inferior ()->tdesc_info.tdesc;
     }
   else
     {
