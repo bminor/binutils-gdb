@@ -6888,7 +6888,8 @@ match_template (char mnem_suffix)
 	    continue;
 
 	  if (t->base_opcode == MOV_AX_DISP32
-	      && t->opcode_modifier.opcodespace == SPACE_BASE)
+	      && t->opcode_modifier.opcodespace == SPACE_BASE
+	      && t->mnem_off != MN_movabs)
 	    {
 	      /* Force 0x8b encoding for "mov foo@GOT, %eax".  */
 	      if (i.reloc[0] == BFD_RELOC_386_GOT32)
