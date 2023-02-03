@@ -478,7 +478,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  child_inf->attach_flag = parent_inf->attach_flag;
 	  copy_terminal_info (child_inf, parent_inf);
 	  child_inf->gdbarch = parent_inf->gdbarch;
-	  copy_inferior_target_desc_info (child_inf, parent_inf);
+	  child_inf->tdesc_info = parent_inf->tdesc_info;
 
 	  child_inf->symfile_flags = SYMFILE_NO_READ;
 
@@ -546,7 +546,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
       child_inf->attach_flag = parent_inf->attach_flag;
       copy_terminal_info (child_inf, parent_inf);
       child_inf->gdbarch = parent_inf->gdbarch;
-      copy_inferior_target_desc_info (child_inf, parent_inf);
+      child_inf->tdesc_info = parent_inf->tdesc_info;
 
       if (has_vforked)
 	{

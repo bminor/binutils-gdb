@@ -48,13 +48,6 @@ void target_clear_description (void);
 
 const struct target_desc *target_current_description (void);
 
-/* Copy inferior target description data.  Used for example when
-   handling (v)forks, where child's description is the same as the
-   parent's, since the child really is a copy of the parent.  */
-
-void copy_inferior_target_desc_info (struct inferior *destinf,
-				     struct inferior *srcinf);
-
 /* Returns true if INFO indicates the target description had been
    supplied by the user.  */
 

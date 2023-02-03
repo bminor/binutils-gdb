@@ -459,17 +459,6 @@ target_desc_info_from_user_p (struct target_desc_info *info)
   return info != nullptr && !info->filename.empty ();
 }
 
-/* See target-descriptions.h.  */
-
-void
-copy_inferior_target_desc_info (struct inferior *destinf, struct inferior *srcinf)
-{
-  struct target_desc_info *src = &srcinf->tdesc_info;
-  struct target_desc_info *dest = &destinf->tdesc_info;
-
-  *dest = *src;
-}
-
 /* The string manipulated by the "set tdesc filename ..." command.  */
 
 static std::string tdesc_filename_cmd_string;
