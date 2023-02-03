@@ -633,7 +633,7 @@ public:
 
   /* Info about an inferior's target description (if it's fetched; the
      user supplied description's filename, if any; etc.).  */
-  target_desc_info *tdesc_info = NULL;
+  target_desc_info tdesc_info;
 
   /* The architecture associated with the inferior through the
      connection to the target.

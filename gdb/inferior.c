@@ -69,8 +69,6 @@ private_inferior::~private_inferior () = default;
 
 inferior::~inferior ()
 {
-  inferior *inf = this;
-
   /* Before the inferior is deleted, all target_ops should be popped from
      the target stack, this leaves just the dummy_target behind.  If this
      is not done, then any target left in the target stack will be left
@@ -81,7 +79,6 @@ inferior::~inferior ()
   gdb_assert (m_target_stack.top ()->stratum () == dummy_stratum);
 
   m_continuations.clear ();
-  target_desc_info_free (inf->tdesc_info);
 }
 
 inferior::inferior (int pid_)
@@ -964,7 +961,7 @@ clone_inferior_command (const char *args, int from_tty)
 
       /* If the original inferior had a user specified target
 	 description, make the clone use it too.  */
-      if (target_desc_info_from_user_p (inf->tdesc_info))
+      if (target_desc_info_from_user_p (&inf->tdesc_info))
 	copy_inferior_target_desc_info (inf, orginf);
 
       clone_program_space (pspace, orginf->pspace);

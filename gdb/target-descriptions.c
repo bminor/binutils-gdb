@@ -436,16 +436,12 @@ struct tdesc_arch_data
   gdbarch_register_reggroup_p_ftype *pseudo_register_reggroup_p = NULL;
 };
 
-/* Get the inferior INF's target description info, allocating one on
-   the stop if necessary.  */
+/* Get the inferior INF's target description info.  */
 
 static struct target_desc_info *
 get_tdesc_info (struct inferior *inf)
 {
-  if (inf->tdesc_info == NULL)
-    inf->tdesc_info = new target_desc_info;
-
-  return inf->tdesc_info;
+  return &inf->tdesc_info;
 }
 
 /* A handle for architecture-specific data associated with the
@@ -480,14 +476,6 @@ copy_inferior_target_desc_info (struct inferior *destinf, struct inferior *srcin
   struct target_desc_info *dest = get_tdesc_info (destinf);
 
   *dest = *src;
-}
-
-/* See target-descriptions.h.  */
-
-void
-target_desc_info_free (struct target_desc_info *tdesc_info)
-{
-  delete tdesc_info;
 }
 
 /* The string manipulated by the "set tdesc filename ..." command.  */

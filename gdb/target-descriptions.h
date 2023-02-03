@@ -55,10 +55,6 @@ const struct target_desc *target_current_description (void);
 void copy_inferior_target_desc_info (struct inferior *destinf,
 				     struct inferior *srcinf);
 
-/* Free a target_desc_info object.  */
-
-void target_desc_info_free (struct target_desc_info *tdesc_info);
-
 /* Returns true if INFO indicates the target description had been
    supplied by the user.  */
 
