@@ -5,6 +5,9 @@
 _start:
 	{nooptimize} testl $0x7f, %eax
 
+	{nooptimize} vpand	%xmm12, %xmm3, %xmm4
+	{nooptimize} vpand	%xmm2, %xmm13, %xmm4
+
 	{nooptimize} vmovdqa32	%ymm1, %ymm2
 	{nooptimize} vmovdqa64	%ymm1, %ymm2
 	{nooptimize} vmovdqu8	%xmm1, %xmm2
