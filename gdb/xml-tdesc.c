@@ -638,7 +638,7 @@ tdesc_parse_xml (const char *document, xml_fetch_another fetcher)
     return it->second.get ();
 
   memset (&data, 0, sizeof (struct tdesc_parsing_data));
-  target_desc_up description (allocate_target_description ());
+  target_desc_up description = allocate_target_description ();
   data.tdesc = description.get ();
 
   if (gdb_xml_parse_quick (_("target description"), "gdb-target.dtd",
