@@ -768,7 +768,7 @@
        "call"
        (endian-isas x-endian)
        "call $disp32"
-       (+ disp32 (f-offset16 0) (f-regs 0)
+       (+ disp32 (f-offset16 0) (.sym src x-endian) ((.sym f-dst x-endian) 0)
           OP_CLASS_JMP OP_SRC_K OP_CODE_CALL)
        (c-call VOID
                "bpfbf_call" disp32 (ifield (.sym f-src x-endian)))

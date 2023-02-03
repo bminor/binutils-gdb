@@ -39,7 +39,7 @@ static void		 add_insn_to_hash_chain (CGEN_INSN_LIST *,
 static int
 count_decodable_bits (const CGEN_INSN *insn)
 {
-  unsigned mask = CGEN_INSN_BASE_MASK (insn);
+  CGEN_INSN_LGUINT mask = CGEN_INSN_BASE_MASK (insn);
 #if GCC_VERSION >= 3004
   return __builtin_popcount (mask);
 #else
