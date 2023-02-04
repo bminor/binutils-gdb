@@ -82,6 +82,7 @@ struct adjusted_section
 {
   asection *section;
   bfd_vma adj_vma;
+  bfd_vma orig_vma;
 };
 
 /* A trie to map quickly from address range to compilation unit.
@@ -4952,7 +4953,7 @@ unset_sections (struct dwarf2_debug *stash)
   i = stash->adjusted_section_count;
   p = stash->adjusted_sections;
   for (; i > 0; i--, p++)
-    p->section->vma = 0;
+    p->section->vma = p->orig_vma;
 }
 
 /* Set VMAs for allocated and .debug_info sections in ORIG_BFD, a
@@ -4993,10 +4994,9 @@ place_sections (bfd *orig_bfd, struct dwarf2_debug *stash)
 	{
 	  int is_debug_info;
 
-	  if ((sect->output_section != NULL
-	       && sect->output_section != sect
-	       && (sect->flags & SEC_DEBUGGING) == 0)
-	      || sect->vma != 0)
+	  if (sect->output_section != NULL
+	      && sect->output_section != sect
+	      && (sect->flags & SEC_DEBUGGING) == 0)
 	    continue;
 
 	  is_debug_info = (strcmp (sect->name, debug_info_name) == 0
@@ -5037,10 +5037,9 @@ place_sections (bfd *orig_bfd, struct dwarf2_debug *stash)
 	      bfd_size_type sz;
 	      int is_debug_info;
 
-	      if ((sect->output_section != NULL
-		   && sect->output_section != sect
-		   && (sect->flags & SEC_DEBUGGING) == 0)
-		  || sect->vma != 0)
+	      if (sect->output_section != NULL
+		  && sect->output_section != sect
+		  && (sect->flags & SEC_DEBUGGING) == 0)
 		continue;
 
 	      is_debug_info = (strcmp (sect->name, debug_info_name) == 0
@@ -5052,24 +5051,17 @@ place_sections (bfd *orig_bfd, struct dwarf2_debug *stash)
 
 	      sz = sect->rawsize ? sect->rawsize : sect->size;
 
-	      if (is_debug_info)
-		{
-		  BFD_ASSERT (sect->alignment_power == 0);
-		  sect->vma = last_dwarf;
-		  last_dwarf += sz;
-		}
-	      else
-		{
-		  /* Align the new address to the current section
-		     alignment.  */
-		  last_vma = ((last_vma
-			       + ~(-((bfd_vma) 1 << sect->alignment_power)))
-			      & (-((bfd_vma) 1 << sect->alignment_power)));
-		  sect->vma = last_vma;
-		  last_vma += sz;
-		}
-
 	      p->section = sect;
+	      p->orig_vma = sect->vma;
+
+	      bfd_vma *v = is_debug_info ? &last_dwarf : &last_vma;
+	      /* Align the new address to the current section
+		 alignment.  */
+	      bfd_vma mask = -(bfd_vma) 1 << sect->alignment_power;
+	      *v = (*v + ~mask) & mask;
+	      sect->vma = *v;
+	      *v += sz;
+
 	      p->adj_vma = sect->vma;
 	      p++;
 	    }
@@ -5379,7 +5371,6 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
 			      void **pinfo,
 			      bool do_place)
 {
-  size_t amt = sizeof (struct dwarf2_debug);
   bfd_size_type total_size;
   asection *msec;
   struct dwarf2_debug *stash = (struct dwarf2_debug *) *pinfo;
@@ -5401,11 +5392,11 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
 	  return false;
 	}
       _bfd_dwarf2_cleanup_debug_info (abfd, pinfo);
-      memset (stash, 0, amt);
+      memset (stash, 0, sizeof (*stash));
     }
   else
     {
-      stash = (struct dwarf2_debug *) bfd_zalloc (abfd, amt);
+      stash = (struct dwarf2_debug *) bfd_zalloc (abfd, sizeof (*stash));
       if (! stash)
 	return false;
       *pinfo = stash;
@@ -5482,14 +5473,11 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
 
   /* There can be more than one DWARF2 info section in a BFD these
      days.  First handle the easy case when there's only one.  If
-     there's more than one, try case two: none of the sections is
-     compressed.  In that case, read them all in and produce one
-     large stash.  We do this in two passes - in the first pass we
+     there's more than one, try case two: read them all in and produce
+     one large stash.  We do this in two passes - in the first pass we
      just accumulate the section sizes, and in the second pass we
      read in the section's contents.  (The allows us to avoid
-     reallocing the data as we add sections to the stash.)  If
-     some or all sections are compressed, then do things the slow
-     way, with a bunch of reallocs.  */
+     reallocing the data as we add sections to the stash.)  */
 
   if (! find_debug_info (debug_bfd, debug_sections, msec))
     {
@@ -5498,7 +5486,7 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
       if (! read_section (debug_bfd, &stash->debug_sections[debug_info],
 			  symbols, 0,
 			  &stash->f.dwarf_info_buffer, &total_size))
-	return false;
+	goto restore_vma;
     }
   else
     {
@@ -5508,19 +5496,19 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
 	   msec = find_debug_info (debug_bfd, debug_sections, msec))
 	{
 	  if (_bfd_section_size_insane (debug_bfd, msec))
-	    return false;
+	    goto restore_vma;
 	  /* Catch PR25070 testcase overflowing size calculation here.  */
 	  if (total_size + msec->size < total_size)
 	    {
 	      bfd_set_error (bfd_error_no_memory);
-	      return false;
+	      goto restore_vma;
 	    }
 	  total_size += msec->size;
 	}
 
       stash->f.dwarf_info_buffer = (bfd_byte *) bfd_malloc (total_size);
       if (stash->f.dwarf_info_buffer == NULL)
-	return false;
+	goto restore_vma;
 
       total_size = 0;
       for (msec = find_debug_info (debug_bfd, debug_sections, NULL);
@@ -5536,7 +5524,7 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
 	  if (!(bfd_simple_get_relocated_section_contents
 		(debug_bfd, msec, stash->f.dwarf_info_buffer + total_size,
 		 symbols)))
-	    return false;
+	    goto restore_vma;
 
 	  total_size += size;
 	}
@@ -5545,6 +5533,10 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
   stash->f.info_ptr = stash->f.dwarf_info_buffer;
   stash->f.dwarf_info_size = total_size;
   return true;
+
+ restore_vma:
+  unset_sections (stash);
+  return false;
 }
 
 /* Parse the next DWARF2 compilation unit at FILE->INFO_PTR.  */
@@ -6038,8 +6030,7 @@ _bfd_dwarf2_find_nearest_line_with_alt
 	}
     }
 
-  if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0)
-    unset_sections (stash);
+  unset_sections (stash);
 
   return found;
 }
