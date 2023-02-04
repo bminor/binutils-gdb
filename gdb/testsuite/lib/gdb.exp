@@ -4585,6 +4585,10 @@ proc gdb_simple_compile {name code {type object} {compile_flags {}} {object obj}
 	    set ext "go"
 	    break
 	}
+	if { "$flag" eq "hip" } {
+	    set ext "cpp"
+	    break
+	}
     }
     set src [standard_temp_file $name-[pid].$ext]
     set obj [standard_temp_file $name-[pid].$postfix]

@@ -15,7 +15,51 @@
 #
 # Support library for testing ROCm (AMD GPU) GDB features.
 
-proc allow_hipcc_tests { } {
+# Get the list of gpu targets to compile for.
+#
+# If HCC_AMDGPU_TARGET is set in the environment, use it.  Otherwise,
+# try reading it from the system using the rocm_agent_enumerator
+# utility.
+
+proc hcc_amdgpu_targets {} {
+    # Look for HCC_AMDGPU_TARGET (same env var hipcc uses).  If
+    # that fails, try using rocm_agent_enumerator (again, same as
+    # hipcc does).
+    if {[info exists ::env(HCC_AMDGPU_TARGET)]} {
+	return [split $::env(HCC_AMDGPU_TARGET) ","]
+    }
+
+    set rocm_agent_enumerator "rocm_agent_enumerator"
+
+    # If available, use ROCM_PATH to locate rocm_agent_enumerator.
+    if { [info exists ::env(ROCM_PATH)] } {
+	set rocm_agent_enumerator \
+	    "$::env(ROCM_PATH)/bin/rocm_agent_enumerator"
+    }
+
+    # If we fail to locate the rocm_agent_enumerator, just return an empty
+    # list of targets and let the caller decide if this should be an error.
+    if { [which $rocm_agent_enumerator] == 0 } {
+	return [list]
+    }
+
+    set result [remote_exec host $rocm_agent_enumerator]
+    if { [lindex $result 0] != 0 } {
+	error "rocm_agent_enumerator failed"
+    }
+
+    set targets [list]
+    foreach target [lindex $result 1] {
+	# Ignore gfx000 which is the host CPU.
+	if { $target ne "gfx000" } {
+	    lappend targets $target
+	}
+    }
+
+    return $targets
+}
+
+gdb_caching_proc allow_hipcc_tests {
     # Only the native target supports ROCm debugging.  E.g., when
     # testing against GDBserver, there's no point in running the ROCm
     # tests.
@@ -26,6 +70,29 @@ proc allow_hipcc_tests { } {
     # Ensure that GDB is built with amd-dbgapi support.
     set output [remote_exec host $::GDB "$::INTERNAL_GDBFLAGS --configuration"]
     if { [string first "--with-amd-dbgapi" $output] == -1 } {
+	return 0
+    }
+
+    # Check we have a working hipcc compiler available.
+    set targets [hcc_amdgpu_targets]
+    if { [llength $targets] == 0} {
+	return 0
+    }
+
+    set flags [list hip additional_flags=--offload-arch=[join $targets ","]]
+    if {![gdb_simple_compile hipprobe {
+	    #include <hip/hip_runtime.h>
+	    __global__ void
+	    kern () {}
+
+	    int
+	    main ()
+	    {
+		kern<<<1, 1>>> ();
+		hipDeviceSynchronize ();
+		return 0;
+	    }
+	} executable $flags]} {
 	return 0
     }
 
