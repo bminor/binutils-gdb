@@ -936,9 +936,11 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_WARN_RWX_SEGMENTS:
 	  link_info.no_warn_rwx_segments = 0;
+	  link_info.user_warn_rwx_segments = 1;
 	  break;
 	case OPTION_NO_WARN_RWX_SEGMENTS:
 	  link_info.no_warn_rwx_segments = 1;
+	  link_info.user_warn_rwx_segments = 1;
 	  break;
 	case 'e':
 	  lang_add_entry (optarg, true);

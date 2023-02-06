@@ -501,6 +501,9 @@ struct bfd_link_info
   /* TRUE if warnings should not be generated for TLS segments with eXecute
      permission or LOAD segments with RWX permissions.  */
   unsigned int no_warn_rwx_segments: 1;
+  /* TRUE if the user gave either --warn-rwx-segments or
+     --no-warn-rwx-segments.  */
+  unsigned int user_warn_rwx_segments: 1;
 
   /* TRUE if the stack can be made executable because of the absence of a
      .note.GNU-stack section in an input file.  Note - even if this field

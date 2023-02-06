@@ -4020,12 +4020,19 @@ ppc_elf_select_plt_layout (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  htab->plt_type = plt_type;
 	}
     }
-  if (htab->plt_type == PLT_OLD && htab->params->plt_style == PLT_NEW)
+  if (htab->plt_type == PLT_OLD)
     {
-      if (htab->old_bfd != NULL)
-	_bfd_error_handler (_("bss-plt forced due to %pB"), htab->old_bfd);
-      else
-	_bfd_error_handler (_("bss-plt forced by profiling"));
+      if (!info->user_warn_rwx_segments)
+	info->no_warn_rwx_segments = 1;
+      if (htab->params->plt_style == PLT_NEW
+	  || (htab->params->plt_style != PLT_OLD
+	      && !info->no_warn_rwx_segments))
+	{
+	  if (htab->old_bfd != NULL)
+	    _bfd_error_handler (_("bss-plt forced due to %pB"), htab->old_bfd);
+	  else
+	    _bfd_error_handler (_("bss-plt forced by profiling"));
+	}
     }
 
   BFD_ASSERT (htab->plt_type != PLT_VXWORKS);

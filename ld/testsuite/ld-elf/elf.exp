@@ -238,6 +238,12 @@ if {   [istarget *-*-*linux*]
 	return $text
     }
 
+    set curr_ldflags $LDFLAGS
+    if { [istarget powerpc*-*-*] && ![istarget powerpc64*-*-*] } {
+	# Don't generate an executable .plt section
+	set LDFLAGS "$LDFLAGS --secure-plt"
+    }
+
     # Since the warnings can be disabled by configure, ensure consistency
     # of the first test by forcing the flags.
     run_ld_link_tests [list \
@@ -284,6 +290,8 @@ if {   [istarget *-*-*linux*]
 	     {} \
 	    "rwx-segments-3.exe"] \
 	  ]
+
+    set LDFLAGS $curr_ldflags
 
     if { [target_defaults_to_execstack] } {
 	run_ld_link_tests [list \
