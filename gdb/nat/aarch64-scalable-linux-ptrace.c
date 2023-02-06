@@ -1,4 +1,5 @@
-/* Common target dependent for AArch64 systems.
+/* Common target dependent routines for AArch64 Scalable Extensions
+   (SVE/SME).
 
    Copyright (C) 2018-2023 Free Software Foundation, Inc.
 
@@ -22,13 +23,13 @@
 #include "gdbsupport/common-defs.h"
 #include "elf/external.h"
 #include "elf/common.h"
-#include "aarch64-sve-linux-ptrace.h"
+#include "aarch64-scalable-linux-ptrace.h"
 #include "arch/aarch64.h"
 #include "gdbsupport/common-regcache.h"
 #include "gdbsupport/byte-vector.h"
 #include <endian.h>
 
-/* See nat/aarch64-sve-linux-ptrace.h.  */
+/* See nat/aarch64-scalable-linux-ptrace.h.  */
 
 uint64_t
 aarch64_sve_get_vq (int tid)
@@ -60,7 +61,7 @@ aarch64_sve_get_vq (int tid)
   return vq;
 }
 
-/* See nat/aarch64-sve-linux-ptrace.h.  */
+/* See nat/aarch64-scalable-linux-ptrace.h.  */
 
 bool
 aarch64_sve_set_vq (int tid, uint64_t vq)
@@ -88,7 +89,7 @@ aarch64_sve_set_vq (int tid, uint64_t vq)
   return true;
 }
 
-/* See nat/aarch64-sve-linux-ptrace.h.  */
+/* See nat/aarch64-scalable-linux-ptrace.h.  */
 
 bool
 aarch64_sve_set_vq (int tid, struct reg_buffer_common *reg_buf)
@@ -117,7 +118,7 @@ aarch64_sve_set_vq (int tid, struct reg_buffer_common *reg_buf)
   return aarch64_sve_set_vq (tid, sve_vq_from_vg (reg_vg));
 }
 
-/* See nat/aarch64-sve-linux-ptrace.h.  */
+/* See nat/aarch64-scalable-linux-ptrace.h.  */
 
 std::unique_ptr<gdb_byte[]>
 aarch64_sve_get_sveregs (int tid)
@@ -161,7 +162,7 @@ aarch64_maybe_swab128 (gdb_byte *dst, const gdb_byte *src, size_t size)
 #endif
 }
 
-/* See nat/aarch64-sve-linux-ptrace.h.  */
+/* See nat/aarch64-scalable-linux-ptrace.h.  */
 
 void
 aarch64_sve_regs_copy_to_reg_buf (struct reg_buffer_common *reg_buf,
@@ -250,7 +251,7 @@ aarch64_sve_regs_copy_to_reg_buf (struct reg_buffer_common *reg_buf,
     }
 }
 
-/* See nat/aarch64-sve-linux-ptrace.h.  */
+/* See nat/aarch64-scalable-linux-ptrace.h.  */
 
 void
 aarch64_sve_regs_copy_from_reg_buf (const struct reg_buffer_common *reg_buf,

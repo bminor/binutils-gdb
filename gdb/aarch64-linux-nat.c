@@ -35,7 +35,7 @@
 #include "arch/arm.h"
 #include "nat/aarch64-linux.h"
 #include "nat/aarch64-linux-hw-point.h"
-#include "nat/aarch64-sve-linux-ptrace.h"
+#include "nat/aarch64-scalable-linux-ptrace.h"
 
 #include "elf/external.h"
 #include "elf/common.h"

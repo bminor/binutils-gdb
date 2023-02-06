@@ -44,7 +44,7 @@
 #include "linux-aarch32-tdesc.h"
 #include "linux-aarch64-tdesc.h"
 #include "nat/aarch64-mte-linux-ptrace.h"
-#include "nat/aarch64-sve-linux-ptrace.h"
+#include "nat/aarch64-scalable-linux-ptrace.h"
 #include "tdesc.h"
 
 #ifdef HAVE_SYS_REG_H

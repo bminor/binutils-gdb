@@ -239,7 +239,7 @@ case ${gdb_host} in
 		aarch32-linux-nat.o nat/aarch64-hw-point.o \
 		nat/aarch64-linux-hw-point.o \
 		nat/aarch64-linux.o \
-		nat/aarch64-sve-linux-ptrace.o \
+		nat/aarch64-scalable-linux-ptrace.o \
 		nat/aarch64-mte-linux-ptrace.o"
 		;;
 	    arc)

@@ -218,7 +218,7 @@ SFILES = \
 	$(srcdir)/../gdb/arch/ppc-linux-common.c \
 	$(srcdir)/../gdb/arch/riscv.c \
 	$(srcdir)/../gdb/nat/aarch64-mte-linux-ptrace.c \
-	$(srcdir)/../gdb/nat/aarch64-sve-linux-ptrace.c \
+	$(srcdir)/../gdb/nat/aarch64-scalable-linux-ptrace.c \
 	$(srcdir)/../gdb/nat/linux-btrace.c \
 	$(srcdir)/../gdb/nat/linux-namespaces.c \
 	$(srcdir)/../gdb/nat/linux-osdata.c \

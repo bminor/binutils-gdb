@@ -1,4 +1,5 @@
-/* Common target dependent for AArch64 systems.
+/* Common target dependent definitions for AArch64 Scalable Extensions
+   (SVE/SME).
 
    Copyright (C) 2018-2023 Free Software Foundation, Inc.
 
@@ -17,8 +18,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef NAT_AARCH64_SVE_LINUX_PTRACE_H
-#define NAT_AARCH64_SVE_LINUX_PTRACE_H
+#ifndef NAT_AARCH64_SCALABLE_LINUX_PTRACE_H
+#define NAT_AARCH64_SCALABLE_LINUX_PTRACE_H
 
 #include <signal.h>
 #include <sys/utsname.h>
@@ -32,7 +33,7 @@
 #include <asm/ptrace.h>
 
 #ifndef SVE_SIG_ZREGS_SIZE
-#include "aarch64-sve-linux-sigcontext.h"
+#include "aarch64-scalable-linux-sigcontext.h"
 #endif
 
 /* Indicates whether a SVE ptrace header is followed by SVE registers or a
@@ -69,4 +70,4 @@ extern void
 aarch64_sve_regs_copy_from_reg_buf (const struct reg_buffer_common *reg_buf,
 				    void *buf);
 
-#endif /* NAT_AARCH64_SVE_LINUX_PTRACE_H */
+#endif /* NAT_AARCH64_SCALABLE_LINUX_PTRACE_H */

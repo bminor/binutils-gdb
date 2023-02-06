@@ -1,4 +1,7 @@
-/* Copyright (C) 2018-2023 Free Software Foundation, Inc.
+/* Linux Kernel sigcontext definitions for AArch64 Scalable Extensions
+   (SVE/SME).
+
+   Copyright (C) 2018-2023 Free Software Foundation, Inc.
    Contributed by Arm Ltd.
 
    This file is part of GDB.
@@ -16,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef NAT_AARCH64_SVE_LINUX_SIGCONTEXT_H
-#define NAT_AARCH64_SVE_LINUX_SIGCONTEXT_H
+#ifndef NAT_AARCH64_SCALABLE_LINUX_SIGCONTEXT_H
+#define NAT_AARCH64_SCALABLE_LINUX_SIGCONTEXT_H
 
 #define SVE_MAGIC	0x53564501
 
@@ -264,4 +267,4 @@ struct user_sve_header {
 		  SVE_PT_SVE_OFFSET + SVE_PT_SVE_SIZE(vq, flags)	\
 		: SVE_PT_FPSIMD_OFFSET + SVE_PT_FPSIMD_SIZE(vq, flags))
 
-#endif /* NAT_AARCH64_SVE_LINUX_SIGCONTEXT_H */
+#endif /* NAT_AARCH64_SCALABLE_LINUX_SIGCONTEXT_H */
