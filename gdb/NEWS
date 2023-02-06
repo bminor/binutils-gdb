@@ -50,6 +50,12 @@
   to 'max-value-size', GDB will now still print the array, however only
   'max-value-size' worth of data will be added into the value history.
 
+* For both the break and watch commands, it is now invalid to use both
+  the 'thread' and 'task' keywords within the same command.  For
+  example the following commnds will now give an error:
+    break foo thread 1 task 1
+    watch var thread 2 task 3
+
 * New commands
 
 maintenance print record-instruction [ N ]

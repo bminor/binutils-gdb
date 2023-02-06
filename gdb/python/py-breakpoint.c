@@ -270,6 +270,13 @@ bppy_set_thread (PyObject *self, PyObject *newvalue, void *closure)
 			   _("Invalid thread ID."));
 	  return -1;
 	}
+
+      if (self_bp->bp->task != 0)
+	{
+	  PyErr_SetString (PyExc_RuntimeError,
+			   _("Cannot set both task and thread attributes."));
+	  return -1;
+	}
     }
   else if (newvalue == Py_None)
     id = -1;
@@ -319,6 +326,13 @@ bppy_set_task (PyObject *self, PyObject *newvalue, void *closure)
 	{
 	  PyErr_SetString (PyExc_RuntimeError,
 			   _("Invalid task ID."));
+	  return -1;
+	}
+
+      if (self_bp->bp->thread != -1)
+	{
+	  PyErr_SetString (PyExc_RuntimeError,
+			   _("Cannot set both task and thread attributes."));
 	  return -1;
 	}
     }

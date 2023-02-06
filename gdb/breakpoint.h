@@ -1673,7 +1673,17 @@ extern void breakpoint_set_commands (struct breakpoint *b,
 
 extern void breakpoint_set_silent (struct breakpoint *b, int silent);
 
+/* Set the thread for this breakpoint.  If THREAD is -1, make the
+   breakpoint work for any thread.  Passing a value other than -1 for
+   THREAD should only be done if b->task is 0; it is not valid to try and
+   set both a thread and task restriction on a breakpoint.  */
+
 extern void breakpoint_set_thread (struct breakpoint *b, int thread);
+
+/* Set the task for this breakpoint.  If TASK is 0, make the breakpoint
+   work for any task.  Passing a value other than 0 for TASK should only be
+   done if b->thread is -1; it is not valid to try and set both a thread
+   and task restriction on a breakpoint.  */
 
 extern void breakpoint_set_task (struct breakpoint *b, int task);
 

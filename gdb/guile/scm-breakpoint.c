@@ -773,6 +773,11 @@ gdbscm_set_breakpoint_thread_x (SCM self, SCM newvalue)
 	  gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG2, newvalue,
 				     _("invalid thread id"));
 	}
+
+      if (bp_smob->bp->task != 0)
+	scm_misc_error (FUNC_NAME,
+			_("cannot set both task and thread attributes"),
+			SCM_EOL);
     }
   else if (gdbscm_is_false (newvalue))
     id = -1;
@@ -828,6 +833,11 @@ gdbscm_set_breakpoint_task_x (SCM self, SCM newvalue)
 	  gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG2, newvalue,
 				     _("invalid task id"));
 	}
+
+      if (bp_smob->bp->thread != -1)
+	scm_misc_error (FUNC_NAME,
+			_("cannot set both task and thread attributes"),
+			SCM_EOL);
     }
   else if (gdbscm_is_false (newvalue))
     id = 0;

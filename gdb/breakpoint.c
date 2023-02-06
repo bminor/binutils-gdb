@@ -1454,12 +1454,16 @@ breakpoint_set_silent (struct breakpoint *b, int silent)
     gdb::observers::breakpoint_modified.notify (b);
 }
 
-/* Set the thread for this breakpoint.  If THREAD is -1, make the
-   breakpoint work for any thread.  */
+/* See breakpoint.h.  */
 
 void
 breakpoint_set_thread (struct breakpoint *b, int thread)
 {
+  /* It is invalid to set the thread field to anything other than -1 (which
+     means no thread restriction) if a task restriction is already in
+     place.  */
+  gdb_assert (thread == -1 || b->task == 0);
+
   int old_thread = b->thread;
 
   b->thread = thread;
@@ -1467,12 +1471,16 @@ breakpoint_set_thread (struct breakpoint *b, int thread)
     gdb::observers::breakpoint_modified.notify (b);
 }
 
-/* Set the task for this breakpoint.  If TASK is 0, make the
-   breakpoint work for any task.  */
+/* See breakpoint.h.  */
 
 void
 breakpoint_set_task (struct breakpoint *b, int task)
 {
+  /* It is invalid to set the task field to anything other than 0 (which
+     means no task restriction) if a thread restriction is already in
+     place.  */
+  gdb_assert (task == 0 || b->thread == -1);
+
   int old_task = b->task;
 
   b->task = task;
@@ -8443,6 +8451,8 @@ code_breakpoint::code_breakpoint (struct gdbarch *gdbarch_,
 
   gdb_assert (!sals.empty ());
 
+  /* At most one of thread or task can be set on any breakpoint.  */
+  gdb_assert (thread == -1 || task == 0);
   thread = thread_;
   task = task_;
 
@@ -8811,6 +8821,9 @@ find_condition_and_thread (const char *tok, CORE_ADDR pc,
 	  if (*thread != -1)
 	    error(_("You can specify only one thread."));
 
+	  if (*task != 0)
+	    error (_("You can specify only one of thread or task."));
+
 	  tok = end_tok + 1;
 	  thr = parse_thread_id (tok, &tmptok);
 	  if (tok == tmptok)
@@ -8824,6 +8837,9 @@ find_condition_and_thread (const char *tok, CORE_ADDR pc,
 
 	  if (*task != 0)
 	    error(_("You can specify only one task."));
+
+	  if (*thread != -1)
+	    error (_("You can specify only one of thread or task."));
 
 	  tok = end_tok + 1;
 	  *task = strtol (tok, &tmptok, 0);
@@ -8859,7 +8875,7 @@ find_condition_and_thread_for_sals (const std::vector<symtab_and_line> &sals,
   for (auto &sal : sals)
     {
       gdb::unique_xmalloc_ptr<char> cond;
-      int thread_id = 0;
+      int thread_id = -1;
       int task_id = 0;
       gdb::unique_xmalloc_ptr<char> remaining;
 
@@ -8874,6 +8890,8 @@ find_condition_and_thread_for_sals (const std::vector<symtab_and_line> &sals,
 	  find_condition_and_thread (input, sal.pc, &cond, &thread_id,
 				     &task_id, &remaining);
 	  *cond_string = std::move (cond);
+	  /* At most one of thread or task can be set.  */
+	  gdb_assert (thread_id == -1 || task_id == 0);
 	  *thread = thread_id;
 	  *task = task_id;
 	  *rest = std::move (remaining);
@@ -10091,6 +10109,9 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 	      if (thread != -1)
 		error(_("You can specify only one thread."));
 
+	      if (task != 0)
+		error (_("You can specify only one of thread or task."));
+
 	      /* Extract the thread ID from the next token.  */
 	      thr = parse_thread_id (value_start, &endp);
 
@@ -10106,6 +10127,9 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 
 	      if (task != 0)
 		error(_("You can specify only one task."));
+
+	      if (thread != -1)
+		error (_("You can specify only one of thread or task."));
 
 	      task = strtol (value_start, &tmp, 0);
 	      if (tmp == value_start)
@@ -10282,6 +10306,8 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   else
     w.reset (new watchpoint (nullptr, bp_type));
 
+  /* At most one of thread or task can be set on a watchpoint.  */
+  gdb_assert (thread == -1 || task == 0);
   w->thread = thread;
   w->task = task;
   w->disposition = disp_donttouch;
