@@ -84,6 +84,9 @@
    */
 #undef HAVE_ALLOCA_H
 
+/* Define if amd-dbgapi is being linked in. */
+#undef HAVE_AMD_DBGAPI
+
 /* Define to 1 if you have the `btowc' function. */
 #undef HAVE_BTOWC
 

@@ -275,6 +275,7 @@ if test "$gdb_require_amd_dbgapi" = true \
 		    [has_amd_dbgapi=yes], [has_amd_dbgapi=no])
 
   if test "$has_amd_dbgapi" = "yes"; then
+    AC_DEFINE(HAVE_AMD_DBGAPI, 1, [Define if amd-dbgapi is being linked in.])
     TARGET_OBS="$TARGET_OBS amd-dbgapi-target.o"
 
     # If --enable-targets=all was provided, use the list of all files depending

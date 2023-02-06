@@ -18252,6 +18252,9 @@ $as_echo "yes" >&6; }
 fi
 
   if test "$has_amd_dbgapi" = "yes"; then
+
+$as_echo "#define HAVE_AMD_DBGAPI 1" >>confdefs.h
+
     TARGET_OBS="$TARGET_OBS amd-dbgapi-target.o"
 
     # If --enable-targets=all was provided, use the list of all files depending

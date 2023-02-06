@@ -1629,6 +1629,16 @@ This GDB was configured as follows:\n\
 "));
 #endif
 
+#if HAVE_AMD_DBGAPI
+  gdb_printf (stream, _("\
+	     --with-amd-dbgapi\n\
+"));
+#else
+  gdb_printf (stream, _("\
+	     --without-amd-dbgapi\n\
+"));
+#endif
+
 #if HAVE_SOURCE_HIGHLIGHT
   gdb_printf (stream, _("\
 	     --enable-source-highlight\n\
