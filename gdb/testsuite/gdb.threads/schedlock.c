@@ -24,13 +24,15 @@ void *thread_function(void *arg); /* Pointer to function executed by each thread
 
 #define NUM 1
 
-unsigned int args[NUM+1];
+unsigned long long int args[NUM+1];
 
 int main() {
     int res;
     pthread_t threads[NUM];
     void *thread_result;
     long i;
+
+    alarm (30);
 
     for (i = 1; i <= NUM; i++)
       {
@@ -72,13 +74,14 @@ volatile int call_function = 0;
 
 void *thread_function(void *arg) {
     int my_number =  (long) arg;
-    int *myp = (int *) &args[my_number];
+    unsigned long long int *myp = (unsigned long long int *) &args[my_number];
+    volatile unsigned int cnt = 0;
 
-    /* Don't run forever.  Run just short of it :)  */
-    while (*myp > 0)
+    while (1)
       {
 	/* schedlock.exp: main loop.  */
 	MAYBE_CALL_SOME_FUNCTION(); (*myp) ++;
+	cnt++;
       }
 
     pthread_exit(NULL);
