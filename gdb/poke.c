@@ -864,6 +864,45 @@ poke_command (const char *args, int from_tty)
     poke_handle_exception (exit_exception);
 }
 
+static struct value *
+poke_internal_fn (struct gdbarch *gdbarch,
+		  const struct language_defn *language,
+		  void *cookie, int argc, struct value **argv)
+{
+  if (argc != 1)
+    error ("_poke_poc requires only one argument");
+
+  struct type *type = value_type (argv[0]);
+  if (type->code () != TYPE_CODE_ARRAY
+      || TYPE_TARGET_TYPE (type) != builtin_type (gdbarch)->builtin_char)
+    error ("_poke_poc's first argument must have type 'const char *'");
+
+  gdb::array_view<const gdb_byte> content = value_contents (argv[0]);
+  const char *poke_expr = reinterpret_cast<const char *> (content.begin ());
+  const char *poke_end = reinterpret_cast<const char *> (content.end () - 1);
+  gdb_assert (*poke_end) == '\0');
+  pk_val val;
+  pk_val exit_exception = PK_NULL;
+  if (pk_compile_statement (poke_compiler, poke_cmd, &poke_end,
+			    &val, &exit_exception) != PK_OK
+      || exit_exception != PK_NULL)
+    {
+      poke_handle_exception (exit_exception);
+      error ("Error compiling poke call");
+    }
+
+  /* Do the best we can to convert a poke value to a GDB value.  */
+  switch (pk_val_kind (val))
+    {
+    case PK_VAL_INT:
+    case PK_VAL_UINT:
+    default:
+      error ("Poke");
+    }
+
+  return value_from_longest (builtin_type (gdbarch)->builtin_int, 0);
+}
+
 /* Initialize the poke GDB subsystem.  */
 
 void _initialize_poke (void);
@@ -885,6 +924,9 @@ Usage: poke-dump-types\n"));
   add_com ("poke", class_vars, poke_command, _("\
 Execute a Poke statement or declaration.\n\
 Usage: poke [STMT]\n"));
+
+  add_internal_function ("_poke", _("\
+Run the expression in poke", poke_internal_fn, nullptr);
 
   make_final_cleanup (poke_finalize, nullptr);
 }
