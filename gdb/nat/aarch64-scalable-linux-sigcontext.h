@@ -30,7 +30,10 @@
 struct sve_context {
 	struct _aarch64_ctx head;
 	__u16 vl;
-	__u16 __reserved[3];
+	/* Holds flags.  This field was defined for SME support.  Prior to it,
+	   this used to be a reserved 16-bit value.  */
+	__u16 flags;
+	__u16 __reserved[2];
 };
 
 /*

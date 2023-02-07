@@ -48,6 +48,7 @@
 #include "linux-record.h"
 
 #include "arch/aarch64-mte-linux.h"
+#include "arch/aarch64-scalable-linux.h"
 
 #include "arch-utils.h"
 #include "value.h"
@@ -152,6 +153,7 @@
 #define AARCH64_EXTRA_MAGIC			0x45585401
 #define AARCH64_FPSIMD_MAGIC			0x46508001
 #define AARCH64_SVE_MAGIC			0x53564501
+#define AARCH64_ZA_MAGIC			0x54366345
 
 /* Defines for the extra_context that follows an AARCH64_EXTRA_MAGIC.  */
 #define AARCH64_EXTRA_DATAP_OFFSET		8
@@ -164,13 +166,23 @@
 
 /* Defines for the sve structure that follows an AARCH64_SVE_MAGIC.  */
 #define AARCH64_SVE_CONTEXT_VL_OFFSET		8
+#define AARCH64_SVE_CONTEXT_FLAGS_OFFSET	10
 #define AARCH64_SVE_CONTEXT_REGS_OFFSET		16
 #define AARCH64_SVE_CONTEXT_P_REGS_OFFSET(vq) (32 * vq * 16)
 #define AARCH64_SVE_CONTEXT_FFR_OFFSET(vq) \
   (AARCH64_SVE_CONTEXT_P_REGS_OFFSET (vq) + (16 * vq * 2))
 #define AARCH64_SVE_CONTEXT_SIZE(vq) \
   (AARCH64_SVE_CONTEXT_FFR_OFFSET (vq) + (vq * 2))
+/* Flag indicating the SVE Context describes streaming mode.  */
+#define SVE_SIG_FLAG_SM				0x1
 
+/* SME constants.  */
+#define AARCH64_SME_CONTEXT_SVL_OFFSET		8
+#define AARCH64_SME_CONTEXT_REGS_OFFSET		16
+#define AARCH64_SME_CONTEXT_ZA_SIZE(svq) \
+  ((sve_vl_from_vq (svq) * sve_vl_from_vq (svq)))
+#define AARCH64_SME_CONTEXT_SIZE(svq) \
+  (AARCH64_SME_CONTEXT_REGS_OFFSET + AARCH64_SME_CONTEXT_ZA_SIZE (svq))
 
 /* Read an aarch64_ctx, returning the magic value, and setting *SIZE to the
    size, or return 0 on error.  */
@@ -324,7 +336,10 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
   CORE_ADDR section_end = section + AARCH64_SIGCONTEXT_RESERVED_SIZE;
   CORE_ADDR fpsimd = 0;
   CORE_ADDR sve_regs = 0;
+  CORE_ADDR za_state = 0;
+  uint64_t svcr = 0;
   uint32_t size, magic;
+  size_t vq = 0, svq = 0;
   bool extra_found = false;
   int num_regs = gdbarch_num_regs (gdbarch);
 
@@ -360,7 +375,7 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
 	    /* Check if the section is followed by a full SVE dump, and set
 	       sve_regs if it is.  */
 	    gdb_byte buf[4];
-	    uint16_t vq;
+	    uint16_t flags;
 
 	    if (!tdep->has_sve ())
 	      break;
@@ -373,12 +388,58 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
 	      }
 	    vq = sve_vq_from_vl (extract_unsigned_integer (buf, 2, byte_order));
 
-	    if (vq != tdep->vq)
-	      error (_("Invalid vector length in signal frame %d vs %s."), vq,
-		     pulongest (tdep->vq));
+	    /* If SME is supported, also read the flags field.  It may
+	       indicate if this SVE context is for streaming mode (SSVE).  */
+	    if (tdep->has_sme ())
+	      {
+		if (target_read_memory (section
+					+ AARCH64_SVE_CONTEXT_FLAGS_OFFSET,
+					buf, 2) != 0)
+		  {
+		    section += size;
+		    break;
+		  }
+		flags = extract_unsigned_integer (buf, 2, byte_order);
+
+		/* Is this SSVE data? If so, enable the SM bit in SVCR.  */
+		if (flags & SVE_SIG_FLAG_SM)
+		  svcr |= SVCR_SM_BIT;
+	      }
 
 	    if (size >= AARCH64_SVE_CONTEXT_SIZE (vq))
 	      sve_regs = section + AARCH64_SVE_CONTEXT_REGS_OFFSET;
+
+	    section += size;
+	    break;
+	  }
+
+	case AARCH64_ZA_MAGIC:
+	  {
+	    if (!tdep->has_sme ())
+	      {
+		section += size;
+		break;
+	      }
+
+	    /* Check if the section is followed by a full ZA dump, and set
+	       za_state if it is.  */
+	    gdb_byte buf[2];
+
+	    if (target_read_memory (section + AARCH64_SME_CONTEXT_SVL_OFFSET,
+				    buf, 2) != 0)
+	      {
+		section += size;
+		break;
+	      }
+	    svq = sve_vq_from_vl (extract_unsigned_integer (buf, 2,
+							    byte_order));
+
+	    if (size >= AARCH64_SME_CONTEXT_SIZE (svq))
+	      {
+		za_state = section + AARCH64_SME_CONTEXT_REGS_OFFSET;
+		/* We have ZA data.  Enable the ZA bit in SVCR.  */
+		svcr |= SVCR_ZA_BIT;
+	      }
 
 	    section += size;
 	    break;
@@ -422,7 +483,7 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
 
       for (int i = 0; i < 32; i++)
 	{
-	  offset = sve_regs + (i * tdep->vq * 16);
+	  offset = sve_regs + (i * vq * 16);
 	  trad_frame_set_reg_addr (this_cache, AARCH64_SVE_Z0_REGNUM + i,
 				   offset);
 	  trad_frame_set_reg_addr (this_cache,
@@ -440,12 +501,12 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
 				   offset);
 	}
 
-      offset = sve_regs + AARCH64_SVE_CONTEXT_P_REGS_OFFSET (tdep->vq);
+      offset = sve_regs + AARCH64_SVE_CONTEXT_P_REGS_OFFSET (vq);
       for (int i = 0; i < 16; i++)
 	trad_frame_set_reg_addr (this_cache, AARCH64_SVE_P0_REGNUM + i,
-				 offset + (i * tdep->vq * 2));
+				 offset + (i * vq * 2));
 
-      offset = sve_regs + AARCH64_SVE_CONTEXT_FFR_OFFSET (tdep->vq);
+      offset = sve_regs + AARCH64_SVE_CONTEXT_FFR_OFFSET (vq);
       trad_frame_set_reg_addr (this_cache, AARCH64_SVE_FFR_REGNUM, offset);
     }
 
@@ -460,6 +521,17 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
       if (sve_regs == 0)
 	aarch64_linux_restore_vregs (gdbarch, this_cache, fpsimd);
     }
+
+  if (za_state != 0)
+    {
+      /* Restore the ZA state.  */
+      trad_frame_set_reg_addr (this_cache, tdep->sme_za_regnum,
+			       za_state);
+    }
+
+  /* If SME is supported, set SVCR as well.  */
+  if (tdep->has_sme ())
+    trad_frame_set_reg_value (this_cache, tdep->sme_svcr_regnum, svcr);
 
   trad_frame_set_id (this_cache, frame_id_build (sp, func));
 }
