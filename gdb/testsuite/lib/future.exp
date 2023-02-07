@@ -125,8 +125,11 @@ proc gdb_find_hipcc {} {
     global tool_root_dir
     if {![is_remote host]} {
 	set hipcc [lookfor_file $tool_root_dir hipcc]
-	if {$hipcc == ""} {
-	    set hipcc [lookfor_file /opt/rocm/bin hipcc]
+	if {$hipcc eq "" && [info exists ::env(ROCM_PATH)]} {
+	    set hipcc [lookfor_file $::env(ROCM_PATH)/bin hipcc]
+	}
+	if {$hipcc eq ""} {
+	    set hipcc hipcc
 	}
     } else {
 	set hipcc ""
