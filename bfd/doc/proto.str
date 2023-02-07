@@ -34,16 +34,16 @@
 	ignore ;
 
 : external
-	0 internalmode ignore ;
+	0 internalmode ! ignore ;
 
 : internal 
-	1 internalmode ignore ;
+	1 internalmode ! ignore ;
 
 - input stack { a b } output b if internal, a if external
 : ifinternal
-	"" swap 1 internalmode maybecatstr
+	"" swap 1 internalmode ! maybecatstr
 	swap
-	"" swap 0 internalmode maybecatstr
+	"" swap 0 internalmode ! maybecatstr
 	catstr
 	;
 
@@ -123,7 +123,7 @@
 	catstr
 	copy_past_newline
 	catstr
-	"" swap 0 internalmode maybecatstr
+	"" swap 0 internalmode ! maybecatstr
 	;
 : ENUMEQX ENUMEQ catstr ;
 : ENUMDOC
@@ -133,7 +133,7 @@
 	"\n{* " swap catstr "  *}\n" catstr
 	translatecomments
 	- discard it if we're doing internal mode
-	"" swap 0 internalmode maybecatstr
+	"" swap 0 internalmode ! maybecatstr
 	swap
 	catstr catstr
 	;

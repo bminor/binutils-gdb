@@ -70,11 +70,12 @@
 	translatecomments - turn {* and *} into comment delimiters
 	kill_bogus_lines - get rid of extra newlines
 	indent
-	internalmode - pop from integer stack, set `internalmode' to that value
 	print_stack_level - print current stack depth to stderr
 	strip_trailing_newlines - go ahead, guess...
 	[quoted string] - push string onto string stack
 	[word starting with digit] - push atol(str) onto integer stack
+
+	internalmode - the internalmode variable (evaluates to address)
 
    A command must be all upper-case, and alone on a line.
 
@@ -119,7 +120,7 @@ typedef struct dict_struct
 } dict_type;
 
 int internal_wanted;
-intptr_t internal_mode;
+intptr_t *internal_mode;
 
 int warning;
 
@@ -374,6 +375,14 @@ push_number (void)
   pc++;
   *isp = pc->l;
   pc++;
+}
+
+/* This is a wrapper for push_number just so we can correctly free the
+   variable at the end.  */
+static void
+push_variable (void)
+{
+  push_number ();
 }
 
 static void
@@ -994,18 +1003,9 @@ skip_past_newline (void)
 }
 
 static void
-internalmode (void)
-{
-  internal_mode = *(isp);
-  isp--;
-  icheck_range ();
-  pc++;
-}
-
-static void
 maybecatstr (void)
 {
-  if (internal_wanted == internal_mode)
+  if (internal_wanted == *internal_mode)
     {
       catstr (tos - 1, tos);
     }
@@ -1138,6 +1138,11 @@ free_words (void)
 		free (ptr->code[i + 1].s - 1);
 		++i;
 	      }
+	    else if (ptr->code[i].f == push_variable)
+	      {
+		free ((void *) ptr->code[i + 1].l);
+		++i;
+	      }
 	  free (ptr->code);
 	}
       next = ptr->next;
@@ -1212,6 +1217,18 @@ add_intrinsic (char *name, void (*func) (void))
 {
   dict_type *new_d = newentry (xstrdup (name));
   pcu p = { func };
+  add_to_definition (new_d, p);
+  p.f = 0;
+  add_to_definition (new_d, p);
+}
+
+static void
+add_intrinsic_variable (char *name, intptr_t *loc)
+{
+  dict_type *new_d = newentry (xstrdup (name));
+  pcu p = { push_variable };
+  add_to_definition (new_d, p);
+  p.l = (intptr_t) loc;
   add_to_definition (new_d, p);
   p.f = 0;
   add_to_definition (new_d, p);
@@ -1430,9 +1447,12 @@ main (int ac, char *av[])
   add_intrinsic ("translatecomments", translatecomments);
   add_intrinsic ("kill_bogus_lines", kill_bogus_lines);
   add_intrinsic ("indent", indent);
-  add_intrinsic ("internalmode", internalmode);
   add_intrinsic ("print_stack_level", print_stack_level);
   add_intrinsic ("strip_trailing_newlines", strip_trailing_newlines);
+
+  internal_mode = xmalloc (sizeof (intptr_t));
+  *internal_mode = 0;
+  add_intrinsic_variable ("internalmode", internal_mode);
 
   /* Put a nl at the start.  */
   catchar (&buffer, '\n');

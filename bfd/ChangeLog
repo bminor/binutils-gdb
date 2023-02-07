@@ -1,5 +1,16 @@
 2023-02-07  Tom Tromey  <tom@tromey.com>
 
+	* doc/proto.str (external, internal, ifinternal, ENUMEQ, ENUMDOC):
+	Update.
+	* doc/chew.c (internalmode): Remove.
+	(add_intrinsic_variable): New function.
+	(main): Add internalmode as intrinsic.
+	(internal_mode): Remove global.
+	(maybecatstr): Update.
+	(free_words): Free variables.
+
+2023-02-07  Tom Tromey  <tom@tromey.com>
+
 	* doc/chew.c (pcu) <l>: Now intptr_t.
 	(internal_mode, istack, isp): Likewise.
 	(bang, atsign): Use intptr_t.
