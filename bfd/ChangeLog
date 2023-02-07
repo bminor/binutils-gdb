@@ -1,5 +1,11 @@
 2023-02-07  Tom Tromey  <tom@tromey.com>
 
+	* doc/webassembly.texi (File layout): Remove second argument from
+	@node.
+	* doc/bfd.texi: Use single-argument @node everywhere.
+
+2023-02-07  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in: Rebuild.
 	* doc/local.mk (%D%/chew.stamp): Don't use H_CFLAGS.
 

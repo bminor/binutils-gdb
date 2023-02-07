@@ -75,7 +75,7 @@ Copyright @copyright{} 1991-2023 Free Software Foundation, Inc.
 @end iftex
 @contents
 
-@node Top, Overview, (dir), (dir)
+@node Top
 @ifinfo
 This file documents the binary file descriptor library libbfd.
 @end ifinfo
@@ -88,7 +88,7 @@ This file documents the binary file descriptor library libbfd.
 * BFD Index::		BFD Index
 @end menu
 
-@node Overview, BFD front end, Top, Top
+@node Overview
 @chapter Introduction
 @cindex BFD
 @cindex what is it?
@@ -114,7 +114,7 @@ their own use, for greater efficiency.
 * What BFD Version 2 Can Do::	What BFD Version 2 Can Do
 @end menu
 
-@node History, How It Works, Overview, Overview
+@node History
 @section History
 
 One spur behind BFD was the desire, on the part of the GNU 960 team at
@@ -137,7 +137,7 @@ and David Henkel-Wallace (@code{gumby@@cygnus.com}).
 
 
 
-@node How It Works, What BFD Version 2 Can Do, History, Overview
+@node How It Works
 @section How To Use BFD
 
 To use the library, include @file{bfd.h} and link with @file{libbfd.a}.	
@@ -188,11 +188,11 @@ and contain subordinate BFDs. This approach is fine for a.out and coff,
 but loses efficiency when applied to formats such as S-records and
 IEEE-695.
 
-@node What BFD Version 2 Can Do,  , How It Works, Overview
+@node What BFD Version 2 Can Do
 @section What BFD Version 2 Can Do
 @include bfdsumm.texi
 
-@node BFD front end, BFD back ends, Overview, Top
+@node BFD front end
 @chapter BFD Front End
 
 @menu
@@ -219,7 +219,7 @@ IEEE-695.
 @include bfdt.texi
 @include bfdio.texi
 
-@node Memory Usage, Sections, Miscellaneous, BFD front end
+@node Memory Usage
 @section Memory Usage
 BFD keeps all of its internal structures in obstacks. There is one obstack
 per open BFD file, into which the current state is stored. When a BFD is
@@ -242,46 +242,46 @@ select the greediest open BFD, close it to reclaim the memory, perform
 some operation and reopen the BFD again, to get a fresh copy of the data
 structures.
 
-@node Sections, Symbols, Memory Usage, BFD front end
+@node Sections
 @include  section.texi
 
-@node Symbols, Archives, Sections, BFD front end
+@node Symbols
 @include  syms.texi
 
-@node Archives, Formats, Symbols, BFD front end
+@node Archives
 @include  archive.texi
 
-@node Formats, Relocations, Archives, BFD front end
+@node Formats
 @include  format.texi
 
-@node Relocations, Core Files, Formats, BFD front end
+@node Relocations
 @include  reloc.texi
 
-@node Core Files, Targets, Relocations, BFD front end
+@node Core Files
 @include  corefile.texi
 
-@node Targets, Architectures, Core Files, BFD front end
+@node Targets
 @include  targets.texi
 
-@node Architectures, Opening and Closing, Targets, BFD front end
+@node Architectures
 @include  archures.texi
 
-@node Opening and Closing, Internal, Architectures, BFD front end
+@node Opening and Closing
 @include  opncls.texi
 
-@node Internal, File Caching, Opening and Closing, BFD front end
+@node Internal
 @include  libbfd.texi
 
-@node File Caching, Linker Functions, Internal, BFD front end
+@node File Caching
 @include  cache.texi
 
-@node Linker Functions, Hash Tables, File Caching, BFD front end
+@node Linker Functions
 @include  linker.texi
 
-@node Hash Tables, , Linker Functions, BFD front end
+@node Hash Tables
 @include  hash.texi
 
-@node BFD back ends, GNU Free Documentation License, BFD front end, Top
+@node BFD back ends
 @chapter BFD back ends
 @menu
 * What to Put Where::
@@ -293,28 +293,28 @@ structures.
 * srecord ::	s-record backend
 @end ignore
 @end menu
-@node What to Put Where, aout, BFD back ends, BFD back ends
+@node What to Put Where
 @section What to Put Where
 All of BFD lives in one directory.
 
-@node aout, coff, What to Put Where, BFD back ends
+@node aout
 @include  aoutx.texi
 
-@node coff, elf, aout, BFD back ends
+@node coff
 @include  coffcode.texi
 
-@node elf, mmo, coff, BFD back ends
+@node elf
 @include  elf.texi
 @c Leave this out until the file has some actual contents...
 @c @include  elfcode.texi
 
-@node mmo,  , elf, BFD back ends
+@node mmo
 @include  mmo.texi
 
-@node GNU Free Documentation License, BFD Index, BFD back ends, Top
+@node GNU Free Documentation License
 @include fdl.texi
 
-@node BFD Index,  , GNU Free Documentation License, Top
+@node BFD Index
 @unnumbered BFD Index
 @printindex cp
 
