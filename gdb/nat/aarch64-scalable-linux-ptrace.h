@@ -52,22 +52,27 @@ uint64_t aarch64_sve_get_vq (int tid);
 bool aarch64_sve_set_vq (int tid, uint64_t vq);
 bool aarch64_sve_set_vq (int tid, struct reg_buffer_common *reg_buf);
 
-/* Read the current SVE register set using ptrace, allocating space as
-   required.  */
+/* Read the current SVE register set from thread TID and return its data
+   through a byte vector.  */
 
-extern std::unique_ptr<gdb_byte[]> aarch64_sve_get_sveregs (int tid);
+extern gdb::byte_vector aarch64_fetch_sve_regset (int tid);
 
-/* Put the registers from linux structure buf into register buffer.  Assumes the
-   vector lengths in the register buffer match the size in the kernel.  */
-
-extern void aarch64_sve_regs_copy_to_reg_buf (struct reg_buffer_common *reg_buf,
-					      const void *buf);
-
-/* Put the registers from register buffer into linux structure buf.  Assumes the
-   vector lengths in the register buffer match the size in the kernel.  */
+/* Write the SVE contents from SVE_STATE to thread TID.  */
 
 extern void
-aarch64_sve_regs_copy_from_reg_buf (const struct reg_buffer_common *reg_buf,
-				    void *buf);
+aarch64_store_sve_regset (int tid, const gdb::byte_vector &sve_state);
+
+/* Given a thread id TID and a register buffer REG_BUF, update the register
+   buffer with the SVE state from thread TID.  */
+
+extern void
+aarch64_sve_regs_copy_to_reg_buf (int tid, struct reg_buffer_common *reg_buf);
+
+/* Given a thread id TID and a register buffer REG_BUF containing SVE
+   register data, write the SVE data to thread TID.  */
+
+extern void
+aarch64_sve_regs_copy_from_reg_buf (int tid,
+				    struct reg_buffer_common *reg_buf);
 
 #endif /* NAT_AARCH64_SCALABLE_LINUX_PTRACE_H */

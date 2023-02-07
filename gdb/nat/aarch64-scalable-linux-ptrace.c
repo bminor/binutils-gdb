@@ -120,28 +120,43 @@ aarch64_sve_set_vq (int tid, struct reg_buffer_common *reg_buf)
 
 /* See nat/aarch64-scalable-linux-ptrace.h.  */
 
-std::unique_ptr<gdb_byte[]>
-aarch64_sve_get_sveregs (int tid)
+gdb::byte_vector
+aarch64_fetch_sve_regset (int tid)
 {
-  struct iovec iovec;
   uint64_t vq = aarch64_sve_get_vq (tid);
 
   if (vq == 0)
-    perror_with_name (_("Unable to fetch SVE register header"));
+    perror_with_name (_("Unable to fetch SVE vector length"));
 
   /* A ptrace call with NT_ARM_SVE will return a header followed by either a
      dump of all the SVE and FP registers, or an fpsimd structure (identical to
      the one returned by NT_FPREGSET) if the kernel has not yet executed any
      SVE code.  Make sure we allocate enough space for a full SVE dump.  */
 
-  iovec.iov_len = SVE_PT_SIZE (vq, SVE_PT_REGS_SVE);
-  std::unique_ptr<gdb_byte[]> buf (new gdb_byte[iovec.iov_len]);
-  iovec.iov_base = buf.get ();
+  gdb::byte_vector sve_state (SVE_PT_SIZE (vq, SVE_PT_REGS_SVE), 0);
+
+  struct iovec iovec;
+  iovec.iov_base = sve_state.data ();
+  iovec.iov_len = sve_state.size ();
 
   if (ptrace (PTRACE_GETREGSET, tid, NT_ARM_SVE, &iovec) < 0)
     perror_with_name (_("Unable to fetch SVE registers"));
 
-  return buf;
+  return sve_state;
+}
+
+/* See nat/aarch64-scalable-linux-ptrace.h.  */
+
+void
+aarch64_store_sve_regset (int tid, const gdb::byte_vector &sve_state)
+{
+  struct iovec iovec;
+  /* We need to cast from (const void *) here.  */
+  iovec.iov_base = (void *) sve_state.data ();
+  iovec.iov_len = sve_state.size ();
+
+  if (ptrace (PTRACE_SETREGSET, tid, NT_ARM_SVE, &iovec) < 0)
+    perror_with_name (_("Unable to store SVE registers"));
 }
 
 /* If we are running in BE mode, byteswap the contents
@@ -165,11 +180,13 @@ aarch64_maybe_swab128 (gdb_byte *dst, const gdb_byte *src, size_t size)
 /* See nat/aarch64-scalable-linux-ptrace.h.  */
 
 void
-aarch64_sve_regs_copy_to_reg_buf (struct reg_buffer_common *reg_buf,
-				  const void *buf)
+aarch64_sve_regs_copy_to_reg_buf (int tid, struct reg_buffer_common *reg_buf)
 {
-  char *base = (char *) buf;
-  struct user_sve_header *header = (struct user_sve_header *) buf;
+  gdb::byte_vector sve_state = aarch64_fetch_sve_regset (tid);
+
+  char *base = (char *) sve_state.data ();
+  struct user_sve_header *header
+    = (struct user_sve_header *) sve_state.data ();
 
   uint64_t vq = sve_vq_from_vl (header->vl);
   uint64_t vg = sve_vg_from_vl (header->vl);
@@ -249,17 +266,32 @@ aarch64_sve_regs_copy_to_reg_buf (struct reg_buffer_common *reg_buf,
 
       reg_buf->raw_supply (AARCH64_SVE_FFR_REGNUM, reg);
     }
+
+  /* At this point we have updated the register cache with the contents of
+     the NT_ARM_SVE register set.  */
 }
 
 /* See nat/aarch64-scalable-linux-ptrace.h.  */
 
 void
-aarch64_sve_regs_copy_from_reg_buf (const struct reg_buffer_common *reg_buf,
-				    void *buf)
+aarch64_sve_regs_copy_from_reg_buf (int tid,
+				    struct reg_buffer_common *reg_buf)
 {
-  struct user_sve_header *header = (struct user_sve_header *) buf;
-  char *base = (char *) buf;
+  /* First store the vector length to the thread.  This is done first to
+     ensure the ptrace buffers read from the kernel are the correct size.  */
+  if (!aarch64_sve_set_vq (tid, reg_buf))
+    perror_with_name (_("Unable to set VG register"));
+
+  /* Obtain a dump of SVE registers from ptrace.  */
+  gdb::byte_vector sve_state = aarch64_fetch_sve_regset (tid);
+
+  struct user_sve_header *header = (struct user_sve_header *) sve_state.data ();
   uint64_t vq = sve_vq_from_vl (header->vl);
+
+  gdb::byte_vector new_state (SVE_PT_SIZE (32, SVE_PT_REGS_SVE), 0);
+  memcpy (new_state.data (), sve_state.data (), sve_state.size ());
+  header = (struct user_sve_header *) new_state.data ();
+  char *base = (char *) new_state.data ();
 
   /* Sanity check the data in the header.  */
   if (!sve_vl_valid (header->vl)
@@ -275,36 +307,40 @@ aarch64_sve_regs_copy_from_reg_buf (const struct reg_buffer_common *reg_buf,
 	 resulting in the initialization of SVE state written back to the
 	 kernel, which is why we try to avoid it.  */
 
-      bool has_sve_state = false;
-      gdb_byte *reg = (gdb_byte *) alloca (SVE_PT_SVE_ZREG_SIZE (vq));
-      struct user_fpsimd_state *fpsimd
-	= (struct user_fpsimd_state *)(base + SVE_PT_FPSIMD_OFFSET);
-
-      memset (reg, 0, SVE_PT_SVE_ZREG_SIZE (vq));
+      /* Buffer (using the maximum size a Z register) used to look for zeroed
+	 out sve state.  */
+      gdb_byte reg[256];
+      memset (reg, 0, sizeof (reg));
 
       /* Check in the reg_buf if any of the Z registers are set after the
 	 first 128 bits, or if any of the other SVE registers are set.  */
-
+      bool has_sve_state = false;
       for (int i = 0; i < AARCH64_SVE_Z_REGS_NUM; i++)
 	{
-	  has_sve_state |= reg_buf->raw_compare (AARCH64_SVE_Z0_REGNUM + i,
-						 reg, sizeof (__int128_t));
-	  if (has_sve_state)
-	    break;
+	  if (!reg_buf->raw_compare (AARCH64_SVE_Z0_REGNUM + i, reg,
+				     V_REGISTER_SIZE))
+	    {
+	      has_sve_state = true;
+	      break;
+	    }
 	}
 
       if (!has_sve_state)
 	for (int i = 0; i < AARCH64_SVE_P_REGS_NUM; i++)
 	  {
-	    has_sve_state |= reg_buf->raw_compare (AARCH64_SVE_P0_REGNUM + i,
-						   reg, 0);
-	    if (has_sve_state)
-	      break;
+	    if (!reg_buf->raw_compare (AARCH64_SVE_P0_REGNUM + i, reg, 0))
+	      {
+		has_sve_state = true;
+		break;
+	      }
 	  }
 
       if (!has_sve_state)
-	  has_sve_state |= reg_buf->raw_compare (AARCH64_SVE_FFR_REGNUM,
-						 reg, 0);
+	  has_sve_state
+	    = !reg_buf->raw_compare (AARCH64_SVE_FFR_REGNUM, reg, 0);
+
+      struct user_fpsimd_state *fpsimd
+	= (struct user_fpsimd_state *)(base + SVE_PT_FPSIMD_OFFSET);
 
       /* If no SVE state exists, then use the existing fpsimd structure to
 	 write out state and return.  */
@@ -344,50 +380,74 @@ aarch64_sve_regs_copy_from_reg_buf (const struct reg_buffer_common *reg_buf,
 	  if (REG_VALID == reg_buf->get_register_status (AARCH64_FPCR_REGNUM))
 	    reg_buf->raw_collect (AARCH64_FPCR_REGNUM, &fpsimd->fpcr);
 
-	  return;
+	  /* At this point we have collected all the data from the register
+	     cache and we are ready to update the FPSIMD register content
+	     of the thread.  */
+
+	  /* Fall through so we can update the thread's contents with the
+	     FPSIMD register cache values.  */
 	}
-
-      /* Otherwise, reformat the fpsimd structure into a full SVE set, by
-	 expanding the V registers (working backwards so we don't splat
-	 registers before they are copied) and using null for everything else.
-	 Note that enough space for a full SVE dump was originally allocated
-	 for base.  */
-
-      header->flags |= SVE_PT_REGS_SVE;
-      header->size = SVE_PT_SIZE (vq, SVE_PT_REGS_SVE);
-
-      memcpy (base + SVE_PT_SVE_FPSR_OFFSET (vq), &fpsimd->fpsr,
-	      sizeof (uint32_t));
-      memcpy (base + SVE_PT_SVE_FPCR_OFFSET (vq), &fpsimd->fpcr,
-	      sizeof (uint32_t));
-
-      for (int i = AARCH64_SVE_Z_REGS_NUM; i >= 0 ; i--)
+      else
 	{
-	  memcpy (base + SVE_PT_SVE_ZREG_OFFSET (vq, i), &fpsimd->vregs[i],
-		  sizeof (__int128_t));
+	  /* Otherwise, reformat the fpsimd structure into a full SVE set, by
+	     expanding the V registers (working backwards so we don't splat
+	     registers before they are copied) and using zero for everything
+	     else.
+	     Note that enough space for a full SVE dump was originally allocated
+	     for base.  */
+
+	  header->flags |= SVE_PT_REGS_SVE;
+	  header->size = SVE_PT_SIZE (vq, SVE_PT_REGS_SVE);
+
+	  memcpy (base + SVE_PT_SVE_FPSR_OFFSET (vq), &fpsimd->fpsr,
+		  sizeof (uint32_t));
+	  memcpy (base + SVE_PT_SVE_FPCR_OFFSET (vq), &fpsimd->fpcr,
+		  sizeof (uint32_t));
+
+	  for (int i = AARCH64_SVE_Z_REGS_NUM - 1; i >= 0 ; i--)
+	    {
+	      memcpy (base + SVE_PT_SVE_ZREG_OFFSET (vq, i), &fpsimd->vregs[i],
+		      sizeof (__int128_t));
+	    }
+
+	  /* At this point we have converted the FPSIMD layout to an SVE
+	     layout and copied the register data.
+
+	     Fall through so we can update the thread's contents with the SVE
+	     register cache values.  */
 	}
     }
+  else
+    {
+      /* We already have SVE state for this thread, so we just need to update
+	 the values of the registers.  */
+      for (int i = 0; i < AARCH64_SVE_Z_REGS_NUM; i++)
+	if (REG_VALID == reg_buf->get_register_status (AARCH64_SVE_Z0_REGNUM
+						       + i))
+	  reg_buf->raw_collect (AARCH64_SVE_Z0_REGNUM + i,
+				base + SVE_PT_SVE_ZREG_OFFSET (vq, i));
 
-  /* Replace the kernel values with those from reg_buf.  */
+      for (int i = 0; i < AARCH64_SVE_P_REGS_NUM; i++)
+	if (REG_VALID == reg_buf->get_register_status (AARCH64_SVE_P0_REGNUM
+						       + i))
+	  reg_buf->raw_collect (AARCH64_SVE_P0_REGNUM + i,
+				base + SVE_PT_SVE_PREG_OFFSET (vq, i));
 
-  for (int i = 0; i < AARCH64_SVE_Z_REGS_NUM; i++)
-    if (REG_VALID == reg_buf->get_register_status (AARCH64_SVE_Z0_REGNUM + i))
-      reg_buf->raw_collect (AARCH64_SVE_Z0_REGNUM + i,
-			    base + SVE_PT_SVE_ZREG_OFFSET (vq, i));
+      if (REG_VALID == reg_buf->get_register_status (AARCH64_SVE_FFR_REGNUM))
+	reg_buf->raw_collect (AARCH64_SVE_FFR_REGNUM,
+			      base + SVE_PT_SVE_FFR_OFFSET (vq));
+      if (REG_VALID == reg_buf->get_register_status (AARCH64_FPSR_REGNUM))
+	reg_buf->raw_collect (AARCH64_FPSR_REGNUM,
+			      base + SVE_PT_SVE_FPSR_OFFSET (vq));
+      if (REG_VALID == reg_buf->get_register_status (AARCH64_FPCR_REGNUM))
+	reg_buf->raw_collect (AARCH64_FPCR_REGNUM,
+			      base + SVE_PT_SVE_FPCR_OFFSET (vq));
+    }
 
-  for (int i = 0; i < AARCH64_SVE_P_REGS_NUM; i++)
-    if (REG_VALID == reg_buf->get_register_status (AARCH64_SVE_P0_REGNUM + i))
-      reg_buf->raw_collect (AARCH64_SVE_P0_REGNUM + i,
-			    base + SVE_PT_SVE_PREG_OFFSET (vq, i));
+  /* At this point we have collected all the data from the register cache and
+     we are ready to update the SVE/FPSIMD register contents of the thread.
 
-  if (REG_VALID == reg_buf->get_register_status (AARCH64_SVE_FFR_REGNUM))
-    reg_buf->raw_collect (AARCH64_SVE_FFR_REGNUM,
-			  base + SVE_PT_SVE_FFR_OFFSET (vq));
-  if (REG_VALID == reg_buf->get_register_status (AARCH64_FPSR_REGNUM))
-    reg_buf->raw_collect (AARCH64_FPSR_REGNUM,
-			  base + SVE_PT_SVE_FPSR_OFFSET (vq));
-  if (REG_VALID == reg_buf->get_register_status (AARCH64_FPCR_REGNUM))
-    reg_buf->raw_collect (AARCH64_FPCR_REGNUM,
-			  base + SVE_PT_SVE_FPCR_OFFSET (vq));
-
+     sve_state should contain all the data in the correct format, ready to be
+     passed on to ptrace.  */
+  aarch64_store_sve_regset (tid, new_state);
 }

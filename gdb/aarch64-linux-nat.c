@@ -319,9 +319,8 @@ store_fpregs_to_thread (const struct regcache *regcache)
 static void
 fetch_sveregs_from_thread (struct regcache *regcache)
 {
-  std::unique_ptr<gdb_byte[]> base
-    = aarch64_sve_get_sveregs (regcache->ptid ().lwp ());
-  aarch64_sve_regs_copy_to_reg_buf (regcache, base.get ());
+  /* Fetch SVE state from the thread and copy it into the register cache.  */
+  aarch64_sve_regs_copy_to_reg_buf (regcache->ptid ().lwp (), regcache);
 }
 
 /* Store to the current thread the valid sve register
@@ -330,28 +329,9 @@ fetch_sveregs_from_thread (struct regcache *regcache)
 static void
 store_sveregs_to_thread (struct regcache *regcache)
 {
-  int ret;
-  struct iovec iovec;
-  int tid = regcache->ptid ().lwp ();
-
-  /* First store vector length to the thread.  This is done first to ensure the
-     ptrace buffers read from the kernel are the correct size.  */
-  if (!aarch64_sve_set_vq (tid, regcache))
-    perror_with_name (_("Unable to set VG register"));
-
-  /* Obtain a dump of SVE registers from ptrace.  */
-  std::unique_ptr<gdb_byte[]> base = aarch64_sve_get_sveregs (tid);
-
-  /* Overwrite with regcache state.  */
-  aarch64_sve_regs_copy_from_reg_buf (regcache, base.get ());
-
-  /* Write back to the kernel.  */
-  iovec.iov_base = base.get ();
-  iovec.iov_len = ((struct user_sve_header *) base.get ())->size;
-  ret = ptrace (PTRACE_SETREGSET, tid, NT_ARM_SVE, &iovec);
-
-  if (ret < 0)
-    perror_with_name (_("Unable to store sve registers"));
+  /* Fetch SVE state from the register cache and update the thread TID with
+     it.  */
+  aarch64_sve_regs_copy_from_reg_buf (regcache->ptid ().lwp (), regcache);
 }
 
 /* Fill GDB's register array with the pointer authentication mask values from

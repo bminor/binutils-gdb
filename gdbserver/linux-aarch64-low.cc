@@ -719,9 +719,18 @@ aarch64_target::low_new_fork (process_info *parent,
 /* Wrapper for aarch64_sve_regs_copy_to_reg_buf.  */
 
 static void
-aarch64_sve_regs_copy_to_regcache (struct regcache *regcache, const void *buf)
+aarch64_sve_regs_copy_to_regcache (struct regcache *regcache,
+				   ATTRIBUTE_UNUSED const void *buf)
 {
-  return aarch64_sve_regs_copy_to_reg_buf (regcache, buf);
+  /* BUF is unused here since we collect the data straight from a ptrace
+     request in aarch64_sve_regs_copy_to_reg_buf, therefore bypassing
+     gdbserver's own call to ptrace.  */
+
+  int tid = lwpid_of (current_thread);
+
+  /* Update the register cache.  aarch64_sve_regs_copy_to_reg_buf handles
+     fetching the NT_ARM_SVE state from thread TID.  */
+  aarch64_sve_regs_copy_to_reg_buf (tid, regcache);
 }
 
 /* Wrapper for aarch64_sve_regs_copy_from_reg_buf.  */
@@ -729,7 +738,16 @@ aarch64_sve_regs_copy_to_regcache (struct regcache *regcache, const void *buf)
 static void
 aarch64_sve_regs_copy_from_regcache (struct regcache *regcache, void *buf)
 {
-  return aarch64_sve_regs_copy_from_reg_buf (regcache, buf);
+  int tid = lwpid_of (current_thread);
+
+  /* Update the thread SVE state.  aarch64_sve_regs_copy_from_reg_buf
+     handles writing the SVE/FPSIMD state back to thread TID.  */
+  aarch64_sve_regs_copy_from_reg_buf (tid, regcache);
+
+  /* We need to return the expected data in BUF, so copy whatever the kernel
+     already has to BUF.  */
+  gdb::byte_vector sve_state = aarch64_fetch_sve_regset (tid);
+  memcpy (buf, sve_state.data (), sve_state.size ());
 }
 
 /* Array containing all the possible register sets for AArch64/Linux.  During
