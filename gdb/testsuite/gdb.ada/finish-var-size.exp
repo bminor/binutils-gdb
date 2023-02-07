@@ -18,10 +18,7 @@ load_lib "ada.exp"
 require allow_ada_tests
 
 # GCC 12 has the needed fix.
-if {![test_compiler_info {gcc-1[2-9]-*}]} {
-    untested "GCC too told for this test"
-    return -1
-}
+require {expr [gcc_major_version] >= 12}
 
 standard_ada_testfile p
 
