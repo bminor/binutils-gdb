@@ -85,6 +85,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #define DEF_SIZE 5000
 #define STACK 50
@@ -105,7 +106,7 @@ typedef union
   void (*f) (void);
   struct dict_struct *e;
   char *s;
-  long l;
+  intptr_t l;
 } pcu;
 
 typedef struct dict_struct
@@ -118,7 +119,7 @@ typedef struct dict_struct
 } dict_type;
 
 int internal_wanted;
-int internal_mode;
+intptr_t internal_mode;
 
 int warning;
 
@@ -128,8 +129,8 @@ string_type *tos;
 unsigned int idx = 0; /* Pos in input buffer */
 string_type *ptr; /* and the buffer */
 
-long istack[STACK];
-long *isp = &istack[0];
+intptr_t istack[STACK];
+intptr_t *isp = &istack[0];
 
 dict_type *root;
 
@@ -1300,7 +1301,7 @@ compile (char *string)
 static void
 bang (void)
 {
-  *(long *) ((isp[0])) = isp[-1];
+  *(intptr_t *) ((isp[0])) = isp[-1];
   isp -= 2;
   icheck_range ();
   pc++;
@@ -1309,7 +1310,7 @@ bang (void)
 static void
 atsign (void)
 {
-  isp[0] = *(long *) (isp[0]);
+  isp[0] = *(intptr_t *) (isp[0]);
   pc++;
 }
 

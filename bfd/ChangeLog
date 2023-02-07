@@ -1,5 +1,11 @@
 2023-02-07  Tom Tromey  <tom@tromey.com>
 
+	* doc/chew.c (pcu) <l>: Now intptr_t.
+	(internal_mode, istack, isp): Likewise.
+	(bang, atsign): Use intptr_t.
+
+2023-02-07  Tom Tromey  <tom@tromey.com>
+
 	* doc/proto.str (SYNOPSIS): Don't use paramstuff.
 	* doc/chew.c (paramstuff): Remove.
 	(main): Don't add paramstuff intrinsic.
