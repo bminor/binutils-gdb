@@ -22,6 +22,7 @@
 #define ARCH_AARCH64_SCALABLE_LINUX_H
 
 #include "gdbsupport/common-defs.h"
+#include "gdbsupport/common-regcache.h"
 
 /* Feature check for Scalable Matrix Extension.  */
 #ifndef HWCAP2_SME
@@ -34,5 +35,19 @@
 #define SVCR_ZA_BIT (1 << 1)
 /* Mask including all valid SVCR bits.  */
 #define SVCR_BIT_MASK (SVCR_SM_BIT | SVCR_ZA_BIT)
+
+/* SVE/SSVE-related constants used for an empty SVE/SSVE register set
+   dumped to a core file.  When SME is supported, either the SVE state or
+   the SSVE state will be empty when it is dumped to a core file.  */
+#define SVE_CORE_DUMMY_SIZE 0x220
+#define SVE_CORE_DUMMY_MAX_SIZE 0x2240
+#define SVE_CORE_DUMMY_VL 0x10
+#define SVE_CORE_DUMMY_MAX_VL 0x100
+#define SVE_CORE_DUMMY_FLAGS 0x0
+#define SVE_CORE_DUMMY_RESERVED 0x0
+
+/* Return TRUE if the SVE state in the register cache REGCACHE
+   is empty (zero).  Return FALSE otherwise.  */
+extern bool sve_state_is_empty (const struct reg_buffer_common *reg_buf);
 
 #endif /* ARCH_AARCH64_SCALABLE_LINUX_H */

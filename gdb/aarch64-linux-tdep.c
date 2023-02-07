@@ -57,6 +57,10 @@
 
 #include "elf/common.h"
 #include "elf/aarch64.h"
+#include "arch/aarch64-insn.h"
+
+/* For std::pow */
+#include <cmath>
 
 /* Signal frame handling.
 
@@ -741,50 +745,55 @@ const struct regset aarch64_linux_fpregset =
 
 #define SVE_HEADER_FLAG_SVE		1
 
-/* Get VQ value from SVE section in the core dump.  */
+/* Get the vector quotient (VQ) or streaming vector quotient (SVQ) value
+   from the section named SECTION_NAME.
+
+   Return non-zero if successful and 0 otherwise.  */
 
 static uint64_t
-aarch64_linux_core_read_vq (struct gdbarch *gdbarch, bfd *abfd)
+aarch64_linux_core_read_vq (struct gdbarch *gdbarch, bfd *abfd,
+			    const char *section_name)
 {
-  gdb_byte header[SVE_HEADER_SIZE];
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  asection *sve_section = bfd_get_section_by_name (abfd, ".reg-aarch-sve");
+  gdb_assert (section_name != nullptr);
 
-  if (sve_section == nullptr)
+  asection *section = bfd_get_section_by_name (abfd, section_name);
+
+  if (section == nullptr)
     {
       /* No SVE state.  */
       return 0;
     }
 
-  size_t size = bfd_section_size (sve_section);
+  size_t size = bfd_section_size (section);
 
   /* Check extended state size.  */
   if (size < SVE_HEADER_SIZE)
     {
-      warning (_("'.reg-aarch-sve' section in core file too small."));
+      warning (_("'%s' core file section is too small. "
+		 "Expected %s bytes, got %s bytes"), section_name,
+		 pulongest (SVE_HEADER_SIZE), pulongest (size));
       return 0;
     }
 
-  if (!bfd_get_section_contents (abfd, sve_section, header, 0, SVE_HEADER_SIZE))
+  gdb_byte header[SVE_HEADER_SIZE];
+
+  if (!bfd_get_section_contents (abfd, section, header, 0, SVE_HEADER_SIZE))
     {
       warning (_("Couldn't read sve header from "
-		 "'.reg-aarch-sve' section in core file."));
+		 "'%s' core file section."), section_name);
       return 0;
     }
 
-  uint64_t vl = extract_unsigned_integer (header + SVE_HEADER_VL_OFFSET,
-					  SVE_HEADER_VL_LENGTH, byte_order);
-  uint64_t vq = sve_vq_from_vl (vl);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  uint64_t vq
+    = sve_vq_from_vl (extract_unsigned_integer (header + SVE_HEADER_VL_OFFSET,
+						SVE_HEADER_VL_LENGTH,
+						byte_order));
 
-  if (vq > AARCH64_MAX_SVE_VQ)
+  if (vq > AARCH64_MAX_SVE_VQ || vq == 0)
     {
-      warning (_("SVE Vector length in core file not supported by this version"
-		 " of GDB.  (VQ=%s)"), pulongest (vq));
-      return 0;
-    }
-  else if (vq == 0)
-    {
-      warning (_("SVE Vector length in core file is invalid. (VQ=%s"),
+      warning (_("SVE/SSVE vector length in core file is invalid."
+		 " (max vq=%d) (detected vq=%s)"), AARCH64_MAX_SVE_VQ,
 	       pulongest (vq));
       return 0;
     }
@@ -792,14 +801,53 @@ aarch64_linux_core_read_vq (struct gdbarch *gdbarch, bfd *abfd)
   return vq;
 }
 
+/* Get the vector quotient (VQ) value from CORE_BFD's sections.
+
+   Return non-zero if successful and 0 otherwise.  */
+
+static uint64_t
+aarch64_linux_core_read_vq_from_sections (struct gdbarch *gdbarch,
+					  bfd *core_bfd)
+{
+  /* First check if we have a SSVE section.  If so, check if it is active.  */
+  asection *section = bfd_get_section_by_name (core_bfd, ".reg-aarch-ssve");
+
+  if (section != nullptr)
+    {
+      /* We've found a SSVE section, so now fetch its data.  */
+      gdb_byte header[SVE_HEADER_SIZE];
+
+      if (bfd_get_section_contents (core_bfd, section, header, 0,
+				    SVE_HEADER_SIZE))
+	{
+	  /* Check if the SSVE section has SVE contents.  */
+	  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+	  uint16_t flags
+	    = extract_unsigned_integer (header + SVE_HEADER_FLAGS_OFFSET,
+					SVE_HEADER_FLAGS_LENGTH, byte_order);
+
+	  if (flags & SVE_HEADER_FLAG_SVE)
+	    {
+	      /* The SSVE state is active, so return the vector length from the
+		 the SSVE section.  */
+	      return aarch64_linux_core_read_vq (gdbarch, core_bfd,
+						 ".reg-aarch-ssve");
+	    }
+	}
+    }
+
+  /* No valid SSVE section.  Return the vq from the SVE section (if any).  */
+  return aarch64_linux_core_read_vq (gdbarch, core_bfd, ".reg-aarch-sve");
+}
+
 /* Supply register REGNUM from BUF to REGCACHE, using the register map
    in REGSET.  If REGNUM is -1, do this for all registers in REGSET.
-   If BUF is NULL, set the registers to "unavailable" status.  */
+   If BUF is nullptr, set the registers to "unavailable" status.  */
 
 static void
-aarch64_linux_supply_sve_regset (const struct regset *regset,
-				 struct regcache *regcache,
-				 int regnum, const void *buf, size_t size)
+supply_sve_regset (const struct regset *regset,
+		   struct regcache *regcache,
+		   int regnum, const void *buf, size_t size)
 {
   gdb_byte *header = (gdb_byte *) buf;
   struct gdbarch *gdbarch = regcache->arch ();
@@ -851,14 +899,89 @@ aarch64_linux_supply_sve_regset (const struct regset *regset,
     }
 }
 
+/* Collect an inactive SVE register set state.  This is equivalent to a
+   fpsimd layout.
+
+   Collect the data from REGCACHE to BUF, using the register
+   map in REGSET.  */
+
+static void
+collect_inactive_sve_regset (const struct regcache *regcache,
+			     void *buf, size_t size, int vg_regnum)
+{
+  gdb_byte *header = (gdb_byte *) buf;
+  struct gdbarch *gdbarch = regcache->arch ();
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
+  gdb_assert (buf != nullptr);
+  gdb_assert (size >= SVE_CORE_DUMMY_SIZE);
+
+  /* Zero out everything first.  */
+  memset ((gdb_byte *) buf, 0, SVE_CORE_DUMMY_SIZE);
+
+  /* BUF starts with a SVE header prior to the register dump.  */
+
+  /* Dump the default size of an empty SVE payload.  */
+  uint32_t real_size = SVE_CORE_DUMMY_SIZE;
+  store_unsigned_integer (header + SVE_HEADER_SIZE_OFFSET,
+			  SVE_HEADER_SIZE_LENGTH, byte_order, real_size);
+
+  /* Dump a dummy max size.  */
+  uint32_t max_size = SVE_CORE_DUMMY_MAX_SIZE;
+  store_unsigned_integer (header + SVE_HEADER_MAX_SIZE_OFFSET,
+			  SVE_HEADER_MAX_SIZE_LENGTH, byte_order, max_size);
+
+  /* Dump the vector length.  */
+  ULONGEST vg = 0;
+  regcache->raw_collect (vg_regnum, &vg);
+  uint16_t vl = sve_vl_from_vg (vg);
+  store_unsigned_integer (header + SVE_HEADER_VL_OFFSET, SVE_HEADER_VL_LENGTH,
+			  byte_order, vl);
+
+  /* Dump the standard maximum vector length.  */
+  uint16_t max_vl = SVE_CORE_DUMMY_MAX_VL;
+  store_unsigned_integer (header + SVE_HEADER_MAX_VL_OFFSET,
+			  SVE_HEADER_MAX_VL_LENGTH, byte_order,
+			  max_vl);
+
+  /* The rest of the fields are zero.  */
+  uint16_t flags = SVE_CORE_DUMMY_FLAGS;
+  store_unsigned_integer (header + SVE_HEADER_FLAGS_OFFSET,
+			  SVE_HEADER_FLAGS_LENGTH, byte_order,
+			  flags);
+  uint16_t reserved = SVE_CORE_DUMMY_RESERVED;
+  store_unsigned_integer (header + SVE_HEADER_RESERVED_OFFSET,
+			  SVE_HEADER_RESERVED_LENGTH, byte_order, reserved);
+
+  /* We are done with the header part of it.  Now dump the register state
+     in the FPSIMD format.  */
+
+  /* Dump the first 128 bits of each of the Z registers.  */
+  header += AARCH64_SVE_CONTEXT_REGS_OFFSET;
+  for (int i = 0; i < AARCH64_SVE_Z_REGS_NUM; i++)
+    regcache->raw_collect_part (AARCH64_SVE_Z0_REGNUM + i, 0, V_REGISTER_SIZE,
+				header + V_REGISTER_SIZE * i);
+
+  /* Dump FPSR and FPCR.  */
+  header += 32 * V_REGISTER_SIZE;
+  regcache->raw_collect (AARCH64_FPSR_REGNUM, header);
+  regcache->raw_collect (AARCH64_FPCR_REGNUM, header + 4);
+
+  /* Dump two reserved empty fields of 4 bytes.  */
+  header += 8;
+  memset (header, 0, 8);
+
+  /* We should have a FPSIMD-formatted register dump now.  */
+}
+
 /* Collect register REGNUM from REGCACHE to BUF, using the register
    map in REGSET.  If REGNUM is -1, do this for all registers in
    REGSET.  */
 
 static void
-aarch64_linux_collect_sve_regset (const struct regset *regset,
-				  const struct regcache *regcache,
-				  int regnum, void *buf, size_t size)
+collect_sve_regset (const struct regset *regset,
+		    const struct regcache *regcache,
+		    int regnum, void *buf, size_t size)
 {
   gdb_byte *header = (gdb_byte *) buf;
   struct gdbarch *gdbarch = regcache->arch ();
@@ -873,21 +996,315 @@ aarch64_linux_collect_sve_regset (const struct regset *regset,
 
   store_unsigned_integer (header + SVE_HEADER_SIZE_OFFSET,
 			  SVE_HEADER_SIZE_LENGTH, byte_order, size);
+  uint32_t max_size = SVE_CORE_DUMMY_MAX_SIZE;
   store_unsigned_integer (header + SVE_HEADER_MAX_SIZE_OFFSET,
-			  SVE_HEADER_MAX_SIZE_LENGTH, byte_order, size);
+			  SVE_HEADER_MAX_SIZE_LENGTH, byte_order, max_size);
   store_unsigned_integer (header + SVE_HEADER_VL_OFFSET, SVE_HEADER_VL_LENGTH,
 			  byte_order, sve_vl_from_vq (vq));
+  uint16_t max_vl = SVE_CORE_DUMMY_MAX_VL;
   store_unsigned_integer (header + SVE_HEADER_MAX_VL_OFFSET,
 			  SVE_HEADER_MAX_VL_LENGTH, byte_order,
-			  sve_vl_from_vq (vq));
+			  max_vl);
+  uint16_t flags = SVE_HEADER_FLAG_SVE;
   store_unsigned_integer (header + SVE_HEADER_FLAGS_OFFSET,
 			  SVE_HEADER_FLAGS_LENGTH, byte_order,
-			  SVE_HEADER_FLAG_SVE);
+			  flags);
+  uint16_t reserved = SVE_CORE_DUMMY_RESERVED;
   store_unsigned_integer (header + SVE_HEADER_RESERVED_OFFSET,
-			  SVE_HEADER_RESERVED_LENGTH, byte_order, 0);
+			  SVE_HEADER_RESERVED_LENGTH, byte_order, reserved);
 
   /* The SVE register dump follows.  */
   regcache->collect_regset (regset, regnum, (gdb_byte *) buf + SVE_HEADER_SIZE,
+			    size - SVE_HEADER_SIZE);
+}
+
+/* Supply register REGNUM from BUF to REGCACHE, using the register map
+   in REGSET.  If REGNUM is -1, do this for all registers in REGSET.
+   If BUF is NULL, set the registers to "unavailable" status.  */
+
+static void
+aarch64_linux_supply_sve_regset (const struct regset *regset,
+				 struct regcache *regcache,
+				 int regnum, const void *buf, size_t size)
+{
+  struct gdbarch *gdbarch = regcache->arch ();
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+  if (tdep->has_sme ())
+    {
+      ULONGEST svcr = 0;
+      regcache->raw_collect (tdep->sme_svcr_regnum, &svcr);
+
+      /* Is streaming mode enabled?  */
+      if (svcr & SVCR_SM_BIT)
+	/* If so, don't load SVE data from the SVE section.  The data to be
+	   used is in the SSVE section.  */
+	return;
+    }
+  /* If streaming mode is not enabled, load the SVE regcache data from the SVE
+     section.  */
+  supply_sve_regset (regset, regcache, regnum, buf, size);
+}
+
+/* Collect register REGNUM from REGCACHE to BUF, using the register
+   map in REGSET.  If REGNUM is -1, do this for all registers in
+   REGSET.  */
+
+static void
+aarch64_linux_collect_sve_regset (const struct regset *regset,
+				  const struct regcache *regcache,
+				  int regnum, void *buf, size_t size)
+{
+  struct gdbarch *gdbarch = regcache->arch ();
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+  bool streaming_mode = false;
+
+  if (tdep->has_sme ())
+    {
+      ULONGEST svcr = 0;
+      regcache->raw_collect (tdep->sme_svcr_regnum, &svcr);
+
+      /* Is streaming mode enabled?  */
+      if (svcr & SVCR_SM_BIT)
+	{
+	  /* If so, don't dump SVE regcache data to the SVE section.  The SVE
+	     data should be dumped to the SSVE section.  Dump an empty SVE
+	     block instead.  */
+	  streaming_mode = true;
+	}
+    }
+
+  /* If streaming mode is not enabled or there is no SME support, dump the
+     SVE regcache data to the SVE section.  */
+
+  /* Check if we have an active SVE state (non-zero Z/P/FFR registers).
+     If so, then we need to dump registers in the SVE format.
+
+     Otherwise we should dump the registers in the FPSIMD format.  */
+  if (sve_state_is_empty (regcache) || streaming_mode)
+    collect_inactive_sve_regset (regcache, buf, size, AARCH64_SVE_VG_REGNUM);
+  else
+    collect_sve_regset (regset, regcache, regnum, buf, size);
+}
+
+/* Supply register REGNUM from BUF to REGCACHE, using the register map
+   in REGSET.  If REGNUM is -1, do this for all registers in REGSET.
+   If BUF is NULL, set the registers to "unavailable" status.  */
+
+static void
+aarch64_linux_supply_ssve_regset (const struct regset *regset,
+				  struct regcache *regcache,
+				  int regnum, const void *buf, size_t size)
+{
+  gdb_byte *header = (gdb_byte *) buf;
+  struct gdbarch *gdbarch = regcache->arch ();
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+  uint16_t flags = extract_unsigned_integer (header + SVE_HEADER_FLAGS_OFFSET,
+					     SVE_HEADER_FLAGS_LENGTH,
+					     byte_order);
+
+  /* Since SVCR's bits are inferred from the data we have in the header of the
+     SSVE section, we need to initialize it to zero first, so that it doesn't
+     carry garbage data.  */
+  ULONGEST svcr = 0;
+  regcache->raw_supply (tdep->sme_svcr_regnum, &svcr);
+
+  /* Is streaming mode enabled?  */
+  if (flags & SVE_HEADER_FLAG_SVE)
+    {
+      /* Streaming mode is active, so flip the SM bit.  */
+      svcr = SVCR_SM_BIT;
+      regcache->raw_supply (tdep->sme_svcr_regnum, &svcr);
+
+      /* Fetch the SVE data from the SSVE section.  */
+      supply_sve_regset (regset, regcache, regnum, buf, size);
+    }
+}
+
+/* Collect register REGNUM from REGCACHE to BUF, using the register
+   map in REGSET.  If REGNUM is -1, do this for all registers in
+   REGSET.  */
+
+static void
+aarch64_linux_collect_ssve_regset (const struct regset *regset,
+				   const struct regcache *regcache,
+				   int regnum, void *buf, size_t size)
+{
+  struct gdbarch *gdbarch = regcache->arch ();
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+  ULONGEST svcr = 0;
+  regcache->raw_collect (tdep->sme_svcr_regnum, &svcr);
+
+  /* Is streaming mode enabled?  */
+  if (svcr & SVCR_SM_BIT)
+    {
+      /* If so, dump SVE regcache data to the SSVE section.  */
+      collect_sve_regset (regset, regcache, regnum, buf, size);
+    }
+  else
+    {
+      /* Otherwise dump an empty SVE block to the SSVE section with the
+	 streaming vector length.  */
+      collect_inactive_sve_regset (regcache, buf, size, tdep->sme_svg_regnum);
+    }
+}
+
+/* Supply register REGNUM from BUF to REGCACHE, using the register map
+   in REGSET.  If REGNUM is -1, do this for all registers in REGSET.
+   If BUF is NULL, set the registers to "unavailable" status.  */
+
+static void
+aarch64_linux_supply_za_regset (const struct regset *regset,
+				struct regcache *regcache,
+				int regnum, const void *buf, size_t size)
+{
+  gdb_byte *header = (gdb_byte *) buf;
+  struct gdbarch *gdbarch = regcache->arch ();
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
+  /* Handle an empty buffer.  */
+  if (buf == nullptr)
+    return regcache->supply_regset (regset, regnum, nullptr, size);
+
+  if (size < SVE_HEADER_SIZE)
+    error (_("ZA state header size (%s) invalid.  Should be at least %s."),
+	   pulongest (size), pulongest (SVE_HEADER_SIZE));
+
+  /* The ZA register note in a core file can have a couple of states:
+
+     1 - Just the header without the payload.  This means that there is no
+	 ZA data, and we should populate only SVCR and SVG registers on GDB's
+	 side.  The ZA data should be marked as unavailable.
+
+     2 - The header with an additional data payload.  This means there is
+	 actual ZA data, and we should populate ZA, SVCR and SVG.  */
+
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+  /* Populate SVG.  */
+  ULONGEST svg
+    = sve_vg_from_vl (extract_unsigned_integer (header + SVE_HEADER_VL_OFFSET,
+						SVE_HEADER_VL_LENGTH,
+						byte_order));
+  regcache->raw_supply (tdep->sme_svg_regnum, &svg);
+
+  size_t data_size
+    = extract_unsigned_integer (header + SVE_HEADER_SIZE_OFFSET,
+				SVE_HEADER_SIZE_LENGTH, byte_order)
+      - SVE_HEADER_SIZE;
+
+  /* Populate SVCR.  */
+  bool has_za_payload = (data_size > 0);
+  ULONGEST svcr;
+  regcache->raw_collect (tdep->sme_svcr_regnum, &svcr);
+
+  /* If we have a ZA payload, enable bit 2 of SVCR, otherwise clear it.  This
+     register gets updated by the SVE/SSVE-handling functions as well, as they
+     report the SM bit 1.  */
+  if (has_za_payload)
+    svcr |= SVCR_ZA_BIT;
+  else
+    svcr &= ~SVCR_ZA_BIT;
+
+  /* Update SVCR in the register buffer.  */
+  regcache->raw_supply (tdep->sme_svcr_regnum, &svcr);
+
+  /* Populate the register cache with ZA register contents, if we have any.  */
+  buf = has_za_payload ? (gdb_byte *) buf + SVE_HEADER_SIZE : nullptr;
+
+  size_t za_bytes = std::pow (sve_vl_from_vg (svg), 2);
+
+  /* Update ZA in the register buffer.  */
+  if (has_za_payload)
+    {
+      /* Check that the payload size is sane.  */
+      if (size < SVE_HEADER_SIZE + za_bytes)
+	{
+	  error (_("ZA header + payload size (%s) invalid.  Should be at "
+		   "least %s."),
+		 pulongest (size), pulongest (SVE_HEADER_SIZE + za_bytes));
+	}
+
+      regcache->raw_supply (tdep->sme_za_regnum, buf);
+    }
+  else
+    {
+      gdb_byte za_zeroed[za_bytes];
+      memset (za_zeroed, 0, za_bytes);
+      regcache->raw_supply (tdep->sme_za_regnum, za_zeroed);
+    }
+}
+
+/* Collect register REGNUM from REGCACHE to BUF, using the register
+   map in REGSET.  If REGNUM is -1, do this for all registers in
+   REGSET.  */
+
+static void
+aarch64_linux_collect_za_regset (const struct regset *regset,
+				 const struct regcache *regcache,
+				 int regnum, void *buf, size_t size)
+{
+  gdb_assert (buf != nullptr);
+
+  /* Sanity check the dump size.  */
+  gdb_assert (size >= SVE_HEADER_SIZE);
+
+  /* The ZA register note in a core file can have a couple of states:
+
+     1 - Just the header without the payload.  This means that there is no
+	 ZA data, and we should dump just the header.
+
+     2 - The header with an additional data payload.  This means there is
+	 actual ZA data, and we should dump both the header and the ZA data
+	 payload.  */
+
+  aarch64_gdbarch_tdep *tdep
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
+
+  /* Determine if we have ZA state from the SVCR register ZA bit.  */
+  ULONGEST svcr;
+  regcache->raw_collect (tdep->sme_svcr_regnum, &svcr);
+
+  /* Check the ZA payload.  */
+  bool has_za_payload = (svcr & SVCR_ZA_BIT) != 0;
+  size = has_za_payload ? size : SVE_HEADER_SIZE;
+
+  /* Write the size and max_size fields.  */
+  gdb_byte *header = (gdb_byte *) buf;
+  enum bfd_endian byte_order = gdbarch_byte_order (regcache->arch ());
+  store_unsigned_integer (header + SVE_HEADER_SIZE_OFFSET,
+			  SVE_HEADER_SIZE_LENGTH, byte_order, size);
+
+  uint32_t max_size
+    = SVE_HEADER_SIZE + std::pow (sve_vl_from_vq (tdep->sme_svq), 2);
+  store_unsigned_integer (header + SVE_HEADER_MAX_SIZE_OFFSET,
+			  SVE_HEADER_MAX_SIZE_LENGTH, byte_order, max_size);
+
+  /* Output the other fields of the ZA header (vl, max_vl, flags and
+     reserved).  */
+  uint64_t svq = tdep->sme_svq;
+  store_unsigned_integer (header + SVE_HEADER_VL_OFFSET, SVE_HEADER_VL_LENGTH,
+			  byte_order, sve_vl_from_vq (svq));
+
+  uint16_t max_vl = SVE_CORE_DUMMY_MAX_VL;
+  store_unsigned_integer (header + SVE_HEADER_MAX_VL_OFFSET,
+			  SVE_HEADER_MAX_VL_LENGTH, byte_order,
+			  max_vl);
+
+  uint16_t flags = SVE_CORE_DUMMY_FLAGS;
+  store_unsigned_integer (header + SVE_HEADER_FLAGS_OFFSET,
+			  SVE_HEADER_FLAGS_LENGTH, byte_order, flags);
+
+  uint16_t reserved = SVE_CORE_DUMMY_RESERVED;
+  store_unsigned_integer (header + SVE_HEADER_RESERVED_OFFSET,
+			  SVE_HEADER_RESERVED_LENGTH, byte_order, reserved);
+
+  buf = has_za_payload ? (gdb_byte *) buf + SVE_HEADER_SIZE : nullptr;
+
+  /* Dump the register cache contents for the ZA register to the buffer.  */
+  regcache->collect_regset (regset, regnum, (gdb_byte *) buf,
 			    size - SVE_HEADER_SIZE);
 }
 
@@ -917,6 +1334,30 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 	  { 0 }
 	};
 
+      const struct regset aarch64_linux_ssve_regset =
+	{
+	  sve_regmap,
+	  aarch64_linux_supply_ssve_regset, aarch64_linux_collect_ssve_regset,
+	  REGSET_VARIABLE_SIZE
+	};
+
+      /* If SME is supported in the core file, process the SSVE section first,
+	 and the SVE section last.  This is because we need information from
+	 the SSVE set to determine if streaming mode is active.  If streaming
+	 mode is active, we need to extract the data from the SSVE section.
+
+	 Otherwise, if streaming mode is not active, we fetch the data from the
+	 SVE section.  */
+      if (tdep->has_sme ())
+	{
+	  cb (".reg-aarch-ssve",
+	      SVE_HEADER_SIZE
+	      + regcache_map_entry_size (aarch64_linux_fpregmap),
+	      SVE_HEADER_SIZE + regcache_map_entry_size (sve_regmap),
+	      &aarch64_linux_ssve_regset, "SSVE registers", cb_data);
+	}
+
+      /* Handle the SVE register set.  */
       const struct regset aarch64_linux_sve_regset =
 	{
 	  sve_regmap,
@@ -933,6 +1374,29 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
     cb (".reg2", AARCH64_LINUX_SIZEOF_FPREGSET, AARCH64_LINUX_SIZEOF_FPREGSET,
 	&aarch64_linux_fpregset, NULL, cb_data);
 
+  if (tdep->has_sme ())
+    {
+      /* Setup the register set information for a ZA register set core
+	 dump.  */
+
+      /* Create this on the fly in order to handle the ZA register size.  */
+      const struct regcache_map_entry za_regmap[] =
+	{
+	  { 1, tdep->sme_za_regnum, (int) std::pow (sve_vl_from_vq (tdep->sme_svq), 2) }
+	};
+
+      const struct regset aarch64_linux_za_regset =
+	{
+	  za_regmap,
+	  aarch64_linux_supply_za_regset, aarch64_linux_collect_za_regset,
+	  REGSET_VARIABLE_SIZE
+	};
+
+      cb (".reg-aarch-za",
+	  SVE_HEADER_SIZE,
+	  SVE_HEADER_SIZE + std::pow (sve_vl_from_vq (tdep->sme_svq), 2),
+	  &aarch64_linux_za_regset, "ZA register", cb_data);
+    }
 
   if (tdep->has_pauth ())
     {
@@ -1011,7 +1475,16 @@ aarch64_linux_core_read_description (struct gdbarch *gdbarch,
   CORE_ADDR hwcap2 = linux_get_hwcap2 (auxv, target, gdbarch);
 
   aarch64_features features;
-  features.vq = aarch64_linux_core_read_vq (gdbarch, abfd);
+
+  /* We need to extract the SVE data from the .reg-aarch-sve section or the
+     .reg-aarch-ssve section depending on which one was active when the core
+     file was generated.
+
+     If the SSVE section contains SVE data, then it is considered active.
+     Otherwise the SVE section is considered active.  This guarantees we will
+     have the correct target description with the correct SVE vector
+     length.  */
+  features.vq = aarch64_linux_core_read_vq_from_sections (gdbarch, abfd);
   features.pauth = hwcap & AARCH64_HWCAP_PACA;
   features.mte = hwcap2 & HWCAP2_MTE;
 
@@ -1024,6 +1497,9 @@ aarch64_linux_core_read_description (struct gdbarch *gdbarch,
 	 dividing by 8.  */
       features.tls = size / AARCH64_TLS_REGISTER_SIZE;
     }
+
+  features.svq
+    = aarch64_linux_core_read_vq (gdbarch, abfd, ".reg-aarch-za");
 
   return aarch64_read_description (features);
 }
