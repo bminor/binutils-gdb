@@ -19,7 +19,6 @@
 : SYNOPSIS
 	skip_past_newline
 	get_stuff_in_command	
-	paramstuff
 	indent
 	maybecatstr
 ;

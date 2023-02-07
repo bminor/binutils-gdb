@@ -65,7 +65,6 @@
 	exit - fn chew_exit
 	swap
 	outputdots - strip out lines without leading dots
-	paramstuff - convert full declaration into "PARAMS" form if not already
 	maybecatstr - do catstr if internal_mode == internal_wanted, discard
 		value in any case
 	translatecomments - turn {* and *} into comment delimiters
@@ -451,84 +450,6 @@ print_stack_level (void)
   fprintf (stderr, "current integer stack depth = %ld\n",
 	   (long) (isp - istack));
   pc++;
-}
-
-/* turn:
-     foobar name(stuff);
-   into:
-     foobar
-     name PARAMS ((stuff));
-   and a blank line.
- */
-
-static void
-paramstuff (void)
-{
-  unsigned int openp;
-  unsigned int fname;
-  unsigned int idx;
-  unsigned int len;
-  string_type out;
-  init_string (&out);
-
-#define NO_PARAMS 1
-
-  /* Make sure that it's not already param'd or proto'd.  */
-  if (NO_PARAMS
-      || find (tos, "PARAMS") || find (tos, "PROTO") || !find (tos, "("))
-    {
-      catstr (&out, tos);
-    }
-  else
-    {
-      /* Find the open paren.  */
-      for (openp = 0; at (tos, openp) != '(' && at (tos, openp); openp++)
-	;
-
-      fname = openp;
-      /* Step back to the fname.  */
-      fname--;
-      while (fname && isspace ((unsigned char) at (tos, fname)))
-	fname--;
-      while (fname
-	     && !isspace ((unsigned char) at (tos,fname))
-	     && at (tos,fname) != '*')
-	fname--;
-
-      fname++;
-
-      /* Output type, omitting trailing whitespace character(s), if
-         any.  */
-      for (len = fname; 0 < len; len--)
-	{
-	  if (!isspace ((unsigned char) at (tos, len - 1)))
-	    break;
-	}
-      for (idx = 0; idx < len; idx++)
-	catchar (&out, at (tos, idx));
-
-      cattext (&out, "\n");	/* Insert a newline between type and fnname */
-
-      /* Output function name, omitting trailing whitespace
-         character(s), if any.  */
-      for (len = openp; 0 < len; len--)
-	{
-	  if (!isspace ((unsigned char) at (tos, len - 1)))
-	    break;
-	}
-      for (idx = fname; idx < len; idx++)
-	catchar (&out, at (tos, idx));
-
-      cattext (&out, " PARAMS (");
-
-      for (idx = openp; at (tos, idx) && at (tos, idx) != ';'; idx++)
-	catchar (&out, at (tos, idx));
-
-      cattext (&out, ");\n\n");
-    }
-  overwrite_string (tos, &out);
-  pc++;
-
 }
 
 /* turn {*
@@ -1504,7 +1425,6 @@ main (int ac, char *av[])
   add_intrinsic ("exit", chew_exit);
   add_intrinsic ("swap", swap);
   add_intrinsic ("outputdots", outputdots);
-  add_intrinsic ("paramstuff", paramstuff);
   add_intrinsic ("maybecatstr", maybecatstr);
   add_intrinsic ("translatecomments", translatecomments);
   add_intrinsic ("kill_bogus_lines", kill_bogus_lines);

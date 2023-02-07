@@ -1,5 +1,11 @@
 2023-02-07  Tom Tromey  <tom@tromey.com>
 
+	* doc/proto.str (SYNOPSIS): Don't use paramstuff.
+	* doc/chew.c (paramstuff): Remove.
+	(main): Don't add paramstuff intrinsic.
+
+2023-02-07  Tom Tromey  <tom@tromey.com>
+
 	* doc/doc.str, doc/proto.str: Add copyright header.
 
 2023-02-07  Tom Tromey  <tom@tromey.com>
