@@ -1,5 +1,9 @@
 2023-02-07  Tom Tromey  <tom@tromey.com>
 
+	* doc/doc.str, doc/proto.str: Add copyright header.
+
+2023-02-07  Tom Tromey  <tom@tromey.com>
+
 	* doc/webassembly.texi (File layout): Remove second argument from
 	@node.
 	* doc/bfd.texi: Use single-argument @node everywhere.
