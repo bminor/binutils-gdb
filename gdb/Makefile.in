@@ -728,6 +728,7 @@ ALL_64_TARGET_OBS = \
 	arch/aarch64.o \
 	arch/aarch64-insn.o \
 	arch/aarch64-mte-linux.o \
+	arch/aarch64-scalable-linux.o \
 	arch/amd64.o \
 	arch/riscv.o \
 	bpf-tdep.o \
@@ -1524,6 +1525,7 @@ HFILES_NO_SRCDIR = \
 	arch/aarch64.h \
 	arch/aarch64-insn.h \
 	arch/aarch64-mte-linux.h \
+	arch/aarch64-scalable-linux.h \
 	arch/arc.h \
 	arch/arm.h \
 	arch/i386.h \
@@ -1562,6 +1564,7 @@ HFILES_NO_SRCDIR = \
 	nat/aarch64-linux-hw-point.h \
 	nat/aarch64-mte-linux-ptrace.h \
 	nat/aarch64-scalable-linux-ptrace.h \
+	nat/aarch64-scalable-linux-sigcontext.h \
 	nat/amd64-linux-siginfo.h \
 	nat/gdb_ptrace.h \
 	nat/gdb_thread_db.h \
@@ -1627,6 +1630,7 @@ ALLDEPFILES = \
 	arch/aarch64.c \
 	arch/aarch64-insn.c \
 	arch/aarch64-mte-linux.c \
+	arch/aarch64-scalable-linux.c \
 	arch/amd64.c \
 	arch/arc.c \
 	arch/arm.c \

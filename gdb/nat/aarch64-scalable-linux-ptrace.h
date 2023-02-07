@@ -1,5 +1,5 @@
-/* Common target dependent definitions for AArch64 Scalable Extensions
-   (SVE/SME).
+/* Common native Linux definitions for the AArch64 scalable
+   extensions: SVE and SME.
 
    Copyright (C) 2018-2023 Free Software Foundation, Inc.
 
@@ -31,19 +31,58 @@
    result when <asm/ptrace.h> is included before <sys/ptrace.h>.  */
 #include <sys/ptrace.h>
 #include <asm/ptrace.h>
-
-#ifndef SVE_SIG_ZREGS_SIZE
+#include <stdarg.h>
+#include "aarch64-scalable-linux-ptrace.h"
 #include "aarch64-scalable-linux-sigcontext.h"
-#endif
 
 /* Indicates whether a SVE ptrace header is followed by SVE registers or a
    fpsimd structure.  */
-
 #define HAS_SVE_STATE(header) ((header).flags & SVE_PT_REGS_SVE)
+
+/* Return true if there is an active SVE state in TID.
+   Return false otherwise.  */
+bool aarch64_has_sve_state (int tid);
+
+/* Return true if there is an active SSVE state in TID.
+   Return false otherwise.  */
+bool aarch64_has_ssve_state (int tid);
+
+/* Return true if there is an active ZA state in TID.
+   Return false otherwise.  */
+bool aarch64_has_za_state (int tid);
+
+/* Given TID, read the SVE header into HEADER.
+
+   Return true if successful, false otherwise.  */
+bool read_sve_header (int tid, struct user_sve_header &header);
+
+/* Given TID, store the SVE HEADER.
+
+   Return true if successful, false otherwise.  */
+bool write_sve_header (int tid, const struct user_sve_header &header);
+
+/* Given TID, read the SSVE header into HEADER.
+
+   Return true if successful, false otherwise.  */
+bool read_ssve_header (int tid, struct user_sve_header &header);
+
+/* Given TID, store the SSVE HEADER.
+
+   Return true if successful, false otherwise.  */
+bool write_ssve_header (int tid, const struct user_sve_header &header);
+
+/* Given TID, read the ZA header into HEADER.
+
+   Return true if successful, false otherwise.  */
+bool read_za_header (int tid, struct user_za_header &header);
+
+/* Given TID, store the ZA HEADER.
+
+   Return true if successful, false otherwise.  */
+bool write_za_header (int tid, const struct user_za_header &header);
 
 /* Read VQ for the given tid using ptrace.  If SVE is not supported then zero
    is returned (on a system that supports SVE, then VQ cannot be zero).  */
-
 uint64_t aarch64_sve_get_vq (int tid);
 
 /* Set VQ in the kernel for the given tid, using either the value VQ or
@@ -52,27 +91,64 @@ uint64_t aarch64_sve_get_vq (int tid);
 bool aarch64_sve_set_vq (int tid, uint64_t vq);
 bool aarch64_sve_set_vq (int tid, struct reg_buffer_common *reg_buf);
 
-/* Read the current SVE register set from thread TID and return its data
-   through a byte vector.  */
+/* Read the streaming mode vq (svq) for the given TID.  If the ZA state is not
+   supported or active, return 0.  */
+uint64_t aarch64_za_get_svq (int tid);
 
+/* Set the vector quotient (vq) in the kernel for the given TID using the
+   value VQ.
+
+   Return true if successful, false otherwise.  */
+bool aarch64_za_set_svq (int tid, uint64_t vq);
+bool aarch64_za_set_svq (int tid, const struct reg_buffer_common *reg_buf,
+			 int svg_regnum);
+
+/* Given TID, return the SVE/SSVE data as a vector of bytes.  */
 extern gdb::byte_vector aarch64_fetch_sve_regset (int tid);
 
-/* Write the SVE contents from SVE_STATE to thread TID.  */
+/* Write the SVE/SSVE contents from SVE_STATE to TID.  */
+extern void aarch64_store_sve_regset (int tid,
+				      const gdb::byte_vector &sve_state);
 
-extern void
-aarch64_store_sve_regset (int tid, const gdb::byte_vector &sve_state);
+/* Given TID, return the ZA data as a vector of bytes.  */
+extern gdb::byte_vector aarch64_fetch_za_regset (int tid);
 
-/* Given a thread id TID and a register buffer REG_BUF, update the register
-   buffer with the SVE state from thread TID.  */
+/* Write ZA_STATE for TID.  */
+extern void aarch64_store_za_regset (int tid, const gdb::byte_vector &za_state);
 
+/* Given TID, initialize the ZA register set so the header contains the right
+   size.  The bytes of the ZA register are initialized to zero.  */
+extern void aarch64_initialize_za_regset (int tid);
+
+/* Given a register buffer REG_BUF, update it with SVE/SSVE register data
+   from SVE_STATE.  */
 extern void
 aarch64_sve_regs_copy_to_reg_buf (int tid, struct reg_buffer_common *reg_buf);
 
-/* Given a thread id TID and a register buffer REG_BUF containing SVE
+/* Given a thread id TID and a register buffer REG_BUF containing SVE/SSVE
    register data, write the SVE data to thread TID.  */
-
 extern void
 aarch64_sve_regs_copy_from_reg_buf (int tid,
 				    struct reg_buffer_common *reg_buf);
 
+/* Given a thread id TID and a register buffer REG_BUF, update the register
+   buffer with the ZA state from thread TID.
+
+   ZA_REGNUM, SVG_REGNUM and SVCR_REGNUM are the register numbers for ZA,
+   SVG and SVCR registers.  */
+extern void aarch64_za_regs_copy_to_reg_buf (int tid,
+					     struct reg_buffer_common *reg_buf,
+					     int za_regnum, int svg_regnum,
+					     int svcr_regnum);
+
+/* Given a thread id TID and a register buffer REG_BUF containing ZA register
+   data, write the ZA data to thread TID.
+
+   ZA_REGNUM, SVG_REGNUM and SVCR_REGNUM are the register numbers for ZA,
+   SVG and SVCR registers.  */
+extern void
+aarch64_za_regs_copy_from_reg_buf (int tid,
+				   struct reg_buffer_common *reg_buf,
+				   int za_regnum, int svg_regnum,
+				   int svcr_regnum);
 #endif /* NAT_AARCH64_SCALABLE_LINUX_PTRACE_H */

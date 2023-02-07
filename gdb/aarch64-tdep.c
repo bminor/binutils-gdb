@@ -57,6 +57,8 @@
 
 /* For inferior_ptid and current_inferior ().  */
 #include "inferior.h"
+/* For std::sqrt and std::pow.  */
+#include <cmath>
 
 /* A Homogeneous Floating-Point or Short-Vector Aggregate may have at most
    four members.  */
@@ -188,6 +190,43 @@ struct aarch64_prologue_cache
 
   /* Saved register offsets.  */
   trad_frame_saved_reg *saved_regs;
+};
+
+/* Holds information used to read/write from/to ZA
+   pseudo-registers.
+
+   With this information, the read/write code can be simplified so it
+   deals only with the required information to map a ZA pseudo-register
+   to the exact bytes into the ZA contents buffer.  Otherwise we'd need
+   to use a lot of conditionals.  */
+
+struct za_offsets
+{
+  /* Offset, into ZA, of the starting byte of the pseudo-register.  */
+  size_t starting_offset;
+  /* The size of the contiguous chunks of the pseudo-register.  */
+  size_t chunk_size;
+  /* The number of pseudo-register chunks contained in ZA.  */
+  size_t chunks;
+  /* The offset between each contiguous chunk.  */
+  size_t stride_size;
+};
+
+/* Holds data that is helpful to determine the individual fields that make
+   up the names of the ZA pseudo-registers.  It is also very helpful to
+   determine offsets, stride and sizes for reading ZA tiles and tile
+   slices.  */
+
+struct za_pseudo_encoding
+{
+  /* The slice index (0 ~ svl).  Only used for tile slices.  */
+  uint8_t slice_index;
+  /* The tile number (0 ~ 15).  */
+  uint8_t tile_index;
+  /* Direction (horizontal/vertical).  Only used for tile slices.  */
+  bool horizontal;
+  /* Qualifier index (0 ~ 4).  These map to B, H, S, D and Q.  */
+  uint8_t qualifier_index;
 };
 
 static void
@@ -2147,6 +2186,214 @@ aarch64_vnb_type (struct gdbarch *gdbarch)
   return tdep->vnb_type;
 }
 
+/* Return TRUE if REGNUM is a ZA tile slice pseudo-register number.  Return
+   FALSE otherwise.  */
+
+static bool
+is_sme_tile_slice_pseudo_register (struct gdbarch *gdbarch, int regnum)
+{
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+  gdb_assert (tdep->has_sme ());
+  gdb_assert (tdep->sme_svq > 0);
+  gdb_assert (tdep->sme_pseudo_base <= regnum);
+  gdb_assert (regnum < tdep->sme_pseudo_base + tdep->sme_pseudo_count);
+
+  if (tdep->sme_tile_slice_pseudo_base <= regnum
+      && regnum < tdep->sme_tile_slice_pseudo_base
+		  + tdep->sme_tile_slice_pseudo_count)
+    return true;
+
+  return false;
+}
+
+/* Given REGNUM, a ZA pseudo-register number, return, in ENCODING, the
+   decoded fields that make up its name.  */
+
+static void
+aarch64_za_decode_pseudos (struct gdbarch *gdbarch, int regnum,
+			   struct za_pseudo_encoding &encoding)
+{
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+  gdb_assert (tdep->has_sme ());
+  gdb_assert (tdep->sme_svq > 0);
+  gdb_assert (tdep->sme_pseudo_base <= regnum);
+  gdb_assert (regnum < tdep->sme_pseudo_base + tdep->sme_pseudo_count);
+
+  if (is_sme_tile_slice_pseudo_register (gdbarch, regnum))
+    {
+      /* Calculate the tile slice pseudo-register offset relative to the other
+	 tile slice pseudo-registers.  */
+      int offset = regnum - tdep->sme_tile_slice_pseudo_base;
+
+      /* Fetch the qualifier.  We can have 160 to 2560 possible tile slice
+	 pseudo-registers.  Each qualifier (we have 5 of them: B, H, S, D
+	 and Q) covers 32 * svq pseudo-registers, so we divide the offset by
+	 that constant.  */
+      size_t qualifier = offset / (tdep->sme_svq * 32);
+      encoding.qualifier_index = qualifier;
+
+      /* Prepare to fetch the direction (d), tile number (t) and slice
+	 number (s).  */
+      int dts = offset % (tdep->sme_svq * 32);
+
+      /* The direction is represented by the even/odd numbers.  Even-numbered
+	 pseudo-registers are horizontal tile slices and odd-numbered
+	 pseudo-registers are vertical tile slices.  */
+      encoding.horizontal = !(dts & 1);
+
+      /* Fetch the tile number.  The tile number is closely related to the
+	 qualifier.  B has 1 tile, H has 2 tiles, S has 4 tiles, D has 8 tiles
+	 and Q has 16 tiles.  */
+      encoding.tile_index = (dts >> 1) & ((1 << qualifier) - 1);
+
+      /* Fetch the slice number.  The slice number is closely related to the
+	 qualifier and the svl.  */
+      encoding.slice_index = dts >> (qualifier + 1);
+    }
+  else
+    {
+      /* Calculate the tile pseudo-register offset relative to the other
+	 tile pseudo-registers.  */
+      int offset = regnum - tdep->sme_tile_pseudo_base;
+
+      encoding.qualifier_index = std::floor (std::log2 (offset + 1));
+      /* Calculate the tile number.  */
+      encoding.tile_index = (offset + 1) - (1 << encoding.qualifier_index);
+      /* Direction and slice index don't get used for tiles.  Set them to
+	 0/false values.  */
+      encoding.slice_index = 0;
+      encoding.horizontal = false;
+    }
+}
+
+/* Return the type for a ZA tile slice pseudo-register based on ENCODING.  */
+
+static struct type *
+aarch64_za_tile_slice_type (struct gdbarch *gdbarch,
+			    const struct za_pseudo_encoding &encoding)
+{
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+  gdb_assert (tdep->has_sme ());
+  gdb_assert (tdep->sme_svq > 0);
+
+  if (tdep->sme_tile_slice_type_q == nullptr)
+    {
+      /* Q tile slice type.  */
+      tdep->sme_tile_slice_type_q
+	= init_vector_type (builtin_type (gdbarch)->builtin_uint128,
+			    tdep->sme_svq);
+      /* D tile slice type.  */
+      tdep->sme_tile_slice_type_d
+	= init_vector_type (builtin_type (gdbarch)->builtin_uint64,
+			    tdep->sme_svq * 2);
+      /* S tile slice type.  */
+      tdep->sme_tile_slice_type_s
+	= init_vector_type (builtin_type (gdbarch)->builtin_uint32,
+			    tdep->sme_svq * 4);
+      /* H tile slice type.  */
+      tdep->sme_tile_slice_type_h
+	= init_vector_type (builtin_type (gdbarch)->builtin_uint16,
+			    tdep->sme_svq * 8);
+      /* B tile slice type.  */
+      tdep->sme_tile_slice_type_b
+	= init_vector_type (builtin_type (gdbarch)->builtin_uint8,
+			    tdep->sme_svq * 16);
+  }
+
+  switch (encoding.qualifier_index)
+    {
+      case 4:
+	return tdep->sme_tile_slice_type_q;
+      case 3:
+	return tdep->sme_tile_slice_type_d;
+      case 2:
+	return tdep->sme_tile_slice_type_s;
+      case 1:
+	return tdep->sme_tile_slice_type_h;
+      case 0:
+	return tdep->sme_tile_slice_type_b;
+      default:
+	error (_("Invalid qualifier index %s for tile slice pseudo register."),
+	       pulongest (encoding.qualifier_index));
+    }
+
+  gdb_assert_not_reached ("Unknown qualifier for ZA tile slice register");
+}
+
+/* Return the type for a ZA tile pseudo-register based on ENCODING.  */
+
+static struct type *
+aarch64_za_tile_type (struct gdbarch *gdbarch,
+		      const struct za_pseudo_encoding &encoding)
+{
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+  gdb_assert (tdep->has_sme ());
+  gdb_assert (tdep->sme_svq > 0);
+
+  if (tdep->sme_tile_type_q == nullptr)
+    {
+      struct type *inner_vectors_type;
+
+      /* Q tile type.  */
+      inner_vectors_type
+	= init_vector_type (builtin_type (gdbarch)->builtin_uint128,
+			    tdep->sme_svq);
+      tdep->sme_tile_type_q
+	= init_vector_type (inner_vectors_type, tdep->sme_svq);
+
+      /* D tile type.  */
+      inner_vectors_type
+	= init_vector_type (builtin_type (gdbarch)->builtin_uint64,
+			    tdep->sme_svq * 2);
+      tdep->sme_tile_type_d
+	= init_vector_type (inner_vectors_type, tdep->sme_svq * 2);
+
+      /* S tile type.  */
+      inner_vectors_type
+	= init_vector_type (builtin_type (gdbarch)->builtin_uint32,
+			    tdep->sme_svq * 4);
+      tdep->sme_tile_type_s
+	= init_vector_type (inner_vectors_type, tdep->sme_svq * 4);
+
+      /* H tile type.  */
+      inner_vectors_type
+	= init_vector_type (builtin_type (gdbarch)->builtin_uint16,
+			    tdep->sme_svq * 8);
+      tdep->sme_tile_type_h
+	= init_vector_type (inner_vectors_type, tdep->sme_svq * 8);
+
+      /* B tile type.  */
+      inner_vectors_type
+	= init_vector_type (builtin_type (gdbarch)->builtin_uint8,
+			    tdep->sme_svq * 16);
+      tdep->sme_tile_type_b
+	= init_vector_type (inner_vectors_type, tdep->sme_svq * 16);
+  }
+
+  switch (encoding.qualifier_index)
+    {
+      case 4:
+	return tdep->sme_tile_type_q;
+      case 3:
+	return tdep->sme_tile_type_d;
+      case 2:
+	return tdep->sme_tile_type_s;
+      case 1:
+	return tdep->sme_tile_type_h;
+      case 0:
+	return tdep->sme_tile_type_b;
+      default:
+	error (_("Invalid qualifier index %s for ZA tile pseudo register."),
+	       pulongest (encoding.qualifier_index));
+    }
+
+  gdb_assert_not_reached ("unknown qualifier for tile pseudo-register");
+}
+
 /* Return the type for an AdvSISD V register.  */
 
 static struct type *
@@ -2579,6 +2826,73 @@ is_w_pseudo_register (struct gdbarch *gdbarch, int regnum)
   return false;
 }
 
+/* Return TRUE if REGNUM is a SME pseudo-register number.  Return FALSE
+   otherwise.  */
+
+static bool
+is_sme_pseudo_register (struct gdbarch *gdbarch, int regnum)
+{
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+  if (tdep->has_sme () && tdep->sme_pseudo_base <= regnum
+      && regnum < tdep->sme_pseudo_base + tdep->sme_pseudo_count)
+    return true;
+
+  return false;
+}
+
+/* Convert ENCODING into a ZA tile slice name.  */
+
+static const std::string
+aarch64_za_tile_slice_name (const struct za_pseudo_encoding &encoding)
+{
+  gdb_assert (encoding.qualifier_index >= 0);
+  gdb_assert (encoding.qualifier_index <= 4);
+  gdb_assert (encoding.tile_index >= 0);
+  gdb_assert (encoding.tile_index <= 15);
+  gdb_assert (encoding.slice_index >= 0);
+  gdb_assert (encoding.slice_index <= 255);
+
+  const char orientation = encoding.horizontal ? 'h' : 'v';
+
+  const char qualifiers[6] = "bhsdq";
+  const char qualifier = qualifiers [encoding.qualifier_index];
+  return string_printf ("za%d%c%c%d", encoding.tile_index, orientation,
+			qualifier, encoding.slice_index);
+}
+
+/* Convert ENCODING into a ZA tile name.  */
+
+static const std::string
+aarch64_za_tile_name (const struct za_pseudo_encoding &encoding)
+{
+  /* Tiles don't use the slice number and the direction fields.  */
+  gdb_assert (encoding.qualifier_index >= 0);
+  gdb_assert (encoding.qualifier_index <= 4);
+  gdb_assert (encoding.tile_index >= 0);
+  gdb_assert (encoding.tile_index <= 15);
+
+  const char qualifiers[6] = "bhsdq";
+  const char qualifier = qualifiers [encoding.qualifier_index];
+  return (string_printf ("za%d%c", encoding.tile_index, qualifier));
+}
+
+/* Given a SME pseudo-register REGNUM, return its type.  */
+
+static struct type *
+aarch64_sme_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
+{
+  struct za_pseudo_encoding encoding;
+
+  /* Decode the SME pseudo-register number.  */
+  aarch64_za_decode_pseudos (gdbarch, regnum, encoding);
+
+  if (is_sme_tile_slice_pseudo_register (gdbarch, regnum))
+    return aarch64_za_tile_slice_type (gdbarch, encoding);
+  else
+    return aarch64_za_tile_type (gdbarch, encoding);
+}
+
 /* Return the pseudo register name corresponding to register regnum.  */
 
 static const char *
@@ -2699,6 +3013,9 @@ aarch64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
 	return sve_v_name[p_regnum - AARCH64_SVE_V0_REGNUM];
     }
 
+  if (is_sme_pseudo_register (gdbarch, regnum))
+    return tdep->sme_pseudo_names[regnum - tdep->sme_pseudo_base].c_str ();
+
   /* RA_STATE is used for unwinding only.  Do not assign it a name - this
      prevents it from being read by methods such as
      mi_cmd_trace_frame_collected.  */
@@ -2741,6 +3058,9 @@ aarch64_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
   if (is_w_pseudo_register (gdbarch, regnum))
     return builtin_type (gdbarch)->builtin_uint32;
 
+  if (is_sme_pseudo_register (gdbarch, regnum))
+    return aarch64_sme_pseudo_register_type (gdbarch, regnum);
+
   if (tdep->has_pauth () && regnum == tdep->ra_sign_state_regnum)
     return builtin_type (gdbarch)->builtin_uint64;
 
@@ -2773,6 +3093,8 @@ aarch64_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   else if (tdep->has_sve () && p_regnum >= AARCH64_SVE_V0_REGNUM
 	   && p_regnum < AARCH64_SVE_V0_REGNUM + AARCH64_V_REGS_NUM)
     return group == all_reggroup || group == vector_reggroup;
+  else if (is_sme_pseudo_register (gdbarch, regnum))
+    return group == all_reggroup || group == vector_reggroup;
   /* RA_STATE is used for unwinding only.  Do not assign it to any groups.  */
   if (tdep->has_pauth () && regnum == tdep->ra_sign_state_regnum)
     return 0;
@@ -2801,6 +3123,122 @@ aarch64_pseudo_read_value_1 (struct gdbarch *gdbarch,
 
   return result_value;
  }
+
+/* Helper function for reading/writing ZA pseudo-registers.  Given REGNUM,
+   a ZA pseudo-register number, return, in OFFSETS, the information on positioning
+   of the bytes that must be read from/written to.  */
+
+static void
+aarch64_za_offsets_from_regnum (struct gdbarch *gdbarch, int regnum,
+				struct za_offsets &offsets)
+{
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+  gdb_assert (tdep->has_sme ());
+  gdb_assert (tdep->sme_svq > 0);
+  gdb_assert (tdep->sme_pseudo_base <= regnum);
+  gdb_assert (regnum < tdep->sme_pseudo_base + tdep->sme_pseudo_count);
+
+  struct za_pseudo_encoding encoding;
+
+  /* Decode the ZA pseudo-register number.  */
+  aarch64_za_decode_pseudos (gdbarch, regnum, encoding);
+
+  /* Fetch the streaming vector length.  */
+  size_t svl = sve_vl_from_vq (tdep->sme_svq);
+
+  if (is_sme_tile_slice_pseudo_register (gdbarch, regnum))
+    {
+      if (encoding.horizontal)
+	{
+	  /* Horizontal tile slices are contiguous ranges of svl bytes.  */
+
+	  /* The starting offset depends on the tile index (to locate the tile
+	     in the ZA buffer), the slice index (to locate the slice within the
+	     tile) and the qualifier.  */
+	  offsets.starting_offset
+	    = encoding.tile_index * svl + encoding.slice_index
+					  * (svl >> encoding.qualifier_index);
+	  /* Horizontal tile slice data is contiguous and thus doesn't have
+	     a stride.  */
+	  offsets.stride_size = 0;
+	  /* Horizontal tile slice data is contiguous and thus only has 1
+	     chunk.  */
+	  offsets.chunks = 1;
+	  /* The chunk size is always svl bytes.  */
+	  offsets.chunk_size = svl;
+	}
+      else
+	{
+	  /* Vertical tile slices are non-contiguous ranges of
+	     (1 << qualifier_index) bytes.  */
+
+	  /* The starting offset depends on the tile number (to locate the
+	     tile in the ZA buffer), the slice index (to locate the element
+	     within the tile slice) and the qualifier.  */
+	  offsets.starting_offset
+	    = encoding.tile_index * svl + encoding.slice_index
+					  * (1 << encoding.qualifier_index);
+	  /* The offset between vertical tile slices depends on the qualifier
+	     and svl.  */
+	  offsets.stride_size = svl << encoding.qualifier_index;
+	  /* The number of chunks depends on svl and the qualifier size.  */
+	  offsets.chunks = svl >> encoding.qualifier_index;
+	  /* The chunk size depends on the qualifier.  */
+	  offsets.chunk_size = 1 << encoding.qualifier_index;
+	}
+    }
+  else
+    {
+      /* ZA tile pseudo-register.  */
+
+      /* Starting offset depends on the tile index and qualifier.  */
+      offsets.starting_offset = encoding.tile_index * svl;
+      /* The offset between tile slices depends on the qualifier and svl.  */
+      offsets.stride_size = svl << encoding.qualifier_index;
+      /* The number of chunks depends on the qualifier and svl.  */
+      offsets.chunks = svl >> encoding.qualifier_index;
+      /* The chunk size is always svl bytes.  */
+      offsets.chunk_size = svl;
+    }
+}
+
+/* Given REGNUM, a SME pseudo-register number, return its value in RESULT.  */
+
+static struct value *
+aarch64_sme_pseudo_register_read (struct gdbarch *gdbarch,
+				  readable_regcache *regcache, int regnum,
+				  struct value *result)
+{
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+  gdb_assert (tdep->has_sme ());
+  gdb_assert (tdep->sme_svq > 0);
+  gdb_assert (tdep->sme_pseudo_base <= regnum);
+  gdb_assert (regnum < tdep->sme_pseudo_base + tdep->sme_pseudo_count);
+
+  /* Fetch the offsets that we need in order to read from the correct blocks
+     of ZA.  */
+  struct za_offsets offsets;
+  aarch64_za_offsets_from_regnum (gdbarch, regnum, offsets);
+
+  /* Fetch the contents of ZA.  */
+  size_t svl = sve_vl_from_vq (tdep->sme_svq);
+  gdb::byte_vector za (std::pow (svl, 2));
+  regcache->raw_read (tdep->sme_za_regnum, za.data ());
+
+  /* Copy the requested data.  */
+  for (int chunks = 0; chunks < offsets.chunks; chunks++)
+    {
+      const gdb_byte *source
+	= za.data () + offsets.starting_offset + chunks * offsets.stride_size;
+      gdb_byte *destination
+	= result->contents_raw ().data () + chunks * offsets.chunk_size;
+
+      memcpy (destination, source, offsets.chunk_size);
+    }
+  return result;
+}
 
 /* Implement the "pseudo_register_read_value" gdbarch method.  */
 
@@ -2835,6 +3273,9 @@ aarch64_pseudo_read_value (struct gdbarch *gdbarch, readable_regcache *regcache,
 
       return result_value;
     }
+  else if (is_sme_pseudo_register (gdbarch, regnum))
+    return aarch64_sme_pseudo_register_read (gdbarch, regcache, regnum,
+					     result_value);
 
   regnum -= gdbarch_num_regs (gdbarch);
 
@@ -2894,6 +3335,44 @@ aarch64_pseudo_write_1 (struct gdbarch *gdbarch, struct regcache *regcache,
   regcache->raw_write (v_regnum, reg_buf);
 }
 
+/* Given REGNUM, a SME pseudo-register number, store the bytes from DATA to the
+   pseudo-register.  */
+
+static void
+aarch64_sme_pseudo_register_write (struct gdbarch *gdbarch,
+				   struct regcache *regcache,
+				   int regnum, const gdb_byte *data)
+{
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+  gdb_assert (tdep->has_sme ());
+  gdb_assert (tdep->sme_svq > 0);
+  gdb_assert (tdep->sme_pseudo_base <= regnum);
+  gdb_assert (regnum < tdep->sme_pseudo_base + tdep->sme_pseudo_count);
+
+  /* Fetch the offsets that we need in order to write to the correct blocks
+     of ZA.  */
+  struct za_offsets offsets;
+  aarch64_za_offsets_from_regnum (gdbarch, regnum, offsets);
+
+  /* Fetch the contents of ZA.  */
+  size_t svl = sve_vl_from_vq (tdep->sme_svq);
+  gdb::byte_vector za (std::pow (svl, 2));
+
+  /* Copy the requested data.  */
+  for (int chunks = 0; chunks < offsets.chunks; chunks++)
+    {
+      const gdb_byte *source = data + chunks * offsets.chunk_size;
+      gdb_byte *destination
+	= za.data () + offsets.starting_offset + chunks * offsets.stride_size;
+
+      memcpy (destination, source, offsets.chunk_size);
+    }
+
+  /* Write back to ZA.  */
+  regcache->raw_write (tdep->sme_za_regnum, za.data ());
+}
+
 /* Implement the "pseudo_register_write" gdbarch method.  */
 
 static void
@@ -2919,6 +3398,11 @@ aarch64_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
       regcache->raw_write (x_regnum, zero);
       /* Write to the bottom 4 bytes of X.  */
       regcache->raw_write_part (x_regnum, offset, 4, buf);
+      return;
+    }
+  else if (is_sme_pseudo_register (gdbarch, regnum))
+    {
+      aarch64_sme_pseudo_register_write (gdbarch, regcache, regnum, buf);
       return;
     }
 
@@ -3500,6 +3984,33 @@ aarch64_get_tdesc_vq (const struct target_desc *tdesc)
   return sve_vq_from_vl (vl);
 }
 
+
+/* Return the svq (streaming vector quotient) used when creating the target
+   description TDESC.  */
+
+static uint64_t
+aarch64_get_tdesc_svq (const struct target_desc *tdesc)
+{
+  const struct tdesc_feature *feature_sme;
+
+  if (!tdesc_has_registers (tdesc))
+    return 0;
+
+  feature_sme = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.sme");
+
+  if (feature_sme == nullptr)
+    return 0;
+
+  size_t svl_squared = tdesc_register_bitsize (feature_sme, "za");
+
+  /* We have the total size of the ZA matrix, in bits.  Figure out the svl
+     value.  */
+  size_t svl = std::sqrt (svl_squared / 8);
+
+  /* Now extract svq.  */
+  return sve_vq_from_vl (svl);
+}
+
 /* Get the AArch64 features present in the given target description. */
 
 aarch64_features
@@ -3534,6 +4045,8 @@ aarch64_features_from_target_desc (const struct target_desc *tdesc)
       else
 	features.tls = 1;
     }
+
+  features.svq = aarch64_get_tdesc_svq (tdesc);
 
   return features;
 }
@@ -3654,6 +4167,35 @@ aarch64_remove_non_address_bits (struct gdbarch *gdbarch, CORE_ADDR pointer)
   return aarch64_remove_top_bits (pointer, mask);
 }
 
+/* Given NAMES, a vector of strings, initialize it with all the SME
+   pseudo-register names for the current streaming vector length.  */
+
+static void
+aarch64_initialize_sme_pseudo_names (struct gdbarch *gdbarch,
+				     std::vector<std::string> &names)
+{
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+  gdb_assert (tdep->has_sme ());
+  gdb_assert (tdep->sme_tile_slice_pseudo_base > 0);
+  gdb_assert (tdep->sme_tile_pseudo_base > 0);
+
+  for (int i = 0; i < tdep->sme_tile_slice_pseudo_count; i++)
+    {
+      int regnum = tdep->sme_tile_slice_pseudo_base + i;
+      struct za_pseudo_encoding encoding;
+      aarch64_za_decode_pseudos (gdbarch, regnum, encoding);
+      names.push_back (aarch64_za_tile_slice_name (encoding));
+    }
+  for (int i = 0; i < AARCH64_ZA_TILES_NUM; i++)
+    {
+      int regnum = tdep->sme_tile_pseudo_base + i;
+      struct za_pseudo_encoding encoding;
+      aarch64_za_decode_pseudos (gdbarch, regnum, encoding);
+      names.push_back (aarch64_za_tile_name (encoding));
+    }
+}
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
@@ -3671,10 +4213,16 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int first_pauth_regnum = -1, ra_sign_state_offset = -1;
   int first_mte_regnum = -1, first_tls_regnum = -1;
   uint64_t vq = aarch64_get_tdesc_vq (info.target_desc);
+  uint64_t svq = aarch64_get_tdesc_svq (info.target_desc);
 
   if (vq > AARCH64_MAX_SVE_VQ)
     internal_error (_("VQ out of bounds: %s (max %d)"),
 		    pulongest (vq), AARCH64_MAX_SVE_VQ);
+
+  if (svq > AARCH64_MAX_SVE_VQ)
+    internal_error (_("Streaming vector quotient (svq) out of bounds: %s"
+		      " (max %d)"),
+		    pulongest (svq), AARCH64_MAX_SVE_VQ);
 
   /* If there is already a candidate, use it.  */
   for (gdbarch_list *best_arch = gdbarch_list_lookup_by_info (arches, &info);
@@ -3683,15 +4231,21 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
       aarch64_gdbarch_tdep *tdep
 	= gdbarch_tdep<aarch64_gdbarch_tdep> (best_arch->gdbarch);
-      if (tdep && tdep->vq == vq)
+      if (tdep && tdep->vq == vq && tdep->sme_svq == svq)
 	return best_arch->gdbarch;
     }
 
   /* Ensure we always have a target descriptor, and that it is for the given VQ
      value.  */
   const struct target_desc *tdesc = info.target_desc;
-  if (!tdesc_has_registers (tdesc))
-    tdesc = aarch64_read_description ({});
+  if (!tdesc_has_registers (tdesc) || vq != aarch64_get_tdesc_vq (tdesc)
+      || svq != aarch64_get_tdesc_svq (tdesc))
+    {
+      aarch64_features features;
+      features.vq = vq;
+      features.svq = svq;
+      tdesc = aarch64_read_description (features);
+    }
   gdb_assert (tdesc);
 
   feature_core = tdesc_find_feature (tdesc,"org.gnu.gdb.aarch64.core");
@@ -3753,6 +4307,35 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       num_pseudo_regs += 32;	/* add the Sn scalar register pseudos */
       num_pseudo_regs += 32;	/* add the Hn scalar register pseudos */
       num_pseudo_regs += 32;	/* add the Bn scalar register pseudos */
+    }
+
+  int first_sme_regnum = -1;
+  int first_sme_pseudo_regnum = -1;
+  const struct tdesc_feature *feature_sme
+    = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.sme");
+  if (feature_sme != nullptr)
+    {
+      /* Record the first SME register.  */
+      first_sme_regnum = num_regs;
+
+      valid_p &= tdesc_numbered_register (feature_sme, tdesc_data.get (),
+					  num_regs++, "svg");
+
+      valid_p &= tdesc_numbered_register (feature_sme, tdesc_data.get (),
+					  num_regs++, "svcr");
+
+      valid_p &= tdesc_numbered_register (feature_sme, tdesc_data.get (),
+					  num_regs++, "za");
+
+      /* Record the first SME pseudo register.  */
+      first_sme_pseudo_regnum = num_pseudo_regs;
+
+      /* Add the ZA tile slice pseudo registers.  The number of tile slice
+	 pseudo-registers depend on the svl, and is always a multiple of 5.  */
+      num_pseudo_regs += (svq << 5) * 5;
+
+      /* Add the ZA tile pseudo registers.  */
+      num_pseudo_regs += AARCH64_ZA_TILES_NUM;
     }
 
   /* Add the TLS register.  */
@@ -3867,6 +4450,14 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->mte_reg_base = first_mte_regnum;
   tdep->tls_regnum_base = first_tls_regnum;
   tdep->tls_register_count = tls_register_count;
+
+  /* Set the SME register set details.  The pseudo-registers will be adjusted
+     later.  */
+  tdep->sme_reg_base = first_sme_regnum;
+  tdep->sme_svg_regnum = first_sme_regnum;
+  tdep->sme_svcr_regnum = first_sme_regnum + 1;
+  tdep->sme_za_regnum = first_sme_regnum + 2;
+  tdep->sme_svq = svq;
 
   set_gdbarch_push_dummy_call (gdbarch, aarch64_push_dummy_call);
   set_gdbarch_frame_align (gdbarch, aarch64_frame_align);
@@ -3984,6 +4575,86 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_remove_non_address_bits (gdbarch,
 				       aarch64_remove_non_address_bits);
 
+  /* SME pseudo-registers.  */
+  if (tdep->has_sme ())
+    {
+      tdep->sme_pseudo_base = num_regs + first_sme_pseudo_regnum;
+      tdep->sme_tile_slice_pseudo_base = tdep->sme_pseudo_base;
+      tdep->sme_tile_slice_pseudo_count = (svq * 32) * 5;
+      tdep->sme_tile_pseudo_base
+	= tdep->sme_pseudo_base + tdep->sme_tile_slice_pseudo_count;
+      tdep->sme_pseudo_count
+	= tdep->sme_tile_slice_pseudo_count + AARCH64_ZA_TILES_NUM;
+
+      /* The SME ZA pseudo-registers are a set of 160 to 2560 pseudo-registers
+	 depending on the value of svl.
+
+	 The tile pseudo-registers are organized around their qualifiers
+	 (b, h, s, d and q).  Their numbers are distributed as follows:
+
+	 b 0
+	 h 1~2
+	 s 3~6
+	 d 7~14
+	 q 15~30
+
+	 The naming of the tile pseudo-registers follows the pattern za<t><q>,
+	 where:
+
+	 <t> is the tile number, with the following possible values based on
+	 the qualifiers:
+
+	 Qualifier - Allocated indexes
+
+	 b - 0
+	 h - 0~1
+	 s - 0~3
+	 d - 0~7
+	 q - 0~15
+
+	 <q> is the qualifier: b, h, s, d and q.
+
+	 The tile slice pseudo-registers are organized around their
+	 qualifiers as well (b, h, s, d and q), but also around their
+	 direction (h - horizontal and v - vertical).
+
+	 Even-numbered tile slice pseudo-registers are horizontally-oriented
+	 and odd-numbered tile slice pseudo-registers are vertically-oriented.
+
+	 Their numbers are distributed as follows:
+
+	 Qualifier - Allocated indexes
+
+	 b tile slices - 0~511
+	 h tile slices - 512~1023
+	 s tile slices - 1024~1535
+	 d tile slices - 1536~2047
+	 q tile slices - 2048~2559
+
+	 The naming of the tile slice pseudo-registers follows the pattern
+	 za<t><d><q><s>, where:
+
+	 <t> is the tile number as described for the tile pseudo-registers.
+	 <d> is the direction of the tile slice (h or v)
+	 <q> is the qualifier of the tile slice (b, h, s, d or q)
+	 <s> is the slice number, defined as follows:
+
+	 Qualifier - Allocated indexes
+
+	 b - 0~15
+	 h - 0~7
+	 s - 0~3
+	 d - 0~1
+	 q - 0
+
+	 We have helper functions to translate to/from register index from/to
+	 the set of fields that make the pseudo-register names.  */
+
+      /* Build the array of pseudo-register names available for this
+	 particular gdbarch configuration.  */
+      aarch64_initialize_sme_pseudo_names (gdbarch, tdep->sme_pseudo_names);
+    }
+
   /* Add standard register aliases.  */
   for (i = 0; i < ARRAY_SIZE (aarch64_register_aliases); i++)
     user_reg_add (gdbarch, aarch64_register_aliases[i].name,
@@ -4005,6 +4676,48 @@ aarch64_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 
   gdb_printf (file, _("aarch64_dump_tdep: Lowest pc = 0x%s\n"),
 	      paddress (gdbarch, tdep->lowest_pc));
+
+  /* SME fields.  */
+  gdb_printf (file, _("aarch64_dump_tdep: sme_tile_type_q = %s\n"),
+	      host_address_to_string (tdep->sme_tile_type_q));
+  gdb_printf (file, _("aarch64_dump_tdep: sme_tile_type_d = %s\n"),
+	      host_address_to_string (tdep->sme_tile_type_d));
+  gdb_printf (file, _("aarch64_dump_tdep: sme_tile_type_s = %s\n"),
+	      host_address_to_string (tdep->sme_tile_type_s));
+  gdb_printf (file, _("aarch64_dump_tdep: sme_tile_type_h = %s\n"),
+	      host_address_to_string (tdep->sme_tile_type_h));
+  gdb_printf (file, _("aarch64_dump_tdep: sme_tile_type_n = %s\n"),
+	      host_address_to_string (tdep->sme_tile_type_b));
+  gdb_printf (file, _("aarch64_dump_tdep: sme_tile_slice_type_q = %s\n"),
+	      host_address_to_string (tdep->sme_tile_slice_type_q));
+  gdb_printf (file, _("aarch64_dump_tdep: sme_tile_slice_type_d = %s\n"),
+	      host_address_to_string (tdep->sme_tile_slice_type_d));
+  gdb_printf (file, _("aarch64_dump_tdep: sme_tile_slice_type_s = %s\n"),
+	      host_address_to_string (tdep->sme_tile_slice_type_s));
+  gdb_printf (file, _("aarch64_dump_tdep: sme_tile_slice_type_h = %s\n"),
+	      host_address_to_string (tdep->sme_tile_slice_type_h));
+  gdb_printf (file, _("aarch64_dump_tdep: sme_tile_slice_type_b = %s\n"),
+	      host_address_to_string (tdep->sme_tile_slice_type_b));
+  gdb_printf (file, _("aarch64_dump_tdep: sme_reg_base = %s\n"),
+	      pulongest (tdep->sme_reg_base));
+  gdb_printf (file, _("aarch64_dump_tdep: sme_svg_regnum = %s\n"),
+	      pulongest (tdep->sme_svg_regnum));
+  gdb_printf (file, _("aarch64_dump_tdep: sme_svcr_regnum = %s\n"),
+	      pulongest (tdep->sme_svcr_regnum));
+  gdb_printf (file, _("aarch64_dump_tdep: sme_za_regnum = %s\n"),
+	      pulongest (tdep->sme_za_regnum));
+  gdb_printf (file, _("aarch64_dump_tdep: sme_pseudo_base = %s\n"),
+	      pulongest (tdep->sme_pseudo_base));
+  gdb_printf (file, _("aarch64_dump_tdep: sme_pseudo_count = %s\n"),
+	      pulongest (tdep->sme_pseudo_count));
+  gdb_printf (file, _("aarch64_dump_tdep: sme_tile_slice_pseudo_base = %s\n"),
+	      pulongest (tdep->sme_tile_slice_pseudo_base));
+  gdb_printf (file, _("aarch64_dump_tdep: sme_tile_slice_pseudo_count = %s\n"),
+	      pulongest (tdep->sme_tile_slice_pseudo_count));
+  gdb_printf (file, _("aarch64_dump_tdep: sme_tile_pseudo_base = %s\n"),
+	      pulongest (tdep->sme_tile_pseudo_base));
+  gdb_printf (file, _("aarch64_dump_tdep: sme_svq = %s\n"),
+	      pulongest (tdep->sme_svq));
 }
 
 #if GDB_SELF_TEST

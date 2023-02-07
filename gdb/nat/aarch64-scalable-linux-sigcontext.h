@@ -22,7 +22,10 @@
 #ifndef NAT_AARCH64_SCALABLE_LINUX_SIGCONTEXT_H
 #define NAT_AARCH64_SCALABLE_LINUX_SIGCONTEXT_H
 
+#ifndef SVE_SIG_ZREGS_SIZE
+
 #define SVE_MAGIC	0x53564501
+
 
 struct sve_context {
 	struct _aarch64_ctx head;
@@ -132,7 +135,7 @@ struct sve_context {
 
 #define SVE_SIG_CONTEXT_SIZE(vq) (SVE_SIG_REGS_OFFSET + SVE_SIG_REGS_SIZE(vq))
 
-/* SVE/FP/SIMD state (NT_ARM_SVE) */
+/* SVE/FP/SIMD state (NT_ARM_SVE and NT_ARM_SSVE) */
 
 struct user_sve_header {
 	__u32 size; /* total meaningful regset content in bytes */
@@ -242,6 +245,7 @@ struct user_sve_header {
 	(SVE_PT_SVE_PREG_OFFSET(vq, SVE_NUM_PREGS) - \
 		SVE_PT_SVE_PREGS_OFFSET(vq))
 
+/* For streaming mode SVE (SSVE) FFR must be read and written as zero.  */
 #define SVE_PT_SVE_FFR_OFFSET(vq) \
 	__SVE_SIG_TO_PT(SVE_SIG_FFR_OFFSET(vq))
 
@@ -266,5 +270,56 @@ struct user_sve_header {
 	 (((flags) & SVE_PT_REGS_MASK) == SVE_PT_REGS_SVE ?		\
 		  SVE_PT_SVE_OFFSET + SVE_PT_SVE_SIZE(vq, flags)	\
 		: SVE_PT_FPSIMD_OFFSET + SVE_PT_FPSIMD_SIZE(vq, flags))
+
+#endif /* SVE_SIG_ZREGS_SIZE */
+
+/* Scalable Matrix Extensions (SME) definitions.  */
+
+/* Make sure we only define these if the kernel header doesn't.  */
+#ifndef ZA_PT_SIZE
+
+/* ZA state (NT_ARM_ZA) */
+struct user_za_header {
+	__u32 size; /* total meaningful regset content in bytes */
+	__u32 max_size; /* maximum possible size for this thread */
+	__u16 vl; /* current vector length */
+	__u16 max_vl; /* maximum possible vector length */
+	__u16 flags;
+	__u16 __reserved;
+};
+
+/* The remainder of the ZA state follows struct user_za_header.  The
+   total size of the ZA state (including header) depends on the
+   metadata in the header:  ZA_PT_SIZE(vq, flags) gives the total size
+   of the state in bytes, including the header.
+
+   Refer to arch/arm64/include/uapi/asm/sigcontext.h from the Linux kernel
+   for details of how to pass the correct "vq" argument to these macros.  */
+
+/* Offset from the start of struct user_za_header to the register data */
+#define ZA_PT_ZA_OFFSET						  \
+	((sizeof (struct user_za_header) + (__SVE_VQ_BYTES - 1))  \
+		/ __SVE_VQ_BYTES * __SVE_VQ_BYTES)
+
+/* The payload starts at offset ZA_PT_ZA_OFFSET, and is of size
+   ZA_PT_ZA_SIZE(vq, flags).
+
+   The ZA array is stored as a sequence of horizontal vectors ZAV of SVL/8
+   bytes each, starting from vector 0.
+
+   Additional data might be appended in the future.
+
+   The ZA matrix is represented in memory in an endianness-invariant layout
+   which differs from the layout used for the FPSIMD V-registers on big-endian
+   systems: see sigcontext.h for more explanation.  */
+
+#define ZA_PT_ZAV_OFFSET(vq, n)				\
+	(ZA_PT_ZA_OFFSET + ((vq * __SVE_VQ_BYTES) * n))
+
+#define ZA_PT_ZA_SIZE(vq) ((vq * __SVE_VQ_BYTES) * (vq * __SVE_VQ_BYTES))
+
+#define ZA_PT_SIZE(vq)			      \
+	(ZA_PT_ZA_OFFSET + ZA_PT_ZA_SIZE(vq))
+#endif /* ZA_PT_SIZE */
 
 #endif /* NAT_AARCH64_SCALABLE_LINUX_SIGCONTEXT_H */

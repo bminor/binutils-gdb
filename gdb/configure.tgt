@@ -146,6 +146,7 @@ aarch64*-*-linux*)
 	# Target: AArch64 linux
 	gdb_target_obs="aarch64-linux-tdep.o arch/aarch64.o\
 			arch/aarch64-mte-linux.o \
+			arch/aarch64-scalable-linux.o \
 			arch/arm.o arch/arm-linux.o arch/arm-get-next-pcs.o \
 			arm-tdep.o arm-linux-tdep.o \
 			glibc-tdep.o linux-tdep.o solib-svr4.o \
